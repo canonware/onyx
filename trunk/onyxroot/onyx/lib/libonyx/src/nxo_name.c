@@ -47,6 +47,7 @@ nxo_name_l_init(void)
 void
 nxo_name_l_shutdown(void)
 {
+    cw_assert(dch_count(&cw_g_name_hash) == 0);
     dch_delete(&cw_g_name_hash);
 #ifdef CW_THREADS
     mtx_delete(&cw_g_name_lock);
