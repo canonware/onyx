@@ -44,10 +44,10 @@ Display usage information and exit.
 .IP \-V
 Display the version number and exit.
 .SH FILES
-@prefix@/share/onyx/doc/html/manual.html
+@prefix@/share/onyx/doc/html/onyx.html
 .br
-@prefix@/share/onyx/doc/ps/manual.ps
+@prefix@/share/onyx/doc/ps/onyx.ps
 .br
-@prefix@/share/onyx/doc/pdf/manual.pdf
+@prefix@/share/onyx/doc/pdf/onyx.pdf
 .SH HISTORY
 Written by Jason Evans <jasone@canonware.com>.
