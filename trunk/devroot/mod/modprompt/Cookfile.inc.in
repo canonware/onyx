@@ -43,17 +43,14 @@ modprompt : [MODPROMPT];
 
 modprompt_mods_tests :
 {
-
 }
 
 modprompt_mods_check :
 {
-
 }
 
 modprompt_mods_check_update :
 {
-
 }
 
 modprompt_mods_install : [MODPROMPT]
@@ -88,6 +85,7 @@ modprompt_mods_distclean :
 /*
  * Various flags.
  */
+
 MODPROMPT_CPPFLAGS = @LIBEDIT_CPPFLAGS@ @MODPROMPT_CPPFLAGS@;
 MODPROMPT_LDFLAGS =
 #if [and [count @RPATH@] [count @LIBEDIT_PREFIX@]]

@@ -412,7 +412,6 @@ modslate_buffer_aux_set(void *a_data, cw_nxo_t *a_thread)
     nxo_stack_npop(ostack, 2);
 }
 
-
 void
 modslate_buffer_seq(void *a_data, cw_nxo_t *a_thread)
 {
@@ -2137,4 +2136,3 @@ modslate_extent_validate(void *a_data, cw_nxo_t *a_thread)
     cw_error("XXX Not implemented");
 }
 #endif
-

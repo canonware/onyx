@@ -11,10 +11,12 @@
  ******************************************************************************/
 
 #include <libonyx/libonyx.h>
+#include "modslate_defs.h"
 
 #include "rb.h"
 #include "buf.h"
 #include "hist.h"
+
 #include "buffer.h"
 
 #define MODSLATE_ENTRY(name) {#name, modslate_##name}
@@ -29,3 +31,6 @@ void
 modslate_hooks_init(cw_nxo_t *a_thread,
 		    const struct cw_modslate_entry *a_entries,
 		    cw_uint32_t a_nentries);
+
+void
+modslate_init(void *a_arg, cw_nxo_t *a_thread);

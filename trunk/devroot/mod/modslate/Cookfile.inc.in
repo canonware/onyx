@@ -98,6 +98,7 @@ modslate_mods_distclean :
 /*
  * Various flags.
  */
+
 MODSLATE_CPPFLAGS = @MODSLATE_CPPFLAGS@;
 MODSLATE_LDFLAGS = @MODSLATE_LDFLAGS@;
 
