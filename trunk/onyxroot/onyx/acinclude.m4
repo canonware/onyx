@@ -243,25 +243,6 @@ if test "x$enable_onyx" = "x1" ; then
 fi
 ])
 
-dnl Build slate by default.
-AC_DEFUN(CW_ENABLE_SLATE,
-[
-AC_ARG_ENABLE(slate, [  --disable-slate         Do not build slate],
-if test "x$enable_slate" = "xno" ; then
-  enable_slate="0"
-else
-  enable_slate="1"
-fi
-,
-enable_slate="1"
-)
-
-AC_SUBST(enable_slate)
-if test "x$enable_slate" = "x1" ; then
-  AC_DEFINE(CW_USE_SLATE)
-fi
-])
-
 dnl CW_BUILD_LIB(lib, var)
 dnl lib : Name of library.
 dnl var : Name of variable to substitute in configure output.

@@ -54,9 +54,6 @@ CW_ENABLE_LIBEDIT
 dnl Build onyx by default.
 CW_ENABLE_ONYX
 
-dnl Build slate by default.
-CW_ENABLE_SLATE
-
 dnl Do not compile with debugging by default.
 CW_DISABLE_DEBUG
 
@@ -88,17 +85,13 @@ AC_CHECK_FUNCS(dlopen, AC_DEFINE(HAVE_DLOPEN), \
     [enable_modules="no"
     AC_MSG_RESULT(Modules disabled since dlopen is missing)]))
 
-if test "x$enable_modules" = "xyes" -a "x$enable_threads" = "x1" \
-     -a "x$enable_posix" = "x1" ; then
-    CW_BUILD_MOD(modpane, mod_pane)
-fi
+dnl if test "x$enable_modules" = "xyes" -a "x$enable_threads" = "x1" \
+dnl      -a "x$enable_posix" = "x1" ; then
+dnl fi
 
 dnl Look for binaries.
 if test "x$enable_onyx" = "x1" ; then
   CW_BUILD_BIN(onyx, bin_onyx)
-fi
-if test "x$enable_slate" = "x1" ; then
-  CW_BUILD_BIN(slate, bin_slate)
 fi
 
 AC_CONFIG_HEADER($cfghdrs)
@@ -243,33 +236,6 @@ if test "x$build_onyx" = "xyes" ; then
   done
   AC_DEFINE_UNQUOTED(CW_TONYX_RPATH, "$trpath")
   AC_DEFINE_UNQUOTED(CW_TONYX_MPATH, "$tmpath")
-fi
-
-if test "x$build_slate" = "xyes" ; then
-  if test "x$prefix" = "xNONE" ; then
-    CW_SLATE_RPATH="/usr/local/share/slate/nxcode:/usr/local/share/onyx/nxcode"
-    CW_SLATE_MPATH="/usr/local/share/slate/nxmod:/usr/local/share/onyx/nxmod"
-  else
-    CW_SLATE_RPATH="$prefix/share/slate/nxcode:$prefix/share/onyx/nxcode"
-    CW_SLATE_MPATH="$prefix/share/slate/nxmod:$prefix/share/onyx/nxmod"
-  fi
-  AC_DEFINE_UNQUOTED(CW_SLATE_RPATH, "$CW_SLATE_RPATH")
-  AC_DEFINE_UNQUOTED(CW_SLATE_MPATH, "$CW_SLATE_MPATH")
-
-  AC_DEFINE_UNQUOTED(CW_TSLATE_SLATE, "$abs_objdir/bin/slate/bin/slate")
-
-  tmpath=SLATE_MPATH=:.
-  trpath=SLATE_RPATH=:.
-  for i in $mods ; do
-    tmpath=$tmpath:$abs_objdir/mod/$i/nxmod
-    trpath=$trpath:$abs_objdir/mod/$i/nxcode
-  done
-  AC_DEFINE_UNQUOTED(CW_TSLATE_RPATH, "$trpath")
-  AC_DEFINE_UNQUOTED(CW_TSLATE_MPATH, "$tmpath")
-fi
-
-if test "x$build_modpane" = "xyes" ; then
-  cfgoutputs="$cfgoutputs mod/modpane/nxcode/modpane/modpane_defs.nx"
 fi
 
 dnl 

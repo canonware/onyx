@@ -127,10 +127,6 @@ Optionally, pass any of the following (not a definitive list) arguments to
 --disable-onyx
 	Use an installed copy of onyx rather than building it.
 
---disable-slate
-	Do not build slate.  This option has no meaning for distributions that
-	do not include slate.
-
 --enable-debug
 	Build debugging code and turn assertions on (controlled by the CW_ASSERT
 	cpp macro).  The resulting libraries and modules will not be binary
