@@ -624,7 +624,7 @@ libsock_p_entry_func(void *a_arg)
 	}
 
 	/*
-	 * Add g_libsock->pipe_out for readingg, so that this thread will return
+	 * Add g_libsock->pipe_out for reading, so that this thread will return
 	 * from poll() when data is written to g_libsock->pipe_in.
 	 */
 	fds[0].fd = g_libsock->pipe_out;
@@ -900,8 +900,7 @@ libsock_p_entry_func(void *a_arg)
 			cw_sint32_t	i, j;
 
 #ifdef _LIBSOCK_CONFESS
-			out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
-			    "Check fd:");
+			_cw_out_put_e("Check fd:");
 #endif
 
 			/* Ready descriptors. */
@@ -963,7 +962,8 @@ libsock_p_entry_func(void *a_arg)
 				sockfd = fds[i].fd;
 
 #ifdef _LIBSOCK_CONFESS
-				_cw_out_put(" [i][s][s][s][s][s][s][s][s][s][s]",
+				out_put(cw_g_out,
+				    " [i][s][s][s][s][s][s][s][s][s][s]",
 				    sockfd,
 #ifdef POLLIN
 				    fds[i].revents & POLLIN ? "<IN>" :
