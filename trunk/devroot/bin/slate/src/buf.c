@@ -248,6 +248,34 @@
 #define	hdr_cnt_set(a_hdr, a_cnt)					\
 	(a_hdr) = ((a_hdr) & HDR_TAG_MASK) | ((a_cnt) - 1)
 
+/* Prototypes. */
+static cw_uint64_t buf_p_pos_b2a(cw_buf_t *a_buf, cw_uint64_t a_bpos);
+static cw_uint64_t buf_p_pos_a2b(cw_buf_t *a_buf, cw_uint64_t a_apos);
+static cw_uint64_t buf_p_lines_rel_forward_count(cw_buf_t *a_buf, cw_uint64_t
+    a_apos_beg, cw_uint64_t a_nlines);
+static cw_uint64_t buf_p_lines_rel_backward_count(cw_buf_t *a_buf, cw_uint64_t
+    a_apos_beg, cw_uint64_t a_nlines);
+static cw_uint64_t buf_p_lines_count(cw_buf_t *a_buf, cw_uint64_t a_apos_beg,
+    cw_uint64_t a_apos_end);
+static void buf_p_bufms_apos_adjust(cw_buf_t *a_buf, cw_bufm_t *a_bufm,
+    cw_sint64_t a_adjust, cw_uint64_t a_beg_apos, cw_uint64_t a_end_apos);
+static void buf_p_gap_move(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_uint64_t
+    a_bpos);
+static void buf_p_grow(cw_buf_t *a_buf, cw_uint64_t a_minlen);
+static void buf_p_shrink(cw_buf_t *a_buf);
+static void buf_p_hist_ins(cw_buf_t *a_buf, cw_uint64_t a_apos, const cw_uint8_t
+    *a_str, cw_uint64_t a_len);
+static void buf_p_hist_ynk(cw_buf_t *a_buf, cw_uint64_t a_apos, const cw_uint8_t
+    *a_str, cw_uint64_t a_len);
+static void buf_p_hist_rem(cw_buf_t *a_buf, cw_uint64_t a_apos, const cw_uint8_t
+    *a_str, cw_uint64_t a_len);
+static void buf_p_hist_del(cw_buf_t *a_buf, cw_uint64_t a_apos, const cw_uint8_t
+    *a_str, cw_uint64_t a_len);
+static void bufm_p_insert(cw_bufm_t *a_bufm, cw_bool_t a_record, cw_bool_t
+    a_after, const cw_uint8_t *a_str, cw_uint64_t a_len);
+static void bufm_p_remove(cw_bufm_t *a_start, cw_bufm_t *a_end, cw_bool_t
+    a_record);
+
 /* buf. */
 static cw_uint64_t
 buf_p_pos_b2a(cw_buf_t *a_buf, cw_uint64_t a_bpos)
@@ -598,18 +626,24 @@ buf_p_hist_pos(cw_buf_t *a_buf, cw_uint64_t a_bpos)
 	}	u;
 
 	_cw_assert(a_buf->h != NULL);
-	_cw_assert(bufm_pos(&a_buf->hcur) == a_buf->len + 1);
+	_cw_assert(bufm_pos(&a_buf->hcur) == a_buf->h->len + 1);
 	_cw_assert(a_bpos != a_buf->hbpos);
+
+	fprintf(stderr, "%s(): %llu --> %llu\n", __FUNCTION__, a_buf->hbpos,
+	    a_bpos);
 
 	buf_p_hist_redo_flush(a_buf);
 
 	/* Old position. */
+	if (a_buf->hbpos == 0) {
+		/*
+		 * We're faking up an initial position record, so that redo will
+		 * work correctly, even if there is no more undo history.
+		 */
+		a_buf->hbpos = a_bpos;
+	}
 	u.bpos = a_buf->hbpos;
 	bufm_before_insert(&a_buf->hcur, u.str, sizeof(a_buf->hbpos));
-
-	/* New position. */
-	u.bpos = a_bpos;
-	bufm_before_insert(&a_buf->hcur, u.str, sizeof(a_bpos));
 
 	/* Record header. */
 	hdr_tag_set(hdr, HDR_TAG_POS);
@@ -619,18 +653,90 @@ buf_p_hist_pos(cw_buf_t *a_buf, cw_uint64_t a_bpos)
 	a_buf->hbpos = a_bpos;
 }
 
-/*
- * a_what is one of: HDR_TAG_INS, HDR_TAG_YNK, HDR_TAG_REM, HDR_TAG_DEL.
- */
 static void
-buf_p_hist_text(cw_buf_t *a_buf, cw_uint8_t a_what, cw_uint64_t a_apos, const
-    cw_uint8_t *a_str, cw_uint64_t a_len)
+buf_p_hist_ins(cw_buf_t *a_buf, cw_uint64_t a_apos, const cw_uint8_t *a_str,
+    cw_uint64_t a_len)
 {
 	cw_uint8_t	*p, hdr, hdr_cnt;
 	cw_uint64_t	i, bpos;
 
-	_cw_assert(a_what == HDR_TAG_INS || a_what == HDR_TAG_YNK || a_what ==
-	    HDR_TAG_REM || a_what == HDR_TAG_DEL);
+	_cw_assert(a_buf->h != NULL);
+
+	buf_p_hist_redo_flush(a_buf);
+
+	/*
+	 * Record a position change if necessary.
+	 */
+	bpos = buf_p_pos_a2b(a_buf, a_apos);
+	if (a_buf->hbpos != bpos)
+		buf_p_hist_pos(a_buf, bpos);
+
+	/* Update the recorded position. */
+	a_buf->hbpos += a_len;
+
+	i = 0;
+	/*
+	 * If the last history record is the same type, and it still has room
+	 * left, insert as much of a_str as will fit.
+	 */
+	if (bufm_pos(&a_buf->hcur) > 1) {
+		p = bufm_before_get(&a_buf->hcur);
+		if (hdr_tag_get(*p) == HDR_TAG_INS && (hdr_cnt =
+		    hdr_cnt_get(*p)) < HDR_CNT_MAX) {
+			/*
+			 * Determine how much of a_str to insert into the
+			 * existing record.
+			 */
+			if (HDR_CNT_MAX - hdr_cnt >= a_len)
+				i = a_len;
+			else
+				i = HDR_CNT_MAX - hdr_cnt;
+
+			/* Update the header before moving hcur. */
+			hdr_cnt_set(*p, hdr_cnt + i);
+			fprintf(stderr, "%s(): Append to record: 0x%x\n",
+			    __FUNCTION__, *p);
+
+			/* Move htmp before the header and insert text. */
+			bufm_dup(&a_buf->htmp, &a_buf->hcur);
+			bufm_seek(&a_buf->htmp, -1, BUFW_REL);
+			bufm_before_insert(&a_buf->htmp, a_str, i);
+		}
+	}
+
+	/*
+	 * While there are still >= HDR_CNT_MAX characters to be inserted,
+	 * insert full records.
+	 */
+	for (; a_len - i >= HDR_CNT_MAX; i += HDR_CNT_MAX) {
+		bufm_before_insert(&a_buf->hcur, &a_str[i], HDR_CNT_MAX);
+		hdr_tag_set(hdr, HDR_TAG_INS);
+		hdr_cnt_set(hdr, HDR_CNT_MAX);
+		fprintf(stderr, "%s(): Full record: 0x%x\n", __FUNCTION__,
+		    hdr);
+		bufm_before_insert(&a_buf->hcur, &hdr, sizeof(hdr));
+	}
+
+	/*
+	 * Insert any remaining characters.
+	 */
+	if (a_len - i > 0) {
+		bufm_before_insert(&a_buf->hcur, &a_str[i], a_len - i);
+		hdr_tag_set(hdr, HDR_TAG_INS);
+		hdr_cnt_set(hdr, a_len - i);
+		fprintf(stderr, "%s(): New record: 0x%x\n", __FUNCTION__,
+		    hdr);
+		bufm_before_insert(&a_buf->hcur, &hdr, sizeof(hdr));
+	}
+}
+
+static void
+buf_p_hist_ynk(cw_buf_t *a_buf, cw_uint64_t a_apos, const cw_uint8_t *a_str,
+    cw_uint64_t a_len)
+{
+	cw_uint8_t	*p, hdr, hdr_cnt;
+	cw_uint64_t	i, j, bpos;
+
 	_cw_assert(a_buf->h != NULL);
 
 	buf_p_hist_redo_flush(a_buf);
@@ -644,13 +750,13 @@ buf_p_hist_text(cw_buf_t *a_buf, cw_uint8_t a_what, cw_uint64_t a_apos, const
 
 	i = 0;
 	/*
-	 * If the last history record is an insertion, and it still has room
+	 * If the last history record is the same type, and it still has room
 	 * left, insert as much of a_str as will fit.
 	 */
 	if (bufm_pos(&a_buf->hcur) > 1) {
 		p = bufm_before_get(&a_buf->hcur);
-		if (hdr_tag_get(*p) == a_what && (hdr_cnt = hdr_cnt_get(*p)) <
-		    HDR_CNT_MAX) {
+		if (hdr_tag_get(*p) == HDR_TAG_YNK && (hdr_cnt =
+		    hdr_cnt_get(*p)) < HDR_CNT_MAX) {
 			/*
 			 * Determine how much of a_str to insert into the
 			 * existing record.
@@ -662,6 +768,179 @@ buf_p_hist_text(cw_buf_t *a_buf, cw_uint8_t a_what, cw_uint64_t a_apos, const
 
 			/* Update the header before moving hcur. */
 			hdr_cnt_set(*p, hdr_cnt + i);
+			fprintf(stderr, "%s(): Append to record: 0x%x\n",
+			    __FUNCTION__, *p);
+
+			/* Move htmp before the header and insert text. */
+			bufm_dup(&a_buf->htmp, &a_buf->hcur);
+			bufm_seek(&a_buf->htmp, -1, BUFW_REL);
+			for (j = 0; j < i; j++) {
+				bufm_before_insert(&a_buf->htmp,
+				    &a_str[i - 1 - j], 1);
+			}
+		}
+	}
+
+	/*
+	 * While there are still >= HDR_CNT_MAX characters to be inserted,
+	 * insert full records.
+	 */
+	for (; a_len - i >= HDR_CNT_MAX; i += HDR_CNT_MAX) {
+		for (j = 0; j < HDR_CNT_MAX; j++) {
+			bufm_before_insert(&a_buf->hcur,
+			    &a_str[i + HDR_CNT_MAX - 1 - j], 1);
+		}
+		hdr_tag_set(hdr, HDR_TAG_YNK);
+		hdr_cnt_set(hdr, HDR_CNT_MAX);
+		fprintf(stderr, "%s(): Full record: 0x%x\n", __FUNCTION__,
+		    hdr);
+		bufm_before_insert(&a_buf->hcur, &hdr, sizeof(hdr));
+	}
+
+	/*
+	 * Insert any remaining characters.
+	 */
+	if (a_len - i > 0) {
+		for (j = 0; j < a_len - i; j++) {
+			bufm_before_insert(&a_buf->hcur,
+			    &a_str[a_len - 1 - j], 1);
+		}
+		hdr_tag_set(hdr, HDR_TAG_YNK);
+		hdr_cnt_set(hdr, a_len - i);
+		fprintf(stderr, "%s(): New record: 0x%x\n", __FUNCTION__,
+		    hdr);
+		bufm_before_insert(&a_buf->hcur, &hdr, sizeof(hdr));
+	}
+}
+
+static void
+buf_p_hist_rem(cw_buf_t *a_buf, cw_uint64_t a_apos, const cw_uint8_t *a_str,
+    cw_uint64_t a_len)
+{
+	cw_uint8_t	*p, hdr, hdr_cnt;
+	cw_uint64_t	i, j, bpos;
+
+	_cw_assert(a_buf->h != NULL);
+
+	buf_p_hist_redo_flush(a_buf);
+
+	/*
+	 * Record a position change if necessary.
+	 */
+	bpos = buf_p_pos_a2b(a_buf, a_apos);
+	if (a_buf->hbpos != bpos)
+		buf_p_hist_pos(a_buf, bpos);
+
+	/* Update the recorded position. */
+	a_buf->hbpos -= a_len;
+
+	i = 0;
+	/*
+	 * If the last history record is the same type, and it still has room
+	 * left, insert as much of a_str as will fit.
+	 */
+	if (bufm_pos(&a_buf->hcur) > 1) {
+		p = bufm_before_get(&a_buf->hcur);
+		if (hdr_tag_get(*p) == HDR_TAG_REM && (hdr_cnt =
+		    hdr_cnt_get(*p)) < HDR_CNT_MAX) {
+			/*
+			 * Determine how much of a_str to insert into the
+			 * existing record.
+			 */
+			if (HDR_CNT_MAX - hdr_cnt >= a_len)
+				i = a_len;
+			else
+				i = HDR_CNT_MAX - hdr_cnt;
+
+			/* Update the header before moving hcur. */
+			hdr_cnt_set(*p, hdr_cnt + i);
+			fprintf(stderr, "%s(): Append to record: 0x%x\n",
+			    __FUNCTION__, *p);
+
+			/* Move htmp before the header and insert text. */
+			bufm_dup(&a_buf->htmp, &a_buf->hcur);
+			bufm_seek(&a_buf->htmp, -1, BUFW_REL);
+			for (j = 0; j < i; j++) {
+				bufm_before_insert(&a_buf->htmp,
+				    &a_str[i - 1 - j], 1);
+			}
+			
+			bufm_before_insert(&a_buf->htmp, a_str, i);
+		}
+	}
+
+	/*
+	 * While there are still >= HDR_CNT_MAX characters to be inserted,
+	 * insert full records.
+	 */
+	for (; a_len - i >= HDR_CNT_MAX; i += HDR_CNT_MAX) {
+		for (j = 0; j < HDR_CNT_MAX; j++) {
+			bufm_before_insert(&a_buf->hcur,
+			    &a_str[i + HDR_CNT_MAX - 1 - j], 1);
+		}
+		hdr_tag_set(hdr, HDR_TAG_REM);
+		hdr_cnt_set(hdr, HDR_CNT_MAX);
+		fprintf(stderr, "%s(): Full record: 0x%x\n", __FUNCTION__,
+		    hdr);
+		bufm_before_insert(&a_buf->hcur, &hdr, sizeof(hdr));
+	}
+
+	/*
+	 * Insert any remaining characters.
+	 */
+	if (a_len - i > 0) {
+		for (j = 0; j < a_len - i; j++) {
+			bufm_before_insert(&a_buf->hcur,
+			    &a_str[a_len - 1 - j], 1);
+		}
+		hdr_tag_set(hdr, HDR_TAG_REM);
+		hdr_cnt_set(hdr, a_len - i);
+		fprintf(stderr, "%s(): New record: 0x%x\n", __FUNCTION__,
+		    hdr);
+		bufm_before_insert(&a_buf->hcur, &hdr, sizeof(hdr));
+	}
+}
+
+static void
+buf_p_hist_del(cw_buf_t *a_buf, cw_uint64_t a_apos, const cw_uint8_t *a_str,
+    cw_uint64_t a_len)
+{
+	cw_uint8_t	*p, hdr, hdr_cnt;
+	cw_uint64_t	i, bpos;
+
+	_cw_assert(a_buf->h != NULL);
+
+	buf_p_hist_redo_flush(a_buf);
+
+	/*
+	 * Record a position change if necessary.
+	 */
+	bpos = buf_p_pos_a2b(a_buf, a_apos);
+	if (a_buf->hbpos != bpos)
+		buf_p_hist_pos(a_buf, bpos);
+
+	i = 0;
+	/*
+	 * If the last history record is the same type, and it still has room
+	 * left, insert as much of a_str as will fit.
+	 */
+	if (bufm_pos(&a_buf->hcur) > 1) {
+		p = bufm_before_get(&a_buf->hcur);
+		if (hdr_tag_get(*p) == HDR_TAG_DEL && (hdr_cnt =
+		    hdr_cnt_get(*p)) < HDR_CNT_MAX) {
+			/*
+			 * Determine how much of a_str to insert into the
+			 * existing record.
+			 */
+			if (HDR_CNT_MAX - hdr_cnt >= a_len)
+				i = a_len;
+			else
+				i = HDR_CNT_MAX - hdr_cnt;
+
+			/* Update the header before moving hcur. */
+			hdr_cnt_set(*p, hdr_cnt + i);
+			fprintf(stderr, "%s(): Append to record: 0x%x\n",
+			    __FUNCTION__, *p);
 
 			/* Move htmp before the header and insert text. */
 			bufm_dup(&a_buf->htmp, &a_buf->hcur);
@@ -671,13 +950,15 @@ buf_p_hist_text(cw_buf_t *a_buf, cw_uint8_t a_what, cw_uint64_t a_apos, const
 	}
 
 	/*
-	 * While there is still >= HDR_CNT_MAX characters text to be inserted,
+	 * While there are still >= HDR_CNT_MAX characters to be inserted,
 	 * insert full records.
 	 */
 	for (; a_len - i >= HDR_CNT_MAX; i += HDR_CNT_MAX) {
 		bufm_before_insert(&a_buf->hcur, &a_str[i], HDR_CNT_MAX);
-		hdr_tag_set(hdr, a_what);
+		hdr_tag_set(hdr, HDR_TAG_DEL);
 		hdr_cnt_set(hdr, HDR_CNT_MAX);
+		fprintf(stderr, "%s(): Full record: 0x%x\n", __FUNCTION__,
+		    hdr);
 		bufm_before_insert(&a_buf->hcur, &hdr, sizeof(hdr));
 	}
 
@@ -686,8 +967,10 @@ buf_p_hist_text(cw_buf_t *a_buf, cw_uint8_t a_what, cw_uint64_t a_apos, const
 	 */
 	if (a_len - i > 0) {
 		bufm_before_insert(&a_buf->hcur, &a_str[i], a_len - i);
-		hdr_tag_set(hdr, a_what);
+		hdr_tag_set(hdr, HDR_TAG_DEL);
 		hdr_cnt_set(hdr, a_len - i);
+		fprintf(stderr, "%s(): New record: 0x%x\n", __FUNCTION__,
+		    hdr);
 		bufm_before_insert(&a_buf->hcur, &hdr, sizeof(hdr));
 	}
 }
@@ -752,9 +1035,8 @@ buf_delete(cw_buf_t *a_buf)
 	_cw_check_ptr(a_buf);
 	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
 
-	if (a_buf->h != NULL) {
-		/* XXX Clean up history. */
-	}
+	if (a_buf->h != NULL)
+		buf_delete(a_buf->h);
 
 	/*
 	 * Set the buf pointers of all objects that point to this one to NULL,
@@ -930,7 +1212,7 @@ buf_hist_active_set(cw_buf_t *a_buf, cw_bool_t a_active)
 		    a_buf->dealloc, a_buf->arg);
 		bufm_new(&a_buf->hcur, a_buf->h, NULL);
 		bufm_new(&a_buf->htmp, a_buf->h, NULL);
-		a_buf->hbpos = 1;
+		a_buf->hbpos = 0; /* Alway record an initial position. */
 	} else if (a_active == FALSE && a_buf->h != NULL) {
 		bufm_delete(&a_buf->hcur);
 		bufm_delete(&a_buf->htmp);
@@ -994,9 +1276,12 @@ buf_undo(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_uint64_t a_count)
 	cw_uint64_t	i;
 	cw_uint32_t	gdepth;
   	cw_uint8_t	*p, uhdr, rhdr, c;
+	cw_bufm_t	tbufm;
 
 	_cw_check_ptr(a_buf);
 	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
+
+	bufm_new(&tbufm, a_buf, NULL);
 
 	if (a_buf->h == NULL || bufm_pos(&a_buf->hcur) == 1) {
 		retval = 0;
@@ -1017,10 +1302,10 @@ buf_undo(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_uint64_t a_count)
 			p = bufm_before_get(&a_buf->hcur);
 			uhdr = *p;
 			switch (hdr_tag_get(uhdr)) {
-			case BUFH_I:
-			case BUFH_Y:
-			case BUFH_R:
-			case BUFH_K:
+			case HDR_TAG_INS:
+			case HDR_TAG_YNK:
+			case HDR_TAG_REM:
+			case HDR_TAG_DEL:
 				/*
 				 * Read (or synthesize) the undo header, redo
 				 * header, and character, then remove them from
@@ -1089,23 +1374,64 @@ buf_undo(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_uint64_t a_count)
 				bufm_after_insert(&a_buf->hcur, &rhdr, 1);
 				/* Insert the undo header if necessary. */
 				if (hdr_cnt_get(uhdr) > 1) {
+					fprintf(stderr,
+					    "%s(): Mod undo record\n",
+					    __FUNCTION__);
 					hdr_cnt_set(uhdr, hdr_cnt_get(uhdr) -
 					    1);
 					bufm_before_insert(&a_buf->hcur, &uhdr,
 					    1);
+				} else {
+					fprintf(stderr,
+					    "%s(): Empty undo record\n",
+					    __FUNCTION__);
+				}
+
+				/*
+				 * Actually take action, now that the log is
+				 * updated.
+				 */
+				bufm_seek(a_bufm, a_buf->hbpos - 1, BUFW_BEG);
+				switch (hdr_tag_get(uhdr)) {
+				case HDR_TAG_INS:
+					bufm_dup(&tbufm, a_bufm);
+					bufm_seek(&tbufm, -1, BUFW_REL);
+					bufm_p_remove(&tbufm, a_bufm, FALSE);
+					a_buf->hbpos--;
+					break;
+				case HDR_TAG_REM:
+					bufm_p_insert(a_bufm, FALSE, FALSE, &c,
+					    1);
+					a_buf->hbpos++;
+					break;
+				case HDR_TAG_YNK:
+					bufm_dup(&tbufm, a_bufm);
+					bufm_seek(&tbufm, 1, BUFW_REL);
+					bufm_p_remove(a_bufm, &tbufm, FALSE);
+					break;
+				case HDR_TAG_DEL:
+					bufm_p_insert(a_bufm, FALSE, TRUE, &c,
+					    1);
+					break;
+				default:
+					_cw_not_reached();
 				}
 
 				i++;
 				break;
-			case BUFH_B:
+			case HDR_TAG_GRP_BEG:
 				gdepth--;
+				fprintf(stderr, "%s(): Group begin\n",
+					    __FUNCTION__);
 				bufm_seek(&a_buf->hcur, -1, BUFW_REL);
 				break;
-			case BUFH_E:
+			case HDR_TAG_GRP_END:
 				gdepth++;
+				fprintf(stderr, "%s(): Group end\n",
+					    __FUNCTION__);
 				bufm_seek(&a_buf->hcur, -1, BUFW_REL);
 				break;
-			case BUFH_P: {
+			case HDR_TAG_POS: {
 				cw_uint64_t	from;
 				union {
 					cw_uint64_t	bpos;
@@ -1124,16 +1450,19 @@ buf_undo(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_uint64_t a_count)
 				a_buf->hbpos = u.bpos;
 				u.bpos = from;
 
+				fprintf(stderr,
+				    "%s(): Position %llu --> %llu\n",
+				    __FUNCTION__, from, a_buf->hbpos);
+
 				/* Invert the history record. */
 				*p = p[8];
 				memcpy(&p[1], u.str, 8);
 
 				/* Move. */
-				bufm_seek(a_bufm, a_buf->hbpos, BUFW_BEG);
+				bufm_seek(a_bufm, a_buf->hbpos - 1, BUFW_BEG);
 
 				break;
 			}
-			case BUFH_NONE:
 			default:
 				_cw_not_reached();
 			}
@@ -1141,11 +1470,12 @@ buf_undo(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_uint64_t a_count)
 	}
 
 	RETURN:
+	bufm_delete(&tbufm);
 	return retval;
 }
 
-cw_bool_t
-buf_redo(cw_buf_t *a_buf, cw_bufm_t *a_bufm)
+cw_uint64_t
+buf_redo(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_uint64_t a_count)
 {
 	_cw_check_ptr(a_buf);
 	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
@@ -1155,7 +1485,7 @@ buf_redo(cw_buf_t *a_buf, cw_bufm_t *a_bufm)
 }
 
 void
-buf_hist_group_beg(cw_buf_t *a_buf)
+buf_hist_group_beg(cw_buf_t *a_buf, cw_bufm_t *a_bufm)
 {
 	cw_uint8_t	hdr;
 
@@ -1164,6 +1494,15 @@ buf_hist_group_beg(cw_buf_t *a_buf)
 
 	if (a_buf->h != NULL) {
 		buf_p_hist_redo_flush(a_buf);
+
+		/*
+		 * If the position of a_bufm is not the same as the last
+		 * saved postion, insert a position record before creating the
+		 * group begin record, so that when the group is undone, the
+		 * position ends up where the user would expect it to.
+		 */
+		if (a_bufm != NULL && bufm_pos(a_bufm) != a_buf->hbpos)
+			buf_p_hist_pos(a_buf, bufm_pos(a_bufm));
 
 		hdr_tag_set(hdr, HDR_TAG_GRP_BEG);
 		bufm_before_insert(&a_buf->hcur, &hdr, sizeof(hdr));
@@ -1202,14 +1541,29 @@ buf_hist_flush(cw_buf_t *a_buf)
 
 /* bufm. */
 static void
-bufm_p_insert(cw_bufm_t *a_bufm, cw_bool_t a_after, const cw_uint8_t *a_str,
-    cw_uint64_t a_len)
+bufm_p_insert(cw_bufm_t *a_bufm, cw_bool_t a_record, cw_bool_t a_after, const
+    cw_uint8_t *a_str, cw_uint64_t a_len)
 {
 	cw_uint64_t	i, nlines;
 	cw_buf_t	*buf;
 	cw_bufm_t	*first, *bufm;
 
+	_cw_check_ptr(a_bufm);
+	_cw_dassert(a_bufm->magic == _CW_BUFM_MAGIC);
+	_cw_check_ptr(a_bufm->buf);
+
 	buf = a_bufm->buf;
+
+	/*
+	 * Record the undo information before inserting so that the apos is
+	 * still unmodified.
+	 */
+	if (buf->h != NULL && a_record) {
+		if (a_after)
+			buf_p_hist_ynk(buf, a_bufm->apos, a_str, a_len);
+		else
+			buf_p_hist_ins(buf, a_bufm->apos, a_str, a_len);
+	}
 
 	/* Make sure that the string will fit. */
 	if (a_len >= buf->gap_len)
@@ -1280,6 +1634,127 @@ bufm_p_insert(cw_bufm_t *a_bufm, cw_bool_t a_after, const cw_uint8_t *a_str,
 		     bufm = ql_next(&buf->bufms, bufm, link))
 			bufm->line += nlines;
 	}
+}
+
+static void
+bufm_p_remove(cw_bufm_t *a_start, cw_bufm_t *a_end, cw_bool_t a_record)
+{
+	cw_buf_t	*buf;
+	cw_bufm_t	*start, *end, *bufm;
+	cw_uint64_t	start_bpos, end_bpos, rcount, nlines;
+
+	_cw_check_ptr(a_start);
+	_cw_dassert(a_start->magic == _CW_BUFM_MAGIC);
+	_cw_check_ptr(a_start->buf);
+	_cw_check_ptr(a_end);
+	_cw_dassert(a_end->magic == _CW_BUFM_MAGIC);
+	_cw_check_ptr(a_end->buf);
+	_cw_assert(a_start->buf == a_end->buf);
+
+	if (a_start->apos < a_end->apos) {
+		start = a_start;
+		end = a_end;
+	} else if (a_start->apos > a_end->apos) {
+		start = a_end;
+		end = a_start;
+	} else {
+		/* No data need to be removed. */
+		return;
+	}
+
+	buf = start->buf;
+
+	/* Get bpos for start and end, since they are used more than once. */
+	start_bpos = buf_p_pos_a2b(buf, start->apos);
+	end_bpos = buf_p_pos_a2b(buf, end->apos);
+
+	/*
+	 * Calculate the number of elements being removed, since it is used more
+	 * than once.
+	 */
+	rcount = end_bpos - start_bpos;
+
+/* 	fprintf(stderr, */
+/* 	    "%s(): rcount %llu, bpos %llu<-->%llu, apos %llu<-->%llu\n", */
+/* 	    __FUNCTION__, rcount, */
+/* 	    start_bpos, end_bpos, */
+/* 	    start->apos, end->apos); */
+
+	/* Move the gap. */
+	buf_p_gap_move(buf, start, start_bpos);
+
+	/*
+	 * Record undo information, now that the gap has been moved and the
+	 * elements to be removed are contiguous.  The ordering of a_start and
+	 * a_end determines whether this is a before/after removal.
+	 */
+	if (a_record && buf->h != NULL) {
+		if (start == a_start) {
+			buf_p_hist_del(buf, start->apos,
+			    &buf->b[start->apos * buf->elmsize], rcount);
+		} else {
+			buf_p_hist_rem(buf, end->apos,
+			    &buf->b[start->apos * buf->elmsize], rcount);
+		}
+	}
+
+	/* Grow the gap. */
+	buf->gap_len += rcount;
+
+	/*
+	 * Adjust apos for all bufm's before start that are at the same
+	 * position.
+	 */
+	for (bufm = ql_prev(&buf->bufms, start, link);
+	     bufm != NULL && bufm->apos == start->apos;
+	     bufm = ql_prev(&buf->bufms, bufm, link)) {
+/* 		fprintf(stderr, */
+/* 		    "%s(): before: apos: %llu --> %llu\n", */
+/* 		    __FUNCTION__, */
+/* 		    bufm->apos, end->apos); */
+		bufm->apos = end->apos;
+	}
+
+	/*
+	 * Adjust apos and line for all bufm's from start (inclusive) to end
+	 * (exclusive).
+	 */
+	for (bufm = start;
+	     bufm->apos < end->apos;
+	     bufm = ql_next(&buf->bufms, bufm, link)) {
+/* 		fprintf(stderr, */
+/* 		    "%s(): in: apos: %llu --> %llu, line: %llu --> %llu\n", */
+/* 		    __FUNCTION__, */
+/* 		    bufm->apos, end->apos, */
+/* 		    bufm->line, start->line); */
+		bufm->apos = end->apos;
+		bufm->line = start->line;
+	}
+	
+	nlines = end->line - start->line;
+
+	/*
+	 * Adjust the line for all bufm's after the gap.
+	 */
+	for (;
+	     bufm != NULL;
+	     bufm = ql_next(&buf->bufms, bufm, link)) {
+/* 		fprintf(stderr, "%s(): after: line: %llu --> %llu\n", */
+/* 		    __FUNCTION__, */
+/* 		    bufm->line, bufm->line - nlines); */
+		bufm->line -= nlines;
+	}
+
+	/* Adjust the buf's len and nlines. */
+/* 	fprintf(stderr, "%s(): len: %llu --> %llu, lines: %llu --> %llu\n", */
+/* 	    __FUNCTION__, */
+/* 	    buf->len, buf->len - rcount, */
+/* 	    buf->nlines, buf->nlines - nlines); */
+	buf->len -= rcount;
+	buf->nlines -= nlines;
+
+	/* Try to shrink the gap. */
+	buf_p_shrink(buf);
 }
 
 cw_bufm_t *
@@ -2003,152 +2478,17 @@ void
 bufm_before_insert(cw_bufm_t *a_bufm, const cw_uint8_t *a_str, cw_uint64_t
     a_len)
 {
-	_cw_check_ptr(a_bufm);
-	_cw_dassert(a_bufm->magic == _CW_BUFM_MAGIC);
-	_cw_check_ptr(a_bufm->buf);
-
-	/*
-	 * Record the undo information before inserting so that the apos is
-	 * still unmodified.
-	 */
-	if (a_bufm->buf->h != NULL) {
-		buf_p_hist_text(a_bufm->buf, HDR_TAG_INS, a_bufm->apos, a_str,
-		    a_len);
-	}
-	bufm_p_insert(a_bufm, FALSE, a_str, a_len);
+	bufm_p_insert(a_bufm, TRUE, FALSE, a_str, a_len);
 }
 
 void
 bufm_after_insert(cw_bufm_t *a_bufm, const cw_uint8_t *a_str, cw_uint64_t a_len)
 {
-	_cw_check_ptr(a_bufm);
-	_cw_dassert(a_bufm->magic == _CW_BUFM_MAGIC);
-	_cw_check_ptr(a_bufm->buf);
-
-	if (a_bufm->buf->h != NULL) {
-		buf_p_hist_text(a_bufm->buf, HDR_TAG_YNK, a_bufm->apos, a_str,
-		    a_len);
-	}
-	bufm_p_insert(a_bufm, TRUE, a_str, a_len);
+	bufm_p_insert(a_bufm, TRUE, TRUE, a_str, a_len);
 }
 
 void
 bufm_remove(cw_bufm_t *a_start, cw_bufm_t *a_end)
 {
-	cw_buf_t	*buf;
-	cw_bufm_t	*start, *end, *bufm;
-	cw_uint64_t	start_bpos, end_bpos, rcount, nlines;
-
-	_cw_check_ptr(a_start);
-	_cw_dassert(a_start->magic == _CW_BUFM_MAGIC);
-	_cw_check_ptr(a_start->buf);
-	_cw_check_ptr(a_end);
-	_cw_dassert(a_end->magic == _CW_BUFM_MAGIC);
-	_cw_check_ptr(a_end->buf);
-	_cw_assert(a_start->buf == a_end->buf);
-
-	if (a_start->apos < a_end->apos) {
-		start = a_start;
-		end = a_end;
-	} else if (a_start->apos > a_end->apos) {
-		start = a_end;
-		end = a_start;
-	} else {
-		/* No data need to be removed. */
-		return;
-	}
-
-	buf = start->buf;
-
-	/* Get bpos for start and end, since they are used more than once. */
-	start_bpos = buf_p_pos_a2b(buf, start->apos);
-	end_bpos = buf_p_pos_a2b(buf, end->apos);
-
-	/*
-	 * Calculate the number of elements being removed, since it is used more
-	 * than once.
-	 */
-	rcount = end_bpos - start_bpos;
-
-/* 	fprintf(stderr, */
-/* 	    "%s(): rcount %llu, bpos %llu<-->%llu, apos %llu<-->%llu\n", */
-/* 	    __FUNCTION__, rcount, */
-/* 	    start_bpos, end_bpos, */
-/* 	    start->apos, end->apos); */
-
-	/* Move the gap. */
-	buf_p_gap_move(buf, start, start_bpos);
-
-	/*
-	 * Record undo information, now that the gap has been moved and the
-	 * elements to be removed are contiguous.  The ordering of a_start and
-	 * a_end determines whether this is a before/after removal.
-	 */
-	if (buf->h != NULL) {
-		if (start == a_start) {
-			buf_p_hist_text(buf, HDR_TAG_DEL, start_bpos,
-			    &buf->b[start->apos * buf->elmsize], rcount);
-		} else {
-			buf_p_hist_text(buf, HDR_TAG_REM, start_bpos,
-			    &buf->b[start->apos * buf->elmsize], rcount);
-		}
-	}
-
-	/* Grow the gap. */
-	buf->gap_len += rcount;
-
-	/*
-	 * Adjust apos for all bufm's before start that are at the same
-	 * position.
-	 */
-	for (bufm = ql_prev(&buf->bufms, start, link);
-	     bufm != NULL && bufm->apos == start->apos;
-	     bufm = ql_prev(&buf->bufms, bufm, link)) {
-/* 		fprintf(stderr, */
-/* 		    "%s(): before: apos: %llu --> %llu\n", */
-/* 		    __FUNCTION__, */
-/* 		    bufm->apos, end->apos); */
-		bufm->apos = end->apos;
-	}
-
-	/*
-	 * Adjust apos and line for all bufm's from start (inclusive) to end
-	 * (exclusive).
-	 */
-	for (bufm = start;
-	     bufm->apos < end->apos;
-	     bufm = ql_next(&buf->bufms, bufm, link)) {
-/* 		fprintf(stderr, */
-/* 		    "%s(): in: apos: %llu --> %llu, line: %llu --> %llu\n", */
-/* 		    __FUNCTION__, */
-/* 		    bufm->apos, end->apos, */
-/* 		    bufm->line, start->line); */
-		bufm->apos = end->apos;
-		bufm->line = start->line;
-	}
-	
-	nlines = end->line - start->line;
-
-	/*
-	 * Adjust the line for all bufm's after the gap.
-	 */
-	for (;
-	     bufm != NULL;
-	     bufm = ql_next(&buf->bufms, bufm, link)) {
-/* 		fprintf(stderr, "%s(): after: line: %llu --> %llu\n", */
-/* 		    __FUNCTION__, */
-/* 		    bufm->line, bufm->line - nlines); */
-		bufm->line -= nlines;
-	}
-
-	/* Adjust the buf's len and nlines. */
-/* 	fprintf(stderr, "%s(): len: %llu --> %llu, lines: %llu --> %llu\n", */
-/* 	    __FUNCTION__, */
-/* 	    buf->len, buf->len - rcount, */
-/* 	    buf->nlines, buf->nlines - nlines); */
-	buf->len -= rcount;
-	buf->nlines -= nlines;
-
-	/* Try to shrink the gap. */
-	buf_p_shrink(buf);
+	bufm_p_remove(a_start, a_end, TRUE);
 }

@@ -75,6 +75,18 @@ static const struct cw_slate_entry slate_buffer_ops[] = {
 	ENTRY(marker_range_cut)
 };
 
+static void buffer_p_eval(void *a_data, cw_nxo_t *a_thread);
+static cw_nxoe_t *buffer_p_ref_iter(void *a_data, cw_bool_t a_reset);
+static cw_bool_t buffer_p_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t
+    a_iter);
+static cw_nxn_t buffer_p_type(cw_nxo_t *a_nxo);
+
+static cw_nxoe_t *marker_p_ref_iter(void *a_data, cw_bool_t a_reset);
+static cw_bool_t marker_p_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t
+    a_iter);
+static cw_nxn_t marker_p_type(cw_nxo_t *a_nxo);
+static cw_bufw_t marker_p_whence(cw_nxo_t *a_whence);
+
 void
 slate_buffer_init(cw_nxo_t *a_thread)
 {
@@ -285,48 +297,54 @@ slate_buffer_redoable(void *a_data, cw_nxo_t *a_thread)
 	nxo_boolean_new(nxo, redoable);
 }
 
+/* XXX Bad API. */
 void
 slate_buffer_undo(void *a_data, cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *nxo;
 	cw_nxn_t		error;
-	struct cw_buffer	*buffer;
+	cw_buf_t		*buf;
+	struct cw_marker	*marker;
 
 	ostack = nxo_thread_ostack_get(a_thread);
 	NXO_STACK_GET(nxo, ostack, a_thread);
-	error = buffer_p_type(nxo);
+	error = marker_p_type(nxo);
 	if (error) {
 		nxo_thread_nerror(a_thread, error);
 		return;
 	}
 
-	buffer = (struct cw_buffer *)nxo_hook_data_get(nxo);
+	marker = (struct cw_marker *)nxo_hook_data_get(nxo);
 
-	buf_lock(&buffer->buf);
-	_cw_error("XXX Not implemented");
-	buf_unlock(&buffer->buf);
+	buf = bufm_buf(&marker->bufm);
+	buf_lock(buf);
+	buf_undo(buf, &marker->bufm, 1);
+	buf_unlock(buf);
 }
 
+/* XXX Bad API. */
 void
 slate_buffer_redo(void *a_data, cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *nxo;
 	cw_nxn_t		error;
-	struct cw_buffer	*buffer;
+	cw_buf_t		*buf;
+	struct cw_marker	*marker;
 
 	ostack = nxo_thread_ostack_get(a_thread);
 	NXO_STACK_GET(nxo, ostack, a_thread);
-	error = buffer_p_type(nxo);
+	error = marker_p_type(nxo);
 	if (error) {
 		nxo_thread_nerror(a_thread, error);
 		return;
 	}
 
-	buffer = (struct cw_buffer *)nxo_hook_data_get(nxo);
+	marker = (struct cw_marker *)nxo_hook_data_get(nxo);
 
-	buf_lock(&buffer->buf);
-	_cw_error("XXX Not implemented");
-	buf_unlock(&buffer->buf);
+	buf = bufm_buf(&marker->bufm);
+	buf_lock(buf);
+	buf_redo(buf, &marker->bufm, 1);
+	buf_unlock(buf);
 }
 
 void
@@ -360,9 +378,17 @@ slate_buffer_history_setactive(void *a_data, cw_nxo_t *a_thread)
 	cw_nxo_t		*ostack, *nxo;
 	cw_nxn_t		error;
 	struct cw_buffer	*buffer;
+	cw_bool_t		active;
 
 	ostack = nxo_thread_ostack_get(a_thread);
 	NXO_STACK_GET(nxo, ostack, a_thread);
+	if (nxo_type_get(nxo) != NXOT_BOOLEAN) {
+		nxo_thread_nerror(a_thread, NXN_typecheck);
+		return;
+	}
+	active = nxo_boolean_get(nxo);
+
+	NXO_STACK_DOWN_GET(nxo, ostack, a_thread, nxo);
 	error = buffer_p_type(nxo);
 	if (error) {
 		nxo_thread_nerror(a_thread, error);
@@ -372,8 +398,10 @@ slate_buffer_history_setactive(void *a_data, cw_nxo_t *a_thread)
 	buffer = (struct cw_buffer *)nxo_hook_data_get(nxo);
 
 	buf_lock(&buffer->buf);
-	_cw_error("XXX Not implemented");
+	buf_hist_active_set(&buffer->buf, active);
 	buf_unlock(&buffer->buf);
+
+	nxo_stack_npop(ostack, 2);
 }
 
 void
@@ -382,9 +410,20 @@ slate_buffer_history_startgroup(void *a_data, cw_nxo_t *a_thread)
 	cw_nxo_t		*ostack, *nxo;
 	cw_nxn_t		error;
 	struct cw_buffer	*buffer;
+	struct cw_marker	*marker;
 
 	ostack = nxo_thread_ostack_get(a_thread);
 	NXO_STACK_GET(nxo, ostack, a_thread);
+	error = marker_p_type(nxo);
+	if (error) {
+		/* No marker specified. */
+		marker = NULL;
+	} else {
+		marker = (struct cw_marker *)nxo_hook_data_get(nxo);
+		
+		NXO_STACK_DOWN_GET(nxo, ostack, a_thread, nxo);
+	}
+
 	error = buffer_p_type(nxo);
 	if (error) {
 		nxo_thread_nerror(a_thread, error);
@@ -394,7 +433,10 @@ slate_buffer_history_startgroup(void *a_data, cw_nxo_t *a_thread)
 	buffer = (struct cw_buffer *)nxo_hook_data_get(nxo);
 
 	buf_lock(&buffer->buf);
-	_cw_error("XXX Not implemented");
+	if (marker != NULL)
+		buf_hist_group_beg(&buffer->buf, &marker->bufm);
+	else
+		buf_hist_group_beg(&buffer->buf, NULL);
 	buf_unlock(&buffer->buf);
 }
 
@@ -416,7 +458,7 @@ slate_buffer_history_endgroup(void *a_data, cw_nxo_t *a_thread)
 	buffer = (struct cw_buffer *)nxo_hook_data_get(nxo);
 
 	buf_lock(&buffer->buf);
-	_cw_error("XXX Not implemented");
+	buf_hist_group_end(&buffer->buf);
 	buf_unlock(&buffer->buf);
 }
 

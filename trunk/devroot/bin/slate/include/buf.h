@@ -20,18 +20,6 @@ typedef enum {
 	BUFW_END	/* Offset from EOB, must be negative. */
 } cw_bufw_t;
 
-/* Buffer history record types and history state machine states. */
-typedef enum {
-	BUFH_NONE,	/* Start state. */
-	BUFH_B,		/* Begin group. */
-	BUFH_E,		/* End group. */
-	BUFH_P,		/* Change buffer position. */
-	BUFH_I,		/* Insert before. */
-	BUFH_Y,		/* Insert after (yank). */
-	BUFH_R,		/* Remove before. */
-	BUFH_K		/* Remove after (kill). */
-} cw_bufh_t;
-
 struct cw_bufm_s {
 #ifdef _CW_DBG
 	cw_uint32_t	magic;
@@ -109,8 +97,8 @@ void	buf_hist_active_set(cw_buf_t *a_buf, cw_bool_t a_active);
 cw_bool_t buf_undoable(cw_buf_t *a_buf);
 cw_bool_t buf_redoable(cw_buf_t *a_buf);
 cw_uint64_t buf_undo(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_uint64_t a_count);
-cw_bool_t buf_redo(cw_buf_t *a_buf, cw_bufm_t *a_bufm);
-void	buf_hist_group_beg(cw_buf_t *a_buf);
+cw_uint64_t buf_redo(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_uint64_t a_count);
+void	buf_hist_group_beg(cw_buf_t *a_buf, cw_bufm_t *a_bufm);
 void	buf_hist_group_end(cw_buf_t *a_buf);
 void	buf_hist_flush(cw_buf_t *a_buf);
 
