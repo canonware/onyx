@@ -446,6 +446,7 @@ native threading facilities.  Along with threads comes the need for methods of
 synchronization between threads.
 
 \subsection{Implicit synchronization}
+\label{sec:implicit_synchronization}
 
 Implicit synchronization is a mandatory language feature, since objects such as
 \htmlref{globaldict}{systemdict:globaldict} are implicitly accessed by the
@@ -2139,7 +2140,7 @@ of systemdict, programs should not normally need to modify systemdict, since
 globaldict provides a place for storing globally shared objects.  All threads
 share the same systemdict, which is implicitly locked.
 
-\begin{longtable}{\optableformat{2.5}}
+\begin{longtable}{\optableformat{2.25}}
 \caption[systemdict summary]{systemdict summary by functional group} \\
 \hline
 Input(s) & Op/Proc/Var & Output(s) & Description \\
@@ -2203,9 +2204,30 @@ number of times. \\
 \hline
 proc & {\bf \htmlref{loop}{systemdict:loop}} & -- &  Iterate indefinitely. \\
 \hline
+array proc & {\bf \htmlref{foreach}{systemdict:foreach}} & -- & Iterate on array
+elements. \\
+dict proc & {\bf \htmlref{foreach}{systemdict:foreach}} & -- & Iterate on
+dictionary key/value pairs. \\
+stack proc & {\bf \htmlref{foreach}{systemdict:foreach}} & -- & Iterate on stack
+elements. \\
+string proc & {\bf \htmlref{foreach}{systemdict:foreach}} & -- & Iterate on
+string elements. \\
+\hline
 -- & {\bf \htmlref{exit}{systemdict:exit}} & -- & Terminate innermost looping
 context. \\
 \hline
+%begin{latexonly}
+file/string & {\bf \htmlref{token}{systemdict:token}} & false & Scan for a
+token. \\
+file/string & {\bf \htmlref{token}{systemdict:token}} & rem object true & \\
+\hline
+%end{latexonly}
+\begin{htmlonly}
+file/string & {\bf \htmlref{token}{systemdict:token}} & false & Scan for a
+token. \\
+file/string & {\bf \htmlref{token}{systemdict:token}} & file/substring object
+true & Scan for a token. \\
+\end{htmlonly}
 object & {\bf \htmlref{start}{systemdict:start}} & -- & Evaluate object. \\
 \hline
 -- & {\bf \htmlref{quit}{systemdict:quit}} & -- & Unwind to innermost start
@@ -2282,28 +2304,12 @@ on stack. \\
 \hline
 stack & {\bf \htmlref{scleartomark}{systemdict:scleartomark}} & stack & Remove
 objecs from stack down through topmost mark. \\
-\hline \hline
-\multicolumn{4}{|l|}{Polymorphic operators} \\
-\hline \hline
-[a] [b] & {\bf \htmlref{catenate}{systemdict:catenate}} & [a b] & \\
-(a) (b) & {\bf \htmlref{catenate}{systemdict:catenate}} & (a b) & \\
-`a' `b' & {\bf \htmlref{catenate}{systemdict:catenate}} & `ab' & \\
 \hline
-& {\bf \htmlref{token}{systemdict:token}} & & \\
+(a) (b) & {\bf \htmlref{catenate}{systemdict:catenate}} & (a b) & Catenate two
+stacks. \\
 \hline
-& {\bf \htmlref{put}{systemdict:put}} & & \\
-\hline
-& {\bf \htmlref{putinterval}{systemdict:putinterval}} & & \\
-\hline
-& {\bf \htmlref{length}{systemdict:length}} & & \\
-\hline
-& {\bf \htmlref{get}{systemdict:get}} & & \\
-\hline
-& {\bf \htmlref{getinterval}{systemdict:getinterval}} & & \\
-\hline
-& {\bf \htmlref{foreach}{systemdict:foreach}} & & \\
-\hline
-& {\bf \htmlref{copy}{systemdict:copy}} & & \\
+(a) (b) & {\bf \htmlref{copy}{systemdict:copy}} & (b a) & Copy stack
+contents. \\
 \hline \hline
 \multicolumn{4}{|l|}{Integer and math operators} \\
 \hline \hline
@@ -2333,6 +2339,30 @@ number. \\
 \hline \hline
 length & {\bf \htmlref{string}{systemdict:string}} & string & Create a
 string. \\
+\hline
+string & {\bf \htmlref{length}{systemdict:length}} & count & Get string
+length. \\
+\hline
+string index & {\bf \htmlref{get}{systemdict:get}} & integer & Get string
+element. \\
+\hline
+string index integer & {\bf \htmlref{put}{systemdict:put}} & -- & Set string
+element. \\
+\hline
+string index length & {\bf \htmlref{getinterval}{systemdict:getinterval}} &
+substring & Get a string interval. \\
+\hline
+string index substring & {\bf \htmlref{putinterval}{systemdict:putinterval}} &
+-- & Copy substring into string. \\
+\hline
+`a' `b' & {\bf \htmlref{catenate}{systemdict:catenate}} & `ab' & Catenate two
+strings. \\
+\hline
+a b & {\bf \htmlref{copy}{systemdict:copy}} & substring & Copy string. \\
+\hline \hline
+\multicolumn{4}{|l|}{Name operators} \\
+\hline \hline
+name & {\bf \htmlref{length}{systemdict:length}} & count & Get name length. \\
 \hline \hline
 \multicolumn{4}{|l|}{Array operators} \\
 \hline \hline
@@ -2345,6 +2375,25 @@ mark objects & {\bf \htmlref{]}{systemdict:sym_rb}} & array & Construct an
 array. \\
 \hline
 length & {\bf \htmlref{array}{systemdict:array}} & array & Create an array. \\
+\hline
+array & {\bf \htmlref{length}{systemdict:length}} & count & Get array length. \\
+\hline
+array index & {\bf \htmlref{get}{systemdict:get}} & object & Get array
+element. \\
+\hline
+array index object & {\bf \htmlref{put}{systemdict:put}} & -- & Set array
+element. \\
+\hline
+array index length & {\bf \htmlref{getinterval}{systemdict:getinterval}} &
+subarray & Get an array interval. \\
+\hline
+array index subarray & {\bf \htmlref{putinterval}{systemdict:putinterval}} & --
+& Copy subarray into array. \\
+\hline
+[a] [b] & {\bf \htmlref{catenate}{systemdict:catenate}} & [a b] & Catenate two
+arrays. \\
+\hline
+a b & {\bf \htmlref{copy}{systemdict:copy}} & subarray & Copy array. \\
 \hline \hline
 \multicolumn{4}{|l|}{Dictionary and dictionary stack operators} \\
 \hline \hline
@@ -2380,9 +2429,28 @@ key & {\bf \htmlref{load}{systemdict:load}} & val & Look up a key's value. \\
 dict key & {\bf \htmlref{known}{systemdict:known}} & boolean & Check for key in
 dict. \\
 \hline
+%begin{latexonly}
 key & {\bf \htmlref{where}{systemdict:where}} & false & Get topmost dstack
 dictionary that \\
 key & {\bf \htmlref{where}{systemdict:where}} & dict true & defines key. \\
+\hline
+%end{latexonly}
+\begin{htmlonly}
+key & {\bf \htmlref{where}{systemdict:where}} & false & Get topmost dstack
+dictionary that defines key. \\
+key & {\bf \htmlref{where}{systemdict:where}} & dict true & Get topmost dstack
+dictionary that defines key. \\
+\end{htmlonly}
+dict & {\bf \htmlref{length}{systemdict:length}} & count & Get number of
+dictionary key/value pairs. \\
+\hline
+dict key & {\bf \htmlref{get}{systemdict:get}} & value & Get dict value
+associate with key. \\
+\hline
+dict key value & {\bf \htmlref{put}{systemdict:put}} & -- & Set dict key/value
+pair. \\
+\hline
+a b & {\bf \htmlref{copy}{systemdict:copy}} & b & Copy dictionary contents. \\
 \hline
 -- & {\bf \htmlref{currentdict}{systemdict:currentdict}} & dict & Get topmost
 dstack dictionary. \\
@@ -2542,18 +2610,23 @@ condition variable. \\
 condition mutex & {\bf \htmlref{wait}{systemdict:wait}} & -- & Wait on
 condition. \\
 \hline
-& {\bf \htmlref{timedwait}{systemdict:timedwait}} & & \\
+condition mutex timeout & {\bf \htmlref{timedwait}{systemdict:timedwait}} &
+boolean & Wait on condition with timeout. \\
 \hline
-& {\bf \htmlref{signal}{systemdict:signal}} & & \\
+condition & {\bf \htmlref{signal}{systemdict:signal}} & -- & Signal a condition
+waiter. \\
 \hline
-& {\bf \htmlref{broadcast}{systemdict:broadcast}} & & \\
+condition & {\bf \htmlref{broadcast}{systemdict:broadcast}} & -- & Signal all
+condition waiters. \\
 \hline
-& {\bf \htmlref{setlocking}{systemdict:setlocking}} & & \\
+-- & {\bf \htmlref{currentlocking}{systemdict:currentlocking}} & boolean & Get
+implicit locking mode. \\
+\hline
+boolean & {\bf \htmlref{setlocking}{systemdict:setlocking}} & -- & Set implicit
+locking mode. \\
 \hline
 object & {\bf \htmlref{lcheck}{systemdict:lcheck}} & boolean & Implicitly
 locked? \\
-\hline
-& {\bf \htmlref{currentlocking}{systemdict:currentlocking}} & & \\
 \hline \hline
 \multicolumn{4}{|l|}{Miscellaneous operators} \\
 \hline \hline
@@ -3022,23 +3095,30 @@ onyx:1>
 	\end{description}
 \label{systemdict:broadcast}
 \index{broadcast@\onyxop{}{broadcast}{}}
-\item[{\onyxop{--}{broadcast}{--}}: ]
+\item[{\onyxop{condition}{broadcast}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[condition: ]
+			A condition object.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Signal all threads that are waiting on \oparg{condition}.  If
+		there are no waiters, this operator has no effect.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> condition mutex dup lock ostack
+onyx:3> {dup lock exch broadcast unlock}
+onyx:4> thread 3 1 roll
+onyx:3> dup 3 1 roll
+onyx:4> wait unlock join
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:bytesavailable}
@@ -3293,7 +3373,9 @@ onyx:0>
 	\end{description}
 \label{systemdict:copy}
 \index{copy@\onyxop{}{copy}{}}
-\item[{\onyxop{--}{copy}{--}}: ]
+\item[{\onyxop{a b}{copy}{subarray}}: ]
+\item[{\onyxop{a b}{copy}{b}}: ]
+\item[{\onyxop{(a) (b)}{copy}{(b a)}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -3458,23 +3540,29 @@ onyx:0>
 	\end{description}
 \label{systemdict:currentlocking}
 \index{currentlocking@\onyxop{}{currentlocking}{}}
-\item[{\onyxop{--}{currentlocking}{--}}: ]
+\item[{\onyxop{--}{currentlocking}{boolean}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[boolean: ]
+			If false, new objects are created with implicit locking
+			disabled.  Otherwise, new objects are created with
+			implicit locking enabled.
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Get the current implicit locking mode.  See
+		Section~\ref{sec:implicit_synchronization} for implicit
+		synchronization details.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> currentlocking 1 sprint
+false
+onyx:0> true setlocking
+onyx:0> currentlocking 1 sprint
+true
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:cvlit}
@@ -4288,7 +4376,10 @@ onyx:0>
 	\end{description}
 \label{systemdict:foreach}
 \index{foreach@\onyxop{}{foreach}{}}
-\item[{\onyxop{--}{foreach}{--}}: ]
+\item[{\onyxop{array proc}{foreach}{--}}: ]
+\item[{\onyxop{dict proc}{foreach}{--}}: ]
+\item[{\onyxop{stack proc}{foreach}{--}}: ]
+\item[{\onyxop{string proc}{foreach}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -4405,7 +4496,9 @@ onyx:0>
 	\end{description}
 \label{systemdict:get}
 \index{get@\onyxop{}{get}{}}
-\item[{\onyxop{--}{get}{--}}: ]
+\item[{\onyxop{array index}{get}{object}}: ]
+\item[{\onyxop{dict key}{get}{value}}: ]
+\item[{\onyxop{string index}{get}{integer}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -4426,7 +4519,8 @@ onyx:0>
 	\end{description}
 \label{systemdict:getinterval}
 \index{getinterval@\onyxop{}{getinterval}{}}
-\item[{\onyxop{--}{getinterval}{--}}: ]
+\item[{\onyxop{array index length}{getinterval}{subarray}}: ]
+\item[{\onyxop{string index length}{getinterval}{substring}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -4759,7 +4853,10 @@ onyx:0>
 	\end{description}
 \label{systemdict:length}
 \index{length@\onyxop{}{length}{}}
-\item[{\onyxop{--}{length}{--}}: ]
+\item[{\onyxop{array}{length}{count}}: ]
+\item[{\onyxop{dict}{length}{count}}: ]
+\item[{\onyxop{name}{length}{count}}: ]
+\item[{\onyxop{string}{length}{count}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -5400,7 +5497,9 @@ onyx:1>
 	\end{description}
 \label{systemdict:put}
 \index{put@\onyxop{}{put}{}}
-\item[{\onyxop{--}{put}{--}}: ]
+\item[{\onyxop{array index object}{put}{--}}: ]
+\item[{\onyxop{dict key value}{put}{--}}: ]
+\item[{\onyxop{string index integer}{put}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -5421,7 +5520,8 @@ onyx:1>
 	\end{description}
 \label{systemdict:putinterval}
 \index{putinterval@\onyxop{}{putinterval}{}}
-\item[{\onyxop{--}{putinterval}{--}}: ]
+\item[{\onyxop{array index subarray}{putinterval}{--}}: ]
+\item[{\onyxop{string index substring}{putinterval}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -5904,23 +6004,31 @@ onyx:0>
 	\end{description}
 \label{systemdict:setlocking}
 \index{setlocking@\onyxop{}{setlocking}{}}
-\item[{\onyxop{--}{setlocking}{--}}: ]
+\item[{\onyxop{boolean}{setlocking}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[boolean: ]
+			A boolean to set the implicit locking mode to.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Set the current implicit locking mode.  See
+		Section~\ref{sec:implicit_synchronization} for implicit
+		synchronization details.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> currentlocking 1 sprint
+false
+onyx:0> true setlocking
+onyx:0> currentlocking 1 sprint
+true
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sexch}
@@ -5987,23 +6095,30 @@ onyx:0>
 	\end{description}
 \label{systemdict:signal}
 \index{signal@\onyxop{}{signal}{}}
-\item[{\onyxop{--}{signal}{--}}: ]
+\item[{\onyxop{condition}{signal}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[condition: ]
+			A condition object.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Signal a thread that is waiting on \oparg{condition}.  If there
+		are no waiters, this operator has no effect.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> condition mutex dup lock ostack
+onyx:3> {dup lock exch signal unlock}
+onyx:4> thread 3 1 roll
+onyx:3> dup 3 1 roll
+onyx:4> wait unlock join
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sindex}
@@ -6726,23 +6841,45 @@ onyx:1>
 	\end{description}
 \label{systemdict:timedwait}
 \index{timedwait@\onyxop{}{timedwait}{}}
-\item[{\onyxop{--}{timedwait}{--}}: ]
+\item[{\onyxop{condition mutex timeout}{timedwait}{boolean}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[condition: ]
+			A condition object.
+		\item[mutex: ]
+			A mutex object that this thread currently owns.
+		\item[timeout: ]
+			Minimum number of nanoseconds to wait for
+			\oparg{condition}.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[boolean: ]
+			If false, success, otherwise timeout.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Wait on \oparg{condition} for at least \oparg{timeout}
+		nanoseconds.  \oparg{mutex} is atomically released when the
+		current thread blocks, then acquired again before the current
+		thread runs again.  Using a mutex that the current thread does
+		not own will result in undefined behavior (likely crash).
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> condition mutex dup lock ostack
+onyx:3> {dup lock exch signal unlock}
+onyx:4> thread 3 1 roll
+onyx:3> dup 3 1 roll
+onyx:4> 1000000000 timedwait 1 sprint unlock join
+false
+onyx:0> mutex condition 1 index dup lock 1000000000 timedwait 1 sprint unlock
+true
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:token}
