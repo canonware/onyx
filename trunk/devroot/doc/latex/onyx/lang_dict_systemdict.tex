@@ -530,6 +530,12 @@ execution stack operators} \\
 	{Fork and exec a new process.}
 \hline
 \optableent
+	{args redirects}
+	{{\bf \htmlref{forkexec}{systemdict:forkexec}}}
+	{pid}
+	{Fork and exec a new process.}
+\hline
+\optableent
 	{pid}
 	{{\bf \htmlref{waitpid}{systemdict:waitpid}}}
 	{status}
@@ -5454,6 +5460,7 @@ onyx:0>
 \label{systemdict:forkexec}
 \index{forkexec@\onyxop{}{forkexec}{}}
 \item[{\onyxop{args}{forkexec}{pid}}: ]
+\item[{\onyxop{args redirects}{forkexec}{pid}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\item[args: ]
@@ -5461,6 +5468,12 @@ onyx:0>
 			is the path of the program to invoke, and any additional
 			array elements are passed as command line arguments to
 			the invoked program.
+		\item[redirects: ]
+			A dictionary of file redirections.  Each key/value pair
+			specifies that the file descriptor associated with the
+			key should be replaced by the file descriptor associated
+			with the value.  The file descriptor associated with the
+			key is kept open across the exec.
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[pid: ]
@@ -5469,6 +5482,7 @@ onyx:0>
 		\end{description}
 	\item[Error(s): ]
 		\begin{description}\item[]
+		\item[\htmlref{argcheck}{argcheck}.]
 		\item[\htmlref{limitcheck}{limitcheck}.]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]

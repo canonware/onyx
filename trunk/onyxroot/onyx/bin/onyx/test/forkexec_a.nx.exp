@@ -3,4 +3,8 @@ Test begin
 Child test begin
 Child test end
 Test end
+Parent read: `Test begin'
+Parent read: `Child test begin'
+Parent read: `Child test end'
+Parent read: `Test end'
 Test end

@@ -1,3 +1,9 @@
+2003-10-22 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/systemdict.c:systemdict_forkexec() : Add the optional
+	  redirects parameter, which makes it possible to redirect standard I/O,
+	  thus enabling program pipelines.
+
 2003-10-21 : Jason Evans <jasone@canonware.com>
 
 	* mod/modprompt/src/modprompt.c : Wrap workaround code for

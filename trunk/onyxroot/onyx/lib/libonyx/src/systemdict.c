@@ -4861,44 +4861,263 @@ systemdict_foreach(cw_nxo_t *a_thread)
 }
 
 #ifdef CW_POSIX
+
+CW_P_INLINE cw_bool_t
+systemdict_p_fork_prepare(cw_nxo_t *a_thread, cw_nxo_t *a_ostack,
+			  int **r_remap, cw_uint32_t *r_nremap)
+{
+    cw_bool_t retval;
+    cw_nxo_t *tstack, *tkey, *tval, *nxo;
+    cw_uint32_t i, j, nremap;
+    int *remap, key_fd, val_fd;
+
+    tstack = nxo_thread_tstack_get(a_thread);
+    tkey = nxo_stack_push(tstack);
+    tval = nxo_stack_push(tstack);
+
+    ;
+    if ((nxo = nxo_stack_get(a_ostack)) == NULL)
+    {
+	nxo_thread_nerror((a_thread), NXN_stackunderflow);
+	retval = TRUE;
+	goto RETURN;
+    }
+    if (nxo_type_get(nxo) != NXOT_DICT)
+    {
+	*r_remap = NULL;
+	*r_nremap = 0;
+	retval = FALSE;
+	goto RETURN;
+    }
+
+    /* Iterate over the key/value pairs in the dict, and construct a table of
+     * file descriptor remappings.  Each "element" in the remapping array looks
+     * like:
+     *
+     *   to from temp
+     *
+     * "to" is the fd to dup2() "from" onto.  "temp" is used during the two-pass
+     * dup()/dup2() remapping algorithm in systemdict_p_fork_remap(). */
+    nremap = nxo_dict_count(nxo);
+    remap = (int *) cw_malloc(sizeof(int) * nremap * 3);
+
+    for (i = 0; i < nremap; i++)
+    {
+	/* Get tkey/tval. */
+	if (nxo_dict_iterate(nxo, tkey)
+	    || nxo_dict_lookup(nxo, tkey, tval))
+	{
+	    /* The only way this can happen is due to a race condition with
+	     * another thread.  Crashing would be a reasonable thing to do, so
+	     * this check isn't strictly necessary. */
+	    cw_free(remap);
+	    nxo_thread_nerror((a_thread), NXN_unregistered);
+	    retval = TRUE;
+	    goto RETURN;
+	}
+
+	/* Check types. */
+	if (nxo_type_get(tkey) != NXOT_FILE || nxo_type_get(tval) != NXOT_FILE)
+	{
+	    cw_free(remap);
+	    nxo_thread_nerror((a_thread), NXN_typecheck);
+	    retval = TRUE;
+	    goto RETURN;
+	}
+
+	/* Make sure files aren't synthetic. */
+	key_fd = nxo_file_fd_get(tkey);
+	val_fd = nxo_file_fd_get(tval);
+	if (key_fd == -1 || val_fd == -1)
+	{
+	    cw_free(remap);
+	    nxo_thread_nerror((a_thread), NXN_argcheck);
+	    retval = TRUE;
+	    goto RETURN;
+	}
+
+	/* Save the remapping. */
+	remap[i * 3] = key_fd;
+	remap[i * 3 + 1] = val_fd;
+
+	/* Make sure that the key file descriptor is unique. */
+	for (j = 0; j < i; j++)
+	{
+	    if (remap[i * 3] == remap[j * 3])
+	    {
+		cw_free(remap);
+		nxo_thread_nerror((a_thread), NXN_argcheck);
+		retval = TRUE;
+		goto RETURN;
+	    }
+	}
+    }
+
+    *r_remap = remap;
+    *r_nremap = nremap;
+    retval = FALSE;
+    RETURN:
+    nxo_stack_npop(tstack, 2);
+    return retval;
+}
+
+CW_P_INLINE void
+systemdict_p_fork_cleanup(int *a_remap, cw_uint32_t a_nremap)
+{
+    if (a_nremap)
+    {
+	cw_free(a_remap);
+    }
+}
+
+CW_P_INLINE cw_bool_t
+systemdict_p_fork_remap(int *a_remap, cw_uint32_t a_nremap)
+{
+    cw_bool_t retval;
+    cw_uint32_t i, fd;
+
+    /* The first pass creates temporary file descriptors. */
+    for (i = 0; i < a_nremap; i++)
+    {
+	if ((a_remap[i * 3 + 2] = dup(a_remap[i * 3 + 1])) == -1)
+	{
+	    retval = TRUE;
+	    goto RETURN;
+	}
+    }
+
+    /* The second pass does the final remapping. */
+    for (i = 0; i < a_nremap; i++)
+    {
+	/* Close the destination fd. */
+	while (close(a_remap[i * 3]) == -1)
+	{
+	    switch (errno)
+	    {
+		case EINTR:
+		{
+		    /* Try again. */
+		    break;
+		}
+		case EBADF:
+		{
+		    /* Oops, maybe the file descriptor didn't need closed.  Oh
+		     * well, no harm done. */
+		    goto CLOSED;
+		}
+		default:
+		{
+		    retval = TRUE;
+		    goto RETURN;
+		}
+	    }
+	}
+	CLOSED:
+
+	/* Duplicate the temp fd to the destination fd.  Using fcntl() makes
+	 * sure that the file descriptor won't be closed during exec. */
+	if ((fd = fcntl(a_remap[i * 3 + 2], F_DUPFD, a_remap[i * 3])) == -1)
+	{
+	    retval = TRUE;
+	    goto RETURN;
+	}
+	if (fd != a_remap[i * 3])
+	{
+	    /* The file descriptor that was returned is the wrong number.  This
+	     * shouldn't ever happen, since that descriptor was just closed. */
+	    retval = TRUE;
+	    goto RETURN;
+	}
+    }
+
+    retval = FALSE;
+    RETURN:
+    return retval;
+}
+
 void
 systemdict_forkexec(cw_nxo_t *a_thread)
 {
+    cw_nxo_t *ostack;
     char *path, **argv, **envp;
+    cw_uint32_t nremap;
+    int *remap;
+    cw_bool_t error;
+    pid_t pid;
 
-    if (systemdict_p_exec_prepare(a_thread, &path, &argv, &envp) == FALSE)
+    ostack = nxo_thread_ostack_get(a_thread);
+
+    /* Check for a file remapping dict.  If one was specified, process it, then
+     * move it out of the way so that the exec call can be prepared for. */
+    if (systemdict_p_fork_prepare(a_thread, ostack, &remap, &nremap))
     {
-	pid_t pid;
+	return;
+    }
 
-	pid = fork();
-	if (pid == 0)
+    if (nremap)
+    {
+	/* Move the remapping dict out of the way. */
+	if (nxo_stack_exch(ostack))
 	{
-	    /* Child. */
-	    execve(path, argv, envp);
+	    nxo_thread_nerror((a_thread), NXN_stackunderflow);
+	    return;
+	}
+    }
 
-	    /* If we get here, then the execve() call failed.  Get an error back
-	     * to the parent. */
+    /* Prepare for exec. */
+    error = systemdict_p_exec_prepare(a_thread, &path, &argv, &envp);
+    if (nremap)
+    {
+	/* Restore ostack to its original state. */
+	nxo_stack_exch(ostack);
+    }
+    if (error)
+    {
+	/* Preparing for exec failed. */
+	return;
+    }
+
+    pid = fork();
+    if (pid == 0)
+    {
+	/* Child. */
+
+	/* If a file remapping dict was specified, perform the
+	 * remappings. */
+	if (systemdict_p_fork_remap(remap, nremap))
+	{
+	    /* Error while remapping file descriptors. */
 	    _exit(1);
 	}
-	else
+
+	execve(path, argv, envp);
+
+	/* If we get here, then the execve() call failed.  Get an error back to
+	 * the parent. */
+	_exit(1);
+    }
+    else
+    {
+	cw_nxo_t *nxo;
+
+	/* Parent. */
+
+	systemdict_p_fork_cleanup(remap, nremap);
+	systemdict_p_exec_cleanup(path, argv, envp);
+
+	if (pid == -1)
 	{
-	    cw_nxo_t *ostack, *nxo;
-
-	    /* Parent. */
-
-	    systemdict_p_exec_cleanup(path, argv, envp);
-
-	    if (pid == -1)
-	    {
-		/* Error, related to some form of resource exhaustion. */
-		nxo_thread_nerror(a_thread, NXN_limitcheck);
-		return;
-	    }
-
-	    ostack = nxo_thread_ostack_get(a_thread);
-	    nxo = nxo_stack_get(ostack);
-	    nxo_integer_new(nxo, pid);
+	    /* Error, related to some form of resource exhaustion. */
+	    nxo_thread_nerror(a_thread, NXN_limitcheck);
+	    return;
 	}
+
+	if (nremap)
+	{
+	    nxo_stack_pop(ostack);
+	}
+	nxo = nxo_stack_get(ostack);
+	nxo_integer_new(nxo, pid);
     }
 }
 #endif
