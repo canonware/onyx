@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 64 $
- * $Date: 1998-05-01 21:20:21 -0700 (Fri, 01 May 1998) $
+ * $Revision: 81 $
+ * $Date: 1998-05-18 23:41:27 -0700 (Mon, 18 May 1998) $
  *
  * <<< Description >>>
  *
@@ -42,3 +42,363 @@
 #include <config.h>
 
 #include <br_priv.h>
+
+/****************************************************************************
+ * <<< Arguments >>>
+ *
+ *
+ *
+ * <<< Return Value >>>
+ *
+ *
+ *
+ * <<< Description >>>
+ *
+ *
+ *
+ ****************************************************************************/
+cw_br_t *
+br_new(cw_br_t * a_br_o)
+{
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  {
+    _cw_marker("Enter br_new()");
+  }
+
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  {
+    _cw_marker("Exit br_new()");
+  }
+  return NULL; /* XXX */
+}
+
+/****************************************************************************
+ * <<< Arguments >>>
+ *
+ *
+ *
+ * <<< Return Value >>>
+ *
+ *
+ *
+ * <<< Description >>>
+ *
+ *
+ *
+ ****************************************************************************/
+void
+br_delete(cw_br_t * a_br_o)
+{
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  {
+    _cw_marker("Enter br_delete()");
+  }
+  _cw_check_ptr(a_br_o);
+  
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  {
+    _cw_marker("Exit br_delete()");
+  }
+}
+
+/****************************************************************************
+ * <<< Arguments >>>
+ *
+ *
+ *
+ * <<< Return Value >>>
+ *
+ *
+ *
+ * <<< Description >>>
+ *
+ *
+ *
+ ****************************************************************************/
+cw_bool_t
+br_is_open(cw_br_t * a_br_o)
+{
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  {
+    _cw_marker("Enter br_is_open()");
+  }
+  _cw_check_ptr(a_br_o);
+  rwl_rlock(&a_br_o->rw_lock);
+
+  
+  rwl_runlock(&a_br_o->rw_lock);
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  {
+    _cw_marker("Exit br_is_open()");
+  }
+  return TRUE; /* XXX */
+}
+
+/****************************************************************************
+ * <<< Arguments >>>
+ *
+ *
+ *
+ * <<< Return Value >>>
+ *
+ *
+ *
+ * <<< Description >>>
+ *
+ *
+ *
+ ****************************************************************************/
+cw_bool_t
+br_open(cw_br_t * a_br_o, char * a_filename)
+{
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  {
+    _cw_marker("Enter br_open()");
+  }
+  _cw_check_ptr(a_br_o);
+  rwl_wlock(&a_br_o->rw_lock);
+
+  
+  rwl_wunlock(&a_br_o->rw_lock);
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  {
+    _cw_marker("Exit br_open()");
+  }
+  return TRUE; /* XXX */
+}
+
+/****************************************************************************
+ * <<< Arguments >>>
+ *
+ *
+ *
+ * <<< Return Value >>>
+ *
+ *
+ *
+ * <<< Description >>>
+ *
+ *
+ *
+ ****************************************************************************/
+cw_bool_t
+br_close(cw_br_t * a_br_o)
+{
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  {
+    _cw_marker("Enter br_close()");
+  }
+  _cw_check_ptr(a_br_o);
+  rwl_wlock(&a_br_o->rw_lock);
+
+  
+  rwl_wunlock(&a_br_o->rw_lock);
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  {
+    _cw_marker("Exit br_close()");
+  }
+  return TRUE; /* XXX */
+}
+
+/****************************************************************************
+ * <<< Arguments >>>
+ *
+ *
+ *
+ * <<< Return Value >>>
+ *
+ *
+ *
+ * <<< Description >>>
+ *
+ *
+ *
+ ****************************************************************************/
+cw_uint64_t
+br_get_block_size(cw_br_t * a_br_o)
+{
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  {
+    _cw_marker("Enter br_get_block_size()");
+  }
+  _cw_check_ptr(a_br_o);
+  rwl_rlock(&a_br_o->rw_lock);
+
+  
+  rwl_runlock(&a_br_o->rw_lock);
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  {
+    _cw_marker("Exit br_get_block_size()");
+  }
+  return 0; /* XXX */
+}
+			    
+/****************************************************************************
+ * <<< Arguments >>>
+ *
+ *
+ *
+ * <<< Return Value >>>
+ *
+ *
+ *
+ * <<< Description >>>
+ *
+ *
+ *
+ ****************************************************************************/
+cw_bool_t
+br_add_file(cw_br_t * a_br_o, char * a_filename,
+	    cw_bool_t a_is_raw, cw_bool_t a_can_overlap,
+	    cw_bool_t a_is_dynamic,
+	    cw_uint64_t a_base_addr, cw_uint64_t a_max_size)
+{
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  {
+    _cw_marker("Enter br_add_file()");
+  }
+  _cw_check_ptr(a_br_o);
+  rwl_wlock(&a_br_o->rw_lock);
+
+  
+  rwl_wunlock(&a_br_o->rw_lock);
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  {
+    _cw_marker("Exit br_add_file()");
+  }
+  return TRUE; /* XXX */
+}
+
+/****************************************************************************
+ * <<< Arguments >>>
+ *
+ *
+ *
+ * <<< Return Value >>>
+ *
+ *
+ *
+ * <<< Description >>>
+ *
+ *
+ *
+ ****************************************************************************/
+cw_bool_t
+br_rm_file(cw_br_t * a_br_o, char * a_filename)
+{
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  {
+    _cw_marker("Enter br_rm_file()");
+  }
+  _cw_check_ptr(a_br_o);
+  rwl_wlock(&a_br_o->rw_lock);
+
+  
+  rwl_wunlock(&a_br_o->rw_lock);
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  {
+    _cw_marker("Exit br_rm_file()");
+  }
+  return TRUE; /* XXX */
+}
+
+/****************************************************************************
+ * <<< Arguments >>>
+ *
+ *
+ *
+ * <<< Return Value >>>
+ *
+ *
+ *
+ * <<< Description >>>
+ *
+ *
+ *
+ ****************************************************************************/
+cw_brblk_t *
+br_block_slock(cw_br_t * a_br_o,
+	       cw_uint64_t a_logical_addr)
+{
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  {
+    _cw_marker("Enter br_block_slock()");
+  }
+  _cw_check_ptr(a_br_o);
+  rwl_rlock(&a_br_o->rw_lock);
+
+  
+  rwl_runlock(&a_br_o->rw_lock);
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  {
+    _cw_marker("Exit br_block_slock()");
+  }
+  return NULL; /* XXX */
+}
+
+/****************************************************************************
+ * <<< Arguments >>>
+ *
+ *
+ *
+ * <<< Return Value >>>
+ *
+ *
+ *
+ * <<< Description >>>
+ *
+ *
+ *
+ ****************************************************************************/
+cw_brblk_t *
+br_block_tlock(cw_br_t * a_br_o,
+	       cw_uint64_t a_logical_addr)
+{
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  {
+    _cw_marker("Enter br_block_tlock()");
+  }
+  _cw_check_ptr(a_br_o);
+  rwl_rlock(&a_br_o->rw_lock);
+
+  
+  rwl_runlock(&a_br_o->rw_lock);
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  {
+    _cw_marker("Exit br_block_tlock()");
+  }
+  return NULL; /* XXX */
+}
+
+/****************************************************************************
+ * <<< Arguments >>>
+ *
+ *
+ *
+ * <<< Return Value >>>
+ *
+ *
+ *
+ * <<< Description >>>
+ *
+ *
+ *
+ ****************************************************************************/
+cw_bool_t
+br_block_destroy(cw_br_t * a_br_o, cw_brblk_t * a_brblk_o)
+{
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  {
+    _cw_marker("Enter br_block_destroy()");
+  }
+  _cw_check_ptr(a_br_o);
+  rwl_rlock(&a_br_o->rw_lock);
+
+  
+  rwl_runlock(&a_br_o->rw_lock);
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  {
+    _cw_marker("Exit br_block_destroy()");
+  }
+  return TRUE; /* XXX */
+}
