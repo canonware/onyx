@@ -1,3 +1,11 @@
+2001-10-07  Jason Evans  <jasone@canonware.com>
+
+	* src/nxa.c (nxa_p_sweep): Implement multiple sweep passes, in
+	order to support ordering the deletion of dependent objects.
+
+	* src/systemdict.c (systemdict_bind): Bind to hooks, just as
+	operators are bound to.
+
 2001-10-04  Jason Evans  <jasone@canonware.com>
 
 	* src/systemdict.c (systemdict_iobuf): Add.
