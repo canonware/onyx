@@ -531,8 +531,8 @@ systemdict_p_bind(cw_stilo_t *a_proc, cw_stilo_t *a_thread)
 							stilo_dup(el, val);
 							stilo_l_operator_fast_op_set(el,
 							    fastops[j].stiln);
-							stilo_array_el_set(a_proc,
-							    el, i);
+							stilo_array_el_set(
+							    a_proc, el, i);
 							break;
 						}
 					}
@@ -957,8 +957,8 @@ systemdict_cvn(cw_stilo_t *a_thread)
 	stilo_dup(tstilo, stilo);
 
 	stilo_string_lock(tstilo);
-	stilo_name_new(stilo, stilo_thread_stil_get(a_thread), stilo_string_get(tstilo),
-	    stilo_string_len_get(tstilo), FALSE);
+	stilo_name_new(stilo, stilo_thread_stil_get(a_thread),
+	    stilo_string_get(tstilo), stilo_string_len_get(tstilo), FALSE);
 	stilo_string_unlock(tstilo);
 	stilo_attrs_set(stilo, stilo_attrs_get(tstilo));
 
@@ -1069,7 +1069,8 @@ systemdict_cvs(cw_stilo_t *a_thread)
 		stilo_dup(tstilo, stilo);
 
 		stilo_string_new(stilo, stilo_thread_stil_get(a_thread),
-		    stilo_thread_currentlocking(a_thread), stilo_name_len_get(tstilo));
+		    stilo_thread_currentlocking(a_thread),
+		    stilo_name_len_get(tstilo));
 		stilo_string_lock(stilo);
 		stilo_string_set(stilo, 0, stilo_name_str_get(tstilo),
 		    stilo_name_len_get(tstilo));
@@ -1093,7 +1094,8 @@ systemdict_cvs(cw_stilo_t *a_thread)
 			stilo_dup(tstilo, stilo);
 
 			stilo_string_new(stilo, stilo_thread_stil_get(a_thread),
-			    stilo_thread_currentlocking(a_thread), stiln_len(stiln));
+			    stilo_thread_currentlocking(a_thread),
+			    stiln_len(stiln));
 			stilo_string_lock(stilo);
 			stilo_string_set(stilo, 0, stiln_str(stiln),
 			    stiln_len(stiln));
@@ -1396,18 +1398,19 @@ systemdict_exec(cw_stilo_t *a_thread)
 		key = stilo_stack_push(tstack);
 		val = stilo_stack_push(tstack);
 
-		dcount =
-		    stilo_dict_count(stil_envdict_get(stilo_thread_stil_get(a_thread)));
+		dcount = stilo_dict_count(stil_envdict_get(
+		    stilo_thread_stil_get(a_thread)));
 		envp = (char **)_cw_malloc(sizeof(char *) * (dcount + 1));
 		for (i = 0; i < dcount; i++) {
 			/* Get key and val. */
-			stilo_dict_iterate(stil_envdict_get(stilo_thread_stil_get(a_thread)),
-			    key);
-			stilo_dict_lookup(stil_envdict_get(stilo_thread_stil_get(a_thread)),
-			    key, val);
+			stilo_dict_iterate(stil_envdict_get(
+			    stilo_thread_stil_get(a_thread)), key);
+			stilo_dict_lookup(stil_envdict_get(
+			    stilo_thread_stil_get(a_thread)), key, val);
 			if (stilo_type_get(key) != STILOT_NAME ||
 			    stilo_type_get(val) != STILOT_STRING) {
-				stilo_thread_error(a_thread, STILO_THREADE_TYPECHECK);
+				stilo_thread_error(a_thread,
+				    STILO_THREADE_TYPECHECK);
 				stilo_stack_npop(tstack, 2);
 				goto ENVP_ERROR;
 			}
@@ -1953,16 +1956,16 @@ systemdict_getinterval(cw_stilo_t *a_thread)
 			stilo_thread_error(a_thread, STILO_THREADE_RANGECHECK);
 			return;
 		}
-		stilo_array_subarray_new(count, from, stilo_thread_stil_get(a_thread),
-		    index, len);
+		stilo_array_subarray_new(count, from,
+		    stilo_thread_stil_get(a_thread), index, len);
 		break;
 	case STILOT_STRING:
 		if (index + len > stilo_string_len_get(from)) {
 			stilo_thread_error(a_thread, STILO_THREADE_RANGECHECK);
 			return;
 		}
-		stilo_string_substring_new(count, from, stilo_thread_stil_get(a_thread),
-		    index, len);
+		stilo_string_substring_new(count, from,
+		    stilo_thread_stil_get(a_thread), index, len);
 		break;
 	default:
 		stilo_thread_error(a_thread, STILO_THREADE_TYPECHECK);
@@ -2019,8 +2022,8 @@ systemdict_handleerror(cw_stilo_t *a_thread)
 	/* Get errordict. */
 	errordict = stilo_stack_push(tstack);
 	key = stilo_stack_push(tstack);
-	stilo_name_new(key, stilo_thread_stil_get(a_thread), stiln_str(STILN_errordict),
-	    stiln_len(STILN_errordict), TRUE);
+	stilo_name_new(key, stilo_thread_stil_get(a_thread),
+	    stiln_str(STILN_errordict), stiln_len(STILN_errordict), TRUE);
 	if (stilo_thread_dstack_search(a_thread, key, errordict)) {
 		stilo_stack_npop(tstack, 2);
 		xep_throw(_CW_STILX_ERRORDICT);
@@ -2689,7 +2692,8 @@ systemdict_put(cw_stilo_t *a_thread)
 		break;
 	}
 	case STILOT_DICT: {
-		stilo_dict_def(into, stilo_thread_stil_get(a_thread), with, what);
+		stilo_dict_def(into, stilo_thread_stil_get(a_thread), with,
+		    what);
 		break;
 	}
 	case STILOT_STRING: {
@@ -2861,7 +2865,8 @@ systemdict_read(cw_stilo_t *a_thread)
 		if (nread == 0) {
 			/* EOF. */
 			stilo_boolean_new(file, TRUE);
-			stilo_string_new(string, stilo_thread_stil_get(a_thread),
+			stilo_string_new(string,
+			    stilo_thread_stil_get(a_thread),
 			    stilo_thread_currentlocking(a_thread), 0);
 			stilo_stack_roll(ostack, 2, 1);
 		} else if (nread < stilo_string_len_get(string)) {
@@ -2984,11 +2989,13 @@ systemdict_renamefile(cw_stilo_t *a_thread)
 		case EPERM:
 		case EROFS:
 		case EINVAL:
-			stilo_thread_error(a_thread, STILO_THREADE_INVALIDFILEACCESS);
+			stilo_thread_error(a_thread,
+			    STILO_THREADE_INVALIDFILEACCESS);
 		case ENAMETOOLONG:
 		case ENOENT:
 		case ENOTDIR:
-			stilo_thread_error(a_thread, STILO_THREADE_UNDEFINEDFILENAME);
+			stilo_thread_error(a_thread,
+			    STILO_THREADE_UNDEFINEDFILENAME);
 		default:
 			stilo_thread_error(a_thread, STILO_THREADE_IOERROR);
 		}
@@ -3640,7 +3647,8 @@ systemdict_store(cw_stilo_t *a_thread)
 		dict = stilo_stack_down_get(dstack, dict);
 		if (stilo_dict_lookup(dict, key, NULL) == FALSE) {
 			/* Found. */
-			stilo_dict_def(dict, stilo_thread_stil_get(a_thread), key, val);
+			stilo_dict_def(dict, stilo_thread_stil_get(a_thread),
+			    key, val);
 			return;
 		}
 	}
@@ -4247,12 +4255,14 @@ systemdict_unlink(cw_stilo_t *a_thread)
 		switch (errno) {
 		case EACCES:
 		case EPERM:
-			stilo_thread_error(a_thread, STILO_THREADE_INVALIDFILEACCESS);
+			stilo_thread_error(a_thread,
+			    STILO_THREADE_INVALIDFILEACCESS);
 		case EIO:
 		case EBUSY:
 			stilo_thread_error(a_thread, STILO_THREADE_IOERROR);
 		default:
-			stilo_thread_error(a_thread, STILO_THREADE_UNDEFINEDFILENAME);
+			stilo_thread_error(a_thread,
+			    STILO_THREADE_UNDEFINEDFILENAME);
 		}
 		return;
 	}
