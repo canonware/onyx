@@ -26,8 +26,9 @@ typedef struct cw_nametype_s cw_nametype_t;
 typedef struct cw_nulltype_s cw_nulltype_t;
 typedef struct cw_numbertype_s cw_numbertype_t;
 typedef struct cw_operatortype_s cw_operatortype_t;
+typedef struct cw_passthrutype_s cw_passthrutype_t; /* Internal library use
+						     * only. */
 typedef struct cw_packedarraytype_s cw_packedarraytype_t;
-typedef struct cw_reftype_s cw_reftype_t; /* Internal library use only. */
 typedef struct cw_savetype_s cw_savetype_t;
 typedef struct cw_stringtype_s cw_stringtype_t;
 
@@ -61,7 +62,7 @@ enum cw_kasio_type_s
   _CW_KASIO_NUMBERTYPE,
   _CW_KASIO_OPERATORTYPE,
   _CW_KASIO_PACKEDARRAYTYPE,
-  _CW_KASIO_REFTYPE, /* Internal library use only. */
+  _CW_KASIO_PASSTHRUTYPE, /* Internal library use only. */
   _CW_KASIO_SAVETYPE,
   _CW_KASIO_STRINGTYPE
 };
@@ -156,9 +157,9 @@ struct cw_packedarraytype_s
   cw_packedarrayext_t * ext;
 };
 
-struct cw_reftype_s
+struct cw_passthrutype_s
 {
-  cw_kasio_t * ref;
+  cw_kasio_t * object;
 };
 
 struct cw_savetype_s
@@ -247,10 +248,6 @@ struct cw_kasio_s
   cw_uint32_t magic_a;
 #endif
 
-  void (*dealloc_func)(void *, void *);
-  void * dealloc_arg;
-  cw_uint32_t ref_count;
-
   cw_kasio_type_t type;
   union
   {
@@ -267,8 +264,8 @@ struct cw_kasio_s
     cw_nulltype_t null;
     cw_numbertype_t number;
     cw_operatortype_t operator;
+    cw_passthrutype_t passthru;
     cw_packedarraytype_t packedarray;
-    cw_reftype_t ref;
     cw_savetype_t save;
     cw_stringtype_t string;
   } op;

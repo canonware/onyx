@@ -11,14 +11,13 @@
  ****************************************************************************/
 
 /* Number of op's per chunk. */
-#define _CW_KASIS_CHUNK_NOPS 64
+#define _CW_KASIS_CHUNK_NOPS 32
 
 /* Padding for chunks.  Ideally, chunk's should be a power of two in size to
  * improve cache performance. */
 #define _CW_KASIS_CHUNK_PAD 0
 
 typedef struct cw_kasis_s cw_kasis_t;
-typedef struct cw_kasis_chunk_spare_s cw_kasis_chunk_spare_t;
 typedef struct cw_kasis_op_s cw_kasis_op_t;
 typedef struct cw_kasis_chunk_s cw_kasis_chunk_t;
 
@@ -39,29 +38,14 @@ struct cw_kasis_s
 #endif
 };
 
-struct cw_kasis_chunk_spare_s
-{
-#if (defined(_LIBKASI_DBG) || defined(_LIBKASI_DEBUG))
-  cw_uint32_t magic_a;
-#endif
-  
-  cw_ring_t stack_spares;
-  cw_ring_t chunk_spares;
-  
-#if (defined(_LIBKASI_DBG) || defined(_LIBKASI_DEBUG))
-  cw_uint32_t magic_b;
-#endif
-};
-
 struct cw_kasis_op_s
 {
   /* The payload.  This must be first in the structure, since pointers are cast
-   * between (cw_kasis_op_t *), (cw_kasis_chunk_spare_t *), and
-   * (cw_kasio_t *). */
+   * between (cw_kasis_op_t *) and (cw_kasio_t *). */
   union
   {
     cw_kasio_t op;
-    cw_kasis_chunk_spare_t spare;
+    cw_ring_t chunk_spares;
   } data;
   
 #if (defined(_LIBKASI_DBG) || defined(_LIBKASI_DEBUG))
@@ -71,7 +55,8 @@ struct cw_kasis_op_s
   /* chunk this op is contained in. */
   cw_kasis_chunk_t * chunk;
 
-  /* Stack linkage. */
+  /* Stack linkage.  If a spare slot, this field is used to link into the
+   * kasis-wide spares ring. */
   cw_ring_t stack;
 
 #if (defined(_LIBKASI_DBG) || defined(_LIBKASI_DEBUG))
@@ -90,7 +75,7 @@ struct cw_kasis_chunk_s
 
   cw_uint32_t ref_count;
   
-  cw_kasis_chunk_spare_t * spares;
+  cw_ring_t * spares;
   cw_kasis_op_t ops[_CW_KASIS_CHUNK_NOPS];
   
 #if (defined(_LIBKASI_DBG) || defined(_LIBKASI_DEBUG))

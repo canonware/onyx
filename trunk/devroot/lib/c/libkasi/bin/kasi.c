@@ -40,8 +40,7 @@ main(int argc, char ** argv)
 
   out_put(cw_g_out, "sizeof(cw_kasio_t): [i]\n", sizeof(cw_kasio_t));
   out_put(cw_g_out, "sizeof(cw_kasis_t): [i]\n", sizeof(cw_kasis_t));
-  out_put(cw_g_out, "sizeof(cw_kasis_chunk_spare_t): [i]\n",
-	  sizeof(cw_kasis_chunk_spare_t));
+  out_put(cw_g_out, "sizeof(cw_ring_t): [i]\n", sizeof(cw_ring_t));
   out_put(cw_g_out, "sizeof(cw_kasis_op_t): [i]\n", sizeof(cw_kasis_op_t));
   out_put(cw_g_out, "sizeof(cw_kasis_chunk_t): [i]\n",
 	  sizeof(cw_kasis_chunk_t));
