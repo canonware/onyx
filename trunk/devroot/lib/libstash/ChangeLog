@@ -2,7 +2,7 @@
 
 	* : Remove _CW_REENTRANT and only build threaded versions of libstash.
 
-2000-02-03  Jason Evans  <jasone@canonware.com>
+2000-02-01  Jason Evans  <jasone@canonware.com>
 
 	* : Remove the matrix class.  It was very domain-specific, and
 	doesn't belong in a generic algorithms/data structures library.
