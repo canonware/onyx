@@ -50,7 +50,7 @@ main(int argc, char ** argv)
   kasi_new(&kasi);
   kasit_new(&kasit, &kasi);
 
-#if (0)
+#if (1)
   _cw_out_put("sizeof(cw_kasio_t): [i]\n", sizeof(cw_kasio_t));
   _cw_out_put("sizeof(cw_kasioe_t): [i]\n", sizeof(cw_kasioe_t));
   _cw_out_put("sizeof(cw_kasioe_t): [i]\n", sizeof(cw_kasioe_t));
