@@ -235,7 +235,7 @@ libonyx_install_s : [LIBONYX_S] libonyx_install_common
 [LIBONYX_S] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_s [LIBONYX_SRCS]]
   set mkdir
 {
-  [CC] -shared -soname libonyx.so.[LIBONYX_REV] -o [target] [need];
+  [CC] -shared -o [target] [need];
 
   rm -f [objdir]/lib/c/libonyx/lib/libonyx.so;
   [LN] -s libonyx.so.[LIBONYX_REV] [objdir]/lib/c/libonyx/lib/libonyx.so;

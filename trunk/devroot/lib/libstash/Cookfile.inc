@@ -222,7 +222,7 @@ libstash_install_s : [LIBSTASH_S] libstash_install_common
 [LIBSTASH_S] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_s [LIBSTASH_SRCS]]
   set mkdir
 {
-  [CC] -shared -soname libstash.so.[LIBSTASH_REV] -o [target] [need];
+  [CC] -shared -o [target] [need];
 
   rm -f [objdir]/lib/c/libstash/lib/libstash.so;
   [LN] -s libstash.so.[LIBSTASH_REV] [objdir]/lib/c/libstash/lib/libstash.so;

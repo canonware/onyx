@@ -206,7 +206,7 @@ libedit_install_s : [LIBEDIT_S] libedit_install_common
 [LIBEDIT_S] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_s [LIBEDIT_SRCS]]
   set mkdir
 {
-  [CC] -shared -soname libedit.so.[LIBEDIT_REV] -o [target] [need];
+  [CC] -shared -o [target] [need];
 
   rm -f [objdir]/lib/c/libedit/lib/libedit.so;
   [LN] -s libedit.so.[LIBEDIT_REV] [objdir]/lib/c/libedit/lib/libedit.so;
