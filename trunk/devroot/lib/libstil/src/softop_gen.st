@@ -22,7 +22,18 @@
 /def {} def % Do this one last.
 
 % Output the header.
-`static void
+`/******************************************************************************
+ *
+ * <Copyright = jasone>
+ * <License>
+ *
+ ******************************************************************************
+ *
+ * Version: <Version>
+ *
+ ******************************************************************************/
+
+static void
 stil_p_soft_init(cw_stil_t *a_stil)
 {
 	_cw_stil_code(&a_stil->stilt, "
