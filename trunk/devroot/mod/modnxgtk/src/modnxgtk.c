@@ -39,6 +39,5 @@ _cw_modnxgtk_init (void *a_arg, cw_nxo_t *a_thread)
 	nxo_dict_def(nx_systemdict_get(nx),
 		     nx, name, gtkdict);
 
-	nxo_stack_pop(tstack);
-	nxo_stack_pop(tstack);
+	nxo_stack_npop(tstack, 2);
 }
