@@ -264,6 +264,11 @@
 /* XXX */
 static cw_sint32_t
 mkr_p_comp(cw_mkr_t *a_a, cw_mkr_t *a_b);
+static cw_sint32_t
+mkr_p_line_comp(cw_mkr_t *a_a, cw_mkr_t *a_b);
+static cw_uint32_t
+mkr_p_raw_insert(cw_bufp_t *a_bufp, const cw_bufv_t *a_bufv,
+		 cw_uint32_t a_bufvcnt, cw_uint32_t a_count);
 
 /* bufv. */
 
@@ -440,6 +445,31 @@ bufp_p_mkrs_ppos_adjust(cw_bufp_t *a_bufp, cw_sint32_t a_adjust,
 	 mkr = ql_next(&a_bufp->mlist, mkr, mlink))
     {
 	mkr->ppos += a_adjust;
+    }
+}
+
+/* Adjust ppos field of a range of mkr's. */
+/* XXX It may be that every case in which this is needed can be done without
+ * doing an rb-tree search.  If so, remove this function or perhaps
+ * conditionally start at the beginning/end of the bufp. */
+static void
+bufp_p_mkrs_pline_adjust(cw_bufp_t *a_bufp, cw_sint32_t a_adjust,
+			cw_uint32_t a_beg_pline, cw_uint32_t a_end_pline)
+{
+    cw_mkr_t *mkr, key;
+
+    cw_check_ptr(a_bufp);
+    cw_assert(a_beg_pline < a_end_pline);
+
+    /* Find the first affected mkr. */
+    key.pline = a_beg_pline;
+    rb_nsearch(&a_bufp->mtree, &key, mkr_p_line_comp, cw_mkr_t, mnode, mkr);
+
+    for (;
+	 mkr != NULL && mkr->pline < a_end_pline;
+	 mkr = ql_next(&a_bufp->mlist, mkr, mlink))
+    {
+	mkr->pline += a_adjust;
     }
 }
 
@@ -787,6 +817,117 @@ buf_p_bufp_cur_set(cw_buf_t *a_buf, cw_bufp_t *a_bufp)
 		bufp->line = line;
 	    } while (bufp != a_bufp);
 	    a_buf->bufp_cur = bufp;
+	}
+    }
+}
+
+/* This function inserts a_bufv into a series of contiguous bufp's.  The first
+ * and last bufp's must have their gaps moved to the end and begin,
+ * respectively, and the intermediate bufp's must be empty.  This allows
+ * mkr_p_raw_insert() to be used. */
+/* XXX pline isn't adjusted. */
+static void
+buf_p_bufv_insert(cw_buf_t *a_buf, cw_bufp_t *a_bufp, cw_bufp_t *a_pastp,
+		  const cw_bufv_t *a_bufv, cw_uint32_t a_bufvcnt)
+{
+    cw_uint32_t i, v, cnt;
+    cw_bufp_t *bufp;
+    cw_bufv_t vsplit, vremain;
+
+    /* Iteratively call mkr_p_simple_insert(), taking care never to insert more
+     * data than will fit in the bufp being inserted into.  The approach taken
+     * here is to use the elements of a_bufv directly, exept when an element
+     * would overflow the space available in the bufp being inserted into.  In
+     * that case, the offending element is iteratively broken into pieces and
+     * inserted into bufp's, until it has been completely inserted.  In the
+     * worst case, this means three calls to mkr_p_simple_insert() per bufp.
+     *
+     * The following diagrams show examples of various cases of how a_bufv can
+     * be split up.  For the purposes of these diagrams, all characters,
+     * including the brackets, represent bytes.  Thus [0 ] is a 4 byte array
+     * (the 0 denotes the array element offset).
+     *
+     * bufv [0         ][1 ][2 ][3 ][4  ][5    ][6][7][8][][][11   ]
+     * bufp [0 ][1     ][2     ][3     ][4     ][5     ][6     ][7 ]
+     *
+     * bufp   | # ins | Explanation
+     * -------+-------+-----------------------------------------------------
+     * [0..1] |     1 | bufv[0] is split, but it is the only thing being
+     *        |       | inserted into bufp[0..1].  Note that a bufv element
+     *        |       | could span more than two bufp's.
+     * -------+-------+-----------------------------------------------------
+     *    [2] |     1 | bufv[1..2] fit exactly into bufp[2].
+     * -------+-------+-----------------------------------------------------
+     *    [3] |     2 | bufv[3] is inserted directly, but bufv[4] is split.
+     * -------+-------+-----------------------------------------------------
+     *    [4] |     2 | bufv[4] is split, and bufv[5] is inserted directly.
+     * -------+-------+-----------------------------------------------------
+     *    [5] |     2 | Same case as for bufp[3].
+     * -------+-------+-----------------------------------------------------
+     *    [6] |     3 | bufv[8] is split, bufv[9..10] are inserted directly,
+     *        |       | and bufv[11] is split.
+     * -------+-------+-----------------------------------------------------
+     *    [7] |     1 | Same case as for bufp[1].
+     * -------+-------+-----------------------------------------------------
+     *
+     * Iterate over bufp's being inserted into.  bufp starts out pointing to the
+     * original bufp on which insertion was attempted before the split. */
+    v = 0;
+    vremain.len = 0;
+    for (bufp = a_bufp;
+	 bufp != a_pastp;
+	 bufp = ql_next(&a_buf->plist, bufp, plink))
+    {
+	/* Insert remainder, if any. */
+	if (vremain.len != 0)
+	{
+	    vsplit.data = vremain.data;
+	    if (CW_BUFP_SIZE - bufp->len < vremain.len)
+	    {
+		vsplit.len = CW_BUFP_SIZE - bufp->len;
+	    }
+	    else
+	    {
+		vsplit.len = vremain.len;
+	    }
+	    vremain.data = &vremain.data[vsplit.len];
+	    vremain.len -= vsplit.len;
+
+	    mkr_p_raw_insert(bufp, &vsplit, 1, vsplit.len);
+
+	    if (CW_BUFP_SIZE - bufp->len == 0)
+	    {
+		/* No more space in this bufp. */
+		continue;
+	    }
+	}
+
+	/* Iterate over a_bufv elements and insert their contents into the
+	 * current bufp. */
+	cnt = 0;
+	for (i = v; i < a_bufvcnt; i++)
+	{
+	    if (cnt + a_bufv[i].len > CW_BUFP_SIZE - bufp->len)
+	    {
+		break;
+	    }
+	    cnt += a_bufv[i].len;
+	}
+	if (cnt != 0)
+	{
+	    mkr_p_raw_insert(bufp, &a_bufv[v], i - v, cnt);
+	    v = i;
+	}
+
+	/* Split a_bufv[v] if bufp isn't full and there are more data. */
+	if (CW_BUFP_SIZE - bufp->len != 0 && v < a_bufvcnt)
+	{
+	    vsplit.data = a_bufv[v].data;
+	    vsplit.len = CW_BUFP_SIZE - bufp->len;
+	    vremain.data = &vsplit.data[vsplit.len];
+	    vremain.len = a_bufv[v].len - vsplit.len;
+
+	    mkr_p_raw_insert(bufp, &vsplit, 1, vsplit.len);
 	}
     }
 }
@@ -1191,6 +1332,50 @@ mkr_p_comp(cw_mkr_t *a_a, cw_mkr_t *a_b)
     return retval;
 }
 
+static cw_sint32_t
+mkr_p_line_comp(cw_mkr_t *a_a, cw_mkr_t *a_b)
+{
+    cw_sint32_t retval;
+
+    cw_check_ptr(a_a);
+    cw_dassert(a_a->magic == CW_MKR_MAGIC);
+    cw_check_ptr(a_a->bufp);
+    cw_check_ptr(a_b);
+    cw_dassert(a_b->magic == CW_MKR_MAGIC);
+    cw_check_ptr(a_b->bufp);
+    cw_assert(a_a->bufp->buf == a_b->bufp->buf);
+
+    if (a_a->bufp == a_b->bufp)
+    {
+	if (a_a->pline < a_b->pline)
+	{
+	    retval = -1;
+	}
+	else if (a_a->pline > a_b->pline)
+	{
+	    retval = 1;
+	}
+	else
+	{
+	    retval = 0;
+	}
+    }
+    else
+    {
+	/* XXX Does this code ever get used anywhere? */
+	if (bufp_p_bpos(a_a->bufp) < bufp_p_bpos(a_b->bufp))
+	{
+	    retval = -1;
+	}
+	else
+	{
+	    retval = 1;
+	}
+    }
+
+    return retval;
+}
+
 static void
 mkr_p_insert(cw_mkr_t *a_mkr)
 {
@@ -1225,8 +1410,9 @@ mkr_p_remove(cw_mkr_t *a_mkr)
 /* Insert data into a single bufp, without moving the gap.  This function
  * assumes that the bufp internals are consistent, and that the data will
  * fit. */
+/* XXX Why is this called mkr_*()?  Shouldn't it be bufp_*()? */
 /* XXX CW_INLINE? */
-static void
+static cw_uint32_t
 mkr_p_raw_insert(cw_bufp_t *a_bufp, const cw_bufv_t *a_bufv,
 		 cw_uint32_t a_bufvcnt, cw_uint32_t a_count)
 {
@@ -1244,6 +1430,8 @@ mkr_p_raw_insert(cw_bufp_t *a_bufp, const cw_bufv_t *a_bufv,
     /* Adjust the buf's length and line count. */
     a_bufp->len += a_count;
     a_bufp->nlines += nlines;
+
+    return nlines;
 }
 
 /* Insert data into a single bufp.  This function assumes that the bufp
@@ -1335,20 +1523,23 @@ mkr_p_simple_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
     }
 }
 
+/* XXX a_mkr isn't moved if a_after is FALSE. */
 static void
-mkr_p_slide_before_insert(cw_mkr_t *a_mkr, cw_bufp_t *a_prevp,
-			  const cw_bufv_t *a_bufv, cw_uint32_t a_bufvcnt,
-			  cw_uint32_t a_count)
+mkr_p_before_slide_insert(cw_mkr_t *a_mkr, cw_bool_t a_after,
+			  cw_bufp_t *a_prevp, const cw_bufv_t *a_bufv,
+			  cw_uint32_t a_bufvcnt, cw_uint32_t a_count)
 {
     cw_buf_t *buf;
     cw_bufp_t *bufp;
+    cw_mkr_t *mkr;
+    cw_bufv_t bufv;
+    cw_sint32_t nmove, nmovelines, nslide;
 
     bufp = a_mkr->bufp;
     buf = bufp->buf;
 
-    /* The data won't fit in this bufp, but enough data can be slid to the next
-     * bufp to make room.  The data inserted may be split across the two bufp's
-     * as well.
+    /* The data won't fit in this bufp, but enough data can be slid to the
+     * previous bufp to make room.
      *
      **************************************************************************
      *           I
@@ -1372,91 +1563,89 @@ mkr_p_slide_before_insert(cw_mkr_t *a_mkr, cw_bufp_t *a_prevp,
      *
      **************************************************************************/
 
+    /* Move the gap to the insertion point. */
+    bufp_p_gap_move(bufp, a_mkr->ppos);
+
+    /* Move the previous bufp's gap to the end. */
+    bufp_p_gap_move(a_prevp, a_prevp->len);
+
+    /* Copy all data that will fit to a_prevp. */
+    if (CW_BUFP_SIZE - a_prevp->len >= bufp->gap_off)
+    {
+	/* All data can be moved to a_prevp. */
+	nmove = bufp->gap_off;
+    }
+    else
+    {
+	/* Only some of the data can be moved to a_prevp. */
+	nmove = CW_BUFP_SIZE - a_prevp->len;
+    }
+    nslide = bufp->gap_off - nmove;
+
+    bufv.data = &bufp->b[0];
+    bufv.len = nmove;
+    nmovelines = mkr_p_raw_insert(a_prevp, &bufv, 1, nmove);
+
+    /* Move markers that belong with the data copied to a_prevp. */
+    for (mkr = ql_first(&bufp->mlist);
+	 mkr != NULL && mkr->ppos < nmove;
+	 mkr = ql_next(&bufp->mlist, mkr, mlink))
+    {
+	mkr_p_remove(mkr);
+	mkr->bufp = a_prevp;
+	mkr->ppos += a_prevp->gap_off;
+	mkr->pline += a_prevp->nlines;
+	mkr_p_insert(mkr);
+    }
+
+    /* If not all slid data fit in a_prevp: */
+    if (nslide > 0)
+    {
+	/* Slide the remainder to the beginning of bufp. */
+	memmove(&bufp->b[0], &bufp->b[nmove], nslide);
+
+	/* Adjust bufp's internal state. */
+	bufp->len -= nmove;
+	bufp->nlines -= nmovelines;
+	bufp->gap_off -= nmove;
+
+	/* Adjust the internal state of markers associated with the slid
+	 * data. */
+	bufp_p_mkrs_ppos_adjust(bufp, -nmove, 0, bufp->gap_off);
+
+	/* Adjust the line numbers for all mkr's in bufp. */
+	bufp_p_mkrs_pline_adjust(bufp, -nmovelines, 0,
+				 bufp->nlines - nmovelines);
+    }
+
+    /* Insert the data. */
+    buf_p_bufv_insert(buf, a_prevp, ql_next(&buf->plist, bufp, plink),
+		      a_bufv, a_bufvcnt);
 }
 
 static void
-mkr_p_slide_after_insert(cw_mkr_t *a_mkr, cw_bufp_t *a_nextp,
+mkr_p_after_slide_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, cw_bufp_t *a_nextp,
 			 const cw_bufv_t *a_bufv, cw_uint32_t a_bufvcnt,
 			 cw_uint32_t a_count)
 {
-/*      cw_bufp_t *bufp; */
-
-/*      bufp = a_mkr->bufp; */
-/*      buf = bufp->buf; */
+    /* The same rules apply to mkr_p_after_slide_insert() as to
+     * mkr_p_before_slide_insert(), except that sliding involves the other
+     * neighboring bufp. */
 
 }
 
-/* The data won't fit in this bufp, but enough data can be slid to the next
-     * bufp to make room.  The data to be inserted may be split across the two
-     * bufp's as well.  This case must be handled specially (as opposed to
-     * simply splitting the bufp), because otherwise very sparse bufp's (as bad
-     * as one character per bufp) could result.  Since coalescing is only done
-     * during deletion, such fragmentation would potentially exist forever
-     * after.  The sliding code assures that for each insertion operation, new
-     * bufp's are on average at least 50% full, yet the algorithmic cost of
-     * sliding is strongly bounded (O(1)).
-     *
-     * Buffer operations tend toward high locality, so on the assumption that
-     * future operations will tend to be at a_mkr, leave as much gap space as
-     * possible in the bufp that contains a_mkr.  Doing so decreases the
-     * likelihood of having to do another slide operation soon after this one.
-     *
-     * In the following diagrams, bufp's are delimited by [], existing data are
-     * Y and Z, data being inserted are I, and ^ points to the insertion point.
-     *
-     **************************************************************************
-     *
-     *     IIIIIIII
-     * [YYYY    ][ZZZZ    ]
-     *     ^
-     *
-     * [YYYIIIII][IIIYZZZZ]
-     *
-     **************************************************************************
-     *
-     *      IIII
-     * [YYYYYY  ][ZZZZ    ]
-     *      ^
-     *
-     * [YYYYIIII][YY  ZZZZ]
-     *
-     **************************************************************************
-     *
-     *        II
-     * [YYYYYYYY][ZZZZ    ]
-     *        ^
-     *
-     * [YYYYYYII][YY   ZZZZ]
-     *
-     **************************************************************************
-     *
-     *         II
-     * [YYYYYYYY][ZZZZ    ]
-     *         ^
-     *
-     * [YYYYYYYI][I   ZZZZ]
-     *
-     **************************************************************************
-     *
-     *      II
-     * [YYYYYYYY][ZZZ     ]
-     *      ^
-     *
-     * [YYYYII  ][YYYY ZZZ]
-     *
-     **************************************************************************/
-
 /* a_bufv won't fit in the a_mkr's bufp, so split it. */
 /* XXX Doesn't move a_mkr if a_after is FALSE. */
+/* XXX Doesn't adjust pline. */
 static void
 mkr_p_split_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
 		   cw_uint32_t a_bufvcnt, cw_uint32_t a_count)
 {
-    cw_uint32_t i, nextra, cnt, v;
+    cw_uint32_t i, nextra;
     cw_buf_t *buf;
     cw_bufp_t *bufp, *nextp, *pastp;
     cw_mkr_t *mkr, *mmkr;
-    cw_bufv_t bufv_to, bufv_from, vsplit, vremain;
+    cw_bufv_t bufv_to, bufv_from;
 
     bufp = a_mkr->bufp;
     buf = bufp->buf;
@@ -1553,100 +1742,7 @@ mkr_p_split_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
 						* sizeof(cw_bufv_t));
     buf->bufvcnt += (nextra + 1) * 2;
 
-    /* Iteratively call mkr_p_simple_insert(), taking care never to insert more
-     * data than will fit in the bufp being inserted into.  The approach taken
-     * here is to use the elements of a_bufv directly, exept when an element
-     * would overflow the space available in the bufp being inserted into.  In
-     * that case, the offending element is iteratively broken into pieces and
-     * inserted into bufp's, until it has been completely inserted.  In the
-     * worst case, this means three calls to mkr_p_simple_insert() per bufp.
-     *
-     * The following diagrams show examples of various cases of how a_bufv can
-     * be split up.  For the purposes of these diagrams, all characters,
-     * including the brackets, represent bytes.  Thus [0 ] is a 4 byte array
-     * (the 0 denotes the array element offset).
-     *
-     * bufv [0         ][1 ][2 ][3 ][4  ][5    ][6][7][8][][][11   ]
-     * bufp [0 ][1     ][2     ][3     ][4     ][5     ][6     ][7 ]
-     *
-     * bufp   | # ins | Explanation
-     * -------+-------+-----------------------------------------------------
-     * [0..1] |     1 | bufv[0] is split, but it is the only thing being
-     *        |       | inserted into bufp[0..1].  Note that a bufv element
-     *        |       | could span more than two bufp's.
-     * -------+-------+-----------------------------------------------------
-     *    [2] |     1 | bufv[1..2] fit exactly into bufp[2].
-     * -------+-------+-----------------------------------------------------
-     *    [3] |     2 | bufv[3] is inserted directly, but bufv[4] is split.
-     * -------+-------+-----------------------------------------------------
-     *    [4] |     2 | bufv[4] is split, and bufv[5] is inserted directly.
-     * -------+-------+-----------------------------------------------------
-     *    [5] |     2 | Same case as for bufp[3].
-     * -------+-------+-----------------------------------------------------
-     *    [6] |     3 | bufv[8] is split, bufv[9..10] are inserted directly,
-     *        |       | and bufv[11] is split.
-     * -------+-------+-----------------------------------------------------
-     *    [7] |     1 | Same case as for bufp[1].
-     * -------+-------+-----------------------------------------------------
-     *
-     * Iterate over bufp's being inserted into.  bufp starts out pointing to the
-     * original bufp on which insertion was attempted before the split. */
-    v = 0;
-    vremain.len = 0;
-    for (; bufp != pastp; bufp = ql_next(&buf->plist, bufp, plink))
-    {
-	/* Insert remainder, if any. */
-	if (vremain.len != 0)
-	{
-	    vsplit.data = vremain.data;
-	    if (CW_BUFP_SIZE - bufp->len < vremain.len)
-	    {
-		vsplit.len = CW_BUFP_SIZE - bufp->len;
-	    }
-	    else
-	    {
-		vsplit.len = vremain.len;
-	    }
-	    vremain.data = &vremain.data[vsplit.len];
-	    vremain.len -= vsplit.len;
-
-	    mkr_p_raw_insert(bufp, &vsplit, 1, vsplit.len);
-
-	    if (CW_BUFP_SIZE - bufp->len == 0)
-	    {
-		/* No more space in this bufp. */
-		continue;
-	    }
-	}
-
-	/* Iterate over a_bufv elements and insert their contents into the
-	 * current bufp. */
-	cnt = 0;
-	for (i = v; i < a_bufvcnt; i++)
-	{
-	    if (cnt + a_bufv[i].len > CW_BUFP_SIZE - bufp->len)
-	    {
-		break;
-	    }
-	    cnt += a_bufv[i].len;
-	}
-	if (cnt != 0)
-	{
-	    mkr_p_raw_insert(bufp, &a_bufv[v], i - v, cnt);
-	    v = i;
-	}
-
-	/* Split a_bufv[v] if bufp isn't full and there are more data. */
-	if (CW_BUFP_SIZE - bufp->len != 0 && v < a_bufvcnt)
-	{
-	    vsplit.data = a_bufv[v].data;
-	    vsplit.len = CW_BUFP_SIZE - bufp->len;
-	    vremain.data = &vsplit.data[vsplit.len];
-	    vremain.len = a_bufv[v].len - vsplit.len;
-
-	    mkr_p_raw_insert(bufp, &vsplit, 1, vsplit.len);
-	}
-    }
+    buf_p_bufv_insert(buf, bufp, pastp, a_bufv, a_bufvcnt);
 }
 
 /* XXX What if inserting before first position in a_mkr->bufp? */
@@ -1701,30 +1797,22 @@ mkr_l_insert(cw_mkr_t *a_mkr, cw_bool_t a_record, cw_bool_t a_after,
 	prevp = ql_next(&buf->plist, bufp, plink);
 	nextp = ql_next(&buf->plist, bufp, plink);
 
-	/* Try sliding backward, then forward, then both directions.  If none of
-	 * the slides would make enough room, splitting is guaranteed not to
-	 * violate the requirement that any two consecutive bufps must both be
-	 * at least 25% full.  Thus, there is never a need to do bufp coalescing
-	 * after insertion.  In addition, by not trying to slide both directions
-	 * unless necessary, there is never the risk of leaving the center bufp
-	 * empty after sliding and insertion. */
+	/* Try sliding backward, then forward.  If neither of the slides would
+	 * make enough room, splitting is guaranteed not to violate the
+	 * requirement that any two consecutive bufps must both be at least 25%
+	 * full.  Thus, there is never a need to do bufp coalescing after
+	 * insertion. */
 	if (prevp != NULL && cnt <= (CW_BUFP_SIZE - bufp->len)
 	    + (CW_BUFP_SIZE - prevp->len))
 	{
-	    mkr_p_slide_before_insert(a_mkr, prevp, a_bufv, a_bufvcnt, cnt);
+	    mkr_p_before_slide_insert(a_mkr, a_after, prevp, a_bufv, a_bufvcnt,
+				      cnt);
 	}
 	else if (nextp != NULL && cnt <= (CW_BUFP_SIZE - bufp->len)
 	    + (CW_BUFP_SIZE - nextp->len))
 	{
-	    mkr_p_slide_after_insert(a_mkr, nextp, a_bufv, a_bufvcnt, cnt);
-	}
-	else if (prevp != NULL && nextp != NULL
-		 && cnt <= (CW_BUFP_SIZE - bufp->len)
-		 + (CW_BUFP_SIZE - prevp->len)
-		 + (CW_BUFP_SIZE - nextp->len))
-	{
-/* 	    mkr_p_slide_both_insert(a_mkr, prevp, nextp, a_bufv, a_bufvcnt, */
-/* 				    cnt); */
+	    mkr_p_after_slide_insert(a_mkr, a_after, nextp, a_bufv, a_bufvcnt,
+				     cnt);
 	}
 	else
 	{
