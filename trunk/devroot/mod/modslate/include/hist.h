@@ -82,5 +82,8 @@ void
 hist_del(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos, const
 	 cw_bufv_t *a_bufv, cw_uint32_t a_bufvcnt);
 
+#ifdef CW_BUF_DUMP
 void
-hist_dump(cw_hist_t *a_hist, cw_buf_t *a_buf);
+hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
+	  const char *a_end);
+#endif

@@ -230,7 +230,8 @@ buf_hist_group_end(cw_buf_t *a_buf);
 
 #ifdef CW_BUF_DUMP
 void
-buf_dump(cw_buf_t *a_buf, const char *a_prefix);
+buf_dump(cw_buf_t *a_buf, const char *a_beg, const char *a_mid,
+	 const char *a_end);
 #endif
 
 /* mkr. */
@@ -278,6 +279,12 @@ mkr_after_insert(cw_mkr_t *a_mkr, const cw_bufv_t *a_bufv,
 
 void
 mkr_remove(cw_mkr_t *a_start, cw_mkr_t *a_end);
+
+#ifdef CW_BUF_DUMP
+void
+mkr_dump(cw_mkr_t *a_mkr, const char *a_beg, const char *a_mid,
+	 const char *a_end);
+#endif
 
 /* ext. */
 cw_ext_t *

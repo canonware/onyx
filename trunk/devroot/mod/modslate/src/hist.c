@@ -1230,9 +1230,12 @@ hist_del(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos, const
     }
 }
 
+#ifdef CW_BUF_DUMP
 void
-hist_dump(cw_hist_t *a_hist, cw_buf_t *a_buf)
+hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
+	  const char *a_end)
 {
+    const char *beg, *mid, *end;
     cw_uint8_t hdr, *p;
     union
     {
@@ -1243,6 +1246,11 @@ hist_dump(cw_hist_t *a_hist, cw_buf_t *a_buf)
     cw_uint8_t text[32];
     cw_mkr_t tmkr, ttmkr;
     cw_uint32_t i, bufvcnt;
+    char *tbeg, *tmid;
+
+    beg = (a_beg != NULL) ? a_beg : "";
+    mid = (a_mid != NULL) ? a_mid : beg;
+    end = (a_end != NULL) ? a_end : mid;
 
     pbufv.data = u.str;
     pbufv.len = 8;
@@ -1253,8 +1261,37 @@ hist_dump(cw_hist_t *a_hist, cw_buf_t *a_buf)
     mkr_new(&tmkr, &a_hist->h);
     mkr_new(&ttmkr, &a_hist->h);
 
+    fprintf(stderr, "%shist: %p\n", beg, a_hist);
+
+    /* h. */
+    fprintf(stderr, "%s|\n", mid);
+    asprintf(&tbeg, "%s|-> h: ", mid);
+    asprintf(&tmid, "%s|      ", mid);
+    buf_dump(&a_hist->h, tbeg, tmid, NULL);
+    free(tbeg);
+    free(tmid);
+
+    /* hcur. */
+    fprintf(stderr, "%s|\n", mid);
+    fprintf(stderr, "%s|-> hcur: %p\n", mid, &a_hist->hcur);
+
+    /* htmp. */
+    fprintf(stderr, "%s|-> htmp: %p\n", mid, &a_hist->htmp);
+
+    /* hbpos. */
+    fprintf(stderr, "%s|-> hbpos: %llu\n", mid, a_hist->hbpos);
+
+    /* gdepth. */
+    fprintf(stderr, "%s|-> gdepth: %u\n", mid, a_hist->gdepth);
+
+    /* Allocator state. */
+    fprintf(stderr, "%s|\n", mid);
+    fprintf(stderr, "%s|-> dealloc: %p\n", mid, a_hist->dealloc);
+    fprintf(stderr, "%s|-> arg: %p\n", mid, a_hist->arg);
+
     /* Undo. */
-    fprintf(stderr, "%s(): Undo: ", __FUNCTION__);
+    fprintf(stderr, "%s|\n", mid);
+    fprintf(stderr, "%s| [undo]: ", mid);
     mkr_dup(&tmkr, &a_hist->hcur);
     while (mkr_pos(&tmkr) > 1)
     {
@@ -1338,9 +1375,11 @@ hist_dump(cw_hist_t *a_hist, cw_buf_t *a_buf)
 	    }
 	}
     }
+    fprintf(stderr, "\n");
 
     /* Redo. */
-    fprintf(stderr, "     Redo: ");
+    fprintf(stderr, "%s|\n", mid);
+    fprintf(stderr, "%sV [redo]: ", end);
     mkr_dup(&tmkr, &a_hist->hcur);
     while (mkr_pos(&tmkr) < buf_len(&a_hist->h) + 1)
     {
@@ -1430,3 +1469,4 @@ hist_dump(cw_hist_t *a_hist, cw_buf_t *a_buf)
     mkr_delete(&ttmkr);
     mkr_delete(&tmkr);
 }
+#endif
