@@ -3066,15 +3066,37 @@ status & {\bf \htmlref{die}{systemdict:die}} & -- & Exit program. \\
 args & {\bf \htmlref{exec}{systemdict:exec}} & -- & Overlay a new program and
 execute it. \\
 \hline
--- & {\bf \htmlref{pid}{systemdict:pid}} & pid & Get process ID. \\
-\hline
--- & {\bf \htmlref{ppid}{systemdict:ppid}} & pid & Get parent's process ID. \\
-\hline
 pid & {\bf \htmlref{waitpid}{systemdict:waitpid}} & status & Wait for a program
 to terminate. \\
 \hline
 args & {\bf \htmlref{system}{systemdict:system}} & status & Execute a
 program. \\
+\hline
+-- & {\bf \htmlref{pid}{systemdict:pid}} & pid & Get process ID. \\
+\hline
+-- & {\bf \htmlref{ppid}{systemdict:ppid}} & pid & Get parent's process ID. \\
+\hline
+-- & {\bf \htmlref{uid}{systemdict:uid}} & uid & Get the process's user ID. \\
+\hline
+uid & {\bf \htmlref{setuid}{systemdict:setuid}} & boolean & Set the process's
+user ID. \\
+\hline
+-- & {\bf \htmlref{euid}{systemdict:euid}} & uid & Get the process's effective
+user ID. \\
+\hline
+uid & {\bf \htmlref{seteuid}{systemdict:seteuid}} & boolean & Set the process's
+effective user ID. \\
+\hline
+-- & {\bf \htmlref{gid}{systemdict:gid}} & gid & Get the process's group ID. \\
+\hline
+gid & {\bf \htmlref{setgid}{systemdict:setgid}} & boolean & Set the process's
+group ID. \\
+\hline
+-- & {\bf \htmlref{egid}{systemdict:egid}} & gid & Get the process's effective
+group ID. \\
+\hline
+gid & {\bf \htmlref{setegid}{systemdict:setegid}} & boolean & Set the process's
+effective group ID. \\
 \hline
 -- & {\bf \htmlref{realtime}{systemdict:realtime}} & nsecs & Get the number of
 nanoseconds since the epoch. \\
@@ -4926,6 +4948,26 @@ onyx:0> 1 dup pstack
 onyx:2>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:egid}
+\index{egid@\onyxop{}{egid}{}}
+\item[{\onyxop{--}{egid}{gid}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[gid: ]
+			Process's effective group ID.
+		\end{description}
+	\item[Errors(s): ] None.
+	\item[Description: ]
+		Get the process's effective group ID.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> egid 1 sprint
+1001
+onyx:0>
+		\end{verbatim}
+	\end{description}
 \label{systemdict:end}
 \index{end@\onyxop{}{end}{}}
 \item[{\onyxop{--}{end}{--}}: ]
@@ -5050,6 +5092,26 @@ onyx:0>
 
 onyx:0> estack 1 sprint
 (--start-- -file- --estack--)
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:euid}
+\index{euid@\onyxop{}{euid}{}}
+\item[{\onyxop{--}{euid}{uid}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[uid: ]
+			Process's effective user ID.
+		\end{description}
+	\item[Errors(s): ] None.
+	\item[Description: ]
+		Get the process's effective user ID.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> euid 1 sprint
+1001
 onyx:0>
 		\end{verbatim}
 	\end{description}
@@ -5565,6 +5627,26 @@ onyx:0> [0 1 2 3] 1 2 getinterval 1 sprint
 [1 2]
 onyx:0> `abcd' 1 2 getinterval 1 sprint
 `bc'
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:gid}
+\index{gid@\onyxop{}{gid}{}}
+\item[{\onyxop{--}{gid}{gid}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[gid: ]
+			Process's group ID.
+		\end{description}
+	\item[Errors(s): ] None.
+	\item[Description: ]
+		Get the process's group ID.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> gid 1 sprint
+1001
 onyx:0>
 		\end{verbatim}
 	\end{description}
@@ -7489,6 +7571,37 @@ onyx:0> self 1 sprint
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:setegid}
+\index{setegid@\onyxop{}{setegid}{}}
+\item[{\onyxop{gid}{setegid}{boolean}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[gid: ]
+			A group ID.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[boolean: ]
+			If false, success, otherwise failure.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{rangecheck}{rangeecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Set the process's effective group ID to \oparg{gid}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> 1001 setegid 1 sprint
+false
+onyx:0> 0 setegid 1 sprint
+true
+onyx:0>
+		\end{verbatim}
+	\end{description}
 \label{systemdict:setenv}
 \index{setenv@\onyxop{}{setenv}{}}
 \item[{\onyxop{key val}{setenv}{--}}: ]
@@ -7526,6 +7639,68 @@ false
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:seteuid}
+\index{seteuid@\onyxop{}{seteuid}{}}
+\item[{\onyxop{uid}{seteuid}{boolean}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[uid: ]
+			A user ID.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[boolean: ]
+			If false, success, otherwise failure.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{rangecheck}{rangeecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Set the process's effective user ID to \oparg{uid}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> 1001 seteuid 1 sprint
+false
+onyx:0> 0 seteuid 1 sprint
+true
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:setgid}
+\index{setgid@\onyxop{}{setgid}{}}
+\item[{\onyxop{gid}{setgid}{boolean}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[gid: ]
+			A group ID.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[boolean: ]
+			If false, success, otherwise failure.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{rangecheck}{rangeecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Set the process's group ID to \oparg{gid}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> 1001 setgid 1 sprint
+false
+onyx:0> 0 setgid 1 sprint
+true
+onyx:0>
+		\end{verbatim}
+	\end{description}
 \label{systemdict:setlocking}
 \index{setlocking@\onyxop{}{setlocking}{}}
 \item[{\onyxop{boolean}{setlocking}{--}}: ]
@@ -7551,6 +7726,37 @@ onyx:0> currentlocking 1 sprint
 false
 onyx:0> true setlocking
 onyx:0> currentlocking 1 sprint
+true
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:setuid}
+\index{setuid@\onyxop{}{setuid}{}}
+\item[{\onyxop{uid}{setuid}{boolean}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[uid: ]
+			A user ID.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[boolean: ]
+			If false, success, otherwise failure.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{rangecheck}{rangeecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Set the process's user ID to \oparg{uid}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> 1001 setuid 1 sprint
+false
+onyx:0> 0 setuid 1 sprint
 true
 onyx:0>
 		\end{verbatim}
@@ -8744,6 +8950,26 @@ onyx:0>
 
 onyx:0> true type 1 sprint
 booleantype
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:uid}
+\index{uid@\onyxop{}{uid}{}}
+\item[{\onyxop{--}{uid}{uid}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[uid: ]
+			Process's user ID.
+		\end{description}
+	\item[Errors(s): ] None.
+	\item[Description: ]
+		Get the process's user ID.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> uid 1 sprint
+1001
 onyx:0>
 		\end{verbatim}
 	\end{description}

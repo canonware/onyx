@@ -103,9 +103,11 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(dirforeach),
 	ENTRY(div),
 	ENTRY(dstack),
+	ENTRY(egid),
 	ENTRY(end),
 	ENTRY(eq),
 	ENTRY(estack),
+	ENTRY(euid),
 	ENTRY(eval),
 	ENTRY(exec),
 	ENTRY(exit),
@@ -118,6 +120,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(ge),
 	ENTRY(get),
 	ENTRY(getinterval),
+	ENTRY(gid),
 	ENTRY(gt),
 	ENTRY(hooktag),
 	ENTRY(if),
@@ -168,8 +171,12 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(sdup),
 	ENTRY(seek),
 	ENTRY(self),
+	ENTRY(setegid),
 	ENTRY(setenv),
+	ENTRY(seteuid),
+	ENTRY(setgid),
 	ENTRY(setlocking),
+	ENTRY(setuid),
 	ENTRY(sexch),
 	ENTRY(shift),
 	ENTRY(signal),
@@ -202,6 +209,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(truncate),
 	ENTRY(trylock),
 	ENTRY(type),
+	ENTRY(uid),
 	ENTRY(undef),
 	ENTRY(unlink),
 	ENTRY(unlock),
@@ -1655,6 +1663,16 @@ systemdict_dup(cw_nxo_t *a_thread)
 #endif
 
 void
+systemdict_egid(cw_nxo_t *a_thread)
+{
+	cw_nxo_t	*ostack, *nxo;
+	
+	ostack = nxo_thread_ostack_get(a_thread);
+	nxo = nxo_stack_push(ostack);
+	nxo_integer_new(nxo, getegid());
+}
+
+void
 systemdict_end(cw_nxo_t *a_thread)
 {
 	cw_nxo_t	*dstack;
@@ -1706,6 +1724,16 @@ systemdict_estack(cw_nxo_t *a_thread)
 	nxo_stack_new(stack, nxo_thread_nx_get(a_thread),
 	    nxo_thread_currentlocking(a_thread));
 	nxo_stack_copy(stack, estack);
+}
+
+void
+systemdict_euid(cw_nxo_t *a_thread)
+{
+	cw_nxo_t	*ostack, *nxo;
+	
+	ostack = nxo_thread_ostack_get(a_thread);
+	nxo = nxo_stack_push(ostack);
+	nxo_integer_new(nxo, geteuid());
 }
 
 void
@@ -2401,6 +2429,16 @@ systemdict_getinterval(cw_nxo_t *a_thread)
 
 	nxo_stack_roll(ostack, 3, 1);
 	nxo_stack_npop(ostack, 2);
+}
+
+void
+systemdict_gid(cw_nxo_t *a_thread)
+{
+	cw_nxo_t	*ostack, *nxo;
+	
+	ostack = nxo_thread_ostack_get(a_thread);
+	nxo = nxo_stack_push(ostack);
+	nxo_integer_new(nxo, getgid());
 }
 
 void
@@ -4001,6 +4039,29 @@ systemdict_seek(cw_nxo_t *a_thread)
 }
 
 void
+systemdict_setegid(cw_nxo_t *a_thread)
+{
+	cw_nxo_t	*ostack, *nxo;
+	cw_nxoi_t	egid;
+	int		error;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	NXO_STACK_GET(nxo, ostack, a_thread);;
+	if (nxo_type_get(nxo) != NXOT_INTEGER) {
+		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		return;
+	}
+	egid = nxo_integer_get(nxo);
+	if (egid < 0) {
+		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+		return;
+	}
+
+	error = setegid((gid_t)egid);
+	nxo_boolean_new(nxo, error == 0 ? FALSE : TRUE);
+}
+
+void
 systemdict_setenv(cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *tstack, *envdict;
@@ -4059,6 +4120,52 @@ systemdict_setenv(cw_nxo_t *a_thread)
 }
 
 void
+systemdict_seteuid(cw_nxo_t *a_thread)
+{
+	cw_nxo_t	*ostack, *nxo;
+	cw_nxoi_t	euid;
+	int		error;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	NXO_STACK_GET(nxo, ostack, a_thread);;
+	if (nxo_type_get(nxo) != NXOT_INTEGER) {
+		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		return;
+	}
+	euid = nxo_integer_get(nxo);
+	if (euid < 0) {
+		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+		return;
+	}
+
+	error = seteuid((uid_t)euid);
+	nxo_boolean_new(nxo, error == 0 ? FALSE : TRUE);
+}
+
+void
+systemdict_setgid(cw_nxo_t *a_thread)
+{
+	cw_nxo_t	*ostack, *nxo;
+	cw_nxoi_t	gid;
+	int		error;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	NXO_STACK_GET(nxo, ostack, a_thread);;
+	if (nxo_type_get(nxo) != NXOT_INTEGER) {
+		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		return;
+	}
+	gid = nxo_integer_get(nxo);
+	if (gid < 0) {
+		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+		return;
+	}
+
+	error = setgid((gid_t)gid);
+	nxo_boolean_new(nxo, error == 0 ? FALSE : TRUE);
+}
+
+void
 systemdict_setlocking(cw_nxo_t *a_thread)
 {
 	cw_nxo_t	*ostack;
@@ -4072,6 +4179,29 @@ systemdict_setlocking(cw_nxo_t *a_thread)
 	}
 	nxo_thread_setlocking(a_thread, nxo_boolean_get(nxo));
 	nxo_stack_pop(ostack);
+}
+
+void
+systemdict_setuid(cw_nxo_t *a_thread)
+{
+	cw_nxo_t	*ostack, *nxo;
+	cw_nxoi_t	uid;
+	int		error;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	NXO_STACK_GET(nxo, ostack, a_thread);;
+	if (nxo_type_get(nxo) != NXOT_INTEGER) {
+		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		return;
+	}
+	uid = nxo_integer_get(nxo);
+	if (uid < 0) {
+		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+		return;
+	}
+
+	error = setuid((uid_t)uid);
+	nxo_boolean_new(nxo, error == 0 ? FALSE : TRUE);
 }
 
 void
@@ -5416,6 +5546,16 @@ systemdict_type(cw_nxo_t *a_thread)
 	nxo_name_new(nxo, nxo_thread_nx_get(a_thread),
 	    nxn_str(typenames[type]), nxn_len(typenames[type]), TRUE);
 	nxo_attr_set(nxo, NXOA_EXECUTABLE);
+}
+
+void
+systemdict_uid(cw_nxo_t *a_thread)
+{
+	cw_nxo_t	*ostack, *nxo;
+	
+	ostack = nxo_thread_ostack_get(a_thread);
+	nxo = nxo_stack_push(ostack);
+	nxo_integer_new(nxo, getuid());
 }
 
 void

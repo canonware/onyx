@@ -1,6 +1,7 @@
 2001-07-23  Jason Evans  <jasone@canonware.com>
 
-	* src/systemdict.c: Add the pid and ppid operators.
+	* src/systemdict.c: Add the following operators: pid, ppid, uid,
+	euid, gid, egid, setuid, seteuid, setgid, and setegid.
 
 2001-07-22  Jason Evans  <jasone@canonware.com>
 
