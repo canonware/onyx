@@ -16,6 +16,7 @@ extern const cw_uint8_t *cw_g_stil_names[];
 
 /* Same order as in stiln.c. */
 typedef enum {
+	STILN_ZERO,
 	STILN_sym_lb,
 	STILN_sym_rb,
 	STILN_sym_lt_lt,
@@ -141,7 +142,6 @@ typedef enum {
 	STILN_ostack,
 	STILN_period,
 	STILN_pop,
-	STILN_ppop,
 	STILN_print,
 	STILN_product,
 	STILN_promptstring,

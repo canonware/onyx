@@ -1,8 +1,8 @@
-s> 0 0 add spop
+s> 0 0 add 1 spop
 0
-s> 3 0 add spop
+s> 3 0 add 1 spop
 3
-s> 3 4 add spop
+s> 3 4 add 1 spop
 7
-s> -5 5 add spop
+s> -5 5 add 1 spop
 0

@@ -13,6 +13,7 @@
 
 /* Alphabetical order. */
 const cw_uint8_t *cw_g_stil_names[] = {
+	"",
 	"[",
 	"]",
 	"<<",
@@ -138,7 +139,6 @@ const cw_uint8_t *cw_g_stil_names[] = {
 	"ostack",
 	"period",
 	"pop",
-	"ppop",
 	"print",
 	"product",
 	"promptstring",

@@ -242,14 +242,14 @@ errordict_handleerror(cw_stilt_t *a_stilt)
 {
 	_cw_stil_code(a_stilt, "
 currenterror begin
-(Error /) print errorname cvs print ( in ) print //command spop
+(Error /) print errorname cvs print ( in ) print //command 1 spop
 recordstacks {
 	(ostack: ) print
-	ostack spop
+	ostack 1 spop
 	(estack: ) print
-	estack spop
+	estack 1 spop
 	(dstack: ) print
-	dstack spop
+	dstack 1 spop
 } if
 end
 ");
