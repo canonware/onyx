@@ -1,4 +1,5 @@
-/******************************************************************************
+/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
+ ******************************************************************************
  *
  * <Copyright = jasone>
  * <License>
@@ -9,20 +10,14 @@
  *
  ******************************************************************************/
 
-/*
- * Default source code path for require.
- */
+/* Default source code path for require. */
 #undef CW_SLATE_RPATH
 
-/*
- * Default module path.
- */
+/* Default module path. */
 #undef CW_SLATE_MPATH
 
 
-/*
- * Used for tslate.
- */
+/* Used for tslate. */
 #undef CW_TSLATE_SLATE
 #undef CW_TSLATE_RPATH
 #undef CW_TSLATE_MPATH

@@ -1,4 +1,5 @@
-/******************************************************************************
+/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
+ ******************************************************************************
  *
  * <Copyright = jasone>
  * <License>
@@ -9,4 +10,5 @@
  *
  ******************************************************************************/
 
-void	envdict_l_populate(cw_nxo_t *a_dict, cw_nx_t *a_nx, char **a_envp);
+void
+envdict_l_populate(cw_nxo_t *a_dict, cw_nx_t *a_nx, char **a_envp);

@@ -1,4 +1,5 @@
-/******************************************************************************
+/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
+ ******************************************************************************
  *
  * <Copyright = jasone>
  * <License>
@@ -21,26 +22,34 @@
 int
 main(int argc, char **argv)
 {
-	char	**arg;
-	int	i;
+    char **arg;
+    int i;
 
-	if (putenv(CW_TONYX_RPATH) == -1)
-		goto RETURN;
-	if (putenv(CW_TONYX_MPATH) == -1)
-		goto RETURN;
+    if (putenv(CW_TONYX_RPATH) == -1)
+    {
+	goto RETURN;
+    }
+    if (putenv(CW_TONYX_MPATH) == -1)
+    {
+	goto RETURN;
+    }
 
-	arg = (char **)malloc((argc + 1) * sizeof(char *));
-	if (arg == NULL)
-		goto RETURN;
+    arg = (char **)malloc((argc + 1) * sizeof(char *));
+    if (arg == NULL)
+    {
+	goto RETURN;
+    }
 
-	arg[0] = CW_TONYX_ONYX;
-	for (i = 1; i < argc; i++)
-		arg[i] = argv[i];
-	arg[i] = NULL;
+    arg[0] = CW_TONYX_ONYX;
+    for (i = 1; i < argc; i++)
+    {
+	arg[i] = argv[i];
+    }
+    arg[i] = NULL;
 
-	execv(CW_TONYX_ONYX, arg);
-	/* Not reached. */
+    execv(CW_TONYX_ONYX, arg);
+    /* Not reached. */
 
-	RETURN:
-	return 1;
+    RETURN:
+    return 1;
 }

@@ -9,21 +9,15 @@
  *
  ******************************************************************************/
 
-/*
- * Default source code path for require.
- */
+/* Default source code path for require. */
 #undef CW_ONYX_RPATH
 
-/*
- * Default module path.
- */
+/* Default module path. */
 #undef CW_ONYX_MPATH
 
 #undef CW_USE_LIBEDIT
 
-/*
- * Used for tonyx.
- */
+/* Used for tonyx. */
 #undef CW_TONYX_ONYX
 #undef CW_TONYX_RPATH
 #undef CW_TONYX_MPATH

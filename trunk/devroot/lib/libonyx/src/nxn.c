@@ -1,13 +1,14 @@
-/******************************************************************************
- *
- * <Copyright = jasone>
- * <License>
- *
- ******************************************************************************
- *
- * Version: <Version>
- *
- ******************************************************************************/
+/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
+******************************************************************************
+*
+* <Copyright = jasone>
+* <License>
+*
+******************************************************************************
+*
+* Version: <Version>
+*
+******************************************************************************/
 
 #define	CW_NXN_C_
 
@@ -15,363 +16,363 @@
 
 /* Alphabetical order. */
 const cw_uint8_t *cw_g_nx_names[] = {
-	"",
-	"!#",
-	"#!",
-	"(",
-	")",
-	"<",
-	">",
-	"[",
-	"]",
-	"abs",
-	"active",
-	"add",
-	"and",
-	"argv",
-	"array",
-	"arraytype",
+    "",
+    "!#",
+    "#!",
+    "(",
+    ")",
+    "<",
+    ">",
+    "[",
+    "]",
+    "abs",
+    "active",
+    "add",
+    "and",
+    "argv",
+    "array",
+    "arraytype",
 #ifdef CW_POSIX
-	"atime",
+    "atime",
 #endif
-	"begin",
-	"bind",
+    "begin",
+    "bind",
 #ifdef CW_POSIX
-	"blksize",
-	"blocks",
+    "blksize",
+    "blocks",
 #endif
-	"booleantype",
+    "booleantype",
 #ifdef CW_THREADS
-	"broadcast",
+    "broadcast",
 #endif
-	"bytesavailable",
-	"catenate",
+    "bytesavailable",
+    "catenate",
 #ifdef CW_POSIX
-	"cd",
-	"chmod",
-	"chown",
+    "cd",
+    "chmod",
+    "chown",
 #endif
-	"clear",
-	"cleardstack",
-	"cleartomark",
+    "clear",
+    "cleardstack",
+    "cleartomark",
 #ifdef CW_POSIX
-	"close",
+    "close",
 #endif
-	"collect",
+    "collect",
 #ifdef CW_THREADS
-	"condition",
-	"conditiontype",
+    "condition",
+    "conditiontype",
 #endif
-	"copy",
-	"count",
-	"countdstack",
-	"countestack",
-	"counttomark",
+    "copy",
+    "count",
+    "countdstack",
+    "countestack",
+    "counttomark",
 #ifdef CW_POSIX
-	"ctime",
+    "ctime",
 #endif
-	"currentdict",
+    "currentdict",
 #ifdef CW_THREADS
-	"currentlocking",
+    "currentlocking",
 #endif
-	"cve",
-	"cvlit",
-	"cvn",
-	"cvrs",
-	"cvs",
-	"cvx",
-	"def",
+    "cve",
+    "cvlit",
+    "cvn",
+    "cvrs",
+    "cvs",
+    "cvx",
+    "def",
 #ifdef CW_THREADS
-	"detach",
+    "detach",
 #endif
 #ifdef CW_POSIX
-	"dev",
+    "dev",
 #endif
-	"dict",
-	"dicttype",
-	"die",
+    "dict",
+    "dicttype",
+    "die",
 #ifdef CW_POSIX
-	"dirforeach",
+    "dirforeach",
 #endif
-	"div",
-	"dstack",
-	"dstackunderflow",
-	"dup",
-	"echeck",
+    "div",
+    "dstack",
+    "dstackunderflow",
+    "dup",
+    "echeck",
 #ifdef CW_POSIX
-	"egid",
+    "egid",
 #endif
-	"end",
+    "end",
 #ifdef CW_POSIX
-	"envdict",
+    "envdict",
 #endif
-	"eq",
-	"errorname",
-	"estack",
-	"estackoverflow",
+    "eq",
+    "errorname",
+    "estack",
+    "estackoverflow",
 #ifdef CW_POSIX
-	"euid",
+    "euid",
 #endif
-	"eval",
-	"exch",
+    "eval",
+    "exch",
 #ifdef CW_POSIX
-	"exec",
+    "exec",
 #endif
-	"exit",
-	"exp",
-	"false",
-	"filetype",
-	"finotype",
-	"flush",
-	"flushfile",
-	"for",
-	"foreach",
+    "exit",
+    "exp",
+    "false",
+    "filetype",
+    "finotype",
+    "flush",
+    "flushfile",
+    "for",
+    "foreach",
 #ifdef CW_POSIX
-	"fork",
+    "fork",
 #endif
-	"gcdict",
-	"ge",
-	"get",
-	"getinterval",
+    "gcdict",
+    "ge",
+    "get",
+    "getinterval",
 #ifdef CW_POSIX
-	"gid",
+    "gid",
 #endif
-	"globaldict",
-	"gt",
-	"hooktag",
-	"hooktype",
-	"if",
-	"ifelse",
-	"index",
+    "globaldict",
+    "gt",
+    "hooktag",
+    "hooktype",
+    "if",
+    "ifelse",
+    "index",
 #ifdef CW_POSIX
-	"ino",
+    "ino",
 #endif
-	"integertype",
-	"invalidaccess",
-	"invalidexit",
-	"invalidfileaccess",
-	"iobuf",
-	"ioerror",
-	"istack",
+    "integertype",
+    "invalidaccess",
+    "invalidexit",
+    "invalidfileaccess",
+    "iobuf",
+    "ioerror",
+    "istack",
 #ifdef CW_THREADS
-	"join",
+    "join",
 #endif
-	"known",
+    "known",
 #ifdef CW_THREADS
-	"lcheck",
+    "lcheck",
 #endif
-	"le",
-	"length",
-	"limitcheck",
+    "le",
+    "length",
+    "limitcheck",
 #ifdef CW_POSIX
-	"link",
+    "link",
 #endif
-	"load",
+    "load",
 #ifdef CW_THREADS
-	"lock",
+    "lock",
 #endif
-	"loop",
-	"lt",
-	"mark",
-	"marktype",
+    "loop",
+    "lt",
+    "mark",
+    "marktype",
 #ifdef CW_POSIX
-	"mkdir",
+    "mkdir",
 #endif
-	"mod",
+    "mod",
 #ifdef CW_POSIX
-	"mode",
+    "mode",
 #endif
 #ifdef HAVE_DLOPEN
-	"modload",
+    "modload",
 #endif
 #ifdef CW_THREADS
-	"monitor",
+    "monitor",
 #endif
 #ifdef CW_POSIX
-	"mtime",
+    "mtime",
 #endif
-	"mul",
+    "mul",
 #ifdef CW_THREADS
-	"mutex",
-	"mutextype",
+    "mutex",
+    "mutextype",
 #endif
-	"nametype",
-	"ndup",
-	"ne",
-	"neg",
-	"newerror",
+    "nametype",
+    "ndup",
+    "ne",
+    "neg",
+    "newerror",
 #ifdef CW_POSIX
-	"nlink",
+    "nlink",
 #endif
-	"not",
-	"npop",
+    "not",
+    "npop",
 #ifdef CW_POSIX
-	"nsleep",
+    "nsleep",
 #endif
-	"null",
-	"nulltype",
+    "null",
+    "nulltype",
 #ifdef CW_POSIX
-	"open",
+    "open",
 #endif
-	"operatortype",
-	"or",
-	"ostack",
+    "operatortype",
+    "or",
+    "ostack",
 #ifdef CW_THREADS
-	"period",
+    "period",
 #endif
 #ifdef CW_POSIX
-	"pid",
+    "pid",
 #endif
-	"pmark",
-	"pmarktype",
-	"pop",
+    "pmark",
+    "pmarktype",
+    "pop",
 #ifdef CW_POSIX
-	"ppid",
+    "ppid",
 #endif
-	"print",
-	"product",
-	"promptstring",
-	"put",
-	"putinterval",
+    "print",
+    "product",
+    "promptstring",
+    "put",
+    "putinterval",
 #ifdef CW_POSIX
-	"pwd",
+    "pwd",
 #endif
-	"quit",
-	"rand",
-	"rangecheck",
+    "quit",
+    "rand",
+    "rangecheck",
 #ifdef CW_POSIX
-	"rdev",
+    "rdev",
 #endif
-	"read",
-	"readline",
+    "read",
+    "readline",
 #ifdef CW_POSIX
-	"realtime",
-	"rename",
+    "realtime",
+    "rename",
 #endif
-	"repeat",
+    "repeat",
 #ifdef CW_POSIX
-	"rmdir",
+    "rmdir",
 #endif
-	"roll",
-	"sclear",
-	"scleartomark",
-	"scount",
-	"scounttomark",
-	"sdup",
+    "roll",
+    "sclear",
+    "scleartomark",
+    "scount",
+    "scounttomark",
+    "sdup",
 #ifdef CW_POSIX
-	"seek",
-#endif
-#ifdef CW_THREADS
-	"self",
-#endif
-	"setactive",
-#ifdef CW_POSIX
-	"setegid",
-	"setenv",
-	"seteuid",
-	"setgid",
-#endif
-	"setiobuf",
-#ifdef CW_THREADS
-	"setlocking",
-	"setperiod",
-#endif
-	"setthreshold",
-#ifdef CW_POSIX
-	"setuid",
-#endif
-	"sexch",
-	"shift",
-#ifdef CW_THREADS
-	"signal",
-#endif
-	"sindex",
-#ifdef CW_POSIX
-	"size",
-#endif
-	"spop",
-	"spush",
-#ifdef CW_POSIX
-	"srand",
-#endif
-	"sroll",
-	"stack",
-	"stacktype",
-	"stackunderflow",
-	"start",
-	"stats",
-#ifdef CW_POSIX
-	"status",
-#endif
-	"stdin",
-	"stderr",
-	"stdout",
-	"stop",
-	"stopped",
-	"string",
-	"stringtype",
-	"sub",
-#ifdef CW_POSIX
-	"symlink",
-#endif
-	"syntaxerror",
-	"system",
-	"systemdict",
-	"tell",
-#ifdef CW_POSIX
-	"test",
+    "seek",
 #endif
 #ifdef CW_THREADS
-	"thread",
-	"threadtype",
+    "self",
 #endif
-	"threshold",
-	"throw",
-#ifdef CW_THREADS
-	"timedwait",
-#endif
-	"token",
-	"true",
+    "setactive",
 #ifdef CW_POSIX
-	"truncate",
+    "setegid",
+    "setenv",
+    "seteuid",
+    "setgid",
+#endif
+    "setiobuf",
+#ifdef CW_THREADS
+    "setlocking",
+    "setperiod",
+#endif
+    "setthreshold",
+#ifdef CW_POSIX
+    "setuid",
+#endif
+    "sexch",
+    "shift",
+#ifdef CW_THREADS
+    "signal",
+#endif
+    "sindex",
+#ifdef CW_POSIX
+    "size",
+#endif
+    "spop",
+    "spush",
+#ifdef CW_POSIX
+    "srand",
+#endif
+    "sroll",
+    "stack",
+    "stacktype",
+    "stackunderflow",
+    "start",
+    "stats",
+#ifdef CW_POSIX
+    "status",
+#endif
+    "stdin",
+    "stderr",
+    "stdout",
+    "stop",
+    "stopped",
+    "string",
+    "stringtype",
+    "sub",
+#ifdef CW_POSIX
+    "symlink",
+#endif
+    "syntaxerror",
+    "system",
+    "systemdict",
+    "tell",
+#ifdef CW_POSIX
+    "test",
 #endif
 #ifdef CW_THREADS
-	"trylock",
+    "thread",
+    "threadtype",
 #endif
-	"type",
-	"typecheck",
-#ifdef CW_POSIX
-	"uid",
+    "threshold",
+    "throw",
+#ifdef CW_THREADS
+    "timedwait",
 #endif
-	"undef",
-	"undefined",
-	"undefinedfilename",
-	"undefinedresult",
+    "token",
+    "true",
 #ifdef CW_POSIX
-	"unlink",
+    "truncate",
 #endif
 #ifdef CW_THREADS
-	"unlock",
+    "trylock",
 #endif
-	"unmatchedfino",
-	"unmatchedmark",
-	"unregistered",
+    "type",
+    "typecheck",
 #ifdef CW_POSIX
-	"unsetenv",
+    "uid",
 #endif
-	"version",
+    "undef",
+    "undefined",
+    "undefinedfilename",
+    "undefinedresult",
+#ifdef CW_POSIX
+    "unlink",
+#endif
 #ifdef CW_THREADS
-	"wait",
+    "unlock",
+#endif
+    "unmatchedfino",
+    "unmatchedmark",
+    "unregistered",
+#ifdef CW_POSIX
+    "unsetenv",
+#endif
+    "version",
+#ifdef CW_THREADS
+    "wait",
 #endif
 #ifdef CW_POSIX
-	"waitpid",
+    "waitpid",
 #endif
-	"where",
-	"write",
-	"xcheck",
-	"xor"
+    "where",
+    "write",
+    "xcheck",
+    "xor"
 #ifdef CW_THREADS
-	,
-	"yield"
+    ,
+    "yield"
 #endif
 };

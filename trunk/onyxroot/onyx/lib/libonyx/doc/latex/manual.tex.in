@@ -31,28 +31,28 @@ A minimal program that runs the Onyx interpreter interactively looks like:
 int
 main(int argc, char **argv, char **envp)
 {
-        cw_nx_t         nx;
-        cw_nxo_t        thread, *nxo;
+    cw_nx_t nx;
+    cw_nxo_t thread, *nxo;
 
-        /* Initialize libonyx and the Onyx interpreter. */
-        libonyx_init();
-        nx_new(&nx, NULL, argc, argv, envp);
+    /* Initialize libonyx and the Onyx interpreter. */
+    libonyx_init();
+    nx_new(&nx, NULL, argc, argv, envp);
 
-        /* Create a thread. */
-        nxo_thread_new(&thread, &nx);
+    /* Create a thread. */
+    nxo_thread_new(&thread, &nx);
 
-        /* Set up stdin for evaluation. */
-        nxo = nxo_stack_push(nxo_thread_ostack_get(&thread));
-        nxo_dup(nxo, nxo_thread_stdin_get(&thread));
-        nxo_attr_set(nxo, NXOA_EXECUTABLE);
+    /* Set up stdin for evaluation. */
+    nxo = nxo_stack_push(nxo_thread_ostack_get(&thread));
+    nxo_dup(nxo, nxo_thread_stdin_get(&thread));
+    nxo_attr_set(nxo, NXOA_EXECUTABLE);
 
-        /* Start the thread. */
-        nxo_thread_start(&thread);
+    /* Start the thread. */
+    nxo_thread_start(&thread);
 
-        /* Clean up. */
-        nx_delete(&nx);
-        libonyx_shutdown();
-        return 0;
+    /* Clean up. */
+    nx_delete(&nx);
+    libonyx_shutdown();
+    return 0;
 }
 \end{verbatim}
 
