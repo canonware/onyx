@@ -309,7 +309,14 @@ modslate_buffer(void *a_data, cw_nxo_t *a_thread)
     /* Initialize the protection mutex; buf's aren't thread-safe. */
     mtx_new(&buffer->mtx);
 
-    /* Create a reference to the buffer. */
+    /* Initialize aux. */
+    nxo_null_new(&buffer->aux);
+
+    /* Initialize the sequence number. */
+    buffer->seq = 0;
+
+    /* Create a reference to the buffer, now that the internals are
+     * initialized. */
     nxo_hook_new(nxo, nx, buffer, buffer_p_eval, buffer_p_ref_iter,
 		 buffer_p_delete);
 
@@ -317,12 +324,6 @@ modslate_buffer(void *a_data, cw_nxo_t *a_thread)
     tag = nxo_hook_tag_get(nxo);
     nxo_name_new(tag, nx, "buffer", sizeof("buffer") - 1, FALSE);
     nxo_attr_set(tag, NXOA_EXECUTABLE);
-
-    /* Initialize aux. */
-    nxo_null_new(&buffer->aux);
-
-    /* Initialize the sequence number. */
-    buffer->seq = 0;
 }
 
 /* #object buffer? #boolean */
@@ -969,8 +970,11 @@ modslate_marker(void *a_data, cw_nxo_t *a_thread)
     mkr_new(&marker->mkr, &buffer->buf);
     buffer_p_unlock(buffer);
 
-    /* Create a reference to the marker; keep a reference to the buf on tstack
-     * to avoid a GC race. */
+    /* Initialize the sequence number. */
+    marker->seq = 0;
+
+    /* Create a reference to the marker, now that the internals are initialized.
+     * Keep a reference to the buf on tstack to avoid a GC race. */
     tnxo = nxo_stack_push(tstack);
     nxo_dup(tnxo, nxo);
     nxo_hook_new(nxo, nx, marker, NULL, marker_p_ref_iter, marker_p_delete);
@@ -980,9 +984,6 @@ modslate_marker(void *a_data, cw_nxo_t *a_thread)
     tag = nxo_hook_tag_get(nxo);
     nxo_name_new(tag, nx, "marker", sizeof("marker") - 1, FALSE);
     nxo_attr_set(tag, NXOA_EXECUTABLE);
-
-    /* Initialize the sequence number. */
-    marker->seq = 0;
 }
 
 /* #object marker? #boolean */
@@ -1061,8 +1062,9 @@ modslate_marker_copy(void *a_data, cw_nxo_t *a_thread)
     marker_copy->seq = 0;
     buffer_p_unlock(buffer);
 
-    /* Create a reference to the new marker; keep a reference to the original
-     * marker on tstack to avoid a GC race. */
+    /* Create a reference to the new marker, now that the internals are
+     * initialized.  Keep a reference to the original marker on tstack to avoid
+     * a GC race. */
     tnxo = nxo_stack_push(tstack);
     nxo_dup(tnxo, nxo);
     nxo_hook_new(nxo, nx, marker_copy, NULL, marker_p_ref_iter,

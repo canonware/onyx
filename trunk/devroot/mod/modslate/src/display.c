@@ -243,15 +243,6 @@ modslate_display(void *a_data, cw_nxo_t *a_thread)
     nxo_no_new(&display->hook);
     nxo_dup(&display->hook, nxo_stack_get(estack));
 
-    /* Create a reference to the display. */
-    tnxo = nxo_stack_push(tstack);
-    nxo_hook_new(tnxo, nx, display, NULL, display_p_ref_iter, display_p_delete);
-
-    /* Set the hook tag. */
-    tag = nxo_hook_tag_get(tnxo);
-    nxo_name_new(tag, nx, "display", sizeof("display") - 1, FALSE);
-    nxo_attr_set(tag, NXOA_EXECUTABLE);
-
     /* Initialize aux. */
     nxo_null_new(&display->aux);
 
@@ -289,6 +280,16 @@ modslate_display(void *a_data, cw_nxo_t *a_thread)
 	nxo_stack_pop(tstack);
 	return;
     }
+
+    /* Create a reference to the display, now that the internals are
+     * initialized. */
+    tnxo = nxo_stack_push(tstack);
+    nxo_hook_new(tnxo, nx, display, NULL, display_p_ref_iter, display_p_delete);
+
+    /* Set the hook tag. */
+    tag = nxo_hook_tag_get(tnxo);
+    nxo_name_new(tag, nx, "display", sizeof("display") - 1, FALSE);
+    nxo_attr_set(tag, NXOA_EXECUTABLE);
 
     /* Clean up the stacks. */
     nxo_dup(term, tnxo);
