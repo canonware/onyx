@@ -154,6 +154,21 @@ ONYX_OTESTS =
               waitpid_a.nx.in waitpid_b.nx.in waitpid_c.nx.in
 
 #endif
+#if @enable_socket@
+
+              peername_a.nx.in peername_b.nx.in peername_c.nx.in
+              peername_d.nx.in peername_e.nx.in serviceport_a.nx.in
+              serviceport_b.nx.in serviceport_c.nx.in socket_a.nx.in
+              socket_b.nx.in socket_c.nx.in socket_d.nx.in socket_e.nx.in
+              socket_f.nx.in socket_g.nx.in socket_h.nx.in socket_i.nx.in
+              socket_j.nx.in socketpair_a.nx.in socketpair_b.nx.in
+              socketpair_c.nx.in socketpair_d.nx.in socketpair_e.nx.in
+              socketpair_f.nx.in socketpair_g.nx.in socketpair_h.nx.in
+              socketpair_i.nx.in socketpair_j.nx.in sockname_a.nx.in
+              sockname_b.nx.in sockname_c.nx.in sockname_d.nx.in
+              sockname_e.nx.in
+
+#endif
 
               abs_a.nx.in abs_b.nx.in abs_c.nx.in add_a.nx.in add_b.nx.in
               add_c.nx.in add_d.nx.in adn_a.nx.in adn_b.nx.in and_a.nx.in
