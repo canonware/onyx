@@ -527,12 +527,15 @@ is described in Section~\ref{sec:gcdict}.
 
 All operators built in to onyx have corresponding names that are composed
 entirely of lower case letters.  In order to avoid any possibility of namespace
-collisions in future versions of onyx, use at least one character that is not a
-lower case letter in names (for example, capital letters, numbers, underscore,
-etc.).
+collisions names defined by current and future versions of onyx, use at least
+one character that is not a lower case letter in names (for example, capital
+letters, numbers, underscore, etc.).
 
 \subsection{currenterror}
 \label{sec:currenterror}
+
+Each thread has its own currenterror dictionary, which is used by the error
+handling machinery.
 
 \begin{longtable}{|r|l|l|p{3in}|}
 \caption[currenterror summary]{currenterror summary by functional group}
@@ -552,192 +555,285 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 %end{latexonly}
 \multicolumn{4}{|l|}{Control operators} \\
 \hline \hline
-& {\bf \htmlref{stop}{currenterror:stop}} & & \\
+-- & {\bf \htmlref{stop}{currenterror:stop}} & -- & Last operation during error
+handling. \\
 \hline
-& {\bf \htmlref{recordstacks}{currenterror:recordstacks}} & & \\
+-- & {\bf \htmlref{recordstacks}{currenterror:recordstacks}} & boolean & Control
+stack snapshotting. \\
 \hline \hline
 \multicolumn{4}{|l|}{State operators} \\
 \hline \hline
-& {\bf \htmlref{newerror}{currenterror:newerror}} & & \\
+-- & {\bf \htmlref{newerror}{currenterror:newerror}} & boolean & Set to true
+during error handling. \\
 \hline
-& {\bf \htmlref{errorname}{currenterror:errorname}} & & \\
+-- & {\bf \htmlref{errorname}{currenterror:errorname}} & name & Name of most
+recent error. \\
 \hline
-& {\bf \htmlref{ostack}{currenterror:ostack}} & & \\
+-- & {\bf \htmlref{ostack}{currenterror:ostack}} & stack & ostack snapshot. \\
 \hline
-& {\bf \htmlref{dstack}{currenterror:dstack}} & & \\
+-- & {\bf \htmlref{dstack}{currenterror:dstack}} & stack & dstack snaphot. \\
 \hline
-& {\bf \htmlref{estack}{currenterror:estack}} & & \\
+-- & {\bf \htmlref{estack}{currenterror:estack}} & stack & estack snapshot. \\
 \hline
-& {\bf \htmlref{istack}{currenterror:istack}} & & \\
+-- & {\bf \htmlref{istack}{currenterror:istack}} & stack & istack snapshot. \\
 \end{longtable}
 
 \begin{description}
 \label{currenterror:dstack}
 \index{dstack@\onyxop{}{dstack}{}}
-\item[{\onyxop{--}{dstack}{--}}: ]
+\item[{\onyxop{--}{dstack}{stack}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[stack: ]
+			A dstack snapshot.
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Get a stack that is a dstack snapshot as of the most recent
+		error.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> x
+Error /undefined
+ostack: ()
+dstack: (-dict- -dict- -dict- -dict-)
+estack/istack trace (0..2):
+0:      x
+1:      -file-
+2:      --start--
+onyx:1> currenterror begin dstack end 1 sprint
+(-dict- -dict- -dict- -dict-)
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{currenterror:errorname}
 \index{errorname@\onyxop{}{errorname}{}}
-\item[{\onyxop{--}{errorname}{--}}: ]
+\item[{\onyxop{--}{errorname}{name}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[name: ]
+			Name of the most recent error.  The name is usually one
+			of the errors defined in
+			\htmlref{errordict}{sec:errordict}, but .
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Get the name of the most recent error.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> x
+Error /undefined
+ostack: ()
+dstack: (-dict- -dict- -dict- -dict-)
+estack/istack trace (0..2):
+0:      x
+1:      -file-
+2:      --start--
+onyx:1> currenterror begin errorname end 1 sprint
+/undefined
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{currenterror:estack}
 \index{estack@\onyxop{}{estack}{}}
 \item[{\onyxop{--}{estack}{--}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[stack: ]
+			An estack snapshot.
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Get a stack that is an estack snapshot as of the most recent
+		error.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> x
+Error /undefined
+ostack: ()
+dstack: (-dict- -dict- -dict- -dict-)
+estack/istack trace (0..2):
+0:      x
+1:      -file-
+2:      --start--
+onyx:1> currenterror begin estack end 1 sprint
+(--start-- -file- x)
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{currenterror:istack}
 \index{istack@\onyxop{}{istack}{}}
 \item[{\onyxop{--}{istack}{--}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[stack: ]
+			An istack snapshot.
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Get a stack that is an istack snapshot as of the most recent
+		error.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> x
+Error /undefined
+ostack: ()
+dstack: (-dict- -dict- -dict- -dict-)
+estack/istack trace (0..2):
+0:      x
+1:      -file-
+2:      --start--
+onyx:1> currenterror begin istack end 1 sprint
+(0 0 0)
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{currenterror:newerror}
 \index{newerror@\onyxop{}{newerror}{}}
-\item[{\onyxop{--}{newerror}{--}}: ]
+\item[{\onyxop{--}{newerror}{boolean}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[boolean: ]
+			False if there has been no error since the last time
+			newerror was reset; true otherwise.
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Get a boolean that represents whether there has been an error
+		since the last time newerror was set to false (as during
+		interpreter initialization).  It is the application's
+		responsibility to reset newerror after each error if it expects
+		the value to be useful across multiple errors.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> currenterror begin
+onyx:0> newerror 1 sprint
+false
+onyx:0> x
+Error /undefined
+ostack: ()
+dstack: (-dict- -dict- -dict- -dict- -dict-)
+estack/istack trace (0..2):
+0:      x
+1:      -file-
+2:      --start--
+onyx:1> newerror 1 sprint
+true
+onyx:1> /newerror false def
+onyx:1> newerror 1 sprint
+false
+onyx:1> resume
+onyx:1> y
+Error /undefined
+ostack: (x)
+dstack: (-dict- -dict- -dict- -dict- -dict-)
+estack/istack trace (0..2):
+0:      y
+1:      -file-
+2:      --start--
+onyx:2> newerror 1 sprint
+true
+onyx:2>
 		\end{verbatim}
 	\end{description}
 \label{currenterror:ostack}
 \index{ostack@\onyxop{}{ostack}{}}
 \item[{\onyxop{--}{ostack}{--}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[stack: ]
+			An ostack snapshot.
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Get a stack that is an ostack snapshot as of the most recent
+		error.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> x
+Error /undefined
+ostack: ()
+dstack: (-dict- -dict- -dict- -dict-)
+estack/istack trace (0..2):
+0:      x
+1:      -file-
+2:      --start--
+onyx:1> currenterror begin ostack end 1 sprint
+()
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{currenterror:recordstacks}
 \index{recordstacks@\onyxop{}{recordstacks}{}}
-\item[{\onyxop{--}{recordstacks}{--}}: ]
+\item[{\onyxop{--}{recordstacks}{boolean}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[boolean: ]
+			True if stacks are snapshotted when an error occurs;
+			false otherwise.
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Get a boolean that represents whether stacks are snapshotted
+		during error handling.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> currenterror begin
+onyx:0> /recordstacks false def
+onyx:0> x
+Error /undefined
+onyx:1> resume
+onyx:1> /recordstacks true def
+onyx:1> x
+Error /undefined
+ostack: (x)
+dstack: (-dict- -dict- -dict- -dict- -dict-)
+estack/istack trace (0..2):
+0:      x
+1:      -file-
+2:      --start--
+onyx:2>
 		\end{verbatim}
 	\end{description}
 \label{currenterror:stop}
 \index{stop@\onyxop{}{stop}{}}
 \item[{\onyxop{--}{stop}{--}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		This is called as the very last operation when an error occurs.
+		Initially, its value is the same as that for the
+		\htmlref{\onyxop{}{stop}{}}{systemdict:stop} operator in
+		systemdict.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> currenterror begin
+onyx:0> /stop {`Custom stop\n' print flush quit} def
+onyx:0> x
+Error /undefined
+ostack: ()
+dstack: (-dict- -dict- -dict- -dict- -dict-)
+estack/istack trace (0..2):
+0:      x
+1:      -file-
+2:      --start--
+Custom stop
 		\end{verbatim}
 	\end{description}
 \end{description}
@@ -2161,9 +2257,9 @@ objecs from stack down through topmost mark. \\
 \hline
 & {\bf \htmlref{undef}{systemdict:undef}} & & \\
 \hline
-& {\bf \htmlref{{\lt}{\lt}}{systemdict:sym_lt_lt}} & & \\
+& {\bf \htmlref{{\lt}}{systemdict:sym_lt}} & & \\
 \hline
-& {\bf \htmlref{{\gt}{\gt}}{systemdict:sym_gt_gt}} & & \\
+& {\bf \htmlref{{\gt}}{systemdict:sym_gt}} & & \\
 \hline
 & {\bf \htmlref{load}{systemdict:load}} & & \\
 \hline
