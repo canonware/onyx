@@ -1394,24 +1394,3 @@ nxo_p_file_buffer_flush(cw_nxo_t *a_nxo)
 	RETURN:
 	return retval;
 }
-
-void
-nxo_file_buffer_reset(cw_nxo_t *a_nxo)
-{
-	cw_nxoe_file_t	*file;
-
-	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
-
-	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
-
-	_cw_check_ptr(file);
-	_cw_assert(file->nxoe.magic == _CW_NXOE_MAGIC);
-	_cw_assert(file->nxoe.type == NXOT_FILE);
-
-	nxoe_p_file_lock(file);
-	file->buffer_mode = BUFFER_EMPTY;
-	file->buffer_offset = 0;
-	nxoe_p_file_unlock(file);
-}
