@@ -321,11 +321,20 @@ matrix_copy(cw_matrix_t * a_matrix)
   _cw_check_ptr(a_matrix);
 
   retval = matrix_new(NULL);
+  if (NULL == retval)
+  {
+    goto RETURN;
+  }
 
   if (a_matrix->grid != NULL)
   {
-    matrix_init(retval, matrix_get_x_size(a_matrix),
-		matrix_get_y_size(a_matrix), FALSE);
+    if (matrix_init(retval, matrix_get_x_size(a_matrix),
+		    matrix_get_y_size(a_matrix), FALSE))
+    {
+      matrix_delete(retval);
+      retval = NULL;
+      goto RETURN;
+    }
 
     /* Copy the grid. */
     for (j = 0; j < retval->grid_y_size; j++)
@@ -338,6 +347,7 @@ matrix_copy(cw_matrix_t * a_matrix)
     }
   }
 
+  RETURN:
   return retval;
 }
 

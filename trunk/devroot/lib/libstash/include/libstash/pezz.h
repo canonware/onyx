@@ -20,6 +20,7 @@
 /* Pseudo-opaque type. */
 typedef struct cw_pezz_s cw_pezz_t;
 
+#if (0)
 struct cw_pezz_s
 {
   cw_bool_t is_malloced;
@@ -48,12 +49,35 @@ struct cw_pezz_s
 
   /* Ring seam for spare buffers. */
   cw_ring_t * spare_buffers;
-
-#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
-  /* Counters to keep track of how much overflow this pezz is seeing. */
-  cw_uint32_t num_overflow;
-  cw_uint32_t max_overflow;
+};
 #endif
+
+struct cw_pezz_s
+{
+  cw_bool_t is_malloced;
+#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
+  cw_uint32_t magic;
+#endif
+#ifdef _CW_REENTRANT
+  cw_mtx_t lock;
+#endif
+
+  /* Pointer to an array of base addresses for the memory blocks from which
+   * memory is allocated. */
+  void * mem_blocks;
+
+  /* Pointer to an array of base addresses for the memory blocks that are used
+   * for ring structures. */
+  cw_ring_t * ring_blocks;
+
+  
+
+  /* Size of one buffer, from the user's perspective. */
+  cw_uint32_t buffer_size;
+
+  
+  /* Ring seam for spare buffers. */
+  cw_ring_t * spare_buffers;
 };
 
 /****************************************************************************

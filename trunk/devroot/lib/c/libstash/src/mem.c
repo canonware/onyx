@@ -20,7 +20,7 @@
 #include "libstash/mem_l.h"
 
 cw_mem_t *
-mem_new()
+mem_new(void)
 {
   cw_mem_t * retval;
 

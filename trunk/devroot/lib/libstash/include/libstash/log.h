@@ -8,38 +8,75 @@
  *
  * Version: <Version>
  *
- * Description: 
- *              
- *              
- *              
- *              
+ * <<< Description >>>
+ *
+ * Public interface for the log (logging) class.  Output can be sent to a file
+ * (stderr by default).  Functions similar to printf() are provided for
+ * formatted output.
+ *
  ****************************************************************************/
 
 typedef struct cw_log_s cw_log_t;
 
 /****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * None.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Pointer to a log, or NULL.
+ *          NULL : Memory allocation error.
+ *
  * <<< Description >>>
  *
- * log constructor.
+ * Constructor.
  *
  ****************************************************************************/
 cw_log_t *
-log_new();
+log_new(void);
 
 /****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_log : Pointer to a log.
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
  * <<< Description >>>
  *
- * log destructor.
+ * Destructor.
  *
  ****************************************************************************/
 void
 log_delete(cw_log_t * a_log);
 
 /****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_log : Pointer to a log.
+ *
+ * a_logfile : Pointer to a string that represents a file to log to.
+ *
+ * a_overwrite : TRUE == truncate a_logfile, FALSE == append to a_logfile.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : FALSE == success, TRUE == error.
+ *          TRUE : Error opening a_logfile.
+ *               : fflush() error.
+ *               : fclose() error.
+ *               : Memory allocation error.
+ *
  * <<< Description >>>
  *
- * Opens file for logging.  If another file is already being used, it is
- * first closed.
+ * Open file for logging.  If another file is already being used, close it
+ * first.
  *
  ****************************************************************************/
 cw_bool_t
@@ -47,42 +84,81 @@ log_set_logfile(cw_log_t * a_log, const char * a_logfile,
 		cw_bool_t a_overwrite);
 
 /****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_log : Pointer to a log.
+ *
+ * a_format : Formatting string.
+ *
+ * ... : Arguments.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Number of characters printed.
+ *
  * <<< Description >>>
  *
- * Run-of-the-mill printf()-alike.
+ * printf() wrapper.
  *
  ****************************************************************************/
 int
 log_printf(cw_log_t * a_log, const char * a_format, ...);
 
 /****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_log : Pointer to a log.
+ *
+ * a_filename : __FILE__, or NULL.
+ *
+ * a_line_num : __LINE__.  Ignored if a_filename == NULL.
+ *
+ * a_func_name : __FUNCTION__, or NULL.
+ *
+ * a_format : Formatting string.
+ *
+ * ... : Arguments.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Number of characters printed.
+ *
  * <<< Description >>>
  *
- * Optional arguments prepend filename, line number, and function name.
- * Otherwise, this still acts like printf().
+ * printf() wrapper.  Optional arguments prepend filename, line number, and
+ * function name.
  *
  ****************************************************************************/
 int
 log_eprintf(cw_log_t * a_log, 
-	    const char * a_filename, /* Optional, pass NULL if not used. */
-	    int a_line_num, /* Only used if (a_filename != NULL) */
-	    const char * a_func_name, /* Optional, pass NULL if not used. */
-	    const char * a_format, 
+	    const char * a_filename,
+	    int a_line_num,
+	    const char * a_func_name,
+	    const char * a_format,
 	    ...);
 
 /****************************************************************************
  *
  * <<< Input(s) >>>
  *
+ * a_log : Pointer to a log.
  *
+ * a_size : Maximum number of bytes to print.
+ *
+ * a_format : Formatting string.
+ *
+ * ... : Arguments.
  *
  * <<< Output(s) >>>
  *
- *
+ * retval : Number of bytes printed, or -1.
+ *          -1 : Memory allocation error.
  *
  * <<< Description >>>
  *
- *
+ * printf() wrapper, but print no more than a_size characters.
  *
  ****************************************************************************/
 int
@@ -92,50 +168,88 @@ log_nprintf(cw_log_t * a_log,
 	    ...);
 
 /****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_log : Pointer to a log.
+ *
+ * a_format : Formatting string.
+ *
+ * ... : Arguments.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Number of bytes printed.
+ *
  * <<< Description >>>
  *
- * printf()-alike that prepends log message foo.
+ * printf() wrapper, with a time stamp prepended.
  *
  ****************************************************************************/
 int
 log_lprintf(cw_log_t * a_log, const char * a_format, ...);
 
 /****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_log : Pointer to a log.
+ *
+ * a_filename : __FILE__, or NULL.
+ *
+ * a_line_num : __LINE__.  Ignored if a_filename == NULL.
+ *
+ * a_func_name : __FUNCTION__, or NULL.
+ *
+ * a_format : Formatting string.
+ *
+ * ... : Arguments.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Number of characters printed.
+ *
  * <<< Description >>>
  *
- * Prepended log message foo.  'Optional' arguments prepend filename, line
- * number, and function name.
+ * printf() wrapper, with a time stamp prepended.  Optional arguments prepend
+ * filename, line number, and function name.
  *
  ****************************************************************************/
 int
 log_leprintf(cw_log_t * a_log,
-	     const char * a_filename, /* Optional, pass NULL if not used. */
-	     int a_line_num, /* Only used if (a_filename != NULL) */
-	     const char * a_func_name, /* Optional, pass NULL if not used. */
+	     const char * a_filename,
+	     int a_line_num,
+	     const char * a_func_name,
 	     const char * a_format,
 	     ...);
 
 /****************************************************************************
- * <<< Arguments >>>
+ *
+ * <<< Input(s) >>>
  *
  * a_val : Value to convert to a string.
+ *
  * a_base : Number base to convert to.
+ *
  * a_buf : A buffer of at least 65 bytes for base 2 conversion, 21 bytes
  *         for base 10 conversion, and 17 bytes for base 16 conversion.
  *
+ * <<< Output(s) >>>
+ *
+ * retval : Pointer to a string that represents a_val, in base a_base (a_buf).
+ *
  * <<< Description >>>
  *
- * Converts a_val to a number string in base a_base and puts the result
- * into *a_buf.
+ * Convert a_val to a number string in base a_base and put the result into
+ * *a_buf.  Supported bases are 2, 10, and 16.
  *
  ****************************************************************************/
 char *
 log_print_uint64(cw_uint64_t a_val, cw_uint32_t a_base, char * a_buf);
 
 /* 
- * My version of assert().  It's a bit prettier and cleaner, but the same idea.
+ * assert()-alike.  It's a bit prettier and cleaner, but the same idea.
  */
-
 #define _cw_error(a) \
   { \
     log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, "Error: %s\n", a); \
@@ -153,12 +267,14 @@ log_print_uint64(cw_uint64_t a_val, cw_uint32_t a_base, char * a_buf);
       } \
   }
 
+/* Macro to ease the drudgery of printing out debugging spew to trace the
+ * execution path. */
 #define _cw_marker(a) \
   { \
     log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, "%s\n", a); \
   }
 
-/* Macro to do the drudgery of checking whether a pointer is null. */
+/* Macro to do the drudgery of assuring that a pointer is non-NULL. */
 #define _cw_check_ptr(x) \
   { \
     if ((x) == NULL) \

@@ -292,7 +292,7 @@ res_get_res_val(cw_res_t * a_res, const char * a_res_name)
 
 cw_bool_t
 res_extract_res(cw_res_t * a_res, char * a_res_key,
-		char ** a_res_name, char ** a_res_val)
+		char ** r_res_name, char ** r_res_val)
 {
   cw_bool_t retval;
 
@@ -302,7 +302,7 @@ res_extract_res(cw_res_t * a_res, char * a_res_key,
 #endif
 
   retval = oh_item_delete(&a_res->hash, a_res_key,
-			  (void **) a_res_name, (void **) a_res_val);
+			  (void **) r_res_name, (void **) r_res_val);
 
 #ifdef _CW_REENTRANT
   rwl_wunlock(&a_res->rw_lock);
@@ -323,7 +323,7 @@ res_dump(cw_res_t * a_res, char * a_filename)
 
   if (a_filename != NULL)
   {
-    t_log = log_new(NULL);
+    t_log = log_new();
     if (log_set_logfile(t_log, a_filename, TRUE) == TRUE)
     {
       log_leprintf(cw_g_log, NULL, 0, __FUNCTION__,

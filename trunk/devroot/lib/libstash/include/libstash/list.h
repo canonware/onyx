@@ -36,21 +36,52 @@ struct cw_list_s
 
 /****************************************************************************
  *
- * list_item constructor.
+ * <<< Input(s) >>>
+ *
+ * None.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Pointer to a list_item, or NULL.
+ *          NULL : Memory allocation error.
+ *
+ * <<< Description >>>
+ *
+ * Constructor.
  *
  ****************************************************************************/
 cw_list_item_t *
-list_item_new();
+list_item_new(void);
 
 /****************************************************************************
  *
- * list_item_destructor.
+ * <<< Input(s) >>>
+ *
+ * a_cont : Pointer to a list_item.
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
+ * <<< Description >>>
+ *
+ * Destructor.
  *
  ****************************************************************************/
 void
 list_item_delete(cw_list_item_t * a_cont);
 
 /****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_cont : Pointer to a list_item.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Data pointer.
+ *
+ * <<< Description >>>
  *
  * Get the value of the data pointer.
  *
@@ -60,7 +91,19 @@ list_item_get(cw_list_item_t * a_cont);
 
 /****************************************************************************
  *
- * Set the value of the data pointer.
+ * <<< Input(s) >>>
+ *
+ * a_cont : Pointer to a list_item.
+ *
+ * a_data : Data pointer.
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
+ * <<< Description >>>
+ *
+ * Set the value of a_cont's data pointer to a_data.
  *
  ****************************************************************************/
 void
@@ -68,7 +111,20 @@ list_item_set(cw_list_item_t * a_cont, void * a_data);
 
 /****************************************************************************
  *
- * list constructor.
+ * <<< Input(s) >>>
+ *
+ * a_list : Pointer to space for a list, or NULL.
+ *
+ * a_is_thread_safe : TRUE if list is to be threadsafe, FALSE otherwise.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Pointer to a list, or NULL.
+ *          NULL : Memory allocation error.
+ *
+ * <<< Description >>>
+ *
+ * Constructor.
  *
  ****************************************************************************/
 #ifdef _CW_REENTRANT
@@ -81,7 +137,17 @@ list_new(cw_list_t * a_list);
 
 /****************************************************************************
  *
- * list destructor.
+ * <<< Input(s) >>>
+ *
+ * a_list : Pointer to a list.
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
+ * <<< Description >>>
+ *
+ * Destructor.
  *
  ****************************************************************************/
 void
@@ -89,7 +155,17 @@ list_delete(cw_list_t * a_list);
 
 /****************************************************************************
  *
- * Get the value of the data pointer.
+ * <<< Input(s) >>>
+ *
+ * a_list : Pointer to a list.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Number of items in a_list.
+ *
+ * <<< Description >>>
+ *
+ * Return the number of items in a_list.
  *
  ****************************************************************************/
 cw_uint64_t
@@ -117,7 +193,20 @@ list_catenate_list(cw_list_t * a_a, cw_list_t * a_b);
 
 /****************************************************************************
  *
- * Pushes an item onto the head of the list.
+ * <<< Input(s) >>>
+ *
+ * a_list : Pointer to a list.
+ *
+ * a_data : Data pointer.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Pointer to the list_item that contains a_data, or NULL.
+ *          NULL : Memory allocation error.
+ *
+ * <<< Description >>>
+ *
+ * Push an item onto the head of a_list.
  *
  ****************************************************************************/
 cw_list_item_t *
@@ -125,7 +214,18 @@ list_hpush(cw_list_t * a_list, void * a_data);
 
 /****************************************************************************
  *
- * Pops an item off the head of the list.
+ * <<< Input(s) >>>
+ *
+ * a_list : Pointer to a list.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Data pointer, or NULL.
+ *          NULL : a_list is empty.
+ *
+ * <<< Description >>>
+ *
+ * Pop an item of the head of a_list.
  *
  ****************************************************************************/
 void *
@@ -133,7 +233,18 @@ list_hpop(cw_list_t * a_list);
 
 /****************************************************************************
  *
- * Returns the item at the head of the list, without removing it.
+ * <<< Input(s) >>>
+ *
+ * a_list : Pointer to a list.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Data pointer, or NULL.
+ *          NULL : a_list is empty.
+ *
+ * <<< Description >>>
+ *
+ * Return the item at the head of the list, without removing it.
  *
  ****************************************************************************/
 void *
@@ -141,7 +252,20 @@ list_hpeek(cw_list_t * a_list);
 
 /****************************************************************************
  *
- * Pushes an item onto the tail of the list.
+ * <<< Input(s) >>>
+ *
+ * a_list : Pointer to a list.
+ *
+ * a_data : Data pointer.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Pointer to the list_item that contains a_data, or NULL.
+ *          NULL : Memory allocation error.
+ *
+ * <<< Description >>>
+ *
+ * Push an item onto the tail of a_list.
  *
  ****************************************************************************/
 cw_list_item_t *
@@ -149,7 +273,18 @@ list_tpush(cw_list_t * a_list, void * a_data);
 
 /****************************************************************************
  *
- * Pops an item off the tail of the list.
+ * <<< Input(s) >>>
+ *
+ * a_list : Pointer to a list.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Data pointer, or NULL.
+ *          NULL : a_list is empty.
+ *
+ * <<< Description >>>
+ *
+ * Pop an item of the tail of a_list.
  *
  ****************************************************************************/
 void *
@@ -157,7 +292,18 @@ list_tpop(cw_list_t * a_list);
 
 /****************************************************************************
  *
- * Returns the item at the tail of the list without removing it.
+ * <<< Input(s) >>>
+ *
+ * a_list : Pointer to a list.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Data pointer, or NULL.
+ *          NULL : a_list is empty.
+ *
+ * <<< Description >>>
+ *
+ * Return the item at the tail of the list, without removing it.
  *
  ****************************************************************************/
 void *
@@ -174,6 +320,7 @@ list_tpeek(cw_list_t * a_list);
  * <<< Output(s) >>>
  *
  * retval : Pointer to an item container, or NULL.
+ *          NULL : a_in_list is the tail of a_list.
  *
  * <<< Description >>>
  *
@@ -196,6 +343,7 @@ list_get_next(cw_list_t * a_list, cw_list_item_t * a_in_list);
  * <<< Output(s) >>>
  *
  * retval : Pointer to an item container, or NULL.
+ *          NULL : a_in_list is the head of a_list.
  *
  * <<< Description >>>
  *
@@ -209,7 +357,22 @@ list_get_prev(cw_list_t * a_list, cw_list_item_t * a_in_list);
 
 /****************************************************************************
  *
- * Inserts an item before the list node pointed to by a_in_list.
+ * <<< Input(s) >>>
+ *
+ * a_list : Pointer to a list.
+ *
+ * a_in_list : Pointer to a list_item in a_list.
+ *
+ * a_data : Data pointer.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Pointer to the list_item that contains a_data, or NULL.
+ *          NULL : Memory allocation error.
+ *
+ * <<< Description >>>
+ *
+ * Insert an item before the list node pointed to by a_in_list.
  *
  ****************************************************************************/
 cw_list_item_t *
@@ -218,7 +381,22 @@ list_insert_before(cw_list_t * a_list, cw_list_item_t * a_in_list,
 
 /****************************************************************************
  *
- * Inserts an item after the list node pointed to by a_in_list.
+ * <<< Input(s) >>>
+ *
+ * a_list : Pointer to a list.
+ *
+ * a_in_list : Pointer to a list_item in a_list.
+ *
+ * a_data : Data pointer.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Pointer to the list_item that contains a_data, or NULL.
+ *          NULL : Memory allocation error.
+ *
+ * <<< Description >>>
+ *
+ * Insert an item after the list node pointed to by a_in_list.
  *
  ****************************************************************************/
 cw_list_item_t *
@@ -247,6 +425,18 @@ list_remove_item(cw_list_t * a_list, void * a_data);
 
 /****************************************************************************
  *
+ * <<< Input(s) >>>
+ *
+ * a_list : Pointer to a list.
+ *
+ * a_to_remove : Pointer to a list_item.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Data pointer.
+ *
+ * <<< Description >>>
+ *
  * Given a pointer to an item, remove the item from the list and return the
  * data pointer.
  *
@@ -256,7 +446,17 @@ list_remove_container(cw_list_t * a_list, cw_list_item_t * a_to_remove);
 
 /****************************************************************************
  *
- * Free the space used by the free item list.
+ * <<< Input(s) >>>
+ *
+ * a_list : Pointer to a list.
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
+ * <<< Description >>>
+ *
+ * Free the space used by the internal free item list.
  *
  ****************************************************************************/
 void
@@ -264,8 +464,17 @@ list_purge_spares(cw_list_t * a_list);
 
 /****************************************************************************
  *
- * Print debugging spew.  Note that the 64 bit values don't print correctly 
- * when using long long for 64 bit variables.
+ * <<< Input(s) >>>
+ *
+ * a_list : Pointer to a list.
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
+ * <<< Description >>>
+ *
+ * Print debugging spew to cw_g_log.
  *
  ****************************************************************************/
 void

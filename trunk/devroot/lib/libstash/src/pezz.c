@@ -123,14 +123,6 @@ pezz_delete(cw_pezz_t * a_pezz)
 #ifdef _LIBSTASH_DBG
   if (dbg_is_registered(cw_g_dbg, "pezz_error"))
   {
-    /* See if there are any leaked overflow buffers. */
-    if (0 < a_pezz->num_overflow)
-    {
-      log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		  "%lu leaked overflow buffer%s\n",
-		  a_pezz->num_overflow,
-		  a_pezz->num_overflow != 1 ? "s" : "");
-    }
     /* See if there are any leaked memory block buffers. */
     if (NULL != a_pezz->spare_buffers)
     {
@@ -160,14 +152,6 @@ pezz_delete(cw_pezz_t * a_pezz)
 		  "%lu leaked buffer%s (all of them)\n",
 		  a_pezz->num_buffers,
 		  (a_pezz->num_buffers != 1) ? "s" : "");
-    }
-  }
-  if (dbg_is_registered(cw_g_dbg, "pezz_verbose"))
-  {
-    if (0 < a_pezz->max_overflow)
-    {
-      log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		  "Maximum overflow was %lu\n", a_pezz->max_overflow);
     }
   }
 #endif
@@ -230,16 +214,6 @@ pezz_get(cw_pezz_t * a_pezz)
   {
     /* No buffers available.  malloc() one. */
     retval = _cw_malloc(a_pezz->buffer_size);
-#ifdef _LIBSTASH_DBG
-    if (NULL != retval)
-    {
-      a_pezz->num_overflow++;
-      if (a_pezz->num_overflow > a_pezz->max_overflow)
-      {
-	a_pezz->max_overflow = a_pezz->num_overflow;
-      }
-    }
-#endif
   }
   
 #ifdef _CW_REENTRANT
@@ -280,9 +254,6 @@ pezz_put(void * a_pezz, void * a_buffer)
   else
   {
     /* a_buffer was malloc()ed. */
-#ifdef _LIBSTASH_DBG
-    pezz->num_overflow--;
-#endif
     _cw_free(a_buffer);
   }
 #ifdef _CW_REENTRANT
@@ -340,13 +311,6 @@ pezz_dump(cw_pezz_t * a_pezz, const char * a_prefix)
 	       a_prefix);
   }
 
-#ifdef _LIBSTASH_DBG
-  log_printf(cw_g_log, "%snum_overflow : %lu\n",
-	     a_prefix, a_pezz->num_overflow);
-  log_printf(cw_g_log, "%smax_overflow : %lu\n",
-	     a_prefix, a_pezz->max_overflow);
-#endif
-  
   log_printf(cw_g_log, "%send ============================================\n",
 	     a_prefix);
 

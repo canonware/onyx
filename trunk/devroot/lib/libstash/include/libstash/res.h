@@ -70,15 +70,16 @@ struct cw_res_s
  *
  * <<< Input(s) >>>
  *
- *
+ * a_res : Pointer to space for a res, or NULL.
  *
  * <<< Output(s) >>>
  *
- *
+ * retval : Pointer to a res, or NULL.
+ *          NULL : Memory allocation error.
  *
  * <<< Description >>>
  *
- *
+ * Constructor.
  *
  ****************************************************************************/
 cw_res_t *
@@ -88,24 +89,33 @@ res_new(cw_res_t * a_res);
  *
  * <<< Input(s) >>>
  *
- *
+ * a_res : Pointer to a res.
  *
  * <<< Output(s) >>>
  *
- *
+ * None.
  *
  * <<< Description >>>
  *
- *
+ * Destructor.
  *
  ****************************************************************************/
 void
 res_delete(cw_res_t * a_res);
 
 /****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_res : Pointer to a res.
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
  * <<< Description >>>
  *
- * Clears out all resources.
+ * Clear all resources.
  *
  ****************************************************************************/
 void
@@ -115,68 +125,110 @@ res_clear(cw_res_t * a_res);
  *
  * <<< Input(s) >>>
  *
+ * a_res : Pointer to a res.
  *
+ * a_other : Pointer to a res.
  *
  * <<< Output(s) >>>
  *
- *
+ * retval : FALSE == not equal, TRUE == equal.
  *
  * <<< Description >>>
  *
- *
+ * If a_res and a_other are equivalent, return TRUE, otherwise FALSE.
  *
  ****************************************************************************/
 cw_bool_t
 res_is_equal(cw_res_t * a_res, cw_res_t * a_other);
 
 /****************************************************************************
- * <<< Return Value >>>
  *
- * TRUE == error 
+ * <<< Input(s) >>>
+ *
+ * a_res : Pointer to a res.
+ *
+ * a_filename : Pointer to a string that represents a resource filename.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : FALSE == success, TRUE == error.
  *
  * <<< Description >>>
  *
- * Merges the resources contained in a_filename into the resource database.
+ * Merge the resources contained in a_filename into the resource database.
  *
  ****************************************************************************/
 cw_bool_t
 res_merge_file(cw_res_t * a_res, const char * a_filename);
 
 /****************************************************************************
- * <<< Arguments >>>
+ *
+ * <<< Input(s) >>>
+ *
+ * a_res : Pointer to a res.
  *
  * ... : NULL-terminated list of resource name/value pair strings.
  *
- * <<< Return Value >>>
+ * <<< Output(s) >>>
  *
- * TRUE == error
+ * retval : FALSE == success, TRUE == error.
  *
  * <<< Description >>>
  *
- * Merges the resources into the resource database.
+ * Merge the resources (...) inter the resource database (a_res).
  *
  ****************************************************************************/
 cw_bool_t
 res_merge_list(cw_res_t * a_res, ...);
 
 /****************************************************************************
- * <<< Return Value >>>
  *
- * NULL == error
+ * <<< Input(s) >>>
+ *
+ * a_res : Pointer to a res.
+ *
+ * a_res_name : Pointer to a string that represents a resource name.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Pointer to a string that represents a resource value, or NULL.
+ *          NULL : *a_res_name does not exist.
  *
  * <<< Description >>>
  *
- * Returns the value associated with a_res_name if it exists.
+ * Return the value associoted with a_res_name if it exists.
  *
  ****************************************************************************/
 const char *
 res_get_res_val(cw_res_t * a_res, const char * a_res_name);
 
 /****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_res : Pointer to a res.
+ *
+ * a_res_key : Pointer to a string that represents a resource key.
+ *
+ * r_res_name : Pointer to a pointer to a string that represents a resource key
+ *              that is set by this function.
+ *
+ * r_res_val : Pointer to a pointer to a string that represents a resource value
+ *             that is set by this function.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : FALSE == success, TRUE == error.
+ *          TRUE : *a_res_key not found.
+ *
+ * *r_res_name : Pointer to a string that represents a resource key.
+ *
+ * *r_res_val : Pointer to a string that represents a resource value.
+ *
  * <<< Description >>>
  *
  * Find a resource name/value pair, remove it from the resource database,
- * and set *a_res_name and *a_res_val to point it.  If the resource isn't
+ * and set *r_res_name and *r_res_val to point it.  If the resource isn't
  * found, return TRUE.
  *
  ****************************************************************************/
@@ -185,6 +237,18 @@ res_extract_res(cw_res_t * a_res, char * a_res_key,
 		char ** a_res_name, char ** a_res_val);
 
 /****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_res : Pointer to a res.
+ *
+ * a_filename : Pointer to a string that represents a file to dump to, or NULL.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : FALSE == success, TRUE == error.
+ *          TRUE : Error opening *a_filename.
+ *
  * <<< Description >>>
  *
  * Dump the resource database.  If a_filename is non-NULL, attempt to open

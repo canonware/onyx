@@ -184,7 +184,7 @@ treen_link_child(cw_treen_t * a_treen, cw_treen_t * a_child,
 
 cw_bool_t
 treen_unlink_child(cw_treen_t * a_treen, cw_uint32_t a_position,
-		   cw_treen_t ** a_child)
+		   cw_treen_t ** r_child)
 {
   cw_bool_t retval;
 
@@ -206,7 +206,7 @@ treen_unlink_child(cw_treen_t * a_treen, cw_uint32_t a_position,
 
     retval = FALSE;
     
-    *a_child = a_treen->children[a_position];
+    *r_child = a_treen->children[a_position];
 
     /* Shuffle things backward to fill the gap. */
     for (i = a_position + 1; i < a_treen->num_children; i++)
@@ -244,7 +244,7 @@ treen_unlink_child(cw_treen_t * a_treen, cw_uint32_t a_position,
 
 cw_bool_t
 treen_get_child_ptr(cw_treen_t * a_treen, cw_uint32_t a_position,
-		    cw_treen_t ** a_child)
+		    cw_treen_t ** r_child)
 {
   cw_bool_t retval;
   
@@ -259,7 +259,7 @@ treen_get_child_ptr(cw_treen_t * a_treen, cw_uint32_t a_position,
   if (a_position < a_treen->num_children)
   {
     retval = FALSE;
-    *a_child = a_treen->children[a_position];
+    *r_child = a_treen->children[a_position];
   }
   else
   {

@@ -24,18 +24,27 @@ dbg_new(void)
   cw_dbg_t * retval;
 
   retval = (cw_dbg_t *) _cw_malloc(sizeof(cw_dbg_t));
-  _cw_check_ptr(retval);
+  if (NULL == retval)
+  {
+    goto RETURN;
+  }
 
 #ifdef _CW_REENTRANT
-  oh_new(&retval->flag_hash, TRUE);
+  if (NULL == oh_new(&retval->flag_hash, TRUE))
 #else
-  oh_new(&retval->flag_hash);
+  if (NULL == oh_new(&retval->flag_hash))
 #endif
+  {
+    _cw_free(retval);
+    retval = NULL;
+    goto RETURN;
+  }
 
 #ifdef _LIBSTASH_DBG
   dbg_register(retval, "mem_error");
 #endif
-  
+
+  RETURN:
   return retval;
 }
 
@@ -48,13 +57,22 @@ dbg_delete(cw_dbg_t * a_dbg)
   _cw_free(a_dbg);
 }
 
-void
+cw_bool_t
 dbg_register(cw_dbg_t * a_dbg, const char * a_flag)
 {
-  if (NULL != a_dbg)
+  cw_bool_t retval;
+  
+  if ((NULL != a_dbg)
+      && (-1 != oh_item_insert(&a_dbg->flag_hash, (void *) a_flag, NULL)))
   {
-    oh_item_insert(&a_dbg->flag_hash, (void *) a_flag, NULL);
+    retval = FALSE;
   }
+  else
+  {
+    retval = TRUE;
+  }
+  
+  return retval;
 }
 
 void

@@ -27,12 +27,15 @@
 #include "libstash/mem_l.h"
 
 cw_log_t *
-log_new()
+log_new(void)
 {
   cw_log_t * retval;
 
   retval = (cw_log_t *) _cw_malloc(sizeof(cw_log_t));
-  _cw_check_ptr(retval);
+  if (NULL == retval)
+  {
+    goto RETURN;
+  }
   
 #ifdef _CW_REENTRANT
   mtx_new(&retval->lock);
@@ -40,7 +43,8 @@ log_new()
   retval->is_logfile_open = FALSE;
   retval->logfile_name = NULL;
   retval->log_fp = NULL;
-  
+
+  RETURN:
   return retval;
 }
 
@@ -74,17 +78,35 @@ log_set_logfile(cw_log_t * a_log,
 {
   cw_bool_t retval;
   FILE * temp_fp;
+  char * t_str;
   
   _cw_check_ptr(a_log);
   _cw_check_ptr(a_logfile);
 #ifdef _CW_REENTRANT
   mtx_lock(&a_log->lock);
 #endif
+
+  t_str = (char *) _cw_malloc(strlen(a_logfile) + 1);
+  if (NULL == t_str)
+  {
+    retval = TRUE;
+    goto RETURN;
+  }
   
   if ((a_log->log_fp != NULL) && (a_log->log_fp != stderr))
   {
-    fflush(a_log->log_fp);
-    fclose(a_log->log_fp);
+    if (fflush(a_log->log_fp))
+    {
+      _cw_free(t_str);
+      retval = TRUE;
+      goto RETURN;
+    }
+    if (fclose(a_log->log_fp))
+    {
+      _cw_free(t_str);
+      retval = TRUE;
+      goto RETURN;
+    }
   }
 
   if (a_overwrite == TRUE)
@@ -102,21 +124,24 @@ log_set_logfile(cw_log_t * a_log,
   
   if (temp_fp != NULL)
   {
-    retval = FALSE;
     a_log->log_fp = temp_fp;
     if (a_log->logfile_name != NULL)
     {
       _cw_free(a_log->logfile_name);
     }
-    a_log->logfile_name = (char *) _cw_malloc(strlen(a_logfile) + 1);
-    _cw_check_ptr(a_log->logfile_name);
+    a_log->logfile_name = t_str;
     strcpy(a_log->logfile_name, a_logfile);
   }
   else
   {
+    _cw_free(t_str);
     retval = TRUE;
+    goto RETURN;
   }
 
+  retval = FALSE;
+
+  RETURN:
 #ifdef _CW_REENTRANT
   mtx_unlock(&a_log->lock);
 #endif
@@ -172,7 +197,7 @@ log_eprintf(cw_log_t * a_log,
 	    ...)
 {
   va_list ap;
-  int retval;
+  int retval = 0;
   FILE * fp;
 
   if (a_log == NULL)
@@ -197,20 +222,20 @@ log_eprintf(cw_log_t * a_log,
   
   if (a_filename != NULL)
   {
-    fprintf(fp,
-	    "At %s, line %d: ",
-	    a_filename,
-	    a_line_num);
+    retval += fprintf(fp,
+		      "At %s, line %d: ",
+		      a_filename,
+		      a_line_num);
   }
   if (a_func_name != NULL)
   {
-    fprintf(fp,
-	    "%s(): ",
-	    a_func_name);
+    retval += fprintf(fp,
+		      "%s(): ",
+		      a_func_name);
   }
 
   va_start(ap, a_format);
-  retval = vfprintf(fp, a_format, ap);
+  retval += vfprintf(fp, a_format, ap);
   va_end(ap);
   fflush(fp);
 
@@ -255,7 +280,11 @@ log_nprintf(cw_log_t * a_log,
   }
 
   t_buf = (char *) _cw_malloc(a_size + 1);
-  _cw_check_ptr(t_buf);
+  if (NULL == t_buf)
+  {
+    retval = -1;
+    goto RETURN;
+  }
   
   va_start(ap, a_format);
   vsnprintf(t_buf, (size_t) a_size + 1, a_format, ap);
@@ -266,6 +295,7 @@ log_nprintf(cw_log_t * a_log,
 
   _cw_free(t_buf);
 
+  RETURN:
 #ifdef _CW_REENTRANT
   if (a_log != NULL)
   {
@@ -279,7 +309,7 @@ int
 log_lprintf(cw_log_t * a_log, const char * a_format, ...)
 {
   va_list ap;
-  int retval;
+  int retval = 0;
   FILE * fp;
   char time_str[29];
   time_t curr_time;
@@ -319,9 +349,9 @@ log_lprintf(cw_log_t * a_log, const char * a_format, ...)
 #  error "Unsupported OS"
 #endif
 
-  fprintf(fp, "%s", time_str);
+  retval += fprintf(fp, "%s", time_str);
   va_start(ap, a_format);
-  retval = vfprintf(fp, a_format, ap);
+  retval += vfprintf(fp, a_format, ap);
   va_end(ap);
   fflush(fp);
 
@@ -343,7 +373,7 @@ log_leprintf(cw_log_t * a_log,
 	     ...)
 {
   va_list ap;
-  int retval;
+  int retval = 0;
   FILE * fp;
   char time_str[29];
   time_t curr_time;
@@ -386,22 +416,22 @@ log_leprintf(cw_log_t * a_log,
 
   if (a_filename != NULL)
   {
-    fprintf(fp,
-	    "%sAt %s, line %d: ",
-	    time_str,
-	    a_filename,
-	    a_line_num);
+    retval += fprintf(fp,
+		      "%sAt %s, line %d: ",
+		      time_str,
+		      a_filename,
+		      a_line_num);
   }
   if (a_func_name != NULL)
   {
-    fprintf(fp,
-	    "%s%s(): ",
-	    time_str,
-	    a_func_name);
+    retval += fprintf(fp,
+		      "%s%s(): ",
+		      time_str,
+		      a_func_name);
   }
 
   va_start(ap, a_format);
-  retval = vfprintf(fp, a_format, ap);
+  retval += vfprintf(fp, a_format, ap);
   va_end(ap);
   fflush(fp);
 
@@ -498,9 +528,6 @@ log_print_uint64(cw_uint64_t a_val, cw_uint32_t a_base, char * a_buf)
     }
     a_buf[64] = '\0';
   }
-/*   else if (a_base == 8) */
-/*   { */
-/*   } */
   else
   {
     /* Unsupported base. */

@@ -130,7 +130,7 @@ typedef enum
 /*
  * libstash initialization and shutdown function prototypes.
  */
-void
+cw_bool_t
 libstash_init(void);
   
 void

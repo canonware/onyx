@@ -82,7 +82,6 @@ struct cw_jtl_s
   cw_uint32_t tlock_waiters;
   cw_ring_t * tlock_wait_ring;
   cw_uint32_t tlock_wait_count;
-/*    cw_list_t tlock_wait; */
 
   cw_uint32_t max_dlocks;
   cw_uint32_t dlock_holders;
@@ -115,7 +114,17 @@ struct cw_jtl_tq_el_s
 
 /****************************************************************************
  *
- * rwl constructor.
+ * <<< Input(s) >>>
+ *
+ * a_rwl : Pointer to space for a rwl, or NULL.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Pointer to a rwl.
+ *
+ * <<< Description >>>
+ *
+ * Constructor.
  *
  ****************************************************************************/
 cw_rwl_t *
@@ -123,7 +132,17 @@ rwl_new(cw_rwl_t * a_rwl);
 
 /****************************************************************************
  *
- * rwl destructor.
+ * <<< Input(s) >>>
+ *
+ * a_rwl : Pointer to a rwl.
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
+ * <<< Description >>>
+ *
+ * Destructor.
  *
  ****************************************************************************/
 void
@@ -131,7 +150,17 @@ rwl_delete(cw_rwl_t * a_rwl);
 
 /****************************************************************************
  *
- * Get an r-lock.
+ * <<< Input(s) >>>
+ *
+ * a_rwl : Pointer to a rwl.
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
+ * <<< Description >>>
+ *
+ * Get a r-lock.
  *
  ****************************************************************************/
 void
@@ -139,7 +168,17 @@ rwl_rlock(cw_rwl_t * a_rwl);
 
 /****************************************************************************
  *
- * Release r-lock.
+ * <<< Input(s) >>>
+ *
+ * a_rwl : Pointer to a rwl.
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
+ * <<< Description >>>
+ *
+ * Release a r-lock.
  *
  ****************************************************************************/
 void
@@ -147,7 +186,17 @@ rwl_runlock(cw_rwl_t * a_rwl);
 
 /****************************************************************************
  *
- * Get a w-lock.
+ * <<< Input(s) >>>
+ *
+ * a_rwl : Pointer to a rwl.
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
+ * <<< Description >>>
+ *
+ * Got w-lock.
  *
  ****************************************************************************/
 void
@@ -155,7 +204,17 @@ rwl_wlock(cw_rwl_t * a_rwl);
 
 /****************************************************************************
  *
- * Release w-lock.
+ * <<< Input(s) >>>
+ *
+ * a_rwl : Pointer to a rwl.
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
+ * <<< Description >>>
+ *
+ * Release a w-lock.
  *
  ****************************************************************************/
 void
@@ -163,7 +222,17 @@ rwl_wunlock(cw_rwl_t * a_rwl);
 
 /****************************************************************************
  *
- * jtl constructor.
+ * <<< Input(s) >>>
+ *
+ * a_jtl : Pointer to space for a jtl, or NULL.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Pointer to a jtl.
+ *
+ * <<< Description >>>
+ *
+ * Constructor.
  *
  ****************************************************************************/
 cw_jtl_t *
@@ -171,7 +240,17 @@ jtl_new(cw_jtl_t * a_jtl);
 
 /****************************************************************************
  *
- * jtl destructor.
+ * <<< Input(s) >>>
+ *
+ * a_jtl : Pointer to a jtl.
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
+ * <<< Description >>>
+ *
+ * Destructor.
  *
  ****************************************************************************/
 void
@@ -179,7 +258,17 @@ jtl_delete(cw_jtl_t * a_jtl);
 
 /****************************************************************************
  *
- * Get an s-lock.
+ * <<< Input(s) >>>
+ *
+ * a_jtl : Pointer to a jtl.
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
+ * <<< Description >>>
+ *
+ * Get a s-lock.
  *
  ****************************************************************************/
 void
@@ -187,13 +276,36 @@ jtl_slock(cw_jtl_t * a_jtl);
 
 /****************************************************************************
  *
- * Reserve a place in line for a tlock.
+ * <<< Input(s) >>>
+ *
+ * a_jtl : Pointer to a jtl.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Pointer to a jtl_tq_el (place holder), or NULL.
+ *          NULL : Memory allocation error.
+ *
+ * <<< Description >>>
+ *
+ * Reserve a place in line for a t-lock.
  *
  ****************************************************************************/
 cw_jtl_tq_el_t *
 jtl_get_tq_el(cw_jtl_t * a_jtl);
 
 /****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_jtl : Pointer to a jtl.
+ *
+ * a_tq_el : Pointer to a place holder.
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
+ * <<< Description >>>
  *
  * Get a t-lock, using the place holder returned by jtl_get_tq_el().
  *
@@ -203,13 +315,33 @@ jtl_tlock(cw_jtl_t * a_jtl, cw_jtl_tq_el_t * a_tq_el);
 
 /****************************************************************************
  *
- * Convert an s-lock to an sd-lock..
+ * <<< Input(s) >>>
+ *
+ * a_jtl : Pointer to a jtl.
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
+ * <<< Description >>>
+ *
+ * Convert an s-lock to an sd-lock.
  *
  ****************************************************************************/
 void
 jtl_s2dlock(cw_jtl_t * a_jtl);
 
 /****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_jtl : Pointer to a jtl.
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
+ * <<< Description >>>
  *
  * Get a q-lock.
  *
@@ -219,13 +351,33 @@ jtl_2qlock(cw_jtl_t * a_jtl);
 
 /****************************************************************************
  *
- * Get an r-lock.
+ * <<< Input(s) >>>
+ *
+ * a_jtl : Pointer to a jtl.
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
+ * <<< Description >>>
+ *
+ * Get a r-lock.
  *
  ****************************************************************************/
 void
 jtl_2rlock(cw_jtl_t * a_jtl);
 
 /****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_jtl : Pointer to a jtl.
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
+ * <<< Description >>>
  *
  * Get a w-lock.
  *
@@ -235,7 +387,17 @@ jtl_2wlock(cw_jtl_t * a_jtl);
 
 /****************************************************************************
  *
- * Get an x-lock.
+ * <<< Input(s) >>>
+ *
+ * a_jtl : Pointer to a jtl.
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
+ * <<< Description >>>
+ *
+ * Get a x-lock.
  *
  ****************************************************************************/
 void
@@ -243,7 +405,17 @@ jtl_2xlock(cw_jtl_t * a_jtl);
 
 /****************************************************************************
  *
- * Release s-lock.
+ * <<< Input(s) >>>
+ *
+ * a_jtl : Pointer to a jtl.
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
+ * <<< Description >>>
+ *
+ * Release a s-lock.
  *
  ****************************************************************************/
 void
@@ -251,7 +423,17 @@ jtl_sunlock(cw_jtl_t * a_jtl);
 
 /****************************************************************************
  *
- * Release t-lock.
+ * <<< Input(s) >>>
+ *
+ * a_jtl : Pointer to a jtl.
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
+ * <<< Description >>>
+ *
+ * Release a t-lock.
  *
  ****************************************************************************/
 void
@@ -259,7 +441,17 @@ jtl_tunlock(cw_jtl_t * a_jtl);
 
 /****************************************************************************
  *
- * Release d-lock.
+ * <<< Input(s) >>>
+ *
+ * a_jtl : Pointer to a jtl.
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
+ * <<< Description >>>
+ *
+ * Release a d-lock.
  *
  ****************************************************************************/
 void
@@ -267,7 +459,17 @@ jtl_dunlock(cw_jtl_t * a_jtl);
 
 /****************************************************************************
  *
- * Release q-lock.
+ * <<< Input(s) >>>
+ *
+ * a_jtl : Pointer to a jtl.
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
+ * <<< Description >>>
+ *
+ * Release a q-lock.
  *
  ****************************************************************************/
 void
@@ -275,7 +477,17 @@ jtl_qunlock(cw_jtl_t * a_jtl);
 
 /****************************************************************************
  *
- * Release r-lock.
+ * <<< Input(s) >>>
+ *
+ * a_jtl : Pointer to a jtl.
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
+ * <<< Description >>>
+ *
+ * Release a r-lock.
  *
  ****************************************************************************/
 void
@@ -283,7 +495,17 @@ jtl_runlock(cw_jtl_t * a_jtl);
 
 /****************************************************************************
  *
- * Release w-lock.
+ * <<< Input(s) >>>
+ *
+ * a_jtl : Pointer to a jtl.
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
+ * <<< Description >>>
+ *
+ * Release a w-lock.
  *
  ****************************************************************************/
 void
@@ -291,13 +513,33 @@ jtl_wunlock(cw_jtl_t * a_jtl);
 
 /****************************************************************************
  *
- * Release x-lock.
+ * <<< Input(s) >>>
+ *
+ * a_jtl : Pointer to a jtl.
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
+ * <<< Description >>>
+ *
+ * Release a x-lock.
  *
  ****************************************************************************/
 void
 jtl_xunlock(cw_jtl_t * a_jtl);
 
 /****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_jtl : Pointer to a jtl.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Maximum number of d-locks.
+ *
+ * <<< Description >>>
  *
  * Return the maximum number of d-locks this a_jtl will grant.
  *
@@ -306,6 +548,16 @@ cw_uint32_t
 jtl_get_max_dlocks(cw_jtl_t * a_jtl);
 
 /****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_jtl : Pointer to a jtl.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Previous maximum number of d-locks.
+ *
+ * <<< Description >>>
  *
  * Set the maximum number of d-locks a_jtl will grant to a_dlocks and return
  * the old value.

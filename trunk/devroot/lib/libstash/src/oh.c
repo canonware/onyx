@@ -563,8 +563,8 @@ oh_item_insert(cw_oh_t * a_oh, const void * a_key, const void * a_data)
 cw_bool_t
 oh_item_delete(cw_oh_t * a_oh,
 	       const void * a_search_key,
-	       void ** a_key,
-	       void ** a_data)
+	       void ** r_key,
+	       void ** r_data)
 {
   cw_uint64_t slot;
   cw_bool_t retval;
@@ -588,13 +588,13 @@ oh_item_delete(cw_oh_t * a_oh,
 
     /* Set the return variables, decrement the item count, and delete the
        item. */
-    if (NULL != a_key)
+    if (NULL != r_key)
     {
-      *a_key = (void *) a_oh->items[slot]->key;
+      *r_key = (void *) a_oh->items[slot]->key;
     }
-    if (NULL != a_data)
+    if (NULL != r_data)
     {
-      *a_data = (void *) a_oh->items[slot]->data;
+      *r_data = (void *) a_oh->items[slot]->data;
     }
     _cw_check_ptr(&a_oh->items[slot]->ring_item);
     
@@ -643,7 +643,7 @@ oh_item_delete(cw_oh_t * a_oh,
 cw_bool_t
 oh_item_search(cw_oh_t * a_oh,
 	       const void * a_key,
-	       void ** a_data)
+	       void ** r_data)
 {
   cw_uint64_t slot;
   cw_bool_t retval;
@@ -661,9 +661,9 @@ oh_item_search(cw_oh_t * a_oh,
     /* Item found. */
     retval = FALSE;
 
-    if (NULL != a_data)
+    if (NULL != r_data)
     {
-      *a_data = (void *) a_oh->items[slot]->data;
+      *r_data = (void *) a_oh->items[slot]->data;
     }
   }
   else
@@ -682,12 +682,12 @@ oh_item_search(cw_oh_t * a_oh,
 }
 
 cw_bool_t
-oh_item_get_iterate(cw_oh_t * a_oh, void ** a_key, void ** a_data)
+oh_item_get_iterate(cw_oh_t * a_oh, void ** r_key, void ** r_data)
 {
   cw_bool_t retval;
   
   _cw_check_ptr(a_oh);
-  _cw_check_ptr(a_key);
+  _cw_check_ptr(r_key);
 #ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
@@ -703,10 +703,10 @@ oh_item_get_iterate(cw_oh_t * a_oh, void ** a_key, void ** a_data)
 
     item = (cw_oh_item_t *) ring_get_data(a_oh->items_ring);
 
-    *a_key = (void *) item->key;
-    if (NULL != a_data)
+    *r_key = (void *) item->key;
+    if (NULL != r_data)
     {
-      *a_data = (void *) item->data;
+      *r_data = (void *) item->data;
     }
 
     a_oh->items_ring = ring_next(a_oh->items_ring);
@@ -726,7 +726,7 @@ oh_item_get_iterate(cw_oh_t * a_oh, void ** a_key, void ** a_data)
 }
 
 cw_bool_t
-oh_item_delete_iterate(cw_oh_t * a_oh, void ** a_key, void ** a_data)
+oh_item_delete_iterate(cw_oh_t * a_oh, void ** r_key, void ** r_data)
 {
   cw_bool_t retval;
   
@@ -751,11 +751,11 @@ oh_item_delete_iterate(cw_oh_t * a_oh, void ** a_key, void ** a_data)
 
     item = (cw_oh_item_t *) ring_get_data(t_ring);
 
-    *a_key = (void *) item->key;
+    *r_key = (void *) item->key;
 
-    if (NULL != a_data)
+    if (NULL != r_data)
     {
-      *a_data = (void *) item->data;
+      *r_data = (void *) item->data;
     }
 
     /* Do slot shuffling. */

@@ -21,9 +21,11 @@ cw_mem_t * cw_g_mem = NULL;
 cw_dbg_t * cw_g_dbg = NULL;
 cw_log_t * cw_g_log = NULL;
 
-void
+cw_bool_t
 libstash_init(void)
 {
+  cw_bool_t retval;
+  
   /* Start up global modules. */
   if (cw_g_log == NULL)
   {
@@ -37,6 +39,18 @@ libstash_init(void)
   {
     cw_g_mem = mem_new();
   }
+
+  if ((NULL == cw_g_log)
+      || (NULL == cw_g_dbg)
+      || (NULL == cw_g_mem))
+  {
+    retval = TRUE;
+  }
+  else
+  {
+    retval = FALSE;
+  }
+  return retval;
 }
 
 void

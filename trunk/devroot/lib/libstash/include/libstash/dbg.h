@@ -24,33 +24,76 @@ struct cw_dbg_s
 };
 
 /****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * None.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Pointer to a dbg, or NULL.
+ *          NULL : Memory allocation error.
+ *
  * <<< Description >>>
  *
- * dbg constructor.
+ * Constructor.
  *
  ****************************************************************************/
 cw_dbg_t *
 dbg_new(void);
 
 /****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_dbg : Pointer to a dbg.
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
  * <<< Description >>>
  *
- * dbg destructor.
+ * Destructor.
  *
  ****************************************************************************/
 void
 dbg_delete(cw_dbg_t * a_dbg);
 
 /****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_dbg : Pointer to a dbg.
+ *
+ * a_flag : Pointer to a string that represents a debugging flag.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : FALSE == success, TRUE == error.
+ *          TRUE : Memory allocation error.
+ *               : a_dbg is NULL.
+ *
  * <<< Description >>>
  *
  * Register a debug flag string (turn it on).
  *
  ****************************************************************************/
-void
+cw_bool_t
 dbg_register(cw_dbg_t * a_dbg, const char * a_flag);
 
 /****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_dbg : Pointer to a dbg.
+ *
+ * a_flag : Pointer to a string that represents a debugging flag.
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
  * <<< Description >>>
  *
  * Unregister a flag (turn it off) if it is registered.
@@ -60,9 +103,20 @@ void
 dbg_unregister(cw_dbg_t * a_dbg, const char * a_flag);
 
 /****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_dbg : Pointer to a dbg.
+ *
+ * a_flag : Pointer to a string that represents a debugging flag.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : FALSE == not registered, TRUE == registered.
+ *
  * <<< Description >>>
  *
- * Return TRUE if a_flag is registered.
+ * Return TRUE if a_flag is registered, FALSE, otherwise.
  *
  ****************************************************************************/
 cw_bool_t

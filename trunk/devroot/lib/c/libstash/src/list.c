@@ -20,7 +20,7 @@
 #include "libstash/list_p.h"
 
 cw_list_item_t *
-list_item_new()
+list_item_new(void)
 {
   cw_list_item_t * retval;
 
