@@ -63,6 +63,30 @@
 
     This workaround has the side effect of changing the process ID.
 
+  + OS X's linker was changed for OS X 10.3.  Onyx's build system specifies
+    flags like the following in multiple places:
+
+	-undefined suppress -flat_namespace -bundle -all_load -bind_at_load
+
+    and:
+
+	-undefined suppress -flat_namespace -dynamiclib -bind_at_load
+
+    This may need to be changed to something like the following for OS X 10.3:
+
+	-undefined dynamic_lookup -bundle -all_load -bind_at_load
+
+    and:
+
+	-undefined dynamic_lookup -dynamiclib -bind_at_load
+
+    This has not been tested by the author.  Whatever you do, do not remove the
+    -bind_at_load flag, since its absence will cause mysterious deadlocks in
+    dyld.  This is because all symbols that can be accessed via a signal handler
+    must be bound before the signal handler is invoked.  There are other ways of
+    causing all such symbols to be bound, but it would be a complex and
+    error-prone process to make these changes.
+
 * NetBSD 1.6.
 
   + POSIX threading does not work due to NetBSD's lack of pthreads.  However,
