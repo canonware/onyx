@@ -131,6 +131,8 @@ while ($opt_root =~ /\/$/)
     chop $opt_root;
 }
 
+$pkgname_base = $opt_pkgname;
+
 if (defined($opt_tag))
 {
     $opt_pkgname = $opt_pkgname . "-" . $opt_tag;
@@ -275,6 +277,17 @@ if ($opt_verbose)
 unless ($opt_noact)
 {
     `tar cvzf $opt_pkgname.tar.gz $opt_pkgname`;
+}
+
+if ($opt_verbose)
+{
+    print STDERR "ln -sf $opt_pkgname $pkgname_base\-latest\n";
+    print STDERR "ln -sf $opt_pkgname.tar.gz $pkgname_base\-latest.tar.gz\n";
+}
+unless ($opt_noact)
+{
+    `ln -sf $opt_pkgname $pkgname_base\-latest`;
+    `ln -sf $opt_pkgname.tar.gz $pkgname_base\-latest.tar.gz`;
 }
 
 # End of main execution.
