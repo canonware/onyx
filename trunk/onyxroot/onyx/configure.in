@@ -5,7 +5,7 @@ dnl
 dnl Version: <Version>
 dnl
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(Howto.cook.in)
+AC_INIT(Cookfile.in)
 
 objdir=.
 AC_SUBST(objdir)
@@ -177,7 +177,7 @@ AC_MSG_RESULT(==================================================================
 
 dnl Process the following files.
 
-AC_OUTPUT(Howto.cook \
+AC_OUTPUT(Cookfile \
 test/verify \
 lib/c/libficl/softwords/softcore.pl \
 )

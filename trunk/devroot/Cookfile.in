@@ -326,7 +326,7 @@ clean :
 
   /*
    * Delete .cook.fp files from the source tree and object tree.
-   * Delete Howto.list files from the object tree. 
+   * Delete Cookfile.list files from the object tree. 
    */
   [SHELL] -e;
 data
@@ -340,7 +340,7 @@ for i in `find [objdir] -type f -name .cook.fp` ; do
 	echo rm $i;
 	rm $i;
 done
-for i in `find [objdir] -type f -name Howto.list` ; do
+for i in `find [objdir] -type f -name Cookfile.list` ; do
 	echo rm $i;
 	rm $i;
 done
@@ -397,7 +397,7 @@ distclean : clean
           libstash_distclean
 #endif
 {
-  rm -f [objdir]/Howto.cook;
+  rm -f [objdir]/Cookfile;
   rm -f [objdir]/config.cache;
   rm -f [objdir]/config.log;
   rm -f [objdir]/config.status;
@@ -487,54 +487,54 @@ dataend
  * link line (-lstil -lficl -ledit -lsock -lstash).
  */
 #if @lib_stil@
-#  include [srcdir]/lib/c/libstil/Howto.cook.inc
+#  include [srcdir]/lib/c/libstil/Cookfile.inc
 #endif
 #if @lib_ficl@
-#  include [srcdir]/lib/c/libficl/Howto.cook.inc
+#  include [srcdir]/lib/c/libficl/Cookfile.inc
 #endif
 #if @lib_edit@
-#  include [srcdir]/lib/c/libedit/Howto.cook.inc
+#  include [srcdir]/lib/c/libedit/Cookfile.inc
 #endif
 #if @lib_sock@
-#  include [srcdir]/lib/c/libsock/Howto.cook.inc
+#  include [srcdir]/lib/c/libsock/Cookfile.inc
 #endif
 #if @lib_stash@
-#  include [srcdir]/lib/c/libstash/Howto.cook.inc
+#  include [srcdir]/lib/c/libstash/Cookfile.inc
 #endif
 
 /*
  * Programs.
  */
 #if @bin_blow@
-#  include [srcdir]/bin/blow/Howto.cook.inc
+#  include [srcdir]/bin/blow/Cookfile.inc
 #endif
 #if @bin_cover@
-#  include [srcdir]/bin/cover/Howto.cook.inc
+#  include [srcdir]/bin/cover/Cookfile.inc
 #endif
 #if @bin_edittest@
-#  include [srcdir]/bin/edittest/Howto.cook.inc
+#  include [srcdir]/bin/edittest/Cookfile.inc
 #endif
 #if @bin_echos@
-#  include [srcdir]/bin/echos/Howto.cook.inc
+#  include [srcdir]/bin/echos/Cookfile.inc
 #endif
 #if @bin_ficl@
-#  include [srcdir]/bin/ficl/Howto.cook.inc
+#  include [srcdir]/bin/ficl/Cookfile.inc
 #endif
 #if @bin_ncat@
-#  include [srcdir]/bin/ncat/Howto.cook.inc
+#  include [srcdir]/bin/ncat/Cookfile.inc
 #endif
 #if @bin_proxy@
-#  include [srcdir]/bin/proxy/Howto.cook.inc
+#  include [srcdir]/bin/proxy/Cookfile.inc
 #endif
 #if @bin_stil@
-#  include [srcdir]/bin/stil/Howto.cook.inc
+#  include [srcdir]/bin/stil/Cookfile.inc
 #endif
 #if @bin_stile@
-#  include [srcdir]/bin/stile/Howto.cook.inc
+#  include [srcdir]/bin/stile/Cookfile.inc
 #endif
 #if @bin_suck@
-#  include [srcdir]/bin/suck/Howto.cook.inc
+#  include [srcdir]/bin/suck/Cookfile.inc
 #endif
 #if @bin_xvx@
-#  include [srcdir]/bin/xvx/Howto.cook.inc
+#  include [srcdir]/bin/xvx/Cookfile.inc
 #endif
