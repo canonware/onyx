@@ -1,3 +1,13 @@
+1999-02-03  Jason Evans  <jasone@canonware.com>
+
+	* src/buf.c (buf_rm_tail_bufel): Add.
+
+1999-02-02  Jason Evans  <jasone@canonware.com>
+
+	* test/c_buf_a.c: Add test for bufel_append_bufel().
+
+	* src/buf.c (bufel_append_bufel): Add.
+
 1999-01-13  Jason Evans  <jasone@canonware.com>
 
 	* include/libstash/log.h: Use __FUNCTION__ in macros.

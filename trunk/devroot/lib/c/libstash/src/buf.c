@@ -195,6 +195,39 @@ buf_rm_head_bufel(cw_buf_t * a_buf)
   return retval;
 }
 
+cw_bufel_t *
+buf_rm_tail_bufel(cw_buf_t * a_buf)
+{
+  cw_bufel_t * retval;
+
+  _cw_check_ptr(a_buf);
+#ifdef _CW_REENTRANT
+  if (a_buf->is_threadsafe == TRUE)
+  {
+    mtx_lock(&a_buf->lock);
+  }
+#endif
+
+  if (a_buf->size > 0) /* Make sure there is valid data. */
+  {
+    retval = (cw_bufel_t *) list_tpop(&a_buf->bufels);
+    a_buf->size -= bufel_get_valid_data_size(retval);
+    _cw_assert((cw_sint32_t) a_buf->size >= 0);
+  }
+  else
+  {
+    retval = NULL;
+  }
+  
+#ifdef _CW_REENTRANT
+  if (a_buf->is_threadsafe == TRUE)
+  {
+    mtx_unlock(&a_buf->lock);
+  }
+#endif
+  return retval;
+}
+
 void
 buf_prepend_bufel(cw_buf_t * a_buf, cw_bufel_t * a_bufel)
 {
@@ -434,6 +467,39 @@ bufel_set_data_ptr(cw_bufel_t * a_bufel, void * a_buf, cw_uint32_t a_size)
   a_bufel->buf_size = a_size;
   a_bufel->beg_offset = 0;
   a_bufel->end_offset = a_size;
+}
+
+void
+bufel_append_bufel(cw_bufel_t * a_bufel, cw_bufel_t * a_other_bufel)
+{
+  _cw_check_ptr(a_bufel);
+  _cw_check_ptr(a_other_bufel);
+
+  if (a_bufel->end_offset + bufel_get_valid_data_size(a_other_bufel)
+      > a_bufel->buf_size)
+  {
+    /* Need more space. */
+    a_bufel->buf
+      = (cw_uint32_t *) _cw_realloc(a_bufel->buf,
+				    a_bufel->buf_size
+				    + bufel_get_valid_data_size(a_other_bufel));
+
+    memcpy(((cw_uint8_t *) a_bufel->buf) + a_bufel->end_offset,
+	   ((cw_uint8_t *) a_other_bufel->buf) + a_other_bufel->beg_offset,
+	   bufel_get_valid_data_size(a_other_bufel));
+
+    a_bufel->buf_size += bufel_get_valid_data_size(a_other_bufel);
+    a_bufel->end_offset += bufel_get_valid_data_size(a_other_bufel);
+  }
+  else
+  {
+    memcpy(((cw_uint8_t *) a_bufel->buf) + a_bufel->end_offset,
+	   ((cw_uint8_t *) a_other_bufel->buf) + a_other_bufel->beg_offset,
+	   bufel_get_valid_data_size(a_other_bufel));
+    
+    a_bufel->end_offset += bufel_get_valid_data_size(a_other_bufel);
+  }
+  
 }
 
 cw_uint8_t

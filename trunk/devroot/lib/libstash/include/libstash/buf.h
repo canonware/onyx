@@ -102,6 +102,15 @@ buf_rm_head_bufel(cw_buf_t * a_buf);
 
 /****************************************************************************
  *
+ * Removes the last bufel from a_buf and returns a pointer to it.
+ *
+ ****************************************************************************/
+#define buf_rm_tail_bufel _CW_NS_STASH(buf_rm_tail_bufel)
+cw_bufel_t *
+buf_rm_tail_bufel(cw_buf_t * a_buf);
+
+/****************************************************************************
+ *
  * Prepends a bufel to a_buf.
  *
  ****************************************************************************/
@@ -227,6 +236,28 @@ bufel_get_data_ptr(cw_bufel_t * a_bufel);
 #define bufel_set_data_ptr _CW_NS_STASH(bufel_set_data_ptr)
 void
 bufel_set_data_ptr(cw_bufel_t * a_bufel, void * a_buf, cw_uint32_t a_size);
+
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_bufel : Pointer to a bufel instance.
+ *
+ * a_other_bufel : Pointer to a bufel instance.
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
+ * <<< Description >>>
+ *
+ * Append a_other_bufel to a_bufel, and realloc if necessary.  a_other_bufel is
+ * not modified by this function.
+ *
+ ****************************************************************************/
+#define bufel_append_bufel _CW_NS_STASH(bufel_append_bufel)
+void
+bufel_append_bufel(cw_bufel_t * a_bufel, cw_bufel_t * a_other_bufel);
 
 /****************************************************************************
  *

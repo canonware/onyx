@@ -138,6 +138,62 @@ main()
     bufel_delete(bufel_p);
   }
 
+  /* bufel_append_bufel(). */
+  {
+    cw_bufel_t * bufel_a, * bufel_b;
+    char * str_a;
+    char * str_b;
+    char str_cat[128] = "This is string A" "This is string B";
+    cw_uint32_t bufel_a_beg_offset, bufel_a_size, bufel_a_valid_size;
+    cw_uint32_t bufel_b_size, bufel_b_valid_size;
+
+    str_a = (char *) _cw_malloc(128);
+    str_b = (char *) _cw_malloc(128);
+
+    strcpy(str_a, "This is string A");
+    strcpy(str_b, "This is string B");
+    
+    bufel_a = bufel_new(NULL);
+    bufel_b = bufel_new(NULL);
+
+    _cw_assert(FALSE == bufel_set_size(bufel_a, 128));
+    _cw_assert(FALSE == bufel_set_size(bufel_b, 128));
+
+    bufel_set_data_ptr(bufel_a, (void *) str_a, 128);
+    _cw_assert(FALSE == bufel_set_end_offset(bufel_a, strlen(str_a)));
+    
+    bufel_set_data_ptr(bufel_b, (void *) str_b, 128);
+    _cw_assert(FALSE == bufel_set_end_offset(bufel_b, strlen(str_b) + 1));
+
+    bufel_a_beg_offset = bufel_get_beg_offset(bufel_a);
+    bufel_a_size = bufel_get_size(bufel_a);
+    bufel_a_valid_size = bufel_get_valid_data_size(bufel_a);
+    bufel_b_size = bufel_get_size(bufel_b);
+    bufel_b_valid_size = bufel_get_valid_data_size(bufel_b);
+
+    bufel_append_bufel(bufel_a, bufel_b);
+
+    _cw_assert(0 == strcmp(str_cat, bufel_get_data_ptr(bufel_a)));
+
+    if (bufel_a_beg_offset + bufel_a_valid_size + bufel_b_valid_size
+	> bufel_a_size)
+    {
+      _cw_assert(bufel_get_size(bufel_a) == bufel_a_size + bufel_b_valid_size);
+    }
+    else
+    {
+      _cw_assert(bufel_get_size(bufel_a) == bufel_a_size);
+    }
+    
+    _cw_assert(bufel_get_valid_data_size(bufel_a)
+	       == bufel_a_valid_size + bufel_b_valid_size);
+    _cw_assert(bufel_get_size(bufel_b) == bufel_b_size);
+    _cw_assert(bufel_get_valid_data_size(bufel_b) == bufel_b_valid_size);
+
+    bufel_delete(bufel_a);
+    bufel_delete(bufel_b);
+  }
+  
   /* bufel_get_uint8(), bufel_set_uint8(),
    * bufel_get_uint32(), bufel_set_uint32(). */
   {
@@ -212,7 +268,8 @@ main()
   }
 
   
-  /* buf_rm_head_bufel(), buf_prepend_bufel(), buf_append_bufel(),
+  /* buf_rm_head_bufel(), buf_rm_tail_bufel(),
+     buf_prepend_bufel(), buf_append_bufel(),
      buf_get_size(). */
   {
     cw_buf_t * buf_p;
@@ -256,13 +313,13 @@ main()
     _cw_assert(2 == buf_get_size(buf_p));
     buf_prepend_bufel(buf_p, bufel_p_c);
     _cw_assert(3 == buf_get_size(buf_p));
-    _cw_assert(bufel_p_c == buf_rm_head_bufel(buf_p));
+    _cw_assert(bufel_p_a == buf_rm_tail_bufel(buf_p));
     _cw_assert(2 == buf_get_size(buf_p));
-    _cw_assert(bufel_p_b == buf_rm_head_bufel(buf_p));
+    _cw_assert(bufel_p_b == buf_rm_tail_bufel(buf_p));
     _cw_assert(1 == buf_get_size(buf_p));
-    _cw_assert(bufel_p_a == buf_rm_head_bufel(buf_p));
+    _cw_assert(bufel_p_c == buf_rm_tail_bufel(buf_p));
     _cw_assert(0 == buf_get_size(buf_p));
-    _cw_assert(NULL == buf_rm_head_bufel(buf_p));
+    _cw_assert(NULL == buf_rm_tail_bufel(buf_p));
 
     bufel_delete(bufel_p_a);
     bufel_delete(bufel_p_b);
@@ -317,11 +374,11 @@ main()
     buf_prepend_buf(buf_p_a, buf_p_b);
     _cw_assert(3 == buf_get_size(buf_p_a));
     _cw_assert(0 == buf_get_size(buf_p_b));
-    _cw_assert(bufel_p_c == buf_rm_head_bufel(buf_p_a));
+    _cw_assert(bufel_p_b == buf_rm_tail_bufel(buf_p_a));
     _cw_assert(2 == buf_get_size(buf_p_a));
-    _cw_assert(bufel_p_a == buf_rm_head_bufel(buf_p_a));
+    _cw_assert(bufel_p_a == buf_rm_tail_bufel(buf_p_a));
     _cw_assert(1 == buf_get_size(buf_p_a));
-    _cw_assert(bufel_p_b == buf_rm_head_bufel(buf_p_a));
+    _cw_assert(bufel_p_c == buf_rm_tail_bufel(buf_p_a));
     _cw_assert(0 == buf_get_size(buf_p_a));
 
     bufel_delete(bufel_p_a);
