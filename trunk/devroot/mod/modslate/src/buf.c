@@ -242,6 +242,9 @@
  ******************************************************************************/
 
 #include "../include/modslate.h"
+#ifndef HAVE_ASPRINTF
+#include "../../../lib/libonyx/src/asprintf.c"
+#endif
 
 #ifdef CW_BUF_DUMP
 #include <ctype.h>
@@ -462,12 +465,13 @@ bufp_p_comp(cw_bufp_t *a_a, cw_bufp_t *a_b)
     return retval;
 }
 
-/* Adjust ppos field of a range of mkr's. */
+/* Adjust ppos field of a range of mkr's, starting at a_beg_ppos (inclusive),
+ * and ending at a_end_ppos (exclusive). */
 static void
 bufp_p_mkrs_ppos_adjust(cw_bufp_t *a_bufp, cw_sint32_t a_adjust,
 			cw_uint32_t a_beg_ppos, cw_uint32_t a_end_ppos)
 {
-    cw_mkr_t *mkr, key;
+    cw_mkr_t *mkr, *prev, key;
 
     cw_check_ptr(a_bufp);
     cw_assert(a_beg_ppos < a_end_ppos);
@@ -480,16 +484,32 @@ bufp_p_mkrs_ppos_adjust(cw_bufp_t *a_bufp, cw_sint32_t a_adjust,
 #endif
 
     rb_nsearch(&a_bufp->mtree, &key, mkr_p_comp, cw_mkr_t, mnode, mkr);
-
-    for (;
-	 mkr != NULL && mkr->ppos < a_end_ppos;
-	 mkr = ql_next(&a_bufp->mlist, mkr, mlink))
+    if (mkr != rb_tree_nil(&a_bufp->mtree))
     {
-	mkr->ppos += a_adjust;
+	/* Get prev before iterating forward, in preparation for backward
+	 * iteration. */
+	prev = ql_prev(&a_bufp->mlist, mkr, mlink);
+
+	/* Iterate forward. */
+	for (;
+	     mkr != NULL && mkr->ppos < a_end_ppos;
+	     mkr = ql_next(&a_bufp->mlist, mkr, mlink))
+	{
+	    mkr->ppos += a_adjust;
+	}
+
+	/* Iterate backward. */
+	for (mkr = prev;
+	     mkr != NULL && mkr->ppos == a_beg_ppos;
+	     mkr = ql_prev(&a_bufp->mlist, mkr, mlink))
+	{
+	    mkr->ppos += a_adjust;
+	}
     }
 }
 
-/* Adjust ppos field of a range of mkr's. */
+/* Adjust pline field of a range of mkr's, starting at a_beg_pline (inclusive),
+ * and ending at a_end_pline (exclusive). */
 /* XXX It may be that every case in which this is needed can be done without
  * doing an rb-tree search.  If so, remove this function or perhaps
  * conditionally start at the beginning/end of the bufp. */
@@ -497,7 +517,7 @@ static void
 bufp_p_mkrs_pline_adjust(cw_bufp_t *a_bufp, cw_sint32_t a_adjust,
 			cw_uint32_t a_beg_pline, cw_uint32_t a_end_pline)
 {
-    cw_mkr_t *mkr, key;
+    cw_mkr_t *mkr, *prev, key;
 
     cw_check_ptr(a_bufp);
     cw_assert(a_beg_pline <= a_end_pline);
@@ -509,12 +529,27 @@ bufp_p_mkrs_pline_adjust(cw_bufp_t *a_bufp, cw_sint32_t a_adjust,
 #endif
 
     rb_nsearch(&a_bufp->mtree, &key, mkr_p_line_comp, cw_mkr_t, mnode, mkr);
-
-    for (;
-	 mkr != NULL && mkr->pline < a_end_pline;
-	 mkr = ql_next(&a_bufp->mlist, mkr, mlink))
+    if (mkr != rb_tree_nil(&a_bufp->mtree))
     {
-	mkr->pline += a_adjust;
+	/* Get prev before iterating forward, in preparation for backward
+	 * iteration. */
+	prev = ql_prev(&a_bufp->mlist, mkr, mlink);
+
+	/* Iterate forward. */
+	for (;
+	     mkr != NULL && mkr->pline < a_end_pline;
+	     mkr = ql_next(&a_bufp->mlist, mkr, mlink))
+	{
+	    mkr->pline += a_adjust;
+	}
+
+	/* Iterate backward. */
+	for (mkr = prev;
+	     mkr != NULL && mkr->ppos == a_beg_pline;
+	     mkr = ql_prev(&a_bufp->mlist, mkr, mlink))
+	{
+	    mkr->ppos += a_adjust;
+	}
     }
 }
 
