@@ -25,6 +25,9 @@ transfig, latex2html, and perl.  However, the source distribution should come
 with the documentation already built, so you should not need to do so unless
 making documentation modifications.
 
+Optional: Regenerating the configure script requires GNU autoconf and GNU
+automake.
+
 Building this distribution in many cases is as simple as typing the following
 while in the root directory of the source tree:
 
