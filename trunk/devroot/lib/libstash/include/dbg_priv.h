@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 51 $
- * $Date: 1998-04-30 02:37:04 -0700 (Thu, 30 Apr 1998) $
+ * $Revision: 56 $
+ * $Date: 1998-05-01 03:14:47 -0700 (Fri, 01 May 1998) $
  *
  * <<< Description >>>
  *
@@ -47,40 +47,24 @@
 #  error "Must include dbg.h first."
 #endif
 
-/*
- * Row definitions for debug flag table.  Each row consists of 0 or more
- * "on" columns.  Each define is terminated by a -1.
- */
-
-#define _CW_DBG_T_FUNC_ENTRY _CW_DBG_FUNC_ENTRY, -1
-#define _CW_DBG_T_FUNC_EXIT _CW_DBG_FUNC_EXIT, -1
-#define _CW_DBG_T_MISC _CW_DBG_MISC, -1
-#define _CW_DBG_T_FUNC _CW_DBG_FUNC_ENTRY, _CW_DBG_FUNC_EXIT, -1
-#define _CW_DBG_T_RES_STATE _CW_DBG_RES_STATE, -1
-/* <ADD> */
-
-#define _CW_DBG_T_MAX 4 /* Highest numbered row in table. */
-#define _CW_DBG_C_MAX 4 /* Highest numbered column in table. */
-/* <ADD> */
-
 /* These are globals so that we don't have to have multiple copies of them,
  * even if there are multiple dbg instances.  We mangle the names to keep
  * them from interfering with other code. */
 #define dbg_raw_tbl _CW_NS_CMN(dbg_raw_tbl)
 #define dbg_raw_on _CW_NS_CMN(dbg_raw_on)
 
-/*
- * Array used to construct the debug table.  Make sure to add *_T_* here.
+/* Array used to construct the debug table.  Make sure to add *_T_* here.
  * Order *IS* important.  These should be in the same order as the
- * externally visible macros for which they are named.
- */
+ * externally visible *_R_* macros for which they are named.  Also, make
+ * sure that all entries are terminated by a -1.  The extra -1 at the end
+ * is also important. */
 cw_sint32_t dbg_raw_tbl[] =
 {
-  _CW_DBG_T_FUNC_ENTRY,
-  _CW_DBG_T_FUNC_EXIT,
-  _CW_DBG_T_MISC,
-  _CW_DBG_T_FUNC,
-  _CW_DBG_T_RES_STATE,
+  _CW_DBG_C_FUNC, -1, /* _CW_DBG_R_FUNC */
+  _CW_DBG_C_OH_FUNC, _CW_DBG_C_FUNC, -1, /* _CW_DBG_R_OH_FUNC */
+  _CW_DBG_C_OH_SLOT, -1, /* _CW_DBG_R_OH_SLOT */
+  _CW_DBG_C_RES_FUNC, _CW_DBG_C_FUNC, -1, /* _CW_DBG_R_RES_FUNC */
+  _CW_DBG_C_RES_STATE, -1, /* _CW_DBG_R_RES_STATE */
   /* <ADD> */
   -1
 };
@@ -90,18 +74,19 @@ cw_sint32_t dbg_raw_tbl[] =
  */
 cw_sint32_t dbg_raw_on[] =
 {
-/*   _CW_DBG_FUNC, */
+/*   _CW_DBG_C_FUNC, */
   /* <ADD> */
   -1
 };
 
 struct cw_dbg_s
 {
+  cw_rwl_t rw_lock;
   cw_bool_t is_current;
   cw_bool_t curr_settings[_CW_DBG_C_MAX + 1];
-  cw_bool_t fmatch[_CW_DBG_T_MAX + 1];
-  cw_bool_t pmatch[_CW_DBG_T_MAX + 1];
-  cw_bool_t tbl[_CW_DBG_C_MAX + 1][_CW_DBG_T_MAX + 1];
+  cw_bool_t fmatch[_CW_DBG_R_MAX + 1];
+  cw_bool_t pmatch[_CW_DBG_R_MAX + 1];
+  cw_bool_t tbl[_CW_DBG_C_MAX + 1][_CW_DBG_R_MAX + 1];
 };
 
 #define dbg_build_tbl _CW_NS_CMN(dbg_build_tbl)

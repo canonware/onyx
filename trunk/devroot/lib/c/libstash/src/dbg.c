@@ -29,12 +29,44 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 51 $
- * $Date: 1998-04-30 02:37:04 -0700 (Thu, 30 Apr 1998) $
+ * $Revision: 56 $
+ * $Date: 1998-05-01 03:14:47 -0700 (Fri, 01 May 1998) $
  *
  * <<< Description >>>
  *
+ * Dynamic debug spew class.  The idea is to be able to turn various types
+ * of debug spew on and off on the fly, without recompilation, without even
+ * restarting the program.
  *
+ * dbg works by building a table as such:
+ *
+ *           | 0 | 1 | 2 | 3 | 4 | . |   |   |   |   |   | x |
+ * ----------+---+---+---+---+---+ . +---+---+---+---+---+---+
+ * Row 0     |   |   |   |   |   | . |   |   |   |   |   |   |
+ * ----------+---+---+---+---+---+ . +---+---+---+---+---+---+
+ * Row 1     |   |   |   |   |   | . |   |   |   |   |   |   |
+ * ----------+---+---+---+---+---+ . +---+---+---+---+---+---+
+ * ...........................................................
+ * ----------+---+---+---+---+---+ . +---+---+---+---+---+---+
+ * Row y -1  |   |   |   |   |   | . |   |   |   |   |   |   |
+ * ----------+---+---+---+---+---+ . +---+---+---+---+---+---+
+ * Row y     |   |   |   |   |   | . |   |   |   |   |   |   |
+ * ----------+---+---+---+---+---+ . +---+---+---+---+---+---+
+ *
+ * The set of columns turned on looks like:
+ *
+ * ----------+---+---+---+---+---+ . +---+---+---+---+---+---+
+ * Turned on |   |   |   |   |   | . |   |   |   |   |   |   |
+ * ----------+---+---+---+---+---+ . +---+---+---+---+---+---+
+ *
+ * The functions dbg_turn_on() and dbg_turn_off() affect the settings in
+ * the turned on columns set.
+ *
+ * The function dbg_fmatch() returns true if the row in question is a
+ * subset of the turned on columns.
+ *
+ * The function dbg_pmatch() returns true if the intersection of the turned
+ * on columns and the row in question exists.
  *
  ****************************************************************************/
 
@@ -43,21 +75,9 @@
 #include <dbg_priv.h>
 
 /****************************************************************************
- * <<< Function >>>
- *
- *
- *
- * <<< Arguments >>>
- *
- *
- *
- * <<< Return Value >>>
- *
- *
- *
  * <<< Description >>>
  *
- *
+ * dbg constructor.
  *
  ****************************************************************************/
 cw_dbg_t *
@@ -70,6 +90,7 @@ dbg_new()
   /* Zero out the entire structure. */
   bzero(retval, sizeof(cw_dbg_t));
 
+  rwl_new(&retval->rw_lock);
   dbg_build_tbl(retval);
   dbg_recalc_fpmatch(retval);
 
@@ -77,21 +98,9 @@ dbg_new()
 }
 
 /****************************************************************************
- * <<< Function >>>
- *
- *
- *
- * <<< Arguments >>>
- *
- *
- *
- * <<< Return Value >>>
- *
- *
- *
  * <<< Description >>>
  *
- *
+ * dbg destructor.
  *
  ****************************************************************************/
 void
@@ -99,25 +108,15 @@ dbg_delete(cw_dbg_t * a_dbg_o)
 {
   _cw_check_ptr(a_dbg_o);
 
+  rwl_delete(&a_dbg_o->rw_lock);
+
   _cw_free(a_dbg_o);
 }
 
 /****************************************************************************
- * <<< Function >>>
- *
- *
- *
- * <<< Arguments >>>
- *
- *
- *
- * <<< Return Value >>>
- *
- *
- *
  * <<< Description >>>
  *
- *
+ * See if row a_flag is a subset of curr_settings.
  *
  ****************************************************************************/
 cw_bool_t
@@ -126,12 +125,13 @@ dbg_fmatch(cw_dbg_t * a_dbg_o, cw_uint32_t a_flag)
   cw_bool_t retval;
   
   _cw_check_ptr(a_dbg_o);
-
+  rwl_rlock(&a_dbg_o->rw_lock);
+  
   if (a_dbg_o->is_current == FALSE)
   {
     dbg_recalc_fpmatch(a_dbg_o);
   }
-  if (a_flag <= _CW_DBG_T_MAX)
+  if (a_flag <= _CW_DBG_R_MAX)
   {
     retval = a_dbg_o->fmatch[a_flag];
   }
@@ -140,25 +140,14 @@ dbg_fmatch(cw_dbg_t * a_dbg_o, cw_uint32_t a_flag)
     retval = FALSE;
   }
   
+  rwl_runlock(&a_dbg_o->rw_lock);
   return retval;
 }
 
 /****************************************************************************
- * <<< Function >>>
- *
- *
- *
- * <<< Arguments >>>
- *
- *
- *
- * <<< Return Value >>>
- *
- *
- *
  * <<< Description >>>
  *
- *
+ * See if the intersection of row a_flag and curr_settings exists.
  *
  ****************************************************************************/
 cw_bool_t
@@ -167,13 +156,14 @@ dbg_pmatch(cw_dbg_t * a_dbg_o, cw_uint32_t a_flag)
   cw_bool_t retval;
   
   _cw_check_ptr(a_dbg_o);
+  rwl_rlock(&a_dbg_o->rw_lock);
 
   if (a_dbg_o->is_current == FALSE)
   {
     dbg_recalc_fpmatch(a_dbg_o);
   }
 
-  if (a_flag <= _CW_DBG_T_MAX)
+  if (a_flag <= _CW_DBG_R_MAX)
   {
     retval = a_dbg_o->pmatch[a_flag];
   }
@@ -182,117 +172,52 @@ dbg_pmatch(cw_dbg_t * a_dbg_o, cw_uint32_t a_flag)
     retval = FALSE;
   }
   
+  rwl_runlock(&a_dbg_o->rw_lock);
   return retval;
 }
 
 /****************************************************************************
- * <<< Function >>>
- *
- *
- *
- * <<< Arguments >>>
- *
- *
- *
- * <<< Return Value >>>
- *
- *
- *
  * <<< Description >>>
  *
- *
+ * Set column a_flag in curr_settings to true.
  *
  ****************************************************************************/
-cw_bool_t
+void
 dbg_turn_on(cw_dbg_t * a_dbg_o, cw_uint32_t a_flag)
 {
-  cw_bool_t retval;
-  cw_uint32_t x;
-  
   _cw_check_ptr(a_dbg_o);
+  _cw_assert(a_flag <= _CW_DBG_R_MAX);
+  rwl_wlock(&a_dbg_o->rw_lock);
 
-  if (a_flag <= _CW_DBG_T_MAX)
-  {
-    a_dbg_o->is_current = FALSE;
-    for (x = 0; x <= _CW_DBG_C_MAX; x++)
-    {
-      if (a_dbg_o->tbl[x][a_flag] == TRUE)
-      {
-	a_dbg_o->curr_settings[x] = TRUE;
-      }
-    }
-    retval = FALSE;
-  }
-  else
-  {
-    retval = TRUE;
-  }
+  a_dbg_o->is_current = FALSE;
+  a_dbg_o->curr_settings[a_flag] = TRUE;
 
-  return retval;
+  rwl_wunlock(&a_dbg_o->rw_lock);
 }
 
 /****************************************************************************
- * <<< Function >>>
- *
- *
- *
- * <<< Arguments >>>
- *
- *
- *
- * <<< Return Value >>>
- *
- *
- *
  * <<< Description >>>
  *
- *
+ * Set column a_flag in curr_settings to false.
  *
  ****************************************************************************/
-cw_bool_t
+void
 dbg_turn_off(cw_dbg_t * a_dbg_o, cw_uint32_t a_flag)
 {
-  cw_bool_t retval;
-  cw_uint32_t x;
-  
   _cw_check_ptr(a_dbg_o);
+  _cw_assert(a_flag <= _CW_DBG_R_MAX);
+  rwl_wlock(&a_dbg_o->rw_lock);
 
-  if (a_flag <= _CW_DBG_T_MAX)
-  {
-    a_dbg_o->is_current = FALSE;
-    for (x = 0; x <= _CW_DBG_C_MAX; x++)
-    {
-      if (a_dbg_o->tbl[x][a_flag] == TRUE)
-      {
-	a_dbg_o->curr_settings[x] = FALSE;
-      }
-    }
-    retval = FALSE;
-  }
-  else
-  {
-    retval = TRUE;
-  }
+  a_dbg_o->is_current = FALSE;
+  a_dbg_o->curr_settings[a_flag] = FALSE;
 
-  return retval;
+  rwl_wunlock(&a_dbg_o->rw_lock);
 }
 
 /****************************************************************************
- * <<< Function >>>
- *
- *
- *
- * <<< Arguments >>>
- *
- *
- *
- * <<< Return Value >>>
- *
- *
- *
  * <<< Description >>>
  *
- *
+ * Clear curr_settings.
  *
  ****************************************************************************/
 void
@@ -301,6 +226,7 @@ dbg_clear(cw_dbg_t * a_dbg_o)
   cw_uint32_t x;
   
   _cw_check_ptr(a_dbg_o);
+  rwl_wlock(&a_dbg_o->rw_lock);
 
   a_dbg_o->is_current = FALSE;
   
@@ -308,24 +234,14 @@ dbg_clear(cw_dbg_t * a_dbg_o)
   {
     a_dbg_o->curr_settings[x] = FALSE;
   }
+  
+  rwl_wunlock(&a_dbg_o->rw_lock);
 }
 
 /****************************************************************************
- * <<< Function >>>
- *
- *
- *
- * <<< Arguments >>>
- *
- *
- *
- * <<< Return Value >>>
- *
- *
- *
  * <<< Description >>>
  *
- *
+ * Build the matrix from the raw array defined in dbg_priv.h.
  *
  ****************************************************************************/
 void
@@ -338,13 +254,13 @@ dbg_build_tbl(cw_dbg_t * a_dbg_o)
   _cw_check_ptr(a_dbg_o);
 
   /* Build table. */
-  for (i = 0, y = 0; y <= _CW_DBG_T_MAX; i++)
+  for (i = 0, y = 0; y <= _CW_DBG_R_MAX; i++)
   {
     if (dbg_raw_tbl[i] == -1)
     {
       y++;
       if ((dbg_raw_tbl[i + 1] == -1)
-	  && (y < _CW_DBG_T_MAX))
+	  && (y < _CW_DBG_R_MAX))
       {
 	_cw_error("Raw debug table is inconsistent.");
       }
@@ -360,9 +276,9 @@ dbg_build_tbl(cw_dbg_t * a_dbg_o)
   /* Set flags that are on by default. */
   for (i = 0; dbg_raw_on[i] != -1; i++)
   {
-    _cw_assert(dbg_raw_tbl[i] <= _CW_DBG_T_MAX);
+    _cw_assert(dbg_raw_tbl[i] <= _CW_DBG_R_MAX);
 
-    for (x = 0; x <= _CW_DBG_T_MAX; x++)
+    for (x = 0; x <= _CW_DBG_R_MAX; x++)
     {
       if (a_dbg_o->tbl[x][dbg_raw_on[i]] == TRUE)
       {
@@ -373,21 +289,9 @@ dbg_build_tbl(cw_dbg_t * a_dbg_o)
 }
 
 /****************************************************************************
- * <<< Function >>>
- *
- *
- *
- * <<< Arguments >>>
- *
- *
- *
- * <<< Return Value >>>
- *
- *
- *
  * <<< Description >>>
  *
- *
+ * Recalculate full and partial matches for all rows, given curr_settings.
  *
  ****************************************************************************/
 void
@@ -398,18 +302,22 @@ dbg_recalc_fpmatch(cw_dbg_t * a_dbg_o)
   
   _cw_check_ptr(a_dbg_o);
 
-  for (y = 0; y <= _CW_DBG_T_MAX; y++)
+  /* Iterate through rows. */
+  for (y = 0; y <= _CW_DBG_R_MAX; y++)
   {
+    /* Iterate through columns. */
     for (x = 0, f = TRUE, p = FALSE;
 	 (x <= _CW_DBG_C_MAX)
 	   && ((f == TRUE) || (p == FALSE));
 	 x++)
     {
+      /* Checking for a full match against the current settings. */
       if ((a_dbg_o->tbl[x][y] == TRUE)
 	  && (a_dbg_o->curr_settings[x] == FALSE))
       {
 	f = FALSE;
       }
+      /* Checking for a partial match against the current settings. */
       if ((a_dbg_o->tbl[x][y] == TRUE)
 	  && (a_dbg_o->curr_settings[x] == TRUE))
       {
