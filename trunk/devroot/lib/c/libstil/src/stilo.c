@@ -1498,33 +1498,39 @@ stilo_p_mstate_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t
  *
  *   const cw_uint8_t *name, cw_uint32_t len, cw_bool_t is_global
  *
- * If this is a global (in a global dictionary) name, the arguments contained in
- * a_p are:
+ * If this a global name, the arguments contained in a_p are:
  *
- *   const cw_uint8_t *name, cw_uint32_t len, cw_bool_t is_global,
+ *   const cw_uint8_t *name_str, cw_uint32_t len, cw_bool_t is_global,
  *   cw_bool_t is_static
  */
 static void
 stilo_p_name_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, va_list a_p)
 {
-#if (0)
-	const cw_uint8_t	*name = (const cw_uint8_t *)va_arg(a_p, const
-	    cw_uint8_t *);
-	cw_uint32_t		len = (cw_uint32_t)va_arg(a_p, cw_uint32_t);
-	cw_bool_t		is_global = (cw_bool_t)va_arg(a_p, cw_bool_t);
+	const cw_uint8_t	*name_str;
+	cw_uint32_t		len;
+	cw_bool_t		is_global;
+
+	/* Get varargs. */
+	name_str = (cw_uint8_t *)va_arg(a_p, cw_uint8_t *);
+	len = (cw_uint32_t)va_arg(a_p, cw_uint32_t);
+	is_global = (cw_bool_t)va_arg(a_p, cw_bool_t);
+
+	name = (cw_stiloe_name_t *)_cw_stilt_malloc(a_stilt,
+	    sizeof(cw_stiloe_name_t));
 
 	if (is_global == FALSE) {
-		a_stilo->indirect_name = TRUE;
-		a_stilo->stilt = a_stilt;
-		a_stilo->name.stiln = stiltn_ref(a_stilt, name, len, TRUE);
-	} else {
-		cw_bool_t	is_static = (cw_bool_t)va_arg(a_p, cw_uint32_t);
+		stilo_new(&name->e.i.stilo, a_stilt, _CW_STILOT_NAME);
+		stilng_l_name_ref(stil_stilng_get(_cw_stilt_stil_get(a_stilt)),
+		    name_str, len, &name->e.i.stilo);
 
-		a_stilo->indirect_name = FALSE;
-		a_stilo->name.stiln = stil_stiln_ref(stilt_stil_get(a_stilt),
-		    name, len, TRUE, is_static, NULL, NULL);
+		XXX
+		name->e.i.stilo.o.stiloe = XXX lookup name stiloe;
+		name->val = name->e.i.stilo.o.stiloe;
+	} else {
+		cw_bool_t	is_static = (cw_bool_t)va_arg(a_p, cw_bool_t);
+
+		stiln_new(&name->e.n.key, a_stilt, name_str, len, is_static);
 	}
-#endif
 }
 
 static void

@@ -32,8 +32,6 @@ static void		stil_p_stiln_delete(cw_stil_t *a_stil, cw_stiln_t
     *a_stiln);
 static cw_bool_t	stil_p_stiln_kref(cw_stil_t *a_stil, cw_stiln_t
     *a_stiln, const void *a_key, const void *a_data);
-static cw_uint32_t	stilnk_p_hash(const void *a_key);
-static cw_bool_t	stilnk_p_key_comp(const void *a_k1, const void *a_k2);
 #endif
 
 cw_stil_t *
@@ -258,25 +256,6 @@ stil_stiln_unref(cw_stil_t *a_stil, const cw_stiln_t *a_stiln, const void
 	mtx_unlock(&a_stil->lock);
 }
 
-static cw_stiln_t *
-stil_p_stiln_new(cw_stil_t *a_stil)
-{
-	cw_stiln_t *retval;
-
-	retval = _cw_stilag_stiln_get(&a_stil->stilag);
-	if (retval == NULL)
-		goto RETURN;
-	memset(retval, 0, sizeof(cw_stiln_t));
-
-	mtx_new(&retval->lock);
-#ifdef _LIBSTIL_DBG
-	retval->magic = _CW_STILN_MAGIC;
-#endif
-
-	RETURN:
-	return retval;
-}
-
 static cw_bool_t
 stil_p_stiln_kref(cw_stil_t *a_stil, cw_stiln_t *a_stiln, const void *a_key,
     const void *a_data)
@@ -316,38 +295,5 @@ stil_p_stiln_kref(cw_stil_t *a_stil, cw_stiln_t *a_stiln, const void *a_key,
 	}
 	OOM_1:
 	return TRUE;
-}
-
-static cw_uint32_t
-stilnk_p_hash(const void *a_key)
-{
-	cw_uint32_t	retval, i;
-	cw_stilnk_t	*key = (cw_stilnk_t *)a_key;
-	const char	*str;
-
-	_cw_check_ptr(a_key);
-
-	for (i = 0, str = key->name, retval = 0; i < key->len; i++, str++)
-		retval = retval * 33 + *str;
-
-	return retval;
-}
-
-static cw_bool_t
-stilnk_p_key_comp(const void *a_k1, const void *a_k2)
-{
-	cw_stilnk_t	*k1 = (cw_stilnk_t *)a_k1;
-	cw_stilnk_t	*k2 = (cw_stilnk_t *)a_k2;
-	size_t		len;
-
-	_cw_check_ptr(a_k1);
-	_cw_check_ptr(a_k2);
-
-	if (k1->len > k2->len)
-		len = k1->len;
-	else
-		len = k2->len;
-
-	return strncmp((char *)k1->name, (char *)k2->name, len) ? FALSE : TRUE;
 }
 #endif

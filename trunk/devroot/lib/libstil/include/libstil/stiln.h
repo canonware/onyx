@@ -53,10 +53,10 @@ struct cw_stiln_s {
  */
 struct cw_stilng_s {
 	/*
-	 * Hash of names (stiln --> stiloe_name).  This hash table keeps track
-	 * of *all* name "values" in the virtual machine.  When a name object is
-	 * created, it actually adds a reference to a stiloe_name and uses a
-	 * pointer to that stiloe_name as a unique key.
+	 * Hash of names ({name, len} --> stiloe_name).  This hash table keeps
+	 * track of *all* name "values" in the virtual machine.  When a name
+	 * object is created, it actually adds a reference to a stiloe_name and
+	 * uses a pointer to that stiloe_name as a unique key.
 	 *
 	 * Note that each stilt maintains a cache of stiln's (via stilnt), so
 	 * that under normal circumstances, all objects in a stilt refer to a
@@ -70,8 +70,9 @@ struct cw_stilng_s {
  */
 struct cw_stilnt_s {
 	/*
-	 * Hash of names (stiln --> stiloe_name).  This hash table keeps track
-	 * of name "values" that are in existence within a particular local VM.
+	 * Hash of names ((stiln *) --> stiloe_name).  This hash table keeps
+	 * track of name "values" that are in existence within a particular
+	 * local VM.
 	 */
 	cw_dch_t	hash;
 
@@ -79,7 +80,8 @@ struct cw_stilnt_s {
 };
 
 /* stiln. */
-void		stiln_new(cw_stiln_t *a_stiln);
+void		stiln_new(cw_stiln_t *a_stiln, cw_stilt_t *a_stilt, const
+    cw_uint32_t *a_name, cw_uint32_t a_len, cw_bool_t a_is_static);
 void		stiln_delete(cw_stiln_t *a_stiln);
 
 #define		stiln_val_get(a_stiln)	(a_stiln)->name
