@@ -83,11 +83,12 @@ main(int argc, char ** argv)
   char * opt_rhost = NULL, * opt_dirname = NULL;
 
   libstash_init();
-  dbg_register(cw_g_dbg, "mem_error");
   dbg_register(cw_g_dbg, "prog_error");
   dbg_register(cw_g_dbg, "sockb_error");
   dbg_register(cw_g_dbg, "socks_error");
   dbg_register(cw_g_dbg, "sock_error");
+/*    dbg_register(cw_g_dbg, "mem_verbose"); */
+/*    dbg_register(cw_g_dbg, "pezz_verbose"); */
 
   /* Parse command line. */
   while (-1 != (c = getopt(argc, argv, "hVvqp:r:ld:")))
@@ -121,6 +122,7 @@ main(int argc, char ** argv)
 	opt_quiet = TRUE;
 	dbg_unregister(cw_g_dbg, "prog_error");
 	dbg_unregister(cw_g_dbg, "mem_error");
+	dbg_unregister(cw_g_dbg, "pezz_error");
 	dbg_unregister(cw_g_dbg, "sockb_error");
 	dbg_unregister(cw_g_dbg, "socks_error");
 	dbg_unregister(cw_g_dbg, "sock_error");

@@ -242,25 +242,15 @@ sockb_get_spare_bufc(void)
   
   _cw_check_ptr(g_sockb);
 
-  /* Do not use pezz for the debug version of libsock in order to make memory
-   * leaks more apparent. */
-#ifdef _LIBSOCK_DBG
-  retval = bufc_new(NULL, NULL, NULL);
-#else
-  retval = bufc_new((cw_bufc_t *) pezz_get(&g_sockb->bufc_pool),
+  retval = bufc_new((cw_bufc_t *) _cw_pezz_get(&g_sockb->bufc_pool),
 		    pezz_put,
 		    (void *) &g_sockb->bufc_pool);
-#endif
   if (NULL == retval)
   {
     retval = NULL;
     goto RETURN;
   }
-#ifdef _LIBSOCK_DBG
-  buffer = (void *) _cw_malloc(pezz_get_buffer_size(&g_sockb->buffer_pool));
-#else
-  buffer = pezz_get(&g_sockb->buffer_pool);
-#endif
+  buffer = _cw_pezz_get(&g_sockb->buffer_pool);
   if (NULL == buffer)
   {
     bufc_delete(retval);
@@ -268,21 +258,12 @@ sockb_get_spare_bufc(void)
     goto RETURN;
   }
   
-#ifdef _LIBSOCK_DBG
-  bufc_set_buffer(retval,
-		  buffer,
-		  pezz_get_buffer_size(&g_sockb->buffer_pool),
-		  TRUE,
-		  mem_dealloc,
-		  (void *) cw_g_mem);
-#else
   bufc_set_buffer(retval,
 		  buffer,
 		  pezz_get_buffer_size(&g_sockb->buffer_pool),
 		  TRUE,
 		  pezz_put,
 		  (void *) &g_sockb->buffer_pool);
-#endif
 
   RETURN:
   return retval;
@@ -303,7 +284,7 @@ sockb_in_notify(cw_mq_t * a_mq, int a_sockfd)
   mtx_new(&mtx);
   cnd_new(&cnd);
   
-  message = (struct cw_sockb_msg_s *) pezz_get(&g_sockb->messages_pezz);
+  message = (struct cw_sockb_msg_s *) _cw_pezz_get(&g_sockb->messages_pezz);
   if (NULL == message)
   {
     retval = TRUE;
@@ -322,7 +303,7 @@ sockb_in_notify(cw_mq_t * a_mq, int a_sockfd)
   mtx_lock(&mtx);
   if (0 != mq_put(&g_sockb->messages, (const void *) message))
   {
-    pezz_put(&g_sockb->messages_pezz, (void *) message);
+    _cw_pezz_put(&g_sockb->messages_pezz, (void *) message);
     retval =TRUE;
     goto RETURN;
   }
@@ -367,7 +348,7 @@ sockb_l_register_sock(cw_sock_t * a_sock)
   _cw_assert(sock_get_fd(a_sock) >= 0);
   _cw_assert(sock_get_fd(a_sock) < FD_SETSIZE);
 
-  message = (struct cw_sockb_msg_s *) pezz_get(&g_sockb->messages_pezz);
+  message = (struct cw_sockb_msg_s *) _cw_pezz_get(&g_sockb->messages_pezz);
   if (NULL == message)
   {
     retval = TRUE;
@@ -381,7 +362,7 @@ sockb_l_register_sock(cw_sock_t * a_sock)
   message->data.sock = a_sock;
   if (0 != mq_put(&g_sockb->messages, (const void *) message))
   {
-    pezz_put(&g_sockb->messages_pezz, (void *) message);
+    _cw_pezz_put(&g_sockb->messages_pezz, (void *) message);
     retval =TRUE;
     goto RETURN;
   }
@@ -403,7 +384,7 @@ sockb_l_unregister_sock(cw_uint32_t a_sockfd)
   _cw_check_ptr(g_sockb);
   _cw_assert(a_sockfd < FD_SETSIZE);
 
-  message = (struct cw_sockb_msg_s *) pezz_get(&g_sockb->messages_pezz);
+  message = (struct cw_sockb_msg_s *) _cw_pezz_get(&g_sockb->messages_pezz);
   if (NULL == message)
   {
     retval = TRUE;
@@ -417,7 +398,7 @@ sockb_l_unregister_sock(cw_uint32_t a_sockfd)
   message->data.sockfd = a_sockfd;
   if (0 != mq_put(&g_sockb->messages, (const void *) message))
   {
-    pezz_put(&g_sockb->messages_pezz, (void *) message);
+    _cw_pezz_put(&g_sockb->messages_pezz, (void *) message);
     retval =TRUE;
     goto RETURN;
   }
@@ -439,7 +420,7 @@ sockb_l_out_notify(cw_uint32_t a_sockfd)
   _cw_check_ptr(g_sockb);
   _cw_assert(a_sockfd < FD_SETSIZE);
 
-  message = (struct cw_sockb_msg_s *) pezz_get(&g_sockb->messages_pezz);
+  message = (struct cw_sockb_msg_s *) _cw_pezz_get(&g_sockb->messages_pezz);
   if (NULL == message)
   {
     retval = TRUE;
@@ -453,7 +434,7 @@ sockb_l_out_notify(cw_uint32_t a_sockfd)
   message->data.sockfd = a_sockfd;
   if (0 != mq_put(&g_sockb->messages, (const void *) message))
   {
-    pezz_put(&g_sockb->messages_pezz, (void *) message);
+    _cw_pezz_put(&g_sockb->messages_pezz, (void *) message);
     retval =TRUE;
     goto RETURN;
   }
@@ -785,7 +766,7 @@ sockb_p_entry_func(void * a_arg)
 #ifdef _LIBSOCK_DBG
       message->magic = 0;
 #endif
-      pezz_put(&g_sockb->messages_pezz, (void *) message);
+      _cw_pezz_put(&g_sockb->messages_pezz, (void *) message);
     }
 
     /* Copy the master sets of descriptors we care about to the sets that are
