@@ -762,6 +762,8 @@ protected, but element reads are not protected.
 deadlocks due to implicit file locking.
 \item[hook: ] No implicit locking is done for hooks.
 \item[mutex: ] No implicit locking is done for mutexes.
+\item[regex: ] No implicit locking is done for regexes.
+\item[regsub: ] No implicit locking is done for regsubs.
 \item[stack: ] All stack operations are protected.  There are no potential
 deadlocks due to implicit stack locking.  However, there are races in stack
 copying, such that the results of copying a stack that is concurrently being
@@ -8388,6 +8390,18 @@ onyx:0>
 		\oparg{dict}, \oparg{stack}, or \oparg{string}), push the entry
 		onto ostack and execute \oparg{proc}.  This operator supports
 		the \htmlref{\onyxop{}{exit}{}}{systemdict:exit} operator.
+
+		The object being iterated over can be modified during iteration,
+		with the expectation of no ill consequences, and in most cases
+		the modifications are immediately apparent.  However, there are
+		some cases in which behavior does not follow this guideline:
+		\begin{itemize}\item[]
+		\item{Objects inserted into a dictionary during iteration may or
+			may not be iterated over.}
+		\item{In the case of stack iteration, a snapshot is taken before
+			iteration begins, so any changes to the stack during
+			iteration will not affect iteration in any way.}
+		\end{itemize}
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> [1 2] {1 sprint} foreach
@@ -9780,12 +9794,12 @@ onyx:3>
 		modules, there is no reasonable solution except to explicitly
 		order the destruction of objects.  Therefore, by default, the
 		hook that is evaluated by modload is destroyed during the second
-		sweep pass.  It is possible for a module to override what sweep
-		pass the hook is destroyed on, in cases where there are
-		additional ordering constraints for the objects created by a
-		module.  This isn't important from the Onyx language
-		perspective, but is important to understand when implementing
-		modules.
+		sweep pass (count starts at 0).  It is possible for a module to
+		override what sweep pass the hook is destroyed on, in cases
+		where there are additional ordering constraints for the objects
+		created by a module.  This isn't important from the Onyx
+		language perspective, but is important to understand when
+		implementing modules.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> `/usr/local/share/onyx/nxmod/mdprompt.nxm' `modprompt_init'
