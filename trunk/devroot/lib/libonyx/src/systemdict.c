@@ -5856,6 +5856,11 @@ systemdict_sqrt(cw_nxo_t *a_thread)
 	    return;
 	}
     }
+    if (real < 0)
+    {
+	nxo_thread_nerror(a_thread, NXN_rangecheck);
+	return;
+    }
     nxo_real_new(nxo, sqrt(real));
 }
 #endif
