@@ -16,7 +16,6 @@
 #endif
 
 /* History record header. */
-typedef struct cw_histh_s cw_histh_t;
 struct cw_histh_s
 {
 #ifdef CW_DBG
@@ -55,13 +54,13 @@ struct cw_hist_s
     /* History buffer. */
     cw_buf_t h;
 
-    /* Marker at begin of current record in h. */
+    /* Header and footer of current record in h. */
+    cw_histh_t hhead;
+    cw_histh_t hfoot;
+
+    /* Marker at begin, current position, and end of current record in h. */
     cw_mkr_t hbeg;
-
-    /* Marker at current position in h. */
     cw_mkr_t hcur;
-
-    /* Marker at end of current record in h. */
     cw_mkr_t hend;
 
     /* Temporary marker in h. */

@@ -22,6 +22,7 @@
 #endif
 /* #define CW_BUFP_VALIDATE */
 
+typedef struct cw_histh_s cw_histh_t;
 typedef struct cw_hist_s cw_hist_t;
 typedef struct cw_ext_s cw_ext_t;
 typedef struct cw_mkr_s cw_mkr_t;
