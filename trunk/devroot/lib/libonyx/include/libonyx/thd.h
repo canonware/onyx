@@ -69,7 +69,8 @@ thd_self(void);
 #define thd_yield() sched_yield()
 #endif
 
-void thd_sigmask(int a_how, const sigset_t *a_set, sigset_t *r_oset);
+void
+thd_sigmask(int a_how, const sigset_t *a_set, sigset_t *r_oset);
 
 void
 thd_crit_enter(void);
