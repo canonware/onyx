@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 45 $
- * $Date: 1998-04-26 22:53:33 -0700 (Sun, 26 Apr 1998) $
+ * $Revision: 57 $
+ * $Date: 1998-05-01 03:17:44 -0700 (Fri, 01 May 1998) $
  *
  * <<< Description >>>
  *
@@ -69,6 +69,7 @@ cw_bool_t oh_shrink_priv(cw_oh_t * a_oh_o,
 			 cw_sint32_t a_num_halvings);
 
 cw_uint32_t oh_h1_priv(cw_oh_t * a_oh_o, void * a_key);
+cw_bool_t oh_key_compare_priv(void * a_k1, void * a_k2);
 cw_bool_t oh_item_insert_priv(cw_oh_t * a_oh_o,
 			      cw_oh_item_t * a_item);
 cw_bool_t oh_item_search_priv(cw_oh_t * a_oh_o,
