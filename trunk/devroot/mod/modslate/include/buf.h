@@ -99,11 +99,13 @@ struct cw_bufp_s
     /* Offset into the buf's bufps array. */
     cw_uint32_t index;
 
-    /* Cached position of the beginning of the bufp, relative to the entire buf.
-     * The validity of these values is determined by the bob_cached and
-     * eob_cached fields of the buf. */
+    /* Cached position of the begin of the bufp, relative to the begin/end
+     * of the entire buf.  The validity of these values is determined by the
+     * bob_cached/eob_cached fields of the buf. */
     cw_uint64_t bpos;
     cw_uint64_t line;
+    cw_uint64_t ebpos;
+    cw_uint64_t eline;
 
     /* Length. */
     cw_uint32_t len;
@@ -148,15 +150,22 @@ struct cw_buf_s
     /* Number of lines (>= 1). */
     cw_uint64_t nlines;
 
+    /* bufp tree and list. */
+    rb_tree(cw_bufp_t) ptree;
+    ql_head(cw_bufp_t) plist;
     /* Array of pointers to bufp's.  There are nbufps elements. */
-    cw_bufp_t **bufps;
-    cw_uint32_t nbufps;
+//    cw_bufp_t **bufps;
+//    cw_uint32_t nbufps;
+
+    /* Pointers to the ends of the bufp ranges with valid caches. */
+    cw_bufp_t *bob_cached;
+    cw_bufp_t *eob_cached;
 
     /* Index of first and last bufp with valid caches.  The first bufp always
      * has a valid cache, which allows bob_cached to be unsigned.  If no bufp's
      * at the end have a valid cache, then eob_cached is set to nbufps. */
-    cw_uint32_t bob_cached;
-    cw_uint32_t eob_cached;
+//    cw_uint32_t bob_cached;
+//    cw_uint32_t eob_cached;
 
     /* An array of (2 * nbufps) bufv's.  This is large enough to create a vector
      * for the entire buf, even if all bufp's are split by their gaps. */

@@ -14,7 +14,46 @@
  * buf  : Main buffer class.
  * bufp : Buffer page.  Each bufb has limited expansion/contraction.
  * mkr  : Marker.  Markers are used as handles for many buf operations.
- * ext  : Extent.  Extents denote buf regions.
+ * ext  : Extent.  Extents denote buf regions, and are internally composed of
+ *        two mkr's.
+ *
+ * A paged buffer gap is used rather than a single buffer gap in order to
+ * provide reasonable scalability with buffer size, even if there are many
+ * extents.  Buffer text insertions and deletions become linearly more expensive
+ * as the number of markers past the gap increases.  By breaking the buffer into
+ * pages, the cost of text insertions and deletions only has to take into
+ * account the markers in the affected page.  Pathological worst case scenarios
+ * (all markers in one bufp) would have the same scaling problems as a single
+ * buffer gap, but it is unrealistic to have more markers than a constant factor
+ * times the size of a buffer page.
+ *
+ * Another advantage to a paged buffer gap is that the cost of gap movement is
+ * bounded by the (fixed) page size rather than by the size of the buffer.
+ *
+ * Unfortunately, the cost of inserting or removing a (randomly placed) page
+ * increases linearly with the number of pages.  This is because it is necessary
+ * to be able to quickly determine the validity of cached position and line
+ * values associated with a page.  The only reasonable way to do this is to keep
+ * track of which ranges (sets) of pages have valid caches, and the cheapest way
+ * to determine membership in those sets is to number the pages and check if a
+ * page's index number falls within a range that is known to have a valid
+ * cache.
+ *
+ * So, there are two aspects in which the paged buffer gap algorithms scale
+ * linearly for the common case:
+ *
+ * 1) M: the number of markers in a page.  This number is approximately
+ *    proportional to page size for a buffer that contains markers that are
+ *    approximately evenly distributed (typically true).
+ *
+ * 2) P: the number of pages.
+ *
+ * Therefore, the cost of paged buffer gap algorithms scales by (M + P).  M is
+ * basically fixed, so as a buffer grows, P grows.  Page size must be chosen
+ * such that M doesn't cause scaling problems by itself.  Additionally, page
+ * size should be low enough that a single page doesn't impose a significant
+ * memory burden on the application.  Wisely choosing a page size should allow
+ * interactive buffer manipulation of buffers several gigabytes large.
  *
  ******************************************************************************
  *
@@ -22,9 +61,9 @@
  *
  * Position rules:
  *
- * *) apos refers to absolute position.
+ * *) ppos refers to absolute position within a bufp.
  * *) bpos refers to buffer position.
- * *) If a position isn't specified as apos or bpos, then it is bpos.
+ * *) If a position isn't specified as ppos or bpos, then it is bpos.
  *
  * Internal buffer page representation:
  *
@@ -44,6 +83,53 @@
  *
  *       bufp->bpos: 1                     bufp->bpos: 6
  *       bufp->line: 1                     bufp->line: 2
+ *
+ ******************************************************************************
+ *
+ * bufp's, mkr's, and ext's are all organized using both red-black trees and
+ * doubly linked lists, so that random access and iteration are fast.
+ *
+ * Searching for a bufp by bpos or line is somewhat tricky, since not all nodes
+ * necessarily have valid caches.  However, it is still possible to do such
+ * searches by taking a bit of extra care in the node comparison function.
+ * Since each bufp has an index number, nodes that fall outside the range of
+ * those with valid caches are known to be greater than the result for searches
+ * within the range starting at BOB, and less than the result for searches
+ * within the range ending at EOB.
+ *
+ ******************************************************************************
+ *
+ * Each bufp caches its bpos and line to speed up many operations.  buf
+ * modifications can invalidate the values cached in bufp's, so pointers to the
+ * end points of the ranges with valid caches are maintained.  At any given
+ * time, the ranges of bufp's with valid caches may look something like:
+ *
+ *    0           1           2           3           4           5
+ * /------\    /------\    /------\    /------\    /------\    /------\
+ * | bufp |<-->| bufp |<-->| bufp |<-->| bufp |<-->| bufp |<-->| bufp |
+ * \------/    \------/    \------/    \------/    \------/    \------/
+ *                ^                       ^
+ *    |-----------|                       |-----------------------|
+ *            bob_cached              eob_cached
+ *
+ * In this example, bufp 2 is the only one without a valid cache, relative to
+ * either the begin or end of the buffer.  Note that it is possible (though
+ * somewhat atypical) for the following to happen:
+ *
+ *    0           1           2           3           4           5
+ * /------\    /------\    /------\    /------\    /------\    /------\
+ * | bufp |<-->| bufp |<-->| bufp |<-->| bufp |<-->| bufp |<-->| bufp |
+ * \------/    \------/    \------/    \------/    \------/    \------/
+ *                            ^                       ^
+ *                            |                       |
+ *    |-----------------------+-----------------------|
+ *                            |                   bob_cached
+ *                            |-----------------------------------|
+ *                        eob_cached
+ *
+ * In this case, bufp's 2, 3, and 4 have valid caches relative to both the begin
+ * and end of the buffer.
+ *
  *
  ******************************************************************************/
 
