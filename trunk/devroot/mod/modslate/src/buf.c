@@ -85,23 +85,14 @@ buf_p_shrink(cw_buf_t *a_buf);
 /* A simplified version of bufv_copy() that counts '\n' characters that are
  * copied, and returns that rather than the number of elements copied. */
 CW_INLINE cw_uint64_t
-bufv_p_copy(cw_bufv_t *a_to, cw_uint32_t a_to_len, cw_uint32_t a_to_sizeof,
-	    const cw_bufv_t *a_fr, cw_uint32_t a_fr_len, cw_uint32_t a_fr_sizeof)
+bufv_p_copy(cw_bufv_t *a_to, cw_uint32_t a_to_len, const cw_bufv_t *a_fr,
+	    cw_uint32_t a_fr_len)
 {
     cw_uint64_t retval;
-    cw_uint32_t to_el, fr_el, to_off, fr_off, cpysizeof;
+    cw_uint32_t to_el, fr_el, to_off, fr_off;
 
     cw_check_ptr(a_to);
     cw_check_ptr(a_fr);
-
-    if (a_to_sizeof <= a_fr_sizeof)
-    {
-	cpysizeof = a_to_sizeof;
-    }
-    else
-    {
-	cpysizeof = a_fr_sizeof;
-    }
 
     retval = 0;
     to_el = 0;
@@ -112,11 +103,10 @@ bufv_p_copy(cw_bufv_t *a_to, cw_uint32_t a_to_len, cw_uint32_t a_to_sizeof,
 	/* Iterate over bufv element contents. */
 	for (fr_off = 0; fr_off < a_fr[fr_el].len; fr_off++)
 	{
-	    memcpy(&a_to[to_el].data[to_off * a_to_sizeof],
-		   &a_fr[fr_el].data[fr_off * a_fr_sizeof], cpysizeof);
+	    a_to[to_el].data[to_off] = a_fr[fr_el].data[fr_off];
 
 	    /* Count newlines. */
-	    if (a_to[to_el].data[to_off * a_to_sizeof] == '\n')
+	    if (a_to[to_el].data[to_off] == '\n')
 	    {
 		retval++;
 	    }
@@ -140,24 +130,14 @@ bufv_p_copy(cw_bufv_t *a_to, cw_uint32_t a_to_len, cw_uint32_t a_to_sizeof,
 }
 
 cw_uint64_t
-bufv_copy(cw_bufv_t *a_to, cw_uint32_t a_to_len, cw_uint32_t a_to_sizeof,
-	  const cw_bufv_t *a_fr, cw_uint32_t a_fr_len, cw_uint32_t a_fr_sizeof,
-	  cw_uint64_t a_maxlen)
+bufv_copy(cw_bufv_t *a_to, cw_uint32_t a_to_len, const cw_bufv_t *a_fr,
+	  cw_uint32_t a_fr_len, cw_uint64_t a_maxlen)
 {
     cw_uint64_t retval;
-    cw_uint32_t to_el, fr_el, to_off, fr_off, cpysizeof;
+    cw_uint32_t to_el, fr_el, to_off, fr_off;
 
     cw_check_ptr(a_to);
     cw_check_ptr(a_fr);
-
-    if (a_to_sizeof <= a_fr_sizeof)
-    {
-	cpysizeof = a_to_sizeof;
-    }
-    else
-    {
-	cpysizeof = a_fr_sizeof;
-    }
 
     retval = 0;
     to_el = 0;
@@ -168,8 +148,7 @@ bufv_copy(cw_bufv_t *a_to, cw_uint32_t a_to_len, cw_uint32_t a_to_sizeof,
 	/* Iterate over bufv element contents. */
 	for (fr_off = 0; fr_off < a_fr[fr_el].len; fr_off++)
 	{
-	    memcpy(&a_to[to_el].data[to_off * a_to_sizeof],
-		   &a_fr[fr_el].data[fr_off * a_fr_sizeof], cpysizeof);
+	    a_to[to_el].data[to_off] = a_fr[fr_el].data[fr_off];
 
 	    /* Copy no more than a_maxlen elements (unless a_maxlen is 0). */
 	    retval++;
@@ -247,7 +226,7 @@ buf_p_lines_rel_forward_count(cw_buf_t *a_buf, cw_uint64_t a_apos_beg,
      * avoid the gap. */
     for (apos = a_apos_beg, nlines = 0; apos < a_buf->gap_off; apos++)
     {
-	if (a_buf->b[apos * a_buf->elmsize] == '\n')
+	if (a_buf->b[apos] == '\n')
 	{
 	    nlines++;
 	    if (nlines == a_nlines)
@@ -265,7 +244,7 @@ buf_p_lines_rel_forward_count(cw_buf_t *a_buf, cw_uint64_t a_apos_beg,
 
     for (;; apos++)
     {
-	if (a_buf->b[apos * a_buf->elmsize] == '\n')
+	if (a_buf->b[apos] == '\n')
 	{
 	    nlines++;
 	    if (nlines == a_nlines)
@@ -290,7 +269,7 @@ buf_p_lines_rel_backward_count(cw_buf_t *a_buf, cw_uint64_t a_apos_beg,
 	 apos >= a_buf->gap_off + a_buf->gap_len;
 	 apos--)
     {
-	if (a_buf->b[apos * a_buf->elmsize] == '\n')
+	if (a_buf->b[apos] == '\n')
 	{
 	    nlines++;
 	    if (nlines == a_nlines)
@@ -308,7 +287,7 @@ buf_p_lines_rel_backward_count(cw_buf_t *a_buf, cw_uint64_t a_apos_beg,
 
     for (;; apos--)
     {
-	if (a_buf->b[apos * a_buf->elmsize] == '\n')
+	if (a_buf->b[apos] == '\n')
 	{
 	    nlines++;
 	    if (nlines == a_nlines)
@@ -350,7 +329,7 @@ buf_p_lines_count(cw_buf_t *a_buf, cw_uint64_t a_apos_beg, cw_uint64_t
 	 apos < a_apos_end && apos < a_buf->gap_off;
 	 apos++)
     {
-	if (a_buf->b[apos * a_buf->elmsize] == '\n')
+	if (a_buf->b[apos] == '\n')
 	{
 	    retval++;
 	}
@@ -362,7 +341,7 @@ buf_p_lines_count(cw_buf_t *a_buf, cw_uint64_t a_apos_beg, cw_uint64_t
     }
     for (; apos < a_apos_end; apos++)
     {
-	if (a_buf->b[apos * a_buf->elmsize] == '\n')
+	if (a_buf->b[apos] == '\n')
 	{
 	    retval++;
 	}
@@ -440,10 +419,9 @@ buf_p_gap_move(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_uint64_t a_bpos)
 	     *                   |
 	     *                   v
 	     * oooooooXXXXXXXXXXX________oo */
-	    memmove(&a_buf->b[a_buf->gap_off * a_buf->elmsize],
-		    &a_buf->b[(a_buf->gap_off + a_buf->gap_len)
-			      * a_buf->elmsize],
-		    (apos - a_buf->gap_off) * a_buf->elmsize);
+	    memmove(&a_buf->b[a_buf->gap_off],
+		    &a_buf->b[(a_buf->gap_off + a_buf->gap_len)],
+		    (apos - a_buf->gap_off));
 
 	    /* Adjust the apos of all bufm's with apos in the moved region. */
 	    buf_p_bufms_apos_adjust(a_buf, a_bufm, -a_buf->gap_len,
@@ -465,10 +443,9 @@ buf_p_gap_move(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_uint64_t a_bpos)
 	     *     |
 	     *     v
 	     * oooo___________XXXXXXXXXoooo */
-	    memmove(&a_buf->b[(a_buf->gap_len + apos)
-			      * a_buf->elmsize],
-		    &a_buf->b[apos * a_buf->elmsize],
-		    (a_buf->gap_off - apos) * a_buf->elmsize);
+	    memmove(&a_buf->b[(a_buf->gap_len + apos)],
+		    &a_buf->b[apos],
+		    (a_buf->gap_off - apos));
 
 	    /* Adjust the apos of all bufm's with apos in the moved region. */
 	    buf_p_bufms_apos_adjust(a_buf, a_bufm, a_buf->gap_len, apos,
@@ -495,9 +472,7 @@ buf_p_grow(cw_buf_t *a_buf, cw_uint64_t a_minlen)
     buf_p_gap_move(a_buf, ql_last(&a_buf->bufms, link), a_buf->len + 1);
 
     a_buf->b = (cw_uint8_t *) cw_opaque_realloc(a_buf->realloc, a_buf->arg,
-						a_buf->b,
-						new_size * a_buf->elmsize,
-						old_size * a_buf->elmsize);
+						a_buf->b, new_size, old_size);
 
     /* Adjust the gap length. */
     a_buf->gap_len += new_size - old_size;
@@ -529,8 +504,7 @@ buf_p_shrink(cw_buf_t *a_buf)
 	/* Shrink the gap. */
 	a_buf->b = (cw_uint8_t *) cw_opaque_realloc(a_buf->realloc,
 						    a_buf->arg, a_buf->b,
-						    new_size * a_buf->elmsize,
-						    old_size * a_buf->elmsize);
+						    new_size, old_size);
 
 	/* Adjust the gap length. */
 	a_buf->gap_len -= old_size - new_size;
@@ -565,10 +539,7 @@ buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc,
     retval->dealloc = a_dealloc;
     retval->arg = a_arg;
 
-    retval->elmsize = 1;
-    retval->b
-	= (cw_uint8_t *) cw_opaque_alloc(a_alloc, a_arg,
-					 CW_BUF_MINELMS * retval->elmsize);
+    retval->b = (cw_uint8_t *) cw_opaque_alloc(a_alloc, a_arg, CW_BUF_MINELMS);
     retval->len = 0;
     retval->nlines = 1;
     retval->gap_off = 0;
@@ -600,7 +571,7 @@ buf_delete(cw_buf_t *a_buf)
     }
 
     cw_opaque_dealloc(a_buf->dealloc, a_buf->arg, a_buf->b,
-		      (a_buf->len + a_buf->gap_len) * a_buf->elmsize);
+		      (a_buf->len + a_buf->gap_len));
 	
     if (a_buf->alloced)
     {
@@ -612,61 +583,6 @@ buf_delete(cw_buf_t *a_buf)
 	memset(a_buf, 0x5a, sizeof(cw_buf_t));
     }
 #endif
-}
-
-cw_uint32_t
-buf_elmsize_get(cw_buf_t *a_buf)
-{
-    cw_check_ptr(a_buf);
-    cw_dassert(a_buf->magic == CW_BUF_MAGIC);
-
-    return a_buf->elmsize;
-}
-
-void
-buf_elmsize_set(cw_buf_t *a_buf, cw_uint32_t a_elmsize)
-{
-    cw_uint8_t *b;
-    cw_uint64_t size;
-    cw_bufv_t bufv_to, bufv_fr;
-
-    cw_check_ptr(a_buf);
-    cw_dassert(a_buf->magic == CW_BUF_MAGIC);
-    cw_assert(a_elmsize > 0);
-
-    if (a_elmsize == a_buf->elmsize)
-    {
-	/* Do nothing. */
-	return;
-    }
-
-    size = a_buf->len + a_buf->gap_len;
-
-    /* Move the gap to the end to make things easier.  It would be possible to
-     * leave the gap where it is, but this is an uncommon operation, so
-     * optimizing it isn't very important. */
-    buf_p_gap_move(a_buf, ql_last(&a_buf->bufms, link), a_buf->len + 1);
-
-    /* Allocate the new buffer. */
-    b = (cw_uint8_t *) cw_opaque_alloc(a_buf->alloc, a_buf->arg,
-				       size * a_elmsize);
-
-    /* Copy data from the old buffer to the new one. */
-    bufv_to.data = b;
-    bufv_to.len = a_buf->len;
-    bufv_fr.data = a_buf->b;
-    bufv_fr.len = a_buf->len;
-    bufv_copy(&bufv_to, 1, a_elmsize, &bufv_fr, 1, a_buf->elmsize, a_buf->len);
-
-    /* Free the old buffer. */
-    cw_opaque_dealloc(a_buf->dealloc, a_buf->arg, a_buf->b,
-		      size * a_buf->elmsize);
-
-    /* Update the buffer pointer. */
-    a_buf->b = b;
-
-    /* Update the element size. */
-    a_buf->elmsize = a_elmsize;
 }
 
 cw_uint64_t
@@ -859,8 +775,8 @@ buf_hist_group_end(cw_buf_t *a_buf)
 
 /* bufm. */
 void
-bufm_l_insert(cw_bufm_t *a_bufm, cw_bool_t a_record, cw_bool_t a_after, const
-	      cw_bufv_t *a_bufv, cw_uint32_t a_bufvcnt, cw_uint32_t a_elmsize)
+bufm_l_insert(cw_bufm_t *a_bufm, cw_bool_t a_record, cw_bool_t a_after,
+	      const cw_bufv_t *a_bufv, cw_uint32_t a_bufvcnt)
 {
     cw_uint64_t i, count, nlines;
     cw_buf_t *buf;
@@ -880,12 +796,12 @@ bufm_l_insert(cw_bufm_t *a_bufm, cw_bool_t a_record, cw_bool_t a_after, const
 	if (a_after)
 	{
 	    hist_ynk(buf->hist, buf, buf_p_pos_a2b(buf, a_bufm->apos), a_bufv,
-		     a_bufvcnt, a_elmsize);
+		     a_bufvcnt);
 	}
 	else
 	{
 	    hist_ins(buf->hist, buf, buf_p_pos_a2b(buf, a_bufm->apos), a_bufv,
-		     a_bufvcnt, a_elmsize);
+		     a_bufvcnt);
 	}
     }
 
@@ -906,9 +822,9 @@ bufm_l_insert(cw_bufm_t *a_bufm, cw_bool_t a_record, cw_bool_t a_after, const
     buf_p_gap_move(buf, a_bufm, buf_p_pos_a2b(buf, a_bufm->apos));
 
     /* Insert. */
-    bufv.data = &buf->b[buf->gap_off * buf->elmsize];
+    bufv.data = &buf->b[buf->gap_off];
     bufv.len = buf->gap_len;
-    nlines = bufv_p_copy(&bufv, 1, buf->elmsize, a_bufv, a_bufvcnt, a_elmsize);
+    nlines = bufv_p_copy(&bufv, 1, a_bufv, a_bufvcnt);
 
     /* Shrink the gap. */
     buf->gap_off += count;
@@ -1029,17 +945,15 @@ bufm_l_remove(cw_bufm_t *a_start, cw_bufm_t *a_end, cw_bool_t a_record)
      * determines whether this is a before/after removal. */
     if (buf->hist != NULL && a_record)
     {
-	bufv.data = &buf->b[start->apos * buf->elmsize];
+	bufv.data = &buf->b[start->apos];
 	bufv.len = rcount;
 	if (start == a_start)
 	{
-	    hist_del(buf->hist, buf, buf_p_pos_a2b(buf, start->apos), &bufv, 1,
-		     buf->elmsize);
+	    hist_del(buf->hist, buf, buf_p_pos_a2b(buf, start->apos), &bufv, 1);
 	}
 	else
 	{
-	    hist_rem(buf->hist, buf, buf_p_pos_a2b(buf, end->apos), &bufv, 1,
-		     buf->elmsize);
+	    hist_rem(buf->hist, buf, buf_p_pos_a2b(buf, end->apos), &bufv, 1);
 	}
     }
 
@@ -1711,7 +1625,7 @@ bufm_before_get(cw_bufm_t *a_bufm)
     }
 
     /* Don't use the marker's apos, in case it is next to the gap. */
-    retval = &buf->b[buf_p_pos_b2a(buf, bpos - 1) * buf->elmsize];
+    retval = &buf->b[buf_p_pos_b2a(buf, bpos - 1)];
 
     RETURN:
     return retval;
@@ -1739,7 +1653,7 @@ bufm_after_get(cw_bufm_t *a_bufm)
 	goto RETURN;
     }
 
-    retval = &buf->b[a_bufm->apos * buf->elmsize];
+    retval = &buf->b[a_bufm->apos];
 
     RETURN:
     return retval;
@@ -1783,7 +1697,7 @@ bufm_range_get(cw_bufm_t *a_start, cw_bufm_t *a_end, cw_uint32_t *r_bufvcnt)
     if (buf->gap_off + buf->gap_len <= start->apos || buf->gap_off > end->apos)
     {
 	/* Not split. */
-	buf->bufv[0].data = &buf->b[start->apos * buf->elmsize];
+	buf->bufv[0].data = &buf->b[start->apos];
 	buf->bufv[0].len = end->apos - start->apos;
 
 	*r_bufvcnt = 1;
@@ -1791,11 +1705,10 @@ bufm_range_get(cw_bufm_t *a_start, cw_bufm_t *a_end, cw_uint32_t *r_bufvcnt)
     else
     {
 	/* Split. */
-	buf->bufv[0].data = &buf->b[start->apos * buf->elmsize];
+	buf->bufv[0].data = &buf->b[start->apos];
 	buf->bufv[0].len = buf->gap_off - start->apos;
 
-	buf->bufv[1].data = &buf->b[(buf->gap_off + buf->gap_len)
-				    * buf->elmsize];
+	buf->bufv[1].data = &buf->b[(buf->gap_off + buf->gap_len)];
 	buf->bufv[1].len = end->apos - buf->gap_off - buf->gap_len;
 
 	*r_bufvcnt = 2;
@@ -1807,16 +1720,16 @@ bufm_range_get(cw_bufm_t *a_start, cw_bufm_t *a_end, cw_uint32_t *r_bufvcnt)
 
 void
 bufm_before_insert(cw_bufm_t *a_bufm, const cw_bufv_t *a_bufv,
-		   cw_uint32_t a_bufvcnt, cw_uint32_t a_elmsize)
+		   cw_uint32_t a_bufvcnt)
 {
-    bufm_l_insert(a_bufm, TRUE, FALSE, a_bufv, a_bufvcnt, a_elmsize);
+    bufm_l_insert(a_bufm, TRUE, FALSE, a_bufv, a_bufvcnt);
 }
 
 void
 bufm_after_insert(cw_bufm_t *a_bufm, const cw_bufv_t *a_bufv,
-		  cw_uint32_t a_bufvcnt, cw_uint32_t a_elmsize)
+		  cw_uint32_t a_bufvcnt)
 {
-    bufm_l_insert(a_bufm, TRUE, TRUE, a_bufv, a_bufvcnt, a_elmsize);
+    bufm_l_insert(a_bufm, TRUE, TRUE, a_bufv, a_bufvcnt);
 }
 
 void

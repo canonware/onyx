@@ -1407,7 +1407,7 @@ modslate_marker_before_insert(void *a_data, cw_nxo_t *a_thread)
     bufv.len = str_len;
 
     buffer_p_lock(buffer);
-    bufm_before_insert(&marker->bufm, &bufv, 1, 1);
+    bufm_before_insert(&marker->bufm, &bufv, 1);
     buffer->seq++;
     marker->seq++;
     buffer_p_unlock(buffer);
@@ -1454,7 +1454,7 @@ modslate_marker_after_insert(void *a_data, cw_nxo_t *a_thread)
     bufv.len = str_len;
 
     buffer_p_lock(buffer);
-    bufm_after_insert(&marker->bufm, &bufv, 1, 1);
+    bufm_after_insert(&marker->bufm, &bufv, 1);
     buffer->seq++;
     buffer_p_unlock(buffer);
 
@@ -1518,7 +1518,7 @@ modslate_marker_range_get(void *a_data, cw_nxo_t *a_thread)
 
     sbufv.data = nxo_string_get(nxo);
     sbufv.len = str_len;
-    bufv_copy(&sbufv, 1, 1, bufv, bufvcnt, buf_elmsize_get(&buffer->buf), 0);
+    bufv_copy(&sbufv, 1, bufv, bufvcnt, 0);
 
     buffer_p_unlock(buffer);
 
@@ -1582,7 +1582,7 @@ modslate_marker_range_cut(void *a_data, cw_nxo_t *a_thread)
 
     sbufv.data = nxo_string_get(nxo);
     sbufv.len = str_len;
-    bufv_copy(&sbufv, 1, 1, bufv, bufvcnt, buf_elmsize_get(&buffer->buf), 0);
+    bufv_copy(&sbufv, 1, bufv, bufvcnt, 0);
 
     /* Remove the buffer range. */
     bufm_remove(&marker_a->bufm, &marker_b->bufm);

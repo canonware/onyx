@@ -78,9 +78,6 @@ struct cw_buf_s
 
     /* Internal buffer state. */
 
-    /* Number of bytes per element, >= 1. */
-    cw_uint32_t elmsize;
-
     /* Text buffer, with gap. */
     cw_uint8_t *b;
 
@@ -108,9 +105,8 @@ struct cw_buf_s
 
 /* bufv. */
 cw_uint64_t
-bufv_copy(cw_bufv_t *a_to, cw_uint32_t a_to_len, cw_uint32_t a_to_sizeof,
-	  const cw_bufv_t *a_fr, cw_uint32_t a_fr_len, cw_uint32_t a_fr_sizeof,
-	  cw_uint64_t a_maxlen);
+bufv_copy(cw_bufv_t *a_to, cw_uint32_t a_to_len, const cw_bufv_t *a_fr,
+	  cw_uint32_t a_fr_len, cw_uint64_t a_maxlen);
 
 /* buf. */
 cw_buf_t *
@@ -120,12 +116,6 @@ buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc,
 
 void
 buf_delete(cw_buf_t *a_buf);
-
-cw_uint32_t
-buf_elmsize_get(cw_buf_t *a_buf);
-
-void
-buf_elmsize_set(cw_buf_t *a_buf, cw_uint32_t a_elmsize);
 
 cw_uint64_t
 buf_len(cw_buf_t *a_buf);
@@ -196,11 +186,11 @@ bufm_range_get(cw_bufm_t *a_start, cw_bufm_t *a_end, cw_uint32_t *r_iovcnt);
 
 void
 bufm_before_insert(cw_bufm_t *a_bufm, const cw_bufv_t *a_bufv,
-		   cw_uint32_t a_bufvcnt, cw_uint32_t a_elmsize);
+		   cw_uint32_t a_bufvcnt);
 
 void
 bufm_after_insert(cw_bufm_t *a_bufm, const cw_bufv_t *a_bufv,
-		  cw_uint32_t a_bufvcnt, cw_uint32_t a_elmsize);
+		  cw_uint32_t a_bufvcnt);
 
 void
 bufm_remove(cw_bufm_t *a_start, cw_bufm_t *a_end);

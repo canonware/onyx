@@ -22,7 +22,7 @@ buffer_type(cw_nxo_t *a_nxo);
 cw_nxn_t
 marker_type(cw_nxo_t *a_nxo);
 
-/* Operators. */
+/* Hooks. */
 
 /* buffer. */
 void
