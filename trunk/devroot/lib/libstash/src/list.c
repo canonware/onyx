@@ -61,7 +61,7 @@ cw_list_t *
 #ifdef _CW_REENTRANT
 list_new(cw_list_t * a_list, cw_bool_t a_is_thread_safe)
 #else
-     list_new(cw_list_t * a_list)
+  list_new(cw_list_t * a_list)
 #endif
 {
   cw_list_t * retval;
@@ -735,35 +735,35 @@ list_dump(cw_list_t * a_list)
   }
 #endif
 
-  log_printf(cw_g_log,
-	     "=== cw_list_t ==============================================\n");
+  out_put(cw_g_out,
+	  "=== cw_list_t ==============================================\n");
 #ifdef _CW_REENTRANT
-  log_printf(cw_g_log, "is_malloced: [%d], is_thread_safe: [%d]\n",
-	     a_list->is_malloced, a_list->is_thread_safe);
+  out_put(cw_g_out, "is_malloced: [[[i32]], is_thread_safe: [[[i32]]\n",
+	  a_list->is_malloced, a_list->is_thread_safe);
 #else
-  log_printf(cw_g_log, "is_malloced: [%d]\n", a_list->is_malloced);
+  out_put(cw_g_out, "is_malloced: [[[i32]]\n", a_list->is_malloced);
 #endif
   {
-    char buf_a[21], buf_b[21];
-    
-    log_printf(cw_g_log, "count: [%s]  spares: [%s]\n",
-	       log_print_uint64(a_list->count, 10, buf_a),
-	       log_print_uint64(a_list->spares_count, 10, buf_b));
+    out_put(cw_g_out, "count: [[[i64]]  spares: [[[i64]]\n",
+	    a_list->count, a_list->spares_count);
   }
   
-  log_printf(cw_g_log, "head: [%010p]  tail: [%010p]  spares_head: [%010p]\n",
-	     a_list->head, a_list->tail, a_list->spares_head);
+  out_put(cw_g_out,
+	  "head: [[0x[p|w:8|p:0]]  tail: [[0x[p|w:8|p:0]]  "
+	  "spares_head: [[0x[p|w:8|p:0]]\n",
+	  a_list->head, a_list->tail, a_list->spares_head);
   if (a_list->count > 0)
   {
-    log_printf(cw_g_log, "head->item: [%010p]  tail->item: [%010p]\n",
-	       list_item_get(a_list->head), list_item_get(a_list->tail));
+    out_put(cw_g_out,
+	    "head->item: [[0x[p|w:8|p:0]]  tail->item: [[0x[p|w:8|p:0]]\n",
+	    list_item_get(a_list->head), list_item_get(a_list->tail));
   }
   else
   {
-    log_printf(cw_g_log, "head->item: [N/A]  tail->item: [N/A]\n");
+    out_put(cw_g_out, "head->item: [[N/A]  tail->item: [[N/A]\n");
   }
-  log_printf(cw_g_log,
-	     "============================================================\n");
+  out_put(cw_g_out,
+	  "============================================================\n");
   
 #ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)

@@ -40,8 +40,8 @@ thd_new(cw_thd_t * a_thd,
   error = pthread_create(&retval->thread, NULL, a_start_func, a_arg);
   if (error)
   {
-    log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		"Error in pthread_create(): %s\n", strerror(error));
+    out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+	      "Error in pthread_create(): [s]\n", strerror(error));
     abort();
   }
 
@@ -59,8 +59,8 @@ thd_delete(cw_thd_t * a_thd)
   error = pthread_detach(a_thd->thread);
   if (error)
   {
-    log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		"Error in pthread_detach(): %s\n", strerror(error));
+    out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+	      "Error in pthread_detach(): [s]\n", strerror(error));
     abort();
   }
   
@@ -81,8 +81,8 @@ thd_join(cw_thd_t * a_thd)
   error = pthread_join(a_thd->thread, &retval);
   if (error)
   {
-    log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		"Error in pthread_join(): %s\n", strerror(error));
+    out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+	      "Error in pthread_join(): [s]\n", strerror(error));
     abort();
   }
 
@@ -117,8 +117,8 @@ mtx_new(cw_mtx_t * a_mtx)
   error = pthread_mutex_init(&retval->mutex, NULL);
   if (error)
   {
-    log_eprintf(NULL, NULL, 0, __FUNCTION__,
-		"Error in pthread_mutex_init: %s\n", strerror(error));
+    out_put_e(NULL, NULL, 0, __FUNCTION__,
+	      "Error in pthread_mutex_init: [s]\n", strerror(error));
     abort();
   }
 
@@ -136,8 +136,8 @@ mtx_delete(cw_mtx_t * a_mtx)
   error = pthread_mutex_destroy(&a_mtx->mutex);
   if (error)
   {
-    log_eprintf(NULL, NULL, 0, __FUNCTION__,
-		"Error in pthread_mutex_destroy(): %s\n", strerror(error));
+    out_put_e(NULL, NULL, 0, __FUNCTION__,
+	      "Error in pthread_mutex_destroy(): [s]\n", strerror(error));
     abort();
   }
 
@@ -157,8 +157,8 @@ mtx_lock(cw_mtx_t * a_mtx)
   error = pthread_mutex_lock(&a_mtx->mutex);
   if (error)
   {
-    log_eprintf(NULL, NULL, 0, __FUNCTION__,
-		"Error in pthread_mutex_lock(): %s\n", strerror(error));
+    out_put_e(NULL, NULL, 0, __FUNCTION__,
+	      "Error in pthread_mutex_lock(): [s]\n", strerror(error));
     abort();
   }
 }
@@ -182,8 +182,8 @@ mtx_trylock(cw_mtx_t * a_mtx)
   }
   else 
   {
-    log_eprintf(NULL, NULL, 0, __FUNCTION__,
-		"Error in pthread_mutex_trylock(): %s\n", strerror(error));
+    out_put_e(NULL, NULL, 0, __FUNCTION__,
+	      "Error in pthread_mutex_trylock(): [s]\n", strerror(error));
     abort();
   }
 
@@ -200,8 +200,8 @@ mtx_unlock(cw_mtx_t * a_mtx)
   error = pthread_mutex_unlock(&a_mtx->mutex);
   if (error)
   {
-    log_eprintf(NULL, NULL, 0, __FUNCTION__,
-		"Error in pthread_mutex_unlock(): %s\n", strerror(error));
+    out_put_e(NULL, NULL, 0, __FUNCTION__,
+	      "Error in pthread_mutex_unlock(): [s]\n", strerror(error));
     abort();
   }
 }
@@ -230,8 +230,8 @@ cnd_new(cw_cnd_t * a_cnd)
   error = pthread_cond_init(&retval->condition, NULL);
   if (error)
   {
-    log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		"Error in pthread_cond_init(): %s\n", strerror(error));
+    out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+	      "Error in pthread_cond_init(): [s]\n", strerror(error));
     abort();
   }
 
@@ -249,8 +249,8 @@ cnd_delete(cw_cnd_t * a_cnd)
   error = pthread_cond_destroy(&a_cnd->condition);
   if (error)
   {
-    log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		"Error in pthread_cond_destroy(): %s\n", strerror(error));
+    out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+	      "Error in pthread_cond_destroy(): [s]\n", strerror(error));
     abort();
   }
 
@@ -270,8 +270,8 @@ cnd_signal(cw_cnd_t * a_cnd)
   error = pthread_cond_signal(&a_cnd->condition);
   if (error)
   {
-    log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		"Error in pthread_cond_signal(): %s\n", strerror(error));
+    out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+	      "Error in pthread_cond_signal(): [s]\n", strerror(error));
     abort();
   }
 }
@@ -286,8 +286,8 @@ cnd_broadcast(cw_cnd_t * a_cnd)
   error = pthread_cond_broadcast(&a_cnd->condition);
   if (error)
   {
-    log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		"Error in pthread_cond_broadcast(): %s\n", strerror(error));
+    out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+	      "Error in pthread_cond_broadcast(): [s]\n", strerror(error));
     abort();
   }
 }
@@ -313,8 +313,8 @@ cnd_timedwait(cw_cnd_t * a_cnd, cw_mtx_t * a_mtx,
   }
   else
   {
-    log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		"Error in pthread_cond_timedwait(): %s\n", strerror(error));
+    out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+	      "Error in pthread_cond_timedwait(): [s]\n", strerror(error));
     abort();
   }
   
@@ -332,8 +332,8 @@ cnd_wait(cw_cnd_t * a_cnd, cw_mtx_t * a_mtx)
   error = pthread_cond_wait(&a_cnd->condition, &a_mtx->mutex);
   if (error)
   {
-    log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		"Error in pthread_cond_wait: %s\n", strerror(error));
+    out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+	      "Error in pthread_cond_wait: [s]\n", strerror(error));
     abort();
   }
 }
@@ -501,8 +501,8 @@ tsd_new(cw_tsd_t * a_tsd, void (*a_func)(void *))
   error = pthread_key_create(&retval->key, a_func);
   if (error)
   {
-    log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		"Error in pthread_key_create(): %s\n", strerror(error));
+    out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+	      "Error in pthread_key_create(): [s]\n", strerror(error));
     abort();
   }
 
@@ -520,8 +520,8 @@ tsd_delete(cw_tsd_t * a_tsd)
   error = pthread_key_delete(a_tsd->key);
   if (error)
   {
-    log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		"Error in pthread_key_delete(): %s\n", strerror(error));
+    out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+	      "Error in pthread_key_delete(): [s]\n", strerror(error));
     abort();
   }
 
@@ -553,8 +553,8 @@ tsd_set(cw_tsd_t * a_tsd, void * a_val)
   error = pthread_setspecific(a_tsd->key, a_val);
   if (error)
   {
-    log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		"Error in pthread_setspecific(): %s\n", strerror(error));
+    out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+	      "Error in pthread_setspecific(): [s]\n", strerror(error));
     abort();
   }
 }

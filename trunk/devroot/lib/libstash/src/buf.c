@@ -166,54 +166,54 @@ buf_dump(cw_buf_t * a_buf, const char * a_prefix)
     mtx_lock(&a_buf->lock);
   }
 #endif
-  log_printf(cw_g_log,
-	     "%s| buf_dump()\n",
+  out_put(cw_g_out,
+	     "[s]| buf_dump()\n",
 	     a_prefix);
 #ifdef _LIBSTASH_DBG
-  log_printf(cw_g_log,
-	     "%s|--> magic : 0x%x\n",
+  out_put(cw_g_out,
+	     "[s]|--> magic : 0x[i32|b:16]\n",
 	     a_prefix, a_buf->magic);
 #endif
-  log_printf(cw_g_log,
-	     "%s|--> is_malloced : %s\n",
+  out_put(cw_g_out,
+	     "[s]|--> is_malloced : [s]\n",
 	     a_prefix, (a_buf->is_malloced) ? "TRUE" : "FALSE");
 #ifdef _CW_REENTRANT
-  log_printf(cw_g_log,
-	     "%s|--> is_threadsafe : %s\n",
+  out_put(cw_g_out,
+	     "[s]|--> is_threadsafe : [s]\n",
 	     a_prefix, (a_buf->is_threadsafe) ? "TRUE" : "FALSE");
 #endif
-  log_printf(cw_g_log,
-	     "%s|--> size : %u\n",
+  out_put(cw_g_out,
+	     "[s]|--> size : [i32]\n",
 	     a_prefix, a_buf->size);
-  log_printf(cw_g_log,
-	     "%s|--> array_size : %u\n",
+  out_put(cw_g_out,
+	     "[s]|--> array_size : [i32]\n",
 	     a_prefix, a_buf->array_size);
-  log_printf(cw_g_log,
-	     "%s|--> array_num_valid : %u\n",
+  out_put(cw_g_out,
+	     "[s]|--> array_num_valid : [i32]\n",
 	     a_prefix, a_buf->array_num_valid);
-  log_printf(cw_g_log,
-	     "%s|--> array_start : %u\n",
+  out_put(cw_g_out,
+	     "[s]|--> array_start : [i32]\n",
 	     a_prefix, a_buf->array_start);
-  log_printf(cw_g_log,
-	     "%s|--> array_end : %u\n",
+  out_put(cw_g_out,
+	     "[s]|--> array_end : [i32]\n",
 	     a_prefix, a_buf->array_end);
-  log_printf(cw_g_log,
-	     "%s|--> is_cumulative_valid : %s\n",
+  out_put(cw_g_out,
+	     "[s]|--> is_cumulative_valid : [s]\n",
 	     a_prefix, (a_buf->is_cumulative_valid) ? "TRUE" : "FALSE");
-  log_printf(cw_g_log,
-	     "%s|--> is_cached_bufel_valid : %s\n",
+  out_put(cw_g_out,
+	     "[s]|--> is_cached_bufel_valid : [s]\n",
 	     a_prefix, (a_buf->is_cached_bufel_valid) ? "TRUE" : "FALSE");
-  log_printf(cw_g_log,
-	     "%s|--> cached_bufel : %u\n",
+  out_put(cw_g_out,
+	     "[s]|--> cached_bufel : [i32]\n",
 	     a_prefix, a_buf->cached_bufel);
   
   for (i = 0; i < a_buf->array_size; i++)
   {
-    log_printf(cw_g_log,
-	       "%s|\\\n"
-	       "%s| |--> cumulative_index[%lu] : %lu\n"
-	       "%s| |--> bufel_array[%lu] : \n"
-	       "%s|  \\\n",
+    out_put(cw_g_out,
+	       "[s]|\\\n"
+	       "[s]| |--> cumulative_index[[[i32]] : [i32]\n"
+	       "[s]| |--> bufel_array[[[i32]] : \n"
+	       "[s]|  \\\n",
 	       a_prefix,
 	       a_prefix, i, a_buf->cumulative_index[i],
 	       a_prefix, i,
@@ -221,15 +221,15 @@ buf_dump(cw_buf_t * a_buf, const char * a_prefix)
 
     /* Dump bufel. */
 #ifdef _LIBSTASH_DBG
-    log_printf(cw_g_log,
-	       "%s|   |--> magic : 0x%x\n",
+    out_put(cw_g_out,
+	       "[s]|   |--> magic : 0x[i32|b:16]\n",
 	       a_prefix, a_buf->bufel_array[i].magic);
 #endif
-    log_printf(cw_g_log,
-	       "%s|   |--> beg_offset : %lu\n",
+    out_put(cw_g_out,
+	       "[s]|   |--> beg_offset : [i32]\n",
 	       a_prefix, a_buf->bufel_array[i].beg_offset);
-    log_printf(cw_g_log,
-	       "%s|   |--> end_offset : %lu\n",
+    out_put(cw_g_out,
+	       "[s]|   |--> end_offset : [i32]\n",
 	       a_prefix, a_buf->bufel_array[i].end_offset);
 #ifdef _LIBSTASH_DBG
     if ((NULL != a_buf->bufel_array[i].bufc)
@@ -240,9 +240,9 @@ buf_dump(cw_buf_t * a_buf, const char * a_prefix)
     {
       char * sub_prefix;
       
-      log_printf(cw_g_log,
-		 "%s|   |--> bufc : 0x%x\n"
-		 "%s|    \\\n",
+      out_put(cw_g_out,
+		 "[s]|   |--> bufc : 0x[i32|b:16]\n"
+		 "[s]|    \\\n",
 		 a_prefix, a_buf->bufel_array[i].bufc, a_prefix);
       
       sub_prefix = _cw_malloc(strlen(a_prefix) + 7);
@@ -252,16 +252,15 @@ buf_dump(cw_buf_t * a_buf, const char * a_prefix)
       }
       else
       {
-	
-	sprintf(sub_prefix, "%s|     ", a_prefix);
+	out_put_s(cw_g_out, sub_prefix, "[s]|     ", a_prefix);
 	bufc_p_dump(a_buf->bufel_array[i].bufc, sub_prefix);
 	_cw_free(sub_prefix);
       }
     }
     else
     {
-      log_printf(cw_g_log,
-		 "%s|   \\--> bufc : 0x%x (invalid)\n",
+      out_put(cw_g_out,
+		 "[s]|   \\--> bufc : 0x[i32|b:16] (invalid)\n",
 		 a_prefix, a_buf->bufel_array[i].bufc);
     }
   }
@@ -2560,42 +2559,42 @@ bufc_p_dump(cw_bufc_t * a_bufc, const char * a_prefix)
   mtx_lock(&a_bufc->lock);
 #endif
   
-  log_printf(cw_g_log,
-	     "%s| bufc_dump()\n",
+  out_put(cw_g_out,
+	     "[s]| bufc_dump()\n",
 	     a_prefix);
 #ifdef _LIBSTASH_DBG
-  log_printf(cw_g_log,
-	     "%s|--> magic : 0x%x\n",
+  out_put(cw_g_out,
+	     "[s]|--> magic : 0x[i32|b:16]\n",
 	     a_prefix, a_bufc->magic);
 #endif
-  log_printf(cw_g_log,
-	     "%s|--> free_func : %p\n",
+  out_put(cw_g_out,
+	     "[s]|--> free_func : 0x[p]\n",
 	     a_prefix, a_bufc->dealloc_func);
-  log_printf(cw_g_log,
-	     "%s|--> free_arg : %p\n",
+  out_put(cw_g_out,
+	     "[s]|--> free_arg : 0x[p]\n",
 	     a_prefix, a_bufc->dealloc_arg);
-  log_printf(cw_g_log,
-	     "%s|--> ref_count : %u\n",
+  out_put(cw_g_out,
+	     "[s]|--> ref_count : [i32]\n",
 	     a_prefix, a_bufc->ref_count);
-  log_printf(cw_g_log,
-	     "%s|--> is_writeable : %s\n",
+  out_put(cw_g_out,
+	     "[s]|--> is_writeable : [s]\n",
 	     a_prefix, a_bufc->is_writeable ? "TRUE" : "FALSE");
-  log_printf(cw_g_log,
-	     "%s|--> buf_size : %u\n",
+  out_put(cw_g_out,
+	     "[s]|--> buf_size : [i32]\n",
 	     a_prefix, a_bufc->buf_size);
-  log_printf(cw_g_log,
-	     "%s\\--> buf (0x%08x) : ",
+  out_put(cw_g_out,
+	     "[s]\\--> buf (0x[i32|w:8|p:0|b:16]) : ",
 	     a_prefix, a_bufc->buf);
   
   for (i = 0; i < a_bufc->buf_size; i++)
   {
     if (i % 16 == 0)
     {
-      log_printf(cw_g_log, "\n%s         [%4x] ", a_prefix, i);
+      out_put(cw_g_out, "\n[s]         [[[i32|w:4|b:16]] ", a_prefix, i);
     }
-    log_printf(cw_g_log, "%02x ", a_bufc->buf[i]);
+    out_put(cw_g_out, "[i32|w:2|p:0|b:16] ", a_bufc->buf[i]);
   }
-  log_printf(cw_g_log, "\n");
+  out_put(cw_g_out, "\n");
   
 #ifdef _CW_REENTRANT
   mtx_unlock(&a_bufc->lock);

@@ -326,8 +326,8 @@ res_dump(cw_res_t * a_res, char * a_filename)
     t_log = log_new();
     if (log_set_logfile(t_log, a_filename, TRUE) == TRUE)
     {
-      log_leprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		   "Error opening file \"%s\"\n", a_filename);
+      out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+		  "Error opening file \"[s]\"\n", a_filename);
       retval = TRUE;
       goto RETURN;
     }
@@ -448,7 +448,7 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	/* Make sure it's an EOF, not an error. */
 	if (ferror(a_res->fd))
 	{
-	  log_printf(cw_g_log, "res_parse_res(): Error reading from file\n");
+	  out_put(cw_g_out, "res_parse_res(): Error reading from file\n");
 	  retval = TRUE;
 	  break;
 	}
@@ -466,7 +466,7 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
     
     if (dbg_is_registered(cw_g_dbg, "res_state"))
     {
-      log_printf(cw_g_log, "res_parse_res(): State == %d, Input == \'%c\'\n",
+      out_put(cw_g_out, "res_parse_res(): State == [i32], Input == \'[c]\'\n",
 		 state, c);
     }
     
@@ -528,9 +528,9 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	  default:
 	  {
 	    /* Error. */
-	    log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
+	    out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
 			"Illegal character while in _LIBSTASH_RES_STATE_START,"
-			" line %d, column %d\n",
+			" line [i32], column [i32]\n",
 			line_num, col_num);
 	    retval = TRUE;
 	    break;
@@ -587,10 +587,10 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	  case _LIBSTASH_RES_CHAR_OTHER:
 	  default:
 	  {
-	    log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
+	    out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
 			"Illegal character while in "
 			"_LIBSTASH_RES_STATE_BEGIN_WHITESPACE,"
-			" line %d, column %d\n",
+			" line [i32], column [i32]\n",
 			line_num, col_num);
 	    retval = TRUE;
 	    break;
@@ -635,10 +635,10 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	  default:
 	  {
 	    /* Error. */
-	    log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
+	    out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
 			"Illegal character while in "
 			"_LIBSTASH_RES_STATE_BEGIN_COMMENT, "
-			"line %d, column %d\n",
+			"line [i32], column [i32]\n",
 			line_num, col_num);
 	    retval = TRUE;
 	    break;
@@ -687,9 +687,9 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	  default:
 	  {
 	    /* Error. */
-	    log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
+	    out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
 			"Illegal character while in _LIBSTASH_RES_STATE_NAME, "
-			"line %d, column %d\n",
+			"line [i32], column [i32]\n",
 			line_num, col_num);
 	    retval = TRUE;
 	    break;
@@ -728,10 +728,10 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	  default:
 	  {
 	    /* Error. */
-	    log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
+	    out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
 			"Illegal character while in "
 			"_LIBSTASH_RES_STATE_POST_NAME_WHITESPACE, "
-			"line %d, column %d\n",
+			"line [i32], column [i32]\n",
 			line_num, col_num);
 	    retval = TRUE;
 	    break;
@@ -813,10 +813,10 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	  default:
 	  {
 	    /* Error. */
-	    log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
+	    out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
 			"Illegal character while in "
 			"_LIBSTASH_RES_STATE_POST_COLON_WHITESPACE, "
-			"line %d, column %d\n",
+			"line [i32], column [i32]\n",
 			line_num, col_num);
 	    retval = TRUE;
 	    break;
@@ -898,9 +898,9 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	  default:
 	  {
 	    /* Error. */
-	    log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
+	    out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
 			"Illegal character while in _LIBSTASH_RES_STATE_VALUE, "
-			"line %d, column %d\n",
+			"line [i32], column [i32]\n",
 			line_num, col_num);
 	    retval = TRUE;
 	    break;
@@ -976,10 +976,10 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	  default:
 	  {
 	    /* Error. */
-	    log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
+	    out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
 			"Illegal character while in "
 			"_LIBSTASH_RES_STATE_VALUE_BACKSLASH, "
-			"line %d, column %d\n",
+			"line [i32], column [i32]\n",
 			line_num, col_num);
 	    retval = TRUE;
 	    break;
@@ -1019,10 +1019,10 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	  default:
 	  {
 	    /* Error. */
-	    log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
+	    out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
 			"Illegal character while in "
 			"_LIBSTASH_RES_STATE_BACKSLASH_WHITESPACE, "
-			"line %d, column %d\n",
+			"line [i32], column [i32]\n",
 			line_num, col_num);
 	    retval = TRUE;
 	    break;
@@ -1067,10 +1067,10 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	  default:
 	  {
 	    /* Error. */
-	    log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
+	    out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
 			"Illegal character while in "
 			"_LIBSTASH_RES_STATE_TRAILING_COMMENT, "
-			"line %d, column %d\n",
+			"line [i32], column [i32]\n",
 			line_num, col_num);
 	    retval = TRUE;
 	    break;
@@ -1080,8 +1080,8 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
       }
       default:
       {
-	log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		    "Jumped to non-existant state, line %d, column %d\n",
+	out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+		    "Jumped to non-existant state, line [i32], column [i32]\n",
 		    line_num, col_num);
 	retval = TRUE;
 	break;
@@ -1240,8 +1240,8 @@ res_p_merge_res(cw_res_t * a_res, const char * a_name, const char * a_val)
 
   if (dbg_is_registered(cw_g_dbg, "res_state"))
   {
-    log_printf(cw_g_log,
-	       "res_merge_res(): Merging name == :%s:, value == :%s:\n",
+    out_put(cw_g_out,
+	       "res_merge_res(): Merging name == :[s]:, value == :[s]:\n",
 	       a_name, a_val);
   }
 

@@ -22,7 +22,7 @@
 #include <ctype.h>
 
 #include "libstash/out_p.h"
-/*  #include "libstash/mem_l.h" */
+#include "libstash/mem_l.h"
 
 cw_out_t *
 out_new(cw_out_t * a_out)
@@ -468,7 +468,13 @@ out_put_fv(cw_out_t * a_out, cw_sint32_t a_fd,
   RETURN:
   if (NULL != output)
   {
-    _cw_free(output);
+    /* This string was allocated using the mem class.  Free it as such. */
+/*      _cw_free(output); */
+#ifdef _LIBSTASH_DBG
+    mem_free(cw_g_mem, output, __FILE__, __LINE__);
+#else
+    mem_free(cw_g_mem, output);
+#endif
   }
   return retval;
 }
@@ -560,7 +566,15 @@ out_put_sva(cw_out_t * a_out, char ** r_str,
     retval = out_size;
     goto RETURN;
   }
-  output = (char *) _cw_malloc(out_size + 1);
+  /* Since this string will get passed out to the user, we must allocate it
+   * using the mem class.  Otherwise, if the user tries to free the string with
+   * mem_free(), an error will occur. */
+/*    output = (char *) _cw_malloc(out_size + 1); */
+#ifdef _LIBSTASH_DBG
+  output = (char *) mem_malloc(cw_g_mem, out_size + 1, __FILE__, __LINE__);
+#else
+  output = (char *) mem_malloc(cw_g_mem, out_size + 1);
+#endif
   if (NULL == output)
   {
     retval = -1;
@@ -983,7 +997,13 @@ out_p_put_fvle(cw_out_t * a_out, cw_sint32_t a_fd,
   RETURN:
   if (NULL != format)
   {
-    _cw_free(format);
+    /* This string was allocated using the mem class.  Free it as such. */
+/*      _cw_free(format); */
+#ifdef _LIBSTASH_DBG
+    mem_free(cw_g_mem, format, __FILE__, __LINE__);
+#else
+    mem_free(cw_g_mem, format);
+#endif
   }
   return retval;
 }

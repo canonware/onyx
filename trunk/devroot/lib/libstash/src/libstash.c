@@ -29,19 +29,6 @@ libstash_init(void)
   cw_bool_t retval = FALSE;
   
   /* Start up global modules. */
-  if (cw_g_log == NULL)
-  {
-    cw_g_log = log_new();
-  }
-  if (cw_g_dbg == NULL)
-  {
-    cw_g_dbg = dbg_new();
-  }
-  if (cw_g_mem == NULL)
-  {
-    cw_g_mem = mem_new();
-  }
-  /* XXX Start this first. */
   if (cw_g_out == NULL)
   {
     cw_g_out = out_new(NULL);
@@ -53,6 +40,18 @@ libstash_init(void)
 	retval = TRUE;
       }
     }
+  }
+  if (cw_g_log == NULL)
+  {
+    cw_g_log = log_new();
+  }
+  if (cw_g_dbg == NULL)
+  {
+    cw_g_dbg = dbg_new();
+  }
+  if (cw_g_mem == NULL)
+  {
+    cw_g_mem = mem_new();
   }
 
   if ((NULL == cw_g_out)
@@ -70,11 +69,6 @@ void
 libstash_shutdown(void)
 {
   /* Shut down global modules in reverse order. */
-
-  /* XXX Shut this down last. */
-  out_delete(cw_g_out);
-  cw_g_out = NULL;
-  
   mem_delete(cw_g_mem);
   cw_g_mem = NULL;
 
@@ -83,4 +77,7 @@ libstash_shutdown(void)
 
   log_delete(cw_g_log);
   cw_g_log = NULL;
+
+  out_delete(cw_g_out);
+  cw_g_out = NULL;
 }

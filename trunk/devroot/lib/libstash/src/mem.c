@@ -121,7 +121,7 @@ mem_malloc(cw_mem_t * a_mem, size_t a_size)
       if (dbg_is_registered(cw_g_dbg, "mem_error"))
       {
 	_cw_assert(old_allocation != NULL);
-	
+
 	log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
 		    "%p multiply-allocated (was at %s, line %d, size %u;"
 		    " now at %s, line %d, size %u)\n",

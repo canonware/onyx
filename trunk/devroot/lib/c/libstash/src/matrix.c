@@ -278,8 +278,8 @@ matrix_get_element(cw_matrix_t * a_matrix, cw_uint32_t a_x_pos,
   _cw_assert(a_y_pos < a_matrix->y_size);
 
   retval = a_matrix->grid[a_matrix->y_index[a_y_pos]
-			   * a_matrix->grid_x_size
-			   + a_matrix->x_index[a_x_pos]];
+			 * a_matrix->grid_x_size
+			 + a_matrix->x_index[a_x_pos]];
 
   return retval;
 }
@@ -293,8 +293,8 @@ matrix_set_element(cw_matrix_t * a_matrix, cw_uint32_t a_x_pos,
   _cw_assert(a_y_pos < a_matrix->y_size);
 
   a_matrix->grid[a_matrix->y_index[a_y_pos]
-		  * a_matrix->grid_x_size
-		  + a_matrix->x_index[a_x_pos]]
+		* a_matrix->grid_x_size
+		+ a_matrix->x_index[a_x_pos]]
     = a_val;
 }
 
@@ -366,10 +366,10 @@ matrix_dump(cw_matrix_t * a_matrix, cw_bool_t a_compact)
       {
 	for (i = 0; i < a_matrix->x_size; i++)
 	{
-	  log_printf(cw_g_log, "%s",
-		     matrix_get_element(a_matrix, i, j) ? "X" : ".");
+	  out_put(cw_g_out, "[s]",
+		  matrix_get_element(a_matrix, i, j) ? "X" : ".");
 	}
-	log_printf(cw_g_log, "\n");
+	out_put(cw_g_out, "\n");
       }
     }
     else
@@ -378,7 +378,7 @@ matrix_dump(cw_matrix_t * a_matrix, cw_bool_t a_compact)
       char t_str[20];
 
       /* Figure out the maximum length of the labels. */
-      y_digits = sprintf(t_str, "%u", a_matrix->y_size -1);
+      y_digits = out_put_s(cw_g_out, t_str, "[i32]", a_matrix->y_size -1);
 	
       /* Figure out the maximum length of any field. */
       for (y = 0, greatest = 0; y < a_matrix->y_size; y++)
@@ -393,76 +393,76 @@ matrix_dump(cw_matrix_t * a_matrix, cw_bool_t a_compact)
       }
       if (greatest > (a_matrix->x_size - 1))
       {
-	x_digits = sprintf(t_str, "%u", greatest);
+	x_digits = out_put_s(cw_g_out, t_str, "[i32]", greatest);
       }
       else
       {
-	x_digits = sprintf(t_str, "%u", a_matrix->x_size - 1);
+	x_digits = out_put_s(cw_g_out, t_str, "[i32]", a_matrix->x_size - 1);
       }
 
       /* Top labels. */
       for (k = 0; k < y_digits; k++)
       {
-	log_printf(cw_g_log, " ");
+	out_put(cw_g_out, " ");
       }
-      log_printf(cw_g_log, "|");
+      out_put(cw_g_out, "|");
       for (i = 0; i < a_matrix->x_size; i++)
       {
-	sprintf(t_str, "%u", i);
+	out_put_s(cw_g_out, t_str, "[i32]", i);
 	t_len = strlen(t_str);
 	for (k = 0; k < ((x_digits + 1) - t_len); k++)
 	{
-	  log_printf(cw_g_log, " ");
+	  out_put(cw_g_out, " ");
 	}
-	log_printf(cw_g_log, "%u", i);
+	out_put(cw_g_out, "[i32]", i);
       }
-      log_printf(cw_g_log, "\n");
+      out_put(cw_g_out, "\n");
 
       /* Top horizontal line. */
       for (k = 0; k < y_digits; k++)
       {
-	log_printf(cw_g_log, "-");
+	out_put(cw_g_out, "-");
       }
-      log_printf(cw_g_log, "+");
+      out_put(cw_g_out, "+");
       for (i = 0; i < (a_matrix->x_size * (x_digits + 1)); i++)
       {
-	log_printf(cw_g_log, "-");
+	out_put(cw_g_out, "-");
       }
-      log_printf(cw_g_log, "\n");
+      out_put(cw_g_out, "\n");
 
       for (j = 0; j < a_matrix->y_size; j++)
       {
 	/* Side label. */
-	sprintf(t_str, "%u", j);
+	out_put_s(cw_g_out, t_str, "[i32]", j);
 	t_len = strlen(t_str);
 	for (k = 0; k < ((y_digits) - t_len); k++)
 	{
-	  log_printf(cw_g_log, " ");
+	  out_put(cw_g_out, " ");
 	}
-	log_printf(cw_g_log, "%u|", j);
+	out_put(cw_g_out, "[i32]|", j);
 
 	/* Matrix elements. */
 	for (i = 0; i < a_matrix->x_size; i++)
 	{
 	  for (k = 0;
-	       k < (x_digits + 1 - sprintf(t_str, "%u",
-					   matrix_get_element(a_matrix,
-							      i, j)));
+	       k < (x_digits + 1 - out_put_s(cw_g_out, t_str, "[i32]",
+					     matrix_get_element(a_matrix,
+								i, j)));
 	       k++)
 	  {
-	    log_printf(cw_g_log, " ");
+	    out_put(cw_g_out, " ");
 	  }
-	  log_printf(cw_g_log, "%d",
-		     matrix_get_element(a_matrix, i, j));
+	  out_put(cw_g_out, "[i32|s:s]",
+		  matrix_get_element(a_matrix, i, j));
 	}
 	
-	log_printf(cw_g_log, "\n");
+	out_put(cw_g_out, "\n");
       }
     }
   }
   else
   {
-    log_printf(cw_g_log, "Invalid matrix\n");
+    out_put(cw_g_out, "Invalid matrix\n");
   }
 }
 

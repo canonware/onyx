@@ -87,7 +87,7 @@ ring_dump(cw_ring_t * a_ring, const char * a_prefix)
 
   _cw_check_ptr(a_prefix);
 
-  log_printf(cw_g_log, "%sbegin ====================================\n",
+  out_put(cw_g_out, "[s]begin ====================================\n",
 	     a_prefix);
   
   t_ring = a_ring;
@@ -96,9 +96,9 @@ ring_dump(cw_ring_t * a_ring, const char * a_prefix)
     _cw_check_ptr(t_ring);
     _cw_assert(t_ring->magic == _CW_RING_MAGIC);
 
-    log_printf(cw_g_log,
-	       "%sprev: %p, this: %p, next: %p, data: %p, "
-	       "dealloc_func: %p, dealloc_arg: %p\n",
+    out_put(cw_g_out,
+	       "[s]prev: 0x[p], this: 0x[p], next: 0x[p], data: 0x[p], "
+	       "dealloc_func: 0x[p], dealloc_arg: 0x[p]\n",
 	       a_prefix,
 	       t_ring->prev,
 	       t_ring,
@@ -109,7 +109,7 @@ ring_dump(cw_ring_t * a_ring, const char * a_prefix)
     
     t_ring = t_ring->next;
   } while (t_ring != a_ring);
-  log_printf(cw_g_log, "%send ======================================\n",
+  out_put(cw_g_out, "[s]end ======================================\n",
 	     a_prefix);
 }
 

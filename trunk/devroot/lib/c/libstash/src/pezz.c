@@ -160,21 +160,21 @@ pezz_delete(cw_pezz_t * a_pezz)
 
       if (i < (a_pezz->num_blocks * a_pezz->block_num_buffers))
       {
-	log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		    "%lu leaked buffer%s\n",
-		    (a_pezz->num_blocks * a_pezz->block_num_buffers) - i,
-		    (((a_pezz->num_blocks
-		       * a_pezz->block_num_buffers) - i) != 1) ? "s" : "");
+	out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+		  "[i32] leaked buffer[s]\n",
+		  (a_pezz->num_blocks * a_pezz->block_num_buffers) - i,
+		  (((a_pezz->num_blocks
+		     * a_pezz->block_num_buffers) - i) != 1) ? "s" : "");
       }
     }
     else
     {
       /* All the memory buffers are leaked! */
-      log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		  "%lu leaked buffer%s (all of them)\n",
-		  (a_pezz->num_blocks * a_pezz->block_num_buffers),
-		  ((a_pezz->num_blocks * a_pezz->block_num_buffers) != 1)
-		  ? "s" : "");
+      out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+		"[i32] leaked buffer[s] (all of them)\n",
+		(a_pezz->num_blocks * a_pezz->block_num_buffers),
+		((a_pezz->num_blocks * a_pezz->block_num_buffers) != 1)
+		? "s" : "");
     }
   }
 #endif
@@ -368,37 +368,37 @@ pezz_dump(cw_pezz_t * a_pezz, const char * a_prefix)
   mtx_lock(&a_pezz->lock);
 #endif
 
-  log_printf(cw_g_log, "%sstart ==========================================\n",
-	     a_prefix);
-  log_printf(cw_g_log, "%sbuffer_size : %lu\n",
-	     a_prefix, a_pezz->buffer_size);
-  log_printf(cw_g_log, "%sblock_num_buffers : %lu\n",
-	     a_prefix, a_pezz->block_num_buffers);
-  log_printf(cw_g_log, "%snum_blocks : %lu\n",
-	     a_prefix, a_pezz->num_blocks);
+  out_put(cw_g_out, "[s]start ==========================================\n",
+	  a_prefix);
+  out_put(cw_g_out, "[s]buffer_size : [i32]\n",
+	  a_prefix, a_pezz->buffer_size);
+  out_put(cw_g_out, "[s]block_num_buffers : [i32]\n",
+	  a_prefix, a_pezz->block_num_buffers);
+  out_put(cw_g_out, "[s]num_blocks : [i32]\n",
+	  a_prefix, a_pezz->num_blocks);
 
-  log_printf(cw_g_log, "%smem_blocks : %p\n",
-	     a_prefix, a_pezz->mem_blocks);
-  log_printf(cw_g_log, "%sring_blocks : %p\n",
-	     a_prefix, a_pezz->ring_blocks);
+  out_put(cw_g_out, "[s]mem_blocks : 0x[p]\n",
+	  a_prefix, a_pezz->mem_blocks);
+  out_put(cw_g_out, "[s]ring_blocks : 0x[p]\n",
+	  a_prefix, a_pezz->ring_blocks);
   
   for (i = 0; i < a_pezz->num_blocks; i++);
   {
-    log_printf(cw_g_log,
-	       "%smem_blocks[%lu] : %p, ring_blocks[%lu] : %p\n",
-	       a_prefix, i, a_pezz->mem_blocks[i], i, a_pezz->ring_blocks[i]);
+    out_put(cw_g_out,
+	    "[s]mem_blocks[[[i32]] : 0x[p], ring_blocks[[[i32]] : 0x[p]\n",
+	    a_prefix, i, a_pezz->mem_blocks[i], i, a_pezz->ring_blocks[i]);
   }
   
   if (NULL != a_pezz->spare_buffers)
   {
     char * prefix = (char *) _cw_malloc(strlen(a_prefix) + 17);
 
-    log_printf(cw_g_log, "%sspare_buffers : \n",
-	       a_prefix);
+    out_put(cw_g_out, "[s]spare_buffers : \n",
+	    a_prefix);
 
     if (NULL != prefix)
     {
-      sprintf(prefix,    "%s              : ", a_prefix);
+      out_put_s(cw_g_out, prefix,    "[s]              : ", a_prefix);
       ring_dump(a_pezz->spare_buffers, prefix);
       _cw_free(prefix);
     }
@@ -410,12 +410,12 @@ pezz_dump(cw_pezz_t * a_pezz, const char * a_prefix)
   }
   else
   {
-    log_printf(cw_g_log, "%sspare_buffers : (null)\n",
-	       a_prefix);
+    out_put(cw_g_out, "[s]spare_buffers : (null)\n",
+	    a_prefix);
   }
 
-  log_printf(cw_g_log, "%send ============================================\n",
-	     a_prefix);
+  out_put(cw_g_out, "[s]end ============================================\n",
+	  a_prefix);
 
 #ifdef _CW_REENTRANT
   mtx_unlock(&a_pezz->lock);

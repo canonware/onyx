@@ -172,14 +172,14 @@ bhp_dump(cw_bhp_t * a_bhp)
   }
 #endif
 
-  log_printf(cw_g_log, "=== bhp_dump() start ==============================\n");
-  log_printf(cw_g_log, "num_nodes: %s\n",
-	     log_print_uint64(a_bhp->num_nodes, 10, buf));
+  out_put(cw_g_out, "=== bhp_dump() start ==============================\n");
+  out_put(cw_g_out, "num_nodes: [s]\n",
+	  log_print_uint64(a_bhp->num_nodes, 10, buf));
   if (NULL != a_bhp->head)
   {
     bhp_p_dump(a_bhp->head, 0, NULL);
   }
-  log_printf(cw_g_log, "=== bhp_dump() end ================================\n");
+  out_put(cw_g_out, "=== bhp_dump() end ================================\n");
   
 #ifdef _CW_REENTRANT
   if (a_bhp->is_thread_safe == TRUE)
@@ -566,22 +566,22 @@ bhp_p_dump(cw_bhpi_t * a_bhpi, cw_uint32_t a_depth, cw_bhpi_t * a_last_printed)
     /* Indent. */
     for (i = 0; i < (a_depth * 38); i++)
     {
-      log_printf(cw_g_log, " ");
+      out_put(cw_g_out, " ");
     }
   }
-  log_printf(cw_g_log, "[deg:%d pri:%010p dat:%010p]",
-	     a_bhpi->degree, a_bhpi->priority, a_bhpi->data);
+  out_put(cw_g_out, "[[deg:[i32] pri:0x[p|w:8|p:0] dat:0x[p|w:8|p:0]]",
+	  a_bhpi->degree, a_bhpi->priority, a_bhpi->data);
   a_last_printed = a_bhpi;
   
   /* Child. */
   if (NULL != a_bhpi->child)
   {
-    log_printf(cw_g_log, "-");
+    out_put(cw_g_out, "-");
     a_last_printed = bhp_p_dump(a_bhpi->child, a_depth + 1, a_bhpi);
   }
   else
   {
-    log_printf(cw_g_log, "\n");
+    out_put(cw_g_out, "\n");
   }
 
   return a_last_printed;
@@ -706,7 +706,7 @@ bhp_p_union(cw_bhp_t * a_a, cw_bhp_t * a_b)
       curr_node = next_node;
     }
     else if (1 != a_a->priority_compare(curr_node->priority,
-					  next_node->priority)) /* <= */
+					next_node->priority)) /* <= */
     {
       /* The priority of the root of curr_node is <= the priority of the root of
        * next_node. */

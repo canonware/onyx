@@ -23,8 +23,6 @@ main()
   libstash_init();
   log_printf(cw_g_log, "Test begin\n");
 
-/*    dbg_register(cw_g_dbg, "mem_verbose"); */
-
   /* out_new(), out_delete(). */
   out_put(cw_g_out, "out_new(), out_delete()\n");
   {
