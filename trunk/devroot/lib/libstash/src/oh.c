@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 90 $
- * $Date: 1998-06-24 23:45:26 -0700 (Wed, 24 Jun 1998) $
+ * $Revision: 100 $
+ * $Date: 1998-06-27 23:37:29 -0700 (Sat, 27 Jun 1998) $
  *
  * <<< Description >>>
  *
@@ -885,7 +885,7 @@ oh_dump(cw_oh_t * a_oh_o, cw_bool_t a_all)
 	     a_oh_o->num_invalid);
   log_printf(g_log_o, "      pow h1         h2    shrink grow  rehash\n");
   log_printf(g_log_o, "      --- ---------- ----- ------ ----- ------\n");
-#ifdef _PEDANTIC
+#ifdef _CW_PEDANTIC
   log_printf(g_log_o, "Base: %2d  %10p %5d %5d  %5d %5d\n",
 	     a_oh_o->base_power,
 	     a_oh_o->base_h1,
@@ -946,7 +946,7 @@ oh_dump(cw_oh_t * a_oh_o, cw_bool_t a_all)
 	{
 	  log_printf(g_log_o, "TRUE     ");
 	}
-#ifdef _PEDANTIC
+#ifdef _CW_PEDANTIC
 	log_printf(g_log_o, "0x%08x %10p\n",
 		   a_oh_o->items[i]->key,
 		   a_oh_o->items[i]->data);
