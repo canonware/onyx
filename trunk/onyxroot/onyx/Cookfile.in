@@ -63,7 +63,11 @@ if [not [defined LDFLAGS]] then
  * User targets.
  */
 
-all : libs mods bins examples tests docs
+/*
+ * Leave tests and examples out, since they aren't generally necessary when
+ * building and installing.
+ */
+all : libs mods bins docs
   set default
 ;
 

@@ -39,13 +39,15 @@ Additional build targets of finer granularity include:
 	mods
 	<modname>
 	tests
+	examples
 
 Additional install targets of finer granularity include:
 
 	{bins,libs,mods,docs}_install
 	<binname>_bins_install
+	libs_install_[ias];
 	<libname>_libs_install
-	<libname>_libs_install_[as]
+	<libname>_libs_install_[ias]
 	<modname>_mods_install
 	docs_install_{ps,pdf,html}
 

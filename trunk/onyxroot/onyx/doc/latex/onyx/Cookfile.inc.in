@@ -51,14 +51,14 @@ onyx_docs_html :
 
 onyx_docs_install_ps : onyx_docs_ps
 {
-  @INSTALL@ -d [PREFIX]/share/onyx/doc/ps;
-  @INSTALL@ -m 0444 [ONYX_PS] [PREFIX]/share/onyx/doc/ps;
+  @INSTALL@ -d [PREFIX]/share/onyx-@onyx_version@/doc/ps;
+  @INSTALL@ -m 0444 [ONYX_PS] [PREFIX]/share/onyx-@onyx_version@/doc/ps;
 }
 
 onyx_docs_install_pdf : onyx_docs_pdf
 {
-  @INSTALL@ -d [PREFIX]/share/onyx/doc/pdf;
-  @INSTALL@ -m 0444 [ONYX_PDF] [PREFIX]/share/onyx/doc/pdf;
+  @INSTALL@ -d [PREFIX]/share/onyx-@onyx_version@/doc/pdf;
+  @INSTALL@ -m 0444 [ONYX_PDF] [PREFIX]/share/onyx-@onyx_version@/doc/pdf;
 }
 
 onyx_docs_install_html : onyx_docs_html
@@ -67,12 +67,12 @@ onyx_docs_install_html : onyx_docs_html
 data
 #![SHELL]
 
-echo @INSTALL@ -d [PREFIX]/share/onyx/doc/html
-@INSTALL@ -d [PREFIX]/share/onyx/doc/html
+echo @INSTALL@ -d [PREFIX]/share/onyx-@onyx_version@/doc/html
+@INSTALL@ -d [PREFIX]/share/onyx-@onyx_version@/doc/html
 
 for i in `find [dirname [ONYX_HTML]] -type f`; do
-  echo @INSTALL@ -m 0444 $i [PREFIX]/share/onyx/doc/html
-  @INSTALL@ -m 0444 $i [PREFIX]/share/onyx/doc/html
+  echo @INSTALL@ -m 0444 $i [PREFIX]/share/onyx-@onyx_version@/doc/html
+  @INSTALL@ -m 0444 $i [PREFIX]/share/onyx-@onyx_version@/doc/html
 done
 dataend
 }
@@ -83,8 +83,8 @@ onyx_docs_uninstall :
 data
 #![SHELL]
 
-echo rm -rf [PREFIX]/share/onyx/doc
-rm -rf [PREFIX]/share/onyx/doc
+echo rm -rf [PREFIX]/share/onyx-@onyx_version@/doc
+rm -rf [PREFIX]/share/onyx-@onyx_version@/doc
 dataend
 }
 

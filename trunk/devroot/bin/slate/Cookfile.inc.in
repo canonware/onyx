@@ -57,7 +57,7 @@ slate_bins_check_update :
 slate_bins_bootstrap : onyx
 {
   cat @srcroot@/bin/slate/src/slate_nxcode.nx
-    | [ONYX] @srcroot@/bin/slate/src/slate_nxcode_gen.nx
+    | @ONYX@ @srcroot@/bin/slate/src/slate_nxcode_gen.nx
     > @srcroot@/bin/slate/src/slate_nxcode.c;
 }
 
@@ -68,7 +68,7 @@ slate_bins_install : [SLATE]
 {
   @INSTALL@ -d [PREFIX]/bin;
 
-  [CC] [A_CFLAGS] -o [PREFIX]/bin/slate
+  [CC] [A_CFLAGS] -o [PREFIX]/bin/slate-@slate_version@
        [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [SLATE_SRCS]]
 #if @enable_libonyx@
 #if [matches elf @abi@]
@@ -76,16 +76,21 @@ slate_bins_install : [SLATE]
 #endif
 #endif
        [LDFLAGS] -lonyx @LIBS@;
-  chmod 0755 [PREFIX]/bin/slate;
+  chmod 0755 [PREFIX]/bin/slate-@slate_version@;
+  ln -s slate-@slate_version@ [PREFIX]/bin/slate;
 
   @INSTALL@ -d [PREFIX]/man/man1;
   @INSTALL@ -m 0444 @objroot@/bin/slate/man/man1/slate.1 [PREFIX]/man/man1;
+
+  ln -s slate-@slate_version@ [PREFIX]/share/slate;
 }
 
 slate_bins_uninstall :
 {
+  rm -f [PREFIX]/bin/slate-@slate_version@;
   rm -f [PREFIX]/bin/slate;
   rm -f [PREFIX]/man/man1/slate.1;
+  rm -f [PREFIX]/share/slate;
 }
 
 slate_bins_clean :

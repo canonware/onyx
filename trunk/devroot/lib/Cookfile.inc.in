@@ -26,7 +26,10 @@ libs_check_update : [addsuffix _libs_check_update @libs@];
 
 libs_bootstrap : [addsuffix _libs_bootstrap @libs@];
 
-libs_install : [addsuffix _libs_install @libs@];
+libs_install_i : [addsuffix _libs_install_i @libs@];
+libs_install_a : [addsuffix _libs_install_a @libs@];
+libs_install_s : [addsuffix _libs_install_s @libs@];
+libs_install : libs_install_i libs_install_a libs_install_s;
 
 libs_uninstall : [addsuffix _libs_uninstall @libs@];
 

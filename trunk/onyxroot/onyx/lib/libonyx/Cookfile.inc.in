@@ -137,7 +137,8 @@ libonyx_libs_check_update : libonyx_libs_tests
            [fromto @srcroot@/%0%.c @objroot@/%0% [LIBONYX_CTESTS]];
 }
 
-libonyx_libs_install : libonyx_libs_install_a libonyx_libs_install_s;
+libonyx_libs_install : libonyx_libs_install_i libonyx_libs_install_a
+                       libonyx_libs_install_s;
 
 libonyx_libs_uninstall :
 {
@@ -185,7 +186,7 @@ CPPFLAGS = [CPPFLAGS] -I@srcroot@/lib/libonyx/include
  * Build rules.
  */
 
-libonyx_libs_install_common :
+libonyx_libs_install_i :
 {
   [SHELL] -e;
 data
@@ -198,10 +199,12 @@ for i in [LIBONYX_INCS]; do
 	echo @INSTALL@ -m 0644 $i [PREFIX]/include/libonyx/
 	@INSTALL@ -m 0644 $i [PREFIX]/include/libonyx/
 done
-
-echo @INSTALL@ -d [PREFIX]/lib
-@INSTALL@ -d [PREFIX]/lib
 dataend
+}
+
+libonyx_libs_install_common :
+{
+  @INSTALL@ -d [PREFIX]/lib;
 }
 
 libonyx_libs_install_a : [LIBONYX_A] libonyx_libs_install_common

@@ -68,7 +68,7 @@ data
 
 echo \"@srcroot@/%0test/%.nx.in --> [target]\"
 
-echo \"#!@abs_objroot@/[TONYX]\" > [target]
+echo \"#!@abs_objroot@/@ONYX@\" > [target]
 echo \"!#\" >> [target]
 cat @srcroot@/%0test/%.nx.in >> [target];
 chmod u+x [target];

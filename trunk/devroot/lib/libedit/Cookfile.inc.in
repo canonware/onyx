@@ -55,6 +55,7 @@ libedit_libs_check_update :
 {
 }
 
+libedit_libs_install_i libedit_libs_install_a libedit_libs_install_s
 libedit_libs_install :
 {
 }

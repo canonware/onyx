@@ -60,26 +60,26 @@ modgtk_mods_install : [MODGTK]
 data
 #![SHELL]
 
-echo @INSTALL@ -d [PREFIX]/share/onyx/nxm
-@INSTALL@ -d [PREFIX]/share/onyx/nxm
+echo @INSTALL@ -d [PREFIX]/share/onyx-@onyx_version@/nxm
+@INSTALL@ -d [PREFIX]/share/onyx-@onyx_version@/nxm
 
-echo @INSTALL@ -m 0444 [MODGTK] [PREFIX]/share/onyx/nxm
-@INSTALL@ -m 0444 [MODGTK] [PREFIX]/share/onyx/nxm
+echo @INSTALL@ -m 0444 [MODGTK] [PREFIX]/share/onyx-@onyx_version@/nxm
+@INSTALL@ -m 0444 [MODGTK] [PREFIX]/share/onyx-@onyx_version@/nxm
 
-echo @INSTALL@ -d [PREFIX]/share/onyx/nx/modgtk
-@INSTALL@ -d [PREFIX]/share/onyx/nx/modgtk
+echo @INSTALL@ -d [PREFIX]/share/onyx-@onyx_version@/nx/modgtk
+@INSTALL@ -d [PREFIX]/share/onyx-@onyx_version@/nx/modgtk
 
 for i in [MODGTK_NX] [MODGTK_NX_GEN]; do
-	echo @INSTALL@ -m 0644 $i [PREFIX]/share/onyx/nx/modgtk/
-	@INSTALL@ -m 0644 $i [PREFIX]/share/onyx/nx/modgtk/
+	echo @INSTALL@ -m 0644 $i [PREFIX]/share/onyx-@onyx_version@/nx/modgtk/
+	@INSTALL@ -m 0644 $i [PREFIX]/share/onyx-@onyx_version@/nx/modgtk/
 done
 dataend
 }
 
 modgtk_mods_uninstall :
 {
-  rm -f [PREFIX]/share/onyx/nxm/modgtk.nxm;
-  rm -rf [PREFIX]/share/onyx/nx/modgtk/;
+  rm -f [PREFIX]/share/onyx-@onyx_version@/nxm/modgtk.nxm;
+  rm -rf [PREFIX]/share/onyx-@onyx_version@/nx/modgtk/;
 }
 
 modgtk_mods_clean :

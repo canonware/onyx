@@ -3243,17 +3243,17 @@ echo "$as_me: error: Cannot find onyx" >&2;}
   fi
 fi
 
+if test `echo "<Version = onyx>" | grep Version` ; then
+  onyx_version="<Version = onyx>"
+else
+  onyx_version=devel
+fi
+
 if test "x$enable_onyx" = "x1" ; then
   cat >>confdefs.h <<\EOF
 #define CW_USE_ONYX 1
 EOF
 
-fi
-
-if test "<Version>" != "<Version\>" ; then
-  onyx_version="<Version = onyx>"
-else
-  onyx_version=devel
 fi
 
 if test "x$enable_threads" = "x1" -a "x$enable_real" = "x1" \
@@ -3273,17 +3273,17 @@ else
 
 fi;
 
+if test `echo "<Version = slate>" | grep Version` ; then
+  slate_version="<Version = slate>"
+else
+  slate_version=devel
+fi
+
 if test "x$enable_slate" = "x1" ; then
   cat >>confdefs.h <<\EOF
 #define CW_USE_SLATE 1
 EOF
 
-fi
-
-if test "<Version>" != "<Version\>" ; then
-  slate_version="<Version = slate>"
-else
-  slate_version=devel
 fi
 
 else
@@ -8373,11 +8373,11 @@ fi
 
 if test "x$bin_onyx" = "x1" ; then
   if test "x$prefix" = "xNONE" ; then
-    CW_ONYX_RPATH="/usr/local/share/onyx/nx"
-    CW_ONYX_MPATH="/usr/local/share/onyx/nxm"
+    CW_ONYX_RPATH="/usr/local/share/onyx-$onyx_version/nx"
+    CW_ONYX_MPATH="/usr/local/share/onyx-$onyx_version/nxm"
   else
-    CW_ONYX_RPATH="$prefix/share/onyx/nx"
-    CW_ONYX_MPATH="$prefix/share/onyx/nxm"
+    CW_ONYX_RPATH="$prefix/share/onyx-$onyx_version/nx"
+    CW_ONYX_MPATH="$prefix/share/onyx-$onyx_version/nxm"
   fi
   cat >>confdefs.h <<EOF
 #define CW_ONYX_RPATH "$CW_ONYX_RPATH"
@@ -8409,11 +8409,11 @@ fi
 
 if test "x$bin_slate" = "x1" ; then
   if test "x$prefix" = "xNONE" ; then
-    CW_SLATE_RPATH="/usr/local/share/slate/nx:/usr/local/share/onyx/nx"
-    CW_SLATE_MPATH="/usr/local/share/slate/nxm:/usr/local/share/onyx/nxm"
+    CW_SLATE_RPATH="/usr/local/share/slate-$slate_version/nx:/usr/local/share/onyx-$onyx_version/nx"
+    CW_SLATE_MPATH="/usr/local/share/slate-$slate_version/nxm:/usr/local/share/onyx-$onyx_version/nxm"
   else
-    CW_SLATE_RPATH="$prefix/share/slate/nx:$prefix/share/onyx/nx"
-    CW_SLATE_MPATH="$prefix/share/slate/nxm:$prefix/share/onyx/nxm"
+    CW_SLATE_RPATH="$prefix/share/slate-$slate_version/nx:$prefix/share/onyx-$onyx_version/nx"
+    CW_SLATE_MPATH="$prefix/share/slate-$slate_version/nxm:$prefix/share/onyx-$onyx_version/nxm"
   fi
   cat >>confdefs.h <<EOF
 #define CW_SLATE_RPATH "$CW_SLATE_RPATH"
@@ -8449,59 +8449,69 @@ fi
 
 echo "$as_me:8450: result: ===============================================================================" >&5
 echo "${ECHO_T}===============================================================================" >&6
-echo "$as_me:8452: result: CFLAGS       : ${CFLAGS}" >&5
-echo "${ECHO_T}CFLAGS       : ${CFLAGS}" >&6
-echo "$as_me:8454: result: CPPFLAGS     : ${CPPFLAGS}" >&5
-echo "${ECHO_T}CPPFLAGS     : ${CPPFLAGS}" >&6
-echo "$as_me:8456: result: LDFLAGS      : ${LDFLAGS}" >&5
-echo "${ECHO_T}LDFLAGS      : ${LDFLAGS}" >&6
-echo "$as_me:8458: result: LIBS         : ${LIBS}" >&5
-echo "${ECHO_T}LIBS         : ${LIBS}" >&6
+if test "x$bin_onyx" = "x1" ; then
+echo "$as_me:8453: result: Onyx version  : $onyx_version" >&5
+echo "${ECHO_T}Onyx version  : $onyx_version" >&6
+fi
+if test "x$bin_slate" = "x1" ; then
+echo "$as_me:8457: result: Slate version : $slate_version" >&5
+echo "${ECHO_T}Slate version : $slate_version" >&6
+fi
 echo "$as_me:8460: result: " >&5
 echo "${ECHO_T}" >&6
-echo "$as_me:8462: result: srcroot      : ${srcroot}" >&5
-echo "${ECHO_T}srcroot      : ${srcroot}" >&6
-echo "$as_me:8464: result: abs_srcroot  : ${abs_srcroot}" >&5
-echo "${ECHO_T}abs_srcroot  : ${abs_srcroot}" >&6
-echo "$as_me:8466: result: objroot      : ${objroot}" >&5
-echo "${ECHO_T}objroot      : ${objroot}" >&6
-echo "$as_me:8468: result: abs_objroot  : ${abs_objroot}" >&5
-echo "${ECHO_T}abs_objroot  : ${abs_objroot}" >&6
-echo "$as_me:8470: result: prefix       : ${prefix}" >&5
-echo "${ECHO_T}prefix       : ${prefix}" >&6
-echo "$as_me:8472: result: " >&5
+echo "$as_me:8462: result: CFLAGS        : ${CFLAGS}" >&5
+echo "${ECHO_T}CFLAGS        : ${CFLAGS}" >&6
+echo "$as_me:8464: result: CPPFLAGS      : ${CPPFLAGS}" >&5
+echo "${ECHO_T}CPPFLAGS      : ${CPPFLAGS}" >&6
+echo "$as_me:8466: result: LDFLAGS       : ${LDFLAGS}" >&5
+echo "${ECHO_T}LDFLAGS       : ${LDFLAGS}" >&6
+echo "$as_me:8468: result: LIBS          : ${LIBS}" >&5
+echo "${ECHO_T}LIBS          : ${LIBS}" >&6
+echo "$as_me:8470: result: " >&5
 echo "${ECHO_T}" >&6
-echo "$as_me:8474: result: libs         :${libs}" >&5
-echo "${ECHO_T}libs         :${libs}" >&6
-echo "$as_me:8476: result: mods         :${mods}" >&5
-echo "${ECHO_T}mods         :${mods}" >&6
-echo "$as_me:8478: result: bins         :${bins}" >&5
-echo "${ECHO_T}bins         :${bins}" >&6
-echo "$as_me:8480: result: docs         :${docs}" >&5
-echo "${ECHO_T}docs         :${docs}" >&6
+echo "$as_me:8472: result: srcroot       : ${srcroot}" >&5
+echo "${ECHO_T}srcroot       : ${srcroot}" >&6
+echo "$as_me:8474: result: abs_srcroot   : ${abs_srcroot}" >&5
+echo "${ECHO_T}abs_srcroot   : ${abs_srcroot}" >&6
+echo "$as_me:8476: result: objroot       : ${objroot}" >&5
+echo "${ECHO_T}objroot       : ${objroot}" >&6
+echo "$as_me:8478: result: abs_objroot   : ${abs_objroot}" >&5
+echo "${ECHO_T}abs_objroot   : ${abs_objroot}" >&6
+echo "$as_me:8480: result: prefix        : ${prefix}" >&5
+echo "${ECHO_T}prefix        : ${prefix}" >&6
 echo "$as_me:8482: result: " >&5
 echo "${ECHO_T}" >&6
-echo "$as_me:8484: result: threads      : ${enable_threads}" >&5
-echo "${ECHO_T}threads      : ${enable_threads}" >&6
-echo "$as_me:8486: result: real         : ${enable_real}" >&5
-echo "${ECHO_T}real         : ${enable_real}" >&6
-echo "$as_me:8488: result: posix        : ${enable_posix}" >&5
-echo "${ECHO_T}posix        : ${enable_posix}" >&6
-echo "$as_me:8490: result: posix-file   : ${enable_posix_file}" >&5
-echo "${ECHO_T}posix-file   : ${enable_posix_file}" >&6
-echo "$as_me:8492: result: inlines      : ${enable_inlines}" >&5
-echo "${ECHO_T}inlines      : ${enable_inlines}" >&6
-echo "$as_me:8494: result: libedit      : ${enable_libedit}" >&5
-echo "${ECHO_T}libedit      : ${enable_libedit}" >&6
-echo "$as_me:8496: result: libonyx      : ${enable_libonyx}" >&5
-echo "${ECHO_T}libonyx      : ${enable_libonyx}" >&6
-echo "$as_me:8498: result: debug        : ${enable_debug}" >&5
-echo "${ECHO_T}debug        : ${enable_debug}" >&6
-echo "$as_me:8500: result: profile      : ${enable_profile}" >&5
-echo "${ECHO_T}profile      : ${enable_profile}" >&6
-echo "$as_me:8502: result: docs         : ${with_docs}" >&5
-echo "${ECHO_T}docs         : ${with_docs}" >&6
-echo "$as_me:8504: result: ===============================================================================" >&5
+echo "$as_me:8484: result: libs          :${libs}" >&5
+echo "${ECHO_T}libs          :${libs}" >&6
+echo "$as_me:8486: result: mods          :${mods}" >&5
+echo "${ECHO_T}mods          :${mods}" >&6
+echo "$as_me:8488: result: bins          :${bins}" >&5
+echo "${ECHO_T}bins          :${bins}" >&6
+echo "$as_me:8490: result: docs          :${docs}" >&5
+echo "${ECHO_T}docs          :${docs}" >&6
+echo "$as_me:8492: result: " >&5
+echo "${ECHO_T}" >&6
+echo "$as_me:8494: result: threads       : ${enable_threads}" >&5
+echo "${ECHO_T}threads       : ${enable_threads}" >&6
+echo "$as_me:8496: result: real          : ${enable_real}" >&5
+echo "${ECHO_T}real          : ${enable_real}" >&6
+echo "$as_me:8498: result: posix         : ${enable_posix}" >&5
+echo "${ECHO_T}posix         : ${enable_posix}" >&6
+echo "$as_me:8500: result: posix-file    : ${enable_posix_file}" >&5
+echo "${ECHO_T}posix-file    : ${enable_posix_file}" >&6
+echo "$as_me:8502: result: inlines       : ${enable_inlines}" >&5
+echo "${ECHO_T}inlines       : ${enable_inlines}" >&6
+echo "$as_me:8504: result: libedit       : ${enable_libedit}" >&5
+echo "${ECHO_T}libedit       : ${enable_libedit}" >&6
+echo "$as_me:8506: result: libonyx       : ${enable_libonyx}" >&5
+echo "${ECHO_T}libonyx       : ${enable_libonyx}" >&6
+echo "$as_me:8508: result: debug         : ${enable_debug}" >&5
+echo "${ECHO_T}debug         : ${enable_debug}" >&6
+echo "$as_me:8510: result: profile       : ${enable_profile}" >&5
+echo "${ECHO_T}profile       : ${enable_profile}" >&6
+echo "$as_me:8512: result: docs          : ${with_docs}" >&5
+echo "${ECHO_T}docs          : ${with_docs}" >&6
+echo "$as_me:8514: result: ===============================================================================" >&5
 echo "${ECHO_T}===============================================================================" >&6
 
 mkdir -p "$objroot/doc/latex"
@@ -8586,7 +8596,7 @@ DEFS=-DHAVE_CONFIG_H
 : ${CONFIG_STATUS=./config.status}
 ac_clean_files_save=$ac_clean_files
 ac_clean_files="$ac_clean_files $CONFIG_STATUS"
-{ echo "$as_me:8589: creating $CONFIG_STATUS" >&5
+{ echo "$as_me:8599: creating $CONFIG_STATUS" >&5
 echo "$as_me: creating $CONFIG_STATUS" >&6;}
 cat >$CONFIG_STATUS <<_ACEOF
 #! $SHELL
@@ -8759,7 +8769,7 @@ cat >>$CONFIG_STATUS <<\EOF
     echo "$ac_cs_version"; exit 0 ;;
   --he | --h)
     # Conflict between --help and --header
-    { { echo "$as_me:8762: error: ambiguous option: $1
+    { { echo "$as_me:8772: error: ambiguous option: $1
 Try \`$0 --help' for more information." >&5
 echo "$as_me: error: ambiguous option: $1
 Try \`$0 --help' for more information." >&2;}
@@ -8778,7 +8788,7 @@ Try \`$0 --help' for more information." >&2;}
     ac_need_defaults=false;;
 
   # This is an error.
-  -*) { { echo "$as_me:8781: error: unrecognized option: $1
+  -*) { { echo "$as_me:8791: error: unrecognized option: $1
 Try \`$0 --help' for more information." >&5
 echo "$as_me: error: unrecognized option: $1
 Try \`$0 --help' for more information." >&2;}
@@ -8815,7 +8825,7 @@ do
   # Handling of arguments.
   "$cfgoutputs" ) CONFIG_FILES="$CONFIG_FILES $cfgoutputs" ;;
   "$cfghdrs" ) CONFIG_HEADERS="$CONFIG_HEADERS $cfghdrs" ;;
-  *) { { echo "$as_me:8818: error: invalid argument: $ac_config_target" >&5
+  *) { { echo "$as_me:8828: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}
    { (exit 1); exit 1; }; };;
   esac
@@ -8915,10 +8925,10 @@ s,@enable_posix@,$enable_posix,;t t
 s,@enable_libonyx@,$enable_libonyx,;t t
 s,@enable_libedit@,$enable_libedit,;t t
 s,@ONYX@,$ONYX,;t t
-s,@enable_onyx@,$enable_onyx,;t t
 s,@onyx_version@,$onyx_version,;t t
-s,@enable_slate@,$enable_slate,;t t
+s,@enable_onyx@,$enable_onyx,;t t
 s,@slate_version@,$slate_version,;t t
+s,@enable_slate@,$enable_slate,;t t
 s,@lib_onyx@,$lib_onyx,;t t
 s,@lib_edit@,$lib_edit,;t t
 s,@mod_gtk@,$mod_gtk,;t t
@@ -9075,7 +9085,7 @@ done; }
   esac
 
   if test x"$ac_file" != x-; then
-    { echo "$as_me:9078: creating $ac_file" >&5
+    { echo "$as_me:9088: creating $ac_file" >&5
 echo "$as_me: creating $ac_file" >&6;}
     rm -f "$ac_file"
   fi
@@ -9093,7 +9103,7 @@ echo "$as_me: creating $ac_file" >&6;}
       -) echo $tmp/stdin ;;
       [\\/$]*)
          # Absolute (can't be DOS-style, as IFS=:)
-         test -f "$f" || { { echo "$as_me:9096: error: cannot find input file: $f" >&5
+         test -f "$f" || { { echo "$as_me:9106: error: cannot find input file: $f" >&5
 echo "$as_me: error: cannot find input file: $f" >&2;}
    { (exit 1); exit 1; }; }
          echo $f;;
@@ -9106,7 +9116,7 @@ echo "$as_me: error: cannot find input file: $f" >&2;}
            echo $srcdir/$f
          else
            # /dev/null tree
-           { { echo "$as_me:9109: error: cannot find input file: $f" >&5
+           { { echo "$as_me:9119: error: cannot find input file: $f" >&5
 echo "$as_me: error: cannot find input file: $f" >&2;}
    { (exit 1); exit 1; }; }
          fi;;
@@ -9167,7 +9177,7 @@ for ac_file in : $CONFIG_HEADERS; do test "x$ac_file" = x: && continue
   * )   ac_file_in=$ac_file.in ;;
   esac
 
-  test x"$ac_file" != x- && { echo "$as_me:9170: creating $ac_file" >&5
+  test x"$ac_file" != x- && { echo "$as_me:9180: creating $ac_file" >&5
 echo "$as_me: creating $ac_file" >&6;}
 
   # First look for the input files in the build tree, otherwise in the
@@ -9178,7 +9188,7 @@ echo "$as_me: creating $ac_file" >&6;}
       -) echo $tmp/stdin ;;
       [\\/$]*)
          # Absolute (can't be DOS-style, as IFS=:)
-         test -f "$f" || { { echo "$as_me:9181: error: cannot find input file: $f" >&5
+         test -f "$f" || { { echo "$as_me:9191: error: cannot find input file: $f" >&5
 echo "$as_me: error: cannot find input file: $f" >&2;}
    { (exit 1); exit 1; }; }
          echo $f;;
@@ -9191,7 +9201,7 @@ echo "$as_me: error: cannot find input file: $f" >&2;}
            echo $srcdir/$f
          else
            # /dev/null tree
-           { { echo "$as_me:9194: error: cannot find input file: $f" >&5
+           { { echo "$as_me:9204: error: cannot find input file: $f" >&5
 echo "$as_me: error: cannot find input file: $f" >&2;}
    { (exit 1); exit 1; }; }
          fi;;
@@ -9308,7 +9318,7 @@ cat >>$CONFIG_STATUS <<\EOF
   rm -f $tmp/in
   if test x"$ac_file" != x-; then
     if cmp -s $ac_file $tmp/config.h 2>/dev/null; then
-      { echo "$as_me:9311: $ac_file is unchanged" >&5
+      { echo "$as_me:9321: $ac_file is unchanged" >&5
 echo "$as_me: $ac_file is unchanged" >&6;}
     else
       ac_dir=`$as_expr X"$ac_file" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \

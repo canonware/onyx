@@ -255,19 +255,22 @@ if test "x$enable_onyx" = "x0" ; then
   if test "x$ONYX" = "x" ; then
     AC_MSG_ERROR(Cannot find onyx)
   fi
+else
+  ONYX="$abs_objroot/bin/onyx/bin/tonyx"
+  AC_SUBST(ONYX)
 fi
 
-AC_SUBST(enable_onyx)
-if test "x$enable_onyx" = "x1" ; then
-  AC_DEFINE(CW_USE_ONYX)
-fi
-
-if test "<Version>" != "<Version\>" ; then
+if test `echo "<Version = onyx>" | grep Version` ; then
   onyx_version="<Version = onyx>"
 else
   onyx_version=devel
 fi
 AC_SUBST(onyx_version)
+
+AC_SUBST(enable_onyx)
+if test "x$enable_onyx" = "x1" ; then
+  AC_DEFINE(CW_USE_ONYX)
+fi
 ])
 
 dnl Build slate by default.
@@ -283,17 +286,17 @@ fi
 enable_slate="1"
 )
 
-AC_SUBST(enable_slate)
-if test "x$enable_slate" = "x1" ; then
-  AC_DEFINE(CW_USE_SLATE)
-fi
-
-if test "<Version>" != "<Version\>" ; then
+if test `echo "<Version = slate>" | grep Version` ; then
   slate_version="<Version = slate>"
 else
   slate_version=devel
 fi
 AC_SUBST(slate_version)
+
+AC_SUBST(enable_slate)
+if test "x$enable_slate" = "x1" ; then
+  AC_DEFINE(CW_USE_SLATE)
+fi
 ])
 
 dnl CW_BUILD_LIB(lib, var)

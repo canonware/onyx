@@ -203,7 +203,7 @@ onyx_bins_install : [ONYX]
 {
   @INSTALL@ -d [PREFIX]/bin;
 
-  [CC] [A_CFLAGS] -o [PREFIX]/bin/onyx
+  [CC] [A_CFLAGS] -o [PREFIX]/bin/onyx-@onyx_version@
        [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [ONYX_SRCS]]
 #if @enable_libedit@
        [LIBEDIT_A]
@@ -214,16 +214,21 @@ onyx_bins_install : [ONYX]
 #endif
 #endif
        [LDFLAGS] -lonyx @LIBS@;
-  chmod 0755 [PREFIX]/bin/onyx;
+  chmod 0755 [PREFIX]/bin/onyx-@onyx_version@;
+  ln -s onyx-@onyx_version@ [PREFIX]/bin/onyx;
 
   @INSTALL@ -d [PREFIX]/man/man1;
   @INSTALL@ -m 0444 @objroot@/bin/onyx/man/man1/onyx.1 [PREFIX]/man/man1;
+
+  ln -s onyx-@onyx_version@ [PREFIX]/share/onyx;
 }
 
 onyx_bins_uninstall :
 {
+  rm -f [PREFIX]/bin/onyx-@onyx_version@;
   rm -f [PREFIX]/bin/onyx;
   rm -f [PREFIX]/man/man1/onyx.1;
+  rm -f [PREFIX]/share/onyx;
 }
 
 onyx_bins_clean :
