@@ -422,6 +422,7 @@ bufp_p_bpos(cw_bufp_t *a_bufp)
 	retval = a_bufp->buf->len + 1 - a_bufp->bpos;
     }
 
+    cw_assert(retval != 0);
     return retval;
 }
 
@@ -1161,6 +1162,7 @@ buf_p_bufp_cur_set(cw_buf_t *a_buf, cw_bufp_t *a_bufp)
 	    line = bufp->line;
 	    do
 	    {
+    fprintf(stderr, "%s:%d:%s()\n", __FILE__, __LINE__, __FUNCTION__);
 		bpos += (cw_uint64_t) bufp->len;
 		line += (cw_uint64_t) bufp->nlines;
 
@@ -2498,12 +2500,15 @@ mkr_l_remove(cw_mkr_t *a_start, cw_mkr_t *a_end, cw_bool_t a_record)
 	bufp_p_gap_move(bufp, bufp_p_pos_p2r(bufp, end->ppos));
 	bufp->len -= bufp->gap_off;
 	buf->len -= (cw_uint64_t) bufp->gap_off;
+	cw_assert(bufp->bob_relative == FALSE);
+	bufp->bpos -= (cw_uint64_t) bufp->gap_off;
 	bufp->gap_off = 0;
 
 	/* Adjust pline for mkr's at or after end. */
 	nlines = end->pline;
-	buf->nlines -= (cw_uint64_t) nlines;
 	bufp->nlines -= nlines;
+	buf->nlines -= (cw_uint64_t) nlines;
+	bufp->line -= (cw_uint64_t) nlines;
 	if (nlines > 0)
 	{
 	    bufp->nlines -= nlines;
@@ -2574,7 +2579,6 @@ mkr_l_remove(cw_mkr_t *a_start, cw_mkr_t *a_end, cw_bool_t a_record)
 	{
 	    mkr_dup(mkr, end);
 	}
-
     }
 
     /* Try to coalesce.  Start at the bufp preceding the first one affected by
