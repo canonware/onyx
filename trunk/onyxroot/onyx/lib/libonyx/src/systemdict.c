@@ -3996,6 +3996,7 @@ systemdict_shift(cw_nxo_t *a_thread)
 {
 	cw_nxo_t	*ostack;
 	cw_nxo_t	*integer, *shift;
+	cw_nxoi_t	nshift;
 
 	ostack = nxo_thread_ostack_get(a_thread);
 
@@ -4007,13 +4008,22 @@ systemdict_shift(cw_nxo_t *a_thread)
 		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
 		return;
 	}
+	nshift = nxo_integer_get(shift);
 
-	if (nxo_integer_get(shift) > 0) {
-		nxo_integer_set(integer, nxo_integer_get(integer) <<
-		    nxo_integer_get(shift));
-	} else if (nxo_integer_get(shift) < 0) {
+	/*
+	 * Specially handle situations where the shift amount is more than 63
+	 * bits.
+	 */
+	if (nshift < -63)
+		nxo_integer_set(integer, 0);
+	else if (nshift < 0) {
 		nxo_integer_set(integer, nxo_integer_get(integer) >>
 		    -nxo_integer_get(shift));
+	} else if (nshift > 63)
+		nxo_integer_set(integer, 0);
+	else if (nshift > 0) {
+		nxo_integer_set(integer, nxo_integer_get(integer) <<
+		    nxo_integer_get(shift));
 	}
 
 	nxo_stack_pop(ostack);

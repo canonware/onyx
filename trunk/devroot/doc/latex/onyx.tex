@@ -2423,31 +2423,40 @@ path proc & {\bf \htmlref{dirforeach}{systemdict:dirforeach}} & -- & \\
 \hline \hline
 \multicolumn{4}{|l|}{Logical and bitwise operators} \\
 \hline \hline
-& {\bf \htmlref{lt}{systemdict:lt}} & boolean & \\
+a b & {\bf \htmlref{lt}{systemdict:lt}} & boolean & a less than b?
+(integer, string) \\
 \hline
-& {\bf \htmlref{le}{systemdict:le}} & & \\
+a b & {\bf \htmlref{le}{systemdict:le}} & boolean & a less than or equal to b?
+(integer, string) \\
 \hline
-& {\bf \htmlref{eq}{systemdict:eq}} & & \\
+a b & {\bf \htmlref{eq}{systemdict:eq}} & boolean & a equal to b? (any type) \\
 \hline
-& {\bf \htmlref{ne}{systemdict:ne}} & & \\
+a b & {\bf \htmlref{ne}{systemdict:ne}} & boolean & a not equal to b? (any type)
+\\
 \hline
-& {\bf \htmlref{ge}{systemdict:ge}} & & \\
+a b & {\bf \htmlref{ge}{systemdict:ge}} & boolean & a greater than or equal to
+b? (integer, string) \\
 \hline
-& {\bf \htmlref{gt}{systemdict:gt}} & & \\
+a b & {\bf \htmlref{gt}{systemdict:gt}} & boolean & a greater than b?
+(integer, string) \\
 \hline
-& {\bf \htmlref{and}{systemdict:and}} & & \\
+a b & {\bf \htmlref{and}{systemdict:and}} & r & Logical/bitwise and.
+(boolean/integer)  \\
 \hline
-& {\bf \htmlref{or}{systemdict:or}} & & \\
+a b & {\bf \htmlref{or}{systemdict:or}} & r & Logical/bitwise or.
+(boolean/integer) \\
 \hline
-& {\bf \htmlref{xor}{systemdict:xor}} & & \\
+a b & {\bf \htmlref{xor}{systemdict:xor}} & r & Logical/bitwise exclusive or.
+(boolean/ integer) \\
 \hline
-& {\bf \htmlref{not}{systemdict:not}} & & \\
+a & {\bf \htmlref{not}{systemdict:not}} & r & Logical/bitwise not.
+(boolean/integer) \\
 \hline
-& {\bf \htmlref{shift}{systemdict:shift}} & & \\
+a shift & {\bf \htmlref{shift}{systemdict:shift}} & integer & Bitwise shift. \\
 \hline
-& {\bf \htmlref{false}{systemdict:false}} & & \\
+-- & {\bf \htmlref{false}{systemdict:false}} & false & Return true. \\
 \hline
-& {\bf \htmlref{true}{systemdict:true}} & & \\
+-- & {\bf \htmlref{true}{systemdict:true}} & true & Return false. \\
 \hline \hline
 \multicolumn{4}{|l|}{Type, conversion, and attribute operators} \\
 \hline \hline
@@ -2809,23 +2818,38 @@ onyx:0>
 	\end{description}
 \label{systemdict:and}
 \index{and@\onyxop{}{and}{}}
-\item[{\onyxop{--}{and}{--}}: ]
+\item[{\onyxop{a b}{and}{r}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a: ]
+			An integer or boolean.
+		\item[b: ]
+			The same type as \oparg{a}.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[r: ]
+			If \oparg{a} and \oparg{b} are integers, their bitwise
+			and, otherwise their logical and.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Return the bitwise and of two integers, or the logical and of
+		two booleans.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> false true and 1 sprint
+false
+onyx:0> true true and 1 sprint
+true
+onyx:0> 5 3 and 1 sprint
+1
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:argv}
@@ -3780,23 +3804,58 @@ onyx:2>
 	\end{description}
 \label{systemdict:eq}
 \index{eq@\onyxop{}{eq}{}}
-\item[{\onyxop{--}{eq}{--}}: ]
+\item[{\onyxop{a b}{eq}{boolean}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a: ]
+			An object.
+		\item[b: ]
+			An object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[boolean: ]
+			True if \oparg{a} is equal to \oparg{b}, false
+			otherwise.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
 	\item[Description: ]
+		Compare two objects for equality.  Equality has the following
+		meaning, depending on the types of \oparg{a} and \oparg{b}:
+		\begin{description}
+		\item[array, condition, dict, file, hook, mutex, stack,
+		thread: ] \oparg{a} and \oparg{b} are equal iff they refer to
+		the same memory.
+		\item[operator: ] \oparg{a} and \oparg{b} are equal iff they
+		refer to the same function.
+		\item[name, string: ] \oparg{a} and \oparg{b} are equal iff they
+		are lexically equivalent.  A name can be equal to a string.
+		\item[boolean: ] \oparg{a} and \oparg{b} are equal iff they
+		are the same value.
+		\item[integer: ] \oparg{a} and \oparg{b} are equal iff they
+		are the same value.
+		\end{description}
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> mutex mutex eq 1 sprint
+false
+onyx:0> mutex dup eq 1 sprint
+true
+onyx:0> /foo `foo' eq 1 sprint
+true
+onyx:0> true true eq 1 sprint
+true
+onyx:0> true false eq 1 sprint
+false
+onyx:0> 1 1 eq 1 sprint
+true
+onyx:0> 1 2 eq 1 sprint
+false
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:estack}
@@ -3965,23 +4024,22 @@ onyx:3>
 	\end{description}
 \label{systemdict:false}
 \index{false@\onyxop{}{false}{}}
-\item[{\onyxop{--}{false}{--}}: ]
+\item[{\onyxop{--}{false}{false}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[false: ]
+			The boolean value false.
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Return false.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> false 1 sprint
+false
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:flush}
@@ -4112,23 +4170,43 @@ onyx:3>
 	\end{description}
 \label{systemdict:ge}
 \index{ge@\onyxop{}{ge}{}}
-\item[{\onyxop{--}{ge}{--}}: ]
+\item[{\onyxop{a b}{ge}{boolean}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a: ]
+			An integer or string.
+		\item[b: ]
+			The same type as \oparg{a}.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[boolean: ]
+			True if \oparg{a} is greater than or equal to \oparg{b},
+			false otherwise.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Compare two integers or strings.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> 1 2 ge 1 sprint
+false
+onyx:0> 1 1 ge 1 sprint
+true
+onyx:0> 2 1 ge 1 sprint
+true
+onyx:0> `a' `b' ge 1 sprint
+false
+onyx:0> `a' `a' ge 1 sprint
+true
+onyx:0> `b' `a' ge 1 sprint
+true
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:get}
@@ -4175,23 +4253,39 @@ onyx:3>
 	\end{description}
 \label{systemdict:gt}
 \index{gt@\onyxop{}{gt}{}}
-\item[{\onyxop{--}{gt}{--}}: ]
+\item[{\onyxop{a b}{gt}{boolean}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a: ]
+			An integer or string.
+		\item[b: ]
+			The same type as \oparg{a}.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[boolean: ]
+			True if \oparg{a} is greater than \oparg{b}, false
+			otherwise.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Compare two integers or strings.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> 1 1 gt 1 sprint
+false
+onyx:0> 2 1 gt 1 sprint
+true
+onyx:0> `a' `a' gt 1 sprint
+false
+onyx:0> `b' `a' gt 1 sprint
+true
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:if}
@@ -4363,23 +4457,43 @@ onyx:5>
 	\end{description}
 \label{systemdict:le}
 \index{le@\onyxop{}{le}{}}
-\item[{\onyxop{--}{le}{--}}: ]
+\item[{\onyxop{a b}{le}{boolean}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a: ]
+			An integer or string.
+		\item[b: ]
+			The same type as \oparg{a}.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[boolean: ]
+			True if \oparg{a} is less than or equal to \oparg{b},
+			false otherwise.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Compare two integers or strings.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> 1 2 le 1 sprint
+true
+onyx:0> 1 1 le 1 sprint
+true
+onyx:0> 2 1 le 1 sprint
+false
+onyx:0> `a' `b' le 1 sprint
+true
+onyx:0> `a' `a' le 1 sprint
+true
+onyx:0> `b' `a' le 1 sprint
+false
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:length}
@@ -4489,23 +4603,39 @@ onyx:5>
 	\end{description}
 \label{systemdict:lt}
 \index{lt@\onyxop{}{lt}{}}
-\item[{\onyxop{--}{lt}{--}}: ]
+\item[{\onyxop{a b}{lt}{boolean}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a: ]
+			An integer or string.
+		\item[b: ]
+			The same type as \oparg{a}.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[boolean: ]
+			True if \oparg{a} is less than \oparg{b}, false
+			otherwise.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Compare two integers or strings.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> 1 2 lt 1 sprint
+true
+onyx:0> 1 1 lt 1 sprint
+false
+onyx:0> `a' `b' lt 1 sprint
+true
+onyx:0> `a' `a' lt 1 sprint
+false
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:mark}
@@ -4671,23 +4801,61 @@ onyx:0>
 	\end{description}
 \label{systemdict:ne}
 \index{ne@\onyxop{}{ne}{}}
-\item[{\onyxop{--}{ne}{--}}: ]
+\item[{\onyxop{a b}{ne}{boolean}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a: ]
+			An object.
+		\item[b: ]
+			An object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[boolean: ]
+			True if \oparg{a} is not equal to \oparg{b}, false
+			otherwise.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
 	\item[Description: ]
+		Compare two objects for inequality.  Inequality has the
+		following meaning, depending on the types of \oparg{a} and
+		\oparg{b}:
+		\begin{description}
+		\item[array, condition, dict, file, hook, mutex, stack,
+		thread: ] \oparg{a} and \oparg{b} are not equal iff they refer
+		to the same memory.
+		\item[operator: ] \oparg{a} and \oparg{b} are not equal iff they
+		refer to the same function.
+		\item[name, string: ] \oparg{a} and \oparg{b} are not equal iff
+		they are lexically equivalent.  A name can be equal to a string.
+		\item[boolean: ] \oparg{a} and \oparg{b} are not equal iff they
+		are the same value.
+		\item[integer: ] \oparg{a} and \oparg{b} are not equal iff they
+		are the same value.
+		\end{description}
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> mutex mutex ne 1 sprint
+true
+onyx:0> mutex dup ne 1 sprint
+false
+onyx:0> /foo `foo' ne 1 sprint
+false
+onyx:0> /foo /bar ne 1 sprint
+true
+onyx:0> true false ne 1 sprint
+true
+onyx:0> true true ne 1 sprint
+false
+onyx:0> 1 1 ne 1 sprint
+false
+onyx:0> 1 2 ne 1 sprint
+true
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:neg}
@@ -4724,23 +4892,36 @@ onyx:0>
 	\end{description}
 \label{systemdict:not}
 \index{not@\onyxop{}{not}{}}
-\item[{\onyxop{--}{not}{--}}: ]
+\item[{\onyxop{a}{not}{r}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a: ]
+			An integer or boolean.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[r: ]
+			If \oparg{a} is an integer, the bitwise negation of
+			\oparg{a}, otherwise the logical negation of \oparg{a}.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Return the bitwise negation of an integer, or the logical
+		negation of a boolean.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> true not 1 sprint
+false
+onyx:0> false not 1 sprint
+true
+onyx:0> 1 not 1 sprint
+-2
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:nsleep}
@@ -4811,23 +4992,38 @@ onyx:1>
 	\end{description}
 \label{systemdict:or}
 \index{or@\onyxop{}{or}{}}
-\item[{\onyxop{--}{or}{--}}: ]
+\item[{\onyxop{a b}{or}{r}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a: ]
+			An integer or boolean.
+		\item[b: ]
+			The same type as \oparg{a}.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[r: ]
+			If \oparg{a} and \oparg{b} are integers, their bitwise
+			or, otherwise their logical or.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Return the bitwise or of two integers, or the logical or of
+		two booleans.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> false false or 1 sprint
+false
+onyx:0> true false or 1 sprint
+true
+onyx:0> 5 3 or 1 sprint
+7
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:ostack}
@@ -5492,19 +5688,32 @@ onyx:1>
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a: ]
+			An integer.
+		\item[shift: ]
+			An integer that represents a bitwise shift amount.
+			Negative means right shift, and positive means left
+			shift.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[r: ]
+			\oparg{a} shifted by \oparg{shift} bits.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Shift an integer bitwise.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> 4 1 shift 1 sprint
+8
+onyx:0> 4 -1 shift 1 sprint
+2
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:signal}
@@ -6187,23 +6396,22 @@ onyx:0>
 	\end{description}
 \label{systemdict:true}
 \index{true@\onyxop{}{true}{}}
-\item[{\onyxop{--}{true}{--}}: ]
+\item[{\onyxop{--}{true}{true}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[true: ]
+			The boolean value true.
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Return true.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> true 1 sprint
+true
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:trylock}
@@ -6439,23 +6647,38 @@ onyx:1>
 	\end{description}
 \label{systemdict:xor}
 \index{xor@\onyxop{}{xor}{}}
-\item[{\onyxop{--}{xor}{--}}: ]
+\item[{\onyxop{a b}{xor}{r}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a: ]
+			An integer or boolean.
+		\item[b: ]
+			The same type as \oparg{a}.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[r: ]
+			If \oparg{a} and \oparg{b} are integers, their bitwise
+			exclusive or, otherwise their logical exclusive or.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Return the bitwise exclusive or of two integers, or the logical
+		exclusive or of two booleans.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> true false xor 1 sprint
+true
+onyx:0> true true xor 1 sprint
+false
+onyx:0> 5 3 xor 1 sprint
+6
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:yield}
