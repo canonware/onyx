@@ -242,10 +242,10 @@ allow single inheritance, and provide dynamic lookup/dispatch capabilities.
 \item[condition: ] A condition is used for thread synchronization.  The standard
 operations on a condition are to wait and to signal.
 
-\item[dict: ] A dict (short for dictionary) is a collection of key/value pairs.
-Other names for dictionaries include ``associative array'' and ``hash''.  A key
-can be of any type, though in most cases, keys are of type name.  A value can
-also be of any type.
+\item[dict: ] A dict (short for dictionary) is a collection of key/value pairs,
+where all keys in a dict are unique.  Other names for dictionaries include
+``associative array'' and ``hash''.  A key can be of any type, though in most
+cases, keys are of type name.  A value can also be of any type.
 
 \item[file: ] A file is a handle to an ordered sequence of bytes with a current
 position.  Read and write permissions are set when a file object is created.
@@ -261,9 +261,9 @@ constructing stacks.
 be used by applications that extend the interpreter as a container object.
 Handles can be executed, but the results are application dependent.
 
-Each handle has a tag associated with it that can used by C extension code as a
-form of type checking.  By default, the tag is a null object.  In most cases, an
-application that extends the interpreter using handle objects will set handle
+Each handle has a tag associated with it that can be used by C extension code as
+a form of type checking.  By default, the tag is a null object.  In most cases,
+an application that extends the interpreter using handle objects will set handle
 tags to be name objects.
 
 \item[instance: ] An instance is an instance of a class, in the object-oriented
@@ -308,7 +308,7 @@ which can be used to find substring matches within an input string.
 
 \item[regsub: ] A regsub encapsulates a regular expression, substitution
 template, and associated flags, which can be used to do substring substitutions
-matches and create an output string from input string.
+and create an output string from an input string.
 
 \item[stack: ] A stack provides LIFO (last in, first out) access to objects that
 it contains, as well as some more advanced access methods.  An application can

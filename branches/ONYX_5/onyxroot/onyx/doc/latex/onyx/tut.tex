@@ -161,7 +161,7 @@ Onyx objects fall into two categories according to type: simple and composite.
 Simple objects take up no virtual memory of their own; they are embedded into
 other composite objects.  For example, an integer on the operand stack takes up
 only the space that the stack requires to store it.  The same is true of an
-integer that is stored an an element of an array.  Composite objects are
+integer that is stored as an element of an array.  Composite objects are
 composed of references that fit into the same places that an integer is stored,
 plus additional structures stored elsewhere in virtual memory.  There can be
 multiple references to the same composite object, and as there is a chain of
@@ -181,12 +181,13 @@ executed, or pushed onto the operand stack.  Doing nothing at all can be useful.
 
 \section{Stacks}
 
-Stacks in Onyx are pretty typical.  Objects are implicitly or explicitly pushed
-onto stacks by operators, and the stack contents can be rearranged and removed.
-Although stacks are a first class object in Onyx, most Onyx programs are
-concerned only with the operand stack, often referred to as ostack, which is
-used as a place to store objects, pass arguments into operators and procedures,
-and return results.
+Stacks in Onyx are pretty typical, and a rich set of stack manipulation
+operators is provided..  Objects are implicitly or explicitly pushed onto stacks
+by operators, and the stack contents can be rearranged and removed.  Although
+stacks are a first class object in Onyx, most Onyx programs are mainly concerned
+with the operand stack, often referred to as ostack.  ostack is used as a place
+to store objects, pass arguments into operators and procedures, and return
+results.
 
 Onyx is a postfix language, which means that code is written such that operands
 precede operators.  For example, the following code Calculates $5 \times (3 +
@@ -339,6 +340,9 @@ language syntax devoted to regular expressions, unlike Perl.  Instead, patterns
 and substitution templates are specified via normal strings, and flags are
 specified via dictionaries.
 
+Regular expression syntax is similar to that of Perl.  See
+Section~\ref{sec:onyx_regular_expressions} for more information.
+
 \subsection{Matching}
 The following snippet iteratively searches for capitalized words:
 
@@ -358,7 +362,7 @@ The above code generates the following output:
 \end{verbatim}
 
 The {\tt \$g} flag to the \htmlref{\onyxop{}{match}{}}{systemdict:match}
-operator says to store the location to start the next match at, which is what
+operator says to start searching where the previous match ended, which is what
 makes the {\tt while} loop possible.  The
 \htmlref{\onyxop{}{submatch}{}}{systemdict:submatch} operator gets the substring
 of the input string that the regular expression most recently matched.
@@ -430,9 +434,8 @@ common operation when using regular expressions for text processing, so the
 \htmlref{\onyxop{}{subst}{}}{systemdict:subst} operator is also provided as a
 more convenient interface for the most common types of substitution.
 
-Suppose that a comma-delimited file needs to be converted to a colon-delmited
-file, consecutive separators need to be merged, and whitespace around the
-separators needs to be stripped out.  The following snippet does that:
+Suppose that a list of email addresses needs to be converted from one format to
+another..  The following snippet does such a conversion:
 
 \begin{verbatim}
 `Jason Evans (jasone@canonware.com)
@@ -485,14 +488,14 @@ go.
 
 \subsection{Procedures}
 
-Named procedures can be created by associating a name in one of the dictionaries
-on dstack with a procedure.  There is nothing magical about this, but some care
+Named procedures can be created by associating a name with a procedure in one of
+the dictionaries on dstack.  There is nothing magical about this, but some care
 should be taken in choosing procedure names, and in deciding how to manage the
-namespace.  Onyx uses only lower case letters in the names of its definitions on
-dstack, so it is easy to avoid namespace collisions by using some other
-character in program definitions.  There is nothing wrong with using all
-lowercase letters for names in your programs, though some extra care is
-warranted when doing so.
+namespace.  Onyx uses only numberss and lowercase letters in the names of its
+definitions on dstack, so it is easy to avoid namespace collisions by using some
+other character in program definitions.  There is nothing wrong with using all
+numbers and lowercase letters for names in your programs, though some extra care
+is warranted when doing so.
 
 An important consideration in program design is determining what belongs in the
 global namespace.  For an example of how Onyx partitions its namespace, look at
@@ -506,7 +509,7 @@ interest.
 
 \subsection{Modules}
 Onyx provides the infrastructure for loadable modules, which can be implemented
-in Onyx and/or dynamically loaded machine code (shared libraries).  At the
+as Onyx code and/or dynamically loaded machine code (shared libraries).  At the
 lowest level, \htmlref{\onyxop{}{modload}{}}{systemdict:modload} can be used to
 load a shared object.  At a higher level,
 \htmlref{\onyxop{}{mrequire}{}}{systemdict:mrequire} can be used to find a
@@ -556,14 +559,14 @@ handling:
 # Restore error handling machinery...
 \end{verbatim}
 
-The possibilities are extensive.  However, a word of caution is in order.  If
-you mess something up in the error handling machinery, bad things will happen,
-and you will have a terrible time debugging the problem.  Be careful.
+The possibilities are extensive.  However, a few words of caution are in order.
+If you mess something up in the error handling machinery, bad things will
+happen, and you will have a terrible time debugging the problem.  Be careful.
 
 \section{Introspection}
 \label{onyxtut:introspection}
 
-The following code defines a named procedure that calculates factorials.
+The following code defines a named procedure that calculates factorials:
 
 \begin{verbatim}
 #n factorial #result
@@ -582,7 +585,7 @@ $factorial {
 
 What this code actually does is create an executable array, which can be
 examined and modified.  The following transcript shows the effects of modifying
-the code.
+the code:
 
 \begin{verbatim}
 onyx:0> 3 factorial 1 sprint
@@ -629,7 +632,7 @@ Implicit locking for new objects is controlled via
 locking is turned off by default when Onyx is started up, so if an application
 needs to create an object that is shared among threads, it should temporarily
 turn on implicit locking.  For example, the following code creates a stack in
-globaldict that can be used as a simple message queue.
+globaldict that can be used as a simple message queue:
 
 \begin{verbatim}
 currentlocking # Save for later restoration.

@@ -56,25 +56,33 @@ onyx_docs_html :
 #endif
                  ;
 
-onyx_docs_install_pdf : onyx_docs_pdf
+onyx_docs_install_pdf : onyx_docs_pdf onyx_docs_install
 {
-  @INSTALL@ -d [DATADIR]/onyx-@onyx_version@/doc/pdf;
-  @INSTALL@ -m 0444 [ONYX_PDF] [DATADIR]/onyx-@onyx_version@/doc/pdf;
+  @INSTALL@ -d [DATADIR]/doc/onyx-@onyx_version@/pdf;
+  @INSTALL@ -m 0444 [ONYX_PDF] [DATADIR]/doc/onyx-@onyx_version@/pdf;
 }
 
-onyx_docs_install_html : onyx_docs_html
+onyx_docs_install_html : onyx_docs_html onyx_docs_install
 {
-  @INSTALL@ -d [DATADIR]/onyx-@onyx_version@/doc/html;
+  @INSTALL@ -d [DATADIR]/doc/onyx-@onyx_version@/html;
 
   loop local f = [glob [dirname [ONYX_HTML]]"/*"]
   {
-    @INSTALL@ -m 0444 [f] [DATADIR]/onyx-@onyx_version@/doc/html;
+    @INSTALL@ -m 0444 [f] [DATADIR]/doc/onyx-@onyx_version@/html;
   }
+}
+
+onyx_docs_install :
+{
+  @INSTALL@ -d [DATADIR]/doc;
+  rm -f [DATADIR]/doc/onyx;
+  ln -s onyx-@onyx_version@ [DATADIR]/doc/onyx;
 }
 
 onyx_docs_uninstall :
 {
-  rm -rf [DATADIR]/onyx-@onyx_version@/doc;
+  rm -rf [DATADIR]/doc/onyx-@onyx_version@;
+  rm -f [DATADIR]/doc/onyx;
 }
 
 onyx_docs_clean :
