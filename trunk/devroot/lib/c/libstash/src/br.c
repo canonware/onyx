@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 173 $
- * $Date: 1998-08-26 12:34:42 -0700 (Wed, 26 Aug 1998) $
+ * $Revision: 184 $
+ * $Date: 1998-08-29 21:04:44 -0700 (Sat, 29 Aug 1998) $
  *
  * <<< Description >>>
  *
@@ -131,8 +131,7 @@ br_new(cw_br_t * a_br_o)
   rwl_new(&retval->rw_lock);
 
   /* Initialize member variables. */
-  retval-> is_open = FALSE;
-  
+  retval->is_open = FALSE;
   
   if (_cw_pmatch(_STASH_DBG_R_BR_FUNC))
   {
