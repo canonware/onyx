@@ -1,3 +1,10 @@
+2003-08-07 : Jason Evans <jasone@canonware.com>
+
+	* configure.in : Remove the --disable-libonyx and --disable-onyx
+          options.
+
+	  Update to autoconf 2.57.
+
 2003-07-29 : Jason Evans <jasone@canonware.com>
 
 	* lib/libonyx/src/mem.c : Unlock s_mem_lock before throwing exceptions.
