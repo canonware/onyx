@@ -195,6 +195,11 @@ opt_dstdir {
 	`-I@abs_objroot@/lib/libonyx/include ' exch cat
 ' cat
     } if
+    `@CPPFLAGS@' `-I@abs_objroot@/lib/libonyx/include/libonyx' match {
+	`\
+	`-I@abs_objroot@/lib/libonyx/include/libonyx ' exch cat
+' cat
+    } unless
 }{
     `\
 	`-I@abs_srcroot@/lib/libonyx/include ' exch cat
