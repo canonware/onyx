@@ -2289,25 +2289,27 @@ objecs from stack down through topmost mark. \\
 \hline \hline
 \multicolumn{4}{|l|}{Integer and math operators} \\
 \hline \hline
-& {\bf \htmlref{sub}{systemdict:sub}} & & \\
+a b & {\bf \htmlref{add}{systemdict:add}} & r & Add a and b. \\
 \hline
-& {\bf \htmlref{srand}{systemdict:srand}} & & \\
+a b & {\bf \htmlref{sub}{systemdict:sub}} & r & Subtract b from a. \\
 \hline
-& {\bf \htmlref{rand}{systemdict:rand}} & & \\
+a b & {\bf \htmlref{mul}{systemdict:mul}} & r & Multiply a and b. \\
 \hline
-& {\bf \htmlref{neg}{systemdict:neg}} & & \\
+a b & {\bf \htmlref{div}{systemdict:div}} & r & Divide a by b. \\
 \hline
-& {\bf \htmlref{mod}{systemdict:mod}} & & \\
+a b & {\bf \htmlref{mod}{systemdict:mod}} & r & Mod a by b. \\
 \hline
-& {\bf \htmlref{mul}{systemdict:mul}} & & \\
+a b & {\bf \htmlref{exp}{systemdict:exp}} & r & Raise a to the power of b. \\
 \hline
-& {\bf \htmlref{exp}{systemdict:exp}} & & \\
+a & {\bf \htmlref{abs}{systemdict:abs}} & r & Get the absolute value of a. \\
 \hline
-& {\bf \htmlref{abs}{systemdict:abs}} & & \\
+a & {\bf \htmlref{neg}{systemdict:neg}} & r & Get the negative of a. \\
 \hline
-& {\bf \htmlref{div}{systemdict:div}} & & \\
+seed & {\bf \htmlref{srand}{systemdict:srand}} & -- & Seed pseudo-random number
+generator. \\
 \hline
-& {\bf \htmlref{add}{systemdict:add}} & & \\
+-- & {\bf \htmlref{rand}{systemdict:rand}} & integer & Get a pseudo-random
+number. \\
 \hline \hline
 \multicolumn{4}{|l|}{String operators} \\
 \hline \hline
@@ -2718,44 +2720,64 @@ onyx:0>
 	\end{description}
 \label{systemdict:abs}
 \index{abs@\onyxop{}{abs}{}}
-\item[{\onyxop{--}{abs}{--}}: ]
+\item[{\onyxop{a}{abs}{r}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a: ]
+			An integer.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[r: ]
+			Absolute value of \oparg{a}.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Return the absolute value of \oparg{a}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> 5 abs 1 sprint
+5
+onyx:0> -5 abs 1 sprint
+5
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:add}
 \index{add@\onyxop{}{add}{}}
-\item[{\onyxop{--}{add}{--}}: ]
+\item[{\onyxop{a b}{add}{r}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a: ]
+			An integer.
+		\item[b: ]
+			An integer.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[r: ]
+			The sum of \oparg{a} and \oparg{b}.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Return the sum of \oparg{a} and \oparg{b}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> 2 2 add 1 sprint
+4
+onyx:0> -1 3 add 1 sprint
+2
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:aload}
@@ -3618,23 +3640,43 @@ onyx:0>
 	\end{description}
 \label{systemdict:div}
 \index{div@\onyxop{}{div}{}}
-\item[{\onyxop{--}{div}{--}}: ]
+\item[{\onyxop{a b}{div}{r}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a: ]
+			An integer.
+		\item[b: ]
+			A non-zero integer.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[r: ]
+			The quotient of \oparg{a} divided by \oparg{b}.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{undefinedresult}{undefinedresult}.]
 		\end{description}
 	\item[Description: ]
+		Return the quotient of \oparg{a} divided by \oparg{b}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> 4 2 div 1 sprint
+2
+onyx:0> 5 2 div 1 sprint
+2
+onyx:0> 5 0 div
+Error /undefinedresult
+ostack: (5 0)
+dstack: (-dict- -dict- -dict- -dict-)
+estack/istack trace (0..2):
+0:      --div--
+1:      -file-
+2:      --start--
+onyx:3>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:dstack}
@@ -3872,23 +3914,47 @@ onyx:2>
 	\end{description}
 \label{systemdict:exp}
 \index{exp@\onyxop{}{exp}{}}
-\item[{\onyxop{--}{exp}{--}}: ]
+\item[{\onyxop{a b}{exp}{r}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a: ]
+			An integer.
+		\item[b: ]
+			A non-negative. integer.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[r: ]
+			\oparg{a} to the \oparg{b} power.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Return \oparg{a} to the \oparg{b} power.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> 5 0 exp 1 sprint
+1
+onyx:0> 5 1 exp 1 sprint
+5
+onyx:0> 5 2 exp 1 sprint
+25
+onyx:0> -5 3 exp 1 sprint
+-125
+onyx:0> 5 -3 exp 1 sprint
+Error /rangecheck
+ostack: (5 -3)
+dstack: (-dict- -dict- -dict- -dict-)
+estack/istack trace (0..2):
+0:      --exp--
+1:      -file-
+2:      --start--
+onyx:3>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:flush}
@@ -4458,23 +4524,43 @@ onyx:1>
 	\end{description}
 \label{systemdict:mod}
 \index{mod@\onyxop{}{mod}{}}
-\item[{\onyxop{--}{mod}{--}}: ]
+\item[{\onyxop{a b}{mod}{r}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a: ]
+			An integer.
+		\item[b: ]
+			A non-zero integer.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[r: ]
+			The modulus of \oparg{a} and \oparg{b}.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{undefinedresult}{undefinedresult}.]
 		\end{description}
 	\item[Description: ]
+			Return the modulus of \oparg{a} and \oparg{b}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> 4 2 mod 1 sprint
+0
+onyx:0> 5 2 mod 1 sprint
+1
+onyx:0> 5 0 mod
+Error /undefinedresult
+ostack: (5 0)
+dstack: (-dict- -dict- -dict- -dict-)
+estack/istack trace (0..2):
+0:      --mod--
+1:      -file-
+2:      --start--
+onyx:3>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:monitor}
@@ -4505,23 +4591,34 @@ onyx:0>
 	\end{description}
 \label{systemdict:mul}
 \index{mul@\onyxop{}{mul}{}}
-\item[{\onyxop{--}{mul}{--}}: ]
+\item[{\onyxop{a b}{mul}{r}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a: ]
+			An integer.
+		\item[b: ]
+			An integer.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[r: ]
+			The product of \oparg{a} and \oparg{b}.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Return the product of \oparg{a} and \oparg{b}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> 3 17 mul 1 sprint
+51
+onyx:0> -5 -6 mul 1 sprint
+30
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:mutex}
@@ -4568,23 +4665,34 @@ onyx:0>
 	\end{description}
 \label{systemdict:neg}
 \index{neg@\onyxop{}{neg}{}}
-\item[{\onyxop{--}{neg}{--}}: ]
+\item[{\onyxop{a}{neg}{r}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a: ]
+			An integer.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[r: ]
+			The negative of \oparg{a}.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Return the negative of \oparg{a}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> 0 neg 1 sprint
+0
+onyx:0> 5 neg 1 sprint
+-5
+onyx:0> -5 neg 1 sprint
+5
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:not}
@@ -4857,23 +4965,26 @@ onyx:1>
 	\end{description}
 \label{systemdict:rand}
 \index{rand@\onyxop{}{rand}{}}
-\item[{\onyxop{--}{rand}{--}}: ]
+\item[{\onyxop{--}{rand}{integer}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[integer: ]
+			A pseudo-random non-negative integer, with 63 bits of
+			psuedo-randomness.
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Return a pseudo-random integer.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> 0 srand
+onyx:0> rand 1 sprint
+9018578418316157091
+onyx:0> rand 1 sprint
+8979240987855095636
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:read}
@@ -5532,23 +5643,26 @@ onyx:1>
 	\end{description}
 \label{systemdict:srand}
 \index{srand@\onyxop{}{srand}{}}
-\item[{\onyxop{--}{srand}{--}}: ]
+\item[{\onyxop{seed}{srand}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[seed: ]
+			A non-negative integer.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Seed the pseudo-random number generator with \oparg{seed}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> 5 srand
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sroll}
@@ -5826,23 +5940,34 @@ onyx:1> pstack
 	\end{description}
 \label{systemdict:sub}
 \index{sub@\onyxop{}{sub}{}}
-\item[{\onyxop{--}{sub}{--}}: ]
+\item[{\onyxop{a b}{sub}{r}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a: ]
+			An integer.
+		\item[b: ]
+			An integer.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[r: ]
+			The value of \oparg{b} subtracted from \oparg{a}.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Subtract \oparg{b} from \oparg{a} and return the result.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> 5 3 sub 1 sprint
+2
+onyx:0> -3 4 sub 1 sprint
+-7
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:symlink}

@@ -3408,7 +3408,9 @@ systemdict_rand(cw_nxo_t *a_thread)
 	ostack = nxo_thread_ostack_get(a_thread);
 
 	num = nxo_stack_push(ostack);
-	nxo_integer_new(num, random());
+	/* random() returns 31 bits. */
+	nxo_integer_new(num, ((cw_nxoi_t)random()) + (((cw_nxoi_t)random()) <<
+	    31) + (((cw_nxoi_t)random()) << 62));
 }
 
 void
@@ -4114,12 +4116,23 @@ void
 systemdict_srand(cw_nxo_t *a_thread)
 {
 	cw_nxo_t	*ostack;
-	cw_nxo_t	*seed;
+	cw_nxo_t	*nxo;
+	cw_nxoi_t	seed;
 
 	ostack = nxo_thread_ostack_get(a_thread);
 
-	NXO_STACK_GET(seed, ostack, a_thread);
-	srandom(nxo_integer_get(seed));
+	NXO_STACK_GET(nxo, ostack, a_thread);
+	if (nxo_type_get(nxo) != NXOT_INTEGER) {
+		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		return;
+	}
+	seed = nxo_integer_get(nxo);
+	if (seed < 0) {
+		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+		return;
+	}
+
+	srandom((unsigned long)seed);
 	nxo_stack_pop(ostack);
 }
 
