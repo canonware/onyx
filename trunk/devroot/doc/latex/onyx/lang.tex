@@ -636,7 +636,7 @@ state for where the error really happened is gone.
 \label{rangecheck}
 \item[rangecheck: ] Out of bounds string or array access.
 \label{stackunderflow}
-\item[stackunderflow: ] Not enough objects on ostack.
+\item[stackunderflow: ] Not enough objects on stack.
 \label{syntaxerror}
 \item[syntaxerror: ] Scanner syntax error.
 \label{typecheck}
@@ -3240,7 +3240,13 @@ control variable. \\
 count proc & {\bf \htmlref{repeat}{systemdict:repeat}} & -- & Iterate a set
 number of times. \\
 \hline
-proc & {\bf \htmlref{loop}{systemdict:loop}} & -- &  Iterate indefinitely. \\
+cond proc & {\bf \htmlref{while}{systemdict:while}} & -- &  Loop while cond
+is true. \\
+\hline
+proc cond & {\bf \htmlref{until}{systemdict:until}} & -- &  Loop until cond
+is false. \\
+\hline
+proc & {\bf \htmlref{loop}{systemdict:loop}} & -- &  Loop indefinitely. \\
 \hline
 array proc & {\bf \htmlref{foreach}{systemdict:foreach}} & -- & Iterate on array
 elements. \\
@@ -3453,7 +3459,11 @@ stack contents. \\
 \hline \hline
 a b & {\bf \htmlref{add}{systemdict:add}} & r & Add a and b. \\
 \hline
+a & {\bf \htmlref{inc}{systemdict:inc}} & r & Add 1 to a. \\
+\hline
 a b & {\bf \htmlref{sub}{systemdict:sub}} & r & Subtract b from a. \\
+\hline
+a & {\bf \htmlref{dec}{systemdict:dec}} & r & Subtract 1 from a. \\
 \hline
 a b & {\bf \htmlref{mul}{systemdict:mul}} & r & Multiply a and b. \\
 \hline
@@ -5393,6 +5403,34 @@ onyx:0> [1 2 3] cvx 1 sprint
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:dec}
+\index{dec@\onyxop{}{dec}{}}
+\item[{\onyxop{a}{dec}{r}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a: ]
+			An integer.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[r: ]
+			$a - 1$.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Subtract one from \oparg{a}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> 1 dec 1 sprint
+0
+onyx:0>
+		\end{verbatim}
+	\end{description}
 \label{systemdict:def}
 \index{def@\onyxop{}{def}{}}
 \item[{\onyxop{key val}{def}{--}}: ]
@@ -5978,6 +6016,8 @@ onyx:0>
 		This operator can be called within the looping context of
 		\htmlref{\onyxop{}{for}{}}{systemdict:for},
 		\htmlref{\onyxop{}{repeat}{}}{systemdict:repeat},
+		\htmlref{\onyxop{}{while}{}}{systemdict:while},
+		\htmlref{\onyxop{}{until}{}}{systemdict:until},
 		\htmlref{\onyxop{}{loop}{}}{systemdict:loop},
 		\htmlref{\onyxop{}{foreach}{}}{systemdict:foreach}, and
 		\htmlref{\onyxop{}{dirforeach}{}}{systemdict:dirforeach}.
@@ -6829,6 +6869,34 @@ onyx:0> false {`yes'}{`no'} ifelse 1 sprint
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:inc}
+\index{inc@\onyxop{}{inc}{}}
+\item[{\onyxop{a}{inc}{r}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a: ]
+			An integer.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[r: ]
+			$a + 1$.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Add one to \oparg{a}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> 1 inc 1 sprint
+2
+onyx:0>
+		\end{verbatim}
+	\end{description}
 \label{systemdict:iobuf}
 \index{iobuf@\onyxop{}{iobuf}{}}
 \item[{\onyxop{file}{iobuf}{count}}: ]
@@ -7267,7 +7335,7 @@ onyx:0>
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
 	\item[Description: ]
-		Iteratively evaluate \oparg{proc} indefinitely.  This operator
+		Repeatedly evaluate \oparg{proc} indefinitely.  This operator
 		supports the \htmlref{\onyxop{}{exit}{}}{systemdict:exit}
 		operator.
 	\item[Example(s): ]\begin{verbatim}
@@ -11684,6 +11752,35 @@ onyx:0> uid 1 sprint
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:umask}
+\index{umask@\onyxop{}{umask}{}}
+\item[{\onyxop{nmask}{umask}{omask}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[nmask: ]
+			Value to set umask to.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[omask: ]
+			Old umask.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Set the process's umask to \oparg{nmask} and return the old
+		umask.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> 8@777 umask </b 8 /w 3 /p `0'> output `\n' print flush
+022
+onyx:0>
+		\end{verbatim}
+	\end{description}
 \label{systemdict:undef}
 \index{undef@\onyxop{}{undef}{}}
 \item[{\onyxop{dict key}{undef}{--}}: ]
@@ -11837,6 +11934,40 @@ onyx:0> envdict /foo get 1 sprint
 onyx:0> /foo unsetenv
 onyx:0> envdict /foo known 1 sprint
 false
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:until}
+\index{until@\onyxop{}{until}{}}
+\item[{\onyxop{proc cond}{until}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[proc: ]
+			An object to be repeatedly evaluated.
+		\item[cond: ]
+			An object that, when evaluated, places a boolean on
+			ostack.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Repeatedly evaluate \oparg{proc} and \oparg{cond}, terminating
+		the first time that \oparg{cond} places false on ostack.  This
+		operator supports the
+		\htmlref{\onyxop{}{exit}{}}{systemdict:exit} operator.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> 0 {inc dup 1 sprint}{dup 3 lt} until pop
+1
+2
+3
+onyx:0> 0 {inc dup 1 sprint exit}{dup 3 lt} until pop
+1
 onyx:0>
 		\end{verbatim}
 	\end{description}
@@ -12004,6 +12135,40 @@ onyx:0> /threaddict where pstack clear
 true
 </threaddict -dict- /userdict -dict- /currenterror -dict- /errordict -dict-
 /resume --stop-->
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:while}
+\index{while@\onyxop{}{while}{}}
+\item[{\onyxop{cond proc}{while}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[cond: ]
+			An object that, when evaluated, places a boolean on
+			ostack.
+		\item[proc: ]
+			An object to be repeatedly evaluated.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Repeatedly evaluate \oparg{cond} and \oparg{proc}, terminating
+		the first time that \oparg{cond} places false on ostack.  This
+		operator supports the
+		\htmlref{\onyxop{}{exit}{}}{systemdict:exit} operator.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> 0 {dup 3 lt}{inc dup 1 sprint} while pop
+1
+2
+3
+onyx:0> 0 {dup 3 lt}{inc dup 1 sprint exit} while pop
+1
 onyx:0>
 		\end{verbatim}
 	\end{description}
