@@ -143,6 +143,7 @@ stile_clean :
 
 stile_distclean :
 {
+  rm -f [objdir]/bin/stile/doc/latex/manual.tex;
 }
 
 /*

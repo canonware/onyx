@@ -158,6 +158,7 @@ libstil_clean :
 
 libstil_distclean :
 {
+  rm -f [objdir]/lib/c/libstil/doc/latex/manual.tex;
 }
 
 /*

@@ -154,6 +154,7 @@ libsock_clean :
 
 libsock_distclean :
 {
+  rm -f [objdir]/lib/c/libsock/doc/latex/manual.tex;
 }
 
 /*

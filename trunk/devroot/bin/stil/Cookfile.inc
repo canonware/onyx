@@ -144,6 +144,7 @@ stil_clean :
 
 stil_distclean :
 {
+  rm -f [objdir]/bin/stil/doc/latex/manual.tex;
 }
 
 /*

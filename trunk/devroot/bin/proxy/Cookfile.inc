@@ -143,6 +143,7 @@ proxy_clean :
 
 proxy_distclean :
 {
+  rm -f [objdir]/bin/proxy/doc/latex/manual.tex;
 }
 
 /*

@@ -143,6 +143,7 @@ ncat_clean :
 
 ncat_distclean :
 {
+  rm -f [objdir]/bin/ncat/doc/latex/manual.tex;
 }
 
 /*

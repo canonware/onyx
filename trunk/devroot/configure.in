@@ -198,6 +198,13 @@ mkdir -p $objdir/doc/latex
 
 dnl Process the following files.
 AC_OUTPUT(Cookfile \
+bin/ncat/doc/latex/manual.tex \
+bin/proxy/doc/latex/manual.tex \
+bin/stil/doc/latex/manual.tex \
+bin/stile/doc/latex/manual.tex \
+lib/c/libstash/doc/latex/manual.tex \
+lib/c/libsock/doc/latex/manual.tex \
+lib/c/libstil/doc/latex/manual.tex \
 doc/latex/manual.tex \
 doc/latex/ltx2e \
 test/verify \

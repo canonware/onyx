@@ -20,16 +20,6 @@ structures that are useful for many purposes.
 \libname{libstash} is designed to run on *nix platforms, and is known to work on
 FreeBSD, Linux, and Solaris.  The pthreads library is required.
 
-\section{Compilation}
-Use one of the following compiler command lines to compile applications with
-\libname{libstash}.
-\begin{description}
-\item[Normal: ] cc \filename{file} -lstash -lpthread
-\item[Debug: ] cc -g -D\_LIBSTASH\_DBG \filename{file} -lstash\_d -lpthread
-\item[Profile: ] cc -pg \filename{file} -lstash\_p -lpthread
-\end{description}
-
-\section{Usage}
 Regardless of what classes are used, at least the following minimal shell of C
 code should be used.
 
@@ -39,53 +29,193 @@ code should be used.
 int
 main()
 {
-	libstash_init();
+        libstash_init();
 
-	/* Do stuff. */
+        /* Do stuff. */
 
-	libstash_shutdown();
-	return 0;
+        libstash_shutdown();
+        return 0;
 }
 \end{verbatim}
 
-\cfunc{libstash\_init}{} must be called in order for things to work properly.
+All \libname{libstash} class API definitions are made available via the
+\filename{libstash/libstash.h} header.  \cfunc{libstash\_init}{} must be called
+in order for things to work properly.
 
-\subsection{API}
+\section{Compilation}
+Use one of the following compiler command lines to compile applications with
+\libname{libstash}.
+\begin{description}
+\item[Normal: ] cc \filename{file} -lstash -lpthread
+\item[Debug: ] cc -g -D\_LIBSTASH\_DBG \filename{file} -lstash\_d -lpthread
+\item[Profile: ] cc -pg \filename{file} -lstash\_p -lpthread
+\end{description}
+
+\section{Exceptions}
+\libname{libstash} reserves exception numbers -1 to -127 and defines the
+following exceptions:
+\begin{description}
+\label{_CW_STASHX_OOM}
+\item[\cppdef{\_CW\_STASHX\_OOM}: ]
+	Memory allocation error.
+\label{_CW_STASHX_OUT_PARSE}
+\item[\cppdef{\_CW\_STASHX\_OUT\_PARSE}: ]
+	Error parsing a format string passed to the \classname{out} class.
+\end{description}
+
+\section{API}
 \begin{description}
 \label{libstash_init}
-\index{\cfunc[]{libstash\_init}{}}
+\index{\cfunc{libstash\_init}{}}
 \item[{\cfunc[void]{libstash\_init}{void}}: ]
-	\begin{description}
+	\begin{description}\item[]
 	\item[Input(s): ] None.
 	\item[Output(s): ] None.
 	\item[Exception(s): ]
-		\begin{description}
-		\item[\htmlref{\_CW\_XEPV\_OOM}{xep:oom}.]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
 		\end{description}
 	\item[Description: ]
 		Initialize various global variables.  In particular, initialize
 		\cvar{cw\_g\_mem}, \cvar{cw\_g\_dbg}, and \cvar{cw\_g\_out}
 		(default output to file descriptor 1).
 	\end{description}
-\label{}
-\index{\cfunc[]{}{}}
-\item[{\cfunc[]{}{}}: ]
-	\begin{description}
+\label{libstash_shutdown}
+\index{\cfunc{libstash\_shutdown}{}}
+\item[{\cfunc[void]{libstash\_shutdown}{void}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Clean up the global variables that are initialized by
+		\cfunc{libstash\_init}{}.
+	\end{description}
+\label{_cw_assert}
+\index{\cppmacro{\_cw\_assert}{}}
+\item[{\cppmacro[void]{\_cw\_assert}{expression}}: ]
+	\begin{description}\item[]
 	\item[Input(s): ]
-		\begin{description}
-		\item[: ]
+		\begin{description}\item[]
+		\item[expression: ]
+			C expression that evaluates to zero or non-zero.
 		\end{description}
 	\item[Output(s): ]
-		\begin{description}
-		\item[: ]
-		\end{description}
-	\item[Exception(s): ]
-		\begin{description}
-		\item[\htmlref{\_CW\_XEPV\_}{xep:}.]
-		\end{description}
+			Possible error printed to \cvar{cw\_g\_out}.
+	\item[Exception(s): ] None.
 	\item[Description: ]
+		If the expression evaluates to zero, print an error message to
+		\cvar{cw\_g\_out} and \cfunc{abort}{}.
+
+		Note: This macro is optimized out of the non-debug versions of
+		\libname{libstash}.
 	\end{description}
+\label{_cw_not_reached}
+\index{\cppmacro{\_cw\_not\_reached}{}}
+\item[{\cppmacro[void]{\_cw\_not\_reached}{void}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Abort with an error message, if a debugging version of
+		\libname{libstash}.
+	\end{description}
+\label{_cw_error}
+\index{\cfunc{\_cw\_error}{}}
+\item[{\cfunc[void]{\_cw\_error}{const char *a\_str}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_str: ]
+			Pointer to a NULL-terminated character array.
+		\end{description}
+	\item[Output(s): ]
+		Contents of \cvar{a\_str}, followed by a carriage return,
+		printed to \cvar{cw\_g\_out}.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Print the contents of \cvar{a\_str}, followed by a carriage
+		return, to \cvar{cw\_g\_out}.
+	\end{description}
+\label{_cw_ntohq}
+\index{\cppmacro{\_cw\_ntohq}{}}
+\item[{\cppmacro[cw\_uint64\_t]{\_cw\_ntohq}{cw\_uint64\_t a\_val}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_val: ]
+			64 bit integer.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			64 bit integer.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Convert \cvar{a\_val} from network byte order to host byte order
+		and return the result.
+	\end{description}
+\label{_cw_htonq}
+\index{\cppmacro{\_cw\_htonq}{}}
+\item[{\cppmacro[cw\_uint64\_t]{\_cw\_htonq}{cw\_uint64\_t a\_val}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_val: ]
+			64 bit integer.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			64 bit integer.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Convert \cvar{a\_val} from host byte order to network byte order
+		and return the result.
+	\end{description}
+% \label{xxx_}
+% \index{\cfunc{xxx\_}{}}
+% \item[{\cfunc[]{xxx\_}{}}: ]
+% 	\begin{description}\item[]
+% 	\item[Input(s): ]
+% 		\begin{description}\item[]
+% 		\item[: ]
+% 		\end{description}
+% 	\item[Output(s): ]
+% 		\begin{description}\item[]
+% 		\item[: ]
+% 		\end{description}
+% 	\item[Exception(s): ]
+% 		\begin{description}\item[]
+% 		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+% 		\end{description}
+% 	\item[Description: ]
+% 	\end{description}
 \end{description}
 
 \section{Classes}
+\input{@abs_srcdir@/lib/c/libstash/doc/latex/bhp}
+\input{@abs_srcdir@/lib/c/libstash/doc/latex/buf}
+\input{@abs_srcdir@/lib/c/libstash/doc/latex/ch}
+\input{@abs_srcdir@/lib/c/libstash/doc/latex/cnd}
+\input{@abs_srcdir@/lib/c/libstash/doc/latex/dbg}
+\input{@abs_srcdir@/lib/c/libstash/doc/latex/dch}
+\input{@abs_srcdir@/lib/c/libstash/doc/latex/mem}
+\input{@abs_srcdir@/lib/c/libstash/doc/latex/mq}
+\input{@abs_srcdir@/lib/c/libstash/doc/latex/mtx}
+\input{@abs_srcdir@/lib/c/libstash/doc/latex/out}
+\input{@abs_srcdir@/lib/c/libstash/doc/latex/pezz}
+\input{@abs_srcdir@/lib/c/libstash/doc/latex/pool}
+\input{@abs_srcdir@/lib/c/libstash/doc/latex/ql}
+\input{@abs_srcdir@/lib/c/libstash/doc/latex/qr}
+\input{@abs_srcdir@/lib/c/libstash/doc/latex/qs}
+\input{@abs_srcdir@/lib/c/libstash/doc/latex/res}
+\input{@abs_srcdir@/lib/c/libstash/doc/latex/rwl}
+\input{@abs_srcdir@/lib/c/libstash/doc/latex/sema}
+\input{@abs_srcdir@/lib/c/libstash/doc/latex/thd}
+\input{@abs_srcdir@/lib/c/libstash/doc/latex/treen}
+\input{@abs_srcdir@/lib/c/libstash/doc/latex/tsd}
 \input{@abs_srcdir@/lib/c/libstash/doc/latex/xep}

@@ -77,8 +77,12 @@ doc_clean :
 {
   rm -f [objdir]/doc/latex/manual.alg;
   rm -f [objdir]/doc/latex/manual.aux;
+  rm -f [objdir]/doc/latex/manual.aux-prev;
   rm -f [objdir]/doc/latex/manual.dvi;
   rm -f [objdir]/doc/latex/manual.idx;
+  rm -f [objdir]/doc/latex/manual.idx-prev;
+  rm -f [objdir]/doc/latex/manual.ilg;
+  rm -f [objdir]/doc/latex/manual.ind;
   rm -f [objdir]/doc/latex/manual.lof;
   rm -f [objdir]/doc/latex/manual.log;
   rm -f [objdir]/doc/latex/manual.toc;
@@ -117,7 +121,7 @@ doc_relclean :
    * Change directory to the object tree, since latex can't be made to use a
    * different location for output files.
    */
-  cd [objdir]/%0\; [LATEX] [objdir]/%.tex;
+  cd [objdir]/%0\; ./ltx2e [objdir]/%.tex;
 }
 
 [objdir]/%0ps/%.ps : [objdir]/%0latex/%.dvi
@@ -130,7 +134,7 @@ doc_relclean :
   set mkdir
 {
   [LATEX2HTML] -init_file [srcdir]/%0latex/.latex2html-init
-    -dir [abs_objdir]/%0html -split 3 -toc_depth 4
+    -dir [abs_objdir]/%0html -split 5 -toc_depth 4
     -footnode -noinfo -auto_link -transparent -image_type png
     -show_section_numbers [abs_srcdir]/%0latex/%.tex;
 }

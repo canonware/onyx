@@ -12,13 +12,11 @@
 %              
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\newcommand{\ainput}[1]{\input{@abs_srcdir@/#1}}
-\providecommand{\ainput}[1]{\input{@abs_srcdir@/#1}}
-
 % Definitions and front matter.
 \input{@abs_srcdir@/doc/latex/front}
 
 % Programs.
+\clearemptydoublepage
 \part{Programs}
 \input{@abs_srcdir@/bin/ncat/doc/latex/manual}
 \input{@abs_srcdir@/bin/proxy/doc/latex/manual}
@@ -26,10 +24,12 @@
 \input{@abs_srcdir@/bin/stile/doc/latex/manual}
 
 % Libraries.
+\clearemptydoublepage
 \part{Libraries}
 \input{@abs_srcdir@/lib/c/libstash/doc/latex/manual}
 \input{@abs_srcdir@/lib/c/libsock/doc/latex/manual}
 \input{@abs_srcdir@/lib/c/libstil/doc/latex/manual}
 
 % Back matter.
+\clearemptydoublepage
 \input{@abs_srcdir@/doc/latex/back}

@@ -23,10 +23,6 @@
 \usepackage{ifthen}
 %end{latexonly}
 
-% For latex2html.
-%\providecommand{\clearemptydoublepage}[0]{}
-%\providecommand{\equal}[2]{1}
-
 %begin{latexonly}
 %
 % Configure margins, line spacing, etc.
@@ -55,63 +51,52 @@
 \date{\today}
 
 % Control what all ends up in the table of contents.
-\addtocounter{secnumdepth}{1}
+%\addtocounter{secnumdepth}{4}
 
 %begin{latexonly}
 % Use this to make sure chapter breaks look right.
-\newcommand{\clearemptydoublepage}{\newpage{\pagestyle{empty}\cleardoublepage}}
+\newcommand{\clearemptydoublepage}
+	{\newpage \thispagestyle{empty} \cleardoublepage}
 
 %
 % Set up the standard page headers.
 %
-\renewcommand{\chaptermark}[1]{\markboth{#1}{}}
-\renewcommand{\sectionmark}[1]{\markright{\thesection\ #1}}
-\lhead[\bfseries\thepage]{\bfseries\rightmark}
-\rhead[\bfseries{Chapter \thechapter}]{\bfseries\thepage}
-\cfoot{}
-\setlength{\headrulewidth}{2pt}
-\chead[\bfseries{Canonware Software Manual}]{\bfseries{Jason Evans}}
-%\lfoot[\bfseries{Canonware Software Manual}]{}
-%\rfoot[]{\bfseries{Jason Evans}}
-%\setlength{\footrulewidth}{2pt}
+%\renewcommand{\chaptermark}[1]{\markboth{#1}{}}
+%\renewcommand{\sectionmark}[1]{\markright{\thesection\ #1}}
+%\lhead[\bfseries\thepage]{\bfseries\rightmark}
+%\rhead[\bfseries{Chapter \thechapter}]{\bfseries\thepage}
+%\cfoot{}
+%\setlength{\headrulewidth}{2pt}
+%\chead[\bfseries{Canonware Software Manual}]{\bfseries{Jason Evans}}
 %end{latexonly}
 
 \providecommand{\ifthenelse}[3]{ } % For latex2html.
 \newcommand{\cfunc}[3][]{#1\ifthenelse{\equal{}{#1}}{}{ }{\em #2}(#3)}
 \newcommand{\cvar}[1]{{\em #1}}
+\newcommand{\ctype}[1]{#1}
+\newcommand{\cppmacro}[3][]{#1\ifthenelse{\equal{}{#1}}{}{ }{\em #2}(#3)}
+\newcommand{\cppdef}[1]{{\em #1}}
 \newcommand{\binname}[1]{{\em #1}}
 \newcommand{\libname}[1]{{\em #1}}
 \newcommand{\filename}[1]{{\em #1}}
+\newcommand{\classname}[1]{{\em #1}}
+\newcommand{\dbgsym}[1]{{``#1''}}
 
 % Generate an index.
 \makeindex
 
 \begin{document}
+\frontmatter
+\pagestyle{plain}
 \maketitle
+
 \clearemptydoublepage
-
-%begin{latexonly}
-\pagestyle{fancy}
-\pagenumbering{roman}
-
-\lhead[\bfseries\thepage]{\bfseries{Table of Contents}}
-\rhead[\bfseries{Table of Contents}]{\bfseries\thepage}
-
-\tableofcontents
-\clearemptydoublepage
-
-%\lhead[\bfseries\thepage]{\bfseries{List of Figures}}
-%\rhead[\bfseries{List of Figures}]{\bfseries\thepage}
-%end{latexonly}
-
-%\listoffigures
-%\clearemptydoublepage
-
-\lhead[\bfseries\thepage]{\bfseries{Preface}}
-\rhead[\bfseries{Preface}]{\bfseries\thepage}
-
+\begin{htmlonly}
 \part*{Preface}
-\addcontentsline{toc}{}{Preface}
+\end{htmlonly}
+\begin{latexonly}
+\chapter*{Preface}
+\end{latexonly}
 The Canonware Software Distribution contains a number of programs and C
 libraries.  All of the programs and libraries are integrated into a single
 software distribution, though it is possible to install and use individual
@@ -134,11 +119,24 @@ III.
 For distribution, news, and additional project information, see
 \htmlurl{http://www.canonware.com/canonware/}.
 
+\clearemptydoublepage
+\tableofcontents
+
 %
 % Setup for main body of document.
 %
+\mainmatter
+
+%
+% Set up the standard page headers.
+%
+%begin{latexonly}
+\renewcommand{\chaptermark}[1]{\markboth{#1}{}}
+\renewcommand{\sectionmark}[1]{\markright{\thesection\ #1}}
 \lhead[\bfseries\thepage]{\bfseries\rightmark}
 \rhead[\bfseries{Chapter \thechapter}]{\bfseries\thepage}
+\cfoot{}
+\setlength{\headrulewidth}{2pt}
+\chead[\bfseries{Canonware Software Manual}]{\bfseries{Jason Evans}}
 \pagestyle{fancy}
-\pagenumbering{arabic}
-\clearemptydoublepage
+%end{latexonly}

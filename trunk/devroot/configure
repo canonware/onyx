@@ -2877,6 +2877,13 @@ ac_given_srcdir=$srcdir
 ac_given_INSTALL="$INSTALL"
 
 trap 'rm -fr `echo "Cookfile \
+bin/ncat/doc/latex/manual.tex \
+bin/proxy/doc/latex/manual.tex \
+bin/stil/doc/latex/manual.tex \
+bin/stile/doc/latex/manual.tex \
+lib/c/libstash/doc/latex/manual.tex \
+lib/c/libsock/doc/latex/manual.tex \
+lib/c/libstil/doc/latex/manual.tex \
 doc/latex/manual.tex \
 doc/latex/ltx2e \
 test/verify \
@@ -3000,6 +3007,13 @@ EOF
 cat >> $CONFIG_STATUS <<EOF
 
 CONFIG_FILES=\${CONFIG_FILES-"Cookfile \
+bin/ncat/doc/latex/manual.tex \
+bin/proxy/doc/latex/manual.tex \
+bin/stil/doc/latex/manual.tex \
+bin/stile/doc/latex/manual.tex \
+lib/c/libstash/doc/latex/manual.tex \
+lib/c/libsock/doc/latex/manual.tex \
+lib/c/libstil/doc/latex/manual.tex \
 doc/latex/manual.tex \
 doc/latex/ltx2e \
 test/verify \
