@@ -30,8 +30,8 @@
 #
 # $Source$
 # $Author: jasone $
-# Current revision: $Revision: 15 $
-# Last modified: $Date: 1998-03-29 05:26:45 -0800 (Sun, 29 Mar 1998) $
+# Current revision: $Revision: 18 $
+# Last modified: $Date: 1998-03-31 00:27:07 -0800 (Tue, 31 Mar 1998) $
 #
 # Description: Makefile for SQuirreL source code.
 #              
@@ -64,7 +64,7 @@ BISONFLAGS = -d
 #
 
 # file lists
-SRCS     = dbg.c log.c mem.c # resource.c $(LEXERS:.l=.yy.c) $(PARSERS:.y=.tab.c)
+SRCS     = dbg.c list.c log.c mem.c oh.c # resource.c $(LEXERS:.l=.yy.c) $(PARSERS:.y=.tab.c)
 LEXERS   = res_lexer.l
 PARSERS  = res_parser.y
 OBJS     = $(SRCS:.c=.o)

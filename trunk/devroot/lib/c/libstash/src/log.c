@@ -29,117 +29,116 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 15 $
- * Last modified: $Date: 1998-03-29 05:26:45 -0800 (Sun, 29 Mar 1998) $
+ * $Revision: 18 $
+ * $Date: 1998-03-31 00:27:07 -0800 (Tue, 31 Mar 1998) $
  *
- * Description: 
- *              
- *              
- *              
- *              
- ****************************************************************************
- */
+ * <<< Description >>>
+ *
+ *
+ *
+ ****************************************************************************/
 
 #define _INC_STDARG_H_
-/* #define _INC_STRING_H_ */
+#define _INC_STRING_H_
+#define _INC_LOG_PRIV_H_
 #include <config.h>
 
-#define G_ERROR_BUFF_SIZE 512
-
-/* Pointer to error string used by set_g_error. */
-char g_error[G_ERROR_BUFF_SIZE] = "";
-
-/* Used to store file handle used for logging. */
-FILE * g_log_fp = NULL;
-
-int
-set_g_error(char * arg_format, ...)
+cw_log_t *
+log_new()
 {
-  va_list ap;
-  int retval;
+  cw_log_t * retval;
 
-  va_start(ap, arg_format);
-  retval = vsnprintf(g_error, G_ERROR_BUFF_SIZE, arg_format, ap);
-  va_end(ap);
-
+  retval = (cw_log_t *) _cw_malloc(sizeof(cw_log_t));
+  
+  pthread_mutexattr_init(&retval->mutex);
+  retval->is_logfile_open = FALSE;
+  retval->logfile_name = NULL;
+  retval->log_fp = NULL;
+  
   return retval;
 }
 
-char *
-get_g_error()
+void
+log_delete(cw_log_t * arg_log_obj)
 {
-  return g_error;
+
+  _cw_check_ptr(arg_log_obj);
+  
+  if ((arg_log_obj->log_fp != NULL) && (arg_log_obj->log_fp != stderr))
+  {
+    fclose(arg_log_obj->log_fp);
+  }
+
+  if (arg_log_obj->logfile_name != NULL)
+  {
+    _cw_free(arg_log_obj->logfile_name);
+  }
+
+  _cw_free(arg_log_obj);
 }
 
-int
-log_init(char * arg_logfile)
+cw_bool_t
+log_set_logfile(cw_log_t * arg_log_obj,
+		char * arg_logfile,
+		cw_bool_t arg_overwrite)
 {
-  int retval = 0;
+  cw_bool_t retval;
+  FILE * temp_fp;
+  
+  _cw_check_ptr(arg_log_obj);
+  _cw_check_ptr(arg_logfile);
+  
+  if ((arg_log_obj->log_fp != NULL) && (arg_log_obj->log_fp != stderr))
+  {
+    fclose(arg_log_obj->log_fp);
+  }
 
-  if (g_log_fp != NULL)
-    {
-      retval = 1;
-      set_g_error("Logging is already on");
-    }
-  else if (arg_logfile == NULL)
-    {
-      g_log_fp = stderr;
-    }
+  if (arg_overwrite == TRUE)
+  {
+    temp_fp = fopen(arg_logfile, "w");
+  }
   else
+  {
+    temp_fp = fopen(arg_logfile, "a+");
+    if (temp_fp == NULL)
     {
-      g_log_fp = fopen(arg_logfile, "a+");
-      if (g_log_fp == NULL)
-	{
-	  g_log_fp = fopen(arg_logfile, "w");
-	  if (g_log_fp == NULL)
-	    {
-	      retval = 1;
-	      set_g_error("Unable to open \"%s\"", arg_logfile);
-	    }
-	}
+      temp_fp = fopen(arg_logfile, "w");
     }
+  }
+  
+  if (temp_fp != NULL)
+  {
+    retval = FALSE;
+    arg_log_obj->log_fp = temp_fp;
+    if (arg_log_obj->logfile_name != NULL)
+    {
+      _cw_free(arg_log_obj->logfile_name);
+    }
+    arg_log_obj->logfile_name = (char *) _cw_malloc(strlen(arg_logfile) + 1);
+    strcpy(arg_log_obj->logfile_name, arg_logfile);
+  }
+  else
+  {
+    retval = TRUE;
+  }
 
   return retval;
 }
 
 int
-log_close()
-{
-  int retval = 0;
-
-  if (g_log_fp != NULL)
-    {
-      if (g_log_fp != stderr) /* Don't want to close stderr. */
-	{
-	  retval = fclose(g_log_fp);
-	  if (retval)
-	    {
-	      set_g_error("Error closing logfile");
-	    }
-	}
-      g_log_fp = NULL; /* log_init() depends on this being NULL if invalid. */
-    }
-  else /* The logfile is already closed. */
-    {
-      set_g_error("Logfile is already closed");
-      retval = 1;
-    }
-
-  return retval;
-}
-
-int
-lprintf(char * arg_format, ...)
+log_printf(cw_log_t * arg_log_obj, char * arg_format, ...)
 {
   va_list ap;
   int retval;
 
-  if (g_log_fp != NULL)
+  _cw_check_ptr(arg_log_obj);
+
+  if (arg_log_obj->log_fp != NULL)
     {
       va_start(ap, arg_format);
-      retval = vfprintf(g_log_fp, arg_format, ap);
+      retval = vfprintf(arg_log_obj->log_fp, arg_format, ap);
       va_end(ap);
-      fflush(g_log_fp);
+      fflush(arg_log_obj->log_fp);
     }
   else
     {
@@ -153,35 +152,38 @@ lprintf(char * arg_format, ...)
 }
 
 int
-leprintf(char * arg_filename,
-	 int arg_line_num,
-	 char * arg_func_name,
-	 char * arg_format,
-	 ...)
+log_eprintf(cw_log_t * arg_log_obj,
+	    char * arg_filename,
+	    int arg_line_num,
+	    char * arg_func_name,
+	    char * arg_format,
+	    ...)
 {
   va_list ap;
   int retval;
 
-  if (g_log_fp != NULL)
+  _cw_check_ptr(arg_log_obj);
+
+  if (arg_log_obj->log_fp != NULL)
     {
       if (arg_filename != NULL)
 	{
-	  fprintf(g_log_fp,
+	  fprintf(arg_log_obj->log_fp,
 		  "At %s, line %d: ",
 		  arg_filename,
 		  arg_line_num);
 	}
       if (arg_func_name != NULL)
 	{
-	  fprintf(g_log_fp,
+	  fprintf(arg_log_obj->log_fp,
 		  "%s(): ",
 		  arg_func_name);
 	}
 
       va_start(ap, arg_format);
-      retval = vfprintf(g_log_fp, arg_format, ap);
+      retval = vfprintf(arg_log_obj->log_fp, arg_format, ap);
       va_end(ap);
-      fflush(g_log_fp);
+      fflush(arg_log_obj->log_fp);
     }
   else
     {

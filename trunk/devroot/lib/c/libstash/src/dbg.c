@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 15 $
- * $Date: 1998-03-29 05:26:45 -0800 (Sun, 29 Mar 1998) $
+ * $Revision: 18 $
+ * $Date: 1998-03-31 00:27:07 -0800 (Tue, 31 Mar 1998) $
  *
  * <<< Description >>>
  *
@@ -64,7 +64,7 @@ cw_dbg_t *
 dbg_new()
 {
   cw_dbg_t * retval;
-  
+
   retval = (cw_dbg_t *) _cw_malloc(sizeof(cw_dbg_t));
 
   /* Zero out the entire structure. */
