@@ -419,22 +419,92 @@ stilt_loop(cw_stilt_t *a_stilt)
 			 */
 			array = stilo_array_get(stilo);
 			for (i = 0; i < len - 1; i++) {
-				if ((stilo_attrs_get(&array[i]) ==
-				    STILOA_LITERAL) ||
-				    (stilo_type_get(&array[i]) ==
-				    STILOT_ARRAY)) {
+				if (stilo_attrs_get(&array[i]) ==
+				    STILOA_LITERAL) {
 					/*
-					 * Always push literal objects and
-					 * nested arrays onto the data stack.
+					 * Always push literal objects onto the
+					 * data stack.
 					 */
 					tstilo =
 					    stils_push(&a_stilt->ostack);
 					stilo_dup(tstilo, &array[i]);
-				} else if (stilo_type_get(&array[i]) ==
-				    STILOT_OPERATOR) {
-					/* Operator.  Execute it directly. */
-					array[i].o.operator.f(a_stilt);
-				} else {
+					continue;
+				}
+
+				switch (stilo_type_get(&array[i])) {
+				case STILOT_ARRAY:
+					/*
+					 * Don't execute nested arrays.
+					 */
+					tstilo = stils_push(&a_stilt->ostack);
+					stilo_dup(tstilo, &array[i]);
+					break;
+				case STILOT_OPERATOR:
+					stilo_operator_f(&array[i])(a_stilt);
+/*  					array[i].o.operator.f(a_stilt); */
+					break;
+				case STILOT_FASTOP:
+					switch (stilo_operator_stiln(&array[i])) {
+					case STILN_add: {
+						cw_stilo_t	*a, *b;
+
+						b = stils_get(&a_stilt->ostack);
+						if (b == NULL) {
+							stilt_error(a_stilt,
+							    STILTE_STACKUNDERFLOW);
+							goto NEXT;
+						}
+						a =
+						    stils_down_get(&a_stilt->ostack,
+						    b);
+						if (a == NULL) {
+							stilt_error(a_stilt,
+							    STILTE_STACKUNDERFLOW);
+							goto NEXT;
+						}
+
+						if (stilo_type_get(a) !=
+						    STILOT_INTEGER ||
+						    stilo_type_get(b) !=
+						    STILOT_INTEGER) {
+							stilt_error(a_stilt,
+							    STILTE_TYPECHECK);
+							goto NEXT;
+						}
+
+						stilo_integer_set(a,
+						    stilo_integer_get(a) +
+						    stilo_integer_get(b));
+						stils_pop(&a_stilt->ostack);
+						break;
+					}
+					case STILN_dup: {
+						cw_stilo_t	*orig, *dup;
+
+						orig =
+						    stils_get(&a_stilt->ostack);
+						if (orig == NULL) {
+							stilt_error(a_stilt,
+							    STILTE_STACKUNDERFLOW);
+							goto NEXT;
+						}
+						dup =
+						    stils_push(&a_stilt->ostack);
+						stilo_dup(dup, orig);
+						break;
+					}
+					case STILN_pop:
+						if (stils_pop(&a_stilt->ostack)) {
+							stilt_error(a_stilt,
+							    STILTE_STACKUNDERFLOW);
+							    goto NEXT;
+						}
+						break;
+					default:
+						   _cw_not_reached();
+					}
+					break;
+				default:
 					/*
 					 * Not a simple common case, so use the
 					 * generic algorithm.
@@ -443,6 +513,7 @@ stilt_loop(cw_stilt_t *a_stilt)
 					stilo_dup(tstilo, &array[i]);
 					stilt_loop(a_stilt);
 				}
+				NEXT:
 			}
 
 			/*
@@ -503,6 +574,7 @@ stilt_loop(cw_stilt_t *a_stilt)
 			break;
 		}
 		case STILOT_OPERATOR:
+		case STILOT_FASTOP:
 			stilo->o.operator.f(a_stilt);
 			stils_pop(&a_stilt->estack);
 			break;

@@ -448,6 +448,11 @@ static cw_stilot_vtable_t stilot_vtable[] = {
 	 NULL,
 	 stilo_p_operator_print},
 
+	/* STILOT_FASTOP */
+	{NULL,
+	 NULL,
+	 stilo_p_operator_print},
+
 	/* STILOT_STRING */
 	{stilo_p_string_delete,
 	 stiloe_p_string_ref_iterate,
@@ -479,12 +484,20 @@ stilo_compare(cw_stilo_t *a_a, cw_stilo_t *a_b, cw_stilt_t *a_stilt)
 	case STILOT_FILE:
 	case STILOT_HOOK:
 	case STILOT_LOCK:
-	case STILOT_OPERATOR:
 		if (a_a->type == a_b->type && a_a->o.stiloe == a_b->o.stiloe)
 			retval = 0;
 		else
 			retval = 2;
 		break;
+	case STILOT_OPERATOR:
+	case STILOT_FASTOP:
+		if ((a_b->type == STILOT_OPERATOR || a_b->type == STILOT_FASTOP)
+		    && a_a->o.operator.f == a_b->o.operator.f)
+			retval = 0;
+		else
+			retval = 2;
+		break;
+
 	case STILOT_NAME:
 	case STILOT_STRING: {
 		const cw_uint8_t	*str_a, *str_b;
@@ -3193,10 +3206,11 @@ stilo_p_null_print(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilo_t *a_file,
  * operator.
  */
 void
-stilo_operator_new(cw_stilo_t *a_stilo, cw_op_t *a_op)
+stilo_operator_new(cw_stilo_t *a_stilo, cw_op_t *a_op, cw_stiln_t a_stiln)
 {
 	stilo_p_new(a_stilo, STILOT_OPERATOR);
 	a_stilo->o.operator.f = a_op;
+	a_stilo->op_code = a_stiln;
 }
 
 static cw_stilte_t
@@ -3207,8 +3221,14 @@ stilo_p_operator_print(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilo_t
 	cw_uint8_t	newline = (a_newline) ? '\n' : '\0';
 	
 	if (a_syntactic) {
-		retval = stilo_file_output(a_file, a_stilt, "-operator-[c]",
-		    newline);
+		if (a_stilo->op_code <= STILN_LAST) {
+			retval = stilo_file_output(a_file, a_stilt,
+			    "--[s]--[c]", stiln_str(a_stilo->op_code),
+			    newline);
+		} else {
+			retval = stilo_file_output(a_file, a_stilt,
+			    "-operator-[c]", newline);
+		}
 	} else {
 		retval = stilo_file_output(a_file, a_stilt,
 		    "--nostringval--[c]", newline);

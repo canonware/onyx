@@ -55,7 +55,8 @@ errordict_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 		stilo_name_new(&name, a_stilt,
 		    stiln_str(errordict_ops[i]),
 		    stiln_len(errordict_ops[i]), TRUE);
-		stilo_operator_new(&operator, errordict_generic);
+		stilo_operator_new(&operator, errordict_generic,
+		    errordict_ops[i]);
 		stilo_attrs_set(&operator, STILOA_EXECUTABLE);
 
 		stilo_dict_def(a_dict, a_stilt, &name, &operator);
@@ -67,7 +68,7 @@ errordict_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 	 */
 	stilo_name_new(&name, a_stilt, stiln_str(STILN_handleerror),
 	    stiln_len(STILN_handleerror), TRUE);
-	stilo_operator_new(&operator, errordict_handleerror);
+	stilo_operator_new(&operator, errordict_handleerror, STILN_handleerror);
 	stilo_attrs_set(&operator, STILOA_EXECUTABLE);
 	stilo_dict_def(a_dict, a_stilt, &name, &operator);
 

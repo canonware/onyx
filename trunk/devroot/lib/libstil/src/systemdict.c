@@ -24,6 +24,16 @@ struct cw_systemdict_entry {
 #define ENTRY(name)	{STILN_##name, systemdict_##name}
 
 /*
+ * Array of fastops, used by systemdict_bind().  stilt_loop() must have
+ * corresponding handlers.
+ */
+static const struct cw_systemdict_entry systemdict_fastops[] = {
+	ENTRY(add),
+	ENTRY(dup),
+	ENTRY(pop)
+};
+
+/*
  * Array of operators in systemdict.
  */
 static const struct cw_systemdict_entry systemdict_ops[] = {
@@ -183,7 +193,8 @@ systemdict_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 		stilo_name_new(&name, a_stilt,
 		    stiln_str(systemdict_ops[i].stiln),
 		    stiln_len(systemdict_ops[i].stiln), TRUE);
-		stilo_operator_new(&operator, systemdict_ops[i].op_f);
+		stilo_operator_new(&operator, systemdict_ops[i].op_f,
+		    systemdict_ops[i].stiln);
 		stilo_attrs_set(&operator, STILOA_EXECUTABLE);
 
 		stilo_dict_def(a_dict, a_stilt, &name, &operator);
@@ -441,8 +452,34 @@ systemdict_p_bind(cw_stilo_t *a_proc, cw_stilt_t *a_stilt)
 		case STILOT_NAME:
 			if ((stilt_dict_stack_search(a_stilt, el, val) == FALSE)
 			    && stilo_type_get(val) == STILOT_OPERATOR) {
-				/* Replace el with val. */
-				stilo_dup(el, val);
+				cw_uint32_t	j;
+
+#define	NFASTOPS							\
+	(sizeof(systemdict_fastops) / sizeof(struct cw_systemdict_entry))
+
+				/*
+				 * If val can be converted to a fastop, do so.
+				 */
+				for (j = 0; j < NFASTOPS; j++) {
+					if (stilo_operator_f(val) ==
+					    systemdict_fastops[j].op_f) {
+						stilo_dup(el, val);
+						/* XXX API abuse. */
+						el->type = STILOT_FASTOP;
+						el->op_code =
+						    systemdict_fastops[j].stiln;
+						break;
+					}
+				}
+				/*
+				 * If val isn't a fastop, still convert the name
+				 * to an operator.
+				 */
+				if (j == NFASTOPS) {
+					/* Replace el with val. */
+					stilo_dup(el, val);
+				}
+#undef NFASTOPS
 			}
 		default:
 		}
@@ -835,7 +872,7 @@ systemdict_def(cw_stilt_t *a_stilt)
 	ostack = stilt_ostack_get(a_stilt);
 	dstack = stilt_dstack_get(a_stilt);
 
-	STILS_GET(dict, dstack, a_stilt);
+	dict = stils_get(dstack);
 	STILS_GET(val, ostack, a_stilt);
 	STILS_DOWN_GET(key, ostack, a_stilt, val);
 
