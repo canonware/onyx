@@ -245,11 +245,12 @@ onyx_bins_uninstall :
 onyx_bins_clean :
 {
   rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.d_a
-                [ONYX_COMMON_SRCS] [BONYX_ONLY_SRCS] [ONYX_ONLY_SRCS]
-                [TONYX_SRCS]];
+                [ONYX_COMMON_SRCS] [BONYX_ONLY_SRCS] [TONYX_SRCS]];
   rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.o_a
-                [ONYX_COMMON_SRCS] [BONYX_ONLY_SRCS] [ONYX_ONLY_SRCS]
-                [TONYX_SRCS]];
+                [ONYX_COMMON_SRCS] [BONYX_ONLY_SRCS] [TONYX_SRCS]];
+
+  rm -f [fromto @objroot@/%0%.c @objroot@/%0%.d_a [ONYX_ONLY_SRCS]];
+  rm -f [fromto @objroot@/%0%.c @objroot@/%0%.o_a [ONYX_ONLY_SRCS]];
 
   rm -f [ONYX_ONLY_SRCS];
 

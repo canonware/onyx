@@ -63,29 +63,17 @@ onyx_docs_install_pdf : onyx_docs_pdf
 
 onyx_docs_install_html : onyx_docs_html
 {
-  [SHELL] -e;
-data
-#![SHELL]
+  @INSTALL@ -d [PREFIX]/share/onyx-@onyx_version@/doc/html;
 
-echo @INSTALL@ -d [PREFIX]/share/onyx-@onyx_version@/doc/html
-@INSTALL@ -d [PREFIX]/share/onyx-@onyx_version@/doc/html
-
-for i in `find [dirname [ONYX_HTML]] -type f`; do
-  echo @INSTALL@ -m 0444 $i [PREFIX]/share/onyx-@onyx_version@/doc/html
-  @INSTALL@ -m 0444 $i [PREFIX]/share/onyx-@onyx_version@/doc/html
-done
-dataend
+  loop local f = [glob [dirname [ONYX_HTML]]"/*"]
+  {
+    @INSTALL@ -m 0444 [f] [PREFIX]/share/onyx-@onyx_version@/doc/html;
+  }
 }
 
 onyx_docs_uninstall :
 {
-  [SHELL] -e;
-data
-#![SHELL]
-
-echo rm -rf [PREFIX]/share/onyx-@onyx_version@/doc
-rm -rf [PREFIX]/share/onyx-@onyx_version@/doc
-dataend
+  rm -rf [PREFIX]/share/onyx-@onyx_version@/doc;
 }
 
 onyx_docs_clean :

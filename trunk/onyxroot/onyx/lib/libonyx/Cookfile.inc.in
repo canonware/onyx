@@ -159,16 +159,8 @@ libonyx_libs_install : libonyx_libs_install_i libonyx_libs_install_a
 
 libonyx_libs_uninstall :
 {
-  [SHELL] -e;
-data
-#![SHELL]
-
-echo rm -f [PREFIX]/lib/libonyx*
-rm -f [PREFIX]/lib/libonyx*
-
-echo rm -rf [PREFIX]/include/libonyx
-rm -rf [PREFIX]/include/libonyx
-dataend
+  rm -f [glob [PREFIX]/lib/libonyx*];
+  rm -rf [PREFIX]/include/libonyx;
 }
 
 libonyx_libs_clean :
@@ -200,7 +192,7 @@ libonyx_libs_distclean :
 {
   rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.perf [LIBONYX_CTESTS]];
 
-  rm -f [fromto @srcroot@/%0%.nx.in @objroot@/%0%.nx LIBONYX_NSRCS];
+  rm -f [fromto @srcroot@/%0%.nx.in @objroot@/%0%.nx [LIBONYX_NSRCS]];
 }
 
 /*
@@ -216,18 +208,12 @@ CPPFLAGS = [CPPFLAGS] -I@srcroot@/lib/libonyx/include
 
 libonyx_libs_install_i :
 {
-  [SHELL] -e;
-data
-#![SHELL]
+  @INSTALL@ -d [PREFIX]/include/libonyx;
 
-echo @INSTALL@ -d [PREFIX]/include/libonyx
-@INSTALL@ -d [PREFIX]/include/libonyx
-
-for i in [LIBONYX_INCS]; do
-	echo @INSTALL@ -m 0644 $i [PREFIX]/include/libonyx/
-	@INSTALL@ -m 0644 $i [PREFIX]/include/libonyx/
-done
-dataend
+  loop local f = [LIBONYX_INCS]
+  {
+    @INSTALL@ -m 0644 [f] [PREFIX]/include/libonyx/;
+  }
 }
 
 libonyx_libs_install_common :

@@ -19,16 +19,18 @@
  */
 
 /* Source files. */
-MODGTK_SRCS = modgtk.c;
-MODGTK_SRCS = [fromto @srcroot@/mod/modgtk/src/ [MODGTK_SRCS]];
+MODGTK_SRCS = [addprefix @srcroot@/mod/modgtk/src/
+                         modgtk.c
+                         ];
 
 /* Generated source code (created by configure). */
-MODGTK_NX_GEN = modgtk_defs.nx.in;
 MODGTK_NX_GEN = [fromto %.nx.in @objroot@/mod/modgtk/nx/modgtk/%.nx
-                        [MODGTK_NX_GEN]];
+                        modgtk_defs.nx.in
+                        ];
 
-MODGTK_NX = modgtk.nx;
-MODGTK_NX = [addprefix @srcroot@/mod/modgtk/nx/modgtk/ [MODGTK_NX]];
+MODGTK_NX = [addprefix @srcroot@/mod/modgtk/nx/modgtk/
+                       modgtk.nx
+                       ];
 
 /* Modules. */
 MODGTK = @objroot@/mod/modgtk/nxm/modgtk.nxm;
@@ -56,30 +58,20 @@ modgtk_mods_check_update :
 
 modgtk_mods_install : [MODGTK]
 {
-  [SHELL] -e;
-data
-#![SHELL]
+  @INSTALL@ -d [PREFIX]/share/onyx-@onyx_version@/nxm;
+  @INSTALL@ -m 0444 [MODGTK] [PREFIX]/share/onyx-@onyx_version@/nxm;
+  @INSTALL@ -d [PREFIX]/share/onyx-@onyx_version@/nx/modgtk;
 
-echo @INSTALL@ -d [PREFIX]/share/onyx-@onyx_version@/nxm
-@INSTALL@ -d [PREFIX]/share/onyx-@onyx_version@/nxm
-
-echo @INSTALL@ -m 0444 [MODGTK] [PREFIX]/share/onyx-@onyx_version@/nxm
-@INSTALL@ -m 0444 [MODGTK] [PREFIX]/share/onyx-@onyx_version@/nxm
-
-echo @INSTALL@ -d [PREFIX]/share/onyx-@onyx_version@/nx/modgtk
-@INSTALL@ -d [PREFIX]/share/onyx-@onyx_version@/nx/modgtk
-
-for i in [MODGTK_NX] [MODGTK_NX_GEN]; do
-	echo @INSTALL@ -m 0644 $i [PREFIX]/share/onyx-@onyx_version@/nx/modgtk/
-	@INSTALL@ -m 0644 $i [PREFIX]/share/onyx-@onyx_version@/nx/modgtk/
-done
-dataend
+  loop local f = [MODGTK_NX] [MODGTK_NX_GEN]
+  {
+    @INSTALL@ -m 0644 [f] [PREFIX]/share/onyx-@onyx_version@/nx/modgtk/;
+  }
 }
 
 modgtk_mods_uninstall :
 {
   rm -f [PREFIX]/share/onyx-@onyx_version@/nxm/modgtk.nxm;
-  rm -rf [PREFIX]/share/onyx-@onyx_version@/nx/modgtk/;
+  rm -rf [PREFIX]/share/onyx-@onyx_version@/nx/modgtk;
 }
 
 modgtk_mods_clean :

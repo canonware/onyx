@@ -66,17 +66,4 @@ tests_distclean :
   echo \"!#\" >> [target];
   cat @srcroot@/%0test/%.nx.in >> [target];
   chmod u+x [target];
-/*
-  [SHELL] -e;
-data
-#![SHELL]
-
-echo \"@srcroot@/%0test/%.nx.in --> [target]\"
-
-echo \"#!@ONYX@\" > [target]
-echo \"!#\" >> [target]
-cat @srcroot@/%0test/%.nx.in >> [target];
-chmod u+x [target];
-dataend
-*/
 }
