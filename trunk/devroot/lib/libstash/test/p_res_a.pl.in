@@ -15,28 +15,25 @@
 select(STDOUT);
 $| = 1;
 
-$testdir = "lib/c/libstash/test";
 $srcdir = $ARGV[0];
-$srcdir = "$srcdir/$testdir";
 $objdir = $ARGV[1];
-$objdir = "$objdir/$testdir";
 
 print "\$srcdir: \"$srcdir\", \$objdir: \"$objdir\"\n";
 
 print "1..1\n";
 
-`$testdir/b_res_a $srcdir/b_res_a.res $testdir/b_res_a.dump > $testdir/p_res_a.out 2>&1`;
-`diff $srcdir/b_res_a.res $testdir/b_res_a.dump > $testdir/b_res_a.diff 2>&1`;
-`diff $testdir/p_res_a.out $srcdir/p_res_a.exp > $testdir/p_res_a.diff 2>&1`;
+`$objdir/b_res_a $srcdir/b_res_a.res $objdir/b_res_a.dump > $objdir/p_res_a.out 2>&1`;
+`diff $srcdir/b_res_a.res $objdir/b_res_a.dump > $objdir/b_res_a.diff 2>&1`;
+`diff $objdir/p_res_a.out $srcdir/p_res_a.exp > $objdir/p_res_a.diff 2>&1`;
 
-if ((-s "$testdir/b_res_a.diff") || (-s "$testdir/p_res_a.diff"))
+if ((-s "$objdir/b_res_a.diff") || (-s "$objdir/p_res_a.diff"))
 {
     print "not ok 1\n";
 }
 else
 {
     print "ok 1\n";
-    unlink("$testdir/p_res_a.diff");
+    unlink("$objdir/p_res_a.diff");
 }
 #unlink("./b_res_a.diff");
-unlink("$testdir/b_res_a.dump");
+unlink("$objdir/b_res_a.dump");

@@ -27,7 +27,7 @@ Getopt::Long::config("bundling"); # Allow -hv rather than forcing -h -v.
 $opt_help = 0;
 $opt_verbose = 0;
 $opt_quiet = 0;
-$opt_rootdir = ".";
+$opt_srcdir = ".";
 $opt_objdir = ".";
 $opt_ustats = 0;
 $opt_zero = 0;
@@ -36,7 +36,7 @@ $opt_retval =
 &GetOptions("h|help" => \$opt_help,
 	    "v|verbose" => \$opt_verbose,
 	    "q|quiet" => \$opt_quiet,
-            "r|rootdir=s" => \$opt_rootdir,
+	    "r|srcdir=s" => \$opt_srcdir,
             "o|objdir=s" => \$opt_objdir,
 	    "u|ustats" => \$opt_ustats,
 	    "z|zero" => \$opt_zero,
@@ -73,10 +73,11 @@ if ($#OPT_STESTS + $#OPT_DTESTS + 2 == 0)
 if ($opt_verbose)
 {
     print STDERR "Option values: h:$opt_help, v:$opt_verbose, "
-	. "r:\"$opt_rootdir\", r:\"$opt_objdir\", q:$opt_quiet, u:$opt_ustats, "
-	. "z:$opt_zero\n";
+	. "t:\"$opt_srcdir\", o:\"$opt_objdir\" "
+	. "q:$opt_quiet, u:$opt_ustats, z:$opt_zero\n";
     printf STDERR "Sequence tests (%d total): @OPT_STESTS\n", $#OPT_STESTS + 1;
     printf STDERR "Diff tests (%d total): @OPT_DTESTS\n", $#OPT_DTESTS + 1;
+    printf STDERR "srcdir:\"$opt_srcdir\", objdir:\"$opt_objdir\"\n";
 }
 
 #
@@ -230,9 +231,10 @@ foreach $test (@OPT_DTESTS)
 
     ($okay, $utime, $stime) = &run_test($test);
 
-    if (-e "$opt_objdir/$test.out" && -e "$opt_rootdir/$test.exp")
+    if (-e "$opt_objdir/$test.out" 
+	&& -e "$opt_srcdir/$test.exp")
     {
-	`diff $opt_objdir/$test.out $opt_rootdir/$test.exp > $opt_objdir/$test.diff 2>&1`;
+	`diff $opt_objdir/$test.out $opt_srcdir/$test.exp > $opt_objdir/$test.diff 2>&1`;
 	if ($?)
 	{
 	    # diff returns non-zero if there is a difference.
@@ -245,7 +247,7 @@ foreach $test (@OPT_DTESTS)
 	if ($opt_verbose)
 	{
 	    print STDERR
-		"Nonexistent expected output file \"$opt_rootdir/$test.exp\"\n";
+		"Nonexistent expected output file \"$opt_srcdir/$test.exp\"\n";
 	}
     }
 
@@ -310,8 +312,15 @@ sub run_test
     my ($okay) = 1;
     my ($tutime, $tstime);
     my ($utime, $stime, $cutime, $cstime);
-    my (@TSTATS);
+    my (@TSTATS, @TPATH);
     my ($t_str);
+    my ($srcdir, $objdir);
+
+    # Get the path component of $test, if any.
+    @TPATH = split(/\//, $test);
+    pop(@TPATH);
+    $srcdir = join('/', ($opt_srcdir, @TPATH));
+    $objdir = join('/', ($opt_objdir, @TPATH));
 
     @TSTATS = ("--------------------------------------------------------------------------\n");
 
@@ -327,7 +336,7 @@ sub run_test
     }
 
     ($utime, $stime, $cutime, $cstime) = times;
-    `$opt_objdir/$test $opt_rootdir $opt_objdir > $opt_objdir/$test.out 2>&1`;
+    `$opt_objdir/$test $srcdir $objdir > $opt_objdir/$test.out 2>&1`;
     ($utime, $stime, $tutime, $tstime) = times;
 
     # Subtract the before time from the after time.
@@ -342,8 +351,7 @@ sub run_test
 	    if ($opt_verbose)
 	    {
 		print STDERR
-		    "\"$opt_objdir/$test > $opt_objdir/$test.out 2>&1\""
-			. " returned $?\n";
+		    "\"$opt_objdir/$test > $opt_objdir/$test.out 2>&1\" returned $?\n";
 	    }
 	}
     }
@@ -437,7 +445,7 @@ $0 usage:
     -h --help     | Print usage and exit.
     -v --verbose  | Verbose (incompatible with quiet).
     -q --quiet    | Quiet (incompatible with verbose).
-    -r --rootdir  | Path to source tree (default is ".").
+    -r --srcdir   | Path to source tree (default is ".").
     -o --objdir   | Path to object tree (default is ".").
     -u --ustats   | Update historical statistics (stored in "<test>.perf".
     -z --zero     | Consider non-zero exit code to be an error.
