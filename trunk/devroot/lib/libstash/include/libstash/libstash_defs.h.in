@@ -25,14 +25,14 @@
 
 #undef WORDS_BIGENDIAN
 
-/* If using gcc, use inline functions. */
-#ifndef _CW_INLINE
-#ifdef __GNUC__
+/*
+ * If using gcc and inlines weren't disabled by configure, use inline functions.
+ */
+#undef _CW_USE_INLINES
+#if (defined(__GNUC__) && defined(_CW_USE_INLINES))
 #define _CW_INLINE static __inline__
-#define _CW_USE_INLINES
 #else
 #define _CW_INLINE
-#endif
 #endif
 
 #undef SIZEOF_SIGNED_CHAR

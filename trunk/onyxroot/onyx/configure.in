@@ -95,6 +95,9 @@ CW_USE_PTHREADS()
 dnl Do not build shared libraries by default.
 CW_DISABLE_SHARED()
 
+dnl Enable inline functions by default.
+CW_ENABLE_INLINES()
+
 dnl Define preprocessor macros.
 
 dnl Check for header files.
@@ -191,6 +194,9 @@ AC_MSG_RESULT(prefix     : ${prefix})
 AC_MSG_RESULT()
 AC_MSG_RESULT(libs       :${libs})
 AC_MSG_RESULT(bins       :${bins})
+AC_MSG_RESULT()
+AC_MSG_RESULT(shared     : ${enable_shared})
+AC_MSG_RESULT(inlines    : ${enable_inlines})
 AC_MSG_RESULT(===============================================================================)
 
 dnl Create additional directories that processed files will land in.

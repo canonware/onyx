@@ -92,6 +92,10 @@ Optionally, pass any of the following (not a definitive list) arguments to
 	reflect incompatible changes, so you will need to handle this manually
 	if upgrading from an older version of the libraries.
 
+--disable-inlines
+	Do not use inline functions.  This reduces the size of binaries at the
+	expense of performance.
+
 Optionally, define environment variables, including (not exclusively):
 
 CFLAGS="?"

@@ -12,7 +12,7 @@ AC_DEFUN(CW_DISABLE_SHARED,
 [
 dnl Comment out target dependencies on shared libraries if --disable-shared
 dnl is defined.
-AC_ARG_ENABLE(shared, [  --disable-shared        Do not build shared libraries],
+AC_ARG_ENABLE(shared, [  --enable-shared         Build shared libraries],
 if test "x$enable_shared" = "xno" ; then
   enable_shared="0"
 else
@@ -22,6 +22,22 @@ fi
 enable_shared="0"
 )
 AC_SUBST(enable_shared)
+])
+
+AC_DEFUN(CW_ENABLE_INLINES,
+[
+AC_ARG_ENABLE(inlines, [  --disable-inlines       Do not use inline functions],
+if test "x$enable_inlines" = "xno" ; then
+  enable_inlines="0"
+else
+  enable_inlines="1"
+fi
+,
+enable_inlines="1"
+)
+if test "x$enable_inlines" = "x1" ; then
+  AC_DEFINE(_CW_USE_INLINES)
+fi
 ])
 
 dnl CW_BUILD_LIB(lib, var)
