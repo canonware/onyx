@@ -70,7 +70,7 @@ struct									\
 	rb_node_new(a_tree, &(a_tree)->rbt_nil, a_field);		\
     } while (0)
 
-#define rb_tree_nil(a_tree, a_field) (&(a_tree)->rbt_nil)
+#define rb_tree_nil(a_tree) (&(a_tree)->rbt_nil)
 
 /* Operations. */
 #define rb_root(a_tree) (a_tree)->rbt_root
@@ -313,6 +313,7 @@ struct									\
 #define rb_remove(a_tree, a_node, a_type, a_field)			\
     do									\
     {									\
+	cw_bool_t fixup;						\
 	a_type *x, *y;							\
 	if ((a_node)->a_field.rbn_left == &(a_tree)->rbt_nil		\
 	    || (a_node)->a_field.rbn_right == &(a_tree)->rbt_nil)	\
@@ -344,6 +345,14 @@ struct									\
 	{								\
 	    y->a_field.rbn_par->a_field.rbn_right = x;			\
 	}								\
+	if (y->a_field.rbn_red == FALSE)				\
+	{								\
+	    fixup = TRUE;						\
+	}								\
+	else								\
+	{								\
+	    fixup = FALSE;						\
+	}								\
 	if (y != (a_node))						\
 	{								\
 	    /* Splice y into a_node's location. */			\
@@ -362,24 +371,26 @@ struct									\
 		    y->a_field.rbn_par->a_field.rbn_right = y;		\
 		}							\
 	    }								\
-	    y->a_field.rbn_left->a_field.rbn_par = y;			\
+	    else							\
+	    {								\
+		(a_tree)->rbt_root = y;					\
+	    }								\
 	    y->a_field.rbn_right->a_field.rbn_par = y;			\
+	    y->a_field.rbn_left->a_field.rbn_par = y;			\
 	}								\
-	if (y->a_field.rbn_red == FALSE)				\
+	rb_node_new(a_tree, a_node, a_field);				\
+	if (fixup)							\
 	{								\
 	    /* Fix up. */						\
 	    a_type *v, *w;						\
-fprintf(stderr, "F");\
 	    while (x != (a_tree)->rbt_root				\
 		   && x->a_field.rbn_red == FALSE)			\
 	    {								\
 		if (x == x->a_field.rbn_par->a_field.rbn_left)		\
 		{							\
-fprintf(stderr, "L");\
 		    w = x->a_field.rbn_par->a_field.rbn_right;		\
 		    if (w->a_field.rbn_red)				\
 		    {							\
-fprintf(stderr, "1");\
 			w->a_field.rbn_red = FALSE;			\
 			v = x->a_field.rbn_par;				\
 			v->a_field.rbn_red = TRUE;			\
@@ -391,7 +402,6 @@ fprintf(stderr, "1");\
 			&& w->a_field.rbn_right->a_field.rbn_red	\
 			== FALSE)					\
 		    {							\
-fprintf(stderr, "2");\
 			w->a_field.rbn_red = TRUE;			\
 			x = x->a_field.rbn_par;				\
 		    }							\
@@ -400,7 +410,6 @@ fprintf(stderr, "2");\
 			if (w->a_field.rbn_right->a_field.rbn_red	\
 			     == FALSE)					\
 			{						\
-fprintf(stderr, "3");\
 			    w->a_field.rbn_left->a_field.rbn_red	\
 				= FALSE;				\
 			    w->a_field.rbn_red = TRUE;			\
@@ -408,7 +417,6 @@ fprintf(stderr, "3");\
 					      a_field);			\
 			    w = x->a_field.rbn_par->a_field.rbn_right;	\
 			}						\
-fprintf(stderr, "4");\
 			w->a_field.rbn_red				\
 			    = x->a_field.rbn_par->a_field.rbn_red;	\
 			x->a_field.rbn_par->a_field.rbn_red = FALSE;	\
@@ -420,11 +428,9 @@ fprintf(stderr, "4");\
 		}							\
 		else							\
 		{							\
-fprintf(stderr, "R");\
 		    w = x->a_field.rbn_par->a_field.rbn_left;		\
 		    if (w->a_field.rbn_red)				\
 		    {							\
-fprintf(stderr, "1");\
 			w->a_field.rbn_red = FALSE;			\
 			v = x->a_field.rbn_par;				\
 			v->a_field.rbn_red = TRUE;			\
@@ -436,7 +442,6 @@ fprintf(stderr, "1");\
 			&& w->a_field.rbn_left->a_field.rbn_red		\
 			== FALSE)					\
 		    {							\
-fprintf(stderr, "2");\
 			w->a_field.rbn_red = TRUE;			\
 			x = x->a_field.rbn_par;				\
 		    }							\
@@ -445,7 +450,6 @@ fprintf(stderr, "2");\
 			if (w->a_field.rbn_left->a_field.rbn_red	\
 			     == FALSE)					\
 			{						\
-fprintf(stderr, "3");\
 			    w->a_field.rbn_right->a_field.rbn_red	\
 				= FALSE;				\
 			    w->a_field.rbn_red = TRUE;			\
@@ -453,7 +457,6 @@ fprintf(stderr, "3");\
 					     a_field);			\
 			    w = x->a_field.rbn_par->a_field.rbn_left;	\
 			}						\
-fprintf(stderr, "4");\
 			w->a_field.rbn_red				\
 			    = x->a_field.rbn_par->a_field.rbn_red;	\
 			x->a_field.rbn_par->a_field.rbn_red = FALSE;	\
@@ -466,5 +469,4 @@ fprintf(stderr, "4");\
 	    }								\
 	    x->a_field.rbn_red = FALSE;					\
 	}								\
-fprintf(stderr, ": ");\
     } while (0)
