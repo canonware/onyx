@@ -135,40 +135,40 @@ doc_relclean :
    * different location for output files.
    */
 
-  rm -f [objdir]/%0latex/manual.alg;
-  rm -f [objdir]/%0latex/manual.aux;
-  rm -f [objdir]/%0latex/manual.aux-prev;
-  rm -f [objdir]/%0latex/manual.idx;
-  rm -f [objdir]/%0latex/manual.idx-prev;
-  rm -f [objdir]/%0latex/manual.ilg;
-  rm -f [objdir]/%0latex/manual.ind;
-  rm -f [objdir]/%0latex/manual.lof;
-  rm -f [objdir]/%0latex/manual.log;
-  rm -f [objdir]/%0latex/manual.out;
-  rm -f [objdir]/%0latex/manual.toc;
+  rm -f [objdir]/%0latex/%.alg;
+  rm -f [objdir]/%0latex/%.aux;
+  rm -f [objdir]/%0latex/%.aux-prev;
+  rm -f [objdir]/%0latex/%.idx;
+  rm -f [objdir]/%0latex/%.idx-prev;
+  rm -f [objdir]/%0latex/%.ilg;
+  rm -f [objdir]/%0latex/%.ind;
+  rm -f [objdir]/%0latex/%.lof;
+  rm -f [objdir]/%0latex/%.log;
+  rm -f [objdir]/%0latex/%.out;
+  rm -f [objdir]/%0latex/%.toc;
   rm -f [objdir]/%0latex/texput.log;
 
-  cd [objdir]/%0latex/\; ./ltx2e [LATEX] [objdir]/%.tex;
-  cd [objdir]/%0latex/\; [MAKEINDEX] -c -l [objdir]/%.idx;
-  cd [objdir]/%0latex/\; ./ltx2e [LATEX] [objdir]/%.tex;
+  cd [objdir]/%0latex/\; ./ltx2e [LATEX] %.tex;
+  cd [objdir]/%0latex/\; [MAKEINDEX] -c -l -s [abs_srcdir]/%0latex/%.mst %.idx;
+  cd [objdir]/%0latex/\; ./ltx2e [LATEX] %.tex;
   [DVIPS] [objdir]/%0latex/%.dvi -o [objdir]/%0ps/%.ps;
 
-  rm -f [objdir]/%0latex/manual.alg;
-  rm -f [objdir]/%0latex/manual.aux;
-  rm -f [objdir]/%0latex/manual.aux-prev;
-  rm -f [objdir]/%0latex/manual.idx;
-  rm -f [objdir]/%0latex/manual.idx-prev;
-  rm -f [objdir]/%0latex/manual.ilg;
-  rm -f [objdir]/%0latex/manual.ind;
-  rm -f [objdir]/%0latex/manual.lof;
-  rm -f [objdir]/%0latex/manual.log;
-  rm -f [objdir]/%0latex/manual.out;
-  rm -f [objdir]/%0latex/manual.toc;
+  rm -f [objdir]/%0latex/%.alg;
+  rm -f [objdir]/%0latex/%.aux;
+  rm -f [objdir]/%0latex/%.aux-prev;
+  rm -f [objdir]/%0latex/%.idx;
+  rm -f [objdir]/%0latex/%.idx-prev;
+  rm -f [objdir]/%0latex/%.ilg;
+  rm -f [objdir]/%0latex/%.ind;
+  rm -f [objdir]/%0latex/%.lof;
+  rm -f [objdir]/%0latex/%.log;
+  rm -f [objdir]/%0latex/%.out;
+  rm -f [objdir]/%0latex/%.toc;
   rm -f [objdir]/%0latex/texput.log;
 
-  cd [objdir]/%0latex/\; ./ltx2e [PDFLATEX] [objdir]/%.tex;
-  cd [objdir]/%0latex/\; [MAKEINDEX] -c -l [objdir]/%.idx;
-  cd [objdir]/%0latex/\; ./ltx2e [PDFLATEX] [objdir]/%.tex;
+  cd [objdir]/%0latex/\; ./ltx2e [PDFLATEX] %.tex;
+  cd [objdir]/%0latex/\; [MAKEINDEX] -c -l %.idx;
+  cd [objdir]/%0latex/\; ./ltx2e [PDFLATEX] %.tex;
   cp [objdir]/%0latex/%.pdf [objdir]/%0pdf/%.pdf;
 }
 
