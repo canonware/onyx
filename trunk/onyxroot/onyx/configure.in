@@ -862,7 +862,7 @@ if test "x$lib_onyx" = "x1" ; then
 ], [
     struct tm tm;
 
-    tm.tm_zone = (void *) 0;
+    tm.tm_zone = "GMT";
 ], AC_MSG_RESULT([yes])
    AC_DEFINE([CW_LIBONYX_USE_TM_ZONE]),
    AC_MSG_RESULT([no])
@@ -885,7 +885,7 @@ if test "x$lib_onyx" = "x1" ; then
 ], [
     struct tm tm;
 
-    tm.tm_gmtoff = (void *) 0;
+    tm.tm_gmtoff = 0;
 ], AC_MSG_RESULT([yes])
    AC_DEFINE([CW_LIBONYX_USE_TM_GMTOFF]),
    AC_MSG_RESULT([no])
