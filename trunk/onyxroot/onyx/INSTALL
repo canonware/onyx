@@ -84,16 +84,15 @@ Optionally, pass any of the following (not a definitive list) arguments to
 --prefix=<install-root-dir>
 	Set the base directory in which to install.  For example:
 	
-	./configure --prefix=/usr/local
+		./configure --prefix=/usr/local
 
 	will cause files to be installed into /usr/local/bin, /usr/local/man,
 	/usr/local/include, and /usr/local/lib.
 
 --disable-threads
-	Do not support threads.  This option is incompatible with the libedit
-	option, so implies --disable-libedit.  Specifying this option disables
-	significant functionality.  The documentation does not mention the
-	effects of this option -- UTSL.
+	Do not support threads.  Specifying this option disables significant
+	functionality.  The documentation does not mention the effects of this
+	option -- UTSL.
 
 --disable-posix
 	As much as reasonably possible, avoid using any external library
@@ -107,10 +106,10 @@ Optionally, pass any of the following (not a definitive list) arguments to
 	read(), write()).  This option is incompatible with the posix option, so
 	implies --disable-posix.  This option is useful when embedding onyx in
 	an application that does not have complete I/O capabilities.  With the
-	exception of calls to printf() and fprintf(stderr, ...), no POSIX file
-	operations are used.  The documentation does not mention the effects of
-	this option, and you absolutely will get bitten if you aren't careful --
-	UTSL.
+	exception of calls to printf() and fprintf(stderr, ...) in debug
+	versions of libonyx, no POSIX file operations are used.  The
+	documentation does not mention the effects of this option, and you
+	absolutely will get bitten if you aren't careful -- UTSL.
 
 --disable-inlines
 	Do not use inline functions.  This reduces the size of binaries at the

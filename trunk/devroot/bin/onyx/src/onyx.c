@@ -18,19 +18,8 @@
 
 #include "onyx.h"
 
-/*
- * Determine what functionality to compile in.
- */
-#if (defined(_CW_USE_LIBEDIT) && defined(_CW_THREADS) && defined(_CW_POSIX))
-#define	_ONYX_FULL
-#elif (defined(_CW_POSIX))
-#define	_ONYX_BASIC
-#else
-#define	_ONYX_MINIMAL
-#endif
-
 /* Include generated code. */
-#if (defined(_ONYX_FULL) || defined(_ONYX_BASIC))
+#ifdef _CW_POSIX
 #include "onyx_nxcode.c"
 #endif
 #include "batch_nxcode.c"
@@ -40,7 +29,7 @@
 #define	_BUFFER_SIZE	512
 
 struct nx_read_arg_s {
-#ifdef _ONYX_FULL
+#if (defined(_CW_USE_LIBEDIT) && defined(_CW_THREADS))
 	cw_bool_t	quit;
 	cw_bool_t	want_data;
 	cw_bool_t	have_data;
@@ -57,7 +46,7 @@ struct nx_read_arg_s {
 	cw_uint32_t	buffer_count;
 };
 
-#ifdef _ONYX_MINIMAL
+#ifndef _CW_POSIX_FILE
 struct nx_write_arg_s {
 	int	fd;
 };
@@ -69,7 +58,7 @@ struct nx_write_arg_s {
  */
 cw_nxo_t	thread;
 cw_nxo_threadp_t threadp;
-#ifdef _ONYX_FULL
+#ifdef _CW_USE_LIBEDIT
 EditLine	*el;
 History		*hist;
 cw_uint8_t	prompt_str[_PROMPT_STRLEN];
@@ -90,14 +79,17 @@ cw_sint32_t	nx_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len,
 int		interactive_run(int argc, char **argv, char **envp);
 int		batch_run(int argc, char **argv, char **envp);
 
-#ifdef _ONYX_FULL
-void		cl_read(struct nx_read_arg_s *a_arg);
+#ifdef _CW_USE_LIBEDIT
 char		*prompt(EditLine *a_el);
-void		*nx_entry(void *a_arg);
 void		signal_handle(int a_signal);
 #endif
 
-#ifdef _ONYX_MINIMAL
+#if (defined(_CW_USE_LIBEDIT) && defined(_CW_THREADS))
+void		cl_read(struct nx_read_arg_s *a_arg);
+void		*nx_entry(void *a_arg);
+#endif
+
+#ifndef _CW_POSIX_FILE
 void		stdout_init(cw_nx_t *a_nx);
 void		stderr_init(cw_nx_t *a_nx);
 cw_bool_t	nx_write(void *a_arg, cw_nxo_t *a_file, const cw_uint8_t *a_str,
@@ -170,7 +162,7 @@ basename(const char *a_str)
 	return retval;
 }
 
-#ifdef _ONYX_FULL
+#if (defined(_CW_USE_LIBEDIT) && defined(_CW_THREADS))
 struct nx_read_arg_s *
 stdin_init(cw_nx_t *a_nx, cw_nxo_t *a_thread, cw_bool_t a_interactive)
 {
@@ -231,7 +223,7 @@ stdin_shutdown(void *a_arg, cw_nx_t *a_nx)
 		_cw_free(arg->buffer);
 }
 
-#ifdef _ONYX_FULL
+#if (defined(_CW_USE_LIBEDIT) && defined(_CW_THREADS))
 cw_sint32_t
 nx_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str)
 {
@@ -271,6 +263,95 @@ nx_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str)
 	}
 
 	mtx_unlock(&arg->mtx);
+	return retval;
+}
+#elif (defined(_CW_USE_LIBEDIT))
+cw_sint32_t
+nx_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str)
+{
+	cw_sint32_t		retval;
+	struct nx_read_arg_s	*arg = (struct nx_read_arg_s *)a_arg;
+	const char		*str;
+	int			count = 0;
+	static cw_bool_t	continuation = FALSE;
+
+	_cw_assert(a_len > 0);
+
+	if (arg->buffer_count == 0) {
+		/*
+		 * Read more data.
+		 */
+		while ((str = el_gets(el, &count)) == NULL) {
+			/*
+			 * An interrupted system call (EINTR) caused an error in
+			 * el_gets().
+			 */
+		}
+		_cw_assert(count > 0);
+
+		/*
+		 * Update the command line history.
+		 */
+		if ((nxo_thread_deferred(&thread) == FALSE) &&
+		    (nxo_thread_state(&thread) == THREADTS_START)) {
+			const HistEvent	*hevent;
+
+			/*
+			 * Completion of a history element.  Insert it, taking
+			 * care to avoid simple (non-continued) duplicates and
+			 * empty lines (simple carriage returns).
+			 */
+			if (continuation) {
+				history(hist, H_ENTER, str);
+				continuation = FALSE;
+			} else {
+				hevent = history(hist, H_FIRST);
+				if ((hevent == NULL || strcmp(str,
+				    hevent->str)) && strlen(str) > 1)
+					history(hist, H_ENTER, str);
+			}
+		} else {
+			/*
+			 * Continuation.  Append it to the current history
+			 * element.
+			 */
+			history(hist, H_ADD, str);
+			continuation = TRUE;
+		}
+
+		/*
+		 * Copy the data to the arg buffer.
+		 */
+		if (count > arg->buffer_size) {
+			/* Expand the buffer. */
+			if (arg->buffer == NULL)
+				arg->buffer = (cw_uint8_t *)_cw_malloc(count);
+			else
+				arg->buffer = (cw_uint8_t
+				    *)_cw_realloc(arg->buffer, count);
+			arg->buffer_size = count;
+		}
+		memcpy(arg->buffer, str, count);
+		arg->buffer_count = count;
+	}
+	_cw_assert(arg->buffer_count > 0);
+
+	/*
+	 * Return as much of the data as possible.
+	 */
+	if (arg->buffer_count > a_len) {
+		/* There are more data than we can return. */
+		retval = a_len;
+		memcpy(r_str, arg->buffer, a_len);
+		arg->buffer_count -= a_len;
+		memmove(arg->buffer, &arg->buffer[a_len], arg->buffer_count);
+	} else {
+		/* Return all the data. */
+		retval = arg->buffer_count;
+		memcpy(r_str, arg->buffer, arg->buffer_count);
+		arg->buffer_count = 0;
+	}
+
 	return retval;
 }
 #else
@@ -376,17 +457,21 @@ nx_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str)
 }
 #endif
 
-#ifdef _ONYX_FULL
 int
 interactive_run(int argc, char **argv, char **envp)
 {
-	struct sigaction	action;
-	sigset_t		set, oset;
 	cw_nx_t			nx;
-	cw_thd_t		*nx_thd;
-	char			*editor;
 	struct nx_read_arg_s	*stdin_arg;
+#ifdef _CW_USE_LIBEDIT
+	struct sigaction	action;
+	char			*editor;
+#endif
+#ifdef _CW_THREADS
+	sigset_t		set, oset;
+	cw_thd_t		*nx_thd;
+#endif
 
+#ifdef _CW_USE_LIBEDIT
 	/*
 	 * Set up a signal handler for various signals that are important to an
 	 * interactive program.
@@ -429,27 +514,33 @@ interactive_run(int argc, char **argv, char **envp)
 		editor = "emacs";
 	}
 	el_set(el, EL_EDITOR, editor);
+#endif
 
 	/* Initialize the interpreter. */
 	nx_new(&nx, NULL, argc, argv, envp);
 
 	stdin_arg = stdin_init(&nx, &thread, TRUE);
+#ifndef _CW_POSIX_FILE
+	stdout_init(&nx);
+	stderr_init(&nx);
+#endif
 
-	/* Create the initial thread. */
+	/* Now that the files have been wrapped, create the initial thread. */
 	nxo_thread_new(&thread, &nx);
 	nxo_threadp_new(&threadp);
 
-	/*
-	 * Install custom operators and run embedded initialization code.
-	 */
+	/* Install custom operators. */
+#ifdef _CW_POSIX
 	onyx_ops_init(&thread);
-	onyx_nxcode(&thread);
+#endif
 
-	/*
-	 * Run embedded initialization code.
-	 */
+	/* Run embedded initialization code. */
+#ifdef _CW_POSIX
+	onyx_nxcode(&thread);
+#endif
 	interactive_nxcode(&thread);
 
+#ifdef _CW_THREADS
 	/*
 	 * Acquire the interlock mtx before creating the interpreter thread, so
 	 * that we won't miss any cnd_signal()s from it.
@@ -485,50 +576,21 @@ interactive_run(int argc, char **argv, char **envp)
 	mtx_delete(&stdin_arg->mtx);
 	cnd_delete(&stdin_arg->cl_cnd);
 	cnd_delete(&stdin_arg->nx_cnd);
+#else
+	/* Run the interpreter such that it will not exit on errors. */
+	nxo_thread_start(&thread);
+#endif
 
+#ifdef _CW_USE_LIBEDIT
 	/* Clean up the command editor. */
 	el_end(el);
 	history_end(hist);
+#endif
 
 	nxo_threadp_delete(&threadp, &thread);
 	nx_delete(&nx);
 	return 0;
 }
-#else
-int
-interactive_run(int argc, char **argv, char **envp)
-{
-	cw_nx_t			nx;
-
-	nx_new(&nx, NULL, argc, argv, NULL);
-
-	stdin_init(&nx, &thread, TRUE);
-#ifdef _ONYX_MINIMAL
-	stdout_init(&nx);
-	stderr_init(&nx);
-#endif
-
-	/* Now that the files have been wrapped, create the initial thread. */
-	nxo_thread_new(&thread, &nx);
-
-#ifdef _ONYX_BASIC
-	/* Install custom operators. */
-	onyx_ops_init(&thread);
-#endif
-
-	/* Run embedded initialization code. */
-#ifdef _ONYX_BASIC
-	onyx_nxcode(&thread);
-#endif
-	interactive_nxcode(&thread);
-
-	/* Run the interpreter. */
-	nxo_thread_start(&thread);
-
-	nx_delete(&nx);
-	return 0;
-}
-#endif
 
 int
 batch_run(int argc, char **argv, char **envp)
@@ -594,7 +656,7 @@ batch_run(int argc, char **argv, char **envp)
 	 * elements of argv.
 	 */
 	nx_new(&nx, NULL, argc - optind, &argv[optind], envp);
-#ifdef _ONYX_MINIMAL
+#ifndef _CW_POSIX_FILE
 	stdin_init(&nx, &thread, FALSE);
 	stdout_init(&nx);
 	stderr_init(&nx);
@@ -602,10 +664,10 @@ batch_run(int argc, char **argv, char **envp)
 	nxo_thread_new(&thread, &nx);
 	nxo_threadp_new(&threadp);
 
-#if (defined(_ONYX_FULL) || defined(_ONYX_BASIC))
 	/*
 	 * Install custom operators and run embedded initialization code.
 	 */
+#ifdef _CW_POSIX
 	onyx_ops_init(&thread);
 	onyx_nxcode(&thread);
 #endif
@@ -694,7 +756,86 @@ batch_run(int argc, char **argv, char **envp)
 	return retval;
 }
 
-#ifdef _ONYX_FULL
+#ifdef _CW_USE_LIBEDIT
+char *
+prompt(EditLine *a_el)
+{
+	if ((nxo_thread_deferred(&thread) == FALSE) &&
+	    (nxo_thread_state(&thread) == THREADTS_START)) {
+		static const cw_uint8_t	code[] = "promptstring";
+		cw_uint8_t		*pstr;
+		cw_uint32_t		plen, maxlen;
+		cw_nxo_t		*nxo;
+		cw_nxo_t		*stack;
+
+		stack = nxo_thread_ostack_get(&thread);
+
+		/* Push the prompt onto the data stack. */
+		nxo_thread_interpret(&thread, &threadp, code, sizeof(code) - 1);
+		nxo_thread_flush(&thread, &threadp);
+
+		/* Get the actual prompt string. */
+		nxo = nxo_stack_get(stack);
+		if (nxo == NULL) {
+			nxo_thread_error(&thread, NXO_THREADE_STACKUNDERFLOW);
+			maxlen = 0;
+		} else if (nxo_type_get(nxo) != NXOT_STRING) {
+			nxo_thread_error(&thread, NXO_THREADE_TYPECHECK);
+			maxlen = 0;
+		} else {
+			pstr = nxo_string_get(nxo);
+			plen = nxo_string_len_get(nxo);
+
+			/* Copy the prompt string to a global buffer. */
+			maxlen = (plen > _PROMPT_STRLEN - 1) ? _PROMPT_STRLEN -
+			    1 : plen;
+			strncpy(prompt_str, pstr, _PROMPT_STRLEN - 1);
+		}
+
+		prompt_str[maxlen] = '\0';
+
+		/* Pop the prompt string off the data stack. */
+		nxo_stack_pop(stack);
+	} else {
+		/*
+		 * One or both of:
+		 *
+		 * - Continuation of a string or similarly parsed token.
+		 * - Execution is deferred due to unmatched {}'s.
+		 *
+		 * Don't print a prompt.
+		 */
+		prompt_str[0] = '\0';
+	}
+
+	return prompt_str;
+}
+
+void
+signal_handle(int a_signal)
+{
+	switch (a_signal) {
+	case SIGWINCH:
+		el_resize(el);
+		break;
+	case SIGTSTP:
+		raise(SIGSTOP);
+		break;
+	case SIGCONT:
+		break;
+	case SIGHUP:
+	case SIGINT:
+	case SIGQUIT:
+	case SIGTERM:
+		exit(0);
+	default:
+		fprintf(stderr, "Unexpected signal %d\n", a_signal);
+		abort();
+	}
+}
+#endif
+
+#if (defined(_CW_USE_LIBEDIT) && defined(_CW_THREADS))
 void
 cl_read(struct nx_read_arg_s *a_arg)
 {
@@ -774,60 +915,6 @@ cl_read(struct nx_read_arg_s *a_arg)
 	}
 }
 
-char *
-prompt(EditLine *a_el)
-{
-	if ((nxo_thread_deferred(&thread) == FALSE) &&
-	    (nxo_thread_state(&thread) == THREADTS_START)) {
-		static const cw_uint8_t	code[] = "promptstring";
-		cw_uint8_t		*pstr;
-		cw_uint32_t		plen, maxlen;
-		cw_nxo_t		*nxo;
-		cw_nxo_t		*stack;
-
-		stack = nxo_thread_ostack_get(&thread);
-
-		/* Push the prompt onto the data stack. */
-		nxo_thread_interpret(&thread, &threadp, code, sizeof(code) - 1);
-		nxo_thread_flush(&thread, &threadp);
-
-		/* Get the actual prompt string. */
-		nxo = nxo_stack_get(stack);
-		if (nxo == NULL) {
-			nxo_thread_error(&thread, NXO_THREADE_STACKUNDERFLOW);
-			maxlen = 0;
-		} else if (nxo_type_get(nxo) != NXOT_STRING) {
-			nxo_thread_error(&thread, NXO_THREADE_TYPECHECK);
-			maxlen = 0;
-		} else {
-			pstr = nxo_string_get(nxo);
-			plen = nxo_string_len_get(nxo);
-
-			/* Copy the prompt string to a global buffer. */
-			maxlen = (plen > _PROMPT_STRLEN - 1) ? _PROMPT_STRLEN -
-			    1 : plen;
-			strncpy(prompt_str, pstr, _PROMPT_STRLEN - 1);
-		}
-
-		prompt_str[maxlen] = '\0';
-
-		/* Pop the prompt string off the data stack. */
-		nxo_stack_pop(stack);
-	} else {
-		/*
-		 * One or both of:
-		 *
-		 * - Continuation of a string or similarly parsed token.
-		 * - Execution is deferred due to unmatched {}'s.
-		 *
-		 * Don't print a prompt.
-		 */
-		prompt_str[0] = '\0';
-	}
-
-	return prompt_str;
-}
-
 /*
  * This thread is started with all signals masked so that we don't have to worry
  * about signals from here on.
@@ -848,33 +935,9 @@ nx_entry(void *a_arg)
 
 	return NULL;
 }
-
-void
-signal_handle(int a_signal)
-{
-	switch (a_signal) {
-	case SIGWINCH:
-		/* XXX Doesn't return until cl_read() returns. */
-		el_resize(el);
-		break;
-	case SIGTSTP:
-		raise(SIGSTOP);
-		break;
-	case SIGCONT:
-		break;
-	case SIGHUP:
-	case SIGINT:
-	case SIGQUIT:
-	case SIGTERM:
-		exit(0);
-	default:
-		fprintf(stderr, "Unexpected signal %d\n", a_signal);
-		abort();
-	}
-}
 #endif
 
-#ifdef _ONYX_MINIMAL
+#ifndef _CW_POSIX_FILE
 void
 stdout_init(cw_nx_t *a_nx)
 {

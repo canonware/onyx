@@ -126,11 +126,6 @@ fi
 ,
 enable_libedit="1"
 )
-dnl libedit depends on threads and posix.
-if test "x$enable_threads" = "x0" -o "x$enable_posix" = "x0" ; then
-  enable_libedit="0"
-fi
-
 AC_SUBST(enable_libedit)
 if test "x$enable_libedit" = "x1" ; then
   AC_DEFINE(_CW_USE_LIBEDIT)
