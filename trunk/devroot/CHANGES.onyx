@@ -1,5 +1,7 @@
 2002-03-31 : Jason Evans <jasone@canonware.com>
 
+	* Add optional mode argument to the open operator.
+
 	* lib/libonyx/src/nxo_file.c:nxo_file_open() : Add the a_mode argument,
           so that file creation mode can be specified.
 
