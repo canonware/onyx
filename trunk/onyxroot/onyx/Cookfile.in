@@ -28,7 +28,7 @@ abi = @abi@;
 /* Paths to programs used by the build system. */
 SHELL = /bin/sh;
 if [not [defined CC]] then
-  CC = [split " " "@CC@"];
+  CC = [split " " [strip "@CC@"]];
 AR = @AR@;
 LD = @LD@;
 LN = @LN@;
@@ -50,11 +50,11 @@ GTKCONFIG = @GTKCONFIG@;
 
 /* Build parameters. */
 if [not [defined CPPFLAGS]] then
-  CPPFLAGS = [split " " "@CPPFLAGS@"];
+  CPPFLAGS = [split " " [strip "@CPPFLAGS@"]];
 CPPDEFS = -D_REENTRANT;
 
 if [not [defined CFLAGS]] then
-  CFLAGS = [split " " "@CFLAGS@"];
+  CFLAGS = [split " " [strip "@CFLAGS@"]];
 A_CFLAGS = [CFLAGS];
 S_CFLAGS = [CFLAGS] -fPIC -DPIC
 #if [matches macho [abi]]
@@ -63,7 +63,7 @@ S_CFLAGS = [CFLAGS] -fPIC -DPIC
            ;
 
 if [not [defined LDFLAGS]] then
-  LDFLAGS = [split " " "@LDFLAGS@"];
+  LDFLAGS = [split " " [strip "@LDFLAGS@"]];
 EXTRALIBS = @LIBS@;
 RPATH = @RPATH@;
 

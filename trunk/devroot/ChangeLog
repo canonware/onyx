@@ -1,3 +1,9 @@
+2001-12-21  Jason Evans  <jasone@canonware.com>
+
+	* Cookfile.in: Strip leading and trailing whitespace from CC,
+	CPPFLAGS, CFLAGS, and LDFLAGS in order to avoid argument splitting
+	confusion.
+
 2001-12-15  Jason Evans  <jasone@canonware.com>
 
 	* doc/latex/onyx_lang.tex: Document search.
