@@ -54,7 +54,7 @@ ch - Chained hashing.
 .I cw_bool_t
 .br
 .B ch_remove_iterate
-.RI ( "cw_ch_t * a_ch" ", " "void ** r_key" ", " "void ** r_data<args>" )
+.RI ( "cw_ch_t * a_ch" ", " "void ** r_key" ", " "void ** r_data" )
 
 .I void
 .br
@@ -249,21 +249,45 @@ Input(s):
 .RS
 Pointer to a ch.
 .RE
-.IR <input> :
+.IR a_search_key :
 .RS
-<input description>
+Pointer to a key.
+.RE
+.IR r_key :
+.RS
+Pointer to a key pointer, or NULL.
+.RE
+.IR r_data :
+.RS
+Pointer to a data pointer, or NULL.
 .RE
 .RE
 Output(s):
 .RS
 .IR retval :
 .RS
-<retval description>
+FALSE: Success.
+.br
+TRUE: Item with key a_search_key not found.
+.RE
+.IR *r_key :
+.RS
+If (NULL != r_key) and (FALSE == retval): Pointer to a key.
+.br
+Otherwise: Undefined.
+.RE
+.IR *r_data :
+.RS
+If (NULL != r_data) and (FALSE == retval): Pointer to data.
+.br
+Otherwise: Undefined.
 .RE
 .RE
 Description:
 .RS
-<description>
+Remove the item from a_ch that was most recently inserted with key
+a_search_key.  If successful, set *r_key and *r_data to point to the key and
+data, respectively.
 .RE
 .RE
 
@@ -278,21 +302,32 @@ Input(s):
 .RS
 Pointer to a ch.
 .RE
-.IR <input> :
+.IR a_key :
 .RS
-<input description>
+Pointer to a key.
+.RE
+.IR r_data :
+.RS
+Pointer to a data pointer, or NULL.
 .RE
 .RE
 Output(s):
 .RS
 .IR retval :
 .RS
-<retval description>
+FALSE: Success.
+.br
+TRUE: Item with key a_key not found in a_ch.
+.RE
+.IR *r_data :
+.RS
+If (NULL != r_data) and (FALSE == retval): Pointer to data.
 .RE
 .RE
 Description:
 .RS
-<description>
+Search for the most recently inserted item with key a_key.  If found, *r_data to
+point to the associated data.
 .RE
 .RE
 
@@ -307,28 +342,47 @@ Input(s):
 .RS
 Pointer to a ch.
 .RE
-.IR <input> :
+.IR r_key :
 .RS
-<input description>
+Pointer to a key pointer, or NULL.
+.RE
+.IR r_data :
+.RS
+Pointer to a data pointer, or NULL.
 .RE
 .RE
 Output(s):
 .RS
 .IR retval :
 .RS
-<retval description>
+FALSE: Success.
+.br
+TRUE: a_ch is empty.
+.RE
+.IR *r_key :
+.RS
+If (NULL != r_key) and (FALSE == retval): Pointer to a key.
+.br
+Otherwise: Undefined.
+.RE
+.IR *r_data :
+.RS
+If (NULL != r_data) and (FALSE == retval): Pointer to data.
+.br
+Otherwise: Undefined.
 .RE
 .RE
 Description:
 .RS
-<description>
+Set *r_key and *r_data to point to the oldest item in a_ch.  Promote the item so
+that it is the newest item in a_ch.
 .RE
 .RE
 
 .I cw_bool_t
 .br
 .B ch_remove_iterate
-.RI ( "cw_ch_t * a_ch" ", " "void ** r_key" ", " "void ** r_data<args>" )
+.RI ( "cw_ch_t * a_ch" ", " "void ** r_key" ", " "void ** r_data" )
 .br
 Input(s):
 .RS
@@ -336,21 +390,40 @@ Input(s):
 .RS
 Pointer to a ch.
 .RE
-.IR <input> :
+.IR r_key :
 .RS
-<input description>
+Pointer to a key pointer, or NULL.
+.RE
+.IR r_data :
+.RS
+Pointer to a data pointer, or NULL.
 .RE
 .RE
 Output(s):
 .RS
 .IR retval :
 .RS
-<retval description>
+FALSE: Success.
+.br
+TRUE: a_ch is empty.
+.RE
+.IR *r_key :
+.RS
+If (NULL != r_key) and (FALSE == retval): Pointer to a key.
+.br
+Otherwise: Undefined.
+.RE
+.IR *r_data :
+.RS
+If (NULL != r_data) and (FALSE == retval): Pointer to data.
+.br
+Otherwise: Undefined.
 .RE
 .RE
 Description:
 .RS
-<description>
+Set *r_key and *r_data to point to the oldest item in a_ch, and remove the item
+from a_ch.
 .RE
 .RE
 
@@ -365,21 +438,18 @@ Input(s):
 .RS
 Pointer to a ch.
 .RE
-.IR <input> :
+.IR a_prefix :
 .RS
-<input description>
+A text string to prefix to all output.
 .RE
 .RE
 Output(s):
 .RS
-.IR retval :
-.RS
-<retval description>
-.RE
+Internal state of a_ch printed to cw_g_out.
 .RE
 Description:
 .RS
-<description>
+Print the internal state of a_ch.
 .RE
 .RE
 
@@ -390,25 +460,21 @@ Description:
 .br
 Input(s):
 .RS
-.IR a_ch :
+.IR a_key :
 .RS
-Pointer to a ch.
-.RE
-.IR <input> :
-.RS
-<input description>
+Pointer to a key.
 .RE
 .RE
 Output(s):
 .RS
 .IR retval :
 .RS
-<retval description>
+Hash result.
 .RE
 .RE
 Description:
 .RS
-<description>
+NULL-terminated string hashing function.
 .RE
 .RE
 
@@ -419,25 +485,21 @@ Description:
 .br
 Input(s):
 .RS
-.IR a_ch :
+.IR a_key :
 .RS
-Pointer to a ch.
-.RE
-.IR <input> :
-.RS
-<input description>
+Pointer to a key.
 .RE
 .RE
 Output(s):
 .RS
 .IR retval :
 .RS
-<retval description>
+Hash result.
 .RE
 .RE
 Description:
 .RS
-<description>
+Direct (pointer) hashing function.
 .RE
 .RE
 
@@ -448,25 +510,27 @@ Description:
 .br
 Input(s):
 .RS
-.IR a_ch :
+.IR a_k1 :
 .RS
-Pointer to a ch.
+Pointer to a key.
 .RE
-.IR <input> :
+.IR a_k2 :
 .RS
-<input description>
+Pointer to a key.
 .RE
 .RE
 Output(s):
 .RS
 .IR retval :
 .RS
-<retval description>
+FALSE: Not equal.
+.br
+TRUE: Equal.
 .RE
 .RE
 Description:
 .RS
-<description>
+Test two keys (NULL-terminated strings) for equality.
 .RE
 .RE
 
@@ -477,25 +541,27 @@ Description:
 .br
 Input(s):
 .RS
-.IR a_ch :
+.IR a_k1 :
 .RS
-Pointer to a ch.
+Pointer to a key.
 .RE
-.IR <input> :
+.IR a_k2 :
 .RS
-<input description>
+Pointer to a key.
 .RE
 .RE
 Output(s):
 .RS
 .IR retval :
 .RS
-<retval description>
+FALSE: Not equal.
+.br
+TRUE: Equal.
 .RE
 .RE
 Description:
 .RS
-<description>
+Test two keys (pointers) for equality.
 .RE
 .RE
 
