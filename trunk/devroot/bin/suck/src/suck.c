@@ -56,7 +56,7 @@ main(int argc, char ** argv)
   dbg_register(cw_g_dbg, "mem_error");
   dbg_register(cw_g_dbg, "prog_error");
   dbg_register(cw_g_dbg, "sockb_error");
-/*    dbg_register(cw_g_dbg, "sockb_verbose"); */
+  dbg_register(cw_g_dbg, "sockb_verbose");
   dbg_register(cw_g_dbg, "socks_error");
   dbg_register(cw_g_dbg, "sock_error");
 
@@ -161,6 +161,9 @@ main(int argc, char ** argv)
     
     while (NULL != (void *) (sockfd = (int) mq_get(mq)))
     {
+      out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
+		"Message for [i]\n", sockfd);
+      
       did_work = TRUE;
 
       if (NULL != sock_vec[sockfd])
@@ -183,9 +186,12 @@ main(int argc, char ** argv)
 
 	  out_put_l(cw_g_out, "Connection closed\n");
 	}
+	else
+	{
+	  _cw_marker("Hmm");
+	}
       }
     }
-
   }
   mq_delete(mq);
   buf_delete(&buf);

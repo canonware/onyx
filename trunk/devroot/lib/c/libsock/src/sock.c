@@ -449,11 +449,11 @@ sock_read(cw_sock_t * a_sock, cw_buf_t * a_spare, cw_sint32_t a_max_read,
   if (a_sock->error)
   {
     mtx_unlock(&a_sock->in_lock);
-    retval = -1;
+    retval = -2;
   }
   else
   {
-    if (buf_get_size(&a_sock->in_buf) == 0)
+    if (0 == buf_get_size(&a_sock->in_buf))
     {
       /* There's no data available right now. */
       a_sock->in_need_signal_count++;
@@ -482,13 +482,25 @@ sock_read(cw_sock_t * a_sock, cw_buf_t * a_spare, cw_sint32_t a_max_read,
       
       if ((a_max_read == 0) || (size < a_max_read))
       {
-	buf_catenate_buf(a_spare, &a_sock->in_buf, FALSE);
-	retval = size;
+	if (TRUE == (buf_catenate_buf(a_spare, &a_sock->in_buf, FALSE)))
+	{
+	  retval = -1;
+	}
+	else
+	{
+	  retval = size;
+	}
       }
       else
       {
-	buf_split(a_spare, &a_sock->in_buf, a_max_read);
-	retval = a_max_read;
+	if (TRUE == (buf_split(a_spare, &a_sock->in_buf, a_max_read)))
+	{
+	  retval = -1;
+	}
+	else
+	{
+	  retval = a_max_read;
+	}
       }
 
       mtx_unlock(&a_sock->in_lock);
@@ -505,7 +517,7 @@ sock_read(cw_sock_t * a_sock, cw_buf_t * a_spare, cw_sint32_t a_max_read,
       /* Make sure there wasn't an error. */
       if (TRUE == a_sock->error)
       {
-	retval = -1;
+	retval = -2;
       }
       else
       {
@@ -547,7 +559,12 @@ sock_write(cw_sock_t * a_sock, cw_buf_t * a_buf)
 	a_sock->out_is_flushed = FALSE;
       }
     
-      buf_catenate_buf(&a_sock->out_buf, a_buf, FALSE);
+      if (TRUE == buf_catenate_buf(&a_sock->out_buf, a_buf, FALSE))
+      {
+	mtx_unlock(&a_sock->out_lock);
+	retval = TRUE;
+	goto RETURN;
+      }
 
       mtx_unlock(&a_sock->out_lock);
     }
@@ -658,6 +675,10 @@ sock_l_get_out_data(cw_sock_t * a_sock, cw_buf_t * r_buf)
 
   mtx_lock(&a_sock->out_lock);
 
+  /* If buf_split() or buf_catenate() has a memory allocation, it isn't fatal,
+   * since it will simply cause the sockb thread to try to write 0 bytes.  In
+   * actuality, this is extremely unlikely to happen in the steady state, but
+   * even if it does, oh well. */
   if (buf_get_size(&a_sock->out_buf) > a_sock->os_outbuf_size)
   {
     buf_split(r_buf, &a_sock->out_buf, a_sock->os_outbuf_size);
@@ -694,12 +715,22 @@ sock_l_put_back_out_data(cw_sock_t * a_sock, cw_buf_t * a_buf)
   _cw_check_ptr(a_buf);
 
   mtx_lock(&a_sock->out_lock);
+  /* It's very unlikely that a memory error would occur in buf_catenate_buf()
+   * here, since we previously had at least as much data buffered in a_sock, and
+   * a_buf tends to have a sufficiently expanded bufel array.  However, an error
+   * could occur, and there's no good way to deal with it. */
   if (0 < buf_get_size(&a_sock->out_buf))
   {
     /* There are still data in out_buf, so preserve the order. */
-    buf_catenate_buf(a_buf, &a_sock->out_buf, FALSE);
+    if (TRUE == buf_catenate_buf(a_buf, &a_sock->out_buf, FALSE))
+    {
+      goto OOM;
+    }
   }
-  buf_catenate_buf(&a_sock->out_buf, a_buf, FALSE);
+  if (TRUE == buf_catenate_buf(&a_sock->out_buf, a_buf, FALSE))
+  {
+    goto OOM;
+  }
   _cw_assert(0 == buf_get_size(a_buf));
   
   retval = buf_get_size(&a_sock->out_buf);
@@ -714,6 +745,15 @@ sock_l_put_back_out_data(cw_sock_t * a_sock, cw_buf_t * a_buf)
   mtx_unlock(&a_sock->out_lock);
 
   return retval;
+  
+  OOM:
+  mtx_unlock(&a_sock->out_lock);
+  buf_release_head_data(a_buf, buf_get_size(a_buf));
+  retval = 0;
+  mtx_lock(&a_sock->state_lock);
+  a_sock->error = TRUE;
+  mtx_unlock(&a_sock->state_lock);
+  return retval;
 }
 
 cw_uint32_t
@@ -726,7 +766,10 @@ sock_l_put_in_data(cw_sock_t * a_sock, cw_buf_t * a_buf)
 
   mtx_lock(&a_sock->in_lock);
 
-  buf_catenate_buf(&a_sock->in_buf, a_buf, FALSE);
+  if (TRUE == buf_catenate_buf(&a_sock->in_buf, a_buf, FALSE))
+  {
+    goto OOM;
+  }
 
   if (a_sock->in_need_signal_count > 0)
   {
@@ -739,6 +782,15 @@ sock_l_put_in_data(cw_sock_t * a_sock, cw_buf_t * a_buf)
   
   mtx_unlock(&a_sock->in_lock);
 
+  return retval;
+
+  OOM:
+  mtx_unlock(&a_sock->in_lock);
+  buf_release_head_data(a_buf, buf_get_size(a_buf));
+  retval = 0;
+  mtx_lock(&a_sock->state_lock);
+  a_sock->error = TRUE;
+  mtx_unlock(&a_sock->state_lock);
   return retval;
 }
 
@@ -778,6 +830,13 @@ sock_l_error_callback(cw_sock_t * a_sock)
     }
     mtx_unlock(&a_sock->out_lock);
   }
+}
+
+static void
+sock_p_set_error(cw_sock_t * a_sock)
+{
+  mtx_lock();
+  
 }
 
 static cw_bool_t
@@ -978,7 +1037,6 @@ sock_p_disconnect(cw_sock_t * a_sock)
       if (TRUE == sockb_l_unregister_sock(a_sock->sockfd))
       {
 	mtx_unlock(&a_sock->lock);
-	mtx_unlock(&a_sock->state_lock);
 	retval = TRUE;
 	goto RETURN;
       }

@@ -1854,7 +1854,7 @@ buf_p_fit_array(cw_buf_t * a_buf, cw_uint32_t a_min_array_size)
 
     if (a_buf->bufel_array != a_buf->static_bufel_array)
     {
-      t_ptr = _cw_realloc(a_buf->bufel_array, i * sizeof(cw_bufel_t)); /* XXX */
+      t_ptr = _cw_realloc(a_buf->bufel_array, i * sizeof(cw_bufel_t));
       if (NULL == t_ptr)
       {
 	retval = TRUE;

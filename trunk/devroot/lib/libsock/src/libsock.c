@@ -14,7 +14,7 @@
  *
  ****************************************************************************/
 
-/*  #define _LIBSTASH_SOCKB_CONFESS */
+#define _LIBSTASH_SOCKB_CONFESS
 
 #define _LIBSTASH_USE_PEZZ
 #define _LIBSTASH_USE_MQ
@@ -1118,8 +1118,41 @@ sockb_p_entry_func(void * a_arg)
 
 	    if (TRUE == buf_split(&tmp_buf, &buf_in, bytes_read))
 	    {
-	      /* XXX */
-	      _cw_error("Unhandled error condition");
+	      if (dbg_is_registered(cw_g_dbg, "sockb_error"))
+	      {
+		out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
+			  "Memory allocation error.  Closing sockfd [i]\n",
+			  sockfd);
+	      }
+	      
+	      /* Fill this hole, decrement i, continue. */
+	      nfds--;
+	      if (regs[sockfd].pollfd_pos != nfds)
+	      {
+#ifdef _LIBSTASH_SOCKB_CONFESS
+		out_put(cw_g_out, "h([i]-->[i])", nfds, i);
+#endif
+	      
+		regs[fds[nfds].fd].pollfd_pos = i;
+		memcpy(&fds[i], &fds[nfds], sizeof(struct pollfd));
+		i--;
+	      }
+	      regs[sockfd].pollfd_pos = -1;
+
+	      sock_l_error_callback(regs[sockfd].sock);
+	    
+	      if (NULL != regs[sockfd].notify_mq)
+	      {
+		if (TRUE == sockb_p_notify(regs[sockfd].notify_mq, sockfd))
+		{
+		  regs[sockfd].notify_mq = NULL;
+		}
+	      }
+
+#ifdef _LIBSTASH_SOCKB_CONFESS
+	      out_put(cw_g_out, "\n");
+#endif
+	      continue;
 	    }
 
 	    /* Append to the sock's in_buf. */
@@ -1169,8 +1202,11 @@ sockb_p_entry_func(void * a_arg)
 	    
 	    if (NULL != regs[sockfd].notify_mq)
 	    {
+	      _cw_marker("Got here");
 	      if (TRUE == sockb_p_notify(regs[sockfd].notify_mq, sockfd))
 	      {
+		/* XXX */
+		_cw_error("Got here");
 		regs[sockfd].notify_mq = NULL;
 	      }
 	    }

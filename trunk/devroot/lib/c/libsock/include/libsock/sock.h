@@ -211,10 +211,10 @@ sock_disconnect(cw_sock_t * a_sock);
  *
  * <<< Output(s) >>>
  *
- * retval : -1 : Error.  This should only happen if the socket has been
- *               closed.
- *        : 0 : Timeout.
- *        : > 0 : Data read.
+ * retval : -2 : Error.  This should only happen if the socket has been closed.
+ *        : -1 : Memory allocation error.
+ *        :  0 : Timeout.
+ *        : >0 : Data read.
  *
  * <<< Description >>>
  *
