@@ -77,10 +77,10 @@ P_CPPFLAGS :=
 TEST_CPPFLAGS := -D_LIBSTASH_DEBUG -D_LIBSOCK_DEBUG
 BIN_CPPFLAGS := @BIN_CPPFLAGS@
 
-CFLAGS := -Wall -pipe @CFLAGS@
+CFLAGS := -Wall -pipe -g3 @CFLAGS@
 ST_CFLAGS :=
 SH_CFLAGS := -fPIC -DPIC
-D_CFLAGS := -g3
+D_CFLAGS :=
 O_CFLAGS := -O2
 P_CFLAGS := -O2 -pg
 TEST_CFLAGS := $(ST_CFLAGS) $(D_CFLAGS)
@@ -263,11 +263,26 @@ uninstall :
 
 doc :
 
-clean : FORCE
+clean_stat_dbg : FORCE
+	rm -f src/*.[do]_st_d
+	rm -f $(LIB_ST_D)
+
+clean_stat_opt : FORCE
+	rm -f src/*.[do]_st_o
+	rm -f $(LIB_ST_O)
+
+clean_shar_opt : FORCE
+	rm -f src/*.[do]_sh_o
+	rm -f $(LIB_SH_O)
+
+clean_stat_prof : FORCE
+	rm -f src/*.[do]_st_p
+	rm -f $(LIB_ST_P)
+
+clean : clean_stat_dbg clean_stat_opt clean_shar_opt clean_stat_prof
 	rm -f *~ */*~ */*/*~
 	rm -f *.bak *.BAK
 	rm -f core test/core *.core test/*.core bin/core bin/*.core
-	rm -f src/*.[do]_*
 	rm -f bin/*.[do]
 	rm -f lib/lib*
 

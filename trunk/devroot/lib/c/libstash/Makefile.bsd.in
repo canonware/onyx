@@ -83,10 +83,10 @@ P_CPPFLAGS :=
 R_CPPFLAGS := -D_CW_REENTRANT
 TEST_CPPFLAGS := -D_LIBSTASH_DEBUG
 
-CFLAGS := -Wall -pipe @CFLAGS@
+CFLAGS := -Wall -pipe -g3 @CFLAGS@
 ST_CFLAGS := 
 SH_CFLAGS := -fPIC -DPIC
-D_CFLAGS := -g3
+D_CFLAGS :=
 O_CFLAGS := -O2
 P_CFLAGS := -O2 -pg
 R_CFLAGS :=
@@ -319,7 +319,39 @@ uninstall :
 
 doc :
 
-clean : FORCE
+clean_stat_dbg : FORCE
+	rm -f src/*.[do]_st_d
+	rm -f $(LIB_ST_D)
+
+clean_stat_opt : FORCE
+	rm -f src/*.[do]_st_o
+	rm -f $(LIB_ST_O)
+
+clean_shar_opt : FORCE
+	rm -f src/*.[do]_sh_o
+	rm -f $(LIB_SH_O)
+
+clean_stat_prof : FORCE
+	rm -f src/*.[do]_st_p
+	rm -f $(LIB_ST_P)
+
+clean_stat_dbg_r : FORCE
+	rm -f src/*.[do]_st_r_d
+	rm -f $(LIB_ST_R_D)
+
+clean_stat_opt_r : FORCE
+	rm -f src/*.[do]_st_r_o
+	rm -f $(LIB_ST_R_O)
+
+clean_shar_opt_r : FORCE
+	rm -f src/*.[do]_sh_r_o
+	rm -f $(LIB_SH_R_O)
+
+clean_stat_prof_r : FORCE
+	rm -f src/*.[do]_st_r_p
+	rm -f $(LIB_ST_R_P)
+
+clean : clean_stat_dbg clean_stat_opt clean_shar_opt clean_stat_prof clean_stat_dbg_r clean_stat_opt_r clean_shar_opt_r clean_stat_prof_r
 	rm -f *~ */*~ */*/*~
 	rm -f *.bak *.BAK
 	rm -f core test/core
@@ -327,8 +359,6 @@ clean : FORCE
 	rm -f test/*.o test/*.out
 	rm -f test/*.diff test/*.pl
 	rm -f $(CTESTS) $(PTESTS) $(BTESTS)
-	rm -f src/*.[do]_*
-	rm -f lib/lib*
 	rm -f test/*.d
 	rm -f test/*.diff
 
