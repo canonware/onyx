@@ -29,6 +29,7 @@ dnl lib : Name of library.
 dnl var : Name of variable to substitute in configure output.
 AC_DEFUN(CW_BUILD_LIB,
 [
+AC_MSG_CHECKING(include $1 in build)
 if test -d "$srcdir/lib/c/$1" ; then
   build_$1="yes"
   $2=1
@@ -39,7 +40,7 @@ else
   build_$1="no"
   $2=0
 fi
-AC_MSG_RESULT(include $1 in build... $build_$1)
+AC_MSG_RESULT($build_$1)
 AC_SUBST($2)
 ])
 
@@ -48,6 +49,7 @@ dnl bin : Name of binary.
 dnl var : Name of variable to substitute in configure output.
 AC_DEFUN(CW_BUILD_BIN,
 [
+AC_MSG_CHECKING(include $1 in build)
 if test -d "$srcdir/bin/$1" ; then
   build_$1="yes"
   $2=1
@@ -58,6 +60,6 @@ else
   build_$1="no"
   $2=0
 fi
-AC_MSG_RESULT(include $1 in build... $build_$1)
+AC_MSG_RESULT($build_$1)
 AC_SUBST($2)
 ])

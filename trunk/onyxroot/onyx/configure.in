@@ -17,6 +17,7 @@ dnl Look for libraries.
 CW_BUILD_LIB(libstash, lib_stash)
 CW_BUILD_LIB(libsock, lib_sock)
 CW_BUILD_LIB(libstil, lib_stil)
+CW_BUILD_LIB(libalt, lib_alt)
 
 dnl Look for binaries.
 CW_BUILD_BIN(blow, bin_blow)
@@ -25,6 +26,7 @@ CW_BUILD_BIN(ncat, bin_ncat)
 CW_BUILD_BIN(proxy, bin_proxy)
 CW_BUILD_BIN(stil, bin_stil)
 CW_BUILD_BIN(stile, bin_stile)
+CW_BUILD_BIN(stilt, bin_stilt)
 CW_BUILD_BIN(suck, bin_suck)
 
 AC_CONFIG_HEADER($cfghdrs)
@@ -67,7 +69,25 @@ AC_PATH_PROG(ETAGS, etags, , $PATH)
 VERIFY="$objdir/test/verify"
 AC_SUBST(VERIFY)
 
+dnl Find libraries.
 CW_USE_PTHREADS()
+
+if test "x$build_stilt" = "xyes" ; then
+  dnl Make sure that libX11 exists.  The stilt build rules manually include it
+  dnl in order to keep from linking everything with X.
+
+  CPPFLAGS="$CPPFLAGS -I/usr/X11R6/include"
+  AC_CHECK_HEADERS(X11/Xlib.h, , AC_MSG_ERROR(Cannot build without X11/Xlib.h))
+  AC_CHECK_HEADERS(X11/Xutil.h, , \
+    AC_MSG_ERROR(Cannot build without X11/Xutil.h))
+  AC_CHECK_HEADERS(X11/Xos.h, , AC_MSG_ERROR(Cannot build without X11/Xos.h))
+  AC_CHECK_HEADERS(X11/Xatom.h, , \
+    AC_MSG_ERROR(Cannot build without X11/Xatom.h))
+
+  LDFLAGS="$LDFLAGS -L/usr/X11R6/lib";
+  AC_CHECK_LIB(X11, main, if true ; then fi , \
+    AC_MSG_ERROR(Cannot build stilt without the X11 library))
+fi
 
 dnl Do not build shared libraries by default.
 CW_DISABLE_SHARED()
@@ -99,6 +119,7 @@ if test "x$build_libstash" = "xyes" ; then
   AC_CHECK_SIZEOF(long double, 12)
 
   dnl Find maximum iovec compatible with readv()/writev().
+  AC_MSG_CHECKING(aximum iov for readv()/writev())
   AC_TRY_RUN([
 #include <stdio.h>
 #include <fcntl.h>
@@ -137,7 +158,7 @@ main()
 }
 ])
   maxiov=`cat _CW_MAX_IOV`
-  AC_MSG_RESULT(_CW_MAX_IOV... $maxiov)
+  AC_MSG_RESULT($maxiov)
   AC_DEFINE_UNQUOTED(_CW_MAX_IOV, $maxiov)
   rm -f _CW_MAX_IOV
 fi

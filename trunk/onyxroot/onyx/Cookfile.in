@@ -136,6 +136,9 @@ install_bins :
 ;
 
 install_libs :
+#if @lib_alt@
+          libalt_install
+#endif
 #if @lib_stil@
           libstil_install
 #endif
@@ -174,6 +177,9 @@ uninstall_bins :
 ;
 
 uninstall_libs :
+#if @lib_alt@
+          libalt_uninstall
+#endif
 #if @lib_stil@
           libstil_uninstall
 #endif
@@ -345,8 +351,11 @@ dataend
 
 /*
  * Libraries.  Order matters.  They should appear in an order that works on the
- * link line (-lstil -lsock -lstash).
+ * link line (-lalt -lstil -lsock -lstash).
  */
+#if @lib_alt@
+#  include [srcdir]/lib/c/libalt/Howto.cook
+#endif
 #if @lib_stil@
 #  include [srcdir]/lib/c/libstil/Howto.cook
 #endif
@@ -377,6 +386,9 @@ dataend
 #endif
 #if @bin_stile@
 #  include [srcdir]/bin/stile/Howto.cook
+#endif
+#if @bin_stilt@
+#  include [srcdir]/bin/stilt/Howto.cook
 #endif
 #if @bin_suck@
 #  include [srcdir]/bin/suck/Howto.cook

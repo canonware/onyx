@@ -1,8 +1,2 @@
-*.core
-core
-config.cache
-config.log
-config.status
-_CW_MAX_IOV
 .cook.fp
 lib
