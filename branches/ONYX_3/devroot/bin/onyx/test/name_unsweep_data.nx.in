@@ -86,9 +86,9 @@ systemdict begin
 		    2 index 1 sub
 		    % %array %depth %accum %el %rdepth
 		    1 index type sprintsdict exch get eval
-		    catenate
+		    cat
 		    % %array %depth %accum %el %rdepth
-		` ' catenate
+		` ' cat
 		} for
 	    } if
 	    % %array %depth %accum
@@ -98,7 +98,7 @@ systemdict begin
 		2 index 1 sub
 		% %array %depth %accum %el %rdepth
 		1 index type sprintsdict exch get eval
-		catenate
+		cat
 	    } if
 	    % %array %depth %accum
 
@@ -114,7 +114,7 @@ systemdict begin
 		`]'
 	    } ifelse
 	    } ifelse
-	    catenate
+	    cat
 	    % %accum
 	}{
 	    pop pop
@@ -125,14 +125,14 @@ systemdict begin
 	pop
 	cvs
     }
-' catenate
+' cat
 1 1 eq {
     `
     /conditiontype {
 	pop pop
 	`-condition-'
     }
-    ' catenate
+    ' cat
 } if
 `
     /dicttype {
@@ -150,20 +150,20 @@ systemdict begin
 		exch 4 index
 		% %dict %rdepth %i %accum %value %key %rdepth
 		1 index type sprintsdict exch get eval
-		` ' catenate
+		` ' cat
 		% %dict %rdepth %accum %i %value %keystr
 		exch 4 index
 		% %dict %rdepth %i %accum %keystr %value %rdepth
 		1 index type sprintsdict exch get eval
 		% %dict %rdepth %i %accum %keystr %valstr
-		catenate catenate
+		cat cat
 		% %dict %rdepth %i %accum
 
 		% Update counter.
 		exch 1 add dup 4 index length lt {
 		    % %dict %rdepth %accum %i
 		    exch
-		    ` ' catenate
+		    ` ' cat
 		    % %dict %rdepth %i %accum
 		}{
 		    % Last element.
@@ -176,7 +176,7 @@ systemdict begin
 	    4 1 roll pop pop pop
 	    % %accum
 	    `>'
-	    catenate
+	    cat
 	    % %accum
 	}{
 	    pop pop
@@ -200,8 +200,8 @@ systemdict begin
 	    % %tag %rdepth
 	    1 index type sprintsdict exch get eval
 	    % %tagstr
-	    `=' exch catenate
-	    `=' catenate
+	    `=' exch cat
+	    `=' cat
 	}{
 	    pop pop
 	    `-hook-'
@@ -215,21 +215,21 @@ systemdict begin
 	pop pop
 	`-mark-'
     }
-' catenate
+' cat
 1 1 eq {
     `
     /mutextype {
 	pop pop
 	`-mutex-'
     }
-    ' catenate
+    ' cat
 } if
 `
     /nametype {
 	pop
 	dup cvs
 	exch xcheck not {
-	    `/' exch catenate
+	    `/' exch cat
 	} if
     }
     /nulltype {
@@ -241,14 +241,14 @@ systemdict begin
 	cvs
 	dup `-operator-' ne {
 	    `--' dup 3 1 roll
-	    catenate catenate
+	    cat cat
 	} if
     }
     /pmarktype {
 	pop pop
 	`-pmark-'
     }
-' catenate
+' cat
 
 1 1 eq {
     `
@@ -256,7 +256,7 @@ systemdict begin
 	pop
 	cvs
     }
-    ' catenate
+    ' cat
 } if
 `
     /stacktype {
@@ -273,9 +273,9 @@ systemdict begin
 		    2 index 1 sub
 		    % %stack %depth %accum %el %rdepth
 		    1 index type sprintsdict exch get eval
-		    catenate
+		    cat
 		    % %stack %depth %accum %el %rdepth
-		` ' catenate
+		` ' cat
 		} for
 	    } if
 	    % %stack %depth %accum
@@ -285,14 +285,14 @@ systemdict begin
 		2 index 1 sub
 		% %stack %depth %accum %el %rdepth
 		1 index type sprintsdict exch get eval
-		catenate
+		cat
 	    } if
 	    % %stack %depth %accum
 
 	    3 1 roll pop pop
 	    % %accum
 	    `)'
-	    catenate
+	    cat
 	    % %accum
 	}{
 	    pop pop
@@ -341,7 +341,7 @@ systemdict begin
 	1 index /s known {
 	    1 index /s get /+ eq {
 		2 index 0 ge {
-		    `+' exch catenate
+		    `+' exch cat
 		} if
 	    } if
 	} if
@@ -353,7 +353,7 @@ systemdict begin
 	outputsdict /stringtype get eval
 	% %str
     }
-' catenate
+' cat
 1 1 eq {
     `
     /realtype {
@@ -390,7 +390,7 @@ systemdict begin
 	1 index /s known {
 	1 index /s get /+ eq {
 	    2 index 0 ge {
-	    `+' exch catenate
+	    `+' exch cat
 	    } if
 	} if
 	} if
@@ -401,7 +401,7 @@ systemdict begin
 	outputsdict /stringtype get eval
 	% %str
     }
-    ' catenate
+    ' cat
 } if
 `
     % Temporarily define.
@@ -540,11 +540,11 @@ systemdict begin
     [
 	/arraytype
 	/booleantype
-' catenate
+' cat
 1 1 eq {
     `
 	/conditiontype
-    ' catenate
+    ' cat
 } if
 `
 	/dicttype
@@ -552,11 +552,11 @@ systemdict begin
 	/finotype
 	/hooktype
 	/marktype
-' catenate
+' cat
 1 1 eq {
     `
 	/mutextype
-    ' catenate
+    ' cat
 } if
 `
 	/nametype
@@ -717,7 +717,7 @@ systemdict begin
 	pop false
     } ifelse
 } def
-' catenate
+' cat
 1 1 eq {
     `
 % [`<path>' `<args>'...] system %exit_code
@@ -808,8 +808,8 @@ end % onyxdict.
 	    % %filename %path
 	    {
 		% %filename %dir
-		`/' catenate
-		1 index catenate
+		`/' cat
+		1 index cat
 		% %filename %full_path
 		dup `f' test {
 		    % Found.
@@ -876,8 +876,8 @@ end % onyxdict.
 	    % %symbol %filename %path
 	    {
 		% %symbol %filename %dir
-		`/' catenate
-		1 index catenate
+		`/' cat
+		1 index cat
 		% %symbol %filename %full_path
 		dup `f' test {
 		    % Found.
@@ -900,7 +900,7 @@ end % onyxdict.
 	/undefinedfilename throw
     } if
 } def
-    ' catenate
+    ' cat
 } if
 `
 % /errorname throw -
@@ -990,7 +990,7 @@ end % onyxdict.
 /version `<Version = onyx>' def
 
 end % systemdict.
-' catenate
+' cat
 
 % Final closing brace.
-`}' catenate cvx eval
+`}' cat cvx eval
