@@ -123,15 +123,17 @@ buf_get_size(cw_buf_t * a_buf_o)
  * moved to it.  If a_spare is not NULL, it is used instead of malloc()ing
  * a new buf.
  *
+ * XXX What is this function useful for?
+ *
  ****************************************************************************/
 cw_buf_t *
-buf_get_buf(cw_buf_t * a_buf_o, cw_buf_t * a_spare)
+buf_transfer_contents(cw_buf_t * a_buf_o, cw_buf_t * a_spare)
 {
   cw_buf_t * retval;
 
   if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
   {
-    _cw_marker("Enter buf_get_buf()");
+    _cw_marker("Enter buf_transfer_contents()");
   }
   _cw_check_ptr(a_buf_o);
   _cw_check_ptr(a_spare);
@@ -184,7 +186,7 @@ buf_get_buf(cw_buf_t * a_buf_o, cw_buf_t * a_spare)
   }
   if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
   {
-    _cw_marker("Exit buf_get_buf()");
+    _cw_marker("Exit buf_transfer_contents()");
   }
   return retval;
 }
@@ -197,11 +199,11 @@ buf_get_buf(cw_buf_t * a_buf_o, cw_buf_t * a_spare)
  *
  ****************************************************************************/
 void
-buf_put_buf(cw_buf_t * a_buf_o, cw_buf_t * a_other)
+buf_append_buf(cw_buf_t * a_buf_o, cw_buf_t * a_other)
 {
   if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
   {
-    _cw_marker("Enter buf_put_buf()");
+    _cw_marker("Enter buf_append_buf()");
   }
   _cw_check_ptr(a_buf_o);
   _cw_check_ptr(a_other);
@@ -231,7 +233,7 @@ buf_put_buf(cw_buf_t * a_buf_o, cw_buf_t * a_other)
   }
   if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
   {
-    _cw_marker("Exit buf_put_buf()");
+    _cw_marker("Exit buf_append_buf()");
   }
 }
 
@@ -242,13 +244,13 @@ buf_put_buf(cw_buf_t * a_buf_o, cw_buf_t * a_other)
  *
  ****************************************************************************/
 cw_bufel_t *
-buf_get_bufel(cw_buf_t * a_buf_o)
+buf_rm_head_bufel(cw_buf_t * a_buf_o)
 {
   cw_bufel_t * retval;
 
   if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
   {
-    _cw_marker("Enter buf_get_bufel()");
+    _cw_marker("Enter buf_rm_head_bufel()");
   }
   _cw_check_ptr(a_buf_o);
   if (a_buf_o->is_threadsafe == TRUE)
@@ -272,7 +274,7 @@ buf_get_bufel(cw_buf_t * a_buf_o)
   }
   if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
   {
-    _cw_marker("Exit buf_get_bufel()");
+    _cw_marker("Exit buf_rm_head_bufel()");
   }
   return retval;
 }
@@ -284,11 +286,11 @@ buf_get_bufel(cw_buf_t * a_buf_o)
  *
  ****************************************************************************/
 void
-buf_put_bufel(cw_buf_t * a_buf_o, cw_bufel_t * a_bufel_o)
+buf_append_bufel(cw_buf_t * a_buf_o, cw_bufel_t * a_bufel_o)
 {
   if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
   {
-    _cw_marker("Enter buf_put_bufel()");
+    _cw_marker("Enter buf_append_bufel()");
   }
   _cw_check_ptr(a_buf_o);
   _cw_check_ptr(a_bufel_o);
@@ -305,7 +307,7 @@ buf_put_bufel(cw_buf_t * a_buf_o, cw_bufel_t * a_bufel_o)
   }
   if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
   {
-    _cw_marker("Exit buf_put_bufel()");
+    _cw_marker("Exit buf_append_bufel()");
   }
 }
 
@@ -326,7 +328,7 @@ bufel_new(cw_bufel_t * a_bufel_o)
   }
   if (a_bufel_o == NULL)
   {
-    retval = (cw_bufel_t *) _cw_malloc(sizeof(a_bufel_o));
+    retval = (cw_bufel_t *) _cw_malloc(sizeof(cw_bufel_t));
     retval->is_malloced = TRUE;
   }
   else
@@ -418,6 +420,7 @@ bufel_set_size(cw_bufel_t * a_bufel_o, cw_uint32_t a_size)
   _cw_check_ptr(a_bufel_o);
   _cw_assert((a_size & 0x3) == 0);
 
+  _cw_marker("Got here");
   if (a_size <= a_bufel_o->end_offset)
   {
     /* We would chop off valid data if we did this. */
@@ -428,31 +431,20 @@ bufel_set_size(cw_bufel_t * a_bufel_o, cw_uint32_t a_size)
     /* Reallocate. */
     t_buf = (cw_uint32_t *) _cw_realloc(a_bufel_o->buf, a_size);
 
-    if (t_buf == NULL)
-    {
-      retval = TRUE;
-    }
-    else
-    {
-      a_bufel_o->buf = t_buf;
-      a_bufel_o->buf_size = a_size;
-      retval = FALSE;
-    }
+    a_bufel_o->buf = t_buf;
+    a_bufel_o->buf_size = a_size;
+    retval = FALSE;
   }
   else
   {
     /* Allocate for the first time. */
+  _cw_marker("Got here");
     a_bufel_o->buf = (cw_uint32_t *) _cw_malloc(a_size);
+  _cw_marker("Got here");
 
-    if (a_bufel_o->buf == NULL)
-    {
-      retval = TRUE;
-    }
-    else
-    {
-      a_bufel_o->buf_size = a_size;
-      retval = FALSE;
-    }
+    a_bufel_o->buf_size = a_size;
+  _cw_marker("Got here");
+    retval = FALSE;
   }
   
   if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
