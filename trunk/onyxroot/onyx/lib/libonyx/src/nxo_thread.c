@@ -2407,24 +2407,6 @@ nxoe_p_thread_real_accept(cw_nxoe_thread_t *a_thread)
     cw_nxo_t *nxo;
     cw_nxor_t val;
 
-/*     fprintf(stderr, */
-/*  	    "mant_neg: %s, radix_base: %u, whole: %s/%u/%u, frac: %s/%u/%u, exp: %s/%u/%u", */
-/*  	    a_thread->m.n.mant_neg ? "TRUE" : "FALSE", */
-/*  	    a_thread->m.n.radix_base, */
-/*  	    a_thread->m.n.whole ? "TRUE" : "FALSE", */
-/*  	    a_thread->m.n.whole_off, */
-/*  	    a_thread->m.n.whole_len, */
-/*  	    a_thread->m.n.frac ? "TRUE" : "FALSE", */
-/*  	    a_thread->m.n.frac_off, */
-/*  	    a_thread->m.n.frac_len, */
-/*  	    a_thread->m.n.exp ? "TRUE" : "FALSE", */
-/*  	    a_thread->m.n.exp_off, */
-/*  	    a_thread->m.n.exp_len); */
-	    
-/*     fprintf(stderr, ", raw :"); */
-/*     write(2, a_thread->tok_str, a_thread->index); */
-/*     fprintf(stderr, ":\n"); */
-
     /* Convert string to real.  Do the conversion before mucking with the stack
      * in case there is a conversion error.
      *
