@@ -517,6 +517,28 @@ void *a\_mem, void *a\_ptr, size\_t a\_size}}
 		Convert \cvar{a\_val} from host byte order to network byte order
 		and return the result.
 	\end{capilist}
+\label{cw_offsetof}
+\index{cw_offsetof@\cppmacro{cw\_offsetof}{}}
+\citem{\cppmacro[cw\_uint32\_t]{cw\_offsetof}{{\lt}type{\gt} a\_type,
+{\lt}field\_name{\gt} a\_field}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_type: ]
+			C structure type name.
+		\item[a\_field: ]
+			Name of a field within \cvar{a\_type}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Offset of \cvar{a\_field} into \cvar{a\_type}.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Calculate the offset of \cvar{a\_field} into \cvar{a\_type}
+		and return the result.
+	\end{capilist}
 \end{capi}
 
 \section{Classes}

@@ -389,6 +389,11 @@ extern cw_mem_t *cw_g_mem;
 #define cw_dassert(a)
 #endif
 
+/* Convenience macro for determining the offset of a field within a
+ * structure. */
+#define cw_offsetof(a_type, a_field)					\
+    ((cw_uint32_t) &(((a_type *)NULL)->a_field))
+
 #include "nxn.h"
 #include "nxo.h"
 #include "nxo_no.h"
