@@ -236,9 +236,8 @@ nxo_thread_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx)
     cw_nxoe_thread_t *thread;
     cw_nxo_t *nxo;
 
-    thread = (cw_nxoe_thread_t *) nxa_malloc(nx_nxa_get(a_nx),
+    thread = (cw_nxoe_thread_t *) nxa_calloc(nx_nxa_get(a_nx), 1,
 					     sizeof(cw_nxoe_thread_t));
-    memset(thread, 0, sizeof(cw_nxoe_thread_t));
 
     nxoe_l_new(&thread->nxoe, NXOT_THREAD, FALSE);
 
@@ -525,7 +524,6 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 {
     cw_nxoe_thread_t *thread;
     cw_nxo_t *nxo, *tnxo, *inxo;
-    cw_uint32_t sdepth, cdepth;
 #ifdef CW_DBG
     cw_uint32_t tdepth;
 #endif
@@ -549,27 +547,270 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
     cw_assert(nxo_stack_count(&thread->estack) ==
 	      nxo_stack_count(&thread->istack));
 
-    for (sdepth = cdepth = nxo_stack_count(&thread->estack);
-	 cdepth >= sdepth;
-	 cdepth = nxo_stack_count(&thread->estack))
+    if (nxo_stack_count(&thread->estack) == CW_LIBONYX_ESTACK_MAX + 1)
     {
-	if (cdepth == CW_LIBONYX_ESTACK_MAX + 1)
-	{
-	    nxo_thread_nerror(a_nxo, NXN_estackoverflow);
-	}
-
-	nxo = nxo_stack_get(&thread->estack);
-	if (nxo_attr_get(nxo) == NXOA_LITERAL)
-	{
-	    /* Always push literal objects onto the operand stack. */
-	    tnxo = nxo_stack_push(&thread->ostack);
-	    nxo_dup(tnxo, nxo);
-	    nxo_stack_pop(&thread->estack);
-	    continue;
-	}
-
+	nxo_thread_nerror(a_nxo, NXN_estackoverflow);
+    }
+    
+    RESTART:
+    nxo = nxo_stack_get(&thread->estack);
+    if (nxo_attr_get(nxo) == NXOA_LITERAL)
+    {
+	/* Always push literal objects onto the operand stack. */
+	tnxo = nxo_stack_push(&thread->ostack);
+	nxo_dup(tnxo, nxo);
+	nxo_stack_pop(&thread->estack);
+    }
+    else
+    {
 	switch (nxo_type_get(nxo))
 	{
+	    case NXOT_ARRAY:
+	    {
+		cw_uint32_t i, len;
+		cw_nxo_t *el;
+		cw_nxoa_t attr;
+
+		len = nxo_array_len_get(nxo);
+		if (len == 0)
+		{
+		    nxo_stack_pop(&thread->estack);
+		    break;
+		}
+
+		/* Iterate through the array and execute each element in turn.
+		 * The generic algorithm is simply to push an element onto
+		 * estack and recurse, but the overhead of the pushing,
+		 * recursion, and popping is excessive for the common cases of a
+		 * simple object or operator.  Therefore, check for the most
+		 * common simple cases and handle them specially. */
+
+#ifdef CW_THREADS
+		nxo_l_array_lock(nxo);
+#endif
+
+		for (i = 0; i < len - 1; i++)
+		{
+		    el = nxo_l_array_el_get(nxo, i);
+		    attr = nxo_attr_get(el);
+		    if (attr == NXOA_LITERAL)
+		    {
+			/* Always push literal objects onto the operand
+			 * stack. */
+			tnxo = nxo_stack_push(&thread->ostack);
+			nxo_dup(tnxo, el);
+			continue;
+		    }
+
+		    /* Set the execution index. */
+		    nxo_integer_set(inxo, i);
+
+		    cw_assert(nxo_type_get(el) <= NXOT_LAST);
+		    switch (nxo_type_get(el))
+		    {
+			case NXOT_ARRAY:
+			{
+			    /* Only execute nested arrays that have the
+			     * evaluatable attribute. */
+			    if (attr == NXOA_EVALUATABLE)
+			    {
+				tnxo = nxo_stack_push(&thread->estack);
+				nxo_dup(tnxo, el);
+#ifdef CW_THREADS
+				nxo_l_array_unlock(nxo);
+#endif
+				nxo_thread_loop(a_nxo);
+#ifdef CW_THREADS
+				nxo_l_array_lock(nxo);
+#endif
+			    }
+			    else
+			    {
+				tnxo = nxo_stack_push(&thread->ostack);
+				nxo_dup(tnxo, el);
+			    }
+			    break;
+			}
+			case NXOT_BOOLEAN:
+#ifdef CW_THREADS
+			case NXOT_CONDITION:
+#endif
+			case NXOT_DICT:
+			case NXOT_FINO:
+			case NXOT_INTEGER:
+			case NXOT_MARK:
+#ifdef CW_THREADS
+			case NXOT_MUTEX:
+#endif
+			case NXOT_PMARK:
+#ifdef CW_REAL
+			case NXOT_REAL:
+#endif
+#ifdef CW_REGEX
+			case NXOT_REGEX:
+			case NXOT_REGSUB:
+#endif
+			case NXOT_STACK:
+			case NXOT_THREAD:
+			{
+			    /* Always push the object onto the operand stack,
+			     * even though it isn't literal. */
+			    tnxo = nxo_stack_push(&thread->ostack);
+			    nxo_dup(tnxo, el);
+			    break;
+			}
+			case NXOT_FILE:
+			{
+			    cw_nxo_threadp_t threadp;
+			    cw_sint32_t nread;
+			    cw_uint8_t buffer[CW_LIBONYX_FILE_EVAL_READ_SIZE];
+
+#ifdef CW_THREADS
+			    nxo_l_array_unlock(nxo);
+#endif
+			    nxo_threadp_new(&threadp);
+			    /* Read data from the file and interpret it until an
+			     * EOF (0 byte read). */
+			    for (nread = nxo_file_read(el,
+						       CW_LIBONYX_FILE_EVAL_READ_SIZE,
+						       buffer);
+				 nread > 0;
+				 nread = nxo_file_read(el,
+						       CW_LIBONYX_FILE_EVAL_READ_SIZE,
+						       buffer))
+			    {
+				nxo_thread_interpret(a_nxo, &threadp, buffer,
+						     nread);
+			    }
+			    /* Do not flush, so that syntax errors get
+			     * caught. */
+			    nxo_threadp_delete(&threadp, a_nxo);
+#ifdef CW_THREADS
+			    nxo_l_array_lock(nxo);
+#endif
+			    break;
+			}
+			case NXOT_HOOK:
+			{
+			    cw_nxo_t *hook;
+
+			    hook = nxo_stack_push(&thread->tstack);
+			    nxo_dup(hook, el);
+#ifdef CW_THREADS
+			    nxo_l_array_unlock(nxo);
+#endif
+			    nxo_hook_eval(hook, a_nxo);
+			    nxo_stack_pop(&thread->tstack);
+#ifdef CW_THREADS
+			    nxo_l_array_lock(nxo);
+#endif
+			    break;
+			}
+			case NXOT_NAME:
+			{
+			    /* There is no way to evaluate the result of the
+			     * name lookup without growing estack, so set up
+			     * estack and recurse. */
+			    tnxo = nxo_stack_push(&thread->estack);
+			    nxo_dup(tnxo, el);
+#ifdef CW_THREADS
+			    nxo_l_array_unlock(nxo);
+#endif
+			    nxo_thread_loop(a_nxo);
+#ifdef CW_THREADS
+			    nxo_l_array_lock(nxo);
+#endif
+			    break;
+			}
+			case NXOT_NULL:
+			{
+			    /* Do nothing. */
+			    break;
+			}
+			case NXOT_OPERATOR:
+			{
+#ifdef CW_THREADS
+			    nxo_l_array_unlock(nxo);
+#endif
+			    nxo_operator_f(el)(a_nxo);
+#ifdef CW_THREADS
+			    nxo_l_array_lock(nxo);
+#endif
+			    break;
+			}
+			case NXOT_STRING:
+			{
+			    cw_nxo_t *string;
+			    cw_nxo_threadp_t threadp;
+
+			    /* Use the string as a source of code. */
+			    string = nxo_stack_push(&thread->tstack);
+			    nxo_dup(string, el);
+#ifdef CW_THREADS
+			    nxo_l_array_unlock(nxo);
+#endif
+			    nxo_threadp_new(&threadp);
+#ifdef CW_THREADS
+			    nxo_string_lock(string);
+#endif
+			    nxo_thread_interpret(a_nxo, &threadp,
+						 nxo_string_get(string),
+						 nxo_string_len_get(string));
+#ifdef CW_THREADS
+			    nxo_string_unlock(string);
+#endif
+			    nxo_thread_flush(a_nxo, &threadp);
+			    nxo_threadp_delete(&threadp, a_nxo);
+#ifdef CW_THREADS
+			    nxo_l_array_lock(nxo);
+#endif
+			    nxo_stack_pop(&thread->tstack);
+			    break;
+			}
+			default:
+			{
+			    cw_not_reached();
+			}
+		    }
+		    cw_assert(nxo_stack_count(&thread->tstack) == tdepth);
+		}
+
+		/* Set the index back to 0 now that we're not executing an array
+		 * any more. */
+		nxo_integer_set(inxo, 0);
+
+		/* If recursion is possible and likely, make tail recursion safe
+		 * by replacing the array with its last element before executing
+		 * the last element. */
+		el = nxo_l_array_el_get(nxo, i);
+		attr = nxo_attr_get(el);
+		if ((attr == NXOA_LITERAL)
+		    || (nxo_type_get(el) == NXOT_ARRAY
+			&& attr == NXOA_EXECUTABLE))
+		{
+		    /* Always push literal objects and nested executable (not
+		     * evaluatable) arrays onto the operand stack. */
+		    tnxo = nxo_stack_push(&thread->ostack);
+		    nxo_dup(tnxo, el);
+#ifdef CW_THREADS
+		    nxo_l_array_unlock(nxo);
+#endif
+		    nxo_stack_pop(&thread->estack);
+		}
+		else
+		{
+		    /* Possible recursion. */
+		    tnxo = nxo_stack_push(&thread->tstack);
+		    nxo_dup(tnxo, el);
+#ifdef CW_THREADS
+		    nxo_l_array_unlock(nxo);
+#endif
+		    nxo_dup(nxo, tnxo);
+		    nxo_stack_pop(&thread->tstack);
+		    goto RESTART;
+		}
+		break;
+	    }
 	    case NXOT_BOOLEAN:
 #ifdef CW_THREADS
 	    case NXOT_CONDITION:
@@ -596,155 +837,6 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 		 * isn't literal. */
 		tnxo = nxo_stack_push(&thread->ostack);
 		nxo_dup(tnxo, nxo);
-		nxo_stack_pop(&thread->estack);
-		break;
-	    }
-	    case NXOT_NULL:
-	    {
-		/* Do nothing. */
-		nxo_stack_pop(&thread->estack);
-		break;
-	    }
-	    case NXOT_ARRAY:
-	    {
-		cw_uint32_t i, len;
-		cw_nxo_t *el;
-		cw_nxoa_t attr;
-
-		len = nxo_array_len_get(nxo);
-		if (len == 0)
-		{
-		    nxo_stack_pop(&thread->estack);
-		    break;
-		}
-
-		/* Iterate through the array and execute each element in turn.
-		 * The generic algorithm is simply to push an element onto
-		 * estack and recurse, but the overhead of the pushing,
-		 * recursion, and popping is excessive for the common cases of a
-		 * simple object or operator.  Therefore, check for the most
-		 * common simple cases and handle them specially. */
-		el = nxo_stack_push(&thread->tstack);
-		for (i = 0; i < len - 1; i++)
-		{
-		    nxo_l_array_el_get(nxo, i, el);
-		    attr = nxo_attr_get(el);
-		    if (attr == NXOA_LITERAL)
-		    {
-			/* Always push literal objects onto the operand
-			 * stack. */
-			tnxo = nxo_stack_push(&thread->ostack);
-			nxo_dup(tnxo, el);
-			continue;
-		    }
-
-		    /* Set the execution index. */
-		    nxo_integer_set(inxo, i);
-
-		    switch (nxo_type_get(el))
-		    {
-			case NXOT_ARRAY:
-			{
-			    /* Only execute nested arrays that have the
-			     * evaluatable attribute. */
-			    if (attr == NXOA_EVALUATABLE)
-			    {
-				tnxo = nxo_stack_push(&thread->estack);
-				nxo_dup(tnxo, el);
-				nxo_thread_loop(a_nxo);
-			    }
-			    else
-			    {
-				tnxo = nxo_stack_push(&thread->ostack);
-				nxo_dup(tnxo, el);
-			    }
-			    break;
-			}
-			case NXOT_OPERATOR:
-			{
-			    nxo_operator_f(el)(a_nxo);
-			    break;
-			}
-			default:
-			{
-			    /* Not a simple common case, so use the generic
-			     * algorithm. */
-			    tnxo = nxo_stack_push(&thread->estack);
-			    nxo_dup(tnxo, el);
-			    nxo_thread_loop(a_nxo);
-			}
-		    }
-		    cw_assert(nxo_stack_count(&thread->tstack) == tdepth + 1);
-		}
-
-		/* Set the index back to 0 now that we're not executing an array
-		 * any more. */
-		nxo_integer_set(inxo, 0);
-
-		/* If recursion is possible and likely, make tail recursion safe
-		 * by replacing the array with its last element before executing
-		 * the last element. */
-		nxo_l_array_el_get(nxo, i, el);
-		attr = nxo_attr_get(el);
-		if ((attr == NXOA_LITERAL)
-		    || (nxo_type_get(el) == NXOT_ARRAY
-			&& attr == NXOA_EXECUTABLE))
-		{
-		    /* Always push literal objects and nested executable (not
-		     * evaluatable) arrays onto the operand stack. */
-		    tnxo = nxo_stack_push(&thread->ostack);
-		    nxo_dup(tnxo, el);
-		    nxo_stack_pop(&thread->estack);
-		}
-		else
-		{
-		    /* Possible recursion. */
-		    nxo_dup(nxo, el);
-		}
-		nxo_stack_pop(&thread->tstack);
-		break;
-	    }
-	    case NXOT_STRING:
-	    {
-		cw_nxo_threadp_t threadp;
-
-		/* Use the string as a source of code. */
-		nxo_threadp_new(&threadp);
-#ifdef CW_THREADS
-		nxo_string_lock(nxo);
-#endif
-		nxo_thread_interpret(a_nxo, &threadp, nxo_string_get(nxo),
-				     nxo_string_len_get(nxo));
-#ifdef CW_THREADS
-		nxo_string_unlock(nxo);
-#endif
-		nxo_thread_flush(a_nxo, &threadp);
-		nxo_threadp_delete(&threadp, a_nxo);
-		nxo_stack_pop(&thread->estack);
-
-		break;
-	    }
-	    case NXOT_NAME:
-	    {
-		cw_nxo_t *name;
-
-		/* Search for a value associated with the name in the dictionary
-		 * stack, and put it on the execution stack, in preparation for
-		 * the next iteration through the execution loop.  Thus, nested
-		 * name lookups work correctly. */
-		name = nxo_stack_push(&thread->tstack);
-		nxo_dup(name, nxo);
-		if (nxo_thread_dstack_search(a_nxo, name, nxo))
-		{
-		    nxo_thread_nerror(a_nxo, NXN_undefined);
-		    nxo_stack_pop(&thread->estack);
-		}
-		nxo_stack_pop(&thread->tstack);
-		break;
-	    }
-	    case NXOT_OPERATOR:
-	    {
-		nxo_operator_f(nxo)(a_nxo);
 		nxo_stack_pop(&thread->estack);
 		break;
 	    }
@@ -775,6 +867,55 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 	    {
 		nxo_hook_eval(nxo, a_nxo);
 
+		nxo_stack_pop(&thread->estack);
+		break;
+	    }
+	    case NXOT_NAME:
+	    {
+		cw_nxo_t *name;
+
+		/* Search for a value associated with the name in the dictionary
+		 * stack, and put it on the execution stack, in preparation for
+		 * restarting the enclosing switch statement.  Thus, nested name
+		 * lookups work correctly. */
+		name = nxo_stack_push(&thread->tstack);
+		nxo_dup(name, nxo);
+		if (nxo_thread_dstack_search(a_nxo, name, nxo))
+		{
+		    nxo_thread_nerror(a_nxo, NXN_undefined);
+		    nxo_stack_pop(&thread->estack);
+		}
+		nxo_stack_pop(&thread->tstack);
+		goto RESTART;
+	    }
+	    case NXOT_NULL:
+	    {
+		/* Do nothing. */
+		nxo_stack_pop(&thread->estack);
+		break;
+	    }
+	    case NXOT_OPERATOR:
+	    {
+		nxo_operator_f(nxo)(a_nxo);
+		nxo_stack_pop(&thread->estack);
+		break;
+	    }
+	    case NXOT_STRING:
+	    {
+		cw_nxo_threadp_t threadp;
+
+		/* Use the string as a source of code. */
+		nxo_threadp_new(&threadp);
+#ifdef CW_THREADS
+		nxo_string_lock(nxo);
+#endif
+		nxo_thread_interpret(a_nxo, &threadp, nxo_string_get(nxo),
+				     nxo_string_len_get(nxo));
+#ifdef CW_THREADS
+		nxo_string_unlock(nxo);
+#endif
+		nxo_thread_flush(a_nxo, &threadp);
+		nxo_threadp_delete(&threadp, a_nxo);
 		nxo_stack_pop(&thread->estack);
 		break;
 	    }
