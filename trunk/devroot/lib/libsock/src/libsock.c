@@ -207,6 +207,7 @@ sockb_get_spare_bufel(void)
   bufc_set_buffer(bufc,
 		  pezz_get(&g_sockb->buffer_pool),
 		  pezz_get_buffer_size(&g_sockb->buffer_pool),
+		  TRUE,
 		  pezz_put,
 		  (void *) &g_sockb->buffer_pool);
   bufel_set_bufc(retval, bufc);

@@ -250,7 +250,7 @@ main(int argc, char ** argv)
     log_printf(cw_g_log, "pid: %d\n", getpid());
   }
 
-  sockb_init(4096, 2048);
+  sockb_init(2048, 4096);
   
   socks = socks_new();
   if (TRUE == socks_listen(socks, &opt_port))
@@ -265,8 +265,14 @@ main(int argc, char ** argv)
   for (conn_num = 0; should_quit == FALSE; conn_num++)
   {
     conn = _cw_malloc(sizeof(connection_t));
-    bzero(conn, sizeof(conn));
-    sock_new(&conn->client_sock, 16384);
+    if (NULL == conn)
+    {
+      log_printf(cw_g_log, "malloc() error\n");
+      exit(1);
+    }
+    
+    bzero(conn, sizeof(connection_t));
+    sock_new(&conn->client_sock, 32768);
     
     if (NULL == socks_accept_block(socks, &conn->client_sock)
 	|| should_quit)
@@ -372,11 +378,21 @@ get_log_str(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str)
   {
     /* Allocate for the first time. */
     retval = _cw_malloc(str_len);
+    if (NULL == retval)
+    {
+      log_printf(cw_g_log, "malloc() error\n");
+      exit(1);
+    }
   }
   else
   {
     /* Re-use a_str. */
     retval = _cw_realloc(a_str, str_len);
+    if (NULL == retval)
+    {
+      log_printf(cw_g_log, "malloc() error\n");
+      exit(1);
+    }
   }
   /* Clear the string. */
   retval[0] = '\0';
@@ -876,7 +892,7 @@ handle_client_send(void * a_arg)
 	     conn->rhost, conn->rport);
       
   /* Connect to the remote end. */
-  sock_new(&conn->remote_sock, 16384);
+  sock_new(&conn->remote_sock, 32768);
   if (TRUE == sock_connect(&conn->remote_sock, conn->rhost, conn->rport))
   {
     log_eprintf(conn->log, __FILE__, __LINE__, __FUNCTION__,
