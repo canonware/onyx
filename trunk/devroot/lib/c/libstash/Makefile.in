@@ -9,8 +9,8 @@
 #
 # $Source$
 # $Author: jasone $
-# Current revision: $Revision: 217 $
-# Last modified: $Date: 1998-09-11 00:23:22 -0700 (Fri, 11 Sep 1998) $
+# Current revision: $Revision: 220 $
+# Last modified: $Date: 1998-09-14 17:34:32 -0700 (Mon, 14 Sep 1998) $
 #
 # Description: Master Makefile for libstash.
 #              
@@ -38,7 +38,7 @@ SRCS := bhp.c br.c brblk.c brbs.c brmap.c buf.c dbg.c \
 # Simple tests.  Output is diff'ed with the expected (.exp file) output.
 CTESTS := c19980411a.c c19980412a.c c19980419a.c c19980430a.c \
 	c19980627a.c c19980630a.c c19980907a.c c19980907b.c c19980907c.c \
-	c19980908a.c c19980908c.c
+	c19980908a.c c19980908c.c c19980914a.c
 
 # Perl scripts that drive the BTESTS.
 PTESTS := p19980828a.pl.in
