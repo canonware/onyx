@@ -78,6 +78,7 @@ dbg_unregister(cw_dbg_t * a_dbg, const char * a_flag)
   }
 }
 
+#ifdef _LIBSTASH_DBG
 cw_bool_t
 dbg_is_registered(cw_dbg_t * a_dbg, const char * a_flag)
 {
@@ -99,3 +100,4 @@ dbg_is_registered(cw_dbg_t * a_dbg, const char * a_flag)
   
   return retval;
 }
+#endif

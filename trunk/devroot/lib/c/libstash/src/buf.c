@@ -752,7 +752,9 @@ buf_prepend_bufel(cw_buf_t * a_buf, cw_bufel_t * a_bufel)
     memcpy(&a_buf->array[a_buf->array_start].bufel,
 	   a_bufel,
 	   sizeof(cw_bufel_t));
+    /* Make sure that we don't try to free this bufel during destruction. */
     a_buf->array[a_buf->array_start].bufel.is_malloced = FALSE;
+    a_buf->array[a_buf->array_start].bufel.dealloc_func = NULL;
 
     a_buf->size += bufel_get_valid_data_size(a_bufel);
     a_buf->is_cumulative_valid = FALSE;
@@ -828,10 +830,14 @@ buf_append_bufel(cw_buf_t * a_buf, cw_bufel_t * a_bufel)
     memcpy(&a_buf->array[a_buf->array_end].bufel,
 	   a_bufel,
 	   sizeof(cw_bufel_t));
+
     a_buf->array_num_valid++;
     a_buf->size += bufel_get_valid_data_size(a_bufel);
     a_buf->array[a_buf->array_end].cumulative_size = a_buf->size;
+
+    /* Make sure that we don't try to free this bufel during destruction. */
     a_buf->array[a_buf->array_end].bufel.is_malloced = FALSE;
+    a_buf->array[a_buf->array_end].bufel.dealloc_func = NULL;
 	      
     a_buf->array_end = ((a_buf->array_end + 1) % a_buf->array_size);
 
@@ -1565,6 +1571,7 @@ void
 bufel_delete(cw_bufel_t * a_bufel)
 {
   _cw_check_ptr(a_bufel);
+  _cw_assert(a_bufel->magic == _CW_BUFEL_MAGIC);
 
   if (a_bufel->bufc != NULL)
   {
@@ -1838,6 +1845,7 @@ bufc_delete(cw_bufc_t * a_bufc)
 {
   _cw_check_ptr(a_bufc);
   _cw_assert(a_bufc->magic == _CW_BUFC_MAGIC);
+  _cw_assert(a_bufc->ref_count == 0);
   
 #ifdef _CW_REENTRANT
   mtx_delete(&a_bufc->lock);
@@ -1860,6 +1868,10 @@ bufc_dump(cw_bufc_t * a_bufc, const char * a_prefix)
   _cw_check_ptr(a_bufc);
   _cw_check_ptr(a_prefix);
 
+#ifdef _CW_REENTRANT
+  mtx_lock(&a_bufc->lock);
+#endif
+  
   log_printf(cw_g_log,
 	     "%s| bufc_dump()\n",
 	     a_prefix);
@@ -1883,6 +1895,9 @@ bufc_dump(cw_bufc_t * a_bufc, const char * a_prefix)
   log_printf(cw_g_log,
 	     "%s\\--> buf : 0x%x\n",
 	     a_prefix, a_bufc->buf);
+#ifdef _CW_REENTRANT
+  mtx_unlock(&a_bufc->lock);
+#endif
 }
 
 static cw_uint32_t

@@ -69,6 +69,10 @@ dbg_unregister(cw_dbg_t * a_dbg, const char * a_flag);
  * Return TRUE if a_flag is registered.
  *
  ****************************************************************************/
-#define dbg_is_registered _CW_NS_LIBSTASH(dbg_is_registered)
+#ifdef _LIBSTASH_DBG
+#  define dbg_is_registered _CW_NS_LIBSTASH(dbg_is_registered)
 cw_bool_t
 dbg_is_registered(cw_dbg_t * a_dbg, const char * a_flag);
+#else
+#  define dbg_is_registered(a, b) (FALSE)
+#endif

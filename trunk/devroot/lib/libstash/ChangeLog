@@ -1,3 +1,11 @@
+1999-02-27  Jason Evans  <jasone@canonware.com>
+
+	* include/libstash/dbg.h (dbg_is_registered): Compile to (FALSE)
+	for non-debug libraries.
+
+	* include/libstash/buf_p.h (_LIBSTASH_BUF_ARRAY_MIN_SIZE): Set to
+	a more reasonable value (64).
+
 1999-02-26  Jason Evans  <jasone@canonware.com>
 
 	* src/buf.c : Complete testing.

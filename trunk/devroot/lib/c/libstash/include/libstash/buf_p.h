@@ -15,8 +15,7 @@
  ****************************************************************************/
 
 /* Minimum size for buf's internal bufel array. */
-/* XXX Set to something larger than 2 after debugged. */
-#define _LIBSTASH_BUF_ARRAY_MIN_SIZE 2
+#define _LIBSTASH_BUF_ARRAY_MIN_SIZE 64
 
 static void
 buf_p_rebuild_cumulative_index(cw_buf_t * a_buf);
