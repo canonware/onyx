@@ -388,17 +388,16 @@ ext_detachable_get(const cw_ext_t *a_ext);
 void
 ext_detachable_set(cw_ext_t *a_ext, cw_bool_t a_detachable);
 
-/* Create the stack of extents that overlap a_mkr, which can then be iterated on
- * by ext_stack_down_get().  The stack is in f-order, starting at the top of the
- * stack. */
+/* Create the stack of extents that overlap the character either before or after
+ * a_mkr, which can then be iterated on by ext_stack_down_get().  The stack is
+ * in f-order, starting at the top of the stack. */
 cw_uint32_t
-ext_stack_init(const cw_mkr_t *a_mkr);
+ext_stack_init(const cw_mkr_t *a_mkr, cw_bool_t a_after);
 
-/* Get the extent in the stack that is below a_ext.  If a_ext is NULL, the top
- * element is returned. */
-/* XXX This should be inlined. */
+#ifndef CW_USE_INLINES
 cw_ext_t *
 ext_stack_down_get(cw_ext_t *a_ext);
+#endif
 
 void
 ext_frag_get(const cw_mkr_t *a_mkr, cw_mkr_t *r_beg, cw_mkr_t *r_end);
@@ -412,4 +411,27 @@ ext_dump(cw_ext_t *a_ext, const char *a_beg, const char *a_mid,
 #ifdef CW_BUF_VALIDATE
 void
 ext_validate(cw_ext_t *a_ext);
+#endif
+
+#if (defined(CW_USE_INLINES) || defined(CW_BUF_C_))
+/* Get the extent in the stack that is below a_ext.  If a_ext is NULL, the top
+ * element is returned. */
+CW_INLINE cw_ext_t *
+ext_stack_down_get(cw_ext_t *a_ext)
+{
+    cw_ext_t *retval;
+
+    if (a_ext != NULL)
+    {
+	cw_dassert(a_ext->magic == CW_EXT_MAGIC);
+
+	retval = ql_next(&a_ext->beg.bufp->buf->elist, a_ext, elink);
+    }
+    else
+    {
+	retval = ql_first(&a_ext->beg.bufp->buf->elist);
+    }
+
+    return retval;
+}
 #endif

@@ -261,6 +261,9 @@
  *
  ******************************************************************************/
 
+/* Compile non-inlined functions if not using inlines. */
+#define CW_BUF_C_
+
 #include "../include/modslate.h"
 #ifndef HAVE_ASPRINTF
 #include "../../../lib/libonyx/src/asprintf.c"
@@ -4820,21 +4823,17 @@ ext_detachable_set(cw_ext_t *a_ext, cw_bool_t a_detachable)
     a_ext->detachable = a_detachable;
 }
 
-/* Create the stack of extents that overlap a_mkr, which can then be iterated on
- * by ext_stack_down_get().  The stack is in f-order, starting at the top of the
- * stack. */
-/* XXX This isn't adequate, since it is impossible to get the extent stack for a
- * fragment of length 1.  Instead of getting an extent stack at a bpos, we need
- * to get an extent stack at a cpos.  This can be achieved by adding a boolean
- * argument to this function that specifies whether to use the character
- * before/after a_mkr. */
+/* Create the stack of extents that overlap the character either before or after
+ * a_mkr, which can then be iterated on by ext_stack_down_get().  The stack is
+ * in f-order, starting at the top of the stack. */
 cw_uint32_t
-ext_stack_init(const cw_mkr_t *a_mkr)
+ext_stack_init(const cw_mkr_t *a_mkr, cw_bool_t a_after)
 {
     cw_uint32_t retval = 0;
     cw_ext_t *ext, *eext, key;
     cw_buf_t *buf;
     cw_bufp_t *bufp;
+    cw_mkr_t tmkr;
 
     cw_check_ptr(a_mkr);
     cw_dassert(a_mkr->magic == CW_MKR_MAGIC);
@@ -4846,11 +4845,24 @@ ext_stack_init(const cw_mkr_t *a_mkr)
     ql_new(&buf->elist);
 
     /* Fake up a key for extent searching. */
-    memcpy(&key.beg, a_mkr, sizeof(cw_mkr_t));
-    memcpy(&key.end, a_mkr, sizeof(cw_mkr_t));
+    mkr_p_new(&tmkr, buf, MKRO_EITHER);
+    mkr_dup(&tmkr, a_mkr);
+    if (a_after == FALSE)
+    {
+	mkr_seek(&tmkr, -1LL, BUFW_REL);
+	memcpy(&key.beg, &tmkr, sizeof(cw_mkr_t));
+	memcpy(&key.end, a_mkr, sizeof(cw_mkr_t));
+    }
+    else
+    {
+	mkr_seek(&tmkr, 1LL, BUFW_REL);
+	memcpy(&key.beg, a_mkr, sizeof(cw_mkr_t));
+	memcpy(&key.end, &tmkr, sizeof(cw_mkr_t));
+    }
 #ifdef CW_DBG
     key.magic = CW_EXT_MAGIC;
 #endif
+    mkr_delete(&tmkr);
 
     /* Find the first extent in f-order. */
     rb_nsearch(&buf->ftree, &key, ext_p_fcomp, cw_ext_t, fnode, ext);
@@ -4904,27 +4916,6 @@ ext_stack_init(const cw_mkr_t *a_mkr)
 	    }
 	    retval++;
 	}
-    }
-
-    return retval;
-}
-
-/* Get the extent in the stack that is below a_ext.  If a_ext is NULL, the top
- * element is returned. */
-cw_ext_t *
-ext_stack_down_get(cw_ext_t *a_ext)
-{
-    cw_ext_t *retval;
-
-    if (a_ext != NULL)
-    {
-	cw_dassert(a_ext->magic == CW_EXT_MAGIC);
-
-	retval = ql_next(&a_ext->beg.bufp->buf->elist, a_ext, elink);
-    }
-    else
-    {
-	retval = ql_first(&a_ext->beg.bufp->buf->elist);
     }
 
     return retval;
