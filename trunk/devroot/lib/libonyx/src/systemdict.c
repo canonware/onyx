@@ -1206,6 +1206,8 @@ systemdict_bindsocket(cw_nxo_t *a_thread)
     }
     else
     {
+	/* Let the OS choose a port. */
+	sockport = 0;
 	npop = 2;
     }
     NXO_STACK_DOWN_GET(sock, ostack, a_thread, addr);
@@ -4910,13 +4912,13 @@ systemdict_listen(cw_nxo_t *a_thread)
     {
 	backlog = (int) nxo_integer_get(sock);
 	NXO_STACK_DOWN_GET(sock, ostack, a_thread, sock);
-	npop = 3;
+	npop = 2;
     }
     else
     {
 	/* Maximum backlog. */
 	backlog = -1;
-	npop = 2;
+	npop = 1;
     }
     if (nxo_type_get(sock) != NXOT_FILE)
     {
