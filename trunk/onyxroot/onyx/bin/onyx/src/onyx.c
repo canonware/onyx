@@ -251,7 +251,6 @@ main(int argc, char **argv, char **envp)
 	}
 	else
 	{
-	    
 	    retval = batch_run(argc, argv, opt_version, opt_expression);
 	}
 
@@ -566,7 +565,7 @@ file_setup(cw_nxo_t *a_thread, const char *a_filename)
     src_arg->buffer = NULL;
     src_arg->buffer_size = 0;
     src_arg->buffer_count = 0;
-	
+
     nxo_file_synthetic(file, nx_read, NULL, NULL, nx_read_shutdown,
 		       (void *) src_arg);
 
