@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 173 $
- * $Date: 1998-08-26 12:34:42 -0700 (Wed, 26 Aug 1998) $
+ * $Revision: 174 $
+ * $Date: 1998-08-26 16:00:21 -0700 (Wed, 26 Aug 1998) $
  *
  * <<< Description >>>
  *
@@ -176,9 +176,8 @@ matrix_rebuild(cw_matrix_t * a_matrix_o)
       for (i = 0; i < a_matrix_o->x_size; i++)
       {
 	a_matrix_o->grid[a_matrix_o->x_size * j + i]
-	  = old_grid[(a_matrix_o->x_index[i]
-		      * a_matrix_o->grid_x_size)
-		    + a_matrix_o->y_index[j]];
+	  = old_grid[(a_matrix_o->grid_x_size * a_matrix_o->y_index[j])
+		    + a_matrix_o->x_index[i]];
       }
     }
 
