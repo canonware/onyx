@@ -87,8 +87,8 @@ struct {								\
 	ql_remove((a_head), t, a_field);				\
 } while (0)
 
-#define ql_foreach(var, a_head, a_field)				\
-	qr_foreach((var), ql_first(a_head), a_field)
+#define ql_foreach(a_var, a_head, a_field)				\
+	qr_foreach((a_var), ql_first(a_head), a_field)
 
-#define ql_reverse_foreach(var, a_head, a_field)			\
-	qr_reverse_foreach((var), ql_first(a_head), a_field)
+#define ql_reverse_foreach(a_var, a_head, a_field)			\
+	qr_reverse_foreach((a_var), ql_first(a_head), a_field)
