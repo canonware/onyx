@@ -266,9 +266,6 @@ static cw_sint32_t
 mkr_p_comp(cw_mkr_t *a_a, cw_mkr_t *a_b);
 static cw_sint32_t
 mkr_p_line_comp(cw_mkr_t *a_a, cw_mkr_t *a_b);
-static cw_uint32_t
-mkr_p_raw_insert(cw_bufp_t *a_bufp, const cw_bufv_t *a_bufv,
-		 cw_uint32_t a_bufvcnt, cw_uint32_t a_count);
 
 /* bufv. */
 
@@ -560,11 +557,41 @@ bufp_p_new(cw_buf_t *a_buf)
     rb_tree_new(&retval->mtree, mnode);
     ql_new(&retval->mlist);
 
+    /* Initial bufp tree and list linkage. */
+    rb_node_new(&a_buf->ptree, retval, pnode);
+    ql_elm_new(retval, plink);
+
 #ifdef CW_DBG
     retval->magic = CW_BUFP_MAGIC;
 #endif
 
     return retval;
+}
+
+/* Insert data into a single bufp, without moving the gap.  This function
+ * assumes that the bufp internals are consistent, and that the data will
+ * fit. */
+/* XXX CW_INLINE? */
+static cw_uint32_t
+bufp_p_simple_insert(cw_bufp_t *a_bufp, const cw_bufv_t *a_bufv,
+		 cw_uint32_t a_bufvcnt, cw_uint32_t a_count)
+{
+    cw_uint32_t nlines;
+    cw_bufv_t bufv;
+
+    /* Insert. */
+    bufv.data = &a_bufp->b[a_bufp->gap_off];
+    bufv.len = CW_BUFP_SIZE - a_bufp->len;
+    nlines = bufv_p_copy(&bufv, 1, a_bufv, a_bufvcnt);
+
+    /* Shrink the gap. */
+    a_bufp->gap_off += a_count;
+
+    /* Adjust the buf's length and line count. */
+    a_bufp->len += a_count;
+    a_bufp->nlines += nlines;
+
+    return nlines;
 }
 
 static void
@@ -824,7 +851,7 @@ buf_p_bufp_cur_set(cw_buf_t *a_buf, cw_bufp_t *a_bufp)
 /* This function inserts a_bufv into a series of contiguous bufp's.  The first
  * and last bufp's must have their gaps moved to the end and begin,
  * respectively, and the intermediate bufp's must be empty.  This allows
- * mkr_p_raw_insert() to be used. */
+ * bufp_p_simple_insert() to be used. */
 /* XXX pline isn't adjusted. */
 static void
 buf_p_bufv_insert(cw_buf_t *a_buf, cw_bufp_t *a_bufp, cw_bufp_t *a_pastp,
@@ -893,7 +920,7 @@ buf_p_bufv_insert(cw_buf_t *a_buf, cw_bufp_t *a_bufp, cw_bufp_t *a_pastp,
 	    vremain.data = &vremain.data[vsplit.len];
 	    vremain.len -= vsplit.len;
 
-	    mkr_p_raw_insert(bufp, &vsplit, 1, vsplit.len);
+	    bufp_p_simple_insert(bufp, &vsplit, 1, vsplit.len);
 
 	    if (CW_BUFP_SIZE - bufp->len == 0)
 	    {
@@ -915,7 +942,7 @@ buf_p_bufv_insert(cw_buf_t *a_buf, cw_bufp_t *a_bufp, cw_bufp_t *a_pastp,
 	}
 	if (cnt != 0)
 	{
-	    mkr_p_raw_insert(bufp, &a_bufv[v], i - v, cnt);
+	    bufp_p_simple_insert(bufp, &a_bufv[v], i - v, cnt);
 	    v = i;
 	}
 
@@ -927,7 +954,7 @@ buf_p_bufv_insert(cw_buf_t *a_buf, cw_bufp_t *a_bufp, cw_bufp_t *a_pastp,
 	    vremain.data = &vsplit.data[vsplit.len];
 	    vremain.len = a_bufv[v].len - vsplit.len;
 
-	    mkr_p_raw_insert(bufp, &vsplit, 1, vsplit.len);
+	    bufp_p_simple_insert(bufp, &vsplit, 1, vsplit.len);
 	}
     }
 }
@@ -943,7 +970,7 @@ buf_p_bufp_insert(cw_buf_t *a_buf, cw_bufp_t *a_bufp)
 
     /* Insert into list. */
     rb_next(&a_buf->ptree, a_bufp, cw_bufp_t, pnode, next);
-    if (next != NULL)
+    if (next != rb_tree_nil(&a_buf->ptree))
     {
 	ql_before_insert(&a_buf->plist, next, a_bufp, plink);
     }
@@ -998,7 +1025,7 @@ buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc,
     /* Initialize bufp tree and list. */
     rb_tree_new(&retval->ptree, pnode);
     ql_new(&retval->plist);
-    
+
     /* Initialize and insert initial bufp. */
     bufp = bufp_p_new(retval);
     bufp->bob_relative = TRUE;
@@ -1388,7 +1415,7 @@ mkr_p_insert(cw_mkr_t *a_mkr)
     /* Insert into list.  Make sure that the tree and list orders are the same.
      */
     rb_next(&bufp->mtree, a_mkr, cw_mkr_t, mnode, next);
-    if (next != NULL)
+    if (next != rb_tree_nil(&bufp->mtree))
     {
 	ql_before_insert(&bufp->mlist, next, a_mkr, mlink);
     }
@@ -1405,33 +1432,6 @@ mkr_p_remove(cw_mkr_t *a_mkr)
 
     rb_remove(&bufp->mtree, a_mkr, cw_mkr_t, mnode);
     ql_remove(&bufp->mlist, a_mkr, mlink);
-}
-
-/* Insert data into a single bufp, without moving the gap.  This function
- * assumes that the bufp internals are consistent, and that the data will
- * fit. */
-/* XXX Why is this called mkr_*()?  Shouldn't it be bufp_*()? */
-/* XXX CW_INLINE? */
-static cw_uint32_t
-mkr_p_raw_insert(cw_bufp_t *a_bufp, const cw_bufv_t *a_bufv,
-		 cw_uint32_t a_bufvcnt, cw_uint32_t a_count)
-{
-    cw_uint32_t nlines;
-    cw_bufv_t bufv;
-
-    /* Insert. */
-    bufv.data = &a_bufp->b[a_bufp->gap_off];
-    bufv.len = CW_BUFP_SIZE - a_bufp->len;
-    nlines = bufv_p_copy(&bufv, 1, a_bufv, a_bufvcnt);
-
-    /* Shrink the gap. */
-    a_bufp->gap_off += a_count;
-
-    /* Adjust the buf's length and line count. */
-    a_bufp->len += a_count;
-    a_bufp->nlines += nlines;
-
-    return nlines;
 }
 
 /* Insert data into a single bufp.  This function assumes that the bufp
@@ -1457,7 +1457,7 @@ mkr_p_simple_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
     bufp_p_gap_move(bufp, a_mkr->ppos);
 
     /* Insert. */
-    mkr_p_raw_insert(bufp, a_bufv, a_bufvcnt, a_count);
+    bufp_p_simple_insert(bufp, a_bufv, a_bufvcnt, a_count);
 
     /* Find the first mkr that is at the same ppos as a_mkr.  This may be
      * a_mkr. */
@@ -1562,7 +1562,7 @@ mkr_p_before_slide_insert(cw_mkr_t *a_mkr, cw_bool_t a_after,
 
     bufv.data = &bufp->b[0];
     bufv.len = nmove;
-    nmovelines = mkr_p_raw_insert(a_prevp, &bufv, 1, nmove);
+    nmovelines = bufp_p_simple_insert(a_prevp, &bufv, 1, nmove);
 
     /* Move markers that belong with the data copied to a_prevp. */
     for (mkr = ql_first(&bufp->mlist);
@@ -1641,7 +1641,7 @@ mkr_p_after_slide_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, cw_bufp_t *a_nextp,
 
     bufv.data = &bufp->b[CW_BUFP_SIZE - nmove];
     bufv.len = nmove;
-    nmovelines = mkr_p_raw_insert(a_nextp, &bufv, 1, nmove);
+    nmovelines = bufp_p_simple_insert(a_nextp, &bufv, 1, nmove);
 
     /* Move markers that belong with the data copied to a_nextp. */
     for (mkr = ql_last(&bufp->mlist, mlink);
