@@ -1,3 +1,15 @@
+1999-09-23  Jason Evans  <jasone@canonware.com>
+
+	* include/libstash/mq.h (mq_timedget): Document the new meaning of
+	a_timeout due to the change in meaning to cnd_timedwait()'s
+	a_timeout parameter meaning.
+
+	* src/thread.c (cnd_timedwait, sem_timedwait): Convert a_timeout
+	parameter to be interpreted as an absolute time interval, rather
+	than absolute time since the epoch.  This keeps the user from
+	having to call gettimeofday() or time() in order to construct a
+	timeout for every call.
+
 1999-09-20  Jason Evans  <jasone@canonware.com>
 
 	* : Add the arena class (contributed by Chris Toshok

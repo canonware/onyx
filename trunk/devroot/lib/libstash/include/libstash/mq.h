@@ -97,7 +97,7 @@ mq_tryget(cw_mq_t * a_mq);
  *
  * a_mq : Pointer to a mq.
  *
- * a_time : Timeout.
+ * a_timeout : Timeout, specified as a time interval from "now".
  *
  * <<< Output(s) >>>
  *
@@ -114,7 +114,7 @@ mq_tryget(cw_mq_t * a_mq);
  ****************************************************************************/
 #ifdef _CW_REENTRANT
 void *
-mq_timedget(cw_mq_t * a_mq, struct timespec * a_time);
+mq_timedget(cw_mq_t * a_mq, struct timespec * a_timeout);
 #endif
 
 /****************************************************************************

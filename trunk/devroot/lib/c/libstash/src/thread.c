@@ -294,15 +294,29 @@ cnd_broadcast(cw_cnd_t * a_cnd)
 
 cw_bool_t
 cnd_timedwait(cw_cnd_t * a_cnd, cw_mtx_t * a_mtx,
-	      struct timespec * a_time)
+	      struct timespec * a_timeout)
 {
   int error;
   cw_bool_t retval;
+  struct timeval now;
+  struct timespec timeout;
+  struct timezone tz;
 
   _cw_check_ptr(a_cnd);
   _cw_check_ptr(a_mtx);
+  _cw_check_ptr(a_timeout);
 
-  error = pthread_cond_timedwait(&a_cnd->condition, &a_mtx->mutex, a_time);
+  /* Set timeout. */
+  bzero(&tz, sizeof(struct timezone));
+  gettimeofday(&now, &tz);
+  timeout.tv_nsec = now.tv_usec * 1000 + a_timeout->tv_nsec;
+  timeout.tv_sec = (now.tv_sec + a_timeout->tv_sec
+		    + (timeout.tv_nsec / 1000000000)); /* Carry if nanoseconds
+							* overflowed. */
+  /* Chop off the number of nanoseconds to be less than one second. */
+  timeout.tv_nsec %= 1000000000;
+  
+  error = pthread_cond_timedwait(&a_cnd->condition, &a_mtx->mutex, &timeout);
   if (error == 0)
   {
     retval = FALSE;
@@ -417,19 +431,19 @@ sem_wait(cw_sem_t * a_sem)
 }
 
 cw_bool_t
-sem_timedwait(cw_sem_t * a_sem, struct timespec * a_time)
+sem_timedwait(cw_sem_t * a_sem, struct timespec * a_timeout)
 {
   cw_bool_t retval;
   
   _cw_check_ptr(a_sem);
-  _cw_check_ptr(a_time);
+  _cw_check_ptr(a_timeout);
 
   mtx_lock(&a_sem->lock);
 
   if (0 >= a_sem->count)
   {
     a_sem->waiters++;
-    cnd_timedwait(&a_sem->gtzero, &a_sem->lock, a_time);
+    cnd_timedwait(&a_sem->gtzero, &a_sem->lock, a_timeout);
     a_sem->waiters--;
   }
   

@@ -52,9 +52,7 @@ main()
   cw_mtx_t mutex;
   cw_thd_t threads[_LIBSTASH_TEST_NUM_THREADS], thread;
   struct cw_foo_s foo_var;
-  struct timeval now;
   struct timespec timeout;
-  struct timezone tz;
   cw_uint32_t i;
   cw_bool_t num_waiting;
   
@@ -73,10 +71,8 @@ main()
   cnd_broadcast(&cond_a);
 
   /* Set timeout for 1 second. */
-  bzero(&tz, sizeof(struct timezone));
-  gettimeofday(&now, &tz);
-  timeout.tv_sec = now.tv_sec + 1;
-  timeout.tv_nsec = now.tv_usec * 1000;
+  timeout.tv_sec = 1;
+  timeout.tv_nsec = 0;
 
   mtx_lock(&mutex);
   _cw_assert(TRUE == cnd_timedwait(&cond_a, &mutex, &timeout));

@@ -345,7 +345,7 @@ cnd_broadcast(cw_cnd_t * a_cnd);
  *
  * a_cnd : Pointer to a cnd.
  *
- * a_time : Timeout.
+ * a_timeout : Timeout, specified as an absolute time interval.
  *
  * <<< Output(s) >>>
  *
@@ -357,7 +357,7 @@ cnd_broadcast(cw_cnd_t * a_cnd);
  *
  ****************************************************************************/
 cw_bool_t
-cnd_timedwait(cw_cnd_t * a_cnd, cw_mtx_t * a_mtx, struct timespec * a_time);
+cnd_timedwait(cw_cnd_t * a_cnd, cw_mtx_t * a_mtx, struct timespec * a_timeout);
 
 /****************************************************************************
  *
@@ -457,7 +457,7 @@ sem_wait(cw_sem_t * a_sem);
  *
  * a_sem : Pointer to a sem.
  *
- * a_time : Timeout.
+ * a_timeout : Timeout, specified as an absolute time interval.
  *
  * <<< Output(s) >>>
  *
@@ -470,7 +470,7 @@ sem_wait(cw_sem_t * a_sem);
  *
  ****************************************************************************/
 cw_bool_t
-sem_timedwait(cw_sem_t * a_sem, struct timespec * a_time);
+sem_timedwait(cw_sem_t * a_sem, struct timespec * a_timeout);
 
 /****************************************************************************
  *

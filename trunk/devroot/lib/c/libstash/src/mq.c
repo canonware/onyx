@@ -188,14 +188,14 @@ mq_get(cw_mq_t * a_mq)
 }
 
 void *
-mq_timedget(cw_mq_t * a_mq, struct timespec * a_time)
+mq_timedget(cw_mq_t * a_mq, struct timespec * a_timeout)
 {
   void * retval;
   cw_ring_t * t_ring;
   
   _cw_check_ptr(a_mq);
   _cw_assert(_LIBSTASH_MQ_MAGIC == a_mq->magic);
-  _cw_check_ptr(a_time);
+  _cw_check_ptr(a_timeout);
   
   mtx_lock(&a_mq->lock);
 
@@ -207,7 +207,7 @@ mq_timedget(cw_mq_t * a_mq, struct timespec * a_time)
 
   if (NULL == a_mq->ring)
   {
-    cnd_timedwait(&a_mq->cond, &a_mq->lock, a_time);
+    cnd_timedwait(&a_mq->cond, &a_mq->lock, a_timeout);
     if (a_mq->get_stop == TRUE)
     {
       retval = NULL;
