@@ -45,7 +45,7 @@ use Getopt::Long;
 # Add values to the %COPYRIGHT associative array as shown below to add 
 # copyright holder tag keys.  This allows substition of tags that look like:
 #
-# <Copyright = "jasone">
+# <Copyright = jasone>
 #
 $COPYRIGHT{"jasone", 0}
 = "Copyright (C) 1996-1999 Jason Evans <jasone\@canonware.com>.";
@@ -222,7 +222,7 @@ sub expand_tags
 
 	while (<$ifh>)
 	{
-	    if (/^(.*)\<Copyright([ \t]*=[ \t]*\"([A-Za-z0-9]+)\")?\>(.*)\n/)
+	    if (/^(.*)\<Copyright([ \t]*=[ \t]*([A-Za-z0-9]+))?\>(.*)\n/)
 	    {
 		$did_subst = 1;
 		if (defined($COPYRIGHT{$3, 0}))
