@@ -1,4 +1,5 @@
 #!/usr/bin/env oonyx
+# -*-mode:onyx-*-
 #
 # regress_docs <prefix> <srcdir> <clean> [<conf>...]
 
