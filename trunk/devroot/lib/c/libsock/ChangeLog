@@ -1,4 +1,4 @@
-1999-07-14  J. Owen Evans  <jasone@canonware.com>
+1999-07-14  Jason Evans  <jasone@canonware.com>
 
 	* src/sockb.c (sockb_p_entry_func): Do not NULL out the sock
 	pointer when an error causes the corresponding socket to be
@@ -41,7 +41,7 @@
 	which offers the capabilities of both removed functions, as well
 	as timeout capability.
 
-1999-05-20  J. Owen Evans  <jasone@canonware.com>
+1999-05-20  Jason Evans  <jasone@canonware.com>
 
 	* include/libsock/sockb.h : sockb_get_spare_bufel() -->
 	sockb_get_spare_bufc().
@@ -50,7 +50,7 @@
 
 	* src/sock.c (sock_connect): Add timeout parameter.
 
-1999-05-07  J. Owen Evans  <jasone@canonware.com>
+1999-05-07  Jason Evans  <jasone@canonware.com>
 
 	* src/sock.c (sock_read_block): Add timeout parameter.
 

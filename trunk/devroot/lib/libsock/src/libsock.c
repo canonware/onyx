@@ -185,7 +185,7 @@ sockb_init(cw_uint32_t a_bufel_size, cw_uint32_t a_max_spare_bufels)
       
     mq_new(&g_sockb->messages);
 
-    /* Create the lock used for protecting gethostbyaddr(). */
+    /* Create the lock used for protecting gethostbyname(). */
     mtx_new(&g_sockb->get_ip_addr_lock);
 
     /* Create a new thread to handle all of the back end socket foo. */
@@ -226,7 +226,7 @@ sockb_shutdown(void)
     }
   }
 
-  /* Delete the gethostbyaddr() protection lock. */
+  /* Delete the gethostbyname() protection lock. */
   mtx_delete(&g_sockb->get_ip_addr_lock);
   
   _cw_free(g_sockb);

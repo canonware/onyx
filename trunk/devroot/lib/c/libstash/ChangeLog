@@ -7,20 +7,18 @@
 	Add a mutex to the mem class to avoid race conditions when
 	inserting and deleting keys in the hash table.
 
-1999-07-21  J. Owen Evans  <jasone@canonware.com>
+1999-07-21  Jason Evans  <jasone@canonware.com>
 
 	* src/out.c (out_p_metric_int, out_p_render_int): Use modulus and
 	division to generate text versions of integers, rather than the
 	amazingly slow out_p_add()-based method.  This speeds up integer
 	printing by approximatly two orders of magnitude.
 
-1999-07-20  J. Owen Evans  <jasone@canonware.com>
+1999-07-20  Jason Evans  <jasone@canonware.com>
 
 	* src/out.c (spec_p_has_specifier): Return -1 if there is a '['
 	anywhere in the string, since "[[" needs interpreted as well as
 	specifiers.
-
-1999-07-20  Jason Evans  <jasone@canonware.com>
 
 	* src/res.c (res_dump): Add file mode argument to open() call.
 	This bug was introduced by the conversion from `log' to `out'.
@@ -33,11 +31,11 @@
 
 	* : Convert use of log_*() to out_*().
 
-1999-07-17  J. Owen Evans  <jasone@canonware.com>
+1999-07-17  Jason Evans  <jasone@canonware.com>
 
 	* test/c_out_a.c: Add unit tests for the out class.
 
-1999-07-16  J. Owen Evans  <jasone@canonware.com>
+1999-07-16  Jason Evans  <jasone@canonware.com>
 
 	* : Add the out (extendible printf-alike) class.
 
@@ -51,7 +49,7 @@
 	* src/bhp.c (bhp_del_min): Call bhpi_delete(), not _cw_free(),
 	when cleaning up a bhpi instance.
 
-1999-07-06  J. Owen Evans  <jasone@canonware.com>
+1999-07-06  Jason Evans  <jasone@canonware.com>
 
 	* src/bhp.c (bhp_delete): Delete the tree.
 
@@ -107,7 +105,7 @@
 	* src/buf.c (buf_{ap,pre}pend_bufc): Correctly set bufel magic.
 	This only affects the debug versions of libstash.
 
-1999-05-20  J. Owen Evans  <jasone@canonware.com>
+1999-05-20  Jason Evans  <jasone@canonware.com>
 
 	* src/buf.c : Eliminate the bufel class.  The bufel structure
 	still exists, but is only used internally by buf.  All operations
@@ -121,13 +119,13 @@
 	reference count for the bufc never reaches zero before the user is
 	done using it explicitly.
 
-1999-05-18  J. Owen Evans  <jasone@canonware.com>
+1999-05-18  Jason Evans  <jasone@canonware.com>
 
 	* include/libstash/buf.h : Remove bufpool.  pezz provides similar
 	functionality, and has generally more desireable runtime
 	characteristics.
 
-1999-05-17  J. Owen Evans  <jasone@canonware.com>
+1999-05-17  Jason Evans  <jasone@canonware.com>
 
 	* src/pezz.c: Completely re-write the pezz class, such that all
 	buffers are carved from blocks of memory, and new blocks are
@@ -140,7 +138,7 @@
 	* test/verify.in: Add.  verify.in provides support for regression
 	testing as well as performance comparison between versions.
 
-1999-05-03  J. Owen Evans  <jasone@canonware.com>
+1999-05-03  Jason Evans  <jasone@canonware.com>
 
 	* src/buf.c: Add buf_set_{uint{8,32,64},range}().
 
@@ -149,7 +147,7 @@
 	continue processing.  Many, many functions changed, including
 	almost all class conststructors.
 
-1999-04-28  J. Owen Evans  <jasone@canonware.com>
+1999-04-28  Jason Evans  <jasone@canonware.com>
 
 	* src/res.c: Remove static buffers.
 
