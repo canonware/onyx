@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 136 $
- * Last modified: $Date: 1998-07-10 13:11:48 -0700 (Fri, 10 Jul 1998) $
+ * Current revision: $Revision: 144 $
+ * Last modified: $Date: 1998-07-15 17:25:18 -0700 (Wed, 15 Jul 1998) $
  *
  * Description: The idea here is to keep cpp from having to process a header
  *              file more than once.
@@ -22,9 +22,28 @@
  * automatically including everything.
  */
 
-#ifndef _INC_COMMON_H_
-#  define _INC_COMMON_H_
-#endif
+/* 
+ * System headers to always be included.
+ */
+
+#  ifndef _STDIO_H_
+#    include <stdio.h>
+#    define _STDIO_H_
+#  endif
+
+#  ifndef _STDLIB_H_
+#    include <stdlib.h>
+#    define _STDLIB_H_
+#  endif
+
+#  if (HAVE_UNISTD_H)
+#    ifndef _UNISTD_H_
+#      include <unistd.h>
+#      define _UNISTD_H_
+#    endif
+#  else
+#    error "unistd.h not found.  Cannot continue"
+#  endif
 
 /*
  * Always include these once per run.
