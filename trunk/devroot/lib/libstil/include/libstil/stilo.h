@@ -54,11 +54,6 @@ typedef enum {
 #define	STILTE_LAST	STILTE_VMERROR
 } cw_stilte_t;
 
-typedef cw_sint32_t cw_stil_read_t (void *a_arg, cw_stilo_t *a_file, cw_stilt_t
-    *a_stilt, cw_uint32_t a_len, cw_uint8_t *r_str);
-typedef cw_bool_t cw_stil_write_t (void *a_arg, cw_stilo_t *a_file, cw_stilt_t
-    *a_stilt, const cw_uint8_t *a_str, cw_uint32_t a_len);
-
 /* Defined here to resolve circular dependencies. */
 typedef void cw_op_t(cw_stilt_t *);
 
@@ -263,10 +258,15 @@ cw_bool_t	stilo_dict_iterate(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
 /*
  * file.
  */
+typedef cw_sint32_t cw_stilo_file_read_t (void *a_arg, cw_stilo_t *a_file,
+    cw_stilt_t *a_stilt, cw_uint32_t a_len, cw_uint8_t *r_str);
+typedef cw_bool_t cw_stilo_file_write_t (void *a_arg, cw_stilo_t *a_file,
+    cw_stilt_t *a_stilt, const cw_uint8_t *a_str, cw_uint32_t a_len);
+
 void		stilo_file_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
 void		stilo_file_fd_wrap(cw_stilo_t *a_stilo, cw_uint32_t a_fd);
-void		stilo_file_interactive(cw_stilo_t *a_stilo, cw_stil_read_t
-    *a_read, cw_stil_write_t *a_write, void *a_arg);
+void		stilo_file_interactive(cw_stilo_t *a_stilo, cw_stilo_file_read_t
+    *a_read, cw_stilo_file_write_t *a_write, void *a_arg);
 cw_stilte_t	stilo_file_open(cw_stilo_t *a_stilo, const cw_uint8_t
     *a_filename, cw_uint32_t a_nlen, const cw_uint8_t *a_flags, cw_uint32_t
     a_flen);
@@ -298,9 +298,16 @@ cw_sint64_t	stilo_file_mtime(cw_stilo_t *a_stilo);
 /*
  * hook.
  */
-void		stilo_hook_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
-cw_stilte_t	stilo_hook_copy(cw_stilo_t *a_to, cw_stilo_t *a_from,
-    cw_stilt_t *a_stilt);
+typedef cw_stilte_t cw_stilo_hook_exec_t (void *a_data, cw_stilt_t *a_stilt);
+typedef cw_stiloe_t *cw_stilo_hook_ref_iterate_t (void *a_data, cw_bool_t
+    a_reset);
+typedef void cw_stilo_hook_dealloc_t (void *a_data, cw_stilt_t *a_stilt);
+
+void		stilo_hook_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, void
+    *a_data, cw_stilo_hook_exec_t *a_exec, cw_stilo_hook_ref_iterate_t
+    *a_ref_iterate, cw_stilo_hook_dealloc_t *a_dealloc);
+void		*stilo_hook_get(cw_stilo_t *a_stilo);
+cw_stilte_t	stilo_hook_exec(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
 
 /*
  * integer.

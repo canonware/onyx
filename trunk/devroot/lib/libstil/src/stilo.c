@@ -151,8 +151,8 @@ struct cw_stiloe_file_s {
 	cw_uint32_t	buffer_offset;
 
 	/* Used for wrapped files. */
-	cw_stil_read_t	*read_f;
-	cw_stil_write_t	*write_f;
+	cw_stilo_file_read_t	*read_f;
+	cw_stilo_file_write_t	*write_f;
 	void		*arg;
 	cw_sint64_t	position;
 };
@@ -160,11 +160,9 @@ struct cw_stiloe_file_s {
 struct cw_stiloe_hook_s {
 	cw_stiloe_t	stiloe;
 	void		*data;
-	void		(*exec) (void *);
-	void		(*copy) (void *);
-	void		(*get) (void *);
-	void		(*dealloc) (void *);
-	cw_stiloe_t	*(*ref_iterator) (void *, cw_bool_t);
+	cw_stilo_hook_exec_t *exec;
+	cw_stilo_hook_ref_iterate_t *ref_iterate;
+	cw_stilo_hook_dealloc_t *dealloc;
 };
 
 struct cw_stiloe_mutex_s {
@@ -1902,8 +1900,8 @@ stilo_file_fd_wrap(cw_stilo_t *a_stilo, cw_uint32_t a_fd)
 }
 
 void
-stilo_file_interactive(cw_stilo_t *a_stilo, cw_stil_read_t *a_read,
-    cw_stil_write_t *a_write, void *a_arg)
+stilo_file_interactive(cw_stilo_t *a_stilo, cw_stilo_file_read_t *a_read,
+    cw_stilo_file_write_t *a_write, void *a_arg)
 {
 	cw_stiloe_file_t	*file;
 
@@ -3075,15 +3073,40 @@ stilo_file_mtime(cw_stilo_t *a_stilo)
  * hook.
  */
 void
-stilo_hook_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
+stilo_hook_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, void *a_data,
+    cw_stilo_hook_exec_t *a_exec, cw_stilo_hook_ref_iterate_t *a_ref_iterate,
+    cw_stilo_hook_dealloc_t *a_dealloc)
 {
+	cw_stiloe_hook_t	*hook;
+
+	hook = (cw_stiloe_hook_t *)stilt_malloc(a_stilt,
+	    sizeof(cw_stiloe_hook_t));
+
+	hook->data = a_data;
+	hook->exec = a_exec;
+	hook->ref_iterate = a_ref_iterate;
+	hook->dealloc = a_dealloc;
+
 	stilo_p_new(a_stilo, STILOT_HOOK);
+	a_stilo->o.stiloe = (cw_stiloe_t *)hook;
 }
 
 static void
 stilo_p_hook_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stiloe_hook_t	*hook;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_stilo->type == STILOT_HOOK);
+
+	hook = (cw_stiloe_hook_t *)a_stilo->o.stiloe;
+
+	_cw_check_ptr(hook);
+	_cw_assert(hook->stiloe.magic == _CW_STILOE_MAGIC);
+	_cw_assert(hook->stiloe.type == STILOT_FILE);
+
+	hook->dealloc(hook->data, a_stilt);
 }
 
 static cw_stiloe_t *
@@ -3094,25 +3117,10 @@ stiloe_p_hook_ref_iterate(cw_stiloe_t *a_stiloe, cw_bool_t a_reset)
 
 	hook = (cw_stiloe_hook_t *)a_stiloe;
 
-	_cw_check_ptr(hook);
-	_cw_assert(hook->stiloe.magic == _CW_STILOE_MAGIC);
-
-	if (hook->ref_iterator != NULL)
-		retval = hook->ref_iterator(hook->data, a_reset);
+	if (hook->ref_iterate != NULL)
+		retval = hook->ref_iterate(hook->data, a_reset);
 	else
 		retval = NULL;
-
-	return retval;
-}
-
-cw_stilte_t
-stilo_hook_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
-{
-	cw_stilte_t	retval;
-
-	_cw_error("XXX Not implemented");
-
-	retval = STILTE_UNREGISTERED;	/* XXX */
 
 	return retval;
 }
@@ -3131,6 +3139,48 @@ stilo_p_hook_print(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilo_t *a_file,
 		retval = stilo_file_output(a_file, a_stilt,
 		    "--nostringval--[c]", newline);
 	}
+
+	return retval;
+}
+
+void *
+stilo_hook_get(cw_stilo_t *a_stilo)
+{
+	void			*retval;
+	cw_stiloe_hook_t	*hook;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_stilo->type == STILOT_HOOK);
+
+	hook = (cw_stiloe_hook_t *)a_stilo->o.stiloe;
+
+	_cw_check_ptr(hook);
+	_cw_assert(hook->stiloe.magic == _CW_STILOE_MAGIC);
+	_cw_assert(hook->stiloe.type == STILOT_FILE);
+
+	retval = hook->data;
+
+	return retval;
+}
+
+cw_stilte_t
+stilo_hook_exec(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
+{
+	cw_stilte_t	retval;
+	cw_stiloe_hook_t	*hook;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_stilo->type == STILOT_HOOK);
+
+	hook = (cw_stiloe_hook_t *)a_stilo->o.stiloe;
+
+	_cw_check_ptr(hook);
+	_cw_assert(hook->stiloe.magic == _CW_STILOE_MAGIC);
+	_cw_assert(hook->stiloe.type == STILOT_FILE);
+
+	retval = hook->exec(hook->data, a_stilt);
 
 	return retval;
 }

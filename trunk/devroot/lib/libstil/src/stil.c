@@ -47,9 +47,10 @@
 cw_sint32_t	stil_p_read(void *a_arg, cw_stilo_t *a_file, cw_stilt_t
     *a_stilt, cw_uint32_t a_len, cw_uint8_t *r_str);
 
-cw_stil_t
-*stil_new(cw_stil_t *a_stil, cw_stil_read_t *a_stdin, cw_stil_write_t *a_stdout,
-    cw_stil_write_t *a_stderr, void *a_arg)
+cw_stil_t *
+stil_new(cw_stil_t *a_stil, cw_stilo_file_read_t *a_stdin,
+    cw_stilo_file_write_t *a_stdout, cw_stilo_file_write_t *a_stderr, void
+    *a_arg)
 {
 	cw_stil_t		*retval;
 	cw_stilt_t		stilt;

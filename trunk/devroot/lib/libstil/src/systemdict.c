@@ -686,23 +686,6 @@ systemdict_copy(cw_stilt_t *a_stilt)
 		}
 		break;
 	}
-	case STILOT_HOOK: {
-		cw_stilte_t	error;
-		cw_stilo_t	*orig;
-
-		STILS_DOWN_GET(orig, ostack, a_stilt, stilo);
-		if (stilo_type_get(orig) != STILOT_HOOK) {
-			stilt_error(a_stilt, STILTE_TYPECHECK);
-			return;
-		}
-
-		error = stilo_hook_copy(stilo, orig, a_stilt);
-		if (error) {
-			stilt_error(a_stilt, error);
-			return;
-		}
-		break;
-	}
 	case STILOT_STRING: {
 		cw_stilte_t	error;
 		cw_stilo_t	*orig;
@@ -1814,9 +1797,6 @@ systemdict_get(cw_stilt_t *a_stilt)
 		stils_npop(ostack, 2);
 		break;
 	}
-	case STILOT_HOOK:
-		_cw_error("XXX Not implemented");
-		break;
 	case STILOT_STRING: {
 		cw_sint64_t	index;
 		cw_uint8_t	*el;
@@ -1869,9 +1849,6 @@ systemdict_getinterval(cw_stilt_t *a_stilt)
 	case STILOT_ARRAY:
 		error = stilo_array_subarray_new(count, from, a_stilt, index,
 		    len);
-		break;
-	case STILOT_HOOK:
-		_cw_error("XXX Not implemented");
 		break;
 	case STILOT_STRING:
 		error = stilo_string_substring_new(count, from, a_stilt, index,
@@ -2539,9 +2516,6 @@ systemdict_put(cw_stilt_t *a_stilt)
 		stilo_dict_def(into, a_stilt, with, what);
 		break;
 	}
-	case STILOT_HOOK:
-		_cw_error("XXX Not implemented");
-		break;
 	case STILOT_STRING: {
 		cw_sint64_t	index;
 		cw_uint8_t	val;
@@ -2601,9 +2575,6 @@ systemdict_putinterval(cw_stilt_t *a_stilt)
 		}
 		break;
 	}
-	case STILOT_HOOK:
-		_cw_error("XXX Not implemented");
-		break;
 	case STILOT_STRING: {
 		cw_uint8_t	*str;
 		cw_uint32_t	len;
