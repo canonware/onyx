@@ -63,10 +63,7 @@
 
     This workaround has the side effect of changing the process ID.
 
-* NetBSD.
+* NetBSD 1.6.
 
   + POSIX threading does not work due to NetBSD's lack of pthreads.  However,
     GNU pth threading should work.
-
-  + The Onyx 4.4.3 release was the last release tested on NetBSD 1.5.  It
-    probably compiles and works, but there are no guarantees.
