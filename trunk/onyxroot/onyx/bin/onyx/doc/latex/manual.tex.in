@@ -45,18 +45,16 @@ bindings.  Use this variable to explicitly set the key bindings to either
 \section{Language differences}
 If \binname{onyx} is being run interactively:
 \begin{itemize}
-\item{The name ``stop'' in currenterror is redefined to recursively execute the
-stdin file in a stopped context in order to keep the interpreter from exiting on
-error.  It is possible (though generally unlikely) for buffering of stdin to
+\item{The name ``stop'' is redefined in the initial thread's errordict to
+recursively execute the stdin file in a stopped context in order to keep the
+interpreter from exiting on error.  It is possible (though generally unlikely,
+since the user must type a very long line of code) for buffering of stdin to
 cause strange things to occur; any additional program execution after an error
 is a result of this.}
-\item{The name ``resume'' is defined in the initial thread's userdict as an
+\item{The name ``resume'' is defined in the initial thread's threaddict as an
 alias to the stop operator.  Thus, when an error occurs, when the user is ready
 to continue running after addressing any issues the error caused, resume can be
 called as a more intuitive name for resuming.}
-\item{The name ``estackoverflow'' in errordict is redefined to call the quit
-operator in order to avoid infinite recursion in the error handling machinery.
-The need for this is a result of not exiting on error.}
 \item{The name ``promptstring'' is defined in systemdict; it takes no arguments
 and returns a string.  The return string is used as the interactive prompt.}
 \end{itemize}

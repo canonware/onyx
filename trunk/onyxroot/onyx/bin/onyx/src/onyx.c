@@ -81,41 +81,34 @@ int
 interactive_run(int argc, char **argv, char **envp)
 {
 	/*
-	 * Define 'resume' to continue after an error.
-	 *
-	 * Do not stop on error.  Recursively executing stdin can result in
-	 * strange behavior if there are data buffered for stdin that haven't
-	 * been consumed by the interpreter buffer (this only happens if the
-	 * user has typed in a very long statement), but at least the error will
-	 * be handled correctly before this happens.
-	 *
-	 * Quit on estackoverflow in order to avoid an infinite loop.
-	 *
 	 * Define promptstring in systemdict:
 	 *   - promptstring <string>
+	 *
+	 * Define 'resume' in threaddict to continue after an error.
+	 *
+	 * Do not stop on error.  Instead, recursively evaluate stdin.  File
+	 * bufferring can cause strange behavior, but at least the error will
+	 * get handled first.
+	 *
+	 * Quit on estackoverflow in order to avoid infinite recursion.
 	 *
 	 * Print the product and version info.
 	 *
 	 * Push an executable stdin on ostack to prepare for the start operator.
 	 */
 	static const cw_uint8_t	code[] = "
-/resume //stop def
-currenterror begin
-	/stop {
-		stdin cvx stopped pop
-	} def
-end
 systemdict begin
 /promptstring {
 	count cvs `onyx:' exch catenate `> ' catenate
 } bind def
 end
+threaddict begin
+/resume //stop def
+end
 errordict begin
-	/estackoverflow {
-		errordict begin
-		handleerror
-		1 die
-	} def
+	/stop {
+		stdin cvx stopped pop
+	} bind def
 end
 product print `, version ' print version print `.\n' print flush
 stdin cvx

@@ -551,7 +551,7 @@ Each thread has its own currenterror dictionary, which is used by the error
 handling machinery.
 
 \begin{longtable}{\optableformat{3}}
-\caption[currenterror summary]{currenterror summary by functional group}
+\caption[currenterror summary]{currenterror summary}
 \\
 \hline
 Input(s) & Op/Proc/Var & Output(s) & Description \\
@@ -565,13 +565,6 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 \multicolumn{4}{r}{\emph{Continued on next page...}} \endfoot
 \hline \endlastfoot
 %end{latexonly}
-\multicolumn{4}{|l|}{Control operators} \\
-\hline \hline
--- & {\bf \htmlref{stop}{currenterror:stop}} & -- & Last operation during error
-handling. \\
-\hline \hline
-\multicolumn{4}{|l|}{State operators} \\
-\hline \hline
 -- & {\bf \htmlref{newerror}{currenterror:newerror}} & boolean & Set to true
 during error handling. \\
 \hline
@@ -790,33 +783,6 @@ onyx:1> currenterror begin ostack end 1 sprint
 onyx:1>
 		\end{verbatim}
 	\end{description}
-\label{currenterror:stop}
-\index{stop@\onyxop{}{stop}{}}
-\item[{\onyxop{--}{stop}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ] None.
-	\item[Output(s): ] None.
-	\item[Errors(s): ] None.
-	\item[Description: ]
-		This is called as the very last operation when an error occurs.
-		Initially, its value is the same as that for the
-		\htmlref{\onyxop{}{stop}{}}{systemdict:stop} operator in
-		systemdict.
-	\item[Example(s): ]\begin{verbatim}
-
-onyx:0> currenterror begin
-onyx:0> /stop {`Custom stop\n' print flush quit} def
-onyx:0> x
-Error /undefined
-ostack: ()
-dstack: (-dict- -dict- -dict- -dict- -dict-)
-estack/istack trace (0..2):
-0:      x
-1:      -file-
-2:      --start--
-Custom stop
-		\end{verbatim}
-	\end{description}
 \end{description}
 
 \subsection{envdict}
@@ -826,7 +792,7 @@ Custom stop
 \label{sec:errordict}
 
 \begin{longtable}{\optableformat{3}}
-\caption{errordict summary} \\
+\caption{errordict summary by functional group} \\
 \hline
 Input(s) & Op/Proc/Var & Output(s) & Description \\
 \hline \hline
@@ -839,11 +805,18 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 \multicolumn{4}{r}{\emph{Continued on next page...}} \endfoot
 \hline \endlastfoot
 %end{latexonly}
+\multicolumn{4}{|l|}{Control operators} \\
+\hline \hline
+& {\bf \htmlref{handleerror}{errordict:handleerror}} & & \\
+\hline
+-- & {\bf \htmlref{stop}{errordict:stop}} & -- & Last operation during error
+handling. \\
+\hline \hline
+\multicolumn{4}{|l|}{Error operators} \\
+\hline \hline
 & {\bf \htmlref{dstackunderflow}{errordict:dstackunderflow}} & & \\
 \hline
 & {\bf \htmlref{estackunderflow}{errordict:estackunderflow}} & & \\
-\hline
-& {\bf \htmlref{handleerror}{errordict:handleerror}} & & \\
 \hline
 & {\bf \htmlref{invalidaccess}{errordict:invalidaccess}} & & \\
 \hline
@@ -1119,6 +1092,33 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 	\item[Description: ]
 	\item[Example(s): ]\begin{verbatim}
 
+		\end{verbatim}
+	\end{description}
+\label{errordict:stop}
+\index{stop@\onyxop{}{stop}{}}
+\item[{\onyxop{--}{stop}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
+	\item[Errors(s): ] None.
+	\item[Description: ]
+		This is called as the very last operation when an error occurs.
+		Initially, its value is the same as that for the
+		\htmlref{\onyxop{}{stop}{}}{systemdict:stop} operator in
+		systemdict.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> errordict begin
+onyx:0> /stop {`Custom stop\n' print flush quit} def
+onyx:0> x
+Error /undefined
+ostack: ()
+dstack: (-dict- -dict- -dict- -dict- -dict-)
+estack/istack trace (0..2):
+0:      x
+1:      -file-
+2:      --start--
+Custom stop
 		\end{verbatim}
 	\end{description}
 \label{syntaxerror}
@@ -1595,374 +1595,28 @@ onyx:0>
 
 All threads share the same globaldict, which is meant as a repository for
 globally shared objects.  globaldict is empty when the onyx interpreter is
-initialized.
+initialized, and is implicitly locked.
 
 \subsection{sprintdict}
 \label{sec:sprintdict}
 
-\begin{longtable}{\optableformat{3}}
-\caption[sprintdict summary]{sprintdict summary}
-\\
-\hline
-Input(s) & Op/Proc/Var & Output(s) & Description \\
-\hline \hline
-%begin{latexonly}
-\endfirsthead
-\caption[]{\emph{continued}} \\
-\hline
-Input(s) & Op/Proc/Var & Output(s) & Description \\
-\hline \endhead
-\multicolumn{4}{r}{\emph{Continued on next page...}} \endfoot
-\hline \endlastfoot
-%end{latexonly}
-& {\bf \htmlref{array}{sprintdict:array}} & & \\
-\hline
-& {\bf \htmlref{boolean}{sprintdict:boolean}} & & \\
-\hline
-& {\bf \htmlref{condition}{sprintdict:condition}} & & \\
-\hline
-& {\bf \htmlref{dict}{sprintdict:dict}} & & \\
-\hline
-& {\bf \htmlref{file}{sprintdict:file}} & & \\
-\hline
-& {\bf \htmlref{fino}{sprintdict:fino}} & & \\
-\hline
-& {\bf \htmlref{hook}{sprintdict:hook}} & & \\
-\hline
-& {\bf \htmlref{integer}{sprintdict:integer}} & & \\
-\hline
-& {\bf \htmlref{mark}{sprintdict:mark}} & & \\
-\hline
-& {\bf \htmlref{mutex}{sprintdict:mutex}} & & \\
-\hline
-& {\bf \htmlref{name}{sprintdict:name}} & & \\
-\hline
-& {\bf \htmlref{operator}{sprintdict:operator}} & & \\
-\hline
-& {\bf \htmlref{stack}{sprintdict:stack}} & & \\
-\hline
-& {\bf \htmlref{string}{sprintdict:string}} & & \\
-\hline
-& {\bf \htmlref{thread}{sprintdict:thread}} & & \\
-\end{longtable}
+The sprintdict dictionary is primarily used to support
+\htmlref{\onyxop{}{sprint}{}}{systemdict:sprint}, but its contents may be of use
+to an application that wishes to extend or modify syntactical printing.
 
-\begin{description}
-\label{sprintdict:array}
-\index{array@\onyxop{}{array}{}}
-\item[{\onyxop{--}{array}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
-	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
+There is an entry in sprintdict for each onyx type (for example,
+\onyxop{}{arraytype}{}).  Each operator takes two arguments: an object to print
+and an integer that represents printing recursion depth.  Each operator removes
+the two arguments from ostack upon completion.  If there is a syntactically
+valid representation for an object and the recursion depth is greater than 0,
+the corresponding operator prints the object syntactically.  Otherwise, a
+non-syntictical representation of the object is printed.  If the recursion depth
+is greater than 0, the operators will recursively print any contained objects.
+All printing is done to \htmlref{\onyxop{}{stdout}{}}{systemdict:stdout}.
 
-		\end{verbatim}
-	\end{description}
-\label{sprintdict:boolean}
-\index{boolean@\onyxop{}{boolean}{}}
-\item[{\onyxop{--}{boolean}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
-	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
-	\end{description}
-\label{sprintdict:condition}
-\index{condition@\onyxop{}{condition}{}}
-\item[{\onyxop{--}{condition}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
-	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
-	\end{description}
-\label{sprintdict:dict}
-\index{dict@\onyxop{}{dict}{}}
-\item[{\onyxop{--}{dict}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
-	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
-	\end{description}
-\label{sprintdict:file}
-\index{file@\onyxop{}{file}{}}
-\item[{\onyxop{--}{file}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
-	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
-	\end{description}
-\label{sprintdict:fino}
-\index{fino@\onyxop{}{fino}{}}
-\item[{\onyxop{--}{fino}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
-	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
-	\end{description}
-\label{sprintdict:hook}
-\index{hook@\onyxop{}{hook}{}}
-\item[{\onyxop{--}{hook}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
-	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
-	\end{description}
-\label{sprintdict:integer}
-\index{integer@\onyxop{}{integer}{}}
-\item[{\onyxop{--}{integer}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
-	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
-	\end{description}
-\label{sprintdict:mark}
-\index{mark@\onyxop{}{mark}{}}
-\item[{\onyxop{--}{mark}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
-	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
-	\end{description}
-\label{sprintdict:mutex}
-\index{mutex@\onyxop{}{mutex}{}}
-\item[{\onyxop{--}{mutex}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
-	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
-	\end{description}
-\label{sprintdict:name}
-\index{name@\onyxop{}{name}{}}
-\item[{\onyxop{--}{name}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
-	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
-	\end{description}
-\label{sprintdict:operator}
-\index{operator@\onyxop{}{operator}{}}
-\item[{\onyxop{--}{operator}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
-	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
-	\end{description}
-\label{sprintdict:stack}
-\index{stack@\onyxop{}{stack}{}}
-\item[{\onyxop{--}{stack}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
-	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
-	\end{description}
-\label{sprintdict:string}
-\index{string@\onyxop{}{string}{}}
-\item[{\onyxop{--}{string}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
-	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
-	\end{description}
-\label{sprintdict:thread}
-\index{thread@\onyxop{}{thread}{}}
-\item[{\onyxop{--}{thread}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
-	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
-	\end{description}
-\end{description}
+The operators do not print whitespace before or after the object
+representations, so if multiple objects are being sequentially printed
+syntactically, care should be taken to insert whitespace delimiters.
 
 \subsection{systemdict}
 \label{sec:systemdict}
@@ -1970,7 +1624,8 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 All threads share the same systemdict, which contains most of the operators that
 are of general use.  Although there are no mechanisms that prevent modification
 of systemdict, programs should not normally need to modify systemdict, since
-globaldict provides a place for storing globally shared objects.
+globaldict provides a place for storing globally shared objects.  systemdict is
+implicitly locked.
 
 \begin{longtable}{\optableformat{2.5}}
 \caption[systemdict summary]{systemdict summary by functional group} \\

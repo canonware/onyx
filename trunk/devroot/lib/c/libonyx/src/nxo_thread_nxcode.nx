@@ -34,7 +34,6 @@ def
 
 % Define and initialize currenterror
 /currenterror <
-	/stop		/stop load
 	/newerror	false
 	/errorname	`'
 	/estack		()
@@ -69,6 +68,8 @@ def
 	]{
 		{/errordict load /handleerror get eval}
 	} foreach
+
+	/stop /stop load
 
 	/handleerror {
 		/currenterror load begin

@@ -188,8 +188,8 @@ systemdict begin
 	{
 		{/errordict where {pop true}{false} ifelse}
 		{/errordict load /handleerror known}
+		{/errordict load /stop known}
 		{/currenterror where {pop true}{false} ifelse}
-		{/currenterror load /stop known}
 	}{
 		eval not {
 			`Onyx: Missing errordict or currenterror defs\n' print
@@ -251,7 +251,7 @@ systemdict begin
 	exch /errordict load exch get eval
 
 	% Stop.
-	/currenterror load /stop get eval
+	/errordict load /stop get eval
 } def
 
 % - version <string>
