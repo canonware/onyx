@@ -63,8 +63,6 @@ nxo_dict_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking,
 
     if (a_dict_size < CW_LIBONYX_DICT_SIZE)
     {
-#define XXX_NOT_YET
-#ifdef XXX_NOT_YET
 	cw_uint32_t i;
 
 	dict->is_hash = FALSE;
@@ -73,13 +71,8 @@ nxo_dict_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking,
 	{
 	    nxo_no_new(&dict->data.array[i].key);
 	}
-#else
-	a_dict_size = CW_LIBONYX_DICT_SIZE;
-#endif
     }
-#ifdef XXX_NOT_YET
     else
-#endif
     {
 	dict->is_hash = TRUE;
 
