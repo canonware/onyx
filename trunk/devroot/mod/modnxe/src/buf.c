@@ -90,7 +90,7 @@
  * Translation:
  *   User started at bpos 3, typed "hello", backspaced through "hello", then
  *   typed "salutations".  Following is what the text looks like at each undo
- *   stup:
+ *   step:
  *
  *   -------------
  *     salutations
@@ -484,6 +484,38 @@ buf_p_shrink(cw_buf_t *a_buf)
 	}
 }
 
+static void
+buf_p_hist_b(cw_buf_t *a_buf)
+{
+}
+
+static void
+buf_p_hist_e(cw_buf_t *a_buf)
+{
+}
+
+static void
+buf_p_hist_i(cw_buf_t *a_buf, cw_uint64_t a_apos, cw_uint8_t *a_str, cw_uint32_t
+    a_len)
+{
+}
+
+static void
+buf_p_hist_y(cw_buf_t *a_buf, cw_uint64_t a_apos, cw_uint8_t *a_str, cw_uint32_t
+    a_len)
+{
+}
+
+static void
+buf_p_hist_r(cw_buf_t *a_buf, cw_uint64_t a_apos, cw_uint32_t a_len)
+{
+}
+
+static void
+buf_p_hist_k(cw_buf_t *a_buf, cw_uint64_t a_apos, cw_uint32_t a_len)
+{
+}
+
 cw_buf_t *
 buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc, cw_opaque_realloc_t
     *a_realloc, cw_opaque_dealloc_t *a_dealloc, void *a_arg)
@@ -738,8 +770,13 @@ buf_undoable(cw_buf_t *a_buf)
 		goto RETURN;
 	}
 
-	_cw_error("XXX Not implemented");
-	retval = FALSE; /* XXX */
+	/* There is at least one undoable operation unless hcur is at BOB. */
+	if (bufm_pos(a_buf->hcur) == 1) {
+		retval = FALSE;
+		goto RETURN;
+	}
+
+	retval = TRUE;
 	RETURN:
 	return retval;
 }
@@ -757,8 +794,13 @@ buf_redoable(cw_buf_t *a_buf)
 		goto RETURN;
 	}
 
-	_cw_error("XXX Not implemented");
-	retval = FALSE; /* XXX */
+	/* There is at least one redoable operation unless hcur is at EOB. */
+	if (bufm_pos(a_buf->hcur) == bufm_pos(a_buf->hend)) {
+		retval = FALSE;
+		goto RETURN;
+	}
+
+	retval = TRUE;
 	RETURN:
 	return retval;
 }

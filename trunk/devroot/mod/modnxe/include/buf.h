@@ -66,7 +66,7 @@ struct cw_buf_s {
 
 	cw_msgq_t	*msgq;		/* Notify of buffer changes. */
 
-	cw_mtx_t	mtx;		/* Implicit lock. */
+	cw_mtx_t	mtx;		/* Explicit lock. */
 
 	/* Internal buffer state. */
 	cw_uint32_t	elmsize;	/* Number of bytes per element, >= 1. */
