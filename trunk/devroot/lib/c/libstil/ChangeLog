@@ -1,3 +1,7 @@
+2001-02-03  Jason Evans  <jasone@canonware.com>
+
+	* : Fold _LIBSTIL_DEBUG into _LIBSTIL_DBG.
+
 2000-06-08  Jason Evans  <jasone@canonware.com>
 
 	* : Remove The packedarray type.  The complexities associated with

@@ -92,7 +92,7 @@ typedef enum {
  * Main object structure.
  */
 struct cw_stilo_s {
-#if (defined(_LIBSTIL_DBG) || defined(_LIBSTIL_DEBUG))
+#ifdef _LIBSTIL_DBG
 	cw_uint32_t	magic;
 #endif
 

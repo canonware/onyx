@@ -42,7 +42,7 @@ typedef enum {
 } cw_stiltts_t;
 
 struct cw_stilts_s {
-#if (defined(_LIBSTIL_DBG) || defined(_LIBSTIL_DEBUG))
+#ifdef _LIBSTIL_DBG
 	cw_uint32_t	magic;
 #endif
 
@@ -57,7 +57,7 @@ struct cw_stilts_s {
 };
 
 struct cw_stilt_s {
-#if (defined(_LIBSTIL_DBG) || defined(_LIBSTIL_DEBUG))
+#ifdef _LIBSTIL_DBG
 	cw_uint32_t	magic;
 #endif
 
@@ -235,7 +235,7 @@ cw_bool_t	stilt_dict_stack_search(cw_stilt_t *a_stilt, cw_stilo_t *a_key,
 #define		stilt_mem_get(a_stilt)					\
 	stilat_mem_get(&(a_stilt)->stilat)
 
-#if (defined(_LIBSTIL_DBG) || defined(_LIBSTIL_DEBUG))
+#ifdef _LIBSTIL_DBG
 #define		stilt_malloc(a_stilt, a_size)				\
 	stilat_malloc_e(&(a_stilt)->stilat, (a_size), __FILE__, __LINE__)
 #define		stilt_free(a_stilt, a_ptr)				\

@@ -49,7 +49,7 @@ stilte_stiln(cw_stilte_t a_stilte)
 	return stilte_stiln[a_stilte];
 }
 
-/*  #define	_CW_STILT_SCANNER_DEBUG */
+/*  #define	_CW_STILT_SCANNER_DBG */
 
 /* Initial size of userdict. */
 #define	_CW_STILT_USERDICT_SIZE	 64
@@ -106,7 +106,7 @@ static cw_sint32_t cw_g_b64_codes[] = {
 static cw_uint32_t	stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts,
     cw_uint32_t a_token, const cw_uint8_t *a_str, cw_uint32_t a_len);
 static void		stilt_p_tok_str_expand(cw_stilt_t *a_stilt);
-#ifdef _CW_STILT_SCANNER_DEBUG
+#ifdef _CW_STILT_SCANNER_DBG
 static void		stilt_p_token_print(cw_stilt_t *a_stilt, cw_stilts_t
     *a_stilts, cw_uint32_t a_length, const cw_uint8_t *a_note);
 static void		stilt_p_syntax_error_print(cw_stilt_t *a_stilt,
@@ -895,7 +895,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 	for (i = 0; i < a_len; i++, a_stilts->column++) {
 		c = a_str[i];
 
-#ifdef _CW_STILT_SCANNER_DEBUG
+#ifdef _CW_STILT_SCANNER_DBG
 #define _CW_STILT_PSTATE(a)						\
 	do {								\
 		if (a_stilt->state == (a))				\
@@ -1943,7 +1943,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 	return retval;
 }
 
-#ifdef _CW_STILT_SCANNER_DEBUG
+#ifdef _CW_STILT_SCANNER_DBG
 static void
 stilt_p_token_print(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t
     a_length, const cw_uint8_t *a_note)

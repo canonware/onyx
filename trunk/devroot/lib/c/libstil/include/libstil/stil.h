@@ -12,7 +12,7 @@
 typedef struct cw_stil_s cw_stil_t;
 
 struct cw_stil_s {
-#if (defined(_LIBSTIL_DBG) || defined(_LIBSTIL_DEBUG))
+#ifdef _LIBSTIL_DBG
 	cw_uint32_t	magic;
 #endif
 

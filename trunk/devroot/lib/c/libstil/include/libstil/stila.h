@@ -13,7 +13,7 @@
  * Book keeping for GC.
  */
 struct cw_stila_s {
-#if (defined(_LIBSTIL_DBG) || defined(_LIBSTIL_DEBUG))
+#ifdef _LIBSTIL_DBG
 	cw_uint32_t	magic;
 #endif
 	/*
@@ -26,7 +26,7 @@ struct cw_stila_s {
  * Global memory allocator.
  */
 struct cw_stilag_s {
-#if (defined(_LIBSTIL_DBG) || defined(_LIBSTIL_DEBUG))
+#ifdef _LIBSTIL_DBG
 	cw_uint32_t	magic;
 #endif
 	cw_mtx_t	lock;
@@ -52,7 +52,7 @@ struct cw_stilag_s {
  * Per-thread memory allocator.
  */
 struct cw_stilat_s {
-#if (defined(_LIBSTIL_DBG) || defined(_LIBSTIL_DEBUG))
+#ifdef _LIBSTIL_DBG
 	cw_uint32_t	magic;
 #endif
 	/* Linkage for the list of all stilat's. */
@@ -96,7 +96,7 @@ void		stilag_gc_register(cw_stilag_t *a_stilag, cw_stilt_t *a_stilt,
 #define		stilag_dicto_pool_get(a_stilag)				\
 	&(a_stilag)->dicto_pool
 
-#if (defined(_LIBSTIL_DBG) || defined(_LIBSTIL_DEBUG))
+#ifdef _LIBSTIL_DBG
 #define		stilag_malloc(a_stilag, a_size)				\
 	stilag_malloc_e((a_stilag), (a_size), __FILE__, __LINE__)
 #define		stilag_free(a_stilag, a_ptr)				\
@@ -161,7 +161,7 @@ void		stilat_free_e(cw_stilat_t *a_stilat, void *a_ptr, const char
 #define		stilat_dicto_pool_get(a_stilat)				\
 	stilag_dicto_pool_get((a_stilat)->stilag)
 
-#if (defined(_LIBSTIL_DBG) || defined(_LIBSTIL_DEBUG))
+#ifdef _LIBSTIL_DBG
 #define		stilat_chi_get(a_stilat)				\
 	stilat_chi_get_e((a_stilat), __FILE__, __LINE__)
 #define		stilat_stilsc_get(a_stilat)				\

@@ -31,7 +31,7 @@ struct cw_stilso_s {
 };
 
 struct cw_stilsc_s {
-#if (defined(_LIBSTIL_DBG) || defined(_LIBSTIL_DEBUG))
+#ifdef _LIBSTIL_DBG
 	cw_uint32_t		magic;
 #endif
 	qs_elm(cw_stilsc_t)	link;	/* Linkage for the stack of stilsc's. */
@@ -44,7 +44,7 @@ struct cw_stilsc_s {
 };
 
 struct cw_stils_s {
-#if (defined(_LIBSTIL_DBG) || defined(_LIBSTIL_DEBUG))
+#ifdef _LIBSTIL_DBG
 	cw_uint32_t		magic;
 #endif
 	ql_head(cw_stilso_t)	stack;	/* Stack. */
