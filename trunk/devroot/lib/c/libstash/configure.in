@@ -10,7 +10,8 @@ AC_CONFIG_HEADER(include/libstash/libstash.h)
 
 dnl Comment out threaded dependency includes in Makefile.in if 
 dnl --without-pthreads is defined.
-AC_ARG_WITH(pthreads, [  --with-pthreads         Build threaded libstash libraries],
+AC_ARG_WITH(pthreads, [  --with-pthreads         Build threaded libstash libraries
+  --without-pthreads      Do not build threaded libstash libraries],
 if test "x$with_pthreads" = "xno" ; then
   without_threads="[#]"
 else
@@ -22,7 +23,7 @@ without_threads=""
 
 AC_SUBST(without_threads)
 
-AC_ARG_WITH(gnu-make, [  --with-gnu-make         Generate a Makefile compatiple with gnu make],
+AC_ARG_WITH(gnu-make, [  --with-gnu-make         Always generate a Makefile compatiple with gnu make],
 if test "x$with_gnu_make" != "xno" ; then
   use_gmake="yes"
 else

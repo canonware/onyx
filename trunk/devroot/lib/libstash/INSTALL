@@ -19,7 +19,7 @@ To install, do the above, then type:
 
    make install
 
-Optionally, pass any of the following (not a definitive list) arguments to 
+Optionally, pass any of the following (not a definitive list) arguments to
 'configure':
 
 --prefix=<install-root-dir>
@@ -28,7 +28,7 @@ Optionally, pass any of the following (not a definitive list) arguments to
 	
 	./configure --prefix=/usr/local
 
-	will install SQRL into /usr/local/lib, /usr/local/include/libstash,
+	will install libstash into /usr/local/lib, /usr/local/include/libstash,
 	/usr/local/man, and /usr/local/share/libstash.
 
 --with-pthreads=no
@@ -41,6 +41,10 @@ Optionally, pass any of the following (not a definitive list) arguments to
 
 	Note that the check target only works correctly if the multi-threaded 
 	versions of libstash are built.
+
+--with-gnu-make
+	Tell configure to link Makefile to the GNU Makefile, even if on a system
+	for which there is a native Makefile.
 
 Optionally, define environment variables, including (not exclusively):
 
@@ -61,7 +65,7 @@ LD_LIBRARY_PATH="?"
 
 LDFLAGS="?"
 
-	Flags passed to gcc, which should normally be passed on to ld.
+	Flags passed to 'gcc', which should normally be passed on to 'ld'.
 
 PATH="?"
 
