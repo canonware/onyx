@@ -1058,28 +1058,66 @@ bufp_p_dump(cw_bufp_t *a_bufp, const char *a_beg, const char *a_mid,
 static void
 bufp_p_validate(cw_bufp_t *a_bufp)
 {
+    cw_uint32_t i, nlines;
+    cw_mkr_t *mkr, *tmkr;
+
     cw_check_ptr(a_bufp);
     cw_dassert(a_bufp->magic == CW_BUFP_MAGIC);
 
-    /* Validate consistency of bob_relative, bpos, and line, relative to
-     * previous and next bufp's. */
-
     /* Validate consistency of len and gap_off. */
+    cw_assert(a_bufp->gap_off <= a_bufp->len);
+    cw_assert(a_bufp->len <= CW_BUFP_SIZE);
+    cw_assert(a_bufp->gap_off <= CW_BUFP_SIZE);
 
     /* Validate nlines. */
+    for (i = nlines = 0; i < a_bufp->gap_off; i++)
+    {
+	if (a_bufp->b[i] == '\n')
+	{
+	    nlines++;
+	}
+    }
+    for (i = a_bufp->gap_off + (CW_BUFP_SIZE - a_bufp->len);
+	 i < CW_BUFP_SIZE;
+	 i++)
+    {
+	if (a_bufp->b[i] == '\n')
+	{
+	    nlines++;
+	}
+    }
+    cw_assert(nlines == a_bufp->nlines);
 
-    /* Iterate through mkr's.
-     *
-     * 1) Make sure the mkr's point to this bufp.
-     *
-     * 2) Validate consistent ordering of mtree and mlist.
-     *
-     * 3) Validate increasing order.
-     *
-     * 4) Validate mkr's, via mkr_validate().
-     */
+    /* Iterate through mkr's. */
+    ql_foreach(mkr, &a_bufp->mlist, mlink)
+    {
+	/* Make sure the mkr's point to this bufp. */
+	cw_assert(mkr->bufp == a_bufp);
 
-    /* XXX */
+	/* Validate mkr. */
+	mkr_validate(mkr);
+
+	/* Validate consistent ordering of mtree and mlist. */
+	rb_prev(&a_bufp->mtree, mkr, cw_mkr_t, mnode, tmkr);
+	if (tmkr == rb_tree_nil(&a_bufp->mtree))
+	{
+	    tmkr = NULL;
+	}
+	cw_assert(ql_prev(&a_bufp->mlist, mkr, mlink) == tmkr);
+
+	rb_next(&a_bufp->mtree, mkr, cw_mkr_t, mnode, tmkr);
+	if (tmkr == rb_tree_nil(&a_bufp->mtree))
+	{
+	    tmkr = NULL;
+	}
+	cw_assert(ql_next(&a_bufp->mlist, mkr, mlink) == tmkr);
+	
+	/* Validate increasing order. */
+	if (tmkr != NULL)
+	{
+	    cw_assert(mkr_p_comp(mkr, tmkr) <= 0);
+	}
+    }
 }
 #endif
 
@@ -1518,10 +1556,6 @@ buf_p_bufp_splice(cw_buf_t *a_buf, cw_bufp_t *a_start, cw_bufp_t *a_end)
     /* Remove a_end. */
     buf_p_bufp_remove(a_buf, a_end);
 
-    /* Update a_start's internals. */
-    a_start->len += a_end->len;
-    a_start->nlines += a_end->nlines;
-
     /* Move a_end's mkr's to a_start. */
     for (mkr = ql_first(&a_end->mlist);
 	 mkr != NULL;
@@ -1533,6 +1567,10 @@ buf_p_bufp_splice(cw_buf_t *a_buf, cw_bufp_t *a_start, cw_bufp_t *a_end)
 	rb_node_new(&a_start->mtree, mkr, mnode);
 	mkr_p_insert(mkr);
     }
+
+    /* Update a_start's internals. */
+    a_start->len += a_end->len;
+    a_start->nlines += a_end->nlines;
 
     /* Delete a_end. */
     if (a_end == a_buf->bufp_cur)
@@ -1966,7 +2004,7 @@ buf_validate(cw_buf_t *a_buf)
     /* Iterate through bufp's. */
     nbufps = 0;
     len = 0;
-    nlines = 0;
+    nlines = 1;
     ql_foreach(bufp, &a_buf->plist, plink)
     {
 	/* Count number of bufp's. */
@@ -1980,9 +2018,17 @@ buf_validate(cw_buf_t *a_buf)
 
 	/* Validate consistent ordering of mtree and mlist. */
 	rb_prev(&a_buf->ptree, bufp, cw_bufp_t, pnode, tbufp);
+	if (tbufp == rb_tree_nil(&a_buf->ptree))
+	{
+	    tbufp = NULL;
+	}
 	cw_assert(ql_prev(&a_buf->plist, bufp, plink) == tbufp);
 
 	rb_next(&a_buf->ptree, bufp, cw_bufp_t, pnode, tbufp);
+	if (tbufp == rb_tree_nil(&a_buf->ptree))
+	{
+	    tbufp = NULL;
+	}
 	cw_assert(ql_next(&a_buf->plist, bufp, plink) == tbufp);
 
 	/* Validate increasing order. */
@@ -1996,17 +2042,18 @@ buf_validate(cw_buf_t *a_buf)
 	    else if (bufp->bob_relative == FALSE 
 		     && tbufp->bob_relative == FALSE)
 	    {
-		cw_assert(bufp->bpos == tbufp->bpos + tbufp->len);
-		cw_assert(bufp->line == tbufp->line + tbufp->nlines);
+		cw_assert(bufp->bpos - bufp->len == tbufp->bpos);
+		cw_assert(bufp->line - bufp->nlines == tbufp->line);
 	    }
 	    else
 	    {
 		cw_assert(bufp->bob_relative && tbufp->bob_relative == FALSE);
 
-		cw_assert(bufp->bpos + bufp->len + tbufp->bpos + tbufp->len
+		cw_assert(bufp->bpos + bufp->len - 1
+			  + tbufp->bpos
 			  == a_buf->len);
 		cw_assert(bufp->line + bufp->nlines
-		          + tbufp->line + tbufp->nlines
+		          + tbufp->line
 			  == a_buf->nlines);
 	    }
 	}
@@ -2029,6 +2076,12 @@ buf_validate(cw_buf_t *a_buf)
 
     /* Validate consistency of bufp_cur versus that bufp's bob_relative, and the
      * previous and next bufp's' bob_relative. */
+    cw_assert(a_buf->bufp_cur->bob_relative);
+    if (ql_next(&a_buf->plist, a_buf->bufp_cur, plink) != NULL)
+    {
+	cw_assert(ql_next(&a_buf->plist, a_buf->bufp_cur, plink)->bob_relative
+		  == FALSE);
+    }
 
     /* Iterate through ext's in f-order.
      *
@@ -2038,6 +2091,7 @@ buf_validate(cw_buf_t *a_buf)
      *
      * 3) Count number of ext's, for later comparison with number in r-order.
      */
+    /* XXX */
 
     /* Iterate through ext's in f-order.
      *
@@ -2047,16 +2101,16 @@ buf_validate(cw_buf_t *a_buf)
      *
      * 3) Validate ext's, via ext_validate().
      */
+    /* XXX */
 
     /* Validate equal number of ext's in f-order and r-order. */
+    /* XXX */
 
     /* Validate hist, via hist_validate(). */
     if (a_buf->hist != NULL)
     {
 	hist_validate(a_buf->hist);
     }
-
-    /* XXX */
 }
 #endif
 
@@ -3961,10 +4015,14 @@ mkr_validate(cw_mkr_t *a_mkr)
     }
 
     /* Validate that ppos isn't in the gap. */
+    cw_assert(a_mkr->ppos <= a_mkr->bufp->gap_off
+	      || (a_mkr->ppos >= a_mkr->bufp->gap_off
+		  + (CW_BUFP_SIZE - a_mkr->bufp->len))
+	      || (a_mkr->ppos == CW_BUFP_SIZE
+		  && a_mkr->bufp == ql_last(&a_mkr->bufp->buf->plist, plink)));
 
     /* Validate pline. */
-
-    /* XXX */
+    cw_assert(bufp_p_ppos2pline(a_mkr->bufp, a_mkr->ppos) == a_mkr->pline);
 }
 #endif
 
