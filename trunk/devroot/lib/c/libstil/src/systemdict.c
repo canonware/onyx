@@ -228,6 +228,9 @@ systemdict_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 #endif
 #undef NENTRIES
 #undef NEXTRA
+
+	/* Make systemdict readonly in order to avoid locking. */
+	stilo_perms_set(a_dict, STILOP_READONLY);
 }
 
 void
