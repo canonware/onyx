@@ -6,16 +6,11 @@ dnl Process this file with autoconf to produce a configure script.
 AC_INIT(libstash.h.in)
 AC_CONFIG_HEADER(libstash.h)
 
-dnl Use libtool
-dnl AM_DISABLE_SHARED
-AM_PROG_LIBTOOL
-
 dnl Check for programs.
 AC_PROG_CC
 AC_PROG_CPP
 AC_PROG_INSTALL
-AC_PROG_MAKE_SET
-dnl AC_PROG_RANLIB
+AC_PROG_RANLIB
 AC_CHECK_PROG(FLEX, flex, /usr/bin/flex, $PATH)
 AC_CHECK_PROG(BISON, bison, /usr/bin/bison, $PATH)
 AC_CHECK_PROG(AR, ar, /usr/bin/ar, $PATH)
@@ -24,7 +19,9 @@ AC_CHECK_PROG(CHMOD, chmod, /bin/chmod, $PATH)
 AC_CHECK_PROG(BASENAME, basename, /usr/bin/basename, $PATH)
 AC_CHECK_PROG(DIFF, diff, /usr/bin/diff, $PATH)
 AC_CHECK_PROG(CAT, cat, /bin/cat, $PATH)
-AC_CHECK_PROG(MAKE, make, /usr/local/bin/make, $PATH)
+dnl AC_CHECK_PROG(MAKE, make, , $PATH,
+dnl  AC_CHECK_PROG(MAKE, gmake, , $PATH,
+dnl    AC_MSG_ERROR(Cannot find GNU make anywhere)))
 AC_CHECK_PROG(ETAGS, etags, /space/local/bin/etags, $PATH)
 
 dnl Check for libraries.
@@ -67,15 +64,21 @@ dnl AC_MSG_RESULT(Extra libraries to link in: $LIBS)
 dnl AC_MSG_RESULT(Defines: ${DEFS})
 
 dnl Create @DIRLIST@.
-DIRLIST=\
-"include \
-src \
-test"
+dnl DIRLIST=\
+dnl "include \
+dnl src \
+dnl test \
+dnl obj/stat_dbg \
+dnl obj/shar_dbg \
+dnl obj/stat_opt \
+dnl obj/shar_opt \
+dnl obj/stat_prof \
+dnl obj/shar_prof"
 
-AC_SUBST(DIRLIST)dnl
+dnl AC_SUBST(DIRLIST)dnl
 
 dnl Process the following files.
 AC_OUTPUT(Makefile \
-Makefile.common \
 bin/pmerge \
 bin/pstub)
+dnl Makefile.common \

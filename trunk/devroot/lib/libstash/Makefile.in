@@ -9,26 +9,75 @@
 #
 # $Source$
 # $Author: jasone $
-# Current revision: $Revision: 164 $
-# Last modified: $Date: 1998-08-11 17:08:58 -0700 (Tue, 11 Aug 1998) $
+# Current revision: $Revision: 168 $
+# Last modified: $Date: 1998-08-24 18:03:32 -0700 (Mon, 24 Aug 1998) $
 #
 # Description: Master Makefile for libstash.
 #              
 ##############################################################################
 
 #
-# Common definitions.
+# File lists.
+#
+
+# Include files that _are_ installed.
+INCS := stash_incs.h bhp.h br.h brblk.h brbs.h buf.h dbg.h \
+	glob.h jt.h list.h locks.h log.h matrix.h mem.h oh.h res.h \
+	sock.h socks.h thread.h
+
+# Include files that are _not_ installed.
+PRIV_INCS := bhp_priv.h br_priv.h  brbs_priv.h \
+	dbg_priv.h jt_priv.h list_priv.h \
+	locks_priv.h log_priv.h mem_priv.h oh_priv.h res_priv.h
+
+# Source files.
+SRCS := bhp.c br.c brblk.c brbs.c buf.c dbg.c \
+	glob.c jt.c list.c locks.c log.c matrix.c mem.c oh.c res.c sock.c \
+	socks.c thread.c zt.c
+
+# Simple tests.  Output is diff'ed with the expected (.expect file) output.
+CTESTS := c19980411a.c c19980412a.c c19980419a.c c19980430a.c \
+	c19980627a.c c19980630a.c c19980731a.c
+
+# Perl scripts that drive the BTESTS.
+PTESTS := p19980701a.pl.in
+
+# Backend test programs that are driven by the PTESTS.
+BTESTS :=#
+
+# Munge the filename lists so that they are prefixed by the directory they're
+# in, relative to @top_srcdir@.  Also, convert the test names to their final
+# names.
+INCS := $(addprefix include/,$(INCS))
+PRIV_INCS := $(addprefix include/,$(P_INCS))
+SRCS := $(addprefix src/,$(SRCS))
+CTESTS := $(addprefix test/,$(CTESTS:.c=))
+BTESTS := $(addprefix test/,$(BTESTS:.c=))
+PTESTS := $(addprefix test/,$(PTESTS:.pl.in=.pl))
+
+#
+# Library names.
+#
+
+LIB := stash
+
+LIB_REV := 0.0
+
+LIB_ST_D := lib/lib$(strip $(LIB))_d.a
+LIB_SH_D := lib/lib$(strip $(LIB))_d.so.$(strip $(LIB_REV))
+LIB_ST_O := lib/lib$(strip $(LIB)).a
+LIB_SH_O := lib/lib$(strip $(LIB)).so.$(strip $(LIB_REV))
+LIB_ST_P := lib/lib$(strip $(LIB))_p.a
+LIB_SH_P := lib/lib$(strip $(LIB))_p.so.$(strip $(LIB_REV))
+
+#
+# Standard definitions.
 #
 
 SHELL   := /bin/sh
-top_builddir :=@top_srcdir@#
-MAKE    := @MAKE@
 CC	:= @CC@
 AR	:= @AR@
-FLEX    := @FLEX@
-BISON   := @BISON@
 RANLIB	:= @RANLIB@
-LIBTOOL := @LIBTOOL@
 INSTALL	:= @INSTALL@
 CAT     := @CAT@
 PERL    := @PERL@
@@ -37,96 +86,148 @@ DIFF    := @DIFF@
 PMERGE  := @top_srcdir@/bin/pmerge
 PSTUB   := @top_srcdir@/bin/pstub
 
-FLEXFLAGS := -CF
-BISONFLAGS := -d
+#
+# Compiler flags.
+#
+
+LIBPATH := -L@top_srcdir@/lib
+EXTRALIBS := @LIBS@
+INCPATH := -I@top_srcdir@ -I@top_srcdir@/include
 
 DEFINES := @DEFS@
-CFLAGS  := @CFLAGS@
-LIBPATH :=
-EXTRALIBS := @LIBS@
-LIBS    :=
-INCPATH := -I@top_srcdir@
+ST_DEFINES := 
+SH_DEFINES := 
+D_DEFINES := -D_STASH_DBG -D_STASH_DEBUG_
+O_DEFINES := 
+P_DEFINES := 
 
-# Needed for dependency generation code.
-define NL
+#CFLAGS  := @CFLAGS@
+CFLAGS := -Wall -pipe
+ST_CFLAGS := 
+SH_CFLAGS := -fPIC -DPIC
+D_CFLAGS := -g3
+O_CFLAGS := -O3
+P_CFLAGS := -O3 -pg
 
-endef
-
-# Clear out all vpaths.
+# Clear out all vpaths, then set just one (default vpath) for the main build
+# directory.
 vpath
-vpath c% @top_srcdir@
+vpath % .
 
-# Need this here since the includes have dependencies in them, but there's stuff
-# in the includes that we need to see before using $(TARGETS).
-all: default
+# Need this here since the includes have dependencies in them, but there's
+# stuff in the includes that we need to see before using $(TARGETS).
+all : default
 
 #
 # Common rules
 #
 
-.SUFFIXES:
-.SUFFIXES: .la .c .h .lo .d .l .y .yy.c .tab.c .tab.h .pl.in .pl
+.SUFFIXES :
+.SUFFIXES : .a .c .h .o .o_st_d .o_sh_d .o_st_o .o_sh_o .o_st_p .o_sh_p \
+	.d_st_d .d_sh_d .d_st_o .d_sh_o .d_st_p .d_sh_p .pl.in .pl
 
-# This rule is used to build the tests.  Note that we copy the binary, even
-# though we have to run it from the main build directory.  This allows make
-# to realize that the target is up to date.  It's a hack necessitated by the
-# fact that libtool doesn't allow a directory component in -o arguments.
-%: %.c $(LIBS)
-	$(LIBTOOL) $(CC) $(CFLAGS) $(INCPATH) $(DEFINES) -c $<
-	mv -f $(notdir $(@:=.o)) $(notdir $(@:=.lo)) $(dir $<)
-	$(LIBTOOL) $(CC) -o $(notdir $@) $(@:=.o) $(LIBPATH) $(LNKLIBS) $(EXTRALIBS)
-	cp -f $(notdir $@) $(<:.c=)
+#
+# Build rules.
+#
 
-%.lo: %.c
-	$(LIBTOOL) $(CC) $(CFLAGS) $(INCPATH) $(DEFINES) -c $<
-	mv -f $(notdir $@) $(notdir $(@:.lo=.o)) $(dir $@)
+# This rule is used to build the tests.
+% : %.c $(LIB_ST_D)
+	$(CC) $(CFLAGS) $(ST_CFLAGS) $(D_CFLAGS) $(INCPATH) $(DEFINES) -c $< -o $(@:=.o)
+	$(CC) -o $@ $(@:=.o) $(LIBPATH) $(EXTRALIBS) -static -l$(LIB)
+
+obj/st_d/%.o_st_d : src/%.c
+	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(D_CFLAGS) $(DEFINES) $(ST_DEFINES) $(D_DEFINES) -c $< -o $@
+
+obj/sh_d/%.o_sh_d : src/%.c
+	$(CC) $(INCPATH) $(CFLAGS) $(SH_CFLAGS) $(D_CFLAGS) $(DEFINES) $(SH_DEFINES) $(D_DEFINES) -c $< -o $@
+
+obj/st_o/%.o_st_o : src/%.c
+	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(O_CFLAGS) $(DEFINES) $(ST_DEFINES) $(O_DEFINES) -c $< -o $@		
+
+obj/sh_o/%.o_sh_o : src/%.c
+	$(CC) $(INCPATH) $(CFLAGS) $(SH_CFLAGS) $(O_CFLAGS) $(DEFINES) $(SH_DEFINES) $(O_DEFINES) -c $< -o $@
+
+obj/st_p/%.o_st_p : src/%.c
+	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(P_CFLAGS) $(DEFINES) $(ST_DEFINES) $(P_DEFINES) -c $< -o $@
+
+obj/sh_p/%.o_sh_p : src/%.c
+	$(CC) $(INCPATH) $(CFLAGS) $(SH_CFLAGS) $(P_CFLAGS) $(DEFINES) $(SH_DEFINES) $(P_DEFINES) -c $< -o $@
 
 # Rule for dependency file creation
-%.d: %.c
-	$(SHELL) -ec "$(CC) -M $(DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.lo $(subst /,\/,$(strip $(dir $@)))\1.d \2/g\" > $@"
+%.d : %.c
+	$(SHELL) -ec "$(CC) -M $(DEFINES) $(ST_DEFINES) $(D_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o $(subst /,\/,$(strip $(dir $@)))\1.d \2/g\" > $@"
 
-%.tab.c %.tab.h: %.y
-	$(BISON) $(BISONFLAGS) -o $(<:.y=.tab.c) $<
-	mv -f $(notdir $(@:.c=.h)) $(dir $@)
+obj/st_d/%.d_st_d : src/%.c
+	$(SHELL) -ec "$(CC) -M $(DEFINES) $(ST_DEFINES) $(D_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_st_d $(subst /,\/,$(strip $(dir $@)))\1.d_st_d \2/g\" > $@"
 
-.l.yy.c:
-	$(FLEX) $(FLEXFLAGS) -o$(<:.l=.yy.c) $<
+obj/sh_d/%.d_sh_d : src/%.c
+	$(SHELL) -ec "$(CC) -M $(DEFINES) $(SH_DEFINES) $(D_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_sh_d $(subst /,\/,$(strip $(dir $@)))\1.d_sh_d \2/g\" > $@"
 
-.pl.in.pl:
+obj/st_o/%.d_st_o : src/%.c
+	$(SHELL) -ec "$(CC) -M $(DEFINES) $(ST_DEFINES) $(O_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_st_o $(subst /,\/,$(strip $(dir $@)))\1.d_st_o \2/g\" > $@"
+
+obj/sh_o/%.d_sh_o : src/%.c
+	$(SHELL) -ec "$(CC) -M $(DEFINES) $(SH_DEFINES) $(O_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_sh_o $(subst /,\/,$(strip $(dir $@)))\1.d_sh_o \2/g\" > $@"
+
+obj/st_p/%.d_st_p : src/%.c
+	$(SHELL) -ec "$(CC) -M $(DEFINES) $(ST_DEFINES) $(P_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_st_p $(subst /,\/,$(strip $(dir $@)))\1.d_st_p \2/g\" > $@"
+
+obj/sh_p/%.d_sh_p : src/%.c
+	$(SHELL) -ec "$(CC) -M $(DEFINES) $(SH_DEFINES) $(P_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_sh_p $(subst /,\/,$(strip $(dir $@)))\1.d_sh_p \2/g\" > $@"
+
+.pl.in.pl :
 	$(PERL) -w $(PMERGE) $(PERL) $(PSTUB) $< $@
 
-# Include per-directory Makefile.mk files.
-ALLDIRS := @DIRLIST@
+#
+# Dependencies (not rules).
+#
 
-include $(foreach dir,$(ALLDIRS),@top_srcdir@/$(strip $(dir))/Makefile.mk)
-
-# Include dependency files.
-ifneq ($(strip $(SRCS)),)
-include $(SRCS:.c=.d)
-endif
-
-ifneq ($(strip $(LSRCS)),)
-include $(LSRCS:.c=.d)
-endif
-
-#include $(EXECS:=.d)
-ifneq ($(strip $(CTESTS)),)
+include $(SRCS:src/%.c=obj/st_d/%.d_st_d)
+include $(SRCS:src/%.c=obj/sh_d/%.d_sh_d)
+include $(SRCS:src/%.c=obj/st_o/%.d_st_o)
+include $(SRCS:src/%.c=obj/sh_o/%.d_sh_o)
+include $(SRCS:src/%.c=obj/st_p/%.d_st_p)
+include $(SRCS:src/%.c=obj/sh_p/%.d_sh_p)
 include $(CTESTS:=.d)
-endif
+#include $(BTESTS:=.d)
 
-ifneq ($(strip $(BTESTS)),)
-include $(BTESTS:=.d)
-endif
-#include $(foreach firstname,$(LEXERS),$(firstname:.yy.c=.d))
-#include $(foreach firstname,$(PARSERS),$(firstname:.tab.c=.d))
+$(LIB_ST_D) : $(SRCS:src/%.c=obj/st_d/%.o_st_d)
+	$(AR) cru $@ $?
+	$(RANLIB) $@
+
+$(LIB_SH_D) : $(SRCS:src/%.c=obj/sh_d/%.o_sh_d)
+	$(CC) -shared -o $@ $^
+
+$(LIB_ST_O) : $(SRCS:src/%.c=obj/st_o/%.o_st_o)
+	$(AR) cru $@ $?
+	$(RANLIB) $@
+
+$(LIB_SH_O) : $(SRCS:src/%.c=obj/sh_o/%.o_sh_o)
+	$(CC) -shared -o $@ $^
+
+$(LIB_ST_P) : $(SRCS:src/%.c=obj/st_p/%.o_st_p)
+	$(AR) cru $@ $?
+	$(RANLIB) $@
+
+$(LIB_SH_P) : $(SRCS:src/%.c=obj/sh_p/%.o_sh_p)
+	$(CC) -shared -o $@ $^
+
+stat_dbg : $(LIB_ST_D)
+shar_dbg : $(LIB_SH_D)
+stat_opt : $(LIB_ST_O)
+shar_opt : $(LIB_SH_O)
+stat_prof : $(LIB_ST_P)
+shar_prof : $(LIB_SH_P)
+
+FORCE :
 
 #
 # user 'make'ables
 #
 
-default: $(LIBS)
+default : stat_dbg shar_dbg stat_opt shar_opt stat_prof shar_prof
 
-check: $(CTESTS) $(PTESTS) $(BTESTS)
+check : $(CTESTS) $(PTESTS)# $(BTESTS)
 	@$(SHELL) -c \
 	'echo Running regression tests: ; \
 	echo "---------------------------------------------" ;\
@@ -136,7 +237,7 @@ check: $(CTESTS) $(PTESTS) $(BTESTS)
 	done; \
 	for i in $(CTESTS); do \
 	echo -n "$$i..."; \
-	./`$(BASENAME) $$i` > ./$$i.out 2>&1; \
+	./$$i > ./$$i.out 2>&1; \
 	$(DIFF) $$i.out $$i.expect > $$i.diff ; \
 	if [ -s $$i.diff ] ; then \
 	echo "failed. ****************" ; \
@@ -155,98 +256,66 @@ check: $(CTESTS) $(PTESTS) $(BTESTS)
 	echo "---------------------------------------------" \
 	'
 
-install: $(LIBS)
+install : install_stat_dbg install_shar_dbg install_stat_opt \
+	install_shar_opt install_stat_prof install_shar_prof
+
+install_common : 
 	$(SHELL) -c \
 	'@INSTALL@ -d @prefix@/lib; \
-	for i in $(LIBS); do \
-	@LIBTOOL@ @INSTALL@ $$i @prefix@/lib; \
-	done; \
 	@INSTALL@ -d @prefix@/include/libstash; \
-	for i in libstash.h $(LIB_LINCS); do \
-	@LIBTOOL@ @INSTALL@ $$i @prefix@/include/libstash/; \
+	for i in libstash.h $(INCS); do \
+	@INSTALL@ $$i @prefix@/include/libstash/; \
 	done; \
 	'
 
-#	@LIBTOOL@ --finish --dry-run @prefix@/lib \
+install_stat_dbg : stat_dbg install_common
+	@INSTALL@ -d @prefix@/lib
+	@INSTALL@ $(LIB_ST_D) @prefix@/lib
 
-uninstall:
-	$(SHELL) -c \
-	'for i in $(LIBS); do \
-	@LIBTOOL@ rm -f @prefix@/lib/$$i; \
-	done; \
-	for i in libstash.h $(notdir $(LIB_LINCS)); do \
-	@LIBTOOL@ rm -f @prefix@/include/libstash/$$i; \
-	done; \
-	'
+install_shar_dbg : shar_dbg install_common
+	@INSTALL@ -d @prefix@/lib
+	@INSTALL@ $(LIB_SH_D) @prefix@/lib
 
-doc:
+install_stat_opt : stat_opt install_common
+	@INSTALL@ -d @prefix@/lib
+	@INSTALL@ $(LIB_ST_O) @prefix@/lib
 
-clean: FORCE
+install_shar_opt : shar_opt install_common
+	@INSTALL@ -d @prefix@/lib
+	@INSTALL@ $(LIB_SH_O) @prefix@/lib
+
+install_stat_prof : stat_prof install_common
+	@INSTALL@ -d @prefix@/lib
+	@INSTALL@ $(LIB_ST_P) @prefix@/lib
+
+install_shar_prof : shar_prof install_common
+	@INSTALL@ -d @prefix@/lib
+	@INSTALL@ $(LIB_SH_P) @prefix@/lib
+
+uninstall :
+	rm -f @prefix@/lib/lib$(strip $(LIB))*
+	rm -rf @prefix@/include/libstash
+
+doc :
+
+clean : FORCE
 	rm -f *~
 	rm -f *.bak *.BAK
-	rm -f core
-	rm -f *.core
-	rm -f $(CTESTS) $(notdir $(CTESTS))
-	rm -f $(PTESTS)
-	rm -f $(ALLDIRS:=/*~) bin/*~
-	rm -f $(ALLDIRS:=/*.d)
-	rm -f $(ALLDIRS:=/*.lo) $(ALLDIRS:=/*.o)
-	rm -f $(ALLDIRS:=/*.bak)
-	rm -f $(ALLDIRS:=/*.BAK)
-	rm -f $(ALLDIRS:=/*.out)
-	rm -f $(ALLDIRS:=/core)
-	rm -f $(ALLDIRS:=/*.core)
-	rm -f $(ALLDIRS:=/*.diff)
-	rm -rf .libs
-	rm -f $(LIBS)
+	rm -f core test/core *.core test/*.core
+	rm -f test/*.o test/*.out test/*.diff
+	rm -f $(CTESTS) $(PTESTS) $(BTESTS)
+	rm -f *~ obj/*/*.[dop]* bin/*~
+	rm -f lib/lib*
+	rm -f test/*.d
+	rm -f test/*.diff
 
-#	rm -f $(EXECS)
-#	rm -f $(BTESTS)
-
-distclean: clean
-	rm -f "#"*"#"
-	rm -f $(ALLDIRS:=/"#"*"#") bin/"#"*"#"
-	rm -f Makefile Makefile.common
-	rm -f config.cache config.log config.status libstash.h libtool
+distclean : clean
+	rm -f "#"*"#" bin/"#"*"#" src/"#"*"#" include/"#"*"#"
+	rm -f Makefile
+	rm -f config.cache config.log config.status libstash.h
 	rm -f TAGS
 	rm -f $(PMERGE)
 	rm -f $(PSTUB)
 
-#	rm -f $(TARGETS)
-
-etags: $(SRCS) $(INCS) $(LSRCS) $(LINCS)
-	@ETAGS@ $(SRCS) $(INCS)
-
-# Create .yy.c, .tab.c, .tab.h, etc. files needed for a release.
-release:
-
-targets:
-	@echo "User 'make'ables: all (default)"
-	@echo "                  check"
-	@echo "                  install"
-	@echo "                  uninstall"
-	@echo "                  doc"
-	@echo "                  clean"
-	@echo "                  distclean"
-	@echo "                  etags"
-	@echo "                  targets"
-	@echo "                  release"
-
-FORCE:
-
-# XXX This can be fixed.
-# The next 3 dependencies unfortunately make all lexers dependent on all
-# parsers, so we may rebuild more than necessary when a parser is changed.
-$(PARSERS:.y=.tab.h): $(PARSERS)
-$(PARSERS:.y=.tab.c): $(PARSERS)
-$(LEXERS): $(PARSERS:.y=.tab.h)
-
-#$(EXECS): $(LIBS)
-#	$(CC) -o $@ $($(subst /_,_,$(strip $(dir $@)_OBJS))) $(LIBPATH) $(LNKLIBS) $(EXTRALIBS)
-
-# Make sure that the tests are rebuilt if the libraries change.  Also force
-# the libraries to be built if they haven't already been.
-$(CTESTS) : $(LIBS)
-$(BTESTS) : $(LIBS)
-
-# End of file.
+etags : $(INCS) $(PRIV_INCS) $(SRCS)
+	@ETAGS@ $(INCS) $(PRIV_INCS) $(SRCS)
