@@ -619,21 +619,22 @@ void
 systemdict_atan(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack;
-    cw_nxo_t *nxo;
-    cw_nxor_t real;
+    cw_nxo_t *nxo_x, *nxo_y;
+    cw_nxor_t x, y;
 
     ostack = nxo_thread_ostack_get(a_thread);
-    NXO_STACK_GET(nxo, ostack, a_thread);
-    switch (nxo_type_get(nxo))
+    NXO_STACK_GET(nxo_x, ostack, a_thread);
+    NXO_STACK_DOWN_GET(nxo_y, ostack, a_thread, nxo_x);
+    switch (nxo_type_get(nxo_y))
     {
 	case NXOT_INTEGER:
 	{
-	    real = (cw_nxor_t) nxo_integer_get(nxo);
+	    y = (cw_nxor_t) nxo_integer_get(nxo_y);
 	    break;
 	}
 	case NXOT_REAL:
 	{
-	    real = nxo_real_get(nxo);
+	    y = nxo_real_get(nxo_y);
 	    break;
 	}
 	default:
@@ -642,7 +643,27 @@ systemdict_atan(cw_nxo_t *a_thread)
 	    return;
 	}
     }
-    nxo_real_new(nxo, atan(real));
+    switch (nxo_type_get(nxo_x))
+    {
+	case NXOT_INTEGER:
+	{
+	    x = (cw_nxor_t) nxo_integer_get(nxo_x);
+	    break;
+	}
+	case NXOT_REAL:
+	{
+	    x = nxo_real_get(nxo_x);
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+    nxo_real_new(nxo_y, atan2(y, x));
+
+    nxo_stack_pop(ostack);
 }
 #endif
 
