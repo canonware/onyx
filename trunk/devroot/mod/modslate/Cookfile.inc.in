@@ -94,6 +94,7 @@ modslate_mods_clean :
 
 modslate_mods_distclean :
 {
+  rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.perf [MODSLATE_CTESTS]];
 }
 
 /*

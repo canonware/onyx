@@ -30,7 +30,7 @@ bins_uninstall : [addsuffix _bins_uninstall @bins@];
 
 bins_clean : [addsuffix _bins_clean @bins@];
 
-bins_distclean : [addsuffix _bins_clean @bins@];
+bins_distclean : [addsuffix _bins_distclean @bins@];
 
 /*
  * Build rules for binary C files --> object files.
