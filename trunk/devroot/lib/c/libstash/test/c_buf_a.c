@@ -316,6 +316,25 @@ main()
     bufpool_delete(&bufpool);
   }
 
+  /* buf_new(), buf_delete(). */
+  {
+    cw_buf_t buf, * buf_p;
+
+    _cw_assert(&buf == buf_new(&buf, FALSE));
+    buf_delete(&buf);
+
+    _cw_assert(&buf == buf_new(&buf, TRUE));
+    buf_delete(&buf);
+
+    buf_p = buf_new(NULL, FALSE);
+    _cw_check_ptr(buf_p);
+    buf_delete(buf_p);
+
+    buf_p = buf_new(NULL, TRUE);
+    _cw_check_ptr(buf_p);
+    buf_delete(buf_p);
+  }
+
   /* buf_get_uint8(), buf_get_uint32(), buf_get_uint64(). */
   {
     cw_bufel_t * bufel_p;
@@ -602,27 +621,515 @@ main()
     bufpool_delete(&bufpool);
   }
   
-  /* buf_new(), buf_delete(). */
+  /* buf_set_uint8(). */
   {
-    cw_buf_t buf, * buf_p;
+    cw_bufpool_t bufpool;
+    cw_buf_t buf;
+    cw_bufel_t bufel;
+    cw_bufc_t * bufc_p;
+    cw_uint8_t * a, b[2], c[3], * d, * e, f[13];
+    cw_uint32_t i;
 
-    _cw_assert(&buf == buf_new(&buf, FALSE));
+    /* r- a  0,
+     * r- b  1,  2,
+     * rw c  3,  4,  5,
+     * r- d  6,  7,  8,  9,
+     * rw e 10, 11, 12, 13, 14,
+     * r- f (42), 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, (42)
+     */
+
+    bufpool_new(&bufpool, 5, 10);
+    buf_new(&buf, TRUE);
+
+    a = (cw_uint8_t *) _cw_malloc(1);
+    a[0] = 0;
+    bufel_new(&bufel, NULL, NULL);
+    bufc_p = bufc_new(NULL, NULL, NULL);
+    bufc_set_buffer(bufc_p, a, 1, FALSE, mem_dealloc, cw_g_mem);
+    bufel_set_bufc(&bufel, bufc_p);
+    _cw_assert(0 == buf_get_num_bufels(&buf));
+    buf_append_bufel(&buf, &bufel);
+    _cw_assert(1 == buf_get_num_bufels(&buf));
+    bufel_delete(&bufel);
+    _cw_assert(1 == buf_get_size(&buf));
+
+    b[0] = 1;
+    b[1] = 2;
+    bufel_new(&bufel, NULL, NULL);
+    bufc_p = bufc_new(NULL, NULL, NULL);
+    bufc_set_buffer(bufc_p, (void *) b, 2, FALSE, NULL, NULL);
+    bufel_set_bufc(&bufel, bufc_p);
+    buf_append_bufel(&buf, &bufel);
+    _cw_assert(2 == buf_get_num_bufels(&buf));
+    bufel_delete(&bufel);
+    _cw_assert(3 == buf_get_size(&buf));
+
+    c[0] = 3;
+    c[1] = 4;
+    c[2] = 5;
+    bufel_new(&bufel, NULL, NULL);
+    bufc_p = bufc_new(NULL, NULL, NULL);
+    bufc_set_buffer(bufc_p, (void *) c, 3, TRUE, NULL, NULL);
+    bufel_set_bufc(&bufel, bufc_p);
+    buf_append_bufel(&buf, &bufel);
+    _cw_assert(3 == buf_get_num_bufels(&buf));
+    bufel_delete(&bufel);
+    _cw_assert(6 == buf_get_size(&buf));
+
+    d = (cw_uint8_t *) _cw_malloc(4);
+    d[0] = 6;
+    d[1] = 7;
+    d[2] = 8;
+    d[3] = 9;
+    bufel_new(&bufel, NULL, NULL);
+    bufc_p = bufc_new(NULL, NULL, NULL);
+    bufc_set_buffer(bufc_p, (void *) d, 4, FALSE, mem_dealloc, cw_g_mem);
+    bufel_set_bufc(&bufel, bufc_p);
+    buf_append_bufel(&buf, &bufel);
+    _cw_assert(4 == buf_get_num_bufels(&buf));
+    bufel_delete(&bufel);
+    _cw_assert(10 == buf_get_size(&buf));
+
+    e = bufpool_get_buffer(&bufpool);
+    e[0] = 10;
+    e[1] = 11;
+    e[2] = 12;
+    e[3] = 13;
+    e[4] = 14;
+    bufel_new(&bufel, NULL, NULL);
+    bufc_p = bufc_new(NULL, NULL, NULL);
+    bufc_set_buffer(bufc_p, (void *) e, 5, TRUE, bufpool_put_buffer, &bufpool);
+    bufel_set_bufc(&bufel, bufc_p);
+    buf_append_bufel(&buf, &bufel);
+    _cw_assert(5 == buf_get_num_bufels(&buf));
+    bufel_delete(&bufel);
+    _cw_assert(15 == buf_get_size(&buf));
+
+    f[0] = 42;
+    f[1] = 15;
+    f[2] = 16;
+    f[3] = 17;
+    f[4] = 18;
+    f[5] = 19;
+    f[6] = 20;
+    f[7] = 21;
+    f[8] = 22;
+    f[9] = 23;
+    f[10] = 24;
+    f[11] = 25;
+    f[12] = 42;
+    bufel_new(&bufel, NULL, NULL);
+    bufc_p = bufc_new(NULL, NULL, NULL);
+    bufc_set_buffer(bufc_p, (void *) f, 13, FALSE, NULL, NULL);
+    bufel_set_bufc(&bufel, bufc_p);
+    bufel_set_beg_offset(&bufel, 1);
+    bufel_set_end_offset(&bufel, 12);
+    buf_append_bufel(&buf, &bufel);
+    _cw_assert(6 == buf_get_num_bufels(&buf));
+    bufel_delete(&bufel);
+    _cw_assert(26 == buf_get_size(&buf));
+
+    _cw_assert(0 == buf_get_uint8(&buf, 0));
+    _cw_assert(1 == buf_get_uint8(&buf, 1));
+    _cw_assert(2 == buf_get_uint8(&buf, 2));
+    _cw_assert(3 == buf_get_uint8(&buf, 3));
+    _cw_assert(4 == buf_get_uint8(&buf, 4));
+    _cw_assert(5 == buf_get_uint8(&buf, 5));
+    _cw_assert(6 == buf_get_uint8(&buf, 6));
+    _cw_assert(7 == buf_get_uint8(&buf, 7));
+    _cw_assert(8 == buf_get_uint8(&buf, 8));
+    _cw_assert(9 == buf_get_uint8(&buf, 9));
+    _cw_assert(10 == buf_get_uint8(&buf, 10));
+    _cw_assert(11 == buf_get_uint8(&buf, 11));
+    _cw_assert(12 == buf_get_uint8(&buf, 12));
+    _cw_assert(13 == buf_get_uint8(&buf, 13));
+    _cw_assert(14 == buf_get_uint8(&buf, 14));
+    _cw_assert(15 == buf_get_uint8(&buf, 15));
+    _cw_assert(16 == buf_get_uint8(&buf, 16));
+    _cw_assert(17 == buf_get_uint8(&buf, 17));
+    _cw_assert(18 == buf_get_uint8(&buf, 18));
+    _cw_assert(19 == buf_get_uint8(&buf, 19));
+    _cw_assert(20 == buf_get_uint8(&buf, 20));
+    _cw_assert(21 == buf_get_uint8(&buf, 21));
+    _cw_assert(22 == buf_get_uint8(&buf, 22));
+    _cw_assert(23 == buf_get_uint8(&buf, 23));
+    _cw_assert(24 == buf_get_uint8(&buf, 24));
+    _cw_assert(25 == buf_get_uint8(&buf, 25));
+
+    for (i = 0; i < 26; i++)
+    {
+      _cw_assert(i == buf_get_uint8(&buf, i));
+      _cw_assert(FALSE == buf_set_uint8(&buf, i, (~i) & 0xff));
+      _cw_assert(((~i) & 0xff) == buf_get_uint8(&buf, i));
+    }
+    
+    for (i = 0; i < 26; i++)
+    {
+      _cw_assert(((~i) & 0xff) == buf_get_uint8(&buf, i));
+      buf_set_uint8(&buf, i, ~i);
+    }
+
+    for (; i < 50; i++)
+    {
+      buf_set_uint8(&buf, i, i);
+      _cw_assert(i == buf_get_uint8(&buf, i));
+    }
+    
     buf_delete(&buf);
+    bufpool_delete(&bufpool);
+  }
 
-    _cw_assert(&buf == buf_new(&buf, TRUE));
+  /* buf_set_uint32(). */
+  {
+    cw_bufpool_t bufpool;
+    cw_buf_t buf;
+    cw_bufel_t bufel;
+    cw_bufc_t * bufc_p;
+    cw_uint8_t * a, b[2], c[3], * d, * e, f[13];
+    cw_uint32_t i;
+    cw_uint32_t t_uint32;
+
+    /* r- a  0,
+     * r- b  1,  2,
+     * rw c  3,  4,  5,
+     * r- d  6,  7,  8,  9,
+     * rw e 10, 11, 12, 13, 14,
+     * r- f (42), 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, (42)
+     */
+
+    bufpool_new(&bufpool, 5, 10);
+    buf_new(&buf, TRUE);
+
+    a = (cw_uint8_t *) _cw_malloc(1);
+    a[0] = 0;
+    bufel_new(&bufel, NULL, NULL);
+    bufc_p = bufc_new(NULL, NULL, NULL);
+    bufc_set_buffer(bufc_p, a, 1, FALSE, mem_dealloc, cw_g_mem);
+    bufel_set_bufc(&bufel, bufc_p);
+    _cw_assert(0 == buf_get_num_bufels(&buf));
+    buf_append_bufel(&buf, &bufel);
+    _cw_assert(1 == buf_get_num_bufels(&buf));
+    bufel_delete(&bufel);
+    _cw_assert(1 == buf_get_size(&buf));
+
+    b[0] = 1;
+    b[1] = 2;
+    bufel_new(&bufel, NULL, NULL);
+    bufc_p = bufc_new(NULL, NULL, NULL);
+    bufc_set_buffer(bufc_p, (void *) b, 2, FALSE, NULL, NULL);
+    bufel_set_bufc(&bufel, bufc_p);
+    buf_append_bufel(&buf, &bufel);
+    _cw_assert(2 == buf_get_num_bufels(&buf));
+    bufel_delete(&bufel);
+    _cw_assert(3 == buf_get_size(&buf));
+
+    c[0] = 3;
+    c[1] = 4;
+    c[2] = 5;
+    bufel_new(&bufel, NULL, NULL);
+    bufc_p = bufc_new(NULL, NULL, NULL);
+    bufc_set_buffer(bufc_p, (void *) c, 3, TRUE, NULL, NULL);
+    bufel_set_bufc(&bufel, bufc_p);
+    buf_append_bufel(&buf, &bufel);
+    _cw_assert(3 == buf_get_num_bufels(&buf));
+    bufel_delete(&bufel);
+    _cw_assert(6 == buf_get_size(&buf));
+
+    d = (cw_uint8_t *) _cw_malloc(4);
+    d[0] = 6;
+    d[1] = 7;
+    d[2] = 8;
+    d[3] = 9;
+    bufel_new(&bufel, NULL, NULL);
+    bufc_p = bufc_new(NULL, NULL, NULL);
+    bufc_set_buffer(bufc_p, (void *) d, 4, FALSE, mem_dealloc, cw_g_mem);
+    bufel_set_bufc(&bufel, bufc_p);
+    buf_append_bufel(&buf, &bufel);
+    _cw_assert(4 == buf_get_num_bufels(&buf));
+    bufel_delete(&bufel);
+    _cw_assert(10 == buf_get_size(&buf));
+
+    e = bufpool_get_buffer(&bufpool);
+    e[0] = 10;
+    e[1] = 11;
+    e[2] = 12;
+    e[3] = 13;
+    e[4] = 14;
+    bufel_new(&bufel, NULL, NULL);
+    bufc_p = bufc_new(NULL, NULL, NULL);
+    bufc_set_buffer(bufc_p, (void *) e, 5, TRUE, bufpool_put_buffer, &bufpool);
+    bufel_set_bufc(&bufel, bufc_p);
+    buf_append_bufel(&buf, &bufel);
+    _cw_assert(5 == buf_get_num_bufels(&buf));
+    bufel_delete(&bufel);
+    _cw_assert(15 == buf_get_size(&buf));
+
+    f[0] = 42;
+    f[1] = 15;
+    f[2] = 16;
+    f[3] = 17;
+    f[4] = 18;
+    f[5] = 19;
+    f[6] = 20;
+    f[7] = 21;
+    f[8] = 22;
+    f[9] = 23;
+    f[10] = 24;
+    f[11] = 25;
+    f[12] = 42;
+    bufel_new(&bufel, NULL, NULL);
+    bufc_p = bufc_new(NULL, NULL, NULL);
+    bufc_set_buffer(bufc_p, (void *) f, 13, FALSE, NULL, NULL);
+    bufel_set_bufc(&bufel, bufc_p);
+    bufel_set_beg_offset(&bufel, 1);
+    bufel_set_end_offset(&bufel, 12);
+    buf_append_bufel(&buf, &bufel);
+    _cw_assert(6 == buf_get_num_bufels(&buf));
+    bufel_delete(&bufel);
+    _cw_assert(26 == buf_get_size(&buf));
+
+    _cw_assert(0 == buf_get_uint8(&buf, 0));
+    _cw_assert(1 == buf_get_uint8(&buf, 1));
+    _cw_assert(2 == buf_get_uint8(&buf, 2));
+    _cw_assert(3 == buf_get_uint8(&buf, 3));
+    _cw_assert(4 == buf_get_uint8(&buf, 4));
+    _cw_assert(5 == buf_get_uint8(&buf, 5));
+    _cw_assert(6 == buf_get_uint8(&buf, 6));
+    _cw_assert(7 == buf_get_uint8(&buf, 7));
+    _cw_assert(8 == buf_get_uint8(&buf, 8));
+    _cw_assert(9 == buf_get_uint8(&buf, 9));
+    _cw_assert(10 == buf_get_uint8(&buf, 10));
+    _cw_assert(11 == buf_get_uint8(&buf, 11));
+    _cw_assert(12 == buf_get_uint8(&buf, 12));
+    _cw_assert(13 == buf_get_uint8(&buf, 13));
+    _cw_assert(14 == buf_get_uint8(&buf, 14));
+    _cw_assert(15 == buf_get_uint8(&buf, 15));
+    _cw_assert(16 == buf_get_uint8(&buf, 16));
+    _cw_assert(17 == buf_get_uint8(&buf, 17));
+    _cw_assert(18 == buf_get_uint8(&buf, 18));
+    _cw_assert(19 == buf_get_uint8(&buf, 19));
+    _cw_assert(20 == buf_get_uint8(&buf, 20));
+    _cw_assert(21 == buf_get_uint8(&buf, 21));
+    _cw_assert(22 == buf_get_uint8(&buf, 22));
+    _cw_assert(23 == buf_get_uint8(&buf, 23));
+    _cw_assert(24 == buf_get_uint8(&buf, 24));
+    _cw_assert(25 == buf_get_uint8(&buf, 25));
+
+    for (i = 0; i < 26; i++)
+    {
+      t_uint32 = ~buf_get_uint32(&buf, i);
+      
+      _cw_assert(FALSE == buf_set_uint32(&buf, i, t_uint32));
+      
+      _cw_assert(t_uint32 == buf_get_uint32(&buf, i));
+    }
+    
+    for (i = 0; i < 26; i++)
+    {
+      buf_set_uint32(&buf, i, ~i);
+      _cw_assert(~i == buf_get_uint32(&buf, i));
+    }
+
+    for (; i < 50; i++)
+    {
+      buf_set_uint32(&buf, i, i);
+      _cw_assert(i == buf_get_uint32(&buf, i));
+    }
+    
     buf_delete(&buf);
+    bufpool_delete(&bufpool);
+  }
 
-    buf_p = buf_new(NULL, FALSE);
-    _cw_check_ptr(buf_p);
-    buf_delete(buf_p);
+  /* buf_set_uint64(). */
+  {
+    cw_bufpool_t bufpool;
+    cw_buf_t buf;
+    cw_bufel_t bufel;
+    cw_bufc_t * bufc_p;
+    cw_uint8_t * a, b[2], c[3], * d, * e, f[13];
+    cw_uint32_t i;
+    cw_uint64_t t_uint64;
 
-    buf_p = buf_new(NULL, TRUE);
-    _cw_check_ptr(buf_p);
-    buf_delete(buf_p);
+    /* r- a  0,
+     * r- b  1,  2,
+     * rw c  3,  4,  5,
+     * r- d  6,  7,  8,  9,
+     * rw e 10, 11, 12, 13, 14,
+     * r- f (42), 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, (42)
+     */
+
+    bufpool_new(&bufpool, 5, 10);
+    buf_new(&buf, TRUE);
+
+    a = (cw_uint8_t *) _cw_malloc(1);
+    a[0] = 0;
+    bufel_new(&bufel, NULL, NULL);
+    bufc_p = bufc_new(NULL, NULL, NULL);
+    bufc_set_buffer(bufc_p, a, 1, FALSE, mem_dealloc, cw_g_mem);
+    bufel_set_bufc(&bufel, bufc_p);
+    _cw_assert(0 == buf_get_num_bufels(&buf));
+    buf_append_bufel(&buf, &bufel);
+    _cw_assert(1 == buf_get_num_bufels(&buf));
+    bufel_delete(&bufel);
+    _cw_assert(1 == buf_get_size(&buf));
+
+    b[0] = 1;
+    b[1] = 2;
+    bufel_new(&bufel, NULL, NULL);
+    bufc_p = bufc_new(NULL, NULL, NULL);
+    bufc_set_buffer(bufc_p, (void *) b, 2, FALSE, NULL, NULL);
+    bufel_set_bufc(&bufel, bufc_p);
+    buf_append_bufel(&buf, &bufel);
+    _cw_assert(2 == buf_get_num_bufels(&buf));
+    bufel_delete(&bufel);
+    _cw_assert(3 == buf_get_size(&buf));
+
+    c[0] = 3;
+    c[1] = 4;
+    c[2] = 5;
+    bufel_new(&bufel, NULL, NULL);
+    bufc_p = bufc_new(NULL, NULL, NULL);
+    bufc_set_buffer(bufc_p, (void *) c, 3, TRUE, NULL, NULL);
+    bufel_set_bufc(&bufel, bufc_p);
+    buf_append_bufel(&buf, &bufel);
+    _cw_assert(3 == buf_get_num_bufels(&buf));
+    bufel_delete(&bufel);
+    _cw_assert(6 == buf_get_size(&buf));
+
+    d = (cw_uint8_t *) _cw_malloc(4);
+    d[0] = 6;
+    d[1] = 7;
+    d[2] = 8;
+    d[3] = 9;
+    bufel_new(&bufel, NULL, NULL);
+    bufc_p = bufc_new(NULL, NULL, NULL);
+    bufc_set_buffer(bufc_p, (void *) d, 4, FALSE, mem_dealloc, cw_g_mem);
+    bufel_set_bufc(&bufel, bufc_p);
+    buf_append_bufel(&buf, &bufel);
+    _cw_assert(4 == buf_get_num_bufels(&buf));
+    bufel_delete(&bufel);
+    _cw_assert(10 == buf_get_size(&buf));
+
+    e = bufpool_get_buffer(&bufpool);
+    e[0] = 10;
+    e[1] = 11;
+    e[2] = 12;
+    e[3] = 13;
+    e[4] = 14;
+    bufel_new(&bufel, NULL, NULL);
+    bufc_p = bufc_new(NULL, NULL, NULL);
+    bufc_set_buffer(bufc_p, (void *) e, 5, TRUE, bufpool_put_buffer, &bufpool);
+    bufel_set_bufc(&bufel, bufc_p);
+    buf_append_bufel(&buf, &bufel);
+    _cw_assert(5 == buf_get_num_bufels(&buf));
+    bufel_delete(&bufel);
+    _cw_assert(15 == buf_get_size(&buf));
+
+    f[0] = 42;
+    f[1] = 15;
+    f[2] = 16;
+    f[3] = 17;
+    f[4] = 18;
+    f[5] = 19;
+    f[6] = 20;
+    f[7] = 21;
+    f[8] = 22;
+    f[9] = 23;
+    f[10] = 24;
+    f[11] = 25;
+    f[12] = 42;
+    bufel_new(&bufel, NULL, NULL);
+    bufc_p = bufc_new(NULL, NULL, NULL);
+    bufc_set_buffer(bufc_p, (void *) f, 13, FALSE, NULL, NULL);
+    bufel_set_bufc(&bufel, bufc_p);
+    bufel_set_beg_offset(&bufel, 1);
+    bufel_set_end_offset(&bufel, 12);
+    buf_append_bufel(&buf, &bufel);
+    _cw_assert(6 == buf_get_num_bufels(&buf));
+    bufel_delete(&bufel);
+    _cw_assert(26 == buf_get_size(&buf));
+
+    _cw_assert(0 == buf_get_uint8(&buf, 0));
+    _cw_assert(1 == buf_get_uint8(&buf, 1));
+    _cw_assert(2 == buf_get_uint8(&buf, 2));
+    _cw_assert(3 == buf_get_uint8(&buf, 3));
+    _cw_assert(4 == buf_get_uint8(&buf, 4));
+    _cw_assert(5 == buf_get_uint8(&buf, 5));
+    _cw_assert(6 == buf_get_uint8(&buf, 6));
+    _cw_assert(7 == buf_get_uint8(&buf, 7));
+    _cw_assert(8 == buf_get_uint8(&buf, 8));
+    _cw_assert(9 == buf_get_uint8(&buf, 9));
+    _cw_assert(10 == buf_get_uint8(&buf, 10));
+    _cw_assert(11 == buf_get_uint8(&buf, 11));
+    _cw_assert(12 == buf_get_uint8(&buf, 12));
+    _cw_assert(13 == buf_get_uint8(&buf, 13));
+    _cw_assert(14 == buf_get_uint8(&buf, 14));
+    _cw_assert(15 == buf_get_uint8(&buf, 15));
+    _cw_assert(16 == buf_get_uint8(&buf, 16));
+    _cw_assert(17 == buf_get_uint8(&buf, 17));
+    _cw_assert(18 == buf_get_uint8(&buf, 18));
+    _cw_assert(19 == buf_get_uint8(&buf, 19));
+    _cw_assert(20 == buf_get_uint8(&buf, 20));
+    _cw_assert(21 == buf_get_uint8(&buf, 21));
+    _cw_assert(22 == buf_get_uint8(&buf, 22));
+    _cw_assert(23 == buf_get_uint8(&buf, 23));
+    _cw_assert(24 == buf_get_uint8(&buf, 24));
+    _cw_assert(25 == buf_get_uint8(&buf, 25));
+
+    for (i = 0; i < 26; i++)
+    {
+      t_uint64 = ~buf_get_uint64(&buf, i);
+      
+      _cw_assert(FALSE == buf_set_uint64(&buf, i, t_uint64));
+      
+      _cw_assert(t_uint64 == buf_get_uint64(&buf, i));
+    }
+    
+    for (i = 0; i < 26; i++)
+    {
+      buf_set_uint64(&buf, i, ~i);
+      _cw_assert(~i == buf_get_uint64(&buf, i));
+    }
+
+    for (; i < 50; i++)
+    {
+      buf_set_uint64(&buf, i, i);
+      _cw_assert(i == buf_get_uint64(&buf, i));
+    }
+    
+    buf_delete(&buf);
+    bufpool_delete(&bufpool);
+  }
+
+  /* buf_set_range(). */
+  {
+    cw_buf_t * buf;
+    char * str_a = "This is string A.  Blah blah.  Okay, this is now longer.";
+    char * str_b = "And following is string B.  Mumble mumble.";
+
+    buf = buf_new(NULL, TRUE);
+    _cw_check_ptr(buf);
+
+    _cw_assert(FALSE == buf_set_range(buf, 0, strlen(str_a) + 1,
+				      str_a, FALSE));
+    _cw_assert(FALSE == buf_set_range(buf, strlen(str_a) + 1, strlen(str_b) + 1,
+				      str_b, FALSE));
+    _cw_assert((strlen(str_a) + strlen(str_b) + 2) == buf_get_size(buf));
+
+    buf_release_head_data(buf, buf_get_size(buf));
+
+    _cw_assert(FALSE == buf_set_range(buf, 0, strlen(str_a) + 1,
+				      str_a, TRUE));
+    _cw_assert(FALSE == buf_set_range(buf, 4, strlen(str_b) + 1,
+				      str_b, TRUE));
+    _cw_assert(strlen(str_b) + 4 == buf_get_size(buf));
+    _cw_assert(strlen(str_a) == strlen(str_b) + 4);
+    
+    buf_delete(buf);
   }
 
   /* buf_prepend_bufel(), buf_append_bufel(),
-     buf_get_size(). */
+   * buf_get_size(). */
   {
     cw_buf_t * buf_p;
     cw_bufel_t * bufel_p_a, * bufel_p_b, * bufel_p_c, * bufel_p_d;
