@@ -69,6 +69,10 @@ struct cw_xep_s
 
 #define xep_value() (_xep.value)
 
+#define xep_filename() (_xep.filename)
+
+#define xep_line_num() (_xep.line_num)
+
 void
 xep_throw_e(cw_xepv_t a_value, volatile const char *a_filename,
 	    cw_uint32_t a_line_num);
