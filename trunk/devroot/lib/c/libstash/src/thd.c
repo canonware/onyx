@@ -353,10 +353,10 @@ thd_p_suspend(cw_thd_t *a_thd)
 	}
 #endif
 #ifdef _CW_THD_FREEBSD_SR
-	error = pthread_resume_np(a_thd->thread);
+	error = pthread_suspend_np(a_thd->thread);
 	if (error) {
 		out_put_e(NULL, NULL, 0, __FUNCTION__,
-		    "Error in pthread_resume_np(): [s]\n",
+		    "Error in pthread_suspend_np(): [s]\n",
 		    strerror(error));
 		abort();
 	}

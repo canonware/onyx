@@ -1,3 +1,8 @@
+2001-02-03  Jason Evans  <jasone@canonware.com>
+
+	* src/thd.c (thd_p_suspend): Call pthread_suspend_np() rather than
+	pthread_resume_np().
+
 2000-12-11  Jason Evans  <jasone@canonware.com>
 
 	* include/libstash/xep.h: Do not pass 0 to longjmp(), since it
