@@ -43,7 +43,7 @@ typedef enum {
 	STILTE_TYPECHECK,		/* Incorrect argument type. */
 	STILTE_UNDEFINED,		/* Object not found in dstack. */
 	STILTE_UNDEFINEDFILENAME,	/* Bad filename. */
-	STILTE_UNDEFINEDRESULT,
+	STILTE_UNDEFINEDRESULT,		/* Divide by 0. */
 	STILTE_UNMATCHEDMARK,		/* No mark on ostack. */
 	STILTE_UNREGISTERED		/* Other non-enumerated error. */
 #define	STILTE_LAST	STILTE_UNREGISTERED

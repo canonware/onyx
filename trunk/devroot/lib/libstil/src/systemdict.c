@@ -3869,25 +3869,30 @@ systemdict_token(cw_stilt_t *a_stilt)
 		stilo_dup(tstilo, stilo);
 		stilts_new(&stilts);
 
-		/* Reset the error value. */
-		stilt_error_set(a_stilt, STILTE_NONE);
-
-		stilo_string_lock(tstilo);
-		nscanned = stilt_token(a_stilt, &stilts,
-		    stilo_string_get(tstilo), stilo_string_len_get(tstilo));
+		xep_begin();
+		xep_try {
+			stilo_string_lock(tstilo);
+			nscanned = stilt_token(a_stilt, &stilts,
+			    stilo_string_get(tstilo),
+			    stilo_string_len_get(tstilo));
+		}
+		xep_acatch {
+			stilo_string_unlock(tstilo);
+			stils_pop(tstack);
+			stilts_delete(&stilts, a_stilt);
+		}
+		xep_end();
 		stilo_string_unlock(tstilo);
-		if (stilt_error_get(a_stilt)) {
-			stils_pop(tstack);
-			stilts_delete(&stilts, a_stilt);
-			return;
-		}
 
-		stilt_flush(a_stilt, &stilts);
-		if (stilt_error_get(a_stilt)) {
+		xep_begin();
+		xep_try {
+			stilt_flush(a_stilt, &stilts);
+		}
+		xep_acatch {
 			stils_pop(tstack);
 			stilts_delete(&stilts, a_stilt);
-			return;
 		}
+		xep_end();
 
 		if (stilt_state(a_stilt) == STILTTS_START &&
 		    stilt_deferred(a_stilt) == FALSE && stils_count(ostack) ==
@@ -3926,9 +3931,6 @@ systemdict_token(cw_stilt_t *a_stilt)
 		stilo_dup(tstilo, stilo);
 		stilts_new(&stilts);
 
-		/* Reset the error value. */
-		stilt_error_set(a_stilt, STILTE_NONE);
-
 		/*
 		 * Feed the scanner one byte at a time, checking after every
 		 * character whether a token was accepted.  If we run out of
@@ -3937,23 +3939,30 @@ systemdict_token(cw_stilt_t *a_stilt)
 		 */
 		for (nread = stilo_file_read(tstilo, 1, &c); nread > 0; nread =
 		    stilo_file_read(tstilo, 1, &c)) {
-			stilt_token(a_stilt, &stilts, &c, 1);
-			if (stilt_error_get(a_stilt)) {
+			xep_begin();
+			xep_try {
+				stilt_token(a_stilt, &stilts, &c, 1);
+			}
+			xep_acatch {
 				stils_pop(tstack);
 				stilts_delete(&stilts, a_stilt);
-				return;
 			}
+			xep_end();
+
 			if (stilt_state(a_stilt) == STILTTS_START &&
 			    stilt_deferred(a_stilt) == FALSE &&
 			    stils_count(ostack) == scount + 1)
 				goto SUCCESS;
 		}
-		stilt_flush(a_stilt, &stilts);
-		if (stilt_error_get(a_stilt)) {
+		xep_begin();
+		xep_try {
+			stilt_flush(a_stilt, &stilts);
+		}
+		xep_acatch {
 			stils_pop(tstack);
 			stilts_delete(&stilts, a_stilt);
-			return;
 		}
+		xep_end();
 
 		if (stilt_state(a_stilt) == STILTTS_START &&
 		    stilt_deferred(a_stilt) == FALSE && stils_count(ostack) ==

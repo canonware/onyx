@@ -120,9 +120,6 @@ struct cw_stilt_s {
 	cw_stilo_t	userdict;
 	cw_stilo_t	threaddict;
 
-	/* Current error value. */
-	cw_stilte_t	error;
-
 	/*
 	 * Tokenizer state.  If a token is broken across two or more input
 	 * strings, data are copied to an internal buffer, and state machine
@@ -237,9 +234,6 @@ cw_bool_t stilt_dict_stack_search(cw_stilt_t *a_stilt, cw_stilo_t *a_key,
 #define	stilt_userdict_get(a_stilt) (&((a_stilt)->userdict))
 #define	stilt_errordict_get(a_stilt) (&((a_stilt)->errordict))
 #define	stilt_currenterror_get(a_stilt) (&((a_stilt)->currenterror))
-
-#define	stilt_error_get(a_stilt) (a_stilt)->error
-#define	stilt_error_set(a_stilt, a_stilte) (a_stilt)->error = (a_stilte)
 
 #define	stilt_currentlocking(a_stilt)					\
 	(a_stilt)->locking

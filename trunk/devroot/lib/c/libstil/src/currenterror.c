@@ -20,13 +20,21 @@ currenterror_l_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 	cw_stils_t	*tstack;
 	cw_stilo_t	*name, *val;
 
-#define NENTRIES	7	/* Number of entries in currenterror. */
+#define NENTRIES	8	/* Number of entries in currenterror. */
 	stilo_dict_new(a_dict, stilt_stil_get(a_stilt),
 	    stilt_currentlocking(a_stilt), NENTRIES);
 
 	tstack = stilt_tstack_get(a_stilt);
 	name = stils_push(tstack);
 	val = stils_push(tstack);
+
+	/*
+	 * Initialize operators.
+	 */
+	stilo_name_new(name, stilt_stil_get(a_stilt),
+	    stiln_str(STILN_stop), stiln_len(STILN_stop), TRUE);
+	stilo_operator_new(val, systemdict_stop, STILN_stop);
+	stilo_dict_def(a_dict, stilt_stil_get(a_stilt), name, val);
 
 	/*
 	 * Initialize entries that are not operators.

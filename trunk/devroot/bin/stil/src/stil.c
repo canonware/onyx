@@ -90,24 +90,15 @@ main(int argc, char **argv, char **envp)
 	 */
 	if (isatty(0) && argc == 1) {
 		/*
+		 * Do not stop on error.
+		 *
 		 * Quit on estackoverflow in order to avoid an infinite loop.
 		 */
 		static const cw_uint8_t	code[] = "
+currenterror begin
+	/stop {} def
+end
 errordict begin
-	/handleerror {
-		currenterror begin
-		(Error /) print errorname cvs print ( in ) print
-		    /command load 1 spop
-		recordstacks {
-			(ostack: ) print
-			ostack 1 spop
-			(estack: ) print
-			estack 1 spop
-			(dstack: ) print
-			dstack 1 spop
-		} if
-		end
-	} def
 	/estackoverflow {
 		//estackoverflow quit
 	} def

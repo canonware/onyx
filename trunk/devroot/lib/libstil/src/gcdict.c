@@ -221,7 +221,7 @@ gcdict_setperiod(cw_stilt_t *a_stilt)
 	}
 	if (stilo_integer_get(period) < 0 || stilo_integer_get(period) >
 	    UINT_MAX) {
-		stilt_error(a_stilt, STILTE_RANGECHECK);
+		stilt_error(a_stilt, STILTE_LIMITCHECK);
 		    return;
 	}
 
@@ -245,7 +245,7 @@ gcdict_setthreshold(cw_stilt_t *a_stilt)
 	}
 	if (stilo_integer_get(threshold) < 0 || stilo_integer_get(threshold) >
 	    UINT_MAX) {
-		stilt_error(a_stilt, STILTE_RANGECHECK);
+		stilt_error(a_stilt, STILTE_LIMITCHECK);
 		    return;
 	}
 

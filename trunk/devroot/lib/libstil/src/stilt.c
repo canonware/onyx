@@ -881,12 +881,6 @@ stilt_error(cw_stilt_t *a_stilt, cw_stilte_t a_error)
 	}
 
 	/*
-	 * Set the error in case our generic error handler gets called (not to
-	 * mention for general use).
-	 */
-	a_stilt->error = a_error;
-
-	/*
 	 * Find handler corresponding to error.
 	 */
 	stiln = stilte_stiln(a_error);

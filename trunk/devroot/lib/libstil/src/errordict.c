@@ -13,26 +13,37 @@
 
 #include <errno.h>
 
-static const cw_stiln_t errordict_ops[] = {
-	STILN_dstackunderflow,
-	STILN_estackoverflow,
-	STILN_interrupt,
-	STILN_invalidaccess,
-	STILN_invalidcontext,
-	STILN_invalidexit,
-	STILN_invalidfileaccess,
-	STILN_ioerror,
-	STILN_limitcheck,
-	STILN_rangecheck,
-	STILN_stackunderflow,
-	STILN_syntaxerror,
-	STILN_timeout,
-	STILN_typecheck,
-	STILN_undefined,
-	STILN_undefinedfilename,
-	STILN_undefinedresult,
-	STILN_unmatchedmark,
-	STILN_unregistered
+struct cw_errordict_entry {
+	cw_stiln_t	stiln;
+	cw_op_t		*op_f;
+};
+
+#define ENTRY(name)	{STILN_##name, errordict_##name}
+
+/*
+ * Array of operators in errordict.
+ */
+static const struct cw_errordict_entry errordict_ops[] = {
+	ENTRY(dstackunderflow),
+	ENTRY(estackoverflow),
+	ENTRY(handleerror),
+	ENTRY(interrupt),
+	ENTRY(invalidaccess),
+	ENTRY(invalidcontext),
+	ENTRY(invalidexit),
+	ENTRY(invalidfileaccess),
+	ENTRY(ioerror),
+	ENTRY(limitcheck),
+	ENTRY(rangecheck),
+	ENTRY(stackunderflow),
+	ENTRY(syntaxerror),
+	ENTRY(timeout),
+	ENTRY(typecheck),
+	ENTRY(undefined),
+	ENTRY(undefinedfilename),
+	ENTRY(undefinedresult),
+	ENTRY(unmatchedmark),
+	ENTRY(unregistered)
 };
 
 void
@@ -42,12 +53,12 @@ errordict_l_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 	cw_stilo_t	*name, *value;
 	cw_uint32_t	i;
 
-#define	NEXTRA	1
+#define	NEXTRA	0
 #define NENTRIES							\
-	(sizeof(errordict_ops) / sizeof(cw_stiln_t))
+	(sizeof(errordict_ops) / sizeof(struct cw_errordict_entry))
 
 	stilo_dict_new(a_dict, stilt_stil_get(a_stilt),
-	    stilt_currentlocking(a_stilt), NENTRIES);
+	    stilt_currentlocking(a_stilt), NENTRIES + NEXTRA);
 
 	tstack = stilt_tstack_get(a_stilt);
 	name = stils_push(tstack);
@@ -55,25 +66,14 @@ errordict_l_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 
 	for (i = 0; i < NENTRIES; i++) {
 		stilo_name_new(name, stilt_stil_get(a_stilt),
-		    stiln_str(errordict_ops[i]),
-		    stiln_len(errordict_ops[i]), TRUE);
-		stilo_operator_new(value, errordict_generic,
-		    errordict_ops[i]);
+		    stiln_str(errordict_ops[i].stiln),
+		    stiln_len(errordict_ops[i].stiln), TRUE);
+		stilo_operator_new(value, errordict_ops[i].op_f,
+		    errordict_ops[i].stiln);
 		stilo_attrs_set(value, STILOA_EXECUTABLE);
 
-		stilo_dict_def(a_dict, stilt_stil_get(a_stilt), name,
-		    value);
+		stilo_dict_def(a_dict, stilt_stil_get(a_stilt), name, value);
 	}
-
-	/*
-	 * Initialize entries that aren't aliases for the generic error
-	 * processor.
-	 */
-	stilo_name_new(name, stilt_stil_get(a_stilt),
-	    stiln_str(STILN_handleerror), stiln_len(STILN_handleerror), TRUE);
-	stilo_operator_new(value, errordict_handleerror, STILN_handleerror);
-	stilo_attrs_set(value, STILOA_EXECUTABLE);
-	stilo_dict_def(a_dict, stilt_stil_get(a_stilt), name, value);
 
 	stils_npop(tstack, 2);
 
@@ -89,8 +89,9 @@ errordict_l_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 #undef NEXTRA
 }
 
-void
-errordict_generic(cw_stilt_t *a_stilt)
+static void
+errordict_p_generic(cw_stilt_t *a_stilt, cw_stilte_t a_stilte, cw_bool_t
+    a_record)
 {
 	cw_stils_t	*tstack;
 	cw_stilo_t	*currenterror, *tname, *tstilo;
@@ -120,33 +121,12 @@ errordict_generic(cw_stilt_t *a_stilt)
 	/* Set errorname. */
 	stilo_name_new(tname, stilt_stil_get(a_stilt),
 	    stiln_str(STILN_errorname), stiln_len(STILN_errorname), TRUE);
-	stiln = stilte_stiln(stilt_error_get(a_stilt));
+	stiln = stilte_stiln(a_stilte);
 	stilo_name_new(tstilo, stilt_stil_get(a_stilt), stiln_str(stiln),
 	    stiln_len(stiln), TRUE);
 	stilo_dict_def(currenterror, stilt_stil_get(a_stilt), tname, tstilo);
 	
-	switch (stilt_error_get(a_stilt)) {
-	case STILTE_INTERRUPT:
-	case STILTE_TIMEOUT:
-		/* Don't do anything. */
-		break;
-	case STILTE_DSTACKUNDERFLOW:
-	case STILTE_ESTACKOVERFLOW:
-	case STILTE_INVALIDACCESS:
-	case STILTE_INVALIDCONTEXT:
-	case STILTE_INVALIDEXIT:
-	case STILTE_INVALIDFILEACCESS:
-	case STILTE_IOERROR:
-	case STILTE_LIMITCHECK:
-	case STILTE_RANGECHECK:
-	case STILTE_STACKUNDERFLOW:
-	case STILTE_SYNTAXERROR:
-	case STILTE_TYPECHECK:
-	case STILTE_UNDEFINED:
-	case STILTE_UNDEFINEDFILENAME:
-	case STILTE_UNDEFINEDRESULT:
-	case STILTE_UNMATCHEDMARK:
-	case STILTE_UNREGISTERED: {
+	if (a_record) {
 		cw_stils_t	*ostack, *estack, *dstack;
 
 		ostack = stilt_ostack_get(a_stilt);
@@ -173,7 +153,7 @@ errordict_generic(cw_stilt_t *a_stilt)
 			stils_npop(tstack, 3);
 			xep_throw(_CW_STILX_CURRENTERROR);
 		}
-		if (stilo_boolean_get(tstilo) && stilt_error_get(a_stilt)) {
+		if (stilo_boolean_get(tstilo) && a_stilte) {
 			cw_stilo_t	*arr, *stilo;
 			cw_sint32_t	i, count;
 
@@ -227,14 +207,22 @@ errordict_generic(cw_stilt_t *a_stilt)
 
 			stils_pop(tstack);
 		}
-		break;
-	}
-	default:
-		_cw_not_reached();
 	}
 	stils_npop(tstack, 3);
 
-	_cw_stil_code(a_stilt, "handleerror");
+	_cw_stil_code(a_stilt, "handleerror currenterror /stop get eval");
+}
+
+void
+errordict_dstackunderflow(cw_stilt_t *a_stilt)
+{
+	errordict_p_generic(a_stilt, STILTE_DSTACKUNDERFLOW, TRUE);
+}
+
+void
+errordict_estackoverflow(cw_stilt_t *a_stilt)
+{
+	errordict_p_generic(a_stilt, STILTE_ESTACKOVERFLOW, TRUE);
 }
 
 void
@@ -252,6 +240,108 @@ recordstacks {
 	dstack 1 spop
 } if
 end
-stop
+currenterror /stop get eval
 ");
+}
+
+void
+errordict_interrupt(cw_stilt_t *a_stilt)
+{
+	errordict_p_generic(a_stilt, STILTE_INTERRUPT, FALSE);
+}
+
+void
+errordict_invalidaccess(cw_stilt_t *a_stilt)
+{
+	errordict_p_generic(a_stilt, STILTE_INVALIDACCESS, TRUE);
+}
+
+void
+errordict_invalidcontext(cw_stilt_t *a_stilt)
+{
+	errordict_p_generic(a_stilt, STILTE_INVALIDCONTEXT, TRUE);
+}
+
+void
+errordict_invalidexit(cw_stilt_t *a_stilt)
+{
+	errordict_p_generic(a_stilt, STILTE_INVALIDEXIT, TRUE);
+}
+
+void
+errordict_invalidfileaccess(cw_stilt_t *a_stilt)
+{
+	errordict_p_generic(a_stilt, STILTE_INVALIDFILEACCESS, TRUE);
+}
+
+void
+errordict_ioerror(cw_stilt_t *a_stilt)
+{
+	errordict_p_generic(a_stilt, STILTE_IOERROR, TRUE);
+}
+
+void
+errordict_limitcheck(cw_stilt_t *a_stilt)
+{
+	errordict_p_generic(a_stilt, STILTE_LIMITCHECK, TRUE);
+}
+
+void
+errordict_rangecheck(cw_stilt_t *a_stilt)
+{
+	errordict_p_generic(a_stilt, STILTE_RANGECHECK, TRUE);
+}
+
+void
+errordict_stackunderflow(cw_stilt_t *a_stilt)
+{
+	errordict_p_generic(a_stilt, STILTE_STACKUNDERFLOW, TRUE);
+}
+
+void
+errordict_syntaxerror(cw_stilt_t *a_stilt)
+{
+	errordict_p_generic(a_stilt, STILTE_SYNTAXERROR, TRUE);
+}
+
+void
+errordict_timeout(cw_stilt_t *a_stilt)
+{
+	errordict_p_generic(a_stilt, STILTE_TIMEOUT, FALSE);
+}
+
+void
+errordict_typecheck(cw_stilt_t *a_stilt)
+{
+	errordict_p_generic(a_stilt, STILTE_TYPECHECK, TRUE);
+}
+
+void
+errordict_undefined(cw_stilt_t *a_stilt)
+{
+	errordict_p_generic(a_stilt, STILTE_UNDEFINED, TRUE);
+}
+
+void
+errordict_undefinedfilename(cw_stilt_t *a_stilt)
+{
+	errordict_p_generic(a_stilt, STILTE_UNDEFINEDFILENAME, TRUE);
+}
+
+void
+errordict_undefinedresult(cw_stilt_t *a_stilt)
+{
+	errordict_p_generic(a_stilt, STILTE_UNDEFINEDRESULT, TRUE);
+}
+
+void
+errordict_unmatchedmark(cw_stilt_t *a_stilt)
+{
+	errordict_p_generic(a_stilt, STILTE_UNMATCHEDMARK, TRUE);
+}
+
+void
+errordict_unregistered(cw_stilt_t *a_stilt)
+{
+	errordict_p_generic(a_stilt, STILTE_UNREGISTERED, TRUE);
 }
