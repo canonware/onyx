@@ -113,7 +113,6 @@ const cw_uint8_t *cw_g_nx_names[] = {
 	"ino",
 	"integertype",
 	"invalidaccess",
-	"invalidcontext",
 	"invalidexit",
 	"invalidfileaccess",
 	"ioerror",

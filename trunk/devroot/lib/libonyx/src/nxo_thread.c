@@ -45,7 +45,6 @@ nxo_threade_nxn(cw_nxo_threade_t a_threade)
 		NXN_dstackunderflow,
 		NXN_estackoverflow,
 		NXN_invalidaccess,
-		NXN_invalidcontext,
 		NXN_invalidexit,
 		NXN_invalidfileaccess,
 		NXN_ioerror,

@@ -111,7 +111,6 @@ typedef enum {
 	NXN_ino,
 	NXN_integertype,
 	NXN_invalidaccess,
-	NXN_invalidcontext,
 	NXN_invalidexit,
 	NXN_invalidfileaccess,
 	NXN_ioerror,

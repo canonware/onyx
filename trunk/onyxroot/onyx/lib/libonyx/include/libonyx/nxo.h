@@ -23,7 +23,6 @@ typedef enum {
 	NXO_THREADE_DSTACKUNDERFLOW,	/* No poppable dictionary on dstack. */
 	NXO_THREADE_ESTACKOVERFLOW,	/* estack too deep. */
 	NXO_THREADE_INVALIDACCESS,	/* Permission error. */
-	NXO_THREADE_INVALIDCONTEXT,	/* Bad thread context. */
 	NXO_THREADE_INVALIDEXIT,	/* exit operator called outside loop. */
 	NXO_THREADE_INVALIDFILEACCESS,	/* Insufficient file permissions. */
 	NXO_THREADE_IOERROR,		/* read()/write()/etc. error. */
