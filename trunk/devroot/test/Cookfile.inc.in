@@ -14,7 +14,7 @@
 /*
  * Targets.
  */
-tests : onyx mods [addsuffix _tests bins mods libs];
+tests : oonyx mods [addsuffix _tests bins mods libs];
 check : tests [addsuffix _check bins mods libs];
 check_update : tests [addsuffix _check_update bins mods libs];
 
