@@ -2255,7 +2255,6 @@ stilo_file_buffer_size_get(cw_stilo_t *a_stilo)
 
 	_cw_check_ptr(file);
 	_cw_assert(file->stiloe.magic == _CW_STILOE_MAGIC);
-	_cw_assert(file->fd != -2);
 
 	return file->buffer_size;
 }
@@ -2273,7 +2272,6 @@ stilo_file_buffer_size_set(cw_stilo_t *a_stilo, cw_uint32_t a_size)
 
 	_cw_check_ptr(file);
 	_cw_assert(file->stiloe.magic == _CW_STILOE_MAGIC);
-	_cw_assert(file->fd != -2);
 
 	if (a_size == 0) {
 		if (file->buffer != NULL) {
@@ -2307,7 +2305,7 @@ stilo_file_buffer_count(cw_stilo_t *a_stilo)
 	_cw_check_ptr(file);
 	_cw_assert(file->stiloe.magic == _CW_STILOE_MAGIC);
 
-	if ((file->fd != -2 && file->buffer != NULL && file->buffer_mode
+	if ((file->fd != -1 && file->buffer != NULL && file->buffer_mode
 	    != BUFFER_WRITE))
 		retval = file->buffer_offset;
 	else
@@ -2334,7 +2332,7 @@ stilo_file_buffer_flush(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 	_cw_check_ptr(file);
 	_cw_assert(file->stiloe.magic == _CW_STILOE_MAGIC);
 
-	if (file->fd >= 0 && file->buffer != NULL) {
+	if (file->fd != -1 && file->buffer != NULL) {
 		if (file->buffer_mode == BUFFER_WRITE) {
 			if (write(file->fd, file->buffer,
 			    file->buffer_offset) == -1) {

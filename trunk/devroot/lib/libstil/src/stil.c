@@ -101,23 +101,23 @@ cw_stil_t
 		stilo_file_new(&retval->stdin_stilo, &stilt);
 		if (a_stdin == NULL) {
 			stilo_file_fd_wrap(&retval->stdin_stilo, 0);
-			stilo_file_buffer_size_set(&retval->stdin_stilo,
-			    _CW_STIL_STDIN_BUFFER_SIZE);
 		} else {
 			stilo_file_interactive(&retval->stdin_stilo, a_stdin,
 			    NULL, a_arg);
 		}
+		stilo_file_buffer_size_set(&retval->stdin_stilo,
+		    _CW_STIL_STDIN_BUFFER_SIZE);
 
 		/* Initialize stdout. */
 		stilo_file_new(&retval->stdout_stilo, &stilt);
 		if (a_stdout == NULL) {
 			stilo_file_fd_wrap(&retval->stdout_stilo, 1);
-			stilo_file_buffer_size_set(&retval->stdout_stilo,
-			    _CW_STIL_STDOUT_BUFFER_SIZE);
 		} else {
 			stilo_file_interactive(&retval->stdout_stilo, NULL,
 			    a_stdout, a_arg);
 		}
+		stilo_file_buffer_size_set(&retval->stdout_stilo,
+		    _CW_STIL_STDOUT_BUFFER_SIZE);
 
 		/* Initialize stderr. */
 		stilo_file_new(&retval->stderr_stilo, &stilt);
