@@ -23,6 +23,5 @@ struct cw_stiloe_mstate_s {
 };
 
 cw_stiloe_mstate_t	*stiloe_mstate_new(cw_stiloe_mstate_t *a_stiloe_mstate);
-
 void			stiloe_mstate_delete(cw_stiloe_mstate_t
     *a_stiloe_mstate);
