@@ -16,7 +16,9 @@
  ****************************************************************************/
 
 #include <netdb.h>
-#include <netinet/in.h>
+#ifdef _CW_OS_LINUX
+#  include <netinet/in.h>
+#endif
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <fcntl.h>
