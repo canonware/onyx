@@ -1,5 +1,7 @@
 1999-08-12  Jason Evans  <jasone@canonware.com>
 
+	* src/buf.c (buf_{g,s}et_uint{32,64}): Fix endianness problems.
+
 	* include/libstash/treen.h (treen_new): Convert to treen_new() and
 	treen_new_r().
 
