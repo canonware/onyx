@@ -2517,17 +2517,11 @@ bufc_set_buffer(cw_bufc_t * a_bufc, void * a_buffer, cw_uint32_t a_size,
   _cw_check_ptr(a_buffer);
   _cw_assert(a_size > 0);
   
-#ifdef _CW_REENTRANT
-  mtx_lock(&a_bufc->lock);
-#endif
   a_bufc->buf = (cw_uint8_t *) a_buffer;
   a_bufc->buf_size = a_size;
   a_bufc->is_writeable = a_is_writeable;
   a_bufc->buffer_dealloc_func = a_dealloc_func;
   a_bufc->buffer_dealloc_arg = a_dealloc_arg;
-#ifdef _CW_REENTRANT
-  mtx_unlock(&a_bufc->lock);
-#endif
 }
 
 static void

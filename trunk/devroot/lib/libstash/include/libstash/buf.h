@@ -543,9 +543,7 @@ buf_set_range(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint32_t a_length,
  *
  * <<< Description >>>
  *
- * Constructor.  The return value should be used in a call to bufc_set_buffer(),
- * then bufel_set_bufc().  bufc_delete() can be called at any time up until the
- * call to bufel_set_bufc() to deallocate, but should not be called thereafter.
+ * Constructor.
  *
  ****************************************************************************/
 cw_bufc_t *
@@ -565,8 +563,7 @@ bufc_new(cw_bufc_t * a_bufc,
  *
  * <<< Description >>>
  *
- * Destructor.  Only call this if a_bufc was never used in a call to
- * bufel_set_bufc().
+ * Destructor.
  *
  ****************************************************************************/
 void
@@ -594,6 +591,11 @@ bufc_delete(cw_bufc_t * a_bufc);
  *
  * Set a_bufc's internal data buffer to a_buffer, with size a_size, and
  * deallocation function a_dealloc_func(a_dealloc_arg, a_buffer).
+ *
+ * This function is not reentrant, and assumes that no other references to
+ * a_bufc exist (or at least they don't rely on the bufc's state).  In other
+ * words, don't call this function after the bufc has been inserted into one or
+ * more buf's.
  *
  ****************************************************************************/
 void

@@ -128,8 +128,8 @@
 #endif
 
 #ifdef _LIBSTASH_USE_MQ
-#  ifndef _LIBSTASH_USE_LIST
-#    define _LIBSTASH_USE_LIST
+#  ifndef _LIBSTASH_USE_RING
+#    define _LIBSTASH_USE_RING
 #  endif
 #endif
 

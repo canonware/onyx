@@ -30,7 +30,9 @@ struct cw_mq_s
 
   cw_bool_t get_stop;
   cw_bool_t put_stop;
-  cw_list_t list;
+  
+  cw_ring_t * ring;
+  cw_ring_t * spares_ring;
 };
 
 /****************************************************************************
@@ -79,7 +81,7 @@ mq_delete(cw_mq_t * a_mq);
  * <<< Output(s) >>>
  *
  * retval : Pointer to a message, or NULL.
- *          NULL : No messages in the queue, or .
+ *          NULL : No messages in the queue, or get is in the stop state.
  *
  * <<< Description >>>
  *

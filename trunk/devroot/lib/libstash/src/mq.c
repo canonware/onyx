@@ -52,11 +52,8 @@ mq_new(cw_mq_t * a_mq)
 
   retval->get_stop = FALSE;
   retval->put_stop = FALSE;
-#ifdef _CW_REENTRANT
-  list_new(&retval->list, FALSE);
-#else
-  list_new(&retval->list);
-#endif
+  retval->ring = NULL;
+  retval->spares_ring = NULL;
 
 #ifdef _LIBSTASH_DBG
   retval->magic = _LIBSTASH_MQ_MAGIC;
@@ -76,8 +73,15 @@ mq_delete(cw_mq_t * a_mq)
   mtx_delete(&a_mq->lock);
   cnd_delete(&a_mq->cond);
 #endif
-  
-  list_delete(&a_mq->list);
+
+  if (NULL != a_mq->ring)
+  {
+    ring_delete(a_mq->ring);
+  }
+  if (NULL != a_mq->spares_ring)
+  {
+    ring_delete(a_mq->spares_ring);
+  }
   
   if (TRUE == a_mq->is_malloced)
   {
@@ -95,6 +99,7 @@ void *
 mq_tryget(cw_mq_t * a_mq)
 {
   void * retval;
+  cw_ring_t * t_ring;
   
   _cw_check_ptr(a_mq);
   _cw_assert(_LIBSTASH_MQ_MAGIC == a_mq->magic);
@@ -107,8 +112,27 @@ mq_tryget(cw_mq_t * a_mq)
     retval = NULL;
     goto RETURN;
   }
-  
-  retval = list_hpop(&a_mq->list);
+
+  if (NULL != a_mq->ring)
+  {
+    t_ring = a_mq->ring;
+    a_mq->ring = ring_cut(t_ring);
+    if (a_mq->ring == t_ring)
+    {
+      a_mq->ring = NULL;
+    }
+    retval = ring_get_data(t_ring);
+
+    if (NULL != a_mq->spares_ring)
+    {
+      ring_meld(t_ring, a_mq->spares_ring);
+    }
+    a_mq->spares_ring = t_ring;
+  }
+  else
+  {
+    retval = NULL;
+  }
 
   RETURN:
 #ifdef _CW_REENTRANT
@@ -122,6 +146,7 @@ void *
 mq_get(cw_mq_t * a_mq)
 {
   void * retval;
+  cw_ring_t * t_ring;
   
   _cw_check_ptr(a_mq);
   _cw_assert(_LIBSTASH_MQ_MAGIC == a_mq->magic);
@@ -132,8 +157,8 @@ mq_get(cw_mq_t * a_mq)
     retval = NULL;
     goto RETURN;
   }
-  
-  while (NULL == (retval = list_hpop(&a_mq->list)))
+
+  while (NULL == a_mq->ring)
   {
     cnd_wait(&a_mq->cond, &a_mq->lock);
     if (a_mq->get_stop == TRUE)
@@ -143,6 +168,20 @@ mq_get(cw_mq_t * a_mq)
     }
   }
 
+  t_ring = a_mq->ring;
+  a_mq->ring = ring_cut(t_ring);
+  if (a_mq->ring == t_ring)
+  {
+    a_mq->ring = NULL;
+  }
+  retval = ring_get_data(t_ring);
+
+  if (NULL != a_mq->spares_ring)
+  {
+    ring_meld(t_ring, a_mq->spares_ring);
+  }
+  a_mq->spares_ring = t_ring;
+  
   RETURN:
   mtx_unlock(&a_mq->lock);
   return retval;
@@ -153,6 +192,7 @@ cw_sint32_t
 mq_put(cw_mq_t * a_mq, const void * a_message)
 {
   cw_sint32_t retval;
+  cw_ring_t * t_ring;
   
   _cw_check_ptr(a_mq);
   _cw_assert(_LIBSTASH_MQ_MAGIC == a_mq->magic);
@@ -161,20 +201,47 @@ mq_put(cw_mq_t * a_mq, const void * a_message)
 #endif
 
 #ifdef _CW_REENTRANT
-  if (0 == list_count(&a_mq->list))
+  if (NULL == a_mq->ring)
   {
     cnd_broadcast(&a_mq->cond);
   }
 #endif
+  
   if (a_mq->put_stop == TRUE)
   {
     retval = 1;
     goto RETURN;
   }
-  else if (NULL == list_tpush(&a_mq->list, (void *) a_message))
+  else
   {
-    retval = -1;
-    goto RETURN;
+    if (NULL != a_mq->spares_ring)
+    {
+      t_ring = a_mq->spares_ring;
+      a_mq->spares_ring = ring_cut(t_ring);
+      if (a_mq->spares_ring == t_ring)
+      {
+	a_mq->spares_ring = NULL;
+      }
+    }
+    else
+    {
+      t_ring = ring_new(NULL, NULL, NULL);
+      if (NULL == t_ring)
+      {
+	retval = -1;
+	goto RETURN;
+      }
+    }
+    
+    ring_set_data(t_ring, (void *) a_message);
+    if (NULL != a_mq->ring)
+    {
+      ring_meld(t_ring, a_mq->ring);
+    }
+    else
+    {
+      a_mq->ring = t_ring;
+    }
   }
 
   retval = 0;

@@ -1,3 +1,7 @@
+1999-06-20  Jason Evans  <jasone@canonware.com>
+
+	* src/mq.c: Rewrite mq, using ring instead of list.
+
 1999-06-18  Jason Evans  <jasone@canonware.com>
 
 	* include/libstash/thread.h (thd_sigmask): Add.
