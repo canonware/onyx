@@ -259,6 +259,7 @@ typedef enum
 #endif
     NXN_nametype,
     NXN_nbpop,
+    NXN_nbpush,
     NXN_ndn,
     NXN_ndup,
     NXN_ne,
@@ -270,6 +271,7 @@ typedef enum
 #endif
     NXN_not,
     NXN_npop,
+    NXN_npush,
 #ifdef CW_POSIX
     NXN_nsleep,
 #endif
@@ -316,6 +318,7 @@ typedef enum
     NXN_print,
     NXN_product,
     NXN_promptstring,
+    NXN_push,
     NXN_put,
     NXN_putinterval,
 #ifdef CW_POSIX
@@ -410,10 +413,12 @@ typedef enum
     NXN_size,
 #endif
     NXN_snbpop,
+    NXN_snbpush,
     NXN_sndn,
     NXN_sndup,
     NXN_snip,
     NXN_snpop,
+    NXN_snpush,
     NXN_snup,
 #ifdef CW_POSIX
     NXN_socket,

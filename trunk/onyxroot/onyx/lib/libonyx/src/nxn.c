@@ -260,6 +260,7 @@ const cw_uint8_t *cw_g_nx_names[] = {
 #endif
     "nametype",
     "nbpop",
+    "nbpush",
     "ndn",
     "ndup",
     "ne",
@@ -271,6 +272,7 @@ const cw_uint8_t *cw_g_nx_names[] = {
 #endif
     "not",
     "npop",
+    "npush",
 #ifdef CW_POSIX
     "nsleep",
 #endif
@@ -317,6 +319,7 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "print",
     "product",
     "promptstring",
+    "push",
     "put",
     "putinterval",
 #ifdef CW_POSIX
@@ -411,10 +414,12 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "size",
 #endif
     "snbpop",
+    "snbpush",
     "sndn",
     "sndup",
     "snip",
     "snpop",
+    "snpush",
     "snup",
 #ifdef CW_POSIX
     "socket",

@@ -256,6 +256,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(mutex),
 #endif
     ENTRY(nbpop),
+    ENTRY(nbpush),
     ENTRY(ndn),
     ENTRY(ndup),
     ENTRY(ne),
@@ -263,6 +264,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(nip),
     ENTRY(not),
     ENTRY(npop),
+    ENTRY(npush),
 #ifdef CW_POSIX
     ENTRY(nsleep),
 #endif
@@ -281,6 +283,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(ppid),
 #endif
     ENTRY(print),
+    ENTRY(push),
     ENTRY(put),
     ENTRY(putinterval),
 #ifdef CW_POSIX
@@ -355,10 +358,12 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #endif
     ENTRY(sipop),
     ENTRY(snbpop),
+    ENTRY(snbpush),
     ENTRY(sndn),
     ENTRY(sndup),
     ENTRY(snip),
     ENTRY(snpop),
+    ENTRY(snpush),
     ENTRY(snup),
 #ifdef CW_POSIX
     ENTRY(socket),
@@ -4832,6 +4837,12 @@ systemdict_nbpop(cw_nxo_t *a_thread)
 }
 
 void
+systemdict_nbpush(cw_nxo_t *a_thread)
+{
+    cw_error("XXX Not implemented");
+}
+
+void
 systemdict_ndn(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack, *nxo;
@@ -4845,7 +4856,7 @@ systemdict_ndn(cw_nxo_t *a_thread)
 	return;
     }
     count = nxo_integer_get(nxo);
-    if (count < 1)
+    if (count < 0)
     {
 	nxo_thread_nerror(a_thread, NXN_rangecheck);
 	return;
@@ -4857,7 +4868,11 @@ systemdict_ndn(cw_nxo_t *a_thread)
     }
 
     nxo_stack_pop(ostack);
-    nxo_stack_roll(ostack, count, -1);
+    /* nxo_stack_roll() doesn't allow a count of 0. */
+    if (count > 0)
+    {
+	nxo_stack_roll(ostack, count, -1);
+    }
 }
 
 void
@@ -5015,6 +5030,12 @@ systemdict_npop(cw_nxo_t *a_thread)
     NXO_STACK_NPOP(ostack, a_thread, count + 1);
 }
 
+void
+systemdict_npush(cw_nxo_t *a_thread)
+{
+    cw_error("XXX Not implemented");
+}
+
 #ifdef CW_POSIX
 void
 systemdict_nsleep(cw_nxo_t *a_thread)
@@ -5071,7 +5092,7 @@ systemdict_nup(cw_nxo_t *a_thread)
 	return;
     }
     count = nxo_integer_get(nxo);
-    if (count < 1)
+    if (count < 0)
     {
 	nxo_thread_nerror(a_thread, NXN_rangecheck);
 	return;
@@ -5083,7 +5104,11 @@ systemdict_nup(cw_nxo_t *a_thread)
     }
 
     nxo_stack_pop(ostack);
-    nxo_stack_roll(ostack, count, 1);
+    /* nxo_stack_roll() doesn't allow a count of 0. */
+    if (count > 0)
+    {
+	nxo_stack_roll(ostack, count, 1);
+    }
 }
 
 #ifdef CW_POSIX
@@ -5485,6 +5510,18 @@ systemdict_print(cw_nxo_t *a_thread)
     }
 
     nxo_stack_pop(ostack);
+}
+
+void
+systemdict_push(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *nxo, *bnxo;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_BGET(bnxo, ostack, a_thread);
+    nxo = nxo_stack_push(ostack);
+    nxo_dup(nxo, bnxo);
+    nxo_stack_bpop(ostack);
 }
 
 void
@@ -6956,6 +6993,12 @@ systemdict_snbpop(cw_nxo_t *a_thread)
 }
 
 void
+systemdict_snbpush(cw_nxo_t *a_thread)
+{
+    cw_error("XXX Not implemented");
+}
+
+void
 systemdict_sndn(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack, *stack, *nxo;
@@ -7083,6 +7126,12 @@ systemdict_snpop(cw_nxo_t *a_thread)
     }
 
     nxo_stack_remove(ostack, stack);
+}
+
+void
+systemdict_snpush(cw_nxo_t *a_thread)
+{
+    cw_error("XXX Not implemented");
 }
 
 void
