@@ -318,13 +318,12 @@ Each onyx thread has three program-visible stacks associated with it:
 	and code generally uses the operand stack for a place to store objects
 	as they are being manipulated.
 \item[Dictionary stack: ] The dictionary stack is used for looking up names.
-	Each thread starts with with four dictionaries on its dictionary stack,
+	Each thread starts with with three dictionaries on its dictionary stack,
 	which are, from top to bottom:
 	\begin{itemize}
 	\item{userdict}
 	\item{globaldict}
 	\item{systemdict}
-	\item{threaddict}
 	\end{itemize}
 	These dictionaries are discussed in detail later.
 \item[Execution stack: ] The interpreter uses the execution stack to store
@@ -728,6 +727,10 @@ a stack. \\
 \hline
 & {\bf \htmlref{globaldict}{systemdict:globaldict}} & & \\
 \hline
+& {\bf \htmlref{userdict}{systemdict:userdict}} & & \\
+\hline
+& {\bf \htmlref{errordict}{systemdict:errordict}} & & \\
+\hline
 & {\bf \htmlref{where}{systemdict:where}} & & \\
 \hline
 & {\bf \htmlref{undef}{systemdict:undef}} & & \\
@@ -900,6 +903,8 @@ under the protection of a mutex. \\
 & {\bf \htmlref{promptstring}{systemdict:promptstring}} & & \\
 \hline
 & {\bf \htmlref{handleerror}{systemdict:handleerror}} & & \\
+\hline
+& {\bf \htmlref{currenterror}{systemdict:currenterror}} & & \\
 \hline
 & {\bf \htmlref{bind}{systemdict:bind}} & & \\
 \hline
@@ -1457,33 +1462,6 @@ onyx:1> pstack
 		\end{verbatim}
 	\end{description}
 \end{description}
-
-\subsection{threaddict}
-
-
-\begin{longtable}{|r|l|l|p{3in}|}
-\caption{threaddict summary} \\
-\hline
-Input(s) & Op/Proc/Var & Output(s) & Description \\
-\hline \hline
-%begin{latexonly}
-\endfirsthead
-\caption[]{\emph{continued}} \\
-\hline
-Input(s) & Op/Proc/Var & Output(s) & Description \\
-\hline \hline \endhead
-\hline
-\multicolumn{4}{r}{\emph{Continued on next page...}} \endfoot
-\hline \endlastfoot
-%end{latexonly}
-& {\bf \htmlref{errordict}{threaddict:errordict}} & & \\
-\hline
-& {\bf \htmlref{currenterror}{threaddict:currenterror}} & & \\
-\hline
-& {\bf \htmlref{userdict}{threaddict:userdict}} & & \\
-\hline
-& {\bf \htmlref{threaddict}{threaddict:threaddict}} & & \\
-\end{longtable}
 
 \subsection{userdict}
 

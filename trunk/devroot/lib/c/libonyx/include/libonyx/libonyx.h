@@ -70,8 +70,8 @@ extern  "C" {
 
 /*
  * Initial size initial name cache hash table.  We know for sure that there will
- * be about 175 names referenced by systemdict, threaddict, errordict, and
- * currenterror to begin with.
+ * be about 250 names referenced by systemdict, errordict, and currenterror to
+ * begin with.
  */
 #define _LIBONYX_NAME_HASH		1024
 

@@ -64,6 +64,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(countestack),
 	ENTRY(counttomark),
 	ENTRY(currentdict),
+	ENTRY(currenterror),
 	ENTRY(currentfile),
 	ENTRY(currentlocking),
 	ENTRY(cvlit),
@@ -80,6 +81,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(dup),
 	ENTRY(end),
 	ENTRY(eq),
+	ENTRY(errordict),
 	ENTRY(estack),
 	ENTRY(eval),
 	ENTRY(exch),
@@ -158,6 +160,9 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(stack),
 	ENTRY(start),
 	ENTRY(status),
+	ENTRY(stderr),
+	ENTRY(stdin),
+	ENTRY(stdout),
 	ENTRY(stop),
 	ENTRY(stopped),
 	ENTRY(store),
@@ -183,6 +188,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(undef),
 	ENTRY(unlink),
 	ENTRY(unlock),
+	ENTRY(userdict),
 	ENTRY(wait),
 	ENTRY(waitpid),
 	ENTRY(where),
@@ -199,7 +205,7 @@ systemdict_l_populate(cw_nxo_t *a_dict, cw_nx_t *a_nx, int a_argc, char
 	cw_uint32_t	i;
 	cw_nxo_t	name, value;
 
-#define	NEXTRA	12
+#define	NEXTRA	9
 #define NENTRIES							\
 	(sizeof(systemdict_ops) / sizeof(struct cw_systemdict_entry))
 
@@ -275,23 +281,6 @@ systemdict_l_populate(cw_nxo_t *a_dict, cw_nx_t *a_nx, int a_argc, char
 		    nxn_len(NXN_argv), TRUE);
 		nxo_dict_def(a_dict, a_nx, &name, &argv_nxo);
 	}
-
-	/* stdin. */
-	nxo_name_new(&name, a_nx, nxn_str(NXN_stdin), nxn_len(NXN_stdin), TRUE);
-	nxo_dup(&value, nx_stdin_get(a_nx));
-	nxo_dict_def(a_dict, a_nx, &name, &value);
-
-	/* stdout. */
-	nxo_name_new(&name, a_nx, nxn_str(NXN_stdout), nxn_len(NXN_stdout),
-	    TRUE);
-	nxo_dup(&value, nx_stdout_get(a_nx));
-	nxo_dict_def(a_dict, a_nx, &name, &value);
-
-	/* stderr. */
-	nxo_name_new(&name, a_nx, nxn_str(NXN_stderr), nxn_len(NXN_stderr),
-	    TRUE);
-	nxo_dup(&value, nx_stderr_get(a_nx));
-	nxo_dict_def(a_dict, a_nx, &name, &value);
 
 	/* true. */
 	nxo_name_new(&name, a_nx, nxn_str(NXN_true), nxn_len(NXN_true), TRUE);
@@ -1201,6 +1190,16 @@ systemdict_currentdict(cw_nxo_t *a_thread)
 }
 
 void
+systemdict_currenterror(cw_nxo_t *a_thread)
+{
+	cw_nxo_t	*ostack, *nxo;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	nxo = nxo_stack_push(ostack);
+	nxo_dup(nxo, nxo_thread_currenterror_get(a_thread));
+}
+
+void
 systemdict_currentfile(cw_nxo_t *a_thread)
 {
 	cw_nxo_t	*ostack, *estack;
@@ -1646,8 +1645,8 @@ systemdict_end(cw_nxo_t *a_thread)
 
 	dstack = nxo_thread_dstack_get(a_thread);
 
-	/* threaddict, systemdict, globaldict, and userdict cannot be popped. */
-	if (nxo_stack_count(dstack) <= 4) {
+	/* systemdict, globaldict, and userdict cannot be popped. */
+	if (nxo_stack_count(dstack) <= 3) {
 		nxo_thread_error(a_thread, NXO_THREADE_DSTACKUNDERFLOW);
 		return;
 	}
@@ -1677,6 +1676,16 @@ systemdict_eq(cw_nxo_t *a_thread)
 	nxo_boolean_new(nxo_a, eq);
 
 	nxo_stack_pop(ostack);
+}
+
+void
+systemdict_errordict(cw_nxo_t *a_thread)
+{
+	cw_nxo_t	*ostack, *nxo;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	nxo = nxo_stack_push(ostack);
+	nxo_dup(nxo, nxo_thread_errordict_get(a_thread));
 }
 
 void
@@ -1907,8 +1916,7 @@ systemdict_flush(cw_nxo_t *a_thread)
 {
 	cw_nxo_threade_t	error;
 
-	error =
-	    nxo_file_buffer_flush(nx_stdout_get(nxo_thread_nx_get(a_thread)));
+	error = nxo_file_buffer_flush(nxo_thread_stdout_get(a_thread));
 	if (error)
 		nxo_thread_error(a_thread, error);
 }
@@ -2439,6 +2447,28 @@ systemdict_handleerror(cw_nxo_t *a_thread)
 		 * infinitely recursive).
 		 */
 		nxo_dup(errordict, nxo_thread_errordict_get(a_thread));
+	} else if (nxo_type_get(errordict) != NXOT_DICT) {
+		cw_nxo_t	*ostack, *nxo;
+
+		ostack = nxo_thread_ostack_get(a_thread);
+
+		/* Evaluate errordict to get its value. */
+		nxo = nxo_stack_push(estack);
+		nxo_dup(nxo, errordict);
+		nxo_thread_loop(a_thread);
+		nxo = nxo_stack_get(ostack);
+		if (nxo != NULL) {
+			nxo_dup(errordict, nxo);
+			nxo_stack_pop(ostack);
+		}
+
+		if (nxo_type_get(errordict) != NXOT_DICT) {
+			/*
+			 * We don't have a usable dictionary.  Fall back to the
+			 * one originally defined in the thread.
+			 */
+			nxo_dup(errordict, nxo_thread_errordict_get(a_thread));
+		}
 	}
 
 	/* Get handleerror from errordict and push it onto estack. */
@@ -3187,7 +3217,7 @@ systemdict_print(cw_nxo_t *a_thread)
 	cw_nxo_threade_t	error;
 
 	ostack = nxo_thread_ostack_get(a_thread);
-	stdout_nxo = nx_stdout_get(nxo_thread_nx_get(a_thread));
+	stdout_nxo = nxo_thread_stdout_get(a_thread);
 
 	NXO_STACK_GET(nxo, ostack, a_thread);
 	if (nxo_type_get(nxo) != NXOT_STRING) {
@@ -4056,7 +4086,7 @@ systemdict_sprint(cw_nxo_t *a_thread)
 	cw_nxo_threade_t	error;
 
 	ostack = nxo_thread_ostack_get(a_thread);
-	stdout_nxo = nx_stdout_get(nxo_thread_nx_get(a_thread));
+	stdout_nxo = nxo_thread_stdout_get(a_thread);
 
 	/*
 	 * depth and nxo aren't used, but accessing them causes a more
@@ -4395,6 +4425,36 @@ systemdict_status(cw_nxo_t *a_thread)
 	nxo_dict_def(dict, nx, name, value);
 
 	nxo_stack_npop(tstack, 2);
+}
+
+void
+systemdict_stderr(cw_nxo_t *a_thread)
+{
+	cw_nxo_t	*ostack, *nxo;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	nxo = nxo_stack_push(ostack);
+	nxo_dup(nxo, nxo_thread_stderr_get(a_thread));
+}
+
+void
+systemdict_stdin(cw_nxo_t *a_thread)
+{
+	cw_nxo_t	*ostack, *nxo;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	nxo = nxo_stack_push(ostack);
+	nxo_dup(nxo, nxo_thread_stdin_get(a_thread));
+}
+
+void
+systemdict_stdout(cw_nxo_t *a_thread)
+{
+	cw_nxo_t	*ostack, *nxo;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	nxo = nxo_stack_push(ostack);
+	nxo_dup(nxo, nxo_thread_stdout_get(a_thread));
 }
 
 void
@@ -5374,6 +5434,16 @@ systemdict_unlock(cw_nxo_t *a_thread)
 	nxo_mutex_unlock(mutex);
 
 	nxo_stack_pop(ostack);
+}
+
+void
+systemdict_userdict(cw_nxo_t *a_thread)
+{
+	cw_nxo_t	*ostack, *nxo;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	nxo = nxo_stack_push(ostack);
+	nxo_dup(nxo, nxo_thread_userdict_get(a_thread));
 }
 
 void

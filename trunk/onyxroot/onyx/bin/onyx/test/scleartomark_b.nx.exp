@@ -1,4 +1,4 @@
 Error /stackunderflow in --scleartomark--
 ostack: (--scleartomark--)
 estack: (--start-- -file- --scleartomark--)
-dstack: (-dict- -dict- -dict- -dict-)
+dstack: (-dict- -dict- -dict-)

@@ -199,53 +199,74 @@ nxa_collect(cw_nxa_t *a_nxa)
 	mq_put(&a_nxa->gc_mq, NXAM_COLLECT);
 }
 
-/* XXX a_thread is unused. */
 void
 nxa_dump(cw_nxa_t *a_nxa, cw_nxo_t *a_thread)
 {
-	cw_nxo_t	*file;
+	cw_nxo_t		*file;
+	cw_nxo_threade_t	error;
 
 	_cw_check_ptr(a_nxa);
 	_cw_assert(a_nxa->magic == _CW_NXA_MAGIC);
 
-	file = nx_stdout_get(a_nxa->nx);
+	file = nxo_thread_stdout_get(a_thread);
 
 	/*
 	 * Print out the contents of gcdict while under the protection of the
 	 * nxa lock, so that we are sure of printing a consistent snapshot.
 	 */
 	mtx_lock(&a_nxa->lock);
-	nxo_file_output(file, "active: [s|w:10]\n", a_nxa->gcdict_active ?
-	    "true" : "false");
-	nxo_file_output(file, "period: [q|w:10]\n", a_nxa->gcdict_period);
-	nxo_file_output(file, "threshold: [q|w:7]\n",
+	error = nxo_file_output(file, "active: [s|w:10]\n", a_nxa->gcdict_active
+	    ? "true" : "false");
+	if (error)
+		goto ERROR;
+	error = nxo_file_output(file, "period: [q|w:10]\n",
+	    a_nxa->gcdict_period);
+	if (error)
+		goto ERROR;
+	error = nxo_file_output(file, "threshold: [q|w:7]\n",
 	    a_nxa->gcdict_threshold);
-	nxo_file_output(file, "collections: [q|w:5]\n",
+	if (error)
+		goto ERROR;
+	error = nxo_file_output(file, "collections: [q|w:5]\n",
 	    a_nxa->gcdict_collections);
-	nxo_file_output(file, "new:     [q|w:9]\n", a_nxa->gcdict_new);
-	nxo_file_output(file,
+	if (error)
+		goto ERROR;
+	error = nxo_file_output(file, "new:     [q|w:9]\n", a_nxa->gcdict_new);
+	if (error)
+		goto ERROR;
+	error = nxo_file_output(file,
 	    "current: [q|w:9] [q|w:5].[q|w:6|p:0] [q|w:5].[q|w:6|p:0]\n",
 	    a_nxa->gcdict_current[0],
 	    a_nxa->gcdict_current[1] / 1000000,
 	    a_nxa->gcdict_current[1] % 1000000,
 	    a_nxa->gcdict_current[2] / 1000000,
 	    a_nxa->gcdict_current[2] % 1000000);
-	nxo_file_output(file,
+	if (error)
+		goto ERROR;
+	error = nxo_file_output(file,
 	    "maximum: [q|w:9] [q|w:5].[q|w:6|p:0] [q|w:5].[q|w:6|p:0]\n",
 	    a_nxa->gcdict_maximum[0],
 	    a_nxa->gcdict_maximum[1] / 1000000,
 	    a_nxa->gcdict_maximum[1] % 1000000,
 	    a_nxa->gcdict_maximum[2] / 1000000,
 	    a_nxa->gcdict_maximum[2] % 1000000);
-	nxo_file_output(file,
+	if (error)
+		goto ERROR;
+	error = nxo_file_output(file,
 	    "sum:     [q|w:9] [q|w:5].[q|w:6|p:0] [q|w:5].[q|w:6|p:0]\n",
 	    a_nxa->gcdict_sum[0],
 	    a_nxa->gcdict_sum[1] / 1000000,
 	    a_nxa->gcdict_sum[1] % 1000000,
 	    a_nxa->gcdict_sum[2] / 1000000,
 	    a_nxa->gcdict_sum[2] % 1000000);
-	nxo_file_buffer_flush(file);
+	if (error)
+		goto ERROR;
+	error = nxo_file_buffer_flush(file);
+
+	ERROR:
 	mtx_unlock(&a_nxa->lock);
+	if (error)
+		nxo_thread_error(a_thread, error);
 }
 
 cw_bool_t

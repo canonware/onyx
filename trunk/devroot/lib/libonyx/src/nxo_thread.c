@@ -19,7 +19,6 @@
 
 #include "../include/libonyx/currenterror_l.h"
 #include "../include/libonyx/errordict_l.h"
-#include "../include/libonyx/threaddict_l.h"
 #include "../include/libonyx/nx_l.h"
 #include "../include/libonyx/nxa_l.h"
 #include "../include/libonyx/nxo_l.h"
@@ -203,7 +202,6 @@ nxo_thread_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx)
 	nxo_no_new(&thread->currenterror);
 	nxo_no_new(&thread->errordict);
 	nxo_no_new(&thread->userdict);
-	nxo_no_new(&thread->threaddict);
 
 	/*
 	 * Register this thread with the interpreter so that the GC will be able
@@ -231,20 +229,19 @@ nxo_thread_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx)
 	nxo_stack_new(&thread->ostack, a_nx, FALSE);
 	nxo_stack_new(&thread->dstack, a_nx, FALSE);
 	nxo_stack_new(&thread->tstack, a_nx, FALSE);
-	
+
 	currenterror_l_populate(&thread->currenterror, a_nxo);
 	errordict_l_populate(&thread->errordict, a_nxo);
 	nxo_dict_new(&thread->userdict, a_nx, FALSE,
 	    _LIBSTASH_USERDICT_HASH);
-	threaddict_l_populate(&thread->threaddict, a_nxo);
+
+	nxo_dup(&thread->stdin_nxo, nx_stdin_get(a_nx));
+	nxo_dup(&thread->stdout_nxo, nx_stdout_get(a_nx));
+	nxo_dup(&thread->stderr_nxo, nx_stderr_get(a_nx));
 
 	/*
-	 * Push threaddict, systemdict, globaldict, and userdict onto
-	 * the dictionary stack.
+	 * Push systemdict, globaldict, and userdict onto the dictionary stack.
 	 */
-	nxo = nxo_stack_push(&thread->dstack);
-	nxo_dup(nxo, &thread->threaddict);
-
 	nxo = nxo_stack_push(&thread->dstack);
 	nxo_dup(nxo, nx_systemdict_get(a_nx));
 
@@ -325,7 +322,13 @@ nxoe_l_thread_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 			retval = nxo_nxoe_get(&thread->userdict);
 			break;
 		case 7:
-			retval = nxo_nxoe_get(&thread->threaddict);
+			retval = nxo_nxoe_get(&thread->stdin_nxo);
+			break;
+		case 8:
+			retval = nxo_nxoe_get(&thread->stdout_nxo);
+			break;
+		case 9:
+			retval = nxo_nxoe_get(&thread->stderr_nxo);
 			break;
 		default:
 			retval = NULL;
@@ -351,7 +354,7 @@ nxo_l_thread_print(cw_nxo_t *a_thread)
 		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
 		return;
 	}
-	stdout_nxo = nx_stdout_get(nxo_thread_nx_get(a_thread));
+	stdout_nxo = nxo_thread_stdout_get(a_thread);
 
 	error = nxo_file_output(stdout_nxo, "-thread-");
 
@@ -964,6 +967,24 @@ nxo_thread_error(cw_nxo_t *a_nxo, cw_nxo_threade_t a_error)
 		 * defined in the thread.
 		 */
 		nxo_dup(errordict, &thread->errordict);
+	} else if (nxo_type_get(errordict) != NXOT_DICT) {
+		/* Evaluate errordict to get its value. */
+		nxo = nxo_stack_push(&thread->estack);
+		nxo_dup(nxo, errordict);
+		nxo_thread_loop(a_nxo);
+		nxo = nxo_stack_get(&thread->ostack);
+		if (nxo != NULL) {
+			nxo_dup(errordict, nxo);
+			nxo_stack_pop(&thread->ostack);
+		}
+
+		if (nxo_type_get(errordict) != NXOT_DICT) {
+			/*
+			 * We don't have a usable dictionary.  Fall back to the
+			 * one originally defined in the thread.
+			 */
+			nxo_dup(errordict, &thread->errordict);
+		}
 	}
 
 	/*
@@ -1045,21 +1066,6 @@ nxo_thread_dstack_search(cw_nxo_t *a_nxo, cw_nxo_t *a_key, cw_nxo_t
 	retval = TRUE;
 	RETURN:
 	return retval;
-}
-
-cw_nxo_t *
-nxo_thread_threaddict_get(cw_nxo_t *a_nxo)
-{
-	cw_nxoe_thread_t	*thread;
-
-	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-
-	thread = (cw_nxoe_thread_t *)a_nxo->o.nxoe;
-	_cw_assert(thread->nxoe.magic == _CW_NXOE_MAGIC);
-	_cw_assert(thread->nxoe.type == NXOT_THREAD);
-
-	return &thread->threaddict;
 }
 
 cw_nxo_t *
@@ -1840,11 +1846,34 @@ nxoe_p_thread_syntax_error(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t
 	key = nxo_stack_push(&a_thread->tstack);
 	val = nxo_stack_push(&a_thread->tstack);
 
-	nxo_name_new(key, a_thread->nx,
-	    nxn_str(NXN_currenterror), nxn_len(NXN_currenterror), TRUE);
+	nxo_name_new(key, a_thread->nx, nxn_str(NXN_currenterror),
+	    nxn_len(NXN_currenterror), TRUE);
 	if (nxo_thread_dstack_search(&a_thread->self, key, currenterror)) {
-		/* Couldn't find currenterror.  Don't record line and column. */
-		goto ERROR;
+		/*
+		 * Couldn't find currenterror.  Fall back to the currenterror
+		 * defined during thread creation.
+		 */
+		nxo_dup(currenterror, &a_thread->currenterror);
+	} else if (nxo_type_get(currenterror) != NXOT_DICT) {
+		cw_nxo_t	*tnxo;
+
+		/* Evaluate currenterror to get its value. */
+		tnxo = nxo_stack_push(&a_thread->estack);
+		nxo_dup(tnxo, currenterror);
+		nxo_thread_loop(&a_thread->self);
+		tnxo = nxo_stack_get(&a_thread->ostack);
+		if (tnxo != NULL) {
+			nxo_dup(currenterror, tnxo);
+			nxo_stack_pop(&a_thread->ostack);
+		}
+
+		if (nxo_type_get(currenterror) != NXOT_DICT) {
+			/*
+			 * We don't have a usable dictionary.  Fall back to the
+			 * one originally defined in the thread.
+			 */
+			nxo_dup(currenterror, &a_thread->currenterror);
+		}
 	}
 
 	nxo_name_new(key, a_thread->nx, nxn_str(NXN_line), nxn_len(NXN_line),
@@ -1865,7 +1894,6 @@ nxoe_p_thread_syntax_error(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t
 		nxo_integer_new(val, (cw_nxoi_t)column);
 	nxo_dict_def(currenterror, a_thread->nx, key, val);
 
-	ERROR:
 	nxo_stack_npop(&a_thread->tstack, 3);
 
 	/* Finally, throw a syntaxerror. */

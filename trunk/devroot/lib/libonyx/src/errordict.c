@@ -112,6 +112,30 @@ errordict_p_generic(cw_nxo_t *a_thread, cw_nxo_threade_t a_threade,
 		 */
 		nxo_dup(currenterror,
 		    nxo_thread_currenterror_get(a_thread));
+	} else if (nxo_type_get(currenterror) != NXOT_DICT) {
+		cw_nxo_t	*estack, *ostack, *nxo;
+
+		estack = nxo_thread_estack_get(a_thread);
+		ostack = nxo_thread_ostack_get(a_thread);
+
+		/* Evaluate currenterror to get its value. */
+		nxo = nxo_stack_push(estack);
+		nxo_dup(nxo, currenterror);
+		nxo_thread_loop(a_thread);
+		nxo = nxo_stack_get(ostack);
+		if (nxo != NULL) {
+			nxo_dup(currenterror, nxo);
+			nxo_stack_pop(ostack);
+		}
+
+		if (nxo_type_get(currenterror) != NXOT_DICT) {
+			/*
+			 * We don't have a usable dictionary.  Fall back to the
+			 * one originally defined in the thread.
+			 */
+			nxo_dup(currenterror,
+			    nxo_thread_currenterror_get(a_thread));
+		}
 	}
 
 	tnxo = nxo_stack_push(tstack);

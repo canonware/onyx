@@ -227,7 +227,6 @@ typedef enum {
 	NXN_tell,
 	NXN_test,
 	NXN_thread,
-	NXN_threaddict,
 	NXN_threadtype,
 	NXN_threshold,
 	NXN_timedwait,

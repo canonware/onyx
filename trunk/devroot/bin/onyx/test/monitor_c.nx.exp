@@ -1,4 +1,4 @@
 Error /stackunderflow in {1 ---index--- --type-- /mutextype --ne-- -array- --if-- 1 ---index--- --lock-- --eval-- --unlock--}
 ostack: (-array- 1 -array-)
 estack: (--start-- -file- -array-)
-dstack: (-dict- -dict- -dict- -dict-)
+dstack: (-dict- -dict- -dict-)

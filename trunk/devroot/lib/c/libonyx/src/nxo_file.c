@@ -145,7 +145,7 @@ nxo_l_file_print(cw_nxo_t *a_thread)
 		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
 		return;
 	}
-	stdout_nxo = nx_stdout_get(nxo_thread_nx_get(a_thread));
+	stdout_nxo = nxo_thread_stdout_get(a_thread);
 
 	error = nxo_file_output(stdout_nxo, "-file-");
 

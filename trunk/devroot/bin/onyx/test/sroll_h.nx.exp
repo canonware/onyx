@@ -1,4 +1,4 @@
 Error /rangecheck in --sroll--
 ostack: (-stack- 0 1 --sroll--)
 estack: (--start-- -file- --sroll--)
-dstack: (-dict- -dict- -dict- -dict-)
+dstack: (-dict- -dict- -dict-)

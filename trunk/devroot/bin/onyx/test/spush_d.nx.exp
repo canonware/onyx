@@ -1,4 +1,4 @@
 Error /typecheck in --spush--
 ostack: (1 2 --spush--)
 estack: (--start-- -file- --spush--)
-dstack: (-dict- -dict- -dict- -dict-)
+dstack: (-dict- -dict- -dict-)

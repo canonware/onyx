@@ -108,7 +108,13 @@ struct cw_nxoe_thread_s {
 	cw_nxo_t	currenterror;
 	cw_nxo_t	errordict;
 	cw_nxo_t	userdict;
-	cw_nxo_t	threaddict;
+
+	/*
+	 * Files.
+	 */
+	cw_nxo_t	stdin_nxo;
+	cw_nxo_t	stdout_nxo;
+	cw_nxo_t	stderr_nxo;
 
 	/*
 	 * Tokenizer state.  If a token is broken across two or more input
@@ -214,9 +220,11 @@ cw_nxo_t *nxo_thread_ostack_get(cw_nxo_t *a_nxo);
 cw_nxo_t *nxo_thread_dstack_get(cw_nxo_t *a_nxo);
 cw_nxo_t *nxo_thread_estack_get(cw_nxo_t *a_nxo);
 cw_nxo_t *nxo_thread_tstack_get(cw_nxo_t *a_nxo);
+cw_nxo_t *nxo_thread_stdin_get(cw_nxo_t *a_nxo);
+cw_nxo_t *nxo_thread_stdout_get(cw_nxo_t *a_nxo);
+cw_nxo_t *nxo_thread_stdout_get(cw_nxo_t *a_nxo);
 #endif
 
-cw_nxo_t *nxo_thread_threaddict_get(cw_nxo_t *a_nxo);
 cw_nxo_t *nxo_thread_userdict_get(cw_nxo_t *a_nxo);
 cw_nxo_t *nxo_thread_errordict_get(cw_nxo_t *a_nxo);
 cw_nxo_t *nxo_thread_currenterror_get(cw_nxo_t *a_nxo);
@@ -298,5 +306,50 @@ nxo_thread_tstack_get(cw_nxo_t *a_nxo)
 	_cw_assert(thread->nxoe.type == NXOT_THREAD);
 
 	return &thread->tstack;
+}
+
+_CW_INLINE cw_nxo_t *
+nxo_thread_stdin_get(cw_nxo_t *a_nxo)
+{
+	cw_nxoe_thread_t	*thread;
+
+	_cw_check_ptr(a_nxo);
+	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+
+	thread = (cw_nxoe_thread_t *)a_nxo->o.nxoe;
+	_cw_assert(thread->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_assert(thread->nxoe.type == NXOT_THREAD);
+
+	return &thread->stdin_nxo;
+}
+
+_CW_INLINE cw_nxo_t *
+nxo_thread_stdout_get(cw_nxo_t *a_nxo)
+{
+	cw_nxoe_thread_t	*thread;
+
+	_cw_check_ptr(a_nxo);
+	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+
+	thread = (cw_nxoe_thread_t *)a_nxo->o.nxoe;
+	_cw_assert(thread->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_assert(thread->nxoe.type == NXOT_THREAD);
+
+	return &thread->stdout_nxo;
+}
+
+_CW_INLINE cw_nxo_t *
+nxo_thread_stderr_get(cw_nxo_t *a_nxo)
+{
+	cw_nxoe_thread_t	*thread;
+
+	_cw_check_ptr(a_nxo);
+	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+
+	thread = (cw_nxoe_thread_t *)a_nxo->o.nxoe;
+	_cw_assert(thread->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_assert(thread->nxoe.type == NXOT_THREAD);
+
+	return &thread->stderr_nxo;
 }
 #endif	/* (defined(_CW_USE_INLINES) || defined(_NXO_THREAD_C_)) */

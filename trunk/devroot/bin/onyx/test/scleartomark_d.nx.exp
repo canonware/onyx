@@ -1,4 +1,4 @@
 Error /unmatchedmark in --scleartomark--
 ostack: (-stack- --scleartomark--)
 estack: (--start-- -file- --scleartomark--)
-dstack: (-dict- -dict- -dict- -dict-)
+dstack: (-dict- -dict- -dict-)

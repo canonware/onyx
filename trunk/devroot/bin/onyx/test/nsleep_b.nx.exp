@@ -1,4 +1,4 @@
 Error /stackunderflow in --nsleep--
 ostack: (--nsleep--)
 estack: (--start-- -file- --nsleep--)
-dstack: (-dict- -dict- -dict- -dict-)
+dstack: (-dict- -dict- -dict-)

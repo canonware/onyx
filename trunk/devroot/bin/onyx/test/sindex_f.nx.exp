@@ -1,4 +1,4 @@
 Error /rangecheck in --sindex--
 ostack: (-stack- -1 --sindex--)
 estack: (--start-- -file- --sindex--)
-dstack: (-dict- -dict- -dict- -dict-)
+dstack: (-dict- -dict- -dict-)
