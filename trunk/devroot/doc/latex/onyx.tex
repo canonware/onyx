@@ -604,6 +604,36 @@ syntax error. \\
 \end{longtable}
 
 \begin{description}
+\label{currenterror:column}
+\index{column@\onyxop{}{column}{}}
+\item[{\onyxop{--}{column}{integer}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[integer: ]
+			Column number, valid only if the error was a
+			syntaxerror.
+		\end{description}
+	\item[Errors(s): ] None.
+	\item[Description: ]
+		Get the column number that a syntaxerror occurred on.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> `1 2 3}' cvx eval
+At line 1, column 5: Error /syntaxerror
+ostack: (1 2 3 `}')
+dstack: (-dict- -dict- -dict- -dict-)
+estack/istack trace (0..3):
+0:      `1 2 3}'
+1:      --eval--
+2:      -file-
+3:      --start--
+onyx:5> currenterror /column get 1 sprint
+5
+onyx:5>
+		\end{verbatim}
+	\end{description}
 \label{currenterror:dstack}
 \index{dstack@\onyxop{}{dstack}{}}
 \item[{\onyxop{--}{dstack}{stack}}: ]
@@ -769,6 +799,35 @@ estack/istack trace (0..2):
 onyx:2> newerror 1 sprint
 true
 onyx:2>
+		\end{verbatim}
+	\end{description}
+\label{currenterror:line}
+\index{line@\onyxop{}{line}{}}
+\item[{\onyxop{--}{line}{integer}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[integer: ]
+			Line number, valid only if the error was a syntaxerror.
+		\end{description}
+	\item[Errors(s): ] None.
+	\item[Description: ]
+		Get the line number that a syntaxerror occurred on.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> `1 2 3}' cvx eval
+At line 1, column 5: Error /syntaxerror
+ostack: (1 2 3 `}')
+dstack: (-dict- -dict- -dict- -dict-)
+estack/istack trace (0..3):
+0:      `1 2 3}'
+1:      --eval--
+2:      -file-
+3:      --start--
+onyx:5> currenterror /line get 1 sprint
+1
+onyx:5>
 		\end{verbatim}
 	\end{description}
 \label{currenterror:ostack}
@@ -6331,7 +6390,7 @@ onyx:2>
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
-		\item[\htmlref{unmatchemark}{unmatchemark}.]
+		\item[\htmlref{unmatchedmark}{unmatchedmark}.]
 		\end{description}
 	\item[Description: ]
 		Get the depth of the topmost mark on \oparg{stack}.
@@ -7290,8 +7349,6 @@ onyx:0>
 			{errordict:estackoverflow}.]
 			\item[\htmlref{\onyxop{}{invalidaccess}{}}
 			{errordict:invalidaccess}.]
-			\item[\htmlref{\onyxop{}{invalidcontext}{}}
-			{errordict:invalidcontext}.]
 			\item[\htmlref{\onyxop{}{invalidexit}{}}
 			{errordict:invalidexit}.]
 			\item[\htmlref{\onyxop{}{invalidfileaccess}{}}
