@@ -131,16 +131,23 @@ interpreter that are executed by the garbage collector during the mark phase
 	Memory allocation error.
 \label{CW_ONYXX_CONTINUE}
 \item[\cppdef{CW\_ONYXX\_CONTINUE}: ]
-	Internal use, for the continue operator.
+	Internal use, for the
+	\htmlref{\onyxop{}{continue}{}}{systemdict:continue} operator.
+\label{CW_ONYXX_ESCAPE}
+\item[\cppdef{CW\_ONYXX\_ESCAPE}: ]
+	Internal use, for the \htmlref{\onyxop{}{escape}{}}{systemdict:escape}
+	operator.
 \label{CW_ONYXX_EXIT}
 \item[\cppdef{CW\_ONYXX\_EXIT}: ]
-	Internal use, for the exit operator.
+	Internal use, for the \htmlref{\onyxop{}{exit}{}}{systemdict:exit} operator.
 \label{CW_ONYXX_STOP}
 \item[\cppdef{CW\_ONYXX\_STOP}: ]
-	Internal use, for the stop operator.
+	Internal use, for the \htmlref{\onyxop{}{stop}{}}{systemdict:stop}
+	operator.
 \label{CW_ONYXX_QUIT}
 \item[\cppdef{CW\_ONYXX\_QUIT}: ]
-	Internal use, for the quit operator.
+	Internal use, for the \htmlref{\onyxop{}{quit}{}}{systemdict:quit}
+	operator.
 \end{description}
 
 \section{Integration issues}
@@ -148,7 +155,7 @@ interpreter that are executed by the garbage collector during the mark phase
 \libname{libonyx}'s garbage collector uses the \htmlref{\classname{thd}}{thd}
 class to suspend and resume all other threads during the mark phase of atomic
 collection.  For this to work, all threads that have any contact with
-\libname{libonyx} must be created as suspendible threads using the
+\libname{libonyx} must be created as suspensible threads using the
 \htmlref{\classname{thd}}{thd} class.
 
 This can cause integration headaches for existing threaded applications, but
