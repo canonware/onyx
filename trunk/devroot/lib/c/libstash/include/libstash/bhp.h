@@ -28,10 +28,8 @@ struct cw_bhp_s
   cw_uint32_t magic_a;
 #endif
   cw_bool_t is_malloced;
-#ifdef _CW_REENTRANT
   cw_bool_t is_thread_safe;
   cw_mtx_t lock;
-#endif
   cw_bhpi_t * head;
   cw_uint64_t num_nodes;
   bhp_prio_comp_t * priority_compare;
@@ -72,10 +70,8 @@ bhpi_delete(cw_bhpi_t * a_bhpi);
 cw_bhp_t *
 bhp_new(cw_bhp_t * a_bhp, bhp_prio_comp_t * a_prio_comp);
 
-#ifdef _CW_REENTRANT
 cw_bhp_t *
 bhp_new_r(cw_bhp_t * a_bhp, bhp_prio_comp_t * a_prio_comp);
-#endif
 
 void
 bhp_delete(cw_bhp_t * a_bhp);

@@ -10,11 +10,7 @@
  *
  ****************************************************************************/
 
-#ifdef _CW_REENTRANT
-#  include "libstash/libstash_r.h"
-#else
-#  include "libstash/libstash.h"
-#endif
+#include "libstash/libstash.h"
 
 #include <stdarg.h>
 #include <time.h>
@@ -46,9 +42,7 @@ out_new(cw_out_t * a_out)
 
   retval->fd = 2;
 
-#ifdef _CW_REENTRANT
   mtx_new(&retval->lock);
-#endif
 
   retval->nextensions = 0;
   retval->extensions = NULL;
@@ -72,9 +66,7 @@ out_delete(cw_out_t * a_out)
     _cw_free(a_out->extensions);
   }
   
-#ifdef _CW_REENTRANT
   mtx_delete(&a_out->lock);
-#endif
   
   if (TRUE == a_out->is_malloced)
   {
@@ -944,12 +936,10 @@ out_p_put_fvn(cw_out_t * a_out, cw_sint32_t a_fd, cw_uint32_t a_size,
     }
   }
   
-#ifdef _CW_REENTRANT
   if (NULL != a_out)
   {
     mtx_lock(&a_out->lock);
   }
-#endif
 
   i = 0;
   do
@@ -969,12 +959,10 @@ out_p_put_fvn(cw_out_t * a_out, cw_sint32_t a_fd, cw_uint32_t a_size,
   retval = i;
   
   RETURN:
-#ifdef _CW_REENTRANT
   if (NULL != a_out)
   {
     mtx_unlock(&a_out->lock);
   }
-#endif
   if ((TRUE == malloced_output) && (NULL != output))
   {
     _cw_free(output);

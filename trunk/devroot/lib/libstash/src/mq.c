@@ -10,11 +10,7 @@
  *
  ****************************************************************************/
 
-#ifdef _CW_REENTRANT
-#  include "libstash/libstash_r.h"
-#else
-#  include "libstash/libstash.h"
-#endif
+#include "libstash/libstash.h"
 
 #ifdef _LIBSTASH_DBG
 #  define _LIBSTASH_MQ_MAGIC 0xab01cd23
@@ -40,10 +36,8 @@ mq_new(cw_mq_t * a_mq)
     retval->is_malloced = TRUE;
   }
 
-#ifdef _CW_REENTRANT
   mtx_new(&retval->lock);
   cnd_new(&retval->cond);
-#endif
 
   retval->get_stop = FALSE;
   retval->put_stop = FALSE;
@@ -64,10 +58,8 @@ mq_delete(cw_mq_t * a_mq)
   _cw_check_ptr(a_mq);
   _cw_assert(_LIBSTASH_MQ_MAGIC == a_mq->magic);
 
-#ifdef _CW_REENTRANT
   mtx_delete(&a_mq->lock);
   cnd_delete(&a_mq->cond);
-#endif
 
   if (NULL != a_mq->ring)
   {
@@ -98,9 +90,7 @@ mq_tryget(cw_mq_t * a_mq)
   
   _cw_check_ptr(a_mq);
   _cw_assert(_LIBSTASH_MQ_MAGIC == a_mq->magic);
-#ifdef _CW_REENTRANT
   mtx_lock(&a_mq->lock);
-#endif
 
   if (a_mq->get_stop == TRUE)
   {
@@ -130,13 +120,10 @@ mq_tryget(cw_mq_t * a_mq)
   }
 
   RETURN:
-#ifdef _CW_REENTRANT
   mtx_unlock(&a_mq->lock);
-#endif
   return retval;
 }
 
-#ifdef _CW_REENTRANT
 void *
 mq_get(cw_mq_t * a_mq)
 {
@@ -235,7 +222,6 @@ mq_timedget(cw_mq_t * a_mq, const struct timespec * a_timeout)
   mtx_unlock(&a_mq->lock);
   return retval;
 }
-#endif
 
 cw_sint32_t
 mq_put(cw_mq_t * a_mq, const void * a_message)
@@ -245,16 +231,12 @@ mq_put(cw_mq_t * a_mq, const void * a_message)
   
   _cw_check_ptr(a_mq);
   _cw_assert(_LIBSTASH_MQ_MAGIC == a_mq->magic);
-#ifdef _CW_REENTRANT
   mtx_lock(&a_mq->lock);
-#endif
 
-#ifdef _CW_REENTRANT
   if (NULL == a_mq->ring)
   {
     cnd_broadcast(&a_mq->cond);
   }
-#endif
   
   if (a_mq->put_stop == TRUE)
   {
@@ -296,9 +278,7 @@ mq_put(cw_mq_t * a_mq, const void * a_message)
   retval = 0;
   
   RETURN:
-#ifdef _CW_REENTRANT
   mtx_unlock(&a_mq->lock);
-#endif
   return retval;
 }
 
@@ -309,9 +289,7 @@ mq_start_get(cw_mq_t * a_mq)
   
   _cw_check_ptr(a_mq);
   _cw_assert(_LIBSTASH_MQ_MAGIC == a_mq->magic);
-#ifdef _CW_REENTRANT
   mtx_lock(&a_mq->lock);
-#endif
 
   if (FALSE == a_mq->get_stop)
   {
@@ -324,9 +302,7 @@ mq_start_get(cw_mq_t * a_mq)
   retval = FALSE;
 
   RETURN:
-#ifdef _CW_REENTRANT
   mtx_unlock(&a_mq->lock);
-#endif
   return retval;
 }
 
@@ -337,9 +313,7 @@ mq_stop_get(cw_mq_t * a_mq)
   
   _cw_check_ptr(a_mq);
   _cw_assert(_LIBSTASH_MQ_MAGIC == a_mq->magic);
-#ifdef _CW_REENTRANT
   mtx_lock(&a_mq->lock);
-#endif
 
   if (TRUE == a_mq->get_stop)
   {
@@ -347,17 +321,13 @@ mq_stop_get(cw_mq_t * a_mq)
     goto RETURN;
   }
 
-#ifdef _CW_REENTRANT
   cnd_broadcast(&a_mq->cond);
-#endif
   a_mq->get_stop = TRUE;
   
   retval = FALSE;
 
   RETURN:
-#ifdef _CW_REENTRANT
   mtx_unlock(&a_mq->lock);
-#endif
   return retval;
 }
 
@@ -368,9 +338,7 @@ mq_start_put(cw_mq_t * a_mq)
   
   _cw_check_ptr(a_mq);
   _cw_assert(_LIBSTASH_MQ_MAGIC == a_mq->magic);
-#ifdef _CW_REENTRANT
   mtx_lock(&a_mq->lock);
-#endif
 
   if (FALSE == a_mq->put_stop)
   {
@@ -383,9 +351,7 @@ mq_start_put(cw_mq_t * a_mq)
   retval = FALSE;
 
   RETURN:
-#ifdef _CW_REENTRANT
   mtx_unlock(&a_mq->lock);
-#endif
   return retval;
 }
 
@@ -396,9 +362,7 @@ mq_stop_put(cw_mq_t * a_mq)
   
   _cw_check_ptr(a_mq);
   _cw_assert(_LIBSTASH_MQ_MAGIC == a_mq->magic);
-#ifdef _CW_REENTRANT
   mtx_lock(&a_mq->lock);
-#endif
 
   if (TRUE == a_mq->put_stop)
   {
@@ -411,8 +375,6 @@ mq_stop_put(cw_mq_t * a_mq)
   retval = FALSE;
 
   RETURN:
-#ifdef _CW_REENTRANT
   mtx_unlock(&a_mq->lock);
-#endif
   return retval;
 }

@@ -10,12 +10,7 @@
  *
  ****************************************************************************/
 
-#ifdef _CW_REENTRANT
-#  include "libstash/libstash_r.h"
-#else
-#  include "libstash/libstash.h"
-#endif
-
+#include "libstash/libstash.h"
 #include "libstash/dbg_p.h"
 #include "libstash/mem_l.h"
 
@@ -30,11 +25,7 @@ dbg_new(void)
     goto RETURN;
   }
 
-#ifdef _CW_REENTRANT
   if (NULL == oh_new_r(&retval->flag_hash))
-#else
-  if (NULL == oh_new(&retval->flag_hash))
-#endif
   {
     _cw_free(retval);
     retval = NULL;

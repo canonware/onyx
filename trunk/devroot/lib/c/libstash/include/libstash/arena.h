@@ -20,10 +20,8 @@ struct cw_arena_s
 #if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
   cw_uint32_t magic;
 #endif
-#ifdef _CW_REENTRANT
   cw_bool_t is_thread_safe;
   cw_mtx_t lock;
-#endif
 
   /* If we notice we're full, this is set to true.  Then all allocation is short
    * circuited and returns FALSE. */
@@ -52,11 +50,9 @@ cw_arena_t *
 arena_new(cw_arena_t * a_arena, cw_uint32_t a_chunk_size,
 	  cw_uint32_t a_max_chunks);
 
-#ifdef _CW_REENTRANT
 cw_arena_t *
 arena_new_r(cw_arena_t * a_arena, cw_uint32_t a_chunk_size,
 	    cw_uint32_t a_max_chunks);
-#endif
 
 void
 arena_delete(cw_arena_t * a_arena);

@@ -10,11 +10,7 @@
  *
  *****************************************************************************/
 
-#ifdef _CW_REENTRANT
-#  include "libstash/libstash_r.h"
-#else
-#  include "libstash/libstash.h"
-#endif
+#include "libstash/libstash.h"
 
 #include <stdarg.h>
 #include <fcntl.h>
@@ -73,9 +69,8 @@ res_new(cw_res_t * a_res)
   }
 
   /* Initialize internals. */
-#ifdef _CW_REENTRANT
   rwl_new(&retval->rw_lock);
-#endif
+
   /* Non-thread-safe hash table, since we're already taking care of the
    * locking. */
   oh_new(&retval->hash);
@@ -93,9 +88,7 @@ res_delete(cw_res_t * a_res)
   _cw_check_ptr(a_res);
 
   /* Clean up internals. */
-#ifdef _CW_REENTRANT
   rwl_delete(&a_res->rw_lock);
-#endif
 
   for (i = 0, num_resources = oh_get_num_items(&a_res->hash);
        i < num_resources;
@@ -119,9 +112,7 @@ res_clear(cw_res_t * a_res)
   char * key, * val;
   
   _cw_check_ptr(a_res);
-#ifdef _CW_REENTRANT
   rwl_wlock(&a_res->rw_lock);
-#endif
 
   while (FALSE == oh_item_delete_iterate(&a_res->hash, (void **) &key,
 					 (void **) &val))
@@ -130,9 +121,7 @@ res_clear(cw_res_t * a_res)
     _cw_free(val);
   }
   
-#ifdef _CW_REENTRANT
   rwl_wunlock(&a_res->rw_lock);
-#endif
 }
 
 cw_bool_t
@@ -142,10 +131,8 @@ res_is_equal(cw_res_t * a_a, cw_res_t * a_b)
 
   _cw_check_ptr(a_a);
   _cw_check_ptr(a_b);
-#ifdef _CW_REENTRANT
   rwl_wlock(&a_a->rw_lock);
   rwl_rlock(&a_b->rw_lock);
-#endif
 
   if (a_a == a_b)
   {
@@ -183,10 +170,8 @@ res_is_equal(cw_res_t * a_a, cw_res_t * a_b)
   }
 
   RETURN:
-#ifdef _CW_REENTRANT
   rwl_runlock(&a_b->rw_lock);
   rwl_wunlock(&a_a->rw_lock);
-#endif
   return retval;
 }
 
@@ -197,9 +182,7 @@ res_merge_file(cw_res_t * a_res, const char * a_filename)
   int error;
   
   _cw_check_ptr(a_res);
-#ifdef _CW_REENTRANT
   rwl_wlock(&a_res->rw_lock);
-#endif
 
   a_res->fd = fopen(a_filename, "r");
   if (a_res->fd == NULL)
@@ -223,9 +206,7 @@ res_merge_file(cw_res_t * a_res, const char * a_filename)
     }
   }
 
-#ifdef _CW_REENTRANT
   rwl_wunlock(&a_res->rw_lock);
-#endif
   return retval;
 }
 
@@ -236,9 +217,7 @@ res_merge_list(cw_res_t * a_res, ...)
   cw_bool_t retval = FALSE, state_mach_error;
   
   _cw_check_ptr(a_res);
-#ifdef _CW_REENTRANT
   rwl_wlock(&a_res->rw_lock);
-#endif
 
   /* Run the strings through the insertion state machine. */
   va_start(ap, a_res);
@@ -254,9 +233,7 @@ res_merge_list(cw_res_t * a_res, ...)
   }
   va_end(ap);
   
-#ifdef _CW_REENTRANT
   rwl_wunlock(&a_res->rw_lock);
-#endif
   return retval;
 }
 
@@ -268,9 +245,7 @@ res_get_res_val(cw_res_t * a_res, const char * a_res_name)
   
   _cw_check_ptr(a_res);
   _cw_check_ptr(a_res_name);
-#ifdef _CW_REENTRANT
   rwl_rlock(&a_res->rw_lock);
-#endif
 
   error = oh_item_search(&a_res->hash, (void *) a_res_name,
 			 (void **) &retval);
@@ -279,9 +254,7 @@ res_get_res_val(cw_res_t * a_res, const char * a_res_name)
     retval = NULL;
   }
   
-#ifdef _CW_REENTRANT
   rwl_runlock(&a_res->rw_lock);
-#endif
   return retval;
 }
 
@@ -292,16 +265,12 @@ res_extract_res(cw_res_t * a_res, const char * a_res_key,
   cw_bool_t retval;
 
   _cw_check_ptr(a_res);
-#ifdef _CW_REENTRANT
   rwl_wlock(&a_res->rw_lock);
-#endif
 
   retval = oh_item_delete(&a_res->hash, a_res_key,
 			  (void **) r_res_name, (void **) r_res_val);
 
-#ifdef _CW_REENTRANT
   rwl_wunlock(&a_res->rw_lock);
-#endif
   return retval;
 }
 
@@ -313,9 +282,7 @@ res_dump(cw_res_t * a_res, const char * a_filename)
   cw_out_t * t_out = NULL;
   
   _cw_check_ptr(a_res);
-#ifdef _CW_REENTRANT
   rwl_wlock(&a_res->rw_lock);
-#endif
 
   if (a_filename != NULL)
   {
@@ -410,9 +377,7 @@ res_dump(cw_res_t * a_res, const char * a_filename)
   {
     close(fd);
   }
-#ifdef _CW_REENTRANT
   rwl_wunlock(&a_res->rw_lock);
-#endif
   return retval;
 }
 

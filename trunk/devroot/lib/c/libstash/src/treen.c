@@ -10,12 +10,7 @@
  *
  ****************************************************************************/
 
-#ifdef _CW_REENTRANT
-#  include "libstash/libstash_r.h"
-#else
-#  include "libstash/libstash.h"
-#endif
-
+#include "libstash/libstash.h"
 #include "libstash/treen_p.h"
 
 cw_treen_t *

@@ -15,12 +15,7 @@
  *
  ****************************************************************************/
 
-#ifdef _CW_REENTRANT
-#  include "libstash/libstash_r.h"
-#else
-#  include "libstash/libstash.h"
-#endif
-
+#include "libstash/libstash.h"
 #include "libstash/arena_p.h"
 
 #ifdef _LIBSTASH_DBG
@@ -34,14 +29,12 @@ arena_new(cw_arena_t * a_arena, cw_uint32_t a_chunk_size,
   return arena_p_new(a_arena, a_chunk_size, a_max_chunks, FALSE);
 }
 
-#ifdef _CW_REENTRANT
 cw_arena_t *
 arena_new_r(cw_arena_t * a_arena, cw_uint32_t a_chunk_size,
 	    cw_uint32_t a_max_chunks)
 {
   return arena_p_new(a_arena, a_chunk_size, a_max_chunks, TRUE);
 }
-#endif
 
 void
 arena_delete(cw_arena_t * a_arena)
@@ -63,12 +56,10 @@ arena_delete(cw_arena_t * a_arena)
 
   list_delete(&a_arena->chunks);
 
-#ifdef _CW_REENTRANT
   if (a_arena->is_thread_safe)
   {
     mtx_delete(&a_arena->lock);
   }
-#endif
   
   if (TRUE == a_arena->is_malloced)
   {
@@ -124,12 +115,10 @@ arena_malloc_e(cw_arena_t * a_arena, cw_uint32_t a_size,
 
   _cw_check_ptr(a_arena);
   _cw_assert(_CW_ARENA_MAGIC == a_arena->magic);
-#ifdef _CW_REENTRANT
   if (a_arena->is_thread_safe)
   {
     mtx_lock(&a_arena->lock);
   }
-#endif
 
   /* Is this allocation impossible to service? */
   if (a_size > a_arena->chunk_size)
@@ -213,12 +202,10 @@ arena_malloc_e(cw_arena_t * a_arena, cw_uint32_t a_size,
   }
 
   RETURN:
-#ifdef _CW_REENTRANT
   if (a_arena->is_thread_safe)
   {
     mtx_unlock(&a_arena->lock);
   }
-#endif
   return retval;
 }
 
@@ -248,13 +235,11 @@ arena_p_new(cw_arena_t * a_arena, cw_uint32_t a_chunk_size,
     retval->is_malloced = FALSE;
   }
 
-#ifdef _CW_REENTRANT
   retval->is_thread_safe = a_is_thread_safe;
   if (retval->is_thread_safe)
   {
     mtx_new(&retval->lock);
   }
-#endif
   
   retval->chunk_size = a_chunk_size;
   retval->max_chunks = a_max_chunks;

@@ -28,9 +28,7 @@ struct cw_bufc_s
 #if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
   cw_uint32_t magic_a;
 #endif
-#ifdef _CW_REENTRANT
   cw_mtx_t lock;
-#endif
   void (*dealloc_func)(void *, void *);
   void * dealloc_arg;
   void (*buffer_dealloc_func)(void *, void *);
@@ -65,10 +63,8 @@ struct cw_buf_s
   cw_uint32_t magic_a;
 #endif
   cw_bool_t is_malloced;
-#ifdef _CW_REENTRANT
   cw_bool_t is_threadsafe;
   cw_mtx_t lock;
-#endif
   cw_uint32_t size;
 
   cw_uint32_t array_size;
@@ -93,10 +89,8 @@ struct cw_buf_s
 cw_buf_t *
 buf_new(cw_buf_t * a_buf);
 
-#ifdef _CW_REENTRANT
 cw_buf_t *
 buf_new_r(cw_buf_t * a_buf);
-#endif
 
 void
 buf_delete(cw_buf_t * a_buf);

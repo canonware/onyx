@@ -10,7 +10,7 @@
  *
  ****************************************************************************/
 
-#include "libstash/libstash_r.h"
+#include "libstash/libstash.h"
 #include "libstash/jtl_p.h"
 
 cw_jtl_t *

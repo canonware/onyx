@@ -14,7 +14,6 @@
  ****************************************************************************/
 
 #include "libstash/libstash.h"
-
 #include "libstash/mem_p.h"
 #include "libstash/mem_l.h"
 
@@ -29,9 +28,7 @@ mem_new(void)
     goto RETURN;
   }
 
-#ifdef _CW_REENTRANT
   mtx_new(&retval->lock);
-#endif
   
 #ifdef _LIBSTASH_DBG
   oh_new(&retval->addr_hash);
@@ -92,9 +89,7 @@ mem_delete(cw_mem_t * a_mem)
       _cw_free(allocation);
     }
     oh_delete(&a_mem->addr_hash);
-#ifdef _CW_REENTRANT
     mtx_delete(&a_mem->lock);
-#endif
   }
 #endif
   
@@ -107,16 +102,12 @@ mem_set_oom_handler(cw_mem_t * a_mem, cw_mem_oom_handler_t * a_oom_handler,
 {
   _cw_check_ptr(a_mem);
 
-#ifdef _CW_REENTRANT
   mtx_lock(&a_mem->lock);
-#endif
 
   a_mem->oom_handler = a_oom_handler;
   a_mem->handler_data = a_data;
   
-#ifdef _CW_REENTRANT
   mtx_unlock(&a_mem->lock);
-#endif
 }
 
 #ifdef _LIBSTASH_DBG
@@ -133,12 +124,10 @@ mem_malloc(cw_mem_t * a_mem, size_t a_size)
   _cw_assert(a_size > 0);
 
 #ifdef _LIBSTASH_DBG
-#  ifdef _CW_REENTRANT
   if (NULL != a_mem)
   {
     mtx_lock(&a_mem->lock);
   }
-#  endif
 #endif
     
   retval = _cw_malloc(a_size);
@@ -148,9 +137,7 @@ mem_malloc(cw_mem_t * a_mem, size_t a_size)
     if (NULL != a_mem)
     {
 #ifndef _LIBSTASH_DBG
-#  ifdef _CW_REENTRANT
       mtx_lock(&a_mem->lock);
-#  endif
 #endif
       if (NULL != a_mem->oom_handler)
       {
@@ -160,9 +147,7 @@ mem_malloc(cw_mem_t * a_mem, size_t a_size)
 	}
       }
 #ifndef _LIBSTASH_DBG
-#  ifdef _CW_REENTRANT
       mtx_unlock(&a_mem->lock);
-#  endif
 #endif
     }
   }
@@ -268,9 +253,7 @@ mem_malloc(cw_mem_t * a_mem, size_t a_size)
 	}
       }
     }
-#ifdef _CW_REENTRANT
     mtx_unlock(&a_mem->lock);
-#endif
   }
 #endif
 
@@ -291,12 +274,10 @@ mem_calloc(cw_mem_t * a_mem, size_t a_number, size_t a_size)
   _cw_assert(a_size * a_number > 0);
   
 #ifdef _LIBSTASH_DBG
-#  ifdef _CW_REENTRANT
   if (NULL != a_mem)
   {
     mtx_lock(&a_mem->lock);
   }
-#  endif
 #endif
   
   retval = _cw_calloc(a_number, a_size);
@@ -306,9 +287,7 @@ mem_calloc(cw_mem_t * a_mem, size_t a_number, size_t a_size)
     if (NULL != a_mem)
     {
 #ifndef _LIBSTASH_DBG
-#  ifdef _CW_REENTRANT
       mtx_lock(&a_mem->lock);
-#  endif
 #endif
       if (NULL != a_mem->oom_handler)
       {
@@ -318,9 +297,7 @@ mem_calloc(cw_mem_t * a_mem, size_t a_number, size_t a_size)
 	}
       }
 #ifndef _LIBSTASH_DBG
-#  ifdef _CW_REENTRANT
       mtx_unlock(&a_mem->lock);
-#  endif
 #endif
     }
   }
@@ -429,9 +406,7 @@ mem_calloc(cw_mem_t * a_mem, size_t a_number, size_t a_size)
 	}
       }
     }
-#ifdef _CW_REENTRANT
     mtx_unlock(&a_mem->lock);
-#endif
   }
 #endif
 
@@ -453,12 +428,10 @@ mem_realloc(cw_mem_t * a_mem, void * a_ptr, size_t a_size)
   _cw_assert(a_size > 0);
 
 #ifdef _LIBSTASH_DBG
-#  ifdef _CW_REENTRANT
   if (NULL != a_mem)
   {
     mtx_lock(&a_mem->lock);
   }
-#  endif
 #endif
   
   retval = _cw_realloc(a_ptr, a_size);
@@ -468,9 +441,7 @@ mem_realloc(cw_mem_t * a_mem, void * a_ptr, size_t a_size)
     if (NULL != a_mem)
     {
 #ifndef _LIBSTASH_DBG
-#  ifdef _CW_REENTRANT
       mtx_lock(&a_mem->lock);
-#  endif
 #endif
       if (NULL != a_mem->oom_handler)
       {
@@ -480,9 +451,7 @@ mem_realloc(cw_mem_t * a_mem, void * a_ptr, size_t a_size)
 	}
       }
 #ifndef _LIBSTASH_DBG
-#  ifdef _CW_REENTRANT
       mtx_unlock(&a_mem->lock);
-#  endif
 #endif
     }
   }
@@ -580,9 +549,7 @@ mem_realloc(cw_mem_t * a_mem, void * a_ptr, size_t a_size)
 	out_put(cw_g_out, buf);
       }
     }
-#ifdef _CW_REENTRANT
     mtx_unlock(&a_mem->lock);
-#endif
   }
 #endif
 
@@ -608,9 +575,7 @@ mem_free(cw_mem_t * a_mem, void * a_ptr)
   {
     struct cw_mem_item_s * allocation;
     
-#ifdef _CW_REENTRANT
     mtx_lock(&a_mem->lock);
-#endif
     
     if (TRUE == oh_item_delete(&a_mem->addr_hash, a_ptr, NULL,
 			       (void **) &allocation))
@@ -656,12 +621,10 @@ mem_free(cw_mem_t * a_mem, void * a_ptr)
   _cw_free(a_ptr);
 
 #ifdef _LIBSTASH_DBG
-#  ifdef _CW_REENTRANT
   if (NULL != a_mem)
   {
     mtx_unlock(&a_mem->lock);
   }
-#  endif
 #endif
 }
 

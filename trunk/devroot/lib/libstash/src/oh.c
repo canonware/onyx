@@ -10,12 +10,7 @@
  *
  ****************************************************************************/
 
-#ifdef _CW_REENTRANT
-#  include "libstash/libstash_r.h"
-#else
-#  include "libstash/libstash.h"
-#endif
-
+#include "libstash/libstash.h"
 #include "libstash/mem_l.h"
 #include "libstash/oh_p.h"
 
@@ -36,12 +31,10 @@ oh_delete(cw_oh_t * a_oh)
 {
   _cw_check_ptr(a_oh);
 
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_delete(&a_oh->rw_lock);
   }
-#endif
 
   /* Delete the items in the table, as well as items_list. */
   {
@@ -91,21 +84,17 @@ oh_get_size(cw_oh_t * a_oh)
 
   _cw_check_ptr(a_oh);
 
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_rlock(&a_oh->rw_lock);
   }
-#endif
 
   retval = a_oh->size;
 
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_rlock(&a_oh->rw_lock);
   }
-#endif
   return retval;
 }
 
@@ -115,21 +104,17 @@ oh_get_num_items(cw_oh_t * a_oh)
   cw_uint64_t retval;
   
   _cw_check_ptr(a_oh);
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_rlock(&a_oh->rw_lock);
   }
-#endif
 
   retval = a_oh->items_count;
   
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_runlock(&a_oh->rw_lock);
   }
-#endif
   return retval;
 }
 
@@ -139,21 +124,17 @@ oh_get_base_size(cw_oh_t * a_oh)
   cw_uint64_t retval;
   
   _cw_check_ptr(a_oh);
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_rlock(&a_oh->rw_lock);
   }
-#endif
 
   retval = (1 << a_oh->base_power);
 
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_runlock(&a_oh->rw_lock);
   }
-#endif
   return retval;
 }
 
@@ -163,21 +144,17 @@ oh_get_base_h2(cw_oh_t * a_oh)
   cw_uint32_t retval;
   
   _cw_check_ptr(a_oh);
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_rlock(&a_oh->rw_lock);
   }
-#endif
 
   retval = a_oh->base_h2;
 
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_runlock(&a_oh->rw_lock);
   }
-#endif
   return retval;
 }
 
@@ -187,21 +164,17 @@ oh_get_base_shrink_point(cw_oh_t * a_oh)
   cw_uint32_t retval;
   
   _cw_check_ptr(a_oh);
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_rlock(&a_oh->rw_lock);
   }
-#endif
 
   retval = a_oh->base_shrink_point;
 
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_runlock(&a_oh->rw_lock);
   }
-#endif
   return retval;
 }
 
@@ -211,21 +184,17 @@ oh_get_base_grow_point(cw_oh_t * a_oh)
   cw_uint32_t retval;
   
   _cw_check_ptr(a_oh);
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_rlock(&a_oh->rw_lock);
   }
-#endif
 
   retval = a_oh->base_grow_point;
 
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_runlock(&a_oh->rw_lock);
   }
-#endif
   return retval;
 }
 
@@ -237,12 +206,10 @@ oh_set_h1(cw_oh_t * a_oh,
   
   _cw_check_ptr(a_oh);
   _cw_check_ptr(a_new_h1);
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_wlock(&a_oh->rw_lock);
   }
-#endif
 
   retval = a_oh->curr_h1;
   
@@ -252,12 +219,10 @@ oh_set_h1(cw_oh_t * a_oh,
     oh_p_rehash(a_oh);
   }
 
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_wunlock(&a_oh->rw_lock);
   }
-#endif
   return retval;
 }
 
@@ -269,12 +234,10 @@ oh_set_key_compare(cw_oh_t * a_oh,
   
   _cw_check_ptr(a_oh);
   _cw_check_ptr(a_new_key_compare);
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_wlock(&a_oh->rw_lock);
   }
-#endif
 
   retval = a_oh->key_compare;
   
@@ -284,12 +247,10 @@ oh_set_key_compare(cw_oh_t * a_oh,
     oh_p_rehash(a_oh);
   }
   
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_wunlock(&a_oh->rw_lock);
   }
-#endif
   return retval;
 }
 
@@ -300,12 +261,10 @@ oh_set_base_h2(cw_oh_t * a_oh,
   cw_bool_t retval;
   
   _cw_check_ptr(a_oh);
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_wlock(&a_oh->rw_lock);
   }
-#endif
   
   if (((a_h2 % 2) == 0)
       || (a_h2 > (1 << a_oh->base_power)))
@@ -324,12 +283,10 @@ oh_set_base_h2(cw_oh_t * a_oh,
     oh_p_rehash(a_oh);
   }
 
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_wunlock(&a_oh->rw_lock);
   }
-#endif
   return retval;
 }
 
@@ -340,12 +297,10 @@ oh_set_base_shrink_point(cw_oh_t * a_oh,
   cw_bool_t retval;
   
   _cw_check_ptr(a_oh);
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_wlock(&a_oh->rw_lock);
   }
-#endif
 
   if ((a_shrink_point >= a_oh->base_grow_point)
       || (a_shrink_point >= (1 << a_oh->base_power)))
@@ -363,12 +318,10 @@ oh_set_base_shrink_point(cw_oh_t * a_oh,
     oh_p_shrink(a_oh);
   }
 
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_wunlock(&a_oh->rw_lock);
   }
-#endif
   return retval;
 }
 
@@ -379,12 +332,10 @@ oh_set_base_grow_point(cw_oh_t * a_oh,
   cw_bool_t retval;
   
   _cw_check_ptr(a_oh);
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_wlock(&a_oh->rw_lock);
   }
-#endif
 
   if ((a_grow_point <= a_oh->base_shrink_point)
       || (a_grow_point >= (1 << a_oh->base_power)))
@@ -405,12 +356,10 @@ oh_set_base_grow_point(cw_oh_t * a_oh,
     }
   }
 
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_wunlock(&a_oh->rw_lock);
   }
-#endif
   return retval;
 }
 
@@ -422,12 +371,10 @@ oh_item_insert(cw_oh_t * a_oh, const void * a_key, const void * a_data)
   cw_uint64_t junk;
 
   _cw_check_ptr(a_oh);
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_wlock(&a_oh->rw_lock);
   }
-#endif
 
   /* Quiesce. */
   oh_p_shrink(a_oh);
@@ -481,12 +428,10 @@ oh_item_insert(cw_oh_t * a_oh, const void * a_key, const void * a_data)
   }
 
   RETURN:
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_wunlock(&a_oh->rw_lock);
   }
-#endif
   return retval;
 }
 
@@ -501,12 +446,10 @@ oh_item_delete(cw_oh_t * a_oh,
   
   _cw_check_ptr(a_oh);
 
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_wlock(&a_oh->rw_lock);
   }
-#endif
 
   /* Get the slot number for what we want to delete (if it exists). */
   if (oh_p_item_search(a_oh, a_search_key, &slot) == FALSE)
@@ -565,12 +508,10 @@ oh_item_delete(cw_oh_t * a_oh,
     retval = TRUE;
   }
 
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_wunlock(&a_oh->rw_lock);
   }
-#endif
   return retval;
 }
 
@@ -583,12 +524,10 @@ oh_item_search(cw_oh_t * a_oh,
   cw_bool_t retval;
 
   _cw_check_ptr(a_oh);
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_rlock(&a_oh->rw_lock);
   }
-#endif
 
   if (FALSE == oh_p_item_search(a_oh, a_key, &slot))
   {
@@ -606,12 +545,10 @@ oh_item_search(cw_oh_t * a_oh,
     retval = TRUE;
   }
 
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_runlock(&a_oh->rw_lock);
   }
-#endif
   return retval;
 }
 
@@ -621,12 +558,10 @@ oh_item_get_iterate(cw_oh_t * a_oh, void ** r_key, void ** r_data)
   cw_bool_t retval;
   
   _cw_check_ptr(a_oh);
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_wlock(&a_oh->rw_lock);
   }
-#endif
 
   if (0 < a_oh->items_count)
   {
@@ -652,12 +587,10 @@ oh_item_get_iterate(cw_oh_t * a_oh, void ** r_key, void ** r_data)
     retval = TRUE;
   }
   
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_wunlock(&a_oh->rw_lock);
   }
-#endif
   return retval;
 }
 
@@ -667,12 +600,10 @@ oh_item_delete_iterate(cw_oh_t * a_oh, void ** r_key, void ** r_data)
   cw_bool_t retval;
   
   _cw_check_ptr(a_oh);
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_wlock(&a_oh->rw_lock);
   }
-#endif
 
   if (0 < a_oh->items_count)
   {
@@ -721,12 +652,10 @@ oh_item_delete_iterate(cw_oh_t * a_oh, void ** r_key, void ** r_data)
     retval = TRUE;
   }
   
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_wunlock(&a_oh->rw_lock);
   }
-#endif
   return retval;
 }
 
@@ -736,12 +665,10 @@ oh_dump(cw_oh_t * a_oh, cw_bool_t a_all)
   cw_uint64_t i;
 
   _cw_check_ptr(a_oh);
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_rlock(&a_oh->rw_lock);
   }
-#endif
 
   out_put(cw_g_out,
 	  "============================================================\n");
@@ -815,12 +742,10 @@ oh_dump(cw_oh_t * a_oh, cw_bool_t a_all)
   out_put(cw_g_out,
 	  "============================================================\n");
 
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_runlock(&a_oh->rw_lock);
   }
-#endif
 }
 
 cw_uint64_t
@@ -829,21 +754,17 @@ oh_get_num_collisions(cw_oh_t * a_oh)
   cw_uint64_t retval;
   
   _cw_check_ptr(a_oh);
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_rlock(&a_oh->rw_lock);
   }
-#endif
 
   retval = a_oh->num_collisions;
 
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_runlock(&a_oh->rw_lock);
   }
-#endif
   return retval;
 }
 
@@ -853,21 +774,17 @@ oh_get_num_inserts(cw_oh_t * a_oh)
   cw_uint64_t retval;
   
   _cw_check_ptr(a_oh);
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_rlock(&a_oh->rw_lock);
   }
-#endif
 
   retval = a_oh->num_inserts;
 
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_runlock(&a_oh->rw_lock);
   }
-#endif
   return retval;
 }
 
@@ -877,21 +794,17 @@ oh_get_num_deletes(cw_oh_t * a_oh)
   cw_uint64_t retval;
   
   _cw_check_ptr(a_oh);
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_rlock(&a_oh->rw_lock);
   }
-#endif
 
   retval = a_oh->num_deletes;
 
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_runlock(&a_oh->rw_lock);
   }
-#endif
   return retval;
 }
 
@@ -901,21 +814,17 @@ oh_get_num_grows(cw_oh_t * a_oh)
   cw_uint64_t retval;
   
   _cw_check_ptr(a_oh);
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_rlock(&a_oh->rw_lock);
   }
-#endif
 
   retval = a_oh->num_grows;
 
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_runlock(&a_oh->rw_lock);
   }
-#endif
   return retval;
 }
 
@@ -925,21 +834,17 @@ oh_get_num_shrinks(cw_oh_t * a_oh)
   cw_uint64_t retval;
   
   _cw_check_ptr(a_oh);
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_rlock(&a_oh->rw_lock);
   }
-#endif
 
   retval = a_oh->num_shrinks;
 
-#ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
     rwl_runlock(&a_oh->rw_lock);
   }
-#endif
   return retval;
 }
 
@@ -1016,7 +921,6 @@ oh_p_new(cw_oh_t * a_oh, cw_bool_t a_is_thread_safe)
     retval->is_malloced = FALSE;
   }
 
-#ifdef _CW_REENTRANT
   if (a_is_thread_safe)
   {
     retval->is_thread_safe = TRUE;
@@ -1026,7 +930,6 @@ oh_p_new(cw_oh_t * a_oh, cw_bool_t a_is_thread_safe)
   {
     retval->is_thread_safe = FALSE;
   }
-#endif
 
   retval->items_ring = NULL;
   retval->items_count = 0;

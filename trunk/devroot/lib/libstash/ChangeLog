@@ -1,3 +1,7 @@
+2000-02-03  Jason Evans  <jasone@canonware.com>
+
+	* : Remove _CW_REENTRANT and only build threaded versions of libstash.
+
 2000-01-11  Jason Evans  <jasone@canonware.com>
 
 	* src/out.c: Add -3 error return for functions that output to a

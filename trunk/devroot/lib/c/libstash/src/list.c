@@ -10,12 +10,7 @@
  *
  ****************************************************************************/
 
-#ifdef _CW_REENTRANT
-#  include "libstash/libstash_r.h"
-#else
-#  include "libstash/libstash.h"
-#endif
-
+#include "libstash/libstash.h"
 #include "libstash/list_p.h"
 
 cw_list_item_t *
@@ -111,12 +106,10 @@ list_delete(cw_list_t * a_list)
     list_item_delete(item);
   }
 
-#ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
     mtx_delete(&a_list->lock);
   }
-#endif
   if (a_list->is_malloced)
   {
     _cw_free(a_list);
@@ -138,21 +131,17 @@ list_count(cw_list_t * a_list)
   _cw_assert(a_list->magic_a == _CW_LIST_MAGIC);
   _cw_assert(a_list->size_of == sizeof(cw_list_t));
   _cw_assert(a_list->magic_b == _CW_LIST_MAGIC);
-#ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
     mtx_lock(&a_list->lock);
   }
-#endif
 
   retval = a_list->count;
   
-#ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
     mtx_unlock(&a_list->lock);
   }
-#endif
   return retval;
 }
 
@@ -168,7 +157,6 @@ list_catenate_list(cw_list_t * a_a, cw_list_t * a_b)
   _cw_assert(a_b->size_of == sizeof(cw_list_t));
   _cw_assert(a_b->magic_b == _CW_LIST_MAGIC);
 
-#ifdef _CW_REENTRANT
   if (a_a->is_thread_safe)
   {
     mtx_lock(&a_a->lock);
@@ -177,7 +165,6 @@ list_catenate_list(cw_list_t * a_a, cw_list_t * a_b)
   {
     mtx_lock(&a_b->lock);
   }
-#endif
 
   if (0 < a_a->count)
   {
@@ -201,7 +188,6 @@ list_catenate_list(cw_list_t * a_a, cw_list_t * a_b)
   a_b->tail = NULL;
   a_b->count = 0;
 
-#ifdef _CW_REENTRANT
   if (a_b->is_thread_safe)
   {
     mtx_unlock(&a_b->lock);
@@ -210,7 +196,6 @@ list_catenate_list(cw_list_t * a_a, cw_list_t * a_b)
   {
     mtx_unlock(&a_a->lock);
   }
-#endif
 }
 
 cw_list_item_t *
@@ -222,12 +207,10 @@ list_hpush(cw_list_t * a_list, void * a_data)
   _cw_assert(a_list->magic_a == _CW_LIST_MAGIC);
   _cw_assert(a_list->size_of == sizeof(cw_list_t));
   _cw_assert(a_list->magic_b == _CW_LIST_MAGIC);
-#ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
     mtx_lock(&a_list->lock);
   }
-#endif
 
   /* Find a list item somewhere. */
   if (a_list->spares_count > 0)
@@ -268,12 +251,10 @@ list_hpush(cw_list_t * a_list, void * a_data)
   a_list->count++;
 
   RETURN:
-#ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
     mtx_unlock(&a_list->lock);
   }
-#endif
   return retval;
 }
 
@@ -286,21 +267,17 @@ list_hpop(cw_list_t * a_list)
   _cw_assert(a_list->magic_a == _CW_LIST_MAGIC);
   _cw_assert(a_list->size_of == sizeof(cw_list_t));
   _cw_assert(a_list->magic_b == _CW_LIST_MAGIC);
-#ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
     mtx_lock(&a_list->lock);
   }
-#endif
 
   retval = list_p_hpop(a_list);
 
-#ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
     mtx_unlock(&a_list->lock);
   }
-#endif
   return retval;
 }
 
@@ -313,12 +290,10 @@ list_hpeek(cw_list_t * a_list)
   _cw_assert(a_list->magic_a == _CW_LIST_MAGIC);
   _cw_assert(a_list->size_of == sizeof(cw_list_t));
   _cw_assert(a_list->magic_b == _CW_LIST_MAGIC);
-#ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
     mtx_lock(&a_list->lock);
   }
-#endif
 
   if (a_list->head == NULL)
   {
@@ -330,12 +305,10 @@ list_hpeek(cw_list_t * a_list)
     retval = list_item_get(a_list->head);
   }
 
-#ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
     mtx_unlock(&a_list->lock);
   }
-#endif
   return retval;
 }
 
@@ -348,12 +321,10 @@ list_tpush(cw_list_t * a_list, void * a_data)
   _cw_assert(a_list->magic_a == _CW_LIST_MAGIC);
   _cw_assert(a_list->size_of == sizeof(cw_list_t));
   _cw_assert(a_list->magic_b == _CW_LIST_MAGIC);
-#ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
     mtx_lock(&a_list->lock);
   }
-#endif
 
   /* Find a list item somewhere. */
   if (a_list->spares_count > 0)
@@ -394,12 +365,10 @@ list_tpush(cw_list_t * a_list, void * a_data)
   a_list->count++;
 
   RETURN:
-#ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
     mtx_unlock(&a_list->lock);
   }
-#endif
   return retval;
 }
 
@@ -412,21 +381,17 @@ list_tpop(cw_list_t * a_list)
   _cw_assert(a_list->magic_a == _CW_LIST_MAGIC);
   _cw_assert(a_list->size_of == sizeof(cw_list_t));
   _cw_assert(a_list->magic_b == _CW_LIST_MAGIC);
-#ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
     mtx_lock(&a_list->lock);
   }
-#endif
 
   retval = list_p_tpop(a_list);
 
-#ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
     mtx_unlock(&a_list->lock);
   }
-#endif
   return retval;
 }
 
@@ -439,12 +404,10 @@ list_tpeek(cw_list_t * a_list)
   _cw_assert(a_list->magic_a == _CW_LIST_MAGIC);
   _cw_assert(a_list->size_of == sizeof(cw_list_t));
   _cw_assert(a_list->magic_b == _CW_LIST_MAGIC);
-#ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
     mtx_lock(&a_list->lock);
   }
-#endif
 
   if (a_list->head == NULL)
   {
@@ -456,12 +419,10 @@ list_tpeek(cw_list_t * a_list)
     retval = list_item_get(a_list->tail);
   }
 
-#ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
     mtx_unlock(&a_list->lock);
   }
-#endif
   return retval;
 }
 
@@ -474,12 +435,10 @@ list_get_next(cw_list_t * a_list, cw_list_item_t * a_in_list)
   _cw_assert(a_list->magic_a == _CW_LIST_MAGIC);
   _cw_assert(a_list->size_of == sizeof(cw_list_t));
   _cw_assert(a_list->magic_b == _CW_LIST_MAGIC);
-#ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
     mtx_lock(&a_list->lock);
   }
-#endif
 
   if (a_in_list == NULL)
   {
@@ -490,12 +449,10 @@ list_get_next(cw_list_t * a_list, cw_list_item_t * a_in_list)
     retval = list_item_p_get_next(a_in_list);
   }
 
-#ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
     mtx_unlock(&a_list->lock);
   }
-#endif
   return retval;
 }
 
@@ -508,12 +465,10 @@ list_get_prev(cw_list_t * a_list, cw_list_item_t * a_in_list)
   _cw_assert(a_list->magic_a == _CW_LIST_MAGIC);
   _cw_assert(a_list->size_of == sizeof(cw_list_t));
   _cw_assert(a_list->magic_b == _CW_LIST_MAGIC);
-#ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
     mtx_lock(&a_list->lock);
   }
-#endif
 
   if (a_in_list == NULL)
   {
@@ -524,12 +479,10 @@ list_get_prev(cw_list_t * a_list, cw_list_item_t * a_in_list)
     retval = list_item_p_get_prev(a_in_list);
   }
 
-#ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
     mtx_unlock(&a_list->lock);
   }
-#endif
   return retval;
 }
 
@@ -548,12 +501,10 @@ list_insert_before(cw_list_t * a_list,
   _cw_assert(a_in_list->magic_a == _CW_LIST_ITEM_MAGIC);
   _cw_assert(a_in_list->size_of == sizeof(cw_list_item_t));
   _cw_assert(a_in_list->magic_b == _CW_LIST_ITEM_MAGIC);
-#ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
     mtx_lock(&a_list->lock);
   }
-#endif
 
   /* Find a list item somewhere. */
   if (a_list->spares_count > 0)
@@ -593,12 +544,10 @@ list_insert_before(cw_list_t * a_list,
   a_list->count++;
 
   RETURN:
-#ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
     mtx_unlock(&a_list->lock);
   }
-#endif
   return retval;
 }
 
@@ -617,12 +566,10 @@ list_insert_after(cw_list_t * a_list,
   _cw_assert(a_in_list->magic_a == _CW_LIST_ITEM_MAGIC);
   _cw_assert(a_in_list->size_of == sizeof(cw_list_item_t));
   _cw_assert(a_in_list->magic_b == _CW_LIST_ITEM_MAGIC);
-#ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
     mtx_lock(&a_list->lock);
   }
-#endif
 
   /* Find a list item somewhere. */
   if (a_list->spares_count > 0)
@@ -662,12 +609,10 @@ list_insert_after(cw_list_t * a_list,
   a_list->count++;
 
   RETURN:
-#ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
     mtx_unlock(&a_list->lock);
   }
-#endif
   return retval;
 }
 
@@ -682,12 +627,10 @@ list_remove_item(cw_list_t * a_list, void * a_data)
   _cw_assert(a_list->size_of == sizeof(cw_list_t));
   _cw_assert(a_list->magic_b == _CW_LIST_MAGIC);
 
-#ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
     mtx_lock(&a_list->lock);
   }
-#endif
 
   for (t = a_list->head;
        (t != NULL) && (retval == NULL);
@@ -699,12 +642,10 @@ list_remove_item(cw_list_t * a_list, void * a_data)
     }
   }
 
-#ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
     mtx_unlock(&a_list->lock);
   }
-#endif
   return retval;
 }
 
@@ -721,21 +662,17 @@ list_remove_container(cw_list_t * a_list, cw_list_item_t * a_to_remove)
   _cw_assert(a_to_remove->magic_a == _CW_LIST_ITEM_MAGIC);
   _cw_assert(a_to_remove->size_of == sizeof(cw_list_item_t));
   _cw_assert(a_to_remove->magic_b == _CW_LIST_ITEM_MAGIC);
-#ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
     mtx_lock(&a_list->lock);
   }
-#endif
 
   retval = list_p_remove_container(a_list, a_to_remove);
 
-#ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
     mtx_unlock(&a_list->lock);
   }
-#endif
   return retval;
 }
 
@@ -748,12 +685,10 @@ list_purge_spares(cw_list_t * a_list)
   _cw_assert(a_list->magic_a == _CW_LIST_MAGIC);
   _cw_assert(a_list->size_of == sizeof(cw_list_t));
   _cw_assert(a_list->magic_b == _CW_LIST_MAGIC);
-#ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
     mtx_lock(&a_list->lock);
   }
-#endif
     
   for (; a_list->spares_count > 0; a_list->spares_count--)
   {
@@ -762,12 +697,10 @@ list_purge_spares(cw_list_t * a_list)
     list_item_delete(item);
   }
 
-#ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
     mtx_unlock(&a_list->lock);
   }
-#endif
 }
 
 void
@@ -777,21 +710,15 @@ list_dump(cw_list_t * a_list)
   _cw_assert(a_list->magic_a == _CW_LIST_MAGIC);
   _cw_assert(a_list->size_of == sizeof(cw_list_t));
   _cw_assert(a_list->magic_b == _CW_LIST_MAGIC);
-#ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
     mtx_lock(&a_list->lock);
   }
-#endif
 
   out_put(cw_g_out,
 	  "=== cw_list_t ==============================================\n");
-#ifdef _CW_REENTRANT
   out_put(cw_g_out, "is_malloced: [[[i]], is_thread_safe: [[[i]]\n",
 	  a_list->is_malloced, a_list->is_thread_safe);
-#else
-  out_put(cw_g_out, "is_malloced: [[[i]]\n", a_list->is_malloced);
-#endif
   {
     out_put(cw_g_out, "count: [[[q]]  spares: [[[q]]\n",
 	    a_list->count, a_list->spares_count);
@@ -814,12 +741,10 @@ list_dump(cw_list_t * a_list)
   out_put(cw_g_out,
 	  "============================================================\n");
   
-#ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
     mtx_unlock(&a_list->lock);
   }
-#endif
 }
 
 static cw_list_t *
@@ -842,7 +767,6 @@ list_p_new(cw_list_t * a_list, cw_bool_t a_is_thread_safe)
     retval->is_malloced = FALSE;
   }
 
-#ifdef _CW_REENTRANT
   if (a_is_thread_safe)
   {
     retval->is_thread_safe = TRUE;
@@ -852,7 +776,6 @@ list_p_new(cw_list_t * a_list, cw_bool_t a_is_thread_safe)
   {
     retval->is_thread_safe = FALSE;
   }
-#endif
   
   retval->head = NULL;
   retval->tail = NULL;

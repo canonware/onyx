@@ -10,12 +10,7 @@
  *
  ****************************************************************************/
 
-#ifdef _CW_REENTRANT
-#  include "libstash/libstash_r.h"
-#else
-#  include "libstash/libstash.h"
-#endif
-
+#include "libstash/libstash.h"
 #include "libstash/bhp_p.h"
 
 cw_bhpi_t *
@@ -106,12 +101,10 @@ bhp_delete(cw_bhp_t * a_bhp)
     }
   }
   
-#ifdef _CW_REENTRANT
   if (a_bhp->is_thread_safe == TRUE)
   {
     mtx_delete(&a_bhp->lock);
   }
-#endif
 
   if (TRUE == a_bhp->is_malloced)
   {
@@ -127,12 +120,10 @@ bhp_dump(cw_bhp_t * a_bhp)
   _cw_assert(sizeof(cw_bhp_t) == a_bhp->size_of);
   _cw_assert(_LIBSTASH_BHP_MAGIC == a_bhp->magic_b);
   
-#ifdef _CW_REENTRANT
   if (a_bhp->is_thread_safe == TRUE)
   {
     mtx_lock(&a_bhp->lock);
   }
-#endif
 
   out_put(cw_g_out, "=== bhp_dump() start ==============================\n");
   out_put(cw_g_out, "num_nodes: [q]\n",
@@ -143,12 +134,10 @@ bhp_dump(cw_bhp_t * a_bhp)
   }
   out_put(cw_g_out, "=== bhp_dump() end ================================\n");
   
-#ifdef _CW_REENTRANT
   if (a_bhp->is_thread_safe == TRUE)
   {
     mtx_unlock(&a_bhp->lock);
   }
-#endif
 }
 
 void
@@ -164,12 +153,10 @@ bhp_insert(cw_bhp_t * a_bhp, cw_bhpi_t * a_bhpi)
   _cw_assert(_LIBSTASH_BHPI_MAGIC == a_bhpi->magic_a);
   _cw_assert(sizeof(cw_bhpi_t) == a_bhpi->size_of);
   _cw_assert(_LIBSTASH_BHPI_MAGIC == a_bhpi->magic_b);
-#ifdef _CW_REENTRANT
   if (a_bhp->is_thread_safe == TRUE)
   {
     mtx_lock(&a_bhp->lock);
   }
-#endif
   
   /* Create and initialize temp_heap. */
   bhp_new(&temp_heap, a_bhp->priority_compare);
@@ -183,12 +170,10 @@ bhp_insert(cw_bhp_t * a_bhp, cw_bhpi_t * a_bhpi)
   temp_heap.head = NULL;
   bhp_delete(&temp_heap);
 
-#ifdef _CW_REENTRANT
   if (a_bhp->is_thread_safe == TRUE)
   {
     mtx_unlock(&a_bhp->lock);
   }
-#endif
 }
 
 cw_bool_t
@@ -201,12 +186,10 @@ bhp_find_min(cw_bhp_t * a_bhp, void ** r_priority, void ** r_data)
   _cw_assert(_LIBSTASH_BHP_MAGIC == a_bhp->magic_a);
   _cw_assert(sizeof(cw_bhp_t) == a_bhp->size_of);
   _cw_assert(_LIBSTASH_BHP_MAGIC == a_bhp->magic_b);
-#ifdef _CW_REENTRANT
   if (a_bhp->is_thread_safe == TRUE)
   {
     mtx_lock(&a_bhp->lock);
   }
-#endif
 
   if (a_bhp->head != NULL)
   {
@@ -245,12 +228,10 @@ bhp_find_min(cw_bhp_t * a_bhp, void ** r_priority, void ** r_data)
     retval = TRUE;
   }
   
-#ifdef _CW_REENTRANT
   if (a_bhp->is_thread_safe == TRUE)
   {
     mtx_unlock(&a_bhp->lock);
   }
-#endif
   return retval;
 }
 
@@ -265,12 +246,10 @@ bhp_del_min(cw_bhp_t * a_bhp, void ** r_priority, void ** r_data)
   _cw_assert(_LIBSTASH_BHP_MAGIC == a_bhp->magic_a);
   _cw_assert(sizeof(cw_bhp_t) == a_bhp->size_of);
   _cw_assert(_LIBSTASH_BHP_MAGIC == a_bhp->magic_b);
-#ifdef _CW_REENTRANT
   if (a_bhp->is_thread_safe == TRUE)
   {
     mtx_lock(&a_bhp->lock);
   }
-#endif
 
   if (a_bhp->num_nodes == 0)
   {
@@ -361,12 +340,10 @@ bhp_del_min(cw_bhp_t * a_bhp, void ** r_priority, void ** r_data)
     bhpi_delete(curr_min);
   }
   
-#ifdef _CW_REENTRANT
   if (a_bhp->is_thread_safe == TRUE)
   {
     mtx_unlock(&a_bhp->lock);
   }
-#endif
   return retval;
 }
 
@@ -379,21 +356,17 @@ bhp_get_size(cw_bhp_t * a_bhp)
   _cw_assert(_LIBSTASH_BHP_MAGIC == a_bhp->magic_a);
   _cw_assert(sizeof(cw_bhp_t) == a_bhp->size_of);
   _cw_assert(_LIBSTASH_BHP_MAGIC == a_bhp->magic_b);
-#ifdef _CW_REENTRANT
   if (a_bhp->is_thread_safe == TRUE)
   {
     mtx_lock(&a_bhp->lock);
   }
-#endif
 
   retval = a_bhp->num_nodes;
   
-#ifdef _CW_REENTRANT
   if (a_bhp->is_thread_safe == TRUE)
   {
     mtx_unlock(&a_bhp->lock);
   }
-#endif
   return retval;
 }
 
@@ -408,7 +381,6 @@ bhp_union(cw_bhp_t * a_a, cw_bhp_t * a_b)
   _cw_assert(_LIBSTASH_BHP_MAGIC == a_b->magic_a);
   _cw_assert(sizeof(cw_bhp_t) == a_b->size_of);
   _cw_assert(_LIBSTASH_BHP_MAGIC == a_b->magic_b);
-#ifdef _CW_REENTRANT
   if (a_a->is_thread_safe == TRUE)
   {
     mtx_lock(&a_a->lock);
@@ -417,27 +389,22 @@ bhp_union(cw_bhp_t * a_a, cw_bhp_t * a_b)
   {
     mtx_lock(&a_b->lock);
   }
-#endif
 
   bhp_p_union(a_a, a_b);
 
-#ifdef _CW_REENTRANT
   if (a_b->is_thread_safe == TRUE)
   {
     mtx_unlock(&a_b->lock);
   }
-#endif
   
   /* Destroy the old heap. */
   a_b->head = NULL;
   bhp_delete(a_b);
 
-#ifdef _CW_REENTRANT
   if (a_a->is_thread_safe == TRUE)
   {
     mtx_unlock(&a_a->lock);
   }
-#endif
 }
 
 cw_sint32_t
@@ -541,7 +508,6 @@ bhp_p_new(cw_bhp_t * a_bhp, bhp_prio_comp_t * a_prio_comp,
     retval->is_malloced = FALSE;
   }
 
-#ifdef _CW_REENTRANT
   if (a_is_thread_safe == TRUE)
   {
     retval->is_thread_safe = TRUE;
@@ -551,7 +517,6 @@ bhp_p_new(cw_bhp_t * a_bhp, bhp_prio_comp_t * a_prio_comp,
   {
     retval->is_thread_safe = FALSE;
   }
-#endif
   
   retval->head = NULL;
   retval->num_nodes = 0;

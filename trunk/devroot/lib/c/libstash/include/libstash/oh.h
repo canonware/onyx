@@ -25,10 +25,8 @@ typedef struct
 struct cw_oh_s
 {
   cw_bool_t is_malloced;
-#ifdef _CW_REENTRANT
   cw_bool_t is_thread_safe;
   cw_rwl_t rw_lock;
-#endif
   cw_oh_item_t ** items;
   cw_ring_t * items_ring;
   cw_uint64_t items_count;
@@ -65,10 +63,8 @@ typedef cw_bool_t oh_key_comp_t(const void *, const void *);
 cw_oh_t *
 oh_new(cw_oh_t * a_oh);
 
-#ifdef _CW_REENTRANT
 cw_oh_t *
 oh_new_r(cw_oh_t * a_oh);
-#endif
 
 void
 oh_delete(cw_oh_t * a_oh);

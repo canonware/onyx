@@ -21,7 +21,12 @@ extern "C" {
 
 #define _LIBSTASH_VERSION_ <Version>
 
-#include "libstash_defs.h"
+/* Must be defined for pthreads. */
+#ifndef _REENTRANT
+#  define _REENTRANT
+#endif
+
+#include "libstash/libstash_defs.h"
 
 /*
  * Global typedefs.
@@ -134,7 +139,7 @@ typedef enum
  * Project headers to always be included.
  */
 
-#include "libstash_incs.h"
+#include "libstash/libstash_incs.h"
 
 /*
  * libstash initialization and shutdown function prototypes.

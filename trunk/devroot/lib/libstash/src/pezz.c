@@ -14,11 +14,7 @@
  *
  ****************************************************************************/
 
-#ifdef _CW_REENTRANT
-#  include "libstash/libstash_r.h"
-#else
-#  include "libstash/libstash.h"
-#endif
+#include "libstash/libstash.h"
 
 #ifdef _LIBSTASH_DBG
 #  define _CW_PEZZ_MAGIC 0x4e224e22
@@ -49,9 +45,7 @@ pezz_new(cw_pezz_t * a_pezz, cw_uint32_t a_buffer_size,
     retval->is_malloced = FALSE;
   }
 
-#ifdef _CW_REENTRANT
   mtx_new(&retval->lock);
-#endif
   
   retval->buffer_size = a_buffer_size;
   retval->block_num_buffers = a_num_buffers;
@@ -189,9 +183,7 @@ pezz_delete(cw_pezz_t * a_pezz)
   _cw_free(a_pezz->mem_blocks);
   _cw_free(a_pezz->ring_blocks);
 
-#ifdef _CW_REENTRANT
   mtx_delete(&a_pezz->lock);
-#endif
 
 #ifdef _LIBSTASH_DBG
   a_pezz->magic = 0;
@@ -223,9 +215,7 @@ pezz_get_e(cw_pezz_t * a_pezz, const char * a_filename, cw_uint32_t a_line_num)
 
   _cw_check_ptr(a_pezz);
   _cw_assert(a_pezz->magic == _CW_PEZZ_MAGIC);
-#ifdef _CW_REENTRANT
   mtx_lock(&a_pezz->lock);
-#endif
 
   if (a_pezz->spare_buffers == NULL)
   {
@@ -402,9 +392,7 @@ pezz_get_e(cw_pezz_t * a_pezz, const char * a_filename, cw_uint32_t a_line_num)
   }
 #endif
   
-#ifdef _CW_REENTRANT
   mtx_unlock(&a_pezz->lock);
-#endif
   return retval;
 }
 
@@ -422,9 +410,7 @@ pezz_put_e(cw_pezz_t * a_pezz, void * a_buffer, const char * a_filename,
   
   _cw_check_ptr(a_pezz);
   _cw_assert(a_pezz->magic == _CW_PEZZ_MAGIC);
-#ifdef _CW_REENTRANT
   mtx_lock(&a_pezz->lock);
-#endif
 
 #ifdef _LIBSTASH_DBG
   if (NULL == a_filename)
@@ -496,9 +482,7 @@ pezz_put_e(cw_pezz_t * a_pezz, void * a_buffer, const char * a_filename,
    * Prevent a compiler warning. */
   RETURN:
 #endif
-#ifdef _CW_REENTRANT
   mtx_unlock(&a_pezz->lock);
-#endif
 }
 
 void
@@ -514,9 +498,7 @@ pezz_dump(cw_pezz_t * a_pezz, const char * a_prefix)
   
   _cw_check_ptr(a_pezz);
   _cw_assert(a_pezz->magic == _CW_PEZZ_MAGIC);
-#ifdef _CW_REENTRANT
   mtx_lock(&a_pezz->lock);
-#endif
 
   out_put(cw_g_out, "[s]start ==========================================\n",
 	  a_prefix);
@@ -567,7 +549,5 @@ pezz_dump(cw_pezz_t * a_pezz, const char * a_prefix)
   out_put(cw_g_out, "[s]end ============================================\n",
 	  a_prefix);
 
-#ifdef _CW_REENTRANT
   mtx_unlock(&a_pezz->lock);
-#endif
 }

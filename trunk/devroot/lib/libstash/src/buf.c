@@ -10,12 +10,7 @@
  *
  ****************************************************************************/
 
-#ifdef _CW_REENTRANT
-#  include "libstash/libstash_r.h"
-#else
-#  include "libstash/libstash.h"
-#endif
-
+#include "libstash/libstash.h"
 #include "libstash/buf_p.h"
 
 #ifdef _CW_OS_FREEBSD
@@ -42,12 +37,10 @@ buf_delete(cw_buf_t * a_buf)
   
   _cw_check_ptr(a_buf);
 
-#ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe == TRUE)
   {
     mtx_delete(&a_buf->lock);
   }
-#endif
 
   for (i = 0;
        i < a_buf->array_num_valid;
@@ -98,12 +91,10 @@ buf_dump(cw_buf_t * a_buf, const char * a_prefix)
   _cw_check_ptr(a_buf);
   _cw_check_ptr(a_prefix);
 
-#ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe == TRUE)
   {
     mtx_lock(&a_buf->lock);
   }
-#endif
   out_put(cw_g_out,
 	  "[s]| buf_dump()\n",
 	  a_prefix);
@@ -121,11 +112,9 @@ buf_dump(cw_buf_t * a_buf, const char * a_prefix)
   out_put(cw_g_out,
 	  "[s]|--> is_malloced : [s]\n",
 	  a_prefix, (a_buf->is_malloced) ? "TRUE" : "FALSE");
-#ifdef _CW_REENTRANT
   out_put(cw_g_out,
 	  "[s]|--> is_threadsafe : [s]\n",
 	  a_prefix, (a_buf->is_threadsafe) ? "TRUE" : "FALSE");
-#endif
   out_put(cw_g_out,
 	  "[s]|--> size : [i]\n",
 	  a_prefix, a_buf->size);
@@ -218,12 +207,10 @@ buf_dump(cw_buf_t * a_buf, const char * a_prefix)
     }
   }
   
-#ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe == TRUE)
   {
     mtx_unlock(&a_buf->lock);
   }
-#endif
 }
 
 cw_sint32_t
@@ -366,21 +353,17 @@ buf_get_size(cw_buf_t * a_buf)
   _cw_assert(a_buf->magic_a == _CW_BUF_MAGIC);
   _cw_assert(a_buf->size_of == sizeof(cw_buf_t));
   _cw_assert(a_buf->magic_b == _CW_BUF_MAGIC);
-#ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe == TRUE)
   {
     mtx_lock(&a_buf->lock);
   }
-#endif
 
   retval = a_buf->size;
 
-#ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe == TRUE)
   {
     mtx_unlock(&a_buf->lock);
   }
-#endif
   return retval;
 }
 
@@ -393,21 +376,17 @@ buf_get_num_bufels(cw_buf_t * a_buf)
   _cw_assert(a_buf->magic_a == _CW_BUF_MAGIC);
   _cw_assert(a_buf->size_of == sizeof(cw_buf_t));
   _cw_assert(a_buf->magic_b == _CW_BUF_MAGIC);
-#ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe == TRUE)
   {
     mtx_lock(&a_buf->lock);
   }
-#endif
 
   retval = a_buf->array_num_valid;
 
-#ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe == TRUE)
   {
     mtx_unlock(&a_buf->lock);
   }
-#endif
   return retval;
 }
 
@@ -422,12 +401,10 @@ buf_get_iovec(cw_buf_t * a_buf, cw_uint32_t a_max_data,
   _cw_assert(a_buf->magic_a == _CW_BUF_MAGIC);
   _cw_assert(a_buf->size_of == sizeof(cw_buf_t));
   _cw_assert(a_buf->magic_b == _CW_BUF_MAGIC);
-#ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe == TRUE)
   {
     mtx_lock(&a_buf->lock);
   }
-#endif
 
   for (i = num_bytes = 0;
        (i < a_buf->array_num_valid) && (num_bytes < a_max_data);
@@ -460,12 +437,10 @@ buf_get_iovec(cw_buf_t * a_buf, cw_uint32_t a_max_data,
     *r_iovec_count = i;
   }
 
-#ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe == TRUE)
   {
     mtx_unlock(&a_buf->lock);
   }
-#endif
   
   return a_buf->iov;
 }
@@ -485,7 +460,6 @@ buf_catenate_buf(cw_buf_t * a_a, cw_buf_t * a_b, cw_bool_t a_preserve)
   _cw_assert(a_b->magic_b == _CW_BUF_MAGIC);
   _cw_assert(a_a != a_b);
   
-#ifdef _CW_REENTRANT
   if (a_a->is_threadsafe == TRUE)
   {
     mtx_lock(&a_a->lock);
@@ -494,11 +468,9 @@ buf_catenate_buf(cw_buf_t * a_a, cw_buf_t * a_b, cw_bool_t a_preserve)
   {
     mtx_lock(&a_b->lock);
   }
-#endif
 
   retval = buf_p_catenate_buf(a_a, a_b, a_preserve);
   
-#ifdef _CW_REENTRANT
   if (a_b->is_threadsafe == TRUE)
   {
     mtx_unlock(&a_b->lock);
@@ -507,7 +479,6 @@ buf_catenate_buf(cw_buf_t * a_a, cw_buf_t * a_b, cw_bool_t a_preserve)
   {
     mtx_unlock(&a_a->lock);
   }
-#endif
   return retval;
 }
 
@@ -529,7 +500,6 @@ buf_split(cw_buf_t * a_a, cw_buf_t * a_b, cw_uint32_t a_offset)
   _cw_assert(a_offset <= buf_get_size(a_b));
   _cw_assert(a_a != a_b);
 
-#ifdef _CW_REENTRANT
   if (a_a->is_threadsafe == TRUE)
   {
     mtx_lock(&a_a->lock);
@@ -538,7 +508,6 @@ buf_split(cw_buf_t * a_a, cw_buf_t * a_b, cw_uint32_t a_offset)
   {
     mtx_lock(&a_b->lock);
   }
-#endif
     
   if ((a_offset > 0) && (a_offset < a_b->size))
   {
@@ -765,7 +734,6 @@ buf_split(cw_buf_t * a_a, cw_buf_t * a_b, cw_uint32_t a_offset)
   retval = FALSE;
   
   RETURN:
-#ifdef _CW_REENTRANT
   if (a_b->is_threadsafe == TRUE)
   {
     mtx_unlock(&a_b->lock);
@@ -774,7 +742,6 @@ buf_split(cw_buf_t * a_a, cw_buf_t * a_b, cw_uint32_t a_offset)
   {
     mtx_unlock(&a_a->lock);
   }
-#endif
   return retval;
 }
 
@@ -794,12 +761,10 @@ buf_prepend_bufc(cw_buf_t * a_buf, cw_bufc_t * a_bufc,
   _cw_assert(a_bufc->magic_b == _CW_BUFC_MAGIC);
   _cw_assert(a_end_offset <= a_bufc->buf_size);
   _cw_assert(a_beg_offset <= a_end_offset);
-#ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe == TRUE)
   {
     mtx_lock(&a_buf->lock);
   }
-#endif
 
   if (NULL != a_bufc->buf)
   {
@@ -852,12 +817,10 @@ buf_prepend_bufc(cw_buf_t * a_buf, cw_bufc_t * a_bufc,
   retval = FALSE;
 
   RETURN:
-#ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe == TRUE)
   {
     mtx_unlock(&a_buf->lock);
   }
-#endif
   return retval;
 }
 
@@ -878,12 +841,10 @@ buf_append_bufc(cw_buf_t * a_buf, cw_bufc_t * a_bufc,
   _cw_assert(a_bufc->magic_b == _CW_BUFC_MAGIC);
   _cw_assert(a_end_offset <= a_bufc->buf_size);
   _cw_assert(a_beg_offset <= a_end_offset);
-#ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe == TRUE)
   {
     mtx_lock(&a_buf->lock);
   }
-#endif
 
   if (NULL != a_bufc->buf)
   {
@@ -944,12 +905,10 @@ buf_append_bufc(cw_buf_t * a_buf, cw_bufc_t * a_bufc,
   retval = FALSE;
 
   RETURN:
-#ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe == TRUE)
   {
     mtx_unlock(&a_buf->lock);
   }
-#endif
   return retval;
 }
 
@@ -963,12 +922,10 @@ buf_release_head_data(cw_buf_t * a_buf, cw_uint32_t a_amount)
   _cw_assert(a_buf->magic_a == _CW_BUF_MAGIC);
   _cw_assert(a_buf->size_of == sizeof(cw_buf_t));
   _cw_assert(a_buf->magic_b == _CW_BUF_MAGIC);
-#ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe)
   {
     mtx_lock(&a_buf->lock);
   }
-#endif
 
   if (a_amount == 0)
   {
@@ -1034,12 +991,10 @@ buf_release_head_data(cw_buf_t * a_buf, cw_uint32_t a_amount)
     retval = FALSE;
   }
 
-#ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe)
   {
     mtx_unlock(&a_buf->lock);
   }
-#endif
   return retval;
 }
 
@@ -1053,12 +1008,10 @@ buf_release_tail_data(cw_buf_t * a_buf, cw_uint32_t a_amount)
   _cw_assert(a_buf->magic_a == _CW_BUF_MAGIC);
   _cw_assert(a_buf->size_of == sizeof(cw_buf_t));
   _cw_assert(a_buf->magic_b == _CW_BUF_MAGIC);
-#ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe)
   {
     mtx_lock(&a_buf->lock);
   }
-#endif
 
   if (a_amount == 0)
   {
@@ -1122,12 +1075,10 @@ buf_release_tail_data(cw_buf_t * a_buf, cw_uint32_t a_amount)
     retval = FALSE;
   }
 
-#ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe)
   {
     mtx_unlock(&a_buf->lock);
   }
-#endif
 
   return retval;
 }
@@ -1144,23 +1095,19 @@ buf_get_uint8(cw_buf_t * a_buf, cw_uint32_t a_offset)
   _cw_assert(a_buf->magic_b == _CW_BUF_MAGIC);
   _cw_assert(a_offset < a_buf->size);
 
-#ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe)
   {
     mtx_lock(&a_buf->lock);
   }
-#endif
 
   buf_p_get_data_position(a_buf, a_offset, &array_element, &bufel_offset);
 
   retval = *(a_buf->bufel_array[array_element].bufc->buf + bufel_offset);
   
-#ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe)
   {
     mtx_unlock(&a_buf->lock);
   }
-#endif
   return retval;
 }
 
@@ -1175,12 +1122,10 @@ buf_get_uint32(cw_buf_t * a_buf, cw_uint32_t a_offset)
   _cw_assert(a_buf->magic_b == _CW_BUF_MAGIC);
   _cw_assert((a_offset + 3) < a_buf->size);
 
-#ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe)
   {
     mtx_lock(&a_buf->lock);
   }
-#endif
 
   /* Prepare a byte for logical or into retval.
    * o: Offset from bufel_offset.
@@ -1229,13 +1174,10 @@ buf_get_uint32(cw_buf_t * a_buf, cw_uint32_t a_offset)
   }
 #undef _LIBSTASH_BUF_OR_BYTE
 
-#ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe)
   {
     mtx_unlock(&a_buf->lock);
   }
-#endif
-  
   return retval;
 }
 
@@ -1251,12 +1193,10 @@ buf_get_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset)
   _cw_assert(a_buf->magic_b == _CW_BUF_MAGIC);
   _cw_assert((a_offset + 7) < a_buf->size);
 
-#ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe)
   {
     mtx_lock(&a_buf->lock);
   }
-#endif
 
   /* Prepare a byte for logical or into retval.
    * o: Offset from bufel_offset.
@@ -1329,12 +1269,10 @@ buf_get_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset)
   }
 #undef _LIBSTASH_BUF_OR_BYTE
 
-#ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe)
   {
     mtx_unlock(&a_buf->lock);
   }
-#endif
   return retval;
 }
 
@@ -1350,12 +1288,10 @@ buf_set_uint8(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint8_t a_val)
   _cw_assert(a_buf->magic_b == _CW_BUF_MAGIC);
   _cw_assert(a_offset <= a_buf->size);
 
-#ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe)
   {
     mtx_lock(&a_buf->lock);
   }
-#endif
   
   if (buf_p_make_range_writeable(a_buf, a_offset, sizeof(cw_uint8_t)))
   {
@@ -1370,12 +1306,10 @@ buf_set_uint8(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint8_t a_val)
   retval = FALSE;
 
   RETURN:
-#ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe)
   {
     mtx_unlock(&a_buf->lock);
   }
-#endif
   return retval;
 }
 
@@ -1391,12 +1325,10 @@ buf_set_uint32(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint32_t a_val)
   _cw_assert(a_buf->magic_b == _CW_BUF_MAGIC);
   _cw_assert(a_offset <= a_buf->size);
 
-#ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe)
   {
     mtx_lock(&a_buf->lock);
   }
-#endif
   
   if (buf_p_make_range_writeable(a_buf, a_offset, sizeof(cw_uint32_t)))
   {
@@ -1468,12 +1400,10 @@ buf_set_uint32(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint32_t a_val)
   retval = FALSE;
 
   RETURN:
-#ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe)
   {
     mtx_unlock(&a_buf->lock);
   }
-#endif
   return retval;
 }
 
@@ -1489,12 +1419,10 @@ buf_set_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint64_t a_val)
   _cw_assert(a_buf->magic_b == _CW_BUF_MAGIC);
   _cw_assert(a_offset <= a_buf->size);
 
-#ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe)
   {
     mtx_lock(&a_buf->lock);
   }
-#endif
   
   if (buf_p_make_range_writeable(a_buf, a_offset, sizeof(cw_uint64_t)))
   {
@@ -1606,12 +1534,10 @@ buf_set_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint64_t a_val)
   retval = FALSE;
 
   RETURN:
-#ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe)
   {
     mtx_unlock(&a_buf->lock);
   }
-#endif
   return retval;
 }
 
@@ -1627,12 +1553,10 @@ buf_set_range(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint32_t a_length,
   _cw_assert(a_buf->magic_b == _CW_BUF_MAGIC);
   _cw_assert(a_offset <= a_buf->size);
 
-#ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe)
   {
     mtx_lock(&a_buf->lock);
   }
-#endif
 
   /* If a_val is writeable and it's being appended to the buf, tack it on to the
    * end of the buf, rather than copying. */
@@ -1713,12 +1637,10 @@ buf_set_range(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint32_t a_length,
   retval = FALSE;
 
   RETURN:
-#ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe)
   {
     mtx_unlock(&a_buf->lock);
   }
-#endif
   return retval;
 }
 
@@ -1748,13 +1670,11 @@ buf_p_new(cw_buf_t * a_buf, cw_bool_t a_is_threadsafe)
   retval->magic_b = _CW_BUF_MAGIC;
 #endif
 
-#ifdef _CW_REENTRANT
   retval->is_threadsafe = a_is_threadsafe;
   if (retval->is_threadsafe == TRUE)
   {
     mtx_new(&retval->lock);
   }
-#endif
 
   retval->size = 0;
 
@@ -2668,9 +2588,7 @@ bufc_new(cw_bufc_t * a_bufc,
   retval->magic_b = _CW_BUFC_MAGIC;
 #endif
 
-#ifdef _CW_REENTRANT
   mtx_new(&retval->lock);
-#endif
   
   RETURN:
   return retval;
@@ -2679,16 +2597,13 @@ bufc_new(cw_bufc_t * a_bufc,
 void
 bufc_delete(cw_bufc_t * a_bufc)
 {
-#ifdef _CW_REENTRANT
   cw_bool_t should_delete;
-#endif
       
   _cw_check_ptr(a_bufc);
   _cw_assert(a_bufc->magic_a == _CW_BUFC_MAGIC);
   _cw_assert(a_bufc->size_of == sizeof(cw_bufc_t));
   _cw_assert(a_bufc->magic_b == _CW_BUFC_MAGIC);
       
-#ifdef _CW_REENTRANT
   mtx_lock(&a_bufc->lock);
     
   a_bufc->ref_count--;
@@ -2720,22 +2635,6 @@ bufc_delete(cw_bufc_t * a_bufc)
       a_bufc->dealloc_func(a_bufc->dealloc_arg, (void *) a_bufc);
     }
   }
-#else
-  a_bufc->ref_count--;
-  if (0 == a_bufc->ref_count)
-  {
-    if (NULL != a_bufc->buffer_dealloc_func)
-    {
-      a_bufc->buffer_dealloc_func(a_bufc->buffer_dealloc_arg,
-				  (void *) a_bufc->buf);
-    }
-    
-    if (NULL != a_bufc->dealloc_func)
-    {
-      a_bufc->dealloc_func(a_bufc->dealloc_arg, (void *) a_bufc);
-    }
-  }
-#endif
 }
 
 void
@@ -2784,9 +2683,7 @@ bufc_p_dump(cw_bufc_t * a_bufc, const char * a_prefix)
   _cw_assert(a_bufc->magic_b == _CW_BUFC_MAGIC);
   _cw_check_ptr(a_prefix);
 
-#ifdef _CW_REENTRANT
   mtx_lock(&a_bufc->lock);
-#endif
   
   out_put(cw_g_out,
 	  "[s]| bufc_dump()\n",
@@ -2831,9 +2728,7 @@ bufc_p_dump(cw_bufc_t * a_bufc, const char * a_prefix)
   }
   out_put(cw_g_out, "\n");
   
-#ifdef _CW_REENTRANT
   mtx_unlock(&a_bufc->lock);
-#endif
 }
 
 static cw_bool_t
@@ -2857,15 +2752,11 @@ bufc_p_get_ref_count(cw_bufc_t * a_bufc)
   _cw_assert(a_bufc->size_of == sizeof(cw_bufc_t));
   _cw_assert(a_bufc->magic_b == _CW_BUFC_MAGIC);
       
-#ifdef _CW_REENTRANT
   mtx_lock(&a_bufc->lock);
-#endif
 
   retval = a_bufc->ref_count;
     
-#ifdef _CW_REENTRANT
   mtx_unlock(&a_bufc->lock);
-#endif
   return retval;
 }
 
@@ -2877,13 +2768,9 @@ bufc_p_ref_increment(cw_bufc_t * a_bufc)
   _cw_assert(a_bufc->size_of == sizeof(cw_bufc_t));
   _cw_assert(a_bufc->magic_b == _CW_BUFC_MAGIC);
       
-#ifdef _CW_REENTRANT
   mtx_lock(&a_bufc->lock);
-#endif
 
   a_bufc->ref_count++;
     
-#ifdef _CW_REENTRANT
   mtx_unlock(&a_bufc->lock);
-#endif
 }
