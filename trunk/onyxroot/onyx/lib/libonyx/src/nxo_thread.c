@@ -171,6 +171,13 @@ nxo_threadp_delete(cw_nxo_threadp_t *a_threadp, cw_nxo_t *a_thread)
 		    suffix[0] = '!';
 		    break;
 		}
+#ifdef CW_OOP
+		case ACTION_CALL:
+		{
+		    suffix[0] = ':';
+		    break;
+		}
+#endif
 		case ACTION_LITERAL:
 		{
 		    suffix[0] = '$';
@@ -931,6 +938,7 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 	    case NXOT_NAME:
 	    {
 		cw_nxo_t *name;
+		cw_nxn_t error;
 
 		/* Search for a value associated with the name in the dictionary
 		 * stack, and put it on the execution stack, in preparation for
@@ -938,15 +946,71 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 		 * lookups work correctly. */
 		name = nxo_stack_push(&thread->tstack);
 		nxo_dup(name, nxo);
-		if (nxo_thread_dstack_search(a_nxo, name, nxo))
+		switch (nxo_attr_get(name))
 		{
-		    nxo_thread_nerror(a_nxo, NXN_undefined);
-		    nxo_stack_pop(&thread->estack);
-		    nxo_stack_pop(&thread->tstack);
-		    break;
+		    case NXOA_EXECUTABLE:
+		    case NXOA_EVALUABLE:
+		    {
+			if (nxo_thread_dstack_search(a_nxo, name, nxo))
+			{
+			    error = NXN_undefined;
+			    goto NAME_ERROR;
+			}
+			break;
+		    }
+#ifdef CW_OOP
+		    case NXOA_CALLABLE:
+		    {
+			cw_nxo_t *instance, *class_;
+
+			/* Get instance. */
+			instance = nxo_stack_get(&thread->ostack);
+			if (instance == NULL)
+			{
+			    error = NXN_stackunderflow;
+			    goto NAME_ERROR;
+			}
+			switch (nxo_type_get(instance))
+			{
+			    case NXOT_CLASS:
+			    {
+				class_ = instance;
+				break;
+			    }
+			    case NXOT_INSTANCE:
+			    {
+				class_ = nxo_instance_isa_get(instance);
+				break;
+			    }
+			    default:
+			    {
+				error = NXN_typecheck;
+				goto NAME_ERROR;
+			    }
+			}
+			if (nxo_thread_class_hier_search(a_nxo, class_, name,
+							 nxo))
+			{
+			    error = NXN_undefined;
+			    goto NAME_ERROR;
+			}
+			break;
+		    }
+#endif
+		    case NXOA_LITERAL:
+		    default:
+		    {
+			cw_not_reached();
+		    }
 		}
 		nxo_stack_pop(&thread->tstack);
 		goto RESTART;
+
+		NAME_ERROR:
+		nxo_thread_nerror(a_nxo, error);
+		nxo_stack_pop(&thread->estack);
+		nxo_stack_pop(&thread->tstack);
+		break;
 	    }
 	    case NXOT_NULL:
 	    {
@@ -1098,6 +1162,45 @@ nxo_thread_dstack_search(cw_nxo_t *a_nxo, cw_nxo_t *a_key, cw_nxo_t *r_value)
     RETURN:
     return retval;
 }
+
+#ifdef CW_OOP
+cw_bool_t
+nxo_thread_class_hier_search(cw_nxo_t *a_nxo, cw_nxo_t *a_class,
+			     cw_nxo_t *a_key, cw_nxo_t *r_value)
+{
+    cw_bool_t retval;
+    cw_nxoe_thread_t *thread;
+    cw_nxo_t *class_, *methods;
+
+    cw_check_ptr(a_nxo);
+    cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+
+    thread = (cw_nxoe_thread_t *) a_nxo->o.nxoe;
+    cw_dassert(thread->nxoe.magic == CW_NXOE_MAGIC);
+    cw_assert(thread->nxoe.type == NXOT_THREAD);
+
+    cw_assert(nxo_type_get(a_class) == NXOT_CLASS);
+
+    /* Iteratively search a_class's class hierarchy for a_key. */
+    for (class_ = a_class;
+	 nxo_type_get(class_) == NXOT_CLASS;
+	 class_ = nxo_class_super_get(class_))
+    {
+	methods = nxo_class_methods_get(class_);
+	if (nxo_type_get(methods) == NXOT_DICT
+	    && nxo_dict_lookup(methods, a_key, r_value) == FALSE)
+	{
+	    /* Found. */
+	    retval = FALSE;
+	    goto RETURN;
+	}
+    }
+
+    retval = TRUE;
+    RETURN:
+    return retval;
+}
+#endif
 
 #ifdef CW_THREADS
 cw_bool_t
@@ -1342,6 +1445,14 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			a_thread->m.m.action = ACTION_EVALUATE;
 			break;
 		    }
+#ifdef CW_OOP
+		    case ':':
+		    {
+			a_thread->state = THREADTS_NAME_START;
+			a_thread->m.m.action = ACTION_CALL;
+			break;
+		    }
+#endif
 		    case '$':
 		    {
 			a_thread->state = THREADTS_NAME_START;
@@ -1576,8 +1687,11 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			/* Fall through. */
 		    }
 		    case '(': case ')': case '`': case '\'': case '<': case '>':
-		    case '[': case ']': case '{': case '}': case '!': case '$':
-		    case '~': case '#':
+		    case '[': case ']': case '{': case '}': case '!':
+#ifdef CW_OOP
+		    case ':':
+#endif
+		    case '$': case '~': case '#':
 		    {
 			/* New token. */
 			/* Invert, in case we fell through from above. */
@@ -1688,8 +1802,11 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			/* Fall through. */
 		    }
 		    case '(': case ')': case '`': case '\'': case '<': case '>':
-		    case '[': case ']': case '{': case '}': case '!': case '$':
-		    case '~': case '#':
+		    case '[': case ']': case '{': case '}': case '!':
+#ifdef CW_OOP
+		    case ':':
+#endif
+		    case '$': case '~': case '#':
 		    {
 			/* New token. */
 			/* Invert, in case we fell through from above. */
@@ -1766,8 +1883,11 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			/* Fall through. */
 		    }
 		    case '(': case ')': case '`': case '\'': case '<': case '>':
-		    case '[': case ']': case '{': case '}': case '!': case '$':
-		    case '~': case '#':
+		    case '[': case ']': case '{': case '}': case '!':
+#ifdef CW_OOP
+		    case ':':
+#endif
+		    case '$': case '~': case '#':
 		    {
 			/* New token. */
 			/* Invert, in case we fell through from above. */
@@ -1862,8 +1982,11 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			/* Fall through. */
 		    }
 		    case '(': case ')': case '`': case '\'': case '<': case '>':
-		    case '[': case ']': case '{': case '}': case '!': case '$':
-		    case '~': case '#':
+		    case '[': case ']': case '{': case '}': case '!':
+#ifdef CW_OOP
+		    case ':':
+#endif
+		    case '$': case '~': case '#':
 		    {
 			/* New token. */
 			/* Invert, in case we fell through from above. */
@@ -2250,8 +2373,11 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 		    }
 		    case '\0': case '\t': case '\f': case '\r': case ' ':
 		    case '(': case ')': case '`': case '\'': case '<': case '>':
-		    case '[': case ']': case '{': case '}': case '!': case '$':
-		    case '~': case '#':
+		    case '[': case ']': case '{': case '}': case '!':
+#ifdef CW_OOP
+		    case ':':
+#endif
+		    case '$': case '~': case '#':
 		    {
 			cw_uint8_t suffix[2] = "?";
 
@@ -2267,6 +2393,13 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 				suffix[0] = '!';
 				break;
 			    }
+#ifdef CW_OOP
+			    case ACTION_CALL:
+			    {
+				suffix[0] = ':';
+				break;
+			    }
+#endif
 			    case ACTION_LITERAL:
 			    {
 				suffix[0] = '$';
@@ -2313,8 +2446,11 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			/* Fall through. */
 		    }
 		    case '(': case ')': case '`': case '\'': case '<': case '>':
-		    case '[': case ']': case '{': case '}': case '!': case '$':
-		    case '~': case '#':
+		    case '[': case ']': case '{': case '}': case '!':
+#ifdef CW_OOP
+		    case ':':
+#endif
+		    case '$': case '~': case '#':
 		    {
 			/* New token. */
 			/* Invert, in case we fell through from above. */
@@ -2345,6 +2481,13 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 				    suffix[0] = '!';
 				    break;
 				}
+#ifdef CW_OOP
+				case ACTION_CALL:
+				{
+				    suffix[0] = ':';
+				    break;
+				}
+#endif
 				case ACTION_LITERAL:
 				{
 				    suffix[0] = '$';
@@ -2716,12 +2859,14 @@ nxoe_p_thread_name_accept(cw_nxoe_thread_t *a_thread)
     {
 	case ACTION_EXECUTE:
 	case ACTION_EVALUATE:
+#ifdef CW_OOP
+	case ACTION_CALL:
+#endif
 	{
 	    if (a_thread->defer_count == 0)
 	    {
-		/* Find the the value associated with the name in the dictionary
-		 * stack, push it onto the execution stack, and run the
-		 * execution loop. */
+		/* Prepare for interpreter recursion by pushing a name object
+		 * onto estack, then run the execution loop. */
 		nxo = nxo_stack_push(&a_thread->estack);
 		nxo_name_new(nxo, a_thread->tok_str, a_thread->index, FALSE);
 		nxo_attr_set(nxo, a_thread->m.m.action);

@@ -23,8 +23,8 @@ bind 2 sprint
 	product pop countdstack true globaldict !userdict
 	{product pop countdstack true globaldict !userdict}
 }
-dup dup 5 get cvlit 5 exch put
-cvlit
+dup dup 5 get cvl 5 exch put
+cvl
 dup 2 sprint
 bind 2 sprint
 

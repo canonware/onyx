@@ -196,7 +196,7 @@ struct cw_nxoe_thread_s
 	/* name. */
 	struct
 	{
-	    /* The values of the first three actions must correspond to the
+	    /* The values of the first four actions must correspond to the
 	     * values of the attributes in cw_nxoa_t, since the two enumerations
 	     * are used interchangeably in nxoe_p_thread_name_accept(). */
 	    enum
@@ -204,6 +204,9 @@ struct cw_nxoe_thread_s
 		ACTION_LITERAL = NXOA_LITERAL,
 		ACTION_EXECUTE = NXOA_EXECUTABLE,
 		ACTION_EVALUATE = NXOA_EVALUABLE,
+#ifdef CW_OOP
+		ACTION_CALL = NXOA_CALLABLE,
+#endif
 		ACTION_IMMEDIATE
 	    } action;
 	} m;	
@@ -273,6 +276,12 @@ nxo_thread_serror(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len);
 
 cw_bool_t
 nxo_thread_dstack_search(cw_nxo_t *a_nxo, cw_nxo_t *a_key, cw_nxo_t *r_value);
+
+#ifdef CW_OOP
+cw_bool_t
+nxo_thread_class_hier_search(cw_nxo_t *a_nxo, cw_nxo_t *a_class,
+			     cw_nxo_t *a_key, cw_nxo_t *r_value);
+#endif
 
 #ifdef CW_THREADS
 cw_bool_t

@@ -3,6 +3,6 @@ Error $stackunderflow
 ostack: ()
 dstack: (-dict- -dict- -dict- -dict-)
 estack/istack trace (0..2):
-0:	--cvlit--
+0:	--cvl--
 1:	-file-
 2:	--start--

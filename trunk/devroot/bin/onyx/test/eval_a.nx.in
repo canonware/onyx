@@ -26,7 +26,7 @@
 	dup 1 sprint
 	cvx
 	# Literal.
-	dup eval cvlit eval
+	dup eval cvl eval
 	1 sprint
 
 	# Executable.

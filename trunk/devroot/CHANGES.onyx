@@ -1,5 +1,39 @@
 2003-05-13 : Jason Evans <jasone@canonware.com>
 
+	* Add vclass, which serves as a convenient base class.
+
+	* Add operators:
+	  + lcheck (note rename below)
+	  + xcheck (note rename below)
+	  + ccheck
+	  + class
+	  + cvc
+	  + data
+	  + implementor
+	  + implements
+	  + instance
+	  + isa
+	  + kind
+	  + method
+	  + methods
+	  + setdata
+	  + setisa
+	  + setmethods
+	  + setsuper
+	  + super
+
+	* Rename operators:
+	  + xcheck --> xecheck
+	  + lcheck --> ilocked
+	  + cvlit --> cvl
+
+	* lib/libonyx/include/libonyx/nxo.h : Rename nxo_lcheck() to
+	  nxo_ilocked().
+
+	* lib/libonyx/include/libonyx/nxo.h : Add the NXOA_CALLABLE attribute.
+
+	* lib/libonyx/src/nxo_thread.c:nxo_thread_class_hier_search() : Add.
+
 	* Add the "class" and "instance" Onyx types.
 
 	* configure.in : Add --disable-oop.

@@ -36,6 +36,8 @@ into the following categories:
 	\item{\htmlref{Array operators}{subsec:systemdict:array}}
 	\item{\htmlref{Dictionary and dictionary stack
 		operators}{subsec:systemdict:dict}}
+	\item{\htmlref{Class, instance, and handle
+		operators}{subsec:systemdict:class}}
 	\item{\htmlref{File and filesystem operators}{subsec:systemdict:file}}
 	\item{\htmlref{Socket and networking
 		operators}{subsec:systemdict:socket}}
@@ -1338,6 +1340,99 @@ stack operators} \\
 	{--}
 	{Unset environment variable.}
 \hline \hline
+\multicolumn{2}{|l|}{\label{subsec:systemdict:class}Class, instance, and handle
+operators} \\
+\hline \hline
+\optableent
+	{--}
+	{{\bf \htmlref{class}{systemdict:class}}}
+	{class}
+	{Create class.}
+\hline
+\optableent
+	{class name}
+	{{\bf \htmlref{implementor}{systemdict:implementor}}}
+	{class/null}
+	{Get class that implements name.}
+\hline
+\optableent
+	{class name}
+	{{\bf \htmlref{implements}{systemdict:implements}}}
+	{boolean}
+	{Does class implement name?}
+\hline
+\optableent
+	{class name}
+	{{\bf \htmlref{method}{systemdict:method}}}
+	{method}
+	{Get class method by name.}
+\hline
+\optableent
+	{class}
+	{{\bf \htmlref{super}{systemdict:super}}}
+	{class/null}
+	{Get class's superclass.}
+\hline
+\optableent
+	{class super/null}
+	{{\bf \htmlref{setsuper}{systemdict:setsuper}}}
+	{--}
+	{Set class's superclass.}
+\hline
+\optableent
+	{class}
+	{{\bf \htmlref{methods}{systemdict:methods}}}
+	{dict/null}
+	{Get methods dict for class.}
+\hline
+\optableent
+	{class dict/null}
+	{{\bf \htmlref{setmethods}{systemdict:setmethods}}}
+	{--}
+	{Set methods dict for class.}
+\hline
+\optableent
+	{class/instance}
+	{{\bf \htmlref{data}{systemdict:data}}}
+	{dict/null}
+	{Get data for class/instance.}
+\hline
+\optableent
+	{class/instance data/null}
+	{{\bf \htmlref{setdata}{systemdict:setdata}}}
+	{--}
+	{Set data dict for class/instance.}
+\hline
+\optableent
+	{--}
+	{{\bf \htmlref{instance}{systemdict:instance}}}
+	{instance}
+	{Create an instance.}
+\hline
+\optableent
+	{instance}
+	{{\bf \htmlref{isa}{systemdict:isa}}}
+	{class}
+	{Get class for instance.}
+\hline
+\optableent
+	{instance class/null}
+	{{\bf \htmlref{setisa}{systemdict:setisa}}}
+	{--}
+	{Set class for instance.}
+\hline
+\optableent
+	{instance class}
+	{{\bf \htmlref{kind}{systemdict:kind}}}
+	{boolean}
+	{Is class in instance's inheritance hierarchy?}
+\hline
+\optableent
+	{handle}
+	{{\bf \htmlref{handletag}{systemdict:handletag}}}
+	{tag}
+	{Get handle tag.}
+\hline \hline
 \multicolumn{2}{|l|}{\label{subsec:systemdict:file}File and filesystem
 operators} \\
 \hline \hline
@@ -1882,15 +1977,39 @@ attribute operators} \\
 \hline
 \optableent
 	{obj}
-	{{\bf \htmlref{echeck}{systemdict:echeck}}}
+	{{\bf \htmlref{lcheck}{systemdict:lcheck}}}
 	{boolean}
-	{Evaluable?}
+	{Literal?}
 \hline
 \optableent
 	{obj}
 	{{\bf \htmlref{xcheck}{systemdict:xcheck}}}
 	{boolean}
 	{Executable?}
+\hline
+\optableent
+	{obj}
+	{{\bf \htmlref{echeck}{systemdict:echeck}}}
+	{boolean}
+	{Evaluable?}
+\hline
+\optableent
+	{obj}
+	{{\bf \htmlref{xecheck}{systemdict:xecheck}}}
+	{boolean}
+	{Executable or evaluable?}
+\hline
+\optableent
+	{obj}
+	{{\bf \htmlref{ccheck}{systemdict:ccheck}}}
+	{boolean}
+	{Callable?}
+\hline
+\optableent
+	{obj}
+	{{\bf \htmlref{cvl}{systemdict:cvl}}}
+	{obj}
+	{Set literal attribute.}
 \hline
 \optableent
 	{obj}
@@ -1906,9 +2025,9 @@ attribute operators} \\
 \hline
 \optableent
 	{obj}
-	{{\bf \htmlref{cvlit}{systemdict:cvlit}}}
+	{{\bf \htmlref{cvc}{systemdict:cvc}}}
 	{obj}
-	{Set literal attribute.}
+	{Set callable attribute.}
 \hline
 \optableent
 	{string}
@@ -1939,12 +2058,6 @@ attribute operators} \\
 	{{\bf \htmlref{cves}{systemdict:cves}}}
 	{string}
 	{Convert real to exponential string.}
-\hline
-\optableent
-	{handle}
-	{{\bf \htmlref{handletag}{systemdict:handletag}}}
-	{tag}
-	{Get handle tag.}
 \hline \hline
 \multicolumn{2}{|l|}{\label{subsec:systemdict:thread}Threading and
 synchronization operators} \\
@@ -2053,7 +2166,7 @@ synchronization operators} \\
 \hline
 \optableent
 	{obj}
-	{{\bf \htmlref{lcheck}{systemdict:lcheck}}}
+	{{\bf \htmlref{ilocked}{systemdict:ilocked}}}
 	{boolean}
 	{Implicitly locked?}
 \hline \hline
@@ -3157,6 +3270,36 @@ onyx:1> 1 sprint
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:ccheck}
+\index{ccheck@\onyxop{}{ccheck}{}}
+\item[{\onyxop{obj}{ccheck}{boolean}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[obj: ]
+			An object.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[boolean: ]
+			True if \oparg{obj} has the callable attribute, false
+			otherwise.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\end{description}
+	\item[Description: ]
+		Check \oparg{obj} for executable attribute.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> $name ccheck 1 sprint
+false
+onyx:0> $name cvc ccheck 1 sprint
+true
+onyx:0>
+		\end{verbatim}
+	\end{description}
 \label{systemdict:cd}
 \index{cd@\onyxop{}{cd}{}}
 \item[{\onyxop{path}{cd}{--}}: ]
@@ -3330,6 +3473,28 @@ onyx:0> `/home/jasone' chroot
 onyx:0> pwd 1 sprint
 `/cw/devroot'
 onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:class}
+\index{class@\onyxop{}{class}{}}
+\item[{\onyxop{OPARGS}{class}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
 		\end{verbatim}
 	\end{description}
 \label{systemdict:clear}
@@ -3740,6 +3905,28 @@ true
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:cvc}
+\index{cvc@\onyxop{}{cvc}{}}
+\item[{\onyxop{OPARGS}{cvc}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
 \label{systemdict:cvds}
 \index{cvds@\onyxop{}{cvds}{}}
 \item[{\onyxop{real precision}{cvds}{string}}: ]
@@ -3845,9 +4032,9 @@ onyx:0> -42.3 5 cves 1 sprint
 onyx:0>
 		\end{verbatim}
 	\end{description}
-\label{systemdict:cvlit}
-\index{cvlit@\onyxop{}{cvlit}{}}
-\item[{\onyxop{obj}{cvlit}{obj}}: ]
+\label{systemdict:cvl}
+\index{cvl@\onyxop{}{cvl}{}}
+\item[{\onyxop{obj}{cvl}{obj}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -3868,7 +4055,7 @@ onyx:0>
 		Set the literal attribute for \oparg{obj}.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> {1 2 3} cvlit 1 sprint
+onyx:0> {1 2 3} cvl 1 sprint
 [1 2 3]
 onyx:0>
 		\end{verbatim}
@@ -4014,6 +4201,28 @@ onyx:0>
 onyx:0> [1 2 3] cvx 1 sprint
 {1 2 3}
 onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:data}
+\index{data@\onyxop{}{data}{}}
+\item[{\onyxop{OPARGS}{data}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
 		\end{verbatim}
 	\end{description}
 \label{systemdict:dec}
@@ -5501,6 +5710,83 @@ onyx:0> false {`yes'}{`no'} ifelse 1 sprint
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:ilocked}
+\index{ilocked@\onyxop{}{ilocked}{}}
+\item[{\onyxop{obj}{ilocked}{boolean}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[obj: ]
+			An array, dict, file, or string.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[boolean: ]
+			True if \oparg{obj} is implicitly locked, false
+			otherwise.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Check if \oparg{obj} is implicitly locked.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> false setlocking
+onyx:0> [1 2 3] ilocked 1 sprint
+false
+onyx:0> true setlocking
+onyx:0> [1 2 3] ilocked 1 sprint
+true
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:implementor}
+\index{implementor@\onyxop{}{implementor}{}}
+\item[{\onyxop{OPARGS}{implementor}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{systemdict:implements}
+\index{implements@\onyxop{}{implements}{}}
+\item[{\onyxop{OPARGS}{implements}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
 \label{systemdict:inc}
 \index{inc@\onyxop{}{inc}{}}
 \item[{\onyxop{a}{inc}{r}}: ]
@@ -5527,6 +5813,28 @@ onyx:0>
 onyx:0> 1 inc 1 sprint
 2
 onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:instance}
+\index{instance@\onyxop{}{instance}{}}
+\item[{\onyxop{OPARGS}{instance}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
 		\end{verbatim}
 	\end{description}
 \label{systemdict:iobuf}
@@ -5589,6 +5897,28 @@ onyx:3> 1 ipop pstack
 onyx:2>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:isa}
+\index{isa@\onyxop{}{isa}{}}
+\item[{\onyxop{OPARGS}{isa}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
 \label{systemdict:istack}
 \index{istack@\onyxop{}{istack}{}}
 \item[{\onyxop{--}{istack}{stack}}: ]
@@ -5636,6 +5966,28 @@ Done
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:kind}
+\index{kind@\onyxop{}{kind}{}}
+\item[{\onyxop{OPARGS}{kind}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
 \label{systemdict:known}
 \index{known@\onyxop{}{known}{}}
 \item[{\onyxop{dict key}{known}{boolean}}: ]
@@ -5676,27 +6028,24 @@ onyx:1>
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[obj: ]
-			An array, dict, file, or string.
+			An object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[boolean: ]
-			True if \oparg{obj} is implicitly locked, false
+			True if \oparg{obj} has the literal attribute, false
 			otherwise.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
-		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Check if \oparg{obj} is implicitly locked.
+		Check \oparg{obj} for literal attribute.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> false setlocking
-onyx:0> [1 2 3] lcheck 1 sprint
+onyx:0> {1 2 3} lcheck 1 sprint
 false
-onyx:0> true setlocking
 onyx:0> [1 2 3] lcheck 1 sprint
 true
 onyx:0>
@@ -6240,6 +6589,50 @@ onyx:0> `input' `I' <$i true> regex match {0 submatch 1 sprint} if
 `i'
 onyx:0> `input' `I' match {0 submatch 1 sprint} if
 onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:method}
+\index{method@\onyxop{}{method}{}}
+\item[{\onyxop{OPARGS}{method}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{systemdict:methods}
+\index{methods@\onyxop{}{methods}{}}
+\item[{\onyxop{OPARGS}{methods}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
 		\end{verbatim}
 	\end{description}
 \label{systemdict:mkdir}
@@ -8837,6 +9230,28 @@ onyx:0> `ftp' serviceport 1 sprint
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:setdata}
+\index{setdata@\onyxop{}{setdata}{}}
+\item[{\onyxop{OPARGS}{setdata}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
 \label{systemdict:setegid}
 \index{setegid@\onyxop{}{setegid}{}}
 \item[{\onyxop{gid}{setegid}{boolean}}: ]
@@ -9120,6 +9535,28 @@ onyx:0> stdout iobuf 1 sprint
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:setisa}
+\index{setisa@\onyxop{}{setisa}{}}
+\item[{\onyxop{OPARGS}{setisa}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
 \label{systemdict:setlocking}
 \index{setlocking@\onyxop{}{setlocking}{}}
 \item[{\onyxop{boolean}{setlocking}{--}}: ]
@@ -9171,6 +9608,28 @@ onyx:0>
 
 onyx:0> 128 setmaxestack
 onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:setmethods}
+\index{setmethods@\onyxop{}{setmethods}{}}
+\item[{\onyxop{OPARGS}{setmethods}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
 		\end{verbatim}
 	\end{description}
 \label{systemdict:setnonblocking}
@@ -9368,6 +9827,28 @@ onyx:0> gstdout setstdout
 onyx:0> `/tmp/stdout' `r' open readline pop 1 sprint
 `Some text'
 onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:setsuper}
+\index{setsuper@\onyxop{}{setsuper}{}}
+\item[{\onyxop{OPARGS}{setsuper}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
 		\end{verbatim}
 	\end{description}
 \label{systemdict:setuid}
@@ -10898,6 +11379,28 @@ onyx:0> (3 2 1 0) dup sup pstack
 onyx:1>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:super}
+\index{super@\onyxop{}{super}{}}
+\item[{\onyxop{OPARGS}{super}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
 \label{systemdict:symlink}
 \index{symlink@\onyxop{}{symlink}{}}
 \item[{\onyxop{filename linkname}{symlink}{--}}: ]
@@ -12250,20 +12753,52 @@ onyx:1>
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[boolean: ]
-			True if \oparg{obj} has the executable or evaluable
-			attribute, false otherwise.
+			True if \oparg{obj} has the executable attribute, false
+			otherwise.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
 	\item[Description: ]
-		Check \oparg{obj} for executable or evaluable attribute.
+		Check \oparg{obj} for executable attribute.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> {1 2 3} xcheck 1 sprint
 true
 onyx:0> [1 2 3] xcheck 1 sprint
+false
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:xecheck}
+\index{xecheck@\onyxop{}{xecheck}{}}
+\item[{\onyxop{obj}{xecheck}{boolean}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[obj: ]
+			An object.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[boolean: ]
+			True if \oparg{obj} has the executable attribute, false
+			otherwise.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\end{description}
+	\item[Description: ]
+		Check \oparg{obj} for executable attribute.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> {1 2 3} xecheck 1 sprint
+true
+onyx:0> {1 2 3} cve xecheck 1 sprint
+true
+onyx:0> [1 2 3] xecheck 1 sprint
 false
 onyx:0>
 		\end{verbatim}

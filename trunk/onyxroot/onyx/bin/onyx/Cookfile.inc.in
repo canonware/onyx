@@ -127,7 +127,7 @@ ONYX_OTESTS =
               copy_d.nx.in copy_e.nx.in copy_f.nx.in copy_g.nx.in count_a.nx.in
               countdstack_a.nx.in countestack_a.nx.in counttomark_a.nx.in
               counttomark_b.nx.in counttomark_c.nx.in cve_a.nx.in cve_b.nx.in
-              cvlit_a.nx.in cvlit_b.nx.in cvn_a.nx.in cvn_b.nx.in cvn_c.nx.in
+              cvl_a.nx.in cvl_b.nx.in cvn_a.nx.in cvn_b.nx.in cvn_c.nx.in
               cvrs_a.nx.in cvrs_b.nx.in cvrs_c.nx.in cvrs_d.nx.in cvrs_e.nx.in
               cvrs_f.nx.in cvs_a.nx.in cvs_b.nx.in cvx_a.nx.in cvx_b.nx.in
               dec_a.nx.in dec_b.nx.in dec_d.nx.in def_a.nx.in def_b.nx.in

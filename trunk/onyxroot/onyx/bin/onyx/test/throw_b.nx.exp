@@ -21,7 +21,7 @@ estack/istack trace (0..2):
 	--dup--
 	$errorname
 	--exch--
-	--cvlit--
+	--cvl--
 	--def--
 	--ostack--
 	--dup--

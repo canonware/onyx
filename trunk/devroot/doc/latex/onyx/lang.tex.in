@@ -100,12 +100,12 @@ indistinguishable, but for arrays and strings, composite objects may only be
 able to access a subset of the total memory backing them.  This behavior is
 described in detail later.
 
-All objects have a literal, executable, or evaluable attribute associated with
-them.  Composite objects each have their own attribute, even for composite
-objects that share the same backing memory.  Objects are ``interpreted'' when
-they are encountered directly by the interpreter.  Objects can also be
-``evaluated''.  One of two actions is taken when an object is interpreted or
-evaluated:
+All objects have a literal, executable, evaluable, or callable attribute
+associated with them.  Composite objects each have their own attribute, even for
+composite objects that share the same backing memory.  Objects are
+``interpreted'' when they are encountered directly by the interpreter.  Objects
+can also be ``evaluated''.  One of two actions is taken when an object is
+interpreted or evaluated:
 
 \begin{itemize}
 \item{The object may be treated as code (executed).  When executed, an object is
@@ -124,55 +124,55 @@ Attributes are not considered in equality test operations.
 
 \begin{table}[htb]
 \begin{center}
-\begin{tabular}{|l|c|c|c|}
+\begin{tabular}{|l|c|c|c|c|}
 \hline
-Type		& \multicolumn{3}{|c|}{Attribute}	\\
-\cline{2-4}
-		& literal & executable & evaluable	\\
+Type		& \multicolumn{4}{|c|}{Attribute}	\\
+\cline{2-5}
+		& literal & executable & evaluable & callable \\
 \hline \hline
-array		& data	& data	& code	\\
+array		& data	& data	& code	& code		\\
 \hline
-boolean		& data	& data	& data	\\
+boolean		& data	& data	& data	& data		\\
 \hline
-class		& data	& data	& data	\\
+class		& data	& data	& data	& data		\\
 \hline
-condition	& data	& data	& data	\\
+condition	& data	& data	& data	& data		\\
 \hline
-dict		& data	& data	& data	\\
+dict		& data	& data	& data	& data		\\
 \hline
-file		& data	& code	& code	\\
+file		& data	& code	& code	& code		\\
 \hline
-fino		& data	& data	& data	\\
+fino		& data	& data	& data	& data		\\
 \hline
-handle		& data	& code	& code	\\
+handle		& data	& code	& code	& code		\\
 \hline
-instance	& data	& data	& data	\\
+instance	& data	& data	& data	& data		\\
 \hline
-integer		& data	& data	& data	\\
+integer		& data	& data	& data	& data		\\
 \hline
-mark		& data	& data	& data	\\
+mark		& data	& data	& data	& data		\\
 \hline
-mutex		& data	& data	& data	\\
+mutex		& data	& data	& data	& data		\\
 \hline
-name		& data	& code	& code	\\
+name		& data	& code	& code	& code		\\
 \hline
-null		& data	& code	& code	\\
+null		& data	& code	& code	& code		\\
 \hline
-operator	& data	& code	& code	\\
+operator	& data	& code	& code	& code		\\
 \hline
-pmark		& data	& data	& data	\\
+pmark		& data	& data	& data	& data		\\
 \hline
-real		& data	& data	& data	\\
+real		& data	& data	& data	& data		\\
 \hline
-regex		& data	& data	& data	\\
+regex		& data	& data	& data	& data		\\
 \hline
-regsub		& data	& data	& data	\\
+regsub		& data	& data	& data	& data		\\
 \hline
-stack		& data	& data	& data	\\
+stack		& data	& data	& data	& data		\\
 \hline
-string		& data	& code	& code	\\
+string		& data	& code	& code	& code		\\
 \hline
-thread		& data	& data	& data	\\
+thread		& data	& data	& data	& data		\\
 \hline
 \end{tabular}
 \end{center}
@@ -182,55 +182,55 @@ Interpretation of objects by type and attribute}
 
 \begin{table}[htb]
 \begin{center}
-\begin{tabular}{|l|c|c|c|}
+\begin{tabular}{|l|c|c|c|c|}
 \hline
-Type		& \multicolumn{3}{|c|}{Attribute}	\\
-\cline{2-4}
-		& literal & executable & evaluable	\\
+Type		& \multicolumn{4}{|c|}{Attribute}	\\
+\cline{2-5}
+		& literal & executable & evaluable & callable \\
 \hline \hline
-array		& data	& code	& code	\\
+array		& data	& code	& code	& code		\\
 \hline
-boolean		& data	& data	& data	\\
+boolean		& data	& data	& data	& data		\\
 \hline
-class		& data	& data	& data	\\
+class		& data	& data	& data	& data		\\
 \hline
-condition	& data	& data	& data	\\
+condition	& data	& data	& data	& data		\\
 \hline
-dict		& data	& data	& data	\\
+dict		& data	& data	& data	& data		\\
 \hline
-file		& data	& code	& code	\\
+file		& data	& code	& code	& code		\\
 \hline
-fino		& data	& data	& data	\\
+fino		& data	& data	& data	& data		\\
 \hline
-handle		& data	& code	& code	\\
+handle		& data	& code	& code	& code		\\
 \hline
-instance	& data	& data	& data	\\
+instance	& data	& data	& data	& data		\\
 \hline
-integer		& data	& data	& data	\\
+integer		& data	& data	& data	& data		\\
 \hline
-mark		& data	& data	& data	\\
+mark		& data	& data	& data	& data		\\
 \hline
-mutex		& data	& data	& data	\\
+mutex		& data	& data	& data	& data		\\
 \hline
-name		& data	& code	& code	\\
+name		& data	& code	& code	& code		\\
 \hline
-null		& data	& code	& code	\\
+null		& data	& code	& code	& code		\\
 \hline
-operator	& data	& code	& code	\\
+operator	& data	& code	& code	& code		\\
 \hline
-pmark		& data	& data	& data	\\
+pmark		& data	& data	& data	& data		\\
 \hline
-real		& data	& data	& data	\\
+real		& data	& data	& data	& data		\\
 \hline
-regex		& data	& data	& data	\\
+regex		& data	& data	& data	& data		\\
 \hline
-regsub		& data	& data	& data	\\
+regsub		& data	& data	& data	& data		\\
 \hline
-stack		& data	& data	& data	\\
+stack		& data	& data	& data	& data		\\
 \hline
-string		& data	& code	& code	\\
+string		& data	& code	& code	& code		\\
 \hline
-thread		& data	& data	& data	\\
+thread		& data	& data	& data	& data		\\
 \hline
 \end{tabular}
 \end{center}
@@ -314,6 +314,10 @@ for equality.  Names are typically used as keys in dictionaries.
 When an executable name is executed, the topmost value in the dictionary stack
 associated with the name is evaluated.
 
+When a callable name is executed, the name is dynamically looked up as a method
+name in the context of the instance which is on the top of the operand stack,
+and the associated value is evaluated.
+
 \item[null: ] A null has no significance other than its existence.  When an
 executable null is executed, it does nothing.  Executable nulls can be useful as
 place holders that can later be replaced with useful code, or for replacing
@@ -375,10 +379,11 @@ reader an idea of the simplicity of the language syntax.
 CRNL (carriage return, newline) pairs are in all important cases converted to
 newlines during scanning.
 
-The characters \#, !, \$, {\twid}, {\lb}, {\rb}, \{, \}, (, ), `, ', {\lt}, and
-{\gt} are special.  In most cases, any of the special characters and whitespace
-(space, tab, newline, formfeed, null) terminate any preceding token.  All other
-characters including non-printing characters are considered regular characters.
+The characters \#, !, :, \$, {\twid}, {\lb}, {\rb}, \{, \}, (, ), `, ', {\lt},
+and {\gt} are special.  In most cases, any of the special characters and
+whitespace (space, tab, newline, formfeed, null) terminate any preceding token.
+All other characters including non-printing characters are considered regular
+characters.
 
 A comment starts with a \# character outside of a string context and extends to
 the next newline or formfeed.
@@ -412,18 +417,21 @@ follows:
 \item[{\lt}real{\gt} ::= ] {\lt}dec\_real{\gt} {\pipe} {\lt}exp\_real{\gt}
 
 \item[{\lt}name{\gt} : ] Any token that cannot be interpreted as a number or a
-string is interpreted as an executable name.  There are four syntaxes for names:
-executable, evaluable, literal, and immediately evaluated.  Executable and
-evaluable names are looked up in the dictionary stack and executed (unless
+string is interpreted as an executable name.  There are five syntaxes for names:
+executable, evaluable, callable, literal, and immediately evaluated.  Executable
+and evaluable names are looked up in the dictionary stack and executed (unless
 execution is deferred).  Evaluable names behave the same as executable names,
 except when being processed by the \htmlref{\onyxop{}{bind}{}}{systemdict:bind}
-operator.  Literal names are simply pushed onto the operand stack.  Immediately
-evaluated names are replaced by their values as defined in the dictionary stack,
-even if execution is deferred.  Examples include:
+operator.  Callable names are looked up in the context of the topmost object on
+the operand stack, which must be an instance.  Literal names are simply pushed
+onto the operand stack.  Immediately evaluated names are replaced by their
+values as defined in the dictionary stack, even if execution is deferred.
+Examples include:
 \begin{verbatim}
 foo     # executable
 4noth3r # executable
 !bar    # evaluable
+:method # callable
 $biz    # literal
 ~baz    # immediately evaluated
 \end{verbatim}

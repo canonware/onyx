@@ -29,7 +29,7 @@
 ]{
 	dup 1 sprint
 	cvx eval
-	cvlit xcheck
+	cvl xcheck
 	1 sprint
 } foreach
 

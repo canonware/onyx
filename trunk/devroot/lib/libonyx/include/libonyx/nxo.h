@@ -66,6 +66,10 @@ typedef enum
     NXOA_LITERAL,
     NXOA_EXECUTABLE,
     NXOA_EVALUABLE
+#ifdef CW_OOP
+    ,
+    NXOA_CALLABLE
+#endif
 } cw_nxoa_t;
 
 typedef cw_sint64_t cw_nxoi_t;
@@ -174,7 +178,7 @@ nxo_nxoe_get(const cw_nxo_t *a_nxo);
 
 #ifdef CW_THREADS
 cw_bool_t
-nxo_lcheck(cw_nxo_t *a_nxo);
+nxo_ilocked(cw_nxo_t *a_nxo);
 #endif
 
 #ifndef CW_USE_INLINES

@@ -93,6 +93,9 @@ typedef enum
     NXN_ENTRY(c),
 #endif
     NXN_ENTRY(cat),
+#ifdef CW_OOP
+    NXN_ENTRY(ccheck),
+#endif
 #ifdef CW_POSIX
     NXN_ENTRY(cd),
 #endif
@@ -137,6 +140,9 @@ typedef enum
 #ifdef CW_THREADS
     NXN_ENTRY(currentlocking),
 #endif
+#ifdef CW_OOP
+    NXN_ENTRY(cvc),
+#endif
 #ifdef CW_REAL
     NXN_ENTRY(cvds),
 #endif
@@ -144,11 +150,14 @@ typedef enum
 #ifdef CW_REAL
     NXN_ENTRY(cves),
 #endif
-    NXN_ENTRY(cvlit),
+    NXN_ENTRY(cvl),
     NXN_ENTRY(cvn),
     NXN_ENTRY(cvrs),
     NXN_ENTRY(cvs),
     NXN_ENTRY(cvx),
+#ifdef CW_OOP
+    NXN_ENTRY(data),
+#endif
     NXN_ENTRY(dec),
     NXN_ENTRY(def),
 #ifdef CW_THREADS
@@ -274,6 +283,13 @@ typedef enum
     NXN_ENTRY(idup),
     NXN_ENTRY(if),
     NXN_ENTRY(ifelse),
+#ifdef CW_THREADS
+    NXN_ENTRY(ilocked),
+#endif
+#ifdef CW_OOP
+    NXN_ENTRY(implementor),
+    NXN_ENTRY(implements),
+#endif
     NXN_ENTRY(inc),
 #ifdef CW_POSIX
     NXN_ENTRY(ino),
@@ -289,6 +305,9 @@ typedef enum
     NXN_ENTRY(iobuf),
     NXN_ENTRY(ioerror),
     NXN_ENTRY(ipop),
+#ifdef CW_OOP
+    NXN_ENTRY(isa),
+#endif
 #ifdef CW_POSIX
     NXN_ENTRY(isdst),
 #endif
@@ -296,10 +315,11 @@ typedef enum
 #ifdef CW_THREADS
     NXN_ENTRY(join),
 #endif
-    NXN_ENTRY(known),
-#ifdef CW_THREADS
-    NXN_ENTRY(lcheck),
+#ifdef CW_OOP
+    NXN_ENTRY(kind),
 #endif
+    NXN_ENTRY(known),
+    NXN_ENTRY(lcheck),
     NXN_ENTRY(le),
     NXN_ENTRY(length),
     NXN_ENTRY(limitcheck),
@@ -340,6 +360,12 @@ typedef enum
     NXN_ENTRY(maxestack),
 #ifdef CW_POSIX
     NXN_ENTRY(mday),
+#endif
+#ifdef CW_OOP
+    NXN_ENTRY(method),
+    NXN_ENTRY(methods),
+#endif
+#ifdef CW_POSIX
     NXN_ENTRY(min),
     NXN_ENTRY(mkdir),
     NXN_ENTRY(mkfifo),
@@ -534,6 +560,9 @@ typedef enum
     NXN_ENTRY(serviceport),
 #endif
     NXN_ENTRY(setactive),
+#ifdef CW_OOP
+    NXN_ENTRY(setdata),
+#endif
 #ifdef CW_POSIX
     NXN_ENTRY(setegid),
     NXN_ENTRY(setenv),
@@ -547,10 +576,16 @@ typedef enum
     NXN_ENTRY(setgstdout),
 #endif
     NXN_ENTRY(setiobuf),
+#ifdef CW_OOP
+    NXN_ENTRY(setisa),
+#endif
 #ifdef CW_THREADS
     NXN_ENTRY(setlocking),
 #endif
     NXN_ENTRY(setmaxestack),
+#ifdef CW_OOP
+    NXN_ENTRY(setmethods),
+#endif
     NXN_ENTRY(setnonblocking),
 #ifdef CW_PTHREADS
     NXN_ENTRY(setperiod),
@@ -562,6 +597,9 @@ typedef enum
     NXN_ENTRY(setstdin),
     NXN_ENTRY(setstdout),
     NXN_ENTRY(setthreshold),
+#ifdef CW_OOP
+    NXN_ENTRY(setsuper),
+#endif
 #ifdef CW_POSIX
     NXN_ENTRY(setuid),
 #endif
@@ -630,6 +668,9 @@ typedef enum
 #endif
     NXN_ENTRY(sunder),
     NXN_ENTRY(sup),
+#ifdef CW_OOP
+    NXN_ENTRY(super),
+#endif
 #ifdef CW_POSIX
     NXN_ENTRY(symlink),
 #endif
@@ -711,6 +752,7 @@ typedef enum
     NXN_ENTRY(while),
     NXN_ENTRY(write),
     NXN_ENTRY(xcheck),
+    NXN_ENTRY(xecheck),
     NXN_ENTRY(xor)
 #ifdef CW_POSIX
     ,

@@ -42,12 +42,12 @@ $sprintsdict <
     $arraytype {
 	#array #depth
 	dup 0 gt {
-	    over dup echeck {
+	    over dup xcheck {
 		pop
-		`_{'
-	    }{
-	    xcheck {
 		`{'
+	    }{
+	    echeck {
+		`_{'
 	    }{
 		`['
 	    } ifelse
@@ -80,12 +80,12 @@ $sprintsdict <
 
 	    nip
 	    #array #accum
-	    exch dup echeck {
+	    exch dup xcheck {
 		pop
-		`}_'
-	    }{
-	    xcheck {
 		`}'
+	    }{
+	    echeck {
+		`}_'
 	    }{
 		`]'
 	    } ifelse
@@ -228,15 +228,21 @@ $sprintsdict <
 	pop
 	dup cvs exch
 	#str #name
-	dup xcheck not {
+	dup lcheck {
 	    # Literal.
 	    pop
 	    `$' exch cat
 	}{
-	echeck {
+	dup echeck {
 	    # Evaluable.
+	    pop
 	    `!' exch cat
+	}{
+	ccheck {
+	    # Callable.
+	    `:' exch cat
 	} if
+	} ifelse
 	} ifelse
     }
     $nulltype {
@@ -940,6 +946,62 @@ $mrequire {
 } def
     ' cat
 } if
+@enable_oop@ 1 eq {
+    `
+# Define vclass, which is provided as the top level base class.
+$vclass class dup up def
+dup <
+    $name $vclass
+> setdata
+<
+    #class new #instance
+    $new {
+	instance dup dn setisa
+    }
+
+    # Typically called at the beginning of :new in subclasses.  Recursively
+    # invokes :new.
+    #
+    #class rnew #instance
+    $rnew {
+	dup super
+	dup type $classtype eq {
+	    dup methods
+	    dup type $dicttype eq {
+		dup $new known {
+		    # Call super:5new.
+		    $new get eval
+		}{
+		    # :new not defined.
+		    pop
+		    instance
+		} ifelse
+	    }{
+		# No methods.
+		pop
+		instance
+	    } ifelse
+	}{
+	    # No superclass.
+	    pop
+	    instance
+	} ifelse
+	#class #instance
+
+	dup dn setisa
+    }
+
+    #class name #name/null
+    $name {
+	data $name get
+    }
+    #name #class setname -
+    $setname {
+	data $name dn put
+    }
+> setmethods
+    ' cat
+} if
 `
 # $errorname throw -
 $throw {
@@ -986,7 +1048,7 @@ $throw {
     $newerror true def
 
     # Set errorname to the argument passed in.
-    dup $errorname exch cvlit def
+    dup $errorname exch cvl def
 
     # ostack.  Get rid of $errorname in the snapshot.  Ordering is important
     # to keep from polluting the snapshot.

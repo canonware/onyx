@@ -350,7 +350,7 @@ nxo_nxoe_get(const cw_nxo_t *a_nxo)
 
 #ifdef CW_THREADS
 cw_bool_t
-nxo_lcheck(cw_nxo_t *a_nxo)
+nxo_ilocked(cw_nxo_t *a_nxo)
 {
     cw_bool_t retval;
 
