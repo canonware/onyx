@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 94 $
- * $Date: 1998-06-26 17:18:43 -0700 (Fri, 26 Jun 1998) $
+ * $Revision: 96 $
+ * $Date: 1998-06-26 23:48:21 -0700 (Fri, 26 Jun 1998) $
  *
  * <<< Description >>>
  *
@@ -154,11 +154,9 @@ brblk_tlock(cw_brblk_t * a_brblk_o)
  *
  *
  ****************************************************************************/
-cw_bool_t
+void
 brblk_s2dlock(cw_brblk_t * a_brblk_o)
 {
-  cw_bool_t retval;
-  
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Enter brblk_s2dlock()");
@@ -166,17 +164,12 @@ brblk_s2dlock(cw_brblk_t * a_brblk_o)
   _cw_check_ptr(a_brblk_o);
   rwl_wlock(&a_brblk_o->rw_lock);
 
-  /* Make sure that the node is potentially deletion safe in the case that
-   * we have to wait for a dlock. */
-
-  /* If we have to wait, make sure that the node is still deletion safe. */
   
   rwl_wunlock(&a_brblk_o->rw_lock);
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Exit brblk_s2dlock()");
   }
-  return retval;
 }
 
 /****************************************************************************
@@ -194,11 +187,11 @@ brblk_s2dlock(cw_brblk_t * a_brblk_o)
  *
  ****************************************************************************/
 void
-brblk_s2rlock(cw_brblk_t * a_brblk_o)
+brblk_2rlock(cw_brblk_t * a_brblk_o)
 {
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
   {
-    _cw_marker("Enter brblk_s2rlock()");
+    _cw_marker("Enter brblk_2rlock()");
   }
   _cw_check_ptr(a_brblk_o);
   rwl_wlock(&a_brblk_o->rw_lock);
@@ -206,38 +199,7 @@ brblk_s2rlock(cw_brblk_t * a_brblk_o)
   rwl_wunlock(&a_brblk_o->rw_lock);
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
   {
-    _cw_marker("Exit brblk_s2rlock()");
-  }
-}
-
-/****************************************************************************
- * <<< Arguments >>>
- *
- *
- *
- * <<< Return Value >>>
- *
- *
- *
- * <<< Description >>>
- *
- *
- *
- ****************************************************************************/
-void
-brblk_s2wlock(cw_brblk_t * a_brblk_o)
-{
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
-  {
-    _cw_marker("Enter brblk_s2wlock()");
-  }
-  _cw_check_ptr(a_brblk_o);
-  rwl_wlock(&a_brblk_o->rw_lock);
-  
-  rwl_wunlock(&a_brblk_o->rw_lock);
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
-  {
-    _cw_marker("Exit brblk_s2wlock()");
+    _cw_marker("Exit brblk_2rlock()");
   }
 }
 
@@ -256,11 +218,11 @@ brblk_s2wlock(cw_brblk_t * a_brblk_o)
  *
  ****************************************************************************/
 void
-brblk_s2xlock(cw_brblk_t * a_brblk_o)
+brblk_2wlock(cw_brblk_t * a_brblk_o)
 {
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
   {
-    _cw_marker("Enter brblk_s2xlock()");
+    _cw_marker("Enter brblk_2wlock()");
   }
   _cw_check_ptr(a_brblk_o);
   rwl_wlock(&a_brblk_o->rw_lock);
@@ -268,7 +230,7 @@ brblk_s2xlock(cw_brblk_t * a_brblk_o)
   rwl_wunlock(&a_brblk_o->rw_lock);
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
   {
-    _cw_marker("Exit brblk_s2xlock()");
+    _cw_marker("Exit brblk_2wlock()");
   }
 }
 
@@ -287,11 +249,11 @@ brblk_s2xlock(cw_brblk_t * a_brblk_o)
  *
  ****************************************************************************/
 void
-brblk_t2rlock(cw_brblk_t * a_brblk_o)
+brblk_2xlock(cw_brblk_t * a_brblk_o)
 {
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
   {
-    _cw_marker("Enter brblk_t2rlock()");
+    _cw_marker("Enter brblk_2xlock()");
   }
   _cw_check_ptr(a_brblk_o);
   rwl_wlock(&a_brblk_o->rw_lock);
@@ -299,69 +261,7 @@ brblk_t2rlock(cw_brblk_t * a_brblk_o)
   rwl_wunlock(&a_brblk_o->rw_lock);
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
   {
-    _cw_marker("Exit brblk_t2rlock()");
-  }
-}
-
-/****************************************************************************
- * <<< Arguments >>>
- *
- *
- *
- * <<< Return Value >>>
- *
- *
- *
- * <<< Description >>>
- *
- *
- *
- ****************************************************************************/
-void
-brblk_t2wlock(cw_brblk_t * a_brblk_o)
-{
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
-  {
-    _cw_marker("Enter brblk_t2wlock()");
-  }
-  _cw_check_ptr(a_brblk_o);
-  rwl_wlock(&a_brblk_o->rw_lock);
-  
-  rwl_wunlock(&a_brblk_o->rw_lock);
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
-  {
-    _cw_marker("Exit brblk_t2wlock()");
-  }
-}
-
-/****************************************************************************
- * <<< Arguments >>>
- *
- *
- *
- * <<< Return Value >>>
- *
- *
- *
- * <<< Description >>>
- *
- *
- *
- ****************************************************************************/
-void
-brblk_t2xlock(cw_brblk_t * a_brblk_o)
-{
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
-  {
-    _cw_marker("Enter brblk_t2xlock()");
-  }
-  _cw_check_ptr(a_brblk_o);
-  rwl_wlock(&a_brblk_o->rw_lock);
-  
-  rwl_wunlock(&a_brblk_o->rw_lock);
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
-  {
-    _cw_marker("Exit brblk_t2xlock()");
+    _cw_marker("Exit brblk_2xlock()");
   }
 }
 
@@ -631,22 +531,26 @@ brblk_set_byte(cw_brblk_t * a_brblk_o, cw_uint32_t a_offset,
  *
  *
  ****************************************************************************/
-cw_bool_t
-brblk_is_dirty(cw_brblk_t * a_brblk_o)
+cw_uint8_t *
+brblk_get_buf_p(cw_brblk_t * a_brblk_o)
 {
+  cw_uint8_t * retval;
+  
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
   {
-    _cw_marker("Enter brblk_is_dirty()");
+    _cw_marker("Enter brblk_get_buf_p()");
   }
   _cw_check_ptr(a_brblk_o);
   rwl_rlock(&a_brblk_o->rw_lock);
+
+  retval = a_brblk_o->buf;
   
   rwl_runlock(&a_brblk_o->rw_lock);
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
   {
-    _cw_marker("Exit brblk_is_dirty()");
+    _cw_marker("Exit brblk_get_buf_p()");
   }
-  return TRUE; /* XXX */
+  return retval;
 }
 
 /****************************************************************************
@@ -664,19 +568,58 @@ brblk_is_dirty(cw_brblk_t * a_brblk_o)
  *
  ****************************************************************************/
 cw_bool_t
-brblk_flush(cw_brblk_t * a_brblk_o)
+brblk_get_is_dirty(cw_brblk_t * a_brblk_o)
 {
+  cw_bool_t retval;
+  
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
   {
-    _cw_marker("Enter brblk_flush()");
+    _cw_marker("Enter brblk_get_is_dirty()");
   }
   _cw_check_ptr(a_brblk_o);
-  rwl_wlock(&a_brblk_o->rw_lock);
+  rwl_rlock(&a_brblk_o->rw_lock);
+
+  retval = a_brblk_o->is_dirty;
   
-  rwl_wunlock(&a_brblk_o->rw_lock);
+  rwl_runlock(&a_brblk_o->rw_lock);
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
   {
-    _cw_marker("Exit brblk_flush()");
+    _cw_marker("Exit brblk_get_is_dirty()");
   }
-  return TRUE; /* XXX */
+  return retval;
+}
+
+/****************************************************************************
+ * <<< Arguments >>>
+ *
+ *
+ *
+ * <<< Return Value >>>
+ *
+ *
+ *
+ * <<< Description >>>
+ *
+ *
+ *
+ ****************************************************************************/
+void
+brblk_set_is_dirty(cw_brblk_t * a_brblk_o, cw_bool_t a_is_dirty)
+{
+  cw_bool_t retval;
+  
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
+  {
+    _cw_marker("Enter brblk_set_is_dirty()");
+  }
+  _cw_check_ptr(a_brblk_o);
+  rwl_rlock(&a_brblk_o->rw_lock);
+
+  retval = a_brblk_o->is_dirty;
+  
+  rwl_runlock(&a_brblk_o->rw_lock);
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
+  {
+    _cw_marker("Exit brblk_set_is_dirty()");
+  }
 }

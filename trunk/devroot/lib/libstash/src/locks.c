@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 95 $
- * $Date: 1998-06-26 17:18:58 -0700 (Fri, 26 Jun 1998) $
+ * $Revision: 96 $
+ * $Date: 1998-06-26 23:48:21 -0700 (Fri, 26 Jun 1998) $
  *
  * <<< Description >>>
  *
@@ -486,7 +486,7 @@ jtl_s2dlock(cw_jtl_t * a_jtl_o)
 }
 
 void
-jtl_s2rlock(cw_jtl_t * a_jtl_o)
+jtl_2rlock(cw_jtl_t * a_jtl_o)
 {
   _cw_check_ptr(a_jtl_o);
 
@@ -496,7 +496,7 @@ jtl_s2rlock(cw_jtl_t * a_jtl_o)
 }
 
 void
-jtl_s2wlock(cw_jtl_t * a_jtl_o)
+jtl_2wlock(cw_jtl_t * a_jtl_o)
 {
   _cw_check_ptr(a_jtl_o);
 
@@ -508,39 +508,7 @@ jtl_s2wlock(cw_jtl_t * a_jtl_o)
 }
 
 void
-jtl_s2xlock(cw_jtl_t * a_jtl_o)
-{
-  _cw_check_ptr(a_jtl_o);
-
-  mtx_lock(&a_jtl_o->lock);
-  rwl_wlock(&a_jtl_o->rxlock);
-  mtx_unlock(&a_jtl_o->lock);
-}
-
-void
-jtl_t2rlock(cw_jtl_t * a_jtl_o)
-{
-  _cw_check_ptr(a_jtl_o);
-
-  mtx_lock(&a_jtl_o->lock);
-  rwl_rlock(&a_jtl_o->rxlock);
-  mtx_unlock(&a_jtl_o->lock);
-}
-
-void
-jtl_t2wlock(cw_jtl_t * a_jtl_o)
-{
-  _cw_check_ptr(a_jtl_o);
-
-  mtx_lock(&a_jtl_o->lock);
-  /* Grab an a read lock on rxlock to assure that there are no xlockers. */
-  rwl_rlock(&a_jtl_o->rxlock);
-  sem_wait(&a_jtl_o->wlock_sem);
-  mtx_unlock(&a_jtl_o->lock);
-}
-
-void
-jtl_t2xlock(cw_jtl_t * a_jtl_o)
+jtl_2xlock(cw_jtl_t * a_jtl_o)
 {
   _cw_check_ptr(a_jtl_o);
 

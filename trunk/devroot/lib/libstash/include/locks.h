@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 90 $
- * $Date: 1998-06-24 23:45:26 -0700 (Wed, 24 Jun 1998) $
+ * $Revision: 96 $
+ * $Date: 1998-06-26 23:48:21 -0700 (Fri, 26 Jun 1998) $
  *
  * <<< Description >>>
  *
@@ -100,12 +100,9 @@ struct cw_jtl_s
 #define jtl_slock _CW_NS_CMN(jtl_slock)
 #define jtl_tlock _CW_NS_CMN(jtl_tlock)
 #define jtl_s2dlock _CW_NS_CMN(jtl_s2dlock)
-#define jtl_s2rlock _CW_NS_CMN(jtl_s2rlock)
-#define jtl_s2wlock _CW_NS_CMN(jtl_s2wlock)
-#define jtl_s2xlock _CW_NS_CMN(jtl_s2xlock)
-#define jtl_t2rlock _CW_NS_CMN(jtl_t2rlock)
-#define jtl_t2wlock _CW_NS_CMN(jtl_t2wlock)
-#define jtl_t2xlock _CW_NS_CMN(jtl_t2xlock)
+#define jtl_2rlock _CW_NS_CMN(jtl_2rlock)
+#define jtl_2wlock _CW_NS_CMN(jtl_2wlock)
+#define jtl_2xlock _CW_NS_CMN(jtl_2xlock)
 #define jtl_sunlock _CW_NS_CMN(jtl_sunlock)
 #define jtl_tunlock _CW_NS_CMN(jtl_tunlock)
 #define jtl_dunlock _CW_NS_CMN(jtl_dunlock)
@@ -142,12 +139,9 @@ void jtl_delete(cw_jtl_t * a_jtl_o);
 void jtl_slock(cw_jtl_t * a_jtl_o);
 void jtl_tlock(cw_jtl_t * a_jtl_o);
 void jtl_s2dlock(cw_jtl_t * a_jtl_o);
-void jtl_s2rlock(cw_jtl_t * a_jtl_o);
-void jtl_s2wlock(cw_jtl_t * a_jtl_o);
-void jtl_s2xlock(cw_jtl_t * a_jtl_o);
-void jtl_t2rlock(cw_jtl_t * a_jtl_o);
-void jtl_t2wlock(cw_jtl_t * a_jtl_o);
-void jtl_t2xlock(cw_jtl_t * a_jtl_o);
+void jtl_2rlock(cw_jtl_t * a_jtl_o);
+void jtl_2wlock(cw_jtl_t * a_jtl_o);
+void jtl_2xlock(cw_jtl_t * a_jtl_o);
 void jtl_sunlock(cw_jtl_t * a_jtl_o);
 void jtl_tunlock(cw_jtl_t * a_jtl_o);
 void jtl_dunlock(cw_jtl_t * a_jtl_o);
