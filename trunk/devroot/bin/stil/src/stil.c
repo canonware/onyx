@@ -24,11 +24,13 @@
 #define	_BUF_SIZE	4096
 #define	_PROMPT_STRLEN	  80
 
+#ifdef _STIL_SIGHANDLER
 struct handler_s {
 	cw_bool_t	quit;
 	sigset_t	hupset;
 	cw_thd_t	*sig_thd;
 };
+#endif
 
 struct stil_arg_s {
 	cw_uint8_t	*buffer;
@@ -59,7 +61,9 @@ int
 main(int argc, char **argv, char **envp)
 {
 	int		retval;
+#ifdef _STIL_SIGHANDLER
 	struct handler_s handler_arg;
+#endif
 	cw_stil_t	stil;
 	static const cw_uint8_t	version[] =
 	    "product print (, version ) print version print (.\n) print flush";
@@ -74,6 +78,7 @@ main(int argc, char **argv, char **envp)
 	dbg_unregister(cw_g_dbg, "pool_error");
 #endif
 
+#ifdef _STIL_SIGHANDLER
 	/*
 	 * Set the per-thread signal masks such that only one thread will catch
 	 * SIGHUP and SIGINT.
@@ -84,6 +89,7 @@ main(int argc, char **argv, char **envp)
 	sigaddset(&handler_arg.hupset, SIGINT);
 	thd_sigmask(SIG_BLOCK, &handler_arg.hupset, NULL);
 	handler_arg.sig_thd = thd_new(sig_handler, (void *)&handler_arg);
+#endif
 
 	/*
 	 * Do a bunch of extra setup work to hook in command editing
@@ -126,7 +132,7 @@ main(int argc, char **argv, char **envp)
 		el_set(el, EL_HIST, history, hist);
 		el_set(el, EL_PROMPT, prompt);
 		el_set(el, EL_EDITOR, "emacs");
-		el_set(el, EL_SIGNAL, 1);
+/*  		el_set(el, EL_SIGNAL, 1); */
 
 		/* Run the interpreter such that it will not exit on errors. */
 		stilt_start(&stilt);
@@ -252,9 +258,9 @@ main(int argc, char **argv, char **envp)
 	/*
 	 * Tell the signal handler thread to quit, then join on it.
 	 */
-	handler_arg.quit = TRUE;
-	raise(SIGINT);
-	thd_join(handler_arg.sig_thd);
+/*  	handler_arg.quit = TRUE; */
+/*  	raise(SIGINT); */
+/*  	thd_join(handler_arg.sig_thd); */
 
 	libstash_shutdown();
 	return retval;
@@ -501,24 +507,33 @@ cl_read(void *a_arg, cw_stilo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str)
 	return retval;
 }
 
+#ifdef _STIL_SIGHANDLER
 void *
 sig_handler(void *a_arg)
 {
 	struct handler_s	*arg = (struct handler_s *)a_arg;
 	int			sig, error;
 
-	error = sigwait(&arg->hupset, &sig);
-	if (error || (!sigismember(&arg->hupset, sig)))
-		_cw_error("sigwait() error");
-	if (arg->quit == FALSE) {
-		/*
-		 * We've received a signal from somewhere outside this program.
-		 */
-		exit(0);
+	for (;;) {
+		error = sigwait(&arg->hupset, &sig);
+		if (error)
+			_cw_error("sigwait() error");
+		if (sigismember(&arg->hupset, sig)) {
+			_cw_out_put_e("Signal [i]\n", sig);
+			if (arg->quit == FALSE) {
+				/*
+				 * We've received a signal from somewhere
+				 * outside this program.
+				 */
+				exit(0);
+			}
+		} else
+			_cw_out_put_e("Unexpected signal [i]\n", sig);
 	}
 
 	return NULL;
 }
+#endif
 
 void
 usage(const char *a_progname)
