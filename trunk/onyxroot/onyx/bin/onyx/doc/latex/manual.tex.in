@@ -32,7 +32,7 @@ the main Onyx language documentation.
 
 \binname{onyx} {\lt}file{\gt} [{\lt}args{\gt}]
 
-\subsection{Options}
+Option descriptions:
 \begin{description}
 \item[-h: ] Display usage information and exit.
 \item[-V: ] Display the version number and exit.
