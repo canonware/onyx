@@ -12,6 +12,7 @@
 void	nxo_operator_new(cw_nxo_t *a_nxo, cw_op_t *a_op, cw_nxn_t a_nxn);
 
 #ifndef _CW_USE_INLINES
+cw_op_t *nxo_operator_f(cw_nxo_t *a_nxo);
 #endif
 
 #if (defined(_CW_USE_INLINES) || defined(_NXO_OPERATOR_C_))
