@@ -12,17 +12,18 @@
  ******************************************************************************/
 
 /*
- * Given [CPPFLAGS], filter out all -D flags.  This is typically used in
- * preparation for calling c_incl, which doesn't recognize the -D flag.
+ * Given [CPPFLAGS], filter out everything but -I flags.  This is typically used
+ * in preparation for calling c_incl, which doesn't recognize flags such as the
+ * -D flag.
  */
 function filter_cppdefs =
 {
   local cppflags = [arg];
 
   cppflags = [unsplit " " [cppflags]];
-  cppflags = [subst " -D " " -D" [cppflags]];
+  cppflags = [subst " -I " " -I" [cppflags]];
   cppflags = [split " " [cppflags]];
-  cppflags = [filter_out -D% [cppflags]];
+  cppflags = [filter -I%0% [cppflags]];
 
   return [cppflags];
 }
