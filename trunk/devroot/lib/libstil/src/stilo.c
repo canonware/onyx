@@ -31,7 +31,7 @@
  * collected stiloe's, but can actually see the old contents of the stiloe we
  * tried to use.
  */
-#if (defined(_LIBSTIL_CONFESS) && defined(_LIBSTIL_DBG))
+#if (0 && defined(_LIBSTIL_CONFESS) && defined(_LIBSTIL_DBG))
 #define	_CW_FREE(a_stilo)
 #define	_CW_STILOE_FREE(a_stiloe) (a_stiloe)->stiloe.magic = 0
 #else
@@ -3384,12 +3384,6 @@ stilo_name_new(cw_stilo_t *a_stilo, cw_stil_t *a_stil, const cw_uint8_t
 
 		stila_gc_register(stil_stila_get(a_stil), (cw_stiloe_t *)name);
 	} else {
-		/*
-		 * Set the name_referenced flag in case the GC comes along and
-		 * tries to delete this entry.
-		 */
-		name->stiloe.name_referenced = TRUE;
-
 		memset(a_stilo, 0, sizeof(cw_stilo_t));
 		a_stilo->o.stiloe = (cw_stiloe_t *)name;
 #ifdef _LIBSTIL_DBG
@@ -3419,9 +3413,8 @@ stiloe_p_name_delete(cw_stiloe_t *a_stiloe, cw_stil_t *a_stil)
 	 * Only delete the hash entry if this object hasn't been put back into
 	 * use.
 	 */
-/*  	(name->stiloe.color != stila_l_white_get(stil_stila_get(a_stil))) */
-	if (name->stiloe.name_referenced == FALSE) {
-/*  		_cw_out_put_e("Got here\n"); */
+	if (name->stiloe.color != stila_l_white_get(stil_stila_get(a_stil))) {
+/*  		_cw_out_put_e("Got here, 0x[p|w:8|p:8]\n", a_stiloe); */
 		/*
 		 * Remove from hash table.
 		 */
@@ -3439,7 +3432,7 @@ stiloe_p_name_delete(cw_stiloe_t *a_stiloe, cw_stil_t *a_stil)
 
 		_CW_STILOE_FREE(name);
 	} else {
-/*  		_cw_out_put_e("Got here\n"); */
+		_cw_out_put_e("Got here, 0x[p|w:8|p:8]\n", a_stiloe);
 		/* Re-register. */
 		a_stiloe->registered = FALSE;
 		stila_gc_register(stil_stila_get(a_stil), a_stiloe);
@@ -3453,12 +3446,6 @@ stiloe_p_name_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t a_reset)
 	cw_stiloe_name_t	*name;
 
 	name = (cw_stiloe_name_t *)a_stiloe;
-
-	/*
-	 * Reset the name_referenced flag in case it got set during the last
-	 * cleanup phase of GC.
-	 */
-	name->stiloe.name_referenced = FALSE;
 
 	return NULL;
 }

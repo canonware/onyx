@@ -49,13 +49,6 @@ struct cw_stiloe_s {
 	 */
 	cw_bool_t	name_static:1;
 	/*
-	 * All name creations toggle this value to TRUE, and the GC toggles
-	 * this value to FALSE for garbage names.  During actual name deletion,
-	 * we check to see if the value has been toggled back to TRUE, and abort
-	 * deletion if so.
-	 */
-	cw_bool_t	name_referenced:1;
-	/*
 	 * If TRUE, there is a watchpoint set on this object.  In general, this
 	 * field is not looked at unless the interpreter has been put into
 	 * debugging mode. Note that setting a watchpoint on an extended type

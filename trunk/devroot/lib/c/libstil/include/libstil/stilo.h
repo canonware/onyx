@@ -155,12 +155,19 @@ struct cw_stilo_s {
 
 cw_sint32_t	stilo_compare(cw_stilo_t *a_a, cw_stilo_t *a_b, cw_stilt_t
     *a_stilt);
-/* XXX The critical section probably isn't necessary. */
+
+/*
+ * XXX This code is only GC-safe as long as o.stiloe is memcpy()ed at or before
+ * the time that the type is set.  This is probably okay with any compiler/OS
+ * combination available, but the memcpy() interface does not guarantee that
+ * bytes are copied in ascending order.
+ *
+ * To make this code safe even if the memcpy() does strange things, the memcpy()
+ * call needs to be surrounded by thd_crit_{enter,leave}().
+ */
 #define		stilo_dup(a_to, a_from) do {				\
 	/* Copy. */							\
-	thd_crit_enter();						\
 	memcpy((a_to), (a_from), sizeof(cw_stilo_t));			\
-	thd_crit_leave();						\
 									\
 	/* Reset debug flags on new copy. */				\
 	(a_to)->breakpoint = FALSE;					\

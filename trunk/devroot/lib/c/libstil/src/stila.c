@@ -7,17 +7,17 @@
  *
  * Version: <Version>
  *
- * stila implements a Baker's Treadmill to implement garbage collection.  The
- * collector is atomic, which means that all "mutator" threads must be suspended
- * during the marking phase.  Although no other threads can do any work during
- * marking, the collector does not have to (nor is it allowed to) do any
- * locking, which is a significant performance gain.  The total amount of work
- * that the garbage collector has to do is reduced, which improves overall
- * program throughput.
+ * stila uses a Baker's Treadmill (an elegant form of mark and sweep) to
+ * implement garbage collection.  The collector is atomic, which means that all
+ * "mutator" threads must be suspended during the marking phase.  Although no
+ * other threads can do any work during marking, the collector does not have to
+ * (nor is it allowed to) do any locking, which is a significant performance
+ * gain.  The total amount of work that the garbage collector has to do is
+ * reduced, which improves overall program throughput.
  *
- * The downside of atomic collection is that if marking takes more than 100
- * milliseconds, the user may notice a lag.  In practice, the collector appears
- * to perform very well; marking is fast enough to stay well below the
+ * The downside of atomic collection is that if marking takes more than about
+ * 100 milliseconds, the user may notice a lag.  In practice, the collector
+ * appears to perform very well; marking is fast enough to stay well below the
  * threshhold of user awareness, unless memory is low enough that system paging
  * becomes a factor.
  *
@@ -95,6 +95,10 @@
 #define	_LIBSTIL_STILA_TIME
 #endif
 
+#ifndef _LIBSTIL_STILA_TIME
+/*  #define	_LIBSTIL_STILA_TIME */
+#endif
+
 /* Number of stack elements per memory chunk. */
 #define	_CW_STIL_STILSC_COUNT	16
 
@@ -104,13 +108,13 @@
  * average, the actual inactivity period will be 1.5 times this, but can range
  * from 1 to 2 times this.
  */
-#define	_CW_STILA_INACTIVE	5
+#define	_CW_STILA_INACTIVE	10
 
 /*
  * Number of sequence set additions since last collection that will cause an
  * immediate collection.
  */
-#define	_CW_STILA_THRESHHOLD	2500
+#define	_CW_STILA_THRESHHOLD	50000
 
 typedef enum {
 	STILAM_THRESHHOLD,
@@ -320,12 +324,15 @@ stila_p_roots(cw_stila_t *a_stila)
 			}
 		}
 	}
+#ifdef _LIBSTIL_STILA_REF_ITER
+	out_put(NULL, "\n");
+#endif
 	/*
 	 * If we completed the above loop, there are no roots, and therefore we
 	 * should not enter the main root set acquisition loop below.
 	 */
 #ifdef _LIBSTIL_CONFESS
-	if (ql_first(&a_stila->seq_set))
+	if (ql_first(&a_stila->seq_set) != NULL)
 		out_put_e(NULL, NULL, 0, __FUNCTION__, "No objects\n");
 	else
 		out_put_e(NULL, NULL, 0, __FUNCTION__, "All garbage\n");
@@ -390,12 +397,12 @@ stila_p_roots(cw_stila_t *a_stila)
 			}
 		}
 	}
-
-	retval = TRUE;
-	RETURN:
 #ifdef _LIBSTIL_STILA_REF_ITER
 	out_put(NULL, "\n");
 #endif
+
+	retval = TRUE;
+	RETURN:
 #ifdef _LIBSTIL_CONFESS
 	out_put_e(NULL, NULL, 0, __FUNCTION__, "[i] root object[s]\n", nroot,
 	    nroot == 1 ? "" : "s");
@@ -536,12 +543,15 @@ stila_p_collect(cw_stila_t *a_stila)
 
 	/*
 	 * Mark the root set gray.  If there are any objects in the root set,
-	 * mark all objects reachable from the root set.
+	 * mark all objects reachable from the root set.  Otherwise, everything
+	 * is garbage.
 	 */
 	if (stila_p_roots(a_stila))
 		garbage = stila_p_mark(a_stila);
-	else
-		garbage = NULL;
+	else {
+		garbage = ql_first(&a_stila->seq_set);
+		ql_first(&a_stila->seq_set) = NULL;
+	}
 
 	/* Flip the value of white. */
 	a_stila->white = !a_stila->white;
@@ -667,257 +677,3 @@ stila_p_gc_entry(void *a_arg)
 #endif
 	return NULL;
 }
-
-/******************************************************************************/
-#if (0)
-
-
-#ifdef _LIBSTIL_CONFESS
-	/* Print the root set and its complement. */
-	{
-		cw_stiloe_t	*p;
-		cw_uint32_t	nroot = 0, nwhite = 0;
-
-		for (p = gray; p != white && p != NULL; p =
-		    qr_next(p, link), nroot++)
-			; /* Do nothing. */
-
-		if (nroot > 0) {
-			for (p = white; p != black; p = qr_next(p, link),
-			    nwhite++)
-				; /* Do nothing. */
-#ifdef _LIBSTIL_STILA_ROOT
-			/* Print root set. */
-			for (p = gray; p != white; p = qr_next(p, link)) {
-				out_put_e(NULL, NULL, 0, __FUNCTION__,
-				    "Root 0x[p|w:8|p:0]: ", p);
-			
-				stiloe_l_print(p,
-				    stil_stderr_get(a_stila->stil), TRUE, TRUE);
-				stilo_file_buffer_flush(stil_stderr_get(
-				    a_stila->stil));
-			}
-#endif
-
-#ifdef _LIBSTIL_STILA_NOT_ROOT
-			/* Print non-root set. */
-			for (p = white; p != black; p = qr_next(p, link)) {
-				out_put_e(NULL, NULL, 0, __FUNCTION__,
-				    "Not root 0x[p|w:8|p:0]: ", p);
-				stiloe_l_print(p,
-				    stil_stderr_get(a_stila->stil), TRUE, TRUE);
-				stilo_file_buffer_flush(stil_stderr_get(
-				    a_stila->stil));
-			}
-#endif
-		} else if (white != NULL) {
-			qr_foreach(p, white, link) {
-				nwhite++;
-			}
-#ifdef _LIBSTIL_STILA_NOT_ROOT
-			/* Print non-root set (everything). */
-			qr_foreach(p, white, link) {
-				out_put_e(NULL, NULL, 0, __FUNCTION__,
-				    "Not root: ");
-				stiloe_l_print(p,
-				    stil_stderr_get(a_stila->stil), TRUE, TRUE);
-				stilo_file_buffer_flush(stil_stderr_get(
-				    a_stila->stil));
-			}
-#endif
-		}
-		out_put_e(NULL, NULL, 0, __FUNCTION__,
-		    "[i] root + [i] white = [i] object[s]\n", nroot, nwhite,
-		    nroot + nwhite, nroot + nwhite == 1 ? "" : "s");
-	}
-#endif
-
-#ifdef _LIBSTIL_DBG
-	/*
-	 * Check that the ring is one region of gray and one region of white.
-	 */
-	if (gray != NULL) {
-		cw_stiloe_t	*p;
-		cw_bool_t	curr = stiloe_l_color_get(gray);
-		cw_bool_t	error = FALSE;
-		cw_uint32_t	transitions = 0;
-
-		qr_foreach(p, gray, link) {
-			if (stiloe_l_color_get(p) != curr) {
-				transitions++;
-				curr = stiloe_l_color_get(p);
-				if (p != black && p != white) {
-					out_put_e(NULL, NULL, 0, __FUNCTION__,
-					    "Color transition ([s]) "
-					    "not at black or white\n",
-					    curr == a_stila->white ?
-					    "gray --> white" :
-					    "white --> gray");
-					out_put_e(NULL, NULL, 0, __FUNCTION__,
-					    "p: 0x[p|p:0|w:8], "
-					    "black: 0x[p|p:0|w:8], "
-					    "gray: 0x[p|p:0|w:8], "
-					    "white: 0x[p|p:0|w:8]\n",
-					    p, black, gray, white);
-					error = TRUE;
-				}
-			}
-		}
-		if (transitions > 1) {
-			out_put_e(NULL, NULL, 0, __FUNCTION__,
-			    "[i] color transitions\n", transitions);
-			error = TRUE;
-		}
-		if (error) {
-			qr_foreach(p, gray, link) {
-				if (p == white)
-					out_put(NULL, "---------------->");
-				out_put(NULL, "0x[p|p:0|w:8] ", p);
-			}
-			out_put(NULL, "\n");
-			abort();
-		}
-	}
-#endif
-
-#ifdef _LIBSTIL_CONFESS
-	{
-		cw_stiloe_t	*p;
-		cw_uint32_t	nblack = 0, nwhite = 0;
-
-		if (black != NULL) {
-			qr_foreach(p, black, link) {
-#ifdef _LIBSTIL_STILA_BLACK
-				out_put_e(NULL, NULL, 0, __FUNCTION__,
-				    "Not garbage: 0x[p|w:8|p:0]: ", p);
-				stiloe_l_print(p,
-				    stil_stderr_get(a_stila->stil), TRUE, TRUE);
-				stilo_file_buffer_flush(stil_stderr_get(a_stila->stil));
-#endif
-				nblack++;
-			}
-		}
-		if (white != NULL) {
-			qr_foreach(p, white, link) {
-				nwhite++;
-			}
-		}
-		out_put_e(NULL, NULL, 0, __FUNCTION__,
-		    "[i] black + [i] white = [i] objects\n", nblack, nwhite,
-		    nblack + nwhite);
-		if (nwhite == 1)
-			out_put_e(NULL, NULL, 0, __FUNCTION__,
-			    "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n");
-	}
-#endif
-
-#ifdef _LIBSTIL_CONFESS
-	out_put_e(NULL, NULL, 0, __FUNCTION__, "<--------- Finish\n");
-#endif
-
-/* Marking code. */
-/*  	for (; gray != white; gray = qr_next(gray, link)) { */
-	for (; gray != black && stiloe_color_get(gray) != a_stila->white; gray =
-	    qr_next(gray, link)) {
-#ifdef _LIBSTIL_STILA_GRAY
-		out_put_e(NULL, NULL, 0, __FUNCTION__, "Gray: ");
-		stiloe_l_print(gray, stil_stderr_get(a_stila->stil), TRUE,
-		    FALSE);
-		stilo_file_buffer_flush(stil_stderr_get(a_stila->stil));
-		out_put(NULL, " :");
-#endif
-		_cw_assert(stiloe_l_color_get(gray) != a_stila->white);
-		for (stiloe = stiloe_l_ref_iter(gray, TRUE); stiloe != NULL;
-		     stiloe = stiloe_l_ref_iter(gray, FALSE)) {
-#ifdef _LIBSTIL_STILA_GRAY
-			out_put(NULL, " ");
-			stiloe_l_print(stiloe, stil_stderr_get(a_stila->stil),
-			    TRUE, FALSE);
-			stilo_file_buffer_flush(stil_stderr_get(a_stila->stil));
-#endif
-			/* Unregistered stiloe's shouldn't be in the ring. */
-			_cw_assert(stiloe_l_registered_get(stiloe));
-
-			/*
-			 * If object is white, color it.
-			 */
-			if (stiloe_l_color_get(stiloe) == a_stila->white) {
-				stiloe_l_color_set(stiloe, !a_stila->white);
-				if (stiloe != white) {
-#ifdef _LIBSTIL_STILA_GRAY
-					out_put(NULL, "<C>");
-#endif
-					qr_remove(stiloe, link);
-					qr_before_insert(white, stiloe, link);
-				} else {
-#ifdef _LIBSTIL_STILA_GRAY
-					out_put(NULL, "<CW>");
-#endif
-					white = qr_next(white, link);
-				}
-			}
-#ifdef _LIBSTIL_STILA_GRAY
-			else {
-				out_put(NULL, "<S>");
-			}
-#endif
-		}
-#ifdef _LIBSTIL_STILA_GRAY
-		out_put(NULL, "\n");
-#endif
-	}
-	if (white != NULL && stiloe_l_color_get(white) != a_stila->white) {
-		/*
-		 * There are no white objects, but due to an artifact of the
-		 * outside loop conditional above, we don't look at the object
-		 * 'white' points to, even though it was gray.  Since it is the
-		 * last object that would have been looked at, we know that
-		 * there are no white objects.  Therefore, set the 'white'
-		 * pointer to be the same as 'black'.
-		 */
-		_cw_assert(stiloe_l_color_get(qr_next(white, link)) !=
-		    a_stila->white);
-		white = black;
-	}
-
-/* Ring splitting diagnostics. */
-#ifdef _LIBSTIL_CONFESS
-		out_put_e(NULL, NULL, 0, __FUNCTION__,
-		    "Split ring into white and black\n");
-#endif
-#ifdef _LIBSTIL_DBG
-		/*
-		 * Ring splitting and melding are idempotent, so make sure that
-		 * we're about to split, rather than meld.
-		 */
-		{
-			cw_stiloe_t	*p;
-			cw_bool_t	same_ring = FALSE;
-
-			qr_foreach(p, black, link) {
-				if (p == white)
-					same_ring = TRUE;
-			}
-			_cw_assert(same_ring);
-		}
-#endif
-
-		else {
-		/* All valid objects. */
-#ifdef _LIBSTIL_CONFESS
-		out_put_e(NULL, NULL, 0, __FUNCTION__, "No garbage\n");
-#endif
-		ql_first(&a_stila->seq_set) = black;
-		white = NULL;
-	}
-
-/* Garbage printout. */
-#ifdef _LIBSTIL_STILA_WHITE
-			out_put_e(NULL, NULL, 0, __FUNCTION__,
-			    "Garbage: 0x[p|w:8|p:0]: ", p);
-			stiloe_l_print(p, stil_stderr_get(a_stila->stil), TRUE,
-			    TRUE);
-			stilo_file_buffer_flush(stil_stderr_get(a_stila->stil));
-#endif
-
-#endif	/* (0) */
