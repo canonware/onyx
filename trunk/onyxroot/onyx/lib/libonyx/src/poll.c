@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  *
- * Version: <Version>
+ * Version: Onyx <Version = onyx>
  *
  * Compatibility shim for poll() that uses select().
  *
