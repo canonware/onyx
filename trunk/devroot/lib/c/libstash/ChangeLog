@@ -1,3 +1,8 @@
+2001-02-20  Jason Evans  <jasone@canonware.com>
+
+	* src/out.c (out_p_put_svn): Do not expand the output buffer for
+	text elements if already at the maximum output buffer length.
+
 2001-02-10  Jason Evans  <jasone@canonware.com>
 
 	* src/pezz.c: Round element size up to the nearest multiple of

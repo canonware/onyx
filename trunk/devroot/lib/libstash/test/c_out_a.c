@@ -648,6 +648,10 @@ main()
 		_cw_assert(out_put_sn(out_p, str, 2, "[p]", (void *)0x42) >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
+		memcpy(buf, ibuf, 81);
+		_cw_assert(out_put_sn(out_p, str, 3, "won't fit") >= 0);
+		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
+
 		out_delete(out_p);
 	}
 
