@@ -6090,8 +6090,7 @@ systemdict_maxestack(cw_nxo_t *a_thread)
 void
 systemdict_method(cw_nxo_t *a_thread)
 {
-    cw_nxo_t *ostack, *nxo, *name;
-    cw_nxo_t *class_, *methods, *method;
+    cw_nxo_t *ostack, *nxo, *name, *method;
 
     ostack = nxo_thread_ostack_get(a_thread);
     NXO_STACK_GET(name, ostack, a_thread);
@@ -6103,25 +6102,15 @@ systemdict_method(cw_nxo_t *a_thread)
     }
 
     method = nxo_stack_under_push(ostack, nxo);
-    /* Iterate up the inheritance chain until an implementor of name is found,
-     * or the baseclass is reached. */
-    for (class_ = nxo;
-	 nxo_type_get(class_) == NXOT_CLASS;
-	 class_ = nxo_class_super_get(class_))
+    if (nxo_thread_class_hier_search(a_thread, nxo, name, method))
     {
-	methods = nxo_class_methods_get(class_);
-	if (nxo_type_get(methods) == NXOT_DICT
-	    && nxo_dict_lookup(methods, name, method) == FALSE)
-	{
-	    /* Found. */
-	    nxo_stack_npop(ostack, 2);
-	    return;
-	}
+	/* Not found. */
+	nxo_stack_remove(ostack, method);
+	nxo_thread_nerror(a_thread, NXN_undefined);
+	return;
     }
 
-    /* Not found. */
-    nxo_stack_remove(ostack, method);
-    nxo_thread_nerror(a_thread, NXN_undefined);
+    nxo_stack_npop(ostack, 2);
 }
 #endif
 
