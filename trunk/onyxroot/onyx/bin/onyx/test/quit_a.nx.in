@@ -1,0 +1,46 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+`Test begin\n' print flush
+
+{
+    `A\n' print
+    quit
+    `B\n' print
+} start
+
+{
+    `C\n' print
+    {
+	`D\n' print
+	quit
+    } start
+    `E\n' print
+} start
+
+{
+    `F\n' print
+    {
+	`G\n' print
+	quit
+    } start
+    `H\n' print
+    quit
+    `I\n' print
+} start
+
+`J\n' print
+quit
+`K\n' print
+
+`Test end\n' print
+pstack

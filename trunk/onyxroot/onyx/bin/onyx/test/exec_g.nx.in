@@ -1,0 +1,22 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+# Called as: ppid_a.nx <srcdir> <objdir>
+
+`Test begin\n' print flush
+
+[
+    argv 1 get `/b_exec_a_no_such_name.nx' cat
+] exec
+
+`Test end\n' print
+pstack

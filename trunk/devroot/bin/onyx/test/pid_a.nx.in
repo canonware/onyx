@@ -1,0 +1,28 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+`Test begin\n' print flush
+
+pid
+
+# Verify type.
+dup type 1 sprint
+
+# Check range.
+dup 0 le {
+    `pid too small: ' exch cvs `\n' 3 ncat print
+}{
+    pop
+} ifelse
+
+`Test end\n' print
+pstack
