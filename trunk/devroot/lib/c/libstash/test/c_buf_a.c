@@ -82,7 +82,8 @@ main()
   {
     cw_bufc_t bufc;
     cw_buf_t * buf_p;
-    cw_uint32_t i, j;
+    cw_uint32_t i, j, t_uint32_a, t_uint32_b;
+    cw_uint64_t t_uint64;
     char * buffer;
     cw_uint32_t * buffer_cast;
     char buf[17];
@@ -134,9 +135,15 @@ main()
     log_printf(cw_g_log, "upper long dump:\n");
     for (i = 256; i < 512; i += 8)
     {
+      t_uint32_a = buf_get_uint32(buf_p, i);
+      t_uint32_a = htonl(t_uint32_a);
+      
+      t_uint32_b = buf_get_uint32(buf_p, i + 4);
+      t_uint32_b = htonl(t_uint32_b);
+      
       log_printf(cw_g_log, "%03u->0x%08x:%03u->0x%08x\n",
-		 i, buf_get_uint32(buf_p, i),
-		 i + 4, buf_get_uint32(buf_p, i + 4));
+		 i, t_uint32_a,
+		 i + 4, t_uint32_b);
     }
 
     log_printf(cw_g_log, "upper quad dump:\n");
