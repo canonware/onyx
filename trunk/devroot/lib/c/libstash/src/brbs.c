@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 97 $
- * $Date: 1998-06-26 23:48:56 -0700 (Fri, 26 Jun 1998) $
+ * $Revision: 99 $
+ * $Date: 1998-06-27 23:36:45 -0700 (Sat, 27 Jun 1998) $
  *
  * <<< Description >>>
  *
@@ -20,6 +20,7 @@
 #define _INC_STRING_H_
 #define _INC_FCNTL_H_
 #define _INC_SYS_TYPES_H_
+#define _INC_SYS_UIO_H_
 #define _INC_SYS_STAT_H_
 #define _INC_SYS_ERRNO_H_
 #define _INC_SYS_DISKLABEL_H_
@@ -90,6 +91,11 @@ brbs_delete(cw_brbs_t * a_brbs_o)
   }
   
   rwl_delete(&a_brbs_o->rw_lock);
+
+  if (a_brbs_o->filename != NULL)
+  {
+    _cw_free(a_brbs_o->filename);
+  }
 
   if (a_brbs_o->is_malloced == TRUE)
   {
@@ -347,8 +353,16 @@ brbs_set_filename(cw_brbs_t * a_brbs_o, char * a_filename)
   else
   {
     retval = FALSE;
-    a_brbs_o->filename = (char *) _cw_realloc(a_brbs_o->filename,
-					      strlen(a_filename) + 1);
+    if (a_brbs_o->filename == NULL)
+    {
+      a_brbs_o->filename = (char *) _cw_malloc(strlen(a_filename) + 1);
+    }
+    else
+    {
+      a_brbs_o->filename = (char *) _cw_realloc(a_brbs_o->filename,
+						strlen(a_filename) + 1);
+    }
+    
     strcpy(a_brbs_o->filename, a_filename);
   }
 
@@ -492,77 +506,203 @@ brbs_set_max_size(cw_brbs_t * a_brbs_o, cw_uint64_t a_max_size)
 }
 
 /****************************************************************************
+ * <<< Description >>>
+ *
+ * Returns whether the file is a raw device.
+ *
+ ****************************************************************************/
+cw_bool_t
+brbs_get_is_raw(cw_brbs_t * a_brbs_o)
+{
+  cw_bool_t retval;
+
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
+  {
+    _cw_marker("Enter brbs_get_()");
+  }
+  _cw_check_ptr(a_brbs_o);
+  rwl_rlock(&a_brbs_o->rw_lock);
+
+  retval = a_brbs_o->is_raw;
+
+  rwl_runlock(&a_brbs_o->rw_lock);
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
+  {
+    _cw_marker("Exit brbs_get_()");
+  }
+  return retval;
+}
+
+/****************************************************************************
+ * <<< Description >>>
+ *
+ * Returns the sector size (only valid if using a raw device).
+ *
+ ****************************************************************************/
+cw_uint32_t
+brbs_get_sect_size(cw_brbs_t * a_brbs_o)
+{
+  cw_bool_t retval;
+
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
+  {
+    _cw_marker("Enter brbs_get_()");
+  }
+  _cw_check_ptr(a_brbs_o);
+  rwl_rlock(&a_brbs_o->rw_lock);
+
+  retval = a_brbs_o->sect_size;
+
+  rwl_runlock(&a_brbs_o->rw_lock);
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
+  {
+    _cw_marker("Exit brbs_get_()");
+  }
+  return retval;
+}
+
+/****************************************************************************
  * <<< Arguments >>>
  *
  * a_offset : Offset in bytes from the beginning of the file.
  *
- * <<< Return Value >>>
- *
- * TRUE == error.
- *
  * <<< Description >>>
  *
- * Reads a block into a_block.
+ * Reads a block into a_brblk_o.
  *
  ****************************************************************************/
 cw_bool_t 
 brbs_block_read(cw_brbs_t * a_brbs_o, cw_uint64_t a_offset,
 		cw_brblk_t * a_brblk_o)
 {
+  ssize_t error;
+  cw_bool_t retval;
+  
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
   {
     _cw_marker("Enter brbs_block_read()");
   }
   _cw_check_ptr(a_brbs_o);
-  _cw_check_ptr(a_brblk_o);
   rwl_rlock(&a_brbs_o->rw_lock);
 
-/*   _cw_assert(a_brblk_o->block_size > 0); */
+  _cw_assert(brblk_get_buf_size(a_brblk_o) > 0);
 
-/*   if (a_brblk_o->block_size */
-
+  if (-1 == lseek(a_brbs_o->fd, a_offset, SEEK_SET))
+  {
+    retval = TRUE;
+    if (dbg_fmatch(g_dbg_o, _CW_DBG_R_BRBS_ERROR))
+    {
+      log_leprintf(g_log_o, __FILE__, __LINE__, "brbs_block_read",
+		   "lseek() error: %s\n", strerror(errno));
+    }
+  }
+  else
+  {
+    error = read(a_brbs_o->fd,
+		 (void *) brblk_get_buf_p(a_brblk_o),
+		 brblk_get_buf_size(a_brblk_o));
+    if (error == -1)
+    {
+      retval = TRUE;
+      if (dbg_fmatch(g_dbg_o, _CW_DBG_R_BRBS_ERROR))
+      {
+	log_leprintf(g_log_o, __FILE__, __LINE__, "brbs_block_read",
+		     "read() error: %s\n", strerror(errno));
+      }
+    }
+    else if (error != brblk_get_buf_size(a_brblk_o))
+    {
+      retval = TRUE;
+      if (dbg_fmatch(g_dbg_o, _CW_DBG_R_BRBS_ERROR))
+      {
+	log_leprintf(g_log_o, __FILE__, __LINE__, "brbs_block_read",
+		     "Incomplete read");
+      }
+    }
+    else
+    {
+      retval = FALSE;
+    }
+  }
+  
   rwl_runlock(&a_brbs_o->rw_lock);
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
   {
     _cw_marker("Exit brbs_block_read()");
   }
-  return TRUE; /* XXX */
+  return retval;
 }
 
 /****************************************************************************
  * <<< Arguments >>>
  *
- *
- *
- * <<< Return Value >>>
- *
- *
+ * a_offset : Offset in bytes from the beginning of the file.
  *
  * <<< Description >>>
  *
- *
+ * Writes a block.
  *
  ****************************************************************************/
 cw_bool_t 
 brbs_block_write(cw_brbs_t * a_brbs_o, cw_uint64_t a_offset,
 		 cw_brblk_t * a_brblk_o)
 {
+  ssize_t error;
+  cw_bool_t retval;
+  
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
   {
     _cw_marker("Enter brbs_block_write()");
   }
   _cw_check_ptr(a_brbs_o);
-  _cw_check_ptr(a_brblk_o);
   rwl_wlock(&a_brbs_o->rw_lock);
 
+  _cw_assert(brblk_get_buf_size(a_brblk_o) > 0);
 
+  if (-1 == lseek(a_brbs_o->fd, a_offset, SEEK_SET))
+  {
+    retval = TRUE;
+    if (dbg_fmatch(g_dbg_o, _CW_DBG_R_BRBS_ERROR))
+    {
+      log_leprintf(g_log_o, __FILE__, __LINE__, "brbs_block_write",
+		   "lseek() error: %s\n", strerror(errno));
+    }
+  }
+  else
+  {
+    error = write(a_brbs_o->fd,
+		  (void *) brblk_get_buf_p(a_brblk_o),
+		  brblk_get_buf_size(a_brblk_o));
+    if (error == -1)
+    {
+      retval = TRUE;
+      if (dbg_fmatch(g_dbg_o, _CW_DBG_R_BRBS_ERROR))
+      {
+	log_leprintf(g_log_o, __FILE__, __LINE__, "brbs_block_write",
+		     "write() error: %s\n", strerror(errno));
+      }
+    }
+    else if (error != brblk_get_buf_size(a_brblk_o))
+    {
+      retval = TRUE;
+      if (dbg_fmatch(g_dbg_o, _CW_DBG_R_BRBS_ERROR))
+      {
+	log_leprintf(g_log_o, __FILE__, __LINE__, "brbs_block_write",
+		     "Incomplete write");
+      }
+    }
+    else
+    {
+      retval = FALSE;
+    }
+  }
 
   rwl_wunlock(&a_brbs_o->rw_lock);
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
   {
     _cw_marker("Exit brbs_block_write()");
   }
-  return TRUE; /* XXX */
+  return retval;
 }
 
 /****************************************************************************

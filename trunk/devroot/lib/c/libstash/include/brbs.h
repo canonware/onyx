@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 94 $
- * $Date: 1998-06-26 17:18:43 -0700 (Fri, 26 Jun 1998) $
+ * $Revision: 99 $
+ * $Date: 1998-06-27 23:36:45 -0700 (Sat, 27 Jun 1998) $
  *
  * <<< Description >>>
  *
@@ -51,6 +51,8 @@ struct cw_brbs_s
 #define brbs_set_is_dynamic _CW_NS_CMN(brbs_set_is_dynamic)
 #define brbs_get_max_size _CW_NS_CMN(brbs_get_max_size)
 #define brbs_set_max_size _CW_NS_CMN(brbs_set_max_size)
+#define brbs_get_is_raw _CW_NS_CMN(brbs_get_is_raw)
+#define brbs_get_sect_size _CW_NS_CMN(brbs_get_sect_size)
 #define brbs_block_read _CW_NS_CMN(brbs_block_read)
 #define brbs_block_write _CW_NS_CMN(brbs_block_write)
 /* #define brbs_ _CW_NS_CMN(brbs_) */
@@ -70,6 +72,9 @@ cw_bool_t brbs_set_is_dynamic(cw_brbs_t * a_brbs_o, cw_bool_t a_is_dynamic);
 
 cw_uint64_t brbs_get_max_size(cw_brbs_t * a_brbs_o);
 cw_bool_t brbs_set_max_size(cw_brbs_t * a_brbs_o, cw_uint64_t a_max_size);
+
+cw_bool_t brbs_get_is_raw(cw_brbs_t * a_brbs_o);
+cw_uint32_t brbs_get_sect_size(cw_brbs_t * a_brbs_o);
 
 cw_bool_t brbs_block_read(cw_brbs_t * a_brbs_o, cw_uint64_t a_offset,
 			  cw_brblk_t * a_brblk_o);
