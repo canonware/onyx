@@ -110,13 +110,13 @@ stils_collect(cw_stils_t *a_stils, void (*a_add_root_func) (void *add_root_arg,
 		stilo_move(new_stilo, &old_stilso->stilo);
 
 		switch (stilo_type_get(new_stilo)) {
-		case _CW_STILOT_ARRAYTYPE:
-		case _CW_STILOT_CONDITIONTYPE:
-		case _CW_STILOT_DICTTYPE:
-		case _CW_STILOT_LOCKTYPE:
-		case _CW_STILOT_MSTATETYPE:
-		case _CW_STILOT_NUMBERTYPE:
-		case _CW_STILOT_STRINGTYPE:
+		case STILOT_ARRAY:
+		case STILOT_CONDITION:
+		case STILOT_DICT:
+		case STILOT_LOCK:
+		case STILOT_MSTATE:
+		case STILOT_NUMBER:
+		case STILOT_STRING:
 			a_add_root_func(a_add_root_arg, new_stilo);
 			break;
 		default:
@@ -268,8 +268,7 @@ stils_roll(cw_stils_t *a_stils, cw_uint32_t a_count, cw_sint32_t a_amount)
 }
 
 cw_bool_t
-stils_dup(cw_stils_t *a_stils, cw_stilt_t *a_stilt, cw_uint32_t a_count,
-    cw_uint32_t a_index)
+stils_dup(cw_stils_t *a_stils, cw_stilt_t *a_stilt)
 {
 	cw_bool_t	retval;
 	cw_stilso_t	*orig, *dup;
