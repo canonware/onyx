@@ -12,11 +12,9 @@
  ******************************************************************************/
 
 #if @with_docs@
-  ONYX_PS = @objroot@/doc/ps/onyx/onyx.ps;
   ONYX_PDF = @objroot@/doc/pdf/onyx/onyx.pdf;
   ONYX_HTML = @objroot@/doc/html/onyx/onyx.html;
 #else
-  ONYX_PS = @srcroot@/doc/ps/onyx/onyx.ps;
   ONYX_PDF = @srcroot@/doc/pdf/onyx/onyx.pdf;
   ONYX_HTML = @srcroot@/doc/html/onyx/onyx.html;
 #endif
@@ -46,11 +44,6 @@ ONYX_FIG_SRCS = [addprefix @srcroot@/doc/latex/onyx/ [ONYX_FIG_SRCS]];
  * Targets.
  */
 
-onyx_docs_ps :
-#if @with_docs@
-               [ONYX_PS]
-#endif
-               ;
 onyx_docs_pdf :
 #if @with_docs@
                 [ONYX_PDF]
@@ -61,12 +54,6 @@ onyx_docs_html :
                  [ONYX_HTML]
 #endif
                  ;
-
-onyx_docs_install_ps : onyx_docs_ps
-{
-  @INSTALL@ -d [DATADIR]/onyx-@onyx_version@/doc/ps;
-  @INSTALL@ -m 0444 [ONYX_PS] [DATADIR]/onyx-@onyx_version@/doc/ps;
-}
 
 onyx_docs_install_pdf : onyx_docs_pdf
 {
@@ -101,24 +88,12 @@ onyx_docs_relclean :
 {
   rm -rf @objroot@/doc/html/onyx;
   rm -rf @objroot@/doc/pdf/onyx;
-  rm -rf @objroot@/doc/ps/onyx;
 }
 
 /*
  * Dependencies.
  */
-@objroot@/%0ps/onyx/%.ps : @objroot@/%0latex/onyx/%.tex [ONYX_TEX_SRCS]
-                           [fromto @srcroot@/%0latex/onyx/%.fig
-                                   @objroot@/%0latex/onyx/%.ps
-                                   [ONYX_FIG_SRCS]];
-
-/*
- * This depends on the PostScript version of the manual so that the two rules
- * will not run in parallel.  This is necessary in order to keep them from
- * stomping all over each others' temporory files.
- */
 @objroot@/%0pdf/onyx/%.pdf : @objroot@/%0latex/onyx/%.tex
-                             @objroot@/%0ps/onyx/%.ps
                              [ONYX_TEX_SRCS]
                              [fromto @srcroot@/%0latex/onyx/%.fig
                                      @objroot@/%0latex/onyx/%.ps

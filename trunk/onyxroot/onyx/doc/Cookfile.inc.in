@@ -17,15 +17,13 @@
 /*
  * Targets.
  */
-docs_ps : [addsuffix _docs_ps @docs@];
 docs_pdf : [addsuffix _docs_pdf @docs@];
 docs_html : [addsuffix _docs_html @docs@];
-docs : docs_ps docs_pdf docs_html;
+docs : docs_pdf docs_html;
 
-docs_install_ps : [addsuffix _docs_install_ps @docs@];
 docs_install_pdf : [addsuffix _docs_install_pdf @docs@];
 docs_install_html : [addsuffix _docs_install_html @docs@];
-docs_install : docs_install_ps docs_install_pdf docs_install_html;
+docs_install : docs_install_pdf docs_install_html;
 
 docs_uninstall : [addsuffix _docs_uninstall @docs@];
 
@@ -35,7 +33,6 @@ docs_relclean : [addsuffix _docs_relclean @docs@]
 {
   rm -rf @objroot@/doc/html;
   rm -rf @objroot@/doc/pdf;
-  rm -rf @objroot@/doc/ps;
 }
 
 /*
@@ -47,43 +44,13 @@ docs_relclean : [addsuffix _docs_relclean @docs@]
   @FIG2DEV@ -L ps @srcroot@/%0%.fig @objroot@/%0%.ps;
 }
 
-@objroot@/%0ps/%1/%.ps : @objroot@/%0latex/%1/%.tex
-  set mkdir
-{
-  /*
-   * Clean up the temp files to keep {pdf}latex from stumbling over the output
-   * of each other.
-   *
-   * Change directory to the object tree, since latex can't be made to use a
-   * different location for output files.
-   */
-
-  rm -f [addprefix @objroot@/%0latex/%1/%.
-                   alg aux aux-prev idx idx-prev ilg ind lof log lot out toc];
-  rm -f @objroot@/%0latex/%1/texput.log;
-
-  cd @objroot@/%0latex/%1/\; @PERL@ @abs_srcroot@/%0latex/ltx2e @LATEX@ %.tex;
-  cd @objroot@/%0latex/%1/\; @MAKEINDEX@ -c -l
-                                         -s @abs_srcroot@/%0latex/%1/%.mst
-                                         %.idx;
-  cd @objroot@/%0latex/%1/\; @PERL@ @abs_srcroot@/%0latex/ltx2e @LATEX@ %.tex;
-  @DVIPS@ @objroot@/%0latex/%1/%.dvi -t letter -o @objroot@/%0ps/%1/%.ps;
-}
-
 @objroot@/%0pdf/%1/%.pdf : @objroot@/%0latex/%1/%.tex
   set mkdir
 {
   /*
-   * Clean up the temp files to keep {pdf}latex from stumbling over the output
-   * of each other.
-   *
    * Change directory to the object tree, since latex can't be made to use a
    * different location for output files.
    */
-
-  rm -f [addprefix @objroot@/%0latex/%1/%.
-                   alg aux aux-prev idx idx-prev ilg ind lof log lot out toc];
-  rm -f @objroot@/%0latex/%1/texput.log;
 
   cd @objroot@/%0latex/%1/\; @PERL@ @abs_srcroot@/%0latex/ltx2e @PDFLATEX@
                                     %.tex;

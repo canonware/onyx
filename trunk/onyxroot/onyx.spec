@@ -78,7 +78,6 @@ fi
 
 %doc %{_datadir}/onyx-%{version}/doc/html
 %doc %{_datadir}/onyx-%{version}/doc/pdf
-%doc %{_datadir}/onyx-%{version}/doc/ps
 
 %files devel
 %defattr(-,root,root)

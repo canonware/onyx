@@ -334,8 +334,7 @@ unless ($opt_noact)
     # Sanity check to make sure documentation got built.
     if (-e "$expdir/$opt_root/doc/latex/$opt_pkgname")
     {
-	unless (-e "$expdir/$opt_root/doc/ps/$opt_pkgname/$opt_pkgname.ps"
-		&& -e "$expdir/$opt_root/doc/pdf/$opt_pkgname/$opt_pkgname.pdf"
+	unless (-e "$expdir/$opt_root/doc/pdf/$opt_pkgname/$opt_pkgname.pdf"
 		&& -e
 		"$expdir/$opt_root/doc/html/$opt_pkgname/$opt_pkgname.html")
 	{
@@ -355,8 +354,7 @@ unless ($opt_noact)
     # Sanity check to make sure documentation is still in the tree.
     if (-e "$expdir/$opt_root/doc/latex/$opt_pkgname")
     {
-	unless (-e "$expdir/$opt_root/doc/ps/$opt_pkgname/$opt_pkgname.ps"
-		&& -e "$expdir/$opt_root/doc/pdf/$opt_pkgname/$opt_pkgname.pdf"
+	unless (-e "$expdir/$opt_root/doc/pdf/$opt_pkgname/$opt_pkgname.pdf"
 		&& -e
 		"$expdir/$opt_root/doc/html/$opt_pkgname/$opt_pkgname.html")
 	{

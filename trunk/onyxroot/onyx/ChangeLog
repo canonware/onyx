@@ -1,3 +1,10 @@
+2003-12-25 : Jason Evans <jasone@canonware.com>
+
+	* Stop building a PostScript version of the documentation.  There
+	  is no good reason to keep building two printable formats, and
+	  PDF is supported by all operating systems of interest, whereas
+	  PostScript is not.
+
 2003-12-13 : Jason Evans <jasone@canonware.com>
 
 	* Remove the following types, and replace them with C99 equivalents:
