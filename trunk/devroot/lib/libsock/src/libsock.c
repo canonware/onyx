@@ -484,7 +484,7 @@ sockb_l_in_space(cw_uint32_t a_sockfd)
 }
 
 cw_bool_t
-sockb_l_get_host_ip(char * a_host_str, cw_uint32_t * r_host_ip)
+sockb_l_get_host_ip(const char * a_host_str, cw_uint32_t * r_host_ip)
 {
   cw_bool_t retval;
   cw_uint32_t host_ip;

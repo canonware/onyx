@@ -52,6 +52,7 @@ typedef struct
 } connection_t;
 
 cw_bool_t should_quit = FALSE;
+const char * g_progname;
 
 /* Function prototypes. */
 void *
@@ -62,14 +63,16 @@ char *
 get_out_str_hex(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str);
 char *
 get_out_str_ascii(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str);
+cw_bool_t
+oom_handler(const void * a_data, cw_uint32_t a_size);
 void *
 handle_client_send(void * a_arg);
 void *
 handle_client_recv(void * a_arg);
 void
-usage(const char * a_progname);
+usage(void);
 void
-version(const char * a_progname);
+version(void);
 const char *
 basename(const char * a_str);
 
@@ -93,6 +96,8 @@ main(int argc, char ** argv)
   char * opt_rhost = NULL, * opt_dirname = NULL;
 
   libstash_init();
+  mem_set_oom_handler(cw_g_mem, oom_handler, NULL);
+  g_progname = basename(argv[0]);
   dbg_register(cw_g_dbg, "prog_error");
   dbg_register(cw_g_dbg, "sockb_error");
   dbg_register(cw_g_dbg, "socks_error");
@@ -210,20 +215,20 @@ main(int argc, char ** argv)
   if ((TRUE == cl_error) || (optind < argc))
   {
     out_put(cw_g_out, "Unrecognized option(s)\n");
-    usage(basename(argv[0]));
+    usage();
     retval = 1;
     goto CLERROR;
   }
 
   if (TRUE == opt_help)
   {
-    usage(basename(argv[0]));
+    usage();
     goto CLERROR;
   }
 
   if (TRUE == opt_version)
   {
-    version(basename(argv[0]));
+    version();
     goto CLERROR;
   }
 
@@ -231,7 +236,7 @@ main(int argc, char ** argv)
   if ((TRUE == opt_verbose) && (TRUE == opt_quiet))
   {
     out_put(cw_g_out, "\"-v\" and \"-q\" are incompatible\n");
-    usage(basename(argv[0]));
+    usage();
     retval = 1;
     goto CLERROR;
   }
@@ -239,7 +244,7 @@ main(int argc, char ** argv)
   if ((TRUE == opt_log) && (NULL != opt_dirname))
   {
     out_put(cw_g_out, "\"-l\" and \"-d\" are incompatible\n");
-    usage(basename(argv[0]));
+    usage();
     retval = 1;
     goto CLERROR;
   }
@@ -248,7 +253,16 @@ main(int argc, char ** argv)
   {
     out_put(cw_g_out,
 	    "Argument to \"-d\" flag is too long (512 bytes max)\n");
-    usage(basename(argv[0]));
+    usage();
+    retval = 1;
+    goto CLERROR;
+  }
+
+  if (NULL == opt_rhost)
+  {
+    out_put(cw_g_out,
+	    "\"-r\" flag must be specified\n");
+    usage();
     retval = 1;
     goto CLERROR;
   }
@@ -268,7 +282,7 @@ main(int argc, char ** argv)
     cw_sint32_t fd;
     
     out_put_s(cw_g_out, logfile, "[s]/[s].pid_[i].log",
-	      opt_dirname, basename(argv[0]), getpid());
+	      opt_dirname, g_progname, getpid());
     
     fd = (cw_sint32_t) open(logfile, O_RDWR | O_CREAT | O_TRUNC, 0644);
     if (-1 == fd)
@@ -340,7 +354,7 @@ main(int argc, char ** argv)
 	}
 
 	out_put_s(cw_g_out, logfile, "[s]/[s].pid_[i].conn[i]",
-		  opt_dirname, basename(argv[0]), getpid(), conn_num);
+		  opt_dirname, g_progname, getpid(), conn_num);
 
 	fd = (cw_sint32_t) open(logfile, O_RDWR | O_CREAT | O_TRUNC, 0644);
 	if (-1 == fd)
@@ -404,12 +418,13 @@ sig_handler(void * a_arg)
 char *
 get_out_str_pretty(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str)
 {
-  char * retval;
+  char * retval, * p, * p_a, * p_b, * t_str;
   char c_trans[4], line_a[81], line_b[81],
     line_sep[81]
     = "         |                 |                 |                 |\n";
   cw_uint32_t str_len, buf_size, i, j;
   cw_uint8_t c;
+  size_t len;
 
   buf_size = buf_get_size(a_buf);
 
@@ -444,30 +459,42 @@ get_out_str_pretty(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str)
   }
   /* Clear the string. */
   retval[0] = '\0';
+  p = retval;
 
   /* First dashed line. */
-  strcat(retval,
-	 "----------------------------------------"
-	 "----------------------------------------\n");
+  t_str =
+    "----------------------------------------"
+    "----------------------------------------\n";
+  len = strlen(t_str);
+  memcpy(p, t_str, len);
+  p += len;
 
-  out_put_s(cw_g_out, line_a, "[s]:0x[i|b:16] ([i]) byte[s]\n",
-	    (TRUE == is_send) ? "send" : "recv",
-	    buf_size,
-	    buf_size,
-	    (buf_size != 1) ? "s" : "");
-  strcat(retval, line_a);
+  len = out_put_s(cw_g_out, line_a, "[s]:0x[i|b:16] ([i]) byte[s]\n",
+		  (TRUE == is_send) ? "send" : "recv",
+		  buf_size,
+		  buf_size,
+		  (buf_size != 1) ? "s" : "");
+  memcpy(p, line_a, len);
+  p += len;
 
   /* Blank line. */
-  strcat(retval, "\n");
+  p[0] = '\n';
+  p++;
 
   for (i = 0; i < buf_size; i += j)
   {
     /* Clear the line buffers and get them set up for printing character
      * translations. */
     line_a[0] = '\0';
+    p_a = line_a;
+    p_a += out_put_s(cw_g_out, line_a, "[i|b:16|w:8|p:0]", i);
+
     line_b[0] = '\0';
-    out_put_s(cw_g_out, line_a, "[i|b:16|w:8|p:0]", i);
-    strcat(line_b, "        ");
+    p_b = line_b;
+    t_str = "        ";
+    len = strlen(t_str);
+    memcpy(line_b, t_str, len);
+    p_b += len;
     
     /* Each iteration generates out text for 16 bytes of data. */
     for (j = 0; (j < 16) && ((i + j) < buf_size); j++)
@@ -475,8 +502,13 @@ get_out_str_pretty(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str)
       if ((j % 4) == 0)
       {
 	/* Print the word separators. */
-	strcat(line_a, " |");
-	strcat(line_b, " |");
+	t_str = " |";
+	len = strlen(t_str);
+	memcpy(p_a, t_str, len);
+	p_a += len;
+
+	memcpy(p_b, t_str, len);
+	p_b += len;
       }
 	
       c = buf_get_uint8(a_buf, i + j);
@@ -880,31 +912,47 @@ get_out_str_pretty(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str)
 	  break;
       }
 
-      out_put_s(cw_g_out, line_a + strlen(line_a), "  [i|b:16|w:2|p:0]", c);
-      out_put_s(cw_g_out, line_b + strlen(line_b), " [s|w:3]", c_trans);
+      p_a += out_put_s(cw_g_out, p_a, "  [i|b:16|w:2|p:0]", c);
+      p_b += out_put_s(cw_g_out, p_b, " [s|w:3]", c_trans);
     }
     /* Actually copy the strings to the final output string. */
-    strcat(retval, line_a);
-    strcat(retval, "\n");
-    
-    strcat(retval, line_b);
-    strcat(retval, "\n");
+    len = p_a - line_a;
+    memcpy(p, line_a, len);
+    p += len;
+
+    p[0] = '\n';
+    p++;
+
+    len = p_b - line_b;
+    memcpy(p, line_b, len);
+    p += len;
+
+    p[0] = '\n';
+    p++;
 
     if ((i + j) < buf_size)
     {
-      strcat(retval, line_sep);
+      len = strlen(line_sep);
+      memcpy(p, line_sep, len);
+      p += len;
     }
     else
     {
-      strcat(retval, "\n");
+      p[0] = '\n';
+      p++;
     }
   }
 
   /* Last dashed line. */
-  strcat(retval,
-	 "----------------------------------------"
-	 "----------------------------------------\n");
+  t_str =
+    "----------------------------------------"
+    "----------------------------------------\n";
+  len = strlen(t_str);
+  memcpy(p, t_str, len);
+  p += len;
 
+  p[0] = '\0';
+  
   return retval;
 }
 
@@ -1053,14 +1101,25 @@ get_out_str_ascii(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str)
   return retval;
 }
 
+cw_bool_t
+oom_handler(const void * a_data, cw_uint32_t a_size)
+{
+  if (dbg_is_registered(cw_g_dbg, "ncat_error"))
+  {
+    out_put(cw_g_out, "[s]: Memory allocation error for size [i]\n",
+	    g_progname, a_size);
+  }
+  exit(1);
+  
+  return FALSE;
+}
+
 void *
 handle_client_send(void * a_arg)
 {
   cw_buf_t buf;
   connection_t * conn = (connection_t *) a_arg;
   char * str = NULL;
-/*    char * hostname = NULL, * port_str = NULL; */
-/*    cw_bool_t parse_error = TRUE; */
 
   out_put(conn->out, "New connection\n");
   
@@ -1069,16 +1128,6 @@ handle_client_send(void * a_arg)
   /* Finish initializing conn. */
   mtx_new(&conn->lock);
   conn->should_quit = FALSE;
-
-  /* XXX Parse the proxy options from the socket stream.  The syntax is:
-   * hostname:port[\r]\n */
-
-  if ((conn->rhost == NULL) || (conn->rport == 0))
-  {
-    /* XXX Parse the options in the socket stream. */
-    _cw_error("Stream option parsing unimplemented");
-    goto OPTERROR;
-  }
 
   out_put(conn->out, "Connecting to \"[s]\" on port [i]\n",
 	  conn->rhost, conn->rport);
@@ -1138,7 +1187,6 @@ handle_client_send(void * a_arg)
 	  default:
 	  {
 	    _cw_error("Programming error");
-	    break;
 	  }
 	}
 	
@@ -1162,17 +1210,12 @@ handle_client_send(void * a_arg)
     _cw_free(str);
   }
     
-/*    JOIN: */
   /* Join on the recv thread. */
   thd_join(&conn->recv_thd);
 
   RETURN:
   /* Don't do this if the socket wasn't created. */
   sock_delete(&conn->remote_sock);
-  
-  OPTERROR:
-/*    _cw_free(hostname); */
-/*    _cw_free(port_str); */
   
   /* Delete this thread. */
   thd_delete(&conn->send_thd);
@@ -1222,17 +1265,17 @@ handle_client_recv(void * a_arg)
 	{
 	  case PRETTY:
 	  {
-	    str = get_out_str_pretty(&buf, TRUE, str);
+	    str = get_out_str_pretty(&buf, FALSE, str);
 	    break;
 	  }
 	  case HEX:
 	  {
-	    str = get_out_str_hex(&buf, TRUE, str);
+	    str = get_out_str_hex(&buf, FALSE, str);
 	    break;
 	  }
 	  case ASCII:
 	  {
-	    str = get_out_str_ascii(&buf, TRUE, str);
+	    str = get_out_str_ascii(&buf, FALSE, str);
 	    break;
 	  }
 	  default:
@@ -1266,7 +1309,7 @@ handle_client_recv(void * a_arg)
 }
 
 void
-usage(const char * a_progname)
+usage(void)
 {
   out_put
     (cw_g_out,
@@ -1290,16 +1333,16 @@ usage(const char * a_progname)
      "    -p <port>            | Listen on port <port>.\n"
      "    -r [[<rhost>:]<rport> | Forward to host <rhost> or \"localhost\",\n"
      "                         | port <rport>.\n",
-     a_progname, a_progname, a_progname, a_progname
+     g_progname, g_progname, g_progname, g_progname
      );
 }
 
 void
-version(const char * a_progname)
+version(void)
 {
   out_put(cw_g_out,
 	  "[s], version [s]\n",
-	  a_progname, _LIBSOCK_VERSION);
+	  g_progname, _LIBSOCK_VERSION);
 }
 
 /* Doesn't strip trailing '/' characters. */

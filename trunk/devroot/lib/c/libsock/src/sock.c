@@ -147,7 +147,7 @@ sock_get_port(cw_sock_t * a_sock)
 }
 
 cw_sint32_t
-sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port,
+sock_connect(cw_sock_t * a_sock, const char * a_server_host, int a_port,
 	     struct timeval * a_timeout)
 {
   cw_sint32_t retval;
