@@ -248,6 +248,14 @@
  * where each fragment is completely overlapped by a particular set of extents.
  * This is used when displaying the buffer.
  *
+ ******************************************************************************
+ *
+ * In order to avoid excessive internal fragmentation, buffer pages are
+ * coalesced during data deletion, such that for every pair of consecutive
+ * pages, both are at least 25% full.  In addition, special care is taken during
+ * insertion to assure that this requirement is never violated when inserting
+ * new pages.
+ *
  ******************************************************************************/
 
 #include "../include/modslate.h"
@@ -1328,10 +1336,30 @@ mkr_p_simple_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
 }
 
 static void
-mkr_p_slide_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
-		   cw_uint32_t a_bufvcnt, cw_uint32_t a_count)
+mkr_p_slide_before_insert(cw_mkr_t *a_mkr, cw_bufp_t *a_prevp,
+			  const cw_bufv_t *a_bufv, cw_uint32_t a_bufvcnt,
+			  cw_uint32_t a_count)
 {
-    /* The data won't fit in this bufp, but enough data can be slid to the next
+/*      cw_bufp_t *bufp; */
+
+/*      bufp = a_mkr->bufp; */
+/*      buf = bufp->buf; */
+
+}
+
+static void
+mkr_p_slide_after_insert(cw_mkr_t *a_mkr, cw_bufp_t *a_nextp,
+			 const cw_bufv_t *a_bufv, cw_uint32_t a_bufvcnt,
+			 cw_uint32_t a_count)
+{
+/*      cw_bufp_t *bufp; */
+
+/*      bufp = a_mkr->bufp; */
+/*      buf = bufp->buf; */
+
+}
+
+/* The data won't fit in this bufp, but enough data can be slid to the next
      * bufp to make room.  The data to be inserted may be split across the two
      * bufp's as well.  This case must be handled specially (as opposed to
      * simply splitting the bufp), because otherwise very sparse bufp's (as bad
@@ -1342,10 +1370,9 @@ mkr_p_slide_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
      * sliding is strongly bounded (O(1)).
      *
      * Buffer operations tend toward high locality, so on the assumption that
-     * future operations will tend to be at the end of the data being inserted,
-     * try to leave all available gap space in the bufp that contains the end of
-     * the data being inserted.  Doing so decreases the likelihood of having to
-     * do another slide operation soon after this one.
+     * future operations will tend to be at a_mkr, leave as much gap space as
+     * possible in the bufp that contains a_mkr.  Doing so decreases the
+     * likelihood of having to do another slide operation soon after this one.
      *
      * In the following diagrams, bufp's are delimited by [], existing data are
      * Y and Z, data being inserted are I, and ^ points to the insertion point.
@@ -1392,10 +1419,8 @@ mkr_p_slide_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
      *
      **************************************************************************/
 
-    /* XXX */
-}
-
 /* a_bufv won't fit in the a_mkr's bufp, so split it. */
+/* XXX Doesn't move a_mkr if a_after is FALSE. */
 static void
 mkr_p_split_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
 		   cw_uint32_t a_bufvcnt, cw_uint32_t a_count)
@@ -1597,6 +1622,7 @@ mkr_p_split_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
     }
 }
 
+/* XXX What if inserting before first position in a_mkr->bufp? */
 void
 mkr_l_insert(cw_mkr_t *a_mkr, cw_bool_t a_record, cw_bool_t a_after,
 	     const cw_bufv_t *a_bufv, cw_uint32_t a_bufvcnt)
@@ -1604,7 +1630,7 @@ mkr_l_insert(cw_mkr_t *a_mkr, cw_bool_t a_record, cw_bool_t a_after,
     cw_uint64_t cnt;
     cw_uint32_t i;
     cw_buf_t *buf;
-    cw_bufp_t *bufp, *nextp;
+    cw_bufp_t *bufp;
 
     cw_check_ptr(a_mkr);
     cw_dassert(a_mkr->magic == CW_MKR_MAGIC);
@@ -1636,27 +1662,45 @@ mkr_l_insert(cw_mkr_t *a_mkr, cw_bool_t a_record, cw_bool_t a_after,
     }
 
     /* Depending on how much data are to be inserted, there are three
-     * possibilities. */
+     * different algorithms: simple, slide, and split. */
     if (cnt <= CW_BUFP_SIZE - bufp->len)
     {
-	/* All the data will fit in the bufp.  This is the common case. */
 	mkr_p_simple_insert(a_mkr, a_after, a_bufv, a_bufvcnt, cnt);
-    }
-    else if ((nextp = ql_next(&buf->plist, bufp, plink)) != NULL
-	     && cnt <= (CW_BUFP_SIZE - bufp->len)
-	     + (CW_BUFP_SIZE - nextp->len))
-    {
-	/* There is not enough space in the bufp, but sliding some data and/or
-	 * splitting the data being inserted between the bufp and the next bufp
-	 * makes it possible to insert the data without splitting. */
-	mkr_p_slide_insert(a_mkr, a_after, a_bufv, a_bufvcnt, cnt);
     }
     else
     {
-	/* There is not enough space in the bufp, so it is split into two
-	 * bufp's, and zero or more additional bufp's are inserted between the
-	 * two in order to make enough room. */
-	mkr_p_split_insert(a_mkr, a_after, a_bufv, a_bufvcnt, cnt);
+	cw_bufp_t *prevp, *nextp;
+
+	prevp = ql_next(&buf->plist, bufp, plink);
+	nextp = ql_next(&buf->plist, bufp, plink);
+
+	/* Try sliding backward, then forward, then both directions.  If none of
+	 * the slides would make enough room, splitting is guaranteed not to
+	 * violate the requirement that any two consecutive bufps must both be
+	 * at least 25% full.  Thus, there is never a need to do bufp coalescing
+	 * after insertion. */
+	if (prevp != NULL && cnt <= (CW_BUFP_SIZE - bufp->len)
+	    + (CW_BUFP_SIZE - prevp->len))
+	{
+	    mkr_p_slide_before_insert(a_mkr, prevp, a_bufv, a_bufvcnt, cnt);
+	}
+	else if (nextp != NULL && cnt <= (CW_BUFP_SIZE - bufp->len)
+	    + (CW_BUFP_SIZE - nextp->len))
+	{
+	    mkr_p_slide_after_insert(a_mkr, nextp, a_bufv, a_bufvcnt, cnt);
+	}
+	else if (prevp != NULL && nextp != NULL
+		 && cnt <= (CW_BUFP_SIZE - bufp->len)
+		 + (CW_BUFP_SIZE - prevp->len)
+		 + (CW_BUFP_SIZE - nextp->len))
+	{
+	    mkr_p_slide_both_insert(a_mkr, prevp, nextp, a_bufv, a_bufvcnt,
+				    cnt);
+	}
+	else
+	{
+	    mkr_p_split_insert(a_mkr, a_after, a_bufv, a_bufvcnt, cnt);
+	}
     }
 }
 
