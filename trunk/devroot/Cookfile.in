@@ -292,7 +292,7 @@ dataend
 #  include [srcdir]/bin/stil/Howto.cook
 #endif
 #if @bin_stile@
-#  include [srcdir]/bin/stil/Howto.cook
+#  include [srcdir]/bin/stile/Howto.cook
 #endif
 #if @bin_suck@
 #  include [srcdir]/bin/suck/Howto.cook

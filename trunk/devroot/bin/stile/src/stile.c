@@ -21,7 +21,7 @@ main(int argc, char **argv)
 
 	/* XXX Set up oom handler. */
 
-	_cw_out_put("stile breaths its first breath!\n");
+	_cw_out_put("stile breathes its first breath!\n");
 
 	libstash_shutdown();
 	return retval;
