@@ -1683,11 +1683,11 @@ systemdict_bindsocket(cw_nxo_t *a_thread)
 		iaddr = (struct in_addr *) ent->h_addr_list[0];
 
 		sockaddr.sin_addr = *iaddr;
-	    }
 
 #ifdef CW_THREADS
-	    mtx_unlock(&cw_g_gethostbyname_mtx);
+		mtx_unlock(&cw_g_gethostbyname_mtx);
 #endif
+	    }
 
 	    /* Bind. */
 	    error = bind(nxo_file_fd_get(sock),
@@ -2525,11 +2525,11 @@ systemdict_connect(cw_nxo_t *a_thread)
 		iaddr = (struct in_addr *) ent->h_addr_list[0];
 
 		sockaddr.sin_addr = *iaddr;
-	    }
 
 #ifdef CW_THREADS
-	    mtx_unlock(&cw_g_gethostbyname_mtx);
+		mtx_unlock(&cw_g_gethostbyname_mtx);
 #endif
+	    }
 
 	    /* Connect. */
 	    error = connect(nxo_file_fd_get(sock),

@@ -130,8 +130,8 @@ mem_p_malloc_e(void *a_arg, size_t a_size, const char *a_filename,
 }
 
 static void *
-mem_p_calloc_e(void *a_arg, size_t a_number, size_t a_size, const
-	       char *a_filename, uint32_t a_line_num)
+mem_p_calloc_e(void *a_arg, size_t a_number, size_t a_size,
+	       const char *a_filename, uint32_t a_line_num)
 {
     return cw_calloc(a_number, a_size);
 }
