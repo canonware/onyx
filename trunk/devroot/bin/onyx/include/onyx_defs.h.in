@@ -9,7 +9,7 @@
  *
  ******************************************************************************/
 
-#undef CW_USE_LIBEDIT
+#undef CW_USE_MODPROMPT
 
 /* Used for tonyx. */
 #undef CW_TONYX_ONYX

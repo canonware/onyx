@@ -28,7 +28,7 @@ interactive_nxcode(cw_nxo_t *a_thread);
 #define CW_PROMPT_STRLEN 80
 #define CW_BUFFER_SIZE 512
 
-#ifndef CW_POSIX_FILE
+#if (!defined(CW_POSIX_FILE) || !defined(CW_USE_MODPROMPT))
 struct nx_read_arg_s
 {
     int fd;
@@ -65,21 +65,23 @@ interactive_run(int argc, char **argv, char **envp);
 int
 batch_run(int argc, char **argv, char **envp);
 
-#ifndef CW_POSIX_FILE
+#if (!defined(CW_POSIX_FILE) || !defined(CW_USE_MODPROMPT))
 void
 stdin_init(cw_nx_t *a_nx, cw_bool_t a_interactive);
-
-void
-stdout_init(cw_nx_t *a_nx);
-
-void
-stderr_init(cw_nx_t *a_nx);
 
 cw_sint32_t
 nx_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str);
 
 void
 nx_read_shutdown(void *a_arg, cw_nx_t *a_nx);
+#endif
+
+#ifndef CW_POSIX_FILE
+void
+stdout_init(cw_nx_t *a_nx);
+
+void
+stderr_init(cw_nx_t *a_nx);
 
 cw_bool_t
 nx_write(void *a_arg, cw_nxo_t *a_file, const cw_uint8_t *a_str,
@@ -132,8 +134,12 @@ interactive_run(int argc, char **argv, char **envp)
     /* Initialize the interpreter. */
     nx_new(&nx, NULL, argc, argv, envp);
 
-#ifndef CW_POSIX_FILE
+    /* Make sure that stdin is always synthetic, so that the prompt will be
+     * printed. */
+#ifndef CW_USE_MODPROMPT
     stdin_init(&nx, TRUE);
+#endif
+#ifndef CW_POSIX_FILE
     stdout_init(&nx);
     stderr_init(&nx);
 #endif
@@ -330,7 +336,7 @@ batch_run(int argc, char **argv, char **envp)
     return retval;
 }
 
-#ifndef CW_POSIX_FILE
+#if (!defined(CW_POSIX_FILE) || !defined(CW_USE_MODPROMPT))
 void
 stdin_init(cw_nx_t *a_nx, cw_bool_t a_interactive)
 {
@@ -350,33 +356,6 @@ stdin_init(cw_nx_t *a_nx, cw_bool_t a_interactive)
     nxo_file_new(nxo, a_nx, TRUE);
     nxo_file_synthetic(nxo, nx_read, NULL, NULL, nx_read_shutdown,
 		       (void *) &stdin_arg);
-}
-void
-stdout_init(cw_nx_t *a_nx)
-{
-    cw_nxo_t *nxo;
-    static struct nx_write_arg_s stdout_arg;
-
-    /* Initialize the stdout argument structure. */
-    stdout_arg.fd = 1;
-
-    nxo = nx_stdout_get(a_nx);
-    nxo_file_new(nxo, a_nx, TRUE);
-    nxo_file_synthetic(nxo, NULL, nx_write, NULL, NULL, (void *) &stdout_arg);
-}
-
-void
-stderr_init(cw_nx_t *a_nx)
-{
-    cw_nxo_t *nxo;
-    static struct nx_write_arg_s stderr_arg;
-
-    /* Initialize the stderr argument structure. */
-    stderr_arg.fd = 2;
-
-    nxo = nx_stderr_get(a_nx);
-    nxo_file_new(nxo, a_nx, TRUE);
-    nxo_file_synthetic(nxo, NULL, nx_write, NULL, NULL, (void *) &stderr_arg);
 }
 
 cw_sint32_t
@@ -486,6 +465,36 @@ nx_read_shutdown(void *a_arg, cw_nx_t *a_nx)
     {
 	cw_free(arg->buffer);
     }
+}
+#endif
+
+#ifndef CW_POSIX_FILE
+void
+stdout_init(cw_nx_t *a_nx)
+{
+    cw_nxo_t *nxo;
+    static struct nx_write_arg_s stdout_arg;
+
+    /* Initialize the stdout argument structure. */
+    stdout_arg.fd = 1;
+
+    nxo = nx_stdout_get(a_nx);
+    nxo_file_new(nxo, a_nx, TRUE);
+    nxo_file_synthetic(nxo, NULL, nx_write, NULL, NULL, (void *) &stdout_arg);
+}
+
+void
+stderr_init(cw_nx_t *a_nx)
+{
+    cw_nxo_t *nxo;
+    static struct nx_write_arg_s stderr_arg;
+
+    /* Initialize the stderr argument structure. */
+    stderr_arg.fd = 2;
+
+    nxo = nx_stderr_get(a_nx);
+    nxo_file_new(nxo, a_nx, TRUE);
+    nxo_file_synthetic(nxo, NULL, nx_write, NULL, NULL, (void *) &stderr_arg);
 }
 
 cw_bool_t
