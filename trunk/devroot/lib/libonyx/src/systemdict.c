@@ -24,6 +24,9 @@
 #include <sys/resource.h>
 #include <sys/stat.h>
 #include <dirent.h> /* For dirforeach operator. */
+#ifndef HAVE_ASPRINTF
+#include "asprintf.c"
+#endif
 #ifdef HAVE_DLOPEN
 #include <dlfcn.h> /* For modload operator. */
 #endif
@@ -1765,39 +1768,19 @@ systemdict_cvds(cw_nxo_t *a_thread)
 	return;
     }
 
-#ifdef HAVE_ASPRINTF
     len = asprintf(&result, "%.*f", (int) nxo_integer_get(precision),
 		   nxo_real_get(real));
     if (len == -1)
     {
 	xep_throw(CW_ONYXX_OOM);
     }
-#else
-    {
-#define CW_STARTLEN 16
-	result = (char *) cw_malloc(CW_STARTLEN);
-	len = snprintf(result, CW_STARTLEN, "%.*f",
-		       (int) nxo_integer_get(precision), nxo_real_get(real));
-	if (len >= CW_STARTLEN)
-	{
-	    result = (char *) cw_realloc(result, len + 1);
-	    snprintf(result, len + 1, "%.*f",
-		     (int) nxo_integer_get(precision), nxo_real_get(real));
-	}
-#undef CW_STARTLEN
-    }
-#endif
 
     nxo_string_new(real, nxo_thread_nx_get(a_thread),
 		   nxo_thread_currentlocking(a_thread), len);
     nxo_string_lock(real);
     nxo_string_set(real, 0, result, len);
     nxo_string_unlock(real);
-#ifdef HAVE_ASPRINTF
     free(result);
-#else
-    cw_free(result);
-#endif
 
     nxo_stack_pop(ostack);
 }
@@ -1833,39 +1816,19 @@ systemdict_cves(cw_nxo_t *a_thread)
 	return;
     }
 
-#ifdef HAVE_ASPRINTF
     len = asprintf(&result, "%.*e", (int) nxo_integer_get(precision),
 		   nxo_real_get(real));
     if (len == -1)
     {
 	xep_throw(CW_ONYXX_OOM);
     }
-#else
-    {
-#define CW_STARTLEN 16
-	result = (char *) cw_malloc(CW_STARTLEN);
-	len = snprintf(result, CW_STARTLEN, "%.*e",
-		       (int) nxo_integer_get(precision), nxo_real_get(real));
-	if (len >= CW_STARTLEN)
-	{
-	    result = (char *) cw_realloc(result, len + 1);
-	    snprintf(result, len + 1, "%.*e",
-		     (int) nxo_integer_get(precision), nxo_real_get(real));
-	}
-#undef CW_STARTLEN
-    }
-#endif
 
     nxo_string_new(real, nxo_thread_nx_get(a_thread),
 		   nxo_thread_currentlocking(a_thread), len);
     nxo_string_lock(real);
     nxo_string_set(real, 0, result, len);
     nxo_string_unlock(real);
-#ifdef HAVE_ASPRINTF
     free(result);
-#else
-    cw_free(result);
-#endif
 
     nxo_stack_pop(ostack);
 }
