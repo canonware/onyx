@@ -600,16 +600,14 @@ nxo_stack_roll(cw_nxo_t *a_nxo, cw_uint32_t a_count, cw_sint32_t a_amount)
  */
 #define	NXO_STACK_POP(a_nxo, a_thread) do {				\
 	if (nxo_stack_pop(a_nxo)) {					\
-		nxo_thread_error((a_thread),				\
-		    NXO_THREADE_STACKUNDERFLOW);			\
+		nxo_thread_nerror((a_thread), NXN_stackunderflow);	\
 		return;							\
 	}								\
 } while (0)
 
 #define	NXO_STACK_NPOP(a_nxo, a_thread, a_count) do {			\
 	if (nxo_stack_npop((a_nxo), (a_count))) {			\
-		nxo_thread_error((a_thread),				\
-		    NXO_THREADE_STACKUNDERFLOW);			\
+		nxo_thread_nerror((a_thread), NXN_stackunderflow);	\
 		return;							\
 	}								\
 } while (0)
@@ -617,8 +615,7 @@ nxo_stack_roll(cw_nxo_t *a_nxo, cw_uint32_t a_count, cw_sint32_t a_amount)
 #define	NXO_STACK_GET(r_nxo, a_nxo, a_thread) do {			\
 	(r_nxo) = nxo_stack_get(a_nxo);					\
 	if ((r_nxo) == NULL) {						\
-		nxo_thread_error((a_thread),				\
-		    NXO_THREADE_STACKUNDERFLOW);			\
+		nxo_thread_nerror((a_thread), NXN_stackunderflow);	\
 		return;							\
 	}								\
 } while (0)
@@ -626,8 +623,7 @@ nxo_stack_roll(cw_nxo_t *a_nxo, cw_uint32_t a_count, cw_sint32_t a_amount)
 #define	NXO_STACK_NGET(r_nxo, a_nxo, a_thread, a_index) do {		\
 	(r_nxo) = nxo_stack_nget((a_nxo), (a_index));			\
 	if ((r_nxo) == NULL) {						\
-		nxo_thread_error((a_thread),				\
-		    NXO_THREADE_STACKUNDERFLOW);			\
+		nxo_thread_nerror((a_thread), NXN_stackunderflow);	\
 		return;							\
 	}								\
 } while (0)
@@ -635,8 +631,7 @@ nxo_stack_roll(cw_nxo_t *a_nxo, cw_uint32_t a_count, cw_sint32_t a_amount)
 #define	NXO_STACK_DOWN_GET(r_nxo, a_nxo, a_thread, a_object) do {	\
 	(r_nxo) = nxo_stack_down_get((a_nxo), (a_object));		\
 	if ((r_nxo) == NULL) {						\
-		nxo_thread_error((a_thread),				\
-		    NXO_THREADE_STACKUNDERFLOW);			\
+		nxo_thread_nerror((a_thread), NXN_stackunderflow);	\
 		return;							\
 	}								\
 } while (0)

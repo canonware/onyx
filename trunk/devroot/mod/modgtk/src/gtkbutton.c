@@ -45,7 +45,7 @@ nx_gtk_button_new_with_label (cw_nxo_t *a_thread)
 
   NXO_STACK_GET (s, ostack, a_thread);
   if (nxo_type_get(s) != NXOT_STRING) {
-    nxo_thread_error (a_thread, NXO_THREADE_TYPECHECK);
+    nxo_thread_nerror (a_thread, NXN_typecheck);
     return;
   }
 

@@ -24,12 +24,12 @@ nx_gtk_widget_show (cw_nxo_t *a_thread)
 
   NXO_STACK_GET (w_hook, ostack, a_thread);
   if (nxo_type_get(w_hook) != NXOT_HOOK) {
-    nxo_thread_error (a_thread, NXO_THREADE_TYPECHECK);
+    nxo_thread_nerror (a_thread, NXN_typecheck);
     return;
   }
   w = nxo_hook_data_get (w_hook);
   if (!GTK_IS_WIDGET (w)) {
-    nxo_thread_error (a_thread, NXO_THREADE_TYPECHECK);
+    nxo_thread_nerror (a_thread, NXN_typecheck);
     return;
   }
 
@@ -49,12 +49,12 @@ nx_gtk_widget_show_all (cw_nxo_t *a_thread)
 
   NXO_STACK_GET (w_hook, ostack, a_thread);
   if (nxo_type_get(w_hook) != NXOT_HOOK) {
-    nxo_thread_error (a_thread, NXO_THREADE_TYPECHECK);
+    nxo_thread_nerror (a_thread, NXN_typecheck);
     return;
   }
   w = nxo_hook_data_get (w_hook);
   if (!GTK_IS_WIDGET (w)) {
-    nxo_thread_error (a_thread, NXO_THREADE_TYPECHECK);
+    nxo_thread_nerror (a_thread, NXN_typecheck);
     return;
   }
 

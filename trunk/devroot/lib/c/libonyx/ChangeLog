@@ -1,3 +1,12 @@
+2001-09-15  Jason Evans  <jasone@canonware.com>
+
+	* src/nxo_thread.c (nxo_threade_nxn): Remove.
+	(nxo_thread_error): Remove.
+	(nxo_thread_nerror): Add.
+	(nxo_thread_serror): Add.
+
+	Generalize the error mechanism to support errors of any name.
+
 2001-08-28  Jason Evans  <jasone@canonware.com>
 
 	* src/nxa.c (nxa_realloc_e): Add.

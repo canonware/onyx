@@ -554,16 +554,48 @@ foo
 \section{Error handling}
 
 The error handling mechanisms in Onyx are simple but flexible.  When an error
-occurs, the following operations are performed as a result of executing
-\htmlref{\onyxop{}{throw}{}}{systemdict:throw}:
-\begin{enumerate}
-\item{Store a snapshot of the thread state in the currenterror dictionary.}
-\item{Push the object whose execution caused the error onto the operand stack.}
-\item{Find an error handler in errordict corresponding to the current error.}
-\item{Execute the error handler.  The standard error handlers in turn execute
-errordict's \htmlref{\onyxop{}{handleerror}{}}{errordict:handleerror}.}
-\item{Execute errordict's stop operator.}
-\end{enumerate}
+occurs, \htmlref{\onyxop{}{throw}{}}{systemdict:throw} is called.  An error can
+have any name, but only the following error names are generated internally by
+Onyx:
+\begin{description}
+\label{dstackunderflow}
+\item[dstackunderflow: ] An attempt was made to remove one of the initial
+dictionaries from dstack.
+\label{estackoverflow}
+\item[estackoverflow: ] Maximum interpreter recursion was exceeded.
+\label{invalidaccess}
+\item[invalidaccess: ] Permission error.
+\label{invalidexit}
+\item[invalidexit: ] The \onyxop{}{exit}{} operator was called outside of any
+loop.  This error is generated as a result of catching an exit, so the execution
+state for where the error really happened is gone.
+\label{invalidfileacess}
+\item[invalidfileaccess: ] Insufficient file permissions.
+\label{ioerror}
+\item[ioerror: ] I/O error (read(), write(), etc.).
+\label{limitcheck}
+\item[limitcheck: ] Value outside of legal range.
+\label{rangecheck}
+\item[rangecheck: ] Out of bounds string or array access.
+\label{stackunderflow}
+\item[stackunderflow: ] Not enough objects on ostack.
+\label{syntaxerror}
+\item[syntaxerror: ] Scanner syntax error.
+\label{typecheck}
+\item[typecheck: ] Incorrect argument type.
+\label{undefined}
+\item[undefined: ] Name not defined in any of the dictionaries on dstack.
+\label{undefinedfilename}
+\item[undefinedfilename: ] Bad filename.
+\label{undefinedresult}
+\item[undefinedresult: ] Attempt to divide by 0.
+\label{unmatchedfino}
+\item[unmatchedfino: ] No fino on ostack.
+\label{unmatchedmark}
+\item[unmatchedmark: ] No mark on ostack.
+\label{unregistered}
+\item[unregistered: ] Non-enumerated error.
+\end{description}
 
 The Onyx scanner handles syntax errors specially, in that it pushes an
 executable string onto the operand stack that represents the code that caused
@@ -805,9 +837,7 @@ onyx:1>
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[name: ]
-			Name of the most recent error.  The name is usually one
-			of the errors defined in
-			\htmlref{errordict}{sec:errordict}.
+			Name of the most recent error.
 		\end{description}
 	\item[Errors(s): ] None.
 	\item[Description: ]
@@ -1011,12 +1041,7 @@ modified directly, the changes will not be visible to programs such as
 \label{sec:errordict}
 
 Each thread has its own errordict, which is used by default by the error
-handling machinery.  \htmlref{\onyxop{}{throw}{}}{systemdict:throw} calls the
-error handlers, which call errordict's
-\htmlref{\onyxop{}{handleerror}{}}{errordict:handleerror}, after which
-\htmlref{\onyxop{}{\onyxop{}{throw}{}}{}}{systemdict:throw} calls errordict's
-\htmlref{\onyxop{}{stop}{}}{errordict:stop}.  Any of the names in errordict can
-be redefined to suit the thread's or application's error handling requirements.
+handling machinery.
 
 \begin{longtable}{\optableformat{3}}
 \caption[errordict summary]{errordict summary by functional group} \\
@@ -1032,91 +1057,14 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 \multicolumn{4}{r}{\emph{Continued on next page...}} \endfoot
 \hline \endlastfoot
 %end{latexonly}
-\multicolumn{4}{|l|}{Control operators} \\
-\hline \hline
 -- & {\bf \htmlref{handleerror}{errordict:handleerror}} & -- & Print a state
 dump. \\
 \hline
 -- & {\bf \htmlref{stop}{errordict:stop}} & -- & Last operation during error
 handling. \\
-\hline \hline
-\multicolumn{4}{|l|}{Error operators} \\
-\hline \hline
--- & {\bf \htmlref{dstackunderflow}{errordict:dstackunderflow}} & -- &
-Dictionary stack underflow. \\
-\hline
--- & {\bf \htmlref{estackoverflow}{errordict:estackoverflow}} & -- & Maximum
-recursion depth exceeded. \\
-\hline
--- & {\bf \htmlref{invalidaccess}{errordict:invalidaccess}} & -- & Permission
-error. \\
-\hline
--- & {\bf \htmlref{invalidexit}{errordict:invalidexit}} & -- & Exit outside of
-any loop. \\
-\hline
--- & {\bf \htmlref{invalidfileaccess}{errordict:invalidfileaccess}} & -- &
-Insufficient file permissions. \\
-\hline
--- & {\bf \htmlref{ioerror}{errordict:ioerror}} & -- & I/O error. \\
-\hline
--- & {\bf \htmlref{limitcheck}{errordict:limitcheck}} & -- & Value outside of
-legal range. \\
-\hline
--- & {\bf \htmlref{rangecheck}{errordict:rangecheck}} & -- & Out of bounds
-string or array access. \\
-\hline
--- & {\bf \htmlref{stackunderflow}{errordict:stackunderflow}} & -- & Not enough
-objects on ostack. \\
-\hline
--- & {\bf \htmlref{syntaxerror}{errordict:syntaxerror}} & -- & Scanner syntax
-error. \\
-\hline
--- & {\bf \htmlref{typecheck}{errordict:typecheck}} & -- & Incorrect argument
-type. \\
-\hline
--- & {\bf \htmlref{undefined}{errordict:undefined}} & -- & Name not defined in
-dstack. \\
-\hline
--- & {\bf \htmlref{undefinedfilename}{errordict:undefinedfilename}} & -- & Bad
-filename. \\
-\hline
--- & {\bf \htmlref{undefinedresult}{errordict:undefinedresult}} & -- & Divide by
-0. \\
-\hline
--- & {\bf \htmlref{unmatchedfino}{errordict:unmatchedfino}} & -- & No fino on
-ostack. \\
-\hline
--- & {\bf \htmlref{unmatchedmark}{errordict:unmatchedmark}} & -- & No mark on
-ostack. \\
-\hline
--- & {\bf \htmlref{unregistered}{errordict:unregistered}} & -- & Non-enumerated
-error. \\
 \end{longtable}
 
 \begin{description}
-\label{dstackunderflow}
-\label{errordict:dstackunderflow}
-\index{dstackunderflow@\onyxop{}{dstackunderflow}{}}
-\item[{\onyxop{--}{dstackunderflow}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ] None.
-	\item[Output(s): ] None.
-	\item[Errors(s): ] None.
-	\item[Description: ]
-		An attempt was made to remove one of the initial dictionaries
-		from dstack.
-	\end{description}
-\label{estackoverflow}
-\label{errordict:estackoverflow}
-\index{estackoverflow@\onyxop{}{estackoverflow}{}}
-\item[{\onyxop{--}{estackoverflow}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ] None.
-	\item[Output(s): ] None.
-	\item[Errors(s): ] None.
-	\item[Description: ]
-		Maximum interpreter recursion was exceeded.
-	\end{description}
 \label{handleerror}
 \label{errordict:handleerror}
 \index{handleerror@\onyxop{}{handleerror}{}}
@@ -1173,85 +1121,6 @@ estack/istack trace (0..5):
 onyx:1>
 		\end{verbatim}
 	\end{description}
-\label{invalidaccess}
-\label{errordict:invalidaccess}
-\index{invalidaccess@\onyxop{}{invalidaccess}{}}
-\item[{\onyxop{--}{invalidaccess}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ] None.
-	\item[Output(s): ] None.
-	\item[Errors(s): ] None.
-	\item[Description: ]
-		Permission error.
-	\end{description}
-\label{invalidexit}
-\label{errordict:invalidexit}
-\index{invalidexit@\onyxop{}{invalidexit}{}}
-\item[{\onyxop{--}{invalidexit}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ] None.
-	\item[Output(s): ] None.
-	\item[Errors(s): ] None.
-	\item[Description: ]
-		Exit was called outside of any loop.  This error is generated as
-		a result of catching an exit, so the execution state for where
-		the error really happened is gone.
-	\end{description}
-\label{invalidfileaccess}
-\label{errordict:invalidfileaccess}
-\index{invalidfileaccess@\onyxop{}{invalidfileaccess}{}}
-\item[{\onyxop{--}{invalidfileaccess}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ] None.
-	\item[Output(s): ] None.
-	\item[Errors(s): ] None.
-	\item[Description: ]
-		Insufficient file permissions.
-	\end{description}
-\label{ioerror}
-\label{errordict:ioerror}
-\index{ioerror@\onyxop{}{ioerror}{}}
-\item[{\onyxop{--}{ioerror}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ] None.
-	\item[Output(s): ] None.
-	\item[Errors(s): ] None.
-	\item[Description: ]
-		I/O error (read(), write(), etc.).
-	\end{description}
-\label{limitcheck}
-\label{errordict:limitcheck}
-\index{limitcheck@\onyxop{}{limitcheck}{}}
-\item[{\onyxop{--}{limitcheck}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ] None.
-	\item[Output(s): ] None.
-	\item[Errors(s): ] None.
-	\item[Description: ]
-		Value outside of legal range.
-	\end{description}
-\label{rangecheck}
-\label{errordict:rangecheck}
-\index{rangecheck@\onyxop{}{rangecheck}{}}
-\item[{\onyxop{--}{rangecheck}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ] None.
-	\item[Output(s): ] None.
-	\item[Errors(s): ] None.
-	\item[Description: ]
-		Out of bounds string or array access.
-	\end{description}
-\label{stackunderflow}
-\label{errordict:stackunderflow}
-\index{stackunderflow@\onyxop{}{stackunderflow}{}}
-\item[{\onyxop{--}{stackunderflow}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ] None.
-	\item[Output(s): ] None.
-	\item[Errors(s): ] None.
-	\item[Description: ]
-		Not enough objects on ostack.
-	\end{description}
 \label{errordict:stop}
 \index{stop@\onyxop{}{stop}{}}
 \item[{\onyxop{--}{stop}{--}}: ]
@@ -1278,94 +1147,6 @@ estack/istack trace (0..2):
 2:      --start--
 Custom stop
 		\end{verbatim}
-	\end{description}
-\label{syntaxerror}
-\label{errordict:syntaxerror}
-\index{syntaxerror@\onyxop{}{syntaxerror}{}}
-\item[{\onyxop{--}{syntaxerror}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ] None.
-	\item[Output(s): ] None.
-	\item[Errors(s): ] None.
-	\item[Description: ]
-		Scanner syntax error.
-	\end{description}
-\label{typecheck}
-\label{errordict:typecheck}
-\index{typecheck@\onyxop{}{typecheck}{}}
-\item[{\onyxop{--}{typecheck}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ] None.
-	\item[Output(s): ] None.
-	\item[Errors(s): ] None.
-	\item[Description: ]
-		Incorrect argument type.
-	\end{description}
-\label{undefined}
-\label{errordict:undefined}
-\index{undefined@\onyxop{}{undefined}{}}
-\item[{\onyxop{--}{undefined}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ] None.
-	\item[Output(s): ] None.
-	\item[Errors(s): ] None.
-	\item[Description: ]
-		Name not defined in any of the dictionaries on dstack.
-	\end{description}
-\label{undefinedfilename}
-\label{errordict:undefinedfilename}
-\index{undefinedfilename@\onyxop{}{undefinedfilename}{}}
-\item[{\onyxop{--}{undefinedfilename}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ] None.
-	\item[Output(s): ] None.
-	\item[Errors(s): ] None.
-	\item[Description: ]
-		Bad filename.
-	\end{description}
-\label{undefinedresult}
-\label{errordict:undefinedresult}
-\index{undefinedresult@\onyxop{}{undefinedresult}{}}
-\item[{\onyxop{--}{undefinedresult}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ] None.
-	\item[Output(s): ] None.
-	\item[Errors(s): ] None.
-	\item[Description: ]
-		Attempt to divide by 0.
-	\end{description}
-\label{unmatchedfino}
-\label{errordict:unmatchedfino}
-\index{unmatchedfino@\onyxop{}{unmatchedfino}{}}
-\item[{\onyxop{--}{unmatchedfino}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ] None.
-	\item[Output(s): ] None.
-	\item[Errors(s): ] None.
-	\item[Description: ]
-		No fino on ostack.
-	\end{description}
-\label{unmatchedmark}
-\label{errordict:unmatchedmark}
-\index{unmatchedmark@\onyxop{}{unmatchedmark}{}}
-\item[{\onyxop{--}{unmatchedmark}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ] None.
-	\item[Output(s): ] None.
-	\item[Errors(s): ] None.
-	\item[Description: ]
-		No mark on ostack.
-	\end{description}
-\label{unregistered}
-\label{errordict:unregistered}
-\index{unregistered@\onyxop{}{unregistered}{}}
-\item[{\onyxop{--}{unregistered}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ] None.
-	\item[Output(s): ] None.
-	\item[Errors(s): ] None.
-	\item[Description: ]
-		Non-enumerated error.
 	\end{description}
 \end{description}
 
@@ -8770,44 +8551,7 @@ onyx:0>
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[name: ] The name of an error, which can be any of the
-		following:
-			\begin{description}
-			\item[\htmlref{\onyxop{}{dstackunderflow}{}}
-			{errordict:dstackunderflow}.]
-			\item[\htmlref{\onyxop{}{estackoverflow}{}}
-			{errordict:estackoverflow}.]
-			\item[\htmlref{\onyxop{}{invalidaccess}{}}
-			{errordict:invalidaccess}.]
-			\item[\htmlref{\onyxop{}{invalidexit}{}}
-			{errordict:invalidexit}.]
-			\item[\htmlref{\onyxop{}{invalidfileaccess}{}}
-			{errordict:invalidfileaccess}.]
-			\item[\htmlref{\onyxop{}{ioerror}{}}
-			{errordict:ioerror}.]
-			\item[\htmlref{\onyxop{}{limitcheck}{}}
-			{errordict:limitcheck}.]
-			\item[\htmlref{\onyxop{}{rangecheck}{}}
-			{errordict:rangecheck}.]
-			\item[\htmlref{\onyxop{}{stackunderflow}{}}
-			{errordict:stackunderflow}.]
-			\item[\htmlref{\onyxop{}{syntaxerror}{}}
-			{errordict:syntaxerror}.]
-			\item[\htmlref{\onyxop{}{typecheck}{}}
-			{errordict:typecheck}.]
-			\item[\htmlref{\onyxop{}{undefined}{}}
-			{errordict:undefined}.]
-			\item[\htmlref{\onyxop{}{undefinedfilename}{}}
-			{errordict:undefinedfilename}.]
-			\item[\htmlref{\onyxop{}{undefinedresult}{}}
-			{errordict:undefinedresult}.]
-			\item[\htmlref{\onyxop{}{unmatchedmark}{}}
-			{errordict:unmatchedmark}.]
-			\item[\htmlref{\onyxop{}{unmatchedfino}{}}
-			{errordict:unmatchedfino}.]
-			\item[\htmlref{\onyxop{}{unregistered}{}}
-			{errordict:unregistered}.]
-			\end{description}
+		\item[name: ] The name of an error.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
@@ -8822,7 +8566,7 @@ onyx:0>
 		\item[\htmlref{undefined}{undefined}.]
 		\end{description}
 	\item[Description: ]
-		Throw an error.  This operator goes through the following steps:
+		Throw an error, using the following steps:
 		\begin{enumerate}
 		\item{Set newerror in the currenterror dictionary to true.}
 		\item{Set errorname in the currenterror dictionary to
@@ -8831,10 +8575,11 @@ onyx:0>
 		dictionary to be current stack snapshots.}
 		\item{Push the object that was being executed before throw was
 		called onto ostack.}
-		\item{Evaluate the error handler in the errordict dictionary
-		that corresponds to \oparg{name}.}
-		\item{Evaluate the errordict dictionary's
-		\htmlref{\onyxop{}{stop}{}}{errordict:stop}.}
+		\item{If there is an error handler in the errordict dictionary
+		that corresponding to \oparg{name}, evaluate it.  Otherwise,
+		evaluate errordict's
+		\htmlref{\onyxop{}{handleerror}{}}{errordict:handleerror} and
+		\htmlref{\onyxop{}{stop}{}}{errordict:stop} operators.}
 		\end{enumerate}
 	\item[Example(s): ]\begin{verbatim}
 

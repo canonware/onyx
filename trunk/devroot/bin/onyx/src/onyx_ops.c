@@ -43,7 +43,7 @@ onyx_ops_modload(cw_nxo_t *a_thread)
 	NXO_STACK_GET(sym, ostack, a_thread);
 	NXO_STACK_DOWN_GET(path, ostack, a_thread, sym);
 	if (nxo_type_get(path) != NXOT_STRING) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -70,7 +70,7 @@ onyx_ops_modload(cw_nxo_t *a_thread)
 		fprintf(stderr, "dlopen() error: %s\n", dlerror());
 #endif
 		nxo_stack_pop(tstack);
-		nxo_thread_error(a_thread, NXO_THREADE_INVALIDFILEACCESS);
+		nxo_thread_nerror(a_thread, NXN_invalidfileaccess);
 		return;
 	}
 
@@ -100,7 +100,7 @@ onyx_ops_modload(cw_nxo_t *a_thread)
 		fprintf(stderr, "dlsym() error: %s]\n", dlerror());
 #endif
 		dlclose(handle);
-		nxo_thread_error(a_thread, NXO_THREADE_UNDEFINED);
+		nxo_thread_nerror(a_thread, NXN_undefined);
 		return;
 	}
 

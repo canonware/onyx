@@ -153,11 +153,11 @@ SRCS = [SRCS] [ONYX_SRCS];
                  syntaxerror_d.nx.in syntaxerror_e.nx.in syntaxerror_f.nx.in
                  syntaxerror_g.nx.in syntaxerror_h.nx.in syntaxerror_i.nx.in
                  syntaxerror_j.nx.in syntaxerror_k.nx.in throw_a.nx.in
-                 throw_b.nx.in throw_c.nx.in throw_d.nx.in token_a.nx.in
-                 token_b.nx.in token_c.nx.in type_a.nx.in type_b.nx.in
-                 undef_a.nx.in undef_b.nx.in undef_c.nx.in where_a.nx.in
-                 where_b.nx.in xcheck_a.nx.in xcheck_b.nx.in xor_a.nx.in
-                 xor_b.nx.in xor_c.nx.in xor_d.nx.in xor_e.nx.in xor_f.nx.in
+                 throw_b.nx.in throw_c.nx.in token_a.nx.in token_b.nx.in
+                 token_c.nx.in type_a.nx.in type_b.nx.in undef_a.nx.in
+                 undef_b.nx.in undef_c.nx.in where_a.nx.in where_b.nx.in
+                 xcheck_a.nx.in xcheck_b.nx.in xor_a.nx.in xor_b.nx.in
+                 xor_c.nx.in xor_d.nx.in xor_e.nx.in xor_f.nx.in
 
 #endif
                  ;

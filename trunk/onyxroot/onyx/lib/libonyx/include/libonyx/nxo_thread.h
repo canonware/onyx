@@ -161,11 +161,6 @@ struct cw_nxoe_thread_s {
 };
 
 /*
- * nxo_threade.
- */
-cw_nxn_t nxo_threade_nxn(cw_nxo_threade_t a_threade);
-
-/*
  * nxo_threadp.
  */
 void	nxo_threadp_new(cw_nxo_threadp_t *a_threadp);
@@ -197,7 +192,9 @@ void	nxo_thread_loop(cw_nxo_t *a_nxo);
 void	nxo_thread_interpret(cw_nxo_t *a_nxo, cw_nxo_threadp_t *a_threadp, const
     cw_uint8_t *a_str, cw_uint32_t a_len);
 void	nxo_thread_flush(cw_nxo_t *a_nxo, cw_nxo_threadp_t *a_threadp);
-void	nxo_thread_error(cw_nxo_t *a_nxo, cw_nxo_threade_t a_threade);
+void	nxo_thread_nerror(cw_nxo_t *a_nxo, cw_nxn_t a_nxn);
+void	nxo_thread_serror(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t
+    a_len);
 
 cw_bool_t nxo_thread_dstack_search(cw_nxo_t *a_nxo, cw_nxo_t *a_key, cw_nxo_t
     *r_value);

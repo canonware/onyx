@@ -177,8 +177,8 @@ obvious when reading the code.
 \begin{itemize}
 \item{Manually managed (\cfunc{malloc}{}/\cfunc{free}{}) memory should not be
 allocated unless the code is very careful.  If a function recurses into the
-interpreter (this includes calls to
-\htmlref{\cfunc{nxo\_thread\_error}{}}{nxo_thread_error}), there is the very
+interpreter (this includes calls to functions such as
+\htmlref{\cfunc{nxo\_thread\_nerror}{}}{nxo_thread_nerror}), there is the very
 real possibility that control will never return to the operator due to an
 exception.  Code must either catch all exceptions and clean up allocations, or
 not recurse into the interpreter.}

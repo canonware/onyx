@@ -22,71 +22,8 @@ The \classname{threadp} class is a helper class that contains scanner position
 information.  The \classname{threadp} state is used when recording syntax
 errors.
 
-Errors are of type \ctype{cw\_nxo\_threade\_t}:
-\begin{description}
-\label{NXO_THREADE_NONE}
-\item[NXO\_THREADE\_NONE: ] No error.
-\label{NXO_THREADE_DSTACKUNDERFLOW}
-\item[NXO\_THREADE\_DSTACKUNDERFLOW: ] No poppable dictionary on dstack.
-\label{NXO_THREADE_ESTACKOVERFLOW}
-\item[NXO\_THREADE\_ESTACKOVERFLOW: ] estack too deep.
-\label{NXO_THREADE_INTERRUPT}
-\item[NXO\_THREADE\_INTERRUPT: ] Interrupt.
-\label{NXO_THREADE_INVALIDACCESS}
-\item[NXO\_THREADE\_INVALIDACCESS: ] Permission error.
-\label{NXO_THREADE_INVALIDEXIT}
-\item[NXO\_THREADE\_INVALIDEXIT: ] \onyxop{}{exit}{} operator called outside
-loop.
-\label{NXO_THREADE_INVALIDFILEACCESS}
-\item[NXO\_THREADE\_INVALIDFILEACCESS: ] Insufficient file permissions.
-\label{NXO_THREADE_IOERROR}
-\item[NXO\_THREADE\_IOERROR: ] read()/write()/etc. error.
-\label{NXO_THREADE_LIMITCHECK}
-\item[NXO\_THREADE\_LIMITCHECK: ] Value outside legal range.
-\label{NXO_THREADE_RANGECHECK}
-\item[NXO\_THREADE\_RANGECHECK: ] Out of bounds string or array use.
-\label{NXO_THREADE_STACKUNDERFLOW}
-\item[NXO\_THREADE\_STACKUNDERFLOW: ] Not enough objects on ostack.
-\label{NXO_THREADE_SYNTAXERROR}
-\item[NXO\_THREADE\_SYNTAXERROR: ] Scanner syntax error.
-\label{NXO_THREADE_TIMEOUT}
-\item[NXO\_THREADE\_TIMEOUT: ] Timeout.
-\label{NXO_THREADE_TYPECHECK}
-\item[NXO\_THREADE\_TYPECHECK: ] Incorrect argument type.
-\label{NXO_THREADE_UNDEFINED}
-\item[NXO\_THREADE\_UNDEFINED: ] Object not found in dstack.
-\label{NXO_THREADE_UNDEFINEDFILENAME}
-\item[NXO\_THREADE\_UNDEFINEDFILENAME: ] Bad filename.
-\label{NXO_THREADE_UNDEFINEDRESULT}
-\item[NXO\_THREADE\_UNDEFINEDRESULT: ] Divide by 0.
-\label{NXO_THREADE_UNMATCHEDFINO}
-\item[NXO\_THREADE\_UNMATCHEDFINO: ] No fino on ostack.
-\label{NXO_THREADE_UNMATCHEDMARK}
-\item[NXO\_THREADE\_UNMATCHEDMARK: ] No mark on ostack.
-\label{NXO_THREADE_UNREGISTERED}
-\item[NXO\_THREADE\_UNREGISTERED: ] Other non-enumerated error.
-\end{description}
-
 \subsubsection{API}
 \begin{capi}
-\label{nxo_threade_nxn}
-\index{nxo_threade_nxn@\cfunc{nxo\_threade\_nxn}{}}
-\citem{\cfunc[cw\_nxn\_t]{nxo\_threade\_nxn}{cw\_nxo\_threade\_t a\_threade}}
-	\begin{capilist}
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[a\_threade: ]
-			A \classname{threade} error code.
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[retval: ]
-			An \classname{nxn} corresponding to \cvar{a\_threade}.
-		\end{description}
-	\item[Exception(s): ] None.
-	\item[Description: ]
-		Return an \classname{nxn} corresponding to \cvar{a\_threade}.
-	\end{capilist}
 \label{nxo_threadp_new}
 \index{nxo_threadp_new@\cfunc{nxo\_threadp\_new}{}}
 \citem{\cfunc[void]{nxo\_threadp\_new}{cw\_nxo\_threadp\_t *a\_threadp}}

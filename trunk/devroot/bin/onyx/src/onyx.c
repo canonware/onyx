@@ -777,10 +777,10 @@ prompt(EditLine *a_el)
 		/* Get the actual prompt string. */
 		nxo = nxo_stack_get(stack);
 		if (nxo == NULL) {
-			nxo_thread_error(&thread, NXO_THREADE_STACKUNDERFLOW);
+			nxo_thread_nerror(&thread, NXN_stackunderflow);
 			maxlen = 0;
 		} else if (nxo_type_get(nxo) != NXOT_STRING) {
-			nxo_thread_error(&thread, NXO_THREADE_TYPECHECK);
+			nxo_thread_nerror(&thread, NXN_typecheck);
 			maxlen = 0;
 		} else {
 			pstr = nxo_string_get(nxo);

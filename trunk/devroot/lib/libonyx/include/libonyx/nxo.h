@@ -17,29 +17,6 @@ typedef struct cw_nx_s cw_nx_t;
 typedef struct cw_nxa_s cw_nxa_t;
 typedef void cw_op_t(cw_nxo_t *);
 
-/* Interpreter errors. */
-typedef enum {
-	NXO_THREADE_NONE,		/* No error. */
-	NXO_THREADE_DSTACKUNDERFLOW,	/* No poppable dictionary on dstack. */
-	NXO_THREADE_ESTACKOVERFLOW,	/* estack too deep. */
-	NXO_THREADE_INVALIDACCESS,	/* Permission error. */
-	NXO_THREADE_INVALIDEXIT,	/* exit operator called outside loop. */
-	NXO_THREADE_INVALIDFILEACCESS,	/* Insufficient file permissions. */
-	NXO_THREADE_IOERROR,		/* read()/write()/etc. error. */
-	NXO_THREADE_LIMITCHECK,		/* Value outside legal range. */
-	NXO_THREADE_RANGECHECK,		/* Out of bounds string or array use. */
-	NXO_THREADE_STACKUNDERFLOW,	/* Not enough objects on ostack. */
-	NXO_THREADE_SYNTAXERROR,	/* Scanner syntax error. */
-	NXO_THREADE_TYPECHECK,		/* Incorrect argument type. */
-	NXO_THREADE_UNDEFINED,		/* Object not found in dstack. */
-	NXO_THREADE_UNDEFINEDFILENAME,	/* Bad filename. */
-	NXO_THREADE_UNDEFINEDRESULT,	/* Divide by 0. */
-	NXO_THREADE_UNMATCHEDFINO,	/* No fino on ostack. */
-	NXO_THREADE_UNMATCHEDMARK,	/* No mark on ostack. */
-	NXO_THREADE_UNREGISTERED	/* Other non-enumerated error. */
-#define	NXO_THREADE_LAST	NXO_THREADE_UNREGISTERED
-} cw_nxo_threade_t;
-
 typedef enum {
 	NXOT_NO,
 	NXOT_ARRAY,

@@ -36,8 +36,6 @@
  */
 typedef void	cw_nxot_delete_t(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa);
 typedef cw_nxoe_t *cw_nxot_ref_iter_t(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
-typedef cw_nxo_threade_t cw_nxot_copy_t(cw_nxo_t *a_to, cw_nxo_t *a_from,
-    cw_nxo_t *a_thread);
 
 typedef struct cw_nxot_vtable_s cw_nxot_vtable_t;
 struct  cw_nxot_vtable_s {

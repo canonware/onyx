@@ -24,23 +24,23 @@ nx_gtk_container_add (cw_nxo_t *a_thread)
 
   NXO_STACK_GET (container_hook, ostack, a_thread);
   if (nxo_type_get(container_hook) != NXOT_HOOK) {
-    nxo_thread_error (a_thread, NXO_THREADE_TYPECHECK);
+    nxo_thread_nerror (a_thread, NXN_typecheck);
     return;
   }
   container = nxo_hook_data_get (container_hook);
   if (!GTK_IS_CONTAINER (container)) {
-    nxo_thread_error (a_thread, NXO_THREADE_TYPECHECK);
+    nxo_thread_nerror (a_thread, NXN_typecheck);
     return;
   }
 
   NXO_STACK_NGET (w_hook, ostack, a_thread, 1);
   if (nxo_type_get(w_hook) != NXOT_HOOK) {
-    nxo_thread_error (a_thread, NXO_THREADE_TYPECHECK);
+    nxo_thread_nerror (a_thread, NXN_typecheck);
     return;
   }
   w = nxo_hook_data_get (w_hook);
   if (!GTK_IS_WIDGET (w)) {
-    nxo_thread_error (a_thread, NXO_THREADE_TYPECHECK);
+    nxo_thread_nerror (a_thread, NXN_typecheck);
     return;
   }
 

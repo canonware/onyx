@@ -27,7 +27,7 @@ nx_gtk_window_new (cw_nxo_t *a_thread)
 
   NXO_STACK_GET (t, ostack, a_thread);
   if (nxo_type_get(t) != NXOT_INTEGER) {
-    nxo_thread_error (a_thread, NXO_THREADE_TYPECHECK);
+    nxo_thread_nerror (a_thread, NXN_typecheck);
     return;
   }
 

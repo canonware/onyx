@@ -203,7 +203,7 @@ void *a\_arg}}
 	\end{capilist}
 \label{nxo_file_open}
 \index{nxo_file_open@\cfunc{nxo\_file\_open}{}}
-\citem{\cfunc[cw\_nxo\_threade\_t]{nxo\_file\_open}{cw\_nxo\_t *a\_nxo, const
+\citem{\cfunc[cw\_nxn\_t]{nxo\_file\_open}{cw\_nxo\_t *a\_nxo, const
 cw\_uint8\_t *a\_filename, cw\_uint32\_t a\_nlen, const cw\_uint8\_t *a\_flags,
 cw\_uint32\_t a\_flen}}
 	\begin{capilist}
@@ -242,13 +242,11 @@ cw\_uint32\_t a\_flen}}
 		\begin{description}\item[]
 		\item[retval: ]
 			\begin{description}\item[]
-			\item[\htmlref{NXO\_THREADE\_NONE}{NXO_THREADE_NONE}.]
-			\item[\htmlref{NXO\_THREADE\_IOERROR}
-				{NXO_THREADE_IOERROR}.]
-			\item[\htmlref{NXO\_THREADE\_INVALIDFILEACCESS}
-				{NXO_THREADE_INVALIDFILEACCESS}.]
-			\item[\htmlref{NXO\_THREADE\_LIMITCHECK}
-				{NXO_THREADE_LIMITCHECK}.]
+			\item[NXN\_ZERO.]
+			\item[NXN\_\htmlref{ioerror}{ioerror}.]
+			\item[NXN\_\htmlref{invalidfileaccess}
+				{invalidfileaccess}.]
+			\item[NXN\_\htmlref{limitcheck}{limitcheck}.]
 			\end{description}
 		\end{description}
 	\item[Exception(s): ] None.
@@ -257,7 +255,7 @@ cw\_uint32\_t a\_flen}}
 	\end{capilist}
 \label{nxo_file_close}
 \index{nxo_file_close@\cfunc{nxo\_file\_close}{}}
-\citem{\cfunc[cw\_nxo\_threade\_t]{nxo\_file\_close}{cw\_nxo\_t *a\_nxo}}
+\citem{\cfunc[cw\_nxn\_t]{nxo\_file\_close}{cw\_nxo\_t *a\_nxo}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -268,9 +266,8 @@ cw\_uint32\_t a\_flen}}
 		\begin{description}\item[]
 		\item[retval: ]
 			\begin{description}\item[]
-			\item[\htmlref{NXO\_THREADE\_NONE}{NXO_THREADE_NONE}.]
-			\item[\htmlref{NXO\_THREADE\_IOERROR}
-				{NXO_THREADE_IOERROR}.]
+			\item[NXN\_ZERO.]
+			\item[NXN\_\htmlref{ioerror}{ioerror}.]
 			\end{description}
 		\end{description}
 	\item[Exception(s): ] None.
@@ -319,8 +316,7 @@ a\_len, cw\_uint8\_t *r\_str}}
 		\item[retval: ]
 			\begin{description}\item[]
 			\item[-1: ]
-				\htmlref{NXO\_THREADE\_IOERROR}
-				{NXO_THREADE_IOERROR}.
+				NXN\_\htmlref{ioerror}{ioerror}.
 			\item[{\gt}= 0: ]
 				Number of bytes of data read into \cvar{r\_str}.
 			\end{description}\item[]
@@ -334,9 +330,8 @@ a\_len, cw\_uint8\_t *r\_str}}
 	\end{capilist}
 \label{nxo_file_readline}
 \index{nxo_file_readline@\cfunc{nxo\_file\_readline}{}}
-\citem{\cfunc[cw\_nxo\_threade\_t]{nxo\_file\_readline}{cw\_nxo\_t *a\_nxo,
-cw\_nx\_t *a\_nx, cw\_bool\_t a\_locking, cw\_nxo\_t *r\_string, cw\_bool\_t
-*r\_eof}}
+\citem{\cfunc[cw\_nxn\_t]{nxo\_file\_readline}{cw\_nxo\_t *a\_nxo, cw\_nx\_t
+*a\_nx, cw\_bool\_t a\_locking, cw\_nxo\_t *r\_string, cw\_bool\_t *r\_eof}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -355,12 +350,11 @@ cw\_nx\_t *a\_nx, cw\_bool\_t a\_locking, cw\_nxo\_t *r\_string, cw\_bool\_t
 		\begin{description}\item[]
 		\item[retval: ]
 			\begin{description}\item[]
-			\item[\htmlref{NXO\_THREADE\_NONE}{NXO_THREADE_NONE}.]
-			\item[\htmlref{NXO\_THREADE\_IOERROR}
-				{NXO_THREADE_IOERROR}.]
+			\item[NXN\_ZERO.]
+			\item[NXN\_\htmlref{ioerror}{ioerror}.]
 			\end{description}
 		\item[r\_string: ]
-			If \cvar{retval} is NXO\_THREADE\_NONE, a string object,
+			If \cvar{retval} is NXN\_ZERO, a string object,
 			otherwise unmodified.
 		\item[*r\_eof: ]
 			\begin{description}\item[]
@@ -379,7 +373,7 @@ cw\_nx\_t *a\_nx, cw\_bool\_t a\_locking, cw\_nxo\_t *r\_string, cw\_bool\_t
 	\end{capilist}
 \label{nxo_file_write}
 \index{nxo_file_write@\cfunc{nxo\_file\_write}{}}
-\citem{\cfunc[cw\_nxo\_threade\_t]{nxo\_file\_write}{cw\_nxo\_t *a\_nxo, const
+\citem{\cfunc[cw\_nxn\_t]{nxo\_file\_write}{cw\_nxo\_t *a\_nxo, const
 cw\_uint8\_t *a\_str, cw\_uint32\_t a\_len}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -395,9 +389,8 @@ cw\_uint8\_t *a\_str, cw\_uint32\_t a\_len}}
 		\begin{description}\item[]
 		\item[retval: ]
 			\begin{description}\item[]
-			\item[\htmlref{NXO\_THREADE\_NONE}{NXO_THREADE_NONE}.]
-			\item[\htmlref{NXO\_THREADE\_IOERROR}
-				{NXO_THREADE_IOERROR}.]
+			\item[NXN\_ZERO.]
+			\item[NXN\_\htmlref{ioerror}{ioerror}.]
 			\end{description}
 		\end{description}
 	\item[Exception(s): ] None.
@@ -406,8 +399,8 @@ cw\_uint8\_t *a\_str, cw\_uint32\_t a\_len}}
 	\end{capilist}
 \label{nxo_file_truncate}
 \index{nxo_file_truncate@\cfunc{nxo\_file\_truncate}{}}
-\citem{\cfunc[cw\_nxo\_threade\_t]{nxo\_file\_truncate}{cw\_nxo\_t *a\_nxo,
-off\_t a\_length}}
+\citem{\cfunc[cw\_nxn\_t]{nxo\_file\_truncate}{cw\_nxo\_t *a\_nxo, off\_t
+a\_length}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -420,9 +413,8 @@ off\_t a\_length}}
 		\begin{description}\item[]
 		\item[retval: ]
 			\begin{description}\item[]
-			\item[\htmlref{NXO\_THREADE\_NONE}{NXO_THREADE_NONE}.]
-			\item[\htmlref{NXO\_THREADE\_IOERROR}
-				{NXO_THREADE_IOERROR}.]
+			\item[NXN\_ZERO.]
+			\item[NXN\_\htmlref{ioerror}{ioerror}.]
 			\end{description}
 		\end{description}
 	\item[Exception(s): ] None.
@@ -444,8 +436,7 @@ off\_t a\_length}}
 		\item[retval: ]
 			\begin{description}\item[]
 			\item[-1: ]
-				\htmlref{NXO\_THREADE\_IOERROR}
-				{NXO_THREADE_IOERROR}.
+				NXN\_\htmlref{ioerror}{ioerror}.
 			\item[{\gt}= 0: ]
 				Current file position.
 			\end{description}\item[]
@@ -456,7 +447,7 @@ off\_t a\_length}}
 	\end{capilist}
 \label{nxo_file_position_set}
 \index{nxo_file_position_set@\cfunc{nxo\_file\_position\_set}{}}
-\citem{\cfunc[cw\_nxo\_threade\_t]{nxo\_file\_position\_set}{cw\_nxo\_t *a\_nxo,
+\citem{\cfunc[cw\_nxn\_t]{nxo\_file\_position\_set}{cw\_nxo\_t *a\_nxo,
 cw\_nxoi\_t a\_position}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -470,9 +461,8 @@ cw\_nxoi\_t a\_position}}
 		\begin{description}\item[]
 		\item[retval: ]
 			\begin{description}\item[]
-			\item[\htmlref{NXO\_THREADE\_NONE}{NXO_THREADE_NONE}.]
-			\item[\htmlref{NXO\_THREADE\_IOERROR}
-				{NXO_THREADE_IOERROR}.]
+			\item[NXN\_ZERO.]
+			\item[NXN\_\htmlref{ioerror}{ioerror}.]
 			\end{description}
 		\end{description}
 	\item[Exception(s): ] None.
@@ -538,8 +528,7 @@ cw\_uint32\_t a\_size}}
 	\end{capilist}
 \label{nxo_file_buffer_flush}
 \index{nxo_file_buffer_flush@\cfunc{nxo\_file\_buffer\_flush}{}}
-\citem{\cfunc[cw\_nxo\_threade\_t]{nxo\_file\_buffer\_flush}{cw\_nxo\_t
-*a\_nxo}}
+\citem{\cfunc[cw\_nxn\_t]{nxo\_file\_buffer\_flush}{cw\_nxo\_t *a\_nxo}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -550,9 +539,8 @@ cw\_uint32\_t a\_size}}
 		\begin{description}\item[]
 		\item[retval: ]
 			\begin{description}\item[]
-			\item[\htmlref{NXO\_THREADE\_NONE}{NXO_THREADE_NONE}.]
-			\item[\htmlref{NXO\_THREADE\_IOERROR}
-				{NXO_THREADE_IOERROR}.]
+			\item[NXN\_ZERO.]
+			\item[NXN\_\htmlref{ioerror}{ioerror}.]
 			\end{description}
 		\end{description}
 	\item[Exception(s): ] None.

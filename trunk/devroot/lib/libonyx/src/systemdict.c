@@ -474,7 +474,7 @@ systemdict_abs(cw_nxo_t *a_thread)
 	
 	NXO_STACK_GET(a, ostack, a_thread);
 	if (nxo_type_get(a) != NXOT_INTEGER) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -515,7 +515,7 @@ systemdict_and(cw_nxo_t *a_thread)
 		nxo_integer_set(nxo_a, nxo_integer_get(nxo_a) &
 		    nxo_integer_get(nxo_b));
 	} else {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -533,12 +533,12 @@ systemdict_array(cw_nxo_t *a_thread)
 	
 	NXO_STACK_GET(nxo, ostack, a_thread);
 	if (nxo_type_get(nxo) != NXOT_INTEGER) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 	len = nxo_integer_get(nxo);
 	if (len < 0) {
-		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+		nxo_thread_nerror(a_thread, NXN_rangecheck);
 		return;
 	}
 
@@ -557,7 +557,7 @@ systemdict_begin(cw_nxo_t *a_thread)
 
 	NXO_STACK_GET(dict, ostack, a_thread);
 	if (nxo_type_get(dict) != NXOT_DICT) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 	
@@ -631,7 +631,7 @@ systemdict_bind(cw_nxo_t *a_thread)
 
 	NXO_STACK_GET(array, ostack, a_thread);
 	if (nxo_type_get(array) != NXOT_ARRAY) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -649,7 +649,7 @@ systemdict_broadcast(cw_nxo_t *a_thread)
 	ostack = nxo_thread_ostack_get(a_thread);
 	NXO_STACK_GET(condition, ostack, a_thread);
 	if (nxo_type_get(condition) != NXOT_CONDITION) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -671,7 +671,7 @@ systemdict_bytesavailable(cw_nxo_t *a_thread)
 	NXO_STACK_GET(file, ostack, a_thread);
 	
 	if (nxo_type_get(file) != NXOT_FILE) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -692,7 +692,7 @@ systemdict_catenate(cw_nxo_t *a_thread)
 	if (nxo_type_get(a) != nxo_type_get(b) || (nxo_type_get(a) !=
 	    NXOT_ARRAY && nxo_type_get(a) != NXOT_STACK &&
 	    nxo_type_get(a) != NXOT_STRING)) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -782,7 +782,7 @@ systemdict_cd(cw_nxo_t *a_thread)
 	tstack = nxo_thread_tstack_get(a_thread);
 	NXO_STACK_GET(path, ostack, a_thread);
 	if (nxo_type_get(path) != NXOT_STRING) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -804,10 +804,10 @@ systemdict_cd(cw_nxo_t *a_thread)
 		nxo_string_unlock(tpath);
 		switch (errno) {
 		case EIO:
-			nxo_thread_error(a_thread, NXO_THREADE_IOERROR);
+			nxo_thread_nerror(a_thread, NXN_ioerror);
 			break;
 		default:
-			nxo_thread_error(a_thread, NXO_THREADE_INVALIDACCESS);
+			nxo_thread_nerror(a_thread, NXN_invalidaccess);
 		}
 		goto ERROR;
 	}
@@ -829,11 +829,11 @@ systemdict_chmod(cw_nxo_t *a_thread)
 	NXO_STACK_DOWN_GET(file, ostack, a_thread, mode);
 	if ((nxo_type_get(mode) != NXOT_INTEGER) || (nxo_type_get(file) !=
 	    NXOT_FILE && nxo_type_get(file) != NXOT_STRING)) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 	if (nxo_integer_get(mode) < 0 || nxo_integer_get(mode) > 0xfff) {
-		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+		nxo_thread_nerror(a_thread, NXN_rangecheck);
 		return;
 	}
 
@@ -842,8 +842,7 @@ systemdict_chmod(cw_nxo_t *a_thread)
 
 		fd = nxo_file_fd_get(file);
 		if (fd < 0) {
-			nxo_thread_error(a_thread,
-			    NXO_THREADE_INVALIDFILEACCESS);
+			nxo_thread_nerror(a_thread, NXN_invalidfileaccess);
 			return;
 		}
 
@@ -875,7 +874,7 @@ systemdict_chmod(cw_nxo_t *a_thread)
 		switch (errno) {
 		case EIO:
 		case EROFS:
-			nxo_thread_error(a_thread, NXO_THREADE_IOERROR);
+			nxo_thread_nerror(a_thread, NXN_ioerror);
 			break;
 		case EACCES:
 #ifdef EFTYPE
@@ -887,13 +886,12 @@ systemdict_chmod(cw_nxo_t *a_thread)
 		case ENOENT:
 		case ENOTDIR:
 		case EPERM:
-			nxo_thread_error(a_thread,
-			    NXO_THREADE_INVALIDFILEACCESS);
+			nxo_thread_nerror(a_thread, NXN_invalidfileaccess);
 			break;
 		case EBADF:
 		case EFAULT:
 		default:
-			nxo_thread_error(a_thread, NXO_THREADE_UNREGISTERED);
+			nxo_thread_nerror(a_thread, NXN_unregistered);
 		}
 		return;
 	}
@@ -914,11 +912,11 @@ systemdict_chown(cw_nxo_t *a_thread)
 	if ((nxo_type_get(file) != NXOT_FILE && nxo_type_get(file) !=
 	    NXOT_STRING) || nxo_type_get(gid) != NXOT_INTEGER ||
 	    nxo_type_get(uid) != NXOT_INTEGER) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 	if (nxo_integer_get(uid) < 0 || nxo_integer_get(gid) < 0) {
-		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+		nxo_thread_nerror(a_thread, NXN_rangecheck);
 		return;
 	}
 
@@ -927,8 +925,7 @@ systemdict_chown(cw_nxo_t *a_thread)
 
 		fd = nxo_file_fd_get(file);
 		if (fd < 0) {
-			nxo_thread_error(a_thread,
-			    NXO_THREADE_INVALIDFILEACCESS);
+			nxo_thread_nerror(a_thread, NXN_invalidfileaccess);
 			return;
 		}
 
@@ -961,7 +958,7 @@ systemdict_chown(cw_nxo_t *a_thread)
 		switch (errno) {
 		case EIO:
 		case EROFS:
-			nxo_thread_error(a_thread, NXO_THREADE_IOERROR);
+			nxo_thread_nerror(a_thread, NXN_ioerror);
 			break;
 		case EACCES:
 		case EINVAL:
@@ -970,14 +967,12 @@ systemdict_chown(cw_nxo_t *a_thread)
 		case ENOENT:
 		case ENOTDIR:
 		case EPERM:
-			nxo_thread_error(a_thread,
-			    NXO_THREADE_INVALIDFILEACCESS);
+			nxo_thread_nerror(a_thread, NXN_invalidfileaccess);
 			break;
 		case EBADF:
 		case EFAULT:
 		default:
-			nxo_thread_error(a_thread,
-			    NXO_THREADE_UNREGISTERED);
+			nxo_thread_nerror(a_thread, NXN_unregistered);
 		}
 		return;
 	}
@@ -1026,7 +1021,7 @@ systemdict_cleartomark(cw_nxo_t *a_thread)
 			break;
 	}
 	if (i == depth) {
-		nxo_thread_error(a_thread, NXO_THREADE_UNMATCHEDMARK);
+		nxo_thread_nerror(a_thread, NXN_unmatchedmark);
 		return;
 	}
 
@@ -1037,21 +1032,21 @@ systemdict_cleartomark(cw_nxo_t *a_thread)
 void
 systemdict_close(cw_nxo_t *a_thread)
 {
-	cw_nxo_t		*ostack;
-	cw_nxo_t		*nxo;
-	cw_nxo_threade_t	error;
+	cw_nxo_t	*ostack;
+	cw_nxo_t	*nxo;
+	cw_nxn_t	error;
 
 	ostack = nxo_thread_ostack_get(a_thread);
 
 	NXO_STACK_GET(nxo, ostack, a_thread);
 	if (nxo_type_get(nxo) != NXOT_FILE) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
 	error = nxo_file_close(nxo);
 	if (error) {
-		nxo_thread_error(a_thread, NXO_THREADE_IOERROR);
+		nxo_thread_nerror(a_thread, NXN_ioerror);
 		return;
 	}
 
@@ -1087,11 +1082,11 @@ systemdict_copy(cw_nxo_t *a_thread)
 
 		NXO_STACK_DOWN_GET(orig, ostack, a_thread, nxo);
 		if (nxo_type_get(orig) != NXOT_ARRAY) {
-			nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+			nxo_thread_nerror(a_thread, NXN_typecheck);
 			return;
 		}
 		if (nxo_array_len_get(nxo) < nxo_array_len_get(orig)) {
-			nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+			nxo_thread_nerror(a_thread, NXN_rangecheck);
 			return;
 		}
 
@@ -1106,7 +1101,7 @@ systemdict_copy(cw_nxo_t *a_thread)
 
 		NXO_STACK_DOWN_GET(orig, ostack, a_thread, nxo);
 		if (nxo_type_get(orig) != NXOT_DICT) {
-			nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+			nxo_thread_nerror(a_thread, NXN_typecheck);
 			return;
 		}
 
@@ -1121,7 +1116,7 @@ systemdict_copy(cw_nxo_t *a_thread)
 
 		NXO_STACK_DOWN_GET(orig, ostack, a_thread, nxo);
 		if (nxo_type_get(orig) != NXOT_STACK) {
-			nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+			nxo_thread_nerror(a_thread, NXN_typecheck);
 			return;
 		}
 
@@ -1136,11 +1131,11 @@ systemdict_copy(cw_nxo_t *a_thread)
 
 		NXO_STACK_DOWN_GET(orig, ostack, a_thread, nxo);
 		if (nxo_type_get(orig) != NXOT_STRING) {
-			nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+			nxo_thread_nerror(a_thread, NXN_typecheck);
 			return;
 		}
 		if (nxo_string_len_get(nxo) < nxo_string_len_get(orig)) {
-			nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+			nxo_thread_nerror(a_thread, NXN_rangecheck);
 			return;
 		}
 
@@ -1151,7 +1146,7 @@ systemdict_copy(cw_nxo_t *a_thread)
 		break;
 	}
 	default:
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 }
@@ -1210,7 +1205,7 @@ systemdict_counttomark(cw_nxo_t *a_thread)
 			break;
 	}
 	if (i == depth) {
-		nxo_thread_error(a_thread, NXO_THREADE_UNMATCHEDMARK);
+		nxo_thread_nerror(a_thread, NXN_unmatchedmark);
 		return;
 	}
 
@@ -1277,7 +1272,7 @@ systemdict_cvn(cw_nxo_t *a_thread)
 	NXO_STACK_GET(nxo, ostack, a_thread);
 
 	if (nxo_type_get(nxo) != NXOT_STRING) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -1370,12 +1365,12 @@ systemdict_cvrs(cw_nxo_t *a_thread)
 	NXO_STACK_DOWN_GET(num, ostack, a_thread, radix);
 	if ((nxo_type_get(num) != NXOT_INTEGER) || (nxo_type_get(radix) !=
 	    NXOT_INTEGER)) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 	base = nxo_integer_get(radix);
 	if (base < 2 || base > 36) {
-		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+		nxo_thread_nerror(a_thread, NXN_rangecheck);
 		return;
 	}
 	val = nxo_integer_get(num);
@@ -1637,7 +1632,7 @@ systemdict_detach(cw_nxo_t *a_thread)
 	ostack = nxo_thread_ostack_get(a_thread);
 	NXO_STACK_GET(thread, ostack, a_thread);
 	if (nxo_type_get(thread) != NXOT_THREAD) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -1671,12 +1666,12 @@ systemdict_die(cw_nxo_t *a_thread)
 
 	NXO_STACK_GET(code, ostack, a_thread);
 	if (nxo_type_get(code) != NXOT_INTEGER) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 	ecode = nxo_integer_get(code);
 	if (ecode < 0 || ecode > 255) {
-		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+		nxo_thread_nerror(a_thread, NXN_rangecheck);
 		return;
 	}
 
@@ -1710,7 +1705,7 @@ systemdict_dirforeach(cw_nxo_t *a_thread)
 	NXO_STACK_GET(tnxo, ostack, a_thread);
 	NXO_STACK_DOWN_GET(nxo, ostack, a_thread, tnxo);
 	if (nxo_type_get(nxo) != NXOT_STRING) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -1738,7 +1733,7 @@ systemdict_dirforeach(cw_nxo_t *a_thread)
 	dir = opendir(nxo_string_get(path));
 	if (dir == NULL) {
 		nxo_stack_npop(tstack, 2);
-		nxo_thread_error(a_thread, NXO_THREADE_INVALIDACCESS);
+		nxo_thread_nerror(a_thread, NXN_invalidaccess);
 		return;
 	}
 
@@ -1788,7 +1783,7 @@ systemdict_dirforeach(cw_nxo_t *a_thread)
 #endif
 		{
 			/* The loop terminated due to an error. */
-			nxo_thread_error(a_thread, NXO_THREADE_IOERROR);
+			nxo_thread_nerror(a_thread, NXN_ioerror);
 		}
 	}
 	xep_catch(_CW_ONYXX_EXIT) {
@@ -1828,11 +1823,11 @@ systemdict_div(cw_nxo_t *a_thread)
 	NXO_STACK_DOWN_GET(a, ostack, a_thread, b);
 	if (nxo_type_get(a) != NXOT_INTEGER || nxo_type_get(b) !=
 	    NXOT_INTEGER) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 	if (nxo_integer_get(b) == 0) {
-		nxo_thread_error(a_thread, NXO_THREADE_UNDEFINEDRESULT);
+		nxo_thread_nerror(a_thread, NXN_undefinedresult);
 		return;
 	}
 
@@ -1898,7 +1893,7 @@ systemdict_end(cw_nxo_t *a_thread)
 
 	/* threaddict, systemdict, globaldict, and userdict cannot be popped. */
 	if (nxo_stack_count(dstack) <= 4) {
-		nxo_thread_error(a_thread, NXO_THREADE_DSTACKUNDERFLOW);
+		nxo_thread_nerror(a_thread, NXN_dstackunderflow);
 		return;
 	}
 
@@ -1984,17 +1979,17 @@ systemdict_exch(cw_nxo_t *a_thread)
 void
 systemdict_exec(cw_nxo_t *a_thread)
 {
-	cw_nxo_t		*ostack, *tstack;
-	cw_nxo_t		*array, *el;
-	cw_uint32_t		i, slen, argc;
-	char			*path, **argv, **envp;
-	cw_nxo_threade_t	error;
+	cw_nxo_t	*ostack, *tstack;
+	cw_nxo_t	*array, *el;
+	cw_uint32_t	i, slen, argc;
+	char		*path, **argv, **envp;
+	cw_nxn_t	error;
 
 	/*
 	 * This operator does a bunch of memory allocation, which must be done
 	 * with great care, since an exception will cause us to leak all of the
 	 * allocated memory.  For example, a user can cause an exception in
-	 * nxo_thread_error(), so we must do all cleanup before throwing the
+	 * nxo_thread_nerror(), so we must do all cleanup before throwing the
 	 * error.
 	 */
 
@@ -2004,14 +1999,14 @@ systemdict_exec(cw_nxo_t *a_thread)
 
 	NXO_STACK_GET(array, ostack, a_thread);
 	if (nxo_type_get(array) != NXOT_ARRAY) {
-		error = NXO_THREADE_TYPECHECK;
+		error = NXN_typecheck;
 		goto VALIDATION_ERROR;
 	}
 	argc = nxo_array_len_get(array);
 	for (i = 0; i < argc; i++) {
 		nxo_array_el_get(array, i, el);
 		if (nxo_type_get(el) != NXOT_STRING) {
-			error = NXO_THREADE_TYPECHECK;
+			error = NXN_typecheck;
 			goto VALIDATION_ERROR;
 		}
 	}
@@ -2021,7 +2016,7 @@ systemdict_exec(cw_nxo_t *a_thread)
 	 */
 	nxo_array_el_get(array, 0, el);
 	if (nxo_type_get(el) != NXOT_STRING) {
-		error = NXO_THREADE_TYPECHECK;
+		error = NXN_typecheck;
 		goto PATH_ERROR;
 	}
 	slen = nxo_string_len_get(el);
@@ -2038,7 +2033,7 @@ systemdict_exec(cw_nxo_t *a_thread)
 	for (i = 0; i < argc; i++) {
 		nxo_array_el_get(array, i, el);
 		if (nxo_type_get(el) != NXOT_STRING) {
-			error = NXO_THREADE_TYPECHECK;
+			error = NXN_typecheck;
 			goto ARGV_ERROR;
 		}
 		slen = nxo_string_len_get(el);
@@ -2073,7 +2068,7 @@ systemdict_exec(cw_nxo_t *a_thread)
 			if (nxo_type_get(key) != NXOT_NAME || nxo_type_get(val)
 			    != NXOT_STRING) {
 				nxo_stack_npop(tstack, 2);
-				error = NXO_THREADE_TYPECHECK;
+				error = NXN_typecheck;
 				goto ENVP_ERROR;
 			}
 
@@ -2116,7 +2111,7 @@ systemdict_exec(cw_nxo_t *a_thread)
 	PATH_ERROR:
 	VALIDATION_ERROR:
 	nxo_stack_pop(tstack);
-	nxo_thread_error(a_thread, error);
+	nxo_thread_nerror(a_thread, error);
 }
 #endif
 
@@ -2140,12 +2135,12 @@ systemdict_exp(cw_nxo_t *a_thread)
 	NXO_STACK_DOWN_GET(a, ostack, a_thread, b);
 	if (nxo_type_get(a) != NXOT_INTEGER || nxo_type_get(b) !=
 	    NXOT_INTEGER) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
 	if (nxo_integer_get(b) < 0) {
-		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+		nxo_thread_nerror(a_thread, NXN_rangecheck);
 		return;
 	} else if (nxo_integer_get(b) > 0) {
 		for (i = 1, r = nxo_integer_get(a); i < nxo_integer_get(b); i++)
@@ -2160,32 +2155,32 @@ systemdict_exp(cw_nxo_t *a_thread)
 void
 systemdict_flush(cw_nxo_t *a_thread)
 {
-	cw_nxo_threade_t	error;
+	cw_nxn_t	error;
 
 	error = nxo_file_buffer_flush(nxo_thread_stdout_get(a_thread));
 	if (error)
-		nxo_thread_error(a_thread, error);
+		nxo_thread_nerror(a_thread, error);
 }
 
 void
 systemdict_flushfile(cw_nxo_t *a_thread)
 {
-	cw_nxo_t		*ostack;
-	cw_nxo_t		*file;
-	cw_nxo_threade_t	error;
+	cw_nxo_t	*ostack;
+	cw_nxo_t	*file;
+	cw_nxn_t	error;
 
 	ostack = nxo_thread_ostack_get(a_thread);
 
 	NXO_STACK_GET(file, ostack, a_thread);
 	
 	if (nxo_type_get(file) != NXOT_FILE) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
 	error = nxo_file_buffer_flush(file);
 	if (error) {
-		nxo_thread_error(a_thread, error);
+		nxo_thread_nerror(a_thread, error);
 		return;
 	}
 	
@@ -2207,21 +2202,21 @@ systemdict_for(cw_nxo_t *a_thread)
 
 	NXO_STACK_DOWN_GET(onxo, ostack, a_thread, exec);
 	if (nxo_type_get(onxo) != NXOT_INTEGER) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 	limit = nxo_integer_get(onxo);
 
 	NXO_STACK_DOWN_GET(onxo, ostack, a_thread, onxo);
 	if (nxo_type_get(onxo) != NXOT_INTEGER) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 	inc = nxo_integer_get(onxo);
 
 	NXO_STACK_DOWN_GET(onxo, ostack, a_thread, onxo);
 	if (nxo_type_get(onxo) != NXOT_INTEGER) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 	i = nxo_integer_get(onxo);
@@ -2321,7 +2316,7 @@ systemdict_foreach(cw_nxo_t *a_thread)
 	case NXOT_STRING:
 		break;
 	default:
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -2491,7 +2486,7 @@ systemdict_fork(cw_nxo_t *a_thread)
 	pid = fork();
 	if (pid == -1) {
 		/* Error, related to some form of resource exhaustion. */
-		nxo_thread_error(a_thread, NXO_THREADE_LIMITCHECK);
+		nxo_thread_nerror(a_thread, NXN_limitcheck);
 		return;
 	}
 
@@ -2519,7 +2514,7 @@ systemdict_ge(cw_nxo_t *a_thread)
 	type_b = nxo_type_get(nxo_b);
 	if (type_a != type_b || (type_a != NXOT_INTEGER && type_a !=
 	    NXOT_STRING) || (type_b != NXOT_INTEGER && type_b != NXOT_STRING)) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -2549,13 +2544,13 @@ systemdict_get(cw_nxo_t *a_thread)
 		cw_nxoi_t	index;
 
 		if (nxo_type_get(with) != NXOT_INTEGER) {
-			nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+			nxo_thread_nerror(a_thread, NXN_typecheck);
 			return;
 		}
 		index = nxo_integer_get(with);
 
 		if (index < 0 || index >= nxo_array_len_get(from)) {
-			nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+			nxo_thread_nerror(a_thread, NXN_rangecheck);
 			return;
 		}
 		nxo_array_el_get(from, index, with);
@@ -2570,7 +2565,7 @@ systemdict_get(cw_nxo_t *a_thread)
 		val = nxo_stack_push(ostack);
 		if (nxo_dict_lookup(from, with, val)) {
 			nxo_stack_pop(ostack);
-			nxo_thread_error(a_thread, NXO_THREADE_UNDEFINED);
+			nxo_thread_nerror(a_thread, NXN_undefined);
 			return;
 		}
 		nxo_stack_roll(ostack, 3, 1);
@@ -2582,13 +2577,13 @@ systemdict_get(cw_nxo_t *a_thread)
 		cw_uint8_t	el;
 
 		if (nxo_type_get(with) != NXOT_INTEGER) {
-			nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+			nxo_thread_nerror(a_thread, NXN_typecheck);
 			return;
 		}
 		index = nxo_integer_get(with);
 
 		if (index < 0 || index >= nxo_string_len_get(from)) {
-			nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+			nxo_thread_nerror(a_thread, NXN_rangecheck);
 			return;
 		}
 		nxo_string_el_get(from, index, &el);
@@ -2599,7 +2594,7 @@ systemdict_get(cw_nxo_t *a_thread)
 		break;
 	}
 	default:
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 }
@@ -2618,20 +2613,20 @@ systemdict_getinterval(cw_nxo_t *a_thread)
 
 	if ((nxo_type_get(with) != NXOT_INTEGER) || (nxo_type_get(count) !=
 	    NXOT_INTEGER)) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 	index = nxo_integer_get(with);
 	len = nxo_integer_get(count);
 	if (index < 0 || len < 0) {
-		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+		nxo_thread_nerror(a_thread, NXN_rangecheck);
 		return;
 	}
 
 	switch (nxo_type_get(from)) {
 	case NXOT_ARRAY:
 		if (index + len > nxo_array_len_get(from)) {
-			nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+			nxo_thread_nerror(a_thread, NXN_rangecheck);
 			return;
 		}
 		nxo_array_subarray_new(count, from,
@@ -2639,14 +2634,14 @@ systemdict_getinterval(cw_nxo_t *a_thread)
 		break;
 	case NXOT_STRING:
 		if (index + len > nxo_string_len_get(from)) {
-			nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+			nxo_thread_nerror(a_thread, NXN_rangecheck);
 			return;
 		}
 		nxo_string_substring_new(count, from,
 		    nxo_thread_nx_get(a_thread), index, len);
 		break;
 	default:
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -2685,7 +2680,7 @@ systemdict_gt(cw_nxo_t *a_thread)
 	if (type_a != type_b || (type_a != NXOT_INTEGER && type_a !=
 	    NXOT_STRING) || (type_b != NXOT_INTEGER && type_b !=
 	    NXOT_STRING)) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -2709,7 +2704,7 @@ systemdict_hooktag(cw_nxo_t *a_thread)
 	tstack = nxo_thread_tstack_get(a_thread);
 	NXO_STACK_GET(nxo, ostack, a_thread);
 	if (nxo_type_get(nxo) != NXOT_HOOK) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -2732,7 +2727,7 @@ systemdict_if(cw_nxo_t *a_thread)
 	NXO_STACK_GET(exec, ostack, a_thread);
 	NXO_STACK_DOWN_GET(cond, ostack, a_thread, exec);
 	if (nxo_type_get(cond) != NXOT_BOOLEAN) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -2764,7 +2759,7 @@ systemdict_ifelse(cw_nxo_t *a_thread)
 
 	NXO_STACK_DOWN_GET(cond, ostack, a_thread, exec_if);
 	if (nxo_type_get(cond) != NXOT_BOOLEAN) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -2809,7 +2804,7 @@ systemdict_join(cw_nxo_t *a_thread)
 	ostack = nxo_thread_ostack_get(a_thread);
 	NXO_STACK_GET(thread, ostack, a_thread);
 	if (nxo_type_get(thread) != NXOT_THREAD) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -2831,7 +2826,7 @@ systemdict_known(cw_nxo_t *a_thread)
 	NXO_STACK_GET(key, ostack, a_thread);
 	NXO_STACK_DOWN_GET(dict, ostack, a_thread, key);
 	if (nxo_type_get(dict) != NXOT_DICT) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -2865,7 +2860,7 @@ systemdict_lcheck(cw_nxo_t *a_thread)
 	case NXOT_OPERATOR:
 	case NXOT_PMARK:
 	case NXOT_THREAD:
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	case NXOT_ARRAY:
 	case NXOT_DICT:
@@ -2900,7 +2895,7 @@ systemdict_le(cw_nxo_t *a_thread)
 	type_b = nxo_type_get(nxo_b);
 	if (type_a != type_b || (type_a != NXOT_INTEGER && type_a !=
 	    NXOT_STRING) || (type_b != NXOT_INTEGER && type_b != NXOT_STRING)) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -2939,7 +2934,7 @@ systemdict_length(cw_nxo_t *a_thread)
 		len = nxo_string_len_get(nxo);
 		break;
 	default:
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -2960,7 +2955,7 @@ systemdict_link(cw_nxo_t *a_thread)
 	NXO_STACK_DOWN_GET(filename, ostack, a_thread, linkname);
 	if (nxo_type_get(filename) != NXOT_STRING ||
 	    nxo_type_get(linkname) != NXOT_STRING) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -3000,26 +2995,24 @@ systemdict_link(cw_nxo_t *a_thread)
 		case EMLINK:
 		case ENOSPC:
 		case EROFS:
-			nxo_thread_error(a_thread, NXO_THREADE_IOERROR);
+			nxo_thread_nerror(a_thread, NXN_ioerror);
 			break;
 		case EEXIST:
 		case ENOENT:
 		case ENOTDIR:
 		case EOPNOTSUPP:
-			nxo_thread_error(a_thread,
-			    NXO_THREADE_UNDEFINEDFILENAME);
+			nxo_thread_nerror(a_thread, NXN_undefinedfilename);
 			break;
 		case EACCES:
 		case ENAMETOOLONG:
 		case ELOOP:
 		case EPERM:
 		case EXDEV:
-			nxo_thread_error(a_thread,
-			    NXO_THREADE_INVALIDFILEACCESS);
+			nxo_thread_nerror(a_thread, NXN_invalidfileaccess);
 			break;
 		case EFAULT:
 		default:
-			nxo_thread_error(a_thread, NXO_THREADE_UNREGISTERED);
+			nxo_thread_nerror(a_thread, NXN_unregistered);
 		}
 		return;
 	}
@@ -3042,7 +3035,7 @@ systemdict_load(cw_nxo_t *a_thread)
 
 	if (nxo_thread_dstack_search(a_thread, key, val)) {
 		nxo_stack_pop(tstack);
-		nxo_thread_error(a_thread, NXO_THREADE_UNDEFINED);
+		nxo_thread_nerror(a_thread, NXN_undefined);
 		return;
 	}
 	nxo_dup(key, val);
@@ -3059,7 +3052,7 @@ systemdict_lock(cw_nxo_t *a_thread)
 	ostack = nxo_thread_ostack_get(a_thread);
 	NXO_STACK_GET(mutex, ostack, a_thread);
 	if (nxo_type_get(mutex) != NXOT_MUTEX) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -3134,7 +3127,7 @@ systemdict_lt(cw_nxo_t *a_thread)
 	type_b = nxo_type_get(nxo_b);
 	if (type_a != type_b || (type_a != NXOT_INTEGER && type_a !=
 	    NXOT_STRING) || (type_b != NXOT_INTEGER && type_b != NXOT_STRING)) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -3162,11 +3155,11 @@ systemdict_mkdir(cw_nxo_t *a_thread)
 	NXO_STACK_DOWN_GET(path, ostack, a_thread, mode);
 	if ((nxo_type_get(mode) != NXOT_INTEGER) || nxo_type_get(path) !=
 	    NXOT_STRING) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 	if (nxo_integer_get(mode) < 0 || nxo_integer_get(mode) > 0xfff) {
-		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+		nxo_thread_nerror(a_thread, NXN_rangecheck);
 		return;
 	}
 
@@ -3192,7 +3185,7 @@ systemdict_mkdir(cw_nxo_t *a_thread)
 		case EDQUOT:
 		case ENOSPC:
 		case EROFS:
-			nxo_thread_error(a_thread, NXO_THREADE_IOERROR);
+			nxo_thread_nerror(a_thread, NXN_ioerror);
 			break;
 		case EACCES:
 		case EEXIST:
@@ -3200,12 +3193,11 @@ systemdict_mkdir(cw_nxo_t *a_thread)
 		case ENOENT:
 		case ENOTDIR:
 		case ENAMETOOLONG:
-			nxo_thread_error(a_thread,
-			    NXO_THREADE_INVALIDFILEACCESS);
+			nxo_thread_nerror(a_thread, NXN_invalidfileaccess);
 			break;
 		case EFAULT:
 		default:
-			nxo_thread_error(a_thread, NXO_THREADE_UNREGISTERED);
+			nxo_thread_nerror(a_thread, NXN_unregistered);
 		}
 		return;
 	}
@@ -3226,11 +3218,11 @@ systemdict_mod(cw_nxo_t *a_thread)
 	NXO_STACK_DOWN_GET(a, ostack, a_thread, b);
 	if (nxo_type_get(a) != NXOT_INTEGER || nxo_type_get(b) !=
 	    NXOT_INTEGER) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 	if (nxo_integer_get(b) == 0) {
-		nxo_thread_error(a_thread, NXO_THREADE_UNDEFINEDRESULT);
+		nxo_thread_nerror(a_thread, NXN_undefinedresult);
 		return;
 	}
 
@@ -3250,7 +3242,7 @@ systemdict_monitor(cw_nxo_t *a_thread)
 	NXO_STACK_GET(proc, ostack, a_thread);
 	NXO_STACK_DOWN_GET(mutex, ostack, a_thread, proc);
 	if (nxo_type_get(mutex) != NXOT_MUTEX) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -3303,7 +3295,7 @@ systemdict_mul(cw_nxo_t *a_thread)
 	NXO_STACK_DOWN_GET(a, ostack, a_thread, b);
 	if (nxo_type_get(a) != NXOT_INTEGER || nxo_type_get(b) !=
 	    NXOT_INTEGER) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -3334,16 +3326,16 @@ systemdict_ndup(cw_nxo_t *a_thread)
 	ostack = nxo_thread_ostack_get(a_thread);
 	NXO_STACK_GET(nxo, ostack, a_thread);
 	if (nxo_type_get(nxo) != NXOT_INTEGER) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 	count = nxo_integer_get(nxo);
 	if (count < 0) {
-		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+		nxo_thread_nerror(a_thread, NXN_rangecheck);
 		return;
 	}
 	if (count > nxo_stack_count(ostack) - 1) {
-		nxo_thread_error(a_thread, NXO_THREADE_STACKUNDERFLOW);
+		nxo_thread_nerror(a_thread, NXN_stackunderflow);
 		return;
 	}
 	nxo_stack_pop(ostack);
@@ -3394,7 +3386,7 @@ systemdict_neg(cw_nxo_t *a_thread)
 	
 	NXO_STACK_GET(a, ostack, a_thread);
 	if (nxo_type_get(a) != NXOT_INTEGER) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -3416,7 +3408,7 @@ systemdict_not(cw_nxo_t *a_thread)
 	else if (nxo_type_get(nxo) == NXOT_INTEGER)
 		nxo_integer_set(nxo, ~nxo_integer_get(nxo));
 	else
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 }
 
 void
@@ -3428,12 +3420,12 @@ systemdict_npop(cw_nxo_t *a_thread)
 	ostack = nxo_thread_ostack_get(a_thread);
 	NXO_STACK_GET(nxo, ostack, a_thread);
 	if (nxo_type_get(nxo) != NXOT_INTEGER) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 	count = nxo_integer_get(nxo);
 	if (count < 0) {
-		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+		nxo_thread_nerror(a_thread, NXN_rangecheck);
 		return;
 	}
 
@@ -3455,11 +3447,11 @@ systemdict_nsleep(cw_nxo_t *a_thread)
 	NXO_STACK_GET(nxo, ostack, a_thread);
 
 	if (nxo_type_get(nxo) != NXOT_INTEGER) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 	if (nxo_integer_get(nxo) <= 0) {
-		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+		nxo_thread_nerror(a_thread, NXN_rangecheck);
 		return;
 	}
 
@@ -3481,9 +3473,9 @@ systemdict_nsleep(cw_nxo_t *a_thread)
 void
 systemdict_open(cw_nxo_t *a_thread)
 {
-	cw_nxo_t		*ostack, *tstack;
-	cw_nxo_t		*name, *flags, *file;
-	cw_nxo_threade_t	error;
+	cw_nxo_t	*ostack, *tstack;
+	cw_nxo_t	*name, *flags, *file;
+	cw_nxn_t	error;
 
 	ostack = nxo_thread_ostack_get(a_thread);
 	tstack = nxo_thread_tstack_get(a_thread);
@@ -3492,7 +3484,7 @@ systemdict_open(cw_nxo_t *a_thread)
 	NXO_STACK_DOWN_GET(name, ostack, a_thread, flags);
 	if (nxo_type_get(name) != NXOT_STRING || nxo_type_get(flags) !=
 	    NXOT_STRING) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -3505,7 +3497,7 @@ systemdict_open(cw_nxo_t *a_thread)
 	    nxo_string_len_get(flags));
 	nxo_string_unlock(name);
 	if (error) {
-		nxo_thread_error(a_thread, error);
+		nxo_thread_nerror(a_thread, error);
 		return;
 	}
 
@@ -3542,7 +3534,7 @@ systemdict_or(cw_nxo_t *a_thread)
 		nxo_integer_set(nxo_a, nxo_integer_get(nxo_a) |
 		    nxo_integer_get(nxo_b));
 	} else {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -3604,16 +3596,16 @@ systemdict_ppid(cw_nxo_t *a_thread)
 void
 systemdict_print(cw_nxo_t *a_thread)
 {
-	cw_nxo_t		*ostack;
-	cw_nxo_t		*nxo, *stdout_nxo;
-	cw_nxo_threade_t	error;
+	cw_nxo_t	*ostack;
+	cw_nxo_t	*nxo, *stdout_nxo;
+	cw_nxn_t	error;
 
 	ostack = nxo_thread_ostack_get(a_thread);
 	stdout_nxo = nxo_thread_stdout_get(a_thread);
 
 	NXO_STACK_GET(nxo, ostack, a_thread);
 	if (nxo_type_get(nxo) != NXOT_STRING) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -3622,7 +3614,7 @@ systemdict_print(cw_nxo_t *a_thread)
 	    nxo_string_len_get(nxo));
 	nxo_string_unlock(nxo);
 	if (error) {
-		nxo_thread_error(a_thread, error);
+		nxo_thread_nerror(a_thread, error);
 		return;
 	}
 
@@ -3645,13 +3637,13 @@ systemdict_put(cw_nxo_t *a_thread)
 		cw_nxoi_t	index;
 
 		if (nxo_type_get(with) != NXOT_INTEGER) {
-			nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+			nxo_thread_nerror(a_thread, NXN_typecheck);
 			return;
 		}
 		index = nxo_integer_get(with);
 
 		if (index < 0 || index >= nxo_array_len_get(into)) {
-			nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+			nxo_thread_nerror(a_thread, NXN_rangecheck);
 			return;
 		}
 		nxo_array_el_set(into, what, index);
@@ -3666,21 +3658,21 @@ systemdict_put(cw_nxo_t *a_thread)
 
 		if ((nxo_type_get(with) != NXOT_INTEGER) ||
 		    nxo_type_get(what) != NXOT_INTEGER) {
-			nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+			nxo_thread_nerror(a_thread, NXN_typecheck);
 			return;
 		}
 		index = nxo_integer_get(with);
 		val = nxo_integer_get(what);
 
 		if (index < 0 || index >= nxo_string_len_get(into)) {
-			nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+			nxo_thread_nerror(a_thread, NXN_rangecheck);
 			return;
 		}
 		nxo_string_el_set(into, val, index);
 		break;
 	}
 	default:
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 	nxo_stack_npop(ostack, 3);
@@ -3700,12 +3692,12 @@ systemdict_putinterval(cw_nxo_t *a_thread)
 
 	if (nxo_type_get(with) != NXOT_INTEGER || nxo_type_get(what) !=
 	    nxo_type_get(into)) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 	index = nxo_integer_get(with);
 	if (index < 0) {
-		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+		nxo_thread_nerror(a_thread, NXN_rangecheck);
 		return;
 	}
 
@@ -3719,7 +3711,7 @@ systemdict_putinterval(cw_nxo_t *a_thread)
 		el = nxo_stack_push(tstack);
 		len = nxo_array_len_get(what);
 		if (index + len > nxo_array_len_get(into)) {
-			nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+			nxo_thread_nerror(a_thread, NXN_rangecheck);
 			nxo_stack_pop(tstack);
 			return;
 		}
@@ -3737,7 +3729,7 @@ systemdict_putinterval(cw_nxo_t *a_thread)
 		str = nxo_string_get(what);
 		len = nxo_string_len_get(what);
 		if (index + len > nxo_string_len_get(into)) {
-			nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+			nxo_thread_nerror(a_thread, NXN_rangecheck);
 			return;
 		}
 
@@ -3749,7 +3741,7 @@ systemdict_putinterval(cw_nxo_t *a_thread)
 		break;
 	}
 	default:
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 	nxo_stack_npop(ostack, 3);
@@ -3764,7 +3756,7 @@ systemdict_pwd(cw_nxo_t *a_thread)
 
 	str = getcwd(NULL, 0);
 	if (str == NULL) {
-		nxo_thread_error(a_thread, NXO_THREADE_INVALIDACCESS);
+		nxo_thread_nerror(a_thread, NXN_invalidaccess);
 		return;
 	}
 
@@ -3823,7 +3815,7 @@ systemdict_read(cw_nxo_t *a_thread)
 		nread = nxo_file_read(file, 1, &val);
 		if (nread == -1) {
 			nxo_stack_npop(ostack, 2);
-			nxo_thread_error(a_thread, NXO_THREADE_IOERROR);
+			nxo_thread_nerror(a_thread, NXN_ioerror);
 			return;
 		}
 
@@ -3846,7 +3838,7 @@ systemdict_read(cw_nxo_t *a_thread)
 		string = file;
 		NXO_STACK_DOWN_GET(file, ostack, a_thread, string);
 		if (nxo_type_get(file) != NXOT_FILE) {
-			nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+			nxo_thread_nerror(a_thread, NXN_typecheck);
 			return;
 		}
 
@@ -3855,7 +3847,7 @@ systemdict_read(cw_nxo_t *a_thread)
 		    nxo_string_get(string));
 		nxo_string_unlock(string);
 		if (nread == -1) {
-			nxo_thread_error(a_thread, NXO_THREADE_IOERROR);
+			nxo_thread_nerror(a_thread, NXN_ioerror);
 			return;
 		}
 
@@ -3889,7 +3881,7 @@ systemdict_read(cw_nxo_t *a_thread)
 		break;
 	}
 	default:
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 }
@@ -3897,17 +3889,17 @@ systemdict_read(cw_nxo_t *a_thread)
 void
 systemdict_readline(cw_nxo_t *a_thread)
 {
-	cw_nxo_t		*ostack, *tstack;
-	cw_nxo_t		*nxo, *tfile;
-	cw_nxo_threade_t	error;
-	cw_bool_t		eof;
+	cw_nxo_t	*ostack, *tstack;
+	cw_nxo_t	*nxo, *tfile;
+	cw_nxn_t	error;
+	cw_bool_t	eof;
 
 	ostack = nxo_thread_ostack_get(a_thread);
 	tstack = nxo_thread_tstack_get(a_thread);
 
 	NXO_STACK_GET(nxo, ostack, a_thread);
 	if (nxo_type_get(nxo) != NXOT_FILE) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -3917,7 +3909,7 @@ systemdict_readline(cw_nxo_t *a_thread)
 	    nxo, &eof);
 	if (error) {
 		nxo_stack_pop(tstack);
-		nxo_thread_error(a_thread, error);
+		nxo_thread_nerror(a_thread, error);
 		return;
 	}
 	nxo_stack_pop(tstack);
@@ -3956,12 +3948,12 @@ systemdict_rename(cw_nxo_t *a_thread)
 
 	if (nxo_type_get(string_from) != NXOT_STRING ||
 	    nxo_type_get(string_to) != NXOT_STRING) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
 	if (nxo_string_len_get(string_from) >= sizeof(str_from)) {
-		nxo_thread_error(a_thread, NXO_THREADE_LIMITCHECK);
+		nxo_thread_nerror(a_thread, NXN_limitcheck);
 		return;
 	}
 	nbytes = nxo_string_len_get(string_from);
@@ -3971,7 +3963,7 @@ systemdict_rename(cw_nxo_t *a_thread)
 	str_from[nbytes] = '\0';
 
 	if (nxo_string_len_get(string_to) >= sizeof(str_to)) {
-		nxo_thread_error(a_thread, NXO_THREADE_LIMITCHECK);
+		nxo_thread_nerror(a_thread, NXN_limitcheck);
 		return;
 	}
 	nbytes = nxo_string_len_get(string_to);
@@ -3986,15 +3978,13 @@ systemdict_rename(cw_nxo_t *a_thread)
 		case EPERM:
 		case EROFS:
 		case EINVAL:
-			nxo_thread_error(a_thread,
-			    NXO_THREADE_INVALIDFILEACCESS);
+			nxo_thread_nerror(a_thread, NXN_invalidfileaccess);
 		case ENAMETOOLONG:
 		case ENOENT:
 		case ENOTDIR:
-			nxo_thread_error(a_thread,
-			    NXO_THREADE_UNDEFINEDFILENAME);
+			nxo_thread_nerror(a_thread, NXN_undefinedfilename);
 		default:
-			nxo_thread_error(a_thread, NXO_THREADE_IOERROR);
+			nxo_thread_nerror(a_thread, NXN_ioerror);
 		}
 		return;
 	}
@@ -4018,13 +4008,13 @@ systemdict_repeat(cw_nxo_t *a_thread)
 	NXO_STACK_GET(exec, ostack, a_thread);
 	NXO_STACK_DOWN_GET(count, ostack, a_thread, exec);
 	if (nxo_type_get(count) != NXOT_INTEGER) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
 	cnt = nxo_integer_get(count);
 	if (cnt < 0) {
-		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+		nxo_thread_nerror(a_thread, NXN_rangecheck);
 		return;
 	}
 
@@ -4081,7 +4071,7 @@ systemdict_rmdir(cw_nxo_t *a_thread)
 	tstack = nxo_thread_tstack_get(a_thread);
 	NXO_STACK_GET(path, ostack, a_thread);
 	if (nxo_type_get(path) != NXOT_STRING) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -4107,7 +4097,7 @@ systemdict_rmdir(cw_nxo_t *a_thread)
 		case EIO:
 		case ENOTEMPTY:
 		case EROFS:
-			nxo_thread_error(a_thread, NXO_THREADE_IOERROR);
+			nxo_thread_nerror(a_thread, NXN_ioerror);
 			break;
 		case EACCES:
 		case ELOOP:
@@ -4115,12 +4105,11 @@ systemdict_rmdir(cw_nxo_t *a_thread)
 		case ENOTDIR:
 		case ENAMETOOLONG:
 		case EPERM:
-			nxo_thread_error(a_thread,
-			    NXO_THREADE_INVALIDFILEACCESS);
+			nxo_thread_nerror(a_thread, NXN_invalidfileaccess);
 			break;
 		case EFAULT:
 		default:
-			nxo_thread_error(a_thread, NXO_THREADE_UNREGISTERED);
+			nxo_thread_nerror(a_thread, NXN_unregistered);
 		}
 		return;
 	}
@@ -4146,7 +4135,7 @@ systemdict_sclear(cw_nxo_t *a_thread)
 	ostack = nxo_thread_ostack_get(a_thread);
 	NXO_STACK_GET(stack, ostack, a_thread);
 	if (nxo_type_get(stack) != NXOT_STACK) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -4166,7 +4155,7 @@ systemdict_scleartomark(cw_nxo_t *a_thread)
 	ostack = nxo_thread_ostack_get(a_thread);
 	NXO_STACK_GET(stack, ostack, a_thread);
 	if (nxo_type_get(stack) != NXOT_STACK) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -4177,7 +4166,7 @@ systemdict_scleartomark(cw_nxo_t *a_thread)
 			break;
 	}
 	if (i == depth) {
-		nxo_thread_error(a_thread, NXO_THREADE_UNMATCHEDMARK);
+		nxo_thread_nerror(a_thread, NXN_unmatchedmark);
 		return;
 	}
 
@@ -4194,7 +4183,7 @@ systemdict_scount(cw_nxo_t *a_thread)
 	ostack = nxo_thread_ostack_get(a_thread);
 	NXO_STACK_GET(nxo, ostack, a_thread);
 	if (nxo_type_get(nxo) != NXOT_STACK) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -4210,7 +4199,7 @@ systemdict_scounttomark(cw_nxo_t *a_thread)
 	ostack = nxo_thread_ostack_get(a_thread);
 	NXO_STACK_GET(stack, ostack, a_thread);
 	if (nxo_type_get(stack) != NXOT_STACK) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -4221,7 +4210,7 @@ systemdict_scounttomark(cw_nxo_t *a_thread)
 			break;
 	}
 	if (i == depth) {
-		nxo_thread_error(a_thread, NXO_THREADE_UNMATCHEDMARK);
+		nxo_thread_nerror(a_thread, NXN_unmatchedmark);
 		return;
 	}
 
@@ -4236,7 +4225,7 @@ systemdict_sdup(cw_nxo_t *a_thread)
 	ostack = nxo_thread_ostack_get(a_thread);
 	NXO_STACK_GET(stack, ostack, a_thread);
 	if (nxo_type_get(stack) != NXOT_STACK) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -4251,9 +4240,9 @@ systemdict_sdup(cw_nxo_t *a_thread)
 void
 systemdict_seek(cw_nxo_t *a_thread)
 {
-	cw_nxo_t		*ostack;
-	cw_nxo_t		*file, *position;
-	cw_nxo_threade_t	error;
+	cw_nxo_t	*ostack;
+	cw_nxo_t	*file, *position;
+	cw_nxn_t	error;
 
 	ostack = nxo_thread_ostack_get(a_thread);
 
@@ -4262,13 +4251,13 @@ systemdict_seek(cw_nxo_t *a_thread)
 	
 	if (nxo_type_get(file) != NXOT_FILE || nxo_type_get(position) !=
 	    NXOT_INTEGER) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
 	error = nxo_file_position_set(file, nxo_integer_get(position));
 	if (error) {
-		nxo_thread_error(a_thread, error);
+		nxo_thread_nerror(a_thread, error);
 		return;
 	}
 
@@ -4300,12 +4289,12 @@ systemdict_setegid(cw_nxo_t *a_thread)
 	ostack = nxo_thread_ostack_get(a_thread);
 	NXO_STACK_GET(nxo, ostack, a_thread);;
 	if (nxo_type_get(nxo) != NXOT_INTEGER) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 	egid = nxo_integer_get(nxo);
 	if (egid < 0) {
-		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+		nxo_thread_nerror(a_thread, NXN_rangecheck);
 		return;
 	}
 
@@ -4330,7 +4319,7 @@ systemdict_setenv(cw_nxo_t *a_thread)
 	NXO_STACK_GET(val, ostack, a_thread);
 	NXO_STACK_DOWN_GET(key, ostack, a_thread, val);
 	if (nxo_type_get(key) != NXOT_NAME) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 	if (nxo_type_get(val) != NXOT_STRING) {
@@ -4381,12 +4370,12 @@ systemdict_seteuid(cw_nxo_t *a_thread)
 	ostack = nxo_thread_ostack_get(a_thread);
 	NXO_STACK_GET(nxo, ostack, a_thread);;
 	if (nxo_type_get(nxo) != NXOT_INTEGER) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 	euid = nxo_integer_get(nxo);
 	if (euid < 0) {
-		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+		nxo_thread_nerror(a_thread, NXN_rangecheck);
 		return;
 	}
 
@@ -4404,12 +4393,12 @@ systemdict_setgid(cw_nxo_t *a_thread)
 	ostack = nxo_thread_ostack_get(a_thread);
 	NXO_STACK_GET(nxo, ostack, a_thread);;
 	if (nxo_type_get(nxo) != NXOT_INTEGER) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 	gid = nxo_integer_get(nxo);
 	if (gid < 0) {
-		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+		nxo_thread_nerror(a_thread, NXN_rangecheck);
 		return;
 	}
 
@@ -4428,7 +4417,7 @@ systemdict_setlocking(cw_nxo_t *a_thread)
 	ostack = nxo_thread_ostack_get(a_thread);
 	NXO_STACK_GET(nxo, ostack, a_thread);
 	if (nxo_type_get(nxo) != NXOT_BOOLEAN) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 	nxo_thread_setlocking(a_thread, nxo_boolean_get(nxo));
@@ -4447,12 +4436,12 @@ systemdict_setuid(cw_nxo_t *a_thread)
 	ostack = nxo_thread_ostack_get(a_thread);
 	NXO_STACK_GET(nxo, ostack, a_thread);;
 	if (nxo_type_get(nxo) != NXOT_INTEGER) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 	uid = nxo_integer_get(nxo);
 	if (uid < 0) {
-		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+		nxo_thread_nerror(a_thread, NXN_rangecheck);
 		return;
 	}
 
@@ -4469,12 +4458,12 @@ systemdict_sexch(cw_nxo_t *a_thread)
 	ostack = nxo_thread_ostack_get(a_thread);
 	NXO_STACK_GET(stack, ostack, a_thread);
 	if (nxo_type_get(stack) != NXOT_STACK) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
 	if (nxo_stack_exch(stack)) 
-		nxo_thread_error(a_thread, NXO_THREADE_STACKUNDERFLOW);
+		nxo_thread_nerror(a_thread, NXN_stackunderflow);
 
 	nxo_stack_pop(ostack);
 }
@@ -4493,7 +4482,7 @@ systemdict_shift(cw_nxo_t *a_thread)
 
 	if (nxo_type_get(integer) != NXOT_INTEGER || nxo_type_get(shift) !=
 	    NXOT_INTEGER) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 	nshift = nxo_integer_get(shift);
@@ -4527,7 +4516,7 @@ systemdict_signal(cw_nxo_t *a_thread)
 	ostack = nxo_thread_ostack_get(a_thread);
 	NXO_STACK_GET(condition, ostack, a_thread);
 	if (nxo_type_get(condition) != NXOT_CONDITION) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -4548,12 +4537,12 @@ systemdict_sindex(cw_nxo_t *a_thread)
 	NXO_STACK_DOWN_GET(stack, ostack, a_thread, nxo);
 	if (nxo_type_get(nxo) != NXOT_INTEGER || nxo_type_get(stack) !=
 	    NXOT_STACK) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 	index = nxo_integer_get(nxo);
 	if (index < 0) {
-		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+		nxo_thread_nerror(a_thread, NXN_rangecheck);
 		return;
 	}
 
@@ -4572,7 +4561,7 @@ systemdict_spop(cw_nxo_t *a_thread)
 	ostack = nxo_thread_ostack_get(a_thread);
 	NXO_STACK_GET(stack, ostack, a_thread);
 	if (nxo_type_get(stack) != NXOT_STACK) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -4593,7 +4582,7 @@ systemdict_spush(cw_nxo_t *a_thread)
 	NXO_STACK_GET(nxo, ostack, a_thread);
 	NXO_STACK_DOWN_GET(stack, ostack, a_thread, nxo);
 	if (nxo_type_get(stack) != NXOT_STACK) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -4614,12 +4603,12 @@ systemdict_srand(cw_nxo_t *a_thread)
 
 	NXO_STACK_GET(nxo, ostack, a_thread);
 	if (nxo_type_get(nxo) != NXOT_INTEGER) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 	seed = nxo_integer_get(nxo);
 	if (seed < 0) {
-		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+		nxo_thread_nerror(a_thread, NXN_rangecheck);
 		return;
 	}
 
@@ -4638,7 +4627,7 @@ systemdict_sroll(cw_nxo_t *a_thread)
 	
 	NXO_STACK_GET(nxo, ostack, a_thread);
 	if (nxo_type_get(nxo) != NXOT_INTEGER) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 	amount = nxo_integer_get(nxo);
@@ -4646,17 +4635,17 @@ systemdict_sroll(cw_nxo_t *a_thread)
 	NXO_STACK_DOWN_GET(stack, ostack, a_thread, nxo);
 	if (nxo_type_get(nxo) != NXOT_INTEGER || nxo_type_get(stack) !=
 	    NXOT_STACK) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 	count = nxo_integer_get(nxo);
 	if (count < 1) {
-		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+		nxo_thread_nerror(a_thread, NXN_rangecheck);
 		return;
 	}
 
 	if (nxo_stack_roll(stack, count, amount)) {
-		nxo_thread_error(a_thread, NXO_THREADE_STACKUNDERFLOW);
+		nxo_thread_nerror(a_thread, NXN_stackunderflow);
 		return;
 	}
 
@@ -4732,7 +4721,7 @@ systemdict_status(cw_nxo_t *a_thread)
 	NXO_STACK_GET(file, ostack, a_thread);
 	if (nxo_type_get(file) != NXOT_FILE && nxo_type_get(file) !=
 	    NXOT_STRING) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -4741,8 +4730,7 @@ systemdict_status(cw_nxo_t *a_thread)
 
 		fd = nxo_file_fd_get(file);
 		if (fd < 0) {
-			nxo_thread_error(a_thread,
-			    NXO_THREADE_INVALIDFILEACCESS);
+			nxo_thread_nerror(a_thread, NXN_invalidfileaccess);
 			return;
 		}
 
@@ -4770,20 +4758,19 @@ systemdict_status(cw_nxo_t *a_thread)
 	if (error == -1) {
 		switch (errno) {
 		case EIO:
-			nxo_thread_error(a_thread, NXO_THREADE_IOERROR);
+			nxo_thread_nerror(a_thread, NXN_ioerror);
 			break;
 		case EACCES:
 		case ELOOP:
 		case ENAMETOOLONG:
 		case ENOENT:
 		case ENOTDIR:
-			nxo_thread_error(a_thread,
-			    NXO_THREADE_INVALIDFILEACCESS);
+			nxo_thread_nerror(a_thread, NXN_invalidfileaccess);
 			break;
 		case EBADF:
 		case EFAULT:
 		default:
-			nxo_thread_error(a_thread, NXO_THREADE_UNREGISTERED);
+			nxo_thread_nerror(a_thread, NXN_unregistered);
 		}
 		return;
 	}
@@ -4971,7 +4958,7 @@ systemdict_stopped(cw_nxo_t *a_thread)
 		 * error, do the equivalent of what the quit operator does, so
 		 * that we'll unwind to the innermost start context.
 		 */
-		nxo_thread_error(a_thread, NXO_THREADE_INVALIDEXIT);
+		nxo_thread_nerror(a_thread, NXN_invalidexit);
 
 		xep_handled();
 
@@ -4994,12 +4981,12 @@ systemdict_string(cw_nxo_t *a_thread)
 	
 	NXO_STACK_GET(nxo, ostack, a_thread);
 	if (nxo_type_get(nxo) != NXOT_INTEGER) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 	len = nxo_integer_get(nxo);
 	if (len < 0) {
-		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+		nxo_thread_nerror(a_thread, NXN_rangecheck);
 		return;
 	}
 
@@ -5019,7 +5006,7 @@ systemdict_sub(cw_nxo_t *a_thread)
 	NXO_STACK_DOWN_GET(a, ostack, a_thread, b);
 	if (nxo_type_get(a) != NXOT_INTEGER || nxo_type_get(b) !=
 	    NXOT_INTEGER) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -5057,7 +5044,7 @@ systemdict_sym_rp(cw_nxo_t *a_thread)
 			break;
 	}
 	if (i == depth) {
-		nxo_thread_error(a_thread, NXO_THREADE_UNMATCHEDFINO);
+		nxo_thread_nerror(a_thread, NXN_unmatchedfino);
 		return;
 	}
 
@@ -5119,11 +5106,11 @@ systemdict_sym_gt(cw_nxo_t *a_thread)
 			break;
 	}
 	if (i == depth) {
-		nxo_thread_error(a_thread, NXO_THREADE_UNMATCHEDMARK);
+		nxo_thread_nerror(a_thread, NXN_unmatchedmark);
 		return;
 	}
 	if ((i & 1) == 1) {
-		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+		nxo_thread_nerror(a_thread, NXN_rangecheck);
 		return;
 	}
 
@@ -5175,7 +5162,7 @@ systemdict_sym_rb(cw_nxo_t *a_thread)
 			break;
 	}
 	if (i == depth) {
-		nxo_thread_error(a_thread, NXO_THREADE_UNMATCHEDMARK);
+		nxo_thread_nerror(a_thread, NXN_unmatchedmark);
 		return;
 	}
 
@@ -5222,7 +5209,7 @@ systemdict_symlink(cw_nxo_t *a_thread)
 	NXO_STACK_DOWN_GET(filename, ostack, a_thread, linkname);
 	if (nxo_type_get(filename) != NXOT_STRING ||
 	    nxo_type_get(linkname) != NXOT_STRING) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -5261,23 +5248,21 @@ systemdict_symlink(cw_nxo_t *a_thread)
 		case EMLINK:
 		case ENOSPC:
 		case EROFS:
-			nxo_thread_error(a_thread, NXO_THREADE_IOERROR);
+			nxo_thread_nerror(a_thread, NXN_ioerror);
 			break;
 		case EEXIST:
 		case ENOENT:
 		case ENOTDIR:
-			nxo_thread_error(a_thread,
-			    NXO_THREADE_UNDEFINEDFILENAME);
+			nxo_thread_nerror(a_thread, NXN_undefinedfilename);
 			break;
 		case EACCES:
 		case ELOOP:
 		case ENAMETOOLONG:
-			nxo_thread_error(a_thread,
-			    NXO_THREADE_INVALIDFILEACCESS);
+			nxo_thread_nerror(a_thread, NXN_invalidfileaccess);
 			break;
 		case EFAULT:
 		default:
-			nxo_thread_error(a_thread, NXO_THREADE_UNREGISTERED);
+			nxo_thread_nerror(a_thread, NXN_unregistered);
 		}
 		return;
 	}
@@ -5298,13 +5283,13 @@ systemdict_tell(cw_nxo_t *a_thread)
 	NXO_STACK_GET(file, ostack, a_thread);
 	
 	if (nxo_type_get(file) != NXOT_FILE) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
 	position = nxo_file_position_get(file);
 	if (position == -1) {
-		nxo_thread_error(a_thread, NXO_THREADE_IOERROR);
+		nxo_thread_nerror(a_thread, NXN_ioerror);
 		return;
 	}
 	nxo_integer_new(file, position);
@@ -5325,11 +5310,11 @@ systemdict_test(cw_nxo_t *a_thread)
 	NXO_STACK_DOWN_GET(file, ostack, a_thread, test);
 	if ((nxo_type_get(file) != NXOT_FILE && nxo_type_get(file) !=
 	    NXOT_STRING) || nxo_type_get(test) != NXOT_STRING) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 	if (nxo_string_len_get(test) != 1) {
-		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+		nxo_thread_nerror(a_thread, NXN_rangecheck);
 		return;
 	}
 	nxo_string_el_get(test, 0, &c);
@@ -5339,7 +5324,7 @@ systemdict_test(cw_nxo_t *a_thread)
 	case 'L': case 'O': case 'G': case 'S':
 		break;
 	default:
-		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+		nxo_thread_nerror(a_thread, NXN_rangecheck);
 		return;
 	}
 
@@ -5351,8 +5336,8 @@ systemdict_test(cw_nxo_t *a_thread)
 	if (nxo_type_get(file) == NXOT_FILE) {
 		fd = nxo_file_fd_get(file);
 		if (fd < 0) {
-			nxo_thread_error(a_thread,
-			    NXO_THREADE_INVALIDFILEACCESS);
+			nxo_thread_nerror(a_thread,
+			    NXN_invalidfileaccess);
 			return;
 		}
 
@@ -5392,16 +5377,15 @@ systemdict_test(cw_nxo_t *a_thread)
 			result = FALSE;
 			break;
 		case EIO:
-			nxo_thread_error(a_thread, NXO_THREADE_IOERROR);
+			nxo_thread_nerror(a_thread, NXN_ioerror);
 			return;
 		case ELOOP:
 		case ENAMETOOLONG:
-			nxo_thread_error(a_thread,
-			    NXO_THREADE_INVALIDFILEACCESS);
+			nxo_thread_nerror(a_thread, NXN_invalidfileaccess);
 			return;
 		case EBADF:
 		case EFAULT:
-			nxo_thread_error(a_thread, NXO_THREADE_UNREGISTERED);
+			nxo_thread_nerror(a_thread, NXN_unregistered);
 			return;
 		}
 	} else {
@@ -5506,7 +5490,7 @@ systemdict_thread(cw_nxo_t *a_thread)
 	NXO_STACK_GET(entry, ostack, a_thread);
 	NXO_STACK_DOWN_GET(stack, ostack, a_thread, entry);
 	if (nxo_type_get(stack) != NXOT_STACK) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -5540,11 +5524,11 @@ systemdict_timedwait(cw_nxo_t *a_thread)
 	if (nxo_type_get(condition) != NXOT_CONDITION ||
 	    nxo_type_get(mutex) != NXOT_MUTEX || nxo_type_get(nsecs) !=
 	    NXOT_INTEGER) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 	if (nxo_integer_get(nsecs) < 0) {
-		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+		nxo_thread_nerror(a_thread, NXN_rangecheck);
 		return;
 	}
 
@@ -5713,7 +5697,7 @@ systemdict_token(cw_nxo_t *a_thread)
 		break;
 	}
 	default:
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 }
@@ -5722,28 +5706,28 @@ systemdict_token(cw_nxo_t *a_thread)
 void
 systemdict_truncate(cw_nxo_t *a_thread)
 {
-	cw_nxo_t		*ostack;
-	cw_nxo_t		*file, *length;
-	cw_nxoi_t		len;
-	cw_nxo_threade_t	error;
+	cw_nxo_t	*ostack;
+	cw_nxo_t	*file, *length;
+	cw_nxoi_t	len;
+	cw_nxn_t	error;
 
 	ostack = nxo_thread_ostack_get(a_thread);
 	NXO_STACK_GET(length, ostack, a_thread);
 	NXO_STACK_DOWN_GET(file, ostack, a_thread, length);
 	if (nxo_type_get(file) != NXOT_FILE || nxo_type_get(length) !=
 	    NXOT_INTEGER) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 	len = nxo_integer_get(length);
 	if (len < 0) {
-		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+		nxo_thread_nerror(a_thread, NXN_rangecheck);
 		return;
 	}
 
 	error = nxo_file_truncate(file, len);
 	if (error) {
-		nxo_thread_error(a_thread, error);
+		nxo_thread_nerror(a_thread, error);
 		return;
 	}
 
@@ -5762,7 +5746,7 @@ systemdict_trylock(cw_nxo_t *a_thread)
 	ostack = nxo_thread_ostack_get(a_thread);
 	NXO_STACK_GET(mutex, ostack, a_thread);
 	if (nxo_type_get(mutex) != NXOT_MUTEX) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -5843,7 +5827,7 @@ systemdict_undef(cw_nxo_t *a_thread)
 	NXO_STACK_GET(key, ostack, a_thread);
 	NXO_STACK_DOWN_GET(dict, ostack, a_thread, key);
 	if (nxo_type_get(dict) != NXOT_DICT) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -5865,7 +5849,7 @@ systemdict_unlink(cw_nxo_t *a_thread)
 	NXO_STACK_GET(filename, ostack, a_thread);
 
 	if (nxo_type_get(filename) != NXOT_STRING) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -5892,22 +5876,20 @@ systemdict_unlink(cw_nxo_t *a_thread)
 		case EBUSY:
 		case ELOOP:
 		case EROFS:
-			nxo_thread_error(a_thread, NXO_THREADE_IOERROR);
+			nxo_thread_nerror(a_thread, NXN_ioerror);
 			break;
 		case ENOENT:
 		case ENOTDIR:
 		case ENAMETOOLONG:
-			nxo_thread_error(a_thread,
-			    NXO_THREADE_UNDEFINEDFILENAME);
+			nxo_thread_nerror(a_thread, NXN_undefinedfilename);
 			break;
 		case EACCES:
 		case EPERM:
-			nxo_thread_error(a_thread,
-			    NXO_THREADE_INVALIDFILEACCESS);
+			nxo_thread_nerror(a_thread, NXN_invalidfileaccess);
 			break;
 		case EFAULT:
 		default:
-			nxo_thread_error(a_thread, NXO_THREADE_UNREGISTERED);
+			nxo_thread_nerror(a_thread, NXN_unregistered);
 		}
 		return;
 	}
@@ -5926,7 +5908,7 @@ systemdict_unlock(cw_nxo_t *a_thread)
 	ostack = nxo_thread_ostack_get(a_thread);
 	NXO_STACK_GET(mutex, ostack, a_thread);
 	if (nxo_type_get(mutex) != NXOT_MUTEX) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -5951,7 +5933,7 @@ systemdict_unsetenv(cw_nxo_t *a_thread)
 	envdict = nx_envdict_get(nx);
 	NXO_STACK_GET(key, ostack, a_thread);
 	if (nxo_type_get(key) != NXOT_NAME) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -6003,7 +5985,7 @@ systemdict_wait(cw_nxo_t *a_thread)
 	NXO_STACK_DOWN_GET(condition, ostack, a_thread, mutex);
 	if (nxo_type_get(condition) != NXOT_CONDITION ||
 	    nxo_type_get(mutex) != NXOT_MUTEX) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -6026,7 +6008,7 @@ systemdict_waitpid(cw_nxo_t *a_thread)
 	ostack = nxo_thread_ostack_get(a_thread);
 	NXO_STACK_GET(nxo, ostack, a_thread);
 	if (nxo_type_get(nxo) != NXOT_INTEGER) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 	pid = nxo_integer_get(nxo);
@@ -6080,9 +6062,9 @@ systemdict_where(cw_nxo_t *a_thread)
 void
 systemdict_write(cw_nxo_t *a_thread)
 {
-	cw_nxo_t		*ostack;
-	cw_nxo_t		*file, *value;
-	cw_nxo_threade_t	error;
+	cw_nxo_t	*ostack;
+	cw_nxo_t	*file, *value;
+	cw_nxn_t	error;
 
 	ostack = nxo_thread_ostack_get(a_thread);
 
@@ -6090,7 +6072,7 @@ systemdict_write(cw_nxo_t *a_thread)
 	NXO_STACK_DOWN_GET(file, ostack, a_thread, value);
 	
 	if (nxo_type_get(file) != NXOT_FILE) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -6101,7 +6083,7 @@ systemdict_write(cw_nxo_t *a_thread)
 		val = (cw_uint8_t)nxo_integer_get(value);
 		error = nxo_file_write(file, &val, 1);
 		if (error) {
-			nxo_thread_error(a_thread, error);
+			nxo_thread_nerror(a_thread, error);
 			return;
 		}
 		break;
@@ -6112,12 +6094,12 @@ systemdict_write(cw_nxo_t *a_thread)
 		    nxo_string_len_get(value));
 		nxo_string_unlock(value);
 		if (error) {
-			nxo_thread_error(a_thread, error);
+			nxo_thread_nerror(a_thread, error);
 			return;
 		}
 		break;
 	default:
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -6168,7 +6150,7 @@ systemdict_xor(cw_nxo_t *a_thread)
 		nxo_integer_set(nxo_a, nxo_integer_get(nxo_a) ^
 		    nxo_integer_get(nxo_b));
 	} else {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 

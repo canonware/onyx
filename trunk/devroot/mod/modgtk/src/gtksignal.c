@@ -145,24 +145,24 @@ nx_gtk_signal_connect (cw_nxo_t *a_thread)
 
   NXO_STACK_GET (w_hook, ostack, a_thread);
   if (nxo_type_get(w_hook) != NXOT_HOOK) {
-    nxo_thread_error (a_thread, NXO_THREADE_TYPECHECK);
+    nxo_thread_nerror (a_thread, NXN_typecheck);
     return;
   }
   w = nxo_hook_data_get (w_hook);
   if (!GTK_IS_OBJECT (w)) {
-    nxo_thread_error (a_thread, NXO_THREADE_TYPECHECK);
+    nxo_thread_nerror (a_thread, NXN_typecheck);
     return;
   }
 
   NXO_STACK_NGET (sig, ostack, a_thread, 1);
   if (nxo_type_get(sig) != NXOT_STRING) {
-    nxo_thread_error (a_thread, NXO_THREADE_TYPECHECK);
+    nxo_thread_nerror (a_thread, NXN_typecheck);
     return;
   }
 
   NXO_STACK_NGET (code, ostack, a_thread, 2);
   if (nxo_type_get(sig) != NXOT_STRING) {
-    nxo_thread_error (a_thread, NXO_THREADE_TYPECHECK);
+    nxo_thread_nerror (a_thread, NXN_typecheck);
     return;
   }
 

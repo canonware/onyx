@@ -292,7 +292,7 @@ systemdict_inline_add(cw_nxo_t *a_thread)
 	NXO_STACK_DOWN_GET(a, ostack, a_thread, b);
 	if (nxo_type_get(a) != NXOT_INTEGER || nxo_type_get(b) !=
 	    NXOT_INTEGER) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -321,7 +321,7 @@ systemdict_inline_exch(cw_nxo_t *a_thread)
 	ostack = nxo_thread_ostack_get(a_thread);
 
 	if (nxo_stack_exch(ostack))
-		nxo_thread_error(a_thread, NXO_THREADE_STACKUNDERFLOW);
+		nxo_thread_nerror(a_thread, NXN_stackunderflow);
 }
 
 _CW_INLINE void
@@ -334,12 +334,12 @@ systemdict_inline_index(cw_nxo_t *a_thread)
 	ostack = nxo_thread_ostack_get(a_thread);
 	NXO_STACK_GET(nxo, ostack, a_thread);
 	if (nxo_type_get(nxo) != NXOT_INTEGER) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 	index = nxo_integer_get(nxo);
 	if (index < 0) {
-		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+		nxo_thread_nerror(a_thread, NXN_rangecheck);
 		return;
 	}
 
@@ -368,18 +368,18 @@ systemdict_inline_roll(cw_nxo_t *a_thread)
 
 	NXO_STACK_GET(nxo, ostack, a_thread);
 	if (nxo_type_get(nxo) != NXOT_INTEGER) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 	amount = nxo_integer_get(nxo);
 	NXO_STACK_DOWN_GET(nxo, ostack, a_thread, nxo);
 	if (nxo_type_get(nxo) != NXOT_INTEGER) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 	count = nxo_integer_get(nxo);
 	if (count < 1) {
-		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+		nxo_thread_nerror(a_thread, NXN_rangecheck);
 		return;
 	}
 
@@ -396,7 +396,7 @@ systemdict_inline_roll(cw_nxo_t *a_thread)
 		nxo = nxo_stack_push(ostack);
 		nxo_integer_new(nxo, amount);
 
-		nxo_thread_error(a_thread, NXO_THREADE_STACKUNDERFLOW);
+		nxo_thread_nerror(a_thread, NXN_stackunderflow);
 	}
 }
 #endif	/* (defined(_CW_USE_INLINES) || defined(_SYSTEMDICT_C_)) */

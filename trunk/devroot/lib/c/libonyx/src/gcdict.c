@@ -111,7 +111,7 @@ gcdict_setactive(cw_nxo_t *a_thread)
 	ostack = nxo_thread_ostack_get(a_thread);
 	NXO_STACK_GET(active, ostack, a_thread);
 	if (nxo_type_get(active) != NXOT_BOOLEAN) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
@@ -131,11 +131,11 @@ gcdict_setperiod(cw_nxo_t *a_thread)
 	ostack = nxo_thread_ostack_get(a_thread);
 	NXO_STACK_GET(period, ostack, a_thread);
 	if (nxo_type_get(period) != NXOT_INTEGER) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 	if (nxo_integer_get(period) < 0 || nxo_integer_get(period) > UINT_MAX) {
-		nxo_thread_error(a_thread, NXO_THREADE_LIMITCHECK);
+		nxo_thread_nerror(a_thread, NXN_limitcheck);
 		return;
 	}
 
@@ -155,12 +155,12 @@ gcdict_setthreshold(cw_nxo_t *a_thread)
 	ostack = nxo_thread_ostack_get(a_thread);
 	NXO_STACK_GET(threshold, ostack, a_thread);
 	if (nxo_type_get(threshold) != NXOT_INTEGER) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 	if (nxo_integer_get(threshold) < 0 || nxo_integer_get(threshold) >
 	    UINT_MAX) {
-		nxo_thread_error(a_thread, NXO_THREADE_LIMITCHECK);
+		nxo_thread_nerror(a_thread, NXN_limitcheck);
 		return;
 	}
 

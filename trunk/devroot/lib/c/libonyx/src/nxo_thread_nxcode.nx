@@ -46,31 +46,9 @@ def
 
 % Define and initialize currenterror.
 /errordict <
-	[
-		/dstackunderflow
-		/estackoverflow
-		/invalidaccess
-		/invalidcontext
-		/invalidexit
-		/invalidfileaccess
-		/ioerror
-		/limitcheck
-		/rangecheck
-		/stackunderflow
-		/syntaxerror
-		/typecheck
-		/undefined
-		/undefinedfilename
-		/undefinedresult
-		/unmatchedmark
-		/unmatchedfino
-		/unregistered
-	]{
-		{/errordict load /handleerror get eval}
-	} foreach
-
 	/stop /stop load
 
+	% - handleerror -
 	/handleerror {
 		/currenterror load begin
 

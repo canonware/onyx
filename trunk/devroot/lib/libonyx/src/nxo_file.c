@@ -23,7 +23,7 @@
 #include "../include/libonyx/nxo_l.h"
 #include "../include/libonyx/nxo_file_l.h"
 
-static cw_nxo_threade_t nxo_p_file_buffer_flush(cw_nxoe_file_t *a_file);
+static cw_nxn_t nxo_p_file_buffer_flush(cw_nxoe_file_t *a_file);
 
 #ifdef _CW_THREADS
 #define		nxoe_p_file_lock(a_nxoe) do {			\
@@ -168,14 +168,14 @@ nxo_file_synthetic(cw_nxo_t *a_nxo, cw_nxo_file_read_t *a_read,
 
 #ifdef _CW_POSIX_FILE
 /*
- * NXO_THREADE_IOERROR, NXO_THREADE_LIMITCHECK,
- * NXO_THREADE_INVALIDFILEACCESS
+ * NXN_ioerror, NXN_limitcheck,
+ * NXN_invalidfileaccess
  */
-cw_nxo_threade_t
+cw_nxn_t
 nxo_file_open(cw_nxo_t *a_nxo, const cw_uint8_t *a_filename, cw_uint32_t a_nlen,
     const cw_uint8_t *a_flags, cw_uint32_t a_flen)
 {
-	cw_nxo_threade_t	retval;
+	cw_nxn_t		retval;
 	cw_nxoe_file_t		*file;
 	cw_uint8_t		filename[PATH_MAX], flags[3];
 	int			access;
@@ -185,14 +185,14 @@ nxo_file_open(cw_nxo_t *a_nxo, const cw_uint8_t *a_filename, cw_uint32_t a_nlen,
 	 * termination.
 	 */
 	if (a_nlen >= sizeof(filename)) {
-		retval = NXO_THREADE_LIMITCHECK;
+		retval = NXN_limitcheck;
 		goto RETURN;
 	}
 	memcpy(filename, a_filename, a_nlen);
 	filename[a_nlen] = '\0';
 
 	if (a_flen >= sizeof(flags)) {
-		retval = NXO_THREADE_LIMITCHECK;
+		retval = NXN_limitcheck;
 		goto RETURN;
 	}
 	memcpy(flags, a_flags, a_flen);
@@ -212,7 +212,7 @@ nxo_file_open(cw_nxo_t *a_nxo, const cw_uint8_t *a_filename, cw_uint32_t a_nlen,
 	nxoe_p_file_lock(file);
 #endif
 	if (file->mode != FILE_NONE) {
-		retval = NXO_THREADE_INVALIDFILEACCESS;
+		retval = NXN_invalidfileaccess;
 		goto URETURN;
 	}
 
@@ -227,7 +227,7 @@ nxo_file_open(cw_nxo_t *a_nxo, const cw_uint8_t *a_filename, cw_uint32_t a_nlen,
 			access = O_RDWR;
 			break;
 		default:
-			retval = NXO_THREADE_INVALIDFILEACCESS;
+			retval = NXN_invalidfileaccess;
 			goto URETURN;
 		}
 		break;
@@ -240,7 +240,7 @@ nxo_file_open(cw_nxo_t *a_nxo, const cw_uint8_t *a_filename, cw_uint32_t a_nlen,
 			access = O_RDWR | O_CREAT | O_TRUNC;
 			break;
 		default:
-			retval = NXO_THREADE_INVALIDFILEACCESS;
+			retval = NXN_invalidfileaccess;
 			goto URETURN;
 		}
 		break;
@@ -253,12 +253,12 @@ nxo_file_open(cw_nxo_t *a_nxo, const cw_uint8_t *a_filename, cw_uint32_t a_nlen,
 			access = O_RDWR | O_APPEND | O_CREAT;
 			break;
 		default:
-			retval = NXO_THREADE_INVALIDFILEACCESS;
+			retval = NXN_invalidfileaccess;
 			goto URETURN;
 		}
 		break;
 	default:
-		retval = NXO_THREADE_INVALIDFILEACCESS;
+		retval = NXN_invalidfileaccess;
 		goto URETURN;
 	}
 
@@ -268,10 +268,10 @@ nxo_file_open(cw_nxo_t *a_nxo, const cw_uint8_t *a_filename, cw_uint32_t a_nlen,
 		case ENOSPC:
 		case EMFILE:
 		case ENFILE:
-			retval = NXO_THREADE_IOERROR;
+			retval = NXN_ioerror;
 			goto URETURN;
 		default:
-			retval = NXO_THREADE_INVALIDFILEACCESS;
+			retval = NXN_invalidfileaccess;
 			goto URETURN;
 		}
 	}
@@ -279,7 +279,7 @@ nxo_file_open(cw_nxo_t *a_nxo, const cw_uint8_t *a_filename, cw_uint32_t a_nlen,
 	file->mode = FILE_POSIX;
 	file->f.p.wrapped = FALSE;
 
-	retval = NXO_THREADE_NONE;
+	retval = NXN_ZERO;
 	URETURN:
 #ifdef _CW_THREADS
 	nxoe_p_file_unlock(file);
@@ -289,11 +289,11 @@ nxo_file_open(cw_nxo_t *a_nxo, const cw_uint8_t *a_filename, cw_uint32_t a_nlen,
 }
 #endif
 
-/* NXO_THREADE_IOERROR */
-cw_nxo_threade_t
+/* NXN_ioerror */
+cw_nxn_t
 nxo_file_close(cw_nxo_t *a_nxo)
 {
-	cw_nxo_threade_t	retval;
+	cw_nxn_t		retval;
 	cw_nxoe_file_t		*file;
 
 	_cw_check_ptr(a_nxo);
@@ -310,7 +310,7 @@ nxo_file_close(cw_nxo_t *a_nxo)
 	nxoe_p_file_lock(file);
 #endif
 	if (file->mode == FILE_NONE) {
-		retval = NXO_THREADE_IOERROR;
+		retval = NXN_ioerror;
 		goto RETURN;
 	}
 
@@ -333,7 +333,7 @@ nxo_file_close(cw_nxo_t *a_nxo)
 		file->mode = FILE_NONE;
 		if (file->f.p.wrapped == FALSE) {
 			if (close(file->f.p.fd) == -1) {
-				retval = NXO_THREADE_IOERROR;
+				retval = NXN_ioerror;
 				goto RETURN;
 			}
 		}
@@ -346,7 +346,7 @@ nxo_file_close(cw_nxo_t *a_nxo)
 		break;
 	}
 
-	retval = NXO_THREADE_NONE;
+	retval = NXN_ZERO;
 	RETURN:
 #ifdef _CW_THREADS
 	nxoe_p_file_unlock(file);
@@ -393,7 +393,7 @@ nxo_file_fd_get(cw_nxo_t *a_nxo)
 }
 #endif
 
-/* -1: NXO_THREADE_IOERROR */
+/* -1: NXN_ioerror */
 cw_sint32_t
 nxo_file_read(cw_nxo_t *a_nxo, cw_uint32_t a_len, cw_uint8_t *r_str)
 {
@@ -592,12 +592,12 @@ nxo_file_read(cw_nxo_t *a_nxo, cw_uint32_t a_len, cw_uint8_t *r_str)
 	return retval;
 }
 
-/* NXO_THREADE_IOERROR */
-cw_nxo_threade_t
+/* NXN_ioerror */
+cw_nxn_t
 nxo_file_readline(cw_nxo_t *a_nxo, cw_bool_t a_locking, cw_nxo_t *r_string,
     cw_bool_t *r_eof)
 {
-	cw_nxo_threade_t	retval;
+	cw_nxn_t		retval;
 	cw_nxoe_file_t		*file;
 	cw_uint8_t		*line, s_line[_CW_NXO_FILE_READLINE_BUFSIZE];
 	cw_uint32_t		i, maxlen;
@@ -620,7 +620,7 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_bool_t a_locking, cw_nxo_t *r_string,
 	nxoe_p_file_lock(file);
 #endif
 	if (file->mode == FILE_NONE) {
-		retval = NXO_THREADE_IOERROR;
+		retval = NXN_ioerror;
 		goto RETURN;
 	}
 
@@ -711,7 +711,7 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_bool_t a_locking, cw_nxo_t *r_string,
 					if (file->mode == FILE_SYNTHETIC)
 						file->f.s.position += i;
 
-					retval = NXO_THREADE_NONE;
+					retval = NXN_ZERO;
 					*r_eof = TRUE;
 					goto RETURN;
 				}
@@ -756,7 +756,7 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_bool_t a_locking, cw_nxo_t *r_string,
 					file->buffer_mode = BUFFER_EMPTY;
 				}
 
-				retval = NXO_THREADE_NONE;
+				retval = NXN_ZERO;
 				*r_eof = FALSE;
 				goto RETURN;
 			default:
@@ -831,7 +831,7 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_bool_t a_locking, cw_nxo_t *r_string,
 				if (file->mode == FILE_SYNTHETIC)
 					file->f.s.position += i;
 
-				retval = NXO_THREADE_NONE;
+				retval = NXN_ZERO;
 				*r_eof = TRUE;
 				goto RETURN;
 			}
@@ -854,7 +854,7 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_bool_t a_locking, cw_nxo_t *r_string,
 				if (file->mode == FILE_SYNTHETIC)
 					file->f.s.position += i;
 
-				retval = NXO_THREADE_NONE;
+				retval = NXN_ZERO;
 				*r_eof = FALSE;
 				goto RETURN;
 			default:
@@ -873,11 +873,11 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_bool_t a_locking, cw_nxo_t *r_string,
 	return retval;
 }
 
-/* NXO_THREADE_IOERROR */
-cw_nxo_threade_t
+/* NXN_ioerror */
+cw_nxn_t
 nxo_file_write(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len)
 {
-	cw_nxo_threade_t	retval;
+	cw_nxn_t		retval;
 	cw_nxoe_file_t		*file;
 
 	_cw_check_ptr(a_nxo);
@@ -894,7 +894,7 @@ nxo_file_write(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len)
 	nxoe_p_file_lock(file);
 #endif
 	if (file->mode == FILE_NONE) {
-		retval = NXO_THREADE_IOERROR;
+		retval = NXN_ioerror;
 		goto RETURN;
 	}
 
@@ -933,7 +933,7 @@ nxo_file_write(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len)
 
 				while (writev(file->f.p.fd, iov, 2) == -1) {
 					if (errno != EINTR) {
-						retval = NXO_THREADE_IOERROR;
+						retval = NXN_ioerror;
 						goto RETURN;
 					}
 				}
@@ -954,7 +954,7 @@ nxo_file_write(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len)
 
 				if (file->f.s.write_f(file->f.s.arg, a_nxo,
 				    a_str, a_len)) {
-					retval = NXO_THREADE_IOERROR;
+					retval = NXN_ioerror;
 					goto RETURN;
 				}
 				file->f.s.position += a_len;
@@ -968,7 +968,7 @@ nxo_file_write(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len)
 		case FILE_POSIX:
 			while (write(file->f.p.fd, a_str, a_len) == -1) {
 				if (errno != EINTR) {
-					retval = NXO_THREADE_IOERROR;
+					retval = NXN_ioerror;
 					goto RETURN;
 				}
 			}
@@ -977,14 +977,14 @@ nxo_file_write(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len)
 		case FILE_SYNTHETIC:
 			if (file->f.s.write_f(file->f.s.arg, a_nxo, a_str,
 			    a_len)) {
-				retval = NXO_THREADE_IOERROR;
+				retval = NXN_ioerror;
 				goto RETURN;
 			}
 			file->f.s.position += a_len;
 		}
 	}
 
-	retval = NXO_THREADE_NONE;
+	retval = NXN_ZERO;
 	RETURN:
 #ifdef _CW_THREADS
 	nxoe_p_file_unlock(file);
@@ -993,11 +993,11 @@ nxo_file_write(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len)
 }
 
 #ifdef _CW_POSIX_FILE
-/* NXO_THREADE_IOERROR */
-cw_nxo_threade_t
+/* NXN_ioerror */
+cw_nxn_t
 nxo_file_truncate(cw_nxo_t *a_nxo, off_t a_length)
 {
-	cw_nxo_threade_t	retval;
+	cw_nxn_t		retval;
 	cw_nxoe_file_t		*file;
 
 	_cw_check_ptr(a_nxo);
@@ -1016,17 +1016,17 @@ nxo_file_truncate(cw_nxo_t *a_nxo, off_t a_length)
 	switch (file->mode) {
 	case FILE_NONE:
 	case FILE_SYNTHETIC:
-		retval = NXO_THREADE_IOERROR;
+		retval = NXN_ioerror;
 		goto RETURN;
 	case FILE_POSIX:
 		nxo_p_file_buffer_flush(file);
 		if (ftruncate(file->f.p.fd, a_length)) {
-			retval = NXO_THREADE_IOERROR;
+			retval = NXN_ioerror;
 			goto RETURN;
 		}
 	}
 
-	retval = NXO_THREADE_NONE;
+	retval = NXN_ZERO;
 	RETURN:
 #ifdef _CW_THREADS
 	nxoe_p_file_unlock(file);
@@ -1035,7 +1035,7 @@ nxo_file_truncate(cw_nxo_t *a_nxo, off_t a_length)
 }
 #endif
 
-/* -1: NXO_THREADE_IOERROR */
+/* -1: NXN_ioerror */
 cw_nxoi_t
 nxo_file_position_get(cw_nxo_t *a_nxo)
 {
@@ -1083,11 +1083,11 @@ nxo_file_position_get(cw_nxo_t *a_nxo)
 }
 
 #ifdef _CW_POSIX_FILE
-/* NXO_THREADE_IOERROR */
-cw_nxo_threade_t
+/* NXN_ioerror */
+cw_nxn_t
 nxo_file_position_set(cw_nxo_t *a_nxo, cw_nxoi_t a_position)
 {
-	cw_nxo_threade_t	retval;
+	cw_nxn_t		retval;
 	cw_nxoe_file_t		*file;
 
 	_cw_check_ptr(a_nxo);
@@ -1106,7 +1106,7 @@ nxo_file_position_set(cw_nxo_t *a_nxo, cw_nxoi_t a_position)
 	switch (file->mode) {
 	case FILE_NONE:
 	case FILE_SYNTHETIC:
-		retval = NXO_THREADE_IOERROR;
+		retval = NXN_ioerror;
 		break;
 	case FILE_POSIX:
 		retval = nxo_p_file_buffer_flush(file);
@@ -1114,7 +1114,7 @@ nxo_file_position_set(cw_nxo_t *a_nxo, cw_nxoi_t a_position)
 			break;
 
 		if (lseek(file->f.p.fd, a_position, SEEK_SET) == -1)
-			retval = NXO_THREADE_IOERROR;
+			retval = NXN_ioerror;
 	}
 
 #ifdef _CW_THREADS
@@ -1222,11 +1222,11 @@ nxo_file_buffer_count(cw_nxo_t *a_nxo)
 	return retval;
 }
 
-/* NXO_THREADE_IOERROR */
-cw_nxo_threade_t
+/* NXN_ioerror */
+cw_nxn_t
 nxo_file_buffer_flush(cw_nxo_t *a_nxo)
 {
-	cw_nxo_threade_t	retval;
+	cw_nxn_t		retval;
 	cw_nxoe_file_t		*file;
 
 	_cw_check_ptr(a_nxo);
@@ -1250,13 +1250,13 @@ nxo_file_buffer_flush(cw_nxo_t *a_nxo)
 	return retval;
 }
 
-static cw_nxo_threade_t
+static cw_nxn_t
 nxo_p_file_buffer_flush(cw_nxoe_file_t *a_file)
 {
-	cw_nxo_threade_t	retval;
+	cw_nxn_t	retval;
 
 	if (a_file->mode == FILE_NONE) {
-		retval = NXO_THREADE_IOERROR;
+		retval = NXN_ioerror;
 		goto RETURN;
 	}
 	
@@ -1271,7 +1271,7 @@ nxo_p_file_buffer_flush(cw_nxoe_file_t *a_file)
 				while (write(a_file->f.p.fd, a_file->buffer,
 				    a_file->buffer_offset) == -1) {
 					if (errno != EINTR) {
-						retval = NXO_THREADE_IOERROR;
+						retval = NXN_ioerror;
 						goto RETURN;
 					}
 				}
@@ -1287,7 +1287,7 @@ nxo_p_file_buffer_flush(cw_nxoe_file_t *a_file)
 				/* Use the write wrapper function. */
 				if (a_file->f.s.write_f(a_file->f.s.arg, &tnxo,
 				    a_file->buffer, a_file->buffer_offset)) {
-					retval = NXO_THREADE_IOERROR;
+					retval = NXN_ioerror;
 					goto RETURN;
 				}
 			}
@@ -1301,7 +1301,7 @@ nxo_p_file_buffer_flush(cw_nxoe_file_t *a_file)
 		a_file->buffer_offset = 0;
 	}
 
-	retval = NXO_THREADE_NONE;
+	retval = NXN_ZERO;
 	RETURN:
 	return retval;
 }

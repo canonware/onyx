@@ -29,7 +29,7 @@ nx_gtk_label_new (cw_nxo_t *a_thread)
 
   NXO_STACK_GET (s, ostack, a_thread);
   if (nxo_type_get(s) != NXOT_STRING) {
-    nxo_thread_error (a_thread, NXO_THREADE_TYPECHECK);
+    nxo_thread_nerror (a_thread, NXN_typecheck);
     return;
   }
 
@@ -58,18 +58,18 @@ nx_gtk_label_set_text(cw_nxo_t *a_thread)
 
   NXO_STACK_GET (w_hook, ostack, a_thread);
   if (nxo_type_get(w_hook) != NXOT_HOOK) {
-    nxo_thread_error (a_thread, NXO_THREADE_TYPECHECK);
+    nxo_thread_nerror (a_thread, NXN_typecheck);
     return;
   }
   w = nxo_hook_data_get (w_hook);
   if (!GTK_IS_WIDGET (w)) {
-    nxo_thread_error (a_thread, NXO_THREADE_TYPECHECK);
+    nxo_thread_nerror (a_thread, NXN_typecheck);
     return;
   }
 
   NXO_STACK_NGET (s, ostack, a_thread, 1);
   if (nxo_type_get(s) != NXOT_STRING) {
-    nxo_thread_error (a_thread, NXO_THREADE_TYPECHECK);
+    nxo_thread_nerror (a_thread, NXN_typecheck);
     return;
   }
 
@@ -95,18 +95,18 @@ nx_gtk_label_set_justify(cw_nxo_t *a_thread)
 
   NXO_STACK_GET (w_hook, ostack, a_thread);
   if (nxo_type_get(w_hook) != NXOT_HOOK) {
-    nxo_thread_error (a_thread, NXO_THREADE_TYPECHECK);
+    nxo_thread_nerror (a_thread, NXN_typecheck);
     return;
   }
   w = nxo_hook_data_get (w_hook);
   if (!GTK_IS_LABEL (w)) {
-    nxo_thread_error (a_thread, NXO_THREADE_TYPECHECK);
+    nxo_thread_nerror (a_thread, NXN_typecheck);
     return;
   }
 
   NXO_STACK_NGET (j, ostack, a_thread, 1);
   if (nxo_type_get(j) != NXOT_INTEGER) {
-    nxo_thread_error (a_thread, NXO_THREADE_TYPECHECK);
+    nxo_thread_nerror (a_thread, NXN_typecheck);
     return;
   }
 

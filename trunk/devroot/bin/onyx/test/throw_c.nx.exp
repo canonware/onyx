@@ -1,9 +1,10 @@
 Test begin
-Error /undefined
-ostack: (-file- -dict- /foo)
+Error /typecheck
+ostack: (-mark-)
 dstack: (-dict- -dict- -dict- -dict-)
-estack/istack trace (0..2):
-0: {
+estack/istack trace (0..3):
+0:	--eval--
+1: {
 	{-array- -array- -array- -array-}
 	{--eval-- --not-- -array- --if--}
 	--foreach--
@@ -12,7 +13,7 @@ estack/istack trace (0..2):
 	/nametype
 	--ne--
 	{/typecheck /systemdict --load-- /throw --get-- --eval--}
-	--if--
+  8:--> --if--
 	/currenterror
 	--load--
 	--begin--
@@ -54,18 +55,17 @@ estack/istack trace (0..2):
 	--dup--
 	--sdup--
 	--spop--
+	--exch--
 	--end--
-	--exch--
 	/errordict
 	--load--
-	--exch--
- 55:--> --get--
-	--eval--
-	/errordict
-	--load--
-	/stop
-	--get--
-	--eval--
+	--dup--
+	2
+	--index--
+	--known--
+	{--exch-- --get-- --eval--}
+	{--exch-- --pop-- --dup-- /handleerror --get-- --eval-- /stop --get-- --eval--}
+	--ifelse--
 }
-1:	-file-
-2:	--start--
+2:	-file-
+3:	--start--

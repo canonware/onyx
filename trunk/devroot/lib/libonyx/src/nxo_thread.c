@@ -27,35 +27,6 @@
 /* Include generated code. */
 #include "nxo_thread_nxcode.c"
 
-cw_nxn_t
-nxo_threade_nxn(cw_nxo_threade_t a_threade)
-{
-	static const cw_nxn_t threade_nxn[] = {
-		0,
-		NXN_dstackunderflow,
-		NXN_estackoverflow,
-		NXN_invalidaccess,
-		NXN_invalidexit,
-		NXN_invalidfileaccess,
-		NXN_ioerror,
-		NXN_limitcheck,
-		NXN_rangecheck,
-		NXN_stackunderflow,
-		NXN_syntaxerror,
-		NXN_typecheck,
-		NXN_undefined,
-		NXN_undefinedfilename,
-		NXN_undefinedresult,
-		NXN_unmatchedfino,
-		NXN_unmatchedmark,
-		NXN_unregistered
-	};
-	_cw_assert(sizeof(threade_nxn) / sizeof(cw_nxn_t) == NXO_THREADE_LAST +
-	    1);
-	_cw_assert(a_threade > 0 && a_threade <= NXO_THREADE_LAST);
-	return threade_nxn[a_threade];
-}
-
 #define _CW_NXO_THREAD_GETC(a_i)					\
 	a_thread->tok_str[(a_i)]
 
@@ -585,7 +556,7 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 	for (sdepth = cdepth = nxo_stack_count(&thread->estack);
 	     cdepth >= sdepth; cdepth = nxo_stack_count(&thread->estack)) {
 		if (cdepth == _CW_LIBONYX_ESTACK_MAX + 1)
-			nxo_thread_error(a_nxo, NXO_THREADE_ESTACKOVERFLOW);
+			nxo_thread_nerror(a_nxo, NXN_estackoverflow);
 
 		nxo = nxo_stack_get(&thread->estack);
 		if (nxo_attr_get(nxo) == NXOA_LITERAL) {
@@ -789,7 +760,7 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 			name = nxo_stack_push(&thread->tstack);
 			nxo_dup(name, nxo);
 			if (nxo_thread_dstack_search(a_nxo, name, nxo)) {
-				nxo_thread_error(a_nxo, NXO_THREADE_UNDEFINED);
+				nxo_thread_nerror(a_nxo, NXN_undefined);
 				nxo_stack_pop(&thread->estack);
 			}
 			nxo_stack_pop(&thread->tstack);
@@ -907,11 +878,16 @@ nxo_thread_flush(cw_nxo_t *a_nxo, cw_nxo_threadp_t *a_threadp)
 }
 
 void
-nxo_thread_error(cw_nxo_t *a_nxo, cw_nxo_threade_t a_error)
+nxo_thread_nerror(cw_nxo_t *a_nxo, cw_nxn_t a_nxn)
+{
+	nxo_thread_serror(a_nxo, nxn_str(a_nxn), nxn_len(a_nxn));
+}
+
+void
+nxo_thread_serror(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len)
 {
 	cw_nxoe_thread_t	*thread;
 	cw_nxo_t		*errorname;
-	cw_nxn_t		nxn;
 	cw_uint32_t		defer_count;
 
 	_cw_check_ptr(a_nxo);
@@ -922,11 +898,10 @@ nxo_thread_error(cw_nxo_t *a_nxo, cw_nxo_threade_t a_error)
 	_cw_assert(thread->nxoe.type == NXOT_THREAD);
 
 	/*
-	 * Convert a_error to a name object on ostack.
+	 * Convert a_str to a name object on ostack.
 	 */
 	errorname = nxo_stack_push(&thread->ostack);
-	nxn = nxo_threade_nxn(a_error);
-	nxo_name_new(errorname, thread->nx, nxn_str(nxn), nxn_len(nxn), TRUE);
+	nxo_name_new(errorname, thread->nx, a_str, a_len, FALSE);
 
 	/*
 	 * Shut off deferral temporarily.  It is possible for this C stack frame
@@ -1980,8 +1955,7 @@ nxoe_p_thread_name_accept(cw_nxoe_thread_t *a_thread)
 			 */
 			a_thread->defer_count = 0;
 
-			nxo_thread_error(&a_thread->self,
-			    NXO_THREADE_UNDEFINED);
+			nxo_thread_nerror(&a_thread->self, NXN_undefined);
 		} else if (nxo_type_get(nxo) == NXOT_ARRAY && nxo_attr_get(nxo)
 		    == NXOA_EXECUTABLE) {
 			/*

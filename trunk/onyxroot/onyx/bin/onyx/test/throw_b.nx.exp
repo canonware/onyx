@@ -54,18 +54,17 @@ estack/istack trace (0..2):
 	--dup--
 	--sdup--
 	--spop--
+	--exch--
 	--end--
-	--exch--
 	/errordict
 	--load--
-	--exch--
-	--get--
-	--eval--
-	/errordict
-	--load--
-	/stop
-	--get--
-	--eval--
+	--dup--
+	2
+	--index--
+	--known--
+	{--exch-- --get-- --eval--}
+	{--exch-- --pop-- --dup-- /handleerror --get-- --eval-- /stop --get-- --eval--}
+	--ifelse--
 }
 1:	-file-
 2:	--start--

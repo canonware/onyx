@@ -665,14 +665,24 @@ systemdict begin
 
 	% Push the offending object onto ostack.
 	/estack load dup sdup spop
+	exch
+	% %object %errorname
 
 	end % currenterror.
 
-	% Call the error handler.
-	exch /errordict load exch get eval
-
-	% Stop.
-	/errordict load /stop get eval
+	% If there is an error handler for the error name, call it.  Otherwise,
+	% call errordict's handleerror, then call errordict's stop.
+	/errordict load
+	% %object %errorname %errordict
+	dup 2 index known {
+		% Call error handler.
+		exch get eval
+	}{
+		% No error handler.
+		exch pop
+		dup /handleerror get eval
+		/stop get eval
+	} ifelse
 } def
 
 % - version <string>

@@ -15,7 +15,7 @@
 /*
  * Global variables.
  */
-TEX_SRCS = ;
+TEX_SRCS = [srcdir]/doc/latex/onyx_lang.tex;
 FIG_SRCS = ;
 
 T_ONYX = [objdir]/doc/latex/onyx.tex;
