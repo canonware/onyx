@@ -67,3 +67,4 @@
 #undef HAVE_POLL
 #undef HAVE_READDIR_R
 #undef HAVE_UNSETENV
+#undef HAVE_ASPRINTF
