@@ -59,8 +59,6 @@ static void		*stilt_p_entry(void *a_arg);
 static void		stilt_p_procedure_accept(cw_stilt_t *a_stilt);
 static void		stilt_p_name_accept(cw_stilt_t *a_stilt, cw_stilts_t
     *a_stilts);
-static cw_bool_t	stilt_p_dict_stack_search(cw_stilt_t *a_stilt,
-    cw_stilo_t *a_key, cw_stilo_t *r_value);
 
 #ifdef _LIBSTIL_DBG
 #define _CW_STILT_MAGIC 0x978fdbe0
@@ -350,6 +348,31 @@ stilt_detach_buf(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_buf_t *a_buf)
 	_cw_free(entry_arg);
 	OOM_1:
 	return TRUE;
+}
+
+cw_bool_t
+stilt_dict_stack_search(cw_stilt_t *a_stilt, cw_stilo_t *a_key, cw_stilo_t
+    *r_value)
+{
+	cw_bool_t	retval;
+	cw_stilo_t	*dict;
+
+	/*
+	 * Iteratively search the dictionaries on the dictionary stack for
+	 * a_key.
+	 */
+	for (dict = stils_get(&a_stilt->dict_stils, 0); dict != NULL; dict =
+	     stils_get_down(&a_stilt->dict_stils, dict)) {
+		if (stilo_dict_lookup(dict, a_stilt, a_key, r_value) == FALSE) {
+			/* Found. */
+			retval = FALSE;
+			goto RETURN;
+		}
+	}
+
+	retval = TRUE;
+	RETURN:
+	return retval;
 }
 
 static cw_sint32_t
@@ -1260,7 +1283,7 @@ stilt_p_name_accept(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts)
 			    a_stilt->index, FALSE);
 
 			stilo = stils_push(&a_stilt->exec_stils);
-			if (stilt_p_dict_stack_search(a_stilt, &key, stilo))
+			if (stilt_dict_stack_search(a_stilt, &key, stilo))
 				_cw_error("XXX Undefined name");
 			stilo_attrs_set(stilo, STILOA_EXECUTABLE);
 
@@ -1293,7 +1316,7 @@ stilt_p_name_accept(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts)
 		    a_stilt->index, FALSE);
 		
 		stilo = stils_push(&a_stilt->data_stils);
-		if (stilt_p_dict_stack_search(a_stilt, &key, stilo))
+		if (stilt_dict_stack_search(a_stilt, &key, stilo))
 			_cw_error("XXX Undefined name");
 
 		stilo_delete(&key, a_stilt);
@@ -1303,29 +1326,4 @@ stilt_p_name_accept(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts)
 	default:
 		_cw_error("Programming error");
 	}
-}
-
-static cw_bool_t
-stilt_p_dict_stack_search(cw_stilt_t *a_stilt, cw_stilo_t *a_key, cw_stilo_t
-    *r_value)
-{
-	cw_bool_t	retval;
-	cw_stilo_t	*dict;
-
-	/*
-	 * Iteratively search the dictionaries on the dictionary stack for
-	 * a_key.
-	 */
-	for (dict = stils_get(&a_stilt->dict_stils, 0); dict != NULL; dict =
-	     stils_get_down(&a_stilt->dict_stils, dict)) {
-		if (stilo_dict_lookup(dict, a_stilt, a_key, r_value) == FALSE) {
-			/* Found. */
-			retval = FALSE;
-			goto RETURN;
-		}
-	}
-
-	retval = TRUE;
-	RETURN:
-	return retval;
 }

@@ -176,6 +176,9 @@ cw_bool_t	stilt_detach_str(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts,
     const cw_uint8_t *a_str, cw_uint32_t a_len);
 cw_bool_t	stilt_detach_buf(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts,
     cw_buf_t *a_buf);
+cw_bool_t	stilt_dict_stack_search(cw_stilt_t *a_stilt, cw_stilo_t *a_key,
+    cw_stilo_t *r_value);
+
 
 #define		stilt_stil_get(a_stilt) (a_stilt)->stil
 #define		stilt_name_hash_get(a_stilt) &(a_stilt)->name_hash
