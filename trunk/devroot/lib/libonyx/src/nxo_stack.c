@@ -231,6 +231,8 @@ nxo_stack_copy(cw_nxo_t *a_to, cw_nxo_t *a_from)
     }
 }
 
+/* This function handles a special case for nxo_stack_push(), but is done as a
+ * separate function to keep nxo_stack_push() small. */
 cw_nxoe_stacko_t *
 nxoe_p_stack_push(cw_nxoe_stack_t *a_stack)
 {
