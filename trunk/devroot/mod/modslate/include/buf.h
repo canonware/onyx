@@ -205,7 +205,8 @@ struct cw_buf_s
     rb_tree(cw_ext_t) rtree;
     ql_head(cw_ext_t) rlist;
 
-    /* Extent stack. */
+    /* Extent stack, also used for tracking extents that grow from zero
+     * length. */
     ql_head(cw_ext_t) elist;
 
     /* History (undo/redo), if non-NULL. */

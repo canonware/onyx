@@ -251,13 +251,13 @@
  * extents; they are normal markers that stay well ordered at all times.
  * However, extent ordering is actually kept track of separately, and there are
  * situations during insertion into a buffer where extra work is necessary to
- * maintain extent ordering.  Specifically, when there are both MKRO_BEFORE and
- * MKRO_AFTER markers at the insertion position, one set or the other of the
- * extents corresponding to the markers needs to be removed, then reinserted.
+ * maintain extent ordering.  Specifically, when there are zero-length extents
+ * at the insertion position, the extents (but not their markers) need to be
+ * removed, then reinserted.
  *
  * In order to support detachable extents, it is necessary to iterate through
- * either the MKRO_BEFORE or MKRO_AFTER markers at the deletion point and remove
- * any detachable extents that have shrunk to zero length.
+ * the MKRO_BEFORE and MKRO_AFTER markers at the deletion point and remove any
+ * detachable extents that have shrunk to zero length.
  *
  ******************************************************************************/
 
@@ -2453,6 +2453,7 @@ mkr_l_insert(cw_mkr_t *a_mkr, cw_bool_t a_record, cw_bool_t a_after,
     cw_buf_t *buf;
     cw_bufp_t *bufp;
     cw_mkr_t *mkr, *mmkr;
+    cw_ext_t *ext;
 
     cw_check_ptr(a_mkr);
     cw_dassert(a_mkr->magic == CW_MKR_MAGIC);
@@ -2485,6 +2486,72 @@ mkr_l_insert(cw_mkr_t *a_mkr, cw_bool_t a_record, cw_bool_t a_after,
     for (i = 0; i < a_bufvcnt; i++)
     {
 	cnt += (cw_uint64_t) a_bufv[i].len;
+    }
+
+    /* Find all the zero-length extents that will grow to non-zero length,
+     * remove them from the extent trees/lists, and hold on to them so that they
+     * can be re-inserted after the data insertion is complete. */
+
+    /* Initialize the extent list. */
+    ql_new(&buf->elist);
+
+    /* Iterate forward. */
+    for (mkr = ql_next(&bufp->mlist, a_mkr, mlink);
+	 mkr != NULL && mkr->ppos == a_mkr->ppos;
+	 mkr = mmkr)
+    {
+	cw_assert(mkr->order != MKRO_BEFORE);
+
+	/* Get the next mkr before potentially removing mkr from the list. */
+	mmkr = ql_next(&bufp->mlist, mkr, mlink);
+
+	if (mkr->order == MKRO_AFTER && mkr->ext_end == FALSE)
+	{
+	    /* Get a pointer to the container extent. */
+	    ext = (cw_ext_t *) ((void *) mkr - cw_offsetof(cw_ext_t, beg));
+	    cw_dassert(ext->magic == CW_EXT_MAGIC);
+
+	    if (ext->beg.bufp == ext->end.bufp
+		&& ext->beg.ppos == ext->end.ppos)
+	    {
+		/* Remove the extent. */
+		ext_p_remove(ext);
+
+		/* Store the extent in the list for later re-insertion. */
+		qr_remove(ext, elink);
+		ql_tail_insert(&buf->elist, ext, elink);
+	    }
+	}
+    }
+
+    /* Iterate backward. */
+    for (mkr = ql_prev(&bufp->mlist, a_mkr, mlink);
+	 mkr != NULL && mkr->ppos == a_mkr->ppos;
+	 mkr = mmkr)
+    {
+	cw_assert(mkr->order != MKRO_AFTER);
+
+	/* Get the previous mkr before potentially removing mkr from the
+	 * list. */
+	mmkr = ql_prev(&bufp->mlist, mkr, mlink);
+
+	if (mkr->order == MKRO_BEFORE && mkr->ext_end == FALSE)
+	{
+	    /* Get a pointer to the container extent. */
+	    ext = (cw_ext_t *) ((void *) mkr - cw_offsetof(cw_ext_t, beg));
+	    cw_dassert(ext->magic == CW_EXT_MAGIC);
+
+	    if (ext->beg.bufp == ext->end.bufp
+		&& ext->beg.ppos == ext->end.ppos)
+	    {
+		/* Remove the extent. */
+		ext_p_remove(ext);
+
+		/* Store the extent in the list for later re-insertion. */
+		qr_remove(ext, elink);
+		ql_tail_insert(&buf->elist, ext, elink);
+	    }
+	}
     }
 
     /* Depending on how much data are to be inserted, there are three
@@ -2620,6 +2687,11 @@ mkr_l_insert(cw_mkr_t *a_mkr, cw_bool_t a_record, cw_bool_t a_after,
 
     buf->len += cnt;
     buf->nlines += (cw_uint64_t) nlines;
+
+    /* Re-insert the extents that grew from zero length. */
+    ql_foreach(ext, &buf->elist, elink) {
+	ext_p_insert(ext);
+    }
 }
 
 void
@@ -2628,6 +2700,7 @@ mkr_l_remove(cw_mkr_t *a_start, cw_mkr_t *a_end, cw_bool_t a_record)
     cw_buf_t *buf;
     cw_bufp_t *bufp, *nextp, *pastp;
     cw_mkr_t *start, *end, *mkr, *prev;
+    cw_ext_t *ext;
     cw_uint32_t nrem = 0;
     cw_uint64_t start_bpos, end_bpos, rcount;
 
@@ -2891,6 +2964,65 @@ mkr_l_remove(cw_mkr_t *a_start, cw_mkr_t *a_end, cw_bool_t a_record)
 						    buf->bufvcnt
 						    * sizeof(cw_bufv_t));
 	buf->bufvcnt -= (nrem * 2);
+    }
+
+    /* Detach any detachable extents that just shrank to zero length.  Starting
+     * at a_start, iterate forward, then backward.  Only consider markers that
+     * are the beginning of extents; this still catches every zero-length
+     * extent, and it saves some wasted effort for non-detachable extents and
+     * non-zero-length extents. */
+    bufp = a_start->bufp;
+
+    /* Iterate forward. */
+    for (mkr = ql_next(&bufp->mlist, a_start, mlink);
+	 mkr != NULL && mkr->ppos == a_start->ppos;
+	 mkr = ql_next(&bufp->mlist, mkr, mlink))
+    {
+	cw_assert(mkr->order != MKRO_BEFORE);
+
+	if (mkr->order == MKRO_AFTER && mkr->ext_end == FALSE)
+	{
+	    /* Get a pointer to the container extent. */
+	    ext = (cw_ext_t *) ((void *) mkr - cw_offsetof(cw_ext_t, beg));
+	    cw_dassert(ext->magic == CW_EXT_MAGIC);
+
+	    if (ext->detachable
+		&& ext->beg.bufp == ext->end.bufp
+		&& ext->beg.ppos == ext->end.ppos)
+	    {
+		/* Detatch the extent. */
+		ext->attached = FALSE;
+		ext_p_remove(ext);
+		mkr_p_remove(&ext->beg);
+		mkr_p_remove(&ext->end);
+	    }
+	}
+    }
+
+    /* Iterate backward. */
+    for (mkr = ql_prev(&bufp->mlist, a_start, mlink);
+	 mkr != NULL && mkr->ppos == a_start->ppos;
+	 mkr = ql_prev(&bufp->mlist, mkr, mlink))
+    {
+	cw_assert(mkr->order != MKRO_AFTER);
+
+	if (mkr->order == MKRO_BEFORE && mkr->ext_end == FALSE)
+	{
+	    /* Get a pointer to the container extent. */
+	    ext = (cw_ext_t *) ((void *) mkr - cw_offsetof(cw_ext_t, beg));
+	    cw_dassert(ext->magic == CW_EXT_MAGIC);
+
+	    if (ext->detachable
+		&& ext->beg.bufp == ext->end.bufp
+		&& ext->beg.ppos == ext->end.ppos)
+	    {
+		/* Detatch the extent. */
+		ext->attached = FALSE;
+		ext_p_remove(ext);
+		mkr_p_remove(&ext->beg);
+		mkr_p_remove(&ext->end);
+	    }
+	}
     }
 }
 
@@ -4207,7 +4339,7 @@ ext_stack_init(const cw_mkr_t *a_mkr)
 		 && (ebpos = mkr_pos(&ext->beg)) <= bpos;
 	     ext = ql_next(&buf->rlist, ext, rlink))
 	{
-	    qr_remove(ext, elink);
+	    ql_remove(&buf->elist, ext, elink);
 	    for (eext = ql_first(&buf->elist);
 		 eext != NULL
 		     && (((tbpos = mkr_pos(&eext->beg)) < ebpos)
@@ -4266,6 +4398,9 @@ ext_frag_get(const cw_mkr_t *a_mkr, cw_mkr_t *r_beg, cw_mkr_t *r_end)
     cw_dassert(r_beg->magic == CW_MKR_MAGIC);
     cw_check_ptr(r_end);
     cw_dassert(r_end->magic == CW_MKR_MAGIC);
+
+    /* nsearch in f-order for one position past a_mkr, and nsearch in r-order
+     * for one position before a_mkr.  Beware of edge conditions (BOB/EOB). */
 
     cw_error("XXX Not implemented");
 }
