@@ -5,19 +5,17 @@
 
 $Source$
 $Author: jasone $
-$Revision: 146 $
-$Date: 1998-07-18 23:45:49 -0700 (Sat, 18 Jul 1998) $
+$Revision: 147 $
+$Date: 1998-07-19 00:34:59 -0700 (Sun, 19 Jul 1998) $
 ..
-.Dd $Date: 1998-07-18 23:45:49 -0700 (Sat, 18 Jul 1998) $
-.Dt libstash 3s
-.Os
-.Sh NAME
-.Nm libstash
-.Nd Library of algorithms and data structures designed for transaction
+.Id $Id: libstash.3s 147 1998-07-19 07:34:59Z jasone $
+.TH libstash 3s
+.SH NAME
+libstash - Library of algorithms and data structures designed for transaction
 processing.
-.Sh SYNOPSIS
+.SH SYNOPSIS
 \fB#include <libstash/libstash.h>\fR
-.Sh DESCRIPTION
+.SH DESCRIPTION
 The \fBlibstash\fR library defines a number of algorithms and data structures
 that are useful for many purposes, but the library specifically targets the
 needs of transaction processing.
@@ -29,8 +27,8 @@ assumes that kernel threads are being used.  If this is not the case,
 \fBlibstash\fR will perform rather poorly due to the way blocking system
 calls are handled.
 
-.Sh CODE STRUCTURE
-.Ss Object-oriented C
+.SH CODE STRUCTURE
+.SS Object-oriented C
 The algorithms and data structures in \fBlibstash\fR are architected in an
 object-oriented manner, though all the actual code is C.  Since C doesn't
 directly support object-oriented design, a number of stylistic conventions
@@ -41,7 +39,7 @@ methods.  For example, open hashing is implemented by the \fBoh\fR class, and
 member methods of \fBoh\fR are named \fBoh_new()\fR, \fBoh_delete()\fR, 
 \fBoh_item_insert()\fR, etc.
 
-.Ss Variable types
+.SS Variable types
 \fBlibstash\fR is careful to use the following data types rather than the
 built-in types (other than when using system library functions) to allow easy 
 porting and explicit knowledge of variable sizes.
@@ -65,32 +63,34 @@ cw_float8_t        8       8 byte floating point variable.
 cw_float12_t      12       12 byte floating point variable.
 .fi
 
-.Ss Preprocessor macros
-The following preprocessor macros are defined for use with \fBlibstash\fR:
-
-.Bl -item -compact
-.It 
-\fB_cw_malloc()\fR, \fB_cw_calloc()\fR, \fB_cw_realloc()\fR, and 
-\fB_cw_free()\fR are wrappers for the standard library memory allocation 
-routines.
-.It
-.Sy _cw_marker(<double-quoted string>)
+.SS Preprocessor macros
+The following macros are defined in \fBlibstash.h\fR:
+.hy 0
+.na
+.TP
+\fB_cw_malloc()\fR, \fB_cw_calloc()\fR, \fB_cw_realloc()\fR, \fB_cw_free()\fR:
+.br
+Wrappers for the standard library memory allocation routines.
+.TP
+\fB_cw_marker(<double-quoted string>)\fR:
+.br
 Print a string to the log.
-.It
-.Sy _cw_error(<double-quoted string>)
+.TP
+\fB_cw_error(<double-quoted string>)\fR:
+.br
 Print a string to the log and exit.
-.It
-.Sy _cw_check_ptr(<pointer>)
+.TP
+\fB_cw_check_ptr(<pointer>)\fR:
+.br
 Check whether a pointer is \fBNULL\fR, and if so, exit.
-.El
-
-.Ss Including headers
+.hy 1
+.SS Including headers
 Rather than directly including header files, preprocessor macros are defined
 before including libstash.h.  For example, to use the oh class, _INC_OH_H_
 should be defined.  The manpages for individual classes tell what preprocessor
 macros to define when using various classes.
-
-.Ss Variable naming
+.hy 1
+.SS Variable naming
 Though the variable naming conventions used in \fBlibstash\fR are far short
 of what Hungarian and other naming conventions attempt, it is still useful, 
 perhaps even more useful than other systems.
@@ -105,17 +105,10 @@ _o            Class instance (object).
 g_            Global variable.
 .fi
 
-.Sh SEE ALSO
-.Xr stash_os 3s ,
-.Xr stash_list 3s ,
-.Xr stash_thread 3s ,
-.Xr stash_log 3s ,
-.Xr stash_bhp 3s ,
-.Xr stash_br 3s ,
-.Xr stash_dbg 3s ,
-.Xr stash_glob 3s ,
-.Xr stash_locks 3s ,
-.Xr stash_mem 3s ,
-.Xr stash_res 3s ,
-.Xr stash_sock 3s ,
-.Xr stash_zt 3s
+.SH AUTHOR
+Written by Jason Evans <jasone@canonware.com>.
+
+.SH SEE ALSO
+stash_os(3s), stash_list(3s), stash_thread(3s), stash_log(3s), stash_bhp(3s),
+stash_br(3s), stash_dbg(3s), stash_glob(3s), stash_locks(3s), stash_mem(3s),
+stash_res(3s), stash_sock(3s), stash_zt(3s)
