@@ -74,7 +74,7 @@ SRCS = [SRCS] [NCAT_SRCS];
 }
 
 /* Binaries. */
-NCAT = [objdir]/bin/ncat/src/ncat;
+NCAT = [objdir]/bin/ncat/bin/ncat;
 NCAT_D = [NCAT].dbg;
 NCAT_A = [NCAT];
 NCAT_P = [NCAT].prof;

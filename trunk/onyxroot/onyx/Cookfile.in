@@ -122,7 +122,7 @@ check_update : tests
 
 install : install_bins install_libs;
 install_bins : [addsuffix _install_a @bins@];
-install_libs : [add_suffix _install @libs@];
+install_libs : [addsuffix _install @libs@];
 
 uninstall : uninstall_bins uninstall_libs;
 uninstall_bins : [addsuffix _uninstall @bins@];

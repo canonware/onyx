@@ -74,7 +74,7 @@ SRCS = [SRCS] [COVER_SRCS];
 }
 
 /* Binaries. */
-COVER = [objdir]/bin/cover/src/cover;
+COVER = [objdir]/bin/cover/bin/cover;
 COVER_D = [COVER].dbg;
 COVER_A = [COVER];
 COVER_P = [COVER].prof;

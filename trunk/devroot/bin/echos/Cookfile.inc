@@ -74,7 +74,7 @@ SRCS = [SRCS] [ECHOS_SRCS];
 }
 
 /* Binaries. */
-ECHOS = [objdir]/bin/echos/src/echos;
+ECHOS = [objdir]/bin/echos/bin/echos;
 ECHOS_D = [ECHOS].dbg;
 ECHOS_A = [ECHOS];
 ECHOS_P = [ECHOS].prof;

@@ -74,7 +74,7 @@ SRCS = [SRCS] [BLOW_SRCS];
 }
 
 /* Binaries. */
-BLOW = [objdir]/bin/blow/src/blow;
+BLOW = [objdir]/bin/blow/bin/blow;
 BLOW_D = [BLOW].dbg;
 BLOW_A = [BLOW];
 BLOW_P = [BLOW].prof;

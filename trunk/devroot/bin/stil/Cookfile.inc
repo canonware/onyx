@@ -74,7 +74,7 @@ SRCS = [SRCS] [STIL_SRCS];
 }
 
 /* Binaries. */
-STIL = [objdir]/bin/stil/src/stil;
+STIL = [objdir]/bin/stil/bin/stil;
 STIL_D = [STIL].dbg;
 STIL_A = [STIL];
 STIL_P = [STIL].prof;

@@ -74,7 +74,7 @@ SRCS = [SRCS] [EDITTEST_SRCS];
 }
 
 /* Binaries. */
-EDITTEST = [objdir]/bin/edittest/src/edittest;
+EDITTEST = [objdir]/bin/edittest/bin/edittest;
 EDITTEST_D = [EDITTEST].dbg;
 EDITTEST_A = [EDITTEST];
 EDITTEST_P = [EDITTEST].prof;

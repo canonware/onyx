@@ -74,7 +74,7 @@ SRCS = [SRCS] [PROXY_SRCS];
 }
 
 /* Binaries. */
-PROXY = [objdir]/bin/proxy/src/proxy;
+PROXY = [objdir]/bin/proxy/bin/proxy;
 PROXY_D = [PROXY].dbg;
 PROXY_A = [PROXY];
 PROXY_P = [PROXY].prof;

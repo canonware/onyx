@@ -74,7 +74,7 @@ SRCS = [SRCS] [SUCK_SRCS];
 }
 
 /* Binaries. */
-SUCK = [objdir]/bin/suck/src/suck;
+SUCK = [objdir]/bin/suck/bin/suck;
 SUCK_D = [SUCK].dbg;
 SUCK_A = [SUCK];
 SUCK_P = [SUCK].prof;

@@ -74,7 +74,7 @@ SRCS = [SRCS] [XVX_SRCS];
 }
 
 /* Binaries. */
-XVX = [objdir]/bin/xvx/src/xvx;
+XVX = [objdir]/bin/xvx/bin/xvx;
 XVX_D = [XVX].dbg;
 XVX_A = [XVX];
 XVX_P = [XVX].prof;
