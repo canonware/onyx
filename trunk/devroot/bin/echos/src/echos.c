@@ -33,7 +33,7 @@ handle_client(void * a_arg)
   
   while (1)
   {
-    if (-1 == sock_read(sock, &buf, 0, NULL))
+    if (0 > sock_read(sock, &buf, 0, NULL))
     {
       break;
     }
@@ -49,7 +49,7 @@ handle_client(void * a_arg)
     }
     out_put(cw_g_out, ":\n");
     
-    if (-1 == sock_write(sock, &buf))
+    if (TRUE == sock_write(sock, &buf))
     {
       break;
     }
