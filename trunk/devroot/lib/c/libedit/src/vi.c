@@ -102,7 +102,7 @@ cv_paste(el, c)
     char *ptr;
     c_undo_t *un = &el->el_chared.c_undo;
 #ifdef DEBUG_PASTE
-    (void) fprintf(el->el_errfile, "Paste: %x \"%s\" +%d -%d\n",
+    _cw_out_put_f(el->el_errfile, "Paste: 0x[i|b:16] \"[s]\" +[i] -[i]\n",
 		   un->action, un->buf, un->isize, un->dsize);
 #endif
     if (un->isize == 0)
@@ -562,7 +562,7 @@ vi_undo(el, c)
     c_undo_t *un = &el->el_chared.c_undo;
 
 #ifdef DEBUG_UNDO
-    (void) fprintf(el->el_errfile, "Undo: %x \"%s\" +%d -%d\n",
+    _cw_out_put_f(el->el_errfile, "Undo: 0x[i|b:16] \"[s]\" +[i] -[i]\n",
 		   un->action, un->buf, un->isize, un->dsize);
 #endif
     switch (un->action) {

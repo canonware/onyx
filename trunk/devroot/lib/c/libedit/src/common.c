@@ -153,8 +153,10 @@ ed_delete_next_char(el, c)
 {
 #ifdef notdef /* XXX */
 #define EL el->el_line
-fprintf(stderr, "\nD(b: %x(%s)  c: %x(%s) last: %x(%s) limit: %x(%s)\n",
-	EL.buffer, EL.buffer, EL.cursor, EL.cursor, EL.lastchar, EL.lastchar, EL.limit, EL.limit);
+_cw_out_put_f(2,
+    "\nD(b: 0x[p]([s])  c: 0x[p]([s]) last: 0x[p]([s]) limit: 0x[p]([s])\n",
+    EL.buffer, EL.buffer, EL.cursor, EL.cursor, EL.lastchar, EL.lastchar,
+    EL.limit, EL.limit); 
 #endif
     if (el->el_line.cursor == el->el_line.lastchar) {/* if I'm at the end */
 	if (el->el_map.type == MAP_VI) {
@@ -758,7 +760,7 @@ ed_search_prev_history(el, c)
     *el->el_line.lastchar = '\0';		/* just in case */
     if (el->el_history.eventno < 0) {
 #ifdef DEBUG_EDIT
-	(void) fprintf(el->el_errfile, "e_prev_search_hist(): eventno < 0;\n");
+	_cw_out_put_f(el->el_errfile, "e_prev_search_hist(): eventno < 0;\n");
 #endif
 	el->el_history.eventno = 0;
 	return CC_ERROR;
@@ -785,7 +787,7 @@ ed_search_prev_history(el, c)
 
     while (hp != NULL) {
 #ifdef SDEBUG
-	(void) fprintf(el->el_errfile, "Comparing with \"%s\"\n", hp);
+	_cw_out_put_f(el->el_errfile, "Comparing with \"[s]\"\n", hp);
 #endif
 	if ((strncmp(hp, el->el_line.buffer,
 		     el->el_line.lastchar - el->el_line.buffer) ||
@@ -800,7 +802,7 @@ ed_search_prev_history(el, c)
 
     if (!found) {
 #ifdef SDEBUG
-	(void) fprintf(el->el_errfile, "not found\n");
+	_cw_out_put_f(el->el_errfile, "not found\n");
 #endif
 	return CC_ERROR;
     }
@@ -843,7 +845,7 @@ ed_search_next_history(el, c)
 
     for (h = 1; h < el->el_history.eventno && hp; h++) {
 #ifdef SDEBUG
-	(void) fprintf(el->el_errfile, "Comparing with \"%s\"\n", hp);
+	_cw_out_put_f(el->el_errfile, "Comparing with \"[s]\"\n", hp);
 #endif
 	if ((strncmp(hp, el->el_line.buffer,
 		     el->el_line.lastchar - el->el_line.buffer) ||
@@ -856,7 +858,7 @@ ed_search_next_history(el, c)
     if (!found) {		/* is it the current history number? */
 	if (!c_hmatch(el, el->el_history.buf)) {
 #ifdef SDEBUG
-	    (void) fprintf(el->el_errfile, "not found\n");
+	    _cw_out_put_f(el->el_errfile, "not found\n");
 #endif
 	    return CC_ERROR;
 	}

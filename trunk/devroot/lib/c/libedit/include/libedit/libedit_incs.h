@@ -84,7 +84,6 @@ typedef void (*sig_t)__P((int));
  * Broken hdrs.
  */
 extern char    *getenv		__P((const char *));
-extern int	fprintf		__P((FILE *, const char *, ...));
 extern int	sigsetmask	__P((int));
 extern int	sigblock	__P((int));
 extern int	ioctl		__P((int, int, void *));
@@ -108,6 +107,8 @@ extern char    *fgetline	__P((FILE *, int *));
 #endif
 
 #include <fcntl.h>
+
+#include <libstash/libstash.h>
 
 /*
  * Include files.  These must be listed in reverse dependency order.

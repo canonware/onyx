@@ -143,7 +143,7 @@ c_hmatch(el, str)
     const char *str;
 {
 #ifdef SDEBUG
-    (void) fprintf(el->el_errfile, "match `%s' with `%s'\n",
+    _cw_out_put_f(el->el_errfile, "match `[s]' with `[s]'\n",
 		   el->el_search.patbuf, str);
 #endif /* SDEBUG */
 
@@ -172,10 +172,10 @@ c_setpat(el)
 	    el->el_search.patlen = strlen(el->el_search.patbuf);
     }
 #ifdef SDEBUG
-    (void) fprintf(el->el_errfile, "\neventno = %d\n", el->el_history.eventno);
-    (void) fprintf(el->el_errfile, "patlen = %d\n", el->el_search.patlen);
-    (void) fprintf(el->el_errfile, "patbuf = \"%s\"\n", el->el_search.patbuf);
-    (void) fprintf(el->el_errfile, "cursor %d lastchar %d\n",
+    _cw_out_put_f(el->el_errfile, "\neventno = [i]\n", el->el_history.eventno);
+    _cw_out_put_f(el->el_errfile, "patlen = [i]\n", el->el_search.patlen);
+    _cw_out_put_f(el->el_errfile, "patbuf = \"[s]\"\n", el->el_search.patbuf);
+    _cw_out_put_f(el->el_errfile, "cursor [i] lastchar [i]\n",
 		   EL_CURSOR(el) - el->el_line.buffer,
 		   el->el_line.lastchar - el->el_line.buffer);
 #endif
@@ -532,7 +532,7 @@ cv_repeat_srch(el, c)
     int c;
 {
 #ifdef SDEBUG
-    (void) fprintf(el->el_errfile, "dir %d patlen %d patbuf %s\n",
+    _cw_out_put_f(el->el_errfile, "dir [i] patlen [i] patbuf [s]\n",
 		   c, el->el_search.patlen, el->el_search.patbuf);
 #endif
 

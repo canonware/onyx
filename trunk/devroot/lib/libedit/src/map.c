@@ -1097,8 +1097,8 @@ map_print_key(el, map, in)
 	(void) key__decode_str(in, outbuf, "");
 	for (bp = el->el_map.help; bp->name != NULL; bp++)
 	    if (bp->func == map[(unsigned char) *in]) {
-		(void) fprintf(el->el_outfile,
-			       "%s\t->\t%s\n", outbuf, bp->name);
+		_cw_out_put_f(el->el_outfile,
+			       "[s]\t->\t[s]\n", outbuf, bp->name);
 		return;
 	    }
     }
@@ -1126,7 +1126,7 @@ map_print_some_keys(el, map, first, last)
     lastbuf[1] = 0;
     if (map[first] == ED_UNASSIGNED) {
 	if (first == last)
-	    (void) fprintf(el->el_outfile, "%-15s->  is undefined\n",
+	    _cw_out_put_f(el->el_outfile, "[s|w:15|j:l]->  is undefined\n",
 		    key__decode_str(firstbuf, unparsbuf, STRQQ));
 	return;
     }
@@ -1134,30 +1134,31 @@ map_print_some_keys(el, map, first, last)
     for (bp = el->el_map.help; bp->name != NULL; bp++) {
 	if (bp->func == map[first]) {
 	    if (first == last) {
-		(void) fprintf(el->el_outfile, "%-15s->  %s\n",
+		_cw_out_put_f(el->el_outfile, "[s|w:15|j:l]->  [s]\n",
 			       key__decode_str(firstbuf, unparsbuf, STRQQ),
 			       bp->name);
 	    }
 	    else {
-		(void) fprintf(el->el_outfile, "%-4s to %-7s->  %s\n",
-			       key__decode_str(firstbuf, unparsbuf, STRQQ),
-			       key__decode_str(lastbuf, extrabuf, STRQQ),
-			       bp->name);
+		_cw_out_put_f(el->el_outfile,
+		    "[s|w:4|j:l] to [s|w:7|j:l]->  [s]\n",
+		    key__decode_str(firstbuf, unparsbuf, STRQQ),
+		    key__decode_str(lastbuf, extrabuf, STRQQ),
+		    bp->name);
 	    }
 	    return;
 	}
     }
 #ifdef MAP_DEBUG
     if (map == el->el_map.key) {
-	(void) fprintf(el->el_outfile, "BUG!!! %s isn't bound to anything.\n",
+	_cw_out_put_f(el->el_outfile, "BUG!!! [s] isn't bound to anything.\n",
 		       key__decode_str(firstbuf, unparsbuf, STRQQ));
-	(void) fprintf(el->el_outfile, "el->el_map.key[%d] == %d\n",
+	_cw_out_put_f(el->el_outfile, "el->el_map.key[[[i]] == [i]\n",
 		       first, el->el_map.key[first]);
     }
     else {
-	(void) fprintf(el->el_outfile, "BUG!!! %s isn't bound to anything.\n",
+	_cw_out_put_f(el->el_outfile, "BUG!!! [s] isn't bound to anything.\n",
 		       key__decode_str(firstbuf, unparsbuf, STRQQ));
-	(void) fprintf(el->el_outfile, "el->el_map.alt[%d] == %d\n",
+	_cw_out_put_f(el->el_outfile, "el->el_map.alt[[[i]] == [i]\n",
 		       first, el->el_map.alt[first]);
     }
 #endif
@@ -1174,7 +1175,7 @@ map_print_all_keys(el)
 {
     int     prev, i;
 
-    (void) fprintf(el->el_outfile, "Standard key bindings\n");
+    _cw_out_put_f(el->el_outfile, "Standard key bindings\n");
     prev = 0;
     for (i = 0; i < N_KEYS; i++) {
 	if (el->el_map.key[prev] == el->el_map.key[i])
@@ -1184,7 +1185,7 @@ map_print_all_keys(el)
     }
     map_print_some_keys(el, el->el_map.key, prev, i - 1);
 
-    (void) fprintf(el->el_outfile, "Alternative key bindings\n");
+    _cw_out_put_f(el->el_outfile, "Alternative key bindings\n");
     prev = 0;
     for (i = 0; i < N_KEYS; i++) {
 	if (el->el_map.alt[prev] == el->el_map.alt[i])
@@ -1194,9 +1195,9 @@ map_print_all_keys(el)
     }
     map_print_some_keys(el, el->el_map.alt, prev, i - 1);
 
-    (void) fprintf(el->el_outfile, "Multi-character bindings\n");
+    _cw_out_put_f(el->el_outfile, "Multi-character bindings\n");
     key_print(el, "");
-    (void) fprintf(el->el_outfile, "Arrow key bindings\n");
+    _cw_out_put_f(el->el_outfile, "Arrow key bindings\n");
     term_print_arrow(el, "");
 }
 
@@ -1260,11 +1261,11 @@ map_bind(el, argc, argv)
 
 	    case 'l':
 		for (bp = el->el_map.help; bp->name != NULL; bp++)
-		    (void) fprintf(el->el_outfile, "%s\n\t%s\n",
+		    _cw_out_put_f(el->el_outfile, "[s]\n\t[s]\n",
 				   bp->name, bp->description);
 		return 0;
 	    default:
-		(void) fprintf(el->el_errfile, "%s: Invalid switch `%c'.\n",
+		_cw_out_put_f(el->el_errfile, "[s]: Invalid switch `[c]'.\n",
 			       argv[0], p[1]);
 	    }
 	else
@@ -1279,7 +1280,8 @@ map_bind(el, argc, argv)
 	in = argv[argc++];
     else
 	if ((in = parse__string(inbuf, argv[argc++])) == NULL) {
-	    (void) fprintf(el->el_errfile, "%s: Invalid \\ or ^ in instring.\n",
+	    _cw_out_put_f(el->el_errfile,
+	    "[s]: Invalid \\ or ^ in instring.\n",
 			   argv[0]);
 	    return -1;
 	}
@@ -1317,8 +1319,8 @@ map_bind(el, argc, argv)
     case XK_STR:
     case XK_EXE:
 	if ((out = parse__string(outbuf, argv[argc])) == NULL) {
-	    (void) fprintf(el->el_errfile,
-			   "%s: Invalid \\ or ^ in outstring.\n", argv[0]);
+	    _cw_out_put_f(el->el_errfile,
+			   "[s]: Invalid \\ or ^ in outstring.\n", argv[0]);
 	    return -1;
 	}
 	if (key)
@@ -1330,8 +1332,8 @@ map_bind(el, argc, argv)
 
     case XK_CMD:
 	if ((cmd = parse_cmd(el, argv[argc])) == -1) {
-	    (void) fprintf(el->el_errfile,
-			   "%s: Invalid command `%s'.\n", argv[0], argv[argc]);
+	    _cw_out_put_f(el->el_errfile,
+	    "[s]: Invalid command `[s]'.\n", argv[0], argv[argc]);
 	    return -1;
 	}
 	if (key)

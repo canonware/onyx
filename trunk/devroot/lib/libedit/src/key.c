@@ -186,13 +186,13 @@ key_add(el, key, val, ntype)
     int          ntype;
 {
     if (key[0] == '\0') {
-	(void) fprintf(el->el_errfile,
+	_cw_out_put_f(el->el_errfile,
 		       "key_add: Null extended-key not allowed.\n");
 	return;
     }
 
     if (ntype == XK_CMD && val->cmd == ED_SEQUENCE_LEAD_IN) {
-	(void) fprintf(el->el_errfile,
+	_cw_out_put_f(el->el_errfile,
 		       "key_add: sequence-lead-in command not allowed\n");
 	return;
     }
@@ -235,7 +235,7 @@ key_delete(el, key)
     char   *key;
 {
     if (key[0] == '\0') {
-	(void) fprintf(el->el_errfile,
+	_cw_out_put_f(el->el_errfile,
 		       "key_delete: Null extended-key not allowed.\n");
 	return -1;
     }
@@ -264,7 +264,7 @@ key_print(el, key)
     el->el_key.buf[0] =  '"';
     if (node_lookup(el, key, el->el_key.map, 1) <= -1)
 	/* key is not bound */
-	(void) fprintf(el->el_errfile, "Unbound extended key \"%s\"\n", key);
+	_cw_out_put_f(el->el_errfile, "Unbound extended key \"[s]\"\n", key);
     return;
 }
 
@@ -548,15 +548,15 @@ node_enum(el, ptr, cnt)
     if (cnt >= KEY_BUFSIZ - 5) {	/* buffer too small */
 	el->el_key.buf[++cnt] = '"';
 	el->el_key.buf[++cnt] = '\0';
-	(void) fprintf(el->el_errfile,
+	_cw_out_put_f(el->el_errfile,
 		    "Some extended keys too long for internal print buffer");
-	(void) fprintf(el->el_errfile, " \"%s...\"\n", el->el_key.buf);
+	_cw_out_put_f(el->el_errfile, " \"[s]...\"\n", el->el_key.buf);
 	return 0;
     }
 
     if (ptr == NULL) {
 #ifdef DEBUG_EDIT
-	(void) fprintf(el->el_errfile, "node_enum: BUG!! Null ptr passed\n!");
+	_cw_out_put_f(el->el_errfile, "node_enum: BUG!! Null ptr passed\n!");
 #endif
 	return -1;
     }
@@ -592,25 +592,25 @@ key_kprint(el, key, val, ntype)
 {
     el_bindings_t *fp;
     char unparsbuf[EL_BUFSIZ];
-    static char *fmt = "%-15s->  %s\n";
+    static char *fmt = "[s|w:15|j:l]->  [s]\n";
 
     if (val != NULL)
 	switch (ntype) {
 	case XK_STR:
 	case XK_EXE:
-	    (void) fprintf(el->el_errfile, fmt, key,
+	    _cw_out_put_f(el->el_errfile, fmt, key,
 			   key__decode_str(val->str, unparsbuf,
 					      ntype == XK_STR ? "\"\"" : "[]"));
 	    break;
 	case XK_CMD:
 	    for (fp = el->el_map.help; fp->name; fp++)
 		if (val->cmd == fp->func) {
-		    (void) fprintf(el->el_errfile, fmt, key, fp->name);
+		    _cw_out_put_f(el->el_errfile, fmt, key, fp->name);
 		    break;
 		}
 #ifdef DEBUG_KEY
 	    if (fp->name == NULL)
-		(void) fprintf(el->el_errfile, "BUG! Command not found.\n");
+		_cw_out_put_f(el->el_errfile, "BUG! Command not found.\n");
 #endif
 
 	    break;
@@ -619,7 +619,7 @@ key_kprint(el, key, val, ntype)
 	    break;
 	}
     else
-	(void) fprintf(el->el_errfile, fmt, key, "no input");
+	_cw_out_put_f(el->el_errfile, fmt, key, "no input");
 }
 
 

@@ -89,8 +89,8 @@ typedef struct el_state_t {
 
 struct editline {
     char	 *el_prog;	/* the program name 			*/
-    FILE         *el_outfile;	/* Stdio stuff				*/
-    FILE         *el_errfile;	/* Stdio stuff				*/
+    int		  el_outfile;	/* Stdio stuff				*/
+    int		  el_errfile;	/* Stdio stuff				*/
     int           el_infd;	/* Input file descriptor		*/
     int		  el_flags;	/* Various flags.			*/
     coord_t       el_cursor;	/* Cursor location			*/

@@ -51,8 +51,8 @@ cv_undo(el, action, size, ptr)
     vu->isize  = size;
     (void) memcpy(vu->buf, vu->ptr, size);
 #ifdef DEBUG_UNDO
-    (void) fprintf(el->el_errfile, "Undo buffer \"%s\" size = +%d -%d\n",
-		   vu->ptr, vu->isize, vu->dsize);
+    (void) _cw_out_put_f(el->el_errfile,
+    "Undo buffer \"[s]\" size = +[i] -[i]\n", vu->ptr, vu->isize, vu->dsize);
 #endif
 }
 

@@ -52,7 +52,7 @@
 public EditLine *
 el_init(prog, fin, fout)
     const char *prog;
-    FILE *fin, *fout;
+    int fin, fout;
 {
     EditLine *el = (EditLine *) el_malloc(sizeof(EditLine));
 #ifdef DEBUG
@@ -64,7 +64,7 @@ el_init(prog, fin, fout)
 
     memset(el, 0, sizeof(EditLine));
 
-    el->el_infd  = fileno(fin);
+    el->el_infd  = fin;
     el->el_outfile = fout;
     el->el_prog = strdup(prog);
 
@@ -72,14 +72,14 @@ el_init(prog, fin, fout)
     if (issetugid() == 0 && (tty = getenv("DEBUGTTY")) != NULL) {
 	el->el_errfile = fopen(tty, "w");
 	if (el->el_errfile == NULL) {
-		(void) fprintf(stderr, "Cannot open %s (%s).\n",
+		_cw_out_put_f(stderr, "Cannot open [s] ([s]).\n",
 			       tty, strerror(errno));
 		return NULL;
 	}
     }
     else
 #endif
-	el->el_errfile = stderr;
+	el->el_errfile = 2;
 
     /*
      * Initialize all the modules. Order is important!!!
@@ -283,7 +283,7 @@ el_source(el, fname)
     if (fname == NULL) {
 	if (issetugid() != 0 || (ptr = getenv("HOME")) == NULL)
 	    return -1;
-	(void) snprintf(path, sizeof(path), "%s%s", ptr, elpath);
+	_cw_out_put_sn(path, sizeof(path), "[s][s]", ptr, elpath);
 	fname = path;
     }
 

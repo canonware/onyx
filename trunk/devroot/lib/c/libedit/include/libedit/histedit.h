@@ -70,7 +70,7 @@ typedef struct lineinfo {
 /*
  * Initialization, cleanup, and resetting
  */
-EditLine	*el_init	__P((const char *, FILE *, FILE *));
+EditLine	*el_init	__P((const char *, int, int));
 void		 el_reset	__P((EditLine *));
 void		 el_end		__P((EditLine *));
 

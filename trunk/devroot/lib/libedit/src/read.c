@@ -52,15 +52,15 @@ read_debug(el)
 {
 
     if (el->el_line.cursor > el->el_line.lastchar)
-	(void) fprintf(el->el_errfile, "cursor > lastchar\r\n");
+	_cw_out_put_f(el->el_errfile, "cursor > lastchar\r\n");
     if (el->el_line.cursor < el->el_line.buffer)
-	(void) fprintf(el->el_errfile, "cursor < buffer\r\n");
+	_cw_out_put_f(el->el_errfile, "cursor < buffer\r\n");
     if (el->el_line.cursor > el->el_line.limit)
-	(void) fprintf(el->el_errfile, "cursor > limit\r\n");
+	_cw_out_put_f(el->el_errfile, "cursor > limit\r\n");
     if (el->el_line.lastchar > el->el_line.limit)
-	(void) fprintf(el->el_errfile, "lastchar > limit\r\n");
+	_cw_out_put_f(el->el_errfile, "lastchar > limit\r\n");
     if (el->el_line.limit != &el->el_line.buffer[EL_BUFSIZ - 2])
-	(void) fprintf(el->el_errfile, "limit != &buffer[EL_BUFSIZ-2]\r\n");
+	_cw_out_put_f(el->el_errfile, "limit != &buffer[EL_BUFSIZ-2]\r\n");
 }
 #endif /* DEBUG_EDIT */
 
@@ -270,13 +270,13 @@ el_getc(el, cp)
     }
 
 #ifdef DEBUG_READ
-    (void) fprintf(el->el_errfile, "Turning raw mode on\n");
+    _cw_out_put_f(el->el_errfile, "Turning raw mode on\n");
 #endif /* DEBUG_READ */
     if (tty_rawmode(el) < 0)	/* make sure the tty is set up correctly */
 	return 0;
 
 #ifdef DEBUG_READ
-    (void) fprintf(el->el_errfile, "Reading a character\n");
+    _cw_out_put_f(el->el_errfile, "Reading a character\n");
 #endif /* DEBUG_READ */
     while ((num_read = read(el->el_infd, (char *) &tcp, 1)) == -1)
 	if (!tried && read__fixio(el->el_infd, errno) == 0)
@@ -286,7 +286,7 @@ el_getc(el, cp)
 	    return -1;
 	}
 #ifdef DEBUG_READ
-    (void) fprintf(el->el_errfile, "Got it %c\n", tcp);
+    _cw_out_put_f(el->el_errfile, "Got it [c]\n", tcp);
 #endif /* DEBUG_READ */
     *cp = tcp;
     return num_read;
@@ -334,15 +334,15 @@ el_gets(el, nread)
 	/* if EOF or error */
 	if ((num = read_getcmd(el, &cmdnum, &ch)) != OKCMD) {
 #ifdef DEBUG_READ
-	    (void) fprintf(el->el_errfile, "Returning from el_gets %d\n", num);
+	    _cw_out_put_f(el->el_errfile, "Returning from el_gets [i]\n", num);
 #endif /* DEBUG_READ */
 	    break;
 	}
 
 	if (cmdnum >= el->el_map.nfunc) {	/* BUG CHECK command */
 #ifdef DEBUG_EDIT
-	    (void) fprintf(el->el_errfile,
-			   "ERROR: illegal command from key 0%o\r\n", ch);
+	    _cw_out_put_f(el->el_errfile,
+	    "ERROR: illegal command from key 0x[i|b:16]\r\n", ch);
 #endif /* DEBUG_EDIT */
 	    continue;		/* try again */
 	}
@@ -355,9 +355,9 @@ el_gets(el, nread)
 		if (b->func == cmdnum)
 		    break;
 	    if (b->name)
-		(void) fprintf(el->el_errfile, "Executing %s\n", b->name);
+		_cw_out_put_f(el->el_errfile, "Executing [s]\n", b->name);
 	    else
-		(void) fprintf(el->el_errfile, "Error command = %d\n", cmdnum);
+		_cw_out_put_f(el->el_errfile, "Error command = [i]\n", cmdnum);
 	}
 #endif /* DEBUG_READ */
 	retval = (*el->el_map.func[cmdnum])(el, ch);
@@ -403,7 +403,7 @@ el_gets(el, nread)
 
 	case CC_FATAL:		/* fatal error, reset to known state */
 #ifdef DEBUG_READ
-	    (void) fprintf(el->el_errfile, "*** editor fatal ERROR ***\r\n\n");
+	    _cw_out_put_f(el->el_errfile, "*** editor fatal ERROR ***\r\n\n");
 #endif /* DEBUG_READ */
 	    /* put (real) cursor in a known place */
 	    re_clear_display(el);	/* reset the display stuff */
@@ -416,7 +416,7 @@ el_gets(el, nread)
 	case CC_ERROR:
 	default:		/* functions we don't know about */
 #ifdef DEBUG_READ
-	    (void) fprintf(el->el_errfile, "*** editor ERROR ***\r\n\n");
+	    _cw_out_put_f(el->el_errfile, "*** editor ERROR ***\r\n\n");
 #endif /* DEBUG_READ */
 	    el->el_state.argument = 1;
 	    el->el_state.doingarg = 0;

@@ -156,6 +156,6 @@ hist_list(el, argc, argv)
     if (el->el_history.ref == NULL)
 	return -1;
     for (str = HIST_LAST(el); str != NULL; str = HIST_PREV(el))
-	(void) fprintf(el->el_outfile, "%d %s", el->el_history.ev->num, str);
+	_cw_out_put_f(el->el_outfile, "[i] [s]", el->el_history.ev->num, str);
     return 0;
 }

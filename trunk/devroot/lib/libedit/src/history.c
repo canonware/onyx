@@ -466,17 +466,17 @@ history_save(h, fname)
     History *h;
     const char *fname;
 {
-    FILE *fp;
+    int	fp;
     const HistEvent *ev;
     int i = 0;
 
-    if ((fp = fopen(fname, "w")) == NULL)
+    if ((fp = open(fname, O_WRONLY | O_TRUNC | O_CREAT)) == NULL)
 	return -1;
 
-    (void) fputs(hist_cookie, fp);
+    write(fp, hist_cookie, strlen(hist_cookie));
     for (ev = HLAST(h); ev != NULL; ev = HPREV(h), i++)
-	(void) fprintf(fp, "%s", ev->str);
-    (void) fclose(fp);
+	_cw_out_put_f(fp, "[s]", ev->str);
+    (void) close(fp);
     return i;
 }
 
