@@ -151,7 +151,7 @@ void		stilo_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t
 /*      *a_stilt); */
 void		stilo_move(cw_stilo_t *a_to, cw_stilo_t *a_from);
 
-void		stilo_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t
+void		stilo_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
     a_syntactic, cw_bool_t a_newline);
 
 /* XXX For the GC only. */
@@ -163,13 +163,13 @@ cw_stiloe_t	*stiloe_l_ref_iterate(cw_stiloe_t *a_stiloe, cw_bool_t a_reset);
  */
 #ifdef _LIBSTIL_DBG
 #define	stilo_no_new(a_stilo) do {					\
-	*(cw_uint32_t *)(a_stilo) = 0;					\
+	memset((a_stilo), 0, sizeof(cw_stilo_t));			\
 	(a_stilo)->type = STILOT_NO;					\
 	(a_stilo)->magic = _CW_STILO_MAGIC;				\
 } while (0)
 #else
 #define	stilo_no_new(a_stilo) do {					\
-	*(cw_uint32_t *)(a_stilo) = 0;					\
+	memset((a_stilo), 0, sizeof(cw_stilo_t));			\
 	(a_stilo)->type = STILOT_NO;					\
 } while (0)
 #endif
@@ -220,12 +220,17 @@ void		stilo_file_fd_wrap(cw_stilo_t *a_stilo, cw_uint32_t a_fd);
 void		stilo_file_interactive(cw_stilo_t *a_stilo, cw_bool_t
     (*a_read)(void *a_opaque, cw_uint32_t a_len, cw_uint8_t *r_str));
 void		stilo_file_open(cw_stilo_t *a_stilo, const cw_uint8_t
-    *a_filename, const cw_uint8_t *a_flags);
+    *a_filename, cw_uint32_t a_nlen, const cw_uint8_t *a_flags, cw_uint32_t
+    a_flen);
 void		stilo_file_close(cw_stilo_t *a_stilo);
 cw_sint32_t	stilo_file_read(cw_stilo_t *a_stilo, cw_uint32_t a_len,
     cw_uint8_t *r_str);
 void		stilo_file_write(cw_stilo_t *a_stilo, const cw_uint8_t *a_str,
     cw_uint32_t a_len);
+void		stilo_file_output(cw_stilo_t *a_stilo, const char *a_format,
+    ...);
+void		stilo_file_output_n(cw_stilo_t *a_stilo, cw_uint32_t a_size,
+    const char *a_format, ...);
 void		stilo_file_truncate(cw_stilo_t *a_stilo, cw_uint32_t a_length);
 cw_sint64_t	stilo_file_position_get(cw_stilo_t *a_stilo);
 void		stilo_file_position_set(cw_stilo_t *a_stilo, cw_sint64_t
@@ -249,14 +254,14 @@ void		stilo_hook_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
  */
 #ifdef _LIBSTIL_DBG
 #define	stilo_integer_new(a_stilo, a_val) do {				\
-	*(cw_uint32_t *)(a_stilo) = 0;					\
+	memset((a_stilo), 0, sizeof(cw_stilo_t));			\
 	(a_stilo)->type = STILOT_INTEGER;				\
 	(a_stilo)->magic = _CW_STILO_MAGIC;				\
 	(a_stilo)->o.integer.i = (a_val);				\
 } while (0)
 #else
 #define	stilo_integer_new(a_stilo, a_val) do {				\
-	*(cw_uint32_t *)(a_stilo) = 0;					\
+	memset((a_stilo), 0, sizeof(cw_stilo_t));			\
 	(a_stilo)->type = STILOT_INTEGER;				\
 	(a_stilo)->o.integer.i = (a_val);				\
 } while (0)
@@ -331,6 +336,8 @@ void		stilo_operator_new(cw_stilo_t *a_stilo, cw_op_t *a_op);
  */
 void		stilo_string_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
     cw_uint32_t a_len);
+void		stilo_string_substring_new(cw_stilo_t *a_stilo, cw_stilo_t
+    *a_string, cw_stilt_t *a_stilt, cw_uint32_t a_offset, cw_uint32_t a_len);
 cw_sint32_t	stilo_string_len_get(cw_stilo_t *a_stilo);
 cw_uint8_t	*stilo_string_el_get(cw_stilo_t *a_stilo, cw_uint32_t a_offset);
 cw_uint8_t	*stilo_string_get(cw_stilo_t *a_stilo);

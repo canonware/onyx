@@ -182,7 +182,10 @@ cw_bool_t	stilt_dict_stack_search(cw_stilt_t *a_stilt, cw_stilo_t *a_key,
 
 #define		stilt_stil_get(a_stilt) (a_stilt)->stil
 #define		stilt_name_hash_get(a_stilt) &(a_stilt)->name_hash
-#define		stilt_stdout_get(a_stilt) (a_stilt)->stdout_fd
+
+#define		stilt_stdin_get(a_stilt) stil_stdin_get((a_stilt)->stil)
+#define		stilt_stdout_get(a_stilt) stil_stdout_get((a_stilt)->stil)
+#define		stilt_stderr_get(a_stilt) stil_stderr_get((a_stilt)->stil)
 #define		stilt_data_stack_get(a_stilt) (&((a_stilt)->data_stils))
 #define		stilt_dict_stack_get(a_stilt) (&((a_stilt)->dict_stils))
 #define		stilt_exec_stack_get(a_stilt) (&((a_stilt)->exec_stils))

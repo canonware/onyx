@@ -257,8 +257,12 @@ stils_roll(cw_stils_t *a_stils, cw_uint32_t a_count, cw_sint32_t a_amount)
 	 * of these calculations with no extra work, since we already have to
 	 * deal with upward versus downward rolling calculations.
 	 */
+	if (a_amount < 0) {
+		/* Convert a_amount to a positive equivalent. */
+		a_amount += ((a_amount - a_count) / a_count) * a_count;
+	}
 	a_amount %= a_count;
-	a_amount = a_amount + a_count;
+	a_amount += a_count;
 	a_amount %= a_count;
 
 	/*
@@ -359,27 +363,20 @@ stils_nget(cw_stils_t *a_stils, cw_uint32_t a_index)
 cw_stilo_t *
 stils_down_get(cw_stils_t *a_stils, cw_stilo_t *a_stilo)
 {
-	cw_stilo_t	*retval;
 	cw_stilso_t	*stilso;
 
 	_cw_check_ptr(a_stils);
 	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
 
-	if (a_stils->count <= 1) {
-		retval = NULL;
-		goto RETURN;
-	}
+	if (a_stils->count <= 1)
+		xep_throw(_CW_XEPV_STACKUNDERFLOW);
 
 	stilso = (cw_stilso_t *)a_stilo;
 	stilso = qs_down(stilso, link);
-	if (stilso == NULL) {
-		retval = NULL;
-		goto RETURN;
-	}
+	if (stilso == NULL)
+		xep_throw(_CW_XEPV_STACKUNDERFLOW);
 
-	retval = &stilso->stilo;
-	RETURN:
-	return retval;
+	return &stilso->stilo;
 }
 
 cw_uint32_t

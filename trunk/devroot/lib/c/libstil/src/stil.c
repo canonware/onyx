@@ -41,6 +41,12 @@
  */
 #define	_CW_STIL_GLOBALDICT_SIZE	 64
 
+/*
+ * Size of buffers for stdin and stdout.  We don't buffer stderr.
+ */
+#define	_CW_STIL_STDIN_BUFFER_SIZE	512
+#define	_CW_STIL_STDOUT_BUFFER_SIZE	512
+
 cw_stil_t *
 stil_new(cw_stil_t *a_stil)
 {
@@ -75,7 +81,8 @@ stil_new(cw_stil_t *a_stil)
 
 		/*
 		 * Create a temporary thread in order to be able to initialize
-		 * systemdict, and destroy the thread as soon as we're done.
+		 * systemdict, stdin, stdout, and stderr, and destroy the thread
+		 * as soon as we're done.
 		 */
 
 		/* Initialize systemdict, since stilt_new() will access it. */
@@ -88,6 +95,20 @@ stil_new(cw_stil_t *a_stil)
 		systemdict_populate(&retval->systemdict, &stilt);
 		stilo_dict_new(&retval->globaldict, &stilt,
 		    _CW_STIL_GLOBALDICT_SIZE);
+
+		stilo_file_new(&retval->stdin_stilo, &stilt);
+		stilo_file_fd_wrap(&retval->stdin_stilo, 0);
+		stilo_file_buffer_size_set(&retval->stdin_stilo,
+		    _CW_STIL_STDIN_BUFFER_SIZE);
+		
+		stilo_file_new(&retval->stdout_stilo, &stilt);
+		stilo_file_fd_wrap(&retval->stdout_stilo, 1);
+		stilo_file_buffer_size_set(&retval->stdout_stilo,
+		    _CW_STIL_STDOUT_BUFFER_SIZE);
+		
+		stilo_file_new(&retval->stderr_stilo, &stilt);
+		stilo_file_fd_wrap(&retval->stderr_stilo, 2);
+
 		stilt_delete(&stilt);
 	}
 	xep_catch (_CW_XEPV_OOM) {

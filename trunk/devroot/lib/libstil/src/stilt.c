@@ -253,7 +253,6 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 	/* XXX Push globaldict onto the dictionary stack. */
 	/* XXX Create and push localdict onto the dictionary stack. */
 
-	retval->stdout_fd = 1;
 	retval->stil = a_stil;
 
 	retval->tok_str = retval->buffer;
@@ -491,17 +490,30 @@ stilt_dict_stack_search(cw_stilt_t *a_stilt, cw_stilo_t *a_key, cw_stilo_t
 {
 	cw_bool_t	retval;
 	cw_stilo_t	*dict;
+	cw_uint32_t	i, depth;
 
 	/*
 	 * Iteratively search the dictionaries on the dictionary stack for
 	 * a_key.
 	 */
-	for (dict = stils_get(&a_stilt->dict_stils); dict != NULL; dict =
-	     stils_down_get(&a_stilt->dict_stils, dict)) {
+	i = 0;
+	depth = stils_count(&a_stilt->dict_stils);
+	if (depth > 0) {
+		dict = stils_get(&a_stilt->dict_stils);
 		if (stilo_dict_lookup(dict, a_stilt, a_key, r_value) == FALSE) {
 			/* Found. */
 			retval = FALSE;
 			goto RETURN;
+		}
+
+		for (i = 1; i < depth; i++) {
+			dict = stils_down_get(&a_stilt->dict_stils, dict);
+			if (stilo_dict_lookup(dict, a_stilt, a_key, r_value) ==
+			    FALSE) {
+				/* Found. */
+				retval = FALSE;
+				goto RETURN;
+			}
 		}
 	}
 
@@ -1564,14 +1576,24 @@ static void
 stilt_p_procedure_accept(cw_stilt_t *a_stilt)
 {
 	cw_stilo_t	t_stilo, *stilo, *arr;	/* XXX GC-unsafe. */
-	cw_uint32_t	nelements, i;
+	cw_uint32_t	nelements, i, depth;
 
 	/* Find the "mark". */
-	for (i = 0, stilo = stils_get(&a_stilt->data_stils);
-	     stilo != NULL && stilo_type_get(stilo) != STILOT_NO;
-	     i++, stilo = stils_down_get(&a_stilt->data_stils, stilo));
+	i = 0;
+	depth = stils_count(&a_stilt->data_stils);
+	if (depth > 0) {
+		stilo = stils_get(&a_stilt->data_stils);
+		if (stilo_type_get(stilo) == STILOT_NO)
+			goto OUT;
 
-	_cw_assert(stilo != NULL);
+		for (i = 1; i < depth; i++) {
+			stilo = stils_down_get(&a_stilt->data_stils, stilo);
+			if (stilo_type_get(stilo) == STILOT_NO)
+				break;
+		}
+	}
+	OUT:
+	_cw_assert(i < depth);
 
 	/*
 	 * i is the index of the mark, and stilo points to the mark.  Set
@@ -1587,9 +1609,16 @@ stilt_p_procedure_accept(cw_stilt_t *a_stilt)
 	/*
 	 * Traverse up the stack, moving stilo's to the array.
 	 */
-	for (i = nelements, stilo = stils_get(&a_stilt->data_stils); i > 0;
-	     i--, stilo = stils_down_get(&a_stilt->data_stils, stilo))
+	i = nelements;
+	if (i > 0) {
+		stilo = stils_get(&a_stilt->data_stils);
 		stilo_move(&arr[i - 1], stilo);
+
+		for (i--; i > 0; i--) {
+			stilo = stils_down_get(&a_stilt->data_stils, stilo);
+			stilo_move(&arr[i - 1], stilo);
+		}
+	}
 
 	/* Pop the stilo's off the stack now. */
 	stils_npop(&a_stilt->data_stils, nelements + 1);
