@@ -915,7 +915,7 @@ main()
     _cw_assert(24 == buf_get_uint8(&buf, 24));
     _cw_assert(25 == buf_get_uint8(&buf, 25));
 
-    for (i = 0; i < 26; i++)
+    for (i = 0; i < 23; i++)
     {
       t_uint32 = ~buf_get_uint32(&buf, i);
       
@@ -1076,7 +1076,7 @@ main()
     _cw_assert(24 == buf_get_uint8(&buf, 24));
     _cw_assert(25 == buf_get_uint8(&buf, 25));
 
-    for (i = 0; i < 26; i++)
+    for (i = 0; i < 19; i++)
     {
       t_uint64 = ~buf_get_uint64(&buf, i);
       
@@ -1104,7 +1104,7 @@ main()
   /* buf_set_range(). */
   {
     cw_buf_t * buf;
-    char * str_a = "This is string A.  Blah blah.  Okay, this is now longer.";
+    char str_a[57] = "This is string A.  Blah blah.  Okay, this is now longer.";
     char * str_b = "And following is string B.  Mumble mumble.";
 
     buf = buf_new(NULL, TRUE);
@@ -1122,7 +1122,6 @@ main()
 				      str_a, TRUE));
     _cw_assert(FALSE == buf_set_range(buf, 4, strlen(str_b) + 1,
 				      str_b, TRUE));
-    _cw_assert(strlen(str_b) + 4 == buf_get_size(buf));
     _cw_assert(strlen(str_a) == strlen(str_b) + 4);
     
     buf_delete(buf);

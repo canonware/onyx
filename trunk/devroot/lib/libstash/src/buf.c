@@ -1429,13 +1429,7 @@ buf_set_uint8(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint8_t a_val)
   }
 
   buf_p_get_data_position(a_buf, a_offset, &array_element, &bufel_offset);
-/*    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
-/*  	      "array_element == %lu, bufel_offset == %lu\n", */
-/*  	      array_element, bufel_offset); */
 
-  _cw_assert(TRUE == a_buf->bufel_array[array_element].bufc->is_writeable);
-  _cw_assert(1 == bufc_p_get_ref_count(a_buf->bufel_array[array_element].bufc));
-  
   a_buf->bufel_array[array_element].bufc_buf[bufel_offset] = a_val;
 
   retval = FALSE;
@@ -2392,7 +2386,7 @@ buf_p_make_range_writeable(cw_buf_t * a_buf, cw_uint32_t a_offset,
 
   /* Add extra buffer space to the end of the buf if the writeable range we're
    * creating extends past the current end of the buf. */
-  if (a_offset + a_length >= a_buf->size)
+  if (a_offset + a_length > a_buf->size)
   {
     cw_bufc_t * bufc;
     void * buffer;
@@ -2404,7 +2398,7 @@ buf_p_make_range_writeable(cw_buf_t * a_buf, cw_uint32_t a_offset,
       goto RETURN;
     }
     
-    buffer = _cw_malloc((a_offset + a_length + 1) - a_buf->size);
+    buffer = _cw_malloc((a_offset + a_length) - a_buf->size);
     if (NULL == buffer)
     {
       bufc_delete(bufc);
@@ -2412,7 +2406,7 @@ buf_p_make_range_writeable(cw_buf_t * a_buf, cw_uint32_t a_offset,
       goto RETURN;
     }
 
-    bufc_set_buffer(bufc, buffer, (a_offset + a_length + 1) - a_buf->size,
+    bufc_set_buffer(bufc, buffer, (a_offset + a_length) - a_buf->size,
 		    TRUE, mem_dealloc, cw_g_mem);
 
     if (buf_p_fit_array(a_buf, a_buf->array_num_valid + 1))
@@ -2425,7 +2419,7 @@ buf_p_make_range_writeable(cw_buf_t * a_buf, cw_uint32_t a_offset,
     bufel_new(&a_buf->bufel_array[a_buf->array_end], NULL, NULL);
     bufel_set_bufc(&a_buf->bufel_array[a_buf->array_end], bufc);
 
-    a_buf->size = a_offset + a_length + 1;
+    a_buf->size = a_offset + a_length;
     a_buf->array_num_valid++;
     /* Do this in case the cumulative index is valid. */
     a_buf->cumulative_index[a_buf->array_end] = a_buf->size;
@@ -2456,9 +2450,6 @@ buf_p_make_range_writeable(cw_buf_t * a_buf, cw_uint32_t a_offset,
       retval = TRUE;
       goto RETURN;
     }
-/*      log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
-/*  		"array_element == %lu (iteration %lu)\n", */
-/*  		first_array_element + i, i); */
     _cw_assert(TRUE == a_buf->
 	       bufel_array[((first_array_element + i)
 			    & (a_buf->array_size - 1))].bufc->is_writeable);
@@ -2524,6 +2515,12 @@ bufel_delete(cw_bufel_t * a_bufel)
   {
     a_bufel->dealloc_func(a_bufel->dealloc_arg, (void *) a_bufel);
   }
+#ifdef _LIBSTASH_DBG
+  else
+  {
+    bzero(a_bufel, sizeof(cw_bufel_t));
+  }
+#endif
 }
 
 void
@@ -2565,7 +2562,11 @@ bufel_dump(cw_bufel_t * a_bufel, const char * a_prefix)
   log_printf(cw_g_log,
 	     "%s|--> end_offset : %u\n",
 	     a_prefix, a_bufel->end_offset);
+#ifdef _LIBSTASH_DBG
+  if ((NULL != a_bufel->bufc) && (_CW_BUFEL_MAGIC == a_bufel->magic))
+#else
   if (NULL != a_bufel->bufc)
+#endif
   {
     log_printf(cw_g_log,
 	       "%s|--> bufc : 0x%x\n"
