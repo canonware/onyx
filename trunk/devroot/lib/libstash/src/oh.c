@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 24 $
- * $Date: 1998-04-12 01:44:39 -0700 (Sun, 12 Apr 1998) $
+ * $Revision: 29 $
+ * $Date: 1998-04-13 01:24:02 -0700 (Mon, 13 Apr 1998) $
  *
  * <<< Description >>>
  *
@@ -40,6 +40,7 @@
 
 #define _OH_PERF_
 
+#define _INC_THREAD_H_
 #define _INC_OH_H_
 #define _INC_OH_PRIV_H_
 
@@ -53,6 +54,8 @@ oh_new()
 
   retval = (oh_t *) _cw_malloc(sizeof(oh_t));
   _cw_check_ptr(retval);
+
+  rwl_new(&retval->rw_lock);
 
   retval->size = 1 << _OH_BASE_POWER;
   
@@ -103,6 +106,8 @@ oh_delete(oh_t * arg_oh_obj)
 
   _cw_check_ptr(arg_oh_obj);
 
+  rwl_delete(&arg_oh_obj->rw_lock);
+
   /* Iteratively delete the items in the table. */
   for (i = 0; i < arg_oh_obj->size; i++)
   {
@@ -119,7 +124,17 @@ oh_delete(oh_t * arg_oh_obj)
 cw_bool_t
 oh_rehash(oh_t * arg_oh_obj)
 {
-  return oh_rehash_priv(arg_oh_obj, TRUE);
+  cw_bool_t retval;
+
+  _cw_check_ptr(arg_oh_obj);
+
+  rwl_wlock(&arg_oh_obj->rw_lock);
+
+  retval = oh_rehash_priv(arg_oh_obj, TRUE);
+
+  rwl_wunlock(&arg_oh_obj->rw_lock);
+  
+  return retval;
 }
 
 cw_uint32_t
@@ -190,11 +205,13 @@ oh_set_h1(oh_t * arg_oh_obj,
   _cw_check_ptr(arg_oh_obj);
   _cw_check_ptr(arg_new_h1);
 
+  rwl_wlock(&arg_oh_obj->rw_lock);
+
   if (arg_oh_obj->curr_h1 != arg_new_h1)
   {
     arg_oh_obj->curr_h1 = arg_new_h1;
 
-    retval = oh_rehash(arg_oh_obj);
+    retval = oh_rehash_priv(arg_oh_obj, TRUE);
     if (retval == FALSE)
     {
       retval = oh_coalesce_priv(arg_oh_obj);
@@ -204,6 +221,8 @@ oh_set_h1(oh_t * arg_oh_obj,
   {
     retval = TRUE;
   }
+
+  rwl_wunlock(&arg_oh_obj->rw_lock);
 
   return retval;
 }
@@ -216,6 +235,8 @@ oh_set_base_h2(oh_t * arg_oh_obj,
   
   _cw_check_ptr(arg_oh_obj);
 
+  rwl_wlock(&arg_oh_obj->rw_lock);
+  
   if (((arg_h2 % 2) != 0)
       || (arg_h2 > (1 << arg_oh_obj->base_power)))
   {
@@ -228,8 +249,10 @@ oh_set_base_h2(oh_t * arg_oh_obj,
 			    << (arg_oh_obj->curr_power
 				- arg_oh_obj->base_power))
 			   - 1);
-    retval = oh_rehash(arg_oh_obj);
+    retval = oh_rehash_priv(arg_oh_obj, TRUE);
   }
+
+  rwl_wunlock(&arg_oh_obj->rw_lock);
 
   return retval;
 }
@@ -241,6 +264,8 @@ oh_set_base_shrink_point(oh_t * arg_oh_obj,
   cw_bool_t retval;
   
   _cw_check_ptr(arg_oh_obj);
+
+  rwl_wlock(&arg_oh_obj->rw_lock);
 
   if ((arg_shrink_point < 0)
       || (arg_shrink_point >= (1 << arg_oh_obj->base_power)))
@@ -256,7 +281,9 @@ oh_set_base_shrink_point(oh_t * arg_oh_obj,
     retval = oh_shrink_priv(arg_oh_obj, 0);
   }
 
-  return retval;
+  rwl_wunlock(&arg_oh_obj->rw_lock);
+
+return retval;
 }
 
 cw_bool_t
@@ -266,6 +293,8 @@ oh_set_base_grow_point(oh_t * arg_oh_obj,
   cw_bool_t retval;
   
   _cw_check_ptr(arg_oh_obj);
+
+  rwl_wlock(&arg_oh_obj->rw_lock);
 
   if ((arg_grow_point <= 0)
       || (arg_grow_point >= (1 << arg_oh_obj->base_power)))
@@ -281,7 +310,9 @@ oh_set_base_grow_point(oh_t * arg_oh_obj,
     retval = oh_grow_priv(arg_oh_obj, 0);
   }
 
-  return retval;
+  rwl_wunlock(&arg_oh_obj->rw_lock);
+
+return retval;
 }
 
 cw_bool_t
@@ -291,6 +322,8 @@ oh_set_base_rehash_point(oh_t * arg_oh_obj,
   cw_bool_t retval;
   
   _cw_check_ptr(arg_oh_obj);
+
+  rwl_wlock(&arg_oh_obj->rw_lock);
 
   if ((arg_rehash_point <= 0)
       || (arg_rehash_point >= (1 << arg_oh_obj->base_power)))
@@ -306,6 +339,8 @@ oh_set_base_rehash_point(oh_t * arg_oh_obj,
     retval = oh_rehash_priv(arg_oh_obj, FALSE);
   }
 
+  rwl_wunlock(&arg_oh_obj->rw_lock);
+
   return retval;
 }
 
@@ -317,6 +352,8 @@ oh_item_insert(oh_t * arg_oh_obj, cw_uint32_t arg_key,
   cw_bool_t retval;
   
   _cw_check_ptr(arg_oh_obj);
+
+  rwl_wlock(&arg_oh_obj->rw_lock);
 
   retval = oh_coalesce_priv(arg_oh_obj);
   {
@@ -340,6 +377,7 @@ oh_item_insert(oh_t * arg_oh_obj, cw_uint32_t arg_key,
   }
 
  RETURN:
+  rwl_wunlock(&arg_oh_obj->rw_lock);
   return retval;
 }
 
@@ -351,6 +389,8 @@ oh_item_delete(oh_t * arg_oh_obj,
   cw_bool_t error, retval = FALSE;
   
   _cw_check_ptr(arg_oh_obj);
+
+  rwl_wlock(&arg_oh_obj->rw_lock);
 
   error = oh_item_search_priv(arg_oh_obj, arg_key, &slot);
 
@@ -370,6 +410,8 @@ oh_item_delete(oh_t * arg_oh_obj,
     retval = TRUE;
   }
 
+  rwl_wunlock(&arg_oh_obj->rw_lock);
+
   return retval;
 }
 
@@ -383,6 +425,8 @@ oh_item_search(oh_t * arg_oh_obj,
   
   _cw_check_ptr(arg_oh_obj);
 
+  rwl_rlock(&arg_oh_obj->rw_lock);
+
   error = oh_item_search_priv(arg_oh_obj, arg_key, &slot);
 
   if (error == FALSE)
@@ -395,6 +439,8 @@ oh_item_search(oh_t * arg_oh_obj,
     retval = TRUE;
   }
 
+  rwl_runlock(&arg_oh_obj->rw_lock);
+
   return retval;
 }
 
@@ -405,12 +451,14 @@ oh_dump(oh_t * arg_oh_obj, cw_bool_t arg_all)
 
   _cw_check_ptr(arg_oh_obj);
   
+  rwl_rlock(&arg_oh_obj->rw_lock);
+
   fprintf(stderr,
 	  "============================================================\n");
   fprintf(stderr, "Size: [%d]  Slots filled: [%d]  Invalid slots: [%d]\n\n",
-	  oh_get_size(arg_oh_obj),
-	  oh_get_num_items(arg_oh_obj),
-	  oh_get_num_invalid(arg_oh_obj));
+	  arg_oh_obj->size,
+	  arg_oh_obj->num_items,
+	  arg_oh_obj->num_invalid);
   fprintf(stderr, "      pow h1         h2    shrink grow  rehash\n");
   fprintf(stderr, "      --- ---------- ----- ------ ----- ------\n");
 #ifdef _PEDANTIC
@@ -493,6 +541,7 @@ oh_dump(oh_t * arg_oh_obj, cw_bool_t arg_all)
   }
   fprintf(stderr,
 	  "============================================================\n");
+  rwl_runlock(&arg_oh_obj->rw_lock);
 }
 
 cw_uint32_t

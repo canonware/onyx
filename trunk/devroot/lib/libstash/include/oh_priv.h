@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 19 $
- * $Date: 1998-04-10 19:51:09 -0700 (Fri, 10 Apr 1998) $
+ * $Revision: 29 $
+ * $Date: 1998-04-13 01:24:02 -0700 (Mon, 13 Apr 1998) $
  *
  * <<< Description >>>
  *
@@ -78,6 +78,7 @@ typedef struct
 
 struct oh_s
 {
+  cw_rwl_t rw_lock;
   cw_oh_item_t ** items;
 
   cw_uint32_t (*base_h1)(oh_t *, cw_uint32_t);
