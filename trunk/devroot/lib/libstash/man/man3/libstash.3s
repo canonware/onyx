@@ -37,26 +37,6 @@ cc -pg
 .RI ( void )
 
 .SS Preprocessor macros
-.I void *
-.br
-.B _cw_malloc
-.RI ( "size_t a_size" )
-
-.I void *
-.br
-.B _cw_calloc
-.RI ( "size_t a_number" ", " "size_t a_size" )
-
-.I void *
-.br
-.B _cw_realloc
-.RI ( "void *a_ptr" ", " "size_t a_size" )
-
-.I void *
-.br
-.B _cw_free
-.RI ( "void *a_ptr" )
-
 .I void
 .br
 .B _cw_assert
@@ -66,11 +46,6 @@ cc -pg
 .br
 .B _cw_check_ptr
 .RI ( "void *a_ptr" )
-
-.I void
-.br
-.B _cw_marker
-.RI ( "const char *a_str" )
 
 .I void
 .br
@@ -167,121 +142,6 @@ Clean up the global variables that are initialized by \fBlibstash_init\fR().
 .RE
 .RE
 
-.I void *
-.br
-.B _cw_malloc
-.RI ( "size_t a_size" )
-.RS
-Input(s):
-.RS
-.IR a_size :
-.RS
-Size of memory block desired.
-.RE
-.RE
-Output(s):
-.RS
-.IR retval :
-.RS
-Pointer to a memory block, or NULL.
-.br
-NULL: Memory allocation error.
-.RE
-.RE
-Description:
-.RS
-\fBmem_malloc\fR() wrapper.  Return a pointer to a newly allocated block of
-memory of size \fIi_size\fR.
-.RE
-.RE
-
-.I void *
-.br
-.B _cw_calloc
-.RI ( "size_t a_number" ", " "size_t a_size" )
-.RS
-Input(s):
-.RS
-.IR a_number :
-.RS
-Number of elements.
-.RE
-.IR a_size :
-.RS
-Size of each element.
-.RE
-.RE
-Output(s):
-.RS
-.IR retval :
-.RS
-Pointer to a memory block, or NULL.
-.br
-NULL: Memory allocation error.
-.RE
-.RE
-Description:
-.RS
-\fBmem_calloc\fR() wrapper.  Return a pointer to a newly allocated array of
-\fIa_number\fR items, where each item is \fIa_size\fR bytes.
-.RE
-.RE
-
-.I void *
-.br
-.B _cw_realloc
-.RI ( "void *a_ptr" ", " "size_t a_size" )
-.RS
-Input(s):
-.RS
-.IR a_ptr :
-.RS
-Pointer to memory block to be reallocated.
-.RE
-.IR a_size :
-.RS
-Size of memory block desired.
-.RE
-.RE
-Output(s):
-.RS
-.IR retval :
-.RS
-Pointer to a memory block, or NULL.
-.br
-NULL: Memory allocation error.
-.RE
-.RE
-Description:
-.RS
-\fBmem_realloc\fR() wrapper.  Return a pointer to a block of memory with up to
-\fIa_size\fR bytes of \fIa_ptr\fR's data preserved.  Use the space at
-\fIa_ptr\fR if possible.
-.RE
-.RE
-
-.I void *
-.br
-.B _cw_free
-.RI ( "void *a_ptr" )
-.RS
-Input(s):
-.RS
-.IR a_ptr :
-.RS
-Pointer to a memory block.
-.RE
-.RE
-Output(s):
-.RS
-None.
-.RE
-Description:
-.RS
-\fBmem_free\fR() wrapper.  Free the memory block pointed to by \fIa_ptr\fR.
-.RE
-.RE
-
 .I void
 .br
 .B _cw_assert
@@ -329,28 +189,6 @@ if \fIa_ptr\fR is NULL, print an error message to \fIcw_g_out\fR and
 \fIabort\fR().
 
 Note: This macro is optimized out of the non-debug versions of the library.
-.RE
-.RE
-
-.I void
-.br
-.B _cw_marker
-.RI ( "const char *a_str" )
-.RS
-Input(s):
-.RS
-.IR a_str :
-.RS
-Pointer to a NULL-terminated character array.
-.RE
-.RE
-Output(s):
-.RS
-Contents of \fIa_str\fR printed to \fIcw_g_out\fR.
-.RE
-Description:
-.RS
-Print the contents of \fIa_str\fR to \fIcw_g_out\fR.
 .RE
 .RE
 
