@@ -748,6 +748,16 @@ systemdict_thread(cw_nxo_t *a_thread);
 
 #ifdef CW_THREADS
 void
+systemdict_threadsdict(cw_nxo_t *a_thread);
+#endif
+
+#ifdef CW_THREADS
+void
+systemdict_threadstate(cw_nxo_t *a_thread);
+#endif
+
+#ifdef CW_THREADS
+void
 systemdict_timedwait(cw_nxo_t *a_thread);
 #endif
 
@@ -768,6 +778,9 @@ systemdict_truncate(cw_nxo_t *a_thread);
 void
 systemdict_trylock(cw_nxo_t *a_thread);
 #endif
+
+void
+systemdict_tstack(cw_nxo_t *a_thread);
 
 void
 systemdict_type(cw_nxo_t *a_thread);

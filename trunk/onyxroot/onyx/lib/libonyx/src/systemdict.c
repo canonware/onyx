@@ -372,6 +372,8 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #endif
 #ifdef CW_THREADS
     ENTRY(thread),
+    ENTRY(threadsdict),
+    ENTRY(threadstate),
     ENTRY(timedwait),
 #endif
     ENTRY(token),
@@ -384,6 +386,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #ifdef CW_THREADS
     ENTRY(trylock),
 #endif
+    ENTRY(tstack),
     ENTRY(type),
 #ifdef CW_POSIX
     ENTRY(uid),
@@ -7614,6 +7617,22 @@ systemdict_thread(cw_nxo_t *a_thread)
 
 #ifdef CW_THREADS
 void
+systemdict_threadsdict(cw_nxo_t *a_thread)
+{
+    cw_error("XXX Not implemented");
+}
+#endif
+
+#ifdef CW_THREADS
+void
+systemdict_threadstate(cw_nxo_t *a_thread)
+{
+    cw_error("XXX Not implemented");
+}
+#endif
+
+#ifdef CW_THREADS
+void
 systemdict_timedwait(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack;
@@ -7917,6 +7936,12 @@ systemdict_trylock(cw_nxo_t *a_thread)
     nxo_boolean_new(mutex, error);
 }
 #endif
+
+void
+systemdict_tstack(cw_nxo_t *a_thread)
+{
+    cw_error("XXX Not implemented");
+}
 
 void
 systemdict_type(cw_nxo_t *a_thread)

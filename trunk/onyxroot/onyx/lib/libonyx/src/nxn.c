@@ -430,6 +430,8 @@ const cw_uint8_t *cw_g_nx_names[] = {
 #endif
 #ifdef CW_THREADS
     "thread",
+    "threadsdict",
+    "threadstate",
     "threadtype",
 #endif
     "threshold",
@@ -448,6 +450,7 @@ const cw_uint8_t *cw_g_nx_names[] = {
 #ifdef CW_THREADS
     "trylock",
 #endif
+    "tstack",
     "type",
     "typecheck",
 #ifdef CW_POSIX

@@ -429,6 +429,8 @@ typedef enum
 #endif
 #ifdef CW_THREADS
     NXN_thread,
+    NXN_threadsdict,
+    NXN_threadstate,
     NXN_threadtype,
 #endif
     NXN_threshold,
@@ -447,6 +449,7 @@ typedef enum
 #ifdef CW_THREADS
     NXN_trylock,
 #endif
+    NXN_tstack,
     NXN_type,
     NXN_typecheck,
 #ifdef CW_POSIX
