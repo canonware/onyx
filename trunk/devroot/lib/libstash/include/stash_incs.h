@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 156 $
- * Last modified: $Date: 1998-07-29 16:59:01 -0700 (Wed, 29 Jul 1998) $
+ * Current revision: $Revision: 158 $
+ * Last modified: $Date: 1998-07-29 17:57:57 -0700 (Wed, 29 Jul 1998) $
  *
  * <<< Description >>>
  *
@@ -178,6 +178,21 @@
 #    endif
 #    include "sock.h"
 #    define _SOCK_H_
+#  endif
+#endif
+
+#if (defined(_INC_SOCKS_H_))
+#  ifndef _SOCKS_H_
+#    ifndef _SOCK_H_
+#      ifndef _BUF_H_
+#        include "buf.h"
+#        define _BUF_H_
+#      endif
+#      include "sock.h"
+#      define _SOCK_H_
+#    endif
+#    include "socks.h"
+#    define _SOCKS_H_
 #  endif
 #endif
 

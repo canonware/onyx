@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 154 $
- * $Date: 1998-07-29 16:56:41 -0700 (Wed, 29 Jul 1998) $
+ * $Revision: 158 $
+ * $Date: 1998-07-29 17:57:57 -0700 (Wed, 29 Jul 1998) $
  *
  * <<< Description >>>
  *
@@ -335,72 +335,5 @@ sock_flush_out(cw_sock_t * a_sock_o)
   mtx_lock(&a_sock_o->lock);
 
   mtx_unlock(&a_sock_o->lock);
-  return retval;
-}
-
-/****************************************************************************
- * <<< Description >>>
- *
- *
- *
- ****************************************************************************/
-cw_socks_t *
-socks_new(cw_socks_t * a_socks_o)
-{
-  cw_socks_t * retval;
-  
-  return retval;
-}
-
-/****************************************************************************
- * <<< Description >>>
- *
- *
- *
- ****************************************************************************/
-void
-socks_delete(cw_socks_t * a_socks_o)
-{
-}
-
-/****************************************************************************
- * <<< Description >>>
- *
- *
- *
- ****************************************************************************/
-cw_bool_t
-socks_listen(cw_socks_t * a_socks_o, int a_port)
-{
-  cw_bool_t retval;
-
-  return retval;
-}
-
-/****************************************************************************
- * <<< Description >>>
- *
- *
- *
- ****************************************************************************/
-cw_sock_t *
-socks_accept_block(cw_socks_t * a_socks_o, cw_sock_t * a_sock_o)
-{
-  cw_sock_t * retval;
-
-  return retval;
-}
-
-/****************************************************************************
- * <<< Description >>>
- *
- *
- *
- ****************************************************************************/
-cw_sock_t *
-socks_accept_noblock(cw_socks_t * a_socks_o, cw_sock_t * a_sock_o)
-{
-  cw_sock_t * retval;
-
   return retval;
 }

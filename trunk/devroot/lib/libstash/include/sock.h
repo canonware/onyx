@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 154 $
- * $Date: 1998-07-29 16:56:41 -0700 (Wed, 29 Jul 1998) $
+ * $Revision: 158 $
+ * $Date: 1998-07-29 17:57:57 -0700 (Wed, 29 Jul 1998) $
  *
  * <<< Description >>>
  *
@@ -21,7 +21,6 @@
 #define _SOCK_H_
 
 typedef struct cw_sock_s cw_sock_t;
-typedef struct cw_socks_s cw_socks_t;
 
 struct cw_sock_s
 {
@@ -31,15 +30,6 @@ struct cw_sock_s
   cw_buf_t out_buf;
   cw_bool_t is_connected;
   int sockfd;
-};
-
-struct cw_socks_s
-{
-  cw_bool_t is_malloced;
-  cw_bool_t is_listenting;
-  cw_uint32_t sockaddrs_struct_size; /* XXX Do we really need this? */
-  struct sockaddr_in server_addr;
-  struct sockaddr_in client_addr;
 };
 
 #define sock_new _CW_NS_ANY(sock_new)
@@ -56,13 +46,6 @@ struct cw_socks_s
 #define sock_write _CW_NS_ANY(sock_write)
 #define sock_flush_out _CW_NS_ANY(sock_flush_out)
 
-#define socks_new _CW_NS_ANY(socks_new)
-#define socks_delete _CW_NS_ANY(socks_delete)
-#define socks_listen _CW_NS_ANY(socks_listen)
-#define socks_accept_block _CW_NS_ANY(socks_accept_block)
-#define socks_accept_noblock _CW_NS_ANY(socks_accept_noblock)
-
-/* sock methods. */
 cw_sock_t * sock_new(cw_sock_t * a_sock_o);
 void sock_delete(cw_sock_t * a_sock_o);
 
@@ -80,14 +63,5 @@ cw_buf_t * sock_read_noblock(cw_sock_t * a_sock_o, cw_buf_t * a_spare);
 cw_buf_t * sock_read_block(cw_sock_t * a_sock_o, cw_buf_t * a_spare);
 cw_bool_t sock_write(cw_sock_t * a_sock_o, cw_buf_t * a_buf_o);
 cw_bool_t sock_flush_out(cw_sock_t * a_sock_o);
-
-/* socks methods. */
-cw_socks_t * socks_new(cw_socks_t * a_socks_o);
-void socks_delete(cw_socks_t * a_socks_o);
-
-cw_bool_t socks_listen(cw_socks_t * a_socks_o, int a_port);
-
-cw_sock_t * socks_accept_block(cw_socks_t * a_socks_o, cw_sock_t * a_sock_o);
-cw_sock_t * socks_accept_noblock(cw_socks_t * a_socks_o, cw_sock_t * a_sock_o);
 
 #endif /* _SOCK_H_ */
