@@ -1276,53 +1276,35 @@ out_p_add(cw_uint32_t a_base, cw_uint32_t a_ndigits,
 }
 
 static cw_uint32_t
-out_p_metric_int8(const char * a_format, cw_uint32_t a_len,
-		  const void * a_arg)
+out_p_metric_int(const char * a_format, cw_uint32_t a_len,
+		 cw_uint64_t a_arg, cw_uint32_t a_nbits)
 {
-  cw_uint32_t retval;
-
-  return retval;
-}
-
-static char *
-out_p_render_int8(const char * a_format, cw_uint32_t a_len,
-		  const void * a_arg, char * r_buf)
-{
-  char * retval;
-
-  return retval;
-}
-
-static cw_uint32_t
-out_p_metric_int16(const char * a_format, cw_uint32_t a_len,
-		   const void * a_arg)
-{
-  cw_uint32_t retval;
-
-  return retval;
-}
-
-static char *
-out_p_render_int16(const char * a_format, cw_uint32_t a_len,
-		   const void * a_arg, char * r_buf)
-{
-  char * retval;
-
-  return retval;
-}
-
-static cw_uint32_t
-out_p_metric_int32(const char * a_format, cw_uint32_t a_len,
-		   const void * a_arg)
-{
-  cw_uint32_t retval, width, base, i, arg = *(const cw_uint32_t *) a_arg;
+  cw_uint32_t retval, width, base, i;
   cw_sint32_t val_len;
+  cw_uint64_t arg = a_arg;
   cw_bool_t is_negative, show_sign;
   const char * val;
-  char zero[33] =     "00000000000000000000000000000000";
-  char curr_add[33] = "00000000000000000000000000000001";
-  char result[33] =   "00000000000000000000000000000000";
-  char temp[33] =     "00000000000000000000000000000000";
+  char * zero, s_zero[65] =
+    "00000000000000000000000000000000"
+    "00000000000000000000000000000000";
+  char * curr_add, s_curr_add[65] =
+    "00000000000000000000000000000000"
+    "00000000000000000000000000000001";
+  char * result, s_result[65] =
+    "00000000000000000000000000000000"
+    "00000000000000000000000000000000";
+  char * temp, s_temp[65] =
+    "00000000000000000000000000000000"
+    "00000000000000000000000000000000";
+
+  _cw_assert((8 == a_nbits) || (16 == a_nbits)
+	     || (32 == a_nbits) || (64 == a_nbits));
+
+  /* Move the pointers forward so that unnecessary digits can be ignored. */
+  zero = &s_zero[64 - a_nbits];
+  curr_add = &s_curr_add[64 - a_nbits];
+  result = &s_result[64 - a_nbits];
+  temp = &s_temp[64 - a_nbits];
 
   if (-1 != (val_len = spec_get_val(a_format, a_len, "w", &val)))
   {
@@ -1339,10 +1321,12 @@ out_p_metric_int32(const char * a_format, cw_uint32_t a_len,
   /* Determine sign. */
   if ((-1 != (val_len = spec_get_val(a_format, a_len, "s", &val)))
       && ('s' == val[0])
-      && (0 > (cw_sint32_t) arg))
+      && (0 != (arg & (((cw_uint64_t) 1) << (a_nbits - 1)))))
   {
     is_negative = TRUE;
-    arg = -1 * ((cw_sint32_t) arg);
+    /* Convert two's complement to positive. */
+    arg ^= ((cw_uint64_t) 0xffffffff << 32) + 0xffffffff;
+    arg++;
   }
   else
   {
@@ -1376,25 +1360,25 @@ out_p_metric_int32(const char * a_format, cw_uint32_t a_len,
     base = 10;
   }
   
-  for (i = 0; i < 32; i++)
+  for (i = 0; i < a_nbits; i++)
   {
     if ((arg >> i) & 1)
     {
       /* Copy the result for use in the next call. */
-      out_p_add(base, 32, temp, result, zero);
+      out_p_add(base, a_nbits, temp, result, zero);
       
       /* Add this digit into the result. */
-      out_p_add(base, 32, result, temp, curr_add);
+      out_p_add(base, a_nbits, result, temp, curr_add);
     }
     /* Copy curr_add for use in the next call. */
-    out_p_add(base, 32, temp, curr_add, zero);
+    out_p_add(base, a_nbits, temp, curr_add, zero);
 
     /* Double curr_add. */
-    out_p_add(base, 32, curr_add, temp, temp);
+    out_p_add(base, a_nbits, curr_add, temp, temp);
   }
 
   /* Find the first non-zero digit. */
-  for (i = 0; i < 31; i++)
+  for (i = 0; i < (a_nbits - 1); i++)
   {
     if (result[i] != '0')
     {
@@ -1402,7 +1386,7 @@ out_p_metric_int32(const char * a_format, cw_uint32_t a_len,
     }
   }
 
-  retval = 32 - i;
+  retval = a_nbits - i;
   if (TRUE == show_sign)
   {
     retval++;
@@ -1418,18 +1402,36 @@ out_p_metric_int32(const char * a_format, cw_uint32_t a_len,
 }
 
 static char *
-out_p_render_int32(const char * a_format, cw_uint32_t a_len,
-		   const void * a_arg, char * r_buf)
+out_p_render_int(const char * a_format, cw_uint32_t a_len,
+		 cw_uint64_t a_arg, char * r_buf, cw_uint32_t a_nbits)
 {
   char * retval;
-  cw_uint32_t base, width, out_len, i, arg = *(const cw_uint32_t *) a_arg;
+  cw_uint32_t base, width, out_len, i;
   cw_sint32_t val_len;
+  cw_uint64_t arg = a_arg;
   cw_bool_t is_negative, show_sign;
   const char * val;
-  char zero[33] =     "00000000000000000000000000000000";
-  char curr_add[33] = "00000000000000000000000000000001";
-  char result[33] =   "00000000000000000000000000000000";
-  char temp[33] =     "00000000000000000000000000000000";
+  char * zero, s_zero[65] =
+    "00000000000000000000000000000000"
+    "00000000000000000000000000000000";
+  char * curr_add, s_curr_add[65] =
+    "00000000000000000000000000000000"
+    "00000000000000000000000000000001";
+  char * result, s_result[65] =
+    "00000000000000000000000000000000"
+    "00000000000000000000000000000000";
+  char * temp, s_temp[65] =
+    "00000000000000000000000000000000"
+    "00000000000000000000000000000000";
+
+  _cw_assert((8 == a_nbits) || (16 == a_nbits)
+	     || (32 == a_nbits) || (64 == a_nbits));
+
+  /* Move the pointers forward so that unnecessary digits can be ignored. */
+  zero = &s_zero[64 - a_nbits];
+  curr_add = &s_curr_add[64 - a_nbits];
+  result = &s_result[64 - a_nbits];
+  temp = &s_temp[64 - a_nbits];
 
   if (-1 != (val_len = spec_get_val(a_format, a_len, "b", &val)))
   {
@@ -1449,10 +1451,12 @@ out_p_render_int32(const char * a_format, cw_uint32_t a_len,
   /* Determine sign. */
   if ((-1 != (val_len = spec_get_val(a_format, a_len, "s", &val)))
       && ('s' == val[0])
-      && (0 > (cw_sint32_t) arg))
+      && (0 != (arg & (((cw_uint64_t) 1) << (a_nbits - 1)))))
   {
     is_negative = TRUE;
-    arg = -1 * ((cw_sint32_t) arg);
+    /* Convert two's complement to positive. */
+    arg ^= ((cw_uint64_t) 0xffffffff << 32) + 0xffffffff;
+    arg++;
   }
   else
   {
@@ -1471,25 +1475,25 @@ out_p_render_int32(const char * a_format, cw_uint32_t a_len,
     show_sign = FALSE;
   }
     
-  for (i = 0; i < 32; i++)
+  for (i = 0; i < a_nbits; i++)
   {
     if ((arg >> i) & 1)
     {
       /* Copy the result for use in the next call. */
-      out_p_add(base, 32, temp, result, zero);
+      out_p_add(base, a_nbits, temp, result, zero);
       
       /* Add this digit into the result. */
-      out_p_add(base, 32, result, temp, curr_add);
+      out_p_add(base, a_nbits, result, temp, curr_add);
     }
     /* Copy curr_add for use in the next call. */
-    out_p_add(base, 32, temp, curr_add, zero);
+    out_p_add(base, a_nbits, temp, curr_add, zero);
 
     /* Double curr_add. */
-    out_p_add(base, 32, curr_add, temp, temp);
+    out_p_add(base, a_nbits, curr_add, temp, temp);
   }
 
   /* Find the first non-zero digit. */
-  for (i = 0; i < 31; i++)
+  for (i = 0; i < (a_nbits - 1); i++)
   {
     if (result[i] != '0')
     {
@@ -1497,8 +1501,8 @@ out_p_render_int32(const char * a_format, cw_uint32_t a_len,
     }
   }
 
-  width = out_p_metric_int32(a_format, a_len, a_arg);
-  out_len = (32 - i) + (show_sign ? 1 : 0);
+  width = out_p_metric_int(a_format, a_len, a_arg, a_nbits);
+  out_len = (a_nbits - i) + (show_sign ? 1 : 0);
 
   if (width > out_len)
   {
@@ -1551,11 +1555,11 @@ out_p_render_int32(const char * a_format, cw_uint32_t a_len,
     if (TRUE == show_sign)
     {
       output[0] = (is_negative) ? '-' : '+';
-      memcpy(&output[1], &result[i], 32 - i);
+      memcpy(&output[1], &result[i], a_nbits - i);
     }
     else
     {
-      memcpy(output, &result[i], 32 - i);
+      memcpy(output, &result[i], a_nbits - i);
     }
   }
   else
@@ -1563,11 +1567,11 @@ out_p_render_int32(const char * a_format, cw_uint32_t a_len,
     if (TRUE == show_sign)
     {
       r_buf[0] = (is_negative) ? '-' : '+';
-      memcpy(&r_buf[1], &result[i], 32 - i);
+      memcpy(&r_buf[1], &result[i], a_nbits - i);
     }
     else
     {
-      memcpy(r_buf, &result[i], 32 - i);
+      memcpy(r_buf, &result[i], a_nbits - i);
     }
   }
 
@@ -1581,12 +1585,85 @@ out_p_render_int32(const char * a_format, cw_uint32_t a_len,
 }
 
 static cw_uint32_t
+out_p_metric_int8(const char * a_format, cw_uint32_t a_len,
+		  const void * a_arg)
+{
+  cw_uint32_t retval;
+  cw_uint64_t arg = (cw_uint64_t) *(const cw_uint8_t *) a_arg;
+  
+  retval = out_p_metric_int(a_format, a_len, arg, 8);
+
+  return retval;
+}
+
+static char *
+out_p_render_int8(const char * a_format, cw_uint32_t a_len,
+		  const void * a_arg, char * r_buf)
+{
+  char * retval;
+  cw_uint64_t arg = (cw_uint64_t) *(const cw_uint8_t *) a_arg;
+
+  retval = out_p_render_int(a_format, a_len, arg, r_buf, 8);
+
+  return retval;
+}
+
+static cw_uint32_t
+out_p_metric_int16(const char * a_format, cw_uint32_t a_len,
+		   const void * a_arg)
+{
+  cw_uint32_t retval;
+  cw_uint64_t arg = (cw_uint64_t) *(const cw_uint16_t *) a_arg;
+  
+  retval = out_p_metric_int(a_format, a_len, arg, 16);
+
+  return retval;
+}
+
+static char *
+out_p_render_int16(const char * a_format, cw_uint32_t a_len,
+		   const void * a_arg, char * r_buf)
+{
+  char * retval;
+  cw_uint64_t arg = (cw_uint64_t) *(const cw_uint16_t *) a_arg;
+
+  retval = out_p_render_int(a_format, a_len, arg, r_buf, 16);
+
+  return retval;
+}
+
+static cw_uint32_t
+out_p_metric_int32(const char * a_format, cw_uint32_t a_len,
+		   const void * a_arg)
+{
+  cw_uint32_t retval;
+  cw_uint64_t arg = (cw_uint64_t) *(const cw_uint32_t *) a_arg;
+  
+  retval = out_p_metric_int(a_format, a_len, arg, 32);
+
+  return retval;
+}
+
+static char *
+out_p_render_int32(const char * a_format, cw_uint32_t a_len,
+		   const void * a_arg, char * r_buf)
+{
+  char * retval;
+  cw_uint64_t arg = (cw_uint64_t) *(const cw_uint32_t *) a_arg;
+
+  retval = out_p_render_int(a_format, a_len, arg, r_buf, 32);
+
+  return retval;
+}
+
+static cw_uint32_t
 out_p_metric_int64(const char * a_format, cw_uint32_t a_len,
 		   const void * a_arg)
 {
   cw_uint32_t retval;
-
-  retval = 21;
+  cw_uint64_t arg = *(const cw_uint64_t *) a_arg;
+  
+  retval = out_p_metric_int(a_format, a_len, arg, 64);
 
   return retval;
 }
@@ -1596,8 +1673,9 @@ out_p_render_int64(const char * a_format, cw_uint32_t a_len,
 		   const void * a_arg, char * r_buf)
 {
   char * retval;
+  cw_uint64_t arg = *(const cw_uint64_t *) a_arg;
 
-  memset(r_buf, '6', 21);
+  retval = out_p_render_int(a_format, a_len, arg, r_buf, 64);
 
   return retval;
 }
@@ -1650,6 +1728,8 @@ out_p_render_string(const char * a_format, cw_uint32_t a_len,
   _cw_assert(0 < a_len);
   _cw_check_ptr(a_arg);
   _cw_check_ptr(r_buf);
+
+  /* XXX Add p: w: j: */
 
   memcpy(r_buf, str, out_p_metric_string(a_format, a_len, a_arg));
 

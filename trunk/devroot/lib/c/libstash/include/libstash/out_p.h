@@ -44,6 +44,14 @@ out_p_add(cw_uint32_t a_base, cw_uint32_t a_ndigits,
 	  char * r_result, const char * a_a, const char * a_b);
 
 static cw_uint32_t
+out_p_metric_int(const char * a_format, cw_uint32_t a_len,
+		 cw_uint64_t a_arg, cw_uint32_t a_nbits);
+
+static char *
+out_p_render_int(const char * a_format, cw_uint32_t a_len,
+		 cw_uint64_t a_arg, char * r_buf, cw_uint32_t a_nbits);
+
+static cw_uint32_t
 out_p_metric_int8(const char * a_format, cw_uint32_t a_len,
 		  const void * a_arg);
 

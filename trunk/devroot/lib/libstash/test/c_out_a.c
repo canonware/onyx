@@ -59,6 +59,9 @@ main()
   out_put(cw_g_out, ":123456789: --> :[t:i32|b:2|w:40]:_2\n", 123456789);
   out_put(cw_g_out, ":123456789: --> :[t:i32|b:2|w:40|j:c]:_2\n", 123456789);
   out_put(cw_g_out, ":123456789: --> :[t:i32|b:2|w:40|j:l]:_2\n", 123456789);
+  out_put(cw_g_out, ":123456789: --> :[t:i32|b:2|w:40|j:l|p:_]:_2\n", 123456789);
+  out_put(cw_g_out, ":123456789: --> :[t:i32|b:2|w:40|j:c|p:-]:_2\n", 123456789);
+  out_put(cw_g_out, ":123456789: --> :[t:i32|b:2|w:40|j:r|p:+]:_2\n", 123456789);
 
   out_put(cw_g_out, ":[t:i32]:\n", 123);
   out_put(cw_g_out, ":[t:i32|+:+]:\n", 123);
@@ -70,6 +73,33 @@ main()
   out_put(cw_g_out, ":[t:i32|s:s|+:+|w:8|j:l]:\n", -123);
   out_put(cw_g_out, ":[t:i32|s:s|+:+|w:8|j:c]:\n", -123);
   out_put(cw_g_out, ":[t:i32|s:s|+:+|w:8|j:r]:\n", -123);
+
+  out_put(cw_g_out, ":[t:i8]:\n", 43);
+  out_put(cw_g_out, ":[t:i8|s:u]:\n", 43);
+  out_put(cw_g_out, ":[t:i8|s:s]:\n", -43);
+  out_put(cw_g_out, ":[t:i8|s:u|b:2|p:0|w:8]: [[t:i8|s:u|b:2|p:0|w:8]\n", 43);
+  out_put(cw_g_out, ":[t:i8|s:u|b:2|p:0|w:8]: [[t:i8|s:u|b:2|p:0|w:8]\n", -43);
+  out_put(cw_g_out, ":[t:i8|s:s|b:2]:\n", -43);
+  
+  out_put(cw_g_out, ":[t:i16]:\n", 43);
+  out_put(cw_g_out, ":[t:i16|s:u]:\n", 43);
+  out_put(cw_g_out, ":[t:i16|s:s]:\n", -43);
+  out_put(cw_g_out, ":[t:i16|s:u|b:2|p:0|w:16]: [[t:i16|s:u|b:2|p:0|w:16]\n", 43);
+  out_put(cw_g_out, ":[t:i16|s:u|b:2|p:0|w:16]: [[t:i16|s:u|b:2|p:0|w:16]\n", -43);
+  out_put(cw_g_out, ":[t:i16|s:s|b:2]:\n", -43);
+
+  {
+    cw_uint32_t i;
+    char buf[65];
+    
+    for (i = 0; i < 1000; i++)
+    {
+/*        out_put_s(cw_g_out, buf, "[t:i64|p:0|w:16|b:16]", 0xf2135123); */
+      out_put_s(cw_g_out, buf, "[t:i32|b:16]", (cw_uint32_t) 0xf2135123);
+      out_put(cw_g_out, ".");
+    }
+    out_put(cw_g_out, "\n[t:s]\n", buf);
+  }
   
   log_printf(cw_g_log, "Test end\n");
   libstash_shutdown();
