@@ -42,6 +42,24 @@ ONYX_ONLY_SRCS = [fromto @srcroot@/%0%.nx.in @objroot@/%0%_nxcode.c
  * Onyx tests.
  */
 ONYX_OTESTS =
+/* The following tests are time consuming, and really don't need to be run for
+ * all configuration permutations. */
+#if [and @enable_oop@ \
+         @enable_handle@ \
+         @enable_threads@ \
+         @enable_real@ \
+         @enable_regex@ \
+         @enable_posix@ \
+         @enable_posix_file@ \
+         @enable_socket@ \
+         @enable_inlines@ \
+         @enable_modules@ \
+    ]
+
+              gc_roll.nx.in
+
+#endif
+         
 #if [and @enable_threads@ @enable_posix@]
 
               setgstderr_a.nx.in setgstderr_b.nx.in setgstderr_c.nx.in
@@ -51,8 +69,8 @@ ONYX_OTESTS =
 #endif
 #if @enable_threads@
 
-              gc_roll.nx.in gmaxestack_a.nx.in gstderr_a.nx.in gstdin_a.nx.in
-              gstdout_a.nx.in monitor_a.nx.in monitor_b.nx.in monitor_c.nx.in
+              gmaxestack_a.nx.in gstderr_a.nx.in gstdin_a.nx.in gstdout_a.nx.in
+              monitor_a.nx.in monitor_b.nx.in monitor_c.nx.in
               setgmaxestack_a.nx.in setgmaxestack_b.nx.in setgmaxestack_c.nx.in
               setgmaxestack_d.nx.in threadsdict_a.nx.in
 
