@@ -35,13 +35,9 @@
 #    define _STDLIB_H_
 #  endif
 
-#  if (HAVE_UNISTD_H)
-#    ifndef _UNISTD_H_
-#      include <unistd.h>
-#      define _UNISTD_H_
-#    endif
-#  else
-#    error "unistd.h not found.  Cannot continue"
+#  ifndef _UNISTD_H_
+#    include <unistd.h>
+#    define _UNISTD_H_
 #  endif
 
 /*
