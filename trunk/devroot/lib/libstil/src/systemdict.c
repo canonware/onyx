@@ -2202,7 +2202,7 @@ systemdict_loop(cw_stilt_t *a_stilt)
 		xep_handled();
 
 		/* Clean up whatever mess was left on the execution stack. */
-		for (i = stils_count(estack); i > sdepth; i--)
+		for (i = stils_count(estack); i > sdepth + 1; i--)
 			stils_pop(estack);
 	}
 	xep_end();
