@@ -18,34 +18,32 @@ typedef struct cw_bufm_s cw_bufm_t;
 typedef struct cw_bufe_s cw_bufe_t;
 typedef struct cw_bufh_s cw_bufh_t;
 
-struct cw_buf_s {
-	cw_mtx_t	mtx;
+struct cw_bufe_s {
+	ql_elm(cw_bufe_t) link;
 
-	cw_bufe_t	narrowing;
+	cw_bufm_t	beg;
+	cw_bufm_t	end;
 
-	cw_bool_t	indirect;
-	union {
-		/* Indirect. */
-		struct {
-			ql_elm(cw_buf_t) link;
-			cw_buf_t	*parent;
-			cw_mq_t		mq;
-		} i;
-		/* Base buf. */
-		struct {
-			cw_uint64_t	nchars;
-			cw_uint64_t	nbufbs;
-			cw_bufb_t	*bufbs;
+	/* bufes are either open or closed at each end. */
+	cw_bool_t	beg_open:1;
+	cw_bool_t	end_open:1;
 
-			qs_head(cw_bufh_t) undo;
-			qs_head(cw_bufh_t) redo;
+	/* Properties. */
+	cw_uint32_t	foreground;
+	cw_uint32_t	background;
+	cw_bool_t	bold:1;
+	cw_bool_t	italic:1;
+	cw_bool_t	underline:1;
 
-			ql_head(cw_buf_t) bufs;
-			ql_head(cw_bufm_t) bufms;
-			/* XXX xemacs keeps 2 lists; 1 forward, 1 reverse. */
-			ql_head(cw_bufe_t) bufes;
-		} b;
-	} d;
+	cw_sint32_t	priority;	/* xemacs uses this for precedence. */
+	cw_bool_t	duplicable;	/*
+					 * If TRUE, save in undo history.  XXX
+					 * Yikes, the history data structure
+					 * needs modification to handle this!
+					 */
+
+	/* Message queue to send notifications to. */
+	cw_mq_t		*mq;
 };
 
 struct cw_bufb_s {
@@ -82,32 +80,34 @@ struct cw_bufm_s {
 	cw_mq_t		*mq;
 };
 
-struct cw_bufe_s {
-	ql_elm(cw_bufe_t) link;
+struct cw_buf_s {
+	cw_mtx_t	mtx;
 
-	cw_bufm_t	beg;
-	cw_bufm_t	end;
+	cw_bufe_t	narrowing;
 
-	/* bufes are either open or closed at each end. */
-	cw_bool_t	beg_open:1;
-	cw_bool_t	end_open:1;
+	cw_bool_t	indirect;
+	union {
+		/* Indirect. */
+		struct {
+			ql_elm(cw_buf_t) link;
+			cw_buf_t	*parent;
+			cw_mq_t		mq;
+		} i;
+		/* Base buf. */
+		struct {
+			cw_uint64_t	nchars;
+			cw_uint64_t	nbufbs;
+			cw_bufb_t	*bufbs;
 
-	/* Properties. */
-	cw_uint32_t	foreground;
-	cw_uint32_t	background;
-	cw_bool_t	bold:1;
-	cw_bool_t	italic:1;
-	cw_bool_t	underline:1;
+			qs_head(cw_bufh_t) undo;
+			qs_head(cw_bufh_t) redo;
 
-	cw_sint32_t	priority;	/* xemacs uses this for precedence. */
-	cw_bool_t	duplicable;	/*
-					 * If TRUE, save in undo history.  XXX
-					 * Yikes, the history data structure
-					 * needs modification to handle this!
-					 */
-
-	/* Message queue to send notifications to. */
-	cw_mq_t		*mq;
+			ql_head(cw_buf_t) bufs;
+			ql_head(cw_bufm_t) bufms;
+			/* XXX xemacs keeps 2 lists; 1 forward, 1 reverse. */
+			ql_head(cw_bufe_t) bufes;
+		} b;
+	} d;
 };
 
 /* buf. */
