@@ -17,7 +17,7 @@ threaddict_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 	cw_stilo_t	name, val;	/* XXX GC-unsafe. */
 
 #define NENTRIES	3	/* Number of entries in threaddict. */
-	stilo_dict_new(a_dict, a_stilt, NENTRIES);
+	stilo_dict_new(a_dict, stilt_stil_get(a_stilt), NENTRIES);
 
 	/*
 	 * Initialize entries that are not operators.

@@ -156,18 +156,15 @@ static void		stilt_p_name_accept(cw_stilt_t *a_stilt, cw_stilts_t
  * stilts.
  */
 cw_stilts_t *
-stilts_new(cw_stilts_t *a_stilts, cw_stilt_t *a_stilt)
+stilts_new(cw_stilts_t *a_stilts)
 {
 	cw_stilts_t	*retval;
 
 	if (a_stilts != NULL) {
 		retval = a_stilts;
-/*  		memset(a_stilts, 0, sizeof(cw_stilts_t)); */
 		retval->is_malloced = FALSE;
 	} else {
-		retval = (cw_stilts_t *)stilt_malloc(a_stilt,
-		    sizeof(cw_stilts_t));
-/*  		memset(a_stilts, 0, sizeof(cw_stilts_t)); */
+		retval = (cw_stilts_t *)_cw_malloc(sizeof(cw_stilts_t));
 		retval->is_malloced = TRUE;
 	}
 
@@ -193,7 +190,7 @@ stilts_delete(cw_stilts_t *a_stilts, cw_stilt_t *a_stilt)
 	}
 
 	if (a_stilts->is_malloced)
-		stilt_free(a_stilt, a_stilts);
+		_cw_free(a_stilts);
 #ifdef _LIBSTIL_DBG
 	else
 		memset(a_stilts, 0x5a, sizeof(cw_stilts_t));
@@ -250,11 +247,9 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 		retval->tok_str = retval->buffer;
 		try_stage = 1;
 
-		dch_new(&retval->name_hash,
-		    stila_mem_get(stil_stila_get(a_stil)),
-		    _CW_STILT_NAME_BASE_TABLE, _CW_STILT_NAME_BASE_GROW,
-		    _CW_STILT_NAME_BASE_SHRINK, stilo_name_hash,
-		    stilo_name_key_comp);
+		dch_new(&retval->name_hash, NULL, _CW_STILT_NAME_BASE_TABLE,
+		    _CW_STILT_NAME_BASE_GROW, _CW_STILT_NAME_BASE_SHRINK,
+		    stilo_name_hash, stilo_name_key_comp);
 		try_stage = 2;
 
 		stils_new(&retval->estack,
@@ -279,7 +274,7 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 		 */
 		derror_populate(&retval->derror, retval);
 		errordict_populate(&retval->errordict, retval);
-		stilo_dict_new(&retval->userdict, retval,
+		stilo_dict_new(&retval->userdict, stilt_stil_get(retval),
 		    _CW_STILT_USERDICT_SIZE);
 
 		/* Create threaddict. */
@@ -344,7 +339,7 @@ stilt_delete(cw_stilt_t *a_stilt)
 		 * unaccepted token.  However, it's really the caller's fault,
 		 * so just clean up.
 		 */
-		stilt_free(a_stilt, a_stilt->tok_str);
+		_cw_free(a_stilt->tok_str);
 	}
 
 	stils_delete(&a_stilt->tstack);
@@ -655,7 +650,7 @@ stilt_loop(cw_stilt_t *a_stilt)
 			/*
 			 * Use the string as a source of code.
 			 */
-			stilts_new(&stilts, a_stilt);
+			stilts_new(&stilts);
 			stilt_interpret(a_stilt, &stilts,
 			    stilo_string_get(stilo),
 			    stilo_string_len_get(stilo));
@@ -692,14 +687,14 @@ stilt_loop(cw_stilt_t *a_stilt)
 			cw_sint32_t	nread;
 			cw_uint8_t	buffer[_CW_STILT_FILE_READ_SIZE];
 
-			stilts_new(&stilts, a_stilt);
+			stilts_new(&stilts);
 			/*
 			 * Read data from the file and interpret it until an EOF
 			 * (0 byte read).
 			 */
-			for (nread = stilo_file_read(stilo, a_stilt,
+			for (nread = stilo_file_read(stilo,
 			    _CW_STILT_FILE_READ_SIZE, buffer); nread > 0;
-			    nread = stilo_file_read(stilo, a_stilt,
+			    nread = stilo_file_read(stilo,
 			    _CW_STILT_FILE_READ_SIZE, buffer)) {
 				stilt_interpret(a_stilt, &stilts, buffer,
 				    nread);
@@ -1108,7 +1103,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 				    a_stilt->index, "empty hex string");
 				token = TRUE;
 				stilo = stils_push(&a_stilt->ostack);
-				stilo_string_new(stilo, a_stilt, 0);
+				stilo_string_new(stilo, stilt_stil_get(a_stilt),
+				    0);
 				break;
 			case '~':
 				a_stilt->state = STILTTS_BASE64_STRING;
@@ -1430,7 +1426,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 					    a_stilt->index, "string");
 					token = TRUE;
 					stilo = stils_push(&a_stilt->ostack);
-					stilo_string_new(stilo, a_stilt,
+					stilo_string_new(stilo,
+					    stilt_stil_get(a_stilt),
 					    a_stilt->index);
 					stilo_string_set(stilo, 0,
 					    a_stilt->tok_str, a_stilt->index);
@@ -1641,7 +1638,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 				    a_stilt->index, "literal string");
 				token = TRUE;
 				stilo = stils_push(&a_stilt->ostack);
-				stilo_string_new(stilo, a_stilt,
+				stilo_string_new(stilo, stilt_stil_get(a_stilt),
 				    a_stilt->index);
 				stilo_string_set(stilo, 0, a_stilt->tok_str,
 				    a_stilt->index);
@@ -1665,7 +1662,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 				    a_stilt->index, "hex string");
 				token = TRUE;
 				stilo = stils_push(&a_stilt->ostack);
-				stilo_string_new(stilo, a_stilt,
+				stilo_string_new(stilo, stilt_stil_get(a_stilt),
 				    (a_stilt->index + 1) >> 1);
 				/*
 				 * Set the character following the string in
@@ -1851,7 +1848,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 
 				ngroups = a_stilt->index >> 2;
 				stilo = stils_push(&a_stilt->ostack);
-				stilo_string_new(stilo, a_stilt,
+				stilo_string_new(stilo, stilt_stil_get(a_stilt),
 				    ngroups * 3 + a_stilt->m.b.nodd);
 
 				str = stilo_string_get(stilo);
@@ -2003,8 +2000,7 @@ stilt_p_tok_str_expand(cw_stilt_t *a_stilt)
 		/*
 		 * First overflow, initial expansion needed.
 		 */
-		a_stilt->tok_str = (cw_uint8_t *)stilt_malloc(a_stilt,
-		    a_stilt->index * 2);
+		a_stilt->tok_str = (cw_uint8_t *)_cw_malloc(a_stilt->index * 2);
 		a_stilt->buffer_len = a_stilt->index * 2;
 		memcpy(a_stilt->tok_str, a_stilt->buffer,
 		    a_stilt->index);
@@ -2014,11 +2010,10 @@ stilt_p_tok_str_expand(cw_stilt_t *a_stilt)
 		/*
 		 * Overflowed, and additional expansion needed.
 		 */
-		t_str = (cw_uint8_t *)stilt_malloc(a_stilt,
-		    a_stilt->index * 2);
+		t_str = (cw_uint8_t *)_cw_malloc(a_stilt->index * 2);
 		a_stilt->buffer_len = a_stilt->index * 2;
 		memcpy(t_str, a_stilt->tok_str, a_stilt->index);
-		stilt_free(a_stilt, a_stilt->tok_str);
+		_cw_free(a_stilt->tok_str);
 		a_stilt->tok_str = t_str;
 	}
 }
@@ -2044,7 +2039,7 @@ stilt_p_reset(cw_stilt_t *a_stilt)
 {
 	a_stilt->state = STILTTS_START;
 	if (a_stilt->index > _CW_STILT_BUFFER_SIZE) {
-		stilt_free(a_stilt, a_stilt->tok_str);
+		_cw_free(a_stilt->tok_str);
 		a_stilt->tok_str = a_stilt->buffer;
 	}
 	a_stilt->index = 0;
@@ -2092,7 +2087,7 @@ stilt_p_procedure_accept(cw_stilt_t *a_stilt)
 	nelements = i;
 
 	tstilo = stils_push(&a_stilt->tstack);
-	stilo_array_new(tstilo, a_stilt, nelements);
+	stilo_array_new(tstilo, stilt_stil_get(a_stilt), nelements);
 	stilo_attrs_set(tstilo, STILOA_EXECUTABLE);
 	arr = stilo_array_get(tstilo);
 

@@ -181,7 +181,7 @@ cw_stiln_t stilte_stiln(cw_stilte_t a_stilte);
 /*
  * stilts.
  */
-cw_stilts_t *stilts_new(cw_stilts_t *a_stilts, cw_stilt_t *a_stilt);
+cw_stilts_t *stilts_new(cw_stilts_t *a_stilts);
 void	stilts_delete(cw_stilts_t *a_stilts, cw_stilt_t *a_stilt);
 void	stilts_position_get(cw_stilts_t *a_stilt, cw_uint32_t *r_line,
     cw_uint32_t *r_column);
@@ -245,11 +245,6 @@ cw_bool_t stilt_dict_stack_search(cw_stilt_t *a_stilt, cw_stilo_t *a_key,
 #define	stilt_setglobal(a_stilt, a_global) do {				\
 	(a_stilt)->global = (a_global);					\
 } while (0);
-
-#define	stilt_malloc(a_stilt, a_size)					\
-	stila_malloc(stil_stila_get((a_stilt)->stil), (a_size))
-#define	stilt_free(a_stilt, a_ptr)					\
-	stila_free(stil_stila_get((a_stilt)->stil), (a_ptr))
 
 #define	stilt_chi_get(a_stilt)						\
 	stila_chi_get(stil_stila_get((a_stilt)->stil))

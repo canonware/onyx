@@ -24,7 +24,7 @@ main(int argc, char **argv)
 	libstash_init();
 	stil_new(&stil, NULL, NULL, NULL, NULL);
 	stilt_new(&stilt, &stil);
-	stilts_new(&stilts, &stilt);
+	stilts_new(&stilts);
 
 	stilt_start(&stilt);
 

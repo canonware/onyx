@@ -40,8 +40,8 @@ History		*hist;
 cw_uint8_t	prompt_str[_PROMPT_STRLEN];
 
 char		*prompt(EditLine *a_el);
-cw_sint32_t	cl_read(void *a_arg, cw_stilo_t *a_file, cw_stilt_t *a_stilt,
-    cw_uint32_t a_len, cw_uint8_t *r_str);
+cw_sint32_t	cl_read(void *a_arg, cw_stilo_t *a_file, cw_uint32_t a_len,
+    cw_uint8_t *r_str);
 const char	*basename(const char *a_str);
 
 int
@@ -71,7 +71,7 @@ main(int argc, char **argv)
 
 		stil_new(&stil, cl_read, NULL, NULL, (void *)&arg);
 		stilt_new(&stilt, &stil);
-		stilts_new(&stilts, &stilt);
+		stilts_new(&stilts);
 
 		/*
 		 * Print product and version info.  Redefine stop so that the
@@ -108,7 +108,7 @@ main(int argc, char **argv)
 	} else {
 		stil_new(&stil, NULL, NULL, NULL, NULL);
 		stilt_new(&stilt, &stil);
-		stilts_new(&stilts, &stilt);
+		stilts_new(&stilts);
 
 		/* Create procedures to handle #! magic. */
 		stilt_interpret(&stilt, &stilts, magic, sizeof(magic) - 1);
@@ -182,8 +182,7 @@ prompt(EditLine *a_el)
 }
 
 cw_sint32_t
-cl_read(void *a_arg, cw_stilo_t *a_file, cw_stilt_t *a_stilt, cw_uint32_t a_len,
-    cw_uint8_t *r_str)
+cl_read(void *a_arg, cw_stilo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str)
 {
 	cw_sint32_t		retval;
 	const char		*str;
@@ -203,8 +202,8 @@ cl_read(void *a_arg, cw_stilo_t *a_file, cw_stilt_t *a_stilt, cw_uint32_t a_len,
 		/*
 		 * Update the command line history.
 		 */
-		if ((stilt_deferred(a_stilt) == FALSE) && (stilt_state(a_stilt)
-		    == STILTTS_START)) {
+		if ((stilt_deferred(&stilt) == FALSE) &&
+		    (stilt_state(&stilt) == STILTTS_START)) {
 			const HistEvent	*hevent;
 
 			/*

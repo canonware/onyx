@@ -18,9 +18,6 @@ struct cw_stila_s {
 #endif
 	cw_mtx_t	lock;
 
-	/* Allocator. */
-	cw_mem_t	mem;
-
 	/* Various pools. */
 	cw_pool_t	chi_pool;
 	cw_pool_t	stilsc_pool;
@@ -45,19 +42,6 @@ void	stila_gc_register(cw_stila_t *a_stila, cw_stiloe_t *a_stiloe);
 #define	stila_gc_suspend(a_stila) thd_suspend(&(a_stila)->gc_thd)
 #define	stila_gc_resume(a_stila) thd_resume(&(a_stila)->gc_thd)
 
-#ifdef _LIBSTIL_DBG
-#define	stila_malloc(a_stila, a_size)					\
-	mem_malloc_e(&(a_stila)->mem, (a_size), __FILE__, __LINE__);
-#define	stila_free(a_stila, a_ptr)					\
-	mem_free_e(&(a_stila)->mem, (a_ptr), __FILE__, __LINE__)
-#else
-#define	stila_malloc(a_stila, a_size)					\
-	mem_malloc_e(&(a_stila)->mem, (a_size), NULL, 0);
-#define	stila_free(a_stila, a_ptr)					\
-	mem_free_e(&(a_stila)->mem, (a_ptr), NULL, 0)
-#endif
-
-#define	stila_mem_get(a_stila)		&(a_stila)->mem
 #define	stila_chi_pool_get(a_stila)	&(a_stila)->chi_pool
 #define	stila_stilsc_pool_get(a_stila)	&(a_stila)->stilsc_pool
 #define	stila_dicto_pool_get(a_stila)	&(a_stila)->dicto_pool

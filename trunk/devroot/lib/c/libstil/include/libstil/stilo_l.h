@@ -76,7 +76,7 @@ struct cw_stiloe_dicto_s {
 	cw_stilo_t	val;
 };
 
-void	stiloe_l_delete(cw_stiloe_t *a_stiloe, cw_stilt_t *a_stilt);
+void	stiloe_l_delete(cw_stiloe_t *a_stiloe, cw_stil_t *a_stil);
 cw_stiloe_t *stiloe_l_ref_iterate(cw_stiloe_t *a_stiloe, cw_bool_t a_reset);
 #define	stiloe_l_next(a_stiloe) (qr_next((a_stiloe), link))
 
