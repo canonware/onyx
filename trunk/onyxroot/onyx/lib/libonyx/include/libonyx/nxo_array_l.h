@@ -122,7 +122,7 @@ nxo_l_array_bound_get(cw_nxo_t *a_nxo)
     cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
     cw_assert(nxo_type_get(a_nxo) == NXOT_ARRAY);
 
-    return ((a_nxo->flags >> 8) & 1);
+    return ((a_nxo->flags >> 5) & 1);
 }
 
 CW_INLINE void
@@ -132,6 +132,6 @@ nxo_l_array_bound_set(cw_nxo_t *a_nxo)
     cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
     cw_assert(nxo_type_get(a_nxo) == NXOT_ARRAY);
 
-    a_nxo->flags = (a_nxo->flags & 0xfffffeff) | (1 << 8);
+    a_nxo->flags = (a_nxo->flags & 0xffffffdf) | (1 << 5);
 }
 #endif /* (defined(CW_USE_INLINES) || defined(CW_NXO_ARRAY_C_)) */

@@ -25,7 +25,6 @@
 #include "../include/libonyx/nxa_l.h"
 #include "../include/libonyx/nxo_l.h"
 #include "../include/libonyx/nxo_array_l.h"
-#include "../include/libonyx/nxo_operator_l.h"
 #include "../include/libonyx/nxo_thread_l.h"
 
 #define CW_NXO_THREAD_GETC(a_i) a_thread->tok_str[(a_i)]
@@ -712,56 +711,8 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 			}
 			case NXOT_OPERATOR:
 			{
-#ifdef CW_USE_INLINES
-			    if (nxo_l_operator_fast_op_get(el) == FALSE)
-			    {
-				nxo_operator_f(el)(a_nxo);
-				break;
-			    }
-
-			    /* Fast operator. */
-			    switch (nxo_l_operator_fast_op_nxn(el))
-			    {
-				case NXN_add:
-				{
-				    systemdict_inline_add(a_nxo);
-				    break;
-				}
-				case NXN_dup:
-				{
-				    systemdict_inline_dup(a_nxo);
-				    break;
-				}
-				case NXN_exch:
-				{
-				    systemdict_inline_exch(a_nxo);
-				    break;
-				}
-				case NXN_idup:
-				{
-				    systemdict_inline_idup(a_nxo);
-				    break;
-				}
-				case NXN_pop:
-				{
-				    systemdict_inline_pop(a_nxo);
-				    break;
-				}
-				case NXN_roll:
-				{
-				    systemdict_inline_roll(a_nxo);
-				    break;
-				}
-				default:
-				{
-				    cw_not_reached();
-				}
-			    }
-			    break;
-#else
 			    nxo_operator_f(el)(a_nxo);
 			    break;
-#endif
 			}
 			default:
 			{
@@ -840,60 +791,9 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 	    }
 	    case NXOT_OPERATOR:
 	    {
-#ifdef CW_USE_INLINES
-		if (nxo_l_operator_fast_op_get(nxo) == FALSE)
-		{
-		    nxo_operator_f(nxo)(a_nxo);
-		    nxo_stack_pop(&thread->estack);
-		    break;
-		}
-
-		/* Fast operator. */
-		switch (nxo_l_operator_fast_op_nxn(nxo))
-		{
-		    case NXN_add:
-		    {
-			systemdict_inline_add(a_nxo);
-			break;
-		    }
-		    case NXN_dup:
-		    {
-			systemdict_inline_dup(a_nxo);
-			break;
-		    }
-		    case NXN_exch:
-		    {
-			systemdict_inline_exch(a_nxo);
-			break;
-		    }
-		    case NXN_idup:
-		    {
-			systemdict_inline_idup(a_nxo);
-			break;
-		    }
-		    case NXN_pop:
-		    {
-			systemdict_inline_pop(a_nxo);
-			break;
-		    }
-		    case NXN_roll:
-		    {
-			systemdict_inline_roll(a_nxo);
-			break;
-		    }
-		    default:
-		    {
-			cw_not_reached();
-		    }
-		}
-
-		nxo_stack_pop(&thread->estack);
-		break;
-#else
 		nxo_operator_f(nxo)(a_nxo);
 		nxo_stack_pop(&thread->estack);
 		break;
-#endif
 	    }
 	    case NXOT_FILE:
 	    {

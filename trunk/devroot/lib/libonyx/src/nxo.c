@@ -27,7 +27,6 @@
 #include "../include/libonyx/nxo_mutex_l.h"
 #endif
 #include "../include/libonyx/nxo_name_l.h"
-#include "../include/libonyx/nxo_operator_l.h"
 #include "../include/libonyx/nxo_stack_l.h"
 #include "../include/libonyx/nxo_string_l.h"
 #include "../include/libonyx/nxo_thread_l.h"
@@ -146,19 +145,8 @@ nxo_compare(cw_nxo_t *a_a, cw_nxo_t *a_b)
 	}
 	case NXOT_OPERATOR:
 	{
-	    if (nxo_type_get(a_b) == NXOT_OPERATOR && a_a->o.operator.f
-		== a_b->o.operator.f
-#ifdef CW_USE_INLINES
-		/*
-		 * Fast operators have NULL function pointers, so take care
-		 * to check fast operators for equality.  Doing this
-		 * additional test unconditionally would be safe, but there
-		 * is no need to do it unless inlines are used.
-		 */
-		&& nxo_l_operator_fast_op_nxn(a_a) ==
-		nxo_l_operator_fast_op_nxn(a_b)
-#endif
-		)
+	    if (nxo_type_get(a_b) == NXOT_OPERATOR
+		&& a_a->o.operator.f == a_b->o.operator.f)
 	    {
 		retval = 0;
 	    }

@@ -1,5 +1,14 @@
 2002-04-21 : Jason Evans <jasone@canonware.com>
 
+	* lib/libonyx/include/libonyx/mb.h : Convert mb_write() to a nop, but in
+          such a way that the compiler cannot re-order instructions around
+          mb_write().  This improves interpreter performance by a factor of
+          approximately 2.5.
+
+	* Remove "fast" operator support, since it wasn't very fast.
+          Performance without fast operators is +-3% of what it was with fast
+          operator support, for typical programs.
+
 	* Remove dstackunderflow as an error.  With the addition of the
           threaddstack operator, it is possible for a program to directly
           manipulate dstack in ways that would thwart dstackunderflow checking,

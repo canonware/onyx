@@ -39,42 +39,18 @@
 #include "../include/libonyx/nxo_operator_l.h"
 #include "../include/libonyx/nxo_thread_l.h"
 
-/* Initial size of dictionaries created with the dict operator. */
-#define CW_SYSTEMDICT_DICT_SIZE 16
-
 struct cw_systemdict_entry
 {
     cw_nxn_t nxn;
     cw_op_t *op_f;
 };
 
-/* If inlines are being used, we don't actually need pointers to the operator
- * functions, since they'll never be used (other than that they would make
- * operator comparison easier.  Therefore, use NULL pointers to allow the
- * operator functions to be stripped. */
-#ifdef CW_USE_INLINES
-#define ENTRY(name) {NXN_##name, NULL}
-#else
-#define ENTRY(name) {NXN_##name, systemdict_##name}
-#endif
-
-/* Array of fast operators in systemdict.  This operators must have
- * corresponding handlers in nxo_thread_loop(). */
-static const struct cw_systemdict_entry systemdict_fastops[] = {
-    ENTRY(add),
-    ENTRY(dup),
-    ENTRY(exch),
-    ENTRY(idup),
-    ENTRY(pop),
-    ENTRY(roll)
-};
-
-#undef ENTRY
 #define ENTRY(name) {NXN_##name, systemdict_##name}
 
 /* Array of operators in systemdict. */
 static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(abs),
+    ENTRY(add),
 #ifdef CW_POSIX
     ENTRY(accept),
 #endif
@@ -158,6 +134,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #endif
     ENTRY(dn),
     ENTRY(dstack),
+    ENTRY(dup),
     ENTRY(echeck),
 #ifdef CW_POSIX
     ENTRY(egid),
@@ -169,6 +146,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(euid),
 #endif
     ENTRY(eval),
+    ENTRY(exch),
 #ifdef CW_POSIX
     ENTRY(exec),
 #endif
@@ -207,6 +185,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(ibdup),
     ENTRY(ibpop),
     ENTRY(idiv),
+    ENTRY(idup),
     ENTRY(if),
     ENTRY(ifelse),
     ENTRY(inc),
@@ -278,6 +257,9 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(pid),
     ENTRY(pipe),
     ENTRY(poll),
+#endif
+    ENTRY(pop),
+#ifdef CW_POSIX
     ENTRY(ppid),
 #endif
     ENTRY(print),
@@ -300,6 +282,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #ifdef CW_POSIX
     ENTRY(rmdir),
 #endif
+    ENTRY(roll),
     ENTRY(rot),
 #ifdef CW_REAL
     ENTRY(round),
@@ -474,26 +457,11 @@ systemdict_l_populate(cw_nxo_t *a_dict, cw_nx_t *a_nx, int a_argc,
 #else
 #define NEXTRA 11
 #endif
-#define NFASTOPS							\
-	(sizeof(systemdict_fastops) / sizeof(struct cw_systemdict_entry))
 #define NOPS								\
 	(sizeof(systemdict_ops) / sizeof(struct cw_systemdict_entry))
 
     nxo_dict_new(a_dict, a_nx, TRUE,
-		 NFASTOPS + NOPS + NEXTRA + CW_LIBONYX_SYSTEMDICT_HASH_SPARE);
-
-    /* Fast operators. */
-    for (i = 0; i < NFASTOPS; i++)
-    {
-	nxo_name_new(&name, a_nx, nxn_str(systemdict_fastops[i].nxn),
-		     nxn_len(systemdict_fastops[i].nxn), TRUE);
-	nxo_operator_new(&value, systemdict_fastops[i].op_f,
-			 systemdict_fastops[i].nxn);
-	nxo_attr_set(&value, NXOA_EXECUTABLE);
-	nxo_l_operator_fast_op_set(&value, systemdict_fastops[i].nxn);
-
-	nxo_dict_def(a_dict, a_nx, &name, &value);
-    }
+		 NOPS + NEXTRA + CW_LIBONYX_SYSTEMDICT_HASH_SPARE);
 
     /* Operators. */
     for (i = 0; i < NOPS; i++)
@@ -592,9 +560,8 @@ systemdict_l_populate(cw_nxo_t *a_dict, cw_nx_t *a_nx, int a_argc,
     nxo_null_new(&value);
     nxo_dict_def(a_dict, a_nx, &name, &value);
 
-    cw_assert(nxo_dict_count(a_dict) == NFASTOPS + NOPS + NEXTRA);
+    cw_assert(nxo_dict_count(a_dict) == NOPS + NEXTRA);
 #undef NOPS
-#undef NFASTOPS
 #undef NEXTRA
 }
 
@@ -643,13 +610,94 @@ systemdict_accept(cw_nxo_t *a_thread)
 }
 #endif
 
-#ifdef CW_USE_INLINES
 void
 systemdict_add(cw_nxo_t *a_thread)
 {
-    systemdict_inline_add(a_thread);
-}
+    cw_nxo_t *ostack;
+    cw_nxo_t *nxo_a, *nxo_b;
+    cw_nxoi_t integer_a, integer_b;
+#ifdef CW_REAL
+    cw_bool_t do_real;
+    cw_nxor_t real_a, real_b;
 #endif
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo_b, ostack, a_thread);
+    NXO_STACK_DOWN_GET(nxo_a, ostack, a_thread, nxo_b);
+    switch (nxo_type_get(nxo_a))
+    {
+	case NXOT_INTEGER:
+	{
+#ifdef CW_REAL
+	    do_real = FALSE;
+#endif
+	    integer_a = nxo_integer_get(nxo_a);
+	    break;
+	}
+#ifdef CW_REAL
+	case NXOT_REAL:
+	{
+	    do_real = TRUE;
+	    real_a = nxo_real_get(nxo_a);
+	    break;
+	}
+#endif
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+    switch (nxo_type_get(nxo_b))
+    {
+	case NXOT_INTEGER:
+	{
+#ifdef CW_REAL
+	    if (do_real)
+	    {
+		real_b = (cw_nxor_t) nxo_integer_get(nxo_b);
+	    }
+	    else
+#endif
+	    {
+		integer_b = nxo_integer_get(nxo_b);
+	    }
+	    break;
+	}
+#ifdef CW_REAL
+	case NXOT_REAL:
+	{
+	    real_b = nxo_real_get(nxo_b);
+	    if (do_real == FALSE)
+	    {
+		do_real = TRUE;
+		real_a = (cw_nxor_t) integer_a;
+	    }
+	    break;
+	}
+#endif
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+
+#ifdef CW_REAL
+    if (do_real)
+    {
+	/* nxo_a may be an integer, so use nxo_real_new() rather than
+	 * nxo_real_set(). */
+	nxo_real_new(nxo_a, real_a + real_b);
+    }
+    else
+#endif
+    {
+	nxo_integer_set(nxo_a, integer_a + integer_b);
+    }
+
+    nxo_stack_pop(ostack);
+}
 
 void
 systemdict_adn(cw_nxo_t *a_thread)
@@ -1987,7 +2035,7 @@ systemdict_cvs(cw_nxo_t *a_thread)
 	{
 	    cw_nxn_t nxn;
 
-	    nxn = nxo_l_operator_fast_op_nxn(nxo);
+	    nxn = nxo_l_operator_nxn_get(nxo);
 	    if (nxn == NXN_ZERO)
 	    {
 		cw_onyx_code(a_thread, "pop `-operator-'");
@@ -2603,13 +2651,18 @@ systemdict_dstack(cw_nxo_t *a_thread)
     nxo_stack_copy(stack, dstack);
 }
 
-#ifdef CW_USE_INLINES
 void
 systemdict_dup(cw_nxo_t *a_thread)
 {
-    systemdict_inline_dup(a_thread);
+    cw_nxo_t *ostack;
+    cw_nxo_t *orig, *dup;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+
+    NXO_STACK_GET(orig, ostack, a_thread);
+    dup = nxo_stack_push(ostack);
+    nxo_dup(dup, orig);
 }
-#endif
 
 void
 systemdict_echeck(cw_nxo_t *a_thread)
@@ -2723,13 +2776,18 @@ systemdict_eval(cw_nxo_t *a_thread)
     nxo_thread_loop(a_thread);
 }
 
-#ifdef CW_USE_INLINES
 void
 systemdict_exch(cw_nxo_t *a_thread)
 {
-    systemdict_inline_exch(a_thread);
+    cw_nxo_t *ostack;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+
+    if (nxo_stack_exch(ostack))
+    {
+	nxo_thread_nerror(a_thread, NXN_stackunderflow);
+    }
 }
-#endif
 
 #ifdef CW_POSIX
 void
@@ -3834,13 +3892,30 @@ systemdict_idiv(cw_nxo_t *a_thread)
     nxo_stack_pop(ostack);
 }
 
-#ifdef CW_USE_INLINES
 void
 systemdict_idup(cw_nxo_t *a_thread)
 {
-    systemdict_inline_idup(a_thread);
+    cw_nxo_t *ostack;
+    cw_nxo_t *nxo, *orig;
+    cw_nxoi_t index;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    if (nxo_type_get(nxo) != NXOT_INTEGER)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    index = nxo_integer_get(nxo);
+    if (index < 0)
+    {
+	nxo_thread_nerror(a_thread, NXN_rangecheck);
+	return;
+    }
+
+    NXO_STACK_NGET(orig, ostack, a_thread, index + 1);
+    nxo_dup(nxo, orig);
 }
-#endif
 
 void
 systemdict_if(cw_nxo_t *a_thread)
@@ -5511,13 +5586,15 @@ systemdict_poll(cw_nxo_t *a_thread)
 }
 #endif
 
-#ifdef CW_USE_INLINES
 void
 systemdict_pop(cw_nxo_t *a_thread)
 {
-    systemdict_inline_pop(a_thread);
+    cw_nxo_t *ostack;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+
+    NXO_STACK_POP(ostack, a_thread);
 }
-#endif
 
 #ifdef CW_POSIX
 void
@@ -6117,13 +6194,50 @@ systemdict_rmdir(cw_nxo_t *a_thread)
 }
 #endif
 
-#ifdef CW_USE_INLINES
 void
 systemdict_roll(cw_nxo_t *a_thread)
 {
-    systemdict_inline_roll(a_thread);
+    cw_nxo_t *ostack;
+    cw_nxo_t *nxo;
+    cw_nxoi_t count, amount;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    if (nxo_type_get(nxo) != NXOT_INTEGER)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    amount = nxo_integer_get(nxo);
+    NXO_STACK_DOWN_GET(nxo, ostack, a_thread, nxo);
+    if (nxo_type_get(nxo) != NXOT_INTEGER)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    count = nxo_integer_get(nxo);
+    if (count < 1)
+    {
+	nxo_thread_nerror(a_thread, NXN_rangecheck);
+	return;
+    }
+
+    nxo_stack_npop(ostack, 2);
+    if (nxo_stack_roll(ostack, count, amount))
+    {
+	cw_nxo_t *nxo;
+
+	/* Stack underflow.  Restore the stack to its original state, then throw
+	 * an error. */
+	nxo = nxo_stack_push(ostack);
+	nxo_integer_new(nxo, count);
+	nxo = nxo_stack_push(ostack);
+	nxo_integer_new(nxo, amount);
+
+	nxo_thread_nerror(a_thread, NXN_stackunderflow);
+    }
 }
-#endif
 
 void
 systemdict_rot(cw_nxo_t *a_thread)

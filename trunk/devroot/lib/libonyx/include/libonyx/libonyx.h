@@ -195,6 +195,9 @@ typedef enum
 /* Initial size of threaddict. */
 #define CW_LIBONYX_THREADDICT_HASH 4
 
+/* Initial size of dictionaries created with the dict operator. */
+#define CW_SYSTEMDICT_DICT_SIZE 16
+
 /* Exception numbers.  libonyx reserves 0 through 127. */
 #define CW_ONYXX_MIN 0
 #define CW_ONYXX_MAX 127

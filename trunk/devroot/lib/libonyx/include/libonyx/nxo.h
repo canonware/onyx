@@ -74,23 +74,19 @@ struct cw_nxo_s
      *
      * . : Unused.
      *
-     * C : Op code.  If this is an operator, and NXN_ZERO < op code <=
-     *     NXN_LAST, op code corresponds to the name of this operator.  This
-     *     can be used to print the operator name or inline fast_op's in the
-     *     interpreter loop.
+     * C : Op code.  If this is an operator, and NXN_ZERO < op code <= NXN_LAST,
+     *     op code corresponds to the name of this operator.  This can be used
+     *     to print the operator name.
+     *
+     * A : Attribute.  An nxo is LITERAL, EXECUTABLE, or EVALUATABLE.
      *
      * B : Array bound.  TRUE if the bind operator has processed this array.
      *     This is used to avoid infinite recursion in the bind operator
      *     when binding recursive procedures.
      *
-     * A : Attribute.  An nxo is LITERAL, EXECUTABLE, or EVALUATABLE.
-     *
-     * P : Fast op.  If type is NXOT_OPERATOR and fast op is TRUE, this
-     *     operator can be handled specially in nxo_thread_loop().
-     *
      * T : Type.
      *
-     * ........ .....CCC CCCCCCCB AAPTTTTT
+     * ........ ......CC CCCCCCCC AABTTTTT
      * */
     cw_uint32_t flags;
 
