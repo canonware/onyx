@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 70 $
- * Last modified: $Date: 1998-05-02 02:09:36 -0700 (Sat, 02 May 1998) $
+ * Current revision: $Revision: 77 $
+ * Last modified: $Date: 1998-05-03 23:46:21 -0700 (Sun, 03 May 1998) $
  *
  * <<< Description >>>
  *
@@ -42,8 +42,8 @@
  * <name> ::= { <caps> | <lower> | <numbers> | <under> | <period> }+
  * <value> ::= { <caps> | <lower> | <numbers> | <under> | <period>
  *               | <backslash> <hash> | <whitespace> | <colon>
- *               | <backslash> <backslash> | <legal_in_name> |
- *               | <linebreak> }+
+ *               | <backslash> <backslash> | <backslash> <n>
+ *               | <legal_in_name> | <linebreak> }+
  *           | <e>
  * <comment> ::= <hash> { <caps> | <lower> | <numbers> | <under> | <period>
  *                        | <hash> | <whitespace> | <colon>
@@ -54,6 +54,7 @@
  *                | <e>
  * <^> ::= Bound to beginning of line.
  * <e> ::= Epsilon.
+ * <n> ::= [n]
  * <caps> ::= [A-Z]
  * <lower> ::= [a-z]
  * <numbers> ::= [0-9]
@@ -872,8 +873,25 @@ res_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
 	    state = _CW_RES_STATE_VALUE;
 	    break;
 	  }
-	  case _CW_RES_CHAR_CAP:
 	  case _CW_RES_CHAR_LOWER:
+	  {
+	    if (c == 'n')
+	    {
+	      /* Insert a carriage return and jump back to the value
+	       * state.  Yes, this is a gross hack, and violation of the
+	       * otherwise purity of the state machine and character
+	       * classes, but to have made a special character class just
+	       * for this would probably have made the code less
+	       * understandable. */
+	      val[val_pos] = '\n';
+	      val_pos++;
+	      state = _CW_RES_STATE_VALUE;
+	      break;
+	    }
+	    /* Note that if it's not an 'n', we fall through to the error
+	     * case. */
+	  }
+	  case _CW_RES_CHAR_CAP:
 	  case _CW_RES_CHAR_NUMBER:
 	  case _CW_RES_CHAR_UNDER:
 	  case _CW_RES_CHAR_PERIOD:
