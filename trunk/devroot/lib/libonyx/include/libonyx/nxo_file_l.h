@@ -13,17 +13,17 @@
  * Size of stack-allocated buffer to use for nxo_file_readline().  If this
  * overflows, heap allocation is used.
  */
-#ifdef _CW_DBG
-#define	_CW_NXO_FILE_READLINE_BUFSIZE	 25
+#ifdef CW_DBG
+#define	CW_NXO_FILE_READLINE_BUFSIZE	 25
 #else
-#define	_CW_NXO_FILE_READLINE_BUFSIZE	100
+#define	CW_NXO_FILE_READLINE_BUFSIZE	100
 #endif
 
 typedef struct cw_nxoe_file_s cw_nxoe_file_t;
 
 struct cw_nxoe_file_s {
 	cw_nxoe_t	nxoe;
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	/*
 	 * Access is locked if this object has the locking bit set.
 	 */
@@ -33,7 +33,7 @@ struct cw_nxoe_file_s {
 
 	enum {
 		FILE_NONE,
-#ifdef _CW_POSIX_FILE
+#ifdef CW_POSIX_FILE
 		FILE_POSIX,
 #endif
 		FILE_SYNTHETIC
@@ -48,7 +48,7 @@ struct cw_nxoe_file_s {
 			void			*arg;
 			cw_nxoi_t		position;
 		}	s;
-#ifdef _CW_POSIX_FILE
+#ifdef CW_POSIX_FILE
 		struct {
 			cw_sint32_t		fd;
 			cw_bool_t		wrapped;

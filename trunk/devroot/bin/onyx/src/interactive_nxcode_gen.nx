@@ -29,7 +29,7 @@
 static void
 interactive_nxcode(cw_nxo_t *a_thread)
 {
-	_cw_onyx_code(a_thread, "' print
+	cw_onyx_code(a_thread, "' print
 
 % Read in the code.
 stdin cvx eval

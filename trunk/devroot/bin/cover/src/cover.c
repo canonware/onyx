@@ -122,7 +122,7 @@ main(int argc, char **argv)
 	if (opt_nnodes > 6)
 		out_put(out_err, "Too many nodes (maximum 6)\n");
 
-	_cw_out_put("opt_nnodes == [i]\n", opt_nnodes);
+	cw_out_put("opt_nnodes == [i]\n", opt_nnodes);
 
 	matrix = build_full_matrix(opt_nnodes, &graphs);
 
@@ -130,34 +130,34 @@ main(int argc, char **argv)
 		cw_uint32_t	i;
 
 		for (i = 0; graphs[i] != NULL; i++) {
-			_cw_out_put("Row [i]:\n", i);
+			cw_out_put("Row [i]:\n", i);
 			matrix_dump(graphs[i], "\t", FALSE);
 		}
 	}
 
 	if (opt_matrix) {
-		_cw_out_put("Matrix before reduction:\n");
+		cw_out_put("Matrix before reduction:\n");
 		matrix_dump(matrix, "before: ", TRUE);
 	}
 
 	num_essentials = reduce(matrix, &x_index, &y_index);
-	_cw_out_put("[i] essentials\n", num_essentials);
+	cw_out_put("[i] essentials\n", num_essentials);
 	matrix_rebuild(matrix);
-	_cw_out_put("Matrix size == [i] x [i]\n",
+	cw_out_put("Matrix size == [i] x [i]\n",
 	    matrix_get_x_size(matrix), matrix_get_y_size(matrix));
 
 	if (opt_key && graphs != NULL) {
 		cw_uint32_t	i;
 
 		for (i = 0; i < matrix_get_y_size(matrix); i++) {
-			_cw_out_put("Row [i]:\n", i);
+			cw_out_put("Row [i]:\n", i);
 			matrix_dump(graphs[matrix_get_element(y_index, 0, i)],
 			    "\t", FALSE);
 		}
 	}
 
 	if (opt_matrix) {
-		_cw_out_put("Matrix after reduction:\n");
+		cw_out_put("Matrix after reduction:\n");
 		matrix_dump(matrix, "after: ", TRUE);
 	}
 
@@ -176,7 +176,7 @@ main(int argc, char **argv)
 			for (i = 0; graphs[i] != NULL; i++)
 				matrix_delete(graphs[i]);
 
-			_cw_free(graphs);
+			cw_free(graphs);
 		}
 
 		matrix_delete(matrix);
@@ -285,16 +285,16 @@ build_full_matrix(cw_uint32_t a_nnodes, cw_matrix_t *** r_graphs)
 	map_el_t	*map;
 
 	/* Hard-coded for (n <= 6). */
-	graphs = (cw_matrix_t **) _cw_calloc(1296, sizeof(cw_matrix_t *));
+	graphs = (cw_matrix_t **) cw_calloc(1296, sizeof(cw_matrix_t *));
 	bzero(graphs, 1296 * sizeof(cw_matrix_t *));
 	*r_graphs = graphs;
 
 	num_edges = a_nnodes * ((a_nnodes - 1) / 2)
 	    + (((a_nnodes + 1) / 2) * ((a_nnodes + 1) % 2));
-	_cw_out_put("num_edges == [i]\n", num_edges);
+	cw_out_put("num_edges == [i]\n", num_edges);
 	num_graphs = 1 << (a_nnodes * ((a_nnodes - 1) / 2)
 	    + (((a_nnodes + 1) / 2) * ((a_nnodes + 1) % 2)));
-	_cw_out_put("num_graphs == [i]\n", num_graphs);
+	cw_out_put("num_graphs == [i]\n", num_graphs);
 
 	/* Create adjacency matrix, given number of nodes. */
 	graph = matrix_new(NULL);
@@ -313,7 +313,7 @@ build_full_matrix(cw_uint32_t a_nnodes, cw_matrix_t *** r_graphs)
 	 * other direction for each edge as well.
 	 */
 
-	map = (map_el_t *) _cw_malloc(sizeof(map_el_t) * num_edges);
+	map = (map_el_t *) cw_malloc(sizeof(map_el_t) * num_edges);
 
 	{
 		cw_uint32_t	x, y, curr_map_el = 0;
@@ -362,7 +362,7 @@ build_full_matrix(cw_uint32_t a_nnodes, cw_matrix_t *** r_graphs)
 		}
 	}
 
-	_cw_out_put("Matrix size == [i] x [i]\n", num_graphs,
+	cw_out_put("Matrix size == [i] x [i]\n", num_graphs,
 	    num_min_graphs);
 
 	/* Create the big bad matrix. */
@@ -433,7 +433,7 @@ build_full_matrix(cw_uint32_t a_nnodes, cw_matrix_t *** r_graphs)
 	/* We've got the complete matrix in cover now. */
 
 	matrix_delete(graph);
-	_cw_free(map);
+	cw_free(map);
 	return cover;
 }
 
@@ -443,9 +443,9 @@ is_min_span_tree(cw_matrix_t *a_matrix, cw_uint32_t a_nnodes)
 	cw_bool_t	retval = TRUE;
 	cw_uint32_t	*class;
 
-	_cw_check_ptr(a_matrix);
+	cw_check_ptr(a_matrix);
 
-	class = (cw_uint32_t *) _cw_malloc(sizeof(cw_uint32_t) * a_nnodes);
+	class = (cw_uint32_t *) cw_malloc(sizeof(cw_uint32_t) * a_nnodes);
 	bzero(class, (sizeof(cw_uint32_t) * a_nnodes));
 
 	/* Are there exactly (a_nnodes - 1) edges? */
@@ -478,11 +478,11 @@ is_min_span_tree(cw_matrix_t *a_matrix, cw_uint32_t a_nnodes)
 		cw_sint32_t	least, curr_path_ele;
 
 		/* Create current weights array and zero it out. */
-		weights = (cw_uint32_t *)_cw_malloc(sizeof(cw_uint32_t) *
+		weights = (cw_uint32_t *)cw_malloc(sizeof(cw_uint32_t) *
 		    a_nnodes);
-		curr_path = (cw_uint32_t *)_cw_malloc(sizeof(cw_uint32_t) *
+		curr_path = (cw_uint32_t *)cw_malloc(sizeof(cw_uint32_t) *
 		    a_nnodes);
-		have_visited = (cw_bool_t *)_cw_malloc(sizeof(cw_bool_t) *
+		have_visited = (cw_bool_t *)cw_malloc(sizeof(cw_bool_t) *
 		    a_nnodes);
 		for (i = 0; i < a_nnodes; i++) {
 			weights[i] = 0x7fffffff;
@@ -553,13 +553,13 @@ is_min_span_tree(cw_matrix_t *a_matrix, cw_uint32_t a_nnodes)
 		}
 
 		CLEANUP:    
-		_cw_free(weights);
-		_cw_free(curr_path);
-		_cw_free(have_visited);
+		cw_free(weights);
+		cw_free(curr_path);
+		cw_free(have_visited);
 	}
 
 	RETURN:
-	_cw_free(class);
+	cw_free(class);
 	return retval;
 }
 
@@ -599,18 +599,18 @@ reduce(cw_matrix_t *a_m, cw_matrix_t **r_x_index, cw_matrix_t **r_y_index)
 	    && (matrix_get_x_size(a_m) > 1)
 	    && (matrix_get_y_size(a_m) > 1)) {
 		/* Check for row covering. */
-		_cw_out_put("rows        [i|w:5] x [i|w:4] --> ",
+		cw_out_put("rows        [i|w:5] x [i|w:4] --> ",
 		    matrix_get_x_size(a_m), matrix_get_y_size(a_m));
 		did_reduce = reduce_rows(a_m, x_index, y_index);
-		_cw_out_put("[i|w:5] x [i|w:4]\n", matrix_get_x_size(a_m),
+		cw_out_put("[i|w:5] x [i|w:4]\n", matrix_get_x_size(a_m),
 		    matrix_get_y_size(a_m));
 
 		/* Check for column matching. */
 		if (did_reduce == FALSE) {
-			_cw_out_put("columns     [i|w:5] x [i|w:4] --> ",
+			cw_out_put("columns     [i|w:5] x [i|w:4] --> ",
 			    matrix_get_x_size(a_m), matrix_get_y_size(a_m));
 			did_reduce = reduce_columns(a_m, x_index, y_index);
-			_cw_out_put("[i|w:5] x [i|w:4]\n",
+			cw_out_put("[i|w:5] x [i|w:4]\n",
 			    matrix_get_x_size(a_m), matrix_get_y_size(a_m));
 		}
 
@@ -620,13 +620,13 @@ reduce(cw_matrix_t *a_m, cw_matrix_t **r_x_index, cw_matrix_t **r_y_index)
 
 			xbefore = matrix_get_x_size(a_m);
 			ybefore = matrix_get_y_size(a_m);
-			_cw_out_put("essentials:");
+			cw_out_put("essentials:");
 			essentials = reduce_essentials(a_m, x_index, y_index);
 			if (essentials > 0) {
 				did_reduce = TRUE;
 				nessentials += essentials;
 			}
-			_cw_out_put("\nessentials  [i|w:5] x [i|w:4] -->"
+			cw_out_put("\nessentials  [i|w:5] x [i|w:4] -->"
 			    " [i|w:5] x [i|w:4]\n",
 			    xbefore, ybefore, matrix_get_x_size(a_m),
 			    matrix_get_y_size(a_m));
@@ -769,10 +769,10 @@ reduce_essentials(cw_matrix_t *a_m, cw_matrix_t *a_x_index, cw_matrix_t
 				essential = y;
 			}
 		}
-		_cw_assert(num_on > 0);
+		cw_assert(num_on > 0);
 
 		if (num_on == 1) {
-			_cw_out_put(" [i]", matrix_get_element(a_y_index, 0,
+			cw_out_put(" [i]", matrix_get_element(a_y_index, 0,
 			    essential));
 			remove_essential(a_m, a_x_index, a_y_index, essential);
 			nessentials++;
@@ -810,8 +810,8 @@ genetic_cover(cw_matrix_t *matrix, cw_matrix_t *x_index, cw_matrix_t *y_index)
 	cw_uint32_t	gene_size, score_sum;
 	pack_t		pack;
 
-	genes1 = (gene_t *) _cw_malloc(opt_psize * sizeof(gene_t));
-	genes2 = (gene_t *) _cw_malloc(opt_psize * sizeof(gene_t));
+	genes1 = (gene_t *) cw_malloc(opt_psize * sizeof(gene_t));
+	genes2 = (gene_t *) cw_malloc(opt_psize * sizeof(gene_t));
 	for (i = 0; i < opt_psize; i++) {
 		gene_new(&genes1[i], matrix_get_y_size(matrix));
 		gene_new(&genes2[i], matrix_get_y_size(matrix));
@@ -821,7 +821,7 @@ genetic_cover(cw_matrix_t *matrix, cw_matrix_t *x_index, cw_matrix_t *y_index)
 	genes = genes1;
 	tga = genes2;
 	srandom(opt_seed);
-	_cw_out_put("pool size: [i], generations: [i], crossover == [i]%, "
+	cw_out_put("pool size: [i], generations: [i], crossover == [i]%, "
 		"mutate == 1/[i], opt_seed == [i]\n", opt_psize, opt_ngens,
 	    _CROSSOVER_PROBABILITY, opt_mutate, opt_seed);
 
@@ -840,9 +840,9 @@ genetic_cover(cw_matrix_t *matrix, cw_matrix_t *x_index, cw_matrix_t *y_index)
 		for (j = 0; j < matrix_get_y_size(matrix); j++) {
 			if (matrix_get_element(matrix, i, j)) {
 				pack_set_el(pack, i, j);
-				_cw_assert(pack_get_el(pack, i, j) == 1);
+				cw_assert(pack_get_el(pack, i, j) == 1);
 			} else {
-				_cw_assert(pack_get_el(pack, i, j) == 0);
+				cw_assert(pack_get_el(pack, i, j) == 0);
 			}
 		}
 	}
@@ -851,13 +851,13 @@ genetic_cover(cw_matrix_t *matrix, cw_matrix_t *x_index, cw_matrix_t *y_index)
 	/* Generation loop. */
 	for (i = 0; i < opt_ngens; i++) {
 
-		_cw_out_put("Generation [i]\n", i);
+		cw_out_put("Generation [i]\n", i);
 
-/*  		_cw_out_put("Scoring...\n", i); */
+/*  		cw_out_put("Scoring...\n", i); */
 		score_sum = genetic_score(matrix, y_index, &pack, genes,
 		    gene_size);
 
-/*  		_cw_out_put("Reproducing...\n", i); */
+/*  		cw_out_put("Reproducing...\n", i); */
 		genetic_reproduce(matrix, y_index, &pack, genes, tga,
 		    gene_size, score_sum);
 
@@ -871,8 +871,8 @@ genetic_cover(cw_matrix_t *matrix, cw_matrix_t *x_index, cw_matrix_t *y_index)
 		gene_delete(&genes1[i]);
 		gene_delete(&genes2[i]);
 	}
-	_cw_free(genes1);
-	_cw_free(genes2);
+	cw_free(genes1);
+	cw_free(genes2);
 	pack_delete(&pack);
 }
 
@@ -905,24 +905,24 @@ genetic_score(cw_matrix_t *matrix, cw_matrix_t *a_y_index, pack_t *a_pack,
 
 			if ((a_gene_size - row) < best) {
 				best = (a_gene_size - row);
-				_cw_out_put("---------------------------------"
+				cw_out_put("---------------------------------"
 				    "--------------\n");
-				_cw_out_put("<<< genes[[[i]] covers using "
+				cw_out_put("<<< genes[[[i]] covers using "
 				    "[i|s:s] rows >>>\n",
 				    j, matrix_get_y_size(matrix) - row);
-				_cw_out_put("Rows:");
+				cw_out_put("Rows:");
 				for (i = 0; i <
 					 matrix_get_y_size(matrix); i++) {
 					if (gene_get_locus(&genes[j],
 					    i)) {
-						_cw_out_put(" [i]",
+						cw_out_put(" [i]",
 						    matrix_get_element(a_y_index,
 						    0, i));
 					}
 				}
-				_cw_out_put("\n");
+				cw_out_put("\n");
 	    
-				_cw_out_put("---------------------------------"
+				cw_out_put("---------------------------------"
 				    "--------------\n");
 			}
 			if ((a_gene_size - row) < gen_best) {
@@ -934,10 +934,10 @@ genetic_score(cw_matrix_t *matrix, cw_matrix_t *a_y_index, pack_t *a_pack,
 		}
 	}
 
-	_cw_out_put("  Solutions/Total = [i]/[i], Best Solution = [i], "
+	cw_out_put("  Solutions/Total = [i]/[i], Best Solution = [i], "
 	    "Average solution = [i]\n", num_solutions, opt_psize,
 	    gen_best, num_solutions ? (gen_total / num_solutions) : 0);
-	_cw_out_put("  Best score = [i], Average score = [i]\n",
+	cw_out_put("  Best score = [i], Average score = [i]\n",
 	    gen_best_score, score_sum / opt_psize);
 
 	return score_sum;
@@ -1057,7 +1057,7 @@ genetic_reproduce(cw_matrix_t *matrix, cw_matrix_t *a_y_index, pack_t *a_pack,
 void
 usage(const char *a_progname)
 {
-	_cw_out_put(
+	cw_out_put(
 	    "[s] usage:\n"
 	    "    [s] -h\n"
 	    "    [s] [[-k] [[-t] [[-n <nnodes>] [[-g <ngens>] [[-s <seed>] "
@@ -1096,7 +1096,7 @@ basename(const char *a_str)
 	const char	*retval = NULL;
 	cw_uint32_t	i;
 
-	_cw_check_ptr(a_str);
+	cw_check_ptr(a_str);
 
 	i = strlen(a_str);
 	if (i > 0) {

@@ -109,22 +109,22 @@ AC_SUBST(libs)
 AC_CANONICAL_HOST
 case "${host}" in
   *-*-darwin*)
-	AC_DEFINE(_CW_OS_DARWIN, )
+	AC_DEFINE(CW_OS_DARWIN, )
 	abi="macho"
 	CFLAGS="$CFLAGS -fno-common -no-cpp-precomp"
 	;;
   *-*-freebsd*)
-	AC_DEFINE(_CW_OS_FREEBSD, )
+	AC_DEFINE(CW_OS_FREEBSD, )
 	abi="elf"
 	RPATH="-Wl,-rpath,"
         ;;
   *-*-linux*)
-	AC_DEFINE(_CW_OS_LINUX, )
+	AC_DEFINE(CW_OS_LINUX, )
 	abi="elf"
 	RPATH="-Wl,-rpath,"
         ;;
   *-*-solaris2*)
-	AC_DEFINE(_CW_OS_SOLARIS, )
+	AC_DEFINE(CW_OS_SOLARIS, )
 	AC_DEFINE(_POSIX_PTHREAD_SEMANTICS)
 	abi="elf"
 	RPATH="-Wl,-R,"
@@ -211,7 +211,7 @@ AC_TRY_LINK([
 
 	ent.d_reclen = 0;
 ], AC_MSG_RESULT(yes)
-   AC_DEFINE(_CW_LIBONYX_USE_DIRENT_RECLEN),
+   AC_DEFINE(CW_LIBONYX_USE_DIRENT_RECLEN),
    AC_MSG_RESULT(no)
    AC_MSG_ERROR(struct dirent too deviant)))
 
@@ -223,16 +223,16 @@ if test "x$build_onyx" = "xyes" ; then
   cfgoutputs="$cfgoutputs doc/latex/onyx.tex"
 
   if test "x$prefix" = "xNONE" ; then
-    _CW_ONYX_RPATH="/usr/local/share/onyx/nxcode"
-    _CW_ONYX_MPATH="/usr/local/share/onyx/nxmod"
+    CW_ONYX_RPATH="/usr/local/share/onyx/nxcode"
+    CW_ONYX_MPATH="/usr/local/share/onyx/nxmod"
   else
-    _CW_ONYX_RPATH="$prefix/share/onyx/nxcode"
-    _CW_ONYX_MPATH="$prefix/share/onyx/nxmod"
+    CW_ONYX_RPATH="$prefix/share/onyx/nxcode"
+    CW_ONYX_MPATH="$prefix/share/onyx/nxmod"
   fi
-  AC_DEFINE_UNQUOTED(_CW_ONYX_RPATH, "$_CW_ONYX_RPATH")
-  AC_DEFINE_UNQUOTED(_CW_ONYX_MPATH, "$_CW_ONYX_MPATH")
+  AC_DEFINE_UNQUOTED(CW_ONYX_RPATH, "$CW_ONYX_RPATH")
+  AC_DEFINE_UNQUOTED(CW_ONYX_MPATH, "$CW_ONYX_MPATH")
 
-  AC_DEFINE_UNQUOTED(_CW_TONYX_ONYX, "$abs_objdir/bin/onyx/bin/onyx")
+  AC_DEFINE_UNQUOTED(CW_TONYX_ONYX, "$abs_objdir/bin/onyx/bin/onyx")
 
   tmpath=ONYX_MPATH=:.
   trpath=ONYX_RPATH=:.
@@ -240,8 +240,8 @@ if test "x$build_onyx" = "xyes" ; then
     tmpath=$tmpath:$abs_objdir/mod/$i/nxmod
     trpath=$trpath:$abs_objdir/mod/$i/src
   done
-  AC_DEFINE_UNQUOTED(_CW_TONYX_RPATH, "$trpath")
-  AC_DEFINE_UNQUOTED(_CW_TONYX_MPATH, "$tmpath")
+  AC_DEFINE_UNQUOTED(CW_TONYX_RPATH, "$trpath")
+  AC_DEFINE_UNQUOTED(CW_TONYX_MPATH, "$tmpath")
 fi
 
 if test "x$build_slate" = "xyes" ; then

@@ -21,7 +21,7 @@ typedef struct cw_mem_s cw_mem_t;
  * multiple ql's in order to implement various LIFO/FIFO orderings.
  */
 struct cw_chi_s {
-#ifdef _CW_DBG
+#ifdef CW_DBG
 	cw_uint32_t	magic;
 #endif
 	cw_bool_t	is_malloced;	/* If space for a chi wasn't passed into
@@ -36,7 +36,7 @@ struct cw_chi_s {
 };
 
 struct cw_ch_s {
-#ifdef _CW_DBG
+#ifdef CW_DBG
 	cw_uint32_t	magic;
 
 	/* Counters used to get an idea of performance. */
@@ -73,7 +73,7 @@ typedef cw_bool_t	cw_ch_key_comp_t (const void *, const void *);
 
 /* Calculates ch size, given the number of hash table slots.  Use this to
  * calculate space allocation when passing pre-allocated space to ch_new(). */
-#define _CW_CH_TABLE2SIZEOF(t)						\
+#define CW_CH_TABLE2SIZEOF(t)						\
 	(sizeof(cw_ch_t) + (((t) - 1) * sizeof(cw_chi_t *)))
 
 cw_ch_t		*ch_new(cw_ch_t *a_ch, cw_opaque_alloc_t *a_alloc,

@@ -14,7 +14,7 @@ typedef struct cw_mq_s cw_mq_t;
 
 struct cw_mq_s {
 	cw_mem_t	*mem;
-#ifdef _CW_DBG
+#ifdef CW_DBG
 	cw_uint32_t	magic;
 #endif
 	cw_uint32_t	msg_count;

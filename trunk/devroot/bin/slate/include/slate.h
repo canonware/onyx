@@ -22,17 +22,3 @@
 #include "hist.h"
 
 #include "buffer.h"
-
-#ifdef WORDS_BIGENDIAN
-#define _cw_ntohq(a) (a)
-#define _cw_htonq(a) (a)
-#else
-#define _cw_ntohq(a)							\
-	(cw_uint64_t) (((cw_uint64_t) (ntohl((cw_uint32_t) ((a) >>	\
-	    32)))) | (((cw_uint64_t) (ntohl((cw_uint32_t) ((a) &	\
-	    0x00000000ffffffff)))) << 32))
-#define _cw_htonq(a)							\
-        (cw_uint64_t) (((cw_uint64_t) (htonl((cw_uint32_t) ((a) >>	\
-            32)))) | (((cw_uint64_t) (htonl((cw_uint32_t) ((a) &	\
-            0x00000000ffffffff)))) << 32))
-#endif

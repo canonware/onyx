@@ -25,11 +25,11 @@ typedef struct
  */
 #define	gene_new(a, b) do {						\
 		(a)->arr_len = ((b) >> 3) + (((b) & 0x7) ? 1 : 0);	\
-		(a)->gene = (char *)_cw_malloc((a)->arr_len);		\
+		(a)->gene = (char *)cw_malloc((a)->arr_len);		\
 	} while (0)
 
 /* a : (gene_t *). */
-#define	gene_delete(a) _cw_free((a)->gene);
+#define	gene_delete(a) cw_free((a)->gene);
 
 /*
  * Copy b to a.

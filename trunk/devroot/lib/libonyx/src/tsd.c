@@ -19,7 +19,7 @@ tsd_new(cw_tsd_t *a_tsd, void (*a_func)(void *))
 {
 	int	error;
 
-	_cw_check_ptr(a_tsd);
+	cw_check_ptr(a_tsd);
 
 	error = pthread_key_create(&a_tsd->key, a_func);
 	if (error) {
@@ -35,7 +35,7 @@ tsd_delete(cw_tsd_t *a_tsd)
 {
 	int	error;
 
-	_cw_check_ptr(a_tsd);
+	cw_check_ptr(a_tsd);
 
 	error = pthread_key_delete(a_tsd->key);
 	if (error) {
@@ -51,7 +51,7 @@ tsd_get(cw_tsd_t *a_tsd)
 {
 	void	*retval;
 
-	_cw_check_ptr(a_tsd);
+	cw_check_ptr(a_tsd);
 
 	retval = pthread_getspecific(a_tsd->key);
 
@@ -63,7 +63,7 @@ tsd_set(cw_tsd_t *a_tsd, void *a_val)
 {
 	int	error;
 
-	_cw_check_ptr(a_tsd);
+	cw_check_ptr(a_tsd);
 
 	error = pthread_setspecific(a_tsd->key, a_val);
 	if (error) {

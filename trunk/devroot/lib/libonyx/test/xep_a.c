@@ -11,17 +11,17 @@
 
 #include "../include/libonyx/libonyx.h"
 
-#define	_CW_XEPV_FOO	128
-#define	_CW_XEPV_BAR	129
-#define	_CW_XEPV_BIZ	130
-#define	_CW_XEPV_BAZ	131
-#define	_CW_XEPV_BANG	132
-#define	_CW_XEPV_BAM	133
+#define	CW_XEPV_FOO	128
+#define	CW_XEPV_BAR	129
+#define	CW_XEPV_BIZ	130
+#define	CW_XEPV_BAZ	131
+#define	CW_XEPV_BANG	132
+#define	CW_XEPV_BAM	133
 
 void
 func_a(void)
 {
-	xep_throw(_CW_XEPV_BIZ);
+	xep_throw(CW_XEPV_BIZ);
 }
 
 void
@@ -29,11 +29,11 @@ func_b(void)
 {
 	xep_begin();
 	xep_try {
-		fprintf(stderr, "%s(): _CW_XEPV_CODE\n", __FUNCTION__);
+		fprintf(stderr, "%s(): CW_XEPV_CODE\n", __FUNCTION__);
 		func_a();
 	}
-	xep_catch(_CW_XEPV_BIZ) {
-		fprintf(stderr, "%s(): _CW_XEPV_BIZ\n", __FUNCTION__);
+	xep_catch(CW_XEPV_BIZ) {
+		fprintf(stderr, "%s(): CW_XEPV_BIZ\n", __FUNCTION__);
 		xep_handled();
 	}
 	xep_end();
@@ -44,11 +44,11 @@ func_c(void)
 {
 	xep_begin();
 	xep_try {
-		fprintf(stderr, "%s(): _CW_XEPV_CODE\n", __FUNCTION__);
+		fprintf(stderr, "%s(): CW_XEPV_CODE\n", __FUNCTION__);
 		func_a();
 	}
 	xep_finally {
-		fprintf(stderr, "%s(): _CW_XEPV_FINALLY\n", __FUNCTION__);
+		fprintf(stderr, "%s(): CW_XEPV_FINALLY\n", __FUNCTION__);
 	}
 	xep_end();
 }
@@ -65,9 +65,9 @@ main()
 		fprintf(stderr, "%s(): i == %u\n", __FUNCTION__, i);
 		xep_begin();
 		xep_try {
-			fprintf(stderr, "%s(): _CW_XEPV_CODE\n", __FUNCTION__);
+			fprintf(stderr, "%s(): CW_XEPV_CODE\n", __FUNCTION__);
 			if (i == 2)
-				xep_throw(_CW_XEPV_FOO);
+				xep_throw(CW_XEPV_FOO);
 			if (i == 3)
 				func_a();
 			if (i == 5)
@@ -75,52 +75,52 @@ main()
 			if (i == 6)
 				func_c();
 			if (i == 7)
-				xep_throw(_CW_XEPV_BAZ);
+				xep_throw(CW_XEPV_BAZ);
 			if (i == 8)
-				xep_throw(_CW_XEPV_BANG);
+				xep_throw(CW_XEPV_BANG);
 			if (i == 9)
-				xep_throw(_CW_XEPV_BAM);
+				xep_throw(CW_XEPV_BAM);
 		}
-		xep_catch(_CW_XEPV_FOO) {
-			_cw_assert(xep_value() == _CW_XEPV_FOO);
-			fprintf(stderr, "%s(): _CW_XEPV_FOO\n", __FUNCTION__);
+		xep_catch(CW_XEPV_FOO) {
+			cw_assert(xep_value() == CW_XEPV_FOO);
+			fprintf(stderr, "%s(): CW_XEPV_FOO\n", __FUNCTION__);
 			xep_handled();
-			xep_throw(_CW_XEPV_BAR);
+			xep_throw(CW_XEPV_BAR);
 		}
-		xep_catch(_CW_XEPV_BAR) {
-			_cw_assert(xep_value() == _CW_XEPV_BAR);
-			fprintf(stderr, "%s(): _CW_XEPV_BAR\n", __FUNCTION__);
-			xep_handled();
-		}
-		xep_catch(_CW_XEPV_BIZ) {
-			_cw_assert(xep_value() == _CW_XEPV_BIZ);
-			fprintf(stderr, "%s(): _CW_XEPV_BIZ\n", __FUNCTION__);
+		xep_catch(CW_XEPV_BAR) {
+			cw_assert(xep_value() == CW_XEPV_BAR);
+			fprintf(stderr, "%s(): CW_XEPV_BAR\n", __FUNCTION__);
 			xep_handled();
 		}
-		xep_catch(_CW_XEPV_BAZ)
-		xep_mcatch(_CW_XEPV_BANG) {
-			_cw_assert(xep_value() == _CW_XEPV_BAZ || xep_value() ==
-				   _CW_XEPV_BANG);
-			if (xep_value() == _CW_XEPV_BAZ) {
-				fprintf(stderr, "%s(): _CW_XEPV_BAZ\n",
+		xep_catch(CW_XEPV_BIZ) {
+			cw_assert(xep_value() == CW_XEPV_BIZ);
+			fprintf(stderr, "%s(): CW_XEPV_BIZ\n", __FUNCTION__);
+			xep_handled();
+		}
+		xep_catch(CW_XEPV_BAZ)
+		xep_mcatch(CW_XEPV_BANG) {
+			cw_assert(xep_value() == CW_XEPV_BAZ || xep_value() ==
+				   CW_XEPV_BANG);
+			if (xep_value() == CW_XEPV_BAZ) {
+				fprintf(stderr, "%s(): CW_XEPV_BAZ\n",
 				    __FUNCTION__);
 				i++;
 				xep_retry();
 			} else {
-				fprintf(stderr, "%s(): _CW_XEPV_BANG\n",
+				fprintf(stderr, "%s(): CW_XEPV_BANG\n",
 				    __FUNCTION__);
 				xep_handled();
 			}
 		}
 		xep_acatch {
-			if (xep_value() == _CW_XEPV_BAM) {
-				fprintf(stderr, "%s(): _CW_XEPV_BAM\n",
+			if (xep_value() == CW_XEPV_BAM) {
+				fprintf(stderr, "%s(): CW_XEPV_BAM\n",
 				    __FUNCTION__);
 				xep_handled();
 			}
 		}
 		xep_finally {
-			fprintf(stderr, "%s(): _CW_XEPV_FINALLY\n",
+			fprintf(stderr, "%s(): CW_XEPV_FINALLY\n",
 			    __FUNCTION__);
 		}
 		xep_end();

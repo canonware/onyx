@@ -37,25 +37,25 @@ main()
 
 		mq_new(&mq, cw_g_mem, sizeof(cw_uint8_t));
 
-		_cw_assert(mq_tryget(&mq, &t));
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_tryget(&mq, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_tryget(&mq, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_tryget(&mq, &t));
 
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_put(&mq, j) == 0);
-		_cw_assert(mq_put(&mq, k) == 0);
-		_cw_assert(mq_tryget(&mq, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_tryget(&mq, &t) == FALSE);
-		_cw_assert(t == j);
-		_cw_assert(mq_tryget(&mq, &t) == FALSE);
-		_cw_assert(t == k);
-		_cw_assert(mq_tryget(&mq, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_put(&mq, j) == 0);
+		cw_assert(mq_put(&mq, k) == 0);
+		cw_assert(mq_tryget(&mq, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_tryget(&mq, &t) == FALSE);
+		cw_assert(t == j);
+		cw_assert(mq_tryget(&mq, &t) == FALSE);
+		cw_assert(t == k);
+		cw_assert(mq_tryget(&mq, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_tryget(&mq, &t));
 
 		mq_delete(&mq);
 	}
@@ -65,25 +65,25 @@ main()
 
 		mq_new(&mq, cw_g_mem, sizeof(cw_uint16_t));
 
-		_cw_assert(mq_tryget(&mq, &t));
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_tryget(&mq, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_tryget(&mq, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_tryget(&mq, &t));
 
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_put(&mq, j) == 0);
-		_cw_assert(mq_put(&mq, k) == 0);
-		_cw_assert(mq_tryget(&mq, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_tryget(&mq, &t) == FALSE);
-		_cw_assert(t == j);
-		_cw_assert(mq_tryget(&mq, &t) == FALSE);
-		_cw_assert(t == k);
-		_cw_assert(mq_tryget(&mq, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_put(&mq, j) == 0);
+		cw_assert(mq_put(&mq, k) == 0);
+		cw_assert(mq_tryget(&mq, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_tryget(&mq, &t) == FALSE);
+		cw_assert(t == j);
+		cw_assert(mq_tryget(&mq, &t) == FALSE);
+		cw_assert(t == k);
+		cw_assert(mq_tryget(&mq, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_tryget(&mq, &t));
 
 		mq_delete(&mq);
 	}
@@ -93,25 +93,25 @@ main()
 
 		mq_new(&mq, cw_g_mem, sizeof(cw_uint32_t));
 
-		_cw_assert(mq_tryget(&mq, &t));
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_tryget(&mq, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_tryget(&mq, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_tryget(&mq, &t));
 
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_put(&mq, j) == 0);
-		_cw_assert(mq_put(&mq, k) == 0);
-		_cw_assert(mq_tryget(&mq, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_tryget(&mq, &t) == FALSE);
-		_cw_assert(t == j);
-		_cw_assert(mq_tryget(&mq, &t) == FALSE);
-		_cw_assert(t == k);
-		_cw_assert(mq_tryget(&mq, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_put(&mq, j) == 0);
+		cw_assert(mq_put(&mq, k) == 0);
+		cw_assert(mq_tryget(&mq, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_tryget(&mq, &t) == FALSE);
+		cw_assert(t == j);
+		cw_assert(mq_tryget(&mq, &t) == FALSE);
+		cw_assert(t == k);
+		cw_assert(mq_tryget(&mq, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_tryget(&mq, &t));
 
 		mq_delete(&mq);
 	}
@@ -121,25 +121,25 @@ main()
 
 		mq_new(&mq, cw_g_mem, sizeof(cw_uint64_t));
 
-		_cw_assert(mq_tryget(&mq, &t));
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_tryget(&mq, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_tryget(&mq, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_tryget(&mq, &t));
 
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_put(&mq, j) == 0);
-		_cw_assert(mq_put(&mq, k) == 0);
-		_cw_assert(mq_tryget(&mq, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_tryget(&mq, &t) == FALSE);
-		_cw_assert(t == j);
-		_cw_assert(mq_tryget(&mq, &t) == FALSE);
-		_cw_assert(t == k);
-		_cw_assert(mq_tryget(&mq, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_put(&mq, j) == 0);
+		cw_assert(mq_put(&mq, k) == 0);
+		cw_assert(mq_tryget(&mq, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_tryget(&mq, &t) == FALSE);
+		cw_assert(t == j);
+		cw_assert(mq_tryget(&mq, &t) == FALSE);
+		cw_assert(t == k);
+		cw_assert(mq_tryget(&mq, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_tryget(&mq, &t));
 
 		mq_delete(&mq);
 	}
@@ -152,25 +152,25 @@ main()
 
 		mq_new(&mq, cw_g_mem, sizeof(cw_uint8_t));
 
-		_cw_assert(mq_timedget(&mq, &timeout));
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_timedget(&mq, &timeout, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_timedget(&mq, &timeout));
+		cw_assert(mq_timedget(&mq, &timeout));
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_timedget(&mq, &timeout, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_timedget(&mq, &timeout));
 
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_put(&mq, j) == 0);
-		_cw_assert(mq_put(&mq, k) == 0);
-		_cw_assert(mq_timedget(&mq, &timeout, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_timedget(&mq, &timeout, &t) == FALSE);
-		_cw_assert(t == j);
-		_cw_assert(mq_timedget(&mq, &timeout, &t) == FALSE);
-		_cw_assert(t == k);
-		_cw_assert(mq_timedget(&mq, &timeout, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_timedget(&mq, &timeout, &t));
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_put(&mq, j) == 0);
+		cw_assert(mq_put(&mq, k) == 0);
+		cw_assert(mq_timedget(&mq, &timeout, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_timedget(&mq, &timeout, &t) == FALSE);
+		cw_assert(t == j);
+		cw_assert(mq_timedget(&mq, &timeout, &t) == FALSE);
+		cw_assert(t == k);
+		cw_assert(mq_timedget(&mq, &timeout, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_timedget(&mq, &timeout, &t));
 
 		mq_delete(&mq);
 	}
@@ -181,25 +181,25 @@ main()
 
 		mq_new(&mq, cw_g_mem, sizeof(cw_uint16_t));
 
-		_cw_assert(mq_timedget(&mq, &timeout));
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_timedget(&mq, &timeout, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_timedget(&mq, &timeout));
+		cw_assert(mq_timedget(&mq, &timeout));
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_timedget(&mq, &timeout, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_timedget(&mq, &timeout));
 
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_put(&mq, j) == 0);
-		_cw_assert(mq_put(&mq, k) == 0);
-		_cw_assert(mq_timedget(&mq, &timeout, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_timedget(&mq, &timeout, &t) == FALSE);
-		_cw_assert(t == j);
-		_cw_assert(mq_timedget(&mq, &timeout, &t) == FALSE);
-		_cw_assert(t == k);
-		_cw_assert(mq_timedget(&mq, &timeout, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_timedget(&mq, &timeout, &t));
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_put(&mq, j) == 0);
+		cw_assert(mq_put(&mq, k) == 0);
+		cw_assert(mq_timedget(&mq, &timeout, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_timedget(&mq, &timeout, &t) == FALSE);
+		cw_assert(t == j);
+		cw_assert(mq_timedget(&mq, &timeout, &t) == FALSE);
+		cw_assert(t == k);
+		cw_assert(mq_timedget(&mq, &timeout, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_timedget(&mq, &timeout, &t));
 
 		mq_delete(&mq);
 	}
@@ -210,25 +210,25 @@ main()
 
 		mq_new(&mq, cw_g_mem, sizeof(cw_uint32_t));
 
-		_cw_assert(mq_timedget(&mq, &timeout));
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_timedget(&mq, &timeout, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_timedget(&mq, &timeout));
+		cw_assert(mq_timedget(&mq, &timeout));
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_timedget(&mq, &timeout, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_timedget(&mq, &timeout));
 
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_put(&mq, j) == 0);
-		_cw_assert(mq_put(&mq, k) == 0);
-		_cw_assert(mq_timedget(&mq, &timeout, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_timedget(&mq, &timeout, &t) == FALSE);
-		_cw_assert(t == j);
-		_cw_assert(mq_timedget(&mq, &timeout, &t) == FALSE);
-		_cw_assert(t == k);
-		_cw_assert(mq_timedget(&mq, &timeout, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_timedget(&mq, &timeout, &t));
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_put(&mq, j) == 0);
+		cw_assert(mq_put(&mq, k) == 0);
+		cw_assert(mq_timedget(&mq, &timeout, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_timedget(&mq, &timeout, &t) == FALSE);
+		cw_assert(t == j);
+		cw_assert(mq_timedget(&mq, &timeout, &t) == FALSE);
+		cw_assert(t == k);
+		cw_assert(mq_timedget(&mq, &timeout, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_timedget(&mq, &timeout, &t));
 
 		mq_delete(&mq);
 	}
@@ -239,25 +239,25 @@ main()
 
 		mq_new(&mq, cw_g_mem, sizeof(cw_uint64_t));
 
-		_cw_assert(mq_timedget(&mq, &timeout));
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_timedget(&mq, &timeout, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_timedget(&mq, &timeout));
+		cw_assert(mq_timedget(&mq, &timeout));
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_timedget(&mq, &timeout, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_timedget(&mq, &timeout));
 
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_put(&mq, j) == 0);
-		_cw_assert(mq_put(&mq, k) == 0);
-		_cw_assert(mq_timedget(&mq, &timeout, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_timedget(&mq, &timeout, &t) == FALSE);
-		_cw_assert(t == j);
-		_cw_assert(mq_timedget(&mq, &timeout, &t) == FALSE);
-		_cw_assert(t == k);
-		_cw_assert(mq_timedget(&mq, &timeout, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_timedget(&mq, &timeout, &t));
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_put(&mq, j) == 0);
+		cw_assert(mq_put(&mq, k) == 0);
+		cw_assert(mq_timedget(&mq, &timeout, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_timedget(&mq, &timeout, &t) == FALSE);
+		cw_assert(t == j);
+		cw_assert(mq_timedget(&mq, &timeout, &t) == FALSE);
+		cw_assert(t == k);
+		cw_assert(mq_timedget(&mq, &timeout, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_timedget(&mq, &timeout, &t));
 
 		mq_delete(&mq);
 	}
@@ -269,25 +269,25 @@ main()
 
 		mq_new(&mq, cw_g_mem, sizeof(cw_uint8_t));
 
-		_cw_assert(mq_tryget(&mq, &t));
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_get(&mq, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_get(&mq, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_tryget(&mq, &t));
 
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_put(&mq, j) == 0);
-		_cw_assert(mq_put(&mq, k) == 0);
-		_cw_assert(mq_get(&mq, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_get(&mq, &t) == FALSE);
-		_cw_assert(t == j);
-		_cw_assert(mq_get(&mq, &t) == FALSE);
-		_cw_assert(t == k);
-		_cw_assert(mq_get(&mq, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_put(&mq, j) == 0);
+		cw_assert(mq_put(&mq, k) == 0);
+		cw_assert(mq_get(&mq, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_get(&mq, &t) == FALSE);
+		cw_assert(t == j);
+		cw_assert(mq_get(&mq, &t) == FALSE);
+		cw_assert(t == k);
+		cw_assert(mq_get(&mq, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_tryget(&mq, &t));
 
 		mq_delete(&mq);
 	}
@@ -297,25 +297,25 @@ main()
 
 		mq_new(&mq, cw_g_mem, sizeof(cw_uint16_t));
 
-		_cw_assert(mq_tryget(&mq, &t));
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_get(&mq, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_get(&mq, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_tryget(&mq, &t));
 
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_put(&mq, j) == 0);
-		_cw_assert(mq_put(&mq, k) == 0);
-		_cw_assert(mq_get(&mq, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_get(&mq, &t) == FALSE);
-		_cw_assert(t == j);
-		_cw_assert(mq_get(&mq, &t) == FALSE);
-		_cw_assert(t == k);
-		_cw_assert(mq_get(&mq, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_put(&mq, j) == 0);
+		cw_assert(mq_put(&mq, k) == 0);
+		cw_assert(mq_get(&mq, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_get(&mq, &t) == FALSE);
+		cw_assert(t == j);
+		cw_assert(mq_get(&mq, &t) == FALSE);
+		cw_assert(t == k);
+		cw_assert(mq_get(&mq, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_tryget(&mq, &t));
 
 		mq_delete(&mq);
 	}
@@ -325,25 +325,25 @@ main()
 
 		mq_new(&mq, cw_g_mem, sizeof(cw_uint32_t));
 
-		_cw_assert(mq_tryget(&mq, &t));
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_get(&mq, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_get(&mq, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_tryget(&mq, &t));
 
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_put(&mq, j) == 0);
-		_cw_assert(mq_put(&mq, k) == 0);
-		_cw_assert(mq_get(&mq, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_get(&mq, &t) == FALSE);
-		_cw_assert(t == j);
-		_cw_assert(mq_get(&mq, &t) == FALSE);
-		_cw_assert(t == k);
-		_cw_assert(mq_get(&mq, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_put(&mq, j) == 0);
+		cw_assert(mq_put(&mq, k) == 0);
+		cw_assert(mq_get(&mq, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_get(&mq, &t) == FALSE);
+		cw_assert(t == j);
+		cw_assert(mq_get(&mq, &t) == FALSE);
+		cw_assert(t == k);
+		cw_assert(mq_get(&mq, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_tryget(&mq, &t));
 
 		mq_delete(&mq);
 	}
@@ -353,25 +353,25 @@ main()
 
 		mq_new(&mq, cw_g_mem, sizeof(cw_uint64_t));
 
-		_cw_assert(mq_tryget(&mq, &t));
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_get(&mq, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_get(&mq, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_tryget(&mq, &t));
 
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_put(&mq, j) == 0);
-		_cw_assert(mq_put(&mq, k) == 0);
-		_cw_assert(mq_get(&mq, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_get(&mq, &t) == FALSE);
-		_cw_assert(t == j);
-		_cw_assert(mq_get(&mq, &t) == FALSE);
-		_cw_assert(t == k);
-		_cw_assert(mq_get(&mq, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_put(&mq, j) == 0);
+		cw_assert(mq_put(&mq, k) == 0);
+		cw_assert(mq_get(&mq, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_get(&mq, &t) == FALSE);
+		cw_assert(t == j);
+		cw_assert(mq_get(&mq, &t) == FALSE);
+		cw_assert(t == k);
+		cw_assert(mq_get(&mq, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_tryget(&mq, &t));
 
 		mq_delete(&mq);
 	}
@@ -383,30 +383,30 @@ main()
 
 		mq_new(&mq, cw_g_mem, sizeof(cw_uint8_t));
 
-		_cw_assert(mq_get_stop(&mq) == FALSE);
-		_cw_assert(mq_get_stop(&mq));
-		_cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_get_stop(&mq) == FALSE);
+		cw_assert(mq_get_stop(&mq));
+		cw_assert(mq_tryget(&mq, &t));
 
-		_cw_assert(mq_get_start(&mq) == FALSE);
-		_cw_assert(mq_get_start(&mq));
-		_cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_get_start(&mq) == FALSE);
+		cw_assert(mq_get_start(&mq));
+		cw_assert(mq_tryget(&mq, &t));
 
-		_cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_put(&mq, i) == 0);
 
-		_cw_assert(mq_get_stop(&mq) == FALSE);
-		_cw_assert(mq_get_stop(&mq));
-		_cw_assert(mq_tryget(&mq, &t));
-		_cw_assert(mq_get(&mq, &t));
+		cw_assert(mq_get_stop(&mq) == FALSE);
+		cw_assert(mq_get_stop(&mq));
+		cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_get(&mq, &t));
 
-		_cw_assert(mq_get_start(&mq) == FALSE);
-		_cw_assert(mq_get_start(&mq));
-		_cw_assert(mq_tryget(&mq, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_get_start(&mq) == FALSE);
+		cw_assert(mq_get_start(&mq));
+		cw_assert(mq_tryget(&mq, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_tryget(&mq, &t));
 
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_put(&mq, j) == 0);
-		_cw_assert(mq_put(&mq, k) == 0);
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_put(&mq, j) == 0);
+		cw_assert(mq_put(&mq, k) == 0);
 
 		mq_delete(&mq);
 	}
@@ -416,30 +416,30 @@ main()
 
 		mq_new(&mq, cw_g_mem, sizeof(cw_uint16_t));
 
-		_cw_assert(mq_get_stop(&mq) == FALSE);
-		_cw_assert(mq_get_stop(&mq));
-		_cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_get_stop(&mq) == FALSE);
+		cw_assert(mq_get_stop(&mq));
+		cw_assert(mq_tryget(&mq, &t));
 
-		_cw_assert(mq_get_start(&mq) == FALSE);
-		_cw_assert(mq_get_start(&mq));
-		_cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_get_start(&mq) == FALSE);
+		cw_assert(mq_get_start(&mq));
+		cw_assert(mq_tryget(&mq, &t));
 
-		_cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_put(&mq, i) == 0);
 
-		_cw_assert(mq_get_stop(&mq) == FALSE);
-		_cw_assert(mq_get_stop(&mq));
-		_cw_assert(mq_tryget(&mq, &t));
-		_cw_assert(mq_get(&mq, &t));
+		cw_assert(mq_get_stop(&mq) == FALSE);
+		cw_assert(mq_get_stop(&mq));
+		cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_get(&mq, &t));
 
-		_cw_assert(mq_get_start(&mq) == FALSE);
-		_cw_assert(mq_get_start(&mq));
-		_cw_assert(mq_tryget(&mq, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_get_start(&mq) == FALSE);
+		cw_assert(mq_get_start(&mq));
+		cw_assert(mq_tryget(&mq, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_tryget(&mq, &t));
 
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_put(&mq, j) == 0);
-		_cw_assert(mq_put(&mq, k) == 0);
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_put(&mq, j) == 0);
+		cw_assert(mq_put(&mq, k) == 0);
 
 		mq_delete(&mq);
 	}
@@ -449,30 +449,30 @@ main()
 
 		mq_new(&mq, cw_g_mem, sizeof(cw_uint32_t));
 
-		_cw_assert(mq_get_stop(&mq) == FALSE);
-		_cw_assert(mq_get_stop(&mq));
-		_cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_get_stop(&mq) == FALSE);
+		cw_assert(mq_get_stop(&mq));
+		cw_assert(mq_tryget(&mq, &t));
 
-		_cw_assert(mq_get_start(&mq) == FALSE);
-		_cw_assert(mq_get_start(&mq));
-		_cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_get_start(&mq) == FALSE);
+		cw_assert(mq_get_start(&mq));
+		cw_assert(mq_tryget(&mq, &t));
 
-		_cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_put(&mq, i) == 0);
 
-		_cw_assert(mq_get_stop(&mq) == FALSE);
-		_cw_assert(mq_get_stop(&mq));
-		_cw_assert(mq_tryget(&mq, &t));
-		_cw_assert(mq_get(&mq, &t));
+		cw_assert(mq_get_stop(&mq) == FALSE);
+		cw_assert(mq_get_stop(&mq));
+		cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_get(&mq, &t));
 
-		_cw_assert(mq_get_start(&mq) == FALSE);
-		_cw_assert(mq_get_start(&mq));
-		_cw_assert(mq_tryget(&mq, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_get_start(&mq) == FALSE);
+		cw_assert(mq_get_start(&mq));
+		cw_assert(mq_tryget(&mq, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_tryget(&mq, &t));
 
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_put(&mq, j) == 0);
-		_cw_assert(mq_put(&mq, k) == 0);
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_put(&mq, j) == 0);
+		cw_assert(mq_put(&mq, k) == 0);
 
 		mq_delete(&mq);
 	}
@@ -482,30 +482,30 @@ main()
 
 		mq_new(&mq, cw_g_mem, sizeof(cw_uint64_t));
 
-		_cw_assert(mq_get_stop(&mq) == FALSE);
-		_cw_assert(mq_get_stop(&mq));
-		_cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_get_stop(&mq) == FALSE);
+		cw_assert(mq_get_stop(&mq));
+		cw_assert(mq_tryget(&mq, &t));
 
-		_cw_assert(mq_get_start(&mq) == FALSE);
-		_cw_assert(mq_get_start(&mq));
-		_cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_get_start(&mq) == FALSE);
+		cw_assert(mq_get_start(&mq));
+		cw_assert(mq_tryget(&mq, &t));
 
-		_cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_put(&mq, i) == 0);
 
-		_cw_assert(mq_get_stop(&mq) == FALSE);
-		_cw_assert(mq_get_stop(&mq));
-		_cw_assert(mq_tryget(&mq, &t));
-		_cw_assert(mq_get(&mq, &t));
+		cw_assert(mq_get_stop(&mq) == FALSE);
+		cw_assert(mq_get_stop(&mq));
+		cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_get(&mq, &t));
 
-		_cw_assert(mq_get_start(&mq) == FALSE);
-		_cw_assert(mq_get_start(&mq));
-		_cw_assert(mq_tryget(&mq, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_get_start(&mq) == FALSE);
+		cw_assert(mq_get_start(&mq));
+		cw_assert(mq_tryget(&mq, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_tryget(&mq, &t));
 
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_put(&mq, j) == 0);
-		_cw_assert(mq_put(&mq, k) == 0);
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_put(&mq, j) == 0);
+		cw_assert(mq_put(&mq, k) == 0);
 
 		mq_delete(&mq);
 	}
@@ -517,27 +517,27 @@ main()
 
 		mq_new(&mq, cw_g_mem, sizeof(cw_uint8_t));
 
-		_cw_assert(mq_tryget(&mq, &t));
-		_cw_assert(mq_put_stop(&mq) == FALSE);
-		_cw_assert(mq_put_stop(&mq));
-		_cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_put_stop(&mq) == FALSE);
+		cw_assert(mq_put_stop(&mq));
+		cw_assert(mq_tryget(&mq, &t));
 
-		_cw_assert(1 == mq_put(&mq, i));
+		cw_assert(1 == mq_put(&mq, i));
 
-		_cw_assert(mq_put_start(&mq) == FALSE);
-		_cw_assert(mq_put_start(&mq));
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_put(&mq, j) == 0);
+		cw_assert(mq_put_start(&mq) == FALSE);
+		cw_assert(mq_put_start(&mq));
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_put(&mq, j) == 0);
 
-		_cw_assert(mq_put_stop(&mq) == FALSE);
-		_cw_assert(mq_put_stop(&mq));
-		_cw_assert(mq_put(&mq, k) == 1);
+		cw_assert(mq_put_stop(&mq) == FALSE);
+		cw_assert(mq_put_stop(&mq));
+		cw_assert(mq_put(&mq, k) == 1);
 
-		_cw_assert(mq_tryget(&mq, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_tryget(&mq, &t) == FALSE);
-		_cw_assert(t == j);
-		_cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_tryget(&mq, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_tryget(&mq, &t) == FALSE);
+		cw_assert(t == j);
+		cw_assert(mq_tryget(&mq, &t));
 
 		mq_delete(&mq);
 	}
@@ -547,27 +547,27 @@ main()
 
 		mq_new(&mq, cw_g_mem, sizeof(cw_uint16_t));
 
-		_cw_assert(mq_tryget(&mq, &t));
-		_cw_assert(mq_put_stop(&mq) == FALSE);
-		_cw_assert(mq_put_stop(&mq));
-		_cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_put_stop(&mq) == FALSE);
+		cw_assert(mq_put_stop(&mq));
+		cw_assert(mq_tryget(&mq, &t));
 
-		_cw_assert(1 == mq_put(&mq, i));
+		cw_assert(1 == mq_put(&mq, i));
 
-		_cw_assert(mq_put_start(&mq) == FALSE);
-		_cw_assert(mq_put_start(&mq));
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_put(&mq, j) == 0);
+		cw_assert(mq_put_start(&mq) == FALSE);
+		cw_assert(mq_put_start(&mq));
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_put(&mq, j) == 0);
 
-		_cw_assert(mq_put_stop(&mq) == FALSE);
-		_cw_assert(mq_put_stop(&mq));
-		_cw_assert(mq_put(&mq, k) == 1);
+		cw_assert(mq_put_stop(&mq) == FALSE);
+		cw_assert(mq_put_stop(&mq));
+		cw_assert(mq_put(&mq, k) == 1);
 
-		_cw_assert(mq_tryget(&mq, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_tryget(&mq, &t) == FALSE);
-		_cw_assert(t == j);
-		_cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_tryget(&mq, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_tryget(&mq, &t) == FALSE);
+		cw_assert(t == j);
+		cw_assert(mq_tryget(&mq, &t));
 
 		mq_delete(&mq);
 	}
@@ -577,27 +577,27 @@ main()
 
 		mq_new(&mq, cw_g_mem, sizeof(cw_uint32_t));
 
-		_cw_assert(mq_tryget(&mq, &t));
-		_cw_assert(mq_put_stop(&mq) == FALSE);
-		_cw_assert(mq_put_stop(&mq));
-		_cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_put_stop(&mq) == FALSE);
+		cw_assert(mq_put_stop(&mq));
+		cw_assert(mq_tryget(&mq, &t));
 
-		_cw_assert(1 == mq_put(&mq, i));
+		cw_assert(1 == mq_put(&mq, i));
 
-		_cw_assert(mq_put_start(&mq) == FALSE);
-		_cw_assert(mq_put_start(&mq));
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_put(&mq, j) == 0);
+		cw_assert(mq_put_start(&mq) == FALSE);
+		cw_assert(mq_put_start(&mq));
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_put(&mq, j) == 0);
 
-		_cw_assert(mq_put_stop(&mq) == FALSE);
-		_cw_assert(mq_put_stop(&mq));
-		_cw_assert(mq_put(&mq, k) == 1);
+		cw_assert(mq_put_stop(&mq) == FALSE);
+		cw_assert(mq_put_stop(&mq));
+		cw_assert(mq_put(&mq, k) == 1);
 
-		_cw_assert(mq_tryget(&mq, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_tryget(&mq, &t) == FALSE);
-		_cw_assert(t == j);
-		_cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_tryget(&mq, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_tryget(&mq, &t) == FALSE);
+		cw_assert(t == j);
+		cw_assert(mq_tryget(&mq, &t));
 
 		mq_delete(&mq);
 	}
@@ -607,27 +607,27 @@ main()
 
 		mq_new(&mq, cw_g_mem, sizeof(cw_uint64_t));
 
-		_cw_assert(mq_tryget(&mq, &t));
-		_cw_assert(mq_put_stop(&mq) == FALSE);
-		_cw_assert(mq_put_stop(&mq));
-		_cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_put_stop(&mq) == FALSE);
+		cw_assert(mq_put_stop(&mq));
+		cw_assert(mq_tryget(&mq, &t));
 
-		_cw_assert(1 == mq_put(&mq, i));
+		cw_assert(1 == mq_put(&mq, i));
 
-		_cw_assert(mq_put_start(&mq) == FALSE);
-		_cw_assert(mq_put_start(&mq));
-		_cw_assert(mq_put(&mq, i) == 0);
-		_cw_assert(mq_put(&mq, j) == 0);
+		cw_assert(mq_put_start(&mq) == FALSE);
+		cw_assert(mq_put_start(&mq));
+		cw_assert(mq_put(&mq, i) == 0);
+		cw_assert(mq_put(&mq, j) == 0);
 
-		_cw_assert(mq_put_stop(&mq) == FALSE);
-		_cw_assert(mq_put_stop(&mq));
-		_cw_assert(mq_put(&mq, k) == 1);
+		cw_assert(mq_put_stop(&mq) == FALSE);
+		cw_assert(mq_put_stop(&mq));
+		cw_assert(mq_put(&mq, k) == 1);
 
-		_cw_assert(mq_tryget(&mq, &t) == FALSE);
-		_cw_assert(t == i);
-		_cw_assert(mq_tryget(&mq, &t) == FALSE);
-		_cw_assert(t == j);
-		_cw_assert(mq_tryget(&mq, &t));
+		cw_assert(mq_tryget(&mq, &t) == FALSE);
+		cw_assert(t == i);
+		cw_assert(mq_tryget(&mq, &t) == FALSE);
+		cw_assert(t == j);
+		cw_assert(mq_tryget(&mq, &t));
 
 		mq_delete(&mq);
 	}

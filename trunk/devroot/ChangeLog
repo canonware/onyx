@@ -1,3 +1,8 @@
+2001-12-08  Jason Evans  <jasone@canonware.com>
+
+	* : Convert _cw_ to cw_ and _CW_ to CW_ in order to follow the
+	ANSI C standard for namespace reservation.
+
 2001-12-07  Jason Evans  <jasone@canonware.com>
 
 	* : Move the modload operator from the onyx program to libonyx.

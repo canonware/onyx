@@ -25,14 +25,14 @@ typedef struct
 #define	pack_new(a, x, y) do {						\
 		(a)->x_size = (x);					\
 		(a)->y_size = ((y) >> 5) + (((y) & 0x1f) ? 1 : 0);	\
-		(a)->pack = (cw_uint32_t *) _cw_calloc((a)->x_size *	\
+		(a)->pack = (cw_uint32_t *) cw_calloc((a)->x_size *	\
 		    (a)->y_size, sizeof(cw_uint32_t));			\
 		bzero((a)->pack, (a)->x_size * (a)->y_size		\
 		    * sizeof(cw_uint32_t));				\
 	} while (0)
 
 /* a : (pack_t *). */
-#define	pack_delete(a) _cw_free((a)->pack)
+#define	pack_delete(a) cw_free((a)->pack)
 
 /*
  * a : (pack_t).

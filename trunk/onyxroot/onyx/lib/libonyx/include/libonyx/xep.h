@@ -14,14 +14,14 @@ typedef struct cw_xep_s cw_xep_t;
 
 typedef cw_uint32_t cw_xepv_t;
 
-#define	_CW_XEPV_NONE		0
-#define	_CW_XEPV_CODE		1
-#define	_CW_XEPV_FINALLY	2
+#define	CW_XEPV_NONE		0
+#define	CW_XEPV_CODE		1
+#define	CW_XEPV_FINALLY	2
 
 typedef enum {
-	_CW_XEPS_TRY,
-	_CW_XEPS_CATCH,
-	_CW_XEPS_FINALLY
+	CW_XEPS_TRY,
+	CW_XEPS_CATCH,
+	CW_XEPS_FINALLY
 } cw_xeps_t;
 
 struct cw_xep_s {
@@ -41,8 +41,8 @@ struct cw_xep_s {
 #define	xep_try								\
 		xep_p_link(&_xep);					\
 		switch (setjmp(_xep.context)) {				\
-		case _CW_XEPV_NONE:					\
-		case _CW_XEPV_CODE:
+		case CW_XEPV_NONE:					\
+		case CW_XEPV_CODE:
 
 #define xep_catch(a_value)						\
 			break;						\
@@ -54,10 +54,10 @@ struct cw_xep_s {
 #define	xep_acatch							\
 			break;						\
 		default:						\
-			if (_xep.state != _CW_XEPS_CATCH)		\
+			if (_xep.state != CW_XEPS_CATCH)		\
 				break;
 
-#define xep_finally xep_catch(_CW_XEPV_FINALLY)
+#define xep_finally xep_catch(CW_XEPV_FINALLY)
 
 #define	xep_end()							\
 		}							\

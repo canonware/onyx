@@ -10,9 +10,9 @@
  ******************************************************************************/
 
 struct cw_hist_s {
-#ifdef _CW_DBG
+#ifdef CW_DBG
 	cw_uint32_t	magic;
-#define _CW_HIST_MAGIC	0x353dd57a
+#define CW_HIST_MAGIC	0x353dd57a
 #endif
 	cw_buf_t	h;	/* History buffer. */
 	cw_bufm_t	hcur;	/* Marker at current position in h. */

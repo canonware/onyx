@@ -13,8 +13,8 @@
 
 #include <stdarg.h>
 
-#ifdef _CW_DBG
-#define _CW_MQ_MAGIC 0xab01cd23
+#ifdef CW_DBG
+#define CW_MQ_MAGIC 0xab01cd23
 #endif
 
 /*
@@ -23,16 +23,16 @@
  * number isn't very important to performance, but if it is too high, space may
  * be wasted.
  */
-#ifdef _CW_DBG
-#define _CW_MQ_ARRAY_MIN_SIZE 1
+#ifdef CW_DBG
+#define CW_MQ_ARRAY_MIN_SIZE 1
 #else
-#define _CW_MQ_ARRAY_MIN_SIZE 8
+#define CW_MQ_ARRAY_MIN_SIZE 8
 #endif
 
 void
 mq_new(cw_mq_t *a_mq, cw_mem_t *a_mem, cw_uint32_t a_msg_size)
 {
-	_cw_check_ptr(a_mq);
+	cw_check_ptr(a_mq);
 
 	a_mq->mem = a_mem;
 	a_mq->msg_count = 0;
@@ -51,10 +51,10 @@ mq_new(cw_mq_t *a_mq, cw_mem_t *a_mem, cw_uint32_t a_msg_size)
 		a_mq->msg_size = 8;
 		break;
 	default:
-		_cw_not_reached();
+		cw_not_reached();
 	}
 
-	a_mq->msgs_vec_count = _CW_MQ_ARRAY_MIN_SIZE;
+	a_mq->msgs_vec_count = CW_MQ_ARRAY_MIN_SIZE;
 	a_mq->msgs_beg = 0;
 	a_mq->msgs_end = 0;
 
@@ -67,23 +67,23 @@ mq_new(cw_mq_t *a_mq, cw_mem_t *a_mem, cw_uint32_t a_msg_size)
 	a_mq->get_stop = FALSE;
 	a_mq->put_stop = FALSE;
 
-#ifdef _CW_DBG
-	a_mq->magic = _CW_MQ_MAGIC;
+#ifdef CW_DBG
+	a_mq->magic = CW_MQ_MAGIC;
 #endif
 }
 
 void
 mq_delete(cw_mq_t *a_mq)
 {
-	_cw_check_ptr(a_mq);
-	_cw_dassert(a_mq->magic == _CW_MQ_MAGIC);
+	cw_check_ptr(a_mq);
+	cw_dassert(a_mq->magic == CW_MQ_MAGIC);
 
 	mtx_delete(&a_mq->lock);
 	cnd_delete(&a_mq->cond);
 
 	mem_free(a_mq->mem, a_mq->msgs.x);
 
-#ifdef _CW_DBG
+#ifdef CW_DBG
 	memset(a_mq, 0x5a, sizeof(cw_mq_t));
 #endif
 }
@@ -101,8 +101,8 @@ mq_tryget(cw_mq_t *a_mq, ...)
 	}		r_msg;
 	va_list		ap;
 
-	_cw_check_ptr(a_mq);
-	_cw_dassert(a_mq->magic == _CW_MQ_MAGIC);
+	cw_check_ptr(a_mq);
+	cw_dassert(a_mq->magic == CW_MQ_MAGIC);
 
 	va_start(ap, a_mq);
 	r_msg.x = (void *)va_arg(ap, void *);
@@ -129,7 +129,7 @@ mq_tryget(cw_mq_t *a_mq, ...)
 			*r_msg.eight = a_mq->msgs.eight[a_mq->msgs_beg];
 			break;
 		default:
-			_cw_not_reached();
+			cw_not_reached();
 		}
 		a_mq->msg_count--;
 		a_mq->msgs_beg = (a_mq->msgs_beg + 1) % a_mq->msgs_vec_count;
@@ -157,9 +157,9 @@ mq_timedget(cw_mq_t *a_mq, const struct timespec *a_timeout, ...)
 	}		r_msg;
 	va_list		ap;
 
-        _cw_check_ptr(a_mq);
-	_cw_dassert(a_mq->magic == _CW_MQ_MAGIC);
-        _cw_check_ptr(a_timeout);
+        cw_check_ptr(a_mq);
+	cw_dassert(a_mq->magic == CW_MQ_MAGIC);
+        cw_check_ptr(a_timeout);
 
 	va_start(ap, a_timeout);
 	r_msg.x = (void *)va_arg(ap, void *);
@@ -199,7 +199,7 @@ mq_timedget(cw_mq_t *a_mq, const struct timespec *a_timeout, ...)
 			*r_msg.eight = a_mq->msgs.eight[a_mq->msgs_beg];
 			break;
 		default:
-			_cw_not_reached();
+			cw_not_reached();
 		}
 		a_mq->msg_count--;
 		a_mq->msgs_beg = (a_mq->msgs_beg + 1) % a_mq->msgs_vec_count;
@@ -227,8 +227,8 @@ mq_get(cw_mq_t *a_mq, ...)
 	}		r_msg;
 	va_list		ap;
 
-	_cw_check_ptr(a_mq);
-	_cw_dassert(a_mq->magic == _CW_MQ_MAGIC);
+	cw_check_ptr(a_mq);
+	cw_dassert(a_mq->magic == CW_MQ_MAGIC);
 
 	va_start(ap, a_mq);
 	r_msg.x = (void *)va_arg(ap, void *);
@@ -262,7 +262,7 @@ mq_get(cw_mq_t *a_mq, ...)
 		*r_msg.eight = a_mq->msgs.eight[a_mq->msgs_beg];
 		break;
 	default:
-		_cw_not_reached();
+		cw_not_reached();
 	}
 	a_mq->msg_count--;
 	a_mq->msgs_beg = (a_mq->msgs_beg + 1) % a_mq->msgs_vec_count;
@@ -283,8 +283,8 @@ mq_put(cw_mq_t *a_mq, ...)
 	}		a_msg;
 	va_list		ap;
 
-	_cw_check_ptr(a_mq);
-	_cw_dassert(a_mq->magic == _CW_MQ_MAGIC);
+	cw_check_ptr(a_mq);
+	cw_dassert(a_mq->magic == CW_MQ_MAGIC);
 
 	va_start(ap, a_mq);
 	switch (a_mq->msg_size) {
@@ -297,7 +297,7 @@ mq_put(cw_mq_t *a_mq, ...)
 		a_msg.eight = va_arg(ap, cw_uint64_t);
 		break;
 	default:
-		_cw_not_reached();
+		cw_not_reached();
 	}
 	va_end(ap);
 
@@ -360,7 +360,7 @@ mq_put(cw_mq_t *a_mq, ...)
 				}
 				break;
 			default:
-				_cw_not_reached();
+				cw_not_reached();
 			}
 			mem_free(a_mq->mem, a_mq->msgs.x);
 			a_mq->msgs.x = t_msgs.x;
@@ -385,7 +385,7 @@ mq_put(cw_mq_t *a_mq, ...)
 			a_mq->msgs.eight[a_mq->msgs_end] = a_msg.eight;
 			break;
 		default:
-			_cw_not_reached();
+			cw_not_reached();
 		}
 		a_mq->msg_count++;
 		a_mq->msgs_end = (a_mq->msgs_end + 1) % a_mq->msgs_vec_count;
@@ -402,8 +402,8 @@ mq_get_start(cw_mq_t *a_mq)
 {
 	cw_bool_t	retval;
 
-	_cw_check_ptr(a_mq);
-	_cw_dassert(a_mq->magic == _CW_MQ_MAGIC);
+	cw_check_ptr(a_mq);
+	cw_dassert(a_mq->magic == CW_MQ_MAGIC);
 	mtx_lock(&a_mq->lock);
 
 	if (a_mq->get_stop == FALSE) {
@@ -423,8 +423,8 @@ mq_get_stop(cw_mq_t *a_mq)
 {
 	cw_bool_t	retval;
 
-	_cw_check_ptr(a_mq);
-	_cw_dassert(a_mq->magic == _CW_MQ_MAGIC);
+	cw_check_ptr(a_mq);
+	cw_dassert(a_mq->magic == CW_MQ_MAGIC);
 	mtx_lock(&a_mq->lock);
 
 	if (a_mq->get_stop) {
@@ -445,8 +445,8 @@ mq_put_start(cw_mq_t *a_mq)
 {
 	cw_bool_t retval;
 
-	_cw_check_ptr(a_mq);
-	_cw_dassert(a_mq->magic == _CW_MQ_MAGIC);
+	cw_check_ptr(a_mq);
+	cw_dassert(a_mq->magic == CW_MQ_MAGIC);
 	mtx_lock(&a_mq->lock);
 
 	if (a_mq->put_stop == FALSE) {
@@ -466,8 +466,8 @@ mq_put_stop(cw_mq_t *a_mq)
 {
 	cw_bool_t retval;
 
-	_cw_check_ptr(a_mq);
-	_cw_dassert(a_mq->magic == _CW_MQ_MAGIC);
+	cw_check_ptr(a_mq);
+	cw_dassert(a_mq->magic == CW_MQ_MAGIC);
 	mtx_lock(&a_mq->lock);
 
 	if (a_mq->put_stop) {

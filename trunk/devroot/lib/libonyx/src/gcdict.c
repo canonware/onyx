@@ -25,11 +25,11 @@ struct cw_gcdict_entry {
 static const struct cw_gcdict_entry gcdict_ops[] = {
 	ENTRY(active),
 	ENTRY(collect),
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	ENTRY(period),
 #endif
 	ENTRY(setactive),
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	ENTRY(setperiod),
 #endif
 	ENTRY(setthreshold),
@@ -64,7 +64,7 @@ gcdict_l_populate(cw_nxo_t *a_dict, cw_nxa_t *a_nxa)
 		nxo_dict_def(a_dict, nx, &name, &value);
 	}
 
-	_cw_assert(nxo_dict_count(a_dict) == NENTRIES + NEXTRA);
+	cw_assert(nxo_dict_count(a_dict) == NENTRIES + NEXTRA);
 #undef NENTRIES
 }
 
@@ -87,7 +87,7 @@ gcdict_collect(cw_nxo_t *a_thread)
 	nxa_collect(nx_nxa_get(nxo_thread_nx_get(a_thread)));
 }
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 void
 gcdict_period(cw_nxo_t *a_thread)
 {
@@ -121,7 +121,7 @@ gcdict_setactive(cw_nxo_t *a_thread)
 	nxo_stack_pop(ostack);
 }
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 void
 gcdict_setperiod(cw_nxo_t *a_thread)
 {

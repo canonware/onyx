@@ -11,7 +11,7 @@
 
 #include "../include/libonyx/libonyx.h"
 
-#ifdef _CW_POSIX_FILE
+#ifdef CW_POSIX_FILE
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -27,7 +27,7 @@
 
 static cw_nxn_t nxo_p_file_buffer_flush(cw_nxoe_file_t *a_file);
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 #define	nxoe_p_file_lock(a_nxoe) do {					\
 	if ((a_nxoe)->nxoe.locking)					\
 		mtx_lock(&(a_nxoe)->lock);				\
@@ -47,7 +47,7 @@ nxo_file_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking)
 	    sizeof(cw_nxoe_file_t));
 
 	nxoe_l_new(&file->nxoe, NXOT_FILE, a_locking);
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	if (a_locking)
 		mtx_new(&file->lock);
 #endif
@@ -73,21 +73,21 @@ nxoe_l_file_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
 
 	file = (cw_nxoe_file_t *)a_nxoe;
 
-	_cw_check_ptr(file);
-	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
-	_cw_assert(file->nxoe.type == NXOT_FILE);
+	cw_check_ptr(file);
+	cw_dassert(file->nxoe.magic == CW_NXOE_MAGIC);
+	cw_assert(file->nxoe.type == NXOT_FILE);
 
 	nxo_p_file_buffer_flush(file);
 	if (file->buffer != NULL)
 		nxa_free(a_nxa, file->buffer, file->buffer_size);
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	if (file->nxoe.locking)
 		mtx_delete(&file->lock);
 #endif
 	switch (file->mode) {
 	case FILE_NONE:
 		break;
-#ifdef _CW_POSIX_FILE
+#ifdef CW_POSIX_FILE
 	case FILE_POSIX:
 		if (file->f.p.wrapped == FALSE)
 			close(file->f.p.fd);
@@ -120,22 +120,22 @@ nxoe_l_file_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 	return retval;
 }
 
-#ifdef _CW_POSIX_FILE
+#ifdef CW_POSIX_FILE
 void
 nxo_file_fd_wrap(cw_nxo_t *a_nxo, cw_uint32_t a_fd)
 {
 	cw_nxoe_file_t	*file;
 
-	_cw_check_ptr(a_nxo);
-	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
+	cw_check_ptr(a_nxo);
+	cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+	cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
-	_cw_check_ptr(file);
-	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
-	_cw_assert(file->nxoe.type == NXOT_FILE);
-	_cw_assert(file->mode == FILE_NONE);
+	cw_check_ptr(file);
+	cw_dassert(file->nxoe.magic == CW_NXOE_MAGIC);
+	cw_assert(file->nxoe.type == NXOT_FILE);
+	cw_assert(file->mode == FILE_NONE);
 
 	file->mode = FILE_POSIX;
 	file->f.p.fd = a_fd;
@@ -150,16 +150,16 @@ nxo_file_synthetic(cw_nxo_t *a_nxo, cw_nxo_file_read_t *a_read,
 {
 	cw_nxoe_file_t	*file;
 
-	_cw_check_ptr(a_nxo);
-	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
+	cw_check_ptr(a_nxo);
+	cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+	cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
-	_cw_check_ptr(file);
-	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
-	_cw_assert(file->nxoe.type == NXOT_FILE);
-	_cw_assert(file->mode == FILE_NONE);
+	cw_check_ptr(file);
+	cw_dassert(file->nxoe.magic == CW_NXOE_MAGIC);
+	cw_assert(file->nxoe.type == NXOT_FILE);
+	cw_assert(file->mode == FILE_NONE);
 
 	file->mode = FILE_SYNTHETIC;
 	file->f.s.read_f = a_read;
@@ -170,7 +170,7 @@ nxo_file_synthetic(cw_nxo_t *a_nxo, cw_nxo_file_read_t *a_read,
 	file->f.s.position = 0;
 }
 
-#ifdef _CW_POSIX_FILE
+#ifdef CW_POSIX_FILE
 /*
  * NXN_ioerror, NXN_limitcheck,
  * NXN_invalidfileaccess
@@ -202,17 +202,17 @@ nxo_file_open(cw_nxo_t *a_nxo, const cw_uint8_t *a_filename, cw_uint32_t a_nlen,
 	memcpy(flags, a_flags, a_flen);
 	flags[a_flen] = '\0';
 
-	_cw_check_ptr(a_nxo);
-	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
+	cw_check_ptr(a_nxo);
+	cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+	cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
-	_cw_check_ptr(file);
-	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
-	_cw_assert(file->nxoe.type == NXOT_FILE);
+	cw_check_ptr(file);
+	cw_dassert(file->nxoe.magic == CW_NXOE_MAGIC);
+	cw_assert(file->nxoe.type == NXOT_FILE);
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	nxoe_p_file_lock(file);
 #endif
 	if (file->mode != FILE_NONE) {
@@ -285,7 +285,7 @@ nxo_file_open(cw_nxo_t *a_nxo, const cw_uint8_t *a_filename, cw_uint32_t a_nlen,
 
 	retval = NXN_ZERO;
 	URETURN:
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	nxoe_p_file_unlock(file);
 #endif
 	RETURN:
@@ -300,17 +300,17 @@ nxo_file_close(cw_nxo_t *a_nxo)
 	cw_nxn_t		retval;
 	cw_nxoe_file_t		*file;
 
-	_cw_check_ptr(a_nxo);
-	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
+	cw_check_ptr(a_nxo);
+	cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+	cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
-	_cw_check_ptr(file);
-	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
-	_cw_assert(file->nxoe.type == NXOT_FILE);
+	cw_check_ptr(file);
+	cw_dassert(file->nxoe.magic == CW_NXOE_MAGIC);
+	cw_assert(file->nxoe.type == NXOT_FILE);
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	nxoe_p_file_lock(file);
 #endif
 	if (file->mode == FILE_NONE) {
@@ -331,8 +331,8 @@ nxo_file_close(cw_nxo_t *a_nxo)
 
 	switch (file->mode) {
 	case FILE_NONE:
-		_cw_not_reached();
-#ifdef _CW_POSIX_FILE
+		cw_not_reached();
+#ifdef CW_POSIX_FILE
 	case FILE_POSIX:
 		file->mode = FILE_NONE;
 		if (file->f.p.wrapped == FALSE) {
@@ -352,30 +352,30 @@ nxo_file_close(cw_nxo_t *a_nxo)
 
 	retval = NXN_ZERO;
 	RETURN:
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	nxoe_p_file_unlock(file);
 #endif
 	return retval;
 }
 
-#ifdef _CW_POSIX_FILE
+#ifdef CW_POSIX_FILE
 cw_sint32_t
 nxo_file_fd_get(cw_nxo_t *a_nxo)
 {
 	cw_sint32_t	retval;
 	cw_nxoe_file_t	*file;
 
-	_cw_check_ptr(a_nxo);
-	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
+	cw_check_ptr(a_nxo);
+	cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+	cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
-	_cw_check_ptr(file);
-	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
-	_cw_assert(file->nxoe.type == NXOT_FILE);
+	cw_check_ptr(file);
+	cw_dassert(file->nxoe.magic == CW_NXOE_MAGIC);
+	cw_assert(file->nxoe.type == NXOT_FILE);
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	nxoe_p_file_lock(file);
 #endif
 	switch (file->mode) {
@@ -383,14 +383,14 @@ nxo_file_fd_get(cw_nxo_t *a_nxo)
 	case FILE_SYNTHETIC:
 		retval = -1;
 		break;
-#ifdef _CW_POSIX_FILE
+#ifdef CW_POSIX_FILE
 	case FILE_POSIX:
 		retval = file->f.p.fd;
 		break;
 #endif
 	}
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	nxoe_p_file_unlock(file);
 #endif
 	return retval;
@@ -404,17 +404,17 @@ nxo_file_read(cw_nxo_t *a_nxo, cw_uint32_t a_len, cw_uint8_t *r_str)
 	cw_sint32_t	retval;
 	cw_nxoe_file_t	*file;
 
-	_cw_check_ptr(a_nxo);
-	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
+	cw_check_ptr(a_nxo);
+	cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+	cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
-	_cw_check_ptr(file);
-	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
-	_cw_assert(file->nxoe.type == NXOT_FILE);
+	cw_check_ptr(file);
+	cw_dassert(file->nxoe.magic == CW_NXOE_MAGIC);
+	cw_assert(file->nxoe.type == NXOT_FILE);
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	nxoe_p_file_lock(file);
 #endif
 	if (file->mode == FILE_NONE) {
@@ -459,8 +459,8 @@ nxo_file_read(cw_nxo_t *a_nxo, cw_uint32_t a_len, cw_uint8_t *r_str)
 
 			switch (file->mode) {
 			case FILE_NONE:
-				_cw_not_reached();
-#ifdef _CW_POSIX_FILE
+				cw_not_reached();
+#ifdef CW_POSIX_FILE
 			case FILE_POSIX: {
 #ifdef HAVE_POLL
 				struct pollfd	events;
@@ -484,7 +484,7 @@ nxo_file_read(cw_nxo_t *a_nxo, cw_uint32_t a_len, cw_uint8_t *r_str)
 					while ((poll(&events, 1, -1)) == -1)
 						; /* EINTR; try again. */
 #else
-					_cw_assert(file->f.p.fd <= FD_SETSIZE);
+					cw_assert(file->f.p.fd <= FD_SETSIZE);
 					FD_ZERO(&fdset);
 					FD_SET(file->f.p.fd, &fdset);
 					while (select(file->f.p.fd + 1, &fdset,
@@ -526,7 +526,7 @@ nxo_file_read(cw_nxo_t *a_nxo, cw_uint32_t a_len, cw_uint8_t *r_str)
 					    -1)
 						; /* EINTR; try again. */
 #else
-					_cw_assert(file->f.p.fd <= FD_SETSIZE);
+					cw_assert(file->f.p.fd <= FD_SETSIZE);
 					FD_ZERO(&fdset);
 					FD_SET(file->f.p.fd, &fdset);
 					timeout.tv_sec = 0;
@@ -594,8 +594,8 @@ nxo_file_read(cw_nxo_t *a_nxo, cw_uint32_t a_len, cw_uint8_t *r_str)
 	} else {
 		switch (file->mode) {
 		case FILE_NONE:
-			_cw_not_reached();
-#ifdef _CW_POSIX_FILE
+			cw_not_reached();
+#ifdef CW_POSIX_FILE
 		case FILE_POSIX:
 			while ((retval = read(file->f.p.fd, r_str, a_len)) ==
 			    -1) {
@@ -618,7 +618,7 @@ nxo_file_read(cw_nxo_t *a_nxo, cw_uint32_t a_len, cw_uint8_t *r_str)
 	RETURN:
 	if (file->mode == FILE_SYNTHETIC && retval != -1)
 		file->f.s.position += retval;
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	nxoe_p_file_unlock(file);
 #endif
 	return retval;
@@ -631,24 +631,24 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_bool_t a_locking, cw_nxo_t *r_string,
 {
 	cw_nxn_t		retval;
 	cw_nxoe_file_t		*file;
-	cw_uint8_t		*line, s_line[_CW_NXO_FILE_READLINE_BUFSIZE];
+	cw_uint8_t		*line, s_line[CW_NXO_FILE_READLINE_BUFSIZE];
 	cw_uint32_t		i, maxlen;
 	cw_sint32_t		nread;
 	enum {NORMAL, CR}	state;
 
-	_cw_check_ptr(a_nxo);
-	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
+	cw_check_ptr(a_nxo);
+	cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+	cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
-	_cw_check_ptr(file);
-	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
-	_cw_assert(file->nxoe.type == NXOT_FILE);
+	cw_check_ptr(file);
+	cw_dassert(file->nxoe.magic == CW_NXOE_MAGIC);
+	cw_assert(file->nxoe.type == NXOT_FILE);
 
 	line = s_line;
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	nxoe_p_file_lock(file);
 #endif
 	if (file->mode == FILE_NONE) {
@@ -675,7 +675,7 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_bool_t a_locking, cw_nxo_t *r_string,
 		 * replenishing the internal buffer as necessary.
 		 */
 		for (i = 0, offset = 0, maxlen =
-		    _CW_NXO_FILE_READLINE_BUFSIZE, state = NORMAL;; i++) {
+		    CW_NXO_FILE_READLINE_BUFSIZE, state = NORMAL;; i++) {
 			/*
 			 * If we're about to overflow the line buffer, expand
 			 * it.
@@ -710,8 +710,8 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_bool_t a_locking, cw_nxo_t *r_string,
 				/* Replenish the internal buffer. */
 				switch (file->mode) {
 				case FILE_NONE:
-					_cw_not_reached();
-#ifdef _CW_POSIX_FILE
+					cw_not_reached();
+#ifdef CW_POSIX_FILE
 				case FILE_POSIX:
 					while ((nread = read(file->f.p.fd,
 					    file->buffer, file->buffer_size)) ==
@@ -802,7 +802,7 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_bool_t a_locking, cw_nxo_t *r_string,
 		 * time from the file.  This is horribly inneficient, but we
 		 * don't have anywhere to unput characters past a newline.
 		 */
-		for (i = 0, maxlen = _CW_NXO_FILE_READLINE_BUFSIZE, state =
+		for (i = 0, maxlen = CW_NXO_FILE_READLINE_BUFSIZE, state =
 			 NORMAL;; i++) {
 			/*
 			 * If we're about to overflow the line buffer, expand
@@ -835,8 +835,8 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_bool_t a_locking, cw_nxo_t *r_string,
 
 			switch (file->mode) {
 			case FILE_NONE:
-				_cw_not_reached();
-#ifdef _CW_POSIX_FILE
+				cw_not_reached();
+#ifdef CW_POSIX_FILE
 			case FILE_POSIX:
 				while ((nread = read(file->f.p.fd, &line[i], 1))
 				    == -1) {
@@ -897,7 +897,7 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_bool_t a_locking, cw_nxo_t *r_string,
 	}
 
 	RETURN:
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	nxoe_p_file_unlock(file);
 #endif
 	if (line != s_line)
@@ -912,17 +912,17 @@ nxo_file_write(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len)
 	cw_nxn_t		retval;
 	cw_nxoe_file_t		*file;
 
-	_cw_check_ptr(a_nxo);
-	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
+	cw_check_ptr(a_nxo);
+	cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+	cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
-	_cw_check_ptr(file);
-	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
-	_cw_assert(file->nxoe.type == NXOT_FILE);
+	cw_check_ptr(file);
+	cw_dassert(file->nxoe.magic == CW_NXOE_MAGIC);
+	cw_assert(file->nxoe.type == NXOT_FILE);
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	nxoe_p_file_lock(file);
 #endif
 	if (file->mode == FILE_NONE) {
@@ -951,8 +951,8 @@ nxo_file_write(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len)
 		} else {
 			switch (file->mode) {
 			case FILE_NONE:
-				_cw_not_reached();
-#ifdef _CW_POSIX_FILE
+				cw_not_reached();
+#ifdef CW_POSIX_FILE
 			case FILE_POSIX: {
 				struct iovec	iov[2];
 
@@ -995,8 +995,8 @@ nxo_file_write(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len)
 	} else {
 		switch (file->mode) {
 		case FILE_NONE:
-			_cw_not_reached();
-#ifdef _CW_POSIX_FILE
+			cw_not_reached();
+#ifdef CW_POSIX_FILE
 		case FILE_POSIX:
 			while (write(file->f.p.fd, a_str, a_len) == -1) {
 				if (errno != EINTR) {
@@ -1018,13 +1018,13 @@ nxo_file_write(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len)
 
 	retval = NXN_ZERO;
 	RETURN:
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	nxoe_p_file_unlock(file);
 #endif
 	return retval;
 }
 
-#ifdef _CW_POSIX_FILE
+#ifdef CW_POSIX_FILE
 /* NXN_ioerror */
 cw_nxn_t
 nxo_file_truncate(cw_nxo_t *a_nxo, off_t a_length)
@@ -1032,17 +1032,17 @@ nxo_file_truncate(cw_nxo_t *a_nxo, off_t a_length)
 	cw_nxn_t		retval;
 	cw_nxoe_file_t		*file;
 
-	_cw_check_ptr(a_nxo);
-	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
+	cw_check_ptr(a_nxo);
+	cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+	cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
-	_cw_check_ptr(file);
-	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
-	_cw_assert(file->nxoe.type == NXOT_FILE);
+	cw_check_ptr(file);
+	cw_dassert(file->nxoe.magic == CW_NXOE_MAGIC);
+	cw_assert(file->nxoe.type == NXOT_FILE);
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	nxoe_p_file_lock(file);
 #endif
 	switch (file->mode) {
@@ -1060,7 +1060,7 @@ nxo_file_truncate(cw_nxo_t *a_nxo, off_t a_length)
 
 	retval = NXN_ZERO;
 	RETURN:
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	nxoe_p_file_unlock(file);
 #endif
 	return retval;
@@ -1074,17 +1074,17 @@ nxo_file_position_get(cw_nxo_t *a_nxo)
 	cw_nxoi_t		retval;
 	cw_nxoe_file_t		*file;
 
-	_cw_check_ptr(a_nxo);
-	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
+	cw_check_ptr(a_nxo);
+	cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+	cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
-	_cw_check_ptr(file);
-	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
-	_cw_assert(file->nxoe.type == NXOT_FILE);
+	cw_check_ptr(file);
+	cw_dassert(file->nxoe.magic == CW_NXOE_MAGIC);
+	cw_assert(file->nxoe.type == NXOT_FILE);
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	nxoe_p_file_lock(file);
 #endif
 
@@ -1092,7 +1092,7 @@ nxo_file_position_get(cw_nxo_t *a_nxo)
 	case FILE_NONE:
 		retval = -1;
 		break;
-#ifdef _CW_POSIX_FILE
+#ifdef CW_POSIX_FILE
 	case FILE_POSIX:
 		/*
 		 * Flush the file in case there are buffered data that have yet
@@ -1108,13 +1108,13 @@ nxo_file_position_get(cw_nxo_t *a_nxo)
 		retval = file->f.s.position;
 	}
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	nxoe_p_file_unlock(file);
 #endif
 	return retval;
 }
 
-#ifdef _CW_POSIX_FILE
+#ifdef CW_POSIX_FILE
 /* NXN_ioerror */
 cw_nxn_t
 nxo_file_position_set(cw_nxo_t *a_nxo, cw_nxoi_t a_position)
@@ -1122,17 +1122,17 @@ nxo_file_position_set(cw_nxo_t *a_nxo, cw_nxoi_t a_position)
 	cw_nxn_t		retval;
 	cw_nxoe_file_t		*file;
 
-	_cw_check_ptr(a_nxo);
-	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
+	cw_check_ptr(a_nxo);
+	cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+	cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
-	_cw_check_ptr(file);
-	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
-	_cw_assert(file->nxoe.type == NXOT_FILE);
+	cw_check_ptr(file);
+	cw_dassert(file->nxoe.magic == CW_NXOE_MAGIC);
+	cw_assert(file->nxoe.type == NXOT_FILE);
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	nxoe_p_file_lock(file);
 #endif
 	switch (file->mode) {
@@ -1149,7 +1149,7 @@ nxo_file_position_set(cw_nxo_t *a_nxo, cw_nxoi_t a_position)
 			retval = NXN_ioerror;
 	}
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	nxoe_p_file_unlock(file);
 #endif
 	return retval;
@@ -1162,21 +1162,21 @@ nxo_file_buffer_size_get(cw_nxo_t *a_nxo)
 	cw_uint32_t		retval;
 	cw_nxoe_file_t		*file;
 
-	_cw_check_ptr(a_nxo);
-	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
+	cw_check_ptr(a_nxo);
+	cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+	cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
-	_cw_check_ptr(file);
-	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
-	_cw_assert(file->nxoe.type == NXOT_FILE);
+	cw_check_ptr(file);
+	cw_dassert(file->nxoe.magic == CW_NXOE_MAGIC);
+	cw_assert(file->nxoe.type == NXOT_FILE);
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	nxoe_p_file_lock(file);
 #endif
 	retval = file->buffer_size;
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	nxoe_p_file_unlock(file);
 #endif
 
@@ -1189,18 +1189,18 @@ nxo_file_buffer_size_set(cw_nxo_t *a_nxo, cw_uint32_t a_size)
 	cw_nxoe_file_t	*file;
 	cw_nxa_t	*nxa;
 
-	_cw_check_ptr(a_nxo);
-	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
+	cw_check_ptr(a_nxo);
+	cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+	cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
-	_cw_check_ptr(file);
-	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
-	_cw_assert(file->nxoe.type == NXOT_FILE);
+	cw_check_ptr(file);
+	cw_dassert(file->nxoe.magic == CW_NXOE_MAGIC);
+	cw_assert(file->nxoe.type == NXOT_FILE);
 
 	nxa = nx_nxa_get(file->nx);
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	nxoe_p_file_lock(file);
 #endif
 	if (a_size == 0) {
@@ -1218,7 +1218,7 @@ nxo_file_buffer_size_set(cw_nxo_t *a_nxo, cw_uint32_t a_size)
 	}
 	file->buffer_mode = BUFFER_EMPTY;
 	file->buffer_offset = 0;
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	nxoe_p_file_unlock(file);
 #endif
 }
@@ -1229,17 +1229,17 @@ nxo_file_buffer_count(cw_nxo_t *a_nxo)
 	cw_nxoi_t		retval;
 	cw_nxoe_file_t		*file;
 
-	_cw_check_ptr(a_nxo);
-	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
+	cw_check_ptr(a_nxo);
+	cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+	cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
-	_cw_check_ptr(file);
-	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
-	_cw_assert(file->nxoe.type == NXOT_FILE);
+	cw_check_ptr(file);
+	cw_dassert(file->nxoe.magic == CW_NXOE_MAGIC);
+	cw_assert(file->nxoe.type == NXOT_FILE);
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	nxoe_p_file_lock(file);
 #endif
 	if ((file->mode != FILE_NONE && file->buffer != NULL &&
@@ -1247,7 +1247,7 @@ nxo_file_buffer_count(cw_nxo_t *a_nxo)
 		retval = file->buffer_offset;
 	else
 		retval = 0;
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	nxoe_p_file_unlock(file);
 #endif
 
@@ -1261,21 +1261,21 @@ nxo_file_buffer_flush(cw_nxo_t *a_nxo)
 	cw_nxn_t		retval;
 	cw_nxoe_file_t		*file;
 
-	_cw_check_ptr(a_nxo);
-	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
+	cw_check_ptr(a_nxo);
+	cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+	cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
-	_cw_check_ptr(file);
-	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
-	_cw_assert(file->nxoe.type == NXOT_FILE);
+	cw_check_ptr(file);
+	cw_dassert(file->nxoe.magic == CW_NXOE_MAGIC);
+	cw_assert(file->nxoe.type == NXOT_FILE);
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	nxoe_p_file_lock(file);
 #endif
 	retval = nxo_p_file_buffer_flush(file);
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	nxoe_p_file_unlock(file);
 #endif
 
@@ -1297,8 +1297,8 @@ nxo_p_file_buffer_flush(cw_nxoe_file_t *a_file)
 		if (a_file->buffer_mode == BUFFER_WRITE) {
 			switch (a_file->mode) {
 			case FILE_NONE:
-				_cw_not_reached();
-#ifdef _CW_POSIX_FILE
+				cw_not_reached();
+#ifdef CW_POSIX_FILE
 			case FILE_POSIX:
 				while (write(a_file->f.p.fd, a_file->buffer,
 				    a_file->buffer_offset) == -1) {

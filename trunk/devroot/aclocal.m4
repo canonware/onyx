@@ -45,7 +45,7 @@ if test "x$enable_threads" = "x1" ; then
   AC_CHECK_HEADERS(mach/task.h, , have_mthreads="0")
   AC_CHECK_FUNCS(mach_thread_self, , have_mthreads="0")
   if test "x$have_mthreads" = "x1" ; then
-    AC_DEFINE(_CW_MTHREADS)
+    AC_DEFINE(CW_MTHREADS)
   fi
 
   dnl Look for Solaris threads.
@@ -55,7 +55,7 @@ if test "x$enable_threads" = "x1" ; then
   AC_CHECK_LIB(thread, thr_continue, , have_sthreads="0")
   if test "x$have_sthreads" = "x1" ; then
     LIBS="$LIBS -lthread"
-    AC_DEFINE(_CW_STHREADS)
+    AC_DEFINE(CW_STHREADS)
   fi
 
   dnl Look for pthreads.
@@ -64,8 +64,8 @@ if test "x$enable_threads" = "x1" ; then
     AC_CHECK_LIB(c_r, pthread_create, \
       LIBS="$LIBS -pthread", enable_threads="0"))
   if test "x$enable_threads" = "x1" ; then
-    AC_DEFINE(_CW_THREADS)
-    AC_DEFINE(_CW_PTHREADS)
+    AC_DEFINE(CW_THREADS)
+    AC_DEFINE(CW_PTHREADS)
   fi
 
   dnl Look for FreeBSD's non-portable suspend/resume API (libc_r).
@@ -73,7 +73,7 @@ if test "x$enable_threads" = "x1" ; then
   AC_CHECK_FUNCS(pthread_suspend_np, , have_fthreads="0")
   AC_CHECK_FUNCS(pthread_resume_np, , have_fthreads="0")
   if test "x$have_fthreads" = "x1" ; then
-    AC_DEFINE(_CW_FTHREADS)
+    AC_DEFINE(CW_FTHREADS)
   fi
 fi
 AC_SUBST(enable_threads)
@@ -93,7 +93,7 @@ enable_posix_file="1"
 )
 AC_SUBST(enable_posix_file)
 if test "x$enable_posix_file" = "x1" ; then
-  AC_DEFINE(_CW_POSIX_FILE)
+  AC_DEFINE(CW_POSIX_FILE)
 fi
 ])
 
@@ -116,7 +116,7 @@ fi
 
 AC_SUBST(enable_posix)
 if test "x$enable_posix" = "x1" ; then
-  AC_DEFINE(_CW_POSIX)
+  AC_DEFINE(CW_POSIX)
 fi
 ])
 
@@ -133,8 +133,8 @@ fi
 enable_debug="0"
 )
 if test "x$enable_debug" = "x1" ; then
-  AC_DEFINE(_CW_DBG)
-  AC_DEFINE(_CW_ASSERT)
+  AC_DEFINE(CW_DBG)
+  AC_DEFINE(CW_ASSERT)
 fi
 ])
 
@@ -165,7 +165,7 @@ fi
 enable_inlines="1"
 )
 if test "x$enable_inlines" = "x1" ; then
-  AC_DEFINE(_CW_USE_INLINES)
+  AC_DEFINE(CW_USE_INLINES)
 fi
 ])
 
@@ -190,7 +190,7 @@ fi
 
 AC_SUBST(enable_libonyx)
 if test "x$enable_libonyx" = "x1" ; then
-  AC_DEFINE(_CW_USE_LIBONYX)
+  AC_DEFINE(CW_USE_LIBONYX)
 fi
 ])
 
@@ -214,7 +214,7 @@ AC_SEARCH_LIBS(tigetstr, ncurses curses, , enable_libedit="0")
 
 AC_SUBST(enable_libedit)
 if test "x$enable_libedit" = "x1" ; then
-  AC_DEFINE(_CW_USE_LIBEDIT)
+  AC_DEFINE(CW_USE_LIBEDIT)
 fi
 ])
 
@@ -239,7 +239,7 @@ fi
 
 AC_SUBST(enable_onyx)
 if test "x$enable_onyx" = "x1" ; then
-  AC_DEFINE(_CW_USE_ONYX)
+  AC_DEFINE(CW_USE_ONYX)
 fi
 ])
 
@@ -258,7 +258,7 @@ enable_slate="1"
 
 AC_SUBST(enable_slate)
 if test "x$enable_slate" = "x1" ; then
-  AC_DEFINE(_CW_USE_SLATE)
+  AC_DEFINE(CW_USE_SLATE)
 fi
 ])
 

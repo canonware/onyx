@@ -19,7 +19,7 @@ mtx_new(cw_mtx_t *a_mtx)
 {
 	int	error;
 
-	_cw_check_ptr(a_mtx);
+	cw_check_ptr(a_mtx);
 
 	error = pthread_mutex_init(&a_mtx->mutex, NULL);
 	if (error) {
@@ -34,7 +34,7 @@ mtx_delete(cw_mtx_t *a_mtx)
 {
 	int	error;
 
-	_cw_check_ptr(a_mtx);
+	cw_check_ptr(a_mtx);
 
 	error = pthread_mutex_destroy(&a_mtx->mutex);
 	if (error) {
@@ -49,7 +49,7 @@ mtx_lock(cw_mtx_t *a_mtx)
 {
 	int	error;
 
-	_cw_check_ptr(a_mtx);
+	cw_check_ptr(a_mtx);
 
 	error = pthread_mutex_lock(&a_mtx->mutex);
 	if (error) {
@@ -65,7 +65,7 @@ mtx_trylock(cw_mtx_t *a_mtx)
 	cw_bool_t	retval;
 	int		error;
 
-	_cw_check_ptr(a_mtx);
+	cw_check_ptr(a_mtx);
 
 	error = pthread_mutex_trylock(&a_mtx->mutex);
 	if (error == 0)
@@ -86,7 +86,7 @@ mtx_unlock(cw_mtx_t *a_mtx)
 {
 	int	error;
 
-	_cw_check_ptr(a_mtx);
+	cw_check_ptr(a_mtx);
 
 	error = pthread_mutex_unlock(&a_mtx->mutex);
 	if (error) {

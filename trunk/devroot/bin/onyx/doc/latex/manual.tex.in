@@ -101,7 +101,7 @@ In addition, the following definitions exist regardless of execution mode:
 		Load a module using the ONYX\_MPATH environment variable.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> `gtk.nxm' `_cw_modgtk_init' mrequire
+onyx:0> `gtk.nxm' `cw_modgtk_init' mrequire
 onyx:0>
 	\end{verbatim}
 	\end{description}

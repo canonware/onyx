@@ -19,7 +19,7 @@
 #include "../include/onyx.h"
 
 /* Include generated code. */
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 #include "onyx_nxcode.c"
 #endif
 #include "batch_nxcode.c"
@@ -29,7 +29,7 @@
 #define	_BUFFER_SIZE	512
 
 struct nx_read_arg_s {
-#if (defined(_CW_USE_LIBEDIT) && defined(_CW_THREADS))
+#if (defined(CW_USE_LIBEDIT) && defined(CW_THREADS))
 	cw_bool_t	quit;
 	cw_bool_t	want_data;
 	cw_bool_t	have_data;
@@ -46,7 +46,7 @@ struct nx_read_arg_s {
 	cw_uint32_t	buffer_count;
 };
 
-#ifndef _CW_POSIX_FILE
+#ifndef CW_POSIX_FILE
 struct nx_write_arg_s {
 	int	fd;
 };
@@ -58,7 +58,7 @@ struct nx_write_arg_s {
  */
 cw_nxo_t	thread;
 cw_nxo_threadp_t threadp;
-#ifdef _CW_USE_LIBEDIT
+#ifdef CW_USE_LIBEDIT
 EditLine	*el;
 History		*hist;
 cw_uint8_t	prompt_str[_PROMPT_STRLEN];
@@ -78,17 +78,17 @@ cw_sint32_t	nx_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len,
 int		interactive_run(int argc, char **argv, char **envp);
 int		batch_run(int argc, char **argv, char **envp);
 
-#ifdef _CW_USE_LIBEDIT
+#ifdef CW_USE_LIBEDIT
 char		*prompt(EditLine *a_el);
 void		signal_handle(int a_signal);
 #endif
 
-#if (defined(_CW_USE_LIBEDIT) && defined(_CW_THREADS))
+#if (defined(CW_USE_LIBEDIT) && defined(CW_THREADS))
 void		cl_read(struct nx_read_arg_s *a_arg);
 void		*nx_entry(void *a_arg);
 #endif
 
-#ifndef _CW_POSIX_FILE
+#ifndef CW_POSIX_FILE
 void		stdout_init(cw_nx_t *a_nx);
 void		stderr_init(cw_nx_t *a_nx);
 cw_bool_t	nx_write(void *a_arg, cw_nxo_t *a_file, const cw_uint8_t *a_str,
@@ -122,7 +122,7 @@ usage(void)
 	    "    onyx -h\n"
 	    "    onyx -V\n"
 	    "    onyx -e <expr>\n"
-#ifdef _CW_POSIX_FILE
+#ifdef CW_POSIX_FILE
 	    "    onyx <file> [<args>]\n"
 #endif
 	    "\n"
@@ -133,7 +133,7 @@ usage(void)
 	    "    -e <expr> | Execute <expr> as Onyx code.\n");
 }
 
-#if (defined(_CW_USE_LIBEDIT) && defined(_CW_THREADS))
+#if (defined(CW_USE_LIBEDIT) && defined(CW_THREADS))
 struct nx_read_arg_s *
 stdin_init(cw_nx_t *a_nx, cw_nxo_t *a_thread, cw_bool_t a_interactive)
 {
@@ -191,17 +191,17 @@ stdin_shutdown(void *a_arg, cw_nx_t *a_nx)
 	struct nx_read_arg_s *arg = (struct nx_read_arg_s *)a_arg;
 
 	if (arg->buffer != NULL)
-		_cw_free(arg->buffer);
+		cw_free(arg->buffer);
 }
 
-#if (defined(_CW_USE_LIBEDIT) && defined(_CW_THREADS))
+#if (defined(CW_USE_LIBEDIT) && defined(CW_THREADS))
 cw_sint32_t
 nx_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str)
 {
 	cw_sint32_t		retval;
 	struct nx_read_arg_s	*arg = (struct nx_read_arg_s *)a_arg;
 
-	_cw_assert(a_len > 0);
+	cw_assert(a_len > 0);
 
 	mtx_lock(&arg->mtx);
 
@@ -215,7 +215,7 @@ nx_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str)
 		while (arg->have_data == FALSE)
 			cnd_wait(&arg->nx_cnd, &arg->mtx);
 	}
-	_cw_assert(arg->buffer_count > 0);
+	cw_assert(arg->buffer_count > 0);
 
 	/*
 	 * Return as much of the data as possible.
@@ -236,7 +236,7 @@ nx_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str)
 	mtx_unlock(&arg->mtx);
 	return retval;
 }
-#elif (defined(_CW_USE_LIBEDIT))
+#elif (defined(CW_USE_LIBEDIT))
 cw_sint32_t
 nx_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str)
 {
@@ -246,7 +246,7 @@ nx_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str)
 	int			count = 0;
 	static cw_bool_t	continuation = FALSE;
 
-	_cw_assert(a_len > 0);
+	cw_assert(a_len > 0);
 
 	if (arg->buffer_count == 0) {
 		/*
@@ -258,7 +258,7 @@ nx_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str)
 			 * el_gets().
 			 */
 		}
-		_cw_assert(count > 0);
+		cw_assert(count > 0);
 
 		/*
 		 * Update the command line history.
@@ -296,16 +296,16 @@ nx_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str)
 		if (count > arg->buffer_size) {
 			/* Expand the buffer. */
 			if (arg->buffer == NULL)
-				arg->buffer = (cw_uint8_t *)_cw_malloc(count);
+				arg->buffer = (cw_uint8_t *)cw_malloc(count);
 			else
 				arg->buffer = (cw_uint8_t
-				    *)_cw_realloc(arg->buffer, count);
+				    *)cw_realloc(arg->buffer, count);
 			arg->buffer_size = count;
 		}
 		memcpy(arg->buffer, str, count);
 		arg->buffer_count = count;
 	}
-	_cw_assert(arg->buffer_count > 0);
+	cw_assert(arg->buffer_count > 0);
 
 	/*
 	 * Return as much of the data as possible.
@@ -332,7 +332,7 @@ nx_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str)
 	cw_sint32_t		retval;
 	struct nx_read_arg_s	*arg = (struct nx_read_arg_s *)a_arg;
 
-	_cw_assert(a_len > 0);
+	cw_assert(a_len > 0);
 
 	if (arg->buffer_count == 0) {
 		/*
@@ -342,7 +342,7 @@ nx_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str)
 		if ((arg->interactive) && (nxo_thread_deferred(arg->thread) ==
 		    FALSE) && (nxo_thread_state(arg->thread) ==
 		    THREADTS_START))
-			_cw_onyx_code(arg->thread, "promptstring print flush");
+			cw_onyx_code(arg->thread, "promptstring print flush");
 
 		/*
 		 * Read data until there are no more.
@@ -368,7 +368,7 @@ nx_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str)
 				if (arg->buffer == NULL) {
 					/* Initialize the buffer. */
 					arg->buffer = (cw_uint8_t
-					    *)_cw_malloc(_BUFFER_SIZE);
+					    *)cw_malloc(_BUFFER_SIZE);
 					arg->buffer_size = _BUFFER_SIZE;
 					arg->buffer_count = 0;
 				}
@@ -398,7 +398,7 @@ nx_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str)
 					    arg->buffer_size) {
 						/* Expand the buffer. */
 						arg->buffer = (cw_uint8_t
-						    *)_cw_realloc(arg->buffer,
+						    *)cw_realloc(arg->buffer,
 						    arg->buffer_size * 2);
 						arg->buffer_size *= 2;
 					}
@@ -433,16 +433,16 @@ interactive_run(int argc, char **argv, char **envp)
 {
 	cw_nx_t			nx;
 	struct nx_read_arg_s	*stdin_arg;
-#ifdef _CW_USE_LIBEDIT
+#ifdef CW_USE_LIBEDIT
 	struct sigaction	action;
 	char			*editor;
 #endif
-#if (defined(_CW_USE_LIBEDIT) && defined(_CW_THREADS))
+#if (defined(CW_USE_LIBEDIT) && defined(CW_THREADS))
 	sigset_t		set, oset;
 	cw_thd_t		*nx_thd;
 #endif
 
-#ifdef _CW_USE_LIBEDIT
+#ifdef CW_USE_LIBEDIT
 	/*
 	 * Set up a signal handler for various signals that are important to an
 	 * interactive program.
@@ -491,7 +491,7 @@ interactive_run(int argc, char **argv, char **envp)
 	nx_new(&nx, NULL, argc, argv, envp);
 
 	stdin_arg = stdin_init(&nx, &thread, TRUE);
-#ifndef _CW_POSIX_FILE
+#ifndef CW_POSIX_FILE
 	stdout_init(&nx);
 	stderr_init(&nx);
 #endif
@@ -501,12 +501,12 @@ interactive_run(int argc, char **argv, char **envp)
 	nxo_threadp_new(&threadp);
 
 	/* Run embedded initialization code. */
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	onyx_nxcode(&thread);
 #endif
 	interactive_nxcode(&thread);
 
-#if (defined(_CW_USE_LIBEDIT) && defined(_CW_THREADS))
+#if (defined(CW_USE_LIBEDIT) && defined(CW_THREADS))
 	/*
 	 * Acquire the interlock mtx before creating the interpreter thread, so
 	 * that we won't miss any cnd_signal()s from it.
@@ -547,7 +547,7 @@ interactive_run(int argc, char **argv, char **envp)
 	nxo_thread_start(&thread);
 #endif
 
-#ifdef _CW_USE_LIBEDIT
+#ifdef CW_USE_LIBEDIT
 	/* Clean up the command editor. */
 	el_end(el);
 	history_end(hist);
@@ -620,7 +620,7 @@ batch_run(int argc, char **argv, char **envp)
 	 * elements of argv.
 	 */
 	nx_new(&nx, NULL, argc - optind, &argv[optind], envp);
-#ifndef _CW_POSIX_FILE
+#ifndef CW_POSIX_FILE
 	stdin_init(&nx, &thread, FALSE);
 	stdout_init(&nx);
 	stderr_init(&nx);
@@ -631,7 +631,7 @@ batch_run(int argc, char **argv, char **envp)
 	/*
 	 * Run embedded initialization code.
 	 */
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	onyx_nxcode(&thread);
 #endif
 
@@ -672,7 +672,7 @@ batch_run(int argc, char **argv, char **envp)
 		str = nxo_string_get(string);
 		memcpy(str, opt_expression, nxo_string_len_get(string));
 	}
-#ifdef _CW_POSIX_FILE
+#ifdef CW_POSIX_FILE
 	else if (optind < argc) {
 		int	src_fd;
 
@@ -718,7 +718,7 @@ batch_run(int argc, char **argv, char **envp)
 	return retval;
 }
 
-#ifdef _CW_USE_LIBEDIT
+#ifdef CW_USE_LIBEDIT
 char *
 prompt(EditLine *a_el)
 {
@@ -798,7 +798,7 @@ signal_handle(int a_signal)
 }
 #endif
 
-#if (defined(_CW_USE_LIBEDIT) && defined(_CW_THREADS))
+#if (defined(CW_USE_LIBEDIT) && defined(CW_THREADS))
 void
 cl_read(struct nx_read_arg_s *a_arg)
 {
@@ -818,14 +818,14 @@ cl_read(struct nx_read_arg_s *a_arg)
 		/*
 		 * Read data.
 		 */
-		_cw_assert(arg->buffer_count == 0);
+		cw_assert(arg->buffer_count == 0);
 		while ((str = el_gets(el, &count)) == NULL) {
 			/*
 			 * An interrupted system call (EINTR) caused an error in
 			 * el_gets().
 			 */
 		}
-		_cw_assert(count > 0);
+		cw_assert(count > 0);
 
 		/*
 		 * Update the command line history.
@@ -863,10 +863,10 @@ cl_read(struct nx_read_arg_s *a_arg)
 		if (count > arg->buffer_size) {
 			/* Expand the buffer. */
 			if (arg->buffer == NULL)
-				arg->buffer = (cw_uint8_t *)_cw_malloc(count);
+				arg->buffer = (cw_uint8_t *)cw_malloc(count);
 			else
 				arg->buffer = (cw_uint8_t
-				    *)_cw_realloc(arg->buffer, count);
+				    *)cw_realloc(arg->buffer, count);
 			arg->buffer_size = count;
 		}
 		memcpy(arg->buffer, str, count);
@@ -900,7 +900,7 @@ nx_entry(void *a_arg)
 }
 #endif
 
-#ifndef _CW_POSIX_FILE
+#ifndef CW_POSIX_FILE
 void
 stdout_init(cw_nx_t *a_nx)
 {
@@ -946,7 +946,7 @@ nx_write(void *a_arg, cw_nxo_t *a_file, const cw_uint8_t *a_str, cw_uint32_t
 		 */
 	}
 	if (nwritten != a_len) {
-		_cw_assert(nwritten == -1);
+		cw_assert(nwritten == -1);
 		retval = TRUE;
 		goto RETURN;
 	}

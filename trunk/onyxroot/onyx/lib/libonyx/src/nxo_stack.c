@@ -39,7 +39,7 @@ nxo_stack_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking)
 	    sizeof(cw_nxoe_stack_t));
 
 	nxoe_l_new(&stack->nxoe, NXOT_STACK, a_locking);
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	if (a_locking)
 		mtx_new(&stack->lock);
 #endif
@@ -53,7 +53,7 @@ nxo_stack_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking)
 	ql_elm_new(&stack->under, link);
 	ql_head_insert(&stack->stack, &stack->under, link);
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	stack->noroll = NULL;
 #endif
 
@@ -73,9 +73,9 @@ nxoe_l_stack_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
 
 	stack = (cw_nxoe_stack_t *)a_nxoe;
 
-	_cw_check_ptr(stack);
-	_cw_dassert(stack->nxoe.magic == _CW_NXOE_MAGIC);
-	_cw_assert(stack->nxoe.type == NXOT_STACK);
+	cw_check_ptr(stack);
+	cw_dassert(stack->nxoe.magic == CW_NXOE_MAGIC);
+	cw_assert(stack->nxoe.type == NXOT_STACK);
 
 	/*
 	 * Deallocate stacko's.
@@ -88,7 +88,7 @@ nxoe_l_stack_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
 		nxa_free(stack->nxa, tstacko, sizeof(cw_nxoe_stacko_t));
 	}
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	if (stack->nxoe.locking)
 		mtx_delete(&stack->lock);
 #endif
@@ -107,7 +107,7 @@ nxoe_l_stack_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 	stack = (cw_nxoe_stack_t *)a_nxoe;
 
 	if (a_reset) {
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 		if (stack->noroll != NULL) {
 			/*
 			 * We're in the middle of a roll operation, so need to
@@ -124,7 +124,7 @@ nxoe_l_stack_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 
 	retval = NULL;
 	switch (stack->ref_stage) {
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	case 0:
 		/* Set up for stage 1. */
 		stack->ref_stacko = stack->noroll;
@@ -183,11 +183,11 @@ nxo_stack_copy(cw_nxo_t *a_to, cw_nxo_t *a_from)
 	cw_nxo_t	*nxo_to, *nxo_fr;
 	cw_uint32_t	i, count;
 
-	_cw_check_ptr(a_to);
-	_cw_dassert(a_to->magic == _CW_NXO_MAGIC);
+	cw_check_ptr(a_to);
+	cw_dassert(a_to->magic == CW_NXO_MAGIC);
 	  
-	_cw_check_ptr(a_from);
-	_cw_dassert(a_from->magic == _CW_NXO_MAGIC);
+	cw_check_ptr(a_from);
+	cw_dassert(a_from->magic == CW_NXO_MAGIC);
 
 	for (i = 0, count = nxo_stack_count(a_from), nxo_fr = NULL, nxo_to
 	    = NULL; i < count; i++) {
@@ -220,7 +220,7 @@ nxoe_p_stack_pop(cw_nxoe_stack_t *a_stack)
 {
 	cw_nxoe_stacko_t	*stacko;
 
-	_cw_assert(a_stack->nspare == _CW_LIBONYX_STACK_CACHE);
+	cw_assert(a_stack->nspare == CW_LIBONYX_STACK_CACHE);
 
 	/* Throw the popped element away. */
 	stacko = ql_first(&a_stack->stack);
@@ -244,7 +244,7 @@ nxoe_p_stack_npop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
 	 * beginning of the region to be removed from the ring.
 	 */
 	for (i = 0, stacko = ql_first(&a_stack->stack); i <
-		 _CW_LIBONYX_STACK_CACHE - a_stack->nspare; i++)
+		 CW_LIBONYX_STACK_CACHE - a_stack->nspare; i++)
 		stacko = qr_next(stacko, link);
 	for (top = stacko; i < a_count; i++)
 		top = qr_next(top, link);
@@ -281,11 +281,11 @@ nxoe_p_stack_npop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
 	qr_split(stacko, top, link);
 
 	for (i = 0; i < a_stack->nspare + a_count -
-		 _CW_LIBONYX_STACK_CACHE; i++) {
+		 CW_LIBONYX_STACK_CACHE; i++) {
 		tstacko = qr_next(stacko, link);
 		qr_remove(tstacko, link);
 		nxa_free(a_stack->nxa, tstacko, sizeof(cw_nxoe_stacko_t));
 	}
 
-	a_stack->nspare = _CW_LIBONYX_STACK_CACHE;
+	a_stack->nspare = CW_LIBONYX_STACK_CACHE;
 }

@@ -47,10 +47,10 @@ typedef enum { Q_none, Q_single, Q_double, Q_one, Q_doubleone } quote_t;
 #define WINCR 20
 #define AINCR 10
 
-#define tok_malloc(a)		_cw_malloc(a)
-#define tok_free(a)		_cw_free(a)
-#define tok_realloc(a, b)	_cw_realloc(a, b)
-#define tok_reallocf(a, b)	_cw_realloc(a, b)
+#define tok_malloc(a)		cw_malloc(a)
+#define tok_free(a)		cw_free(a)
+#define tok_realloc(a, b)	cw_realloc(a, b)
+#define tok_reallocf(a, b)	cw_realloc(a, b)
 
 
 struct tokenizer {

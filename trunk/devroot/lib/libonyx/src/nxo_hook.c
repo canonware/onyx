@@ -47,9 +47,9 @@ nxoe_l_hook_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
 
 	hook = (cw_nxoe_hook_t *)a_nxoe;
 
-	_cw_check_ptr(hook);
-	_cw_dassert(hook->nxoe.magic == _CW_NXOE_MAGIC);
-	_cw_assert(hook->nxoe.type == NXOT_HOOK);
+	cw_check_ptr(hook);
+	cw_dassert(hook->nxoe.magic == CW_NXOE_MAGIC);
+	cw_assert(hook->nxoe.type == NXOT_HOOK);
 
 	if (hook->delete_f != NULL)
 		retval = hook->delete_f(hook->data, nxa_nx_get(a_nxa), a_iter);
@@ -90,7 +90,7 @@ nxoe_l_hook_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 		retval = hook->ref_iter_f(hook->data, FALSE);
 		break;
 	default:
-		_cw_not_reached();
+		cw_not_reached();
 	}
 
 	return retval;
@@ -102,15 +102,15 @@ nxo_hook_tag_get(cw_nxo_t *a_nxo)
 	cw_nxo_t	*retval;
 	cw_nxoe_hook_t	*hook;
 
-	_cw_check_ptr(a_nxo);
-	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(nxo_type_get(a_nxo) == NXOT_HOOK);
+	cw_check_ptr(a_nxo);
+	cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+	cw_assert(nxo_type_get(a_nxo) == NXOT_HOOK);
 
 	hook = (cw_nxoe_hook_t *)a_nxo->o.nxoe;
 
-	_cw_check_ptr(hook);
-	_cw_dassert(hook->nxoe.magic == _CW_NXOE_MAGIC);
-	_cw_assert(hook->nxoe.type == NXOT_HOOK);
+	cw_check_ptr(hook);
+	cw_dassert(hook->nxoe.magic == CW_NXOE_MAGIC);
+	cw_assert(hook->nxoe.type == NXOT_HOOK);
 
 	retval = &hook->tag;
 
@@ -123,15 +123,15 @@ nxo_hook_data_get(cw_nxo_t *a_nxo)
 	void		*retval;
 	cw_nxoe_hook_t	*hook;
 
-	_cw_check_ptr(a_nxo);
-	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(nxo_type_get(a_nxo) == NXOT_HOOK);
+	cw_check_ptr(a_nxo);
+	cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+	cw_assert(nxo_type_get(a_nxo) == NXOT_HOOK);
 
 	hook = (cw_nxoe_hook_t *)a_nxo->o.nxoe;
 
-	_cw_check_ptr(hook);
-	_cw_dassert(hook->nxoe.magic == _CW_NXOE_MAGIC);
-	_cw_assert(hook->nxoe.type == NXOT_HOOK);
+	cw_check_ptr(hook);
+	cw_dassert(hook->nxoe.magic == CW_NXOE_MAGIC);
+	cw_assert(hook->nxoe.type == NXOT_HOOK);
 
 	retval = hook->data;
 
@@ -143,15 +143,15 @@ nxo_hook_data_set(cw_nxo_t *a_nxo, void *a_data)
 {
 	cw_nxoe_hook_t	*hook;
 
-	_cw_check_ptr(a_nxo);
-	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(nxo_type_get(a_nxo) == NXOT_HOOK);
+	cw_check_ptr(a_nxo);
+	cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+	cw_assert(nxo_type_get(a_nxo) == NXOT_HOOK);
 
 	hook = (cw_nxoe_hook_t *)a_nxo->o.nxoe;
 
-	_cw_check_ptr(hook);
-	_cw_dassert(hook->nxoe.magic == _CW_NXOE_MAGIC);
-	_cw_assert(hook->nxoe.type == NXOT_HOOK);
+	cw_check_ptr(hook);
+	cw_dassert(hook->nxoe.magic == CW_NXOE_MAGIC);
+	cw_assert(hook->nxoe.type == NXOT_HOOK);
 
 	hook->data = a_data;
 }
@@ -161,15 +161,15 @@ nxo_hook_eval(cw_nxo_t *a_nxo, cw_nxo_t *a_thread)
 {
 	cw_nxoe_hook_t		*hook;
 
-	_cw_check_ptr(a_nxo);
-	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(nxo_type_get(a_nxo) == NXOT_HOOK);
+	cw_check_ptr(a_nxo);
+	cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+	cw_assert(nxo_type_get(a_nxo) == NXOT_HOOK);
 
 	hook = (cw_nxoe_hook_t *)a_nxo->o.nxoe;
 
-	_cw_check_ptr(hook);
-	_cw_dassert(hook->nxoe.magic == _CW_NXOE_MAGIC);
-	_cw_assert(hook->nxoe.type == NXOT_HOOK);
+	cw_check_ptr(hook);
+	cw_dassert(hook->nxoe.magic == CW_NXOE_MAGIC);
+	cw_assert(hook->nxoe.type == NXOT_HOOK);
 
 	if (hook->eval_f != NULL)
 		hook->eval_f(hook->data, a_thread);

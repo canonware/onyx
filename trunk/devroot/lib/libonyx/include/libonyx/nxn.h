@@ -29,22 +29,22 @@ typedef enum {
 	NXN_argv,
 	NXN_array,
 	NXN_arraytype,
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	NXN_atime,
 #endif
 	NXN_begin,
 	NXN_bind,
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	NXN_blksize,
 	NXN_blocks,
 #endif
 	NXN_booleantype,
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	NXN_broadcast,
 #endif
 	NXN_bytesavailable,
 	NXN_catenate,
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	NXN_cd,
 	NXN_chmod,
 	NXN_chown,
@@ -52,11 +52,11 @@ typedef enum {
 	NXN_clear,
 	NXN_cleardstack,
 	NXN_cleartomark,
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	NXN_close,
 #endif
 	NXN_collect,
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	NXN_condition,
 	NXN_conditiontype,
 #endif
@@ -65,11 +65,11 @@ typedef enum {
 	NXN_countdstack,
 	NXN_countestack,
 	NXN_counttomark,
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	NXN_ctime,
 #endif
 	NXN_currentdict,
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	NXN_currentlocking,
 #endif
 	NXN_cve,
@@ -79,16 +79,16 @@ typedef enum {
 	NXN_cvs,
 	NXN_cvx,
 	NXN_def,
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	NXN_detach,
 #endif
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	NXN_dev,
 #endif
 	NXN_dict,
 	NXN_dicttype,
 	NXN_die,
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	NXN_dirforeach,
 #endif
 	NXN_div,
@@ -96,23 +96,23 @@ typedef enum {
 	NXN_dstackunderflow,
 	NXN_dup,
 	NXN_echeck,
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	NXN_egid,
 #endif
 	NXN_end,
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	NXN_envdict,
 #endif
 	NXN_eq,
 	NXN_errorname,
 	NXN_estack,
 	NXN_estackoverflow,
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	NXN_euid,
 #endif
 	NXN_eval,
 	NXN_exch,
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	NXN_exec,
 #endif
 	NXN_exit,
@@ -124,14 +124,14 @@ typedef enum {
 	NXN_flushfile,
 	NXN_for,
 	NXN_foreach,
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	NXN_fork,
 #endif
 	NXN_gcdict,
 	NXN_ge,
 	NXN_get,
 	NXN_getinterval,
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	NXN_gid,
 #endif
 	NXN_globaldict,
@@ -141,7 +141,7 @@ typedef enum {
 	NXN_if,
 	NXN_ifelse,
 	NXN_index,
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	NXN_ino,
 #endif
 	NXN_integertype,
@@ -151,45 +151,45 @@ typedef enum {
 	NXN_iobuf,
 	NXN_ioerror,
 	NXN_istack,
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	NXN_join,
 #endif
 	NXN_known,
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	NXN_lcheck,
 #endif
 	NXN_le,
 	NXN_length,
 	NXN_limitcheck,
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	NXN_link,
 #endif
 	NXN_load,
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	NXN_lock,
 #endif
 	NXN_loop,
 	NXN_lt,
 	NXN_mark,
 	NXN_marktype,
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	NXN_mkdir,
 #endif
 	NXN_mod,
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	NXN_mode,
 #endif
 #ifdef HAVE_DLOPEN
 	NXN_modload,
 #endif
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	NXN_monitor,
 #endif
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	NXN_mtime,
 #endif
 	NXN_mul,
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	NXN_mutex,
 	NXN_mutextype,
 #endif
@@ -198,32 +198,32 @@ typedef enum {
 	NXN_ne,
 	NXN_neg,
 	NXN_newerror,
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	NXN_nlink,
 #endif
 	NXN_not,
 	NXN_npop,
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	NXN_nsleep,
 #endif
 	NXN_null,
 	NXN_nulltype,
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	NXN_open,
 #endif
 	NXN_operatortype,
 	NXN_or,
 	NXN_ostack,
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	NXN_period,
 #endif
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	NXN_pid,
 #endif
 	NXN_pmark,
 	NXN_pmarktype,
 	NXN_pop,
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	NXN_ppid,
 #endif
 	NXN_print,
@@ -231,23 +231,23 @@ typedef enum {
 	NXN_promptstring,
 	NXN_put,
 	NXN_putinterval,
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	NXN_pwd,
 #endif
 	NXN_quit,
 	NXN_rand,
 	NXN_rangecheck,
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	NXN_rdev,
 #endif
 	NXN_read,
 	NXN_readline,
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	NXN_realtime,
 	NXN_rename,
 #endif
 	NXN_repeat,
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	NXN_rmdir,
 #endif
 	NXN_roll,
@@ -256,40 +256,40 @@ typedef enum {
 	NXN_scount,
 	NXN_scounttomark,
 	NXN_sdup,
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	NXN_seek,
 #endif
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	NXN_self,
 #endif
 	NXN_setactive,
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	NXN_setegid,
 	NXN_setenv,
 	NXN_seteuid,
 	NXN_setgid,
 #endif
 	NXN_setiobuf,
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	NXN_setlocking,
 	NXN_setperiod,
 #endif
 	NXN_setthreshold,
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	NXN_setuid,
 #endif
 	NXN_sexch,
 	NXN_shift,
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	NXN_signal,
 #endif
 	NXN_sindex,
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	NXN_size,
 #endif
 	NXN_spop,
 	NXN_spush,
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	NXN_srand,
 #endif
 	NXN_sroll,
@@ -298,7 +298,7 @@ typedef enum {
 	NXN_stackunderflow,
 	NXN_start,
 	NXN_stats,
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	NXN_status,
 #endif
 	NXN_stdin,
@@ -309,66 +309,66 @@ typedef enum {
 	NXN_string,
 	NXN_stringtype,
 	NXN_sub,
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	NXN_symlink,
 #endif
 	NXN_syntaxerror,
 	NXN_system,
 	NXN_systemdict,
 	NXN_tell,
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	NXN_test,
 #endif
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	NXN_thread,
 	NXN_threadtype,
 #endif
 	NXN_threshold,
 	NXN_throw,
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	NXN_timedwait,
 #endif
 	NXN_token,
 	NXN_true,
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	NXN_truncate,
 #endif
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	NXN_trylock,
 #endif
 	NXN_type,
 	NXN_typecheck,
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	NXN_uid,
 #endif
 	NXN_undef,
 	NXN_undefined,
 	NXN_undefinedfilename,
 	NXN_undefinedresult,
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	NXN_unlink,
 #endif
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	NXN_unlock,
 #endif
 	NXN_unmatchedfino,
 	NXN_unmatchedmark,
 	NXN_unregistered,
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	NXN_unsetenv,
 #endif
 	NXN_version,
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	NXN_wait,
 #endif
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	NXN_waitpid,
 #endif
 	NXN_where,
 	NXN_write,
 	NXN_xcheck,
 	NXN_xor
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	,
 	NXN_yield
 #define	NXN_LAST	NXN_yield
@@ -377,25 +377,25 @@ typedef enum {
 #endif
 } cw_nxn_t;
 
-#ifndef _CW_USE_INLINES
+#ifndef CW_USE_INLINES
 const cw_uint8_t *nxn_str(cw_nxn_t a_nxn);
 cw_uint32_t nxn_len(cw_nxn_t a_nxn);
 #endif
 
-#if (defined(_CW_USE_INLINES) || defined(_NXN_C_))
-_CW_INLINE const cw_uint8_t *
+#if (defined(CW_USE_INLINES) || defined(_NXN_C_))
+CW_INLINE const cw_uint8_t *
 nxn_str(cw_nxn_t a_nxn)
 {
-	_cw_assert(a_nxn > NXN_ZERO && a_nxn <= NXN_LAST);
+	cw_assert(a_nxn > NXN_ZERO && a_nxn <= NXN_LAST);
 
 	return cw_g_nx_names[a_nxn];
 }
 
-_CW_INLINE cw_uint32_t
+CW_INLINE cw_uint32_t
 nxn_len(cw_nxn_t a_nxn)
 {
-	_cw_assert(a_nxn > NXN_ZERO && a_nxn <= NXN_LAST);
+	cw_assert(a_nxn > NXN_ZERO && a_nxn <= NXN_LAST);
 
 	return strlen(cw_g_nx_names[a_nxn]);
 }
-#endif	/* (defined(_CW_USE_INLINES) || defined(_NXN_C_)) */
+#endif	/* (defined(CW_USE_INLINES) || defined(_NXN_C_)) */

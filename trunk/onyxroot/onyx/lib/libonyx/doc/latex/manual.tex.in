@@ -122,17 +122,17 @@ interpreter that are executed by the garbage collector during the mark phase
 \libname{libonyx} reserves \htmlref{xep}{xep} exception numbers 0 to 127 and
 defines the following exceptions:
 \begin{description}
-\label{_CW_ONYXX_OOM}
-\item[\cppdef{\_CW\_ONYXX\_OOM}: ]
+\label{CW_ONYXX_OOM}
+\item[\cppdef{CW\_ONYXX\_OOM}: ]
 	Memory allocation error.
-\label{_CW_ONYXX_EXIT}
-\item[\cppdef{\_CW\_ONYXX\_EXIT}: ]
+\label{CW_ONYXX_EXIT}
+\item[\cppdef{CW\_ONYXX\_EXIT}: ]
 	Internal use, for the exit operator.
-\label{_CW_ONYXX_STOP}
-\item[\cppdef{\_CW\_ONYXX\_STOP}: ]
+\label{CW_ONYXX_STOP}
+\item[\cppdef{CW\_ONYXX\_STOP}: ]
 	Internal use, for the stop operator.
-\label{_CW_ONYXX_QUIT}
-\item[\cppdef{\_CW\_ONYXX\_QUIT}: ]
+\label{CW_ONYXX_QUIT}
+\item[\cppdef{CW\_ONYXX\_QUIT}: ]
 	Internal use, for the quit operator.
 \end{description}
 
@@ -216,7 +216,7 @@ behavior and likely crashes.
 	\item[Output(s): ] None.
 	\item[Exception(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{\_CW\_ONYXX\_OOM}{_CW_ONYXX_OOM}.]
+		\item[\htmlref{CW\_ONYXX\_OOM}{CW_ONYXX_OOM}.]
 		\end{description}
 	\item[Description: ]
 		Initialize various global variables.  In particular, initialize
@@ -256,7 +256,7 @@ const char *a\_filename, cw\_uint32\_t a\_line\_num}}
 		\end{description}
 	\item[Exception(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{\_CW\_ONYXX\_OOM}{_CW_ONYXX_OOM}.]
+		\item[\htmlref{CW\_ONYXX\_OOM}{CW_ONYXX_OOM}.]
 		\end{description}
 	\item[Description: ]
 		Allocate \cvar{a\_size} of space and return a pointer to it.
@@ -286,7 +286,7 @@ size\_t a\_size, const char *a\_filename, cw\_uint32\_t a\_line\_num}}
 		\end{description}
 	\item[Exception(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{\_CW\_ONYXX\_OOM}{_CW_ONYXX_OOM}.]
+		\item[\htmlref{CW\_ONYXX\_OOM}{CW_ONYXX_OOM}.]
 		\end{description}
 	\item[Description: ]
 		Allocate \cvar{a\_size} of space and return a pointer to it.
@@ -314,9 +314,9 @@ a\_size, const char *a\_filename, cw\_uint32\_t a\_line\_num}}
 	\item[Description: ]
 		Deallocate the memory pointed to by \cvar{a\_ptr}.
 	\end{capilist}
-\label{_cw_onyx_code}
-\index{_cw_onyx_code@\cppmacro{\_cw\_onyx\_code}{}}
-\citem{\cppmacro[void]{\_cw\_onyx\_code}{cw\_nxo\_t *a\_thread, const char
+\label{cw_onyx_code}
+\index{cw_onyx_code@\cppmacro{cw\_onyx\_code}{}}
+\citem{\cppmacro[void]{cw\_onyx\_code}{cw\_nxo\_t *a\_thread, const char
 *a\_code}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -332,9 +332,9 @@ a\_size, const char *a\_filename, cw\_uint32\_t a\_line\_num}}
 		Convenience macro for static embedded \htmlref{Onyx}{onyxlang}
 		code.
 	\end{capilist}
-\label{_cw_assert}
-\index{_cw_assert@\cppmacro{\_cw\_assert}{}}
-\citem{\cppmacro[void]{\_cw\_assert}{expression}}
+\label{cw_assert}
+\index{cw_assert@\cppmacro{cw\_assert}{}}
+\citem{\cppmacro[void]{cw\_assert}{expression}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -348,12 +348,12 @@ a\_size, const char *a\_filename, cw\_uint32\_t a\_line\_num}}
 		If the expression evaluates to zero, print an error message to
 		file descriptor 2 and \cfunc{abort}{}.
 
-		Note: This macro is only active if the \cppdef{\_CW\_ASSERT} cpp
+		Note: This macro is only active if the \cppdef{CW\_ASSERT} cpp
 		macro is defined.
 	\end{capilist}
-\label{_cw_not_reached}
-\index{_cw_not_reached@\cppmacro{\_cw\_not\_reached}{}}
-\citem{\cppmacro[void]{\_cw\_not\_reached}{void}}
+\label{cw_not_reached}
+\index{cw_not_reached@\cppmacro{cw\_not\_reached}{}}
+\citem{\cppmacro[void]{cw\_not\_reached}{void}}
 	\begin{capilist}
 	\item[Input(s): ] None.
 	\item[Output(s): ]
@@ -362,12 +362,12 @@ a\_size, const char *a\_filename, cw\_uint32\_t a\_line\_num}}
 	\item[Description: ]
 		Abort with an error message.
 
-		Note: This macro is only active if the \cppdef{\_CW\_ASSERT} cpp
+		Note: This macro is only active if the \cppdef{CW\_ASSERT} cpp
 		macro is defined.
 	\end{capilist}
-\label{_cw_check_ptr}
-\index{_cw_check\_ptr@\cppmacro{\_cw\_check\_ptr}{}}
-\citem{\cppmacro[void]{\_cw\_check\_ptr}{a\_pointer}}
+\label{cw_check_ptr}
+\index{cw_check\_ptr@\cppmacro{cw\_check\_ptr}{}}
+\citem{\cppmacro[void]{cw\_check\_ptr}{a\_pointer}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -381,12 +381,12 @@ a\_size, const char *a\_filename, cw\_uint32\_t a\_line\_num}}
 		If \cvar{a\_pointer} is NULL, print an error message to file
 		descriptor 2 and \cfunc{abort}{}.
 
-		Note: This macro is only active if the \cppdef{\_CW\_ASSERT} cpp
+		Note: This macro is only active if the \cppdef{CW\_ASSERT} cpp
 		macro is defined.
 	\end{capilist}
-\label{_cw_error}
-\index{_cw_error@\cppmacro{\_cw\_error}{}}
-\citem{\cppmacro[void]{\_cw\_error}{const char *a\_str}}
+\label{cw_error}
+\index{cw_error@\cppmacro{cw\_error}{}}
+\citem{\cppmacro[void]{cw\_error}{const char *a\_str}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -401,9 +401,9 @@ a\_size, const char *a\_filename, cw\_uint32\_t a\_line\_num}}
 		Print the contents of \cvar{a\_str}, followed by a carriage
 		return, to file descriptor 2.
 	\end{capilist}
-\label{_cw_ntohq}
-\index{_cw_ntohq@\cppmacro{\_cw\_ntohq}{}}
-\citem{\cppmacro[cw\_uint64\_t]{\_cw\_ntohq}{cw\_uint64\_t a\_val}}
+\label{cw_ntohq}
+\index{cw_ntohq@\cppmacro{cw\_ntohq}{}}
+\citem{\cppmacro[cw\_uint64\_t]{cw\_ntohq}{cw\_uint64\_t a\_val}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -420,9 +420,9 @@ a\_size, const char *a\_filename, cw\_uint32\_t a\_line\_num}}
 		Convert \cvar{a\_val} from network byte order to host byte order
 		and return the result.
 	\end{capilist}
-\label{_cw_htonq}
-\index{_cw_htonq@\cppmacro{\_cw\_htonq}{}}
-\citem{\cppmacro[cw\_uint64\_t]{\_cw\_htonq}{cw\_uint64\_t a\_val}}
+\label{cw_htonq}
+\index{cw_htonq@\cppmacro{cw\_htonq}{}}
+\citem{\cppmacro[cw\_uint64\_t]{cw\_htonq}{cw\_uint64\_t a\_val}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]

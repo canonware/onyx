@@ -13,7 +13,7 @@
 
 #include "../include/libonyx/libonyx.h"
 
-#define _CW_TEST_NUM_THREADS 10
+#define CW_TEST_NUM_THREADS 10
 
 struct cw_foo_s {
 	cw_uint32_t	*num_waiting;
@@ -43,7 +43,7 @@ main()
 {
 	cw_cnd_t	cond;
 	cw_mtx_t	mutex;
-	cw_thd_t	*threads[_CW_TEST_NUM_THREADS], *thread;
+	cw_thd_t	*threads[CW_TEST_NUM_THREADS], *thread;
 	struct cw_foo_s	foo_var;
 	struct timespec	timeout;
 	cw_uint32_t	i;
@@ -64,7 +64,7 @@ main()
 	timeout.tv_nsec = 0;
 
 	mtx_lock(&mutex);
-	_cw_assert(cnd_timedwait(&cond, &mutex, &timeout));
+	cw_assert(cnd_timedwait(&cond, &mutex, &timeout));
 	mtx_unlock(&mutex);
 
 	/* Create argument for thd_new(). */
@@ -90,12 +90,12 @@ main()
 
 	/* Test cnd_broadcast. */
 	num_waiting = 0;
-	for (i = 0; i < _CW_TEST_NUM_THREADS; i++)
+	for (i = 0; i < CW_TEST_NUM_THREADS; i++)
 		threads[i] = thd_new(thread_entry_func, (void *)&foo_var, TRUE);
 
 	/* Bad programming practice, but it works for this test. */
 	mtx_lock(&mutex);
-	while (num_waiting < _CW_TEST_NUM_THREADS) {
+	while (num_waiting < CW_TEST_NUM_THREADS) {
 		mtx_unlock(&mutex);
 		usleep(10000);
 		mtx_lock(&mutex);
@@ -104,7 +104,7 @@ main()
 	cnd_broadcast(&cond);
 	mtx_unlock(&mutex);
 
-	for (i = 0; i < _CW_TEST_NUM_THREADS; i++)
+	for (i = 0; i < CW_TEST_NUM_THREADS; i++)
 		thd_join(threads[i]);
 
 	cnd_delete(&cond);

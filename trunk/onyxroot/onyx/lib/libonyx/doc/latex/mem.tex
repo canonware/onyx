@@ -36,8 +36,8 @@ uninitialized or deallocated memory is referenced.
 
 In general, the \classname{mem} class doesn't need to be used directly.
 Instead, there are several preprocessor macros that can be used:
-\cppmacro{\_cw\_malloc}{}, \cppmacro{\_cw\_calloc}{},
-\cppmacro{\_cw\_realloc}{}, and \cppmacro{\_cw\_free}{}.
+\cppmacro{cw\_malloc}{}, \cppmacro{cw\_calloc}{},
+\cppmacro{cw\_realloc}{}, and \cppmacro{cw\_free}{}.
 
 \subsubsection{API}
 \begin{capi}
@@ -61,7 +61,7 @@ Instead, there are several preprocessor macros that can be used:
 		\end{description}
 	\item[Exception(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{\_CW\_ONYXX\_OOM}{_CW_ONYXX_OOM}.]
+		\item[\htmlref{CW\_ONYXX\_OOM}{CW_ONYXX_OOM}.]
 		\end{description}
 	\item[Description: ]
 		Constructor.
@@ -87,9 +87,9 @@ char *a\_filename, cw\_uint32\_t a\_line\_num}}
 \label{mem_malloc}
 \index{mem_malloc@\cfunc{mem\_malloc}{}}
 \citem{\cfunc[void *]{mem\_malloc}{cw\_mem\_t *a\_mem, size\_t a\_size}}
-\label{_cw_malloc}
-\index{_cw_malloc@\cppmacro{\_cw\_malloc}{}}
-\citem{\cppmacro[void *]{\_cw\_malloc}{size\_t a\_size}}
+\label{cw_malloc}
+\index{cw_malloc@\cppmacro{cw\_malloc}{}}
+\citem{\cppmacro[void *]{cw\_malloc}{size\_t a\_size}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -109,7 +109,7 @@ char *a\_filename, cw\_uint32\_t a\_line\_num}}
 		\end{description}
 	\item[Exception(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{\_CW\_ONYXX\_OOM}{_CW_ONYXX_OOM}.]
+		\item[\htmlref{CW\_ONYXX\_OOM}{CW_ONYXX_OOM}.]
 		\end{description}
 	\item[Description: ]
 		\cfunc{malloc}{} wrapper.
@@ -122,9 +122,9 @@ size\_t a\_size, const char *a\_filename, cw\_uint32\_t a\_line\_num}}
 \index{mem_calloc@\cfunc{mem\_calloc}{}}
 \citem{\cfunc[void *]{mem\_calloc}{cw\_mem\_t *a\_mem, size\_t a\_number,
 size\_t a\_size}}
-\label{_cw_calloc}
-\index{_cw_calloc@\cppmacro{\_cw\_calloc}{}}
-\citem{\cppmacro[void *]{\_cw\_calloc}{size\_t a\_number, size\_t a\_size}}
+\label{cw_calloc}
+\index{cw_calloc@\cppmacro{cw\_calloc}{}}
+\citem{\cppmacro[void *]{cw\_calloc}{size\_t a\_number, size\_t a\_size}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -146,7 +146,7 @@ size\_t a\_size}}
 		\end{description}
 	\item[Exception(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{\_CW\_ONYXX\_OOM}{_CW_ONYXX_OOM}.]
+		\item[\htmlref{CW\_ONYXX\_OOM}{CW_ONYXX_OOM}.]
 		\end{description}
 	\item[Description: ]
 		\cfunc{calloc}{} wrapper.
@@ -160,9 +160,9 @@ a\_line\_num}}
 \index{mem_realloc@\cfunc{mem\_realloc}{}}
 \citem{\cfunc[void *]{mem\_realloc}{cw\_mem\_t *a\_mem, void *a\_ptr, size\_t
 a\_size}}
-\label{_cw_realloc}
-\index{_cw_realloc@\cppmacro{\_cw\_realloc}{}}
-\citem{\cppmacro[void *]{\_cw\_realloc}{void *a\_ptr, size\_t a\_size}}
+\label{cw_realloc}
+\index{cw_realloc@\cppmacro{cw\_realloc}{}}
+\citem{\cppmacro[void *]{cw\_realloc}{void *a\_ptr, size\_t a\_size}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -187,7 +187,7 @@ a\_size}}
 		\end{description}
 	\item[Exception(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{\_CW\_ONYXX\_OOM}{_CW_ONYXX_OOM}.]
+		\item[\htmlref{CW\_ONYXX\_OOM}{CW_ONYXX_OOM}.]
 		\end{description}
 	\item[Description: ]
 		\cfunc{realloc}{} wrapper.
@@ -200,9 +200,9 @@ a\_size, const char *a\_filename, cw\_uint32\_t a\_line\_num}}
 \index{mem_free@\cfunc{mem\_free}{}}
 \citem{\cfunc[void]{mem\_free}{cw\_mem\_t *a\_mem, void *a\_ptr, size\_t
 a\_size}}
-\label{_cw_free}
-\index{_cw_free@\cppmacro{\_cw\_free}{}}
-\citem{\cppmacro[void]{\_cw\_free}{void *a\_ptr}}
+\label{cw_free}
+\index{cw_free@\cppmacro{cw\_free}{}}
+\citem{\cppmacro[void]{cw\_free}{void *a\_ptr}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]

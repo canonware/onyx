@@ -11,7 +11,7 @@
 
 #include "../include/libonyx/libonyx.h"
 
-#define	_CW_NX_ENVDICT_SIZE	128
+#define	CW_NX_ENVDICT_SIZE	128
 
 void
 envdict_l_populate(cw_nxo_t *a_dict, cw_nx_t *a_nx, char **a_envp)
@@ -22,7 +22,7 @@ envdict_l_populate(cw_nxo_t *a_dict, cw_nx_t *a_nx, char **a_envp)
 	cw_uint32_t	key_len, val_len;
 	cw_nxo_t	key_nxo, val_nxo;
 
-	nxo_dict_new(a_dict, a_nx, TRUE, _CW_NX_ENVDICT_SIZE);
+	nxo_dict_new(a_dict, a_nx, TRUE, CW_NX_ENVDICT_SIZE);
 
 	if (a_envp != NULL) {
 		/*
@@ -42,11 +42,11 @@ envdict_l_populate(cw_nxo_t *a_dict, cw_nx_t *a_nx, char **a_envp)
 			val_len = strlen(val_str);
 			nxo_string_new(&val_nxo, a_nx, TRUE, val_len);
 			t_str = nxo_string_get(&val_nxo);
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 			nxo_string_lock(&val_nxo);
 #endif
 			memcpy(t_str, val_str, val_len);
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 			nxo_string_unlock(&val_nxo);
 #endif
 

@@ -59,12 +59,12 @@ main()
 		count = i;
 		nanosleep(&tout, NULL);
 /*  		fprintf(stderr, "count(%u) == i(%u)\n", count, i); */
-		_cw_assert(count == i);
+		cw_assert(count == i);
 		thd_resume(thd);
 		nanosleep(&tout, NULL);
 		thd_suspend(thd);
 /*  		fprintf(stderr, "count(%u) != i(%u)\n", count, i); */
-		_cw_assert(count != i);
+		cw_assert(count != i);
 		thd_resume(thd);
 	}
 	
@@ -74,12 +74,12 @@ main()
 		count = i;
 		nanosleep(&tout, NULL);
 /*  		fprintf(stderr, "count(%u) == i(%u)\n", count, i); */
-		_cw_assert(count == i);
+		cw_assert(count == i);
 		thd_resume(thd);
 		nanosleep(&tout, NULL);
 		while (thd_trysuspend(thd));
 /*  		fprintf(stderr, "count(%u) != i(%u)\n", count, i); */
-		_cw_assert(count != i);
+		cw_assert(count != i);
 		thd_resume(thd);
 	}
 	done = TRUE;

@@ -28,9 +28,9 @@ typedef enum {
 } cw_bufw_t;
 
 struct cw_bufm_s {
-#ifdef _CW_DBG
+#ifdef CW_DBG
 	cw_uint32_t	magic;
-#define _CW_BUFM_MAGIC	0x2e84a3c9
+#define CW_BUFM_MAGIC	0x2e84a3c9
 #endif
 
 	ql_elm(cw_bufm_t) link;		/* Ordered bufm list linkage. */
@@ -44,11 +44,11 @@ struct cw_bufm_s {
 	cw_uint64_t	line;		/* Always kept up to date. */
 };
 
-#define	_CW_BUF_MINELMS		4096
+#define	CW_BUF_MINELMS		4096
 struct cw_buf_s {
-#ifdef _CW_DBG
+#ifdef CW_DBG
 	cw_uint32_t	magic;
-#define _CW_BUF_MAGIC	0x348279bd
+#define CW_BUF_MAGIC	0x348279bd
 #endif
 
 	/* Allocator state. */

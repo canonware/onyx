@@ -995,7 +995,7 @@ done
 
   if test "x$have_mthreads" = "x1" ; then
     cat >> confdefs.h <<\EOF
-#define _CW_MTHREADS 1
+#define CW_MTHREADS 1
 EOF
 
   fi
@@ -1141,7 +1141,7 @@ fi
   if test "x$have_sthreads" = "x1" ; then
     LIBS="$LIBS -lthread"
     cat >> confdefs.h <<\EOF
-#define _CW_STHREADS 1
+#define CW_STHREADS 1
 EOF
 
   fi
@@ -1272,11 +1272,11 @@ fi
 
   if test "x$enable_threads" = "x1" ; then
     cat >> confdefs.h <<\EOF
-#define _CW_THREADS 1
+#define CW_THREADS 1
 EOF
 
     cat >> confdefs.h <<\EOF
-#define _CW_PTHREADS 1
+#define CW_PTHREADS 1
 EOF
 
   fi
@@ -1396,7 +1396,7 @@ done
 
   if test "x$have_fthreads" = "x1" ; then
     cat >> confdefs.h <<\EOF
-#define _CW_FTHREADS 1
+#define CW_FTHREADS 1
 EOF
 
   fi
@@ -1422,7 +1422,7 @@ fi
 
 if test "x$enable_posix_file" = "x1" ; then
   cat >> confdefs.h <<\EOF
-#define _CW_POSIX_FILE 1
+#define CW_POSIX_FILE 1
 EOF
 
 fi
@@ -1450,7 +1450,7 @@ fi
 
 if test "x$enable_posix" = "x1" ; then
   cat >> confdefs.h <<\EOF
-#define _CW_POSIX 1
+#define CW_POSIX 1
 EOF
 
 fi
@@ -1473,7 +1473,7 @@ fi
 
 if test "x$enable_inlines" = "x1" ; then
   cat >> confdefs.h <<\EOF
-#define _CW_USE_INLINES 1
+#define CW_USE_INLINES 1
 EOF
 
 fi
@@ -1584,7 +1584,7 @@ fi
 
 if test "x$enable_libonyx" = "x1" ; then
   cat >> confdefs.h <<\EOF
-#define _CW_USE_LIBONYX 1
+#define CW_USE_LIBONYX 1
 EOF
 
 fi
@@ -1877,7 +1877,7 @@ fi
 
 if test "x$enable_libedit" = "x1" ; then
   cat >> confdefs.h <<\EOF
-#define _CW_USE_LIBEDIT 1
+#define CW_USE_LIBEDIT 1
 EOF
 
 fi
@@ -1942,7 +1942,7 @@ fi
 
 if test "x$enable_onyx" = "x1" ; then
   cat >> confdefs.h <<\EOF
-#define _CW_USE_ONYX 1
+#define CW_USE_ONYX 1
 EOF
 
 fi
@@ -1967,7 +1967,7 @@ fi
 
 if test "x$enable_slate" = "x1" ; then
   cat >> confdefs.h <<\EOF
-#define _CW_USE_SLATE 1
+#define CW_USE_SLATE 1
 EOF
 
 fi
@@ -1990,11 +1990,11 @@ fi
 
 if test "x$enable_debug" = "x1" ; then
   cat >> confdefs.h <<\EOF
-#define _CW_DBG 1
+#define CW_DBG 1
 EOF
 
   cat >> confdefs.h <<\EOF
-#define _CW_ASSERT 1
+#define CW_ASSERT 1
 EOF
 
 fi
@@ -2302,7 +2302,7 @@ echo "$ac_t""$host" 1>&6
 case "${host}" in
   *-*-darwin*)
 	cat >> confdefs.h <<\EOF
-#define _CW_OS_DARWIN 
+#define CW_OS_DARWIN 
 EOF
 
 	abi="macho"
@@ -2310,7 +2310,7 @@ EOF
 	;;
   *-*-freebsd*)
 	cat >> confdefs.h <<\EOF
-#define _CW_OS_FREEBSD 
+#define CW_OS_FREEBSD 
 EOF
 
 	abi="elf"
@@ -2318,7 +2318,7 @@ EOF
         ;;
   *-*-linux*)
 	cat >> confdefs.h <<\EOF
-#define _CW_OS_LINUX 
+#define CW_OS_LINUX 
 EOF
 
 	abi="elf"
@@ -2326,7 +2326,7 @@ EOF
         ;;
   *-*-solaris2*)
 	cat >> confdefs.h <<\EOF
-#define _CW_OS_SOLARIS 
+#define CW_OS_SOLARIS 
 EOF
 
 	cat >> confdefs.h <<\EOF
@@ -3758,7 +3758,7 @@ if { (eval echo configure:3758: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && t
   rm -rf conftest*
   echo "$ac_t""yes" 1>&6
    cat >> confdefs.h <<\EOF
-#define _CW_LIBONYX_USE_DIRENT_RECLEN 1
+#define CW_LIBONYX_USE_DIRENT_RECLEN 1
 EOF
 
 else
@@ -3834,23 +3834,23 @@ if test "x$build_onyx" = "xyes" ; then
   cfgoutputs="$cfgoutputs doc/latex/onyx.tex"
 
   if test "x$prefix" = "xNONE" ; then
-    _CW_ONYX_RPATH="/usr/local/share/onyx/nxcode"
-    _CW_ONYX_MPATH="/usr/local/share/onyx/nxmod"
+    CW_ONYX_RPATH="/usr/local/share/onyx/nxcode"
+    CW_ONYX_MPATH="/usr/local/share/onyx/nxmod"
   else
-    _CW_ONYX_RPATH="$prefix/share/onyx/nxcode"
-    _CW_ONYX_MPATH="$prefix/share/onyx/nxmod"
+    CW_ONYX_RPATH="$prefix/share/onyx/nxcode"
+    CW_ONYX_MPATH="$prefix/share/onyx/nxmod"
   fi
   cat >> confdefs.h <<EOF
-#define _CW_ONYX_RPATH "$_CW_ONYX_RPATH"
+#define CW_ONYX_RPATH "$CW_ONYX_RPATH"
 EOF
 
   cat >> confdefs.h <<EOF
-#define _CW_ONYX_MPATH "$_CW_ONYX_MPATH"
+#define CW_ONYX_MPATH "$CW_ONYX_MPATH"
 EOF
 
 
   cat >> confdefs.h <<EOF
-#define _CW_TONYX_ONYX "$abs_objdir/bin/onyx/bin/onyx"
+#define CW_TONYX_ONYX "$abs_objdir/bin/onyx/bin/onyx"
 EOF
 
 
@@ -3861,11 +3861,11 @@ EOF
     trpath=$trpath:$abs_objdir/mod/$i/src
   done
   cat >> confdefs.h <<EOF
-#define _CW_TONYX_RPATH "$trpath"
+#define CW_TONYX_RPATH "$trpath"
 EOF
 
   cat >> confdefs.h <<EOF
-#define _CW_TONYX_MPATH "$tmpath"
+#define CW_TONYX_MPATH "$tmpath"
 EOF
 
 fi

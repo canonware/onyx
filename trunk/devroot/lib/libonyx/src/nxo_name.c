@@ -20,7 +20,7 @@ nxo_name_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_uint8_t *a_str,
     cw_uint32_t a_len, cw_bool_t a_is_static)
 {
 	cw_nxoe_name_t		*name, key;
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	cw_mtx_t		*name_lock;
 #endif
 	cw_dch_t		*name_hash;
@@ -31,7 +31,7 @@ nxo_name_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_uint8_t *a_str,
 	key.str = a_str;
 	key.len = a_len;
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	name_lock = nx_l_name_lock_get(a_nx);
 #endif
 	name_hash = nx_l_name_hash_get(a_nx);
@@ -40,7 +40,7 @@ nxo_name_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_uint8_t *a_str,
 	 * Look in the global hash for the name.  If the name doesn't exist,
 	 * create it.
 	 */
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	mtx_lock(name_lock);
 	thd_crit_enter();
 #endif
@@ -83,7 +83,7 @@ nxo_name_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_uint8_t *a_str,
 
 		do_register = FALSE;
 	}
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	thd_crit_leave();
 #endif
 
@@ -94,7 +94,7 @@ nxo_name_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_uint8_t *a_str,
 	if (do_register)
 		nxa_l_gc_register(nx_nxa_get(a_nx), (cw_nxoe_t *)name);
 		
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	mtx_unlock(name_lock);
 #endif
 }
@@ -103,7 +103,7 @@ cw_bool_t
 nxoe_l_name_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
 {
 	cw_nxoe_name_t	*name;
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	cw_mtx_t	*name_lock;
 #endif
 	cw_dch_t	*name_hash;
@@ -114,12 +114,12 @@ nxoe_l_name_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
 
 	nx = nxa_nx_get(a_nxa);
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	name_lock = nx_l_name_lock_get(nx);
 #endif
 	name_hash = nx_l_name_hash_get(nx);
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	mtx_lock(name_lock);
 #endif
 	/*
@@ -148,7 +148,7 @@ nxoe_l_name_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
 		a_nxoe->registered = FALSE;
 		nxa_l_gc_register(a_nxa, a_nxoe);
 	}
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	mtx_unlock(name_lock);
 #endif
 
@@ -173,7 +173,7 @@ nxo_l_name_hash(const void *a_key)
 	cw_nxoe_name_t	*key = (cw_nxoe_name_t *)a_key;
 	const char	*str;
 
-	_cw_check_ptr(a_key);
+	cw_check_ptr(a_key);
 
 	for (i = 0, str = key->str, retval = 0; i < key->len; i++, str++)
 		retval = retval * 33 + *str;
@@ -189,8 +189,8 @@ nxo_l_name_key_comp(const void *a_k1, const void *a_k2)
 	cw_nxoe_name_t	*k2 = (cw_nxoe_name_t *)a_k2;
 	size_t		len;
 
-	_cw_check_ptr(a_k1);
-	_cw_check_ptr(a_k2);
+	cw_check_ptr(a_k1);
+	cw_check_ptr(a_k2);
 
 	if (k1->len > k2->len)
 		len = k1->len;
@@ -206,15 +206,15 @@ nxo_name_str_get(cw_nxo_t *a_nxo)
 	const cw_uint8_t	*retval;
 	cw_nxoe_name_t		*name;
 
-	_cw_check_ptr(a_nxo);
-	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(nxo_type_get(a_nxo) == NXOT_NAME);
+	cw_check_ptr(a_nxo);
+	cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+	cw_assert(nxo_type_get(a_nxo) == NXOT_NAME);
 
 	name = (cw_nxoe_name_t *)a_nxo->o.nxoe;
 
-	_cw_check_ptr(name);
-	_cw_dassert(name->nxoe.magic == _CW_NXOE_MAGIC);
-	_cw_assert(name->nxoe.type == NXOT_NAME);
+	cw_check_ptr(name);
+	cw_dassert(name->nxoe.magic == CW_NXOE_MAGIC);
+	cw_assert(name->nxoe.type == NXOT_NAME);
 
 	retval = name->str;
 
@@ -227,15 +227,15 @@ nxo_name_len_get(cw_nxo_t *a_nxo)
 	cw_uint32_t	retval;
 	cw_nxoe_name_t	*name;
 
-	_cw_check_ptr(a_nxo);
-	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(nxo_type_get(a_nxo) == NXOT_NAME);
+	cw_check_ptr(a_nxo);
+	cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+	cw_assert(nxo_type_get(a_nxo) == NXOT_NAME);
 
 	name = (cw_nxoe_name_t *)a_nxo->o.nxoe;
 
-	_cw_check_ptr(name);
-	_cw_dassert(name->nxoe.magic == _CW_NXOE_MAGIC);
-	_cw_assert(name->nxoe.type == NXOT_NAME);
+	cw_check_ptr(name);
+	cw_dassert(name->nxoe.magic == CW_NXOE_MAGIC);
+	cw_assert(name->nxoe.type == NXOT_NAME);
 
 	retval = name->len;
 

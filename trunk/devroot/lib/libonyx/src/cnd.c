@@ -19,7 +19,7 @@ cnd_new(cw_cnd_t *a_cnd)
 {
 	int	error;
 
-	_cw_check_ptr(a_cnd);
+	cw_check_ptr(a_cnd);
 
 	error = pthread_cond_init(&a_cnd->condition, NULL);
 	if (error) {
@@ -34,7 +34,7 @@ cnd_delete(cw_cnd_t *a_cnd)
 {
 	int	error;
 
-	_cw_check_ptr(a_cnd);
+	cw_check_ptr(a_cnd);
 
 	error = pthread_cond_destroy(&a_cnd->condition);
 	if (error) {
@@ -49,7 +49,7 @@ cnd_signal(cw_cnd_t *a_cnd)
 {
 	int	error;
 
-	_cw_check_ptr(a_cnd);
+	cw_check_ptr(a_cnd);
 
 	error = pthread_cond_signal(&a_cnd->condition);
 	if (error) {
@@ -64,7 +64,7 @@ cnd_broadcast(cw_cnd_t *a_cnd)
 {
 	int	error;
 
-	_cw_check_ptr(a_cnd);
+	cw_check_ptr(a_cnd);
 
 	error = pthread_cond_broadcast(&a_cnd->condition);
 	if (error) {
@@ -84,9 +84,9 @@ cnd_timedwait(cw_cnd_t *a_cnd, cw_mtx_t *a_mtx, const struct timespec
 	struct timespec	timeout;
 	struct timezone	tz;
 
-        _cw_check_ptr(a_cnd);
-        _cw_check_ptr(a_mtx);
-        _cw_check_ptr(a_timeout);
+        cw_check_ptr(a_cnd);
+        cw_check_ptr(a_mtx);
+        cw_check_ptr(a_timeout);
 
 	/* Set timeout. */
         memset(&tz, 0, sizeof(struct timezone));
@@ -124,8 +124,8 @@ cnd_wait(cw_cnd_t *a_cnd, cw_mtx_t *a_mtx)
 {
 	int	error;
 
-	_cw_check_ptr(a_cnd);
-	_cw_check_ptr(a_mtx);
+	cw_check_ptr(a_cnd);
+	cw_check_ptr(a_mtx);
 
 	error = pthread_cond_wait(&a_cnd->condition, &a_mtx->mutex);
 	if (error) {

@@ -74,7 +74,7 @@ test_distclean :
 [objdir]/%0test/%1.o_a : [srcdir]/%0test/%1.c
   set mkdir
 {
-  [CC] [A_CFLAGS] [CPPFLAGS] [CPPDEFS] -D_CW_ASSERT
+  [CC] [A_CFLAGS] [CPPFLAGS] [CPPDEFS] -DCW_ASSERT
     -c [srcdir]/%0test/%1.c -o [target];
 
   c_incl [CPPFLAGS] --no-cache -Absent_Local_Ignore -No_System

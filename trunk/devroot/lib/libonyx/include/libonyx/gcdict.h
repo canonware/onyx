@@ -11,11 +11,11 @@
 
 void	gcdict_active(cw_nxo_t *a_thread);
 void	gcdict_collect(cw_nxo_t *a_thread);
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 void	gcdict_period(cw_nxo_t *a_thread);
 #endif
 void	gcdict_setactive(cw_nxo_t *a_thread);
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 void	gcdict_setperiod(cw_nxo_t *a_thread);
 #endif
 void	gcdict_setthreshold(cw_nxo_t *a_thread);

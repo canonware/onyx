@@ -32,7 +32,7 @@
 #include "../include/libonyx/nxo_thread_l.h"
 
 /* Initial size of dictionaries created with the dict operator. */
-#define	_CW_SYSTEMDICT_DICT_SIZE	16
+#define	CW_SYSTEMDICT_DICT_SIZE	16
 
 struct cw_systemdict_entry {
 	cw_nxn_t	nxn;
@@ -45,7 +45,7 @@ struct cw_systemdict_entry {
  * operator comparison easier.  Therefore, use NULL pointers to allow the
  * operator functions to be stripped.
 */
-#ifdef _CW_USE_INLINES
+#ifdef CW_USE_INLINES
 #define ENTRY(name)	{NXN_##name, NULL}
 #else
 #define ENTRY(name)	{NXN_##name, systemdict_##name}
@@ -76,12 +76,12 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(array),
 	ENTRY(begin),
 	ENTRY(bind),
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	ENTRY(broadcast),
 #endif
 	ENTRY(bytesavailable),
 	ENTRY(catenate),
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	ENTRY(cd),
 	ENTRY(chmod),
 	ENTRY(chown),
@@ -89,10 +89,10 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(clear),
 	ENTRY(cleardstack),
 	ENTRY(cleartomark),
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	ENTRY(close),
 #endif
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	ENTRY(condition),
 #endif
 	ENTRY(copy),
@@ -101,7 +101,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(countestack),
 	ENTRY(counttomark),
 	ENTRY(currentdict),
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	ENTRY(currentlocking),
 #endif
 	ENTRY(cve),
@@ -111,28 +111,28 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(cvs),
 	ENTRY(cvx),
 	ENTRY(def),
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	ENTRY(detach),
 #endif
 	ENTRY(dict),
 	ENTRY(die),
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	ENTRY(dirforeach),
 #endif
 	ENTRY(div),
 	ENTRY(dstack),
 	ENTRY(echeck),
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	ENTRY(egid),
 #endif
 	ENTRY(end),
 	ENTRY(eq),
 	ENTRY(estack),
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	ENTRY(euid),
 #endif
 	ENTRY(eval),
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	ENTRY(exec),
 #endif
 	ENTRY(exit),
@@ -141,13 +141,13 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(flushfile),
 	ENTRY(for),
 	ENTRY(foreach),
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	ENTRY(fork),
 #endif
 	ENTRY(ge),
 	ENTRY(get),
 	ENTRY(getinterval),
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	ENTRY(gid),
 #endif
 	ENTRY(gt),
@@ -156,36 +156,36 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(ifelse),
 	ENTRY(iobuf),
 	ENTRY(istack),
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	ENTRY(join),
 #endif
 	ENTRY(known),
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	ENTRY(lcheck),
 #endif
 	ENTRY(le),
 	ENTRY(length),
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	ENTRY(link),
 #endif
 	ENTRY(load),
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	ENTRY(lock),
 #endif
 	ENTRY(loop),
 	ENTRY(lt),
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	ENTRY(mkdir),
 #endif
 	ENTRY(mod),
 #ifdef HAVE_DLOPEN
 	ENTRY(modload),
 #endif
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	ENTRY(monitor),
 #endif
 	ENTRY(mul),
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	ENTRY(mutex),
 #endif
 	ENTRY(ndup),
@@ -193,32 +193,32 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(neg),
 	ENTRY(not),
 	ENTRY(npop),
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	ENTRY(nsleep),
 	ENTRY(open),
 #endif
 	ENTRY(or),
 	ENTRY(ostack),
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	ENTRY(pid),
 	ENTRY(ppid),
 #endif
 	ENTRY(print),
 	ENTRY(put),
 	ENTRY(putinterval),
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	ENTRY(pwd),
 #endif
 	ENTRY(quit),
 	ENTRY(rand),
 	ENTRY(read),
 	ENTRY(readline),
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	ENTRY(realtime),
 	ENTRY(rename),
 #endif
 	ENTRY(repeat),
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	ENTRY(rmdir),
 #endif
 	ENTRY(sclear),
@@ -226,40 +226,40 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(scount),
 	ENTRY(scounttomark),
 	ENTRY(sdup),
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	ENTRY(seek),
 #endif
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	ENTRY(self),
 #endif
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	ENTRY(setegid),
 	ENTRY(setenv),
 	ENTRY(seteuid),
 	ENTRY(setgid),
 #endif
 	ENTRY(setiobuf),
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	ENTRY(setlocking),
 #endif
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	ENTRY(setuid),
 #endif
 	ENTRY(sexch),
 	ENTRY(shift),
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	ENTRY(signal),
 #endif
 	ENTRY(sindex),
 	ENTRY(spop),
 	ENTRY(spush),
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	ENTRY(srand),
 #endif
 	ENTRY(sroll),
 	ENTRY(stack),
 	ENTRY(start),
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	ENTRY(status),
 #endif
 	ENTRY(stderr),
@@ -274,49 +274,49 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(sym_rp),
 	ENTRY(sym_gt),
 	ENTRY(sym_rb),
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	ENTRY(symlink),
 #endif
 	ENTRY(tell),
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	ENTRY(test),
 #endif
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	ENTRY(thread),
 	ENTRY(timedwait),
 #endif
 	ENTRY(token),
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	ENTRY(truncate),
 #endif
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	ENTRY(trylock),
 #endif
 	ENTRY(type),
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	ENTRY(uid),
 #endif
 	ENTRY(undef),
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	ENTRY(unlink),
 #endif
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	ENTRY(unlock),
 #endif
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	ENTRY(unsetenv),
 #endif
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	ENTRY(wait),
 #endif
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	ENTRY(waitpid),
 #endif
 	ENTRY(where),
 	ENTRY(write),
 	ENTRY(xcheck),
 	ENTRY(xor)
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	,
 	ENTRY(yield)
 #endif
@@ -336,7 +336,7 @@ systemdict_l_populate(cw_nxo_t *a_dict, cw_nx_t *a_nx, int a_argc, char
 #define	NSPARE	 8
 
 /* Number of names that are defined below, but not as operators. */
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 #define	NEXTRA	12
 #else
 #define	NEXTRA	11
@@ -395,7 +395,7 @@ systemdict_l_populate(cw_nxo_t *a_dict, cw_nx_t *a_nx, int a_argc, char
 	nxo_dup(&value, nxa_gcdict_get(nx_nxa_get(a_nx)));
 	nxo_dict_def(a_dict, a_nx, &name, &value);
 
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 	/* envdict. */
 	nxo_name_new(&name, a_nx, nxn_str(NXN_envdict), nxn_len(NXN_envdict),
 	    TRUE);
@@ -465,7 +465,7 @@ systemdict_l_populate(cw_nxo_t *a_dict, cw_nx_t *a_nx, int a_argc, char
 	nxo_null_new(&value);
 	nxo_dict_def(a_dict, a_nx, &name, &value);
 
-	_cw_assert(nxo_dict_count(a_dict) == NFASTOPS + NOPS + NEXTRA);
+	cw_assert(nxo_dict_count(a_dict) == NFASTOPS + NOPS + NEXTRA);
 #undef NOPS
 #undef NFASTOPS
 #undef NEXTRA
@@ -490,7 +490,7 @@ systemdict_abs(cw_nxo_t *a_thread)
 		nxo_integer_set(a, -nxo_integer_get(a));
 }
 
-#ifdef _CW_USE_INLINES
+#ifdef CW_USE_INLINES
 void
 systemdict_add(cw_nxo_t *a_thread)
 {
@@ -649,7 +649,7 @@ systemdict_bind(cw_nxo_t *a_thread)
 		systemdict_p_bind(array, a_thread);
 }
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 void
 systemdict_broadcast(cw_nxo_t *a_thread)
 {
@@ -775,13 +775,13 @@ systemdict_catenate(cw_nxo_t *a_thread)
 
 		break;
 	default:
-		_cw_not_reached();
+		cw_not_reached();
 	}
 
 	nxo_stack_npop(ostack, 2);
 }
 
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 void
 systemdict_cd(cw_nxo_t *a_thread)
 {
@@ -1020,7 +1020,7 @@ systemdict_cleartomark(cw_nxo_t *a_thread)
 	nxo_stack_npop(ostack, i + 1);
 }
 
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 void
 systemdict_close(cw_nxo_t *a_thread)
 {
@@ -1046,7 +1046,7 @@ systemdict_close(cw_nxo_t *a_thread)
 }
 #endif
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 void
 systemdict_condition(cw_nxo_t *a_thread)
 {
@@ -1218,7 +1218,7 @@ systemdict_currentdict(cw_nxo_t *a_thread)
 	nxo_dup(nxo, nxo_stack_get(dstack));
 }
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 void
 systemdict_currentlocking(cw_nxo_t *a_thread)
 {
@@ -1368,7 +1368,7 @@ systemdict_cvrs(cw_nxo_t *a_thread)
 	val = nxo_integer_get(num);
 
 	rlen = systemdict_p_integer_render(val, base, result);
-	_cw_assert(rlen <= 65);
+	cw_assert(rlen <= 65);
 
 	nxo_string_new(num, nxo_thread_nx_get(a_thread),
 	    nxo_thread_currentlocking(a_thread), rlen);
@@ -1392,7 +1392,7 @@ systemdict_cvs(cw_nxo_t *a_thread)
 
 	switch (nxo_type_get(nxo)) {
 	case NXOT_BOOLEAN:
-		_cw_onyx_code(a_thread, "{`true'} {`false'} ifelse");
+		cw_onyx_code(a_thread, "{`true'} {`false'} ifelse");
 		break;
 	case NXOT_INTEGER: {
 		cw_uint8_t	result[21];
@@ -1432,12 +1432,12 @@ systemdict_cvs(cw_nxo_t *a_thread)
 
 		nxn = nxo_l_operator_fast_op_nxn(nxo);
 		if (nxn == NXN_ZERO)
-			_cw_onyx_code(a_thread, "pop `-operator-'");
+			cw_onyx_code(a_thread, "pop `-operator-'");
 		else {
 			cw_nxo_t	*tstack;
 			cw_nxo_t	*tnxo;
 
-			_cw_assert(nxn <= NXN_LAST);
+			cw_assert(nxn <= NXN_LAST);
 			tstack = nxo_thread_tstack_get(a_thread);
 			tnxo = nxo_stack_push(tstack);
 			nxo_dup(tnxo, nxo);
@@ -1562,7 +1562,7 @@ systemdict_cvs(cw_nxo_t *a_thread)
 		break;
 	}
 	case NXOT_ARRAY:
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	case NXOT_CONDITION:
 #endif
 	case NXOT_DICT:
@@ -1570,18 +1570,18 @@ systemdict_cvs(cw_nxo_t *a_thread)
 	case NXOT_FINO:
 	case NXOT_HOOK:
 	case NXOT_MARK:
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	case NXOT_MUTEX:
 #endif
 	case NXOT_NULL:
 	case NXOT_PMARK:
 	case NXOT_STACK:
 	case NXOT_THREAD:
-		_cw_onyx_code(a_thread, "pop `--nostringval--'");
+		cw_onyx_code(a_thread, "pop `--nostringval--'");
 		break;
 	case NXOT_NO:
 	default:
-		_cw_not_reached();
+		cw_not_reached();
 	}
 }
 
@@ -1614,7 +1614,7 @@ systemdict_def(cw_nxo_t *a_thread)
 	nxo_stack_npop(ostack, 2);
 }
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 void
 systemdict_detach(cw_nxo_t *a_thread)
 {
@@ -1644,7 +1644,7 @@ systemdict_dict(cw_nxo_t *a_thread)
 
 	dict = nxo_stack_push(ostack);
 	nxo_dict_new(dict, nxo_thread_nx_get(a_thread),
-	    nxo_thread_currentlocking(a_thread), _CW_SYSTEMDICT_DICT_SIZE);
+	    nxo_thread_currentlocking(a_thread), CW_SYSTEMDICT_DICT_SIZE);
 }
 
 void
@@ -1670,7 +1670,7 @@ systemdict_die(cw_nxo_t *a_thread)
 	exit(ecode);
 }
 
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 void
 systemdict_dirforeach(cw_nxo_t *a_thread)
 {
@@ -1744,7 +1744,7 @@ systemdict_dirforeach(cw_nxo_t *a_thread)
  * OSes don't agree on field naming.  Try using d_reclen instead of d_namlen if
  * d_namlen isn't in struct dirent.
  */
-#ifdef _CW_LIBONYX_USE_DIRENT_RECLEN
+#ifdef CW_LIBONYX_USE_DIRENT_RECLEN
 #define	d_namlen	d_reclen
 #endif
 			/*
@@ -1773,7 +1773,7 @@ systemdict_dirforeach(cw_nxo_t *a_thread)
 			nxo_thread_nerror(a_thread, NXN_ioerror);
 		}
 	}
-	xep_catch(_CW_ONYXX_EXIT) {
+	xep_catch(CW_ONYXX_EXIT) {
 		cw_nxo_t	*istack;
 
 		xep_handled();
@@ -1836,7 +1836,7 @@ systemdict_dstack(cw_nxo_t *a_thread)
 	nxo_stack_copy(stack, dstack);
 }
 
-#ifdef _CW_USE_INLINES
+#ifdef CW_USE_INLINES
 void
 systemdict_dup(cw_nxo_t *a_thread)
 {
@@ -1859,7 +1859,7 @@ systemdict_echeck(cw_nxo_t *a_thread)
 		nxo_boolean_new(nxo, FALSE);
 }
 
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 void
 systemdict_egid(cw_nxo_t *a_thread)
 {
@@ -1925,7 +1925,7 @@ systemdict_estack(cw_nxo_t *a_thread)
 	nxo_stack_copy(stack, estack);
 }
 
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 void
 systemdict_euid(cw_nxo_t *a_thread)
 {
@@ -1954,7 +1954,7 @@ systemdict_eval(cw_nxo_t *a_thread)
 	nxo_thread_loop(a_thread);
 }
 
-#ifdef _CW_USE_INLINES
+#ifdef CW_USE_INLINES
 void
 systemdict_exch(cw_nxo_t *a_thread)
 {
@@ -1962,7 +1962,7 @@ systemdict_exch(cw_nxo_t *a_thread)
 }
 #endif
 
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 void
 systemdict_exec(cw_nxo_t *a_thread)
 {
@@ -2011,7 +2011,7 @@ systemdict_exec(cw_nxo_t *a_thread)
 		goto PATH_ERROR;
 	}
 	slen = nxo_string_len_get(el);
-	path = (char *)_cw_malloc(slen + 1);
+	path = (char *)cw_malloc(slen + 1);
 	nxo_string_lock(el);
 	memcpy(path, nxo_string_get(el), slen);
 	nxo_string_unlock(el);
@@ -2020,7 +2020,7 @@ systemdict_exec(cw_nxo_t *a_thread)
 	/*
 	 * Construct argv.
 	 */
-	argv = (char **)_cw_malloc(sizeof(char *) * (argc + 1));
+	argv = (char **)cw_malloc(sizeof(char *) * (argc + 1));
 	for (i = 0; i < argc; i++) {
 		nxo_array_el_get(array, i, el);
 		if (nxo_type_get(el) != NXOT_STRING) {
@@ -2028,7 +2028,7 @@ systemdict_exec(cw_nxo_t *a_thread)
 			goto ARGV_ERROR;
 		}
 		slen = nxo_string_len_get(el);
-		argv[i] = (char *)_cw_malloc(slen + 1);
+		argv[i] = (char *)cw_malloc(slen + 1);
 		nxo_string_lock(el);
 		memcpy(argv[i], nxo_string_get(el), slen);
 		nxo_string_unlock(el);
@@ -2049,7 +2049,7 @@ systemdict_exec(cw_nxo_t *a_thread)
 
 		dcount = nxo_dict_count(nx_envdict_get(
 		    nxo_thread_nx_get(a_thread)));
-		envp = (char **)_cw_malloc(sizeof(char *) * (dcount + 1));
+		envp = (char **)cw_malloc(sizeof(char *) * (dcount + 1));
 		for (i = 0; i < dcount; i++) {
 			/* Get key and val. */
 			nxo_dict_iterate(nx_envdict_get(
@@ -2066,7 +2066,7 @@ systemdict_exec(cw_nxo_t *a_thread)
 			/* Create string that looks like "<key>=<val>\0". */
 			key_len = nxo_name_len_get(key);
 			val_len = nxo_string_len_get(val);
-			entry = (char *)_cw_malloc(key_len + val_len + 2);
+			entry = (char *)cw_malloc(key_len + val_len + 2);
 
 			memcpy(entry, nxo_name_str_get(key), key_len);
 			entry[key_len] = '=';
@@ -2092,13 +2092,13 @@ systemdict_exec(cw_nxo_t *a_thread)
 
 	ENVP_ERROR:
 	for (i = 0; envp[i] != NULL; i++)
-		_cw_free(envp[i]);
-	_cw_free(envp);
+		cw_free(envp[i]);
+	cw_free(envp);
 	ARGV_ERROR:
 	for (i = 0; argv[i] != NULL; i++)
-		_cw_free(argv[i]);
-	_cw_free(argv);
-	_cw_free(path);
+		cw_free(argv[i]);
+	cw_free(argv);
+	cw_free(path);
 	PATH_ERROR:
 	VALIDATION_ERROR:
 	nxo_stack_pop(tstack);
@@ -2109,7 +2109,7 @@ systemdict_exec(cw_nxo_t *a_thread)
 void
 systemdict_exit(cw_nxo_t *a_thread)
 {
-	xep_throw(_CW_ONYXX_EXIT);
+	xep_throw(CW_ONYXX_EXIT);
 }
 
 void
@@ -2265,7 +2265,7 @@ systemdict_for(cw_nxo_t *a_thread)
 			}
 		}
 	}
-	xep_catch(_CW_ONYXX_EXIT) {
+	xep_catch(CW_ONYXX_EXIT) {
 		cw_nxo_t	*istack;
 
 		xep_handled();
@@ -2444,10 +2444,10 @@ systemdict_foreach(cw_nxo_t *a_thread)
 			break;
 		}
 		default:
-			_cw_not_reached();
+			cw_not_reached();
 		}
 	}
-	xep_catch(_CW_ONYXX_EXIT) {
+	xep_catch(CW_ONYXX_EXIT) {
 		cw_nxo_t	*istack;
 
 		xep_handled();
@@ -2466,7 +2466,7 @@ systemdict_foreach(cw_nxo_t *a_thread)
 	nxo_stack_npop(tstack, nxo_stack_count(tstack) - tdepth);
 }
 
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 void
 systemdict_fork(cw_nxo_t *a_thread)
 {
@@ -2640,7 +2640,7 @@ systemdict_getinterval(cw_nxo_t *a_thread)
 	nxo_stack_npop(ostack, 2);
 }
 
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 void
 systemdict_gid(cw_nxo_t *a_thread)
 {
@@ -2763,7 +2763,7 @@ systemdict_ifelse(cw_nxo_t *a_thread)
 	nxo_thread_loop(a_thread);
 }
 
-#ifdef _CW_USE_INLINES
+#ifdef CW_USE_INLINES
 void
 systemdict_index(cw_nxo_t *a_thread)
 {
@@ -2799,7 +2799,7 @@ systemdict_istack(cw_nxo_t *a_thread)
 	nxo_stack_copy(stack, istack);
 }
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 void
 systemdict_join(cw_nxo_t *a_thread)
 {
@@ -2841,7 +2841,7 @@ systemdict_known(cw_nxo_t *a_thread)
 	nxo_stack_pop(ostack);
 }
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 void
 systemdict_lcheck(cw_nxo_t *a_thread)
 {
@@ -2876,7 +2876,7 @@ systemdict_lcheck(cw_nxo_t *a_thread)
 		break;
 	case NXOT_NO:
 	default:
-		_cw_not_reached();
+		cw_not_reached();
 	}
 	nxo_boolean_new(nxo, locking);
 }
@@ -2946,7 +2946,7 @@ systemdict_length(cw_nxo_t *a_thread)
 	nxo_integer_new(nxo, len);
 }
 
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 void
 systemdict_link(cw_nxo_t *a_thread)
 {
@@ -3034,7 +3034,7 @@ systemdict_load(cw_nxo_t *a_thread)
 	nxo_stack_pop(tstack);
 }
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 void
 systemdict_lock(cw_nxo_t *a_thread)
 {
@@ -3089,7 +3089,7 @@ systemdict_loop(cw_nxo_t *a_thread)
 			nxo_thread_loop(a_thread);
 		}
 	}
-	xep_catch(_CW_ONYXX_EXIT) {
+	xep_catch(CW_ONYXX_EXIT) {
 		xep_handled();
 	}
 	xep_end();
@@ -3134,7 +3134,7 @@ systemdict_lt(cw_nxo_t *a_thread)
 	nxo_stack_pop(ostack);
 }
 
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 void
 systemdict_mkdir(cw_nxo_t *a_thread)
 {
@@ -3289,7 +3289,7 @@ systemdict_modload(cw_nxo_t *a_thread)
 /*  	fprintf(stderr, "dlopen(\"%s\")\n", str); */
 	handle = dlopen(str, RTLD_LAZY);
 	if (handle == NULL) {
-#ifdef _CW_DBG
+#ifdef CW_DBG
 		fprintf(stderr, "dlopen() error: %s\n", dlerror());
 #endif
 		nxo_stack_pop(tstack);
@@ -3310,7 +3310,7 @@ systemdict_modload(cw_nxo_t *a_thread)
 
 	if (symbol == NULL) {
 		/* Couldn't find the symbol. */
-#ifdef _CW_DBG
+#ifdef CW_DBG
 		fprintf(stderr, "dlsym() error: %s\n", dlerror());
 #endif
 		dlclose(handle);
@@ -3337,7 +3337,7 @@ systemdict_modload(cw_nxo_t *a_thread)
 }
 #endif
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 void
 systemdict_monitor(cw_nxo_t *a_thread)
 {
@@ -3410,7 +3410,7 @@ systemdict_mul(cw_nxo_t *a_thread)
 	nxo_stack_pop(ostack);
 }
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 void
 systemdict_mutex(cw_nxo_t *a_thread)
 {
@@ -3540,7 +3540,7 @@ systemdict_npop(cw_nxo_t *a_thread)
 	NXO_STACK_NPOP(ostack, a_thread, count + 1);
 }
 
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 void
 systemdict_nsleep(cw_nxo_t *a_thread)
 {
@@ -3608,7 +3608,7 @@ systemdict_open(cw_nxo_t *a_thread)
 		return;
 	}
 
-	nxo_file_buffer_size_set(file, _CW_LIBONYX_FILE_BUFFER_SIZE);
+	nxo_file_buffer_size_set(file, CW_LIBONYX_FILE_BUFFER_SIZE);
 
 	nxo_stack_pop(ostack);
 	nxo_dup(name, file);
@@ -3666,7 +3666,7 @@ systemdict_ostack(cw_nxo_t *a_thread)
 	nxo_stack_pop(stack);
 }
 
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 void
 systemdict_pid(cw_nxo_t *a_thread)
 {
@@ -3679,7 +3679,7 @@ systemdict_pid(cw_nxo_t *a_thread)
 }
 #endif
 
-#ifdef _CW_USE_INLINES
+#ifdef CW_USE_INLINES
 void
 systemdict_pop(cw_nxo_t *a_thread)
 {
@@ -3687,7 +3687,7 @@ systemdict_pop(cw_nxo_t *a_thread)
 }
 #endif
 
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 void
 systemdict_ppid(cw_nxo_t *a_thread)
 {
@@ -3854,7 +3854,7 @@ systemdict_putinterval(cw_nxo_t *a_thread)
 	nxo_stack_npop(ostack, 3);
 }
 
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 void
 systemdict_pwd(cw_nxo_t *a_thread)
 {
@@ -3883,7 +3883,7 @@ systemdict_pwd(cw_nxo_t *a_thread)
 void
 systemdict_quit(cw_nxo_t *a_thread)
 {
-	xep_throw(_CW_ONYXX_QUIT);
+	xep_throw(CW_ONYXX_QUIT);
 }
 
 void
@@ -4025,7 +4025,7 @@ systemdict_readline(cw_nxo_t *a_thread)
 	nxo_boolean_new(nxo, eof);
 }
 
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 void
 systemdict_realtime(cw_nxo_t *a_thread)
 {
@@ -4138,7 +4138,7 @@ systemdict_repeat(cw_nxo_t *a_thread)
 			nxo_thread_loop(a_thread);
 		}
 	}
-	xep_catch(_CW_ONYXX_EXIT) {
+	xep_catch(CW_ONYXX_EXIT) {
 		cw_nxo_t	*istack;
 
 		xep_handled();
@@ -4159,7 +4159,7 @@ systemdict_repeat(cw_nxo_t *a_thread)
 	nxo_stack_pop(tstack);
 }
 
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 void
 systemdict_rmdir(cw_nxo_t *a_thread)
 {
@@ -4211,7 +4211,7 @@ systemdict_rmdir(cw_nxo_t *a_thread)
 }
 #endif
 
-#ifdef _CW_USE_INLINES
+#ifdef CW_USE_INLINES
 void
 systemdict_roll(cw_nxo_t *a_thread)
 {
@@ -4329,7 +4329,7 @@ systemdict_sdup(cw_nxo_t *a_thread)
 	nxo_stack_pop(ostack);
 }
 
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 void
 systemdict_seek(cw_nxo_t *a_thread)
 {
@@ -4358,7 +4358,7 @@ systemdict_seek(cw_nxo_t *a_thread)
 }
 #endif
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 void
 systemdict_self(cw_nxo_t *a_thread)
 {
@@ -4371,7 +4371,7 @@ systemdict_self(cw_nxo_t *a_thread)
 }
 #endif
 
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 void
 systemdict_setegid(cw_nxo_t *a_thread)
 {
@@ -4444,7 +4444,7 @@ systemdict_setenv(cw_nxo_t *a_thread)
 
 	/* Do the putenv(). */
 	if (putenv(tstr) == -1)
-		xep_throw(_CW_ONYXX_OOM);
+		xep_throw(CW_ONYXX_OOM);
 	nxo_stack_pop(tstack);
 
 	/* Insert the key/value pair into envdict. */
@@ -4517,7 +4517,7 @@ systemdict_setiobuf(cw_nxo_t *a_thread)
 	nxo_stack_npop(ostack, 2);
 }
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 void
 systemdict_setlocking(cw_nxo_t *a_thread)
 {
@@ -4535,7 +4535,7 @@ systemdict_setlocking(cw_nxo_t *a_thread)
 }
 #endif
 
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 void
 systemdict_setuid(cw_nxo_t *a_thread)
 {
@@ -4616,7 +4616,7 @@ systemdict_shift(cw_nxo_t *a_thread)
 	nxo_stack_pop(ostack);
 }
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 void
 systemdict_signal(cw_nxo_t *a_thread)
 {
@@ -4701,7 +4701,7 @@ systemdict_spush(cw_nxo_t *a_thread)
 	nxo_stack_npop(ostack, 2);
 }
 
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 void
 systemdict_srand(cw_nxo_t *a_thread)
 {
@@ -4798,9 +4798,9 @@ systemdict_start(cw_nxo_t *a_thread)
 	xep_try {
 		nxo_thread_loop(a_thread);
 	}
-	xep_catch(_CW_ONYXX_EXIT)
-	xep_mcatch(_CW_ONYXX_QUIT)
-	xep_mcatch(_CW_ONYXX_STOP) {
+	xep_catch(CW_ONYXX_EXIT)
+	xep_mcatch(CW_ONYXX_QUIT)
+	xep_mcatch(CW_ONYXX_STOP) {
 		xep_handled();
 	}
 	xep_end();
@@ -4815,7 +4815,7 @@ systemdict_start(cw_nxo_t *a_thread)
 	nxo_stack_npop(tstack, nxo_stack_count(tstack) - tdepth);
 }
 
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 void
 systemdict_status(cw_nxo_t *a_thread)
 {
@@ -4934,7 +4934,7 @@ systemdict_status(cw_nxo_t *a_thread)
 
 	/* atime. */
 	nxo_name_new(name, nx, nxn_str(NXN_atime), nxn_len(NXN_atime), TRUE);
-#ifdef _CW_OS_FREEBSD
+#ifdef CW_OS_FREEBSD
 	nxo_integer_new(value, ((cw_nxoi_t)sb.st_atimespec.tv_sec *
 	    (cw_nxoi_t)1000000000) + (cw_nxoi_t)sb.st_atimespec.tv_nsec);
 #else
@@ -4945,7 +4945,7 @@ systemdict_status(cw_nxo_t *a_thread)
 
 	/* mtime. */
 	nxo_name_new(name, nx, nxn_str(NXN_mtime), nxn_len(NXN_mtime), TRUE);
-#ifdef _CW_OS_FREEBSD
+#ifdef CW_OS_FREEBSD
 	nxo_integer_new(value, ((cw_nxoi_t)sb.st_mtimespec.tv_sec *
 	    (cw_nxoi_t)1000000000) + (cw_nxoi_t)sb.st_mtimespec.tv_nsec);
 #else
@@ -4956,7 +4956,7 @@ systemdict_status(cw_nxo_t *a_thread)
 
 	/* ctime. */
 	nxo_name_new(name, nx, nxn_str(NXN_ctime), nxn_len(NXN_ctime), TRUE);
-#ifdef _CW_OS_FREEBSD
+#ifdef CW_OS_FREEBSD
 	nxo_integer_new(value, ((cw_nxoi_t)sb.st_ctimespec.tv_sec *
 	    (cw_nxoi_t)1000000000) + (cw_nxoi_t)sb.st_ctimespec.tv_nsec);
 #else
@@ -5013,7 +5013,7 @@ systemdict_stdout(cw_nxo_t *a_thread)
 void
 systemdict_stop(cw_nxo_t *a_thread)
 {
-	xep_throw(_CW_ONYXX_STOP);
+	xep_throw(CW_ONYXX_STOP);
 }
 
 void
@@ -5043,7 +5043,7 @@ systemdict_stopped(cw_nxo_t *a_thread)
 	xep_try {
 		nxo_thread_loop(a_thread);
 	}
-	xep_catch(_CW_ONYXX_STOP) {
+	xep_catch(CW_ONYXX_STOP) {
 		cw_nxo_t	*istack;
 
 		xep_handled();
@@ -5056,7 +5056,7 @@ systemdict_stopped(cw_nxo_t *a_thread)
 		    nxo_stack_count(estack));
 		nxo_stack_npop(tstack, nxo_stack_count(tstack) - tdepth);
 	}
-	xep_catch(_CW_ONYXX_EXIT) {
+	xep_catch(CW_ONYXX_EXIT) {
 		/*
 		 * This is a serious program error, and we've already unwound
 		 * the C stack, so there's no going back.  After throwing an
@@ -5067,7 +5067,7 @@ systemdict_stopped(cw_nxo_t *a_thread)
 
 		xep_handled();
 
-		xep_throw(_CW_ONYXX_QUIT);
+		xep_throw(CW_ONYXX_QUIT);
 	}
 	xep_end();
 
@@ -5300,7 +5300,7 @@ systemdict_sym_rb(cw_nxo_t *a_thread)
 	nxo_stack_pop(tstack);
 }
 
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 void
 systemdict_symlink(cw_nxo_t *a_thread)
 {
@@ -5388,7 +5388,7 @@ systemdict_tell(cw_nxo_t *a_thread)
 	nxo_integer_new(file, position);
 }
 
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 void
 systemdict_test(cw_nxo_t *a_thread)
 {
@@ -5555,7 +5555,7 @@ systemdict_test(cw_nxo_t *a_thread)
 			result = (sb.st_mode & S_IFSOCK) ? TRUE : FALSE;
 			break;
 		default:
-			_cw_not_reached();
+			cw_not_reached();
 		}
 	}
 
@@ -5564,7 +5564,7 @@ systemdict_test(cw_nxo_t *a_thread)
 }
 #endif
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 void
 systemdict_thread(cw_nxo_t *a_thread)
 {
@@ -5789,7 +5789,7 @@ systemdict_token(cw_nxo_t *a_thread)
 	}
 }
 
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 void
 systemdict_truncate(cw_nxo_t *a_thread)
 {
@@ -5822,7 +5822,7 @@ systemdict_truncate(cw_nxo_t *a_thread)
 }
 #endif
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 void
 systemdict_trylock(cw_nxo_t *a_thread)
 {
@@ -5854,7 +5854,7 @@ systemdict_type(cw_nxo_t *a_thread)
 		0,
 		NXN_arraytype,
 		NXN_booleantype,
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 		NXN_conditiontype,
 #endif
 		NXN_dicttype,
@@ -5863,7 +5863,7 @@ systemdict_type(cw_nxo_t *a_thread)
 		NXN_hooktype,
 		NXN_integertype,
 		NXN_marktype,
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 		NXN_mutextype,
 #endif
 		NXN_nametype,
@@ -5872,26 +5872,26 @@ systemdict_type(cw_nxo_t *a_thread)
 		NXN_pmarktype,
 		NXN_stacktype,
 		NXN_stringtype,
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 		NXN_threadtype
 #else
 		0
 #endif
 	};
-	_cw_assert(sizeof(typenames) / sizeof(cw_nxn_t) == NXOT_LAST + 1);
+	cw_assert(sizeof(typenames) / sizeof(cw_nxn_t) == NXOT_LAST + 1);
 
 	ostack = nxo_thread_ostack_get(a_thread);
 	NXO_STACK_GET(nxo, ostack, a_thread);
 
 	type = nxo_type_get(nxo);
-	_cw_assert(type > NXOT_NO && type <= NXOT_LAST);
+	cw_assert(type > NXOT_NO && type <= NXOT_LAST);
 
 	nxo_name_new(nxo, nxo_thread_nx_get(a_thread),
 	    nxn_str(typenames[type]), nxn_len(typenames[type]), TRUE);
 	nxo_attr_set(nxo, NXOA_EXECUTABLE);
 }
 
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 void
 systemdict_uid(cw_nxo_t *a_thread)
 {
@@ -5923,7 +5923,7 @@ systemdict_undef(cw_nxo_t *a_thread)
 	nxo_stack_npop(ostack, 2);
 }
 
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 void
 systemdict_unlink(cw_nxo_t *a_thread)
 {
@@ -5979,7 +5979,7 @@ systemdict_unlink(cw_nxo_t *a_thread)
 }
 #endif
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 void
 systemdict_unlock(cw_nxo_t *a_thread)
 {
@@ -5999,7 +5999,7 @@ systemdict_unlock(cw_nxo_t *a_thread)
 }
 #endif
 
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 void
 systemdict_unsetenv(cw_nxo_t *a_thread)
 {
@@ -6041,7 +6041,7 @@ systemdict_unsetenv(cw_nxo_t *a_thread)
 
 	/* Do the putenv(). */
 	if (putenv(nxo_string_get(tkey)) == -1)
-		xep_throw(_CW_ONYXX_OOM);
+		xep_throw(CW_ONYXX_OOM);
 #endif
 	nxo_stack_pop(tstack);
 
@@ -6052,7 +6052,7 @@ systemdict_unsetenv(cw_nxo_t *a_thread)
 }
 #endif
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 void
 systemdict_wait(cw_nxo_t *a_thread)
 {
@@ -6074,7 +6074,7 @@ systemdict_wait(cw_nxo_t *a_thread)
 }
 #endif
 
-#ifdef _CW_POSIX
+#ifdef CW_POSIX
 void
 systemdict_waitpid(cw_nxo_t *a_thread)
 {
@@ -6236,7 +6236,7 @@ systemdict_xor(cw_nxo_t *a_thread)
 	nxo_stack_pop(ostack);
 }
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 void
 systemdict_yield(cw_nxo_t *a_thread)
 {

@@ -27,14 +27,14 @@
  *
  ******************************************************************************/
 
-#ifdef _CW_USE_INLINES
-_CW_INLINE void
+#ifdef CW_USE_INLINES
+CW_INLINE void
 #else
 static void
 #endif
 nxo_p_thread_nxcode(cw_nxo_t *a_thread)
 {
-	_cw_onyx_code(a_thread, "' print
+	cw_onyx_code(a_thread, "' print
 
 % Read in the code.
 stdin cvx eval

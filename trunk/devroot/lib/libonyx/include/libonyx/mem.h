@@ -9,25 +9,25 @@
  *
  ******************************************************************************/
 
-#ifdef _CW_DBG
+#ifdef CW_DBG
 /* Track allocations and report leaks. */
-#define	_CW_MEM_ERROR
-/* Report all allocations.  Requires _CW_MEM_ERROR. */
-/*  #define	_CW_MEM_VERBOSE */
+#define	CW_MEM_ERROR
+/* Report all allocations.  Requires CW_MEM_ERROR. */
+/*  #define	CW_MEM_VERBOSE */
 #endif
 
 struct cw_mem_s {
 	cw_mem_t	*mem;
 	cw_bool_t	is_malloced;
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	cw_mtx_t	lock;
 #endif
 
-#ifdef _CW_MEM_ERROR
-#define	_CW_MEM_BASE_TABLE	1024	/* Slots in base hash table. */
-#define	_CW_MEM_BASE_GROW	 256	/* Maximum fullness of base table. */
-#define	_CW_MEM_BASE_SHRINK	  32	/* Proportional minimal fullness. */
+#ifdef CW_MEM_ERROR
+#define	CW_MEM_BASE_TABLE	1024	/* Slots in base hash table. */
+#define	CW_MEM_BASE_GROW	 256	/* Maximum fullness of base table. */
+#define	CW_MEM_BASE_SHRINK	  32	/* Proportional minimal fullness. */
 	cw_dch_t	*addr_hash;
 #endif
 
@@ -51,7 +51,7 @@ void	mem_free_e(cw_mem_t *a_mem, void *a_ptr, size_t a_size, const char
  * of the generated binary.  Since these arguments aren't used in the optimized
  * library anyway, this is a free (though perhaps small) memory savings.
  */
-#ifdef _CW_MEM_ERROR
+#ifdef CW_MEM_ERROR
 #define mem_malloc(a_mem, a_size)					\
 	mem_malloc_e((a_mem), (a_size), __FILE__, __LINE__)
 #define mem_calloc(a_mem, a_number, a_size)				\
@@ -61,13 +61,13 @@ void	mem_free_e(cw_mem_t *a_mem, void *a_ptr, size_t a_size, const char
 #define	mem_free(a_mem, a_ptr)						\
 	mem_free_e((a_mem), (a_ptr), 0, __FILE__, __LINE__)
 
-#define _cw_malloc(a_size)						\
+#define cw_malloc(a_size)						\
 	mem_malloc_e(cw_g_mem, (a_size), __FILE__, __LINE__)
-#define _cw_calloc(a_number, a_size)					\
+#define cw_calloc(a_number, a_size)					\
 	mem_calloc_e(cw_g_mem, (a_number), (a_size), __FILE__, __LINE__)
-#define _cw_realloc(a_ptr, a_size)					\
+#define cw_realloc(a_ptr, a_size)					\
 	mem_realloc_e(cw_g_mem, (a_ptr), (a_size), 0, __FILE__, __LINE__)
-#define	_cw_free(a_ptr)							\
+#define	cw_free(a_ptr)							\
 	mem_free_e(cw_g_mem, (a_ptr), 0, __FILE__, __LINE__)
 
 #else
@@ -80,13 +80,13 @@ void	mem_free_e(cw_mem_t *a_mem, void *a_ptr, size_t a_size, const char
 #define	mem_free(a_mem, a_ptr)						\
 	mem_free_e((a_mem), (a_ptr), 0, NULL, 0)
 
-#define _cw_malloc(a_size)						\
+#define cw_malloc(a_size)						\
 	mem_malloc_e(cw_g_mem, (a_size), NULL, 0)
-#define _cw_calloc(a_number, a_size)					\
+#define cw_calloc(a_number, a_size)					\
 	mem_calloc_e(cw_g_mem, (a_number), (a_size), NULL, 0)
-#define _cw_realloc(a_ptr, a_size)					\
+#define cw_realloc(a_ptr, a_size)					\
 	mem_realloc_e(cw_g_mem, (a_ptr), (a_size), 0, NULL, 0)
-#define	_cw_free(a_ptr)							\
+#define	cw_free(a_ptr)							\
 	mem_free_e(cw_g_mem, (a_ptr), 0, NULL, 0)
 
 #endif

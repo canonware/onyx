@@ -12,18 +12,18 @@
 /*
  * Default source code path for require.
  */
-#undef _CW_ONYX_RPATH
+#undef CW_ONYX_RPATH
 
 /*
  * Default module path.
  */
-#undef _CW_ONYX_MPATH
+#undef CW_ONYX_MPATH
 
-#undef _CW_USE_LIBEDIT
+#undef CW_USE_LIBEDIT
 
 /*
  * Used for tonyx.
  */
-#undef _CW_TONYX_ONYX
-#undef _CW_TONYX_RPATH
-#undef _CW_TONYX_MPATH
+#undef CW_TONYX_ONYX
+#undef CW_TONYX_RPATH
+#undef CW_TONYX_MPATH

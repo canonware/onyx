@@ -17,27 +17,27 @@ typedef struct cw_thd_s cw_thd_t;
  * version relies on signals, which tends to be much slower than native
  * implementations of suspend/resume, so only use it as a last resort.
  */
-#define _CW_THD_GENERIC_SR
+#define CW_THD_GENERIC_SR
 
 /* FreeBSD-specific extensions (pthread_{suspend,resume}_np()). */
-#ifdef _CW_FTHREADS
-#undef _CW_THD_GENERIC_SR
+#ifdef CW_FTHREADS
+#undef CW_THD_GENERIC_SR
 #endif
 
 /* Mach threads. */
-#ifdef _CW_MTHREADS
-#undef _CW_THD_GENERIC_SR
+#ifdef CW_MTHREADS
+#undef CW_THD_GENERIC_SR
 #endif
 
 /* Solaris threads. */
-#ifdef _CW_STHREADS
-#undef _CW_THD_GENERIC_SR
+#ifdef CW_STHREADS
+#undef CW_THD_GENERIC_SR
 #endif
 
 /*
  * Minimum thread stack size.
  */
-#define	_CW_THD_MINSTACK	524288
+#define	CW_THD_MINSTACK	524288
 
 cw_thd_t *thd_new(void *(*a_start_func)(void *), void *a_arg, cw_bool_t
     a_suspendible);

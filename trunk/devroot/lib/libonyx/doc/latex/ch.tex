@@ -41,9 +41,9 @@ such situations.
 
 \subsubsection{API}
 \begin{capi}
-\label{_CW_CH_TABLE2SIZEOF}
-\index{_CW_CH_TABLE2SIZEOF@\cppmacro{\_CW\_CH\_TABLE2SIZEOF}{}}
-\citem{\cppmacro[cw\_uint32\_t]{\_CW\_CH\_TABLE2SIZEOF}{cw\_uint32\_t
+\label{CW_CH_TABLE2SIZEOF}
+\index{CW_CH_TABLE2SIZEOF@\cppmacro{CW\_CH\_TABLE2SIZEOF}{}}
+\citem{\cppmacro[cw\_uint32\_t]{CW\_CH\_TABLE2SIZEOF}{cw\_uint32\_t
 a\_table\_size}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -73,7 +73,7 @@ cw\_ch\_hash\_t *a\_hash, cw\_ch\_key\_comp\_t  *a\_key\_comp}}
 		\item[a\_ch: ]
 			Pointer to space for a \classname{ch} with
 			\cvar{a\_table\_size} slots, or NULL.  Use the
-			\cppmacro{\_CW\_CH\_TABLE2SIZEOF}{} macro to calculate
+			\cppmacro{CW\_CH\_TABLE2SIZEOF}{} macro to calculate
 			the total space needed for a given table size.
 		\item[a\_alloc: ]
 			Pointer to an allocation function to use internally.
@@ -96,7 +96,7 @@ cw\_ch\_hash\_t *a\_hash, cw\_ch\_key\_comp\_t  *a\_key\_comp}}
 		\end{description}
 	\item[Exception(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{\_CW\_ONYXX\_OOM}{_CW_ONYXX_OOM}.]
+		\item[\htmlref{CW\_ONYXX\_OOM}{CW_ONYXX_OOM}.]
 		\end{description}
 	\item[Description: ]
 		Constructor.
@@ -152,7 +152,7 @@ cw\_ch\_hash\_t *a\_hash, cw\_ch\_key\_comp\_t  *a\_key\_comp}}
 	\item[Output(s): ] None.
 	\item[Exception(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{\_CW\_ONYXX\_OOM}{_CW_ONYXX_OOM}.]
+		\item[\htmlref{CW\_ONYXX\_OOM}{CW_ONYXX_OOM}.]
 		\end{description}
 	\item[Description: ]
 		Insert \cvar{a\_data} into \cvar{a\_ch}, using key

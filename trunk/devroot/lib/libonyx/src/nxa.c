@@ -85,14 +85,14 @@
 #include "../include/libonyx/nxo_thread_l.h"
 
 static void nxa_p_collect(cw_nxa_t *a_nxa);
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 static void *nxa_p_gc_entry(void *a_arg);
 #endif
 
 void
 nxa_l_new(cw_nxa_t *a_nxa, cw_nx_t *a_nx)
 {
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	sigset_t		sig_mask, old_mask;
 #endif
 	volatile cw_uint32_t	try_stage = 0;
@@ -101,43 +101,43 @@ nxa_l_new(cw_nxa_t *a_nxa, cw_nx_t *a_nx)
 	xep_try {
 		a_nxa->nx = a_nx;
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 		mtx_new(&a_nxa->lock);
 		try_stage = 1;
 #endif
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 		mtx_new(&a_nxa->seq_mtx);
 #endif
 		ql_new(&a_nxa->seq_set);
 		a_nxa->white = FALSE;
 		try_stage = 2;
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 		mq_new(&a_nxa->gc_mq, NULL, sizeof(cw_nxam_t));
 #endif
 		a_nxa->gc_pending = FALSE;
 		a_nxa->gc_allocated = FALSE;
 		try_stage = 3;
 
-#ifdef _CW_DBG
-		a_nxa->magic = _CW_NXA_MAGIC;
+#ifdef CW_DBG
+		a_nxa->magic = CW_NXA_MAGIC;
 #endif
 
 		/*
 		 * Initialize gcdict state.
 		 */
 		a_nxa->gcdict_active = FALSE;
-#ifdef _CW_THREADS
-		a_nxa->gcdict_period = _CW_LIBONYX_GCDICT_PERIOD;
+#ifdef CW_THREADS
+		a_nxa->gcdict_period = CW_LIBONYX_GCDICT_PERIOD;
 #endif
-		a_nxa->gcdict_threshold = _CW_LIBONYX_GCDICT_THRESHOLD;
+		a_nxa->gcdict_threshold = CW_LIBONYX_GCDICT_THRESHOLD;
 		a_nxa->gcdict_count = 0;
 		memset(a_nxa->gcdict_current, 0, sizeof(cw_nxoi_t) * 3);
 		memset(a_nxa->gcdict_maximum, 0, sizeof(cw_nxoi_t) * 3);
 		memset(a_nxa->gcdict_sum, 0, sizeof(cw_nxoi_t) * 3);
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 		/*
 		 * Block all signals during thread creation, so that the GC
 		 * thread does not receive any signals.  Doing this here rather
@@ -151,22 +151,22 @@ nxa_l_new(cw_nxa_t *a_nxa, cw_nx_t *a_nx)
 		try_stage = 4;
 #endif
 	}
-	xep_catch(_CW_ONYXX_OOM) {
+	xep_catch(CW_ONYXX_OOM) {
 		switch (try_stage) {
 		case 4:
 		case 3:
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 			mq_delete(&a_nxa->gc_mq);
 #endif
 		case 2:
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 			mtx_delete(&a_nxa->seq_mtx);
 		case 1:
 			mtx_delete(&a_nxa->lock);
 #endif
 			break;
 		default:
-			_cw_not_reached();
+			cw_not_reached();
 		}
 	}
 	xep_end();
@@ -175,10 +175,10 @@ nxa_l_new(cw_nxa_t *a_nxa, cw_nx_t *a_nx)
 void
 nxa_l_shutdown(cw_nxa_t *a_nxa)
 {
-	_cw_check_ptr(a_nxa);
-	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
+	cw_check_ptr(a_nxa);
+	cw_dassert(a_nxa->magic == CW_NXA_MAGIC);
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	mq_put(&a_nxa->gc_mq, NXAM_SHUTDOWN);
 
 	thd_join(a_nxa->gc_thd);
@@ -193,10 +193,10 @@ nxa_l_shutdown(cw_nxa_t *a_nxa)
 void
 nxa_l_delete(cw_nxa_t *a_nxa)
 {
-	_cw_check_ptr(a_nxa);
-	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
+	cw_check_ptr(a_nxa);
+	cw_dassert(a_nxa->magic == CW_NXA_MAGIC);
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	mtx_delete(&a_nxa->lock);
 #endif
 }
@@ -205,10 +205,10 @@ void *
 nxa_malloc_e(cw_nxa_t *a_nxa, size_t a_size, const char *a_filename, cw_uint32_t
     a_line_num)
 {
-	_cw_check_ptr(a_nxa);
-	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
+	cw_check_ptr(a_nxa);
+	cw_dassert(a_nxa->magic == CW_NXA_MAGIC);
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	mtx_lock(&a_nxa->lock);
 #endif
 
@@ -227,7 +227,7 @@ nxa_malloc_e(cw_nxa_t *a_nxa, size_t a_size, const char *a_filename, cw_uint32_t
 	    a_nxa->gcdict_threshold != 0) {
 		if (a_nxa->gc_pending == FALSE) {
 			a_nxa->gc_pending = TRUE;
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 			mq_put(&a_nxa->gc_mq, NXAM_COLLECT);
 #else
 			if (a_nxa->gcdict_active)
@@ -235,7 +235,7 @@ nxa_malloc_e(cw_nxa_t *a_nxa, size_t a_size, const char *a_filename, cw_uint32_t
 #endif
 		}
 	}
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	mtx_unlock(&a_nxa->lock);
 #endif
 
@@ -246,10 +246,10 @@ void *
 nxa_realloc_e(cw_nxa_t *a_nxa, void *a_ptr, size_t a_size, size_t a_old_size,
     const char *a_filename, cw_uint32_t a_line_num)
 {
-	_cw_check_ptr(a_nxa);
-	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
+	cw_check_ptr(a_nxa);
+	cw_dassert(a_nxa->magic == CW_NXA_MAGIC);
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	mtx_lock(&a_nxa->lock);
 #endif
 
@@ -269,7 +269,7 @@ nxa_realloc_e(cw_nxa_t *a_nxa, void *a_ptr, size_t a_size, size_t a_old_size,
 	    a_nxa->gcdict_threshold != 0) {
 		if (a_nxa->gc_pending == FALSE) {
 			a_nxa->gc_pending = TRUE;
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 			mq_put(&a_nxa->gc_mq, NXAM_COLLECT);
 #else
 			if (a_nxa->gcdict_active)
@@ -277,7 +277,7 @@ nxa_realloc_e(cw_nxa_t *a_nxa, void *a_ptr, size_t a_size, size_t a_old_size,
 #endif
 		}
 	}
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	mtx_unlock(&a_nxa->lock);
 #endif
 
@@ -289,14 +289,14 @@ void
 nxa_free_e(cw_nxa_t *a_nxa, void *a_ptr, size_t a_size, const char *a_filename,
     cw_uint32_t a_line_num)
 {
-	_cw_check_ptr(a_nxa);
-	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
+	cw_check_ptr(a_nxa);
+	cw_dassert(a_nxa->magic == CW_NXA_MAGIC);
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	mtx_lock(&a_nxa->lock);
 #endif
 	a_nxa->gcdict_count -= (cw_nxoi_t)a_size;
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	mtx_unlock(&a_nxa->lock);
 #endif
 
@@ -306,22 +306,22 @@ nxa_free_e(cw_nxa_t *a_nxa, void *a_ptr, size_t a_size, const char *a_filename,
 void
 nxa_collect(cw_nxa_t *a_nxa)
 {
-	_cw_check_ptr(a_nxa);
-	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
+	cw_check_ptr(a_nxa);
+	cw_dassert(a_nxa->magic == CW_NXA_MAGIC);
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	mtx_lock(&a_nxa->lock);
 #endif
 	if (a_nxa->gc_pending == FALSE) {
 		a_nxa->gc_pending = TRUE;
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 		mq_put(&a_nxa->gc_mq, NXAM_COLLECT);
 #else
 		if (a_nxa->gcdict_active)
 			nxa_p_collect(a_nxa);
 #endif
 	}
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	mtx_unlock(&a_nxa->lock);
 #endif
 }
@@ -331,14 +331,14 @@ nxa_active_get(cw_nxa_t *a_nxa)
 {
 	cw_bool_t	retval;
 
-	_cw_check_ptr(a_nxa);
-	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
+	cw_check_ptr(a_nxa);
+	cw_dassert(a_nxa->magic == CW_NXA_MAGIC);
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	mtx_lock(&a_nxa->lock);
 #endif
 	retval = a_nxa->gcdict_active;
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	mtx_unlock(&a_nxa->lock);
 #endif
 
@@ -348,10 +348,10 @@ nxa_active_get(cw_nxa_t *a_nxa)
 void
 nxa_active_set(cw_nxa_t *a_nxa, cw_bool_t a_active)
 {
-	_cw_check_ptr(a_nxa);
-	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
+	cw_check_ptr(a_nxa);
+	cw_dassert(a_nxa->magic == CW_NXA_MAGIC);
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	mtx_lock(&a_nxa->lock);
 #endif
 	a_nxa->gcdict_active = a_active;
@@ -359,7 +359,7 @@ nxa_active_set(cw_nxa_t *a_nxa, cw_bool_t a_active)
 	    <= a_nxa->gcdict_count - a_nxa->gcdict_current[0]) {
 		if (a_nxa->gc_pending == FALSE) {
 			a_nxa->gc_pending = TRUE;
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 			mq_put(&a_nxa->gc_mq, NXAM_COLLECT);
 #else
 			if (a_nxa->gcdict_active)
@@ -367,7 +367,7 @@ nxa_active_set(cw_nxa_t *a_nxa, cw_bool_t a_active)
 #endif
 		}
 	}
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	else {
 		if (a_nxa->gc_pending == FALSE)
 			mq_put(&a_nxa->gc_mq, NXAM_RECONFIGURE);
@@ -376,14 +376,14 @@ nxa_active_set(cw_nxa_t *a_nxa, cw_bool_t a_active)
 #endif
 }
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 cw_nxoi_t
 nxa_period_get(cw_nxa_t *a_nxa)
 {
 	cw_nxoi_t	retval;
 
-	_cw_check_ptr(a_nxa);
-	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
+	cw_check_ptr(a_nxa);
+	cw_dassert(a_nxa->magic == CW_NXA_MAGIC);
 
 	mtx_lock(&a_nxa->lock);
 	retval = a_nxa->gcdict_period;
@@ -395,9 +395,9 @@ nxa_period_get(cw_nxa_t *a_nxa)
 void
 nxa_period_set(cw_nxa_t *a_nxa, cw_nxoi_t a_period)
 {
-	_cw_check_ptr(a_nxa);
-	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
-	_cw_assert(a_period >= 0);
+	cw_check_ptr(a_nxa);
+	cw_dassert(a_nxa->magic == CW_NXA_MAGIC);
+	cw_assert(a_period >= 0);
 
 	mtx_lock(&a_nxa->lock);
 	a_nxa->gcdict_period = a_period;
@@ -411,14 +411,14 @@ nxa_threshold_get(cw_nxa_t *a_nxa)
 {
 	cw_nxoi_t	retval;
 
-	_cw_check_ptr(a_nxa);
-	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
+	cw_check_ptr(a_nxa);
+	cw_dassert(a_nxa->magic == CW_NXA_MAGIC);
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	mtx_lock(&a_nxa->lock);
 #endif
 	retval = a_nxa->gcdict_threshold;
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	mtx_unlock(&a_nxa->lock);
 #endif
 
@@ -428,11 +428,11 @@ nxa_threshold_get(cw_nxa_t *a_nxa)
 void
 nxa_threshold_set(cw_nxa_t *a_nxa, cw_nxoi_t a_threshold)
 {
-	_cw_check_ptr(a_nxa);
-	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
-	_cw_assert(a_threshold >= 0);
+	cw_check_ptr(a_nxa);
+	cw_dassert(a_nxa->magic == CW_NXA_MAGIC);
+	cw_assert(a_threshold >= 0);
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	mtx_lock(&a_nxa->lock);
 #endif
 	a_nxa->gcdict_threshold = a_threshold;
@@ -440,7 +440,7 @@ nxa_threshold_set(cw_nxa_t *a_nxa, cw_nxoi_t a_threshold)
 	    a_nxa->gcdict_current[0] && a_nxa->gcdict_active) {
 		if (a_nxa->gc_pending == FALSE) {
 			a_nxa->gc_pending = TRUE;
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 			mq_put(&a_nxa->gc_mq, NXAM_COLLECT);
 #else
 			if (a_nxa->gcdict_active)
@@ -448,7 +448,7 @@ nxa_threshold_set(cw_nxa_t *a_nxa, cw_nxoi_t a_threshold)
 #endif
 		}
 	}
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	mtx_unlock(&a_nxa->lock);
 #endif
 }
@@ -459,10 +459,10 @@ nxa_stats_get(cw_nxa_t *a_nxa, cw_nxoi_t *r_collections, cw_nxoi_t *r_count,
     *r_mcount, cw_nxoi_t *r_mmark, cw_nxoi_t *r_msweep, cw_nxoi_t *r_scount,
     cw_nxoi_t *r_smark, cw_nxoi_t *r_ssweep)
 {
-	_cw_check_ptr(a_nxa);
-	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
+	cw_check_ptr(a_nxa);
+	cw_dassert(a_nxa->magic == CW_NXA_MAGIC);
 	
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	mtx_lock(&a_nxa->lock);
 #endif
 
@@ -498,7 +498,7 @@ nxa_stats_get(cw_nxa_t *a_nxa, cw_nxoi_t *r_collections, cw_nxoi_t *r_count,
 	if (r_ssweep != NULL)
 		*r_ssweep = a_nxa->gcdict_sum[2];
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	mtx_unlock(&a_nxa->lock);
 #endif
 }
@@ -506,15 +506,15 @@ nxa_stats_get(cw_nxa_t *a_nxa, cw_nxoi_t *r_collections, cw_nxoi_t *r_count,
 void
 nxa_l_gc_register(cw_nxa_t *a_nxa, cw_nxoe_t *a_nxoe)
 {
-	_cw_check_ptr(a_nxa);
-	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
+	cw_check_ptr(a_nxa);
+	cw_dassert(a_nxa->magic == CW_NXA_MAGIC);
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	mtx_lock(&a_nxa->seq_mtx);
 #endif
-	_cw_assert(nxoe_l_registered_get(a_nxoe) == FALSE);
-	_cw_assert(qr_next(a_nxoe, link) == a_nxoe);
-	_cw_assert(qr_prev(a_nxoe, link) == a_nxoe);
+	cw_assert(nxoe_l_registered_get(a_nxoe) == FALSE);
+	cw_assert(qr_next(a_nxoe, link) == a_nxoe);
+	cw_assert(qr_prev(a_nxoe, link) == a_nxoe);
 
 	/*
 	 * Set the color to white, set the registered bit, and insert into the
@@ -524,7 +524,7 @@ nxa_l_gc_register(cw_nxa_t *a_nxa, cw_nxoe_t *a_nxoe)
 	nxoe_l_registered_set(a_nxoe, TRUE);
 	ql_tail_insert(&a_nxa->seq_set, a_nxoe, link);
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	mtx_unlock(&a_nxa->seq_mtx);
 #endif
 }
@@ -532,8 +532,8 @@ nxa_l_gc_register(cw_nxa_t *a_nxa, cw_nxoe_t *a_nxoe)
 cw_bool_t
 nxa_l_white_get(cw_nxa_t *a_nxa)
 {
-	_cw_check_ptr(a_nxa);
-	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
+	cw_check_ptr(a_nxa);
+	cw_dassert(a_nxa->magic == CW_NXA_MAGIC);
 
 	/*
 	 * This function is only called in nxoe_l_name_delete(), which is
@@ -546,7 +546,7 @@ nxa_l_white_get(cw_nxa_t *a_nxa)
  * Find roots, if any.  Return TRUE if there are roots, FALSE otherwise.
  * Upon return, a_nxa->seq_set points to the first object in the root set.
  */
-_CW_INLINE cw_bool_t
+CW_INLINE cw_bool_t
 nxa_p_roots(cw_nxa_t *a_nxa, cw_uint32_t *r_nroot)
 {
 	cw_bool_t	retval;
@@ -573,7 +573,7 @@ nxa_p_roots(cw_nxa_t *a_nxa, cw_uint32_t *r_nroot)
 			 * Paint object gray.
 			 */
 			nroot++;
-			_cw_assert(nxoe_l_color_get(nxoe) == a_nxa->white);
+			cw_assert(nxoe_l_color_get(nxoe) == a_nxa->white);
 			nxoe_l_color_set(nxoe, !a_nxa->white);
 			ql_first(&a_nxa->seq_set) = nxoe;
 			gray = nxoe;
@@ -592,7 +592,7 @@ nxa_p_roots(cw_nxa_t *a_nxa, cw_uint32_t *r_nroot)
 /*
  * Mark.  Return a pointer to a ring of garbage, if any, otherwise NULL.
  */
-_CW_INLINE cw_nxoe_t *
+CW_INLINE cw_nxoe_t *
 nxa_p_mark(cw_nxa_t *a_nxa, cw_uint32_t *r_nreachable)
 {
 	cw_nxoe_t	*retval, *gray, *nxoe;
@@ -604,7 +604,7 @@ nxa_p_mark(cw_nxa_t *a_nxa, cw_uint32_t *r_nreachable)
 	 */
 	gray = ql_first(&a_nxa->seq_set);
 	do {
-		_cw_assert(nxoe_l_color_get(gray) != a_nxa->white);
+		cw_assert(nxoe_l_color_get(gray) != a_nxa->white);
 		for (nxoe = nxoe_l_ref_iter(gray, TRUE); nxoe != NULL;
 		    nxoe = nxoe_l_ref_iter(gray, FALSE)) {
 			/*
@@ -648,7 +648,7 @@ nxa_p_mark(cw_nxa_t *a_nxa, cw_uint32_t *r_nreachable)
 /*
  * Clean up unreferenced objects.
  */
-_CW_INLINE void
+CW_INLINE void
 nxa_p_sweep(cw_nxa_t *a_nxa, cw_nxoe_t *a_garbage)
 {
 	cw_nxoe_t	*last, *defer, *nxoe;
@@ -702,7 +702,7 @@ nxa_p_collect(cw_nxa_t *a_nxa)
 	 * sections.  We don't need the lock anyway, except to protect the GC
 	 * statistics and the gc_pending flag.
 	 */
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	mtx_unlock(&a_nxa->lock);
 #endif
 
@@ -713,11 +713,11 @@ nxa_p_collect(cw_nxa_t *a_nxa)
 	start_us += t_tv.tv_usec;
 
 	/* Prevent new registrations until after the mark phase is completed. */
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	mtx_lock(&a_nxa->seq_mtx);
 #endif
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	/* Stop mutator threads. */
 	thd_single_enter();
 #endif
@@ -734,7 +734,7 @@ nxa_p_collect(cw_nxa_t *a_nxa)
 		ql_first(&a_nxa->seq_set) = NULL;
 	}
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	/* Allow mutator threads to run. */
 	thd_single_leave();
 #endif
@@ -743,7 +743,7 @@ nxa_p_collect(cw_nxa_t *a_nxa)
 	a_nxa->white = !a_nxa->white;
 
 	/* New registrations are safe again. */
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	mtx_unlock(&a_nxa->seq_mtx);
 #endif
 
@@ -767,7 +767,7 @@ nxa_p_collect(cw_nxa_t *a_nxa)
 	sweep_us -= mark_us;
 
 	/* Protect statistics updates. */
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	mtx_lock(&a_nxa->lock);
 #endif
 
@@ -797,7 +797,7 @@ nxa_p_collect(cw_nxa_t *a_nxa)
 	a_nxa->gcdict_collections++;
 }
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 static void *
 nxa_p_gc_entry(void *a_arg)
 {
@@ -881,7 +881,7 @@ nxa_p_gc_entry(void *a_arg)
 			mtx_unlock(&nxa->lock);
 			break;
 		default:
-			_cw_not_reached();
+			cw_not_reached();
 		}
 	}
 

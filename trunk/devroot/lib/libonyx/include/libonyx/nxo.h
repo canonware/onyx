@@ -21,7 +21,7 @@ typedef enum {
 	NXOT_NO,
 	NXOT_ARRAY,
 	NXOT_BOOLEAN,
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	NXOT_CONDITION,
 #endif
 	NXOT_DICT,
@@ -30,7 +30,7 @@ typedef enum {
 	NXOT_HOOK,
 	NXOT_INTEGER,
 	NXOT_MARK,
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	NXOT_MUTEX,
 #endif
 	NXOT_NAME,
@@ -56,9 +56,9 @@ typedef cw_sint64_t cw_nxoi_t;
  * Main object structure.
  */
 struct cw_nxo_s {
-#ifdef _CW_DBG
+#ifdef CW_DBG
 	cw_uint32_t	magic;
-#define _CW_NXO_MAGIC	0x398754ba
+#define CW_NXO_MAGIC	0x398754ba
 #endif
 
 	/*
@@ -110,9 +110,9 @@ struct cw_nxo_s {
  * adequate.
  */
 struct cw_nxoe_s {
-#ifdef _CW_DBG
+#ifdef CW_DBG
 	cw_uint32_t	magic;
-#define _CW_NXOE_MAGIC	0x0fa6e798
+#define CW_NXOE_MAGIC	0x0fa6e798
 #endif
 
 	/*
@@ -142,7 +142,7 @@ struct cw_nxoe_s {
 	 * but not be registered yet.
 	 */
 	cw_bool_t	registered:1;
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 	/*
 	 * If true, accesses to this object are locked.  This applies to arrays,
 	 * dictionaries, files, and strings.
@@ -157,11 +157,11 @@ struct cw_nxoe_s {
 
 cw_sint32_t nxo_compare(cw_nxo_t *a_a, cw_nxo_t *a_b);
 cw_nxoe_t *nxo_nxoe_get(cw_nxo_t *a_nxo);
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 cw_bool_t nxo_lcheck(cw_nxo_t *a_nxo);
 #endif
 
-#ifndef _CW_USE_INLINES
+#ifndef CW_USE_INLINES
 void	nxo_dup(cw_nxo_t *a_to, cw_nxo_t *a_from);
 cw_nxot_t nxo_type_get(cw_nxo_t *a_nxo);
 cw_nxoa_t nxo_attr_get(cw_nxo_t *a_nxo);
@@ -169,15 +169,15 @@ void	nxo_attr_set(cw_nxo_t *a_nxo, cw_nxoa_t a_attr);
 void	nxo_p_new(cw_nxo_t *a_nxo, cw_nxot_t a_type);
 #endif
 
-#if (defined(_CW_USE_INLINES) || defined(_NXO_C_))
-_CW_INLINE void
+#if (defined(CW_USE_INLINES) || defined(_NXO_C_))
+CW_INLINE void
 nxo_dup(cw_nxo_t *a_to, cw_nxo_t *a_from)
 {
-	_cw_check_ptr(a_to);
-	_cw_dassert(a_to->magic == _CW_NXO_MAGIC);
+	cw_check_ptr(a_to);
+	cw_dassert(a_to->magic == CW_NXO_MAGIC);
 
-	_cw_check_ptr(a_from);
-	_cw_dassert(a_from->magic == _CW_NXO_MAGIC);
+	cw_check_ptr(a_from);
+	cw_dassert(a_from->magic == CW_NXO_MAGIC);
 
 	/*
 	 * The order of operations is important in order to avoid a GC race.
@@ -187,29 +187,29 @@ nxo_dup(cw_nxo_t *a_to, cw_nxo_t *a_from)
 	a_to->flags = a_from->flags;
 }
 
-_CW_INLINE cw_nxot_t
+CW_INLINE cw_nxot_t
 nxo_type_get(cw_nxo_t *a_nxo)
 {
-	_cw_check_ptr(a_nxo);
-	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
+	cw_check_ptr(a_nxo);
+	cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
 
 	return ((cw_nxot_t)(a_nxo->flags & 0x1f));
 }
 
-_CW_INLINE cw_nxoa_t
+CW_INLINE cw_nxoa_t
 nxo_attr_get(cw_nxo_t *a_nxo)
 {
-	_cw_check_ptr(a_nxo);
-	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
+	cw_check_ptr(a_nxo);
+	cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
 
 	return ((cw_nxoa_t)(((a_nxo)->flags >> 6) & 3));
 }
 
-_CW_INLINE void
+CW_INLINE void
 nxo_attr_set(cw_nxo_t *a_nxo, cw_nxoa_t a_attr)
 {
-	_cw_check_ptr(a_nxo);
-	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
+	cw_check_ptr(a_nxo);
+	cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
 
 	a_nxo->flags = (a_nxo->flags & 0xffffff3f) | (a_attr << 6);
 }
@@ -217,15 +217,15 @@ nxo_attr_set(cw_nxo_t *a_nxo, cw_nxoa_t a_attr)
 /*
  * Private, but various object constructor macros need its definition.
  */
-_CW_INLINE void
+CW_INLINE void
 nxo_p_new(cw_nxo_t *a_nxo, cw_nxot_t a_type)
 {
 	/*
 	 * The order of operations is important in order to avoid a GC race.
 	 */
 	a_nxo->flags = 0;
-#ifdef _CW_DBG
-	a_nxo->magic = _CW_NXO_MAGIC;
+#ifdef CW_DBG
+	a_nxo->magic = CW_NXO_MAGIC;
 #endif
 
 	/*
@@ -235,4 +235,4 @@ nxo_p_new(cw_nxo_t *a_nxo, cw_nxot_t a_type)
 	a_nxo->o.integer.i = 0;
 	a_nxo->flags = a_type;
 }
-#endif	/* (defined(_CW_USE_INLINES) || defined(_NXO_C_)) */
+#endif	/* (defined(CW_USE_INLINES) || defined(_NXO_C_)) */

@@ -70,8 +70,8 @@ struct history {
 #define	HENTER(h, str)	(*(h)->h_enter)((h)->h_ref, str)
 #define	HADD(h, str)	(*(h)->h_add)((h)->h_ref, str)
 
-#define h_malloc(a)	_cw_malloc(a)
-#define h_free(a)	_cw_free(a)
+#define h_malloc(a)	cw_malloc(a)
+#define h_free(a)	cw_free(a)
 
 
 private int		 history_set_num	__P((History *, int));

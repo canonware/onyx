@@ -16,18 +16,18 @@ do_mem(void)
 {
 	void	*p;
 
-	p = _cw_malloc(1024);
-	_cw_check_ptr(p);
+	p = cw_malloc(1024);
+	cw_check_ptr(p);
 
-	p = _cw_realloc(p, 2048);
-	_cw_check_ptr(p);
+	p = cw_realloc(p, 2048);
+	cw_check_ptr(p);
 
-	_cw_free(p);
+	cw_free(p);
 
-	p = _cw_calloc(8, 128);
-	_cw_check_ptr(p);
+	p = cw_calloc(8, 128);
+	cw_check_ptr(p);
 
-	_cw_free(p);
+	cw_free(p);
 }
 
 int

@@ -54,7 +54,7 @@ main()
 	for (i = 0; i < NTHREADS; i++)
 		thd_join(thds[i]);
 
-	_cw_assert(count == (NTHREADS + 1) * NITERATIONS);
+	cw_assert(count == (NTHREADS + 1) * NITERATIONS);
 
 	fprintf(stderr, "Test end\n");
 	libonyx_shutdown();

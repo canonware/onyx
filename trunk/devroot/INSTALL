@@ -132,9 +132,9 @@ Optionally, pass any of the following (not a definitive list) arguments to
 	do not include slate.
 
 --enable-debug
-	Build debugging code and turn assertions on (controlled by the
-	_CW_ASSERT cpp macro).  The resulting libraries and modules will not be
-	binary compatible with ones that were compiled without this option, so
+	Build debugging code and turn assertions on (controlled by the CW_ASSERT
+	cpp macro).  The resulting libraries and modules will not be binary
+	compatible with ones that were compiled without this option, so
 	specifying this option and installing the results for general use is not
 	recommended.
 

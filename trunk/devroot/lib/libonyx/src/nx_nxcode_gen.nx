@@ -91,8 +91,8 @@
  *
  ******************************************************************************/
 
-#ifdef _CW_USE_INLINES
-_CW_INLINE void
+#ifdef CW_USE_INLINES
+CW_INLINE void
 #else
 static void
 #endif
@@ -101,7 +101,7 @@ nx_p_nxcode(cw_nx_t *a_nx)
 	cw_nxo_t	thread;
 
 	nxo_thread_new(&thread, a_nx);
-	_cw_onyx_code(&thread, "' print
+	cw_onyx_code(&thread, "' print
 
 % Output the translation dictionary.
 `<' print

@@ -20,7 +20,7 @@ cw_uint32_t nxo_string_len_get(cw_nxo_t *a_nxo);
 void	nxo_string_el_get(cw_nxo_t *a_nxo, cw_nxoi_t a_offset, cw_uint8_t
     *r_el);
 void	nxo_string_el_set(cw_nxo_t *a_nxo, cw_uint8_t a_el, cw_nxoi_t a_offset);
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 void	nxo_string_lock(cw_nxo_t *a_nxo);
 void	nxo_string_unlock(cw_nxo_t *a_nxo);
 #else

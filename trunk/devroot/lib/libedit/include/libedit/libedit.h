@@ -80,10 +80,10 @@ typedef struct el_state_t {
 /*
  * Until we come up with something better...
  */
-#define el_malloc(a)	_cw_malloc(a)
-#define el_realloc(a,b)	_cw_realloc(a, b)
-#define el_reallocf(a,b) _cw_realloc(a, b)
-#define el_free(a)	_cw_free(a)
+#define el_malloc(a)	cw_malloc(a)
+#define el_realloc(a,b)	cw_realloc(a, b)
+#define el_reallocf(a,b) cw_realloc(a, b)
+#define el_free(a)	cw_free(a)
 
 struct editline {
     char	 *el_prog;	/* the program name 			*/

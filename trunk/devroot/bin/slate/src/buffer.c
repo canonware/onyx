@@ -84,13 +84,13 @@ slate_buffer_init(cw_nxo_t *a_thread)
 	    sizeof(struct cw_slate_entry)));
 }
 
-_CW_INLINE void
+CW_INLINE void
 buffer_p_lock(struct cw_buffer *a_buffer)
 {
 	mtx_lock(&a_buffer->mtx);
 }
 
-_CW_INLINE void
+CW_INLINE void
 buffer_p_unlock(struct cw_buffer *a_buffer)
 {
 	mtx_unlock(&a_buffer->mtx);
@@ -105,7 +105,7 @@ buffer_p_eval(void *a_data, cw_nxo_t *a_thread)
 	 * buffer and feed it to the interpreter.  Catch all exceptions to
 	 * deallocate the copy in case of an error.
 	 */
-	_cw_error("XXX Not implemented");
+	cw_error("XXX Not implemented");
 }
 
 static cw_nxoe_t *
@@ -120,7 +120,7 @@ buffer_p_ref_iter(void *a_data, cw_bool_t a_reset)
 	switch (buffer->iter) {
 	case 0:
 		retval = nxo_nxoe_get(&buffer->hook);
-		_cw_check_ptr(retval);
+		cw_check_ptr(retval);
 		break;
 	case 1:
 		retval = nxo_nxoe_get(&buffer->aux);

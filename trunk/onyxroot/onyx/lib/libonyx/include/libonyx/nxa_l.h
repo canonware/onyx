@@ -9,7 +9,7 @@
  *
  ******************************************************************************/
 
-#ifdef _CW_THREADS
+#ifdef CW_THREADS
 /* Enumeration of message types for the GC thread event loop. */
 typedef enum {
 	NXAM_NONE,
@@ -19,7 +19,7 @@ typedef enum {
 } cw_nxam_t;
 #endif
 
-#ifndef _CW_THREADS
+#ifndef CW_THREADS
 #endif
 
 void	nxa_l_new(cw_nxa_t *a_nxa, cw_nx_t *a_nx);

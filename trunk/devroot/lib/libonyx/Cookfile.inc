@@ -105,7 +105,7 @@ SRCS = [SRCS] [LIBONYX_SRCS];
 }
 
 /* Libraries. */
-LIBONYX_REV = 4;
+LIBONYX_REV = 5;
 
 LIBONYX_A = [objdir]/lib/libonyx/lib/libonyx.a;
 #if [matches elf [abi]]

@@ -68,15 +68,15 @@ static void buf_p_shrink(cw_buf_t *a_buf);
  * A simplified version of bufv_copy() that counts '\n' characters that are
  * copied, and returns that rather than the number of elements copied.
  */
-_CW_INLINE cw_uint64_t
+CW_INLINE cw_uint64_t
 bufv_p_copy(cw_bufv_t *a_to, cw_uint32_t a_to_len, cw_uint32_t a_to_sizeof,
     const cw_bufv_t *a_fr, cw_uint32_t a_fr_len, cw_uint32_t a_fr_sizeof)
 {
 	cw_uint64_t	retval;
 	cw_uint32_t	to_el, fr_el, to_off, fr_off, cpysizeof;
 
-	_cw_check_ptr(a_to);
-	_cw_check_ptr(a_fr);
+	cw_check_ptr(a_to);
+	cw_check_ptr(a_fr);
 
 	if (a_to_sizeof <= a_fr_sizeof)
 		cpysizeof = a_to_sizeof;
@@ -120,8 +120,8 @@ bufv_copy(cw_bufv_t *a_to, cw_uint32_t a_to_len, cw_uint32_t a_to_sizeof,
 	cw_uint64_t	retval;
 	cw_uint32_t	to_el, fr_el, to_off, fr_off, cpysizeof;
 
-	_cw_check_ptr(a_to);
-	_cw_check_ptr(a_fr);
+	cw_check_ptr(a_to);
+	cw_check_ptr(a_fr);
 
 	if (a_to_sizeof <= a_fr_sizeof)
 		cpysizeof = a_to_sizeof;
@@ -167,8 +167,8 @@ buf_p_pos_b2a(cw_buf_t *a_buf, cw_uint64_t a_bpos)
 {
 	cw_uint64_t	apos;
 
-	_cw_assert(a_bpos > 0);
-	_cw_assert(a_bpos <= a_buf->len + 1);
+	cw_assert(a_bpos > 0);
+	cw_assert(a_bpos <= a_buf->len + 1);
 
 	if (a_bpos <= a_buf->gap_off)
 		apos = a_bpos - 1;
@@ -183,7 +183,7 @@ buf_p_pos_a2b(cw_buf_t *a_buf, cw_uint64_t a_apos)
 {
 	cw_uint64_t	bpos;
 
-	_cw_assert(a_apos <= a_buf->gap_off || a_apos >= a_buf->gap_off +
+	cw_assert(a_apos <= a_buf->gap_off || a_apos >= a_buf->gap_off +
 	    a_buf->gap_len);
 
 	if (a_apos <= a_buf->gap_off)
@@ -275,13 +275,13 @@ buf_p_lines_count(cw_buf_t *a_buf, cw_uint64_t a_apos_beg, cw_uint64_t
 {
 	cw_uint64_t	retval, apos;
 
-	_cw_assert(a_apos_beg <= a_buf->gap_off || a_apos_beg >= a_buf->gap_off
+	cw_assert(a_apos_beg <= a_buf->gap_off || a_apos_beg >= a_buf->gap_off
 	    + a_buf->gap_len);
-	_cw_assert(a_apos_beg <= a_buf->len + a_buf->gap_len);
-	_cw_assert(a_apos_end <= a_buf->gap_off || a_apos_end >= a_buf->gap_off
+	cw_assert(a_apos_beg <= a_buf->len + a_buf->gap_len);
+	cw_assert(a_apos_end <= a_buf->gap_off || a_apos_end >= a_buf->gap_off
 	    + a_buf->gap_len);
-	_cw_assert(a_apos_end <= a_buf->len + a_buf->gap_len);
-	_cw_assert(a_apos_beg <= a_apos_end);
+	cw_assert(a_apos_end <= a_buf->len + a_buf->gap_len);
+	cw_assert(a_apos_beg <= a_apos_end);
 
 	retval = 0;
 
@@ -308,9 +308,9 @@ buf_p_bufms_apos_adjust(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_sint64_t
 {
 	cw_bufm_t	*bufm;
 
-	_cw_check_ptr(a_buf);
-	_cw_check_ptr(a_bufm);
-	_cw_assert(a_beg_apos < a_end_apos);
+	cw_check_ptr(a_buf);
+	cw_check_ptr(a_bufm);
+	cw_assert(a_beg_apos < a_end_apos);
 
 	/*
 	 * Adjust apos field of affected bufm's. a_bufm is either in or adjacent
@@ -345,8 +345,8 @@ buf_p_gap_move(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_uint64_t a_bpos)
 {
 	cw_uint64_t	apos;
 
-	_cw_assert(a_bpos > 0);
-	_cw_assert(a_bpos <= a_buf->len + 1);
+	cw_assert(a_bpos > 0);
+	cw_assert(a_bpos <= a_buf->len + 1);
 
 	apos = a_bpos - 1;
 
@@ -429,7 +429,7 @@ buf_p_grow(cw_buf_t *a_buf, cw_uint64_t a_minlen)
 	/* Move the gap to the end before reallocating. */
 	buf_p_gap_move(a_buf, ql_last(&a_buf->bufms, link), a_buf->len + 1);
 
-	a_buf->b = (cw_uint8_t *)_cw_opaque_realloc(a_buf->realloc, a_buf->arg,
+	a_buf->b = (cw_uint8_t *)cw_opaque_realloc(a_buf->realloc, a_buf->arg,
 	    a_buf->b, new_size * a_buf->elmsize, old_size * a_buf->elmsize);
 
 	/* Adjust the gap length. */
@@ -444,7 +444,7 @@ buf_p_shrink(cw_buf_t *a_buf)
 	old_size = a_buf->len + a_buf->gap_len;
 
 	for (new_size = old_size;
-	    (new_size >> 1) > a_buf->len && new_size > _CW_BUF_MINELMS;
+	    (new_size >> 1) > a_buf->len && new_size > CW_BUF_MINELMS;
 	    new_size >>= 1) {
 		/*
 		 * Iteratively halve new_size until the actual buffer size is
@@ -463,7 +463,7 @@ buf_p_shrink(cw_buf_t *a_buf)
 		    1);
 
 		/* Shrink the gap. */
-		a_buf->b = (cw_uint8_t *)_cw_opaque_realloc(a_buf->realloc,
+		a_buf->b = (cw_uint8_t *)cw_opaque_realloc(a_buf->realloc,
 		    a_buf->arg, a_buf->b, new_size * a_buf->elmsize,
 		    old_size * a_buf->elmsize);
 
@@ -488,7 +488,7 @@ buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc, cw_opaque_realloc_t
 		memset(retval, 0, sizeof(cw_buf_t));
 		retval->alloced = FALSE;
 	} else {
-		retval = (cw_buf_t *)_cw_opaque_alloc(a_alloc, a_arg,
+		retval = (cw_buf_t *)cw_opaque_alloc(a_alloc, a_arg,
 		    sizeof(cw_buf_t));
 		memset(retval, 0, sizeof(cw_buf_t));
 		retval->alloced = TRUE;
@@ -500,12 +500,12 @@ buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc, cw_opaque_realloc_t
 	retval->arg = a_arg;
 
 	retval->elmsize = 1;
-	retval->b = (cw_uint8_t *)_cw_opaque_alloc(a_alloc, a_arg,
-	    _CW_BUF_MINELMS * retval->elmsize);
+	retval->b = (cw_uint8_t *)cw_opaque_alloc(a_alloc, a_arg,
+	    CW_BUF_MINELMS * retval->elmsize);
 	retval->len = 0;
 	retval->nlines = 1;
 	retval->gap_off = 0;
-	retval->gap_len = _CW_BUF_MINELMS;
+	retval->gap_len = CW_BUF_MINELMS;
 
 	/* Initialize history. */
 	retval->hist = NULL;
@@ -513,8 +513,8 @@ buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc, cw_opaque_realloc_t
 	/* Initialize lists. */
 	ql_new(&retval->bufms);
 
-#ifdef _CW_DBG
-	retval->magic = _CW_BUF_MAGIC;
+#ifdef CW_DBG
+	retval->magic = CW_BUF_MAGIC;
 #endif
 
 	return retval;
@@ -523,21 +523,21 @@ buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc, cw_opaque_realloc_t
 void
 buf_delete(cw_buf_t *a_buf)
 {
-	_cw_check_ptr(a_buf);
-	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
-	_cw_assert(ql_first(&a_buf->bufms) == NULL);
+	cw_check_ptr(a_buf);
+	cw_dassert(a_buf->magic == CW_BUF_MAGIC);
+	cw_assert(ql_first(&a_buf->bufms) == NULL);
 
 	if (a_buf->hist != NULL)
 		hist_delete(a_buf->hist);
 
-	_cw_opaque_dealloc(a_buf->dealloc, a_buf->arg, a_buf->b, (a_buf->len +
+	cw_opaque_dealloc(a_buf->dealloc, a_buf->arg, a_buf->b, (a_buf->len +
 	    a_buf->gap_len) * a_buf->elmsize);
 	
 	if (a_buf->alloced) {
-		_cw_opaque_dealloc(a_buf->dealloc, a_buf->arg, a_buf,
+		cw_opaque_dealloc(a_buf->dealloc, a_buf->arg, a_buf,
 		    sizeof(cw_buf_t));
 	}
-#ifdef _CW_DBG
+#ifdef CW_DBG
 	else
 		memset(a_buf, 0x5a, sizeof(cw_buf_t));
 #endif
@@ -546,8 +546,8 @@ buf_delete(cw_buf_t *a_buf)
 cw_uint32_t
 buf_elmsize_get(cw_buf_t *a_buf)
 {
-	_cw_check_ptr(a_buf);
-	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
+	cw_check_ptr(a_buf);
+	cw_dassert(a_buf->magic == CW_BUF_MAGIC);
 
 	return a_buf->elmsize;
 }
@@ -559,9 +559,9 @@ buf_elmsize_set(cw_buf_t *a_buf, cw_uint32_t a_elmsize)
 	cw_uint64_t	size;
 	cw_bufv_t	bufv_to, bufv_fr;
 
-	_cw_check_ptr(a_buf);
-	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
-	_cw_assert(a_elmsize > 0);
+	cw_check_ptr(a_buf);
+	cw_dassert(a_buf->magic == CW_BUF_MAGIC);
+	cw_assert(a_elmsize > 0);
 
 	if (a_elmsize == a_buf->elmsize) {
 		/* Do nothing. */
@@ -578,7 +578,7 @@ buf_elmsize_set(cw_buf_t *a_buf, cw_uint32_t a_elmsize)
 	buf_p_gap_move(a_buf, ql_last(&a_buf->bufms, link), a_buf->len + 1);
 
 	/* Allocate the new buffer. */
-	b = (cw_uint8_t *)_cw_opaque_alloc(a_buf->alloc, a_buf->arg, size *
+	b = (cw_uint8_t *)cw_opaque_alloc(a_buf->alloc, a_buf->arg, size *
 	    a_elmsize);
 
 	/* Copy data from the old buffer to the new one. */
@@ -590,7 +590,7 @@ buf_elmsize_set(cw_buf_t *a_buf, cw_uint32_t a_elmsize)
 	    a_buf->len);
 
 	/* Free the old buffer. */
-	_cw_opaque_dealloc(a_buf->dealloc, a_buf->arg, a_buf->b, size *
+	cw_opaque_dealloc(a_buf->dealloc, a_buf->arg, a_buf->b, size *
 	    a_buf->elmsize);
 
 	/* Update the buffer pointer. */
@@ -605,8 +605,8 @@ buf_len(cw_buf_t *a_buf)
 {
 	cw_uint64_t	retval;
 
-	_cw_check_ptr(a_buf);
-	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
+	cw_check_ptr(a_buf);
+	cw_dassert(a_buf->magic == CW_BUF_MAGIC);
 
 	retval = a_buf->len;
 
@@ -618,8 +618,8 @@ buf_nlines(cw_buf_t *a_buf)
 {
 	cw_uint64_t	retval;
 
-	_cw_check_ptr(a_buf);
-	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
+	cw_check_ptr(a_buf);
+	cw_dassert(a_buf->magic == CW_BUF_MAGIC);
 
 	retval = a_buf->nlines;
 
@@ -631,8 +631,8 @@ buf_hist_active_get(cw_buf_t *a_buf)
 {
 	cw_bool_t	retval;
 
-	_cw_check_ptr(a_buf);
-	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
+	cw_check_ptr(a_buf);
+	cw_dassert(a_buf->magic == CW_BUF_MAGIC);
 
 	if (a_buf->hist != NULL)
 		retval = TRUE;
@@ -645,8 +645,8 @@ buf_hist_active_get(cw_buf_t *a_buf)
 void
 buf_hist_active_set(cw_buf_t *a_buf, cw_bool_t a_active)
 {
-	_cw_check_ptr(a_buf);
-	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
+	cw_check_ptr(a_buf);
+	cw_dassert(a_buf->magic == CW_BUF_MAGIC);
 
 	if (a_active == TRUE && a_buf->hist == NULL) {
 		a_buf->hist = hist_new(a_buf->alloc, a_buf->realloc,
@@ -662,8 +662,8 @@ buf_undoable(cw_buf_t *a_buf)
 {
 	cw_bool_t	retval;
 
-	_cw_check_ptr(a_buf);
-	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
+	cw_check_ptr(a_buf);
+	cw_dassert(a_buf->magic == CW_BUF_MAGIC);
 
 	if (a_buf->hist == NULL) {
 		retval = FALSE;
@@ -681,8 +681,8 @@ buf_redoable(cw_buf_t *a_buf)
 {
 	cw_bool_t	retval;
 
-	_cw_check_ptr(a_buf);
-	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
+	cw_check_ptr(a_buf);
+	cw_dassert(a_buf->magic == CW_BUF_MAGIC);
 
 	if (a_buf->hist == NULL) {
 		retval = FALSE;
@@ -700,8 +700,8 @@ buf_undo(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_uint64_t a_count)
 {
 	cw_uint64_t	retval;
 
-	_cw_check_ptr(a_buf);
-	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
+	cw_check_ptr(a_buf);
+	cw_dassert(a_buf->magic == CW_BUF_MAGIC);
 
 	if (a_buf->hist == NULL) {
 		retval = 0;
@@ -719,8 +719,8 @@ buf_redo(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_uint64_t a_count)
 {
 	cw_uint64_t	retval;
 
-	_cw_check_ptr(a_buf);
-	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
+	cw_check_ptr(a_buf);
+	cw_dassert(a_buf->magic == CW_BUF_MAGIC);
 
 	if (a_buf->hist == NULL) {
 		retval = 0;
@@ -736,8 +736,8 @@ buf_redo(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_uint64_t a_count)
 void
 buf_hist_flush(cw_buf_t *a_buf)
 {
-	_cw_check_ptr(a_buf);
-	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
+	cw_check_ptr(a_buf);
+	cw_dassert(a_buf->magic == CW_BUF_MAGIC);
 
 	if (a_buf->hist != NULL)
 		hist_flush(a_buf->hist, a_buf);
@@ -746,8 +746,8 @@ buf_hist_flush(cw_buf_t *a_buf)
 void
 buf_hist_group_beg(cw_buf_t *a_buf, cw_bufm_t *a_bufm)
 {
-	_cw_check_ptr(a_buf);
-	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
+	cw_check_ptr(a_buf);
+	cw_dassert(a_buf->magic == CW_BUF_MAGIC);
 
 	if (a_buf->hist != NULL)
 		hist_group_beg(a_buf->hist, a_buf, a_bufm);
@@ -758,8 +758,8 @@ buf_hist_group_end(cw_buf_t *a_buf)
 {
 	cw_bool_t	retval;
 
-	_cw_check_ptr(a_buf);
-	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
+	cw_check_ptr(a_buf);
+	cw_dassert(a_buf->magic == CW_BUF_MAGIC);
 
 	if (a_buf->hist != NULL)
 		retval = hist_group_end(a_buf->hist, a_buf);
@@ -779,9 +779,9 @@ bufm_l_insert(cw_bufm_t *a_bufm, cw_bool_t a_record, cw_bool_t a_after, const
 	cw_bufm_t	*first, *bufm;
 	cw_bufv_t	bufv;
 
-	_cw_check_ptr(a_bufm);
-	_cw_dassert(a_bufm->magic == _CW_BUFM_MAGIC);
-	_cw_check_ptr(a_bufm->buf);
+	cw_check_ptr(a_bufm);
+	cw_dassert(a_bufm->magic == CW_BUFM_MAGIC);
+	cw_check_ptr(a_bufm->buf);
 
 	buf = a_bufm->buf;
 
@@ -884,13 +884,13 @@ bufm_l_remove(cw_bufm_t *a_start, cw_bufm_t *a_end, cw_bool_t a_record)
 	cw_uint64_t	start_bpos, end_bpos, rcount, nlines;
 	cw_bufv_t	bufv;
 
-	_cw_check_ptr(a_start);
-	_cw_dassert(a_start->magic == _CW_BUFM_MAGIC);
-	_cw_check_ptr(a_start->buf);
-	_cw_check_ptr(a_end);
-	_cw_dassert(a_end->magic == _CW_BUFM_MAGIC);
-	_cw_check_ptr(a_end->buf);
-	_cw_assert(a_start->buf == a_end->buf);
+	cw_check_ptr(a_start);
+	cw_dassert(a_start->magic == CW_BUFM_MAGIC);
+	cw_check_ptr(a_start->buf);
+	cw_check_ptr(a_end);
+	cw_dassert(a_end->magic == CW_BUFM_MAGIC);
+	cw_check_ptr(a_end->buf);
+	cw_assert(a_start->buf == a_end->buf);
 
 	if (a_start->apos < a_end->apos) {
 		start = a_start;
@@ -982,11 +982,11 @@ bufm_new(cw_bufm_t *a_bufm, cw_buf_t *a_buf)
 {
 	cw_bufm_t	*retval;
 
-	_cw_check_ptr(a_buf);
-	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
+	cw_check_ptr(a_buf);
+	cw_dassert(a_buf->magic == CW_BUF_MAGIC);
 
 	if (a_bufm == NULL) {
-		retval = (cw_bufm_t *)_cw_opaque_alloc(a_buf->alloc, a_buf->arg,
+		retval = (cw_bufm_t *)cw_opaque_alloc(a_buf->alloc, a_buf->arg,
 		    sizeof(cw_bufm_t));
 		retval->dealloc = a_buf->dealloc;
 		retval->arg = a_buf->arg;
@@ -1003,8 +1003,8 @@ bufm_new(cw_bufm_t *a_bufm, cw_buf_t *a_buf)
 
 	ql_head_insert(&a_buf->bufms, retval, link);
 
-#ifdef _CW_DBG
-	retval->magic = _CW_BUFM_MAGIC;
+#ifdef CW_DBG
+	retval->magic = CW_BUFM_MAGIC;
 #endif
 
 	return retval;
@@ -1013,13 +1013,13 @@ bufm_new(cw_bufm_t *a_bufm, cw_buf_t *a_buf)
 void
 bufm_dup(cw_bufm_t *a_to, cw_bufm_t *a_from)
 {
-	_cw_check_ptr(a_to);
-	_cw_dassert(a_to->magic == _CW_BUFM_MAGIC);
-	_cw_check_ptr(a_to->buf);
-	_cw_check_ptr(a_from);
-	_cw_dassert(a_from->magic == _CW_BUFM_MAGIC);
-	_cw_check_ptr(a_from->buf);
-	_cw_assert(a_to->buf == a_from->buf);
+	cw_check_ptr(a_to);
+	cw_dassert(a_to->magic == CW_BUFM_MAGIC);
+	cw_check_ptr(a_to->buf);
+	cw_check_ptr(a_from);
+	cw_dassert(a_from->magic == CW_BUFM_MAGIC);
+	cw_check_ptr(a_from->buf);
+	cw_assert(a_to->buf == a_from->buf);
 
 	a_to->apos = a_from->apos;
 	a_to->line = a_from->line;
@@ -1031,17 +1031,17 @@ bufm_dup(cw_bufm_t *a_to, cw_bufm_t *a_from)
 void
 bufm_delete(cw_bufm_t *a_bufm)
 {
-	_cw_check_ptr(a_bufm);
-	_cw_dassert(a_bufm->magic == _CW_BUFM_MAGIC);
-	_cw_check_ptr(a_bufm->buf);
+	cw_check_ptr(a_bufm);
+	cw_dassert(a_bufm->magic == CW_BUFM_MAGIC);
+	cw_check_ptr(a_bufm->buf);
 
 	ql_remove(&a_bufm->buf->bufms, a_bufm, link);
 
 	if (a_bufm->dealloc != NULL) {
-		_cw_opaque_dealloc(a_bufm->dealloc, a_bufm->arg, a_bufm,
+		cw_opaque_dealloc(a_bufm->dealloc, a_bufm->arg, a_bufm,
 		    sizeof(cw_bufm_t));
 	}
-#ifdef _CW_DBG
+#ifdef CW_DBG
 	else
 		memset(a_bufm, 0x5a, sizeof(cw_bufm_t));
 #endif
@@ -1050,9 +1050,9 @@ bufm_delete(cw_bufm_t *a_bufm)
 cw_buf_t *
 bufm_buf(cw_bufm_t *a_bufm)
 {
-	_cw_check_ptr(a_bufm);
-	_cw_dassert(a_bufm->magic == _CW_BUFM_MAGIC);
-	_cw_check_ptr(a_bufm->buf);
+	cw_check_ptr(a_bufm);
+	cw_dassert(a_bufm->magic == CW_BUFM_MAGIC);
+	cw_check_ptr(a_bufm->buf);
 
 	return a_bufm->buf;
 }
@@ -1062,9 +1062,9 @@ bufm_line_seek(cw_bufm_t *a_bufm, cw_sint64_t a_offset, cw_bufw_t a_whence)
 {
 	cw_bufm_t	*bufm;
 
-	_cw_check_ptr(a_bufm);
-	_cw_dassert(a_bufm->magic == _CW_BUFM_MAGIC);
-	_cw_check_ptr(a_bufm->buf);
+	cw_check_ptr(a_bufm);
+	cw_dassert(a_bufm->magic == CW_BUFM_MAGIC);
+	cw_check_ptr(a_bufm->buf);
 
 	/*
 	 * When checking for attempted seeking out of buf bounds, it is
@@ -1312,7 +1312,7 @@ bufm_line_seek(cw_bufm_t *a_bufm, cw_sint64_t a_offset, cw_bufw_t a_whence)
 		}
 		break;
 	default:
-		_cw_not_reached();
+		cw_not_reached();
 	}
 
 	return buf_p_pos_a2b(a_bufm->buf, a_bufm->apos);
@@ -1323,9 +1323,9 @@ bufm_line(cw_bufm_t *a_bufm)
 {
 	cw_uint64_t	retval;
 
-	_cw_check_ptr(a_bufm);
-	_cw_dassert(a_bufm->magic == _CW_BUFM_MAGIC);
-	_cw_check_ptr(a_bufm->buf);
+	cw_check_ptr(a_bufm);
+	cw_dassert(a_bufm->magic == CW_BUFM_MAGIC);
+	cw_check_ptr(a_bufm->buf);
 
 	retval = a_bufm->line;
 
@@ -1338,9 +1338,9 @@ bufm_seek(cw_bufm_t *a_bufm, cw_sint64_t a_offset, cw_bufw_t a_whence)
 	cw_uint64_t	bpos;
 	cw_bufm_t	*bufm;
 
-	_cw_check_ptr(a_bufm);
-	_cw_dassert(a_bufm->magic == _CW_BUFM_MAGIC);
-	_cw_check_ptr(a_bufm->buf);
+	cw_check_ptr(a_bufm);
+	cw_dassert(a_bufm->magic == CW_BUFM_MAGIC);
+	cw_check_ptr(a_bufm->buf);
 
 	switch (a_whence) {
 	case BUFW_BEG:
@@ -1557,7 +1557,7 @@ bufm_seek(cw_bufm_t *a_bufm, cw_sint64_t a_offset, cw_bufw_t a_whence)
 
 		break;
 	default:
-		_cw_not_reached();
+		cw_not_reached();
 	}
 
 	return bpos;
@@ -1568,9 +1568,9 @@ bufm_pos(cw_bufm_t *a_bufm)
 {
 	cw_uint64_t	retval;
 
-	_cw_check_ptr(a_bufm);
-	_cw_dassert(a_bufm->magic == _CW_BUFM_MAGIC);
-	_cw_check_ptr(a_bufm->buf);
+	cw_check_ptr(a_bufm);
+	cw_dassert(a_bufm->magic == CW_BUFM_MAGIC);
+	cw_check_ptr(a_bufm->buf);
 
 	retval = buf_p_pos_a2b(a_bufm->buf, a_bufm->apos);
 
@@ -1584,9 +1584,9 @@ bufm_before_get(cw_bufm_t *a_bufm)
 	cw_uint64_t	bpos;
 	cw_buf_t	*buf;
 
-	_cw_check_ptr(a_bufm);
-	_cw_dassert(a_bufm->magic == _CW_BUFM_MAGIC);
-	_cw_check_ptr(a_bufm->buf);
+	cw_check_ptr(a_bufm);
+	cw_dassert(a_bufm->magic == CW_BUFM_MAGIC);
+	cw_check_ptr(a_bufm->buf);
 
 	buf = a_bufm->buf;
 
@@ -1612,9 +1612,9 @@ bufm_after_get(cw_bufm_t *a_bufm)
 	cw_uint64_t	bpos;
 	cw_buf_t	*buf;
 
-	_cw_check_ptr(a_bufm);
-	_cw_dassert(a_bufm->magic == _CW_BUFM_MAGIC);
-	_cw_check_ptr(a_bufm->buf);
+	cw_check_ptr(a_bufm);
+	cw_dassert(a_bufm->magic == CW_BUFM_MAGIC);
+	cw_check_ptr(a_bufm->buf);
 
 	buf = a_bufm->buf;
 
@@ -1638,14 +1638,14 @@ bufm_range_get(cw_bufm_t *a_start, cw_bufm_t *a_end, cw_uint32_t *r_bufvcnt)
 	cw_bufm_t	*start, *end;
 	cw_buf_t	*buf;
 
-	_cw_check_ptr(a_start);
-	_cw_dassert(a_start->magic == _CW_BUFM_MAGIC);
-	_cw_check_ptr(a_start->buf);
-	_cw_check_ptr(a_end);
-	_cw_dassert(a_end->magic == _CW_BUFM_MAGIC);
-	_cw_check_ptr(a_end->buf);
-	_cw_assert(a_start->buf == a_end->buf);
-	_cw_check_ptr(r_bufvcnt);
+	cw_check_ptr(a_start);
+	cw_dassert(a_start->magic == CW_BUFM_MAGIC);
+	cw_check_ptr(a_start->buf);
+	cw_check_ptr(a_end);
+	cw_dassert(a_end->magic == CW_BUFM_MAGIC);
+	cw_check_ptr(a_end->buf);
+	cw_assert(a_start->buf == a_end->buf);
+	cw_check_ptr(r_bufvcnt);
 
 	buf = a_start->buf;
 

@@ -45,14 +45,14 @@ main()
 	thread_a = thd_new(thread_entry_func, (void *)"Thread A argument",
 	    TRUE);
 	mtx_unlock(&mtx);
-	_cw_assert(thd_join(thread_a) == NULL);
+	cw_assert(thd_join(thread_a) == NULL);
 	thread_a = NULL;
 
 	mtx_lock(&mtx);
 	thread_b = thd_new(thread_entry_func, (void *)"Thread B argument",
 	    TRUE);
 	mtx_unlock(&mtx);
-	_cw_assert(thd_join(thread_b) == NULL);
+	cw_assert(thd_join(thread_b) == NULL);
 
 	mtx_delete(&mtx);
 	fprintf(stderr, "Test end\n");

@@ -24,21 +24,21 @@ main(int argc, char **argv)
 	char	**arg;
 	int	i;
 
-	if (putenv(_CW_TONYX_RPATH) == -1)
+	if (putenv(CW_TONYX_RPATH) == -1)
 		goto RETURN;
-	if (putenv(_CW_TONYX_MPATH) == -1)
+	if (putenv(CW_TONYX_MPATH) == -1)
 		goto RETURN;
 
 	arg = (char **)malloc((argc + 1) * sizeof(char *));
 	if (arg == NULL)
 		goto RETURN;
 
-	arg[0] = _CW_TONYX_ONYX;
+	arg[0] = CW_TONYX_ONYX;
 	for (i = 1; i < argc; i++)
 		arg[i] = argv[i];
 	arg[i] = NULL;
 
-	execv(_CW_TONYX_ONYX, arg);
+	execv(CW_TONYX_ONYX, arg);
 	/* Not reached. */
 
 	RETURN:

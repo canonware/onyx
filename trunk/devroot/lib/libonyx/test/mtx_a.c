@@ -13,7 +13,7 @@
 
 #include "../include/libonyx/libonyx.h"
 
-#define _CW_TEST_COUNT 50
+#define CW_TEST_COUNT 50
 
 cw_uint32_t	g_count = 0;
 
@@ -23,7 +23,7 @@ thread_entry_func(void *a_arg)
 	cw_uint32_t	i, temp;
 	cw_mtx_t	*mutex = (cw_mtx_t *)a_arg;
 
-	for (i = 0; i < _CW_TEST_COUNT; i++) {
+	for (i = 0; i < CW_TEST_COUNT; i++) {
 		mtx_lock(mutex);
 		temp = g_count;
 		usleep(1);
@@ -50,12 +50,12 @@ main()
 	/* Locked. */
 	mtx_unlock(&mutex_a);
 	/* Unlocked. */
-	_cw_assert(mtx_trylock(&mutex_a) == FALSE);
+	cw_assert(mtx_trylock(&mutex_a) == FALSE);
 	/* Locked. */
-	_cw_assert(mtx_trylock(&mutex_a));
+	cw_assert(mtx_trylock(&mutex_a));
 	mtx_unlock(&mutex_a);
 	/* Unlocked. */
-	_cw_assert(mtx_trylock(&mutex_a) == FALSE);
+	cw_assert(mtx_trylock(&mutex_a) == FALSE);
 	/* Locked. */
 	mtx_unlock(&mutex_a);
 	/* Unlocked. */
@@ -63,7 +63,7 @@ main()
 
 	mtx_new(&mutex_b);
 	mtx_lock(&mutex_b);
-	_cw_assert(mtx_trylock(&mutex_b));
+	cw_assert(mtx_trylock(&mutex_b));
 	mtx_unlock(&mutex_b);
 	mtx_delete(&mutex_b);
 

@@ -19,15 +19,15 @@ const cw_uint8_t *data = "hook data";
 void
 hook_eval(void *a_data, cw_nxo_t *a_thread)
 {
-	_cw_assert(a_data == data);
+	cw_assert(a_data == data);
 
-	_cw_onyx_code(a_thread, "`Evaluated hook\n' print");
+	cw_onyx_code(a_thread, "`Evaluated hook\n' print");
 }
 
 cw_nxoe_t *
 hook_ref_iter(void *a_data, cw_bool_t a_reset)
 {
-	_cw_assert(a_data == data);
+	cw_assert(a_data == data);
 
 	return NULL;
 }
@@ -35,7 +35,7 @@ hook_ref_iter(void *a_data, cw_bool_t a_reset)
 cw_bool_t
 hook_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t a_iter)
 {
-	_cw_assert(a_data == data);
+	cw_assert(a_data == data);
 
 	return FALSE;
 }
@@ -74,7 +74,7 @@ main(int argc, char **argv, char **envp)
 	libonyx_init();
 	fprintf(stderr, "Test begin\n");
 
-	_cw_assert(nx_new(&nx, NULL, argc, argv, envp) == &nx);
+	cw_assert(nx_new(&nx, NULL, argc, argv, envp) == &nx);
 	nxo_thread_new(&thread, &nx);
 
 	/* Define anon_hook and mark_hook. */
@@ -86,7 +86,7 @@ main(int argc, char **argv, char **envp)
 	    FALSE);
 	nxo_operator_new(operator, anon_hook, NXN_ZERO);
 	nxo_attr_set(operator, NXOA_EXECUTABLE);
-	_cw_onyx_code(&thread, "def");
+	cw_onyx_code(&thread, "def");
 
 	name = nxo_stack_push(ostack);
 	operator = nxo_stack_push(ostack);
@@ -94,9 +94,9 @@ main(int argc, char **argv, char **envp)
 	    FALSE);
 	nxo_operator_new(operator, mark_hook, NXN_ZERO);
 	nxo_attr_set(operator, NXOA_EXECUTABLE);
-	_cw_onyx_code(&thread, "def");
+	cw_onyx_code(&thread, "def");
 
-	_cw_onyx_code(&thread, "\n\
+	cw_onyx_code(&thread, "\n\
 anon_hook 1 sprint\n\
 anon_hook eval\n\
 mark_hook 1 sprint\n\

@@ -27,7 +27,7 @@ thread_entry_func(void *a_arg)
 	for (i = 0; i < NITERATIONS; i++) {
 		tsd_set(&tsd, (void *)&arr[i]);
 		thd_yield();
-		_cw_assert((cw_uint8_t *)tsd_get(&tsd) == &arr[i]);
+		cw_assert((cw_uint8_t *)tsd_get(&tsd) == &arr[i]);
 		thd_yield();
 	}
 

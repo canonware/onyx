@@ -9,42 +9,42 @@
  *
  ******************************************************************************/
 
-#undef _CW_DBG
+#undef CW_DBG
 
-#ifndef _CW_ASSERT
-#undef _CW_ASSERT
+#ifndef CW_ASSERT
+#undef CW_ASSERT
 #endif
 
-#undef _CW_OS_DARWIN
-#undef _CW_OS_FREEBSD
-#undef _CW_OS_LINUX
-#undef _CW_OS_SOLARIS
+#undef CW_OS_DARWIN
+#undef CW_OS_FREEBSD
+#undef CW_OS_LINUX
+#undef CW_OS_SOLARIS
 
 /* Solaris needs this for sigwait(). */
 #undef _POSIX_PTHREAD_SEMANTICS
 
 #undef WORDS_BIGENDIAN
 
-#undef _CW_THREADS
-#undef _CW_PTHREADS
-#undef _CW_FTHREADS
-#undef _CW_MTHREADS
-#undef _CW_STHREADS
+#undef CW_THREADS
+#undef CW_PTHREADS
+#undef CW_FTHREADS
+#undef CW_MTHREADS
+#undef CW_STHREADS
 
-#undef _CW_POSIX
+#undef CW_POSIX
 
-#undef _CW_POSIX_FILE
+#undef CW_POSIX_FILE
 
 #undef HAVE_DLOPEN
 
 /*
  * If using gcc and inlines weren't disabled by configure, use inline functions.
  */
-#undef _CW_USE_INLINES
-#if (defined(__GNUC__) && defined(_CW_USE_INLINES))
-#define _CW_INLINE static __inline__
+#undef CW_USE_INLINES
+#if (defined(__GNUC__) && defined(CW_USE_INLINES))
+#define CW_INLINE static __inline__
 #else
-#define _CW_INLINE
+#define CW_INLINE
 #endif
 
 #undef SIZEOF_SIGNED_CHAR
@@ -59,7 +59,7 @@
 #undef SIZEOF_UNSIGNED_LONG_LONG
 #undef SIZEOF_INT_P
 
-#undef _CW_LIBONYX_USE_DIRENT_RECLEN
+#undef CW_LIBONYX_USE_DIRENT_RECLEN
 
 #undef HAVE_POLL
 #undef HAVE_READDIR_R
