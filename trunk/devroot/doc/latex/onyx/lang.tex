@@ -3529,8 +3529,8 @@ Read from file. \\
 file & {\bf \htmlref{readline}{systemdict:readline}} & string boolean &
 Read a line from file. \\
 \hline
-{\lt}file dict \dots{\gt} & {\bf \htmlref{poll}{systemdict:poll}} & {\lt}file
-dict \dots{\gt} & Wait for file(s) to change status. \\
+{\lt}file dict \dots{\gt} timeout & {\bf \htmlref{poll}{systemdict:poll}} &
+{\lb}file \dots{\rb} & Wait for file(s) to change status. \\
 \hline
 file & {\bf \htmlref{bytesavailable}{systemdict:bytesavailable}} & count &
 Get number of buffered readable bytes. \\
@@ -7649,42 +7649,42 @@ onyx:1>
 	\end{description}
 \label{systemdict:poll}
 \index{poll@\onyxop{}{poll}{}}
-\item[{\onyxop{{\lt}file dict \dots{\gt} timeout}{poll}{{\lt}file dict
-      \dots{\gt}}}: ]
+\item[{\onyxop{{\lt}file flags \dots{\gt} timeout}{poll}{{\lb}file
+      \dots{\rb}}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[{\lt}\dots{\gt}: ]
-			A dictionary of \oparg{file}/\oparg{dict} key/value
+			A dictionary of \oparg{file}/\oparg{flags} key/value
 			pairs.
 			\begin{description}\item[]
 			\item[file: ]
 				A file object.
-			\item[dict: ]
+			\item[flags: ]
 				A dictionary that contains keys corresponding to
-				\oparg{file} status attributes to poll.  The
-				following keys are heeded:
+				file status attributes to poll.  The following
+				keys are heeded:
 				\begin{description}\item[]
-				\item[POLLIN: ]
+				\item[/POLLIN: ]
 					Normal or priority data are available
 					for reading.
-				\item[POLLRDNORM: ]
+				\item[/POLLRDNORM: ]
 					Normal data are available for reading.
-				\item[POLLRDBAND: ]
+				\item[/POLLRDBAND: ]
 					Priority data are available for reading.
-				\item[POLLPRI: ]
+				\item[/POLLPRI: ]
 					High-priority data are available for
 					reading.
-				\item[POLLOUT: ]
+				\item[/POLLOUT: ]
 					Normal data can be written.
-				\item[POLLWRNORM: ]
+				\item[/POLLWRNORM: ]
 					Normal data can be written.
-				\item[POLLWRBAND: ]
+				\item[/POLLWRBAND: ]
 					Priority data can be written.
 				\end{description}
 				The values associated with the keys are
 				disregarded, but are set appropriately before
-				\onyxop{}{poll}{} returns.
+				\onyxop{}{poll}{} returns (true/false).
 			\end{description}
 		\item[timeout: ]
 			Timeout, in milliseconds (maximum $2^{31} - 1$).  -1 is
@@ -7692,20 +7692,32 @@ onyx:1>
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[file: ]
-			The file object passed in.
-		\item[dict: ]
-			The dictionary passed in.  For each of the keys defined,
-			the associated value is set to true or false, depending
-			on the status of \oparg{file}.  In addition, the
-			following keys may defined (if not already defined) with
-			an associated value of true in the case of errors:
+		\item[{\lb}\dots{\rb}: ]
+			An array containing a reference to each \oparg{file} in
+			\oparg{{\lt}\dots{\gt}} for which a non-zero number of
+			status attributes is set to true.  A zero-length array
+			indicates that the poll timed out.
 			\begin{description}\item[]
-			\item[POLLERR: ]
+			\item[file: ]
+				A reference to a file object passed in that has
+				one or more attributes set to true.
+			\end{description}
+		\end{description}
+		Although \oparg{{\lt}\dots{\gt}} is not returned, its contents
+		are modified.
+		\begin{description}\item[]
+		\item[flags: ]
+			The dictionary passed in.  For recognized key that is
+			defined, the associated value is set to true or false,
+			depending on the status of \oparg{file}.  In addition,
+			the following keys may defined (if not already defined)
+			with a value of true in the case of errors:
+			\begin{description}\item[]
+			\item[/POLLERR: ]
 				An error has occurred.
-			\item[POLLHUP: ]
+			\item[/POLLHUP: ]
 				Hangup has occurred.
-			\item[POLLNVAL: ]
+			\item[/POLLNVAL: ]
 				\oparg{file} is not an open file.
 			\end{description}
 		\end{description}
@@ -7716,8 +7728,8 @@ onyx:1>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Wait for \oparg{file} to change status, and report status
-		changes.
+		Wait for any of the \oparg{flags} associated with a \oparg{file}
+		in \oparg{{\lt}\dots{\gt}} to be true.
 	\item[Example(s): ]\begin{verbatim}
 
 		\end{verbatim}

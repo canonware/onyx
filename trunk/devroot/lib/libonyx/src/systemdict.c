@@ -4942,11 +4942,15 @@ systemdict_poll(cw_nxo_t *a_thread)
     cw_nxa_t *nxa;
     struct pollfd *fds;
     unsigned i, nfds;
+    int nready;
     cw_uint32_t j, nflags;
+    cw_bool_t changed;
+    cw_uint32_t tcount;
     cw_nxoi_t timeout;
 
     ostack = nxo_thread_ostack_get(a_thread);
     tstack = nxo_thread_tstack_get(a_thread);
+    tcount = nxo_stack_count(tstack);
     NXO_STACK_GET(nxo, ostack, a_thread);
     if (nxo_type_get(nxo) != NXOT_INTEGER)
     {
@@ -4959,12 +4963,15 @@ systemdict_poll(cw_nxo_t *a_thread)
 	nxo_thread_nerror(a_thread, NXN_rangecheck);
 	return;
     }
-    NXO_STACK_DOWN_GET(dict, ostack, a_thread, nxo);
+    NXO_STACK_DOWN_GET(nxo, ostack, a_thread, nxo);
     if (nxo_type_get(dict) != NXOT_DICT)
     {
 	nxo_thread_nerror(a_thread, NXN_typecheck);
 	return;
     }
+    dict = nxo_stack_push(tstack);
+    nxo_dup(dict, nxo);
+
     nx = nxo_thread_nx_get(a_thread);
     nxa = nx_nxa_get(nx);
     nxo_boolean_new(&boolean_true, TRUE);
@@ -5000,6 +5007,7 @@ systemdict_poll(cw_nxo_t *a_thread)
     nfds = nxo_dict_count(dict);
     if (nfds == 0)
     {
+	nxo_stack_npop(tstack, nxo_stack_count(tstack) - tcount);
 	nxo_thread_nerror(a_thread, NXN_rangecheck);
 	return;
     }
@@ -5013,7 +5021,7 @@ systemdict_poll(cw_nxo_t *a_thread)
 	if (nxo_type_get(file) != NXOT_FILE || nxo_type_get(flags) != NXOT_DICT)
 	{
 	    nxa_free(nxa, fds, nfds * sizeof(struct pollfd));
-	    nxo_stack_npop(tstack, 13);
+	    nxo_stack_npop(tstack, nxo_stack_count(tstack) - tcount);
 	    nxo_thread_nerror(a_thread, NXN_typecheck);
 	    return;
 	}
@@ -5024,7 +5032,7 @@ systemdict_poll(cw_nxo_t *a_thread)
 	if (nflags == 0)
 	{
 	    nxa_free(nxa, fds, nfds * sizeof(struct pollfd));
-	    nxo_stack_npop(tstack, 13);
+	    nxo_stack_npop(tstack, nxo_stack_count(tstack) - tcount);
 	    nxo_thread_nerror(a_thread, NXN_rangecheck);
 	    return;
 	}
@@ -5041,6 +5049,11 @@ systemdict_poll(cw_nxo_t *a_thread)
 		    fds[i].events |= (a_flag);				\
 		    nxo_dict_def(flags, nx, flag, &boolean_false);	\
 		}
+#define CLEARPOLLERROR(a_name, a_flag)					\
+		if (nxo_compare(flag, (a_name)) == 0)			\
+		{							\
+		    nxo_dict_def(flags, nx, flag, &boolean_false);	\
+		}
 
 		/* List these in order of most to least used. */
 		ADDPOLLFLAG(pollin, POLLIN)
@@ -5049,21 +5062,66 @@ systemdict_poll(cw_nxo_t *a_thread)
 		else ADDPOLLFLAG(pollwrnorm, POLLWRNORM)
 		else ADDPOLLFLAG(pollrdband, POLLRDBAND)
 		else ADDPOLLFLAG(pollwrband, POLLWRBAND)
-		else ADDPOLLFLAG(pollpri, POLLPRI);
+		else ADDPOLLFLAG(pollpri, POLLPRI)
+		else CLEARPOLLERROR(pollerr, POLLERR)
+		else CLEARPOLLERROR(pollhup, POLLHUP)
+		else CLEARPOLLERROR(pollnval, POLLNVAL);
 #undef ADDPOLLFLAG
+#undef CLEARPOLLERROR
 	    }
 	}
     }
 
     /* Call poll(). */
-    cw_error("XXX Not implemented");
+    nready = poll(fds, nfds, (int) timeout);
 
     /* Translate the results. */
+    nxo_array_new(nxo, nx, nxo_thread_currentlocking(a_thread), nready);
+    for (i = j = 0, changed = FALSE; i < nfds && j < nready; i++)
+    {
+	nxo_dict_iterate(dict, file);
+	nxo_dict_lookup(dict, file, flags);
+	cw_assert(nxo_file_fd_get(file) == fds[i].fd);
 
+#define CHECKPOLLFLAG(a_var, a_flag)					\
+	if ((fds[i].events & (a_flag)) && (fds[i].revents & (a_flag)))	\
+	{								\
+	    nxo_dict_def(flags, nx, (a_var), &boolean_true);		\
+	    nxo_array_el_set(nxo, file, j);				\
+	    changed = TRUE;						\
+	}
+#define CHECKPOLLERROR(a_var, a_flag)					\
+	if (fds[i].revents & (a_flag))					\
+	{								\
+	    nxo_dict_def(flags, nx, (a_var), &boolean_true);		\
+	    nxo_array_el_set(nxo, file, j);				\
+	    changed = TRUE;						\
+	}
+
+	CHECKPOLLFLAG(pollin, POLLIN);
+	CHECKPOLLFLAG(pollrdnorm, POLLRDNORM);
+	CHECKPOLLFLAG(pollrdband, POLLRDBAND);
+	CHECKPOLLFLAG(pollpri, POLLPRI);
+	CHECKPOLLFLAG(pollout, POLLOUT);
+	CHECKPOLLFLAG(pollwrnorm, POLLWRNORM);
+	CHECKPOLLFLAG(pollwrband, POLLWRBAND);
+	CHECKPOLLERROR(pollerr, POLLERR);
+	CHECKPOLLERROR(pollhup, POLLHUP);
+	CHECKPOLLERROR(pollnval, POLLNVAL);
+
+#undef CHECKPOLLFLAG
+#undef CHECKPOLLERROR
+
+	    if (changed)
+	{
+	    changed = FALSE;
+	    j++;
+	}
+    }
 
     nxo_stack_pop(ostack);
     nxa_free(nxa, fds, nfds * sizeof(struct pollfd));
-    nxo_stack_npop(tstack, 13);
+    nxo_stack_npop(tstack, nxo_stack_count(tstack) - tcount);
 }
 #endif
 
