@@ -425,14 +425,14 @@ nx_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str)
 	 */
 	if (arg->buffer_count > a_len) {
 		/* There are more data than we can return. */
-		memcpy(r_str, arg->buffer, a_len);
-		memmove(r_str, &r_str[a_len], arg->buffer_count - a_len);
-		arg->buffer_count -= a_len;
 		retval = a_len;
+		memcpy(r_str, arg->buffer, a_len);
+		arg->buffer_count -= a_len;
+		memmove(arg->buffer, &arg->buffer[a_len], arg->buffer_count);
 	} else {
 		/* Return all the data. */
-		memcpy(r_str, arg->buffer, arg->buffer_count);
 		retval = arg->buffer_count;
+		memcpy(r_str, arg->buffer, arg->buffer_count);
 		arg->buffer_count = 0;
 	}
 
