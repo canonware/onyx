@@ -74,16 +74,6 @@ clopt <
 	} ifelse
     } bind
 
-    #instance#
-    #- remainder #remainder/null
-    $remainder {
-	;data $remainder known {
-	    ,remainder
-	}{
-	    null
-	} ifelse
-    } bind
-
     # Parse #argv.
     #
     #instance#
@@ -132,8 +122,8 @@ clopt <
 		#argv #i
 	    }{
 	    dup `^--$' match {
-		# Terminate argument processing.  Make the remainder of the
-		# arguments (not including the --) available via :remainder.
+		# Terminate argument processing.  Do not include the -- in the
+		# remainder.
 		pop inc
 		#argv #i+1
 		exit
@@ -163,7 +153,6 @@ clopt <
 	#argv #i #remlen
 	getinterval
 	#remainder
-	$remainder over ;def
     } bind
 
     # Dispatch a long format option.
