@@ -105,7 +105,7 @@ int ficlLockDictionary(short fLock)
 
   _cw_check_ptr(g_dict_lock);
   
-  if (TRUE == fLock)
+  if (fLock)
   {
     /* Lock. */
     mtx_lock(g_dict_lock);
