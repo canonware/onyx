@@ -4452,60 +4452,16 @@ systemdict_forkexec(cw_nxo_t *a_thread)
     if (systemdict_p_exec_prepare(a_thread, &path, &argv, &envp) == FALSE)
     {
 	pid_t pid;
-	cw_nxn_t error;
-	int execerror;
 
 	pid = fork();
 	if (pid == 0)
 	{
 	    /* Child. */
-	    execerror = execve(path, argv, envp);
-	    if (execerror == -1)
-	    {
-		switch (errno)
-		{
-		    case EACCES:
-		    case ENOEXEC:
-		    {
-			error = NXN_invalidaccess;
-			goto ERROR;
-		    }
-		    case ENOENT:
-		    case ENOTDIR:
-		    {
-			error = NXN_undefinedfilename;
-			goto ERROR;
-		    }
-		    case EIO:
-		    case ETXTBSY:
-		    {
-			error = NXN_ioerror;
-			goto ERROR;
-		    }
-		    case E2BIG:
-		    case ELOOP:
-		    case ENAMETOOLONG:
-		    {
-			error = NXN_invalidfileaccess;
-			goto ERROR;
-		    }
-		    case EFAULT:
-		    case EISDIR:
-		    case EMFILE:
-		    case ENFILE:
-		    case ENOMEM:
-		    default:
-		    {
-			error = NXN_unregistered;
-			goto ERROR;
-		    }
-		}
-	    }
-	    cw_not_reached();
+	    execve(path, argv, envp);
 
-	    ERROR:
-	    systemdict_p_exec_cleanup(path, argv, envp);
-	    nxo_thread_nerror(a_thread, error);
+	    /* If we get here, then the execve() call failed.  Get an error back
+	     * to the parent. */
+	    _exit(1);
 	}
 	else
 	{
