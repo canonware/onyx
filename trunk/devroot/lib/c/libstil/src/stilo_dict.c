@@ -136,7 +136,11 @@ stilo_l_dict_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_uint32_t
 		for (i = 0, count = stilo_dict_count(a_stilo); i < count; i++) {
 			/* Get key and val. */
 			stilo_dict_iterate(a_stilo, &key);
-			stilo_dict_lookup(a_stilo, &key, &val);
+			if (stilo_dict_lookup(a_stilo, &key, &val)) {
+				/* Race condition.  Pretend it didn't happen. */
+				retval = STILO_THREADE_NONE;
+				goto RETURN;
+			}
 
 			/* Print key. */
 			retval = stilo_print(&key, a_file, a_depth - 1, FALSE);
