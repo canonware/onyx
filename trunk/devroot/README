@@ -12,8 +12,8 @@ The following files may be of direct interest to the user:
 
 * PLATFORMS - Supported platforms and platform-specific information.
 
-* doc/html/onyx.html - Manual in html format.
+* doc/html/onyx/onyx.html - Manual in html format.
 
-* doc/ps/onyx.ps - Manual in PostScript format.
+* doc/ps/onyx/onyx.ps - Manual in PostScript format.
 
-* doc/pdf/onyx.pdf - Manual in Portable Document Format.
+* doc/pdf/onyx/onyx.pdf - Manual in Portable Document Format.
