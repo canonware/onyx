@@ -9,38 +9,10 @@
  *
  ******************************************************************************/
 
-typedef struct cw_bufhi_s cw_bufhi_t;
-typedef struct cw_bufh_s cw_bufh_t;
 typedef cw_uint8_t cw_char_t;
 typedef cw_uint32_t cw_bufc_t;
 typedef struct cw_bufm_s cw_bufm_t;
 typedef struct cw_buf_s cw_buf_t;
-
-struct cw_bufhi_s {
-	qs_elm(cw_bufhi_t) link;
-
-	enum {
-		BUFH_GROUP_START,
-		BUFH_GROUP_END,
-		BUFH_SEEK,
-		BUFH_INSERT,
-		BUFH_REMOVE
-	}		mod;
-	union {
-		struct {
-			cw_uint64_t	from;
-			cw_uint64_t	to;
-		}	seek;
-		struct {
-			cw_bufc_t	bufc;
-		}	insert;
-	}		data;
-};
-
-struct cw_bufh_s {
-	qs_head(cw_bufhi_t) undo;
-	qs_head(cw_bufhi_t) redo;
-};
 
 /*
  * The bits of a bufc are defined as follows:
@@ -172,8 +144,10 @@ struct cw_buf_s {
 
 	ql_head(cw_bufm_t) bufms;	/* Ordered list of all markers. */
 
-	cw_bool_t	hist_active:1;	/* History is active if TRUE. */
-	cw_bufh_t	hist;		/* History state. */
+	cw_uint8_t	*hist_buf;	/* History buffer, if non-NULL. */
+	cw_uint64_t	hist_buflen;	/* Total size of hist_buf. */
+	cw_uint64_t	hist_len;	/* Amount of hist_buf used. */
+	
 };
 
 /* buf. */
@@ -182,12 +156,16 @@ cw_buf_t *buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc,
     cw_msgq_t *a_msgq);
 void	buf_delete(cw_buf_t *a_buf);
 
+void	buf_lock(cw_buf_t *a_buf);
+void	buf_unlock(cw_buf_t *a_buf);
+
 cw_uint64_t buf_len(cw_buf_t *a_buf);
+cw_uint64_t buf_nlines(cw_buf_t *a_buf);
 
 cw_bool_t buf_hist_active_get(cw_buf_t *a_buf);
 void	buf_hist_active_set(cw_buf_t *a_buf, cw_bool_t a_active);
-cw_bool_t buf_undo(cw_buf_t *a_buf);
-cw_bool_t buf_redo(cw_buf_t *a_buf);
+cw_bool_t buf_undo(cw_buf_t *a_buf, cw_bufm_t *a_bufm);
+cw_bool_t buf_redo(cw_buf_t *a_buf, cw_bufm_t *a_bufm);
 void	buf_hist_group_beg(cw_buf_t *a_buf);
 void	buf_hist_group_end(cw_buf_t *a_buf);
 void	buf_hist_flush(cw_buf_t *a_buf);
