@@ -15,7 +15,7 @@ true spush
 [] spush
 condition spush
 <> spush
-fino spush
+( spush
 1 spush
 mark spush
 mutex spush

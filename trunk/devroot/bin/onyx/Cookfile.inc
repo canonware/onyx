@@ -54,41 +54,39 @@ SRCS = [SRCS] [ONYX_SRCS];
  */
 {
   local otests = abs_a.nx.in abs_b.nx.in abs_c.nx.in add_a.nx.in add_b.nx.in
-                 add_c.nx.in add_d.nx.in bind_a.nx.in
-                 catenate_a.nx.in catenate_b.nx.in catenate_c.nx.in
-                 catenate_d.nx.in clear_a.nx.in cleartomark_a.nx.in copy_a.nx.in
-                 count_a.nx.in counttomark_a.nx.in counttomark_b.nx.in
-                 counttomark_c.nx.in div_a.nx.in div_b.nx.in div_c.nx.in
-                 div_d.nx.in div_e.nx.in dup_a.nx.in dup_b.nx.in eval.nx.in
-                 exch_a.nx.in exch_b.nx.in exch_c.nx.in exp_a.nx.in exp_b.nx.in
-                 exp_c.nx.in exp_d.nx.in exp_e.nx.in fino_a.nx.in
-                 gc_roll.nx.in hello.nx.in immediate_a.nx.in immediate_b.nx.in
-                 index_a.nx.in index_b.nx.in index_c.nx.in index_d.nx.in
-                 index_e.nx.in index_f.nx.in integer.nx.in integer_a.nx.in
-                 integer_b.nx.in integer_c.nx.in integer_d.nx.in mark_a.nx.in
-                 mod_a.nx.in mod_b.nx.in mod_c.nx.in mod_d.nx.in mod_e.nx.in
-                 monitor_a.nx.in monitor_b.nx.in monitor_c.nx.in mul_a.nx.in
-                 mul_b.nx.in mul_c.nx.in mul_d.nx.in neg_a.nx.in neg_b.nx.in
-                 neg_c.nx.in nsleep_a.nx.in
-                 nsleep_b.nx.in nsleep_c.nx.in nsleep_d.nx.in pop_a.nx.in
-                 pop_b.nx.in rand_a.nx.in roll_a.nx.in roll_b.nx.in
-                 roll_c.nx.in roll_d.nx.in
-                 roll_e.nx.in roll_f.nx.in roll_g.nx.in sclear_a.nx.in
-                 sclear_b.nx.in sclear_c.nx.in scleartomark_a.nx.in
-                 scleartomark_b.nx.in scleartomark_c.nx.in scleartomark_d.nx.in
-                 scount_a.nx.in scount_b.nx.in scount_c.nx.in
-                 scounttomark_a.nx.in scounttomark_b.nx.in scounttomark_c.nx.in
-                 sdup_a.nx.in sdup_b.nx.in sdup_c.nx.in sdup_d.nx.in
-                 search.nx.in sexch_a.nx.in sexch_b.nx.in sexch_c.nx.in
-                 sexch_d.nx.in sindex_a.nx.in sindex_b.nx.in sindex_c.nx.in
-                 sindex_d.nx.in sindex_e.nx.in sindex_f.nx.in sindex_g.nx.in
-                 spop_a.nx.in spop_b.nx.in spop_c.nx.in spop_d.nx.in
-                 sprint_a.nx.in spush_a.nx.in spush_b.nx.in spush_c.nx.in
-                 spush_d.nx.in srand_a.nx.in srand_b.nx.in srand_c.nx.in
-                 srand_d.nx.in sroll_a.nx.in sroll_b.nx.in sroll_c.nx.in
-                 sroll_d.nx.in sroll_e.nx.in sroll_f.nx.in sroll_g.nx.in
-                 sroll_h.nx.in sroll_i.nx.in stack_a.nx.in sub_a.nx.in
-                 sub_b.nx.in sub_c.nx.in sub_d.nx.in sym_lp_a.nx.in
+                 add_c.nx.in add_d.nx.in bind_a.nx.in catenate_a.nx.in
+                 catenate_b.nx.in catenate_c.nx.in catenate_d.nx.in
+                 clear_a.nx.in cleartomark_a.nx.in copy_a.nx.in count_a.nx.in
+                 counttomark_a.nx.in counttomark_b.nx.in counttomark_c.nx.in
+                 div_a.nx.in div_b.nx.in div_c.nx.in div_d.nx.in div_e.nx.in
+                 dup_a.nx.in dup_b.nx.in eval.nx.in exch_a.nx.in exch_b.nx.in
+                 exch_c.nx.in exp_a.nx.in exp_b.nx.in exp_c.nx.in exp_d.nx.in
+                 exp_e.nx.in gc_roll.nx.in hello.nx.in immediate_a.nx.in
+                 immediate_b.nx.in index_a.nx.in index_b.nx.in index_c.nx.in
+                 index_d.nx.in index_e.nx.in index_f.nx.in integer.nx.in
+                 integer_a.nx.in integer_b.nx.in integer_c.nx.in integer_d.nx.in
+                 mark_a.nx.in mod_a.nx.in mod_b.nx.in mod_c.nx.in mod_d.nx.in
+                 mod_e.nx.in monitor_a.nx.in monitor_b.nx.in monitor_c.nx.in
+                 mul_a.nx.in mul_b.nx.in mul_c.nx.in mul_d.nx.in neg_a.nx.in
+                 neg_b.nx.in neg_c.nx.in nsleep_a.nx.in nsleep_b.nx.in
+                 nsleep_c.nx.in nsleep_d.nx.in pop_a.nx.in pop_b.nx.in
+                 rand_a.nx.in roll_a.nx.in roll_b.nx.in roll_c.nx.in
+                 roll_d.nx.in roll_e.nx.in roll_f.nx.in roll_g.nx.in
+                 sclear_a.nx.in sclear_b.nx.in sclear_c.nx.in
+                 scleartomark_a.nx.in scleartomark_b.nx.in scleartomark_c.nx.in
+                 scleartomark_d.nx.in scount_a.nx.in scount_b.nx.in
+                 scount_c.nx.in scounttomark_a.nx.in scounttomark_b.nx.in
+                 scounttomark_c.nx.in sdup_a.nx.in sdup_b.nx.in sdup_c.nx.in
+                 sdup_d.nx.in search.nx.in sexch_a.nx.in sexch_b.nx.in
+                 sexch_c.nx.in sexch_d.nx.in sindex_a.nx.in sindex_b.nx.in
+                 sindex_c.nx.in sindex_d.nx.in sindex_e.nx.in sindex_f.nx.in
+                 sindex_g.nx.in spop_a.nx.in spop_b.nx.in spop_c.nx.in
+                 spop_d.nx.in sprint_a.nx.in spush_a.nx.in spush_b.nx.in
+                 spush_c.nx.in spush_d.nx.in srand_a.nx.in srand_b.nx.in
+                 srand_c.nx.in srand_d.nx.in sroll_a.nx.in sroll_b.nx.in
+                 sroll_c.nx.in sroll_d.nx.in sroll_e.nx.in sroll_f.nx.in
+                 sroll_g.nx.in sroll_h.nx.in sroll_i.nx.in stack_a.nx.in
+                 sub_a.nx.in sub_b.nx.in sub_c.nx.in sub_d.nx.in sym_lp_a.nx.in
                  sym_rp_a.nx.in sym_rp_b.nx.in syntaxerror_a.nx.in
                  syntaxerror_b.nx.in syntaxerror_c.nx.in syntaxerror_d.nx.in
                  syntaxerror_e.nx.in syntaxerror_f.nx.in syntaxerror_g.nx.in
