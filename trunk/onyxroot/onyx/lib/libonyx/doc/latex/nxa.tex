@@ -18,9 +18,6 @@
 
 The \classname{nxa} class implements garbage collection.  The garbage collector
 runs a separate thread that is controlled via an asynchronous message queue.
-The collector thread is only responsible for doing asynchronous collection due
-to allocation inactivity and all sweeping; all other marking is synchronously
-done in the thread context of the mutator that triggers collection.
 
 \subsubsection{API}
 \begin{capi}
@@ -133,7 +130,7 @@ a\_size}}
 		\item[\htmlref{CW\_ONYXX\_OOM}{CW_ONYXX_OOM}.]
 		\end{description}
 	\item[Description: ]
-		Do a synchronous garbage collection.
+		Force an asynchronous garbage collection.
 	\end{capilist}
 \label{nxa_dump}
 \index{nxa_dump@\cfunc{nxa\_dump}{}}
