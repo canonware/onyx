@@ -460,7 +460,7 @@ echo > confdefs.h
 
 # A filename unique to this package, relative to the directory that
 # configure is in, which we can look for to find out if srcdir is correct.
-ac_unique_file=libhungry.h.in
+ac_unique_file=libstash.h.in
 
 # Find the source files, if location was not specified.
 if test -z "$srcdir"; then
@@ -2609,7 +2609,7 @@ ac_given_INSTALL="$INSTALL"
 trap 'rm -fr `echo "Makefile \
 Makefile.common \
 bin/pmerge \
-bin/pstub libhungry.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
+bin/pstub libstash.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
 EOF
 cat >> $CONFIG_STATUS <<EOF
 
@@ -2790,7 +2790,7 @@ ac_eD='%g'
 if test "${CONFIG_HEADERS+set}" != set; then
 EOF
 cat >> $CONFIG_STATUS <<EOF
-  CONFIG_HEADERS="libhungry.h"
+  CONFIG_HEADERS="libstash.h"
 EOF
 cat >> $CONFIG_STATUS <<\EOF
 fi

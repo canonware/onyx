@@ -8,14 +8,11 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 131 $
- * Last modified: $Date: 1998-07-07 13:43:45 -0700 (Tue, 07 Jul 1998) $
+ * Current revision: $Revision: 136 $
+ * Last modified: $Date: 1998-07-10 13:11:48 -0700 (Fri, 10 Jul 1998) $
  *
- * Description: 
- *              
- *              
- *              
- *              
+ * Description: Master header file for libstash.
+ *
  ****************************************************************************/
 
 /* 
@@ -23,7 +20,7 @@
  * not automatically including everything.
  */
 
-#ifndef _CONFIG_H_
+#ifndef _LIBSTASH_H_
 /*
  * Defined by configure if we have the corresponding header on this system.
  */
@@ -58,7 +55,7 @@
 #undef SIZEOF_LONG_DOUBLE
 #undef SIZEOF_INT_P
 
-#endif /* _CONFIG_H_ */
+#endif /* _LIBSTASH_H_ */
 
 /*
  * System headers we may want to include.
@@ -153,14 +150,14 @@
 
 #endif
 
-#ifndef _CONFIG_H_
-#  define _CONFIG_H_
+#ifndef _LIBSTASH_H_
+#  define _LIBSTASH_H_
 
 /*
  * Namespace setup.
  */
 
-#  define _CW_PREF _sqrl_
+#  define _CW_PREF _libstash_
 
 #  define _cw_ns_glue(x,y,z) x##y##z
 #  define _cw_ns_xglue(x,y,z) _cw_ns_glue(x,y,z)
@@ -281,27 +278,9 @@ typedef enum
  * Project headers to always be included.
  */
 
-#  ifndef _COMMON_INCS_H_
-#    include <common_incs.h>
-#    define _COMMON_INCS_H_
-#  endif
-
-/*
- * Project headers we may want to include.
- */
-
-#  if (defined(_INC_CSQRL_INCS_H_) || defined(_INC_ALL))
-#    ifndef _CSQRL_INCS_H_
-#      include <csqrl_incs.h>
-#      define _CSQRL_INCS_H_
-#    endif
-#  endif
-
-#  if (defined(_INC_SQL_INCS_H_) || defined(_INC_ALL))
-#    ifndef _INC_SQL_INCS_H_
-#      include <sql_incs.h>
-#      define _SQL_INCS_H_
-#    endif
+#  ifndef _STASH_INCS_H_
+#    include <stash_incs.h>
+#    define _STASH_INCS_H_
 #  endif
 
 /*
@@ -322,4 +301,4 @@ extern cw_log_t * g_log_o;
 #  define _cw_fmatch(a) dbg_fmatch(g_dbg_o, a)
 #  define _cw_pmatch(a) dbg_pmatch(g_dbg_o, a)
 
-#endif /* _CONFIG_H_ */
+#endif /* _LIBSTASH_H_ */

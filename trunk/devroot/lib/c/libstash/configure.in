@@ -3,8 +3,8 @@ dnl <Copyright = "jasone">
 dnl <License>
 dnl
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(libhungry.h.in)
-AC_CONFIG_HEADER(libhungry.h)
+AC_INIT(libstash.h.in)
+AC_CONFIG_HEADER(libstash.h)
 
 dnl Use libtool
 dnl AM_DISABLE_SHARED
