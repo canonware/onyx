@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 156 $
- * $Date: 1998-07-29 16:59:01 -0700 (Wed, 29 Jul 1998) $
+ * $Revision: 183 $
+ * $Date: 1998-08-29 21:04:27 -0700 (Sat, 29 Aug 1998) $
  *
  * <<< Description >>>
  *
@@ -45,6 +45,7 @@ struct cw_br_s
 #define br_block_destroy _CW_NS_ANY(br_block_destroy)
 #define br_block_slock _CW_NS_ANY(br_block_slock)
 #define br_block_tlock _CW_NS_ANY(br_block_tlock)
+#define br_block_flush _CW_NS_ANY(br_block_flush)
 
 /* Function prototypes. */
 cw_br_t * br_new(cw_br_t * a_br_o);
