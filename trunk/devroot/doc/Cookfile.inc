@@ -21,6 +21,7 @@ FIG_SRCS = ;
 T_MANUAL = [objdir]/doc/latex/manual.tex;
 D_MANUAL = [objdir]/doc/latex/manual.dvi;
 P_MANUAL = [objdir]/doc/ps/manual.ps;
+F_MANUAL = [objdir]/doc/pdf/manual.pdf;
 H_MANUAL = [objdir]/doc/html/manual.html;
 
 /* LaTeX source files. */
@@ -39,11 +40,17 @@ H_MANUAL = [objdir]/doc/html/manual.html;
   FIG_SRCS = [FIG_SRCS] [fig_srcs];
 }
 
-install_doc : install_doc_p install_doc_h;
+install_doc : install_doc_p install_doc_f install_doc_h;
 install_doc_p : /* [P_MANUAL] */
 {
   [INSTALL] -d [PREFIX]/share/canonware/doc/ps;
   [INSTALL] -m 0444 [P_MANUAL] [PREFIX]/share/canonware/doc/ps;
+}
+
+install_doc_f : /* [F_MANUAL] */
+{
+  [INSTALL] -d [PREFIX]/share/canonware/doc/pdf;
+  [INSTALL] -m 0444 [F_MANUAL] [PREFIX]/share/canonware/doc/pdf;
 }
 
 install_doc_h : /* [H_MANUAL] */
@@ -106,6 +113,8 @@ doc_relclean :
 
 [P_MANUAL] : [D_MANUAL];
 
+[F_MANUAL] : [D_MANUAL];
+
 [H_MANUAL] : [P_MANUAL];
 
 [objdir]/%0%.ps : [objdir]/%0%.fig
@@ -128,6 +137,12 @@ doc_relclean :
   set mkdir
 {
   [DVIPS] [objdir]/%0latex/%.dvi -o [objdir]/%0ps/%.ps;
+}
+
+[objdir]/%0pdf/%.pdf : [objdir]/%0latex/%.dvi
+  set mkdir
+{
+  [DVIPDF] [objdir]/%0latex/%.dvi [objdir]/%0pdf/%.pdf;
 }
 
 [objdir]/%0html/%.html : [objdir]/%0ps/%.ps

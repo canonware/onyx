@@ -38,6 +38,7 @@ DIFF = @DIFF@;
 VERIFY = @VERIFY@;
 LATEX = @LATEX@;
 DVIPS = @DVIPS@;
+DVIPDF = @DVIPDF@;
 FIG2DEV = @FIG2DEV@;
 LATEX2HTML = @LATEX2HTML@;
 
@@ -120,9 +121,11 @@ check_update : tests
 
 release : doc;
 
-doc : manual_p manual_h;
+doc : manual_p manual_f manual_h;
 
 manual_p : [P_MANUAL];
+
+manual_f : [F_MANUAL];
 
 manual_h : [H_MANUAL];
 
