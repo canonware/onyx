@@ -890,8 +890,7 @@ end % onyxdict.
 	{/currenterror where {pop true}{false} ifelse}
     }{
 	eval not {
-	    stderr `Onyx: Missing errordict or currenterror defs\n'
-	    write
+	    stderr `Onyx: Missing errordict or currenterror defs\n' write
 
 	    % Print stack dumps.
 	    stderr `ostack: ' write
