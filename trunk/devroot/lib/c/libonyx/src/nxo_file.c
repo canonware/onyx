@@ -28,11 +28,11 @@
 static cw_nxn_t nxo_p_file_buffer_flush(cw_nxoe_file_t *a_file);
 
 #ifdef _CW_THREADS
-#define		nxoe_p_file_lock(a_nxoe) do {			\
+#define	nxoe_p_file_lock(a_nxoe) do {					\
 	if ((a_nxoe)->nxoe.locking)					\
 		mtx_lock(&(a_nxoe)->lock);				\
 } while (0)
-#define		nxoe_p_file_unlock(a_nxoe) do {			\
+#define	nxoe_p_file_unlock(a_nxoe) do {					\
 	if ((a_nxoe)->nxoe.locking)					\
 		mtx_unlock(&(a_nxoe)->lock);				\
 } while (0)
