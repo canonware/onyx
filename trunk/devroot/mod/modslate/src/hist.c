@@ -218,7 +218,7 @@
 #define hst_cnt_set(a_hdr, a_cnt)					\
     (a_hdr) = ((a_hdr) & HST_TAG_MASK) | ((a_cnt) - 1)
 
-CW_INLINE void
+CW_P_INLINE void
 hist_p_redo_flush(cw_hist_t *a_hist)
 {
     /* Flush redo state, if any. */
@@ -229,7 +229,7 @@ hist_p_redo_flush(cw_hist_t *a_hist)
     }
 }
 
-CW_INLINE void
+CW_P_INLINE void
 hist_p_pos(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos)
 {
     cw_uint8_t hdr;

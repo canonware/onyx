@@ -177,13 +177,13 @@ modslate_buffer_init(cw_nxo_t *a_thread)
 			 / sizeof(struct cw_modslate_entry)));
 }
 
-CW_INLINE void
+CW_P_INLINE void
 buffer_p_lock(struct cw_buffer *a_buffer)
 {
     mtx_lock(&a_buffer->mtx);
 }
 
-CW_INLINE void
+CW_P_INLINE void
 buffer_p_unlock(struct cw_buffer *a_buffer)
 {
     mtx_unlock(&a_buffer->mtx);

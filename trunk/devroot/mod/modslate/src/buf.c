@@ -421,7 +421,7 @@ ext_p_remove(cw_ext_t *a_ext);
 
 /* A simplified version of bufv_copy() that counts '\n' characters that are
  * copied, and returns that rather than the number of elements copied. */
-CW_INLINE cw_uint32_t
+CW_P_INLINE cw_uint32_t
 bufv_p_copy(cw_bufv_t *a_to, cw_uint32_t a_to_len, const cw_bufv_t *a_fr,
 	    cw_uint32_t a_fr_len)
 {
@@ -512,7 +512,7 @@ bufv_copy(cw_bufv_t *a_to, cw_uint32_t a_to_len, const cw_bufv_t *a_fr,
 }
 
 /* bufp. */
-CW_INLINE cw_uint64_t
+CW_P_INLINE cw_uint64_t
 bufp_p_bpos(cw_bufp_t *a_bufp)
 {
     cw_uint64_t retval;
@@ -533,7 +533,7 @@ bufp_p_bpos(cw_bufp_t *a_bufp)
     return retval;
 }
 
-CW_INLINE cw_uint64_t
+CW_P_INLINE cw_uint64_t
 bufp_p_line(cw_bufp_t *a_bufp)
 {
     cw_uint64_t retval;

@@ -45,8 +45,10 @@
 #undef CW_USE_INLINES
 #if (defined(__GNUC__) && defined(CW_USE_INLINES))
 #define CW_INLINE static __inline__
+#define CW_P_INLINE static __inline__
 #else
 #define CW_INLINE
+#define CW_P_INLINE static
 #endif
 
 #undef CW_CPU_IA32

@@ -633,7 +633,7 @@ nxa_l_white_get(cw_nxa_t *a_nxa)
 
 /* Find roots, if any.  Return TRUE if there are roots, FALSE otherwise.  Upon
  * return, a_nxa->seq_set points to the first object in the root set. */
-CW_INLINE cw_bool_t
+CW_P_INLINE cw_bool_t
 nxa_p_roots(cw_nxa_t *a_nxa, cw_uint32_t *r_nroot)
 {
     cw_bool_t retval = FALSE;
@@ -675,7 +675,7 @@ nxa_p_roots(cw_nxa_t *a_nxa, cw_uint32_t *r_nroot)
 }
 
 /* Mark.  Return a pointer to a ring of garbage, if any, otherwise NULL. */
-CW_INLINE cw_nxoe_t *
+CW_P_INLINE cw_nxoe_t *
 nxa_p_mark(cw_nxa_t *a_nxa, cw_uint32_t *r_nreachable)
 {
     cw_nxoe_t *retval, *gray, *nxoe;
@@ -728,7 +728,7 @@ nxa_p_mark(cw_nxa_t *a_nxa, cw_uint32_t *r_nreachable)
 }
 
 /* Clean up unreferenced objects. */
-CW_INLINE void
+CW_P_INLINE void
 nxa_p_sweep(cw_nxa_t *a_nxa, cw_nxoe_t *a_garbage)
 {
     cw_nxoe_t *last, *defer, *nxoe;

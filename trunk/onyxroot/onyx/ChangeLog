@@ -1,3 +1,8 @@
+2002-07-12 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/include/libonyx/libonyx_defs.h.in : Add CW_P_INLINE and
+	  use it instead of CW_INLINE for private functions.
+
 2002-07-09 : Jason Evans <jasone@canonware.com>
 
 	* Significantly revamp the xep code to adopt the semantics of C++
