@@ -17,8 +17,8 @@
 2003-10-21 : Jason Evans <jasone@canonware.com>
 
 	* mod/modprompt/src/modprompt.c : Wrap workaround code for
-	  LinuxThreads's broken handling in #ifdef CW_MODPROMPT_LINUXTHREADS
-	  ... #endif.
+	  LinuxThreads's broken signal handling in 
+	  #ifdef CW_MODPROMPT_LINUXTHREADS ... #endif.
 
 2003-10-20 : Jason Evans <jasone@canonware.com>
 
@@ -138,7 +138,7 @@
 
 	  Update to autoconf 2.57.
 
-	  Add --disable-clopt.
+	  Add --disable-modclopt.
 
 2003-07-29 : Jason Evans <jasone@canonware.com>
 
