@@ -81,55 +81,8 @@ buf_new(cw_buf_t * a_buf)
 /*    retval->cached_bufel = 0; */
 
   retval->bufel_array = retval->static_bufel_array;
-/*    t_ptr = _cw_calloc(_LIBSTASH_BUF_ARRAY_MIN_SIZE, sizeof(cw_bufel_t)); */
-/*    if (NULL == t_ptr) */
-/*    { */
-/*      if (retval->is_malloced) */
-/*      { */
-/*        _cw_free(retval); */
-/*      } */
-/*      retval = NULL; */
-/*      goto RETURN; */
-/*    } */
-/*    else */
-/*    { */
-/*      retval->bufel_array = (cw_bufel_t *) t_ptr; */
-/*    } */
-
   retval->cumulative_index = retval->static_cumulative_index;
-/*    t_ptr = _cw_calloc(_LIBSTASH_BUF_ARRAY_MIN_SIZE, sizeof(cw_uint32_t)); */
-/*    if (NULL == t_ptr) */
-/*    { */
-/*      _cw_free(retval->bufel_array); */
-/*      if (retval->is_malloced) */
-/*      { */
-/*        _cw_free(retval); */
-/*      } */
-/*      retval = NULL; */
-/*      goto RETURN; */
-/*    } */
-/*    else */
-/*    { */
-/*      retval->cumulative_index = (cw_uint32_t *) t_ptr; */
-/*    } */
-
   retval->iov = retval->static_iov;
-/*    t_ptr = _cw_calloc(_LIBSTASH_BUF_ARRAY_MIN_SIZE, sizeof(struct iovec)); */
-/*    if (NULL == t_ptr) */
-/*    { */
-/*      _cw_free(retval->cumulative_index); */
-/*      _cw_free(retval->bufel_array); */
-/*      if (retval->is_malloced) */
-/*      { */
-/*        _cw_free(retval); */
-/*      } */
-/*      retval = NULL; */
-/*      goto RETURN; */
-/*    } */
-/*    else */
-/*    { */
-/*      retval->iov = (struct iovec *) t_ptr; */
-/*    } */
 
 #ifdef _LIBSTASH_DBG
   bzero(retval->bufel_array,
