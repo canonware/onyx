@@ -396,12 +396,12 @@ clopt <
 		    ;error_escape
 		} ifelse
 	    }{
-		`Error parsing seed value \`' ;arg_get `\' for option ' ,flag
+		`Error parsing value \`' ;arg_get `\' for option ' ,flag
 		4 ncat
 		;error_escape
 	    } ifelse
 	}{
-	    `Error parsing seed value \`' ;arg_get `\' for option ' ,flag 4 ncat
+	    `Error parsing value \`' ;arg_get `\' for option ' ,flag 4 ncat
 	    ;error_escape
 	} ifelse
 
