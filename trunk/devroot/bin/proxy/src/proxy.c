@@ -939,17 +939,18 @@ get_out_str_pretty(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str)
 char *
 get_out_str_hex(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str)
 {
-  char * retval, * t_str, * p;
+  char * retval, * p;
+  char * syms = "0123456789abcdef";
   cw_uint32_t str_len, buf_size, i;
+  cw_uint8_t c;
 
   buf_size = buf_get_size(a_buf);
   
   /* Calculate the total size of the output. */
-  str_len = (81 /* First dashed line. */
-	     + 35 /* Header. */
-	     + (buf_size * 3) /* Hex dump. */
+  str_len = (1 /* '<' or '>'. */
+	     + (buf_size << 1) /* Hex dump. */
 	     + 1 /* Newline. */
-	     + 81 /* Last dashed line. */
+	     + 1 /* Null terminator. */
 	     );
 
   if (NULL == a_str)
@@ -962,38 +963,34 @@ get_out_str_hex(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str)
     /* Re-use a_str. */
     retval = _cw_realloc(a_str, str_len);
   }
-  /* Clear the string. */
-  retval[0] = '\0';
   p = retval;
-
-  /* First dashed line. */
-  t_str =
-    "----------------------------------------"
-    "----------------------------------------\n";
-  strcpy(p, t_str);
-  p += strlen(t_str);
   
-  /* Header. */
-  p += out_put_s(cw_g_out, p, "[s]:0x[i|b:16] ([i]) byte[s]\n",
-		 (TRUE == is_send) ? "send" : "recv",
-		 buf_size,
-		 buf_size,
-		 (buf_size != 1) ? "s" : "");
-
+  if (TRUE == is_send)
+  {
+    p[0] = '>';
+  }
+  else
+  {
+    p[0] = '<';
+  }
+  p++;
+  
   /* Hex dump. */
   for (i = 0; i < buf_size; i++)
   {
-    p += out_put_s(cw_g_out, p, "[i|b:16|w:2|p:0] ", buf_get_uint8(a_buf, i));
+    c = buf_get_uint8(a_buf, i);
+    p[0] = syms[c >> 4] ;
+    p++;
+    p[0] = syms[c & 0xf];
+    p++;
   }
 
-  p += out_put_s(cw_g_out, p, "\n");
+  /* Newline. */
+  p[0] = '\n';
+  p++;
   
-  /* Last dashed line. */
-  t_str =
-    "----------------------------------------"
-    "----------------------------------------\n";
-  strcpy(p, t_str);
-/*    p += strlen(t_str); */
+  /* Null terminator. */
+  p[0] = '\0';
   
   return retval;
 }

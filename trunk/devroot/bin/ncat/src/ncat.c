@@ -28,7 +28,7 @@
 
 typedef enum
 {
-  PRETTY, HEX, ASCII
+  NONE, PRETTY, HEX, ASCII
 } format_t;
 
 /* Function prototypes. */
@@ -74,7 +74,7 @@ main(int argc, char ** argv)
   char * opt_rhost = "localhost";
   cw_uint32_t opt_timeout = 0;
   char * opt_log = NULL;
-  format_t opt_format = PRETTY;
+  format_t opt_format = NONE;
 
   if (TRUE == libstash_init())
   {
@@ -127,6 +127,12 @@ main(int argc, char ** argv)
       }
       case 'l':
       {
+	if (NONE == opt_format)
+	{
+	  /* Set the default logging format if the user hasn't already specified
+	   * a logging format. */
+	  opt_format = PRETTY;
+	}
 	opt_log = optarg;
 	break;
       }
@@ -246,8 +252,7 @@ main(int argc, char ** argv)
   /* Check validity of command line options. */
   if ((TRUE == opt_verbose) && (TRUE == opt_quiet))
   {
-    out_put(cw_g_out, "[s]: \"-v\" and \"-q\" are incompatible\n",
-	    g_progname);
+    out_put(cw_g_out, "[s]: \"-v\" and \"-q\" are incompatible\n", g_progname);
     usage();
     retval = 1;
     goto RETURN;
@@ -257,8 +262,7 @@ main(int argc, char ** argv)
   {
     if (FALSE == opt_server)
     {
-      out_put(cw_g_out, "[s]: -p or -r must be specified\n",
-	      g_progname);
+      out_put(cw_g_out, "[s]: -p or -r must be specified\n", g_progname);
       usage();
       retval = 1;
       goto RETURN;
@@ -266,8 +270,15 @@ main(int argc, char ** argv)
   }
   else if (TRUE == opt_server)
   {
-    out_put(cw_g_out, "[s]: -p and -r are incompatible\n",
-	    g_progname);
+    out_put(cw_g_out, "[s]: -p and -r are incompatible\n", g_progname);
+    usage();
+    retval = 1;
+    goto RETURN;
+  }
+
+  if ((NULL == opt_log) && (NONE != opt_format))
+  {
+    out_put(cw_g_out, "[s]: -f requires -l to be specified\n", g_progname);
     usage();
     retval = 1;
     goto RETURN;
@@ -352,7 +363,7 @@ main(int argc, char ** argv)
       {
 	timeout.tv_sec = opt_timeout;
 	timeout.tv_nsec = 0;
-      
+
 	fd = (int) mq_timedget(mq, &timeout);
 	if (0 == fd)
 	{
@@ -372,7 +383,6 @@ main(int argc, char ** argv)
       else
       {
 	fd = (int) mq_get(mq);
-
 	if (0 == fd)
 	{
 	  break;
@@ -381,35 +391,39 @@ main(int argc, char ** argv)
 
       if (fd_sock_stdin == fd)
       {
-	while (0 <= (bytes_read = sock_read(sock_stdin, buf, 0, &zero)))
+	do
 	{
-	  if (NULL != opt_log)
+	  bytes_read = sock_read(sock_stdin, buf, 0, &zero);
+	  
+	  /* Log. */
+	  switch (opt_format)
 	  {
-	    /* Log. */
-	    switch (opt_format)
+	    case NONE:
 	    {
-	      case PRETTY:
-	      {
-		str = get_out_str_pretty(buf, TRUE, str);
-		break;
-	      }
-	      case HEX:
-	      {
-		str = get_out_str_hex(buf, TRUE, str);
-		break;
-	      }
-	      case ASCII:
-	      {
-		str = get_out_str_ascii(buf, TRUE, str);
-		break;
-	      }
-	      default:
-	      {
-		_cw_error("Programming error");
-	      }
+	      break;
 	    }
-	    
-	    out_put(log_out, str);
+	    case PRETTY:
+	    {
+	      str = get_out_str_pretty(buf, TRUE, str);
+	      out_put(log_out, str);
+	      break;
+	    }
+	    case HEX:
+	    {
+	      str = get_out_str_hex(buf, TRUE, str);
+	      out_put(log_out, str);
+	      break;
+	    }
+	    case ASCII:
+	    {
+	      str = get_out_str_ascii(buf, TRUE, str);
+	      out_put(log_out, str);
+	      break;
+	    }
+	    default:
+	    {
+	      _cw_error("Programming error");
+	    }
 	  }
 	  
 	  if (TRUE == sock_write(sock, buf))
@@ -418,7 +432,7 @@ main(int argc, char ** argv)
 	    done_reading = TRUE;
 	    break;
 	  }
-	}
+	} while (0 < sock_buffered_in(sock_stdin));
 
 	if ((FALSE == done_reading) && (0 > bytes_read))
 	{
@@ -428,41 +442,53 @@ main(int argc, char ** argv)
       }
       else if (fd_sock == fd)
       {
-	while (0 <= (bytes_read = sock_read(sock, buf, 0, &zero)))
+	do
 	{
-	  if (NULL != opt_log)
+	  bytes_read = sock_read(sock, buf, 0, &zero);
+	  
+	  /* Log. */
+	  switch (opt_format)
 	  {
-	    /* Log. */
-	    switch (opt_format)
+	    case NONE:
 	    {
-	      case PRETTY:
-	      {
-		str = get_out_str_pretty(buf, FALSE, str);
-		break;
-	      }
-	      case HEX:
-	      {
-		str = get_out_str_hex(buf, FALSE, str);
-		break;
-	      }
-	      case ASCII:
-	      {
-		str = get_out_str_ascii(buf, FALSE, str);
-		break;
-	      }
-	      default:
-	      {
-		_cw_error("Programming error");
-	      }
+	      break;
 	    }
-	    
-	    out_put(log_out, str);
+	    case PRETTY:
+	    {
+	      str = get_out_str_pretty(buf, FALSE, str);
+	      out_put(log_out, str);
+	      break;
+	    }
+	    case HEX:
+	    {
+	      str = get_out_str_hex(buf, FALSE, str);
+	      out_put(log_out, str);
+	      break;
+	    }
+	    case ASCII:
+	    {
+	      str = get_out_str_ascii(buf, FALSE, str);
+	      out_put(log_out, str);
+	      break;
+	    }
+	    default:
+	    {
+	      _cw_error("Programming error");
+	    }
 	  }
 	  
 	  if (TRUE == sock_write(sock_stdout, buf))
 	  {
 	    break;
 	  }
+	} while (0 < sock_buffered_in(sock));
+	
+	if (0 > bytes_read)
+	{
+	  /* The peer has disconnected.  Flush any buffered data to stdout, then
+	   * quit. */
+	  sock_flush_out(sock_stdout);
+	  break;
 	}
       }
       else /*  if (-1 == fd) */
@@ -1129,17 +1155,18 @@ get_out_str_pretty(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str)
 char *
 get_out_str_hex(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str)
 {
-  char * retval, * t_str, * p;
+  char * retval, * p;
+  char * syms = "0123456789abcdef";
   cw_uint32_t str_len, buf_size, i;
+  cw_uint8_t c;
 
   buf_size = buf_get_size(a_buf);
   
   /* Calculate the total size of the output. */
-  str_len = (81 /* First dashed line. */
-	     + 35 /* Header. */
-	     + (buf_size * 3) /* Hex dump. */
+  str_len = (1 /* '<' or '>'. */
+	     + (buf_size << 1) /* Hex dump. */
 	     + 1 /* Newline. */
-	     + 81 /* Last dashed line. */
+	     + 1 /* Null terminator. */
 	     );
 
   if (NULL == a_str)
@@ -1152,37 +1179,34 @@ get_out_str_hex(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str)
     /* Re-use a_str. */
     retval = _cw_realloc(a_str, str_len);
   }
-  /* Clear the string. */
-  retval[0] = '\0';
   p = retval;
-
-  /* First dashed line. */
-  t_str =
-    "----------------------------------------"
-    "----------------------------------------\n";
-  strcpy(p, t_str);
-  p += strlen(t_str);
   
-  /* Header. */
-  p += out_put_s(cw_g_out, p, "[s]:0x[i|b:16] ([i]) byte[s]\n",
-		 (TRUE == is_send) ? "send" : "recv",
-		 buf_size,
-		 buf_size,
-		 (buf_size != 1) ? "s" : "");
-
+  if (TRUE == is_send)
+  {
+    p[0] = '>';
+  }
+  else
+  {
+    p[0] = '<';
+  }
+  p++;
+  
   /* Hex dump. */
   for (i = 0; i < buf_size; i++)
   {
-    p += out_put_s(cw_g_out, p, "[i|b:16|w:2|p:0] ", buf_get_uint8(a_buf, i));
+    c = buf_get_uint8(a_buf, i);
+    p[0] = syms[c >> 4] ;
+    p++;
+    p[0] = syms[c & 0xf];
+    p++;
   }
 
-  p += out_put_s(cw_g_out, p, "\n");
+  /* Newline. */
+  p[0] = '\n';
+  p++;
   
-  /* Last dashed line. */
-  t_str =
-    "----------------------------------------"
-    "----------------------------------------\n";
-  strcpy(p, t_str);
+  /* Null terminator. */
+  p[0] = '\0';
   
   return retval;
 }
@@ -1270,8 +1294,8 @@ usage(void)
      "[s]: Usage:\n"
      "    [s] -h\n"
      "    [s] -V\n"
-     "    [s] [[-v [[-v] | -q] [[-t <timeout>] -r [[<rhost>:]<rport>\n"
-     "    [s] [[-v [[-v] | -q] [[-t <timeout>] -p <port>\n"
+     "    [s] [[-v [[-v] | -q] [[-l <logfile> [[-f <format>]] [[-t <timeout>] -r [[<rhost>:]<rport>\n"
+     "    [s] [[-v [[-v] | -q] [[-l <logfile> [[-f <format>]] [[-t <timeout>] -p <port>\n"
      "\n"
      "    Option               | Description\n"
      "    ---------------------+-----------------------------------------------------\n"
