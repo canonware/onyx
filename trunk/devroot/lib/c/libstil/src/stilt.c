@@ -461,19 +461,17 @@ stilt_loop(cw_stilt_t *a_stilt)
 			 * recursion safe by replacing the array with its last
 			 * element before executing the last element.
 			 */
-			if (stilo_attrs_get(&array[i]) == STILOA_LITERAL) {
+			if ((stilo_attrs_get(&array[i]) == STILOA_LITERAL) ||
+			    (stilo_type_get(&array[i]) == STILOT_ARRAY)) {
 				/*
-				 * Always push literal objects onto the
-				 * data stack.
+				 * Always push literal objects and nested arrays
+				 * onto the data stack.
 				 */
 				tstilo = stils_push(&a_stilt->ostack);
 				stilo_dup(tstilo, &array[i]);
 				stils_pop(&a_stilt->estack);
 			} else {
-				/*
-				 * Possible recursion, so use the generic
-				 * algorithm.
-				 */
+				/* Possible recursion. */
 				tstilo = stils_push(&a_stilt->estack);
 				stilo_dup(tstilo, &array[i]);
 				stils_roll(&a_stilt->estack, 2, 1);
@@ -505,7 +503,6 @@ stilt_loop(cw_stilt_t *a_stilt)
 			 * in the dictionary stack, push it onto the
 			 * execution stack, and execute it.
 			 */
-/*  			stilo = stils_get(&a_stilt->estack); */
 			val = stils_push(&a_stilt->tstack);
 			if (stilt_dict_stack_search(a_stilt, stilo, val)) {
 				stilt_error(a_stilt, STILTE_UNDEFINED);
