@@ -1,0 +1,5 @@
+1999-02-24  Jason Evans  <jasone@canonware.com>
+
+	* : Convert to new buf code.
+	
+	* : Split libsqrl into libsock and libbr.
