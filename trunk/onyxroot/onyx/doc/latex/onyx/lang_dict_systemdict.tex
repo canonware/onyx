@@ -1465,6 +1465,30 @@ operators} \\
 	{Is class in instance's inheritance hierarchy?}
 \hline
 \optableent
+	{name super data methods}
+	{{\bf \htmlref{cdef}{systemdict:cdef}}}
+	{--}
+	{Create and define a class.}
+\hline
+\optableent
+	{--}
+	{{\bf \htmlref{this}{systemdict:this}}}
+	{method/instance}
+	{Get topmost object on cstack.}
+\hline
+\optableent
+	{--}
+	{{\bf \htmlref{cstack}{systemdict:cstack}}}
+	{stack}
+	{Get cstack snapshot.}
+\hline
+\optableent
+	{thread}
+	{{\bf \htmlref{threadcstack}{systemdict:threadcstack}}}
+	{stack}
+	{Get a reference to thread's cstack.}
+\hline
+\optableent
 	{handle}
 	{{\bf \htmlref{handletag}{systemdict:handletag}}}
 	{tag}
@@ -2050,6 +2074,18 @@ attribute operators} \\
 \hline
 \optableent
 	{obj}
+	{{\bf \htmlref{icheck}{systemdict:icheck}}}
+	{boolean}
+	{Invokable?}
+\hline
+\optableent
+	{obj}
+	{{\bf \htmlref{fcheck}{systemdict:fcheck}}}
+	{boolean}
+	{Fetchable?}
+\hline
+\optableent
+	{obj}
 	{{\bf \htmlref{cvl}{systemdict:cvl}}}
 	{obj}
 	{Set literal attribute.}
@@ -2071,6 +2107,18 @@ attribute operators} \\
 	{{\bf \htmlref{cvc}{systemdict:cvc}}}
 	{obj}
 	{Set callable attribute.}
+\hline
+\optableent
+	{obj}
+	{{\bf \htmlref{cvi}{systemdict:cvi}}}
+	{obj}
+	{Set invokable attribute.}
+\hline
+\optableent
+	{obj}
+	{{\bf \htmlref{cvf}{systemdict:cvf}}}
+	{obj}
+	{Set fetchable attribute.}
 \hline
 \optableent
 	{string}
@@ -3333,7 +3381,7 @@ onyx:0>
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
 	\item[Description: ]
-		Check \oparg{obj} for executable attribute.
+		Check \oparg{obj} for callable attribute.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> $name ccheck 1 sprint
@@ -3374,24 +3422,40 @@ onyx:0>
 	\end{description}
 \label{systemdict:cdef}
 \index{cdef@\onyxop{}{cdef}{}}
-\item[{\onyxop{OPARGS}{cdef}{OPOUTS}}: ]
+\item[{\onyxop{name super data methods}{cdef}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[name: ]
+			An object (usually a name) to set the class's name
+			to and associate the class with.
+		\item[super: ]
+			A superclass, or null.
+		\item[data: ]
+			A dictionary of data definitions, or null.
+		\item[methods: ]
+			A dictionary of method definitions, or null.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Create a new class with \oparg{name} as its name, \oparg{super}
+		as its superclass, \oparg{data} as its data definitions, and
+		\oparg{methods} as its method definitions.  Define \oparg{name}
+		in \htmlref{\onyxop{}{currentdict}{}}{systemdict:currentdict} to
+		be the class.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> $fooclass vclass <$foodata `foo'> <$foomethod {`hi' 1 sprint}> cdef
+onyx:0> fooclass 1 sprint
+-class-
+onyx:0> fooclass:foomethod
+`hi'
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:ceiling}
@@ -3981,24 +4045,22 @@ onyx:5>
 	\end{description}
 \label{systemdict:cstack}
 \index{cstack@\onyxop{}{cstack}{}}
-\item[{\onyxop{OPARGS}{cstack}{OPOUTS}}: ]
+\item[{\onyxop{--}{cstack}{stack}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[stack: ]
+			A snapshot of cstack.
 		\end{description}
-	\item[Error(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{stackunderflow}{stackunderflow}.]
-		\item[\htmlref{typecheck}{typecheck}.]
-		\end{description}
+	\item[Error(s): ] None.
 	\item[Description: ]
+		Get a snapshot of cstack.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> cstack 1 sprint
+()
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:currentdict}
@@ -4184,46 +4246,58 @@ onyx:0>
 	\end{description}
 \label{systemdict:cvf}
 \index{cvf@\onyxop{}{cvf}{}}
-\item[{\onyxop{OPARGS}{cvf}{OPOUTS}}: ]
+\item[{\onyxop{obj}{cvf}{obj}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[obj: ]
+			An object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[obj: ]
+			The same object that was passed in, but with the
+			fetchable attribute set.
 		\end{description}
 	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
-		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Set the fetchable attribute for \oparg{obj}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> $foo cvf 1 sprint
+,foo
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:cvi}
 \index{cvi@\onyxop{}{cvi}{}}
-\item[{\onyxop{OPARGS}{cvi}{OPOUTS}}: ]
+\item[{\onyxop{obj}{cvi}{obj}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[obj: ]
+			An object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[obj: ]
+			The same object that was passed in, but with the
+			invokable attribute set.
 		\end{description}
 	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
-		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Set the invokable attribute for \oparg{obj}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> $foo cvi 1 sprint
+;foo
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:cvl}
@@ -5126,24 +5200,32 @@ onyx:0>
 	\end{description}
 \label{systemdict:fcheck}
 \index{fcheck@\onyxop{}{fcheck}{}}
-\item[{\onyxop{OPARGS}{fcheck}{OPOUTS}}: ]
+\item[{\onyxop{obj}{fcheck}{boolean}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[obj: ]
+			An object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[boolean: ]
+			True if \oparg{obj} has the fetchable attribute, false
+			otherwise.
 		\end{description}
 	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
-		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Check \oparg{obj} for fetchable attribute.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> $name fcheck 1 sprint
+false
+onyx:0> $name cvf fcheck 1 sprint
+true
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:floor}
@@ -5845,24 +5927,32 @@ onyx:3>
 	\end{description}
 \label{systemdict:icheck}
 \index{icheck@\onyxop{}{icheck}{}}
-\item[{\onyxop{OPARGS}{icheck}{OPOUTS}}: ]
+\item[{\onyxop{obj}{icheck}{boolean}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[obj: ]
+			An object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[boolean: ]
+			True if \oparg{obj} has the invokable attribute, false
+			otherwise.
 		\end{description}
 	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
-		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Check \oparg{obj} for invokable attribute.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> $name icheck 1 sprint
+false
+onyx:0> $name cvi icheck 1 sprint
+true
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:idiv}
@@ -12171,24 +12261,27 @@ onyx:0>
 	\end{description}
 \label{systemdict:this}
 \index{this@\onyxop{}{this}{}}
-\item[{\onyxop{OPARGS}{this}{OPOUTS}}: ]
+\item[{\onyxop{--}{this}{class/instance}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[class: ] A class object.
+		\item[instance: ] An instance object.
 		\end{description}
 	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
-		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Get the topmost object on cstack, which provides the context for
+		execution of invokable and fetchable objects.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> $fooclass vclass <> <$foomethod {this:classname 1 sprint}> cdef
+onyx:0> fooclass:foomethod
+$fooclass
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:thread}
@@ -12225,15 +12318,17 @@ onyx:0>
 	\end{description}
 \label{systemdict:threadcstack}
 \index{threadcstack@\onyxop{}{threadcstack}{}}
-\item[{\onyxop{OPARGS}{threadcstack}{OPOUTS}}: ]
+\item[{\onyxop{thread}{threadcstack}{stack}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[thread: ]
+			A thread object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[stack: ]
+			The context stack belonging to \oparg{thread}.
 		\end{description}
 	\item[Error(s): ]
 		\begin{description}\item[]
@@ -12241,8 +12336,13 @@ onyx:0>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Get a reference to the context stack belonging to
+		\oparg{thread}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> self threacdstack 1 sprint
+()
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:threaddstack}
