@@ -148,7 +148,11 @@ thd_join(cw_thd_t * a_thd);
  * Give up the rest of this thread's time slice.
  *
  ****************************************************************************/
-#define thd_yield() pthread_yield()
+#ifdef _CW_OS_SOLARIS
+#  define thd_yield() sched_yield()
+#else
+#  define thd_yield() pthread_yield()
+#endif
 
 /****************************************************************************
  *

@@ -17,6 +17,9 @@
 #undef _CW_OS_FREEBSD
 #undef _CW_OS_LINUX
 #undef _CW_OS_SOLARIS
+
+/* Solaris needs this for sigwait(). */
+#undef _POSIX_PTHREAD_SEMANTICS
  
 #undef WORDS_BIGENDIAN
 

@@ -18,6 +18,7 @@
 #define _LIBSOCK_USE_SOCKS
 #include "libsock/libsock.h"
 
+#include <signal.h>
 #include <sys/stat.h>
 #include <errno.h>
 #include <sys/types.h>
@@ -229,9 +230,14 @@ main(int argc, char ** argv)
   
   if (NULL != opt_dirname)
   {
+#ifdef _CW_OS_SOLARIS
+    sprintf(logfile, "%s/%s.pid_%lu.log",
+	    opt_dirname, basename(argv[0]), getpid());
+#else
     sprintf(logfile, "%s/%s.pid_%u.log",
 	    opt_dirname, basename(argv[0]), getpid());
-	
+#endif
+    
     if (log_set_logfile(cw_g_log, logfile, TRUE))
     {
       if (dbg_is_registered(cw_g_dbg, "prog_error"))
@@ -291,9 +297,13 @@ main(int argc, char ** argv)
 	
 	conn->log = log_new();
 
+#ifdef _CW_OS_SOLARIS
+	sprintf(logfile, "%s/%s.pid_%lu.conn%u",
+		opt_dirname, basename(argv[0]), getpid(), conn_num);
+#else
 	sprintf(logfile, "%s/%s.pid_%u.conn%u",
 		opt_dirname, basename(argv[0]), getpid(), conn_num);
-	
+#endif	
 	if (log_set_logfile(conn->log, logfile, TRUE))
 	{
 	  if (dbg_is_registered(cw_g_dbg, "prog_error"))

@@ -18,6 +18,8 @@ case "${host}" in
         ;;
   *-*-solaris2*)
 	AC_DEFINE(_CW_OS_SOLARIS, )
+	AC_DEFINE(_POSIX_PTHREAD_SEMANTICS)
+	LIBS="$LIBS -lposix4"
         ;;
 esac
 

@@ -454,7 +454,12 @@ sockb_l_get_host_ip(char * a_host_str, cw_uint32_t * r_host_ip)
   _cw_check_ptr(g_sockb);
     
   host_ip = inet_addr(a_host_str);
+
+#ifdef _CW_OS_SOLARIS
+  if ((in_addr_t) host_ip == (in_addr_t) -1)
+#else 
   if (host_ip == INADDR_NONE)
+#endif
   {
     struct hostent * host_entry;
     
@@ -468,8 +473,13 @@ sockb_l_get_host_ip(char * a_host_str, cw_uint32_t * r_host_ip)
     {
       if (dbg_is_registered(cw_g_dbg, "sockb_error"))
       {
+#ifdef _CW_OS_SOLARIS
+	log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
+		    "Error in gethostbyname(): %d\n", h_errno);
+#else
 	log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
 		    "Error in gethostbyname(): %s\n", hstrerror(h_errno));
+#endif
 	log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
 		    "Host \"%s\" isn't an IP address or a hostname\n",
 		    a_host_str);
