@@ -11817,7 +11817,83 @@ systemdict_signal(cw_nxo_t *a_thread)
 void
 systemdict_sigpending(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *nxo;
+    cw_nxo_t *tstack, *tkey, *tval;
+    sigset_t set;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    tstack = nxo_thread_tstack_get(a_thread);
+
+    /* Get argument. */
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    if (nxo_type_get(nxo) != NXOT_DICT)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+
+    sigpending(&set);
+
+    tkey = nxo_stack_push(tstack);
+    tval = nxo_stack_push(tstack);
+
+    /* Update nxo. */
+    if (nxo != NULL)
+    {
+#define SIGNALNAMESET(a_nxn, a_signal)					\
+	nxo_name_new(tkey, nxn_str(a_nxn), nxn_len(a_nxn), true);	\
+	if (sigismember(&set, a_signal))				\
+	{								\
+	    nxo_dict_def(nxo, tkey, tval);				\
+	}								\
+	else								\
+	{								\
+	    if (nxo_dict_lookup(nxo, tkey, NULL) == false)		\
+	    {								\
+		nxo_dict_undef(nxo, tkey);				\
+	    }								\
+	}
+
+	/* tval is used in the above macro. */
+	nxo_boolean_new(tval, true);
+
+	SIGNALNAMESET(NXN_SIGABRT, SIGABRT);
+	SIGNALNAMESET(NXN_SIGALRM, SIGALRM);
+	SIGNALNAMESET(NXN_SIGBUS, SIGBUS);
+	SIGNALNAMESET(NXN_SIGCHLD, SIGCHLD);
+	SIGNALNAMESET(NXN_SIGCONT, SIGCONT);
+	SIGNALNAMESET(NXN_SIGFPE, SIGFPE);
+	SIGNALNAMESET(NXN_SIGHUP, SIGHUP);
+	SIGNALNAMESET(NXN_SIGILL, SIGILL);
+	SIGNALNAMESET(NXN_SIGINT, SIGINT);
+	SIGNALNAMESET(NXN_SIGKILL, SIGKILL);
+	SIGNALNAMESET(NXN_SIGPIPE, SIGPIPE);
+	SIGNALNAMESET(NXN_SIGQUIT, SIGQUIT);
+	SIGNALNAMESET(NXN_SIGSEGV, SIGSEGV);
+	SIGNALNAMESET(NXN_SIGSTOP, SIGSTOP);
+	SIGNALNAMESET(NXN_SIGTERM, SIGTERM);
+	SIGNALNAMESET(NXN_SIGTSTP, SIGTSTP);
+	SIGNALNAMESET(NXN_SIGTTIN, SIGTTIN);
+	SIGNALNAMESET(NXN_SIGTTOU, SIGTTOU);
+	SIGNALNAMESET(NXN_SIGUSR1, SIGUSR1);
+	SIGNALNAMESET(NXN_SIGUSR2, SIGUSR2);
+#ifdef SIGPOLL
+	SIGNALNAMESET(NXN_SIGPOLL, SIGPOLL);
+#endif
+	SIGNALNAMESET(NXN_SIGPROF, SIGPROF);
+	SIGNALNAMESET(NXN_SIGSYS, SIGSYS);
+	SIGNALNAMESET(NXN_SIGTRAP, SIGTRAP);
+	SIGNALNAMESET(NXN_SIGURG, SIGURG);
+#ifdef SIGVTALRM
+	SIGNALNAMESET(NXN_SIGVTALRM, SIGVTALRM);
+#endif
+	SIGNALNAMESET(NXN_SIGXCPU, SIGXCPU);
+	SIGNALNAMESET(NXN_SIGXFSZ, SIGXFSZ);
+#undef SIGNALNAMESET
+    }
+
+    /* Clean up. */
+    nxo_stack_npop(tstack, 2);
 }
 #endif
 
@@ -11825,7 +11901,107 @@ systemdict_sigpending(cw_nxo_t *a_thread)
 void
 systemdict_sigsuspend(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *nxo_set;
+    cw_nxo_t *tstack, *tnxo, *tkey, *tval;
+    int sig;
+    uint32_t i, nkeys;
+    sigset_t set;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+
+    /* Get argument. */
+    NXO_STACK_GET(nxo_set, ostack, a_thread);
+    if (nxo_type_get(nxo_set) != NXOT_DICT)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+
+    /* Translate argument. */
+    tstack = nxo_thread_tstack_get(a_thread);
+    tnxo = nxo_stack_push(tstack);
+    tkey = nxo_stack_push(tstack);
+    tval = nxo_stack_push(tstack);
+
+    sigemptyset(&set);
+
+#define SIGNALNAMECOMP(a_nxn, a_signal)					\
+    nxo_name_new(tnxo, nxn_str(a_nxn), nxn_len(a_nxn), true);		\
+    if (nxo_compare(tnxo, tkey) == 0)					\
+    {									\
+	sig = (a_signal);						\
+	break;								\
+    }
+
+    for (i = 0, nkeys = nxo_dict_count(nxo_set); i < nkeys; i++)
+    {
+	nxo_dict_iterate(nxo_set, tkey);
+
+	sig = -1;
+	do
+	{
+	    SIGNALNAMECOMP(NXN_SIGABRT, SIGABRT);
+	    SIGNALNAMECOMP(NXN_SIGALRM, SIGALRM);
+	    SIGNALNAMECOMP(NXN_SIGBUS, SIGBUS);
+	    SIGNALNAMECOMP(NXN_SIGCHLD, SIGCHLD);
+	    SIGNALNAMECOMP(NXN_SIGCONT, SIGCONT);
+	    SIGNALNAMECOMP(NXN_SIGFPE, SIGFPE);
+	    SIGNALNAMECOMP(NXN_SIGHUP, SIGHUP);
+	    SIGNALNAMECOMP(NXN_SIGILL, SIGILL);
+	    SIGNALNAMECOMP(NXN_SIGINT, SIGINT);
+	    SIGNALNAMECOMP(NXN_SIGKILL, SIGKILL);
+	    SIGNALNAMECOMP(NXN_SIGPIPE, SIGPIPE);
+	    SIGNALNAMECOMP(NXN_SIGQUIT, SIGQUIT);
+	    SIGNALNAMECOMP(NXN_SIGSEGV, SIGSEGV);
+	    SIGNALNAMECOMP(NXN_SIGSTOP, SIGSTOP);
+	    SIGNALNAMECOMP(NXN_SIGTERM, SIGTERM);
+	    SIGNALNAMECOMP(NXN_SIGTSTP, SIGTSTP);
+	    SIGNALNAMECOMP(NXN_SIGTTIN, SIGTTIN);
+	    SIGNALNAMECOMP(NXN_SIGTTOU, SIGTTOU);
+	    SIGNALNAMECOMP(NXN_SIGUSR1, SIGUSR1);
+	    SIGNALNAMECOMP(NXN_SIGUSR2, SIGUSR2);
+#ifdef SIGPOLL
+	    SIGNALNAMECOMP(NXN_SIGPOLL, SIGPOLL);
+#endif
+	    SIGNALNAMECOMP(NXN_SIGPROF, SIGPROF);
+	    SIGNALNAMECOMP(NXN_SIGSYS, SIGSYS);
+	    SIGNALNAMECOMP(NXN_SIGTRAP, SIGTRAP);
+	    SIGNALNAMECOMP(NXN_SIGURG, SIGURG);
+#ifdef SIGVTALRM
+	    SIGNALNAMECOMP(NXN_SIGVTALRM, SIGVTALRM);
+#endif
+	    SIGNALNAMECOMP(NXN_SIGXCPU, SIGXCPU);
+	    SIGNALNAMECOMP(NXN_SIGXFSZ, SIGXFSZ);
+#undef SIGNALNAMECOMP
+	} while (0);
+
+	if (sig == -1)
+	{
+	    /* Unrecognized signal name. */
+	    nxo_stack_npop(tstack, 3);
+	    nxo_thread_nerror(a_thread, NXN_argcheck);
+	    return;
+	}
+
+	nxo_dict_lookup(nxo_set, tkey, tval);
+	if (nxo_type_get(tval) != NXOT_BOOLEAN)
+	{
+	    nxo_stack_npop(tstack, 3);
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+
+	if (nxo_boolean_get(tval))
+	{
+	    sigaddset(&set, sig);
+	}
+    }
+
+    sigsuspend(&set);
+
+    /* Clean up. */
+    nxo_stack_npop(tstack, 3);
+    nxo_stack_pop(ostack);
 }
 #endif
 
@@ -11833,7 +12009,260 @@ systemdict_sigsuspend(cw_nxo_t *a_thread)
 void
 systemdict_sigwait(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *nxo;
+    cw_nxo_t *tstack, *tnxo, *tkey, *tval;
+    int sig;
+    uint32_t i, nkeys;
+    sigset_t set;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+
+    /* Get argument. */
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    if (nxo_type_get(nxo) != NXOT_DICT)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+
+    /* Translate argument. */
+    tstack = nxo_thread_tstack_get(a_thread);
+    tnxo = nxo_stack_push(tstack);
+    tkey = nxo_stack_push(tstack);
+    tval = nxo_stack_push(tstack);
+
+    sigemptyset(&set);
+
+#define SIGNALNAMECOMP(a_nxn, a_signal)					\
+    nxo_name_new(tnxo, nxn_str(a_nxn), nxn_len(a_nxn), true);		\
+    if (nxo_compare(tnxo, tkey) == 0)					\
+    {									\
+	sig = (a_signal);						\
+	break;								\
+    }
+
+    for (i = 0, nkeys = nxo_dict_count(nxo); i < nkeys; i++)
+    {
+	nxo_dict_iterate(nxo, tkey);
+
+	sig = -1;
+	do
+	{
+	    SIGNALNAMECOMP(NXN_SIGABRT, SIGABRT);
+	    SIGNALNAMECOMP(NXN_SIGALRM, SIGALRM);
+	    SIGNALNAMECOMP(NXN_SIGBUS, SIGBUS);
+	    SIGNALNAMECOMP(NXN_SIGCHLD, SIGCHLD);
+	    SIGNALNAMECOMP(NXN_SIGCONT, SIGCONT);
+	    SIGNALNAMECOMP(NXN_SIGFPE, SIGFPE);
+	    SIGNALNAMECOMP(NXN_SIGHUP, SIGHUP);
+	    SIGNALNAMECOMP(NXN_SIGILL, SIGILL);
+	    SIGNALNAMECOMP(NXN_SIGINT, SIGINT);
+	    SIGNALNAMECOMP(NXN_SIGKILL, SIGKILL);
+	    SIGNALNAMECOMP(NXN_SIGPIPE, SIGPIPE);
+	    SIGNALNAMECOMP(NXN_SIGQUIT, SIGQUIT);
+	    SIGNALNAMECOMP(NXN_SIGSEGV, SIGSEGV);
+	    SIGNALNAMECOMP(NXN_SIGSTOP, SIGSTOP);
+	    SIGNALNAMECOMP(NXN_SIGTERM, SIGTERM);
+	    SIGNALNAMECOMP(NXN_SIGTSTP, SIGTSTP);
+	    SIGNALNAMECOMP(NXN_SIGTTIN, SIGTTIN);
+	    SIGNALNAMECOMP(NXN_SIGTTOU, SIGTTOU);
+	    SIGNALNAMECOMP(NXN_SIGUSR1, SIGUSR1);
+	    SIGNALNAMECOMP(NXN_SIGUSR2, SIGUSR2);
+#ifdef SIGPOLL
+	    SIGNALNAMECOMP(NXN_SIGPOLL, SIGPOLL);
+#endif
+	    SIGNALNAMECOMP(NXN_SIGPROF, SIGPROF);
+	    SIGNALNAMECOMP(NXN_SIGSYS, SIGSYS);
+	    SIGNALNAMECOMP(NXN_SIGTRAP, SIGTRAP);
+	    SIGNALNAMECOMP(NXN_SIGURG, SIGURG);
+#ifdef SIGVTALRM
+	    SIGNALNAMECOMP(NXN_SIGVTALRM, SIGVTALRM);
+#endif
+	    SIGNALNAMECOMP(NXN_SIGXCPU, SIGXCPU);
+	    SIGNALNAMECOMP(NXN_SIGXFSZ, SIGXFSZ);
+#undef SIGNALNAMECOMP
+	} while (0);
+
+	if (sig == -1)
+	{
+	    /* Unrecognized signal name. */
+	    nxo_stack_npop(tstack, 3);
+	    nxo_thread_nerror(a_thread, NXN_argcheck);
+	    return;
+	}
+
+	nxo_dict_lookup(nxo, tkey, tval);
+	if (nxo_type_get(tval) != NXOT_BOOLEAN)
+	{
+	    nxo_stack_npop(tstack, 3);
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+
+	if (nxo_boolean_get(tval))
+	{
+	    sigaddset(&set, sig);
+	}
+    }
+
+    sigwait(&set, &sig);
+
+    /* Return the signal that was caught. */
+    switch (sig)
+    {
+	case SIGABRT:
+	{
+	    nxo_name_new(nxo, nxn_str(NXN_SIGABRT), nxn_len(NXN_SIGABRT), true);
+	    break;
+	}
+	case SIGALRM:
+	{
+	    nxo_name_new(nxo, nxn_str(NXN_SIGALRM), nxn_len(NXN_SIGALRM), true);
+	    break;
+	}
+	case SIGBUS:
+	{
+	    nxo_name_new(nxo, nxn_str(NXN_SIGBUS), nxn_len(NXN_SIGBUS), true);
+	    break;
+	}
+	case SIGCHLD:
+	{
+	    nxo_name_new(nxo, nxn_str(NXN_SIGCHLD), nxn_len(NXN_SIGCHLD), true);
+	    break;
+	}
+	case SIGCONT:
+	{
+	    nxo_name_new(nxo, nxn_str(NXN_SIGCONT), nxn_len(NXN_SIGCONT), true);
+	    break;
+	}
+	case SIGFPE:
+	{
+	    nxo_name_new(nxo, nxn_str(NXN_SIGFPE), nxn_len(NXN_SIGFPE), true);
+	    break;
+	}
+	case SIGHUP:
+	{
+	    nxo_name_new(nxo, nxn_str(NXN_SIGHUP), nxn_len(NXN_SIGHUP), true);
+	    break;
+	}
+	case SIGILL:
+	{
+	    nxo_name_new(nxo, nxn_str(NXN_SIGILL), nxn_len(NXN_SIGILL), true);
+	    break;
+	}
+	case SIGINT:
+	{
+	    nxo_name_new(nxo, nxn_str(NXN_SIGINT), nxn_len(NXN_SIGINT), true);
+	    break;
+	}
+	case SIGKILL:
+	{
+	    nxo_name_new(nxo, nxn_str(NXN_SIGKILL), nxn_len(NXN_SIGKILL), true);
+	    break;
+	}
+	case SIGPIPE:
+	{
+	    nxo_name_new(nxo, nxn_str(NXN_SIGPIPE), nxn_len(NXN_SIGPIPE), true);
+	    break;
+	}
+	case SIGQUIT:
+	{
+	    nxo_name_new(nxo, nxn_str(NXN_SIGQUIT), nxn_len(NXN_SIGQUIT), true);
+	    break;
+	}
+	case SIGSEGV:
+	{
+	    nxo_name_new(nxo, nxn_str(NXN_SIGSEGV), nxn_len(NXN_SIGSEGV), true);
+	    break;
+	}
+	case SIGSTOP:
+	{
+	    nxo_name_new(nxo, nxn_str(NXN_SIGSTOP), nxn_len(NXN_SIGSTOP), true);
+	    break;
+	}
+	case SIGTERM:
+	{
+	    nxo_name_new(nxo, nxn_str(NXN_SIGTERM), nxn_len(NXN_SIGTERM), true);
+	    break;
+	}
+	case SIGTSTP:
+	{
+	    nxo_name_new(nxo, nxn_str(NXN_SIGTSTP), nxn_len(NXN_SIGTSTP), true);
+	    break;
+	}
+	case SIGTTIN:
+	{
+	    nxo_name_new(nxo, nxn_str(NXN_SIGTTIN), nxn_len(NXN_SIGTTIN), true);
+	    break;
+	}
+	case SIGTTOU:
+	{
+	    nxo_name_new(nxo, nxn_str(NXN_SIGTTOU), nxn_len(NXN_SIGTTOU), true);
+	    break;
+	}
+	case SIGUSR1:
+	{
+	    nxo_name_new(nxo, nxn_str(NXN_SIGUSR1), nxn_len(NXN_SIGUSR1), true);
+	    break;
+	}
+	case SIGUSR2:
+	{
+	    nxo_name_new(nxo, nxn_str(NXN_SIGUSR2), nxn_len(NXN_SIGUSR2), true);
+	    break;
+	}
+#ifdef SIGPOLL
+	case SIGPOLL:
+	{
+	    nxo_name_new(nxo, nxn_str(NXN_SIGPOLL), nxn_len(NXN_SIGPOLL), true);
+	    break;
+	}
+#endif
+	case SIGPROF:
+	{
+	    nxo_name_new(nxo, nxn_str(NXN_SIGPROF), nxn_len(NXN_SIGPROF), true);
+	    break;
+	}
+	case SIGSYS:
+	{
+	    nxo_name_new(nxo, nxn_str(NXN_SIGSYS), nxn_len(NXN_SIGSYS), true);
+	    break;
+	}
+	case SIGTRAP:
+	{
+	    nxo_name_new(nxo, nxn_str(NXN_SIGTRAP), nxn_len(NXN_SIGTRAP), true);
+	    break;
+	}
+	case SIGURG:
+	{
+	    nxo_name_new(nxo, nxn_str(NXN_SIGURG), nxn_len(NXN_SIGURG), true);
+	    break;
+	}
+#ifdef SIGVTALRM
+	case SIGVTALRM:
+	{
+	    nxo_name_new(nxo, nxn_str(NXN_SIGVTALRM), nxn_len(NXN_SIGVTALRM),
+			 true);
+	    break;
+	}
+#endif
+	case SIGXCPU:
+	{
+	    nxo_name_new(nxo, nxn_str(NXN_SIGXCPU), nxn_len(NXN_SIGXCPU), true);
+	    break;
+	}
+	case SIGXFSZ:
+	{
+	    nxo_name_new(nxo, nxn_str(NXN_SIGXFSZ), nxn_len(NXN_SIGXFSZ), true);
+	    break;
+	}
+	default:
+	{
+	    cw_not_reached();
+	}
+    }
+
+    /* Clean up. */
+    nxo_stack_npop(tstack, 3);
 }
 #endif
 

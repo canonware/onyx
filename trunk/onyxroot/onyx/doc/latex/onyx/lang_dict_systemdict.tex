@@ -10935,15 +10935,49 @@ onyx:0>
 	\end{description}
 \label{systemdict:sigpending}
 \index{sigpending@\onyxop{}{sigpending}{}}
-\item[{\onyxop{OPARGS}{sigpending}{OPOUTS}}: ]
+\item[{\onyxop{set}{sigpending}{set}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[set: ] A dictionary.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[set: ]
+			The same dictionary as the input \oparg{set}.  A
+			dictionary of signal name keys, with associated true
+			values.  A value of true indicates set membership.  The
+			supported names are:
+			\begin{itemize}
+			\item{\$SIGABRT}
+			\item{\$SIGALRM}
+			\item{\$SIGBUS}
+			\item{\$SIGCHLD}
+			\item{\$SIGCONT}
+			\item{\$SIGFPE}
+			\item{\$SIGHUP}
+			\item{\$SIGILL}
+			\item{\$SIGINT}
+			\item{\$SIGKILL}
+			\item{\$SIGPIPE}
+			\item{\$SIGQUIT}
+			\item{\$SIGSEGV}
+			\item{\$SIGSTOP}
+			\item{\$SIGTERM}
+			\item{\$SIGTSTP}
+			\item{\$SIGTTIN}
+			\item{\$SIGTTOU}
+			\item{\$SIGUSR1}
+			\item{\$SIGUSR2}
+			\item{\$SIGPOLL (may not be present)}
+			\item{\$SIGPROF}
+			\item{\$SIGSYS}
+			\item{\$SIGTRAP}
+			\item{\$SIGURG}
+			\item{\$SIGVTALRM (may not be present)}
+			\item{\$SIGXCPU}
+			\item{\$SIGXFSZ}
+			\end{itemize}
 		\end{description}
 	\item[Error(s): ]
 		\begin{description}\item[]
@@ -10951,52 +10985,134 @@ onyx:0>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Get pending signals.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> <> sigpending 1 sprint
+<>
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sigsuspend}
 \index{sigsuspend@\onyxop{}{sigsuspend}{}}
-\item[{\onyxop{OPARGS}{sigsuspend}{OPOUTS}}: ]
+\item[{\onyxop{set}{sigsuspend}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[set: ]
+			A dictionary of signal name and/or integers keys, with
+			associated true/false values.  A value of true indicates
+			set membership.  The recognized names are:
+			\begin{itemize}
+			\item{\$SIGABRT}
+			\item{\$SIGALRM}
+			\item{\$SIGBUS}
+			\item{\$SIGCHLD}
+			\item{\$SIGCONT}
+			\item{\$SIGFPE}
+			\item{\$SIGHUP}
+			\item{\$SIGILL}
+			\item{\$SIGINT}
+			\item{\$SIGKILL}
+			\item{\$SIGPIPE}
+			\item{\$SIGQUIT}
+			\item{\$SIGSEGV}
+			\item{\$SIGSTOP}
+			\item{\$SIGTERM}
+			\item{\$SIGTSTP}
+			\item{\$SIGTTIN}
+			\item{\$SIGTTOU}
+			\item{\$SIGUSR1}
+			\item{\$SIGUSR2}
+			\item{\$SIGPOLL (may not be present)}
+			\item{\$SIGPROF}
+			\item{\$SIGSYS}
+			\item{\$SIGTRAP}
+			\item{\$SIGURG}
+			\item{\$SIGVTALRM (may not be present)}
+			\item{\$SIGXCPU}
+			\item{\$SIGXFSZ}
+			\end{itemize}
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Error(s): ]
 		\begin{description}\item[]
+		\item[\htmlref{argcheck}{argcheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Suspend the calling thread until one of the signals in
+		\oparg{set} is caught.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> <> sigsuspend
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sigwait}
 \index{sigwait@\onyxop{}{sigwait}{}}
-\item[{\onyxop{OPARGS}{sigwait}{OPOUTS}}: ]
+\item[{\onyxop{set}{sigwait}{sig}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[set: ]
+			A dictionary of signal name and/or integers keys, with
+			associated true/false values.  A value of true indicates
+			set membership.  The recognized names are:
+			\begin{itemize}
+			\item{\$SIGABRT}
+			\item{\$SIGALRM}
+			\item{\$SIGBUS}
+			\item{\$SIGCHLD}
+			\item{\$SIGCONT}
+			\item{\$SIGFPE}
+			\item{\$SIGHUP}
+			\item{\$SIGILL}
+			\item{\$SIGINT}
+			\item{\$SIGKILL}
+			\item{\$SIGPIPE}
+			\item{\$SIGQUIT}
+			\item{\$SIGSEGV}
+			\item{\$SIGSTOP}
+			\item{\$SIGTERM}
+			\item{\$SIGTSTP}
+			\item{\$SIGTTIN}
+			\item{\$SIGTTOU}
+			\item{\$SIGUSR1}
+			\item{\$SIGUSR2}
+			\item{\$SIGPOLL (may not be present)}
+			\item{\$SIGPROF}
+			\item{\$SIGSYS}
+			\item{\$SIGTRAP}
+			\item{\$SIGURG}
+			\item{\$SIGVTALRM (may not be present)}
+			\item{\$SIGXCPU}
+			\item{\$SIGXFSZ}
+			\end{itemize}
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[sig: ]
+			One of the signal names that was specified in
+			\oparg{set}.
 		\end{description}
 	\item[Error(s): ]
 		\begin{description}\item[]
+		\item[\htmlref{argcheck}{argcheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Wait for one of the signals in \oparg{set}, and return the name
+		of the signal that was caught.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> $SIG_BLOCK <$SIGXCPU true> sigmask
+onyx:0> <$SIGXCPU true> sigwait
+onyx:1> 1 sprint
+$SIGXCPU
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sin}
