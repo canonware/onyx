@@ -142,6 +142,10 @@ static void
 hist_p_record_prev(cw_hist_t *a_hist);
 static void
 hist_p_record_next(cw_hist_t *a_hist);
+static void
+hist_p_gap_prev(cw_hist_t *a_hist);
+static void
+hist_p_gap_next(cw_hist_t *a_hist);
 CW_P_INLINE void
 hist_p_redo_flush(cw_hist_t *a_hist);
 CW_P_INLINE void
@@ -811,6 +815,28 @@ hist_p_record_next(cw_hist_t *a_hist)
 			&a_hist->htmp);
 }
 
+/* Move to the gap previous to the current record in h. */
+static void
+hist_p_gap_prev(cw_hist_t *a_hist)
+{
+    histh_p_header_tag_set(&a_hist->hhead, HISTH_TAG_NONE);
+    histh_p_footer_tag_set(&a_hist->hfoot, HISTH_TAG_NONE);
+
+    mkr_dup(&a_hist->hcur, &a_hist->hbeg);
+    mkr_dup(&a_hist->hend, &a_hist->hbeg);
+}
+
+/* Move to the gap following the current record in h. */
+static void
+hist_p_gap_next(cw_hist_t *a_hist)
+{
+    histh_p_header_tag_set(&a_hist->hhead, HISTH_TAG_NONE);
+    histh_p_footer_tag_set(&a_hist->hfoot, HISTH_TAG_NONE);
+
+    mkr_dup(&a_hist->hbeg, &a_hist->hend);
+    mkr_dup(&a_hist->hcur, &a_hist->hend);
+}
+
 /* Flush redo state, if any. */
 CW_P_INLINE void
 hist_p_redo_flush(cw_hist_t *a_hist)
@@ -1160,14 +1186,6 @@ hist_undo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 
     mkr_new(&tmkr, a_buf);
 
-    if (histh_p_tag_get(&a_hist->hhead) == HISTH_TAG_NONE
-	&& mkr_pos(&a_hist->hcur) > 1)
-    {
-	/* Move to the previous record, since we're currently at the end of the
-	 * history. */
-	hist_p_record_prev(a_hist);
-    }
-
     /* Iteratively undo a_count times. */
     for (retval = 0;
 	 retval < a_count && mkr_pos(&a_hist->hcur) > 1;
@@ -1175,18 +1193,30 @@ hist_undo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
     {
 	switch (histh_p_tag_get(&a_hist->hhead))
 	{
+	    case HISTH_TAG_NONE:
+	    {
+		/* Move to the previous record. */
+		hist_p_record_prev(a_hist);
+		if (histh_p_tag_get(&a_hist->hhead) == HISTH_TAG_NONE)
+		{
+		    /* No more records. */
+		    goto RETURN;
+		}
+		break;
+	    }
 	    case HISTH_TAG_SYNC:
 	    {
 		/* Remove sync records. */
 		mkr_remove(&a_hist->hbeg, &a_hist->hend);
 
-		/* Get the previous record. */
-		hist_p_record_prev(a_hist);
+		/* Move before the current record. */
+		hist_p_gap_prev(a_hist);
 		break;
 	    }
 	    case HISTH_TAG_GBEG:
 	    {
 		/* Decrease depth. */
+		cw_assert(a_hist->gdepth != 0);
 		a_hist->gdepth--;
 
 		/* Increment the undo count, if the group depth dropped to 0. */
@@ -1195,8 +1225,8 @@ hist_undo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 		    retval++;
 		}
 
-		/* Get the previous record. */
-		hist_p_record_prev(a_hist);
+		/* Move before the current record. */
+		hist_p_gap_prev(a_hist);
 		break;
 	    }
 	    case HISTH_TAG_GEND:
@@ -1204,8 +1234,8 @@ hist_undo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 		/* Increase depth. */
 		a_hist->gdepth++;
 
-		/* Get the previous record. */
-		hist_p_record_prev(a_hist);
+		/* Move before the current record. */
+		hist_p_gap_prev(a_hist);
 		break;
 	    }
 	    case HISTH_TAG_POS:
@@ -1216,8 +1246,8 @@ hist_undo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 		/* Move. */
 		mkr_seek(a_mkr, a_hist->hbpos - 1, BUFW_BOB);
 
-		/* Get the previous record. */
-		hist_p_record_prev(a_hist);
+		/* Move before the current record. */
+		hist_p_gap_prev(a_hist);
 		break;
 	    }
 	    case HISTH_TAG_SINS:
@@ -1232,6 +1262,8 @@ hist_undo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 		cw_assert(mkr_pos(&a_hist->hcur)
 			  > mkr_pos(&a_hist->hbeg)
 			  + histh_p_bufvlen_get(&a_hist->hhead));
+
+		/* XXX Undo more than one if possible. */
 
 		/* Take action. */
 		mkr_seek(a_mkr, a_hist->hbpos - 1, BUFW_BOB);
@@ -1314,7 +1346,6 @@ hist_undo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 		}
 		break;
 	    }
-	    case HISTH_TAG_NONE:
 	    default:
 	    {
 		cw_not_reached();
@@ -1322,6 +1353,7 @@ hist_undo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 	}
     }
 
+    RETURN:
     mkr_delete(&tmkr);
     return retval;
 }
@@ -1343,14 +1375,6 @@ hist_redo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 
     mkr_new(&tmkr, a_buf);
 
-    if (histh_p_tag_get(&a_hist->hhead) == HISTH_TAG_NONE
-	&& mkr_pos(&a_hist->hcur) < buf_len(&a_hist->h) + 1)
-    {
-	/* Move to the next record, since we're currently at the begin of the
-	 * history. */
-	hist_p_record_next(a_hist);
-    }
-
     /* Iteratively redo a_count times. */
     for (retval = 0, redid = FALSE;
 	 retval < a_count && mkr_pos(&a_hist->hcur) < buf_len(&a_hist->h) + 1;
@@ -1363,13 +1387,24 @@ hist_redo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 
 	switch (histh_p_tag_get(&a_hist->hhead))
 	{
+	    case HISTH_TAG_NONE:
+	    {
+		/* Move to the next record. */
+		hist_p_record_next(a_hist);
+		if (histh_p_tag_get(&a_hist->hhead) == HISTH_TAG_NONE)
+		{
+		    /* No more records. */
+		    goto RETURN;
+		}
+		break;
+	    }
 	    case HISTH_TAG_SYNC:
 	    {
 		/* Remove sync records. */
 		mkr_remove(&a_hist->hbeg, &a_hist->hend);
 
-		/* Get the next record. */
-		hist_p_record_next(a_hist);
+		/* Move after the current record. */
+		hist_p_gap_next(a_hist);
 		break;
 	    }
 	    case HISTH_TAG_GBEG:
@@ -1377,13 +1412,14 @@ hist_redo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 		/* Increase depth. */
 		a_hist->gdepth++;
 
-		/* Get the next record. */
-		hist_p_record_next(a_hist);
+		/* Move after the current record. */
+		hist_p_gap_next(a_hist);
 		break;
 	    }
 	    case HISTH_TAG_GEND:
 	    {
 		/* Decrease depth. */
+		cw_assert(a_hist->gdepth != 0);
 		a_hist->gdepth--;
 
 		/* Increment the redo count, if the group depth dropped to 0. */
@@ -1392,8 +1428,8 @@ hist_redo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 		    retval++;
 		}
 
-		/* Get the next record. */
-		hist_p_record_next(a_hist);
+		/* Move after the current record. */
+		hist_p_gap_next(a_hist);
 		break;
 	    }
 	    case HISTH_TAG_POS:
@@ -1404,8 +1440,8 @@ hist_redo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 		/* Move. */
 		mkr_seek(a_mkr, a_hist->hbpos - 1, BUFW_BOB);
 
-		/* Get the next record. */
-		hist_p_record_next(a_hist);
+		/* Move after the current record. */
+		hist_p_gap_next(a_hist);
 		break;
 	    }
 	    case HISTH_TAG_SINS:
@@ -1509,6 +1545,7 @@ hist_redo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 	}
     }
 
+    RETURN:
     if (a_hist->gdepth > 0
 	&& redid
 	&& mkr_pos(&a_hist->hcur) == buf_len(&a_hist->h) + 1)
@@ -1616,6 +1653,7 @@ hist_group_end(cw_hist_t *a_hist, cw_buf_t *a_buf)
     histh_p_footer_tag_set(&a_hist->hhead, HISTH_TAG_NONE);
 
     /* Decrease depth. */
+    cw_assert(a_hist->gdepth != 0);
     a_hist->gdepth--;
 
     retval = FALSE;
