@@ -600,6 +600,27 @@ sock_get_fd(cw_sock_t * a_sock)
 }
 
 cw_uint32_t
+sock_l_get_in_space(cw_sock_t * a_sock)
+{
+  cw_uint32_t retval;
+
+  _cw_check_ptr(a_sock);
+
+  retval = a_sock->in_max_buf_size;
+
+  mtx_lock(&a_sock->in_lock);
+  retval -= buf_get_size(&a_sock->in_buf);
+  mtx_unlock(&a_sock->in_lock);
+  
+  if (retval > a_sock->os_inbuf_size)
+  {
+    retval = a_sock->os_inbuf_size;
+  }
+
+  return retval;
+}
+
+cw_uint32_t
 sock_l_get_in_size(cw_sock_t * a_sock)
 {
   cw_uint32_t retval;
@@ -790,6 +811,22 @@ sock_p_config_socket(cw_sock_t * a_sock)
 #undef _CW_SOCK_GETSOCKOPT
   }
 
+  /* Get the size of the OS's incoming buffer, so that we don't place undo
+   * strain on the sockb thread when it asks how much it should try to read. */
+  {
+    int len;
+    
+    len = sizeof(a_sock->os_inbuf_size);
+    if (getsockopt(a_sock->sockfd, SOL_SOCKET, (SO_RCVBUF),
+		   (void *) &a_sock->os_inbuf_size, &len))
+    {
+      log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
+		  "Error for SO_RCVBUF in getsockopt(): %s\n", strerror(errno));
+      retval = TRUE;
+      goto RETURN;
+    }
+  }
+  
   /* Get the size of the OS's outgoing buffer, so that we can hand no more than
    * that amount to sockb each time it asks for data. */
   {

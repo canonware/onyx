@@ -21,6 +21,8 @@
 #define _LIBSOCK_BLOW_DEFAULT_BSIZE 4096
 
 /* Function Prototypes. */
+void *
+accept_entry_func(void * a_arg);
 void
 usage(const char * a_progname);
 void
@@ -28,29 +30,33 @@ version(const char * a_progname);
 const char *
 basename(const char * a_str);
 
+/* Global. */
+cw_sock_t * sock_vec[FD_SETSIZE];
+cw_mq_t * mq;
+cw_socks_t * socks;
+cw_uint32_t opt_bsize = _LIBSOCK_BLOW_DEFAULT_BSIZE;
+
 int
 main(int argc, char ** argv)
 {
-  int retval = 0, bytes_read;
-  cw_socks_t * socks;
-  cw_sock_t * sock;
-  struct timeval timeout;
+  int retval = 0, bytes_read, sockfd;
   struct timespec tout;
   cw_buf_t buf;
-  cw_ring_t * sock_ring = NULL, * t_ring;
-  int fd_vec[FD_SETSIZE];
-  cw_uint32_t nfds = 0;
-  
+  cw_bool_t did_work;
+  cw_thd_t accept_thd;
+
   /* Command line parsing variables. */
   int c;
   cw_bool_t cl_error = FALSE, opt_help = FALSE, opt_version = FALSE;
-  cw_uint32_t opt_bsize = _LIBSOCK_BLOW_DEFAULT_BSIZE;
   int opt_port = 0;
 
+  bzero(sock_vec, FD_SETSIZE * sizeof(cw_sock_t *));
+  
   libstash_init();
   dbg_register(cw_g_dbg, "mem_error");
   dbg_register(cw_g_dbg, "prog_error");
   dbg_register(cw_g_dbg, "sockb_error");
+/*    dbg_register(cw_g_dbg, "sockb_verbose"); */
   dbg_register(cw_g_dbg, "socks_error");
   dbg_register(cw_g_dbg, "sock_error");
 
@@ -125,6 +131,7 @@ main(int argc, char ** argv)
   {
     _cw_error("Memory allocation error");
   }
+  
   if (TRUE == socks_listen(socks, &opt_port))
   {
     exit(1);
@@ -132,116 +139,89 @@ main(int argc, char ** argv)
   log_printf(cw_g_log, "%s: Listening on port %d\n",
 	     basename(argv[0]), opt_port);
 
-  timeout.tv_sec = 0;
-  timeout.tv_usec = 0;
-
   tout.tv_sec = 0;
   tout.tv_nsec = 0;
 
   /* Loop, accepting connections, reading from the open sock's, and closing
    * sock's on error. */
   buf_new(&buf, FALSE);
+
+  mq = mq_new(NULL);
+  if (NULL == mq)
+  {
+    _cw_error("Memory allocation error");
+  }
+
+  /* Start thread to accept connections. */
+  thd_new(&accept_thd, accept_entry_func, NULL);
+
+  while (1)
+  {
+    did_work = FALSE;
+    
+    while (NULL != (sockfd = (int) mq_get(mq)))
+    {
+      did_work = TRUE;
+
+      if (NULL != sock_vec[sockfd])
+      {
+	bytes_read = sock_read(sock_vec[sockfd], &buf, 0, &tout);
+	if (0 < bytes_read)
+	{
+	  /* Throw the data away. */
+	  buf_release_head_data(&buf, bytes_read);
+	}
+	else if (-1 == bytes_read)
+	{
+	  while (TRUE == sockb_in_notify(NULL, sockfd))
+	  {
+	    thd_yield();
+	  }
+
+	  sock_delete(sock_vec[sockfd]);
+	  sock_vec[sockfd] = NULL;
+
+	  log_printf(cw_g_log, "Connection closed\n");
+	}
+      }
+    }
+
+  }
+  mq_delete(mq);
+  buf_delete(&buf);
+
+  sockb_shutdown();
+  CLERROR:
+  libstash_shutdown();
+  return retval;
+}
+
+void *
+accept_entry_func(void * a_arg)
+{
+  cw_sock_t * sock;
+
   sock = sock_new(NULL, opt_bsize * 8);
   if (NULL == sock)
   {
     _cw_error("Memory allocation error");
   }
-
-  timeout.tv_usec = 0;
-
+  
   while (1)
   {
-    if (NULL != sock_ring)
-    {
-      tout.tv_sec = 1;
-      tout.tv_nsec = 0;
-      sockb_wait(fd_vec, nfds, &tout);
-/*        sockb_wait(fd_vec, nfds, NULL); */
-      t_ring = sock_ring;
-      do
-      {
-	tout.tv_sec = 0;
-	tout.tv_nsec = 0;
-	bytes_read = sock_read((cw_sock_t *) ring_get_data(t_ring),
-			       &buf, 0, &tout);
-	if (0 < bytes_read)
-	{
-	  /* Throw the data away. */
-	  buf_release_head_data(&buf, bytes_read);
-	  
-	  t_ring = ring_next(t_ring);
-	}
-	else if (-1 == bytes_read)
-	{
-	  cw_ring_t * old_ring;
-	  int sockfd;
-	  cw_sock_t * t_sock;
-	  
-	  log_printf(cw_g_log, "Connection closed\n");
-	  
-	  /* Socket error.  Remove this sock from the ring. */
-	  t_sock = (cw_sock_t *) ring_get_data(t_ring);
-	  sockfd = sock_get_fd(t_sock);
-	  sock_delete(t_sock);
-
-	  /* This advances us to the next ring item, so there is no need to
-	   * call ring_next(). */
-	  old_ring = t_ring;
-	  t_ring = ring_cut(old_ring);
-	  ring_delete(old_ring);
-	  if (t_ring == old_ring)
-	  {
-	    t_ring = NULL;
-	    sock_ring = NULL;
-	  }
-	  else if (nfds > 1)
-	  {
-	    cw_uint32_t j;
-	    
-	    /* Search through fd_vec and find the corresponding entry for this
-	     * sock. */
-	    for (j = 0; j < nfds; j++)
-	    {
-	      if (fd_vec[j] == sockfd)
-	      {
-		fd_vec[j] = fd_vec[nfds - 1];
-		break;
-	      }
-	    }
-	    _cw_assert(j < nfds);
-	  }
-	  nfds--;
-	  timeout.tv_sec = 5;
-	}
-      } while (t_ring != sock_ring);
-    }
-  
-    if (sock == socks_accept(socks, &timeout, sock))
+    if (sock == socks_accept(socks, NULL, sock))
     {
       log_printf(cw_g_log, "New connection\n");
-      /* New connection.  Add it to the sock ring. */
-      t_ring = ring_new(NULL, NULL, NULL);
-      if (NULL == t_ring)
-      {
-	_cw_error("Memory allocation error");
-      }
-      ring_set_data(t_ring, sock);
       
-      if (NULL != sock_ring)
-      {
-	ring_meld(sock_ring, t_ring);
-      }
-      else
-      {
-	sock_ring = t_ring;
-      }
+      sock_vec[sock_get_fd(sock)] = sock;
 
-      fd_vec[nfds] = sock_get_fd(sock);
-      nfds++;
-      timeout.tv_sec = 0;
+      while (TRUE == sockb_in_notify(mq, sock_get_fd(sock)))
+      {
+	thd_yield();
+      }
 
       /* Create another sock object for the next time we call
-	 * socks_accept(). */
+       * socks_accept(). */
       sock = sock_new(NULL, opt_bsize * 8);
       if (NULL == sock)
       {
@@ -249,12 +229,8 @@ main(int argc, char ** argv)
       }
     }
   }
-  buf_delete(&buf);
-
-  sockb_shutdown();
-  CLERROR:
-  libstash_shutdown();
-  return retval;
+  
+  return NULL;
 }
 
 void

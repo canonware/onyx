@@ -24,6 +24,9 @@
 #ifndef _LIBSTASH_USE_BUF
 #  define _LIBSTASH_USE_BUF
 #endif
+#ifndef _LIBSTASH_USE_MQ
+#  define _LIBSTASH_USE_MQ
+#endif
  
 /*
  * Include libstash_r.h now so that any dependencies on its classes are

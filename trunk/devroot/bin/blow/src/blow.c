@@ -53,7 +53,7 @@ main(int argc, char ** argv)
   libstash_init();
   dbg_register(cw_g_dbg, "mem_error");
   dbg_register(cw_g_dbg, "prog_error");
-  dbg_register(cw_g_dbg, "sockb_verbose");
+/*    dbg_register(cw_g_dbg, "sockb_verbose"); */
   dbg_register(cw_g_dbg, "sockb_error");
   dbg_register(cw_g_dbg, "sock_error");
 
@@ -212,13 +212,10 @@ main(int argc, char ** argv)
    * thereby incur extra memory allocation overhead). */
   for (i = 0; i < opt_nblocks; i++)
   {
-/*      log_printf(cw_g_log, "w"); */
     if (0xf == (i & 0xf))
     {
-/*        log_printf(cw_g_log, "f"); */
       for (j = 0; j < opt_nsocks; j++)
       {
-/*  	log_printf(cw_g_log, "."); */
 	if (TRUE == sock_flush_out(&sock_array[j]))
 	{
 	  log_eprintf(cw_g_log, __FILE__, __LINE__, NULL,
@@ -239,10 +236,8 @@ main(int argc, char ** argv)
     }
     else
     {
-/*        log_printf(cw_g_log, "s"); */
       for (j = 0; j < opt_nsocks; j++)
       {
-/*  	log_printf(cw_g_log, "."); */
 	if (TRUE == buf_catenate_buf(&t_buf, &buf, TRUE))
 	{
 	  _cw_error("Memory allocation error");

@@ -268,98 +268,54 @@ sockb_get_spare_bufc(void)
 }
 
 cw_bool_t
-sockb_wait(int * a_sock_vec, cw_uint32_t a_vec_len,
-	   struct timespec * a_timeout)
+sockb_in_notify(cw_mq_t * a_mq, int a_sockfd)
 {
   cw_bool_t retval;
-  struct timeval now;
-  struct timespec tout;
-  struct timezone tz;
-  struct cw_sockb_msg_s msg_wait;
-  cw_cnd_t cnd_a;
+  struct cw_sockb_msg_s * message;
   cw_mtx_t mtx;
-  cw_bool_t did_timeout;
-
-  _cw_check_ptr(a_sock_vec);
+  cw_cnd_t cnd;
   
-  cnd_new(&cnd_a);
+  _cw_check_ptr(g_sockb);
+  _cw_assert(a_sockfd >= 0);
+  _cw_assert(a_sockfd < FD_SETSIZE);
+
   mtx_new(&mtx);
-
-#ifdef _LIBSOCK_DBG
-  msg_wait.magic = _LIBSOCK_SOCKB_MSG_MAGIC;
-#endif
-  msg_wait.type = WAIT;
-  msg_wait.data.wait.cnd = &cnd_a;
-  msg_wait.data.wait.mtx = &mtx;
-  msg_wait.data.wait.fd_array = a_sock_vec;
-  msg_wait.data.wait.nfds = a_vec_len;
-
-  mtx_lock(&mtx);
-  if (0 != mq_put(&g_sockb->messages, (const void *) &msg_wait))
+  cnd_new(&cnd);
+  
+  message = (struct cw_sockb_msg_s *) pezz_get(&g_sockb->messages_pezz);
+  if (NULL == message)
   {
     retval = TRUE;
     goto RETURN;
   }
+
+#ifdef _LIBSOCK_DBG
+  message->magic = _LIBSOCK_SOCKB_MSG_MAGIC;
+#endif
+  message->type = IN_NOTIFY;
+  message->data.in_notify.sockfd = a_sockfd;
+  message->data.in_notify.mq = a_mq;
+  message->data.in_notify.mtx = &mtx;
+  message->data.in_notify.cnd = &cnd;
+
+  mtx_lock(&mtx);
+  if (0 != mq_put(&g_sockb->messages, (const void *) message))
+  {
+    pezz_put(&g_sockb->messages_pezz, (void *) message);
+    retval =TRUE;
+    goto RETURN;
+  }
+  
   sockb_l_wakeup();
 
-  if (NULL != a_timeout)
-  {
-    /* Set timeout. */
-    bzero(&tz, sizeof(struct timezone));
-    gettimeofday(&now, &tz);
-    tout.tv_sec = now.tv_sec + a_timeout->tv_sec;
-    tout.tv_nsec = now.tv_usec * 1000 + a_timeout->tv_nsec;
-
-    did_timeout = cnd_timedwait(&cnd_a, &mtx, &tout);
-  }
-  else
-  {
-    did_timeout = FALSE;
-    cnd_wait(&cnd_a, &mtx);
-  }
+  cnd_wait(&cnd, &mtx);
+  mtx_unlock(&mtx);
   
-  if (FALSE == did_timeout)
-  {
-    /* We got something! */
-    mtx_unlock(&mtx);
-    retval = FALSE;
-  }
-  else
-  {
-    struct cw_sockb_msg_s msg_unwait;
-    cw_cnd_t cnd_b;
+  retval = FALSE;
 
-    /* Timeout.  Now send an UNWAIT message to clean things up inside the sockb
-     * thread. */
-    cnd_new(&cnd_b);
-    
-#ifdef _LIBSOCK_DBG
-    msg_unwait.magic = _LIBSOCK_SOCKB_MSG_MAGIC;
-#endif
-    msg_unwait.type = UNWAIT;
-    msg_unwait.data.unwait.old_msg_p = &msg_wait;
-    msg_unwait.data.unwait.cnd = &cnd_b;
-    msg_unwait.data.unwait.mtx = &mtx;
-
-    while (0 != mq_put(&g_sockb->messages, (const void *) &msg_unwait))
-    {
-      /* Uh oh.  The msg_wait structure absolutely can't go away until we've
-       * removed all references to it in the sockb thread.  This is a very bad
-       * error, so we have to loop until the message gets through. */
-      thd_yield();
-    }
-    sockb_l_wakeup();
-    cnd_wait(&cnd_b, &mtx);
-    mtx_unlock(&mtx);
-    
-    cnd_delete(&cnd_b);
-
-    retval = TRUE;
-  }
-  
   RETURN:
-  cnd_delete(&cnd_a);
   mtx_delete(&mtx);
+  cnd_delete(&cnd);
   return retval;
 }
 
@@ -587,32 +543,20 @@ sockb_l_get_spare_fd(void)
 }
 
 static void
-sockb_p_wait_notify(struct cw_sockb_msg_s ** a_wait_vector,
-		    struct cw_sockb_msg_s * a_msg)
+sockb_p_notify(cw_mq_t * a_mq, int a_sockfd)
 {
-  cw_uint32_t i;
-  
-  _cw_check_ptr(a_msg);
-  _cw_assert(_LIBSOCK_SOCKB_MSG_MAGIC == a_msg->magic);
-  _cw_assert(WAIT == a_msg->type);
+  _cw_check_ptr(a_mq);
 
-  mtx_lock(a_msg->data.wait.mtx);
-  for (i = 0; i < a_msg->data.wait.nfds; i++)
+  while (-1 == mq_put(a_mq, (void *) a_sockfd))
   {
-    /* Clear out the vector entry if it still belongs to us. */
-    if (a_wait_vector[a_msg->data.wait.fd_array[i]] == a_msg)
-    {
-#ifdef _LIBSTASH_SOCKB_CONFESS
-      log_printf(cw_g_log,
-		 "v",
-		 a_msg->data.wait.fd_array[i]);
-#endif
-      a_wait_vector[a_msg->data.wait.fd_array[i]] = NULL;
-    }
+    /* We can't afford to lose the message, since it could end up causing
+     * deadlock. */
+    thd_yield();
   }
   
-  cnd_signal(a_msg->data.wait.cnd);
-  mtx_unlock(a_msg->data.wait.mtx);
+#ifdef _LIBSTASH_SOCKB_CONFESS
+  log_printf(cw_g_log, "n");
+#endif
 }
 
 static void *
@@ -629,10 +573,9 @@ sockb_p_entry_func(void * a_arg)
   cw_buf_t tmp_buf, buf_in;
   struct cw_sockb_msg_s * message;
 
-  /* If a pointer is non-NULL, then there is a message structure that contains
-   * the necessary information to be able to remove all the entries in the
-   * vector that the waiter specified, as well as wake up the waiter. */
-  struct cw_sockb_msg_s * wait_vector[FD_SETSIZE];
+  /* If a pointer is non-NULL, then we should send a message to the mq whenever
+   * data is readable, or the socket is closed. */
+  cw_mq_t * notify_vec[FD_SETSIZE];
 
   /* Initialize data structures. */
   FD_ZERO(&registered_set);
@@ -641,7 +584,7 @@ sockb_p_entry_func(void * a_arg)
   FD_ZERO(&fd_m_exception_set);
   buf_new(&tmp_buf, FALSE);
   buf_new(&buf_in, FALSE);
-  bzero(wait_vector, FD_SETSIZE * sizeof(struct cw_sockb_msg_s *));
+  bzero(notify_vec, FD_SETSIZE * sizeof(cw_mq_t *));
   
   /* Add g_sockb->pipe_out to the read set, so that this thread will return from
    * select() when data is written to g_sockb->pipe_in. */
@@ -698,10 +641,6 @@ sockb_p_entry_func(void * a_arg)
 			"Refuse to register %d\n", sockfd);
 	  }
 #endif
-#ifdef _LIBSOCK_DBG
-	  message->magic = 0;
-#endif
-	  pezz_put(&g_sockb->messages_pezz, (void *) message);
 	  break;
 	}
 	case UNREGISTER:
@@ -745,10 +684,6 @@ sockb_p_entry_func(void * a_arg)
 	  /* Notify the sock that it's unregistered. */
 	  sock_l_message_callback(socks[sockfd]);
 	  socks[sockfd] = NULL;
-#ifdef _LIBSOCK_DBG
-	  message->magic = 0;
-#endif
-	  pezz_put(&g_sockb->messages_pezz, (void *) message);
 	  break;
 	}
 	case OUT_NOTIFY:
@@ -771,72 +706,31 @@ sockb_p_entry_func(void * a_arg)
 			"Refuse to set %dw\n", sockfd);
 	  }
 #endif
-#ifdef _LIBSOCK_DBG
-	  message->magic = 0;
-#endif
-	  pezz_put(&g_sockb->messages_pezz, (void *) message);
 	  break;
 	}
-	case WAIT:
+	case IN_NOTIFY:
 	{
-	  cw_uint32_t i;
-
-	  for (i = 0; i < message->data.wait.nfds; i++)
-	  {
-	    /* Set the wait vector entry to this message. */
+	  notify_vec[message->data.in_notify.sockfd]
+	    = message->data.in_notify.mq;
 #ifdef _LIBSTASH_SOCKB_CONFESS
-	    log_printf(cw_g_log,
-			" (s%lu)",
-			message->data.wait.fd_array[i]);
+	  log_eprintf(cw_g_log, __FILE__, __LINE__, NULL,
+		      "notify_vec[%d] = %p\n",
+		      message->in_notify.sockfd,
+		      notify_vec[message->in_notify.sockfd]);
 #endif
-	    
-	    wait_vector[message->data.wait.fd_array[i]] = message;
-	  }
-	    
-	  break;
-	}
-	case UNWAIT:
-	{
-	  cw_uint32_t i;
-
-	  mtx_lock(message->data.unwait.mtx);
-	  _cw_assert(WAIT == message->data.unwait.old_msg_p->type);
-	  
-	  for (i = 0; i < message->data.unwait.old_msg_p->data.wait.nfds; i++)
-	  {
-	    /* Clear the wait_vector entry if it's still for this message. */
-	    if (wait_vector
-		[message->data.unwait.old_msg_p->data.wait.fd_array[i]]
-		== message->data.unwait.old_msg_p)
-	    {
-#ifdef _LIBSTASH_SOCKB_CONFESS
-	    log_printf(cw_g_log,
-			" (u%lu)",
-			message->data.unwait.old_msg_p->data.wait.fd_array[i]);
-#endif
-	      wait_vector[message->data.unwait.old_msg_p->
-			 data.wait.fd_array[i]] = NULL;
-	    }
-#ifdef _LIBSTASH_SOCKB_CONFESS
-	    else
-	    {
-	      log_printf(cw_g_log,
-			 " (x%lu)",
-			 message->data.unwait.old_msg_p->data.wait.fd_array[i]);
-	    }
-#endif
-	    
-	  }
-
-	  /* Notify the message sender that all is well now. */
-	  cnd_signal(message->data.unwait.cnd);
-	  mtx_unlock(message->data.unwait.mtx);
+	  mtx_lock(message->data.in_notify.mtx);
+	  cnd_signal(message->data.in_notify.cnd);
+	  mtx_unlock(message->data.in_notify.mtx);
 	  break;
 	}
 	default:
 	{
 	  _cw_error("Programming error");
 	}
+#ifdef _LIBSOCK_DBG
+	message->magic = 0;
+#endif
+	pezz_put(&g_sockb->messages_pezz, (void *) message);
       }
     }
 
@@ -870,16 +764,20 @@ sockb_p_entry_func(void * a_arg)
 	  /* Is any space available? */
 	  in_size = sock_l_get_in_size(socks[i]);
 	  
-	  if (sock_l_get_in_max_buf_size(socks[i])
-	      <= in_size)
+	  if (0 == (sock_l_get_in_max_buf_size(socks[i]) - in_size))
 	  {
 	    /* Nope, no space. */
 	    FD_CLR(i, &fd_read_set);
-	    
+
+	    if (NULL != notify_vec[i])
+	    {
+	      sockb_p_notify(notify_vec[i], i);
+	    }
 	  }
-	  if ((0 < in_size) && (NULL != wait_vector[i]) && (NULL != socks[i]))
+	  else if ((0 < in_size) &&
+		   (NULL != notify_vec[i]))
 	  {
-	    sockb_p_wait_notify(wait_vector, wait_vector[i]);
+	    sockb_p_notify(notify_vec[i], i);
 	  }
 #ifdef _LIBSTASH_SOCKB_CONFESS
 	  else
@@ -994,10 +892,10 @@ sockb_p_entry_func(void * a_arg)
 #endif
 
 	/* XXX Yuck, fix this. */
-	if (!FD_ISSET(i, &registered_set))
-	{
-	  continue;
-	}
+/*  	if (!FD_ISSET(i, &registered_set)) */
+/*  	{ */
+/*  	  continue; */
+/*  	} */
 	
 	if (FD_ISSET(i, &fd_read_set))
 	{
@@ -1016,8 +914,8 @@ sockb_p_entry_func(void * a_arg)
 
 	    /* Figure out how much data we're willing to shove into this sock's
 	     * incoming buffer. */
-	  max_read = (sock_l_get_in_max_buf_size(socks[i])
-		      - sock_l_get_in_size(socks[i]));
+	  max_read = sock_l_get_in_space(socks[i]);
+	  
 	  _cw_assert(max_read > 0);
 
 	    /* Build up buf_in to be at least large enough for the readv(). */
@@ -1077,11 +975,10 @@ sockb_p_entry_func(void * a_arg)
 	  }
 	  
 	  /* Get an iovec for reading.  This somewhat goes against the idea of
-	     * never writing the internals of a buf after the buffers have been
-	     * inserted.  However, this is quite safe, since as a result of how
-	     * we use buf_in, we know for sure that there are no other
-	     * references to the byte ranges of the buffers we are writing
-	     * to. */
+	   * never writing the internals of a buf after the buffers have been
+	   * inserted.  However, this is quite safe, since as a result of how we
+	   * use buf_in, we know for sure that there are no other references to
+	   * the byte ranges of the buffers we are writing to. */
 	  iovec = buf_get_iovec(&buf_in, max_read, TRUE, &iovec_count);
 
 	  bytes_read = readv(i, iovec, iovec_count);
@@ -1091,9 +988,9 @@ sockb_p_entry_func(void * a_arg)
 
 	  if (bytes_read > 0)
 	  {
-	    if ((NULL != wait_vector[i]) && (NULL != socks[i]))
+	    if (NULL != notify_vec[i])
 	    {
-	      sockb_p_wait_notify(wait_vector, wait_vector[i]);
+	      sockb_p_notify(notify_vec[i], i);
 	    }
 	    _cw_assert(buf_get_size(&tmp_buf) == 0);
 
@@ -1143,6 +1040,11 @@ sockb_p_entry_func(void * a_arg)
 
 	    sock_l_error_callback(socks[i]);
 	    socks[i] = NULL;
+	    
+	    if (NULL != notify_vec[i])
+	    {
+	      sockb_p_notify(notify_vec[i], i);
+	    }
 
 	    /* Make sure not to try to handle outgoing data on this socket,
 	       * since we just set the sock pointer to NULL. */
@@ -1213,11 +1115,6 @@ sockb_p_entry_func(void * a_arg)
 	  }
 	  else /* if (bytes_written == -1) */
 	  {
-	    if ((NULL != wait_vector[i]) && (NULL != socks[i]))
-	    {
-	      sockb_p_wait_notify(wait_vector, wait_vector[i]);
-	    }
-	    
 	    buf_release_head_data(&tmp_buf,
 				  buf_get_size(&tmp_buf));
 	    
@@ -1257,6 +1154,11 @@ sockb_p_entry_func(void * a_arg)
 
 	    sock_l_error_callback(socks[i]);
 	    socks[i] = NULL;
+	    
+	    if (NULL != notify_vec[i])
+	    {
+	      sockb_p_notify(notify_vec[i], i);
+	    }
 	  }
 	  _cw_assert(buf_get_size(&tmp_buf) == 0);
 	}

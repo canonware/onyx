@@ -103,23 +103,26 @@ sockb_get_spare_bufc(void);
  *
  * <<< Input(s) >>>
  *
- * a_sock_vec : Pointer to an array of pointers to sock's.
+ * a_mq : Pointer to a mq, or NULL.
  *
- * a_vec_len : Size of a_sock_vec array.
- *
- * a_timeout : Pointer to timeout, or NULL.
+ * a_sockfd : A socket desccriptor number.
  *
  * <<< Output(s) >>>
  *
- * retval : FALSE : One or more sock's either ready for reading or closed.
- *          TRUE : Timeout, or memory allocation error.
+ * retval : FALSE == success, TRUE == error.
+ *          TRUE : Memory allocation error.
  *
  * <<< Description >>>
  *
- * Wait on a set of sock's.
+ * Register such that whenever data is available for reading on a_sockfd, or
+ * a_sockfd is closed by the sockb thread, a message is sent to a_mq.  The
+ * message is simply a socket descriptor number embedded in the mq's data
+ * pointer (ew gross), in order to avoid memory allocation complexity.  To stop
+ * receiving notifications, pass a NULL mq pointer.
+ *
+ * Note: Only one mq at a time can be notified of events on a particular
+ * sockfd.
  *
  ****************************************************************************/
 cw_bool_t
-sockb_wait(int * a_sock_vec, cw_uint32_t a_vec_len,
-	   struct timespec * a_timeout);
-
+sockb_in_notify(cw_mq_t * a_mq, int a_sockfd);

@@ -18,6 +18,24 @@
  *
  * <<< Input(s) >>>
  *
+ * a_sock : Pointer to a sock.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Minimum number of bytes available buffer space.
+ *
+ * <<< Description >>>
+ *
+ * Return the minimum incoming buffer space available.
+ *
+ ****************************************************************************/
+cw_uint32_t
+sock_l_get_in_space(cw_sock_t * a_sock);
+
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
  * a_sock : Pointer to a sock instance.
  *
  * <<< Output(s) >>>

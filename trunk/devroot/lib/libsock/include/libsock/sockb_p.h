@@ -14,11 +14,6 @@
  *
  ****************************************************************************/
 
-/*  struct cw_sockb_el_s */
-/*  { */
-/*    cw_sock_t * sock; */
-/*  }; */
-
 #ifdef _LIBSOCK_DBG
 #  define _LIBSOCK_SOCKB_MSG_MAGIC 0xf0010725
 #endif
@@ -28,24 +23,18 @@ struct cw_sockb_msg_s
 #ifdef _LIBSOCK_DBG
   cw_uint32_t magic;
 #endif
-  enum {REGISTER, UNREGISTER, OUT_NOTIFY, WAIT, UNWAIT} type;
+  enum {REGISTER, UNREGISTER, OUT_NOTIFY, IN_NOTIFY} type;
   union
   {
     cw_sock_t * sock;
     cw_uint32_t sockfd;
     struct
     {
-      cw_cnd_t * cnd;
+      int sockfd;
+      cw_mq_t * mq;
       cw_mtx_t * mtx;
-      int * fd_array;
-      cw_uint32_t nfds;
-    } wait;
-    struct
-    {
-      struct cw_sockb_msg_s * old_msg_p;
       cw_cnd_t * cnd;
-      cw_mtx_t * mtx;
-    } unwait;
+    } in_notify;
   } data;
 };
 
@@ -69,8 +58,7 @@ struct cw_sockb_s
 };
 
 static void
-sockb_p_wait_notify(struct cw_sockb_msg_s ** a_wait_vector,
-		    struct cw_sockb_msg_s * a_msg);
+sockb_p_notify(cw_mq_t * a_mq, int a_sockfd);
 
 /****************************************************************************
  *

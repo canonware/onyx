@@ -26,6 +26,7 @@ struct cw_sock_s
   cw_cnd_t callback_cnd;
   cw_bool_t is_registered;
 
+  cw_uint32_t os_inbuf_size;
   cw_uint32_t os_outbuf_size;
   cw_uint16_t port;
 
