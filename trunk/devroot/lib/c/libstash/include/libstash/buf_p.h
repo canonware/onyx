@@ -14,8 +14,17 @@
  *
  ****************************************************************************/
 
-/* Minimum size for buf's internal bufel array. */
+/* Minimum size for buf's internal bufel array.  This must be a power of two,
+ * since bit masks are used to wrap around the end of the circular
+ * bufel_array. */
 #define _LIBSTASH_BUF_ARRAY_MIN_SIZE 1
+
+#ifdef _LIBSTASH_DBG
+#  define _CW_BUF_MAGIC 0xb00f0001
+#  define _CW_BUFEL_MAGIC 0xb00f0002
+#  define _CW_BUFC_MAGIC 0xb00f0003
+#  define _CW_BUFPOOL_MAGIC 0xb00f0004
+#endif
 
 static void
 buf_p_rebuild_cumulative_index(cw_buf_t * a_buf);
