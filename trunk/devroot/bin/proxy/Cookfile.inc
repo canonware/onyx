@@ -40,7 +40,7 @@ PROXY_SRCS = proxy.c;
 PROXY_SRCS = [fromto % [srcdir]/bin/proxy/src/% [PROXY_SRCS]];
 SRCS = [SRCS] [PROXY_SRCS];
 
-/* Simple tests.  Output is diff'ed with the expected (.exp file) output. */
+/* Simple C tests.  Output is diff'ed with the expected (.exp file) output. */
 {
   local ctests = ;
   ctests = [fromto % [srcdir]/bin/proxy/test/% [ctests]];
@@ -48,7 +48,18 @@ SRCS = [SRCS] [PROXY_SRCS];
   CTESTS = [CTESTS] [ctests];
 }
 
-/* Perl scripts that drive the BTESTS. */
+/*
+ * Simple stil tests.  Output is diff'ed with the expected (.exp file)
+ * output.
+ */
+{
+  local stests = ;
+  ptests = [fromto % [srcdir]/bin/proxy/test/% [stests]];
+
+  STESTS = [STESTS] [stests];
+}
+
+/* Perl scripts that drive other tests and use the sequence mode of verify. */
 {
   local ptests = ;
   ptests = [fromto % [srcdir]/bin/proxy/test/% [ptests]];
@@ -56,12 +67,20 @@ SRCS = [SRCS] [PROXY_SRCS];
   PTESTS = [PTESTS] [ptests];
 }
 
-/* Backend test programs that are driven by the PTESTS. */
+/* C programs that are driven by tests. */
 {
-  local btests = ;
-  btests = [fromto % [srcdir]/bin/proxy/test/% [btests]];
+  local cbtests = ;
+  cbtests = [fromto % [srcdir]/bin/proxy/test/% [cbtests]];
 
-  BTESTS = [BTESTS] [btests];
+  CBTESTS = [CBTESTS] [cbtests];
+}
+
+/* stil programs that are driven by tests. */
+{
+  local sbtests = ;
+  sbtests = [fromto % [srcdir]/bin/proxy/test/% [sbtests]];
+
+  SBTESTS = [SBTESTS] [sbtests];
 }
 
 /* Man pages. */

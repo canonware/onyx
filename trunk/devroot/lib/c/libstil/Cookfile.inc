@@ -45,7 +45,7 @@ LIBSTIL_SRCS = stil.c stila.c stiln.c stilo.c stils.c stilt.c systemdict.c
 LIBSTIL_SRCS = [fromto % [srcdir]/lib/c/libstil/src/% [LIBSTIL_SRCS]];
 SRCS = [SRCS] [LIBSTIL_SRCS];
 
-/* Simple tests.  Output is diff'ed with the expected (.exp file) output. */
+/* Simple C tests.  Output is diff'ed with the expected (.exp file) output. */
 {
   local ctests = ;
   ctests = [fromto % [srcdir]/lib/c/libstil/test/% [ctests]];
@@ -53,7 +53,18 @@ SRCS = [SRCS] [LIBSTIL_SRCS];
   CTESTS = [CTESTS] [ctests];
 }
 
-/* Perl scripts that drive the BTESTS. */
+/*
+ * Simple stil tests.  Output is diff'ed with the expected (.exp file)
+ * output.
+ */
+{
+  local stests = ;
+  ptests = [fromto % [srcdir]/lib/c/libstil/test/% [stests]];
+
+  STESTS = [STESTS] [stests];
+}
+
+/* Perl scripts that drive other tests. */
 {
   local ptests = ;
   ptests = [fromto % [srcdir]/lib/c/libstil/test/% [ptests]];
@@ -61,12 +72,20 @@ SRCS = [SRCS] [LIBSTIL_SRCS];
   PTESTS = [PTESTS] [ptests];
 }
 
-/* Backend test programs that are driven by the PTESTS. */
+/* C programs that are driven by tests. */
 {
-  local btests = ;
-  btests = [fromto % [srcdir]/lib/c/libstil/test/% [btests]];
+  local cbtests = ;
+  cbtests = [fromto % [srcdir]/lib/c/libstil/test/% [cbtests]];
 
-  BTESTS = [BTESTS] [btests];
+  CBTESTS = [CBTESTS] [cbtests];
+}
+
+/* stil programs that are driven by tests. */
+{
+  local sbtests = ;
+  sbtests = [fromto % [srcdir]/lib/c/libstil/test/% [sbtests]];
+
+  SBTESTS = [SBTESTS] [sbtests];
 }
 
 /* Man pages. */

@@ -40,7 +40,7 @@ BLOW_SRCS = blow.c;
 BLOW_SRCS = [fromto % [srcdir]/bin/blow/src/% [BLOW_SRCS]];
 SRCS = [SRCS] [BLOW_SRCS];
 
-/* Simple tests.  Output is diff'ed with the expected (.exp file) output. */
+/* Simple C tests.  Output is diff'ed with the expected (.exp file) output. */
 {
   local ctests = ;
   ctests = [fromto % [srcdir]/bin/blow/test/% [ctests]];
@@ -48,7 +48,18 @@ SRCS = [SRCS] [BLOW_SRCS];
   CTESTS = [CTESTS] [ctests];
 }
 
-/* Perl scripts that drive the BTESTS. */
+/*
+ * Simple stil tests.  Output is diff'ed with the expected (.exp file)
+ * output.
+ */
+{
+  local stests = ;
+  ptests = [fromto % [srcdir]/bin/blow/test/% [stests]];
+
+  STESTS = [STESTS] [stests];
+}
+
+/* Perl scripts that drive other tests and use the sequence mode of verify. */
 {
   local ptests = ;
   ptests = [fromto % [srcdir]/bin/blow/test/% [ptests]];
@@ -56,12 +67,20 @@ SRCS = [SRCS] [BLOW_SRCS];
   PTESTS = [PTESTS] [ptests];
 }
 
-/* Backend test programs that are driven by the PTESTS. */
+/* C programs that are driven by tests. */
 {
-  local btests = ;
-  btests = [fromto % [srcdir]/bin/blow/test/% [btests]];
+  local cbtests = ;
+  cbtests = [fromto % [srcdir]/bin/blow/test/% [cbtests]];
 
-  BTESTS = [BTESTS] [btests];
+  CBTESTS = [CBTESTS] [cbtests];
+}
+
+/* stil programs that are driven by tests. */
+{
+  local sbtests = ;
+  sbtests = [fromto % [srcdir]/bin/blow/test/% [sbtests]];
+
+  SBTESTS = [SBTESTS] [sbtests];
 }
 
 /* Man pages. */

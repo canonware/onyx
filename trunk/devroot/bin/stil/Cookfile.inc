@@ -40,7 +40,7 @@ STIL_SRCS = stil.c;
 STIL_SRCS = [fromto % [srcdir]/bin/stil/src/% [STIL_SRCS]];
 SRCS = [SRCS] [STIL_SRCS];
 
-/* Simple tests.  Output is diff'ed with the expected (.exp file) output. */
+/* Simple C tests.  Output is diff'ed with the expected (.exp file) output. */
 {
   local ctests = ;
   ctests = [fromto % [srcdir]/bin/stil/test/% [ctests]];
@@ -48,7 +48,18 @@ SRCS = [SRCS] [STIL_SRCS];
   CTESTS = [CTESTS] [ctests];
 }
 
-/* Perl scripts that drive the BTESTS. */
+/*
+ * Simple stil tests.  Output is diff'ed with the expected (.exp file)
+ * output.
+ */
+{
+  local stests = ;
+  ptests = [fromto % [srcdir]/bin/stil/test/% [stests]];
+
+  STESTS = [STESTS] [stests];
+}
+
+/* Perl scripts that drive other tests and use the sequence mode of verify. */
 {
   local ptests = ;
   ptests = [fromto % [srcdir]/bin/stil/test/% [ptests]];
@@ -56,12 +67,20 @@ SRCS = [SRCS] [STIL_SRCS];
   PTESTS = [PTESTS] [ptests];
 }
 
-/* Backend test programs that are driven by the PTESTS. */
+/* C programs that are driven by tests. */
 {
-  local btests = ;
-  btests = [fromto % [srcdir]/bin/stil/test/% [btests]];
+  local cbtests = ;
+  cbtests = [fromto % [srcdir]/bin/stil/test/% [cbtests]];
 
-  BTESTS = [BTESTS] [btests];
+  CBTESTS = [CBTESTS] [cbtests];
+}
+
+/* stil programs that are driven by tests. */
+{
+  local sbtests = ;
+  sbtests = [fromto % [srcdir]/bin/stil/test/% [sbtests]];
+
+  SBTESTS = [SBTESTS] [sbtests];
 }
 
 /* Man pages. */

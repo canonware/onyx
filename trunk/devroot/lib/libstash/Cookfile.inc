@@ -47,7 +47,7 @@ LIBSTASH_SRCS = libstash.c bhp.c buf.c ch.c cnd.c dch.c dbg.c mem.c mq.c mtx.c
 LIBSTASH_SRCS = [fromto % [srcdir]/lib/c/libstash/src/% [LIBSTASH_SRCS]];
 SRCS = [SRCS] [LIBSTASH_SRCS];
 
-/* Simple tests.  Output is diff'ed with the expected (.exp file) output. */
+/* Simple C tests.  Output is diff'ed with the expected (.exp file) output. */
 {
   local ctests = c_bhp_a.c c_bhp_b.c c_buf_a.c c_buf_b.c c_buf_c.c c_buf_d.c
                  c_buf_e.c c_ch_a.c c_cnd_a.c c_dbg_a.c c_dch_a.c
@@ -60,7 +60,18 @@ SRCS = [SRCS] [LIBSTASH_SRCS];
   CTESTS = [CTESTS] [ctests];
 }
 
-/* Perl scripts that drive the BTESTS. */
+/*
+ * Simple stil tests.  Output is diff'ed with the expected (.exp file)
+ * output.
+ */
+{
+  local stests = ;
+  ptests = [fromto % [srcdir]/lib/c/libstash/test/% [stests]];
+
+  STESTS = [STESTS] [stests];
+}
+
+/* Perl scripts that drive other tests and use the sequence mode of verify. */
 {
   local ptests = p_res_a.pl.in;
   ptests = [fromto % [srcdir]/lib/c/libstash/test/% [ptests]];
@@ -68,12 +79,20 @@ SRCS = [SRCS] [LIBSTASH_SRCS];
   PTESTS = [PTESTS] [ptests];
 }
 
-/* Backend test programs that are driven by the PTESTS. */
+/* C programs that are driven by tests. */
 {
-  local btests = b_res_a.c;
-  btests = [fromto % [srcdir]/lib/c/libstash/test/% [btests]];
+  local cbtests = b_res_a.c;
+  cbtests = [fromto % [srcdir]/lib/c/libstash/test/% [cbtests]];
 
-  BTESTS = [BTESTS] [btests];
+  CBTESTS = [CBTESTS] [cbtests];
+}
+
+/* stil programs that are driven by tests. */
+{
+  local sbtests = ;
+  sbtests = [fromto % [srcdir]/lib/c/libstash/test/% [sbtests]];
+
+  SBTESTS = [SBTESTS] [sbtests];
 }
 
 /* Man pages. */

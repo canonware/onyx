@@ -47,28 +47,47 @@ LIBEDIT_SRCS = chared.c common.c edit.c emacs.c hist.c history.c key.c map.c
 LIBEDIT_SRCS = [fromto % [srcdir]/lib/c/libedit/src/% [LIBEDIT_SRCS]];
 SRCS = [SRCS] [LIBEDIT_SRCS];
 
-/* Simple tests.  Output is diff'ed with the expected (.exp file) output. */
+/* Simple C tests.  Output is diff'ed with the expected (.exp file) output. */
 {
   local ctests = ;
-  ctests = [fromto % [srcdir]/lib/c/libedit/test/% [ctests]];
+  ctests = [fromto % [srcdir]/lib/c/libstil/test/% [ctests]];
 
   CTESTS = [CTESTS] [ctests];
 }
 
-/* Perl scripts that drive the BTESTS. */
+/*
+ * Simple stil tests.  Output is diff'ed with the expected (.exp file)
+ * output.
+ */
+{
+  local stests = ;
+  ptests = [fromto % [srcdir]/lib/c/libstil/test/% [stests]];
+
+  STESTS = [STESTS] [stests];
+}
+
+/* Perl scripts that drive other tests and use the sequence mode of verify. */
 {
   local ptests = ;
-  ptests = [fromto % [srcdir]/lib/c/libedit/test/% [ptests]];
+  ptests = [fromto % [srcdir]/lib/c/libstil/test/% [ptests]];
 
   PTESTS = [PTESTS] [ptests];
 }
 
-/* Backend test programs that are driven by the PTESTS. */
+/* C programs that are driven by tests. */
 {
-  local btests = ;
-  btests = [fromto % [srcdir]/lib/c/libedit/test/% [btests]];
+  local cbtests = ;
+  cbtests = [fromto % [srcdir]/lib/c/libstil/test/% [cbtests]];
 
-  BTESTS = [BTESTS] [btests];
+  CBTESTS = [CBTESTS] [cbtests];
+}
+
+/* stil programs that are driven by tests. */
+{
+  local sbtests = ;
+  sbtests = [fromto % [srcdir]/lib/c/libstil/test/% [sbtests]];
+
+  SBTESTS = [SBTESTS] [sbtests];
 }
 
 /* Man pages. */

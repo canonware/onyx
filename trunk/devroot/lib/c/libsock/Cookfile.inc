@@ -43,7 +43,7 @@ LIBSOCK_SRCS = libsock.c sock.c socks.c;
 LIBSOCK_SRCS = [fromto % [srcdir]/lib/c/libsock/src/% [LIBSOCK_SRCS]];
 SRCS = [SRCS] [LIBSOCK_SRCS];
 
-/* Simple tests.  Output is diff'ed with the expected (.exp file) output. */
+/* Simple C tests.  Output is diff'ed with the expected (.exp file) output. */
 {
   local ctests = c_sock_a.c;
   ctests = [fromto % [srcdir]/lib/c/libsock/test/% [ctests]];
@@ -51,7 +51,18 @@ SRCS = [SRCS] [LIBSOCK_SRCS];
   CTESTS = [CTESTS] [ctests];
 }
 
-/* Perl scripts that drive the BTESTS. */
+/*
+ * Simple stil tests.  Output is diff'ed with the expected (.exp file)
+ * output.
+ */
+{
+  local stests = ;
+  ptests = [fromto % [srcdir]/lib/c/libsock/test/% [stests]];
+
+  STESTS = [STESTS] [stests];
+}
+
+/* Perl scripts that drive other tests and use the sequence mode of verify. */
 {
   local ptests = ;
   ptests = [fromto % [srcdir]/lib/c/libsock/test/% [ptests]];
@@ -59,12 +70,20 @@ SRCS = [SRCS] [LIBSOCK_SRCS];
   PTESTS = [PTESTS] [ptests];
 }
 
-/* Backend test programs that are driven by the PTESTS. */
+/* C programs that are driven by tests. */
 {
-  local btests = ;
-  btests = [fromto % [srcdir]/lib/c/libsock/test/% [btests]];
+  local cbtests = ;
+  cbtests = [fromto % [srcdir]/lib/c/libsock/test/% [cbtests]];
 
-  BTESTS = [BTESTS] [btests];
+  CBTESTS = [CBTESTS] [cbtests];
+}
+
+/* stil programs that are driven by tests. */
+{
+  local sbtests = ;
+  sbtests = [fromto % [srcdir]/lib/c/libsock/test/% [sbtests]];
+
+  SBTESTS = [SBTESTS] [sbtests];
 }
 
 /* Man pages. */

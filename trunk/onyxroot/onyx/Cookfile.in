@@ -47,8 +47,10 @@ D_BINS = ;
 A_BINS = ;
 P_BINS = ;
 CTESTS = ;
+STESTS = ;
 PTESTS = ;
-BTESTS = ;
+CBTESTS = ;
+SBTESTS = ;
 MANPAGES_1 = ;
 MANPAGES_3 = ;
 
@@ -101,13 +103,16 @@ bins_a : [A_BINS];
 bins_p : [P_BINS];
 bins : bins_d bins_a bins_p;
 
-tests : [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS] [BTESTS]]
+tests : [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS] [CBTESTS]]
+        [fromto [srcdir]/%0%.st.in [objdir]/%0%.st [STESTS] [SBTESTS]]
         [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]];
 
 check : tests
 {
   [VERIFY] -z -r [srcdir] -o [objdir]
            [prepost "-d " "" [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS]]]
+           [prepost "-d " ""
+                    [fromto [srcdir]/%0%.st.in [objdir]/%0%.st [STESTS]]]
            [prepost "-s " ""
                     [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]]];
 }
@@ -116,6 +121,8 @@ check_update : tests
 {
   [VERIFY] -u -z -r [srcdir] -o [objdir]
            [prepost "-d " "" [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS]]]
+           [prepost "-d " ""
+                    [fromto [srcdir]/%0%.st.in [objdir]/%0%.st [STESTS]]]
            [prepost "-s " ""
                     [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]]];
 }
@@ -159,16 +166,29 @@ clean : [addsuffix _clean @bins@ @libs@]
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.perf [CTESTS]];
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS]];
 
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_d [BTESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [BTESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.out [BTESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.diff [BTESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0% [BTESTS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_d [STESTS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [STESTS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.out [STESTS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.diff [STESTS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.perf [STESTS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0% [STESTS]];
 
   rm -f [fromto [srcdir]/%0%.pl.in [objdir]/%0%.out [PTESTS]];
   rm -f [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl.out [PTESTS]];
   rm -f [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl.perf [PTESTS]];
   rm -f [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]];
+
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_d [CBTESTS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [CBTESTS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.out [CBTESTS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.diff [CBTESTS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0% [CBTESTS]];
+
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_d [SBTESTS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [SBTESTS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.out [SBTESTS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.diff [SBTESTS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0% [SBTESTS]];
 
   /*
    * Delete .cook.fp files from the source tree and object tree.
@@ -218,6 +238,9 @@ etags : [INCS] [PRIV_INCS] [SRCS]
   @ETAGS@ [INCS] [PRIV_INCS] [SRCS];
 }
 
+/*
+ * Add magic to perl files.
+ */
 [objdir]/%0%.pl : [srcdir]/%0%.pl.in
   set mkdir
 {
@@ -229,6 +252,25 @@ echo \"[srcdir]/%0%.pl.in --> [target]\"
 
 echo \"#![PERL] -w\" > [target]
 [CAT] [srcdir]/%0%.pl.in >> [target];
+chmod u+x [target];
+dataend
+}
+
+/*
+ * Add magic to stil files.
+ */
+[objdir]/%0%.st : [srcdir]/%0%.st.in [STIL_D]
+  set mkdir
+{
+  [SHELL] -e;
+data
+#![SHELL]
+
+echo \"[srcdir]/%0%.st.in --> [target]\"
+
+echo \"#![STIL_D]\" > [target]
+echo \"!#\" >> [target]
+[CAT] [srcdir]/%0%.st.in >> [target];
 chmod u+x [target];
 dataend
 }

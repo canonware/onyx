@@ -40,7 +40,7 @@ ECHOS_SRCS = echos.c;
 ECHOS_SRCS = [fromto % [srcdir]/bin/echos/src/% [ECHOS_SRCS]];
 SRCS = [SRCS] [ECHOS_SRCS];
 
-/* Simple tests.  Output is diff'ed with the expected (.exp file) output. */
+/* Simple C tests.  Output is diff'ed with the expected (.exp file) output. */
 {
   local ctests = ;
   ctests = [fromto % [srcdir]/bin/echos/test/% [ctests]];
@@ -48,7 +48,18 @@ SRCS = [SRCS] [ECHOS_SRCS];
   CTESTS = [CTESTS] [ctests];
 }
 
-/* Perl scripts that drive the BTESTS. */
+/*
+ * Simple stil tests.  Output is diff'ed with the expected (.exp file)
+ * output.
+ */
+{
+  local stests = ;
+  ptests = [fromto % [srcdir]/bin/echos/test/% [stests]];
+
+  STESTS = [STESTS] [stests];
+}
+
+/* Perl scripts that drive other tests and use the sequence mode of verify. */
 {
   local ptests = ;
   ptests = [fromto % [srcdir]/bin/echos/test/% [ptests]];
@@ -56,12 +67,20 @@ SRCS = [SRCS] [ECHOS_SRCS];
   PTESTS = [PTESTS] [ptests];
 }
 
-/* Backend test programs that are driven by the PTESTS. */
+/* C programs that are driven by tests. */
 {
-  local btests = ;
-  btests = [fromto % [srcdir]/bin/echos/test/% [btests]];
+  local cbtests = ;
+  cbtests = [fromto % [srcdir]/bin/echos/test/% [cbtests]];
 
-  BTESTS = [BTESTS] [btests];
+  CBTESTS = [CBTESTS] [cbtests];
+}
+
+/* stil programs that are driven by tests. */
+{
+  local sbtests = ;
+  sbtests = [fromto % [srcdir]/bin/echos/test/% [sbtests]];
+
+  SBTESTS = [SBTESTS] [sbtests];
 }
 
 /* Man pages. */
