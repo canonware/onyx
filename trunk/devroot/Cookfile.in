@@ -134,7 +134,11 @@ check_update : tests
 
 release : docs;
 
-docs : docs_ps docs_pdf docs_html;
+docs :
+#if [with_docs]
+       docs_ps docs_pdf docs_html
+#endif
+       ;
 docs_ps : [PS_ONYX];
 docs_pdf : [PDF_ONYX];
 docs_html : [HTML_ONYX];
