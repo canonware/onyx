@@ -59,10 +59,7 @@ clopt <
     #instance:;
     #errstr error_print -
     $error_print {
-	,argv 0 get
-	`/' split
-	dup length dec get
-
+	,progname
 	`: ' cat
 	exch cat
 	`\n' cat
@@ -103,6 +100,12 @@ clopt <
     $p_parse {
 	# Store a reference to #argv.
 	$argv over ;def
+
+	# Get and store progname.
+	$progname ,argv 0 get
+	`/' split
+	dup length dec get
+	;def
 
 	# Clear the error flag.
 	$error false ;def
@@ -322,6 +325,14 @@ clopt <
 
 	# Clean up.
 	pop nip
+    } bind
+
+    # Return the program name, which is the basename of argv[0].
+    #
+    #instance:
+    #- progname_get #progname
+    $progname_get {
+	,progname
     } bind
 
     # Return argv.  This is provided to aid option handlers.
