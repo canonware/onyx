@@ -3403,25 +3403,25 @@ stack up by \oparg{amount}. \\
 stack count amount & {\bf \htmlref{sroll}{systemdict:sroll}} & -- & Roll objects
 on stack. \\
 \hline
-stack & {\bf \htmlref{spop}{systemdict:spop}} & object & Pop object off
+stack & {\bf \htmlref{spop}{systemdict:spop}} & obj & Pop object off
 stack. \\
 \hline
-stack & {\bf \htmlref{sbpop}{systemdict:sbpop}} & object & Pop object off
-bottom of stack. \\
+stack & {\bf \htmlref{sbpop}{systemdict:sbpop}} & obj & Pop object off bottom of
+stack. \\
 \hline
-stack count & {\bf \htmlref{snpop}{systemdict:snpop}} & pstack & Pop count
+stack count & {\bf \htmlref{snpop}{systemdict:snpop}} & array & Pop count
 objects off stack. \\
 \hline
-stack count & {\bf \htmlref{snbpop}{systemdict:snbpop}} & pstack & Pop count
+stack count & {\bf \htmlref{snbpop}{systemdict:snbpop}} & array & Pop count
 objects off bottom of stack. \\
 \hline
-stack index & {\bf \htmlref{sipop}{systemdict:sipop}} & object & Remove object
+stack index & {\bf \htmlref{sipop}{systemdict:sipop}} & obj & Remove object
 on stack at index. \\
 \hline
-stack index & {\bf \htmlref{sibpop}{systemdict:sibpop}} & object & Remove object
+stack index & {\bf \htmlref{sibpop}{systemdict:sibpop}} & obj & Remove object
 on stack at index from bottom. \\
 \hline
-stack & {\bf \htmlref{snip}{systemdict:snip}} & object & Remove second object on
+stack & {\bf \htmlref{snip}{systemdict:snip}} & obj & Remove second object on
 stack. \\
 \hline
 stack & {\bf \htmlref{sclear}{systemdict:sclear}} & -- & Remove all objects on
@@ -9157,15 +9157,17 @@ onyx:0>
 	\end{description}
 \label{systemdict:sbpop}
 \index{sbpop@\onyxop{}{sbpop}{}}
-\item[{\onyxop{OPARGS}{sbpop}{OPOUTS}}: ]
+\item[{\onyxop{stack}{sbpop}{obj}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[stack: ]
+			A stack object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[obj: ]
+			An object.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
@@ -9173,8 +9175,13 @@ onyx:0>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Pop \oparg{obj} off the bottom of \oparg{stack}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> (1 2 3) dup sbpop pstack
+1
+(2 3)
+onyx:2>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sbpush}
@@ -9967,24 +9974,36 @@ onyx:0>
 	\end{description}
 \label{systemdict:sibpop}
 \index{sibpop@\onyxop{}{sibpop}{}}
-\item[{\onyxop{OPARGS}{sibpop}{OPOUTS}}: ]
+\item[{\onyxop{stack index}{sibpop}{obj}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[stack: ]
+			A stack object.
+		\item[index: ]
+			Offset from bottom of \oparg{stack}, counting from 0, of
+			the object to remove from \oparg{stack}.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[obj: ]
+			An object removed from \oparg{stack}.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
+		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Remove the \oparg{obj} from \oparg{stack} that is at offset
+		\oparg{index} from the bottom of \oparg{stack}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> (0 1 2 3) dup 2 sibpop pstack
+2
+(0 1 3)
+onyx:2>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sidup}
@@ -10079,46 +10098,71 @@ onyx:0>
 	\end{description}
 \label{systemdict:sipop}
 \index{sipop@\onyxop{}{sipop}{}}
-\item[{\onyxop{OPARGS}{sipop}{OPOUTS}}: ]
+\item[{\onyxop{stack index}{sipop}{obj}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[stack: ]
+			A stack object.
+		\item[index: ]
+			Offset from top of \oparg{stack}, counting from 0, of
+			the object to remove from \oparg{stack}.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[obj: ]
+			An object removed from \oparg{stack}.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
+		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Remove the \oparg{obj} at \oparg{index} from \oparg{stack}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> (3 2 1 0) dup 2 sipop pstack
+2
+(3 1 0)
+onyx:2>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:snbpop}
 \index{snbpop@\onyxop{}{snbpop}{}}
-\item[{\onyxop{OPARGS}{snbpop}{OPOUTS}}: ]
+\item[{\onyxop{stack count}{snbpop}{array}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[stack: ]
+			A stack object.
+		\item[count: ]
+			Number of objects to pop off the bottom of
+			\oparg{stack}.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[array: ]
+			An array of objects popped off the bottom of
+			\oparg{stack}, with the same object ordering as when on
+			\oparg{stack}.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
+		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Pop \oparg{count} objects off the bottom of \oparg{stack} and
+		put them into an array.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> (1 2 3 4) dup 2 snbpop pstack
+[1 2]
+(3 4)
+onyx:2>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sndn}
@@ -10189,24 +10233,36 @@ onyx:0>
 	\end{description}
 \label{systemdict:snpop}
 \index{snpop@\onyxop{}{snpop}{}}
-\item[{\onyxop{OPARGS}{snpop}{OPOUTS}}: ]
+\item[{\onyxop{stack count}{snpop}{array}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[stack: ]
+			A stack object.
+		\item[count: ]
+			Number of objects to pop off of \oparg{stack}.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[array: ]
+			An array of objects popped off of \oparg{stack}, with
+			the same object ordering as when on \oparg{stack}.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
+		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Pop \oparg{count} objects off of \oparg{stack} and put them into
+		an array.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> (1 2 3 4) dup 2 snpop pstack
+[3 4]
+(1 2)
+onyx:2>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:snup}
