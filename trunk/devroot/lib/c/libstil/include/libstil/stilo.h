@@ -167,5 +167,6 @@ void    stilo_delete(cw_stilo_t *a_stilo);
 cw_stilot_t stilo_type(cw_stilo_t *a_stilo);
 
 void    stilo_copy(cw_stilo_t *a_to, cw_stilo_t *a_from);
+void	stilo_move(cw_stilo_t *a_to, cw_stilo_t *a_from);
 
 cw_bool_t stilo_cast(cw_stilo_t *a_stilo, cw_stilot_t a_stilot);
