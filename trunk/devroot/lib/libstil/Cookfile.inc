@@ -63,7 +63,7 @@ SRCS = [SRCS] [LIBSTIL_SRCS];
 
 /* Simple C tests.  Output is diff'ed with the expected (.exp file) output. */
 {
-  local ctests = ;
+  local ctests = hook_a.c;
   ctests = [fromto % [srcdir]/lib/c/libstil/test/% [ctests]];
 
   CTESTS = [CTESTS] [ctests];

@@ -50,7 +50,7 @@ stiloe_l_hook_delete(cw_stiloe_t *a_stiloe, cw_stil_t *a_stil)
 
 	_cw_check_ptr(hook);
 	_cw_assert(hook->stiloe.magic == _CW_STILOE_MAGIC);
-	_cw_assert(hook->stiloe.type == STILOT_FILE);
+	_cw_assert(hook->stiloe.type == STILOT_HOOK);
 
 	if (hook->delete_f != NULL)
 		hook->delete_f(hook->data, a_stil);
@@ -113,11 +113,11 @@ stilo_l_hook_print(cw_stilo_t *a_thread)
 
 	_cw_check_ptr(hook);
 	_cw_assert(hook->stiloe.magic == _CW_STILOE_MAGIC);
-	_cw_assert(hook->stiloe.type == STILOT_FILE);
+	_cw_assert(hook->stiloe.type == STILOT_HOOK);
 
 
 	if (stilo_type_get(&hook->tag) != STILOT_NULL) {
-		error = stilo_file_output(stdout_stilo, "-hook[[");
+		error = stilo_file_output(stdout_stilo, "=");
 		if (error) {
 			stilo_thread_error(a_thread, error);
 			return;
@@ -130,7 +130,7 @@ stilo_l_hook_print(cw_stilo_t *a_thread)
 		_cw_stil_code(a_thread,
 		    "1 index type sprintdict exch get eval");
 
-		error = stilo_file_output(stdout_stilo, "]-");
+		error = stilo_file_output(stdout_stilo, "=");
 		if (error) {
 			stilo_thread_error(a_thread, error);
 			return;
@@ -165,7 +165,7 @@ stilo_hook_tag_get(cw_stilo_t *a_stilo)
 
 	_cw_check_ptr(hook);
 	_cw_assert(hook->stiloe.magic == _CW_STILOE_MAGIC);
-	_cw_assert(hook->stiloe.type == STILOT_FILE);
+	_cw_assert(hook->stiloe.type == STILOT_HOOK);
 
 	retval = &hook->tag;
 
@@ -186,7 +186,7 @@ stilo_hook_data_get(cw_stilo_t *a_stilo)
 
 	_cw_check_ptr(hook);
 	_cw_assert(hook->stiloe.magic == _CW_STILOE_MAGIC);
-	_cw_assert(hook->stiloe.type == STILOT_FILE);
+	_cw_assert(hook->stiloe.type == STILOT_HOOK);
 
 	retval = hook->data;
 
@@ -207,7 +207,7 @@ stilo_hook_eval(cw_stilo_t *a_stilo, cw_stilo_t *a_thread)
 
 	_cw_check_ptr(hook);
 	_cw_assert(hook->stiloe.magic == _CW_STILOE_MAGIC);
-	_cw_assert(hook->stiloe.type == STILOT_FILE);
+	_cw_assert(hook->stiloe.type == STILOT_HOOK);
 
 	if (hook->eval_f == NULL) {
 		retval = STILO_THREADE_INVALIDACCESS;
