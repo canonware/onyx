@@ -239,12 +239,11 @@
 
 /* A simplified version of bufv_copy() that counts '\n' characters that are
  * copied, and returns that rather than the number of elements copied. */
-CW_INLINE cw_uint64_t
+CW_INLINE cw_uint32_t
 bufv_p_copy(cw_bufv_t *a_to, cw_uint32_t a_to_len, const cw_bufv_t *a_fr,
 	    cw_uint32_t a_fr_len)
 {
-    cw_uint64_t retval;
-    cw_uint32_t to_el, fr_el, to_off, fr_off;
+    cw_uint32_t retval, to_el, fr_el, to_off, fr_off;
 
     cw_check_ptr(a_to);
     cw_check_ptr(a_fr);
@@ -386,6 +385,87 @@ bufp_p_comp(cw_bufp_t *a_a, cw_bufp_t *a_b)
     }
 
     return retval;
+}
+
+/* Adjust ppos field of a range of mkr's. */
+static void
+bufp_p_mkrs_ppos_adjust(cw_bufp_t *a_bufp, cw_sint32_t a_adjust,
+			cw_uint32_t a_beg_ppos, cw_uint32_t a_end_ppos)
+{
+    cw_mkr_t *mkr, key;
+
+    cw_check_ptr(a_bufp);
+    cw_assert(a_beg_ppos < a_end_ppos);
+
+    /* Find the first affected mkr. */
+    key.ppos = a_beg_ppos;
+    rb_nsearch(&a_bufp->mtree, &key, mkr_p_comp, cw_mkr_t, mnode, mkr);
+
+    for (;
+	 mkr != NULL && mkr->ppos < a_end_ppos;
+	 mkr = ql_next(&a_bufp->mlist, mkr, mlink))
+    {
+	mkr->ppos += a_adjust;
+    }
+}
+
+static void
+bufp_p_gap_move(cw_bufp_t *a_bufp, cw_uint32_t a_ppos)
+{
+    cw_assert(a_ppos < CW_BUFP_SIZE);
+
+    /* Move the gap if it isn't already where it needs to be. */
+    if (a_bufp->gap_off != a_ppos)
+    {
+	if (a_bufp->gap_off < a_ppos)
+	{
+	    /* Move the gap forward.
+	     *
+	     * o: data
+	     * M: move
+	     * _: gap
+	     *
+	     * ooooooo________MMMMMMMMMMMoo
+	     *                   ^
+	     *                   |
+	     *                   a_ppos
+	     *                   |
+	     *                   v
+	     * oooooooMMMMMMMMMMM________oo */
+	    memmove(&a_bufp->b[a_bufp->gap_off],
+		    &a_bufp->b[a_bufp->gap_off + a_bufp->gap_len],
+		    (a_ppos - a_bufp->gap_off));
+
+	    /* Adjust the ppos of all mkr's with ppos in the moved region. */
+	    bufp_p_mkrs_ppos_adjust(a_bufp, -a_bufp->gap_len,
+				    a_bufp->gap_off + a_bufp->gap_len,
+				    a_ppos + a_bufp->gap_len);
+	}
+	else
+	{
+	    /* Move the gap backward.
+	     *
+	     * o: data
+	     * M: move
+	     * _: gap
+	     *
+	     * ooooMMMMMMMMM___________oooo
+	     *     ^
+	     *     |
+	     *     a_ppos
+	     *     |
+	     *     v
+	     * oooo___________MMMMMMMMMoooo */
+	    memmove(&a_bufp->b[a_bufp->gap_len + a_ppos],
+		    &a_bufp->b[a_ppos],
+		    (a_bufp->gap_off - a_ppos));
+
+	    /* Adjust the ppos of all mkr's with ppos in the moved region. */
+	    bufp_p_mkrs_ppos_adjust(a_bufp, a_bufp->gap_len, a_ppos,
+				    a_bufp->gap_off);
+	}
+	a_bufp->gap_off = a_ppos;
+    }
 }
 
 static cw_bufp_t *
@@ -620,6 +700,61 @@ buf_p_bpos_after_lf(cw_buf_t *a_buf, cw_uint64_t a_line, cw_bufp_t **r_bufp)
 
     *r_bufp = bufp;
     return bpos + 1;
+}
+
+static void
+buf_p_bufp_cur_set(cw_buf_t *a_buf, cw_bufp_t *a_bufp)
+{
+    cw_assert(a_bufp->buf == a_buf);
+
+    if (a_buf->bufp_cur != a_bufp)
+    {
+	cw_bufp_t *bufp;
+	cw_uint64_t bpos, line;
+
+	if (bufp_p_bpos(a_bufp) > bufp_p_bpos(a_buf->bufp_cur))
+	{
+	    /* Move forward. */
+	    bufp = a_buf->bufp_cur;
+	    bpos = bufp->bpos;
+	    line = bufp->line;
+	    do
+	    {
+		bpos += bufp->len;
+		line += bufp->line;
+
+		bufp = ql_next(&a_buf->plist, bufp, plink);
+		cw_check_ptr(bufp);
+		cw_assert(bufp->bob_relative == FALSE);
+
+		bufp->bob_relative = TRUE;
+		bufp->bpos = bpos;
+		bufp->line = line;
+	    } while (bufp != a_bufp);
+	    a_buf->bufp_cur = bufp;
+	}
+	else
+	{
+	    /* Move backward. */
+	    bufp = a_buf->bufp_cur;
+	    bpos = bufp->line;
+	    line = bufp->line;
+	    do
+	    {
+		bufp = ql_prev(&a_buf->plist, bufp, plink);
+		cw_check_ptr(bufp);
+		cw_assert(bufp->bob_relative);
+
+		bpos += bufp->len;
+		line += bufp->line;
+
+		bufp->bob_relative = FALSE;
+		bufp->bpos = bpos;
+		bufp->line = line;
+	    } while (bufp != a_bufp);
+	    a_buf->bufp_cur = bufp;
+	}
+    }
 }
 
 static void
@@ -1028,6 +1163,7 @@ mkr_p_comp(cw_mkr_t *a_a, cw_mkr_t *a_b)
     }
     else
     {
+	/* XXX Does this code ever get used anywhere? */
 	if (bufp_p_bpos(a_a->bufp) < bufp_p_bpos(a_b->bufp))
 	{
 	    retval = -1;
@@ -1072,11 +1208,195 @@ mkr_p_remove(cw_mkr_t *a_mkr)
     ql_remove(&bufp->mlist, a_mkr, mlink);
 }
 
+/* Insert data into a single bufp. */
+static void
+mkr_p_simple_insert(cw_mkr_t *a_mkr, cw_bool_t a_after,
+		    const cw_bufv_t *a_bufv, cw_uint32_t a_bufvcnt)
+{
+    cw_uint32_t i, nlines;
+    cw_bufv_t bufv;
+    cw_mkr_t *first, *mkr;
+    cw_buf_t *buf;
+    cw_bufp_t *bufp;
+
+    bufp = a_mkr->bufp;
+    buf = bufp->buf;
+
+    /* Move bufp_cur. */
+    buf_p_bufp_cur_set(buf, bufp);
+
+    /* Move the gap. */
+    bufp_gap_move(bufp, a_mkr->ppos);
+
+    /* Insert. */
+    bufv.data = &bufp->b[bufp->gap_off];
+    bufv.len = bufp->gap_len;
+    nlines = bufv_p_copy(&bufv, 1, a_bufv, a_bufvcnt);
+
+    /* Shrink the gap. */
+    bufp->gap_off += count;
+    bufp->gap_len -= count;
+
+    /* Adjust the buf's length and line count. */
+    bufp->len += count;
+    bufp->nlines += nlines;
+
+    /* Find the first mkr that is at the same ppos as a_mkr.  This may be
+     * a_mkr. */
+    for (first = a_mkr, mkr = ql_prev(&bufp->mlist, a_mkr, mlink);
+	 mkr != NULL && mkr->ppos == a_mkr->ppos;
+	 mkr = ql_prev(&bufp->mlist, mkr, mlink))
+    {
+	first = mkr;
+    }
+
+    /* If inserting after a_mkr, move a_mkr before the data just inserted. */
+    if (a_after)
+    {
+	if (first == a_mkr)
+	{
+	    /* Adjust first, since a_mkr won't need adjusted. */
+	    first = ql_next(&bufp->mlist, first, mlink);
+	}
+	else
+	{
+	    /* Remove, then reinsert a_mkr. */
+	    mkr_p_remove(a_mkr);
+	    a_mkr->ppos = bufp_p_pos_b2p(bufp,
+					 bufp_p_pos_p2b(bufp, a_mkr->ppos)
+					 - count);
+	    mkr_p_insert(a_mkr);
+
+	    cw_assert(ql_next(&bufp->mlist, a_mkr, mlink) == first);
+	}
+    }
+
+    if (nlines > 0)
+    {
+	/* Adjust line. */
+	if (a_after == FALSE)
+	{
+	    /* Adjust line for all mkr's at the same position. */
+	    for (mkr = first;
+		 mkr != NULL && mkr->ppos == a_mkr->ppos;
+		 mkr = ql_next(&bufp->mlist, mkr, mlink))
+	    {
+		mkr->line += nlines;
+	    }
+	}
+	else
+	{
+	    /* Move past mkr's at the same position. */
+	    for (mkr = a_mkr; /* a_mkr may be farther than first. */
+		 mkr != NULL && mkr->ppos == a_mkr->ppos;
+		 mkr = ql_next(&bufp->mlist, mkr, mlink))
+	    {
+		/* Do nothing. */
+	    }
+	}
+
+	/* Adjust line for all following mkr's. */
+	for (;
+	     mkr != NULL;
+	     mkr = ql_next(&bufp->mlist, mkr, mlink))
+	{
+	    mkr->line += nlines;
+	}
+    }
+}
+
 void
 mkr_l_insert(cw_mkr_t *a_mkr, cw_bool_t a_record, cw_bool_t a_after,
 	     const cw_bufv_t *a_bufv, cw_uint32_t a_bufvcnt)
 {
-    cw_error("XXX Not implemented");
+    cw_uint64_t cnt;
+    cw_buf_t *buf;
+    cw_bufp_t *bufp;
+
+    cw_check_ptr(a_mkr);
+    cw_dassert(a_mkr->magic == CW_MKR_MAGIC);
+
+    bufp = a_mkr->bufp;
+    buf = bufp->buf;
+
+    /* Record the undo information before inserting so that the apos is still
+     * unmodified. */
+    if (buf->hist != NULL && a_record)
+    {
+	if (a_after)
+	{
+	    hist_ynk(buf->hist, buf, bufp_p_pos_p2b(a_mkr->bufp, a_mkr->ppos),
+		     a_bufv, a_bufvcnt);
+	}
+	else
+	{
+	    hist_ins(buf->hist, buf, bufp_p_pos_p2b(a_mkr->bufp, a_mkr->ppos),
+		     a_bufv, a_bufvcnt);
+	}
+    }
+
+    /* Determine the total number of characters to be inserted. */
+    cnt = 0;
+    for (i = 0; i < a_bufvcnt; i++)
+    {
+	cnt += a_bufv[i].len;
+    }
+
+    /* Depending on how much data are to be inserted, there are two
+     * possibilities:
+     *
+     * 1) All the data will fit in the bufp.  This is the common case.
+     *
+     * 2) There is not enough space in the bufp, so it is split into two bufp's,
+     *    and zero or more additional bufp's are inserted between the two in
+     *    order to make enough room.
+     */
+    if (cnt <= bufp->gap_len)
+    {
+	/* The data will fit. */
+	mkr_p_simple_insert(a_mkr, a_after, a_bufv, a_bufvcnt);
+    }
+    else
+    {
+	/* Additional space is needed. */
+
+	/* Split the bufp. */
+	/* XXX */
+
+	if (cnt > ((cw_uint64_t) a_mkr->bufp->gap_len + CW_BUFP_SIZE))
+	{
+	    cw_uint32_t i, nextra;
+
+	    /* Splitting the current bufp provides a total of
+	     * a_mkr->bufp->gap_len + CW_BUFP_SIZE bytes of space.  Calculate
+	     * how many more bufp's are needed. */
+	    nextra = (cnt - ((cw_uint64_t) a_mkr->bufp->gap_len + CW_BUFP_SIZE))
+		/ (cw_uint64_t) CW_BUFP_SIZE;
+	    if ((cnt - ((cw_uint64_t) a_mkr->bufp->gap_len + CW_BUFP_SIZE))
+		% (cw_uint64_t) CW_BUFP_SIZE != 0)
+	    {
+		nextra++;
+	    }
+
+	    /* Insert extra bufp's. */
+	    for (i = 0; i < nextra; i++)
+	    {
+		bufp = bufp_p_new(buf);
+		bufp->bob_relative = TRUE;
+		/* XXX */
+		
+
+	    /* XXX */
+
+	    }
+	    /* XXX Resize bufv here, and everywhere buf_p_bufp_insert() is
+	     *called, then remove bufv resizing from buf_p_bufp_insert(). */
+	}
+
+	/* Iteratively call mkr_p_simple_insert(), taking care never to insert
+	 * more data than will fit in the bufp being inserted into. */
+	/* XXX */
+    }
 }
 
 void
