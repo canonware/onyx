@@ -60,10 +60,10 @@ $flags <
 	`@CPPFLAGS@'
 	@enable_regex@ 1 eq {
 	    dup `-I@prefix@/include\\b' match not {
-		` -I@prefix@/include' cat
+		`-I@prefix@/include ' exch cat
 	    } if
 	}{
-	    ` -I@prefix@/include' cat
+	    `-I@prefix@/include ' exch cat
 	} ifelse
 	strip_print
     }
