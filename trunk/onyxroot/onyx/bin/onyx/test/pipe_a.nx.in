@@ -13,13 +13,13 @@
 `Test begin\n' print flush
 
 pipe
-/outfd exch def
-/infd exch def
-outfd `foo\nbar\nbiz\n' write
-outfd flushfile
-infd readline pop 1 sprint
-infd readline pop 1 sprint
-infd readline pop 1 sprint
+/wfile exch def
+/rfile exch def
+wfile `foo\nbar\nbiz\n' write
+wfile flushfile
+rfile readline pop 1 sprint
+rfile readline pop 1 sprint
+rfile readline pop 1 sprint
 
 `Test end\n' print
 pstack
