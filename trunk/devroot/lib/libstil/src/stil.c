@@ -137,6 +137,9 @@ stil_new(cw_stil_t *a_stil, int a_argc, char **a_argv, char **a_envp,
 		    a_argv);
 
 		stilt_delete(&stilt);
+
+		/* Activate the GC. */
+		stila_collect_set(&retval->stila, TRUE);
 	}
 	xep_catch (_CW_XEPV_OOM) {
 		retval = (cw_stil_t *)v_retval;

@@ -622,7 +622,7 @@ stila_p_gc_entry(void *a_arg)
 	 *    suspended, this will trigger a collection.
 	 */
 	prev_seq_new = 0;
-	for (shutdown = FALSE, collect = FALSE, suspend = FALSE; shutdown ==
+	for (shutdown = FALSE, collect = FALSE, suspend = TRUE; shutdown ==
 	    FALSE; collect = FALSE) {
 		if (mq_timedget(&stila->gc_mq, &interval, &message) == FALSE) {
 			switch (message) {
