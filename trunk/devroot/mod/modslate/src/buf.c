@@ -377,7 +377,7 @@ bufp_p_delete(cw_bufp_t *a_bufp)
 #ifdef CW_DBG
     {
 	cw_mkr_t *first;
-	rb_first(&a_bufp->mtree, rb_root(&a_bufp->mtree), node, first);
+	rb_first(&a_bufp->mtree, node, first);
 	cw_assert(first == NULL);
     }
 #endif
@@ -737,7 +737,7 @@ buf_delete(cw_buf_t *a_buf)
 #ifdef CW_DBG
     {
 	cw_ext_t *first;
-	rb_first(&a_buf->ftree, rb_root(&a_buf->ftree), fnode, first);
+	rb_first(&a_buf->ftree, fnode, first);
 	cw_assert(first == NULL);
     }
 #endif
@@ -745,7 +745,7 @@ buf_delete(cw_buf_t *a_buf)
 #ifdef CW_DBG
     {
 	cw_ext_t *first;
-	rb_first(&a_buf->rtree, rb_root(&a_buf->rtree), rnode, first);
+	rb_first(&a_buf->rtree, rnode, first);
 	cw_assert(first == NULL);
     }
 #endif
