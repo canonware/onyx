@@ -20,14 +20,6 @@ nx_l_thread_insert(cw_nx_t *a_nx, cw_nxo_t *a_thread);
 void
 nx_l_thread_remove(cw_nx_t *a_nx, cw_nxo_t *a_thread);
 
-#ifdef CW_THREADS
-cw_mtx_t *
-nx_l_name_lock_get(cw_nx_t *a_nx);
-#endif
-
-cw_dch_t *
-nx_l_name_hash_get(cw_nx_t *a_nx);
-
 cw_op_t *
 nx_l_thread_init(cw_nx_t *a_nx);
 
