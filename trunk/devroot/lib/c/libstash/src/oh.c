@@ -539,7 +539,7 @@ oh_item_delete(cw_oh_t * a_oh,
   cw_bool_t retval;
   
   _cw_check_ptr(a_oh);
-  _cw_check_ptr(a_search_key);
+
 #ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {

@@ -1,3 +1,9 @@
+1999-03-01  Jason Evans  <jasone@canonware.com>
+
+	* src/mem.c : Add sophisticated logging and checking to the mem class.
+
+	* include/libstash/buf.h : Add public interface for the bufc class.
+
 1999-02-27  Jason Evans  <jasone@canonware.com>
 
 	* include/libstash/dbg.h (dbg_is_registered): Compile to (FALSE)

@@ -16,11 +16,11 @@
  *
  ****************************************************************************/
 
-#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
-#define _CW_BUF_MAGIC 0xb00f0001
-#define _CW_BUFEL_MAGIC 0xb00f0002
-#define _CW_BUFC_MAGIC 0xb00f0003
-#define _CW_BUFPOOL_MAGIC 0xb00f0004
+#ifdef _LIBSTASH_DBG
+#  define _CW_BUF_MAGIC 0xb00f0001
+#  define _CW_BUFEL_MAGIC 0xb00f0002
+#  define _CW_BUFC_MAGIC 0xb00f0003
+#  define _CW_BUFPOOL_MAGIC 0xb00f0004
 #endif
 
 /* Pseudo-opaque typedefs. */
@@ -45,6 +45,7 @@ struct cw_bufpool_s
 
 typedef struct
 {
+  cw_bool_t is_malloced;
 #if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
   cw_uint32_t magic;
 #endif
@@ -53,6 +54,8 @@ typedef struct
 #endif
   void (*dealloc_func)(void *, void *);
   void * dealloc_arg;
+  void (*buffer_dealloc_func)(void *, void *);
+  void * buffer_dealloc_arg;
   cw_uint32_t ref_count;
   cw_uint32_t buf_size;
   char * buf;
@@ -786,8 +789,67 @@ bufel_get_data_ptr(cw_bufel_t * a_bufel);
  * already an internal buffer, unreference the old one.
  *
  ****************************************************************************/
-#define bufel_set_data_ptr _CW_NS_LIBSTASH(bufel_set_data_ptr)
+#define bufel_set_bufc _CW_NS_LIBSTASH(bufel_set_bufc)
 void
-bufel_set_data_ptr(cw_bufel_t * a_bufel, void * a_buf, cw_uint32_t a_size,
-		   void (*a_dealloc_func)(void * delloc_arg, void * buffer_p),
-		   void * a_dealloc_arg);
+bufel_set_bufc(cw_bufel_t * a_bufel, cw_bufc_t * a_bufc);
+
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ *
+ *
+ * <<< Output(s) >>>
+ *
+ *
+ *
+ * <<< Description >>>
+ *
+ *
+ *
+ ****************************************************************************/
+#define bufc_new _CW_NS_LIBSTASH(bufc_new)
+cw_bufc_t *
+bufc_new(cw_bufc_t * a_bufc,
+	 void (*a_dealloc_func)(void * dealloc_arg, void * bufel),
+	 void * a_dealloc_arg);
+
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ *
+ *
+ * <<< Output(s) >>>
+ *
+ *
+ *
+ * <<< Description >>>
+ *
+ *
+ *
+ ****************************************************************************/
+#define bufc_delete _CW_NS_LIBSTASH(bufc_delete)
+void
+bufc_delete(cw_bufc_t * a_bufc);
+
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ *
+ *
+ * <<< Output(s) >>>
+ *
+ *
+ *
+ * <<< Description >>>
+ *
+ *
+ *
+ ****************************************************************************/
+#define bufc_set_buffer _CW_NS_LIBSTASH(bufc_set_buffer)
+void
+bufc_set_buffer(cw_bufc_t * a_bufc, void * a_buffer, cw_uint32_t a_size,
+		void (*a_dealloc_func)(void * dealloc_arg, void * buffer),
+		void * a_dealloc_arg);

@@ -35,25 +35,20 @@ buf_p_catenate_buf(cw_buf_t * a_a, cw_buf_t * a_b, cw_bool_t a_preserve);
 static cw_bool_t
 bufel_p_merge_bufel(cw_bufel_t * a_a, cw_bufel_t * a_b);
 
-static cw_bufc_t *
-bufc_new(void * a_buffer, cw_uint32_t a_size,
-	 void (*a_dealloc_func)(void * dealloc_arg, void * buffer_p),
-	 void * a_dealloc_arg);
-
 static void
-bufc_delete(cw_bufc_t * a_bufc);
-
-static void
-bufc_dump(cw_bufc_t * a_bufc, const char * a_prefix);
+bufc_p_dump(cw_bufc_t * a_bufc, const char * a_prefix);
 
 static cw_uint32_t
-bufc_get_size(cw_bufc_t * a_bufc);
+bufc_p_get_size(cw_bufc_t * a_bufc);
 
 static char *
-bufc_get_p(cw_bufc_t * a_bufc);
+bufc_p_get_p(cw_bufc_t * a_bufc);
+
+static cw_uint32_t
+bufc_p_get_ref_count(cw_bufc_t * a_bufc);
 
 static void
-bufc_ref_increment(cw_bufc_t * a_bufc);
+bufc_p_ref_increment(cw_bufc_t * a_bufc);
 
 static void
-bufc_ref_decrement(cw_bufc_t * a_bufc);
+bufc_p_ref_decrement(cw_bufc_t * a_bufc);
