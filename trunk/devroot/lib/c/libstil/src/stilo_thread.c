@@ -1159,77 +1159,166 @@ stilo_thread_dstack_search(cw_stilo_t *a_stilo, cw_stilo_t *a_key, cw_stilo_t
 cw_stil_t *
 stilo_thread_stil_get(cw_stilo_t *a_stilo)
 {
-	_cw_error("XXX Not implemented");
-	return NULL; /* XXX */
+	cw_stiloe_thread_t	*thread;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+
+	thread = (cw_stiloe_thread_t *)a_stilo->o.stiloe;
+	_cw_assert(thread->stiloe.magic == _CW_STILOE_MAGIC);
+	_cw_assert(thread->stiloe.type == STILOT_THREAD);
+
+	return thread->stil;
 }
 
 cw_stilo_t *
 stilo_thread_ostack_get(cw_stilo_t *a_stilo)
 {
-	_cw_error("XXX Not implemented");
-	return NULL; /* XXX */
+	cw_stiloe_thread_t	*thread;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+
+	thread = (cw_stiloe_thread_t *)a_stilo->o.stiloe;
+	_cw_assert(thread->stiloe.magic == _CW_STILOE_MAGIC);
+	_cw_assert(thread->stiloe.type == STILOT_THREAD);
+
+	return &thread->ostack;
 }
 
 cw_stilo_t *
 stilo_thread_dstack_get(cw_stilo_t *a_stilo)
 {
-	_cw_error("XXX Not implemented");
-	return NULL; /* XXX */
+	cw_stiloe_thread_t	*thread;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+
+	thread = (cw_stiloe_thread_t *)a_stilo->o.stiloe;
+	_cw_assert(thread->stiloe.magic == _CW_STILOE_MAGIC);
+	_cw_assert(thread->stiloe.type == STILOT_THREAD);
+
+	return &thread->dstack;
 }
 
 cw_stilo_t *
 stilo_thread_estack_get(cw_stilo_t *a_stilo)
 {
-	_cw_error("XXX Not implemented");
-	return NULL; /* XXX */
+	cw_stiloe_thread_t	*thread;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+
+	thread = (cw_stiloe_thread_t *)a_stilo->o.stiloe;
+	_cw_assert(thread->stiloe.magic == _CW_STILOE_MAGIC);
+	_cw_assert(thread->stiloe.type == STILOT_THREAD);
+
+	return &thread->estack;
 }
 
 cw_stilo_t *
 stilo_thread_tstack_get(cw_stilo_t *a_stilo)
 {
-	_cw_error("XXX Not implemented");
-	return NULL; /* XXX */
+	cw_stiloe_thread_t	*thread;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+
+	thread = (cw_stiloe_thread_t *)a_stilo->o.stiloe;
+	_cw_assert(thread->stiloe.magic == _CW_STILOE_MAGIC);
+	_cw_assert(thread->stiloe.type == STILOT_THREAD);
+
+	return &thread->tstack;
 }
 
 cw_stilo_t *
 stilo_thread_threaddict_get(cw_stilo_t *a_stilo)
 {
-	_cw_error("XXX Not implemented");
-	return NULL; /* XXX */
+	cw_stiloe_thread_t	*thread;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+
+	thread = (cw_stiloe_thread_t *)a_stilo->o.stiloe;
+	_cw_assert(thread->stiloe.magic == _CW_STILOE_MAGIC);
+	_cw_assert(thread->stiloe.type == STILOT_THREAD);
+
+	return &thread->threaddict;
 }
 
 cw_stilo_t *
 stilo_thread_userdict_get(cw_stilo_t *a_stilo)
 {
-	_cw_error("XXX Not implemented");
-	return NULL; /* XXX */
+	cw_stiloe_thread_t	*thread;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+
+	thread = (cw_stiloe_thread_t *)a_stilo->o.stiloe;
+	_cw_assert(thread->stiloe.magic == _CW_STILOE_MAGIC);
+	_cw_assert(thread->stiloe.type == STILOT_THREAD);
+
+	return &thread->userdict;
 }
 
 cw_stilo_t *
 stilo_thread_errordict_get(cw_stilo_t *a_stilo)
 {
-	_cw_error("XXX Not implemented");
-	return NULL; /* XXX */
+	cw_stiloe_thread_t	*thread;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+
+	thread = (cw_stiloe_thread_t *)a_stilo->o.stiloe;
+	_cw_assert(thread->stiloe.magic == _CW_STILOE_MAGIC);
+	_cw_assert(thread->stiloe.type == STILOT_THREAD);
+
+	return &thread->errordict;
 }
 
 cw_stilo_t *
 stilo_thread_currenterror_get(cw_stilo_t *a_stilo)
 {
-	_cw_error("XXX Not implemented");
-	return NULL; /* XXX */
+	cw_stiloe_thread_t	*thread;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+
+	thread = (cw_stiloe_thread_t *)a_stilo->o.stiloe;
+	_cw_assert(thread->stiloe.magic == _CW_STILOE_MAGIC);
+	_cw_assert(thread->stiloe.type == STILOT_THREAD);
+
+	return &thread->currenterror;
 }
 
 cw_bool_t
 stilo_thread_currentlocking(cw_stilo_t *a_stilo)
 {
-	_cw_error("XXX Not implemented");
-	return TRUE; /* XXX */
+	cw_stiloe_thread_t	*thread;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+
+	thread = (cw_stiloe_thread_t *)a_stilo->o.stiloe;
+	_cw_assert(thread->stiloe.magic == _CW_STILOE_MAGIC);
+	_cw_assert(thread->stiloe.type == STILOT_THREAD);
+
+	return thread->locking;
 }
 
 void
 stilo_thread_setlocking(cw_stilo_t *a_stilo, cw_bool_t a_locking)
 {
-	_cw_error("XXX Not implemented");
+	cw_stiloe_thread_t	*thread;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+
+	thread = (cw_stiloe_thread_t *)a_stilo->o.stiloe;
+	_cw_assert(thread->stiloe.magic == _CW_STILOE_MAGIC);
+	_cw_assert(thread->stiloe.type == STILOT_THREAD);
+
+	thread->locking = a_locking;
 }
 
 static cw_uint32_t
