@@ -68,12 +68,6 @@ extensions to the interpreter.
 \libname{libstil} reserves \htmlref{xep}{xep} exception numbers 128 to 255 and
 defines the following exceptions:
 \begin{description}
-\label{_CW_STILX_ERRORDICT}
-\item[\cppdef{\_CW\_STILX\_ERRORDICT}: ]
-	errordict not found, or handler not found in errordict.
-\label{_CW_STILX_CURRENTERROR}
-\item[\cppdef{\_CW\_STILX\_CURRENTERROR}: ]
-	Error accessing currenterror.
 \label{_CW_STILX_EXIT}
 \item[\cppdef{\_CW\_STILX\_EXIT}: ]
 	Internal use, for the exit operator.

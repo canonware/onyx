@@ -2007,8 +2007,12 @@ systemdict_handleerror(cw_stilo_t *a_thread)
 	stilo_name_new(key, stilo_thread_stil_get(a_thread),
 	    stiln_str(STILN_errordict), stiln_len(STILN_errordict), TRUE);
 	if (stilo_thread_dstack_search(a_thread, key, errordict)) {
-		stilo_stack_npop(tstack, 2);
-		xep_throw(_CW_STILX_ERRORDICT);
+		/*
+		 * Fall back to the errordict defined during thread creation,
+		 * since the alternative is to blow up (or potentially go
+		 * infinitely recursive).
+		 */
+		stilo_dup(errordict, stilo_thread_errordict_get(a_thread));
 	}
 
 	/* Get handleerror from errordict and push it onto estack. */
@@ -2016,9 +2020,13 @@ systemdict_handleerror(cw_stilo_t *a_thread)
 	stilo_name_new(key, stilo_thread_stil_get(a_thread),
 	    stiln_str(STILN_handleerror), stiln_len(STILN_handleerror), TRUE);
 	if (stilo_dict_lookup(errordict, key, handleerror)) {
+		/*
+		 * Do not execute an error handler, since the alternative is to
+		 * blow up (or potentially go infinitely recursive).
+		 */
 		stilo_stack_pop(estack);
 		stilo_stack_npop(tstack, 2);
-		xep_throw(_CW_STILX_ERRORDICT);
+		return;
 	}
 	stilo_stack_npop(tstack, 2);
 

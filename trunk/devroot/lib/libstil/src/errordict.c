@@ -107,8 +107,11 @@ errordict_p_generic(cw_stilo_t *a_thread, cw_stilo_threade_t a_threade,
 	    stiln_str(STILN_currenterror),
 	    stiln_len(STILN_currenterror), TRUE);
 	if (stilo_thread_dstack_search(a_thread, tname, currenterror)) {
-		stilo_stack_npop(tstack, 2);
-		xep_throw(_CW_STILX_CURRENTERROR);
+		/*
+		 * Fall back to the currenterror defined during thread creation.
+		 */
+		stilo_dup(currenterror,
+		    stilo_thread_currenterror_get(a_thread));
 	}
 
 	tstilo = stilo_stack_push(tstack);
@@ -149,13 +152,15 @@ errordict_p_generic(cw_stilo_t *a_thread, cw_stilo_threade_t a_threade,
 		    stiln_str(STILN_recordstacks),
 		    stiln_len(STILN_recordstacks), TRUE);
 		if (stilo_dict_lookup(currenterror, tname, tstilo)) {
-			stilo_stack_npop(tstack, 3);
-			xep_throw(_CW_STILX_CURRENTERROR);
+			/*
+			 * Give up on snapshotting the stacks, since the
+			 * alternative is to blow up (or potentially go
+			 * infinitely recursive).
+			 */
+			goto ERROR;
 		}
-		if (stilo_type_get(tstilo) != STILOT_BOOLEAN) {
-			stilo_stack_npop(tstack, 3);
-			xep_throw(_CW_STILX_CURRENTERROR);
-		}
+		if (stilo_type_get(tstilo) != STILOT_BOOLEAN)
+			goto ERROR;
 		if (stilo_boolean_get(tstilo) && a_threade) {
 			cw_stilo_t	*stack;
 
@@ -198,6 +203,7 @@ errordict_p_generic(cw_stilo_t *a_thread, cw_stilo_threade_t a_threade,
 			stilo_stack_pop(tstack);
 		}
 	}
+	ERROR:
 	stilo_stack_npop(tstack, 3);
 
 	_cw_stil_code(a_thread, "handleerror currenterror /stop get eval");

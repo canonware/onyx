@@ -940,8 +940,11 @@ stilo_thread_error(cw_stilo_t *a_stilo, cw_stilo_threade_t a_error)
 	stilo_name_new(key, thread->stil, stiln_str(STILN_errordict),
 	    stiln_len(STILN_errordict), TRUE);
 	if (stilo_thread_dstack_search(a_stilo, key, errordict)) {
-		stilo_stack_npop(&thread->tstack, 2);
-		xep_throw(_CW_STILX_ERRORDICT);
+		/*
+		 * We failed to find errordict.  Fall back to the one originally
+		 * defined in the thread.
+		 */
+		stilo_dup(errordict, &thread->errordict);
 	}
 
 	/*
@@ -973,15 +976,20 @@ stilo_thread_error(cw_stilo_t *a_stilo, cw_stilo_threade_t a_error)
 	 */
 	handler = stilo_stack_push(&thread->estack);
 	if (stilo_dict_lookup(errordict, key, handler)) {
+		/*
+		 * Ignore the error, since the only alternative is to blow
+		 * up (or potentially go infinitely recursive).
+		 */
 		stilo_stack_npop(&thread->tstack, 2);
 		stilo_stack_pop(&thread->estack);
-		xep_throw(_CW_STILX_ERRORDICT);
+		goto IGNORE;
 	}
 	stilo_stack_npop(&thread->tstack, 2);
 
 	/* Execute the handler. */
 	stilo_thread_loop(a_stilo);
 
+	IGNORE:
 	/* Turn deferral back on. */
 	thread->defer_count = defer_count;
 }
