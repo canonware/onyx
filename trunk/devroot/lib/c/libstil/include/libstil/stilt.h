@@ -47,25 +47,17 @@ struct cw_stilt_s {
 	 */
 
 	/*
-	 * Number of characters seen since the last call to
-	 * stilt_reset_position(), and the offset of the beginning of the
-	 * current line, which can be used to calculate current column number.
+	 * Current line number (counting starts at 1 by convention) and column
+	 * number (counting starts at 0).
 	 */
-	cw_uint32_t	nchars;
-	cw_sint32_t	line_offset;
+	cw_uint32_t	line;
+	cw_sint32_t	column;
 	
-	/*
-	 * Number of '\n' characters seen since the last call to
-	 * stilt_reset_position().  This variable counts from zero, so
-	 * stilt_get_position() adds one when reporting the line number.
-	 */
-	cw_uint32_t	nlines;
-
 	/*
 	 * Position where the current token starts.
 	 */
-	cw_uint32_t	tok_line_start;
-	cw_uint32_t	tok_col_start;
+	cw_uint32_t	tok_line;
+	cw_uint32_t	tok_column;
 
 	/*
 	 * If greater than _CW_STIL_BUFC_SIZE, tok_buffer is a buf.
@@ -138,9 +130,10 @@ cw_stilt_t	*stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil);
 void		stilt_delete(cw_stilt_t *a_stilt);
 
 void		stilt_get_position(cw_stilt_t *a_stilt, cw_uint32_t *r_line,
-    cw_uint32_t *r_col);
+    cw_uint32_t *r_column);
 
-void		stilt_reset_position(cw_stilt_t *a_stilt);
+void		stilt_set_position(cw_stilt_t *a_stilt, cw_uint32_t a_line,
+    cw_uint32_t a_column);
 	
 cw_bool_t	stilt_interp_str(cw_stilt_t *a_stilt, const char *a_str,
     cw_uint32_t a_len);

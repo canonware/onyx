@@ -1,3 +1,7 @@
+2000-06-02  Jason Evans  <jasone@canonware.com>
+
+	* src/stilt.c : Change stilt_reset_position() to stilt_set_position().
+
 2000-06-01  Jason Evans  <jasone@canonware.com>
 
 	* src/stilt.c: Add stilt_get_position() and stilt_reset_position().

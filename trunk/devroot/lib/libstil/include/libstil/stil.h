@@ -34,6 +34,7 @@ struct cw_stil_s {
 
 	/* pezz from which stiln's are allocated for the names hash. */
 	cw_pezz_t stiln_pezz;
+
 	/*
 	 * Hash of names ((cw_stilnk_t *) string is hashed) to (cw_stiln_t
 	 * *).  This hash table keeps track of *all* name "values" in the
