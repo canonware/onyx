@@ -6366,7 +6366,68 @@ systemdict_nup(cw_nxo_t *a_thread)
 void
 systemdict_offsets(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *tstack, *offsets, *input, *matches, *tnxo, nxo;
+    cw_uint8_t *instr, *inend, *mstr;
+    cw_uint32_t i, mcnt;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    tstack = nxo_thread_tstack_get(a_thread);
+    NXO_STACK_GET(matches, ostack, a_thread);
+    NXO_STACK_DOWN_GET(input, ostack, a_thread, matches);
+    if (nxo_type_get(input) != NXOT_STRING
+	|| nxo_type_get(matches) != NXOT_ARRAY)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+
+    /* Get pointers that bound the input string. */
+    instr = nxo_string_get(input);
+    inend = &instr[nxo_string_len_get(input)];
+
+    /* Create offsets array. */
+    mcnt = nxo_array_len_get(matches);
+    offsets = nxo_stack_under_push(ostack, input);
+    nxo_array_new(offsets, nxo_thread_nx_get(a_thread),
+		  nxo_thread_currentlocking(a_thread), mcnt);
+
+    /* Create a temporary nxo for storing array elements. */
+    tnxo = nxo_stack_push(tstack);
+
+    for (i = 0; i < mcnt; i++)
+    {
+	/* Get array element. */
+	nxo_array_el_get(matches, (cw_nxoi_t) i, tnxo);
+	if (nxo_type_get(tnxo) != NXOT_STRING)
+	{
+	    nxo_stack_pop(tstack);
+	    nxo_stack_remove(ostack, offsets);
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+	/* Get substring. */
+	mstr = nxo_string_get(tnxo);
+	/* Make sure mstr really is a substring of instr.  There is no need to
+	 * check whether mstr extends past inend, since horrible things (not
+	 * possible via nxo_string APIs) would have to happen for that to be
+	 * possible. */
+	if (mstr < instr || mstr >= inend)
+	{
+	    nxo_stack_pop(tstack);
+	    nxo_stack_remove(ostack, offsets);
+	    nxo_thread_nerror(a_thread, NXN_rangecheck);
+	    return;
+	}
+
+	/* Calculate the substring offset and store it into the offsets
+	 * array. */
+	nxo_integer_new(&nxo, (cw_nxoi_t) (mstr - instr));
+	nxo_array_el_set(offsets, &nxo, i);
+    }
+
+    /* Clean up stacks. */
+    nxo_stack_pop(tstack);
+    nxo_stack_npop(ostack, 2);
 }
 #endif
 

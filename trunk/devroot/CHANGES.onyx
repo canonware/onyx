@@ -1,3 +1,7 @@
+2002-11-24 : Jason Evans <jasone@canonware.com>
+
+	* Add the offsets operator.
+
 2002-11-23 : Jason Evans <jasone@canonware.com>
 
 	* Add the match operator.
