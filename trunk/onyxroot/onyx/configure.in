@@ -235,6 +235,7 @@ if test "x$enable_threads" = "x1" ; then
     AC_CHECK_FUNCS([pthread_suspend_np], , [have_fthreads="0"])
     AC_CHECK_FUNCS([pthread_resume_np], , [have_fthreads="0"])
     if test "x$have_fthreads" = "x1" ; then
+      AC_CHECK_HEADERS([pthread_np.h])
       AC_DEFINE([CW_FTHREADS])
     fi
   else

@@ -1,5 +1,9 @@
 2004-02-29 : Jason Evans <jasone@canonware.com>
 
+	* configure.in : Check for pthread_np.h independently of checking
+	  for pthread_{suspend,resume}_np(), so this works on NetBSD,
+	  which has the functions, but not the header.
+
 	* Install documentation in <prefix>/share/doc/onyx rather than
 	  <prefix>/share/onyx/doc.
 
