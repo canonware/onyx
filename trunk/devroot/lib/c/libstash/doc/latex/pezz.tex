@@ -14,7 +14,7 @@
 
 \subsection{pezz}
 \label{pezz}
-\index{\classname{pezz}{}}
+\index{pezz@\classname{pezz}{}}
 
 The \classname{pezz} class provides cached allocation for equal-size buffers.
 It does incremental block allocation, then carves buffers from those blocks.  No
@@ -27,7 +27,7 @@ memory leaks and other memory allocation errors can be detected and printed to
 \subsubsection{API}
 \begin{capi}
 \label{pezz_new}
-\index{\cfunc{pezz\_new}{}}
+\index{pezz_new@\cfunc{pezz\_new}{}}
 \citem{\cfunc[cw\_pezz\_t *]{pezz\_new}{cw\_pezz\_t *a\_pezz, cw\_mem\_t
 *a\_mem, cw\_uint32\_t a\_buffer\_size, cw\_uint32\_t a\_num\_buffers}}
 	\begin{capilist}
@@ -57,7 +57,7 @@ memory leaks and other memory allocation errors can be detected and printed to
 		Constructor.
 	\end{capilist}
 \label{pezz_delete}
-\index{\cfunc{pezz\_delete}{}}
+\index{pezz_delete@\cfunc{pezz\_delete}{}}
 \citem{\cfunc[void]{pezz\_delete}{cw\_pezz\_t *a\_pezz}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -71,7 +71,7 @@ memory leaks and other memory allocation errors can be detected and printed to
 		Destructor.
 	\end{capilist}
 \label{pezz_buffer_size_get}
-\index{\cfunc{pezz\_buffer\_size\_get}{}}
+\index{pezz_buffer_size_get@\cfunc{pezz\_buffer\_size\_get}{}}
 \citem{\cfunc[cw\_uint32\_t]{pezz\_}{cw\_pezz\_t *a\_pezz}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -89,11 +89,11 @@ memory leaks and other memory allocation errors can be detected and printed to
 		Return the size of the buffers that \cvar{a\_pezz} is using.
 	\end{capilist}
 \label{pezz_get_e}
-\index{\cfunc{pezz\_get\_e}{}}
+\index{pezz_get_e@\cfunc{pezz\_get\_e}{}}
 \citem{\cfunc[void *]{pezz\_get\_e}{cw\_pezz\_t *a\_pezz, const char
 *a\_filename, cw\_uint32\_t a\_line\_num}}
 \label{pezz_get}
-\index{\cppmacro{pezz\_get}{}}
+\index{pezz_get@\cppmacro{pezz\_get}{}}
 \citem{\cppmacro[void *]{pezz\_get}{cw\_pezz\_t *a\_pezz}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -118,11 +118,11 @@ memory leaks and other memory allocation errors can be detected and printed to
 		Allocate a memory buffer and return a pointer to it.
 	\end{capilist}
 \label{pezz_put_e}
-\index{\cfunc{pezz\_put\_e}{}}
+\index{pezz_put_e@\cfunc{pezz\_put\_e}{}}
 \citem{\cfunc[void]{pezz\_put\_e}{cw\_pezz\_t *a\_pezz, void *a\_buffer, const
 char *a\_filename, cw\_uint32\_t a\_line\_num}}
 \label{pezz_put}
-\index{\cppmacro{pezz\_put}{}}
+\index{pezz_put@\cppmacro{pezz\_put}{}}
 \citem{\cppmacro[void]{pezz\_put}{cw\_pezz\_t *a\_pezz, void *a\_buffer}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -142,7 +142,7 @@ char *a\_filename, cw\_uint32\_t a\_line\_num}}
 		Put back (deallocate) \cvar{a\_buffer}.
 	\end{capilist}
 \label{pezz_dump}
-\index{\cfunc{pezz\_dump}{}}
+\index{pezz_dump@\cfunc{pezz\_dump}{}}
 \citem{\cfunc[void]{pezz\_dump}{cw\_pezz\_t *a\_pezz, const char *a\_prefix}}
 	\begin{capilist}
 	\item[Input(s): ]

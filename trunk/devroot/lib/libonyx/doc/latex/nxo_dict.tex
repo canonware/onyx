@@ -14,14 +14,14 @@
 
 \subsection{nxo\_dict}
 \label{nxo_dict}
-\index{\classname{nxo\_dict}{}}
+\index{nxo_dict@\classname{nxo\_dict}{}}
 
 The \classname{nxo\_dict} class is a subclass of the \classname{nxo} class.
 
 \subsubsection{API}
 \begin{capi}
 \label{nxo_dict_new}
-\index{\cfunc{nxo\_dict\_new}{}}
+\index{nxo_dict_new@\cfunc{nxo\_dict\_new}{}}
 \citem{\cfunc[void]{nxo\_dict\_new}{cw\_nxo\_t *a\_nxo, cw\_nx\_t *a\_nx,
 cw\_bool\_t a\_locking, cw\_uint32\_t a\_dict\_size}}
 	\begin{capilist}
@@ -48,7 +48,7 @@ cw\_bool\_t a\_locking, cw\_uint32\_t a\_dict\_size}}
 		Constructor.
 	\end{capilist}
 \label{nxo_dict_copy}
-\index{\cfunc{nxo\_dict\_copy}{}}
+\index{nxo_dict_copy@\cfunc{nxo\_dict\_copy}{}}
 \citem{\cfunc[]{nxo\_dict\_copy}{cw\_nxo\_t *a\_to, cw\_nxo\_t *a\_from,
 cw\_nx\_t *a\_nx}}
 	\begin{capilist}
@@ -71,7 +71,7 @@ cw\_nx\_t *a\_nx}}
 		\cvar{a\_to}.
 	\end{capilist}
 \label{nxo_dict_def}
-\index{\cfunc{nxo\_dict\_def}{}}
+\index{nxo_dict_def@\cfunc{nxo\_dict\_def}{}}
 \citem{\cfunc[void]{nxo\_dict\_def}{cw\_nxo\_t *a\_nxo, cw\_nx\_t *a\_nx,
 cw\_nxo\_t *a\_key, cw\_nxo\_t *a\_val}}
 	\begin{capilist}
@@ -95,7 +95,7 @@ cw\_nxo\_t *a\_key, cw\_nxo\_t *a\_val}}
 		Define \cvar{a\_key} with value \cvar{a\_val} in \cvar{a\_nxo}.
 	\end{capilist}
 \label{nxo_dict_undef}
-\index{\cfunc{nxo\_dict\_undef}{}}
+\index{nxo_dict_undef@\cfunc{nxo\_dict\_undef}{}}
 \citem{\cfunc[void]{nxo\_dict\_undef}{cw\_nxo\_t *a\_nxo, cw\_nx\_t *a\_nx,
 cw\_nxo\_t *a\_key}}
 	\begin{capilist}
@@ -114,7 +114,7 @@ cw\_nxo\_t *a\_key}}
 		Undefine \cvar{a\_key} in \cvar{a\_nxo}, if defined.
 	\end{capilist}
 \label{nxo_dict_lookup}
-\index{\cfunc{nxo\_dict\_lookup}{}}
+\index{nxo_dict_lookup@\cfunc{nxo\_dict\_lookup}{}}
 \citem{\cfunc[cw\_bool\_t]{nxo\_dict\_lookup}{cw\_nxo\_t *a\_nxo, const
 cw\_nxo\_t *a\_key, cw\_nxo\_t *r\_nxo}}
 	\begin{capilist}
@@ -146,7 +146,7 @@ cw\_nxo\_t *a\_key, cw\_nxo\_t *r\_nxo}}
 		to \cvar{r\_nxo}.
 	\end{capilist}
 \label{nxo_dict_count}
-\index{\cfunc{nxo\_dict\_count}{}}
+\index{nxo_dict_count@\cfunc{nxo\_dict\_count}{}}
 \citem{\cfunc[cw\_uint32\_t]{nxo\_dict\_count}{cw\_nxo\_t *a\_nxo}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -164,7 +164,7 @@ cw\_nxo\_t *a\_key, cw\_nxo\_t *r\_nxo}}
 		Return the number of key/value pairs in \cvar{a\_nxo}.
 	\end{capilist}
 \label{nxo_dict_iterate}
-\index{\cfunc{nxo\_dict\_iterate}{}}
+\index{nxo_dict_iterate@\cfunc{nxo\_dict\_iterate}{}}
 \citem{\cfunc[void]{nxo\_dict\_iterate}{cw\_nxo\_t *a\_nxo, cw\_nxo\_t *r\_nxo}}
 	\begin{capilist}
 	\item[Input(s): ]

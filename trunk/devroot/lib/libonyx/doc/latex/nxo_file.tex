@@ -14,14 +14,14 @@
 
 \subsection{nxo\_file}
 \label{nxo_file}
-\index{\classname{nxo\_file}{}}
+\index{nxo_file@\classname{nxo\_file}{}}
 
 The \classname{nxo\_file} class is a subclass of the \classname{nxo} class.
 
 \subsubsection{API}
 \begin{capi}
 \label{cw_nxo_file_read_t}
-\index{\cfunc{cw\_nxo\_file\_read\_t}{}}
+\index{cw_nxo_file_read_t@\cfunc{cw\_nxo\_file\_read\_t}{}}
 \citem{\cfunc[cw\_sint32\_t]{cw\_nxo\_file\_read\_t}{void *a\_arg, cw\_nxo\_t
 *a\_file, cw\_uint32\_t a\_len, cw\_uint8\_t *r\_str}}
 	\begin{capilist}
@@ -55,7 +55,7 @@ The \classname{nxo\_file} class is a subclass of the \classname{nxo} class.
 		store the result in \cvar{r\_str}.
 	\end{capilist}
 \label{cw_nxo_file_write_t}
-\index{\cfunc{cw\_nxo\_file\_write\_t}{}}
+\index{cw_nxo_file_write_t@\cfunc{cw\_nxo\_file\_write\_t}{}}
 \citem{\cfunc[cw\_bool\_t]{cw\_nxo\_file\_write\_t}{void *a\_arg, cw\_nxo\_t
 *a\_file, const cw\_uint8\_t *a\_str, cw\_uint32\_t a\_len}}
 	\begin{capilist}
@@ -86,7 +86,7 @@ The \classname{nxo\_file} class is a subclass of the \classname{nxo} class.
 		\cvar{a\_file}.
 	\end{capilist}
 \label{nxo_file_new}
-\index{\cfunc{nxo\_file\_new}{}}
+\index{nxo_file_new@\cfunc{nxo\_file\_new}{}}
 \citem{\cfunc[void]{nxo\_file\_new}{cw\_nxo\_t *a\_nxo, cw\_nx\_t *a\_nx,
 cw\_bool\_t a\_locking}}
 	\begin{capilist}
@@ -108,7 +108,7 @@ cw\_bool\_t a\_locking}}
 		Constructor.
 	\end{capilist}
 \label{nxo_file_fd_wrap}
-\index{\cfunc{nxo\_file\_fd\_wrap}{}}
+\index{nxo_file_fd_wrap@\cfunc{nxo\_file\_fd\_wrap}{}}
 \citem{\cfunc[void]{nxo\_file\_fd\_wrap}{cw\_nxo\_t *a\_nxo, cw\_uint32\_t
 a\_fd}}
 	\begin{capilist}
@@ -126,7 +126,7 @@ a\_fd}}
 		\cvar{a\_nxo} will be backed by the file descriptor.
 	\end{capilist}
 \label{nxo_file_interactive}
-\index{\cfunc{nxo\_file\_interactive}{}}
+\index{nxo_file_interactive@\cfunc{nxo\_file\_interactive}{}}
 \citem{\cfunc[void]{nxo\_file\_interactive}{cw\_nxo\_t *a\_nxo,
 cw\_nxo\_file\_read\_t *a\_read, cw\_nxo\_file\_write\_t *a\_write, void
 *a\_arg}}
@@ -150,7 +150,7 @@ cw\_nxo\_file\_read\_t *a\_read, cw\_nxo\_file\_write\_t *a\_write, void
 		operations on \cvar{a\_nxo}.
 	\end{capilist}
 \label{nxo_file_open}
-\index{\cfunc{nxo\_file\_open}{}}
+\index{nxo_file_open@\cfunc{nxo\_file\_open}{}}
 \citem{\cfunc[cw\_nxo\_threade\_t]{nxo\_file\_open}{cw\_nxo\_t *a\_nxo, const
 cw\_uint8\_t *a\_filename, cw\_uint32\_t a\_nlen, const cw\_uint8\_t *a\_flags,
 cw\_uint32\_t a\_flen}}
@@ -203,7 +203,7 @@ cw\_uint32\_t a\_flen}}
 		Open a file.
 	\end{capilist}
 \label{nxo_file_close}
-\index{\cfunc{nxo\_file\_close}{}}
+\index{nxo_file_close@\cfunc{nxo\_file\_close}{}}
 \citem{\cfunc[cw\_nxo\_threade\_t]{nxo\_file\_close}{cw\_nxo\_t *a\_nxo}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -225,7 +225,7 @@ cw\_uint32\_t a\_flen}}
 		Close a file.
 	\end{capilist}
 \label{nxo_file_fd_get}
-\index{\cfunc{nxo\_file\_fd\_get}{}}
+\index{nxo_file_fd_get@\cfunc{nxo\_file\_fd\_get}{}}
 \citem{\cfunc[cw\_sint32\_t]{nxo\_file\_fd\_get}{cw\_nxo\_t *a\_nxo}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -248,7 +248,7 @@ cw\_uint32\_t a\_flen}}
 		Return the file descriptor associated with \cvar{a\_nxo}.
 	\end{capilist}
 \label{nxo_file_read}
-\index{\cfunc{nxo\_file\_read}{}}
+\index{nxo_file_read@\cfunc{nxo\_file\_read}{}}
 \citem{\cfunc[cw\_sint32\_t]{nxo\_file\_read}{cw\_nxo\_t *a\_nxo, cw\_uint32\_t
 a\_len, cw\_uint8\_t *r\_str}}
 	\begin{capilist}
@@ -280,7 +280,7 @@ a\_len, cw\_uint8\_t *r\_str}}
 		Read data.
 	\end{capilist}
 \label{nxo_file_readline}
-\index{\cfunc{nxo\_file\_readline}{}}
+\index{nxo_file_readline@\cfunc{nxo\_file\_readline}{}}
 \citem{\cfunc[cw\_nxo\_threade\_t]{nxo\_file\_readline}{cw\_nxo\_t *a\_nxo,
 cw\_nx\_t *a\_nx, cw\_bool\_t a\_locking, cw\_nxo\_t *r\_string, cw\_bool\_t
 *r\_eof}}
@@ -325,7 +325,7 @@ cw\_nx\_t *a\_nx, cw\_bool\_t a\_locking, cw\_nxo\_t *r\_string, cw\_bool\_t
 		Read a line, terminated by ``{\bs}r'', ``{\bs}r{\bs}n'', or EOF.
 	\end{capilist}
 \label{nxo_file_write}
-\index{\cfunc{nxo\_file\_write}{}}
+\index{nxo_file_write@\cfunc{nxo\_file\_write}{}}
 \citem{\cfunc[cw\_nxo\_threade\_t]{nxo\_file\_write}{cw\_nxo\_t *a\_nxo, const
 cw\_uint8\_t *a\_str, cw\_uint32\_t a\_len}}
 	\begin{capilist}
@@ -352,7 +352,7 @@ cw\_uint8\_t *a\_str, cw\_uint32\_t a\_len}}
 		Write the \cvar{a\_len} bytes of data pointed to \cvar{a\_str}.
 	\end{capilist}
 \label{nxo_file_output}
-\index{\cfunc{nxo\_file\_output}{}}
+\index{nxo_file_output@\cfunc{nxo\_file\_output}{}}
 \citem{\cfunc[cw\_nxo\_threade\_t]{nxo\_file\_output}{cw\_nxo\_t *a\_nxo, const
 char *a\_format, ...}}
 	\begin{capilist}
@@ -385,7 +385,7 @@ char *a\_format, ...}}
 		class.
 	\end{capilist}
 \label{nxo_file_output_n}
-\index{\cfunc{nxo\_file\_output\_n}{}}
+\index{nxo_file_output_n@\cfunc{nxo\_file\_output\_n}{}}
 \citem{\cfunc[cw\_nxo\_threade\_t]{nxo\_file\_output\_n}{cw\_nxo\_t *a\_nxo,
 cw\_uint32\_t a\_size, const char *a\_format, ...}}
 	\begin{capilist}
@@ -420,7 +420,7 @@ cw\_uint32\_t a\_size, const char *a\_format, ...}}
 		the \htmlref{\classname{out}}{out} class.
 	\end{capilist}
 \label{nxo_file_truncate}
-\index{\cfunc{nxo\_file\_truncate}{}}
+\index{nxo_file_truncate@\cfunc{nxo\_file\_truncate}{}}
 \citem{\cfunc[cw\_nxo\_threade\_t]{nxo\_file\_truncate}{cw\_nxo\_t *a\_nxo,
 off\_t a\_length}}
 	\begin{capilist}
@@ -446,7 +446,7 @@ off\_t a\_length}}
 		that it is \cvar{a\_length} bytes long.
 	\end{capilist}
 \label{nxo_file_position_get}
-\index{\cfunc{nxo\_file\_position\_get}{}}
+\index{nxo_file_position_get@\cfunc{nxo\_file\_position\_get}{}}
 \citem{\cfunc[cw\_nxoi\_t]{nxo\_file\_position\_get}{cw\_nxo\_t *a\_nxo}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -470,7 +470,7 @@ off\_t a\_length}}
 		Get the current file position.
 	\end{capilist}
 \label{nxo_file_position_set}
-\index{\cfunc{nxo\_file\_position\_set}{}}
+\index{nxo_file_position_set@\cfunc{nxo\_file\_position\_set}{}}
 \citem{\cfunc[cw\_nxo\_threade\_t]{nxo\_file\_position\_set}{cw\_nxo\_t *a\_nxo,
 cw\_nxoi\_t a\_position}}
 	\begin{capilist}
@@ -495,7 +495,7 @@ cw\_nxoi\_t a\_position}}
 		Move the current file position to \cvar{a\_position}.
 	\end{capilist}
 \label{nxo_file_buffer_size_get}
-\index{\cfunc{nxo\_file\_buffer\_size\_get}{}}
+\index{nxo_file_buffer_size_get@\cfunc{nxo\_file\_buffer\_size\_get}{}}
 \citem{\cfunc[cw\_uint32\_t]{nxo\_file\_buffer\_size\_get}{cw\_nxo\_t *a\_nxo}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -513,7 +513,7 @@ cw\_nxoi\_t a\_position}}
 		Return the size of the internal data buffer.
 	\end{capilist}
 \label{nxo_file_buffer_size_set}
-\index{\cfunc{nxo\_file\_buffer\_size\_set}{}}
+\index{nxo_file_buffer_size_set@\cfunc{nxo\_file\_buffer\_size\_set}{}}
 \citem{\cfunc[void]{nxo\_file\_buffer\_size\_set}{cw\_nxo\_t *a\_nxo,
 cw\_uint32\_t a\_size}}
 	\begin{capilist}
@@ -533,7 +533,7 @@ cw\_uint32\_t a\_size}}
 		Use an internal buffer of \cvar{a\_size} bytes.
 	\end{capilist}
 \label{nxo_file_buffer_count}
-\index{\cfunc{nxo\_file\_buffer\_count}{}}
+\index{nxo_file_buffer_count@\cfunc{nxo\_file\_buffer\_count}{}}
 \citem{\cfunc[cw\_nxoi\_t]{nxo\_file\_buffer\_count}{cw\_nxo\_t *a\_nxo}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -552,7 +552,7 @@ cw\_uint32\_t a\_size}}
 		reading.
 	\end{capilist}
 \label{nxo_file_buffer_flush}
-\index{\cfunc{nxo\_file\_buffer\_flush}{}}
+\index{nxo_file_buffer_flush@\cfunc{nxo\_file\_buffer\_flush}{}}
 \citem{\cfunc[cw\_nxo\_threade\_t]{nxo\_file\_buffer\_flush}{cw\_nxo\_t
 *a\_nxo}}
 	\begin{capilist}

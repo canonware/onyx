@@ -78,7 +78,7 @@ Use one of the following compiler command lines to compile applications with
 \section{API}
 \begin{capi}
 \label{libsock_init}
-\index{\cfunc{libsock\_init}{}}
+\index{libsock_init@\cfunc{libsock\_init}{}}
 \citem{\cfunc[void]{libsock\_init}{cw\_uint32\_t a\_max\_fds, cw\_uint32\_t
 a\_bufc\_size, cw\_uint32\_t a\_max\_spare\_bufcs}}
 	\begin{capilist}
@@ -106,7 +106,7 @@ a\_bufc\_size, cw\_uint32\_t a\_max\_spare\_bufcs}}
 		Global initializer for \libname{libsock} and its I/O thread.
 	\end{capilist}
 \label{libsock_shutdown}
-\index{\cfunc{libsock\_shutdown}{}}
+\index{libsock_shutdown@\cfunc{libsock\_shutdown}{}}
 \citem{\cfunc[void]{libsock\_shutdown}{void}}
 	\begin{capilist}
 	\item[Input(s): ] None.
@@ -116,7 +116,7 @@ a\_bufc\_size, cw\_uint32\_t a\_max\_spare\_bufcs}}
 		Global shutdown for \libname{libsock}.
 	\end{capilist}
 \label{libsock_spare_bufc_get}
-\index{\cfunc{libsock\_spare\_bufc\_get}{}}
+\index{libsock_spare_bufc_get@\cfunc{libsock\_spare\_bufc\_get}{}}
 \citem{\cfunc[cw\_bufc\_t *]{libsock\_spare\_bufc\_get}{void}}
 	\begin{capilist}
 	\item[Input(s): ] None.
@@ -136,7 +136,7 @@ a\_bufc\_size, cw\_uint32\_t a\_max\_spare\_bufcs}}
 		\cfunc{libsock\_init}{}.
 	\end{capilist}
 \label{libsock_in_notify}
-\index{\cfunc{libsock\_in\_notify}{}}
+\index{libsock_in_notify@\cfunc{libsock\_in\_notify}{}}
 \citem{\cfunc[void]{libsock\_in\_notify}{cw\_mq\_t *a\_mq, cw\_sock\_t *a\_sock,
 void *a\_val}}
 	\begin{capilist}

@@ -69,12 +69,12 @@ classifications.
 Simple	& Composite	\\
 \hline \hline
 boolean	& array		\\
-integer	& condition	\\
-mark	& dict		\\
-name	& file		\\
-null	& hook		\\
-operator & mutex	\\
-	& stack		\\
+fino	& condition	\\
+integer	& dict		\\
+mark	& file		\\
+name	& hook		\\
+null	& mutex		\\
+operator & stack	\\
         & string	\\
 	& thread	\\
 \hline
@@ -131,6 +131,8 @@ also be of any type.
 
 \item[file: ] A file is a handle to an ordered sequence of bytes with a current
 position.  Read and write permissions are set when a file object is created.
+
+\item[fino: ] A fino is used as a stack marker when constructing stacks.
 
 \item[hook: ] The hook type is not used by the core onyx language.  It can be
 used by applications that extend the interpreter as a container object.
@@ -515,7 +517,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 
 \begin{description}
 \label{currenterror:command}
-\index{\onyxop{}{command}{}}
+\index{command@\onyxop{}{command}{}}
 \item[{\onyxop{--}{command}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -536,7 +538,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 		\end{verbatim}
 	\end{description}
 \label{currenterror:dstack}
-\index{\onyxop{}{dstack}{}}
+\index{dstack@\onyxop{}{dstack}{}}
 \item[{\onyxop{--}{dstack}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -557,7 +559,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 		\end{verbatim}
 	\end{description}
 \label{currenterror:errorname}
-\index{\onyxop{}{errorname}{}}
+\index{errorname@\onyxop{}{errorname}{}}
 \item[{\onyxop{--}{errorname}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -578,7 +580,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 		\end{verbatim}
 	\end{description}
 \label{currenterror:estack}
-\index{\onyxop{}{estack}{}}
+\index{estack@\onyxop{}{estack}{}}
 \item[{\onyxop{--}{estack}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -599,7 +601,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 		\end{verbatim}
 	\end{description}
 \label{currenterror:newerror}
-\index{\onyxop{}{newerror}{}}
+\index{newerror@\onyxop{}{newerror}{}}
 \item[{\onyxop{--}{newerror}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -620,7 +622,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 		\end{verbatim}
 	\end{description}
 \label{currenterror:ostack}
-\index{\onyxop{}{ostack}{}}
+\index{ostack@\onyxop{}{ostack}{}}
 \item[{\onyxop{--}{ostack}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -641,7 +643,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 		\end{verbatim}
 	\end{description}
 \label{currenterror:recordstacks}
-\index{\onyxop{}{recordstacks}{}}
+\index{recordstacks@\onyxop{}{recordstacks}{}}
 \item[{\onyxop{--}{recordstacks}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -662,7 +664,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 		\end{verbatim}
 	\end{description}
 \label{currenterror:stop}
-\index{\onyxop{}{stop}{}}
+\index{stop@\onyxop{}{stop}{}}
 \item[{\onyxop{--}{stop}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -752,7 +754,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 
 \begin{description}
 \label{errordict:dstackunderflow}
-\index{\onyxop{}{dstackunderflow}{}}
+\index{dstackunderflow@\onyxop{}{dstackunderflow}{}}
 \item[{\onyxop{--}{dstackunderflow}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -773,7 +775,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 		\end{verbatim}
 	\end{description}
 \label{errordict:estackunderflow}
-\index{\onyxop{}{estackunderflow}{}}
+\index{estackunderflow@\onyxop{}{estackunderflow}{}}
 \item[{\onyxop{--}{estackunderflow}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -794,7 +796,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 		\end{verbatim}
 	\end{description}
 \label{errordict:handleerror}
-\index{\onyxop{}{handleerror}{}}
+\index{handleerror@\onyxop{}{handleerror}{}}
 \item[{\onyxop{--}{handleerror}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -815,7 +817,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 		\end{verbatim}
 	\end{description}
 \label{errordict:interrupt}
-\index{\onyxop{}{interrupt}{}}
+\index{interrupt@\onyxop{}{interrupt}{}}
 \item[{\onyxop{--}{interrupt}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -836,7 +838,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 		\end{verbatim}
 	\end{description}
 \label{errordict:invalidaccess}
-\index{\onyxop{}{invalidaccess}{}}
+\index{invalidaccess@\onyxop{}{invalidaccess}{}}
 \item[{\onyxop{--}{invalidaccess}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -857,7 +859,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 		\end{verbatim}
 	\end{description}
 \label{errordict:invalidcontext}
-\index{\onyxop{}{invalidcontext}{}}
+\index{invalidcontext@\onyxop{}{invalidcontext}{}}
 \item[{\onyxop{--}{invalidcontext}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -878,7 +880,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 		\end{verbatim}
 	\end{description}
 \label{errordict:invalidexit}
-\index{\onyxop{}{invalidexit}{}}
+\index{invalidexit@\onyxop{}{invalidexit}{}}
 \item[{\onyxop{--}{invalidexit}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -899,7 +901,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 		\end{verbatim}
 	\end{description}
 \label{errordict:invalidfileaccess}
-\index{\onyxop{}{invalidfileaccess}{}}
+\index{invalidfileaccess@\onyxop{}{invalidfileaccess}{}}
 \item[{\onyxop{--}{invalidfileaccess}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -920,7 +922,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 		\end{verbatim}
 	\end{description}
 \label{errordict:ioerror}
-\index{\onyxop{}{ioerror}{}}
+\index{ioerror@\onyxop{}{ioerror}{}}
 \item[{\onyxop{--}{ioerror}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -941,7 +943,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 		\end{verbatim}
 	\end{description}
 \label{errordict:limitcheck}
-\index{\onyxop{}{limitcheck}{}}
+\index{limitcheck@\onyxop{}{limitcheck}{}}
 \item[{\onyxop{--}{limitcheck}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -962,7 +964,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 		\end{verbatim}
 	\end{description}
 \label{errordict:rangecheck}
-\index{\onyxop{}{rangecheck}{}}
+\index{rangecheck@\onyxop{}{rangecheck}{}}
 \item[{\onyxop{--}{rangecheck}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -983,7 +985,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 		\end{verbatim}
 	\end{description}
 \label{errordict:stackunderflow}
-\index{\onyxop{}{stackunderflow}{}}
+\index{stackunderflow@\onyxop{}{stackunderflow}{}}
 \item[{\onyxop{--}{stackunderflow}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -1004,7 +1006,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 		\end{verbatim}
 	\end{description}
 \label{errordict:stop}
-\index{\onyxop{}{stop}{}}
+\index{stop@\onyxop{}{stop}{}}
 \item[{\onyxop{--}{stop}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -1025,7 +1027,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 		\end{verbatim}
 	\end{description}
 \label{errordict:syntaxerror}
-\index{\onyxop{}{syntaxerror}{}}
+\index{syntaxerror@\onyxop{}{syntaxerror}{}}
 \item[{\onyxop{--}{syntaxerror}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -1046,7 +1048,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 		\end{verbatim}
 	\end{description}
 \label{errordict:timeout}
-\index{\onyxop{}{timeout}{}}
+\index{timeout@\onyxop{}{timeout}{}}
 \item[{\onyxop{--}{timeout}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -1067,7 +1069,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 		\end{verbatim}
 	\end{description}
 \label{errordict:typecheck}
-\index{\onyxop{}{typecheck}{}}
+\index{typecheck@\onyxop{}{typecheck}{}}
 \item[{\onyxop{--}{typecheck}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -1088,7 +1090,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 		\end{verbatim}
 	\end{description}
 \label{errordict:undefined}
-\index{\onyxop{}{undefined}{}}
+\index{undefined@\onyxop{}{undefined}{}}
 \item[{\onyxop{--}{undefined}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -1109,7 +1111,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 		\end{verbatim}
 	\end{description}
 \label{errordict:undefinedfilename}
-\index{\onyxop{}{undefinedfilename}{}}
+\index{undefinedfilename@\onyxop{}{undefinedfilename}{}}
 \item[{\onyxop{--}{undefinedfilename}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -1130,7 +1132,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 		\end{verbatim}
 	\end{description}
 \label{errordict:undefinedresult}
-\index{\onyxop{}{undefinedresult}{}}
+\index{undefinedresult@\onyxop{}{undefinedresult}{}}
 \item[{\onyxop{--}{undefinedresult}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -1151,7 +1153,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 		\end{verbatim}
 	\end{description}
 \label{errordict:unmatchedfino}
-\index{\onyxop{}{unmatchedfino}{}}
+\index{unmatchedfino@\onyxop{}{unmatchedfino}{}}
 \item[{\onyxop{--}{unmatchedfino}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -1172,7 +1174,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 		\end{verbatim}
 	\end{description}
 \label{errordict:unmatchedmark}
-\index{\onyxop{}{unmatchedmark}{}}
+\index{unmatchedmark@\onyxop{}{unmatchedmark}{}}
 \item[{\onyxop{--}{unmatchedmark}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -1193,7 +1195,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 		\end{verbatim}
 	\end{description}
 \label{errordict:unregistered}
-\index{\onyxop{}{unregistered}{}}
+\index{unregistered@\onyxop{}{unregistered}{}}
 \item[{\onyxop{--}{unregistered}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -1326,7 +1328,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 
 \begin{description}
 \label{sprintdict:array}
-\index{\onyxop{}{array}{}}
+\index{array@\onyxop{}{array}{}}
 \item[{\onyxop{--}{array}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -1347,7 +1349,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 		\end{verbatim}
 	\end{description}
 \label{sprintdict:boolean}
-\index{\onyxop{}{boolean}{}}
+\index{boolean@\onyxop{}{boolean}{}}
 \item[{\onyxop{--}{boolean}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -1368,7 +1370,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 		\end{verbatim}
 	\end{description}
 \label{sprintdict:condition}
-\index{\onyxop{}{condition}{}}
+\index{condition@\onyxop{}{condition}{}}
 \item[{\onyxop{--}{condition}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -1389,7 +1391,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 		\end{verbatim}
 	\end{description}
 \label{sprintdict:dict}
-\index{\onyxop{}{dict}{}}
+\index{dict@\onyxop{}{dict}{}}
 \item[{\onyxop{--}{dict}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -1410,7 +1412,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 		\end{verbatim}
 	\end{description}
 \label{sprintdict:file}
-\index{\onyxop{}{file}{}}
+\index{file@\onyxop{}{file}{}}
 \item[{\onyxop{--}{file}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -1431,7 +1433,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 		\end{verbatim}
 	\end{description}
 \label{sprintdict:fino}
-\index{\onyxop{}{fino}{}}
+\index{fino@\onyxop{}{fino}{}}
 \item[{\onyxop{--}{fino}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -1452,7 +1454,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 		\end{verbatim}
 	\end{description}
 \label{sprintdict:hook}
-\index{\onyxop{}{hook}{}}
+\index{hook@\onyxop{}{hook}{}}
 \item[{\onyxop{--}{hook}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -1473,7 +1475,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 		\end{verbatim}
 	\end{description}
 \label{sprintdict:integer}
-\index{\onyxop{}{integer}{}}
+\index{integer@\onyxop{}{integer}{}}
 \item[{\onyxop{--}{integer}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -1494,7 +1496,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 		\end{verbatim}
 	\end{description}
 \label{sprintdict:mark}
-\index{\onyxop{}{mark}{}}
+\index{mark@\onyxop{}{mark}{}}
 \item[{\onyxop{--}{mark}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -1515,7 +1517,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 		\end{verbatim}
 	\end{description}
 \label{sprintdict:mutex}
-\index{\onyxop{}{mutex}{}}
+\index{mutex@\onyxop{}{mutex}{}}
 \item[{\onyxop{--}{mutex}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -1536,7 +1538,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 		\end{verbatim}
 	\end{description}
 \label{sprintdict:name}
-\index{\onyxop{}{name}{}}
+\index{name@\onyxop{}{name}{}}
 \item[{\onyxop{--}{name}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -1557,7 +1559,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 		\end{verbatim}
 	\end{description}
 \label{sprintdict:operator}
-\index{\onyxop{}{operator}{}}
+\index{operator@\onyxop{}{operator}{}}
 \item[{\onyxop{--}{operator}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -1578,7 +1580,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 		\end{verbatim}
 	\end{description}
 \label{sprintdict:stack}
-\index{\onyxop{}{stack}{}}
+\index{stack@\onyxop{}{stack}{}}
 \item[{\onyxop{--}{stack}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -1599,7 +1601,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 		\end{verbatim}
 	\end{description}
 \label{sprintdict:string}
-\index{\onyxop{}{string}{}}
+\index{string@\onyxop{}{string}{}}
 \item[{\onyxop{--}{string}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -1620,7 +1622,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 		\end{verbatim}
 	\end{description}
 \label{sprintdict:thread}
-\index{\onyxop{}{thread}{}}
+\index{thread@\onyxop{}{thread}{}}
 \item[{\onyxop{--}{thread}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -2024,7 +2026,7 @@ under the protection of a mutex. \\
 
 \begin{description}
 \label{systemdict:sym_lp}
-\index{\onyxop{}{(}{}}
+\index{(@\onyxop{}{(}{}}
 \item[{\onyxop{--}{(}{fino}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ] None.
@@ -2046,7 +2048,7 @@ onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sym_rp}
-\index{\onyxop{}{)}{}}
+\index{)@\onyxop{}{)}{}}
 \item[{\onyxop{fino objects}{)}{stack}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -2085,7 +2087,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sym_lt}
-\index{\onyxop{}{{\lt}}{}}
+\index{<@\onyxop{}{{\lt}}{}}
 \item[{\onyxop{--}{{\lt}}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -2106,7 +2108,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sym_gt}
-\index{\onyxop{}{{\gt}}{}}
+\index{>@\onyxop{}{{\gt}}{}}
 \item[{\onyxop{--}{{\gt}}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -2127,7 +2129,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sym_lb}
-\index{\onyxop{}{{\lb}}{}}
+\index{[@\onyxop{}{{\lb}}{}}
 \item[{\onyxop{--}{{\lb}}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -2148,7 +2150,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sym_rb}
-\index{\onyxop{}{{\rb}}{}}
+\index{]@\onyxop{}{{\rb}}{}}
 \item[{\onyxop{--}{{\rb}}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -2169,7 +2171,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:abs}
-\index{\onyxop{}{abs}{}}
+\index{abs@\onyxop{}{abs}{}}
 \item[{\onyxop{--}{abs}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -2190,7 +2192,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:add}
-\index{\onyxop{}{add}{}}
+\index{add@\onyxop{}{add}{}}
 \item[{\onyxop{--}{add}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -2211,7 +2213,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:aload}
-\index{\onyxop{}{aload}{}}
+\index{aload@\onyxop{}{aload}{}}
 \item[{\onyxop{--}{aload}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -2232,7 +2234,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:and}
-\index{\onyxop{}{and}{}}
+\index{and@\onyxop{}{and}{}}
 \item[{\onyxop{--}{and}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -2253,7 +2255,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:array}
-\index{\onyxop{}{array}{}}
+\index{array@\onyxop{}{array}{}}
 \item[{\onyxop{--}{array}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -2274,7 +2276,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:astore}
-\index{\onyxop{}{astore}{}}
+\index{astore@\onyxop{}{astore}{}}
 \item[{\onyxop{--}{astore}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -2295,7 +2297,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:begin}
-\index{\onyxop{}{begin}{}}
+\index{begin@\onyxop{}{begin}{}}
 \item[{\onyxop{--}{begin}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -2316,7 +2318,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:bind}
-\index{\onyxop{}{bind}{}}
+\index{bind@\onyxop{}{bind}{}}
 \item[{\onyxop{--}{bind}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -2337,7 +2339,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:broadcast}
-\index{\onyxop{}{broadcast}{}}
+\index{broadcast@\onyxop{}{broadcast}{}}
 \item[{\onyxop{--}{broadcast}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -2358,7 +2360,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:bytesavailable}
-\index{\onyxop{}{bytesavailable}{}}
+\index{bytesavailable@\onyxop{}{bytesavailable}{}}
 \item[{\onyxop{--}{bytesavailable}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -2379,7 +2381,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:catenate}
-\index{\onyxop{}{catenate}{}}
+\index{catenate@\onyxop{}{catenate}{}}
 \item[{\onyxop{[a] [b]}{catenate}{[a b]}}: ]
 \item[{\onyxop{(a) (b)}{catenate}{(a b)}}: ]
 \item[{\onyxop{`a' `b'}{catenate}{`ab'}}: ]
@@ -2418,7 +2420,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:cd}
-\index{\onyxop{}{cd}{}}
+\index{cd@\onyxop{}{cd}{}}
 \item[{\onyxop{path}{cd}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -2447,7 +2449,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:chmod}
-\index{\onyxop{}{chmod}{}}
+\index{chmod@\onyxop{}{chmod}{}}
 \item[{\onyxop{--}{chmod}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -2468,7 +2470,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:chown}
-\index{\onyxop{}{chown}{}}
+\index{chown@\onyxop{}{chown}{}}
 \item[{\onyxop{--}{chown}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -2489,7 +2491,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:clear}
-\index{\onyxop{}{clear}{}}
+\index{clear@\onyxop{}{clear}{}}
 \item[{\onyxop{--}{clear}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -2510,7 +2512,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:cleardstack}
-\index{\onyxop{}{cleardstack}{}}
+\index{cleardstack@\onyxop{}{cleardstack}{}}
 \item[{\onyxop{--}{cleardstack}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -2531,7 +2533,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:cleartomark}
-\index{\onyxop{}{cleartomark}{}}
+\index{cleartomark@\onyxop{}{cleartomark}{}}
 \item[{\onyxop{--}{cleartomark}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -2552,7 +2554,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:close}
-\index{\onyxop{}{close}{}}
+\index{close@\onyxop{}{close}{}}
 \item[{\onyxop{--}{close}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -2573,7 +2575,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:condition}
-\index{\onyxop{}{condition}{}}
+\index{condition@\onyxop{}{condition}{}}
 \item[{\onyxop{--}{condition}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -2594,7 +2596,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:copy}
-\index{\onyxop{}{copy}{}}
+\index{copy@\onyxop{}{copy}{}}
 \item[{\onyxop{--}{copy}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -2615,7 +2617,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:count}
-\index{\onyxop{}{count}{}}
+\index{count@\onyxop{}{count}{}}
 \item[{\onyxop{--}{count}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -2636,7 +2638,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:countdstack}
-\index{\onyxop{}{countdstack}{}}
+\index{countdstack@\onyxop{}{countdstack}{}}
 \item[{\onyxop{--}{countdstack}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -2657,7 +2659,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:countestack}
-\index{\onyxop{}{countestack}{}}
+\index{countestack@\onyxop{}{countestack}{}}
 \item[{\onyxop{--}{countestack}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -2678,7 +2680,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:counttomark}
-\index{\onyxop{}{counttomark}{}}
+\index{counttomark@\onyxop{}{counttomark}{}}
 \item[{\onyxop{--}{counttomark}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -2699,7 +2701,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:currentdict}
-\index{\onyxop{}{currentdict}{}}
+\index{currentdict@\onyxop{}{currentdict}{}}
 \item[{\onyxop{--}{currentdict}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -2720,7 +2722,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:currenterror}
-\index{\onyxop{}{currenterror}{}}
+\index{currenterror@\onyxop{}{currenterror}{}}
 \item[{\onyxop{--}{currenterror}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -2741,7 +2743,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:currentfile}
-\index{\onyxop{}{currentfile}{}}
+\index{currentfile@\onyxop{}{currentfile}{}}
 \item[{\onyxop{--}{currentfile}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -2762,7 +2764,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:currentlocking}
-\index{\onyxop{}{currentlocking}{}}
+\index{currentlocking@\onyxop{}{currentlocking}{}}
 \item[{\onyxop{--}{currentlocking}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -2783,7 +2785,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:cvlit}
-\index{\onyxop{}{cvlit}{}}
+\index{cvlit@\onyxop{}{cvlit}{}}
 \item[{\onyxop{--}{cvlit}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -2804,7 +2806,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:cvn}
-\index{\onyxop{}{cvn}{}}
+\index{cvn@\onyxop{}{cvn}{}}
 \item[{\onyxop{--}{cvn}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -2825,7 +2827,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:cvrs}
-\index{\onyxop{}{cvrs}{}}
+\index{cvrs@\onyxop{}{cvrs}{}}
 \item[{\onyxop{--}{cvrs}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -2846,7 +2848,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:cvs}
-\index{\onyxop{}{cvs}{}}
+\index{cvs@\onyxop{}{cvs}{}}
 \item[{\onyxop{--}{cvs}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -2867,7 +2869,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:cvx}
-\index{\onyxop{}{cvx}{}}
+\index{cvx@\onyxop{}{cvx}{}}
 \item[{\onyxop{--}{cvx}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -2888,7 +2890,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:def}
-\index{\onyxop{}{def}{}}
+\index{def@\onyxop{}{def}{}}
 \item[{\onyxop{--}{def}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -2909,7 +2911,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:detach}
-\index{\onyxop{}{detach}{}}
+\index{detach@\onyxop{}{detach}{}}
 \item[{\onyxop{--}{detach}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -2930,7 +2932,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:dict}
-\index{\onyxop{}{dict}{}}
+\index{dict@\onyxop{}{dict}{}}
 \item[{\onyxop{--}{dict}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -2951,7 +2953,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:die}
-\index{\onyxop{}{die}{}}
+\index{die@\onyxop{}{die}{}}
 \item[{\onyxop{--}{die}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -2972,7 +2974,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:dirforeach}
-\index{\onyxop{}{dirforeach}{}}
+\index{dirforeach@\onyxop{}{dirforeach}{}}
 \item[{\onyxop{path proc}{dirforeach}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3024,7 +3026,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:div}
-\index{\onyxop{}{div}{}}
+\index{div@\onyxop{}{div}{}}
 \item[{\onyxop{--}{div}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3045,7 +3047,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:dstack}
-\index{\onyxop{}{dstack}{}}
+\index{dstack@\onyxop{}{dstack}{}}
 \item[{\onyxop{--}{dstack}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3066,7 +3068,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:dup}
-\index{\onyxop{}{dup}{}}
+\index{dup@\onyxop{}{dup}{}}
 \item[{\onyxop{--}{dup}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3087,7 +3089,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:end}
-\index{\onyxop{}{end}{}}
+\index{end@\onyxop{}{end}{}}
 \item[{\onyxop{--}{end}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3108,7 +3110,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:eq}
-\index{\onyxop{}{eq}{}}
+\index{eq@\onyxop{}{eq}{}}
 \item[{\onyxop{--}{eq}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3129,7 +3131,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:errordict}
-\index{\onyxop{}{errordict}{}}
+\index{errordict@\onyxop{}{errordict}{}}
 \item[{\onyxop{--}{errordict}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3150,7 +3152,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:estack}
-\index{\onyxop{}{estack}{}}
+\index{estack@\onyxop{}{estack}{}}
 \item[{\onyxop{--}{estack}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3171,7 +3173,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:eval}
-\index{\onyxop{}{eval}{}}
+\index{eval@\onyxop{}{eval}{}}
 \item[{\onyxop{--}{eval}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3192,7 +3194,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:exch}
-\index{\onyxop{}{exch}{}}
+\index{exch@\onyxop{}{exch}{}}
 \item[{\onyxop{--}{exch}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3213,7 +3215,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:exec}
-\index{\onyxop{}{exec}{}}
+\index{exec@\onyxop{}{exec}{}}
 \item[{\onyxop{--}{exec}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3234,7 +3236,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:exit}
-\index{\onyxop{}{exit}{}}
+\index{exit@\onyxop{}{exit}{}}
 \item[{\onyxop{--}{exit}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3255,7 +3257,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:exp}
-\index{\onyxop{}{exp}{}}
+\index{exp@\onyxop{}{exp}{}}
 \item[{\onyxop{--}{exp}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3276,7 +3278,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:fino}
-\index{\onyxop{}{fino}{}}
+\index{fino@\onyxop{}{fino}{}}
 \item[{\onyxop{--}{fino}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3297,7 +3299,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:flush}
-\index{\onyxop{}{flush}{}}
+\index{flush@\onyxop{}{flush}{}}
 \item[{\onyxop{--}{flush}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3318,7 +3320,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:flushfile}
-\index{\onyxop{}{flushfile}{}}
+\index{flushfile@\onyxop{}{flushfile}{}}
 \item[{\onyxop{--}{flushfile}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3339,7 +3341,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:for}
-\index{\onyxop{}{for}{}}
+\index{for@\onyxop{}{for}{}}
 \item[{\onyxop{--}{for}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3360,7 +3362,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:foreach}
-\index{\onyxop{}{foreach}{}}
+\index{foreach@\onyxop{}{foreach}{}}
 \item[{\onyxop{--}{foreach}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3381,7 +3383,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:fork}
-\index{\onyxop{}{fork}{}}
+\index{fork@\onyxop{}{fork}{}}
 \item[{\onyxop{--}{fork}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3402,7 +3404,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:ge}
-\index{\onyxop{}{ge}{}}
+\index{ge@\onyxop{}{ge}{}}
 \item[{\onyxop{--}{ge}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3423,7 +3425,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:get}
-\index{\onyxop{}{get}{}}
+\index{get@\onyxop{}{get}{}}
 \item[{\onyxop{--}{get}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3444,7 +3446,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:getinterval}
-\index{\onyxop{}{getinterval}{}}
+\index{getinterval@\onyxop{}{getinterval}{}}
 \item[{\onyxop{--}{getinterval}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3465,7 +3467,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:gt}
-\index{\onyxop{}{gt}{}}
+\index{gt@\onyxop{}{gt}{}}
 \item[{\onyxop{--}{gt}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3486,7 +3488,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:handleerror}
-\index{\onyxop{}{handleerror}{}}
+\index{handleerror@\onyxop{}{handleerror}{}}
 \item[{\onyxop{--}{handleerror}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3507,7 +3509,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:if}
-\index{\onyxop{}{if}{}}
+\index{if@\onyxop{}{if}{}}
 \item[{\onyxop{--}{if}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3528,7 +3530,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:ifelse}
-\index{\onyxop{}{ifelse}{}}
+\index{ifelse@\onyxop{}{ifelse}{}}
 \item[{\onyxop{--}{ifelse}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3549,7 +3551,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:index}
-\index{\onyxop{}{index}{}}
+\index{index@\onyxop{}{index}{}}
 \item[{\onyxop{--}{index}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3570,7 +3572,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:join}
-\index{\onyxop{}{join}{}}
+\index{join@\onyxop{}{join}{}}
 \item[{\onyxop{--}{join}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3591,7 +3593,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:known}
-\index{\onyxop{}{known}{}}
+\index{known@\onyxop{}{known}{}}
 \item[{\onyxop{--}{known}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3612,7 +3614,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:lcheck}
-\index{\onyxop{}{lcheck}{}}
+\index{lcheck@\onyxop{}{lcheck}{}}
 \item[{\onyxop{--}{lcheck}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3633,7 +3635,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:le}
-\index{\onyxop{}{le}{}}
+\index{le@\onyxop{}{le}{}}
 \item[{\onyxop{--}{le}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3654,7 +3656,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:length}
-\index{\onyxop{}{length}{}}
+\index{length@\onyxop{}{length}{}}
 \item[{\onyxop{--}{length}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3675,7 +3677,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:link}
-\index{\onyxop{}{link}{}}
+\index{link@\onyxop{}{link}{}}
 \item[{\onyxop{--}{link}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3696,7 +3698,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:load}
-\index{\onyxop{}{load}{}}
+\index{load@\onyxop{}{load}{}}
 \item[{\onyxop{--}{load}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3717,7 +3719,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:lock}
-\index{\onyxop{}{lock}{}}
+\index{lock@\onyxop{}{lock}{}}
 \item[{\onyxop{--}{lock}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3738,7 +3740,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:loop}
-\index{\onyxop{}{loop}{}}
+\index{loop@\onyxop{}{loop}{}}
 \item[{\onyxop{--}{loop}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3759,7 +3761,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:lt}
-\index{\onyxop{}{lt}{}}
+\index{lt@\onyxop{}{lt}{}}
 \item[{\onyxop{--}{lt}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3780,7 +3782,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:mark}
-\index{\onyxop{}{mark}{}}
+\index{mark@\onyxop{}{mark}{}}
 \item[{\onyxop{--}{mark}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3801,7 +3803,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:mkdir}
-\index{\onyxop{}{mkdir}{}}
+\index{mkdir@\onyxop{}{mkdir}{}}
 \item[{\onyxop{--}{mkdir}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3822,7 +3824,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:mod}
-\index{\onyxop{}{mod}{}}
+\index{mod@\onyxop{}{mod}{}}
 \item[{\onyxop{--}{mod}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3843,7 +3845,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:monitor}
-\index{\onyxop{}{monitor}{}}
+\index{monitor@\onyxop{}{monitor}{}}
 \item[{\onyxop{mutex proc}{monitor}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3869,7 +3871,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:mul}
-\index{\onyxop{}{mul}{}}
+\index{mul@\onyxop{}{mul}{}}
 \item[{\onyxop{--}{mul}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3890,7 +3892,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:mutex}
-\index{\onyxop{}{mutex}{}}
+\index{mutex@\onyxop{}{mutex}{}}
 \item[{\onyxop{--}{mutex}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3911,7 +3913,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:ne}
-\index{\onyxop{}{ne}{}}
+\index{ne@\onyxop{}{ne}{}}
 \item[{\onyxop{--}{ne}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3932,7 +3934,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:neg}
-\index{\onyxop{}{neg}{}}
+\index{neg@\onyxop{}{neg}{}}
 \item[{\onyxop{--}{neg}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3953,7 +3955,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:not}
-\index{\onyxop{}{not}{}}
+\index{not@\onyxop{}{not}{}}
 \item[{\onyxop{--}{not}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3974,7 +3976,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:nsleep}
-\index{\onyxop{}{nsleep}{}}
+\index{nsleep@\onyxop{}{nsleep}{}}
 \item[{\onyxop{nanoseconds}{nsleep}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -3999,7 +4001,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:open}
-\index{\onyxop{}{open}{}}
+\index{open@\onyxop{}{open}{}}
 \item[{\onyxop{--}{open}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -4020,7 +4022,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:or}
-\index{\onyxop{}{or}{}}
+\index{or@\onyxop{}{or}{}}
 \item[{\onyxop{--}{or}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -4041,7 +4043,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:ostack}
-\index{\onyxop{}{ostack}{}}
+\index{ostack@\onyxop{}{ostack}{}}
 \item[{\onyxop{--}{ostack}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -4062,7 +4064,7 @@ onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:pop}
-\index{\onyxop{}{pop}{}}
+\index{pop@\onyxop{}{pop}{}}
 \item[{\onyxop{any}{pop}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -4090,7 +4092,7 @@ onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:print}
-\index{\onyxop{}{print}{}}
+\index{print@\onyxop{}{print}{}}
 \item[{\onyxop{--}{print}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -4111,7 +4113,7 @@ onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:put}
-\index{\onyxop{}{put}{}}
+\index{put@\onyxop{}{put}{}}
 \item[{\onyxop{--}{put}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -4132,7 +4134,7 @@ onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:putinterval}
-\index{\onyxop{}{putinterval}{}}
+\index{putinterval@\onyxop{}{putinterval}{}}
 \item[{\onyxop{--}{putinterval}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -4153,7 +4155,7 @@ onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:pwd}
-\index{\onyxop{}{pwd}{}}
+\index{pwd@\onyxop{}{pwd}{}}
 \item[{\onyxop{--}{pwd}{path}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ] None.
@@ -4178,7 +4180,7 @@ onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:quit}
-\index{\onyxop{}{quit}{}}
+\index{quit@\onyxop{}{quit}{}}
 \item[{\onyxop{--}{quit}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -4199,7 +4201,7 @@ onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:rand}
-\index{\onyxop{}{rand}{}}
+\index{rand@\onyxop{}{rand}{}}
 \item[{\onyxop{--}{rand}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -4220,7 +4222,7 @@ onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:read}
-\index{\onyxop{}{read}{}}
+\index{read@\onyxop{}{read}{}}
 \item[{\onyxop{--}{read}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -4241,7 +4243,7 @@ onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:readline}
-\index{\onyxop{}{readline}{}}
+\index{readline@\onyxop{}{readline}{}}
 \item[{\onyxop{--}{readline}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -4262,7 +4264,7 @@ onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:realtime}
-\index{\onyxop{}{realtime}{}}
+\index{realtime@\onyxop{}{realtime}{}}
 \item[{\onyxop{--}{realtime}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -4283,7 +4285,7 @@ onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:rename}
-\index{\onyxop{}{rename}{}}
+\index{rename@\onyxop{}{rename}{}}
 \item[{\onyxop{--}{rename}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -4304,7 +4306,7 @@ onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:repeat}
-\index{\onyxop{}{repeat}{}}
+\index{repeat@\onyxop{}{repeat}{}}
 \item[{\onyxop{--}{repeat}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -4325,7 +4327,7 @@ onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:rmdir}
-\index{\onyxop{}{rmdir}{}}
+\index{rmdir@\onyxop{}{rmdir}{}}
 \item[{\onyxop{--}{rmdir}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -4346,7 +4348,7 @@ onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:roll}
-\index{\onyxop{}{roll}{}}
+\index{roll@\onyxop{}{roll}{}}
 \item[{\onyxop{region count amount}{roll}{rolled}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -4406,7 +4408,7 @@ onyx:4>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:run}
-\index{\onyxop{}{run}{}}
+\index{run@\onyxop{}{run}{}}
 \item[{\onyxop{--}{run}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -4427,7 +4429,7 @@ onyx:4>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sclear}
-\index{\onyxop{}{sclear}{}}
+\index{sclear@\onyxop{}{sclear}{}}
 \item[{\onyxop{--}{sclear}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -4448,7 +4450,7 @@ onyx:4>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:scleartomark}
-\index{\onyxop{}{scleartomark}{}}
+\index{scleartomark@\onyxop{}{scleartomark}{}}
 \item[{\onyxop{--}{scleartomark}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -4469,7 +4471,7 @@ onyx:4>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:scount}
-\index{\onyxop{}{scount}{}}
+\index{scount@\onyxop{}{scount}{}}
 \item[{\onyxop{stack}{scount}{stack count}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -4501,7 +4503,7 @@ onyx:2>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:scounttomark}
-\index{\onyxop{}{scounttomark}{}}
+\index{scounttomark@\onyxop{}{scounttomark}{}}
 \item[{\onyxop{--}{scounttomark}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -4522,7 +4524,7 @@ onyx:2>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sdup}
-\index{\onyxop{}{sdup}{}}
+\index{sdup@\onyxop{}{sdup}{}}
 \item[{\onyxop{stack}{sdup}{stack}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -4552,7 +4554,7 @@ onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:seek}
-\index{\onyxop{}{seek}{}}
+\index{seek@\onyxop{}{seek}{}}
 \item[{\onyxop{--}{seek}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -4573,7 +4575,7 @@ onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:self}
-\index{\onyxop{}{self}{}}
+\index{self@\onyxop{}{self}{}}
 \item[{\onyxop{--}{self}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -4594,7 +4596,7 @@ onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:setlocking}
-\index{\onyxop{}{setlocking}{}}
+\index{setlocking@\onyxop{}{setlocking}{}}
 \item[{\onyxop{--}{setlocking}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -4615,7 +4617,7 @@ onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sexch}
-\index{\onyxop{}{sexch}{}}
+\index{sexch@\onyxop{}{sexch}{}}
 \item[{\onyxop{--}{sexch}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -4636,7 +4638,7 @@ onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:shift}
-\index{\onyxop{}{shift}{}}
+\index{shift@\onyxop{}{shift}{}}
 \item[{\onyxop{--}{shift}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -4657,7 +4659,7 @@ onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:signal}
-\index{\onyxop{}{signal}{}}
+\index{signal@\onyxop{}{signal}{}}
 \item[{\onyxop{--}{signal}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -4678,7 +4680,7 @@ onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sindex}
-\index{\onyxop{}{sindex}{}}
+\index{sindex@\onyxop{}{sindex}{}}
 \item[{\onyxop{stack index}{sindex}{stack}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -4712,7 +4714,7 @@ onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sload}
-\index{\onyxop{}{sload}{}}
+\index{sload@\onyxop{}{sload}{}}
 \item[{\onyxop{--}{sload}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -4733,7 +4735,7 @@ onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:spop}
-\index{\onyxop{}{spop}{}}
+\index{spop@\onyxop{}{spop}{}}
 \item[{\onyxop{stack}{spop}{stack object}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -4765,7 +4767,7 @@ onyx:2>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sprint}
-\index{\onyxop{}{sprint}{}}
+\index{sprint@\onyxop{}{sprint}{}}
 \item[{\onyxop{--}{sprint}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -4786,7 +4788,7 @@ onyx:2>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:spush}
-\index{\onyxop{}{spush}{}}
+\index{spush@\onyxop{}{spush}{}}
 \item[{\onyxop{stack object}{spush}{stack}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -4817,7 +4819,7 @@ onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:srand}
-\index{\onyxop{}{srand}{}}
+\index{srand@\onyxop{}{srand}{}}
 \item[{\onyxop{--}{srand}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -4838,7 +4840,7 @@ onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sroll}
-\index{\onyxop{}{sroll}{}}
+\index{sroll@\onyxop{}{sroll}{}}
 \item[{\onyxop{--}{sroll}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -4859,7 +4861,7 @@ onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sstore}
-\index{\onyxop{}{sstore}{}}
+\index{sstore@\onyxop{}{sstore}{}}
 \item[{\onyxop{--}{sstore}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -4880,7 +4882,7 @@ onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:stack}
-\index{\onyxop{}{stack}{}}
+\index{stack@\onyxop{}{stack}{}}
 \item[{\onyxop{--}{stack}{stack}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ] None.
@@ -4900,7 +4902,7 @@ onyx:1> pstack
 		\end{verbatim}
 	\end{description}
 \label{systemdict:start}
-\index{\onyxop{}{start}{}}
+\index{start@\onyxop{}{start}{}}
 \item[{\onyxop{--}{start}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -4921,7 +4923,7 @@ onyx:1> pstack
 		\end{verbatim}
 	\end{description}
 \label{systemdict:status}
-\index{\onyxop{}{status}{}}
+\index{status@\onyxop{}{status}{}}
 \item[{\onyxop{--}{status}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -4942,7 +4944,7 @@ onyx:1> pstack
 		\end{verbatim}
 	\end{description}
 \label{systemdict:stderr}
-\index{\onyxop{}{stderr}{}}
+\index{stderr@\onyxop{}{stderr}{}}
 \item[{\onyxop{--}{stderr}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -4963,7 +4965,7 @@ onyx:1> pstack
 		\end{verbatim}
 	\end{description}
 \label{systemdict:stdin}
-\index{\onyxop{}{stdin}{}}
+\index{stdin@\onyxop{}{stdin}{}}
 \item[{\onyxop{--}{stdin}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -4984,7 +4986,7 @@ onyx:1> pstack
 		\end{verbatim}
 	\end{description}
 \label{systemdict:stdout}
-\index{\onyxop{}{stdout}{}}
+\index{stdout@\onyxop{}{stdout}{}}
 \item[{\onyxop{--}{stdout}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -5005,7 +5007,7 @@ onyx:1> pstack
 		\end{verbatim}
 	\end{description}
 \label{systemdict:stop}
-\index{\onyxop{}{stop}{}}
+\index{stop@\onyxop{}{stop}{}}
 \item[{\onyxop{--}{stop}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -5026,7 +5028,7 @@ onyx:1> pstack
 		\end{verbatim}
 	\end{description}
 \label{systemdict:stopped}
-\index{\onyxop{}{stopped}{}}
+\index{stopped@\onyxop{}{stopped}{}}
 \item[{\onyxop{--}{stopped}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -5047,7 +5049,7 @@ onyx:1> pstack
 		\end{verbatim}
 	\end{description}
 \label{systemdict:store}
-\index{\onyxop{}{store}{}}
+\index{store@\onyxop{}{store}{}}
 \item[{\onyxop{--}{store}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -5068,7 +5070,7 @@ onyx:1> pstack
 		\end{verbatim}
 	\end{description}
 \label{systemdict:string}
-\index{\onyxop{}{string}{}}
+\index{string@\onyxop{}{string}{}}
 \item[{\onyxop{--}{string}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -5089,7 +5091,7 @@ onyx:1> pstack
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sub}
-\index{\onyxop{}{sub}{}}
+\index{sub@\onyxop{}{sub}{}}
 \item[{\onyxop{--}{sub}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -5110,7 +5112,7 @@ onyx:1> pstack
 		\end{verbatim}
 	\end{description}
 \label{systemdict:symlink}
-\index{\onyxop{}{symlink}{}}
+\index{symlink@\onyxop{}{symlink}{}}
 \item[{\onyxop{--}{symlink}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -5131,7 +5133,7 @@ onyx:1> pstack
 		\end{verbatim}
 	\end{description}
 \label{systemdict:tell}
-\index{\onyxop{}{tell}{}}
+\index{tell@\onyxop{}{tell}{}}
 \item[{\onyxop{--}{tell}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -5152,7 +5154,7 @@ onyx:1> pstack
 		\end{verbatim}
 	\end{description}
 \label{systemdict:test}
-\index{\onyxop{}{test}{}}
+\index{test@\onyxop{}{test}{}}
 \item[{\onyxop{--}{test}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -5173,7 +5175,7 @@ onyx:1> pstack
 		\end{verbatim}
 	\end{description}
 \label{systemdict:thread}
-\index{\onyxop{}{thread}{}}
+\index{thread@\onyxop{}{thread}{}}
 \item[{\onyxop{--}{thread}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -5194,7 +5196,7 @@ onyx:1> pstack
 		\end{verbatim}
 	\end{description}
 \label{systemdict:timedwait}
-\index{\onyxop{}{timedwait}{}}
+\index{timedwait@\onyxop{}{timedwait}{}}
 \item[{\onyxop{--}{timedwait}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -5215,7 +5217,7 @@ onyx:1> pstack
 		\end{verbatim}
 	\end{description}
 \label{systemdict:token}
-\index{\onyxop{}{token}{}}
+\index{token@\onyxop{}{token}{}}
 \item[{\onyxop{--}{token}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -5236,7 +5238,7 @@ onyx:1> pstack
 		\end{verbatim}
 	\end{description}
 \label{systemdict:truncate}
-\index{\onyxop{}{truncate}{}}
+\index{truncate@\onyxop{}{truncate}{}}
 \item[{\onyxop{--}{truncate}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -5257,7 +5259,7 @@ onyx:1> pstack
 		\end{verbatim}
 	\end{description}
 \label{systemdict:trylock}
-\index{\onyxop{}{trylock}{}}
+\index{trylock@\onyxop{}{trylock}{}}
 \item[{\onyxop{--}{trylock}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -5278,7 +5280,7 @@ onyx:1> pstack
 		\end{verbatim}
 	\end{description}
 \label{systemdict:type}
-\index{\onyxop{}{type}{}}
+\index{type@\onyxop{}{type}{}}
 \item[{\onyxop{--}{type}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -5299,7 +5301,7 @@ onyx:1> pstack
 		\end{verbatim}
 	\end{description}
 \label{systemdict:undef}
-\index{\onyxop{}{undef}{}}
+\index{undef@\onyxop{}{undef}{}}
 \item[{\onyxop{--}{undef}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -5320,7 +5322,7 @@ onyx:1> pstack
 		\end{verbatim}
 	\end{description}
 \label{systemdict:unlink}
-\index{\onyxop{}{unlink}{}}
+\index{unlink@\onyxop{}{unlink}{}}
 \item[{\onyxop{--}{unlink}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -5341,7 +5343,7 @@ onyx:1> pstack
 		\end{verbatim}
 	\end{description}
 \label{systemdict:unlock}
-\index{\onyxop{}{unlock}{}}
+\index{unlock@\onyxop{}{unlock}{}}
 \item[{\onyxop{--}{unlock}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -5362,7 +5364,7 @@ onyx:1> pstack
 		\end{verbatim}
 	\end{description}
 \label{systemdict:userdict}
-\index{\onyxop{}{userdict}{}}
+\index{userdict@\onyxop{}{userdict}{}}
 \item[{\onyxop{--}{userdict}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -5383,7 +5385,7 @@ onyx:1> pstack
 		\end{verbatim}
 	\end{description}
 \label{systemdict:wait}
-\index{\onyxop{}{wait}{}}
+\index{wait@\onyxop{}{wait}{}}
 \item[{\onyxop{--}{wait}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -5404,7 +5406,7 @@ onyx:1> pstack
 		\end{verbatim}
 	\end{description}
 \label{systemdict:waitpid}
-\index{\onyxop{}{waitpid}{}}
+\index{waitpid@\onyxop{}{waitpid}{}}
 \item[{\onyxop{--}{waitpid}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -5425,7 +5427,7 @@ onyx:1> pstack
 		\end{verbatim}
 	\end{description}
 \label{systemdict:where}
-\index{\onyxop{}{where}{}}
+\index{where@\onyxop{}{where}{}}
 \item[{\onyxop{--}{where}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -5446,7 +5448,7 @@ onyx:1> pstack
 		\end{verbatim}
 	\end{description}
 \label{systemdict:write}
-\index{\onyxop{}{write}{}}
+\index{write@\onyxop{}{write}{}}
 \item[{\onyxop{--}{write}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -5467,7 +5469,7 @@ onyx:1> pstack
 		\end{verbatim}
 	\end{description}
 \label{systemdict:xcheck}
-\index{\onyxop{}{xcheck}{}}
+\index{xcheck@\onyxop{}{xcheck}{}}
 \item[{\onyxop{--}{xcheck}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -5488,7 +5490,7 @@ onyx:1> pstack
 		\end{verbatim}
 	\end{description}
 \label{systemdict:xor}
-\index{\onyxop{}{xor}{}}
+\index{xor@\onyxop{}{xor}{}}
 \item[{\onyxop{--}{xor}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -5509,7 +5511,7 @@ onyx:1> pstack
 		\end{verbatim}
 	\end{description}
 \label{systemdict:yield}
-\index{\onyxop{}{yield}{}}
+\index{yield@\onyxop{}{yield}{}}
 \item[{\onyxop{--}{yield}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]

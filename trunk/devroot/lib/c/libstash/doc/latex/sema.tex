@@ -14,7 +14,7 @@
 
 \subsection{sema}
 \label{sema}
-\index{\classname{sema}{}}
+\index{sema@\classname{sema}{}}
 
 The \classname{sema} class implements semaphores.  This implementation is a bit
 different than normal, in that it is possible to decrement the count to less
@@ -24,7 +24,7 @@ semaphores.
 \subsubsection{API}
 \begin{capi}
 \label{sema_new}
-\index{\cfunc{sema\_new}{}}
+\index{sema_new@\cfunc{sema\_new}{}}
 \citem{\cfunc[cw\_sema\_t *]{sema\_new}{cw\_sema\_t *a\_sema, cw\_sint32\_t
 a\_count}}
 	\begin{capilist}
@@ -41,7 +41,7 @@ a\_count}}
 		Constructor.
 	\end{capilist}
 \label{sema_delete}
-\index{\cfunc{sema\_delete}{}}
+\index{sema_delete@\cfunc{sema\_delete}{}}
 \citem{\cfunc[void]{sema\_delete}{cw\_sema\_t *a\_sema}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -55,7 +55,7 @@ a\_count}}
 		Destructor.
 	\end{capilist}
 \label{sema_post}
-\index{\cfunc{sema\_post}{}}
+\index{sema_post@\cfunc{sema\_post}{}}
 \citem{\cfunc[void]{sema\_post}{cw\_sema\_t *a\_sema}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -69,7 +69,7 @@ a\_count}}
 		Post (increment) \cvar{a\_sema}.
 	\end{capilist}
 \label{sema_wait}
-\index{\cfunc{sema\_wait}{}}
+\index{sema_wait@\cfunc{sema\_wait}{}}
 \citem{\cfunc[void]{sema\_wait}{cw\_sema\_t *a\_sema}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -83,7 +83,7 @@ a\_count}}
 		Wait on (block until able to decrement) \cvar{a\_sema}.
 	\end{capilist}
 \label{sema_timedwait}
-\index{\cfunc{sema\_timedwait}{}}
+\index{sema_timedwait@\cfunc{sema\_timedwait}{}}
 \citem{\cfunc[cw\_bool\_t]{sema\_timedwait}{cw\_sema\_t *a\_sema, struct
 timespec *a\_timeout}}
 	\begin{capilist}
@@ -108,7 +108,7 @@ timespec *a\_timeout}}
 		\cvar{a\_timeout} has expired if unable to.
 	\end{capilist}
 \label{sema_trywait}
-\index{\cfunc{sema\_trywait}{}}
+\index{sema_trywait@\cfunc{sema\_trywait}{}}
 \citem{\cfunc[cw\_bool\_t]{sema\_trywait}{cw\_sema\_t *a\_sema}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -130,7 +130,7 @@ timespec *a\_timeout}}
 		instead of blocking if unable to.
 	\end{capilist}
 \label{sema_getvalue}
-\index{\cfunc{sema\_getvalue}{}}
+\index{sema_getvalue@\cfunc{sema\_getvalue}{}}
 \citem{\cfunc[cw\_sint32\_t]{sema\_getvalue}{cw\_sema\_t *a\_sema}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -148,7 +148,7 @@ timespec *a\_timeout}}
 		Get value of \cvar{a\_sema}.
 	\end{capilist}
 \label{sema_adjust}
-\index{\cfunc{sema\_adjust}{}}
+\index{sema_adjust@\cfunc{sema\_adjust}{}}
 \citem{\cfunc[void]{sema\_adjust}{cw\_sema\_t *a\_sema}}
 	\begin{capilist}
 	\item[Input(s): ]

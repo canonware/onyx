@@ -14,7 +14,7 @@
 
 \subsection{rwl}
 \label{rwl}
-\index{\classname{rwl}{}}
+\index{rwl@\classname{rwl}{}}
 
 The \classname{rwl} class implements read/write locks.  Multiple simultaneous
 readers are allowed, but only one writer (with no readers) is allowed.  This
@@ -24,7 +24,7 @@ assure deterministic locking.
 \subsubsection{API}
 \begin{capi}
 \label{rwl_new}
-\index{\cfunc{rwl\_new}{}}
+\index{rwl_new@\cfunc{rwl\_new}{}}
 \citem{\cfunc[void]{rwl\_new}{cw\_rwl\_t *a\_rwl}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -38,7 +38,7 @@ assure deterministic locking.
 		Constructor.
 	\end{capilist}
 \label{rwl_delete}
-\index{\cfunc{rwl\_delete}{}}
+\index{rwl_delete@\cfunc{rwl\_delete}{}}
 \citem{\cfunc[void]{rwl\_delete}{cw\_rwl\_t *a\_rwl}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -52,7 +52,7 @@ assure deterministic locking.
 		Destructor.
 	\end{capilist}
 \label{rwl_rlock}
-\index{\cfunc{rwl\_rlock}{}}
+\index{rwl_rlock@\cfunc{rwl\_rlock}{}}
 \citem{\cfunc[void]{rwl\_rlock}{cw\_rwl\_t *a\_rwl}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -66,7 +66,7 @@ assure deterministic locking.
 		Acquire a read lock.
 	\end{capilist}
 \label{rwl_runlock}
-\index{\cfunc{rwl\_runlock}{}}
+\index{rwl_runlock@\cfunc{rwl\_runlock}{}}
 \citem{\cfunc[void]{rwl\_runlock}{cw\_rwl\_t *a\_rwl}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -80,7 +80,7 @@ assure deterministic locking.
 		Release a read lock.
 	\end{capilist}
 \label{rwl_wlock}
-\index{\cfunc{rwl\_wlock}{}}
+\index{rwl_wlock@\cfunc{rwl\_wlock}{}}
 \citem{\cfunc[void]{rwl\_wlock}{cw\_rwl\_t *a\_rwl}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -94,7 +94,7 @@ assure deterministic locking.
 		Acquire a write lock.
 	\end{capilist}
 \label{rwl_wunlock}
-\index{\cfunc{rwl\_wunlock}{}}
+\index{rwl_wunlock@\cfunc{rwl\_wunlock}{}}
 \citem{\cfunc[void]{rwl\_wunlock}{cw\_rwl\_t *a\_rwl}}
 	\begin{capilist}
 	\item[Input(s): ]

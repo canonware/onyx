@@ -14,7 +14,7 @@
 
 \subsection{bhp}
 \label{bhp}
-\index{\classname{bhp}{}}
+\index{bhp@\classname{bhp}{}}
 The \classname{bhp} and \classname{bhpi} classes implement binomial heaps.  The
 \classname{bhpi} class encapsulates the internal nodes of \classname{bhp}
 instances.  Pointer casting is used to allow arbitrary data types to be used.  A
@@ -25,7 +25,7 @@ priority comparison function must be specified during creation of a
 \subsubsection{API}
 \begin{capi}
 \label{bhpi_new}
-\index{\cfunc{bhpi\_new}{}}
+\index{bhpi_new@\cfunc{bhpi\_new}{}}
 \citem{\cfunc[cw\_bhpi\_t]{bhpi\_new}{cw\_bhpi\_t *a\_bhpi, cw\_mem\_t *a\_mem,
 const void *a\_priority, const void *a\_data, void (*a\_dealloc\_func)(void
 *dealloc\_arg, void *bhpi), void *a\_dealloc\_arg}}
@@ -61,7 +61,7 @@ const void *a\_priority, const void *a\_data, void (*a\_dealloc\_func)(void
 		Constructor.
 	\end{capilist}
 \label{bhpi_delete}
-\index{\cfunc{bhpi\_delete}{}}
+\index{bhpi_delete@\cfunc{bhpi\_delete}{}}
 \citem{\cfunc[void]{bhpi\_delete}{cw\_bhpi\_t *a\_bhpi}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -81,8 +81,8 @@ const void *a\_priority, const void *a\_data, void (*a\_dealloc\_func)(void
 	\end{capilist}
 \label{bhp_new}
 \label{bhp_new_r}
-\index{\cfunc{bhp\_new}{}}
-\index{\cfunc{bhp\_new\_r}{}}
+\index{bhp_new@\cfunc{bhp\_new}{}}
+\index{bhp_new_r@\cfunc{bhp\_new\_r}{}}
 \citem{\cfunc[cw\_bhp\_t *]{bhp\_new}{cw\_bhp\_t *a\_bhp, cw\_mem\_t *a\_mem,
 bhp\_prio\_comp\_t *a\_prio\_comp}}
 \citem{\cfunc[cw\_bhp\_t *]{bhp\_new\_r}{cw\_bhp\_t *a\_bhp, cw\_mem\_t
@@ -110,7 +110,7 @@ bhp\_prio\_comp\_t *a\_prio\_comp}}
 		Non-thread-safe and thread-safe constructors.
 	\end{capilist}
 \label{bhp_delete}
-\index{\cfunc{bhp\_delete}{}}
+\index{bhp_delete@\cfunc{bhp\_delete}{}}
 \citem{\cfunc[void]{bhp\_delete}{cw\_bhp\_t *a\_bhp}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -124,7 +124,7 @@ bhp\_prio\_comp\_t *a\_prio\_comp}}
 		Destructor.
 	\end{capilist}
 \label{bhp_dump}
-\index{\cfunc{bhp\_dump}{}}
+\index{bhp_dump@\cfunc{bhp\_dump}{}}
 \citem{\cfunc[void]{bhp\_dump}{cw\_bhp\_t *a\_bhp}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -142,7 +142,7 @@ bhp\_prio\_comp\_t *a\_prio\_comp}}
 		Print the internal tree to \cvar{out\_err}.
 	\end{capilist}
 \label{bhp_insert}
-\index{\cfunc{bhp\_insert}{}}
+\index{bhp_insert@\cfunc{bhp\_insert}{}}
 \citem{\cfunc[void]{bhp\_insert}{cw\_bhp\_t *a\_bhp, cw\_bhpi\_t *a\_bhpi}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -158,7 +158,7 @@ bhp\_prio\_comp\_t *a\_prio\_comp}}
 		Insert an item into \cvar{a\_bhp}.
 	\end{capilist}
 \label{bhp_min_find}
-\index{\cfunc{bhp\_min\_find}{}}
+\index{bhp_min_find@\cfunc{bhp\_min\_find}{}}
 \citem{\cfunc[cw\_bool\_t]{bhp\_min\_find}{cw\_bhp\_t *a\_bhp, void
 **r\_priority, void **r\_data}}
 	\begin{capilist}
@@ -189,7 +189,7 @@ bhp\_prio\_comp\_t *a\_prio\_comp}}
 		minimum node in \cvar{a\_bhp}.
 	\end{capilist}
 \label{bhp_min_del}
-\index{\cfunc{bhp\_min\_del}{}}
+\index{bhp_min_del@\cfunc{bhp\_min\_del}{}}
 \citem{\cfunc[cw\_bool\_t]{bhp\_min\_del}{cw\_bhp\_t *a\_bhp, void
 **r\_priority, void **r\_data}}
 	\begin{capilist}
@@ -221,7 +221,7 @@ bhp\_prio\_comp\_t *a\_prio\_comp}}
 		\cvar{a\_bhp}.
 	\end{capilist}
 \label{bhp_size_get}
-\index{\cfunc{bhp\_size\_get}{}}
+\index{bhp_size_get@\cfunc{bhp\_size\_get}{}}
 \citem{\cfunc[cw\_uint64\_t]{bhp\_size\_get}{cw\_bhp\_t *a\_bhp}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -239,7 +239,7 @@ bhp\_prio\_comp\_t *a\_prio\_comp}}
 		Return the number of items in \cvar{a\_bhp}.
 	\end{capilist}
 \label{bhp_union}
-\index{\cfunc{bhp\_union}{}}
+\index{bhp_union@\cfunc{bhp\_union}{}}
 \citem{\cfunc[void]{bhp\_union}{cw\_bhp\_t *a\_a, cw\_bhp\_t *a\_b}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -256,7 +256,7 @@ bhp\_prio\_comp\_t *a\_prio\_comp}}
 		after this call, and does not need to be deleted.
 	\end{capilist}
 \label{bhp_priority_compare_uint32}
-\index{\cfunc{bhp\_priority\_compare\_uint32}{}}
+\index{bhp_priority_compare_uint32@\cfunc{bhp\_priority\_compare\_uint32}{}}
 \citem{\cfunc[cw\_sint32\_t]{bhp\_priority\_compare\_uint32}{const void *a\_a,
 const void *a\_b}}
 	\begin{capilist}
@@ -282,7 +282,7 @@ const void *a\_b}}
 		integers.
 	\end{capilist}
 \label{bhp_priority_compare_sint32}
-\index{\cfunc{bhp\_priority\_compare\_sint32}{}}
+\index{bhp_priority_compare_sint32@\cfunc{bhp\_priority\_compare\_sint32}{}}
 \citem{\cfunc[cw\_sint32\_t]{bhp\_priority\_compare\_sint32}{const void *a\_a,
 const void *a\_b}}
 	\begin{capilist}
@@ -308,7 +308,7 @@ const void *a\_b}}
 		integers.
 	\end{capilist}
 \label{bhp_priority_compare_uint64}
-\index{\cfunc{bhp\_priority\_compare\_uint64}{}}
+\index{bhp_priority_compare_uint64@\cfunc{bhp\_priority\_compare\_uint64}{}}
 \citem{\cfunc[cw\_sint32\_t]{bhp\_priority\_compare\_uint64}{const void *a\_a,
 const void *a\_b}}
 	\begin{capilist}

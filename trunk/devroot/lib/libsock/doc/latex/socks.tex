@@ -14,7 +14,7 @@
 
 \subsection{socks}
 \label{socks}
-\index{\classname{socks}{}}
+\index{socks@\classname{socks}{}}
 
 The \classname{socks} class implements a socket listener (server).  The
 \classname{socks} class is used to accept connections to a port and create a
@@ -23,7 +23,7 @@ The \classname{socks} class implements a socket listener (server).  The
 \subsubsection{API}
 \begin{capi}
 \label{socks_new}
-\index{\cfunc{socks\_new}{}}
+\index{socks_new@\cfunc{socks\_new}{}}
 \citem{\cfunc[cw\_socks\_t *]{socks\_new}{void}}
 	\begin{capilist}
 	\item[Input(s): ] None.
@@ -40,7 +40,7 @@ The \classname{socks} class implements a socket listener (server).  The
 		Constructor.
 	\end{capilist}
 \label{socks_delete}
-\index{\cfunc{socks\_delete}{}}
+\index{socks_delete@\cfunc{socks\_delete}{}}
 \citem{\cfunc[void]{socks\_delete}{cw\_socks\_t *a\_socks}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -54,7 +54,7 @@ The \classname{socks} class implements a socket listener (server).  The
 		Destructor.
 	\end{capilist}
 \label{socks_listen}
-\index{\cfunc{socks\_listen}{}}
+\index{socks_listen@\cfunc{socks\_listen}{}}
 \citem{\cfunc[cw\_bool\_t]{socks\_listen}{cw\_socks\_t *a\_socks,
 cw\_uint32\_a\_mask, int *r\_port}}
 	\begin{capilist}
@@ -90,7 +90,7 @@ cw\_uint32\_a\_mask, int *r\_port}}
 		returning.
 	\end{capilist}
 \label{socks_accept}
-\index{\cfunc{socks\_accept}{}}
+\index{socks_accept@\cfunc{socks\_accept}{}}
 \citem{\cfunc[cw\_sock\_t *]{socks\_accept}{cw\_socks\_t *a\_socks, struct
 timespec *a\_timeout, cw\_sock\_t *r\_sock}}
 	\begin{capilist}

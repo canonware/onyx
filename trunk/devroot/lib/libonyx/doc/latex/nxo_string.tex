@@ -14,14 +14,14 @@
 
 \subsection{nxo\_string}
 \label{nxo_string}
-\index{\classname{nxo\_string}{}}
+\index{nxo_string@\classname{nxo\_string}{}}
 
 The \classname{nxo\_string} class is a subclass of the \classname{nxo} class.
 
 \subsubsection{API}
 \begin{capi}
 \label{nxo_string_new}
-\index{\cfunc{nxo\_string\_new}{}}
+\index{nxo_string_new@\cfunc{nxo\_string\_new}{}}
 \citem{\cfunc[void]{nxo\_string\_new}{cw\_nxo\_t *a\_nxo, cw\_nx\_t *a\_nx,
 cw\_bool\_t a\_locking, cw\_uint32\_t a\_len}}
 	\begin{capilist}
@@ -45,7 +45,7 @@ cw\_bool\_t a\_locking, cw\_uint32\_t a\_len}}
 		Constructor.
 	\end{capilist}
 \label{nxo_string_substring_new}
-\index{\cfunc{nxo\_string\_substring\_new}{}}
+\index{nxo_string_substring_new@\cfunc{nxo\_string\_substring\_new}{}}
 \citem{\cfunc[void]{nxo\_string\_substring\_new}{cw\_nxo\_t *a\_nxo, cw\_nxo\_t
 *a\_string, cw\_nx\_t *a\_nx, cw\_uint32\_t a\_offset, cw\_uint32\_t a\_len}}
 	\begin{capilist}
@@ -72,7 +72,7 @@ cw\_bool\_t a\_locking, cw\_uint32\_t a\_len}}
 		Substring constructor.
 	\end{capilist}
 \label{nxo_string_copy}
-\index{\cfunc{nxo\_string\_copy}{}}
+\index{nxo_string_copy@\cfunc{nxo\_string\_copy}{}}
 \citem{\cfunc[void]{nxo\_string\_copy}{cw\_nxo\_t *a\_to, cw\_nxo\_t *a\_from}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -89,7 +89,7 @@ cw\_bool\_t a\_locking, cw\_uint32\_t a\_len}}
 		of \cvar{a\_to} must be at least that of \cvar{a\_from}.
 	\end{capilist}
 \label{nxo_string_len_get}
-\index{\cfunc{nxo\_string\_len\_get}{}}
+\index{nxo_string_len_get@\cfunc{nxo\_string\_len\_get}{}}
 \citem{\cfunc[cw\_uint32\_t]{nxo\_string\_len\_get}{cw\_nxo\_t *a\_nxo}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -107,7 +107,7 @@ cw\_bool\_t a\_locking, cw\_uint32\_t a\_len}}
 		Return the length of \cvar{a\_nxo}.
 	\end{capilist}
 \label{nxo_string_el_get}
-\index{\cfunc{nxo\_string\_el\_get}{}}
+\index{nxo_string_el_get@\cfunc{nxo\_string\_el\_get}{}}
 \citem{\cfunc[void]{nxo\_string\_el\_get}{cw\_nxo\_t *a\_nxo, cw\_nxoi\_t
 a\_offset, cw\_uint8\_t *r\_el}}
 	\begin{capilist}
@@ -132,7 +132,7 @@ a\_offset, cw\_uint8\_t *r\_el}}
 		\cvar{a\_offset}.
 	\end{capilist}
 \label{nxo_string_el_set}
-\index{\cfunc{nxo\_string\_el\_set}{}}
+\index{nxo_string_el_set@\cfunc{nxo\_string\_el\_set}{}}
 \citem{\cfunc[void]{nxo\_string\_el\_set}{cw\_nxo\_t *a\_nxo, cw\_uint8\_t
 a\_el, cw\_nxoi\_t a\_offset}}
 	\begin{capilist}
@@ -153,7 +153,7 @@ a\_el, cw\_nxoi\_t a\_offset}}
 		\cvar{a\_offset}.
 	\end{capilist}
 \label{nxo_string_lock}
-\index{\cfunc{nxo\_string\_lock}{}}
+\index{nxo_string_lock@\cfunc{nxo\_string\_lock}{}}
 \citem{\cfunc[void]{nxo\_string\_lock}{cw\_nxo\_t *a\_nxo}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -167,7 +167,7 @@ a\_el, cw\_nxoi\_t a\_offset}}
 		If implicit locking is activated for \cvar{a\_nxo}, lock it.
 	\end{capilist}
 \label{nxo_string_unlock}
-\index{\cfunc{nxo\_string\_unlock}{}}
+\index{nxo_string_unlock@\cfunc{nxo\_string\_unlock}{}}
 \citem{\cfunc[void]{nxo\_string\_unlock}{cw\_nxo\_t *a\_nxo}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -181,7 +181,7 @@ a\_el, cw\_nxoi\_t a\_offset}}
 		If implicit locking is activated for \cvar{a\_nxo}, unlock it.
 	\end{capilist}
 \label{nxo_string_get}
-\index{\cfunc{nxo\_string\_get}{}}
+\index{nxo_string_get@\cfunc{nxo\_string\_get}{}}
 \citem{\cfunc[cw\_uint8\_t]{nxo\_string\_get}{cw\_nxo\_t *a\_nxo}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -199,7 +199,7 @@ a\_el, cw\_nxoi\_t a\_offset}}
 		Return a pointer to the string internal to \cvar{a\_nxo}.
 	\end{capilist}
 \label{nxo_string_set}
-\index{\cfunc{nxo\_string\_set}{}}
+\index{nxo_string_set@\cfunc{nxo\_string\_set}{}}
 \citem{\cfunc[void]{nxo\_string\_set}{cw\_nxo\_t *a\_nxo, cw\_uint32\_t
 a\_offset, const cw\_uint8\_t *a\_str, cw\_uint32\_t a\_len}}
 	\begin{capilist}

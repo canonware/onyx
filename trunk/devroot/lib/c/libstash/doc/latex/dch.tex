@@ -14,7 +14,7 @@
 
 \subsection{dch}
 \label{dch}
-\index{\classname{dch}{}}
+\index{dch@\classname{dch}{}}
 
 The \classname{dch} class implements dynamic chained hashing.  The
 \classname{dch} class is a wrapper around the \classname{ch} class that enforces
@@ -27,7 +27,7 @@ class documentation for more additional information.
 \begin{capi}
 
 \label{dch_new}
-\index{\cfunc{dch\_new}{}}
+\index{dch_new@\cfunc{dch\_new}{}}
 \citem{\cfunc[]{dch\_new}{cw\_dch\_t *a\_dch, cw\_mem\_t *a\_mem, cw\_uint32\_t
 a\_base\_table, cw\_uint32\_t a\_base\_grow, cw\_uint32\_t a\_base\_shrink,
 cw\_ch\_hash\_t *a\_hash, cw\_ch\_key\_comp\_t *a\_key\_comp}}
@@ -67,7 +67,7 @@ cw\_ch\_hash\_t *a\_hash, cw\_ch\_key\_comp\_t *a\_key\_comp}}
 		Constructor.
 	\end{capilist}
 \label{dch_delete}
-\index{\cfunc{dch\_delete}{}}
+\index{dch_delete@\cfunc{dch\_delete}{}}
 \citem{\cfunc[void]{dch\_delete}{cw\_dch\_t *a\_dch}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -81,7 +81,7 @@ cw\_ch\_hash\_t *a\_hash, cw\_ch\_key\_comp\_t *a\_key\_comp}}
 		Destructor.
 	\end{capilist}
 \label{dch_count}
-\index{\cfunc{dch\_count}{}}
+\index{dch_count@\cfunc{dch\_count}{}}
 \citem{\cfunc[cw\_uint32\_t]{dch\_count}{cw\_dch\_t *a\_dch}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -99,7 +99,7 @@ cw\_ch\_hash\_t *a\_hash, cw\_ch\_key\_comp\_t *a\_key\_comp}}
 		Return the number of items in \cvar{a\_dch}.
 	\end{capilist}
 \label{dch_insert}
-\index{\cfunc{dch\_insert}{}}
+\index{dch_insert@\cfunc{dch\_insert}{}}
 \citem{\cfunc[void]{dch\_insert}{cw\_dch\_t *a\_dch, const void *a\_key, const
 void *a\_data, cw\_chi\_t *a\_chi}}
 	\begin{capilist}
@@ -125,7 +125,7 @@ void *a\_data, cw\_chi\_t *a\_chi}}
 		\classname{chi} container if non-NULL.
 	\end{capilist}
 \label{dch_remove}
-\index{\cfunc{dch\_remove}{}}
+\index{dch_remove@\cfunc{dch\_remove}{}}
 \citem{\cfunc[cw\_bool\_t]{dch\_remove}{cw\_dch\_t *a\_dch, const void
 *a\_search\_key, void **r\_key, void **r\_data, cw\_chi\_t **r\_chi}}
 	\begin{capilist}
@@ -170,7 +170,7 @@ void *a\_data, cw\_chi\_t *a\_chi}}
 		and externally allocated \classname{chi}, respectively.
 	\end{capilist}
 \label{dch_search}
-\index{\cfunc{dch\_search}{}}
+\index{dch_search@\cfunc{dch\_search}{}}
 \citem{\cfunc[cw\_bool\_t]{dch\_search}{cw\_dch\_t *a\_dch, const void *a\_key,
 void **r\_data}}
 	\begin{capilist}
@@ -204,7 +204,7 @@ void **r\_data}}
 		associated data.
 	\end{capilist}
 \label{dch_get_iterate}
-\index{\cfunc{dch\_get\_iterate}{}}
+\index{dch_get_iterate@\cfunc{dch\_get\_iterate}{}}
 \citem{\cfunc[cw\_bool\_t]{dch\_get\_iterate}{cw\_dch\_t *a\_dch, void **r\_key,
 void **r\_data}}
 	\begin{capilist}
@@ -240,7 +240,7 @@ void **r\_data}}
 		newest item in \cvar{a\_dch}.
 	\end{capilist}
 \label{dch_remove_iterate}
-\index{\cfunc{dch\_remove\_iterate}{}}
+\index{dch_remove_iterate@\cfunc{dch\_remove\_iterate}{}}
 \citem{\cfunc[cw\_bool\_t]{dch\_remove\_iterate}{cw\_dch\_t *a\_dch,  void
 **r\_key, void **r\_data, cw\_chi\_t **r\_chi}}
 	\begin{capilist}
@@ -283,7 +283,7 @@ void **r\_data}}
 		\cvar{a\_dch}.
 	\end{capilist}
 \label{dch_dump}
-\index{\cfunc{dch\_dump}{}}
+\index{dch_dump@\cfunc{dch\_dump}{}}
 \citem{\cfunc[void]{dch\_dump}{cw\_dch\_t *a\_dch, const char *a\_prefix}}
 	\begin{capilist}
 	\item[Input(s): ]

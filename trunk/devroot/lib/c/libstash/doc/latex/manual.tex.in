@@ -98,7 +98,7 @@ defines the following exceptions:
 \section{API}
 \begin{capi}
 \label{libstash_init}
-\index{\cfunc{libstash\_init}{}}
+\index{libstash_init@\cfunc{libstash\_init}{}}
 \citem{\cfunc[void]{libstash\_init}{void}}
 	\begin{capilist}
 	\item[Input(s): ] None.
@@ -113,7 +113,7 @@ defines the following exceptions:
 		output to file descriptor 1).
 	\end{capilist}
 \label{libstash_shutdown}
-\index{\cfunc{libstash\_shutdown}{}}
+\index{libstash_shutdown@\cfunc{libstash\_shutdown}{}}
 \citem{\cfunc[void]{libstash\_shutdown}{void}}
 	\begin{capilist}
 	\item[Input(s): ] None.
@@ -124,7 +124,7 @@ defines the following exceptions:
 		\cfunc{libstash\_init}{}.
 	\end{capilist}
 \label{_cw_assert}
-\index{\cppmacro{\_cw\_assert}{}}
+\index{_cw_assert@\cppmacro{\_cw\_assert}{}}
 \citem{\cppmacro[void]{\_cw\_assert}{expression}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -143,7 +143,7 @@ defines the following exceptions:
 		\libname{libstash}.
 	\end{capilist}
 \label{_cw_not_reached}
-\index{\cppmacro{\_cw\_not\_reached}{}}
+\index{_cw_not_reached@\cppmacro{\_cw\_not\_reached}{}}
 \citem{\cppmacro[void]{\_cw\_not\_reached}{void}}
 	\begin{capilist}
 	\item[Input(s): ] None.
@@ -154,7 +154,7 @@ defines the following exceptions:
 		\libname{libstash}.
 	\end{capilist}
 \label{_cw_error}
-\index{\cppmacro{\_cw\_error}{}}
+\index{_cw_error@\cppmacro{\_cw\_error}{}}
 \citem{\cppmacro[void]{\_cw\_error}{const char *a\_str}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -171,7 +171,7 @@ defines the following exceptions:
 		return, to file descriptor 2.
 	\end{capilist}
 \label{_cw_ntohq}
-\index{\cppmacro{\_cw\_ntohq}{}}
+\index{_cw_ntohq@\cppmacro{\_cw\_ntohq}{}}
 \citem{\cppmacro[cw\_uint64\_t]{\_cw\_ntohq}{cw\_uint64\_t a\_val}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -190,7 +190,7 @@ defines the following exceptions:
 		and return the result.
 	\end{capilist}
 \label{_cw_htonq}
-\index{\cppmacro{\_cw\_htonq}{}}
+\index{_cw_htonq@\cppmacro{\_cw\_htonq}{}}
 \citem{\cppmacro[cw\_uint64\_t]{\_cw\_htonq}{cw\_uint64\_t a\_val}}
 	\begin{capilist}
 	\item[Input(s): ]

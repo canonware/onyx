@@ -14,7 +14,7 @@
 
 \subsection{ql}
 \label{ql}
-\index{\classname{ql}{}}
+\index{ql@\classname{ql}{}}
 
 The \classname{ql} macros implement operations on a list.  The type of the list
 elements and which field of the elements to use are determined by arguments that
@@ -34,7 +34,7 @@ caveat that operations on one \classname{ql} can have side-effects on another.
 \subsubsection{API}
 \begin{capi}
 \label{ql_head}
-\index{\cppmacro{ql\_head}{}}
+\index{ql_head@\cppmacro{ql\_head}{}}
 \citem{\cppmacro[]{ql\_head}{{\lt}ql\_type{\gt} a\_type}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -49,7 +49,7 @@ caveat that operations on one \classname{ql} can have side-effects on another.
 		Generate code for a \classname{ql} head data structure.
 	\end{capilist}
 \label{ql_head_initializer}
-\index{\cppmacro{ql\_head\_initializer}{}}
+\index{ql_head_initializer@\cppmacro{ql\_head\_initializer}{}}
 \citem{\cppmacro[]{ql\_head\_initializer}{{\lt}ql\_type{\gt} *a\_head}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -63,7 +63,7 @@ caveat that operations on one \classname{ql} can have side-effects on another.
 		Statically initialize a \classname{ql} head.
 	\end{capilist}
 \label{ql_elm}
-\index{\cppmacro{ql\_elm}{}}
+\index{ql_elm@\cppmacro{ql\_elm}{}}
 \citem{\cppmacro[]{ql\_elm}{{\lt}ql\_type{\gt} a\_type}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -78,7 +78,7 @@ caveat that operations on one \classname{ql} can have side-effects on another.
 		Generate code for a \classname{ql} element data structure.
 	\end{capilist}
 \label{ql_new}
-\index{\cppmacro{ql\_new}{}}
+\index{ql_new@\cppmacro{ql\_new}{}}
 \citem{\cppmacro[void]{ql\_new}{{\lt}ql\_head{\gt} *a\_head}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -92,7 +92,7 @@ caveat that operations on one \classname{ql} can have side-effects on another.
 		Constructor.
 	\end{capilist}
 \label{ql_elm_new}
-\index{\cppmacro{ql\_elm\_new}{}}
+\index{ql_elm_new@\cppmacro{ql\_elm\_new}{}}
 \citem{\cppmacro[void]{ql\_elm\_new}{{\lt}ql\_type{\gt} *a\_elm,
 {\lt}field\_name{\gt} a\_field}}
 	\begin{capilist}
@@ -109,7 +109,7 @@ caveat that operations on one \classname{ql} can have side-effects on another.
 		Constructor.
 	\end{capilist}
 \label{ql_first}
-\index{\cppmacro{ql\_first}{}}
+\index{ql_first@\cppmacro{ql\_first}{}}
 \citem{\cppmacro[{\lt}ql\_type{\gt} *]{ql\_first}{{\lt}ql\_head{\gt}
 *a\_head}}
 	\begin{capilist}
@@ -133,7 +133,7 @@ caveat that operations on one \classname{ql} can have side-effects on another.
 		Return a pointer to the first element in the \classname{ql}.
 	\end{capilist}
 \label{ql_last}
-\index{\cppmacro{ql\_last}{}}
+\index{ql_last@\cppmacro{ql\_last}{}}
 \citem{\cppmacro[{\lt}ql\_type{\gt} *]{ql\_last}{{\lt}ql\_head{\gt}
 *a\_head}}
 	\begin{capilist}
@@ -157,7 +157,7 @@ caveat that operations on one \classname{ql} can have side-effects on another.
 		Return a pointer to the last element in the \classname{ql}.
 	\end{capilist}
 \label{ql_next}
-\index{\cppmacro{ql\_next}{}}
+\index{ql_next@\cppmacro{ql\_next}{}}
 \citem{\cppmacro[{\lt}ql\_type{\gt} *]{ql\_next}{{\lt}ql\_head{\gt} *a\_head,
 {\lt}ql\_type{\gt} *a\_elm, {\lt}field\_name{\gt} a\_field}}
 	\begin{capilist}
@@ -187,7 +187,7 @@ caveat that operations on one \classname{ql} can have side-effects on another.
 		\cvar{a\_elm}.
 	\end{capilist}
 \label{ql_prev}
-\index{\cppmacro{ql\_prev}{}}
+\index{ql_prev@\cppmacro{ql\_prev}{}}
 \citem{\cppmacro[{\lt}ql\_type{\gt} *]{ql\_prev}{{\lt}ql\_head{\gt} *a\_head,
 {\lt}ql\_type{\gt} *a\_elm, {\lt}field\_name{\gt} a\_field}}
 	\begin{capilist}
@@ -217,7 +217,7 @@ caveat that operations on one \classname{ql} can have side-effects on another.
 		\cvar{a\_elm}.
 	\end{capilist}
 \label{ql_before_insert}
-\index{\cppmacro{ql\_before\_insert}{}}
+\index{ql_before_insert@\cppmacro{ql\_before\_insert}{}}
 \citem{\cppmacro[void]{ql\_before\_insert}{{\lt}ql\_head{\gt} *a\_head,
 {\lt}ql\_type{\gt} *a\_qlelm, {\lt}ql\_type{\gt} *a\_elm, {\lt}field\_name{\gt}
 a\_field}}
@@ -239,7 +239,7 @@ a\_field}}
 		Insert \cvar{a\_elm} into \cvar{a\_head} before \cvar{a\_qlelm}.
 	\end{capilist}
 \label{ql_after_insert}
-\index{\cppmacro{ql\_after\_insert}{}}
+\index{ql_after_insert@\cppmacro{ql\_after\_insert}{}}
 \citem{\cppmacro[void]{ql\_after\_insert}{{\lt}ql\_head{\gt} *a\_head,
 {\lt}ql\_type{\gt} *a\_qlelm, {\lt}ql\_type{\gt} *a\_elm, {\lt}field\_name{\gt}
 a\_field}}
@@ -261,7 +261,7 @@ a\_field}}
 		Insert \cvar{a\_elm} into \cvar{a\_head} after \cvar{a\_qlelm}.
 	\end{capilist}
 \label{ql_head_insert}
-\index{\cppmacro{ql\_head\_insert}{}}
+\index{ql_head_insert@\cppmacro{ql\_head\_insert}{}}
 \citem{\cppmacro[void]{ql\_head\_insert}{{\lt}ql\_head{\gt} *a\_head,
 {\lt}ql\_type{\gt} *a\_elm, {\lt}field\_name{\gt} a\_field}}
 	\begin{capilist}
@@ -280,7 +280,7 @@ a\_field}}
 		Insert \cvar{a\_elm} at the head of \cvar{a\_head}.
 	\end{capilist}
 \label{ql_tail_insert}
-\index{\cppmacro{ql\_tail\_insert}{}}
+\index{ql_tail_insert@\cppmacro{ql\_tail\_insert}{}}
 \citem{\cppmacro[void]{ql\_tail\_insert}{{\lt}ql\_head{\gt} *a\_head,
 {\lt}ql\_type{\gt} *a\_elm, {\lt}field\_name{\gt} a\_field}}
 	\begin{capilist}
@@ -299,7 +299,7 @@ a\_field}}
 		Insert \cvar{a\_elm} at the tail of \cvar{a\_head}.
 	\end{capilist}
 \label{ql_remove}
-\index{\cppmacro{ql\_remove}{}}
+\index{ql_remove@\cppmacro{ql\_remove}{}}
 \citem{\cppmacro[void]{ql\_remove}{{\lt}ql\_head{\gt} *a\_head,
 {\lt}ql\_type{\gt} *a\_elm, {\lt}field\_name{\gt} a\_field}}
 	\begin{capilist}
@@ -318,7 +318,7 @@ a\_field}}
 		Remove \cvar{a\_elm} from \cvar{a\_head}.
 	\end{capilist}
 \label{ql_head_remove}
-\index{\cppmacro{ql\_head\_remove}{}}
+\index{ql_head_remove@\cppmacro{ql\_head\_remove}{}}
 \citem{\cppmacro[void]{ql\_head\_remove}{{\lt}ql\_head{\gt} *a\_head,
 {\lt}ql\_type{\gt} a\_type, {\lt}field\_name{\gt} a\_field}}
 	\begin{capilist}
@@ -337,7 +337,7 @@ a\_field}}
 		Remove the head element of \cvar{a\_head}.
 	\end{capilist}
 \label{ql_tail_remove}
-\index{\cppmacro{ql\_tail\_remove}{}}
+\index{ql_tail_remove@\cppmacro{ql\_tail\_remove}{}}
 \citem{\cppmacro[void]{ql\_tail\_remove}{{\lt}ql\_head{\gt} *a\_head,
 {\lt}ql\_type{\gt} a\_type, {\lt}field\_name{\gt} a\_field}}
 	\begin{capilist}
@@ -356,7 +356,7 @@ a\_field}}
 		Remove the tail element of \cvar{a\_head}.
 	\end{capilist}
 \label{ql_foreach}
-\index{\cppmacro{ql\_foreach}{}}
+\index{ql_foreach@\cppmacro{ql\_foreach}{}}
 \citem{\cppmacro[]{ql\_foreach}{{\lt}ql\_type{\gt} *a\_var, {\lt}ql\_type{\gt}
 *a\_head, {\lt}field\_name{\gt} a\_field}}
 	\begin{capilist}
@@ -376,7 +376,7 @@ a\_field}}
 		element in \cvar{a\_var} along the way.
 	\end{capilist}
 \label{ql_foreach_reverse}
-\index{\cppmacro{ql\_foreach\_reverse}{}}
+\index{ql_foreach_reverse@\cppmacro{ql\_foreach\_reverse}{}}
 \citem{\cppmacro[]{ql\_foreach\_reverse}{{\lt}ql\_type{\gt} *a\_var,
 {\lt}ql\_type{\gt} *a\_head, {\lt}field\_name{\gt} a\_field}}
 	\begin{capilist}

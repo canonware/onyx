@@ -14,14 +14,14 @@
 
 \subsection{nxo\_array}
 \label{nxo_array}
-\index{\classname{nxo\_array}{}}
+\index{nxo_array@\classname{nxo\_array}{}}
 
 The \classname{nxo\_array} class is a subclass of the \classname{nxo} class.
 
 \subsubsection{API}
 \begin{capi}
 \label{nxo_array_new}
-\index{\cfunc{nxo\_array\_new}{}}
+\index{nxo_array_new@\cfunc{nxo\_array\_new}{}}
 \citem{\cfunc[void]{nxo\_array\_new}{cw\_nxo\_t *a\_nxo, cw\_nx\_t *a\_nx,
 cw\_bool\_t a\_locking, cw\_uint32\_t a\_len}}
 	\begin{capilist}
@@ -45,7 +45,7 @@ cw\_bool\_t a\_locking, cw\_uint32\_t a\_len}}
 		Constructor.
 	\end{capilist}
 \label{nxo_array_subarray_new}
-\index{\cfunc{nxo\_array\_subarray\_new}{}}
+\index{nxo_array_subarray_new@\cfunc{nxo\_array\_subarray\_new}{}}
 \citem{\cfunc[void]{nxo\_array\_subarray\_new}{cw\_nxo\_t *a\_nxo, cw\_nxo\_t
 *a\_array, cw\_nx\_t *a\_nx, cw\_uint32\_t a\_offset, cw\_uint32\_t a\_len}}
 	\begin{capilist}
@@ -72,7 +72,7 @@ cw\_bool\_t a\_locking, cw\_uint32\_t a\_len}}
 		Subarray constructor.
 	\end{capilist}
 \label{nxo_array_copy}
-\index{\cfunc{nxo\_array\_copy}{}}
+\index{nxo_array_copy@\cfunc{nxo\_array\_copy}{}}
 \citem{\cfunc[void]{nxo\_array\_copy}{cw\_nxo\_t *a\_to, cw\_nxo\_t *a\_from}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -89,7 +89,7 @@ cw\_bool\_t a\_locking, cw\_uint32\_t a\_len}}
 		of \cvar{a\_to} must be at least that of \cvar{a\_from}.
 	\end{capilist}
 \label{nxo_array_len_get}
-\index{\cfunc{nxo\_array\_len\_get}{}}
+\index{nxo_array_len_get@\cfunc{nxo\_array\_len\_get}{}}
 \citem{\cfunc[cw\_uint32\_t]{nxo\_array\_len\_get}{cw\_nxo\_t *a\_nxo}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -107,7 +107,7 @@ cw\_bool\_t a\_locking, cw\_uint32\_t a\_len}}
 		Return the number of elements in \cvar{a\_nxo}.
 	\end{capilist}
 \label{nxo_array_el_get}
-\index{\cfunc{nxo\_array\_el\_get}{}}
+\index{nxo_array_el_get@\cfunc{nxo\_array\_el\_get}{}}
 \citem{\cfunc[void]{nxo\_array\_el\_get}{cw\_nxo\_t *a\_nxo, cw\_nxoi\_t
 a\_offset, cw\_nxo\_t *r\_el}}
 	\begin{capilist}
@@ -132,7 +132,7 @@ a\_offset, cw\_nxo\_t *r\_el}}
 		\cvar{a\_offset}.
 	\end{capilist}
 \label{nxo_array_el_set}
-\index{\cfunc{nxo\_array\_el\_set}{}}
+\index{nxo_array_el_set@\cfunc{nxo\_array\_el\_set}{}}
 \citem{\cfunc[void]{nxo\_array\_el\_set}{cw\_nxo\_t *a\_nxo, cw\_nxo\_t *a\_el,
 cw\_nxoi\_t a\_offset}}
 	\begin{capilist}

@@ -14,7 +14,7 @@
 
 \subsection{thd}
 \label{thd}
-\index{\classname{thd}{}}
+\index{thd@\classname{thd}{}}
 
 The \classname{thd} class implements a wrapper around the system threads library
 (POSIX threads only, so far).  In most regards, this is a thin wrapper around
@@ -35,7 +35,7 @@ interrupted: \cfunc{read}{}, \cfunc{write}{}, \cfunc{sendto}{},
 \subsubsection{API}
 \begin{capi}
 \label{thd_new}
-\index{\cfunc{thd\_new}{}}
+\index{thd_new@\cfunc{thd\_new}{}}
 \citem{\cfunc[cw\_thd\_t]{thd\_new}{void *(*a\_start\_func)(void *), void
 *a\_arg, cw\_bool\_t a\_suspendible}}
 	\begin{capilist}
@@ -61,7 +61,7 @@ interrupted: \cfunc{read}{}, \cfunc{write}{}, \cfunc{sendto}{},
 		Constructor (creates a new thread).
 	\end{capilist}
 \label{thd_delete}
-\index{\cfunc{thd\_delete}{}}
+\index{thd_delete@\cfunc{thd\_delete}{}}
 \citem{\cfunc[void]{thd\_delete}{cw\_thd\_t *a\_thd}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -74,7 +74,7 @@ interrupted: \cfunc{read}{}, \cfunc{write}{}, \cfunc{sendto}{},
 		Destructor.
 	\end{capilist}
 \label{thd_join}
-\index{\cfunc{thd\_join}{}}
+\index{thd_join@\cfunc{thd\_join}{}}
 \citem{\cfunc[void *]{thd\_join}{cw\_thd\_t *a\_thd}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -91,7 +91,7 @@ interrupted: \cfunc{read}{}, \cfunc{write}{}, \cfunc{sendto}{},
 		Join (wait for) the thread associated with \cvar{a\_thd}.
 	\end{capilist}
 \label{thd_self}
-\index{\cfunc{thd\_self}{}}
+\index{thd_self@\cfunc{thd\_self}{}}
 \citem{\cfunc[cw\_thd\_t *]{thd\_self}{void}}
 	\begin{capilist}
 	\item[Input(s): ] None.
@@ -107,7 +107,7 @@ interrupted: \cfunc{read}{}, \cfunc{write}{}, \cfunc{sendto}{},
 		corresponds to the calling thread.
 	\end{capilist}
 \label{thd_yield}
-\index{\cfunc{thd\_yield}{}}
+\index{thd_yield@\cfunc{thd\_yield}{}}
 \citem{\cfunc[void]{thd\_yield}{void}}
 	\begin{capilist}
 	\item[Input(s): ] None.
@@ -117,7 +117,7 @@ interrupted: \cfunc{read}{}, \cfunc{write}{}, \cfunc{sendto}{},
 		Give up the rest of the calling thread's time slice.
 	\end{capilist}
 \label{thd_sigmask}
-\index{\cfunc{thd\_sigmask}{}}
+\index{thd_sigmask@\cfunc{thd\_sigmask}{}}
 \citem{\cfunc[int]{thd\_sigmask}{int a\_how, const sigset\_t *a\_set, sigset\_t
 *r\_oset}}
 	\begin{capilist}
@@ -154,7 +154,7 @@ interrupted: \cfunc{read}{}, \cfunc{write}{}, \cfunc{sendto}{},
 		Set the calling thread's signal mask.
 	\end{capilist}
 \label{thd_crit_enter}
-\index{\cfunc{thd\_crit\_enter}{}}
+\index{thd_crit_enter@\cfunc{thd\_crit\_enter}{}}
 \citem{\cfunc[void]{thd\_crit\_enter}{void}}
 	\begin{capilist}
 	\item[Input(s): ] None.
@@ -166,7 +166,7 @@ interrupted: \cfunc{read}{}, \cfunc{write}{}, \cfunc{sendto}{},
 		or \cfunc{thd\_single\_enter}{}.
 	\end{capilist}
 \label{thd_crit_leave}
-\index{\cfunc{thd\_crit\_leave}{}}
+\index{thd_crit_leave@\cfunc{thd\_crit\_leave}{}}
 \citem{\cfunc[void]{thd\_crit\_leave}{void}}
 	\begin{capilist}
 	\item[Input(s): ] None.
@@ -177,7 +177,7 @@ interrupted: \cfunc{read}{}, \cfunc{write}{}, \cfunc{sendto}{},
 		suspended.
 	\end{capilist}
 \label{thd_single_enter}
-\index{\cfunc{thd\_single\_enter}{}}
+\index{thd_single_enter@\cfunc{thd\_single\_enter}{}}
 \citem{\cfunc[void]{thd\_single\_enter}{void}}
 	\begin{capilist}
 	\item[Input(s): ] None.
@@ -188,7 +188,7 @@ interrupted: \cfunc{read}{}, \cfunc{write}{}, \cfunc{sendto}{},
 		be suspended.
 	\end{capilist}
 \label{thd_single_leave}
-\index{\cfunc{thd\_single\_leave}{}}
+\index{thd_single_leave@\cfunc{thd\_single\_leave}{}}
 \citem{\cfunc[void]{thd\_single\_leave}{void}}
 	\begin{capilist}
 	\item[Input(s): ] None.
@@ -200,7 +200,7 @@ interrupted: \cfunc{read}{}, \cfunc{write}{}, \cfunc{sendto}{},
 		\cfunc{thd\_single\_enter}{} are resumed.
 	\end{capilist}
 \label{thd_suspend}
-\index{\cfunc{thd\_suspend}{}}
+\index{thd_suspend@\cfunc{thd\_suspend}{}}
 \citem{\cfunc[void]{thd\_suspend}{cw\_thd\_t *a\_thd}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -214,7 +214,7 @@ interrupted: \cfunc{read}{}, \cfunc{write}{}, \cfunc{sendto}{},
 		Suspend \cvar{a\_thd}.
 	\end{capilist}
 \label{thd_trysuspend}
-\index{\cfunc{thd\_trysuspend}{}}
+\index{thd_trysuspend@\cfunc{thd\_trysuspend}{}}
 \citem{\cfunc[cw\_bool\_t]{thd\_trysuspend}{cw\_thd\_t *a\_thd}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -238,7 +238,7 @@ interrupted: \cfunc{read}{}, \cfunc{write}{}, \cfunc{sendto}{},
 		section.
 	\end{capilist}
 \label{thd_resume}
-\index{\cfunc{thd\_resume}{}}
+\index{thd_resume@\cfunc{thd\_resume}{}}
 \citem{\cfunc[void]{thd\_resume}{cw\_thd\_t *a\_thd}}
 	\begin{capilist}
 	\item[Input(s): ]

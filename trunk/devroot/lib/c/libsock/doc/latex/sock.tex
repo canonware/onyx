@@ -14,7 +14,7 @@
 
 \subsection{sock}
 \label{sock}
-\index{\classname{sock}{}}
+\index{sock@\classname{sock}{}}
 
 The \classname{sock} class encapsulates a TCP/IP socket and provides an
 abstracted API that allows completely asynchronous socket I/O.
@@ -22,7 +22,7 @@ abstracted API that allows completely asynchronous socket I/O.
 \subsubsection{API}
 \begin{capi}
 \label{sock_new}
-\index{\cfunc{sock\_new}{}}
+\index{sock_new@\cfunc{sock\_new}{}}
 \citem{\cfunc[cw\_sock\_t *]{sock\_new}{cw\_sock\_t *a\_sock, cw\_uint32\_t
 a\_in\_max\_buf\_size}}
 	\begin{capilist}
@@ -48,7 +48,7 @@ a\_in\_max\_buf\_size}}
 		Constructor.
 	\end{capilist}
 \label{sock_delete}
-\index{\cfunc{sock\_delete}{}}
+\index{sock_delete@\cfunc{sock\_delete}{}}
 \citem{\cfunc[void]{sock\_delete}{cw\_sock\_t *a\_sock}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -62,7 +62,7 @@ a\_in\_max\_buf\_size}}
 		Destructor.
 	\end{capilist}
 \label{sock_is_connected}
-\index{\cfunc{sock\_is\_connected}{}}
+\index{sock_is_connected@\cfunc{sock\_is\_connected}{}}
 \citem{\cfunc[cw\_bool\_t]{sock\_is\_connected}{cw\_sock\_t *a\_sock}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -85,7 +85,7 @@ a\_in\_max\_buf\_size}}
 		Return TRUE if \cvar{a\_sock} is connected.
 	\end{capilist}
 \label{sock_port_get}
-\index{\cfunc{sock\_port\_get}{}}
+\index{sock_port_get@\cfunc{sock\_port\_get}{}}
 \citem{\cfunc[cw\_uint32\_t]{sock\_port\_get}{cw\_sock\_t *a\_sock}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -103,7 +103,7 @@ a\_in\_max\_buf\_size}}
 		Return the local port number for \cvar{a\_sock}.
 	\end{capilist}
 \label{sock_connect}
-\index{\cfunc{sock\_connect}{}}
+\index{sock_connect@\cfunc{sock\_connect}{}}
 \citem{\cfunc[cw\_sint32\_t]{sock\_connect}{cw\_sock\_t *a\_sock, const char
 *a\_server\_host, int a\_port, struct timespec *a\_timeout}}
 	\begin{capilist}
@@ -140,7 +140,7 @@ a\_in\_max\_buf\_size}}
 		attempt completing a non-blocking connect.
 	\end{capilist}
 \label{sock_wrap}
-\index{\cfunc{sock\_wrap}{}}
+\index{sock_wrap@\cfunc{sock\_wrap}{}}
 \citem{\cfunc[cw\_bool\_t]{sock\_wrap}{cw\_sock\_t *a\_sock, int a\_sockfd,
 cw\_bool\_t a\_init}}
 	\begin{capilist}
@@ -169,7 +169,7 @@ cw\_bool\_t a\_init}}
 		Wrap an open socket descriptor inside \cvar{a\_sock}.
 	\end{capilist}
 \label{sock_disconnect}
-\index{\cfunc{sock\_disconnect}{}}
+\index{sock_disconnect@\cfunc{sock\_disconnect}{}}
 \citem{\cfunc[cw\_bool\_t]{sock\_disconnect}{cw\_sock\_t *a\_sock}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -193,7 +193,7 @@ cw\_bool\_t a\_init}}
 		Disconnect \cvar{a\_sock}.
 	\end{capilist}
 \label{sock_buffered_in}
-\index{\cfunc{sock\_buffered\_in}{}}
+\index{sock_buffered_in@\cfunc{sock\_buffered\_in}{}}
 \citem{\cfunc[cw\_uint32\_t]{sock\_buffered\_in}{cw\_sock\_t *a\_sock}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -211,7 +211,7 @@ cw\_bool\_t a\_init}}
 		Return the number of bytes of buffered incoming data.
 	\end{capilist}
 \label{sock_read}
-\index{\cfunc{sock\_read}{}}
+\index{sock_read@\cfunc{sock\_read}{}}
 \citem{\cfunc[cw\_sint32\_t]{sock\_read}{cw\_sock\_t *a\_sock, cw\_buf\_t
 *a\_spare, cw\_sint32\_t a\_max\_read, struct timespec *a\_timeout}}
 	\begin{capilist}
@@ -253,7 +253,7 @@ cw\_bool\_t a\_init}}
 		expires.
 	\end{capilist}
 \label{sock_write}
-\index{\cfunc{sock\_write}{}}
+\index{sock_write@\cfunc{sock\_write}{}}
 \citem{\cfunc[cw\_bool\_t]{sock\_write}{cw\_sock\_t *a\_sock, cw\_buf\_t
 *a\_buf}}
 	\begin{capilist}
@@ -280,7 +280,7 @@ cw\_bool\_t a\_init}}
 		Queue the data in \cvar{a\_buf} for asynchronous writing.
 	\end{capilist}
 \label{sock_out_flush}
-\index{\cfunc{sock\_out\_flush}{}}
+\index{sock_out_flush@\cfunc{sock\_out\_flush}{}}
 \citem{\cfunc[cw\_bool\_t]{sock\_out\_flush}{cw\_sock\_t *a\_sock}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -302,7 +302,7 @@ cw\_bool\_t a\_init}}
 		all been sent), and do not return until done.
 	\end{capilist}
 \label{sock_fd_get}
-\index{\cfunc{sock\_fd\_get}{}}
+\index{sock_fd_get@\cfunc{sock\_fd\_get}{}}
 \citem{\cfunc[int]{sock\_fd\_get}{cw\_sock\_t *a\_sock}}
 	\begin{capilist}
 	\item[Input(s): ]

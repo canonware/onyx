@@ -14,7 +14,7 @@
 
 \subsection{qr}
 \label{qr}
-\index{\classname{qr}{}}
+\index{qr@\classname{qr}{}}
 
 The \classname{qr} macros implement operations on a ring.  The type of the ring
 elements and which field of the elements to use are determined by arguments that
@@ -26,7 +26,7 @@ happen.
 \subsubsection{API}
 \begin{capi}
 %\label{qr}
-\index{\cppmacro{qr}{}}
+\index{qr@\cppmacro{qr}{}}
 \citem{\cppmacro[]{qr}{{\lt}qr\_type{\gt} a\_type}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -41,7 +41,7 @@ happen.
 		Generate code for a \classname{qr} data structure.
 	\end{capilist}
 \label{qr_new}
-\index{\cppmacro{qr\_new}{}}
+\index{qr_new@\cppmacro{qr\_new}{}}
 \citem{\cppmacro[void]{qr\_new}{{\lt}qr\_type{\gt} *a\_qr, {\lt}field\_name{\gt}
 a\_field}}
 	\begin{capilist}
@@ -58,7 +58,7 @@ a\_field}}
 		Constructor.
 	\end{capilist}
 \label{qr_next}
-\index{\cppmacro{qr\_next}{}}
+\index{qr_next@\cppmacro{qr\_next}{}}
 \citem{\cppmacro[{\lt}qr\_type{\gt} *]{qr\_next}{{\lt}qr\_type{\gt} *a\_qr,
 {\lt}field\_name{\gt} a\_field}}
 	\begin{capilist}
@@ -79,7 +79,7 @@ a\_field}}
 		Return a pointer to the next element in the \classname{qr}.
 	\end{capilist}
 \label{qr_prev}
-\index{\cppmacro{qr\_prev}{}}
+\index{qr_prev@\cppmacro{qr\_prev}{}}
 \citem{\cppmacro[{\lt}qr\_type{\gt} *]{qr\_prev}{{\lt}qr\_type{\gt} *a\_qr,
 {\lt}field\_name{\gt} a\_field}}
 	\begin{capilist}
@@ -100,7 +100,7 @@ a\_field}}
 		Return a pointer to the previous element in the \classname{qr}.
 	\end{capilist}
 \label{qr_before_insert}
-\index{\cppmacro{qr\_before\_insert}{}}
+\index{qr_before_insert@\cppmacro{qr\_before\_insert}{}}
 \citem{\cppmacro[void]{qr\_before\_insert}{{\lt}qr\_type{\gt} *a\_qrelm,
 {\lt}qr\_type{\gt} *a\_qr, {\lt}field\_name{\gt} a\_field}}
 	\begin{capilist}
@@ -120,7 +120,7 @@ a\_field}}
 		Insert \cvar{a\_qr} before \cvar{a\_qrelm}.
 	\end{capilist}
 \label{qr_after_insert}
-\index{\cppmacro{qr\_after\_insert}{}}
+\index{qr_after_insert@\cppmacro{qr\_after\_insert}{}}
 \citem{\cppmacro[void]{qr\_after\_insert}{{\lt}qr\_type{\gt} *a\_qrelm,
 {\lt}qr\_type{\gt} *a\_qr, {\lt}field\_name{\gt} a\_field}}
 	\begin{capilist}
@@ -140,7 +140,7 @@ a\_field}}
 		Insert \cvar{a\_qr} after \cvar{a\_qrelm}.
 	\end{capilist}
 \label{qr_meld}
-\index{\cppmacro{qr\_meld}{}}
+\index{qr_meld@\cppmacro{qr\_meld}{}}
 \citem{\cppmacro[void]{qr\_meld}{{\lt}qr\_type{\gt} *a\_qr\_a,
 {\lt}qr\_type{\gt} *a\_qr\_b, {\lt}field\_name{\gt} a\_field}}
 	\begin{capilist}
@@ -159,7 +159,7 @@ a\_field}}
 		Meld \cvar{a\_qr\_a} and \cvar{a\_qr\_b} into one ring.
 	\end{capilist}
 \label{qr_split}
-\index{\cppmacro{qr\_split}{}}
+\index{qr_split@\cppmacro{qr\_split}{}}
 \citem{\cppmacro[void]{qr\_split}{{\lt}qr\_type{\gt} *a\_qr\_a,
 {\lt}qr\_type{\gt} *a\_qr\_b, {\lt}field\_name{\gt} a\_field}}
 	\begin{capilist}
@@ -178,7 +178,7 @@ a\_field}}
 		Split a ring at \cvar{a\_qr\_a} and \cvar{a\_qr\_b}.
 	\end{capilist}
 \label{qr_remove}
-\index{\cppmacro{qr\_remove}{}}
+\index{qr_remove@\cppmacro{qr\_remove}{}}
 \citem{\cppmacro[void]{qr\_remove}{{\lt}qr\_type{\gt} *a\_qr,
 {\lt}field\_name{\gt} a\_field}}
 	\begin{capilist}
@@ -195,7 +195,7 @@ a\_field}}
 		Remove \cvar{a\_qr} from the ring.
 	\end{capilist}
 \label{qr_foreach}
-\index{\cppmacro{qr\_foreach}{}}
+\index{qr_foreach@\cppmacro{qr\_foreach}{}}
 \citem{\cppmacro[]{qr\_foreach}{{\lt}qr\_type{\gt} *a\_var, {\lt}qr\_type{\gt}
 *a\_qr, {\lt}field\_name{\gt} a\_field}}
 	\begin{capilist}
@@ -215,7 +215,7 @@ a\_field}}
 		element in \cvar{a\_var} along the way.
 	\end{capilist}
 \label{qr_foreach_reverse}
-\index{\cppmacro{qr\_foreach\_reverse}{}}
+\index{qr_foreach_reverse@\cppmacro{qr\_foreach\_reverse}{}}
 \citem{\cppmacro[]{qr\_foreach\_reverse}{{\lt}qr\_type{\gt} *a\_var,
 {\lt}qr\_type{\gt} *a\_qr, {\lt}field\_name{\gt} a\_field}}
 	\begin{capilist}

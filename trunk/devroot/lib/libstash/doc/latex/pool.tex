@@ -14,7 +14,7 @@
 
 \subsection{pool}
 \label{pool}
-\index{\classname{pool}{}}
+\index{pool@\classname{pool}{}}
 
 The \classname{pool} class provides cached allocation for equal-size buffers.
 Each allocation is done via \cfunc{mem\_malloc}{}, and deallocated buffers are
@@ -27,7 +27,7 @@ memory leaks and other memory allocation errors can be detected and printed to
 \subsubsection{API}
 \begin{capi}
 \label{pool_new}
-\index{\cfunc{pool\_new}{}}
+\index{pool_new@\cfunc{pool\_new}{}}
 \citem{\cfunc[cw\_pool\_t *]{pool\_new}{cw\_pool\_t *a\_pool, cw\_mem\_t
 *a\_mem, cw\_uint32\_t a\_buffer\_size}}
 	\begin{capilist}
@@ -54,7 +54,7 @@ memory leaks and other memory allocation errors can be detected and printed to
 		Constructor.
 	\end{capilist}
 \label{pool_delete}
-\index{\cfunc{pool\_delete}{}}
+\index{pool_delete@\cfunc{pool\_delete}{}}
 \citem{\cfunc[void]{pool\_delete}{cw\_pool\_t *a\_pool}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -68,7 +68,7 @@ memory leaks and other memory allocation errors can be detected and printed to
 		Destructor.
 	\end{capilist}
 \label{pool_buffer_size_get}
-\index{\cfunc{pool\_buffer\_size\_get}{}}
+\index{pool_buffer_size_get@\cfunc{pool\_buffer\_size\_get}{}}
 \citem{\cfunc[cw\_uint32\_t]{pool\_}{cw\_pool\_t *a\_pool}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -86,7 +86,7 @@ memory leaks and other memory allocation errors can be detected and printed to
 		Return the size of the buffers that \cvar{a\_pool} is using.
 	\end{capilist}
 \label{pool_drain}
-\index{\cfunc{pool\_drain}{}}
+\index{pool_drain@\cfunc{pool\_drain}{}}
 \citem{\cfunc[void]{pool\_drain}{cw\_pool\_t *a\_pool}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -100,11 +100,11 @@ memory leaks and other memory allocation errors can be detected and printed to
 		Discard internally cached buffers, if any.
 	\end{capilist}
 \label{pool_get_e}
-\index{\cfunc{pool\_get\_e}{}}
+\index{pool_get_e@\cfunc{pool\_get\_e}{}}
 \citem{\cfunc[void *]{pool\_get\_e}{cw\_pool\_t *a\_pool, const char
 *a\_filename, cw\_uint32\_t a\_line\_num}}
 \label{pool_get}
-\index{\cppmacro{pool\_get}{}}
+\index{pool_get@\cppmacro{pool\_get}{}}
 \citem{\cppmacro[void *]{pool\_get}{cw\_pool\_t *a\_pool}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -129,11 +129,11 @@ memory leaks and other memory allocation errors can be detected and printed to
 		Allocate a memory buffer and return a pointer to it.
 	\end{capilist}
 \label{pool_put_e}
-\index{\cfunc{pool\_put\_e}{}}
+\index{pool_put_e@\cfunc{pool\_put\_e}{}}
 \citem{\cfunc[void]{pool\_put\_e}{cw\_pool\_t *a\_pool, void *a\_buffer, const
 char *a\_filename, cw\_uint32\_t a\_line\_num}}
 \label{pool_put}
-\index{\cppmacro{pool\_put}{}}
+\index{pool_put@\cppmacro{pool\_put}{}}
 \citem{\cppmacro[void]{pool\_put}{cw\_pool\_t *a\_pool, void *a\_buffer}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -153,7 +153,7 @@ char *a\_filename, cw\_uint32\_t a\_line\_num}}
 		Put back (deallocate) \cvar{a\_buffer}.
 	\end{capilist}
 \label{pool_dump}
-\index{\cfunc{pool\_dump}{}}
+\index{pool_dump@\cfunc{pool\_dump}{}}
 \citem{\cfunc[void]{pool\_dump}{cw\_pool\_t *a\_pool, const char *a\_prefix}}
 	\begin{capilist}
 	\item[Input(s): ]

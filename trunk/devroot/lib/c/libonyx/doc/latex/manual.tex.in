@@ -192,7 +192,7 @@ behavior and likely crashes.
 \section{API}
 \begin{capi}
 \label{_cw_onyx_code}
-\index{\cppmacro{\_cw\_onyx\_code}{}}
+\index{_cw_onyx_code@\cppmacro{\_cw\_onyx\_code}{}}
 \citem{\cppmacro[void]{\_cw\_onyx\_code}{cw\_nxo\_t *a\_thread, const char
 *a\_code}}
 	\begin{capilist}

@@ -14,7 +14,7 @@
 
 \subsection{mq}
 \label{mq}
-\index{\classname{mq}{}}
+\index{mq@\classname{mq}{}}
 
 The \classname{mq} class implements a simple unidirectional message queue.
 In addition to putting and getting messages, there are methods that control
@@ -24,7 +24,7 @@ transition capability.
 \subsubsection{API}
 \begin{capi}
 \label{mq_new}
-\index{\cfunc{mq\_new}{}}
+\index{mq_new@\cfunc{mq\_new}{}}
 \citem{\cfunc[void]{mq\_new}{cw\_mq\_t *a\_mq, cw\_mem\_t *a\_mem,
 cw\_uint32\_t a\_msg\_size}}
 	\begin{capilist}
@@ -47,7 +47,7 @@ cw\_uint32\_t a\_msg\_size}}
 		Constructor.
 	\end{capilist}
 \label{mq_delete}
-\index{\cfunc{mq\_delete}{}}
+\index{mq_delete@\cfunc{mq\_delete}{}}
 \citem{\cfunc[void]{mq\_delete}{cw\_mq\_t *a\_mq}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -61,7 +61,7 @@ cw\_uint32\_t a\_msg\_size}}
 		Destructor.
 	\end{capilist}
 \label{mq_tryget}
-\index{\cfunc{mq\_tryget}{}}
+\index{mq_tryget@\cfunc{mq\_tryget}{}}
 \citem{\cfunc[cw\_bool\_t]{mq\_tryget}{cw\_mq\_t *a\_mq, ...}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -88,7 +88,7 @@ cw\_uint32\_t a\_msg\_size}}
 		Try to get a message, but return TRUE if none are available.
 	\end{capilist}
 \label{mq_timedget}
-\index{\cfunc{mq\_timedget}{}}
+\index{mq_timedget@\cfunc{mq\_timedget}{}}
 \citem{\cfunc[cw\_bool\_t]{mq\_timedget}{cw\_mq\_t *a\_mq, const struct timespec
 *a\_timeout, ...}}
 	\begin{capilist}
@@ -119,7 +119,7 @@ cw\_uint32\_t a\_msg\_size}}
 		message is available, or until timeout.
 	\end{capilist}
 \label{mq_get}
-\index{\cfunc{mq\_get}{}}
+\index{mq_get@\cfunc{mq\_get}{}}
 \citem{\cfunc[cw\_bol\_t]{mq\_get}{cw\_mq\_t *a\_mq, ...}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -147,7 +147,7 @@ cw\_uint32\_t a\_msg\_size}}
 		message is available.
 	\end{capilist}
 \label{mq_put}
-\index{\cfunc{mq\_put}{}}
+\index{mq_put@\cfunc{mq\_put}{}}
 \citem{\cfunc[cw\_bool\_t]{mq\_put}{cw\_mq\_t *a\_mq, ...}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -174,7 +174,7 @@ cw\_uint32\_t a\_msg\_size}}
 		Put a message in \cvar{a\_mq}.
 	\end{capilist}
 \label{mq_get_start}
-\index{\cfunc{mq\_get\_start}{}}
+\index{mq_get_start@\cfunc{mq\_get\_start}{}}
 \citem{\cfunc[cw\_bool\_t]{mq\_get\_start}{cw\_mq\_t *a\_mq}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -196,7 +196,7 @@ cw\_uint32\_t a\_msg\_size}}
 		(\cfunc{mq\_get}{} will not return TRUE).
 	\end{capilist}
 \label{mq_get_stop}
-\index{\cfunc{mq\_get\_stop}{}}
+\index{mq_get_stop@\cfunc{mq\_get\_stop}{}}
 \citem{\cfunc[cw\_bool\_t]{mq\_get\_stop}{cw\_mq\_t *a\_mq}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -218,7 +218,7 @@ cw\_uint32\_t a\_msg\_size}}
 		(\cfunc{mq\_get}{} will return TRUE).
 	\end{capilist}
 \label{mq_put_start}
-\index{\cfunc{mq\_put\_start}{}}
+\index{mq_put_start@\cfunc{mq\_put\_start}{}}
 \citem{\cfunc[cw\_bool\_t]{mq\_put\_start}{cw\_mq\_t *a\_mq}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -240,7 +240,7 @@ cw\_uint32\_t a\_msg\_size}}
 		(\cfunc{mq\_put}{} will not return TRUE).
 	\end{capilist}
 \label{mq_put_stop}
-\index{\cfunc{mq\_put\_stop}{}}
+\index{mq_put_stop@\cfunc{mq\_put\_stop}{}}
 \citem{\cfunc[cw\_bool\_t]{mq\_put\_stop}{cw\_mq\_t *a\_mq}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -262,7 +262,7 @@ cw\_uint32\_t a\_msg\_size}}
 		(\cfunc{mq\_put}{} will return TRUE).
 	\end{capilist}
 \label{mq_dump}
-\index{\cfunc{mq\_dump}{}}
+\index{mq_dump@\cfunc{mq\_dump}{}}
 \citem{\cfunc[void]{mq\_dump}{cw\_mq\_t *a\_mq, const char *a\_prefix}}
 	\begin{capilist}
 	\item[Input(s): ]

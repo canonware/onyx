@@ -15,7 +15,7 @@
 \subsection{ch}
 \label{ch}
 \label{chi}
-\index{\classname{ch}{}}
+\index{ch@\classname{ch}{}}
 
 The \classname{ch} class implements chained hashing.  It uses a simple bucket
 chaining hash table implementation.  Table size is set at creation time, and
@@ -42,7 +42,7 @@ such situations.
 \subsubsection{API}
 \begin{capi}
 \label{_CW_CH_TABLE2SIZEOF}
-\index{\cppmacro{\_CW\_CH\_TABLE2SIZEOF}{}}
+\index{_CW_CH_TABLE2SIZEOF@\cppmacro{\_CW\_CH\_TABLE2SIZEOF}{}}
 \citem{\cppmacro[cw\_uint32\_t]{\_CW\_CH\_TABLE2SIZEOF}{cw\_uint32\_t
 a\_table\_size}}
 	\begin{capilist}
@@ -63,7 +63,7 @@ a\_table\_size}}
 		\cvar{a\_table\_size} slots.
 	\end{capilist}
 \label{ch_new}
-\index{\cfunc{ch\_new}{}}
+\index{ch_new@\cfunc{ch\_new}{}}
 \citem{\cfunc[]{ch\_new}{cw\_ch\_t *a\_ch, cw\_mem\_t *a\_mem, cw\_uint32\_t
 a\_table\_size, cw\_ch\_hash\_t *a\_hash, cw\_ch\_key\_comp\_t 
 *a\_key\_comp}}
@@ -97,7 +97,7 @@ a\_table\_size, cw\_ch\_hash\_t *a\_hash, cw\_ch\_key\_comp\_t
 		Constructor.
 	\end{capilist}
 \label{ch_delete}
-\index{\cfunc{ch\_delete}{}}
+\index{ch_delete@\cfunc{ch\_delete}{}}
 \citem{\cfunc[void]{ch\_delete}{cw\_ch\_t *a\_ch}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -111,7 +111,7 @@ a\_table\_size, cw\_ch\_hash\_t *a\_hash, cw\_ch\_key\_comp\_t
 		Destructor.
 	\end{capilist}
 \label{ch_count}
-\index{\cfunc{ch\_count}{}}
+\index{ch_count@\cfunc{ch\_count}{}}
 \citem{\cfunc[cw\_uint32\_t]{ch\_count}{cw\_ch\_t *a\_ch}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -129,7 +129,7 @@ a\_table\_size, cw\_ch\_hash\_t *a\_hash, cw\_ch\_key\_comp\_t
 		Return the number of items in \cvar{a\_ch}.
 	\end{capilist}
 \label{ch_insert}
-\index{\cfunc{ch\_insert}{}}
+\index{ch_insert@\cfunc{ch\_insert}{}}
 \citem{\cfunc[void]{ch\_insert}{cw\_ch\_t *a\_ch, const void *a\_key, const void
 *a\_data, cw\_chi\_t *a\_chi}}
 	\begin{capilist}
@@ -155,7 +155,7 @@ a\_table\_size, cw\_ch\_hash\_t *a\_hash, cw\_ch\_key\_comp\_t
 		\classname{chi} container if non-NULL.
 	\end{capilist}
 \label{ch_remove}
-\index{\cfunc{ch\_remove}{}}
+\index{ch_remove@\cfunc{ch\_remove}{}}
 \citem{\cfunc[cw\_bool\_t]{ch\_remove}{cw\_ch\_t *a\_ch, const void
 *a\_search\_key, void **r\_key, void **r\_data, cw\_chi\_t **r\_chi}}
 	\begin{capilist}
@@ -200,7 +200,7 @@ a\_table\_size, cw\_ch\_hash\_t *a\_hash, cw\_ch\_key\_comp\_t
 		and externally allocated \classname{chi}, respectively.
 	\end{capilist}
 \label{ch_search}
-\index{\cfunc{ch\_search}{}}
+\index{ch_search@\cfunc{ch\_search}{}}
 \citem{\cfunc[cw\_bool\_t]{ch\_search}{cw\_ch\_t *a\_ch, const void *a\_key,
 void **r\_data}}
 	\begin{capilist}
@@ -234,7 +234,7 @@ void **r\_data}}
 		associated data.
 	\end{capilist}
 \label{ch_get_iterate}
-\index{\cfunc{ch\_get\_iterate}{}}
+\index{ch_get_iterate@\cfunc{ch\_get\_iterate}{}}
 \citem{\cfunc[cw\_bool\_t]{ch\_get\_iterate}{cw\_ch\_t *a\_ch,  void **r\_key,
 void **r\_data}}
 	\begin{capilist}
@@ -270,7 +270,7 @@ void **r\_data}}
 		item in \cvar{a\_ch}.
 	\end{capilist}
 \label{ch_remove_iterate}
-\index{\cfunc{ch\_remove\_iterate}{}}
+\index{ch_remove_iterate@\cfunc{ch\_remove\_iterate}{}}
 \citem{\cfunc[cw\_bool\_t]{ch\_remove\_iterate}{cw\_ch\_t *a\_ch,  void
 **r\_key, void **r\_data, cw\_chi\_t **r\_chi}}
 	\begin{capilist}
@@ -313,7 +313,7 @@ void **r\_data}}
 		\cvar{a\_ch}.
 	\end{capilist}
 \label{ch_dump}
-\index{\cfunc{ch\_dump}{}}
+\index{ch_dump@\cfunc{ch\_dump}{}}
 \citem{\cfunc[void]{ch\_dump}{cw\_ch\_t *a\_ch, const char *a\_prefix}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -333,7 +333,7 @@ void **r\_data}}
 		Print the internal state of \cvar{a\_ch}.
 	\end{capilist}
 \label{ch_string_hash}
-\index{\cfunc{ch\_string\_hash}{}}
+\index{ch_string_hash@\cfunc{ch\_string\_hash}{}}
 \citem{\cfunc[cw\_uint32\_t]{ch\_string\_hash}{const void *a\_key}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -351,7 +351,7 @@ void **r\_data}}
 		NULL-terminated string hashing function.
 	\end{capilist}
 \label{ch_direct_hash}
-\index{\cfunc{ch\_direct\_hash}{}}
+\index{ch_direct_hash@\cfunc{ch\_direct\_hash}{}}
 \citem{\cfunc[cw\_uint32\_t]{ch\_direct\_hash}{const void *a\_key}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -369,7 +369,7 @@ void **r\_data}}
 		Direct (pointer) hashing function.
 	\end{capilist}
 \label{ch_string_key_comp}
-\index{\cfunc{ch\_string\_key\_comp}{}}
+\index{ch_string_key_comp@\cfunc{ch\_string\_key\_comp}{}}
 \citem{\cfunc[cw\_bool\_t]{ch\_string\_key\_comp}{const void *a\_k1, const void
 *a\_k2}}
 	\begin{capilist}
@@ -395,7 +395,7 @@ void **r\_data}}
 		Test two keys (NULL-terminated strings) for equality.
 	\end{capilist}
 \label{ch_direct_key_comp}
-\index{\cfunc{ch\_direct\_key\_comp}{}}
+\index{ch_direct_key_comp@\cfunc{ch\_direct\_key\_comp}{}}
 \citem{\cfunc[cw\_bool\_t]{ch\_direct\_key\_comp}{const void *a\_k1, const void
 *a\_k2}}
 	\begin{capilist}

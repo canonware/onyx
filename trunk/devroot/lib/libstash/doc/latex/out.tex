@@ -14,7 +14,7 @@
 
 \subsection{out}
 \label{out}
-\index{\classname{out}{}}
+\index{out@\classname{out}{}}
 
 The \classname{out} class provides functionality similar to the printf family of
 functions, with the additional capability of dynamically adding handlers for
@@ -112,7 +112,7 @@ cw\_buf\_t *	& b	& Fit	& r	& ` '	&	&	&	\\
 \subsubsection{API}
 \begin{capi}
 \label{cw_out_render_t}
-\index{\cfunc{cw\_out\_render\_t}{}}
+\index{cw_out_render_t@\cfunc{cw\_out\_render\_t}{}}
 \citem{\cfunc[typedef cw\_uint32\_t]{out\_render\_t}{const char *a\_format,
 cw\_uint32\_t a\_format\_len, const void *a\_arg, cw\_uint32\_t a\_max\_len,
 cw\_uint8\_t *r\_str}}
@@ -147,7 +147,7 @@ cw\_uint8\_t *r\_str}}
 		pointed to by \cvar{a\_format}.
 	\end{capilist}
 \label{out_new}
-\index{\cfunc{out\_new}{}}
+\index{out_new@\cfunc{out\_new}{}}
 \citem{\cfunc[cw\_out\_t *]{out\_new}{cw\_out\_t *a\_out, cw\_mem\_t
 *a\_mem}}
 	\begin{capilist}
@@ -171,7 +171,7 @@ cw\_uint8\_t *r\_str}}
 		Constructor.
 	\end{capilist}
 \label{out_delete}
-\index{\cfunc{out\_delete}{}}
+\index{out_delete@\cfunc{out\_delete}{}}
 \citem{\cfunc[void]{out\_delete}{cw\_out\_t *a\_out}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -185,7 +185,7 @@ cw\_uint8\_t *r\_str}}
 		Destructor.
 	\end{capilist}
 \label{out_register}
-\index{\cfunc{out\_register}{}}
+\index{out_register@\cfunc{out\_register}{}}
 \citem{\cfunc[cw\_bool\_t]{out\_register}{cw\_out\_t *a\_out, const char
 *a\_type, cw\_uint32\_t a\_size, cw\_out\_render\_t *a\_render\_func}}
 	\begin{capilist}
@@ -216,7 +216,7 @@ cw\_uint8\_t *r\_str}}
 		specifiers can be embedded in formatting strings.
 	\end{capilist}
 \label{out_merge}
-\index{\cfunc{out\_merge}{}}
+\index{out_merge@\cfunc{out\_merge}{}}
 \citem{\cfunc[void]{out\_merge}{cw\_out\_t *a\_a, cw\_out\_t *a\_b}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -236,7 +236,7 @@ cw\_uint8\_t *r\_str}}
 		\cvar{a\_a}.
 	\end{capilist}
 \label{out_default_fd_get}
-\index{\cfunc{out\_default\_fd\_get}{}}
+\index{out_default_fd_get@\cfunc{out\_default\_fd\_get}{}}
 \citem{\cfunc[cw\_sint32\_t]{out\_default\_fd\_get}{cw\_out\_t *a\_out}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -254,7 +254,7 @@ cw\_uint8\_t *r\_str}}
 		Return the default file descriptor for \cvar{a\_out}.
 	\end{capilist}
 \label{out_default_fd_set}
-\index{\cfunc{out\_default\_fd\_set}{}}
+\index{out_default_fd_set@\cfunc{out\_default\_fd\_set}{}}
 \citem{\cfunc[void]{out\_default\_fd\_set}{cw\_out\_t *a\_out, cw\_sint32\_t
 a\_fd}}
 	\begin{capilist}
@@ -271,11 +271,11 @@ a\_fd}}
 		Set the default file descriptor number for \cvar{a\_out}.
 	\end{capilist}
 \label{out_put}
-\index{\cfunc{out\_put}{}}
+\index{out_put@\cfunc{out\_put}{}}
 \citem{\cfunc[cw\_sint32\_t]{out\_put}{cw\_out\_t *a\_out, const char
 *a\_format, ...}}
 \label{_cw_out_put}
-\index{\cppmacro{\_cw\_out\_put}{}}
+\index{_cw_out_put@\cppmacro{\_cw\_out\_put}{}}
 \citem{\cppmacro[cw\_sint32\_t]{\_cw\_out\_put}{const char *a\_format, ...}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -311,12 +311,12 @@ a\_fd}}
 		Print formatted output.
 	\end{capilist}
 \label{out_put_e}
-\index{\cfunc{out\_put\_e}{}}
+\index{out_put_e@\cfunc{out\_put\_e}{}}
 \citem{\cfunc[cw\_sint32\_t]{out\_put\_e}{cw\_out\_t *a\_out, const char
 *a\_file\_name, cw\_uint32\_t a\_line\_num, const char *a\_func\_name, const
 char *a\_format, ...}}
 \label{_cw_out_put_e}
-\index{\cppmacro{\_cw\_out\_put\_e}{}}
+\index{_cw_out_put_e@\cppmacro{\_cw\_out\_put\_e}{}}
 \citem{\cppmacro[cw\_sint32\_t]{\_cw\_out\_put\_e}{const char *a\_file\_name,
 cw\_uint32\_t a\_line\_num, const char *a\_func\_name, const char *a\_format,
 ...}}
@@ -363,11 +363,11 @@ cw\_uint32\_t a\_line\_num, const char *a\_func\_name, const char *a\_format,
 		output.
 	\end{capilist}
 \label{out_put_n}
-\index{\cfunc{out\_put\_n}{}}
+\index{out_put_n@\cfunc{out\_put\_n}{}}
 \citem{\cfunc[cw\_sint32\_t]{out\_put\_n}{cw\_out\_t *a\_out, cw\_uint32\_t
 a\_size, const char *a\_format, ...}}
 \label{_cw_out_put_n}
-\index{\cppmacro{\_cw\_out\_put\_n}{}}
+\index{_cw_out_put_n@\cppmacro{\_cw\_out\_put\_n}{}}
 \citem{\cppmacro[cw\_sint32\_t]{\_cw\_out\_put\_n}{cw\_uint32\_t a\_size, const
 char *a\_format, ...}}
 	\begin{capilist}
@@ -406,11 +406,11 @@ char *a\_format, ...}}
 		Print at most \cvar{a\_size} bytes of formatted output.
 	\end{capilist}
 \label{out_put_f}
-\index{\cfunc{out\_put\_f}{}}
+\index{out_put_f@\cfunc{out\_put\_f}{}}
 \citem{\cfunc[cw\_sint32\_t]{out\_put\_f}{cw\_out\_t *a\_out, cw\_sint32\_t
 a\_fd, const char *a\_format, ...}}
 \label{_cw_out_put_f}
-\index{\cppmacro{\_cw\_out\_put\_f}{}}
+\index{_cw_out_put_f@\cppmacro{\_cw\_out\_put\_f}{}}
 \citem{\cppmacro[cw\_sint32\_t]{\_cw\_out\_put\_f}{cw\_sint32\_t a\_fd, const
 char *a\_format, ...}}
 	\begin{capilist}
@@ -446,11 +446,11 @@ char *a\_format, ...}}
 		Print formatted output.
 	\end{capilist}
 \label{out_put_fn}
-\index{\cfunc{out\_put\_fn}{}}
+\index{out_put_fn@\cfunc{out\_put\_fn}{}}
 \citem{\cfunc[cw\_sint32\_t]{out\_put\_fn}{cw\_out\_t *a\_out, cw\_sint32\_t
 a\_fd, cw\_uint32\_t a\_size, const char *a\_format, ...}}
 \label{_cw_out_put_fn}
-\index{\cppmacro{\_cw\_out\_put\_fn}{}}
+\index{_cw_out_put_fn@\cppmacro{\_cw\_out\_put\_fn}{}}
 \citem{\cppmacro[cw\_sint32\_t]{\_cw\_out\_put\_fn}{cw\_sint32\_t a\_fd,
 cw\_uint32\_t a\_size, const char *a\_format, ...}}
 	\begin{capilist}
@@ -488,7 +488,7 @@ cw\_uint32\_t a\_size, const char *a\_format, ...}}
 		Print at most \cvar{a\_size} bytes of formatted output.
 	\end{capilist}
 \label{out_put_fv}
-\index{\cfunc{out\_put\_fv}{}}
+\index{out_put_fv@\cfunc{out\_put\_fv}{}}
 \citem{\cfunc[cw\_sint32\_t]{out\_put\_fv}{cw\_out\_t *a\_out, cw\_sint32\_t
 a\_fd, const char *a\_format, va\_list a\_p}}
 	\begin{capilist}
@@ -523,7 +523,7 @@ a\_fd, const char *a\_format, va\_list a\_p}}
 		Print formatted output.
 	\end{capilist}
 \label{out_put_fvn}
-\index{\cfunc{out\_put\_fvn}{}}
+\index{out_put_fvn@\cfunc{out\_put\_fvn}{}}
 \citem{\cfunc[cw\_sint32\_t]{out\_put\_fvn}{cw\_out\_t *a\_out, cw\_sint32\_t
 a\_fd, cw\_uint32\_t a\_size, const char *a\_format, va\_list a\_p}}
 	\begin{capilist}
@@ -560,11 +560,11 @@ a\_fd, cw\_uint32\_t a\_size, const char *a\_format, va\_list a\_p}}
 		Print at most \cvar{a\_size} bytes of formatted output.
 	\end{capilist}
 \label{out_put_s}
-\index{\cfunc{out\_put\_s}{}}
+\index{out_put_s@\cfunc{out\_put\_s}{}}
 \citem{\cfunc[cw\_sint32\_t]{out\_put\_s}{cw\_out\_t *a\_out, char *a\_str,
 const char *a\_format, ...}}
 \label{_cw_out_put_s}
-\index{\cppmacro{\_cw\_out\_put\_s}{}}
+\index{_cw_out_put_s@\cppmacro{\_cw\_out\_put\_s}{}}
 \citem{\cppmacro[cw\_sint32\_t]{\_cw\_out\_put\_s}{char *a\_str, const char
 *a\_format, ...}}
 	\begin{capilist}
@@ -598,7 +598,7 @@ const char *a\_format, ...}}
 		Print formatted output.
 	\end{capilist}
 \label{out_put_sa}
-\index{\cfunc{out\_put\_sa}{}}
+\index{out_put_sa@\cfunc{out\_put\_sa}{}}
 \citem{\cfunc[cw\_sint32\_t]{out\_put\_sa}{cw\_out\_t *a\_out, char **r\_str,
 const char *a\_format, ...}}
 	\begin{capilist}
@@ -632,11 +632,11 @@ const char *a\_format, ...}}
 		Allocate space, then print formatted output to it.
 	\end{capilist}
 \label{out_put_sn}
-\index{\cfunc{out\_put\_sn}{}}
+\index{out_put_sn@\cfunc{out\_put\_sn}{}}
 \citem{\cfunc[cw\_sint32\_t]{out\_put\_sn}{cw\_out\_t *a\_out, char *a\_str,
 cw\_uint32\_t a\_size, const char *a\_format, ...}}
 \label{_cw_out_put_sn}
-\index{\cppmacro{\_cw\_out\_put\_sn}{}}
+\index{_cw_out_put_sn@\cppmacro{\_cw\_out\_put\_sn}{}}
 \citem{\cppmacro[cw\_sint32\_t]{\_cw\_out\_put\_sn}{char *a\_str, cw\_uint32\_t
 a\_size, const char *a\_format, ...}}
 	\begin{capilist}
@@ -680,7 +680,7 @@ a\_size, const char *a\_format, ...}}
 		Print at most \cvar{a\_size} bytes of formatted output.
 	\end{capilist}
 \label{out_put_sv}
-\index{\cfunc{out\_put\_sv}{}}
+\index{out_put_sv@\cfunc{out\_put\_sv}{}}
 \citem{\cfunc[cw\_sint32\_t]{out\_put\_sv}{cw\_out\_t *a\_out, char *a\_str,
 const char *a\_format, va\_list a\_p}}
 	\begin{capilist}
@@ -712,7 +712,7 @@ const char *a\_format, va\_list a\_p}}
 		Print formatted output.
 	\end{capilist}
 \label{out_put_sva}
-\index{\cfunc{out\_put\_sva}{}}
+\index{out_put_sva@\cfunc{out\_put\_sva}{}}
 \citem{\cfunc[cw\_sint32\_t]{out\_put\_sva}{cw\_out\_t *a\_out, char **r\_str,
 const char *a\_format, va\_list a\_p}}
 	\begin{capilist}
@@ -744,7 +744,7 @@ const char *a\_format, va\_list a\_p}}
 		Allocate space, then print formatted output to it.
 	\end{capilist}
 \label{out_put_svn}
-\index{\cfunc{out\_put\_svn}{}}
+\index{out_put_svn@\cfunc{out\_put\_svn}{}}
 \citem{\cfunc[cw\_sint32\_t]{out\_put\_svn}{cw\_out\_t *a\_out, char *a\_str,
 cw\_uint32\_t a\_size, const char *a\_format, va\_list a\_p}}
 	\begin{capilist}
@@ -790,7 +790,7 @@ cw\_uint32\_t a\_size, const char *a\_format, va\_list a\_p}}
 		Print at most \cvar{a\_size} bytes of formatted output.
 	\end{capilist}
 \label{spec_type_get}
-\index{\cfunc{spec\_type\_get}{}}
+\index{spec_type_get@\cfunc{spec\_type\_get}{}}
 \citem{\cfunc[cw\_sint32\_t]{spec\_type\_get}{const char *a\_spec, cw\_uint32\_t
 a\_spec\_len, const char **r\_val}}
 	\begin{capilist}
@@ -816,7 +816,7 @@ a\_spec\_len, const char **r\_val}}
 		\cvar{*r\_val} to point to it.
 	\end{capilist}
 \label{spec_val_get}
-\index{\cfunc{spec\_val\_get}{}}
+\index{spec_val_get@\cfunc{spec\_val\_get}{}}
 \citem{\cfunc[cw\_sint32\_t]{spec\_val\_get}{const char *a\_spec, cw\_uint32\_t
 a\_spec\_len, const char *a\_name, cw\_uint32\_t a\_name\_len, const
 cw\_uint8\_t **r\_val}}

@@ -14,7 +14,7 @@
 
 \subsection{xep}
 \label{xep}
-\index{\classname{xep}{}}
+\index{xep@\classname{xep}{}}
 The \classname{xep} class implements exception handling, with support for
 \cppdef{xep\_try}, \cppmacro{xep\_catch}{}, and \cppdef{xep\_finally} blocks.
 Minimal use must include at least:
@@ -68,7 +68,7 @@ block; doing so will corrupt the exception handler chain.
 \subsubsection{API}
 \begin{capi}
 \label{xep_begin}
-\index{\cppmacro{xep\_begin}{}}
+\index{xep_begin@\cppmacro{xep\_begin}{}}
 \citem{\cppmacro[void]{xep\_begin}{void}}
 	\begin{capilist}
 	\item[Input(s): ] None.
@@ -78,7 +78,7 @@ block; doing so will corrupt the exception handler chain.
 		Begin an exception handling code block.
 	\end{capilist}
 \label{xep_end}
-\index{\cppmacro{xep\_end}{}}
+\index{xep_end@\cppmacro{xep\_end}{}}
 \citem{\cppmacro[void]{xep\_end}{void}}
 	\begin{capilist}
 	\item[Input(s): ] None.
@@ -88,7 +88,7 @@ block; doing so will corrupt the exception handler chain.
 		End an exception handling block.
 	\end{capilist}
 \label{xep_try}
-\index{\cppdef{xep\_try}}
+\index{xep_try@\cppdef{xep\_try}}
 \citem{\cppdef{xep\_try} \dots}
 	\begin{capilist}
 	\item[Input(s): ] None.
@@ -99,7 +99,7 @@ block; doing so will corrupt the exception handler chain.
 		possibility that an exception might be thrown.
 	\end{capilist}
 \label{xep_catch}
-\index{\cppmacro{xep\_catch}{}}
+\index{xep_catch@\cppmacro{xep\_catch}{}}
 \citem{\cppmacro{xep\_catch}{cw\_xepv\_t a\_xepv} \dots}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -115,7 +115,7 @@ block; doing so will corrupt the exception handler chain.
 		called.
 	\end{capilist}
 \label{xep_mcatch}
-\index{\cppmacro{xep\_mcatch}{}}
+\index{xep_mcatch@\cppmacro{xep\_mcatch}{}}
 \citem{\cppmacro{xep\_mcatch}{cw\_xepv\_t a\_xepv} \dots}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -133,7 +133,7 @@ block; doing so will corrupt the exception handler chain.
 		handled unless \cfunc{xep\_handled}{} is called.
 	\end{capilist}
 \label{xep_acatch}
-\index{\cppdef{xep\_acatch}}
+\index{xep_acatch@\cppdef{xep\_acatch}}
 \citem{\cppdef{xep\_acatch} \dots}
 	\begin{capilist}
 	\item[Input(s): ] None.
@@ -147,7 +147,7 @@ block; doing so will corrupt the exception handler chain.
 		unless \cfunc{xep\_handled}{} is called.
 	\end{capilist}
 \label{xep_finally}
-\index{\cppdef{xep\_finally}}
+\index{xep_finally@\cppdef{xep\_finally}}
 \citem{\cppdef{xep\_finally} \dots}
 	\begin{capilist}
 	\item[Input(s): ] None.
@@ -159,7 +159,7 @@ block; doing so will corrupt the exception handler chain.
 		handler is executed.
 	\end{capilist}
 \label{xep_value}
-\index{\cfunc{xep\_value}{}}
+\index{xep_value@\cfunc{xep\_value}{}}
 \citem{\cfunc[cw\_xepv\_t]{xep\_value}{void}}
 	\begin{capilist}
 	\item[Input(s): ] None.
@@ -174,8 +174,8 @@ block; doing so will corrupt the exception handler chain.
 	\end{capilist}
 \label{xep_throw_e}
 \label{xep_throw}
-\index{\cfunc{xep\_throw\_e}{}}
-\index{\cfunc{xep\_throw}{}}
+\index{xep_throw_e@\cfunc{xep\_throw\_e}{}}
+\index{xep_throw@\cfunc{xep\_throw}{}}
 \citem{\cfunc[void]{xep\_throw\_e}{cw\_xepv\_t a\_xepv, const char *a\_filename,
 cw\_uint32\_t a\_line\_num}}
 \citem{\cfunc[void]{xep\_throw}{cw\_xepv\_t a\_xepv}}
@@ -198,7 +198,7 @@ cw\_uint32\_t a\_line\_num}}
 		Throw an exception.
 	\end{capilist}
 \label{xep_retry}
-\index{\cfunc{xep\_retry}{}}
+\index{xep_retry@\cfunc{xep\_retry}{}}
 \citem{\cfunc[void]{xep\_retry}{void}}
 	\begin{capilist}
 	\item[Input(s): ] None.
@@ -209,7 +209,7 @@ cw\_uint32\_t a\_line\_num}}
 		\cppdef{xep\_try} code block.
 	\end{capilist}
 \label{xep_handled}
-\index{\cfunc{xep\_handled}{}}
+\index{xep_handled@\cfunc{xep\_handled}{}}
 \citem{\cfunc[void]{xep\_handled}{void}}
 	\begin{capilist}
 	\item[Input(s): ] None.

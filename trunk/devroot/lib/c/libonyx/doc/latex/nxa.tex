@@ -14,7 +14,7 @@
 
 \subsection{nxa}
 \label{nxa}
-\index{\classname{nxa}{}}
+\index{nxa@\classname{nxa}{}}
 
 The \classname{nxa} class implements garbage collection.  The garbage collector
 runs in a separate thread and is controlled via an asynchronous message queue.
@@ -22,7 +22,7 @@ runs in a separate thread and is controlled via an asynchronous message queue.
 \subsubsection{API}
 \begin{capi}
 \label{nxa_new}
-\index{\cfunc{nxa\_new}{}}
+\index{nxa_new@\cfunc{nxa\_new}{}}
 \citem{\cfunc[void]{nxa\_new}{cw\_nxa\_t *a\_nxa, cw\_nx\_t *a\_nx}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -41,7 +41,7 @@ runs in a separate thread and is controlled via an asynchronous message queue.
 		Constructor.
 	\end{capilist}
 \label{nxa_delete}
-\index{\cfunc{nxa\_delete}{}}
+\index{nxa_delete@\cfunc{nxa\_delete}{}}
 \citem{\cfunc[void]{nxa\_delete}{cw\_nxa\_t *a\_nxa}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -55,7 +55,7 @@ runs in a separate thread and is controlled via an asynchronous message queue.
 		Destructor.
 	\end{capilist}
 \label{nxa_collect}
-\index{\cfunc{nxa\_collect}{}}
+\index{nxa_collect@\cfunc{nxa\_collect}{}}
 \citem{\cfunc[void]{nxa\_collect}{cw\_nxa\_t *a\_nxa}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -73,7 +73,7 @@ runs in a separate thread and is controlled via an asynchronous message queue.
 		collection.
 	\end{capilist}
 \label{nxa_dump}
-\index{\cfunc{nxa\_dump}{}}
+\index{nxa_dump@\cfunc{nxa\_dump}{}}
 \citem{\cfunc[void]{nxa\_dump}{cw\_nxa\_t *a\_nxa, cw\_nxo\_t *a\_thread}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -93,7 +93,7 @@ runs in a separate thread and is controlled via an asynchronous message queue.
 		Print the internal state of gcdict to \onyxop{stdout}{}.
 	\end{capilist}
 \label{nxa_active_get}
-\index{\cfunc{nxa\_active\_get}{}}
+\index{nxa_active_get@\cfunc{nxa\_active\_get}{}}
 \citem{\cfunc[cw\_bool\_t]{nxa\_active\_get}{cw\_nxa\_t *a\_nxa}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -116,7 +116,7 @@ runs in a separate thread and is controlled via an asynchronous message queue.
 		Return whether the garbage collector is active (runnable).
 	\end{capilist}
 \label{nxa_active_set}
-\index{\cfunc{nxa\_active\_set}{}}
+\index{nxa_active_set@\cfunc{nxa\_active\_set}{}}
 \citem{\cfunc[void]{nxa\_active\_set}{cw\_nxa\_t *a\_nxa, cw\_bool\_t
 a\_active}}
 	\begin{capilist}
@@ -144,7 +144,7 @@ a\_active}}
 		function returns, even if a deactivation message has been sent.
 	\end{capilist}
 \label{nxa_period_get}
-\index{\cfunc{nxa\_period\_get}{}}
+\index{nxa_period_get@\cfunc{nxa\_period\_get}{}}
 \citem{\cfunc[cw\_nxoi\_t]{nxa\_period\_get}{cw\_nxa\_t *a\_nxa}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -164,7 +164,7 @@ a\_active}}
 		collector waits before doing a collection.
 	\end{capilist}
 \label{nxa_period_set}
-\index{\cfunc{nxa\_period\_set}{}}
+\index{nxa_period_set@\cfunc{nxa\_period\_set}{}}
 \citem{\cfunc[void]{nxa\_period\_set}{cw\_nxa\_t *a\_nxa, cw\_nxoi\_t
 a\_period}}
 	\begin{capilist}
@@ -187,7 +187,7 @@ a\_period}}
 		should wait before doing a collection.
 	\end{capilist}
 \label{nxa_threshold_get}
-\index{\cfunc{nxa\_threshold\_get}{}}
+\index{nxa_threshold_get@\cfunc{nxa\_threshold\_get}{}}
 \citem{\cfunc[cw\_nxoi\_t]{nxa\_threshold\_get}{cw\_nxa\_t *a\_nxa}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -208,7 +208,7 @@ a\_period}}
 		collection that will trigger the garbage collector to run.
 	\end{capilist}
 \label{nxa_threshold_set}
-\index{\cfunc{nxa\_threshold\_set}{}}
+\index{nxa_threshold_set@\cfunc{nxa\_threshold\_set}{}}
 \citem{\cfunc[void]{nxa\_threshold\_set}{cw\_nxa\_t *a\_nxa, cw\_nxoi\_t
 a\_threshold}}
 	\begin{capilist}
@@ -231,7 +231,7 @@ a\_threshold}}
 		collection that will trigger the garbage collector to run.
 	\end{capilist}
 \label{nxa_collections_get}
-\index{\cfunc{nxa\_collections\_get}{}}
+\index{nxa_collections_get@\cfunc{nxa\_collections\_get}{}}
 \citem{\cfunc[cw\_nxoi\_t]{nxa\_collections\_get}{cw\_nxa\_t *a\_nxa}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -249,7 +249,7 @@ a\_threshold}}
 		Return the number of times the garbage collector has run.
 	\end{capilist}
 \label{nxa_new_get}
-\index{\cfunc{nxa\_new\_get}{}}
+\index{nxa_new_get@\cfunc{nxa\_new\_get}{}}
 \citem{\cfunc[cw\_nxoi\_t]{nxa\_new\_get}{cw\_nxa\_t *a\_nxa}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -269,7 +269,7 @@ a\_threshold}}
 		last garbage collection.
 	\end{capilist}
 \label{nxa_current_get}
-\index{\cfunc{nxa\_current\_get}{}}
+\index{nxa_current_get@\cfunc{nxa\_current\_get}{}}
 \citem{\cfunc[void]{nxa\_current\_get}{cw\_nxa\_t *a\_nxa}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -302,7 +302,7 @@ a\_threshold}}
 		most recent garbage collection.
 	\end{capilist}
 \label{nxa_maximum_get}
-\index{\cfunc{nxa\_maximum\_get}{}}
+\index{nxa_maximum_get@\cfunc{nxa\_maximum\_get}{}}
 \citem{\cfunc[void]{nxa\_maximum\_get}{cw\_nxa\_t *a\_nxa}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -335,7 +335,7 @@ a\_threshold}}
 		times for the longest recent garbage collection phases.
 	\end{capilist}
 \label{nxa_sum_get}
-\index{\cfunc{nxa\_sum\_get}{}}
+\index{nxa_sum_get@\cfunc{nxa\_sum\_get}{}}
 \citem{\cfunc[void]{nxa\_sum\_get}{cw\_nxa\_t *a\_nxa}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -368,7 +368,7 @@ a\_threshold}}
 		are the total times spent in garbage collection.
 	\end{capilist}
 \label{nxa_gcdict_get}
-\index{\cfunc{nxa\_gcdict\_get}{}}
+\index{nxa_gcdict_get@\cfunc{nxa\_gcdict\_get}{}}
 \citem{\cfunc[cw\_nxo\_t *]{nxa\_gcdict\_get}{cw\_nxa\_t *a\_nxa}}
 	\begin{capilist}
 	\item[Input(s): ]

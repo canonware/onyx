@@ -87,7 +87,6 @@ doc_clean :
   rm -f [objdir]/doc/latex/manual.dvi;
   rm -f [objdir]/doc/latex/manual.idx;
   rm -f [objdir]/doc/latex/manual.idx-prev;
-  rm -f [objdir]/doc/latex/manual.idx-sorted;
   rm -f [objdir]/doc/latex/manual.ilg;
   rm -f [objdir]/doc/latex/manual.ind;
   rm -f [objdir]/doc/latex/manual.lof;
@@ -136,7 +135,6 @@ doc_relclean :
   rm -f [objdir]/%0latex/%.aux-prev;
   rm -f [objdir]/%0latex/%.idx;
   rm -f [objdir]/%0latex/%.idx-prev;
-  rm -f [objdir]/%0latex/%.idx-sorted;
   rm -f [objdir]/%0latex/%.ilg;
   rm -f [objdir]/%0latex/%.ind;
   rm -f [objdir]/%0latex/%.lof;
@@ -146,10 +144,7 @@ doc_relclean :
   rm -f [objdir]/%0latex/texput.log;
 
   cd [objdir]/%0latex/\; [PERL] [abs_srcdir]/%0latex/ltx2e [LATEX] %.tex;
-  cat [objdir]/%0latex/%.idx | [PERL] [srcdir]/%0latex/idx_sort
-      > [objdir]/%0latex/%.idx-sorted;
-  cd [objdir]/%0latex/\; [MAKEINDEX] -c -l -s [abs_srcdir]/%0latex/%.mst
-     %.idx-sorted;
+  cd [objdir]/%0latex/\; [MAKEINDEX] -c -l -s [abs_srcdir]/%0latex/%.mst %.idx;
   cd [objdir]/%0latex/\; [PERL] [abs_srcdir]/%0latex/ltx2e [LATEX] %.tex;
   [DVIPS] [objdir]/%0latex/%.dvi -o [objdir]/%0ps/%.ps;
 }
@@ -177,7 +172,6 @@ doc_relclean :
   rm -f [objdir]/%0latex/%.aux-prev;
   rm -f [objdir]/%0latex/%.idx;
   rm -f [objdir]/%0latex/%.idx-prev;
-  rm -f [objdir]/%0latex/%.idx-sorted;
   rm -f [objdir]/%0latex/%.ilg;
   rm -f [objdir]/%0latex/%.ind;
   rm -f [objdir]/%0latex/%.lof;
@@ -187,13 +181,16 @@ doc_relclean :
   rm -f [objdir]/%0latex/texput.log;
 
   cd [objdir]/%0latex/\; [PERL] [abs_srcdir]/%0latex/ltx2e [PDFLATEX] %.tex;
-  cat [objdir]/%0latex/%.idx | [PERL] [srcdir]/%0latex/idx_sort
-      > [objdir]/%0latex/%.idx-sorted;
-  cd [objdir]/%0latex/\; [MAKEINDEX] -c -l %.idx-sorted;
+  cd [objdir]/%0latex/\; [MAKEINDEX] -c -l -s [abs_srcdir]/%0latex/%.mst %.idx;
   cd [objdir]/%0latex/\; [PERL] [abs_srcdir]/%0latex/ltx2e [PDFLATEX] %.tex;
   cp [objdir]/%0latex/%.pdf [objdir]/%0pdf/%.pdf;
 }
 
+/*
+ * This rule depends on the PostScript version of the manual because latex2html
+ * behaves unpredictably if fed invalid latex code.  By adding this dependency,
+ * we assure that latex2html doesn't get run unless the latex code is okay.
+ */
 [objdir]/%0html/%.html : [objdir]/%0ps/%.ps
   set mkdir
 {

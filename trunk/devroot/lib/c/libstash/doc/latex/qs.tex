@@ -14,7 +14,7 @@
 
 \subsection{qs}
 \label{qs}
-\index{\classname{qs}{}}
+\index{qs@\classname{qs}{}}
 
 The \classname{qs} macros implement operations on a stack.  The type of the
 stack elements and which field of the elements to use are determined by
@@ -26,7 +26,7 @@ strange things can happen.
 \subsubsection{API}
 \begin{capi}
 \label{qs_head}
-\index{\cppmacro{qs\_head}{}}
+\index{qs_head@\cppmacro{qs\_head}{}}
 \citem{\cppmacro[]{qs\_head}{{\lt}qs\_type{\gt} a\_type}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -41,7 +41,7 @@ strange things can happen.
 		Generate code for a \classname{qs} head data structure.
 	\end{capilist}
 \label{qs_head_initializer}
-\index{\cppmacro{qs\_head\_initializer}{}}
+\index{qs_head_initializer@\cppmacro{qs\_head\_initializer}{}}
 \citem{\cppmacro[]{qs\_head\_initializer}{{\lt}qs\_type{\gt} *a\_head}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -55,7 +55,7 @@ strange things can happen.
 		Statically initialize a \classname{qs} head.
 	\end{capilist}
 \label{qs_elm}
-\index{\cppmacro{qs\_elm}{}}
+\index{qs_elm@\cppmacro{qs\_elm}{}}
 \citem{\cppmacro[]{qs\_elm}{{\lt}qs\_elm\_type{\gt} a\_type}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -70,7 +70,7 @@ strange things can happen.
 		Generate code for a \classname{qs} element data structure.
 	\end{capilist}
 \label{qs_new}
-\index{\cppmacro{qs\_new}{}}
+\index{qs_new@\cppmacro{qs\_new}{}}
 \citem{\cppmacro[void]{qs\_new}{{\lt}qs\_type{\gt} *a\_head}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -84,7 +84,7 @@ strange things can happen.
 		Constructor.
 	\end{capilist}
 \label{qs_elm_new}
-\index{\cppmacro{qs\_elm\_new}{}}
+\index{qs_elm_new@\cppmacro{qs\_elm\_new}{}}
 \citem{\cppmacro[void]{qs\_elm\_new}{{\lt}qs\_elm\_type{\gt} *a\_elm,
 {\lt}field\_name{\gt} a\_field}}
 	\begin{capilist}
@@ -101,7 +101,7 @@ strange things can happen.
 		Constructor.
 	\end{capilist}
 \label{qs_top}
-\index{\cppmacro{qs\_top}{}}
+\index{qs_top@\cppmacro{qs\_top}{}}
 \citem{\cppmacro[{\lt}qs\_type{\gt} *]{qs\_top}{{\lt}qs\_type{\gt} *a\_head}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -119,7 +119,7 @@ strange things can happen.
 		Return a pointer to the top element in the \classname{qs}.
 	\end{capilist}
 \label{qs_down}
-\index{\cppmacro{qs\_down}{}}
+\index{qs_down@\cppmacro{qs\_down}{}}
 \citem{\cppmacro[{\lt}qs\_type{\gt} *]{qs\_down}{{\lt}qs\_elm\_type{\gt}
 *a\_elm, {\lt}field\_name{\gt} a\_field}}
 	\begin{capilist}
@@ -148,7 +148,7 @@ strange things can happen.
 		\cvar{a\_elm}.
 	\end{capilist}
 \label{qs_push}
-\index{\cppmacro{qs\_push}{}}
+\index{qs_push@\cppmacro{qs\_push}{}}
 \citem{\cppmacro[void]{qs\_push}{{\lt}qs\_type{\gt} *a\_head,
 {\lt}qs\_elm\_type{\gt} *a\_elm, {\lt}field\_name{\gt} a\_field}}
 	\begin{capilist}
@@ -167,7 +167,7 @@ strange things can happen.
 		Push \cvar{a\_elm} onto the \classname{qs}.
 	\end{capilist}
 \label{qs_under_push}
-\index{\cppmacro{qs\_under\_push}{}}
+\index{qs_under_push@\cppmacro{qs\_under\_push}{}}
 \citem{\cppmacro[void]{qs\_under\_push}{{\lt}qs\_elm\_type{\gt} *a\_qselm,
 {\lt}qs\_elm\_type{\gt} *a\_elm, {\lt}field\_name{\gt} a\_field}}
 	\begin{capilist}
@@ -186,7 +186,7 @@ strange things can happen.
 		Push \cvar{a\_elm} under \cvar{a\_qselm}.
 	\end{capilist}
 \label{qs_pop}
-\index{\cppmacro{qs\_pop}{}}
+\index{qs_pop@\cppmacro{qs\_pop}{}}
 \citem{\cppmacro[void]{qs\_pop}{{\lt}qs\_type{\gt} *a\_head,
 {\lt}field\_name{\gt} a\_field}}
 	\begin{capilist}
@@ -203,7 +203,7 @@ strange things can happen.
 		Pop an element off of \cvar{a\_head}.
 	\end{capilist}
 \label{qs_foreach}
-\index{\cppmacro{qs\_foreach}{}}
+\index{qs_foreach@\cppmacro{qs\_foreach}{}}
 \citem{\cppmacro[]{qs\_foreach}{{\lt}qs\_elm\_type{\gt} *a\_var,
 {\lt}qs\_type{\gt} *a\_head, {\lt}field\_name{\gt} a\_field}}
 	\begin{capilist}
