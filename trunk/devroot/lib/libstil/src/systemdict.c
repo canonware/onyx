@@ -2778,7 +2778,8 @@ systemdict_readline(cw_stilt_t *a_stilt)
 
 	tfile = stils_push(tstack);
 	stilo_dup(tfile, stilo);
-	error = stilo_file_readline(tfile, a_stilt, stilo, &eof);
+	error = stilo_file_readline(tfile, stilt_stil_get(a_stilt), stilo,
+	    &eof);
 	if (error) {
 		stils_pop(tstack);
 		stilt_error(a_stilt, error);

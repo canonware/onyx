@@ -53,8 +53,6 @@ struct cw_stila_s {
 void	stila_new(cw_stila_t *a_stila, cw_stil_t *a_stil);
 void	stila_delete(cw_stila_t *a_stila);
 
-void	stila_gc_register(cw_stila_t *a_stila, cw_stiloe_t *a_stiloe);
-
 void	stila_collect(cw_stila_t *a_stila);
 void	stila_dump(cw_stila_t *a_stila, cw_stilt_t *a_stilt);
 

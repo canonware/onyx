@@ -273,7 +273,7 @@ cw_stilte_t	stilo_file_open(cw_stilo_t *a_stilo, const cw_uint8_t
 cw_stilte_t	stilo_file_close(cw_stilo_t *a_stilo);
 cw_sint32_t	stilo_file_read(cw_stilo_t *a_stilo, cw_uint32_t a_len,
     cw_uint8_t *r_str);
-cw_stilte_t	stilo_file_readline(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
+cw_stilte_t	stilo_file_readline(cw_stilo_t *a_stilo, cw_stil_t *a_stil,
     cw_stilo_t *r_string, cw_bool_t *r_eof);
 cw_stilte_t	stilo_file_write(cw_stilo_t *a_stilo, const cw_uint8_t *a_str,
     cw_uint32_t a_len);

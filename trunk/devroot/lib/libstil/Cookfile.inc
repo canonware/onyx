@@ -34,8 +34,8 @@
 /* Include files that are _not_ installed. */
 {
   local priv_incs = currenterror_l.h envdict_l.h errordict_l.h gcdict_l.h
-                    systemdict_l.h threaddict_l.h stil_l.h stila_l.h stilo_l.h
-                    stils_l.h stilt_l.h;
+                    stil_l.h stila_l.h stilo_l.h stils_l.h stilt_l.h
+                    systemdict_l.h threaddict_l.h;
   priv_incs = [fromto % [srcdir]/lib/c/libstil/include/libstil/% [priv_incs]];
 
   PRIV_INCS = [PRIV_INCS] [priv_incs];

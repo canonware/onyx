@@ -265,54 +265,6 @@ stila_delete(cw_stila_t *a_stila)
 }
 
 void
-stila_gc_register(cw_stila_t *a_stila, cw_stiloe_t *a_stiloe)
-{
-	_cw_check_ptr(a_stila);
-	_cw_assert(a_stila->magic == _CW_STILA_MAGIC);
-
-	mtx_lock(&a_stila->lock);
-	_cw_assert(stiloe_l_registered_get(a_stiloe) == FALSE);
-	_cw_assert(qr_next(a_stiloe, link) == a_stiloe);
-	_cw_assert(qr_prev(a_stiloe, link) == a_stiloe);
-
-	/*
-	 * Set the color to white, set the registered bit, and insert into the
-	 * object ring.
-	 */
-	stiloe_l_color_set(a_stiloe, a_stila->white);
-	stiloe_l_registered_set(a_stiloe, TRUE);
-	ql_tail_insert(&a_stila->seq_set, a_stiloe, link);
-
-	/* Update new. */
-	stilo_integer_set(a_stila->gcdict_new,
-	    stilo_integer_get(a_stila->gcdict_new) + 1);
-
-	/* Update current[0]. */
-	stilo_integer_set(&a_stila->gcdict_current[0],
-	    stilo_integer_get(&a_stila->gcdict_current[0]) + 1);
-
-	/* Update maximum[0]. */
-	if (stilo_integer_get(&a_stila->gcdict_maximum[0]) <
-	    stilo_integer_get(&a_stila->gcdict_current[0])) {
-		stilo_integer_set(&a_stila->gcdict_maximum[0],
-		    stilo_integer_get(&a_stila->gcdict_current[0]));
-	}
-
-	/* Update sum[0]. */
-	stilo_integer_set(&a_stila->gcdict_sum[0],
-	    stilo_integer_get(&a_stila->gcdict_sum[0]) + 1);
-
-	/* Trigger a collection if the threshold was reached. */
-	if (stilo_integer_get(a_stila->gcdict_new) ==
-	    stilo_integer_get(a_stila->gcdict_threshold) &&
-	    stilo_boolean_get(a_stila->gcdict_active) &&
-	    stilo_integer_get(a_stila->gcdict_threshold) != 0)
-		mq_put(&a_stila->gc_mq, STILAM_COLLECT);
-
-	mtx_unlock(&a_stila->lock);
-}
-
-void
 stila_collect(cw_stila_t *a_stila)
 {
 	_cw_check_ptr(a_stila);
@@ -470,6 +422,54 @@ stila_threshold_set(cw_stila_t *a_stila, cw_uint32_t a_threshold)
 		mq_put(&a_stila->gc_mq, STILAM_COLLECT);
 	else
 		mq_put(&a_stila->gc_mq, STILAM_RECONFIGURE);
+	mtx_unlock(&a_stila->lock);
+}
+
+void
+stila_l_gc_register(cw_stila_t *a_stila, cw_stiloe_t *a_stiloe)
+{
+	_cw_check_ptr(a_stila);
+	_cw_assert(a_stila->magic == _CW_STILA_MAGIC);
+
+	mtx_lock(&a_stila->lock);
+	_cw_assert(stiloe_l_registered_get(a_stiloe) == FALSE);
+	_cw_assert(qr_next(a_stiloe, link) == a_stiloe);
+	_cw_assert(qr_prev(a_stiloe, link) == a_stiloe);
+
+	/*
+	 * Set the color to white, set the registered bit, and insert into the
+	 * object ring.
+	 */
+	stiloe_l_color_set(a_stiloe, a_stila->white);
+	stiloe_l_registered_set(a_stiloe, TRUE);
+	ql_tail_insert(&a_stila->seq_set, a_stiloe, link);
+
+	/* Update new. */
+	stilo_integer_set(a_stila->gcdict_new,
+	    stilo_integer_get(a_stila->gcdict_new) + 1);
+
+	/* Update current[0]. */
+	stilo_integer_set(&a_stila->gcdict_current[0],
+	    stilo_integer_get(&a_stila->gcdict_current[0]) + 1);
+
+	/* Update maximum[0]. */
+	if (stilo_integer_get(&a_stila->gcdict_maximum[0]) <
+	    stilo_integer_get(&a_stila->gcdict_current[0])) {
+		stilo_integer_set(&a_stila->gcdict_maximum[0],
+		    stilo_integer_get(&a_stila->gcdict_current[0]));
+	}
+
+	/* Update sum[0]. */
+	stilo_integer_set(&a_stila->gcdict_sum[0],
+	    stilo_integer_get(&a_stila->gcdict_sum[0]) + 1);
+
+	/* Trigger a collection if the threshold was reached. */
+	if (stilo_integer_get(a_stila->gcdict_new) ==
+	    stilo_integer_get(a_stila->gcdict_threshold) &&
+	    stilo_boolean_get(a_stila->gcdict_active) &&
+	    stilo_integer_get(a_stila->gcdict_threshold) != 0)
+		mq_put(&a_stila->gc_mq, STILAM_COLLECT);
+
 	mtx_unlock(&a_stila->lock);
 }
 

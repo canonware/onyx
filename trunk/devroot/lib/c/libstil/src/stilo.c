@@ -814,7 +814,7 @@ stilo_array_new(cw_stilo_t *a_stilo, cw_stil_t *a_stil, cw_uint32_t a_len)
 #endif
 	a_stilo->type = STILOT_ARRAY;
 
-	stila_gc_register(stil_stila_get(a_stil), (cw_stiloe_t *)array);
+	stila_l_gc_register(stil_stila_get(a_stil), (cw_stiloe_t *)array);
 }
 
 cw_stilte_t
@@ -848,7 +848,7 @@ stilo_array_subarray_new(cw_stilo_t *a_stilo, cw_stilo_t *a_array, cw_stil_t
 #endif
 	a_stilo->type = STILOT_ARRAY;
 
-	stila_gc_register(stil_stila_get(a_stil), (cw_stiloe_t *)array);
+	stila_l_gc_register(stil_stila_get(a_stil), (cw_stiloe_t *)array);
 
 	retval = STILTE_NONE;
 	RETURN:
@@ -1255,7 +1255,7 @@ stilo_condition_new(cw_stilo_t *a_stilo, cw_stil_t *a_stil)
 #endif
 	a_stilo->type = STILOT_CONDITION;
 
-	stila_gc_register(stil_stila_get(a_stil), (cw_stiloe_t *)condition);
+	stila_l_gc_register(stil_stila_get(a_stil), (cw_stiloe_t *)condition);
 }
 
 static void
@@ -1428,7 +1428,7 @@ stilo_dict_new(cw_stilo_t *a_stilo, cw_stil_t *a_stil, cw_uint32_t a_dict_size)
 #endif
 	a_stilo->type = STILOT_DICT;
 
-	stila_gc_register(stil_stila_get(a_stil), (cw_stiloe_t *)dict);
+	stila_l_gc_register(stil_stila_get(a_stil), (cw_stiloe_t *)dict);
 }
 
 static void
@@ -1815,7 +1815,7 @@ stilo_file_new(cw_stilo_t *a_stilo, cw_stil_t *a_stil)
 #endif
 	a_stilo->type = STILOT_FILE;
 
-	stila_gc_register(stil_stila_get(a_stil), (cw_stiloe_t *)file);
+	stila_l_gc_register(stil_stila_get(a_stil), (cw_stiloe_t *)file);
 }
 
 static void
@@ -2222,7 +2222,7 @@ stilo_file_read(cw_stilo_t *a_stilo, cw_uint32_t a_len, cw_uint8_t *r_str)
 
 /* STILTE_IOERROR */
 cw_stilte_t
-stilo_file_readline(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilo_t
+stilo_file_readline(cw_stilo_t *a_stilo, cw_stil_t *a_stil, cw_stilo_t
     *r_string, cw_bool_t *r_eof)
 {
 	cw_stilte_t		retval;
@@ -2314,8 +2314,7 @@ stilo_file_readline(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilo_t
 					file->buffer_offset = 0;
 					file->buffer_mode = BUFFER_EMPTY;
 
-					stilo_string_new(r_string,
-					    stilt_stil_get(a_stilt), i);
+					stilo_string_new(r_string, a_stil, i);
 					stilo_string_set(r_string, 0, line, i);
 
 					retval = STILTE_NONE;
@@ -2340,8 +2339,7 @@ stilo_file_readline(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilo_t
 					/* Throw away the preceding \r. */
 					i--;
 				}
-				stilo_string_new(r_string,
-				    stilt_stil_get(a_stilt), i);
+				stilo_string_new(r_string, a_stil, i);
 				stilo_string_set(r_string, 0, line, i);
 
 				/*
@@ -2409,8 +2407,7 @@ stilo_file_readline(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilo_t
 			}
 			if (nread <= 0) {
 				/* EOF. */
-				stilo_string_new(r_string,
-				    stilt_stil_get(a_stilt), i);
+				stilo_string_new(r_string, a_stil, i);
 				stilo_string_set(r_string, 0, line, i);
 
 				retval = STILTE_NONE;
@@ -2427,8 +2424,7 @@ stilo_file_readline(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilo_t
 					/* Throw away the preceding \r. */
 					i--;
 				}
-				stilo_string_new(r_string,
-				    stilt_stil_get(a_stilt), i);
+				stilo_string_new(r_string, a_stil, i);
 				stilo_string_set(r_string, 0, line, i);
 
 				retval = STILTE_NONE;
@@ -3148,7 +3144,7 @@ stilo_hook_new(cw_stilo_t *a_stilo, cw_stil_t *a_stil, void *a_data,
 #endif
 	a_stilo->type = STILOT_HOOK;
 
-	stila_gc_register(stil_stila_get(a_stil), (cw_stiloe_t *)hook);
+	stila_l_gc_register(stil_stila_get(a_stil), (cw_stiloe_t *)hook);
 }
 
 static void
@@ -3300,7 +3296,7 @@ stilo_mutex_new(cw_stilo_t *a_stilo, cw_stil_t *a_stil)
 #endif
 	a_stilo->type = STILOT_MUTEX;
 
-	stila_gc_register(stil_stila_get(a_stil), (cw_stiloe_t *)mutex);
+	stila_l_gc_register(stil_stila_get(a_stil), (cw_stiloe_t *)mutex);
 }
 
 static void
@@ -3449,7 +3445,7 @@ stilo_name_new(cw_stilo_t *a_stilo, cw_stil_t *a_stil, const cw_uint8_t
 #endif
 		a_stilo->type = STILOT_NAME;
 
-		stila_gc_register(stil_stila_get(a_stil), (cw_stiloe_t *)name);
+		stila_l_gc_register(stil_stila_get(a_stil), (cw_stiloe_t *)name);
 	} else {
 		memset(a_stilo, 0, sizeof(cw_stilo_t));
 		a_stilo->o.stiloe = (cw_stiloe_t *)name;
@@ -3500,7 +3496,7 @@ stiloe_p_name_delete(cw_stiloe_t *a_stiloe, cw_stil_t *a_stil)
 	} else {
 		/* Re-register. */
 		a_stiloe->registered = FALSE;
-		stila_gc_register(stil_stila_get(a_stil), a_stiloe);
+		stila_l_gc_register(stil_stila_get(a_stil), a_stiloe);
 	}
 	mtx_unlock(name_lock);
 }
@@ -3709,7 +3705,7 @@ stilo_string_new(cw_stilo_t *a_stilo, cw_stil_t *a_stil, cw_uint32_t a_len)
 #endif
 	a_stilo->type = STILOT_STRING;
 
-	stila_gc_register(stil_stila_get(a_stil), (cw_stiloe_t *)string);
+	stila_l_gc_register(stil_stila_get(a_stil), (cw_stiloe_t *)string);
 }
 
 cw_stilte_t
@@ -3749,7 +3745,7 @@ stilo_string_substring_new(cw_stilo_t *a_stilo, cw_stilo_t *a_string, cw_stil_t
 #endif
 	a_stilo->type = STILOT_STRING;
 
-	stila_gc_register(stil_stila_get(a_stil), (cw_stiloe_t *)string);
+	stila_l_gc_register(stil_stila_get(a_stil), (cw_stiloe_t *)string);
 
 	retval = STILTE_NONE;
 	RETURN:
