@@ -7,6 +7,11 @@ dnl
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(Cookfile.in)
 
+dnl
+dnl Version requirements for external software we depend on.
+dnl
+GTK_VERSION_REQUIRED=1.3.12
+
 abs_srcdir=`cd $srcdir; pwd`
 AC_SUBST(abs_srcdir)
 
@@ -93,7 +98,13 @@ AC_CHECK_FUNCS(dlopen, AC_DEFINE(HAVE_DLOPEN), \
 
 if test "x$enable_modules" = "xyes" -a "x$enable_threads" = "x1" \
      -a "x$enable_posix" = "x1" ; then
+  dnl modpane.
   CW_BUILD_MOD(modpane, mod_pane)
+
+  dnl modgtk.
+  PKG_CHECK_MODULES(GTK, gtk+-2.0 >= $GTK_VERSION_REQUIRED, \
+    CW_BUILD_MOD(modgtk, mod_gtk), \
+    AC_MSG_RESULT(gtk+ $GTK_VERSION_REQUIRED or newer not found))
 fi
 
 dnl Look for binaries.

@@ -119,7 +119,7 @@ modgtk_distclean :
 
 CPPFLAGS = [CPPFLAGS] -I[srcdir]/mod/modgtk/include
                       -I[objdir]/mod/modgtk/include
-		      `[GTKCONFIG] --cflags`;
+                      [MODGTK_CPPFLAGS];
 
 /*
  * Dependencies.
@@ -129,10 +129,10 @@ CPPFLAGS = [CPPFLAGS] -I[srcdir]/mod/modgtk/include
   set mkdir
 {
 #if [matches elf [abi]]
-  [CC] -shared -o [target] [need] `[GTKCONFIG] --libs`;
+  [CC] -shared -o [target] [need] [MODGTK_LDFLAGS];
 #elif [matches macho [abi]]
   [LD] -undefined suppress -flat_namespace -bundle -dynamic -all_load
        -lbundle1.o -lcc_dynamic
-       -o [target] [need] `[GTKCONFIG] --libs`;
+       -o [target] [need] [MODGTK_LDFLAGS];
 #endif
 }

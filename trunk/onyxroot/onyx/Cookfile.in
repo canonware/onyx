@@ -47,13 +47,13 @@ DVIPS = @DVIPS@;
 FIG2DEV = @FIG2DEV@;
 LATEX2HTML = @LATEX2HTML@;
 MAKEINDEX = @MAKEINDEX@;
-GTKCONFIG = @GTKCONFIG@;
 
 /* Build parameters. */
 if [not [defined CPPFLAGS]] then
   CPPFLAGS = [split " " [strip "@CPPFLAGS@"]];
 CPPDEFS = -D_REENTRANT;
 
+MODGTK_CPPFLAGS = @GTK_CFLAGS@;
 if [not [defined CFLAGS]] then
   CFLAGS = [split " " [strip "@CFLAGS@"]];
 A_CFLAGS = [CFLAGS];
@@ -67,6 +67,8 @@ if [not [defined LDFLAGS]] then
   LDFLAGS = [split " " [strip "@LDFLAGS@"]];
 EXTRALIBS = @LIBS@;
 RPATH = @RPATH@;
+
+MODGTK_LDFLAGS = @GTK_LIBS@;
 
 libs = @libs@;
 mods = @mods@;
