@@ -55,9 +55,7 @@ static void	bufh_p_new(cw_bufh_t *a_bufh);
 static void	bufh_p_delete(cw_bufh_t *a_bufh);
 
 /* buf. */
-static cw_uint64_t buf_p_pos_c2a(cw_buf_t *a_buf, cw_uint64_t a_cpos);
 static cw_uint64_t buf_p_pos_a2b(cw_buf_t *a_buf, cw_uint64_t a_apos);
-static cw_uint64_t buf_p_pos_a2c(cw_buf_t *a_buf, cw_uint64_t a_apos);
 static cw_uint64_t buf_p_lines_count(cw_buf_t *a_buf, cw_uint64_t a_apos_beg,
     cw_uint64_t a_apos_end);
 static void	buf_p_bufms_apos_adjust(cw_buf_t *a_buf, cw_bufm_t *a_bufm,
@@ -106,22 +104,6 @@ buf_p_pos_b2a(cw_buf_t *a_buf, cw_uint64_t a_bpos)
 }
 
 static cw_uint64_t
-buf_p_pos_c2a(cw_buf_t *a_buf, cw_uint64_t a_cpos)
-{
-	cw_uint64_t	apos;
-
-	_cw_assert(a_cpos > 0);
-	_cw_assert(a_cpos <= a_buf->len);
-
-	if (a_cpos <= a_buf->gap_off)
-		apos = a_cpos - 1;
-	else
-		apos = a_cpos - 1 + a_buf->gap_len;
-
-	return apos;
-}
-
-static cw_uint64_t
 buf_p_pos_a2b(cw_buf_t *a_buf, cw_uint64_t a_apos)
 {
 	cw_uint64_t	bpos;
@@ -137,23 +119,6 @@ buf_p_pos_a2b(cw_buf_t *a_buf, cw_uint64_t a_apos)
 	return bpos;
 }
 
-/* Same as buf_p_pos_a2b(). */
-static cw_uint64_t
-buf_p_pos_a2c(cw_buf_t *a_buf, cw_uint64_t a_apos)
-{
-	cw_uint64_t	cpos;
-
-	_cw_assert(a_apos <= a_buf->gap_off || a_apos >= a_buf->gap_off +
-	    a_buf->gap_len);
-
-	if (a_apos <= a_buf->gap_off)
-		cpos = a_apos + 1;
-	else
-		cpos = a_apos + 1 - a_buf->gap_len;
-
-	return cpos;
-}
-
 static cw_uint64_t
 buf_p_lines_count(cw_buf_t *a_buf, cw_uint64_t a_apos_beg, cw_uint64_t
     a_apos_end)
@@ -166,6 +131,7 @@ buf_p_lines_count(cw_buf_t *a_buf, cw_uint64_t a_apos_beg, cw_uint64_t
 	_cw_assert(a_apos_end <= a_buf->gap_off || a_apos_end >= a_buf->gap_off
 	    + a_buf->gap_len);
 	_cw_assert(a_apos_end <= a_buf->len + a_buf->gap_len);
+	_cw_assert(a_apos_beg <= a_apos_end);
 
 	retval = 0;
 
@@ -212,21 +178,17 @@ buf_p_bufms_apos_adjust(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_bool_t a_exclude,
 	for (bufm = ql_next(&a_buf->bufms, a_bufm, link);
 	     bufm != NULL && bufm->apos >= a_beg_apos && bufm->apos <
 	     a_end_apos;
-	     bufm = ql_next(&a_buf->bufms, bufm, link)) {
-		fprintf(stderr, "%s:%u:%s(): Got here\n", __FILE__, __LINE__,
-		    __FUNCTION__);
+	     bufm = ql_next(&a_buf->bufms, bufm, link))
 		bufm->apos += a_adjust;
-	}
+/*  	fprintf(stderr, "%s:%u:%s(): Got here\n", __FILE__, __LINE__, */
+/*  	    __FUNCTION__); */
 
 	/* Backward. */
 	for (bufm = ql_prev(&a_buf->bufms, a_bufm, link);
 	     bufm != NULL && bufm->apos >= a_beg_apos && bufm->apos <
 	     a_end_apos;
-	     bufm = ql_prev(&a_buf->bufms, bufm, link)) {
-		fprintf(stderr, "%s:%u:%s(): Got here\n", __FILE__, __LINE__,
-		    __FUNCTION__);
+	     bufm = ql_prev(&a_buf->bufms, bufm, link))
 		bufm->apos += a_adjust;
-	}
 }
 
 static void
@@ -535,6 +497,8 @@ bufm_p_insert(cw_bufm_t *a_bufm, cw_bool_t a_exclude, const cw_char_t *a_str,
 	if (nlines > 0) {
 		cw_bufm_t	*bufm;
 
+/*  	fprintf(stderr, "%s:%u:%s(): Got here\n", __FILE__, __LINE__, */
+/*  	    __FUNCTION__); */
 		/* Adjust line. */
 		if (a_exclude == FALSE)
 			a_bufm->line += nlines;
@@ -794,7 +758,7 @@ bufm_seek(cw_bufm_t *a_bufm, cw_sint64_t a_offset, cw_bufw_t a_whence)
 			 * the line number accordingly.
 			 */
 			a_bufm->line += buf_p_lines_count(a_bufm->buf,
-			    a_bufm->apos, apos);
+			    apos, a_bufm->apos);
 
 			/*
 			 * Set the apos of the bufm now that the old value isn't
@@ -847,7 +811,7 @@ bufm_seek(cw_bufm_t *a_bufm, cw_sint64_t a_offset, cw_bufw_t a_whence)
 			 * the line number accordingly.
 			 */
 			a_bufm->line += buf_p_lines_count(a_bufm->buf,
-			    apos, a_bufm->apos);
+			    a_bufm->apos, apos);
 
 			/*
 			 * Set the apos of the bufm now that the old value isn't
@@ -997,6 +961,7 @@ cw_bool_t
 bufm_before_set(cw_bufm_t *a_bufm, cw_char_t a_char)
 {
 	cw_bool_t	retval;
+	cw_uint64_t	apos, bpos;
 
 	_cw_check_ptr(a_bufm);
 	_cw_dassert(a_bufm->magic == _CW_BUFM_MAGIC);
@@ -1004,13 +969,17 @@ bufm_before_set(cw_bufm_t *a_bufm, cw_char_t a_char)
 
 	mtx_lock(&a_bufm->buf->mtx);
 
+	bpos = buf_p_pos_a2b(a_bufm->buf, a_bufm->apos);
+
 	/* Make sure the marker isn't at BOB. */
-	if (buf_p_pos_a2b(a_bufm->buf, a_bufm->apos) == 1) {
+	if (bpos == 1) {
 		retval = TRUE;
 		goto RETURN;
 	}
 
-	_cw_error("XXX Not implemented");
+	bpos--;
+	apos = buf_p_pos_b2a(a_bufm->buf, bpos);
+	bufc_char_set(a_bufm->buf->b[apos], a_char);
 
 	retval = FALSE;
 	RETURN:
@@ -1035,7 +1004,7 @@ bufm_after_set(cw_bufm_t *a_bufm, cw_char_t a_char)
 		goto RETURN;
 	}
 
-	_cw_error("XXX Not implemented");
+	bufc_char_set(a_bufm->buf->b[a_bufm->apos], a_char);
 
 	retval = FALSE;
 	RETURN:
@@ -1047,6 +1016,7 @@ cw_bool_t
 bufm_before_attrs_set(cw_bufm_t *a_bufm, cw_bufc_t a_bufc)
 {
 	cw_bool_t	retval;
+	cw_uint64_t	apos, bpos;
 
 	_cw_check_ptr(a_bufm);
 	_cw_dassert(a_bufm->magic == _CW_BUFM_MAGIC);
@@ -1054,13 +1024,17 @@ bufm_before_attrs_set(cw_bufm_t *a_bufm, cw_bufc_t a_bufc)
 
 	mtx_lock(&a_bufm->buf->mtx);
 
-	/* Make sure the marker isn't at EOB. */
-	if (buf_p_pos_a2b(a_bufm->buf, a_bufm->apos) == a_bufm->buf->len + 1) {
+	bpos = buf_p_pos_a2b(a_bufm->buf, a_bufm->apos);
+
+	/* Make sure the marker isn't at BOB. */
+	if (bpos == 1) {
 		retval = TRUE;
 		goto RETURN;
 	}
 
-	_cw_error("XXX Not implemented");
+	bpos--;
+	apos = buf_p_pos_b2a(a_bufm->buf, bpos);
+	bufc_attrs_copy(a_bufm->buf->b[apos], a_bufc);
 
 	retval = FALSE;
 	RETURN:
@@ -1085,7 +1059,7 @@ bufm_after_attrs_set(cw_bufm_t *a_bufm, cw_bufc_t a_bufc)
 		goto RETURN;
 	}
 
-	_cw_error("XXX Not implemented");
+	bufc_attrs_copy(a_bufm->buf->b[a_bufm->apos], a_bufc);
 
 	retval = FALSE;
 	RETURN:

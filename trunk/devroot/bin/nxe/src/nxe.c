@@ -16,9 +16,9 @@ foo(cw_nx_t *a_nx, cw_nxo_t *a_thread)
 {
 	cw_buf_t	*buf;
 	cw_bufm_t	*bufm;
-	cw_char_t	data_a[] = "ABC";
-	cw_char_t	data_b[] = "abc";
-	cw_char_t	data_c[] = "012";
+	cw_char_t	data_a[] = "AB\nD";
+	cw_char_t	data_b[] = "\nabc";
+	cw_char_t	data_c[] = "012\n";
 	cw_bufc_t	bufc;
 
 	buf = buf_new(NULL, (cw_opaque_alloc_t *)mem_malloc_e,
@@ -56,6 +56,30 @@ foo(cw_nx_t *a_nx, cw_nxo_t *a_thread)
 		fprintf(stderr, "position %llu, line %llu, char :%c:\n",
 		    bufm_pos(bufm), bufm_line(bufm), bufc_char_get(bufc));
 	}
+
+	fprintf(stderr, "length %llu, position %llu, line %llu\n", buf_len(buf),
+	    bufm_pos(bufm), bufm_line(bufm));
+	bufm_seek(bufm, 5, BUFW_BEG);
+
+	bufm_before_set(bufm, 'X');
+	bufm_after_set(bufm, 'Y');
+
+	fprintf(stderr, "bufm_after_get():\n");
+	for (bufm_seek(bufm, 0, BUFW_BEG); bufm_pos(bufm) <= buf_len(buf);
+	    bufm_seek(bufm, 1, BUFW_REL)) {
+		_cw_assert(bufm_after_get(bufm, &bufc) == FALSE);
+		fprintf(stderr, "position %llu, line %llu, char :%c:\n",
+		    bufm_pos(bufm), bufm_line(bufm), bufc_char_get(bufc));
+	}
+
+	fprintf(stderr, "bufm_before_get():\n");
+	for (bufm_seek(bufm, 1, BUFW_BEG); bufm_pos(bufm) <= buf_len(buf);
+	    bufm_seek(bufm, 1, BUFW_REL)) {
+		_cw_assert(bufm_before_get(bufm, &bufc) == FALSE);
+		fprintf(stderr, "position %llu, line %llu, char :%c:\n",
+		    bufm_pos(bufm), bufm_line(bufm), bufc_char_get(bufc));
+	}
+	
 
 	bufm_delete(bufm);
 	buf_delete(buf);
