@@ -15,7 +15,7 @@
 #include <sys/time.h>
 #include <errno.h>
 
-#ifdef CW_OS_FREEBSD
+#ifdef CW_FTHREADS
 #include <pthread_np.h>
 #endif
 
@@ -85,23 +85,6 @@ static void
 thd_p_resume(cw_thd_t *a_thd);
 
 #ifdef CW_THD_GENERIC_SR
-/* The generic suspend/resume mechanism uses signals (using pthread_kill()).
- * This is rather expensive, depending on the OS, but it does not violate
- * portability.  The only issue with this mechanism is that it requires one
- * signal that cannot otherwise be used by the thread being suspended/resumed.
- * On most OSs, SIGUSR1 or SIGUSR2 is the logical choice. */
-#ifdef CW_OS_LINUX
-/* I don't whether this signal can be safely used, but SIGUSR[12] definitely
- * won't work with LinuxThreads. */
-#define CW_THD_SIGSR SIGUNUSED
-#elif (defined(CW_OS_FREEBSD))
-/* SIGUSR[12] are used by the linuxthreads port on FreeBSD, so use another
- * signal to allow libonyx to work even if linked with linuxthreads. */
-#define CW_THD_SIGSR SIGXCPU
-#else
-#define CW_THD_SIGSR SIGUSR1
-#endif
-
 static void
 thd_p_sr_handle(int a_signal);
 #endif
@@ -351,12 +334,7 @@ thd_sigmask(int a_how, const sigset_t *a_set, sigset_t *r_oset)
 	pthread_sigmask(a_how, &set, r_oset);
     }
 #else
-/* XXX Signal handling for Darwin's pthreads is badly broken up to and including
- * 1.4.1 (OS X 10.1).  This hack *really* needs to go away as soon as Darwin's
- * signal handling support is improved. */
-#ifndef CW_OS_DARWIN
     pthread_sigmask(a_how, a_set, r_oset);
-#endif
 #endif
 #endif
 }

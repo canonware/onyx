@@ -34,7 +34,7 @@ tests_distclean :
 {
   [CC] [A_CFLAGS] -o [target]
        @objroot@/%0test/%1.o_a
-#if [matches elf @abi@]
+#if [count @RPATH@]
        [split " "
               [prepost [prepost @RPATH@ "/lib/" @abs_objroot@]
                        "/lib"

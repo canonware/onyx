@@ -16,11 +16,6 @@
 #undef CW_ASSERT
 #endif
 
-#undef CW_OS_DARWIN
-#undef CW_OS_FREEBSD
-#undef CW_OS_LINUX
-#undef CW_OS_SOLARIS
-
 /* Solaris needs this for sigwait(). */
 #undef _POSIX_PTHREAD_SEMANTICS
 
@@ -65,6 +60,9 @@
 #undef SIZEOF_LONG_DOUBLE
 
 #undef CW_LIBONYX_USE_DIRENT_RECLEN
+#undef CW_LIBONYX_USE_STAT_ATIMESPEC
+#undef CW_LIBONYX_USE_STAT_MTIMESPEC
+#undef CW_LIBONYX_USE_STAT_CTIMESPEC
 
 #undef HAVE_POLL
 #undef HAVE_READDIR_R

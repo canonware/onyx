@@ -209,7 +209,7 @@ onyx_bins_install : [ONYX]
        [LIBEDIT_A]
 #endif
 #if @enable_libonyx@
-#if [matches elf @abi@]
+#if [count @RPATH@]
        @RPATH@[PREFIX]/lib
 #endif
 #endif
@@ -236,9 +236,11 @@ onyx_bins_clean :
   rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.d_a [ONYX_SRCS] [TONYX_SRCS]];
   rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [ONYX_SRCS] [TONYX_SRCS]];
 
+#if [count [ONYX_OTESTS]]
   rm -f [fromto @srcroot@/%0%.nx.in @objroot@/%0%.nx.out [ONYX_OTESTS]];
   rm -f [fromto @srcroot@/%0%.nx.in @objroot@/%0%.nx.diff [ONYX_OTESTS]];
   rm -f [fromto @srcroot@/%0%.nx.in @objroot@/%0%.nx [ONYX_OTESTS]];
+#endif
 
   rm -f [ONYX] [TONYX];
 }
@@ -274,7 +276,7 @@ onyx_bins_distclean :
        [LIBEDIT_A]
 #endif
 #if @enable_libonyx@
-#if [matches elf @abi@]
+#if [count @RPATH@]
        @RPATH@@abs_objroot@/lib/libonyx/lib
 #endif
 #endif

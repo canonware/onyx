@@ -6118,7 +6118,7 @@ systemdict_status(cw_nxo_t *a_thread)
 
     /* atime. */
     nxo_name_new(name, nx, nxn_str(NXN_atime), nxn_len(NXN_atime), TRUE);
-#ifdef CW_OS_FREEBSD
+#ifdef CW_LIBONYX_USE_STAT_ATIMESPEC
     nxo_integer_new(value,
 		    ((cw_nxoi_t) sb.st_atimespec.tv_sec *
 		     (cw_nxoi_t) 1000000000)
@@ -6130,7 +6130,7 @@ systemdict_status(cw_nxo_t *a_thread)
 
     /* mtime. */
     nxo_name_new(name, nx, nxn_str(NXN_mtime), nxn_len(NXN_mtime), TRUE);
-#ifdef CW_OS_FREEBSD
+#ifdef CW_LIBONYX_USE_STAT_MTIMESPEC
     nxo_integer_new(value,
 		    ((cw_nxoi_t) sb.st_mtimespec.tv_sec
 		     * (cw_nxoi_t) 1000000000)
@@ -6142,7 +6142,7 @@ systemdict_status(cw_nxo_t *a_thread)
 
     /* ctime. */
     nxo_name_new(name, nx, nxn_str(NXN_ctime), nxn_len(NXN_ctime), TRUE);
-#ifdef CW_OS_FREEBSD
+#ifdef CW_LIBONYX_USE_STAT_CTIMESPEC
     nxo_integer_new(value,
 		    ((cw_nxoi_t) sb.st_ctimespec.tv_sec
 		     * (cw_nxoi_t) 1000000000)

@@ -133,30 +133,41 @@ AC_SUBST(mods)
 AC_SUBST(libs)
 AC_SUBST(docs)
 
+dnl Platform-specific settings.  abi and RPATH can probably be determined
+dnl programmatically, but doing so is error-prone, which makes it generally
+dnl not worth the trouble.
 AC_CANONICAL_HOST
 case "${host}" in
   *-*-darwin*)
-	AC_DEFINE(CW_OS_DARWIN, )
-	abi="macho"
 	CFLAGS="$CFLAGS -fno-common -no-cpp-precomp"
+	abi="macho"
+	RPATH=""
 	;;
   *-*-freebsd*)
-	AC_DEFINE(CW_OS_FREEBSD, )
 	abi="elf"
 	RPATH="-Wl,-rpath,"
-        ;;
+	;;
   *-*-linux*)
-	AC_DEFINE(CW_OS_LINUX, )
 	abi="elf"
 	RPATH="-Wl,-rpath,"
-        ;;
+	;;
+  *-*-netbsd*)
+	AC_MSG_CHECKING(ABI)
+	AC_EGREP_CPP(yes,
+[#ifdef __ELF__
+  yes
+#endif
+],
+		     abi="elf",
+		     abi="aout")
+	AC_MSG_RESULT($abi)
+	RPATH="-Wl,-rpath,"
+	;;
   *-*-solaris2*)
-	AC_DEFINE(CW_OS_SOLARIS, )
-	AC_DEFINE(_POSIX_PTHREAD_SEMANTICS)
 	abi="elf"
-	RPATH="-Wl,-R,"
+	AC_DEFINE(_POSIX_PTHREAD_SEMANTICS)
 	LIBS="$LIBS -lposix4"
-        ;;
+	;;
   *)
 	AC_MSG_RESULT(Unsupported operating system: ${host})
 	abi="elf"
@@ -233,9 +244,9 @@ AC_TRY_LINK([
 #include <sys/types.h>
 #include <dirent.h>
 ], [
-	struct dirent	ent;
+    struct dirent ent;
 
-	ent.d_namlen = 0;
+    ent.d_namlen = 0;
 ], AC_MSG_RESULT(yes), AC_MSG_RESULT(no)
 
 dnl d_namlen doesn't exist, so try d_reclen.
@@ -244,15 +255,54 @@ AC_TRY_LINK([
 #include <sys/types.h>
 #include <dirent.h>
 ], [
-	struct dirent	ent;
+    struct dirent ent;
 
-	ent.d_reclen = 0;
+    ent.d_reclen = 0;
 ], AC_MSG_RESULT(yes)
    AC_DEFINE(CW_LIBONYX_USE_DIRENT_RECLEN),
    AC_MSG_RESULT(no)
    AC_MSG_ERROR(struct dirent too deviant)))
 
-  AC_CHECK_FUNCS(unsetenv)
+dnl Look for nanosecond resolution of atime in struct stat.
+AC_MSG_CHECKING(for (struct stat).st_atimespec)
+AC_TRY_LINK([
+#include <sys/types.h>
+#include <sys/stat.h>
+], [
+    struct stat st;
+
+    st.st_atimespec.tv_nsec = 0;
+], AC_MSG_RESULT(yes)
+   AC_DEFINE(CW_LIBONYX_USE_STAT_ATIMESPEC),
+   AC_MSG_RESULT(no))
+
+dnl Look for nanosecond resolution of mtime in struct stat.
+AC_MSG_CHECKING(for (struct stat).st_mtimespec)
+AC_TRY_LINK([
+#include <sys/types.h>
+#include <sys/stat.h>
+], [
+    struct stat st;
+
+    st.st_mtimespec.tv_nsec = 0;
+], AC_MSG_RESULT(yes)
+   AC_DEFINE(CW_LIBONYX_USE_STAT_MTIMESPEC),
+   AC_MSG_RESULT(no))
+
+dnl Look for nanosecond resolution of ctime in struct stat.
+AC_MSG_CHECKING(for (struct stat).st_ctimespec)
+AC_TRY_LINK([
+#include <sys/types.h>
+#include <sys/stat.h>
+], [
+    struct stat st;
+
+    st.st_ctimespec.tv_nsec = 0;
+], AC_MSG_RESULT(yes)
+   AC_DEFINE(CW_LIBONYX_USE_STAT_CTIMESPEC),
+   AC_MSG_RESULT(no))
+
+AC_CHECK_FUNCS(unsetenv)
 fi
 fi
 

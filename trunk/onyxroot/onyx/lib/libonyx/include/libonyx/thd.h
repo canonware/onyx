@@ -33,6 +33,15 @@ typedef struct cw_thd_s cw_thd_t;
 #undef CW_THD_GENERIC_SR
 #endif
 
+#ifdef CW_THD_GENERIC_SR
+/* The generic suspend/resume mechanism uses signals (using pthread_kill()).
+ * This is rather expensive, depending on the OS, but it does not violate
+ * portability.  The only issue with this mechanism is that it requires one
+ * signal that cannot otherwise be used by the thread being suspended/resumed.
+ * On most OSs, SIGUSR1 or SIGUSR2 is the logical choice. */
+#define CW_THD_SIGSR SIGUSR1
+#endif
+
 /* Minimum thread stack size. */
 #define CW_THD_MINSTACK 524288
 

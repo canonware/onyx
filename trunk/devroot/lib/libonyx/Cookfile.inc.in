@@ -91,17 +91,17 @@ LIBONYX_A = @objroot@/lib/libonyx/lib/libonyx.a;
 #if [matches elf @abi@]
 LIBONYX_SNAME = libonyx.so.[LIBONYX_REV];
 LIBONYX_LNAME = libonyx.so;
-LIBONYX_S = @objroot@/lib/libonyx/lib/[LIBONYX_SNAME];
 LIBONYX_L = @objroot@/lib/libonyx/lib/[LIBONYX_LNAME];
 #elif [matches macho @abi@]
 LIBONYX_SNAME = libonyx.[LIBONYX_REV].dylib;
 LIBONYX_LNAME = libonyx.dylib;
-LIBONYX_S = @objroot@/lib/libonyx/lib/[LIBONYX_SNAME];
 LIBONYX_L = @objroot@/lib/libonyx/lib/[LIBONYX_LNAME];
-#else
-LIBONYX_S = ;
+#else /* if [matches aout @abi@] */
+LIBONYX_SNAME = libonyx.so.[LIBONYX_REV].0;
+LIBONYX_LNAME = ;
 LIBONYX_L = ;
 #endif
+LIBONYX_S = @objroot@/lib/libonyx/lib/[LIBONYX_SNAME];
 
 LDFLAGS = [LDFLAGS] -L@objroot@/lib/libonyx/lib;
 
@@ -225,8 +225,10 @@ libonyx_libs_install_s : [LIBONYX_S] libonyx_libs_install_common
 
   @INSTALL@ -m 0444 [LIBONYX_S] [PREFIX]/lib;
 
+#if [count [LIBONYX_LNAME]]
   rm -f [PREFIX]/lib/[LIBONYX_LNAME];
   ln -s [LIBONYX_SNAME] [PREFIX]/lib/[LIBONYX_LNAME];
+#endif
 }
 
 /*
@@ -254,6 +256,8 @@ libonyx_libs_install_s : [LIBONYX_S] libonyx_libs_install_common
 #endif
        -o [target] [need];
 
+#if [count [LIBONYX_LNAME]]
   rm -f @objroot@/lib/libonyx/lib/[LIBONYX_LNAME];
   ln -s [LIBONYX_SNAME] @objroot@/lib/libonyx/lib/[LIBONYX_LNAME];
+#endif
 }

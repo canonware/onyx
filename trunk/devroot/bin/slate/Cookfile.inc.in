@@ -71,7 +71,7 @@ slate_bins_install : [SLATE]
   [CC] [A_CFLAGS] -o [PREFIX]/bin/slate-@slate_version@
        [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [SLATE_SRCS]]
 #if @enable_libonyx@
-#if [matches elf @abi@]
+#if [count @RPATH@]
        @RPATH@[PREFIX]/lib
 #endif
 #endif
@@ -124,7 +124,7 @@ slate_bins_distclean :
   [CC] [A_CFLAGS] -o [target]
        [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [SLATE_SRCS]]
 #if @enable_libonyx@
-#if [matches elf @abi@]
+#if [count @RPATH@]
        @RPATH@@abs_objroot@/lib/libonyx/lib
 #endif
 #endif
