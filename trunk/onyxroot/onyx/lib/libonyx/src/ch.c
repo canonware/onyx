@@ -300,7 +300,7 @@ uint32_t
 ch_string_hash(const void *a_key)
 {
     uint32_t retval, c;
-    char *str;
+    unsigned char *str;
 
     cw_check_ptr(a_key);
 
