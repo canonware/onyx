@@ -56,7 +56,11 @@ CPPDEFS = -D_REENTRANT;
 if [not [defined CFLAGS]] then
   CFLAGS = [split " " "@CFLAGS@"];
 A_CFLAGS = [CFLAGS];
-S_CFLAGS = [CFLAGS] -fPIC -DPIC;
+S_CFLAGS = [CFLAGS] -fPIC -DPIC
+#if [matches macho [abi]]
+           -dynamic
+#endif
+           ;
 
 if [not [defined LDFLAGS]] then
   LDFLAGS = [split " " "@LDFLAGS@"];

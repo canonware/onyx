@@ -123,11 +123,11 @@ CPPFLAGS = [CPPFLAGS] -I[srcdir]/mod/modslate/include
 [MODSLATE] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_s [MODSLATE_MSRCS]]
   set mkdir
 {
+  [CC]
 #if [matches elf [abi]]
-  [CC] -shared -o [target] [need];
+       -shared
 #elif [matches macho [abi]]
-  [LD] -undefined suppress -flat_namespace -bundle -dynamic -all_load
-       -lbundle1.o -lcc_dynamic
-       -o [target] [need];
+       -undefined suppress -flat_namespace -bundle -all_load
 #endif
+       -o [target] [need];
 }

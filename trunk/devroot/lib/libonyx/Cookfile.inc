@@ -156,7 +156,7 @@ LIBONYX_SNAME = libonyx.so.[LIBONYX_REV];
 LIBONYX_LNAME = libonyx.so;
 LIBONYX_S = [objdir]/lib/libonyx/lib/[LIBONYX_SNAME];
 #elif [matches macho [abi]]
-LIBONYX_SNAME = libonyx.[LIBONYX_REV].[LIBONYX_REV].dylib;
+LIBONYX_SNAME = libonyx.[LIBONYX_REV].dylib;
 LIBONYX_LNAME = libonyx.dylib;
 LIBONYX_S = [objdir]/lib/libonyx/lib/[LIBONYX_SNAME];
 #else
@@ -255,12 +255,10 @@ libonyx_install_s : [LIBONYX_S] libonyx_install_common
 {
 #if [matches macho [abi]]
   /* Set install_name correctly before installing. */
-  [LD] -undefined suppress -flat_namespace -dylib -dynamic -all_load
-       -dylib_compatibility_version [LIBONYX_REV]
-       -dylib_current_version [LIBONYX_REV]
-       -dylib_install_name
-       [PREFIX]/lib/libonyx.[LIBONYX_REV].[LIBONYX_REV].dylib
-       -ldylib1.o -lcc_dynamic
+  [CC] -undefined suppress -flat_namespace -dynamiclib
+       -compatibility_version [LIBONYX_REV]
+       -current_version [LIBONYX_REV]
+       -install_name [PREFIX]/lib/libonyx.[LIBONYX_REV].dylib
        -o [LIBONYX_S] [fromto [srcdir]/%0%.c [objdir]/%0%.o_s [LIBONYX_SRCS]];
 #endif
 
@@ -284,15 +282,15 @@ libonyx_install_s : [LIBONYX_S] libonyx_install_common
 [LIBONYX_S] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_s [LIBONYX_SRCS]]
   set mkdir
 {
+  [CC]
 #if [matches elf [abi]]
-  [CC] -shared -o [target] [need];
+       -shared
 #elif [matches macho [abi]]
-  [LD] -undefined suppress -flat_namespace -dylib -dynamic -all_load
-       -dylib_compatibility_version [LIBONYX_REV]
-       -dylib_current_version [LIBONYX_REV]
-       -ldylib1.o -lcc_dynamic
-       -o [target] [need];
+       -undefined suppress -flat_namespace -dynamiclib
+       -compatibility_version [LIBONYX_REV]
+       -current_version [LIBONYX_REV]
 #endif
+       -o [target] [need];
 
   rm -f [objdir]/lib/libonyx/lib/[LIBONYX_LNAME];
   [LN] -s [LIBONYX_SNAME] [objdir]/lib/libonyx/lib/[LIBONYX_LNAME];
