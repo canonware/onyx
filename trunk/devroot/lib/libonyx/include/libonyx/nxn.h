@@ -235,6 +235,9 @@ typedef enum
     NXN_ENTRY(IPPROTO_COMP),
     NXN_ENTRY(IPPROTO_RAW),
 #endif
+#ifdef CW_REGEX
+    NXN_ENTRY(i),
+#endif
     NXN_ENTRY(ibdup),
     NXN_ENTRY(ibpop),
     NXN_ENTRY(idiv),
@@ -257,6 +260,9 @@ typedef enum
     NXN_ENTRY(join),
 #endif
     NXN_ENTRY(known),
+#ifdef CW_REGEX
+    NXN_ENTRY(l),
+#endif
 #ifdef CW_THREADS
     NXN_ENTRY(lcheck),
 #endif
@@ -285,6 +291,9 @@ typedef enum
     NXN_ENTRY(MSG_OOB),
     NXN_ENTRY(MSG_PEEK),
     NXN_ENTRY(MSG_WAITALL),
+#endif
+#ifdef CW_REGEX
+    NXN_ENTRY(m),
 #endif
     NXN_ENTRY(mark),
     NXN_ENTRY(marktype),
@@ -414,6 +423,7 @@ typedef enum
 #endif
 #ifdef CW_REGEX
     NXN_ENTRY(regex),
+    NXN_ENTRY(regexerror),
     NXN_ENTRY(regextype),
     NXN_ENTRY(regsub),
     NXN_ENTRY(regsubtype),
@@ -453,6 +463,9 @@ typedef enum
     NXN_ENTRY(SOCK_RAW),
     NXN_ENTRY(SOCK_STREAM),
     NXN_ENTRY(SOL_SOCKET),
+#endif
+#ifdef CW_REGEX
+    NXN_ENTRY(s),
 #endif
     NXN_ENTRY(sadn),
     NXN_ENTRY(saup),

@@ -246,12 +246,12 @@ $sprintsdict <
 @enable_regex@ 1 eq {
     `
     $regextype {
-	pop
-	cvs
+	pop pop
+	`-regex-'
     }
     $regsubtype {
-	pop
-	cvs
+	pop pop
+	`-regsub-'
     }
     ' cat
 } if

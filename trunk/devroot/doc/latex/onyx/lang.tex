@@ -669,6 +669,9 @@ etc.).
 \label{rangecheck}
 \index{rangecheck}
 \item[rangecheck: ] Out of bounds string or array access.
+\label{regexerror}
+\index{regexerror}
+\item[regexerror: ] Regular expression syntax error.
 \label{stackunderflow}
 \index{stackunderflow}
 \item[stackunderflow: ] Not enough objects on stack.
@@ -9271,11 +9274,14 @@ onyx:1>
 		\item[flags: ]
 			A dictionary of optional flags:
 			\begin{description}%\item[]
-			\item[\$m: ] Maximum number of matches (0 is treated as
-				infinity).  Defaults to 1.
 			\item[\$i: ] Case insensitive.  Defaults to false.
-			\item[\$o: ] Allow matches to overlap.  Defaults to
-				false.
+			\item[\$l: ] Maximum number of matches (0 is treated as
+				infinity).  Defaults to 1.
+			\item[\$m: ] Treat input as a multi-line string.
+				Defaults to false.
+			\item[\$s: ] Treat input as a single line, so that
+				the dot metacharacter matches any character,
+				including a newline.
 			\end{description}
 		\item[regex: ]
 			A regex object.
@@ -11018,11 +11024,14 @@ onyx:1>
 		\item[flags: ]
 			A dictionary of optional flags:
 			\begin{description}%\item[]
-			\item[\$m: ] Maximum number of matches (0 is treated as
-				infinity).  Defaults to 1.
 			\item[\$i: ] Case insensitive.  Defaults to false.
-			\item[\$o: ] Allow matches to overlap.  Defaults to
-				false.
+			\item[\$l: ] Maximum number of matches (0 is treated as
+				infinity).  Defaults to 1.
+			\item[\$m: ] Treat input as a multi-line string.
+				Defaults to false.
+			\item[\$s: ] Treat input as a single line, so that
+				the dot metacharacter matches any character,
+				including a newline.
 			\end{description}
 		\end{description}
 	\item[Output(s): ]
@@ -11058,9 +11067,14 @@ onyx:1>
 		\item[flags: ]
 			A dictionary of optional flags:
 			\begin{description}%\item[]
-			\item[\$m: ] Maximum number of matches (0 is treated as
-				infinity).  Defaults to 1.
 			\item[\$i: ] Case insensitive.  Defaults to false.
+			\item[\$l: ] Maximum number of matches (0 is treated as
+				infinity).  Defaults to 1.
+			\item[\$m: ] Treat input as a multi-line string.
+				Defaults to false.
+			\item[\$s: ] Treat input as a single line, so that
+				the dot metacharacter matches any character,
+				including a newline.
 			\end{description}
 		\end{description}
 	\item[Output(s): ]
@@ -13596,9 +13610,14 @@ onyx:0>
 		\item[flags: ]
 			A dictionary of optional flags:
 			\begin{description}%\item[]
-			\item[\$m: ] Maximum number of matches (0 is treated as
-				infinity).  Defaults to 1.
 			\item[\$i: ] Case insensitive.  Defaults to false.
+			\item[\$l: ] Maximum number of matches (0 is treated as
+				infinity).  Defaults to 1.
+			\item[\$m: ] Treat input as a multi-line string.
+				Defaults to false.
+			\item[\$s: ] Treat input as a single line, so that
+				the dot metacharacter matches any character,
+				including a newline.
 			\end{description}
 		\item[regsub: ]
 		\end{description}

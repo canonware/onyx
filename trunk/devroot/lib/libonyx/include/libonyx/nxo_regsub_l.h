@@ -10,6 +10,8 @@
  *
  ******************************************************************************/
 
+#include <pcre.h>
+
 typedef struct cw_nxoe_regsub_s cw_nxoe_regsub_t;
 
 struct cw_nxoe_regsub_s

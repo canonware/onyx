@@ -7452,7 +7452,153 @@ systemdict_rename(cw_nxo_t *a_thread)
 void
 systemdict_regex(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *tstack, *pattern, *flags, *nxo;
+    cw_nxn_t error;
+    cw_uint32_t npop;
+    cw_bool_t insensitive, multiline, singleline;
+    cw_nxoi_t limit;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    tstack = nxo_thread_tstack_get(a_thread);
+
+    NXO_STACK_GET(pattern, ostack, a_thread);
+    switch (nxo_type_get(pattern))
+    {
+	case NXOT_DICT:
+	{
+	    flags = pattern;
+	    npop = 2;
+	    NXO_STACK_DOWN_GET(pattern, ostack, a_thread, pattern);
+	    if (nxo_type_get(pattern) != NXOT_STRING)
+	    {
+		nxo_thread_nerror(a_thread, NXN_typecheck);
+		return;
+	    }
+	    break;
+	}
+	case NXOT_STRING:
+	{
+	    npop = 1;
+	    flags = NULL;
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+
+    if (flags != NULL)
+    {
+	cw_nxo_t *tkey, *tval;
+
+	/* Get flags in preparation for calling nxo_regex_new(). */
+
+	tkey = nxo_stack_push(tstack);
+	tval = nxo_stack_push(tstack);
+
+	/* $i. */
+	nxo_name_new(tkey, nxo_thread_nx_get(a_thread), nxn_str(NXN_i),
+		     nxn_len(NXN_i), TRUE);
+	if (nxo_dict_lookup(flags, tkey, tval))
+	{
+	    insensitive = FALSE;
+	}
+	else
+	{
+	    if (nxo_type_get(tval) != NXOT_BOOLEAN)
+	    {
+		nxo_stack_npop(tstack, 2);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
+		return;
+	    }
+
+	    insensitive = nxo_boolean_get(tval);
+	}
+
+	/* $m. */
+	nxo_name_new(tkey, nxo_thread_nx_get(a_thread), nxn_str(NXN_m),
+		     nxn_len(NXN_m), TRUE);
+	if (nxo_dict_lookup(flags, tkey, tval))
+	{
+	    multiline = FALSE;
+	}
+	else
+	{
+	    if (nxo_type_get(tval) != NXOT_BOOLEAN)
+	    {
+		nxo_stack_npop(tstack, 2);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
+		return;
+	    }
+
+	    multiline = nxo_boolean_get(tval);
+	}
+
+	/* $s. */
+	nxo_name_new(tkey, nxo_thread_nx_get(a_thread), nxn_str(NXN_s),
+		     nxn_len(NXN_s), TRUE);
+	if (nxo_dict_lookup(flags, tkey, tval))
+	{
+	    singleline = FALSE;
+	}
+	else
+	{
+	    if (nxo_type_get(tval) != NXOT_BOOLEAN)
+	    {
+		nxo_stack_npop(tstack, 2);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
+		return;
+	    }
+
+	    singleline = nxo_boolean_get(tval);
+	}
+
+	/* $l. */
+	nxo_name_new(tkey, nxo_thread_nx_get(a_thread), nxn_str(NXN_l),
+		     nxn_len(NXN_l), TRUE);
+	if (nxo_dict_lookup(flags, tkey, tval))
+	{
+	    limit = 1;
+	}
+	else
+	{
+	    if (nxo_type_get(tval) != NXOT_INTEGER)
+	    {
+		nxo_stack_npop(tstack, 2);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
+		return;
+	    }
+
+	    limit = nxo_integer_get(tval);
+	    if (limit < 0LL)
+	    {
+		nxo_stack_npop(tstack, 2);
+		nxo_thread_nerror(a_thread, NXN_rangecheck);
+		return;
+	    }
+	}
+
+	nxo_stack_npop(tstack, 2);
+    }
+
+    /* Create the regex object. */
+    nxo = nxo_stack_under_push(ostack, pattern);
+    nxo_string_lock(pattern);
+    error = nxo_regex_new(nxo, nxo_thread_nx_get(a_thread),
+			  nxo_string_get(pattern),
+			  nxo_string_len_get(pattern), multiline, insensitive,
+			  singleline, (cw_uint32_t) limit);
+    nxo_string_unlock(pattern);
+    if (error)
+    {
+	nxo_stack_remove(ostack, nxo);
+	nxo_thread_nerror(a_thread, error);
+	return;
+    }
+
+    nxo_stack_npop(ostack, npop);
 }
 #endif
 

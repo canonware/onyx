@@ -10,11 +10,18 @@
  *
  ******************************************************************************/
 
+#include <pcre.h>
+
 typedef struct cw_nxoe_regex_s cw_nxoe_regex_t;
 
 struct cw_nxoe_regex_s
 {
     cw_nxoe_t nxoe;
+
+    pcre *pcre;
+
+    /* Maximum number of matches.  0 means unlimited. */
+    cw_uint32_t limit;
 };
 
 #ifndef CW_USE_INLINES
