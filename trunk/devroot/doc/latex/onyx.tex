@@ -5620,19 +5620,44 @@ onyx:1>
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[array: ]
+			An array object.
+		\item[dict: ]
+			A dict object.
+		\item[string: ]
+			A string object.
+		\item[index: ]
+			Offset in \oparg{array} or \oparg{string} to put
+			\oparg{object} or \oparg{integer}, respectively.
+		\item[key: ]
+			An object to use as a key in \oparg{dict}.
+		\item[object: ]
+			An object to insert into \oparg{array} at offset
+			\oparg{index}.
+		\item[value: ]
+			An object to associate with \oparg{key} in \oparg{dict}.
+		\item[integer: ]
+			The ascii value of a character to insert into
+			\oparg{string} at offset \oparg{index}.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Insert into \oparg{array}, \oparg{dict}, or \oparg{string}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> 3 array dup 1 `a' put 1 sprint
+[null `a' null]
+onyx:0> dict dup /foo `foo' put 1 sprint
+</foo `foo'>
+onyx:0> 3 string dup 1 97 put 1 sprint
+`\x00a\x00'
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:putinterval}
