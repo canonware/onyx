@@ -81,8 +81,8 @@ nxoe_l_dict_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 		mtx_delete(&dict->lock);
 	while (dch_remove_iterate(&dict->hash, NULL, (void **)&dicto, &chi) ==
 	    FALSE) {
-		nxa_dicto_put(nx_nxa_get(a_nx), dicto);
-		nxa_chi_put(nx_nxa_get(a_nx), chi);
+		nxa_l_dicto_put(nx_nxa_get(a_nx), dicto);
+		nxa_l_chi_put(nx_nxa_get(a_nx), chi);
 	}
 
 	_CW_NXOE_FREE(dict);
@@ -236,12 +236,12 @@ nxo_dict_copy(cw_nxo_t *a_to, cw_nxo_t *a_from, cw_nx_t *a_nx, cw_bool_t
 		dch_get_iterate(&from->hash, NULL, (void **)&dicto_from);
 
 		/* Allocate and copy. */
-		dicto_to = nxa_dicto_get(nx_nxa_get(a_nx));
+		dicto_to = nxa_l_dicto_get(nx_nxa_get(a_nx));
 		nxo_no_new(&dicto_to->key);
 		nxo_dup(&dicto_to->key, &dicto_from->key);
 		nxo_no_new(&dicto_to->val);
 		nxo_dup(&dicto_to->val, &dicto_from->val);
-		chi = nxa_chi_get(nx_nxa_get(a_nx));
+		chi = nxa_l_chi_get(nx_nxa_get(a_nx));
 
 		/* Insert. */
 		dch_insert(&to->hash, &dicto_to->key, dicto_to, chi);
@@ -281,8 +281,8 @@ nxo_dict_def(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_nxo_t *a_key, cw_nxo_t *a_val)
 		cw_chi_t	*chi;
 
 		/* Allocate and initialize. */
-		dicto = nxa_dicto_get(nx_nxa_get(a_nx));
-		chi = nxa_chi_get(nx_nxa_get(a_nx));
+		dicto = nxa_l_dicto_get(nx_nxa_get(a_nx));
+		chi = nxa_l_chi_get(nx_nxa_get(a_nx));
 		nxo_no_new(&dicto->key);
 		nxo_dup(&dicto->key, a_key);
 		nxo_no_new(&dicto->val);
@@ -323,8 +323,8 @@ nxo_dict_undef(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_nxo_t *a_key)
 	nxoe_p_dict_unlock(dict);
 
 	if (error == FALSE) {
-		nxa_dicto_put(nx_nxa_get(a_nx), dicto);
-		nxa_chi_put(nx_nxa_get(a_nx), chi);
+		nxa_l_dicto_put(nx_nxa_get(a_nx), dicto);
+		nxa_l_chi_put(nx_nxa_get(a_nx), chi);
 	}
 }
 

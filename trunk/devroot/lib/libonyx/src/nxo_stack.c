@@ -97,7 +97,7 @@ nxoe_l_stack_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 	while (ql_first(&stack->chunks) != NULL) {
 		stackc = ql_first(&stack->chunks);
 		ql_remove(&stack->chunks, stackc, link);
-		nxa_stackc_put(nx_nxa_get(stack->nx), stackc);
+		nxa_l_stackc_put(nx_nxa_get(stack->nx), stackc);
 	}
 
 	if (stack->nxoe.locking)
@@ -311,7 +311,7 @@ nxoe_p_stack_spares_create(cw_nxoe_stack_t *a_stack)
 	 * create a new stackc, add it to the stackc ql, and add its stacko's to
 	 * the stack.
 	 */
-	stackc = nxa_stackc_get(nx_nxa_get(a_stack->nx));
+	stackc = nxa_l_stackc_get(nx_nxa_get(a_stack->nx));
 
 	ql_elm_new(stackc, link);
 
@@ -349,7 +349,7 @@ nxoe_p_stack_spares_destroy(cw_nxoe_stack_t *a_stack, cw_nxoe_stackc_t
 	ql_remove(&a_stack->chunks, a_stackc, link);
 
 	/* Deallocate. */
-	nxa_stackc_put(nx_nxa_get(a_stack->nx), a_stackc);
+	nxa_l_stackc_put(nx_nxa_get(a_stack->nx), a_stackc);
 
 	a_stack->nspare -= _LIBONYX_STACKC_COUNT;
 }

@@ -59,7 +59,7 @@ nxo_name_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_uint8_t *a_str,
 			name->str = a_str;
 
 		dch_insert(name_hash, (void *)name, (void **)name,
-		    nxa_chi_get(nx_nxa_get(a_nx)));
+		    nxa_l_chi_get(nx_nxa_get(a_nx)));
 
 		nxo_no_new(a_nxo);
 		a_nxo->o.nxoe = (cw_nxoe_t *)name;
@@ -104,7 +104,7 @@ nxoe_l_name_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 		 * Remove from hash table.
 		 */
 		dch_remove(name_hash, (void *)name, NULL, NULL, &chi);
-		nxa_chi_put(nx_nxa_get(a_nx), chi);
+		nxa_l_chi_put(nx_nxa_get(a_nx), chi);
 
 		if (name->nxoe.name_static == FALSE) {
 			/*
