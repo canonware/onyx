@@ -48,7 +48,7 @@ modslate : [MODSLATE];
 
 modslate_mods_tests : [fromto @srcroot@/%0%.c @objroot@/%0% [MODSLATE_CTESTS]];
 
-modslate_mods_check :
+modslate_mods_check : modslate_mods_tests
 {
   @VERIFY@ -s @srcroot@ -o @objroot@
            [fromto @srcroot@/%0%.c @objroot@/%0% [MODSLATE_CTESTS]];
