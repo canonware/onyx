@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 96 $
- * $Date: 1998-06-26 23:48:21 -0700 (Fri, 26 Jun 1998) $
+ * $Revision: 98 $
+ * $Date: 1998-06-27 23:35:44 -0700 (Sat, 27 Jun 1998) $
  *
  * <<< Description >>>
  *
@@ -64,6 +64,7 @@ struct cw_jtl_s
   cw_mtx_t lock;
 
   cw_rwq_t stlock;
+  cw_uint32_t num_stlocks;
 
   cw_uint32_t max_dlocks;
   cw_sem_t dlock_sem;
@@ -109,8 +110,9 @@ struct cw_jtl_s
 #define jtl_runlock _CW_NS_CMN(jtl_runlock)
 #define jtl_wunlock _CW_NS_CMN(jtl_wunlock)
 #define jtl_xunlock _CW_NS_CMN(jtl_xunlock)
-#define jtl_get_dlocks _CW_NS_CMN(jtl_get_dlocks)
-#define jtl_set_dlocks _CW_NS_CMN(jtl_set_dlocks)
+#define jtl_get_max_dlocks _CW_NS_CMN(jtl_get_max_dlocks)
+#define jtl_set_max_dlocks _CW_NS_CMN(jtl_set_max_dlocks)
+#define jtl_get_num_stlocks _CW_NS_CMN(jtl_get_num_stlocks)
 
 /* Function prototypes. */
 cw_lwq_t * lwq_new(cw_lwq_t * a_lwq_o);
@@ -148,7 +150,8 @@ void jtl_dunlock(cw_jtl_t * a_jtl_o);
 void jtl_runlock(cw_jtl_t * a_jtl_o);
 void jtl_wunlock(cw_jtl_t * a_jtl_o);
 void jtl_xunlock(cw_jtl_t * a_jtl_o);
-cw_uint32_t jtl_get_dlocks(cw_jtl_t * a_jtl_o);
-cw_uint32_t jtl_set_dlocks(cw_jtl_t * a_jtl_o, cw_uint32_t a_dlocks);
+cw_uint32_t jtl_get_max_dlocks(cw_jtl_t * a_jtl_o);
+cw_uint32_t jtl_set_max_dlocks(cw_jtl_t * a_jtl_o, cw_uint32_t a_dlocks);
+cw_uint32_t jtl_get_num_stlocks(cw_jtl_t * a_jtl_o);
 
 #endif /* _LOCKS_H_ */

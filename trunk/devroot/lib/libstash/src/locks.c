@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 96 $
- * $Date: 1998-06-26 23:48:21 -0700 (Fri, 26 Jun 1998) $
+ * $Revision: 98 $
+ * $Date: 1998-06-27 23:35:44 -0700 (Sat, 27 Jun 1998) $
  *
  * <<< Description >>>
  *
@@ -462,6 +462,7 @@ jtl_slock(cw_jtl_t * a_jtl_o)
 
   mtx_lock(&a_jtl_o->lock);
   rwq_rlock(&a_jtl_o->stlock);
+  a_jtl_o->num_stlocks++;
   mtx_unlock(&a_jtl_o->lock);
 }
 
@@ -472,6 +473,7 @@ jtl_tlock(cw_jtl_t * a_jtl_o)
 
   mtx_lock(&a_jtl_o->lock);
   rwq_wlock(&a_jtl_o->stlock);
+  a_jtl_o->num_stlocks++;
   mtx_unlock(&a_jtl_o->lock);
 }
 
@@ -524,6 +526,7 @@ jtl_sunlock(cw_jtl_t * a_jtl_o)
 
   mtx_lock(&a_jtl_o->lock);
   rwq_runlock(&a_jtl_o->stlock);
+  a_jtl_o->num_stlocks--;
   mtx_unlock(&a_jtl_o->lock);
 }
 
@@ -534,6 +537,7 @@ jtl_tunlock(cw_jtl_t * a_jtl_o)
 
   mtx_lock(&a_jtl_o->lock);
   rwq_wunlock(&a_jtl_o->stlock);
+  a_jtl_o->num_stlocks--;
   mtx_unlock(&a_jtl_o->lock);
 }
 
@@ -582,7 +586,7 @@ jtl_xunlock(cw_jtl_t * a_jtl_o)
 }
 
 cw_uint32_t
-jtl_get_dlocks(cw_jtl_t * a_jtl_o)
+jtl_get_max_dlocks(cw_jtl_t * a_jtl_o)
 {
   cw_uint32_t retval;
   
@@ -597,7 +601,7 @@ jtl_get_dlocks(cw_jtl_t * a_jtl_o)
 }
 
 cw_uint32_t
-jtl_set_dlocks(cw_jtl_t * a_jtl_o, cw_uint32_t a_dlocks)
+jtl_set_max_dlocks(cw_jtl_t * a_jtl_o, cw_uint32_t a_dlocks)
 {
   cw_uint32_t retval;
   
@@ -607,6 +611,20 @@ jtl_set_dlocks(cw_jtl_t * a_jtl_o, cw_uint32_t a_dlocks)
   retval = a_jtl_o->max_dlocks;
   a_jtl_o->max_dlocks = a_dlocks;
   sem_adjust(&a_jtl_o->dlock_sem, retval - a_jtl_o->max_dlocks);
+  mtx_unlock(&a_jtl_o->lock);
+
+  return retval;
+}
+
+cw_uint32_t
+jtl_get_num_stlocks(cw_jtl_t * a_jtl_o)
+{
+  cw_uint32_t retval;
+
+  _cw_check_ptr(a_jtl_o);
+
+  mtx_lock(&a_jtl_o->lock);
+  retval = a_jtl_o->num_stlocks;
   mtx_unlock(&a_jtl_o->lock);
 
   return retval;
