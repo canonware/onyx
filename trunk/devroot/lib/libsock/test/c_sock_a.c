@@ -32,8 +32,6 @@ handle_client(void * a_arg)
 
   for (i = 0; i < _CW_NCONNS; i++)
   {
-    _cw_marker("Got here");
-    
     _cw_assert(NULL != socks_accept(socks, NULL, &sock));
     buf_release_head_data(&buf, buf_get_size(&buf));
     while (0 < sock_read(&sock, &buf, 0, NULL))
@@ -42,9 +40,9 @@ handle_client(void * a_arg)
 
     _cw_assert(4 <= buf_get_size(&buf));
     message = buf_get_uint32(&buf, 0);
-
     out_put(cw_g_out, "Connection [i], message [i]\n", i, message);
-    
+
+    sock_disconnect(&sock);
   }
 
   sock_delete(&sock);
@@ -56,13 +54,15 @@ int
 main()
 {
   cw_socks_t * socks = NULL;
-  int port = 6666;
+  int port = 0;
   cw_sock_t sock;
   cw_thd_t * thd;
   cw_buf_t buf;
   cw_uint32_t i;
   
   libstash_init();
+/*    dbg_register(cw_g_dbg, "sock_error"); */
+/*    dbg_register(cw_g_dbg, "sock_sockopt"); */
   out_put(cw_g_out, "Test begin\n");
   sockb_init(1024, /* a_max_fds */
 	     4096, /* a_bufc_size */
@@ -73,12 +73,11 @@ main()
 
   socks = socks_new();
   _cw_check_ptr(socks);
-  if (TRUE == socks_listen(socks, INADDR_ANY, &port))
+  if (TRUE == socks_listen(socks, INADDR_LOOPBACK, &port))
   {
     out_put(cw_g_out, "Error listening on port [i]\n", port);
     goto RETURN;
   }
-  out_put(cw_g_out, "Listening on port [i]\n", port);
 
   thd = thd_new(NULL, handle_client, (void *) socks);
   _cw_check_ptr(thd);
@@ -86,9 +85,7 @@ main()
   _cw_assert(NULL != sock_new(&sock, 16384));
   for (i = 0; i < _CW_NCONNS; i++)
   {
-    _cw_marker("Got here");
-    _cw_assert(0 == sock_connect(&sock, "127.0.0.1", 6666, NULL));
-/*      _cw_assert(0 == sock_connect(&sock, "127.0.0.1", port, NULL)); */
+    _cw_assert(0 == sock_connect(&sock, "localhost", port, NULL));
 
     /* Write some data. */
     buf_set_uint32(&buf, 0, i);

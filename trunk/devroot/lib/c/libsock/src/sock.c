@@ -636,7 +636,6 @@ sock_write(cw_sock_t * a_sock, cw_buf_t * a_buf)
 
     out_buf_size = buf_get_size(&a_sock->out_buf);
 
-#if (1)
     if ((FALSE == a_sock->sockb_in_progress)
 	&& (TRUE == a_sock->out_is_flushed))
     {
@@ -688,9 +687,7 @@ sock_write(cw_sock_t * a_sock, cw_buf_t * a_buf)
 	a_sock->out_is_flushed = TRUE;
       }
     }
-    else
-#endif
-    if (a_sock->out_is_flushed == TRUE)
+    else if (a_sock->out_is_flushed == TRUE)
     {
       /* Notify the sockb that we now have data. */
       if (TRUE == sockb_l_out_notify(a_sock->sockfd))
@@ -1102,17 +1099,8 @@ sock_p_config_socket(cw_sock_t * a_sock, cw_bool_t a_init)
     if (getsockopt(a_sock->sockfd, SOL_SOCKET, (SO_RCVBUF),
 		   (void *) &a_sock->os_inbuf_size, &len))
     {
-/*        if (dbg_is_registered(cw_g_dbg, "sock_error")) */
-/*        { */
-/*  	out_put_e(cw_g_out, NULL, 0, __FUNCTION__, */
-/*  		  "Error for SO_RCVBUF in getsockopt(): [s]\n", */
-/*  		  strerror(errno)); */
-/*        } */
-      
       /* Just choose some number... */
       a_sock->os_inbuf_size = 65536;
-/*        retval = TRUE; */
-/*        goto RETURN; */
     }
   }
   
@@ -1125,17 +1113,8 @@ sock_p_config_socket(cw_sock_t * a_sock, cw_bool_t a_init)
     if (getsockopt(a_sock->sockfd, SOL_SOCKET, SO_SNDBUF,
 		   (void *) &a_sock->os_outbuf_size, &len))
     {
-/*        if (dbg_is_registered(cw_g_dbg, "sock_error")) */
-/*        { */
-/*  	out_put_e(cw_g_out, NULL, 0, __FUNCTION__, */
-/*  		  "Error for SO_SNDBUF in getsockopt(): [s]\n", */
-/*  		  strerror(errno)); */
-/*        } */
-
       /* Just choose some number... */
       a_sock->os_outbuf_size = 65536;
-/*        retval = TRUE; */
-/*        goto RETURN; */
     }
   }
 
