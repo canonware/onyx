@@ -186,7 +186,9 @@ typedef enum
     NXN_ENTRY(exec),
 #endif
     NXN_ENTRY(exit),
+#ifdef CW_REAL
     NXN_ENTRY(exp),
+#endif
     NXN_ENTRY(false),
 #ifdef CW_POSIX
     NXN_ENTRY(family),
@@ -406,9 +408,7 @@ typedef enum
 #ifdef CW_POSIX
     NXN_ENTRY(port),
 #endif
-#ifdef CW_REAL
     NXN_ENTRY(pow),
-#endif
 #ifdef CW_POSIX
     NXN_ENTRY(ppid),
 #endif

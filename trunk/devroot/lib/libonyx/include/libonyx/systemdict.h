@@ -269,8 +269,10 @@ systemdict_exec(cw_nxo_t *a_thread);
 void
 systemdict_exit(cw_nxo_t *a_thread);
 
+#ifdef CW_REAL
 void
 systemdict_exp(cw_nxo_t *a_thread);
+#endif
 
 #ifdef CW_REAL
 void
@@ -528,10 +530,8 @@ systemdict_poll(cw_nxo_t *a_thread);
 void
 systemdict_pop(cw_nxo_t *a_thread);
 
-#ifdef CW_REAL
 void
 systemdict_pow(cw_nxo_t *a_thread);
-#endif
 
 #ifdef CW_POSIX
 void
