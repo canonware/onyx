@@ -1428,8 +1428,21 @@ out_p_get_ent(cw_out_t * a_out, const char * a_format, cw_uint32_t a_len)
   _cw_assert(0 < a_len);
 
   /* Find a match for the type.  Use the first match found by searching the
-   * extended types, then the built in types.  If there is no match, return an
+   * built in types, then the extended types.  If there is no match, return an
    * error, since we have no way of knowing the size of argument to use. */
+  for (i = 0;
+       i < (sizeof(cw_g_out_builtins) / sizeof(struct cw_out_ent_s));
+       i++)
+  {
+    if (0 == strncmp(a_format, cw_g_out_builtins[i].type,
+		     cw_g_out_builtins[i].len)
+	&& (a_len == cw_g_out_builtins[i].len))
+    {
+      retval = &cw_g_out_builtins[i];
+      goto RETURN;
+    }
+  }
+
   if (NULL != a_out)
   {
     for (i = 0;
@@ -1443,19 +1456,6 @@ out_p_get_ent(cw_out_t * a_out, const char * a_format, cw_uint32_t a_len)
 	retval = &a_out->extensions[i];
 	goto RETURN;
       }
-    }
-  }
-
-  for (i = 0;
-       i < (sizeof(cw_g_out_builtins) / sizeof(struct cw_out_ent_s));
-       i++)
-  {
-    if (0 == strncmp(a_format, cw_g_out_builtins[i].type,
-		     cw_g_out_builtins[i].len)
-	&& (a_len == cw_g_out_builtins[i].len))
-    {
-      retval = &cw_g_out_builtins[i];
-      goto RETURN;
     }
   }
 
