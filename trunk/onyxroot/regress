@@ -18,7 +18,8 @@ argv length 3 ge {
 
 $PREFIX pwd `/regress_' SRCDIR 3 ncat def
 
-$CONFIGURE_FLAGS `' def
+#$CONFIGURE_FLAGS [`--with-libedit-prefix=/usr/local'] def
+$CONFIGURE_FLAGS [] def
 
 # $CC `gcc30' setenv
 $CFLAGS `-Wall -Werror -Wno-uninitialized -g3' setenv
@@ -140,6 +141,7 @@ $worker_entry {
     (
 	`'
 	`--disable-posix'
+	`--disable-socket'
 	`--disable-posix-file'
     )
     (
@@ -168,6 +170,8 @@ exch {
 	    dup `' eq {
 		pop
 	    } if
+	} foreach
+	CONFIGURE_FLAGS {
 	} foreach
     ]
 
