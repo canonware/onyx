@@ -1008,6 +1008,9 @@ systemdict_copy(cw_nxo_t *a_thread)
 		}
 
 		nxo_dict_copy(nxo, orig, nxo_thread_nx_get(a_thread));
+		
+		nxo_stack_exch(ostack);
+		nxo_stack_pop(ostack);
 		break;
 	}
 	case NXOT_STACK: {
