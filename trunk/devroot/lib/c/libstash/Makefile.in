@@ -375,7 +375,7 @@ clean : FORCE
 	rm -f core test/core *.core test/*.core
 	rm -f test/*.o test/*.out test/*.diff test/*.pl
 	rm -f $(CTESTS) $(PTESTS) $(BTESTS)
-	rm -f obj/*/*.[dop]*
+	rm -f obj/*/*.[do]*
 	rm -f lib/lib*
 	rm -f test/*.d
 	rm -f test/*.diff

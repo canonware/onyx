@@ -124,7 +124,7 @@ lex_delete(cw_lex_t * a_lex_o)
  *                 | example, "a*" matches zero or more 'a' characters.  
  *                 | "[a-z]*" matches zero or more lower case letters.
  * ----------------+---------------------------------------------------------
- *  +              | Matches one or more of the prededing expression.  For
+ *  +              | Matches one or more of the preceding expression.  For
  *                 | example, "a+b" matches one or more 'a' characters, 
  *                 | followed by one 'b'.
  * ----------------+---------------------------------------------------------
@@ -143,6 +143,10 @@ lex_delete(cw_lex_t * a_lex_o)
  *                 | "bar".  "foo|ba[rR]" matches "foo", "bar", or "baR".
  *                 | Multiple '|' metacharacters can be chained: 
  *                 | "foo|bar|biz|baz".
+ *                 | 
+ *                 | As can be seen from the above examples, '|' associates the
+ *                 | entire regular expressions before and after it, rather than
+ *                 | just one minimal expression.  '|' is greedy.
  * ----------------+---------------------------------------------------------
  *  ()             | Groups a sequence of expressions as an expression.  Parens
  *                 | are useful with the '?', '*', and '+' metacharacters in the

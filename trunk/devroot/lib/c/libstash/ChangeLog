@@ -1,0 +1,8 @@
+1998-11-22  Jason Evans  <jasone@canonware.com>
+
+	* Makefile.in: obj/*/*.p* never exists, so don't delete it in the
+	distclean target.
+
+	* src/lex.c: Clarified the documentation for the '|' character in
+	regular expressions and fixed a typo.
+
