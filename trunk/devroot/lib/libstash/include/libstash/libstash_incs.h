@@ -182,6 +182,13 @@
 #  endif
 #endif
  
+#ifdef _LIBSTASH_USE_RING
+#  ifndef _RING_H_
+#    include "ring.h"
+#    define _RING_H_
+#  endif
+#endif
+ 
 #ifdef _LIBSTASH_USE_LEX
 #  ifndef _LEX_H_
 #    include "lex.h"

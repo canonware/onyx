@@ -1,0 +1,7 @@
+Test begin
+ring_a contents (1): a b c d e f g h i j 
+ring_a contents (2): a b 
+ring_b contents (3): c d e f g h i j 
+ring_a contents (4): a 
+ring_a contents (5): a 
+Test end

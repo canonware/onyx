@@ -19,7 +19,17 @@
 #undef _CW_OS_SOLARIS
  
 #undef WORDS_BIGENDIAN
- 
+
+/* If using gcc, use inline functions. */
+#ifndef _CW_INLINE
+#  ifdef __GNUC__
+#    define _CW_INLINE __inline__
+#    define _CW_USE_INLINES
+#  else
+#    define _CW_INLINE
+#  endif
+#endif
+
 #undef SIZEOF_SIGNED_CHAR
 #undef SIZEOF_UNSIGNED_CHAR
 #undef SIZEOF_SIGNED_SHORT

@@ -1,3 +1,7 @@
+1999-04-09  Jason Evans  <jasone@canonware.com>
+
+	* src/ring.c: Add the ring class.
+
 1999-04-05  Jason Evans  <jasone@canonware.com>
 
 	* src/buf.c (buf_get_uint32, buf_get_uint64): Don't try to deal
