@@ -52,32 +52,32 @@ struct cw_thd_s
 };
 
 #ifdef CW_DBG
-static cw_bool_t cw_g_thd_initialized = FALSE;
+static cw_bool_t s_thd_initialized = FALSE;
 #endif
 
 #ifdef CW_PTH
 /* Thread attribute object used for all thread creations. */
-static pth_attr_t cw_g_thd_attr;
+static pth_attr_t s_thd_attr;
 #endif
 
 #ifdef CW_PTHREADS
 /* Thread attribute object used for all thread creations. */
-static pthread_attr_t cw_g_thd_attr;
+static pthread_attr_t s_thd_attr;
 #endif
 
 /* Special thd structure for initial thread, needed for critical sections. */
-static cw_thd_t cw_g_thd;
+static cw_thd_t s_thd;
 
 /* Protects the ring of thd's in thd_single_{enter,leave}(). */
-static cw_mtx_t cw_g_thd_single_lock;
+static cw_mtx_t s_thd_single_lock;
 
 #ifdef CW_THD_GENERIC_SR
 /* For interlocking of suspend. */
-static sem_t cw_g_thd_sem;
+static sem_t s_thd_sem;
 #endif
 
 /* For thd_self(). */
-static cw_tsd_t cw_g_thd_self_key;
+static cw_tsd_t s_thd_self_key;
 
 static void
 thd_p_delete(cw_thd_t *a_thd);
@@ -135,7 +135,7 @@ thd_l_init(void)
     }
 
     /* Initialize the semaphore that is used for suspend interlocking. */
-    error = sem_init(&cw_g_thd_sem, 0, 0);
+    error = sem_init(&s_thd_sem, 0, 0);
     if (error)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in sem_init(): %s\n",
@@ -143,7 +143,7 @@ thd_l_init(void)
 	abort();
     }
 #endif
-    cw_assert(cw_g_thd_initialized == FALSE);
+    cw_assert(s_thd_initialized == FALSE);
 
 #ifdef CW_PTH
     if (pth_init() == FALSE)
@@ -155,8 +155,8 @@ thd_l_init(void)
 
     /* Create a thread attribute object to be used for all thread creations.
      * Make sure that the thread stack size isn't too tiny. */
-    cw_g_thd_attr = pth_attr_new();
-    if (pth_attr_get(cw_g_thd_attr, PTH_ATTR_STACK_SIZE, &stacksize) == FALSE)
+    s_thd_attr = pth_attr_new();
+    if (pth_attr_get(s_thd_attr, PTH_ATTR_STACK_SIZE, &stacksize) == FALSE)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in pth_attr_get(): %s\n",
 		__FILE__, __LINE__, __func__, strerror(errno));
@@ -164,7 +164,7 @@ thd_l_init(void)
     }
     if (stacksize < CW_THD_MINSTACK)
     {
-	if (pth_attr_set(cw_g_thd_attr, PTH_ATTR_STACK_SIZE, CW_THD_MINSTACK)
+	if (pth_attr_set(s_thd_attr, PTH_ATTR_STACK_SIZE, CW_THD_MINSTACK)
 	    == FALSE)
 	{
 	    fprintf(stderr, "%s:%u:%s(): Error in pth_attr_set(): %s\n",
@@ -176,44 +176,44 @@ thd_l_init(void)
 #ifdef CW_PTHREADS
     /* Create a thread attribute object to be used for all thread creations.
      * Make sure that the thread stack size isn't too tiny. */
-    pthread_attr_init(&cw_g_thd_attr);
-    pthread_attr_getstacksize(&cw_g_thd_attr, &stacksize);
+    pthread_attr_init(&s_thd_attr);
+    pthread_attr_getstacksize(&s_thd_attr, &stacksize);
     if (stacksize < CW_THD_MINSTACK)
     {
-	pthread_attr_setstacksize(&cw_g_thd_attr, CW_THD_MINSTACK);
+	pthread_attr_setstacksize(&s_thd_attr, CW_THD_MINSTACK);
     }
 #endif
 
-    mtx_new(&cw_g_thd_single_lock);
-    tsd_new(&cw_g_thd_self_key, NULL);
+    mtx_new(&s_thd_single_lock);
+    tsd_new(&s_thd_self_key, NULL);
 
     /* Initialize the main thread's thd structure. */
-    cw_g_thd.start_func = NULL;
-    cw_g_thd.start_arg = NULL;
-    mtx_new(&cw_g_thd.mtx);
-    mtx_lock(&cw_g_thd.mtx);
+    s_thd.start_func = NULL;
+    s_thd.start_arg = NULL;
+    mtx_new(&s_thd.mtx);
+    mtx_lock(&s_thd.mtx);
 #ifdef CW_PTH
-    cw_g_thd.pth = pth_self();
+    s_thd.pth = pth_self();
 #endif
 #ifdef CW_PTHREADS
-    cw_g_thd.pthread = pthread_self();
+    s_thd.pthread = pthread_self();
 #endif
 #ifdef CW_MTHREADS
-    cw_g_thd.mthread = mach_thread_self();
+    s_thd.mthread = mach_thread_self();
 #endif
-    cw_g_thd.suspendible = TRUE;
-    cw_g_thd.suspended = FALSE;
-    cw_g_thd.singled = FALSE;
-    qr_new(&cw_g_thd, link);
+    s_thd.suspendible = TRUE;
+    s_thd.suspended = FALSE;
+    s_thd.singled = FALSE;
+    qr_new(&s_thd, link);
 #ifdef CW_DBG
-    cw_g_thd.magic = CW_THD_MAGIC;
+    s_thd.magic = CW_THD_MAGIC;
 #endif
     /* Make thd_self() work for the main thread. */
-    tsd_set(&cw_g_thd_self_key, (void *) &cw_g_thd);
-    mtx_unlock(&cw_g_thd.mtx);
+    tsd_set(&s_thd_self_key, (void *) &s_thd);
+    mtx_unlock(&s_thd.mtx);
 
 #ifdef CW_DBG
-    cw_g_thd_initialized = TRUE;
+    s_thd_initialized = TRUE;
 #endif
 }
 
@@ -224,13 +224,13 @@ thd_l_shutdown(void)
     int error;
 #endif
 
-    cw_assert(cw_g_thd_initialized);
+    cw_assert(s_thd_initialized);
 
 #ifdef CW_PTHREADS
-    pthread_attr_destroy(&cw_g_thd_attr);
+    pthread_attr_destroy(&s_thd_attr);
 #endif
 #ifdef CW_PTH
-    if (pth_attr_destroy(cw_g_thd_attr) == FALSE)
+    if (pth_attr_destroy(s_thd_attr) == FALSE)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in pth_attr_destroy(): %s\n",
 		__FILE__, __LINE__, __func__, strerror(errno));
@@ -245,9 +245,9 @@ thd_l_shutdown(void)
     }
 #endif
 
-    mtx_delete(&cw_g_thd.mtx);
+    mtx_delete(&s_thd.mtx);
 #ifdef CW_THD_GENERIC_SR
-    error = sem_destroy(&cw_g_thd_sem);
+    error = sem_destroy(&s_thd_sem);
     if (error)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in sem_destroy(): %s\n",
@@ -255,11 +255,11 @@ thd_l_shutdown(void)
 	abort();
     }
 #endif
-    tsd_delete(&cw_g_thd_self_key);
-    mtx_delete(&cw_g_thd_single_lock);
+    tsd_delete(&s_thd_self_key);
+    mtx_delete(&s_thd_single_lock);
 #ifdef CW_DBG
-    memset(&cw_g_thd, 0x5a, sizeof(cw_thd_t));
-    cw_g_thd_initialized = FALSE;
+    memset(&s_thd, 0x5a, sizeof(cw_thd_t));
+    s_thd_initialized = FALSE;
 #endif
 }
 
@@ -275,7 +275,7 @@ thd_new(void *(*a_start_func)(void *), void *a_arg, cw_bool_t a_suspendible)
     int error;
 #endif
 
-    cw_assert(cw_g_thd_initialized);
+    cw_assert(s_thd_initialized);
 
     retval = (cw_thd_t *) cw_malloc(sizeof(cw_thd_t));
 
@@ -297,13 +297,13 @@ thd_new(void *(*a_start_func)(void *), void *a_arg, cw_bool_t a_suspendible)
      * multiple ways of trying to write this code, and all of them end up
      * requiring that an interlock be used (to avoid race conditions and/or
      * deadlocks, depending on the approach).  Since an interlock
-     * (cw_g_thd_single_lock; using retval->mtx could result in deadlock) is
+     * (s_thd_single_lock; using retval->mtx could result in deadlock) is
      * mandatory anyway, the pthread field of thd's is universally protected by
-     * cw_g_thd_single_lock. */
-    mtx_lock(&cw_g_thd_single_lock);
+     * s_thd_single_lock. */
+    mtx_lock(&s_thd_single_lock);
 
 #ifdef CW_PTH
-    pth = pth_spawn(cw_g_thd_attr, thd_p_start_func, (void *) retval);
+    pth = pth_spawn(s_thd_attr, thd_p_start_func, (void *) retval);
     if (pth == NULL)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in pth_spawn(): %s\n",
@@ -317,7 +317,7 @@ thd_new(void *(*a_start_func)(void *), void *a_arg, cw_bool_t a_suspendible)
     retval->pth = pth;
 #endif
 #ifdef CW_PTHREADS
-    error = pthread_create(&pthread, &cw_g_thd_attr,
+    error = pthread_create(&pthread, &s_thd_attr,
 			   thd_p_start_func, (void *) retval);
     if (error)
     {
@@ -332,7 +332,7 @@ thd_new(void *(*a_start_func)(void *), void *a_arg, cw_bool_t a_suspendible)
     retval->pthread = pthread;
 #endif
 
-    mtx_unlock(&cw_g_thd_single_lock);
+    mtx_unlock(&s_thd_single_lock);
 
     return retval;
 }
@@ -351,12 +351,12 @@ thd_delete(cw_thd_t *a_thd)
 
     cw_check_ptr(a_thd);
     cw_dassert(a_thd->magic == CW_THD_MAGIC);
-    cw_assert(cw_g_thd_initialized);
+    cw_assert(s_thd_initialized);
 
 #ifdef CW_PTH
-    mtx_lock(&cw_g_thd_single_lock);
+    mtx_lock(&s_thd_single_lock);
     pth = a_thd->pth;
-    mtx_unlock(&cw_g_thd_single_lock);
+    mtx_unlock(&s_thd_single_lock);
 
     attr = pth_attr_of(pth);
     if (attr == NULL)
@@ -379,9 +379,9 @@ thd_delete(cw_thd_t *a_thd)
     }
 #endif
 #ifdef CW_PTHREADS
-    mtx_lock(&cw_g_thd_single_lock);
+    mtx_lock(&s_thd_single_lock);
     pthread = a_thd->pthread;
-    mtx_unlock(&cw_g_thd_single_lock);
+    mtx_unlock(&s_thd_single_lock);
 
     error = pthread_detach(pthread);
     if (error)
@@ -409,12 +409,12 @@ thd_join(cw_thd_t *a_thd)
 
     cw_check_ptr(a_thd);
     cw_dassert(a_thd->magic == CW_THD_MAGIC);
-    cw_assert(cw_g_thd_initialized);
+    cw_assert(s_thd_initialized);
 
 #ifdef CW_PTH
-    mtx_lock(&cw_g_thd_single_lock);
+    mtx_lock(&s_thd_single_lock);
     pth = a_thd->pth;
-    mtx_unlock(&cw_g_thd_single_lock);
+    mtx_unlock(&s_thd_single_lock);
 
     if (pth_join(pth, &retval) == FALSE)
     {
@@ -424,9 +424,9 @@ thd_join(cw_thd_t *a_thd)
     }
 #endif
 #ifdef CW_PTHREADS
-    mtx_lock(&cw_g_thd_single_lock);
+    mtx_lock(&s_thd_single_lock);
     pthread = a_thd->pthread;
-    mtx_unlock(&cw_g_thd_single_lock);
+    mtx_unlock(&s_thd_single_lock);
 
     error = pthread_join(pthread, &retval);
     if (error)
@@ -446,11 +446,11 @@ thd_self(void)
 {
     cw_thd_t *retval;
 
-    retval = (cw_thd_t *) tsd_get(&cw_g_thd_self_key);
+    retval = (cw_thd_t *) tsd_get(&s_thd_self_key);
 
     cw_check_ptr(retval);
     cw_dassert(retval->magic == CW_THD_MAGIC);
-    cw_assert(cw_g_thd_initialized);
+    cw_assert(s_thd_initialized);
 
     return retval;
 }
@@ -487,7 +487,7 @@ thd_crit_enter(void)
 {
     cw_thd_t *thd;
 
-    cw_assert(cw_g_thd_initialized);
+    cw_assert(s_thd_initialized);
 
     thd = thd_self();
     cw_check_ptr(thd);
@@ -500,7 +500,7 @@ thd_crit_leave(void)
 {
     cw_thd_t *thd;
 
-    cw_assert(cw_g_thd_initialized);
+    cw_assert(s_thd_initialized);
 
     thd = thd_self();
     cw_check_ptr(thd);
@@ -513,14 +513,14 @@ thd_single_enter(void)
 {
     cw_thd_t *self, *thd;
 
-    cw_assert(cw_g_thd_initialized);
+    cw_assert(s_thd_initialized);
 
     self = thd_self();
     cw_check_ptr(self);
     cw_dassert(self->magic == CW_THD_MAGIC);
 
-    mtx_lock(&cw_g_thd_single_lock);
-    qr_foreach(thd, &cw_g_thd, link)
+    mtx_lock(&s_thd_single_lock);
+    qr_foreach(thd, &s_thd, link)
     {
 	if (thd != self && thd->suspended == FALSE)
 	{
@@ -536,9 +536,9 @@ thd_single_leave(void)
 {
     cw_thd_t *thd;
 
-    cw_assert(cw_g_thd_initialized);
+    cw_assert(s_thd_initialized);
 
-    qr_foreach(thd, &cw_g_thd, link)
+    qr_foreach(thd, &s_thd, link)
     {
 	if (thd->singled)
 	{
@@ -546,7 +546,7 @@ thd_single_leave(void)
 	    thd_p_resume(thd);
 	}
     }
-    mtx_unlock(&cw_g_thd_single_lock);
+    mtx_unlock(&s_thd_single_lock);
 }
 
 void
@@ -554,14 +554,14 @@ thd_suspend(cw_thd_t *a_thd)
 {
     cw_check_ptr(a_thd);
     cw_dassert(a_thd->magic == CW_THD_MAGIC);
-    cw_assert(cw_g_thd_initialized);
+    cw_assert(s_thd_initialized);
 
     /* Protect suspension so that we don't risk deadlocking with a thread
      * entering a single section. */
-    mtx_lock(&cw_g_thd_single_lock);
+    mtx_lock(&s_thd_single_lock);
     mtx_lock(&a_thd->mtx);
     thd_p_suspend(a_thd);
-    mtx_unlock(&cw_g_thd_single_lock);
+    mtx_unlock(&s_thd_single_lock);
 }
 
 cw_bool_t
@@ -571,9 +571,9 @@ thd_trysuspend(cw_thd_t *a_thd)
 
     cw_check_ptr(a_thd);
     cw_dassert(a_thd->magic == CW_THD_MAGIC);
-    cw_assert(cw_g_thd_initialized);
+    cw_assert(s_thd_initialized);
 
-    mtx_lock(&cw_g_thd_single_lock);
+    mtx_lock(&s_thd_single_lock);
     if (mtx_trylock(&a_thd->mtx))
     {
 	retval = TRUE;
@@ -583,7 +583,7 @@ thd_trysuspend(cw_thd_t *a_thd)
 
     retval = FALSE;
     RETURN:
-    mtx_unlock(&cw_g_thd_single_lock);
+    mtx_unlock(&s_thd_single_lock);
     return retval;
 }
 
@@ -592,16 +592,16 @@ thd_resume(cw_thd_t *a_thd)
 {
     cw_check_ptr(a_thd);
     cw_dassert(a_thd->magic == CW_THD_MAGIC);
-    cw_assert(cw_g_thd_initialized);
+    cw_assert(s_thd_initialized);
 
 #ifdef CW_THD_GENERIC_SR
-    mtx_lock(&cw_g_thd_single_lock);
+    mtx_lock(&s_thd_single_lock);
 #endif
 
     thd_p_resume(a_thd);
 
 #ifdef CW_THD_GENERIC_SR
-    mtx_unlock(&cw_g_thd_single_lock);
+    mtx_unlock(&s_thd_single_lock);
 #endif
 }
 
@@ -636,26 +636,26 @@ thd_p_start_func(void *a_arg)
     void *retval;
     cw_thd_t *thd = (cw_thd_t *) a_arg;
 
-    cw_assert(cw_g_thd_initialized);
+    cw_assert(s_thd_initialized);
 
-    tsd_set(&cw_g_thd_self_key, (void *) thd);
+    tsd_set(&s_thd_self_key, (void *) thd);
 
     if (thd->suspendible)
     {
 	/* Insert this thread into the thread ring. */
-	mtx_lock(&cw_g_thd_single_lock);
+	mtx_lock(&s_thd_single_lock);
 #ifdef CW_MTHREADS
 	thd->mthread = mach_thread_self();
 #endif
-	qr_before_insert(&cw_g_thd, thd, link);
-	mtx_unlock(&cw_g_thd_single_lock);
+	qr_before_insert(&s_thd, thd, link);
+	mtx_unlock(&s_thd_single_lock);
 
 	retval = thd->start_func(thd->start_arg);
 
 	/* Remove this thread from the thread ring. */
-	mtx_lock(&cw_g_thd_single_lock);
+	mtx_lock(&s_thd_single_lock);
 	qr_remove(thd, link);
-	mtx_unlock(&cw_g_thd_single_lock);
+	mtx_unlock(&s_thd_single_lock);
     }
     else
     {
@@ -694,7 +694,7 @@ thd_p_suspend(cw_thd_t *a_thd)
 		__FILE__, __LINE__, __func__, strerror(error));
 	abort();
     }
-    if (sem_wait(&cw_g_thd_sem) != 0)
+    if (sem_wait(&s_thd_sem) != 0)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in sem_wait(): %s\n",
 		__FILE__, __LINE__, __func__, strerror(errno));
@@ -799,7 +799,7 @@ thd_p_suspend_handle(int a_signal)
     sigfillset(&set);
     sigdelset(&set, CW_THD_SIGRESUME);
     /* Tell suspender we're suspended. */
-    sem_post(&cw_g_thd_sem);
+    sem_post(&s_thd_sem);
 
     /* Suspend until CW_THD_SIGRESUME is delivered and handled. */
     sigsuspend(&set);

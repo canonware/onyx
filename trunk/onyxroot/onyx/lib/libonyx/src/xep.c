@@ -13,39 +13,39 @@
 #include "../include/libonyx/libonyx.h"
 
 #ifdef CW_DBG
-static cw_bool_t cw_g_xep_initialized = FALSE;
+static cw_bool_t s_xep_initialized = FALSE;
 #endif
 #ifdef CW_THREADS
-static cw_tsd_t cw_g_xep_key;
+static cw_tsd_t s_xep_key;
 #else
-static cw_xep_t *cw_g_xep_first;
+static cw_xep_t *s_xep_first;
 #endif
 
 void
 xep_l_init(void)
 {
-    cw_assert(cw_g_xep_initialized == FALSE);
+    cw_assert(s_xep_initialized == FALSE);
 
 #ifdef CW_THREADS
-    tsd_new(&cw_g_xep_key, NULL);
+    tsd_new(&s_xep_key, NULL);
 #else
-    cw_g_xep_first = NULL;
+    s_xep_first = NULL;
 #endif
 #ifdef CW_DBG
-    cw_g_xep_initialized = TRUE;
+    s_xep_initialized = TRUE;
 #endif
 }
 
 void
 xep_l_shutdown(void)
 {
-    cw_assert(cw_g_xep_initialized);
+    cw_assert(s_xep_initialized);
 
 #ifdef CW_THREADS
-    tsd_delete(&cw_g_xep_key);
+    tsd_delete(&s_xep_key);
 #endif
 #ifdef CW_DBG
-    cw_g_xep_initialized = FALSE;
+    s_xep_initialized = FALSE;
 #endif
 }	
 
@@ -55,15 +55,15 @@ xep_throw_e(cw_xepv_t a_value, volatile const char *a_filename,
 {
     cw_xep_t *xep_first, *xep;
 
-    cw_assert(cw_g_xep_initialized);
+    cw_assert(s_xep_initialized);
     cw_assert(a_value > CW_XEPS_CATCH);
 
     /* Iterate backward through the exception handlers until the exception is
      * handled or there are no more exception handlers. */
 #ifdef CW_THREADS
-    xep = xep_first = (cw_xep_t *) tsd_get(&cw_g_xep_key);
+    xep = xep_first = (cw_xep_t *) tsd_get(&s_xep_key);
 #else
-    xep = xep_first = cw_g_xep_first;
+    xep = xep_first = s_xep_first;
 #endif
     if (xep_first != NULL)
     {
@@ -116,7 +116,7 @@ xep_throw_e(cw_xepv_t a_value, volatile const char *a_filename,
 void
 xep_p_retry(cw_xep_t *a_xep)
 {
-    cw_assert(cw_g_xep_initialized);
+    cw_assert(s_xep_initialized);
 
 #ifdef CW_DBG
     switch (a_xep->state)
@@ -145,7 +145,7 @@ xep_p_retry(cw_xep_t *a_xep)
 void
 xep_p_handled(cw_xep_t *a_xep)
 {
-    cw_assert(cw_g_xep_initialized);
+    cw_assert(s_xep_initialized);
 
 #ifdef CW_DBG
     switch (a_xep->state)
@@ -174,12 +174,12 @@ xep_p_link(cw_xep_t *a_xep)
 {
     cw_xep_t *xep_first;
 
-    cw_assert(cw_g_xep_initialized);
+    cw_assert(s_xep_initialized);
 
 #ifdef CW_THREADS
-    xep_first = (cw_xep_t *) tsd_get(&cw_g_xep_key);
+    xep_first = (cw_xep_t *) tsd_get(&s_xep_key);
 #else
-    xep_first = cw_g_xep_first;
+    xep_first = s_xep_first;
 #endif
 
     /* Link into the xep ring, if it exists. */
@@ -194,9 +194,9 @@ xep_p_link(cw_xep_t *a_xep)
     else
     {
 #ifdef CW_THREADS
-	tsd_set(&cw_g_xep_key, (void *) a_xep);
+	tsd_set(&s_xep_key, (void *) a_xep);
 #else
-	cw_g_xep_first = a_xep;
+	s_xep_first = a_xep;
 #endif
     }
 
@@ -211,14 +211,14 @@ xep_p_unlink(cw_xep_t *a_xep)
 {
     cw_xep_t *xep_first;
 
-    cw_assert(cw_g_xep_initialized);
+    cw_assert(s_xep_initialized);
 
     if (a_xep->is_linked)
     {
 #ifdef CW_THREADS
-	xep_first = (cw_xep_t *) tsd_get(&cw_g_xep_key);
+	xep_first = (cw_xep_t *) tsd_get(&s_xep_key);
 #else
-	xep_first = cw_g_xep_first;
+	xep_first = s_xep_first;
 #endif
 	cw_check_ptr(qr_prev(xep_first, link));
 	cw_check_ptr(qr_next(xep_first, link));
@@ -231,9 +231,9 @@ xep_p_unlink(cw_xep_t *a_xep)
 	else
 	{
 #ifdef CW_THREADS
-	    tsd_set(&cw_g_xep_key, NULL);
+	    tsd_set(&s_xep_key, NULL);
 #else
-	    cw_g_xep_first = NULL;
+	    s_xep_first = NULL;
 #endif
 	}
 	a_xep->is_linked = FALSE;
