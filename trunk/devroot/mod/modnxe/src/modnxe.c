@@ -36,9 +36,12 @@ static const struct cw_nxe_entry nxe_ops[] = {
 	ENTRY(marker_seekline),
 	ENTRY(marker_position),
 	ENTRY(marker_seek),
-	ENTRY(marker_prepend),
-	ENTRY(marker_append),
-	ENTRY(marker_remove)
+	ENTRY(marker_before_get),
+	ENTRY(marker_after_get),
+	ENTRY(marker_before_put),
+	ENTRY(marker_after_put),
+	ENTRY(marker_range_get),
+	ENTRY(marker_range_cut)
 };
 
 void
@@ -76,14 +79,14 @@ foo(cw_nx_t *a_nx, cw_nxo_t *a_thread)
 {
 	cw_buf_t	*buf;
 	cw_bufm_t	*bufm, *bufm_b, *bufm_c;
-	cw_char_t	data_a[] = "AB\nD";
-	cw_char_t	data_b[] = "\nabc";
-	cw_char_t	data_c[] = "012\n";
-	cw_bufc_t	bufc;
+	cw_uint8_t	*data;
+	cw_uint8_t	data_a[] = "AB\nD";
+	cw_uint8_t	data_b[] = "\nabc";
+	cw_uint8_t	data_c[] = "012\n";
 
 	buf = buf_new(NULL, (cw_opaque_alloc_t *)mem_malloc_e,
 	    (cw_opaque_realloc_t *)mem_realloc_e, (cw_opaque_dealloc_t
-	    *)mem_free_e, cw_g_mem, NULL);
+	    *)mem_free_e, cw_g_mem);
 
 	bufm = bufm_new(NULL, buf, NULL);
 
@@ -112,32 +115,34 @@ foo(cw_nx_t *a_nx, cw_nxo_t *a_thread)
 
 	for (bufm_seek(bufm, 0, BUFW_BEG); bufm_pos(bufm) <= buf_len(buf);
 	    bufm_seek(bufm, 1, BUFW_REL)) {
-		_cw_assert(bufm_after_get(bufm, &bufc) == FALSE);
+		_cw_assert((data = bufm_after_get(bufm)) != NULL);
 		fprintf(stderr, "position %llu, line %llu, char :%c:\n",
-		    bufm_pos(bufm), bufm_line(bufm), bufc_char_get(bufc));
+		    bufm_pos(bufm), bufm_line(bufm), *data);
 	}
 
 	fprintf(stderr, "length %llu, position %llu, line %llu\n", buf_len(buf),
 	    bufm_pos(bufm), bufm_line(bufm));
 	bufm_seek(bufm, 5, BUFW_BEG);
 
-	bufm_before_set(bufm, 'X');
-	bufm_after_set(bufm, 'Y');
+	data = bufm_before_get(bufm);
+	*data = 'X';
+	data = bufm_after_get(bufm);
+	*data = 'Y';
 
 	fprintf(stderr, "bufm_after_get():\n");
 	for (bufm_seek(bufm, 0, BUFW_BEG); bufm_pos(bufm) <= buf_len(buf);
 	    bufm_seek(bufm, 1, BUFW_REL)) {
-		_cw_assert(bufm_after_get(bufm, &bufc) == FALSE);
+		_cw_assert((data = bufm_after_get(bufm)) != NULL);
 		fprintf(stderr, "position %llu, line %llu, char :%c:\n",
-		    bufm_pos(bufm), bufm_line(bufm), bufc_char_get(bufc));
+		    bufm_pos(bufm), bufm_line(bufm), *data);
 	}
 
 	fprintf(stderr, "bufm_before_get():\n");
 	for (bufm_seek(bufm, 1, BUFW_BEG); bufm_pos(bufm) <= buf_len(buf);
 	    bufm_seek(bufm, 1, BUFW_REL)) {
-		_cw_assert(bufm_before_get(bufm, &bufc) == FALSE);
+		_cw_assert((data = bufm_before_get(bufm)) != NULL);
 		fprintf(stderr, "position %llu, line %llu, char :%c:\n",
-		    bufm_pos(bufm), bufm_line(bufm), bufc_char_get(bufc));
+		    bufm_pos(bufm), bufm_line(bufm), *data);
 	}
 	
 	bufm_b = bufm_new(NULL, buf, NULL);
@@ -151,11 +156,20 @@ foo(cw_nx_t *a_nx, cw_nxo_t *a_thread)
 	fprintf(stderr, "bufm_after_get():\n");
 	for (bufm_seek(bufm, 0, BUFW_BEG); bufm_pos(bufm) <= buf_len(buf);
 	    bufm_seek(bufm, 1, BUFW_REL)) {
-		_cw_assert(bufm_after_get(bufm, &bufc) == FALSE);
+		_cw_assert((data = bufm_after_get(bufm)) != NULL);
 		fprintf(stderr, "position %llu, line %llu, char :%c:\n",
-		    bufm_pos(bufm), bufm_line(bufm), bufc_char_get(bufc));
+		    bufm_pos(bufm), bufm_line(bufm), *data);
 	}
 
+	buf_elmsize_set(buf, 7);
+
+	fprintf(stderr, "bufm_after_get(): after buf_elmsize_set()\n");
+	for (bufm_seek(bufm, 0, BUFW_BEG); bufm_pos(bufm) <= buf_len(buf);
+	    bufm_seek(bufm, 1, BUFW_REL)) {
+		_cw_assert((data = bufm_after_get(bufm)) != NULL);
+		fprintf(stderr, "position %llu, line %llu, char :%c:\n",
+		    bufm_pos(bufm), bufm_line(bufm), *data);
+	}
 
 	bufm_delete(bufm_c);
 	bufm_delete(bufm_b);
