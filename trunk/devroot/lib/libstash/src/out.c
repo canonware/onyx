@@ -629,8 +629,12 @@ spec_get_type(const char *a_spec, cw_uint32_t a_spec_len, const char **r_val)
 	_cw_assert(a_spec_len > 0);
 	_cw_check_ptr(r_val);
 
+	/*
+	 * If we don't hit a '|' before the end of the specifier, then the
+	 * entire specifier is the type.
+	 */
 	for (i = 0; i < a_spec_len; i++) {
-		if ('|' == a_spec[i])
+		if (a_spec[i] == '|')
 			break;
 	}
 
@@ -756,36 +760,28 @@ out_p_put_fvle(cw_out_t *a_out, cw_sint32_t a_fd, cw_bool_t a_time_stamp, const
 	if (a_file_name != NULL) {
 		if (a_func_name != NULL) {
 			/* Print filename, line number, and function name. */
-			if (out_put_sa(a_out, &format,
+			if ((retval = out_put_sa(a_out, &format,
 			    "[s]At [s], line [i]: [s](): [s]", timestamp,
-			    a_file_name, a_line_num, a_func_name, a_format) ==
-			    -1) {
-				retval = -1;
+			    a_file_name, a_line_num, a_func_name, a_format)) <
+			    0)
 				goto RETURN;
-			}
 		} else {
 			/* Print filename and line number. */
-			if (out_put_sa(a_out, &format,
+			if ((retval = out_put_sa(a_out, &format,
 			    "[s]At [s], line [i]: [s]", timestamp, a_file_name,
-			    a_line_num, a_format) == -1) {
-				retval = -1;
+			    a_line_num, a_format)) < 0)
 				goto RETURN;
-			}
 		}
 	} else if (a_func_name != NULL) {
 		/* Print function name. */
-		if (out_put_sa(a_out, &format, "[s][s](): [s]", timestamp,
-		    a_func_name, a_format) == -1) {
-			retval = -1;
+		if ((retval = out_put_sa(a_out, &format, "[s][s](): [s]",
+		    timestamp, a_func_name, a_format)) < 0)
 			goto RETURN;
-		}
 	} else {
 		/* Make no modifications. */
-		if (out_put_sa(a_out, &format, "[s][s]", timestamp, a_format) ==
-		    -1) {
-			retval = -1;
+		if ((retval = out_put_sa(a_out, &format, "[s][s]", timestamp,
+		    a_format)) < 0)
 			goto RETURN;
-		}
 	}
 
 	retval = out_put_fv(a_out, a_fd, format, a_p);
@@ -1186,7 +1182,7 @@ out_p_el_accept(cw_out_t *a_out, const char *a_format, cw_out_key_t *a_key,
 
 	/* Check for overflow of the stack-allocated els buffer. */
 	if (a_key->key_nels == _CW_OUT_ELS_BUF) {
-		cw_uint32_t	i, el_offset, total_els = _CW_OUT_ELS_BUF + 2;
+		cw_uint32_t	i, total_els = _CW_OUT_ELS_BUF + 2;
 
 		_cw_assert(a_key->key_els == a_key->key_els_buf);
 			
@@ -1199,8 +1195,7 @@ out_p_el_accept(cw_out_t *a_out, const char *a_format, cw_out_key_t *a_key,
 		 * the initialization of total_els), plus anything after the end
 		 * of this el.
 		 */
-		for (i = el_offset = a_offset + a_len; a_format[i] != '\0';
-		     i++) {
+		for (i = a_offset + a_len; a_format[i] != '\0'; i++) {
 			if (a_format[i] == '[') {
 				if (a_format[i + 1] == '[') {
 					/*
@@ -1208,9 +1203,9 @@ out_p_el_accept(cw_out_t *a_out, const char *a_format, cw_out_key_t *a_key,
 					 * total_els.
 					 */
 					i++;
-				}
-				total_els++;
-				el_offset = i;
+					total_els++;
+				} else
+					total_els += 2;
 			}
 		}
 		a_key->key_els = (cw_out_el_t *)_cw_mem_malloc((a_out != NULL)

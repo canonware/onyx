@@ -1,5 +1,9 @@
 2000-07-21  Jason Evans  <jasone@canonware.com>
 
+	* src/out.c (out_p_el_accept): Correctly calculate the number of
+	elements in a specifier when the stack-allocated element cache
+	overflows.
+
 	* src/ch.c: Add magic to the chi structure.  This seems prudent,
 	given that the library user can control allocation of chi's, and
 	can therefore easily screw them up.
