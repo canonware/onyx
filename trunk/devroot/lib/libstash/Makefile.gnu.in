@@ -95,16 +95,16 @@ CAT     := @CAT@
 PERL    := @PERL@
 BASENAME:= @BASENAME@
 DIFF    := @DIFF@
-PMERGE  := @top_srcdir@/bin/pmerge
-PSTUB   := @top_srcdir@/bin/pstub
+PMERGE  := test/pmerge
+PSTUB   := test/pstub
 
 #
 # Compiler flags.
 #
 
-LIBPATH := -L@top_srcdir@/lib
+LIBPATH := -Llib
 EXTRALIBS := @LDFLAGS@ @LIBS@
-INCPATH := -I@top_srcdir@/include @CPPFLAGS@
+INCPATH := -Iinclude @CPPFLAGS@
 
 DEFINES := @DEFS@
 ST_DEFINES := 
@@ -153,35 +153,35 @@ all : all_s @without_threads@all_r
 	$(CC) -o $@ $(@:=.o) $(LIB_ST_R_D) $(LIBPATH) -dynamic $(EXTRALIBS)
 	$(SHELL) -ec "$(CC) -M $(DEFINES) $(ST_DEFINES) $(D_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o \2/g\" > $(@:%=%.d)"
 
-obj/%.o_st_d : src/%.c
+src/%.o_st_d : src/%.c
 	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(D_CFLAGS) $(DEFINES) $(ST_DEFINES) $(D_DEFINES) -c $< -o $@
 	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(D_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_st_d \2/g\" > $(@:%.o_st_d=%.d_st_d)"
 
-obj/%.o_st_o : src/%.c
+src/%.o_st_o : src/%.c
 	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(O_CFLAGS) $(DEFINES) $(ST_DEFINES) $(O_DEFINES) -c $< -o $@
 	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(O_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_st_o \2/g\" > $(@:%.o_st_o=%.d_st_o)"
 
-obj/%.o_sh_o : src/%.c
+src/%.o_sh_o : src/%.c
 	$(CC) $(INCPATH) $(CFLAGS) $(SH_CFLAGS) $(O_CFLAGS) $(DEFINES) $(SH_DEFINES) $(O_DEFINES) -c $< -o $@
 	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(SH_DEFINES) $(O_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_sh_o \2/g\" > $(@:%.o_sh_o=%.d_sh_o)"
 
-obj/%.o_st_p : src/%.c
+src/%.o_st_p : src/%.c
 	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(P_CFLAGS) $(DEFINES) $(ST_DEFINES) $(P_DEFINES) -c $< -o $@
 	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(P_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_st_p \2/g\" > $(@:%.o_st_p=%.d_st_p)"
 
-obj/%.o_st_r_d : src/%.c
+src/%.o_st_r_d : src/%.c
 	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(D_CFLAGS) $(R_CFLAGS) $(DEFINES) $(ST_DEFINES) $(D_DEFINES) $(R_DEFINES) -c $< -o $@
 	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(D_DEFINES) $(R_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_st_r_d \2/g\" > $(@:%.o_st_r_d=%.d_st_r_d)"
 
-obj/%.o_st_r_o : src/%.c
+src/%.o_st_r_o : src/%.c
 	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(O_CFLAGS) $(R_CFLAGS) $(DEFINES) $(ST_DEFINES) $(O_DEFINES) $(R_DEFINES) -c $< -o $@
 	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(O_DEFINES) $(R_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_st_r_o \2/g\" > $(@:%.o_st_r_o=%.d_st_r_o)"
 
-obj/%.o_sh_r_o : src/%.c
+src/%.o_sh_r_o : src/%.c
 	$(CC) $(INCPATH) $(CFLAGS) $(SH_CFLAGS) $(O_CFLAGS) $(R_CFLAGS) $(DEFINES) $(SH_DEFINES) $(O_DEFINES) $(R_DEFINES) -c $< -o $@
 	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(SH_DEFINES) $(O_DEFINES) $(R_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_sh_r_o \2/g\" > $(@:%.o_sh_r_o=%.d_sh_r_o)"
 
-obj/%.o_st_r_p : src/%.c
+src/%.o_st_r_p : src/%.c
 	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(P_CFLAGS) $(R_CFLAGS) $(DEFINES) $(ST_DEFINES) $(P_DEFINES) $(R_DEFINES) -c $< -o $@
 	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(P_DEFINES) $(R_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_st_r_p \2/g\" > $(@:%.o_st_r_p=%.d_st_r_p)"
 
@@ -192,18 +192,18 @@ obj/%.o_st_r_p : src/%.c
 # Dependencies (not rules).
 #
 
--include $(SRCS:src/%.c=obj/%.d_st_d)
--include $(SRCS:src/%.c=obj/%.d_st_o)
--include $(SRCS:src/%.c=obj/%.d_sh_o)
--include $(SRCS:src/%.c=obj/%.d_st_p)
-@without_threads@-include $(SRCS:src/%.c=obj/%.d_st_r_d) \
-@without_threads@	$(SRCS_R:src/%.c=obj/%.d_st_r_d)
-@without_threads@-include $(SRCS:src/%.c=obj/%.d_st_r_o) \
-@without_threads@	$(SRCS_R:src/%.c=obj/%.d_st_r_o)
-@without_threads@-include $(SRCS:src/%.c=obj/%.d_sh_r_o) \
-@without_threads@	$(SRCS_R:src/%.c=obj/%.d_sh_r_o)
-@without_threads@-include $(SRCS:src/%.c=obj/%.d_st_r_p) \
-@without_threads@	$(SRCS_R:src/%.c=obj/%.d_st_r_p)
+-include $(SRCS:%.c=%.d_st_d)
+-include $(SRCS:%.c=%.d_st_o)
+-include $(SRCS:%.c=%.d_sh_o)
+-include $(SRCS:%.c=%.d_st_p)
+@without_threads@-include $(SRCS:%.c=%.d_st_r_d) \
+@without_threads@	$(SRCS_R:%.c=%.d_st_r_d)
+@without_threads@-include $(SRCS:%.c=%.d_st_r_o) \
+@without_threads@	$(SRCS_R:%.c=%.d_st_r_o)
+@without_threads@-include $(SRCS:%.c=%.d_sh_r_o) \
+@without_threads@	$(SRCS_R:%.c=%.d_sh_r_o)
+@without_threads@-include $(SRCS:%.c=%.d_st_r_p) \
+@without_threads@	$(SRCS_R:%.c=%.d_st_r_p)
 ifneq ($(strip $(CTESTS)),)
 -include $(CTESTS:=.d)
 endif
@@ -211,37 +211,37 @@ ifneq ($(strip $(BTESTS)),)
 -include $(BTESTS:=.d)
 endif
 
-$(LIB_ST_D) : $(SRCS:src/%.c=obj/%.o_st_d)
+$(LIB_ST_D) : $(SRCS:%.c=%.o_st_d)
 	$(AR) cru $@ $?
 	$(RANLIB) $@
 
-$(LIB_ST_O) : $(SRCS:src/%.c=obj/%.o_st_o)
+$(LIB_ST_O) : $(SRCS:%.c=%.o_st_o)
 	$(AR) cru $@ $?
 	$(RANLIB) $@
 
-$(LIB_SH_O) : $(SRCS:src/%.c=obj/%.o_sh_o)
+$(LIB_SH_O) : $(SRCS:%.c=%.o_sh_o)
 	$(CC) -shared -o $@ $^
 
-$(LIB_ST_P) : $(SRCS:src/%.c=obj/%.o_st_p)
+$(LIB_ST_P) : $(SRCS:%.c=%.o_st_p)
 	$(AR) cru $@ $?
 	$(RANLIB) $@
 
-$(LIB_ST_R_D) : $(SRCS:src/%.c=obj/%.o_st_r_d) \
-	$(SRCS_R:src/%.c=obj/%.o_st_r_d)
+$(LIB_ST_R_D) : $(SRCS:%.c=%.o_st_r_d) \
+	$(SRCS_R:%.c=%.o_st_r_d)
 	$(AR) cru $@ $?
 	$(RANLIB) $@
 
-$(LIB_ST_R_O) : $(SRCS:src/%.c=obj/%.o_st_r_o) \
-	$(SRCS_R:src/%.c=obj/%.o_st_r_o)
+$(LIB_ST_R_O) : $(SRCS:%.c=%.o_st_r_o) \
+	$(SRCS_R:%.c=%.o_st_r_o)
 	$(AR) cru $@ $?
 	$(RANLIB) $@
 
-$(LIB_SH_R_O) : $(SRCS:src/%.c=obj/%.o_sh_r_o) \
-	$(SRCS_R:src/%.c=obj/%.o_sh_r_o)
+$(LIB_SH_R_O) : $(SRCS:%.c=%.o_sh_r_o) \
+	$(SRCS_R:%.c=%.o_sh_r_o)
 	$(CC) -shared -o $@ $^
 
-$(LIB_ST_R_P) : $(SRCS:src/%.c=obj/%.o_st_r_p) \
-	$(SRCS_R:src/%.c=obj/%.o_st_r_p)
+$(LIB_ST_R_P) : $(SRCS:%.c=%.o_st_r_p) \
+	$(SRCS_R:%.c=%.o_st_r_p)
 	$(AR) cru $@ $?
 	$(RANLIB) $@
 
@@ -377,7 +377,7 @@ clean : FORCE
 	rm -f core test/core *.core test/*.core
 	rm -f test/*.o test/*.out test/*.diff test/*.pl
 	rm -f $(CTESTS) $(PTESTS) $(BTESTS)
-	rm -f obj/*.[do]*
+	rm -f src/*.[do]_*
 	rm -f lib/lib*
 	rm -f test/*.d
 	rm -f test/*.diff

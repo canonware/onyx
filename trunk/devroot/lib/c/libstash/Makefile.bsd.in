@@ -55,17 +55,17 @@ BTESTS := b19980828a.c
 # Munge the filename lists so that they are prefixed by the directory they're
 # in, relative to @top_srcdir@.  Also, convert the test names to their final
 # names.
-INCS := $(INCS:S/^/$(.CURDIR)\/include\/libstash\/&/)
-INCS_R := $(INCS_R:S/^/$(.CURDIR)\/include\/libstash\/&/)
-PRIV_INCS := $(PRIV_INCS:S/^/$(.CURDIR)\/include\/libstash\/&/)
-PRIV_INCS_R := $(PRIV_INCS_R:S/^/$(.CURDIR)\/include\/libstash\/&/)
+INCS := $(INCS:S/^/include\/libstash\/&/)
+INCS_R := $(INCS_R:S/^/include\/libstash\/&/)
+PRIV_INCS := $(PRIV_INCS:S/^/include\/libstash\/&/)
+PRIV_INCS_R := $(PRIV_INCS_R:S/^/include\/libstash\/&/)
 
-SRCS := $(SRCS:S/^/$(.CURDIR)\/src\/&/)
-SRCS_R := $(SRCS_R:S/^/$(.CURDIR)\/src\/&/)
+SRCS := $(SRCS:S/^/src\/&/)
+SRCS_R := $(SRCS_R:S/^/src\/&/)
 
-CTESTS := $(CTESTS:R:S/^/$(.CURDIR)\/test\/&/)
-BTESTS := $(BTESTS:R:S/^/$(.CURDIR)\/test\/&/)
-PTESTS := $(PTESTS:R:S/^/$(.CURDIR)\/test\/&/)
+CTESTS := $(CTESTS:R:S/^/test\/&/)
+BTESTS := $(BTESTS:R:S/^/test\/&/)
+PTESTS := $(PTESTS:R:S/^/test\/&/)
 
 #
 # Library names.
@@ -75,14 +75,14 @@ LIB := stash
 
 LIB_REV := 0.0
 
-LIB_ST_D := $(LIB:S/^/$(.CURDIR)\/lib\/lib&/:S/$/&_d.a/)
-LIB_ST_O := $(LIB:S/^/$(.CURDIR)\/lib\/lib&/:S/$/&.a/)
-LIB_SH_O := $(LIB:S/^/$(.CURDIR)\/lib\/lib&/:S/$/&.so.$(LIB_REV)/)
-LIB_ST_P := $(LIB:S/^/$(.CURDIR)\/lib\/lib&/:S/$/&_p.a/)
-LIB_ST_R_D := $(LIB:S/^/$(.CURDIR)\/lib\/lib&/:S/$/&_r_d.a/)
-LIB_ST_R_O := $(LIB:S/^/$(.CURDIR)\/lib\/lib&/:S/$/&_r.a/)
-LIB_SH_R_O := $(LIB:S/^/$(.CURDIR)\/lib\/lib&/:S/$/&_r.so.$(LIB_REV)/)
-LIB_ST_R_P := $(LIB:S/^/$(.CURDIR)\/lib\/lib&/:S/$/&_r_p.a/)
+LIB_ST_D := $(LIB:S/^/lib\/lib&/:S/$/&_d.a/)
+LIB_ST_O := $(LIB:S/^/lib\/lib&/:S/$/&.a/)
+LIB_SH_O := $(LIB:S/^/lib\/lib&/:S/$/&.so.$(LIB_REV)/)
+LIB_ST_P := $(LIB:S/^/lib\/lib&/:S/$/&_p.a/)
+LIB_ST_R_D := $(LIB:S/^/lib\/lib&/:S/$/&_r_d.a/)
+LIB_ST_R_O := $(LIB:S/^/lib\/lib&/:S/$/&_r.a/)
+LIB_SH_R_O := $(LIB:S/^/lib\/lib&/:S/$/&_r.so.$(LIB_REV)/)
+LIB_ST_R_P := $(LIB:S/^/lib\/lib&/:S/$/&_r_p.a/)
 
 #
 # Standard definitions.
@@ -97,16 +97,16 @@ CAT     := @CAT@
 PERL    := @PERL@
 BASENAME:= @BASENAME@
 DIFF    := @DIFF@
-PMERGE  := $(.CURDIR)/bin/pmerge
-PSTUB   := $(.CURDIR)/bin/pstub
+PMERGE  := test/pmerge
+PSTUB   := test/pstub
 
 #
 # Compiler flags.
 #
 
-LIBPATH := -L$(.CURDIR)/lib
+LIBPATH := -Llib
 EXTRALIBS := @LDFLAGS@ @LIBS@
-INCPATH := -I$(.CURDIR)/include @CPPFLAGS@
+INCPATH := -Iinclude @CPPFLAGS@
 
 DEFINES := @DEFS@
 ST_DEFINES := 
@@ -125,7 +125,7 @@ O_CFLAGS := -O3
 P_CFLAGS := -O3 -pg
 R_CFLAGS :=
 
-# Clear out all vpaths, then set just one (default vpath) for the main build
+# Clear out all paths, then set just one (default path) for the main build
 # directory.
 .PATH :
 .PATH : .
@@ -153,43 +153,43 @@ all : all_s @without_threads@all_r
 $(bin) : $(LIB_ST_R_D) $(bin:S/$/&.c/)
 	$(CC) $(CFLAGS) $(ST_CFLAGS) $(D_CFLAGS) $(R_CFLAGS) $(INCPATH) $(DEFINES) $(R_DEFINES) $(TEST_DEFINES) -c $(bin:S/$/&.c/) -o $(@:S/$/&.o/)
 	$(CC) -o $@ $(@:S/$/&.o/) $(LIB_ST_R_D) $(LIBPATH) -dynamic $(EXTRALIBS)
-	$(SHELL) -ec "$(CC) -M $(DEFINES) $(ST_DEFINES) $(D_DEFINES) $(INCPATH) $(bin:S/$/&.c/) | sed \"s/\($(bin:R:T)\)\.o\([ :]*\)/$(.CURDIR:S/\//\\\//g)\/test\/\1.o \2/g\" > $(@:R:S/$/&.d/)"
+	$(SHELL) -ec "$(CC) -M $(DEFINES) $(ST_DEFINES) $(D_DEFINES) $(INCPATH) $(bin:S/$/&.c/) | sed \"s/\($(bin:R:S!/!\\/!g)\)\.o\([ :]*\)/test\/\1.o \2/g\" > $(@:R:S/$/&.d/)"
 .endfor
 
 .for srcfile in $(SRCS)
-$(srcfile:T:R:S/^/$(.OBJDIR)\/&/:S/$/&.o_st_d/) : $(srcfile)
+$(srcfile:R:S/$/&.o_st_d/) : $(srcfile)
 	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(D_CFLAGS) $(DEFINES) $(ST_DEFINES) $(D_DEFINES) -c $(srcfile) -o $@
-	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(D_DEFINES) $(INCPATH) $(srcfile) | sed \"s/\($(srcfile:T:R)\)\.o\([ :]*\)/$(.CURDIR:S/\//\\\//g)\/obj\/st_d\/\1.o_st_d \2/g\" > $(@:R:S/$/&.d_st_d/)"
+	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(D_DEFINES) $(INCPATH) $(srcfile) | sed \"s/\($(srcfile:R:S!/!\\/!g)\)\.o\([ :]*\)/\1.o_st_d \2/g\" > $(@:R:S/$/&.d_st_d/)"
 
-$(srcfile:T:R:S/^/$(.OBJDIR)\/&/:S/$/&.o_st_o/) : $(srcfile)
+$(srcfile:R:S/$/&.o_st_o/) : $(srcfile)
 	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(O_CFLAGS) $(DEFINES) $(ST_DEFINES) $(O_DEFINES) -c $(srcfile) -o $@
-	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(O_DEFINES) $(INCPATH) $(srcfile) | sed \"s/\($(srcfile:T:R)\)\.o\([ :]*\)/$(.CURDIR:S/\//\\\//g)\/obj\/st_o\/\1.o_st_o \2/g\" > $(@:R:S/$/&.d_st_o/)"
+	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(O_DEFINES) $(INCPATH) $(srcfile) | sed \"s/\($(srcfile:R:S!/!\\/!g)\)\.o\([ :]*\)/\1.o_st_o \2/g\" > $(@:R:S/$/&.d_st_o/)"
 
-$(srcfile:T:R:S/^/$(.OBJDIR)\/&/:S/$/&.o_sh_o/) : $(srcfile)
+$(srcfile:R:S/$/&.o_sh_o/) : $(srcfile)
 	$(CC) $(INCPATH) $(CFLAGS) $(SH_CFLAGS) $(O_CFLAGS) $(DEFINES) $(SH_DEFINES) $(O_DEFINES) -c $(srcfile) -o $@
-	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(SH_DEFINES) $(O_DEFINES) $(INCPATH) $(srcfile) | sed \"s/\($(srcfile:T:R)\)\.o\([ :]*\)/$(.CURDIR:S/\//\\\//g)\/obj\/sh_o\/\1.o_sh_o \2/g\" > $(@:R:S/$/&.d_sh_o/)"
+	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(SH_DEFINES) $(O_DEFINES) $(INCPATH) $(srcfile) | sed \"s/\($(srcfile:R:S!/!\\/!g)\)\.o\([ :]*\)/\1.o_sh_o \2/g\" > $(@:R:S/$/&.d_sh_o/)"
 
-$(srcfile:T:R:S/^/$(.OBJDIR)\/&/:S/$/&.o_st_p/) : $(srcfile)
+$(srcfile:R:S/$/&.o_st_p/) : $(srcfile)
 	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(P_CFLAGS) $(DEFINES) $(ST_DEFINES) $(P_DEFINES) -c $(srcfile) -o $@
-	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(P_DEFINES) $(INCPATH) $(srcfile) | sed \"s/\($(srcfile:T:R)\)\.o\([ :]*\)/$(.CURDIR:S/\//\\\//g)\/obj\/st_p\/\1.o_st_p \2/g\" > $(@:R:S/$/&.d_st_p/)"
+	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(P_DEFINES) $(INCPATH) $(srcfile) | sed \"s/\($(srcfile:R:S!/!\\/!g)\)\.o\([ :]*\)/\1.o_st_p \2/g\" > $(@:R:S/$/&.d_st_p/)"
 .endfor
 
 .for srcfile in $(SRCS) $(SRCS_R)
-$(srcfile:T:R:S/^/$(.OBJDIR)\/&/:S/$/&.o_st_r_d/) : $(srcfile)
+$(srcfile:R:S/$/&.o_st_r_d/) : $(srcfile)
 	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(D_CFLAGS) $(R_CFLAGS) $(DEFINES) $(ST_DEFINES) $(D_DEFINES) $(R_DEFINES) -c $(srcfile) -o $@
-	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(D_DEFINES) $(R_DEFINES) $(INCPATH) $(srcfile) | sed \"s/\($(srcfile:T:R)\)\.o\([ :]*\)/$(.CURDIR:S/\//\\\//g)\/obj\/st_r_d\/\1.o_st_r_d \2/g\" > $(@:R:S/$/&.d_st_r_d/)"
+	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(D_DEFINES) $(R_DEFINES) $(INCPATH) $(srcfile) | sed \"s/\($(srcfile:R:S!/!\\/!g)\)\.o\([ :]*\)/\1.o_st_r_d \2/g\" > $(@:R:S/$/&.d_st_r_d/)"
 
-$(srcfile:T:R:S/^/$(.OBJDIR)\/&/:S/$/&.o_st_r_o/) : $(srcfile)
+$(srcfile:R:S/$/&.o_st_r_o/) : $(srcfile)
 	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(O_CFLAGS) $(R_CFLAGS) $(DEFINES) $(ST_DEFINES) $(O_DEFINES) $(R_DEFINES) -c $(srcfile) -o $@
-	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(O_DEFINES) $(R_DEFINES) $(INCPATH) $(srcfile) | sed \"s/\($(srcfile:T:R)\)\.o\([ :]*\)/$(.CURDIR:S/\//\\\//g)\/obj\/st_r_o\/\1.o_st_r_o \2/g\" > $(@:R:S/$/&.d_st_r_o/)"
+	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(O_DEFINES) $(R_DEFINES) $(INCPATH) $(srcfile) | sed \"s/\($(srcfile:R:S!/!\\/!g)\)\.o\([ :]*\)/\1.o_st_r_o \2/g\" > $(@:R:S/$/&.d_st_r_o/)"
 
-$(srcfile:T:R:S/^/$(.OBJDIR)\/&/:S/$/&.o_sh_r_o/) : $(srcfile)
+$(srcfile:R:S/$/&.o_sh_r_o/) : $(srcfile)
 	$(CC) $(INCPATH) $(CFLAGS) $(SH_CFLAGS) $(O_CFLAGS) $(R_CFLAGS) $(DEFINES) $(SH_DEFINES) $(O_DEFINES) $(R_DEFINES) -c $(srcfile) -o $@
-	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(SH_DEFINES) $(O_DEFINES) $(R_DEFINES) $(INCPATH) $(srcfile) | sed \"s/\($(srcfile:T:R)\)\.o\([ :]*\)/$(.CURDIR:S/\//\\\//g)\/obj\/sh_r_o\/\1.o_sh_r_o \2/g\" > $(@:R:S/$/&.d_sh_r_o/)"
+	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(SH_DEFINES) $(O_DEFINES) $(R_DEFINES) $(INCPATH) $(srcfile) | sed \"s/\($(srcfile:R:S!/!\\/!g)\)\.o\([ :]*\)/\1.o_sh_r_o \2/g\" > $(@:R:S/$/&.d_sh_r_o/)"
 
-$(srcfile:T:R:S/^/$(.OBJDIR)\/&/:S/$/&.o_st_r_p/) : $(srcfile)
+$(srcfile:R:S/$/&.o_st_r_p/) : $(srcfile)
 	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(P_CFLAGS) $(R_CFLAGS) $(DEFINES) $(ST_DEFINES) $(P_DEFINES) $(R_DEFINES) -c $(srcfile) -o $@
-	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(P_DEFINES) $(R_DEFINES) $(INCPATH) $(srcfile) | sed \"s/\($(srcfile:T:R)\)\.o\([ :]*\)/$(.CURDIR:S/\//\\\//g)\/obj\/st_r_p\/\1.o_st_r_p \2/g\" > $(@:R:S/$/&.d_st_r_p/)"
+	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(P_DEFINES) $(R_DEFINES) $(INCPATH) $(srcfile) | sed \"s/\($(srcfile:R:S!/!\\/!g)\)\.o\([ :]*\)/\1.o_st_r_p \2/g\" > $(@:R:S/$/&.d_st_r_p/)"
 .endfor
 
 .pl.in.pl :
@@ -199,10 +199,10 @@ $(srcfile:T:R:S/^/$(.OBJDIR)\/&/:S/$/&.o_st_r_p/) : $(srcfile)
 # Dependencies (not rules).
 #
 
-.for depfile in $(SRCS:T:R:S/^/$(.CURDIR)\/obj\/&/:S/$/&.d_st_d/) \
-	$(SRCS:T:R:S/^/$(.CURDIR)\/obj\/&/:S/$/&.d_st_o/) \
-	$(SRCS:T:R:S/^/$(.CURDIR)\/obj\/&/:S/$/&.d_sh_o/) \
-	$(SRCS:T:R:S/^/$(.CURDIR)\/obj\/&/:S/$/&.d_st_p/)
+.for depfile in $(SRCS:R:S/$/&.d_st_d/) \
+	$(SRCS:R:S/$/&.d_st_o/) \
+	$(SRCS:R:S/$/&.d_sh_o/) \
+	$(SRCS:R:S/$/&.d_st_p/)
 .if exists($(depfile))
 .include "$(depfile)"
 .endif
@@ -210,14 +210,14 @@ $(srcfile:T:R:S/^/$(.OBJDIR)\/&/:S/$/&.o_st_r_p/) : $(srcfile)
 
 #@without_threads@WITH_THREADS=yes
 #.ifdef WITHTHREADS
-@without_threads@.for depfile in $(SRCS:T:R:S/^/$(.CURDIR)\/obj\/&/:S/$/&.d_st_r_d/) \
-@without_threads@	$(SRCS_R:T:R:S/^/$(.CURDIR)\/obj\/&/:S/$/&.d_st_r_d/) \
-@without_threads@	$(SRCS:T:R:S/^/$(.CURDIR)\/obj\/&/:S/$/&.d_st_r_o/) \
-@without_threads@	$(SRCS_R:T:R:S/^/$(.CURDIR)\/obj\/&/:S/$/&.d_st_r_o/) \
-@without_threads@	$(SRCS:T:R:S/^/$(.CURDIR)\/obj\/&/:S/$/&.d_sh_r_o/) \
-@without_threads@	$(SRCS_R:T:R:S/^/$(.CURDIR)\/obj\/&/:S/$/&.d_sh_r_o/) \
-@without_threads@	$(SRCS:T:R:S/^/$(.CURDIR)\/obj\/&/:S/$/&.d_st_r_p/) \
-@without_threads@	$(SRCS_R:T:R:S/^/$(.CURDIR)\/obj\/&/:S/$/&.d_st_p_d/)
+@without_threads@.for depfile in $(SRCS:R:S/$/&.d_st_r_d/) \
+@without_threads@	$(SRCS_R:R:S/$/&.d_st_r_d/) \
+@without_threads@	$(SRCS:R:S/$/&.d_st_r_o/) \
+@without_threads@	$(SRCS_R:R:S/$/&.d_st_r_o/) \
+@without_threads@	$(SRCS:R:S/$/&.d_sh_r_o/) \
+@without_threads@	$(SRCS_R:R:S/$/&.d_sh_r_o/) \
+@without_threads@	$(SRCS:R:S/$/&.d_st_r_p/) \
+@without_threads@	$(SRCS_R:R:S/$/&.d_st_p_d/)
 @without_threads@.if exists($(depfile))
 @without_threads@.include "$(depfile)"
 @without_threads@.endif
@@ -230,37 +230,33 @@ $(srcfile:T:R:S/^/$(.OBJDIR)\/&/:S/$/&.o_st_r_p/) : $(srcfile)
 .endif
 .endfor
 
-$(LIB_ST_D) : $(SRCS:T:R:S/^/$(.OBJDIR)\/&/:S/$/&.o_st_d/)
+$(LIB_ST_D) : $(SRCS:R:S/$/&.o_st_d/)
 	$(AR) cru $@ $?
 	$(RANLIB) $@
 
-$(LIB_ST_O) : $(SRCS:T:R:S/^/$(.OBJDIR)\/&/:S/$/&.o_st_o/)
+$(LIB_ST_O) : $(SRCS:R:S/$/&.o_st_o/)
 	$(AR) cru $@ $?
 	$(RANLIB) $@
 
-$(LIB_SH_O) : $(SRCS:T:R:S/^/$(.OBJDIR)\/&/:S/$/&.o_sh_o/)
+$(LIB_SH_O) : $(SRCS:R:S/$/&.o_sh_o/)
 	$(CC) -shared -o $@ $>
 
-$(LIB_ST_P) : $(SRCS:T:R:S/^/$(.OBJDIR)\/&/:S/$/&.o_st_p/)
+$(LIB_ST_P) : $(SRCS:R:S/$/&.o_st_p/)
 	$(AR) cru $@ $?
 	$(RANLIB) $@
 
-$(LIB_ST_R_D) : $(SRCS:T:R:S/^/$(.OBJDIR)\/&/:S/$/&.o_st_r_d/) \
-	$(SRCS_R:T:R:S/^/$(.OBJDIR)\/&/:S/$/&.o_st_r_d/)
+$(LIB_ST_R_D) : $(SRCS:R:S/$/&.o_st_r_d/) $(SRCS_R:R:S/$/&.o_st_r_d/)
 	$(AR) cru $@ $?
 	$(RANLIB) $@
 
-$(LIB_ST_R_O) : $(SRCS:T:R:S/^/$(.OBJDIR)\/&/:S/$/&.o_st_r_o/) \
-	$(SRCS_R:T:R:S/^/$(.OBJDIR)\/&/:S/$/&.o_st_r_o/)
+$(LIB_ST_R_O) : $(SRCS:R:S/$/&.o_st_r_o/) $(SRCS_R:R:S/$/&.o_st_r_o/)
 	$(AR) cru $@ $?
 	$(RANLIB) $@
 
-$(LIB_SH_R_O) : $(SRCS:T:R:S/^/$(.OBJDIR)\/&/:S/$/&.o_sh_r_o/) \
-	$(SRCS_R:T:R:S/^/$(.OBJDIR)\/&/:S/$/&.o_sh_r_o/)
+$(LIB_SH_R_O) : $(SRCS:R:S/$/&.o_sh_r_o/) $(SRCS_R:R:S/$/&.o_sh_r_o/)
 	$(CC) -shared -o $@ $>
 
-$(LIB_ST_R_P) : $(SRCS:T:R:S/^/$(.OBJDIR)\/&/:S/$/&.o_st_r_p/) \
-	$(SRCS:T:R:S/^/$(.OBJDIR)\/&/:S/$/&.o_st_r_p/)
+$(LIB_ST_R_P) : $(SRCS:R:S/$/&.o_st_r_p/) $(SRCS:R:S/$/&.o_st_r_p/)
 	$(AR) cru $@ $?
 	$(RANLIB) $@
 
@@ -276,26 +272,25 @@ stat_prof_r : $(LIB_ST_R_P) makefile
 #
 # autoconf-related rules.
 #
-$(.CURDIR)/configure : $(.CURDIR)/configure.in
-	$(SHELL) -c 'cd $(.CURDIR); autoconf; cd -'
+configure : configure.in
+	autoconf
 
-$(.CURDIR)/config.status : $(.CURDIR)/configure
-	$(SHELL) -c 'cd $(.CURDIR); ./config.status --recheck; cd -'
+config.status : configure
+	./config.status --recheck
 
-makefile :: $(.CURDIR)/Makefile
+makefile :: Makefile
 
-$(.CURDIR)/Makefile : $(.CURDIR)/Makefile.bsd
-$(.CURDIR)/Makefile.bsd : $(.CURDIR)/Makefile.bsd.in $(.CURDIR)/config.status
-	$(SHELL) -c 'cd $(.CURDIR); ./config.status; cd -'
+Makefile : Makefile.bsd
+Makefile.bsd : Makefile.bsd.in config.status
+	./config.status
 
-$(.CURDIR)/stamp.in : $(.CURDIR)/configure.in
-	$(SHELL) -c 'cd $(.CURDIR); echo timestamp > stamp.in; cd -'
+stamp.in : configure.in
+	echo timestamp > stamp.in
 
-$(.CURDIR)/stamp : $(.CURDIR)/include/libstash/libstash_defs.h.in \
-	$(.CURDIR)/config.status
-	$(SHELL) -c 'cd $(.CURDIR); ./config.status; cd -'
+stamp : include/libstash/libstash_defs.h.in config.status
+	./config.status
 
-$(.CURDIR)/include/libstash/libstash_defs.h : $(.CURDIR)/stamp
+include/libstash/libstash_defs.h : stamp
 
 FORCE :
 
@@ -311,9 +306,7 @@ tests : $(CTESTS) $(PTESTS) $(BTESTS) makefile
 
 check : tests
 	@$(SHELL) -c \
-	'cd $(.CURDIR) ;\
-	echo Hi ;\
-	printf "Running regression tests:\\n" ;\
+	'printf "Running regression tests:\\n" ;\
 	printf "%s\\n" "---------------------------------------------" ;\
 	for i in $(PTESTS); do \
 	printf "%s" "$$i..." ;\
@@ -396,29 +389,29 @@ uninstall : makefile
 doc :
 
 clean : makefile FORCE
-	rm -f $(.CURDIR)/*~ $(.CURDIR)/*/*~ $(.CURDIR)/*/*/*~
-	rm -f $(.CURDIR)/*.bak $(.CURDIR)/*.BAK
-	rm -f $(.CURDIR)/core $(.CURDIR)/test/core
-	rm -f $(.CURDIR)/*.core $(.CURDIR)/test/*.core
-	rm -f $(.CURDIR)/test/*.o $(.CURDIR)/test/*.out
-	rm -f $(.CURDIR)/test/*.diff $(.CURDIR)/test/*.pl
+	rm -f *~ */*~ */*/*~
+	rm -f *.bak *.BAK
+	rm -f core test/core
+	rm -f *.core test/*.core
+	rm -f test/*.o test/*.out
+	rm -f test/*.diff test/*.pl
 	rm -f $(CTESTS) $(PTESTS) $(BTESTS)
-	rm -f $(.CURDIR)/obj/*.[do]*
-	rm -f $(.CURDIR)/lib/lib*
-	rm -f $(.CURDIR)/test/*.d
-	rm -f $(.CURDIR)/test/*.diff
+	rm -f src/*.[do]_*
+	rm -f lib/lib*
+	rm -f test/*.d
+	rm -f test/*.diff
 
 distclean : clean
-	rm -f $(.CURDIR)/"#"*"#" $(.CURDIR)/bin/"#"*"#"
-	rm -f $(.CURDIR)/src/"#"*"#" $(.CURDIR)/include/"#"*"#"
-	rm -f $(.CURDIR)/Makefile $(.CURDIR)/Makefile.bsd 
-	rm -f $(.CURDIR)/Makefile.gnu $(.CURDIR)/stamp
-	rm -f $(.CURDIR)/config.cache $(.CURDIR)/config.log 
-	rm -f $(.CURDIR)/config.status
-	rm -f $(.CURDIR)/include/libstash/libstash_defs.h
-	rm -f $(.CURDIR)/TAGS
-	rm -f $(.CURDIR)/$(PMERGE)
-	rm -f $(.CURDIR)/$(PSTUB)
+	rm -f "#"*"#" bin/"#"*"#"
+	rm -f src/"#"*"#" include/"#"*"#"
+	rm -f Makefile Makefile.bsd 
+	rm -f Makefile.gnu stamp
+	rm -f config.cache config.log 
+	rm -f config.status
+	rm -f include/libstash/libstash_defs.h
+	rm -f TAGS
+	rm -f $(PMERGE)
+	rm -f $(PSTUB)
 
 etags : $(INCS) $(INCS_R) $(PRIV_INCS) $(PRIV_INCS_R) $(SRCS) $(SRCS_R) \
 	makefile

@@ -33,8 +33,6 @@ fi
 use_gmake="maybe"
 )
 
-AC_ARG_WITH
-
 AC_CANONICAL_HOST
 case "${host}" in
   i386-*-freebsd*)
@@ -141,8 +139,8 @@ fi
 dnl Process the following files.
 AC_OUTPUT(Makefile.bsd \
 Makefile.gnu \
-bin/pmerge \
-bin/pstub
+test/pmerge \
+test/pstub
 ,
 echo timestamp > stamp
 )

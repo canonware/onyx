@@ -8,3 +8,5 @@ p*.pl
 b19980828a
 *.core
 core
+pmerge
+pstub
