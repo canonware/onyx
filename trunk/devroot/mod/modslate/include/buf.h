@@ -16,6 +16,12 @@
 #endif
 /* #define CW_BUFP_DUMP */
 
+/* Define CW_BUF_VALIDATE to enable buf_validate(). */
+#ifdef CW_DBG
+#define CW_BUF_VALIDATE
+#endif
+/* #define CW_BUFP_VALIDATE */
+
 typedef struct cw_hist_s cw_hist_t;
 typedef struct cw_ext_s cw_ext_t;
 typedef struct cw_mkr_s cw_mkr_t;
@@ -266,6 +272,11 @@ buf_dump(cw_buf_t *a_buf, const char *a_beg, const char *a_mid,
 	 const char *a_end);
 #endif
 
+#ifdef CW_BUF_VALIDATE
+void
+buf_validate(cw_buf_t *a_buf);
+#endif
+
 /* mkr. */
 void
 mkr_new(cw_mkr_t *a_mkr, cw_buf_t *a_buf);
@@ -316,6 +327,11 @@ mkr_remove(cw_mkr_t *a_start, cw_mkr_t *a_end);
 void
 mkr_dump(cw_mkr_t *a_mkr, const char *a_beg, const char *a_mid,
 	 const char *a_end);
+#endif
+
+#ifdef CW_BUF_VALIDATE
+void
+mkr_validate(cw_mkr_t *a_mkr);
 #endif
 
 /* ext. */
@@ -389,4 +405,9 @@ ext_frag_get(const cw_mkr_t *a_mkr, cw_mkr_t *r_beg, cw_mkr_t *r_end);
 void
 ext_dump(cw_ext_t *a_ext, const char *a_beg, const char *a_mid,
 	 const char *a_end);
+#endif
+
+#ifdef CW_BUF_VALIDATE
+void
+ext_validate(cw_ext_t *a_ext);
 #endif

@@ -1586,3 +1586,28 @@ hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
     mkr_delete(&tmkr);
 }
 #endif
+
+#ifdef CW_BUF_VALIDATE
+void
+hist_validate(cw_hist_t *a_hist)
+{
+    cw_check_ptr(a_hist);
+    cw_dassert(a_hist->magic == CW_HIST_MAGIC);
+
+    /* Validate h. */
+    buf_validate(&a_hist->h);
+
+    /* Validate that hcur and htmp are in h. */
+    cw_assert(a_hist->hcur.bufp->buf == &a_hist->h);
+    cw_assert(a_hist->htmp.bufp->buf == &a_hist->h);
+
+    /* Validate that hpbos is a legal bpos in the data buf. */
+    cw_assert(a_hist->hbpos <= buf_len(&a_hist->h) + 1);
+
+    /* Iterate through the undo history and validate record consistency. */
+
+    /* Iterate through the redo history and validate record consistency. */
+
+    /* XXX */
+}
+#endif

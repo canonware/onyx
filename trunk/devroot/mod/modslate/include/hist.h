@@ -22,7 +22,7 @@ struct cw_hist_s
     /* Marker at current position in h. */
     cw_mkr_t hcur;
 
-    /* Temporary marker. */
+    /* Temporary marker in h. */
     cw_mkr_t htmp;
 
     /* Current history bpos (in the data buf). */
@@ -86,4 +86,9 @@ hist_del(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos, const
 void
 hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
 	  const char *a_end);
+#endif
+
+#ifdef CW_BUF_VALIDATE
+void
+hist_validate(cw_hist_t *a_hist);
 #endif

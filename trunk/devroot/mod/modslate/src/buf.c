@@ -351,6 +351,10 @@ static void
 bufp_p_dump(cw_bufp_t *a_bufp, const char *a_beg, const char *a_mid,
 	    const char *a_end);
 #endif
+#ifdef CW_BUF_VALIDATE
+static void
+bufp_p_validate(cw_bufp_t *a_bufp);
+#endif
 
 /* buf. */
 static cw_sint32_t
@@ -1047,6 +1051,35 @@ bufp_p_dump(cw_bufp_t *a_bufp, const char *a_beg, const char *a_mid,
 	free(tbeg);
 	i++;
     }
+}
+#endif
+
+#ifdef CW_BUF_VALIDATE
+static void
+bufp_p_validate(cw_bufp_t *a_bufp)
+{
+    cw_check_ptr(a_bufp);
+    cw_dassert(a_bufp->magic == CW_BUFP_MAGIC);
+
+    /* Validate consistency of bob_relative, bpos, and line, relative to
+     * previous and next bufp's. */
+
+    /* Validate consistency of len and gap_off. */
+
+    /* Validate nlines. */
+
+    /* Iterate through mkr's.
+     *
+     * 1) Make sure the mkr's point to this bufp.
+     *
+     * 2) Validate consistent ordering of mtree and mlist.
+     *
+     * 3) Validate increasing order.
+     *
+     * 4) Validate mkr's, via mkr_validate().
+     */
+
+    /* XXX */
 }
 #endif
 
@@ -1916,6 +1949,114 @@ buf_dump(cw_buf_t *a_buf, const char *a_beg, const char *a_mid,
     {
 	fprintf(stderr, "%s\\-> hist: %p\n", end, a_buf->hist);
     }
+}
+#endif
+
+#ifdef CW_BUF_VALIDATE
+void
+buf_validate(cw_buf_t *a_buf)
+{
+    cw_uint32_t nbufps;
+    cw_uint64_t len, nlines;
+    cw_bufp_t *bufp, *tbufp;
+
+    cw_check_ptr(a_buf);
+    cw_dassert(a_buf->magic == CW_BUF_MAGIC);
+
+    /* Iterate through bufp's. */
+    nbufps = 0;
+    len = 0;
+    nlines = 0;
+    ql_foreach(bufp, &a_buf->plist, plink)
+    {
+	/* Count number of bufp's. */
+	nbufps++;
+
+	/* Make sure the bufp points to this buf. */
+	cw_assert(bufp->buf == a_buf);
+
+	/* Validate bufp. */
+	bufp_p_validate(bufp);
+
+	/* Validate consistent ordering of mtree and mlist. */
+	rb_prev(&a_buf->ptree, bufp, cw_bufp_t, pnode, tbufp);
+	cw_assert(ql_prev(&a_buf->plist, bufp, plink) == tbufp);
+
+	rb_next(&a_buf->ptree, bufp, cw_bufp_t, pnode, tbufp);
+	cw_assert(ql_next(&a_buf->plist, bufp, plink) == tbufp);
+
+	/* Validate increasing order. */
+	if (tbufp != NULL)
+	{
+	    if (bufp->bob_relative && tbufp->bob_relative)
+	    {
+		cw_assert(bufp->bpos + bufp->len == tbufp->bpos);
+		cw_assert(bufp->line + bufp->nlines == tbufp->line);
+	    }
+	    else if (bufp->bob_relative == FALSE 
+		     && tbufp->bob_relative == FALSE)
+	    {
+		cw_assert(bufp->bpos == tbufp->bpos + tbufp->len);
+		cw_assert(bufp->line == tbufp->line + tbufp->nlines);
+	    }
+	    else
+	    {
+		cw_assert(bufp->bob_relative && tbufp->bob_relative == FALSE);
+
+		cw_assert(bufp->bpos + bufp->len + tbufp->bpos + tbufp->len
+			  == a_buf->len);
+		cw_assert(bufp->line + bufp->nlines
+		          + tbufp->line + tbufp->nlines
+			  == a_buf->nlines);
+	    }
+	}
+
+	/* Sum bufp lengths and number of lines in order to validate buf len
+	 * and nlines. */
+	len += bufp->len;
+	nlines += bufp->nlines;
+    }
+
+    /* Validate minimum number of bufp's (1). */
+    cw_assert(nbufps >= 1);
+
+    /* Validate bufvcnt. */
+    cw_assert(a_buf->bufvcnt == 2 * nbufps);
+
+    /* Validate len and nlines. */
+    cw_assert(len == a_buf->len);
+    cw_assert(nlines == a_buf->nlines);
+
+    /* Validate consistency of bufp_cur versus that bufp's bob_relative, and the
+     * previous and next bufp's' bob_relative. */
+
+    /* Iterate through ext's in f-order.
+     *
+     * 1) Validate consistent ordering of ftree and flist.
+     *
+     * 2) Validate increasing order.
+     *
+     * 3) Count number of ext's, for later comparison with number in r-order.
+     */
+
+    /* Iterate through ext's in f-order.
+     *
+     * 1) Validate consistent ordering of rtree and rlist.
+     *
+     * 2) Validate increasing order.
+     *
+     * 3) Validate ext's, via ext_validate().
+     */
+
+    /* Validate equal number of ext's in f-order and r-order. */
+
+    /* Validate hist, via hist_validate(). */
+    if (a_buf->hist != NULL)
+    {
+	hist_validate(a_buf->hist);
+    }
+
+    /* XXX */
 }
 #endif
 
@@ -3795,6 +3936,38 @@ mkr_dump(cw_mkr_t *a_mkr, const char *a_beg, const char *a_mid,
 }
 #endif
 
+#ifdef CW_BUF_VALIDATE
+void
+mkr_validate(cw_mkr_t *a_mkr)
+{
+    /* Validate consistency between order and ext_end. */
+    if (a_mkr->order != MKRO_EITHER)
+    {
+	cw_ext_t *ext;
+
+	if (a_mkr->ext_end == FALSE)
+	{
+	    /* Begin of extent. */
+	    ext = (cw_ext_t *)(a_mkr - cw_offsetof(cw_ext_t, beg));
+	}
+	else
+	{
+	    /* End of extext. */
+	    ext = (cw_ext_t *)(a_mkr - cw_offsetof(cw_ext_t, end));
+	}
+
+	cw_check_ptr(ext);
+	cw_dassert(ext->magic == CW_EXT_MAGIC);
+    }
+
+    /* Validate that ppos isn't in the gap. */
+
+    /* Validate pline. */
+
+    /* XXX */
+}
+#endif
+
 /* ext. */
 static cw_sint32_t
 ext_p_fcomp(cw_ext_t *a_a, cw_ext_t *a_b)
@@ -4292,6 +4465,11 @@ ext_detachable_set(cw_ext_t *a_ext, cw_bool_t a_detachable)
 /* Create the stack of extents that overlap a_mkr, which can then be iterated on
  * by ext_stack_down_get().  The stack is in f-order, starting at the top of the
  * stack. */
+/* XXX This isn't adequate, since it is impossible to get the extent stack for a
+ * fragment of length 1.  Instead of getting an extent stack at a bpos, we need
+ * to get an extent stack at a cpos.  This can be achieved by adding a boolean
+ * argument to this function that specifies whether to use the character
+ * before/after a_mkr. */
 cw_uint32_t
 ext_stack_init(const cw_mkr_t *a_mkr)
 {
@@ -4525,5 +4703,35 @@ ext_dump(cw_ext_t *a_ext, const char *a_beg, const char *a_mid,
     free(tbeg);
     free(tmid);
     free(tend);
+}
+#endif
+
+#ifdef CW_BUF_VALIDATE
+void
+ext_validate(cw_ext_t *a_ext)
+{
+    cw_check_ptr(a_ext);
+    cw_dassert(a_ext->magic == CW_EXT_MAGIC);
+
+    /* Validate consistency of attached and detachable. */
+    if (a_ext->detachable == FALSE)
+    {
+	cw_assert(a_ext->attached);
+    }
+    else
+    {
+	if (mkr_pos(&a_ext->beg) == mkr_pos(&a_ext->end))
+	{
+	    cw_assert(a_ext->attached == FALSE);
+	}
+	else
+	{
+	    cw_assert(a_ext->attached);
+	}
+    }
+
+    /* Validate beg and end. */
+    mkr_validate(&a_ext->beg);
+    mkr_validate(&a_ext->end);
 }
 #endif
