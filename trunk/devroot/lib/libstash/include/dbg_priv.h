@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 56 $
- * $Date: 1998-05-01 03:14:47 -0700 (Fri, 01 May 1998) $
+ * $Revision: 59 $
+ * $Date: 1998-05-01 14:49:14 -0700 (Fri, 01 May 1998) $
  *
  * <<< Description >>>
  *
@@ -61,9 +61,11 @@
 cw_sint32_t dbg_raw_tbl[] =
 {
   _CW_DBG_C_FUNC, -1, /* _CW_DBG_R_FUNC */
+  _CW_DBG_C_ERROR, -1, /* _CW_DBG_R_ERROR */
   _CW_DBG_C_OH_FUNC, _CW_DBG_C_FUNC, -1, /* _CW_DBG_R_OH_FUNC */
   _CW_DBG_C_OH_SLOT, -1, /* _CW_DBG_R_OH_SLOT */
   _CW_DBG_C_RES_FUNC, _CW_DBG_C_FUNC, -1, /* _CW_DBG_R_RES_FUNC */
+  _CW_DBG_C_RES_ERROR, _CW_DBG_C_ERROR, -1, /* _CW_DBG_R_RES_ERROR */
   _CW_DBG_C_RES_STATE, -1, /* _CW_DBG_R_RES_STATE */
   /* <ADD> */
   -1
