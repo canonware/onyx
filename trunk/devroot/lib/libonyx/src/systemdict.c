@@ -8584,25 +8584,6 @@ systemdict_threadostack(cw_nxo_t *a_thread)
     nxo_stack_remove(ostack, thread);
 }
 
-void
-systemdict_threadtstack(cw_nxo_t *a_thread)
-{
-    cw_nxo_t *ostack, *thread, *nxo;
-
-    ostack = nxo_thread_ostack_get(a_thread);
-    NXO_STACK_GET(thread, ostack, a_thread);
-    if (nxo_type_get(thread) != NXOT_THREAD)
-    {
-	nxo_thread_nerror(a_thread, NXN_typecheck);
-	return;
-    }
-
-    nxo = nxo_stack_push(ostack);
-    nxo_dup(nxo, nxo_thread_tstack_get(thread));
-
-    nxo_stack_remove(ostack, thread);
-}
-
 #ifdef CW_THREADS
 void
 systemdict_threadsdict(cw_nxo_t *a_thread)

@@ -466,7 +466,6 @@ typedef enum
     NXN_threadestack,
     NXN_threadistack,
     NXN_threadostack,
-    NXN_threadtstack,
     NXN_threadsdict,
     NXN_threadtype,
     NXN_threshold,
