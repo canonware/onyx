@@ -363,14 +363,25 @@ main()
     bufpool_delete(&bufpool);
   }
 
-  /* buf_get_uint32(), buf_get_uint64(). */
+  /* buf_get_uint32(), buf_get_uint64(),
+   * buf_get_iovec(). */
   {
     cw_bufpool_t bufpool;
     cw_buf_t buf;
     cw_bufel_t bufel;
-    cw_uint8_t * a, b[2], c[3], * d, * e, f[9];
+    cw_uint8_t * a, b[2], c[3], * d, * e, f[11];
     cw_uint8_t t_buf[17];
     cw_uint32_t i;
+    int iov_count;
+    const struct iovec * iov;
+
+    /* a  0,
+     * b  1,  2,
+     * c  3,  4,  5,
+     * d  6,  7,  8,  9,
+     * e 10, 11, 12, 13, 14,
+     * f 42, 15, 16, 17, 18, 19, 20, 21, 22, 23, 42
+     */
 
     bufpool_new(&bufpool, 5, 10);
     buf_new(&buf, TRUE);
@@ -417,32 +428,51 @@ main()
     bufel_set_data_ptr(&bufel, (void *) e, 5, bufpool_put_buffer, &bufpool);
     buf_append_bufel(&buf, &bufel);
     bufel_delete(&bufel);
-    
-    f[0] = 15;
-    f[1] = 16;
-    f[2] = 17;
-    f[3] = 18;
-    f[4] = 19;
-    f[5] = 20;
-    f[6] = 21;
-    f[7] = 22;
-    f[8] = 23;
+
+    f[0] = 42;
+    f[1] = 15;
+    f[2] = 16;
+    f[3] = 17;
+    f[4] = 18;
+    f[5] = 19;
+    f[6] = 20;
+    f[7] = 21;
+    f[8] = 22;
+    f[9] = 23;
+    f[10] = 42;
     bufel_new(&bufel);
-    bufel_set_data_ptr(&bufel, (void *) c, 9, NULL, NULL);
+    bufel_set_data_ptr(&bufel, (void *) f, 11, NULL, NULL);
+    bufel_set_beg_offset(&bufel, 1);
+    bufel_set_end_offset(&bufel, 10);
     buf_append_bufel(&buf, &bufel);
     bufel_delete(&bufel);
+
+    iov = buf_get_iovec(&buf, &iov_count);
+    _cw_assert(iov_count == 6);
+    _cw_assert(iov[0].iov_base == (char *) a);
+    _cw_assert(iov[0].iov_len == 1);
+    _cw_assert(iov[1].iov_base == (char *) b);
+    _cw_assert(iov[1].iov_len == 2);
+    _cw_assert(iov[2].iov_base == (char *) c);
+    _cw_assert(iov[2].iov_len == 3);
+    _cw_assert(iov[3].iov_base == (char *) d);
+    _cw_assert(iov[3].iov_len == 4);
+    _cw_assert(iov[4].iov_base == (char *) e);
+    _cw_assert(iov[4].iov_len == 5);
+    _cw_assert(iov[5].iov_base == (char *) &f[1]);
+    _cw_assert(iov[5].iov_len == 9);
 
     _cw_assert(24 == buf_get_size(&buf));
 
     log_printf(cw_g_log, "Hodge podge buf_get_uint32():\n");
-    for (i = 0; i < 20; i++)
+    for (i = 0; i <= 20; i++)
     {
       log_printf(cw_g_log, "%03u->0x%08x\n",
 		 i, buf_get_uint32(&buf, i));
     }
     
     log_printf(cw_g_log, "Hodge podge buf_get_uint64():\n");
-    for (i = 0; i < 16; i++)
+    for (i = 0; i <= 16; i++)
     {
       log_printf(cw_g_log, "%03u->0x%s\n",
 		 i,
@@ -531,7 +561,6 @@ main()
     _cw_assert(6 == buf_get_size(buf_p));
 
     _cw_assert('C' == buf_get_uint8(buf_p, 0));
-/*      buf_dump(buf_p, "H "); */
     _cw_assert('B' == buf_get_uint8(buf_p, 1));
     _cw_assert('A' == buf_get_uint8(buf_p, 2));
     _cw_assert('A' == buf_get_uint8(buf_p, 3));
@@ -610,9 +639,72 @@ main()
     bufpool_delete(&bufpool);
   }
 
-  /* buf_get_iovec(). */
   /* buf_split(). */
   /* buf_release_head_data(), buf_release_tail_data(). */
+  {
+    cw_bufpool_t bufpool;
+    cw_buf_t buf_a, buf_b, buf_c;
+    cw_bufel_t bufel;
+    cw_uint32_t i;
+
+    bufpool_new(&bufpool, 8, 10);
+
+    buf_new(&buf_a, TRUE);
+    buf_new(&buf_b, FALSE);
+    buf_new(&buf_c, TRUE);
+
+    for (i = 0; i < 3; i++)
+    {
+      bufel_new(&bufel);
+      bufel_set_data_ptr(&bufel,
+			 bufpool_get_buffer(&bufpool),
+			 bufpool_get_buffer_size(&bufpool),
+			 bufpool_put_buffer,
+			 (void *) &bufpool);
+      buf_append_bufel(&buf_a, &bufel);
+      buf_append_bufel(&buf_b, &bufel);
+      buf_prepend_bufel(&buf_c, &bufel);
+      bufel_delete(&bufel);
+    }
+
+    _cw_assert(24 == buf_get_size(&buf_a));
+    _cw_assert(24 == buf_get_size(&buf_b));
+    _cw_assert(24 == buf_get_size(&buf_c));
+    log_printf(cw_g_log, "buf_get_size(&buf_a) == %lu\n", buf_get_size(&buf_a));
+    log_printf(cw_g_log, "buf_get_size(&buf_b) == %lu\n", buf_get_size(&buf_b));
+    log_printf(cw_g_log, "buf_get_size(&buf_c) == %lu\n", buf_get_size(&buf_c));
+
+    buf_split(&buf_a, &buf_b, 13);
+    log_printf(cw_g_log, "buf_get_size(&buf_a) == %lu\n", buf_get_size(&buf_a));
+    log_printf(cw_g_log, "buf_get_size(&buf_b) == %lu\n", buf_get_size(&buf_b));
+    log_printf(cw_g_log, "buf_get_size(&buf_c) == %lu\n", buf_get_size(&buf_c));
+    _cw_assert(37 == buf_get_size(&buf_a));
+    _cw_assert(11 == buf_get_size(&buf_b));
+
+    buf_catenate_buf(&buf_b, &buf_c, TRUE);
+    _cw_marker("Got here");
+    log_printf(cw_g_log, "buf_get_size(&buf_a) == %lu\n", buf_get_size(&buf_a));
+    log_printf(cw_g_log, "buf_get_size(&buf_b) == %lu\n", buf_get_size(&buf_b));
+    log_printf(cw_g_log, "buf_get_size(&buf_c) == %lu\n", buf_get_size(&buf_c));
+    _cw_assert(35 == buf_get_size(&buf_b));
+    _cw_marker("Got here");
+    _cw_assert(24 == buf_get_size(&buf_c));
+
+    _cw_marker("Got here");
+    buf_release_head_data(&buf_b, 10);
+    _cw_marker("Got here");
+    _cw_assert(25 == buf_get_size(&buf_b));
+    _cw_marker("Got here");
+    buf_release_head_data(&buf_b, 10);
+    _cw_assert(15 == buf_get_size(&buf_b));
+    buf_release_head_data(&buf_b, 15);
+    _cw_assert(0 == buf_get_size(&buf_b));
+    
+    buf_delete(&buf_a);
+    buf_delete(&buf_b);
+    buf_delete(&buf_c);
+    bufpool_delete(&bufpool);
+  }
 
 /*    libstash_shutdown(); */
   return 0;
