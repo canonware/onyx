@@ -6356,7 +6356,15 @@ systemdict_listen(cw_nxo_t *a_thread)
     NXO_STACK_GET(sock, ostack, a_thread);
     if (nxo_type_get(sock) == NXOT_INTEGER)
     {
-	backlog = (int) nxo_integer_get(sock);
+	cw_nxoi_t tbacklog;
+
+	tbacklog = nxo_integer_get(sock);
+	if (tbacklog < 0)
+	{
+	    nxo_thread_nerror(a_thread, NXN_rangecheck);
+	    return;
+	}
+	backlog = tbacklog;
 	NXO_STACK_NGET(sock, ostack, a_thread, 1);
 	npop = 2;
     }
