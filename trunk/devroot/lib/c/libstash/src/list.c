@@ -549,7 +549,42 @@ list_insert_after(cw_list_t * a_list,
 }
 
 void *
-list_remove(cw_list_t * a_list, cw_list_item_t * a_to_remove)
+list_remove_item(cw_list_t * a_list, void * a_data)
+{
+  void * retval = NULL;
+  cw_list_item_t * t;
+
+  _cw_check_ptr(a_list);
+  _cw_check_ptr(a_data);
+
+#ifdef _CW_REENTRANT
+  if (a_list->is_thread_safe)
+  {
+    mtx_lock(&a_list->lock);
+  }
+#endif
+
+  for (t = a_list->head;
+       (t != NULL) && (retval == NULL);
+       t = list_item_p_get_next(t))
+  {
+    if (list_item_get(t) == a_data)
+    {
+      retval = list_p_remove_container(a_list, t);
+    }
+  }
+
+#ifdef _CW_REENTRANT
+  if (a_list->is_thread_safe)
+  {
+    mtx_unlock(&a_list->lock);
+  }
+#endif
+  return retval;
+}
+
+void *
+list_remove_container(cw_list_t * a_list, cw_list_item_t * a_to_remove)
 {
   void * retval;
 
@@ -562,33 +597,7 @@ list_remove(cw_list_t * a_list, cw_list_item_t * a_to_remove)
   }
 #endif
 
-  if (list_item_p_get_prev(a_to_remove) == NULL)
-  {
-    /* Removing from the beginning of the list. */
-    retval = list_p_hpop(a_list);
-  }
-  else if (list_item_p_get_next(a_to_remove) == NULL)
-  {
-    /* Removing from the end of the list. */
-    retval = list_p_tpop(a_list);
-  }
-  else
-  {
-    /* Removing from the middle of the list. */
-    retval = list_item_get(a_to_remove);
-
-    list_item_p_set_next(list_item_p_get_prev(a_to_remove),
-			 list_item_p_get_next(a_to_remove));
-    list_item_p_set_prev(list_item_p_get_next(a_to_remove),
-			 list_item_p_get_prev(a_to_remove));
-
-    /* Put item on the spares list. */
-    list_item_p_set_next(a_to_remove, a_list->spares_head);
-    a_list->spares_head = a_to_remove;
-    a_list->spares_count++;
-    
-    a_list->count--;
-  }
+  retval = list_p_remove_container(a_list, a_to_remove);
 
 #ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
@@ -768,6 +777,42 @@ list_p_tpop(cw_list_t * a_list)
     a_list->spares_count++;
     /* Done with spares list. */
       
+    a_list->count--;
+  }
+
+  return retval;
+}
+
+void *
+list_p_remove_container(cw_list_t * a_list, cw_list_item_t * a_to_remove)
+{
+  void * retval;
+  
+  if (list_item_p_get_prev(a_to_remove) == NULL)
+  {
+    /* Removing from the beginning of the list. */
+    retval = list_p_hpop(a_list);
+  }
+  else if (list_item_p_get_next(a_to_remove) == NULL)
+  {
+    /* Removing from the end of the list. */
+    retval = list_p_tpop(a_list);
+  }
+  else
+  {
+    /* Removing from the middle of the list. */
+    retval = list_item_get(a_to_remove);
+
+    list_item_p_set_next(list_item_p_get_prev(a_to_remove),
+			 list_item_p_get_next(a_to_remove));
+    list_item_p_set_prev(list_item_p_get_next(a_to_remove),
+			 list_item_p_get_prev(a_to_remove));
+
+    /* Put item on the spares list. */
+    list_item_p_set_next(a_to_remove, a_list->spares_head);
+    a_list->spares_head = a_to_remove;
+    a_list->spares_count++;
+    
     a_list->count--;
   }
 

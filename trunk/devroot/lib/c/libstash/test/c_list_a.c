@@ -282,7 +282,67 @@ main()
     list_delete(list);
   }
 
-  /* list_remove(),
+  /* list_remove_item(),
+   * list_count(). */
+  {
+    cw_list_t * list;
+    cw_list_item_t * items[11];
+    cw_uint32_t ints[11], i;
+
+    list = list_new(NULL, TRUE);
+
+    /* Push the ints onto the list. */
+    for (i = 0; i < 11; i++)
+    {
+      ints[i] = i;
+      _cw_assert(i == list_count(list));
+      items[i] = list_tpush(list, &ints[i]);
+      _cw_assert((i + 1) == list_count(list));
+    }
+
+    _cw_assert(11 == list_count(list));
+    _cw_assert(ints[0] == *(cw_uint32_t *) list_remove_item(list,
+							    (void *) &ints[0]));
+    _cw_assert(10 == list_count(list));
+    _cw_assert(ints[10] == *(cw_uint32_t *) list_remove_item(list, 
+							    (void *)
+							     &ints[10]));
+    _cw_assert(9 == list_count(list));
+    _cw_assert(ints[5] == *(cw_uint32_t *) list_remove_item(list, 
+							    (void *) &ints[5]));
+    _cw_assert(8 == list_count(list));
+
+    _cw_assert(ints[1] == *(cw_uint32_t *) list_remove_item(list, 
+							    (void *) &ints[1]));
+    _cw_assert(7 == list_count(list));
+    _cw_assert(ints[9] == *(cw_uint32_t *) list_remove_item(list, 
+							    (void *) &ints[9]));
+    _cw_assert(6 == list_count(list));
+    _cw_assert(ints[6] == *(cw_uint32_t *) list_remove_item(list, 
+							    (void *) &ints[6]));
+    _cw_assert(5 == list_count(list));
+    
+    _cw_assert(ints[2] == *(cw_uint32_t *) list_remove_item(list, 
+							    (void *) &ints[2]));
+    _cw_assert(4 == list_count(list));
+    _cw_assert(ints[8] == *(cw_uint32_t *) list_remove_item(list, 
+							    (void *) &ints[8]));
+    _cw_assert(3 == list_count(list));
+    _cw_assert(ints[7] == *(cw_uint32_t *) list_remove_item(list, 
+							    (void *) &ints[7]));
+    _cw_assert(2 == list_count(list));
+    
+    _cw_assert(ints[3] == *(cw_uint32_t *) list_remove_item(list, 
+							    (void *) &ints[3]));
+    _cw_assert(1 == list_count(list));
+    _cw_assert(ints[4] == *(cw_uint32_t *) list_remove_item(list, 
+							    (void *) &ints[4]));
+    _cw_assert(0 == list_count(list));
+    
+    list_delete(list);
+  }
+  
+  /* list_remove_container(),
    * list_count(). */
   {
     cw_list_t * list;
@@ -304,7 +364,8 @@ main()
     for (i = 0; i < 11; i++)
     {
       _cw_assert((11 - i) == list_count(list));
-      _cw_assert(ints[i] == *(cw_uint32_t *) list_remove(list, items[i]));
+      _cw_assert(ints[i] ==
+		 *(cw_uint32_t *) list_remove_container(list, items[i]));
     }
 
     _cw_assert(0 == list_count(list));

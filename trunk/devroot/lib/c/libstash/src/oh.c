@@ -559,7 +559,7 @@ oh_item_delete(cw_oh_t * a_oh,
        item. */
     *a_key = (void *) a_oh->items[slot]->key;
     *a_data = (void *) a_oh->items[slot]->data;
-    list_remove(&a_oh->items_list, a_oh->items[slot]->list_item);
+    list_remove_container(&a_oh->items_list, a_oh->items[slot]->list_item);
 
     /* Put the item on the spares list. */
     list_hpush(&a_oh->spares_list, (void *) a_oh->items[slot]);

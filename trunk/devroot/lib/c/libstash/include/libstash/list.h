@@ -207,12 +207,32 @@ list_insert_after(cw_list_t * a_list, cw_list_item_t * a_in_list,
 
 /****************************************************************************
  *
- * Given a pointer to an item, removes the item from the list and returns
- * the data pointer.
+ * <<< Input(s) >>>
+ *
+ * a_list : Pointer to a list.
+ *
+ * a_data : Pointer to data.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Pointer to a_data, or NULL.
+ *
+ * <<< Description >>>
+ *
+ * Find a_data in a_list and remove it from the list.
  *
  ****************************************************************************/
 void *
-list_remove(cw_list_t * a_list, cw_list_item_t * a_to_remove);
+list_remove_item(cw_list_t * a_list, void * a_data);
+
+/****************************************************************************
+ *
+ * Given a pointer to an item, remove the item from the list and return the
+ * data pointer.
+ *
+ ****************************************************************************/
+void *
+list_remove_container(cw_list_t * a_list, cw_list_item_t * a_to_remove);
 
 /****************************************************************************
  *

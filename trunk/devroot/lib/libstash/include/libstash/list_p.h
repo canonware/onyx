@@ -41,3 +41,7 @@ list_p_hpop(cw_list_t * a_list);
  ****************************************************************************/
 static void *
 list_p_tpop(cw_list_t * a_list);
+
+/* Remove a list_item container from the list and return the data pointer. */
+void *
+list_p_remove_container(cw_list_t * a_list, cw_list_item_t * a_to_remove);
