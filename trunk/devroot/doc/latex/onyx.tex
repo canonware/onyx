@@ -2185,8 +2185,9 @@ ostack. \\
 \hline
 mark \dots & {\bf \htmlref{cleartomark}{systemdict:cleartomark}} & -- & Remove
 objects from ostack through topmost mark. \\
-& {\bf \htmlref{ostack}{systemdict:ostack}} & & \\
 \hline
+-- & {\bf \htmlref{ostack}{systemdict:ostack}} & stack & Get a current ostack
+snapshot. \\
 \hline \hline
 \multicolumn{4}{|l|}{Execution, control, and execution stack operators} \\
 \hline \hline
@@ -2305,7 +2306,7 @@ stack & {\bf \htmlref{sclear}{systemdict:sclear}} & stack & Remove all objects
 on stack. \\
 \hline
 stack & {\bf \htmlref{scleartomark}{systemdict:scleartomark}} & stack & Remove
-objecs from stack down through topmost mark. \\
+objects from stack down through topmost mark. \\
 \hline
 (a) (b) & {\bf \htmlref{catenate}{systemdict:catenate}} & (a b) & Catenate two
 stacks. \\
@@ -2537,17 +2538,29 @@ symbolic link. \\
 \hline
 filename & {\bf \htmlref{unlink}{systemdict:unlink}} & -- & Unlink a file. \\
 \hline
-& {\bf \htmlref{rmdir}{systemdict:rmdir}} & & \\
+path & {\bf \htmlref{rmdir}{systemdict:rmdir}} & -- & Remove an empty
+directory. \\
 \hline
-& {\bf \htmlref{test}{systemdict:test}} & & \\
+file/filename flag & {\bf \htmlref{test}{systemdict:test}} & boolean & Test a
+file. \\
 \hline
-& {\bf \htmlref{status}{systemdict:status}} & & \\
+file/filename & {\bf \htmlref{status}{systemdict:status}} & dict & Get file
+information. \\
 \hline
-path proc & {\bf \htmlref{dirforeach}{systemdict:dirforeach}} & -- & \\
+path proc & {\bf \htmlref{dirforeach}{systemdict:dirforeach}} & -- & Iterate on
+directory entries. \\
 \hline
--- & {\bf \htmlref{pwd}{systemdict:pwd}} & path & \\
+-- & {\bf \htmlref{pwd}{systemdict:pwd}} & path & Get present working
+directory. \\
 \hline
-path & {\bf \htmlref{cd}{systemdict:cd}} & -- & \\
+path & {\bf \htmlref{cd}{systemdict:cd}} & -- & Change present working
+directory. \\
+\hline
+-- & {\bf \htmlref{stdin}{systemdict:stdin}} & file & Get stdin. \\
+\hline
+-- & {\bf \htmlref{stdout}{systemdict:stdout}} & file & Get stdout. \\
+\hline
+-- & {\bf \htmlref{stderr}{systemdict:stderr}} & file & Get stderr. \\
 \hline \hline
 \multicolumn{4}{|l|}{Logical and bitwise operators} \\
 \hline \hline
@@ -5667,23 +5680,25 @@ onyx:0>
 	\end{description}
 \label{systemdict:ostack}
 \index{ostack@\onyxop{}{ostack}{}}
-\item[{\onyxop{--}{ostack}{--}}: ]
+\item[{\onyxop{--}{ostack}{stack}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[stack: ]
+			A current snapshot (copy) of the operand stack.
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Get a current snapshot of the operand stack.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> 1 2 3 ostack pstack
+(1 2 3)
+3
+2
+1
+onyx:4>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:pop}
@@ -6119,23 +6134,29 @@ onyx:0>
 	\end{description}
 \label{systemdict:rmdir}
 \index{rmdir@\onyxop{}{rmdir}{}}
-\item[{\onyxop{--}{rmdir}{--}}: ]
+\item[{\onyxop{path}{rmdir}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[path: ]
+			A string object that represents a directory path.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
+		\item[\htmlref{ioerror}{ioerror}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{unregistered}{unregistered}.]
 		\end{description}
 	\item[Description: ]
+		Remove an empty directory.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> `/tmp/tdir' 8#755 mkdir
+onyx:0> `/tmp/tdir' rmdir
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:roll}
@@ -6558,27 +6579,6 @@ onyx:1> pstack
 onyx:1>
 		\end{verbatim}
 	\end{description}
-\label{systemdict:sload}
-\index{sload@\onyxop{}{sload}{}}
-\item[{\onyxop{--}{sload}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
-	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
-	\end{description}
 \label{systemdict:spop}
 \index{spop@\onyxop{}{spop}{}}
 \item[{\onyxop{stack}{spop}{stack object}}: ]
@@ -6659,6 +6659,9 @@ onyx:1>
 		sprintdict.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> sprintdict 0 sprint
+-dict-
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:spush}
@@ -6759,27 +6762,6 @@ onyx:1> 4 0 sroll pstack
 onyx:1>
 		\end{verbatim}
 	\end{description}
-\label{systemdict:sstore}
-\index{sstore@\onyxop{}{sstore}{}}
-\item[{\onyxop{--}{sstore}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
-	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
-	\end{description}
 \label{systemdict:stack}
 \index{stack@\onyxop{}{stack}{}}
 \item[{\onyxop{--}{stack}{stack}}: ]
@@ -6829,86 +6811,128 @@ onyx:0>
 	\end{description}
 \label{systemdict:status}
 \index{status@\onyxop{}{status}{}}
-\item[{\onyxop{--}{status}{--}}: ]
+\item[{\onyxop{file/filename}{status}{dict}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[file: ]
+			A file object.
+		\item[filename: ]
+			A string that represents a filename.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[dict: ]
+			A dictionary that contains the following entries:
+			\begin{description}\item[]
+			\item[dev: ]
+				Inode's device.
+			\item[ino: ]
+				Inode's number.
+			\item[mode: ]
+				Inode permissions.
+			\item[nlink: ]
+				Number of hard links.
+			\item[uid: ]
+				User ID of the file owner.
+			\item[gid: ]
+				Group ID of the file owner.
+			\item[rdev: ]
+				Device type.
+			\item[size: ]
+				File size in bytes.
+			\item[atime: ]
+				Time of last access, in nanoseconds since the
+				epoch.
+			\item[mtime: ]
+				Time of last modification, in nanoseconds since
+				the epoch.
+			\item[ctime: ]
+				Time of last file status change, in nanoseconds
+				since the epoch.
+			\item[blksize: ]
+				Optimal block size for I/O.
+			\item[blocks: ]
+				Number of blocks allocated.
+			\end{description}
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
+		\item[\htmlref{ioerror}{ioerror}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{unregistered}{unregistered}.]
 		\end{description}
 	\item[Description: ]
+		Get status information about a file.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> `/tmp' status 1 sprint
+</dev 134405 /ino 2 /mode 17407 /nlink 5 /uid 0 /gid 0 /rdev 952 /size 3584
+/atime 994883041000000000 /mtime 994883041000000000 /ctime 994883041000000000
+/blksize 0 /blocks 8>
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:stderr}
 \index{stderr@\onyxop{}{stderr}{}}
 \item[{\onyxop{--}{stderr}{--}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[file: ]
+			A file object corresponding to stderr.
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Get stdout.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> stderr pstack
+-file-
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:stdin}
 \index{stdin@\onyxop{}{stdin}{}}
-\item[{\onyxop{--}{stdin}{--}}: ]
+\item[{\onyxop{--}{stdin}{file}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[file: ]
+			A file object corresponding to stdin.
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Get stdin.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> stdin pstack
+-file-
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:stdout}
 \index{stdout@\onyxop{}{stdout}{}}
-\item[{\onyxop{--}{stdout}{--}}: ]
+\item[{\onyxop{--}{stdout}{file}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[file: ]
+			A file object corresponding to stdout.
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Get stdout.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> stdout pstack
+-file-
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:stop}
@@ -7144,23 +7168,79 @@ onyx:1>
 	\end{description}
 \label{systemdict:test}
 \index{test@\onyxop{}{test}{}}
-\item[{\onyxop{--}{test}{--}}: ]
+\item[{\onyxop{file/filename flag}{test}{boolean}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[file: ]
+			A file object.
+		\item[filename: ]
+			A string that represents a filename.
+		\item[flag: ]
+			A single-character string that represents the test to do
+			on \oparg{file} or \oparg{filename}:
+			\begin{description}\item[]
+			\item[`b': ]
+				Block special device?
+			\item[`c': ]
+				Character special device?
+			\item[`d': ]
+				Directory?
+			\item[`e': ]
+				Exists?
+			\item[`f': ]
+				Regular file?
+			\item[`g': ]
+				Setgid?
+			\item[`k': ]
+				Sticky?
+			\item[`p': ]
+				Named pipe?
+			\item[`r': ]
+				Readable?
+			\item[`s': ]
+				Size greater than 0?
+			\item[`t': ]
+				tty?
+			\item[`u': ]
+				Setuid?
+			\item[`w': ]
+				Write bit set?
+			\item[`x': ]
+				Executable bit set?
+			\item[`L': ]
+				Symbolic link?
+			\item[`O': ]
+				Owner matches effective uid?
+			\item[`G': ]
+				Group matches effective gid?
+			\item[`S': ]
+				Socket?
+			\end{description}
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[boolean: ]
+			If true, the test evaluated to true; false otherwise.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
+		\item[\htmlref{ioerror}{ioerror}.]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{unregistered}{unregistered}.]
 		\end{description}
 	\item[Description: ]
+		Test a file for an attribute.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> `/blah' `e' test 1 sprint
+false
+onyx:0> `/tmp' `e' test 1 sprint
+true
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:thread}
@@ -7892,98 +7972,100 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 \multicolumn{4}{r}{\emph{Continued on next page...}} \endfoot
 \hline \endlastfoot
 %end{latexonly}
-& {\bf \htmlref{threaddict}{threaddict:threaddict}} & & \\
+-- & {\bf \htmlref{threaddict}{threaddict:threaddict}} & dict & Get
+threaddict. \\
 \hline
-& {\bf \htmlref{userdict}{threaddict:userdict}} & & \\
+-- & {\bf \htmlref{userdict}{threaddict:userdict}} & dict & Get userdict. \\
 \hline
-& {\bf \htmlref{currenterror}{threaddict:currenterror}} & & \\
+-- & {\bf \htmlref{currenterror}{threaddict:currenterror}} & dict & Get
+currenterror. \\
 \hline
-& {\bf \htmlref{errordict}{threaddict:errordict}} & & \\
+-- & {\bf \htmlref{errordict}{threaddict:errordict}} & dict & Get errordict. \\
 \end{longtable}
 
 \begin{description}
 \label{threaddict:currenterror}
 \index{currenterror@\onyxop{}{currenterror}{}}
-\item[{\onyxop{--}{currenterror}{--}}: ]
+\item[{\onyxop{--}{currenterror}{dict}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[dict: ]
+			The currenterror dictionary.  See
+			Section~\ref{sec:currenterror} for details on
+			currenterror.
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Get currenterror.
 	\item[Example(s): ]\begin{verbatim}
 
-		\end{verbatim}
+onyx:0> currenterror 0 sprint
+-dict-
+onyx:0>
+	\end{verbatim}
 	\end{description}
 \label{threaddict:errordict}
 \index{errordict@\onyxop{}{errordict}{}}
-\item[{\onyxop{--}{errordict}{--}}: ]
+\item[{\onyxop{--}{errordict}{dict}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[dict: ]
+			The errordict dictionary.  See
+			Section~\ref{sec:errordict} for details on errordict.
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Get errordict.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> errordict 0 sprint
+-dict-
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{threaddict:threaddict}
 \index{threaddict@\onyxop{}{threaddict}{}}
-\item[{\onyxop{--}{threaddict}{--}}: ]
+\item[{\onyxop{--}{threaddict}{dict}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[dict: ]
+			The threaddict dictionary.
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Get threaddict.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> threaddict 0 sprint
+-dict-
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{threaddict:userdict}
 \index{userdict@\onyxop{}{userdict}{}}
-\item[{\onyxop{--}{userdict}{--}}: ]
+\item[{\onyxop{--}{userdict}{dict}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[dict: ]
+			The userdict dictionary.  See
+			Section~\ref{sec:userdict} for details on userdict.
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Get userdict.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> userdict 1 sprint
+<>
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \end{description}

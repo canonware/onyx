@@ -30,8 +30,8 @@
 @lib_onyx_manual@\input{@abs_objdir@/lib/c/libonyx/doc/latex/manual}
 
 % Modules.
-\clearemptydoublepage
-\part{Modules}
+@mod_ncurses_manual@\clearemptydoublepage
+@mod_ncurses_manual@\part{Modules}
 @mod_ncurses_manual@\input{@abs_objdir@/mod/modncurses/doc/latex/manual}
 
 % onyx Language Reference.
