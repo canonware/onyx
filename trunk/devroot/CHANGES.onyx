@@ -1,3 +1,14 @@
+2002-11-03 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/nxo_dict.c:nxo_p_dict_hash() : Add case for NXOT_REAL
+	  (bug fix).
+
+	* lib/libonyx/src/nxo_thread.c:nxo_thread_loop() : Add case for
+	  NXOT_REAL (bug fix).
+
+	* lib/libonyx/src/systemdic.c:systemdict_lcheck() : Add case for
+	  NXOT_REAL (bug fix).
+
 2002-09-08 : Jason Evans <jasone@canonware.com>
 
 	* Onyx 4.1.0 released.
