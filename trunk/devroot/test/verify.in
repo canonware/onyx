@@ -39,9 +39,7 @@ $opt_retval =
 	    "r|srcdir=s" => \$opt_srcdir,
             "o|objdir=s" => \$opt_objdir,
 	    "u|ustats" => \$opt_ustats,
-	    "z|zero" => \$opt_zero,
-	    "d|difftest=s@" => \@OPT_DTESTS,
-	    "s|seqtest=s@" => \@OPT_STESTS
+	    "z|zero" => \$opt_zero
 	    );
 
 if ($opt_help)
@@ -63,7 +61,7 @@ if ($opt_verbose && $opt_quiet)
     exit 1;
 }
 
-if ($#OPT_STESTS + $#OPT_DTESTS + 2 == 0)
+if ($#ARGV + 1 == 0)
 {
     print STDERR "No tests specified\n";
     &usage();
@@ -75,8 +73,7 @@ if ($opt_verbose)
     print STDERR "Option values: h:$opt_help, v:$opt_verbose, "
 	. "t:\"$opt_srcdir\", o:\"$opt_objdir\" "
 	. "q:$opt_quiet, u:$opt_ustats, z:$opt_zero\n";
-    printf STDERR "Sequence tests (%d total): @OPT_STESTS\n", $#OPT_STESTS + 1;
-    printf STDERR "Diff tests (%d total): @OPT_DTESTS\n", $#OPT_DTESTS + 1;
+    printf STDERR "Tests (%d total): @ARGV\n", $#ARGV + 1;
     printf STDERR "srcdir:\"$opt_srcdir\", objdir:\"$opt_objdir\"\n";
 }
 
@@ -107,151 +104,130 @@ $total_hutime = 0.0; # Total historical user time.
 $total_hstime = 0.0; # Total historical system time.
 $total_ntime = 0.0; # Total time for tests that have historical data.
 
-foreach $test (@OPT_STESTS)
+foreach $test (@ARGV)
 {
-    # sequence mode.
-
     # Strip out any whitespace in $test.
     $test =~ s/^\s*(.*)\s*$/$1/;
 
     $okay = 1;
 
-    ($okay, $utime, $stime) = &run_test($test);
-
-    if (open (STEST_OUT, "<$opt_objdir/$test.out"))
+    if (-e "$opt_srcdir/$test.exp")
     {
-	$num_subtests = 0;
-	$num_failed_subtests = 0;
+	# Diff mode.
 
-	while (defined($line = <STEST_OUT>))
+	($okay, $utime, $stime) = &run_test($test);
+
+	if (-e "$opt_objdir/$test.out")
 	{
-	    if ($line =~ /1\.\.(\d+)/)
+	    `diff $opt_objdir/$test.out $opt_srcdir/$test.exp > $opt_objdir/$test.diff 2>&1`;
+	    if ($?)
 	    {
-		$num_subtests = $1;
-		last;
-	    }
-	}
-	if ($num_subtests == 0)
-	{
-	    $okay = 0;
-	    if ($opt_verbose)
-	    {
-		print STDERR "Malformed or missing 1..n line\n";
+		# diff returns non-zero if there is a difference.
+		$okay = 0;
 	    }
 	}
 	else
 	{
-	    for ($subtest = 1; $subtest <= $num_subtests; $subtest++)
+	    $okay = 0;
+	    if ($opt_verbose)
 	    {
-		while (defined($line = <STEST_OUT>))
+		print STDERR
+		    "Nonexistent output file \"$opt_objdir/$test.out\"\n";
+	    }
+	}
+
+	($hutime, $hstime) = &print_stats($test, $okay, 0, 0, $utime, $stime);
+    }
+    else
+    {
+	# Sequence mode.
+
+	($okay, $utime, $stime) = &run_test($test);
+
+	if (open (STEST_OUT, "<$opt_objdir/$test.out"))
+	{
+	    $num_subtests = 0;
+	    $num_failed_subtests = 0;
+
+	    while (defined($line = <STEST_OUT>))
+	    {
+		if ($line =~ /1\.\.(\d+)/)
 		{
-		    if ($line =~ /^not\s+ok\s+(\d+)?/)
-		    {
-			$not = 1;
-			$test_num = $1;
-			last;
-		    }
-		    elsif ($line =~ /^ok\s+(\d+)?/)
-		    {
-			$not = 0;
-			$test_num = $1;
-			last;
-		    }
+		    $num_subtests = $1;
+		    last;
 		}
-		if (defined($line))
+	    }
+	    if ($num_subtests == 0)
+	    {
+		$okay = 0;
+		if ($opt_verbose)
 		{
-		    if (defined($test_num) && ($test_num != $subtest))
+		    print STDERR "Malformed or missing 1..n line\n";
+		}
+	    }
+	    else
+	    {
+		for ($subtest = 1; $subtest <= $num_subtests; $subtest++)
+		{
+		    while (defined($line = <STEST_OUT>))
 		    {
-			# There was no output printed for one or more tests.
-			for (; $subtest < $test_num; $subtest++)
+			if ($line =~ /^not\s+ok\s+(\d+)?/)
+			{
+			    $not = 1;
+			    $test_num = $1;
+			    last;
+			}
+			elsif ($line =~ /^ok\s+(\d+)?/)
+			{
+			    $not = 0;
+			    $test_num = $1;
+			    last;
+			}
+		    }
+		    if (defined($line))
+		    {
+			if (defined($test_num) && ($test_num != $subtest))
+			{
+			    # There was no output printed for one or more tests.
+			    for (; $subtest < $test_num; $subtest++)
+			    {
+				$num_failed_subtests++;
+			    }
+			}
+			if ($not)
 			{
 			    $num_failed_subtests++;
 			}
 		    }
-		    if ($not)
+		    else
 		    {
-			$num_failed_subtests++;
+			for (; $subtest <= $num_subtests; $subtest++)
+			{
+			    $num_failed_subtests++;
+			}
 		    }
 		}
-		else
+
+		if (0 < $num_failed_subtests)
 		{
-		    for (; $subtest <= $num_subtests; $subtest++)
-		    {
-			$num_failed_subtests++;
-		    }
+		    $okay = 0;
 		}
 	    }
-
-	    if (0 < $num_failed_subtests)
+	}
+	else
+	{
+	    if (!$opt_quiet)
 	    {
-		$okay = 0;
+		print STDERR "Cannot open output file \"$opt_objdir/$test.out\"\n";
 	    }
+	    exit 1;
 	}
-    }
-    else
-    {
-	if (!$opt_quiet)
-	{
-	    print STDERR "Cannot open output file \"$opt_objdir/$test.out\"\n";
-	}
-	exit 1;
+
+	($hutime, $hstime) = &print_stats($test, $okay,
+					  $num_failed_subtests, $num_subtests,
+					  $utime, $stime);
     }
 
-    ($hutime, $hstime) = &print_stats($test, $okay, 
-				      $num_failed_subtests, $num_subtests,
-				      $utime, $stime);
-    $total_hutime += $hutime;
-    $total_hstime += $hstime;
-
-    if ($okay)
-    {
-	$total_utime += $utime;
-	$total_stime += $stime;
-    }
-    else
-    {
-	@FAILED_TESTS = (@FAILED_TESTS, $test);
-    }
-
-    # If there were historical data, add the run time to the total time to 
-    # compare against the historical run time.
-    if (0 < ($hutime + $hstime))
-    {
-	$total_ntime += $utime + $stime;
-    }
-}
-foreach $test (@OPT_DTESTS)
-{
-    # Diff mode.
-
-    # Strip out any whitespace in $test.
-    $test =~ s/^\s*(.*)\s*$/$1/;
-
-    $okay = 1;
-
-    ($okay, $utime, $stime) = &run_test($test);
-
-    if (-e "$opt_objdir/$test.out" 
-	&& -e "$opt_srcdir/$test.exp")
-    {
-	`diff $opt_objdir/$test.out $opt_srcdir/$test.exp > $opt_objdir/$test.diff 2>&1`;
-	if ($?)
-	{
-	    # diff returns non-zero if there is a difference.
-	    $okay = 0;
-	}
-    }
-    else
-    {
-	$okay = 0;
-	if ($opt_verbose)
-	{
-	    print STDERR
-		"Nonexistent expected output file \"$opt_srcdir/$test.exp\"\n";
-	}
-    }
-
-    ($hutime, $hstime) = &print_stats($test, $okay, 0, 0, $utime, $stime);
     $total_hutime += $hutime;
     $total_hstime += $hstime;
 
@@ -275,10 +251,10 @@ foreach $test (@OPT_DTESTS)
 
 # Print summary stats.
 $tt_str = sprintf ("%d / %d passed (%5.2f%%%%)",
-		   ($#OPT_STESTS + $#OPT_DTESTS + 2) - ($#FAILED_TESTS + 1),
-		   $#OPT_STESTS + $#OPT_DTESTS + 2,
-		   (($#OPT_STESTS + $#OPT_DTESTS + 2) - ($#FAILED_TESTS + 1))
-		   / ($#OPT_STESTS + $#OPT_DTESTS + 2) * 100);
+		   ($#ARGV + 1) - ($#FAILED_TESTS + 1),
+		   $#ARGV + 1,
+		   (($#ARGV + 1) - ($#FAILED_TESTS + 1))
+		   / ($#ARGV + 1) * 100);
 
 $t_str = sprintf ("Totals                                   %7.2f  %7.2f %7.2f"
                   . "  %7.2f\n"
@@ -443,7 +419,7 @@ sub usage
 {
     print <<EOF;
 $0 usage:
-    $0 [<options>] {[-s | -d | --sequence | --diff] <test>}+
+    $0 [<options>] <test>+
 
     Option        | Description
     --------------+-------------------------------------------------------------
@@ -456,27 +432,20 @@ $0 usage:
     -z --zero     | Consider non-zero exit code to be an error.
     --------------+-------------------------------------------------------------
 
-    Flag          | Description
-    --------------+-------------------------------------------------------------
-    -s --sequence | Sequence mode (default).
-                  | Output to stdout of the following form is expected:
-                  | 
-                  | -----------------
-                  | 1..<n>
-                  | {not} ok [1]
-                  | {not} ok [2]
-                  | ...
-                  | {not} ok [n]
-                  | -----------------
-                  | 
-                  | 1 <= <n> < 2^31
-                  | 
-                  | Lines which do not match the patterns shown above are
-                  | ignored.
-                  | 
-    -d --diff     | Diff mode (incompatible with sequence mode).
-                  | If <test>.exp exists, diff it with the output from <test> to
-                  | determine success or failure.
-    --------------+-------------------------------------------------------------
+    If <test>.exp exists, <test>'s output is diff'ed with <test>.exp.  Any
+    difference is considered failure.
+
+    If <test>.exp does not exist, output to stdout of the following form is
+    expected:
+
+        1..<n>
+        {not }ok[ 1]
+        {not }ok[ 2]
+        ...
+        {not }ok[ n]
+
+    1 <= <n> < 2^31
+
+    Lines which do not match the patterns shown above are ignored.
 EOF
 }

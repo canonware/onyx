@@ -105,21 +105,17 @@ tests : [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS] [CBTESTS]]
 check : tests
 {
   [VERIFY] -z -r [srcdir] -o [objdir]
-           [prepost "-d " "" [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS]]]
-           [prepost "-d " ""
-                    [fromto [srcdir]/%0%.st.in [objdir]/%0%.st [STESTS]]]
-           [prepost "-s " ""
-                    [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]]];
+           [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS]]
+           [fromto [srcdir]/%0%.st.in [objdir]/%0%.st [STESTS]]
+           [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]];
 }
 
 check_update : tests
 {
   [VERIFY] -u -z -r [srcdir] -o [objdir]
-           [prepost "-d " "" [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS]]]
-           [prepost "-d " ""
-                    [fromto [srcdir]/%0%.st.in [objdir]/%0%.st [STESTS]]]
-           [prepost "-s " ""
-                    [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]]];
+           [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS]]
+           [fromto [srcdir]/%0%.st.in [objdir]/%0%.st [STESTS]]
+           [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]];
 }
 
 release : doc;
