@@ -420,7 +420,7 @@ bufp_p_new(cw_buf_t *a_buf)
 					       CW_BUFP_SIZE);
 
     /* Initialize marker tree and list. */
-    rb_tree_new(&retval->mtree, node);
+    rb_tree_new(&retval->mtree, mnode);
     ql_new(&retval->mlist);
 
 #ifdef CW_DBG
@@ -438,7 +438,7 @@ bufp_p_delete(cw_bufp_t *a_bufp)
 #ifdef CW_DBG
     {
 	cw_mkr_t *first;
-	rb_first(&a_bufp->mtree, node, first);
+	rb_first(&a_bufp->mtree, mnode, first);
 	cw_assert(first == NULL);
     }
 #endif
@@ -893,18 +893,18 @@ mkr_p_insert(cw_mkr_t *a_mkr)
     cw_mkr_t *next;
 
     /* Insert into tree. */
-    rb_insert(&bufp->mtree, a_mkr, mkr_p_comp, cw_mkr_t, node);
+    rb_insert(&bufp->mtree, a_mkr, mkr_p_comp, cw_mkr_t, mnode);
 
     /* Insert into list.  Make sure that the tree and list orders are the same.
      */
-    rb_next(&bufp->mtree, a_mkr, cw_mkr_t, node, next);
+    rb_next(&bufp->mtree, a_mkr, cw_mkr_t, mnode, next);
     if (next != NULL)
     {
-	ql_before_insert(&bufp->mlist, next, a_mkr, link);
+	ql_before_insert(&bufp->mlist, next, a_mkr, mlink);
     }
     else
     {
-	ql_head_insert(&bufp->mlist, a_mkr, link);
+	ql_head_insert(&bufp->mlist, a_mkr, mlink);
     }
 }
 
@@ -913,8 +913,8 @@ mkr_p_remove(cw_mkr_t *a_mkr)
 {
     cw_bufp_t *bufp = a_mkr->bufp;
 
-    rb_remove(&bufp->mtree, a_mkr, cw_mkr_t, node);
-    ql_remove(&bufp->mlist, a_mkr, link);
+    rb_remove(&bufp->mtree, a_mkr, cw_mkr_t, mnode);
+    ql_remove(&bufp->mlist, a_mkr, mlink);
 }
 
 void
@@ -943,8 +943,8 @@ mkr_new(cw_mkr_t *a_mkr, cw_buf_t *a_buf)
     a_mkr->bufp = bufp;
     a_mkr->ppos = bufp_p_pos_b2p(bufp, 1);
     a_mkr->pline = 0;
-    rb_node_new(&bufp->mtree, a_mkr, node);
-    ql_elm_new(a_mkr, link);
+    rb_node_new(&bufp->mtree, a_mkr, mnode);
+    ql_elm_new(a_mkr, mlink);
 
     mkr_p_insert(a_mkr);
 

@@ -56,8 +56,8 @@ struct cw_mkr_s
     cw_uint64_t pline;
 
     /* Ordered mkr tree and list linkage. */
-    rb_node(cw_mkr_t) node;
-    ql_elm(cw_mkr_t) link;
+    rb_node(cw_mkr_t) mnode;
+    ql_elm(cw_mkr_t) mlink;
 };
 
 struct cw_ext_s
