@@ -1,0 +1,17 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+`ls' path
+type $stringtype ne {`ls is not in PATH\n' print} if
+
+`HopeFully_ThIs_iS_NoT_In_PATH' path
+type $nulltype ne {`HopeFully_ThIs_iS_NoT_In_PATH is in PATH\n' print} if
