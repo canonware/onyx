@@ -616,7 +616,7 @@ nxo_file_read(cw_nxo_t *a_nxo, cw_uint32_t a_len, cw_uint8_t *r_str)
 			    | POLLRDNORM
 #endif
 			    ;
-			while ((poll(&events, 1, -1)) == -1 && errno == EINTR)
+			while (poll(&events, 1, -1) == -1 && errno == EINTR)
 			{
 			    /* EINTR; try again. */
 			}
@@ -1097,7 +1097,7 @@ nxo_file_write(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len,
     cw_uint32_t retcount;
     cw_nxoe_file_t *file;
 #ifdef CW_POSIX_FILE
-    int count;
+    ssize_t count;
 #endif
 
     cw_check_ptr(a_nxo);
@@ -1620,7 +1620,8 @@ nxo_p_file_buffer_flush(cw_nxoe_file_t *a_file)
 #ifdef CW_POSIX_FILE
 		case FILE_POSIX:
 		{
-		    int flags, count, nwritten;
+		    ssize_t count;
+		    int flags, nwritten;
 
 		    if (a_file->nonblocking)
 		    {
