@@ -248,11 +248,17 @@ if test "x$build_onyx" = "xyes" ; then
   AC_DEFINE_UNQUOTED(_CW_TONYX_MPATH, "$tmpath")
 fi
 
-if test "$build_mod_slate" = "xyes" ; then
+if test "x$build_modslate" = "xyes" ; then
   if test "x$enable_libedit" != "x1" ; then
-    AC_CHECK_LIB(ncurses, tigetstr, LIBS="$LIBS", \
-      AC_CHECK_LIB(curses, tigetstr, LIBS="$LIBS", \
-        AC_MSG_ERROR(Cannot find the curses library)))
+    AC_CHECK_HEADERS(curses.h, , build_modslate="no")
+    AC_CHECK_HEADERS(term.h, , build_modslate="no")
+    AC_SEARCH_LIBS(set_term, ncurses curses, , build_modslate="no")
+  fi
+  AC_CHECK_HEADERS(panel.h, , build_modslate="no")
+  AC_SEARCH_LIBS(new_panel, panel, , build_modslate="no")
+
+  if test "x$build_modslate" != "xyes" ; then
+    AC_MSG_ERROR(Missing features necessary to build slate)
   fi
 fi
 
