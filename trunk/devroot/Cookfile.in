@@ -51,22 +51,22 @@ EXTRALIBS = @LIBS@;
 RPATH = @RPATH@;
 
 /* Documentation. */
-#include-cooked [srcdir]/doc/Cookfile.inc
+#include-cooked [objdir]/doc/Cookfile.inc
 
 /* Examples. */
-#include-cooked [srcdir]/examples/Cookfile.inc
+#include-cooked [objdir]/examples/Cookfile.inc
 
 /* Tests. */
-#include-cooked [srcdir]/test/Cookfile.inc
+#include-cooked [objdir]/test/Cookfile.inc
 
 /* Binaries. */
-#include-cooked [srcdir]/bin/Cookfile.inc
+#include-cooked [objdir]/bin/Cookfile.inc
 
 /* Libraries. */
-#include-cooked [srcdir]/lib/Cookfile.inc
+#include-cooked [objdir]/lib/Cookfile.inc
 
 /* Modules. */
-#include-cooked [srcdir]/mod/Cookfile.inc
+#include-cooked [objdir]/mod/Cookfile.inc
 
 /*
  * User targets.
