@@ -65,7 +65,6 @@ MSRCS = [MSRCS] [MODNXE_MSRCS];
 {
   local tex_srcs = ;
   tex_srcs = [fromto % [srcdir]/mod/modnxe/doc/latex/% [tex_srcs]];
-  tex_srcs = [tex_srcs] [objdir]/mod/modnxe/doc/latex/manual.tex;
 
   TEX_SRCS = [TEX_SRCS] [tex_srcs];
 }
