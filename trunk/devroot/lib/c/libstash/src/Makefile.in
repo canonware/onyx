@@ -30,8 +30,8 @@
 #
 # $Source$
 # $Author: jasone $
-# Current revision: $Revision: 6 $
-# Last modified: $Date: 1998-01-16 00:20:41 -0800 (Fri, 16 Jan 1998) $
+# Current revision: $Revision: 9 $
+# Last modified: $Date: 1998-02-08 22:18:43 -0800 (Sun, 08 Feb 1998) $
 #
 # Description: Makefile for SQuirreL source code.
 #              
@@ -57,14 +57,16 @@ DEFINES = -D_REENTRANT @DEFS@
 LIBS    = -L@top_srcdir@/src $(STATLIB:%=-l%) @LIBS@
 
 FLEXFLAGS = -CF
-BISONFLAGS = 
+BISONFLAGS = -d
 
 #
 # variables
 #
 
 # file lists
-SRCS     = log.c res_lexer.yy.c
+SRCS     = log.c resource.c $(LEXERS:.l=.yy.c) $(PARSERS:.y=.tab.c)
+LEXERS   = res_lexer.l
+PARSERS  = res_parser.y
 OBJS     = $(SRCS:.c=.o)
 DIRS     = 
 STATLIB  = common
@@ -75,7 +77,7 @@ TARGETS  =
 #
 
 .SUFFIXES:
-.SUFFIXES: .c .h .o .d .l .y .yy.c
+.SUFFIXES: .c .h .o .d .l .y .yy.c .tab.c .tab.h
 
 .c.o:
 	$(CC) -c $< $(CFLAGS) $(INCS) $(DEFINES)
@@ -83,8 +85,13 @@ TARGETS  =
 .l.yy.c:
 	$(FLEX) $(FLEXFLAGS) -o$@ $<
 
-.y.yy.c:
+.y.tab.c:
 	$(BISON) $(BISONFLAGS) -o $@ $<
+	mv $(@:.c=.h) ../include
+
+.y.tab.h:
+	$(BISON) $(BISONFLAGS) -o $(@:.h=.c) $<
+	mv $(@:.c=.h) ../include
 
 #
 # user 'make'ables
@@ -170,6 +177,14 @@ heredistclean:
 	rm -f "#"*"#"
 	rm -f $(OBJS) $(TARGETS)
 	rm -f Makefile
+
+#
+# The next 3 rules unfortunately make all lexers dependent on all parsers, so
+# we may rebuild more than necessary when a parser is changed.
+#
+$(PARSERS:.y=.tab.h): $(PARSERS)
+$(PARSERS:.y=.tab.c): $(PARSERS)
+$(LEXERS): $(PARSERS:.y=.tab.h)
 
 $(STATLIB:%=lib%.a): $(OBJS)
 	$(AR) cr $@ $?

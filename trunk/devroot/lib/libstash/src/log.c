@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 6 $
- * Last modified: $Date: 1998-01-16 00:20:41 -0800 (Fri, 16 Jan 1998) $
+ * Current revision: $Revision: 9 $
+ * Last modified: $Date: 1998-02-08 22:18:43 -0800 (Sun, 08 Feb 1998) $
  *
  * Description: 
  *              
@@ -152,10 +152,10 @@ lprintf(char * arg_format, ...)
 }
 
 int
-leprintf(char * arg_filename, 
-	 int arg_line_num, 
+leprintf(char * arg_filename,
+	 int arg_line_num,
 	 char * arg_func_name,
-	 char * arg_format, 
+	 char * arg_format,
 	 ...)
 {
   va_list ap;
@@ -165,15 +165,15 @@ leprintf(char * arg_filename,
     {
       if (arg_filename != NULL)
 	{
-	  fprintf(g_log_fp, 
-		  "At %s, line %d: ", 
-		  arg_filename, 
+	  fprintf(g_log_fp,
+		  "At %s, line %d: ",
+		  arg_filename,
 		  arg_line_num);
 	}
       if (arg_func_name != NULL)
 	{
-	  fprintf(g_log_fp, 
-		  "%s(): ", 
+	  fprintf(g_log_fp,
+		  "%s(): ",
 		  arg_func_name);
 	}
 
@@ -186,15 +186,15 @@ leprintf(char * arg_filename,
       /* Use stderr. */
       if (arg_filename != NULL)
 	{
-	  fprintf(stderr, 
+	  fprintf(stderr,
 		  "At %s, line %d: ",
-		  arg_filename, 
+		  arg_filename,
 		  arg_line_num);
 	}
       if (arg_func_name != NULL)
 	{
-	  fprintf(stderr, 
-		  "%s(): ", 
+	  fprintf(stderr,
+		  "%s(): ",
 		  arg_func_name);
 	}
 

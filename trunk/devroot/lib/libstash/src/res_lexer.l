@@ -31,8 +31,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 6 $
- * Last modified: $Date: 1998-01-16 00:20:41 -0800 (Fri, 16 Jan 1998) $
+ * Current revision: $Revision: 9 $
+ * Last modified: $Date: 1998-02-08 22:18:43 -0800 (Sun, 08 Feb 1998) $
  *
  * Description: 
  *              
@@ -44,7 +44,8 @@
 
 #define _INC_STRING_H_
 #include <inc_common.h>
-
+#include <res_parser.tab.h>
+  
 extern unsigned g_line_num;
 extern YYSTYPE yylval;
 %}
@@ -89,7 +90,7 @@ extern YYSTYPE yylval;
  /* Resource instance. */
 [a-z][A-Za-z0-9_]* {
                      yylval.string = (char *) malloc(strlen(yytext) + 1);
-		     _cw_checkptr(yylval.string);
+		     _cw_check_ptr(yylval.string);
                      strcpy(yylval.string, yytext);
 		     return RES_INST;
                    }
@@ -97,7 +98,7 @@ extern YYSTYPE yylval;
  /* Resource class. */
 [A-Z][A-Za-z0-9_]* {
                      yylval.string = (char *) malloc(strlen(yytext) + 1);
-		     _cw_checkptr(yylval.string);
+		     _cw_check_ptr(yylval.string);
                      strcpy(yylval.string, yytext);
 		     return RES_CLASS;
                    }

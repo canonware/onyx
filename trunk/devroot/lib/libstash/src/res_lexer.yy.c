@@ -1533,8 +1533,8 @@ char *yytext;
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 6 $
- * Last modified: $Date: 1998-01-16 00:20:41 -0800 (Fri, 16 Jan 1998) $
+ * Current revision: $Revision: 9 $
+ * Last modified: $Date: 1998-02-08 22:18:43 -0800 (Sun, 08 Feb 1998) $
  *
  * Description: 
  *              
@@ -1546,10 +1546,11 @@ char *yytext;
 
 #define _INC_STRING_H_
 #include <inc_common.h>
-
+#include <res_parser.tab.h>
+  
 extern unsigned g_line_num;
 extern YYSTYPE yylval;
-#line 1553 "res_lexer.yy.c"
+#line 1554 "res_lexer.yy.c"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -1700,11 +1701,11 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
 
-#line 52 "res_lexer.l"
+#line 53 "res_lexer.l"
 
 
  /* Suck up whitespace. */
-#line 1708 "res_lexer.yy.c"
+#line 1709 "res_lexer.yy.c"
 
 	if ( yy_init )
 		{
@@ -1784,149 +1785,149 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 55 "res_lexer.l"
+#line 56 "res_lexer.l"
 ;
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 57 "res_lexer.l"
+#line 58 "res_lexer.l"
 {
                  g_line_num++;
                }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 61 "res_lexer.l"
+#line 62 "res_lexer.l"
 {return STAR;}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 62 "res_lexer.l"
+#line 63 "res_lexer.l"
 {return PERIOD;}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 63 "res_lexer.l"
+#line 64 "res_lexer.l"
 {return QUESTION;}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 64 "res_lexer.l"
+#line 65 "res_lexer.l"
 {return COLON;}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 65 "res_lexer.l"
+#line 66 "res_lexer.l"
 {return BACKSLASH;}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 66 "res_lexer.l"
+#line 67 "res_lexer.l"
 {return DEFINE;}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 67 "res_lexer.l"
+#line 68 "res_lexer.l"
 {return UNDEF;}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 68 "res_lexer.l"
+#line 69 "res_lexer.l"
 {return INCLUDE;}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 69 "res_lexer.l"
+#line 70 "res_lexer.l"
 {return IF;}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 70 "res_lexer.l"
+#line 71 "res_lexer.l"
 {return IFDEF;}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 71 "res_lexer.l"
+#line 72 "res_lexer.l"
 {return IFNDEF;}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 72 "res_lexer.l"
+#line 73 "res_lexer.l"
 {return ELSE;}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 73 "res_lexer.l"
+#line 74 "res_lexer.l"
 {return ENDIF;}
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 74 "res_lexer.l"
+#line 75 "res_lexer.l"
 {return LINE;}
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 75 "res_lexer.l"
+#line 76 "res_lexer.l"
 {return ELIF;}
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 76 "res_lexer.l"
+#line 77 "res_lexer.l"
 {return DEFINED;}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 77 "res_lexer.l"
+#line 78 "res_lexer.l"
 {return POUND;}
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 78 "res_lexer.l"
+#line 79 "res_lexer.l"
 {return POUNDPOUND;}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 79 "res_lexer.l"
+#line 80 "res_lexer.l"
 {return PRAGMA;}
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 80 "res_lexer.l"
+#line 81 "res_lexer.l"
 {return ERROR;}
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 81 "res_lexer.l"
+#line 82 "res_lexer.l"
 {return BACKSLASHCONT;}
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 82 "res_lexer.l"
+#line 83 "res_lexer.l"
 {return LT;}
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 83 "res_lexer.l"
+#line 84 "res_lexer.l"
 {return GT;}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 84 "res_lexer.l"
+#line 85 "res_lexer.l"
 {return OP;}
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 85 "res_lexer.l"
+#line 86 "res_lexer.l"
 {return CP;}
 	YY_BREAK
 /* ??? Should _ be allowed in instances and classes? */
 /* Resource instance. */
 case 28:
 YY_RULE_SETUP
-#line 90 "res_lexer.l"
+#line 91 "res_lexer.l"
 {
                      yylval.string = (char *) malloc(strlen(yytext) + 1);
-		     _cw_checkptr(yylval.string);
+		     _cw_check_ptr(yylval.string);
                      strcpy(yylval.string, yytext);
 		     return RES_INST;
                    }
@@ -1934,10 +1935,10 @@ YY_RULE_SETUP
 /* Resource class. */
 case 29:
 YY_RULE_SETUP
-#line 98 "res_lexer.l"
+#line 99 "res_lexer.l"
 {
                      yylval.string = (char *) malloc(strlen(yytext) + 1);
-		     _cw_checkptr(yylval.string);
+		     _cw_check_ptr(yylval.string);
                      strcpy(yylval.string, yytext);
 		     return RES_CLASS;
                    }
@@ -1945,24 +1946,24 @@ YY_RULE_SETUP
 /* filename */
 case 30:
 YY_RULE_SETUP
-#line 106 "res_lexer.l"
+#line 107 "res_lexer.l"
 {} /* ??? Need to look this up. */
 	YY_BREAK
 /* ??? Does this cause a possible confict with the resource specifiers? */
 /* Catch-all */
 case 31:
 YY_RULE_SETUP
-#line 110 "res_lexer.l"
+#line 111 "res_lexer.l"
 {ECHO; leprintf(__FILE__, __LINE__, NULL,
 		  "Possible error: catch-all hit in flex grammar.\n");
   }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 114 "res_lexer.l"
+#line 115 "res_lexer.l"
 ECHO;
 	YY_BREAK
-#line 1966 "res_lexer.yy.c"
+#line 1967 "res_lexer.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2842,5 +2843,5 @@ int main()
 	return 0;
 	}
 #endif
-#line 114 "res_lexer.l"
+#line 115 "res_lexer.l"
 
