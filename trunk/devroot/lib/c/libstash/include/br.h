@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 190 $
- * $Date: 1998-09-01 18:14:15 -0700 (Tue, 01 Sep 1998) $
+ * $Revision: 196 $
+ * $Date: 1998-09-05 18:26:34 -0700 (Sat, 05 Sep 1998) $
  *
  * <<< Description >>>
  *
@@ -28,7 +28,7 @@ struct cw_br_s
   cw_bool_t is_malloced;
   cw_rwl_t rw_lock;
   cw_bool_t is_open;
-  cw_oh_t vaddr_hash;
+  cw_brmap_t brmap_o;
   cw_res_t res;
   char * res_file_a;
   char * res_file_b;
