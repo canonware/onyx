@@ -54,7 +54,14 @@ SRCS = [SRCS] [STIL_SRCS];
  */
 {
   local stests = b64scan.st.in copy_a.st.in eval.st.in gc_roll.st.in hello.st.in
-                 integer.st.in search.st.in;
+                 integer.st.in search.st.in syntaxerror_a.st.in
+                 syntaxerror_b.st.in syntaxerror_c.st.in syntaxerror_d.st.in
+                 syntaxerror_e.st.in syntaxerror_f.st.in syntaxerror_g.st.in
+                 syntaxerror_h.st.in syntaxerror_i.st.in syntaxerror_j.st.in
+                 syntaxerror_k.st.in syntaxerror_l.st.in syntaxerror_m.st.in
+                 syntaxerror_n.st.in syntaxerror_o.st.in syntaxerror_p.st.in
+                 syntaxerror_q.st.in syntaxerror_r.st.in syntaxerror_s.st.in
+                 syntaxerror_t.st.in;
   stests = [fromto % [srcdir]/bin/stil/test/% [stests]];
 
   STESTS = [STESTS] [stests];

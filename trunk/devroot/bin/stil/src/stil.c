@@ -138,7 +138,7 @@ end
 /*  		el_set(el, EL_SIGNAL, 1); */
 
 		stil_new(&stil, argc, argv, envp, cl_read, NULL, NULL, (void
-		    *)&arg);
+		    *)&arg, NULL);
 		stilt = stil_stilt_get(&stil);
 		stilts_new(&stilts);
 
@@ -220,7 +220,7 @@ end
 		 * elements of argv, and wrap stdin.
 		 */
 		stil_new(&stil, argc - optind, &argv[optind], envp, NULL, NULL,
-		    NULL, NULL);
+		    NULL, NULL, NULL);
 		stilt = stil_stilt_get(&stil);
 		stilts_new(&stilts);
 

@@ -1,0 +1,4 @@
+Error /syntaxerror in -file-
+ostack: [(<~YQ==~x) -file-]
+estack: [-file-]
+dstack: [-dict- -dict- -dict- -dict-]
