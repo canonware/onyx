@@ -23,7 +23,7 @@
 	: Use the list_item methods inside of list instead of mucking with
 	list_item internals.
 
-	* test/c_list_a.c: Added unit tests for the list_item and list
+	* test/c_list_a.c: Add unit tests for the list_item and list
 	public methods.
 
 	* src/list.c (list_item_set): Remove pointer check for a_data.
@@ -77,12 +77,12 @@
 
 1998-11-22  Jason Evans  <jasone@canonware.com>
 
-	* src/buf.c (bufel_set_data_ptr): Added so that a bufel can be
+	* src/buf.c (bufel_set_data_ptr): Add so that a bufel can be
 	handed a buffer and avoid copying.
-	(bufel_get_valid_data_size): Added so that it doesn't require two
+	(bufel_get_valid_data_size): Add so that it doesn't require two
 	funtion calls to determine how much valid data there is.
 
-	* test/c19981014a.c: Got rid of the parts of the test that could
+	* test/c19981014a.c: Get rid of the parts of the test that could
 	potentially cause incorrect failures on big endian machines.
 
 	* src/buf.c (bufel_[gs]et_uint8): Endianness shouldn't matter for
@@ -90,5 +90,5 @@
 
 	* Makefile.in (clean): obj/*/*.p* never exists, so don't delete it.
 
-	* src/lex.c: Clarified the documentation for the '|' character in
-	regular expressions and fixed a typo.
+	* src/lex.c: Clarify the documentation for the '|' character in
+	regular expressions and fix a typo.

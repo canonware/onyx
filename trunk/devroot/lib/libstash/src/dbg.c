@@ -8,12 +8,6 @@
  *
  * Version: <Version>
  *
- * <<< Description >>>
- *
- * Dynamic debug spew class.  The idea is to be able to turn various types
- * of debug spew on and off on the fly, without recompilation, without even
- * restarting the program.
- *
  ****************************************************************************/
 
 #ifdef _CW_REENTRANT
@@ -22,12 +16,6 @@
 #  include "libstash/libstash.h"
 #endif
 
-/****************************************************************************
- * <<< Description >>>
- *
- * dbg constructor.
- *
- ****************************************************************************/
 cw_dbg_t *
 dbg_new()
 {
@@ -44,12 +32,6 @@ dbg_new()
   return retval;
 }
 
-/****************************************************************************
- * <<< Description >>>
- *
- * dbg destructor.
- *
- ****************************************************************************/
 void
 dbg_delete(cw_dbg_t * a_dbg)
 {
@@ -59,12 +41,6 @@ dbg_delete(cw_dbg_t * a_dbg)
   _cw_free(a_dbg);
 }
 
-/****************************************************************************
- * <<< Description >>>
- *
- * Register a debug flag string (turn it on).
- *
- ****************************************************************************/
 void
 dbg_register(cw_dbg_t * a_dbg, char * a_flag)
 {
@@ -76,12 +52,6 @@ dbg_register(cw_dbg_t * a_dbg, char * a_flag)
   oh_item_insert(&a_dbg->flag_hash, (void *) a_flag, NULL);
 }
 
-/****************************************************************************
- * <<< Description >>>
- *
- * Unregister a flag (turn it off) if it is registered.
- *
- ****************************************************************************/
 void
 dbg_unregister(cw_dbg_t * a_dbg, char * a_flag)
 {
@@ -95,12 +65,6 @@ dbg_unregister(cw_dbg_t * a_dbg, char * a_flag)
   oh_item_delete(&a_dbg->flag_hash, a_flag, (void **) junk1, (void **) junk2);
 }
 
-/****************************************************************************
- * <<< Description >>>
- *
- * Return TRUE if a_flag is registered.
- *
- ****************************************************************************/
 cw_bool_t
 dbg_is_registered(cw_dbg_t * a_dbg, char * a_flag)
 {

@@ -26,10 +26,20 @@ struct cw_list_item_s
 #define list_item_p_get_next(a) (a)->next
 #define list_item_p_set_next(a, b) (a)->next = (b)
 
+/****************************************************************************
+ *
+ * Pop an item of the head of the list, without locking.
+ *
+ ****************************************************************************/
 #define list_p_hpop _CW_NS_STASH(list_p_hpop)
 void *
 list_p_hpop(cw_list_t * a_list);
 
+/****************************************************************************
+ *
+ * Pop an item off the tail of the list, without locking.
+ *
+ ****************************************************************************/
 #define list_p_tpop _CW_NS_STASH(list_p_tpop)
 void *
 list_p_tpop(cw_list_t * a_list);

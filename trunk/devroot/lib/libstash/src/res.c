@@ -8,47 +8,6 @@
  *
  * Version: <Version>
  *
- * <<< Description >>>
- *
- * Very simple resources class.  A resource looks like:
- *
- * <resource> ::= <^> <whitespaces> <name> <whitespaces> <linebreaks> <colon>
- *                <whitespaces> <linebreaks> <value> <comment>
- *              | <^> <whitespaces> <comment>
- * <name> ::= { <caps> | <lower> | <numbers> | <under> | <period> }+
- * <value> ::= { <caps> | <lower> | <numbers> | <under> | <period>
- *               | <backslash> <hash> | <whitespace> | <colon>
- *               | <backslash> <backslash> | <backslash> <n>
- *               | <legal_in_name> | <linebreak> }+
- *           | <e>
- * <comment> ::= <hash> { <caps> | <lower> | <numbers> | <under> | <period>
- *                        | <hash> | <whitespace> | <colon>
- *                        | <backslash> | <legal_in_name> }+
- *             | <hash> <e>
- * <linebreak> ::= <backslash> <whitespaces> <newline>
- * <linebreaks> ::= <linebreak> <linebreaks>
- *                | <e>
- * <^> ::= Bound to beginning of line.
- * <e> ::= Epsilon.
- * <n> ::= [n]
- * <caps> ::= [A-Z]
- * <lower> ::= [a-z]
- * <numbers> ::= [0-9]
- * <under> ::= [_]
- * <period> ::= [.]
- * <hash> ::= [#]
- * <whitespace> ::= [ \t] | <whitespace> [ \t]
- * <whitespaces> ::= <whitespace> <whitespaces>
- *                 | <e>
- * <colon> ::= [:]
- * <backslash> ::= [\\]
- * <legal_in_name> ::= [!"$%&'()*+,-/;<=>?@[]^`{|}~]
- * <newline> ::= [\n]
- * <null> ::= [\0]
- *
- * \ is a special character within <name>.  \ protects [#\\\n] and [ ]+[\n],
- * but a \ followed by anything else is an error.
- *
  *****************************************************************************/
 
 #define _STASH_USE_RES
@@ -143,12 +102,6 @@ res_delete(cw_res_t * a_res)
   }
 }
 
-/****************************************************************************
- * <<< Description >>>
- *
- * Clears out all resources.
- *
- ****************************************************************************/
 void
 res_clear(cw_res_t * a_res)
 {
@@ -171,12 +124,6 @@ res_clear(cw_res_t * a_res)
 #endif
 }
 
-/****************************************************************************
- * <<< Description >>>
- *
- *
- *
- ****************************************************************************/
 cw_bool_t
 res_is_equal(cw_res_t * a_res, cw_res_t * a_other)
 {
@@ -227,16 +174,6 @@ res_is_equal(cw_res_t * a_res, cw_res_t * a_other)
   return retval;
 }
 
-/****************************************************************************
- * <<< Return Value >>>
- *
- * TRUE == error 
- *
- * <<< Description >>>
- *
- * Merges the resources contained in a_filename into the resource database.
- *
- ****************************************************************************/
 cw_bool_t
 res_merge_file(cw_res_t * a_res, char * a_filename)
 {
@@ -276,20 +213,6 @@ res_merge_file(cw_res_t * a_res, char * a_filename)
   return retval;
 }
 
-/****************************************************************************
- * <<< Arguments >>>
- *
- * ... : NULL-terminated list of resource name/value pair strings.
- *
- * <<< Return Value >>>
- *
- * TRUE == error
- *
- * <<< Description >>>
- *
- * Merges the resources into the resource database.
- *
- ****************************************************************************/
 cw_bool_t
 res_merge_list(cw_res_t * a_res, ...)
 {
@@ -321,18 +244,6 @@ res_merge_list(cw_res_t * a_res, ...)
   return retval;
 }
 
-/****************************************************************************
- * <<< Return Value >>>
- *
- * NULL == error
- *
- * <<< Description >>>
- *
- * Returns the value associated with a_res_name if it exists.  Note that it
- * returns a pointer to an internal buffer, so if any modifications need
- * to be made to the string, make a copy and modify it instead.
- *
- ****************************************************************************/
 char *
 res_get_res_val(cw_res_t * a_res, char * a_res_name)
 {
@@ -358,14 +269,6 @@ res_get_res_val(cw_res_t * a_res, char * a_res_name)
   return retval;
 }
 
-/****************************************************************************
- * <<< Description >>>
- *
- * Find a resource name/value pair, remove it from the resource database,
- * and set *a_res_name and *a_res_val to point it.  If the resource isn't
- * found, return TRUE.
- *
- ****************************************************************************/
 cw_bool_t
 res_extract_res(cw_res_t * a_res, char * a_res_key,
 		char ** a_res_name, char ** a_res_val)
@@ -386,13 +289,6 @@ res_extract_res(cw_res_t * a_res, char * a_res_key,
   return retval;
 }
 
-/****************************************************************************
- * <<< Description >>>
- *
- * Dump the resource database.  If a_filename is non-NULL, attempt to open
- * the specified file and write to it.  Otherwise, use g_log.
- *
- ****************************************************************************/
 cw_bool_t
 res_dump(cw_res_t * a_res, char * a_filename)
 {
@@ -475,17 +371,6 @@ res_dump(cw_res_t * a_res, char * a_filename)
   return retval;
 }
 
-/****************************************************************************
- * <<< Return Value >>>
- *
- * TRUE == error
- *
- * <<< Description >>>
- *
- * Private method.  Parses the resources contained either in a string or in 
- * a file and inserts the results into the hash table.
- *
- ****************************************************************************/
 cw_bool_t
 res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 {
@@ -1114,12 +999,6 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
   return retval;
 }
 
-/****************************************************************************
- * <<< Description >>>
- *
- * Returns the "type" of a_char.
- *
- ****************************************************************************/
 cw_uint32_t
 res_p_char_type(char a_char)
 {
@@ -1232,14 +1111,6 @@ res_p_char_type(char a_char)
   return retval;
 }
 
-/****************************************************************************
- * <<< Description >>>
- *
- * Merges a resource into the hash table, taking care to clean up any
- * entry it replaces.  This is private, because we don't want to trust any
- * methods external to res to give us valid resources.
- *
- ****************************************************************************/
 void
 res_p_merge_res(cw_res_t * a_res, char * a_name, char * a_val)
 {

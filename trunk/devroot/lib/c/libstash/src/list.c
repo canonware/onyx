@@ -8,10 +8,6 @@
  *
  * Version: <Version>
  *
- * <<< Description >>>
- *
- * Doubly linked list implementation.
- *
  ****************************************************************************/
 
 #define _STASH_USE_LIST
@@ -23,11 +19,6 @@
 
 #include "libstash/list_priv.h"
 
-/****************************************************************************
- *
- * list_item constructor.
- *
- ****************************************************************************/
 cw_list_item_t *
 list_item_new()
 {
@@ -38,11 +29,6 @@ list_item_new()
   return retval;
 }
 
-/****************************************************************************
- *
- * list_item_destructor.
- *
- ****************************************************************************/
 void
 list_item_delete(cw_list_item_t * a_list_item)
 {
@@ -51,11 +37,6 @@ list_item_delete(cw_list_item_t * a_list_item)
   _cw_free(a_list_item);
 }
 
-/****************************************************************************
- *
- * Get the value of the data pointer.
- *
- ****************************************************************************/
 void *
 list_item_get(cw_list_item_t * a_list_item)
 {
@@ -64,11 +45,6 @@ list_item_get(cw_list_item_t * a_list_item)
   return a_list_item->item;
 }
 
-/****************************************************************************
- *
- * Set the value of the data pointer.
- *
- ****************************************************************************/
 void
 list_item_set(cw_list_item_t * a_list_item, void * a_data)
 {
@@ -77,11 +53,6 @@ list_item_set(cw_list_item_t * a_list_item, void * a_data)
   a_list_item->item = a_data;
 }
 
-/****************************************************************************
- *
- * list constructor.
- *
- ****************************************************************************/
 cw_list_t *
 #ifdef _CW_REENTRANT
 list_new(cw_list_t * a_list, cw_bool_t a_is_thread_safe)
@@ -123,11 +94,6 @@ list_new(cw_list_t * a_list, cw_bool_t a_is_thread_safe)
   return retval;
 }
      
-/****************************************************************************
- *
- * list destructor.
- *
- ****************************************************************************/
 void
 list_delete(cw_list_t * a_list)
 {
@@ -164,11 +130,6 @@ list_delete(cw_list_t * a_list)
   }
 }
 
-/****************************************************************************
- *
- * Returns the number of items in the list.
- *
- ****************************************************************************/
 cw_uint64_t
 list_count(cw_list_t * a_list)
 {
@@ -181,11 +142,6 @@ list_count(cw_list_t * a_list)
   return retval;
 }
 
-/****************************************************************************
- *
- * Pushes an item onto the head of the list.
- *
- ****************************************************************************/
 cw_list_item_t *
 list_hpush(cw_list_t * a_list, void * a_data)
 {
@@ -242,11 +198,6 @@ list_hpush(cw_list_t * a_list, void * a_data)
   return retval;
 }
 
-/****************************************************************************
- *
- * Pops an item off the head of the list.
- *
- ****************************************************************************/
 void *
 list_hpop(cw_list_t * a_list)
 {
@@ -271,11 +222,6 @@ list_hpop(cw_list_t * a_list)
   return retval;
 }
 
-/****************************************************************************
- *
- * Returns the item at the head of the list, without removing it.
- *
- ****************************************************************************/
 void *
 list_hpeek(cw_list_t * a_list)
 {
@@ -308,11 +254,6 @@ list_hpeek(cw_list_t * a_list)
   return retval;
 }
 
-/****************************************************************************
- *
- * Pushes an item onto the tail of the list.
- *
- ****************************************************************************/
 cw_list_item_t *
 list_tpush(cw_list_t * a_list, void * a_data)
 {
@@ -369,11 +310,6 @@ list_tpush(cw_list_t * a_list, void * a_data)
   return retval;
 }
 
-/****************************************************************************
- *
- * Pops an item off the tail of the list.
- *
- ****************************************************************************/
 void *
 list_tpop(cw_list_t * a_list)
 {
@@ -398,11 +334,6 @@ list_tpop(cw_list_t * a_list)
   return retval;
 }
 
-/****************************************************************************
- *
- * Returns the item at the tail of the list without removing it.
- *
- ****************************************************************************/
 void *
 list_tpeek(cw_list_t * a_list)
 {
@@ -435,11 +366,6 @@ list_tpeek(cw_list_t * a_list)
   return retval;
 }
 
-/****************************************************************************
- *
- * Inserts an item before the list node pointed to by a_in_list.
- *
- ****************************************************************************/
 cw_list_item_t *
 list_insert_before(cw_list_t * a_list,
 		   cw_list_item_t * a_in_list,
@@ -498,11 +424,6 @@ list_insert_before(cw_list_t * a_list,
   return retval;
 }
 
-/****************************************************************************
- *
- * Inserts an item after the list node pointed to by a_in_list.
- *
- ****************************************************************************/
 cw_list_item_t *
 list_insert_after(cw_list_t * a_list,
 		  cw_list_item_t * a_in_list,
@@ -561,12 +482,6 @@ list_insert_after(cw_list_t * a_list,
   return retval;
 }
 
-/****************************************************************************
- *
- * Given a pointer to an item, removes the item from the list and returns
- * the data pointer.
- *
- ****************************************************************************/
 void *
 list_remove(cw_list_t * a_list, cw_list_item_t * a_to_remove)
 {
@@ -618,11 +533,6 @@ list_remove(cw_list_t * a_list, cw_list_item_t * a_to_remove)
   return retval;
 }
 
-/****************************************************************************
- *
- * Free the space used by the free item list.
- *
- ****************************************************************************/
 void
 list_purge_spares(cw_list_t * a_list)
 {
@@ -651,12 +561,6 @@ list_purge_spares(cw_list_t * a_list)
 #endif
 }
 
-/****************************************************************************
- *
- * Print debugging spew.  Note that the 64 bit values don't print correctly 
- * when using long long for 64 bit variables.
- *
- ****************************************************************************/
 void
 list_dump(cw_list_t * a_list)
 {
@@ -706,11 +610,6 @@ list_dump(cw_list_t * a_list)
 #endif
 }
 
-/****************************************************************************
- *
- * Pop an item of the head of the list, without locking.
- *
- ****************************************************************************/
 void *
 list_p_hpop(cw_list_t * a_list)
 {
@@ -760,11 +659,6 @@ list_p_hpop(cw_list_t * a_list)
   return retval;
 }
 
-/****************************************************************************
- *
- * Pop an item off the tail of the list, without locking.
- *
- ****************************************************************************/
 void *
 list_p_tpop(cw_list_t * a_list)
 {

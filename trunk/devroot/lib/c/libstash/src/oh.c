@@ -8,39 +8,6 @@
  *
  * Version: <Version>
  *
- * <<< Description >>>
- *
- * Dynamic open hashing class.  This is a somewhat sophisticated
- * implementation of hashing.  All internal consistency, growth, shrinkage,
- * etc. issues are taken care of internally.  The hash functions to use, as
- * well as just about any other useful parameter, can be modified on the
- * fly with no worries of inconsistency.  This class is thread safe, thanks
- * to read/write locks.  That is, multiple readers can be in the code
- * simultaneously, but only one locker (with no readers) can be in the code
- * at any given time.
- *
- * This implementation uses a secondary hash function instead of bucket
- * chaining.  As a result, the table needs to be kept a little emptier than
- * some implementations in order to avoid excessive secondary hashing.
- * This seems like a good tradeoff though, since it avoids list management,
- * pointer chasing, and calls to malloc().
- *
- * This code never rehashes during normal operation, because it is careful
- * to shuffle slot contents (items) whenever items are deleted.  This code
- * also keeps an internal list of all items to allow fast table rebuilding
- * when growing, shrinking, and rehashing (done only when hashing functions
- * are changed).  This also makes it possible to use realloc() instead of
- * malloc(), since the table can be bzero()ed, then rebuilt from the list.
- *
- * A useful side effect of the internal list is that calling
- * oh_item_delete_iterate() is guaranteed to remove the oldest item in the 
- * hash table, which means that the hash code has an integrated FIFO
- * queue.
- *
- * A list of spare item containers is kept around to avoid excessive calls
- * to malloc during insertion/deletion.  All internal lists and buffers are
- * kept tidy and at reasonable sizes.
- *
  ****************************************************************************/
 
 #define _STASH_USE_OH
@@ -52,11 +19,6 @@
 
 #include "libstash/oh_priv.h"
 
-/****************************************************************************
- *
- * oh constructor.
- *
- ****************************************************************************/
 cw_oh_t *
 #ifdef _CW_REENTRANT
 oh_new(cw_oh_t * a_oh, cw_bool_t a_is_thread_safe)
@@ -136,11 +98,6 @@ oh_new(cw_oh_t * a_oh, cw_bool_t a_is_thread_safe)
   return retval;
 }
 
-/****************************************************************************
- *
- * oh destructor.
- *
- ****************************************************************************/
 void
 oh_delete(cw_oh_t * a_oh)
 {
@@ -186,11 +143,6 @@ oh_delete(cw_oh_t * a_oh)
   }
 }
 
-/****************************************************************************
- *
- * Returns the internal table size.
- *
- ****************************************************************************/
 cw_uint64_t
 oh_get_size(cw_oh_t * a_oh)
 {
@@ -216,11 +168,6 @@ oh_get_size(cw_oh_t * a_oh)
   return retval;
 }
 
-/****************************************************************************
- *
- * Returns the number of items in the hash table.
- *
- ****************************************************************************/
 cw_uint64_t
 oh_get_num_items(cw_oh_t * a_oh)
 {
@@ -245,12 +192,6 @@ oh_get_num_items(cw_oh_t * a_oh)
   return retval;
 }
 
-/****************************************************************************
- *
- * Returns the base table size on which the expansion and contraction parameters
- * depend.
- *
- ****************************************************************************/
 cw_uint64_t
 oh_get_base_size(cw_oh_t * a_oh)
 {
@@ -275,11 +216,6 @@ oh_get_base_size(cw_oh_t * a_oh)
   return retval;
 }
 
-/****************************************************************************
- *
- * Returns the value of the base secondary hashing function.
- *
- ****************************************************************************/
 cw_uint32_t
 oh_get_base_h2(cw_oh_t * a_oh)
 {
@@ -304,12 +240,6 @@ oh_get_base_h2(cw_oh_t * a_oh)
   return retval;
 }
 
-/****************************************************************************
- *
- * Returns the value of the base shrink point, which is used to determine when
- * to shrink the internal table.
- *
- ****************************************************************************/
 cw_uint32_t
 oh_get_base_shrink_point(cw_oh_t * a_oh)
 {
@@ -334,12 +264,6 @@ oh_get_base_shrink_point(cw_oh_t * a_oh)
   return retval;
 }
 
-/****************************************************************************
- *
- * Returns the value of the base grow point, which is used to determine when to
- * grow the internal table.
- *
- ****************************************************************************/
 cw_uint32_t
 oh_get_base_grow_point(cw_oh_t * a_oh)
 {
@@ -364,12 +288,6 @@ oh_get_base_grow_point(cw_oh_t * a_oh)
   return retval;
 }
 
-/****************************************************************************
- *
- * Sets the primary hashing function.  Calling this function causes an internal
- * rehash.
- *
- ****************************************************************************/
 oh_h1_t *
 oh_set_h1(cw_oh_t * a_oh,
 	  oh_h1_t * a_new_h1)
@@ -402,11 +320,6 @@ oh_set_h1(cw_oh_t * a_oh,
   return retval;
 }
 
-/****************************************************************************
- *
- * Sets the key comparison function.
- *
- ****************************************************************************/
 oh_key_comp_t *
 oh_set_key_compare(cw_oh_t * a_oh,
 		   oh_key_comp_t * a_new_key_compare)
@@ -439,11 +352,6 @@ oh_set_key_compare(cw_oh_t * a_oh,
   return retval;
 }
 
-/****************************************************************************
- *
- * Sets the base secondary hashing function.
- *
- ****************************************************************************/
 cw_bool_t
 oh_set_base_h2(cw_oh_t * a_oh,
 	       cw_uint32_t a_h2)
@@ -484,11 +392,6 @@ oh_set_base_h2(cw_oh_t * a_oh,
   return retval;
 }
 
-/****************************************************************************
- *
- * Sets the base shrink point.
- *
- ****************************************************************************/
 cw_bool_t
 oh_set_base_shrink_point(cw_oh_t * a_oh,
 			 cw_uint32_t a_shrink_point)
@@ -528,11 +431,6 @@ oh_set_base_shrink_point(cw_oh_t * a_oh,
   return retval;
 }
 
-/****************************************************************************
- *
- * Sets the base grow point.
- *
- ****************************************************************************/
 cw_bool_t
 oh_set_base_grow_point(cw_oh_t * a_oh,
 		       cw_uint32_t a_grow_point)
@@ -572,11 +470,6 @@ oh_set_base_grow_point(cw_oh_t * a_oh,
   return retval;
 }
 
-/****************************************************************************
- *
- * Insert an item, unless an item with the same key already exists.
- *
- ****************************************************************************/
 cw_bool_t
 oh_item_insert(cw_oh_t * a_oh, void * a_key,
 	       void * a_data)
@@ -633,12 +526,6 @@ oh_item_insert(cw_oh_t * a_oh, void * a_key,
   return retval;
 }
 
-/****************************************************************************
- *
- * Delete an item with key a_search_key.  If successful, set *a_key and
- * *a_data to point to the key and data, respectively.
- *
- ****************************************************************************/
 cw_bool_t
 oh_item_delete(cw_oh_t * a_oh,
 	       void * a_search_key,
@@ -694,12 +581,6 @@ oh_item_delete(cw_oh_t * a_oh,
   return retval;
 }
 
-/****************************************************************************
- *
- * Search for an item with key a_key.  If found, set *a_data to point to
- * the associated data.
- *
- ****************************************************************************/
 cw_bool_t
 oh_item_search(cw_oh_t * a_oh,
 	       void * a_key,
@@ -739,12 +620,6 @@ oh_item_search(cw_oh_t * a_oh,
   return retval;
 }
 
-/****************************************************************************
- *
- * Searches linearly through the hash table and deletes the first valid
- * item found.
- *
- ****************************************************************************/
 cw_bool_t
 oh_item_get_iterate(cw_oh_t * a_oh, void ** a_key, void ** a_data)
 {
@@ -786,12 +661,6 @@ oh_item_get_iterate(cw_oh_t * a_oh, void ** a_key, void ** a_data)
   return retval;
 }
 
-/****************************************************************************
- *
- * Searches linearly through the hash table and deletes the first valid
- * item found.
- *
- ****************************************************************************/
 cw_bool_t
 oh_item_delete_iterate(cw_oh_t * a_oh, void ** a_key, void ** a_data)
 {
@@ -837,11 +706,6 @@ oh_item_delete_iterate(cw_oh_t * a_oh, void ** a_key, void ** a_data)
   return retval;
 }
 
-/****************************************************************************
- *
- * Print the internal state of the hash table.
- *
- ****************************************************************************/
 void
 oh_dump(cw_oh_t * a_oh, cw_bool_t a_all)
 {
@@ -915,12 +779,126 @@ oh_dump(cw_oh_t * a_oh, cw_bool_t a_all)
 #endif
 }
 
-/****************************************************************************
- *
- * Default primary hash function.  This is a string hash, so if the keys
- * being used for an oh instance aren't strings, don't use this.
- *
- ****************************************************************************/
+cw_uint64_t
+oh_get_num_collisions(cw_oh_t * a_oh)
+{
+  cw_uint64_t retval;
+  
+  _cw_check_ptr(a_oh);
+#ifdef _CW_REENTRANT
+  if (a_oh->is_thread_safe)
+  {
+    rwl_rlock(&a_oh->rw_lock);
+  }
+#endif
+
+  retval = a_oh->num_collisions;
+
+#ifdef _CW_REENTRANT
+  if (a_oh->is_thread_safe)
+  {
+    rwl_runlock(&a_oh->rw_lock);
+  }
+#endif
+  return retval;
+}
+
+cw_uint64_t
+oh_get_num_inserts(cw_oh_t * a_oh)
+{
+  cw_uint64_t retval;
+  
+  _cw_check_ptr(a_oh);
+#ifdef _CW_REENTRANT
+  if (a_oh->is_thread_safe)
+  {
+    rwl_rlock(&a_oh->rw_lock);
+  }
+#endif
+
+  retval = a_oh->num_inserts;
+
+#ifdef _CW_REENTRANT
+  if (a_oh->is_thread_safe)
+  {
+    rwl_runlock(&a_oh->rw_lock);
+  }
+#endif
+  return retval;
+}
+
+cw_uint64_t
+oh_get_num_deletes(cw_oh_t * a_oh)
+{
+  cw_uint64_t retval;
+  
+  _cw_check_ptr(a_oh);
+#ifdef _CW_REENTRANT
+  if (a_oh->is_thread_safe)
+  {
+    rwl_rlock(&a_oh->rw_lock);
+  }
+#endif
+
+  retval = a_oh->num_deletes;
+
+#ifdef _CW_REENTRANT
+  if (a_oh->is_thread_safe)
+  {
+    rwl_runlock(&a_oh->rw_lock);
+  }
+#endif
+  return retval;
+}
+
+cw_uint64_t
+oh_get_num_grows(cw_oh_t * a_oh)
+{
+  cw_uint64_t retval;
+  
+  _cw_check_ptr(a_oh);
+#ifdef _CW_REENTRANT
+  if (a_oh->is_thread_safe)
+  {
+    rwl_rlock(&a_oh->rw_lock);
+  }
+#endif
+
+  retval = a_oh->num_grows;
+
+#ifdef _CW_REENTRANT
+  if (a_oh->is_thread_safe)
+  {
+    rwl_runlock(&a_oh->rw_lock);
+  }
+#endif
+  return retval;
+}
+
+cw_uint64_t
+oh_get_num_shrinks(cw_oh_t * a_oh)
+{
+  cw_uint64_t retval;
+  
+  _cw_check_ptr(a_oh);
+#ifdef _CW_REENTRANT
+  if (a_oh->is_thread_safe)
+  {
+    rwl_rlock(&a_oh->rw_lock);
+  }
+#endif
+
+  retval = a_oh->num_shrinks;
+
+#ifdef _CW_REENTRANT
+  if (a_oh->is_thread_safe)
+  {
+    rwl_runlock(&a_oh->rw_lock);
+  }
+#endif
+  return retval;
+}
+
 cw_uint64_t
 oh_p_h1(cw_oh_t * a_oh, void * a_key)
 {
@@ -950,23 +928,12 @@ oh_p_h1(cw_oh_t * a_oh, void * a_key)
 }
 #endif
 
-/****************************************************************************
- *
- * Compares two keys for equality.  A return value of TRUE means the
- * arguments are equal.
- *
- ****************************************************************************/
 cw_bool_t
 oh_p_key_compare(void * a_k1, void * a_k2)
 {
   return strcmp((char *) a_k1, (char *) a_k2) ? FALSE : TRUE;
 }
 
-/****************************************************************************
- *
- * If the table is too full, double in size and insert into the new table.
- *
- ****************************************************************************/
 void
 oh_p_grow(cw_oh_t * a_oh)
 {
@@ -1008,12 +975,6 @@ oh_p_grow(cw_oh_t * a_oh)
   }
 }
 
-/****************************************************************************
- *
- * If the table is too empty, shrink it as small as possible, without
- * making it so small that the table would need to immediately grow again.
- *
- ****************************************************************************/
 void
 oh_p_shrink(cw_oh_t * a_oh)
 {
@@ -1087,11 +1048,6 @@ oh_p_shrink(cw_oh_t * a_oh)
   }
 }
 
-/****************************************************************************
- *
- * Find the slot that we should insert into, given a_item, and insert.
- *
- ****************************************************************************/
 void
 oh_p_item_insert(cw_oh_t * a_oh,
 		 cw_oh_item_t * a_item)
@@ -1130,12 +1086,6 @@ oh_p_item_insert(cw_oh_t * a_oh,
   }
 }
 
-/****************************************************************************
- *
- * Uses the primary and secondary hash function to search for an item with
- * key == a_key.
- *
- ****************************************************************************/
 cw_bool_t
 oh_p_item_search(cw_oh_t * a_oh,
 		 void * a_key,
@@ -1171,11 +1121,6 @@ oh_p_item_search(cw_oh_t * a_oh,
   return retval;
 }
 
-/****************************************************************************
- *
- * Rehash.
- *
- ****************************************************************************/
 void
 oh_p_rehash(cw_oh_t * a_oh)
 {
@@ -1193,14 +1138,6 @@ oh_p_rehash(cw_oh_t * a_oh)
   }
 }
 
-/****************************************************************************
- *
- *  Figure out whether there are any items that bounced past this slot
- *  using the secondary hash.  If so, shuffle things backward to fill this
- *  slot in.  We know we've looked far enough forward when we hit an empty
- *  slot.
- *
- ****************************************************************************/
 void
 oh_p_slot_shuffle(cw_oh_t * a_oh, cw_uint64_t a_slot)
 {
@@ -1233,149 +1170,4 @@ oh_p_slot_shuffle(cw_oh_t * a_oh, cw_uint64_t a_slot)
       curr_distance = 0;
     }
   }
-}
-
-/****************************************************************************
- *
- * Returns the number of collisions that have occurred.
- *
- ****************************************************************************/
-cw_uint64_t
-oh_get_num_collisions(cw_oh_t * a_oh)
-{
-  cw_uint64_t retval;
-  
-  _cw_check_ptr(a_oh);
-#ifdef _CW_REENTRANT
-  if (a_oh->is_thread_safe)
-  {
-    rwl_rlock(&a_oh->rw_lock);
-  }
-#endif
-
-  retval = a_oh->num_collisions;
-
-#ifdef _CW_REENTRANT
-  if (a_oh->is_thread_safe)
-  {
-    rwl_runlock(&a_oh->rw_lock);
-  }
-#endif
-  return retval;
-}
-
-/****************************************************************************
- *
- * Returns the number of inserts that have been done.
- *
- ****************************************************************************/
-cw_uint64_t
-oh_get_num_inserts(cw_oh_t * a_oh)
-{
-  cw_uint64_t retval;
-  
-  _cw_check_ptr(a_oh);
-#ifdef _CW_REENTRANT
-  if (a_oh->is_thread_safe)
-  {
-    rwl_rlock(&a_oh->rw_lock);
-  }
-#endif
-
-  retval = a_oh->num_inserts;
-
-#ifdef _CW_REENTRANT
-  if (a_oh->is_thread_safe)
-  {
-    rwl_runlock(&a_oh->rw_lock);
-  }
-#endif
-  return retval;
-}
-
-/****************************************************************************
- *
- * Returns the number of deletes that have been done.
- *
- ****************************************************************************/
-cw_uint64_t
-oh_get_num_deletes(cw_oh_t * a_oh)
-{
-  cw_uint64_t retval;
-  
-  _cw_check_ptr(a_oh);
-#ifdef _CW_REENTRANT
-  if (a_oh->is_thread_safe)
-  {
-    rwl_rlock(&a_oh->rw_lock);
-  }
-#endif
-
-  retval = a_oh->num_deletes;
-
-#ifdef _CW_REENTRANT
-  if (a_oh->is_thread_safe)
-  {
-    rwl_runlock(&a_oh->rw_lock);
-  }
-#endif
-  return retval;
-}
-
-/****************************************************************************
- *
- * Returns the number of table grows that have happened.
- *
- ****************************************************************************/
-cw_uint64_t
-oh_get_num_grows(cw_oh_t * a_oh)
-{
-  cw_uint64_t retval;
-  
-  _cw_check_ptr(a_oh);
-#ifdef _CW_REENTRANT
-  if (a_oh->is_thread_safe)
-  {
-    rwl_rlock(&a_oh->rw_lock);
-  }
-#endif
-
-  retval = a_oh->num_grows;
-
-#ifdef _CW_REENTRANT
-  if (a_oh->is_thread_safe)
-  {
-    rwl_runlock(&a_oh->rw_lock);
-  }
-#endif
-  return retval;
-}
-
-/****************************************************************************
- *
- * Returns the number of table shrinks that have happened.
- *
- ****************************************************************************/
-cw_uint64_t
-oh_get_num_shrinks(cw_oh_t * a_oh)
-{
-  cw_uint64_t retval;
-  
-  _cw_check_ptr(a_oh);
-#ifdef _CW_REENTRANT
-  if (a_oh->is_thread_safe)
-  {
-    rwl_rlock(&a_oh->rw_lock);
-  }
-#endif
-
-  retval = a_oh->num_shrinks;
-
-#ifdef _CW_REENTRANT
-  if (a_oh->is_thread_safe)
-  {
-    rwl_runlock(&a_oh->rw_lock);
-  }
-#endif
-  return retval;
 }

@@ -25,12 +25,6 @@
 
 #include "libstash/log_priv.h"
 
-/****************************************************************************
- * <<< Description >>>
- *
- * log constructor.
- *
- ****************************************************************************/
 cw_log_t *
 log_new()
 {
@@ -48,12 +42,6 @@ log_new()
   return retval;
 }
 
-/****************************************************************************
- * <<< Description >>>
- *
- * log destructor.
- *
- ****************************************************************************/
 void
 log_delete(cw_log_t * a_log)
 {
@@ -77,13 +65,6 @@ log_delete(cw_log_t * a_log)
   _cw_free(a_log);
 }
 
-/****************************************************************************
- * <<< Description >>>
- *
- * Opens file for logging.  If another file is already being used, it is
- * first closed.
- *
- ****************************************************************************/
 cw_bool_t
 log_set_logfile(cw_log_t * a_log,
 		char * a_logfile,
@@ -139,12 +120,6 @@ log_set_logfile(cw_log_t * a_log,
   return retval;
 }
 
-/****************************************************************************
- * <<< Description >>>
- *
- * Run-of-the-mill printf()-alike.
- *
- ****************************************************************************/
 int
 log_printf(cw_log_t * a_log, char * a_format, ...)
 {
@@ -185,13 +160,6 @@ log_printf(cw_log_t * a_log, char * a_format, ...)
   return retval;
 }
 
-/****************************************************************************
- * <<< Description >>>
- *
- * Optional arguments prepend filename, line number, and function name.
- * Otherwise, this still acts like printf().
- *
- ****************************************************************************/
 int
 log_eprintf(cw_log_t * a_log,
 	    char * a_filename,
@@ -303,12 +271,6 @@ log_nprintf(cw_log_t * a_log,
   return retval;
 }
 
-/****************************************************************************
- * <<< Description >>>
- *
- * printf()-alike that prepends log message foo.
- *
- ****************************************************************************/
 int
 log_lprintf(cw_log_t * a_log, char * a_format, ...)
 {
@@ -369,13 +331,6 @@ log_lprintf(cw_log_t * a_log, char * a_format, ...)
   return retval;
 }
 
-/****************************************************************************
- * <<< Description >>>
- *
- * Prepended log message foo.  'Optional' arguments prepend filename, line
- * number, and function name.
- *
- ****************************************************************************/
 int
 log_leprintf(cw_log_t * a_log,
 	     char * a_filename,
@@ -455,20 +410,6 @@ log_leprintf(cw_log_t * a_log,
   return retval;
 }
 
-/****************************************************************************
- * <<< Arguments >>>
- *
- * a_val : Value to convert to a string.
- * a_base : Number base to convert to.
- * a_buf : A buffer of at least 65 bytes for base 2 conversion, 21 bytes
- *         for base 10 conversion, and 17 bytes for base 16 conversion.
- *
- * <<< Description >>>
- *
- * Converts a_val to a number string in base a_base and puts the result
- * into *a_buf.
- *
- ****************************************************************************/
 char *
 log_print_uint64(cw_uint64_t a_val, cw_uint32_t a_base, char * a_buf)
 {
@@ -566,13 +507,6 @@ log_print_uint64(cw_uint64_t a_val, cw_uint32_t a_base, char * a_buf)
   return retval;
 }
 
-/****************************************************************************
- * <<< Description >>>
- *
- * Does a base 10 addition of the strings a_a and a_b, and puts the result
- * into string a_result.
- *
- ****************************************************************************/
 void
 log_p_uint64_base10_add(char * a_result, char * a_a, char * a_b)
 {

@@ -8,22 +8,6 @@
  *
  * Version: <Version>
  *
- * <<< Description >>>
- * 
- * Implementation of thread locking primitives.
- *
- * thd : Thread.
- *
- * mtx : Mutex.
- *
- * cnd : Condition variable.
- * 
- * sem : Semaphore.  This implementation is a bit different than normal, in 
- * that it is possible to decrement the count to less than zero.  This
- * allows dynamic modification of resource pools locked by semaphores.
- *
- * tsd : Thread-specific data.
- *
  ****************************************************************************/
 
 #include "libstash/libstash_r.h"

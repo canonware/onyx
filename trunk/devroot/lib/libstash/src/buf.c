@@ -8,12 +8,6 @@
  *
  * Version: <Version>
  *
- * <<< Description >>>
- *
- * Simple extensible (mostly FIFO) buffer class.  Although this may be
- * useful for other purposes, buf and bufel are designed to support
- * asynchronous buffering of I/O for the sock (socket) class.
- *
  ****************************************************************************/
 
 #define _STASH_USE_BUF
@@ -26,11 +20,6 @@
 #include <netinet/in.h>
 #include <sys/param.h>
 
-/****************************************************************************
- *
- * buf constructor.
- *
- ****************************************************************************/
 cw_buf_t *
 #ifdef _CW_REENTRANT
 buf_new(cw_buf_t * a_buf, cw_bool_t a_is_threadsafe)
@@ -67,11 +56,6 @@ buf_new(cw_buf_t * a_buf)
   return retval;
 }
 
-/****************************************************************************
- *
- * buf destructor.
- *
- ****************************************************************************/
 void
 buf_delete(cw_buf_t * a_buf)
 {
@@ -91,11 +75,6 @@ buf_delete(cw_buf_t * a_buf)
   list_delete(&a_buf->bufels);
 }
 
-/****************************************************************************
- *
- * Returns the amount of valid data in bytes.
- *
- ****************************************************************************/
 cw_uint32_t
 buf_get_size(cw_buf_t * a_buf)
 {
@@ -103,12 +82,6 @@ buf_get_size(cw_buf_t * a_buf)
   return a_buf->size;
 }
 
-/****************************************************************************
- *
- * Concatenates two bufs.  After this function call, a_other is empty, but
- * it still exists.
- *
- ****************************************************************************/
 void
 buf_prepend_buf(cw_buf_t * a_buf, cw_buf_t * a_other)
 {
@@ -149,12 +122,6 @@ buf_prepend_buf(cw_buf_t * a_buf, cw_buf_t * a_other)
 #endif
 }
 
-/****************************************************************************
- *
- * Concatenates two bufs.  After this function call, a_other is empty, but
- * it still exists.
- *
- ****************************************************************************/
 void
 buf_append_buf(cw_buf_t * a_buf, cw_buf_t * a_other)
 {
@@ -195,11 +162,6 @@ buf_append_buf(cw_buf_t * a_buf, cw_buf_t * a_other)
 #endif
 }
 
-/****************************************************************************
- *
- * Removes the first bufel from a_buf and returns a pointer to it.
- *
- ****************************************************************************/
 cw_bufel_t *
 buf_rm_head_bufel(cw_buf_t * a_buf)
 {
@@ -233,11 +195,6 @@ buf_rm_head_bufel(cw_buf_t * a_buf)
   return retval;
 }
 
-/****************************************************************************
- *
- * Prepends a bufel to a_buf.
- *
- ****************************************************************************/
 void
 buf_prepend_bufel(cw_buf_t * a_buf, cw_bufel_t * a_bufel)
 {
@@ -261,11 +218,6 @@ buf_prepend_bufel(cw_buf_t * a_buf, cw_bufel_t * a_bufel)
 #endif
 }
 
-/****************************************************************************
- *
- * Appends a bufel to a_buf.
- *
- ****************************************************************************/
 void
 buf_append_bufel(cw_buf_t * a_buf, cw_bufel_t * a_bufel)
 {
@@ -289,11 +241,6 @@ buf_append_bufel(cw_buf_t * a_buf, cw_bufel_t * a_bufel)
 #endif
 }
 
-/****************************************************************************
- *
- * bufel constructor.
- *
- ****************************************************************************/
 cw_bufel_t *
 bufel_new(cw_bufel_t * a_bufel)
 {
@@ -318,11 +265,6 @@ bufel_new(cw_bufel_t * a_bufel)
   return retval;
 }
 
-/****************************************************************************
- *
- * bufel destructor.
- *
- ****************************************************************************/
 void
 bufel_delete(cw_bufel_t * a_bufel)
 {
@@ -338,12 +280,6 @@ bufel_delete(cw_bufel_t * a_bufel)
   }
 }
 
-/****************************************************************************
- *
- * Returns total size of a_bufel's internal buffer.  This is _not_
- * necessarily the same as the amount of valid data.
- *
- ****************************************************************************/
 cw_uint32_t
 bufel_get_size(cw_bufel_t * a_bufel)
 {
@@ -351,13 +287,6 @@ bufel_get_size(cw_bufel_t * a_bufel)
   return a_bufel->buf_size;
 }
 
-/****************************************************************************
- *
- * Either malloc()s or realloc()s the internal buffer to be of size a_size.  If
- * shrinking the bufel would chop off valid data as indicated by end_offset,
- * return TRUE.
- *
- ****************************************************************************/
 cw_bool_t
 bufel_set_size(cw_bufel_t * a_bufel, cw_uint32_t a_size)
 {
@@ -415,11 +344,6 @@ bufel_set_size(cw_bufel_t * a_bufel, cw_uint32_t a_size)
   return retval;
 }
 
-/****************************************************************************
- *
- * Returns the offset to the begin pointer.
- *
- ****************************************************************************/
 cw_uint32_t
 bufel_get_beg_offset(cw_bufel_t * a_bufel)
 {
@@ -427,12 +351,6 @@ bufel_get_beg_offset(cw_bufel_t * a_bufel)
   return a_bufel->beg_offset;
 }
 
-/****************************************************************************
- *
- * Sets the begin pointer offset.  If an attempt is made to set the beg_offset
- * to something greater than end_offset, return TRUE.
- *
- ****************************************************************************/
 cw_bool_t
 bufel_set_beg_offset(cw_bufel_t * a_bufel, cw_uint32_t a_offset)
 {
@@ -453,11 +371,6 @@ bufel_set_beg_offset(cw_bufel_t * a_bufel, cw_uint32_t a_offset)
   return retval;
 }
 
-/****************************************************************************
- *
- * Returns the offset to the end pointer.
- *
- ****************************************************************************/
 cw_uint32_t
 bufel_get_end_offset(cw_bufel_t * a_bufel)
 {
@@ -465,14 +378,6 @@ bufel_get_end_offset(cw_bufel_t * a_bufel)
   return a_bufel->end_offset;
 }
 
-/****************************************************************************
- *
- * Sets the end pointer offset.  If an attempt is made to set the end_offset
- * to something less than beg_offset, return TRUE.  If an attempt is made to set
- * end_offset to something greater than one past the end of the buffer
- * (buf_size), return TRUE.
- *
- ****************************************************************************/
 cw_bool_t
 bufel_set_end_offset(cw_bufel_t * a_bufel, cw_uint32_t a_offset)
 {
@@ -497,12 +402,6 @@ bufel_set_end_offset(cw_bufel_t * a_bufel, cw_uint32_t a_offset)
   return retval;
 }
 
-/****************************************************************************
- *
- * Returns the number of bytes between the beginning offset marker and the end
- * offset marker.
- *
- ****************************************************************************/
 cw_uint32_t
 bufel_get_valid_data_size(cw_bufel_t * a_bufel)
 {
@@ -512,11 +411,6 @@ bufel_get_valid_data_size(cw_bufel_t * a_bufel)
   return a_bufel->end_offset - a_bufel->beg_offset;
 }
 
-/****************************************************************************
- *
- * Returns a pointer to the internal buffer.
- *
- ****************************************************************************/
 void *
 bufel_get_data_ptr(cw_bufel_t * a_bufel)
 {
@@ -525,14 +419,6 @@ bufel_get_data_ptr(cw_bufel_t * a_bufel)
   return (void *) a_bufel->buf;
 }
 
-/****************************************************************************
- *
- * Sets the internal buffer to a_buf, assumes the a_buf is a_size bytes long,
- * and sets the beginning offset to 0 and the end offset to a_size.  If there is
- * already an internal buffer, the old one is freed.  Note that a_buf _must_ be
- * allocated on the heap, since the bufel class will eventually free it.
- *
- ****************************************************************************/
 void
 bufel_set_data_ptr(cw_bufel_t * a_bufel, void * a_buf, cw_uint32_t a_size)
 {
@@ -550,11 +436,6 @@ bufel_set_data_ptr(cw_bufel_t * a_bufel, void * a_buf, cw_uint32_t a_size)
   a_bufel->end_offset = a_size;
 }
 
-/****************************************************************************
- *
- * Returns the uint8 at offset a_offset.
- *
- ****************************************************************************/
 cw_uint8_t
 bufel_get_uint8(cw_bufel_t * a_bufel, cw_uint32_t a_offset)
 {
@@ -571,11 +452,6 @@ bufel_get_uint8(cw_bufel_t * a_bufel, cw_uint32_t a_offset)
   return retval;
 }
 
-/****************************************************************************
- *
- * Sets the uint8 at a_offset to a_val.
- *
- ****************************************************************************/
 void
 bufel_set_uint8(cw_bufel_t * a_bufel, cw_uint32_t a_offset,
 		cw_uint8_t a_val)
@@ -590,14 +466,6 @@ bufel_set_uint8(cw_bufel_t * a_bufel, cw_uint32_t a_offset,
   data[a_offset] = a_val;
 }
 
-/****************************************************************************
- *
- * Returns the uint32 at offset a_offset.  If a_offset is not a multiple of 4,
- * behavior is undefined.  If the buffer size is not a multiple
- * of 4, reading the last bytes of the buffer has undefined behavior.  That is,
- * segmentation faults could ensue.
- *
- ****************************************************************************/
 cw_uint32_t
 bufel_get_uint32(cw_bufel_t * a_bufel, cw_uint32_t a_offset)
 {
@@ -615,11 +483,6 @@ bufel_get_uint32(cw_bufel_t * a_bufel, cw_uint32_t a_offset)
   return retval;
 }
 
-/****************************************************************************
- *
- * Sets the uint32 at a_offset to a_val.
- *
- ****************************************************************************/
 void
 bufel_set_uint32(cw_bufel_t * a_bufel, cw_uint32_t a_offset,
 		 cw_uint32_t a_val)
