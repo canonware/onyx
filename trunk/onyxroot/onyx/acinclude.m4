@@ -81,7 +81,7 @@ else
   enable_libedit="1"
 fi
 ,
-if "x$enable_threads" = "x1" ; then
+if test "x$enable_threads" = "x1" ; then
   enable_libedit="1"
 else
   enable_libedit="0"
