@@ -1017,36 +1017,14 @@ dup <
 	dup dn setisa
     }
 
-    #class :classname #name/null
-    $classname $classname load
-
-    #name #class :setclassname -
-    $setclassname {
-	exch setclassname
+    #name #class :implementor #class
+    $implementor {
+	exch implementor
     }
 
-    #class :super #super
-    $super $super load
-
-    #super #class :setsuper -
-    $setsuper {
-	exch setsuper
-    }
-
-    #class/instance :data #data
-    $data $data load
-
-    #data #class/instance :setdata -
-    $setdata {
-	exch setdata
-    }
-
-    #class :methods #methods
-    $methods $methods load
-
-    #methods #class :setmethods -
-    $setmethods {
-	exch setmethods
+    #name #class :method #boolean
+    $implements {
+	exch implements
     }
 
     #name #class :method #method
@@ -1054,14 +1032,46 @@ dup <
 	exch method
     }
 
+    #class :classname #name/null
+    $classname $classname load
+
+    #name/null #class :setclassname -
+    $setclassname {
+	exch setclassname
+    }
+
+    #class :super #super/null
+    $super $super load
+
+    #super/null #class :setsuper -
+    $setsuper {
+	exch setsuper
+    }
+
+    #class :methods #methods/null
+    $methods $methods load
+
+    #methods/null #class :setmethods -
+    $setmethods {
+	exch setmethods
+    }
+
+    #class/instance :data #data/null
+    $data $data load
+
+    #data/null #class/instance :setdata -
+    $setdata {
+	exch setdata
+    }
+
     #
     # Instance-related methods.
     #
 
-    #instance :isa #class
+    #instance :isa #class/null
     $isa $isa load
 
-    #class #instance :setisa -
+    #class/null #instance :setisa -
     $setisa {
 	exch setisa
     }
