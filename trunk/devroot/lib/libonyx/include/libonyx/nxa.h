@@ -63,6 +63,9 @@ struct cw_nxa_s
 #endif
 };
 
+/* Global variables. */
+extern cw_mema_t *cw_g_nxaa;
+
 void *
 nxa_malloc_e(void *a_arg, size_t a_size, const char *a_filename,
 	     cw_uint32_t a_line_num);
