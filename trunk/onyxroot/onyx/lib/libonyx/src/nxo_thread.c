@@ -252,6 +252,8 @@ nxo_thread_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx)
     thread->nx = a_nx;
     thread->tok_str = thread->buffer;
 
+    thread->maxestack = nx_maxestack_get(a_nx);
+
     nxo_no_new(&thread->estack);
     nxo_no_new(&thread->istack);
     nxo_no_new(&thread->ostack);
@@ -585,7 +587,7 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
     cw_assert(nxo_stack_count(&thread->estack) ==
 	      nxo_stack_count(&thread->istack));
 
-    if (nxo_stack_count(&thread->estack) == CW_LIBONYX_ESTACK_MAX + 1)
+    if (nxo_stack_count(&thread->estack) == thread->maxestack + 1)
     {
 	nxo_thread_nerror(a_nxo, NXN_estackoverflow);
 	nxo_stack_pop(&thread->estack);
@@ -1116,6 +1118,22 @@ nxo_thread_setlocking(cw_nxo_t *a_nxo, cw_bool_t a_locking)
     thread->locking = a_locking;
 }
 #endif
+
+void
+nxo_thread_maxestack_set(cw_nxo_t *a_nxo, cw_nxoi_t a_maxestack)
+{
+    cw_nxoe_thread_t *thread;
+
+    cw_check_ptr(a_nxo);
+    cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+    cw_assert(a_maxestack >= 0);
+
+    thread = (cw_nxoe_thread_t *) a_nxo->o.nxoe;
+    cw_dassert(thread->nxoe.magic == CW_NXOE_MAGIC);
+    cw_assert(thread->nxoe.type == NXOT_THREAD);
+
+    thread->maxestack = a_maxestack;
+}
 
 void
 nxo_thread_stdin_set(cw_nxo_t *a_nxo, cw_nxo_t *a_stdin)

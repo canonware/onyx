@@ -3999,6 +3999,36 @@ execution stack operators} \\
 \hline
 \optableent
 	{--}
+	{{\bf \htmlref{maxestack}{systemdict:maxestack}}}
+	{count}
+	{Get maximum allowable estack depth.}
+\hline
+\optableent
+	{--}
+	{{\bf \htmlref{gmaxestack}{systemdict:gmaxestack}}}
+	{count}
+	{Get default maximum allowable estack depth.}
+\hline
+\optableent
+	{count}
+	{{\bf \htmlref{setmaxestack}{systemdict:setmaxestack}}}
+	{--}
+	{Set maximum allowable estack depth.}
+\hline
+\optableent
+	{count}
+	{{\bf \htmlref{setgmaxestack}{systemdict:setgmaxestack}}}
+	{--}
+	{Set default maximum allowable estack depth.}
+\hline
+\optableent
+	{--}
+	{{\bf \htmlref{estack}{systemdict:estack}}}
+	{stack}
+	{Get a current estack snapshot.}
+\hline
+\optableent
+	{--}
 	{{\bf \htmlref{estack}{systemdict:estack}}}
 	{stack}
 	{Get a current estack snapshot.}
@@ -8710,6 +8740,27 @@ onyx:0> globaldict 1 sprint
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:gmaxestack}
+\index{gmaxestack@\onyxop{}{gmaxestack}{}}
+\item[{\onyxop{--}{gmaxestack}{count}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[count: ]
+			Default maximum allowable estack depth.
+		\end{description}
+	\item[Errors(s): ] None.
+	\item[Description: ]
+		Get the default maximum allowable estack depth.  This value is
+		used when creating new threads.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> gmaxestack 1 sprint
+256
+onyx:0>
+		\end{verbatim}
+	\end{description}
 \label{systemdict:gstderr}
 \index{gstderr@\onyxop{}{gstderr}{}}
 \item[{\onyxop{--}{gstderr}{file}}: ]
@@ -9720,6 +9771,26 @@ onyx:0>
 onyx:0> mark pstack
 -mark-
 onyx:1>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:maxestack}
+\index{maxestack@\onyxop{}{maxestack}{}}
+\item[{\onyxop{--}{maxestack}{count}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[count: ]
+			Maximum allowable estack depth.
+		\end{description}
+	\item[Errors(s): ] None.
+	\item[Description: ]
+		Get the maximum allowable estack depth.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> maxestack 1 sprint
+256
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:match}
@@ -12510,6 +12581,31 @@ true
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:setgmaxestack}
+\index{setgmaxestack@\onyxop{}{setgmaxestack}{}}
+\item[{\onyxop{count}{setgmaxestack}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[count: ]
+			Default maximum allowable estack depth.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Set the default maximum allowable estack depth to \oparg{count}.
+		This value is used when creating new threads.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> 128 setgmaxestack
+onyx:0>
+		\end{verbatim}
+	\end{description}
 \label{systemdict:setgstderr}
 \index{setgstderr@\onyxop{}{setgstderr}{}}
 \item[{\onyxop{file}{setgstderr}{--}}: ]
@@ -12664,6 +12760,30 @@ false
 onyx:0> true setlocking
 onyx:0> currentlocking 1 sprint
 true
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:setmaxestack}
+\index{setmaxestack@\onyxop{}{setmaxestack}{}}
+\item[{\onyxop{count}{setmaxestack}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[count: ]
+			Maximum allowable estack depth.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Set the maximum allowable estack depth to \oparg{count}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> 128 setmaxestack
 onyx:0>
 		\end{verbatim}
 	\end{description}

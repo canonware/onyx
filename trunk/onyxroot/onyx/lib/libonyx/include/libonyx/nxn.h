@@ -216,6 +216,9 @@ typedef enum
     NXN_ENTRY(gid),
 #endif
     NXN_ENTRY(globaldict),
+#ifdef CW_THREADS
+    NXN_ENTRY(gmaxestack),
+#endif
 #ifdef CW_POSIX
     NXN_ENTRY(gmtoff),
 #endif
@@ -326,6 +329,7 @@ typedef enum
 #ifdef CW_REGEX
     NXN_ENTRY(match),
 #endif
+    NXN_ENTRY(maxestack),
 #ifdef CW_POSIX
     NXN_ENTRY(mday),
     NXN_ENTRY(min),
@@ -529,6 +533,7 @@ typedef enum
     NXN_ENTRY(setgid),
 #endif
 #ifdef CW_THREADS
+    NXN_ENTRY(setgmaxestack),
     NXN_ENTRY(setgstderr),
     NXN_ENTRY(setgstdin),
     NXN_ENTRY(setgstdout),
@@ -537,6 +542,7 @@ typedef enum
 #ifdef CW_THREADS
     NXN_ENTRY(setlocking),
 #endif
+    NXN_ENTRY(setmaxestack),
     NXN_ENTRY(setnonblocking),
 #ifdef CW_PTHREADS
     NXN_ENTRY(setperiod),

@@ -52,6 +52,9 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, cw_thread_start_t *a_thread_start)
 	retval->magic = CW_NX_MAGIC;
 #endif
 
+	/* Set initial maximum estack depth. */
+	retval->maxestack = CW_LIBONYX_ESTACK_MAX;
+
 	/* Initialize the internals such that if a collection happens before
 	 * we're done, reference iteration will work correctly. */
 	nxo_no_new(&retval->gcdict);
@@ -169,6 +172,16 @@ nx_delete(cw_nx_t *a_nx)
 	memset(a_nx, 0x5a, sizeof(cw_nx_t));
     }
 #endif
+}
+
+void
+nx_maxestack_set(cw_nx_t *a_nx, cw_nxoi_t a_maxestack)
+{
+    cw_check_ptr(a_nx);
+    cw_dassert(a_nx->magic == CW_NX_MAGIC);
+    cw_assert(a_maxestack >= 0);
+
+    a_nx->maxestack = a_maxestack;
 }
 
 void

@@ -464,6 +464,42 @@ a\_locking}}
 	\item[Description: ]
 		Activate or deactivate implicit locking for new objects.
 	\end{capilist}
+\label{nxo_thread_maxestack_get}
+\index{nxo_thread_maxestack_get@\cfunc{nxo\_thread\_maxestack\_get}{}}
+\citem{\cfunc[cw\_nxoi\_t]{nxo\_thread\_maxestack\_get}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Maximum allowable estack depth.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return \cvar{a\_nxo}'s maximum allowable estack depth.
+	\end{capilist}
+\label{nxo_thread_maxestack_set}
+\index{nxo_thread_maxestack_set@\cfunc{nxo\_thread\_maxestack\_set}{}}
+\citem{\cfunc[void]{nxo\_thread\_maxestack\_set}{cw\_nxo\_t *a\_nxo, cw\_nxoi\_t
+a\_maxestack}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[a\_maxestack: ]
+			Maximum estack depth.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Set \cvar{a\_nxo}'s maximum allowable estack depth to
+		\cvar{a\_maxestack}.
+	\end{capilist}
 \label{nxo_thread_nx_get}
 \index{nxo_thread_nx_get@\cfunc{nxo\_thread\_nx\_get}{}}
 \citem{\cfunc[cw\_nx\_t *]{nxo\_thread\_nx\_get}{cw\_nxo\_t *a\_nxo}}

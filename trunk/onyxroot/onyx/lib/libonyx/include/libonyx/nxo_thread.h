@@ -83,6 +83,9 @@ struct cw_nxoe_thread_s
     cw_bool_t locking:1;
 #endif
 
+    /* Current maximum estack depth. */
+    cw_nxoi_t maxestack;
+
     /* Stacks. */
 
     /* Execution stack. */
@@ -282,6 +285,9 @@ nxo_thread_setlocking(cw_nxo_t *a_nxo, cw_bool_t a_locking);
 #endif
 
 void
+nxo_thread_maxestack_set(cw_nxo_t *a_nxo, cw_nxoi_t a_maxestack);
+
+void
 nxo_thread_stdin_set(cw_nxo_t *a_nxo, cw_nxo_t *a_stdin);
 
 void
@@ -293,6 +299,9 @@ nxo_thread_stderr_set(cw_nxo_t *a_nxo, cw_nxo_t *a_stderr);
 #ifndef CW_USE_INLINES
 cw_nx_t *
 nxo_thread_nx_get(cw_nxo_t *a_nxo);
+
+cw_nxoi_t
+nxo_thread_maxestack_get(cw_nxo_t *a_nxo);
 
 cw_nxo_t *
 nxo_thread_ostack_get(cw_nxo_t *a_nxo);
@@ -333,6 +342,21 @@ nxo_thread_nx_get(cw_nxo_t *a_nxo)
     cw_assert(thread->nxoe.type == NXOT_THREAD);
 
     return thread->nx;
+}
+
+CW_INLINE cw_nxoi_t
+nxo_thread_maxestack_get(cw_nxo_t *a_nxo)
+{
+    cw_nxoe_thread_t *thread;
+
+    cw_check_ptr(a_nxo);
+    cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+
+    thread = (cw_nxoe_thread_t *) a_nxo->o.nxoe;
+    cw_dassert(thread->nxoe.magic == CW_NXOE_MAGIC);
+    cw_assert(thread->nxoe.type == NXOT_THREAD);
+
+    return thread->maxestack;
 }
 
 CW_INLINE cw_nxo_t *

@@ -243,6 +243,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(gid),
 #endif
 #ifdef CW_THREADS
+    ENTRY(gmaxestack),
     ENTRY(gstderr),
     ENTRY(gstdin),
     ENTRY(gstdout),
@@ -294,6 +295,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #ifdef CW_REGEX
     ENTRY(match),
 #endif
+    ENTRY(maxestack),
 #ifdef CW_POSIX
     ENTRY(mkdir),
     ENTRY(mkfifo),
@@ -404,6 +406,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(setgid),
 #endif
 #ifdef CW_THREADS
+    ENTRY(setgmaxestack),
     ENTRY(setgstderr),
     ENTRY(setgstdin),
     ENTRY(setgstdout),
@@ -412,6 +415,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #ifdef CW_THREADS
     ENTRY(setlocking),
 #endif
+    ENTRY(setmaxestack),
     ENTRY(setnonblocking),
 #ifdef CW_SOCKET
     ENTRY(setsockopt),
@@ -4487,6 +4491,18 @@ systemdict_gid(cw_nxo_t *a_thread)
 
 #ifdef CW_THREADS
 void
+systemdict_gmaxestack(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *nxo;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    nxo = nxo_stack_push(ostack);
+    nxo_integer_new(nxo, nx_maxestack_get(nxo_thread_nx_get(a_thread)));
+}
+#endif
+
+#ifdef CW_THREADS
+void
 systemdict_gstderr(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack, *nxo;
@@ -5760,6 +5776,16 @@ systemdict_mkdir(cw_nxo_t *a_thread)
     nxo_stack_npop(ostack, npop);
 }
 #endif
+
+void
+systemdict_maxestack(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *nxo;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    nxo = nxo_stack_push(ostack);
+    nxo_integer_new(nxo, nxo_thread_maxestack_get(a_thread));
+}
 
 #ifdef CW_POSIX
 void
@@ -9074,6 +9100,32 @@ systemdict_setgid(cw_nxo_t *a_thread)
 
 #ifdef CW_THREADS
 void
+systemdict_setgmaxestack(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *nxo;
+    cw_nxoi_t maxestack;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    if (nxo_type_get(nxo) != NXOT_INTEGER)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    maxestack = nxo_integer_get(nxo);
+    if (maxestack < 0)
+    {
+	nxo_thread_nerror(a_thread, NXN_rangecheck);
+	return;
+    }
+
+    nx_maxestack_set(nxo_thread_nx_get(a_thread), maxestack);
+    nxo_stack_pop(ostack);
+}
+#endif
+
+#ifdef CW_THREADS
+void
 systemdict_setgstderr(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack;
@@ -9173,6 +9225,30 @@ systemdict_setlocking(cw_nxo_t *a_thread)
     nxo_stack_pop(ostack);
 }
 #endif
+
+void
+systemdict_setmaxestack(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *nxo;
+    cw_nxoi_t maxestack;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    if (nxo_type_get(nxo) != NXOT_INTEGER)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    maxestack = nxo_integer_get(nxo);
+    if (maxestack < 0)
+    {
+	nxo_thread_nerror(a_thread, NXN_rangecheck);
+	return;
+    }
+
+    nxo_thread_maxestack_set(a_thread, maxestack);
+    nxo_stack_pop(ostack);
+}
 
 void
 systemdict_setnonblocking(cw_nxo_t *a_thread)

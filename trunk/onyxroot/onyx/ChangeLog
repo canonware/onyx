@@ -1,5 +1,11 @@
 2003-05-07 : Jason Evans <jasone@canonware.com>
 
+	* Add operators:
+	  + maxestack
+	  + gmaxestack
+	  + setmaxestack
+	  + setgmaxestack
+
 	* Rename the "hook" type to "handle".  This impacts all APIs with "hook"
 	  in them.  This change was made to avoid confusion between handles and
 	  function pointer hooks, configuration/initialization hooks, etc.

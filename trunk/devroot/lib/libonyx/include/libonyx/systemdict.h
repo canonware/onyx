@@ -319,6 +319,11 @@ systemdict_gid(cw_nxo_t *a_thread);
 
 #ifdef CW_THREADS
 void
+systemdict_gmaxestack(cw_nxo_t *a_thread);
+#endif
+
+#ifdef CW_THREADS
+void
 systemdict_gstderr(cw_nxo_t *a_thread);
 #endif
 
@@ -432,6 +437,9 @@ systemdict_lt(cw_nxo_t *a_thread);
 void
 systemdict_match(cw_nxo_t *a_thread);
 #endif
+
+void
+systemdict_maxestack(cw_nxo_t *a_thread);
 
 #ifdef CW_POSIX
 void
@@ -700,6 +708,11 @@ systemdict_setgid(cw_nxo_t *a_thread);
 
 #ifdef CW_THREADS
 void
+systemdict_setgmaxestack(cw_nxo_t *a_thread);
+#endif
+
+#ifdef CW_THREADS
+void
 systemdict_setgstderr(cw_nxo_t *a_thread);
 #endif
 
@@ -720,6 +733,9 @@ systemdict_setiobuf(cw_nxo_t *a_thread);
 void
 systemdict_setlocking(cw_nxo_t *a_thread);
 #endif
+
+void
+systemdict_setmaxestack(cw_nxo_t *a_thread);
 
 void
 systemdict_setnonblocking(cw_nxo_t *a_thread);

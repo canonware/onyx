@@ -119,7 +119,7 @@ typedef unsigned int cw_bool_t;
  * of a hash table, which means that operations require linear searches. */
 #define CW_LIBONYX_DICT_SIZE 8
 
-/* Maximum depth of estack. */
+/* Initial default maximum depth of estack. */
 #define CW_LIBONYX_ESTACK_MAX 256
 
 /* Default file buffer size. */
