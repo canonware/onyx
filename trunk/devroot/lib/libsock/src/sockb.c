@@ -72,7 +72,7 @@ struct cw_sockb_s {
 	cw_thd_t	thread;
 	int		pipe_in;
 	int		pipe_out;
-	cw_sem_t	pipe_sem;
+	cw_sema_t	pipe_sema;
 
 	cw_pezz_t	bufc_pool;
 	cw_pezz_t	buffer_pool;
@@ -196,7 +196,7 @@ sockb_init(cw_uint32_t a_max_fds, cw_uint32_t a_bufc_size, cw_uint32_t
 		 * be written to the pipe in order to force a return from
 		 * poll().
 		 */
-		sem_new(&g_sockb->pipe_sem, 1);
+		sema_new(&g_sockb->pipe_sema, 1);
 
 		/*
 		 * Create the spare bufc pool and initialize associated
@@ -256,7 +256,7 @@ sockb_shutdown(void)
 		sockb_l_wakeup();
 		thd_join(&g_sockb->thread);
 
-		sem_delete(&g_sockb->pipe_sem);
+		sema_delete(&g_sockb->pipe_sema);
 
 		/* Clean up the spare bufc's. */
 		pezz_delete(&g_sockb->bufc_pool);
@@ -353,7 +353,7 @@ sockb_in_notify(cw_mq_t *a_mq, int a_sockfd)
 void
 sockb_l_wakeup(void)
 {
-	if (sem_trywait(&g_sockb->pipe_sem) == FALSE) {
+	if (sema_trywait(&g_sockb->pipe_sema) == FALSE) {
 		if (write(g_sockb->pipe_in, "X", 1) == -1) {
 			if (dbg_is_registered(cw_g_dbg, "sockb_error")) {
 				_cw_out_put_e("Error in write(): [s]\n",
@@ -944,7 +944,7 @@ sockb_p_entry_func(void *a_arg)
 					 * written to g_sockb->pipe_in and cause
 					 * a return from poll() if one or more
 					 * messages needs handled.  Note that we
-					 * must post the semophore before
+					 * must post the semaophore before
 					 * handling the message queues, since it
 					 * is possible to have new messages come
 					 * in and miss them otherwise.  Posting
@@ -954,7 +954,7 @@ sockb_p_entry_func(void *a_arg)
 					 * caused data to be written to the pipe
 					 * may have already been read.
 					 */
-					sem_post(&g_sockb->pipe_sem);
+					sema_post(&g_sockb->pipe_sema);
 				}
 				_cw_assert(bytes_read <= 1);
 			}
