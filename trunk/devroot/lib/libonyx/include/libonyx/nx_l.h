@@ -115,13 +115,16 @@ nx_l_ref_iter(cw_nx_t *a_nx, cw_bool_t a_reset)
 CW_INLINE void
 nx_l_thread_insert(cw_nx_t *a_nx, cw_nxo_t *a_thread)
 {
+    cw_nxo_t nxo;
+
     cw_check_ptr(a_nx);
     cw_dassert(a_nx->magic == CW_NX_MAGIC);
 
     cw_check_ptr(a_thread);
     cw_assert(nxo_type_get(a_thread) == NXOT_THREAD);
 
-    nxo_dict_def(&a_nx->threadsdict, a_nx, a_thread, a_thread);
+    nxo_null_new(&nxo);
+    nxo_dict_def(&a_nx->threadsdict, a_nx, a_thread, &nxo);
 }
 
 CW_INLINE void

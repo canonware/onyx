@@ -12349,9 +12349,8 @@ onyx:0>
 		\begin{description}\item[]
 		\item[dict: ]
 			A dictionary.  Each key is a thread reference.  By
-			default, each value is the same as its key, but this
-			need not be so, and the value can be redefined for
-			debugging purposes.
+			default, each value is null, but this need not be so,
+			and the value can be redefined for debugging purposes.
 		\end{description}
 	\item[Errors(s): ] None.
 	\item[Description: ]
@@ -12359,7 +12358,7 @@ onyx:0>
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> threadsdict 1 sprint
-<-thread- -thread->
+<-thread- null>
 onyx:0>
 		\end{verbatim}
 	\end{description}
