@@ -32,14 +32,12 @@ int
 main(int argc, char ** argv)
 {
   int retval = 0, bytes_read;
-  cw_bool_t did_work;
   cw_socks_t * socks;
   cw_sock_t * sock;
   struct timeval timeout;
   struct timespec tout;
   cw_buf_t buf;
   cw_ring_t * sock_ring = NULL, * t_ring;
-/*    cw_uint32_t i; */
   int fd_vec[FD_SETSIZE];
   cw_uint32_t nfds = 0;
   
@@ -148,123 +146,104 @@ main(int argc, char ** argv)
   {
     _cw_error("Memory allocation error");
   }
-  while (1)
-/*    for (i = 0; ; i++) */
-  {
-    did_work = FALSE;
 
+  timeout.tv_usec = 0;
+
+  while (1)
+  {
     if (NULL != sock_ring)
     {
-      tout.tv_sec = 1;
-      tout.tv_nsec = 100000000;
-/*        tout.tv_nsec = 0; */
-      if (FALSE == sockb_wait(fd_vec, nfds, &tout))
+      sockb_wait(fd_vec, nfds, NULL);
+      t_ring = sock_ring;
+      do
       {
-	t_ring = sock_ring;
-	do
+	tout.tv_sec = 0;
+	tout.tv_nsec = 0;
+	bytes_read = sock_read((cw_sock_t *) ring_get_data(t_ring),
+			       &buf, 0, &tout);
+	if (0 < bytes_read)
 	{
-	  tout.tv_sec = 0;
-	  tout.tv_nsec = 0;
-	  bytes_read = sock_read((cw_sock_t *) ring_get_data(t_ring),
-				 &buf, 0, &tout);
-	  if (0 < bytes_read)
-	  {
-	    did_work = TRUE;
+	  /* Throw the data away. */
+	  buf_release_head_data(&buf, bytes_read);
 	  
-	    /* Throw the data away. */
-/*  	    log_printf(cw_g_log, "Got %d bytes data\n", bytes_read); */
-	    
-	    buf_release_head_data(&buf, bytes_read);
+	  t_ring = ring_next(t_ring);
+	}
+	else if (-1 == bytes_read)
+	{
+	  cw_ring_t * old_ring;
+	  int sockfd;
+	  cw_sock_t * t_sock;
 	  
-	    t_ring = ring_next(t_ring);
-	  }
-	  else if (-1 == bytes_read)
-	  {
-	    cw_ring_t * old_ring;
-	    int sockfd;
+	  log_printf(cw_g_log, "Connection closed\n");
 	  
-	    log_printf(cw_g_log, "Connection closed\n");
-	  
-	    /* Socket error.  Remove this sock from the ring. */
-	    sock = (cw_sock_t *) ring_get_data(t_ring);
-	    sockfd = sock_get_fd(sock);
-	    sock_delete(sock);
+	  /* Socket error.  Remove this sock from the ring. */
+	  t_sock = (cw_sock_t *) ring_get_data(t_ring);
+	  sockfd = sock_get_fd(t_sock);
+	  sock_delete(t_sock);
 
-	    /* This advances us to the next ring item, so there is no need to
-	     * call ring_next(). */
-	    old_ring = t_ring;
-	    t_ring = ring_cut(old_ring);
-	    ring_delete(old_ring);
-	    if (t_ring == old_ring)
-	    {
-	      t_ring = NULL;
-	      sock_ring = NULL;
-	    }
-	    else if (nfds > 1)
-	    {
-	      cw_uint32_t j;
-	    
-	      /* Search through fd_vec and find the corresponding entry for this
-	       * sock. */
-	      for (j = 0; j < nfds; j++)
-	      {
-		if (fd_vec[j] == sockfd)
-		{
-		  fd_vec[j] = fd_vec[nfds - 1];
-		  break;
-		}
-	      }
-	      _cw_assert(j < nfds);
-	    }
-	    nfds--;
+	  /* This advances us to the next ring item, so there is no need to
+	   * call ring_next(). */
+	  old_ring = t_ring;
+	  t_ring = ring_cut(old_ring);
+	  ring_delete(old_ring);
+	  if (t_ring == old_ring)
+	  {
+	    t_ring = NULL;
+	    sock_ring = NULL;
 	  }
-	} while (t_ring != sock_ring);
+	  else if (nfds > 1)
+	  {
+	    cw_uint32_t j;
+	    
+	    /* Search through fd_vec and find the corresponding entry for this
+	     * sock. */
+	    for (j = 0; j < nfds; j++)
+	    {
+	      if (fd_vec[j] == sockfd)
+	      {
+		fd_vec[j] = fd_vec[nfds - 1];
+		break;
+	      }
+	    }
+	    _cw_assert(j < nfds);
+	  }
+	  nfds--;
+	  timeout.tv_sec = 5;
+	}
+      } while (t_ring != sock_ring);
+    }
+  
+    if (sock == socks_accept(socks, &timeout, sock))
+    {
+      log_printf(cw_g_log, "New connection\n");
+      /* New connection.  Add it to the sock ring. */
+      t_ring = ring_new(NULL, NULL, NULL);
+      if (NULL == t_ring)
+      {
+	_cw_error("Memory allocation error");
+      }
+      ring_set_data(t_ring, sock);
+      
+      if (NULL != sock_ring)
+      {
+	ring_meld(sock_ring, t_ring);
       }
       else
       {
-	log_printf(cw_g_log, ".");
+	sock_ring = t_ring;
       }
-    }
-    
-/*      if (127 == (i & 0x7f)) */
-/*      { */
-      if (sock == socks_accept(socks, &timeout, sock))
-      {
-	did_work = TRUE;
-      
-	log_printf(cw_g_log, "New connection\n");
-	/* New connection.  Add it to the sock ring. */
-	t_ring = ring_new(NULL, NULL, NULL);
-	if (NULL == t_ring)
-	{
-	  _cw_error("Memory allocation error");
-	}
-	ring_set_data(t_ring, sock);
-      
-	if (NULL != sock_ring)
-	{
-	  ring_meld(sock_ring, t_ring);
-	}
-	else
-	{
-	  sock_ring = t_ring;
-	}
 
-	fd_vec[nfds] = sock_get_fd(sock);
-	nfds++;
+      fd_vec[nfds] = sock_get_fd(sock);
+      nfds++;
+      timeout.tv_sec = 0;
 
-	/* Create another sock object for the next time we call
+      /* Create another sock object for the next time we call
 	 * socks_accept(). */
-	sock = sock_new(NULL, opt_bsize * 8);
-	if (NULL == sock)
-	{
-	  _cw_error("Memory allocation error");
-	}
+      sock = sock_new(NULL, opt_bsize * 8);
+      if (NULL == sock)
+      {
+	_cw_error("Memory allocation error");
       }
-/*      } */
-    if (FALSE == did_work)
-    {
-      thd_yield();
     }
   }
   buf_delete(&buf);

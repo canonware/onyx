@@ -429,11 +429,9 @@ sock_disconnect(cw_sock_t * a_sock)
   cw_bool_t retval;
 
   _cw_check_ptr(a_sock);
-/*    mtx_lock(&a_sock->state_lock); */
 
   retval = sock_p_disconnect(a_sock);
   
-/*    mtx_unlock(&a_sock->state_lock); */
   return retval;
 }
 
