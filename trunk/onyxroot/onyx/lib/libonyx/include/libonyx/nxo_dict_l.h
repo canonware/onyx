@@ -26,13 +26,6 @@ struct cw_nxoe_dict_s
     cw_mtx_t lock;
 #endif
 
-    /* Used for remembering the current state of reference iteration. */
-    cw_uint32_t ref_iter;
-
-    /* If non-NULL, the previous reference iteration returned the key of this
-     * dicto, so the value of this dicto is the next reference to check. */
-    cw_nxoe_dicto_t *dicto;
-
     /* If TRUE, the data are in the hash.  Otherwise, they are stored in the
      * array. */
     cw_bool_t is_hash:1;
@@ -108,61 +101,69 @@ nxoe_l_dict_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 {
     cw_nxoe_t *retval;
     cw_nxoe_dict_t *dict;
+    /* Used for remembering the current state of reference iteration.  This
+     * function is only called by the garbage collector, so as long as two
+     * interpreters aren't collecting simultaneously, using a static variable
+     * works fine. */
+    static cw_uint32_t ref_iter;
+    /* If non-NULL, the previous reference iteration returned the key of this
+     * dicto, so the value of this dicto is the next reference to check. */
+    cw_nxoe_dicto_t *dicto;
 
     dict = (cw_nxoe_dict_t *) a_nxoe;
 
     if (a_reset)
     {
-	dict->ref_iter = 0;
-	dict->dicto = NULL;
+	ref_iter = 0;
+	dicto = NULL;
     }
 
     retval = NULL;
     if (dict->is_hash)
     {
 	while (retval == NULL
-	       && dict->ref_iter < dch_count(&dict->data.hash))
+	       && ref_iter < dch_count(&dict->data.hash))
 	{
-	    if (dict->dicto == NULL)
+	    if (dicto == NULL)
 	    {
 		/* Key. */
-		dch_get_iterate(&dict->data.hash, NULL, (void **) &dict->dicto);
-		retval = nxo_nxoe_get(&dict->dicto->key);
+		dch_get_iterate(&dict->data.hash, NULL, (void **) &dicto);
+		retval = nxo_nxoe_get(&dicto->key);
 	    }
 	    else
 	    {
 		/* Value. */
-		retval = nxo_nxoe_get(&dict->dicto->val);
-		dict->ref_iter++;
-		dict->dicto = NULL;
+		retval = nxo_nxoe_get(&dicto->val);
+		ref_iter++;
+		dicto = NULL;
 	    }
 	}
     }
     else
     {
-	while (retval == NULL && dict->ref_iter < CW_LIBONYX_DICT_SIZE)
+	while (retval == NULL && ref_iter < CW_LIBONYX_DICT_SIZE)
 	{
-	    if (dict->dicto == NULL)
+	    if (dicto == NULL)
 	    {
-		if (nxo_type_get(&dict->data.array[dict->ref_iter].key)
+		if (nxo_type_get(&dict->data.array[ref_iter].key)
 		    != NXOT_NO)
 		{
 		    /* Key. */
-		    dict->dicto = &dict->data.array[dict->ref_iter];
-		    retval = nxo_nxoe_get(&dict->dicto->key);
+		    dicto = &dict->data.array[ref_iter];
+		    retval = nxo_nxoe_get(&dicto->key);
 		}
 		else
 		{
 		    /* Empty slot. */
-		    dict->ref_iter++;
+		    ref_iter++;
 		}
 	    }
 	    else
 	    {
 		/* Value. */
-		retval = nxo_nxoe_get(&dict->dicto->val);
-		dict->ref_iter++;
-		dict->dicto = NULL;
+		retval = nxo_nxoe_get(&dicto->val);
+		ref_iter++;
+		dicto = NULL;
 	    }
 	}
     }

@@ -59,7 +59,6 @@ nxo_dict_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking,
     if (a_locking)
     mtx_new(&dict->lock);
 #endif
-    dict->dicto = NULL;
 
     if (a_dict_size < CW_LIBONYX_DICT_SIZE)
     {

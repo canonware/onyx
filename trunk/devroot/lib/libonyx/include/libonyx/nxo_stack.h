@@ -47,9 +47,6 @@ struct cw_nxoe_stack_s
     /* Not used, just under stack bottom. */
     cw_nxoe_stacko_t under;
 
-    /* Used for remembering the current state of reference iteration. */
-    cw_uint32_t ref_stage;
-
     cw_nxoe_stacko_t *ref_stacko;
 
 #ifdef CW_THREADS

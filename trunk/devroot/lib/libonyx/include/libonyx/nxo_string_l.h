@@ -22,13 +22,11 @@ struct cw_nxoe_string_s
     cw_mtx_t lock;
 #endif
 
-    /* Used for remembering the current state of reference iteration. */
-    cw_uint32_t ref_iter;
     union
     {
 	struct
 	{
-	    cw_nxo_t nxo;
+	    cw_nxoe_string_t *string;
 	    cw_uint32_t beg_offset;
 	    cw_uint32_t len;
 	} i;
@@ -83,22 +81,27 @@ nxoe_l_string_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 {
     cw_nxoe_t *retval;
     cw_nxoe_string_t *string;
+    /* Used for remembering the current state of reference iteration.  This
+     * function is only called by the garbage collector, so as long as two
+     * interpreters aren't collecting simultaneously, using a static variable
+     * works fine. */
+    static cw_uint32_t ref_iter;
 
     string = (cw_nxoe_string_t *) a_nxoe;
 
     if (a_reset)
     {
-	string->ref_iter = 0;
+	ref_iter = 0;
     }
 
     if (a_nxoe->indirect == FALSE)
     {
 	retval = NULL;
     }
-    else if (string->ref_iter == 0)
+    else if (ref_iter == 0)
     {
-	retval = string->e.i.nxo.o.nxoe;
-	string->ref_iter++;
+	retval = (cw_nxoe_t *) string->e.i.string;
+	ref_iter++;
     }
     else
     {

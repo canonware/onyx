@@ -89,30 +89,32 @@ nxo_string_substring_new(cw_nxo_t *a_nxo, cw_nxo_t *a_string, cw_nx_t *a_nx,
     cw_check_ptr(orig);
     cw_dassert(orig->nxoe.magic == CW_NXOE_MAGIC);
 
+    string = (cw_nxoe_string_t *) nxa_malloc(nx_nxa_get(a_nx),
+					     sizeof(cw_nxoe_string_t));
+
+    nxoe_l_new(&string->nxoe, NXOT_STRING, FALSE);
+    string->nxoe.indirect = TRUE;
+
     if (orig->nxoe.indirect)
     {
-	nxo_string_substring_new(a_nxo, &orig->e.i.nxo, a_nx,
-				 a_offset + orig->e.i.beg_offset, a_len);
+	cw_assert(a_offset + a_len + orig->e.i.beg_offset
+		  <= orig->e.i.string->e.s.len);
+	string->e.i.string = orig->e.i.string;
+	string->e.i.beg_offset = a_offset + orig->e.i.beg_offset;
     }
     else
     {
 	cw_assert(a_offset + a_len <= orig->e.s.len);
-
-	string = (cw_nxoe_string_t *) nxa_malloc(nx_nxa_get(a_nx),
-						 sizeof(cw_nxoe_string_t));
-
-	nxoe_l_new(&string->nxoe, NXOT_STRING, FALSE);
-	string->nxoe.indirect = TRUE;
-	memcpy(&string->e.i.nxo, a_string, sizeof(cw_nxo_t));
+	string->e.i.string = orig;
 	string->e.i.beg_offset = a_offset;
-	string->e.i.len = a_len;
-
-	nxo_no_new(a_nxo);
-	a_nxo->o.nxoe = (cw_nxoe_t *) string;
-	nxo_p_type_set(a_nxo, NXOT_STRING);
-
-	nxa_l_gc_register(nx_nxa_get(a_nx), (cw_nxoe_t *) string);
     }
+    string->e.i.len = a_len;
+
+    nxo_no_new(a_nxo);
+    a_nxo->o.nxoe = (cw_nxoe_t *) string;
+    nxo_p_type_set(a_nxo, NXOT_STRING);
+
+    nxa_l_gc_register(nx_nxa_get(a_nx), (cw_nxoe_t *) string);
 }
 
 void
@@ -127,12 +129,12 @@ nxo_string_copy(cw_nxo_t *a_to, cw_nxo_t *a_from)
     string_fr = (cw_nxoe_string_t *) a_from->o.nxoe;
     if (string_fr->nxoe.indirect)
     {
-	string_fr_i = (cw_nxoe_string_t *) string_fr->e.i.nxo.o.nxoe;
+	string_fr_i = string_fr->e.i.string;
     }
     string_to = (cw_nxoe_string_t *) a_to->o.nxoe;
     if (string_to->nxoe.indirect)
     {
-	string_to_i = (cw_nxoe_string_t *) string_to->e.i.nxo.o.nxoe;
+	string_to_i = string_to->e.i.string;
     }
 
     /* Set str_fr and len_fr according to whether string_fr is an indirect
@@ -228,13 +230,13 @@ nxo_string_len_get(const cw_nxo_t *a_nxo)
     cw_dassert(string->nxoe.magic == CW_NXOE_MAGIC);
     cw_assert(string->nxoe.type == NXOT_STRING);
 
-    if (string->nxoe.indirect == FALSE)
+    if (string->nxoe.indirect)
     {
-	retval = string->e.s.len;
+	retval = string->e.i.len;
     }
     else
     {
-	retval = string->e.i.len;
+	retval = string->e.s.len;
     }
 
     return retval;
@@ -255,16 +257,15 @@ nxo_string_el_get(const cw_nxo_t *a_nxo, cw_nxoi_t a_offset, cw_uint8_t *r_el)
     cw_dassert(string->nxoe.magic == CW_NXOE_MAGIC);
     cw_assert(string->nxoe.type == NXOT_STRING);
 
-    if (string->nxoe.indirect == FALSE)
+    if (string->nxoe.indirect)
     {
-	cw_assert(a_offset >= 0 && a_offset < string->e.s.len);
-	*r_el = string->e.s.str[a_offset];
+	a_offset += string->e.i.beg_offset;
+	string = string->e.i.string;
     }
-    else
-    {
-	nxo_string_el_get(&string->e.i.nxo, a_offset + string->e.i.beg_offset,
-			  r_el);
-    }
+    cw_assert(string->nxoe.indirect == FALSE);
+
+    cw_assert(a_offset >= 0 && a_offset < string->e.s.len);
+    *r_el = string->e.s.str[a_offset];
 }
 
 void
@@ -282,16 +283,15 @@ nxo_string_el_set(cw_nxo_t *a_nxo, cw_uint8_t a_el, cw_nxoi_t a_offset)
     cw_dassert(string->nxoe.magic == CW_NXOE_MAGIC);
     cw_assert(string->nxoe.type == NXOT_STRING);
 
-    if (string->nxoe.indirect == FALSE)
+    if (string->nxoe.indirect)
     {
-	cw_assert(a_offset >= 0 && a_offset < string->e.s.len);
-	string->e.s.str[a_offset] = a_el;
+	a_offset += string->e.i.beg_offset;
+	string = string->e.i.string;
     }
-    else
-    {
-	nxo_string_el_set(&string->e.i.nxo, a_el,
-			  a_offset + string->e.i.beg_offset);
-    }
+    cw_assert(string->nxoe.indirect == FALSE);
+
+    cw_assert(a_offset >= 0 && a_offset < string->e.s.len);
+    string->e.s.str[a_offset] = a_el;
 }
 
 #ifdef CW_THREADS
@@ -310,14 +310,13 @@ nxo_string_lock(cw_nxo_t *a_nxo)
     cw_dassert(string->nxoe.magic == CW_NXOE_MAGIC);
     cw_assert(string->nxoe.type == NXOT_STRING);
 
-    if (string->nxoe.indirect == FALSE)
+    if (string->nxoe.indirect)
     {
-	nxoe_p_string_lock(string);
+	string = string->e.i.string;
     }
-    else
-    {
-	nxo_string_lock(&string->e.i.nxo);
-    }
+    cw_assert(string->nxoe.indirect == FALSE);
+
+    nxoe_p_string_lock(string);
 }
 
 void
@@ -335,14 +334,13 @@ nxo_string_unlock(cw_nxo_t *a_nxo)
     cw_dassert(string->nxoe.magic == CW_NXOE_MAGIC);
     cw_assert(string->nxoe.type == NXOT_STRING);
 
-    if (string->nxoe.indirect == FALSE)
+    if (string->nxoe.indirect)
     {
-	nxoe_p_string_unlock(string);
+	string = string->e.i.string;
     }
-    else
-    {
-	nxo_string_unlock(&string->e.i.nxo);
-    }
+    cw_assert(string->nxoe.indirect == FALSE);
+
+    nxoe_p_string_unlock(string);
 }
 #endif
 
@@ -362,13 +360,13 @@ nxo_string_get(const cw_nxo_t *a_nxo)
     cw_dassert(string->nxoe.magic == CW_NXOE_MAGIC);
     cw_assert(string->nxoe.type == NXOT_STRING);
 
-    if (string->nxoe.indirect == FALSE)
+    if (string->nxoe.indirect)
     {
-	retval = string->e.s.str;
+	retval = &string->e.i.string->e.s.str[string->e.i.beg_offset];
     }
     else
     {
-	retval = &nxo_string_get(&string->e.i.nxo)[string->e.i.beg_offset];
+	retval = string->e.s.str;
     }
 
     return retval;
@@ -392,15 +390,16 @@ nxo_string_set(cw_nxo_t *a_nxo, cw_uint32_t a_offset, const cw_uint8_t *a_str,
     cw_assert(string->nxoe.type == NXOT_STRING);
 
     /* Get the string pointer. */
-    if (string->nxoe.indirect == FALSE)
+    if (string->nxoe.indirect)
     {
-	cw_assert(a_offset + a_len <= string->e.s.len);
-	str = string->e.s.str;
-
-	memcpy(&str[a_offset], a_str, a_len);
+	a_offset += string->e.i.beg_offset;
+	cw_assert(a_offset + a_len <= string->e.i.string->e.s.len);
+	str = string->e.i.string->e.s.str;
     }
     else
     {
-	nxo_string_set(&string->e.i.nxo, a_offset, a_str, a_len);
+	cw_assert(a_offset + a_len <= string->e.s.len);
+	str = string->e.s.str;
     }
+    memcpy(&str[a_offset], a_str, a_len);
 }

@@ -16,9 +16,6 @@ struct cw_nxoe_hook_s
 {
     cw_nxoe_t nxoe;
     
-    /* Used for remembering the current state of reference iteration. */
-    cw_uint32_t ref_iter;
-    
     cw_nxo_t tag;
     void *data;
     cw_nxo_hook_eval_t *eval_f;
@@ -69,19 +66,24 @@ nxoe_l_hook_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 {
     cw_nxoe_t *retval;
     cw_nxoe_hook_t *hook;
+    /* Used for remembering the current state of reference iteration.  This
+     * function is only called by the garbage collector, so as long as two
+     * interpreters aren't collecting simultaneously, using a static variable
+     * works fine. */
+    static cw_uint32_t ref_stage;
 
     hook = (cw_nxoe_hook_t *) a_nxoe;
 
     if (a_reset)
     {
-	hook->ref_iter = 0;
+	ref_stage = 0;
     }
 
-    switch (hook->ref_iter)
+    switch (ref_stage)
     {
 	case 0:
 	{
-	    hook->ref_iter++;
+	    ref_stage++;
 	    retval = nxo_nxoe_get(&hook->tag);
 	    if (retval != NULL)
 	    {
@@ -90,7 +92,7 @@ nxoe_l_hook_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 	}
 	case 1:
 	{
-	    hook->ref_iter++;
+	    ref_stage++;
 	    if (hook->ref_iter_f != NULL)
 	    {
 		retval = hook->ref_iter_f(hook->data, TRUE);

@@ -59,6 +59,11 @@ nxoe_l_stack_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 {
     cw_nxoe_t *retval;
     cw_nxoe_stack_t *stack;
+    /* Used for remembering the current state of reference iteration.  This
+     * function is only called by the garbage collector, so as long as two
+     * interpreters aren't collecting simultaneously, using a static variable
+     * works fine. */
+    static cw_uint32_t ref_stage;
 
     stack = (cw_nxoe_stack_t *) a_nxoe;
 
@@ -72,24 +77,24 @@ nxoe_l_stack_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 	     * up reporting some/all stack elements twice, but that doesn't
 	     * cause a correctness problem, whereas not reporting them at all
 	     * does. */
-	    stack->ref_stage = 0;
+	    ref_stage = 0;
 	}
 	else
 #endif
 	{
-	    stack->ref_stage = 2;
+	    ref_stage = 2;
 	}
     }
 
     retval = NULL;
-    switch (stack->ref_stage)
+    switch (ref_stage)
     {
 #ifdef CW_THREADS
 	case 0:
 	{
 	    /* Set up for stage 1. */
 	    stack->ref_stacko = stack->below;
-	    stack->ref_stage++;
+	    ref_stage++;
 	    /* Fall through. */
 	}
 	case 1:
@@ -105,7 +110,7 @@ nxoe_l_stack_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 	    {
 		break;
 	    }
-	    stack->ref_stage++;
+	    ref_stage++;
 	    /* Fall through. */
 	}
 #endif
@@ -118,7 +123,7 @@ nxoe_l_stack_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 		retval = nxo_nxoe_get(&stack->ref_stacko->nxo);
 	    }
 
-	    stack->ref_stage++;
+	    ref_stage++;
 	    if (retval != NULL)
 	    {
 		break;
@@ -132,7 +137,7 @@ nxoe_l_stack_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 	    {
 		stack->ref_stacko = qr_next(stack->ref_stacko, link);
 	    }
-	    stack->ref_stage++;
+	    ref_stage++;
 	    /* Fall through. */
 	}
 	case 4:
@@ -149,7 +154,7 @@ nxoe_l_stack_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 	    {
 		break;
 	    }
-	    stack->ref_stage++;
+	    ref_stage++;
 	    /* Fall through. */
 	}
 	default:

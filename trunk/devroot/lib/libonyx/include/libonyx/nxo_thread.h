@@ -77,9 +77,6 @@ struct cw_nxoe_thread_s
     cw_bool_t joined:1;
 #endif
 
-    /* Used for remembering the current state of reference iteration. */
-    cw_uint32_t ref_iter;
-
 #ifdef CW_THREADS
     /* TRUE  : New array, dict, file, and string objects are implicitly
      *         locked.

@@ -22,8 +22,6 @@ struct cw_nxoe_array_s
      * arrays aren't locked, but their parents are. */
     cw_mtx_t lock;
 #endif
-    /* Used for remembering the current state of reference iteration. */
-    cw_uint32_t ref_iter;
     union
     {
 	struct
@@ -115,20 +113,25 @@ nxoe_l_array_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 {
     cw_nxoe_t *retval;
     cw_nxoe_array_t *array;
+    /* Used for remembering the current state of reference iteration.  This
+     * function is only called by the garbage collector, so as long as two
+     * interpreters aren't collecting simultaneously, using a static variable
+     * works fine. */
+    static cw_uint32_t ref_iter;
 
     array = (cw_nxoe_array_t *) a_nxoe;
 
     if (a_reset)
     {
-	array->ref_iter = 0;
+	ref_iter = 0;
     }
 
     if (a_nxoe->indirect)
     {
-	if (array->ref_iter == 0)
+	if (ref_iter == 0)
 	{
 	    retval = array->e.i.nxo.o.nxoe;
-	    array->ref_iter++;
+	    ref_iter++;
 	}
 	else
 	{
@@ -138,10 +141,10 @@ nxoe_l_array_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
     else
     {
 	retval = NULL;
-	while (retval == NULL && array->ref_iter < array->e.a.len)
+	while (retval == NULL && ref_iter < array->e.a.len)
 	{
-	    retval = nxo_nxoe_get(&array->e.a.arr[array->ref_iter]);
-	    array->ref_iter++;
+	    retval = nxo_nxoe_get(&array->e.a.arr[ref_iter]);
+	    ref_iter++;
 	}
     }
 

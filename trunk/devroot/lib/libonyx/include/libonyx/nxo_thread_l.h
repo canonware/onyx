@@ -51,17 +51,22 @@ nxoe_l_thread_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 {
     cw_nxoe_t *retval;
     cw_nxoe_thread_t *thread;
+    /* Used for remembering the current state of reference iteration.  This
+     * function is only called by the garbage collector, so as long as two
+     * interpreters aren't collecting simultaneously, using a static variable
+     * works fine. */
+    static cw_uint32_t ref_iter;
 
     thread = (cw_nxoe_thread_t *) a_nxoe;
 
     if (a_reset)
     {
-	thread->ref_iter = 0;
+	ref_iter = 0;
     }
 
-    for (retval = NULL; retval == NULL; thread->ref_iter++)
+    for (retval = NULL; retval == NULL; ref_iter++)
     {
-	switch (thread->ref_iter)
+	switch (ref_iter)
 	{
 	    case 0:
 	    {
