@@ -58,6 +58,12 @@ $flags <
     }
     `--features' {
 	mark # Use for counting number of feature strings on stack.
+	@enable_oop@ 1 eq {
+	    ` oop'
+	} if
+	@enable_handle@ 1 eq {
+	    ` handle'
+	} if
 	@enable_threads@ 1 eq {
 	    ` threads'
 	} if
@@ -76,8 +82,8 @@ $flags <
 	@enable_socket@ 1 eq {
 	    ` socket'
 	} if
-	@enable_modprompt@ 1 eq {
-	    ` modprompt'
+	@enable_modules@ 1 eq {
+	    ` modules'
 	} if
 	@enable_inlines@ 1 eq {
 	    ` inlines'
