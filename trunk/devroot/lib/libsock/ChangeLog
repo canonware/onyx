@@ -1,3 +1,10 @@
+1999-07-28  Jason Evans  <jasone@canonware.com>
+
+	* src/socks.c (socks_listen): Set SO_REUSEADDR option on socket.
+
+	* src/sockb.c (sockb_p_entry_func): Fix a pseudo-memory leak of
+	g_sockb->messages_pezz allocations.
+
 1999-07-26  Jason Evans  <jasone@canonware.com>
 
 	* Makefile.{gnu,bsd}.in: Quiet noise caused by dependency updating.
