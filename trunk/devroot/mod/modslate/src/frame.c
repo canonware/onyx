@@ -38,7 +38,10 @@ static const struct cw_modslate_entry modslate_frame_hooks[] = {
     {"frame?", modslate_frame_p},
     MODSLATE_ENTRY(frame_aux_get),
     MODSLATE_ENTRY(frame_aux_set),
-    MODSLATE_ENTRY(frame_focus)
+    MODSLATE_ENTRY(frame_focus)//,
+//    MODSLATE_ENTRY(frame_window_current),
+//    MODSLATE_ENTRY(frame_window_prev),
+//    MODSLATE_ENTRY(frame_window_next)
 };
 
 static cw_nxoe_t *
@@ -77,6 +80,11 @@ frame_p_ref_iter(void *a_data, cw_bool_t a_reset)
 	    case 1:
 	    {
 		retval = nxo_nxoe_get(&frame->aux);
+		break;
+	    }
+	    case 2:
+	    {
+		retval = nxo_nxoe_get(&frame->display);
 		break;
 	    }
 	    default:
@@ -149,15 +157,6 @@ modslate_frame(void *a_data, cw_nxo_t *a_thread)
     frame = (struct cw_frame *)nxa_malloc(nx_nxa_get(nx),
 					  sizeof(struct cw_frame));
 
-    /* Create a reference to the frame. */
-    tnxo = nxo_stack_push(tstack);
-    nxo_hook_new(tnxo, nx, frame, NULL, frame_p_ref_iter, frame_p_delete);
-
-    /* Set the hook tag. */
-    tag = nxo_hook_tag_get(tnxo);
-    nxo_name_new(tag, nx, "frame", sizeof("frame") - 1, FALSE);
-    nxo_attr_set(tag, NXOA_EXECUTABLE);
-
     /* Create a reference to this operator in order to prevent the module from
      * being prematurely unloaded. */
     nxo_no_new(&frame->hook);
@@ -182,6 +181,16 @@ modslate_frame(void *a_data, cw_nxo_t *a_thread)
 	nxo_stack_pop(tstack);
 	return;
     }
+
+    /* Create a reference to the frame, now that the internals are
+     * initialized. */
+    tnxo = nxo_stack_push(tstack);
+    nxo_hook_new(tnxo, nx, frame, NULL, frame_p_ref_iter, frame_p_delete);
+
+    /* Set the hook tag. */
+    tag = nxo_hook_tag_get(tnxo);
+    nxo_name_new(tag, nx, "frame", sizeof("frame") - 1, FALSE);
+    nxo_attr_set(tag, NXOA_EXECUTABLE);
 
     /* Clean up the stacks. */
     nxo_dup(display, tnxo);

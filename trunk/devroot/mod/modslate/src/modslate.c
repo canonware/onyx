@@ -166,6 +166,7 @@ modslate_init(void *a_arg, cw_nxo_t *a_thread)
     modslate_buffer_init(a_thread);
     modslate_display_init(a_thread);
     modslate_frame_init(a_thread);
+    modslate_window_init(a_thread);
     modslate_funnel_init(a_thread);
 
     /* Initialize curses_funnel such that it is usable both in Onyx code and C
