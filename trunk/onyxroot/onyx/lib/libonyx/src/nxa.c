@@ -132,7 +132,7 @@ static cw_mema_t s_nxaa;
 static ql_head(cw_nx_t) s_nx_ql;
 
 #ifdef CW_THREADS
-/* Protects the gcdict_* fields, gc_pending, and nx_ql. */
+/* Protects the gcdict_* fields and gc_pending. */
 static cw_mtx_t s_lock;
 #endif
 
@@ -150,6 +150,7 @@ static cw_nxoi_t s_gcdict_sum[2];
 
 /* Sequence set. */
 #ifdef CW_THREADS
+/* Protects s_seq_set, s_white, and s_nx_ql. */
 static cw_mtx_t s_seq_mtx;
 #endif
 static ql_head(cw_nxoe_t) s_seq_set;
@@ -510,11 +511,11 @@ nxa_l_nx_insert(cw_nx_t *a_nx)
     cw_assert(cw_g_nxa_initialized);
 
 #ifdef CW_THREADS
-    mtx_lock(&s_lock);
+    mtx_lock(&s_seq_mtx);
 #endif
     ql_tail_insert(&s_nx_ql, a_nx, link);
 #ifdef CW_THREADS
-    mtx_unlock(&s_lock);
+    mtx_unlock(&s_seq_mtx);
 #endif
 }
 
@@ -524,11 +525,11 @@ nxa_l_nx_remove(cw_nx_t *a_nx)
     cw_assert(cw_g_nxa_initialized);
 
 #ifdef CW_THREADS
-    mtx_lock(&s_lock);
+    mtx_lock(&s_seq_mtx);
 #endif
     ql_remove(&s_nx_ql, a_nx, link);
 #ifdef CW_THREADS
-    mtx_unlock(&s_lock);
+    mtx_unlock(&s_seq_mtx);
 #endif
 }
 
@@ -903,14 +904,23 @@ nxa_l_count_adjust(cw_nxoi_t a_adjust)
 #endif
 }
 
+/* This function is only called in nxoe_l_name_delete(). */
 cw_bool_t
 nxa_l_white_get(void)
 {
+    cw_bool_t retval;
+
     cw_assert(cw_g_nxa_initialized);
 
-    /* This function is only called in nxoe_l_name_delete(), which is executed
-     * in the context of the GC thread, so no locking is necessary. */
-    return s_white;
+#ifdef CW_THREADS
+    mtx_lock(&s_seq_mtx);
+#endif
+    retval = s_white;
+#ifdef CW_THREADS
+    mtx_unlock(&s_seq_mtx);
+#endif
+
+    return retval;
 }
 
 CW_P_INLINE void
