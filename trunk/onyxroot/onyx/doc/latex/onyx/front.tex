@@ -43,16 +43,6 @@
 \renewcommand{\baselinestretch}{1.0}
 %end{latexonly}
 
-%
-% Title page setup
-%
-\title{Onyx Manual, Version <Version = onyx>}
-\author{Jason Evans}
-\date{\today}
-
-% Control what all ends up in the table of contents.
-%\addtocounter{secnumdepth}{4}
-
 %begin{latexonly}
 % Use this to make sure chapter breaks look right.
 \newcommand{\clearemptydoublepage}
@@ -158,6 +148,16 @@
 \newcommand{\rb}{YYYrbZZZ}
 \end{htmlonly}
 
+%
+% Title page setup
+%
+\title{Onyx Manual, Version <Version = onyx>}
+\author{Jason Evans {\lt}jasone@canonware.com{\gt}}
+\date{\today}
+
+% Control what all ends up in the table of contents.
+%\addtocounter{secnumdepth}{4}
+
 % Generate an index.
 \makeindex
 
@@ -180,7 +180,7 @@ interpreter, so the manual also documents different aspects of the
 implementation that are important when embedding Onyx into another program.
 
 Onyx came in to existence when the author started working on a text editor
-(since abandoned) that was meant to be extensible.  One of the goals was to
+(since mothballed) that was meant to be extensible.  One of the goals was to
 provide robust multi-threading.  Unfortunately, when work began on the text
 editor in 1999, the author was unable to find any embeddable scripting languages
 that provided adequate support for threads.  Thus Onyx was born.  The author was
@@ -201,7 +201,9 @@ features may be disabled, so there are portions that do not apply to Onyx
 interpreters that have been configured without Onyx's full feature set.
 
 For software distributions, news, and additional project information, see
-\htmlurl{http://www.canonware.com/}.
+\htmlurl{http://www.canonware.com/onyx/}.  The author is interested in hearing
+how people are using Onyx, so please do not hesitate to email him comments or
+questions.
 
 \clearemptydoublepage
 \tableofcontents
