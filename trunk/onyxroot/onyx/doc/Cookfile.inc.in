@@ -67,7 +67,7 @@ docs_relclean : [addsuffix _docs_relclean @docs@]
                                          -s @abs_srcroot@/%0latex/%1/%.mst
                                          %.idx;
   cd @objroot@/%0latex/%1/\; @PERL@ @abs_srcroot@/%0latex/ltx2e @LATEX@ %.tex;
-  @DVIPS@ @objroot@/%0latex/%1/%.dvi -o @objroot@/%0ps/%1/%.ps;
+  @DVIPS@ @objroot@/%0latex/%1/%.dvi -t letter -o @objroot@/%0ps/%1/%.ps;
 }
 
 @objroot@/%0pdf/%1/%.pdf : @objroot@/%0latex/%1/%.tex
