@@ -70,10 +70,7 @@ onyx_config_bins_clean :
   rm -f [OONYX_CONFIG] [ONYX_CONFIG];
 }
 
-onyx_config_bins_distclean :
-{
-  rm -f [fromto @srcroot@/%0%.nx.in.in @objroot@/%0%.nx.in [ONYX_CONFIG_NSRCS]];
-}
+onyx_config_bins_distclean : ;
 
 /*
  * Dependencies.
@@ -86,7 +83,7 @@ onyx_config_bins_distclean :
 {
   echo \"#!@OONYX@\" > [target];
   cat [fromto @srcroot@/%0%.nx.in @objroot@/%0%.nx [ONYX_CONFIG_NSRCS]]
-    | [BONYX] @objroot@/bin/onyx_config/src/oonyx_config_gen.nx
+    | [BONYX] @srcroot@/bin/onyx_config/src/oonyx_config_gen.nx
     >> [target];
   chmod 0755 [target];
 }
@@ -98,7 +95,7 @@ onyx_config_bins_distclean :
 {
   echo \"#!@ONYX@\" > [target];
   cat [fromto @srcroot@/%0%.nx.in @objroot@/%0%.nx [ONYX_CONFIG_NSRCS]]
-    | [BONYX] @objroot@/bin/onyx_config/src/onyx_config_gen.nx
+    | [BONYX] @srcroot@/bin/onyx_config/src/onyx_config_gen.nx
     >> [target];
   chmod 0755 [target];
 }
