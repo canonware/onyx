@@ -13,7 +13,7 @@ argv length 2 ge {
 argv length 3 ge {
     $nworker_threads argv 2 get cvx eval def
 }{
-    $nworker_threads 4 def
+    $nworker_threads 8 def
 } ifelse
 
 $PREFIX pwd `/regress_' SRCDIR 3 ncat def
