@@ -273,7 +273,7 @@ main(int argc, char **argv)
 		zero.tv_sec = 0;
 		zero.tv_nsec = 0;
 
-		while (1) {
+		for (;;) {
 			if ((NULL != tout) && (TRUE == done_reading)) {
 				/*
 				 * If mq_timedget() times out, fd will be

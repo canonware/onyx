@@ -512,10 +512,10 @@ sockb_l_get_host_ip(const char *a_host_str, cw_uint32_t *r_host_ip)
 
 		out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
 		    "IP address: [i].[i].[i].[i]\n",
-		    t_host_ip & 0xff,
-		    (t_host_ip >> 8) & 0xff,
+		    t_host_ip >> 24,
 		    (t_host_ip >> 16) & 0xff,
-		    t_host_ip >> 24);
+		    (t_host_ip >> 8) & 0xff,
+		    t_host_ip & 0xff);
 	}
 	return retval;
 }
