@@ -7,7 +7,7 @@
  *
  * Version: Onyx <Version = onyx>
  *
- * cook file for onyx.
+ * Cookfile for onyx.
  *
  ******************************************************************************/
 
@@ -18,26 +18,12 @@
  * File lists.
  */
 
-/* Include files that are _not_ installed. */
-{
-  local priv_incs = onyx.h;
-  priv_incs = [fromto % [srcdir]/bin/onyx/include/% [priv_incs]];
-  priv_incs = [priv_incs] [objdir]/bin/onyx/include/onyx_defs.h;
-
-  local priv_cincs = onyx_nxcode.c batch_nxcode.c interactive_nxcode.c;
-  prix_cincs = [fromto % [srcdir]/bin/onyx/src/% [priv_cincs]];
-
-  PRIV_INCS = [PRIV_INCS] [priv_incs] [priv_cincs];
-}
-
 /* Source files. */
 ONYX_SRCS = onyx.c;
 ONYX_SRCS = [fromto % [srcdir]/bin/onyx/src/% [ONYX_SRCS]];
 
 TONYX_SRCS = tonyx.c;
 TONYX_SRCS = [fromto % [srcdir]/bin/onyx/src/% [TONYX_SRCS]];
-
-SRCS = [SRCS] [ONYX_SRCS] [TONYX_SRCS];
 
 /*
  * Onyx tests.
@@ -173,13 +159,12 @@ SRCS = [SRCS] [ONYX_SRCS] [TONYX_SRCS];
   tex_srcs = [fromto % [srcdir]/bin/onyx/doc/latex/% [tex_srcs]];
   tex_srcs = [tex_srcs] [objdir]/bin/onyx/doc/latex/manual.tex;
 
-  TEX_SRCS = [TEX_SRCS] [tex_srcs];
+  ONYX_TEX_SRCS = [ONYX_TEX_SRCS] [tex_srcs];
 }
 
 /* Binaries. */
 ONYX = [objdir]/bin/onyx/bin/onyx;
 TONYX = [objdir]/bin/onyx/bin/tonyx;
-BINS = [BINS] [ONYX] [TONYX];
 
 [TONYX] : [ONYX];
 
@@ -187,9 +172,9 @@ BINS = [BINS] [ONYX] [TONYX];
  * User cook'ables.
  */
 
-BOOTSTRAP = [BOOTSTRAP] onyx_bootstrap;
+onyx : [ONYX] [TONYX];
 
-onyx_bootstrap : [ONYX]
+onyx_bins_bootstrap : [ONYX]
 {
   cat [srcdir]/bin/onyx/src/onyx_nxcode.nx
     | [ONYX] [srcdir]/bin/onyx/src/onyx_nxcode_gen.nx
@@ -204,15 +189,13 @@ onyx_bootstrap : [ONYX]
     > [srcdir]/bin/onyx/src/interactive_nxcode.c;
 }
 
-onyx : [ONYX];
-tonyx : [TONYX];
-
 onyx_install : [ONYX]
 #if [enable_libonyx]
-               libonyx_install_s
+               libonyx_libs_install_s
 #endif
 {
   [INSTALL] -d [PREFIX]/bin;
+
   [CC] [A_CFLAGS] -o [PREFIX]/bin/onyx
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [ONYX_SRCS]]
 #if [enable_libedit]
@@ -243,8 +226,6 @@ onyx_clean :
 
 onyx_distclean :
 {
-  rm -f [objdir]/bin/onyx/doc/latex/manual.tex;
-  rm -f [objdir]/bin/onyx/man/man1/onyx.1;
 }
 
 /*
@@ -260,7 +241,7 @@ onyx_distclean :
 
 [ONYX] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [ONYX_SRCS]]
 #if [enable_libonyx]
-          [LIBONYX_S]
+          libonyx_libs_s
 #endif
 #if [enable_libedit]
           [LIBEDIT_A]

@@ -1,0 +1,56 @@
+/******************************************************************************
+ *
+ * <Copyright = jasone>
+ * <License>
+ *
+ ******************************************************************************
+ *
+ * Version: <Version>
+ *
+ * Top level Cookfile for documentation.  Documentation is only rebuilt if the
+ * --with-docs option is specified.
+ *
+ ******************************************************************************/
+
+#include-cooked [fromto % [objdir]/lib/%/Cookfile.inc @docs@]
+
+/* Paths to programs. */
+LATEX = @LATEX@;
+PDFLATEX = @PDFLATEX@;
+DVIPS = @DVIPS@;
+FIG2DEV = @FIG2DEV@;
+LATEX2HTML = @LATEX2HTML@;
+MAKEINDEX = @MAKEINDEX@;
+
+/*
+ * Targets.
+ */
+docs_ps : [addsuffix _docs_ps @docs@];
+docs_pdf : [addsuffix _docs_pdf @docs@];
+docs_html : [addsuffix _docs_html @docs@];
+docs : docs_ps docs_pdf docs_html;
+
+docs_install_ps : [addsuffix _docs_install_ps @docs@];
+docs_install_pdf : [addsuffix _docs_install_pdf @docs@];
+docs_install_html : [addsuffix _docs_install_html @docs@];
+docs_install : docs_install_ps docs_install_pdf docs_install_html;
+
+docs_uninstall : [addsuffix _docs_uninstall @docs@];
+
+docs_clean : [addsuffix _docs_clean @docs@];
+
+docs_relclean : [addsuffix _docs_relclean @docs@]
+{
+  rm -rf [objdir]/doc/html;
+  rm -rf [objdir]/doc/pdf;
+  rm -rf [objdir]/doc/ps;
+}
+
+/*
+ * Build rules.
+ */
+[objdir]/%0%.ps : [srcdir]/%0%.fig
+  set mkdir
+{
+  [FIG2DEV] -L ps [srcdir]/%0%.fig [objdir]/%0%.ps;
+}

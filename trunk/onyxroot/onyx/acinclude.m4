@@ -261,6 +261,13 @@ AC_SUBST(enable_onyx)
 if test "x$enable_onyx" = "x1" ; then
   AC_DEFINE(CW_USE_ONYX)
 fi
+
+if test "<Version>" != "<Version\>" ; then
+  onyx_version=<Version = onyx>
+else
+  onyx_version=devel
+fi
+AC_SUBST(onyx_version)
 ])
 
 dnl Build slate by default.
@@ -280,6 +287,13 @@ AC_SUBST(enable_slate)
 if test "x$enable_slate" = "x1" ; then
   AC_DEFINE(CW_USE_SLATE)
 fi
+
+if test "<Version>" != "<Version\>" ; then
+  slate_version=<Version = slate>
+else
+  slate_version=devel
+fi
+AC_SUBST(slate_version)
 ])
 
 dnl CW_BUILD_LIB(lib, var)
@@ -291,6 +305,7 @@ AC_MSG_CHECKING(whether to include $1 in build)
 if test -d "$srcdir/lib/$1" ; then
   build_$1="yes"
   $2=1
+  cfgoutputs="$cfgoutputs lib/$1/Cookfile.inc"
   if test -f "$srcdir/lib/$1/doc/latex/manual.tex.in" ; then
     mkdir -p $objdir/lib/$1/doc/latex
     cfgoutputs="$cfgoutputs lib/$1/doc/latex/manual.tex"
@@ -315,6 +330,7 @@ AC_MSG_CHECKING(whether to include $1 in build)
 if test -d "$srcdir/mod/$1" ; then
   build_$1="yes"
   $2=1
+  cfgoutputs="$cfgoutputs mod/$1/Cookfile.inc"
   if test -f "$srcdir/mod/$1/doc/latex/manual.tex.in" ; then
     mkdir -p $objdir/mod/$1/doc/latex
     cfgoutputs="$cfgoutputs mod/$1/doc/latex/manual.tex"
@@ -339,6 +355,7 @@ AC_MSG_CHECKING(whether to include $1 in build)
 if test -d "$srcdir/bin/$1" ; then
   build_$1="yes"
   $2=1
+  cfgoutputs="$cfgoutputs bin/$1/Cookfile.inc"
   if test -f "$srcdir/bin/$1/doc/latex/manual.tex.in" ; then
     mkdir -p $objdir/bin/$1/doc/latex
     cfgoutputs="$cfgoutputs bin/$1/doc/latex/manual.tex"
@@ -352,6 +369,28 @@ if test -d "$srcdir/bin/$1" ; then
     cfghdrs="$cfghdrs $objdir/bin/$1/include/$1_defs.h"
   fi
   bins="$bins $1"
+else
+  build_$1="no"
+  $2=0
+fi
+AC_MSG_RESULT($build_$1)
+AC_SUBST($2)
+])
+
+dnl CW_BUILD_DOC(doc, var)
+dnl bin : Name of document.
+dnl var : Name of variable to substitute in configure output.
+AC_DEFUN(CW_BUILD_DOC,
+[
+AC_MSG_CHECKING(whether to include $1 document in build)
+if test -d "$srcdir/doc/latex/$1" ; then
+  build_$1="yes"
+  $2=1
+  if test -f "$srcdir/doc/latex/$1/$1.tex.in" ; then
+    mkdir -p $objdir/doc/latex/$1
+    cfgoutputs="$cfgoutputs doc/latex/$1/$1.tex doc/latex/$1/Cookfile.inc"
+  fi
+  docs="$docs $1"
 else
   build_$1="no"
   $2=0

@@ -7,9 +7,13 @@
  *
  * Version: <Version>
  *
- * Test build rules.
+ * Top level Cookfile for tests.
  *
  ******************************************************************************/
+
+/* Paths to programs. */
+DIFF = @DIFF@;
+VERIFY = @VERIFY@;
 
 /*
  * Global variables.
@@ -20,7 +24,28 @@ PTESTS = ;
 CBTESTS = ;
 OBTESTS = ;
 
-test_clean :
+tests : bins_onyx mods
+        [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS] [CBTESTS]]
+        [fromto [srcdir]/%0%.nx.in [objdir]/%0%.nx [OTESTS] [OBTESTS]]
+        [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]];
+
+check : tests
+{
+  [VERIFY] -s [srcdir] -o [objdir]
+           [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS]]
+           [fromto [srcdir]/%0%.nx.in [objdir]/%0%.nx [OTESTS]]
+           [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]];
+}
+
+check_update : tests
+{
+  [VERIFY] -u -s [srcdir] -o [objdir]
+           [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS]]
+           [fromto [srcdir]/%0%.nx.in [objdir]/%0%.nx [OTESTS]]
+           [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]];
+}
+
+tests_clean :
 {
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_a [CTESTS]];
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [CTESTS]];
@@ -47,7 +72,7 @@ test_clean :
   rm -f [fromto [srcdir]/%0%.nx.in [objdir]/%0%.nx [OBTESTS]];
 }
 
-test_distclean :
+tests_distclean :
 {
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.perf [CTESTS]];
   rm -f [fromto [srcdir]/%0%.nx.in [objdir]/%0%.nx.perf [OTESTS]];

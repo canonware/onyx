@@ -1,0 +1,205 @@
+/******************************************************************************
+ *
+ * <Copyright = jasone>
+ * <License>
+ *
+ ******************************************************************************
+ *
+ * Version: Onyx <Version = onyx>
+ *
+ * Cookfile for Onyx manual.
+ *
+ ******************************************************************************/
+
+#if [@with_docs@]
+  ONYX_PS = [objdir]/doc/ps/onyx.ps;
+  ONYX_PDF = [objdir]/doc/pdf/onyx.pdf;
+  ONYX_HTML = [objdir]/doc/html/onyx/onyx.html;
+#else
+  ONYX_PS = [srcdir]/doc/ps/onyx.ps;
+  ONYX_PDF = [srcdir]/doc/pdf/onyx.pdf;
+  ONYX_HTML = [srcdir]/doc/html/onyx/onyx.html;
+#endif
+
+/* LaTeX source files. */
+{
+  local tex_srcs = onyx_front.tex onyx_back.tex onyx_lang.tex onyx_tut.tex
+                   onyx_ex.tex;
+  tex_srcs = [fromto % [srcdir]/doc/latex/% [tex_srcs]];
+
+  ONYX_TEX_SRCS = [tex_srcs];
+}
+
+/* xfig source files. */
+{
+  local fig_srcs = ;
+  fig_srcs = [fromto % [srcdir]/doc/latex/% [fig_srcs]];
+
+  ONYX_FIG_SRCS = [fig_srcs];
+}
+
+/*
+ * Targets.
+ */
+onyx_docs_install_ps :
+#if [with_docs]
+                       [ONYX_PS]
+#endif
+{
+  [INSTALL] -d [PREFIX]/share/onyx/doc/ps;
+  [INSTALL] -m 0444 [ONYX_PS] [PREFIX]/share/onyx/doc/ps;
+}
+
+onyx_docs_install_pdf :
+#if [with_docs]
+                        [ONYX_PDF]
+#endif
+{
+  [INSTALL] -d [PREFIX]/share/onyx/doc/pdf;
+  [INSTALL] -m 0444 [ONYX_PDF] [PREFIX]/share/onyx/doc/pdf;
+}
+
+onyx_docs_install_html :
+#if [with_docs]
+                         [ONYX_HTML]
+#endif
+{
+  [SHELL] -e;
+data
+#![SHELL]
+
+echo [INSTALL] -d [PREFIX]/share/onyx/doc/html
+[INSTALL] -d [PREFIX]/share/onyx/doc/html
+
+for i in `find [dirname [ONYX_HTML]] -type f`; do
+  echo [INSTALL] -m 0444 $i [PREFIX]/share/onyx/doc/html
+  [INSTALL] -m 0444 $i [PREFIX]/share/onyx/doc/html
+done
+dataend
+}
+
+onyx_docs_uninstall :
+{
+  [SHELL] -e;
+data
+#![SHELL]
+
+echo rm -rf [PREFIX]/share/onyx/doc
+rm -rf [PREFIX]/share/onyx/doc
+dataend
+}
+
+onyx_docs_clean :
+{
+  rm -f [addprefix [objdir]/doc/latex/onyx/onyx.
+                   alg aux aux-prev dvi idx idx-prev ilg ind lof log lot out pdf
+                   toc];
+  rm -f [objdir]/doc/latex/onyx/texput.log;
+}
+
+onyx_docs_relclean :
+{
+  rm -rf [objdir]/doc/html/onyx;
+  rm -rf [objdir]/doc/pdf/onyx;
+  rm -rf [objdir]/doc/ps/onyx;
+}
+
+/*
+ * Build rules.
+ */
+[objdir]/%0ps/onyx/%.ps : [objdir]/%0latex/onyx/%.tex [ONYX_TEX_SRCS]
+                          [fromto [srcdir]/%0latex/onyx/%.fig
+                                  [objdir]/%0latex/onyx/%.ps
+                                  [ONYX_FIG_SRCS]]
+  set mkdir
+{
+  /*
+   * Clean up the temp files to keep {pdf}latex from stumbling over the output
+   * of each other.
+   *
+   * Change directory to the object tree, since latex can't be made to use a
+   * different location for output files.
+   */
+
+  rm -f [addprefix [objdir]/%0latex/onyx/%.
+                   alg aux aux-prev idx idx-prev ilg ind lof log lot out toc];
+  rm -f [objdir]/%0latex/onyx/texput.log;
+
+  cd [objdir]/%0latex/onyx/\; [PERL] [abs_srcdir]/%0latex/ltx2e [LATEX] %.tex;
+  cd [objdir]/%0latex/onyx/\; [MAKEINDEX] -c -l
+                                          -s [abs_srcdir]/%0latex/onyx/%.mst
+                                          %.idx;
+  cd [objdir]/%0latex/onyx/\; [PERL] [abs_srcdir]/%0latex/ltx2e [LATEX] %.tex;
+  [DVIPS] [objdir]/%0latex/onyx/%.dvi -o [objdir]/%0ps/onyx/%.ps;
+}
+
+/*
+ * This rule depends on the PostScript version of the manual so that the two
+ * rules will not run in parallel.  This is necessary in order to keep them
+ * from stomping all over each others' temporory files.
+ */
+[objdir]/%0pdf/onyx/%.pdf : [objdir]/%0latex/onyx/%.tex [objdir]/%0ps/onyx/%.ps
+                            [ONYX_TEX_SRCS]
+                            [fromto [srcdir]/%0latex/onyx/%.fig
+                                    [objdir]/%0latex/onyx/%.ps
+                                    [ONYX_FIG_SRCS]]
+  set mkdir
+{
+  /*
+   * Clean up the temp files to keep {pdf}latex from stumbling over the output
+   * of each other.
+   *
+   * Change directory to the object tree, since latex can't be made to use a
+   * different location for output files.
+   */
+
+  rm -f [addprefix [objdir]/%0latex/onyx/%.
+                   alg aux aux-prev idx idx-prev ilg ind lof log lot out toc];
+  rm -f [objdir]/%0latex/onyx/texput.log;
+
+  cd [objdir]/%0latex/onyx/\; [PERL] [abs_srcdir]/%0latex/ltx2e [PDFLATEX]
+                                     %.tex;
+  cd [objdir]/%0latex/onyx/\; [MAKEINDEX] -c -l 
+                                          -s [abs_srcdir]/%0latex/onyx/%.mst
+                                          %.idx;
+  cd [objdir]/%0latex/onyx/\; [PERL] [abs_srcdir]/%0latex/ltx2e [PDFLATEX]
+                                     %.tex;
+  cp [objdir]/%0latex/onyx/%.pdf [objdir]/%0pdf/onyx/%.pdf;
+}
+
+[objdir]/%0html/onyx/%.html : [objdir]/%0latex/onyx/%.tex [TEX_SRCS]
+                              [fromto [srcdir]/%0latex/onyx/%.fig
+                                      [objdir]/%0latex/onyx/%.ps
+                                      [FIG_SRCS]]
+  set mkdir
+{
+  [LATEX2HTML] -init_file [srcdir]/%0latex/onyx/.latex2html-init
+    -dir [abs_objdir]/%0html/onyx -split 5 -toc_depth 4 -show_section_numbers
+    -footnode -noinfo -auto_link -transparent -image_type png -local_icons
+    [abs_objdir]/%0latex/onyx/%.tex;
+  /*
+   * Fix up [, ], and \ characters.
+   * Get rid of spurious <> at the end of tables.
+   */
+  [SHELL] -e;
+data
+  for i in `find [objdir]/%0html/onyx/ -type f |grep "\.html$"` ; do
+    mv $i $i.tmp
+    cat $i.tmp | sed -e s/YYYbsZZZ/\\\\\\\\/g \\
+      | sed -e s/YYYlbZZZ/\[/g \\
+      | sed -e s/YYYrbZZZ/\]/g \\
+      | sed -e \\
+        "s/^\\\\\\(\\\\\\<\\\\/TABLE\\\\\\>\\\\\\)\\\\\\<\\\\\\>/\\\\1/g" \\
+      > $i
+    rm $i.tmp
+  done
+dataend
+
+  /*
+   * Clean up temp files so that they won't get installed.
+   */
+  rm -f [objdir]/%0html/onyx/WARNINGS;
+  rm -f [addprefix [objdir]/%0html/onyx/images. aux idx log pl tex];
+  rm -f [objdir]/%0html/onyx/internals.pl;
+  rm -f [objdir]/%0html/onyx/labels.pl;
+}

@@ -39,21 +39,12 @@ CHMOD = @CHMOD@;
 INSTALL = @INSTALL@;
 PERL = @PERL@;
 CAT = @CAT@;
-DIFF = @DIFF@;
-VERIFY = @VERIFY@;
-LATEX = @LATEX@;
-PDFLATEX = @PDFLATEX@;
-DVIPS = @DVIPS@;
-FIG2DEV = @FIG2DEV@;
-LATEX2HTML = @LATEX2HTML@;
-MAKEINDEX = @MAKEINDEX@;
 
 /* Build parameters. */
 if [not [defined CPPFLAGS]] then
   CPPFLAGS = [split " " [strip "@CPPFLAGS@"]];
 CPPDEFS = -D_REENTRANT;
 
-MODGTK_CPPFLAGS = @GTK_CFLAGS@;
 if [not [defined CFLAGS]] then
   CFLAGS = [split " " [strip "@CFLAGS@"]];
 A_CFLAGS = [CFLAGS];
@@ -68,23 +59,6 @@ if [not [defined LDFLAGS]] then
 EXTRALIBS = @LIBS@;
 RPATH = @RPATH@;
 
-MODGTK_LDFLAGS = @GTK_LIBS@;
-
-libs = @libs@;
-mods = @mods@;
-bins = @bins@;
-
-enable_threads = @enable_threads@;
-enable_real = @enable_real@;
-enable_posix = @enable_posix@;
-enable_posix_file = @enable_posix_file@;
-enable_libedit = @enable_libedit@;
-enable_onyx = @enable_onyx@;
-enable_libonyx = @enable_libonyx@;
-with_docs = @with_docs@;
-
-BOOTSTRAP = ;
-
 /* Documentation. */
 #include-cooked [srcdir]/doc/Cookfile.inc
 
@@ -94,17 +68,14 @@ BOOTSTRAP = ;
 /* Tests. */
 #include-cooked [srcdir]/test/Cookfile.inc
 
+/* Binaries. */
+#include-cooked [srcdir]/bin/Cookfile.inc
+
 /* Libraries. */
 #include-cooked [srcdir]/lib/Cookfile.inc
-#include-cooked [fromto % [srcdir]/lib/%/Cookfile.inc @libs@]
 
 /* Modules. */
 #include-cooked [srcdir]/mod/Cookfile.inc
-#include-cooked [fromto % [srcdir]/mod/%/Cookfile.inc @mods@]
-
-/* Programs. */
-#include-cooked [srcdir]/bin/Cookfile.inc
-#include-cooked [fromto % [srcdir]/bin/%/Cookfile.inc @bins@]
 
 /*
  * User targets.
@@ -114,71 +85,24 @@ all : libs mods bins examples tests docs
   set default
 ;
 
-libs_a : [A_LIBS];
-libs_s : [S_LIBS];
-libs : libs_a libs_s;
-
 mods : [MODS];
 
-bins : [BINS];
-
-bootstrap : [BOOTSTRAP];
-
-tests : [TONYX] [MODS]
-        [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS] [CBTESTS]]
-        [fromto [srcdir]/%0%.nx.in [objdir]/%0%.nx [OTESTS] [OBTESTS]]
-        [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]];
-
-check : tests
-{
-  [VERIFY] -s [srcdir] -o [objdir]
-           [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS]]
-           [fromto [srcdir]/%0%.nx.in [objdir]/%0%.nx [OTESTS]]
-           [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]];
-}
-
-check_update : tests
-{
-  [VERIFY] -u -s [srcdir] -o [objdir]
-           [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS]]
-           [fromto [srcdir]/%0%.nx.in [objdir]/%0%.nx [OTESTS]]
-           [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]];
-}
+bootstrap : [addsuffix _bootstrap bins libs];
 
 release : docs;
 
-docs :
-#if [with_docs]
-       docs_ps docs_pdf docs_html
-#endif
-       ;
-docs_ps : [PS_ONYX];
-docs_pdf : [PDF_ONYX];
-docs_html : [HTML_ONYX];
+mods_install : [addsuffix _install @mods@];
+install : [addsuffix _install bins mods libs docs];
 
-install_bins : [addsuffix _install @bins@];
-install_mods : [addsuffix _install @mods@];
-install_libs : [addsuffix _install @libs@];
-install : install_bins install_mods install_libs install_docs;
+mods_uninstall : [addsuffix _uninstall @mods@];
+uninstall : [addsuffix _uninstall bins mods libs docs];
 
-uninstall_bins : [addsuffix _uninstall @bins@];
-uninstall_mods : [addsuffix _uninstall @mods@];
-uninstall_libs : [addsuffix _uninstall @libs@];
-uninstall : uninstall_bins uninstall_mods uninstall_libs uninstall_docs;
-
-clean : [addsuffix _clean docs test @bins@ @mods@ @libs@]
+clean : [addsuffix _clean docs tests bins mods libs]
 {
   rm -f core *.core;
   rm -f *.gmon;
-  rm -f TAGS;
-
-  rm -f [A_LIBS];
-  rm -f [S_LIBS];
-  rm -f [S_LINKS];
 
   rm -f [MODS];
-
-  rm -f [BINS];
 
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_d [SRCS]];
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_a [SRCS]];
@@ -215,21 +139,12 @@ done
 dataend
 }
 
-distclean : clean [addsuffix _distclean docs test @bins@ @mods@ @libs@]
+distclean : clean [addsuffix _distclean tests bins mods libs]
 {
-  rm -f [objdir]/Cookfile;
-  rm -f [objdir]/config.cache;
   rm -f [objdir]/config.log;
   rm -f [objdir]/config.status;
-  rm -f [objdir]/test/verify;
   rm -f @cfghdrs@;
+  rm -f @cfgoutputs@;
 }
 
-relclean : distclean [addsuffix _relclean docs]
-{
-}
-
-etags : [INCS] [PRIV_INCS] [MINCS] [SRCS] [MSRCS]
-{
-  @ETAGS@ [INCS] [PRIV_INCS] [MINCS] [SRCS] [MSRCS];
-}
+relclean : distclean [addsuffix _relclean docs];

@@ -7,7 +7,7 @@
  *
  * Version: Slate <Version = slate>
  *
- * cook file for slate.
+ * Cookfile for slate.
  *
  ******************************************************************************/
 
@@ -17,18 +17,6 @@
 /*
  * File lists.
  */
-
-/* Include files that are _not_ installed. */
-{
-  local priv_incs = buf.h buffer.h hist.h slate.h slate_ops.h;
-  priv_incs = [fromto % [srcdir]/bin/slate/include/% [priv_incs]];
-  priv_incs = [priv_incs] [objdir]/bin/slate/include/slate_defs.h;
-
-  local priv_cincs = slate_nxcode.c;
-  prix_cincs = [fromto % [srcdir]/bin/slate/src/% [priv_cincs]];
-
-  PRIV_INCS = [PRIV_INCS] [priv_incs] [priv_cincs];
-}
 
 /* Source files. */
 SLATE_SRCS = buf.c buffer.c hist.c slate.c slate_ops.c;
@@ -44,13 +32,12 @@ SRCS = [SRCS] [SLATE_SRCS] [TSLATE_SRCS];
   local tex_srcs = ;
   tex_srcs = [fromto % [srcdir]/bin/slate/doc/latex/% [tex_srcs]];
 
-  TEX_SRCS = [TEX_SRCS] [tex_srcs];
+  SLATE_TEX_SRCS = [SLATE_TEX_SRCS] [tex_srcs];
 }
 
 /* Binaries. */
 SLATE = [objdir]/bin/slate/bin/slate;
 TSLATE = [objdir]/bin/slate/bin/tslate;
-BINS = [BINS] [SLATE] [TSLATE];
 
 [TSLATE] : [SLATE];
 
@@ -58,30 +45,28 @@ BINS = [BINS] [SLATE] [TSLATE];
  * User cook'ables.
  */
 
-BOOTSTRAP = [BOOTSTRAP] slate_bootstrap;
+slate : [SLATE] [TSLATE];
 
-slate_bootstrap : [ONYX]
+slate_bins_bootstrap : [ONYX]
 {
   cat [srcdir]/bin/slate/src/slate_nxcode.nx
     | [ONYX] [srcdir]/bin/slate/src/slate_nxcode_gen.nx
     > [srcdir]/bin/slate/src/slate_nxcode.c;
 }
 
-slate : [SLATE];
-tslate : [TSLATE];
-
 slate_install : [SLATE]
-#if [matches macho [abi]]
-/* Make sure install_name is set correctly before relinking. */
-                install_libs
+#if [enable_libonyx]
+                libonyx_libs_install_s
 #endif
 {
   [INSTALL] -d [PREFIX]/bin;
 
   [CC] [A_CFLAGS] -o [PREFIX]/bin/slate
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [SLATE_SRCS]]
+#if [enable_libonyx]
 #if [matches elf [abi]]
        [RPATH][PREFIX]/lib
+#endif
 #endif
        [LDFLAGS] -lonyx
        [EXTRALIBS];
@@ -103,8 +88,6 @@ slate_clean :
 
 slate_distclean :
 {
-  rm -f [objdir]/bin/slate/doc/latex/manual.tex;
-  rm -f [objdir]/bin/slate/man/man1/slate.1;
 }
 
 /*
@@ -120,18 +103,12 @@ slate_distclean :
 
 [SLATE] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [SLATE_SRCS]]
 #if [enable_libonyx]
-          [LIBONYX_S]
-#endif
-#if [enable_libedit]
-          [LIBEDIT_A]
+          libonyx_libs_s
 #endif
   set mkdir
 {
   [CC] [A_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [SLATE_SRCS]]
-#if [enable_libedit]
-       [LIBEDIT_A]
-#endif
 #if [enable_libonyx]
 #if [matches elf [abi]]
        [RPATH][abs_objdir]/lib/libonyx/lib

@@ -20,11 +20,14 @@ AC_SUBST(objdir)
 abs_objdir=`pwd`
 AC_SUBST(abs_objdir)
 
-cfgoutputs="Cookfile test/verify"
+cfgoutputs="Cookfile bin/Cookfile.inc doc/Cookfile.inc examples/Cookfile.inc"
+cfgoutputs="$cfgoutputs lib/Cookfile.inc mod/Cookfile.inc test/Cookfile.inc"
+cfgoutputs="$cfgoutputs test/verify"
 cfghdrs=
 bins=
 mods=
 libs=
+docs=
 
 dnl If CFLAGS isn't defined and using gcc, set CFLAGS to something reasonable.
 dnl Otherwise, just prevent autoconf from molesting CFLAGS.
@@ -63,7 +66,10 @@ dnl Build onyx by default.
 CW_ENABLE_ONYX
 
 dnl Build slate by default.
-CW_ENABLE_SLATE
+if test "x$enable_threads" = "x1" -a "x$enable_real" = "x1"
+     -a "x$enable_posix" = "x1" -a "x$enable_posix_file" = "x1" ; then
+  CW_ENABLE_SLATE
+fi
 
 dnl Do not compile with debugging by default.
 CW_DISABLE_DEBUG
@@ -114,9 +120,11 @@ fi
 
 AC_CONFIG_HEADER($cfghdrs)
 AC_SUBST(cfghdrs)
+AC_SUBST(cfgoutputs)
 AC_SUBST(bins)
 AC_SUBST(mods)
 AC_SUBST(libs)
+AC_SUBST(docs)
 
 AC_CANONICAL_HOST
 case "${host}" in
@@ -160,10 +168,14 @@ AC_PATH_PROG(BASENAME, basename, , $PATH)
 AC_PATH_PROG(CHMOD, chmod, , $PATH)
 AC_PATH_PROG(CAT, cat, , $PATH)
 AC_PATH_PROG(DIFF, diff, , $PATH)
-AC_PATH_PROG(ETAGS, etags, , $PATH)
 
-dnl Do not build documentaion by default.
+dnl Do not build documentaion by default; instead use the prebuilt
+dnl documentation.
 CW_WITHOUT_DOCS()
+dnl Include rules for building/installing documents, if the docs are included.
+dnl These tests are orthogonal to the tests in CW_WITHOUT_DOCS.
+CW_BUILD_DOC(onyx, doc_onyx)
+CW_BUILD_DOC(slate, doc_slate)
 
 VERIFY="$objdir/test/verify"
 mkdir -p $objdir/test
@@ -320,6 +332,7 @@ AC_MSG_RESULT()
 AC_MSG_RESULT(libs         :${libs})
 AC_MSG_RESULT(mods         :${mods})
 AC_MSG_RESULT(bins         :${bins})
+AC_MSG_RESULT(docs         :${docs})
 AC_MSG_RESULT()
 AC_MSG_RESULT(threads      : ${enable_threads})
 AC_MSG_RESULT(real         : ${enable_real})

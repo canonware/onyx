@@ -70,7 +70,6 @@ Targets that depend on optional supporting software include:
 	release
 	check
 	check_update
-	etags
 
 The build system is capable of building in a different directory than the
 source, so that no files are written to the source tree.  In order to use this

@@ -7,15 +7,26 @@
  *
  * Version: <Version>
  *
- * Program build rules.
+ * Top level Cookfile for building binaries.
  *
  ******************************************************************************/
 
+#include-cooked [fromto % [objdir]/bin/%/Cookfile.inc @bins@]
+
 /*
- * Global variables.
+ * Targets.
  */
-BINS = ;
-MAN1 = ;
+bins : @bins@;
+
+bins_bootstrap : [addsuffix _bins_bootstrap @bins@];
+
+bins_install : [addsuffix _bins_install @bins@];
+
+bins_uninstall : [addsuffix _bins_uninstall @bins@];
+
+bins_clean : [addsuffix _bins_clean @bins@];
+
+bins_distclean : [addsuffix _bins_clean @bins@];
 
 /*
  * Build rules for binary C files --> object files.

@@ -7,7 +7,7 @@
  *
  * Version: Onyx <Version = onyx>
  *
- * cook file for gtk module.
+ * Cookfile for modgtk.
  *
  ******************************************************************************/
 
@@ -18,21 +18,10 @@
  * File lists.
  */
 
-/* Include files (not installed). */
-{
-  local incs = modgtk.h;
-  incs = [fromto % [srcdir]/mod/modgtk/include/% [incs]];
-  incs = [incs] [objdir]/mod/modgtk/include/modgtk_defs.h;
-
-  MODGTK_MINCS = [incs];
-  MINCS = [MINCS] [incs];
-}
-
 /* Source files. */
 MODGTK_MSRCS = modgtk.c;
 
 MODGTK_MSRCS = [fromto % [srcdir]/mod/modgtk/src/% [MODGTK_MSRCS]];
-MSRCS = [MSRCS] [MODGTK_MSRCS];
 
 /* Generated source code (created by configure). */
 MODGTK_NX_GEN = modgtk_defs.nx.in;
@@ -45,15 +34,13 @@ MODGTK_NX = [fromto % [srcdir]/mod/modgtk/nx/modgtk/% [MODGTK_NX]];
 /* Modules. */
 MODGTK = [objdir]/mod/modgtk/nxm/modgtk.nxm;
 
-MODS = [MODS] [MODGTK];
-
 /*
  * User cook'ables.
  */
 
 modgtk : [MODGTK];
 
-modgtk_install : [MODGTK]
+modgtk_mods_install : [MODGTK]
 {
   [SHELL] -e;
 data
@@ -75,24 +62,25 @@ done
 dataend
 }
 
-modgtk_uninstall :
+modgtk_mods_uninstall :
 {
   rm -f [PREFIX]/share/onyx/nxm/modgtk.nxm;
   rm -rf [PREFIX]/share/onyx/nx/modgtk/;
 }
 
-modgtk_clean :
+modgtk_mods_clean :
 {
 }
 
-modgtk_distclean :
+modgtk_mods_distclean :
 {
-  rm -f [MODGTK_NX_GEN];
 }
 
 /*
  * Various flags.
  */
+MODGTK_CPPFLAGS = @GTK_CFLAGS@;
+MODGTK_LDFLAGS = @GTK_LIBS@;
 
 CPPFLAGS = [CPPFLAGS] -I[srcdir]/mod/modgtk/include
                       -I[objdir]/mod/modgtk/include
