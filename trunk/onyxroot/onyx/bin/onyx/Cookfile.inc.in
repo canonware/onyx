@@ -42,7 +42,6 @@ ONYX_ONLY_SRCS = [fromto @srcroot@/%0%.nx.in @objroot@/%0%_nxcode.c
  * Onyx tests.
  */
 ONYX_OTESTS =
-#if @enable_posix_file@
 #if @enable_threads@
               gc_roll.nx.in monitor_a.nx.in monitor_b.nx.in monitor_c.nx.in
 #endif
@@ -153,7 +152,6 @@ ONYX_OTESTS =
               xcheck_a.nx.in xcheck_b.nx.in xor_a.nx.in xor_b.nx.in xor_c.nx.in
               xor_d.nx.in xor_e.nx.in xor_f.nx.in
 
-#endif
               ;
 
 ONYX_OTESTS = [addprefix @srcroot@/bin/onyx/test/ [ONYX_OTESTS]];
