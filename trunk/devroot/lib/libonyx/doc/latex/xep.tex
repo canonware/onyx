@@ -20,8 +20,9 @@ The \classname{xep} class implements exception handling, with support for
 Minimal use must include at least:
 \begin{verbatim}
 xep_begin();
-xep_try {
-        /* Code that might throw an exception. */
+xep_try
+{
+    /* Code that might throw an exception. */
 }
 xep_end();
 \end{verbatim}
@@ -29,20 +30,24 @@ xep_end();
 A more complete skeleton looks like:
 \begin{verbatim}
 xep_begin();
-xep_try {
-        /* Code that might throw an exception. */
+xep_try
+{
+    /* Code that might throw an exception. */
 }
-xep_catch(SOME_EXCEPTION) {
-        /* Handle exception... */
-        xep_handled();
+xep_catch(SOME_EXCEPTION)
+{
+    /* Handle exception... */
+    xep_handled();
 }
 xep_catch(ANOTHER_EXCEPTION)
-xep_mcatch(YET_ANOTHER) {
-        /* React to exception, but propagate... */
+xep_mcatch(YET_ANOTHER)
+{
+    /* React to exception, but propagate... */
 }
-xep_acatch {
-        /* Handle all exceptions not explicitly handled above... */
-        xep_handled();
+xep_acatch
+{
+    /* Handle all exceptions not explicitly handled above... */
+    xep_handled();
 }
 xep_end();
 \end{verbatim}
@@ -51,16 +56,17 @@ Note that there is some serious cpp macro magic behind the \classname{xep}
 interface, and as such, if usage deviates significantly from the above
 templates, compiler errors may result.
 
-Exception values are of type \ctype{cw\_xepv\_t}.  0 to 127 are reserved by
-\libname{libonyx}, and other ranges may be reserved by other libraries.  See
-their documentation for details.
+Exception values are of type \ctype{cw\_xepv\_t}.  \cppdef{CW\_ONYXX\_MIN} to
+\cppdef{CW\_ONYXX\_MAX} are reserved by \libname{libonyx}, and other ranges may
+be reserved by other libraries.  See their documentation for details.
 
 An exception is not implicitly handled if an exception handler is executed for
 that exception.  Instead, \cfunc{xep\_handled}{} must be manually called to
 avoid propagating the exception up the handler chain.
 
 It is not legal to return from a function within an exception handling code
-block; doing so will corrupt the exception handler chain.
+block, nor is it legal to jump out of an exception handling block; doing so will
+corrupt the exception handler chain.
 
 \subsubsection{API}
 \begin{capi}

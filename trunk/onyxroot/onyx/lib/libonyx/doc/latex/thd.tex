@@ -30,7 +30,7 @@ suspendible.
 Depending on how \libname{libonyx} is built, the additional functionality is
 implemented with the aid of the \cvar{SIGUSR1} and \cvar{SIGUSR2} signals.  As a
 result, system calls may be interrupted by signals.  The system calls will be
-automaticalaly restarted if they have made no progress at the time of
+automatically restarted if they have made no progress at the time of
 interruption, but will return a partial result otherwise.  Therefore, if any of
 the additional functionality is utilized, the application must be careful to
 handle partial system call results.  At least the following system calls can be
