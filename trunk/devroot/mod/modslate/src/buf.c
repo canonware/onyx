@@ -907,6 +907,14 @@ bufp_p_pos_p2r(cw_bufp_t *a_bufp, cw_uint32_t a_ppos)
 
     cw_check_ptr(a_bufp);
     cw_dassert(a_bufp->magic == CW_BUFP_MAGIC);
+    /* Check that a_ppos is one of the following:
+     *
+     * *) Before the gap.
+     *
+     * *) After the gap, but before the end of the bufp.
+     *
+     * *) Just past the end of the last bufp in the buf.
+     */
     cw_assert(a_ppos < a_bufp->gap_off
 	      || (a_ppos >= a_bufp->gap_off + (CW_BUFP_SIZE - a_bufp->len)
 		  && a_ppos < CW_BUFP_SIZE)
@@ -2597,8 +2605,8 @@ mkr_p_before_slide_insert(cw_mkr_t *a_mkr, cw_bool_t a_after,
 
 	mkr_p_remove(mkr);
 	mkr->bufp = a_prevp;
-	mkr->ppos += a_prevp->gap_off;
-	mkr->pline += a_prevp->nlines;
+	mkr->ppos += a_prevp->gap_off - nmove;
+	mkr->pline += a_prevp->nlines - nmovelines;
 	rb_node_new(&a_prevp->mtree, mkr, mnode);
 	mkr_p_insert(mkr);
     }
