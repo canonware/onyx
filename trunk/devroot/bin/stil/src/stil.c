@@ -21,7 +21,6 @@
 
 #include "stil_defs.h"
 
-#define	_BUF_SIZE	4096
 #define	_PROMPT_STRLEN	  80
 
 /*  #define	_STIL_SIGHANDLER */
