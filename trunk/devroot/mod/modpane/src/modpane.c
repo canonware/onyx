@@ -52,8 +52,8 @@ modpane_p_hook_ref_iter(void *a_data, cw_bool_t a_reset)
 
 void
 modpane_hooks_init(cw_nxo_t *a_thread,
-		    const struct cw_modpane_entry *a_entries,
-		    cw_uint32_t a_nentries)
+		   const struct cw_modpane_entry *a_entries,
+		   cw_uint32_t a_nentries)
 {
     cw_nxo_t *tstack;
     cw_nxo_t *currentdict, *name, *value;

@@ -54,8 +54,8 @@ bins_distclean : [addsuffix _bins_clean @bins@];
   set mkdir
 {
   [TCC] [A_CFLAGS] [CPPFLAGS]
-       -I@srcroot@/bin/%0include -I@objroot@/bin/%0include
-       [CPPDEFS] -c @objroot@/bin/%0src/%1.c -o [target];
+        -I@srcroot@/bin/%0include -I@objroot@/bin/%0include
+        [CPPDEFS] -c @objroot@/bin/%0src/%1.c -o [target];
 
   c_incl [CPPFLAGS] -I@srcroot@/bin/%0include -I@objroot@/bin/%0include
          --no-cache -Absent_Local_Ignore -No_System @objroot@/bin/%0src/%1.c

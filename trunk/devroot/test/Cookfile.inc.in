@@ -40,7 +40,7 @@ tests_distclean :
                         "/lib"
                         @libs@]]
 #endif
-       [LDFLAGS] [subst lib -l @libs@] @LIBS@;
+        [LDFLAGS] [subst lib -l @libs@] @LIBS@;
 }
 
 @objroot@/%0test/%1.o_a : @srcroot@/%0test/%1.c
