@@ -3074,11 +3074,11 @@ stilo_file_mtime(cw_stilo_t *a_stilo)
 		retval = -1;
 		goto RETURN;
 	}
-
+	/* XXX Replace this function with generic status. */
 	/* Keep 63 bits of accuracy. */
-	retval = sb.st_mtimespec.tv_sec;
+/*  	retval = sb.st_mtimespec.tv_sec; */
 	retval <<= 31;
-	retval |= (sb.st_mtimespec.tv_nsec >> 1);
+/*  	retval |= (sb.st_mtimespec.tv_nsec >> 1); */
 
 	RETURN:
 	stiloe_p_file_unlock(file);
