@@ -33,7 +33,10 @@
     mod/modprompt/src/modprompt.c that can be enabled by defining the
     CW_MODPROMPT_LINUXTHREADS cpp macro.
 
-* FreeBSD 4.9, 5.1.
+  + The Onyx 4.4.3 release was the last release tested on Red Hat Linux 8.  It
+    probably compiles and works, but there are no guarantees.
+
+* FreeBSD 4.9, 5.2.
 
   + FreeBSD's libedit is too old for Onyx's needs.  Use the ports version of
     libedit.  Take care to specify the appropriate configure script parameters
@@ -60,7 +63,10 @@
 
     This workaround has the side effect of changing the process ID.
 
-* NetBSD 1.5.
+* NetBSD.
 
   + POSIX threading does not work due to NetBSD's lack of pthreads.  However,
     GNU pth threading should work.
+
+  + The Onyx 4.4.3 release was the last release tested on NetBSD 1.5.  It
+    probably compiles and works, but there are no guarantees.
