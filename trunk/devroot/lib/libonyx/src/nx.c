@@ -208,3 +208,30 @@ nx_delete(cw_nx_t *a_nx)
     }
 #endif
 }
+
+void
+nx_stdin_set(cw_nx_t *a_nx, cw_nxo_t *a_stdin)
+{
+    cw_check_ptr(a_nx);
+    cw_dassert(a_nx->magic == CW_NX_MAGIC);
+
+    nxo_dup(&a_nx->stdin_nxo, a_stdin);
+}
+
+void
+nx_stdout_set(cw_nx_t *a_nx, cw_nxo_t *a_stdout)
+{
+    cw_check_ptr(a_nx);
+    cw_dassert(a_nx->magic == CW_NX_MAGIC);
+
+    nxo_dup(&a_nx->stdout_nxo, a_stdout);
+}
+
+void
+nx_stderr_set(cw_nx_t *a_nx, cw_nxo_t *a_stderr)
+{
+    cw_check_ptr(a_nx);
+    cw_dassert(a_nx->magic == CW_NX_MAGIC);
+
+    nxo_dup(&a_nx->stderr_nxo, a_stderr);
+}

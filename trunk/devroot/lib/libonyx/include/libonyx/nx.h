@@ -63,6 +63,15 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, int a_argc, char **a_argv,
 void
 nx_delete(cw_nx_t *a_nx);
 
+void
+nx_stdin_set(cw_nx_t *a_nx, cw_nxo_t *a_stdin);
+
+void
+nx_stdout_set(cw_nx_t *a_nx, cw_nxo_t *a_stdout);
+
+void
+nx_stderr_set(cw_nx_t *a_nx, cw_nxo_t *a_stderr);
+
 #ifndef CW_USE_INLINES
 cw_nxa_t *
 nx_nxa_get(cw_nx_t *a_nx);

@@ -169,6 +169,23 @@ objects are deallocated.
 		Return a pointer to the \classname{nxo} corresponding to
 		\onyxop{stdin}{}.
 	\end{capilist}
+\label{nx_stdin_set}
+\index{nx_stdin_set@\cfunc{nx\_stdin\_set}{}}
+\citem{\cfunc[void]{nx\_\htmlref{stdin}{systemdict:stdin}\_set}{cw\_nx\_t
+*a\_nx, cw\_nxo\_t *a\_stdin}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nx: ]
+			Pointer to an \classname{nx}.
+		\item[a\_stdin: ]
+			Pointer to a file \classname{nxo}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Set \cvar{a\_nx}'s stdin to \cvar{a\_stdin}.
+	\end{capilist}
 \label{nx_stdout_get}
 \index{nx_stdout_get@\cfunc{nx\_stdout\_get}{}}
 \citem{\cfunc[cw\_nxo\_t
@@ -190,6 +207,23 @@ objects are deallocated.
 		Return a pointer to the \classname{nxo} corresponding to
 		\onyxop{stdout}{}.
 	\end{capilist}
+\label{nx_stdout_set}
+\index{nx_stdout_set@\cfunc{nx\_stdout\_set}{}}
+\citem{\cfunc[void]{nx\_\htmlref{stdout}{systemdict:stdout}\_set}{cw\_nx\_t
+*a\_nx, cw\_nxo\_t *a\_stdout}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nx: ]
+			Pointer to an \classname{nx}.
+		\item[a\_stdout: ]
+			Pointer to a file \classname{nxo}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Set \cvar{a\_nx}'s stdout to \cvar{a\_stdout}.
+	\end{capilist}
 \label{nx_stderr_get}
 \index{nx_stderr_get@\cfunc{nx\_stderr\_get}{}}
 \citem{\cfunc[cw\_nxo\_t
@@ -210,5 +244,22 @@ objects are deallocated.
 	\item[Description: ]
 		Return a pointer to the \classname{nxo} corresponding to
 		\onyxop{stderr}{}.
+	\end{capilist}
+\label{nx_stderr_set}
+\index{nx_stderr_set@\cfunc{nx\_stderr\_set}{}}
+\citem{\cfunc[void]{nx\_\htmlref{stderr}{systemdict:stderr}\_set}{cw\_nx\_t
+*a\_nx, cw\_nxo\_t *a\_stderr}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nx: ]
+			Pointer to an \classname{nx}.
+		\item[a\_stderr: ]
+			Pointer to a file \classname{nxo}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Set \cvar{a\_nx}'s stderr to \cvar{a\_stderr}.
 	\end{capilist}
 \end{capi}
