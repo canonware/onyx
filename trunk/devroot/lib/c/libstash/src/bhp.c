@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 108 $
- * $Date: 1998-06-30 00:07:07 -0700 (Tue, 30 Jun 1998) $
+ * $Revision: 122 $
+ * $Date: 1998-07-02 16:24:43 -0700 (Thu, 02 Jul 1998) $
  *
  * <<< Description >>>
  *
@@ -224,67 +224,76 @@ bhp_del_min(cw_bhp_t * a_bhp_o, void ** a_priority, void ** a_data)
     rwl_wlock(&a_bhp_o->rw_lock);
   }
 
-  /* Find a root with minimum priority. */
-  before_min = NULL;
-  prev_pos = NULL;
-  curr_pos = a_bhp_o->head;
-  curr_min = curr_pos;
-  while (curr_pos != NULL)
+  if (a_bhp_o->num_nodes == 0)
   {
-    if (a_bhp_o->priority_compare(curr_pos, curr_min) == -1)
-    {
-      /* Found a new minimum. */
-      curr_min = curr_pos;
-      before_min = prev_pos;
-    }
-    prev_pos = curr_pos;
-    curr_pos = curr_pos->sibling;
-  }
-
-  /* Take the minimum root out of the list. */
-  if (before_min == NULL)
-  {
-    /* Minimum root is the first in the list, so move the head pointer
-     * forward. */
-    a_bhp_o->head = curr_min->sibling;
+    retval = TRUE;
   }
   else
   {
-    /* Attach previous and next roots together. */
-    before_min->sibling = curr_min->sibling;
-  }
-
-  /* Reverse order of curr_min's children. */
-  prev_pos = NULL;
-  curr_pos = curr_min->child;
-  if (curr_pos != NULL)
-  {
-    next_pos = curr_pos->sibling;
-  }
-  while (curr_pos != NULL)
-  {
-    curr_pos->parent = NULL;
-    curr_pos->sibling = prev_pos;
-
-    prev_pos = curr_pos;
-    curr_pos = next_pos;
-    if (next_pos != NULL)
+    retval = FALSE;
+    
+    /* Find a root with minimum priority. */
+    before_min = NULL;
+    prev_pos = NULL;
+    curr_pos = a_bhp_o->head;
+    curr_min = curr_pos;
+    while (curr_pos != NULL)
     {
-      next_pos = next_pos->sibling;
+      if (a_bhp_o->priority_compare(curr_pos, curr_min) == -1)
+      {
+	/* Found a new minimum. */
+	curr_min = curr_pos;
+	before_min = prev_pos;
+      }
+      prev_pos = curr_pos;
+      curr_pos = curr_pos->sibling;
     }
+
+    /* Take the minimum root out of the list. */
+    if (before_min == NULL)
+    {
+      /* Minimum root is the first in the list, so move the head pointer
+       * forward. */
+      a_bhp_o->head = curr_min->sibling;
+    }
+    else
+    {
+      /* Attach previous and next roots together. */
+      before_min->sibling = curr_min->sibling;
+    }
+
+    /* Reverse order of curr_min's children. */
+    prev_pos = NULL;
+    curr_pos = curr_min->child;
+    if (curr_pos != NULL)
+    {
+      next_pos = curr_pos->sibling;
+    }
+    while (curr_pos != NULL)
+    {
+      curr_pos->parent = NULL;
+      curr_pos->sibling = prev_pos;
+
+      prev_pos = curr_pos;
+      curr_pos = next_pos;
+      if (next_pos != NULL)
+      {
+	next_pos = next_pos->sibling;
+      }
+    }
+
+    /* Create a temporary heap and initialize it. */
+    bhp_new(&temp_heap, FALSE);
+    temp_heap.head = prev_pos;
+    bhp_union(a_bhp_o, &temp_heap);
+    a_bhp_o->num_nodes--;
+
+    /* Now point *a_priority and *a_data to the item and free the space taken 
+     * up by the item structure. */
+    *a_priority = curr_min->priority;
+    *a_data = curr_min->data;
+    _cw_free(curr_min);
   }
-
-  /* Create a temporary heap and initialize it. */
-  bhp_new(&temp_heap, FALSE);
-  temp_heap.head = prev_pos;
-  bhp_union(a_bhp_o, &temp_heap);
-  a_bhp_o->num_nodes--;
-
-  /* Now point *a_priority and *a_data to the item and free the space taken 
-   * up by the item structure. */
-  *a_priority = curr_min->priority;
-  *a_data = curr_min->data;
-  _cw_free(curr_min);
   
   if (a_bhp_o->is_thread_safe == TRUE)
   {
@@ -424,7 +433,7 @@ bhp_bin_link(cw_bhpi_t * a_root, cw_bhpi_t * a_non_root)
 void
 bhp_merge(cw_bhp_t * a_bhp_o, cw_bhp_t * a_other)
 {
-  cw_bhpi_t * curr_this, * curr_other, * this_marker, * other_marker;
+  cw_bhpi_t * curr_this, * curr_other, * this_marker = NULL, * other_marker;
   
 /*   _cw_check_ptr(a_bhp_o); */
 /*   _cw_check_ptr(a_other); */
@@ -503,6 +512,7 @@ bhp_merge(cw_bhp_t * a_bhp_o, cw_bhp_t * a_other)
       else
       {
 	/* Append remainder of other to this. */
+	_cw_assert(this_marker != NULL);
 	this_marker->sibling = curr_other;
       }
     }
