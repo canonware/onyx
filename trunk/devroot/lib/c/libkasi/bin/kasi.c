@@ -62,8 +62,6 @@ main(int argc, char ** argv)
   _cw_out_put("sizeof(cw_kasioe_mstate_t): [i]\n", sizeof(cw_kasioe_mstate_t));
   _cw_out_put("sizeof(cw_kasioe_name_t): [i]\n", sizeof(cw_kasioe_name_t));
   _cw_out_put("sizeof(cw_kasioe_number_t): [i]\n", sizeof(cw_kasioe_number_t));
-  _cw_out_put("sizeof(cw_kasioe_operator_t): [i]\n",
-	      sizeof(cw_kasioe_operator_t));
   _cw_out_put("sizeof(cw_kasioe_packedarray_t): [i]\n",
 	      sizeof(cw_kasioe_packedarray_t));
   _cw_out_put("sizeof(cw_kasioe_string_t): [i]\n", sizeof(cw_kasioe_string_t));

@@ -20,7 +20,6 @@ typedef struct cw_kasioe_lock_s cw_kasioe_lock_t;
 typedef struct cw_kasioe_mstate_s cw_kasioe_mstate_t;
 typedef struct cw_kasioe_name_s cw_kasioe_name_t;
 typedef struct cw_kasioe_number_s cw_kasioe_number_t;
-typedef struct cw_kasioe_operator_s cw_kasioe_operator_t;
 typedef struct cw_kasioe_packedarray_s cw_kasioe_packedarray_t;
 typedef struct cw_kasioe_string_s cw_kasioe_string_t;
 
@@ -104,15 +103,6 @@ struct cw_kasioe_number_s
   cw_uint8_t * val;
 };
 
-/* Defined here (instead of in kasit.h) to resolve a circular dependency. */
-typedef struct cw_kasit_s cw_kasit_t;
-
-struct cw_kasioe_operator_s
-{
-  cw_kasioe_t kasioe;
-  void (*operator)(cw_kasit_t *);
-};
-
 struct cw_kasioe_packedarray_s
 {
   cw_kasioe_t kasioe;
@@ -122,6 +112,9 @@ struct cw_kasioe_string_s
 {
   cw_kasioe_t kasioe;
 };
+
+/* Defined here (instead of in kasit.h) to resolve a circular dependency. */
+typedef struct cw_kasit_s cw_kasit_t;
 
 /*
  * Main object structure.
@@ -226,7 +219,7 @@ struct cw_kasio_s
     } number;
     struct
     {
-      cw_kasioe_operator_t * kasioe;
+      void (*f)(cw_kasit_t *);
     } operator;
     struct
     {
