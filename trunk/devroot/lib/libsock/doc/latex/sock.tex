@@ -16,24 +16,313 @@
 \label{sock}
 \index{\classname{sock}{}}
 
+The \classname{sock} class encapsulates a TCP/IP socket and provides an
+abstracted API that allows completely asynchronous socket I/O.
+
 \subsubsection{API}
 \begin{description}
-\label{sock_}
-\index{\cfunc{sock\_}{}}
-\item[{\cfunc[]{sock\_}{}}: ]
+\label{sock_new}
+\index{\cfunc{sock\_new}{}}
+\item[{\cfunc[cw\_sock\_t *]{sock\_new}{cw\_sock\_t *a\_sock, cw\_uint32\_t
+a\_in\_max\_buf\_size}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a\_sock: ]
+			Pointer to space for a \classname{sock}, or NULL.
+		\item[a\_in\_max\_buf\_size: ]
+			Maximum number of bytes of incoming data to buffer.  A
+			value of 0 will prevent the I/O thread from ever trying
+			to read from the descriptor.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[retval: ]
+			Pointer to a \classname{sock}.
 		\end{description}
 	\item[Exception(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
 		\end{description}
 	\item[Description: ]
+		Constructor.
+	\end{description}
+\label{sock_delete}
+\index{\cfunc{sock\_delete}{}}
+\item[{\cfunc[void]{sock\_delete}{cw\_sock\_t *a\_sock}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_sock: ]
+			Pointer to a \classname{sock}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Destructor.
+	\end{description}
+\label{sock_is_connected}
+\index{\cfunc{sock\_is\_connected}{}}
+\item[{\cfunc[cw\_bool\_t]{sock\_is\_connected}{cw\_sock\_t *a\_sock}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_sock: ]
+			Pointer to a \classname{sock}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[FALSE: ]
+				Not connected.
+			\item[TRUE: ]
+				Connected.
+			\end{description}
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return TRUE if \cvar{a\_sock} is connected.
+	\end{description}
+\label{sock_port_get}
+\index{\cfunc{sock\_port\_get}{}}
+\item[{\cfunc[cw\_uint32\_t]{sock\_port\_get}{cw\_sock\_t *a\_sock}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_sock: ]
+			Pointer to a \classname{sock}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Port number on this end of the connection.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return the local port number for \cvar{a\_sock}.
+	\end{description}
+\label{sock_connect}
+\index{\cfunc{sock\_connect}{}}
+\item[{\cfunc[cw\_sint32\_t]{sock\_connect}{cw\_sock\_t *a\_sock, const char
+*a\_server\_host, int a\_port, struct timespec *a\_timeout}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_sock: ]
+			Pointer to a \classname{sock}.
+		\item[a\_server\_host: ]
+			String that represents remote hostname or IP address.
+		\item[a\_port: ]
+			Remote port number to connect to.
+		\item[a\_timeout: ]
+			Connect timeout, specified as an absolute time interval,
+			or NULL for no timeout.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[-1: ]
+				Already connected, \cfunc{socket}{} error,
+				\cfunc{close}{} error, \cfunc{connect}{} error,
+				or socket configuration error.
+			\item[0: ]
+				Success.
+			\item[1: ]
+				Timeout.
+			\end{description}
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Connect to a remote socket.  If the connection attempt times
+		out, \cfunc{sock\_connect}{} can be called again in order to
+		attempt completing a non-blocking connect.
+	\end{description}
+\label{sock_wrap}
+\index{\cfunc{sock\_wrap}{}}
+\item[{\cfunc[cw\_bool\_t]{sock\_wrap}{cw\_sock\_t *a\_sock, int a\_sockfd,
+cw\_bool\_t a\_init}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_sock: ]
+			Pointer to a \classname{sock}.
+		\item[a\_sock\_fd: ]
+			File descriptor number.
+		\item[a\_init: ]
+			\begin{description}\item[]
+			\item[FALSE: ] Use \cvar{a\_sockfd} as is.
+			\item[TRUE: ] Initialize \cvar{a\_sockfd}.
+			\end{description}
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[FALSE: ] Success.
+			\item[TRUE: ] Socket configuration error.
+			\end{description}
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Wrap an open socket descriptor inside \cvar{a\_sock}.
+	\end{description}
+\label{sock_disconnect}
+\index{\cfunc{sock\_disconnect}{}}
+\item[{\cfunc[cw\_bool\_t]{sock\_disconnect}{cw\_sock\_t *a\_sock}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_sock: ]
+			Pointer to a \classname{sock}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[FALSE: ]
+				Success.
+			\item[TRUE: ]
+				Not connected, \cfunc{fcntl}{} error, or
+				\cfunc{close}{} error.
+			\end{description}
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Disconnect \cvar{a\_sock}.
+	\end{description}
+\label{sock_buffered_in}
+\index{\cfunc{sock\_buffered\_in}{}}
+\item[{\cfunc[cw\_uint32\_t]{sock\_buffered\_in}{cw\_sock\_t *a\_sock}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_sock: ]
+			Pointer to a \classname{sock}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Number of bytes of buffered incoming data.
+		\end{description}
+	\item[Exception(s): ] none.
+	\item[Description: ]
+		Return the number of bytes of buffered incoming data.
+	\end{description}
+\label{sock_read}
+\index{\cfunc{sock\_read}{}}
+\item[{\cfunc[cw\_sint32\_t]{sock\_read}{cw\_sock\_t *a\_sock, cw\_buf\_t
+*a\_spare, cw\_sint32\_t a\_max\_read, struct timespec *a\_timeout}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_sock: ]
+			Pointer to a \classname{sock}.
+		\item[a\_spare: ]
+			Pointer to a spare \classname{buf}, to which data may be
+			appended.
+		\item[a\_max\_read: ]
+			Maximum number of bytes to read into \cvar{a\_spare}, or
+			0 for no limit.
+		\item[a\_timeout: ]
+			Maximum time to wait for data before returning, or NULL
+			to wait indefinitely.  To avoid blocking, pass a 0
+			timeout value.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[-1: ]
+				Error.  This should only happen if the socket
+				has been closed.
+			\item[0: ]
+				Timeout.
+			\item[>0: ]
+				Number of bytes of data read.
+			\end{description}
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Read data from the socket, and do not return until there are
+		data (not necessarily \cvar{a\_max\_read}), or the timeout
+		expires.
+	\end{description}
+\label{sock_write}
+\index{\cfunc{sock\_write}{}}
+\item[{\cfunc[cw\_bool\_t]{sock\_write}{cw\_sock\_t *a\_sock, cw\_buf\_t
+*a\_buf}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_sock: ]
+			Pointer to a \classname{sock}.
+		\item[a\_buf: ]
+			Pointer to a \classname{buf}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[FALSE: ] Success.
+			\item[TRUE: ] Error.
+			\end{description}
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Queue the data in \cvar{a\_buf} for asynchronous writing.
+	\end{description}
+\label{sock_out_flush}
+\index{\cfunc{sock\_out\_flush}{}}
+\item[{\cfunc[cw\_bool\_t]{sock\_out\_flush}{cw\_sock\_t *a\_sock}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_sock: ]
+			Pointer to a \classname{sock}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[FALSE: ] Success.
+			\item[TRUE: ] Error.
+			\end{description}
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Flush the outgoing data queue (actually, just wait until it has
+		all been sent), and do not return until done.
+	\end{description}
+\label{sock_fd_get}
+\index{\cfunc{sock\_fd\_get}{}}
+\item[{\cfunc[int]{sock\_fd\_get}{cw\_sock\_t *a\_sock}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_sock: ]
+			Pointer to a \classname{sock}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[>=0: ]
+				File descriptor corresponding to \cvar{a\_sock}.
+			\item[-1: ]
+				Not connected.
+			\end{description}
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return the number of the file descriptor associated with
+		\cvar{a\_sock}.
 	\end{description}
 \end{description}
