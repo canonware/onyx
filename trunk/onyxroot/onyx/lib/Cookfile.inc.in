@@ -62,7 +62,7 @@ libs_distclean : [addsuffix _libs_distclean @libs@];
          @srcroot@/lib/%0src/%1.c
          "--prefix='"[target]" : "@srcroot@/lib/%0src/%1.c"'"
          "--suffix='set nodefault;'"
-         -o [fromto lib/%0src/%1.o_b lib/%0src/%1.d_a [target]];
+         -o [fromto lib/%0src/%1.o_b lib/%0src/%1.d_b [target]];
 }
 
 @objroot@/lib/%0src/%1.o_s : @srcroot@/lib/%0src/%1.c
@@ -102,7 +102,7 @@ libs_distclean : [addsuffix _libs_distclean @libs@];
          @objroot@/lib/%0src/%1.c
          "--prefix='"[target]" : "@objroot@/lib/%0src/%1.c"'"
          "--suffix='set nodefault;'"
-         -o [fromto lib/%0src/%1.o_b lib/%0src/%1.d_a [target]];
+         -o [fromto lib/%0src/%1.o_b lib/%0src/%1.d_b [target]];
 }
 
 /* For generated C files. */
