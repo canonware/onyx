@@ -56,7 +56,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(clear),
 	ENTRY(cleardstack),
 	ENTRY(cleartomark),
-	ENTRY(closefile),
+	ENTRY(close),
 	ENTRY(condition),
 	ENTRY(copy),
 	ENTRY(count),
@@ -131,7 +131,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(read),
 	ENTRY(readline),
 	ENTRY(realtime),
-	ENTRY(renamefile),
+	ENTRY(rename),
 	ENTRY(repeat),
 	ENTRY(rmdir),
 	ENTRY(roll),
@@ -980,7 +980,7 @@ systemdict_cleartomark(cw_nxo_t *a_thread)
 }
 
 void
-systemdict_closefile(cw_nxo_t *a_thread)
+systemdict_close(cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack;
 	cw_nxo_t		*nxo;
@@ -3511,7 +3511,7 @@ systemdict_realtime(cw_nxo_t *a_thread)
 }
 
 void
-systemdict_renamefile(cw_nxo_t *a_thread)
+systemdict_rename(cw_nxo_t *a_thread)
 {
 	cw_nxo_t	*ostack;
 	cw_nxo_t	*string_from, *string_to;
