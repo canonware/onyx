@@ -1,0 +1,438 @@
+.ig \" -*-mode:nroff-*-
+
+<Copyright = jasone>
+<License>
+
+Version: <Version>
+..
+.TH libstash_dch 3s "libstash, version <Version>"
+.Nm libstash_dch
+.hy 1
+.SH NAME
+dch - Dynamic chained hashing.
+.SH SYNOPSIS
+\fB#include <libstash/libstash.h>\fR
+
+.I cw_dch_t *
+.br
+.B dch_new
+.RI ( "cw_dch_t * a_dch" ", " "cw_uint32_t a_base_table" ", "
+.IR "cw_uint32_t a_base_grow" ", " "cw_uint32_t a_base_shrink" ", "
+.IR "cw_pezz_t * a_chi_pezz" ", " "cw_ch_hash_t * a_hash" ", "
+.IR "cw_ch_key_comp_t * a_key_comp" )
+
+.I void
+.br
+.B dch_delete
+.RI ( "cw_dch_t * a_dch" )
+
+.I cw_uint32_t
+.br
+.B dch_count
+.RI ( "cw_dch_t * a_dch" )
+
+.I cw_bool_t
+.br
+.B dch_insert
+.RI ( "cw_dch_t * a_dch" ", " "const void * a_key" ", " 
+.IR "const void * a_data" )
+
+.I cw_bool_t
+.br
+.B dch_remove
+.RI ( "cw_dch_t * a_dch" ", " "const void * a_search_key" ", " "void ** r_key"
+.RI ", " "void ** r_data" )
+
+.I cw_bool_t
+.br
+.B dch_search
+.RI ( "cw_dch_t * a_dch" ", " "const void * a_key" ", " "void ** r_data" )
+
+.I cw_bool_t
+.br
+.B dch_get_iterate
+.RI ( "cw_dch_t * a_dch" ", "  "void ** r_key" ", " "void ** r_data" )
+
+.I cw_bool_t
+.br
+.B dch_remove_iterate
+.RI ( "cw_dch_t * a_dch" ", " "void ** r_key" ", " "void ** r_data" )
+
+.I void
+.br
+.B dch_dump
+.RI ( "cw_dch_t * a_dch" ", " "const char * a_prefix" )
+
+.SS Debugging (dbg) symbols
+None.
+
+.SH DESCRIPTION
+Dynamic chained hashing class.  The \fBdch\fR class is a wrapper around the
+\fBch\fR class that enforces fullness/emptiness constraints and rebuilds the
+hash table when necessary.  Other than this added functionality, the \fBdch\fR
+class behaves almost exactly like the \fBch\f class.
+
+.SH USAGE
+.I cw_dch_t *
+.br
+.B dch_new
+.RI ( "cw_dch_t * a_dch" ", " "cw_uint32_t a_base_table" ", "
+.IR "cw_uint32_t a_base_grow" ", " "cw_uint32_t a_base_shrink" ", "
+.IR "cw_pezz_t * a_chi_pezz" ", " "cw_ch_hash_t * a_hash" ", "
+.IR "cw_ch_key_comp_t * a_key_comp" )
+.br
+Input(s):
+.RS
+.IR a_dch :
+.RS
+Pointer to space for a dch, or NULL.
+.RE
+.IR a_base_table :
+.RS
+Number of slots in the initial hash table.
+.RE
+.IR a_base_grow :
+.RS
+Maximum number of items to allow in a_dch before doubling the hash table size.
+The same proportions (in relation to a_base_table) are used to decide when to
+double the table additional times.
+.RE
+.IR a_base_shrink :
+.RS
+Minimum proportional (with respect to a_base_table) emptiness to allow in the
+hash table before cutting the hash table size in half.  This
+.RE
+.IR a_chi_pezz :
+.RS
+Non-NULL: Pointer to a pezz from which to allocate cw_chi_t structures.
+.br
+NULL: Allocate cw_chi_t structures using the mem class.
+.RE
+.IR a_hash :
+.RS
+Pointer to a hashing function.
+.RE
+.IR a_key_comp :
+.RS
+Pointer to a key comparison function.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+non-NULL: Pointer to a dch.
+.br
+NULL: Memory allocation error.
+.RE
+.RE
+Description:
+.RS
+Constructor.
+.RE
+.RE
+
+.I void
+.br
+.B dch_delete
+.RI ( "cw_dch_t * a_dch" )
+.br
+Input(s):
+.RS
+.IR a_dch :
+.RS
+Pointer to a dch.
+.RE
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Destructor.
+.RE
+.RE
+
+.I cw_uint32_t
+.br
+.B dch_count
+.RI ( "cw_dch_t * a_dch" )
+.br
+Input(s):
+.RS
+.IR a_dch :
+.RS
+Pointer to a dch.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+Number of items in a_dch.
+.RE
+.RE
+Description:
+.RS
+Return the number of items in a_dch.
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B dch_insert
+.RI ( "cw_dch_t * a_dch" ", " "const void * a_key" ", "
+.IR "const void * a_data" )
+.br
+Input(s):
+.RS
+.IR a_dch :
+.RS
+Pointer to a dch.
+.RE
+.IR a_key :
+.RS
+Pointer to a key.
+.RE
+.IR a_data :
+.RS
+Pointer to data associated with a_key.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+FALSE: Success.
+.br
+TRUE: Memory allocation error.
+.RE
+.RE
+Description:
+.RS
+Insert a_data into a_dch, using key a_key.
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B dch_remove
+.RI ( "cw_dch_t * a_dch" ", " "const void * a_search_key" ", " "void ** r_key"
+.RI ", " "void ** r_data" )
+.br
+Input(s):
+.RS
+.IR a_dch :
+.RS
+Pointer to a dch.
+.RE
+.IR a_search_key :
+.RS
+Pointer to a key.
+.RE
+.IR r_key :
+.RS
+Pointer to a key pointer, or NULL.
+.RE
+.IR r_data :
+.RS
+Pointer to a data pointer, or NULL.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+FALSE: Success.
+.br
+TRUE: Item with key a_search_key not found.
+.RE
+.IR *r_key :
+.RS
+If (NULL != r_key) and (FALSE == retval): Pointer to a key.
+.br
+Otherwise: Undefined.
+.RE
+.IR *r_data :
+.RS
+If (NULL != r_data) and (FALSE == retval): Pointer to data.
+.br
+Otherwise: Undefined.
+.RE
+.RE
+Description:
+.RS
+Remove the item from a_dch that was most recently inserted with key
+a_search_key.  If successful, set *r_key and *r_data to point to the key and
+data, respectively.
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B dch_search
+.RI ( "cw_dch_t * a_dch" ", " "const void * a_key" ", " "void ** r_data" )
+.br
+Input(s):
+.RS
+.IR a_dch :
+.RS
+Pointer to a dch.
+.RE
+.IR a_key :
+.RS
+Pointer to a key.
+.RE
+.IR r_data :
+.RS
+Pointer to a data pointer, or NULL.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+FALSE: Success.
+.br
+TRUE: Item with key a_key not found in a_dch.
+.RE
+.IR *r_data :
+.RS
+If (NULL != r_data) and (FALSE == retval): Pointer to data.
+.RE
+.RE
+Description:
+.RS
+Search for the most recently inserted item with key a_key.  If found, *r_data to
+point to the associated data.
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B dch_get_iterate
+.RI ( "cw_dch_t * a_dch" ", "  "void ** r_key" ", " "void ** r_data" )
+.br
+Input(s):
+.RS
+.IR a_dch :
+.RS
+Pointer to a dch.
+.RE
+.IR r_key :
+.RS
+Pointer to a key pointer, or NULL.
+.RE
+.IR r_data :
+.RS
+Pointer to a data pointer, or NULL.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+FALSE: Success.
+.br
+TRUE: a_dch is empty.
+.RE
+.IR *r_key :
+.RS
+If (NULL != r_key) and (FALSE == retval): Pointer to a key.
+.br
+Otherwise: Undefined.
+.RE
+.IR *r_data :
+.RS
+If (NULL != r_data) and (FALSE == retval): Pointer to data.
+.br
+Otherwise: Undefined.
+.RE
+.RE
+Description:
+.RS
+Set *r_key and *r_data to point to the oldest item in a_dch.  Promote the item
+so that it is the newest item in a_dch.
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B dch_remove_iterate
+.RI ( "cw_dch_t * a_dch" ", " "void ** r_key" ", " "void ** r_data" )
+.br
+Input(s):
+.RS
+.IR a_dch :
+.RS
+Pointer to a dch.
+.RE
+.IR r_key :
+.RS
+Pointer to a key pointer, or NULL.
+.RE
+.IR r_data :
+.RS
+Pointer to a data pointer, or NULL.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+FALSE: Success.
+.br
+TRUE: a_dch is empty.
+.RE
+.IR *r_key :
+.RS
+If (NULL != r_key) and (FALSE == retval): Pointer to a key.
+.br
+Otherwise: Undefined.
+.RE
+.IR *r_data :
+.RS
+If (NULL != r_data) and (FALSE == retval): Pointer to data.
+.br
+Otherwise: Undefined.
+.RE
+.RE
+Description:
+.RS
+Set *r_key and *r_data to point to the oldest item in a_dch, and remove the item
+from a_dch.
+.RE
+.RE
+
+.I void
+.br
+.B dch_dump
+.RI ( "cw_dch_t * a_dch" ", " "const char * a_prefix" )
+.br
+Input(s):
+.RS
+.IR a_dch :
+.RS
+Pointer to a dch.
+.RE
+.IR a_prefix :
+.RS
+A text string to prefix to all output.
+.RE
+.RE
+Output(s):
+.RS
+Internal state of a_dch printed to cw_g_out.
+.RE
+Description:
+.RS
+Print the internal state of a_dch.
+.RE
+.RE
+
+.SH SEE ALSO
+libstash(3s), libstash_pezz(3s), libstash_ch(3s).
+
+.SH HISTORY
+Written by Jason Evans <jasone@canonware.com>.
