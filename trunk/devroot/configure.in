@@ -159,6 +159,10 @@ if test "x$build_libsock" = "xyes" ; then
   AC_CHECK_FUNCS(poll, , AC_MSG_ERROR(Cannot build without poll))
 fi
 
+if test "x$build_proxy" = "xyes" ; then
+  AC_CHECK_HEADERS(netinet/ip_nat.h, AC_DEFINE(_CW_IPFILTER))
+fi
+
 dnl
 dnl Print out the results of configuration.
 dnl
