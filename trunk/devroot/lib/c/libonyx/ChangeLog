@@ -1,5 +1,11 @@
 2001-11-03  Jason Evans  <jasone@canonware.com>
 
+	* src/systemdict.c (systemdict_exec): Throw a rangecheck error if
+	the argument array is empty.
+
+	* src/nx_nxcode.nx: Redefine throw rather than handleerror in the
+	child process.  Do type checking for the argument.
+
 	* test/thd_a.c: Fix a race condition in the test.
 
 2001-10-31  Jason Evans  <jasone@canonware.com>

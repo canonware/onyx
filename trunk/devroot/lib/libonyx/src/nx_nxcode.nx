@@ -592,13 +592,34 @@ systemdict begin
 
 % [`<path>' `<args>'...] system <exit_code>
 /system {
+	% Make sure argument is an array.
+	dup type /arraytype ne {
+		/typecheck throw
+	} if
+	% Make sure array is non-empty.
+	dup length 0 eq {
+		/rangecheck throw
+	} if
+	% Make sure array elements are strings.
+	dup {
+		{
+			type /stringtype ne {
+				stop
+			} if
+		} foreach
+	} stopped {
+		/typecheck throw
+	} if
+
 	fork
 	dup 0 eq {
-		errordict begin
-		/handleerror {quit} def
+		% Child.
+		systemdict begin
+		/throw {1 die} def
 		end
 		pop exec
 	}{
+		% Parent.
 		exch pop waitpid
 	} ifelse
 } def

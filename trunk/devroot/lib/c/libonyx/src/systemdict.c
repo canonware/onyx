@@ -1984,6 +1984,10 @@ systemdict_exec(cw_nxo_t *a_thread)
 		goto VALIDATION_ERROR;
 	}
 	argc = nxo_array_len_get(array);
+	if (argc < 1) {
+		error = NXN_rangecheck;
+		goto VALIDATION_ERROR;
+	}
 	for (i = 0; i < argc; i++) {
 		nxo_array_el_get(array, i, el);
 		if (nxo_type_get(el) != NXOT_STRING) {
