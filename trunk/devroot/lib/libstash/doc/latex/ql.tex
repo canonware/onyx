@@ -16,24 +16,384 @@
 \label{ql}
 \index{\classname{ql}{}}
 
+The \classname{ql} macros implement operations on a list.  The type of the list
+elements and which field of the elements to use are determined by arguments that
+are passed into the macros.  The macros are optimized for speed and code size,
+which means that there is minimal error checking built in.  As a result, care
+must be taken to assure that these macros are ussed as intended, or strange
+things can happen.
+
+Internally, the list is represented as a ring, so with some care, the
+\classname{ql} and \classname{qr} interfaces can be used in conjunction with
+each other.
+
+Since a \classname{ql} is actually a ring, it is possible to have multiple
+\classname{ql} heads that share the same ring.  This works just fine, with the
+caveat that operations on one \classname{ql} can have side-effects on another.
+
 \subsubsection{API}
 \begin{description}
-\label{ql_}
-\index{\cfunc{ql\_}{}}
-\item[{\cfunc[]{ql\_}{}}: ]
+\label{ql_head}
+\index{\cppmacro{ql\_head}{}}
+\item[{\cppmacro[]{ql\_head}{{\lt}ql\_type{\gt} a\_type}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a\_type: ]
+			Data type for the \classname{ql} elements.
+		\end{description}
+	\item[Output(s): ]
+		A data structure that can be used as a \classname{ql} head.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Generate code for a \classname{ql} head data structure.
+	\end{description}
+\label{ql_head_initializer}
+\index{\cppmacro{ql\_head\_initializer}{}}
+\item[{\cppmacro[]{ql\_head\_initializer}{{\lt}ql\_type{\gt} *a\_head}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_head: ]
+			Pointer to a \classname{ql} head.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Statically initialize a \classname{ql} head.
+	\end{description}
+\label{ql_elm}
+\index{\cppmacro{ql\_elm}{}}
+\item[{\cppmacro[]{ql\_elm}{{\lt}ql\_type{\gt} a\_type}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_type: ]
+			Data type for the \classname{ql} elements.
+		\end{description}
+	\item[Output(s): ]
+		A data structure that can be used as a \classname{ql} element.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Generate code for a \classname{ql} element data structure.
+	\end{description}
+\label{ql_new}
+\index{\cppmacro{ql\_new}{}}
+\item[{\cppmacro[void]{ql\_new}{{\lt}ql\_head{\gt} *a\_head}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_head: ]
+			Pointer to a \classname{ql} head.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Constructor.
+	\end{description}
+\label{ql_elm_new}
+\index{\cppmacro{ql\_elm\_new}{}}
+\item[{\cppmacro[void]{ql\_elm\_new}{{\lt}ql\_type{\gt} *a\_elm,
+{\lt}field\_name{\gt} a\_field}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_elm: ]
+			Pointer to an element.
+		\item[a\_field: ]
+			Field within the \classname{ql} elements to use.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Constructor.
+	\end{description}
+\label{ql_first}
+\index{\cppmacro{ql\_first}{}}
+\item[{\cppmacro[{\lt}ql\_type{\gt} *]{ql\_first}{{\lt}ql\_head{\gt}
+*a\_head}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_head: ]
+			Pointer to a \classname{ql} head.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[non-NULL: ]
+				Pointer to the first element in \cvar{a\_head}.
+			\item[NULL: ]
+				\cvar{a\_head} is empty.
+			\end{description}
 		\end{description}
-	\item[Exception(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
-		\end{description}
+	\item[Exception(s): ] None.
 	\item[Description: ]
+		Return a pointer to the first element in the \classname{ql}.
+	\end{description}
+\label{ql_last}
+\index{\cppmacro{ql\_last}{}}
+\item[{\cppmacro[{\lt}ql\_type{\gt} *]{ql\_last}{{\lt}ql\_head{\gt}
+*a\_head}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_head: ]
+			Pointer to a \classname{ql} head.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[non-NULL: ]
+				Pointer to the last element in \cvar{a\_head}.
+			\item[NULL: ]
+				\cvar{a\_head} is empty.
+			\end{description}
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return a pointer to the last element in the \classname{ql}.
+	\end{description}
+\label{ql_next}
+\index{\cppmacro{ql\_next}{}}
+\item[{\cppmacro[{\lt}ql\_type{\gt} *]{ql\_next}{{\lt}ql\_head{\gt} *a\_head,
+{\lt}ql\_type{\gt} *a\_elm, {\lt}field\_name{\gt} a\_field}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_head: ]
+			Pointer to a \classname{ql} head.
+		\item[a\_elm: ]
+			Pointer to an element.
+		\item[a\_field: ]
+			Field within the \classname{ql} elements to use.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[non-NULL: ]
+				Pointer to the element after \cvar{a\_elm}.
+			\item[NULL: ]
+				\cvar{a\_elm} is the last element in
+				\cvar{a\_head}.
+			\end{description}
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return a pointer to the element in \cvar{a\_head} after
+		\cvar{a\_elm}.
+	\end{description}
+\label{ql_prev}
+\index{\cppmacro{ql\_prev}{}}
+\item[{\cppmacro[{\lt}ql\_type{\gt} *]{ql\_prev}{{\lt}ql\_head{\gt} *a\_head,
+{\lt}ql\_type{\gt} *a\_elm, {\lt}field\_name{\gt} a\_field}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_head: ]
+			Pointer to a \classname{ql} head.
+		\item[a\_elm: ]
+			Pointer to an element.
+		\item[a\_field: ]
+			Field within the \classname{ql} elements to use.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[non-NULL: ]
+				Pointer to the element before \cvar{a\_elm}.
+			\item[NULL: ]
+				\cvar{a\_elm} is the first element in
+				\cvar{a\_head}.
+			\end{description}
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return a pointer to the element in \cvar{a\_head} before
+		\cvar{a\_elm}.
+	\end{description}
+\label{ql_before_insert}
+\index{\cppmacro{ql\_before\_insert}{}}
+\item[{\cppmacro[void]{ql\_before\_insert}{{\lt}ql\_head{\gt} *a\_head,
+{\lt}ql\_type{\gt} *a\_qlelm, {\lt}ql\_type{\gt} *a\_elm, {\lt}field\_name{\gt}
+a\_field}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_head: ]
+			Pointer to a \classname{ql} head.
+		\item[a\_qlelm: ]
+			Pointer to an element within \cvar{a\_head}.
+		\item[a\_elm: ]
+			Pointer to an element.
+		\item[a\_field: ]
+			Field within the \classname{ql} elements to use.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Insert \cvar{a\_elm} into \cvar{a\_head} before \cvar{a\_qlelm}.
+	\end{description}
+\label{ql_after_insert}
+\index{\cppmacro{ql\_after\_insert}{}}
+\item[{\cppmacro[void]{ql\_after\_insert}{{\lt}ql\_head{\gt} *a\_head,
+{\lt}ql\_type{\gt} *a\_qlelm, {\lt}ql\_type{\gt} *a\_elm, {\lt}field\_name{\gt}
+a\_field}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_head: ]
+			Pointer to a \classname{ql} head.
+		\item[a\_qlelm: ]
+			Pointer to an element within \cvar{a\_head}.
+		\item[a\_elm: ]
+			Pointer to an element.
+		\item[a\_field: ]
+			Field within the \classname{ql} elements to use.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Insert \cvar{a\_elm} into \cvar{a\_head} after \cvar{a\_qlelm}.
+	\end{description}
+\label{ql_head_insert}
+\index{\cppmacro{ql\_head\_insert}{}}
+\item[{\cppmacro[void]{ql\_head\_insert}{{\lt}ql\_head{\gt} *a\_head,
+{\lt}ql\_type{\gt} *a\_elm, {\lt}field\_name{\gt} a\_field}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_head: ]
+			Pointer to a \classname{ql} head.
+		\item[a\_elm: ]
+			Pointer to an element.
+		\item[a\_field: ]
+			Field within the \classname{ql} elements to use.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Insert \cvar{a\_elm} at the head of \cvar{a\_head}.
+	\end{description}
+\label{ql_tail_insert}
+\index{\cppmacro{ql\_tail\_insert}{}}
+\item[{\cppmacro[void]{ql\_tail\_insert}{{\lt}ql\_head{\gt} *a\_head,
+{\lt}ql\_type{\gt} *a\_elm, {\lt}field\_name{\gt} a\_field}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_head: ]
+			Pointer to a \classname{ql} head.
+		\item[a\_elm: ]
+			Pointer to an element.
+		\item[a\_field: ]
+			Field within the \classname{ql} elements to use.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Insert \cvar{a\_elm} at the tail of \cvar{a\_head}.
+	\end{description}
+\label{ql_remove}
+\index{\cppmacro{ql\_remove}{}}
+\item[{\cppmacro[void]{ql\_remove}{{\lt}ql\_head{\gt} *a\_head,
+{\lt}ql\_type{\gt} *a\_elm, {\lt}field\_name{\gt} a\_field}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_head: ]
+			Pointer to a \classname{ql} head.
+		\item[a\_elm: ]
+			Pointer to an element.
+		\item[a\_field: ]
+			Field within the \classname{ql} elements to use.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Remove \cvar{a\_elm} from \cvar{a\_head}.
+	\end{description}
+\label{ql_head_remove}
+\index{\cppmacro{ql\_head\_remove}{}}
+\item[{\cppmacro[void]{ql\_head\_remove}{{\lt}ql\_head{\gt} *a\_head,
+{\lt}ql\_type{\gt} a\_type, {\lt}field\_name{\gt} a\_field}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_head: ]
+			Pointer to a \classname{ql} head.
+		\item[a\_type: ]
+			Data type for the \classname{ql} elements.
+		\item[a\_field: ]
+			Field within the \classname{ql} elements to use.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Remove the head element of \cvar{a\_head}.
+	\end{description}
+\label{ql_tail_remove}
+\index{\cppmacro{ql\_tail\_remove}{}}
+\item[{\cppmacro[void]{ql\_tail\_remove}{{\lt}ql\_head{\gt} *a\_head,
+{\lt}ql\_type{\gt} a\_type, {\lt}field\_name{\gt} a\_field}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_head: ]
+			Pointer to a \classname{ql} head.
+		\item[a\_type: ]
+			Data type for the \classname{ql} elements.
+		\item[a\_field: ]
+			Field within the \classname{ql} elements to use.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Remove the tail element of \cvar{a\_head}.
+	\end{description}
+\label{ql_foreach}
+\index{\cppmacro{ql\_foreach}{}}
+\item[{\cppmacro[]{ql\_foreach}{{\lt}ql\_type{\gt} *a\_var, {\lt}ql\_type{\gt}
+*a\_head, {\lt}field\_name{\gt} a\_field}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_var: ]
+			The name of a temporary variable to use for iteration.
+		\item[a\_head: ]
+			Pointer to a \classname{ql} head.
+		\item[a\_field: ]
+			Field within the \classname{ql} elements to use.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Iterate through the \classname{ql}, storing a pointer to each
+		element in \cvar{a\_var} along the way.
+	\end{description}
+\label{ql_foreach_reverse}
+\index{\cppmacro{ql\_foreach\_reverse}{}}
+\item[{\cppmacro[]{ql\_foreach\_reverse}{{\lt}ql\_type{\gt} *a\_var,
+{\lt}ql\_type{\gt} *a\_head, {\lt}field\_name{\gt} a\_field}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_var: ]
+			The name of a temporary variable to use for iteration.
+		\item[a\_head: ]
+			Pointer to a \classname{ql} head.
+		\item[a\_field: ]
+			Field within the \classname{ql} elements to use.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Iterate through the \classname{ql} in the reverse direction,
+		storing a pointer to each element in \cvar{a\_var} along the
+		way.
 	\end{description}
 \end{description}
