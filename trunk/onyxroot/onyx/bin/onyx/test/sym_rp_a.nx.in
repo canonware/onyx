@@ -12,6 +12,8 @@
 
 `Test begin\n' print
 
-
+() 1 sprint
+(()) 1 sprint
+(1 (2) 3) 2 sprint
 
 `Test end\n' print

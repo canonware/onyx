@@ -28,15 +28,17 @@ named procedures that can be called at a later time, but behind the scenes, the
 code is actually being interpreted as it is scanned in such a way that an
 executable object is created.  As such, onyx is not suited for compilation,
 native or byte code.  However, the language syntax is very simple and the
-scanner/parser is extremely fast.
+scanner/parser is extremely fast.  There is also a mechanism for binding
+procedures, which makes interpreter performance approximately the same as would
+be expected of a byte code interpreter.
 
 Onyx is implemented as a C library that can be embedded in other programs.
 Mechanisms are provided for extending the set of operators available.  This
 manual only documents the base language; see application documentation for any
 language extensions.
 
-Following is a laundry list of language features that are discussed in more
-detail later in this manual:
+Following is a list of basic language features that are discussed in more detail
+later in this manual:
 
 \begin{itemize}
 \item{Stack-based.  There are no named variables as in procedural languages.
@@ -53,7 +55,7 @@ collector.}
 
 \section{Objects}
 
-A onyx object has three aspects: type, attribute, and value.
+An onyx object has three aspects: type, attribute, and value.
 
 Objects fall into two categories according to type: simple and composite.  A
 simple object takes up no memory of its own; it uses space within a stack,
@@ -1752,7 +1754,7 @@ onto a stack. \\
 stack & {\bf \htmlref{scount}{systemdict:scount}} & stack count & Get the number
 of objects on a stack. \\
 \hline
-& {\bf \htmlref{scounttomark}{systemdict:scounttomark}} & & \\
+stack & {\bf \htmlref{scounttomark}{systemdict:scounttomark}} & stack count & \\
 \hline
 stack & {\bf \htmlref{sdup}{systemdict:sdup}} & stack & Duplicate an object. \\
 \hline
@@ -2025,6 +2027,48 @@ under the protection of a mutex. \\
 \end{longtable}
 
 \begin{description}
+\label{systemdict:sym_bang_hash}
+\index{"!#@\onyxop{}{"!\#}{}}
+\item[{\onyxop{--}{!\#}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{systemdict:sym_hash_bang}
+\index{#"!@\onyxop{}{\#"!}{}}
+\item[{\onyxop{--}{\#!}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
 \label{systemdict:sym_lp}
 \index{(@\onyxop{}{(}{}}
 \item[{\onyxop{--}{(}{fino}}: ]
@@ -4504,23 +4548,34 @@ onyx:2>
 	\end{description}
 \label{systemdict:scounttomark}
 \index{scounttomark@\onyxop{}{scounttomark}{}}
-\item[{\onyxop{--}{scounttomark}{--}}: ]
+\item[{\onyxop{stack}{scounttomark}{stack count}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[stack: ]
+			A stack object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[stack: ]
+			The same stack as was passed in.
+		\item[count: ]
+			The depth of the topmost mark on \oparg{stack}.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{unmatchemark}{unmatchemark}.]
 		\end{description}
 	\item[Description: ]
+		Get the depth of the topmost mark on \oparg{stack}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> (3 mark 1 0) scounttomark pstack
+2
+(3 -mark- 1 0)
+onyx:2>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sdup}

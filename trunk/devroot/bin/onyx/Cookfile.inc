@@ -58,7 +58,8 @@ SRCS = [SRCS] [ONYX_SRCS];
                  hello.nx.in
                  integer.nx.in monitor_a.nx.in monitor_b.nx.in monitor_c.nx.in
                  nsleep_a.nx.in nsleep_b.nx.in nsleep_c.nx.in
-                 nsleep_d.nx.in sclear_a.nx.in sclear_b.nx.in sclear_c.nx.in
+                 nsleep_d.nx.in pop_a.nx.in pop_b.nx.in sclear_a.nx.in
+                 sclear_b.nx.in sclear_c.nx.in
                  scleartomark_a.nx.in scleartomark_b.nx.in scleartomark_c.nx.in
                  scleartomark_d.nx.in scount_a.nx.in scount_b.nx.in
                  scount_c.nx.in scounttomark_a.nx.in scounttomark_b.nx.in
@@ -69,7 +70,9 @@ SRCS = [SRCS] [ONYX_SRCS];
                  spop_d.nx.in sprint_a.nx.in spush_a.nx.in spush_b.nx.in
                  spush_c.nx.in spush_d.nx.in sroll_a.nx.in sroll_b.nx.in
                  sroll_c.nx.in sroll_d.nx.in sroll_e.nx.in sroll_f.nx.in
-                 sroll_g.nx.in sroll_h.nx.in sroll_i.nx.in syntaxerror_a.nx.in
+                 sroll_g.nx.in sroll_h.nx.in sroll_i.nx.in stack_a.nx.in
+                 sym_lp_a.nx.in
+                 sym_rp_a.nx.in sym_rp_b.nx.in syntaxerror_a.nx.in
                  syntaxerror_b.nx.in syntaxerror_c.nx.in syntaxerror_d.nx.in
                  syntaxerror_e.nx.in syntaxerror_f.nx.in syntaxerror_g.nx.in
                  syntaxerror_h.nx.in syntaxerror_i.nx.in syntaxerror_j.nx.in
