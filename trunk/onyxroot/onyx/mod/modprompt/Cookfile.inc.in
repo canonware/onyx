@@ -89,7 +89,7 @@ modprompt_mods_distclean :
  * Various flags.
  */
 MODPROMPT_CPPFLAGS = @PROMPT_CFLAGS@;
-MODPROMPT_LDFLAGS = @PROMPT_LIBS@ @LIBS@;
+MODPROMPT_LDFLAGS = @PROMPT_LIBS@;
 
 CPPFLAGS = [CPPFLAGS] -I@srcroot@/mod/modprompt/include
                       -I@objroot@/mod/modprompt/include
