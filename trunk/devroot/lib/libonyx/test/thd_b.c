@@ -66,8 +66,8 @@ main()
 	thd_resume(thd);
 	nanosleep(&tout, NULL);
 	thd_suspend(thd);
-/* 	fprintf(stderr, "count(%u) != i(%u)\n", count, i); */
-	cw_assert(count != i);
+/* 	fprintf(stderr, "count(%u) <= i(%u)\n", count, i); */
+	cw_assert(count <= i);
 	thd_resume(thd);
     }
 	
@@ -86,8 +86,8 @@ main()
 	while (thd_trysuspend(thd))
 	{
 	}
-/* 	fprintf(stderr, "count(%u) != i(%u)\n", count, i); */
-	cw_assert(count != i);
+/* 	fprintf(stderr, "count(%u) <= i(%u)\n", count, i); */
+	cw_assert(count <= i);
 	thd_resume(thd);
     }
     done = TRUE;
