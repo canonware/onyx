@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 86 $
- * $Date: 1998-06-23 17:40:29 -0700 (Tue, 23 Jun 1998) $
+ * $Revision: 105 $
+ * $Date: 1998-06-29 21:49:55 -0700 (Mon, 29 Jun 1998) $
  *
  * <<< Description >>>
  *
@@ -32,7 +32,7 @@ main()
   cw_bool_t error;
 
   glob_new();
-  oh_new(&hash_o, FALSE, TRUE);
+  oh_new(&hash_o, FALSE);
 /*   dbg_turn_on(g_dbg_o, _CW_DBG_R_OH_FUNC); */
 /*   dbg_turn_on(g_dbg_o, _CW_DBG_R_OH_SLOT); */
   
@@ -46,9 +46,11 @@ main()
 
 /*   h1_ptr = oh_get_h1(hash_o); */
 /*   oh_set_h1(hash_o, new_h1); */
-  
+
+/*   log_printf(g_log_o, "<<< Begin first insertion loop >>>\n"); */
   for (i = 0; i < NUM_STRINGS; i++)
   {
+/*     log_printf(g_log_o, "<<< Iteration %d >>>\n", i); */
     error = oh_item_insert(&hash_o, (void *) strings[i],
 				 (void *) &(strings[i]));
     if (error == TRUE)
@@ -58,6 +60,7 @@ main()
     }
   }
 
+/*   log_printf(g_log_o, "<<< Begin first deletion loop >>>\n"); */
   for (i = 0; i < (NUM_STRINGS / 2); i++)
   {
     error = oh_item_delete(&hash_o, (void *) strings[i],
@@ -69,6 +72,7 @@ main()
     }
   }
 
+/*   log_printf(g_log_o, "<<< Begin second insertion loop >>>\n"); */
   for (i = 0; i < NUM_STRINGS / 2; i++)
   {
     error = oh_item_insert(&hash_o, (void *) strings[i],
@@ -80,6 +84,7 @@ main()
     }
   }
 
+/*   log_printf(g_log_o, "<<< Begin second deletion loop >>>\n"); */
   for (i = 0; i < NUM_STRINGS; i++)
   {
     error = oh_item_delete(&hash_o, (void *) strings[i],
@@ -87,10 +92,12 @@ main()
     if (error == TRUE)
     {
       log_printf(g_log_o, "(4) Error at i == %d\n", i);
+      oh_dump(&hash_o, TRUE);
       exit(1);
     }
   }
 
+/*   log_printf(g_log_o, "<<< Final insertion >>>\n"); */
   error = oh_item_insert(&hash_o, (void *) strings[0],
 			       (void *) &(strings[0]));
   
@@ -98,10 +105,8 @@ main()
 	     oh_get_size(&hash_o));
   log_printf(g_log_o, "Number of items: %d\n",
 	     oh_get_num_items(&hash_o));
-  log_printf(g_log_o, "Number of invalid slots: %d\n",
-	     oh_get_num_invalid(&hash_o));
 
-/*   oh_dump(&hash_o, TRUE); */
+/*   oh_dump(&hash_o, FALSE); */
   
   for (i = 0; i < NUM_STRINGS; i++)
   {
