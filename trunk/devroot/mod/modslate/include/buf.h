@@ -45,12 +45,32 @@ typedef enum
     BUFW_EOB
 } cw_bufw_t;
 
+/* Enumeration for marker ordering.  This is used for mkr ordering (to support
+ * extents), as well as for deciding whether insertions at a mkr's position go
+ * before or after the mkr. */
+typedef enum
+{
+    /* The mkr stays before data inserted. */
+    MKRO_BEFORE,
+
+    /* The mkr stays before data inserted via mkr_after_insert(), and goes after
+     * data inserted via mkr_before_insert(). */
+    MKRO_EITHER,
+
+    /* The mkr goes after data inserted at its position. */
+    MKRO_AFTER
+} cw_mkro_t;
+
 struct cw_mkr_s
 {
 #ifdef CW_DBG
     cw_uint32_t magic;
 #define CW_MKR_MAGIC 0x2e84a3c9
 #endif
+
+    /* Marker type.  Normal markers are MKRO_EITHER; other values are for
+     * extents. */
+    cw_mkro_t order;
 
     /* bufp this marker is in. */
     cw_bufp_t *bufp;
@@ -73,17 +93,17 @@ struct cw_ext_s
 #define CW_EXT_MAGIC 0x8a94e34c
 #endif
 
+    /* Allocator state. */
+    cw_bool_t alloced:1;
+
+    /* A detachable extent is removed from the buffer if its size reaches 0.
+     * Note that an extent is created detached, but not detachable. */
+    cw_bool_t attached:1;
+    cw_bool_t detachable:1;
+
     /* Beginning and ending markers. */
     cw_mkr_t beg;
     cw_mkr_t end;
-
-    /* Extents are either open or shut at each end. */
-    cw_bool_t beg_open:1;
-    cw_bool_t end_open:1;
-
-    /* A detachable extent is removed from the buffer if its size reaches 0. */
-    cw_bool_t detachable:1;
-    cw_bool_t detached:1;
 
     /* Forward- and reverse-ordered ext tree and list linkage. */
     rb_node(cw_ext_t) fnode;
@@ -122,7 +142,7 @@ struct cw_bufp_s
 #ifdef XXX_NOT_YET
 #define CW_BUFP_SIZE 65536
 #else
-#define CW_BUFP_SIZE 8
+#define CW_BUFP_SIZE 5
 #endif
     cw_uint8_t *b;
 
@@ -324,19 +344,19 @@ void
 ext_end_open_set(cw_ext_t *a_ext, cw_bool_t a_end_open);
 
 cw_bool_t
+ext_attached_get(const cw_ext_t *a_ext);
+
+void
+ext_attach(cw_ext_t *a_ext);
+
+void
+ext_detach(cw_ext_t *a_ext);
+
+cw_bool_t
 ext_detachable_get(const cw_ext_t *a_ext);
 
 void
 ext_detachable_set(cw_ext_t *a_ext, cw_bool_t a_detachable);
-
-cw_bool_t
-ext_detached_get(const cw_ext_t *a_ext);
-
-void
-ext_detached_set(cw_ext_t *a_ext, cw_bool_t a_detached);
-
-void
-ext_detach(cw_ext_t *a_ext);
 
 /* Get the first and last ext's that overlap a_mkr.  retval is the length of the
  * run.  r_beg and r_end are NULL if there are no extents overlapping the
@@ -344,9 +364,18 @@ ext_detach(cw_ext_t *a_ext);
 cw_uint64_t
 ext_run_get(const cw_mkr_t *a_mkr, cw_ext_t *r_beg, cw_ext_t *r_end);
 
+void
+ext_frag_get(const cw_mkr_t *a_mkr, cw_mkr_t *r_beg, cw_mkr_t *r_end);
+
 /* Iterate in f-order. */
 cw_ext_t *
 ext_prev_get(const cw_ext_t *a_ext);
 
 cw_ext_t *
 ext_next_get(const cw_ext_t *a_ext);
+
+#ifdef CW_BUF_DUMP
+void
+ext_dump(cw_ext_t *a_ext, const char *a_beg, const char *a_mid,
+	 const char *a_end);
+#endif

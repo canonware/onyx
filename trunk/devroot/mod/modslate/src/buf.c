@@ -152,11 +152,10 @@
  *
  * Extents keep track of buffer ranges, and are typically used to associate
  * attributes (primarily for color syntax highlighting) with those ranges.  The
- * end points of an extent are denoted by markers, which are no different than
- * other markers.  This is the primary motivation for making marker operations
- * scalable, since a typical buffer has only a handfull of markers, until
- * extents come into play, at which time the number of markers can quickly
- * become huge.
+ * end points of an extent are denoted by markers.  This is the primary
+ * motivation for making marker operations scalable, since a typical buffer has
+ * only a handfull of markers, until extents come into play, at which time the
+ * number of markers can quickly become huge.
  *
  * An extent's end points are each open or shut:
  *
@@ -287,6 +286,8 @@ a_fname(a_type *a_node, a_type *a_nil)					\
 }
 buf_p_rb_recurse_gen(buf_p_ptree_dump, cw_bufp_t, pnode)
 buf_p_rb_recurse_gen(buf_p_mtree_dump, cw_mkr_t, mnode)
+buf_p_rb_recurse_gen(buf_p_ftree_dump, cw_ext_t, fnode)
+buf_p_rb_recurse_gen(buf_p_rtree_dump, cw_ext_t, rnode)
 
 #define buf_p_ql_dump(a_ql, a_type, a_field)				\
     do									\
@@ -299,16 +300,101 @@ buf_p_rb_recurse_gen(buf_p_mtree_dump, cw_mkr_t, mnode)
     } while (0)
 #endif
 
-/* #define XXX_NOT_YET */
-
 /* Prototypes. */
-/* XXX */
+/* bufp. */
+static cw_sint32_t
+bufp_p_comp(cw_bufp_t *a_a, cw_bufp_t *a_b);
+static void
+bufp_p_mkrs_ppos_adjust(cw_bufp_t *a_bufp, cw_sint32_t a_adjust,
+			cw_uint32_t a_beg_ppos, cw_uint32_t a_end_ppos);
+static void
+bufp_p_mkrs_pline_adjust(cw_bufp_t *a_bufp, cw_sint32_t a_adjust,
+			 cw_uint32_t a_beg_ppos);
+static void
+bufp_p_gap_move(cw_bufp_t *a_bufp, cw_uint32_t a_ppos);
+static cw_bufp_t *
+bufp_p_new(cw_buf_t *a_buf);
+static cw_uint32_t
+bufp_p_simple_insert(cw_bufp_t *a_bufp, const cw_bufv_t *a_bufv,
+		     cw_uint32_t a_bufvcnt, cw_uint32_t a_count);
+static void
+bufp_p_delete(cw_bufp_t *a_bufp);
+static cw_uint32_t
+bufp_p_pos_p2r(cw_bufp_t *a_bufp, cw_uint32_t a_ppos);
+static cw_uint32_t
+bufp_p_pos_b2p(cw_bufp_t *a_bufp, cw_uint64_t a_bpos);
+static cw_uint64_t
+bufp_p_pos_p2b(cw_bufp_t *a_bufp, cw_uint32_t a_ppos);
+static cw_uint32_t
+bufp_p_ppos2pline(cw_bufp_t *a_bufp, cw_uint32_t a_ppos);
+#ifdef CW_BUF_DUMP
+static void
+bufp_p_dump(cw_bufp_t *a_bufp, const char *a_beg, const char *a_mid,
+	    const char *a_end);
+#endif
+
+/* buf. */
+static cw_sint32_t
+buf_p_bufp_at_bpos_comp(cw_bufp_t *a_key, cw_bufp_t *a_bufp);
+static cw_bufp_t *
+buf_p_bufp_at_bpos(cw_buf_t *a_buf, cw_uint64_t a_bpos);
+static cw_sint32_t
+buf_p_bpos_lf_comp(cw_bufp_t *a_key, cw_bufp_t *a_bufp);
+static cw_uint64_t
+buf_p_bpos_before_lf(cw_buf_t *a_buf, cw_uint64_t a_lf, cw_bufp_t **r_bufp);
+static cw_uint64_t
+buf_p_bpos_after_lf(cw_buf_t *a_buf, cw_uint64_t a_lf, cw_bufp_t **r_bufp);
+static void
+buf_p_bufp_cur_set(cw_buf_t *a_buf, cw_bufp_t *a_bufp);
+static cw_uint64_t
+buf_p_bufv_insert(cw_buf_t *a_buf, cw_bufp_t *a_bufp, cw_bufp_t *a_pastp,
+		  const cw_bufv_t *a_bufv, cw_uint32_t a_bufvcnt);
+static void
+buf_p_bufp_insert(cw_buf_t *a_buf, cw_bufp_t *a_bufp);
+static void
+buf_p_bufp_remove(cw_buf_t *a_buf, cw_bufp_t *a_bufp);
+static void
+buf_p_bufp_splice(cw_buf_t *a_buf, cw_bufp_t *a_start, cw_bufp_t *a_end);
+
+/* mkr. */
+static void
+mkr_p_new(cw_mkr_t *a_mkr, cw_buf_t *a_buf, cw_mkro_t a_order);
+static void
+mkr_p_dup(cw_mkr_t *a_to, const cw_mkr_t *a_from, cw_mkro_t a_order);
+static cw_uint64_t
+mkr_p_bpos(cw_mkr_t *a_mkr);
+static cw_uint64_t
+mkr_p_line(cw_mkr_t *a_mkr);
 static cw_sint32_t
 mkr_p_comp(cw_mkr_t *a_a, cw_mkr_t *a_b);
 static void
 mkr_p_insert(cw_mkr_t *a_mkr);
 static void
 mkr_p_remove(cw_mkr_t *a_mkr);
+static cw_uint32_t
+mkr_p_simple_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
+		    cw_uint32_t a_bufvcnt, cw_uint32_t a_count);
+static cw_uint32_t
+mkr_p_before_slide_insert(cw_mkr_t *a_mkr, cw_bool_t a_after,
+			  cw_bufp_t *a_prevp, const cw_bufv_t *a_bufv,
+			  cw_uint32_t a_bufvcnt, cw_uint32_t a_count);
+static cw_uint32_t
+mkr_p_after_slide_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, cw_bufp_t *a_nextp,
+			 const cw_bufv_t *a_bufv, cw_uint32_t a_bufvcnt,
+			 cw_uint32_t a_count);
+static cw_uint64_t
+mkr_p_split_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
+		   cw_uint32_t a_bufvcnt, cw_uint64_t a_count);
+
+/* ext. */
+static cw_sint32_t
+ext_p_fcomp(cw_ext_t *a_a, cw_ext_t *a_b);
+static cw_sint32_t
+ext_p_rcomp(cw_ext_t *a_a, cw_ext_t *a_b);
+static void
+ext_p_insert(cw_ext_t *a_ext);
+static void
+ext_p_remove(cw_ext_t *a_ext);
 
 /* bufv. */
 
@@ -1780,7 +1866,21 @@ buf_dump(cw_buf_t *a_buf, const char *a_beg, const char *a_mid,
     fprintf(stderr, "\n");
     fprintf(stderr, "%s|-> bufvcnt: %u\n", mid, a_buf->bufvcnt);
 
-    /* XXX ftree, flist, rtree, rlist. */
+    fprintf(stderr, "%s|\n", mid);
+    fprintf(stderr, "%s|-> ftree: ", mid);
+    buf_p_ftree_dump(rb_root(&a_buf->ftree), rb_tree_nil(&a_buf->ftree));
+    fprintf(stderr, "\n");
+    fprintf(stderr, "%s|-> flist:", mid);
+    buf_p_ql_dump(&a_buf->flist, cw_ext_t, rlink);
+    fprintf(stderr, "\n");
+
+    fprintf(stderr, "%s|\n", mid);
+    fprintf(stderr, "%s|-> rtree: ", mid);
+    buf_p_rtree_dump(rb_root(&a_buf->rtree), rb_tree_nil(&a_buf->rtree));
+    fprintf(stderr, "\n");
+    fprintf(stderr, "%s|-> rlist:", mid);
+    buf_p_ql_dump(&a_buf->rlist, cw_ext_t, rlink);
+    fprintf(stderr, "\n");
 
     fprintf(stderr, "%s|\n", mid);
     if (a_buf->hist != NULL)
@@ -1801,6 +1901,51 @@ buf_dump(cw_buf_t *a_buf, const char *a_beg, const char *a_mid,
 #endif
 
 /* mkr. */
+static void
+mkr_p_new(cw_mkr_t *a_mkr, cw_buf_t *a_buf, cw_mkro_t a_order)
+{
+    cw_bufp_t *bufp;
+
+    cw_check_ptr(a_mkr);
+    cw_check_ptr(a_buf);
+    cw_dassert(a_buf->magic == CW_BUF_MAGIC);
+
+    a_mkr->order = a_order;
+    bufp = ql_first(&a_buf->plist);
+    a_mkr->bufp = bufp;
+    a_mkr->ppos = bufp_p_pos_b2p(bufp, 1);
+    a_mkr->pline = 0;
+    rb_node_new(&bufp->mtree, a_mkr, mnode);
+    ql_elm_new(a_mkr, mlink);
+
+#ifdef CW_DBG
+    a_mkr->magic = CW_MKR_MAGIC;
+#endif
+
+    mkr_p_insert(a_mkr);
+}
+
+static void
+mkr_p_dup(cw_mkr_t *a_to, const cw_mkr_t *a_from, cw_mkro_t a_order)
+{
+    cw_check_ptr(a_to);
+    cw_dassert(a_to->magic == CW_MKR_MAGIC);
+    cw_check_ptr(a_from);
+    cw_dassert(a_from->magic == CW_MKR_MAGIC);
+    cw_assert(a_to != a_from);
+    cw_assert(a_to->bufp->buf == a_from->bufp->buf);
+
+    mkr_p_remove(a_to);
+
+    a_to->order = a_order;
+    a_to->bufp = a_from->bufp;
+    a_to->ppos = a_from->ppos;
+    a_to->pline = a_from->pline;
+
+    rb_node_new(&a_to->bufp->mtree, a_to, mnode);
+    mkr_p_insert(a_to);
+}
+
 static cw_uint64_t
 mkr_p_bpos(cw_mkr_t *a_mkr)
 {
@@ -1837,43 +1982,22 @@ mkr_p_comp(cw_mkr_t *a_a, cw_mkr_t *a_b)
     }
     else
     {
-	retval = 0;
+	if (a_a->order == a_b->order)
+	{
+	    retval = 0;
+	}
+	else if (a_a->order < a_b->order)
+	{
+	    retval = -1;
+	}
+	else
+	{
+	    retval = 1;
+	}
     }
 
     return retval;
 }
-
-/* XXX */
-#if (0)
-static cw_sint32_t
-mkr_p_line_comp(cw_mkr_t *a_a, cw_mkr_t *a_b)
-{
-    cw_sint32_t retval;
-
-    cw_check_ptr(a_a);
-    cw_dassert(a_a->magic == CW_MKR_MAGIC);
-    cw_check_ptr(a_a->bufp);
-    cw_check_ptr(a_b);
-    cw_dassert(a_b->magic == CW_MKR_MAGIC);
-    cw_check_ptr(a_b->bufp);
-    cw_assert(a_a->bufp == a_b->bufp);
-
-    if (a_a->pline < a_b->pline)
-    {
-	retval = -1;
-    }
-    else if (a_a->pline > a_b->pline)
-    {
-	retval = 1;
-    }
-    else
-    {
-	retval = 0;
-    }
-
-    return retval;
-}
-#endif
 
 static void
 mkr_p_insert(cw_mkr_t *a_mkr)
@@ -2628,44 +2752,17 @@ mkr_l_remove(cw_mkr_t *a_start, cw_mkr_t *a_end, cw_bool_t a_record)
 void
 mkr_new(cw_mkr_t *a_mkr, cw_buf_t *a_buf)
 {
-    cw_bufp_t *bufp;
-
     cw_check_ptr(a_mkr);
     cw_check_ptr(a_buf);
     cw_dassert(a_buf->magic == CW_BUF_MAGIC);
 
-    bufp = ql_first(&a_buf->plist);
-    a_mkr->bufp = bufp;
-    a_mkr->ppos = bufp_p_pos_b2p(bufp, 1);
-    a_mkr->pline = 0;
-    rb_node_new(&bufp->mtree, a_mkr, mnode);
-    ql_elm_new(a_mkr, mlink);
-
-#ifdef CW_DBG
-    a_mkr->magic = CW_MKR_MAGIC;
-#endif
-
-    mkr_p_insert(a_mkr);
+    mkr_p_new(a_mkr, a_buf, MKRO_EITHER);
 }
 
 void
 mkr_dup(cw_mkr_t *a_to, const cw_mkr_t *a_from)
 {
-    cw_check_ptr(a_to);
-    cw_dassert(a_to->magic == CW_MKR_MAGIC);
-    cw_check_ptr(a_from);
-    cw_dassert(a_from->magic == CW_MKR_MAGIC);
-    cw_assert(a_to != a_from);
-    cw_assert(a_to->bufp->buf == a_from->bufp->buf);
-
-    mkr_p_remove(a_to);
-
-    a_to->bufp = a_from->bufp;
-    a_to->ppos = a_from->ppos;
-    a_to->pline = a_from->pline;
-
-    rb_node_new(&a_to->bufp->mtree, a_to, mnode);
-    mkr_p_insert(a_to);
+    mkr_p_dup(a_to, a_from, a_to->order);
 }
 
 void
@@ -3410,127 +3507,499 @@ mkr_dump(cw_mkr_t *a_mkr, const char *a_beg, const char *a_mid,
 #endif
 
 /* ext. */
-#ifdef XXX_NOT_YET
 static cw_sint32_t
 ext_p_fcomp(cw_ext_t *a_a, cw_ext_t *a_b)
 {
-    cw_error("XXX Not implemented");
+    cw_sint32_t retval;
+    cw_uint64_t abeg, bbeg;
+
+    cw_check_ptr(a_a);
+    cw_dassert(a_a->magic == CW_EXT_MAGIC);
+    cw_check_ptr(a_a->beg.bufp->buf);
+    cw_check_ptr(a_b);
+    cw_dassert(a_b->magic == CW_EXT_MAGIC);
+    cw_check_ptr(a_b->beg.bufp->buf);
+    cw_assert(a_a->beg.bufp->buf == a_b->beg.bufp->buf);
+
+    abeg = mkr_pos(&a_a->beg);
+    bbeg = mkr_pos(&a_b->beg);
+    if (abeg < bbeg)
+    {
+	retval = -1;
+    }
+    else if (abeg == bbeg)
+    {
+	cw_uint64_t aend, bend;
+
+	aend = mkr_pos(&a_a->end);
+	bend = mkr_pos(&a_b->end);
+	if (aend > bend)
+	{
+	    retval = -1;
+	}
+	else if (aend == bend)
+	{
+	    retval = 0;
+	}
+	else
+	{
+	    retval = 1;
+	}
+    }
+    else
+    {
+	retval = 1;
+    }
+
+    return retval;
 }
 
 static cw_sint32_t
 ext_p_rcomp(cw_ext_t *a_a, cw_ext_t *a_b)
 {
-    cw_error("XXX Not implemented");
+    cw_sint32_t retval;
+    cw_uint64_t aend, bend;
+
+    cw_check_ptr(a_a);
+    cw_dassert(a_a->magic == CW_EXT_MAGIC);
+    cw_check_ptr(a_a->beg.bufp->buf);
+    cw_check_ptr(a_b);
+    cw_dassert(a_b->magic == CW_EXT_MAGIC);
+    cw_check_ptr(a_b->beg.bufp->buf);
+    cw_assert(a_a->beg.bufp->buf == a_b->beg.bufp->buf);
+
+    aend = mkr_pos(&a_a->end);
+    bend = mkr_pos(&a_b->end);
+    if (aend < bend)
+    {
+	retval = -1;
+    }
+    else if (aend == bend)
+    {
+	cw_uint64_t abeg, bbeg;
+
+	abeg = mkr_pos(&a_a->beg);
+	bbeg = mkr_pos(&a_b->beg);
+	if (abeg > bbeg)
+	{
+	    retval = -1;
+	}
+	else if (abeg == bbeg)
+	{
+	    retval = 0;
+	}
+	else
+	{
+	    retval = 1;
+	}
+    }
+    else
+    {
+	retval = 1;
+    }
+
+    return retval;
 }
-#endif
+
+static void
+ext_p_insert(cw_ext_t *a_ext)
+{
+    cw_buf_t *buf = a_ext->beg.bufp->buf;
+    cw_ext_t *next;
+
+    cw_assert(a_ext->fnode.rbn_par == rb_tree_nil(&buf->ftree));
+    cw_assert(a_ext->fnode.rbn_left == rb_tree_nil(&buf->ftree));
+    cw_assert(a_ext->fnode.rbn_right == rb_tree_nil(&buf->ftree));
+    cw_assert(a_ext->rnode.rbn_par == rb_tree_nil(&buf->rtree));
+    cw_assert(a_ext->rnode.rbn_left == rb_tree_nil(&buf->rtree));
+    cw_assert(a_ext->rnode.rbn_right == rb_tree_nil(&buf->rtree));
+
+    /* Insert into ftree. */
+    rb_insert(&buf->ftree, a_ext, ext_p_fcomp, cw_ext_t, fnode);
+
+    /* Insert into flist.  Make sure that the tree and list orders are the
+     * same. */
+    rb_next(&buf->ftree, a_ext, cw_ext_t, fnode, next);
+    if (next != rb_tree_nil(&buf->ftree))
+    {
+	ql_before_insert(&buf->flist, next, a_ext, flink);
+    }
+    else
+    {
+	ql_tail_insert(&buf->flist, a_ext, flink);
+    }
+
+    /* Insert into rtree. */
+    rb_insert(&buf->rtree, a_ext, ext_p_rcomp, cw_ext_t, rnode);
+
+    /* Insert into rlist.  Make sure that the tree and list orders are the
+     * same. */
+    rb_next(&buf->rtree, a_ext, cw_ext_t, rnode, next);
+    if (next != rb_tree_nil(&buf->rtree))
+    {
+	ql_before_insert(&buf->rlist, next, a_ext, rlink);
+    }
+    else
+    {
+	ql_tail_insert(&buf->rlist, a_ext, rlink);
+    }
+}
+
+static void
+ext_p_remove(cw_ext_t *a_ext)
+{
+    cw_buf_t *buf = a_ext->beg.bufp->buf;
+
+    rb_remove(&buf->ftree, a_ext, cw_ext_t, fnode);
+    ql_remove(&buf->flist, a_ext, flink);
+
+    rb_remove(&buf->rtree, a_ext, cw_ext_t, rnode);
+    ql_remove(&buf->rlist, a_ext, rlink);
+}
 
 cw_ext_t *
 ext_new(cw_ext_t *a_ext, cw_buf_t *a_buf)
 {
-    cw_error("XXX Not implemented");
+    cw_ext_t *retval;
+
+    cw_check_ptr(a_buf);
+    cw_dassert(a_buf->magic == CW_BUF_MAGIC);
+
+    /* Allocate ext. */
+    if (a_ext != NULL)
+    {
+	retval = a_ext;
+	retval->alloced = FALSE;
+    }
+    else
+    {
+	retval = (cw_ext_t *) cw_opaque_alloc(a_buf->alloc, a_buf->arg,
+					      sizeof(cw_ext_t));
+	retval->alloced = TRUE;
+    }
+
+    /* Initialize detach state. */
+    retval->attached = FALSE;
+    retval->detachable = FALSE;
+
+    /* Initialize markers.  Extents start out as zero-length shut-shut. */
+    mkr_p_new(&retval->beg, a_buf, MKRO_BEFORE);
+    mkr_p_new(&retval->end, a_buf, MKRO_AFTER);
+
+    /* Initialize extent tree and list linkage. */
+    rb_node_new(&a_buf->ftree, retval, fnode);
+    ql_elm_new(retval, flink);
+    rb_node_new(&a_buf->rtree, retval, rnode);
+    ql_elm_new(retval, rlink);
+
+#ifdef CW_DBG
+    retval->magic = CW_EXT_MAGIC;
+#endif
+
+    return retval;
 }
 
 void
 ext_dup(cw_ext_t *a_to, cw_ext_t *a_from)
 {
-    cw_error("XXX Not implemented");
+    cw_check_ptr(a_to);
+    cw_dassert(a_to->magic == CW_EXT_MAGIC);
+    cw_check_ptr(a_from);
+    cw_dassert(a_from->magic == CW_EXT_MAGIC);
+    cw_assert(a_to != a_from);
+    cw_assert(a_to->beg.bufp->buf == a_from->beg.bufp->buf);
+
+    if (a_to->attached)
+    {
+	ext_p_remove(a_to);
+    }
+
+    a_to->attached = a_from->attached;
+    a_to->detachable = a_from->detachable;
+    mkr_dup(&a_to->beg, &a_from->beg);
+    mkr_dup(&a_to->end, &a_from->beg);
+
+    if (a_to->attached)
+    {
+	ext_p_insert(a_to);
+    }
 }
 
 void
 ext_delete(cw_ext_t *a_ext)
 {
-    cw_error("XXX Not implemented");
+    cw_buf_t *buf;
+
+    cw_check_ptr(a_ext);
+    cw_dassert(a_ext->magic == CW_EXT_MAGIC);
+
+    buf = a_ext->beg.bufp->buf;
+
+    if (a_ext->attached)
+    {
+	ext_p_remove(a_ext);
+    }
+    mkr_delete(&a_ext->beg);
+    mkr_delete(&a_ext->end);
+
+    if (a_ext->alloced)
+    {
+	cw_opaque_dealloc(buf->dealloc, buf->arg, a_ext, sizeof(cw_ext_t));
+    }
+#ifdef CW_DBG
+    else
+    {
+	memset(a_ext, 0x5a, sizeof(cw_ext_t));
+    }
+#endif
 }
 
 cw_buf_t *
 ext_buf(const cw_ext_t *a_ext)
 {
-    cw_error("XXX Not implemented");
+    cw_check_ptr(a_ext);
+    cw_dassert(a_ext->magic == CW_EXT_MAGIC);
+
+    return a_ext->beg.bufp->buf;
 }
 
 const cw_mkr_t *
 ext_beg_get(cw_ext_t *a_ext)
 {
-    cw_error("XXX Not implemented");
+    cw_check_ptr(a_ext);
+    cw_dassert(a_ext->magic == CW_EXT_MAGIC);
+
+    return &a_ext->beg;
 }
 
 void
 ext_beg_set(cw_ext_t *a_ext, const cw_mkr_t *a_beg)
 {
-    cw_error("XXX Not implemented");
+    cw_uint64_t bbpos, ebpos;
+
+    cw_check_ptr(a_ext);
+    cw_dassert(a_ext->magic == CW_EXT_MAGIC);
+
+    if (a_ext->attached)
+    {
+	ext_p_remove(a_ext);
+    }
+
+    ebpos = mkr_pos(&a_ext->end);
+    bbpos = mkr_pos(a_beg);
+    if (ebpos < bbpos)
+    {
+	/* Convert to zero-length, since the beginning is being moved after the
+	 * end. */
+	mkr_p_dup(&a_ext->end, a_beg, a_ext->end.order);
+	ebpos = bbpos;
+    }
+    mkr_p_dup(&a_ext->beg, a_beg, a_ext->beg.order);
+
+    if (a_ext->attached)
+    {
+	if (bbpos == ebpos && a_ext->detachable)
+	{
+	    /* Detach. */
+	    a_ext->attached = FALSE;
+	}
+	else
+	{
+	    ext_p_insert(a_ext);
+	}
+    }
 }
 
 const cw_mkr_t *
 ext_end_get(cw_ext_t *a_ext)
 {
-    cw_error("XXX Not implemented");
+    cw_check_ptr(a_ext);
+    cw_dassert(a_ext->magic == CW_EXT_MAGIC);
+
+    return &a_ext->end;
 }
 
 void
 ext_end_set(cw_ext_t *a_ext, const cw_mkr_t *a_end)
 {
-    cw_error("XXX Not implemented");
+    cw_uint64_t bbpos, ebpos;
+
+    cw_check_ptr(a_ext);
+    cw_dassert(a_ext->magic == CW_EXT_MAGIC);
+
+    if (a_ext->attached)
+    {
+	ext_p_remove(a_ext);
+    }
+
+    bbpos = mkr_pos(&a_ext->beg);
+    ebpos = mkr_pos(a_end);
+    if (bbpos > ebpos)
+    {
+	/* Convert to zero-length, since the end is being moved before the
+	 * beginning. */
+	mkr_p_dup(&a_ext->beg, a_end, a_ext->beg.order);
+	bbpos = ebpos;
+    }
+    mkr_p_dup(&a_ext->end, a_end, a_ext->end.order);
+
+    if (a_ext->attached)
+    {
+	if (bbpos == ebpos && a_ext->detachable)
+	{
+	    /* Detach. */
+	    a_ext->attached = FALSE;
+	}
+	else
+	{
+	    ext_p_insert(a_ext);
+	}
+    }
 }
 
 cw_bool_t
 ext_beg_open_get(const cw_ext_t *a_ext)
 {
-    cw_error("XXX Not implemented");
+    cw_bool_t retval;
+
+    cw_check_ptr(a_ext);
+    cw_dassert(a_ext->magic == CW_EXT_MAGIC);
+
+    if (a_ext->beg.order == MKRO_AFTER)
+    {
+	retval = TRUE;
+    }
+    else
+    {
+	retval = FALSE;
+    }
+
+    return retval;
 }
 
 void
 ext_beg_open_set(cw_ext_t *a_ext, cw_bool_t a_beg_open)
 {
-    cw_error("XXX Not implemented");
+    cw_check_ptr(a_ext);
+    cw_dassert(a_ext->magic == CW_EXT_MAGIC);
+
+    if (a_ext->beg.order != a_beg_open)
+    {
+	mkr_p_remove(&a_ext->beg);
+	a_ext->beg.order = a_beg_open;
+	mkr_p_insert(&a_ext->beg);
+    }
 }
 
 cw_bool_t
 ext_end_open_get(const cw_ext_t *a_ext)
 {
-    cw_error("XXX Not implemented");
+    cw_bool_t retval;
+
+    cw_check_ptr(a_ext);
+    cw_dassert(a_ext->magic == CW_EXT_MAGIC);
+
+    if (a_ext->end.order == MKRO_BEFORE)
+    {
+	retval = TRUE;
+    }
+    else
+    {
+	retval = FALSE;
+    }
+
+    return retval;
 }
 
 void
 ext_end_open_set(cw_ext_t *a_ext, cw_bool_t a_end_open)
 {
-    cw_error("XXX Not implemented");
+    cw_check_ptr(a_ext);
+    cw_dassert(a_ext->magic == CW_EXT_MAGIC);
+
+    if (a_ext->end.order != a_end_open)
+    {
+	mkr_p_remove(&a_ext->end);
+	a_ext->end.order = a_end_open;
+	mkr_p_insert(&a_ext->end);
+    }
 }
 
 cw_bool_t
-ext_detachable_get(const cw_ext_t *a_ext)
+ext_attached_get(const cw_ext_t *a_ext)
 {
-    cw_error("XXX Not implemented");
+    cw_check_ptr(a_ext);
+    cw_dassert(a_ext->magic == CW_EXT_MAGIC);
+
+    return a_ext->attached;
 }
 
 void
-ext_detachable_set(cw_ext_t *a_ext, cw_bool_t a_detachable)
+ext_attach(cw_ext_t *a_ext)
 {
-    cw_error("XXX Not implemented");
-}
+    cw_check_ptr(a_ext);
+    cw_dassert(a_ext->magic == CW_EXT_MAGIC);
 
-cw_bool_t
-ext_detached_get(const cw_ext_t *a_ext)
-{
-    cw_error("XXX Not implemented");
-}
-
-void
-ext_detached_set(cw_ext_t *a_ext, cw_bool_t a_detached)
-{
-    cw_error("XXX Not implemented");
+    if (a_ext->attached == FALSE)
+    {
+	ext_p_insert(a_ext);
+	a_ext->attached = TRUE;
+    }
 }
 
 void
 ext_detach(cw_ext_t *a_ext)
 {
-    cw_error("XXX Not implemented");
+    cw_check_ptr(a_ext);
+    cw_dassert(a_ext->magic == CW_EXT_MAGIC);
+
+    if (a_ext->attached)
+    {
+	ext_p_remove(a_ext);
+	a_ext->attached = FALSE;
+    }
+}
+
+cw_bool_t
+ext_detachable_get(const cw_ext_t *a_ext)
+{
+    cw_check_ptr(a_ext);
+    cw_dassert(a_ext->magic == CW_EXT_MAGIC);
+
+    return a_ext->detachable;
+}
+
+void
+ext_detachable_set(cw_ext_t *a_ext, cw_bool_t a_detachable)
+{
+    cw_check_ptr(a_ext);
+    cw_dassert(a_ext->magic == CW_EXT_MAGIC);
+
+    if (a_ext->detachable == FALSE
+	&& a_detachable
+	&& mkr_pos(&a_ext->beg) == mkr_pos(&a_ext->end))
+    {
+	/* This extent meets the conditions for detachment, and is being set
+	 * detachable.  Detach now. */
+	ext_p_remove(a_ext);
+    }
+
+    a_ext->detachable = a_detachable;
 }
 
 /* Get the first and last ext's that overlap a_mkr.  retval is the length of the
- * run.  r_beg and r_end are NULL if there are no extents overlapping the
- * run. */
+ * run (going forward only).  r_beg and r_end are NULL if there are no extents
+ * overlapping the run. */
 cw_uint64_t
 ext_run_get(const cw_mkr_t *a_mkr, cw_ext_t *r_beg, cw_ext_t *r_end)
+{
+    cw_error("XXX Not implemented");
+}
+
+/* Get the beginning and ending points of the fragment that a_mkr is contained
+ * by. */
+void
+ext_frag_get(const cw_mkr_t *a_mkr, cw_mkr_t *r_beg, cw_mkr_t *r_end)
 {
     cw_error("XXX Not implemented");
 }
@@ -3547,3 +4016,43 @@ ext_next_get(const cw_ext_t *a_ext)
 {
     cw_error("XXX Not implemented");
 }
+
+#ifdef CW_BUF_DUMP
+void
+ext_dump(cw_ext_t *a_ext, const char *a_beg, const char *a_mid,
+	 const char *a_end)
+{
+    const char *beg, *mid, *end;
+    char *tbeg, *tmid, *tend;
+
+    cw_check_ptr(a_ext);
+    cw_dassert(a_ext->magic == CW_EXT_MAGIC);
+
+    beg = (a_beg != NULL) ? a_beg : "";
+    mid = (a_mid != NULL) ? a_mid : beg;
+    end = (a_end != NULL) ? a_end : mid;
+
+    fprintf(stderr, "%sext: %p\n", beg, a_ext);
+
+    fprintf(stderr, "%s|\n", mid);
+    fprintf(stderr, "%s|-> alloced: %s\n", mid,
+	    a_ext->alloced ? "TRUE" : "FALSE");
+    fprintf(stderr, "%s|-> detachable: %s\n", mid,
+	    a_ext->detachable ? "TRUE" : "FALSE");
+    fprintf(stderr, "%s|-> attached: %s\n", mid,
+	    a_ext->attached ? "TRUE" : "FALSE");
+
+    fprintf(stderr, "%s|\n", mid);
+    asprintf(&tbeg, "%s|-> beg: ", mid);
+    asprintf(&tmid, "%s|        ", mid);
+    mkr_dump(&a_ext->beg, tbeg, tmid, NULL);
+    free(tbeg);
+    fprintf(stderr, "%s|\n", mid);
+    asprintf(&tbeg, "%s|-> end: ", mid);
+    asprintf(&tend, "%sV        ", end);
+    mkr_dump(&a_ext->end, tbeg, tmid, tend);
+    free(tbeg);
+    free(tmid);
+    free(tend);
+}
+#endif
