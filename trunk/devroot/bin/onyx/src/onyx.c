@@ -48,7 +48,7 @@ struct nx_read_arg_s
 };
 
 #ifndef CW_POSIX_FILE
-struct src_read_arg_s
+struct synth_read_arg_s
 {
     int fd;
     cw_nxo_t *thread;
@@ -110,13 +110,10 @@ nx_entry(void *a_arg);
 
 #ifndef CW_POSIX_FILE
 cw_sint32_t
-src_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str);
-
-struct src_read_arg_s *
-src_init(cw_nx_t *a_nx, cw_nxo_t *a_thread, int a_fd);
+synth_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str);
 
 void
-src_shutdown(void *a_arg, cw_nx_t *a_nx);
+synth_read_shutdown(void *a_arg, cw_nx_t *a_nx);
 
 void
 stdout_init(cw_nx_t *a_nx);
@@ -645,7 +642,23 @@ batch_run(int argc, char **argv, char **envp)
      * argv. */
     nx_new(&nx, NULL, argc - optind, &argv[optind], envp);
 #ifndef CW_POSIX_FILE
-    stdin_init(&nx, &thread, FALSE);
+    {
+	cw_nxo_t *nxo;
+	static struct synth_read_arg_s stdin_arg;
+
+	/* Add a synthetic wrapper for stdin, since normal files can't be
+	 * used. */
+	stdin_arg.fd = 0;
+	stdin_arg.thread = &thread;
+	stdin_arg.buffer = NULL;
+	stdin_arg.buffer_size = 0;
+	stdin_arg.buffer_count = 0;
+
+	nxo = nx_stdin_get(&nx);
+	nxo_file_new(nxo, &nx, TRUE);
+	nxo_file_synthetic(nxo, synth_read, NULL, NULL, synth_read_shutdown,
+			   (void *) &stdin_arg);
+    }
     stdout_init(&nx);
     stderr_init(&nx);
 #endif
@@ -708,7 +721,7 @@ batch_run(int argc, char **argv, char **envp)
 #else
     {
 	int src_fd;
-	struct src_read_arg_s *src_arg;
+	static struct synth_read_arg_s src_arg;
 
 	/* Remaining command line arguments should be the name of a source file,
 	 * followed by optional arguments.  Open the source file, wrap it in an
@@ -726,9 +739,15 @@ batch_run(int argc, char **argv, char **envp)
 	nxo_file_new(file, &nx, FALSE);
 	nxo_attr_set(file, NXOA_EXECUTABLE);
 
-	src_arg = src_init(&nx, &thread, src_fd);
-	nxo_file_synthetic(file, src_read, NULL, NULL, src_shutdown,
-			   (void *) src_arg);
+	/* Initialize the src argument structure. */
+	src_arg.fd = src_fd;
+	src_arg.thread = &thread;
+	src_arg.buffer = NULL;
+	src_arg.buffer_size = 0;
+	src_arg.buffer_count = 0;
+	
+	nxo_file_synthetic(file, synth_read, NULL, NULL, synth_read_shutdown,
+			   (void *) &src_arg);
     }
 #endif
     else
@@ -955,10 +974,10 @@ nx_entry(void *a_arg)
 
 #ifndef CW_POSIX_FILE
 cw_sint32_t
-src_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str)
+synth_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str)
 {
     cw_sint32_t retval;
-    struct src_read_arg_s *arg = (struct src_read_arg_s *) a_arg;
+    struct synth_read_arg_s *arg = (struct synth_read_arg_s *) a_arg;
 
     cw_assert(a_len > 0);
 
@@ -1043,25 +1062,10 @@ src_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str)
     return retval;
 }
 
-struct src_read_arg_s *
-src_init(cw_nx_t *a_nx, cw_nxo_t *a_thread, int a_fd)
-{
-    static struct src_read_arg_s src_arg;
-
-    /* Initialize the src argument structure. */
-    src_arg.fd = a_fd;
-    src_arg.thread = a_thread;
-    src_arg.buffer = NULL;
-    src_arg.buffer_size = 0;
-    src_arg.buffer_count = 0;
-
-    return &src_arg;
-}
-
 void
-src_shutdown(void *a_arg, cw_nx_t *a_nx)
+synth_read_shutdown(void *a_arg, cw_nx_t *a_nx)
 {
-    struct src_read_arg_s *arg = (struct src_read_arg_s *) a_arg;
+    struct synth_read_arg_s *arg = (struct synth_read_arg_s *) a_arg;
 
     if (arg->buffer != NULL)
     {
