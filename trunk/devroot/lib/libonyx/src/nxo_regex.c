@@ -251,7 +251,7 @@ nxo_regex_nonew_match(cw_nxo_t *a_thread, const cw_uint8_t *a_pattern,
 
     nxo_p_regex_match(&regex, a_thread, a_input, r_matches);
 
-    /* Destroy pcre. */
+    /* Clean up memory. */
     free(regex.pcre);
     if (regex.extra != NULL)
     {
