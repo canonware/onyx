@@ -17,6 +17,7 @@
 # Create an encoding dictionary for various operators.  The values must not
 # correspond to an existing name in dstack.
 /_encdict <
+	/begin		/$	# 4
 	/cat		/a	# 19
 	/cvx		/b	# 13
 	/def		/c	# ~21
@@ -29,17 +30,20 @@
 	/ifelse		/j	# 20
 	/idup		/k	# ~66
 	/known		/l	# 8
-	/load		/m	# 9
-	/pop		/n	# ~69
-	/putinterval	/o	# 3
-	/roll		/p	# 16
-	/scount		/q	# 3
-	/spop		/r	# 7
-	/sub		/s	# 15
-	/true		/t	# 4
-	/type		/u	# >= 17
-	/xcheck		/v	# 3
-	/ostack		/w	# 3
+	/length		/m	# 16
+	/load		/n	# 9
+	/ostack		/o	# 3
+	/pop		/p	# ~69
+	/putinterval	/q	# 3
+	/scount		/r	# 3
+	/spop		/s	# 7
+	/stderr		/t	# 10
+	/sub		/u	# 15
+	/systemdict	/v	# 3
+	/true		/w	# 4
+	/type		/x	# >= 17
+	/write		/y	# 10
+	/xcheck		/z	# 3
 > def
 
 # #proc _encarr -
