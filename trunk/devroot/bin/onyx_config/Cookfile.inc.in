@@ -44,7 +44,8 @@ onyx_config_bins_check_update : ;
 
 onyx_config_bins_bootstrap : ;
 
-onyx_config_bins_install : mods_install
+onyx_config_bins_install : [ONYX_CONFIG]
+                           mods_install
                            onyx_bins_install
 {
   @INSTALL@ -d [BINDIR];
