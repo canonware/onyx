@@ -15,7 +15,7 @@
 #include <sys/time.h>
 #include <errno.h>
 
-#ifdef CW_FTHREADS
+#ifdef HAVE_PTHREAD_NP_H
 #include <pthread_np.h>
 #endif
 
