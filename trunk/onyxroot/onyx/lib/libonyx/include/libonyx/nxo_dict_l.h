@@ -108,7 +108,7 @@ nxoe_l_dict_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
     static cw_uint32_t ref_iter;
     /* If non-NULL, the previous reference iteration returned the key of this
      * dicto, so the value of this dicto is the next reference to check. */
-    cw_nxoe_dicto_t *dicto;
+    static cw_nxoe_dicto_t *dicto;
 
     dict = (cw_nxoe_dict_t *) a_nxoe;
 
