@@ -103,11 +103,11 @@
 			`:' catenate 3 2 roll catenate
 		} ifelse
 		% /ONYX_[MR]PATH `:.:%PATH:%ONYX_[MR]PATH'
-		envdict 3 1 roll put
+		setenv
 	}{
 		exch `:.:' exch catenate
 		% /ONYX_[MR]PATH `:.:%ONYX_[MR]PATH'
-		envdict 3 1 roll put
+		setenv
 	} ifelse
 } foreach
 
