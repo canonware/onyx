@@ -124,6 +124,10 @@
 \newcommand{\onyxop}[3]{{\em #1}\ifthenelse{\equal{}{#1}}{}{ }{\bf #2}\ifthenelse{\equal{}{#3}}{}{ }{\em #3}}
 \newcommand{\oparg}[1]{{\em #1}}
 
+% For printed versions, we need to limit the width of the operator summary
+% tables, but for html there is no need do.
+\newcommand{\optableformat}[1]{|r|l|l|p{#1in}|}
+
 % TeX doesn't have '\', '<', '>', '|', and '~' in its text fonts.
 \newcommand{\bs}{$\backslash$}
 \newcommand{\lt}{$<$}
@@ -136,6 +140,7 @@
 % The build system does substitution of the YYY..ZZZ strings after the html
 % is generated.
 \begin{htmlonly}
+\newcommand{\optableformat}[1]{|r|l|l|l|}
 \newcommand{\bs}{YYYbsZZZ}
 \newcommand{\lt}{<}
 \newcommand{\gt}{>}

@@ -550,7 +550,7 @@ letters, numbers, underscore, etc.).
 Each thread has its own currenterror dictionary, which is used by the error
 handling machinery.
 
-\begin{longtable}{|r|l|l|p{3in}|}
+\begin{longtable}{\optableformat{3}}
 \caption[currenterror summary]{currenterror summary by functional group}
 \\
 \hline
@@ -825,7 +825,7 @@ Custom stop
 \subsection{errordict}
 \label{sec:errordict}
 
-\begin{longtable}{|r|l|l|p{3in}|}
+\begin{longtable}{\optableformat{3}}
 \caption{errordict summary} \\
 \hline
 Input(s) & Op/Proc/Var & Output(s) & Description \\
@@ -1305,7 +1305,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 The gcdict dictionary provides garbage collection control and status
 capabilities.
 
-\begin{longtable}{|r|l|l|p{3in}|}
+\begin{longtable}{\optableformat{3.75}}
 \caption[gcdict summary]{gcdict summary by functional group}
 \\
 \hline
@@ -1600,7 +1600,7 @@ initialized.
 \subsection{sprintdict}
 \label{sec:sprintdict}
 
-\begin{longtable}{|r|l|l|p{3in}|}
+\begin{longtable}{\optableformat{3}}
 \caption[sprintdict summary]{sprintdict summary}
 \\
 \hline
@@ -1972,7 +1972,7 @@ are of general use.  Although there are no mechanisms that prevent modification
 of systemdict, programs should not normally need to modify systemdict, since
 globaldict provides a place for storing globally shared objects.
 
-\begin{longtable}{|r|l|l|p{2.5in}|}
+\begin{longtable}{\optableformat{2.5}}
 \caption[systemdict summary]{systemdict summary by functional group} \\
 \hline
 Input(s) & Op/Proc/Var & Output(s) & Description \\
@@ -5994,7 +5994,7 @@ Each thread has its own threaddict, which is not shared with any other threads.
 threaddict is meant to be used for thread-specific definitions that would
 otherwise go in systemdict.
 
-\begin{longtable}{|r|l|l|p{3in}|}
+\begin{longtable}{\optableformat{3}}
 \caption[threaddict summary]{threaddict summary}
 \\
 \hline
