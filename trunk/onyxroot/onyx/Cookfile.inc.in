@@ -1,0 +1,164 @@
+/******************************************************************************
+ *
+ * <Copyright = jasone>
+ * <License>
+ *
+ ******************************************************************************
+ *
+ * Version: <Version>
+ *
+ * Cooked master Cookfile.
+ *
+ ******************************************************************************/
+
+/*
+ * Standard definitions.
+ */
+
+/* Installation prefix. */
+if [not [defined PREFIX]] then
+  PREFIX = [split " " [strip "@prefix@"]];
+
+/* Paths to programs used by the build system. */
+SHELL = /bin/sh;
+if [not [defined CC]] then
+  CC = [split " " [strip "@CC@"]];
+
+/* Build parameters. */
+if [not [defined CPPFLAGS]] then
+  CPPFLAGS = [split " " [strip "@CPPFLAGS@"]];
+CPPDEFS = -D_REENTRANT;
+
+if [not [defined CFLAGS]] then
+  CFLAGS = [split " " [strip "@CFLAGS@"]];
+A_CFLAGS = [CFLAGS];
+S_CFLAGS = [CFLAGS] -fPIC -DPIC
+#if [matches macho @abi@]
+           -dynamic
+#endif
+           ;
+
+if [not [defined LDFLAGS]] then
+  LDFLAGS = [split " " [strip "@LDFLAGS@"]];
+
+/*
+ * Re-configuration rules.
+ */
+@srcroot@/aclocal.m4 : @srcroot@/acinclude.m4
+{
+  cd @srcroot@/\; @ACLOCAL@;
+}
+
+@srcroot@/configure : @srcroot@/configure.in @srcroot@/aclocal.m4
+{
+  cd @srcroot@/\; @AUTOCONF@;
+}
+
+@objroot@/config.status : @srcroot@/configure
+{
+  @objroot@/config.status --recheck;
+}
+
+@srcroot@/config.stamp.in : @srcroot@/configure.in @srcroot@/aclocal.m4
+{
+  cd @srcroot@/\; @AUTOHEADER@;
+  echo stamp > @srcroot@/config.stamp.in;
+}
+
+[fromto %0% @srcroot@/%0%.in @cfghdrs@] : @srcroot@/config.stamp.in;
+
+@objroot@/config.stamp : [fromto %0% @srcroot@/%0%.in @cfghdrs@]
+                         @objroot@/config.status
+{
+  @objroot@/config.status;
+}
+
+[addprefix @objroot@/ @cfgoutputs@] : [prepost @srcroot@/ .in @cfgoutputs@]
+                                      @objroot@/config.status
+{
+  @objroot@/config.status;
+}
+
+/* Documentation. */
+#include-cooked @objroot@/doc/Cookfile.inc
+
+/* Examples. */
+#include-cooked @objroot@/examples/Cookfile.inc
+
+/* Tests. */
+#include-cooked @objroot@/test/Cookfile.inc
+
+/* Binaries. */
+#include-cooked @objroot@/bin/Cookfile.inc
+
+/* Libraries. */
+#include-cooked @objroot@/lib/Cookfile.inc
+
+/* Modules. */
+#include-cooked @objroot@/mod/Cookfile.inc
+
+/*
+ * User targets.
+ */
+
+/*
+ * Leave tests and examples out, since they aren't generally necessary when
+ * building and installing.
+ */
+all : libs mods bins docs
+  set default
+;
+
+bootstrap : [addsuffix _bootstrap bins libs];
+
+release : docs;
+
+install : [addsuffix _install bins mods libs docs];
+
+uninstall : [addsuffix _uninstall bins mods libs docs];
+
+clean : [addsuffix _clean docs tests bins mods libs]
+{
+  /*
+   * Delete .cook.fp files from the source tree and object tree.
+   * Delete Cookfile.list files from the object tree. 
+   */
+  [SHELL] -e;
+data
+#![SHELL]
+
+for i in `find @srcroot@ -type f -name .cook.fp` ; do
+	echo rm $i;
+	rm $i;
+done
+for i in `find @objroot@ -type f -name .cook.fp` ; do
+	echo rm $i;
+	rm $i;
+done
+for i in `find @objroot@ -type f -name Cookfile.list` ; do
+	echo rm $i;
+	rm $i;
+done
+dataend
+}
+
+distclean : clean [addsuffix _distclean tests bins mods libs]
+{
+  rm -f @objroot@/config.log;
+  rm -f @objroot@/config.status;
+  rm -f @objroot@/config.stamp;
+  rm -f @cfghdrs@;
+  rm -f @cfgoutputs@;
+}
+
+relclean : distclean [addsuffix _relclean docs];
+
+/*
+ * Rule for generation of C code from Onyx code.  This rule assumes a stylized
+ * file naming convention, which all the pertinent source files conform to.
+ */
+@objroot@/%0%_nxcode.c : @objroot@/%0%.nx @srcroot@/%0%_gen.nx [BONYX]
+  set mkdir
+{
+  cat @objroot@/%0%.nx | [BONYX] @srcroot@/%0%_gen.nx > [target];
+}

@@ -22,10 +22,10 @@ AC_SUBST(objroot)
 abs_objroot=`pwd`
 AC_SUBST(abs_objroot)
 
-cfgoutputs="Cookfile bin/Cookfile.inc doc/Cookfile.inc examples/Cookfile.inc"
-cfgoutputs="$cfgoutputs lib/Cookfile.inc mod/Cookfile.inc test/Cookfile.inc"
-cfgoutputs="$cfgoutputs test/verify"
-cfghdrs=
+cfgoutputs="Cookfile Cookfile.inc bin/Cookfile.inc doc/Cookfile.inc"
+cfgoutputs="$cfgoutputs examples/Cookfile.inc lib/Cookfile.inc mod/Cookfile.inc"
+cfgoutputs="$cfgoutputs test/Cookfile.inc test/verify"
+cfghdrs="config.stamp"
 bins=
 mods=
 libs=
@@ -127,9 +127,6 @@ if test "x$enable_slate" = "x1" ; then
   CW_BUILD_BIN(slate, bin_slate)
 fi
 
-AC_CONFIG_HEADER($cfghdrs)
-AC_SUBST(cfghdrs)
-AC_SUBST(cfgoutputs)
 AC_SUBST(bins)
 AC_SUBST(mods)
 AC_SUBST(libs)
@@ -184,6 +181,9 @@ AC_PROG_RANLIB
 AC_PATH_PROG(AR, ar, , $PATH)
 AC_PATH_PROG(LD, ld, , $PATH)
 AC_PATH_PROG(PERL, perl, , $PATH)
+AC_PATH_PROG(ACLOCAL, aclocal, , $PATH)
+AC_PATH_PROG(AUTOCONF, , autoconf, , $PATH)
+AC_PATH_PROG(AUTOHEADER, , autoheader, , $PATH)
 
 dnl Do not build documentaion by default; instead use the prebuilt
 dnl documentation.
@@ -407,10 +407,10 @@ AC_MSG_RESULT(profile       : ${enable_profile})
 AC_MSG_RESULT(docs          : ${with_docs})
 AC_MSG_RESULT(===============================================================================)
 
-dnl Create additional directories that processed files will land in.
-mkdir -p "$objroot/doc/latex"
-
 dnl Process .in files.
+AC_SUBST(cfghdrs)
+AC_SUBST(cfgoutputs)
+AC_CONFIG_HEADER($cfghdrs)
 AC_OUTPUT($cfgoutputs)
 
 dnl autoconf doesn't keep the execute bit if it's set for the input files, so do

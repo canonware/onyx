@@ -1,3 +1,11 @@
+2002-01-29  Jason Evans  <jasone@canonware.com>
+
+	* Cookfile.inc.in : Move the contents of Cookfile.in to
+	Cookfile.inc.in, so that cook's #include-cooked can re-read it if
+	reconfiguration occurs.
+
+	Add rules to cause reconfiguration if any .in files are modified.
+
 2002-01-25  Jason Evans  <jasone@canonware.com>
 
 	* : Add a bootstrap phase to the build, so that the Onyx code that
