@@ -42,9 +42,6 @@ struct cw_thd_s
     thread_t mthread;
 #endif
     cw_bool_t suspendible:1;
-#ifdef CW_THD_GENERIC_SR
-    sem_t sem; /* For suspend/resume. */
-#endif
     cw_bool_t suspended:1; /* Suspended by thd_suspend()? */
     cw_bool_t singled:1; /* Suspended by thd_single_enter()? */
     qr(cw_thd_t) link;
@@ -67,9 +64,8 @@ static cw_thd_t cw_g_thd;
 static cw_mtx_t cw_g_thd_single_lock;
 
 #ifdef CW_THD_GENERIC_SR
-/* Since a signal handler can't call thd_self(), this variable is used to "pass"
- * a thd pointer to the signal handler function. */
-static cw_thd_t *cw_g_sr_self;
+/* For interlocking of suspend. */
+static sem_t cw_g_thd_sem;
 #endif
 
 /* For thd_self(). */
@@ -86,7 +82,9 @@ thd_p_resume(cw_thd_t *a_thd);
 
 #ifdef CW_THD_GENERIC_SR
 static void
-thd_p_sr_handle(int a_signal);
+thd_p_suspend_handle(int a_signal);
+static void
+thd_p_resume_handle(int a_signal);
 #endif
 
 void
@@ -100,12 +98,13 @@ thd_l_init(void)
     int error;
     struct sigaction action;
 
-    /* Install a signal handler for suspend and resume.  Restart system calls in
+    /* Install signal handlers for suspend and resume.  Restart system calls in
      * order to reduce the impact of signals on the application. */
     action.sa_flags = SA_RESTART;
-    action.sa_handler = thd_p_sr_handle;
+    action.sa_handler = thd_p_suspend_handle;
     sigemptyset(&action.sa_mask);
-    error = sigaction(CW_THD_SIGSR, &action, NULL);
+    sigaddset(&action.sa_mask, CW_THD_SIGRESUME);
+    error = sigaction(CW_THD_SIGSUSPEND, &action, NULL);
     if (error == -1)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in sigaction(): %s\n",
@@ -113,8 +112,25 @@ thd_l_init(void)
 	abort();
     }
 
-    /* Initialize globals that support suspend/resume. */
-    cw_g_sr_self = NULL;
+    action.sa_flags = SA_RESTART;
+    action.sa_handler = thd_p_resume_handle;
+    sigemptyset(&action.sa_mask);
+    error = sigaction(CW_THD_SIGRESUME, &action, NULL);
+    if (error == -1)
+    {
+	fprintf(stderr, "%s:%u:%s(): Error in sigaction(): %s\n",
+		__FILE__, __LINE__, __FUNCTION__, strerror(error));
+	abort();
+    }
+
+    /* Initialize the semaphore that is used for suspend interlocking. */
+    error = sem_init(&cw_g_thd_sem, 0, 0);
+    if (error)
+    {
+	fprintf(stderr, "%s:%u:%s(): Error in sem_init(): %s\n",
+		__FILE__, __LINE__, __FUNCTION__, strerror(error));
+	abort();
+    }
 #endif
     cw_assert(cw_g_thd_initialized == FALSE);
 
@@ -144,15 +160,6 @@ thd_l_init(void)
     cw_g_thd.mthread = mach_thread_self();
 #endif
     cw_g_thd.suspendible = TRUE;
-#ifdef CW_THD_GENERIC_SR
-    error = sem_init(&cw_g_thd.sem, 0, 0);
-    if (error)
-    {
-	fprintf(stderr, "%s:%u:%s(): Error in sem_init(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(error));
-	abort();
-    }
-#endif
     cw_g_thd.suspended = FALSE;
     cw_g_thd.singled = FALSE;
     qr_new(&cw_g_thd, link);
@@ -183,7 +190,7 @@ thd_l_shutdown(void)
 
     mtx_delete(&cw_g_thd.mtx);
 #ifdef CW_THD_GENERIC_SR
-    error = sem_destroy(&cw_g_thd.sem);
+    error = sem_destroy(&cw_g_thd_sem);
     if (error)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in sem_destroy(): %s\n",
@@ -218,15 +225,6 @@ thd_new(void *(*a_start_func)(void *), void *a_arg, cw_bool_t a_suspendible)
     mtx_new(&retval->mtx);
     mtx_lock(&retval->mtx);
     retval->suspendible = a_suspendible;
-#ifdef CW_THD_GENERIC_SR
-    error = sem_init(&retval->sem, 0, 0);
-    if (error)
-    {
-	fprintf(stderr, "%s:%u:%s(): Error in sem_init(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(error));
-	abort();
-    }
-#endif
     retval->suspended = FALSE;
     retval->singled = FALSE;
     retval->delete = FALSE;
@@ -322,15 +320,6 @@ thd_join(cw_thd_t *a_thd)
     }
 #endif
     mtx_delete(&a_thd->mtx);
-#ifdef CW_THD_GENERIC_SR
-    error = sem_destroy(&a_thd->sem);
-    if (error)
-    {
-	fprintf(stderr, "%s:%u:%s(): Error in sem_destroy(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(error));
-	abort();
-    }
-#endif
     cw_free(a_thd);
     return retval;
 }
@@ -363,7 +352,8 @@ thd_sigmask(int a_how, const sigset_t *a_set, sigset_t *r_oset)
 	/* Make a local copy of the signal mask, then modify it appropriately to
 	 * keep from breaking suspend/resume. */
 	memcpy(&set, a_set, sizeof(sigset_t));
-	sigdelset(&set, CW_THD_SIGSR);
+	sigdelset(&set, CW_THD_SIGSUSPEND);
+	sigdelset(&set, CW_THD_SIGRESUME);
 	pthread_sigmask(a_how, &set, r_oset);
     }
 #else
@@ -446,11 +436,10 @@ thd_suspend(cw_thd_t *a_thd)
     cw_dassert(a_thd->magic == CW_THD_MAGIC);
     cw_assert(cw_g_thd_initialized);
 
-    mtx_lock(&a_thd->mtx);
-
     /* Protect suspension so that we don't risk deadlocking with a thread
      * entering a single section. */
     mtx_lock(&cw_g_thd_single_lock);
+    mtx_lock(&a_thd->mtx);
     thd_p_suspend(a_thd);
     mtx_unlock(&cw_g_thd_single_lock);
 }
@@ -464,18 +453,17 @@ thd_trysuspend(cw_thd_t *a_thd)
     cw_dassert(a_thd->magic == CW_THD_MAGIC);
     cw_assert(cw_g_thd_initialized);
 
+    mtx_lock(&cw_g_thd_single_lock);
     if (mtx_trylock(&a_thd->mtx))
     {
 	retval = TRUE;
 	goto RETURN;
     }
-
-    mtx_lock(&cw_g_thd_single_lock);
     thd_p_suspend(a_thd);
-    mtx_unlock(&cw_g_thd_single_lock);
 
     retval = FALSE;
     RETURN:
+    mtx_unlock(&cw_g_thd_single_lock);
     return retval;
 }
 
@@ -501,9 +489,6 @@ static void
 thd_p_delete(cw_thd_t *a_thd)
 {
     cw_bool_t delete;
-#ifdef CW_THD_GENERIC_SR
-    int error;
-#endif
 
     /* Determine whether to delete the object now. */
     mtx_lock(&a_thd->mtx);
@@ -521,15 +506,6 @@ thd_p_delete(cw_thd_t *a_thd)
     if (delete)
     {
 	mtx_delete(&a_thd->mtx);
-#ifdef CW_THD_GENERIC_SR
-	error = sem_destroy(&a_thd->sem);
-	if (error)
-	{
-	    fprintf(stderr, "%s:%u:%s(): Error in sem_destroy(): %s\n",
-		    __FILE__, __LINE__, __FUNCTION__, strerror(error));
-	    abort();
-	}
-#endif
 	cw_free(a_thd);
     }
 }
@@ -581,24 +557,16 @@ thd_p_suspend(cw_thd_t *a_thd)
     int error;
 #endif
 
+    a_thd->suspended = TRUE;
 #ifdef CW_THD_GENERIC_SR
-    /* Save the thread's pointer in a place that the signal handler can get to
-     * it.  cw_g_thd_single_lock protects us from other suspend/resume
-     * activity. */
-    while (cw_g_sr_self != NULL)
-    {
-	/* Loop until the value of cw_g_sr_self becomes invalid. */
-    }
-    cw_g_sr_self = a_thd;
-
-    error = pthread_kill(a_thd->pthread, CW_THD_SIGSR);
+    error = pthread_kill(a_thd->pthread, CW_THD_SIGSUSPEND);
     if (error != 0)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in pthread_kill(): %s\n",
 		__FILE__, __LINE__, __FUNCTION__, strerror(error));
 	abort();
     }
-    if (sem_wait(&a_thd->sem) != 0)
+    if (sem_wait(&cw_g_thd_sem) != 0)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in sem_wait(): %s\n",
 		__FILE__, __LINE__, __FUNCTION__, strerror(errno));
@@ -606,7 +574,6 @@ thd_p_suspend(cw_thd_t *a_thd)
     }
 #endif
 #ifdef CW_FTHREADS
-    a_thd->suspended = TRUE;
     error = pthread_suspend_np(a_thd->pthread);
     if (error)
     {
@@ -616,7 +583,6 @@ thd_p_suspend(cw_thd_t *a_thd)
     }
 #endif
 #ifdef CW_STHREADS
-    a_thd->suspended = TRUE;
     error = thr_suspend(a_thd->pthread);
     if (error)
     {
@@ -626,7 +592,6 @@ thd_p_suspend(cw_thd_t *a_thd)
     }
 #endif
 #ifdef CW_MTHREADS
-    a_thd->suspended = TRUE;
     mach_error = thread_suspend(a_thd->mthread);
     if (mach_error != KERN_SUCCESS)
     {
@@ -640,38 +605,20 @@ thd_p_suspend(cw_thd_t *a_thd)
 static void
 thd_p_resume(cw_thd_t *a_thd)
 {
-#ifdef CW_MTHREADS
-    kern_return_t mach_error;
-#endif
-#ifdef CW_PTHREADS
-    int error;
-#endif
-
 #ifdef CW_THD_GENERIC_SR
-    /* Save the thread's pointer in a place that the signal handler can get to
-     * it.  cw_g_thd_single_lock protects us from other suspend/resume
-     * activity. */
-    while (cw_g_sr_self != NULL)
-    {
-	/* Loop until the value of cw_g_sr_self becomes invalid. */
-    }
-    cw_g_sr_self = a_thd;
+    int error;
 
-    error = pthread_kill(a_thd->pthread, CW_THD_SIGSR);
+    error = pthread_kill(a_thd->pthread, CW_THD_SIGRESUME);
     if (error != 0)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in pthread_kill(): %s\n",
 		__FILE__, __LINE__, __FUNCTION__, strerror(error));
 	abort();
     }
-    if (sem_wait(&a_thd->sem) != 0)
-    {
-	fprintf(stderr, "%s:%u:%s(): Error in sem_wait(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(errno));
-	abort();
-    }
 #endif
 #ifdef CW_FTHREADS
+    int error;
+
     error = pthread_resume_np(a_thd->pthread);
     if (error)
     {
@@ -681,6 +628,8 @@ thd_p_resume(cw_thd_t *a_thd)
     }
 #endif
 #ifdef CW_STHREADS
+    int error;
+
     error = thr_continue(a_thd->pthread);
     if (error)
     {
@@ -690,6 +639,8 @@ thd_p_resume(cw_thd_t *a_thd)
     }
 #endif
 #ifdef CW_MTHREADS
+    kern_return_t mach_error;
+
     mach_error = thread_resume(a_thd->mthread);
     if (mach_error != KERN_SUCCESS)
     {
@@ -698,41 +649,30 @@ thd_p_resume(cw_thd_t *a_thd)
 	abort();
     }
 #endif
+    a_thd->suspended = FALSE;
     mtx_unlock(&a_thd->mtx);
 }
 
 #ifdef CW_THD_GENERIC_SR
 static void
-thd_p_sr_handle(int a_signal)
+thd_p_suspend_handle(int a_signal)
 {
     sigset_t set;
-    cw_thd_t *thd;
 
-    while (cw_g_sr_self == NULL)
-    {
-	/* Loop until the value of cw_g_sr_self becomes valid. */
-    }
-    thd = cw_g_sr_self;
-    cw_g_sr_self = NULL;
+    /* Block all signals except CW_THD_SIGRESUME while suspended. */
+    sigfillset(&set);
+    sigdelset(&set, CW_THD_SIGRESUME);
+    /* Tell suspender we're suspended. */
+    sem_post(&cw_g_thd_sem);
 
-    /* Only enter the following block of code if we're being suspended; this
-     * function also gets entered again when the resume signal is sent. */
-    if (thd->suspended == FALSE)
-    {
-	thd->suspended = TRUE;
-	/* Block all signals except CW_THD_SIGSR while suspended. */
-	sigfillset(&set);
-	sigdelset(&set, CW_THD_SIGSR);
+    /* Suspend until CW_THD_SIGRESUME is delivered and handled. */
+    sigsuspend(&set);
+}
 
-	/* Tell suspender we're suspended. */
-	sem_post(&thd->sem);
-
-	/* Suspend. */
-	sigsuspend(&set);
-
-	/* Tell resumer we're resumed. */
-	thd->suspended = FALSE;
-	sem_post(&thd->sem);
-    }
+static void
+thd_p_resume_handle(int a_signal)
+{
+    /* Do nothing.  This function only exists to allow the suspended thread to
+     * return from the sigsuspend() call in thd_p_suspend_handle(). */
 }
 #endif
