@@ -130,6 +130,7 @@ dstack saup
     `\r\n' print
     tpoint dup 0 /SEEK_BOB marker_seek pop bpoint marker_range_get
     srender flush
+    scratch `redisplay ' buffer_dump
 } def
 
 # - getc #string
@@ -145,6 +146,7 @@ dstack saup
 #    stderr `insert_string a\n' write
     bpoint exch marker_before_insert
 #    stderr `insert_string b\n' write
+    scratch `insert_string ' buffer_dump
 } def
 
 # Undefined characters are inserted literally.
@@ -232,11 +234,10 @@ scratch <
 
 2 gcdict /setperiod get eval
 
-scratch true buffer_history_setactive
+# scratch true buffer_history_setactive
 
 stdin 0 setiobuf {
     redisplay
     getc
     interpc
-    scratch `I ' buffer_dump
 } loop

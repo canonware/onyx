@@ -306,8 +306,6 @@ buf_p_rb_recurse_gen(buf_p_mtree_dump, cw_mkr_t, mnode)
 /* XXX */
 static cw_sint32_t
 mkr_p_comp(cw_mkr_t *a_a, cw_mkr_t *a_b);
-static cw_sint32_t
-mkr_p_line_comp(cw_mkr_t *a_a, cw_mkr_t *a_b);
 
 /* bufv. */
 
@@ -474,7 +472,7 @@ bufp_p_mkrs_ppos_adjust(cw_bufp_t *a_bufp, cw_sint32_t a_adjust,
     cw_mkr_t *mkr, *prev, key;
 
     cw_check_ptr(a_bufp);
-    fprintf(stderr, "%s(): a_bufp: %p, a_adjust: %d, a_beg_ppos: %u, a_end_ppos: %u\n", __FUNCTION__, a_bufp, a_adjust, a_beg_ppos, a_end_ppos);
+//    fprintf(stderr, "%s(): a_bufp: %p, a_adjust: %d, a_beg_ppos: %u, a_end_ppos: %u\n", __FUNCTION__, a_bufp, a_adjust, a_beg_ppos, a_end_ppos);
     cw_assert(a_adjust != 0);
     cw_assert(a_beg_ppos < a_end_ppos);
 
@@ -512,47 +510,22 @@ bufp_p_mkrs_ppos_adjust(cw_bufp_t *a_bufp, cw_sint32_t a_adjust,
 
 /* Adjust pline field of a range of mkr's, starting at a_beg_pline (inclusive),
  * and ending at a_end_pline (exclusive). */
-/* XXX It may be that every case in which this is needed can be done without
- * doing an rb-tree search.  If so, remove this function or perhaps
- * conditionally start at the beginning/end of the bufp. */
 static void
 bufp_p_mkrs_pline_adjust(cw_bufp_t *a_bufp, cw_sint32_t a_adjust,
-			cw_uint32_t a_beg_pline, cw_uint32_t a_end_pline)
+			 cw_uint32_t a_beg_ppos)
 {
-    cw_mkr_t *mkr, *prev, key;
+    cw_mkr_t *mkr;
 
     cw_check_ptr(a_bufp);
-    cw_assert(a_beg_pline <= a_end_pline);
+    cw_assert(a_beg_ppos <= CW_BUFP_SIZE + 1);
 
-    /* Find the first affected mkr. */
-    key.pline = a_beg_pline;
-#ifdef CW_DBG
-    key.bufp = a_bufp;
-    key.magic = CW_MKR_MAGIC;
-#endif
+//fprintf(stderr, "%s:%d:%s(): adjust %u %u..%u\n", __FILE__, __LINE__, __FUNCTION__, a_adjust, a_beg_ppos, CW_BUFP_SIZE + 1);
 
-    rb_nsearch(&a_bufp->mtree, &key, mkr_p_line_comp, cw_mkr_t, mnode, mkr);
-    if (mkr != rb_tree_nil(&a_bufp->mtree))
+    for (mkr = ql_last(&a_bufp->mlist, mlink);
+	 mkr != NULL && mkr->ppos >= a_beg_ppos;
+	 mkr = ql_prev(&a_bufp->mlist, mkr, mlink))
     {
-	/* Get prev before iterating forward, in preparation for backward
-	 * iteration. */
-	prev = ql_prev(&a_bufp->mlist, mkr, mlink);
-
-	/* Iterate forward. */
-	for (;
-	     mkr != NULL && mkr->pline < a_end_pline;
-	     mkr = ql_next(&a_bufp->mlist, mkr, mlink))
-	{
-	    mkr->pline += a_adjust;
-	}
-
-	/* Iterate backward. */
-	for (mkr = prev;
-	     mkr != NULL && mkr->pline == a_beg_pline;
-	     mkr = ql_prev(&a_bufp->mlist, mkr, mlink))
-	{
-	    mkr->pline += a_adjust;
-	}
+	mkr->pline += a_adjust;
     }
 }
 
@@ -671,15 +644,16 @@ static cw_uint32_t
 bufp_p_simple_insert(cw_bufp_t *a_bufp, const cw_bufv_t *a_bufv,
 		     cw_uint32_t a_bufvcnt, cw_uint32_t a_count)
 {
-    cw_uint32_t nlines, gap_end;
+    cw_uint32_t nlines;
     cw_bufv_t bufv;
 
-    gap_end = a_bufp->len - a_bufp->gap_off;
+    fprintf(stderr, "%s:%d:%s()\n", __FILE__, __LINE__, __FUNCTION__);
 
     /* Insert. */
     bufv.data = &a_bufp->b[a_bufp->gap_off];
     bufv.len = CW_BUFP_SIZE - a_bufp->len;
     nlines = bufv_p_copy(&bufv, 1, a_bufv, a_bufvcnt);
+    fprintf(stderr, "%s(): nlines: %u\n", __FUNCTION__, nlines);
 
     /* Shrink the gap. */
     a_bufp->gap_off += a_count;
@@ -688,10 +662,13 @@ bufp_p_simple_insert(cw_bufp_t *a_bufp, const cw_bufv_t *a_bufv,
     a_bufp->len += a_count;
     a_bufp->nlines += nlines;
 
-    if (gap_end < CW_BUFP_SIZE && nlines > 0)
+    if (nlines > 0)
     {
+    fprintf(stderr, "%s:%d:%s()\n", __FILE__, __LINE__, __FUNCTION__);
 	/* Adjust the line numbers of all mkr's after the gap. */
-	bufp_p_mkrs_pline_adjust(a_bufp, a_count, gap_end, CW_BUFP_SIZE);
+	bufp_p_mkrs_pline_adjust(a_bufp, a_count,
+				 a_bufp->gap_off
+				 + (CW_BUFP_SIZE - a_bufp->len));
     }
 
     return nlines;
@@ -1292,6 +1269,7 @@ buf_p_bufv_insert(cw_buf_t *a_buf, cw_bufp_t *a_bufp, cw_bufp_t *a_pastp,
      *
      * Iterate over bufp's being inserted into.  bufp starts out pointing to the
      * original bufp on which insertion was attempted before the split. */
+//    fprintf(stderr, "%s:%d:%s()\n", __FILE__, __LINE__, __FUNCTION__);
     nlines = 0;
     v = 0;
     vremain.len = 0;
@@ -1299,26 +1277,34 @@ buf_p_bufv_insert(cw_buf_t *a_buf, cw_bufp_t *a_bufp, cw_bufp_t *a_pastp,
 	 bufp != a_pastp;
 	 bufp = ql_next(&a_buf->plist, bufp, plink))
     {
+//    fprintf(stderr, "%s:%d:%s()\n", __FILE__, __LINE__, __FUNCTION__);
 	/* Insert remainder, if any. */
 	if (vremain.len != 0)
 	{
+//    fprintf(stderr, "%s:%d:%s()\n", __FILE__, __LINE__, __FUNCTION__);
 	    vsplit.data = vremain.data;
 	    if (CW_BUFP_SIZE - bufp->len < vremain.len)
 	    {
+//    fprintf(stderr, "%s:%d:%s()\n", __FILE__, __LINE__, __FUNCTION__);
 		vsplit.len = CW_BUFP_SIZE - bufp->len;
 	    }
 	    else
 	    {
+//    fprintf(stderr, "%s:%d:%s()\n", __FILE__, __LINE__, __FUNCTION__);
 		vsplit.len = vremain.len;
 	    }
 	    vremain.data = &vremain.data[vsplit.len];
 	    vremain.len -= vsplit.len;
+//	    fprintf(stderr, "vsplit.len: %u, vremain.len: %u\n",
+//		    vsplit.len, vremain.len);
 
 	    nlines += bufp_p_simple_insert(bufp, &vsplit, 1, vsplit.len);
 
-	    if (CW_BUFP_SIZE - bufp->len == 0)
+	    if (CW_BUFP_SIZE - bufp->len == 0 || vremain.len == 0)
 	    {
-		/* No more space in this bufp. */
+//    fprintf(stderr, "%s:%d:%s()\n", __FILE__, __LINE__, __FUNCTION__);
+		/* No more space in this bufp, or no more remaining data in
+		 * bufv[v]. */
 		goto CONTINUE;
 	    }
 	}
@@ -1328,14 +1314,17 @@ buf_p_bufv_insert(cw_buf_t *a_buf, cw_bufp_t *a_bufp, cw_bufp_t *a_pastp,
 	cnt = 0;
 	for (i = v; i < a_bufvcnt; i++)
 	{
+//    fprintf(stderr, "%s:%d:%s()\n", __FILE__, __LINE__, __FUNCTION__);
 	    if (cnt + a_bufv[i].len > CW_BUFP_SIZE - bufp->len)
 	    {
+//    fprintf(stderr, "%s:%d:%s()\n", __FILE__, __LINE__, __FUNCTION__);
 		break;
 	    }
 	    cnt += a_bufv[i].len;
 	}
 	if (cnt != 0)
 	{
+//    fprintf(stderr, "%s:%d:%s()\n", __FILE__, __LINE__, __FUNCTION__);
 	    nlines += bufp_p_simple_insert(bufp, &a_bufv[v], i - v, cnt);
 	    v = i;
 	}
@@ -1343,6 +1332,7 @@ buf_p_bufv_insert(cw_buf_t *a_buf, cw_bufp_t *a_bufp, cw_bufp_t *a_pastp,
 	/* Split a_bufv[v] if bufp isn't full and there are more data. */
 	if (CW_BUFP_SIZE - bufp->len != 0 && v < a_bufvcnt)
 	{
+//    fprintf(stderr, "%s:%d:%s()\n", __FILE__, __LINE__, __FUNCTION__);
 	    vsplit.data = a_bufv[v].data;
 	    vsplit.len = CW_BUFP_SIZE - bufp->len;
 	    vremain.data = &vsplit.data[vsplit.len];
@@ -1352,6 +1342,7 @@ buf_p_bufv_insert(cw_buf_t *a_buf, cw_bufp_t *a_bufp, cw_bufp_t *a_pastp,
 	}
 
 	CONTINUE:
+//    fprintf(stderr, "%s:%d:%s()\n", __FILE__, __LINE__, __FUNCTION__);
 	/* Update the cached position. */
 	bufp->bob_relative = TRUE;
 	bufp->bpos = bpos;
@@ -1360,6 +1351,7 @@ buf_p_bufv_insert(cw_buf_t *a_buf, cw_bufp_t *a_bufp, cw_bufp_t *a_pastp,
 	line += bufp->nlines;
 	a_buf->bufp_cur = bufp;
     }
+//    fprintf(stderr, "%s:%d:%s()\n", __FILE__, __LINE__, __FUNCTION__);
 
     return nlines;
 }
@@ -1833,6 +1825,7 @@ mkr_p_comp(cw_mkr_t *a_a, cw_mkr_t *a_b)
     return retval;
 }
 
+#if (0)
 static cw_sint32_t
 mkr_p_line_comp(cw_mkr_t *a_a, cw_mkr_t *a_b)
 {
@@ -1861,6 +1854,7 @@ mkr_p_line_comp(cw_mkr_t *a_a, cw_mkr_t *a_b)
 
     return retval;
 }
+#endif
 
 static void
 mkr_p_insert(cw_mkr_t *a_mkr)
@@ -1924,7 +1918,7 @@ mkr_p_simple_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
     if (a_after)
     {
 	mkr_p_remove(a_mkr);
-	a_mkr->ppos -= CW_BUFP_SIZE - bufp->len;
+	a_mkr->ppos -= (CW_BUFP_SIZE - bufp->len) + a_count;
 	a_mkr->pline -= nlines;
 	mkr_p_insert(a_mkr);
     }
@@ -2003,13 +1997,8 @@ fprintf(stderr, "%s:%d:%s():\n", __FILE__, __LINE__, __FUNCTION__);
 	bufp->nlines -= nmovelines;
 	bufp->gap_off -= nmove;
 
-	/* Adjust the internal state of markers associated with the slid
-	 * data. */
+	/* Adjust the ppos of markers associated with the slid data. */
 	bufp_p_mkrs_ppos_adjust(bufp, -nmove, nmove, bufp->gap_off + nmove);
-
-	/* Adjust the line numbers for all mkr's in bufp. */
-	bufp_p_mkrs_pline_adjust(bufp, -nmovelines, 0,
-				 bufp->nlines - nmovelines);
     }
     else
     {
@@ -2020,6 +2009,9 @@ fprintf(stderr, "%s:%d:%s():\n", __FILE__, __LINE__, __FUNCTION__);
 	bufp->nlines -= nmovelines;
 	bufp->gap_off -= nmove;
     }
+
+    /* Adjust the line numbers for all mkr's in bufp. */
+    bufp_p_mkrs_pline_adjust(bufp, -nmovelines, 0);
 
     /* Insert the data. */
     nlines = buf_p_bufv_insert(buf, a_prevp, ql_next(&buf->plist, bufp, plink),
