@@ -72,7 +72,7 @@ struct cw_buf_s {
 	/* Internal buffer state. */
 	cw_uint32_t	elmsize;	/* Number of bytes per element, >= 1. */
 	cw_uint8_t	*b;		/* Text buffer, with gap. */
-	cw_uint64_t	len;		/* Length (also last valid cpos). */
+	cw_uint64_t	len;		/* Length. */
 	cw_uint64_t	nlines; 	/* Number of lines (>= 1). */
 	cw_uint64_t	gap_off;	/* Gap offset, in elements. */
 	cw_uint64_t	gap_len;	/* Gap length, in elements. */
@@ -81,12 +81,9 @@ struct cw_buf_s {
 
 	/* History (undo/redo) state. */
 	cw_buf_t	*h;		/* History buffer, if non-NULL. */
-	cw_bufm_t	hend;		/* Marker at end of h. */
 	cw_bufm_t	hcur;		/* Marker at current position in h. */
-	cw_bufh_t	hstate;		/* Current history state. */
+	cw_bufm_t	htmp;		/* Temporary marker in h. */
 	cw_uint64_t	hbpos;		/* Current history bpos. */
-	cw_uint32_t	ucount;		/* # of undo chars in current record. */
-	cw_uint32_t	rcount;		/* # of redo chars in current record. */
 };
 
 /* buf. */
@@ -111,7 +108,7 @@ cw_bool_t buf_hist_active_get(cw_buf_t *a_buf);
 void	buf_hist_active_set(cw_buf_t *a_buf, cw_bool_t a_active);
 cw_bool_t buf_undoable(cw_buf_t *a_buf);
 cw_bool_t buf_redoable(cw_buf_t *a_buf);
-cw_bool_t buf_undo(cw_buf_t *a_buf, cw_bufm_t *a_bufm);
+cw_uint64_t buf_undo(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_uint64_t a_count);
 cw_bool_t buf_redo(cw_buf_t *a_buf, cw_bufm_t *a_bufm);
 void	buf_hist_group_beg(cw_buf_t *a_buf);
 void	buf_hist_group_end(cw_buf_t *a_buf);
