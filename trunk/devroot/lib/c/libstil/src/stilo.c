@@ -114,7 +114,7 @@ struct cw_stiloe_file_s {
 	cw_stilo_file_read_t	*read_f;
 	cw_stilo_file_write_t	*write_f;
 	void		*arg;
-	cw_sint64_t	position;
+	cw_stiloi_t	position;
 };
 
 struct cw_stiloe_hook_s {
@@ -1004,13 +1004,13 @@ stilo_array_len_get(cw_stilo_t *a_stilo)
 }
 
 void
-stilo_array_el_get(cw_stilo_t *a_stilo, cw_sint64_t a_offset, cw_stilo_t *r_el)
+stilo_array_el_get(cw_stilo_t *a_stilo, cw_stiloi_t a_offset, cw_stilo_t *r_el)
 {
 	stilo_l_array_el_get(a_stilo, a_offset, r_el);
 }
 
 void
-stilo_array_el_set(cw_stilo_t *a_stilo, cw_stilo_t *a_el, cw_sint64_t a_offset)
+stilo_array_el_set(cw_stilo_t *a_stilo, cw_stilo_t *a_el, cw_stiloi_t a_offset)
 {
 	cw_stiloe_array_t	*array;
 
@@ -1801,7 +1801,7 @@ stilo_file_interactive(cw_stilo_t *a_stilo, cw_stilo_file_read_t *a_read,
 	file->position = 0;
 }
 
-/* STILTE_LIMITCHECK, STILTE_INVALIDFILEACCESS */
+/* STILTE_IOERROR, STILTE_LIMITCHECK, STILTE_INVALIDFILEACCESS */
 cw_stilte_t
 stilo_file_open(cw_stilo_t *a_stilo, const cw_uint8_t *a_filename, cw_uint32_t
     a_nlen, const cw_uint8_t *a_flags, cw_uint32_t a_flen)
@@ -2725,10 +2725,10 @@ stilo_file_truncate(cw_stilo_t *a_stilo, off_t a_length)
 }
 
 /* -1: STILTE_IOERROR */
-cw_sint64_t
+cw_stiloi_t
 stilo_file_position_get(cw_stilo_t *a_stilo)
 {
-	cw_sint64_t		retval;
+	cw_stiloi_t		retval;
 	cw_stiloe_file_t	*file;
 
 	_cw_check_ptr(a_stilo);
@@ -2759,7 +2759,7 @@ stilo_file_position_get(cw_stilo_t *a_stilo)
 
 /* STILTE_IOERROR */
 cw_stilte_t
-stilo_file_position_set(cw_stilo_t *a_stilo, cw_sint64_t a_position)
+stilo_file_position_set(cw_stilo_t *a_stilo, cw_stiloi_t a_position)
 {
 	cw_stilte_t		retval;
 	cw_stiloe_file_t	*file;
@@ -2851,10 +2851,10 @@ stilo_file_buffer_size_set(cw_stilo_t *a_stilo, cw_uint32_t a_size)
 	stiloe_p_file_unlock(file);
 }
 
-cw_sint64_t
+cw_stiloi_t
 stilo_file_buffer_count(cw_stilo_t *a_stilo)
 {
-	cw_sint64_t		retval;
+	cw_stiloi_t		retval;
 	cw_stiloe_file_t	*file;
 
 	_cw_check_ptr(a_stilo);
@@ -2995,10 +2995,10 @@ stilo_file_status(cw_stilo_t *a_stilo)
 }
 
 /* -1: STILTE_IOERROR */
-cw_sint64_t
+cw_stiloi_t
 stilo_file_mtime(cw_stilo_t *a_stilo)
 {
-	cw_sint64_t		retval;
+	cw_stiloi_t		retval;
 	struct stat		sb;
 	cw_stiloe_file_t	*file;
 
@@ -3025,8 +3025,9 @@ stilo_file_mtime(cw_stilo_t *a_stilo)
 	/* XXX Replace this function with generic status. */
 	/* Keep 63 bits of accuracy. */
 /*  	retval = sb.st_mtimespec.tv_sec; */
-	retval <<= 31;
+/*  	retval <<= 31; */
 /*  	retval |= (sb.st_mtimespec.tv_nsec >> 1); */
+	retval = 0;
 
 	RETURN:
 	stiloe_p_file_unlock(file);
@@ -3160,8 +3161,12 @@ stilo_p_integer_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_uint32_t
     a_depth)
 {
 	cw_stilte_t	retval;
-	
+
+#if (_CW_STILOI_SIZEOF == 8)
 	retval = stilo_file_output(a_file, "[q|s:s]", a_stilo->o.integer.i);
+#else
+	retval = stilo_file_output(a_file, "[i|s:s]", a_stilo->o.integer.i);
+#endif
 
 	return retval;
 }
@@ -3858,7 +3863,7 @@ stilo_string_len_get(cw_stilo_t *a_stilo)
 }
 
 void
-stilo_string_el_get(cw_stilo_t *a_stilo, cw_sint64_t a_offset, cw_uint8_t *r_el)
+stilo_string_el_get(cw_stilo_t *a_stilo, cw_stiloi_t a_offset, cw_uint8_t *r_el)
 {
 	cw_stiloe_string_t	*string;
 
@@ -3882,7 +3887,7 @@ stilo_string_el_get(cw_stilo_t *a_stilo, cw_sint64_t a_offset, cw_uint8_t *r_el)
 }
 
 void
-stilo_string_el_set(cw_stilo_t *a_stilo, cw_uint8_t a_el, cw_sint64_t a_offset)
+stilo_string_el_set(cw_stilo_t *a_stilo, cw_uint8_t a_el, cw_stiloi_t a_offset)
 {
 	cw_stiloe_string_t	*string;
 

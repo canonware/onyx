@@ -390,7 +390,7 @@ systemdict_array(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack;
 	cw_stilo_t	*stilo;
-	cw_sint64_t	len;
+	cw_stiloi_t	len;
 
 	ostack = stilt_ostack_get(a_stilt);
 	
@@ -705,7 +705,7 @@ systemdict_copy(cw_stilt_t *a_stilt)
 	case STILOT_INTEGER: {
 		cw_stilo_t	*dup;
 		cw_uint32_t	i;
-		cw_sint64_t	count;
+		cw_stiloi_t	count;
 
 		/* Dup a range of the stack. */
 		count = stilo_integer_get(stilo);
@@ -1118,7 +1118,7 @@ systemdict_detach(cw_stilt_t *a_stilt)
 	cw_stils_t	*ostack;
 	cw_stilo_t	*thread;
 	union {
-		cw_sint64_t	i;
+		cw_stiloi_t	i;
 		cw_stilt_t	*stilt;
 	} u;
 
@@ -1449,7 +1449,7 @@ systemdict_exp(cw_stilt_t *a_stilt)
 	cw_stils_t	*ostack;
 	cw_stilo_t	*a, *b;
 	cw_uint32_t	i;
-	cw_sint64_t	r;
+	cw_stiloi_t	r;
 
 	ostack = stilt_ostack_get(a_stilt);
 	
@@ -1515,7 +1515,7 @@ systemdict_for(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack, *estack, *tstack;
 	cw_stilo_t	*exec, *ostilo, *estilo, *tstilo;
-	cw_sint64_t	i, inc, limit, edepth;
+	cw_stiloi_t	i, inc, limit, edepth;
 
 	ostack = stilt_ostack_get(a_stilt);
 	estack = stilt_estack_get(a_stilt);
@@ -1614,7 +1614,7 @@ systemdict_foreach(cw_stilt_t *a_stilt)
 	cw_stils_t	*ostack, *estack, *tstack;
 	cw_stilo_t	*stilo, *what, *proc;
 	cw_uint32_t	tstack_depth;
-	cw_sint64_t	i, count;
+	cw_stiloi_t	i, count;
 
 	ostack = stilt_ostack_get(a_stilt);
 	estack = stilt_estack_get(a_stilt);
@@ -1713,7 +1713,7 @@ systemdict_foreach(cw_stilt_t *a_stilt)
 				 count; i++) {
 				stilo_string_el_get(what, i, &el);
 				stilo = stils_push(ostack);
-				stilo_integer_new(stilo, (cw_sint64_t)el);
+				stilo_integer_new(stilo, (cw_stiloi_t)el);
 
 				stilo = stils_push(estack);
 				stilo_dup(stilo, proc);
@@ -1803,7 +1803,7 @@ systemdict_get(cw_stilt_t *a_stilt)
 
 	switch (stilo_type_get(from)) {
 	case STILOT_ARRAY: {
-		cw_sint64_t	index;
+		cw_stiloi_t	index;
 
 		if (stilo_type_get(with) != STILOT_INTEGER) {
 			stilt_error(a_stilt, STILTE_TYPECHECK);
@@ -1835,7 +1835,7 @@ systemdict_get(cw_stilt_t *a_stilt)
 		break;
 	}
 	case STILOT_STRING: {
-		cw_sint64_t	index;
+		cw_stiloi_t	index;
 		cw_uint8_t	el;
 
 		if (stilo_type_get(with) != STILOT_INTEGER) {
@@ -1849,7 +1849,7 @@ systemdict_get(cw_stilt_t *a_stilt)
 			return;
 		}
 		stilo_string_el_get(from, index, &el);
-		stilo_integer_set(with, (cw_sint64_t)el);
+		stilo_integer_set(with, (cw_stiloi_t)el);
 
 		stils_roll(ostack, 2, 1);
 		stils_pop(ostack);
@@ -1866,7 +1866,7 @@ systemdict_getinterval(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack;
 	cw_stilo_t	*from, *with, *count;
-	cw_sint64_t	index, len;
+	cw_stiloi_t	index, len;
 
 	ostack = stilt_ostack_get(a_stilt);
 	STILS_GET(count, ostack, a_stilt);
@@ -2035,7 +2035,7 @@ systemdict_index(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack;
 	cw_stilo_t	*stilo, *orig;
-	cw_sint64_t	index;
+	cw_stiloi_t	index;
 
 	ostack = stilt_ostack_get(a_stilt);
 	STILS_GET(stilo, ostack, a_stilt);
@@ -2059,7 +2059,7 @@ systemdict_join(cw_stilt_t *a_stilt)
 	cw_stils_t	*ostack;
 	cw_stilo_t	*thread;
 	union {
-		cw_sint64_t	i;
+		cw_stiloi_t	i;
 		cw_stilt_t	*stilt;
 	} u;
 
@@ -2172,7 +2172,7 @@ systemdict_length(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack;
 	cw_stilo_t	*stilo;
-	cw_sint64_t	len;
+	cw_stiloi_t	len;
 
 	ostack = stilt_ostack_get(a_stilt);
 	
@@ -2637,7 +2637,7 @@ systemdict_put(cw_stilt_t *a_stilt)
 
 	switch (stilo_type_get(into)) {
 	case STILOT_ARRAY: {
-		cw_sint64_t	index;
+		cw_stiloi_t	index;
 
 		if (stilo_type_get(with) != STILOT_INTEGER) {
 			stilt_error(a_stilt, STILTE_TYPECHECK);
@@ -2657,7 +2657,7 @@ systemdict_put(cw_stilt_t *a_stilt)
 		break;
 	}
 	case STILOT_STRING: {
-		cw_sint64_t	index;
+		cw_stiloi_t	index;
 		cw_uint8_t	val;
 
 		if ((stilo_type_get(with) != STILOT_INTEGER) ||
@@ -2687,7 +2687,7 @@ systemdict_putinterval(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack;
 	cw_stilo_t	*into, *with, *what;
-	cw_sint64_t	index;
+	cw_stiloi_t	index;
 
 	ostack = stilt_ostack_get(a_stilt);
 	STILS_GET(what, ostack, a_stilt);
@@ -2794,7 +2794,7 @@ systemdict_read(cw_stilt_t *a_stilt)
 			stilo_integer_new(value, 0);
 			stilo_boolean_new(code, FALSE);
 		} else {
-			stilo_integer_new(value, (cw_sint64_t)val);
+			stilo_integer_new(value, (cw_stiloi_t)val);
 			stilo_boolean_new(code, TRUE);
 		}
 
@@ -2900,8 +2900,8 @@ systemdict_realtime(cw_stilt_t *a_stilt)
 	stilo = stils_push(ostack);
 
 	gettimeofday(&tv, NULL);
-	stilo_integer_new(stilo, ((cw_sint64_t)tv.tv_sec *
-	    (cw_sint64_t)1000000) + (cw_sint64_t)tv.tv_usec);
+	stilo_integer_new(stilo, ((cw_stiloi_t)tv.tv_sec *
+	    (cw_stiloi_t)1000000) + (cw_stiloi_t)tv.tv_usec);
 }
 
 void
@@ -2967,7 +2967,7 @@ systemdict_repeat(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack, *estack, *tstack;
 	cw_stilo_t	*count, *exec, *stilo, *tstilo;
-	cw_sint64_t	i, cnt;
+	cw_stiloi_t	i, cnt;
 	cw_uint32_t	sdepth;
 
 	ostack = stilt_ostack_get(a_stilt);
@@ -3018,7 +3018,7 @@ systemdict_roll(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack;
 	cw_stilo_t	*stilo;
-	cw_sint64_t	count, amount;
+	cw_stiloi_t	count, amount;
 
 	ostack = stilt_ostack_get(a_stilt);
 
@@ -3120,10 +3120,10 @@ systemdict_self(cw_stilt_t *a_stilt)
 	cw_stils_t	*ostack;
 	cw_stilo_t	*context;
 	union {
-		cw_sint64_t	i;
+		cw_stiloi_t	i;
 		cw_stilt_t	*stilt;
 	} u;
-	_cw_assert(sizeof(cw_sint64_t) >= sizeof(void *));
+	_cw_assert(sizeof(cw_stiloi_t) >= sizeof(void *));
 
 	ostack = stilt_ostack_get(a_stilt);
 	context = stils_push(ostack);
@@ -3405,7 +3405,7 @@ systemdict_string(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack;
 	cw_stilo_t	*stilo;
-	cw_sint64_t	len;
+	cw_stiloi_t	len;
 
 	ostack = stilt_ostack_get(a_stilt);
 	
@@ -3578,7 +3578,7 @@ dup 0 eq {
 	char		*path, **argv, **envp;
 	pid_t		pid;
 	int		status;
-	cw_sint64_t	result;
+	cw_stiloi_t	result;
 
 	ostack = stilt_ostack_get(a_stilt);
 	tstack = stilt_tstack_get(a_stilt);
@@ -3740,7 +3740,7 @@ systemdict_tell(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack;
 	cw_stilo_t	*file;
-	cw_sint64_t	position;
+	cw_stiloi_t	position;
 
 	ostack = stilt_ostack_get(a_stilt);
 
@@ -3771,7 +3771,7 @@ systemdict_thread(cw_stilt_t *a_stilt)
 	cw_stils_t	*ostack, *tstack;
 	cw_stilo_t	*mark, *stilo, *new;
 	union {
-		cw_sint64_t	i;
+		cw_stiloi_t	i;
 		cw_stilt_t	*stilt;
 	} u;
 
@@ -4181,7 +4181,7 @@ systemdict_waitpid(cw_stilt_t *a_stilt)
 	cw_stilo_t	*stilo;
 	pid_t		pid;
 	int		status;
-	cw_sint64_t	result;
+	cw_stiloi_t	result;
 	
 	ostack = stilt_ostack_get(a_stilt);
 	STILS_GET(stilo, ostack, a_stilt);

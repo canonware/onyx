@@ -77,6 +77,23 @@ typedef enum {
 }	cw_stiloa_t;
 
 /*
+ * The stil language was designed to use 64 bit signed integers.  However, 64
+ * bit processors still aren't the defacto standard, and stil performance can
+ * suffer considerably due to the compiler emulating 64 bit integers.  It is
+ * possible to use stil with signed 32 bit integers, but this introduces a
+ * number of unpleasant limitations.  The worst of these is that files are
+ * limited to 2 GB in size.
+ */
+#define	_CW_STILOI_SIZEOF	8
+#if (_CW_STILOI_SIZEOF == 8)
+typedef cw_sint64_t cw_stiloi_t;
+#elif (_CW_STILOI_SIZEOF == 4)
+typedef cw_sint32_t cw_stiloi_t;
+#else
+#error "Unsupported stiloi size"
+#endif
+
+/*
  * Main object structure.
  */
 struct cw_stilo_s {
@@ -94,7 +111,7 @@ struct cw_stilo_s {
 			cw_bool_t	val;
 		}	boolean;
 		struct {
-			cw_sint64_t	i;
+			cw_stiloi_t	i;
 		}	integer;
 		struct {
 			cw_op_t		*f;
@@ -180,10 +197,10 @@ void		stilo_array_subarray_new(cw_stilo_t *a_stilo, cw_stilo_t
     *a_array, cw_stil_t *a_stil, cw_uint32_t a_offset, cw_uint32_t a_len);
 void		stilo_array_copy(cw_stilo_t *a_to, cw_stilo_t *a_from);
 cw_uint32_t	stilo_array_len_get(cw_stilo_t *a_stilo);
-void		stilo_array_el_get(cw_stilo_t *a_stilo, cw_sint64_t a_offset,
+void		stilo_array_el_get(cw_stilo_t *a_stilo, cw_stiloi_t a_offset,
     cw_stilo_t *r_el);
 void		stilo_array_el_set(cw_stilo_t *a_stilo, cw_stilo_t *a_el,
-    cw_sint64_t a_offset);
+    cw_stiloi_t a_offset);
 
 /*
  * boolean.
@@ -246,17 +263,17 @@ cw_stilte_t	stilo_file_output(cw_stilo_t *a_stilo, const char *a_format,
 cw_stilte_t	stilo_file_output_n(cw_stilo_t *a_stilo, cw_uint32_t a_size,
     const char *a_format, ...);
 cw_stilte_t	stilo_file_truncate(cw_stilo_t *a_stilo, off_t a_length);
-cw_sint64_t	stilo_file_position_get(cw_stilo_t *a_stilo);
-cw_stilte_t	stilo_file_position_set(cw_stilo_t *a_stilo, cw_sint64_t
+cw_stiloi_t	stilo_file_position_get(cw_stilo_t *a_stilo);
+cw_stilte_t	stilo_file_position_set(cw_stilo_t *a_stilo, cw_stiloi_t
     a_position);
 cw_uint32_t	stilo_file_buffer_size_get(cw_stilo_t *a_stilo);
 void		stilo_file_buffer_size_set(cw_stilo_t *a_stilo, cw_uint32_t
     a_size);
-cw_sint64_t	stilo_file_buffer_count(cw_stilo_t *a_stilo);
+cw_stiloi_t	stilo_file_buffer_count(cw_stilo_t *a_stilo);
 cw_stilte_t	stilo_file_buffer_flush(cw_stilo_t *a_stilo);
 void		stilo_file_buffer_reset(cw_stilo_t *a_stilo);
 cw_bool_t	stilo_file_status(cw_stilo_t *a_stilo);
-cw_sint64_t	stilo_file_mtime(cw_stilo_t *a_stilo);
+cw_stiloi_t	stilo_file_mtime(cw_stilo_t *a_stilo);
 
 /*
  * hook.
@@ -348,10 +365,10 @@ void		stilo_string_substring_new(cw_stilo_t *a_stilo, cw_stilo_t
     *a_string, cw_stil_t *a_stil, cw_uint32_t a_offset, cw_uint32_t a_len);
 void		stilo_string_copy(cw_stilo_t *a_to, cw_stilo_t *a_from);
 cw_uint32_t	stilo_string_len_get(cw_stilo_t *a_stilo);
-void		stilo_string_el_get(cw_stilo_t *a_stilo, cw_sint64_t a_offset,
+void		stilo_string_el_get(cw_stilo_t *a_stilo, cw_stiloi_t a_offset,
     cw_uint8_t *r_el);
 void		stilo_string_el_set(cw_stilo_t *a_stilo, cw_uint8_t a_el,
-    cw_sint64_t a_offset);
+    cw_stiloi_t a_offset);
 void		stilo_string_lock(cw_stilo_t *a_stilo);
 void		stilo_string_unlock(cw_stilo_t *a_stilo);
 cw_uint8_t	*stilo_string_get(cw_stilo_t *a_stilo);

@@ -607,7 +607,7 @@ stilt_loop(cw_stilt_t *a_stilt)
 						break;
 					case STILN_index: {
 						cw_stilo_t	*stilo, *orig;
-						cw_sint64_t	index;
+						cw_stiloi_t	index;
 
 						stilo =
 						    stils_get(&a_stilt->ostack);
@@ -650,7 +650,7 @@ stilt_loop(cw_stilt_t *a_stilt)
 						break;
 					case STILN_roll: {
 						cw_stilo_t	*stilo;
-						cw_sint64_t	count, amount;
+						cw_stiloi_t	count, amount;
 
 						stilo =
 						    stils_get(&a_stilt->ostack);
@@ -1354,7 +1354,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 				/* Fall through. */
 			case '\0': case '\t': case '\f': case '\r': case ' ':
 				if (a_stilt->index > a_stilt->m.n.b_off) {
-					cw_sint64_t	val;
+					cw_stiloi_t	val;
 
 					/* Integer. */
 					stilt_p_token_print(a_stilt, a_stilts,
@@ -1369,8 +1369,16 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 					errno = 0;
 					val = strtoq(a_stilt->tok_str, NULL,
 					    10);
-					if ((errno == ERANGE) && ((val ==
-					    QUAD_MIN) || (val == QUAD_MAX))) {
+
+					if ((errno == ERANGE) &&
+#if (_CW_STILOI_SIZEOF == 8)
+					    ((val == QUAD_MIN) || (val ==
+					    QUAD_MAX))
+#else
+					    ((val == LONG_MIN) || (val ==
+					    LONG_MAX))
+#endif
+					    ) {
 						stilt_p_reset(a_stilt);
 						stilt_error(a_stilt,
 						    STILTE_RANGECHECK);
@@ -1445,7 +1453,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 				/* Fall through. */
 			case '\0': case '\t': case '\f': case '\r': case ' ':
 				if (a_stilt->index > a_stilt->m.n.b_off) {
-					cw_sint64_t	val;
+					cw_stiloi_t	val;
 
 					/* Integer. */
 					stilt_p_token_print(a_stilt, a_stilts,
@@ -1462,8 +1470,15 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 					    strtoq(&a_stilt->tok_str[a_stilt->m.n.b_off],
 					    NULL,
 					    a_stilt->m.n.base);
-					if ((errno == ERANGE) && ((val ==
-					    QUAD_MIN) || (val == QUAD_MAX))) {
+					if ((errno == ERANGE) &&
+#if (_CW_STILOI_SIZEOF == 8)
+					    ((val == QUAD_MIN) || (val ==
+					    QUAD_MAX))
+#else
+					    ((val == LONG_MIN) || (val ==
+					    LONG_MAX))
+#endif
+					    ) {
 						stilt_p_reset(a_stilt);
 						stilt_error(a_stilt,
 						    STILTE_RANGECHECK);

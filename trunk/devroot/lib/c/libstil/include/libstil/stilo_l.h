@@ -125,13 +125,13 @@ cw_stiloe_t *stiloe_l_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t a_reset);
 } while (0)
 
 #ifndef _CW_USE_INLINES
-void	stilo_l_array_el_get(cw_stilo_t *a_stilo, cw_sint64_t a_offset,
+void	stilo_l_array_el_get(cw_stilo_t *a_stilo, cw_stiloi_t a_offset,
     cw_stilo_t *r_el);
 #endif
 
 #if (defined(_CW_USE_INLINES) || defined(_STILO_C_))
 _CW_INLINE void
-stilo_l_array_el_get(cw_stilo_t *a_stilo, cw_sint64_t a_offset, cw_stilo_t
+stilo_l_array_el_get(cw_stilo_t *a_stilo, cw_stiloi_t a_offset, cw_stilo_t
     *r_el)
 {
 	cw_stiloe_array_t	*array;

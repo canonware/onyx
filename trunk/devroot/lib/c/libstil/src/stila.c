@@ -754,7 +754,7 @@ stila_p_collect(cw_stila_t *a_stila, cw_bool_t a_shutdown)
 	cw_uint32_t	nroot, nreachable;
 	cw_stiloe_t	*garbage;
 	struct timeval	t_tv;
-	cw_sint64_t	start_us, mark_us, sweep_us;
+	cw_stiloi_t	start_us, mark_us, sweep_us;
 
 	/* Record the start time. */
 	gettimeofday(&t_tv, NULL);
