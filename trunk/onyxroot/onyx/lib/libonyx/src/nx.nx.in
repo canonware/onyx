@@ -815,9 +815,9 @@ $require {
 		dup `f' test {
 		    # Found.
 		    # #filename #full_path
+		    nip
+		    # #full_path
 		    `r' open cvx eval
-		    # #filename
-		    pop
 		    stop # Success.
 		}{
 		    # Not found.
@@ -882,9 +882,9 @@ $mrequire {
 		dup `f' test {
 		    # Found.
 		    # #symbol #filename #full_path
-		    dn modload
-		    # #filename
-		    pop
+		    nip
+		    # #symbol #full_path
+		    exch modload
 		    stop # Success.
 		}{
 		    # Not found.

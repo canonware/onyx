@@ -1,5 +1,8 @@
 2003-03-20 : Jason Evans <jasone@canonware.com>
 
+	* lib/libonyx/src/nx.nx.in:[m]require : Re-order code so that loaded
+	  modules can safely leave objects on ostack.
+
 	* lib/libonyx/src/nxo_file.c:nxo_file_write() : Handle short writes (due
 	  to signal interruption) even when there are no buffered data.
 
