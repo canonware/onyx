@@ -245,7 +245,7 @@ thd_new(void *(*a_start_func)(void *), void *a_arg, cw_bool_t a_suspendible)
 	abort();
     }
 
-    /* Set retval->thread, even though it is also set in thd_p_start_func().
+    /* Set retval->pthread, even though it is also set in thd_p_start_func().
      * This is necessary, since it's possible to call something like thd_join()
      * before the new thread even gets as far as initializing itself. */
     mtx_lock(&retval->mtx);
