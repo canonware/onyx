@@ -180,16 +180,8 @@ onyx : [ONYX];
 
 onyx_bins_bootstrap : [BONYX]
 {
-  local t = [fromto @srcroot@/bin/onyx/src/%.nx.in % [ONYX_NSRCS]];
-
-  loop
+  loop local f = [fromto @srcroot@/bin/onyx/src/%.nx.in % [ONYX_NSRCS]]
   {
-    local f = [head [t]];
-
-    if [not [f]] then
-      loopstop;
-    t = [tail [t]];
-    
     cat @objroot@/bin/onyx/src/[f].nx
       | [BONYX] @srcroot@/bin/onyx/src/[f]_gen.nx
       > @srcroot@/bin/onyx/src/[f]_bootstrap.c;
