@@ -1675,7 +1675,7 @@ systemdict_dirforeach(cw_nxo_t *a_thread)
 	DIR		*dir;
 	cw_uint32_t	edepth, tdepth;
 	struct dirent	*entp;
-#ifdef _CW_THREADS
+#ifdef HAVE_READDIR_R
 	struct dirent	ent;
 	int		error;
 #endif
@@ -1726,7 +1726,7 @@ systemdict_dirforeach(cw_nxo_t *a_thread)
 		/*
 		 * Iterate through the directory.
 		 */
-#ifdef _CW_THREADS
+#ifdef HAVE_READDIR_R
 		while ((error = readdir_r(dir, &ent, &entp) == 0) && entp ==
 		    &ent)
 #else
@@ -1757,7 +1757,7 @@ systemdict_dirforeach(cw_nxo_t *a_thread)
 			nxo_dup(nxo, proc);
 			nxo_thread_loop(a_thread);
 		}
-#ifdef _CW_THREADS
+#ifdef HAVE_READDIR_R
 		if (error && entp != NULL)
 #else
 		if (errno != 0)

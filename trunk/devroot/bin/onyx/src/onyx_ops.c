@@ -9,10 +9,13 @@
  *
  ******************************************************************************/
 
-#include <dlfcn.h>	/* for modload operator. */
-
 #include "onyx.h"
 
+#ifdef HAVE_DLOPEN
+#include <dlfcn.h>	/* for modload operator. */
+#endif
+
+#ifdef HAVE_DLOPEN
 static cw_nxoe_t *
 onyx_ops_modload_sym_ref_iter(void *a_data, cw_bool_t a_reset)
 {
@@ -112,10 +115,12 @@ onyx_ops_modload(cw_nxo_t *a_thread)
 	/* Recurse on the hook. */
 	nxo_thread_loop(a_thread);
 }
+#endif
 
 void
 onyx_ops_init(cw_nxo_t *a_thread)
 {
+#ifdef HAVE_DLOPEN
 	cw_nx_t			*nx;
 	cw_nxo_t		*tstack, *name, *value;
 	static const cw_uint8_t	onyx_name_modload[] = "modload";
@@ -133,4 +138,5 @@ onyx_ops_init(cw_nxo_t *a_thread)
 	nxo_dict_def(nx_systemdict_get(nx), nx, name, value);
 
 	nxo_stack_npop(tstack, 2);
+#endif
 }

@@ -16,7 +16,9 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#ifdef HAVE_POLL
 #include <poll.h>
+#endif
 #endif
 
 #include "../include/libonyx/nxa_l.h"
@@ -460,7 +462,11 @@ nxo_file_read(cw_nxo_t *a_nxo, cw_uint32_t a_len, cw_uint8_t *r_str)
 				_cw_not_reached();
 #ifdef _CW_POSIX_FILE
 			case FILE_POSIX: {
+#ifdef HAVE_POLL
 				struct pollfd	events;
+#else
+				fd_set		fdset;
+#endif
 				struct iovec	iov[2];
 
 				if (retval == 0) {
@@ -468,6 +474,7 @@ nxo_file_read(cw_nxo_t *a_nxo, cw_uint32_t a_len, cw_uint8_t *r_str)
 					 * No data read yet.  Sleep until some
 					 * data are available.
 					 */
+#ifdef HAVE_POLL
 					events.fd = file->f.p.fd;
 					events.events = POLLIN
 #ifdef POLLRDNORM
@@ -476,6 +483,14 @@ nxo_file_read(cw_nxo_t *a_nxo, cw_uint32_t a_len, cw_uint8_t *r_str)
 					    ;
 					while ((poll(&events, 1, -1)) == -1)
 						; /* EINTR; try again. */
+#else
+					_cw_assert(file->f.p.fd <= FD_SETSIZE);
+					FD_ZERO(&fdset);
+					FD_SET(file->f.p.fd, &fdset);
+					while (select(file->f.p.fd + 1, &fdset,
+					    NULL, NULL, NULL) == -1)
+						; /* EINTR; try again. */
+#endif
 
 					/*
 					 * Finish filling r_str and replenish
@@ -492,12 +507,16 @@ nxo_file_read(cw_nxo_t *a_nxo, cw_uint32_t a_len, cw_uint8_t *r_str)
 							break;
 					}
 				} else {
-					int	nready;
+					int		nready;
+#ifndef HAVE_POLL
+					struct timeval	timeout;
+#endif
 
 					/*
 					 * Only read if data are available.
 					 */
-					events.fd = file->f.p.fd;
+#ifdef HAVE_POLL
+					events.fd = finle->f.p.fd;
 					events.events = POLLIN
 #ifdef POLLRDNORM
 					    | POLLRDNORM
@@ -506,6 +525,17 @@ nxo_file_read(cw_nxo_t *a_nxo, cw_uint32_t a_len, cw_uint8_t *r_str)
 					while ((nready = poll(&events, 1, 0)) ==
 					    -1)
 						; /* EINTR; try again. */
+#else
+					_cw_assert(file->f.p.fd <= FD_SETSIZE);
+					FD_ZERO(&fdset);
+					FD_SET(file->f.p.fd, &fdset);
+					timeout.tv_sec = 0;
+					timeout.tv_usec = 0;
+					while ((nready = select(file->f.p.fd +
+					    1, &fdset, NULL, NULL, &timeout)) ==
+						   -1)
+						; /* EINTR; try again. */
+#endif
 
 					if (nready == 1) {
 						/*

@@ -10,7 +10,6 @@
  ******************************************************************************/
 
 #undef HAVE_DLOPEN
-#undef HAVE_DYNALOAD
 
 /*
  * Default source code path for require.

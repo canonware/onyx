@@ -152,6 +152,12 @@ fi
 ,
 enable_libedit="1"
 )
+AC_CHECK_HEADERS(curses.h, , enable_libedit="0")
+AC_CHECK_HEADERS(term.h, , enable_libedit="0")
+AC_CHECK_FUNC(tigetflag, , enable_libedit="0")
+AC_CHECK_FUNC(tigetnum, , enable_libedit="0")
+AC_CHECK_FUNC(tigetstr, , enable_libedit="0")
+
 AC_SUBST(enable_libedit)
 if test "x$enable_libedit" = "x1" ; then
   AC_DEFINE(_CW_USE_LIBEDIT)

@@ -96,11 +96,11 @@ main(int argc, char **argv, char **envp)
 	nxo_attr_set(operator, NXOA_EXECUTABLE);
 	_cw_onyx_code(&thread, "def");
 
-	_cw_onyx_code(&thread, "
-anon_hook 1 sprint
-anon_hook eval
-mark_hook 1 sprint
-mark_hook eval
+	_cw_onyx_code(&thread, "\n\
+anon_hook 1 sprint\n\
+anon_hook eval\n\
+mark_hook 1 sprint\n\
+mark_hook eval\n\
 ");
 	nx_delete(&nx);
 

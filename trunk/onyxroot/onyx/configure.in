@@ -68,14 +68,24 @@ if test "x$enable_libedit" = "x1" ; then
 fi
 
 dnl Look for modules.
-if test "x$enable_threads" = "x1" -a "x$enable_posix" = "x1" ; then
-  CW_BUILD_MOD(modgtk, mod_gtk)
+enable_modules="yes"
+AC_CHECK_FUNCS(dlopen, AC_DEFINE(HAVE_DLOPEN), \
+  AC_CHECK_LIB(dl, dlopen, LIBS="$LIBS -ldl" ; AC_DEFINE(HAVE_DLOPEN), \
+    [enable_modules="no"
+    AC_MSG_RESULT(Modules disabled since dlopen is missing)]))
+
+if test "x$enable_modules" = "xyes" -a "x$enable_threads" = "x1" \
+     -a "x$enable_posix" = "x1" ; then
+  AC_PATH_PROGS(GTKCONFIG, gtk-config gtk12-config, , $PATH)
+  if test "x$GTKCONFIG" != "x" ; then
+    CW_BUILD_MOD(modgtk, mod_gtk)
+  fi
   CW_BUILD_MOD(modslate, mod_slate)
 fi
 
 dnl Look for binaries.
 CW_BUILD_BIN(onyx, bin_onyx)
-if test "x$build_modslate" = "x1" ; then
+if test "x$build_modslate" = "xyes" ; then
   CW_BUILD_BIN(slate, bin_slate)
 fi
 
@@ -90,7 +100,6 @@ case "${host}" in
   *-*-darwin*)
 	AC_DEFINE(_CW_OS_DARWIN, )
 	abi="macho"
-	RPATH="-Wl,-dylib_install_name,"
 	;;
   *-*-freebsd*)
 	AC_DEFINE(_CW_OS_FREEBSD, )
@@ -150,7 +159,10 @@ dnl Define preprocessor macros.
 
 dnl Check for header files.
 if test "x$enable_posix_file" = "x1" ; then
-  AC_CHECK_HEADERS(poll.h, , AC_MSG_ERROR(Cannot build without poll.h))
+  AC_CHECK_FUNC(poll, , \
+    AC_CHECK_FUNC(select, , \
+      AC_MSG_ERROR(Cannot build without poll() or select())))
+  AC_CHECK_FUNC(readdir_r)
 fi
 if test "x$enable_posix" = "x1" ; then
   AC_CHECK_HEADERS(unistd.h, , AC_MSG_ERROR(Cannot build without unistd.h))
@@ -177,6 +189,7 @@ dnl Try to figure out which field of struct dirent contains the entry string
 dnl length.
 AC_MSG_CHECKING(for (struct dirent).d_namlen)
 AC_TRY_LINK([
+#include <sys/types.h>
 #include <dirent.h>
 ], [
 	struct dirent	ent;
@@ -187,6 +200,7 @@ AC_TRY_LINK([
 dnl d_namlen doesn't exist, so try d_reclen.
 AC_MSG_CHECKING(for (struct dirent).d_reclen)
 AC_TRY_LINK([
+#include <sys/types.h>
 #include <dirent.h>
 ], [
 	struct dirent	ent;
@@ -203,14 +217,6 @@ fi
 
 if test "x$build_onyx" = "xyes" ; then
   cfgoutputs="$cfgoutputs doc/latex/onyx.tex"
-
-  if test "x$enable_posix" = "x1" ; then
-    AC_CHECK_FUNCS(dlopen, , \
-      AC_CHECK_LIB(dl, dlopen, LIBS="$LIBS -ldl" ; AC_DEFINE(HAVE_DLOPEN), \
-        AC_CHECK_LIB(dyna, dynaload, LIB="$LIBS -ldyna" ; \
-                                     AC_DEFINE(HAVE_DYNALOAD), \
-            AC_MSG_ERROR(Cannot find dlopen or dynaload))))
-  fi
 
   if test "x$prefix" = "xNONE" ; then
     _CW_ONYX_RPATH="/usr/local/share/onyx/nxcode"
@@ -232,14 +238,6 @@ if test "x$build_onyx" = "xyes" ; then
   done
   AC_DEFINE_UNQUOTED(_CW_TONYX_RPATH, "$trpath")
   AC_DEFINE_UNQUOTED(_CW_TONYX_MPATH, "$tmpath")
-fi
-
-if test "x$build_modgtk" = "xyes" ; then
-  AC_PATH_PROGS(GTKCONFIG, gtk-config gtk12-config, , $PATH)
-fi
-
-if test "x$build_modslate" = "xyes" ; then
-  AC_CHECK_HEADERS(ncurses.h, , AC_MSG_ERROR(Cannot build without ncurses.h))
 fi
 
 dnl 
