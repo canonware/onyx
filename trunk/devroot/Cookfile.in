@@ -245,7 +245,10 @@ clean :
   rm -f [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl.perf [PTESTS]];
   rm -f [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]];
 
-  /* Delete .cook.fp files from the source tree and object tree. */
+  /*
+   * Delete .cook.fp files from the source tree and object tree.
+   * Delete Howto.list files from the object tree. 
+   */
   [SHELL] -e;
 data
 #![SHELL]
@@ -258,13 +261,16 @@ for i in `find [objdir] -type f -name .cook.fp` ; do
 	echo rm $i;
 	rm $i;
 done
+for i in `find [objdir] -type f -name Howto.list` ; do
+	echo rm $i;
+	rm $i;
+done
 dataend
 }
 
 distclean : clean
 {
   rm -f [objdir]/Howto.cook;
-  rm -f [objdir]/Howto.list;
   rm -f [objdir]/config.cache;
   rm -f [objdir]/config.log;
   rm -f [objdir]/config.status;
