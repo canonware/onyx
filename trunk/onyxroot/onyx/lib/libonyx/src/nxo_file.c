@@ -21,7 +21,7 @@
 #include "../include/libonyx/nxo_l.h"
 #include "../include/libonyx/nxo_file_l.h"
 
-static cw_nxo_threade_t nxo_p_file_buffer_flush(cw_nxo_t *a_nxo);
+static cw_nxo_threade_t nxo_p_file_buffer_flush(cw_nxoe_file_t *a_file);
 
 #define		nxoe_p_file_lock(a_nxoe) do {			\
 	if ((a_nxoe)->nxoe.locking)					\
@@ -72,32 +72,9 @@ nxoe_l_file_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(file->nxoe.type == NXOT_FILE);
 
-	if (file->buffer != NULL) {
-		if (file->buffer_mode == BUFFER_WRITE) {
-			switch (file->fd) {
-			case -2: {
-				cw_nxo_t	tnxo;
-
-				nxo_p_new(&tnxo, NXOT_FILE);
-				tnxo.o.nxoe = (cw_nxoe_t *)file;
-
-				file->write_f(file->arg, &tnxo, file->buffer,
-				    file->buffer_offset);
-				break;
-			}
-			case -1:
-				break;
-			default:
-				while (write(file->fd, file->buffer,
-				    file->buffer_offset) == -1) {
-					if (errno != EINTR)
-						break;
-				}
-				break;
-			}
-		}
+	nxo_p_file_buffer_flush(file);
+	if (file->buffer != NULL)
 		_cw_free(file->buffer);
-	}
 	if (file->nxoe.locking)
 		mtx_delete(&file->lock);
 	/*
@@ -326,7 +303,7 @@ nxo_file_close(cw_nxo_t *a_nxo)
 	}
 
 	/* Flush and get rid of the buffer if necessary. */
-	retval = nxo_p_file_buffer_flush(a_nxo);
+	retval = nxo_p_file_buffer_flush(file);
 	if (retval)
 		goto RETURN;
 	if (file->buffer != NULL) {
@@ -593,7 +570,7 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking, cw_nxo_t
 
 		/* Flush the internal buffer if it has write data. */
 		if (file->buffer_mode == BUFFER_WRITE) {
-			retval = nxo_p_file_buffer_flush(a_nxo);
+			retval = nxo_p_file_buffer_flush(file);
 			if (retval)
 				goto RETURN;
 		}
@@ -863,7 +840,7 @@ nxo_file_write(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len)
 			 * a_str won't fit.  Flush the buffer and call the
 			 * write wrapper function.
 			 */
-			retval = nxo_p_file_buffer_flush(a_nxo);
+			retval = nxo_p_file_buffer_flush(file);
 			if (retval)
 				goto RETURN;
 
@@ -952,7 +929,7 @@ nxo_file_output(cw_nxo_t *a_nxo, const char *a_format, ...)
 			va_end(ap);
 
 			/* Flush the internal buffer. */
-			retval = nxo_p_file_buffer_flush(a_nxo);
+			retval = nxo_p_file_buffer_flush(file);
 			if (retval)
 				goto RETURN;
 
@@ -1075,7 +1052,7 @@ nxo_file_output_n(cw_nxo_t *a_nxo, cw_uint32_t a_size, const char *a_format,
 			/* It won't fit. */
 
 			/* Flush the internal buffer, if necessary. */
-			retval = nxo_p_file_buffer_flush(a_nxo);
+			retval = nxo_p_file_buffer_flush(file);
 			if (retval)
 				goto RETURN;
 
@@ -1152,7 +1129,7 @@ nxo_file_truncate(cw_nxo_t *a_nxo, off_t a_length)
 		goto RETURN;
 	}
 
-	nxo_p_file_buffer_flush(a_nxo);
+	nxo_p_file_buffer_flush(file);
 
 	if (ftruncate(file->fd, a_length)) {
 		retval = NXO_THREADE_IOERROR;
@@ -1195,7 +1172,7 @@ nxo_file_position_get(cw_nxo_t *a_nxo)
 		 * Flush the file in case there are buffered data that have yet
 		 * to be written.
 		 */
-		retval = nxo_p_file_buffer_flush(a_nxo);
+		retval = nxo_p_file_buffer_flush(file);
 		if (retval)
 			goto RETURN;
 		retval = lseek(file->fd, 0, SEEK_CUR);
@@ -1229,7 +1206,7 @@ nxo_file_position_set(cw_nxo_t *a_nxo, cw_nxoi_t a_position)
 		goto RETURN;
 	}
 
-	retval = nxo_p_file_buffer_flush(a_nxo);
+	retval = nxo_p_file_buffer_flush(file);
 	if (retval)
 		goto RETURN;
 
@@ -1345,41 +1322,44 @@ nxo_file_buffer_flush(cw_nxo_t *a_nxo)
 	_cw_assert(file->nxoe.type == NXOT_FILE);
 
 	nxoe_p_file_lock(file);
-	retval = nxo_p_file_buffer_flush(a_nxo);
+	retval = nxo_p_file_buffer_flush(file);
 	nxoe_p_file_unlock(file);
 
 	return retval;
 }
 
 static cw_nxo_threade_t
-nxo_p_file_buffer_flush(cw_nxo_t *a_nxo)
+nxo_p_file_buffer_flush(cw_nxoe_file_t *a_file)
 {
 	cw_nxo_threade_t	retval;
-	cw_nxoe_file_t		*file;
 
-	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
-
-	if (file->fd == -1) {
+	if (a_file->fd == -1) {
 		retval = NXO_THREADE_IOERROR;
 		goto RETURN;
 	}
 	
-	if (file->buffer != NULL) {
+	if (a_file->buffer != NULL) {
 		/* Only write if the buffered data is for writing. */
-		if (file->buffer_mode == BUFFER_WRITE) {
-			if (file->fd >= 0) {
+		if (a_file->buffer_mode == BUFFER_WRITE) {
+			if (a_file->fd >= 0) {
 				/* Normal file descriptor. */
-				while (write(file->fd, file->buffer,
-				    file->buffer_offset) == -1) {
+				while (write(a_file->fd, a_file->buffer,
+				    a_file->buffer_offset) == -1) {
 					if (errno != EINTR) {
 						retval = NXO_THREADE_IOERROR;
 						goto RETURN;
 					}
 				}
 			} else {
+				cw_nxo_t	tnxo;
+
+				/* Fake up a file object. */
+				nxo_p_new(&tnxo, NXOT_FILE);
+				tnxo.o.nxoe = (cw_nxoe_t *)a_file;
+
 				/* Use the write wrapper function. */
-				if (file->write_f(file->arg, a_nxo,
-				    file->buffer, file->buffer_offset)) {
+				if (a_file->write_f(a_file->arg, &tnxo,
+				    a_file->buffer, a_file->buffer_offset)) {
 					retval = NXO_THREADE_IOERROR;
 					goto RETURN;
 				}
@@ -1389,8 +1369,8 @@ nxo_p_file_buffer_flush(cw_nxo_t *a_nxo)
 		 * Reset the buffer to being empty, regardless of the type of
 		 * buffered data.
 		 */
-		file->buffer_mode = BUFFER_EMPTY;
-		file->buffer_offset = 0;
+		a_file->buffer_mode = BUFFER_EMPTY;
+		a_file->buffer_offset = 0;
 	}
 
 	retval = NXO_THREADE_NONE;
