@@ -36,12 +36,9 @@ main()
   /* Create a whole bunch of data. */
   {
     cw_uint32_t i, j;
-    cw_bufel_t bufel;
     cw_bufc_t * bufc;
     void * data;
 
-    bufel_new(&bufel, NULL, NULL);
-    
     for (i = 1; i < 32; i++)
     {
       for (j = 1; j < 32; j++)
@@ -51,9 +48,9 @@ main()
 			cw_g_mem);
 	data = _cw_malloc(i * j);
 	bufc_set_buffer(bufc, data, i * j, FALSE, mem_dealloc, cw_g_mem);
-	bufel_set_bufc(&bufel, bufc);
 
-	buf_append_bufel(buf_a, &bufel);
+	buf_append_bufc(buf_a, bufc, 0, i * j);
+	bufc_delete(bufc);
       }
     }
 
@@ -64,8 +61,8 @@ main()
 		      cw_g_mem);
       data = _cw_malloc(4096);
       bufc_set_buffer(bufc, data, 4096, FALSE, mem_dealloc, cw_g_mem);
-      bufel_set_bufc(&bufel, bufc);
-      buf_append_bufel(buf_b, &bufel);
+      buf_append_bufc(buf_b, bufc, 0, 4096);
+      bufc_delete(bufc);
     }
 
     for (i = 0; i < 16384; i++)
@@ -75,11 +72,9 @@ main()
 		      cw_g_mem);
       data = _cw_malloc(16);
       bufc_set_buffer(bufc, data, 16, FALSE, mem_dealloc, cw_g_mem);
-      bufel_set_bufc(&bufel, bufc);
-      buf_append_bufel(buf_c, &bufel);
+      buf_append_bufc(buf_c, bufc, 0, 16);
+      bufc_delete(bufc);
     }
-
-    bufel_delete(&bufel);
   }
 
   log_printf(cw_g_log, "%lu bytes of data in buf_a (various sized bufc's)\n",

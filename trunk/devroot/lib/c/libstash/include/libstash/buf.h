@@ -10,10 +10,10 @@
  *
  * <<< Description >>>
  *
- * The buf, bufel, and bufc classes implement a buffer abstraction.  These
- * classes are designed specifically to handle streaming and transparent
- * extensible buffering of data for applications such as socket programs.  The
- * main features include:
+ * The buf and bufc classes implement a buffer abstraction.  These classes are
+ * designed specifically to handle streaming and transparent extensible
+ * buffering of data for applications such as socket programs.  The main
+ * features include:
  *
  * - Dynamically extensible and contractible buffering.
  * - Internal reference counting, which avoids copying between buf's, and allows
@@ -26,10 +26,13 @@
 
 /* Pseudo-opaque typedefs. */
 typedef struct cw_buf_s cw_buf_t;
+typedef struct cw_bufc_s cw_bufc_t;
+
+/* Opaque typedef. */
 typedef struct cw_bufel_s cw_bufel_t;
 
 /* The following data types should be considered opaque. */
-typedef struct
+struct cw_bufc_s
 {
 #if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
   cw_uint32_t magic;
@@ -45,21 +48,6 @@ typedef struct
   cw_bool_t is_writeable;
   cw_uint32_t buf_size;
   cw_uint8_t * buf;
-} cw_bufc_t;
-
-struct cw_bufel_s
-{
-#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
-  cw_uint32_t magic;
-#endif
-
-  void (*dealloc_func)(void *, void *);
-  void * dealloc_arg;
-
-  cw_uint32_t beg_offset;
-  cw_uint32_t end_offset;
-  cw_bufc_t * bufc;
-  cw_uint8_t * bufc_buf;
 };
 
 struct cw_buf_s
@@ -284,6 +272,61 @@ buf_split(cw_buf_t * a_a, cw_buf_t * a_b, cw_uint32_t a_offset);
 cw_bool_t
 buf_prepend_bufel(cw_buf_t * a_buf, cw_bufel_t * a_bufel);
 
+
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_buf : Pointer to a buf.
+ *
+ * a_bufc : Pointer to a bufc.
+ *
+ * a_beg_offset : Offset of first valid byte in a_bufc's memory buffer.
+ *
+ * a_end_offset : Offset of first byte past the valid range of bytes in a_bufc's
+ *                memory buffer.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : FALSE == success, TRUE == error.
+ *          TRUE : Memory allocation error.  a_buf is still valid.
+ *
+ * <<< Description >>>
+ *
+ * Prepend a_bufc, bytes a_beg_offset .. (a_end_offset - 1) to a_buf.
+ *
+ ****************************************************************************/
+cw_bool_t
+buf_prepend_bufc(cw_buf_t * a_buf, cw_bufc_t * a_bufc,
+		 cw_uint32_t a_beg_offset, cw_uint32_t a_end_offset);
+
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_buf : Pointer to a buf.
+ *
+ * a_bufc : Pointer to a bufc.
+ *
+ * a_beg_offset : Offset of first valid byte in a_bufc's memory buffer.
+ *
+ * a_end_offset : Offset of first byte past the valid range of bytes in a_bufc's
+ *                memory buffer.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : FALSE == success, TRUE == error.
+ *          TRUE : Memory allocation error.  a_buf is still valid.
+ *
+ * <<< Description >>>
+ *
+ * Append a_bufc, bytes a_beg_offset .. (a_end_offset - 1) to a_buf.
+ *
+ ****************************************************************************/
+cw_bool_t
+buf_append_bufc(cw_buf_t * a_buf, cw_bufc_t * a_bufc,
+		cw_uint32_t a_beg_offset, cw_uint32_t a_end_offset);
+
 /****************************************************************************
  *
  * <<< Input(s) >>>
@@ -506,21 +549,15 @@ buf_set_range(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint32_t a_length,
  *
  * <<< Input(s) >>>
  *
- * a_bufel : Pointer to space for a bufel, or NULL.
- *
- * a_dealloc_func : Pointer to a deallocation function for a_bufel, or NULL.
- *                  Ignored if a_bufel == NULL.
- *
- * a_dealloc_arg : First argument to a_dealloc_func.
+ * a_bufel : Pointer to space for a bufel.
  *
  * <<< Output(s) >>>
  *
- * retval : Pointer to a bufel, or NULL.
- *          NULL : Memory allocation error.
+ * retval : a_bufel.
  *
  * <<< Description >>>
  *
- * bufel constructor.
+ * Constructor.
  *
  ****************************************************************************/
 cw_bufel_t *
@@ -540,7 +577,7 @@ bufel_new(cw_bufel_t * a_bufel,
  *
  * <<< Description >>>
  *
- * bufel destructor.
+ * Destructor.
  *
  ****************************************************************************/
 void
@@ -563,24 +600,6 @@ bufel_delete(cw_bufel_t * a_bufel);
  ****************************************************************************/
 void
 bufel_dump(cw_bufel_t * a_bufel, const char * a_prefix);
-
-/****************************************************************************
- *
- * <<< Input(s) >>>
- *
- * a_bufel : Pointer to a bufel.
- *
- * <<< Output(s) >>>
- *
- * retval : Size of a_bufel's buffer, in bytes.
- *
- * <<< Description >>>
- *
- * Return the total size of a_bufel's buffer.
- * 
- ****************************************************************************/
-cw_uint32_t
-bufel_get_size(cw_bufel_t * a_bufel);
 
 /****************************************************************************
  *

@@ -25,6 +25,16 @@
 #  define _CW_BUFC_MAGIC 0xb00f0003
 #endif
 
+struct cw_bufel_s
+{
+#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
+  cw_uint32_t magic;
+#endif
+  cw_uint32_t beg_offset;
+  cw_uint32_t end_offset;
+  cw_bufc_t * bufc;
+};
+
 static void
 buf_p_rebuild_cumulative_index(cw_buf_t * a_buf);
 
@@ -56,21 +66,12 @@ buf_p_copy_array(cw_buf_t * a_a, cw_buf_t * a_b,
 static cw_bool_t
 buf_p_make_range_writeable(cw_buf_t * a_buf, cw_uint32_t a_offset,
 			   cw_uint32_t a_length);
-  
-static cw_bool_t
-bufel_p_merge_bufel(cw_bufel_t * a_a, cw_bufel_t * a_b);
-
-static cw_bool_t
-bufel_p_make_writeable(cw_bufel_t * a_bufel);
 
 static void
 bufc_p_dump(cw_bufc_t * a_bufc, const char * a_prefix);
 
 static cw_uint32_t
 bufc_p_get_size(cw_bufc_t * a_bufc);
-
-static cw_uint8_t *
-bufc_p_get_p(cw_bufc_t * a_bufc);
 
 static cw_bool_t
 bufc_p_get_is_writeable(cw_bufc_t * a_bufc);
@@ -80,6 +81,3 @@ bufc_p_get_ref_count(cw_bufc_t * a_bufc);
 
 static void
 bufc_p_ref_increment(cw_bufc_t * a_bufc);
-
-static void
-bufc_p_ref_decrement(cw_bufc_t * a_bufc);

@@ -109,7 +109,6 @@ int
 main(int argc, char ** argv)
 {
   cw_buf_t * buf_a, buf_b;
-  cw_bufel_t * bufel;
   cw_bufc_t * bufc;
   cw_uint32_t i, j, n;
   char * buffer;
@@ -130,7 +129,6 @@ main(int argc, char ** argv)
   for (i = n = 0; i < _LIBSTASH_TEST_NUM_BUFELS; i++)
   {
     /* Create a bufel, fill it with data, and append it to buf_a. */
-    bufel = bufel_new(NULL, NULL, NULL);
     bufc = bufc_new(NULL, NULL, NULL);
     buffer = _cw_malloc(_LIBSTASH_TEST_SIZEOF_BUFFER);
     for (j = 0; j < _LIBSTASH_TEST_SIZEOF_BUFFER; j++, n++)
@@ -143,9 +141,8 @@ main(int argc, char ** argv)
 		    FALSE,
 		    mem_dealloc,
 		    cw_g_mem);
-    bufel_set_bufc(bufel, bufc);
-    buf_append_bufel(buf_a, bufel);
-    bufel_delete(bufel);
+    buf_append_bufc(buf_a, bufc, 0, _LIBSTASH_TEST_SIZEOF_BUFFER);
+    bufc_delete(bufc);
   }
 
   buf_new(&buf_b, TRUE);
