@@ -1,3 +1,8 @@
+2000-06-11  Jason Evans  <jasone@canonware.com>
+
+	* src/dbg.c: Fix regressions due to switching from the oh class to
+	the ch class, and add a regression test.
+
 2000-06-08  Jason Evans  <jasone@canonware.com>
 
 	* src/mem.c: Continue to retry memory allocation (loop) while the

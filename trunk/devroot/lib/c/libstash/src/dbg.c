@@ -26,7 +26,7 @@ dbg_new(void)
 	cw_dbg_t	*retval;
 
 	retval = (cw_dbg_t *)_cw_malloc(sizeof(cw_dbg_t));
-	if (NULL == retval)
+	if (retval == NULL)
 		goto RETURN;
 
 	mtx_new(&retval->lock);
@@ -47,7 +47,12 @@ dbg_new(void)
 void
 dbg_delete(cw_dbg_t *a_dbg)
 {
+	cw_chi_t	*chi;
+
 	_cw_check_ptr(a_dbg);
+
+	while (ch_remove_iterate(a_dbg->flag_hash, NULL, NULL, &chi) == FALSE)
+		_cw_free(chi);
 
 	ch_delete(a_dbg->flag_hash);
 	mtx_delete(&a_dbg->lock);
@@ -58,34 +63,37 @@ cw_bool_t
 dbg_register(cw_dbg_t *a_dbg, const char *a_flag)
 {
 	cw_bool_t	retval;
+	cw_chi_t	*chi;
 
 	if (a_dbg != NULL) {
 		mtx_lock(&a_dbg->lock);
-		if ((ch_search(a_dbg->flag_hash, a_flag, NULL)) ||
-		    (ch_insert(a_dbg->flag_hash, a_flag, NULL, NULL))) {
-			/*
-			 * a_flag is already registered, or memory allocation
-			 * error.
-			 */
-			mtx_unlock(&a_dbg->lock);
-			retval = TRUE;
-			goto RETURN;
+		if (ch_search(a_dbg->flag_hash, a_flag, NULL)) {
+			/* Flag not registered. */
+			chi = (cw_chi_t *)_cw_malloc(sizeof(cw_chi_t));
+			if (chi == NULL)
+				retval = TRUE;
+			else {
+				ch_insert(a_dbg->flag_hash, a_flag, NULL, chi);
+				retval = FALSE;
+			}
 		}
-	} else {
+		mtx_unlock(&a_dbg->lock);
+	} else
 		retval = TRUE;
-		goto RETURN;
-	}
 
-	retval = FALSE;
-	RETURN:
 	return retval;
 }
 
 void
 dbg_unregister(cw_dbg_t *a_dbg, const char *a_flag)
 {
-	if (a_dbg != NULL)
-		ch_remove(a_dbg->flag_hash, a_flag, NULL, NULL, NULL);
+	cw_chi_t	*chi;
+
+	if (a_dbg != NULL) {
+		if (ch_remove(a_dbg->flag_hash, a_flag, NULL, NULL, &chi) ==
+		    FALSE)
+			_cw_free(chi);
+	}
 }
 
 cw_bool_t

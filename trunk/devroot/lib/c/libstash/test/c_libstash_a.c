@@ -7,8 +7,6 @@
  *
  * Version: <Version>
  *
- * <<< Description >>>
- *
  * Verify that libstash works, even if libstash_init() is not called.
  *
  ****************************************************************************/
