@@ -38,7 +38,7 @@ nxo_file_synthetic(cw_nxo_t *a_nxo, cw_nxo_file_read_t *a_read,
 #ifdef CW_POSIX_FILE
 cw_nxn_t
 nxo_file_open(cw_nxo_t *a_nxo, const cw_uint8_t *a_filename, cw_uint32_t a_nlen,
-	      const cw_uint8_t *a_flags, cw_uint32_t a_flen);
+	      const cw_uint8_t *a_flags, cw_uint32_t a_flen, mode_t a_mode);
 #endif
 
 cw_nxn_t

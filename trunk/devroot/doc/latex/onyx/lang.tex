@@ -3509,6 +3509,9 @@ elements pushed by \htmlref{\onyxop{}{begin}{}}{systemdict:begin}. \\
 \hline \hline
 filename flags & {\bf \htmlref{open}{systemdict:open}} & file & Open a file. \\
 \hline
+filename flags mode & {\bf \htmlref{open}{systemdict:open}} & file & Open a
+file, creation mode specified. \\
+\hline
 file & {\bf \htmlref{close}{systemdict:close}} & -- & Close file. \\
 \hline
 %begin{latexonly}
@@ -7378,6 +7381,7 @@ onyx:0>
 \label{systemdict:open}
 \index{open@\onyxop{}{open}{}}
 \item[{\onyxop{filename flags}{open}{file}}: ]
+\item[{\onyxop{filename flags mode}{open}{file}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -7401,6 +7405,10 @@ onyx:0>
 			\item[`a+': ]
 				Read/write, starting at end of file.
 			\end{description}
+		\item[mode: ]
+			Mode to use when creating a new file (defaults to 0777).
+			Note that the process's umask also affects creation
+			mode.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
@@ -7412,6 +7420,7 @@ onyx:0>
 		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
 		\item[\htmlref{ioerror}{ioerror}.]
 		\item[\htmlref{limitcheck}{limitcheck}.]
+		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
