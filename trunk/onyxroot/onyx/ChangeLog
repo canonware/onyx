@@ -7,7 +7,8 @@
 	  Additionally, this could only happen when the dictionary was
 	  initialized with the knowledge that it would immediately grow
 	  beyond the maximum size that can be represented as an array
-	  (this is the case in several code paths through libonyx).
+	  (this is the case in several code paths through libonyx).  This
+	  was a regression that existed since the 5.0.0 release.
 
 2004-01-03 : Jason Evans <jasone@canonware.com>
 
