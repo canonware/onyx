@@ -1,4 +1,10 @@
-*.d
+*.[do]
+*.out
+*.diff
+c_*_a
+c_*_b
+c_*_c
+p*.pl
 *.core
 core
 b_echos

@@ -6,4 +6,3 @@ Makefile.bsd
 Makefile.gnu
 *.core
 core
-stamp

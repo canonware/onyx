@@ -269,28 +269,6 @@ stat_opt_r : $(LIB_ST_R_O)
 shar_opt_r : $(LIB_SH_R_O)
 stat_prof_r : $(LIB_ST_R_P)
 
-#
-# autoconf-related rules.
-#
-configure : configure.in
-	autoconf
-
-config.status : configure
-	./config.status --recheck
-
-makefile : Makefile
-Makefile : Makefile.bsd
-Makefile.bsd : Makefile.bsd.in config.status
-	./config.status
-
-stamp.in : configure.in
-	echo timestamp > stamp.in
-
-stamp : include/libstash/libstash_defs.h.in config.status
-	./config.status
-
-include/libstash/libstash_defs.h : stamp
-
 FORCE :
 
 #
@@ -403,8 +381,7 @@ clean : FORCE
 distclean : clean
 	rm -f "#"*"#" bin/"#"*"#"
 	rm -f src/"#"*"#" include/"#"*"#"
-	rm -f Makefile Makefile.bsd 
-	rm -f Makefile.gnu stamp
+	rm -f Makefile Makefile.bsd Makefile.gnu
 	rm -f config.cache config.log 
 	rm -f config.status
 	rm -f include/libstash/libstash_defs.h

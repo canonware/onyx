@@ -207,28 +207,6 @@ stat_opt : $(LIB_ST_O)
 shar_opt : $(LIB_SH_O)
 stat_prof : $(LIB_ST_P)
 
-#
-# autoconf-related rules.
-#
-configure : configure.in
-	autoconf
-
-config.status : configure
-	./config.status --recheck
-
-makefile : Makefile
-Makefile : Makefile.bsd
-Makefile.bsd : Makefile.bsd.in config.status
-	./config.status
-
-stamp.in : configure.in
-	echo timestamp > stamp.in
-
-stamp : include/libsock/libsock_defs.h.in config.status
-	./config.status
-
-include/libsock/libsock_defs.h : stamp
-
 FORCE :
 
 #
@@ -317,7 +295,7 @@ clean : FORCE
 
 distclean : clean
 	rm -f "#"*"#" bin/"#"*"#" src/"#"*"#" include/"#"*"#"
-	rm -f Makefile Makefile.bsd Makefile.gnu stamp
+	rm -f Makefile Makefile.bsd Makefile.gnu
 	rm -f config.cache config.log config.status
 	rm -f include/libsock/libsock_defs.h
 	rm -f TAGS
