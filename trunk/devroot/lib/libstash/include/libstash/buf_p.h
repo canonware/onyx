@@ -10,18 +10,12 @@
  *
  * <<< Description >>>
  *
- *
+ * Private buf, bufel, and bufc interfaces.
  *
  ****************************************************************************/
 
 /* Minimum size for buf's internal bufel array. */
-#ifdef _LIBSTASH_DBG
-/* Make it small to increase the likelihood of hitting bugs in the debug
- * library. */
-#  define _LIBSTASH_BUF_ARRAY_MIN_SIZE 2
-#else
-#  define _LIBSTASH_BUF_ARRAY_MIN_SIZE 64
-#endif
+#define _LIBSTASH_BUF_ARRAY_MIN_SIZE 1
 
 static void
 buf_p_rebuild_cumulative_index(cw_buf_t * a_buf);

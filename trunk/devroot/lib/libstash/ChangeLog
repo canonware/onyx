@@ -1,3 +1,10 @@
+1999-03-22  Jason Evans  <jasone@canonware.com>
+
+	* include/libstash/buf_p.h: Set _LIBSTASH_BUF_ARRAY_MIN_SIZE to 1
+	in all cases.  Since the array grows exponentially and never
+	shrinks, setting the array to a larger size potentially wastes
+	space, and saves little effort.
+
 1999-03-17  Jason Evans  <jasone@canonware.com>
 
 	* include/libstash/libstash.h: Fix wretched hack to make TRUE and
