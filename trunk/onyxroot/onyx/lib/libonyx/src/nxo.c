@@ -207,11 +207,11 @@ nxo_compare(const cw_nxo_t *a_a, const cw_nxo_t *a_b)
 #ifdef CW_THREADS
 	    if (lock_a)
 	    {
-		nxo_string_lock(a_a);
+		nxo_string_lock((cw_nxo_t *) a_a);
 	    }
 	    if (lock_b)
 	    {
-		nxo_string_lock(a_b);
+		nxo_string_lock((cw_nxo_t *) a_b);
 	    }
 #endif
 	    if (len_a == len_b)
@@ -237,11 +237,11 @@ nxo_compare(const cw_nxo_t *a_a, const cw_nxo_t *a_b)
 #ifdef CW_THREADS
 	    if (lock_b)
 	    {
-		nxo_string_unlock(a_b);
+		nxo_string_unlock((cw_nxo_t *) a_b);
 	    }
 	    if (lock_a)
 	    {
-		nxo_string_unlock(a_a);
+		nxo_string_unlock((cw_nxo_t *) a_a);
 	    }
 #endif
 	    break;
