@@ -13,7 +13,7 @@ typedef struct cw_matrix_s cw_matrix_t;
 
 struct cw_matrix_s {
 	cw_bool_t	is_malloced;
-	cw_sint32_t	*grid;
+	cw_sint8_t	*grid;
 	cw_uint32_t	*x_index;
 	cw_uint32_t	*y_index;
 	cw_uint32_t	grid_x_size;
@@ -121,7 +121,7 @@ cw_bool_t	matrix_rebuild(cw_matrix_t *a_matrix);
  *
  ****************************************************************************/
 #ifdef _COVER_DBG
-cw_sint32_t	matrix_get_element(cw_matrix_t *a_matrix, cw_uint32_t a_x_pos,
+cw_sint8_t	matrix_get_element(cw_matrix_t *a_matrix, cw_uint32_t a_x_pos,
     cw_uint32_t a_y_pos);
 #else
 #define	matrix_get_element(a, b, c)					\
@@ -151,7 +151,7 @@ cw_sint32_t	matrix_get_element(cw_matrix_t *a_matrix, cw_uint32_t a_x_pos,
  ****************************************************************************/
 #ifdef _COVER_DBG
 void		matrix_set_element(cw_matrix_t *a_matrix, cw_uint32_t a_x_pos,
-    cw_uint32_t a_y_pos, cw_sint32_t a_val);
+    cw_uint32_t a_y_pos, cw_sint8_t a_val);
 #else
 #define	matrix_set_element(a, b, c, d)					\
 	(a)->grid[(a)->y_index[(c)] * (a)->grid_x_size +		\
@@ -238,7 +238,7 @@ matrix_copy(cw_matrix_t *a_matrix);
  *
  ****************************************************************************/
 void
-matrix_dump(cw_matrix_t *a_matrix, cw_bool_t a_compact);
+matrix_dump(cw_matrix_t *a_matrix, const char *a_prefix, cw_bool_t a_compact);
 
 /****************************************************************************
  *

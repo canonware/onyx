@@ -29,9 +29,17 @@ cw_matrix_t	*build_full_matrix(cw_uint32_t a_nnodes, cw_matrix_t ***
 cw_bool_t	is_min_span_tree(cw_matrix_t *, cw_uint32_t);
 cw_uint32_t	reduce(cw_matrix_t *a_m, cw_matrix_t ** r_x_index, cw_matrix_t
     ** r_y_index);
+cw_bool_t	reduce_rows(cw_matrix_t *a_m, cw_matrix_t *a_x_index,
+    cw_matrix_t *a_y_index);
+cw_bool_t	reduce_columns(cw_matrix_t *a_m, cw_matrix_t *a_x_index,
+    cw_matrix_t *a_y_index);
+cw_uint32_t	reduce_essentials(cw_matrix_t *a_m, cw_matrix_t *a_x_index,
+    cw_matrix_t *a_y_index);
+
 void		remove_essential(cw_matrix_t *a_m, cw_matrix_t *a_x_index,
     cw_matrix_t *a_y_index, cw_uint32_t a_essential);
-void		genetic_cover(cw_matrix_t *matrix);
+void		genetic_cover(cw_matrix_t *matrix, cw_matrix_t *x_index,
+    cw_matrix_t *y_index);
 cw_uint32_t	genetic_score(cw_matrix_t *matrix, cw_matrix_t *a_y_index,
     pack_t *a_pack, gene_t *genes, cw_uint32_t a_gene_size);
 void		genetic_reproduce(cw_matrix_t *matrix, cw_matrix_t *a_y_index,
@@ -47,13 +55,17 @@ cw_uint32_t	opt_ngens = _GENERATIONS;
 cw_uint32_t	opt_seed = _SEED;
 cw_uint32_t	opt_mutate = _MUTATE_PROBABILITY_INV;
 cw_uint32_t	opt_psize = _POP_SIZE;
+cw_uint32_t	opt_key = FALSE;
+cw_uint32_t	opt_matrix = FALSE;
 
 int
 main(int argc, char **argv)
 {
 	int		retval;
 	cw_matrix_t	*matrix = NULL;
+	cw_matrix_t	*x_index, *y_index;
 	cw_matrix_t	**graphs = NULL;
+	cw_uint32_t	num_essentials;
 
 	int		c;
 	cw_bool_t	cl_error = FALSE;
@@ -62,10 +74,16 @@ main(int argc, char **argv)
 	libstash_init();
 
 	/* Parse command line. */
-	while (-1 != (c = getopt(argc, argv, "hn:g:s:m:p:"))) {
+	while (-1 != (c = getopt(argc, argv, "hktn:g:s:m:p:"))) {
 		switch (c) {
 		case 'h':
 			opt_help = TRUE;
+			break;
+		case 'k':
+			opt_key = TRUE;
+			break;
+		case 't':
+			opt_matrix = TRUE;
 			break;
 		case 'n':
 			opt_nnodes = strtoul(optarg, NULL, 10);
@@ -87,7 +105,7 @@ main(int argc, char **argv)
 			break;
 		}
 	}
-  
+
 	if ((cl_error) || (optind < argc)) {
 		_cw_out_put("Unrecognized option(s)\n");
 		usage(basename(argv[0]));
@@ -100,32 +118,67 @@ main(int argc, char **argv)
 		retval = 0;
 		goto RETURN;
 	}
-  
+
 	if (opt_nnodes > 6)
 		_cw_out_put("Too many nodes (maximum 6)\n");
-    
+
 	_cw_out_put("opt_nnodes == [i]\n", opt_nnodes);
 
 	matrix = build_full_matrix(opt_nnodes, &graphs);
-/*  	matrix_dump(matrix, TRUE); */
 
-	genetic_cover(matrix);
+	if (opt_key && graphs != NULL) {
+		cw_uint32_t	i;
+
+		for (i = 0; graphs[i] != NULL; i++) {
+			_cw_out_put("Row [i]:\n", i);
+			matrix_dump(graphs[i], "\t", FALSE);
+		}
+	}
+
+	if (opt_matrix) {
+		_cw_out_put("Matrix before reduction:\n");
+		matrix_dump(matrix, "before: ", TRUE);
+	}
+
+	num_essentials = reduce(matrix, &x_index, &y_index);
+	_cw_out_put("[i] essentials\n", num_essentials);
+	matrix_rebuild(matrix);
+	_cw_out_put("Matrix size == [i] x [i]\n",
+	    matrix_get_x_size(matrix), matrix_get_y_size(matrix));
+
+	if (opt_key && graphs != NULL) {
+		cw_uint32_t	i;
+
+		for (i = 0; graphs[i] != NULL; i++) {
+			_cw_out_put("Row [i]:\n", i);
+			matrix_dump(graphs[matrix_get_element(y_index, 0, i)],
+			    "\t", FALSE);
+		}
+	}
+
+	if (opt_matrix) {
+		_cw_out_put("Matrix after reduction:\n");
+		matrix_dump(matrix, "after: ", TRUE);
+	}
+
+	genetic_cover(matrix, x_index, y_index);
+
+	matrix_delete(x_index);
+	matrix_delete(y_index);
 
 	retval = 0;
-  
+
 	RETURN:
 	if (matrix != NULL) {
 		if (NULL != graphs) {
 			cw_uint32_t	i;
 
-			for (i = 0; i < 1296; i++) {
-				if (NULL != graphs[i])
-					matrix_delete(graphs[i]);
-			}
+			for (i = 0; graphs[i] != NULL; i++)
+				matrix_delete(graphs[i]);
 
 			_cw_free(graphs);
 		}
-    
+
 		matrix_delete(matrix);
 	}
 	libstash_shutdown();
@@ -187,7 +240,7 @@ gene_pack_col_score(pack_t *a_pack, gene_t *a_gene)
 		if (splat)
 			retval++;
 	}
-  
+
 	return retval;
 #elif (0)
 	cw_uint32_t	retval, i, j, splat;
@@ -203,7 +256,7 @@ gene_pack_col_score(pack_t *a_pack, gene_t *a_gene)
 		}
 		retval += splat;
 	}
-  
+
 	return retval;
 #else
 	cw_uint32_t	retval, i, j;
@@ -219,7 +272,7 @@ gene_pack_col_score(pack_t *a_pack, gene_t *a_gene)
 			}
 		}
 	}
-  
+
 	return retval;
 #endif
 }
@@ -235,14 +288,14 @@ build_full_matrix(cw_uint32_t a_nnodes, cw_matrix_t *** r_graphs)
 	graphs = (cw_matrix_t **) _cw_calloc(1296, sizeof(cw_matrix_t *));
 	bzero(graphs, 1296 * sizeof(cw_matrix_t *));
 	*r_graphs = graphs;
-  
+
 	num_edges = a_nnodes * ((a_nnodes - 1) / 2)
 	    + (((a_nnodes + 1) / 2) * ((a_nnodes + 1) % 2));
 	_cw_out_put("num_edges == [i]\n", num_edges);
 	num_graphs = 1 << (a_nnodes * ((a_nnodes - 1) / 2)
 	    + (((a_nnodes + 1) / 2) * ((a_nnodes + 1) % 2)));
 	_cw_out_put("num_graphs == [i]\n", num_graphs);
-  
+
 	/* Create adjacency matrix, given number of nodes. */
 	graph = matrix_new(NULL);
 	matrix_init(graph, a_nnodes, a_nnodes, TRUE);
@@ -264,7 +317,7 @@ build_full_matrix(cw_uint32_t a_nnodes, cw_matrix_t *** r_graphs)
 
 	{
 		cw_uint32_t	x, y, curr_map_el = 0;
-    
+
 		for (y = 0; y < a_nnodes; y++) {
 			for (x = 0; x < a_nnodes; x++) {
 				if (x > y) {
@@ -279,22 +332,26 @@ build_full_matrix(cw_uint32_t a_nnodes, cw_matrix_t *** r_graphs)
 		}
 	}
 
-	/* Now, cycle through all the possible graphs, to find out how many
-	 * minimal spanning trees there are. */
+	/*
+	 * Now, cycle through all the possible graphs, to find out how many
+	 * minimal spanning trees there are.
+	 */
 	{
 		cw_uint32_t	i;
-    
+
 		num_min_graphs = 0;
 		for (i = 0; i < num_graphs; i++) {
 			cw_uint32_t	curr_bit;
-    
+
 			matrix_init(graph, a_nnodes, a_nnodes, TRUE);
-    
+
 			for (curr_bit = 0; curr_bit < 28; curr_bit++) {
 				if (i & (1 << curr_bit)) {
-					matrix_set_element(graph, map[curr_bit].x_pos,
+					matrix_set_element(graph,
+					    map[curr_bit].x_pos,
 					    map[curr_bit].y_pos, TRUE);
-					matrix_set_element(graph, map[curr_bit].y_pos,
+					matrix_set_element(graph,
+					    map[curr_bit].y_pos,
 					    map[curr_bit].x_pos, TRUE);
 				}
 			}
@@ -304,7 +361,7 @@ build_full_matrix(cw_uint32_t a_nnodes, cw_matrix_t *** r_graphs)
 			}
 		}
 	}
-  
+
 	_cw_out_put("Matrix size == [i] x [i]\n", num_graphs,
 	    num_min_graphs);
 
@@ -312,17 +369,23 @@ build_full_matrix(cw_uint32_t a_nnodes, cw_matrix_t *** r_graphs)
 	cover = matrix_new(NULL);
 	matrix_init(cover, num_graphs, num_min_graphs, TRUE);
 
-	/* Now fill in the matrix.  The minimum spanning trees are in graphs[].*/
+	/*
+	 * Now fill in the matrix.  The minimum spanning trees are in
+	 * graphs[].
+	 */
 	{
 		cw_uint32_t	y, i, j, k, curr_blanks, super_graph, sub_graph;
-		cw_uint32_t	digits[15], blanks[10]; /* Hard-coded for (n <= 6). */
+		cw_uint32_t	digits[15], blanks[10]; /*
+							 * Hard-coded for (n <=
+							 * 6).
+							 */
 
 		/* Do this for every mimimum spanning tree. */
 		for (y = 0; y < num_min_graphs; y++) {
 			/* Copy graph into digits. */
 			for (j = 0, curr_blanks = 0; j < num_edges; j++) {
-				digits[j] = matrix_get_element(graphs[y], map[j].x_pos,
-				    map[j].y_pos);
+				digits[j] = matrix_get_element(graphs[y],
+				    map[j].x_pos, map[j].y_pos);
 				/* Record which digits are blank. */
 				if (digits[j] == 0) {
 					blanks[curr_blanks] = j;
@@ -330,25 +393,37 @@ build_full_matrix(cw_uint32_t a_nnodes, cw_matrix_t *** r_graphs)
 				}
 			}
 
-			/* Iterate through all of the possible subset/superset graphs. */
+			/*
+			 * Iterate through all of the possible subset/superset
+			 * graphs.
+			 */
 			for (j = 0; j < (1 << curr_blanks); j++) {
-				/* Initialize sub_graph and super_graph, so that all we have left
-				 * to do is | in the additional counter bits. */
+				/*
+				 * Initialize sub_graph and super_graph, so that
+				 * all we have left to do is | in the additional
+				 * counter bits.
+				 */
 				sub_graph = 0;
 				super_graph = 0;
 				for (k = 0; k < num_edges; k++)
 					super_graph |= (digits[k] << k);
 	
-				/* j contains our bit counter.  Extract the bits from j and
-				 * interleave them into super_graph and sub_graph. */
+				/*
+				 * j contains our bit counter.  Extract the bits
+				 * from j and interleave them into super_graph
+				 * and sub_graph.
+				 */
 				for (i = 0; i < curr_blanks; i++) {
 					if (j & (1 << i)) {
 						super_graph |= 1 << blanks[i];
 						sub_graph |= 1 << blanks[i];
 					}
 				}
-				/* Okay, we now have the column numbers in cover that need turned
-				 * on. */
+
+				/*
+				 * Okay, we now have the column numbers in cover
+				 * that need turned on.
+				 */
 				matrix_set_element(cover, super_graph, y, 1);
 				matrix_set_element(cover, sub_graph, y, 1);
 			}
@@ -367,7 +442,7 @@ is_min_span_tree(cw_matrix_t *a_matrix, cw_uint32_t a_nnodes)
 {
 	cw_bool_t	retval = TRUE;
 	cw_uint32_t	*class;
-  
+
 	_cw_check_ptr(a_matrix);
 
 	class = (cw_uint32_t *) _cw_malloc(sizeof(cw_uint32_t) * a_nnodes);
@@ -403,15 +478,18 @@ is_min_span_tree(cw_matrix_t *a_matrix, cw_uint32_t a_nnodes)
 		cw_sint32_t	least, curr_path_ele;
 
 		/* Create current weights array and zero it out. */
-		weights = (cw_uint32_t *)_cw_malloc(sizeof(cw_uint32_t) * a_nnodes);
-		curr_path = (cw_uint32_t *)_cw_malloc(sizeof(cw_uint32_t) * a_nnodes);
-		have_visited = (cw_bool_t *)_cw_malloc(sizeof(cw_bool_t) * a_nnodes);
+		weights = (cw_uint32_t *)_cw_malloc(sizeof(cw_uint32_t) *
+		    a_nnodes);
+		curr_path = (cw_uint32_t *)_cw_malloc(sizeof(cw_uint32_t) *
+		    a_nnodes);
+		have_visited = (cw_bool_t *)_cw_malloc(sizeof(cw_bool_t) *
+		    a_nnodes);
 		for (i = 0; i < a_nnodes; i++) {
 			weights[i] = 0x7fffffff;
 			curr_path[i] = 0;
 			have_visited[i] = FALSE;
 		}
-    
+
 /*  		bzero(weights, (sizeof(cw_uint32_t) * a_nnodes)); */
 
 		/* Main loop. */
@@ -423,17 +501,24 @@ is_min_span_tree(cw_matrix_t *a_matrix, cw_uint32_t a_nnodes)
 			have_visited[i] = TRUE;
 			curr_path_ele++;
 			curr_path[curr_path_ele] = i;
-      
+
 			/* Relax all nodes. */
 			for (j = 0; j < a_nnodes; j++) {
 				if (matrix_get_element(a_matrix, i, j) != 0) {
-					if (curr_leg + matrix_get_element(a_matrix, i, j) < weights[j])
-						weights[j] = curr_leg + matrix_get_element(a_matrix, i, j);
+					if (curr_leg +
+					    matrix_get_element(a_matrix, i, j) <
+					    weights[j]) {
+						weights[j] = curr_leg +
+						    matrix_get_element(a_matrix,
+						    i, j);
+					}
 				}
 				if ((have_visited[j] == FALSE)
 				    && (matrix_get_element(a_matrix, i, j) != 0)
-				    && (matrix_get_element(a_matrix, i, j) < least)) {
-					least = matrix_get_element(a_matrix, i, j);
+				    && (matrix_get_element(a_matrix, i, j) <
+				    least)) {
+					least = matrix_get_element(a_matrix, i,
+					    j);
 					new_i = j;
 				}
 			}
@@ -441,18 +526,19 @@ is_min_span_tree(cw_matrix_t *a_matrix, cw_uint32_t a_nnodes)
 				cw_uint32_t	k;
 	
 				/*
-				 * We can't go anywhere else from the current node.  Start backing
-				 * up on the current path to try to find an alternate path.
+				 * We can't go anywhere else from the current
+				 * node.  Start backing up on the current path
+				 * to try to find an alternate path.
 				 */
 				for (curr_path_ele--;
 				     (curr_path_ele >= 0) && (new_i == 0);
 				     curr_path_ele--) {
 					for (k = 0; k < a_nnodes; k++) {
 						if ((have_visited[k] == FALSE)
-						    && (matrix_get_element(a_matrix,
+						    &&
+						    (matrix_get_element(a_matrix,
 						    k, curr_path[curr_path_ele])
-						    != 0)
-						    ) {
+						    != 0)) {
 							curr_path_ele++;
 							new_i = k;
 							break;
@@ -480,31 +566,28 @@ is_min_span_tree(cw_matrix_t *a_matrix, cw_uint32_t a_nnodes)
 cw_uint32_t
 reduce(cw_matrix_t *a_m, cw_matrix_t **r_x_index, cw_matrix_t **r_y_index)
 {
-	cw_uint32_t	num_essentials = 0;
 	cw_bool_t	did_reduce;
 	cw_matrix_t	*x_index, *y_index;
+	cw_uint32_t	nessentials = 0;
+	cw_uint32_t	i;
 
 	/*
 	 * Create indices that can be used to figure out the origins of rows and
 	 * colums.  Every time a row or column is removed from the big matrix,
 	 * so should that row or column be removed from the indices.
 	 */
-	{
-		cw_uint32_t	i;
-    
-		x_index = matrix_new(NULL);
-		matrix_init(x_index, matrix_get_x_size(a_m), 1, FALSE);
-		for (i = 0; i < matrix_get_x_size(x_index); i++)
-			matrix_set_element(x_index, i, 0, i);
-		*r_x_index = x_index;
+	x_index = matrix_new(NULL);
+	matrix_init(x_index, matrix_get_x_size(a_m), 1, FALSE);
+	for (i = 0; i < matrix_get_x_size(x_index); i++)
+		matrix_set_element(x_index, i, 0, i);
+	*r_x_index = x_index;
 
-		y_index = matrix_new(NULL);
-		matrix_init(y_index, 1, matrix_get_y_size(a_m), FALSE);
-		for (i = 0; i < matrix_get_y_size(y_index); i++)
-			matrix_set_element(y_index, 0, i, i);
-		*r_y_index = y_index;
-	}
-  
+	y_index = matrix_new(NULL);
+	matrix_init(y_index, 1, matrix_get_y_size(a_m), FALSE);
+	for (i = 0; i < matrix_get_y_size(y_index); i++)
+		matrix_set_element(y_index, 0, i, i);
+	*r_y_index = y_index;
+
 	/*
 	 * Loop and do three reduction steps until we make a full pass through
 	 * all three steps without any change.
@@ -515,145 +598,187 @@ reduce(cw_matrix_t *a_m, cw_matrix_t **r_x_index, cw_matrix_t **r_y_index)
 	while ((did_reduce)
 	    && (matrix_get_x_size(a_m) > 1)
 	    && (matrix_get_y_size(a_m) > 1)) {
-		did_reduce = FALSE;
-      
 		/* Check for row covering. */
-		_cw_out_put("row [i]...", matrix_get_y_size(a_m));
-		{
-			cw_uint32_t	x, y1, y2, y1_el, y2_el;
-			cw_bool_t	y1_is_subset, y2_is_subset;
-
-			for (y1 = 0;
-			     (y1 < matrix_get_y_size(a_m) - 1) && (did_reduce == FALSE);
-			     y1++) {
-				for (y2 = y1 + 1;
-				     (y2 < matrix_get_y_size(a_m)) && (did_reduce == FALSE);
-				     y2++) {
-					y1_is_subset = TRUE;
-					y2_is_subset = TRUE;
-					for (x = 0; x < matrix_get_x_size(a_m); x++) {
-						y1_el = matrix_get_element(a_m, x, y1);
-						y2_el = matrix_get_element(a_m, x, y2);
-						if (y1_el < y2_el) {
-							y2_is_subset = FALSE;
-							if (y1_is_subset == FALSE) {
-								/* No good, might as well quit comparing now. */
-								break;
-							}
-						} else if (y1_el > y2_el) {
-							y1_is_subset = FALSE;
-							if (y2_is_subset == FALSE) {
-								/* No good, might as well quit comparing now. */
-								break;
-							}
-						}
-					}
-					/*
-					 * If either y1_is_subset or y2_is_subset is TRUE, we can
-					 * remove a row.
-					 */
-					if (y1_is_subset) {
-						/* Remove y1. */
-						did_reduce = TRUE;
-
-						matrix_remove_row(a_m, y1);
-						matrix_remove_row(y_index, y1);
-					} else if (y2_is_subset) {
-						/* Remove y2. */
-						did_reduce = TRUE;
-
-						matrix_remove_row(a_m, y2);
-						matrix_remove_row(y_index, y2);
-					}
-				}
-			}
-		}
-		_cw_out_put("[i]\n", matrix_get_y_size(a_m));
+		_cw_out_put("rows        [i|w:5] x [i|w:4] --> ",
+		    matrix_get_x_size(a_m), matrix_get_y_size(a_m));
+		did_reduce = reduce_rows(a_m, x_index, y_index);
+		_cw_out_put("[i|w:5] x [i|w:4]\n", matrix_get_x_size(a_m),
+		    matrix_get_y_size(a_m));
 
 		/* Check for column matching. */
 		if (did_reduce == FALSE) {
-			cw_uint32_t	x1, x2, y, x1_el, x2_el;
-			cw_bool_t	x_is_equal;
-			cw_matrix_t	*t_matrix;
-
-			/* Make a copy of a_m in column-major order to improve cache locality. */
-			{
-				cw_uint32_t	i, j;
-	
-				t_matrix = matrix_new(NULL);
-				matrix_init(t_matrix, matrix_get_y_size(a_m),
-				    matrix_get_x_size(a_m), TRUE);
-
-				for (j = 0; j < matrix_get_y_size(a_m); j++) {
-					for (i = 0; i < matrix_get_x_size(a_m); i++) {
-						matrix_set_element(t_matrix, j, i,
-						    matrix_get_element(a_m, i, j));
-					}
-				}
-			}
-      
-			_cw_out_put("col [i]...", matrix_get_y_size(t_matrix));
-			for (x1 = 0; x1 < matrix_get_y_size(t_matrix) - 1; x1++) {
-				for (x2 = x1 + 1; x2 < matrix_get_y_size(t_matrix); x2++) {
-					x_is_equal = TRUE;
-
-					for (y = 0; y < matrix_get_x_size(t_matrix); y++) {
-						x1_el = matrix_get_element(t_matrix, y, x1);
-						x2_el = matrix_get_element(t_matrix, y, x2);
-						if (x1_el != x2_el) {
-							x_is_equal = FALSE;
-							/* No good, might as well quit comparing now. */
-							break;
-						}
-					}
-					if (x_is_equal) {
-						/* Remove x2. */
-						did_reduce = TRUE;
-
-						matrix_remove_row(t_matrix, x2);
-						matrix_remove_column(a_m, x2);
-						matrix_remove_column(x_index, x2);
-					}
-				}
-			}
-			_cw_out_put("[i]\n", matrix_get_x_size(a_m));
-
-			matrix_delete(t_matrix);
+			_cw_out_put("columns     [i|w:5] x [i|w:4] --> ",
+			    matrix_get_x_size(a_m), matrix_get_y_size(a_m));
+			did_reduce = reduce_columns(a_m, x_index, y_index);
+			_cw_out_put("[i|w:5] x [i|w:4]\n",
+			    matrix_get_x_size(a_m), matrix_get_y_size(a_m));
 		}
 
 		/* Check for essentials. */
 		if (did_reduce == FALSE) {
-			cw_uint32_t	x, y;
-			cw_uint32_t	num_on, essential;
-	
-			_cw_out_put("essentials...", matrix_get_y_size(a_m));
-			for (x = essential = 0; x < matrix_get_x_size(a_m); x++) {
-				for (y = 0, num_on = 0; y < matrix_get_y_size(a_m); y++) {
-					if (matrix_get_element(a_m, x, y)) {
-						num_on++;
-						if (num_on > 1)
-							break;
-						essential = y;
-					}
-				}
-				if (num_on == 0) {
-					_cw_out_put("Empty column [i] (iteration [i])\n", x, x);
-					exit(1);
-				}
+			cw_uint32_t	xbefore, ybefore, essentials;
 
-				if (num_on == 1) {
-					did_reduce = TRUE;
-
-					_cw_out_put(" [i]", matrix_get_element(y_index, 0, essential));
-					remove_essential(a_m, x_index, y_index, essential);
-					num_essentials++;
-				}
+			xbefore = matrix_get_x_size(a_m);
+			ybefore = matrix_get_y_size(a_m);
+			_cw_out_put("essentials:");
+			essentials = reduce_essentials(a_m, x_index, y_index);
+			if (essentials > 0) {
+				did_reduce = TRUE;
+				nessentials += essentials;
 			}
-			_cw_out_put("\n");
+			_cw_out_put("\nessentials  [i|w:5] x [i|w:4] -->"
+			    " [i|w:5] x [i|w:4]\n",
+			    xbefore, ybefore, matrix_get_x_size(a_m),
+			    matrix_get_y_size(a_m));
 		}
 	}
-  
-	return num_essentials;
+
+	return nessentials;
+}
+
+cw_bool_t
+reduce_rows(cw_matrix_t *a_m, cw_matrix_t *a_x_index, cw_matrix_t *a_y_index)
+{
+	cw_bool_t	did_reduce = FALSE;
+	cw_uint32_t	x, y1, y2, y1_el, y2_el;
+	cw_bool_t	y1_is_subset, y2_is_subset;
+
+	for (y1 = 0;
+	     (y1 < matrix_get_y_size(a_m) - 1) && (did_reduce == FALSE);
+	     y1++) {
+		for (y2 = y1 + 1;
+		     (y2 < matrix_get_y_size(a_m)) && (did_reduce == FALSE);
+		     y2++) {
+			y1_is_subset = TRUE;
+			y2_is_subset = TRUE;
+			for (x = 0; x < matrix_get_x_size(a_m); x++) {
+				y1_el = matrix_get_element(a_m, x, y1);
+				y2_el = matrix_get_element(a_m, x, y2);
+				if (y1_el < y2_el) {
+					y2_is_subset = FALSE;
+					if (y1_is_subset == FALSE) {
+						/*
+						 * No good, might as well quit
+						 * comparing now.
+						 */
+						break;
+					}
+				} else if (y1_el > y2_el) {
+					y1_is_subset = FALSE;
+					if (y2_is_subset == FALSE) {
+						/*
+						 * No good, might as well quit
+						 * comparing now.
+						 */
+						break;
+					}
+				}
+			}
+				/*
+				 * If either y1_is_subset or y2_is_subset is
+				 * TRUE, we can remove a row.
+				 */
+			if (y1_is_subset) {
+				/* Remove y1. */
+				did_reduce = TRUE;
+
+				matrix_remove_row(a_m, y1);
+				matrix_remove_row(a_y_index, y1);
+			} else if (y2_is_subset) {
+				/* Remove y2. */
+				did_reduce = TRUE;
+
+				matrix_remove_row(a_m, y2);
+				matrix_remove_row(a_y_index, y2);
+			}
+		}
+	}
+
+	return did_reduce;
+}
+
+cw_bool_t
+reduce_columns(cw_matrix_t *a_m, cw_matrix_t *a_x_index, cw_matrix_t *a_y_index)
+{
+	cw_bool_t	did_reduce = FALSE;
+	cw_uint32_t	x1, x2, y, x1_el, x2_el;
+	cw_uint32_t	i, j;
+	cw_bool_t	x_is_equal;
+	cw_matrix_t	*t_matrix;
+
+	/*
+	 * Make a copy of a_m in column-major order to improve cache
+	 * locality.
+	 */
+	t_matrix = matrix_new(NULL);
+	matrix_init(t_matrix, matrix_get_y_size(a_m),matrix_get_x_size(a_m),
+	    TRUE);
+
+	for (j = 0; j < matrix_get_y_size(a_m); j++) {
+		for (i = 0; i < matrix_get_x_size(a_m); i++) {
+			matrix_set_element(t_matrix, j, i,
+			    matrix_get_element(a_m, i, j));
+		}
+	}
+
+	for (x1 = 0; x1 < matrix_get_y_size(t_matrix) - 1; x1++) {
+		for (x2 = x1 + 1; x2 < matrix_get_y_size(t_matrix); x2++) {
+			x_is_equal = TRUE;
+
+			for (y = 0; y < matrix_get_x_size(t_matrix); y++) {
+				x1_el = matrix_get_element(t_matrix, y, x1);
+				x2_el = matrix_get_element(t_matrix, y, x2);
+				if (x1_el != x2_el) {
+					x_is_equal = FALSE;
+					/*
+					 * No good, might as well quit comparing
+					 * now.
+					 */
+					break;
+				}
+			}
+			if (x_is_equal) {
+				/* Remove x2. */
+				did_reduce = TRUE;
+
+				matrix_remove_row(t_matrix, x2);
+				matrix_remove_column(a_m, x2);
+				matrix_remove_column(a_x_index, x2);
+			}
+		}
+	}
+
+	matrix_delete(t_matrix);
+	return did_reduce;
+}
+
+cw_uint32_t
+reduce_essentials(cw_matrix_t *a_m, cw_matrix_t *a_x_index, cw_matrix_t
+    *a_y_index)
+{
+	cw_uint32_t	nessentials = 0;
+	cw_uint32_t	x, y;
+	cw_uint32_t	num_on, essential;
+	
+	for (x = essential = 0; x < matrix_get_x_size(a_m); x++) {
+		for (y = 0, num_on = 0; y < matrix_get_y_size(a_m); y++) {
+			if (matrix_get_element(a_m, x, y)) {
+				num_on++;
+				if (num_on > 1)
+					break;
+				essential = y;
+			}
+		}
+		_cw_assert(num_on > 0);
+
+		if (num_on == 1) {
+			_cw_out_put(" [i]", matrix_get_element(a_y_index, 0,
+			    essential));
+			remove_essential(a_m, a_x_index, a_y_index, essential);
+			nessentials++;
+		}
+	}
+	return nessentials;
 }
 
 void
@@ -669,7 +794,7 @@ remove_essential(cw_matrix_t *a_m, cw_matrix_t *a_x_index,
 			i--; /* Don't skip over next column. */
 		}
 	}
-  
+
 	matrix_remove_row(a_m, a_essential);
 	matrix_remove_row(a_y_index, a_essential);
 }
@@ -678,22 +803,12 @@ remove_essential(cw_matrix_t *a_m, cw_matrix_t *a_x_index,
  * Use a genetic algorithm to create generations of partial solutions.
  */
 void
-genetic_cover(cw_matrix_t *matrix)
+genetic_cover(cw_matrix_t *matrix, cw_matrix_t *x_index, cw_matrix_t *y_index)
 {
-	cw_uint32_t	num_essentials, i, j;
+	cw_uint32_t	i, j;
 	gene_t		*genes1, *genes2, *genes, *tga, *tgb;
 	cw_uint32_t	gene_size, score_sum;
-	cw_matrix_t	temp_matrix;
 	pack_t		pack;
-	cw_matrix_t	*x_index, *y_index;
-    
-	num_essentials = reduce(matrix, &x_index, &y_index);
-	_cw_out_put("[i] essentials\n", num_essentials);
-	matrix_rebuild(matrix);
-	_cw_out_put("Matrix size == [i] x [i]\n",
-	    matrix_get_x_size(matrix), matrix_get_y_size(matrix));
-
-	matrix_new(&temp_matrix);
 
 	genes1 = (gene_t *) _cw_malloc(opt_psize * sizeof(gene_t));
 	genes2 = (gene_t *) _cw_malloc(opt_psize * sizeof(gene_t));
@@ -701,7 +816,7 @@ genetic_cover(cw_matrix_t *matrix)
 		gene_new(&genes1[i], matrix_get_y_size(matrix));
 		gene_new(&genes2[i], matrix_get_y_size(matrix));
 	}
-    
+
 	/* Randomly fill all the bits in the genes. */
 	genes = genes1;
 	tga = genes2;
@@ -735,17 +850,17 @@ genetic_cover(cw_matrix_t *matrix)
 	gene_size = matrix_get_y_size(matrix);
 	/* Generation loop. */
 	for (i = 0; i < opt_ngens; i++) {
-      
+
 		_cw_out_put("Generation [i]\n", i);
-      
+
 /*  		_cw_out_put("Scoring...\n", i); */
 		score_sum = genetic_score(matrix, y_index, &pack, genes,
 		    gene_size);
-      
+
 /*  		_cw_out_put("Reproducing...\n", i); */
 		genetic_reproduce(matrix, y_index, &pack, genes, tga,
 		    gene_size, score_sum);
-      
+
 		/* Switch to the new gene pool. */
 		tgb = genes;
 		genes = tga;
@@ -759,9 +874,6 @@ genetic_cover(cw_matrix_t *matrix)
 	_cw_free(genes1);
 	_cw_free(genes2);
 	pack_delete(&pack);
-	matrix_delete(&temp_matrix);
-	matrix_delete(x_index);
-	matrix_delete(y_index);
 }
 
 /*
@@ -948,13 +1060,15 @@ usage(const char *a_progname)
 	_cw_out_put(
 	    "[s] usage:\n"
 	    "    [s] -h\n"
-	    "    [s] [[-n <nnodes>] [[-g <ngens>] [[-s <seed>] "
+	    "    [s] [[-k] [[-t] [[-n <nnodes>] [[-g <ngens>] [[-s <seed>] "
 	    "[[-c <crossover>] [[-m <mutate>] [[-p <psize>]\n"
 	    "\n"
 	    "    Option               | Description\n"
 	    "    ---------------------+--------------------------------------"
 	    "---------------\n"
 	    "    -h                   | Print usage and exit.\n"
+	    "    -k                   | Print row --> graph key.\n"
+	    "    -t                   | Print matrices.\n"
 	    "    -n <nnodes>          | Use a graph with <nnodes> nodes.\n"
 	    "                         | (Default is [i].)\n"
 	    "    -g <ngens>           | Process <ngens> generations.\n"

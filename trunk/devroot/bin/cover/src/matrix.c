@@ -7,7 +7,7 @@
  *
  * Version: <Version>
  *
- * Implementation of matrices.  Each cell is a signed 32 bit integer.
+ * Implementation of matrices.  Each cell is a signed 8 bit integer.
  *
  ****************************************************************************/
 
@@ -65,12 +65,12 @@ matrix_init(cw_matrix_t *a_matrix, cw_uint32_t a_x_size, cw_uint32_t a_y_size,
 
 	if (a_matrix->grid == NULL) {
 		/* Fresh start, create a matrix. */
-		t_ptr = _cw_malloc(sizeof(cw_sint32_t) * a_x_size * a_y_size);
+		t_ptr = _cw_malloc(sizeof(cw_sint8_t) * a_x_size * a_y_size);
 		if (t_ptr == NULL) {
 			retval = TRUE;
 			goto RETURN;
 		} else
-			a_matrix->grid = (cw_sint32_t *)t_ptr;
+			a_matrix->grid = (cw_sint8_t *)t_ptr;
 
 		t_ptr = _cw_malloc(sizeof(cw_uint32_t) * a_x_size);
 		if (t_ptr == NULL) {
@@ -103,7 +103,7 @@ matrix_init(cw_matrix_t *a_matrix, cw_uint32_t a_x_size, cw_uint32_t a_y_size,
 			retval = TRUE;
 			goto RETURN;
 		} else
-			a_matrix->grid = (cw_sint32_t *)t_ptr;
+			a_matrix->grid = (cw_sint8_t *)t_ptr;
 
 		t_ptr = _cw_realloc(a_matrix->x_index, sizeof(cw_uint32_t) *
 		    a_x_size);
@@ -131,7 +131,7 @@ matrix_init(cw_matrix_t *a_matrix, cw_uint32_t a_x_size, cw_uint32_t a_y_size,
 
 	/* bzero() the matrix and initialize the indices. */
 	if (a_should_zero) {
-		bzero(a_matrix->grid, sizeof(cw_sint32_t) * a_x_size *
+		bzero(a_matrix->grid, sizeof(cw_sint8_t) * a_x_size *
 		    a_y_size);
 	}
   
@@ -155,18 +155,19 @@ matrix_rebuild(cw_matrix_t *a_matrix)
 
 	if ((a_matrix->x_size != a_matrix->grid_x_size)
 	    || (a_matrix->y_size != a_matrix->grid_y_size)) {
-		cw_sint32_t	*old_grid, i, j;
+		cw_sint8_t	*old_grid;
+		cw_sint32_t	i, j;
 
 		/* Create new grid and indices. */
 		old_grid = a_matrix->grid;
-		t_ptr = _cw_malloc(sizeof(cw_sint32_t)
+		t_ptr = _cw_malloc(sizeof(cw_sint8_t)
 		    * a_matrix->x_size
 		    * a_matrix->y_size);
 		if (t_ptr == NULL) {
 			retval = TRUE;
 			goto RETURN;
 		} else
-			a_matrix->grid = (cw_sint32_t *)t_ptr;
+			a_matrix->grid = (cw_sint8_t *)t_ptr;
 
 		/* Copy valid parts of old grid to new grid. */
 		for (j = 0; j < a_matrix->y_size; j++) {
@@ -216,11 +217,11 @@ matrix_rebuild(cw_matrix_t *a_matrix)
 }
 
 #ifdef _COVER_DBG
-cw_sint32_t
+cw_sint8_t
 matrix_get_element(cw_matrix_t *a_matrix, cw_uint32_t a_x_pos, cw_uint32_t
     a_y_pos)
 {
-	cw_sint32_t	retval;
+	cw_sint8_t	retval;
   
 	_cw_check_ptr(a_matrix);
 	_cw_assert(a_x_pos < a_matrix->x_size);
@@ -235,7 +236,7 @@ matrix_get_element(cw_matrix_t *a_matrix, cw_uint32_t a_x_pos, cw_uint32_t
 
 void
 matrix_set_element(cw_matrix_t *a_matrix, cw_uint32_t a_x_pos, cw_uint32_t
-    a_y_pos, cw_sint32_t a_val)
+    a_y_pos, cw_sint8_t a_val)
 {
 	_cw_check_ptr(a_matrix);
 	_cw_assert(a_x_pos < a_matrix->x_size);
@@ -295,7 +296,7 @@ matrix_copy(cw_matrix_t *a_matrix)
 }
 
 void
-matrix_dump(cw_matrix_t *a_matrix, cw_bool_t a_compact)
+matrix_dump(cw_matrix_t *a_matrix, const char *a_prefix, cw_bool_t a_compact)
 {
 	_cw_check_ptr(a_matrix);
 
@@ -304,12 +305,13 @@ matrix_dump(cw_matrix_t *a_matrix, cw_bool_t a_compact)
     
 		if (a_compact) {
 			for (j = 0; j < a_matrix->y_size; j++) {
+				_cw_out_put("[s]", a_prefix);
 				for (i = 0; i < a_matrix->x_size; i++) {
-					out_put(cw_g_out, "[s]",
+					_cw_out_put("[s]",
 					    matrix_get_element(a_matrix, i, j) ?
 					    "X" : ".");
 				}
-				out_put(cw_g_out, "\n");
+				_cw_out_put("\n");
 			}
 		} else {
 			cw_uint32_t	k, x_digits, y_digits, t_len, x, y;
@@ -317,7 +319,7 @@ matrix_dump(cw_matrix_t *a_matrix, cw_bool_t a_compact)
 			char		t_str[20];
 
 			/* Figure out the maximum length of the labels. */
-			y_digits = out_put_s(cw_g_out, t_str, "[i]",
+			y_digits = _cw_out_put_s(t_str, "[i]",
 			    a_matrix->y_size -1);
 	
 			/* Figure out the maximum length of any field. */
@@ -332,60 +334,63 @@ matrix_dump(cw_matrix_t *a_matrix, cw_bool_t a_compact)
 				}
 			}
 			if (greatest > (a_matrix->x_size - 1)) {
-				x_digits = out_put_s(cw_g_out, t_str, "[i]",
+				x_digits = _cw_out_put_s(t_str, "[i]",
 				    greatest);
 			} else {
-				x_digits = out_put_s(cw_g_out, t_str, "[i]",
+				x_digits = _cw_out_put_s(t_str, "[i]",
 				    a_matrix->x_size - 1);
 			}
 
 			/* Top labels. */
+			_cw_out_put("[s]", a_prefix);
 			for (k = 0; k < y_digits; k++)
-				out_put(cw_g_out, " ");
-			out_put(cw_g_out, "|");
+				_cw_out_put(" ");
+			_cw_out_put("|");
 			for (i = 0; i < a_matrix->x_size; i++) {
-				out_put_s(cw_g_out, t_str, "[i]", i);
+				_cw_out_put_s(t_str, "[i]", i);
 				t_len = strlen(t_str);
 				for (k = 0; k < ((x_digits + 1) - t_len); k++)
-					out_put(cw_g_out, " ");
-				out_put(cw_g_out, "[i]", i);
+					_cw_out_put(" ");
+				_cw_out_put("[i]", i);
 			}
-			out_put(cw_g_out, "\n");
+			_cw_out_put("\n");
 
 			/* Top horizontal line. */
+			_cw_out_put("[s]", a_prefix);
 			for (k = 0; k < y_digits; k++)
-				out_put(cw_g_out, "-");
-			out_put(cw_g_out, "+");
+				_cw_out_put("-");
+			_cw_out_put("+");
 			for (i = 0; i < (a_matrix->x_size * (x_digits + 1));
 			     i++)
-				out_put(cw_g_out, "-");
-			out_put(cw_g_out, "\n");
+				_cw_out_put("-");
+			_cw_out_put("\n");
 
 			for (j = 0; j < a_matrix->y_size; j++) {
+				_cw_out_put("[s]", a_prefix);
 				/* Side label. */
-				out_put_s(cw_g_out, t_str, "[i]", j);
+				_cw_out_put_s(t_str, "[i]", j);
 				t_len = strlen(t_str);
 				for (k = 0; k < ((y_digits) - t_len); k++)
-					out_put(cw_g_out, " ");
-				out_put(cw_g_out, "[i]|", j);
+					_cw_out_put(" ");
+				_cw_out_put("[i]|", j);
 
 				/* Matrix elements. */
 				for (i = 0; i < a_matrix->x_size; i++) {
 					for (k = 0; k < (x_digits + 1 -
-					    out_put_s(cw_g_out, t_str, "[i]",
+					    _cw_out_put_s(t_str, "[i]",
 					    matrix_get_element(a_matrix, i,
 					    j))); k++)
-						out_put(cw_g_out, " ");
-					out_put(cw_g_out, "[i|s:s]",
+						_cw_out_put(" ");
+					_cw_out_put("[i|s:s]",
 					    matrix_get_element(a_matrix, i, j));
 				}
 	
-				out_put(cw_g_out, "\n");
+				_cw_out_put("\n");
 			}
 		}
 	}
 	else
-		out_put(cw_g_out, "Invalid matrix\n");
+		_cw_out_put("Invalid matrix\n");
 }
 
 cw_bool_t
