@@ -13,7 +13,6 @@
 typedef struct cw_rwl_s cw_rwl_t;
 
 struct cw_rwl_s {
-	cw_bool_t	is_malloced;
 	cw_mtx_t	lock;
 	cw_cnd_t	read_wait;
 	cw_cnd_t	write_wait;
@@ -23,7 +22,7 @@ struct cw_rwl_s {
 	cw_uint32_t	write_waiters;
 };
 
-cw_rwl_t *rwl_new(cw_rwl_t *a_rwl);
+void	rwl_new(cw_rwl_t *a_rwl);
 void	rwl_delete(cw_rwl_t *a_rwl);
 void	rwl_rlock(cw_rwl_t *a_rwl);
 void	rwl_runlock(cw_rwl_t *a_rwl);

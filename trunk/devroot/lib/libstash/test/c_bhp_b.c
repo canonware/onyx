@@ -28,12 +28,12 @@ main()
 		cw_bhpi_t	bhpi, *bhpi_p;
 		cw_uint32_t	prio, data;
 
-		_cw_assert(&bhpi == bhpi_new(&bhpi, (const void *)prio, (const
-		    void *)data, NULL, NULL));
+		_cw_assert(&bhpi == bhpi_new(&bhpi, cw_g_mem, (const void
+		    *)prio, (const void *)data, NULL, NULL));
 		bhpi_delete(&bhpi);
 
-		bhpi_p = bhpi_new(NULL, (const void *)prio, (const void *)data,
-		    NULL, NULL);
+		bhpi_p = bhpi_new(NULL, cw_g_mem, (const void *)prio, (const
+		    void *)data, NULL, NULL);
 		_cw_check_ptr(bhpi_p);
 		bhpi_delete(bhpi_p);
 	}
@@ -42,11 +42,11 @@ main()
 	{
 		cw_bhp_t	bhp, *bhp_p;
 
-		_cw_assert(&bhp == bhp_new_r(&bhp,
+		_cw_assert(&bhp == bhp_new_r(&bhp, cw_g_mem,
 		    bhp_priority_compare_uint32));
 		bhp_delete(&bhp);
 
-		bhp_p = bhp_new(NULL, bhp_priority_compare_sint32);
+		bhp_p = bhp_new(NULL, cw_g_mem, bhp_priority_compare_sint32);
 		_cw_check_ptr(bhp_p);
 		bhp_delete(bhp_p);
 	}
@@ -57,14 +57,14 @@ main()
 		cw_bhpi_t	*bhpi_p;
 		cw_uint32_t	items[_LIBSTASH_TEST_HEAP_SIZE], i;
 
-		bhp_p = bhp_new_r(NULL, bhp_priority_compare_uint32);
+		bhp_p = bhp_new_r(NULL, cw_g_mem, bhp_priority_compare_uint32);
 		_cw_check_ptr(bhp_p);
 
 		for (i = 0; i < _LIBSTASH_TEST_HEAP_SIZE; i++) {
 			items[i] = i;
 
-			bhpi_p = bhpi_new(NULL, (const void *)&items[i], (const
-			    void *)items[i], NULL, NULL);
+			bhpi_p = bhpi_new(NULL, cw_g_mem, (const void
+			    *)&items[i], (const void *)items[i], NULL, NULL);
 			_cw_check_ptr(bhpi_p);
 
 			_cw_assert(bhp_get_size(bhp_p) == i);
@@ -89,22 +89,24 @@ main()
 		cw_bhpi_t	*bhpi_p;
 		cw_uint32_t	items[_LIBSTASH_TEST_HEAP_SIZE], i;
 
-		bhp_p_a = bhp_new_r(NULL, bhp_priority_compare_uint32);
+		bhp_p_a = bhp_new_r(NULL, cw_g_mem,
+		    bhp_priority_compare_uint32);
 		_cw_check_ptr(bhp_p_a);
 
-		bhp_p_b = bhp_new_r(NULL, bhp_priority_compare_uint32);
+		bhp_p_b = bhp_new_r(NULL, cw_g_mem,
+		    bhp_priority_compare_uint32);
 		_cw_check_ptr(bhp_p_b);
 
 		for (i = 0; i < _LIBSTASH_TEST_HEAP_SIZE; i++) {
 			items[i] = i;
 
-			bhpi_p = bhpi_new(NULL, (const void *)&items[i], (const
-			    void *)items[i], NULL, NULL);
+			bhpi_p = bhpi_new(NULL, cw_g_mem, (const void
+			    *)&items[i], (const void *)items[i], NULL, NULL);
 			_cw_check_ptr(bhpi_p);
 			bhp_insert(bhp_p_a, bhpi_p);
 
-			bhpi_p = bhpi_new(NULL, (const void *)&items[i], (const
-			    void *)items[i], NULL, NULL);
+			bhpi_p = bhpi_new(NULL, cw_g_mem, (const void
+			    *)&items[i], (const void *)items[i], NULL, NULL);
 			_cw_check_ptr(bhpi_p);
 			bhp_insert(bhp_p_b, bhpi_p);
 		}

@@ -16,8 +16,8 @@
 #endif
 
 cw_treen_t *
-treen_new(cw_treen_t *a_treen, cw_opaque_dealloc_t *a_dealloc_func, void
-    *a_dealloc_arg)
+treen_new(cw_treen_t *a_treen, cw_mem_t *a_mem, cw_opaque_dealloc_t
+    *a_dealloc_func, void *a_dealloc_arg)
 {
 	cw_treen_t	*retval;
 
@@ -27,12 +27,13 @@ treen_new(cw_treen_t *a_treen, cw_opaque_dealloc_t *a_dealloc_func, void
 		retval->dealloc_func = a_dealloc_func;
 		retval->dealloc_arg = a_dealloc_arg;
 	} else {
-		retval = (cw_treen_t *)_cw_malloc(sizeof(cw_treen_t));
+		retval = (cw_treen_t *)_cw_mem_malloc(a_mem,
+		    sizeof(cw_treen_t));
 		if (retval == NULL)
 			goto RETURN;
 		bzero(retval, sizeof(cw_treen_t));
 		retval->dealloc_func = (cw_opaque_dealloc_t *)mem_free;
-		retval->dealloc_arg = cw_g_mem;
+		retval->dealloc_arg = a_mem;
 	}
 
 	ring_new(&retval->siblings);

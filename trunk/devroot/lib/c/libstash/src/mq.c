@@ -26,7 +26,7 @@
 #define _LIBSTASH_MQ_ARRAY_MIN_SIZE 8
 
 cw_mq_t *
-mq_new(cw_mq_t *a_mq, cw_uint32_t a_msg_size)
+mq_new(cw_mq_t *a_mq, cw_mem_t *a_mem, cw_uint32_t a_msg_size)
 {
 	cw_mq_t	*retval;
 
@@ -34,12 +34,13 @@ mq_new(cw_mq_t *a_mq, cw_uint32_t a_msg_size)
 		retval = a_mq;
 		a_mq->is_malloced = FALSE;
 	} else {
-		retval = (cw_mq_t *)_cw_malloc(sizeof(cw_mq_t));
+		retval = (cw_mq_t *)_cw_mem_malloc(a_mem, sizeof(cw_mq_t));
 		if (retval == NULL)
 			goto OOM_1;
 		retval->is_malloced = TRUE;
 	}
 
+	retval->mem = a_mem;
 	retval->msg_count = 0;
 
 	switch (a_msg_size) {
@@ -63,8 +64,8 @@ mq_new(cw_mq_t *a_mq, cw_uint32_t a_msg_size)
 	retval->msgs_beg = 0;
 	retval->msgs_end = 0;
 
-	retval->msgs.x = (cw_uint32_t *)_cw_malloc(retval->msgs_vec_count *
-	    retval->msg_size);
+	retval->msgs.x = (cw_uint32_t *)_cw_mem_malloc(a_mem,
+	    retval->msgs_vec_count * retval->msg_size);
 	if (retval->msgs.x == NULL)
 		goto OOM_2;
 
@@ -82,7 +83,7 @@ mq_new(cw_mq_t *a_mq, cw_uint32_t a_msg_size)
 
 	OOM_2:
 	if (a_mq->is_malloced)
-		_cw_free(retval);
+		_cw_mem_free(a_mem, retval);
 	retval = NULL;
 	OOM_1:
 	return retval;
@@ -97,10 +98,10 @@ mq_delete(cw_mq_t *a_mq)
 	mtx_delete(&a_mq->lock);
 	cnd_delete(&a_mq->cond);
 
-	_cw_free(a_mq->msgs.x);
+	_cw_mem_free(a_mq->mem, a_mq->msgs.x);
 
 	if (a_mq->is_malloced)
-		_cw_free(a_mq);
+		_cw_mem_free(a_mq->mem, a_mq);
 #ifdef _LIBSTASH_DBG
 	else
 		memset(a_mq, 0x5a, sizeof(cw_mq_t));
@@ -326,8 +327,8 @@ mq_put(cw_mq_t *a_mq, ...)
 			 * Array overflow.  Double the array and copy the
 			 * messages.
 			 */
-			t_msgs.x = (void *)_cw_malloc(a_mq->msgs_vec_count * 2 *
-			    a_mq->msg_size);
+			t_msgs.x = (void *)_cw_mem_malloc(a_mq->mem,
+			    a_mq->msgs_vec_count * 2 * a_mq->msg_size);
 			if (t_msgs.x == NULL) {
 				retval = -1;
 				goto RETURN;

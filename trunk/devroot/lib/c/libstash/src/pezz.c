@@ -16,8 +16,8 @@
 #endif
 
 cw_pezz_t *
-pezz_new(cw_pezz_t *a_pezz, cw_uint32_t a_buffer_size, cw_uint32_t
-    a_num_buffers)
+pezz_new(cw_pezz_t *a_pezz, cw_mem_t *a_mem, cw_uint32_t a_buffer_size,
+    cw_uint32_t a_num_buffers)
 {
 	cw_pezz_t	*retval;
 	cw_uint32_t	i;
@@ -26,7 +26,7 @@ pezz_new(cw_pezz_t *a_pezz, cw_uint32_t a_buffer_size, cw_uint32_t
 	_cw_assert(0 != (a_buffer_size * a_num_buffers));
 
 	if (a_pezz == NULL) {
-		retval = (cw_pezz_t *)_cw_malloc(sizeof(cw_pezz_t));
+		retval = (cw_pezz_t *)_cw_mem_malloc(a_mem, sizeof(cw_pezz_t));
 		if (retval == NULL)
 			goto OOM_1;
 		memset(retval, 0, sizeof(cw_pezz_t));
@@ -37,24 +37,26 @@ pezz_new(cw_pezz_t *a_pezz, cw_uint32_t a_buffer_size, cw_uint32_t
 		retval->is_malloced = FALSE;
 	}
 
+	retval->mem = a_mem;
 	mtx_new(&retval->lock);
 
 	retval->buffer_size = a_buffer_size;
 	retval->block_num_buffers = a_num_buffers;
 
 	/* Allocate and initialize first block. */
-	retval->mem_blocks = (void **)_cw_calloc(1, sizeof(void *));
+	retval->mem_blocks = (void **)_cw_mem_calloc(a_mem, 1, sizeof(void *));
 	if (retval->mem_blocks == NULL)
 		goto OOM_2;
-	retval->ring_blocks = (cw_ring_t **)_cw_calloc(1, sizeof(cw_ring_t *));
+	retval->ring_blocks = (cw_ring_t **)_cw_mem_calloc(a_mem, 1,
+	    sizeof(cw_ring_t *));
 	if (retval->ring_blocks == NULL)
 		goto OOM_3;
-	retval->mem_blocks[0] = (void *)_cw_calloc(retval->block_num_buffers,
-	    retval->buffer_size);
+	retval->mem_blocks[0] = (void *)_cw_mem_calloc(a_mem,
+	    retval->block_num_buffers, retval->buffer_size);
 	if (retval->mem_blocks[0] == NULL)
 		goto OOM_4;
 	retval->ring_blocks[0] =
-	    (cw_ring_t *)_cw_calloc(retval->block_num_buffers,
+	    (cw_ring_t *)_cw_mem_calloc(a_mem, retval->block_num_buffers,
 	    sizeof(cw_ring_t));
 	if (retval->ring_blocks[0] == NULL)
 		goto OOM_5;
@@ -75,8 +77,8 @@ pezz_new(cw_pezz_t *a_pezz, cw_uint32_t a_buffer_size, cw_uint32_t
 	retval->num_blocks = 1;
 
 #ifdef _LIBSTASH_DBG
-	if (dch_new(&retval->addr_hash, a_num_buffers * 3, a_num_buffers * 2, 0,
-	    ch_hash_direct, ch_key_comp_direct) == NULL)
+	if (dch_new(&retval->addr_hash, a_mem, a_num_buffers * 3, a_num_buffers
+	    * 2, 0, ch_hash_direct, ch_key_comp_direct) == NULL)
 		goto OOM_6;
 
 	retval->magic = _CW_PEZZ_MAGIC;
@@ -86,18 +88,18 @@ pezz_new(cw_pezz_t *a_pezz, cw_uint32_t a_buffer_size, cw_uint32_t
 
 #ifdef _LIBSTASH_DBG
 	OOM_6:
-	_cw_free(retval->ring_blocks[0]);
+	_cw_mem_free(a_mem, retval->ring_blocks[0]);
 #endif
 	OOM_5:
-	_cw_free(retval->mem_blocks[0]);
+	_cw_mem_free(a_mem, retval->mem_blocks[0]);
 	OOM_4:
-	_cw_free(retval->ring_blocks);
+	_cw_mem_free(a_mem, retval->ring_blocks);
 	OOM_3:
-	_cw_free(retval->mem_blocks);
+	_cw_mem_free(a_mem, retval->mem_blocks);
 	OOM_2:
 	mtx_delete(&retval->lock);
 	if (retval->is_malloced)
-		_cw_free(retval);
+		_cw_mem_free(a_mem, retval);
 	retval = NULL;
 	OOM_1:
 	return retval;
@@ -137,23 +139,23 @@ pezz_delete(cw_pezz_t *a_pezz)
 				    allocation->filename),
 				    allocation->line_num);
 			}
-			_cw_free(allocation);
+			_cw_mem_free(a_pezz->mem, allocation);
 		}
 		dch_delete(&a_pezz->addr_hash);
 	}
 #endif
 
 	for (i = 0; i < a_pezz->num_blocks; i++) {
-		_cw_free(a_pezz->mem_blocks[i]);
-		_cw_free(a_pezz->ring_blocks[i]);
+		_cw_mem_free(a_pezz->mem, a_pezz->mem_blocks[i]);
+		_cw_mem_free(a_pezz->mem, a_pezz->ring_blocks[i]);
 	}
-	_cw_free(a_pezz->mem_blocks);
-	_cw_free(a_pezz->ring_blocks);
+	_cw_mem_free(a_pezz->mem, a_pezz->mem_blocks);
+	_cw_mem_free(a_pezz->mem, a_pezz->ring_blocks);
 
 	mtx_delete(&a_pezz->lock);
 
 	if (a_pezz->is_malloced)
-		_cw_free(a_pezz);
+		_cw_mem_free(a_pezz->mem, a_pezz);
 #ifdef _LIBSTASH_DBG
 	else
 		memset(a_pezz, 0x5a, sizeof(cw_pezz_t));
@@ -185,16 +187,18 @@ pezz_get(cw_pezz_t *a_pezz, const char *a_filename, cw_uint32_t a_line_num)
 		cw_uint32_t	i;
 
 		/* No buffers available.  Add a block. */
-		t_mem_blocks = (void **)_cw_realloc(a_pezz->mem_blocks,
-		    ((a_pezz->num_blocks + 1) * sizeof(void *)));
+		t_mem_blocks = (void **)_cw_mem_realloc(a_pezz->mem,
+		    a_pezz->mem_blocks, ((a_pezz->num_blocks + 1) * sizeof(void
+		    *)));
 		if (t_mem_blocks == NULL) {
 			retval = NULL;
 			goto RETURN;
 		}
 		a_pezz->mem_blocks = t_mem_blocks;
 
-		t_ring_blocks = (cw_ring_t **)_cw_realloc(a_pezz->ring_blocks,
-		    ((a_pezz->num_blocks + 1) * sizeof(cw_ring_t *)));
+		t_ring_blocks = (cw_ring_t **)_cw_mem_realloc(a_pezz->mem,
+		    a_pezz->ring_blocks, ((a_pezz->num_blocks + 1) *
+		    sizeof(cw_ring_t *)));
 		if (t_ring_blocks == NULL) {
 			retval = NULL;
 			goto RETURN;
@@ -202,16 +206,18 @@ pezz_get(cw_pezz_t *a_pezz, const char *a_filename, cw_uint32_t a_line_num)
 		a_pezz->ring_blocks = t_ring_blocks;
 
 		a_pezz->mem_blocks[a_pezz->num_blocks] = (void
-		    *)_cw_calloc(a_pezz->block_num_buffers,
+		    *)_cw_mem_calloc(a_pezz->mem, a_pezz->block_num_buffers,
 		    a_pezz->buffer_size);
 		if (a_pezz->mem_blocks[a_pezz->num_blocks] == NULL) {
 			retval = NULL;
 			goto RETURN;
 		}
 		a_pezz->ring_blocks[a_pezz->num_blocks] = (cw_ring_t
-		    *)_cw_calloc(a_pezz->block_num_buffers, sizeof(cw_ring_t));
+		    *)_cw_mem_calloc(a_pezz->mem, a_pezz->block_num_buffers,
+		    sizeof(cw_ring_t));
 		if (a_pezz->ring_blocks[a_pezz->num_blocks] == NULL) {
-			_cw_free(a_pezz->mem_blocks[a_pezz->num_blocks]);
+			_cw_mem_free(a_pezz->mem,
+			    a_pezz->mem_blocks[a_pezz->num_blocks]);
 			retval = NULL;
 			goto RETURN;
 		}
@@ -282,7 +288,8 @@ pezz_get(cw_pezz_t *a_pezz, const char *a_filename, cw_uint32_t a_line_num)
 		} else {
 			cw_pezz_item_t	*allocation;
 
-			allocation = _cw_malloc(sizeof(cw_pezz_item_t));
+			allocation = _cw_mem_malloc(a_pezz->mem,
+			    sizeof(cw_pezz_item_t));
 			if (allocation == NULL) {
 				if (dbg_is_registered(cw_g_dbg, "pezz_error")) {
 					_cw_out_put_e("Memory allocation error;"
@@ -381,7 +388,7 @@ pezz_put(cw_pezz_t *a_pezz, void *a_buffer, const char *a_filename, cw_uint32_t
 				    allocation->filename, allocation->line_num);
 			}
 			memset(a_buffer, 0x5a, a_pezz->buffer_size);
-			_cw_free(allocation);
+			_cw_mem_free(a_pezz->mem, allocation);
 		}
 	}
 #endif
@@ -439,7 +446,8 @@ pezz_dump(cw_pezz_t *a_pezz, const char *a_prefix)
 	}
 
 	if (a_pezz->spare_buffers != NULL) {
-		char	*prefix = (char *)_cw_malloc(strlen(a_prefix) + 17);
+		char	*prefix = (char *)_cw_mem_malloc(a_pezz->mem,
+		    strlen(a_prefix) + 17);
 
 		_cw_out_put("[s]spare_buffers : \n",
 		    a_prefix);
@@ -447,7 +455,7 @@ pezz_dump(cw_pezz_t *a_pezz, const char *a_prefix)
 		if (prefix != NULL) {
 			_cw_out_put_s(prefix, "[s]              : ", a_prefix);
 			ring_dump(a_pezz->spare_buffers, prefix);
-			_cw_free(prefix);
+			_cw_mem_free(a_pezz->mem, prefix);
 		} else {
 			prefix = (char *)a_prefix;
 			ring_dump(a_pezz->spare_buffers, prefix);

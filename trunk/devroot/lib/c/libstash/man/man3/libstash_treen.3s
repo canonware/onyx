@@ -16,7 +16,7 @@ treen - Arbitrary tree (tree node).
 .I cw_treen_t *
 .br
 .B treen_new
-.RI ( "cw_treen_t *a_treen" ", " 
+.RI ( "cw_treen_t *a_treen" ", " "cw_mem_t *a_mem" ", "
 .IR "cw_opaque_dealloc_t *a_dealloc_func" ", " 
 .IR "void *a_dealloc_arg" )
 
@@ -70,7 +70,7 @@ of the fan-out.  Care must be taken when iterating on the sibling ring with
 .I cw_treen_t *
 .br
 .B treen_new
-.RI ( "cw_treen_t *a_treen" ", " 
+.RI ( "cw_treen_t *a_treen" ", " "cw_mem_t *a_mem" ", "
 .IR "cw_opaque_dealloc_t *a_dealloc_func" ", " 
 .IR "void *a_dealloc_arg" )
 .RS
@@ -79,6 +79,10 @@ Input(s):
 .IR a_treen :
 .RS
 Pointer to space for a treen, or NULL.
+.RE
+.IR a_mem :
+.RS
+Pointer to the allocator to use internally.
 .RE
 .IR a_dealloc_func :
 .RS

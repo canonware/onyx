@@ -13,6 +13,7 @@
 typedef struct cw_pezz_s cw_pezz_t;
 
 struct cw_pezz_s {
+	cw_mem_t	*mem;
 	cw_bool_t	is_malloced;
 #if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
 	cw_uint32_t	magic;
@@ -65,16 +66,14 @@ typedef struct {
 }	cw_pezz_item_t;
 #endif
 
-cw_pezz_t *pezz_new(cw_pezz_t *a_pezz, cw_uint32_t a_buffer_size, cw_uint32_t
-    a_num_buffers);
-
+cw_pezz_t *pezz_new(cw_pezz_t *a_pezz, cw_mem_t *a_mem, cw_uint32_t
+    a_buffer_size, cw_uint32_t a_num_buffers);
 void	pezz_delete(cw_pezz_t *a_pezz);
 
 cw_uint32_t pezz_get_buffer_size(cw_pezz_t *a_pezz);
 
 void	*pezz_get(cw_pezz_t *a_pezz, const char *a_filename, cw_uint32_t
     a_line_num);
-
 void	pezz_put(cw_pezz_t *a_pezz, void *a_buffer, const char *a_filename,
     cw_uint32_t a_line_num);
 

@@ -16,8 +16,8 @@ ch - Chained hashing.
 .I cw_ch_t *
 .br
 .B ch_new
-.RI ( "cw_ch_t *a_ch" ", " "cw_uint32_t a_table_size" ", "
-.IR "cw_ch_hash_t *a_hash" ", " "cw_ch_key_comp_t *a_key_comp" )
+.RI ( "cw_ch_t *a_ch" ", " "cw_mem_t *a_mem" ", " "cw_uint32_t a_table_size"
+.RI ", " "cw_ch_hash_t *a_hash" ", " "cw_ch_key_comp_t *a_key_comp" )
 
 .I void
 .br
@@ -108,8 +108,8 @@ the number of items can vary wildly.
 .I cw_ch_t *
 .br
 .B ch_new
-.RI ( "cw_ch_t *a_ch" ", " "cw_uint32_t a_table_size" ", "
-.IR "cw_ch_hash_t *a_hash" ", " "cw_ch_key_comp_t *a_key_comp" )
+.RI ( "cw_ch_t *a_ch" ", " "cw_mem_t *a_mem" ", " "cw_uint32_t a_table_size"
+.RI ", " "cw_ch_hash_t *a_hash" ", " "cw_ch_key_comp_t *a_key_comp" )
 .RS
 Input(s):
 .RS
@@ -118,6 +118,10 @@ Input(s):
 Pointer to space for a ch with a_table_size slots, or NULL.  Use the
 _CW_CH_TABLE2SIZEOF() macro to calculate the total space needed for a given
 table size.
+.RE
+.IR a_mem :
+.RS
+Pointer to the allocator to use internally.
 .RE
 .IR a_table_size :
 .RS

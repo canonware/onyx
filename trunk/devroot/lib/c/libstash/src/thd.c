@@ -18,32 +18,20 @@
 #include <pthread_np.h>
 #endif
 
-cw_thd_t *
-thd_new(cw_thd_t *a_thd, void *(*a_start_func) (void *), void *a_arg)
+void
+thd_new(cw_thd_t *a_thd, void *(*a_start_func)(void *), void *a_arg)
 {
-	cw_thd_t	*retval;
-	int		error;
+	int	error;
 
-	if (a_thd == NULL) {
-		retval = (cw_thd_t *)_cw_malloc(sizeof(cw_thd_t));
-		if (retval == NULL)
-			goto RETURN;
-		retval->is_malloced = TRUE;
-	} else {
-		retval = a_thd;
-		retval->is_malloced = FALSE;
-	}
+	_cw_check_ptr(a_thd);
 
-	error = pthread_create(&retval->thread, NULL, a_start_func, a_arg);
+	error = pthread_create(&a_thd->thread, NULL, a_start_func, a_arg);
 	if (error) {
 		out_put_e(NULL, NULL, 0, __FUNCTION__,
 		    "Error in pthread_create(): [s]\n", strerror(error));
 		abort();
 	}
-	mtx_new(&retval->crit_lock);
-
-	RETURN:
-	return retval;
+	mtx_new(&a_thd->crit_lock);
 }
 
 void
@@ -60,8 +48,6 @@ thd_delete(cw_thd_t *a_thd)
 		    "Error in pthread_detach(): [s]\n", strerror(error));
 		abort();
 	}
-	if (a_thd->is_malloced)
-		_cw_free(a_thd);
 }
 
 void *
@@ -79,8 +65,6 @@ thd_join(cw_thd_t *a_thd)
 		    "Error in pthread_join(): [s]\n", strerror(error));
 		abort();
 	}
-	if (a_thd->is_malloced)
-		_cw_free(a_thd);
 	return retval;
 }
 

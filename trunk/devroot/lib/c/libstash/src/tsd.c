@@ -14,30 +14,19 @@
 #include <sys/time.h>
 #include <errno.h>
 
-cw_tsd_t *
-tsd_new(cw_tsd_t *a_tsd, void (*a_func) (void *))
+void
+tsd_new(cw_tsd_t *a_tsd, void (*a_func)(void *))
 {
-	cw_tsd_t	*retval;
-	int		error;
+	int	error;
 
-	if (a_tsd == NULL) {
-		retval = (cw_tsd_t *)_cw_malloc(sizeof(cw_tsd_t));
-		if (retval == NULL)
-			goto RETURN;
-		retval->is_malloced = TRUE;
-	} else {
-		retval = a_tsd;
-		retval->is_malloced = FALSE;
-	}
+	_cw_check_ptr(a_tsd);
 
-	error = pthread_key_create(&retval->key, a_func);
+	error = pthread_key_create(&a_tsd->key, a_func);
 	if (error) {
 		out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
 		    "Error in pthread_key_create(): [s]\n", strerror(error));
 		abort();
 	}
-	RETURN:
-	return retval;
 }
 
 void
@@ -53,8 +42,6 @@ tsd_delete(cw_tsd_t *a_tsd)
 		    "Error in pthread_key_delete(): [s]\n", strerror(error));
 		abort();
 	}
-	if (a_tsd->is_malloced)
-		_cw_free(a_tsd);
 }
 
 void *

@@ -14,31 +14,19 @@
 #include <sys/time.h>
 #include <errno.h>
 
-cw_mtx_t *
+void
 mtx_new(cw_mtx_t *a_mtx)
 {
-	cw_mtx_t	*retval;
-	int		error;
+	int	error;
 
-	if (a_mtx == NULL) {
-		retval = (cw_mtx_t *)_cw_malloc(sizeof(cw_mtx_t));
-		if (retval == NULL)
-			goto RETURN;
-		retval->is_malloced = TRUE;
-	} else {
-		retval = a_mtx;
-		retval->is_malloced = FALSE;
-	}
+	_cw_check_ptr(a_mtx);
 
-	error = pthread_mutex_init(&retval->mutex, NULL);
+	error = pthread_mutex_init(&a_mtx->mutex, NULL);
 	if (error) {
 		out_put_e(NULL, NULL, 0, __FUNCTION__,
 		    "Error in pthread_mutex_init: [s]\n", strerror(error));
 		abort();
 	}
-
-	RETURN:
-	return retval;
 }
 
 void
@@ -54,8 +42,6 @@ mtx_delete(cw_mtx_t *a_mtx)
 		    "Error in pthread_mutex_destroy(): [s]\n", strerror(error));
 		abort();
 	}
-	if (a_mtx->is_malloced)
-		_cw_free(a_mtx);
 }
 
 void

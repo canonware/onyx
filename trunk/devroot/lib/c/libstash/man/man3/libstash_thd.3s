@@ -81,7 +81,7 @@ Input(s):
 .RS
 .IR a_thd :
 .RS
-Pointer to a thd.
+Pointer to space for a thd.
 .RE
 .IR a_start_func :
 .RS

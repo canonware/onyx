@@ -23,12 +23,12 @@ main()
 	{
 		cw_dch_t	*dch_a, dch_b;
 
-		dch_a = dch_new(NULL, 2, 2, 1, ch_hash_string,
+		dch_a = dch_new(NULL, cw_g_mem, 2, 2, 1, ch_hash_string,
 		    ch_key_comp_string);
 		_cw_check_ptr(dch_a);
 		dch_delete(dch_a);
 
-		_cw_assert(dch_new(&dch_b, 4, 3, 1, ch_hash_direct,
+		_cw_assert(dch_new(&dch_b, cw_g_mem, 4, 3, 1, ch_hash_direct,
 		    ch_key_comp_direct) == &dch_b);
 		dch_delete(&dch_b);
 	}
@@ -41,7 +41,7 @@ main()
 		char		*c = "two of these";
 		char		*d = "two of these\0foo";
 
-		dch = dch_new(NULL, 4, 2, 1, ch_hash_string,
+		dch = dch_new(NULL, cw_g_mem, 4, 2, 1, ch_hash_string,
 		    ch_key_comp_string);
 		_cw_check_ptr(dch);
 		_cw_assert(dch_count(dch) == 0);
@@ -73,7 +73,7 @@ main()
 		char		*d = "two of these\0foo";
 		char		*k, *v;
 
-		dch = dch_new(NULL, 4, 2, 1, ch_hash_string,
+		dch = dch_new(NULL, cw_g_mem, 4, 2, 1, ch_hash_string,
 		    ch_key_comp_string);
 		_cw_check_ptr(dch);
 		_cw_assert(dch_count(dch) == 0);
@@ -129,10 +129,10 @@ main()
 		char		*d = "two of these\0foo";
 		char		*v;
 
-		chi_pezz = pezz_new(NULL, sizeof(cw_chi_t), 10);
+		chi_pezz = pezz_new(NULL, cw_g_mem, sizeof(cw_chi_t), 10);
 		_cw_check_ptr(chi_pezz);
 
-		dch = dch_new(NULL, 4, 2, 1, ch_hash_string,
+		dch = dch_new(NULL, cw_g_mem, 4, 2, 1, ch_hash_string,
 		    ch_key_comp_string);
 		_cw_check_ptr(dch);
 
@@ -177,10 +177,10 @@ main()
 		char		*d = "two of these\0foo";
 		char		*k, *v;
 
-		chi_pezz = pezz_new(NULL, sizeof(cw_chi_t), 10);
+		chi_pezz = pezz_new(NULL, cw_g_mem, sizeof(cw_chi_t), 10);
 		_cw_check_ptr(chi_pezz);
 
-		dch = dch_new(NULL, 3, 2, 1, ch_hash_string,
+		dch = dch_new(NULL, cw_g_mem, 3, 2, 1, ch_hash_string,
 		    ch_key_comp_string);
 		_cw_check_ptr(dch);
 

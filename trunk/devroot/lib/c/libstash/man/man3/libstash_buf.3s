@@ -16,12 +16,12 @@ buf, bufc - Reference-counted extensible buffer.
 .I cw_buf_t *
 .br
 .B buf_new
-.RI ( "cw_buf_t *a_buf" )
+.RI ( "cw_buf_t *a_buf" ", " "cw_mem_t *a_mem" )
 
 .I cw_buf_t *
 .br
 .B buf_new_r
-.RI ( "cw_buf_t *a_buf" )
+.RI ( "cw_buf_t *a_buf" ", " "cw_mem_t *a_mem" )
 
 .I void
 .br
@@ -124,7 +124,7 @@ buf, bufc - Reference-counted extensible buffer.
 .I cw_bufc_t *
 .br
 .B bufc_new
-.RI ( "cw_bufc_t *a_bufc" ", "
+.RI ( "cw_bufc_t *a_bufc" ", " "cw_mem_t *a_mem" ", "
 .IR "cw_opaque_dealloc_t *a_dealloc_func" ", "
 .IR "void *a_dealloc_arg)" )
 
@@ -136,8 +136,8 @@ buf, bufc - Reference-counted extensible buffer.
 .I void
 .br
 .B bufc_set_buffer
-.RI ( "cw_bufc_t *a_bufc" ", " "void *a_buffer" ", " "cw_uint32_t a_size"
-.RI ", " "cw_bool_t a_is_writeable" ", "
+.RI ( "cw_bufc_t *a_bufc" ", " "void *a_buffer" ", "
+.IR "cw_uint32_t a_size" ", " "cw_bool_t a_is_writeable" ", "
 .IR "cw_opaque_dealloc_t *a_dealloc_func" ", "
 .IR "void *a_dealloc_arg" )
 
@@ -186,18 +186,22 @@ any buf has a reference to it.
 .I cw_buf_t *
 .br
 .B buf_new
-.RI ( "cw_buf_t *a_buf" )
+.RI ( "cw_buf_t *a_buf" ", " "cw_mem_t *a_mem" )
 .br
 .I cw_buf_t *
 .br
 .B buf_new_r
-.RI ( "cw_buf_t *a_buf" )
+.RI ( "cw_buf_t *a_buf" ", " "cw_mem_t *a_mem" )
 .RS
 Input(s):
 .RS
 .IR a_buf :
 .RS
 Pointer to space for a buf, or NULL.
+.RE
+.IR a_mem :
+.RS
+Pointer to the allocator to use internally.
 .RE
 .RE
 Output(s):
@@ -819,7 +823,7 @@ Copy a_offset bytes from a_val to a_buf at offset a_offset.
 .I cw_bufc_t *
 .br
 .B bufc_new
-.RI ( "cw_bufc_t *a_bufc" ", "
+.RI ( "cw_bufc_t *a_bufc" ", " "cw_mem_t *a_mem" ", "
 .IR "cw_opaque_dealloc_t *a_dealloc_func" ", "
 .IR "void *a_dealloc_arg)" )
 .RS
@@ -828,6 +832,10 @@ Input(s):
 .IR a_bufc :
 .RS
 Pointer to a bufc.
+.RE
+.IR a_mem :
+.RS
+Pointer to the allocator to use internally.
 .RE
 .IR a_dealloc_func :
 .RS
@@ -882,8 +890,8 @@ Destructor.
 .I void
 .br
 .B bufc_set_buffer
-.RI ( "cw_bufc_t *a_bufc" ", " "void *a_buffer" ", " "cw_uint32_t a_size"
-.RI ", " "cw_bool_t a_is_writeable" ", "
+.RI ( "cw_bufc_t *a_bufc" ", " "void *a_buffer" ", "
+.IR "cw_uint32_t a_size" ", " "cw_bool_t a_is_writeable" ", "
 .IR "cw_opaque_dealloc_t *a_dealloc_func" ", "
 .IR "void *a_dealloc_arg" )
 .RS

@@ -22,7 +22,8 @@
 #define _CW_BUFC_MAGIC 0xb00f0003
 #endif
 
-static cw_buf_t	*buf_p_new(cw_buf_t *a_buf, cw_bool_t a_is_threadsafe);
+static cw_buf_t	*buf_p_new(cw_buf_t *a_buf, cw_mem_t *a_mem, cw_bool_t
+    a_is_threadsafe);
 static void	buf_p_rebuild_cumulative_index(cw_buf_t *a_buf);
 static void	buf_p_get_data_position(cw_buf_t *a_buf, cw_uint32_t a_offset,
     cw_uint32_t *a_array_element, cw_uint32_t *a_bufel_offset);
@@ -45,15 +46,15 @@ static cw_uint32_t bufc_p_get_ref_count(cw_bufc_t *a_bufc);
 static void	bufc_p_ref_increment(cw_bufc_t *a_bufc);
 
 cw_buf_t *
-buf_new(cw_buf_t *a_buf)
+buf_new(cw_buf_t *a_buf, cw_mem_t *a_mem)
 {
-	return buf_p_new(a_buf, FALSE);
+	return buf_p_new(a_buf, a_mem, FALSE);
 }
 
 cw_buf_t *
-buf_new_r(cw_buf_t *a_buf)
+buf_new_r(cw_buf_t *a_buf, cw_mem_t *a_mem)
 {
-	return buf_p_new(a_buf, TRUE);
+	return buf_p_new(a_buf, a_mem, TRUE);
 }
 
 void
@@ -82,13 +83,13 @@ buf_delete(cw_buf_t *a_buf)
 	}
 
 	if (a_buf->bufel_array != a_buf->static_bufel_array)
-		_cw_free(a_buf->bufel_array);
+		_cw_mem_free(a_buf->mem, a_buf->bufel_array);
 	if (a_buf->cumulative_index != a_buf->static_cumulative_index)
-		_cw_free(a_buf->cumulative_index);
+		_cw_mem_free(a_buf->mem, a_buf->cumulative_index);
 	if (a_buf->iov != a_buf->static_iov)
-		_cw_free(a_buf->iov);
+		_cw_mem_free(a_buf->mem, a_buf->iov);
 	if (a_buf->is_malloced)
-		_cw_free(a_buf);
+		_cw_mem_free(a_buf->mem, a_buf);
 }
 
 void
@@ -162,7 +163,8 @@ buf_dump(cw_buf_t *a_buf, const char *a_prefix)
 			    "[s]|    \\\n", a_prefix,
 			    a_buf->bufel_array[i].bufc, a_prefix);
 
-			sub_prefix = _cw_malloc(strlen(a_prefix) + 7);
+			sub_prefix = _cw_mem_malloc(a_buf->mem, strlen(a_prefix)
+			    + 7);
 			if (sub_prefix == NULL)
 				bufc_p_dump(a_buf->bufel_array[i].bufc, "...");
 			else {
@@ -170,7 +172,7 @@ buf_dump(cw_buf_t *a_buf, const char *a_prefix)
 				    a_prefix);
 				bufc_p_dump(a_buf->bufel_array[i].bufc,
 				    sub_prefix);
-				_cw_free(sub_prefix);
+				_cw_mem_free(a_buf->mem, sub_prefix);
 			}
 		} else {
 			_cw_out_put("[s]|   \\--> bufc : 0x[i|b:16]"
@@ -1446,7 +1448,7 @@ buf_set_range(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint32_t a_length,
 	if (a_is_writeable && (a_offset == a_buf->size)) {
 		cw_bufc_t	*bufc;
 
-		bufc = bufc_new(NULL, NULL, NULL);
+		bufc = bufc_new(NULL, a_buf->mem, NULL, NULL);
 		if (bufc == NULL) {
 			retval = TRUE;
 			goto RETURN;
@@ -1521,12 +1523,12 @@ buf_set_range(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint32_t a_length,
 }
 
 static cw_buf_t *
-buf_p_new(cw_buf_t *a_buf, cw_bool_t a_is_threadsafe)
+buf_p_new(cw_buf_t *a_buf, cw_mem_t *a_mem, cw_bool_t a_is_threadsafe)
 {
 	cw_buf_t	*retval;
 
 	if (a_buf == NULL) {
-		retval = (cw_buf_t *)_cw_malloc(sizeof(cw_buf_t));
+		retval = (cw_buf_t *)_cw_mem_malloc(a_mem, sizeof(cw_buf_t));
 		if (retval == NULL)
 			goto RETURN;
 		retval->is_malloced = TRUE;
@@ -1534,6 +1536,8 @@ buf_p_new(cw_buf_t *a_buf, cw_bool_t a_is_threadsafe)
 		retval = a_buf;
 		retval->is_malloced = FALSE;
 	}
+
+	retval->mem = a_mem;
 
 #ifdef _LIBSTASH_DBG
 	retval->magic_a = _CW_BUF_MAGIC;
@@ -1686,14 +1690,15 @@ buf_p_fit_array(cw_buf_t *a_buf, cw_uint32_t a_min_array_size)
 		for (i = a_buf->array_size << 1; i < a_min_array_size; i <<= 1);
 
 		if (a_buf->bufel_array != a_buf->static_bufel_array) {
-			t_ptr = _cw_realloc(a_buf->bufel_array, i *
-			    sizeof(cw_bufel_t));
+			t_ptr = _cw_mem_realloc(a_buf->mem, a_buf->bufel_array,
+			    i * sizeof(cw_bufel_t));
 			if (t_ptr == NULL) {
 				retval = TRUE;
 				goto RETURN;
 			}
 		} else {
-			t_ptr = _cw_calloc(i, sizeof(cw_bufel_t));
+			t_ptr = _cw_mem_calloc(a_buf->mem, i,
+			    sizeof(cw_bufel_t));
 			if (t_ptr == NULL) {
 				retval = TRUE;
 				goto RETURN;
@@ -1708,14 +1713,15 @@ buf_p_fit_array(cw_buf_t *a_buf, cw_uint32_t a_min_array_size)
 		a_buf->bufel_array = (cw_bufel_t *)t_ptr;
 
 		if (a_buf->cumulative_index != a_buf->static_cumulative_index) {
-			t_ptr = _cw_realloc(a_buf->cumulative_index, i *
-			    sizeof(cw_uint32_t));
+			t_ptr = _cw_mem_realloc(a_buf->mem,
+			    a_buf->cumulative_index, i * sizeof(cw_uint32_t));
 			if (t_ptr == NULL) {
 				retval = TRUE;
 				goto RETURN;
 			}
 		} else {
-			t_ptr = _cw_calloc(i, sizeof(cw_uint32_t));
+			t_ptr = _cw_mem_calloc(a_buf->mem, i,
+			    sizeof(cw_uint32_t));
 			if (t_ptr == NULL) {
 				retval = TRUE;
 				goto RETURN;
@@ -1730,14 +1736,15 @@ buf_p_fit_array(cw_buf_t *a_buf, cw_uint32_t a_min_array_size)
 		a_buf->cumulative_index = (cw_uint32_t *)t_ptr;
 
 		if (a_buf->iov != a_buf->static_iov) {
-			t_ptr = _cw_realloc(a_buf->iov, i * sizeof(struct
-			    iovec));
+			t_ptr = _cw_mem_realloc(a_buf->mem, a_buf->iov, i *
+			    sizeof(struct iovec));
 			if (t_ptr == NULL) {
 				retval = TRUE;
 				goto RETURN;
 			}
 		} else {
-			t_ptr = _cw_calloc(i, sizeof(struct iovec));
+			t_ptr = _cw_mem_calloc(a_buf->mem, i, sizeof(struct
+			    iovec));
 			if (t_ptr == NULL) {
 				retval = TRUE;
 				goto RETURN;
@@ -2271,13 +2278,14 @@ buf_p_make_range_writeable(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint32_t
 	 * we're creating extends past the current end of the buf.
 	 */
 	if (a_offset + a_length > a_buf->size) {
-		bufc = bufc_new(NULL, (cw_opaque_dealloc_t *)mem_free,
-		    cw_g_mem);
+		bufc = bufc_new(NULL, a_buf->mem, (cw_opaque_dealloc_t
+		    *)mem_free, cw_g_mem);
 		if (bufc == NULL) {
 			retval = TRUE;
 			goto RETURN;
 		}
-		buffer = _cw_malloc((a_offset + a_length) - a_buf->size);
+		buffer = _cw_mem_malloc(a_buf->mem, (a_offset + a_length) -
+		    a_buf->size);
 		if (buffer == NULL) {
 			bufc_delete(bufc);
 			retval = TRUE;
@@ -2334,15 +2342,15 @@ buf_p_make_range_writeable(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint32_t
 		    (a_buf->array_size - 1))];
 		if ((bufc_p_get_is_writeable(bufel->bufc) == FALSE) ||
 		    (bufc_p_get_ref_count(bufel->bufc) > 1)) {
-			buffer = _cw_malloc(bufel->end_offset -
+			buffer = _cw_mem_malloc(a_buf->mem, bufel->end_offset -
 			    bufel->beg_offset);
 			if (buffer == NULL) {
 				retval = TRUE;
 				goto RETURN;
 			}
-			bufc = bufc_new(NULL, NULL, NULL);
+			bufc = bufc_new(NULL, a_buf->mem, NULL, NULL);
 			if (bufc == NULL) {
-				_cw_free(buffer);
+				_cw_mem_free(a_buf->mem, buffer);
 				retval = TRUE;
 				goto RETURN;
 			}
@@ -2369,18 +2377,19 @@ buf_p_make_range_writeable(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint32_t
 }
 
 cw_bufc_t *
-bufc_new(cw_bufc_t *a_bufc, cw_opaque_dealloc_t *a_dealloc_func, void
-    *a_dealloc_arg)
+bufc_new(cw_bufc_t *a_bufc, cw_mem_t *a_mem, cw_opaque_dealloc_t
+    *a_dealloc_func, void *a_dealloc_arg)
 {
 	cw_bufc_t	*retval;
 
 	if (a_bufc == NULL) {
-		retval = (cw_bufc_t *)_cw_malloc(sizeof(cw_bufc_t));
+		retval = (cw_bufc_t *)_cw_mem_malloc(a_mem,
+		    sizeof(cw_bufc_t));
 		if (retval == NULL)
 			goto RETURN;
 		bzero(retval, sizeof(cw_bufc_t));
 		retval->dealloc_func = (cw_opaque_dealloc_t *)mem_free;
-		retval->dealloc_arg = (void *)cw_g_mem;
+		retval->dealloc_arg = (void *)a_mem;
 	} else {
 		retval = a_bufc;
 		bzero(retval, sizeof(cw_bufc_t));
@@ -2440,9 +2449,8 @@ bufc_delete(cw_bufc_t *a_bufc)
 }
 
 void
-bufc_set_buffer(cw_bufc_t *a_bufc, void *a_buffer, cw_uint32_t a_size,
-    cw_bool_t a_is_writeable, cw_opaque_dealloc_t *a_dealloc_func, void
-    *a_dealloc_arg)
+bufc_set_buffer(cw_bufc_t *a_bufc, void *a_buffer, cw_uint32_t a_size, cw_bool_t
+    a_is_writeable, cw_opaque_dealloc_t *a_dealloc_func, void *a_dealloc_arg)
 {
 	_cw_check_ptr(a_bufc);
 	_cw_assert(a_bufc->magic_a == _CW_BUFC_MAGIC);

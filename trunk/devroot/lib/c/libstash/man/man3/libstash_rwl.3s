@@ -13,7 +13,7 @@ rwl - Read/write lock.
 .SH SYNOPSIS
 \fB#include <libstash/libstash.h>\fR
 
-.I cw_rwl_t *
+.I void
 .br
 .B rwl_new
 .RI ( "cw_rwl_t *a_rwl" )
@@ -53,7 +53,7 @@ toggles back and forth between read locks and write locks to assure
 deterministic locking.
 
 .SH USAGE
-.I cw_rwl_t *
+.I void
 .br
 .B rwl_new
 .RI ( "cw_rwl_t *a_rwl" )
@@ -62,17 +62,12 @@ Input(s):
 .RS
 .IR a_rwl :
 .RS
-Pointer to space for a rwl, or NULL.
+Pointer to space for a rwl.
 .RE
 .RE
 Output(s):
 .RS
-.IR retval :
-.RS
-non-NULL: Pointer to a rwl.
-.br
-NULL: Memory allocation error.  Can only occur if (NULL == a_rwl).
-.RE
+None.
 .RE
 Description:
 .RS

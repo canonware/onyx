@@ -26,11 +26,11 @@ main()
 	{
 		cw_pezz_t	pezz, *pezz_p;
 
-		_cw_assert(pezz_new(&pezz, 123, 7) == &pezz);
+		_cw_assert(pezz_new(&pezz, cw_g_mem, 123, 7) == &pezz);
 		_cw_assert(pezz_get_buffer_size(&pezz) == 123);
 		pezz_delete(&pezz);
 
-		pezz_p = pezz_new(NULL, 234, 11);
+		pezz_p = pezz_new(NULL, cw_g_mem, 234, 11);
 		_cw_check_ptr(pezz_p);
 		_cw_assert(pezz_get_buffer_size(pezz_p) == 234);
 		pezz_delete(pezz_p);
@@ -42,7 +42,7 @@ main()
 		void		*pointers[100];
 		cw_uint32_t	i;
 
-		pezz_new(&pezz, 4096, 10);
+		pezz_new(&pezz, cw_g_mem, 4096, 10);
 		_cw_assert(pezz_get_buffer_size(&pezz) == 4096);
 		for (i = 0; i < 100; i++) {
 			pointers[i] = _cw_pezz_get(&pezz);

@@ -16,7 +16,7 @@ mq - Message queue.
 .I cw_mq_t *
 .br
 .B mq_new
-.RI ( "cw_mq_t *a_mq" ", " "cw_uint32_t a_msg_size" )
+.RI ( "cw_mq_t *a_mq" ", " "cw_mem_t *a_mem" ", " "cw_uint32_t a_msg_size" )
 
 .I void
 .br
@@ -75,13 +75,17 @@ or put.  This provides a simple out of band state transition capability.
 .I cw_mq_t *
 .br
 .B mq_new
-.RI ( "cw_mq_t *a_mq" ", " "cw_uint32_t a_msg_size" )
+.RI ( "cw_mq_t *a_mq" ", " "cw_mem_t *a_mem" ", " "cw_uint32_t a_msg_size" )
 .RS
 Input(s):
 .RS
 .IR a_mq :
 .RS
 Pointer to space for a mq, or NULL.
+.RE
+.IR a_mem :
+.RS
+Pointer to the allocator to use internally.
 .RE
 .IR a_msg_size :
 .RS

@@ -28,10 +28,10 @@ main()
 	{
 		cw_out_t	out, *out_p;
 
-		_cw_assert(out_new(&out) == &out);
+		_cw_assert(out_new(&out, cw_g_mem) == &out);
 		out_delete(&out);
 
-		out_p = out_new(NULL);
+		out_p = out_new(NULL, cw_g_mem);
 		_cw_check_ptr(out_p);
 		out_delete(out_p);
 	}
@@ -41,7 +41,7 @@ main()
 	{
 		cw_out_t	*out_p;
 
-		out_p = out_new(NULL);
+		out_p = out_new(NULL, cw_g_mem);
 		_cw_check_ptr(out_p);
 
 		_cw_assert(out_register(out_p, "buf", sizeof(cw_buf_t *),
@@ -57,7 +57,7 @@ main()
 	{
 		cw_out_t	*out_p;
 
-		out_p = out_new(NULL);
+		out_p = out_new(NULL, cw_g_mem);
 		_cw_check_ptr(out_p);
 
 		_cw_assert(out_get_default_fd(out_p) == 2);
@@ -73,7 +73,7 @@ main()
 	{
 		cw_out_t	*out_p;
 
-		out_p = out_new(NULL);
+		out_p = out_new(NULL, cw_g_mem);
 		_cw_check_ptr(out_p);
 
 		_cw_assert(out_put(out_p, "16 Bytes output\n") == 16);
@@ -88,7 +88,7 @@ main()
 	{
 		cw_out_t	*out_p;
 
-		out_p = out_new(NULL);
+		out_p = out_new(NULL, cw_g_mem);
 		_cw_check_ptr(out_p);
 
 		_cw_assert(out_put_e(out_p, "<file>", 42, "<function>",
@@ -109,7 +109,7 @@ main()
 	{
 		cw_out_t	*out_p;
 
-		out_p = out_new(NULL);
+		out_p = out_new(NULL, cw_g_mem);
 		_cw_check_ptr(out_p);
 
 /*  		_cw_assert(out_put_l(out_p, "Timestamped output [s]\n", "[s]") > */
@@ -124,7 +124,7 @@ main()
 	{
 		cw_out_t	*out_p;
 
-		out_p = out_new(NULL);
+		out_p = out_new(NULL, cw_g_mem);
 		_cw_check_ptr(out_p);
 
 /*  		_cw_assert(out_put_le(out_p, "<file>", 42, "<function>", */
@@ -142,7 +142,7 @@ main()
 		    "0123456789012345678901234567890123456789"
 		    "0123456789012345678901234567890123456789";
 
-		out_p = out_new(NULL);
+		out_p = out_new(NULL, cw_g_mem);
 		_cw_check_ptr(out_p);
 
 		_cw_assert(out_put_n(out_p, 60, "[s]", buf) == 60);
@@ -157,7 +157,7 @@ main()
 	{
 		cw_out_t	*out_p;
 
-		out_p = out_new(NULL);
+		out_p = out_new(NULL, cw_g_mem);
 		_cw_check_ptr(out_p);
 
 		_cw_assert(out_put_f(out_p, 2, "16 Bytes output\n") == 16);
@@ -172,7 +172,7 @@ main()
 	{
 		cw_out_t	*out_p;
 
-		out_p = out_new(NULL);
+		out_p = out_new(NULL, cw_g_mem);
 		_cw_check_ptr(out_p);
 
 		_cw_assert(out_put_fe(out_p, 2, "<file>", 42, "<function>",
@@ -196,7 +196,7 @@ main()
 	{
 		cw_out_t	*out_p;
 
-		out_p = out_new(NULL);
+		out_p = out_new(NULL, cw_g_mem);
 		_cw_check_ptr(out_p);
 
 /*  		_cw_assert(out_put_fl(out_p, 2, "Timestamped output [s]\n", */
@@ -211,7 +211,7 @@ main()
 	{
 		cw_out_t	*out_p;
 
-		out_p = out_new(NULL);
+		out_p = out_new(NULL, cw_g_mem);
 		_cw_check_ptr(out_p);
 
 /*  		_cw_assert(out_put_fle(out_p, 2, "<file>", 42, "<function>", */
@@ -229,7 +229,7 @@ main()
 		    "0123456789012345678901234567890123456789"
 		    "0123456789012345678901234567890123456789";
 
-		out_p = out_new(NULL);
+		out_p = out_new(NULL, cw_g_mem);
 		_cw_check_ptr(out_p);
 
 		_cw_assert(out_put_fn(out_p, 2, 60, "[s]", buf) == 60);
@@ -245,7 +245,7 @@ main()
 		cw_out_t	*out_p;
 		char		buf[80];
 
-		out_p = out_new(NULL);
+		out_p = out_new(NULL, cw_g_mem);
 		_cw_check_ptr(out_p);
 
 		memset(buf, 'x', 80);
@@ -263,7 +263,7 @@ main()
 		cw_out_t	*out_p;
 		char		*buf;
 
-		out_p = out_new(NULL);
+		out_p = out_new(NULL, cw_g_mem);
 		_cw_check_ptr(out_p);
 
 		_cw_assert(out_put_sa(out_p, &buf, "<string> [s]\n",
@@ -284,7 +284,7 @@ main()
 
 		str = &buf[10];
 
-		out_p = out_new(NULL);
+		out_p = out_new(NULL, cw_g_mem);
 		_cw_check_ptr(out_p);
 
 		/* i. wjpbs+. */
@@ -647,7 +647,7 @@ main()
 	{
 		cw_out_t	*out_p;
 
-		out_p = out_new(NULL);
+		out_p = out_new(NULL, cw_g_mem);
 		_cw_check_ptr(out_p);
 
 		_cw_assert(out_put(out_p, "[") == -2);

@@ -31,7 +31,7 @@ helpers.
 .I cw_out_t *
 .br
 .B out_new
-.RI ( "cw_out_t *a_out" )
+.RI ( "cw_out_t *a_out" ", " "cw_out_t *a_mem" )
 
 .I void
 .br
@@ -245,7 +245,7 @@ delimited by `[' and `]'.  Following are some examples of formatting strings,
 followed by explanations.
 
 \*(lq[[\*(rq
-Print a `[' character.  Due to the way C strings and `\' protection work,
+Print a `[' character.  Due to the way C strings and `\\' protection work,
 it is necessary to use a different escape character (`[').
 
 \*(lq[s]\*(rq
@@ -439,13 +439,17 @@ Print a_arg, given the specification pointed to by a_format.
 .I cw_out_t *
 .br
 .B out_new
-.RI ( "cw_out_t *a_out" )
+.RI ( "cw_out_t *a_out" ", " "cw_out_t *a_mem" )
 .RS
 Input(s):
 .RS
 .IR a_out :
 .RS
 Pointer to space for an out, or NULL.
+.RE
+.IR a_mem :
+.RS
+Pointer to the allocator to use internally.
 .RE
 .RE
 Output(s):

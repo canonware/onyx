@@ -16,9 +16,10 @@ dch - Dynamic chained hashing.
 .I cw_dch_t *
 .br
 .B dch_new
-.RI ( "cw_dch_t *a_dch" ", " "cw_uint32_t a_base_table" ", "
-.IR "cw_uint32_t a_base_grow" ", " "cw_uint32_t a_base_shrink" ", "
-.IR "cw_ch_hash_t *a_hash" ", " "cw_ch_key_comp_t *a_key_comp" )
+.RI ( "cw_dch_t *a_dch" ", " "cw_mem_t *a_mem" ", "
+.IR "cw_uint32_t a_base_table" ", " "cw_uint32_t a_base_grow" ", "
+.IR "cw_uint32_t a_base_shrink" ", " "cw_ch_hash_t *a_hash" ", "
+.IR "cw_ch_key_comp_t *a_key_comp" )
 
 .I void
 .br
@@ -76,15 +77,20 @@ class behaves almost exactly like the \fBch\f class.
 .I cw_dch_t *
 .br
 .B dch_new
-.RI ( "cw_dch_t *a_dch" ", " "cw_uint32_t a_base_table" ", "
-.IR "cw_uint32_t a_base_grow" ", " "cw_uint32_t a_base_shrink" ", "
-.IR "cw_ch_hash_t *a_hash" ", " "cw_ch_key_comp_t *a_key_comp" )
+.RI ( "cw_dch_t *a_dch" ", " "cw_mem_t *a_mem" ", "
+.IR "cw_uint32_t a_base_table" ", " "cw_uint32_t a_base_grow" ", "
+.IR "cw_uint32_t a_base_shrink" ", " "cw_ch_hash_t *a_hash" ", "
+.IR "cw_ch_key_comp_t *a_key_comp" )
 .RS
 Input(s):
 .RS
 .IR a_dch :
 .RS
 Pointer to space for a dch, or NULL.
+.RE
+.IR a_mem :
+.RS
+Pointer to the allocator to use internally.
 .RE
 .IR a_base_table :
 .RS

@@ -14,30 +14,19 @@
 #include <sys/time.h>
 #include <errno.h>
 
-cw_cnd_t *
+void
 cnd_new(cw_cnd_t *a_cnd)
 {
-	cw_cnd_t	*retval;
-	int		error;
+	int	error;
 
-	if (a_cnd == NULL) {
-		retval = (cw_cnd_t *)_cw_malloc(sizeof(cw_cnd_t));
-		if (retval == NULL)
-			goto RETURN;
-		retval->is_malloced = TRUE;
-	} else {
-		retval = a_cnd;
-		retval->is_malloced = FALSE;
-	}
+	_cw_check_ptr(a_cnd);
 
-	error = pthread_cond_init(&retval->condition, NULL);
+	error = pthread_cond_init(&a_cnd->condition, NULL);
 	if (error) {
 		out_put_e(NULL, NULL, 0, __FUNCTION__,
 		    "Error in pthread_cond_init(): [s]\n", strerror(error));
 		abort();
 	}
-	RETURN:
-	return retval;
 }
 
 void
@@ -53,8 +42,6 @@ cnd_delete(cw_cnd_t *a_cnd)
 		    "Error in pthread_cond_destroy(): [s]\n", strerror(error));
 		abort();
 	}
-	if (a_cnd->is_malloced)
-		_cw_free(a_cnd);
 }
 
 void

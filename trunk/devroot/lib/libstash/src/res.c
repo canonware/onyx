@@ -59,14 +59,14 @@ static cw_bool_t	res_p_merge_res(cw_res_t *a_res, const char *a_name,
 #define _LIBSTASH_RES_STATE_FINISH		10
 
 cw_res_t *
-res_new(cw_res_t *a_res)
+res_new(cw_res_t *a_res, cw_mem_t *a_mem)
 {
 	cw_res_t	*retval;
 
 	if (a_res == NULL) {
-		retval = (cw_res_t *)_cw_malloc(sizeof(cw_res_t));
+		retval = (cw_res_t *)_cw_mem_malloc(a_mem, sizeof(cw_res_t));
 		if (retval == NULL)
-			goto RETURN;
+			goto OOM_1;
 		retval->is_malloced = TRUE;
 	} else {
 		retval = a_res;
@@ -74,17 +74,19 @@ res_new(cw_res_t *a_res)
 	}
 
 	/* Initialize internals. */
+	retval->mem = a_mem;
 	rwl_new(&retval->rw_lock);
+	if (dch_new(&retval->hash, a_mem, _CW_RES_BASE_TABLE,
+	    _CW_RES_BASE_GROW, _CW_RES_BASE_SHRINK, ch_hash_string,
+	    ch_key_comp_string) == NULL)
+		goto OOM_2;
 
-	/*
-	 * Non-thread-safe hash table, since we're already taking care of the
-	 * locking.
-	 */
-	dch_new(&retval->hash, _CW_RES_BASE_TABLE, _CW_RES_BASE_GROW,
-	    _CW_RES_BASE_SHRINK, ch_hash_string, ch_key_comp_string);
-
-	RETURN:
 	return retval;
+	OOM_2:
+	if (retval->is_malloced)
+		_cw_mem_free(a_mem, retval);
+	OOM_1:
+	return NULL;
 }
 
 void
@@ -101,13 +103,13 @@ res_delete(cw_res_t *a_res)
 	for (i = 0, num_resources = dch_count(&a_res->hash); i < num_resources;
 	     i++) {
 		dch_remove_iterate(&a_res->hash, &name, &val, NULL);
-		_cw_free(name);
-		_cw_free(val);
+		_cw_mem_free(a_res->mem, name);
+		_cw_mem_free(a_res->mem, val);
 	}
 	dch_delete(&a_res->hash);
 
 	if (a_res->is_malloced)
-		_cw_free(a_res);
+		_cw_mem_free(a_res->mem, a_res);
 }
 
 void
@@ -120,8 +122,8 @@ res_clear(cw_res_t *a_res)
 
 	while (dch_remove_iterate(&a_res->hash, (void **)&key, (void **)&val,
 	    NULL) == FALSE) {
-		_cw_free(key);
-		_cw_free(val);
+		_cw_mem_free(a_res->mem, key);
+		_cw_mem_free(a_res->mem, val);
 	}
 
 	rwl_wunlock(&a_res->rw_lock);
@@ -262,7 +264,7 @@ res_dump(cw_res_t *a_res, const char *a_filename)
 	rwl_wlock(&a_res->rw_lock);
 
 	if (a_filename != NULL) {
-		t_out = out_new(NULL);
+		t_out = out_new(NULL, a_res->mem);
 		if (t_out == NULL) {
 			retval = TRUE;
 			goto RETURN;
@@ -354,10 +356,10 @@ res_p_parse_res(cw_res_t *a_res, cw_bool_t a_is_file)
 	name_bufsize = _LIBSTASH_RES_BUFFSIZE;
 	val_bufsize = _LIBSTASH_RES_BUFFSIZE;
 
-	name = (char *)_cw_malloc(name_bufsize);
+	name = (char *)_cw_mem_malloc(a_res->mem, name_bufsize);
 	if (name == NULL)
 		goto RETURN;
-	val = (char *)_cw_malloc(val_bufsize);
+	val = (char *)_cw_mem_malloc(a_res->mem, val_bufsize);
 	if (val == NULL)
 		goto RETURN;
 	for (i = 0, col_num = 1; ((state != _LIBSTASH_RES_STATE_FINISH) &&
@@ -368,13 +370,15 @@ res_p_parse_res(cw_res_t *a_res, cw_bool_t a_is_file)
 		 */
 		if (name_pos >= name_bufsize) {
 			name_bufsize <<= 1;
-			name = (char *)_cw_realloc(name, name_bufsize);
+			name = (char *)_cw_mem_realloc(a_res->mem, name,
+			    name_bufsize);
 			if (name == NULL)
 				goto RETURN;
 		}
 		if (val_pos >= val_bufsize) {
 			val_bufsize <<= 1;
-			val = (char *)_cw_realloc(val, val_bufsize);
+			val = (char *)_cw_mem_realloc(a_res->mem, val,
+			    val_bufsize);
 			if (val == NULL)
 				goto RETURN;
 		}
@@ -948,9 +952,9 @@ res_p_parse_res(cw_res_t *a_res, cw_bool_t a_is_file)
 
 	RETURN:
 	if (NULL != name)
-		_cw_free(name);
+		_cw_mem_free(a_res->mem, name);
 	if (NULL != val)
-		_cw_free(val);
+		_cw_mem_free(a_res->mem, val);
 	return retval;
 }
 
@@ -1053,16 +1057,16 @@ res_p_merge_res(cw_res_t *a_res, const char *a_name, const char *a_val)
 	char		*temp_name, *temp_val;
 
 	/* Make copies to insert into the hash table. */
-	temp_name = (char *)_cw_malloc(strlen(a_name) + 1);
+	temp_name = (char *)_cw_mem_malloc(a_res->mem, strlen(a_name) + 1);
 	if (temp_name == NULL) {
 		retval = TRUE;
 		goto RETURN;
 	}
 	strcpy(temp_name, a_name);
 
-	temp_val = (char *)_cw_malloc(strlen(a_val) + 1);
+	temp_val = (char *)_cw_mem_malloc(a_res->mem, strlen(a_val) + 1);
 	if (temp_val == NULL) {
-		_cw_free(temp_name);
+		_cw_mem_free(a_res->mem, temp_name);
 		retval = TRUE;
 		goto RETURN;
 	}
@@ -1083,8 +1087,8 @@ res_p_merge_res(cw_res_t *a_res, const char *a_name, const char *a_val)
 		 */
 		dch_remove(&a_res->hash, (void *)temp_name, (void **)&old_name,
 		    (void **)&old_val, NULL);
-		_cw_free(old_name);
-		_cw_free(old_val);
+		_cw_mem_free(a_res->mem, old_name);
+		_cw_mem_free(a_res->mem, old_val);
 
 		if (dch_insert(&a_res->hash, (void *)temp_name, (void
 		    *)temp_val, NULL)) {
@@ -1101,8 +1105,8 @@ res_p_merge_res(cw_res_t *a_res, const char *a_name, const char *a_val)
 		 * could have changed even though this call was a failure.  Oh
 		 * well.
 		 */
-		_cw_free(temp_name);
-		_cw_free(temp_val);
+		_cw_mem_free(a_res->mem, temp_name);
+		_cw_mem_free(a_res->mem, temp_val);
 		retval = TRUE;
 		goto RETURN;
 	}

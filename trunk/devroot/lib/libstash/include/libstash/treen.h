@@ -39,8 +39,8 @@ struct cw_treen_s {
 #endif
 };
 
-cw_treen_t	*treen_new(cw_treen_t *a_treen, cw_opaque_dealloc_t
-    *a_dealloc_func, void *a_dealloc_arg);
+cw_treen_t	*treen_new(cw_treen_t *a_treen, cw_mem_t *a_mem,
+    cw_opaque_dealloc_t *a_dealloc_func, void *a_dealloc_arg);
 void		treen_delete(cw_treen_t *a_treen);
 void		treen_link(cw_treen_t *a_treen, cw_treen_t *a_parent);
 cw_treen_t	*treen_get_parent(cw_treen_t *a_treen);

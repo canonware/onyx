@@ -13,7 +13,7 @@ mtx - Mutex (mutual exclusion lock).
 .SH SYNOPSIS
 \fB#include <libstash/libstash.h>\fR
 
-.I cw_mtx_t *
+.I void
 .br
 .B mtx_new
 .RI ( "cw_mtx_t *a_mtx" )
@@ -47,7 +47,7 @@ at a time, and attempting to attain the lock while already owing it has
 undefined results.
 
 .SH USAGE
-.I cw_mtx_t *
+.I void
 .br
 .B mtx_new
 .RI ( "cw_mtx_t *a_mtx" )
@@ -56,15 +56,12 @@ Input(s):
 .RS
 .IR a_mtx :
 .RS
-Pointer to space for a mtx, or NULL.
+Pointer to space for a mtx.
 .RE
 .RE
 Output(s):
 .RS
-.IR retval :
-.RS
-Pointer to a mtx.
-.RE
+None.
 .RE
 Description:
 .RS

@@ -40,16 +40,16 @@ main()
 	quads[2] = ((cw_uint64_t)0x31323334 << 32) + 0x35363738;
 	quads[3] = ((cw_uint64_t)0x393a3b3c << 32) + 0x3d3e3f40;
 
-	buf = buf_new(NULL);
+	buf = buf_new(NULL, cw_g_mem);
 	_cw_check_ptr(buf);
 
-	bufc = bufc_new(NULL, NULL, NULL);
+	bufc = bufc_new(NULL, cw_g_mem, NULL, NULL);
 	_cw_check_ptr(bufc);
 	bufc_set_buffer(bufc, longs, sizeof(longs), TRUE, NULL, NULL);
 	_cw_assert(buf_append_bufc(buf, bufc, 0, sizeof(longs)) == FALSE);
 	bufc_delete(bufc);
 
-	bufc = bufc_new(NULL, NULL, NULL);
+	bufc = bufc_new(NULL, cw_g_mem, NULL, NULL);
 	_cw_check_ptr(bufc);
 	bufc_set_buffer(bufc, quads, sizeof(quads), TRUE, NULL, NULL);
 	_cw_assert(buf_append_bufc(buf, bufc, 0, sizeof(quads)) == FALSE);

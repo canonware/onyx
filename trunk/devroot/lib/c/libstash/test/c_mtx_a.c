@@ -41,12 +41,12 @@ int
 main()
 {
 	cw_thd_t	thread_a, thread_b;
-	cw_mtx_t	mutex_a, *mutex_b;
+	cw_mtx_t	mutex_a, mutex_b;
 
 	libstash_init();
 	_cw_out_put("Test begin\n");
 
-	_cw_assert(mtx_new(&mutex_a) == &mutex_a);
+	mtx_new(&mutex_a);
 	/* Unlocked. */
 	mtx_lock(&mutex_a);
 	/* Locked. */
@@ -63,11 +63,11 @@ main()
 	/* Unlocked. */
 	mtx_delete(&mutex_a);
 
-	mutex_b = mtx_new(NULL);
-	mtx_lock(mutex_b);
-	_cw_assert(mtx_trylock(mutex_b));
-	mtx_unlock(mutex_b);
-	mtx_delete(mutex_b);
+	mtx_new(&mutex_b);
+	mtx_lock(&mutex_b);
+	_cw_assert(mtx_trylock(&mutex_b));
+	mtx_unlock(&mutex_b);
+	mtx_delete(&mutex_b);
 
 	/*
 	 * See if the mutex actually locks other threads out of critical

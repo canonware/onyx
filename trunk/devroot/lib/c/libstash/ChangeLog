@@ -1,3 +1,15 @@
+2000-07-14  Jason Evans  <jasone@canonware.com>
+
+	* : Make it possible to explicitly set the memory allocator (of
+	type cw_mem_t) for all classes that do internal memory allocation.
+	This is a major API change that affects the majority of the
+	classes in libstash.
+
+	* : Correct a bootstrapping problem that caused OOM events in the
+	dbg and out classes to slip past the OOM handler, if installed.
+	In the case of cw_g_dbg, OOM events still aren't caught, but this
+	can't be helped, since the mem class uses dbg symbols.
+
 2000-07-01  Jason Evans  <jasone@canonware.com>
 
 	* : Add the pool class.  pool is similar to pezz, but each buffer

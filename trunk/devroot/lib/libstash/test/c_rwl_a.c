@@ -33,23 +33,22 @@ int
 main()
 {
 	cw_thd_t	threads[_LIBSTASH_TEST_NUM_THREADS];
-	cw_rwl_t	lock_a, *lock_b;
+	cw_rwl_t	lock_a, lock_b;
 	cw_uint32_t	i;
 
 	libstash_init();
 	_cw_out_put("Test begin\n");
 
-	lock_b = rwl_new(NULL);
-	_cw_check_ptr(lock_b);
-	rwl_rlock(lock_b);
-	rwl_rlock(lock_b);
-	rwl_runlock(lock_b);
-	rwl_runlock(lock_b);
-	rwl_wlock(lock_b);
-	rwl_wunlock(lock_b);
-	rwl_delete(lock_b);
+	rwl_new(&lock_b);
+	rwl_rlock(&lock_b);
+	rwl_rlock(&lock_b);
+	rwl_runlock(&lock_b);
+	rwl_runlock(&lock_b);
+	rwl_wlock(&lock_b);
+	rwl_wunlock(&lock_b);
+	rwl_delete(&lock_b);
 
-	_cw_assert(rwl_new(&lock_a) == &lock_a);
+	rwl_new(&lock_a);
 	rwl_rlock(&lock_a);
 	rwl_rlock(&lock_a);
 	rwl_rlock(&lock_a);

@@ -16,8 +16,6 @@
 #include <errno.h>
 #include <ctype.h>
 
-#include "../include/libstash/mem_l.h"
-
 #ifdef _LIBSTASH_DBG
 #define _LIBSTASH_OUT_MAGIC 0x8293cade
 #endif
@@ -135,7 +133,7 @@ static cw_out_ent_t cw_g_out_builtins[] = {
 };
 
 cw_out_t *
-out_new(cw_out_t *a_out)
+out_new(cw_out_t *a_out, cw_mem_t *a_mem)
 {
 	cw_out_t	*retval;
 
@@ -143,12 +141,13 @@ out_new(cw_out_t *a_out)
 		retval = a_out;
 		retval->is_malloced = FALSE;
 	} else {
-		retval = (cw_out_t *)_cw_malloc(sizeof(cw_out_t));
+		retval = (cw_out_t *)_cw_mem_malloc(a_mem, sizeof(cw_out_t));
 		if (retval == NULL)
 			goto RETURN;
 		retval->is_malloced = TRUE;
 	}
 
+	retval->mem = a_mem;
 	retval->fd = 2;
 
 	mtx_new(&retval->lock);
@@ -171,11 +170,11 @@ out_delete(cw_out_t *a_out)
 	_cw_assert(a_out->magic == _LIBSTASH_OUT_MAGIC);
 
 	if (a_out->extensions != NULL)
-		_cw_free(a_out->extensions);
+		_cw_mem_free(a_out->mem, a_out->extensions);
 	mtx_delete(&a_out->lock);
 
 	if (a_out->is_malloced)
-		_cw_free(a_out);
+		_cw_mem_free(a_out->mem, a_out);
 #ifdef _LIBSTASH_DBG
 	else
 		memset(a_out, 0x5a, sizeof(cw_out_t));
@@ -199,7 +198,7 @@ out_register(cw_out_t *a_out, const char *a_type, cw_uint32_t a_size,
 
 	if (a_out->extensions == NULL) {
 		a_out->extensions = (cw_out_ent_t
-		    *)_cw_malloc(sizeof(cw_out_ent_t));
+		    *)_cw_mem_malloc(a_out->mem, sizeof(cw_out_ent_t));
 		if (a_out->extensions == NULL) {
 			retval = TRUE;
 			goto RETURN;
@@ -207,8 +206,9 @@ out_register(cw_out_t *a_out, const char *a_type, cw_uint32_t a_size,
 	} else {
 		cw_out_ent_t	*t_ptr;
 
-		t_ptr = (cw_out_ent_t *)_cw_realloc(a_out->extensions,
-		    ((a_out->nextensions + 1) * sizeof(cw_out_ent_t)));
+		t_ptr = (cw_out_ent_t *)_cw_mem_realloc(a_out->mem,
+		    a_out->extensions, ((a_out->nextensions + 1) *
+		    sizeof(cw_out_ent_t)));
 		if (t_ptr == NULL) {
 			retval = TRUE;
 			goto RETURN;
@@ -245,7 +245,7 @@ out_merge(cw_out_t *a_a, cw_out_t *a_b)
 	if (a_b->nextensions > 0) {
 		if (a_a->extensions == NULL) {
 			a_a->extensions = (cw_out_ent_t
-			    *)_cw_calloc(a_b->nextensions,
+			    *)_cw_mem_calloc(a_a->mem, a_b->nextensions,
 			    sizeof(cw_out_ent_t));
 			if (a_a->extensions == NULL) {
 				retval = TRUE;
@@ -254,9 +254,9 @@ out_merge(cw_out_t *a_a, cw_out_t *a_b)
 		} else {
 			cw_out_ent_t	*t_ptr;
 
-			t_ptr = (cw_out_ent_t *)_cw_realloc(a_a->extensions,
-			    ((a_a->nextensions + a_b->nextensions) *
-			    sizeof(cw_out_ent_t)));
+			t_ptr = (cw_out_ent_t *)_cw_mem_realloc(a_a->mem,
+			    a_a->extensions, ((a_a->nextensions +
+			    a_b->nextensions) * sizeof(cw_out_ent_t)));
 			if (t_ptr == NULL) {
 				retval = TRUE;
 				goto RETURN;
@@ -419,7 +419,8 @@ out_put_n(cw_out_t *a_out, cw_uint32_t a_size, const char *a_format,...)
 	RETURN:
 	if (key.format_key_buf != key.format_key) {
 		/* out_p_metric() allocated a new spec key. */
-		_cw_free(key.format_key);
+		_cw_mem_free((a_out != NULL) ? a_out->mem : NULL,
+		    key.format_key);
 	}
 	return retval;
 }
@@ -515,7 +516,8 @@ out_put_fn(cw_out_t *a_out, cw_sint32_t a_fd, cw_uint32_t a_size,
 	RETURN:
 	if (key.format_key_buf != key.format_key) {
 		/* out_p_metric() allocated a new spec key. */
-		_cw_free(key.format_key);
+		_cw_mem_free((a_out != NULL) ? a_out->mem : NULL,
+		    key.format_key);
 	}
 	return retval;
 }
@@ -540,7 +542,8 @@ out_put_fv(cw_out_t *a_out, cw_sint32_t a_fd, const char *a_format, va_list a_p)
 	RETURN:
 	if (key.format_key_buf != key.format_key) {
 		/* out_p_metric() allocated a new spec key. */
-		_cw_free(key.format_key);
+		_cw_mem_free((a_out != NULL) ? a_out->mem : NULL,
+		    key.format_key);
 	}
 	return retval;
 }
@@ -616,7 +619,8 @@ out_put_sv(cw_out_t *a_out, char *a_str, const char *a_format, va_list a_p)
 	RETURN:
 	if (key.format_key_buf != key.format_key) {
 		/* out_p_metric() allocated a new spec key. */
-		_cw_free(key.format_key);
+		_cw_mem_free((a_out != NULL) ? a_out->mem : NULL,
+		    key.format_key);
 	}
 	return retval;
 }
@@ -640,7 +644,8 @@ out_put_sva(cw_out_t *a_out, char **r_str, const char *a_format, va_list a_p)
 	RETURN:
 	if (key.format_key_buf != key.format_key) {
 		/* out_p_metric() allocated a new spec key. */
-		_cw_free(key.format_key);
+		_cw_mem_free((a_out != NULL) ? a_out->mem : NULL,
+		    key.format_key);
 	}
 	return retval;
 }
@@ -667,7 +672,8 @@ out_put_svn(cw_out_t *a_out, char *a_str, cw_uint32_t a_size,
 	RETURN:
 	if (key.format_key_buf != key.format_key) {
 		/* out_p_metric() allocated a new spec key. */
-		_cw_free(key.format_key);
+		_cw_mem_free((a_out != NULL) ? a_out->mem : NULL,
+		    key.format_key);
 	}
 	return retval;
 }
@@ -848,11 +854,12 @@ out_p_put_fvle(cw_out_t *a_out, cw_sint32_t a_fd, cw_bool_t a_time_stamp, const
 		 * This string was allocated using the mem class.  Free it as
 		 * such.
 		 */
-#ifdef _LIBSTASH_DBG
-		mem_free(cw_g_mem, format, __FILE__, __LINE__);
-#else
-		mem_free(cw_g_mem, format, NULL, 0);
-#endif
+		_cw_mem_free((a_out != NULL) ? a_out->mem : NULL, format);
+/*  #ifdef _LIBSTASH_DBG */
+/*  		mem_free(cw_g_mem, format, __FILE__, __LINE__); */
+/*  #else */
+/*  		mem_free(cw_g_mem, format, NULL, 0); */
+/*  #endif */
 	}
 	return retval;
 }
@@ -879,7 +886,8 @@ out_p_put_fvn(cw_out_t *a_out, cw_sint32_t a_fd, cw_uint32_t a_size,
 			output = output_buf;
 		} else {
 			malloced_output = TRUE;
-			output = (char *)_cw_malloc(a_size);
+			output = (char *)_cw_mem_malloc((a_out != NULL) ?
+			    a_out->mem : NULL, a_size);
 			if (output == NULL) {
 				retval = -1;
 				goto RETURN;
@@ -912,7 +920,7 @@ out_p_put_fvn(cw_out_t *a_out, cw_sint32_t a_fd, cw_uint32_t a_size,
 	if (a_out != NULL)
 		mtx_unlock(&a_out->lock);
 	if (malloced_output && (output != NULL))
-		_cw_free(output);
+		_cw_mem_free((a_out != NULL) ? a_out->mem : NULL, output);
 	return retval;
 }
 
@@ -928,12 +936,14 @@ out_p_put_sva(cw_out_t *a_out, char **r_str, cw_out_key_t * a_key, const char
 	 * it using the mem class.  Otherwise, if the user tries to free the
 	 * string with mem_free(), an error will occur.
 	 */
-#ifdef _LIBSTASH_DBG
-	output = (char *)mem_malloc(cw_g_mem, a_key->metric + 1, __FILE__,
-	    __LINE__);
-#else
-	output = (char *)mem_malloc(cw_g_mem, a_key->metric + 1, NULL, 0);
-#endif
+	output = (char *)_cw_mem_malloc((a_out != NULL) ? a_out->mem : NULL,
+	    a_key->metric + 1);
+/*  #ifdef _LIBSTASH_DBG */
+/*  	output = (char *)mem_malloc(cw_g_mem, a_key->metric + 1, __FILE__, */
+/*  	    __LINE__); */
+/*  #else */
+/*  	output = (char *)mem_malloc(cw_g_mem, a_key->metric + 1, NULL, 0); */
+/*  #endif */
 	if (output == NULL) {
 		retval = -1;
 		goto RETURN;
@@ -1070,20 +1080,24 @@ out_p_put_svn(cw_out_t *a_out, char *a_str, cw_uint32_t a_size, cw_out_key_t
 					 * the item there, then copy as much as
 					 * will fit into the output string.
 					 */
-					t_buf = (char *)_cw_malloc(metric);
+					t_buf = (char
+					    *)_cw_mem_malloc((a_out != NULL) ?
+					    a_out->mem : NULL, metric);
 					if (t_buf == NULL) {
 						retval = -1;
 						goto RETURN;
 					}
 					if (ent->render_func(&a_format[i],
 					    spec_len, arg, t_buf) == NULL) {
-						_cw_free(t_buf);
+						_cw_mem_free((a_out != NULL) ?
+						    a_out->mem : NULL, t_buf);
 						retval = -1;
 						goto RETURN;
 					}
 					memcpy(&a_str[j], t_buf, size - j);
 
-					_cw_free(t_buf);
+					_cw_mem_free((a_out != NULL) ?
+					    a_out->mem : NULL, t_buf);
 				}
 
 				j += metric;
@@ -1140,7 +1154,8 @@ out_p_metric(cw_out_t *a_out, const char *a_format, cw_out_key_t * a_key,
 			 * static buffer's contents over.
 			 */
 			format_len = strlen(a_format);
-			a_key->format_key = (char *)_cw_malloc(format_len);
+			a_key->format_key = (char *)_cw_mem_malloc((a_out !=
+			    NULL) ? a_out->mem : NULL, format_len);
 			if (a_key->format_key == NULL) {
 				retval = -1;
 				goto RETURN;

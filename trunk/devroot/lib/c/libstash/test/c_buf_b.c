@@ -42,7 +42,7 @@ thread_entry_func(void *a_arg)
 	cw_uint32_t	i, size, split;
 	cw_buf_t	*buf;
 
-	buf = buf_new(NULL);
+	buf = buf_new(NULL, cw_g_mem);
 
 	for (i = 0; i < (_LIBSTASH_TEST_NUM_BUFELS *
 	    _LIBSTASH_TEST_SIZEOF_BUFFER * _LIBSTASH_TEST_NUM_CIRCULATIONS);
@@ -109,11 +109,11 @@ main(int argc, char **argv)
 /*  	dbg_register(cw_g_dbg, "mem_verbose"); */
 
 	/* Create a buf with a known pattern of data in it. */
-	buf_a = buf_new_r(NULL);
+	buf_a = buf_new_r(NULL, cw_g_mem);
 
 	for (i = n = 0; i < _LIBSTASH_TEST_NUM_BUFELS; i++) {
 		/* Create a bufc, fill it with data, and append it to buf_a. */
-		bufc = bufc_new(NULL, NULL, NULL);
+		bufc = bufc_new(NULL, cw_g_mem, NULL, NULL);
 		buffer = _cw_malloc(_LIBSTASH_TEST_SIZEOF_BUFFER);
 		for (j = 0; j < _LIBSTASH_TEST_SIZEOF_BUFFER; j++, n++)
 			buffer[j] = (char)(n % _LIBSTASH_TEST_DATA_MODULUS);
@@ -124,7 +124,7 @@ main(int argc, char **argv)
 		bufc_delete(bufc);
 	}
 
-	buf_new_r(&buf_b);
+	buf_new_r(&buf_b, cw_g_mem);
 	mtx_new(&rand_lock);
 
 	if (argc > 1)

@@ -27,11 +27,11 @@ main()
 	{
 		cw_pool_t	pool, *pool_p;
 
-		_cw_assert(pool_new(&pool, 123) == &pool);
+		_cw_assert(pool_new(&pool, cw_g_mem, 123) == &pool);
 		_cw_assert(pool_get_buffer_size(&pool) == 123);
 		pool_delete(&pool);
 
-		pool_p = pool_new(NULL, 234);
+		pool_p = pool_new(NULL, cw_g_mem, 234);
 		_cw_check_ptr(pool_p);
 		_cw_assert(pool_get_buffer_size(pool_p) == 234);
 		pool_delete(pool_p);
@@ -43,7 +43,7 @@ main()
 		void		*pointers[100];
 		cw_uint32_t	i;
 
-		pool_new(&pool, 4096);
+		pool_new(&pool, cw_g_mem, 4096);
 		_cw_assert(pool_get_buffer_size(&pool) == 4096);
 		for (i = 0; i < 100; i++) {
 			pointers[i] = _cw_pool_get(&pool);

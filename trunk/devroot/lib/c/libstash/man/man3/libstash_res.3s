@@ -16,7 +16,7 @@ res - Simple resource class.
 .I cw_res_t *
 .br
 .B res_new
-.RI ( "cw_res_t *a_res" )
+.RI ( "cw_res_t *a_res" ", " "cw_mem_t *a_mem" )
 
 .I void
 .br
@@ -208,13 +208,17 @@ Epsilon.
 .I cw_res_t *
 .br
 .B res_new
-.RI ( "cw_res_t *a_res" )
+.RI ( "cw_res_t *a_res" ", " "cw_mem_t *a_mem" )
 .RS
 Input(s):
 .RS
 .IR a_res :
 .RS
 Pointer to space for a res, or NULL.
+.RE
+.IR a_mem :
+.RS
+Pointer to the allocator to use internally.
 .RE
 .RE
 Output(s):

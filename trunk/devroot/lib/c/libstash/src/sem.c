@@ -14,29 +14,16 @@
 #include <sys/time.h>
 #include <errno.h>
 
-cw_sem_t *
+void
 sem_new(cw_sem_t *a_sem, cw_sint32_t a_count)
 {
-	cw_sem_t	*retval;
+	_cw_check_ptr(a_sem);
 
-	if (a_sem == NULL) {
-		retval = (cw_sem_t *)_cw_malloc(sizeof(cw_sem_t));
-		if (retval == NULL)
-			goto RETURN;
-		retval->is_malloced = TRUE;
-	} else {
-		retval = a_sem;
-		retval->is_malloced = FALSE;
-	}
+	a_sem->count = a_count;
+	a_sem->waiters = 0;
 
-	retval->count = a_count;
-	retval->waiters = 0;
-
-	mtx_new(&retval->lock);
-	cnd_new(&retval->gtzero);
-
-	RETURN:
-	return retval;
+	mtx_new(&a_sem->lock);
+	cnd_new(&a_sem->gtzero);
 }
 
 void
@@ -46,9 +33,6 @@ sem_delete(cw_sem_t *a_sem)
 
 	mtx_delete(&a_sem->lock);
 	cnd_delete(&a_sem->gtzero);
-
-	if (a_sem->is_malloced)
-		_cw_free(a_sem);
 }
 
 void

@@ -17,7 +17,7 @@ dbg - Dynamic debug spew.
 .I cw_dbg_t *
 .br
 .B dbg_new
-.RI ( "void" )
+.RI ( "cw_mem_t *a_mem" )
 
 .I void
 .br
@@ -49,15 +49,24 @@ program.  This is achieved via a simple symbol registry.  Symbols (strings) are
 registered and unregistered, and runtime decisions can be made on whether a
 symbol is registered.
 
+Note that the out-of-memory handler mechanism that is built into the \fBmem\fR
+class does not catch memory errors that occur inside of the cw_g_dbg instance of
+the \fBdbg\fR class, due to bootstrapping issues.  Therefore,
+\fBdbg_register\fR(cw_g_dbg, "foo") can fail, and the out-of-memory handler will
+not catch the error.
+
 .SH USAGE
 .I cw_dbg_t *
 .br
 .B dbg_new
-.RI ( "void" )
+.RI ( "cw_mem_t *a_mem" )
 .RS
 Input(s):
 .RS
-None.
+.IR a_mem :
+.RS
+Pointer to the allocator to use internally.
+.RE
 .RE
 Output(s):
 .RS

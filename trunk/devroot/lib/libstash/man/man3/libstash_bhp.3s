@@ -16,8 +16,8 @@ bhp, bhpi - Binomial heap.
 .I cw_bhpi_t *
 .br
 .B bhpi_new
-.RI ( "cw_bhpi_t *a_bhpi" ", " "const void *a_priority" ", "
-.IR "const void *a_data" ", " 
+.RI ( "cw_bhpi_t *a_bhpi" ", " "cw_mem_t *a_mem" ", "
+.IR "const void *a_priority" ", " "const void *a_data" ", " 
 .IR "void (*a_dealloc_func)(void *dealloc_arg, void *bhpi)" ", " 
 .IR "void *a_dealloc_arg" )
 
@@ -29,12 +29,14 @@ bhp, bhpi - Binomial heap.
 .I cw_bhp_t *
 .br
 .B bhp_new
-.RI ( "cw_bhp_t *a_bhp" ", " "bhp_prio_comp_t *a_prio_comp" )
+.RI ( "cw_bhp_t *a_bhp" ", " "cw_mem_t *a_mem" ", "
+.IR "bhp_prio_comp_t *a_prio_comp" )
 
 .I cw_bhp_t *
 .br
 .B bhp_new_r
-.RI ( "cw_bhp_t *a_bhp" ", " "bhp_prio_comp_t *a_prio_comp" )
+.RI ( "cw_bhp_t *a_bhp" ", " "cw_mem_t *a_mem" ", "
+.IR "bhp_prio_comp_t *a_prio_comp" )
 
 .I void
 .br
@@ -100,8 +102,8 @@ cw_uint32_t, cw_sint32_t, and cw_uint64_t.
 .I cw_bhpi_t *
 .br
 .B bhpi_new
-.RI ( "cw_bhpi_t *a_bhpi" ", " "const void *a_priority" ", "
-.IR "const void *a_data" ", " 
+.RI ( "cw_bhpi_t *a_bhpi" ", " "cw_mem_t *a_mem" ", "
+.IR "const void *a_priority" ", " "const void *a_data" ", " 
 .IR "void (*a_dealloc_func)(void *dealloc_arg, void *bhpi)" ", " 
 .IR "void *a_dealloc_arg" )
 .RS
@@ -111,32 +113,27 @@ Input(s):
 .RS
 Pointer to space for a bhpi, or NULL.
 .RE
-.RE
+.IR a_mem :
 .RS
+Pointer to the allocator to use internally.
+.RE
 .IR a_priority :
 .RS
 Pointer to a priority object.
 .RE
-.RE
-.RS
 .IR a_data :
 .RS
 Pointer to a data object.
 .RE
-.RE
-.RS
 .IR a_dealloc_func :
 .RS
 Pointer to a memory deallocation function, or NULL.  Ignored if (NULL ==
 a_bhpi).
 .RE
-.RE
-.RS
 .IR a_dealloc_arg :
 .RS
 Pointer to first argument to a_dealloc_func, or NULL.  Ignored if (NULL ==
 a_dealloc_func), or (NULL == a_bhpi).
-.RE
 .RE
 .RE
 Output(s):
@@ -183,12 +180,14 @@ pointers.
 .I cw_bhp_t *
 .br
 .B bhp_new
-.RI ( "cw_bhp_t *a_bhp" ", " "bhp_prio_comp_t *a_prio_comp" )
+.RI ( "cw_bhp_t *a_bhp" ", " "cw_mem_t *a_mem" ", "
+.IR "bhp_prio_comp_t *a_prio_comp" )
 .br
 .I cw_bhp_t *
 .br
 .B bhp_new_r
-.RI ( "cw_bhp_t *a_bhp" ", " "bhp_prio_comp_t *a_prio_comp" )
+.RI ( "cw_bhp_t *a_bhp" ", " "cw_mem_t *a_mem" ", "
+.IR "bhp_prio_comp_t *a_prio_comp" )
 .RS
 Input(s):
 .RS
@@ -196,8 +195,10 @@ Input(s):
 .RS
 Pointer to space for a bhp, or NULL.
 .RE
-.RE
+.IR a_mem :
 .RS
+Pointer to the allocator to use internally.
+.RE
 .IR a_prio_comp :
 .RS
 Pointer to a priority comparison function.

@@ -13,7 +13,7 @@ tsd - Thread-specific data.
 .SH SYNOPSIS
 \fB#include <libstash/libstash.h>\fR
 
-.I cw_tsd_t *
+.I void
 .br
 .B tsd_new
 .RI ( "cw_tsd_t *a_tsd" ", " "void (*a_func)(void *)" )
@@ -42,7 +42,7 @@ then any number of threads can use that same instance to store and retrieve a
 thread-specific pointer to data.
 
 .SH USAGE
-.I cw_tsd_t *
+.I void
 .br
 .B tsd_new
 .RI ( "cw_tsd_t *a_tsd" ", " "void (*a_func)(void *)" )
@@ -51,7 +51,7 @@ Input(s):
 .RS
 .IR a_tsd :
 .RS
-Pointer to space for a tsd, or NULL.
+Pointer to space for a tsd.
 .RE
 .IR a_func :
 .RS
@@ -60,12 +60,7 @@ Pointer to a cleanup function, or NULL.
 .RE
 Output(s):
 .RS
-.IR retval :
-.RS
-non-NULL: Pointer to a TSD.
-.br
-NULL: Memory allocation error.  Can only occur if (NULL == a_tsd).
-.RE
+None.
 .RE
 Description:
 .RS

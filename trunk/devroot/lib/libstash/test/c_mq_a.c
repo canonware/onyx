@@ -25,10 +25,10 @@ main()
 	{
 		cw_mq_t	mq, *mq_p;
 
-		_cw_assert(mq_new(&mq, sizeof(cw_uint32_t)) == &mq);
+		_cw_assert(mq_new(&mq, cw_g_mem, sizeof(cw_uint32_t)) == &mq);
 		mq_delete(&mq);
 
-		mq_p = mq_new(NULL, sizeof(cw_uint64_t));
+		mq_p = mq_new(NULL, cw_g_mem, sizeof(cw_uint64_t));
 		_cw_check_ptr(mq_p);
 		mq_delete(mq_p);
 	}
@@ -38,7 +38,7 @@ main()
 		cw_mq_t		*mq_p;
 		cw_uint8_t	i = 1, j = 2, k = 3, t;
 
-		mq_p = mq_new(NULL, sizeof(cw_uint8_t));
+		mq_p = mq_new(NULL, cw_g_mem, sizeof(cw_uint8_t));
 		_cw_check_ptr(mq_p);
 
 		_cw_assert(mq_tryget(mq_p, &t));
@@ -67,7 +67,7 @@ main()
 		cw_mq_t		*mq_p;
 		cw_uint16_t	i = 1, j = 2, k = 3, t;
 
-		mq_p = mq_new(NULL, sizeof(cw_uint16_t));
+		mq_p = mq_new(NULL, cw_g_mem, sizeof(cw_uint16_t));
 		_cw_check_ptr(mq_p);
 
 		_cw_assert(mq_tryget(mq_p, &t));
@@ -96,7 +96,7 @@ main()
 		cw_mq_t		*mq_p;
 		cw_uint32_t	i = 1, j = 2, k = 3, t;
 
-		mq_p = mq_new(NULL, sizeof(cw_uint32_t));
+		mq_p = mq_new(NULL, cw_g_mem, sizeof(cw_uint32_t));
 		_cw_check_ptr(mq_p);
 
 		_cw_assert(mq_tryget(mq_p, &t));
@@ -125,7 +125,7 @@ main()
 		cw_mq_t		*mq_p;
 		cw_uint64_t	i = 1, j = 2, k = 3, t;
 
-		mq_p = mq_new(NULL, sizeof(cw_uint64_t));
+		mq_p = mq_new(NULL, cw_g_mem, sizeof(cw_uint64_t));
 		_cw_check_ptr(mq_p);
 
 		_cw_assert(mq_tryget(mq_p, &t));
@@ -157,7 +157,7 @@ main()
 		cw_uint8_t	i = 1, j = 2, k = 3, t;
 		struct timespec	timeout = {0, 10000};
 
-		mq_p = mq_new(NULL, sizeof(cw_uint8_t));
+		mq_p = mq_new(NULL, cw_g_mem, sizeof(cw_uint8_t));
 		_cw_check_ptr(mq_p);
 
 		_cw_assert(mq_timedget(mq_p, &timeout));
@@ -187,7 +187,7 @@ main()
 		cw_uint16_t	i = 1, j = 2, k = 3, t;
 		struct timespec	timeout = {0, 10000};
 
-		mq_p = mq_new(NULL, sizeof(cw_uint16_t));
+		mq_p = mq_new(NULL, cw_g_mem, sizeof(cw_uint16_t));
 		_cw_check_ptr(mq_p);
 
 		_cw_assert(mq_timedget(mq_p, &timeout));
@@ -217,7 +217,7 @@ main()
 		cw_uint32_t	i = 1, j = 2, k = 3, t;
 		struct timespec	timeout = {0, 10000};
 
-		mq_p = mq_new(NULL, sizeof(cw_uint32_t));
+		mq_p = mq_new(NULL, cw_g_mem, sizeof(cw_uint32_t));
 		_cw_check_ptr(mq_p);
 
 		_cw_assert(mq_timedget(mq_p, &timeout));
@@ -247,7 +247,7 @@ main()
 		cw_uint64_t	i = 1, j = 2, k = 3, t;
 		struct timespec	timeout = {0, 10000};
 
-		mq_p = mq_new(NULL, sizeof(cw_uint64_t));
+		mq_p = mq_new(NULL, cw_g_mem, sizeof(cw_uint64_t));
 		_cw_check_ptr(mq_p);
 
 		_cw_assert(mq_timedget(mq_p, &timeout));
@@ -278,7 +278,7 @@ main()
 		cw_mq_t		*mq_p;
 		cw_uint8_t	i = 1, j = 2, k = 3, t;
 
-		mq_p = mq_new(NULL, sizeof(cw_uint8_t));
+		mq_p = mq_new(NULL, cw_g_mem, sizeof(cw_uint8_t));
 		_cw_check_ptr(mq_p);
 
 		_cw_assert(mq_tryget(mq_p, &t));
@@ -307,7 +307,7 @@ main()
 		cw_mq_t		*mq_p;
 		cw_uint16_t	i = 1, j = 2, k = 3, t;
 
-		mq_p = mq_new(NULL, sizeof(cw_uint16_t));
+		mq_p = mq_new(NULL, cw_g_mem, sizeof(cw_uint16_t));
 		_cw_check_ptr(mq_p);
 
 		_cw_assert(mq_tryget(mq_p, &t));
@@ -336,7 +336,7 @@ main()
 		cw_mq_t		*mq_p;
 		cw_uint32_t	i = 1, j = 2, k = 3, t;
 
-		mq_p = mq_new(NULL, sizeof(cw_uint32_t));
+		mq_p = mq_new(NULL, cw_g_mem, sizeof(cw_uint32_t));
 		_cw_check_ptr(mq_p);
 
 		_cw_assert(mq_tryget(mq_p, &t));
@@ -365,7 +365,7 @@ main()
 		cw_mq_t		*mq_p;
 		cw_uint64_t	i = 1, j = 2, k = 3, t;
 
-		mq_p = mq_new(NULL, sizeof(cw_uint64_t));
+		mq_p = mq_new(NULL, cw_g_mem, sizeof(cw_uint64_t));
 		_cw_check_ptr(mq_p);
 
 		_cw_assert(mq_tryget(mq_p, &t));
@@ -396,7 +396,7 @@ main()
 		cw_mq_t		*mq_p;
 		cw_uint8_t	i = 1, j = 2, k = 3, t;
 
-		mq_p = mq_new(NULL, sizeof(cw_uint8_t));
+		mq_p = mq_new(NULL, cw_g_mem, sizeof(cw_uint8_t));
 		_cw_check_ptr(mq_p);
 
 		_cw_assert(mq_stop_get(mq_p) == FALSE);
@@ -430,7 +430,7 @@ main()
 		cw_mq_t		*mq_p;
 		cw_uint16_t	i = 1, j = 2, k = 3, t;
 
-		mq_p = mq_new(NULL, sizeof(cw_uint16_t));
+		mq_p = mq_new(NULL, cw_g_mem, sizeof(cw_uint16_t));
 		_cw_check_ptr(mq_p);
 
 		_cw_assert(mq_stop_get(mq_p) == FALSE);
@@ -464,7 +464,7 @@ main()
 		cw_mq_t		*mq_p;
 		cw_uint32_t	i = 1, j = 2, k = 3, t;
 
-		mq_p = mq_new(NULL, sizeof(cw_uint32_t));
+		mq_p = mq_new(NULL, cw_g_mem, sizeof(cw_uint32_t));
 		_cw_check_ptr(mq_p);
 
 		_cw_assert(mq_stop_get(mq_p) == FALSE);
@@ -498,7 +498,7 @@ main()
 		cw_mq_t		*mq_p;
 		cw_uint64_t	i = 1, j = 2, k = 3, t;
 
-		mq_p = mq_new(NULL, sizeof(cw_uint64_t));
+		mq_p = mq_new(NULL, cw_g_mem, sizeof(cw_uint64_t));
 		_cw_check_ptr(mq_p);
 
 		_cw_assert(mq_stop_get(mq_p) == FALSE);
@@ -534,7 +534,7 @@ main()
 		cw_mq_t		*mq_p;
 		cw_uint8_t	i = 1, j = 2, k = 3, t;
 
-		mq_p = mq_new(NULL, sizeof(cw_uint8_t));
+		mq_p = mq_new(NULL, cw_g_mem, sizeof(cw_uint8_t));
 		_cw_check_ptr(mq_p);
 
 		_cw_assert(mq_tryget(mq_p, &t));
@@ -565,7 +565,7 @@ main()
 		cw_mq_t		*mq_p;
 		cw_uint16_t	i = 1, j = 2, k = 3, t;
 
-		mq_p = mq_new(NULL, sizeof(cw_uint16_t));
+		mq_p = mq_new(NULL, cw_g_mem, sizeof(cw_uint16_t));
 		_cw_check_ptr(mq_p);
 
 		_cw_assert(mq_tryget(mq_p, &t));
@@ -596,7 +596,7 @@ main()
 		cw_mq_t		*mq_p;
 		cw_uint32_t	i = 1, j = 2, k = 3, t;
 
-		mq_p = mq_new(NULL, sizeof(cw_uint32_t));
+		mq_p = mq_new(NULL, cw_g_mem, sizeof(cw_uint32_t));
 		_cw_check_ptr(mq_p);
 
 		_cw_assert(mq_tryget(mq_p, &t));
@@ -627,7 +627,7 @@ main()
 		cw_mq_t		*mq_p;
 		cw_uint64_t	i = 1, j = 2, k = 3, t;
 
-		mq_p = mq_new(NULL, sizeof(cw_uint64_t));
+		mq_p = mq_new(NULL, cw_g_mem, sizeof(cw_uint64_t));
 		_cw_check_ptr(mq_p);
 
 		_cw_assert(mq_tryget(mq_p, &t));

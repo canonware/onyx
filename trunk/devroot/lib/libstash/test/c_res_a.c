@@ -52,7 +52,7 @@ main()
 
 /*  	dbg_register(cw_g_dbg, "res_state"); */
 
-	res_new(&res);
+	res_new(&res, cw_g_mem);
 
 	_cw_out_put("Merging in a list...\n");
 	_cw_assert(res_merge_list(&res, s1, s2, s3, s4, s5, s6, s7, s8, NULL) ==

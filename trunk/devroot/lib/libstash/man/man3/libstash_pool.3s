@@ -16,7 +16,8 @@ pool - Cached memory allocation of equal-size buffers.
 .I cw_pool_t *
 .br
 .B pool_new
-.RI ( "cw_pool_t *a_pool" ", " "cw_uint32_t a_buffer_size" )
+.RI ( "cw_pool_t *a_pool" ", " "cw_mem_t *a_mem" ", "
+.IR "cw_uint32_t a_buffer_size" )
 
 .I void
 .br
@@ -77,14 +78,18 @@ The \fBpool\fR class provides cached allocation for equal-size buffers.  Each al
 .I cw_pool_t *
 .br
 .B pool_new
-.RI ( "cw_pool_t *a_pool" ", " "cw_uint32_t a_buffer_size" ", "
-.IR "cw_uint32_t a_num_buffers" )
+.RI ( "cw_pool_t *a_pool" ", " "cw_mem_t *a_mem" ", "
+.IR "cw_uint32_t a_buffer_size" )
 .RS
 Input(s):
 .RS
 .IR a_pool :
 .RS
 Pointer to space for a pool, or NULL.
+.RE
+.IR a_mem :
+.RS
+Pointer to the allocator to use internally.
 .RE
 .IR a_buffer_size :
 .RS

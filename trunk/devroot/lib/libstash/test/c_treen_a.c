@@ -25,16 +25,16 @@ main()
 	{
 		cw_treen_t	*treen_a, treen_b;
 
-		treen_a = treen_new(NULL, NULL, NULL);
+		treen_a = treen_new(NULL, cw_g_mem, NULL, NULL);
 		_cw_check_ptr(treen_a);
 		treen_delete(treen_a);
 
-		treen_a = treen_new(_cw_malloc(sizeof(cw_treen_t)),
+		treen_a = treen_new(_cw_malloc(sizeof(cw_treen_t)), cw_g_mem,
 		    (cw_opaque_dealloc_t *)mem_free, cw_g_mem);
 		_cw_check_ptr(treen_a);
 		treen_delete(treen_a);
 
-		treen_a = treen_new(&treen_b, NULL, NULL);
+		treen_a = treen_new(&treen_b, NULL, NULL, NULL);
 		_cw_assert(treen_a == &treen_b);
 		treen_delete(&treen_b);
 	}
@@ -46,13 +46,13 @@ main()
 	{
 		cw_treen_t	*treen_a, *treen_b, *treen_c, *treen_d;
 
-		treen_a = treen_new(NULL, NULL, NULL);
+		treen_a = treen_new(NULL, cw_g_mem, NULL, NULL);
 		_cw_check_ptr(treen_a);
-		treen_b = treen_new(NULL, NULL, NULL);
+		treen_b = treen_new(NULL, cw_g_mem, NULL, NULL);
 		_cw_check_ptr(treen_b);
-		treen_c = treen_new(NULL, NULL, NULL);
+		treen_c = treen_new(NULL, cw_g_mem, NULL, NULL);
 		_cw_check_ptr(treen_c);
-		treen_d = treen_new(NULL, NULL, NULL);
+		treen_d = treen_new(NULL, cw_g_mem, NULL, NULL);
 		_cw_check_ptr(treen_d);
 
 		treen_link(treen_b, treen_a);
@@ -104,7 +104,7 @@ main()
 	{
 		cw_treen_t	*treen_a;
 
-		treen_a = treen_new(NULL, NULL, NULL);
+		treen_a = treen_new(NULL, cw_g_mem, NULL, NULL);
 		_cw_check_ptr(treen_a);
 
 		_cw_assert(treen_get_data_ptr(treen_a) == NULL);

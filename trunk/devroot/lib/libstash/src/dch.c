@@ -20,9 +20,9 @@ static cw_bool_t dch_p_shrink(cw_dch_t *a_dch);
 static void dch_p_insert(cw_ch_t *a_ch, cw_chi_t * a_chi);
 
 cw_dch_t *
-dch_new(cw_dch_t *a_dch, cw_uint32_t a_base_table, cw_uint32_t a_base_grow,
-    cw_uint32_t a_base_shrink, cw_ch_hash_t *a_hash, cw_ch_key_comp_t
-    *a_key_comp)
+dch_new(cw_dch_t *a_dch, cw_mem_t *a_mem, cw_uint32_t a_base_table, cw_uint32_t
+    a_base_grow, cw_uint32_t a_base_shrink, cw_ch_hash_t *a_hash,
+    cw_ch_key_comp_t *a_key_comp)
 {
 	cw_dch_t	*retval;
 
@@ -35,13 +35,14 @@ dch_new(cw_dch_t *a_dch, cw_uint32_t a_base_table, cw_uint32_t a_base_grow,
 		bzero(retval, sizeof(cw_dch_t));
 		retval->is_malloced = FALSE;
 	} else {
-		retval = (cw_dch_t *)_cw_malloc(sizeof(cw_dch_t));
+		retval = (cw_dch_t *)_cw_mem_malloc(a_mem, sizeof(cw_dch_t));
 		if (retval == NULL)
 			goto RETURN;
 		bzero(retval, sizeof(cw_dch_t));
 		retval->is_malloced = TRUE;
 	}
 
+	retval->mem = a_mem;
 	retval->base_table = a_base_table;
 	retval->base_grow = a_base_grow;
 	retval->base_shrink = a_base_shrink;
@@ -49,11 +50,11 @@ dch_new(cw_dch_t *a_dch, cw_uint32_t a_base_table, cw_uint32_t a_base_grow,
 	retval->hash = a_hash;
 	retval->key_comp = a_key_comp;
 
-	retval->ch = ch_new(NULL, retval->base_table, retval->hash,
+	retval->ch = ch_new(NULL, a_mem, retval->base_table, retval->hash,
 	    retval->key_comp);
 	if (retval == NULL) {
 		if (a_dch->is_malloced)
-			_cw_free(a_dch);
+			_cw_mem_free(a_mem, a_dch);
 		goto RETURN;
 	}
 #ifdef _LIBSTASH_DBG
@@ -73,7 +74,7 @@ dch_delete(cw_dch_t *a_dch)
 	ch_delete(a_dch->ch);
 
 	if (TRUE == a_dch->is_malloced)
-		_cw_free(a_dch);
+		_cw_mem_free(a_dch->mem, a_dch);
 #ifdef _LIBSTASH_DBG
 	else
 		memset(a_dch, 0x5a, sizeof(cw_dch_t));
@@ -210,8 +211,8 @@ dch_p_grow(cw_dch_t *a_dch)
 
 	if ((count + 1) > (a_dch->grow_factor * a_dch->base_grow)) {
 		/* Too big.  Create a new ch twice as large and populate it. */
-		t_ch = ch_new(NULL, a_dch->base_table * a_dch->grow_factor * 2,
-		    a_dch->hash, a_dch->key_comp);
+		t_ch = ch_new(NULL, a_dch->mem, a_dch->base_table *
+		    a_dch->grow_factor * 2, a_dch->hash, a_dch->key_comp);
 		if (t_ch == NULL) {
 			retval = TRUE;
 			goto RETURN;
@@ -261,8 +262,8 @@ dch_p_shrink(cw_dch_t *a_dch)
 	if ((count - 1) < (a_dch->grow_factor > 1) && ((a_dch->grow_factor *
 	    a_dch->base_shrink))) {
 		/* Too big.  Create a new ch half as large and populate it. */
-		t_ch = ch_new(NULL, a_dch->base_table * a_dch->grow_factor / 2,
-		    a_dch->hash, a_dch->key_comp);
+		t_ch = ch_new(NULL, a_dch->mem, a_dch->base_table *
+		    a_dch->grow_factor / 2, a_dch->hash, a_dch->key_comp);
 		if (t_ch == NULL) {
 			retval = TRUE;
 			goto RETURN;

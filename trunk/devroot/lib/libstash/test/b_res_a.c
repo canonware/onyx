@@ -29,7 +29,7 @@ main(int argc, char **argv)
 	res_file = argv[1];
 	dump_file = argv[2];
 
-	res_new(&res);
+	res_new(&res, cw_g_mem);
 	_cw_assert(res_merge_file(&res, res_file) == FALSE);
 	_cw_assert(res_dump(&res, dump_file) == FALSE);
 	res_delete(&res);

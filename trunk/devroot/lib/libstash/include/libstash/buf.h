@@ -59,6 +59,7 @@ struct cw_buf_s {
 #if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
 	cw_uint32_t	magic_a;
 #endif
+	cw_mem_t	*mem;
 	cw_bool_t	is_malloced;
 	cw_bool_t	is_threadsafe;
 	cw_mtx_t	lock;
@@ -83,9 +84,9 @@ struct cw_buf_s {
 #endif
 };
 
-cw_buf_t	*buf_new(cw_buf_t *a_buf);
+cw_buf_t	*buf_new(cw_buf_t *a_buf, cw_mem_t *a_mem);
 
-cw_buf_t	*buf_new_r(cw_buf_t *a_buf);
+cw_buf_t	*buf_new_r(cw_buf_t *a_buf, cw_mem_t *a_mem);
 
 void		buf_delete(cw_buf_t *a_buf);
 
@@ -137,13 +138,13 @@ cw_bool_t	buf_set_uint64(cw_buf_t *a_buf, cw_uint32_t a_offset,
 cw_bool_t	buf_set_range(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint32_t
     a_length, cw_uint8_t *a_val, cw_bool_t a_is_writeable);
 
-cw_bufc_t	*bufc_new(cw_bufc_t *a_bufc, cw_opaque_dealloc_t
-    *a_dealloc_func, void *a_dealloc_arg);
+cw_bufc_t	*bufc_new(cw_bufc_t *a_bufc, cw_mem_t *a_mem,
+    cw_opaque_dealloc_t *a_dealloc_func, void *a_dealloc_arg);
 
 void		bufc_delete(cw_bufc_t *a_bufc);
 
 void		bufc_set_buffer(cw_bufc_t *a_bufc, void *a_buffer, cw_uint32_t
-    a_size, cw_bool_t a_is_writeable, cw_opaque_dealloc_t *a_dealloc_func,
-    void *a_dealloc_arg);
+    a_size, cw_bool_t a_is_writeable, cw_opaque_dealloc_t *a_dealloc_func, void
+    *a_dealloc_arg);
 
 cw_uint32_t	bufc_get_size(cw_bufc_t *a_bufc);

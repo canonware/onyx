@@ -23,7 +23,7 @@ mem - malloc wrapper.
 .I cw_mem_t *
 .br
 .B mem_new
-.RI ( "void" )
+.RI ( "cw_mem_t *a_mem" )
 
 .I void
 .br
@@ -44,6 +44,11 @@ mem - malloc wrapper.
 .br
 .I void *
 .br
+.B _cw_mem_malloc
+.RI ( "cw_mem_t *a_mem" ", " "size_t a_size" )
+.br
+.I void *
+.br
 .B _cw_malloc
 .RI ( "size_t a_size" )
 
@@ -52,6 +57,11 @@ mem - malloc wrapper.
 .B mem_calloc
 .RI ( "cw_mem_t *a_mem" ", " "size_t a_number" ", " "size_t a_size" ", "
 .IR "const char *a_filename" ", " "cw_uint32_t a_line_num" )
+.br
+.I void *
+.br
+.B _cw_mem_calloc
+.RI ( "cw_mem_t *a_mem" ", " "size_t a_number" ", " "size_t a_size" )
 .br
 .I void *
 .br
@@ -66,6 +76,11 @@ mem - malloc wrapper.
 .br
 .I void *
 .br
+.B _cw_mem_realloc
+.RI ( "cw_mem_t *a_mem" ", " "void *a_ptr" ", " "size_t a_size" )
+.br
+.I void *
+.br
 .B _cw_realloc
 .RI ( "void *a_ptr" ", " "size_t a_size" )
 
@@ -74,6 +89,11 @@ mem - malloc wrapper.
 .B mem_free
 .RI ( "cw_mem_t *a_mem" ", " "void *a_ptr" ", " "const char *a_filename"
 .RI ", " "cw_uint32_t a_line_num" )
+.br
+.I void
+.br
+.B _cw_mem_free
+.RI ( "cw_mem_t *a_mem" ", " "void *a_ptr" )
 .br
 .I void
 .br
@@ -153,7 +173,10 @@ A function pointer of this type can be passed in via
 .RS
 Input(s):
 .RS
-None.
+.IR a_mem :
+.RS
+Pointer to space for a mem.
+.RE
 .RE
 Output(s):
 .RS
@@ -233,6 +256,11 @@ re-attempted.
 .br
 .I void *
 .br
+.B _cw_mem_malloc
+.RI ( "cw_mem_t *a_mem" ", " "size_t a_size" )
+.br
+.I void *
+.br
 .B _cw_malloc
 .RI ( "size_t a_size" )
 .RS
@@ -275,6 +303,11 @@ Description:
 .B mem_calloc
 .RI ( "cw_mem_t *a_mem" ", " "size_t a_number" ", " "size_t a_size" ", "
 .IR "const char *a_filename" ", " "cw_uint32_t a_line_num" )
+.br
+.I void *
+.br
+.B _cw_mem_calloc
+.RI ( "cw_mem_t *a_mem" ", " "size_t a_number" ", " "size_t a_size" )
 .br
 .I void *
 .br
@@ -327,6 +360,11 @@ Description:
 .br
 .I void *
 .br
+.B _cw_mem_realloc
+.RI ( "cw_mem_t *a_mem" ", " "void *a_ptr" ", " "size_t a_size" )
+.br
+.I void *
+.br
 .B _cw_realloc
 .RI ( "void *a_ptr" ", " "size_t a_size" )
 .RS
@@ -373,6 +411,11 @@ Description:
 .B mem_free
 .RI ( "cw_mem_t *a_mem" ", " "void *a_ptr" ", " "const char *a_filename"
 .RI ", " "cw_uint32_t a_line_num" )
+.br
+.I void
+.br
+.B _cw_mem_free
+.RI ( "cw_mem_t *a_mem" ", " "void *a_ptr" )
 .br
 .I void
 .br

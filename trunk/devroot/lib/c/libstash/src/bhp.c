@@ -16,8 +16,8 @@
 #define _LIBSTASH_BHPI_MAGIC 0xbf90ec15
 #endif
 
-static cw_bhp_t	*bhp_p_new(cw_bhp_t *a_bhp, bhp_prio_comp_t *a_prio_comp,
-    cw_bool_t a_is_thread_safe);
+static cw_bhp_t	*bhp_p_new(cw_bhp_t *a_bhp, cw_mem_t *a_mem, bhp_prio_comp_t
+    *a_prio_comp, cw_bool_t a_is_thread_safe);
 static cw_bhpi_t *bhp_p_dump(cw_bhpi_t *a_bhpi, cw_uint32_t a_depth, cw_bhpi_t
     *a_last_printed);
 static void	bhp_p_bin_link(cw_bhpi_t *a_root, cw_bhpi_t *a_non_root);
@@ -25,8 +25,8 @@ static void	bhp_p_merge(cw_bhp_t *a_bhp, cw_bhp_t *a_other);
 static void	bhp_p_union(cw_bhp_t *a_bhp, cw_bhp_t *a_other);
 
 cw_bhpi_t *
-bhpi_new(cw_bhpi_t *a_bhpi, const void *a_priority, const void *a_data,
-    cw_opaque_dealloc_t *a_dealloc_func, void *a_dealloc_arg)
+bhpi_new(cw_bhpi_t *a_bhpi, cw_mem_t *a_mem, const void *a_priority, const void
+    *a_data, cw_opaque_dealloc_t *a_dealloc_func, void *a_dealloc_arg)
 {
 	cw_bhpi_t	*retval;
 
@@ -36,12 +36,12 @@ bhpi_new(cw_bhpi_t *a_bhpi, const void *a_priority, const void *a_data,
 		retval->dealloc_func = a_dealloc_func;
 		retval->dealloc_arg = a_dealloc_arg;
 	} else {
-		retval = (cw_bhpi_t *)_cw_malloc(sizeof(cw_bhpi_t));
+		retval = (cw_bhpi_t *)_cw_mem_malloc(a_mem, sizeof(cw_bhpi_t));
 		if (retval == NULL)
 			goto RETURN;
 		bzero(retval, sizeof(cw_bhpi_t));
 		retval->dealloc_func = (cw_opaque_dealloc_t *)mem_free;
-		retval->dealloc_arg = cw_g_mem;
+		retval->dealloc_arg = a_mem;
 	}
 
 	retval->priority = a_priority;
@@ -76,15 +76,15 @@ bhpi_delete(cw_bhpi_t *a_bhpi)
 }
 
 cw_bhp_t *
-bhp_new(cw_bhp_t *a_bhp, bhp_prio_comp_t *a_prio_comp)
+bhp_new(cw_bhp_t *a_bhp, cw_mem_t *a_mem, bhp_prio_comp_t *a_prio_comp)
 {
-	return bhp_p_new(a_bhp, a_prio_comp, FALSE);
+	return bhp_p_new(a_bhp, a_mem, a_prio_comp, FALSE);
 }
 
 cw_bhp_t *
-bhp_new_r(cw_bhp_t *a_bhp, bhp_prio_comp_t *a_prio_comp)
+bhp_new_r(cw_bhp_t *a_bhp, cw_mem_t *a_mem, bhp_prio_comp_t *a_prio_comp)
 {
-	return bhp_p_new(a_bhp, a_prio_comp, TRUE);
+	return bhp_p_new(a_bhp, a_mem, a_prio_comp, TRUE);
 }
 
 void
@@ -103,7 +103,7 @@ bhp_delete(cw_bhp_t *a_bhp)
 	if (a_bhp->is_thread_safe)
 		mtx_delete(&a_bhp->lock);
 	if (a_bhp->is_malloced)
-		_cw_free(a_bhp);
+		_cw_mem_free(a_bhp->mem, a_bhp);
 }
 
 void
@@ -144,7 +144,7 @@ bhp_insert(cw_bhp_t *a_bhp, cw_bhpi_t *a_bhpi)
 		mtx_lock(&a_bhp->lock);
 
 	/* Create and initialize temp_heap. */
-	bhp_new(&temp_heap, a_bhp->priority_compare);
+	bhp_new(&temp_heap, a_bhp->mem, a_bhp->priority_compare);
 	temp_heap.head = a_bhpi;
 	temp_heap.num_nodes = 1;
 
@@ -279,7 +279,7 @@ bhp_del_min(cw_bhp_t *a_bhp, void **r_priority, void **r_data)
 		}
 
 		/* Create a temporary heap and initialize it. */
-		bhp_new(&temp_heap, a_bhp->priority_compare);
+		bhp_new(&temp_heap, a_bhp->mem, a_bhp->priority_compare);
 		temp_heap.head = prev_pos;
 		bhp_p_union(a_bhp, &temp_heap);
 
@@ -415,15 +415,15 @@ bhp_priority_compare_uint64(const void *a_a, const void *a_b)
 }
 
 static cw_bhp_t *
-bhp_p_new(cw_bhp_t *a_bhp, bhp_prio_comp_t *a_prio_comp, cw_bool_t
-    a_is_thread_safe)
+bhp_p_new(cw_bhp_t *a_bhp, cw_mem_t *a_mem, bhp_prio_comp_t *a_prio_comp,
+    cw_bool_t a_is_thread_safe)
 {
 	cw_bhp_t	*retval;
 
 	_cw_check_ptr(a_prio_comp);
 
 	if (a_bhp == NULL) {
-		retval = (cw_bhp_t *)_cw_malloc(sizeof(cw_bhp_t));
+		retval = (cw_bhp_t *)_cw_mem_malloc(a_mem, sizeof(cw_bhp_t));
 		if (retval == NULL)
 			goto RETURN;
 		retval->is_malloced = TRUE;
@@ -431,6 +431,8 @@ bhp_p_new(cw_bhp_t *a_bhp, bhp_prio_comp_t *a_prio_comp, cw_bool_t
 		retval = a_bhp;
 		retval->is_malloced = FALSE;
 	}
+
+	retval->mem = a_mem;
 
 	if (a_is_thread_safe) {
 		retval->is_thread_safe = TRUE;

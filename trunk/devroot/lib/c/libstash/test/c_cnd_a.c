@@ -44,7 +44,7 @@ thread_entry_func(void *a_arg)
 int
 main()
 {
-	cw_cnd_t	cond_a, *cond_b;
+	cw_cnd_t	cond;
 	cw_mtx_t	mutex;
 	cw_thd_t	threads[_LIBSTASH_TEST_NUM_THREADS], thread;
 	struct cw_foo_s	foo_var;
@@ -57,27 +57,23 @@ main()
 
 	mtx_new(&mutex);
 
-	cond_b = cnd_new(NULL);
-	_cw_check_ptr(cond_b);
-	cnd_delete(cond_b);
-
-	_cw_assert(cnd_new(&cond_a) == &cond_a);
+	cnd_new(&cond);
 	/* These should do nothing. */
-	cnd_signal(&cond_a);
-	cnd_broadcast(&cond_a);
+	cnd_signal(&cond);
+	cnd_broadcast(&cond);
 
 	/* Set timeout for 1 second. */
 	timeout.tv_sec = 1;
 	timeout.tv_nsec = 0;
 
 	mtx_lock(&mutex);
-	_cw_assert(cnd_timedwait(&cond_a, &mutex, &timeout));
+	_cw_assert(cnd_timedwait(&cond, &mutex, &timeout));
 	mtx_unlock(&mutex);
 
 	/* Create argument for thd_new(). */
 	num_waiting = 0;
 	foo_var.num_waiting = &num_waiting;
-	foo_var.cond = &cond_a;
+	foo_var.cond = &cond;
 	foo_var.mutex = &mutex;
 
 	/* Test cnd_signal. */
@@ -91,7 +87,7 @@ main()
 		mtx_lock(&mutex);
 	}
 
-	cnd_signal(&cond_a);
+	cnd_signal(&cond);
 	mtx_unlock(&mutex);
 	thd_join(&thread);
 
@@ -108,13 +104,13 @@ main()
 		mtx_lock(&mutex);
 	}
 
-	cnd_broadcast(&cond_a);
+	cnd_broadcast(&cond);
 	mtx_unlock(&mutex);
 
 	for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
 		thd_join(&threads[i]);
 
-	cnd_delete(&cond_a);
+	cnd_delete(&cond);
 	mtx_delete(&mutex);
 
 	_cw_out_put("Test end\n");

@@ -13,11 +13,15 @@
 typedef struct cw_ch_s cw_ch_t;
 typedef struct cw_chi_s cw_chi_t;
 
+/* Declared here to avoid a circular dependency. */
+typedef struct cw_mem_s cw_mem_t;
+
 /*
  * Internal container used by ch, one per item.  chi's are internally linked to
  * multiple qr's in order to implement various LIFO/FIFO orderings.
  */
 struct cw_chi_s {
+	cw_mem_t	*mem;
 	cw_bool_t	is_malloced;	/* If space for a chi wasn't passed into
 					 * ch_insert(), this is TRUE. */
 	const void	*key;		/* Key. */
@@ -65,8 +69,8 @@ typedef cw_bool_t	cw_ch_key_comp_t (const void *, const void *);
 #define _CW_CH_TABLE2SIZEOF(t)						\
 	(sizeof(cw_ch_t) + (((t) - 1) * sizeof(cw_chi_t *)))
 
-cw_ch_t		*ch_new(cw_ch_t *a_ch, cw_uint32_t a_table_size, cw_ch_hash_t
-    *a_hash, cw_ch_key_comp_t *a_key_comp);
+cw_ch_t		*ch_new(cw_ch_t *a_ch, cw_mem_t *a_mem, cw_uint32_t
+    a_table_size, cw_ch_hash_t *a_hash, cw_ch_key_comp_t *a_key_comp);
 
 void		ch_delete(cw_ch_t *a_ch);
 

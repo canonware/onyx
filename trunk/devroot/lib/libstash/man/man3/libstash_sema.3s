@@ -71,7 +71,7 @@ Input(s):
 .RS
 .IR a_sem :
 .RS
-Pointer to space for a sem, or NULL.
+Pointer to space for a sem.
 .RE
 .IR a_count :
 .RS

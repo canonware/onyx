@@ -23,10 +23,10 @@ main()
 	libstash_init();
 	_cw_out_put("Test begin\n");
 
-	buf_a = buf_new_r(NULL);
-	buf_b = buf_new_r(NULL);
-	buf_c = buf_new_r(NULL);
-	buf_d = buf_new_r(NULL);
+	buf_a = buf_new_r(NULL, cw_g_mem);
+	buf_b = buf_new_r(NULL, cw_g_mem);
+	buf_c = buf_new_r(NULL, cw_g_mem);
+	buf_d = buf_new_r(NULL, cw_g_mem);
 
 	/* Create the data. */
 	{
@@ -37,7 +37,7 @@ main()
 		for (i = 1; i < 16; i++) {
 			for (j = 1; j < 16; j++) {
 				bufc = bufc_new((cw_bufc_t
-				    *)_cw_malloc(sizeof(cw_bufc_t)),
+				    *)_cw_malloc(sizeof(cw_bufc_t)), cw_g_mem,
 				    (cw_opaque_dealloc_t *)mem_free, cw_g_mem);
 				data = _cw_malloc(i * j);
 				bufc_set_buffer(bufc, data, i * j, FALSE,
@@ -50,7 +50,7 @@ main()
 
 		for (i = 0; i < 4; i++) {
 			bufc = bufc_new((cw_bufc_t
-			    *)_cw_malloc(sizeof(cw_bufc_t)),
+			    *)_cw_malloc(sizeof(cw_bufc_t)), cw_g_mem,
 			    (cw_opaque_dealloc_t *)mem_free, cw_g_mem);
 			data = _cw_malloc(4096);
 			bufc_set_buffer(bufc, data, 4096, FALSE,
@@ -61,7 +61,7 @@ main()
 
 		for (i = 0; i < 1024; i++) {
 			bufc = bufc_new((cw_bufc_t
-			    *)_cw_malloc(sizeof(cw_bufc_t)),
+			    *)_cw_malloc(sizeof(cw_bufc_t)), cw_g_mem,
 			    (cw_opaque_dealloc_t *)mem_free, cw_g_mem);
 			data = _cw_malloc(16);
 			bufc_set_buffer(bufc, data, 16, FALSE,

@@ -38,7 +38,7 @@ main()
 	libstash_init();
 	_cw_out_put("Test begin\n");
 
-	_cw_assert(thd_new(&thd, thread_entry_func, NULL) == &thd);
+	thd_new(&thd, thread_entry_func, NULL);
 	thd_yield();
 
 	_cw_out_put("thd_suspend()\n");

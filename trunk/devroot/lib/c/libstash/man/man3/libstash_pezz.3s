@@ -16,8 +16,8 @@ pezz - Grouped memory allocation of equal-size buffers.
 .I cw_pezz_t *
 .br
 .B pezz_new
-.RI ( "cw_pezz_t *a_pezz" ", " "cw_uint32_t a_buffer_size" ", "
-.IR "cw_uint32_t a_num_buffers" )
+.RI ( "cw_pezz_t *a_pezz" ", " "cw_mem_t *a_mem" ", "
+.IR "cw_uint32_t a_buffer_size" ", " "cw_uint32_t a_num_buffers" )
 
 .I void
 .br
@@ -75,14 +75,18 @@ is freed until \fBpezz_delete\fR() is called.
 .I cw_pezz_t *
 .br
 .B pezz_new
-.RI ( "cw_pezz_t *a_pezz" ", " "cw_uint32_t a_buffer_size" ", "
-.IR "cw_uint32_t a_num_buffers" )
+.RI ( "cw_pezz_t *a_pezz" ", " "cw_mem_t *a_mem" ", "
+.IR "cw_uint32_t a_buffer_size" ", " "cw_uint32_t a_num_buffers" )
 .RS
 Input(s):
 .RS
 .IR a_pezz :
 .RS
 Pointer to space for a pezz, or NULL.
+.RE
+.IR a_mem :
+.RS
+Pointer to the allocator to use internally.
 .RE
 .IR a_buffer_size :
 .RS

@@ -15,7 +15,7 @@
 
 typedef struct cw_dbg_s cw_dbg_t;
 
-cw_dbg_t	*dbg_new(void);
+cw_dbg_t	*dbg_new(cw_mem_t *a_mem);
 
 void		dbg_delete(cw_dbg_t *a_dbg);
 

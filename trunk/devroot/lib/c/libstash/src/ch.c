@@ -16,8 +16,8 @@
 #endif
 
 cw_ch_t *
-ch_new(cw_ch_t *a_ch, cw_uint32_t a_table_size, cw_ch_hash_t *a_hash,
-    cw_ch_key_comp_t *a_key_comp)
+ch_new(cw_ch_t *a_ch, cw_mem_t *a_mem, cw_uint32_t a_table_size, cw_ch_hash_t
+    *a_hash, cw_ch_key_comp_t *a_key_comp)
 {
 	cw_ch_t	*retval;
 

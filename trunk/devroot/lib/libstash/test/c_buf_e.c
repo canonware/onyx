@@ -45,7 +45,7 @@ foo(void)
 	print_arr(a, _ARR_SIZE, "a(0)");
 	print_arr(b, _ARR_SIZE, "b(0)");
 
-	buf_new(&buf);
+	buf_new(&buf, cw_g_mem);
 
 	print_arr(a, _ARR_SIZE, "a(1)");
 	print_arr(b, _ARR_SIZE, "b(1)");

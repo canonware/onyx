@@ -16,14 +16,14 @@
 #endif
 
 cw_pool_t *
-pool_new(cw_pool_t *a_pool, cw_uint32_t a_buffer_size)
+pool_new(cw_pool_t *a_pool, cw_mem_t *a_mem, cw_uint32_t a_buffer_size)
 {
 	cw_pool_t	*retval;
 
 	_cw_assert(a_buffer_size > 0);
 
 	if (a_pool == NULL) {
-		retval = (cw_pool_t *)_cw_malloc(sizeof(cw_pool_t));
+		retval = (cw_pool_t *)_cw_mem_malloc(a_mem, sizeof(cw_pool_t));
 		if (retval == NULL)
 			goto OOM_1;
 		memset(retval, 0, sizeof(cw_pool_t));
@@ -34,13 +34,14 @@ pool_new(cw_pool_t *a_pool, cw_uint32_t a_buffer_size)
 		retval->is_malloced = FALSE;
 	}
 
+	retval->mem = a_mem;
 	mtx_new(&retval->lock);
 
 	retval->buffer_size = a_buffer_size;
 	qs_new(&retval->spares);
 
 #ifdef _LIBSTASH_DBG
-	if (dch_new(&retval->addr_hash, 8, 6, 2, ch_hash_direct,
+	if (dch_new(&retval->addr_hash, a_mem, 8, 6, 2, ch_hash_direct,
 	    ch_key_comp_direct) == NULL)
 		goto OOM_2;
 
@@ -52,7 +53,7 @@ pool_new(cw_pool_t *a_pool, cw_uint32_t a_buffer_size)
 #ifdef _LIBSTASH_DBG
 	OOM_2:
 	if (retval->is_malloced)
-		_cw_free(retval);
+		_cw_mem_free(a_mem, retval);
 	retval = NULL;
 #endif
 	OOM_1:
@@ -93,7 +94,7 @@ pool_delete(cw_pool_t *a_pool)
 				    allocation->filename),
 				    allocation->line_num);
 			}
-			_cw_free(allocation);
+			_cw_mem_free(a_pool->mem, allocation);
 		}
 		dch_delete(&a_pool->addr_hash);
 	}
@@ -102,13 +103,13 @@ pool_delete(cw_pool_t *a_pool)
 	for (spare = qs_first(&a_pool->spares); spare != NULL; spare =
 	     qs_first(&a_pool->spares)) {
 		qs_remove_head(&a_pool->spares, link);
-		_cw_free(spare);
+		_cw_mem_free(a_pool->mem, spare);
 	}
 
 	mtx_delete(&a_pool->lock);
 
 	if (a_pool->is_malloced)
-		_cw_free(a_pool);
+		_cw_mem_free(a_pool->mem, a_pool);
 #ifdef _LIBSTASH_DBG
 	else
 		memset(a_pool, 0x5a, sizeof(cw_pool_t));
@@ -136,7 +137,7 @@ pool_drain(cw_pool_t *a_pool)
 	for (spare = qs_first(&a_pool->spares); spare != NULL; spare =
 	     qs_first(&a_pool->spares)) {
 		qs_remove_head(&a_pool->spares, link);
-		_cw_free(spare);
+		_cw_mem_free(a_pool->mem, spare);
 	}
 
 	mtx_unlock(&a_pool->lock);
@@ -158,9 +159,11 @@ pool_get(cw_pool_t *a_pool, const char *a_filename, cw_uint32_t a_line_num)
 		retval = (void *)spare;
 	} else {
 		if (a_pool->buffer_size >= sizeof(cw_pool_spare_t))
-			retval = (void *)_cw_malloc(a_pool->buffer_size);
+			retval = (void *)_cw_mem_malloc(a_pool->mem,
+			    a_pool->buffer_size);
 		else
-			retval = (void *)_cw_malloc(sizeof(cw_pool_spare_t));
+			retval = (void *)_cw_mem_malloc(a_pool->mem,
+			    sizeof(cw_pool_spare_t));
 	}
 
 #ifdef _LIBSTASH_DBG
@@ -189,7 +192,8 @@ pool_get(cw_pool_t *a_pool, const char *a_filename, cw_uint32_t a_line_num)
 		} else {
 			cw_pool_item_t	*allocation;
 
-			allocation = _cw_malloc(sizeof(cw_pool_item_t));
+			allocation = _cw_mem_malloc(a_pool->mem,
+			    sizeof(cw_pool_item_t));
 			if (allocation == NULL) {
 				if (dbg_is_registered(cw_g_dbg, "pool_error")) {
 					_cw_out_put_e("Memory allocation error;"
@@ -272,7 +276,7 @@ pool_put(cw_pool_t *a_pool, void *a_buffer, const char *a_filename, cw_uint32_t
 				    allocation->filename, allocation->line_num);
 			}
 			memset(a_buffer, 0x5a, a_pool->buffer_size);
-			_cw_free(allocation);
+			_cw_mem_free(a_pool->mem, allocation);
 		}
 	}
 #endif

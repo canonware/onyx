@@ -34,7 +34,7 @@
 
 /* Include files that are _not_ installed. */
 {
-  local priv_incs = mem_l.h;
+  local priv_incs = ;
   priv_incs = [fromto % [srcdir]/lib/c/libstash/include/libstash/% [priv_incs]];
 
   PRIV_INCS = [PRIV_INCS] [priv_incs];

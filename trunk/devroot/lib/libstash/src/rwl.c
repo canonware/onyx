@@ -11,32 +11,19 @@
 
 #include "../include/libstash/libstash.h"
 
-cw_rwl_t *
+void
 rwl_new(cw_rwl_t *a_rwl)
 {
-	cw_rwl_t	*retval;
+	_cw_check_ptr(a_rwl);
 
-	if (a_rwl == NULL) {
-		retval = (cw_rwl_t *)_cw_malloc(sizeof(cw_rwl_t));
-		if (retval == NULL)
-			goto RETURN;
-		retval->is_malloced = TRUE;
-	} else {
-		retval = a_rwl;
-		retval->is_malloced = FALSE;
-	}
+	mtx_new(&a_rwl->lock);
+	cnd_new(&a_rwl->read_wait);
+	cnd_new(&a_rwl->write_wait);
 
-	mtx_new(&retval->lock);
-	cnd_new(&retval->read_wait);
-	cnd_new(&retval->write_wait);
-
-	retval->num_readers = 0;
-	retval->num_writers = 0;
-	retval->read_waiters = 0;
-	retval->write_waiters = 0;
-
-	RETURN:
-	return retval;
+	a_rwl->num_readers = 0;
+	a_rwl->num_writers = 0;
+	a_rwl->read_waiters = 0;
+	a_rwl->write_waiters = 0;
 }
 
 void
@@ -47,9 +34,6 @@ rwl_delete(cw_rwl_t *a_rwl)
 	mtx_delete(&a_rwl->lock);
 	cnd_delete(&a_rwl->read_wait);
 	cnd_delete(&a_rwl->write_wait);
-
-	if (a_rwl->is_malloced)
-		_cw_free(a_rwl);
 }
 
 void

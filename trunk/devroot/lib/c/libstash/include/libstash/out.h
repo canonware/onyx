@@ -30,6 +30,9 @@ struct cw_out_s {
 	cw_uint32_t	magic;
 #endif
 
+	/* Allocator. */
+	cw_mem_t	*mem;
+
 	cw_bool_t	is_malloced;
 	cw_sint32_t	fd;
 
@@ -47,7 +50,7 @@ struct cw_out_ent_s {
 	cw_out_render_t	*render_func;
 };
 
-cw_out_t	*out_new(cw_out_t *a_out);
+cw_out_t	*out_new(cw_out_t *a_out, cw_mem_t *a_mem);
 
 void		out_delete(cw_out_t *a_out);
 

@@ -38,11 +38,12 @@ main()
 	libstash_init();
 	_cw_out_put("Test begin\n");
 
-	h = bhp_new_r(NULL, bhp_priority_compare_sint32);
+	h = bhp_new_r(NULL, cw_g_mem, bhp_priority_compare_sint32);
 	_cw_check_ptr(h);
 
 	for (i = 0; i < _LIBSTASH_TEST_NUM_NODES; i++) {
-		bhpi = bhpi_new(NULL, &(nums[i]), &(nums[i]), NULL, NULL);
+		bhpi = bhpi_new(NULL, cw_g_mem, &(nums[i]), &(nums[i]), NULL,
+		    NULL);
 		_cw_check_ptr(bhpi);
 		bhp_insert(h, bhpi);
 	}
@@ -50,7 +51,8 @@ main()
 		_cw_assert(bhp_del_min(h, (void **)&a, (void **)&b) == FALSE);
 
 	for (i = 0; i < _LIBSTASH_TEST_NUM_NODES; i++) {
-		bhpi = bhpi_new(NULL, &(nums[i]), &(nums[i]), NULL, NULL);
+		bhpi = bhpi_new(NULL, cw_g_mem, &(nums[i]), &(nums[i]), NULL,
+		    NULL);
 		_cw_check_ptr(bhpi);
 		bhp_insert(h, bhpi);
 	}
