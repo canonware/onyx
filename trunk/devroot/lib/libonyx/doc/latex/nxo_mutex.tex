@@ -20,24 +20,75 @@ The \classname{nxo\_mutex} class is a subclass of the \classname{nxo} class.
 
 \subsubsection{API}
 \begin{capi}
-\label{nxo_mutex_}
-\index{\cfunc{nxo\_mutex\_}{}}
-\citem{\cfunc[]{nxo\_mutex\_}{}}
+\label{nxo_mutex_new}
+\index{\cfunc{nxo\_mutex\_new}{}}
+\citem{\cfunc[void]{nxo\_mutex\_new}{cw\_nxo\_t *a\_nxo, cw\_nx\_t *a\_nx}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_nxo: ]
 			Pointer to a mutex \classname{nxo}.
-		\item[: ]
+		\item[a\_nx: ]
+			Pointer to an \classname{nx}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Constructor.
+	\end{capilist}
+\label{nxo_mutex_lock}
+\index{\cfunc{nxo\_mutex\_lock}{}}
+\citem{\cfunc[void]{nxo\_mutex\_lock}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a mutex \classname{nxo}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Lock \cvar{a\_nxo}.
+	\end{capilist}
+\label{nxo_mutex_trylock}
+\index{\cfunc{nxo\_mutex\_trylock}{}}
+\citem{\cfunc[cw\_bool\_t]{nxo\_mutex\_trylock}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a mutex \classname{nxo}.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[FALSE: ]
+				Success.
+			\item[TRUE: ]
+				Failure.
+			\end{description}
 		\end{description}
-	\item[Exception(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
-		\end{description}
+	\item[Exception(s): ] None.
 	\item[Description: ]
+		Try to lock \cvar{a\_nxo}, but return immediately with an error
+		if unable to do so.
+	\end{capilist}
+\label{nxo_mutex_unlock}
+\index{\cfunc{nxo\_mutex\_unlock}{}}
+\citem{\cfunc[void]{nxo\_mutex\_unlock}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a mutex \classname{nxo}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Unlock \cvar{a\_nxo}.
 	\end{capilist}
 \end{capi}
