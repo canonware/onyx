@@ -54,7 +54,7 @@ private	void	re__copy_and_pad	__P((char *, char *, size_t));
 private	void	re_printstr		__P((EditLine *, char *, char *,
 					     char *));
 # define __F el->el_errfile
-# define RE_DEBUG(a, b, c)	do 				\
+# define _RE_DEBUG(a, b, c)	do 				\
 				    if (a) {			\
 					(void) fprintf b;	\
 					c;			\
@@ -69,13 +69,13 @@ re_printstr(el, str, f, t)
     char *str;
     char *f, *t;
 {
-    RE_DEBUG(1,(__F, "%s:\"", str),);
+    _RE_DEBUG(1,(__F, "%s:\"", str),);
     while (f < t)
-	RE_DEBUG(1,(__F, "%c", *f++ & 0177),);
-    RE_DEBUG(1,(__F, "\"\r\n"),);
+	_RE_DEBUG(1,(__F, "%c", *f++ & 0177),);
+    _RE_DEBUG(1,(__F, "\"\r\n"),);
 }
 #else
-# define RE_DEBUG(a, b, c)
+# define _RE_DEBUG(a, b, c)
 #endif
 
 
@@ -131,7 +131,7 @@ re_putc(el, c)
     EditLine *el;
     int c;
 {
-    RE_DEBUG(1,(__F, "printing %3.3o '%c'\r\n", c, c),);
+    _RE_DEBUG(1,(__F, "printing %3.3o '%c'\r\n", c, c),);
 
     el->el_vdisplay[el->el_refresh.r_cursor.v][el->el_refresh.r_cursor.h] = c;
     el->el_refresh.r_cursor.h++;				/* advance to next place */
@@ -140,7 +140,7 @@ re_putc(el, c)
 						/* assure end of line */
 	el->el_refresh.r_cursor.h = 0;				/* reset it. */
 	el->el_refresh.r_cursor.v++;
-	RE_DEBUG(el->el_refresh.r_cursor.v >= el->el_term.t_size.v,
+	_RE_DEBUG(el->el_refresh.r_cursor.v >= el->el_term.t_size.v,
 		 (__F, "\r\nre_putc: overflow! r_cursor.v == %d > %d\r\n",
 		  el->el_refresh.r_cursor.v, el->el_term.t_size.v), abort());
     }
@@ -161,7 +161,7 @@ re_refresh(el)
     char *cp;
     coord_t     cur;
 
-    RE_DEBUG(1,(__F, "el->el_line.buffer = :%s:\r\n", el->el_line.buffer),);
+    _RE_DEBUG(1,(__F, "el->el_line.buffer = :%s:\r\n", el->el_line.buffer),);
 
     /* reset the Drawing cursor */
     el->el_refresh.r_cursor.h = 0;
@@ -189,12 +189,12 @@ re_refresh(el)
     el->el_refresh.r_newcv = el->el_refresh.r_cursor.v;
     re_putc(el, '\0');		/* put NUL on end */
 
-    RE_DEBUG(1,(__F,
+    _RE_DEBUG(1,(__F,
 	     "term.h=%d vcur.h=%d vcur.v=%d vdisplay[0]=\r\n:%80.80s:\r\n",
 	     el->el_term.t_size.h, el->el_refresh.r_cursor.h,
 	     el->el_refresh.r_cursor.v, el->el_vdisplay[0]),);
 
-    RE_DEBUG(1,(__F, "updating %d lines.\r\n", el->el_refresh.r_newcv),);
+    _RE_DEBUG(1,(__F, "updating %d lines.\r\n", el->el_refresh.r_newcv),);
     for (i = 0; i <= el->el_refresh.r_newcv; i++) {
 	/* NOTE THAT re_update_line MAY CHANGE el_display[i] */
 	re_update_line(el, el->el_display[i], el->el_vdisplay[i], i);
@@ -208,7 +208,7 @@ re_refresh(el)
 	re__copy_and_pad(el->el_display[i], el->el_vdisplay[i],
 			el->el_term.t_size.h);
     }
-    RE_DEBUG(1,(__F,
+    _RE_DEBUG(1,(__F,
 	 "\r\nel->el_refresh.r_cursor.v=%d,el->el_refresh.r_oldcv=%d i=%d\r\n",
 	 el->el_refresh.r_cursor.v, el->el_refresh.r_oldcv, i),);
 
@@ -224,7 +224,7 @@ re_refresh(el)
 	}
 
     el->el_refresh.r_oldcv = el->el_refresh.r_newcv;	/* set for next time */
-    RE_DEBUG(1,(__F,
+    _RE_DEBUG(1,(__F,
 		"\r\ncursor.h = %d, cursor.v = %d, cur.h = %d, cur.v = %d\r\n",
 		el->el_refresh.r_cursor.h, el->el_refresh.r_cursor.v,
 		cur.h, cur.v),);
@@ -268,9 +268,9 @@ re_insert(el, d, dat, dlen, s, num)
     if (num > dlen - dat)
 	num = dlen - dat;
 
-    RE_DEBUG(1,(__F, "re_insert() starting: %d at %d max %d, d == \"%s\"\n",
+    _RE_DEBUG(1,(__F, "re_insert() starting: %d at %d max %d, d == \"%s\"\n",
 	    num, dat, dlen, d),);
-    RE_DEBUG(1,(__F, "s == \"%s\"n", s),);
+    _RE_DEBUG(1,(__F, "s == \"%s\"n", s),);
 
     /* open up the space for num chars */
     if (num > 0) {
@@ -280,18 +280,18 @@ re_insert(el, d, dat, dlen, s, num)
 	    *b-- = *a--;
 	d[dlen] = '\0';		/* just in case */
     }
-    RE_DEBUG(1,(__F,
+    _RE_DEBUG(1,(__F,
 		"re_insert() after insert: %d at %d max %d, d == \"%s\"\n",
 		num, dat, dlen, d),);
-    RE_DEBUG(1,(__F, "s == \"%s\"n", s),);
+    _RE_DEBUG(1,(__F, "s == \"%s\"n", s),);
 
     /* copy the characters */
     for (a = d + dat; (a < d + dlen) && (num > 0); num--)
 	*a++ = *s++;
 
-    RE_DEBUG(1,(__F, "re_insert() after copy: %d at %d max %d, %s == \"%s\"\n",
+    _RE_DEBUG(1,(__F, "re_insert() after copy: %d at %d max %d, %s == \"%s\"\n",
 	     num, dat, dlen, d, s),);
-    RE_DEBUG(1,(__F, "s == \"%s\"n", s),);
+    _RE_DEBUG(1,(__F, "s == \"%s\"n", s),);
 } /* end re_insert */
 
 
@@ -314,7 +314,7 @@ re_delete(el, d, dat, dlen, num)
 	return;
     }
 
-    RE_DEBUG(1,(__F, "re_delete() starting: %d at %d max %d, d == \"%s\"\n",
+    _RE_DEBUG(1,(__F, "re_delete() starting: %d at %d max %d, d == \"%s\"\n",
 	    num, dat, dlen, d),);
 
     /* open up the space for num chars */
@@ -325,7 +325,7 @@ re_delete(el, d, dat, dlen, num)
 	    *b++ = *a++;
 	d[dlen] = '\0';		/* just in case */
     }
-    RE_DEBUG(1,(__F, "re_delete() after delete: %d at %d max %d, d == \"%s\"\n",
+    _RE_DEBUG(1,(__F, "re_delete() after delete: %d at %d max %d, d == \"%s\"\n",
 	    num, dat, dlen, d),);
 } /* end re_delete */
 
@@ -419,7 +419,7 @@ re_update_line(el, old, new, i)
      * if no diff, continue to next line of redraw
      */
     if (*ofd == '\0' && *nfd == '\0') {
-	RE_DEBUG(1,(__F, "no difference.\r\n"),);
+	_RE_DEBUG(1,(__F, "no difference.\r\n"),);
 	return;
     }
 
@@ -560,14 +560,14 @@ re_update_line(el, old, new, i)
     fx = (nsb - nfd) - (osb - ofd);
     sx = (nls - nse) - (ols - ose);
 
-    RE_DEBUG(1,(__F, "\n"),);
-    RE_DEBUG(1,(__F, "ofd %d, osb %d, ose %d, ols %d, oe %d\n",
+    _RE_DEBUG(1,(__F, "\n"),);
+    _RE_DEBUG(1,(__F, "ofd %d, osb %d, ose %d, ols %d, oe %d\n",
 	    ofd - old, osb - old, ose - old, ols - old, oe - old),);
-    RE_DEBUG(1,(__F, "nfd %d, nsb %d, nse %d, nls %d, ne %d\n",
+    _RE_DEBUG(1,(__F, "nfd %d, nsb %d, nse %d, nls %d, ne %d\n",
 	    nfd - new, nsb - new, nse - new, nls - new, ne - new),);
-    RE_DEBUG(1,(__F,
+    _RE_DEBUG(1,(__F,
 		"xxx-xxx:\"00000000001111111111222222222233333333334\"\r\n"),);
-    RE_DEBUG(1,(__F,
+    _RE_DEBUG(1,(__F,
 		"xxx-xxx:\"01234567890123456789012345678901234567890\"\r\n"),);
 #ifdef DEBUG_REFRESH
     re_printstr(el, "old- oe", old, oe);
@@ -631,7 +631,7 @@ re_update_line(el, old, new, i)
      * We need to delete characters! else No insert or delete
      */
     if ((nsb != nfd) && fx > 0 && ((p - old) + fx <= el->el_term.t_size.h)) {
-	RE_DEBUG(1,(__F, "first diff insert at %d...\r\n", nfd - new),);
+	_RE_DEBUG(1,(__F, "first diff insert at %d...\r\n", nfd - new),);
 	/*
 	 * Move to the first char to insert, where the first diff is.
 	 */
@@ -640,12 +640,12 @@ re_update_line(el, old, new, i)
 	 * Check if we have stuff to keep at end
 	 */
 	if (nsb != ne) {
-	    RE_DEBUG(1,(__F, "with stuff to keep at end\r\n"),);
+	    _RE_DEBUG(1,(__F, "with stuff to keep at end\r\n"),);
 	    /*
 	     * insert fx chars of new starting at nfd
 	     */
 	    if (fx > 0) {
-		RE_DEBUG(!EL_CAN_INSERT,
+		_RE_DEBUG(!EL_CAN_INSERT,
 			 (__F, "ERROR: cannot insert in early first diff\n"),);
 		term_insertwrite(el, nfd, fx);
 		re_insert(el, old, ofd - old, el->el_term.t_size.h, nfd, fx);
@@ -657,7 +657,7 @@ re_update_line(el, old, new, i)
 	    re__strncopy(ofd + fx, nfd + fx, (nsb - nfd) - fx);
 	}
 	else {
-	    RE_DEBUG(1,(__F, "without anything to save\r\n"),);
+	    _RE_DEBUG(1,(__F, "without anything to save\r\n"),);
 	    term_overwrite(el, nfd, (nsb - nfd));
 	    re__strncopy(ofd, nfd, (nsb - nfd));
 	    /*
@@ -667,7 +667,7 @@ re_update_line(el, old, new, i)
 	}
     }
     else if (fx < 0) {
-	RE_DEBUG(1,(__F, "first diff delete at %d...\r\n", ofd - old),);
+	_RE_DEBUG(1,(__F, "first diff delete at %d...\r\n", ofd - old),);
 	/*
 	 * move to the first char to delete where the first diff is
 	 */
@@ -676,13 +676,13 @@ re_update_line(el, old, new, i)
 	 * Check if we have stuff to save
 	 */
 	if (osb != oe) {
-	    RE_DEBUG(1,(__F, "with stuff to save at end\r\n"),);
+	    _RE_DEBUG(1,(__F, "with stuff to save at end\r\n"),);
 	    /*
 	     * fx is less than zero *always* here but we check for code
 	     * symmetry
 	     */
 	    if (fx < 0) {
-		RE_DEBUG(!EL_CAN_DELETE,
+		_RE_DEBUG(!EL_CAN_DELETE,
 			 (__F, "ERROR: cannot delete in first diff\n"),);
 		term_deletechars(el, -fx);
 		re_delete(el, old, ofd - old, el->el_term.t_size.h, -fx);
@@ -695,12 +695,12 @@ re_update_line(el, old, new, i)
 
 	}
 	else {
-	    RE_DEBUG(1,(__F, "but with nothing left to save\r\n"),);
+	    _RE_DEBUG(1,(__F, "but with nothing left to save\r\n"),);
 	    /*
 	     * write (nsb-nfd) chars of new starting at nfd
 	     */
 	    term_overwrite(el, nfd, (nsb - nfd));
-	    RE_DEBUG(1,(__F, "cleareol %d\n", (oe - old) - (ne - new)),);
+	    _RE_DEBUG(1,(__F, "cleareol %d\n", (oe - old) - (ne - new)),);
 	    term_clear_EOL(el, (oe - old) - (ne - new));
 	    /*
 	     * Done
@@ -712,7 +712,7 @@ re_update_line(el, old, new, i)
 	fx = 0;
 
     if (sx < 0) {
-	RE_DEBUG(1,(__F, "second diff delete at %d...\r\n", (ose - old) + fx),);
+	_RE_DEBUG(1,(__F, "second diff delete at %d...\r\n", (ose - old) + fx),);
 	/*
 	 * Check if we have stuff to delete
 	 */
@@ -725,12 +725,12 @@ re_update_line(el, old, new, i)
 	 * Check if we have stuff to save
 	 */
 	if (ols != oe) {
-	    RE_DEBUG(1,(__F, "with stuff to save at end\r\n"),);
+	    _RE_DEBUG(1,(__F, "with stuff to save at end\r\n"),);
 	    /*
 	     * Again a duplicate test.
 	     */
 	    if (sx < 0) {
-		RE_DEBUG(!EL_CAN_DELETE,
+		_RE_DEBUG(!EL_CAN_DELETE,
 			 (__F, "ERROR: cannot delete in second diff\n"),);
 		term_deletechars(el, -sx);
 	    }
@@ -741,9 +741,9 @@ re_update_line(el, old, new, i)
 	    term_overwrite(el, nse, (nls - nse));
 	}
 	else {
-	    RE_DEBUG(1,(__F, "but with nothing left to save\r\n"),);
+	    _RE_DEBUG(1,(__F, "but with nothing left to save\r\n"),);
 	    term_overwrite(el, nse, (nls - nse));
-	    RE_DEBUG(1,(__F, "cleareol %d\n", (oe - old) - (ne - new)),);
+	    _RE_DEBUG(1,(__F, "cleareol %d\n", (oe - old) - (ne - new)),);
 	    term_clear_EOL(el, (oe - old) - (ne - new));
 	}
     }
@@ -752,14 +752,14 @@ re_update_line(el, old, new, i)
      * if we have a first insert AND WE HAVEN'T ALREADY DONE IT...
      */
     if ((nsb != nfd) && (osb - ofd) <= (nsb - nfd) && (fx == 0)) {
-	RE_DEBUG(1,(__F, "late first diff insert at %d...\r\n", nfd - new),);
+	_RE_DEBUG(1,(__F, "late first diff insert at %d...\r\n", nfd - new),);
 
 	term_move_to_char(el, nfd - new);
 	/*
 	 * Check if we have stuff to keep at the end
 	 */
 	if (nsb != ne) {
-	    RE_DEBUG(1,(__F, "with stuff to keep at end\r\n"),);
+	    _RE_DEBUG(1,(__F, "with stuff to keep at end\r\n"),);
 	    /*
 	     * We have to recalculate fx here because we set it
 	     * to zero above as a flag saying that we hadn't done
@@ -770,7 +770,7 @@ re_update_line(el, old, new, i)
 		/*
 		 * insert fx chars of new starting at nfd
 		 */
-		RE_DEBUG(!EL_CAN_INSERT,
+		_RE_DEBUG(!EL_CAN_INSERT,
 			 (__F, "ERROR: cannot insert in late first diff\n"),);
 		term_insertwrite(el, nfd, fx);
 		re_insert(el, old, ofd - old, el->el_term.t_size.h, nfd, fx);
@@ -783,7 +783,7 @@ re_update_line(el, old, new, i)
 	    re__strncopy(ofd + fx, nfd + fx, (nsb - nfd) - fx);
 	}
 	else {
-	    RE_DEBUG(1,(__F, "without anything to save\r\n"),);
+	    _RE_DEBUG(1,(__F, "without anything to save\r\n"),);
 	    term_overwrite(el, nfd, (nsb - nfd));
 	    re__strncopy(ofd, nfd, (nsb - nfd));
 	}
@@ -793,13 +793,13 @@ re_update_line(el, old, new, i)
      * line is now NEW up to nse
      */
     if (sx >= 0) {
-	RE_DEBUG(1,(__F, "second diff insert at %d...\r\n", nse - new),);
+	_RE_DEBUG(1,(__F, "second diff insert at %d...\r\n", nse - new),);
 	term_move_to_char(el, nse - new);
 	if (ols != oe) {
-	    RE_DEBUG(1,(__F, "with stuff to keep at end\r\n"),);
+	    _RE_DEBUG(1,(__F, "with stuff to keep at end\r\n"),);
 	    if (sx > 0) {
 		/* insert sx chars of new starting at nse */
-		RE_DEBUG(!EL_CAN_INSERT,
+		_RE_DEBUG(!EL_CAN_INSERT,
 		         (__F, "ERROR: cannot insert in second diff\n"),);
 		term_insertwrite(el, nse, sx);
 	    }
@@ -810,7 +810,7 @@ re_update_line(el, old, new, i)
 	    term_overwrite(el, nse + sx, (nls - nse) - sx);
 	}
 	else {
-	    RE_DEBUG(1,(__F, "without anything to save\r\n"),);
+	    _RE_DEBUG(1,(__F, "without anything to save\r\n"),);
 	    term_overwrite(el, nse, (nls - nse));
 
 	    /*
@@ -820,7 +820,7 @@ re_update_line(el, old, new, i)
 	     */
 	}
     }
-    RE_DEBUG(1,(__F, "done.\r\n"),);
+    _RE_DEBUG(1,(__F, "done.\r\n"),);
 } /* re_update_line */
 
 
