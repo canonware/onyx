@@ -429,8 +429,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				if (a_stilt->defer_count > 0)
 					a_stilt->defer_count--;
 				else {
-					/* XXX Missing '{'. */
-					_cw_error("XXX Missing '}'\n");
+					/* Missing '{'. */
+					xep_throw(_CW_XEPV_SYNTAXERROR);
 				}
 				stilt_p_procedure_accept(a_stilt);
 				break;
@@ -450,6 +450,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				a_stilt->state = STATE_NUMBER;
 				a_stilt->meta.number.sign = SIGN_POS;
 				a_stilt->meta.number.base = 10;
+				a_stilt->meta.number.exp_offset = -1;
 				a_stilt->meta.number.point_offset = -1;
 				a_stilt->meta.number.begin_offset = 1;
 				_CW_STILT_PUTC(c);
@@ -458,6 +459,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				a_stilt->state = STATE_NUMBER;
 				a_stilt->meta.number.sign = SIGN_NEG;
 				a_stilt->meta.number.base = 10;
+				a_stilt->meta.number.exp_offset = -1;
 				a_stilt->meta.number.point_offset = -1;
 				a_stilt->meta.number.begin_offset = 1;
 				_CW_STILT_PUTC(c);
@@ -466,6 +468,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				a_stilt->state = STATE_NUMBER;
 				a_stilt->meta.number.sign = SIGN_POS;
 				a_stilt->meta.number.base = 10;
+				a_stilt->meta.number.exp_offset = -1;
 				a_stilt->meta.number.point_offset = 0;
 				a_stilt->meta.number.begin_offset = 0;
 				_CW_STILT_PUTC(c);
@@ -475,6 +478,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				a_stilt->state = STATE_NUMBER;
 				a_stilt->meta.number.sign = SIGN_POS;
 				a_stilt->meta.number.base = 10;
+				a_stilt->meta.number.exp_offset = -1;
 				a_stilt->meta.number.point_offset = -1;
 				a_stilt->meta.number.begin_offset = 0;
 				_CW_STILT_PUTC(c);
@@ -695,8 +699,18 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				    a_stilt->meta.number.begin_offset > 0) &&
 				    (a_stilt->meta.number.point_offset ==
 				    -1))) {
-					stilt_p_token_print(a_stilt, a_stilts,
-					    a_stilt->index, "number");
+					if (a_stilt->meta.number.point_offset ==
+					    -1) {
+						/* Integer. */
+						stilt_p_token_print(a_stilt,
+						    a_stilts, a_stilt->index,
+						    "integer");
+					} else {
+						/* Real. */
+						stilt_p_token_print(a_stilt,
+						    a_stilts, a_stilt->index,
+						    "real");
+					}
 					stilt_p_reset(a_stilt);
 				} else {
 					/* No number specified, so a name. */
@@ -715,8 +729,18 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				    a_stilt->meta.number.begin_offset > 0) &&
 				    (a_stilt->meta.number.point_offset ==
 				    -1))) {
-					stilt_p_token_print(a_stilt, a_stilts,
-					    a_stilt->index, "number");
+					if (a_stilt->meta.number.point_offset ==
+					    -1) {
+						/* Integer. */
+						stilt_p_token_print(a_stilt,
+						    a_stilts, a_stilt->index,
+						    "integer");
+					} else {
+						/* Real. */
+						stilt_p_token_print(a_stilt,
+						    a_stilts, a_stilt->index,
+						    "real");
+					}
 					stilt_p_reset(a_stilt);
 				} else {
 					/* No number specified, so a name. */
@@ -1066,7 +1090,7 @@ static void
 stilt_p_token_print(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t
     a_length, const cw_uint8_t *a_note)
 {
-#if (0)
+#if (1)
 #ifdef _LIBSTIL_DBG
 	cw_uint32_t	line, col;
 
@@ -1234,7 +1258,7 @@ stilt_p_name_accept(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts)
 
 			stilo = stils_push(&a_stilt->exec_stils);
 			if (stilt_dict_stack_search(a_stilt, &key, stilo))
-				_cw_error("XXX Undefined name");
+				xep_throw(_CW_XEPV_UNDEFINED);
 			stilo_attrs_set(stilo, STILOA_EXECUTABLE);
 
 			stilt_p_reset(a_stilt);
@@ -1267,7 +1291,7 @@ stilt_p_name_accept(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts)
 		
 		stilo = stils_push(&a_stilt->data_stils);
 		if (stilt_dict_stack_search(a_stilt, &key, stilo))
-			_cw_error("XXX Undefined name");
+			xep_throw(_CW_XEPV_UNDEFINED);
 
 		stilo_delete(&key, a_stilt);
 		stilt_p_reset(a_stilt);

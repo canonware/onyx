@@ -134,6 +134,7 @@ struct cw_stilt_s {
 				SIGN_NEG
 			}		sign;
 			cw_uint32_t	base;
+			cw_sint32_t	exp_offset;
 			cw_sint32_t	point_offset;
 			cw_uint32_t	begin_offset;
 		}       number;

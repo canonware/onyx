@@ -720,63 +720,63 @@ stilo_p_key_comp(const void *a_k1, const void *a_k2)
 void
 stilo_add(const cw_stilo_t *a_a, const cw_stilo_t *a_b, cw_stilo_t *r_sum)
 {
-	_cw_not_reached();	/* XXX */
+	_cw_error("XXX Not implemented");
 }
 
 void
 stilo_sub(const cw_stilo_t *a_num, const cw_stilo_t *a_sub, cw_stilo_t
     *r_result)
 {
-	_cw_not_reached();	/* XXX */
+	_cw_error("XXX Not implemented");
 }
 
 void
 stilo_mul(const cw_stilo_t *a_a, const cw_stilo_t *a_b, cw_stilo_t *r_product)
 {
-	_cw_not_reached();	/* XXX */
+	_cw_error("XXX Not implemented");
 }
 
 void
 stilo_div(const cw_stilo_t *a_num, const cw_stilo_t *a_div, cw_stilo_t
     *r_quotient)
 {
-	_cw_not_reached();	/* XXX */
+	_cw_error("XXX Not implemented");
 }
 	
 void
 stilo_abs(const cw_stilo_t *a_a, const cw_stilo_t *a_b, cw_stilo_t *r_abs)
 {
-	_cw_not_reached();	/* XXX */
+	_cw_error("XXX Not implemented");
 }
 	
 void
 stilo_neg(const cw_stilo_t *a_a, const cw_stilo_t *a_b, cw_stilo_t *r_neg)
 {
-	_cw_not_reached();	/* XXX */
+	_cw_error("XXX Not implemented");
 }
 	
 void
 stilo_ceiling(const cw_stilo_t *a_num, cw_stilo_t *r_ceiling)
 {
-	_cw_not_reached();	/* XXX */
+	_cw_error("XXX Not implemented");
 }
 	
 void
 stilo_floor(const cw_stilo_t *a_num, cw_stilo_t *r_floor)
 {
-	_cw_not_reached();	/* XXX */
+	_cw_error("XXX Not implemented");
 }
 	
 void
 stilo_round(const cw_stilo_t *a_num, cw_stilo_t *r_round)
 {
-	_cw_not_reached();	/* XXX */
+	_cw_error("XXX Not implemented");
 }
 	
 void
 stilo_truncate(const cw_stilo_t *a_num, cw_stilo_t *r_truncate)
 {
-	_cw_not_reached();	/* XXX */
+	_cw_error("XXX Not implemented");
 }
 
 /*
@@ -922,7 +922,7 @@ stiloe_p_array_ref_iterate(cw_stiloe_t *a_stiloe, cw_bool_t a_reset)
 static void
 stilo_p_array_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type)
 {
-	_cw_not_reached();	/* XXX */
+	_cw_error("XXX Not implemented");
 }
 
 static void
@@ -1110,7 +1110,7 @@ stilo_boolean_new(cw_stilo_t *a_stilo, cw_bool_t a_val)
 static void
 stilo_p_boolean_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type)
 {
-	_cw_not_reached();	/* XXX */
+	_cw_error("XXX Not implemented");
 }
 
 static void
@@ -1157,20 +1157,20 @@ stilo_condition_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 static void
 stilo_p_condition_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 {
-	_cw_not_reached();	/* XXX */
+	_cw_error("XXX Not implemented");
 }
 
 static cw_stiloe_t *
 stiloe_p_condition_ref_iterate(cw_stiloe_t *a_stilo, cw_bool_t a_reset)
 {
-	_cw_not_reached();	/* XXX */
+	_cw_error("XXX Not implemented");
 	return NULL;	/* XXX */
 }
 
 static void
 stilo_p_condition_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type)
 {
-	_cw_not_reached();	/* XXX */
+	_cw_error("XXX Not implemented");
 }
 
 static void
@@ -1304,7 +1304,7 @@ stiloe_p_dict_ref_iterate(cw_stiloe_t *a_stiloe, cw_bool_t a_reset)
 static void
 stilo_p_dict_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type)
 {
-	_cw_not_reached();	/* XXX */
+	_cw_error("XXX Not implemented");
 }
 
 static void
@@ -1540,26 +1540,26 @@ stilo_file_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 static void
 stilo_p_file_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 {
-	_cw_not_reached();	/* XXX */
+	_cw_error("XXX Not implemented");
 }
 
 static cw_stiloe_t *
 stiloe_p_file_ref_iterate(cw_stiloe_t *a_stilo, cw_bool_t a_reset)
 {
-	_cw_not_reached();	/* XXX */
+	_cw_error("XXX Not implemented");
 	return NULL;	/* XXX */
 }
 
 static void
 stilo_p_file_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type)
 {
-	_cw_not_reached();	/* XXX */
+	_cw_error("XXX Not implemented");
 }
 
 static void
 stilo_p_file_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
 {
-	_cw_not_reached();	/* XXX */
+	_cw_error("XXX Not implemented");
 }
 
 static void
@@ -1586,26 +1586,26 @@ stilo_hook_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 static void
 stilo_p_hook_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 {
-	_cw_not_reached();	/* XXX */
+	_cw_error("XXX Not implemented");
 }
 
 static cw_stiloe_t *
 stiloe_p_hook_ref_iterate(cw_stiloe_t *a_stilo, cw_bool_t a_reset)
 {
-	_cw_not_reached();	/* XXX */
+	_cw_error("XXX Not implemented");
 	return NULL;	/* XXX */
 }
 
 static void
 stilo_p_hook_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type)
 {
-	_cw_not_reached();	/* XXX */
+	_cw_error("XXX Not implemented");
 }
 
 static void
 stilo_p_hook_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
 {
-	_cw_not_reached();	/* XXX */
+	_cw_error("XXX Not implemented");
 }
 
 static void
@@ -1632,7 +1632,7 @@ stilo_integer_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 static void
 stilo_p_integer_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type)
 {
-	_cw_not_reached();	/* XXX */
+	_cw_error("XXX Not implemented");
 }
 
 static void
@@ -1648,32 +1648,32 @@ void
 stilo_integer_div(const cw_stilo_t *a_num, const cw_stilo_t *a_div, cw_stilo_t
     *r_quotient)
 {
-	_cw_not_reached();	/* XXX */
+	_cw_error("XXX Not implemented");
 }
 
 void
 stilo_integer_mod(const cw_stilo_t *a_num, const cw_stilo_t *a_div, cw_stilo_t
     *r_mod)
 {
-	_cw_not_reached();	/* XXX */
+	_cw_error("XXX Not implemented");
 }
 
 void
 stilo_integer_srand(const cw_stilo_t *a_seed)
 {
-	_cw_not_reached();	/* XXX */
+	_cw_error("XXX Not implemented");
 }
 
 void
 stilo_integer_rrand(cw_stilo_t *r_seed)
 {
-	_cw_not_reached();	/* XXX */
+	_cw_error("XXX Not implemented");
 }
 
 void
 stilo_integer_rand(cw_stilo_t *r_num)
 {
-	_cw_not_reached();	/* XXX */
+	_cw_error("XXX Not implemented");
 }
 
 /*
@@ -1688,20 +1688,20 @@ stilo_lock_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 static void
 stilo_p_lock_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 {
-	_cw_not_reached();	/* XXX */
+	_cw_error("XXX Not implemented");
 }
 
 static cw_stiloe_t *
 stiloe_p_lock_ref_iterate(cw_stiloe_t *a_stilo, cw_bool_t a_reset)
 {
-	_cw_not_reached();	/* XXX */
+	_cw_error("XXX Not implemented");
 	return NULL;	/* XXX */
 }
 
 static void
 stilo_p_lock_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type)
 {
-	_cw_not_reached();	/* XXX */
+	_cw_error("XXX Not implemented");
 }
 
 static void
@@ -1728,7 +1728,7 @@ stilo_mark_new(cw_stilo_t *a_stilo)
 static void
 stilo_p_mark_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type)
 {
-	_cw_not_reached();	/* XXX */
+	_cw_error("XXX Not implemented");
 }
 
 static void
@@ -1979,13 +1979,13 @@ stiloe_p_name_ref_iterate(cw_stiloe_t *a_stiloe, cw_bool_t a_reset)
 static void
 stilo_p_name_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type)
 {
-	_cw_not_reached();	/* XXX */
+	_cw_error("XXX Not implemented");
 }
 
 static void
 stilo_p_name_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
 {
-	_cw_not_reached();	/* XXX */
+	_cw_error("XXX Not implemented");
 }
 
 static void
@@ -2171,7 +2171,7 @@ stilo_null_new(cw_stilo_t *a_stilo)
 static void
 stilo_p_null_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type)
 {
-	_cw_not_reached();	/* XXX */
+	_cw_error("XXX Not implemented");
 }
 
 static void
@@ -2199,7 +2199,7 @@ stilo_operator_new(cw_stilo_t *a_stilo, cw_op_t *a_op)
 static void
 stilo_p_operator_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type)
 {
-	_cw_not_reached();	/* XXX */
+	_cw_error("XXX Not implemented");
 }
 
 static void
@@ -2226,7 +2226,7 @@ stilo_real_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 static void
 stilo_p_real_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type)
 {
-	_cw_not_reached();	/* XXX */
+	_cw_error("XXX Not implemented");
 }
 
 static void
@@ -2241,14 +2241,14 @@ stilo_p_real_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t
 void
 stilo_real_sqrt(const cw_stilo_t *a_num, cw_stilo_t *r_sqrt)
 {
-	_cw_not_reached();	/* XXX */
+	_cw_error("XXX Not implemented");
 }
 
 void
 stilo_real_exp(const cw_stilo_t *a_num, const cw_stilo_t *a_exp, cw_stilo_t
     *r_result)
 {
-	_cw_not_reached();	/* XXX */
+	_cw_error("XXX Not implemented");
 }
 
 /*
@@ -2321,10 +2321,10 @@ stilo_p_string_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type)
 	case STILOT_NO:
 		break;
 	case STILOT_NAME:
-		_cw_not_reached();	/* XXX */
+		_cw_error("XXX Not implemented");
 		break;
 	case STILOT_INTEGER:
-		_cw_not_reached();	/* XXX */
+		_cw_error("XXX Not implemented");
 		break;
 	default:
 		xep_throw(_CW_XEPV_TYPECHECK);

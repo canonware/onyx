@@ -210,11 +210,13 @@ systemdict_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 void
 systemdict_abort(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_abs(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
@@ -239,16 +241,19 @@ systemdict_add(cw_stilt_t *a_stilt)
 void
 systemdict_aload(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_anchorsearch(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_and(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
@@ -297,51 +302,61 @@ systemdict_array(cw_stilt_t *a_stilt)
 void
 systemdict_astore(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_begin(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_bind(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_bytesavailable(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_ceiling(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_clear(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_cleardictstack(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_cleartomark(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_closefile(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_condition(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
@@ -374,116 +389,139 @@ systemdict_copy(cw_stilt_t *a_stilt)
 void
 systemdict_count(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_countdictstack(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_countexecstack(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_counttomark(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_currentaccuracy(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_currentcontext(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_currentdict(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_currentfile(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_currentglobal(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_currentobjectformat(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_cvlit(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_cvm(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_cvn(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_cvrs(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_cvs(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_cvx(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_def(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_defineresource(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_deletefile(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_detach(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_dict(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_dictstack(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_div(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
@@ -502,51 +540,61 @@ systemdict_dup(cw_stilt_t *a_stilt)
 void
 systemdict_echo(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_end(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_eq(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_exch(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_exec(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_execstack(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_executeonly(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_executive(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_exit(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_exp(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
@@ -563,141 +611,169 @@ systemdict_false(cw_stilt_t *a_stilt)
 void
 systemdict_file(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_filenameforall(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_fileposition(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_filter(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_findresource(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_floor(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_flush(cw_stilt_t *a_stilt)
 {
+/*  	_cw_error("XXX Not implemented"); */
 }
 
 void
 systemdict_flushfile(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_for(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_forall(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_fork(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_gcheck(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_ge(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_get(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_getinterval(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_gt(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_if(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_idiv(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_ifelse(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_index(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_join(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_known(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_le(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_length(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_load(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_lock(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_loop(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_lt(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
@@ -714,46 +790,55 @@ systemdict_mark(cw_stilt_t *a_stilt)
 void
 systemdict_maxlength(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_mod(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_mul(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_mutex(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_ne(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_neg(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_noaccess(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_not(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_notify(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
@@ -770,6 +855,7 @@ systemdict_null(cw_stilt_t *a_stilt)
 void
 systemdict_or(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
@@ -800,6 +886,7 @@ systemdict_print(cw_stilt_t *a_stilt)
 void
 systemdict_printobject(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
@@ -863,111 +950,133 @@ systemdict_pstack(cw_stilt_t *a_stilt)
 void
 systemdict_put(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_putinterval(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_quit(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_rand(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_rcheck(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_read(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_readhexstring(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_readline(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_readonly(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_readstring(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_realtime(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_renamefile(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_repeat(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_resetfile(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_resourceforall(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_resourcestatus(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_roll(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_round(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_rrand(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_run(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_search(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_setfileposition(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
@@ -985,21 +1094,25 @@ systemdict_setglobal(cw_stilt_t *a_stilt)
 void
 systemdict_setobjectformat(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_shift(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_sqrt(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_srand(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
@@ -1025,36 +1138,43 @@ systemdict_stack(cw_stilt_t *a_stilt)
 void
 systemdict_start(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_status(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_stop(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_stopped(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_store(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_string(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_sub(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 /* = */
@@ -1093,16 +1213,19 @@ systemdict_sym_eq_eq(cw_stilt_t *a_stilt)
 void
 systemdict_sym_gt_gt(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_timedwait(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_token(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
@@ -1119,36 +1242,43 @@ systemdict_true(cw_stilt_t *a_stilt)
 void
 systemdict_truncate(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_trylock(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_type(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_undef(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_undefineresource(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_unlock(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_usertime(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
@@ -1165,49 +1295,59 @@ systemdict_version(cw_stilt_t *a_stilt)
 void
 systemdict_wait(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_wcheck(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_where(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_write(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_writehexstring(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_writeobject(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_writestring(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_xcheck(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_xor(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
 
 void
 systemdict_yield(cw_stilt_t *a_stilt)
 {
+	_cw_error("XXX Not implemented");
 }
