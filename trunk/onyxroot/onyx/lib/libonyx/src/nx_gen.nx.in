@@ -207,7 +207,7 @@ bind eval end");
     opt_dstdir {
 	`@DATADIR@/onyx-@onyx_version@/libonyx/libonyx_init.nx'
     }{
-	`@abs_objroot@/lib/libonyx/src/libonyx_init.nx'
+	`@abs_objroot@/lib/libonyx/src/liboonyx_init.nx'
     } ifelse
     def
 

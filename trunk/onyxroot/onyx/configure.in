@@ -55,10 +55,11 @@ AC_SUBST([MANDIR])
 cfgoutputs="Cookfile Cookfile.inc bin/Cookfile.inc doc/Cookfile.inc"
 cfgoutputs="$cfgoutputs lib/Cookfile.inc mod/Cookfile.inc test/Cookfile.inc"
 cfgoutputs="$cfgoutputs lib/libonyx/src/nx_gen.nx"
+cfgoutputs="$cfgoutputs lib/libonyx/src/liboonyx_init_gen.nx"
 cfgoutputs="$cfgoutputs lib/libonyx/src/libonyx_init_gen.nx"
 cfgoutputs="$cfgoutputs lib/libonyx/src/nx.nx lib/libonyx/src/nxo_thread.nx"
 cfgoutputs="$cfgoutputs bin/onyx/src/batch.nx bin/onyx/src/interactive.nx"
-cfgoutputs="$cfgoutputs bin/onyx_config/src/onyx_config.nx.in"
+cfgoutputs="$cfgoutputs bin/onyx_config/src/onyx_config.nx"
 cfghdrs="$objroot/config.stamp"
 
 bins=
@@ -725,25 +726,11 @@ if test "x$bin_onyx" = "x1" ; then
   fi
   AC_SUBST([onyx_version])
 
+  OONYX="$abs_objroot/bin/onyx/bin/oonyx"
+  AC_SUBST([OONYX])
+
   ONYX="$BINDIR/onyx-$onyx_version"
   AC_SUBST([ONYX])
-
-  TONYX="$abs_objroot/bin/onyx/bin/tonyx"
-  AC_SUBST([TONYX])
-
-  AC_DEFINE_UNQUOTED([CW_TONYX_ONYX], ["$abs_objroot/bin/onyx/bin/onyx"])
-
-  tmpath=ONYX_MPATH=
-  trpath=ONYX_RPATH=
-  for i in $mods ; do
-    tmpath=$tmpath:$abs_srcroot/mod/$i/nxm:$abs_objroot/mod/$i/nxm
-    trpath=$trpath:$abs_srcroot/mod/$i/nx:$abs_objroot/mod/$i/nx
-  done
-  dnl Remove leading ':'.
-  tmpath=`echo $tmpath | sed s/://`
-  trpath=`echo $trpath | sed s/://`
-  AC_DEFINE_UNQUOTED([CW_TONYX_MPATH], ["$tmpath"])
-  AC_DEFINE_UNQUOTED([CW_TONYX_RPATH], ["$trpath"])
 
   AC_CHECK_DECL([optreset])
 fi
@@ -770,10 +757,25 @@ if test "x$lib_onyx" = "x1" ; then
   AC_CHECK_HEADERS([sys/socket.h netinet/in.h arpa/inet.h machine/endian.h])
 
   if test "x$enable_posix" = "x1" ; then
-    rpath_post="\`$DATADIR/onyx-$onyx_version/nx'"
-    mpath_post="\`$DATADIR/onyx-$onyx_version/nxm'"
-    AC_SUBST([rpath_post])
-    AC_SUBST([mpath_post])
+    oonyx_mpath_post=
+    oonyx_rpath_post=
+    for i in $mods ; do
+      oonyx_mpath_post="$oonyx_mpath_post \`$abs_srcroot/mod/$i/nxm'"
+      oonyx_mpath_post="$oonyx_mpath_post \`$abs_objroot/mod/$i/nxm'"
+
+      oonyx_rpath_post="$oonyx_rpath_post \`$abs_srcroot/mod/$i/nx'"
+      oonyx_rpath_post="$oonyx_rpath_post \`$abs_objroot/mod/$i/nx'"
+    done
+    dnl Remove leading ' '.
+    oonyx_mpath_post=`echo $oonyx_mpath_post | sed s/\ //`
+    oonyx_rpath_post=`echo $oonyx_rpath_post | sed s/\ //`
+    AC_SUBST([oonyx_rpath_post])
+    AC_SUBST([oonyx_mpath_post])
+
+    onyx_rpath_post="\`$DATADIR/onyx-$onyx_version/nx'"
+    onyx_mpath_post="\`$DATADIR/onyx-$onyx_version/nxm'"
+    AC_SUBST([onyx_rpath_post])
+    AC_SUBST([onyx_mpath_post])
 
     dnl Try to figure out which field of struct dirent contains the entry string
     dnl length.

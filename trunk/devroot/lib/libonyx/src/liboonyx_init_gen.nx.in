@@ -14,7 +14,7 @@
 ################################################################################
 
 $opt_bootstrap false def
-$opt_dstdir true def
+$opt_dstdir false def
 
 # Read in the code.
 stdin cvx eval

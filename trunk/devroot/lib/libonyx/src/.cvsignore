@@ -4,7 +4,9 @@ nx.nx
 nx_objdir.c
 nx_dstdir.c
 nxo_thread.nx
+liboonyx_init_gen.nx
 libonyx_init_gen.nx
+liboonyx_init.nx
 libonyx_init.nx
 nxo_thread_nxcode.c
 Cookfile.list

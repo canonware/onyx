@@ -22,6 +22,9 @@
 # order to support output that differs according to configuration options, a
 # string is constructed, then evaluated.
 #
+# This file is also processed by lib[o]onyx_init_gen.nx to create
+# lib[o]onyx_init.nx.
+#
 # The output of running sprints on the procedure must be evaluable, which
 # means that certain language features such as immediate evaluation must be
 # avoided.
@@ -769,10 +772,23 @@ $system {
 # 4) `@prefix@/share/onyx-@onyx_version@/nx[m]': Standard installation location.
 onyxdict begin
 $rpath_pre [`' `.'] def
-$rpath_post [@rpath_post@] def
-
 $mpath_pre [`' `.'] def
-$mpath_post [@mpath_post@] def
+' cat
+} if
+
+opt_dstdir {
+    `\
+$rpath_post [@onyx_rpath_post@] def
+$mpath_post [@onyx_mpath_post@] def
+' cat
+}{
+    `\
+$rpath_post [@oonyx_rpath_post@] def
+$mpath_post [@oonyx_mpath_post@] def
+' cat
+} ifelse
+@enable_modules@ 1 eq {
+    `\
 end # onyxdict.
 
 #filename require -

@@ -1,3 +1,11 @@
+2003-10-13 : Jason Evans <jasone@canonware.com>
+
+	* Remove tonyx, and replace it with oonyx (and oonyx_config).  This
+	  makes it possible to run the debugger directly on oonyx (was not
+	  possible with tonyx), and oonyx_config makes it possible for external
+	  programs to use an onyx build tree, rather than requiring that onyx be
+	  installed.
+
 2003-10-05 : Jason Evans <jasone@canonware.com>
 
 	* lib/libonyx/src/systemdict.c:systemdict_p_nxmod_delete() : Add support

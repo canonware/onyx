@@ -87,6 +87,7 @@ LIBONYX_NSRCS = [addprefix @srcroot@/lib/libonyx/src/
 /* Onyx source files that are used to initialize libonyx. */
 LIBONYX_ISRC = @srcroot@/lib/libonyx/src/nx.nx.in;
 
+LIBOONYX_INIT = @objroot@/lib/libonyx/src/liboonyx_init.nx;
 LIBONYX_INIT = @objroot@/lib/libonyx/src/libonyx_init.nx;
 
 /* libbonyx-only source files. */
@@ -187,13 +188,13 @@ libonyx_libs_bootstrap : [BONYX]
 
 libonyx_libs_tests : [fromto @srcroot@/%0%.c @objroot@/%0% [LIBONYX_CTESTS]];
 
-libonyx_libs_check : libonyx_libs_tests [TONYX]
+libonyx_libs_check : libonyx_libs_tests [OONYX]
 {
   @VERIFY@ -s @srcroot@ -o @objroot@
            [fromto @srcroot@/%0%.c @objroot@/%0% [LIBONYX_CTESTS]];
 }
 
-libonyx_libs_check_update : libonyx_libs_tests [TONYX]
+libonyx_libs_check_update : libonyx_libs_tests [OONYX]
 {
   @VERIFY@ -u -s @srcroot@ -o @objroot@
            [fromto @srcroot@/%0%.c @objroot@/%0% [LIBONYX_CTESTS]];
@@ -380,7 +381,16 @@ libonyx_libs_install_s : [LIBONYX_S] libonyx_libs_install_common
 
 /* Dependencies and build rule for creating the initialization file. */
 [fromto @srcroot@/%0%.nx.in @objroot@/%0%_objdir.c
-        [LIBONYX_ISRC]] : [LIBONYX_INIT];
+        [LIBONYX_ISRC]] : [LIBOONYX_INIT];
+[LIBOONYX_INIT] : [fromto @srcroot@/%0%.nx.in @objroot@/%0%.nx
+                          [LIBONYX_ISRC]]
+                  [BONYX]
+{
+  cat [fromto @srcroot@/%0%.nx.in @objroot@/%0%.nx [LIBONYX_ISRC]]
+    | [BONYX] @objroot@/lib/libonyx/src/liboonyx_init_gen.nx > [target];
+}
+
+
 [fromto @srcroot@/%0%.nx.in @objroot@/%0%_dstdir.c
         [LIBONYX_ISRC]] : [LIBONYX_INIT];
 [LIBONYX_INIT] : [fromto @srcroot@/%0%.nx.in @objroot@/%0%.nx

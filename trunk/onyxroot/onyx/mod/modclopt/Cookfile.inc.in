@@ -36,20 +36,18 @@ MODCLOPT_OTESTS = [addprefix @srcroot@/mod/modclopt/test/
  * User cook'ables.
  */
 
-modclopt :
-{
-}
+modclopt : ;
 
 modclopt_mods_tests : [fromto @srcroot@/%0%.nx.in @objroot@/%0%.nx
                               [MODCLOPT_OTESTS]];
 
-modclopt_mods_check : modclopt_mods_tests [TONYX]
+modclopt_mods_check : modclopt_mods_tests [OONYX]
 {
   @VERIFY@ -s @srcroot@ -o @objroot@
            [fromto @srcroot@/%0%.nx.in @objroot@/%0%.nx [MODCLOPT_OTESTS]];
 }
 
-modclopt_mods_check_update : modclopt_mods_tests [TONYX]
+modclopt_mods_check_update : modclopt_mods_tests [OONYX]
 {
   @VERIFY@ -u -s @srcroot@ -o @objroot@
            [fromto @srcroot@/%0%.nx.in @objroot@/%0%.nx [MODCLOPT_OTESTS]];
@@ -73,8 +71,12 @@ modclopt_mods_uninstall :
 
 modclopt_mods_clean :
 {
+  rm -f [fromto @srcroot@/%0%.nx.in @objroot@/%0%.nx.out [MODCLOPT_OTESTS]];
+  rm -f [fromto @srcroot@/%0%.nx.in @objroot@/%0%.nx.diff [MODCLOPT_OTESTS]];
+  rm -f [fromto @srcroot@/%0%.nx.in @objroot@/%0%.nx [MODCLOPT_OTESTS]];
 }
 
 modclopt_mods_distclean :
 {
+  rm -f [fromto @srcroot@/%0%.nx.in @objroot@/%0%.nx.perf [MODCLOPT_OTESTS]];
 }

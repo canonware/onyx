@@ -16,7 +16,7 @@
  */
 
 /* Source file. */
-ONYX_CONFIG_NSRCS = @srcroot@/bin/onyx_config/src/onyx_config.nx.in.in;
+ONYX_CONFIG_NSRCS = @srcroot@/bin/onyx_config/src/onyx_config.nx.in;
 
 /* LaTeX source files. */
 ONYX_CONFIG_TEX_SRCS = ;
@@ -26,40 +26,30 @@ ONYX_CONFIG_TEX_SRCS = [addprefix @srcroot@/bin/onyx_config/doc/latex/
                         @objroot@/bin/onyx_config/doc/latex/manual.tex; */
 
 /* Binaries. */
+OONYX_CONFIG = @objroot@/bin/onyx_config/bin/oonyx_config;
 ONYX_CONFIG = @objroot@/bin/onyx_config/bin/onyx_config;
 
 /*
  * User cook'ables.
  */
 
+oonyx_config : [OONYX_CONFIG];
 onyx_config : [ONYX_CONFIG];
 
-onyx_config_bins_tests :
-{
-}
+onyx_config_bins_tests : ;
 
-onyx_config_bins_check :
-{
-}
+onyx_config_bins_check : ;
 
-onyx_config_bins_check_update :
-{
-}
+onyx_config_bins_check_update : ;
 
-onyx_config_bins_bootstrap :
-{
-}
+onyx_config_bins_bootstrap : ;
 
 onyx_config_bins_install : mods_install
                            onyx_bins_install
 {
   @INSTALL@ -d [BINDIR];
 
-  echo \"#!@ONYX@\" > [BINDIR]/onyx_config-@onyx_version@;
-  cat [fromto @srcroot@/%0%.nx.in.in @objroot@/%0%.nx.in [ONYX_CONFIG_NSRCS]]
-      >> [BINDIR]/onyx_config-@onyx_version@;
-  chmod 0755 [BINDIR]/onyx_config-@onyx_version@;
-
+  @INSTALL@ -m 0755 [ONYX_CONFIG] [BINDIR]/onyx_config-@onyx_version@;
   rm -f [BINDIR]/onyx_config;
   ln -s onyx_config-@onyx_version@ [BINDIR]/onyx_config;
 
@@ -77,12 +67,7 @@ onyx_config_bins_uninstall :
 
 onyx_config_bins_clean :
 {
-  rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.d_a
-                [ONYX_COMMON_SRCS] [BONYX_ONLY_SRCS]];
-  rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.o_a
-                [ONYX_COMMON_SRCS] [BONYX_ONLY_SRCS]];
-
-  rm -f [ONYX_CONFIG];
+  rm -f [OONYX_CONFIG] [ONYX_CONFIG];
 }
 
 onyx_config_bins_distclean :
@@ -94,13 +79,26 @@ onyx_config_bins_distclean :
  * Dependencies.
  */
 
-[ONYX_CONFIG] : [fromto @srcroot@/%0%.nx.in.in @objroot@/%0%.nx.in
-                        [ONYX_CONFIG_NSRCS]]
-                tonyx
+[OONYX_CONFIG] : [fromto @srcroot@/%0%.nx.in @objroot@/%0%.nx
+                         [ONYX_CONFIG_NSRCS]]
+                 oonyx
   set mkdir
 {
-  echo \"#!@TONYX@\" > [target];
-  cat [fromto @srcroot@/%0%.nx.in.in @objroot@/%0%.nx.in [ONYX_CONFIG_NSRCS]]
-      >> [target];
+  echo \"#!@OONYX@\" > [target];
+  cat [fromto @srcroot@/%0%.nx.in @objroot@/%0%.nx [ONYX_CONFIG_NSRCS]]
+    | [BONYX] @objroot@/bin/onyx_config/src/oonyx_config_gen.nx
+    >> [target];
+  chmod 0755 [target];
+}
+
+[ONYX_CONFIG] : [fromto @srcroot@/%0%.nx.in @objroot@/%0%.nx
+                        [ONYX_CONFIG_NSRCS]]
+                onyx
+  set mkdir
+{
+  echo \"#!@ONYX@\" > [target];
+  cat [fromto @srcroot@/%0%.nx.in @objroot@/%0%.nx [ONYX_CONFIG_NSRCS]]
+    | [BONYX] @objroot@/bin/onyx_config/src/onyx_config_gen.nx
+    >> [target];
   chmod 0755 [target];
 }

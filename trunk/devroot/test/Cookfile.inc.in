@@ -18,13 +18,9 @@ tests : onyx mods [addsuffix _tests bins mods libs];
 check : tests [addsuffix _check bins mods libs];
 check_update : tests [addsuffix _check_update bins mods libs];
 
-tests_clean :
-{
-}
+tests_clean : ;
 
-tests_distclean :
-{
-}
+tests_distclean : ;
 
 /*
  * Build rules for tests.
@@ -66,7 +62,7 @@ tests_distclean :
                         [glob @srcroot@/%0test/%_test_footer.nx.in]
   set mkdir
 {
-  echo \"#!@TONYX@\" > [target];
+  echo \"#!@OONYX@\" > [target];
 
   if [exists @srcroot@/%0test/%_test_header.nx.in] then
     cat @srcroot@/%0test/%_test_header.nx.in >> [target];

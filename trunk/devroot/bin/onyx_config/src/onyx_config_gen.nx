@@ -13,7 +13,6 @@
 #
 ################################################################################
 
-$opt_bootstrap false def
 $opt_dstdir true def
 
 # Read in the code.

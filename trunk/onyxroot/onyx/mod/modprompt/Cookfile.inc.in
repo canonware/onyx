@@ -41,17 +41,11 @@ MODPROMPT = @objroot@/mod/modprompt/nxm/modprompt.nxm;
 
 modprompt : [MODPROMPT];
 
-modprompt_mods_tests :
-{
-}
+modprompt_mods_tests : ;
 
-modprompt_mods_check :
-{
-}
+modprompt_mods_check : ;
 
-modprompt_mods_check_update :
-{
-}
+modprompt_mods_check_update : ;
 
 modprompt_mods_install : [MODPROMPT]
 {
@@ -78,9 +72,7 @@ modprompt_mods_clean :
   rm -f [MODPROMPT];
 }
 
-modprompt_mods_distclean :
-{
-}
+modprompt_mods_distclean : ;
 
 /*
  * Various flags.
