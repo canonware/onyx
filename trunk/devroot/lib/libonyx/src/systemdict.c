@@ -152,6 +152,9 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #ifdef CW_POSIX
     ENTRY(cd),
 #endif
+#ifdef CW_OOP
+    ENTRY(cdef),
+#endif
 #ifdef CW_REAL
     ENTRY(ceiling),
 #endif
@@ -1939,6 +1942,82 @@ systemdict_cd(cw_nxo_t *a_thread)
 
     ERROR:
     nxo_stack_pop(tstack);
+}
+#endif
+
+#ifdef CW_OOP
+void
+systemdict_cdef(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *dstack, *tstack;
+    cw_nxo_t *name, *super, *data, *methods, *tnxo;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    dstack = nxo_thread_dstack_get(a_thread);
+    tstack = nxo_thread_tstack_get(a_thread);
+    NXO_STACK_GET(methods, ostack, a_thread);
+    switch (nxo_type_get(methods))
+    {
+	case NXOT_NULL:
+	case NXOT_DICT:
+	{
+	    /* Okay. */
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+    NXO_STACK_NGET(data, ostack, a_thread, 1);
+    switch (nxo_type_get(data))
+    {
+	case NXOT_NULL:
+	case NXOT_DICT:
+	{
+	    /* Okay. */
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+    NXO_STACK_NGET(super, ostack, a_thread, 2);
+    switch (nxo_type_get(super))
+    {
+	case NXOT_NULL:
+	case NXOT_CLASS:
+	{
+	    /* Okay. */
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+    NXO_STACK_NGET(name, ostack, a_thread, 3);
+
+    /* Create class. */
+    tnxo = nxo_stack_push(tstack);
+    nxo_class_new(tnxo, NULL, NULL, NULL);
+
+    /* Set name, super, methods, and data. */
+    nxo_dup(nxo_class_name_get(tnxo), name);
+    nxo_dup(nxo_class_super_get(tnxo), super);
+    nxo_dup(nxo_class_methods_get(tnxo), methods);
+    nxo_dup(nxo_class_data_get(tnxo), data);
+
+    /* Define in currentdict. */
+    nxo_dict_def(nxo_stack_get(dstack), name, tnxo);
+
+    /* Clean up. */
+    nxo_stack_pop(tstack);
+    nxo_stack_npop(ostack, 4);
 }
 #endif
 

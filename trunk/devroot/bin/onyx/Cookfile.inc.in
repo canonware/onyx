@@ -99,6 +99,11 @@ ONYX_OTESTS =
               subst_p.nx.in subst_q.nx.in
 
 #endif
+#if @enable_oop@
+
+              cdef_a.nx.in cdef_b.nx.in cdef_c.nx.in cdef_d.nx.in cdef_e.nx.in
+
+#endif
 #if @enable_posix@
 
               argv_a.nx.in argv_b.nx.in chroot_a.nx.in chroot_b.nx.in

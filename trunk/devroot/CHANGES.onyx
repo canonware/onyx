@@ -1,5 +1,7 @@
 2003-08-30 : Jason Evans <jasone@canonware.com>
 
+	* Add the cdef operator.
+
 	* Add the cstackunderflow error.
 
 2003-08-22 : Jason Evans <jasone@canonware.com>

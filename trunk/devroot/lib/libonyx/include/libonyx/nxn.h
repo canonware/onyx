@@ -99,6 +99,9 @@ typedef enum
 #ifdef CW_POSIX
     NXN_ENTRY(cd),
 #endif
+#ifdef CW_OOP
+    NXN_ENTRY(cdef),
+#endif
 #ifdef CW_REAL
     NXN_ENTRY(ceiling),
 #endif

@@ -1,0 +1,17 @@
+Test begin
+=== fooclass_a ===
+$fooclass_a
+$vclass
+<$key `val'>
+<$method -array->
+=== fooclass_b ===
+$fooclass_b
+null
+null
+null
+=== fooclass_c ===
+`fooclass_c'
+null
+<$Key `Val'>
+<$Method -array->
+Test end

@@ -119,6 +119,11 @@ void
 systemdict_cd(cw_nxo_t *a_thread);
 #endif
 
+#ifdef CW_OOP
+void
+systemdict_cdef(cw_nxo_t *a_thread);
+#endif
+
 #ifdef CW_REAL
 void
 systemdict_ceiling(cw_nxo_t *a_thread);

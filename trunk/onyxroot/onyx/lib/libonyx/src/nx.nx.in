@@ -846,17 +846,6 @@ $mrequire {
 } if
 @enable_oop@ 1 eq opt_bootstrap not and {
     `
-# XXX Make this an operator?
-#name #super #data #methods cdef -
-$cdef {
-    class
-    dup dn setmethods
-    dup dn setdata
-    dup dn setsuper
-    2 ndup exch setclassname
-    def
-} def
-
 # Define vclass, which is provided as the top level base class.
 $vclass class dup up def
 dup $vclass setclassname
