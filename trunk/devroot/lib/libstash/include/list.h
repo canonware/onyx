@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 33 $
- * $Date: 1998-04-19 01:43:20 -0700 (Sun, 19 Apr 1998) $
+ * $Revision: 68 $
+ * $Date: 1998-05-02 02:08:23 -0700 (Sat, 02 May 1998) $
  *
  * <<< Description >>>
  *
@@ -41,8 +41,26 @@
 #ifndef _LIST_H_
 #define _LIST_H_
 
+/* Pseudo-opaque types. */
 typedef struct cw_list_item_s cw_list_item_t;
 typedef struct cw_list_s cw_list_t;
+
+struct cw_list_item_s
+{
+  struct cw_list_item_s * next;
+  struct cw_list_item_s * prev;
+  void * item;
+};
+
+struct cw_list_s
+{
+  cw_bool_t is_malloced;
+  cw_bool_t is_thread_safe;
+  cw_mtx_t lock;
+  cw_list_item_t * head;
+  cw_list_item_t * tail;
+  cw_sint64_t count;
+};
 
 /*
  * Namespace definitions.
@@ -68,9 +86,9 @@ void list_item_delete(cw_list_item_t * a_cont);
 void * list_item_get(cw_list_item_t * a_cont);
 void list_item_set(cw_list_item_t * a_cont, void * a_item);
 
-cw_list_t * list_new();
+cw_list_t * list_new(cw_list_t * a_list_o, cw_bool_t a_is_thread_safe);
 void list_delete(cw_list_t * a_list);
-cw_sint32_t list_count(cw_list_t * a_list);
+cw_sint64_t list_count(cw_list_t * a_list);
 void list_hpush(cw_list_t * a_list, cw_list_item_t * a_item);
 cw_list_item_t * list_hpop(cw_list_t * a_list);
 void list_tpush(cw_list_t * a_list, cw_list_item_t * a_item);
