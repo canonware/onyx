@@ -10,8 +10,8 @@ AC_INIT(Cookfile.in)
 dnl 
 dnl Version requirements for external software we depend on.
 dnl 
-GTK_VERSION_MIN=1.3.12
 PCRE_VERSION_MIN=3.7
+LIBEDIT_VERSION_MIN=2.6
 
 srcroot=$srcdir
 AC_SUBST(srcroot)
@@ -152,6 +152,7 @@ AC_SUBST(enable_real)
 if test "x$enable_real" = "x1" ; then
   AC_DEFINE(CW_REAL)
   LIBS="$LIBS -lm"
+  AC_CHECK_FUNCS(asprintf)
 fi
 
 dnl Support POSIX file operations by default.
@@ -348,20 +349,6 @@ AC_CHECK_FUNCS(dlopen, AC_DEFINE(HAVE_DLOPEN), \
     AC_MSG_RESULT(Modules disabled since dlopen is missing)]))
 
 if test "x$enable_modules" = "xyes" ; then
-  dnl modgtk.
-  if test "x$enable_threads" = "x1" -a "x$enable_real" = "x1" \
-       -a "x$enable_posix" = "x1" ; then
-    PKG_CHECK_MODULES(GTK, gtk+-2.0 >= $GTK_VERSION_MIN, \
-      CW_BUILD_MOD(modgtk, enable_modgtk), \
-      AC_MSG_RESULT(gtk+ $GTK_VERSION_MIN or newer not found))
-    if test "x$enable_modpcre" = "x1" ; then
-      AC_DEFINE(CW_USE_MODPCRE)
-    fi
-  else
-    enable_modgtk="0"
-  fi
-  AC_SUBST(enable_modgtk)
-
   dnl modpcre.
   if test "x$enable_threads" = "x1" -a "x$enable_real" = "x1" \
        -a "x$enable_posix" = "x1" ; then
@@ -454,18 +441,51 @@ if test "x$enable_modules" = "xyes" ; then
     )
     if test "x$enable_modprompt" = "x1" ; then
       MODPROMPT_CPPFLAGS=
+
+      TEMP_CPPFLAGS="$CPPFLAGS"
+      CPPFLAGS="$LIBEDIT_CPPFLAGS $CPPFLAGS"
       AC_CHECK_HEADERS(histedit.h, , enable_modprompt="0")
+      dnl Check if this version of libedit is known to be compatible.
+      LIBEDIT_MAJOR_MIN=`echo $LIBEDIT_VERSION_MIN | tr . " " | awk '{print $1}'`
+      LIBEDIT_MINOR_MIN=`echo $LIBEDIT_VERSION_MIN | tr . " " | awk '{print $2}'`
+      AC_MSG_CHECKING(for libedit >= $LIBEDIT_MAJOR_MIN.$LIBEDIT_MINOR_MIN)
+      AC_EGREP_CPP(bad_libedit,
+[#include <histedit.h>
+#if (defined(LIBEDIT_MAJOR) && defined(LIBEDIT_MINOR))
+#if (LIBEDIT_MAJOR > $LIBEDIT_MAJOR_MIN || LIBEDIT_MAJOR == $LIBEDIT_MAJOR_MIN && LIBEDIT_MINOR >= $LIBEDIT_MINOR_MIN)
+  good_libedit
+#else
+  bad_libedit
+#endif
+#else
+  unknown_libedit
+#endif
+], [enable_modprompt="0" ; AC_MSG_RESULT(Obsolete libedit found)], \
+        AC_EGREP_CPP(unknown_libedit,
+[#include <histedit.h>
+#if (defined(LIBEDIT_MAJOR) && defined(LIBEDIT_MINOR))
+#if (LIBEDIT_MAJOR > $LIBEDIT_MAJOR_MIN || LIBEDIT_MAJOR == $LIBEDIT_MAJOR_MIN && LIBEDIT_MINOR >= $LIBEDIT_MINOR_MIN)
+  good_libedit
+#else
+  bad_libedit
+#endif
+#else
+  unknown_libedit
+#endif
+], AC_MSG_RESULT(Unknown libedit; modprompt build may fail), \
+   AC_MSG_RESULT(yes)))
+      CPPFLAGS="$TEMP_CPPFLAGS"
 
       TEMP_LIBS="$LIBS"
-      LIBS=
-      AC_CHECK_LIB(termcap, tgetent, LIBS="-ltermcap", \
-        AC_CHECK_LIB(tinfo, tgetent, LIBS="-ltinfo", \
-          AC_CHECK_LIB(curses, tgetent, LIBS="-lcurses", \
-            AC_CHECK_LIB(ncurses, tgetent, LIBS="-lncurses"))), \
+      LIBS="$LIBEDIT_LDFLAGS $LIBS"
+      AC_CHECK_LIB(termcap, tgetent, MODPROMPT_LDFLAGS="-ltermcap", \
+        AC_CHECK_LIB(tinfo, tgetent, MODPROMPT_LDFLAGS="-ltinfo", \
+          AC_CHECK_LIB(curses, tgetent, MODPROMPT_LDFLAGS="-lcurses", \
+            AC_CHECK_LIB(ncurses, tgetent, MODPROMPT_LDFLAGS="-lncurses"))), \
         enable_modprompt="0")
-      AC_CHECK_LIB(edit, el_init, LIBS="$LIBS -ledit", \
-        enable_modprompt="0")
-      MODPROMPT_LDFLAGS="$LIBS"
+      LIBS="$LIBS $MODPROMPT_LDFLAGS"
+      AC_CHECK_LIB(edit, el_init, \
+        MODPROMPT_LDFLAGS="$MODPROMPT_LDFLAGS -ledit", enable_modprompt="0")
       LIBS="$TEMP_LIBS"
       AC_SUBST(MODPROMPT_CPPFLAGS)
       AC_SUBST(MODPROMPT_LDFLAGS)
@@ -584,7 +604,7 @@ if test "x$lib_onyx" = "x1" ; then
       mpath_post="\`/usr/local/share/onyx-$onyx_version/nxm'"
     else
       rpath_post="\`$prefix/share/onyx-$onyx_version/nx'"
-      mpaath_post="\`$prefix/share/onyx-$onyx_version/nxm'"
+      mpath_post="\`$prefix/share/onyx-$onyx_version/nxm'"
     fi
     AC_SUBST(rpath_post)
     AC_SUBST(mpath_post)
