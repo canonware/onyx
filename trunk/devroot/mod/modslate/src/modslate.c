@@ -11,6 +11,9 @@
 
 #include "../include/modslate.h"
 
+/* XXX Temporary hack. */
+#include <termios.h>
+
 /* Refers to a hook that holds a reference to the dynamically loaded module. */
 static cw_nxo_t hook_data;
 
@@ -61,7 +64,8 @@ slate_hooks_init(cw_nxo_t *a_thread, const struct cw_slate_entry *a_entries,
 void
 slate_init (void *a_arg, cw_nxo_t *a_thread)
 {
-	cw_nxo_t		*estack;
+	cw_nxo_t	*estack;
+	struct termios	t;	/* XXX */
 
 	/*
 	 * The interpreter is currently executing a hook that holds a reference
@@ -74,4 +78,11 @@ slate_init (void *a_arg, cw_nxo_t *a_thread)
 	nxo_dup(&hook_data, nxo_stack_get(estack));
 
 	slate_buffer_init(a_thread);
+
+	/* XXX Temporary hack. */
+	if (tcgetattr(0, &t))
+		fprintf(stderr, "tcgetattr() error\n");
+	cfmakeraw(&t);
+	if (tcsetattr(0, TCSANOW, &t))
+		fprintf(stderr, "tcsetattr() error\n");
 }

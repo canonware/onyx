@@ -16,6 +16,8 @@ void	slate_buffer_init(cw_nxo_t *a_thread);
 void	slate_buffer(void *a_data, cw_nxo_t *a_thread);
 void	slate_buffer_length(void *a_data, cw_nxo_t *a_thread);
 void	slate_buffer_lines(void *a_data, cw_nxo_t *a_thread);
+void	slate_buffer_undoable(void *a_data, cw_nxo_t *a_thread);
+void	slate_buffer_redoable(void *a_data, cw_nxo_t *a_thread);
 void	slate_buffer_undo(void *a_data, cw_nxo_t *a_thread);
 void	slate_buffer_redo(void *a_data, cw_nxo_t *a_thread);
 void	slate_buffer_history_active(void *a_data, cw_nxo_t *a_thread);

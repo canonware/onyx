@@ -577,7 +577,7 @@ buf_p_hist_pos(cw_buf_t *a_buf, cw_uint64_t a_bpos)
 	}	u;
 
 	_cw_assert(a_buf->h != NULL);
-	_cw_assert(a_buf->hcur->apos == buf_p_pos_b2a(a_buf->len + 1));
+	_cw_assert(bufm_pos(&a_buf->hcur) == a_buf->len + 1);
 	_cw_assert(a_bpos != a_buf->hbpos);
 
 	buf_p_hist_redo_flush(a_buf);
@@ -1676,6 +1676,8 @@ bufm_seek(cw_bufm_t *a_bufm, cw_sint64_t a_offset, cw_bufw_t a_whence)
 		cw_uint64_t	apos;
 		cw_bool_t	relocate = FALSE;
 
+/* 		fprintf(stderr, "%s:%d:%s(): Got here\n", __FILE__, __LINE__, */
+/* 		    __FUNCTION__); */
 		/*
 		 * The algorithm differs substantially depending whether seeking
 		 * forward or backward.  There is slight code duplication in the
@@ -2004,7 +2006,7 @@ bufm_remove(cw_bufm_t *a_start, cw_bufm_t *a_end)
 {
 	cw_buf_t	*buf;
 	cw_bufm_t	*start, *end, *bufm;
-	cw_uint64_t	start_bpos, end_bpos, rcount, napos, nlines;
+	cw_uint64_t	start_bpos, end_bpos, rcount, nlines;
 
 	_cw_check_ptr(a_start);
 	_cw_dassert(a_start->magic == _CW_BUFM_MAGIC);
@@ -2037,6 +2039,12 @@ bufm_remove(cw_bufm_t *a_start, cw_bufm_t *a_end)
 	 */
 	rcount = end_bpos - start_bpos;
 
+/* 	fprintf(stderr, */
+/* 	    "%s(): rcount %llu, bpos %llu<-->%llu, apos %llu<-->%llu\n", */
+/* 	    __FUNCTION__, rcount, */
+/* 	    start_bpos, end_bpos, */
+/* 	    start->apos, end->apos); */
+
 	/* Move the gap. */
 	buf_p_gap_move(buf, start, start_bpos);
 
@@ -2058,28 +2066,57 @@ bufm_remove(cw_bufm_t *a_start, cw_bufm_t *a_end)
 	/* Grow the gap. */
 	buf->gap_len += rcount;
 
-	/* Adjust the apos and line of all bufm's in the gap. */
-	for (bufm = ql_next(&buf->bufms, start, link);
+	/*
+	 * Adjust apos for all bufm's before start that are at the same
+	 * position.
+	 */
+	for (bufm = ql_prev(&buf->bufms, start, link);
+	     bufm != NULL && bufm->apos == start->apos;
+	     bufm = ql_prev(&buf->bufms, bufm, link)) {
+/* 		fprintf(stderr, */
+/* 		    "%s(): before: apos: %llu --> %llu\n", */
+/* 		    __FUNCTION__, */
+/* 		    bufm->apos, end->apos); */
+		bufm->apos = end->apos;
+	}
+
+	/*
+	 * Adjust apos and line for all bufm's from start (inclusive) to end
+	 * (exclusive).
+	 */
+	for (bufm = start;
 	     bufm->apos < end->apos;
 	     bufm = ql_next(&buf->bufms, bufm, link)) {
-		bufm->apos = start->apos;
+/* 		fprintf(stderr, */
+/* 		    "%s(): in: apos: %llu --> %llu, line: %llu --> %llu\n", */
+/* 		    __FUNCTION__, */
+/* 		    bufm->apos, end->apos, */
+/* 		    bufm->line, start->line); */
+		bufm->apos = end->apos;
 		bufm->line = start->line;
 	}
-
-	napos = rcount;
+	
 	nlines = end->line - start->line;
 
-	/* Adjust the buf's len and nlines. */
-	buf->len -= napos;
-	buf->nlines -= nlines;
-
-	/* Adjust the apos and line of all bufm's after the gap. */
-	for (bufm = end;
+	/*
+	 * Adjust the line for all bufm's after the gap.
+	 */
+	for (;
 	     bufm != NULL;
 	     bufm = ql_next(&buf->bufms, bufm, link)) {
-		bufm->apos -= napos;
+/* 		fprintf(stderr, "%s(): after: line: %llu --> %llu\n", */
+/* 		    __FUNCTION__, */
+/* 		    bufm->line, bufm->line - nlines); */
 		bufm->line -= nlines;
 	}
+
+	/* Adjust the buf's len and nlines. */
+/* 	fprintf(stderr, "%s(): len: %llu --> %llu, lines: %llu --> %llu\n", */
+/* 	    __FUNCTION__, */
+/* 	    buf->len, buf->len - rcount, */
+/* 	    buf->nlines, buf->nlines - nlines); */
+	buf->len -= rcount;
+	buf->nlines -= nlines;
 
 	/* Try to shrink the gap. */
 	buf_p_shrink(buf);

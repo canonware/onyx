@@ -49,6 +49,8 @@ static const struct cw_slate_entry slate_buffer_ops[] = {
 	ENTRY(buffer),
 	ENTRY(buffer_length),
 	ENTRY(buffer_lines),
+	ENTRY(buffer_undoable),
+	ENTRY(buffer_redoable),
 	ENTRY(buffer_undo),
 	ENTRY(buffer_redo),
 	ENTRY(buffer_history_active),
@@ -234,6 +236,56 @@ slate_buffer_lines(void *a_data, cw_nxo_t *a_thread)
 }
 
 void
+slate_buffer_undoable(void *a_data, cw_nxo_t *a_thread)
+{
+	cw_nxo_t		*ostack, *nxo;
+	cw_nxn_t		error;
+	struct cw_buffer	*buffer;
+	cw_bool_t		undoable;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	NXO_STACK_GET(nxo, ostack, a_thread);
+	error = buffer_p_type(nxo);
+	if (error) {
+		nxo_thread_nerror(a_thread, error);
+		return;
+	}
+
+	buffer = (struct cw_buffer *)nxo_hook_data_get(nxo);
+
+	buf_lock(&buffer->buf);
+	undoable = buf_undoable(&buffer->buf);
+	buf_unlock(&buffer->buf);
+
+	nxo_boolean_new(nxo, undoable);
+}
+
+void
+slate_buffer_redoable(void *a_data, cw_nxo_t *a_thread)
+{
+	cw_nxo_t		*ostack, *nxo;
+	cw_nxn_t		error;
+	struct cw_buffer	*buffer;
+	cw_bool_t		redoable;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	NXO_STACK_GET(nxo, ostack, a_thread);
+	error = buffer_p_type(nxo);
+	if (error) {
+		nxo_thread_nerror(a_thread, error);
+		return;
+	}
+
+	buffer = (struct cw_buffer *)nxo_hook_data_get(nxo);
+
+	buf_lock(&buffer->buf);
+	redoable = buf_redoable(&buffer->buf);
+	buf_unlock(&buffer->buf);
+
+	nxo_boolean_new(nxo, redoable);
+}
+
+void
 slate_buffer_undo(void *a_data, cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *nxo;
@@ -283,6 +335,7 @@ slate_buffer_history_active(void *a_data, cw_nxo_t *a_thread)
 	cw_nxo_t		*ostack, *nxo;
 	cw_nxn_t		error;
 	struct cw_buffer	*buffer;
+	cw_bool_t		history_active;
 
 	ostack = nxo_thread_ostack_get(a_thread);
 	NXO_STACK_GET(nxo, ostack, a_thread);
@@ -295,8 +348,10 @@ slate_buffer_history_active(void *a_data, cw_nxo_t *a_thread)
 	buffer = (struct cw_buffer *)nxo_hook_data_get(nxo);
 
 	buf_lock(&buffer->buf);
-	_cw_error("XXX Not implemented");
+	history_active = buf_hist_active_get(&buffer->buf);
 	buf_unlock(&buffer->buf);
+
+	nxo_boolean_new(nxo, history_active);
 }
 
 void
@@ -480,9 +535,9 @@ marker_p_whence(cw_nxo_t *a_whence)
 
 	str = nxo_name_str_get(a_whence);
 	if (strncmp(str, "SEEK_CUR", len) == 0)
-		retval = BUFW_BEG;
-	else if (strncmp(str, "SEEK_SET", len) == 0)
 		retval = BUFW_REL;
+	else if (strncmp(str, "SEEK_SET", len) == 0)
+		retval = BUFW_BEG;
 	else if (strncmp(str, "SEEK_END", len) == 0)
 		retval = BUFW_END;
 	else
@@ -549,12 +604,13 @@ slate_marker(void *a_data, cw_nxo_t *a_thread)
 void
 slate_marker_copy(void *a_data, cw_nxo_t *a_thread)
 {
-	cw_nxo_t		*ostack, *tstack, *nxo, *tnxo, *tag;
+	cw_nxo_t		*estack, *ostack, *tstack, *nxo, *tnxo, *tag;
 	cw_nx_t			*nx;
 	cw_nxn_t		error;
 	cw_buf_t		*buf;
 	struct cw_marker	*marker, *marker_copy;
 
+	estack = nxo_thread_estack_get(a_thread);
 	ostack = nxo_thread_ostack_get(a_thread);
 	tstack = nxo_thread_tstack_get(a_thread);
 	nx = nxo_thread_nx_get(a_thread);
@@ -569,6 +625,13 @@ slate_marker_copy(void *a_data, cw_nxo_t *a_thread)
 
 	marker_copy = (struct cw_marker *)nxa_malloc(nx_nxa_get(nx),
 	    sizeof(struct cw_marker));
+
+	/*
+	 * Create a reference to this operator in order to prevent the module
+	 * from being prematurely unloaded.
+	 */
+	nxo_no_new(&marker_copy->hook);
+	nxo_dup(&marker_copy->hook, nxo_stack_get(estack));
 
 	nxo_no_new(&marker_copy->buffer_nxo);
 	nxo_dup(&marker_copy->buffer_nxo, &marker->buffer_nxo);
@@ -726,7 +789,7 @@ slate_marker_position(void *a_data, cw_nxo_t *a_thread)
 	buf_unlock(buf);
 }
 
-/* %marker %offset %whence? marker_seek %pos */
+/* %=marker= %offset %whence/%=marker=? marker_seek %pos */
 void
 slate_marker_seek(void *a_data, cw_nxo_t *a_thread)
 {
@@ -734,7 +797,7 @@ slate_marker_seek(void *a_data, cw_nxo_t *a_thread)
 	cw_uint32_t		npop;
 	cw_nxn_t		error;
 	cw_buf_t		*buf;
-	struct cw_marker	*marker;
+	struct cw_marker	*marker, *whence_marker = NULL;
 	cw_sint64_t		offset, pos;
 	cw_bufw_t		whence;
 
@@ -743,6 +806,18 @@ slate_marker_seek(void *a_data, cw_nxo_t *a_thread)
 	NXO_STACK_GET(nxo, ostack, a_thread);
 	/* The whence argument is optional. */
 	switch (nxo_type_get(nxo)) {
+	case NXOT_HOOK:
+		error = marker_p_type(nxo);
+		if (error) {
+			nxo_thread_nerror(a_thread, error);
+			return;
+		}
+		whence_marker = (struct cw_marker *)nxo_hook_data_get(nxo);
+
+		whence = BUFW_REL;
+		NXO_STACK_DOWN_GET(nxo, ostack, a_thread, nxo);
+		npop = 2;
+		break;
 	case NXOT_NAME:
 		whence = marker_p_whence(nxo);
 		NXO_STACK_DOWN_GET(nxo, ostack, a_thread, nxo);
@@ -779,6 +854,13 @@ slate_marker_seek(void *a_data, cw_nxo_t *a_thread)
 
 	buf = bufm_buf(&marker->bufm);
 	buf_lock(buf);
+	if (whence_marker != NULL) {
+		/*
+		 * Move to the location of the whence marker before doing a
+		 * relative seek.
+		 */
+		bufm_dup(&marker->bufm, &whence_marker->bufm);
+	}
 	pos = bufm_seek(&marker->bufm, offset, whence);
 	buf_unlock(buf);
 
