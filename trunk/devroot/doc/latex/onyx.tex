@@ -2206,11 +2206,11 @@ onyx:1>
 \subsection{systemdict}
 \label{sec:systemdict}
 
-All threads share the same systemdict, which contains most of the operators that
-are of general use.  Although there are no mechanisms that prevent modification
-of systemdict, programs should not normally need to modify systemdict, since
-globaldict provides a place for storing globally shared objects.  All threads
-share the same systemdict, which is implicitly locked.
+The systemdict dictionary contains most of the operators that are of general
+use.  Although there are no mechanisms that prevent modification of systemdict,
+programs should not normally need to modify systemdict, since globaldict
+provides a place for storing globally shared objects.  All threads share the
+same systemdict, which is implicitly locked.
 
 \begin{longtable}{\optableformat{2.25}}
 \caption[systemdict summary]{systemdict summary by functional group} \\
@@ -6793,7 +6793,7 @@ onyx:0>
 	\end{description}
 \label{systemdict:sroll}
 \index{sroll@\onyxop{}{sroll}{}}
-\item[{\onyxop{--}{sroll}{--}}: ]
+\item[{\onyxop{stack count amount}{sroll}{stack}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -6949,7 +6949,7 @@ onyx:0>
 	\end{description}
 \label{systemdict:stderr}
 \index{stderr@\onyxop{}{stderr}{}}
-\item[{\onyxop{--}{stderr}{--}}: ]
+\item[{\onyxop{--}{stderr}{file}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ] None.
 	\item[Output(s): ]
