@@ -1,0 +1,328 @@
+# -*-mode:makefile-*-
+# @configure_input@
+#############################################################################
+#
+# <Copyright = "jasone">
+# <License>
+#
+#############################################################################
+#
+# Version: <Version>
+#
+# Description: Master GNU-compatible Makefile for libsock.
+#              
+##############################################################################
+
+#
+# File lists.
+#
+
+# Include files that _are_ installed.
+INCS := libsock.h libsock_incs.h sock.h sockb.h socks.h
+
+# Include files that are _not_ installed.
+P_INCS := sock_p.h sockb_p.h socks_p.h
+
+# Source files.
+SRCS := sock.c sockb.c socks.c
+
+# Executables.
+BINS :=
+
+# Simple tests.  Output is diff'ed with the expected (.exp file) output.
+CTESTS :=
+
+# Perl scripts that drive the BTESTS.
+PTESTS :=
+
+# Backend test programs that are driven by the PTESTS.
+BTESTS := b_echos.c b_proxy.c
+
+# Munge the filename lists so that they are prefixed by the directory they're
+# in, relative to @top_srcdir@.  Also, convert the test and binary names to
+# their final names.
+INCS := $(INCS:S/^/include\/libsock\/&/)
+P_INCS := $(P_INCS:S/^/include\/libsock\/&/)
+SRCS := $(SRCS:S/^/src\/&/)
+BINS := $(BINS:R:S/^/bin\/&/)
+CTESTS := $(CTESTS:R:S/^/test\/&/)
+BTESTS := $(BTESTS:R:S/^/test\/&/)
+PTESTS := $(PTESTS:R:S/^/test\/&/)
+
+#
+# Library names.
+#
+
+LIB := sock
+
+LIB_REV := 0.0
+
+LIB_ST_D := $(LIB:S/^/lib\/lib&/:S/$/&_d.a/)
+LIB_ST_O := $(LIB:S/^/lib\/lib&/:S/$/&.a/)
+LIB_SH_O := $(LIB:S/^/lib\/lib&/:S/$/&.so.$(LIB_REV)/)
+LIB_ST_P := $(LIB:S/^/lib\/lib&/:S/$/&_p.a/)
+
+#
+# Standard definitions.
+#
+
+SHELL   := /bin/sh
+CC	:= @CC@
+AR	:= @AR@
+RANLIB	:= @RANLIB@
+INSTALL	:= @INSTALL@
+CAT     := @CAT@
+PERL    := @PERL@
+BASENAME:= @BASENAME@
+DIFF    := @DIFF@
+PMERGE  := test/pmerge
+PSTUB   := test/pstub
+
+#
+# Compiler flags.
+#
+
+LIBPATH := -Llib @LDFLAGS@ 
+EXTRALIBS := @LIBS@
+TEST_LIBS := @TEST_LIBS@
+BIN_LIBS := @BIN_LIBS@
+BIN_LIBSOCK := @BIN_LIBSOCK@
+INCPATH := -Iinclude @CPPFLAGS@
+
+DEFINES := @DEFS@
+ST_DEFINES :=
+SH_DEFINES :=
+D_DEFINES := -D_LIBSTASH_DEBUG -D_LIBSOCK_DBG
+O_DEFINES :=
+P_DEFINES :=
+TEST_DEFINES := -D_LIBSTASH_DEBUG -D_LIBSOCK_DEBUG
+BIN_DEFINES := @BIN_DEFINES@
+
+CFLAGS := -Wall -pipe @CFLAGS@
+ST_CFLAGS :=
+SH_CFLAGS := -fPIC -DPIC
+D_CFLAGS := -g3
+O_CFLAGS := -O3
+P_CFLAGS := -O3 -pg
+TEST_CFLAGS := $(ST_CFLAGS) $(D_CFLAGS)
+BIN_CFLAGS := @BIN_CFLAGS@
+
+# Clear out all paths, then set just one (default path) for the main build
+# directory.
+.PATH :
+.PATH : .
+
+# Need this here since the includes have dependencies in them, but there's
+# stuff in the includes that we need to see before using $(TARGETS).
+all : default
+
+#
+# Common rules
+#
+
+.SUFFIXES :
+.SUFFIXES : .a .c .h .d .o .pl.in .pl \
+	.o_st_d .o_st_o .o_sh_o .o_st_p \
+	.d_st_d .d_st_o .d_sh_o .d_st_p
+
+#
+# Build rules.
+#
+
+.for bin in $(CTESTS) $(BTESTS)
+$(bin) : $(LIB_ST_D) $(bin:S/$/&.o/)
+	$(CC) -o $@ $(@:S/$/&.o/) $(LIBPATH) $(LIB_ST_D) $(TEST_LIBS) -dynamic $(EXTRALIBS)
+
+$(bin:S/$/&.o/) : $(bin:S/$/&.c/)
+	$(CC) $(CFLAGS) $(TEST_CFLAGS) $(INCPATH) $(DEFINES) $(TEST_DEFINES) -c $(bin:S/$/&.c/) -o $@
+	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(TEST_DEFINES) $(INCPATH) $(bin:S/$/&.c/) | sed \"s/\($(bin:R:S!/!\\/!g)\)\.o\([ :]*\)/test\/\1.o \2/g\" > $(@:R:S/$/&.d/)"
+.endfor
+
+.for bin in $(BINS)
+$(bin) : $(LIB_ST_D) $(bin:S/$/&.o/)
+	$(CC) -o $@ $(@:S/$/&.o/) $(LIBPATH) $(BIN_LIBSOCK) $(BIN_LIBS) -dynamic $(EXTRALIBS)
+
+$(bin:S/$/&.o/) : $(bin:S/$/&.c/)
+	$(CC) $(CFLAGS) $(BIN_CFLAGS) $(INCPATH) $(DEFINES) $(BIN_DEFINES) -c $(bin:S/$/&.c/) -o $@
+	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(BIN_DEFINES) $(INCPATH) $(bin:S/$/&.c/) | sed \"s/\($(bin:R:S!/!\\/!g)\)\.o\([ :]*\)/test\/\1.o \2/g\" > $(@:R:S/$/&.d/)"
+.endfor
+
+.for srcfile in $(SRCS)
+$(srcfile:R:S/$/&.o_st_d/) : $(srcfile)
+	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(D_CFLAGS) $(DEFINES) $(ST_DEFINES) $(D_DEFINES) -c $(srcfile) -o $@
+	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(D_DEFINES) $(INCPATH) $(srcfile) | sed \"s/\($(srcfile:R:S!/!\\/!g)\)\.o\([ :]*\)/\1.o_st_d \2/g\" > $(@:R:S/$/&.d_st_d/)"
+
+$(srcfile:R:S/$/&.o_st_o/) : $(srcfile)
+	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(O_CFLAGS) $(DEFINES) $(ST_DEFINES) $(O_DEFINES) -c $(srcfile) -o $@
+	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(O_DEFINES) $(INCPATH) $(srcfile) | sed \"s/\($(srcfile:R:S!/!\\/!g)\)\.o\([ :]*\)/\1.o_st_o \2/g\" > $(@:R:S/$/&.d_st_o/)"
+
+$(srcfile:R:S/$/&.o_sh_o/) : $(srcfile)
+	$(CC) $(INCPATH) $(CFLAGS) $(SH_CFLAGS) $(O_CFLAGS) $(DEFINES) $(SH_DEFINES) $(O_DEFINES) -c $(srcfile) -o $@
+	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(SH_DEFINES) $(O_DEFINES) $(INCPATH) $(srcfile) | sed \"s/\($(srcfile:R:S!/!\\/!g)\)\.o\([ :]*\)/\1.o_sh_o \2/g\" > $(@:R:S/$/&.d_sh_o/)"
+
+$(srcfile:R:S/$/&.o_st_p/) : $(srcfile)
+	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(P_CFLAGS) $(DEFINES) $(ST_DEFINES) $(P_DEFINES) -c $(srcfile) -o $@
+	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(P_DEFINES) $(INCPATH) $(srcfile) | sed \"s/\($(srcfile:R:S!/!\\/!g)\)\.o\([ :]*\)/\1.o_st_p \2/g\" > $(@:R:S/$/&.d_st_p/)"
+.endfor
+
+.pl.in.pl :
+	$(PERL) -w $(PMERGE) $(PERL) $(PSTUB) $< $@
+
+#
+# Dependencies (not rules).
+#
+
+.for depfile in $(SRCS:R:S/$/&.d_st_d/) \
+	$(SRCS:R:S/$/&.d_st_o/) \
+	$(SRCS:R:S/$/&.d_sh_o/) \
+	$(SRCS:R:S/$/&.d_st_p/)
+.if exists($(depfile))
+.include "$(depfile)"
+.endif
+.endfor
+
+.for depfile in $(CTESTS:R:S/$/&.d/) $(BTESTS:R:S/$/&.d/) $(BINS:R:S/$/&.d/)
+.if exists($(depfile))
+.include "$(depfile)"
+.endif
+.endfor
+
+$(LIB_ST_D) : $(SRCS:R:S/$/&.o_st_d/)
+	$(AR) cru $@ $?
+	$(RANLIB) $@
+
+$(LIB_ST_O) : $(SRCS:R:S/$/&.o_st_o/)
+	$(AR) cru $@ $?
+	$(RANLIB) $@
+
+$(LIB_SH_O) : $(SRCS:R:S/$/&.o_sh_o/)
+	$(CC) -shared -o $@ $>
+
+$(LIB_ST_P) : $(SRCS:R:S/$/&.o_st_p/)
+	$(AR) cru $@ $?
+	$(RANLIB) $@
+
+stat_dbg : $(LIB_ST_D)
+stat_opt : $(LIB_ST_O)
+shar_opt : $(LIB_SH_O)
+stat_prof : $(LIB_ST_P)
+
+#
+# autoconf-related rules.
+#
+configure : configure.in
+	autoconf
+
+config.status : configure
+	./config.status --recheck
+
+makefile : Makefile
+Makefile : Makefile.bsd
+Makefile.bsd : Makefile.bsd.in config.status
+	./config.status
+
+stamp.in : configure.in
+	echo timestamp > stamp.in
+
+stamp : include/libsock/libsock_defs.h.in config.status
+	./config.status
+
+include/libsock/libsock_defs.h : stamp
+
+FORCE :
+
+#
+# user 'make'ables
+#
+
+default : libs# bins
+
+libs : stat_dbg stat_opt shar_opt stat_prof
+
+bins : $(BINS)
+
+tests : $(CTESTS) $(PTESTS) $(BTESTS)
+
+check :
+	@$(SHELL) -c \
+	'printf "Running regression tests:\\n" ;\
+	printf "%s\\n" "---------------------------------------------" ;\
+	for i in $(PTESTS); do \
+	printf "%s" "$$i..." ;\
+	$$i ;\
+	done ;\
+	for i in $(CTESTS); do \
+	printf "%s" "$$i..."; \
+	$$i > $$i.out 2>&1 ;\
+	$(DIFF) $$i.out $$i.exp > $$i.diff ;\
+	if [ -s $$i.diff ] ; then \
+	printf "%s\\n" "failed. ****************" ;\
+	else \
+	printf "%s\\n" "passed." ;\
+	rm $$i.diff ;\
+	fi \
+	done ;\
+	printf "%s\\n\\n" "---------------------------------------------" ;\
+	printf "%s\\n" "The following regression tests failed:" ;\
+	printf "%s\\n" "---------------------------------------------" ;\
+	for i in `find ./test -print | grep "\.diff$$"`; do \
+	echo `echo $$i | sed "s/\.\/\(.*\)\.diff/\1/g"` ;\
+	done ;\
+	printf "%s\\n" "---------------------------------------------" ;\
+	cd - \
+	'
+
+install : install_stat_dbg install_stat_opt install_shar_opt install_stat_prof
+
+install_common : 
+	$(SHELL) -c \
+	'@INSTALL@ -d @prefix@/lib; \
+	@INSTALL@ -d @prefix@/include/libsock; \
+	for i in $(INCS); do \
+	@INSTALL@ -m 0644 $$i @prefix@/include/libsock/; \
+	done; \
+	'
+
+install_stat_dbg : stat_dbg install_common
+	@INSTALL@ -m 0444 $(LIB_ST_D) @prefix@/lib
+
+install_stat_opt : stat_opt install_common
+	@INSTALL@ -m 0444 $(LIB_ST_O) @prefix@/lib
+
+install_shar_opt : shar_opt install_common
+	@INSTALL@ -m 0444 $(LIB_SH_O) @prefix@/lib
+
+install_stat_prof : stat_prof install_common
+	@INSTALL@ -m 0444 $(LIB_ST_P) @prefix@/lib
+
+uninstall :
+	rm -f @prefix@/lib/lib$(LIB)*
+	rm -rf @prefix@/include/libsock
+
+doc :
+
+clean : FORCE
+	rm -f *~ */*~ */*/*~
+	rm -f *.bak *.BAK
+	rm -f core test/core *.core test/*.core
+	rm -f src/*.[do]_*
+	rm -f bin/*.[do]
+	rm -f lib/lib*
+	rm -f test/*.out test/*.diff test/*.pl
+	rm -f test/*.[do]
+	rm -f test/*.diff
+	rm -f $(BTESTS)
+
+#	rm -f $(CTESTS) $(PTESTS) $(BTESTS) $(BINS)
+
+distclean : clean
+	rm -f "#"*"#" bin/"#"*"#" src/"#"*"#" include/"#"*"#"
+	rm -f Makefile Makefile.bsd Makefile.gnu stamp
+	rm -f config.cache config.log config.status
+	rm -f include/libsock/libsock_defs.h
+	rm -f TAGS
+	rm -f $(PMERGE)
+	rm -f $(PSTUB)
+
+etags : $(INCS) $(P_INCS) $(SRCS)
+	@ETAGS@ $(INCS) $(P_INCS) $(SRCS)

@@ -260,14 +260,14 @@ $(LIB_ST_R_P) : $(SRCS:R:S/$/&.o_st_r_p/) $(SRCS:R:S/$/&.o_st_r_p/)
 	$(AR) cru $@ $?
 	$(RANLIB) $@
 
-stat_dbg : $(LIB_ST_D) makefile
-stat_opt : $(LIB_ST_O) makefile
-shar_opt : $(LIB_SH_O) makefile
-stat_prof : $(LIB_ST_P) makefile
-stat_dbg_r : $(LIB_ST_R_D) makefile
-stat_opt_r : $(LIB_ST_R_O) makefile
-shar_opt_r : $(LIB_SH_R_O) makefile
-stat_prof_r : $(LIB_ST_R_P) makefile
+stat_dbg : $(LIB_ST_D)
+stat_opt : $(LIB_ST_O)
+shar_opt : $(LIB_SH_O)
+stat_prof : $(LIB_ST_P)
+stat_dbg_r : $(LIB_ST_R_D)
+stat_opt_r : $(LIB_ST_R_O)
+shar_opt_r : $(LIB_SH_R_O)
+stat_prof_r : $(LIB_ST_R_P)
 
 #
 # autoconf-related rules.
@@ -278,8 +278,7 @@ configure : configure.in
 config.status : configure
 	./config.status --recheck
 
-makefile :: Makefile
-
+makefile : Makefile
 Makefile : Makefile.bsd
 Makefile.bsd : Makefile.bsd.in config.status
 	./config.status
@@ -302,7 +301,7 @@ all_s : stat_dbg stat_opt shar_opt stat_prof
 
 all_r : stat_dbg_r stat_opt_r shar_opt_r stat_prof_r
 
-tests : $(CTESTS) $(PTESTS) $(BTESTS) makefile
+tests : $(CTESTS) $(PTESTS) $(BTESTS)
 
 check : tests
 	@$(SHELL) -c \
@@ -341,7 +340,7 @@ install_s : install_stat_dbg install_stat_opt install_shar_opt \
 install_r : install_stat_dbg_r install_stat_opt_r install_shar_opt_r \
 	install_stat_prof_r
 
-install_common : makefile
+install_common :
 	$(SHELL) -c \
 	'@INSTALL@ -d @prefix@/include/libstash; \
 	@INSTALL@ -d @prefix@/include/libstash; \
@@ -382,13 +381,13 @@ install_shar_opt_r : shar_opt_r install_common install_common_r
 install_stat_prof_r : stat_prof_r install_common install_common_r
 	@INSTALL@ -m 0444 $(LIB_ST_R_P) @prefix@/lib
 
-uninstall : makefile
+uninstall :
 	rm -f @prefix@/lib/lib$(LIB)*
 	rm -rf @prefix@/include/libstash
 
 doc :
 
-clean : makefile FORCE
+clean : FORCE
 	rm -f *~ */*~ */*/*~
 	rm -f *.bak *.BAK
 	rm -f core test/core
@@ -413,6 +412,5 @@ distclean : clean
 	rm -f $(PMERGE)
 	rm -f $(PSTUB)
 
-etags : $(INCS) $(INCS_R) $(PRIV_INCS) $(PRIV_INCS_R) $(SRCS) $(SRCS_R) \
-	makefile
+etags : $(INCS) $(INCS_R) $(PRIV_INCS) $(PRIV_INCS_R) $(SRCS) $(SRCS_R)
 	@ETAGS@ $(INCS) $(INCS_R) $(PRIV_INCS) $(PRIV_INCS_R) $(SRCS) $(SRCS_R)

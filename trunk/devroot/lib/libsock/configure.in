@@ -6,11 +6,39 @@ dnl Version: <Version>
 dnl
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(include/libsock/libsock.h)
+AC_CONFIG_HEADER(include/libsock/libsock_defs.h)
 
-dnl Use this simply to keep all the -D* gunk off of the command line.
-AC_CONFIG_HEADER(include/libsock/config.h)
+AC_ARG_WITH(gnu-make, [  --with-gnu-make         Always generate a Makefile compatiple with gnu make],
+if test "x$with_gnu_make" != "xno" ; then
+  use_gmake="yes"
+else
+  use_gmake="maybe"
+fi
+,
+use_gmake="maybe"
+)
 
 AC_CANONICAL_HOST
+case "${host}" in
+  i386-*-freebsd*)
+	AC_DEFINE(_CW_OS_FREEBSD, )
+	if test "x$use_gmake" = "xmaybe" ; then
+	  use_gmake="no"
+	fi
+        ;;
+  *-*-linux*)
+	AC_DEFINE(_CW_OS_LINUX, )
+	if test "x$use_gmake" = "xmaybe" ; then
+	  use_gmake="yes"
+	fi
+        ;;
+  *-*-solaris2*)
+	AC_DEFINE(_CW_OS_SOLARIS, )
+	if test "x$use_gmake" = "xmaybe" ; then
+	  use_gmake="yes"
+	fi
+        ;;
+esac
 
 dnl Check for programs.
 dnl Trick AC_PROG_CC into not defining CFLAGS, even if it wasn't specified on
@@ -44,14 +72,35 @@ else
   fi
 fi
 
+AC_ARG_WITH(debug, [  --with-debug            Define debugging macros and link binaries with
+                          debugging libraries])
+
 dnl Check for libraries.
 AC_CHECK_LIB(pthread, pthread_create, LIBS="$LIBS -lpthread", \
   AC_CHECK_LIB(c_r, pthread_create, \
     LIBS="$LIBS -pthread", AC_MSG_ERROR(Cannot find the pthreads library)))
-AC_CHECK_LIB(stash_r_d, main, LIBS="$LIBS -lstash_r_d", \
+
+AC_CHECK_LIB(stash_r_d, main, TEST_LIBS="-lstash_r_d", \
   AC_MSG_ERROR(Cannot find the stash library))
 
-dnl Define preprocessor macros.
+if test "x$with_debug" != "xno"; then
+  AC_CHECK_LIB(stash_r_d, main, BIN_LIBS="-lstash_r_d", \
+    AC_MSG_ERROR(Cannot find the stash library))
+  BIN_LIBSOCK="lib/libsock_d.a"
+  BIN_DEFINES="\$(TEST_DEFINES)"
+  BIN_CFLAGS="\$(TEST_CFLAGS)"
+else
+  AC_CHECK_LIB(stash_r, main, BIN_LIBS="-lstash_r", \
+    AC_MSG_ERROR(Cannot find the stash library))
+  BIN_LIBSOCK="lib/libsock.a"
+  BIN_DEFINES=""
+  BIN_CFLAGS="\$(ST_CFLAGS) \$(O_CFLAGS)"
+fi
+AC_SUBST(TEST_LIBS)
+AC_SUBST(BIN_LIBS)
+AC_SUBST(BIN_LIBSOCK)
+AC_SUBST(BIN_DEFINES)
+AC_SUBST(BIN_CFLAGS)
 
 dnl Check for header files.
 AC_HEADER_STDC
@@ -64,16 +113,28 @@ dnl AC_C_BIGENDIAN
 
 AC_MSG_RESULT(================================================================)
 AC_MSG_RESULT(Extra libraries to link in: ${LIBS})
+AC_MSG_RESULT(Extra libraries for binaries: ${BIN_LIBS})
+AC_MSG_RESULT(Version of libsock to link bins with: ${BIN_LIBSOCK})
+AC_MSG_RESULT(Extra libraries for tests: ${TEST_LIBS})
 AC_MSG_RESULT(Extra ld flags: ${LDFLAGS})
 AC_MSG_RESULT(Extra Defines: ${DEFS})
 AC_MSG_RESULT(Compiler flags: ${CFLAGS})
 AC_MSG_RESULT(C preprocessor flags: ${CPPFLAGS})
 AC_MSG_RESULT(================================================================)
 
+echo rm -f Makefile
+rm -f Makefile
+if test "x$use_gmake" = "xyes" ; then
+  echo "ln -s Makefile.gnu Makefile"
+  ln -s Makefile.gnu Makefile
+else
+  echo "ln -s Makefile.bsd Makefile"
+  ln -s Makefile.bsd Makefile
+fi
+
 dnl Process the following files.
-AC_OUTPUT(Makefile \
+AC_OUTPUT(Makefile.bsd \
+Makefile.gnu
 test/pmerge \
 test/pstub
-,
-echo timestamp > stamp
-)
+, echo timestamp > stamp)

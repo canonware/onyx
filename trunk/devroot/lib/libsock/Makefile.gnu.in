@@ -9,7 +9,7 @@
 #
 # Version: <Version>
 #
-# Description: Master Makefile for libsock.
+# Description: Master GNU-compatible Makefile for libsock.
 #              
 ##############################################################################
 
@@ -26,6 +26,9 @@ P_INCS := sock_p.h sockb_p.h socks_p.h
 # Source files.
 SRCS := sock.c sockb.c socks.c
 
+# Executables.
+BINS :=
+
 # Simple tests.  Output is diff'ed with the expected (.exp file) output.
 CTESTS :=
 
@@ -36,8 +39,8 @@ PTESTS :=
 BTESTS := b_echos.c b_proxy.c
 
 # Munge the filename lists so that they are prefixed by the directory they're
-# in, relative to @top_srcdir@.  Also, convert the test names to their final
-# names.
+# in, relative to @top_srcdir@.  Also, convert the test and binary names to
+# their final names.
 INCS := $(addprefix include/libsock/,$(INCS))
 P_INCS := $(addprefix include/libsock/,$(P_INCS))
 SRCS := $(addprefix src/,$(SRCS))
@@ -71,24 +74,28 @@ CAT     := @CAT@
 PERL    := @PERL@
 BASENAME:= @BASENAME@
 DIFF    := @DIFF@
-PMERGE  := @top_srcdir@/test/pmerge
-PSTUB   := @top_srcdir@/test/pstub
+PMERGE  := test/pmerge
+PSTUB   := test/pstub
 
 #
 # Compiler flags.
 #
 
-LIBPATH := -L@top_srcdir@/lib
+LIBPATH := -Llib
 EXTRALIBS := @LDFLAGS@ @LIBS@
-INCPATH := -I@top_srcdir@/include @CPPFLAGS@
+TEST_LIBS := @TEST_LIBS@
+BIN_LIBS := @BIN_LIBS@
+BIN_LIBSOCK := @BIN_LIBSOCK@
+INCPATH := -Iinclude @CPPFLAGS@
 
 DEFINES := @DEFS@
 ST_DEFINES := 
 SH_DEFINES := 
-D_DEFINES := -D_LIBSTASH_DBG -D_LIBSOCK_DBG
+D_DEFINES := -D_LIBSTASH_DEBUG -D_LIBSOCK_DBG
 O_DEFINES := 
 P_DEFINES := 
 TEST_DEFINES := -D_LIBSTASH_DEBUG -D_LIBSOCK_DEBUG
+BIN_DEFINES := @BIN_DEFINES@
 
 CFLAGS := -Wall -pipe @CFLAGS@
 ST_CFLAGS :=
@@ -96,6 +103,8 @@ SH_CFLAGS := -fPIC -DPIC
 D_CFLAGS := -g3
 O_CFLAGS := -O3
 P_CFLAGS := -O3 -pg
+TEST_CFLAGS := $(ST_CFLAGS) $(D_CFLAGS)
+BIN_CFLAGS := @BIN_CFLAGS@
 
 # Clear out all vpaths, then set just one (default vpath) for the main build
 # directory.
@@ -120,24 +129,33 @@ all : default
 #
 
 # This rule is used to build the tests.
-% : %.c $(LIB_ST_D) # $(LIB_ST_O) XXX For utils?
-	$(CC) $(CFLAGS) $(ST_CFLAGS) $(D_CFLAGS) $(R_CFLAGS) $(INCPATH) $(DEFINES) $(R_DEFINES) $(TEST_DEFINES) -c $< -o $(@:=.o)
-	$(CC) -o $@ $(@:=.o) $(LIBPATH) $(LIB_ST_D) -dynamic $(EXTRALIBS)
-	$(SHELL) -ec "$(CC) -M $(DEFINES) $(ST_DEFINES) $(D_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o \2/g\" > $(@:%=%.d)"
+test/% : test/%.o
+	$(CC) -o $@ $< $(LIBPATH) $(LIB_ST_D) $(TEST_LIBS) -dynamic $(EXTRALIBS)
 
-obj/%.o_st_d : src/%.c
+test/%.o : test/%.c
+	$(CC) $(CFLAGS) $(TEST_CFLAGS) $(INCPATH) $(DEFINES) $(TEST_DEFINES) -c $< -o $@
+	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(TEST_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o \2/g\" > $(@:%.o=%.d)"
+
+bin/% : bin/%.o
+	$(CC) -o $@ $< $(LIBPATH) $(BIN_LIBSOCK) $(BIN_LIBS) -dynamic $(EXTRALIBS)
+
+bin/%.o : bin/%.c
+	$(CC) $(CFLAGS) $(BIN_CFLAGS) $(INCPATH) $(DEFINES) $(BIN_DEFINES) -c $< -o $(@)
+	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(BIN_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o \2/g\" > $(@:%.o=%.d)"
+
+src/%.o_st_d : src/%.c
 	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(D_CFLAGS) $(DEFINES) $(ST_DEFINES) $(D_DEFINES) -c $< -o $@
 	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(D_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_st_d \2/g\" > $(@:%.o_st_d=%.d_st_d)"
 
-obj/%.o_st_o : src/%.c
+src/%.o_st_o : src/%.c
 	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(O_CFLAGS) $(DEFINES) $(ST_DEFINES) $(O_DEFINES) -c $< -o $@		
 	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(O_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_st_o \2/g\" > $(@:%.o_st_o=%.d_st_o)"
 
-obj/%.o_sh_o : src/%.c
+src/%.o_sh_o : src/%.c
 	$(CC) $(INCPATH) $(CFLAGS) $(SH_CFLAGS) $(O_CFLAGS) $(DEFINES) $(SH_DEFINES) $(O_DEFINES) -c $< -o $@
 	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(SH_DEFINES) $(O_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_sh_o \2/g\" > $(@:%.o_sh_o=%.d_sh_o)"
 
-obj/%.o_st_p : src/%.c
+src/%.o_st_p : src/%.c
 	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(P_CFLAGS) $(DEFINES) $(ST_DEFINES) $(P_DEFINES) -c $< -o $@
 	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(P_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_st_p \2/g\" > $(@:%.o_st_p=%.d_st_p)"
 
@@ -148,29 +166,32 @@ obj/%.o_st_p : src/%.c
 # Dependencies (not rules).
 #
 
--include $(SRCS:src/%.c=obj/%.d_st_d)
--include $(SRCS:src/%.c=obj/%.d_st_o)
--include $(SRCS:src/%.c=obj/%.d_sh_o)
--include $(SRCS:src/%.c=obj/%.d_st_p)
+-include $(SRCS:%.c=%.d_st_d)
+-include $(SRCS:%.c=%.d_st_o)
+-include $(SRCS:%.c=%.d_sh_o)
+-include $(SRCS:%.c=%.d_st_p)
 ifneq ($(strip $(CTESTS)),)
--include $(CTESTS:=.d)
+-include $(CTESTS:%=%.d)
 endif
 ifneq ($(strip $(BTESTS)),)
--include $(BTESTS:=.d)
+-include $(BTESTS:%=%.d)
+endif
+ifneq ($(strip $(BINS)),)
+-include $(BINS:%=%.d)
 endif
 
-$(LIB_ST_D) : $(SRCS:src/%.c=obj/%.o_st_d)
+$(LIB_ST_D) : $(SRCS:%.c=%.o_st_d)
 	$(AR) cru $@ $?
 	$(RANLIB) $@
 
-$(LIB_ST_O) : $(SRCS:src/%.c=obj/%.o_st_o)
+$(LIB_ST_O) : $(SRCS:%.c=%.o_st_o)
 	$(AR) cru $@ $?
 	$(RANLIB) $@
 
-$(LIB_SH_O) : $(SRCS:src/%.c=obj/%.o_sh_o)
+$(LIB_SH_O) : $(SRCS:%.c=%.o_sh_o)
 	$(CC) -shared -o $@ $^
 
-$(LIB_ST_P) : $(SRCS:src/%.c=obj/%.o_st_p)
+$(LIB_ST_P) : $(SRCS:%.c=%.o_st_p)
 	$(AR) cru $@ $?
 	$(RANLIB) $@
 
@@ -178,6 +199,10 @@ stat_dbg : $(LIB_ST_D)
 stat_opt : $(LIB_ST_O)
 shar_opt : $(LIB_SH_O)
 stat_prof : $(LIB_ST_P)
+
+$(BINS) : $(BIN_LIBSOCK)
+$(CTESTS) : $(LIB_ST_D)
+$(BTESTS) : $(LIB_ST_D)
 
 #
 # autoconf-related rules.
@@ -188,11 +213,18 @@ configure : configure.in
 config.status : configure
 	./config.status --recheck
 
-# include/libsock/libsock.h : include/libsock/libsock.h.in
-# 	./config.status
+Makefile : Makefile.gnu
 
-Makefile : Makefile.in config.status
+Makefile.gnu : Makefile.gnu.in config.status
 	./config.status
+
+stamp.in : configure.in
+	echo timestamp > stamp.in
+
+stamp : include/libsock/libsock_defs.h.in config.status
+	./config.status
+
+include/libsock/libsock_defs.h : stamp
 
 FORCE :
 
@@ -200,37 +232,40 @@ FORCE :
 # user 'make'ables
 #
 
-default : stat_dbg stat_opt shar_opt stat_prof
+default : libs bins
+
+libs : stat_dbg stat_opt shar_opt stat_prof
+
+bins : $(BINS)
 
 tests : $(CTESTS) $(PTESTS) $(BTESTS)
 
-check : tests
+check :
 	@$(SHELL) -c \
-	'echo Running regression tests: ; \
-	echo "---------------------------------------------" ;\
+	'printf "%s\\n" "Running regression tests:" ; \
+	printf "%s\\n" "---------------------------------------------" ;\
 	for i in $(PTESTS); do \
-	echo -n "$$i..."; \
+	printf "%s" "$$i..."; \
 	./$$i; \
 	done; \
 	for i in $(CTESTS); do \
-	echo -n "$$i..."; \
+	printf "%s" "$$i..."; \
 	./$$i > ./$$i.out 2>&1; \
 	$(DIFF) $$i.out $$i.exp > $$i.diff ; \
 	if [ -s $$i.diff ] ; then \
-	echo "failed. ****************" ; \
+	printf "%s\\n" "failed. ****************" ; \
 	else \
-	echo "passed." ; \
+	printf "%s\\n" "passed." ; \
 	rm $$i.diff ; \
 	fi \
 	done ; \
-	echo "---------------------------------------------" ;\
-	echo ;\
-	echo The following regression tests failed: ; \
-	echo "---------------------------------------------" ;\
+	printf "%s\\n\\n" "---------------------------------------------" ;\
+	printf "%s\\n" "The following regression tests failed:" ; \
+	printf "%s\\n" "---------------------------------------------" ;\
 	for i in `find ./test -print | grep "\.diff$$"`; do \
 	echo `echo $$i | sed "s/\.\/\(.*\)\.diff/\1/g"`; \
 	done; \
-	echo "---------------------------------------------" \
+	printf "%s\\n" "---------------------------------------------" \
 	'
 
 install : install_stat_dbg install_stat_opt install_shar_opt install_stat_prof
@@ -266,18 +301,19 @@ clean : FORCE
 	rm -f *~ */*~ */*/*~
 	rm -f *.bak *.BAK
 	rm -f core test/core *.core test/*.core
-	rm -f test/*.o test/*.out test/*.diff test/*.pl
-	rm -f obj/*.[do]*
+	rm -f src/*.[do]_*
+	rm -f bin/*.[do]_b
 	rm -f lib/lib*
-	rm -f test/*.d
+	rm -f test/*.out test/*.diff test/*.pl
+	rm -f test/*.[do]
 	rm -f test/*.diff
-	rm -f $(CTESTS) $(PTESTS) $(BTESTS)
+	rm -f $(CTESTS) $(PTESTS) $(BTESTS) $(BINS)
 
 distclean : clean
 	rm -f "#"*"#" bin/"#"*"#" src/"#"*"#" include/"#"*"#"
-	rm -f Makefile stamp
+	rm -f Makefile Makefile.bsd Makefile.gnu stamp
 	rm -f config.cache config.log config.status
-	rm -f include/libsock/config.h
+	rm -f include/libsock/libsock_defs.h
 	rm -f TAGS
 	rm -f $(PMERGE)
 	rm -f $(PSTUB)

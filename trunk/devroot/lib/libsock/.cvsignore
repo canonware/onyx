@@ -2,6 +2,8 @@ config.log
 config.cache
 config.status
 Makefile
+Makefile.bsd
+Makefile.gnu
 *.core
 core
 stamp
