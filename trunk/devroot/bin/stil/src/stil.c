@@ -24,6 +24,7 @@
 #define	_BUF_SIZE	4096
 #define	_PROMPT_STRLEN	  80
 
+/*  #define	_STIL_SIGHANDLER */
 #ifdef _STIL_SIGHANDLER
 struct handler_s {
 	cw_bool_t	quit;
@@ -78,6 +79,7 @@ main(int argc, char **argv, char **envp)
 	sigemptyset(&handler_arg.hupset);
 	sigaddset(&handler_arg.hupset, SIGHUP);
 	sigaddset(&handler_arg.hupset, SIGINT);
+	sigaddset(&handler_arg.hupset, SIGWINCH);
 	thd_sigmask(SIG_BLOCK, &handler_arg.hupset, NULL);
 	handler_arg.sig_thd = thd_new(sig_handler, (void *)&handler_arg, FALSE);
 #endif
@@ -304,7 +306,7 @@ end
 	 * Tell the signal handler thread to quit, then join on it.
 	 */
 	handler_arg.quit = TRUE;
-	raise(SIGINT);
+	raise(SIGHUP);
 	thd_join(handler_arg.sig_thd);
 #endif
 	libstash_shutdown();
@@ -471,25 +473,33 @@ void *
 sig_handler(void *a_arg)
 {
 	struct handler_s	*arg = (struct handler_s *)a_arg;
-	int			sig, error;
+	int			sig;
 
 	for (;;) {
-		error = sigwait(&arg->hupset, &sig);
-		if (error)
-			_cw_error("sigwait() error");
-		if (sigismember(&arg->hupset, sig)) {
-			_cw_out_put_e("Signal [i]\n", sig);
+		sigwait(&arg->hupset, &sig);
+
+		switch (sig) {
+		case SIGHUP:
 			if (arg->quit == FALSE) {
 				/*
 				 * We've received a signal from somewhere
 				 * outside this program.
 				 */
 				exit(0);
-			}
-		} else
-			_cw_out_put_e("Unexpected signal [i]\n", sig);
+			} else
+				goto RETURN;
+		case SIGINT:
+			exit(0);
+		case SIGWINCH:
+			/* XXX Doesn't return until cl_read() returns. */
+			el_resize(el);
+			break;
+		default:
+			_cw_not_reached();
+		}
 	}
 
+	RETURN:
 	return NULL;
 }
 #endif
