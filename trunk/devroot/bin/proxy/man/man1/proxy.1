@@ -29,13 +29,87 @@ proxy - transparent logging TCP/IP proxy
 .IR <port> ]
 .B \-r
 .RI [ <rhost> :] <rport>
-
 .SH DESCRIPTION
-<XXX Description>
-
-.SH USAGE
-
-.SH SEE ALSO
-
+.B proxy
+is a transparent TCP/IP proxy that listens for connections and forwards
+bi-directional data with the ability to log the data to stdout or to files
+within a specified directory.
+.PP
+.B proxy
+can log the data streams in three formats.
+Which format to use (if any) should be chosen according to the nature of the
+data being streamed.
+.SS Command line flags:
+.B \-d
+.I <dirpath>
+.RS
+Write logs to
+.RI \*(lq <dirpath> /proxy.*\*(rq.
+.RE
+.PP
+.B \-f
+.RB { p | h | a }
+.RS
+Specify format of log output:
+.RS
+.BR p :
+pretty
+.br
+.BR h :
+hexadecimal
+.br
+.BR a :
+ascii
+.RE
+.RE
+.PP
+.IP \-h
+Display usage information and exit.
+.PP
+.IP \-l
+Write logs to stderr.
+.PP
+.B \-p
+.I <port>
+.RS
+Listen on port
+.IR <port> .
+.RE
+.IP \-q
+Be very quiet.
+This flag is incompatible with the
+.B \-v
+flag.
+.PP
+.B \-r
+.I <rport>
+.br
+.B \-r
+.IR <rhost> : <rport>
+.RS
+Send output to host
+.I <rhost>
+on port
+.IR <rport> .
+If
+.I <rhost>
+is not specified, then localhost is assumed.
+.RE
+.PP
+.B \-t
+.I <timeout>
+.RS
+Specify minimum timeout in seconds.
+If zero, then there is no timeout.
+.RE
+.PP
+.IP \-V
+Display the version number and exit.
+.IP \-v
+Be verbose.
+This flag is incompatible with the
+.B \-q
+flag.
+.RE
 .SH HISTORY
 Written by Jason Evans <jasone@canonware.com>.
