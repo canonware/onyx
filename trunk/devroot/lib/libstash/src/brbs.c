@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 145 $
- * $Date: 1998-07-15 17:26:27 -0700 (Wed, 15 Jul 1998) $
+ * $Revision: 173 $
+ * $Date: 1998-08-26 12:34:42 -0700 (Wed, 26 Aug 1998) $
  *
  * <<< Description >>>
  *
@@ -43,7 +43,7 @@ brbs_new(cw_brbs_t * a_brbs_o)
 {
   cw_brbs_t * retval;
 
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBS_FUNC))
   {
     _cw_marker("Enter brbs_new()");
   }
@@ -66,7 +66,7 @@ brbs_new(cw_brbs_t * a_brbs_o)
   retval->is_raw = FALSE;
   retval->sect_size = 0;
 
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBS_FUNC))
   {
     _cw_marker("Exit brbs_new()");
   }
@@ -82,7 +82,7 @@ brbs_new(cw_brbs_t * a_brbs_o)
 void 
 brbs_delete(cw_brbs_t * a_brbs_o)
 {
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBS_FUNC))
   {
     _cw_marker("Enter brbs_delete()");
   }
@@ -105,7 +105,7 @@ brbs_delete(cw_brbs_t * a_brbs_o)
     _cw_free(a_brbs_o);
   }
 
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBS_FUNC))
   {
     _cw_marker("Exit brbs_delete()");
   }
@@ -122,7 +122,7 @@ brbs_is_open(cw_brbs_t * a_brbs_o)
 {
   cw_bool_t retval;
   
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBS_FUNC))
   {
     _cw_marker("Enter brbs_is_open()");
   }
@@ -132,7 +132,7 @@ brbs_is_open(cw_brbs_t * a_brbs_o)
   retval = a_brbs_o->is_open;
 
 /*   rwl_runlock(&a_brbs_o->rw_lock); */
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBS_FUNC))
   {
     _cw_marker("Exit brbs_is_open()");
   }
@@ -150,7 +150,7 @@ brbs_open(cw_brbs_t * a_brbs_o)
 {
   cw_bool_t retval = FALSE;
   
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBS_FUNC))
   {
     _cw_marker("Enter brbs_open()");
   }
@@ -172,7 +172,7 @@ brbs_open(cw_brbs_t * a_brbs_o)
       {
 	/* We're not allowed to do the operation.  Return an error. */
 	retval = TRUE;
-	if (dbg_fmatch(g_dbg_o, _CW_DBG_R_BRBS_ERROR))
+	if (_cw_fmatch(_STASH_DBG_R_BRBS_ERROR))
 	{
 	  log_leprintf(g_log_o, __FILE__, __LINE__, "brbs_open",
 		       "open() error: %s\n", strerror(errno));
@@ -186,7 +186,7 @@ brbs_open(cw_brbs_t * a_brbs_o)
 	{
 	  /* Error opening file. */
 	  retval = TRUE;
-	  if (dbg_fmatch(g_dbg_o, _CW_DBG_R_BRBS_ERROR))
+	  if (_cw_fmatch(_STASH_DBG_R_BRBS_ERROR))
 	  {
 	    log_leprintf(g_log_o, __FILE__, __LINE__, "brbs_open",
 			 "open() error: %s\n", strerror(errno));
@@ -237,7 +237,7 @@ brbs_open(cw_brbs_t * a_brbs_o)
   }
 
   rwl_wunlock(&a_brbs_o->rw_lock);
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBS_FUNC))
   {
     _cw_marker("Exit brbs_open()");
   }
@@ -255,7 +255,7 @@ brbs_close(cw_brbs_t * a_brbs_o)
 {
   cw_bool_t retval;
 
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBS_FUNC))
   {
     _cw_marker("Enter brbs_close()");
   }
@@ -267,7 +267,7 @@ brbs_close(cw_brbs_t * a_brbs_o)
     if (close(a_brbs_o->fd) == -1)
     {
       retval = TRUE;
-      if (dbg_fmatch(g_dbg_o, _CW_DBG_R_BRBS_ERROR))
+      if (_cw_fmatch(_STASH_DBG_R_BRBS_ERROR))
       {
 	log_leprintf(g_log_o, __FILE__, __LINE__, "brbs_close",
 		     "close() error: %s\n", strerror(errno));
@@ -284,7 +284,7 @@ brbs_close(cw_brbs_t * a_brbs_o)
   }
 
   rwl_wunlock(&a_brbs_o->rw_lock);
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBS_FUNC))
   {
     _cw_marker("Exit brbs_close()");
   }
@@ -334,7 +334,7 @@ brbs_get_filename(cw_brbs_t * a_brbs_o)
 {
   char * retval;
   
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBS_FUNC))
   {
     _cw_marker("Enter brbs_get_filename()");
   }
@@ -345,7 +345,7 @@ brbs_get_filename(cw_brbs_t * a_brbs_o)
   retval = a_brbs_o->filename;
 
 /*   rwl_runlock(&a_brbs_o->rw_lock); */
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBS_FUNC))
   {
     _cw_marker("Exit brbs_get_filename()");
   }
@@ -363,7 +363,7 @@ brbs_set_filename(cw_brbs_t * a_brbs_o, char * a_filename)
 {
   cw_bool_t retval;
   
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBS_FUNC))
   {
     _cw_marker("Enter brbs_set_filename()");
   }
@@ -393,7 +393,7 @@ brbs_set_filename(cw_brbs_t * a_brbs_o, char * a_filename)
   }
 
   rwl_wunlock(&a_brbs_o->rw_lock);
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBS_FUNC))
   {
     _cw_marker("Exit brbs_set_filename()");
   }
@@ -411,7 +411,7 @@ brbs_get_size(cw_brbs_t * a_brbs_o)
 {
   cw_uint64_t retval;
   
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBS_FUNC))
   {
     _cw_marker("Enter brbs_get_size()");
   }
@@ -421,7 +421,7 @@ brbs_get_size(cw_brbs_t * a_brbs_o)
   retval = a_brbs_o->size;
 
 /*   rwl_runlock(&a_brbs_o->rw_lock); */
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBS_FUNC))
   {
     _cw_marker("Exit brbs_get_size()");
   }
@@ -439,7 +439,7 @@ brbs_get_is_raw(cw_brbs_t * a_brbs_o)
 {
   cw_bool_t retval;
 
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBS_FUNC))
   {
     _cw_marker("Enter brbs_get_()");
   }
@@ -449,7 +449,7 @@ brbs_get_is_raw(cw_brbs_t * a_brbs_o)
   retval = a_brbs_o->is_raw;
 
 /*   rwl_runlock(&a_brbs_o->rw_lock); */
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBS_FUNC))
   {
     _cw_marker("Exit brbs_get_()");
   }
@@ -467,7 +467,7 @@ brbs_get_sect_size(cw_brbs_t * a_brbs_o)
 {
   cw_bool_t retval;
 
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBS_FUNC))
   {
     _cw_marker("Enter brbs_get_()");
   }
@@ -477,7 +477,7 @@ brbs_get_sect_size(cw_brbs_t * a_brbs_o)
   retval = a_brbs_o->sect_size;
 
 /*   rwl_runlock(&a_brbs_o->rw_lock); */
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBS_FUNC))
   {
     _cw_marker("Exit brbs_get_()");
   }
@@ -501,7 +501,7 @@ brbs_block_read(cw_brbs_t * a_brbs_o, cw_uint64_t a_offset,
   ssize_t error;
   cw_bool_t retval;
   
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBS_FUNC))
   {
     _cw_marker("Enter brbs_block_read()");
   }
@@ -514,7 +514,7 @@ brbs_block_read(cw_brbs_t * a_brbs_o, cw_uint64_t a_offset,
   {
     /* Error seeking. */
     retval = TRUE;
-    if (dbg_fmatch(g_dbg_o, _CW_DBG_R_BRBS_ERROR))
+    if (_cw_fmatch(_STASH_DBG_R_BRBS_ERROR))
     {
       log_leprintf(g_log_o, __FILE__, __LINE__, "brbs_block_read",
 		   "lseek() error: %s\n", strerror(errno));
@@ -529,7 +529,7 @@ brbs_block_read(cw_brbs_t * a_brbs_o, cw_uint64_t a_offset,
     {
       /* Error reading. */
       retval = TRUE;
-      if (dbg_fmatch(g_dbg_o, _CW_DBG_R_BRBS_ERROR))
+      if (_cw_fmatch(_STASH_DBG_R_BRBS_ERROR))
       {
 	log_leprintf(g_log_o, __FILE__, __LINE__, "brbs_block_read",
 		     "read() error: %s\n", strerror(errno));
@@ -539,7 +539,7 @@ brbs_block_read(cw_brbs_t * a_brbs_o, cw_uint64_t a_offset,
     {
       /* Partial read error. */
       retval = TRUE;
-      if (dbg_fmatch(g_dbg_o, _CW_DBG_R_BRBS_ERROR))
+      if (_cw_fmatch(_STASH_DBG_R_BRBS_ERROR))
       {
 	log_leprintf(g_log_o, __FILE__, __LINE__, "brbs_block_read",
 		     "Incomplete read");
@@ -553,7 +553,7 @@ brbs_block_read(cw_brbs_t * a_brbs_o, cw_uint64_t a_offset,
   }
   
   rwl_runlock(&a_brbs_o->rw_lock);
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBS_FUNC))
   {
     _cw_marker("Exit brbs_block_read()");
   }
@@ -577,7 +577,7 @@ brbs_block_write(cw_brbs_t * a_brbs_o, cw_uint64_t a_offset,
   ssize_t error;
   cw_bool_t retval;
   
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBS_FUNC))
   {
     _cw_marker("Enter brbs_block_write()");
   }
@@ -590,7 +590,7 @@ brbs_block_write(cw_brbs_t * a_brbs_o, cw_uint64_t a_offset,
   {
     /* Error seeking. */
     retval = TRUE;
-    if (dbg_fmatch(g_dbg_o, _CW_DBG_R_BRBS_ERROR))
+    if (_cw_fmatch(_STASH_DBG_R_BRBS_ERROR))
     {
       log_leprintf(g_log_o, __FILE__, __LINE__, "brbs_block_write",
 		   "lseek() error: %s\n", strerror(errno));
@@ -605,7 +605,7 @@ brbs_block_write(cw_brbs_t * a_brbs_o, cw_uint64_t a_offset,
     {
       /* Error writing. */
       retval = TRUE;
-      if (dbg_fmatch(g_dbg_o, _CW_DBG_R_BRBS_ERROR))
+      if (_cw_fmatch(_STASH_DBG_R_BRBS_ERROR))
       {
 	log_leprintf(g_log_o, __FILE__, __LINE__, "brbs_block_write",
 		     "write() error: %s\n", strerror(errno));
@@ -615,7 +615,7 @@ brbs_block_write(cw_brbs_t * a_brbs_o, cw_uint64_t a_offset,
     {
       /* Partial write error. */
       retval = TRUE;
-      if (dbg_fmatch(g_dbg_o, _CW_DBG_R_BRBS_ERROR))
+      if (_cw_fmatch(_STASH_DBG_R_BRBS_ERROR))
       {
 	log_leprintf(g_log_o, __FILE__, __LINE__, "brbs_block_write",
 		     "Incomplete write");
@@ -629,7 +629,7 @@ brbs_block_write(cw_brbs_t * a_brbs_o, cw_uint64_t a_offset,
   }
 
   rwl_wunlock(&a_brbs_o->rw_lock);
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBS_FUNC))
   {
     _cw_marker("Exit brbs_block_write()");
   }
@@ -650,7 +650,7 @@ brbs_p_get_raw_info(cw_brbs_t * a_brbs_o)
   cw_bool_t retval;
   struct disklabel dlp;
   
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBS_FUNC))
   {
     _cw_marker("Enter brbs_p_get_raw_info()");
   }
@@ -659,7 +659,7 @@ brbs_p_get_raw_info(cw_brbs_t * a_brbs_o)
   {
     retval = TRUE;
     
-    if (dbg_fmatch(g_dbg_o, _CW_DBG_R_BRBS_ERROR))
+    if (_cw_fmatch(_STASH_DBG_R_BRBS_ERROR))
     {
       log_leprintf(g_log_o, __FILE__, __LINE__, "brbs_p_get_raw_info",
 		   "ioctl() error: %s\n", strerror(errno));
@@ -689,7 +689,7 @@ brbs_p_get_raw_info(cw_brbs_t * a_brbs_o)
   }
 
   _cw_assert(a_brbs_o->sect_size > 0);
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBS_FUNC))
   {
     _cw_marker("Exit brbs_p_get_raw_info()");
   }
@@ -709,14 +709,14 @@ brbs_p_get_is_raw(cw_brbs_t * a_brbs_o)
   cw_bool_t retval = FALSE;
   struct stat sb;
 
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBS_FUNC))
   {
     _cw_marker("Enter brbs_p_get_is_raw()");
   }
   if (-1 == fstat(a_brbs_o->fd, &sb))
   {
     retval = TRUE;
-    if (dbg_fmatch(g_dbg_o, _CW_DBG_R_BRBS_ERROR))
+    if (_cw_fmatch(_STASH_DBG_R_BRBS_ERROR))
     {
       log_leprintf(g_log_o, __FILE__, __LINE__, "brbs_p_get_is_raw",
 		   "fstat() error: %s\n", strerror(errno));
@@ -733,7 +733,7 @@ brbs_p_get_is_raw(cw_brbs_t * a_brbs_o)
       a_brbs_o->is_raw = FALSE;
     }
   }
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBS_FUNC))
   {
     _cw_marker("Exit brbs_p_get_is_raw()");
   }

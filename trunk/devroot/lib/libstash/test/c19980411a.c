@@ -8,18 +8,14 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 136 $
- * $Date: 1998-07-10 13:11:48 -0700 (Fri, 10 Jul 1998) $
+ * $Revision: 173 $
+ * $Date: 1998-08-26 12:34:42 -0700 (Wed, 26 Aug 1998) $
  *
  * <<< Description >>>
  *
  * Simple test to make sure the test harness is working.
  *
  ****************************************************************************/
-
-#ifndef _CW_DEBUG
-#  define _CW_DEBUG
-#endif
 
 #define _INC_OH_H_
 #define _INC_GLOB_H_
@@ -38,8 +34,8 @@ main()
 
   glob_new();
   oh_new(&hash_o, FALSE);
-/*   dbg_turn_on(g_dbg_o, _CW_DBG_R_OH_FUNC); */
-/*   dbg_turn_on(g_dbg_o, _CW_DBG_R_OH_SLOT); */
+/*   dbg_turn_on(g_dbg_o, _STASH_DBG_R_OH_FUNC); */
+/*   dbg_turn_on(g_dbg_o, _STASH_DBG_R_OH_SLOT); */
   
   strings = (char **) _cw_malloc(sizeof(char *) * NUM_STRINGS);
 

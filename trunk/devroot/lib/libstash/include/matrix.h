@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 167 $
- * $Date: 1998-08-12 15:02:36 -0700 (Wed, 12 Aug 1998) $
+ * $Revision: 173 $
+ * $Date: 1998-08-26 12:34:42 -0700 (Wed, 26 Aug 1998) $
  *
  * <<< Description >>>
  *
@@ -38,7 +38,7 @@ struct cw_matrix_s
 #define matrix_delete _CW_NS_ANY(matrix_delete)
 #define matrix_init _CW_NS_ANY(matrix_init)
 #define matrix_rebuild _CW_NS_ANY(matrix_rebuild)
-#ifdef _CW_DEBUG
+#ifdef _STASH_DBG
 #  define matrix_get_element _CW_NS_ANY(matrix_get_element)
 #  define matrix_set_element _CW_NS_ANY(matrix_set_element)
 #  define matrix_get_x_size _CW_NS_ANY(matrix_get_x_size)
@@ -64,7 +64,7 @@ void matrix_delete(cw_matrix_t * a_matrix_o);
 void matrix_init(cw_matrix_t * a_matrix_o, cw_uint32_t a_x_size,
 		 cw_uint32_t a_y_size, cw_bool_t a_should_zero);
 void matrix_rebuild(cw_matrix_t * a_matrix_o);
-#ifdef _CW_DEBUG
+#ifdef _STASH_DBG
 cw_sint32_t matrix_get_element(cw_matrix_t * a_matrix_o, cw_uint32_t a_x_pos,
 			       cw_uint32_t a_y_pos);
 void matrix_set_element(cw_matrix_t * a_matrix_o, cw_uint32_t a_x_pos,

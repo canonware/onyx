@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 136 $
- * $Date: 1998-07-10 13:11:48 -0700 (Fri, 10 Jul 1998) $
+ * $Revision: 173 $
+ * $Date: 1998-08-26 12:34:42 -0700 (Wed, 26 Aug 1998) $
  *
  * <<< Description >>>
  *
@@ -91,6 +91,11 @@ list_new(cw_list_t * a_list_o, cw_bool_t a_is_thread_safe)
 {
   cw_list_t * retval;
 
+  if (_cw_pmatch(_STASH_DBG_R_LIST_FUNC))
+  {
+    _cw_marker("Enter list_new()");
+  }
+
   if (a_list_o == NULL)
   {
     retval = (cw_list_t *) _cw_malloc(sizeof(cw_list_t));
@@ -118,6 +123,10 @@ list_new(cw_list_t * a_list_o, cw_bool_t a_is_thread_safe)
   retval->spares_head = NULL;
   retval->spares_count = 0;
 
+  if (_cw_pmatch(_STASH_DBG_R_LIST_FUNC))
+  {
+    _cw_marker("Exit list_new()");
+  }
   return retval;
 }
      
@@ -130,6 +139,10 @@ list_new(cw_list_t * a_list_o, cw_bool_t a_is_thread_safe)
 void
 list_delete(cw_list_t * a_list_o)
 {
+  if (_cw_pmatch(_STASH_DBG_R_LIST_FUNC))
+  {
+    _cw_marker("Enter list_delete()");
+  }
   _cw_check_ptr(a_list_o);
 
   /* Delete whatever items are still in the list.  This does *not* free
@@ -159,6 +172,10 @@ list_delete(cw_list_t * a_list_o)
   {
     _cw_free(a_list_o);
   }
+  if (_cw_pmatch(_STASH_DBG_R_LIST_FUNC))
+  {
+    _cw_marker("Exit list_delete()");
+  }
 }
 
 /****************************************************************************
@@ -172,10 +189,18 @@ list_count(cw_list_t * a_list_o)
 {
   cw_uint64_t retval;
 
+  if (_cw_pmatch(_STASH_DBG_R_LIST_FUNC))
+  {
+    _cw_marker("Enter list_count()");
+  }
   _cw_check_ptr(a_list_o);
 
   retval = a_list_o->count;
   
+  if (_cw_pmatch(_STASH_DBG_R_LIST_FUNC))
+  {
+    _cw_marker("Exit list_count()");
+  }
   return retval;
 }
 
@@ -190,6 +215,10 @@ list_hpush(cw_list_t * a_list_o, void * a_data)
 {
   cw_list_item_t * retval;
   
+  if (_cw_pmatch(_STASH_DBG_R_LIST_FUNC))
+  {
+    _cw_marker("Enter list_hpush()");
+  }
   _cw_check_ptr(a_list_o);
   if (a_list_o->is_thread_safe)
   {
@@ -234,6 +263,10 @@ list_hpush(cw_list_t * a_list_o, void * a_data)
   {
     mtx_unlock(&a_list_o->lock);
   }
+  if (_cw_pmatch(_STASH_DBG_R_LIST_FUNC))
+  {
+    _cw_marker("Exit list_hpush()");
+  }
   return retval;
 }
 
@@ -248,6 +281,10 @@ list_hpop(cw_list_t * a_list_o)
 {
   void * retval;
 
+  if (_cw_pmatch(_STASH_DBG_R_LIST_FUNC))
+  {
+    _cw_marker("Enter list_hpop()");
+  }
   _cw_check_ptr(a_list_o);
   if (a_list_o->is_thread_safe)
   {
@@ -259,6 +296,10 @@ list_hpop(cw_list_t * a_list_o)
   if (a_list_o->is_thread_safe)
   {
     mtx_unlock(&a_list_o->lock);
+  }
+  if (_cw_pmatch(_STASH_DBG_R_LIST_FUNC))
+  {
+    _cw_marker("Exit list_hpop()");
   }
   return retval;
 }
@@ -274,6 +315,10 @@ list_tpush(cw_list_t * a_list_o, void * a_data)
 {
   cw_list_item_t * retval;
 
+  if (_cw_pmatch(_STASH_DBG_R_LIST_FUNC))
+  {
+    _cw_marker("Enter list_tpush()");
+  }
   _cw_check_ptr(a_list_o);
   if (a_list_o->is_thread_safe)
   {
@@ -318,6 +363,10 @@ list_tpush(cw_list_t * a_list_o, void * a_data)
   {
     mtx_unlock(&a_list_o->lock);
   }
+  if (_cw_pmatch(_STASH_DBG_R_LIST_FUNC))
+  {
+    _cw_marker("Exit list_tpush()");
+  }
   return retval;
 }
 
@@ -332,6 +381,10 @@ list_tpop(cw_list_t * a_list_o)
 {
   void * retval;
 
+  if (_cw_pmatch(_STASH_DBG_R_LIST_FUNC))
+  {
+    _cw_marker("Enter list_tpop()");
+  }
   _cw_check_ptr(a_list_o);
   if (a_list_o->is_thread_safe)
   {
@@ -343,6 +396,10 @@ list_tpop(cw_list_t * a_list_o)
   if (a_list_o->is_thread_safe)
   {
     mtx_unlock(&a_list_o->lock);
+  }
+  if (_cw_pmatch(_STASH_DBG_R_LIST_FUNC))
+  {
+    _cw_marker("Exit list_tpop()");
   }
   return retval;
 }
@@ -360,6 +417,10 @@ list_insert_after(cw_list_t * a_list_o,
 {
   cw_list_item_t * retval;
   
+  if (_cw_pmatch(_STASH_DBG_R_LIST_FUNC))
+  {
+    _cw_marker("Enter list_insert_after()");
+  }
   _cw_check_ptr(a_list_o);
   _cw_check_ptr(a_in_list);
   if (a_list_o->is_thread_safe)
@@ -403,6 +464,10 @@ list_insert_after(cw_list_t * a_list_o,
   {
     mtx_unlock(&a_list_o->lock);
   }
+  if (_cw_pmatch(_STASH_DBG_R_LIST_FUNC))
+  {
+    _cw_marker("Exit list_insert_after()");
+  }
   return retval;
 }
 
@@ -418,6 +483,10 @@ list_remove(cw_list_t * a_list_o, cw_list_item_t * a_to_remove)
 {
   void * retval;
 
+  if (_cw_pmatch(_STASH_DBG_R_LIST_FUNC))
+  {
+    _cw_marker("Enter list_remove()");
+  }
   _cw_check_ptr(a_list_o);
   _cw_check_ptr(a_to_remove);
   if (a_list_o->is_thread_safe)
@@ -455,6 +524,10 @@ list_remove(cw_list_t * a_list_o, cw_list_item_t * a_to_remove)
   {
     mtx_unlock(&a_list_o->lock);
   }
+  if (_cw_pmatch(_STASH_DBG_R_LIST_FUNC))
+  {
+    _cw_marker("Exit list_remove()");
+  }
   return retval;
 }
 
@@ -469,6 +542,10 @@ list_purge_spares(cw_list_t * a_list_o)
 {
   cw_list_item_t * item;
 
+  if (_cw_pmatch(_STASH_DBG_R_LIST_FUNC))
+  {
+    _cw_marker("Enter list_purge_spares()");
+  }
   _cw_check_ptr(a_list_o);
   if (a_list_o->is_thread_safe)
   {
@@ -486,6 +563,10 @@ list_purge_spares(cw_list_t * a_list_o)
   {
     mtx_unlock(&a_list_o->lock);
   }
+  if (_cw_pmatch(_STASH_DBG_R_LIST_FUNC))
+  {
+    _cw_marker("Exit list_purge_spares()");
+  }
 }
 
 /****************************************************************************
@@ -498,6 +579,10 @@ list_purge_spares(cw_list_t * a_list_o)
 void
 list_dump(cw_list_t * a_list_o)
 {
+  if (_cw_pmatch(_STASH_DBG_R_LIST_FUNC))
+  {
+    _cw_marker("Enter list_dump()");
+  }
   _cw_check_ptr(a_list_o);
   if (a_list_o->is_thread_safe)
   {
@@ -528,6 +613,10 @@ list_dump(cw_list_t * a_list_o)
   {
     mtx_unlock(&a_list_o->lock);
   }
+  if (_cw_pmatch(_STASH_DBG_R_LIST_FUNC))
+  {
+    _cw_marker("Exit list_dump()");
+  }
 }
 
 /****************************************************************************
@@ -541,6 +630,10 @@ list_p_hpop(cw_list_t * a_list_o)
 {
   void * retval;
 
+  if (_cw_pmatch(_STASH_DBG_R_LIST_FUNC))
+  {
+    _cw_marker("Enter list_p_hpop()");
+  }
   if (a_list_o->head == NULL)
   {
     /* List is empty. */
@@ -582,6 +675,10 @@ list_p_hpop(cw_list_t * a_list_o)
     a_list_o->count--;
   }
 
+  if (_cw_pmatch(_STASH_DBG_R_LIST_FUNC))
+  {
+    _cw_marker("Exit list_p_hpop()");
+  }
   return retval;
 }
 
@@ -596,6 +693,10 @@ list_p_tpop(cw_list_t * a_list_o)
 {
   void * retval;
 
+  if (_cw_pmatch(_STASH_DBG_R_LIST_FUNC))
+  {
+    _cw_marker("Enter list_p_tpop()");
+  }
   if (a_list_o->tail == NULL)
   {
     /* List is empty. */
@@ -637,5 +738,9 @@ list_p_tpop(cw_list_t * a_list_o)
     a_list_o->count--;
   }
 
+  if (_cw_pmatch(_STASH_DBG_R_LIST_FUNC))
+  {
+    _cw_marker("Exit list_p_tpop()");
+  }
   return retval;
 }

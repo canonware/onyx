@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 145 $
- * $Date: 1998-07-15 17:26:27 -0700 (Wed, 15 Jul 1998) $
+ * $Revision: 173 $
+ * $Date: 1998-08-26 12:34:42 -0700 (Wed, 26 Aug 1998) $
  *
  * <<< Description >>>
  *
@@ -103,7 +103,7 @@ void
 dbg_turn_on(cw_dbg_t * a_dbg_o, cw_uint32_t a_flag)
 {
   _cw_check_ptr(a_dbg_o);
-  _cw_assert(a_flag <= _CW_DBG_R_MAX);
+  _cw_assert(a_flag <= _STASH_DBG_R_MAX);
   rwl_wlock(&a_dbg_o->rw_lock);
 
   a_dbg_o->curr_settings[a_flag] = TRUE;
@@ -122,7 +122,7 @@ void
 dbg_turn_off(cw_dbg_t * a_dbg_o, cw_uint32_t a_flag)
 {
   _cw_check_ptr(a_dbg_o);
-  _cw_assert(a_flag <= _CW_DBG_R_MAX);
+  _cw_assert(a_flag <= _STASH_DBG_R_MAX);
   rwl_wlock(&a_dbg_o->rw_lock);
 
   a_dbg_o->curr_settings[a_flag] = FALSE;
@@ -145,7 +145,7 @@ dbg_clear(cw_dbg_t * a_dbg_o)
   _cw_check_ptr(a_dbg_o);
   rwl_wlock(&a_dbg_o->rw_lock);
 
-  for (x = 0; x <= _CW_DBG_C_MAX; x++)
+  for (x = 0; x <= _STASH_DBG_C_MAX; x++)
   {
     a_dbg_o->curr_settings[x] = FALSE;
   }
@@ -170,20 +170,20 @@ dbg_build_tbl(cw_dbg_t * a_dbg_o)
   _cw_check_ptr(a_dbg_o);
 
   /* Build table. */
-  for (i = 0, y = 0; y <= _CW_DBG_R_MAX; i++)
+  for (i = 0, y = 0; y <= _STASH_DBG_R_MAX; i++)
   {
     if (dbg_raw_tbl[i] == -1)
     {
       y++;
       if ((dbg_raw_tbl[i + 1] == -1)
-	  && (y < _CW_DBG_R_MAX))
+	  && (y < _STASH_DBG_R_MAX))
       {
 	_cw_error("Raw debug table is inconsistent.");
       }
     }
     else
     {
-      _cw_assert(dbg_raw_tbl[i] <= _CW_DBG_C_MAX);
+      _cw_assert(dbg_raw_tbl[i] <= _STASH_DBG_C_MAX);
 
       a_dbg_o->tbl[dbg_raw_tbl[i]][y] = TRUE;
     }
@@ -192,9 +192,9 @@ dbg_build_tbl(cw_dbg_t * a_dbg_o)
   /* Set flags that are on by default. */
   for (i = 0; dbg_raw_on[i] != -1; i++)
   {
-    _cw_assert(dbg_raw_tbl[i] <= _CW_DBG_R_MAX);
+    _cw_assert(dbg_raw_tbl[i] <= _STASH_DBG_R_MAX);
 
-    for (x = 0; x <= _CW_DBG_R_MAX; x++)
+    for (x = 0; x <= _STASH_DBG_R_MAX; x++)
     {
       if (a_dbg_o->tbl[x][dbg_raw_on[i]] == TRUE)
       {
@@ -219,11 +219,11 @@ dbg_recalc_fpmatch(cw_dbg_t * a_dbg_o)
   _cw_check_ptr(a_dbg_o);
 
   /* Iterate through rows. */
-  for (y = 0; y <= _CW_DBG_R_MAX; y++)
+  for (y = 0; y <= _STASH_DBG_R_MAX; y++)
   {
     /* Iterate through columns. */
     for (x = 0, f = TRUE, p = FALSE;
-	 (x <= _CW_DBG_C_MAX)
+	 (x <= _STASH_DBG_C_MAX)
 	   && ((f == TRUE) || (p == FALSE));
 	 x++)
     {

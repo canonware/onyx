@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 156 $
- * Last modified: $Date: 1998-07-29 16:59:01 -0700 (Wed, 29 Jul 1998) $
+ * Current revision: $Revision: 173 $
+ * Last modified: $Date: 1998-08-26 12:34:42 -0700 (Wed, 26 Aug 1998) $
  *
  * Description: 
  *              
@@ -67,7 +67,7 @@ char * log_print_uint64(cw_uint64_t a_val, cw_uint32_t a_base, char * a_buf);
     abort(); \
   }
 
-#ifdef _CW_DEBUG
+#if (defined(_STASH_DBG) || defined(_STASH_DEBUG))
 #define _cw_assert(a) \
   { \
     if (!(a)) \

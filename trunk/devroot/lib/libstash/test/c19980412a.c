@@ -8,18 +8,14 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 136 $
- * $Date: 1998-07-10 13:11:48 -0700 (Fri, 10 Jul 1998) $
+ * $Revision: 173 $
+ * $Date: 1998-08-26 12:34:42 -0700 (Wed, 26 Aug 1998) $
  *
  * <<< Description >>>
  *
  *
  *
  ****************************************************************************/
-
-#ifndef _CW_DEBUG
-#  define _CW_DEBUG
-#endif
 
 #define _INC_OH_H_
 #define _INC_GLOB_H_

@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 158 $
- * $Date: 1998-07-29 17:57:57 -0700 (Wed, 29 Jul 1998) $
+ * $Revision: 173 $
+ * $Date: 1998-08-26 12:34:42 -0700 (Wed, 26 Aug 1998) $
  *
  * <<< Description >>>
  *
@@ -39,6 +39,10 @@ sock_new(cw_sock_t * a_sock_o)
 {
   cw_sock_t * retval;
   
+  if (_cw_pmatch(_STASH_DBG_R_SOCK_FUNC))
+  {
+    _cw_marker("Enter sock_new()");
+  }
   if (a_sock_o == NULL)
   {
     retval = (cw_sock_t *) _cw_malloc(sizeof(cw_sock_t));
@@ -53,6 +57,10 @@ sock_new(cw_sock_t * a_sock_o)
   mtx_new(&retval->lock);
   retval->is_connected = FALSE;
   
+  if (_cw_pmatch(_STASH_DBG_R_SOCK_FUNC))
+  {
+    _cw_marker("Exit sock_new()");
+  }
   return retval;
 }
 
@@ -65,6 +73,10 @@ sock_new(cw_sock_t * a_sock_o)
 void
 sock_delete(cw_sock_t * a_sock_o)
 {
+  if (_cw_pmatch(_STASH_DBG_R_SOCK_FUNC))
+  {
+    _cw_marker("Enter sock_delete()");
+  }
   _cw_check_ptr(a_sock_o);
 
   /* Close the fd if open. */
@@ -79,6 +91,10 @@ sock_delete(cw_sock_t * a_sock_o)
   {
     _cw_free(a_sock_o);
   }
+  if (_cw_pmatch(_STASH_DBG_R_SOCK_FUNC))
+  {
+    _cw_marker("Exit sock_delete()");
+  }
 }
 
 /****************************************************************************
@@ -92,6 +108,10 @@ sock_get_fd(cw_sock_t * a_sock_o)
 {
   int retval;
   
+  if (_cw_pmatch(_STASH_DBG_R_SOCK_FUNC))
+  {
+    _cw_marker("Enter sock_get_fd()");
+  }
   _cw_check_ptr(a_sock_o);
   mtx_lock(&a_sock_o->lock);
 
@@ -105,6 +125,10 @@ sock_get_fd(cw_sock_t * a_sock_o)
   }
   
   mtx_unlock(&a_sock_o->lock);
+  if (_cw_pmatch(_STASH_DBG_R_SOCK_FUNC))
+  {
+    _cw_marker("Exit sock_get_fd()");
+  }
   return retval;
 }
 
@@ -117,8 +141,16 @@ sock_get_fd(cw_sock_t * a_sock_o)
 cw_bool_t
 sock_is_connected(cw_sock_t * a_sock_o)
 {
+  if (_cw_pmatch(_STASH_DBG_R_SOCK_FUNC))
+  {
+    _cw_marker("Enter sock_is_connected()");
+  }
   _cw_check_ptr(a_sock_o);
 
+  if (_cw_pmatch(_STASH_DBG_R_SOCK_FUNC))
+  {
+    _cw_marker("Exit sock_is_connected()");
+  }
   return a_sock_o->is_connected;
 }
 
@@ -135,6 +167,10 @@ sock_connect(cw_sock_t * a_sock_o, char * a_server_host,
   cw_bool_t retval;
   struct sockaddr_in server_addr;
   
+  if (_cw_pmatch(_STASH_DBG_R_SOCK_FUNC))
+  {
+    _cw_marker("Enter sock_connect()");
+  }
   _cw_check_ptr(a_sock_o);
   _cw_check_ptr(a_server_host);
   mtx_lock(&a_sock_o->lock);
@@ -166,6 +202,10 @@ sock_connect(cw_sock_t * a_sock_o, char * a_server_host,
   
  RETURN:
   mtx_unlock(&a_sock_o->lock);
+  if (_cw_pmatch(_STASH_DBG_R_SOCK_FUNC))
+  {
+    _cw_marker("Exit sock_connect()");
+  }
   return retval;
 }
 
@@ -181,6 +221,10 @@ sock_wrap(cw_sock_t * a_sock_o, int a_sockfd)
   cw_bool_t retval;
   int opt_val, opt_len;
   
+  if (_cw_pmatch(_STASH_DBG_R_SOCK_FUNC))
+  {
+    _cw_marker("Enter sock_wrap()");
+  }
   _cw_check_ptr(a_sock_o);
   mtx_lock(&a_sock_o->lock);
 
@@ -198,6 +242,10 @@ sock_wrap(cw_sock_t * a_sock_o, int a_sockfd)
   }
   
   mtx_unlock(&a_sock_o->lock);
+  if (_cw_pmatch(_STASH_DBG_R_SOCK_FUNC))
+  {
+    _cw_marker("Exit sock_wrap()");
+  }
   return retval;
 }
 
@@ -212,6 +260,10 @@ sock_disconnect(cw_sock_t * a_sock_o)
 {
   cw_bool_t retval;
   
+  if (_cw_pmatch(_STASH_DBG_R_SOCK_FUNC))
+  {
+    _cw_marker("Enter sock_disconnect()");
+  }
   _cw_check_ptr(a_sock_o);
   mtx_lock(&a_sock_o->lock);
 
@@ -227,6 +279,10 @@ sock_disconnect(cw_sock_t * a_sock_o)
   }
 
   mtx_unlock(&a_sock_o->lock);
+  if (_cw_pmatch(_STASH_DBG_R_SOCK_FUNC))
+  {
+    _cw_marker("Exit sock_disconnect()");
+  }
   return retval;
 }
 
@@ -241,10 +297,18 @@ sock_wait_for_in_data(cw_sock_t * a_sock_o)
 {
   cw_bool_t retval;
   
+  if (_cw_pmatch(_STASH_DBG_R_SOCK_FUNC))
+  {
+    _cw_marker("Enter sock_wait_for_in_data()");
+  }
   _cw_check_ptr(a_sock_o);
   mtx_lock(&a_sock_o->lock);
 
   mtx_unlock(&a_sock_o->lock);
+  if (_cw_pmatch(_STASH_DBG_R_SOCK_FUNC))
+  {
+    _cw_marker("Exit sock_wait_for_in_data()");
+  }
   return retval;
 }
 
@@ -259,10 +323,18 @@ sock_get_max_read(cw_sock_t * a_sock_o)
 {
   cw_uint32_t retval;
   
+  if (_cw_pmatch(_STASH_DBG_R_SOCK_FUNC))
+  {
+    _cw_marker("Enter sock_get_max_read()");
+  }
   _cw_check_ptr(a_sock_o);
   mtx_lock(&a_sock_o->lock);
 
   mtx_unlock(&a_sock_o->lock);
+  if (_cw_pmatch(_STASH_DBG_R_SOCK_FUNC))
+  {
+    _cw_marker("Exit sock_get_max_read()");
+  }
   return retval;
 }
 
@@ -277,10 +349,18 @@ sock_read_noblock(cw_sock_t * a_sock_o, cw_buf_t * a_spare)
 {
   cw_buf_t * retval;
   
+  if (_cw_pmatch(_STASH_DBG_R_SOCK_FUNC))
+  {
+    _cw_marker("Enter sock_read_noblock()");
+  }
   _cw_check_ptr(a_sock_o);
   mtx_lock(&a_sock_o->lock);
 
   mtx_unlock(&a_sock_o->lock);
+  if (_cw_pmatch(_STASH_DBG_R_SOCK_FUNC))
+  {
+    _cw_marker("Exit sock_read_noblock()");
+  }
   return retval;
 }
 
@@ -295,10 +375,18 @@ sock_read_block(cw_sock_t * a_sock_o, cw_buf_t * a_spare)
 {
   cw_buf_t * retval;
   
+  if (_cw_pmatch(_STASH_DBG_R_SOCK_FUNC))
+  {
+    _cw_marker("Enter sock_read_block()");
+  }
   _cw_check_ptr(a_sock_o);
   mtx_lock(&a_sock_o->lock);
 
   mtx_unlock(&a_sock_o->lock);
+  if (_cw_pmatch(_STASH_DBG_R_SOCK_FUNC))
+  {
+    _cw_marker("Exit sock_read_block()");
+  }
   return retval;
 }
 
@@ -313,10 +401,18 @@ sock_write(cw_sock_t * a_sock_o, cw_buf_t * a_buf_o)
 {
   cw_bool_t retval;
   
+  if (_cw_pmatch(_STASH_DBG_R_SOCK_FUNC))
+  {
+    _cw_marker("Enter sock_write()");
+  }
   _cw_check_ptr(a_sock_o);
   mtx_lock(&a_sock_o->lock);
 
   mtx_unlock(&a_sock_o->lock);
+  if (_cw_pmatch(_STASH_DBG_R_SOCK_FUNC))
+  {
+    _cw_marker("Exit sock_write()");
+  }
   return retval;
 }
 
@@ -331,9 +427,17 @@ sock_flush_out(cw_sock_t * a_sock_o)
 {
   cw_bool_t retval;
   
+  if (_cw_pmatch(_STASH_DBG_R_SOCK_FUNC))
+  {
+    _cw_marker("Enter sock_flush_out()");
+  }
   _cw_check_ptr(a_sock_o);
   mtx_lock(&a_sock_o->lock);
 
   mtx_unlock(&a_sock_o->lock);
+  if (_cw_pmatch(_STASH_DBG_R_SOCK_FUNC))
+  {
+    _cw_marker("Exit sock_flush_out()");
+  }
   return retval;
 }

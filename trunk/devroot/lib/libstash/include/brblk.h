@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 156 $
- * $Date: 1998-07-29 16:59:01 -0700 (Wed, 29 Jul 1998) $
+ * $Revision: 173 $
+ * $Date: 1998-08-26 12:34:42 -0700 (Wed, 26 Aug 1998) $
  *
  * <<< Description >>>
  *
@@ -36,7 +36,7 @@ struct cw_brblk_s
 /* Namespace definition. */
 #define brblk_new _CW_NS_ANY(brblk_new)
 #define brblk_delete _CW_NS_ANY(brblk_delete)
-#ifdef _CW_DEBUG
+#ifdef _STASH_DBG
 #  define brblk_slock _CW_NS_ANY(brblk_slock)
 #  define brblk_tlock _CW_NS_ANY(brblk_tlock)
 #  define brblk_sunlock _CW_NS_ANY(brblk_sunlock)
@@ -62,7 +62,7 @@ struct cw_brblk_s
 cw_brblk_t * brblk_new(cw_brblk_t * a_brblk_o, cw_uint32_t a_block_size);
 void brblk_delete(cw_brblk_t * a_brblk_o);
 
-#ifdef _CW_DEBUG
+#ifdef _STASH_DBG
 void brblk_slock(cw_brblk_t * a_brblk_o);
 void brblk_tlock(cw_brblk_t * a_brblk_o);
 void brblk_sunlock(cw_brblk_t * a_brblk_o);
@@ -82,7 +82,7 @@ void brblk_set_is_dirty(cw_brblk_t * a_brblk_o, cw_bool_t a_is_dirty);
 
 /* The following functions are safe for use outside of the br code.  The
  * above ones should only be used by br though. */
-#ifdef _CW_DEBUG
+#ifdef _STASH_DBG
 void brblk_s2dlock(cw_brblk_t * a_brblk_o);
 void brblk_2rlock(cw_brblk_t * a_brblk_o);
 void brblk_2wlock(cw_brblk_t * a_brblk_o);
@@ -107,7 +107,7 @@ void brblk_xunlock(cw_brblk_t * a_brblk_o);
 /* You're on scouts' honor if you use the below functions.  That is, you'd
  * better have already locked the block properly, or Bad Things (TM) will
  * happen. */
-#ifdef _CW_DEBUG
+#ifdef _STASH_DBG
 cw_uint8_t brblk_get_byte(cw_brblk_t * a_brblk_o, cw_uint32_t a_offset);
 void brblk_set_byte(cw_brblk_t * a_brblk_o, cw_uint32_t a_offset,
 		    cw_uint8_t a_byte);

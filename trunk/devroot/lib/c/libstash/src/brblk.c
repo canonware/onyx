@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 155 $
- * $Date: 1998-07-29 16:58:01 -0700 (Wed, 29 Jul 1998) $
+ * $Revision: 173 $
+ * $Date: 1998-08-26 12:34:42 -0700 (Wed, 26 Aug 1998) $
  *
  * <<< Description >>>
  *
@@ -31,7 +31,7 @@ brblk_new(cw_brblk_t * a_brblk_o, cw_uint32_t a_block_size)
 {
   cw_brblk_t * retval;
   
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Enter brblk_new()");
   }
@@ -53,11 +53,11 @@ brblk_new(cw_brblk_t * a_brblk_o, cw_uint32_t a_block_size)
   retval->buf = (cw_uint8_t *) _cw_malloc(a_block_size);
   retval->buf_size = a_block_size;
   
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Exit brblk_new()");
   }
-  return NULL; /* XXX */
+  return retval;
 }
 
 /****************************************************************************
@@ -69,7 +69,7 @@ brblk_new(cw_brblk_t * a_brblk_o, cw_uint32_t a_block_size)
 void
 brblk_delete(cw_brblk_t * a_brblk_o)
 {
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Enter brblk_delete()");
   }
@@ -78,13 +78,13 @@ brblk_delete(cw_brblk_t * a_brblk_o)
   jtl_delete(&a_brblk_o->jt_lock);
   _cw_free(a_brblk_o->buf);
   
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Exit brblk_delete()");
   }
 }
 
-#ifdef _CW_DEBUG
+#ifdef _STASH_DBG
 /****************************************************************************
  * <<< Description >>>
  *
@@ -94,7 +94,7 @@ brblk_delete(cw_brblk_t * a_brblk_o)
 void
 brblk_slock(cw_brblk_t * a_brblk_o)
 {
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Enter brblk_slock()");
   }
@@ -102,7 +102,7 @@ brblk_slock(cw_brblk_t * a_brblk_o)
 
   jtl_slock(&a_brblk_o->jt_lock);
   
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Exit brblk_slock()");
   }
@@ -117,7 +117,7 @@ brblk_slock(cw_brblk_t * a_brblk_o)
 void
 brblk_tlock(cw_brblk_t * a_brblk_o)
 {
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Enter brblk_tlock()");
   }
@@ -125,7 +125,7 @@ brblk_tlock(cw_brblk_t * a_brblk_o)
 
   jtl_tlock(&a_brblk_o->jt_lock);
   
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Exit brblk_tlock()");
   }
@@ -142,7 +142,7 @@ brblk_get_is_dirty(cw_brblk_t * a_brblk_o)
 {
   cw_bool_t retval;
   
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Enter brblk_get_is_dirty()");
   }
@@ -150,7 +150,7 @@ brblk_get_is_dirty(cw_brblk_t * a_brblk_o)
 
   retval = a_brblk_o->is_dirty;
   
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Exit brblk_get_is_dirty()");
   }
@@ -166,7 +166,7 @@ brblk_get_is_dirty(cw_brblk_t * a_brblk_o)
 void
 brblk_set_is_dirty(cw_brblk_t * a_brblk_o, cw_bool_t a_is_dirty)
 {
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Enter brblk_get_is_dirty()");
   }
@@ -174,7 +174,7 @@ brblk_set_is_dirty(cw_brblk_t * a_brblk_o, cw_bool_t a_is_dirty)
 
   a_brblk_o->is_dirty = a_is_dirty;
   
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Exit brblk_get_is_dirty()");
   }
@@ -189,7 +189,7 @@ brblk_set_is_dirty(cw_brblk_t * a_brblk_o, cw_bool_t a_is_dirty)
 void
 brblk_s2dlock(cw_brblk_t * a_brblk_o)
 {
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Enter brblk_s2dlock()");
   }
@@ -197,7 +197,7 @@ brblk_s2dlock(cw_brblk_t * a_brblk_o)
 
   jtl_s2dlock(&a_brblk_o->jt_lock);
   
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Exit brblk_s2dlock()");
   }
@@ -212,7 +212,7 @@ brblk_s2dlock(cw_brblk_t * a_brblk_o)
 void
 brblk_2rlock(cw_brblk_t * a_brblk_o)
 {
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Enter brblk_2rlock()");
   }
@@ -220,7 +220,7 @@ brblk_2rlock(cw_brblk_t * a_brblk_o)
 
   jtl_2rlock(&a_brblk_o->jt_lock);
   
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Exit brblk_2rlock()");
   }
@@ -235,7 +235,7 @@ brblk_2rlock(cw_brblk_t * a_brblk_o)
 void
 brblk_2wlock(cw_brblk_t * a_brblk_o)
 {
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Enter brblk_2wlock()");
   }
@@ -244,7 +244,7 @@ brblk_2wlock(cw_brblk_t * a_brblk_o)
   jtl_2wlock(&a_brblk_o->jt_lock);
   a_brblk_o->is_dirty = TRUE;
 
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Exit brblk_2wlock()");
   }
@@ -259,7 +259,7 @@ brblk_2wlock(cw_brblk_t * a_brblk_o)
 void
 brblk_2xlock(cw_brblk_t * a_brblk_o)
 {
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Enter brblk_2xlock()");
   }
@@ -268,7 +268,7 @@ brblk_2xlock(cw_brblk_t * a_brblk_o)
   jtl_2xlock(&a_brblk_o->jt_lock);
   a_brblk_o->is_dirty = TRUE;
 
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Exit brblk_2xlock()");
   }
@@ -283,7 +283,7 @@ brblk_2xlock(cw_brblk_t * a_brblk_o)
 void
 brblk_sunlock(cw_brblk_t * a_brblk_o)
 {
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Enter brblk_sunlock()");
   }
@@ -291,7 +291,7 @@ brblk_sunlock(cw_brblk_t * a_brblk_o)
 
   jtl_sunlock(&a_brblk_o->jt_lock);
   
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Exit brblk_sunlock()");
   }
@@ -306,7 +306,7 @@ brblk_sunlock(cw_brblk_t * a_brblk_o)
 void
 brblk_tunlock(cw_brblk_t * a_brblk_o)
 {
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Enter brblk_tunlock()");
   }
@@ -314,7 +314,7 @@ brblk_tunlock(cw_brblk_t * a_brblk_o)
   
   jtl_tunlock(&a_brblk_o->jt_lock);
 
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Exit brblk_tunlock()");
   }
@@ -329,7 +329,7 @@ brblk_tunlock(cw_brblk_t * a_brblk_o)
 void
 brblk_dunlock(cw_brblk_t * a_brblk_o)
 {
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Enter brblk_dunlock()");
   }
@@ -337,7 +337,7 @@ brblk_dunlock(cw_brblk_t * a_brblk_o)
   
   jtl_dunlock(&a_brblk_o->jt_lock);
 
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Exit brblk_dunlock()");
   }
@@ -352,7 +352,7 @@ brblk_dunlock(cw_brblk_t * a_brblk_o)
 void
 brblk_runlock(cw_brblk_t * a_brblk_o)
 {
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Enter brblk_runlock()");
   }
@@ -360,7 +360,7 @@ brblk_runlock(cw_brblk_t * a_brblk_o)
   
   jtl_runlock(&a_brblk_o->jt_lock);
 
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Exit brblk_runlock()");
   }
@@ -375,7 +375,7 @@ brblk_runlock(cw_brblk_t * a_brblk_o)
 void
 brblk_wunlock(cw_brblk_t * a_brblk_o)
 {
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Enter brblk_wunlock()");
   }
@@ -383,7 +383,7 @@ brblk_wunlock(cw_brblk_t * a_brblk_o)
   
   jtl_wunlock(&a_brblk_o->jt_lock);
 
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Exit brblk_wunlock()");
   }
@@ -398,7 +398,7 @@ brblk_wunlock(cw_brblk_t * a_brblk_o)
 void
 brblk_xunlock(cw_brblk_t * a_brblk_o)
 {
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Enter brblk_xunlock()");
   }
@@ -406,7 +406,7 @@ brblk_xunlock(cw_brblk_t * a_brblk_o)
   
   jtl_xunlock(&a_brblk_o->jt_lock);
 
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Exit brblk_xunlock()");
   }
@@ -423,7 +423,7 @@ brblk_get_byte(cw_brblk_t * a_brblk_o, cw_uint32_t a_offset)
 {
   cw_uint8_t retval;
   
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Enter brblk_get_byte()");
   }
@@ -433,7 +433,7 @@ brblk_get_byte(cw_brblk_t * a_brblk_o, cw_uint32_t a_offset)
   
   retval = a_brblk_o->buf[a_offset];
   
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Exit brblk_get_byte()");
   }
@@ -450,7 +450,7 @@ void
 brblk_set_byte(cw_brblk_t * a_brblk_o, cw_uint32_t a_offset,
 	       cw_uint8_t a_byte)
 {
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Enter brblk_set_byte()");
   }
@@ -460,7 +460,7 @@ brblk_set_byte(cw_brblk_t * a_brblk_o, cw_uint32_t a_offset,
   
   a_brblk_o->buf[a_offset] = a_byte;
 
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Exit brblk_set_byte()");
   }
@@ -477,7 +477,7 @@ brblk_get_buf_p(cw_brblk_t * a_brblk_o)
 {
   cw_uint8_t * retval;
   
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Enter brblk_get_buf_p()");
   }
@@ -485,7 +485,7 @@ brblk_get_buf_p(cw_brblk_t * a_brblk_o)
 
   retval = a_brblk_o->buf;
   
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Exit brblk_get_buf_p()");
   }
@@ -503,7 +503,7 @@ brblk_get_buf_size(cw_brblk_t * a_brblk_o)
 {
   cw_uint32_t retval;
   
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Enter brblk_get_buf_size()");
   }
@@ -511,10 +511,10 @@ brblk_get_buf_size(cw_brblk_t * a_brblk_o)
 
   retval = a_brblk_o->buf_size;
   
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Exit brblk_get_buf_size()");
   }
   return retval;
 }
-#endif /* _CW_DEBUG */
+#endif /* _STASH_DBG */

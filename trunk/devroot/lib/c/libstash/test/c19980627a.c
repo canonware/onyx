@@ -8,18 +8,14 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 145 $
- * $Date: 1998-07-15 17:26:27 -0700 (Wed, 15 Jul 1998) $
+ * $Revision: 173 $
+ * $Date: 1998-08-26 12:34:42 -0700 (Wed, 26 Aug 1998) $
  *
  * <<< Description >>>
  *
  * Test for the brbs class.
  *
  ****************************************************************************/
-
-#ifndef _CW_DEBUG
-#  define _CW_DEBUG
-#endif
 
 #include <string.h>
 
@@ -35,9 +31,9 @@ main()
   glob_new();
 
   dbg_clear(g_dbg_o);
-/*   dbg_turn_on(g_dbg_o, _CW_DBG_C_BRBS_FUNC); */
-  dbg_turn_on(g_dbg_o, _CW_DBG_C_BRBS_INIT);
-  dbg_turn_on(g_dbg_o, _CW_DBG_C_BRBS_ERROR);
+/*   dbg_turn_on(g_dbg_o, _STASH_DBG_C_BRBS_FUNC); */
+  dbg_turn_on(g_dbg_o, _STASH_DBG_C_BRBS_INIT);
+  dbg_turn_on(g_dbg_o, _STASH_DBG_C_BRBS_ERROR);
   
   brbs_new(&brbs_o);
   _cw_assert(brbs_is_open(&brbs_o) == FALSE);

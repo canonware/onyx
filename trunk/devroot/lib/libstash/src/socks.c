@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 158 $
- * $Date: 1998-07-29 17:57:57 -0700 (Wed, 29 Jul 1998) $
+ * $Revision: 173 $
+ * $Date: 1998-08-26 12:34:42 -0700 (Wed, 26 Aug 1998) $
  *
  * <<< Description >>>
  *
@@ -39,6 +39,14 @@ socks_new(cw_socks_t * a_socks_o)
 {
   cw_socks_t * retval;
   
+  if (_cw_pmatch(_STASH_DBG_R_SOCKS_FUNC))
+  {
+    _cw_marker("Enter socks_new()");
+  }
+  if (_cw_pmatch(_STASH_DBG_R_SOCKS_FUNC))
+  {
+    _cw_marker("Exit socks_new()");
+  }
   return retval;
 }
 
@@ -51,6 +59,14 @@ socks_new(cw_socks_t * a_socks_o)
 void
 socks_delete(cw_socks_t * a_socks_o)
 {
+  if (_cw_pmatch(_STASH_DBG_R_SOCKS_FUNC))
+  {
+    _cw_marker("Enter socks_delete()");
+  }
+  if (_cw_pmatch(_STASH_DBG_R_SOCKS_FUNC))
+  {
+    _cw_marker("Exit socks_delete()");
+  }
 }
 
 /****************************************************************************
@@ -64,6 +80,14 @@ socks_listen(cw_socks_t * a_socks_o, int a_port)
 {
   cw_bool_t retval;
 
+  if (_cw_pmatch(_STASH_DBG_R_SOCKS_FUNC))
+  {
+    _cw_marker("Enter socks_listen()");
+  }
+  if (_cw_pmatch(_STASH_DBG_R_SOCKS_FUNC))
+  {
+    _cw_marker("Exit socks_listen()");
+  }
   return retval;
 }
 
@@ -78,6 +102,14 @@ socks_accept_block(cw_socks_t * a_socks_o, cw_sock_t * a_sock_o)
 {
   cw_sock_t * retval;
 
+  if (_cw_pmatch(_STASH_DBG_R_SOCKS_FUNC))
+  {
+    _cw_marker("Enter socks_accept_block()");
+  }
+  if (_cw_pmatch(_STASH_DBG_R_SOCKS_FUNC))
+  {
+    _cw_marker("Exit socks_accept_block()");
+  }
   return retval;
 }
 
@@ -92,5 +124,13 @@ socks_accept_noblock(cw_socks_t * a_socks_o, cw_sock_t * a_sock_o)
 {
   cw_sock_t * retval;
 
+  if (_cw_pmatch(_STASH_DBG_R_SOCKS_FUNC))
+  {
+    _cw_marker("Enter socks_accept_noblock()");
+  }
+  if (_cw_pmatch(_STASH_DBG_R_SOCKS_FUNC))
+  {
+    _cw_marker("Exit socks_accept_noblock()");
+  }
   return retval;
 }

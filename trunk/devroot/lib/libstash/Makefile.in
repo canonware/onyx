@@ -9,8 +9,8 @@
 #
 # $Source$
 # $Author: jasone $
-# Current revision: $Revision: 168 $
-# Last modified: $Date: 1998-08-24 18:03:32 -0700 (Mon, 24 Aug 1998) $
+# Current revision: $Revision: 173 $
+# Last modified: $Date: 1998-08-26 12:34:42 -0700 (Wed, 26 Aug 1998) $
 #
 # Description: Master Makefile for libstash.
 #              
@@ -97,9 +97,10 @@ INCPATH := -I@top_srcdir@ -I@top_srcdir@/include
 DEFINES := @DEFS@
 ST_DEFINES := 
 SH_DEFINES := 
-D_DEFINES := -D_STASH_DBG -D_STASH_DEBUG_
+D_DEFINES := -D_STASH_DBG
 O_DEFINES := 
 P_DEFINES := 
+TEST_DEFINES := -D_STASH_DEBUG
 
 #CFLAGS  := @CFLAGS@
 CFLAGS := -Wall -pipe
@@ -132,7 +133,7 @@ all : default
 
 # This rule is used to build the tests.
 % : %.c $(LIB_ST_D)
-	$(CC) $(CFLAGS) $(ST_CFLAGS) $(D_CFLAGS) $(INCPATH) $(DEFINES) -c $< -o $(@:=.o)
+	$(CC) $(CFLAGS) $(ST_CFLAGS) $(D_CFLAGS) $(INCPATH) $(DEFINES) $(TEST_DEFINES) -c $< -o $(@:=.o)
 	$(CC) -o $@ $(@:=.o) $(LIBPATH) $(EXTRALIBS) -static -l$(LIB)
 
 obj/st_d/%.o_st_d : src/%.c
