@@ -3,7 +3,12 @@
 	* include/libstash/libstash.h: Add cw_fp{32,64,96,128}_t typedefs.
 
 	* src/out.c: Rework internals significantly.  Performance is
-	approximately 5 times better.
+	approximately 5 times better.  Tests now show the `out' printing
+	performance to be within a factor of two of `log' (which is a
+	simple printf wrapper).  Not much more performance can be squeezed
+	out of `out'.  The remaining overhead is due to the generalized
+	grammar of the format specifiers, which is necessary in order to
+	provide a reasonable extensible interface.
 
 	* include/libstash/out.h: Remove several specifier types.
 
