@@ -12,6 +12,7 @@
 #include "../include/libstil/libstil.h"
 
 #include <ctype.h>
+#include <errno.h>
 #include <limits.h>
 
 #define _CW_STILT_GETC(a_i)						\
@@ -656,9 +657,29 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				/* Fall through. */
 			case '\0': case '\t': case '\f': case '\r': case ' ':
 				if (a_stilt->index > a_stilt->m.n.b_off) {
+					cw_sint64_t	val;
+
 					/* Integer. */
 					stilt_p_token_print(a_stilt, a_stilts,
 					    a_stilt->index, "integer");
+
+					/*
+					 * Convert string to integer.  Do the
+					 * conversion before mucking with the
+					 * stack in case there is an exception.
+					 */
+					a_stilt->tok_str[a_stilt->index] = '\0';
+					errno = 0;
+					val = strtoq(a_stilt->tok_str, NULL,
+					    10);
+					if ((errno == ERANGE) && ((val ==
+					    QUAD_MIN) || (val == QUAD_MAX)))
+						xep_throw(_CW_XEPV_RANGECHECK);
+
+					stilo =
+					    stils_push(&a_stilt->data_stils);
+					stilo_integer_new(stilo, a_stilt, val);
+
 					stilt_p_reset(a_stilt);
 				} else {
 					/* No number specified, so a name. */
@@ -722,9 +743,31 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				/* Fall through. */
 			case '\0': case '\t': case '\f': case '\r': case ' ':
 				if (a_stilt->index > a_stilt->m.n.b_off) {
+					cw_sint64_t	val;
+
 					/* Integer. */
 					stilt_p_token_print(a_stilt, a_stilts,
 					    a_stilt->index, "integer (radix)");
+
+					/*
+					 * Convert string to integer.  Do the
+					 * conversion before mucking with the
+					 * stack in case there is an exception.
+					 */
+					a_stilt->tok_str[a_stilt->index] = '\0';
+					errno = 0;
+					val =
+					    strtoq(&a_stilt->tok_str[a_stilt->m.n.b_off],
+					    NULL,
+					    a_stilt->m.n.t.b.base);
+					if ((errno == ERANGE) && ((val ==
+					    QUAD_MIN) || (val == QUAD_MAX)))
+						xep_throw(_CW_XEPV_RANGECHECK);
+
+					stilo =
+					    stils_push(&a_stilt->data_stils);
+					stilo_integer_new(stilo, a_stilt, val);
+
 					stilt_p_reset(a_stilt);
 				} else {
 					/* No number specified, so a name. */

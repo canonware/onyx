@@ -213,6 +213,14 @@ static void	stilo_p_new(cw_stilo_t *a_stilo, cw_stilot_t a_type);
 static cw_uint32_t stilo_p_hash(const void *a_key);
 static cw_bool_t stilo_p_key_comp(const void *a_k1, const void *a_k2);
 
+#define	_STILO_CALC_ADD	1
+#define	_STILO_CALC_SUB	2
+#define	_STILO_CALC_MUL	3
+#define	_STILO_CALC_DIV	4
+#define	_STILO_CALC_MOD	5
+static void	stilo_p_calc(const cw_stilo_t *a_a, const cw_stilo_t *a_b,
+    cw_uint32_t a_operation, cw_stilo_t *r_sum);
+
 /* stiloe. */
 static void	stiloe_p_new(cw_stiloe_t *a_stiloe, cw_stilot_t a_type);
 /*  static void	stiloe_p_delete(cw_stiloe_t *a_stiloe, cw_stilt_t *a_stilt); */
@@ -577,7 +585,7 @@ stilo_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
 }
 
 void
-stilo_dup(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
+stilo_dup(cw_stilo_t *a_to, const cw_stilo_t *a_from, cw_stilt_t *a_stilt)
 {
 	_cw_check_ptr(a_to);
 	_cw_assert(a_to->magic == _CW_STILO_MAGIC);
@@ -717,30 +725,113 @@ stilo_p_key_comp(const void *a_k1, const void *a_k2)
 /*
  * integer/real.
  */
+static void
+stilo_p_calc(const cw_stilo_t *a_a, const cw_stilo_t *a_b, cw_uint32_t
+    a_operation, cw_stilo_t *r_sum)
+{
+	if ((a_a->type == STILOT_INTEGER) && (a_b->type == STILOT_INTEGER)) {
+		cw_sint64_t	a, b, r;
+
+		/* Integer calculation. */
+		a = a_a->o.integer.i;
+		b = a_b->o.integer.i;
+
+		switch (a_operation) {
+		case _STILO_CALC_ADD:
+			r = a + b;
+			break;
+		case _STILO_CALC_SUB:
+			r = a - b;
+			break;
+		case _STILO_CALC_MUL:
+			r = a * b;
+			break;
+		case _STILO_CALC_DIV:
+			r = a / b;
+			break;
+		case _STILO_CALC_MOD:
+			r = a % b;
+			break;
+		default:
+			_cw_not_reached();
+		}
+
+		stilo_cast(r_sum, STILOT_INTEGER);
+		r_sum->o.integer.i = r;
+	} else {
+		cw_fp64_t	a, b, r;
+
+		/* Real calculation, potentially mixed operands. */
+		switch (a_a->type) {
+		case STILOT_INTEGER:
+			a = a_a->o.integer.i;
+			break;
+		case STILOT_REAL:
+			a = a_a->o.real.r;
+			break;
+		default:
+			xep_throw(_CW_XEPV_TYPECHECK);
+		}
+
+		switch (a_b->type) {
+		case STILOT_INTEGER:
+			b = a_b->o.integer.i;
+			break;
+		case STILOT_REAL:
+			b = a_b->o.real.r;
+			break;
+		default:
+			xep_throw(_CW_XEPV_TYPECHECK);
+		}
+
+		switch (a_operation) {
+		case _STILO_CALC_ADD:
+			r = a + b;
+			break;
+		case _STILO_CALC_SUB:
+			r = a - b;
+			break;
+		case _STILO_CALC_MUL:
+			r = a * b;
+			break;
+		case _STILO_CALC_DIV:
+			r = a / b;
+			break;
+		case _STILO_CALC_MOD:
+			xep_throw(_CW_XEPV_TYPECHECK);
+		default:
+			_cw_not_reached();
+		}
+		
+		stilo_cast(r_sum, STILOT_REAL);
+		r_sum->o.real.r = r;
+	}
+}
+
 void
 stilo_add(const cw_stilo_t *a_a, const cw_stilo_t *a_b, cw_stilo_t *r_sum)
 {
-	_cw_error("XXX Not implemented");
+	stilo_p_calc(a_a, a_b, _STILO_CALC_ADD, r_sum);
 }
 
 void
 stilo_sub(const cw_stilo_t *a_num, const cw_stilo_t *a_sub, cw_stilo_t
     *r_result)
 {
-	_cw_error("XXX Not implemented");
+	stilo_p_calc(a_num, a_sub, _STILO_CALC_SUB, r_result);
 }
 
 void
 stilo_mul(const cw_stilo_t *a_a, const cw_stilo_t *a_b, cw_stilo_t *r_product)
 {
-	_cw_error("XXX Not implemented");
+	stilo_p_calc(a_a, a_b, _STILO_CALC_MUL, r_product);
 }
 
 void
 stilo_div(const cw_stilo_t *a_num, const cw_stilo_t *a_div, cw_stilo_t
     *r_quotient)
 {
-	_cw_error("XXX Not implemented");
+	stilo_p_calc(a_num, a_div, _STILO_CALC_DIV, r_quotient);
 }
 	
 void
@@ -1624,9 +1715,11 @@ stilo_p_hook_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t a_syntactic,
  * integer.
  */
 void
-stilo_integer_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
+stilo_integer_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_sint64_t a_val)
 {
 	stilo_p_new(a_stilo, STILOT_INTEGER);
+
+	a_stilo->o.integer.i = a_val;
 }
 
 static void
@@ -1648,32 +1741,42 @@ void
 stilo_integer_div(const cw_stilo_t *a_num, const cw_stilo_t *a_div, cw_stilo_t
     *r_quotient)
 {
-	_cw_error("XXX Not implemented");
+	cw_stilo_t	num, div;
+
+	memcpy(&num, a_num, sizeof(cw_stilo_t));
+	if (num.type == STILOT_REAL)
+		stilo_cast(&num, STILOT_INTEGER);
+
+	memcpy(&div, a_div, sizeof(cw_stilo_t));
+	if (div.type == STILOT_REAL)
+		stilo_cast(&div, STILOT_INTEGER);
+
+	stilo_div(&num, &div, r_quotient);
 }
 
 void
 stilo_integer_mod(const cw_stilo_t *a_num, const cw_stilo_t *a_div, cw_stilo_t
     *r_mod)
 {
-	_cw_error("XXX Not implemented");
+	stilo_p_calc(a_num, a_div, _STILO_CALC_MOD, r_mod);
 }
 
 void
 stilo_integer_srand(const cw_stilo_t *a_seed)
 {
-	_cw_error("XXX Not implemented");
-}
+	if (a_seed->type != STILOT_INTEGER)
+		xep_throw(_CW_XEPV_TYPECHECK);
 
-void
-stilo_integer_rrand(cw_stilo_t *r_seed)
-{
-	_cw_error("XXX Not implemented");
+	srandom(a_seed->o.integer.i);
 }
 
 void
 stilo_integer_rand(cw_stilo_t *r_num)
 {
-	_cw_error("XXX Not implemented");
+	if (r_num->type != STILOT_INTEGER)
+		xep_throw(_CW_XEPV_TYPECHECK);
+
+	r_num->o.integer.i = random();
 }
 
 /*
@@ -2218,7 +2321,7 @@ stilo_p_operator_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t
  * real.
  */
 void
-stilo_real_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
+stilo_real_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_fp64_t a_val)
 {
 	stilo_p_new(a_stilo, STILOT_REAL);
 }

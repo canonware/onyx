@@ -135,7 +135,7 @@ struct cw_stilt_s {
 			enum {
 				SIGN_POS,
 				SIGN_NEG
-			}		sign;
+			}	sign;
 			union {
 				struct {
 					cw_uint32_t	base;

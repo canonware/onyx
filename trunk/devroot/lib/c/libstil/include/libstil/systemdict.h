@@ -127,7 +127,6 @@ void	systemdict_resourceforall(cw_stilt_t *a_stilt);
 void	systemdict_resourcestatus(cw_stilt_t *a_stilt);
 void	systemdict_roll(cw_stilt_t *a_stilt);
 void	systemdict_round(cw_stilt_t *a_stilt);
-void	systemdict_rrand(cw_stilt_t *a_stilt);
 void	systemdict_run(cw_stilt_t *a_stilt);
 void	systemdict_search(cw_stilt_t *a_stilt);
 void	systemdict_setfileposition(cw_stilt_t *a_stilt);

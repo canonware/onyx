@@ -138,7 +138,6 @@ static struct cw_systemdict_entry systemdict_ops[] = {
 	_SYSTEMDICT_ENTRY(resourcestatus),
 	_SYSTEMDICT_ENTRY(roll),
 	_SYSTEMDICT_ENTRY(round),
-	_SYSTEMDICT_ENTRY(rrand),
 	_SYSTEMDICT_ENTRY(run),
 	_SYSTEMDICT_ENTRY(search),
 	_SYSTEMDICT_ENTRY(setfileposition),
@@ -228,11 +227,9 @@ systemdict_add(cw_stilt_t *a_stilt)
 	stack = stilt_data_stack_get(a_stilt);
 	
 	b = stils_get(stack, 0);
-	/* XXX Check type of b. */
 	a = stils_get_down(stack, b);
 	if (a == NULL)
 		xep_throw(_CW_XEPV_STACKUNDERFLOW);
-	/* XXX Check type of a. */
 	stilo_no_new(&t_stilo);
 	stilo_move(&t_stilo, a);
 	stilo_add(&t_stilo, b, a);
@@ -523,7 +520,20 @@ systemdict_dictstack(cw_stilt_t *a_stilt)
 void
 systemdict_div(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*stack;
+	cw_stilo_t	t_stilo, *a, *b;
+
+	stack = stilt_data_stack_get(a_stilt);
+	
+	b = stils_get(stack, 0);
+	a = stils_get_down(stack, b);
+	if (a == NULL)
+		xep_throw(_CW_XEPV_STACKUNDERFLOW);
+	stilo_no_new(&t_stilo);
+	stilo_move(&t_stilo, a);
+	stilo_div(&t_stilo, b, a);
+	stils_pop(stack, a_stilt, 1);
+	stilo_delete(&t_stilo, a_stilt);
 }
 
 void
@@ -715,7 +725,20 @@ systemdict_if(cw_stilt_t *a_stilt)
 void
 systemdict_idiv(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*stack;
+	cw_stilo_t	t_stilo, *a, *b;
+
+	stack = stilt_data_stack_get(a_stilt);
+	
+	b = stils_get(stack, 0);
+	a = stils_get_down(stack, b);
+	if (a == NULL)
+		xep_throw(_CW_XEPV_STACKUNDERFLOW);
+	stilo_no_new(&t_stilo);
+	stilo_move(&t_stilo, a);
+	stilo_integer_div(&t_stilo, b, a);
+	stils_pop(stack, a_stilt, 1);
+	stilo_delete(&t_stilo, a_stilt);
 }
 
 void
@@ -804,7 +827,20 @@ systemdict_mod(cw_stilt_t *a_stilt)
 void
 systemdict_mul(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*stack;
+	cw_stilo_t	t_stilo, *a, *b;
+
+	stack = stilt_data_stack_get(a_stilt);
+	
+	b = stils_get(stack, 0);
+	a = stils_get_down(stack, b);
+	if (a == NULL)
+		xep_throw(_CW_XEPV_STACKUNDERFLOW);
+	stilo_no_new(&t_stilo);
+	stilo_move(&t_stilo, a);
+	stilo_mul(&t_stilo, b, a);
+	stils_pop(stack, a_stilt, 1);
+	stilo_delete(&t_stilo, a_stilt);
 }
 
 void
@@ -970,7 +1006,14 @@ systemdict_quit(cw_stilt_t *a_stilt)
 void
 systemdict_rand(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*stack;
+	cw_stilo_t	*num;
+
+	stack = stilt_data_stack_get(a_stilt);
+
+	num = stils_push(stack);
+	stilo_cast(num, STILOT_INTEGER);
+	stilo_integer_rand(num);
 }
 
 void
@@ -1058,12 +1101,6 @@ systemdict_round(cw_stilt_t *a_stilt)
 }
 
 void
-systemdict_rrand(cw_stilt_t *a_stilt)
-{
-	_cw_error("XXX Not implemented");
-}
-
-void
 systemdict_run(cw_stilt_t *a_stilt)
 {
 	_cw_error("XXX Not implemented");
@@ -1114,7 +1151,14 @@ systemdict_sqrt(cw_stilt_t *a_stilt)
 void
 systemdict_srand(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*stack;
+	cw_stilo_t	*seed;
+
+	stack = stilt_data_stack_get(a_stilt);
+
+	seed = stils_get(stack, 0);
+	stilo_integer_srand(seed);
+	stils_pop(stack, 1);
 }
 
 void
@@ -1176,7 +1220,20 @@ systemdict_string(cw_stilt_t *a_stilt)
 void
 systemdict_sub(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*stack;
+	cw_stilo_t	t_stilo, *a, *b;
+
+	stack = stilt_data_stack_get(a_stilt);
+	
+	b = stils_get(stack, 0);
+	a = stils_get_down(stack, b);
+	if (a == NULL)
+		xep_throw(_CW_XEPV_STACKUNDERFLOW);
+	stilo_no_new(&t_stilo);
+	stilo_move(&t_stilo, a);
+	stilo_sub(&t_stilo, b, a);
+	stils_pop(stack, a_stilt, 1);
+	stilo_delete(&t_stilo, a_stilt);
 }
 
 /* = */
