@@ -456,8 +456,8 @@ newline.'
 `Another actual \ backslash.'
 \end{verbatim}
 
-\item[{\lt}dec\_integer{\gt} : ] Signed integer in the range $-2^{63}$ to
-$2^{63} - 1$.  The sign is optional.  Examples include:
+\item[{\lt}dec\_integer{\gt} : ] Signed decimal integer in the range $-2^{63}$
+to $2^{63} - 1$.  The sign is optional.  Examples include:
 \begin{verbatim}
 0
 42
@@ -710,6 +710,19 @@ invoking \htmlref{\onyxop{}{throw}{}}{systemdict:throw}.
 The Onyx scanner also handles immediate name evaluation errors specially, in
 that it pushes the name that could not be evaluated onto ostack before invoking
 \htmlref{\onyxop{}{throw}{}}{systemdict:throw}.
+
+In addition to the \htmlref{\onyxop{}{throw}{}}{systemdict:throw} operator,
+there are several other operators that exist specifically for the purpose of
+error handling.  The \htmlref{\onyxop{}{start}{}}{systemdict:start} operator
+silently catches any uncaught \htmlref{\onyxop{}{stop}{}}{systemdict:stop},
+\htmlref{\onyxop{}{exit}{}}{systemdict:exit}, or
+\htmlref{\onyxop{}{quit}{}}{systemdict:quit} calls.  The \onyxop{}{start}{}
+operator is the first operator called by the Onyx interpreter during startup,
+and it can also be used by applications to limit execution stack unwinding.  The
+\htmlref{\onyxop{}{stopped}{}}{systemdict:stopped} operator is useful for
+catching \htmlref{\onyxop{}{stop}{}}{systemdict:stop} calls, since it reports
+whether a \onyxop{}{stop}{} call was caught, allowing conditional error
+recovery.
 
 \section{Threads}
 
@@ -3853,6 +3866,12 @@ same systemdict, which is implicitly locked.
 \optableent
 	{boolean obj}
 	{{\bf \htmlref{if}{systemdict:if}}}
+	{--}
+	{Conditionally evaluate object.}
+\hline
+\optableent
+	{boolean obj}
+	{{\bf \htmlref{unless}{systemdict:unless}}}
 	{--}
 	{Conditionally evaluate object.}
 \hline
@@ -15172,6 +15191,33 @@ onyx:0> 0 1 2 under pstack
 1
 0
 onyx:4>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:unless}
+\index{unless@\onyxop{}{unless}{}}
+\item[{\onyxop{boolean obj}{unless}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[boolean: ]
+			A boolean.
+		\item[obj: ]
+			An object.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Evaluate \oparg{obj} unless \oparg{boolean} is true.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> false {`yes' 1 sprint} unless
+`yes'
+onyx:0> true {`yes' 1 sprint} unless
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:unlink}
