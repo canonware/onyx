@@ -1,3 +1,8 @@
+1999-03-24  Jason Evans  <jasone@canonware.com>
+
+	* src/buf.c (buf_prepend_bufel): Don't try to append a bufel that
+	has a NULL bufc pointer.
+
 1999-03-22  Jason Evans  <jasone@canonware.com>
 
 	* include/libstash/buf_p.h: Set _LIBSTASH_BUF_ARRAY_MIN_SIZE to 1

@@ -678,23 +678,8 @@ buf_split(cw_buf_t * a_a, cw_buf_t * a_b, cw_uint32_t a_offset)
     if ((a_b->array_num_valid == 0)
 	&& (a_b->array_size != _LIBSTASH_BUF_ARRAY_MIN_SIZE))
     {
-      /* Shrink the array back down. */
-/*        a_b->array = (cw_bufel_array_el_t *) */
-/*  	_cw_realloc(a_b->array, (_LIBSTASH_BUF_ARRAY_MIN_SIZE */
-/*  				 * sizeof(cw_bufel_array_el_t))); */
-/*        a_b->iov = (struct iovec *) */
-/*  	_cw_realloc(a_b->iov, (_LIBSTASH_BUF_ARRAY_MIN_SIZE */
-/*  			       * sizeof(struct iovec))); */
-
-#ifdef _LIBSTASH_DBG
-      bzero(a_b->array, (_LIBSTASH_BUF_ARRAY_MIN_SIZE
-			 * sizeof(cw_bufel_array_el_t)));
-      bzero(a_b->iov, _LIBSTASH_BUF_ARRAY_MIN_SIZE * sizeof(struct iovec));
-#endif
-      
-/*        a_b->array_size = _LIBSTASH_BUF_ARRAY_MIN_SIZE; */
-      a_b->array_start = 0;
-      a_b->array_end = 0;
+/*        a_b->array_start = 0; */
+/*        a_b->array_end = 0; */
       a_b->is_cumulative_valid = TRUE;
     }
   }
@@ -730,50 +715,50 @@ buf_prepend_bufel(cw_buf_t * a_buf, cw_bufel_t * a_bufel)
   }
 #endif
 
-  if (NULL == bufel_get_data_ptr(a_bufel))
+  if (NULL != bufel_get_data_ptr(a_bufel))
   {
-    /* Do nothing, since a_bufel is empty. */
-  }  /* Try to merge a_bufel into the first bufel in a_buf. */
-  else if ((a_buf->array_num_valid > 0)
-	   && (bufel_get_data_ptr(&a_buf->array[a_buf->array_start].bufel)
-	       == bufel_get_data_ptr(a_bufel))
-	   && (bufel_get_end_offset(&a_buf->array[a_buf->array_start].bufel)
-	       == bufel_get_beg_offset(a_bufel)))
-  {
-    /* These two bufel's reference the same bufc, and the buffer regions they
-     * refer to are consecutive and adjacent.  Merge the two bufel's
-     * together. */
-    bufel_set_end_offset(&a_buf->array[a_buf->array_start].bufel,
-			 (bufel_get_end_offset(
-			   &a_buf->array[a_buf->array_start].bufel)
-			  + bufel_get_valid_data_size(
-			    a_bufel)));
+    /* Try to merge a_bufel into the first bufel in a_buf. */
+    if ((a_buf->array_num_valid > 0)
+	&& (bufel_get_data_ptr(&a_buf->array[a_buf->array_start].bufel)
+	    == bufel_get_data_ptr(a_bufel))
+	&& (bufel_get_end_offset(&a_buf->array[a_buf->array_start].bufel)
+	    == bufel_get_beg_offset(a_bufel)))
+    {
+      /* These two bufel's reference the same bufc, and the buffer regions they
+       * refer to are consecutive and adjacent.  Merge the two bufel's
+       * together. */
+      bufel_set_end_offset(&a_buf->array[a_buf->array_start].bufel,
+			   (bufel_get_end_offset(
+			     &a_buf->array[a_buf->array_start].bufel)
+			    + bufel_get_valid_data_size(
+			      a_bufel)));
       
-    a_buf->size
-      += bufel_get_valid_data_size(a_bufel);
+      a_buf->size
+	+= bufel_get_valid_data_size(a_bufel);
       
-    a_buf->array[a_buf->array_start].cumulative_size = a_buf->size;
-  }
-  else
-  {
-    buf_p_fit_array(a_buf, a_buf->array_num_valid + 1);
+      a_buf->array[a_buf->array_start].cumulative_size = a_buf->size;
+    }
+    else
+    {
+      buf_p_fit_array(a_buf, a_buf->array_num_valid + 1);
   
-    /* Now prepend the bufel. */
-    a_buf->array_start = (((a_buf->array_start + a_buf->array_size) - 1)
-			  % a_buf->array_size);
+      /* Now prepend the bufel. */
+      a_buf->array_start = (((a_buf->array_start + a_buf->array_size) - 1)
+			    % a_buf->array_size);
   
-    a_buf->array_num_valid++;
-    memcpy(&a_buf->array[a_buf->array_start].bufel,
-	   a_bufel,
-	   sizeof(cw_bufel_t));
-    /* Make sure that we don't try to free this bufel during destruction. */
-    a_buf->array[a_buf->array_start].bufel.is_malloced = FALSE;
-    a_buf->array[a_buf->array_start].bufel.dealloc_func = NULL;
+      a_buf->array_num_valid++;
+      memcpy(&a_buf->array[a_buf->array_start].bufel,
+	     a_bufel,
+	     sizeof(cw_bufel_t));
+      /* Make sure that we don't try to free this bufel during destruction. */
+      a_buf->array[a_buf->array_start].bufel.is_malloced = FALSE;
+      a_buf->array[a_buf->array_start].bufel.dealloc_func = NULL;
 
-    a_buf->size += bufel_get_valid_data_size(a_bufel);
-    a_buf->is_cumulative_valid = FALSE;
+      a_buf->size += bufel_get_valid_data_size(a_bufel);
+      a_buf->is_cumulative_valid = FALSE;
 
-    bufc_p_ref_increment(a_bufel->bufc);
+      bufc_p_ref_increment(a_bufel->bufc);
+    }
   }
   
 #ifdef _CW_REENTRANT
@@ -800,64 +785,62 @@ buf_append_bufel(cw_buf_t * a_buf, cw_bufel_t * a_bufel)
   }
 #endif
 
-  if (NULL == bufel_get_data_ptr(a_bufel))
+  if (NULL != bufel_get_data_ptr(a_bufel))
   {
-    /* Do nothing, since a_bufel is empty. */
-  }
-  /* Try to merge a_bufel into the last bufel in a_buf. */
-  if (a_buf->array_num_valid > 0)
-  {
-    cw_uint32_t last_element_index;
-    
-    last_element_index = ((a_buf->array_end + a_buf->array_size - 1)
-			  % a_buf->array_size);
-  
-    if ((a_buf->array_num_valid > 0)
-	&& (bufel_get_data_ptr(&a_buf->array[last_element_index].bufel)
-	    == bufel_get_data_ptr(a_bufel))
-	&& (bufel_get_end_offset(&a_buf->array[last_element_index].bufel)
-	    == bufel_get_beg_offset(a_bufel)))
+    if (a_buf->array_num_valid > 0)
     {
-      /* These two bufel's reference the same bufc, and the buffer regions they
-       * refer to are consecutive and adjacent.  Merge the two bufel's
-       * together. */
-      bufel_set_end_offset(&a_buf->array[last_element_index].bufel,
-			   (bufel_get_end_offset(
-			     &a_buf->array[last_element_index].bufel)
-			    + bufel_get_valid_data_size(
-			      a_bufel)));
+      cw_uint32_t last_element_index;
+    
+      last_element_index = ((a_buf->array_end + a_buf->array_size - 1)
+			    % a_buf->array_size);
+  
+      if ((a_buf->array_num_valid > 0)
+	  && (bufel_get_data_ptr(&a_buf->array[last_element_index].bufel)
+	      == bufel_get_data_ptr(a_bufel))
+	  && (bufel_get_end_offset(&a_buf->array[last_element_index].bufel)
+	      == bufel_get_beg_offset(a_bufel)))
+      {
+	/* These two bufel's reference the same bufc, and the buffer regions
+	 * they refer to are consecutive and adjacent.  Merge the two bufel's
+	 * together. */
+	bufel_set_end_offset(&a_buf->array[last_element_index].bufel,
+			     (bufel_get_end_offset(
+			       &a_buf->array[last_element_index].bufel)
+			      + bufel_get_valid_data_size(
+				a_bufel)));
       
-      a_buf->size
-	+= bufel_get_valid_data_size(a_bufel);
+	a_buf->size
+	  += bufel_get_valid_data_size(a_bufel);
       
-      a_buf->array[last_element_index].cumulative_size = a_buf->size;
+	a_buf->array[last_element_index].cumulative_size = a_buf->size;
 
-      did_bufel_merge = TRUE;
+	did_bufel_merge = TRUE;
+      }
+    }
+  
+    if (FALSE == did_bufel_merge)
+    {
+      buf_p_fit_array(a_buf, a_buf->array_num_valid + 1);
+  
+      /* Now append the bufel. */
+      memcpy(&a_buf->array[a_buf->array_end].bufel,
+	     a_bufel,
+	     sizeof(cw_bufel_t));
+
+      a_buf->array_num_valid++;
+      a_buf->size += bufel_get_valid_data_size(a_bufel);
+      a_buf->array[a_buf->array_end].cumulative_size = a_buf->size;
+
+      /* Make sure that we don't try to free this bufel during destruction. */
+      a_buf->array[a_buf->array_end].bufel.is_malloced = FALSE;
+      a_buf->array[a_buf->array_end].bufel.dealloc_func = NULL;
+	      
+      a_buf->array_end = ((a_buf->array_end + 1) % a_buf->array_size);
+
+      bufc_p_ref_increment(a_bufel->bufc);
     }
   }
-  
-  if (FALSE == did_bufel_merge)
-  {
-    buf_p_fit_array(a_buf, a_buf->array_num_valid + 1);
-  
-    /* Now append the bufel. */
-    memcpy(&a_buf->array[a_buf->array_end].bufel,
-	   a_bufel,
-	   sizeof(cw_bufel_t));
 
-    a_buf->array_num_valid++;
-    a_buf->size += bufel_get_valid_data_size(a_bufel);
-    a_buf->array[a_buf->array_end].cumulative_size = a_buf->size;
-
-    /* Make sure that we don't try to free this bufel during destruction. */
-    a_buf->array[a_buf->array_end].bufel.is_malloced = FALSE;
-    a_buf->array[a_buf->array_end].bufel.dealloc_func = NULL;
-	      
-    a_buf->array_end = ((a_buf->array_end + 1) % a_buf->array_size);
-
-    bufc_p_ref_increment(a_bufel->bufc);
-  }
-  
 #ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe == TRUE)
   {
@@ -924,23 +907,8 @@ buf_release_head_data(cw_buf_t * a_buf, cw_uint32_t a_amount)
     if ((a_buf->array_num_valid == 0)
 	&& (a_buf->array_size != _LIBSTASH_BUF_ARRAY_MIN_SIZE))
     {
-      /* Shrink the array back down. */
-/*        a_buf->array = (cw_bufel_array_el_t *) */
-/*  	_cw_realloc(a_buf->array, (_LIBSTASH_BUF_ARRAY_MIN_SIZE */
-/*  				   * sizeof(cw_bufel_array_el_t))); */
-/*        a_buf->iov = (struct iovec *) */
-/*  	_cw_realloc(a_buf->iov, (_LIBSTASH_BUF_ARRAY_MIN_SIZE */
-/*  				 * sizeof(struct iovec))); */
-      
-#ifdef _LIBSTASH_DBG
-      bzero(a_buf->array, (_LIBSTASH_BUF_ARRAY_MIN_SIZE
-			   * sizeof(cw_bufel_array_el_t)));
-      bzero(a_buf->iov, _LIBSTASH_BUF_ARRAY_MIN_SIZE * sizeof(struct iovec));
-#endif
-  
-/*        a_buf->array_size = _LIBSTASH_BUF_ARRAY_MIN_SIZE; */
-      a_buf->array_start = 0;
-      a_buf->array_end = 0;
+/*        a_buf->array_start = 0; */
+/*        a_buf->array_end = 0; */
       a_buf->is_cumulative_valid = TRUE;
     }
 
@@ -1018,23 +986,8 @@ buf_release_tail_data(cw_buf_t * a_buf, cw_uint32_t a_amount)
     if ((a_buf->array_num_valid == 0)
 	&& (a_buf->array_size != _LIBSTASH_BUF_ARRAY_MIN_SIZE))
     {
-      /* Shrink the array back down. */
-/*        a_buf->array = (cw_bufel_array_el_t *) */
-/*  	_cw_realloc(a_buf->array, (_LIBSTASH_BUF_ARRAY_MIN_SIZE */
-/*  				   * sizeof(cw_bufel_array_el_t))); */
-/*        a_buf->iov = (struct iovec *) */
-/*  	_cw_realloc(a_buf->iov, (_LIBSTASH_BUF_ARRAY_MIN_SIZE */
-/*  				 * sizeof(struct iovec))); */
-
-#ifdef _LIBSTASH_DBG
-      bzero(a_buf->array, (_LIBSTASH_BUF_ARRAY_MIN_SIZE
-			   * sizeof(cw_bufel_array_el_t)));
-      bzero(a_buf->iov, _LIBSTASH_BUF_ARRAY_MIN_SIZE * sizeof(struct iovec));
-#endif
-      
-/*        a_buf->array_size = _LIBSTASH_BUF_ARRAY_MIN_SIZE; */
-      a_buf->array_start = 0;
-      a_buf->array_end = 0;
+/*        a_buf->array_start = 0; */
+/*        a_buf->array_end = 0; */
       a_buf->is_cumulative_valid = TRUE;
     }
 

@@ -608,7 +608,7 @@ main()
      buf_get_size(). */
   {
     cw_buf_t * buf_p;
-    cw_bufel_t * bufel_p_a, * bufel_p_b, * bufel_p_c;
+    cw_bufel_t * bufel_p_a, * bufel_p_b, * bufel_p_c, * bufel_p_d;
     cw_bufc_t * bufc_p;
     char * str_a, * str_b, * str_c;
     cw_bufpool_t bufpool;
@@ -660,6 +660,13 @@ main()
     _cw_assert(2 == buf_get_size(buf_p));
     buf_append_bufel(buf_p, bufel_p_c);
     _cw_assert(3 == buf_get_size(buf_p));
+
+    bufel_p_d = bufel_new(NULL, NULL, NULL);
+    buf_append_bufel(buf_p, bufel_p_d);
+    _cw_assert(3 == buf_get_size(buf_p));
+    buf_prepend_bufel(buf_p, bufel_p_d);
+    _cw_assert(3 == buf_get_size(buf_p));
+    bufel_delete(bufel_p_d);
 
     buf_prepend_bufel(buf_p, bufel_p_a);
     _cw_assert(4 == buf_get_size(buf_p));
