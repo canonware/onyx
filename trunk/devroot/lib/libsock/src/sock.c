@@ -677,8 +677,11 @@ sock_write(cw_sock_t *a_sock, cw_buf_t *a_buf)
 			iovec = buf_iovec_get(&a_sock->out_buf, out_buf_size,
 			    TRUE, &iovec_count);
 
-			bytes_written = writev(a_sock->sockfd, iovec,
-			    iovec_count);
+			while ((bytes_written = writev(a_sock->sockfd, iovec,
+			    iovec_count)) == -1) {
+				if (errno != EINTR)
+					break;
+			}
 #ifdef _LIBSOCK_CONFESS
 			_cw_out_put_e("[i]w?([i|s:s]/[i])\n", a_sock->sockfd,
 			    bytes_written, buf_size_get(&a_sock->out_buf));

@@ -370,10 +370,14 @@ void
 libsock_l_wakeup(void)
 {
 	if (sema_trywait(&g_libsock->pipe_sema) == FALSE) {
-		if (write(g_libsock->pipe_in, "X", 1) == -1) {
-			if (dbg_is_registered(cw_g_dbg, "libsock_error")) {
-				_cw_out_put_e("Error in write(): [s]\n",
-				    strerror(errno));
+		while (write(g_libsock->pipe_in, "X", 1) == -1) {
+			if (errno != EINTR) {
+				if (dbg_is_registered(cw_g_dbg,
+				    "libsock_error")) {
+					_cw_out_put_e("Error in write(): [s]\n",
+					    strerror(errno));
+				}
+				break;
 			}
 		}
 	}
@@ -846,8 +850,11 @@ libsock_p_entry_func(void *a_arg)
 				 * queues are checked after emptying the pipe,
 				 * but before calling poll() again.
 				 */
-				bytes_read = read(g_libsock->pipe_out, t_buf,
-				    2);
+				while ((bytes_read = read(g_libsock->pipe_out,
+				    t_buf, 2)) == -1) {
+					if (errno != EINTR)
+						break;
+				}
 				if (bytes_read == -1) {
 					if (dbg_is_registered(cw_g_dbg,
 					    "libsock_error")) {
@@ -999,8 +1006,11 @@ libsock_p_entry_func(void *a_arg)
 					iov = buf_iovec_get(&buf_in, max_read,
 					    TRUE, &iov_cnt);
 
-					bytes_read = readv(sockfd, iov,
-					    iov_cnt);
+					while ((bytes_read = readv(sockfd, iov,
+					    iov_cnt)) == -1) {
+						if (errno != EINTR)
+							break;
+					}
 #ifdef _LIBSOCK_CONFESS
 					_cw_out_put("([i|s:s])",
 					    bytes_read);
@@ -1185,8 +1195,12 @@ libsock_p_entry_func(void *a_arg)
 						    buffer_size, TRUE,
 						    &iov_cnt);
 
-						bytes_read = readv(sockfd, iov,
-						    iov_cnt);
+						while ((bytes_read =
+						    readv(sockfd, iov, iov_cnt))
+						    == -1) {
+							if (errno != EINTR)
+								break;
+						}
 
 #ifdef _LIBSOCK_CONFESS
 						_cw_out_put("[i|s:s][s]",
@@ -1284,8 +1298,11 @@ libsock_p_entry_func(void *a_arg)
 					 * very unlikely though, and doesn't
 					 * cause erroneous behavior.
 					 */
-					bytes_written = writev(sockfd, iov,
-					    iov_cnt);
+					while ((bytes_written = writev(sockfd,
+					    iov, iov_cnt)) == -1) {
+						if (errno != EINTR)
+							break;
+					}
 #ifdef _LIBSOCK_CONFESS
 					_cw_out_put("([i|s:s]/[i])",
 					    bytes_written,

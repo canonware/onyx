@@ -143,7 +143,11 @@ read_preread(el)
     if (chrs > 0) {
 	char    buf[EL_BUFSIZ];
 
-	chrs = read(el->el_infd, buf, (size_t) MIN(chrs, EL_BUFSIZ - 1));
+	while ((chrs = read(el->el_infd, buf, (size_t) MIN(chrs, EL_BUFSIZ -
+	    1))) == -1) {
+		if (errno != EINTR)
+			break;
+	}
 	if (chrs > 0) {
 	    buf[chrs] = '\0';
 	    el->el_chared.c_macro.nline = strdup(buf);
@@ -278,13 +282,16 @@ el_getc(el, cp)
 #ifdef DEBUG_READ
     (void) fprintf(el->el_errfile, "Reading a character\n");
 #endif /* DEBUG_READ */
-    while ((num_read = read(el->el_infd, (char *) &tcp, 1)) == -1)
+    while ((num_read = read(el->el_infd, (char *) &tcp, 1)) == -1) {
+	    if (errno == EINTR)
+		    continue;
 	if (!tried && read__fixio(el->el_infd, errno) == 0)
 	    tried = 1;
 	else {
 	    *cp = '\0';
 	    return -1;
 	}
+    }
 #ifdef DEBUG_READ
     (void) fprintf(el->el_errfile, "Got it %c\n", tcp);
 #endif /* DEBUG_READ */

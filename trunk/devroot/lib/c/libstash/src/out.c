@@ -781,7 +781,10 @@ out_p_put_fvn(cw_out_t *a_out, cw_sint32_t a_fd, cw_uint32_t a_size, const char
 		mtx_lock(&a_out->lock);
 	i = 0;
 	do {
-		nwritten = write(a_fd, &obuf[i], out_size - i);
+		while ((nwritten = write(a_fd, &obuf[i], out_size - i)) == -1) {
+			if (errno != EINTR)
+				break;
+		}
 		if (nwritten != -1)
 			i += nwritten;
 		else {

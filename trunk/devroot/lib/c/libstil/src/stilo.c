@@ -1709,9 +1709,13 @@ stiloe_p_file_delete(cw_stiloe_t *a_stiloe, cw_stil_t *a_stil)
 			case -1:
 				break;
 			default:
-				if (write(file->fd, file->buffer,
-				    file->buffer_offset) == -1)
-					ioerror = TRUE;
+				while (write(file->fd, file->buffer,
+				    file->buffer_offset) == -1) {
+					if (errno != EINTR) {
+						ioerror = TRUE;
+						break;
+					}
+				}
 				break;
 			}
 		}
@@ -2040,7 +2044,11 @@ stilo_file_read(cw_stilo_t *a_stilo, cw_uint32_t a_len, cw_uint8_t *r_str)
 					iov[1].iov_base = file->buffer;
 					iov[1].iov_len = file->buffer_size;
 
-					nread = readv(file->fd, iov, 2);
+					while ((nread = readv(file->fd, iov, 2))
+					    == -1) {
+						if (errno != EINTR)
+							break;
+					}
 				} else {
 					int	nready;
 
@@ -2065,7 +2073,11 @@ stilo_file_read(cw_stilo_t *a_stilo, cw_uint32_t a_len, cw_uint8_t *r_str)
 						iov[1].iov_len =
 						    file->buffer_size;
 
-						nread = readv(file->fd, iov, 2);
+						while ((nread = readv(file->fd,
+						    iov, 2)) == -1) {
+							if (errno != EINTR)
+								break;
+						}
 					} else
 						nread = 0;
 				}
@@ -2099,9 +2111,12 @@ stilo_file_read(cw_stilo_t *a_stilo, cw_uint32_t a_len, cw_uint8_t *r_str)
 			}
 		}
 	} else {
-		if (file->fd >= 0)
-			retval = read(file->fd, r_str, a_len);
-		else
+		if (file->fd >= 0) {
+			while ((retval = read(file->fd, r_str, a_len)) == -1) {
+				if (errno != EINTR)
+					break;
+			}
+		}else
 			retval = file->read_f(file->arg, a_stilo, a_len, r_str);
 	}
 
@@ -2199,8 +2214,12 @@ stilo_file_readline(cw_stilo_t *a_stilo, cw_stil_t *a_stil, cw_bool_t a_locking,
 			    (file->buffer_mode == BUFFER_EMPTY)) {
 				/* Replenish the internal buffer. */
 				if (file->fd >= 0) {
-					nread = read(file->fd, file->buffer,
-					    file->buffer_size);
+					while ((nread = read(file->fd,
+					    file->buffer, file->buffer_size)) ==
+					    -1) {
+						if (errno != EINTR)
+							break;
+					}
 				} else {
 					/* Use the read wrapper function. */
 					nread = file->read_f(file->arg, a_stilo,
@@ -2306,7 +2325,11 @@ stilo_file_readline(cw_stilo_t *a_stilo, cw_stil_t *a_stil, cw_bool_t a_locking,
 			}
 
 			if (file->fd >= 0)
-				nread = read(file->fd, &line[i], 1);
+				while ((nread = read(file->fd, &line[i], 1)) ==
+				    -1) {
+					if (errno != EINTR)
+						break;
+				}
 			else {
 				/* Use the read wrapper function. */
 				nread = file->read_f(file->arg, a_stilo, 1,
@@ -2411,9 +2434,11 @@ stilo_file_write(cw_stilo_t *a_stilo, const cw_uint8_t *a_str, cw_uint32_t
 			iov[1].iov_base = (char *)a_str;
 			iov[1].iov_len = a_len;
 
-			if (writev(file->fd, iov, 2) == -1) {
-				retval = STILTE_IOERROR;
-				goto RETURN;
+			while (writev(file->fd, iov, 2) == -1) {
+				if (errno != EINTR) {
+					retval = STILTE_IOERROR;
+					goto RETURN;
+				}
 			}
 
 			file->buffer_mode = BUFFER_EMPTY;
@@ -2435,9 +2460,11 @@ stilo_file_write(cw_stilo_t *a_stilo, const cw_uint8_t *a_str, cw_uint32_t
 		}
 	} else {
 		if (file->fd >= 0) {
-			if (write(file->fd, a_str, a_len) == -1) {
-				retval = STILTE_IOERROR;
-				goto RETURN;
+			while (write(file->fd, a_str, a_len) == -1) {
+				if (errno != EINTR) {
+					retval = STILTE_IOERROR;
+					goto RETURN;
+				}
 			}
 		} else {
 			if (file->write_f(file->arg, a_stilo, a_str, a_len)) {
@@ -2920,10 +2947,12 @@ stilo_p_file_buffer_flush(cw_stilo_t *a_stilo)
 		if (file->buffer_mode == BUFFER_WRITE) {
 			if (file->fd >= 0) {
 				/* Normal file descriptor. */
-				if (write(file->fd, file->buffer,
+				while (write(file->fd, file->buffer,
 				    file->buffer_offset) == -1) {
-					retval = STILTE_IOERROR;
-					goto RETURN;
+					if (errno != EINTR) {
+						retval = STILTE_IOERROR;
+						goto RETURN;
+					}
 				}
 			} else {
 				/* Use the write wrapper function. */
