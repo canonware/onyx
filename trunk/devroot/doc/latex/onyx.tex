@@ -430,22 +430,25 @@ other synchronization primitives can be constructed.
 
 \section{Memory management}
 Onyx programs do not need to track memory allocations, since memory reclamation
-is done implicitly via garbage collection.  Onyx uses an asynchronous atomic
-mark and sweep garbage collector.  The garbage collector is asynchronous in that
-it is a separate thread and can collect at any time.  However, it is atomic,
-which means that while the garbage collector is in the mark phase, no other
-threads are running.
+is done implicitly via automatic garbage collection.  Onyx uses an asynchronous
+atomic mark and sweep garbage collector.  The garbage collector is asynchronous
+in that it is a separate thread that can run at any time.  However, it is
+atomic, which means that while the garbage collector is in the mark phase, no
+other threads are running.
 
 The atomic nature of garbage collection may sound worrisome with regard to
 performance, but in fact there are tangible benefits and no significant negative
-impacts.  Total throughput is improved, since minimal locking is necessary.
-Concurrent garbage collection would impose a significant locking overhead.
+impacts for most applications.  Total throughput is improved, since minimal
+locking is necessary.  Concurrent garbage collection would impose a significant
+locking overhead.
 
 On the down side, atomic garbage collection cannot make strong real-time
-guarantees.  However, the garbage collector is very effecient, and for typical
-applications, garbage collection delays are measured in the tens of milliseconds
-on current hardware as of the year 2000.  For interactive applications, anything
-under about 100 milliseconds is undetectable by the user.
+guarantees.  However, the garbage collector is very efficient, and for typical
+applications, garbage collection delays are measured in microseconds up to tens
+of milliseconds on current hardware as of the year 2000.  For interactive
+applications, anything under about 100 milliseconds is undetectable by the user,
+so under normal circumstances the user will not notice that garbage collection
+is happening.
 
 There are three parameters that can be used to customize garbage collection:
 \begin{enumerate}
