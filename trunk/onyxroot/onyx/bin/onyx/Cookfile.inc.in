@@ -159,9 +159,7 @@ ONYX_OTESTS =
 ONYX_OTESTS = [addprefix @srcroot@/bin/onyx/test/ [ONYX_OTESTS]];
 
 /* LaTeX source files. */
-ONYX_TEX_SRCS = ;
-ONYX_TEX_SRCS = [addprefix @srcroot@/bin/onyx/doc/latex/ [ONYX_TEX_SRCS]];
-ONYX_TEX_SRCS = [ONYX_TEX_SRCS] @objroot@/bin/onyx/doc/latex/manual.tex;
+ONYX_TEX_SRCS += @objroot@/bin/onyx/doc/latex/manual.tex;
 
 /* Binaries. */
 ONYX = @objroot@/bin/onyx/bin/onyx;

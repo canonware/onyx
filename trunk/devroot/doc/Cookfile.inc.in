@@ -109,6 +109,7 @@ docs_relclean : [addsuffix _docs_relclean @docs@]
   [SHELL] -e;
 data
   for i in `find @objroot@/%0html/%1/ -type f |grep "\.html$"` ; do
+    echo "Fix up $i"
     mv $i $i.tmp
     cat $i.tmp | sed -e s/YYYbsZZZ/\\\\\\\\/g \\
       | sed -e s/YYYlbZZZ/\[/g \\
