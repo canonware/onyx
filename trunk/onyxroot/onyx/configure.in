@@ -70,12 +70,12 @@ fi
 dnl Look for modules.
 if test "x$enable_threads" = "x1" -a "x$enable_posix" = "x1" ; then
   CW_BUILD_MOD(modgtk, mod_gtk)
-  CW_BUILD_MOD(modnxe, mod_nxe)
+  CW_BUILD_MOD(modslate, mod_slate)
 fi
 
 dnl Look for binaries.
 CW_BUILD_BIN(onyx, bin_onyx)
-CW_BUILD_BIN(nxe, bin_nxe)
+CW_BUILD_BIN(slate, bin_slate)
 
 AC_CONFIG_HEADER($cfghdrs)
 AC_SUBST(cfghdrs)
@@ -218,7 +218,7 @@ if test "x$build_modgtk" = "xyes" ; then
   AC_PATH_PROGS(GTKCONFIG, gtk-config gtk12-config, , $PATH)
 fi
 
-if test "x$build_modnxe" = "xyes" ; then
+if test "x$build_modslate" = "xyes" ; then
   AC_CHECK_HEADERS(ncurses.h, , AC_MSG_ERROR(Cannot build without ncurses.h))
 fi
 

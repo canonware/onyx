@@ -27,7 +27,7 @@
  *
  ******************************************************************************/
 
-#include "../include/modnxe.h"
+#include "../include/modslate.h"
 
 struct cw_buffer {
 	cw_buf_t	buf;
@@ -42,7 +42,7 @@ struct cw_marker {
 	cw_bufm_t	bufm;
 };
 
-static const struct cw_nxe_entry nxe_buffer_ops[] = {
+static const struct cw_slate_entry slate_buffer_ops[] = {
 	ENTRY(buffer),
 	ENTRY(buffer_length),
 	ENTRY(buffer_lines),
@@ -71,10 +71,10 @@ static const struct cw_nxe_entry nxe_buffer_ops[] = {
 };
 
 void
-nxe_buffer_init(cw_nxo_t *a_thread)
+slate_buffer_init(cw_nxo_t *a_thread)
 {
-	nxe_ops_init(a_thread, nxe_buffer_ops, (sizeof(nxe_buffer_ops) /
-	    sizeof(struct cw_nxe_entry)));
+	slate_ops_init(a_thread, slate_buffer_ops, (sizeof(slate_buffer_ops) /
+	    sizeof(struct cw_slate_entry)));
 }
 
 static void
@@ -140,7 +140,7 @@ buffer_p_type(cw_nxo_t *a_nxo)
 }
 
 void
-nxe_buffer(cw_nxo_t *a_thread)
+slate_buffer(cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *nxo, *tag;
 	cw_nx_t			*nx;
@@ -169,7 +169,7 @@ nxe_buffer(cw_nxo_t *a_thread)
 }
 
 void
-nxe_buffer_length(cw_nxo_t *a_thread)
+slate_buffer_length(cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *nxo;
 	cw_nxn_t		error;
@@ -191,7 +191,7 @@ nxe_buffer_length(cw_nxo_t *a_thread)
 }
 
 void
-nxe_buffer_lines(cw_nxo_t *a_thread)
+slate_buffer_lines(cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *nxo;
 	cw_nxn_t		error;
@@ -213,7 +213,7 @@ nxe_buffer_lines(cw_nxo_t *a_thread)
 }
 
 void
-nxe_buffer_undo(cw_nxo_t *a_thread)
+slate_buffer_undo(cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *nxo;
 	cw_nxn_t		error;
@@ -235,7 +235,7 @@ nxe_buffer_undo(cw_nxo_t *a_thread)
 }
 
 void
-nxe_buffer_redo(cw_nxo_t *a_thread)
+slate_buffer_redo(cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *nxo;
 	cw_nxn_t		error;
@@ -257,7 +257,7 @@ nxe_buffer_redo(cw_nxo_t *a_thread)
 }
 
 void
-nxe_buffer_history_active(cw_nxo_t *a_thread)
+slate_buffer_history_active(cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *nxo;
 	cw_nxn_t		error;
@@ -279,7 +279,7 @@ nxe_buffer_history_active(cw_nxo_t *a_thread)
 }
 
 void
-nxe_buffer_history_setactive(cw_nxo_t *a_thread)
+slate_buffer_history_setactive(cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *nxo;
 	cw_nxn_t		error;
@@ -301,7 +301,7 @@ nxe_buffer_history_setactive(cw_nxo_t *a_thread)
 }
 
 void
-nxe_buffer_history_startgroup(cw_nxo_t *a_thread)
+slate_buffer_history_startgroup(cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *nxo;
 	cw_nxn_t		error;
@@ -323,7 +323,7 @@ nxe_buffer_history_startgroup(cw_nxo_t *a_thread)
 }
 
 void
-nxe_buffer_history_endgroup(cw_nxo_t *a_thread)
+slate_buffer_history_endgroup(cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *nxo;
 	cw_nxn_t		error;
@@ -345,7 +345,7 @@ nxe_buffer_history_endgroup(cw_nxo_t *a_thread)
 }
 
 void
-nxe_buffer_history_flush(cw_nxo_t *a_thread)
+slate_buffer_history_flush(cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *nxo;
 	cw_nxn_t		error;
@@ -457,7 +457,7 @@ marker_p_whence(cw_nxo_t *a_whence)
 }
 
 void
-nxe_marker(cw_nxo_t *a_thread)
+slate_marker(cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *tstack, *nxo, *tnxo, *tag;
 	cw_nx_t			*nx;
@@ -503,7 +503,7 @@ nxe_marker(cw_nxo_t *a_thread)
 
 /* %=marker= marker_copy %=marker= */
 void
-nxe_marker_copy(cw_nxo_t *a_thread)
+slate_marker_copy(cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *tstack, *nxo, *tnxo, *tag;
 	cw_nx_t			*nx;
@@ -553,7 +553,7 @@ nxe_marker_copy(cw_nxo_t *a_thread)
 
 /* %=marker= marker_buffer %=buffer= */
 void
-nxe_marker_buffer(cw_nxo_t *a_thread)
+slate_marker_buffer(cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *nxo;
 	cw_nxn_t		error;
@@ -573,7 +573,7 @@ nxe_marker_buffer(cw_nxo_t *a_thread)
 }
 
 void
-nxe_marker_line(cw_nxo_t *a_thread)
+slate_marker_line(cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *nxo;
 	cw_nxn_t		error;
@@ -598,7 +598,7 @@ nxe_marker_line(cw_nxo_t *a_thread)
 
 /* %marker %offset %whence? marker_seekline %pos */
 void
-nxe_marker_seekline(cw_nxo_t *a_thread)
+slate_marker_seekline(cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *nxo;
 	cw_uint32_t		npop;
@@ -659,7 +659,7 @@ nxe_marker_seekline(cw_nxo_t *a_thread)
 
 /* %marker marker_position %pos */
 void
-nxe_marker_position(cw_nxo_t *a_thread)
+slate_marker_position(cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *nxo;
 	cw_nxn_t		error;
@@ -684,7 +684,7 @@ nxe_marker_position(cw_nxo_t *a_thread)
 
 /* %marker %offset %whence? marker_seek %pos */
 void
-nxe_marker_seek(cw_nxo_t *a_thread)
+slate_marker_seek(cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *nxo;
 	cw_uint32_t		npop;
@@ -745,7 +745,7 @@ nxe_marker_seek(cw_nxo_t *a_thread)
 
 /* %=marker= marker_before_get %c */
 void
-nxe_marker_before_get(cw_nxo_t *a_thread)
+slate_marker_before_get(cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *nxo;
 	cw_nxn_t		error;
@@ -777,7 +777,7 @@ nxe_marker_before_get(cw_nxo_t *a_thread)
 
 /* %=marker= marker_after_get %c */
 void
-nxe_marker_after_get(cw_nxo_t *a_thread)
+slate_marker_after_get(cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *nxo;
 	cw_nxn_t		error;
@@ -809,7 +809,7 @@ nxe_marker_after_get(cw_nxo_t *a_thread)
 
 /* %=marker= %val marker_before_set - */
 void
-nxe_marker_before_set(cw_nxo_t *a_thread)
+slate_marker_before_set(cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *nxo;
 	cw_nxn_t		error;
@@ -852,7 +852,7 @@ nxe_marker_before_set(cw_nxo_t *a_thread)
 
 /* %=marker= %val marker_after_set - */
 void
-nxe_marker_after_set(cw_nxo_t *a_thread)
+slate_marker_after_set(cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *nxo;
 	cw_nxn_t		error;
@@ -895,7 +895,7 @@ nxe_marker_after_set(cw_nxo_t *a_thread)
 
 /* %=marker= %str marker_before_insert - */
 void
-nxe_marker_before_insert(cw_nxo_t *a_thread)
+slate_marker_before_insert(cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *nxo;
 	cw_nxn_t		error;
@@ -934,7 +934,7 @@ nxe_marker_before_insert(cw_nxo_t *a_thread)
 
 /* %=marker= %str marker_after_insert - */
 void
-nxe_marker_after_insert(cw_nxo_t *a_thread)
+slate_marker_after_insert(cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *nxo;
 	cw_nxn_t		error;
@@ -973,7 +973,7 @@ nxe_marker_after_insert(cw_nxo_t *a_thread)
 
 /* %=marker= %=marker= marker_range_get %string */
 void
-nxe_marker_range_get(cw_nxo_t *a_thread)
+slate_marker_range_get(cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *nxo;
 	cw_nxn_t		error;
@@ -1050,7 +1050,7 @@ nxe_marker_range_get(cw_nxo_t *a_thread)
 
 /* %=marker= %=marker= marker_range_get %string */
 void
-nxe_marker_range_cut(cw_nxo_t *a_thread)
+slate_marker_range_cut(cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *nxo;
 	cw_nxn_t		error;

@@ -9,7 +9,7 @@
  *
  ******************************************************************************/
 
-#include "../include/modnxe.h"
+#include "../include/modslate.h"
 
 /* msgq. */
 void

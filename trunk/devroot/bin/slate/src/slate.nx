@@ -7,10 +7,10 @@
 %
 % Version: <Version>
 %
-% Entry point for the nxe text editor.
+% Entry point for the slate text editor.
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-`nxe.nxm' `nxe_init' mrequire
+`slate.nxm' `slate_init' mrequire
 
 `Do something\n' print flush

@@ -9,9 +9,9 @@
  *
  ******************************************************************************/
 
-#include "../include/modnxe.h"
+#include "../include/modslate.h"
 
-static const struct cw_nxe_entry nxe_ops[] = {
+static const struct cw_slate_entry slate_ops[] = {
 	ENTRY(buffer),
 	ENTRY(buffer_length),
 	ENTRY(buffer_lines),
@@ -38,7 +38,7 @@ static const struct cw_nxe_entry nxe_ops[] = {
 };
 
 void
-nxe_ops_init(cw_nxo_t *a_thread, const struct cw_nxe_entry *a_entries,
+slate_ops_init(cw_nxo_t *a_thread, const struct cw_slate_entry *a_entries,
     cw_uint32_t a_nentries)
 {
 	cw_nxo_t	*tstack;
@@ -171,11 +171,11 @@ foo(cw_nx_t *a_nx, cw_nxo_t *a_thread)
 #endif
 
 void
-nxe_init (void *a_arg, cw_nxo_t *a_thread)
+slate_init (void *a_arg, cw_nxo_t *a_thread)
 {
 /*  	fprintf(stderr, "%s:%u:%s(): Got here\n", __FILE__, __LINE__, */
 /*  	    __FUNCTION__); */
-	nxe_buffer_init(a_thread);
+	slate_buffer_init(a_thread);
 
 #if (0)
 	foo(nxo_thread_nx_get(a_thread), a_thread);	/* XXX */

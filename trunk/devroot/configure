@@ -1234,25 +1234,25 @@ echo "$ac_t""$build_modgtk" 1>&6
 
 
   
-echo $ac_n "checking whether to include modnxe in build""... $ac_c" 1>&6
-echo "configure:1239: checking whether to include modnxe in build" >&5
-if test -d "$srcdir/mod/modnxe" ; then
-  build_modnxe="yes"
-  mod_nxe=1
-  mod_nxe_manual=""
-  if test -f "$srcdir/mod/modnxe/doc/latex/manual.tex.in" ; then
-    mkdir -p $objdir/mod/modnxe/doc/latex
-    cfgoutputs="$cfgoutputs mod/modnxe/doc/latex/manual.tex"
+echo $ac_n "checking whether to include modslate in build""... $ac_c" 1>&6
+echo "configure:1239: checking whether to include modslate in build" >&5
+if test -d "$srcdir/mod/modslate" ; then
+  build_modslate="yes"
+  mod_slate=1
+  mod_slate_manual=""
+  if test -f "$srcdir/mod/modslate/doc/latex/manual.tex.in" ; then
+    mkdir -p $objdir/mod/modslate/doc/latex
+    cfgoutputs="$cfgoutputs mod/modslate/doc/latex/manual.tex"
   fi
-  mkdir -p $objdir/mod/modnxe/include
-  cfghdrs="$cfghdrs $objdir/mod/modnxe/include/modnxe_defs.h"
-  mods="$mods modnxe"
+  mkdir -p $objdir/mod/modslate/include
+  cfghdrs="$cfghdrs $objdir/mod/modslate/include/modslate_defs.h"
+  mods="$mods modslate"
 else
-  build_modnxe="no"
-  mod_nxe=0
-  mod_nxe_manual="%"
+  build_modslate="no"
+  mod_slate=0
+  mod_slate_manual="%"
 fi
-echo "$ac_t""$build_modnxe" 1>&6
+echo "$ac_t""$build_modslate" 1>&6
 
 
 
@@ -1288,31 +1288,31 @@ echo "$ac_t""$build_onyx" 1>&6
 
 
 
-echo $ac_n "checking whether to include nxe in build""... $ac_c" 1>&6
-echo "configure:1293: checking whether to include nxe in build" >&5
-if test -d "$srcdir/bin/nxe" ; then
-  build_nxe="yes"
-  bin_nxe=1
-  bin_nxe_manual=""
-  if test -f "$srcdir/bin/nxe/doc/latex/manual.tex.in" ; then
-    mkdir -p $objdir/bin/nxe/doc/latex
-    cfgoutputs="$cfgoutputs bin/nxe/doc/latex/manual.tex"
+echo $ac_n "checking whether to include slate in build""... $ac_c" 1>&6
+echo "configure:1293: checking whether to include slate in build" >&5
+if test -d "$srcdir/bin/slate" ; then
+  build_slate="yes"
+  bin_slate=1
+  bin_slate_manual=""
+  if test -f "$srcdir/bin/slate/doc/latex/manual.tex.in" ; then
+    mkdir -p $objdir/bin/slate/doc/latex
+    cfgoutputs="$cfgoutputs bin/slate/doc/latex/manual.tex"
   fi
-  if test -f "$srcdir/bin/nxe/man/man1/nxe.1.in" ; then
-    mkdir -p $objdir/bin/nxe/man/man1
-    cfgoutputs="$cfgoutputs bin/nxe/man/man1/nxe.1"
+  if test -f "$srcdir/bin/slate/man/man1/slate.1.in" ; then
+    mkdir -p $objdir/bin/slate/man/man1
+    cfgoutputs="$cfgoutputs bin/slate/man/man1/slate.1"
   fi
-  if test -f "$srcdir/bin/nxe/include/nxe_defs.h.in" ; then
-    mkdir -p $objdir/bin/nxe/include
-    cfghdrs="$cfghdrs $objdir/bin/nxe/include/nxe_defs.h"
+  if test -f "$srcdir/bin/slate/include/slate_defs.h.in" ; then
+    mkdir -p $objdir/bin/slate/include
+    cfghdrs="$cfghdrs $objdir/bin/slate/include/slate_defs.h"
   fi
-  bins="$bins nxe"
+  bins="$bins slate"
 else
-  build_nxe="no"
-  bin_nxe=0
-  bin_nxe_manual="%"
+  build_slate="no"
+  bin_slate=0
+  bin_slate_manual="%"
 fi
-echo "$ac_t""$build_nxe" 1>&6
+echo "$ac_t""$build_slate" 1>&6
 
 
 
@@ -3047,7 +3047,7 @@ done
 
 fi
 
-if test "x$build_modnxe" = "xyes" ; then
+if test "x$build_modslate" = "xyes" ; then
   for ac_hdr in ncurses.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
@@ -3266,12 +3266,12 @@ s%@lib_edit@%$lib_edit%g
 s%@lib_edit_manual@%$lib_edit_manual%g
 s%@mod_gtk@%$mod_gtk%g
 s%@mod_gtk_manual@%$mod_gtk_manual%g
-s%@mod_nxe@%$mod_nxe%g
-s%@mod_nxe_manual@%$mod_nxe_manual%g
+s%@mod_slate@%$mod_slate%g
+s%@mod_slate_manual@%$mod_slate_manual%g
 s%@bin_onyx@%$bin_onyx%g
 s%@bin_onyx_manual@%$bin_onyx_manual%g
-s%@bin_nxe@%$bin_nxe%g
-s%@bin_nxe_manual@%$bin_nxe_manual%g
+s%@bin_slate@%$bin_slate%g
+s%@bin_slate_manual@%$bin_slate_manual%g
 s%@cfghdrs@%$cfghdrs%g
 s%@bins@%$bins%g
 s%@mods@%$mods%g

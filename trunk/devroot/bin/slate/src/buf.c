@@ -7,8 +7,8 @@
  *
  * Version: <Version>
  *
- * This file contains a buffer gap implementation of buffers for use in the nxe
- * text editor.  The code is broken up into the following classes:
+ * This file contains a buffer gap implementation of buffers for use in the
+ * slate text editor.  The code is broken up into the following classes:
  *
  * buf  : Main buffer class.
  * bufm : Marker.  Markers are used as handles for many buf operations.
@@ -48,7 +48,7 @@
  *
  * Undo/redo history:
  *
- * Since nxe supports infinite undo (within the memory limitations of the
+ * Since slate supports infinite undo (within the memory limitations of the
  * system, or up to 4 GB of history storage, whichever is less), buffer history
  * can become quite long.  Therefore, the buffer history mechanism aims to be as
  * compact as possible, at the expense of complexity.  Internally, the history
@@ -165,7 +165,7 @@
  *
  ******************************************************************************/
 
-#include "../include/modnxe.h"
+#include "../include/modslate.h"
 
 /*
  * The upper 3 bits are used to denote the record type, and the lower 5 bits are
