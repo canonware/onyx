@@ -83,7 +83,7 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, int a_argc, char **a_argv,
 	/* Initialize stdin. */
 	nxo_file_new(&retval->stdin_nxo, retval, TRUE);
 #ifdef CW_POSIX_FILE
-	nxo_file_fd_wrap(&retval->stdin_nxo, 0);
+	nxo_file_fd_wrap(&retval->stdin_nxo, 0, FALSE);
 #endif
 	nxo_file_buffer_size_set(&retval->stdin_nxo,
 				 CW_LIBONYX_FILE_BUFFER_SIZE);
@@ -92,7 +92,7 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, int a_argc, char **a_argv,
 	/* Initialize stdout. */
 	nxo_file_new(&retval->stdout_nxo, retval, TRUE);
 #ifdef CW_POSIX_FILE
-	nxo_file_fd_wrap(&retval->stdout_nxo, 1);
+	nxo_file_fd_wrap(&retval->stdout_nxo, 1, FALSE);
 #endif
 	nxo_file_buffer_size_set(&retval->stdout_nxo,
 				 CW_LIBONYX_FILE_BUFFER_SIZE);
@@ -101,7 +101,7 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, int a_argc, char **a_argv,
 	/* Initialize stderr. */
 	nxo_file_new(&retval->stderr_nxo, retval, TRUE);
 #ifdef CW_POSIX_FILE
-	nxo_file_fd_wrap(&retval->stderr_nxo, 2);
+	nxo_file_fd_wrap(&retval->stderr_nxo, 2, FALSE);
 #endif
 	try_stage = 7;
 

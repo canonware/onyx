@@ -26,7 +26,7 @@ nxo_file_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking);
 
 #ifdef CW_POSIX_FILE
 void
-nxo_file_fd_wrap(cw_nxo_t *a_nxo, cw_uint32_t a_fd);
+nxo_file_fd_wrap(cw_nxo_t *a_nxo, cw_uint32_t a_fd, cw_bool_t a_close);
 #endif
 
 void

@@ -1,3 +1,9 @@
+2003-04-04 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/nxo_file.c:nxo_file_fd_wrap() : Add the a_close
+	  parameter, which makes it possible to avoid leaking file descriptors
+	  for wrapped files.
+
 2003-03-23 : Jason Evans <jasone@canonware.com>
 
 	* Onyx 4.4.2 released.

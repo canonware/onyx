@@ -157,7 +157,7 @@ cw\_bool\_t a\_locking}}
 \label{nxo_file_fd_wrap}
 \index{nxo_file_fd_wrap@\cfunc{nxo\_file\_fd\_wrap}{}}
 \citem{\cfunc[void]{nxo\_file\_fd\_wrap}{cw\_nxo\_t *a\_nxo, cw\_uint32\_t
-a\_fd}}
+a\_fd, cw\_bool\_t a\_close}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -165,6 +165,10 @@ a\_fd}}
 			Pointer to a file \classname{nxo}.
 		\item[a\_fd: ]
 			File descriptor number.
+		\item[a\_close: ] If TRUE, close \cvar{a\_fd} when \cvar{a\_nxo}
+			is finalized by the garbage collector, otherwise, do
+			not automatically close \cvar{a\_fd}.  This should
+			typically be set to TRUE.
 		\end{description}
 	\item[Output(s): ] None.
 	\item[Exception(s): ] None.

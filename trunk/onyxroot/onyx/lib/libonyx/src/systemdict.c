@@ -865,7 +865,7 @@ systemdict_accept(cw_nxo_t *a_thread)
 
     nxo_file_new(sock, nxo_thread_nx_get(a_thread),
 		 nxo_thread_currentlocking(a_thread));
-    nxo_file_fd_wrap(sock, sockfd);
+    nxo_file_fd_wrap(sock, sockfd, TRUE);
 }
 #endif
 
@@ -7073,13 +7073,13 @@ systemdict_pipe(cw_nxo_t *a_thread)
     nxo = nxo_stack_push(ostack);
     nxo_file_new(nxo, nxo_thread_nx_get(a_thread),
 		 nxo_thread_currentlocking(a_thread));
-    nxo_file_fd_wrap(nxo, filedes[0]);
+    nxo_file_fd_wrap(nxo, filedes[0], TRUE);
     
     /* Write fd. */
     nxo = nxo_stack_push(ostack);
     nxo_file_new(nxo, nxo_thread_nx_get(a_thread),
 		 nxo_thread_currentlocking(a_thread));
-    nxo_file_fd_wrap(nxo, filedes[1]);
+    nxo_file_fd_wrap(nxo, filedes[1], TRUE);
 }
 #endif
 
@@ -10279,7 +10279,7 @@ systemdict_p_socket(cw_nxo_t *a_thread, cw_bool_t a_pair)
 	nxo = nxo_stack_under_push(ostack, nxo);
 	nxo_file_new(nxo, nxo_thread_nx_get(a_thread),
 		     nxo_thread_currentlocking(a_thread));
-	nxo_file_fd_wrap(nxo, sockfd);
+	nxo_file_fd_wrap(nxo, sockfd, TRUE);
     }
     else
     {
@@ -10296,7 +10296,7 @@ systemdict_p_socket(cw_nxo_t *a_thread, cw_bool_t a_pair)
 	    nxo = nxo_stack_under_push(ostack, nxo);
 	    nxo_file_new(nxo, nxo_thread_nx_get(a_thread),
 			 nxo_thread_currentlocking(a_thread));
-	    nxo_file_fd_wrap(nxo, sockfds[i]);
+	    nxo_file_fd_wrap(nxo, sockfds[i], TRUE);
 	}
     }
 

@@ -54,7 +54,7 @@ struct cw_nxoe_file_s
 	struct
 	{
 	    cw_sint32_t fd;
-	    cw_bool_t wrapped;
+	    cw_bool_t close;
 	} p;
 #endif
     } f;
@@ -114,7 +114,7 @@ nxoe_l_file_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
 #ifdef CW_POSIX_FILE
 	case FILE_POSIX:
 	{
-	    if (file->f.p.wrapped == FALSE)
+	    if (file->f.p.close)
 	    {
 		close(file->f.p.fd);
 	    }

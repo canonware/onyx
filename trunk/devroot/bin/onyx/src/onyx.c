@@ -481,7 +481,7 @@ file_setup(cw_nx_t *a_nx, cw_nxo_t *a_thread, const char *a_filename)
     nxo_file_new(file, a_nx, FALSE);
     nxo_attr_set(file, NXOA_EXECUTABLE);
 
-    nxo_file_fd_wrap(file, src_fd);
+    nxo_file_fd_wrap(file, src_fd, TRUE);
 
     retval = FALSE;
     RETURN:
