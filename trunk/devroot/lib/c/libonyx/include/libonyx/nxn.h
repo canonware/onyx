@@ -100,7 +100,9 @@ typedef enum {
 	NXN_egid,
 #endif
 	NXN_end,
+#ifdef _CW_POSIX
 	NXN_envdict,
+#endif
 	NXN_eq,
 	NXN_errorname,
 	NXN_estack,

@@ -55,17 +55,19 @@ nx_l_ref_iter(cw_nx_t *a_nx, cw_bool_t a_reset)
 			retval = nxo_nxoe_get(&a_nx->globaldict);
 			break;
 		case 4:
-			retval = nxo_nxoe_get(&a_nx->envdict);
-			break;
-		case 5:
 			retval = nxo_nxoe_get(&a_nx->stdin_nxo);
 			break;
-		case 6:
+		case 5:
 			retval = nxo_nxoe_get(&a_nx->stdout_nxo);
 			break;
-		case 7:
+		case 6:
 			retval = nxo_nxoe_get(&a_nx->stderr_nxo);
 			break;
+#ifdef _CW_POSIX
+		case 7:
+			retval = nxo_nxoe_get(&a_nx->envdict);
+			break;
+#endif
 		default:
 			retval = NULL;
 			goto RETURN;

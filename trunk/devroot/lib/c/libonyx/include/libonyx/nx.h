@@ -49,7 +49,9 @@ struct cw_nx_s {
 	cw_nxo_t	threadsdict;
 	cw_nxo_t	systemdict;
 	cw_nxo_t	globaldict;
+#ifdef _CW_POSIX
 	cw_nxo_t	envdict;
+#endif
 
 	/*
 	 * Files.
@@ -73,7 +75,9 @@ void	nx_delete(cw_nx_t *a_nx);
 cw_nxa_t *nx_nxa_get(cw_nx_t *a_nx);
 cw_nxo_t *nx_systemdict_get(cw_nx_t *a_nx);
 cw_nxo_t *nx_globaldict_get(cw_nx_t *a_nx);
+#ifdef _CW_POSIX
 cw_nxo_t *nx_envdict_get(cw_nx_t *a_nx);
+#endif
 cw_nxo_t *nx_stdin_get(cw_nx_t *a_nx);
 cw_nxo_t *nx_stdout_get(cw_nx_t *a_nx);
 cw_nxo_t *nx_stderr_get(cw_nx_t *a_nx);
@@ -107,6 +111,7 @@ nx_globaldict_get(cw_nx_t *a_nx)
 	return &a_nx->globaldict;
 }
 
+#ifdef _CW_POSIX
 _CW_INLINE cw_nxo_t *
 nx_envdict_get(cw_nx_t *a_nx)
 {
@@ -115,6 +120,7 @@ nx_envdict_get(cw_nx_t *a_nx)
 
 	return &a_nx->envdict;
 }
+#endif
 
 _CW_INLINE cw_nxo_t *
 nx_stdin_get(cw_nx_t *a_nx)

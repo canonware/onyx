@@ -330,7 +330,11 @@ systemdict_l_populate(cw_nxo_t *a_dict, cw_nx_t *a_nx, int a_argc, char
 #define	NSPARE	 8
 
 /* Number of names that are defined below, but not as operators. */
+#ifdef _CW_POSIX
 #define	NEXTRA	12
+#else
+#define	NEXTRA	11
+#endif
 #define NFASTOPS							\
 	(sizeof(systemdict_fastops) / sizeof(struct cw_systemdict_entry))
 #define NOPS								\
@@ -385,11 +389,13 @@ systemdict_l_populate(cw_nxo_t *a_dict, cw_nx_t *a_nx, int a_argc, char
 	nxo_dup(&value, nxa_gcdict_get(nx_nxa_get(a_nx)));
 	nxo_dict_def(a_dict, a_nx, &name, &value);
 
+#ifdef _CW_POSIX
 	/* envdict. */
 	nxo_name_new(&name, a_nx, nxn_str(NXN_envdict), nxn_len(NXN_envdict),
 	    TRUE);
 	nxo_dup(&value, nx_envdict_get(a_nx));
 	nxo_dict_def(a_dict, a_nx, &name, &value);
+#endif
 
 	/* argv. */
 	{

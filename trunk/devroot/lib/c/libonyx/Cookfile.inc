@@ -39,12 +39,14 @@
 
 /* Include files that are _not_ installed. */
 {
-  local priv_incs = envdict_l.h gcdict_l.h nx_l.h nxa_l.h nxo_l.h nxo_array_l.h
-                    nxo_dict_l.h nxo_file_l.h nxo_hook_l.h nxo_name_l.h
-                    nxo_operator_l.h nxo_stack_l.h nxo_string_l.h nxo_thread_l.h
-                    systemdict_l.h
+  local priv_incs = gcdict_l.h nx_l.h nxa_l.h nxo_l.h nxo_array_l.h nxo_dict_l.h
+                    nxo_file_l.h nxo_hook_l.h nxo_name_l.h nxo_operator_l.h
+                    nxo_stack_l.h nxo_string_l.h nxo_thread_l.h systemdict_l.h
 #if [enable_threads]
                     nxo_condition_l.h nxo_mutex_l.h
+#endif
+#if [enable_posix]
+                    envdict_l.h
 #endif
                     ;
   priv_incs = [fromto % [srcdir]/lib/c/libonyx/include/libonyx/% [priv_incs]];
@@ -56,14 +58,16 @@
 }
 
 /* Source files. */
-LIBONYX_SRCS = libonyx.c ch.c dch.c envdict.c gcdict.c mem.c nx.c nxa.c nxn.c
-               nxo.c nxo_array.c nxo_boolean.c nxo_dict.c nxo_file.c nxo_fino.c
+LIBONYX_SRCS = libonyx.c ch.c dch.c gcdict.c mem.c nx.c nxa.c nxn.c nxo.c
+               nxo_array.c nxo_boolean.c nxo_dict.c nxo_file.c nxo_fino.c
                nxo_hook.c nxo_integer.c nxo_mark.c nxo_name.c nxo_null.c
                nxo_operator.c nxo_pmark.c nxo_stack.c nxo_string.c nxo_thread.c
                systemdict.c xep.c
-
 #if [enable_threads]
                cnd.c mq.c mtx.c nxo_condition.c nxo_mutex.c thd.c tsd.c
+#endif
+#if [enable_posix]
+               envdict.c
 #endif
                ;
 

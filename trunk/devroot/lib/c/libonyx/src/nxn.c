@@ -102,7 +102,9 @@ const cw_uint8_t *cw_g_nx_names[] = {
 	"egid",
 #endif
 	"end",
+#ifdef _CW_POSIX
 	"envdict",
+#endif
 	"eq",
 	"errorname",
 	"estack",

@@ -12,7 +12,9 @@
 #define	_NX_C_
 
 #include "../include/libonyx/libonyx.h"
+#ifdef _CW_POSIX
 #include "../include/libonyx/envdict_l.h"
+#endif
 #include "../include/libonyx/gcdict_l.h"
 #include "../include/libonyx/systemdict_l.h"
 #include "../include/libonyx/nx_l.h"
@@ -91,9 +93,11 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, int a_argc, char **a_argv, char
 		    _CW_LIBONYX_GLOBALDICT_HASH);
 		try_stage = 8;
 
+#ifdef _CW_POSIX
 		/* Initialize envdict. */
 		envdict_l_populate(&retval->envdict, retval, a_envp);
 		try_stage = 9;
+#endif
 
 		/* Initialize systemdict. */
 		systemdict_l_populate(&retval->systemdict, retval, a_argc,
@@ -124,7 +128,9 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, int a_argc, char **a_argv, char
 		switch (try_stage) {
 		case 11:
 		case 10:
+#ifdef _CW_POSIX
 		case 9:
+#endif
 		case 8:
 		case 7:
 		case 6:
