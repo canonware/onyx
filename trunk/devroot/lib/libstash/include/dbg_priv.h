@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 67 $
- * $Date: 1998-05-02 02:07:58 -0700 (Sat, 02 May 1998) $
+ * $Revision: 82 $
+ * $Date: 1998-05-18 23:41:54 -0700 (Mon, 18 May 1998) $
  *
  * <<< Description >>>
  *
@@ -41,11 +41,6 @@
 
 #ifndef _DBG_PRIV_H_
 #define _DBG_PRIV_H_
-
-/* This file will die a horrible death if included before dbg.h. */
-#ifndef _DBG_H_
-#  error "Must include dbg.h first."
-#endif
 
 /* These are globals so that we don't have to have multiple copies of them,
  * even if there are multiple dbg instances.  We mangle the names to keep
@@ -70,6 +65,8 @@ cw_sint32_t dbg_raw_tbl[] =
   _CW_DBG_C_RES_STATE, -1, /* _CW_DBG_R_RES_STATE */
   _CW_DBG_C_BHP_FUNC, _CW_DBG_C_FUNC, -1, /* _CW_DBG_R_BHP_FUNC */
   _CW_DBG_C_LIST_FUNC, _CW_DBG_C_FUNC, -1, /* _CW_DBG_R_LIST_FUNC */
+  _CW_DBG_C_BR_FUNC, _CW_DBG_C_FUNC, -1, /* _CW_DBG_R_BR_FUNC */
+  _CW_DBG_C_BRBLK_FUNC, _CW_DBG_C_FUNC, -1, /* _CW_DBG_R_BRBLK_FUNC */
   /* <ADD> */
   -1
 };

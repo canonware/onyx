@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 67 $
- * $Date: 1998-05-02 02:07:58 -0700 (Sat, 02 May 1998) $
+ * $Revision: 82 $
+ * $Date: 1998-05-18 23:41:54 -0700 (Mon, 18 May 1998) $
  *
  * <<< Description >>>
  *
@@ -53,6 +53,8 @@
 #define _CW_DBG_C_RES_STATE 7
 #define _CW_DBG_C_BHP_FUNC 8
 #define _CW_DBG_C_LIST_FUNC 9
+#define _CW_DBG_C_BR_FUNC 10
+#define _CW_DBG_C_BRBLK_FUNC 11
 /* <ADD> */
 
 /* Filters (rows).  Use these with calls to dbg_fmatch() and dbg_pmatch(). */
@@ -66,12 +68,14 @@
 #define _CW_DBG_R_RES_STATE 7
 #define _CW_DBG_R_BHP_FUNC 8
 #define _CW_DBG_R_LIST_FUNC 9
+#define _CW_DBG_R_BR_FUNC 10
+#define _CW_DBG_R_BRBLK_FUNC 11
 /* <ADD> */
 
 /* Put these here only because they're related to the above macros.  They
  * aren't directly useful to the caller. */
-#define _CW_DBG_C_MAX 9 /* Highest numbered column in table. */
-#define _CW_DBG_R_MAX 9 /* Highest numbered row in table. */
+#define _CW_DBG_C_MAX 11 /* Highest numbered column in table. */
+#define _CW_DBG_R_MAX 11 /* Highest numbered row in table. */
 /* <ADD> */
 
 typedef struct cw_dbg_s cw_dbg_t;
