@@ -115,14 +115,14 @@ test/% : test/%.o
 
 test/%.o : test/%.c
 	$(CC) $(CFLAGS) $(TEST_CFLAGS) $(INCPATH) $(DEFINES) $(TEST_DEFINES) -c $< -o $@
-	@$(SHELL) -ec "$(CC) -MM $(DEFINES) $(TEST_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o \2/g\" > $(@:%.o=%.d)"
+	@$(SHELL) -ec "$(CC) -M $(DEFINES) $(TEST_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o \2/g\" > $(@:%.o=%.d)"
 
 bin/% : bin/%.o
 	$(CC) -o $@ $< $(LIBPATH) $(BIN_LIBSOCK) $(BIN_LIBS) $(EXTRALIBS)
 
 bin/%.o : bin/%.c
 	$(CC) $(CFLAGS) $(BIN_CFLAGS) $(INCPATH) $(DEFINES) $(BIN_DEFINES) -c $< -o $(@)
-	@$(SHELL) -ec "$(CC) -MM $(DEFINES) $(BIN_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o \2/g\" > $(@:%.o=%.d)"
+	@$(SHELL) -ec "$(CC) -M $(DEFINES) $(BIN_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o \2/g\" > $(@:%.o=%.d)"
 
 src/%.o_st_d : src/%.c
 	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(D_CFLAGS) $(DEFINES) $(ST_DEFINES) $(D_DEFINES) -c $< -o $@
