@@ -250,10 +250,10 @@ usage(void)
 	   "    -h        | Print usage and exit.\n"
 	   "    -V        | Print version information and exit.\n"
 	   "    -e <expr> | Evaluate <expr>.\n"
+	   "    -i <expr> | Evaluate initialization <expr>.\n"
 #ifdef CW_POSIX_FILE
 	   "    -f <file> | Evaluate contents of initialization <file>.\n"
 #endif
-	   "    -i <expr> | Evaluate initialization <expr>.\n"
 	   "    -s <expr> | Call start with <expr>.\n"
 	   );
 }
