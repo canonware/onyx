@@ -1,3 +1,7 @@
+2001-11-03  Jason Evans  <jasone@canonware.com>
+
+	* test/thd_a.c: Fix a race condition in the test.
+
 2001-10-31  Jason Evans  <jasone@canonware.com>
 
 	* src/mem.c: Use size_t instead of cw_uint32_t where appropriate
