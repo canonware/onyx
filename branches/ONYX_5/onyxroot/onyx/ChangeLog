@@ -1,3 +1,17 @@
+2004-01-16 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/nxo_dict.c:nxoe_p_dict_def() : Fix a race
+	  condition between updating the internal list and internal hash
+	  that could cause a crash if suspended by the garbage collector
+	  while inserting the first object into a dictionary.
+	  Additionally, this could only happen when the dictionary was
+	  stored as a hash, rather than as an array.  This was a
+	  regression that existed since the 5.0.0 release.
+
+2004-01-03 : Jason Evans <jasone@canonware.com>
+
+	* Onyx 5.0.0 released.
+
 2003-12-31  Jason Evans  <jasone@canonware.com>
 
 	* lib/libonyx/src/systemdict.c:systemdict_{send,recv}() : Fix
