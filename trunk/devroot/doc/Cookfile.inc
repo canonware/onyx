@@ -15,7 +15,7 @@
 /*
  * Global variables.
  */
-TEX_SRCS = [srcdir]/doc/latex/onyx_lang.tex;
+TEX_SRCS = ;
 FIG_SRCS = ;
 
 T_ONYX = [objdir]/doc/latex/onyx.tex;
@@ -25,7 +25,7 @@ HTML_ONYX = [objdir]/doc/html/onyx.html;
 
 /* LaTeX source files. */
 {
-  local tex_srcs = front.tex back.tex onyx.tex;
+  local tex_srcs = front.tex back.tex onyx_lang.tex;
   tex_srcs = [fromto % [srcdir]/doc/latex/% [tex_srcs]];
 
   TEX_SRCS = [TEX_SRCS] [tex_srcs];
@@ -112,10 +112,10 @@ docs_relclean :
 
 [HTML_ONYX] : [PS_ONYX];
 
-[objdir]/%0%.ps : [objdir]/%0%.fig
+[objdir]/%0%.ps : [srcdir]/%0%.fig
   set mkdir
 {
-  [FIG2DEV] -L ps [objdir]/%0%.fig [objdir]/%0%.ps;
+  [FIG2DEV] -L ps [srcdir]/%0%.fig [objdir]/%0%.ps;
 }
 
 [objdir]/%0ps/%.ps : [objdir]/%0latex/%.tex [TEX_SRCS]
