@@ -106,6 +106,7 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "cvrs",
     "cvs",
     "cvx",
+    "dec",
     "def",
 #ifdef CW_THREADS
     "detach",
@@ -122,6 +123,8 @@ const cw_uint8_t *cw_g_nx_names[] = {
 #ifdef CW_REAL
     "div",
 #endif
+    "dn",
+    "drop",
     "dstack",
     "dstackunderflow",
     "dup",
@@ -186,6 +189,7 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "idiv",
     "if",
     "ifelse",
+    "inc",
     "index",
 #ifdef CW_POSIX
     "ino",
@@ -199,6 +203,7 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "ioctl",
 #endif
     "ioerror",
+    "ipop",
     "istack",
 #ifdef CW_THREADS
     "join",
@@ -250,10 +255,13 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "mutextype",
 #endif
     "nametype",
+    "ndn",
+    "ndrop",
     "ndup",
     "ne",
     "neg",
     "newerror",
+    "nip",
 #ifdef CW_POSIX
     "nlink",
 #endif
@@ -264,6 +272,7 @@ const cw_uint8_t *cw_g_nx_names[] = {
 #endif
     "null",
     "nulltype",
+    "nup",
     "onyxdict",
 #ifdef CW_POSIX
     "open",
@@ -271,6 +280,7 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "operatortype",
     "or",
     "ostack",
+    "over",
 #ifdef CW_POSIX
     "peername",
 #endif
@@ -339,6 +349,8 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "scleartomark",
     "scount",
     "scounttomark",
+    "sdn",
+    "sdrop",
     "sdup",
 #ifdef CW_POSIX
     "seek",
@@ -386,13 +398,23 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "sin",
 #endif
     "sindex",
+    "sipop",
 #ifdef CW_POSIX
     "size",
+#endif
+    "sndn",
+    "sndrop",
+    "sndup",
+    "snip",
+    "snpop",
+    "snup",
+#ifdef CW_POSIX
     "socket",
     "socketpair",
     "sockname",
     "sockopt",
 #endif
+    "sover",
     "spop",
     "spush",
 #ifdef CW_REAL
@@ -417,7 +439,10 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "stopped",
     "string",
     "stringtype",
+    "stuck",
     "sub",
+    "sunder",
+    "sup",
 #ifdef CW_POSIX
     "symlink",
 #endif
@@ -451,6 +476,7 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "trylock",
 #endif
     "tstack",
+    "tuck",
     "type",
     "typecheck",
 #ifdef CW_POSIX
@@ -461,6 +487,7 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "undefined",
     "undefinedfilename",
     "undefinedresult",
+    "under",
 #ifdef CW_POSIX
     "unlink",
 #endif
@@ -473,6 +500,8 @@ const cw_uint8_t *cw_g_nx_names[] = {
 #ifdef CW_POSIX
     "unsetenv",
 #endif
+    "until",
+    "up",
     "version",
 #ifdef CW_THREADS
     "wait",
@@ -481,6 +510,7 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "waitpid",
 #endif
     "where",
+    "while",
     "write",
     "xcheck",
     "xor"

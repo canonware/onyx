@@ -166,6 +166,9 @@ void
 systemdict_cvx(cw_nxo_t *a_thread);
 
 void
+systemdict_dec(cw_nxo_t *a_thread);
+
+void
 systemdict_def(cw_nxo_t *a_thread);
 
 #ifdef CW_THREADS
@@ -188,6 +191,12 @@ systemdict_dirforeach(cw_nxo_t *a_thread);
 void
 systemdict_div(cw_nxo_t *a_thread);
 #endif
+
+void
+systemdict_dn(cw_nxo_t *a_thread);
+
+void
+systemdict_drop(cw_nxo_t *a_thread);
 
 void
 systemdict_dstack(cw_nxo_t *a_thread);
@@ -316,6 +325,9 @@ void
 systemdict_ifelse(cw_nxo_t *a_thread);
 
 void
+systemdict_inc(cw_nxo_t *a_thread);
+
+void
 systemdict_index(cw_nxo_t *a_thread);
 
 void
@@ -325,6 +337,9 @@ systemdict_iobuf(cw_nxo_t *a_thread);
 void
 systemdict_ioctl(cw_nxo_t *a_thread);
 #endif
+
+void
+systemdict_ipop(cw_nxo_t *a_thread);
 
 void
 systemdict_istack(cw_nxo_t *a_thread);
@@ -351,6 +366,11 @@ systemdict_length(cw_nxo_t *a_thread);
 #ifdef CW_POSIX
 void
 systemdict_link(cw_nxo_t *a_thread);
+#endif
+
+#ifdef CW_POSIX
+void
+systemdict_listen(cw_nxo_t *a_thread);
 #endif
 
 #ifdef CW_REAL
@@ -404,6 +424,12 @@ systemdict_mutex(cw_nxo_t *a_thread);
 #endif
 
 void
+systemdict_ndn(cw_nxo_t *a_thread);
+
+void
+systemdict_ndrop(cw_nxo_t *a_thread);
+
+void
 systemdict_ndup(cw_nxo_t *a_thread);
 
 void
@@ -411,6 +437,9 @@ systemdict_ne(cw_nxo_t *a_thread);
 
 void
 systemdict_neg(cw_nxo_t *a_thread);
+
+void
+systemdict_nip(cw_nxo_t *a_thread);
 
 void
 systemdict_not(cw_nxo_t *a_thread);
@@ -423,6 +452,9 @@ void
 systemdict_nsleep(cw_nxo_t *a_thread);
 #endif
 
+void
+systemdict_nup(cw_nxo_t *a_thread);
+
 #ifdef CW_POSIX
 void
 systemdict_open(cw_nxo_t *a_thread);
@@ -433,6 +465,9 @@ systemdict_or(cw_nxo_t *a_thread);
 
 void
 systemdict_ostack(cw_nxo_t *a_thread);
+
+void
+systemdict_over(cw_nxo_t *a_thread);
 
 #ifdef CW_POSIX
 void
@@ -535,6 +570,12 @@ systemdict_scount(cw_nxo_t *a_thread);
 
 void
 systemdict_scounttomark(cw_nxo_t *a_thread);
+
+void
+systemdict_sdn(cw_nxo_t *a_thread);
+
+void
+systemdict_sdrop(cw_nxo_t *a_thread);
 
 void
 systemdict_sdup(cw_nxo_t *a_thread);
@@ -640,6 +681,27 @@ systemdict_sin(cw_nxo_t *a_thread);
 void
 systemdict_sindex(cw_nxo_t *a_thread);
 
+void
+systemdict_sipop(cw_nxo_t *a_thread);
+
+void
+systemdict_sndn(cw_nxo_t *a_thread);
+
+void
+systemdict_sndrop(cw_nxo_t *a_thread);
+
+void
+systemdict_sndup(cw_nxo_t *a_thread);
+
+void
+systemdict_snip(cw_nxo_t *a_thread);
+
+void
+systemdict_snpop(cw_nxo_t *a_thread);
+
+void
+systemdict_snup(cw_nxo_t *a_thread);
+
 #ifdef CW_POSIX
 void
 systemdict_socket(cw_nxo_t *a_thread);
@@ -659,6 +721,9 @@ systemdict_sockname(cw_nxo_t *a_thread);
 void
 systemdict_sockopt(cw_nxo_t *a_thread);
 #endif
+
+void
+systemdict_sover(cw_nxo_t *a_thread);
 
 void
 systemdict_spop(cw_nxo_t *a_thread);
@@ -709,7 +774,16 @@ void
 systemdict_string(cw_nxo_t *a_thread);
 
 void
+systemdict_stuck(cw_nxo_t *a_thread);
+
+void
 systemdict_sub(cw_nxo_t *a_thread);
+
+void
+systemdict_sunder(cw_nxo_t *a_thread);
+
+void
+systemdict_sup(cw_nxo_t *a_thread);
 
 void
 systemdict_sym_lp(cw_nxo_t *a_thread);
@@ -726,11 +800,6 @@ systemdict_sym_rb(cw_nxo_t *a_thread);
 #ifdef CW_POSIX
 void
 systemdict_symlink(cw_nxo_t *a_thread);
-#endif
-
-#ifdef CW_POSIX
-void
-systemdict_listen(cw_nxo_t *a_thread);
 #endif
 
 void
@@ -783,6 +852,9 @@ void
 systemdict_tstack(cw_nxo_t *a_thread);
 
 void
+systemdict_tuck(cw_nxo_t *a_thread);
+
+void
 systemdict_type(cw_nxo_t *a_thread);
 
 #ifdef CW_POSIX
@@ -797,6 +869,9 @@ systemdict_umask(cw_nxo_t *a_thread);
 
 void
 systemdict_undef(cw_nxo_t *a_thread);
+
+void
+systemdict_under(cw_nxo_t *a_thread);
 
 #ifdef CW_POSIX
 void
@@ -813,6 +888,12 @@ void
 systemdict_unsetenv(cw_nxo_t *a_thread);
 #endif
 
+void
+systemdict_until(cw_nxo_t *a_thread);
+
+void
+systemdict_up(cw_nxo_t *a_thread);
+
 #ifdef CW_THREADS
 void
 systemdict_wait(cw_nxo_t *a_thread);
@@ -825,6 +906,9 @@ systemdict_waitpid(cw_nxo_t *a_thread);
 
 void
 systemdict_where(cw_nxo_t *a_thread);
+
+void
+systemdict_while(cw_nxo_t *a_thread);
 
 void
 systemdict_write(cw_nxo_t *a_thread);
