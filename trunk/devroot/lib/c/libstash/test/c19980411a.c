@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 35 $
- * $Date: 1998-04-19 14:08:14 -0700 (Sun, 19 Apr 1998) $
+ * $Revision: 39 $
+ * $Date: 1998-04-19 21:31:10 -0700 (Sun, 19 Apr 1998) $
  *
  * <<< Description >>>
  *
@@ -70,7 +70,7 @@ main()
   
   for (i = 0; i < NUM_STRINGS; i++)
   {
-    error = oh_item_insert(hash_obj, (cw_uint32_t) strings[i],
+    error = oh_item_insert(hash_obj, (void *) strings[i],
 				 (void *) &(strings[i]));
     if (error == TRUE)
     {
@@ -81,7 +81,7 @@ main()
 
   for (i = 0; i < (NUM_STRINGS / 2); i++)
   {
-    error = oh_item_delete(hash_obj, (cw_uint32_t) strings[i],
+    error = oh_item_delete(hash_obj, (void *) strings[i],
 				 (void *) junk);
     if (error == TRUE)
     {
@@ -92,7 +92,7 @@ main()
 
   for (i = 0; i < NUM_STRINGS / 2; i++)
   {
-    error = oh_item_insert(hash_obj, (cw_uint32_t) strings[i],
+    error = oh_item_insert(hash_obj, (void *) strings[i],
 				 (void *) &(strings[i]));
     if (error == TRUE)
     {
@@ -103,7 +103,7 @@ main()
 
   for (i = 0; i < NUM_STRINGS; i++)
   {
-    error = oh_item_delete(hash_obj, (cw_uint32_t) strings[i],
+    error = oh_item_delete(hash_obj, (void *) strings[i],
 				 (void *) junk);
     if (error == TRUE)
     {
@@ -112,7 +112,7 @@ main()
     }
   }
 
-  error = oh_item_insert(hash_obj, (cw_uint32_t) strings[0],
+  error = oh_item_insert(hash_obj, (void *) strings[0],
 			       (void *) &(strings[0]));
   
   log_printf(g_log_obj, "Table size: %d\n",
