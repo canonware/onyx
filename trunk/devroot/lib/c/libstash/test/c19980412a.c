@@ -8,12 +8,12 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 173 $
- * $Date: 1998-08-26 12:34:42 -0700 (Wed, 26 Aug 1998) $
+ * $Revision: 204 $
+ * $Date: 1998-09-07 11:02:46 -0700 (Mon, 07 Sep 1998) $
  *
  * <<< Description >>>
  *
- *
+ * Multi-threded oh test.
  *
  ****************************************************************************/
 
@@ -22,8 +22,8 @@
 #define _INC_THREAD_H_
 #include <libstash.h>
 
-#define NUM_STRINGS 100
-#define NUM_THREADS 20
+#define NUM_STRINGS 1000
+#define NUM_THREADS 100
 
 struct foo
 {
@@ -45,10 +45,11 @@ insert_items(void * arg)
 
   for (i = 0; i < NUM_STRINGS; i++)
   {
-    string = (char *) _cw_malloc(20);
+    string = (char *) _cw_malloc(40);
     sprintf(string, "%d String %d", thread_num, i);
     _cw_assert(oh_item_insert(hash_o, (void *) string, (void *) string)
 	       == FALSE);
+/*     log_printf(g_log_o, "End of insertion loop, i == %u\n", i); */
   }
   return NULL;
 }
@@ -71,6 +72,7 @@ main()
     bar->thread_num = i;
     
     thd_new(&threads[i], insert_items, (void *) bar);
+/*     log_printf(g_log_o, "Got to end of for loop, i == %u\n", i); */
   }
 
   /* Join on threads, then delete them. */

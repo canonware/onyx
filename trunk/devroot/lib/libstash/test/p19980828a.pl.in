@@ -8,8 +8,8 @@
 #
 # $Source$
 # $Author: jasone $
-# $Revision: 178 $
-# $Date: 1998-08-29 20:58:51 -0700 (Sat, 29 Aug 1998) $
+# $Revision: 204 $
+# $Date: 1998-09-07 11:02:46 -0700 (Mon, 07 Sep 1998) $
 #
 # <<< Description >>>
 #
@@ -20,7 +20,7 @@
 chdir('test');
 `./b19980828a > ./p19980828a.out 2>&1`;
 `diff b19980828a.res b19980828a.dump > b19980828a.diff 2>&1`;
-`diff p19980828a.out p19980828a.expect > p19980828a.diff 2>&1`;
+`diff p19980828a.out p19980828a.exp > p19980828a.diff 2>&1`;
 
 if ((-s "./b19980828a.diff") || (-s "./p19980828a.diff"))
 {

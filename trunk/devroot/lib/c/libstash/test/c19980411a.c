@@ -8,12 +8,12 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 173 $
- * $Date: 1998-08-26 12:34:42 -0700 (Wed, 26 Aug 1998) $
+ * $Revision: 204 $
+ * $Date: 1998-09-07 11:02:46 -0700 (Mon, 07 Sep 1998) $
  *
  * <<< Description >>>
  *
- * Simple test to make sure the test harness is working.
+ * Simple oh test.
  *
  ****************************************************************************/
 
