@@ -27,21 +27,15 @@ struct cw_mem_s {
 };
 
 cw_mem_t *mem_new(cw_mem_t *a_mem, cw_mem_t *a_internal);
-
 void	mem_delete(cw_mem_t *a_mem);
-
 void	mem_set_oom_handler(cw_mem_t *a_mem, cw_mem_oom_handler_t
     *a_oom_handler, const void *a_data);
-
 void	*mem_malloc(cw_mem_t *a_mem, size_t a_size, const char *a_filename,
     cw_uint32_t a_line_num);
-
 void	*mem_calloc(cw_mem_t *a_mem, size_t a_number, size_t a_size, const
     char *a_filename, cw_uint32_t a_line_num);
-
 void	*mem_realloc(cw_mem_t *a_mem, void *a_ptr, size_t a_size, const char
     *a_filename, cw_uint32_t a_line_num);
-
 void	mem_free(cw_mem_t *a_mem, void *a_ptr, const char *a_filename,
     cw_uint32_t a_line_num);
 
