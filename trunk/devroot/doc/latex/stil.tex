@@ -795,6 +795,8 @@ a stack. \\
 \hline
 & {\bf \htmlref{flushfile}{systemdict:flushfile}} & & \\
 \hline
+-- & {\bf \htmlref{pwd}{systemdict:dirforeach}} & path & \\
+\hline
 & {\bf \htmlref{dirforeach}{systemdict:dirforeach}} & & \\
 \hline
 & {\bf \htmlref{currentfile}{systemdict:currentfile}} & & \\
@@ -1103,6 +1105,31 @@ s:2> pstack
 s:2> pop
 s:1> pstack
 1
+s:1>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:pwd}
+\index{\stilop{}{pwd}{}}
+\item[{\stilop{--}{pwd}{path}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[path: ]
+			A string that represents the present working directory.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{invalidaccess}{invalidaccess}.]
+		\end{description}
+	\item[Description: ]
+		Push a string onto ostack that represents the present working
+		directory.
+	\item[Example(s): ]\begin{verbatim}
+
+s:0> pwd
+s:1> pstack
+`/usr/local/bin'
 s:1>
 		\end{verbatim}
 	\end{description}

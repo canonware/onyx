@@ -48,6 +48,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(broadcast),
 	ENTRY(bytesavailable),
 	ENTRY(catenate),
+	ENTRY(cd),
 	ENTRY(chmod),
 	ENTRY(chown),
 	ENTRY(clear),
@@ -122,6 +123,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(print),
 	ENTRY(put),
 	ENTRY(putinterval),
+	ENTRY(pwd),
 	ENTRY(quit),
 	ENTRY(rand),
 	ENTRY(read),
@@ -701,6 +703,12 @@ systemdict_catenate(cw_stilo_t *a_thread)
 	}
 
 	stilo_stack_npop(ostack, 2);
+}
+
+void
+systemdict_cd(cw_stilo_t *a_thread)
+{
+	_cw_error("XXX Not implemented");
 }
 
 void
@@ -2867,6 +2875,30 @@ systemdict_putinterval(cw_stilo_t *a_thread)
 		return;
 	}
 	stilo_stack_npop(ostack, 3);
+}
+
+void
+systemdict_pwd(cw_stilo_t *a_thread)
+{
+	cw_stilo_t	*ostack, *stilo;
+	char		*str;
+
+	str = getcwd(NULL, 0);
+	if (str == NULL) {
+		stilo_thread_error(a_thread, STILO_THREADE_INVALIDACCESS);
+		return;
+	}
+
+	ostack = stilo_thread_ostack_get(a_thread);
+	stilo = stilo_stack_push(ostack);
+
+	stilo_string_new(stilo, stilo_thread_stil_get(a_thread),
+	    stilo_thread_currentlocking(a_thread), strlen(str));
+	stilo_string_lock(stilo);
+	stilo_string_set(stilo, 0, str, stilo_string_len_get(stilo));
+	stilo_string_unlock(stilo);
+
+	free(str);
 }
 
 void
