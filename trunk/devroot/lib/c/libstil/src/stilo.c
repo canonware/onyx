@@ -3215,9 +3215,15 @@ stilo_p_operator_print(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilo_t
 	
 	if (a_syntactic) {
 		if (a_stilo->op_code <= STILN_LAST) {
-			retval = stilo_file_output(a_file, a_stilt,
-			    "--[s]--[c]", stiln_str(a_stilo->op_code),
-			    newline);
+			if (a_stilo->fast_op) {
+				retval = stilo_file_output(a_file, a_stilt,
+				    "---[s]---[c]", stiln_str(a_stilo->op_code),
+				    newline);
+			} else {
+				retval = stilo_file_output(a_file, a_stilt,
+				    "--[s]--[c]", stiln_str(a_stilo->op_code),
+				    newline);
+			}
 		} else {
 			retval = stilo_file_output(a_file, a_stilt,
 			    "-operator-[c]", newline);

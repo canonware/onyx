@@ -497,6 +497,52 @@ stilt_loop(cw_stilt_t *a_stilt)
 						stilo_dup(dup, orig);
 						break;
 					}
+					case STILN_exch:
+						if (stils_count(&a_stilt->ostack)
+						    < 2) {
+							stilt_error(a_stilt,
+							    STILTE_STACKUNDERFLOW);
+							goto NEXT;
+						}
+						stils_roll(&a_stilt->ostack, 2,
+						    1);
+						break;
+					case STILN_index: {
+						cw_stilo_t	*stilo, *orig;
+						cw_sint64_t	index;
+
+						stilo =
+						    stils_get(&a_stilt->ostack);
+						if (stilo == NULL) {
+							stilt_error(a_stilt,
+							    STILTE_STACKUNDERFLOW);
+							    goto NEXT;
+						}
+						if (stilo_type_get(stilo) !=
+						    STILOT_INTEGER) {
+							stilt_error(a_stilt,
+							    STILTE_TYPECHECK);
+							goto NEXT;
+						}
+						index =
+						    stilo_integer_get(stilo);
+						if (index < 0) {
+							stilt_error(a_stilt,
+							    STILTE_RANGECHECK);
+							goto NEXT;
+						}
+						orig =
+						    stils_nget(&a_stilt->ostack,
+						    index + 1);
+						if (orig == NULL) {
+							stilt_error(a_stilt,
+							    STILTE_STACKUNDERFLOW);
+							goto NEXT;
+						}
+
+						stilo_dup(stilo, orig);
+						break;
+					}
 					case STILN_pop:
 						if (stils_pop(&a_stilt->ostack)) {
 							stilt_error(a_stilt,
@@ -504,6 +550,60 @@ stilt_loop(cw_stilt_t *a_stilt)
 							    goto NEXT;
 						}
 						break;
+					case STILN_roll: {
+						cw_stilo_t	*stilo;
+						cw_sint64_t	count, amount;
+
+						stilo =
+						    stils_get(&a_stilt->ostack);
+						if (stilo == NULL) {
+							stilt_error(a_stilt,
+							    STILTE_STACKUNDERFLOW);
+							    goto NEXT;
+						}
+						if (stilo_type_get(stilo) !=
+						    STILOT_INTEGER) {
+							stilt_error(a_stilt,
+							    STILTE_TYPECHECK);
+							goto NEXT;
+						}
+						amount =
+						    stilo_integer_get(stilo);
+
+						stilo =
+						    stils_down_get(&a_stilt->ostack, stilo);
+						if (stilo == NULL) {
+							stilt_error(a_stilt,
+							    STILTE_STACKUNDERFLOW);
+							    goto NEXT;
+						}
+						if (stilo_type_get(stilo) !=
+						    STILOT_INTEGER) {
+							stilt_error(a_stilt,
+							    STILTE_TYPECHECK);
+							goto NEXT;
+						}
+						count =
+						    stilo_integer_get(stilo);
+						if (count < 1) {
+							stilt_error(a_stilt,
+							    STILTE_RANGECHECK);
+							goto NEXT;
+						}
+						if (count >
+						    stils_count(&a_stilt->ostack)
+						    - 2) {
+							stilt_error(a_stilt,
+							    STILTE_STACKUNDERFLOW);
+							goto NEXT;
+						}
+
+						stils_npop(&a_stilt->ostack, 2);
+						stils_roll(&a_stilt->ostack,
+						    count, amount);
+
+						break;
+					}
 					default:
 						   _cw_not_reached();
 					}

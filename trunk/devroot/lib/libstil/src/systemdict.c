@@ -30,7 +30,10 @@ struct cw_systemdict_entry {
 static const struct cw_systemdict_entry systemdict_fastops[] = {
 	ENTRY(add),
 	ENTRY(dup),
-	ENTRY(pop)
+	ENTRY(exch),
+	ENTRY(index),
+	ENTRY(pop),
+	ENTRY(roll)
 };
 
 /*
@@ -1822,7 +1825,6 @@ systemdict_index(cw_stilt_t *a_stilt)
 	}
 
 	STILS_NGET(orig, ostack, a_stilt, index + 1);
-	stilo_no_new(stilo);
 	stilo_dup(stilo, orig);
 }
 
@@ -2614,8 +2616,16 @@ systemdict_roll(cw_stilt_t *a_stilt)
 	ostack = stilt_ostack_get(a_stilt);
 
 	STILS_GET(stilo, ostack, a_stilt);
+	if (stilo_type_get(stilo) != STILOT_INTEGER) {
+		stilt_error(a_stilt, STILTE_TYPECHECK);
+		return;
+	}
 	amount = stilo_integer_get(stilo);
 	STILS_DOWN_GET(stilo, ostack, a_stilt, stilo);
+	if (stilo_type_get(stilo) != STILOT_INTEGER) {
+		stilt_error(a_stilt, STILTE_TYPECHECK);
+		return;
+	}
 	count = stilo_integer_get(stilo);
 	if (count < 1) {
 		stilt_error(a_stilt, STILTE_RANGECHECK);
