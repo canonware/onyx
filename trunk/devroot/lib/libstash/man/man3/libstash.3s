@@ -9,8 +9,7 @@ Version: <Version>
 .Nm libstash
 .hy 1
 .SH NAME
-libstash - Library of algorithms and data structures designed for transaction
-processing.
+libstash - Library of algorithms and data structures.
 .SH SYNOPSIS
 cc
 .I file
@@ -90,10 +89,7 @@ cc -pg
 
 .SH DESCRIPTION
 The \fBlibstash\fR library defines a number of algorithms and data structures
-that are useful for many purposes, but the library specifically targets the
-needs of transaction processing.  The main artifact of this focus is that many
-classes use 64 bit variables in places where most applications would work fine
-with 32 bit variables.
+that are useful for many purposes.
 
 \fBlibstash\fR is designed to run on *nix platforms, and is known to work on
 FreeBSD, Linux, and Solaris.  The \fBpthreads\fR library is required for the
