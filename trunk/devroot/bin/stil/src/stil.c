@@ -74,8 +74,8 @@ main(int argc, char **argv)
 		el_set(el, EL_EDITOR, "emacs");
 		el_set(el, EL_SIGNAL, 1);
 
-		/* Run the interpreter. */
-		stilt_exec(&stilt);
+		/* Run the interpreter such that it will not exit on errors. */
+		stilt_start(&stilt, TRUE);
 
 		/* Clean up the command editor. */
 		el_end(el);
@@ -88,8 +88,8 @@ main(int argc, char **argv)
 		stilt_new(&stilt, &stil);
 		stilts_new(&stilts, &stilt);
 
-		/* Run the interpreter. */
-		stilt_exec(&stilt);
+		/* Run the interpreter non-interactively. */
+		stilt_start(&stilt, FALSE);
 	}
 
 	stilts_delete(&stilts, &stilt);

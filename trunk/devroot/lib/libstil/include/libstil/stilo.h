@@ -179,11 +179,15 @@ cw_stiloe_t	*stiloe_l_ref_iterate(cw_stiloe_t *a_stiloe, cw_bool_t a_reset);
  */
 void		stilo_array_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
     cw_uint32_t a_len);
-cw_sint32_t	stilo_array_len_get(cw_stilo_t *a_stilo);
-cw_stilo_t	*stilo_array_el_get(cw_stilo_t *a_stilo, cw_uint32_t a_offset);
+void		stilo_array_subarray_new(cw_stilo_t *a_stilo, cw_stilo_t
+    *a_array, cw_stilt_t *a_stilt, cw_uint32_t a_offset, cw_uint32_t a_len);
+cw_uint32_t	stilo_array_len_get(cw_stilo_t *a_stilo);
+cw_stilo_t	*stilo_array_el_get(cw_stilo_t *a_stilo, cw_sint64_t a_offset);
+void		stilo_array_el_set(cw_stilo_t *a_stilo, cw_stilo_t *a_el,
+    cw_sint64_t a_offset);
 cw_stilo_t	*stilo_array_get(cw_stilo_t *a_stilo);
 void		stilo_array_set(cw_stilo_t *a_stilo, cw_uint32_t a_offset,
-    cw_stilo_t *a_arr, cw_uint32_t a_len, cw_stilt_t *a_stilt);
+    cw_stilo_t *a_arr, cw_uint32_t a_len);
 
 /*
  * boolean.
@@ -319,6 +323,8 @@ void		stilo_mstate_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
  */
 void		stilo_name_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const
     cw_uint8_t *a_name, cw_uint32_t a_len, cw_bool_t a_is_static);
+cw_uint32_t	stilo_name_len_get(cw_stilo_t *a_stilo);
+
 cw_uint32_t	stilo_name_hash(const void *a_key);
 cw_bool_t	stilo_name_key_comp(const void *a_k1, const void *a_k2);
 
@@ -339,8 +345,10 @@ void		stilo_string_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
     cw_uint32_t a_len);
 void		stilo_string_substring_new(cw_stilo_t *a_stilo, cw_stilo_t
     *a_string, cw_stilt_t *a_stilt, cw_uint32_t a_offset, cw_uint32_t a_len);
-cw_sint32_t	stilo_string_len_get(cw_stilo_t *a_stilo);
-cw_uint8_t	*stilo_string_el_get(cw_stilo_t *a_stilo, cw_uint32_t a_offset);
+cw_uint32_t	stilo_string_len_get(cw_stilo_t *a_stilo);
+cw_uint8_t	*stilo_string_el_get(cw_stilo_t *a_stilo, cw_sint64_t a_offset);
+void		stilo_string_el_set(cw_stilo_t *a_stilo, cw_uint8_t a_el,
+    cw_sint64_t a_offset);
 cw_uint8_t	*stilo_string_get(cw_stilo_t *a_stilo);
 void		stilo_string_set(cw_stilo_t *a_stilo, cw_uint32_t a_offset,
     const cw_uint8_t *a_str, cw_uint32_t a_len);

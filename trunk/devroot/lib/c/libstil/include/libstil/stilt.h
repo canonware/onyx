@@ -86,7 +86,7 @@ struct cw_stilt_s {
 	/*
 	 * Local dictionary.
 	 */
-	cw_stilo_t	localdict;
+	cw_stilo_t	userdict;
 
 	/*
 	 * File handles.
@@ -171,7 +171,9 @@ void		stilts_position_set(cw_stilts_t *a_stilt, cw_uint32_t a_line,
  */
 cw_stilt_t	*stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil);
 void		stilt_delete(cw_stilt_t *a_stilt);
-#define		stilt_exec(a_stilt) systemdict_start(a_stilt)
+#define		stilt_start(a_stilt, a_interactive) do {		\
+	systemdict_start(a_stilt);					\
+} while (0)
 
 #define		stilt_state(a_stilt) (a_stilt)->state
 #define		stilt_deferred(a_stilt) ((a_stilt)->defer_count ? TRUE : FALSE)
@@ -191,9 +193,16 @@ cw_bool_t	stilt_dict_stack_search(cw_stilt_t *a_stilt, cw_stilo_t *a_key,
 #define		stilt_stdin_get(a_stilt) stil_stdin_get((a_stilt)->stil)
 #define		stilt_stdout_get(a_stilt) stil_stdout_get((a_stilt)->stil)
 #define		stilt_stderr_get(a_stilt) stil_stderr_get((a_stilt)->stil)
+
 #define		stilt_data_stack_get(a_stilt) (&((a_stilt)->data_stils))
 #define		stilt_dict_stack_get(a_stilt) (&((a_stilt)->dict_stils))
 #define		stilt_exec_stack_get(a_stilt) (&((a_stilt)->exec_stils))
+
+#define		stilt_systemdict_get(a_stilt)				\
+	(stil_systemdict_get((a_stilt)->stil))
+#define		stilt_globaldict_get(a_stilt)				\
+	(stil_globaldict_get((a_stilt)->stil))
+#define		stilt_userdict_get(a_stilt) (&((a_stilt)->userdict))
 
 /*
  * If TRUE, allocation for the stilt is global.  Otherwise, allocation is

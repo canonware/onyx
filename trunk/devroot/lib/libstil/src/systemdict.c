@@ -73,7 +73,6 @@ static struct cw_systemdict_entry systemdict_ops[] = {
 	_SYSTEMDICT_ENTRY(dictstack),
 	_SYSTEMDICT_ENTRY(div),
 	_SYSTEMDICT_ENTRY(dup),
-	_SYSTEMDICT_ENTRY(echo),
 	_SYSTEMDICT_ENTRY(end),
 	_SYSTEMDICT_ENTRY(eq),
 	_SYSTEMDICT_ENTRY(errordict),
@@ -81,7 +80,6 @@ static struct cw_systemdict_entry systemdict_ops[] = {
 	_SYSTEMDICT_ENTRY(exec),
 	_SYSTEMDICT_ENTRY(execstack),
 	_SYSTEMDICT_ENTRY(executeonly),
-	_SYSTEMDICT_ENTRY(executive),
 	_SYSTEMDICT_ENTRY(exit),
 	_SYSTEMDICT_ENTRY(exp),
 	_SYSTEMDICT_ENTRY(false),
@@ -99,6 +97,7 @@ static struct cw_systemdict_entry systemdict_ops[] = {
 	_SYSTEMDICT_ENTRY(ge),
 	_SYSTEMDICT_ENTRY(get),
 	_SYSTEMDICT_ENTRY(getinterval),
+	_SYSTEMDICT_ENTRY(globaldict),
 	_SYSTEMDICT_ENTRY(gt),
 	_SYSTEMDICT_ENTRY(if),
 	_SYSTEMDICT_ENTRY(ifelse),
@@ -171,6 +170,7 @@ static struct cw_systemdict_entry systemdict_ops[] = {
 	{"[",	systemdict_mark},
 	{"<<",	systemdict_mark},
 	{"]",	systemdict_sym_rb},
+	_SYSTEMDICT_ENTRY(systemdict),
 	_SYSTEMDICT_ENTRY(timedwait),
 	_SYSTEMDICT_ENTRY(token),
 	_SYSTEMDICT_ENTRY(true),
@@ -301,7 +301,19 @@ systemdict_astore(cw_stilt_t *a_stilt)
 void
 systemdict_begin(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*ostack, *dstack;
+	cw_stilo_t	*stilo, *dict;
+
+	dstack = stilt_dict_stack_get(a_stilt);
+	ostack = stilt_data_stack_get(a_stilt);
+
+	dict = stils_get(ostack);
+	if (stilo_type_get(dict) != STILOT_DICT)
+		xep_throw(_CW_STILX_TYPECHECK);
+	
+	stilo = stils_push(dstack);
+	stilo_dup(stilo, dict);
+	stils_pop(ostack);
 }
 
 void
@@ -537,7 +549,14 @@ systemdict_currentcontext(cw_stilt_t *a_stilt)
 void
 systemdict_currentdict(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*ostack, *dstack;
+	cw_stilo_t	*stilo;
+
+	ostack = stilt_data_stack_get(a_stilt);
+	dstack = stilt_dict_stack_get(a_stilt);
+
+	stilo = stils_push(ostack);
+	stilo_dup(stilo, stils_get(dstack));
 }
 
 void
@@ -730,15 +749,16 @@ systemdict_dup(cw_stilt_t *a_stilt)
 }
 
 void
-systemdict_echo(cw_stilt_t *a_stilt)
-{
-	_cw_error("XXX Not implemented");
-}
-
-void
 systemdict_end(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*dstack;
+
+	dstack = stilt_dict_stack_get(a_stilt);
+
+	if (stils_count(dstack) < 4)
+		xep_throw(_CW_STILX_DICTSTACKUNDERFLOW);
+
+	stils_pop(dstack);
 }
 
 void
@@ -788,12 +808,6 @@ systemdict_execstack(cw_stilt_t *a_stilt)
 
 void
 systemdict_executeonly(cw_stilt_t *a_stilt)
-{
-	_cw_error("XXX Not implemented");
-}
-
-void
-systemdict_executive(cw_stilt_t *a_stilt)
 {
 	_cw_error("XXX Not implemented");
 }
@@ -1049,27 +1063,22 @@ void
 systemdict_get(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*stack;
-	cw_stilo_t	*what, *how;
+	cw_stilo_t	*from, *with;
 
 	stack = stilt_data_stack_get(a_stilt);
-	how = stils_get(stack);
-	what = stils_down_get(stack, how);
+	with = stils_get(stack);
+	from = stils_down_get(stack, with);
 
-	switch (stilo_type_get(what)) {
+	switch (stilo_type_get(from)) {
 	case STILOT_ARRAY: {
 		cw_sint64_t	index;
-		cw_stilo_t	*arr;
-		cw_uint32_t	len;
 
-		if (stilo_type_get(how) != STILOT_INTEGER)
+		if (stilo_type_get(with) != STILOT_INTEGER)
 			xep_throw(_CW_STILX_TYPECHECK);
-		index = stilo_integer_get(how);
-		len = stilo_array_len_get(what);
-		if (index < 0 || index >= len)
-			xep_throw(_CW_STILX_RANGECHECK);
-		arr = stilo_array_get(what);
+		index = stilo_integer_get(with);
 
-		stilo_dup(how, &arr[index]);
+		stilo_dup(with, stilo_array_el_get(from, index));
+
 		stils_roll(stack, 2, 1);
 		stils_pop(stack);
 		break;
@@ -1078,7 +1087,7 @@ systemdict_get(cw_stilt_t *a_stilt)
 		cw_stilo_t	*val;
 
 		val = stils_push(stack);
-		if (stilo_dict_lookup(what, a_stilt, how, val)) {
+		if (stilo_dict_lookup(from, a_stilt, with, val)) {
 			stils_pop(stack);
 			xep_throw(_CW_STILX_UNDEFINED);
 		}
@@ -1091,22 +1100,14 @@ systemdict_get(cw_stilt_t *a_stilt)
 		break;
 	case STILOT_STRING: {
 		cw_sint64_t	index;
-		cw_uint8_t	*str;
-		cw_uint32_t	len;
 
-		if (stilo_type_get(how) != STILOT_INTEGER)
+		if (stilo_type_get(with) != STILOT_INTEGER)
 			xep_throw(_CW_STILX_TYPECHECK);
-		index = stilo_integer_get(how);
-		len = stilo_string_len_get(what);
-		if (index < 0 || index >= len)
-			xep_throw(_CW_STILX_RANGECHECK);
-		str = stilo_string_get(what);
+		index = stilo_integer_get(with);
 
-		/*
-		 * Make sure to keep the string on the stack until after we're
-		 * done with it.
-		 */
-		stilo_integer_set(how, (cw_sint64_t)str[index]);
+		stilo_integer_set(with, (cw_sint64_t)*stilo_string_el_get(from,
+		    index));
+
 		stils_roll(stack, 2, 1);
 		stils_pop(stack);
 		break;
@@ -1119,7 +1120,48 @@ systemdict_get(cw_stilt_t *a_stilt)
 void
 systemdict_getinterval(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*stack;
+	cw_stilo_t	*from, *with, *count;
+	cw_sint64_t	index, len;
+
+	stack = stilt_data_stack_get(a_stilt);
+	count = stils_get(stack);
+	with = stils_down_get(stack, count);
+	from = stils_down_get(stack, with);
+
+	if ((stilo_type_get(with) != STILOT_INTEGER) || (stilo_type_get(count)
+	    != STILOT_INTEGER))
+		xep_throw(_CW_STILX_TYPECHECK);
+	index = stilo_integer_get(with);
+	len = stilo_integer_get(count);
+
+	switch (stilo_type_get(from)) {
+	case STILOT_ARRAY:
+		stilo_array_subarray_new(count, from, a_stilt, index, len);
+		break;
+	case STILOT_HOOK:
+		_cw_error("XXX Not implemented");
+		break;
+	case STILOT_STRING:
+		stilo_string_substring_new(count, from, a_stilt, index, len);
+		break;
+	default:
+		xep_throw(_CW_STILX_TYPECHECK);
+	}
+	stils_roll(stack, 3, 1);
+	stils_npop(stack, 2);
+}
+
+void
+systemdict_globaldict(cw_stilt_t *a_stilt)
+{
+	cw_stils_t	*stack;
+	cw_stilo_t	*stilo;
+
+	stack = stilt_data_stack_get(a_stilt);
+
+	stilo = stils_push(stack);
+	stilo_dup(stilo, stilt_globaldict_get(a_stilt));
 }
 
 void
@@ -1226,7 +1268,31 @@ systemdict_le(cw_stilt_t *a_stilt)
 void
 systemdict_length(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*stack;
+	cw_stilo_t	*stilo;
+	cw_sint64_t	len;
+
+	stack = stilt_data_stack_get(a_stilt);
+	
+	stilo = stils_get(stack);
+	switch (stilo_type_get(stilo)) {
+	case STILOT_ARRAY:
+		len = stilo_array_len_get(stilo);
+		break;
+	case STILOT_DICT:
+		len = stilo_dict_count(stilo);
+		break;
+	case STILOT_NAME:
+		len = stilo_name_len_get(stilo);
+		break;
+	case STILOT_STRING:
+		len = stilo_string_len_get(stilo);
+		break;
+	default:
+		xep_throw(_CW_STILX_TYPECHECK);
+	}
+
+	stilo_integer_new(stilo, len);
 }
 
 void
@@ -1486,13 +1552,93 @@ systemdict_pstack(cw_stilt_t *a_stilt)
 void
 systemdict_put(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*stack;
+	cw_stilo_t	*into, *with, *what;
+
+	stack = stilt_data_stack_get(a_stilt);
+	what = stils_get(stack);
+	with = stils_down_get(stack, what);
+	into = stils_down_get(stack, with);
+
+	switch (stilo_type_get(into)) {
+	case STILOT_ARRAY: {
+		cw_sint64_t	index;
+
+		if (stilo_type_get(with) != STILOT_INTEGER)
+			xep_throw(_CW_STILX_TYPECHECK);
+		index = stilo_integer_get(with);
+
+		stilo_array_el_set(into, what, index);
+		break;
+	}
+	case STILOT_DICT: {
+		stilo_dict_def(into, a_stilt, with, what);
+		break;
+	}
+	case STILOT_HOOK:
+		_cw_error("XXX Not implemented");
+		break;
+	case STILOT_STRING: {
+		cw_sint64_t	index;
+		cw_uint8_t	val;
+
+		if ((stilo_type_get(with) != STILOT_INTEGER) ||
+		    stilo_type_get(what) != STILOT_INTEGER)
+			xep_throw(_CW_STILX_TYPECHECK);
+		index = stilo_integer_get(with);
+		val = stilo_integer_get(what);
+		
+		stilo_string_el_set(into, val, index);
+		break;
+	}
+	default:
+		xep_throw(_CW_STILX_TYPECHECK);
+	}
+	stils_npop(stack, 3);
 }
 
 void
 systemdict_putinterval(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*stack;
+	cw_stilo_t	*into, *with, *what;
+	cw_sint64_t	index;
+
+	stack = stilt_data_stack_get(a_stilt);
+	what = stils_get(stack);
+	with = stils_down_get(stack, what);
+	into = stils_down_get(stack, with);
+
+	if (stilo_type_get(with) != STILOT_INTEGER)
+		xep_throw(_CW_STILX_TYPECHECK);
+	index = stilo_integer_get(with);
+
+	switch (stilo_type_get(into)) {
+	case STILOT_ARRAY: {
+		cw_stilo_t	*arr;
+		cw_uint32_t	len;
+
+		arr = stilo_array_get(what);
+		len = stilo_array_len_get(what);
+		stilo_array_set(into, index, arr, len);
+		break;
+	}
+	case STILOT_HOOK:
+		_cw_error("XXX Not implemented");
+		break;
+	case STILOT_STRING: {
+		cw_uint8_t	*str;
+		cw_uint32_t	len;
+
+		str = stilo_string_get(what);
+		len = stilo_string_len_get(what);
+		stilo_string_set(into, index, str, len);
+		break;
+	}
+	default:
+		xep_throw(_CW_STILX_TYPECHECK);
+	}
+	stils_npop(stack, 3);
 }
 
 void
@@ -1977,7 +2123,20 @@ systemdict_store(cw_stilt_t *a_stilt)
 void
 systemdict_string(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*stack;
+	cw_stilo_t	*stilo;
+	cw_sint64_t	len;
+
+	stack = stilt_data_stack_get(a_stilt);
+	
+	stilo = stils_get(stack);
+	if (stilo_type_get(stilo) != STILOT_INTEGER)
+		xep_throw(_CW_STILX_TYPECHECK);
+	len = stilo_integer_get(stilo);
+	if (len < 0)
+		xep_throw(_CW_STILX_RANGECHECK);
+
+	stilo_string_new(stilo, a_stilt, len);
 }
 
 void
@@ -2105,6 +2264,18 @@ systemdict_sym_rb(cw_stilt_t *a_stilt)
 }
 
 void
+systemdict_systemdict(cw_stilt_t *a_stilt)
+{
+	cw_stils_t	*stack;
+	cw_stilo_t	*stilo;
+
+	stack = stilt_data_stack_get(a_stilt);
+
+	stilo = stils_push(stack);
+	stilo_dup(stilo, stilt_systemdict_get(a_stilt));
+}
+
+void
 systemdict_timedwait(cw_stilt_t *a_stilt)
 {
 	_cw_error("XXX Not implemented");
@@ -2160,7 +2331,13 @@ systemdict_unlock(cw_stilt_t *a_stilt)
 void
 systemdict_userdict(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*stack;
+	cw_stilo_t	*stilo;
+
+	stack = stilt_data_stack_get(a_stilt);
+
+	stilo = stils_push(stack);
+	stilo_dup(stilo, stilt_userdict_get(a_stilt));
 }
 
 void

@@ -761,6 +761,34 @@ stilo_array_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_uint32_t a_len)
 	stiloe_p_new(a_stilo->o.stiloe, STILOT_ARRAY);
 }
 
+void
+stilo_array_subarray_new(cw_stilo_t *a_stilo, cw_stilo_t *a_array, cw_stilt_t
+    *a_stilt, cw_uint32_t a_offset, cw_uint32_t a_len)
+{
+	cw_stiloe_array_t	*array, *orig;
+
+	orig = (cw_stiloe_array_t *)a_array->o.stiloe;
+	_cw_check_ptr(orig);
+	_cw_assert(orig->stiloe.magic == _CW_STILOE_MAGIC);
+	if (a_offset + a_len > orig->e.a.len)
+		xep_throw(_CW_STILX_RANGECHECK);
+
+	stilo_p_new(a_stilo, STILOT_ARRAY);
+	array = (cw_stiloe_array_t *)stilt_malloc(a_stilt,
+	    sizeof(cw_stiloe_array_t));
+	a_stilo->o.stiloe = (cw_stiloe_t *)array;
+
+	array->iterations = 0;
+	memcpy(&array->e.i.stilo, a_array, sizeof(cw_stilo_t));
+
+	array->e.i.beg_offset = a_offset;
+	array->e.i.len = a_len;
+
+	memcpy(&array->stiloe, &orig->stiloe, sizeof(cw_stiloe_t));
+	array->stiloe.watchpoint = FALSE;
+	array->stiloe.indirect = TRUE;
+}
+
 static void
 stilo_p_array_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 {
@@ -886,10 +914,10 @@ stilo_p_array_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
 		stilo_file_output(a_file, "--nostringval--[c]", newline);
 }
 
-cw_sint32_t
+cw_uint32_t
 stilo_array_len_get(cw_stilo_t *a_stilo)
 {
-	cw_sint32_t		retval;
+	cw_uint32_t		retval;
 	cw_stiloe_array_t	*array;
 
 	_cw_check_ptr(a_stilo);
@@ -908,7 +936,7 @@ stilo_array_len_get(cw_stilo_t *a_stilo)
 }
 
 cw_stilo_t *
-stilo_array_el_get(cw_stilo_t *a_stilo, cw_uint32_t a_offset)
+stilo_array_el_get(cw_stilo_t *a_stilo, cw_sint64_t a_offset)
 {
 	cw_stilo_t		*retval;
 	cw_stiloe_array_t	*array;
@@ -921,14 +949,37 @@ stilo_array_el_get(cw_stilo_t *a_stilo, cw_uint32_t a_offset)
 	_cw_assert(array->stiloe.magic == _CW_STILOE_MAGIC);
 
 	if (array->stiloe.indirect == FALSE) {
-		_cw_assert(array->e.a.len > a_offset);
+		if (a_offset >= array->e.a.len || a_offset < 0)
+			xep_throw(_CW_STILX_RANGECHECK);
 		retval = &array->e.a.arr[a_offset];
 	} else {
-		retval = &stilo_array_el_get(&array->e.i.stilo,
-		    a_offset)[array->e.i.beg_offset];
+		retval = stilo_array_el_get(&array->e.i.stilo,
+		    a_offset + array->e.i.beg_offset);
 	}
 
 	return retval;
+}
+
+void
+stilo_array_el_set(cw_stilo_t *a_stilo, cw_stilo_t *a_el, cw_sint64_t a_offset)
+{
+	cw_stiloe_array_t	*array;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_stilo->type == STILOT_ARRAY);
+
+	array = (cw_stiloe_array_t *)a_stilo->o.stiloe;
+	_cw_assert(array->stiloe.magic == _CW_STILOE_MAGIC);
+
+	if (array->stiloe.indirect == FALSE) {
+		if (a_offset >= array->e.a.len || a_offset < 0)
+			xep_throw(_CW_STILX_RANGECHECK);
+		stilo_dup(&array->e.a.arr[a_offset], a_el);
+	} else {
+		stilo_array_el_set(&array->e.i.stilo, a_el, a_offset +
+		    array->e.i.beg_offset);
+	}
 }
 
 cw_stilo_t *
@@ -956,11 +1007,9 @@ stilo_array_get(cw_stilo_t *a_stilo)
 
 void
 stilo_array_set(cw_stilo_t *a_stilo, cw_uint32_t a_offset, cw_stilo_t *a_arr,
-    cw_uint32_t a_len, cw_stilt_t *a_stilt)
+    cw_uint32_t a_len)
 {
 	cw_stiloe_array_t	*array;
-	cw_stilo_t		*arr;
-	cw_uint32_t		i;
 
 	_cw_check_ptr(a_stilo);
 	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
@@ -971,17 +1020,20 @@ stilo_array_set(cw_stilo_t *a_stilo, cw_uint32_t a_offset, cw_stilo_t *a_arr,
 
 	/* Get the array pointer. */
 	if (array->stiloe.indirect == FALSE) {
-		_cw_assert(array->e.a.len >= a_len);
-		arr = array->e.a.arr;
-	} else {
-		_cw_assert(array->e.i.len > a_len);
-		arr = &stilo_array_get(&array->e.i.stilo)
-		    [array->e.i.beg_offset];
-	}
+		cw_stilo_t	*arr;
+		cw_uint32_t	i;
 
-	/* Set the array. */
-	for (i = 0; i < a_len; i++)
-		stilo_copy(&arr[i], &a_arr[i], a_stilt);
+		if (a_offset + a_len > array->e.a.len)
+			xep_throw(_CW_STILX_RANGECHECK);
+		arr = array->e.a.arr;
+
+		/* Set the array. */
+		for (i = 0; i < a_len; i++) {
+			/* XXX Check local/global allocation. */
+			stilo_dup(&arr[i + a_offset], &a_arr[i]);
+		}
+	} else
+		stilo_array_set(&array->e.i.stilo, a_offset, a_arr, a_len);
 }
 
 /*
@@ -2669,6 +2721,22 @@ stilo_p_name_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
 		stilo_file_output(a_file, "\n");
 }
 
+cw_uint32_t
+stilo_name_len_get(cw_stilo_t *a_stilo)
+{
+	cw_uint32_t		retval;
+	cw_stiloe_name_t	*name;
+
+	/* Chase down the name. */
+	name = (cw_stiloe_name_t *)a_stilo->o.stiloe;
+	name = name->val;
+	_cw_assert(name == name->val);
+
+	retval = name->e.n.len;
+
+	return retval;
+}
+
 static cw_stiloe_name_t *
 stilo_p_name_gref(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len,
     cw_bool_t a_is_static)
@@ -2909,20 +2977,20 @@ stilo_string_substring_new(cw_stilo_t *a_stilo, cw_stilo_t *a_string, cw_stilt_t
 {
 	cw_stiloe_string_t	*string, *orig;
 
+	orig = (cw_stiloe_string_t *)a_string->o.stiloe;
+	_cw_check_ptr(orig);
+	_cw_assert(orig->stiloe.magic == _CW_STILOE_MAGIC);
+	if (a_offset + a_len > orig->e.s.len)
+		xep_throw(_CW_STILX_RANGECHECK);
+
 	stilo_p_new(a_stilo, STILOT_STRING);
 	string = (cw_stiloe_string_t *)stilt_malloc(a_stilt,
 	    sizeof(cw_stiloe_string_t));
 	a_stilo->o.stiloe = (cw_stiloe_t *)string;
 
-	orig = (cw_stiloe_string_t *)a_string->o.stiloe;
-	_cw_check_ptr(orig);
-	_cw_assert(orig->stiloe.magic == _CW_STILOE_MAGIC);
-
 	string->iterations = 0;
 	memcpy(&string->e.i.stilo, a_string, sizeof(cw_stilo_t));
 
-	if (a_offset + a_len > orig->e.s.len)
-		xep_throw(_CW_STILX_RANGECHECK);
 	string->e.i.beg_offset = a_offset;
 	string->e.i.len = a_len;
 
@@ -3076,10 +3144,10 @@ stilo_p_string_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
 	}
 }
 
-cw_sint32_t
+cw_uint32_t
 stilo_string_len_get(cw_stilo_t *a_stilo)
 {
-	cw_sint32_t		retval;
+	cw_uint32_t		retval;
 	cw_stiloe_string_t	*string;
 
 	_cw_check_ptr(a_stilo);
@@ -3098,7 +3166,7 @@ stilo_string_len_get(cw_stilo_t *a_stilo)
 }
 
 cw_uint8_t *
-stilo_string_el_get(cw_stilo_t *a_stilo, cw_uint32_t a_offset)
+stilo_string_el_get(cw_stilo_t *a_stilo, cw_sint64_t a_offset)
 {
 	cw_uint8_t		*retval;
 	cw_stiloe_string_t	*string;
@@ -3111,14 +3179,37 @@ stilo_string_el_get(cw_stilo_t *a_stilo, cw_uint32_t a_offset)
 	_cw_assert(string->stiloe.magic == _CW_STILOE_MAGIC);
 
 	if (string->stiloe.indirect == FALSE) {
-		_cw_assert(string->e.s.len > a_offset);
+		if (a_offset >= string->e.s.len || a_offset < 0)
+			xep_throw(_CW_STILX_RANGECHECK);
 		retval = &string->e.s.str[a_offset];
 	} else {
-		retval = &stilo_string_el_get(&string->e.i.stilo,
-		    a_offset)[string->e.i.beg_offset];
+		retval = stilo_string_el_get(&string->e.i.stilo,
+		    a_offset + string->e.i.beg_offset);
 	}
 
 	return retval;
+}
+
+void
+stilo_string_el_set(cw_stilo_t *a_stilo, cw_uint8_t a_el, cw_sint64_t a_offset)
+{
+	cw_stiloe_string_t	*string;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_stilo->type == STILOT_STRING);
+
+	string = (cw_stiloe_string_t *)a_stilo->o.stiloe;
+	_cw_assert(string->stiloe.magic == _CW_STILOE_MAGIC);
+
+	if (string->stiloe.indirect == FALSE) {
+		if (a_offset >= string->e.s.len || a_offset < 0)
+			xep_throw(_CW_STILX_RANGECHECK);
+		string->e.s.str[a_offset] = a_el;
+	} else {
+		stilo_string_el_set(&string->e.i.stilo, a_el, a_offset +
+		    string->e.i.beg_offset);
+	}
 }
 
 cw_uint8_t *
@@ -3160,14 +3251,11 @@ stilo_string_set(cw_stilo_t *a_stilo, cw_uint32_t a_offset, const cw_uint8_t
 
 	/* Get the string pointer. */
 	if (string->stiloe.indirect == FALSE) {
-		_cw_assert(string->e.s.len >= a_len);
+		if (a_offset + a_len > string->e.s.len)
+			xep_throw(_CW_STILX_RANGECHECK);
 		str = string->e.s.str;
-	} else {
-		_cw_assert(string->e.i.len >= a_len);
-		str = &stilo_string_get(&string->e.i.stilo)
-		    [string->e.i.beg_offset];
-	}
 
-	/* Set the string. */
-	memcpy(str, a_str, a_len);
+		memcpy(&str[a_offset], a_str, a_len);
+	} else
+		stilo_string_set(&string->e.i.stilo, a_offset, a_str, a_len);
 }

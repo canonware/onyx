@@ -18,8 +18,8 @@
 
 /*  #define	_CW_STILT_SCANNER_DEBUG */
 
-/* Initial size of localdict. */
-#define	_CW_STILT_LOCALDICT_SIZE	 64
+/* Initial size of userdict. */
+#define	_CW_STILT_USERDICT_SIZE	 64
 
 #define _CW_STILT_GETC(a_i)						\
 	a_stilt->tok_str[(a_i)]
@@ -244,11 +244,11 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 		stilo = stils_push(&retval->dict_stils);
 		stilo_dup(stilo, stil_globaldict_get(a_stil));
 
-		/* Create and push localdict onto the dictionary stack. */
-		stilo_dict_new(&retval->localdict, retval,
-		    _CW_STILT_LOCALDICT_SIZE);
+		/* Create and push userdict onto the dictionary stack. */
+		stilo_dict_new(&retval->userdict, retval,
+		    _CW_STILT_USERDICT_SIZE);
 		stilo = stils_push(&retval->dict_stils);
-		stilo_dup(stilo, &retval->localdict);
+		stilo_dup(stilo, &retval->userdict);
 	}
 	xep_catch (_CW_XEPV_OOM) {
 		retval = (cw_stilt_t *)v_retval;

@@ -15,14 +15,21 @@
 int
 main(int argc, char **argv)
 {
-	int	retval = 0;
+	cw_stil_t	stil;
+	cw_stilt_t	stilt;
+	cw_stilts_t	stilts;
 
 	libstash_init();
 
-	/* XXX Set up oom handler. */
+	stil_new(&stil, NULL, NULL);
+	stilt_new(&stilt, &stil);
+	stilts_new(&stilts, &stilt);
 
-	_cw_out_put("stile breathes its first breath!\n");
+	stilt_start(&stilt, FALSE);
 
+	stilts_delete(&stilts, &stilt);
+	stilt_delete(&stilt);
+	stil_delete(&stil);
 	libstash_shutdown();
-	return retval;
+	return 0;
 }
