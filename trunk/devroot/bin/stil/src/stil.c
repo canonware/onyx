@@ -53,6 +53,10 @@ main(int argc, char **argv)
 
 	libstash_init();
 
+	/* XXX Turn off leak warnings until GC works. */
+	dbg_unregister(cw_g_dbg, "mem_error");
+	dbg_unregister(cw_g_dbg, "pool_error");
+
 	/*
 	 * Do a bunch of extra setup work to hook in command editing
 	 * functionality if this is an interactive session.  Otherwise, just let
