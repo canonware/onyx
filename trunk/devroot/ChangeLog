@@ -1,3 +1,8 @@
+2001-07-18  Jason Evans  <jasone@canonware.com>
+
+	* doc/Cookfile.inc: Add -nolocal_icons flag to latex2html
+	invocation so that icons will be included in the distribution.
+
 2001-07-13  Jason Evans  <jasone@canonware.com>
 
 	* : Install in [prefix]/share/onyx/* instead of

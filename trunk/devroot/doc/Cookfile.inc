@@ -196,7 +196,7 @@ docs_relclean :
 {
   [LATEX2HTML] -init_file [srcdir]/%0latex/.latex2html-init
     -dir [abs_objdir]/%0html -split 3 -toc_depth 4
-    -footnode -noinfo -auto_link -transparent -image_type png
+    -footnode -noinfo -auto_link -transparent -image_type png -nolocal_icons
     [abs_objdir]/%0latex/%.tex;
   /*
    * Fix up [, ], and \ characters.
