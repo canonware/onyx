@@ -889,7 +889,7 @@ EOF
 EOF
 
 	RPATH="-Wl,-R,"
-	LIBS="$LIBS -lposix4 -lsocket -lnsl"
+	LIBS="$LIBS -lposix4 -lthread -lsocket -lnsl"
         ;;
 esac
 

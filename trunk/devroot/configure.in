@@ -71,7 +71,7 @@ case "${host}" in
 	AC_DEFINE(_CW_OS_SOLARIS, )
 	AC_DEFINE(_POSIX_PTHREAD_SEMANTICS)
 	RPATH="-Wl,-R,"
-	LIBS="$LIBS -lposix4 -lsocket -lnsl"
+	LIBS="$LIBS -lposix4 -lthread -lsocket -lnsl"
         ;;
 esac
 AC_SUBST(RPATH)
