@@ -72,6 +72,9 @@
  ******************************************************************************/
 
 #include "../include/libstil/libstil.h"
+
+#include <sys/time.h>
+
 #include "../include/libstil/gcdict_l.h"
 #include "../include/libstil/stil_l.h"
 #include "../include/libstil/stilo_l.h"

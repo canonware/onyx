@@ -10,15 +10,23 @@
  ******************************************************************************/
 
 #include "../include/libstil/libstil.h"
+
+#include <ctype.h>
+#include <errno.h>
+#include <limits.h>
+
 #include "../include/libstil/currenterror_l.h"
 #include "../include/libstil/errordict_l.h"
 #include "../include/libstil/threaddict_l.h"
 #include "../include/libstil/stil_l.h"
 #include "../include/libstil/stilo_l.h"
 
-#include <ctype.h>
-#include <errno.h>
-#include <limits.h>
+#ifndef QUAD_MIN
+#define	QUAD_MIN (-0x7fffffffffffffffLL - 1)
+#endif
+#ifndef QUAD_MAX
+#define	QUAD_MAX (0x7fffffffffffffffLL)
+#endif
 
 cw_stiln_t
 stilte_stiln(cw_stilte_t a_stilte)

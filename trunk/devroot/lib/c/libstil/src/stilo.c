@@ -10,10 +10,6 @@
  ******************************************************************************/
 
 #include "../include/libstil/libstil.h"
-#include "../include/libstil/stil_l.h"
-#include "../include/libstil/stila_l.h"
-#include "../include/libstil/stilo_l.h"
-#include "../include/libstil/stilt_l.h"
 
 #include <stdarg.h>
 #include <ctype.h>
@@ -22,6 +18,11 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <poll.h>
+
+#include "../include/libstil/stil_l.h"
+#include "../include/libstil/stila_l.h"
+#include "../include/libstil/stilo_l.h"
+#include "../include/libstil/stilt_l.h"
 
 #ifdef _LIBSTIL_DBG
 #define _CW_STILOE_MAGIC	0x0fa6e798
@@ -2078,8 +2079,8 @@ stilo_file_read(cw_stilo_t *a_stilo, cw_uint32_t a_len, cw_uint8_t *r_str)
 					 * data are available.
 					 */
 					events.fd = file->fd;
-					events.events = POLLRDNORM;
-					while ((poll(&events, 1, INFTIM)) == -1)
+					events.events = POLLIN;
+					while ((poll(&events, 1, -1)) == -1)
 						; /* EINTR; try again. */
 
 					/*
@@ -2099,7 +2100,7 @@ stilo_file_read(cw_stilo_t *a_stilo, cw_uint32_t a_len, cw_uint8_t *r_str)
 					 * Only read if data are available.
 					 */
 					events.fd = file->fd;
-					events.events = POLLRDNORM;
+					events.events = POLLIN;
 					while ((nready = poll(&events, 1, 0)) ==
 					    -1)
 						; /* EINTR; try again. */

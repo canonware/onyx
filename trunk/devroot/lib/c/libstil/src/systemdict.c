@@ -10,13 +10,14 @@
  ******************************************************************************/
 
 #include "../include/libstil/libstil.h"
-#include "../include/libstil/stilo_l.h"
 
 #include <sys/time.h>	/* For realtime operator. */
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/resource.h>
+
+#include "../include/libstil/stilo_l.h"
 
 /* Initial size of dictionaries created with the dict operator. */
 #define	_CW_SYSTEMDICT_DICT_SIZE	16
