@@ -150,22 +150,27 @@ struct cw_buf_s
     /* Number of lines (>= 1). */
     cw_uint64_t nlines;
 
+#ifdef NOT_YET
     /* bufp tree and list. */
     rb_tree(cw_bufp_t) ptree;
     ql_head(cw_bufp_t) plist;
+#else
     /* Array of pointers to bufp's.  There are nbufps elements. */
-//    cw_bufp_t **bufps;
-//    cw_uint32_t nbufps;
+    cw_bufp_t **bufps;
+    cw_uint32_t nbufps;
+#endif
 
+#ifdef NOT_YET
     /* Pointers to the ends of the bufp ranges with valid caches. */
     cw_bufp_t *bob_cached;
     cw_bufp_t *eob_cached;
-
+#else
     /* Index of first and last bufp with valid caches.  The first bufp always
      * has a valid cache, which allows bob_cached to be unsigned.  If no bufp's
      * at the end have a valid cache, then eob_cached is set to nbufps. */
-//    cw_uint32_t bob_cached;
-//    cw_uint32_t eob_cached;
+    cw_uint32_t bob_cached;
+    cw_uint32_t eob_cached;
+#endif
 
     /* An array of (2 * nbufps) bufv's.  This is large enough to create a vector
      * for the entire buf, even if all bufp's are split by their gaps. */
