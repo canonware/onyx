@@ -1,6 +1,7 @@
 2003-03-16 : Jason Evans <jasone@canonware.com>
 
-	* Add operator:
+	* Add operators:
+	  + localtime
 	  + unless
 
 2003-03-15 : Jason Evans <jasone@canonware.com>

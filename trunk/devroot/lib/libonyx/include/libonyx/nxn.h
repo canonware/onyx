@@ -216,6 +216,9 @@ typedef enum
     NXN_ENTRY(gid),
 #endif
     NXN_ENTRY(globaldict),
+#ifdef CW_POSIX
+    NXN_ENTRY(gmtoff),
+#endif
 #ifdef CW_THREADS
     NXN_ENTRY(gstderr),
     NXN_ENTRY(gstdin),
@@ -225,6 +228,7 @@ typedef enum
     NXN_ENTRY(hooktag),
     NXN_ENTRY(hooktype),
 #ifdef CW_POSIX
+    NXN_ENTRY(hour),
     NXN_ENTRY(IPPROTO_IP),
     NXN_ENTRY(IPPROTO_HOPOPTS),
     NXN_ENTRY(IPPROTO_ICMP),
@@ -272,6 +276,9 @@ typedef enum
     NXN_ENTRY(iobuf),
     NXN_ENTRY(ioerror),
     NXN_ENTRY(ipop),
+#ifdef CW_POSIX
+    NXN_ENTRY(isdst),
+#endif
     NXN_ENTRY(istack),
 #ifdef CW_THREADS
     NXN_ENTRY(join),
@@ -293,6 +300,9 @@ typedef enum
     NXN_ENTRY(ln),
 #endif
     NXN_ENTRY(load),
+#ifdef CW_POSIX
+    NXN_ENTRY(localtime),
+#endif
 #ifdef CW_THREADS
     NXN_ENTRY(lock),
 #endif
@@ -315,6 +325,8 @@ typedef enum
     NXN_ENTRY(match),
 #endif
 #ifdef CW_POSIX
+    NXN_ENTRY(mday),
+    NXN_ENTRY(min),
     NXN_ENTRY(mkdir),
     NXN_ENTRY(mkfifo),
 #endif
@@ -324,6 +336,9 @@ typedef enum
 #endif
 #ifdef CW_MODULES
     NXN_ENTRY(modload),
+#endif
+#ifdef CW_POSIX
+    NXN_ENTRY(mon),
 #endif
 #ifdef CW_THREADS
     NXN_ENTRY(monitor),
@@ -496,6 +511,7 @@ typedef enum
     NXN_ENTRY(sdn),
     NXN_ENTRY(sdup),
 #ifdef CW_POSIX
+    NXN_ENTRY(sec),
     NXN_ENTRY(seek),
 #endif
     NXN_ENTRY(self),
@@ -673,15 +689,27 @@ typedef enum
 #endif
 #ifdef CW_POSIX
     NXN_ENTRY(waitpid),
+    NXN_ENTRY(wday),
 #endif
     NXN_ENTRY(where),
     NXN_ENTRY(while),
     NXN_ENTRY(write),
     NXN_ENTRY(xcheck),
     NXN_ENTRY(xor)
+#ifdef CW_POSIX
+    ,
+    NXN_ENTRY(year),
+    NXN_ENTRY(yday)
+#endif
 #ifdef CW_THREADS
     ,
     NXN_ENTRY(yield)
+#endif
+#ifdef CW_POSIX
+    ,
+    NXN_ENTRY(zone)
+#define NXN_LAST NXN_zone
+#elif (defined(CW_THREADS))
 #define NXN_LAST NXN_yield
 #else
 #define NXN_LAST NXN_xor

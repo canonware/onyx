@@ -4151,6 +4151,12 @@ execution stack operators} \\
 	{Get the number of nanoseconds since the epoch.}
 \hline
 \optableent
+	{nsecs}
+	{{\bf \htmlref{localtime}{systemdict:localtime}}}
+	{dict}
+	{Get a dict with local time definitions.}
+\hline
+\optableent
 	{nanoseconds}
 	{{\bf \htmlref{nsleep}{systemdict:nsleep}}}
 	{--}
@@ -9491,6 +9497,92 @@ onyx:1> <$foo `FOO'> begin
 onyx:1> $foo load 1 sprint
 `FOO'
 onyx:1>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:localtime}
+\index{localtime@\onyxop{}{localtime}{}}
+\item[{\onyxop{nsecs}{localtime}{dict}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[nsecs: ]
+			Number of nanoseconds since the epoch.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[dict: ]
+			A dictionary that contains the following entries:
+			\begin{description}\item[]
+			\item[sec: ]
+				Seconds (0-59).
+			\item[min: ]
+				Minutes (0-59).
+			\item[hour: ]
+				Hours (0-23).
+			\item[mday: ]
+				Month day (0-30).
+			\item[mon: ]
+				Month (0-11).
+			\item[year: ]
+				Year.
+			\item[wday: ]
+				Week day (0-6, Sunday is 0).
+			\item[yday: ]
+				Year day (0-365).
+			\item[isdst: ]
+				Is daylight savings time (true or false).
+			\item[zone: ]
+				Time zone (string).
+			\item[gmtoff: ]
+				Offset from UTC in seconds.
+			\end{description}
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Convert a time, as returned by
+		\htmlref{realtime}{systemdict:realtime}, to a dictionary that
+		contains time information in a more human-usable format.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> $date {
+    realtime localtime
+
+    [`Sunday' `Monday' `Tuesday' `Wednesday' `Thursday' `Friday' `Saturday']
+    over $wday get
+    get
+    ` ' cat
+
+    over $year get cvs
+    `/' 3 ncat
+
+    over $mon get inc <$w 2 $p `0'> outputs
+    `/' 3 ncat
+
+    over $mday get inc <$w 2 $p `0'> outputs
+    ` ' 3 ncat
+
+    over $hour get <$w 2 $p `0'> outputs
+    `:' 3 ncat
+    
+    over $min get <$w 2 $p `0'> outputs
+    `:' 3 ncat
+
+    over $sec get <$w 2 $p `0'> outputs
+    ` (' 3 ncat
+
+    exch $zone get
+    `)\n' 3 ncat
+
+    print flush
+} def
+onyx:0> date
+Monday 2003/03/18 01:31:49 (PST)
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:lock}

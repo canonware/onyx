@@ -398,6 +398,11 @@ systemdict_ln(cw_nxo_t *a_thread);
 void
 systemdict_load(cw_nxo_t *a_thread);
 
+#ifdef CW_POSIX
+void
+systemdict_localtime(cw_nxo_t *a_thread);
+#endif
+
 #ifdef CW_THREADS
 void
 systemdict_lock(cw_nxo_t *a_thread);

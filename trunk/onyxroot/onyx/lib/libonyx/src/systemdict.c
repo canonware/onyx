@@ -17,7 +17,7 @@
 
 #include <unistd.h>
 #include <sys/time.h> /* For realtime operator. */
-#include <time.h> /* For nanosleep(). */
+#include <time.h> /* For nanosleep() and localtime_r(). */
 #include <ctype.h>
 #include <errno.h>
 #include <sys/types.h>
@@ -270,6 +270,9 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(ln),
 #endif
     ENTRY(load),
+#ifdef CW_POSIX
+    ENTRY(localtime),
+#endif
 #ifdef CW_THREADS
     ENTRY(lock),
 #endif
@@ -5244,6 +5247,102 @@ systemdict_load(cw_nxo_t *a_thread)
     nxo_dup(key, val);
     nxo_stack_pop(tstack);
 }
+
+#ifdef CW_POSIX
+void
+systemdict_localtime(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *tstack, *nxo, *name, *value;
+    cw_nx_t *nx;
+    cw_bool_t currentlocking;
+    cw_nxoi_t realtime;
+    struct tm tm;
+    time_t time;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    tstack = nxo_thread_tstack_get(a_thread);
+    nx = nxo_thread_nx_get(a_thread);
+    currentlocking = nxo_thread_currentlocking(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    if (nxo_type_get(nxo) != NXOT_INTEGER)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    realtime = nxo_integer_get(nxo);
+    if (realtime < 0)
+    {
+	nxo_thread_nerror(a_thread, NXN_rangecheck);
+	return;
+    }
+
+    time = realtime / 1000000000LL;
+    localtime_r(&time, &tm);
+
+    name = nxo_stack_push(tstack);
+    value = nxo_stack_push(tstack);
+
+    nxo_dict_new(nxo, nx, currentlocking, 11);
+
+    /* sec. */
+    nxo_name_new(name, nx, nxn_str(NXN_sec), nxn_len(NXN_sec), TRUE);
+    nxo_integer_new(value, tm.tm_sec);
+    nxo_dict_def(nxo, nx, name, value);
+
+    /* min. */
+    nxo_name_new(name, nx, nxn_str(NXN_min), nxn_len(NXN_min), TRUE);
+    nxo_integer_new(value, tm.tm_min);
+    nxo_dict_def(nxo, nx, name, value);
+
+    /* hour. */
+    nxo_name_new(name, nx, nxn_str(NXN_hour), nxn_len(NXN_hour), TRUE);
+    nxo_integer_new(value, tm.tm_hour);
+    nxo_dict_def(nxo, nx, name, value);
+
+    /* mday. */
+    nxo_name_new(name, nx, nxn_str(NXN_mday), nxn_len(NXN_mday), TRUE);
+    nxo_integer_new(value, tm.tm_mday);
+    nxo_dict_def(nxo, nx, name, value);
+
+    /* mon. */
+    nxo_name_new(name, nx, nxn_str(NXN_mon), nxn_len(NXN_mon), TRUE);
+    nxo_integer_new(value, tm.tm_mon);
+    nxo_dict_def(nxo, nx, name, value);
+
+    /* year. */
+    nxo_name_new(name, nx, nxn_str(NXN_year), nxn_len(NXN_year), TRUE);
+    nxo_integer_new(value, tm.tm_year + 1900);
+    nxo_dict_def(nxo, nx, name, value);
+
+    /* wday. */
+    nxo_name_new(name, nx, nxn_str(NXN_wday), nxn_len(NXN_wday), TRUE);
+    nxo_integer_new(value, tm.tm_wday);
+    nxo_dict_def(nxo, nx, name, value);
+
+    /* yday. */
+    nxo_name_new(name, nx, nxn_str(NXN_yday), nxn_len(NXN_yday), TRUE);
+    nxo_integer_new(value, tm.tm_yday);
+    nxo_dict_def(nxo, nx, name, value);
+
+    /* isdst. */
+    nxo_name_new(name, nx, nxn_str(NXN_isdst), nxn_len(NXN_isdst), TRUE);
+    nxo_boolean_new(value, tm.tm_isdst ? TRUE : FALSE);
+    nxo_dict_def(nxo, nx, name, value);
+
+    /* zone. */
+    nxo_name_new(name, nx, nxn_str(NXN_zone), nxn_len(NXN_zone), TRUE);
+    nxo_string_new(value, nx, currentlocking, strlen(tm.tm_zone));
+    nxo_string_set(value, 0, tm.tm_zone, nxo_string_len_get(value));
+    nxo_dict_def(nxo, nx, name, value);
+
+    /* gmtoff. */
+    nxo_name_new(name, nx, nxn_str(NXN_gmtoff), nxn_len(NXN_gmtoff), TRUE);
+    nxo_integer_new(value, tm.tm_gmtoff);
+    nxo_dict_def(nxo, nx, name, value);
+
+    nxo_stack_npop(tstack, 2);
+}
+#endif
 
 #ifdef CW_THREADS
 void
