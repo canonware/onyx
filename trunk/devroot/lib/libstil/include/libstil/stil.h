@@ -21,6 +21,12 @@ struct cw_stil_s {
 	 */
 	cw_uint32_t	ref_iter;
 
+	/*
+	 * Set to TRUE before the final garbage collection so that all objects
+	 * get collected.
+	 */
+	cw_bool_t	shutdown;
+
         /*
          * Global hash of names (key: {name, len}, value: (stiloe_name *)).
          * This hash table keeps track of *all* name "values" in the virtual

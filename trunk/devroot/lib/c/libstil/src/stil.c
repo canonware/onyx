@@ -161,6 +161,7 @@ stil_delete(cw_stil_t *a_stil)
 	 */
 	stilo_file_buffer_flush(&a_stil->stdout_stilo);
 
+	a_stil->shutdown = TRUE;
 	stila_delete(&a_stil->stila);
 	dch_delete(&a_stil->name_hash);
 	mtx_delete(&a_stil->name_lock);
@@ -180,6 +181,15 @@ stil_l_ref_iter(cw_stil_t *a_stil, cw_bool_t a_reset)
 
 	_cw_check_ptr(a_stil);
 	_cw_assert(a_stil->magic == _CW_STIL_MAGIC);
+
+	if (a_stil->shutdown) {
+		/*
+		 * Return an empty root set so that the garbage collector will
+		 * collect everything.
+		 */
+		retval = NULL;
+		goto RETURN;
+	}
 
 	if (a_reset)
 		a_stil->ref_iter = 0;
