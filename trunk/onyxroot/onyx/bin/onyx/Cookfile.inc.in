@@ -84,11 +84,18 @@ ONYX_OTESTS =
               offset_g.nx.in offset_h.nx.in regex_a.nx.in regex_b.nx.in
               regex_c.nx.in regex_d.nx.in regex_e.nx.in regex_f.nx.in
               regex_g.nx.in regex_h.nx.in regex_i.nx.in regex_j.nx.in
+              regsub_a.nx.in regsub_b.nx.in regsub_c.nx.in regsub_d.nx.in
+              regsub_e.nx.in regsub_f.nx.in regsub_g.nx.in regsub_h.nx.in
+              regsub_i.nx.in regsub_j.nx.in regsub_k.nx.in regsub_l.nx.in
               split_a.nx.in split_b.nx.in split_c.nx.in split_d.nx.in
               split_e.nx.in split_f.nx.in split_g.nx.in split_h.nx.in
               split_i.nx.in split_j.nx.in split_k.nx.in split_l.nx.in
               split_m.nx.in split_n.nx.in submatch_a.nx.in submatch_b.nx.in
-              submatch_c.nx.in
+              submatch_c.nx.in subst_a.nx.in subst_b.nx.in subst_c.nx.in
+              subst_d.nx.in subst_e.nx.in subst_f.nx.in subst_g.nx.in
+              subst_h.nx.in subst_i.nx.in subst_j.nx.in subst_k.nx.in
+              subst_l.nx.in subst_m.nx.in subst_n.nx.in subst_o.nx.in
+              subst_p.nx.in subst_q.nx.in
 
 #endif
 #if @enable_posix@

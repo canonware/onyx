@@ -113,8 +113,15 @@ nxo_p_regsub_init(cw_nxoe_regsub_t *a_regsub, cw_nxa_t *a_nxa,
     a_regsub->ovcnt = (capturecount + 1) * 3;
 
     /* Make a copy of a_template. */
-    a_regsub->template = (cw_uint8_t *) nxa_malloc(a_nxa, a_tlen);
-    memcpy(a_regsub->template, a_template, a_tlen);
+    if (a_tlen > 0)
+    {
+	a_regsub->template = (cw_uint8_t *) nxa_malloc(a_nxa, a_tlen);
+	memcpy(a_regsub->template, a_template, a_tlen);
+    }
+    else
+    {
+	a_regsub->template = NULL;
+    }
     a_regsub->tlen = a_tlen;
 
     /* Parse a_template and construct a vector from it.  Do this in two passes,
@@ -132,14 +139,12 @@ nxo_p_regsub_init(cw_nxoe_regsub_t *a_regsub, cw_nxa_t *a_nxa,
 		{
 		    case '\\':
 		    {
-//			fprintf(stderr, "%s:%d:%s()\n", __FILE__, __LINE__, __FUNCTION__);
-			end = i + 1;
+			end = i;
 			tstate = TSTATE_BS_CONT;
 			break;
 		    }
 		    default:
 		    {
-//			fprintf(stderr, "%s:%d:%s()\n", __FILE__, __LINE__, __FUNCTION__);
 			break;
 		    }
 		}
@@ -149,14 +154,12 @@ nxo_p_regsub_init(cw_nxoe_regsub_t *a_regsub, cw_nxa_t *a_nxa,
 	    {
 		switch (a_regsub->template[i])
 		{
-		    case '0': case '1': case '2': case '3': case '4': case '5':
-		    case '6': case '7': case '8': case '9':
+		    case '1': case '2': case '3': case '4': case '5': case '6':
+		    case '7': case '8': case '9':
 		    {
-//			fprintf(stderr, "%s:%d:%s()\n", __FILE__, __LINE__, __FUNCTION__);
 			/* Preceding plain text, if any. */
 			if (end > beg)
 			{
-//			fprintf(stderr, "%s:%d:%s()\n", __FILE__, __LINE__, __FUNCTION__);
 			    a_regsub->vlen++;
 			}
 
@@ -168,15 +171,13 @@ nxo_p_regsub_init(cw_nxoe_regsub_t *a_regsub, cw_nxa_t *a_nxa,
 		    }
 		    case '\\':
 		    {
-//			fprintf(stderr, "%s:%d:%s()\n", __FILE__, __LINE__, __FUNCTION__);
 			/* Stay in this state (ignore extra leading '\'
 			 * characters. */
-			end = i + 1;
+			end = i;
 			break;
 		    }
 		    default:
 		    {
-//			fprintf(stderr, "%s:%d:%s()\n", __FILE__, __LINE__, __FUNCTION__);
 			/* Ignore. */
 			tstate = TSTATE_START;
 			break;
@@ -192,16 +193,23 @@ nxo_p_regsub_init(cw_nxoe_regsub_t *a_regsub, cw_nxa_t *a_nxa,
     }
     if (beg < i)
     {
-//			fprintf(stderr, "%s:%d:%s()\n", __FILE__, __LINE__, __FUNCTION__);
 	/* Normal characters after last subpattern substitution. */
 	a_regsub->vlen++;
     }
 
     /* Initialize the vector, now that we know how big to make it. */
-    a_regsub->vec
-	= (cw_nxoe_regsub_telm_t *) nxa_malloc(a_nxa,
-					       sizeof(cw_nxoe_regsub_telm_t)
-					       * a_regsub->vlen);
+    if (a_regsub->vlen > 0)
+    {
+	a_regsub->vec
+	    = (cw_nxoe_regsub_telm_t *) nxa_malloc(a_nxa,
+						   sizeof(cw_nxoe_regsub_telm_t)
+						   * a_regsub->vlen);
+    }
+    else
+    {
+	a_regsub->vec = NULL;
+    }
+
     for (i = beg = end = voff = 0, tstate = TSTATE_START;
 	 i < a_tlen;
 	 i++)
@@ -229,8 +237,8 @@ nxo_p_regsub_init(cw_nxoe_regsub_t *a_regsub, cw_nxa_t *a_nxa,
 	    {
 		switch (a_regsub->template[i])
 		{
-		    case '0': case '1': case '2': case '3': case '4': case '5':
-		    case '6': case '7': case '8': case '9':
+		    case '1': case '2': case '3': case '4': case '5': case '6':
+		    case '7': case '8': case '9':
 		    {
 			/* Preceding plain text, if any. */
 			if (end > beg)
@@ -288,8 +296,7 @@ nxo_p_regsub_init(cw_nxoe_regsub_t *a_regsub, cw_nxa_t *a_nxa,
     return retval;
 }
 
-//CW_P_INLINE void
-static void
+CW_P_INLINE void
 nxo_p_regsub_append(cw_uint8_t **r_ostr, cw_uint32_t *r_omax,
 		    cw_uint32_t *r_olen, const cw_uint8_t *a_istr,
 		    cw_uint32_t a_ilen, cw_nxa_t *a_nxa)
@@ -307,29 +314,16 @@ nxo_p_regsub_append(cw_uint8_t **r_ostr, cw_uint32_t *r_omax,
 	*r_omax = omax;
     }
 
-/*      fprintf(stderr, "%s:%d:%s(): *r_ostr(%p): \"%s\"\n", __FILE__, __LINE__, */
-/*  	    __FUNCTION__, *r_ostr, *r_ostr); */
-/*      fprintf(stderr, "%s:%d:%s(): *r_olen: %u, *r_omax: %u\n", __FILE__, */
-/*  	    __LINE__, __FUNCTION__, *r_olen, *r_omax); */
-/*      fprintf(stderr, "%s:%d:%s(): a_istr(%p): \"%s\"\n", __FILE__, __LINE__, */
-/*  	    __FUNCTION__, a_istr, a_istr); */
-/*      fprintf(stderr, "%s:%d:%s(): a_ilen: %u\n", __FILE__, __LINE__, */
-/*  	    __FUNCTION__, a_ilen); */
-
-/*      fprintf(stderr, "%s:%d:%s(): memcpy(\"%s\", \"%s\", %u)\n", */
-/*  	    __FILE__, __LINE__, __FUNCTION__, */
-/*  	    &(*r_ostr)[*r_olen], a_istr, a_ilen); */
-
-
     /* Copy and adjust *r_olen. */
     memcpy(&(*r_ostr)[*r_olen], a_istr, a_ilen);
     *r_olen += a_ilen;
 }
 
-static void
+static cw_uint32_t
 nxo_p_regsub_subst(cw_nxoe_regsub_t *a_regsub, cw_nxo_t *a_thread,
 		   cw_nxo_t *a_input, cw_nxo_t *r_output)
 {
+    cw_bool_t retval = 0;
     cw_nxo_regex_cache_t *cache;
     cw_nx_t *nx;
     cw_nxa_t *nxa;
@@ -439,6 +433,9 @@ nxo_p_regsub_subst(cw_nxoe_regsub_t *a_regsub, cw_nxo_t *a_thread,
 		}
 	    }
 	}
+
+	/* Increment substitution count. */
+	retval++;
     }
     DONE:
     /* If there are trailing bytes after the last match, copy them. */
@@ -448,22 +445,31 @@ nxo_p_regsub_subst(cw_nxoe_regsub_t *a_regsub, cw_nxo_t *a_thread,
     }
 
     /* Create an Onyx string and copy ostr to it. */
-    nxo_string_new(r_output, nx, nxo_thread_currentlocking(a_thread), olen);
-    if (olen > 0)
+    if (retval > 0)
     {
-	nxo_string_set(r_output, 0, ostr, olen);
+	nxo_string_new(r_output, nx, nxo_thread_currentlocking(a_thread), olen);
+	if (olen > 0)
+	{
+	    nxo_string_set(r_output, 0, ostr, olen);
+	}
+    }
+    else
+    {
+	/* No substitution done.  Dup the input string. */
+	nxo_dup(r_output, a_input);
     }
 
     /* Clean up. */
     nxa_free(nxa, ostr, omax);
+
+    return retval;
 }
 
 cw_nxn_t
 nxo_regsub_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_uint8_t *a_pattern,
 	       cw_uint32_t a_plen, cw_bool_t a_global, cw_bool_t a_insensitive,
 	       cw_bool_t a_multiline, cw_bool_t a_singleline,
-	       const cw_uint8_t *a_template,
-	       cw_uint32_t a_tlen)
+	       const cw_uint8_t *a_template, cw_uint32_t a_tlen)
 {
     cw_nxn_t retval;
     cw_nxoe_regsub_t *regsub;
@@ -505,7 +511,7 @@ nxo_regsub_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_uint8_t *a_pattern,
 
 void
 nxo_regsub_subst(cw_nxo_t *a_nxo, cw_nxo_t *a_thread, cw_nxo_t *a_input,
-		 cw_nxo_t *r_output)
+		 cw_nxo_t *r_output, cw_uint32_t *r_count)
 {
     cw_nxoe_regsub_t *regsub;
 
@@ -519,7 +525,7 @@ nxo_regsub_subst(cw_nxo_t *a_nxo, cw_nxo_t *a_thread, cw_nxo_t *a_input,
     cw_dassert(regsub->nxoe.magic == CW_NXOE_MAGIC);
     cw_assert(regsub->nxoe.type == NXOT_REGSUB);
 
-    nxo_p_regsub_subst(regsub, a_thread, a_input, r_output);
+    *r_count = nxo_p_regsub_subst(regsub, a_thread, a_input, r_output);
 }
 
 /* Do a subst without creating a regsub object, in order to avoid putting
@@ -530,7 +536,7 @@ nxo_regsub_nonew_subst(cw_nxo_t *a_thread, const cw_uint8_t *a_pattern,
 		       cw_bool_t a_insensitive, cw_bool_t a_multiline,
 		       cw_bool_t a_singleline, const cw_uint8_t *a_template,
 		       cw_uint32_t a_tlen, cw_nxo_t *a_input,
-		       cw_nxo_t *r_output)
+		       cw_nxo_t *r_output, cw_uint32_t *r_count)
 {
     cw_nxn_t retval;
     cw_nxoe_regsub_t regsub;
@@ -548,7 +554,7 @@ nxo_regsub_nonew_subst(cw_nxo_t *a_thread, const cw_uint8_t *a_pattern,
 	goto RETURN;
     }
 
-    nxo_p_regsub_subst(&regsub, a_thread, a_input, r_output);
+    *r_count = nxo_p_regsub_subst(&regsub, a_thread, a_input, r_output);
 
     /* Clean up memory. */
 

@@ -895,8 +895,6 @@ Sequence & Description \\
 \multicolumn{2}{r}{\emph{Continued on next page...}} \endfoot
 \hline \endlastfoot
 %end{latexonly}
-{\tt {\bs}0} & Refer to the entire matched expression. \\
-\hline
 {\tt {\bs}1..{\bs}9} & Refer to captured expressions 1 through 9. \\
 \end{longtable}
 
@@ -11142,14 +11140,15 @@ onyx:0>
 		\item[flags: ]
 			A dictionary of optional flags:
 			\begin{description}%\item[]
+			\item[\$g: ]
+				Substitute all matches, if true, rather than
+				just the first match.  Defaults to false.
 			\item[\$i: ] Case insensitive.  Defaults to false.
-			\item[\$l: ] Maximum number of matches (0 is treated as
-				infinity).  Defaults to 1.
 			\item[\$m: ] Treat input as a multi-line string.
 				Defaults to false.
 			\item[\$s: ] Treat input as a single line, so that
 				the dot metacharacter matches any character,
-				including a newline.
+				including a newline.  Defaults to false.
 			\end{description}
 		\end{description}
 	\item[Output(s): ]
@@ -11159,6 +11158,7 @@ onyx:0>
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
+		\item[\htmlref{regexerror}{regexerror}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
@@ -11167,6 +11167,10 @@ onyx:0>
 		\oparg{template}, and \oparg{flags}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> `([a-z]+)' `<\1>' <$g true> regsub
+onyx:1> 1 sprint
+-regsub-
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:rename}
@@ -13797,37 +13801,45 @@ onyx:0>
 		\item[flags: ]
 			A dictionary of optional flags:
 			\begin{description}%\item[]
+			\item[\$g: ]
+				Substitute all matches, if true, rather than
+				just the first match.  Defaults to false.
 			\item[\$i: ] Case insensitive.  Defaults to false.
-			\item[\$l: ] Maximum number of matches (0 is treated as
-				infinity).  Defaults to 1.
 			\item[\$m: ] Treat input as a multi-line string.
 				Defaults to false.
 			\item[\$s: ] Treat input as a single line, so that
 				the dot metacharacter matches any character,
-				including a newline.
+				including a newline.  Defaults to false.
 			\end{description}
 		\item[regsub: ]
+			A regsub object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[output: ]
 			A string that is created by substituting substrings
-			within \oparg{input} that match a regular expression
-			with \oparg{template}.
+			within \oparg{input} that match a regular expression.
 		\item[count: ]
-			Number of substitutions made.
+			Number of substitutions made.  If 0 substitutions were
+			made, then \oparg{output} is a duplicate of
+			\oparg{input}, rather than a copy.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
+		\item[\htmlref{regexerror}{regexerror}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Create a string by substituting \oparg{template} for each
+		Create a string by substituting according to a template for each
 		substring within \oparg{input} that matches a regular
 		expression.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> `Input String' `([a-r])' `[\1]' <$g true> subst pstack
+6
+`I[n][p]ut St[r][i][n][g]'
+onyx:2>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sunder}

@@ -10649,13 +10649,13 @@ void
 systemdict_subst(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack, *nxo, *flags, *template, *pattern, *input, *output;
-    cw_uint32_t npop;
+    cw_uint32_t npop, count;
     cw_nxn_t error;
 
     ostack = nxo_thread_ostack_get(a_thread);
 
     flags = NULL;
-    npop = 1;
+    npop = 0;
     NXO_STACK_GET(nxo, ostack, a_thread);
     switch (nxo_type_get(nxo))
     {
@@ -10703,7 +10703,7 @@ systemdict_subst(cw_nxo_t *a_thread)
 	    /* Get pattern. */
 	    npop++;
 	    NXO_STACK_DOWN_GET(pattern, ostack, a_thread, nxo);
-	    if (nxo_type_get(nxo) != NXOT_STRING)
+	    if (nxo_type_get(pattern) != NXOT_STRING)
 	    {
 		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
@@ -10726,7 +10726,7 @@ systemdict_subst(cw_nxo_t *a_thread)
 					   insensitive, multiline, singleline,
 					   nxo_string_get(template),
 					   nxo_string_len_get(template), input,
-					   output);
+					   output, &count);
 	    nxo_string_unlock(template);
 	    nxo_string_unlock(pattern);
 	    if (error)
@@ -10754,7 +10754,7 @@ systemdict_subst(cw_nxo_t *a_thread)
 	    }
 
 	    output = nxo_stack_under_push(ostack, input);
-	    nxo_regsub_subst(regsub, a_thread, input, output);
+	    nxo_regsub_subst(regsub, a_thread, input, output, &count);
 
 	    break;
 	}
@@ -10765,6 +10765,7 @@ systemdict_subst(cw_nxo_t *a_thread)
 	}
     }
 
+    nxo_integer_new(input, (cw_nxoi_t) count);
     nxo_stack_npop(ostack, npop);
 }
 #endif
