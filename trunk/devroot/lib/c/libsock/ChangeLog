@@ -1,3 +1,7 @@
+1999-10-21  Jason Evans  <jasone@canonware.com>
+
+	* bin/ncat.c: Clarify error messages.
+
 1999-09-30  Jason Evans  <jasone@canonware.com>
 
 	* : Remove all _LIBSTASH_USE_* and _LIBSOCK_USE_* macros.  All

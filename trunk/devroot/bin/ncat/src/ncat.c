@@ -312,8 +312,16 @@ main(int argc, char ** argv)
   {
     if (dbg_is_registered(cw_g_dbg, "ncat_error"))
     {
-      out_put(cw_g_out, "[s]: Connection failure or timeout\n",
-	      g_progname);
+      if (TRUE == opt_client)
+      {
+	out_put(cw_g_out, "[s]: Connection failure or timeout\n",
+		g_progname);
+      }
+      else
+      {
+	out_put(cw_g_out, "[s]: Error listening on port [i] or timeout\n",
+		g_progname, opt_port);
+      }
     }
   }
   else
