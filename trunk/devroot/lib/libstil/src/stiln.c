@@ -174,6 +174,7 @@ const cw_uint8_t *cw_g_stil_names[] = {
 	"sub",
 	"symlink",
 	"syntaxerror",
+	"system",
 	"systemdict",
 	"tell",
 	"test",

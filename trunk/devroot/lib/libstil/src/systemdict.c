@@ -13,6 +13,9 @@
 
 #include <sys/time.h>	/* For realtime operator. */
 #include <errno.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <sys/resource.h>
 
 /* Initial size of dictionaries created with the dict operator. */
 #define	_CW_SYSTEMDICT_DICT_SIZE	16
@@ -147,6 +150,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	{STILN_sym_lt_lt, systemdict_mark},
 	ENTRY(sym_rb),
 	ENTRY(symlink),
+	ENTRY(system),
 	ENTRY(tell),
 	ENTRY(test),
 	ENTRY(thread),
@@ -3514,6 +3518,152 @@ void
 systemdict_symlink(cw_stilt_t *a_stilt)
 {
 	_cw_error("XXX Not implemented");
+}
+
+void
+systemdict_system(cw_stilt_t *a_stilt)
+{
+	cw_stils_t	*ostack, *tstack;
+	cw_stilo_t	*array, *el;
+	cw_uint32_t	i, slen, argc;
+	char		*path, **argv, **envp;
+	pid_t		pid;
+	int		status;
+
+	ostack = stilt_ostack_get(a_stilt);
+	tstack = stilt_tstack_get(a_stilt);
+
+	STILS_GET(array, ostack, a_stilt);
+	if (stilo_type_get(array) != STILOT_ARRAY) {
+		stilt_error(a_stilt, STILTE_TYPECHECK);
+		return;
+	}
+	argc = stilo_array_len_get(array);
+	for (i = 0; i < argc; i++) {
+		if (stilo_type_get(stilo_array_el_get(array, i)) !=
+		    STILOT_STRING) {
+			stilt_error(a_stilt, STILTE_TYPECHECK);
+			return;
+		}
+	}
+
+	/*
+	 * Construct path.
+	 */
+	el = stilo_array_el_get(array, 0);
+	if (stilo_type_get(el) != STILOT_STRING) {
+		stilt_error(a_stilt, STILTE_TYPECHECK);
+		goto PATH_ERROR;
+	}
+	slen = stilo_string_len_get(el);
+	path = (char *)_cw_malloc(slen + 1);
+	memcpy(path, stilo_string_get(el), slen);
+	path[slen] = '\0';
+
+	/*
+	 * Construct argv.
+	 */
+	argv = (char **)_cw_malloc(sizeof(char *) * (argc + 1));
+	for (i = 0; i < argc; i++) {
+		el = stilo_array_el_get(array, i);
+		if (stilo_type_get(el) != STILOT_STRING) {
+			stilt_error(a_stilt, STILTE_TYPECHECK);
+			goto ARGV_ERROR;
+		}
+		slen = stilo_string_len_get(el);
+		argv[i] = (char *)_cw_malloc(slen + 1);
+		memcpy(argv[i], stilo_string_get(el), slen);
+		argv[i][slen] = '\0';
+	}
+	argv[i] = NULL;
+
+	/*
+	 * Construct envp.
+	 */
+	{
+		cw_uint32_t	dcount, key_len, val_len;
+		cw_stilo_t	*key, *val;
+		char		*entry;
+
+		key = stils_push(tstack);
+		val = stils_push(tstack);
+
+		dcount = stilo_dict_count(stilt_envdict_get(a_stilt));
+		envp = (char **)_cw_malloc(sizeof(char *) * (dcount + 1));
+		for (i = 0; i < dcount; i++) {
+			/* Get key and val. */
+			stilo_dict_iterate(stilt_envdict_get(a_stilt), a_stilt,
+			    key);
+			stilo_dict_lookup(stilt_envdict_get(a_stilt), a_stilt,
+			    key, val);
+			if (stilo_type_get(key) != STILOT_NAME ||
+			    stilo_type_get(val) != STILOT_STRING) {
+				stilt_error(a_stilt, STILTE_TYPECHECK);
+				stils_npop(tstack, 2);
+				goto ENVP_ERROR;
+			}
+
+			/* Create string that looks like "<key>=<val>\0". */
+			key_len = stilo_name_len_get(key);
+			val_len = stilo_string_len_get(val);
+			entry = (char *)_cw_malloc(key_len + val_len + 2);
+
+			memcpy(entry, stilo_name_str_get(key), key_len);
+			entry[key_len] = '=';
+			memcpy(&entry[key_len + 1], stilo_string_get(val),
+			    val_len);
+			entry[key_len + 1 + val_len] = '\0';
+
+			envp[i] = entry;
+		}
+		envp[i] = NULL;
+
+		stils_npop(tstack, 2);
+	}
+
+	/*
+	 * Call fork()/execve()/wait().
+	 */
+	pid = fork();
+	switch (pid) {
+	case 0:
+		/* Child. */
+		execve(path, argv, envp);
+		/*
+		 * If we get here, then the execve() call failed.  Get an error
+		 * back to the parent.
+		 */
+		exit(1);
+	case -1:
+		/* Error, related to some form of resource exhaustion. */
+		stilt_error(a_stilt, STILTE_LIMITCHECK);
+		goto FORK_ERROR;
+	default:
+		/* Parent. */
+		waitpid(pid, &status, 0);
+		if (!WIFEXITED(status) || (WEXITSTATUS(status) != 0))
+			_cw_out_put_e("XXX Handle non-zero child exit\n");
+		else {
+			/* XXX Set equivalent of $?. */
+		}
+	}
+
+	stils_pop(ostack);
+
+	/*
+	 * Clean up.
+	 */
+	FORK_ERROR:
+	ENVP_ERROR:
+	for (i = 0; envp[i] != NULL; i++)
+		_cw_free(envp[i]);
+	_cw_free(envp);
+	ARGV_ERROR:
+	for (i = 0; argv[i] != NULL; i++)
+		_cw_free(argv[i]);
+	_cw_free(argv);
+	_cw_free(path);
+	PATH_ERROR:
 }
 
 void

@@ -177,6 +177,7 @@ typedef enum {
 	STILN_sub,
 	STILN_symlink,
 	STILN_syntaxerror,
+	STILN_system,
 	STILN_systemdict,
 	STILN_tell,
 	STILN_test,
