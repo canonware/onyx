@@ -79,6 +79,7 @@ bufpool_delete(cw_bufpool_t * a_bufpool)
     buffer = list_hpop(&a_bufpool->spare_buffers);
     _cw_free(buffer);
   }
+  list_delete(&a_bufpool->spare_buffers);
 
   if (a_bufpool->is_malloced)
   {
@@ -1075,7 +1076,7 @@ buf_get_uint8(cw_buf_t * a_buf, cw_uint32_t a_offset)
 #ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe)
   {
-    mtx_lock(&a_buf->lock);
+    mtx_unlock(&a_buf->lock);
   }
 #endif
   return retval;
@@ -1149,7 +1150,7 @@ buf_get_uint32(cw_buf_t * a_buf, cw_uint32_t a_offset)
 #ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe)
   {
-    mtx_lock(&a_buf->lock);
+    mtx_unlock(&a_buf->lock);
   }
 #endif
   
@@ -1273,7 +1274,7 @@ buf_get_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset)
 #ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe)
   {
-    mtx_lock(&a_buf->lock);
+    mtx_unlock(&a_buf->lock);
   }
 #endif
   return _cw_ntohq(retval);

@@ -397,8 +397,8 @@ mem_free(cw_mem_t * a_mem, void * a_ptr)
 		    ((NULL == allocation->filename)
 		     ? "<?>" : allocation->filename),
 		    allocation->line_num);
-	_cw_free(allocation);
       }
+      _cw_free(allocation);
     }
   }
 #else

@@ -1,3 +1,10 @@
+1999-03-08    <jasone@canonware.com>
+
+	* src/buf.c (buf_get_uint8): Fix locking bug.
+	(buf_get_uint32): Fix locking bug.
+	(buf_get_uint64): Fix locking bug.
+	(bufpool_delete): Fix memory leak (Delete the spare buffers list).
+
 1999-03-07  Jason Evans  <jasone@canonware.com>
 
 	* include/libstash/dbg.h (dbg_is_registered): Revert change made

@@ -110,6 +110,7 @@ main()
   tq_el = jtl_get_tq_el(&jtl_a);
   jtl_tlock(&jtl_a, tq_el);
   jtl_tunlock(&jtl_a);
+  jtl_delete(&jtl_a);
 
   jtl_b = jtl_new(NULL);
 

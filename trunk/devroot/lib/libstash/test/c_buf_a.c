@@ -980,7 +980,7 @@ main()
     buf_delete(&buf_c);
     bufpool_delete(&bufpool);
   }
-  
+
   libstash_shutdown();
   return 0;
 }
