@@ -110,8 +110,7 @@ onyx_ops_modload(cw_nxo_t *a_thread)
 	 */
 	nxo = nxo_stack_push(estack);
 	nxo_hook_new(nxo, nxo_thread_nx_get(a_thread), handle, symbol,
-	    onyx_ops_modload_sym_ref_iter,
-	    onyx_ops_modload_sym_delete);
+	    onyx_ops_modload_sym_ref_iter, onyx_ops_modload_sym_delete);
 	nxo_dup(nxo_hook_tag_get(nxo), sym);
 	nxo_attr_set(nxo, NXOA_EXECUTABLE);
 
