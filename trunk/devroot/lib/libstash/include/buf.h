@@ -65,10 +65,10 @@ void buf_delete(cw_buf_t * a_buf_o);
 cw_uint32_t buf_get_size(cw_buf_t * a_buf_o);
 
 cw_buf_t * buf_get_buf(cw_buf_t * a_buf_o, cw_buf_t * a_spare);
-cw_bool_t buf_put_buf(cw_buf_t * a_a, cw_buf_t * a_b);
+void buf_put_buf(cw_buf_t * a_a, cw_buf_t * a_b);
 
 cw_bufel_t * buf_get_bufel(cw_buf_t * a_buf_o);
-cw_bool_t buf_put_bufel(cw_buf_t * a_buf_o, cw_bufel_t * a_bufel_o);
+void buf_put_bufel(cw_buf_t * a_buf_o, cw_bufel_t * a_bufel_o);
 
 cw_bufel_t * bufel_new(cw_bufel_t * a_bufel_o);
 void bufel_delete(cw_bufel_t * a_bufel_o);

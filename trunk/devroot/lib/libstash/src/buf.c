@@ -196,11 +196,9 @@ buf_get_buf(cw_buf_t * a_buf_o, cw_buf_t * a_spare)
  * it still exists.
  *
  ****************************************************************************/
-cw_bool_t
+void
 buf_put_buf(cw_buf_t * a_buf_o, cw_buf_t * a_other)
 {
-  cw_bool_t retval = FALSE; /* XXX Never used. */
-
   if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
   {
     _cw_marker("Enter buf_put_buf()");
@@ -235,7 +233,6 @@ buf_put_buf(cw_buf_t * a_buf_o, cw_buf_t * a_other)
   {
     _cw_marker("Exit buf_put_buf()");
   }
-  return retval;
 }
 
 /****************************************************************************
@@ -286,11 +283,9 @@ buf_get_bufel(cw_buf_t * a_buf_o)
  * Appends a bufel to a_buf_o.
  *
  ****************************************************************************/
-cw_bool_t
+void
 buf_put_bufel(cw_buf_t * a_buf_o, cw_bufel_t * a_bufel_o)
 {
-  cw_bool_t retval = FALSE; /* XXX Never used. */
-
   if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
   {
     _cw_marker("Enter buf_put_bufel()");
@@ -312,7 +307,6 @@ buf_put_bufel(cw_buf_t * a_buf_o, cw_bufel_t * a_bufel_o)
   {
     _cw_marker("Exit buf_put_bufel()");
   }
-  return retval;
 }
 
 /****************************************************************************
