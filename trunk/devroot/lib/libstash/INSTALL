@@ -1,27 +1,18 @@
 #-*-mode:text-*-
 #############################################################################
 #
-# <Copyright = "jasone">
-# <License>
-#
-#############################################################################
-#
 # $Source$
 # $Author: jasone $
-# $Revision: 131 $
-# $Date: 1998-07-07 13:43:45 -0700 (Tue, 07 Jul 1998) $
+# $Revision: 139 $
+# $Date: 1998-07-10 13:45:38 -0700 (Fri, 10 Jul 1998) $
 #
 # <<< Description >>>
 #
-# Building and installation instructions for SQRL.
+# Building and installation instructions for libstash.
 #
 #############################################################################
 
-*** WARNING ***
-SQRL does not yet do anything useful, and these directions may not work.
-
-
-Building SQRL in many cases is as simple as typing the following while in
+Building libstash in many cases is as simple as typing the following while in
 the root directory of the source tree:
 
     ./configure
@@ -37,6 +28,11 @@ Optionally, pass any of the following arguments to 'configure':
 
 	Set the base directory in which to install.  For example:
 	
-	./configure --prefix=/usr/local/sqrl
+	./configure --prefix=/usr/local
 
-	will install SQRL into /usr/local/sqrl/*.
+	will install SQRL into /usr/local/lib, /usr/local/include/libstash,
+	and /usr/local/man/.
+
+--disable-shared
+
+	Build only static libraries.  Do not build shared libraries.

@@ -1,15 +1,13 @@
--*-mode:text-*-
+#-*-mode:text-*-
+#############################################################################
+#
+# $Source$
+# $Author: jasone $
+# Current revision: $Revision: 139 $
+# Last modified: $Date: 1998-07-10 13:45:38 -0700 (Fri, 10 Jul 1998) $
+#
+#############################################################################
 
-$Source$
-$Author: jasone $
-Current revision: $Revision: 137 $
-Last modified: $Date: 1998-07-10 13:12:22 -0700 (Fri, 10 Jul 1998) $
-
------------------------------------------------------------------------------
-<Copyright = "jasone">
-<License>
-
------------------------------------------------------------------------------
 IMPORTANT FILES:
 
 The following files may be of direct interest to the user:
@@ -17,5 +15,3 @@ The following files may be of direct interest to the user:
 * COPYING - Copyright and redistribution information.
 * INSTALL - Installation information.
 * TODO - Work yet to be done.
-
------------------------------------------------------------------------------
