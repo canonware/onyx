@@ -488,6 +488,18 @@ bufv_copy(cw_bufv_t *a_to, cw_uint32_t a_to_len, const cw_bufv_t *a_fr,
 	/* Iterate over bufv element contents. */
 	for (fr_off = 0; fr_off < a_fr[fr_el].len; fr_off++)
 	{
+	    /* If there is no more room in the current destination bufv element,
+	     * move on to the next one. */
+	    while (to_off == a_to[to_el].len)
+	    {
+		to_off = 0;
+		to_el++;
+		if (to_el == a_to_len)
+		{
+		    goto RETURN;
+		}
+	    }
+
 	    a_to[to_el].data[to_off] = a_fr[fr_el].data[fr_off];
 
 	    /* Copy no more than a_maxlen elements (unless a_maxlen is 0). */
@@ -499,15 +511,55 @@ bufv_copy(cw_bufv_t *a_to, cw_uint32_t a_to_len, const cw_bufv_t *a_fr,
 
 	    /* Increment the position to copy to. */
 	    to_off++;
-	    if (to_off == a_to[to_el].len)
+	}
+    }
+
+    RETURN:
+    return retval;
+}
+
+cw_uint64_t
+bufv_rcopy(cw_bufv_t *a_to, cw_uint32_t a_to_len, const cw_bufv_t *a_fr,
+	   cw_uint32_t a_fr_len, cw_uint64_t a_maxlen)
+{
+    cw_uint64_t retval;
+    cw_uint32_t to_el, fr_el, to_off, fr_off;
+
+    cw_check_ptr(a_to);
+    cw_check_ptr(a_fr);
+
+    retval = 0;
+    to_el = a_to_len - 1;
+    to_off = a_to[to_el].len - 1;
+    /* Iterate over bufv elements. */
+    for (fr_el = 0; fr_el < a_fr_len; fr_el++)
+    {
+	/* Iterate over bufv element contents. */
+	for (fr_off = 0; fr_off < a_fr[fr_el].len; fr_off++)
+	{
+	    /* If there is no more room in the current destination bufv element,
+	     * move on to the previous one. */
+	    while (to_off == 0xffffffff)
 	    {
-		to_off = 0;
-		to_el++;
-		if (to_el == a_to_len)
+		to_el--;
+		if (to_el == 0xffffffff)
 		{
 		    goto RETURN;
 		}
+		to_off = a_to[to_el].len - 1;
 	    }
+
+	    a_to[to_el].data[to_off] = a_fr[fr_el].data[fr_off];
+
+	    /* Copy no more than a_maxlen elements (unless a_maxlen is 0). */
+	    retval++;
+	    if (retval == a_maxlen)
+	    {
+		goto RETURN;
+	    }
+
+	    /* Decrement the position to copy to. */
+	    to_off--;
 	}
     }
 

@@ -223,6 +223,9 @@ struct cw_buf_s
 cw_uint64_t
 bufv_copy(cw_bufv_t *a_to, cw_uint32_t a_to_len, const cw_bufv_t *a_fr,
 	  cw_uint32_t a_fr_len, cw_uint64_t a_maxlen);
+cw_uint64_t
+bufv_rcopy(cw_bufv_t *a_to, cw_uint32_t a_to_len, const cw_bufv_t *a_fr,
+	   cw_uint32_t a_fr_len, cw_uint64_t a_maxlen);
 
 /* buf. */
 cw_buf_t *
