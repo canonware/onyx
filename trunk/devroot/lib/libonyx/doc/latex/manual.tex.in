@@ -576,12 +576,15 @@ void *a\_mem, void *a\_ptr, size\_t a\_size}}
 \input{@abs_srcroot@/lib/libonyx/doc/latex/nxo_operator}
 \input{@abs_srcroot@/lib/libonyx/doc/latex/nxo_pmark}
 \input{@abs_srcroot@/lib/libonyx/doc/latex/nxo_real}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/nxo_regexp}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/nxo_regsub}
 \input{@abs_srcroot@/lib/libonyx/doc/latex/nxo_stack}
 \input{@abs_srcroot@/lib/libonyx/doc/latex/nxo_string}
 \input{@abs_srcroot@/lib/libonyx/doc/latex/nxo_thread}
 \input{@abs_srcroot@/lib/libonyx/doc/latex/ql}
 \input{@abs_srcroot@/lib/libonyx/doc/latex/qr}
 \input{@abs_srcroot@/lib/libonyx/doc/latex/qs}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/rx}
 \input{@abs_srcroot@/lib/libonyx/doc/latex/thd}
 \input{@abs_srcroot@/lib/libonyx/doc/latex/tsd}
 \input{@abs_srcroot@/lib/libonyx/doc/latex/xep}

@@ -204,9 +204,6 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #endif
     ENTRY(exit),
     ENTRY(exp),
-#ifdef CW_POSIX
-    ENTRY(mkfifo),
-#endif
 #ifdef CW_REAL
     ENTRY(floor),
 #endif
@@ -267,8 +264,12 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #endif
     ENTRY(loop),
     ENTRY(lt),
+#ifdef CW_RX
+    ENTRY(match),
+#endif
 #ifdef CW_POSIX
     ENTRY(mkdir),
+    ENTRY(mkfifo),
 #endif
     ENTRY(mod),
 #ifdef CW_MODULES
@@ -295,6 +296,9 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(nsleep),
 #endif
     ENTRY(nup),
+#ifdef CW_RX
+    ENTRY(offsets),
+#endif
 #ifdef CW_POSIX
     ENTRY(open),
 #endif
@@ -329,6 +333,10 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #endif
 #ifdef CW_SOCKET
     ENTRY(recv),
+#endif
+#ifdef CW_RX
+    ENTRY(regexp),
+    ENTRY(regsub),
 #endif
 #ifdef CW_POSIX
     ENTRY(rename),
@@ -434,6 +442,9 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(string),
     ENTRY(stuck),
     ENTRY(sub),
+#ifdef CW_RX
+    ENTRY(subst),
+#endif
     ENTRY(sunder),
     ENTRY(sup),
     ENTRY(sym_lp),
@@ -5200,6 +5211,14 @@ systemdict_lt(cw_nxo_t *a_thread)
     nxo_stack_pop(ostack);
 }
 
+#ifdef CW_RX
+void
+systemdict_match(cw_nxo_t *a_thread)
+{
+    cw_error("XXX Not implemented");
+}
+#endif
+
 #ifdef CW_POSIX
 void
 systemdict_mkdir(cw_nxo_t *a_thread)
@@ -6135,6 +6154,14 @@ systemdict_nup(cw_nxo_t *a_thread)
 	nxo_stack_roll(ostack, count, 1);
     }
 }
+
+#ifdef CW_RX
+void
+systemdict_offsets(cw_nxo_t *a_thread)
+{
+    cw_error("XXX Not implemented");
+}
+#endif
 
 #ifdef CW_POSIX
 void
@@ -7407,6 +7434,22 @@ systemdict_rename(cw_nxo_t *a_thread)
 
     nxo_stack_npop(tstack, 2);
     nxo_stack_npop(ostack, 2);
+}
+#endif
+
+#ifdef CW_RX
+void
+systemdict_regexp(cw_nxo_t *a_thread)
+{
+    cw_error("XXX Not implemented");
+}
+#endif
+
+#ifdef CW_RX
+void
+systemdict_regsub(cw_nxo_t *a_thread)
+{
+    cw_error("XXX Not implemented");
 }
 #endif
 
@@ -10103,6 +10146,14 @@ systemdict_sub(cw_nxo_t *a_thread)
     nxo_stack_pop(ostack);
 }
 
+#ifdef CW_RX
+void
+systemdict_subst(cw_nxo_t *a_thread)
+{
+    cw_error("XXX Not implemented");
+}
+#endif
+
 void
 systemdict_sunder(cw_nxo_t *a_thread)
 {
@@ -11131,6 +11182,10 @@ systemdict_type(cw_nxo_t *a_thread)
 	NXN_pmarktype,
 #ifdef CW_REAL
 	NXN_realtype,
+#endif
+#ifdef CW_RX
+	NXN_regexptype,
+	NXN_regsubtype,
 #endif
 	NXN_stacktype,
 	NXN_stringtype,

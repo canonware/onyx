@@ -80,9 +80,11 @@ integer	& dict		\\
 mark	& file		\\
 name	& hook		\\
 null	& mutex		\\
-operator & stack	\\
-pmark	& string	\\
-real	& thread	\\
+operator & regexp	\\
+pmark	& regsub	\\
+real	& stack		\\
+	& string	\\
+	& thread	\\
 \hline
 \end{tabular}
 \end{center}
@@ -156,6 +158,10 @@ pmark		& data	& data	& data	\\
 \hline
 real		& data	& data	& data	\\
 \hline
+regexp		& data	& data	& data	\\
+\hline
+regsub		& data	& data	& data	\\
+\hline
 stack		& data	& data	& data	\\
 \hline
 string		& data	& code	& code	\\
@@ -205,6 +211,10 @@ operator	& data	& code	& code	\\
 pmark		& data	& data	& data	\\
 \hline
 real		& data	& data	& data	\\
+\hline
+regexp		& data	& data	& data	\\
+\hline
+regsub		& data	& data	& data	\\
 \hline
 stack		& data	& data	& data	\\
 \hline
@@ -300,6 +310,13 @@ application will only encounter pmarks in error conditions, and there is never a
 reason for an application to explicitly create a pmark.
 
 \item[real: ] A real is a double precision (64 bit) floating point number.
+
+\item[regexp: ] A regexp encapsulates a regular expression and associated flags,
+which can be used to find substring matches within an input string.
+
+\item[regsub: ] A regsub encapsulates a regular expression, substitution
+template, and associated flags, which can be used to do substring substitutions
+matches and create an output string from input string.
 
 \item[stack: ] A stack provides LIFO (last in, first out) access to objects that
 it contains, as well as some more advanced access methods.  An application can
@@ -2162,6 +2179,18 @@ The following additional flags are supported for reals:
 	{Create formatted string from real.}
 \hline
 \optableent
+	{regexp flags}
+	{{\bf \htmlref{regexptype}{outputsdict:regexptype}}}
+	{string}
+	{Create formatted string from regexp.}
+\hline
+\optableent
+	{regsub flags}
+	{{\bf \htmlref{regsubtype}{outputsdict:regsubtype}}}
+	{string}
+	{Create formatted string from regsub.}
+\hline
+\optableent
 	{stack flags}
 	{{\bf \htmlref{stacktype}{outputsdict:stacktype}}}
 	{string}
@@ -2690,6 +2719,62 @@ onyx:0> 6.022e23 <$d 4 $w 40 $p `0'> realtype print `\n' print flush
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{outputsdict:regexptype}
+\index{regexptype@\onyxop{}{regexptype}{}}
+\item[{\onyxop{regexp flags}{regexptype}{string}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[regexp: ]
+			A regexp object.
+		\item[flags: ]
+			Formatting flags.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[string: ]
+			Formatted string representation of \oparg{regexp}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Create a formatted string representation of \oparg{regexp}.
+	\item[Example(s): ]\begin{verbatim}
+
+XXX
+		\end{verbatim}
+	\end{description}
+\label{outputsdict:regsubtype}
+\index{regsubtype@\onyxop{}{regsubtype}{}}
+\item[{\onyxop{regsub flags}{regsubtype}{string}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[regsub: ]
+			A regsub object.
+		\item[flags: ]
+			Formatting flags.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[string: ]
+			Formatted string representation of \oparg{regsub}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Create a formatted string representation of \oparg{regsub}.
+	\item[Example(s): ]\begin{verbatim}
+
+XXX
+		\end{verbatim}
+	\end{description}
 \label{outputsdict:stacktype}
 \index{stacktype@\onyxop{}{stacktype}{}}
 \item[{\onyxop{stack flags}{stacktype}{string}}: ]
@@ -2928,6 +3013,18 @@ $sprints {
 	{{\bf \htmlref{realtype}{sprintsdict:realtype}}}
 	{string}
 	{Create syntactical string from real.}
+\hline
+\optableent
+	{regexp depth}
+	{{\bf \htmlref{regexptype}{sprintsdict:regexptype}}}
+	{string}
+	{Create syntactical string from regexp.}
+\hline
+\optableent
+	{regsub depth}
+	{{\bf \htmlref{regsubtype}{sprintsdict:regsubtype}}}
+	{string}
+	{Create syntactical string from regsub.}
 \hline
 \optableent
 	{stack depth}
@@ -3450,6 +3547,62 @@ onyx:1> dup 0 pmarktype print `\n' print flush
 onyx:1> dup 1 pmarktype print `\n' print flush
 -pmark-
 onyx:1>
+		\end{verbatim}
+	\end{description}
+\label{sprintsdict:regexptype}
+\index{regexptype@\onyxop{}{regexptype}{}}
+\item[{\onyxop{regexp depth}{regexptype}{string}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[regexp: ]
+			A regexp object.
+		\item[depth: ]
+			Recursion depth.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[string: ]
+			Syntactical string representation of \oparg{regexp}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Create a syntactical string representation of \oparg{regexp}.
+	\item[Example(s): ]\begin{verbatim}
+
+XXX
+		\end{verbatim}
+	\end{description}
+\label{sprintsdict:regsubtype}
+\index{regsubtype@\onyxop{}{regsubtype}{}}
+\item[{\onyxop{regsub depth}{regsubtype}{string}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[regsub: ]
+			A regsub object.
+		\item[depth: ]
+			Recursion depth.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[string: ]
+			Syntactical string representation of \oparg{regsub}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Create a syntactical string representation of \oparg{regsub}.
+	\item[Example(s): ]\begin{verbatim}
+
+XXX
 		\end{verbatim}
 	\end{description}
 \label{sprintsdict:realtype}

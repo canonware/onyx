@@ -218,6 +218,22 @@ if test "x$enable_real" = "x1" ; then
   AC_CHECK_FUNCS(asprintf)
 fi
 
+dnl Enable regular expression support by default.
+AC_ARG_ENABLE(real, [  --disable-rx            Disable regular expression support],
+
+if test "x$enable_rx" = "xyes" ; then
+  enable_rx="1"
+else
+  enable_rx="0"
+fi
+,
+enable_rx="1"
+)
+AC_SUBST(enable_rx)
+if test "x$enable_rx" = "x1" ; then
+  AC_DEFINE(CW_RX)
+fi
+
 dnl Support POSIX file operations by default.
 AC_ARG_ENABLE(posix-file, [  --disable-posix-file    Disable POSIX file support],
 if test "x$enable_posix_file" = "xyes" ; then

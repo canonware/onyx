@@ -126,6 +126,12 @@ Optionally, pass any of the following (not a definitive list) arguments to
 	floating point operations.  The documentation does not mention the
 	effects of this option -- UTSL.
 
+--disable-rx
+	Do not include support for regular expressions.  This excludes the
+	"regexp" and "regsub" Onyx types and associated operators, as well as
+	the rx C API.  The documentation does not mention the effects of this
+	option -- UTSL.
+
 --disable-posix
 	As much as reasonably possible, avoid using any external library
 	functions (disjoint from --disable-threads option).  This option is

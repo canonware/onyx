@@ -35,6 +35,9 @@
 #if @enable_real@
                nxo_real.h
 #endif
+#if @enable_rx@
+               nxo_regexp.h nxo_regub.h rx.h
+#endif
                ;
   incs = [addprefix @srcroot@/lib/libonyx/include/libonyx/ [incs]];
   incs = [incs] @objroot@/lib/libonyx/include/libonyx/libonyx_defs.h;
@@ -56,6 +59,9 @@ LIBONYX_COMMON_SRCS = [addprefix @srcroot@/lib/libonyx/src/
 #endif
 #if @enable_real@
                                  nxo_real.c
+#endif
+#if @enable_rx@
+                                 nxo_regexp.c nxo_regsub.c rx.c
 #endif
 #if @enable_posix@
                                  envdict.c
@@ -93,13 +99,14 @@ ONYX_TEX_SRCS += [addprefix @srcroot@/lib/libonyx/doc/latex/
                             nxo_integer.tex nxo_mark.tex nxo_mutex.tex
                             nxo_name.tex nxo_no.tex nxo_null.tex
                             nxo_operator.tex nxo_pmark.tex nxo_real.tex
-                            nxo_stack.tex nxo_string.tex nxo_thread.tex ql.tex
-                            qr.tex qs.tex systemdict.tex thd.tex tsd.tex
+                            nxo_regexp.tex nxo_regsub.tex nxo_stack.tex
+                            nxo_string.tex nxo_thread.tex ql.tex qr.tex qs.tex
+                            rx.tex systemdict.tex thd.tex tsd.tex
                             xep.tex]
                  @objroot@/lib/libonyx/doc/latex/manual.tex;
 
 /* Libraries. */
-LIBONYX_REV = 7;
+LIBONYX_REV = 8;
 
 LIBBONYX_A = @objroot@/lib/libonyx/lib/libbonyx.a;
 LIBONYX_A = @objroot@/lib/libonyx/lib/libonyx.a;
