@@ -466,7 +466,7 @@ interactive_run(int argc, char **argv, char **envp)
 	struct sigaction	action;
 	char			*editor;
 #endif
-#ifdef _CW_THREADS
+#if (defined(_CW_USE_LIBEDIT) && defined(_CW_THREADS))
 	sigset_t		set, oset;
 	cw_thd_t		*nx_thd;
 #endif
