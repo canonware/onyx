@@ -28,12 +28,12 @@
 #include "../include/libstil/stilt_l.h"
 
 /*
- * Don't actually free stiloe's if we're running GC diagnostics.  Instead, just
- * reset the stiloe magic.  This way, we should still core dump when we hit
- * collected stiloe's, but can actually see the old contents of the stiloe we
- * tried to use.
+ * Don't actually free stiloe's if debugging GC.  Instead, just reset the
+ * stiloe magic.  This way, we should still core dump when we hit collected
+ * stiloe's, but can actually see the old contents of the stiloe we tried
+ * to use.
  */
-#if (0 && defined(_LIBSTIL_CONFESS) && defined(_LIBSTIL_DBG))
+#if (0)
 #define	_CW_FREE(a_stilo)
 #define	_CW_STILOE_FREE(a_stiloe) (a_stiloe)->stiloe.magic = 0
 #else
