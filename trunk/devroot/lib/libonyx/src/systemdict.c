@@ -76,6 +76,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(def),
 	ENTRY(detach),
 	ENTRY(dict),
+	ENTRY(die),
 	ENTRY(dirforeach),
 	ENTRY(div),
 	ENTRY(dstack),
@@ -1483,6 +1484,29 @@ systemdict_dict(cw_nxo_t *a_thread)
 	dict = nxo_stack_push(ostack);
 	nxo_dict_new(dict, nxo_thread_nx_get(a_thread),
 	    nxo_thread_currentlocking(a_thread), _CW_SYSTEMDICT_DICT_SIZE);
+}
+
+void
+systemdict_die(cw_nxo_t *a_thread)
+{
+	cw_nxo_t	*ostack;
+	cw_nxo_t	*code;
+	cw_nxoi_t	ecode;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+
+	NXO_STACK_GET(code, ostack, a_thread);
+	if (nxo_type_get(code) != NXOT_INTEGER) {
+		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		return;
+	}
+	ecode = nxo_integer_get(code);
+	if (ecode < 0 || ecode > 255) {
+		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+		return;
+	}
+
+	exit(ecode);
 }
 
 void

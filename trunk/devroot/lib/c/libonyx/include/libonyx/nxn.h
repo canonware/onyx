@@ -74,6 +74,7 @@ typedef enum {
 	NXN_dev,
 	NXN_dict,
 	NXN_dicttype,
+	NXN_die,
 	NXN_dirforeach,
 	NXN_div,
 	NXN_dstack,

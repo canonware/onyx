@@ -45,6 +45,7 @@ void	systemdict_cvx(cw_nxo_t *a_thread);
 void	systemdict_def(cw_nxo_t *a_thread);
 void	systemdict_detach(cw_nxo_t *a_thread);
 void	systemdict_dict(cw_nxo_t *a_thread);
+void	systemdict_die(cw_nxo_t *a_thread);
 void	systemdict_dirforeach(cw_nxo_t *a_thread);
 void	systemdict_div(cw_nxo_t *a_thread);
 void	systemdict_dstack(cw_nxo_t *a_thread);
