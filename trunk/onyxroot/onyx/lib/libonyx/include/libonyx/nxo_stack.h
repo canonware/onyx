@@ -137,41 +137,88 @@ nxo_stack_roll(cw_nxo_t *a_nxo, cw_uint32_t a_count, cw_sint32_t a_amount);
 void
 nxoe_p_stack_shrink(cw_nxoe_stack_t *a_stack);
 
-cw_nxo_t *
-nxoe_p_stack_push(cw_nxoe_stack_t *a_stack);
+cw_uint32_t
+nxoe_p_stack_count_locking(cw_nxoe_stack_t *a_stack);
 
 cw_nxo_t *
-nxoe_p_stack_bpush(cw_nxoe_stack_t *a_stack);
+nxoe_p_stack_push_hard(cw_nxoe_stack_t *a_stack);
 
-void
-nxoe_p_stack_npop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count);
-
-void
-nxoe_p_stack_nbpop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count);
-
-#if (defined(CW_USE_INLINES) || defined(CW_NXO_STACK_C_))
 #ifdef CW_THREADS
-/* Private, but defined here for the inline functions. */
-CW_INLINE void
-nxoe_p_stack_lock(cw_nxoe_stack_t *a_nxoe)
-{
-    if (a_nxoe->nxoe.locking)
-    {
-	mtx_lock(&a_nxoe->lock);
-    }
-}
-
-/* Private, but defined here for the inline functions. */
-CW_INLINE void
-nxoe_p_stack_unlock(cw_nxoe_stack_t *a_nxoe)
-{
-    if (a_nxoe->nxoe.locking)
-    {
-	mtx_unlock(&a_nxoe->lock);
-    }
-}
+cw_nxo_t *
+nxoe_p_stack_push_locking(cw_nxoe_stack_t *a_stack);
 #endif
 
+cw_nxo_t *
+nxoe_p_stack_bpush_hard(cw_nxoe_stack_t *a_stack);
+
+#ifdef CW_THREADS
+cw_nxo_t *
+nxoe_p_stack_bpush_locking(cw_nxoe_stack_t *a_stack);
+#endif
+
+#ifdef CW_THREADS
+cw_bool_t
+nxoe_p_stack_pop_locking(cw_nxoe_stack_t *a_stack);
+#endif
+
+#ifdef CW_THREADS
+cw_bool_t
+nxoe_p_stack_bpop_locking(cw_nxoe_stack_t *a_stack);
+#endif
+
+void
+nxoe_p_stack_npop_hard(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count);
+
+#ifdef CW_THREADS
+cw_bool_t
+nxoe_p_stack_npop_locking(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count);
+#endif
+
+void
+nxoe_p_stack_nbpop_hard(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count);
+
+#ifdef CW_THREADS
+cw_bool_t
+nxoe_p_stack_nbpop_locking(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count);
+#endif
+
+#ifdef CW_THREADS
+cw_nxo_t *
+nxoe_p_stack_get_locking(cw_nxoe_stack_t *a_stack);
+#endif
+
+#ifdef CW_THREADS
+cw_nxo_t *
+nxoe_p_stack_bget_locking(cw_nxoe_stack_t *a_stack);
+#endif
+
+#ifdef CW_THREADS
+cw_nxo_t *
+nxoe_p_stack_nget_locking(cw_nxoe_stack_t *a_stack, cw_uint32_t a_index);
+#endif
+
+#ifdef CW_THREADS
+cw_nxo_t *
+nxoe_p_stack_nbget_locking(cw_nxoe_stack_t *a_stack, cw_uint32_t a_index);
+#endif
+
+#ifdef CW_THREADS
+cw_bool_t
+nxoe_p_stack_exch_locking(cw_nxoe_stack_t *a_stack);
+#endif
+
+#ifdef CW_THREADS
+void
+nxoe_p_stack_rot_locking(cw_nxoe_stack_t *a_stack, cw_sint32_t a_amount);
+#endif
+
+#ifdef CW_THREADS
+cw_bool_t
+nxoe_p_stack_roll_locking(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count,
+			  cw_sint32_t a_amount);
+#endif
+
+#if (defined(CW_USE_INLINES) || defined(CW_NXO_STACK_C_))
 CW_INLINE cw_uint32_t
 nxo_stack_count(cw_nxo_t *a_nxo)
 {
@@ -186,12 +233,42 @@ nxo_stack_count(cw_nxo_t *a_nxo)
     cw_assert(stack->nxoe.type == NXOT_STACK);
 
 #ifdef CW_THREADS
-    nxoe_p_stack_lock(stack);
+    if (stack->nxoe.locking)
+    {
+	retval = nxoe_p_stack_count_locking(stack);
+    }
+    else
 #endif
-    retval = stack->aend - stack->abeg;
-#ifdef CW_THREADS
-    nxoe_p_stack_unlock(stack);
-#endif
+    {
+	retval = stack->aend - stack->abeg;
+    }
+
+    return retval;
+}
+
+CW_INLINE cw_nxo_t *
+nxoe_p_stack_push(cw_nxoe_stack_t *a_stack)
+{
+    cw_nxo_t *retval;
+
+    /* Allocate new object. */
+    if (a_stack->abeg > 0 && a_stack->nspare > 0)
+    {
+	a_stack->nspare--;
+	retval = a_stack->spare[a_stack->nspare];
+    }
+    else
+    {
+	/* There isn't an empty slot above the top of the stack and/or there are
+	 * no spares. */
+	retval = nxoe_p_stack_push_hard(a_stack);
+    }
+
+    /* Insert new object. */
+    nxo_no_new(retval);
+    a_stack->a[a_stack->abase + a_stack->abeg - 1] = retval;
+    mb_write();
+    a_stack->abeg--;
 
     return retval;
 }
@@ -210,34 +287,45 @@ nxo_stack_push(cw_nxo_t *a_nxo)
     cw_assert(stack->nxoe.type == NXOT_STACK);
 
 #ifdef CW_THREADS
-    nxoe_p_stack_lock(stack);
+    if (stack->nxoe.locking)
+    {
+	retval = nxoe_p_stack_push_locking(stack);
+    }
+    else
 #endif
+    {
+	retval = nxoe_p_stack_push(stack);
+    }
+
+    mb_write();
+    return retval;
+}
+
+CW_INLINE cw_nxo_t *
+nxoe_p_stack_bpush(cw_nxoe_stack_t *a_stack)
+{
+    cw_nxo_t *retval;
 
     /* Allocate new object. */
-    if (stack->abeg > 0 && stack->nspare > 0)
+    if (a_stack->aend + 1 < a_stack->ahlen && a_stack->nspare > 0)
     {
-	stack->nspare--;
-	retval = stack->spare[stack->nspare];
+	a_stack->nspare--;
+	retval = a_stack->spare[a_stack->nspare];
     }
     else
     {
-	/* There isn't an empty slot above the top of the stack and/or there are
-	 * no spares.  Deal with this in a separate function to keep this one
-	 * small, since this code path is rarely executed. */
-	retval = nxoe_p_stack_push(stack);
+	/* There isn't an empty slot below the bottom of the stack and/or
+	 * there are no spares.  Deal with this in a separate function to
+	 * keep this one small, since this code path is rarely executed. */
+	retval = nxoe_p_stack_bpush_hard(a_stack);
     }
 
     /* Insert new object. */
     nxo_no_new(retval);
-    stack->a[stack->abase + stack->abeg - 1] = retval;
+    a_stack->a[a_stack->abase + a_stack->aend] = retval;
     mb_write();
-    stack->abeg--;
+    a_stack->aend++;
 
-#ifdef CW_THREADS
-    nxoe_p_stack_unlock(stack);
-#endif
-
-    mb_write();
     return retval;
 }
 
@@ -255,34 +343,57 @@ nxo_stack_bpush(cw_nxo_t *a_nxo)
     cw_assert(stack->nxoe.type == NXOT_STACK);
 
 #ifdef CW_THREADS
-    nxoe_p_stack_lock(stack);
-#endif
-
-    /* Allocate new object. */
-    if (stack->aend + 1 < stack->ahlen && stack->nspare > 0)
+    if (stack->nxoe.locking)
     {
-	stack->nspare--;
-	retval = stack->spare[stack->nspare];
+	retval = nxoe_p_stack_bpush_locking(stack);
     }
     else
+#endif
     {
-	/* There isn't an empty slot below the bottom of the stack and/or there
-	 * are no spares.  Deal with this in a separate function to keep this
-	 * one small, since this code path is rarely executed. */
 	retval = nxoe_p_stack_bpush(stack);
     }
 
-    /* Insert new object. */
-    nxo_no_new(retval);
-    stack->a[stack->abase + stack->aend] = retval;
     mb_write();
-    stack->aend++;
+    return retval;
+}
 
-#ifdef CW_THREADS
-    nxoe_p_stack_unlock(stack);
+CW_INLINE cw_bool_t
+nxoe_p_stack_pop(cw_nxoe_stack_t *a_stack)
+{
+    cw_bool_t retval;
+
+    if (a_stack->aend == a_stack->abeg)
+    {
+	retval = TRUE;
+	goto RETURN;
+    }
+
+    a_stack->abeg++;
+    mb_write();
+    if (a_stack->nspare < CW_LIBONYX_STACK_CACHE)
+    {
+	a_stack->spare[a_stack->nspare] = a_stack->a[a_stack->abase
+						     + a_stack->abeg - 1];
+#ifdef CW_DBG
+	memset(a_stack->spare[a_stack->nspare], 0x5a, sizeof(cw_nxo_t));
 #endif
+	a_stack->nspare++;
+    }
+    else
+    {
+	nxa_free(a_stack->a[a_stack->abase + a_stack->abeg - 1],
+		 sizeof(cw_nxo_t));
+    }
 
-    mb_write();
+    /* Shrink the array, if necessary. */
+    if (a_stack->aend - a_stack->abeg < a_stack->ahlen / 8
+	&& a_stack->ahlen > a_stack->ahmin)
+    {
+	nxoe_p_stack_shrink(a_stack);
+    }
+
+    retval = FALSE;
+    RETURN:
     return retval;
 }
 
@@ -300,41 +411,55 @@ nxo_stack_pop(cw_nxo_t *a_nxo)
     cw_assert(stack->nxoe.type == NXOT_STACK);
 
 #ifdef CW_THREADS
-    nxoe_p_stack_lock(stack);
+    if (stack->nxoe.locking)
+    {
+	retval = nxoe_p_stack_pop_locking(stack);
+    }
+    else
 #endif
-    if (stack->aend == stack->abeg)
+    {
+	retval = nxoe_p_stack_pop(stack);
+    }
+
+    return retval;
+}
+
+CW_INLINE cw_bool_t
+nxoe_p_stack_bpop(cw_nxoe_stack_t *a_stack)
+{
+    cw_bool_t retval;
+
+    if (a_stack->aend == a_stack->abeg)
     {
 	retval = TRUE;
 	goto RETURN;
     }
 
-    stack->abeg++;
+    a_stack->aend--;
     mb_write();
-    if (stack->nspare < CW_LIBONYX_STACK_CACHE)
+    if (a_stack->nspare < CW_LIBONYX_STACK_CACHE)
     {
-	stack->spare[stack->nspare] = stack->a[stack->abase + stack->abeg - 1];
+	a_stack->spare[a_stack->nspare] = a_stack->a[a_stack->abase
+						     + a_stack->aend];
 #ifdef CW_DBG
-	memset(stack->spare[stack->nspare], 0x5a, sizeof(cw_nxo_t));
+	memset(a_stack->spare[a_stack->nspare], 0x5a, sizeof(cw_nxo_t));
 #endif
-	stack->nspare++;
+	a_stack->nspare++;
     }
     else
     {
-	nxa_free(stack->a[stack->abase + stack->abeg - 1], sizeof(cw_nxo_t));
+	nxa_free(a_stack->a[a_stack->abase + a_stack->aend], sizeof(cw_nxo_t));
     }
 
     /* Shrink the array, if necessary. */
-    if (stack->aend - stack->abeg < stack->ahlen / 8
-	&& stack->ahlen > stack->ahmin)
+    if (a_stack->aend - a_stack->abeg < a_stack->ahlen / 8
+	&& a_stack->ahlen > a_stack->ahmin)
     {
-	nxoe_p_stack_shrink(stack);
+	nxoe_p_stack_shrink(a_stack);
     }
 
     retval = FALSE;
     RETURN:
-#ifdef CW_THREADS
-    nxoe_p_stack_unlock(stack);
-#endif
     return retval;
 }
 
@@ -352,41 +477,60 @@ nxo_stack_bpop(cw_nxo_t *a_nxo)
     cw_assert(stack->nxoe.type == NXOT_STACK);
 
 #ifdef CW_THREADS
-    nxoe_p_stack_lock(stack);
+    if (stack->nxoe.locking)
+    {
+	retval = nxoe_p_stack_bpop_locking(stack);
+    }
+    else
 #endif
-    if (stack->aend == stack->abeg)
+    {
+	retval = nxoe_p_stack_bpop(stack);
+    }
+
+    return retval;
+}
+
+CW_INLINE cw_bool_t
+nxoe_p_stack_npop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
+{
+    cw_bool_t retval;
+    cw_uint32_t i;
+
+    if (a_count > a_stack->aend - a_stack->abeg)
     {
 	retval = TRUE;
 	goto RETURN;
     }
 
-    stack->aend--;
+    a_stack->abeg += a_count;
     mb_write();
-    if (stack->nspare < CW_LIBONYX_STACK_CACHE)
+    if (a_stack->nspare + a_count <= CW_LIBONYX_STACK_CACHE)
     {
-	stack->spare[stack->nspare] = stack->a[stack->abase + stack->aend];
+	for (i = 0; i < a_count; i++)
+	{
+	    a_stack->spare[a_stack->nspare]
+		= a_stack->a[a_stack->abase + a_stack->abeg - a_count + i];
 #ifdef CW_DBG
-	memset(stack->spare[stack->nspare], 0x5a, sizeof(cw_nxo_t));
+	    memset(a_stack->spare[a_stack->nspare], 0x5a, sizeof(cw_nxo_t));
 #endif
-	stack->nspare++;
+	    a_stack->nspare++;
+	}
     }
     else
     {
-	nxa_free(stack->a[stack->abase + stack->aend], sizeof(cw_nxo_t));
+	/* Spares need to be discarded. */
+	nxoe_p_stack_npop_hard(a_stack, a_count);
     }
 
     /* Shrink the array, if necessary. */
-    if (stack->aend - stack->abeg < stack->ahlen / 8
-	&& stack->ahlen > stack->ahmin)
+    if (a_stack->aend - a_stack->abeg < a_stack->ahlen / 8
+	&& a_stack->ahlen > a_stack->ahmin)
     {
-	nxoe_p_stack_shrink(stack);
+	nxoe_p_stack_shrink(a_stack);
     }
 
     retval = FALSE;
     RETURN:
-#ifdef CW_THREADS
-    nxoe_p_stack_unlock(stack);
-#endif
     return retval;
 }
 
@@ -395,7 +539,6 @@ nxo_stack_npop(cw_nxo_t *a_nxo, cw_uint32_t a_count)
 {
     cw_bool_t retval;
     cw_nxoe_stack_t *stack;
-    cw_uint32_t i;
 
     cw_check_ptr(a_nxo);
     cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
@@ -405,47 +548,61 @@ nxo_stack_npop(cw_nxo_t *a_nxo, cw_uint32_t a_count)
     cw_assert(stack->nxoe.type == NXOT_STACK);
 
 #ifdef CW_THREADS
-    nxoe_p_stack_lock(stack);
+    if (stack->nxoe.locking)
+    {
+	retval = nxoe_p_stack_npop_locking(stack, a_count);
+    }
+    else
 #endif
-    if (a_count > stack->aend - stack->abeg)
+    {
+	retval = nxoe_p_stack_npop(stack, a_count);
+    }
+
+    return retval;
+}
+
+CW_INLINE cw_bool_t
+nxoe_p_stack_nbpop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
+{
+    cw_bool_t retval;
+    cw_uint32_t i;
+
+    if (a_count > a_stack->aend - a_stack->abeg)
     {
 	retval = TRUE;
 	goto RETURN;
     }
 
-    stack->abeg += a_count;
+    a_stack->aend -= a_count;
     mb_write();
-    if (stack->nspare + a_count <= CW_LIBONYX_STACK_CACHE)
+    if (a_stack->nspare + a_count <= CW_LIBONYX_STACK_CACHE)
     {
 	for (i = 0; i < a_count; i++)
 	{
-	    stack->spare[stack->nspare]
-		= stack->a[stack->abase + stack->abeg - a_count + i];
+	    a_stack->spare[a_stack->nspare]
+		= a_stack->a[a_stack->abase + a_stack->aend + i];
 #ifdef CW_DBG
-	    memset(stack->spare[stack->nspare], 0x5a, sizeof(cw_nxo_t));
+	    memset(a_stack->spare[a_stack->nspare], 0x5a, sizeof(cw_nxo_t));
 #endif
-	    stack->nspare++;
+	    a_stack->nspare++;
 	}
     }
     else
     {
-	/* Spares need to be discarded.  Do this in a separate function to keep
-	 * this one small, since this code path is rarely executed. */
-	nxoe_p_stack_npop(stack, a_count);
+	/* Spares need to be discarded.  Do this in a separate function to
+	 * keep this one small, since this code path is rarely executed. */
+	nxoe_p_stack_nbpop_hard(a_stack, a_count);
     }
 
     /* Shrink the array, if necessary. */
-    if (stack->aend - stack->abeg < stack->ahlen / 8
-	&& stack->ahlen > stack->ahmin)
+    if (a_stack->aend - a_stack->abeg < a_stack->ahlen / 8
+	&& a_stack->ahlen > a_stack->ahmin)
     {
-	nxoe_p_stack_shrink(stack);
+	nxoe_p_stack_shrink(a_stack);
     }
 
     retval = FALSE;
     RETURN:
-#ifdef CW_THREADS
-    nxoe_p_stack_unlock(stack);
-#endif
     return retval;
 }
 
@@ -454,7 +611,6 @@ nxo_stack_nbpop(cw_nxo_t *a_nxo, cw_uint32_t a_count)
 {
     cw_bool_t retval;
     cw_nxoe_stack_t *stack;
-    cw_uint32_t i;
 
     cw_check_ptr(a_nxo);
     cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
@@ -464,47 +620,34 @@ nxo_stack_nbpop(cw_nxo_t *a_nxo, cw_uint32_t a_count)
     cw_assert(stack->nxoe.type == NXOT_STACK);
 
 #ifdef CW_THREADS
-    nxoe_p_stack_lock(stack);
-#endif
-    if (a_count > stack->aend - stack->abeg)
+    if (stack->nxoe.locking)
     {
-	retval = TRUE;
+	retval = nxoe_p_stack_nbpop_locking(stack, a_count);
+    }
+    else
+#endif
+    {
+	retval = nxoe_p_stack_nbpop(stack, a_count);
+    }
+
+    return retval;
+}
+
+CW_INLINE cw_nxo_t *
+nxoe_p_stack_get(cw_nxoe_stack_t *a_stack)
+{
+    cw_nxo_t *retval;
+
+    if (a_stack->aend == a_stack->abeg)
+    {
+	retval = NULL;
 	goto RETURN;
     }
 
-    stack->aend -= a_count;
-    mb_write();
-    if (stack->nspare + a_count <= CW_LIBONYX_STACK_CACHE)
-    {
-	for (i = 0; i < a_count; i++)
-	{
-	    stack->spare[stack->nspare]
-		= stack->a[stack->abase + stack->aend + i];
-#ifdef CW_DBG
-	    memset(stack->spare[stack->nspare], 0x5a, sizeof(cw_nxo_t));
-#endif
-	    stack->nspare++;
-	}
-    }
-    else
-    {
-	/* Spares need to be discarded.  Do this in a separate function to keep
-	 * this one small, since this code path is rarely executed. */
-	nxoe_p_stack_nbpop(stack, a_count);
-    }
+    retval = a_stack->a[a_stack->abase + a_stack->abeg];
 
-    /* Shrink the array, if necessary. */
-    if (stack->aend - stack->abeg < stack->ahlen / 8
-	&& stack->ahlen > stack->ahmin)
-    {
-	nxoe_p_stack_shrink(stack);
-    }
-
-    retval = FALSE;
+    cw_dassert(retval->magic == CW_NXO_MAGIC);
     RETURN:
-#ifdef CW_THREADS
-    nxoe_p_stack_unlock(stack);
-#endif
     return retval;
 }
 
@@ -522,21 +665,34 @@ nxo_stack_get(const cw_nxo_t *a_nxo)
     cw_assert(stack->nxoe.type == NXOT_STACK);
 
 #ifdef CW_THREADS
-    nxoe_p_stack_lock(stack);
+    if (stack->nxoe.locking)
+    {
+	retval = nxoe_p_stack_get_locking(stack);
+    }
+    else
 #endif
-    if (stack->aend == stack->abeg)
+    {
+	retval = nxoe_p_stack_get(stack);
+    }
+
+    return retval;
+}
+
+CW_INLINE cw_nxo_t *
+nxoe_p_stack_bget(cw_nxoe_stack_t *a_stack)
+{
+    cw_nxo_t *retval;
+
+    if (a_stack->aend == a_stack->abeg)
     {
 	retval = NULL;
 	goto RETURN;
     }
 
-    retval = stack->a[stack->abase + stack->abeg];
+    retval = a_stack->a[a_stack->abase + a_stack->aend - 1];
 
     cw_dassert(retval->magic == CW_NXO_MAGIC);
     RETURN:
-#ifdef CW_THREADS
-    nxoe_p_stack_unlock(stack);
-#endif
     return retval;
 }
 
@@ -554,21 +710,34 @@ nxo_stack_bget(const cw_nxo_t *a_nxo)
     cw_assert(stack->nxoe.type == NXOT_STACK);
 
 #ifdef CW_THREADS
-    nxoe_p_stack_lock(stack);
+    if (stack->nxoe.locking)
+    {
+	retval = nxoe_p_stack_bget_locking(stack);
+    }
+    else
 #endif
-    if (stack->aend == stack->abeg)
+    {
+	retval = nxoe_p_stack_bget(stack);
+    }
+
+    return retval;
+}
+
+CW_INLINE cw_nxo_t *
+nxoe_p_stack_nget(cw_nxoe_stack_t *a_stack, cw_uint32_t a_index)
+{
+    cw_nxo_t *retval;
+
+    if (a_index >= a_stack->aend - a_stack->abeg)
     {
 	retval = NULL;
 	goto RETURN;
     }
 
-    retval = stack->a[stack->abase + stack->aend - 1];
+    retval = a_stack->a[a_stack->abase + a_stack->abeg + a_index];
 
     cw_dassert(retval->magic == CW_NXO_MAGIC);
     RETURN:
-#ifdef CW_THREADS
-    nxoe_p_stack_unlock(stack);
-#endif
     return retval;
 }
 
@@ -586,21 +755,34 @@ nxo_stack_nget(const cw_nxo_t *a_nxo, cw_uint32_t a_index)
     cw_assert(stack->nxoe.type == NXOT_STACK);
 
 #ifdef CW_THREADS
-    nxoe_p_stack_lock(stack);
+    if (stack->nxoe.locking)
+    {
+	retval = nxoe_p_stack_nget_locking(stack, a_index);
+    }
+    else
 #endif
-    if (a_index >= stack->aend - stack->abeg)
+    {
+	retval = nxoe_p_stack_nget(stack, a_index);
+    }
+
+    return retval;
+}
+
+CW_INLINE cw_nxo_t *
+nxoe_p_stack_nbget(cw_nxoe_stack_t *a_stack, cw_uint32_t a_index)
+{
+    cw_nxo_t *retval;
+
+    if (a_index >= a_stack->aend - a_stack->abeg)
     {
 	retval = NULL;
 	goto RETURN;
     }
 
-    retval = stack->a[stack->abase + stack->abeg + a_index];
+    retval = a_stack->a[a_stack->abase + a_stack->aend - 1 - a_index];
 
     cw_dassert(retval->magic == CW_NXO_MAGIC);
     RETURN:
-#ifdef CW_THREADS
-    nxoe_p_stack_unlock(stack);
-#endif
     return retval;
 }
 
@@ -618,21 +800,57 @@ nxo_stack_nbget(const cw_nxo_t *a_nxo, cw_uint32_t a_index)
     cw_assert(stack->nxoe.type == NXOT_STACK);
 
 #ifdef CW_THREADS
-    nxoe_p_stack_lock(stack);
-#endif
-    if (a_index >= stack->aend - stack->abeg)
+    if (stack->nxoe.locking)
     {
-	retval = NULL;
-	goto RETURN;
+	retval = nxoe_p_stack_nbget_locking(stack, a_index);
+    }
+    else
+#endif
+    {
+	retval = nxoe_p_stack_nbget(stack, a_index);
     }
 
-    retval = stack->a[stack->abase + stack->aend - 1 - a_index];
+    return retval;
+}
 
-    cw_dassert(retval->magic == CW_NXO_MAGIC);
-    RETURN:
+CW_INLINE cw_bool_t
+nxoe_p_stack_exch(cw_nxoe_stack_t *a_stack)
+{
+    cw_bool_t retval;
+
+    if (a_stack->aend - a_stack->abeg < 2)
+    {
+	retval = TRUE;
+	goto ERROR;
+    }
+
+    /* Protect the region that is being modified.  Do the exchange operation at
+     * the same time, in order to be consistent with nxo_stack_roll(). */
+    a_stack->rbeg = a_stack->abeg;
+    a_stack->rend = a_stack->aend;
+    a_stack->r[a_stack->rbase + a_stack->rbeg]
+	= a_stack->a[a_stack->abase + a_stack->abeg + 1];
+    a_stack->r[a_stack->rbase + a_stack->rbeg + 1]
+	= a_stack->a[a_stack->abase + a_stack->abeg];
 #ifdef CW_THREADS
-    nxoe_p_stack_unlock(stack);
+    mb_write();
+    a_stack->rstate = RSTATE_RMASK;
+    mb_write();
 #endif
+
+    /* Exchange. */
+    memcpy(&a_stack->a[a_stack->abase + a_stack->abeg],
+	   &a_stack->r[a_stack->rbase + a_stack->rbeg],
+	   2 * sizeof(cw_nxo_t *));
+
+#ifdef CW_THREADS
+    /* Unprotect. */
+    mb_write();
+    a_stack->rstate = RSTATE_NONE;
+#endif
+
+    retval = FALSE;
+    ERROR:
     return retval;
 }
 
@@ -650,67 +868,25 @@ nxo_stack_exch(cw_nxo_t *a_nxo)
     cw_assert(stack->nxoe.type == NXOT_STACK);
 
 #ifdef CW_THREADS
-    nxoe_p_stack_lock(stack);
-#endif
-    if (stack->aend - stack->abeg < 2)
+    if (stack->nxoe.locking)
     {
-#ifdef CW_THREADS
-	nxoe_p_stack_unlock(stack);
+	retval = nxoe_p_stack_exch_locking(stack);
+    }
+    else
 #endif
-	retval = TRUE;
-	goto ERROR;
+    {
+	retval = nxoe_p_stack_exch(stack);
     }
 
-    /* Protect the region that is being modified.  Do the exchange operation at
-     * the same time, in order to be consistent with nxo_stack_roll(). */
-    stack->rbeg = stack->abeg;
-    stack->rend = stack->aend;
-    stack->r[stack->rbase + stack->rbeg]
-	= stack->a[stack->abase + stack->abeg + 1];
-    stack->r[stack->rbase + stack->rbeg + 1]
-	= stack->a[stack->abase + stack->abeg];
-#ifdef CW_THREADS
-    mb_write();
-    stack->rstate = RSTATE_RMASK;
-    mb_write();
-#endif
-
-    /* Exchange. */
-    memcpy(&stack->a[stack->abase + stack->abeg],
-	   &stack->r[stack->rbase + stack->rbeg],
-	   2 * sizeof(cw_nxo_t *));
-
-#ifdef CW_THREADS
-    /* Unprotect. */
-    mb_write();
-    stack->rstate = RSTATE_NONE;
-
-    nxoe_p_stack_unlock(stack);
-#endif
-
-    retval = FALSE;
-    ERROR:
     return retval;
 }
 
 CW_INLINE void
-nxo_stack_rot(cw_nxo_t *a_nxo, cw_sint32_t a_amount)
+nxoe_p_stack_rot(cw_nxoe_stack_t *a_stack, cw_sint32_t a_amount)
 {
-    cw_nxoe_stack_t *stack;
     cw_uint32_t trbase, count;
 
-    cw_check_ptr(a_nxo);
-    cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
-
-    stack = (cw_nxoe_stack_t *) a_nxo->o.nxoe;
-    cw_dassert(stack->nxoe.magic == CW_NXOE_MAGIC);
-    cw_assert(stack->nxoe.type == NXOT_STACK);
-
-#ifdef CW_THREADS
-    nxoe_p_stack_lock(stack);
-#endif
-
-    cw_assert(stack->aend > stack->abeg);
+    cw_assert(a_stack->aend > a_stack->abeg);
 
     /* Calculate the current index of the element that will end up on top of the
      * stack.  This allows us to do the rotation with a minimum number of
@@ -720,7 +896,7 @@ nxo_stack_rot(cw_nxo_t *a_nxo, cw_sint32_t a_amount)
      * will never do this, so it's not worth specifically optimizing, but it
      * falls out of these calculations with no extra work, since we already have
      * to deal with upward versus downward rotating calculations. */
-    count = stack->aend - stack->abeg;
+    count = a_stack->aend - a_stack->abeg;
     if (a_amount < 0)
     {
 	/* Convert a_amount to a positive equivalent. */
@@ -735,9 +911,6 @@ nxo_stack_rot(cw_nxo_t *a_nxo, cw_sint32_t a_amount)
     if (a_amount == 0)
     {
 	/* Noop. */
-#ifdef CW_THREADS
-	nxoe_p_stack_unlock(stack);
-#endif
 	return;
     }
 
@@ -759,101 +932,166 @@ nxo_stack_rot(cw_nxo_t *a_nxo, cw_sint32_t a_amount)
      *         \----------/ /  /
      *
      * Decide whether to do the rotation in place, or copy the entire array. */
-    if (count - a_amount <= stack->abeg)
+    if (count - a_amount <= a_stack->abeg)
     {
 	/* Copy the end of the array to the beginning. */
 
 	/* Protect the region that is being moved. */
-	trbase = stack->rbase;
-	stack->rbase = stack->abase;
-	stack->rbeg = stack->abeg + a_amount;
-	stack->rend = stack->aend;
+	trbase = a_stack->rbase;
+	a_stack->rbase = a_stack->abase;
+	a_stack->rbeg = a_stack->abeg + a_amount;
+	a_stack->rend = a_stack->aend;
 #ifdef CW_THREADS
 	mb_write();
-	stack->rstate = RSTATE_RMASK;
+	a_stack->rstate = RSTATE_RMASK;
 	mb_write();
 #endif
 
 	/* Rotate. */
-	memcpy(&stack->a[stack->abase + stack->abeg - (count - a_amount)],
-	       &stack->a[stack->abase + stack->abeg + a_amount],
+	memcpy(&a_stack->a[a_stack->abase + a_stack->abeg - (count - a_amount)],
+	       &a_stack->a[a_stack->abase + a_stack->abeg + a_amount],
 	       (count - a_amount) * sizeof(cw_nxo_t *));
-	stack->abeg -= (count - a_amount);
-	stack->aend -= (count - a_amount);
+	a_stack->abeg -= (count - a_amount);
+	a_stack->aend -= (count - a_amount);
 
 	/* Unprotect. */
 #ifdef CW_THREADS
 	mb_write();
-	stack->rstate = RSTATE_NONE;
+	a_stack->rstate = RSTATE_NONE;
 	mb_write();
 #endif
-	stack->rbase = trbase;
+	a_stack->rbase = trbase;
     }
-    else if (a_amount <= stack->ahlen - stack->aend)
+    else if (a_amount <= a_stack->ahlen - a_stack->aend)
     {
 	/* Copy the beginning of the array to the end. */
 
 	/* Protect the region that is being moved. */
-	trbase = stack->rbase;
-	stack->rbase = stack->abase;
-	stack->rbeg = stack->abeg;
-	stack->rend = stack->abeg + a_amount;
+	trbase = a_stack->rbase;
+	a_stack->rbase = a_stack->abase;
+	a_stack->rbeg = a_stack->abeg;
+	a_stack->rend = a_stack->abeg + a_amount;
 #ifdef CW_THREADS
 	mb_write();
-	stack->rstate = RSTATE_RMASK;
+	a_stack->rstate = RSTATE_RMASK;
 	mb_write();
 #endif
 
 	/* Rotate. */
-	memcpy(&stack->a[stack->abase + stack->aend],
-	       &stack->a[stack->abase + stack->abeg],
+	memcpy(&a_stack->a[a_stack->abase + a_stack->aend],
+	       &a_stack->a[a_stack->abase + a_stack->abeg],
 	       a_amount * sizeof(cw_nxo_t *));
-	stack->aend += a_amount;
-	stack->abeg += a_amount;
+	a_stack->aend += a_amount;
+	a_stack->abeg += a_amount;
 
 	/* Unprotect. */
 #ifdef CW_THREADS
 	mb_write();
-	stack->rstate = RSTATE_NONE;
+	a_stack->rstate = RSTATE_NONE;
 	mb_write();
 #endif
-	stack->rbase = trbase;
+	a_stack->rbase = trbase;
     }
     else
     {
 	/* Copy the entire array, swapping abase and rbase. */
 
 	/* Protect the region that is being moved. */
-	trbase = stack->rbase;
-	stack->rbase = stack->abase;
-	stack->rbeg = stack->abeg;
-	stack->rend = stack->aend;
+	trbase = a_stack->rbase;
+	a_stack->rbase = a_stack->abase;
+	a_stack->rbeg = a_stack->abeg;
+	a_stack->rend = a_stack->aend;
 #ifdef CW_THREADS
 	mb_write();
-	stack->rstate = RSTATE_RONLY;
+	a_stack->rstate = RSTATE_RONLY;
 	mb_write();
 #endif
 
 	/* Rotate and center. */
-	stack->abase = trbase;
-	stack->abeg = (stack->ahlen - (stack->rend - stack->rbeg)) / 2;
-	stack->aend = stack->abeg + count;
-	memcpy(&stack->a[stack->abase + stack->abeg],
-	       &stack->r[stack->rbase + stack->rbeg + a_amount],
+	a_stack->abase = trbase;
+	a_stack->abeg = (a_stack->ahlen - (a_stack->rend - a_stack->rbeg)) / 2;
+	a_stack->aend = a_stack->abeg + count;
+	memcpy(&a_stack->a[a_stack->abase + a_stack->abeg],
+	       &a_stack->r[a_stack->rbase + a_stack->rbeg + a_amount],
 	       (count - a_amount) * sizeof(cw_nxo_t *));
-	memcpy(&stack->a[stack->abase + stack->abeg + (count - a_amount)],
-	       &stack->r[stack->rbase + stack->rbeg],
+	memcpy(&a_stack->a[a_stack->abase + a_stack->abeg + (count - a_amount)],
+	       &a_stack->r[a_stack->rbase + a_stack->rbeg],
 	       a_amount * sizeof(cw_nxo_t *));
 
 #ifdef CW_THREADS
 	/* Unprotect. */
 	mb_write();
-	stack->rstate = RSTATE_NONE;
+	a_stack->rstate = RSTATE_NONE;
 #endif
     }
+}
+
+CW_INLINE void
+nxo_stack_rot(cw_nxo_t *a_nxo, cw_sint32_t a_amount)
+{
+    cw_nxoe_stack_t *stack;
+
+    cw_check_ptr(a_nxo);
+    cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+
+    stack = (cw_nxoe_stack_t *) a_nxo->o.nxoe;
+    cw_dassert(stack->nxoe.magic == CW_NXOE_MAGIC);
+    cw_assert(stack->nxoe.type == NXOT_STACK);
+
 #ifdef CW_THREADS
-    nxoe_p_stack_unlock(stack);
+    if (stack->nxoe.locking)
+    {
+	nxoe_p_stack_rot_locking(stack, a_amount);
+    }
+    else
 #endif
+    {
+	nxoe_p_stack_rot(stack, a_amount);
+    }
+}
+
+CW_INLINE cw_bool_t
+nxoe_p_stack_roll(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count,
+		  cw_sint32_t a_amount)
+{
+    cw_bool_t retval;
+
+    if (a_count > a_stack->aend - a_stack->abeg)
+    {
+	retval = TRUE;
+	goto RETURN;
+    }
+
+    /* Protect the region that is being modified.  Do the roll operation at the
+     * same time, in order to save one memcpy() call. */
+    a_stack->rbeg = a_stack->abeg;
+    a_stack->rend = a_stack->abeg + a_count;
+    memcpy(&a_stack->r[a_stack->rbase + a_stack->rbeg],
+	   &a_stack->a[a_stack->abase + a_stack->abeg + a_amount],
+	   (a_count - a_amount) * sizeof(cw_nxo_t *));
+    memcpy(&a_stack->r[a_stack->rbase + a_stack->rbeg + (a_count - a_amount)],
+	   &a_stack->a[a_stack->abase + a_stack->abeg],
+	   a_amount * sizeof(cw_nxo_t *));
+#ifdef CW_THREADS
+    mb_write();
+    a_stack->rstate = RSTATE_RMASK;
+    mb_write();
+#endif
+
+    /* Roll. */
+    memcpy(&a_stack->a[a_stack->abase + a_stack->abeg],
+	   &a_stack->r[a_stack->rbase + a_stack->rbeg],
+	   a_count * sizeof(cw_nxo_t *));
+
+#ifdef CW_THREADS
+    /* Unprotect. */
+    mb_write();
+    a_stack->rstate = RSTATE_NONE;
+#endif
+
+    retval = FALSE;
+    RETURN:
+    return retval;
 }
 
 CW_INLINE cw_bool_t
@@ -893,53 +1131,22 @@ nxo_stack_roll(cw_nxo_t *a_nxo, cw_uint32_t a_count, cw_sint32_t a_amount)
     if (a_amount == 0)
     {
 	/* Noop. */
+	retval = FALSE;
 	goto RETURN;
     }
 
 #ifdef CW_THREADS
-    nxoe_p_stack_lock(stack);
-#endif
-    if (a_count > stack->aend - stack->abeg)
+    if (stack->nxoe.locking)
     {
-#ifdef CW_THREADS
-	nxoe_p_stack_unlock(stack);
+	retval = nxoe_p_stack_roll_locking(stack, a_count, a_amount);
+    }
+    else
 #endif
-	retval = TRUE;
-	goto ERROR;
+    {
+	retval = nxoe_p_stack_roll(stack, a_count, a_amount);
     }
 
-    /* Protect the region that is being modified.  Do the roll operation at the
-     * same time, in order to save one memcpy() call. */
-    stack->rbeg = stack->abeg;
-    stack->rend = stack->abeg + a_count;
-    memcpy(&stack->r[stack->rbase + stack->rbeg],
-	   &stack->a[stack->abase + stack->abeg + a_amount],
-	   (a_count - a_amount) * sizeof(cw_nxo_t *));
-    memcpy(&stack->r[stack->rbase + stack->rbeg + (a_count - a_amount)],
-	   &stack->a[stack->abase + stack->abeg],
-	   a_amount * sizeof(cw_nxo_t *));
-#ifdef CW_THREADS
-    mb_write();
-    stack->rstate = RSTATE_RMASK;
-    mb_write();
-#endif
-
-    /* Roll. */
-    memcpy(&stack->a[stack->abase + stack->abeg],
-	   &stack->r[stack->rbase + stack->rbeg],
-	   a_count * sizeof(cw_nxo_t *));
-
-#ifdef CW_THREADS
-    /* Unprotect. */
-    mb_write();
-    stack->rstate = RSTATE_NONE;
-
-    nxoe_p_stack_unlock(stack);
-#endif
-
     RETURN:
-    retval = FALSE;
-    ERROR:
     return retval;
 }
 #endif /* (defined(CW_USE_INLINES) || defined(CW_NXO_STACK_C_)) */

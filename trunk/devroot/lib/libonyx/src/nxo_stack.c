@@ -279,10 +279,27 @@ nxoe_p_stack_shrink(cw_nxoe_stack_t *a_stack)
     a_stack->r = a_stack->a;
 }
 
-/* This function handles a special case for nxo_stack_push(), but is done as a
- * separate function to keep nxo_stack_push() small. */
+/* The following functions handle special cases for various stack operations.
+ * They are done as separate functions to keep the inline functions as small and
+ * branch-free as possible. */
+
+#ifdef CW_THREADS
+cw_uint32_t
+nxoe_p_stack_count_locking(cw_nxoe_stack_t *a_stack)
+{
+    cw_uint32_t retval;
+    cw_nxoe_stack_t *stack;
+
+    mtx_lock(&a_stack->lock);
+    retval = stack->aend - stack->abeg;
+    mtx_unlock(&a_stack->lock);
+
+    return retval;
+}
+#endif
+
 cw_nxo_t *
-nxoe_p_stack_push(cw_nxoe_stack_t *a_stack)
+nxoe_p_stack_push_hard(cw_nxoe_stack_t *a_stack)
 {
     cw_nxo_t *retval;
 
@@ -311,10 +328,22 @@ nxoe_p_stack_push(cw_nxoe_stack_t *a_stack)
     return retval;
 }
 
-/* This function handles a special case for nxo_stack_bpush(), but is done as a
- * separate function to keep nxo_stack_bpush() small. */
+#ifdef CW_THREADS
 cw_nxo_t *
-nxoe_p_stack_bpush(cw_nxoe_stack_t *a_stack)
+nxoe_p_stack_push_locking(cw_nxoe_stack_t *a_stack)
+{
+    cw_nxo_t *retval;
+
+    mtx_lock(&a_stack->lock);
+    retval = nxoe_p_stack_push(a_stack);
+    mtx_unlock(&a_stack->lock);
+
+    return retval;
+}
+#endif
+
+cw_nxo_t *
+nxoe_p_stack_bpush_hard(cw_nxoe_stack_t *a_stack)
 {
     cw_nxo_t *retval;
 
@@ -345,10 +374,50 @@ nxoe_p_stack_bpush(cw_nxoe_stack_t *a_stack)
     return retval;
 }
 
-/* This function handles a special case for nxo_stack_npop(), but is done as a
- * separate function to keep nxo_stack_npop() small. */
+#ifdef CW_THREADS
+cw_nxo_t *
+nxoe_p_stack_bpush_locking(cw_nxoe_stack_t *a_stack)
+{
+    cw_nxo_t *retval;
+
+    mtx_lock(&a_stack->lock);
+    retval = nxoe_p_stack_bpush(a_stack);
+    mtx_unlock(&a_stack->lock);
+
+    return retval;
+}
+#endif
+
+#ifdef CW_THREADS
+cw_bool_t
+nxoe_p_stack_pop_locking(cw_nxoe_stack_t *a_stack)
+{
+    cw_bool_t retval;
+
+    mtx_lock(&a_stack->lock);
+    retval = nxoe_p_stack_pop(a_stack);
+    mtx_unlock(&a_stack->lock);
+
+    return retval;
+}
+#endif
+
+#ifdef CW_THREADS
+cw_bool_t
+nxoe_p_stack_bpop_locking(cw_nxoe_stack_t *a_stack)
+{
+    cw_bool_t retval;
+
+    mtx_lock(&a_stack->lock);
+    retval = nxoe_p_stack_bpop(a_stack);
+    mtx_unlock(&a_stack->lock);
+
+    return retval;
+}
+#endif
+
 void
-nxoe_p_stack_npop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
+nxoe_p_stack_npop_hard(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
 {
     cw_uint32_t i;
 
@@ -371,10 +440,22 @@ nxoe_p_stack_npop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
     }
 }
 
-/* This function handles a special case for nxo_stack_nbpop(), but is done as a
- * separate function to keep nxo_stack_nbpop() small. */
+#ifdef CW_THREADS
+cw_bool_t
+nxoe_p_stack_npop_locking(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
+{
+    cw_bool_t retval;
+
+    mtx_lock(&a_stack->lock);
+    retval = nxoe_p_stack_npop(a_stack, a_count);
+    mtx_unlock(&a_stack->lock);
+
+    return retval;
+}
+#endif
+
 void
-nxoe_p_stack_nbpop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
+nxoe_p_stack_nbpop_hard(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
 {
     cw_uint32_t i;
 
@@ -396,3 +477,112 @@ nxoe_p_stack_nbpop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
 		 sizeof(cw_nxo_t));
     }
 }
+
+#ifdef CW_THREADS
+cw_bool_t
+nxoe_p_stack_nbpop_locking(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
+{
+    cw_bool_t retval;
+
+    mtx_lock(&a_stack->lock);
+    retval = nxoe_p_stack_nbpop(a_stack, a_count);
+    mtx_unlock(&a_stack->lock);
+
+    return retval;
+}
+#endif
+
+#ifdef CW_THREADS
+cw_nxo_t *
+nxoe_p_stack_get_locking(cw_nxoe_stack_t *a_stack)
+{
+    cw_nxo_t *retval;
+
+    mtx_lock(&a_stack->lock);
+    retval = nxoe_p_stack_get(a_stack);
+    mtx_unlock(&a_stack->lock);
+
+    return retval;
+}
+#endif
+
+#ifdef CW_THREADS
+cw_nxo_t *
+nxoe_p_stack_bget_locking(cw_nxoe_stack_t *a_stack)
+{
+    cw_nxo_t *retval;
+
+    mtx_lock(&a_stack->lock);
+    retval = nxoe_p_stack_bget(a_stack);
+    mtx_unlock(&a_stack->lock);
+
+    return retval;
+}
+#endif
+
+#ifdef CW_THREADS
+cw_nxo_t *
+nxoe_p_stack_nget_locking(cw_nxoe_stack_t *a_stack, cw_uint32_t a_index)
+{
+    cw_nxo_t *retval;
+    
+    mtx_lock(&a_stack->lock);
+    retval = nxoe_p_stack_nget(a_stack, a_index);
+    mtx_unlock(&a_stack->lock);
+
+    return retval;
+}
+#endif
+
+#ifdef CW_THREADS
+cw_nxo_t *
+nxoe_p_stack_nbget_locking(cw_nxoe_stack_t *a_stack, cw_uint32_t a_index)
+{
+    cw_nxo_t *retval;
+    
+    mtx_lock(&a_stack->lock);
+    retval = nxoe_p_stack_nbget(a_stack, a_index);
+    mtx_unlock(&a_stack->lock);
+
+    return retval;
+}
+#endif
+
+#ifdef CW_THREADS
+cw_bool_t
+nxoe_p_stack_exch_locking(cw_nxoe_stack_t *a_stack)
+{
+    cw_bool_t retval;
+    
+    mtx_lock(&a_stack->lock);
+    retval = nxoe_p_stack_exch(a_stack);
+    mtx_unlock(&a_stack->lock);
+
+    return retval;
+}
+#endif
+
+#ifdef CW_THREADS
+void
+nxoe_p_stack_rot_locking(cw_nxoe_stack_t *a_stack, cw_sint32_t a_amount)
+{
+    mtx_lock(&a_stack->lock);
+    nxoe_p_stack_rot(a_stack, a_amount);
+    mtx_unlock(&a_stack->lock);
+}
+#endif
+
+#ifdef CW_THREADS
+cw_bool_t
+nxoe_p_stack_roll_locking(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count,
+			  cw_sint32_t a_amount)
+{
+    cw_bool_t retval;
+
+    mtx_lock(&a_stack->lock);
+    retval = nxoe_p_stack_roll(a_stack, a_count, a_amount);
+    mtx_unlock(&a_stack->lock);
+
+    return retval;
+}
+#endif
