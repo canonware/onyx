@@ -101,6 +101,17 @@ allocator (also accessible via the \classname{mem} APIs).
 is tied to the garbage collector (also accessible via the \classname{nxa} APIs).
 \end{description}
 
+\section{Multiple interpreters}
+\libname{libonyx} supports running multiple interpreters (encapsulated by the
+\classname{nx} class) in the same process, though as already mentioned, it
+usually makes more sense to use threads.  The values associated with
+\htmlref{argv}{systemdict:argv} and \htmlref{envdict}{systemdict:envdict} are
+shared among all interpreters, but otherwise, no state is shared between
+interpreters by default.  However, since all interpreters share a single garbage
+collector, C code can create references to the same Onyx object in more than one
+interpreter, and no problems will result (normal object synchronization issues
+not withstanding).
+
 \section{Threads}
 \libname{libonyx} encapsulates each interpreter instance in an \classname{nx}
 object.  An \classname{nx} object supports running multiple concurrent threads.
