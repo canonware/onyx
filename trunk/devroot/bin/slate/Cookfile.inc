@@ -87,14 +87,14 @@ slate_install : [SLATE]
        [EXTRALIBS];
   [CHMOD] 0755 [PREFIX]/bin/slate;
 
-/*  [INSTALL] -d [PREFIX]/man/man1;
-  [INSTALL] -m 0444 [objdir]/bin/slate/man/man1/slate.1 [PREFIX]/man/man1; */
+  [INSTALL] -d [PREFIX]/man/man1;
+  [INSTALL] -m 0444 [objdir]/bin/slate/man/man1/slate.1 [PREFIX]/man/man1;
 }
 
 slate_uninstall :
 {
   rm -f [PREFIX]/bin/slate;
-/*  rm -f [PREFIX]/man/man1/slate.1; */
+  rm -f [PREFIX]/man/man1/slate.1;
 }
 
 slate_clean :
@@ -104,7 +104,7 @@ slate_clean :
 slate_distclean :
 {
   rm -f [objdir]/bin/slate/doc/latex/manual.tex;
-/*  rm -f [objdir]/bin/slate/man/man1/slate.1; */
+  rm -f [objdir]/bin/slate/man/man1/slate.1;
 }
 
 /*
