@@ -774,7 +774,14 @@ systemdict_atan(cw_nxo_t *a_thread)
 void
 systemdict_bdup(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack;
+    cw_nxo_t *orig, *dup;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+
+    NXO_STACK_BGET(orig, ostack, a_thread);
+    dup = nxo_stack_push(ostack);
+    nxo_dup(dup, orig);
 }
 
 void
@@ -801,7 +808,31 @@ systemdict_begin(cw_nxo_t *a_thread)
 void
 systemdict_bidup(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack;
+    cw_nxo_t *nxo, *orig;
+    cw_nxoi_t index;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    if (nxo_type_get(nxo) != NXOT_INTEGER)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    index = nxo_integer_get(nxo);
+    if (index < 0)
+    {
+	nxo_thread_nerror(a_thread, NXN_rangecheck);
+	return;
+    }
+    if (index >= nxo_stack_count(ostack) - 1)
+    {
+	nxo_thread_nerror(a_thread, NXN_stackunderflow);
+	return;
+    }
+
+    orig = nxo_stack_nbget(ostack, index);
+    nxo_dup(nxo, orig);
 }
 
 static void
@@ -906,19 +937,53 @@ systemdict_bindsocket(cw_nxo_t *a_thread)
 void
 systemdict_bipop(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *nxo;
+    cw_nxoi_t index;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    if (nxo_type_get(nxo) != NXOT_INTEGER)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    index = nxo_integer_get(nxo);
+    if (index < 0)
+    {
+	nxo_thread_nerror(a_thread, NXN_rangecheck);
+	return;
+    }
+    if (index >= nxo_stack_count(ostack) - 1)
+    {
+	nxo_thread_nerror(a_thread, NXN_stackunderflow);
+	return;
+    }
+
+    nxo = nxo_stack_nbget(ostack, index);
+    nxo_stack_remove(ostack, nxo);
+    nxo_stack_pop(ostack);
 }
 
 void
 systemdict_bpop(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+
+    NXO_STACK_BPOP(ostack, a_thread);
 }
 
 void
 systemdict_bpush(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *nxo, *bnxo;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    bnxo = nxo_stack_bpush(ostack);
+    nxo_dup(bnxo, nxo);
+    nxo_stack_pop(ostack);
 }
 
 #ifdef CW_THREADS
@@ -2507,7 +2572,16 @@ systemdict_div(cw_nxo_t *a_thread)
 void
 systemdict_dn(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    if (nxo_stack_count(ostack) < 3)
+    {
+	nxo_thread_nerror(a_thread, NXN_stackunderflow);
+	return;
+    }
+
+    nxo_stack_roll(ostack, 3, -1);
 }
 
 void
@@ -3807,7 +3881,26 @@ systemdict_ioctl(cw_nxo_t *a_thread)
 void
 systemdict_ipop(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *nxo;
+    cw_nxoi_t index;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    if (nxo_type_get(nxo) != NXOT_INTEGER)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    index = nxo_integer_get(nxo);
+    if (index < 0)
+    {
+	nxo_thread_nerror(a_thread, NXN_rangecheck);
+	return;
+    }
+
+    NXO_STACK_NGET(nxo, ostack, a_thread, index + 1);
+    nxo_stack_remove(ostack, nxo);
+    nxo_stack_pop(ostack);
 }
 
 void
@@ -4711,13 +4804,55 @@ systemdict_mutex(cw_nxo_t *a_thread)
 void
 systemdict_nbpop(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *nxo;
+    cw_nxoi_t count;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    if (nxo_type_get(nxo) != NXOT_INTEGER)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    count = nxo_integer_get(nxo);
+    if (count < 0)
+    {
+	nxo_thread_nerror(a_thread, NXN_rangecheck);
+	return;
+    }
+    if (count - 1 >= nxo_stack_count(ostack))
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+
+    /* Pop the argument off as well as the count. */
+    nxo_stack_pop(ostack);
+    nxo_stack_nbpop(ostack, count);
 }
 
 void
 systemdict_ndn(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *nxo;
+    cw_nxoi_t count;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    if (nxo_type_get(nxo) != NXOT_INTEGER)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    count = nxo_integer_get(nxo);
+    if (count > nxo_stack_count(ostack) - 1)
+    {
+	nxo_thread_nerror(a_thread, NXN_stackunderflow);
+	return;
+    }
+
+    nxo_stack_pop(ostack);
+    nxo_stack_roll(ostack, count, -1);
 }
 
 void
@@ -4788,7 +4923,12 @@ systemdict_ne(cw_nxo_t *a_thread)
 void
 systemdict_nip(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack;
+    cw_nxo_t *nxo;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_NGET(nxo, ostack, a_thread, 1);
+    nxo_stack_remove(ostack, nxo);
 }
 
 void
@@ -4915,7 +5055,25 @@ systemdict_nsleep(cw_nxo_t *a_thread)
 void
 systemdict_nup(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *nxo;
+    cw_nxoi_t count;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    if (nxo_type_get(nxo) != NXOT_INTEGER)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    count = nxo_integer_get(nxo);
+    if (count > nxo_stack_count(ostack) - 1)
+    {
+	nxo_thread_nerror(a_thread, NXN_stackunderflow);
+	return;
+    }
+
+    nxo_stack_pop(ostack);
+    nxo_stack_roll(ostack, count, 1);
 }
 
 #ifdef CW_POSIX
@@ -5033,7 +5191,13 @@ systemdict_ostack(cw_nxo_t *a_thread)
 void
 systemdict_over(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack;
+    cw_nxo_t *under, *nxo;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_NGET(under, ostack, a_thread, 1);
+    nxo = nxo_stack_push(ostack);
+    nxo_dup(nxo, under);
 }
 
 #ifdef CW_POSIX
@@ -5908,31 +6072,116 @@ systemdict_round(cw_nxo_t *a_thread)
 void
 systemdict_sbdup(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *stack, *orig, *dup;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(stack, ostack, a_thread);
+    if (nxo_type_get(stack) != NXOT_STACK)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+
+    NXO_STACK_BGET(orig, stack, a_thread);
+    dup = nxo_stack_push(stack);
+    nxo_dup(dup, orig);
+
+    nxo_stack_pop(ostack);
 }
 
 void
 systemdict_sbidup(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *nxo, *stack, *orig;
+    cw_nxoi_t index;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    NXO_STACK_DOWN_GET(stack, ostack, a_thread, nxo);
+    if (nxo_type_get(nxo) != NXOT_INTEGER || nxo_type_get(stack) != NXOT_STACK)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    index = nxo_integer_get(nxo);
+    if (index < 0)
+    {
+	nxo_thread_nerror(a_thread, NXN_rangecheck);
+	return;
+    }
+
+    NXO_STACK_NBGET(orig, stack, a_thread, index);
+    nxo = nxo_stack_push(stack);
+    nxo_dup(nxo, orig);
+
+    nxo_stack_npop(ostack, 2);
 }
 
 void
 systemdict_sbipop(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *nxo, *stack;
+    cw_nxoi_t index;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    NXO_STACK_DOWN_GET(stack, ostack, a_thread, nxo);
+    if (nxo_type_get(nxo) != NXOT_INTEGER || nxo_type_get(stack) != NXOT_STACK)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    index = nxo_integer_get(nxo);
+    if (index < 0)
+    {
+	nxo_thread_nerror(a_thread, NXN_rangecheck);
+	return;
+    }
+
+    NXO_STACK_NBGET(nxo, stack, a_thread, index);
+    nxo_stack_remove(stack, nxo);
+
+    nxo_stack_npop(ostack, 2);
 }
 
 void
 systemdict_sbpop(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *stack, *snxo, *onxo;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(stack, ostack, a_thread);
+    if (nxo_type_get(stack) != NXOT_STACK)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+
+    NXO_STACK_BGET(snxo, stack, a_thread);
+    onxo = nxo_stack_under_push(ostack, stack);
+    nxo_dup(onxo, snxo);
+
+    nxo_stack_bpop(stack);
+    nxo_stack_pop(ostack);
 }
 
 void
 systemdict_sbpush(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *nxo, *stack, *nnxo;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    NXO_STACK_DOWN_GET(stack, ostack, a_thread, nxo);
+    if (nxo_type_get(stack) != NXOT_STACK)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+
+    nnxo = nxo_stack_bpush(stack);
+    nxo_dup(nnxo, nxo);
+    nxo_stack_npop(ostack, 2);
 }
 
 void
@@ -6041,7 +6290,22 @@ systemdict_scounttomark(cw_nxo_t *a_thread)
 void
 systemdict_sdn(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *stack;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(stack, ostack, a_thread);
+    if (nxo_type_get(stack) != NXOT_STACK)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    if (nxo_stack_count(stack) < 3)
+    {
+	nxo_thread_nerror(a_thread, NXN_stackunderflow);
+	return;
+    }
+
+    nxo_stack_roll(stack, 3, -1);
 }
 
 void
@@ -6615,43 +6879,220 @@ systemdict_sin(cw_nxo_t *a_thread)
 void
 systemdict_sipop(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *nxo, *stack;
+    cw_nxoi_t index;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    NXO_STACK_DOWN_GET(stack, ostack, a_thread, nxo);
+    if (nxo_type_get(nxo) != NXOT_INTEGER || nxo_type_get(stack) != NXOT_STACK)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    index = nxo_integer_get(nxo);
+    if (index < 0)
+    {
+	nxo_thread_nerror(a_thread, NXN_rangecheck);
+	return;
+    }
+
+    NXO_STACK_NGET(nxo, stack, a_thread, index);
+    nxo_stack_remove(stack, nxo);
+
+    nxo_stack_npop(ostack, 2);
 }
 
 void
 systemdict_snbpop(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *nxo, *stack, *snxo, *sdup;
+    cw_nxoi_t count;
+    cw_uint32_t i;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    NXO_STACK_DOWN_GET(stack, ostack, a_thread, nxo);
+    if (nxo_type_get(nxo) != NXOT_INTEGER || nxo_type_get(stack) != NXOT_STACK)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    count = nxo_integer_get(nxo);
+    if (count < 0)
+    {
+	nxo_thread_nerror(a_thread, NXN_rangecheck);
+	return;
+    }
+    if (count > nxo_stack_count(stack))
+    {
+	nxo_thread_nerror(a_thread, NXN_stackunderflow);
+	return;
+    }
+
+    nxo_stack_new(nxo, nxo_thread_nx_get(a_thread),
+		  nxo_thread_currentlocking(a_thread));
+
+    /* Iteratively create dup's and bpop.. */
+    for (i = 0, snxo = NULL, sdup = NULL; i < count; i++)
+    {
+	snxo = nxo_stack_bget(stack);
+	sdup = nxo_stack_push(nxo);
+	nxo_dup(sdup, snxo);
+	nxo_stack_bpop(stack);
+    }
+
+    nxo_stack_remove(ostack, stack);
 }
 
 void
 systemdict_sndn(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *stack, *nxo;
+    cw_nxoi_t count;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    NXO_STACK_DOWN_GET(stack, ostack, a_thread, nxo);
+    if (nxo_type_get(nxo) != NXOT_INTEGER || nxo_type_get(stack) != NXOT_STACK)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    count = nxo_integer_get(nxo);
+    if (count > nxo_stack_count(stack))
+    {
+	nxo_thread_nerror(a_thread, NXN_stackunderflow);
+	return;
+    }
+
+    nxo_stack_roll(stack, count, -1);
+    nxo_stack_npop(ostack, 2);
 }
 
 void
 systemdict_sndup(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *stack, *nxo, *dup;
+    cw_uint32_t i;
+    cw_nxoi_t count;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    NXO_STACK_DOWN_GET(stack, ostack, a_thread, nxo);
+    if (nxo_type_get(nxo) != NXOT_INTEGER || nxo_type_get(stack) != NXOT_STACK)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    count = nxo_integer_get(nxo);
+    if (count < 0)
+    {
+	nxo_thread_nerror(a_thread, NXN_rangecheck);
+	return;
+    }
+    if (count > nxo_stack_count(stack))
+    {
+	nxo_thread_nerror(a_thread, NXN_stackunderflow);
+	return;
+    }
+
+    /* Iterate down the stack, creating dup's along the way.  Since we're going
+     * down, it's necessary to use nxo_stack_under_push() to preserve order. */
+    for (i = 0, nxo = NULL, dup = NULL; i < count; i++)
+    {
+	nxo = nxo_stack_down_get(stack, nxo);
+	dup = nxo_stack_under_push(stack, dup);
+	nxo_dup(dup, nxo);
+    }
+
+    nxo_stack_npop(ostack, 2);
 }
 
 void
 systemdict_snip(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *stack, *snxo;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(stack, ostack, a_thread);
+    if (nxo_type_get(stack) != NXOT_STACK)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+
+    NXO_STACK_NGET(snxo, stack, a_thread, 1);
+    nxo_stack_remove(stack, snxo);
+    nxo_stack_pop(ostack);
 }
 
 void
 systemdict_snpop(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *nxo, *stack, *snxo, *sdup;
+    cw_nxoi_t count;
+    cw_uint32_t i;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    NXO_STACK_DOWN_GET(stack, ostack, a_thread, nxo);
+    if (nxo_type_get(nxo) != NXOT_INTEGER || nxo_type_get(stack) != NXOT_STACK)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    count = nxo_integer_get(nxo);
+    if (count < 0)
+    {
+	nxo_thread_nerror(a_thread, NXN_rangecheck);
+	return;
+    }
+    if (count > nxo_stack_count(stack))
+    {
+	nxo_thread_nerror(a_thread, NXN_stackunderflow);
+	return;
+    }
+
+    nxo_stack_new(nxo, nxo_thread_nx_get(a_thread),
+		  nxo_thread_currentlocking(a_thread));
+
+    /* Iteratively create dup's and pop.  Since we're going down, it's necessary
+     * to use nxo_stack_under_push() to preserve order. */
+    for (i = 0, snxo = NULL, sdup = NULL; i < count; i++)
+    {
+	snxo = nxo_stack_get(stack);
+	sdup = nxo_stack_under_push(nxo, sdup);
+	nxo_dup(sdup, snxo);
+	nxo_stack_pop(stack);
+    }
+
+    nxo_stack_remove(ostack, stack);
 }
 
 void
 systemdict_snup(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *stack, *nxo;
+    cw_nxoi_t count;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    NXO_STACK_DOWN_GET(stack, ostack, a_thread, nxo);
+    if (nxo_type_get(nxo) != NXOT_INTEGER || nxo_type_get(stack) != NXOT_STACK)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    count = nxo_integer_get(nxo);
+    if (count > nxo_stack_count(stack))
+    {
+	nxo_thread_nerror(a_thread, NXN_stackunderflow);
+	return;
+    }
+
+    nxo_stack_roll(stack, count, 1);
+    nxo_stack_npop(ostack, 2);
 }
 
 #ifdef CW_POSIX
@@ -6689,7 +7130,21 @@ systemdict_sockopt(cw_nxo_t *a_thread)
 void
 systemdict_sover(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *stack, *sunder, *snxo;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(stack, ostack, a_thread);
+    if (nxo_type_get(stack) != NXOT_STACK)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+
+    NXO_STACK_NGET(sunder, stack, a_thread, 1);
+    snxo = nxo_stack_push(stack);
+    nxo_dup(snxo, sunder);
+
+    nxo_stack_pop(ostack);
 }
 
 void
@@ -7187,7 +7642,22 @@ systemdict_string(cw_nxo_t *a_thread)
 void
 systemdict_stuck(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *stack, *stop, *snxo;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(stack, ostack, a_thread);
+    if (nxo_type_get(stack) != NXOT_STACK)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+
+    NXO_STACK_GET(stop, stack, a_thread);
+    NXO_STACK_DOWN_GET(snxo, stack, a_thread, stop);
+    snxo = nxo_stack_under_push(ostack, snxo);
+    nxo_dup(snxo, stop);
+
+    nxo_stack_pop(ostack);
 }
 
 void
@@ -7282,13 +7752,42 @@ systemdict_sub(cw_nxo_t *a_thread)
 void
 systemdict_sunder(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *stack, *sunder, *snxo;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(stack, ostack, a_thread);
+    if (nxo_type_get(stack) != NXOT_STACK)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+
+    NXO_STACK_NGET(sunder, stack, a_thread, 1);
+    snxo = nxo_stack_under_push(ostack, sunder);
+    nxo_dup(snxo, sunder);
+
+    nxo_stack_pop(ostack);
 }
 
 void
 systemdict_sup(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *stack;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(stack, ostack, a_thread);
+    if (nxo_type_get(stack) != NXOT_STACK)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    if (nxo_stack_count(stack) < 3)
+    {
+	nxo_thread_nerror(a_thread, NXN_stackunderflow);
+	return;
+    }
+
+    nxo_stack_roll(stack, 3, 1);
 }
 
 /* ( */
@@ -8170,7 +8669,14 @@ systemdict_tstack(cw_nxo_t *a_thread)
 void
 systemdict_tuck(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack;
+    cw_nxo_t *top, *nxo;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(top, ostack, a_thread);
+    NXO_STACK_DOWN_GET(nxo, ostack, a_thread, top);
+    nxo = nxo_stack_under_push(ostack, nxo);
+    nxo_dup(nxo, top);
 }
 
 void
@@ -8268,7 +8774,13 @@ systemdict_undef(cw_nxo_t *a_thread)
 void
 systemdict_under(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack;
+    cw_nxo_t *under, *nxo;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_NGET(under, ostack, a_thread, 1);
+    nxo = nxo_stack_under_push(ostack, under);
+    nxo_dup(nxo, under);
 }
 
 #ifdef CW_POSIX
@@ -8418,7 +8930,16 @@ systemdict_until(cw_nxo_t *a_thread)
 void
 systemdict_up(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    if (nxo_stack_count(ostack) < 3)
+    {
+	nxo_thread_nerror(a_thread, NXN_stackunderflow);
+	return;
+    }
+
+    nxo_stack_roll(ostack, 3, 1);
 }
 
 #ifdef CW_THREADS
