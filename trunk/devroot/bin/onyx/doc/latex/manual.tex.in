@@ -28,13 +28,16 @@ the main Onyx language documentation.
 
 \binname{onyx} -e {\lt}expr{\gt}
 
+\binname{onyx} [-i {\lt}init{\gt}]*
+
 \binname{onyx} {\lt}file{\gt} [{\lt}args{\gt}]
 
 \subsection{Options}
 \begin{description}
-\item[-e {\lt}expr{\gt}: ] Execute {\lt}expr{\gt} as Onyx code.
 \item[-h: ] Display usage information and exit.
 \item[-V: ] Display the version number and exit.
+\item[-e {\lt}expr{\gt}: ] Execute {\lt}expr{\gt} as Onyx code.
+\item[-i {\lt}file{\gt}: ] Execute initialization {\lt}file{\gt}.
 \end{description}
 
 \section{Environment variables}
@@ -42,6 +45,9 @@ the main Onyx language documentation.
 \item[ONYX\_EDITOR: ] By default, the command line editor uses emacs key
 bindings.  Use this variable to explicitly set the key bindings to either
 ``emacs'' or ``vi''.
+\item[ONYXRC: ] If this variable is set to the name of a file, that file will be
+executed as part of the initialization of interactive onyx sessions.  A typical
+setting for this would be ``{\twid}/.onyxrc''.
 \end{description}
 
 \section{Language differences}

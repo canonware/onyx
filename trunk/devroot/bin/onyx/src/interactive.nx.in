@@ -54,9 +54,6 @@ errordict begin
 	stdin cvx stopped pop
     } bind def
 end
-
-# Print the product and version info.
-product print `, version ' print version print `.\n' print flush
 ' cat
 @enable_modprompt@ 1 eq {
     `

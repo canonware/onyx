@@ -17,6 +17,9 @@ onyx - stand-alone Onyx language interpreter
 .B onyx \-e
 .I <expr>
 .br
+.B onyx \-i
+.RI [ <file> ]*
+.br
 .B onyx
 .I <file>
 .RI [ <args> ]
@@ -36,6 +39,13 @@ formats.  See the FILES section below.
 Execute
 .I <expr>
 as Onyx code.
+.RE
+.PP
+.IP \-i
+.I <file>
+.RS
+Execute initalization
+.IR <file> .
 .RE
 .PP
 .IP \-h

@@ -1,3 +1,11 @@
+2003-02-26 : Jason Evans <jasone@canonware.com>
+
+	* bin/onyx/src/interactive.nx.in : Stop printing product information
+	  during interactive startup.
+
+	* bin/onyx/src/onyx.c : Add -i command line flag.  Add ONYXRC
+	  environment variable support.
+
 2003-02-15 : Jason Evans <jasone@canonware.com>
 
 	* Onyx 4.3.1 released.

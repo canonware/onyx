@@ -60,10 +60,15 @@ void
 usage(void);
 
 int
-interactive_run(int argc, char **argv, char **envp);
+interactive_run(int argc, char **argv, char **envp, cw_uint8_t **a_init,
+		cw_uint32_t a_ninit);
 
 int
-batch_run(int argc, char **argv, char **envp);
+batch_run(int argc, char **argv, char **envp, cw_bool_t a_version,
+	  cw_uint8_t *a_expression);
+
+cw_bool_t
+file_setup(cw_nx_t *a_nx, cw_nxo_t *a_thread, const char *a_filename);
 
 #if (!defined(CW_POSIX_FILE) || !defined(CW_USE_MODPROMPT))
 void
@@ -91,20 +96,109 @@ nx_write(void *a_arg, cw_nxo_t *a_file, const cw_uint8_t *a_str,
 int
 main(int argc, char **argv, char **envp)
 {
-    int retval;
+    int retval, c;
+    cw_bool_t opt_version = FALSE;
+    cw_uint8_t *opt_expression = NULL;
+    cw_uint32_t opt_ninit = 0;
+    cw_uint8_t **opt_init = NULL;
 
     libonyx_init();
 
-    /* Run differently, depending on whether this is an interactive session. */
-    if (isatty(0) && argc == 1)
+    /* Parse command line arguments, but postpone taking any actions that
+     * require the onyx interpreter to be up and running.  This is necessary
+     * because we need to know how much of argv to pass to nx_new(). */
+    while ((c = getopt(argc, argv,
+#ifdef _GNU_SOURCE
+		       /* Without this, glibc will permute unknown options to
+			* the end of the argument list. */
+		       "+"
+#endif
+		       "hVe:i:")) != -1)
     {
-	retval = interactive_run(argc, argv, envp);
+	switch (c)
+	{
+	    case 'h':
+	    {
+		usage();
+		retval = 0;
+		goto CLERROR;
+	    }
+	    case 'V':
+	    {
+		opt_version = TRUE;
+		break;
+	    }
+	    case 'e':
+	    {
+		if (argc != 3)
+		{
+		    fprintf(stderr, "onyx: Incorrect number of arguments\n");
+		    usage();
+		    retval = 1;
+		    goto CLERROR;
+		}
+
+		opt_expression = optarg;
+		break;
+	    }
+#ifdef CW_POSIX_FILE
+	    case 'i':
+	    {
+		opt_ninit++;
+		if (opt_ninit == 1)
+		{
+		    opt_init = (cw_uint8_t **)cw_malloc(sizeof(cw_uint8_t *));
+		}
+		else
+		{
+		    opt_init = (cw_uint8_t **)cw_realloc(opt_init,
+							 sizeof(cw_uint8_t *)
+							 * opt_ninit);
+		}
+		opt_init[opt_ninit - 1] = optarg;
+		break;
+	    }
+#endif
+	    default:
+	    {
+		fprintf(stderr,  "onyx: Unrecognized option\n");
+		usage();
+		retval = 1;
+		goto CLERROR;
+	    }
+	}
+    }
+
+    /* Do additional command line argument error checking. */
+    if ((optind < argc && (opt_expression != NULL || opt_version
+			   || opt_ninit != 0))
+	|| (opt_version && opt_expression != NULL)
+	|| (opt_ninit != 0 && (opt_version || opt_expression != NULL))
+	)
+    {
+	fprintf(stderr, "onyx: Incorrect number of arguments\n");
+	usage();
+	retval = 1;
+	goto CLERROR;
+    }
+
+    /* Run differently, depending on whether this is an interactive session, and
+     * what flags were specified. */
+    if (isatty(0) && optind == argc
+	&& opt_version == FALSE && opt_expression == NULL)
+    {
+	retval = interactive_run(argc, argv, envp, opt_init, opt_ninit);
     }
     else
     {
-	retval = batch_run(argc, argv, envp);
+	retval = batch_run(argc, argv, envp, opt_version, opt_expression);
     }
 
+    CLERROR:
+    if (opt_init != NULL)
+    {
+	cw_free(opt_init);
+    }
     libonyx_shutdown();
     return retval;
 }
@@ -113,23 +207,33 @@ void
 usage(void)
 {
     printf("onyx usage:\n"
-	   "    onyx\n"
 	   "    onyx -h\n"
 	   "    onyx -V\n"
-	   "    onyx -e <expr>\n"
+	   "    onyx [-e <expr>]\n"
+	   "    onyx [-i <file>]*\n"
 	   "    onyx <file> [<args>]\n"
 	   "\n"
 	   "    Option    | Description\n"
-	   "    ----------+------------------------------------\n"
+	   "    ----------+--------------------------------------------------------\n"
 	   "    -h        | Print usage and exit.\n"
 	   "    -V        | Print version information and exit.\n"
-	   "    -e <expr> | Execute <expr> as Onyx code.\n");
+	   "    -e <expr> | Execute <expr> as Onyx code.\n"
+#ifdef CW_POSIX_FILE
+	   "    -i <file> | Execute contents of <file> as Onyx initialization code.\n"
+#endif
+	   );
 }
 
 int
-interactive_run(int argc, char **argv, char **envp)
+interactive_run(int argc, char **argv, char **envp, cw_uint8_t **a_init,
+		cw_uint32_t a_ninit)
 {
+    int retval;
     cw_nx_t nx;
+#ifdef CW_POSIX_FILE
+    cw_uint32_t i;
+    char *init;
+#endif
 
     /* Initialize the interpreter. */
     nx_new(&nx, NULL, argc, argv, envp);
@@ -150,81 +254,48 @@ interactive_run(int argc, char **argv, char **envp)
     /* Run embedded initialization code specific to interactive execution. */
     interactive_nxcode(&thread);
 
+#ifdef CW_POSIX_FILE
+    /* Run initialization scripts, if any. */
+    for (i = 0; i < a_ninit; i++)
+    {
+	if (file_setup(&nx, &thread, (char *)a_init[i]))
+	{
+	    retval = 1;
+	    goto RETURN;
+	}
+	nxo_thread_start(&thread);
+    }
+
+    /* Run RC ("run commands") file specified by ONYXRC environment variable,
+     * if any. */
+    init = getenv("ONYXRC");
+    if (init != NULL)
+    {
+	if (file_setup(&nx, &thread, init))
+	{
+	    retval = 1;
+	    goto RETURN;
+	}
+	nxo_thread_start(&thread);
+    }
+#endif
+
     /* Run the interpreter such that it will not exit on errors. */
     nxo_thread_start(&thread);
 
+    retval = 0;
+    RETURN:
     nx_delete(&nx);
-    return 0;
+    return retval;
 }
 
 int
-batch_run(int argc, char **argv, char **envp)
+batch_run(int argc, char **argv, char **envp, cw_bool_t a_version,
+	  cw_uint8_t *a_expression)
 {
     int retval;
     cw_nxo_t *file;
-    int c;
-    cw_bool_t opt_version = FALSE;
-    cw_uint8_t *opt_expression = NULL;
     cw_nx_t nx;
-
-    /* Parse command line arguments, but postpone taking any actions that
-     * require the onyx interpreter to be up and running.  This is necessary
-     * because we need to know how much of argv to pass to nx_new(). */
-    c = getopt(argc, argv,
-#ifdef _GNU_SOURCE
-	       /* Without this, glibc will permute unknown options to the end of
-		* the argument list. */
-	       "+"
-#endif
-	       "hVe:");
-    switch (c)
-    {
-	case 'h':
-	{
-	    usage();
-	    retval = 0;
-	    goto CLERROR;
-	}
-	case 'V':
-	{
-	    opt_version = TRUE;
-	    break;
-	}
-	case 'e':
-	{
-	    if (argc != 3)
-	    {
-		fprintf(stderr, "onyx: Incorrect number of arguments\n");
-		usage();
-		retval = 1;
-		goto CLERROR;
-	    }
-
-	    opt_expression = optarg;
-	    break;
-	}
-	case -1:
-	{
-	    break;
-	}
-	default:
-	{
-	    fprintf(stderr,  "onyx: Unrecognized option\n");
-	    usage();
-	    retval = 1;
-	    goto CLERROR;
-	}
-    }
-
-    /* Do additional command line argument error checking. */
-    if ((optind < argc && (opt_expression != NULL || opt_version))
-	|| (opt_version && opt_expression != NULL))
-    {
-	fprintf(stderr, "onyx: Incorrect number of arguments\n");
-	usage();
-	retval = 1;
-	goto CLERROR;
-    }
 
     /* Since this is a non-interactive invocation, don't include all elements of
      * argv. */
@@ -243,7 +314,7 @@ batch_run(int argc, char **argv, char **envp)
 
     /* Act on the command line arguments, now that the interpreter is
      * initialized. */
-    if (opt_version)
+    if (a_version)
     {
 	static const cw_uint8_t version[]
 	    = "product print `, version ' print version print"
@@ -255,77 +326,30 @@ batch_run(int argc, char **argv, char **envp)
 	retval = 0;
 	goto RETURN;
     }
-    else if (opt_expression != NULL)
+    else if (a_expression != NULL)
     {
 	cw_nxo_t *string;
 	cw_uint8_t *str;
 
 	/* Push the string onto the execution stack. */
 	string = nxo_stack_push(nxo_thread_ostack_get(&thread));
-	nxo_string_new(string, &nx, FALSE, strlen((char *) opt_expression));
+	nxo_string_new(string, &nx, FALSE, strlen((char *) a_expression));
 	nxo_attr_set(string, NXOA_EXECUTABLE);
 	str = nxo_string_get(string);
-	memcpy(str, opt_expression, nxo_string_len_get(string));
+	memcpy(str, a_expression, nxo_string_len_get(string));
     }
     else if (optind < argc)
-#ifdef CW_POSIX_FILE
     {
-	int src_fd;
-
-	/* Remaining command line arguments should be the name of a source file,
-	 * followed by optional arguments.  Open the source file, wrap it in an
-	 * onyx file object, and push it onto the execution stack. */
-	src_fd = open(argv[optind], O_RDONLY);
-	if (src_fd == -1)
+	if (file_setup(&nx, &thread, argv[optind]))
 	{
-	    fprintf(stderr,
-		    "onyx: Error in open(\"%s\", O_RDONLY): %s\n", argv[optind],
-		    strerror(errno));
 	    retval = 1;
 	    goto RETURN;
 	}
-	file = nxo_stack_push(nxo_thread_ostack_get(&thread));
-	nxo_file_new(file, &nx, FALSE);
-	nxo_attr_set(file, NXOA_EXECUTABLE);
-
-	nxo_file_fd_wrap(file, src_fd);
     }
-#else
-    {
-	int src_fd;
-	static struct nx_read_arg_s src_arg;
-
-	/* Remaining command line arguments should be the name of a source file,
-	 * followed by optional arguments.  Open the source file, wrap it in an
-	 * onyx file object, and push it onto the execution stack. */
-	src_fd = open(argv[optind], O_RDONLY);
-	if (src_fd == -1)
-	{
-	    fprintf(stderr,
-		    "onyx: Error in open(\"%s\", O_RDONLY): %s\n", argv[optind],
-		    strerror(errno));
-	    retval = 1;
-	    goto RETURN;
-	}
-	file = nxo_stack_push(nxo_thread_ostack_get(&thread));
-	nxo_file_new(file, &nx, FALSE);
-	nxo_attr_set(file, NXOA_EXECUTABLE);
-
-	/* Initialize the src argument structure. */
-	src_arg.fd = src_fd;
-	src_arg.thread = &thread;
-	src_arg.buffer = NULL;
-	src_arg.buffer_size = 0;
-	src_arg.buffer_count = 0;
-	
-	nxo_file_synthetic(file, nx_read, NULL, NULL, nx_read_shutdown,
-			   (void *) &src_arg);
-    }
-#endif
     else
     {
-	/* No source file specified (or not supported), and there there was no
-	 * -e expression specified either, so treat stdin as the source. */
+	/* No source file specified, and there there was no -e expression
+	 * specified either, so treat stdin as the source. */
 	file = nxo_stack_push(nxo_thread_ostack_get(&thread));
 	nxo_dup(file, nx_stdin_get(&nx));
 	nxo_attr_set(file, NXOA_EXECUTABLE);
@@ -338,9 +362,79 @@ batch_run(int argc, char **argv, char **envp)
     RETURN:
     nxo_threadp_delete(&threadp, &thread);
     nx_delete(&nx);
-    CLERROR:
     return retval;
 }
+
+#ifdef CW_POSIX_FILE
+cw_bool_t
+file_setup(cw_nx_t *a_nx, cw_nxo_t *a_thread, const char *a_filename)
+{
+    cw_bool_t retval;
+    int src_fd;
+    cw_nxo_t *file;
+
+    /* Remaining command line arguments should be the name of a source file,
+     * followed by optional arguments.  Open the source file, wrap it in an
+     * onyx file object, and push it onto the execution stack. */
+    src_fd = open(a_filename, O_RDONLY);
+    if (src_fd == -1)
+    {
+	fprintf(stderr,
+		"onyx: Error in open(\"%s\", O_RDONLY): %s\n", a_filename,
+		strerror(errno));
+	retval = TRUE;
+	goto RETURN;
+    }
+    file = nxo_stack_push(nxo_thread_ostack_get(a_thread));
+    nxo_file_new(file, a_nx, FALSE);
+    nxo_attr_set(file, NXOA_EXECUTABLE);
+
+    nxo_file_fd_wrap(file, src_fd);
+
+    retval = FALSE;
+    RETURN:
+    return retval;
+}
+#else
+cw_bool_t
+file_setup(cw_nx_t *a_nx, cw_nxo_t *a_thread, const char *a_filename)
+{
+    cw_bool_t retval;
+    int src_fd;
+    cw_nxo_t *file;
+    static struct nx_read_arg_s src_arg;
+
+    /* Remaining command line arguments should be the name of a source file,
+     * followed by optional arguments.  Open the source file, wrap it in an
+     * onyx file object, and push it onto the execution stack. */
+    src_fd = open(a_filename, O_RDONLY);
+    if (src_fd == -1)
+    {
+	fprintf(stderr,
+		"onyx: Error in open(\"%s\", O_RDONLY): %s\n", a_filename,
+		strerror(errno));
+	retval = TRUE;
+	goto RETURN;
+    }
+    file = nxo_stack_push(nxo_thread_ostack_get(a_thread));
+    nxo_file_new(file, a_nx, FALSE);
+    nxo_attr_set(file, NXOA_EXECUTABLE);
+
+    /* Initialize the src argument structure. */
+    src_arg.fd = src_fd;
+    src_arg.thread = a_thread;
+    src_arg.buffer = NULL;
+    src_arg.buffer_size = 0;
+    src_arg.buffer_count = 0;
+	
+    nxo_file_synthetic(file, nx_read, NULL, NULL, nx_read_shutdown,
+		       (void *) &src_arg);
+
+    retval = FALSE;
+    RETURN:
+    return retval;
+}
+#endif
 
 #if (!defined(CW_POSIX_FILE) || !defined(CW_USE_MODPROMPT))
 void
