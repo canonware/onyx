@@ -1011,7 +1011,7 @@ oh_get_num_shrinks(cw_oh_t * a_oh)
 }
 
 cw_uint64_t
-oh_h1_string(cw_oh_t * a_oh, const void * a_key)
+oh_h1_string(const void * a_key)
 {
   cw_uint64_t retval;
   char * str;
@@ -1027,12 +1027,10 @@ oh_h1_string(cw_oh_t * a_oh, const void * a_key)
 }
 
 cw_uint64_t
-oh_h1_direct(cw_oh_t * a_oh, const void * a_key)
+oh_h1_direct(const void * a_key)
 {
   cw_uint64_t retval;
   cw_uint32_t i;
-
-  _cw_check_ptr(a_oh);
 
   retval = (cw_uint64_t) (cw_uint32_t) a_key;
 
@@ -1231,7 +1229,7 @@ oh_p_item_insert(cw_oh_t * a_oh,
   cw_uint64_t slot, i, j;
   
   /* Primary hash to first possible location to insert. */
-  slot = a_oh->curr_h1(a_oh, a_item->key) % a_oh->size;
+  slot = a_oh->curr_h1(a_item->key) % a_oh->size;
 
   for (i = 0, j = slot;
        i < a_oh->size;
@@ -1275,7 +1273,7 @@ oh_p_item_search(cw_oh_t * a_oh,
   cw_bool_t retval;
   
   /* Primary hash to the first location to look. */
-  slot = a_oh->curr_h1(a_oh, a_key) % a_oh->size;
+  slot = a_oh->curr_h1(a_key) % a_oh->size;
 
   /* Jump by the secondary hash value until we either find what we're
    * looking for, or hit an empty slot. */

@@ -67,7 +67,7 @@ struct cw_oh_s
   cw_ring_t * spares_ring;
   cw_uint64_t spares_count;
 
-  cw_uint64_t (*curr_h1)(cw_oh_t *, const void *);
+  cw_uint64_t (*curr_h1)(const void *);
   cw_bool_t (*key_compare)(const void *, const void *);
 
   cw_uint64_t size;
@@ -91,7 +91,7 @@ struct cw_oh_s
 };
 
 /* Typedefs to allow easy function pointer passing. */
-typedef cw_uint64_t oh_h1_t(cw_oh_t *, const void *);
+typedef cw_uint64_t oh_h1_t(const void *);
 typedef cw_bool_t oh_key_comp_t(const void *, const void *);
 
 /****************************************************************************
@@ -594,8 +594,6 @@ oh_get_num_shrinks(cw_oh_t * a_oh);
  *
  * <<< Input(s) >>>
  *
- * a_oh : Pointer to an oh.
- *
  * a_key : Pointer to a key.
  *
  * <<< Output(s) >>>
@@ -609,13 +607,11 @@ oh_get_num_shrinks(cw_oh_t * a_oh);
  *
  ****************************************************************************/
 cw_uint64_t
-oh_h1_string(cw_oh_t * a_oh, const void * a_key);
+oh_h1_string(const void * a_key);
 
 /****************************************************************************
  *
  * <<< Input(s) >>>
- *
- * a_oh : Pointer to an oh.
  *
  * a_key : Pointer to a key.
  *
@@ -629,7 +625,7 @@ oh_h1_string(cw_oh_t * a_oh, const void * a_key);
  *
  ****************************************************************************/
 cw_uint64_t
-oh_h1_direct(cw_oh_t * a_oh, const void * a_key);
+oh_h1_direct(const void * a_key);
 
 /****************************************************************************
  *
