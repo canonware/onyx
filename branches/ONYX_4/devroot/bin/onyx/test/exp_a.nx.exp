@@ -1,0 +1,20 @@
+Test begin
+`0 0 exp'
+1
+`4 0 exp'
+1
+`4 1 exp'
+4
+`4 2 exp'
+16
+`4 3 exp'
+64
+`5 3 exp'
+125
+`-5 1 exp'
+-5
+`-5 2 exp'
+25
+`-5 3 exp'
+-125
+Test end
