@@ -1,3 +1,19 @@
+2000-10-16  Jason Evans  <jasone@canonware.com>
+
+	* : libstash_init() now *must* be called in order for the thd and
+	xep classes to function correctly.
+
+	* src/xep.c: Implement the xep class.  xep provides exception
+	handling capabilities by using setjmp()/longjmp().
+
+	* src/thd.c: Initialize cw_g_thd_self_key in thd_l_init(), which
+	is called by libstash_init().  This removes the need for
+	thd_once() calls.
+
+	Make thd_self() work correctly for the initial thread.
+
+	Make critical sections work correctly for the initial thread.
+
 2000-07-26  Jason Evans  <jasone@canonware.com>
 
 	* src/mq.c (mq_put): Correctly expand the message queue when it

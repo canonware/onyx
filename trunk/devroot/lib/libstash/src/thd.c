@@ -22,14 +22,17 @@
 #define _CW_THD_MAGIC 0x5638638e
 #endif
 
-/* Control internal initialization. */
-pthread_once_t	cw_g_thd_once = PTHREAD_ONCE_INIT;
+#ifdef _LIBSTASH_DBG
+cw_bool_t	cw_g_thd_initialized = FALSE;
+#endif
+
+/* Special thd structure for initial thread, needed for critical sections. */
+cw_thd_t	cw_g_thd;
 
 /* For thd_self(). */
 cw_tsd_t	cw_g_thd_self_key;
 
 static void	*thd_p_start_func(void *a_arg);
-static void	thd_p_once(void);
 static void	thd_p_suspend(cw_thd_t *a_thd);
 
 #ifdef _CW_THD_GENERIC_SR
@@ -60,14 +63,84 @@ static void	thd_p_sr_handle(int a_signal);
 #endif
 
 void
+thd_l_init(void)
+{
+	_cw_assert(cw_g_thd_initialized == FALSE);
+
+#ifdef _CW_THD_GENERIC_SR
+	int			error;
+	struct sigaction	action;
+
+	/*
+	 * Install a signal handler for suspend and resume.
+	 */
+	action.sa_flags = 0;
+	action.sa_handler = thd_p_sr_handle;
+	sigemptyset(&action.sa_mask);
+	error = sigaction(_CW_THD_SIGSR, &action, NULL);
+	if (error == -1) {
+		_cw_out_put_e("Error in sigaction(): [s]\n",
+		    strerror(error));
+		abort();
+	}
+#endif
+	tsd_new(&cw_g_thd_self_key, NULL);
+	
+	/* Initialize the main thread's thd structure. */
+	cw_g_thd.thread = pthread_self();
+	cw_g_thd.start_func = NULL;
+	cw_g_thd.start_arg = NULL;
+#ifdef _CW_THD_GENERIC_SR
+	error = sem_init(&cw_g_thd.sem, 0, 0);
+	if (error) {
+		out_put_e(NULL, NULL, 0, __FUNCTION__,
+		    "Error in sem_init(): [s]\n", strerror(error));
+		abort();
+	}
+#endif
+	cw_g_thd.suspended = FALSE;
+	mtx_new(&cw_g_thd.crit_lock);
+#ifdef _LIBSTASH_DBG
+	cw_g_thd.magic = _CW_THD_MAGIC;
+#endif
+	/* Make thd_self() work for the main thread. */
+	tsd_set(&cw_g_thd_self_key, (void *)&cw_g_thd);
+	
+#ifdef _LIBSTASH_DBG
+	cw_g_thd_initialized = TRUE;
+#endif
+}
+
+void
+thd_l_shutdown(void)
+{
+#ifdef _CW_THD_GENERIC_SR
+	int	error;
+#endif
+
+	_cw_assert(cw_g_thd_initialized);
+	mtx_delete(&cw_g_thd.crit_lock);
+#ifdef _CW_THD_GENERIC_SR
+	error = sem_destroy(&cw_g_thd.sem);
+	if (error) {
+		out_put_e(NULL, NULL, 0, __FUNCTION__,
+		    "Error in sem_destroy(): [s]\n", strerror(error));
+		abort();
+	}
+#endif
+#ifdef _LIBSTASH_DBG
+	memset(&cw_g_thd, 0x5a, sizeof(cw_thd_t));
+	cw_g_thd_initialized = FALSE;
+#endif
+}
+
+void
 thd_new(cw_thd_t *a_thd, void *(*a_start_func)(void *), void *a_arg)
 {
 	int	error;
 
 	_cw_check_ptr(a_thd);
-
-	/* Initialize the thd_self() tsd key. */
-	thd_p_once();
+	_cw_assert(cw_g_thd_initialized);
 
 	a_thd->start_func = a_start_func;
 	a_thd->start_arg = a_arg;
@@ -101,6 +174,7 @@ thd_delete(cw_thd_t *a_thd)
 
 	_cw_check_ptr(a_thd);
 	_cw_assert(a_thd->magic == _CW_THD_MAGIC);
+	_cw_assert(cw_g_thd_initialized);
 
 	mtx_delete(&a_thd->crit_lock);
 #ifdef _CW_THD_GENERIC_SR
@@ -130,6 +204,7 @@ thd_join(cw_thd_t *a_thd)
 
 	_cw_check_ptr(a_thd);
 	_cw_assert(a_thd->magic == _CW_THD_MAGIC);
+	_cw_assert(cw_g_thd_initialized);
 
 	mtx_delete(&a_thd->crit_lock);
 	error = pthread_join(a_thd->thread, &retval);
@@ -153,6 +228,7 @@ thd_self(void)
 
 	_cw_check_ptr(retval);
 	_cw_assert(retval->magic == _CW_THD_MAGIC);
+	_cw_assert(cw_g_thd_initialized);
 
 	return retval;
 }
@@ -162,6 +238,8 @@ thd_crit_enter(void)
 {
 	cw_thd_t	*thd;
 
+	_cw_assert(cw_g_thd_initialized);
+	
 	thd = thd_self();
 	_cw_check_ptr(thd);
 	_cw_assert(thd->magic == _CW_THD_MAGIC);
@@ -172,6 +250,8 @@ void
 thd_crit_leave(void)
 {
 	cw_thd_t	*thd;
+
+	_cw_assert(cw_g_thd_initialized);
 
 	thd = thd_self();
 	_cw_check_ptr(thd);
@@ -185,6 +265,7 @@ thd_suspend(cw_thd_t *a_thd)
 {
 	_cw_check_ptr(a_thd);
 	_cw_assert(a_thd->magic == _CW_THD_MAGIC);
+	_cw_assert(cw_g_thd_initialized);
 
 	mtx_lock(&a_thd->crit_lock);
 
@@ -198,6 +279,7 @@ thd_trysuspend(cw_thd_t *a_thd)
 
 	_cw_check_ptr(a_thd);
 	_cw_assert(a_thd->magic == _CW_THD_MAGIC);
+	_cw_assert(cw_g_thd_initialized);
 
 	if (mtx_trylock(&a_thd->crit_lock)) {
 		retval = TRUE;
@@ -218,6 +300,7 @@ thd_resume(cw_thd_t *a_thd)
 
 	_cw_check_ptr(a_thd);
 	_cw_assert(a_thd->magic == _CW_THD_MAGIC);
+	_cw_assert(cw_g_thd_initialized);
 
 #ifdef _CW_THD_GENERIC_SR
 	error = pthread_kill(a_thd->thread, _CW_THD_SIGSR);
@@ -244,32 +327,11 @@ thd_p_start_func(void *a_arg)
 {
 	cw_thd_t	*thd = (cw_thd_t *)a_arg;
 
+	_cw_assert(cw_g_thd_initialized);
+
 	tsd_set(&cw_g_thd_self_key, (void *)thd);
 	
 	return thd->start_func(thd->start_arg);
-}
-
-static void
-thd_p_once(void)
-{
-#ifdef _CW_THD_GENERIC_SR
-	int			error;
-	struct sigaction	action;
-
-	/*
-	 * Install a signal handler for suspend and resume.
-	 */
-	action.sa_flags = 0;
-	action.sa_handler = thd_p_sr_handle;
-	sigemptyset(&action.sa_mask);
-	error = sigaction(_CW_THD_SIGSR, &action, NULL);
-	if (error == -1) {
-		_cw_out_put_e("Error in sigaction(): [s]\n",
-		    strerror(error));
-		abort();
-	}
-#endif
-	tsd_new(&cw_g_thd_self_key, NULL);
 }
 
 static void

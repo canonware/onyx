@@ -46,6 +46,9 @@ main()
 	libstash_init();
 	_cw_out_put("Test begin\n");
 
+	thd_crit_enter();
+	thd_crit_leave();
+
 	thd_new(&thd, thread_entry_func, NULL);
 	nanosleep(&tout, NULL);
 
