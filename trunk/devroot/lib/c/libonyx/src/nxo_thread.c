@@ -92,8 +92,8 @@ static cw_uint32_t nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread,
     cw_uint32_t a_len);
 static void	nxoe_p_thread_tok_str_expand(cw_nxoe_thread_t *a_thread);
 static void	nxoe_p_thread_syntax_error(cw_nxoe_thread_t *a_thread,
-    cw_nxo_threadp_t *a_threadp, cw_uint8_t *a_prefix, cw_uint8_t *a_suffix,
-    cw_uint8_t a_c);
+    cw_nxo_threadp_t *a_threadp, cw_uint32_t a_defer_base, cw_uint8_t *a_prefix,
+    cw_uint8_t *a_suffix, cw_uint8_t a_c);
 static void	nxoe_p_thread_reset(cw_nxoe_thread_t *a_thread);
 static void	nxoe_p_thread_procedure_accept(cw_nxoe_thread_t *a_thread);
 static void	nxoe_p_thread_name_accept(cw_nxoe_thread_t *a_thread);
@@ -1211,7 +1211,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 				break;
 			case '\'':
 				nxoe_p_thread_syntax_error(a_thread, a_threadp,
-				    "", "", c);
+				    defer_base, "", "", c);
 				if (a_token)
 					goto RETURN;
 				break;
@@ -1239,7 +1239,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 				} else {
 					/* Missing '{'. */
 					nxoe_p_thread_syntax_error(a_thread,
-					    a_threadp, "", "", c);
+					    a_threadp, defer_base, "", "", c);
 					if (a_token)
 						goto RETURN;
 				}
@@ -1291,7 +1291,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 				_CW_NXO_THREAD_NEWLINE();
 
 				nxoe_p_thread_syntax_error(a_thread, a_threadp,
-				    "", "/", c);
+				    defer_base, "", "/", c);
 				if (a_token)
 					goto RETURN;
 				break;
@@ -1300,7 +1300,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			case '>': case '[': case ']': case '{': case '}':
 			case '%':
 				nxoe_p_thread_syntax_error(a_thread, a_threadp,
-				    "", "/", c);
+				    defer_base, "", "/", c);
 				if (a_token)
 					goto RETURN;
 				break;
@@ -1659,7 +1659,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 				break;
 			default:
 				nxoe_p_thread_syntax_error(a_thread, a_threadp,
-				    "(", "\\x", c);
+				    defer_base, "(", "\\x", c);
 				if (a_token)
 					goto RETURN;
 			}
@@ -1709,7 +1709,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 
 				suffix[2] = a_thread->m.s.hex_val;
 				nxoe_p_thread_syntax_error(a_thread, a_threadp,
-				    "(", suffix, c);
+				    defer_base, "(", suffix, c);
 				if (a_token)
 					goto RETURN;
 			}
@@ -1742,13 +1742,13 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 					switch (a_thread->m.m.action) {
 					case ACTION_LITERAL:
 						nxoe_p_thread_syntax_error(
-						    a_thread, a_threadp, "/",
-						    "", c);
+						    a_thread, a_threadp,
+						    defer_base, "/", "", c);
 						break;
 					case ACTION_EVALUATE:
 						nxoe_p_thread_syntax_error(
-						    a_thread, a_threadp, "//",
-						    "", c);
+						    a_thread, a_threadp,
+						    defer_base, "//", "", c);
 						break;
 					default:
 						_cw_not_reached();
@@ -1810,7 +1810,8 @@ nxoe_p_thread_tok_str_expand(cw_nxoe_thread_t *a_thread)
  */
 static void
 nxoe_p_thread_syntax_error(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t
-    *a_threadp, cw_uint8_t *a_prefix, cw_uint8_t *a_suffix, cw_uint8_t a_c)
+    *a_threadp, cw_uint32_t a_defer_base, cw_uint8_t *a_prefix, cw_uint8_t
+    *a_suffix, cw_uint8_t a_c)
 {
 	cw_nxo_t	*nxo, *currenterror, *key, *val;
 	cw_uint32_t	line, column;
@@ -1898,6 +1899,24 @@ nxoe_p_thread_syntax_error(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t
 	nxo_dict_def(currenterror, a_thread->nx, key, val);
 
 	nxo_stack_npop(&a_thread->tstack, 3);
+
+	/*
+	 * Objects of type "no" should never be visible to the user.  If we are
+	 * currently in deferred execution mode, then there are "no" objects on
+	 * ostack acting as markers.  We can't leave them there, so convert them
+	 * to null objects and turn deferred execution mode off.
+	 */
+	if (a_thread->defer_count > a_defer_base) {
+		for (nxo = nxo_stack_down_get(&a_thread->ostack, NULL);
+		     a_thread->defer_count > a_defer_base;
+		     nxo = nxo_stack_down_get(&a_thread->ostack, nxo)) {
+			_cw_assert(nxo != NULL);
+			if (nxo_type_get(nxo) == NXOT_NO) {
+				a_thread->defer_count--;
+				nxo_null_new(nxo);
+			}
+		}
+	}
 
 	/* Finally, throw a syntaxerror. */
 	nxo_thread_error(&a_thread->self, NXO_THREADE_SYNTAXERROR);
