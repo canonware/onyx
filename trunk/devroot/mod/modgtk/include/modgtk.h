@@ -10,22 +10,19 @@
  *
  ******************************************************************************/
 
-/* modpane initialization. */
-void
-modpane_display_init(cw_nxo_t *a_thread);
+#include <libonyx/libonyx.h>
 
-/* Predicates. */
+#define GTK_DISABLE_DEPRECATED
+#include <gtk/gtk.h>
 
-cw_nxn_t
-modpane_display_type(cw_nxo_t *a_nxo);
+#define MODGTK_ENTRY(name) {#name, modgtk_##name}
 
-/* Hooks. */
-
-void
-modpane_display(void *a_data, cw_nxo_t *a_thread);
-
-void
-modpane_display_aux(void *a_data, cw_nxo_t *a_thread);
+struct cw_modgtk_entry
+{
+    const cw_uint8_t *name;
+    cw_nxo_hook_eval_t *eval_f;
+};
 
 void
-modpane_display_setaux(void *a_data, cw_nxo_t *a_thread);
+modgtk_hooks_init(cw_nxo_t *a_thread, const struct cw_modgtk_entry *a_entries,
+		  cw_uint32_t a_nentries);

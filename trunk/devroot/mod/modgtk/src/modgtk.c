@@ -1,6 +1,7 @@
-/******************************************************************************
+/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
+ ******************************************************************************
  *
- * <Copyright = toshok>
+ * <Copyright = jasone>
  * <License>
  *
  ******************************************************************************
@@ -9,45 +10,72 @@
  *
  ******************************************************************************/
 
-#include "libonyx/libonyx.h"
-#include "gtk/gtk.h"
-#include "gtkdict.h"
+#include "../include/modgtk.h"
 
-static const cw_uint8_t dict_name[] = "gtkdict";
+/* Refers to a hook that holds a reference to the dynamically loaded module. */
+static cw_nxo_t hook_data;
+
+static cw_nxoe_t *
+modgtk_p_hook_ref_iter(void *a_data, cw_bool_t a_reset)
+{
+    cw_nxoe_t *retval;
+    cw_nxo_t *hook = (cw_nxo_t *) a_data;
+
+    if (a_reset)
+    {
+	retval = nxo_nxoe_get(hook);
+    }
+    else
+    {
+	retval = NULL;
+    }
+
+    return retval;
+}
 
 void
-_cw_modgtk_init (void *a_arg, cw_nxo_t *a_thread)
+modgtk_hooks_init(cw_nxo_t *a_thread, const struct cw_modgtk_entry *a_entries,
+		  cw_uint32_t a_nentries)
 {
-	cw_nxo_t *ostack, *tstack;
-	cw_nx_t *nx;
-	cw_nxo_t *name, *gtkdict;
-	int fake_argc = 1;
-	char **fake_argv;
+    cw_nxo_t *tstack;
+    cw_nxo_t *currentdict, *name, *value;
+    cw_nx_t *nx;
+    cw_uint32_t i;
 
-	fake_argv = g_new (char*, 2);
-	fake_argv[0] = "onyx";
-	fake_argv[1] = NULL;
+    tstack = nxo_thread_tstack_get(a_thread);
+    nx = nxo_thread_nx_get(a_thread);
+    currentdict = nxo_stack_get(nxo_thread_dstack_get(a_thread));
 
-	gtk_init (&fake_argc, &fake_argv);
+    name = nxo_stack_push(tstack);
+    value = nxo_stack_push(tstack);
 
-	gtk_signal_set_funcs (nx_gtk_signal_marshal,
-			      nx_gtk_signal_destroy);
+    for (i = 0; i < a_nentries; i++)
+    {
+	nxo_name_new(name, nx, a_entries[i].name, strlen(a_entries[i].name),
+		     FALSE);
+	nxo_hook_new(value, nx, (void *) &hook_data, a_entries[i].eval_f,
+		     modgtk_p_hook_ref_iter, NULL);
+	nxo_dup(nxo_hook_tag_get(value), name);
+	nxo_attr_set(value, NXOA_EXECUTABLE);
 
-	ostack = nxo_thread_ostack_get(a_thread);
-	tstack = nxo_thread_tstack_get(a_thread);
-	nx = nxo_thread_nx_get(a_thread);
+	nxo_dict_def(currentdict, nx, name, value);
+    }
 
-	/* create and populate our gtkdict */
-	gtkdict = nxo_stack_push(tstack);
-	nxo_dict_new(gtkdict, nx, TRUE, 128);
-	gtkdict_l_populate (gtkdict, nx, a_thread);
+    nxo_stack_npop(tstack, 2);
+}
 
-	name = nxo_stack_push(tstack);
-	nxo_name_new(name, nx, dict_name,
-		     strlen(dict_name), TRUE);
-	/* and place it into the systmdict */
-	nxo_dict_def(nx_systemdict_get(nx),
-		     nx, name, gtkdict);
+void
+modgtk_init(void *a_arg, cw_nxo_t *a_thread)
+{
+    cw_nxo_t *estack;
 
-	nxo_stack_npop(tstack, 2);
+    /* The interpreter is currently executing a hook that holds a reference to
+     * the dynamically loaded module.  Initialize hook_data to refer to it, then
+     * create hooks such that they refer to hook_data.  This prevents the module
+     * from being closed until all hooks are gone. */
+    estack = nxo_thread_estack_get(a_thread);
+    nxo_no_new(&hook_data);
+    nxo_dup(&hook_data, nxo_stack_get(estack));
+
+    /* Initialize hooks. */
 }

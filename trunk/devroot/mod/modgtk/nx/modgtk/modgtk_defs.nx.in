@@ -8,11 +8,3 @@
 % Version: <Version>
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-/widget <
-	/type		/widget
-	/parent		null
-	/children	null
-	/pane		null
-	/handlers	null
-> def
