@@ -51,23 +51,22 @@ mem_delete(cw_mem_t * a_mem)
     void * addr;
     struct cw_mem_item_s * allocation;
 
-    if ((dbg_is_registered(cw_g_dbg, "mem_verbose"))
-	|| ((dbg_is_registered(cw_g_dbg, "mem_error"))
-	    && (0 < oh_get_num_items(&a_mem->addr_hash))))
+    num_addrs = oh_get_num_items(&a_mem->addr_hash);
+
+    if (dbg_is_registered(cw_g_dbg, "mem_verbose")
+	|| (dbg_is_registered(cw_g_dbg, "mem_error")
+	    && (0 < num_addrs)))
     {
       char buf[1025];
 
       bzero(buf, sizeof(buf));
       out_put_sn(cw_g_out, buf, 1024,
 		 "[s](): [q] unfreed allocation[s]\n",
-		 __FUNCTION__, oh_get_num_items(&a_mem->addr_hash),
-		 oh_get_num_items(&a_mem->addr_hash) != 1 ? "s" : "");
+		 __FUNCTION__, num_addrs,
+		 num_addrs != 1 ? "s" : "");
       out_put(cw_g_out, buf);
     }
-    for (i = 0,
-	   num_addrs = oh_get_num_items(&a_mem->addr_hash);
-	 i < num_addrs;
-	 i++)
+    for (i = 0; i < num_addrs; i++)
     {
       oh_item_delete_iterate(&a_mem->addr_hash,
 			     &addr, (void **) &allocation);
@@ -80,11 +79,11 @@ mem_delete(cw_mem_t * a_mem)
 		   "[s](): 0x[p], size [i] never freed "
 		   "(allocated at [s], line [i])\n",
 		   __FUNCTION__, addr, allocation->size,
-		   ((NULL == allocation->filename)
-		    ? "<?>" : allocation->filename),
+		   allocation->filename,
 		   allocation->line_num);
 	out_put(cw_g_out, buf);
       }
+      _cw_free(allocation);
     }
     oh_delete(&a_mem->addr_hash);
 #ifdef _CW_REENTRANT
@@ -112,6 +111,11 @@ mem_malloc(cw_mem_t * a_mem, size_t a_size)
   retval = _cw_malloc(a_size);
   
 #ifdef _LIBSTASH_DBG
+  if (NULL == a_filename)
+  {
+    a_filename = "<?>";
+  }
+  
   if (NULL == retval)
   {
     if (dbg_is_registered(cw_g_dbg, "mem_error"))
@@ -148,11 +152,10 @@ mem_malloc(cw_mem_t * a_mem, size_t a_size)
 		   "(was at [s], line [i], size [i];"
 		   " now at [s], line [i], size [i])\n",
 		   __FUNCTION__, retval,
-		   ((NULL == old_allocation->filename)
-		    ? "<?>" : old_allocation->filename),
+		   old_allocation->filename,
 		   old_allocation->line_num,
 		   old_allocation->size,
-		   (NULL == a_filename) ? "<?>" : a_filename,
+		   a_filename,
 		   a_line_num,
 		   a_size);
 	out_put(cw_g_out, buf);
@@ -189,11 +192,11 @@ mem_malloc(cw_mem_t * a_mem, size_t a_size)
 	  out_put_sn(cw_g_out, buf, 1024,
 		     "[s](): 0x[p] <-- malloc([i]) at [s], line [i]\n",
 		     __FUNCTION__, retval, a_size,
-		     (NULL == a_filename) ? "<?>" : a_filename, a_line_num);
+		     a_filename, a_line_num);
 	  out_put(cw_g_out, buf);
 	}
 
-	if (0 != oh_item_insert(&a_mem->addr_hash, retval, allocation))
+	if (-1 == oh_item_insert(&a_mem->addr_hash, retval, allocation))
 	{
 	  if (dbg_is_registered(cw_g_dbg, "mem_error"))
 	  {
@@ -202,10 +205,10 @@ mem_malloc(cw_mem_t * a_mem, size_t a_size)
 	    bzero(buf, sizeof(buf));
 
 	    out_put_sn(cw_g_out, buf, 1024,
-		       "[s](): 0x[p] multiply-allocated "
-		       "(probably used free() directly) at [s], line [i]\n",
+		       "[s](): Memory allocation error; "
+		       "unable to record allocation 0x[p] at [s], line [i]\n",
 		       __FUNCTION__, retval,
-		       (NULL == a_filename) ? "<?>" : a_filename, a_line_num);
+		       a_filename, a_line_num);
 	    out_put(cw_g_out, buf);
 	  }
 	}
@@ -236,6 +239,11 @@ mem_calloc(cw_mem_t * a_mem, size_t a_number, size_t a_size)
   retval = _cw_calloc(a_number, a_size);
 
 #ifdef _LIBSTASH_DBG
+  if (NULL == a_filename)
+  {
+    a_filename = "<?>";
+  }
+  
   if (NULL == retval)
   {
     if (dbg_is_registered(cw_g_dbg, "mem_error"))
@@ -274,11 +282,10 @@ mem_calloc(cw_mem_t * a_mem, size_t a_number, size_t a_size)
 		   "(was at [s], line [i], size [i];"
 		   " now at [s], line [i], size [i])\n",
 		   __FUNCTION__, retval,
-		   ((NULL == old_allocation->filename)
-		    ? "<?>" : old_allocation->filename),
+		   old_allocation->filename,
 		   old_allocation->line_num,
 		   old_allocation->size,
-		   (NULL == a_filename) ? "<?>" : a_filename,
+		   a_filename,
 		   a_line_num,
 		   a_size);
 	out_put(cw_g_out, buf);
@@ -316,7 +323,7 @@ mem_calloc(cw_mem_t * a_mem, size_t a_number, size_t a_size)
 		     "[s](): 0x[p] <-- calloc([i], [i]) "
 		     "at [s], line [i]\n",
 		     __FUNCTION__, retval, a_number, a_size,
-		     (NULL == a_filename) ? "<?>" : a_filename, a_line_num);
+		     a_filename, a_line_num);
 	  out_put(cw_g_out, buf);
 	}
       
@@ -332,7 +339,7 @@ mem_calloc(cw_mem_t * a_mem, size_t a_number, size_t a_size)
 		       "[s](): 0x[p] multiply-allocated "
 		       "(probably used free() directly) at [s], line [i]\n",
 		       __FUNCTION__, retval,
-		       (NULL == a_filename) ? "<?>" : a_filename, a_line_num);
+		       a_filename, a_line_num);
 	    out_put(cw_g_out, buf);
 	  }
 	}
@@ -364,6 +371,11 @@ mem_realloc(cw_mem_t * a_mem, void * a_ptr, size_t a_size)
   retval = _cw_realloc(a_ptr, a_size);
   
 #ifdef _LIBSTASH_DBG
+  if (NULL == a_filename)
+  {
+    a_filename = "<?>";
+  }
+
   if (NULL == retval)
   {
     if (dbg_is_registered(cw_g_dbg, "mem_error"))
@@ -445,12 +457,11 @@ mem_realloc(cw_mem_t * a_mem, void * a_ptr, size_t a_size)
 		   " to 0x[p], size [i] at [s], line [i]\n",
 		   __FUNCTION__, a_ptr,
 		   old_size,
-		   ((NULL == old_filename)
-		    ? "<?>" : old_filename),
+		   old_filename,
 		   old_line_num,
 		   retval,
 		   a_size,
-		   (NULL == a_filename) ? "<?>" : a_filename,
+		   a_filename,
 		   a_line_num);
 	out_put(cw_g_out, buf);
       }
@@ -474,6 +485,11 @@ mem_free(cw_mem_t * a_mem, void * a_ptr)
 #endif
 {
 #ifdef _LIBSTASH_DBG
+  if (NULL == a_filename)
+  {
+    a_filename = "<?>";
+  }
+  
   if (NULL != a_mem)
   {
     struct cw_mem_item_s * allocation;
@@ -494,7 +510,7 @@ mem_free(cw_mem_t * a_mem, void * a_ptr)
 		   "[s](): 0x[p] not allocated, "
 		   "attempted to free at [s], line [i]\n",
 		   __FUNCTION__, a_ptr,
-		   (NULL == a_filename) ? "<?>" : a_filename,
+		   a_filename,
 		   a_line_num);
 	out_put(cw_g_out, buf);
       }
@@ -511,10 +527,9 @@ mem_free(cw_mem_t * a_mem, void * a_ptr)
 		   "(allocated at [s], line [i])\n",
 		   __FUNCTION__, a_ptr,
 		   allocation->size,
-		   (NULL == a_filename) ? "<?>" : a_filename,
+		   a_filename,
 		   a_line_num,
-		   ((NULL == allocation->filename)
-		    ? "<?>" : allocation->filename),
+		   allocation->filename,
 		   allocation->line_num);
 	out_put(cw_g_out, buf);
       }

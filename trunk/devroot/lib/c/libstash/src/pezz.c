@@ -53,7 +53,7 @@ pezz_new(cw_pezz_t * a_pezz, cw_uint32_t a_buffer_size,
 #ifdef _CW_REENTRANT
   mtx_new(&retval->lock);
 #endif
-
+  
   retval->buffer_size = a_buffer_size;
   retval->block_num_buffers = a_num_buffers;
 
@@ -125,8 +125,16 @@ pezz_new(cw_pezz_t * a_pezz, cw_uint32_t a_buffer_size,
     }
   }
   retval->num_blocks = 1;
-  
+
 #ifdef _LIBSTASH_DBG
+#  ifdef _CW_REENTRANT
+  oh_new(&retval->addr_hash, FALSE);
+#  else
+  oh_new(&retval->addr_hash);
+#  endif
+  oh_set_h1(&retval->addr_hash, oh_h1_direct);
+  oh_set_key_compare(&retval->addr_hash, oh_key_compare_direct);
+  
   retval->magic = _CW_PEZZ_MAGIC;
 #endif
 
@@ -143,40 +151,38 @@ pezz_delete(cw_pezz_t * a_pezz)
   _cw_assert(a_pezz->magic == _CW_PEZZ_MAGIC);
 
 #ifdef _LIBSTASH_DBG
-  if (dbg_is_registered(cw_g_dbg, "pezz_error"))
   {
-    /* See if there are any leaked memory block buffers. */
-    if (NULL != a_pezz->spare_buffers)
+    cw_uint64_t i, num_addrs;
+    void * addr;
+    cw_pezz_item_t * allocation;
+
+    num_addrs = oh_get_num_items(&a_pezz->addr_hash);
+    
+    if (dbg_is_registered(cw_g_dbg, "pezz_verbose")
+	|| (dbg_is_registered(cw_g_dbg, "pezz_error")
+	    && (0 < num_addrs)))
     {
-      cw_uint32_t i;
-      cw_ring_t * t_ring;
-
-      t_ring = a_pezz->spare_buffers;
-      i = 0;
-      do
-      {
-	t_ring = ring_next(t_ring);
-	i++;
-      } while (t_ring != a_pezz->spare_buffers);
-
-      if (i < (a_pezz->num_blocks * a_pezz->block_num_buffers))
+      out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+		"[q] leaked buffer[s]\n",
+		num_addrs,
+		num_addrs != 1 ? "s" : "");
+    }
+    for (i = 0; i < num_addrs; i++)
+    {
+      oh_item_delete_iterate(&a_pezz->addr_hash,
+			     &addr, (void **) &allocation);
+      if (dbg_is_registered(cw_g_dbg, "pezz_error"))
       {
 	out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-		  "[i] leaked buffer[s]\n",
-		  (a_pezz->num_blocks * a_pezz->block_num_buffers) - i,
-		  (((a_pezz->num_blocks
-		     * a_pezz->block_num_buffers) - i) != 1) ? "s" : "");
+		  "0x[p] never freed (allocated at [s], line [i])\n",
+		  addr,
+		  ((NULL == allocation->filename)
+		   ? "<?>" : allocation->filename),
+		  allocation->line_num);
       }
+      _cw_free(allocation);
     }
-    else
-    {
-      /* All the memory buffers are leaked! */
-      out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-		"[i] leaked buffer[s] (all of them)\n",
-		(a_pezz->num_blocks * a_pezz->block_num_buffers),
-		((a_pezz->num_blocks * a_pezz->block_num_buffers) != 1)
-		? "s" : "");
-    }
+    oh_delete(&a_pezz->addr_hash);
   }
 #endif
 
@@ -216,7 +222,7 @@ pezz_get_buffer_size(cw_pezz_t * a_pezz)
 }
 
 void *
-pezz_get(cw_pezz_t * a_pezz)
+pezz_get_e(cw_pezz_t * a_pezz, const char * a_filename, cw_uint32_t a_line_num)
 {
   void * retval;
 
@@ -319,43 +325,191 @@ pezz_get(cw_pezz_t * a_pezz)
   }
 
   RETURN:
+#ifdef _LIBSTASH_DBG
+  if (NULL == a_filename)
+  {
+    a_filename = "<?>";
+  }
+  
+  if (NULL == retval)
+  {
+    if (dbg_is_registered(cw_g_dbg, "pezz_error"))
+    {
+      out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+		"Memory allocation failed at [s], line [i]\n",
+		a_filename, a_line_num);
+    }
+  }
+  else
+  {
+    cw_pezz_item_t * old_allocation;
+    
+    if (FALSE == oh_item_search(&a_pezz->addr_hash,
+				a_pezz,
+				(void **) &old_allocation))
+    {
+      if (dbg_is_registered(cw_g_dbg, "pezz_error"))
+      {
+	out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+		  "0x[p] multiply-allocated "
+		  "(was at [s], line [i];"
+		  " now at [s], line [i])\n",
+		  retval,
+		  old_allocation->filename, old_allocation->line_num,
+		  a_filename, a_line_num);
+      }
+    }
+    else
+    {
+      cw_pezz_item_t * allocation;
+
+      allocation = _cw_malloc(sizeof(cw_pezz_item_t));
+      if (allocation == NULL)
+      {
+	if (dbg_is_registered(cw_g_dbg, "pezz_error"))
+	{
+	  out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
+		    "Memory allocation error; "
+		    "unable to record pezz allocation "
+		    "0x[p] at [s], line [i]\n",
+		    sizeof(cw_pezz_item_t),
+		    retval, a_filename, a_line_num);
+	}
+      }
+      else
+      {
+	memset(retval, 0xa5, a_pezz->buffer_size);
+	
+	allocation->filename = a_filename;
+	allocation->line_num = a_line_num;
+      
+	if (dbg_is_registered(cw_g_dbg, "pezz_verbose"))
+	{
+	  out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+		    "0x[p] ([i] B) <-- pezz_get() at [s], line [i]\n",
+		    retval, a_pezz->buffer_size, a_filename, a_line_num);
+	}
+
+	if (-1 == oh_item_insert(&a_pezz->addr_hash, retval, allocation))
+	{
+	  if (dbg_is_registered(cw_g_dbg, "pezz_error"))
+	  {
+	    out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
+		      "Memory allocation error; "
+		      "unable to record pezz allocation "
+		      "0x[p] at [s], line [i]\n",
+		      sizeof(cw_pezz_item_t),
+		      retval, a_filename, a_line_num);
+	  }
+	}
+      }
+    }
+  }
+#endif
+  
 #ifdef _CW_REENTRANT
   mtx_unlock(&a_pezz->lock);
 #endif
   return retval;
 }
 
-void
-pezz_put(void * a_pezz, void * a_buffer)
+void *
+pezz_get(cw_pezz_t * a_pezz)
 {
-  cw_pezz_t * pezz = (cw_pezz_t *) a_pezz;
+  return pezz_get_e(a_pezz, NULL, 0);
+}
+
+void
+pezz_put_e(cw_pezz_t * a_pezz, void * a_buffer, const char * a_filename,
+	   cw_uint32_t a_line_num)
+{
   cw_ring_t * t_ring;
   
-  _cw_check_ptr(pezz);
-  _cw_assert(pezz->magic == _CW_PEZZ_MAGIC);
+  _cw_check_ptr(a_pezz);
+  _cw_assert(a_pezz->magic == _CW_PEZZ_MAGIC);
 #ifdef _CW_REENTRANT
-  mtx_lock(&pezz->lock);
+  mtx_lock(&a_pezz->lock);
 #endif
 
-  t_ring = pezz->spare_rings;
-  pezz->spare_rings = ring_cut(t_ring);
-  if (pezz->spare_rings == t_ring)
+#ifdef _LIBSTASH_DBG
+  if (NULL == a_filename)
+  {
+    a_filename = "<?>";
+  }
+  
+  {
+    cw_pezz_item_t * allocation;
+    
+    if (TRUE == oh_item_delete(&a_pezz->addr_hash, a_buffer, NULL,
+			       (void **) &allocation))
+    {
+      /* Bail out in order to prevent corruption of the internal data
+       * structures.  If we were to go ahead and "free" this allocation, it
+       * would take up a ring structure, making it possible to over-empty the
+       * ring, as well as the likely problem of actually returning this
+       * allocation in a later call to pezz_get().  Of course, the non-debug
+       * versions of libstash will just blow chunks since there isn't the extra
+       * book keeping that allows detection of this problem.
+       *
+       * Of course, there is the possibility that the reason this allocation
+       * isn't recorded in the hash table due to a memory allocation error.  If
+       * so, then we're causing a memory leak here.  Oh well.  At least the user
+       * got a message about the memory allocation error already. */
+      if (dbg_is_registered(cw_g_dbg, "pezz_error"))
+      {
+	out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+		  "0x[p] not allocated, "
+		  "attempted to free at [s], line [i]\n",
+		  a_buffer, a_filename, a_line_num);
+      }
+      goto RETURN;
+    }
+    else
+    {
+      if (dbg_is_registered(cw_g_dbg, "pezz_verbose"))
+      {
+	out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+		  "Freeing 0x[p] at [s], line [i], "
+		  "allocated at [s], line [i]\n",
+		  a_buffer, a_filename, a_line_num,
+		  allocation->filename, allocation->line_num);
+      }
+      memset(a_buffer, 0x5a, a_pezz->buffer_size);
+      _cw_free(allocation);
+    }
+  }
+#endif
+  
+  t_ring = a_pezz->spare_rings;
+  a_pezz->spare_rings = ring_cut(t_ring);
+  if (a_pezz->spare_rings == t_ring)
   {
     /* spare_rings is empty. */
-    pezz->spare_rings = NULL;
+    a_pezz->spare_rings = NULL;
   }
 
   ring_set_data(t_ring, a_buffer);
 
-  if (NULL != pezz->spare_buffers)
+  if (NULL != a_pezz->spare_buffers)
   {
-    ring_meld(t_ring, pezz->spare_buffers);
+    ring_meld(t_ring, a_pezz->spare_buffers);
   }
-  pezz->spare_buffers = t_ring;
-  
-#ifdef _CW_REENTRANT
-  mtx_unlock(&pezz->lock);
+  a_pezz->spare_buffers = t_ring;
+
+#ifdef _LIBSTASH_DBG
+  /* The RETURN label is only used in the debugging versions of libstash.
+   * Prevent a compiler warning. */
+  RETURN:
 #endif
+#ifdef _CW_REENTRANT
+  mtx_unlock(&a_pezz->lock);
+#endif
+}
+
+void
+pezz_put(void * a_pezz, void * a_buffer)
+{
+  pezz_put_e(a_pezz, a_buffer, NULL, 0);
 }
 
 void

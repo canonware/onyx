@@ -24,7 +24,7 @@ main()
   out_put(cw_g_out, "Test begin\n");
 
   dbg_register(cw_g_dbg, "pezz_error");
-  dbg_register(cw_g_dbg, "pezz_verbose");
+/*    dbg_register(cw_g_dbg, "pezz_verbose"); */
 
   /* pezz_new(), pezz_delete(), pezz_get_buffer_size(). */
   {
@@ -50,56 +50,56 @@ main()
     _cw_assert(4096 == pezz_get_buffer_size(&pezz));
     for (i = 0; i < 100; i++)
     {
-      pointers[i] = pezz_get(&pezz);
+      pointers[i] = _cw_pezz_get(&pezz);
       _cw_check_ptr(pointers[i]);
     }
     for (i = 0; i < 100; i++)
     {
-      pezz_put(&pezz, pointers[i]);
+      _cw_pezz_put(&pezz, pointers[i]);
       pointers[i] = NULL;
     }
     
     for (i = 0; i < 5; i++)
     {
-      pointers[i] = pezz_get(&pezz);
+      pointers[i] = _cw_pezz_get(&pezz);
       _cw_check_ptr(pointers[i]);
     }
     for (i = 0; i < 5; i++)
     {
-      pezz_put(&pezz, pointers[i]);
+      _cw_pezz_put(&pezz, pointers[i]);
       pointers[i] = NULL;
     }
     
     for (i = 0; i < 6; i++)
     {
-      pointers[i] = pezz_get(&pezz);
+      pointers[i] = _cw_pezz_get(&pezz);
       _cw_check_ptr(pointers[i]);
     }
     for (i = 0; i < 6; i++)
     {
-      pezz_put(&pezz, pointers[i]);
+      _cw_pezz_put(&pezz, pointers[i]);
       pointers[i] = NULL;
     }
     
     for (i = 0; i < 1; i++)
     {
-      pointers[i] = pezz_get(&pezz);
+      pointers[i] = _cw_pezz_get(&pezz);
       _cw_check_ptr(pointers[i]);
     }
     for (i = 0; i < 1; i++)
     {
-      pezz_put(&pezz, pointers[i]);
+      _cw_pezz_put(&pezz, pointers[i]);
       pointers[i] = NULL;
     }
     
     for (i = 0; i < 11; i++)
     {
-      pointers[i] = pezz_get(&pezz);
+      pointers[i] = _cw_pezz_get(&pezz);
       _cw_check_ptr(pointers[i]);
     }
     for (i = 0; i < 11; i++)
     {
-      pezz_put(&pezz, pointers[i]);
+      _cw_pezz_put(&pezz, pointers[i]);
       pointers[i] = NULL;
     }
 

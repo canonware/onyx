@@ -24,6 +24,7 @@ struct cw_pezz_s
   cw_bool_t is_malloced;
 #if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
   cw_uint32_t magic;
+  cw_oh_t addr_hash;
 #endif
 #ifdef _CW_REENTRANT
   cw_mtx_t lock;
@@ -56,6 +57,14 @@ struct cw_pezz_s
    * ring. */
   cw_ring_t * spare_rings;
 };
+
+#ifdef _LIBSTASH_DBG
+typedef struct
+{
+  const char * filename;
+  cw_uint32_t line_num;
+} cw_pezz_item_t;
+#endif
 
 /****************************************************************************
  *
@@ -136,6 +145,11 @@ pezz_get_buffer_size(cw_pezz_t * a_pezz);
 void *
 pezz_get(cw_pezz_t * a_pezz);
 
+void *
+pezz_get_e(cw_pezz_t * a_pezz, const char * a_filename, cw_uint32_t a_line_num);
+
+#define _cw_pezz_get(a_pezz) pezz_get_e((a_pezz), __FILE__, __LINE__)
+
 /****************************************************************************
  *
  * <<< Input(s) >>>
@@ -155,6 +169,13 @@ pezz_get(cw_pezz_t * a_pezz);
  ****************************************************************************/
 void
 pezz_put(void * a_pezz, void * a_buffer);
+
+void
+pezz_put_e(cw_pezz_t * a_pezz, void * a_buffer, const char * a_filename,
+	   cw_uint32_t a_line_num);
+
+#define _cw_pezz_put(a_pezz, a_buffer) \
+                     pezz_put_e((a_pezz), (a_buffer), __FILE__, __LINE__)
 
 /****************************************************************************
  *

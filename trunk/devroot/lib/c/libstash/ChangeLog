@@ -1,5 +1,10 @@
 1999-07-31  Jason Evans  <jasone@canonware.com>
 
+	* include/libstash/pezz.h (_cw_pezz_{get,put}): Add.  Use these
+	macros instead of pezz_{get,put}(), except when passing function
+	pointers around.  This allows the debugging versions of libstash
+	to track pezz allocations (and leaks).
+
 	* include/libstash/out.h: Add buf printing capability.
 
 1999-07-30  Jason Evans  <jasone@canonware.com>

@@ -664,7 +664,7 @@ oh_item_search(cw_oh_t * a_oh,
   }
 #endif
 
-  if (oh_p_item_search(a_oh, a_key, &slot) == FALSE)
+  if (FALSE == oh_p_item_search(a_oh, a_key, &slot))
   {
     /* Item found. */
     retval = FALSE;
@@ -754,6 +754,7 @@ oh_item_delete_iterate(cw_oh_t * a_oh, void ** r_key, void ** r_data)
     cw_oh_item_t * item;
 
     retval = FALSE;
+    a_oh->num_deletes++;
 
     t_ring = a_oh->items_ring;
     a_oh->items_ring = ring_cut(t_ring);
@@ -831,7 +832,7 @@ oh_dump(cw_oh_t * a_oh, cw_bool_t a_all)
 	  a_oh->base_shrink_point,
 	  a_oh->base_grow_point);
   out_put(cw_g_out,
-	  "Curr: [i|w:2]  0x[p|w:10] [q|w:5] [q|w:5]  [q|w:5]\n\n",
+	  "Curr: [i|w:2]  0x[p|w:8|p:0] [q|w:5] [q|w:5]  [q|w:5]\n\n",
 	  a_oh->curr_power,
 	  a_oh->curr_h1,
 	  a_oh->curr_h2,
@@ -875,7 +876,7 @@ oh_dump(cw_oh_t * a_oh, cw_bool_t a_all)
       out_put(cw_g_out, "[i|w:4] ", i);
       if (a_oh->items[i] != NULL)
       {
-	out_put(cw_g_out, "0x[i|w:8|p:0|b:16] 0x[p|w:10]\n",
+	out_put(cw_g_out, "0x[i|w:8|p:0|b:16] 0x[p|w:8|p:0]\n",
 		a_oh->items[i]->key,
 		a_oh->items[i]->data);
       }
@@ -1293,7 +1294,7 @@ oh_p_item_search(cw_oh_t * a_oh,
       retval = TRUE;
       break;
     }
-    else if (a_oh->key_compare(a_oh->items[j]->key, a_key) == TRUE)
+    else if (TRUE == a_oh->key_compare(a_oh->items[j]->key, a_key))
     {
       /* Found it. */
       *a_slot = j;
