@@ -15,8 +15,8 @@
  ****************************************************************************/
 
 /* Typedef's to allow easy function pointer passing. */
-typedef cw_uint32_t cw_out_metric_t(const char *, const void *);
-typedef char * cw_out_render_t(const char *, const void *, char *);
+typedef cw_uint32_t cw_out_metric_t(const char *, cw_uint32_t, const void *);
+typedef char * cw_out_render_t(const char *, cw_uint32_t, const void *, char *);
 
 typedef struct cw_out_s cw_out_t;
 typedef struct cw_out_ent_s cw_out_ent_t;
@@ -58,8 +58,22 @@ out_register(cw_out_t * a_out,
 	     cw_out_metric_t * a_metric_func,
 	     cw_out_render_t * a_render_func);
 
+cw_sint32_t 
+out_get_default_fd(cw_out_t * a_out);
+
 void
 out_set_default_fd(cw_out_t * a_out, cw_sint32_t a_fd);
+
+cw_sint32_t
+out_put(cw_out_t * a_out, const char * a_format, ...);
+
+cw_sint32_t
+out_put_e(cw_out_t * a_out,
+	  const char * a_file_name,
+	  cw_uint32_t a_line_num,
+	  const char * a_func_name,
+	  const char * a_format,
+	  ...);
 
 cw_sint32_t
 out_put_f(cw_out_t * a_out, cw_sint32_t a_fd, const char * a_format, ...);
@@ -109,3 +123,9 @@ out_put_sva(cw_out_t * a_out, char ** r_str,
 cw_sint32_t
 out_put_svn(cw_out_t * a_out, char * a_str, cw_uint32_t a_size,
 	    const char * a_format, va_list a_p);
+
+/* spec */
+cw_sint32_t
+spec_get_val(const char * a_spec, cw_uint32_t a_spec_len,
+	     const char * a_name, const char ** r_val);
+

@@ -18,54 +18,77 @@
 #  define _LIBSTASH_OUT_MAGIC 0x8293cade
 #endif
 
+cw_sint32_t
+out_p_put_vfe(cw_out_t * a_out, cw_sint32_t a_fd,
+	      const char * a_file_name,
+	      cw_uint32_t a_line_num,
+	      const char * a_func_name,
+	      const char * a_format,
+	      va_list a_p);
+
 static cw_sint32_t
-out_p_metric(cw_out_t * a_out, const char * a_format, va_list a_p);
+out_p_metric(cw_out_t * a_out, const char * a_format, char ** r_format,
+	     va_list a_p);
 
 static void
 out_p_add(cw_uint32_t a_base, cw_uint32_t a_ndigits,
 	  char * r_result, const char * a_a, const char * a_b);
 
 static cw_uint32_t
-out_p_metric_int8(const char * a_format, const void * a_arg);
+out_p_metric_int8(const char * a_format, cw_uint32_t a_len,
+		  const void * a_arg);
 
 static char *
-out_p_render_int8(const char * a_format, const void * a_arg, char * r_buf);
+out_p_render_int8(const char * a_format, cw_uint32_t a_len,
+		  const void * a_arg, char * r_buf);
 
 static cw_uint32_t
-out_p_metric_int16(const char * a_format, const void * a_arg);
+out_p_metric_int16(const char * a_format, cw_uint32_t a_len,
+		   const void * a_arg);
 
 static char *
-out_p_render_int16(const char * a_format, const void * a_arg, char * r_buf);
+out_p_render_int16(const char * a_format, cw_uint32_t a_len,
+		   const void * a_arg, char * r_buf);
 
 static cw_uint32_t
-out_p_metric_int32(const char * a_format, const void * a_arg);
+out_p_metric_int32(const char * a_format, cw_uint32_t a_len,
+		   const void * a_arg);
 
 static char *
-out_p_render_int32(const char * a_format, const void * a_arg, char * r_buf);
+out_p_render_int32(const char * a_format, cw_uint32_t a_len,
+		   const void * a_arg, char * r_buf);
 
 static cw_uint32_t
-out_p_metric_int64(const char * a_format, const void * a_arg);
+out_p_metric_int64(const char * a_format, cw_uint32_t a_len,
+		   const void * a_arg);
 
 static char *
-out_p_render_int64(const char * a_format, const void * a_arg, char * r_buf);
+out_p_render_int64(const char * a_format, cw_uint32_t a_len,
+		   const void * a_arg, char * r_buf);
 
 static cw_uint32_t
-out_p_metric_string(const char * a_format, const void * a_arg);
+out_p_metric_string(const char * a_format, cw_uint32_t a_len,
+		    const void * a_arg);
 
 static char *
-out_p_render_string(const char * a_format, const void * a_arg, char * r_buf);
+out_p_render_string(const char * a_format, cw_uint32_t a_len,
+		    const void * a_arg, char * r_buf);
 
 static cw_uint32_t
-out_p_metric_pointer(const char * a_format, const void * a_arg);
+out_p_metric_pointer(const char * a_format, cw_uint32_t a_len,
+		     const void * a_arg);
 
 static char *
-out_p_render_pointer(const char * a_format, const void * a_arg, char * r_buf);
+out_p_render_pointer(const char * a_format, cw_uint32_t a_len,
+		     const void * a_arg, char * r_buf);
 
 static cw_uint32_t
-out_p_metric_undef(const char * a_format, const void * a_arg);
+out_p_metric_undef(const char * a_format, cw_uint32_t a_len,
+		   const void * a_arg);
 
 static char *
-out_p_render_undef(const char * a_format, const void * a_arg, char * r_buf);
+out_p_render_undef(const char * a_format, cw_uint32_t a_len,
+		   const void * a_arg, char * r_buf);
 
 static cw_out_ent_t cw_g_out_builtins[] = 
 {
