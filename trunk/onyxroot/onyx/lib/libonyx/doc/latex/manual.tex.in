@@ -128,6 +128,7 @@ interpreter that are executed by the garbage collector during the mark phase
 \libname{libonyx} reserves \htmlref{xep}{xep} exception numbers 0 to 127 and
 defines the following exceptions:
 \begin{description}
+\label{_CW_ONYXX_OOM}
 \item[\cppdef{\_CW\_ONYXX\_OOM}: ]
 	Memory allocation error.
 \label{_CW_ONYXX_EXIT}
