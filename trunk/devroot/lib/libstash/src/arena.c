@@ -15,7 +15,6 @@
  *
  ****************************************************************************/
 
-#define _LIBSTASH_USE_ARENA
 #ifdef _CW_REENTRANT
 #  include "libstash/libstash_r.h"
 #else

@@ -14,8 +14,6 @@
  *
  ****************************************************************************/
 
-#define _LIBSTASH_USE_OH
-#define _LIBSTASH_USE_THREAD
 #include <libstash/libstash_r.h>
 
 #define NUM_STRINGS 20

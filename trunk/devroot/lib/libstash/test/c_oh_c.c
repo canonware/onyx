@@ -14,7 +14,6 @@
  *
  ****************************************************************************/
 
-#define _LIBSTASH_USE_OH
 #include <libstash/libstash_r.h>
 
 int

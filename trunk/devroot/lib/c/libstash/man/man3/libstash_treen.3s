@@ -1,0 +1,336 @@
+.ig \" -*-mode:nroff-*-
+
+<Copyright = jasone>
+<License>
+
+Version: <Version>
+..
+.TH libstash_treen 3s "libstash, version <Version>"
+.Nm libstash_treen
+.hy 1
+.SH NAME
+treen - Arbitrary tree (tree node).
+.SH SYNOPSIS
+.SS Single-threaded
+#define _LIBSTASH_USE_TREEN
+.br
+\fB#include <libstash/libstash.h>\fR
+
+.SS Multi-threaded
+#define _LIBSTASH_USE_TREEN
+.br
+\fB#include <libstash/libstash_r.h>\fR
+
+.I cw_treen_t *
+.br
+.B treen_new_r
+.RI ( "void" )
+
+.SS General
+.I cw_treen_t *
+.br
+.B treen_new
+.RI ( "void" )
+
+.I void
+.br
+.B treen_delete
+.RI ( "cw_treen_t * a_treen" )
+
+.I cw_uint32_t
+.br
+.B treen_get_num_children
+.RI ( "cw_treen_t * a_treen" )
+
+.I cw_bool_t
+.br
+.B treen_link_child
+.RI ( "cw_treen_t * a_treen" ", " "cw_treen_t * a_child" ", " 
+.IR "cw_uint32_t a_position" )
+
+.I cw_bool_t
+.br
+.B treen_unlink_child
+.RI ( "cw_treen_t * a_treen" ", " "cw_uint32_t a_position" ", " 
+.IR "cw_treen_t ** r_child" )
+
+.I cw_bool_t
+.br
+.B treen_get_child_ptr
+.RI ( "cw_treen_t * a_treen" ", " "cw_uint32_t a_position" ", " 
+.IR "cw_treen_t ** r_child" )
+
+.I void *
+.br
+.B treen_get_data_ptr
+.RI ( "cw_treen_t * a_treen" )
+
+.I void *
+.br
+.B treen_set_data_ptr
+.RI ( "cw_treen_t * a_treen" ", " "void * a_data" )
+
+.SS Debugging (dbg) symbols
+None.
+
+.SH DESCRIPTION
+Implementation of arbitrary trees.  Each treen (tree node) can have an arbitrary
+number of children.
+
+.SH USAGE
+.I cw_treen_t *
+.br
+.B treen_new
+.RI ( "void" )
+.br
+.I cw_treen_t *
+.br
+.B treen_new_r
+.RI ( "void" )
+.br
+Input(s):
+.RS
+None.
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+non-NULL: Pointer to a treen.
+.br
+NULL: Memory allocation error.
+.RE
+.RE
+Description:
+.RS
+Non-thread-safe and thread-safe constructors.
+.RE
+.RE
+
+.I void
+.br
+.B treen_delete
+.RI ( "cw_treen_t * a_treen" )
+.br
+Input(s):
+.RS
+.IR a_treen :
+.RS
+Pointer to a treen.
+.RE
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Destructor.
+.RE
+.RE
+
+.I cw_uint32_t
+.br
+.B treen_get_num_children
+.RI ( "cw_treen_t * a_treen" )
+.br
+Input(s):
+.RS
+.IR a_treen :
+.RS
+Pointer to a treen.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+Number of children of a_treen.
+.RE
+.RE
+Description:
+.RS
+Return the number of children of a_treen.
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B treen_link_child
+.RI ( "cw_treen_t * a_treen" ", " "cw_treen_t * a_child" ", " 
+.IR "cw_uint32_t a_position" )
+.br
+Input(s):
+.RS
+.IR a_treen :
+.RS
+Pointer to a treen.
+.RE
+.IR a_child :
+.RS
+Pointer to a treen.
+.RE
+.IR a_position :
+.RS
+Which child of a_treen to insert a_child as (0..n).
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+FALSE: Success.
+.br
+TRUE: (number of children < a_position), or memory allocation error.
+.RE
+.RE
+Description:
+.RS
+Insert a child pointer at position a_position.  If a_position is greater than
+the number of children, return TRUE and do not insert the child pointer.
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B treen_unlink_child
+.RI ( "cw_treen_t * a_treen" ", " "cw_uint32_t a_position" ", " 
+.IR "cw_treen_t ** r_child" )
+.br
+Input(s):
+.RS
+.IR a_treen :
+.RS
+Pointer to a treen.
+.RE
+.IR a_position :
+.RS
+Which child of a_treen to unlink (0..n).
+.RE
+.IR r_child :
+.RS
+Pointer to a treen pointer.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+FALSE: Success.
+.br
+TRUE: Error.
+.RE
+.IR *r_child :
+.RS
+Pointer to a treen.
+.RE
+.RE
+Description:
+.RS
+Delete child pointer at a_position and shuffle following children down to fill
+the space.  If a_position is greater than the index of the last child, return
+TRUE.
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B treen_get_child_ptr
+.RI ( "cw_treen_t * a_treen" ", " "cw_uint32_t a_position" ", " 
+.IR "cw_treen_t ** r_child" )
+.br
+Input(s):
+.RS
+.IR a_treen :
+.RS
+Pointer to a treen.
+.RE
+.IR a_position :
+.RS
+Whild child of a_treen to return a pointer to (0..n).
+.RE
+.IR r_child :
+.RS
+Pointer to a treen pointer.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+FALSE: Success.
+.br
+TRUE: (number of children < a_position).
+.RE
+.IR *r_child :
+.RS
+Pointer to a treen.
+.RE
+.RE
+Description:
+.RS
+Return a pointer to the child pointer at a_position in *r_child, unless
+a_position is greater than the index of the last child, in which case, return
+TRUE.
+.RE
+.RE
+
+.I void *
+.br
+.B treen_get_data_ptr
+.RI ( "cw_treen_t * a_treen" )
+.br
+Input(s):
+.RS
+.IR a_treen :
+.RS
+Pointer to a treen.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+Pointer to data.
+.RE
+.RE
+Description:
+.RS
+Return a pointer to the data for a_treen.
+.RE
+.RE
+
+.I void *
+.br
+.B treen_set_data_ptr
+.RI ( "cw_treen_t * a_treen" ", " "void * a_data" )
+.br
+Input(s):
+.RS
+.IR a_treen :
+.RS
+Pointer to a treen.
+.RE
+.IR a_data :
+.RS
+Pointer to data.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+Pointer to old data.
+.RE
+.RE
+Description:
+.RS
+Set the pointer for data for a_treen.
+.RE
+.RE
+
+.SH SEE ALSO
+libstash(3s).
+
+.SH HISTORY
+Written by Jason Evans <jasone@canonware.com>.

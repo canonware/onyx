@@ -15,7 +15,6 @@
  *
  ****************************************************************************/
 
-#define _LIBSTASH_USE_ARENA
 #include <libstash/libstash_r.h>
 
 int

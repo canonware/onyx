@@ -16,19 +16,19 @@
 INCS := libstash.h libstash_defs.h libstash_incs.h arena.h bhp.h buf.h dbg.h \
 	list.h log.h matrix.h mem.h mq.h oh.h out.h pezz.h res.h ring.h treen.h
 
-INCS_R := libstash_r.h locks.h thread.h
+INCS_R := libstash_r.h cnd.h jtl.h mtx.h rwl.h sem.h thd.h tsd.h
 
 # Include files that are _not_ installed.
 PRIV_INCS := arena_p.h bhp_p.h buf_p.h dbg_p.h list_p.h log_p.h mem_l.h \
 	mem_p.h oh_p.h out_p.h res_p.h treen_p.h
 
-PRIV_INCS_R := locks_p.h
+PRIV_INCS_R := jtl_p.h
 
 # Source files.
 SRCS := libstash.c arena.c bhp.c buf.c dbg.c list.c log.c matrix.c mem.c mq.c \
 	oh.c out.c pezz.c res.c ring.c treen.c
 
-SRCS_R := locks.c thread.c
+SRCS_R := cnd.c jtl.c mtx.c rwl.c sem.c thd.c tsd.c
 
 # Simple tests.  Output is diff'ed with the expected (.exp file) output.
 CTESTS := c_arena_a.c c_bhp_a.c c_bhp_b.c c_buf_a.c c_buf_b.c c_buf_c.c \
@@ -44,4 +44,7 @@ PTESTS := p_res_a.pl.in
 BTESTS := b_res_a.c
 
 # Man pages.
-MANPAGES := libstash.3s libstash_buf.3s libstash_oh.3s
+MANPAGES := libstash.3s libstash_bhp.3s libstash_buf.3s libstash_dbg.3s \
+	libstash_list.3s libstash_mem.3s libstash_mq.3s libstash_oh.3s \
+	libstash_out.3s libstash_pezz.3s libstash_res.3s libstash_ring.3s \
+	libstash_treen.3s

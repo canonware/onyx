@@ -14,7 +14,6 @@
  *
  ****************************************************************************/
 
-#define _LIBSTASH_USE_BHP
 #include <libstash/libstash_r.h>
 
 /* Make sure that nums is at least as large. */

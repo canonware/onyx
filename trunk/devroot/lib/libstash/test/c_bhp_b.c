@@ -14,7 +14,6 @@
  *
  ****************************************************************************/
 
-#define _LIBSTASH_USE_BHP
 #include <libstash/libstash_r.h>
 
 #define _LIBSTASH_TEST_HEAP_SIZE 4097

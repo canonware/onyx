@@ -1,0 +1,365 @@
+.ig \" -*-mode:nroff-*-
+
+<Copyright = jasone>
+<License>
+
+Version: <Version>
+..
+.TH libstash_mq 3s "libstash, version <Version>"
+.Nm libstash_mq
+.hy 1
+.SH NAME
+mq - Message queue.
+.SH SYNOPSIS
+.SS Single-threaded
+#define _LIBSTASH_USE_MQ
+.br
+\fB#include <libstash/libstash.h>\fR
+
+.SS Multi-threaded
+#define _LIBSTASH_USE_MQ
+.br
+\fB#include <libstash/libstash_r.h>\fR
+
+.I void *
+.br
+.B mq_timedget
+.RI ( "cw_mq_t * a_mq" ", " "const struct timespec * a_timeout" )
+
+.I void *
+.br
+.B mq_get
+.RI ( "cw_mq_t * a_mq" )
+
+.SS General
+.I cw_mq_t *
+.br
+.B mq_new
+.RI ( "cw_mq_t * a_mq" )
+
+.I void
+.br
+.B mq_delete
+.RI ( "cw_mq_t * a_mq" )
+
+.I void *
+.br
+.B mq_tryget
+.RI ( "cw_mq_t * a_mq" )
+
+.I cw_sint32_t
+.br
+.B mq_put
+.RI ( "cw_mq_t * a_mq" ", " "const void * a_message" )
+
+.I cw_bool_t
+.br
+.B mq_start_get
+.RI ( "cw_mq_t * a_mq" )
+
+.I cw_bool_t
+.br
+.B mq_stop_get
+.RI ( "cw_mq_t * a_mq" )
+
+.I cw_bool_t
+.br
+.B mq_start_put
+.RI ( "cw_mq_t * a_mq" )
+
+.I cw_bool_t
+.br
+.B mq_stop_put
+.RI ( "cw_mq_t * a_mq" )
+
+.SS Debugging (dbg) symbols
+None.
+
+.SH DESCRIPTION
+\fBmq\fR implements a simple unidirectional message queue.  In addition to
+putting and getting messages, there are methods that control the ability to get
+or put.  This provides a simple out of band state transition capability.
+
+.SH USAGE
+.I cw_mq_t *
+.br
+.B mq_new
+.RI ( "cw_mq_t * a_mq" )
+.br
+Input(s):
+.RS
+.IR a_mq :
+.RS
+Pointer to space for a mq, or NULL.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+non-NULL: Pointer to a mq.
+.br
+NULL: Memory allocation error.  Can only occur if (NULL == a_mq).
+.RE
+.RE
+Description:
+.RS
+Constructor.
+.RE
+.RE
+
+.I void
+.br
+.B mq_delete
+.RI ( "cw_mq_t * a_mq" )
+.br
+Input(s):
+.RS
+.IR a_mq :
+.RS
+Pointer to a mq.
+.RE
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Destructor.
+.RE
+.RE
+
+.I void *
+.br
+.B mq_tryget
+.RI ( "cw_mq_t * a_mq" )
+.br
+Input(s):
+.RS
+.IR a_mq :
+.RS
+Pointer to a mq.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+non-NULL: Pointer to a message.
+.br
+NULL: No messages in the queue, or get is in the stop state.
+.RE
+.RE
+Description:
+.RS
+Try to get a message, but return NULL if none are available.
+.RE
+.RE
+
+.I void *
+.br
+.B mq_timedget
+.RI ( "cw_mq_t * a_mq" ", " "const struct timespec * a_timeout" )
+.br
+Input(s):
+.RS
+.IR a_mq :
+.RS
+Pointer to a mq.
+.RE
+.IR a_timeout :
+.RS
+Timeout, specified as an absolute time interval.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+non-NULL: Pointer to a message.
+.br
+NULL: No messages in the queue, or get is in the stop state.
+.RE
+.RE
+Description:
+.RS
+Get a message.  If none are available, block until a message is available, or
+until timeout.
+.RE
+.RE
+
+.I void *
+.br
+.B mq_get
+.RI ( "cw_mq_t * a_mq" )
+.br
+Input(s):
+.RS
+.IR a_mq :
+.RS
+Pointer to a mq.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+non-NULL: Pointer to a message.
+.br
+NULL: No messages in the queue, or get is in the stop state.
+.RE
+.RE
+Description:
+.RS
+Get a message.  If none are available, block until a message is available.
+.RE
+.RE
+
+.I cw_sint32_t
+.br
+.B mq_put
+.RI ( "cw_mq_t * a_mq" ", " "const void * a_message" )
+.br
+Input(s):
+.RS
+.IR a_mq :
+.RS
+Pointer to a mq.
+.RE
+.IR a_message :
+.RS
+Pointer to a message.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+-1: Memory allocation error.
+.br
+0: Success.
+.br
+1: Failure due to put being in the stop state.
+.RE
+.RE
+Description:
+.RS
+Put a message in a_mq.
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B mq_start_get
+.RI ( "cw_mq_t * a_mq" )
+.br
+Input(s):
+.RS
+.IR a_mq :
+.RS
+Pointer to a mq.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+FALSE: Success.
+.br
+TRUE: Error (already in start state).
+.RE
+.RE
+Description:
+.RS
+Change the get operation to the start state (\fBmq_get\fR() will not return
+NULL).
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B mq_stop_get
+.RI ( "cw_mq_t * a_mq" )
+.br
+Input(s):
+.RS
+.IR a_mq :
+.RS
+Pointer to a mq.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+FALSE: Success.
+.br
+TRUE: Error (already in the stop state).
+.RE
+.RE
+Description:
+.RS
+Change the get operation to the stop state (\fBmq_get\fR() will return NULL).
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B mq_start_put
+.RI ( "cw_mq_t * a_mq" )
+.br
+Input(s):
+.RS
+.IR a_mq :
+.RS
+Pointer to a mq.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+FALSE: Success.
+.br
+TRUE: Error (already in start state).
+.RE
+.RE
+Description:
+.RS
+Change the put operation to the start state (\fBmq_put\fR() will not return 1).
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B mq_stop_put
+.RI ( "cw_mq_t * a_mq" )
+.br
+Input(s):
+.RS
+.IR a_mq :
+.RS
+Pointer to a mq.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+FALSE: Success.
+.br
+TRUE: Error (already in the stop state).
+.RE
+.RE
+Description:
+.RS
+Change the put operation to the stop state (mq_put() will return 1).
+.RE
+.RE
+
+.SH SEE ALSO
+libstash(3s).
+
+.SH HISTORY
+Written by Jason Evans <jasone@canonware.com>.

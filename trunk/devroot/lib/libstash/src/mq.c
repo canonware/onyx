@@ -8,13 +8,8 @@
  *
  * Version: <Version>
  *
- * <<< Description >>>
- *
- * Implementation of the mq (message queue) class.
- *
  ****************************************************************************/
 
-#define _LIBSTASH_USE_MQ
 #ifdef _CW_REENTRANT
 #  include "libstash/libstash_r.h"
 #else
@@ -188,7 +183,7 @@ mq_get(cw_mq_t * a_mq)
 }
 
 void *
-mq_timedget(cw_mq_t * a_mq, struct timespec * a_timeout)
+mq_timedget(cw_mq_t * a_mq, const struct timespec * a_timeout)
 {
   void * retval;
   cw_ring_t * t_ring;

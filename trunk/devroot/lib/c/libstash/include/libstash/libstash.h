@@ -16,102 +16,102 @@
 extern "C" {
 #endif
 
-#ifndef _LIBSTASH_H_A_
-#  define _LIBSTASH_H_A_
+#ifndef _LIBSTASH_H_
+#define _LIBSTASH_H_
 
-#  define _LIBSTASH_VERSION_ <Version>
+#define _LIBSTASH_VERSION_ <Version>
 
-#  include "libstash_defs.h"
+#include "libstash_defs.h"
 
 /*
  * Global typedefs.
  */
 
-#  if (SIZEOF_SIGNED_CHAR == 1)
-#    define _TYPE_SINT8_DEFINED
+#if (SIZEOF_SIGNED_CHAR == 1)
+#  define _TYPE_SINT8_DEFINED
 typedef signed char cw_sint8_t;
-#  endif
+#endif
 
-#  if (SIZEOF_SIGNED_CHAR == 1)
-#    define _TYPE_UINT8_DEFINED
+#if (SIZEOF_SIGNED_CHAR == 1)
+#  define _TYPE_UINT8_DEFINED
 typedef unsigned char cw_uint8_t;
-#  endif
+#endif
 
-#  if (SIZEOF_SIGNED_SHORT == 2)
-#    define _TYPE_SINT16_DEFINED
+#if (SIZEOF_SIGNED_SHORT == 2)
+#  define _TYPE_SINT16_DEFINED
 typedef signed short cw_sint16_t;
-#  endif
+#endif
 
-#  if (SIZEOF_UNSIGNED_SHORT == 2)
-#    define _TYPE_UINT16_DEFINED
+#if (SIZEOF_UNSIGNED_SHORT == 2)
+#  define _TYPE_UINT16_DEFINED
 typedef unsigned short cw_uint16_t;
-#  endif
+#endif
 
-#  if (SIZEOF_INT == 4)
-#    define _TYPE_SINT32_DEFINED
+#if (SIZEOF_INT == 4)
+#  define _TYPE_SINT32_DEFINED
 typedef int cw_sint32_t;
-#  endif
+#endif
 
-#  if (SIZEOF_UNSIGNED == 4)
-#    define _TYPE_UINT32_DEFINED
+#if (SIZEOF_UNSIGNED == 4)
+#  define _TYPE_UINT32_DEFINED
 typedef unsigned cw_uint32_t;
-#  endif
+#endif
 
-#  if (SIZEOF_LONG == 8)
-#    define _TYPE_SINT64_DEFINED
+#if (SIZEOF_LONG == 8)
+#  define _TYPE_SINT64_DEFINED
 typedef long cw_sint64_t;
-#  endif
+#endif
 
-#  if (SIZEOF_UNSIGNED_LONG == 8)
-#    define _TYPE_UINT64_DEFINED
+#if (SIZEOF_UNSIGNED_LONG == 8)
+#  define _TYPE_UINT64_DEFINED
 typedef unsigned long cw_uint64_t;
-#  endif
+#endif
 
-#  if (SIZEOF_LONG_LONG == 8)
-#    define _TYPE_SINT64_DEFINED
+#if (SIZEOF_LONG_LONG == 8)
+#  define _TYPE_SINT64_DEFINED
 typedef long long cw_sint64_t;
-#  endif
+#endif
 
-#  if (SIZEOF_UNSIGNED_LONG_LONG == 8)
-#    define _TYPE_UINT64_DEFINED
+#if (SIZEOF_UNSIGNED_LONG_LONG == 8)
+#  define _TYPE_UINT64_DEFINED
 typedef unsigned long long cw_uint64_t;
-#  endif
+#endif
 
-#  if (!defined(_TYPE_SINT8_DEFINED) || !defined(_TYPE_UINT8_DEFINED) \
+#if (!defined(_TYPE_SINT8_DEFINED) || !defined(_TYPE_UINT8_DEFINED) \
   || !defined(_TYPE_SINT16_DEFINED) || !defined(_TYPE_UINT16_DEFINED) \
   || !defined(_TYPE_SINT32_DEFINED) || !defined(_TYPE_UINT32_DEFINED) \
   || !defined(_TYPE_SINT64_DEFINED) || !defined(_TYPE_UINT64_DEFINED))
-#    error "Lacking mandatory typedefs"
-#  endif
+#  error "Lacking mandatory typedefs"
+#endif
 
-#  if (SIZEOF_FLOAT == 4)
-#    define _TYPE_FP32_DEFINED
+#if (SIZEOF_FLOAT == 4)
+#  define _TYPE_FP32_DEFINED
 typedef float cw_fp32_t;
-#  endif
+#endif
   
-#  if (SIZEOF_DOUBLE == 8)
-#    define _TYPE_FP64_DEFINED
+#if (SIZEOF_DOUBLE == 8)
+#  define _TYPE_FP64_DEFINED
 typedef double cw_fp64_t;
-#  endif
+#endif
   
-#  if (SIZEOF_LONG_DOUBLE == 12)
-#    define _TYPE_FP96_DEFINED
+#if (SIZEOF_LONG_DOUBLE == 12)
+#  define _TYPE_FP96_DEFINED
 typedef long double cw_fp96_t;
-#  elif (SIZEOF_LONG_DOUBLE == 16)
-#    define _TYPE_FP128_DEFINED
+#elif (SIZEOF_LONG_DOUBLE == 16)
+#  define _TYPE_FP128_DEFINED
 typedef long double cw_fp128_t;
-#  endif
+#endif
 
 /* Grossness to make sure things still work, even if TRUE and/or FALSE are/is
  * defined. */
-#  ifdef FALSE
-#    define _CW_FALSE_DEFINED
-#    undef FALSE
-#  endif
-#  ifdef TRUE
-#    define _CW_TRUE_DEFINED
-#    undef TRUE
-#  endif
+#ifdef FALSE
+#  define _CW_FALSE_DEFINED
+#  undef FALSE
+#endif
+#ifdef TRUE
+#  define _CW_TRUE_DEFINED
+#  undef TRUE
+#endif
   
 typedef enum
 {
@@ -121,29 +121,20 @@ typedef enum
 
 /* More grossness to make sure things still work, even if TRUE and/or FALSE
  * are/is defined. */
-#  ifdef _CW_FALSE_DEFINED
-#    define FALSE (0)
-#    undef _CW_FALSE_DEFINED
-#  endif
-#  ifdef _CW_TRUE_DEFINED
-#    define TRUE (1)
-#    undef _CW_TRUE_DEFINED
-#  endif
+#ifdef _CW_FALSE_DEFINED
+#  define FALSE (0)
+#  undef _CW_FALSE_DEFINED
+#endif
+#ifdef _CW_TRUE_DEFINED
+#  define TRUE (1)
+#  undef _CW_TRUE_DEFINED
+#endif
   
 /*
  * Project headers to always be included.
  */
 
-#endif /* _LIBSTASH_H_A_ */
-
-/* This needs to be done every time this file is included, in case both
- * libstash.h and, say, libsqrl.h are included.  Unfortunately, it has to be in
- * the middle of this file because what follows depends on stuff that is
- * included in/by stash_incs.h. */
 #include "libstash_incs.h"
-
-#ifndef _LIBSTASH_H_B_
-#  define _LIBSTASH_H_B_
 
 /*
  * libstash initialization and shutdown function prototypes.
@@ -210,7 +201,7 @@ extern cw_out_t * cw_g_out;
   }
 
 #if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
-#define _cw_assert(a) \
+#  define _cw_assert(a) \
   { \
     if (!(a)) \
       { \
@@ -222,13 +213,13 @@ extern cw_out_t * cw_g_out;
 
 /* Macro to ease the drudgery of printing out debugging spew to trace the
  * execution path. */
-#define _cw_marker(a) \
+#  define _cw_marker(a) \
   { \
     out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__, "[s]\n", a); \
   }
 
 /* Macro to do the drudgery of assuring that a pointer is non-NULL. */
-#define _cw_check_ptr(x) \
+#  define _cw_check_ptr(x) \
   do \
   { \
     if (((x) == NULL) \
@@ -246,7 +237,7 @@ extern cw_out_t * cw_g_out;
 #  define _cw_check_ptr(a)
 #endif
 
-#endif /* _LIBSTASH_H_B_ */
+#endif /* _LIBSTASH_H_ */
 
 #ifdef __cplusplus
 };

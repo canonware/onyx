@@ -1,3 +1,10 @@
+1999-09-30  Jason Evans  <jasone@canonware.com>
+
+	* : Remove all _LIBSTASH_USE_* macros.
+
+	* Makefile.bsd.in: Include the threads-specific object files when
+	building stat_prof_r.
+
 1999-09-23  Jason Evans  <jasone@canonware.com>
 
 	* include/libstash/mq.h (mq_timedget): Document the new meaning of
