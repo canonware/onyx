@@ -30,7 +30,7 @@ Version: <Version>
 .I void
 .br
 .B <template>_delete
-.RI ( void )
+.RI ( "cw_<template>_t * a_<template>" )
 
 .I <return type>
 .br
@@ -102,7 +102,7 @@ Input(s):
 .RS
 .IR a_<template> :
 .RS
-Pointer to a<n> <template>..
+Pointer to a<n> <template>.
 .RE
 .IR <input> :
 .RS

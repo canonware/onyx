@@ -557,7 +557,7 @@ buf_set_range(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint32_t a_length,
  ****************************************************************************/
 cw_bufc_t *
 bufc_new(cw_bufc_t * a_bufc,
-	 void (*a_dealloc_func)(void * dealloc_arg, void * bufel),
+	 void (*a_dealloc_func)(void * dealloc_arg, void * bufc),
 	 void * a_dealloc_arg);
 
 /****************************************************************************

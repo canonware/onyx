@@ -1,0 +1,818 @@
+.ig \" -*-mode:nroff-*-
+
+<Copyright = jasone>
+<License>
+
+Version: <Version>
+..
+.TH libstash_buf 3s "libstash, version <Version>"
+.Nm libstash_buf
+.hy 1
+.SH NAME
+buf, bufc - Reference-counted extensible buffer.
+.SH SYNOPSIS
+.SS Single-threaded
+#define _LIBSTASH_USE_BUF
+.br
+\fB#include <libstash/libstash.h>\fR
+
+.I cw_buf_t *
+.br
+.B buf_new
+.RI ( "cw_buf_t * a_buf" )
+
+.SS Multi-threaded
+#define _LIBSTASH_USE_BUF
+.br
+\fB#include <libstash/libstash_r.h>\fR
+
+.I cw_buf_t *
+.br
+.B buf_new
+.RI ( "cw_buf_t * a_buf" ", " "cw_bool_t a_is_threadsafe" )
+
+.SS General
+.I void
+.br
+.B buf_delete
+.RI ( "cw_buf_t * a_buf" )
+
+.I void
+.br
+.B buf_dump
+.RI ( "cw_buf_t * a_buf" ", " "const char * a_prefix" )
+
+.I cw_sint32_t
+.br
+.B buf_get_size
+.RI ( "cw_buf_t * a_buf" )
+
+.I cw_uint32_t
+.br
+.B buf_get_num_bufels
+.RI ( "cw_buf_t * a_buf" )
+
+.I const struct iovec *
+.br
+.B buf_get_iovec
+.RI ( "cw_buf_t * a_buf" ", " "cw_uint32_t a_max_data" ", " 
+.IR "cw_bool_t a_is_sys_iovec" ", " "int * r_iovec_count" )
+
+.I cw_bool_t
+.br
+.B buf_catenate_buf
+.RI ( "cw_buf_t * a_a" ", " "cw_buf_t * a_b" ", " "cw_bool_t a_preserve" )
+
+.I cw_bool_t
+.br
+.B buf_split
+.RI ( "cw_buf_t * a_a" ", " "cw_buf_t * a_b" ", " "cw_uint32_t a_offset" )
+
+.I cw_bool_t
+.br
+.B buf_prepend_bufc
+.RI ( "cw_buf_t * a_buf" ", " "cw_bufc_t * a_bufc" ", " 
+.IR "cw_uint32_t a_beg_offset" ", " "cw_uint32_t a_end_offset" )
+
+.I cw_bool_t
+.br
+.B buf_append_bufc
+.RI ( "cw_buf_t * a_buf" ", " "cw_bufc_t * a_bufc" ", " 
+.IR "cw_uint32_t a_beg_offset" ", " "cw_uint32_t a_end_offset" )
+
+.I cw_bool_t
+.br
+.B buf_release_head_data
+.RI ( "cw_buf_t * a_buf" ", " "cw_uint32_t a_amount" )
+
+.I cw_bool_t
+.br
+.B buf_release_tail_data
+.RI ( "cw_buf_t * a_buf" ", " "cw_uint32_t a_amount" )
+
+.I cw_uint8_t
+.br
+.B buf_get_uint8
+.RI ( "cw_buf_t * a_buf" ", " "cw_uint32_t a_offset" )
+
+.I cw_uint32_t
+.br
+.B buf_get_uint32
+.RI ( "cw_buf_t * a_buf" ", " "cw_uint32_t a_offset" )
+
+.I cw_uint64_t
+.br
+.B buf_get_uint64
+.RI ( "cw_buf_t * a_buf" ", " "cw_uint32_t a_offset" )
+
+.I cw_bool_t
+.br
+.B buf_set_uint8
+.RI ( "cw_buf_t * a_buf" ", " "cw_uint32_t a_offset" ", " 
+.IR "cw_uint_t32 a_val" )
+
+.I cw_bool_t
+.br
+.B buf_set_uint32
+.RI ( "cw_buf_t * a_buf" ", " "cw_uint32_t a_offset" ", " 
+.IR "cw_uint32_t a_val" )
+
+.I cw_bool_t
+.br
+.B buf_set_uint64
+.RI ( "cw_buf_t * a_buf" ", " "cw_uint32_t a_offset" ", " 
+.IR "cw_uint64_t a_val" )
+
+.I cw_bool_t
+.br
+.B buf_set_range
+.RI ( "cw_buf_t * a_buf" ", " "cw_uint32_t a_offset" ", " 
+.IR "cw_uint32_t a_length" ", " "cw_uint8_t * a_val" ", " 
+.IR "cw_bool_t a_is_writeable" )
+
+.I cw_bufc_t *
+.br
+.B bufc_new
+.RI ( "cw_bufc_t * a_bufc" ", " 
+.IR "void (*a_dealloc_func)(void * dealloc_arg, void * bufel)" ", "
+.IR "void * a_dealloc_arg)" )
+
+.I void
+.br
+.B bufc_delete
+.RI ( "cw_bufc_t * a_bufc" )
+
+.I void
+.br
+.B bufc_set_buffer
+.RI ( "cw_bufc_t * a_bufc" ", " "void * a_buffer" ", " "cw_uint32_t a_size" 
+.RI ", " "cw_bool_t a_is_writeable" ", " 
+.IR "void (*a_dealloc_func)(void * dealloc_arg, void * buffer" ", "
+.IR "void * a_dealloc_arg" )
+
+.SS Debugging (dbg) symbols
+.TP \" XXX
+\*(lq<XXX symbol>\*(rq
+<XXX Symbol description>
+
+.SH DESCRIPTION
+<XXX Description>
+
+.SH USAGE
+.I cw_buf_t *
+.br
+.B buf_new
+.RI ( "cw_buf_t * a_buf" )
+.I cw_buf_t *
+.br
+.B buf_new
+.RI ( "cw_buf_t * a_buf" ", " "cw_bool_t a_is_threadsafe" )
+.RS
+Input(s):
+.RS
+.IR a_buf :
+.RS
+Pointer to space for a buf, or NULL.
+.RE
+.IR a_is_thread_safe :
+.RS
+FALSE: Not thread-safe.
+.br
+TRUE: Thread-safe.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+non-NULL: Pointer to a buf.
+.br
+NULL: Memory allocation.  Can only occur if (NULL == a_buf).
+.RE
+.RE
+Description:
+.RS
+Constructor.
+.RE
+.RE
+
+.I void
+.br
+.B buf_delete
+.RI ( "cw_buf_t * a_buf" )
+.RS
+Input(s):
+.RS
+.IR a_buf :
+.RS
+Pointer to a buf.
+.RE
+.RE
+Output(s):
+.RS
+None
+.RE
+Description:
+.RS
+Destructor.
+.RE
+.RE
+
+.I void
+.br
+.B buf_dump
+.RI ( "cw_buf_t * a_buf" ", " "const char * a_prefix" )
+.RS
+Input(s):
+.RS
+.IR a_buf :
+.RS
+Pointer to a buf.
+.RE
+.IR a_prefix :
+.RS
+Pointer to a string that represents a string to be prefixed to each line of
+output.
+.RE
+.RE
+Output(s):
+.RS
+a_buf's internals printed to cw_g_out.
+.RE
+Description:
+.RS
+Dump the internal state of a_buf to cw_g_out.
+.RE
+.RE
+
+.I cw_sint32_t
+.br
+.B buf_get_size
+.RI ( "cw_buf_t * a_buf" )
+.RS
+Input(s):
+.RS
+.IR a_buf :
+.RS
+Pointer to a buf.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+Number of bytes of valid data.
+.RE
+.RE
+Description:
+.RS
+Return the amout of valid data in bytes.
+.RE
+.RE
+
+.I cw_uint32_t
+.br
+.B buf_get_num_bufels
+.RI ( "cw_buf_t * a_buf" )
+.RS
+Input(s):
+.RS
+.IR a_buf :
+.RS
+Pointer to a buf.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+Number of bufel's (internal buffer elements) in a_buf (same as iovec count in
+buf_get_iovec()).
+.RE
+.RE
+Description:
+.RS
+Return the number of bufel's in a_buf.
+.RE
+.RE
+
+.I const struct iovec *
+.br
+.B buf_get_iovec
+.RI ( "cw_buf_t * a_buf" ", " "cw_uint32_t a_max_data" ", " 
+.IR "cw_bool_t a_is_sys_iovec" ", " "int * r_iovec_count" )
+.RS
+Input(s):
+.RS
+.IR a_buf :
+.RS
+Pointer to a buf.
+.RE
+.IR a_max_data :
+.RS
+Maximum number of bytes of space to include in the iovec.
+.RE
+.IR a_is_sys_iovec :
+.RS
+If TRUE, limit *r_iovec_count to the maximum iovec count supported by this
+system for readv()/writev().
+.RE
+.IR <input> :
+.RS
+<input description>
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+<retval description>
+.RE
+.RE
+Description:
+.RS
+<description>
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B buf_catenate_buf
+.RI ( "cw_buf_t * a_a" ", " "cw_buf_t * a_b" ", " "cw_bool_t a_preserve" )
+.RS
+Input(s):
+.RS
+.IR a_buf :
+.RS
+Pointer to a buf.
+.RE
+.IR <input> :
+.RS
+<input description>
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+<retval description>
+.RE
+.RE
+Description:
+.RS
+<description>
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B buf_split
+.RI ( "cw_buf_t * a_a" ", " "cw_buf_t * a_b" ", " "cw_uint32_t a_offset" )
+.RS
+Input(s):
+.RS
+.IR a_buf :
+.RS
+Pointer to a buf.
+.RE
+.IR <input> :
+.RS
+<input description>
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+<retval description>
+.RE
+.RE
+Description:
+.RS
+<description>
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B buf_prepend_bufc
+.RI ( "cw_buf_t * a_buf" ", " "cw_bufc_t * a_bufc" ", " 
+.IR "cw_uint32_t a_beg_offset" ", " "cw_uint32_t a_end_offset" )
+.RS
+Input(s):
+.RS
+.IR a_buf :
+.RS
+Pointer to a buf.
+.RE
+.IR <input> :
+.RS
+<input description>
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+<retval description>
+.RE
+.RE
+Description:
+.RS
+<description>
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B buf_append_bufc
+.RI ( "cw_buf_t * a_buf" ", " "cw_bufc_t * a_bufc" ", " 
+.IR "cw_uint32_t a_beg_offset" ", " "cw_uint32_t a_end_offset" )
+.RS
+Input(s):
+.RS
+.IR a_buf :
+.RS
+Pointer to a buf.
+.RE
+.IR <input> :
+.RS
+<input description>
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+<retval description>
+.RE
+.RE
+Description:
+.RS
+<description>
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B buf_release_head_data
+.RI ( "cw_buf_t * a_buf" ", " "cw_uint32_t a_amount" )
+.RS
+Input(s):
+.RS
+.IR a_buf :
+.RS
+Pointer to a buf.
+.RE
+.IR <input> :
+.RS
+<input description>
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+<retval description>
+.RE
+.RE
+Description:
+.RS
+<description>
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B buf_release_tail_data
+.RI ( "cw_buf_t * a_buf" ", " "cw_uint32_t a_amount" )
+.RS
+Input(s):
+.RS
+.IR a_buf :
+.RS
+Pointer to a buf.
+.RE
+.IR <input> :
+.RS
+<input description>
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+<retval description>
+.RE
+.RE
+Description:
+.RS
+<description>
+.RE
+.RE
+
+.I cw_uint8_t
+.br
+.B buf_get_uint8
+.RI ( "cw_buf_t * a_buf" ", " "cw_uint32_t a_offset" )
+.RS
+Input(s):
+.RS
+.IR a_buf :
+.RS
+Pointer to a buf.
+.RE
+.IR <input> :
+.RS
+<input description>
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+<retval description>
+.RE
+.RE
+Description:
+.RS
+<description>
+.RE
+.RE
+
+.I cw_uint32_t
+.br
+.B buf_get_uint32
+.RI ( "cw_buf_t * a_buf" ", " "cw_uint32_t a_offset" )
+.RS
+Input(s):
+.RS
+.IR a_buf :
+.RS
+Pointer to a buf.
+.RE
+.IR <input> :
+.RS
+<input description>
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+<retval description>
+.RE
+.RE
+Description:
+.RS
+<description>
+.RE
+.RE
+
+.I cw_uint64_t
+.br
+.B buf_get_uint64
+.RI ( "cw_buf_t * a_buf" ", " "cw_uint32_t a_offset" )
+.RS
+Input(s):
+.RS
+.IR a_buf :
+.RS
+Pointer to a buf.
+.RE
+.IR <input> :
+.RS
+<input description>
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+<retval description>
+.RE
+.RE
+Description:
+.RS
+<description>
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B buf_set_uint8
+.RI ( "cw_buf_t * a_buf" ", " "cw_uint32_t a_offset" ", " 
+.IR "cw_uint_t32 a_val" )
+.RS
+Input(s):
+.RS
+.IR a_buf :
+.RS
+Pointer to a buf.
+.RE
+.IR <input> :
+.RS
+<input description>
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+<retval description>
+.RE
+.RE
+Description:
+.RS
+<description>
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B buf_set_uint32
+.RI ( "cw_buf_t * a_buf" ", " "cw_uint32_t a_offset" ", " 
+.IR "cw_uint32_t a_val" )
+.RS
+Input(s):
+.RS
+.IR a_buf :
+.RS
+Pointer to a buf.
+.RE
+.IR <input> :
+.RS
+<input description>
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+<retval description>
+.RE
+.RE
+Description:
+.RS
+<description>
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B buf_set_uint64
+.RI ( "cw_buf_t * a_buf" ", " "cw_uint32_t a_offset" ", " 
+.IR "cw_uint64_t a_val" )
+.RS
+Input(s):
+.RS
+.IR a_buf :
+.RS
+Pointer to a buf.
+.RE
+.IR <input> :
+.RS
+<input description>
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+<retval description>
+.RE
+.RE
+Description:
+.RS
+<description>
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B buf_set_range
+.RI ( "cw_buf_t * a_buf" ", " "cw_uint32_t a_offset" ", " 
+.IR "cw_uint32_t a_length" ", " "cw_uint8_t * a_val" ", " 
+.IR "cw_bool_t a_is_writeable" )
+.RS
+Input(s):
+.RS
+.IR a_buf :
+.RS
+Pointer to a buf.
+.RE
+.IR <input> :
+.RS
+<input description>
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+<retval description>
+.RE
+.RE
+Description:
+.RS
+<description>
+.RE
+.RE
+
+.I cw_bufc_t *
+.br
+.B bufc_new
+.RI ( "cw_bufc_t * a_bufc" ", " 
+.IR "void (*a_dealloc_func)(void * dealloc_arg, void * bufel)" ", "
+.IR "void * a_dealloc_arg)" )
+.RS
+Input(s):
+.RS
+.IR a_bufc :
+.RS
+Pointer to a bufc.
+.RE
+.IR <input> :
+.RS
+<input description>
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+<retval description>
+.RE
+.RE
+Description:
+.RS
+<description>
+.RE
+.RE
+
+.I void
+.br
+.B bufc_delete
+.RI ( "cw_bufc_t * a_bufc" )
+.RS
+Input(s):
+.RS
+.IR a_bufc :
+.RS
+Pointer to a bufc.
+.RE
+.IR <input> :
+.RS
+<input description>
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+<retval description>
+.RE
+.RE
+Description:
+.RS
+<description>
+.RE
+.RE
+
+.I void
+.br
+.B bufc_set_buffer
+.RI ( "cw_bufc_t * a_bufc" ", " "void * a_buffer" ", " "cw_uint32_t a_size" 
+.RI ", " "cw_bool_t a_is_writeable" ", " 
+.IR "void (*a_dealloc_func)(void * dealloc_arg, void * buffer" ", "
+.IR "void * a_dealloc_arg" )
+.RS
+Input(s):
+.RS
+.IR a_bufc :
+.RS
+Pointer to a bufc.
+.RE
+.IR <input> :
+.RS
+<input description>
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+<retval description>
+.RE
+.RE
+Description:
+.RS
+<description>
+.RE
+.RE
+
+.SH SEE ALSO
+libstash(3s).
+
+.SH HISTORY
+Written by Jason Evans <jasone@canonware.com>.

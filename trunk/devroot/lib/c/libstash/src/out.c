@@ -1558,7 +1558,7 @@ out_p_render_int(const char * a_format, cw_uint32_t a_len,
   else
   {
     cw_uint64_t rval = arg;
-    
+
     for (i = a_nbits - 1; rval != 0; i--)
     {
       result[i] = syms[rval % base];
