@@ -70,7 +70,7 @@ typedef struct lineinfo {
 /*
  * Initialization, cleanup, and resetting
  */
-EditLine	*el_init	__P((const char *, int, int));
+EditLine	*el_init	__P((const char *, FILE *, FILE *));
 void		 el_reset	__P((EditLine *));
 void		 el_end		__P((EditLine *));
 
@@ -100,11 +100,14 @@ int 		 el_set		__P((EditLine *, int, ...));
 #define EL_TERMINAL	1	/* , const char *);		*/
 #define EL_EDITOR	2	/* , const char *);		*/
 #define EL_SIGNAL	3	/* , int);			*/
-#define	EL_TELLTC	4	/* , const char *, ..., NULL);	*/
-#define	EL_SETTC	5	/* , const char *, ..., NULL);	*/
-#define	EL_ECHOTC	6	/* , const char *, ..., NULL);	*/
-#define	EL_SETTY	7	/* , const char *, ..., NULL);	*/
-#define EL_HIST		8	/* , hist_fun_t, const char *);	*/
+#define	EL_BIND		4	/* , const char *, ..., NULL);	*/
+#define	EL_TELLTC	5	/* , const char *, ..., NULL);	*/
+#define	EL_SETTC	6	/* , const char *, ..., NULL);	*/
+#define	EL_ECHOTC	7	/* , const char *, ..., NULL);	*/
+#define	EL_SETTY	8	/* , const char *, ..., NULL);	*/
+#define	EL_ADDFN	9	/* , const char *, const char *	*/
+				/* , el_func_t);		*/
+#define EL_HIST		10	/* , hist_fun_t, const char *);	*/
 
 /*
  * Source named file or $PWD/.editrc or $HOME/.editrc
@@ -162,4 +165,6 @@ const HistEvent *	history		__P((History *, int, ...));
 #define H_PREV_STR	11	/* , const char*);	*/
 #define H_NEXT_EVENT	12	/* , const int);	*/
 #define H_PREV_EVENT	13	/* , const int);	*/
-#define H_CLEAR		14	/* , void);		*/
+#define H_LOAD		14	/* , const char *);	*/
+#define H_SAVE		15	/* , const char *);	*/
+#define H_CLEAR		16	/* , void);		*/

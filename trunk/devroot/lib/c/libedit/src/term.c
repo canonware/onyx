@@ -178,7 +178,7 @@ private void	term_init_arrow		__P((EditLine *));
 private void	term_reset_arrow	__P((EditLine *));
 
 
-private int term_outfile = 0;	/* XXX: How do we fix that? */
+private FILE *term_outfile = NULL;	/* XXX: How do we fix that? */
 
 
 /* term_setflags():
@@ -209,15 +209,15 @@ term_setflags(el)
 
 #ifdef DEBUG_SCREEN
     if (!EL_CAN_UP) {
-	_cw_out_put_f(el->el_errfile, "WARNING: Your terminal cannot move up.\n");
-	_cw_out_put_f(el->el_errfile, "Editing may be odd for long lines.\n");
+	(void) fprintf(el->el_errfile, "WARNING: Your terminal cannot move up.\n");
+	(void) fprintf(el->el_errfile, "Editing may be odd for long lines.\n");
     }
     if (!EL_CAN_CEOL)
-	_cw_out_put_f(el->el_errfile, "no clear EOL capability.\n");
+	(void) fprintf(el->el_errfile, "no clear EOL capability.\n");
     if (!EL_CAN_DELETE)
-	_cw_out_put_f(el->el_errfile, "no delete char capability.\n");
+	(void) fprintf(el->el_errfile, "no delete char capability.\n");
     if (!EL_CAN_INSERT)
-	_cw_out_put_f(el->el_errfile, "no insert char capability.\n");
+	(void) fprintf(el->el_errfile, "no insert char capability.\n");
 #endif /* DEBUG_SCREEN */
 }
 
@@ -255,8 +255,6 @@ term_end(el)
     el->el_term.t_buf = NULL;
     el_free((ptr_t) el->el_term.t_cap);
     el->el_term.t_cap = NULL;
-    el_free((ptr_t) el->el_term.t_fkey);
-    el->el_term.t_fkey = NULL;
     el->el_term.t_loc = 0;
     el_free((ptr_t) el->el_term.t_str);
     el->el_term.t_str = NULL;
@@ -323,7 +321,7 @@ term_alloc(el, t, cap)
     memcpy(el->el_term.t_buf, termbuf, TC_BUFSIZE);
     el->el_term.t_loc = tlen;
     if (el->el_term.t_loc + 3 >= TC_BUFSIZE) {
-	_cw_out_put_f(el->el_errfile, "Out of termcap string space.\n");
+	(void) fprintf(el->el_errfile, "Out of termcap string space.\n");
 	return;
     }
     /* XXX strcpy is safe */
@@ -421,8 +419,8 @@ term_move_to_line(el, where)
 
     if (where > el->el_term.t_size.v) {
 #ifdef DEBUG_SCREEN
-	_cw_out_put_f(el->el_errfile,
-		"term_move_to_line: where is ridiculous: [i]\r\n", where);
+	(void) fprintf(el->el_errfile,
+		"term_move_to_line: where is ridiculous: %d\r\n", where);
 #endif /* DEBUG_SCREEN */
 	return;
     }
@@ -465,8 +463,8 @@ mc_again:
 
     if (where > (el->el_term.t_size.h + 1)) {
 #ifdef DEBUG_SCREEN
-	_cw_out_put_f(el->el_errfile,
-		"term_move_to_char: where is riduculous: [i]\r\n", where);
+	(void) fprintf(el->el_errfile,
+		"term_move_to_char: where is riduculous: %d\r\n", where);
 #endif /* DEBUG_SCREEN */
 	return;
     }
@@ -539,7 +537,7 @@ term_overwrite(el, cp, n)
 
     if (n > (el->el_term.t_size.h + 1)) {
 #ifdef DEBUG_SCREEN
-	_cw_out_put_f(el->el_errfile, "term_overwrite: n is riduculous: [i]\r\n", n);
+	(void) fprintf(el->el_errfile, "term_overwrite: n is riduculous: %d\r\n", n);
 #endif /* DEBUG_SCREEN */
 	return;
     }
@@ -564,15 +562,15 @@ term_deletechars(el, num)
 
     if (!EL_CAN_DELETE) {
 #ifdef DEBUG_EDIT
-	_cw_out_put_f(el->el_errfile, "   ERROR: cannot delete   \n");
+	(void) fprintf(el->el_errfile, "   ERROR: cannot delete   \n");
 #endif /* DEBUG_EDIT */
 	return;
     }
 
     if (num > el->el_term.t_size.h) {
 #ifdef DEBUG_SCREEN
-	_cw_out_put_f(el->el_errfile,
-		"term_deletechars: num is riduculous: [i]\r\n", num);
+	(void) fprintf(el->el_errfile,
+		"term_deletechars: num is riduculous: %d\r\n", num);
 #endif /* DEBUG_SCREEN */
 	return;
     }
@@ -609,14 +607,14 @@ term_insertwrite(el, cp, num)
 	return;
     if (!EL_CAN_INSERT) {
 #ifdef DEBUG_EDIT
-	_cw_out_put_f(el->el_errfile, "   ERROR: cannot insert   \n");
+	(void) fprintf(el->el_errfile, "   ERROR: cannot insert   \n");
 #endif /* DEBUG_EDIT */
 	return;
     }
 
     if (num > el->el_term.t_size.h) {
 #ifdef DEBUG_SCREEN
-	_cw_out_put_f(el->el_errfile, "StartInsert: num is riduculous: [i]\r\n", num);
+	(void) fprintf(el->el_errfile, "StartInsert: num is riduculous: %d\r\n", num);
 #endif /* DEBUG_SCREEN */
 	return;
     }
@@ -767,11 +765,11 @@ term_set(el, term)
 
     if (i <= 0) {
 	if (i == -1)
-	    _cw_out_put_f(el->el_errfile, "Cannot read termcap database;\n");
+	    (void) fprintf(el->el_errfile, "Cannot read termcap database;\n");
 	else if (i == 0)
-	    _cw_out_put_f(el->el_errfile,
-			   "No entry for terminal type \"[s]\";\n", term);
-	_cw_out_put_f(el->el_errfile, "using dumb terminal settings.\n");
+	    (void) fprintf(el->el_errfile,
+			   "No entry for terminal type \"%s\";\n", term);
+	(void) fprintf(el->el_errfile, "using dumb terminal settings.\n");
 	Val(T_co) = 80;		/* do a dumb terminal */
 	Val(T_pt) = Val(T_km) = Val(T_li) = 0;
 	Val(T_xt) = Val(T_MT);
@@ -997,6 +995,24 @@ term_clear_arrow(el, name)
 }
 
 
+/* term_print_arrow():
+ *	Print the arrow key bindings
+ */
+protected void
+term_print_arrow(el, name)
+    EditLine *el;
+    char *name;
+{
+    int i;
+    fkey_t *arrow = el->el_term.t_fkey;
+
+    for (i = 0; i < A_K_NKEYS; i++)
+	if (*name == '\0' || strcmp(name, arrow[i].name) == 0)
+	    if (arrow[i].type != XK_NOD)
+		key_kprint(el, arrow[i].name, &arrow[i].fun, arrow[i].type);
+}
+
+
 /* term_bind_arrow():
  *	Bind the arrow keys
  */
@@ -1059,15 +1075,7 @@ protected int
 term__putc(c)
     int c;
 {
-	char s[1];
-	int error;
-
-	s[0] = c;
-	error = write(term_outfile, s, 1);
-	if (error)
-		return EOF;
-	else
-		return c;
+    return fputc(c, term_outfile);
 } /* end term__putc */
 
 
@@ -1077,6 +1085,7 @@ term__putc(c)
 protected void
 term__flush()
 {
+    (void) fflush(term_outfile);
 } /* end term__flush */
 
 
@@ -1094,31 +1103,27 @@ term_telltc(el, argc, argv)
     char **ts;
     char upbuf[EL_BUFSIZ];
 
-    _cw_out_put_f(el->el_outfile, "\n\tYour terminal has the\n");
-    _cw_out_put_f(el->el_outfile, "\tfollowing characteristics:\n\n");
-    _cw_out_put_f(el->el_outfile, "\tIt has [i] columns and [i] lines\n",
+    (void) fprintf(el->el_outfile, "\n\tYour terminal has the\n");
+    (void) fprintf(el->el_outfile, "\tfollowing characteristics:\n\n");
+    (void) fprintf(el->el_outfile, "\tIt has %d columns and %d lines\n",
 	    Val(T_co), Val(T_li));
-    _cw_out_put_f(el->el_outfile,
-		   "\tIt has [s] meta key\n", EL_HAS_META ? "a" : "no");
-    _cw_out_put_f(el->el_outfile,
-		   "\tIt can[s]use tabs\n", EL_CAN_TAB ? " " : "not ");
+    (void) fprintf(el->el_outfile,
+		   "\tIt has %s meta key\n", EL_HAS_META ? "a" : "no");
+    (void) fprintf(el->el_outfile,
+		   "\tIt can%suse tabs\n", EL_CAN_TAB ? " " : "not ");
 #ifdef notyet
-    _cw_out_put_f(el->el_outfile, "\tIt [s] automatic margins\n",
+    (void) fprintf(el->el_outfile, "\tIt %s automatic margins\n",
 		   (T_Margin&MARGIN_AUTO)? "has": "does not have");
     if (T_Margin & MARGIN_AUTO)
-	_cw_out_put_f(el->el_outfile, "\tIt [s] magic margins\n",
+	(void) fprintf(el->el_outfile, "\tIt %s magic margins\n",
 			(T_Margin&MARGIN_MAGIC)?"has":"does not have");
 #endif
 
     for (t = tstr, ts = el->el_term.t_str; t->name != NULL; t++, ts++)
-	_cw_out_put_f(el->el_outfile, "\t[s|w:25] ([s]) == [s]\n", t->long_name,
+	(void) fprintf(el->el_outfile, "\t%25s (%s) == %s\n", t->long_name,
 		       t->name, *ts && **ts ?
 			key__decode_str(*ts, upbuf, "") : "(empty)");
-    {
-	    char s[] = "\n";
-	    
-	    write(el->el_outfile, s, 1);
-    }
+    (void) fputc('\n', el->el_outfile);
     return 0;
 }
 
@@ -1174,7 +1179,7 @@ term_settc(el, argc, argv)
 	    else if (strcmp(how, "no") == 0)
 		el->el_term.t_val[tv - tval] = 0;
 	    else {
-		_cw_out_put_f(el->el_errfile, "settc: Bad value `[s]'.\n", how);
+		(void) fprintf(el->el_errfile, "settc: Bad value `%s'.\n", how);
 		return -1;
 	    }
 	    term_setflags(el);
@@ -1208,7 +1213,7 @@ term_echotc(el, argc, argv)
     int     arg_need, arg_cols, arg_rows;
     int     verbose = 0, silent = 0;
     char   *area;
-    static char *fmts = "[s]\n", *fmtd = "[i]\n";
+    static char *fmts = "%s\n", *fmtd = "%d\n";
     struct termcapstr *t;
     char    buf[TC_BUFSIZE];
 
@@ -1235,35 +1240,35 @@ term_echotc(el, argc, argv)
     if (!*argv || *argv[0] == '\0')
 	return 0;
     if (strcmp(*argv, "tabs") == 0) {
-	_cw_out_put_f(el->el_outfile, fmts, EL_CAN_TAB ? "yes" : "no");
+	(void) fprintf(el->el_outfile, fmts, EL_CAN_TAB ? "yes" : "no");
 	return 0;
     }
     else if (strcmp(*argv, "meta") == 0) {
-	_cw_out_put_f(el->el_outfile, fmts, Val(T_km) ? "yes" : "no");
+	(void) fprintf(el->el_outfile, fmts, Val(T_km) ? "yes" : "no");
 	return 0;
     }
 #ifdef notyet
     else if (strcmp(*argv, "xn") == 0) {
-	_cw_out_put_f(el->el_outfile, fmts, T_Margin & MARGIN_MAGIC ?
+	(void) fprintf(el->el_outfile, fmts, T_Margin & MARGIN_MAGIC ?
 			"yes" : "no");
 	return 0;
     }
     else if (strcmp(*argv, "am") == 0) {
-	_cw_out_put_f(el->el_outfile, fmts, T_Margin & MARGIN_AUTO ?
+	(void) fprintf(el->el_outfile, fmts, T_Margin & MARGIN_AUTO ?
 			"yes" : "no");
 	return 0;
     }
 #endif
     else if (strcmp(*argv, "baud") == 0) {
-	_cw_out_put_f(el->el_outfile, "[i]\n", (u_long)el->el_tty.t_speed);
+	(void) fprintf(el->el_outfile, "%lu\n", (u_long)el->el_tty.t_speed);
 	return 0;
     }
     else if (strcmp(*argv, "rows") == 0 || strcmp(*argv, "lines") == 0) {
-	_cw_out_put_f(el->el_outfile, fmtd, Val(T_li));
+	(void) fprintf(el->el_outfile, fmtd, Val(T_li));
 	return 0;
     }
     else if (strcmp(*argv, "cols") == 0) {
-	_cw_out_put_f(el->el_outfile, fmtd, Val(T_co));
+	(void) fprintf(el->el_outfile, fmtd, Val(T_co));
 	return 0;
     }
 
@@ -1280,8 +1285,8 @@ term_echotc(el, argc, argv)
 	scap = tgetstr(*argv, &area);
     if (!scap || scap[0] == '\0') {
 	if (!silent)
-	    _cw_out_put_f(el->el_errfile,
-		"echotc: Termcap parameter `[s]' not found.\n", *argv);
+	    (void) fprintf(el->el_errfile,
+		"echotc: Termcap parameter `%s' not found.\n", *argv);
 	return -1;
     }
 
@@ -1311,8 +1316,8 @@ term_echotc(el, argc, argv)
 		 * hpux has lot's of them...
 		 */
 		if (verbose)
-		    _cw_out_put_f(el->el_errfile,
-			"echotc: Warning: unknown termcap % `[c]'.\n", *cap);
+		    (void) fprintf(el->el_errfile,
+			"echotc: Warning: unknown termcap %% `%c'.\n", *cap);
 		/* This is bad, but I won't complain */
 		break;
 	    }
@@ -1322,8 +1327,8 @@ term_echotc(el, argc, argv)
 	argv++;
 	if (*argv && *argv[0]) {
 	    if (!silent)
-		_cw_out_put_f(el->el_errfile,
-		    "echotc: Warning: Extra argument `[s]'.\n", *argv);
+		(void) fprintf(el->el_errfile,
+		    "echotc: Warning: Extra argument `%s'.\n", *argv);
 	    return -1;
 	}
 	(void) tputs(scap, 1, term__putc);
@@ -1332,7 +1337,7 @@ term_echotc(el, argc, argv)
 	argv++;
 	if (!*argv || *argv[0] == '\0') {
 	    if (!silent)
-		_cw_out_put_f(el->el_errfile,
+		(void) fprintf(el->el_errfile,
 		    "echotc: Warning: Missing argument.\n");
 	    return -1;
 	}
@@ -1341,8 +1346,8 @@ term_echotc(el, argc, argv)
 	argv++;
 	if (*argv && *argv[0]) {
 	    if (!silent)
-		_cw_out_put_f(el->el_errfile,
-		    "echotc: Warning: Extra argument `[s]'.\n", *argv);
+		(void) fprintf(el->el_errfile,
+		    "echotc: Warning: Extra argument `%s'.\n", *argv);
 	    return -1;
 	}
 	(void) tputs(tgoto(scap, arg_cols, arg_rows), 1, term__putc);
@@ -1350,15 +1355,15 @@ term_echotc(el, argc, argv)
     default:
 	/* This is wrong, but I will ignore it... */
 	if (verbose)
-	    _cw_out_put_f(el->el_errfile,
-		"echotc: Warning: Too many required arguments ([i]).\n",
+	    (void) fprintf(el->el_errfile,
+		"echotc: Warning: Too many required arguments (%d).\n",
 		arg_need);
 	/*FALLTHROUGH*/
     case 2:
 	argv++;
 	if (!*argv || *argv[0] == '\0') {
 	    if (!silent)
-		_cw_out_put_f(el->el_errfile,
+		(void) fprintf(el->el_errfile,
 		    "echotc: Warning: Missing argument.\n");
 	    return -1;
 	}
@@ -1366,7 +1371,7 @@ term_echotc(el, argc, argv)
 	argv++;
 	if (!*argv || *argv[0] == '\0') {
 	    if (!silent)
-		_cw_out_put_f(el->el_errfile,
+		(void) fprintf(el->el_errfile,
 		    "echotc: Warning: Missing argument.\n");
 	    return -1;
 	}
@@ -1374,8 +1379,8 @@ term_echotc(el, argc, argv)
 	argv++;
 	if (*argv && *argv[0]) {
 	    if (!silent)
-		_cw_out_put_f(el->el_errfile,
-		    "echotc: Warning: Extra argument `[s]'.\n", *argv);
+		(void) fprintf(el->el_errfile,
+		    "echotc: Warning: Extra argument `%s'.\n", *argv);
 	    return -1;
 	}
 	(void) tputs(tgoto(scap, arg_cols, arg_rows), arg_rows, term__putc);

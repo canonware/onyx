@@ -31,10 +31,6 @@
  *
  * $FreeBSD: src/lib/libedit/tty.c,v 1.4.6.1 2000/08/16 14:43:40 ache Exp $
  */
-/*  #define DEBUG_TTY */
-#ifdef DEBUG_TTY
-#include <errno.h>
-#endif
 
 /*
  * tty.c: tty interface stuff
@@ -460,8 +456,8 @@ tty_setup(el)
     int rst = 1;
     if (tty_getty(el, &el->el_tty.t_ed) == -1) {
 #ifdef DEBUG_TTY
-	_cw_out_put_f(el->el_errfile,
-		       "tty_setup: tty_getty: [s]\n", strerror(errno));
+	(void) fprintf(el->el_errfile,
+		       "tty_setup: tty_getty: %s\n", strerror(errno));
 #endif /* DEBUG_TTY */
 	return(-1);
     }
@@ -505,7 +501,7 @@ tty_setup(el)
     el->el_tty.t_ed.c_lflag |=  el->el_tty.t_t[ED_IO][M_LIN].t_setmask;
 
     tty__setchar(&el->el_tty.t_ed, el->el_tty.t_c[ED_IO]);
-   return 0;
+    return 0;
 }
 
 protected int
@@ -772,7 +768,7 @@ tty_rawmode(el)
 
     if (tty_getty(el, &el->el_tty.t_ts) == -1) {
 #ifdef DEBUG_TTY
-	_cw_out_put_f(el->el_errfile, "tty_rawmode: tty_getty: [s]\n", strerror(errno));
+	(void) fprintf(el->el_errfile, "tty_rawmode: tty_getty: %s\n", strerror(errno));
 #endif /* DEBUG_TTY */
 	return(-1);
     }
@@ -868,7 +864,7 @@ tty_rawmode(el)
 
     if (tty_setty(el, &el->el_tty.t_ed) == -1) {
 #ifdef DEBUG_TTY
-	_cw_out_put_f(el->el_errfile, "tty_rawmode: tty_setty: [s]\n",
+	(void) fprintf(el->el_errfile, "tty_rawmode: tty_setty: %s\n",
 		       strerror(errno));
 #endif /* DEBUG_TTY */
 	return -1;
@@ -890,7 +886,7 @@ tty_cookedmode(el)
 
     if (tty_setty(el, &el->el_tty.t_ex) == -1) {
 #ifdef DEBUG_TTY
-	_cw_out_put_f(el->el_errfile, "tty_cookedmode: tty_setty: [s]\n",
+	(void) fprintf(el->el_errfile, "tty_cookedmode: tty_setty: %s\n",
 		       strerror(errno));
 #endif /* DEBUG_TTY */
 	return -1;
@@ -926,7 +922,7 @@ tty_quotemode(el)
 
     if (tty_setty(el, &el->el_tty.t_qu) == -1) {
 #ifdef DEBUG_TTY
-	_cw_out_put_f(el->el_errfile, "QuoteModeOn: tty_setty: [s]\n",
+	(void) fprintf(el->el_errfile, "QuoteModeOn: tty_setty: %s\n",
 		       strerror(errno));
 #endif /* DEBUG_TTY */
 	return -1;
@@ -947,7 +943,7 @@ tty_noquotemode(el)
 	return 0;
     if (tty_setty(el, &el->el_tty.t_ed) == -1) {
 #ifdef DEBUG_TTY
-	_cw_out_put_f(el->el_errfile, "QuoteModeOff: tty_setty: [s]\n",
+	(void) fprintf(el->el_errfile, "QuoteModeOff: tty_setty: %s\n",
 		       strerror(errno));
 #endif /* DEBUG_TTY */
 	return -1;
@@ -996,7 +992,7 @@ tty_stty(el, argc, argv)
 	    z = QU_IO;
 	    break;
 	default:
-	    _cw_out_put_f(el->el_errfile, "[s]: Unknown switch `[c]'.\n",
+	    (void) fprintf(el->el_errfile, "%s: Unknown switch `%c'.\n",
 			   name, argv[0][1]);
 	    return -1;
 	}
@@ -1006,7 +1002,7 @@ tty_stty(el, argc, argv)
 	int len = 0, st = 0, cu;
 	for (m = ttymodes; m->m_name; m++) {
 	    if (m->m_type != i) {
-		_cw_out_put_f(el->el_outfile, "[s][s]", i != -1 ? "\n" : "",
+		(void) fprintf(el->el_outfile, "%s%s", i != -1 ? "\n" : "",
 			el->el_tty.t_t[z][m->m_type].t_name);
 		i = m->m_type;
 		st = len = strlen(el->el_tty.t_t[z][m->m_type].t_name);
@@ -1020,24 +1016,19 @@ tty_stty(el, argc, argv)
 		cu = strlen(m->m_name) + (x != '\0') + 1;
 
 		if (len + cu >= el->el_term.t_size.h) {
-			char	*format;
-
-			out_put_sa(NULL, &format, "\n[[s|w:[i]]", st);
-			_cw_out_put_f(el->el_outfile, format, "");
-			_cw_free(format);
-/*  			_cw_out_put_f(el->el_outfile, "\n%*s", st, ""); */
-			len = st + cu;
+		    (void) fprintf(el->el_outfile, "\n%*s", st, "");
+		    len = st + cu;
 		}
 		else
 		    len += cu;
 
 		if (x != '\0')
-		    _cw_out_put_f(el->el_outfile, "[c][s] ", x, m->m_name);
+		    (void) fprintf(el->el_outfile, "%c%s ", x, m->m_name);
 		else
-		    _cw_out_put_f(el->el_outfile, "[s] ", m->m_name);
+		    (void) fprintf(el->el_outfile, "%s ", m->m_name);
 	    }
 	}
-	_cw_out_put_f(el->el_outfile, "\n");
+	(void) fprintf(el->el_outfile, "\n");
 	return 0;
     }
 
@@ -1057,7 +1048,7 @@ tty_stty(el, argc, argv)
 		break;
 
 	if (!m->m_name)  {
-	    _cw_out_put_f(el->el_errfile, "[s]: Invalid argument `[s]'.\n",
+	    (void) fprintf(el->el_errfile, "%s: Invalid argument `%s'.\n",
 			   name, d);
 	    return -1;
 	}
@@ -1098,11 +1089,10 @@ tty_printchar(el, s)
 	    if (m->m_type == M_CHAR && C_SH(i) == m->m_value)
 		break;
 	if (m->m_name)
-	    _cw_out_put_f(el->el_errfile, "[s] ^[c] ", m->m_name, s[i] +
-	    'A'-1);
+	    (void) fprintf(el->el_errfile, "%s ^%c ", m->m_name, s[i] + 'A'-1);
 	if (i % 5 == 0)
-	    _cw_out_put_f(el->el_errfile, "\n");
+	    (void) fprintf(el->el_errfile, "\n");
     }
-    _cw_out_put_f(el->el_errfile, "\n");
+    (void) fprintf(el->el_errfile, "\n");
 }
 #endif /* notyet */

@@ -38,6 +38,9 @@
 
 #define N_KEYS 256
 
+private void map_print_key	 __P((EditLine *, el_action_t *, char *));
+private void map_print_some_keys __P((EditLine *, el_action_t *, int, int));
+private void map_print_all_keys	 __P((EditLine *));
 private void map_init_nls 	 __P((EditLine *));
 private void map_init_meta	 __P((EditLine *));
 
@@ -260,7 +263,7 @@ private el_action_t  el_map_emacs[] = {
     /* 213 */	EM_UPPER_CASE,		/* M-U */
     /* 214 */	ED_UNASSIGNED,		/* M-V */
     /* 215 */	EM_COPY_REGION,		/* M-W */
-    /* 216 */	ED_UNASSIGNED,		/* M-X */
+    /* 216 */	ED_COMMAND,		/* M-X */
     /* 217 */	ED_UNASSIGNED,		/* M-Y */
     /* 218 */	ED_UNASSIGNED,		/* M-Z */
     /* 219 */	ED_SEQUENCE_LEAD_IN,	/* M-[ */
@@ -286,13 +289,13 @@ private el_action_t  el_map_emacs[] = {
     /* 238 */	ED_UNASSIGNED,		/* M-o */
     /* 239 */	ED_SEARCH_PREV_HISTORY,	/* M-p */
     /* 240 */	ED_UNASSIGNED,		/* M-q */
-    /* 241 */	EM_INC_SEARCH_PREV,	/* M-r */
-    /* 242 */	EM_INC_SEARCH_NEXT,	/* M-s */
+    /* 241 */	ED_UNASSIGNED,		/* M-r */
+    /* 242 */	ED_UNASSIGNED,		/* M-s */
     /* 243 */	ED_UNASSIGNED,		/* M-t */
     /* 244 */	EM_UPPER_CASE,		/* M-u */
     /* 245 */	ED_UNASSIGNED,		/* M-v */
     /* 246 */	EM_COPY_REGION,		/* M-w */
-    /* 247 */	ED_UNASSIGNED,		/* M-x */
+    /* 247 */	ED_COMMAND,		/* M-x */
     /* 248 */	ED_UNASSIGNED,		/* M-y */
     /* 249 */	ED_UNASSIGNED,		/* M-z */
     /* 250 */	ED_UNASSIGNED,		/* M-{ */
@@ -662,7 +665,7 @@ private el_action_t  el_map_vi_command[] = {
     /*  55 */	ED_ARGUMENT_DIGIT,	/* 7 */
     /*  56 */	ED_ARGUMENT_DIGIT,	/* 8 */
     /*  57 */	ED_ARGUMENT_DIGIT,	/* 9 */
-    /*  58 */	ED_UNASSIGNED,		/* : */
+    /*  58 */	ED_COMMAND,		/* : */
     /*  59 */	VI_REPEAT_NEXT_CHAR,	/* ; */
     /*  60 */	ED_UNASSIGNED,		/* < */
     /*  61 */	ED_UNASSIGNED,		/* = */
@@ -888,6 +891,10 @@ map_init(el)
     el->el_map.emacs = el_map_emacs;
     el->el_map.vic   = el_map_vi_command;
     el->el_map.vii   = el_map_vi_insert;
+    el->el_map.help  = (el_bindings_t *) el_malloc(sizeof(el_bindings_t) *
+						   EL_NUM_FCNS);
+    (void) memcpy(el->el_map.help, help__get(),
+		  sizeof(el_bindings_t) * EL_NUM_FCNS);
     el->el_map.func  = (el_func_t *) el_malloc(sizeof(el_func_t) * EL_NUM_FCNS);
     memcpy(el->el_map.func, func__get(), sizeof(el_func_t) * EL_NUM_FCNS);
     el->el_map.nfunc = EL_NUM_FCNS;
@@ -915,6 +922,8 @@ map_end(el)
     el->el_map.emacs = NULL;
     el->el_map.vic   = NULL;
     el->el_map.vii   = NULL;
+    el_free((ptr_t) el->el_map.help);
+    el->el_map.help  = NULL;
     el_free((ptr_t) el->el_map.func);
     el->el_map.func  = NULL;
 }
@@ -1069,4 +1078,311 @@ map_set_editor(el, editor)
 	return 0;
     }
     return -1;
+}
+
+
+/* map_print_key():
+ *	Print the function description for 1 key
+ */
+private void
+map_print_key(el, map, in)
+    EditLine *el;
+    el_action_t *map;
+    char *in;
+{
+    char outbuf[EL_BUFSIZ];
+    el_bindings_t *bp;
+
+    if (in[0] == '\0' || in[1] == '\0') {
+	(void) key__decode_str(in, outbuf, "");
+	for (bp = el->el_map.help; bp->name != NULL; bp++)
+	    if (bp->func == map[(unsigned char) *in]) {
+		(void) fprintf(el->el_outfile,
+			       "%s\t->\t%s\n", outbuf, bp->name);
+		return;
+	    }
+    }
+    else
+	key_print(el, in);
+}
+
+
+/* map_print_some_keys():
+ *	Print keys from first to last
+ */
+private void
+map_print_some_keys(el, map, first, last)
+    EditLine *el;
+    el_action_t *map;
+    int     first, last;
+{
+    el_bindings_t *bp;
+    char    firstbuf[2], lastbuf[2];
+    char unparsbuf[EL_BUFSIZ], extrabuf[EL_BUFSIZ];
+
+    firstbuf[0] = first;
+    firstbuf[1] = 0;
+    lastbuf[0] = last;
+    lastbuf[1] = 0;
+    if (map[first] == ED_UNASSIGNED) {
+	if (first == last)
+	    (void) fprintf(el->el_outfile, "%-15s->  is undefined\n",
+		    key__decode_str(firstbuf, unparsbuf, STRQQ));
+	return;
+    }
+
+    for (bp = el->el_map.help; bp->name != NULL; bp++) {
+	if (bp->func == map[first]) {
+	    if (first == last) {
+		(void) fprintf(el->el_outfile, "%-15s->  %s\n",
+			       key__decode_str(firstbuf, unparsbuf, STRQQ),
+			       bp->name);
+	    }
+	    else {
+		(void) fprintf(el->el_outfile, "%-4s to %-7s->  %s\n",
+			       key__decode_str(firstbuf, unparsbuf, STRQQ),
+			       key__decode_str(lastbuf, extrabuf, STRQQ),
+			       bp->name);
+	    }
+	    return;
+	}
+    }
+#ifdef MAP_DEBUG
+    if (map == el->el_map.key) {
+	(void) fprintf(el->el_outfile, "BUG!!! %s isn't bound to anything.\n",
+		       key__decode_str(firstbuf, unparsbuf, STRQQ));
+	(void) fprintf(el->el_outfile, "el->el_map.key[%d] == %d\n",
+		       first, el->el_map.key[first]);
+    }
+    else {
+	(void) fprintf(el->el_outfile, "BUG!!! %s isn't bound to anything.\n",
+		       key__decode_str(firstbuf, unparsbuf, STRQQ));
+	(void) fprintf(el->el_outfile, "el->el_map.alt[%d] == %d\n",
+		       first, el->el_map.alt[first]);
+    }
+#endif
+    abort();
+}
+
+
+/* map_print_all_keys():
+ *	Print the function description for all keys.
+ */
+private void
+map_print_all_keys(el)
+    EditLine *el;
+{
+    int     prev, i;
+
+    (void) fprintf(el->el_outfile, "Standard key bindings\n");
+    prev = 0;
+    for (i = 0; i < N_KEYS; i++) {
+	if (el->el_map.key[prev] == el->el_map.key[i])
+	    continue;
+	map_print_some_keys(el, el->el_map.key, prev, i - 1);
+	prev = i;
+    }
+    map_print_some_keys(el, el->el_map.key, prev, i - 1);
+
+    (void) fprintf(el->el_outfile, "Alternative key bindings\n");
+    prev = 0;
+    for (i = 0; i < N_KEYS; i++) {
+	if (el->el_map.alt[prev] == el->el_map.alt[i])
+	    continue;
+	map_print_some_keys(el, el->el_map.alt, prev, i - 1);
+	prev = i;
+    }
+    map_print_some_keys(el, el->el_map.alt, prev, i - 1);
+
+    (void) fprintf(el->el_outfile, "Multi-character bindings\n");
+    key_print(el, "");
+    (void) fprintf(el->el_outfile, "Arrow key bindings\n");
+    term_print_arrow(el, "");
+}
+
+
+/* map_bind():
+ *	Add/remove/change bindings
+ */
+protected int
+map_bind(el, argc, argv)
+    EditLine *el;
+    int argc;
+    char **argv;
+{
+    el_action_t *map;
+    int     ntype, remove;
+    char   *p;
+    char    inbuf[EL_BUFSIZ];
+    char    outbuf[EL_BUFSIZ];
+    char   *in = NULL;
+    char   *out = NULL;
+    el_bindings_t *bp;
+    int     cmd;
+    int	    key;
+
+    if (argv == NULL)
+	return -1;
+
+    map = el->el_map.key;
+    ntype = XK_CMD;
+    key = remove = 0;
+    for (argc = 1; (p = argv[argc]) != NULL; argc++)
+	if (p[0] == '-')
+	    switch (p[1]) {
+	    case 'a':
+		map = el->el_map.alt;
+		break;
+
+	    case 's':
+		ntype = XK_STR;
+		break;
+#ifdef notyet
+	    case 'c':
+		ntype = XK_EXE;
+		break;
+#endif
+	    case 'k':
+		key = 1;
+		break;
+
+	    case 'r':
+		remove = 1;
+		break;
+
+	    case 'v':
+		map_init_vi(el);
+		return 0;
+
+	    case 'e':
+		map_init_emacs(el);
+		return 0;
+
+	    case 'l':
+		for (bp = el->el_map.help; bp->name != NULL; bp++)
+		    (void) fprintf(el->el_outfile, "%s\n\t%s\n",
+				   bp->name, bp->description);
+		return 0;
+	    default:
+		(void) fprintf(el->el_errfile, "%s: Invalid switch `%c'.\n",
+			       argv[0], p[1]);
+	    }
+	else
+	    break;
+
+    if (argv[argc] == NULL) {
+	map_print_all_keys(el);
+	return 0;
+    }
+
+    if (key)
+	in = argv[argc++];
+    else
+	if ((in = parse__string(inbuf, argv[argc++])) == NULL) {
+	    (void) fprintf(el->el_errfile, "%s: Invalid \\ or ^ in instring.\n",
+			   argv[0]);
+	    return -1;
+	}
+
+    if (remove) {
+	if (key) {
+	    (void) term_clear_arrow(el, in);
+	    return -1;
+	}
+	if (in[1])
+	    (void) key_delete(el, in);
+	else if (map[(unsigned char) *in] == ED_SEQUENCE_LEAD_IN)
+	    (void) key_delete(el, in);
+	else
+	    map[(unsigned char) *in] = ED_UNASSIGNED;
+	return 0;
+    }
+
+    if (argv[argc] == NULL) {
+	if (key)
+	    term_print_arrow(el, in);
+	else
+	    map_print_key(el, map, in);
+	return 0;
+    }
+
+#ifdef notyet
+    if (argv[argc + 1] != NULL) {
+	bindkey_usage();
+	return -1;
+    }
+#endif
+
+    switch (ntype) {
+    case XK_STR:
+    case XK_EXE:
+	if ((out = parse__string(outbuf, argv[argc])) == NULL) {
+	    (void) fprintf(el->el_errfile,
+			   "%s: Invalid \\ or ^ in outstring.\n", argv[0]);
+	    return -1;
+	}
+	if (key)
+	    term_set_arrow(el, in, key_map_str(el, out), ntype);
+	else
+	    key_add(el, in, key_map_str(el, out), ntype);
+	map[(unsigned char) *in] = ED_SEQUENCE_LEAD_IN;
+	break;
+
+    case XK_CMD:
+	if ((cmd = parse_cmd(el, argv[argc])) == -1) {
+	    (void) fprintf(el->el_errfile,
+			   "%s: Invalid command `%s'.\n", argv[0], argv[argc]);
+	    return -1;
+	}
+	if (key)
+	    term_set_arrow(el, in, key_map_str(el, out), ntype);
+	else {
+	    if (in[1]) {
+		key_add(el, in, key_map_cmd(el, cmd), ntype);
+		map[(unsigned char) *in] = ED_SEQUENCE_LEAD_IN;
+	    }
+	    else  {
+		key_clear(el, map, in);
+		map[(unsigned char) *in] = cmd;
+	    }
+	}
+	break;
+
+    default:
+	abort();
+	break;
+    }
+    return 0;
+}
+
+
+/* map_addfunc():
+ *	add a user defined function
+ */
+protected int
+map_addfunc(el, name, help, func)
+    EditLine *el;
+    const char *name;
+    const char *help;
+    el_func_t func;
+{
+    int nf = el->el_map.nfunc + 2;
+    if (name == NULL || help == NULL || func == NULL)
+	return -1;
+
+    el->el_map.func = (el_func_t *)
+		el_reallocf(el->el_map.func, nf * sizeof(el_func_t));
+    el->el_map.help = (el_bindings_t *)
+		el_reallocf(el->el_map.help, nf * sizeof(el_bindings_t));
+
+    nf = el->el_map.nfunc;
+    el->el_map.func[nf] = func;
+
+    el->el_map.help[nf].name = name;
+    el->el_map.help[nf].func = nf;
+    el->el_map.help[nf].description = help;
+    el->el_map.help[++nf].name = NULL;
+    el->el_map.nfunc++;
+
+    return 0;
 }

@@ -1,7 +1,7 @@
 #include "../include/libedit/libedit.h"
 private el_func_t el_func[] = {
     ed_argument_digit,         ed_clear_screen,           
-    ed_delete_next_char,       
+    ed_command,                ed_delete_next_char,       
     ed_delete_prev_char,       ed_delete_prev_word,       
     ed_digit,                  ed_end_of_file,            
     ed_insert,                 ed_kill_line,              

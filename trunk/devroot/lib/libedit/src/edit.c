@@ -52,7 +52,7 @@
 public EditLine *
 el_init(prog, fin, fout)
     const char *prog;
-    int fin, fout;
+    FILE *fin, *fout;
 {
     EditLine *el = (EditLine *) el_malloc(sizeof(EditLine));
 #ifdef DEBUG
@@ -64,10 +64,22 @@ el_init(prog, fin, fout)
 
     memset(el, 0, sizeof(EditLine));
 
-    el->el_infd  = fin;
+    el->el_infd  = fileno(fin);
     el->el_outfile = fout;
     el->el_prog = strdup(prog);
-    el->el_errfile = 2;
+
+#ifdef DEBUG
+    if (issetugid() == 0 && (tty = getenv("DEBUGTTY")) != NULL) {
+	el->el_errfile = fopen(tty, "w");
+	if (el->el_errfile == NULL) {
+		(void) fprintf(stderr, "Cannot open %s (%s).\n",
+			       tty, strerror(errno));
+		return NULL;
+	}
+    }
+    else
+#endif
+	el->el_errfile = stderr;
 
     /*
      * Initialize all the modules. Order is important!!!
@@ -110,7 +122,7 @@ el_end(el)
     prompt_end(el);
     sig_end(el);
 
-    free((ptr_t) el->el_prog);
+    el_free((ptr_t) el->el_prog);
     el_free((ptr_t) el);
 } /* end el_end */
 
@@ -172,6 +184,7 @@ el_set(va_alist)
 	rv = 0;
 	break;
 
+    case EL_BIND:
     case EL_TELLTC:
     case EL_SETTC:
     case EL_ECHOTC:
@@ -184,6 +197,11 @@ el_set(va_alist)
 		     break;
 
 	    switch (op) {
+	    case EL_BIND:
+		argv[0] = "bind";
+		rv = map_bind(el, i, argv);
+		break;
+
 	    case EL_TELLTC:
 		argv[0] = "telltc";
 		rv = term_telltc(el, i, argv);
@@ -212,6 +230,15 @@ el_set(va_alist)
 	}
 	break;
 
+    case EL_ADDFN:
+	{
+	    char 	*name = va_arg(va, char *);
+	    char 	*help = va_arg(va, char *);
+	    el_func_t    func = va_arg(va, el_func_t);
+	    rv = map_addfunc(el, name, help, func);
+	}
+	break;
+
     case EL_HIST:
 	{
 	    hist_fun_t func = va_arg(va, hist_fun_t);
@@ -221,7 +248,6 @@ el_set(va_alist)
 	break;
 
     default:
-	    _cw_not_reached(); /* XXX jasone */
 	rv = -1;
     }
 
@@ -239,6 +265,46 @@ el_line(el)
 {
     return (const LineInfo *) &el->el_line;
 }
+
+static const char elpath[] = "/.editrc";
+
+/* el_source():
+ *	Source a file
+ */
+public int
+el_source(el, fname)
+    EditLine *el;
+    const char *fname;
+{
+    FILE *fp;
+    size_t len;
+    char *ptr, path[MAXPATHLEN];
+
+    if (fname == NULL) {
+	if (issetugid() != 0 || (ptr = getenv("HOME")) == NULL)
+	    return -1;
+	(void) snprintf(path, sizeof(path), "%s%s", ptr, elpath);
+	fname = path;
+    }
+
+    if ((fp = fopen(fname, "r")) == NULL)
+	return -1;
+
+    while ((ptr = fgetln(fp, &len)) != NULL) {
+	if (ptr[len - 1] == '\n')
+	    --len;
+	ptr[len] = '\0';
+
+	if (parse_line(el, ptr) == -1) {
+	    (void) fclose(fp);
+	    return -1;
+	}
+    }
+
+    (void) fclose(fp);
+    return 0;
+}
+
 
 /* el_resize():
  *	Called from program when terminal is resized

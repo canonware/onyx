@@ -42,7 +42,7 @@
  */
 #define KSHVI
 #define VIDEFAULT
-/*  #define ANCHOR */
+#define ANCHOR
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -77,20 +77,20 @@ typedef struct el_state_t {
     el_action_t lastcmd;		/* Previous command		*/
 } el_state_t;
 
-#include "libedit_incs.h"
-
 /*
  * Until we come up with something better...
  */
-#define el_malloc(a)	_cw_malloc(a)
-#define el_realloc(a,b)	_cw_realloc(a, b)
-#define el_reallocf(a,b) _cw_realloc(a, b)
-#define el_free(a)	_cw_free(a)
+#define el_malloc(a)	malloc(a)
+#define el_realloc(a,b)	realloc(a, b)
+#define el_reallocf(a,b) reallocf(a, b)
+#define el_free(a)	free(a)
+
+#include "libedit_incs.h"
 
 struct editline {
     char	 *el_prog;	/* the program name 			*/
-    int		  el_outfile;	/* Stdio stuff				*/
-    int		  el_errfile;	/* Stdio stuff				*/
+    FILE         *el_outfile;	/* Stdio stuff				*/
+    FILE         *el_errfile;	/* Stdio stuff				*/
     int           el_infd;	/* Input file descriptor		*/
     int		  el_flags;	/* Various flags.			*/
     coord_t       el_cursor;	/* Cursor location			*/

@@ -107,7 +107,7 @@ key_end(el)
 {
     el_free((ptr_t) el->el_key.buf);
     el->el_key.buf = NULL;
-    key_reset(el);
+    /* XXX: provide a function to clear the keys */
     el->el_key.map = NULL;
 }
 
@@ -186,13 +186,13 @@ key_add(el, key, val, ntype)
     int          ntype;
 {
     if (key[0] == '\0') {
-	_cw_out_put_f(el->el_errfile,
+	(void) fprintf(el->el_errfile,
 		       "key_add: Null extended-key not allowed.\n");
 	return;
     }
 
     if (ntype == XK_CMD && val->cmd == ED_SEQUENCE_LEAD_IN) {
-	_cw_out_put_f(el->el_errfile,
+	(void) fprintf(el->el_errfile,
 		       "key_add: sequence-lead-in command not allowed\n");
 	return;
     }
@@ -235,7 +235,7 @@ key_delete(el, key)
     char   *key;
 {
     if (key[0] == '\0') {
-	_cw_out_put_f(el->el_errfile,
+	(void) fprintf(el->el_errfile,
 		       "key_delete: Null extended-key not allowed.\n");
 	return -1;
     }
@@ -264,7 +264,7 @@ key_print(el, key)
     el->el_key.buf[0] =  '"';
     if (node_lookup(el, key, el->el_key.map, 1) <= -1)
 	/* key is not bound */
-	_cw_out_put_f(el->el_errfile, "Unbound extended key \"[s]\"\n", key);
+	(void) fprintf(el->el_errfile, "Unbound extended key \"%s\"\n", key);
     return;
 }
 
@@ -367,10 +367,10 @@ node__try(ptr, str, val, ntype)
 	}
     }
     else {
-	    /* still more chars to go */
-	    if (ptr->next == NULL)
-		    ptr->next = node__get(*str);	/* setup new node */
-	    (void) node__try(ptr->next, str, val, ntype);
+	/* still more chars to go */
+	if (ptr->next == NULL)
+	    ptr->next = node__get(*str);	/* setup new node */
+	(void) node__try(ptr->next, str, val, ntype);
     }
     return 0;
 }
@@ -548,15 +548,15 @@ node_enum(el, ptr, cnt)
     if (cnt >= KEY_BUFSIZ - 5) {	/* buffer too small */
 	el->el_key.buf[++cnt] = '"';
 	el->el_key.buf[++cnt] = '\0';
-	_cw_out_put_f(el->el_errfile,
+	(void) fprintf(el->el_errfile,
 		    "Some extended keys too long for internal print buffer");
-	_cw_out_put_f(el->el_errfile, " \"[s]...\"\n", el->el_key.buf);
+	(void) fprintf(el->el_errfile, " \"%s...\"\n", el->el_key.buf);
 	return 0;
     }
 
     if (ptr == NULL) {
 #ifdef DEBUG_EDIT
-	_cw_out_put_f(el->el_errfile, "node_enum: BUG!! Null ptr passed\n!");
+	(void) fprintf(el->el_errfile, "node_enum: BUG!! Null ptr passed\n!");
 #endif
 	return -1;
     }
@@ -592,26 +592,25 @@ key_kprint(el, key, val, ntype)
 {
     el_bindings_t *fp;
     char unparsbuf[EL_BUFSIZ];
-    static char *fmt = "[s|w:15|j:l]->  [s]\n";
+    static char *fmt = "%-15s->  %s\n";
 
     if (val != NULL)
 	switch (ntype) {
 	case XK_STR:
 	case XK_EXE:
-	    _cw_out_put_f(el->el_errfile, fmt, key,
+	    (void) fprintf(el->el_errfile, fmt, key,
 			   key__decode_str(val->str, unparsbuf,
 					      ntype == XK_STR ? "\"\"" : "[]"));
 	    break;
 	case XK_CMD:
-		_cw_not_reached(); /* XXX jasone */
-/*  	    for (fp = el->el_map.help; fp->name; fp++) */
-/*  		if (val->cmd == fp->func) { */
-/*  		    _cw_out_put_f(el->el_errfile, fmt, key, fp->name); */
-/*  		    break; */
-/*  		} */
+	    for (fp = el->el_map.help; fp->name; fp++)
+		if (val->cmd == fp->func) {
+		    (void) fprintf(el->el_errfile, fmt, key, fp->name);
+		    break;
+		}
 #ifdef DEBUG_KEY
 	    if (fp->name == NULL)
-		_cw_out_put_f(el->el_errfile, "BUG! Command not found.\n");
+		(void) fprintf(el->el_errfile, "BUG! Command not found.\n");
 #endif
 
 	    break;
@@ -620,7 +619,7 @@ key_kprint(el, key, val, ntype)
 	    break;
 	}
     else
-	_cw_out_put_f(el->el_errfile, fmt, key, "no input");
+	(void) fprintf(el->el_errfile, fmt, key, "no input");
 }
 
 
