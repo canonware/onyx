@@ -1201,7 +1201,7 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 	    cnxo = nxo_stack_get(&thread->cstack);
 	    if (cnxo == NULL)
 	    {
-		error = NXN_stackunderflow; // XXX cstackunderflow
+		error = NXN_cstackunderflow;
 		goto INVOKABLE_ERROR;
 	    }
 	    switch (nxo_type_get(cnxo))
@@ -1248,7 +1248,7 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 	    cnxo = nxo_stack_get(&thread->cstack);
 	    if (cnxo == NULL)
 	    {
-		error = NXN_stackunderflow; // XXX cstackunderflow
+		error = NXN_cstackunderflow;
 		goto FETCHABLE_ERROR;
 	    }
 	    switch (nxo_type_get(cnxo))

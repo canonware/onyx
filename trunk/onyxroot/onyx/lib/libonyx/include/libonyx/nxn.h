@@ -137,6 +137,7 @@ typedef enum
     NXN_ENTRY(counttomark),
 #ifdef CW_OOP
     NXN_ENTRY(cstack),
+    NXN_ENTRY(cstackunderflow),
 #endif
 #ifdef CW_POSIX
     NXN_ENTRY(ctime),
