@@ -88,6 +88,17 @@ clean :
   rm -f core *.core;
   rm -rf bin lib test;
   [srcdir]/configure;
+
+  /* XXX Delete .cook.fp files from the source tree. */
+  [SHELL] -e;
+data
+#![SHELL]
+
+for i in `find [srcdir] -type f -name .cook.fp` ; do
+  echo rm $i;
+  rm $i;
+done
+dataend
 }
 
 distclean :
