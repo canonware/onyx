@@ -260,10 +260,10 @@ else
   AC_SUBST(ONYX)
 fi
 
-if test `echo "<Version = onyx>" | grep Version` ; then
-  onyx_version="<Version = onyx>"
-else
+if echo "<Version = onyx>" | grep Version >/dev/null ; then
   onyx_version=devel
+else
+  onyx_version="<Version = onyx>"
 fi
 AC_SUBST(onyx_version)
 
@@ -286,10 +286,11 @@ fi
 enable_slate="1"
 )
 
-if test `echo "<Version = slate>" | grep Version` ; then
-  slate_version="<Version = slate>"
-else
+
+if echo "<Version = slate>" | grep Version >/dev/null ; then
   slate_version=devel
+else
+  slate_version="<Version = slate>"
 fi
 AC_SUBST(slate_version)
 

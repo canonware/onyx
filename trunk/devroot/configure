@@ -3246,10 +3246,10 @@ else
 
 fi
 
-if test `echo "<Version = onyx>" | grep Version` ; then
-  onyx_version="<Version = onyx>"
-else
+if echo "<Version = onyx>" | grep Version >/dev/null ; then
   onyx_version=devel
+else
+  onyx_version="<Version = onyx>"
 fi
 
 if test "x$enable_onyx" = "x1" ; then
@@ -3276,10 +3276,10 @@ else
 
 fi;
 
-if test `echo "<Version = slate>" | grep Version` ; then
-  slate_version="<Version = slate>"
-else
+if echo "<Version = slate>" | grep Version >/dev/null ; then
   slate_version=devel
+else
+  slate_version="<Version = slate>"
 fi
 
 if test "x$enable_slate" = "x1" ; then
