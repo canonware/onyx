@@ -80,6 +80,7 @@ AC_PATH_PROG(DVIPS, dvips, , $PATH)
 AC_PATH_PROG(DVIPDFM, dvipdfm, , $PATH)
 AC_PATH_PROG(FIG2DEV, fig2dev, , $PATH)
 AC_PATH_PROG(LATEX2HTML, latex2html, , $PATH)
+AC_PATH_PROG(MAKEINDEX, makeindex, , $PATH)
 
 VERIFY="$objdir/test/verify"
 mkdir -p $objdir/test

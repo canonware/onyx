@@ -24,8 +24,7 @@ interpreter instance with multiple threads.
 documents the C API with as little information about the
 \htmlref{onyx}{onyxlang} language as possible.
 
-A minimal program that runs the onyx interpreter interactively looks something
-like:
+A minimal program that runs the onyx interpreter interactively looks like:
 \begin{verbatim}
 #include <libonyx/libonyx.h>
 
@@ -56,6 +55,12 @@ main(int argc, char **argv, char **envp)
         return 0;
 }
 \end{verbatim}
+
+In most cases, an application will need to implement additional onyx operators
+(and make them accessible from within the onyx interpreter) in order to make the
+application accessible/controllable from the onyx interpreter.  If the
+application user interface is to be interaction with the onyx interpreter, then
+little else needs to be done.
 
 \section{Compilation}
 \begin{description}

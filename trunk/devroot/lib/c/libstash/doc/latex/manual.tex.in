@@ -154,8 +154,8 @@ defines the following exceptions:
 		\libname{libstash}.
 	\end{capilist}
 \label{_cw_error}
-\index{\cfunc{\_cw\_error}{}}
-\citem{\cfunc[void]{\_cw\_error}{const char *a\_str}}
+\index{\cppmacro{\_cw\_error}{}}
+\citem{\cppmacro[void]{\_cw\_error}{const char *a\_str}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
