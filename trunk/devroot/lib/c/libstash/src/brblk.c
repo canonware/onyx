@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 173 $
- * $Date: 1998-08-26 12:34:42 -0700 (Wed, 26 Aug 1998) $
+ * $Revision: 194 $
+ * $Date: 1998-09-05 13:33:40 -0700 (Sat, 05 Sep 1998) $
  *
  * <<< Description >>>
  *
@@ -518,3 +518,17 @@ brblk_get_buf_size(cw_brblk_t * a_brblk_o)
   return retval;
 }
 #endif /* _STASH_DBG */
+
+cw_uint32_t
+brblk_get_dlocks(cw_brblk_t * a_brblk_o)
+{
+  _cw_error("Unimplemented");
+}
+
+cw_uint32_t
+brblk_set_dlocks(cw_brblk_t * a_brblk_o, cw_uint32_t a_dlocks)
+{
+  _cw_error("Unimplemented");
+}
+
+

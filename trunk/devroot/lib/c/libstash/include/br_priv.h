@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 125 $
- * $Date: 1998-07-02 16:55:52 -0700 (Thu, 02 Jul 1998) $
+ * $Revision: 194 $
+ * $Date: 1998-09-05 13:33:40 -0700 (Sat, 05 Sep 1998) $
  *
  * <<< Description >>>
  *
@@ -20,10 +20,9 @@
 #ifndef _BR_PRIV_H_
 #define _BR_PRIV_H_
 
-/* brblk private methods. */
-cw_uint32_t brblk_get_dlocks(cw_brblk_t * a_brblk_o);
-cw_uint32_t brblk_set_dlocks(cw_brblk_t * a_brblk_o, cw_uint32_t a_dlocks);
+#define br_p_map_brbs _CW_NS_ANY(br_p_map_brbs)
+#define br_p_unmap_brbs _CW_NS_ANY(br_p_unmap_brbs)
 
-/* br private methods. */
+/* XXX Add function prototypes. */
 
 #endif /* _BR_PRIV_H_ */

@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 191 $
- * $Date: 1998-09-01 18:15:02 -0700 (Tue, 01 Sep 1998) $
+ * $Revision: 194 $
+ * $Date: 1998-09-05 13:33:40 -0700 (Sat, 05 Sep 1998) $
  *
  * <<< Description >>>
  *
@@ -56,6 +56,9 @@ struct cw_brblk_s
 #  define brblk_get_buf_p _CW_NS_ANY(brblk_get_buf_p)
 #  define brblk_get_buf_size _CW_NS_ANY(brblk_get_buf_size)
 #endif
+#define brblk_get_dlocks _CW_NS_ANY(brblk_get_dlocks)
+#define brblk_set_dlocks _CW_NS_ANY(brblk_set_dlocks)
+
 /* #define brblk_ _CW_NS_ANY(brblk_) */
 
 /* The following several functions should only be used by the br code. */
@@ -107,6 +110,9 @@ void brblk_xunlock(cw_brblk_t * a_brblk_o);
 /* You're on scouts' honor if you use the below functions.  That is, you'd
  * better have already locked the block properly, or Bad Things (TM) will
  * happen. */
+cw_uint32_t brblk_get_dlocks(cw_brblk_t * a_brblk_o);
+cw_uint32_t brblk_set_dlocks(cw_brblk_t * a_brblk_o, cw_uint32_t a_dlocks);
+
 #ifdef _STASH_DBG
 cw_uint8_t brblk_get_byte(cw_brblk_t * a_brblk_o, cw_uint32_t a_offset);
 void brblk_set_byte(cw_brblk_t * a_brblk_o, cw_uint32_t a_offset,
