@@ -390,7 +390,7 @@ struct									\
 			= x->(a_field).rbn_par->(a_field).rbn_red;	\
 		    x->(a_field).rbn_par->(a_field).rbn_red = FALSE;	\
 		    w->(a_field).rbn_right->(a_field).rbn_red = FALSE;	\
-		    v = x->(a_field).rbn_parent;			\
+		    v = x->(a_field).rbn_par;				\
 		    rb_p_left_rotate(a_tree, v, a_type, a_field);	\
 		    x = (a_tree->rbt_root);				\
 		}							\
@@ -426,7 +426,7 @@ struct									\
 			= x->(a_field).rbn_par->(a_field).rbn_red;	\
 		    x->(a_field).rbn_par->(a_field).rbn_red = FALSE;	\
 		    w->(a_field).rbn_left->(a_field).rbn_red = FALSE;	\
-		    v = x->(a_field).rbn_parent;			\
+		    v = x->(a_field).rbn_par;				\
 		    rb_p_right_rotate(a_tree, v, a_type, a_field);	\
 		    x = (a_tree->rbt_root);				\
 		}							\
