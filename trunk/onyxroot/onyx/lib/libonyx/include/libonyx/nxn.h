@@ -122,6 +122,7 @@ typedef enum {
 	NXN_invalidexit,
 	NXN_invalidfileaccess,
 	NXN_ioerror,
+	NXN_istack,
 	NXN_join,
 	NXN_known,
 	NXN_lcheck,

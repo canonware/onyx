@@ -10,6 +10,7 @@
  ******************************************************************************/
 
 #include "../include/libonyx/libonyx.h"
+#include "../include/libonyx/nxo_thread_l.h"
 
 #include <errno.h>
 
@@ -157,17 +158,18 @@ errordict_p_generic(cw_nxo_t *a_thread, cw_nxo_threade_t a_threade,
 	    tnxo);
 	
 	if (a_record) {
-		cw_nxo_t	*ostack, *estack, *dstack;
+		cw_nxo_t	*ostack, *estack, *dstack, *command;
 
 		ostack = nxo_thread_ostack_get(a_thread);
 		estack = nxo_thread_estack_get(a_thread);
 		dstack = nxo_thread_dstack_get(a_thread);
 
 		/* Set command to second element of estack. */
+		command = nxo_stack_nget(estack, 1);
 		nxo_name_new(tname, nxo_thread_nx_get(a_thread),
 		    nxn_str(NXN_command), nxn_len(NXN_command), TRUE);
 		nxo_dict_def(currenterror, nxo_thread_nx_get(a_thread),
-		    tname, nxo_stack_nget(estack, 1));
+		    tname, command);
 
 		/*
 		 * If recordstacks is TRUE, snapshot the stacks.
@@ -257,7 +259,8 @@ errorname /syntaxerror eq {
 	column cvs print
 	`: ' print
 } if
-`Error /' print errorname cvs print ` in ' print /command load 1 sprint
+`Error /' print errorname cvs print
+` in ' print /command load 1 sprint
 recordstacks {
 	`ostack: ' print
 	ostack 1 sprint

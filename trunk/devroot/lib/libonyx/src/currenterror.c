@@ -20,7 +20,7 @@ currenterror_l_populate(cw_nxo_t *a_dict, cw_nxo_t *a_thread)
 	cw_nxo_t	*tstack;
 	cw_nxo_t	*name, *val;
 
-#define NENTRIES	10	/* Number of entries in currenterror. */
+#define NENTRIES	11	/* Number of entries in currenterror. */
 	nxo_dict_new(a_dict, nxo_thread_nx_get(a_thread),
 	    nxo_thread_currentlocking(a_thread), NENTRIES);
 
@@ -57,12 +57,17 @@ currenterror_l_populate(cw_nxo_t *a_dict, cw_nxo_t *a_thread)
 	nxo_dict_def(a_dict, nxo_thread_nx_get(a_thread), name, val);
 
 	nxo_name_new(name, nxo_thread_nx_get(a_thread),
-	    nxn_str(NXN_ostack), nxn_len(NXN_ostack), TRUE);
+	    nxn_str(NXN_estack), nxn_len(NXN_estack), TRUE);
 	nxo_stack_new(val, nxo_thread_nx_get(a_thread), FALSE);
 	nxo_dict_def(a_dict, nxo_thread_nx_get(a_thread), name, val);
 
 	nxo_name_new(name, nxo_thread_nx_get(a_thread),
-	    nxn_str(NXN_estack), nxn_len(NXN_estack), TRUE);
+	    nxn_str(NXN_istack), nxn_len(NXN_istack), TRUE);
+	nxo_stack_new(val, nxo_thread_nx_get(a_thread), FALSE);
+	nxo_dict_def(a_dict, nxo_thread_nx_get(a_thread), name, val);
+
+	nxo_name_new(name, nxo_thread_nx_get(a_thread),
+	    nxn_str(NXN_ostack), nxn_len(NXN_ostack), TRUE);
 	nxo_stack_new(val, nxo_thread_nx_get(a_thread), FALSE);
 	nxo_dict_def(a_dict, nxo_thread_nx_get(a_thread), name, val);
 

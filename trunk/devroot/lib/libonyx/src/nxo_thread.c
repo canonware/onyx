@@ -233,6 +233,7 @@ nxo_thread_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx)
 	thread->tok_str = thread->buffer;
 
 	nxo_no_new(&thread->estack);
+	nxo_no_new(&thread->istack);
 	nxo_no_new(&thread->ostack);
 	nxo_no_new(&thread->dstack);
 	nxo_no_new(&thread->tstack);
@@ -266,6 +267,7 @@ nxo_thread_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx)
 	 * Finish setting up the internals.
 	 */
 	nxo_stack_new(&thread->estack, a_nx, FALSE);
+	nxo_stack_new(&thread->istack, a_nx, FALSE);
 	nxo_stack_new(&thread->ostack, a_nx, FALSE);
 	nxo_stack_new(&thread->dstack, a_nx, FALSE);
 	nxo_stack_new(&thread->tstack, a_nx, FALSE);
@@ -343,30 +345,33 @@ nxoe_l_thread_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 			retval = nxo_nxoe_get(&thread->estack);
 			break;
 		case 1:
-			retval = nxo_nxoe_get(&thread->ostack);
+			retval = nxo_nxoe_get(&thread->istack);
 			break;
 		case 2:
-			retval = nxo_nxoe_get(&thread->dstack);
+			retval = nxo_nxoe_get(&thread->ostack);
 			break;
 		case 3:
-			retval = nxo_nxoe_get(&thread->tstack);
+			retval = nxo_nxoe_get(&thread->dstack);
 			break;
 		case 4:
-			retval = nxo_nxoe_get(&thread->currenterror);
+			retval = nxo_nxoe_get(&thread->tstack);
 			break;
 		case 5:
-			retval = nxo_nxoe_get(&thread->errordict);
+			retval = nxo_nxoe_get(&thread->currenterror);
 			break;
 		case 6:
-			retval = nxo_nxoe_get(&thread->userdict);
+			retval = nxo_nxoe_get(&thread->errordict);
 			break;
 		case 7:
-			retval = nxo_nxoe_get(&thread->stdin_nxo);
+			retval = nxo_nxoe_get(&thread->userdict);
 			break;
 		case 8:
-			retval = nxo_nxoe_get(&thread->stdout_nxo);
+			retval = nxo_nxoe_get(&thread->stdin_nxo);
 			break;
 		case 9:
+			retval = nxo_nxoe_get(&thread->stdout_nxo);
+			break;
+		case 10:
 			retval = nxo_nxoe_get(&thread->stderr_nxo);
 			break;
 		default:
@@ -625,7 +630,7 @@ void
 nxo_thread_loop(cw_nxo_t *a_nxo)
 {
 	cw_nxoe_thread_t	*thread;
-	cw_nxo_t		*nxo, *tnxo;
+	cw_nxo_t		*nxo, *tnxo, *inxo;
 	cw_uint32_t		sdepth, cdepth;
 #ifdef _CW_DBG
 	cw_uint32_t		tdepth;
@@ -645,6 +650,14 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 	 */
 	tdepth = nxo_stack_count(&thread->tstack);
 #endif
+	/*
+	 * Push an integer onto istack that corresponds to the object on estack
+	 * we're executing.
+	 */
+	inxo = nxo_stack_push(&thread->istack);
+	nxo_integer_new(inxo, 0);
+	_cw_assert(nxo_stack_count(&thread->estack) ==
+	    nxo_stack_count(&thread->istack));
 
 	for (sdepth = cdepth = nxo_stack_count(&thread->estack);
 	     cdepth >= sdepth; cdepth = nxo_stack_count(&thread->estack)) {
@@ -696,12 +709,12 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 
 			/*
 			 * Iterate through the array and execute each element in
-			 * turn.  The generic algorithm is encapsulated in the
-			 * last part of the if..else if..else statement, but the
-			 * overhead of the pushing, recursion, and popping is
-			 * excessive for the common cases of a simple object or
-			 * operator.  Therefore, check for the most common
-			 * simple cases and handle them specially.
+			 * turn.  The generic algorithm is simply to push an
+			 * element onto estack and recurse, but the overhead of
+			 * the pushing, recursion, and popping is excessive for
+			 * the common cases of a simple object or operator.
+			 * Therefore, check for the most common simple cases and
+			 * handle them specially.
 			 */
 			el = nxo_stack_push(&thread->tstack);
 			for (i = 0; i < len - 1; i++) {
@@ -715,6 +728,9 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 					nxo_dup(tnxo, el);
 					continue;
 				}
+
+				/* Set the execution index. */
+				nxo_integer_set(inxo, i);
 
 				switch (nxo_type_get(el)) {
 				case NXOT_ARRAY:
@@ -773,6 +789,12 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 				_cw_assert(nxo_stack_count(&thread->tstack) ==
 				    tdepth + 1);
 			}
+
+			/*
+			 * Set the index back to 0 now that we're not executing
+			 * an array any more.
+			 */
+			nxo_integer_set(inxo, 0);
 
 			/*
 			 * If recursion is possible and likely, make tail
@@ -907,6 +929,11 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 		}
 		_cw_assert(nxo_stack_count(&thread->tstack) == tdepth);
 	}
+
+	/* Pop the execution index for this onyx stack frame. */
+	nxo_stack_pop(&thread->istack);
+	_cw_assert(nxo_stack_count(&thread->estack) ==
+	    nxo_stack_count(&thread->istack));
 }
 
 void
