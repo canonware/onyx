@@ -319,19 +319,22 @@ mem_realloc(cw_mem_t * a_mem, void * a_ptr, size_t a_size)
   retval = _cw_realloc(a_ptr, a_size);
   
 #ifdef _LIBSTASH_DBG
-  if (NULL == a_mem)
+  if (NULL == retval)
   {
-    char buf[1025];
+    if (dbg_is_registered(cw_g_dbg, "mem_error"))
+    {
+      char buf[1025];
 
-    bzero(buf, sizeof(buf));
-    out_put_sn(cw_g_out, buf, 1024,
-	       "[s](): realloc(0x[p], [i32]) "
-	       "returned NULL at [s], line [i32]\n",
-	       __FUNCTION__, a_ptr, a_size,
-	       a_filename, a_line_num);
-    out_put(cw_g_out, buf);
+      bzero(buf, sizeof(buf));
+      out_put_sn(cw_g_out, buf, 1024,
+		 "[s](): realloc(0x[p], [i32]) "
+		 "returned NULL at [s], line [i32]\n",
+		 __FUNCTION__, a_ptr, a_size,
+		 a_filename, a_line_num);
+      out_put(cw_g_out, buf);
+    }
   }
-  else
+  else if (NULL != a_mem)
   {
     void * junk;
     struct cw_mem_item_s * allocation;

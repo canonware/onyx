@@ -332,7 +332,7 @@ res_dump(cw_res_t * a_res, char * a_filename)
       goto RETURN;
     }
     
-    fd = open(a_filename, O_RDWR | O_CREAT | O_TRUNC);
+    fd = open(a_filename, O_RDWR | O_CREAT | O_TRUNC, 0644);
     if (-1 == fd)
     {
       out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
