@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 190 $
- * $Date: 1998-09-01 18:14:15 -0700 (Tue, 01 Sep 1998) $
+ * $Revision: 195 $
+ * $Date: 1998-09-05 13:34:19 -0700 (Sat, 05 Sep 1998) $
  *
  * <<< Description >>>
  *
@@ -114,27 +114,19 @@
  * The brbs class encapsulates the fundamental operations on files and raw
  * devices that are necessary for reading and writing persistent data.  The
  * br uses brbs instances by mapping them into the paddr space.  brbs
- * instances are of constant size, and they can be broken up and mapped
- * into multiple portions of the paddr space.
+ * instances are of constant size (can't expand or contract).
  *
- * There can be one overlapping mapping at any given time in the V2P.  This
- * is important because it allows consolidation of mappings as a br
- * evolves.  Say for example that an installation starts off with only a
- * relatively small portion of the V2P map backed by a brbs.  Sometime
- * later, additional storage is needed, so more of the V2P map is backed by
- * a different brbs.  If this goes on for a while, it may be desireable to
- * replace the multiple small backings with one big backing.  Since we
- * can't just delete the V2P and start over, instead we can add an
- * additional backing to the entire range.  Once that backing is committed
- * (all data is also stored on the new backing), the other backings can be
- * removed.
- *
- * Each brbs instance is responsible for mapping the relevant portion of
- * the P2B, so there is no need for overlapping mappings there.  For the
- * DS, other algorithms can be employed to empty a backing, such as moving
- * data blocks from one backing to another and reflecting the moves in the
- * maps.  However, for the V2P, there is no other way to consolidate and
- * remove backings.
+ * There can be overlapping mappings.  This is important because it allows
+ * consolidation of mappings as a br evolves, as well as changing the
+ * hardware on which data is stored without taking the br offline.  Say for
+ * example that an installation starts off with only a relatively small
+ * portion of the V2P map backed by a brbs.  Sometime later, additional
+ * storage is needed, so more of the V2P map is backed by a different brbs.
+ * If this goes on for a while, it may be desireable to replace the
+ * multiple small backings with one big backing.  Since we can't just
+ * delete the V2P and start over, instead we can add an additional backing
+ * to the entire range.  Once that backing is committed (all data is also
+ * stored on the new backing), the other backings can be removed.
  *
  * << Brief explanation of the br components and logical sections >>
  *
@@ -460,7 +452,8 @@ cw_bool_t
 br_create(cw_br_t * a_br_o, cw_uint32_t a_block_size)
 {
   cw_bool_t retval = FALSE;
-  char block_size[17] = "block_size:", t_str[6];
+#define _STASH_BR_BS_STRLEN 17
+  char block_size[_STASH_BR_BS_STRLEN],
 
   if (_cw_pmatch(_STASH_DBG_R_BR_FUNC))
   {
@@ -473,18 +466,23 @@ br_create(cw_br_t * a_br_o, cw_uint32_t a_block_size)
   {
     switch (a_block_size)
     {
-      case 0x200:
+      case 0x200: /* 512 B */
       case 0x400:
       case 0x800:
       case 0x1000:
-      case 0x2000:
+      case 0x2000: /* 8 kB */
       case 0x4000:
       case 0x8000:
       case 0x10000:
+      case 0x20000:
+      case 0x40000: /* 256 kB */
       {
-	sprintf(t_str, "%x", a_block_size);
-	_cw_assert(strlen(t_str) <= 5);
-	strcat(block_size, t_str);
+	int bytes_written;
+	
+	bytes_written = snprintf(block_size, _STASH_BR_BS_STRLEN,
+				 "block_size:%x", a_block_size);
+	_cw_assert(bytes_written < _STASH_BR_BS_STRLEN);
+#undef _STASH_BR_BS_STRING
 	break;
       }
       default:
@@ -622,11 +620,6 @@ br_set_res_files(cw_br_t * a_br_o, char * a_res_file_a,
 }
 
 /****************************************************************************
- * <<< Return Value >>>
- *
- * TRUE == Unrecoverable error.  Barring media failure and br bugs, this
- *         function will never return TRUE.
- *
  * <<< Description >>>
  *
  * Checks whether the br was shut down properly.  If not, rolls all pending
@@ -637,8 +630,10 @@ br_set_res_files(cw_br_t * a_br_o, char * a_res_file_a,
 cw_bool_t
 br_fsck(cw_br_t * a_br_o)
 {
-  cw_bool_t retval = FALSE;
-  cw_res_t t_res_b, t_res_c;
+  cw_bool_t retval = FALSE, is_clean = FALSE;
+  cw_bool_t error_a, error_b, error_c;
+  cw_res_t t_res_a, t_res_b, t_res_c;
+  cw_sint8_t which_valid;
 
   if (_cw_pmatch(_STASH_DBG_R_BR_FUNC))
   {
@@ -650,29 +645,144 @@ br_fsck(cw_br_t * a_br_o)
   _cw_check_ptr(a_br_o->res_file_c);
   rwl_wlock(&a_br_o->rw_lock);
   
+  res_new(&t_res_a);
   res_new(&t_res_b);
   res_new(&t_res_c);
+  
+  error_a = res_merge_file(&t_res_a, a_br_o->res_file_a);
+  error_b = res_merge_file(&t_res_b, a_br_o->res_file_b);
+  error_c = res_merge_file(&t_res_c, a_br_o->res_file_c);
 
-  if (res_merge_file(&a_br_o->res, a_br_o->res_file_a)
-      || res_merge_file(&t_res_b, a_br_o->res_file_b)
-      || res_merge_file(&t_res_c, a_br_o->res_file_c)
-      || !res_is_equal(&a_br_o->res, &t_res_b)
-      || !res_is_equal(&a_br_o->res, &t_res_c)
-      || strcmp(res_get_res_val(&a_br_o->res, "clean"), "yes")
-      )
+  if (error_a || error_b || error_c)
   {
-    _cw_error("Unimplemented");
+    /* At least one resource file can't be read.  Try to recover. */
+      
+    if ((error_a && error_b)
+	|| (error_a && error_c)
+	|| (error_b && error_c))
+    {
+      /* Unresolvable error.  There may still be one valid resource file, 
+       * but the standard procedures br uses ensure that at least two are 
+       * intact at any given time.  As such, there's no way to know
+       * whether to trust a single resource file. */
+      retval = TRUE;
+      goto RETURN;
+    }
+    else
+    {
+      if (error_a)
+      {
+	if (res_is_equal(&t_res_b, &t_res_c))
+	{
+	  /* The resource files are valid.  Assume the crash happened
+	   * while updating file A.  Roll backward and use file C.*/
+	  which_valid = 'c';
+	}
+	else
+	{
+	  /* Something bad happened.  An error in file A indicates it was
+	   * being written to during the crash, which means files B and C
+	   * should be identical. */
+	  retval = TRUE;
+	  goto RETURN;
+	}
+      }
+      else if (error_b)
+      {
+	/* Files A and C are likely (but not for sure) different.  Roll
+	 * forward and use file A. */
+	which_valid = 'a';
+      }
+      else /* (error_c) */
+      {
+	if (res_is_equal(&t_res_a, &t_res_b))
+	{
+	  /* Assume the crash happened while updating file C.  Files A
+	   * and B agree, so roll forward and use file A. */
+	  which_valid = 'a'
+	    }
+	else
+	{
+	  /* Something bad happened.  An error in file C indicates it was 
+	   * being written to, which means files A and B should be
+	   * identical. */
+	  retval = TRUE;
+	  goto RETURN;
+	}
+      }
+    }
+  }
+  else if (res_is_equal(&t_res_a, &t_res_b)
+	   && res_is_equal(&t_res_a, &t_res_c)
+	   && strcmp(res_get_res_val(&t_res_a, "clean"), "yes"))
+  {
+    /* The br was shut down cleanly. */
+    is_clean = TRUE;
+    which_valid = 'a';
+  }
+  if (res_is_equal(&t_res_a, &t_res_b))
+  {
+    /* First and second copies (at least) are valid. */
+    which_valid = 'a';
+  }
+  else if (res_is_equal(&t_res_b, &t_res_c))
+  {
+    /* Second and third copies are valid. */
+    which_valid = 'b';
+  }
+  else
+  {
+    /* All three copies are different, so roll forward.  Use the first
+     * copy. */
+    which_valid = 'a';
+  }
+
+  if (is_clean == FALSE)
+  {
+    res_clear(&a_br_o->res);
+    switch (which_valid)
+    {
+      case 'a':
+      {
+	if (res_merge_file(&a_br_o->res, a_br_o->res_file_a))
+	{
+	  retval = TRUE;
+	  goto RETURN;
+	}
+	break;
+      }
+      case 'b':
+      {
+	if (res_merge_file(&a_br_o->res, a_br_o->res_file_b))
+	{
+	  retval = TRUE;
+	  goto RETURN;
+	}
+	break;
+      }
+      case 'c':
+      {
+	if (res_merge_file(&a_br_o->res, a_br_o->res_file_c))
+	{
+	  retval = TRUE;
+	  goto RETURN;
+	}
+	break;
+      }
+      default:
+      {
+	_cw_error("Programming logic error");
+      }
+    }
+    /* Make sure that the resource files will have the clean flag set when 
+     * written later on. */
+    res_merge_list(&a_br_o->res, "clean:yes", NULL);
     
-    /* There was an error of some sort.  Chances are that the repository
-     * wasn't cleanly shut down.  Recover. */
-
-    /* Figure out which of the resource files are valid. */
-
     /* Map the brbs instances into the paddr space. */
 
     /* Find all valid TB buffers and roll forward the blocks they
-       correspond to, if necessary.  Mark each TP buffers valid only
-       _after_ rolling forward its corresponding block. */
+       correspond to, if necessary.  Mark each TP buffer valid only _after_
+       rolling forward its corresponding block. */
 
     /* Sync up the V2P mirror. */
 
@@ -681,9 +791,14 @@ br_fsck(cw_br_t * a_br_o)
 
     /* Close the brbs instances. */
 
-    /* Set the clean resource to "yes", and write all three resource files. */
+    /* Set the clean resource to "yes", and write all three resource
+     * files. */
+
+    /* Merge the resources into &a_br_o->res. */
   }
-    
+
+ RETURN:
+  res_delete(&t_res_a);
   res_delete(&t_res_b);
   res_delete(&t_res_c);
     
