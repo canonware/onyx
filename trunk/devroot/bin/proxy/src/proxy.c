@@ -171,20 +171,14 @@ main(int argc, char ** argv)
     }
   }
 
-  _cw_marker("Got here");
-  
   if ((TRUE == cl_error) || (optind < argc))
   {
-    if (dbg_is_registered(cw_g_dbg, "prog_error"))
-    {
-      log_printf(cw_g_log, "Unrecognized option(s)\n");
-      usage(basename(argv[0]));
-    }
+    log_printf(cw_g_log, "Unrecognized option(s)\n");
+    usage(basename(argv[0]));
     retval = 1;
     goto CLERROR;
   }
 
-  _cw_marker("Got here");
   if (TRUE == opt_help)
   {
     usage(basename(argv[0]));
@@ -197,7 +191,6 @@ main(int argc, char ** argv)
     goto CLERROR;
   }
 
-  _cw_marker("Got here");
   /* Check validity of command line options. */
   if ((TRUE == opt_verbose) && (TRUE == opt_quiet))
   {
@@ -206,32 +199,23 @@ main(int argc, char ** argv)
     retval = 1;
     goto CLERROR;
   }
-  _cw_marker("Got here");
   
   if ((TRUE == opt_log) && (NULL != opt_dirname))
   {
-    if (dbg_is_registered(cw_g_dbg, "prog_error"))
-    {
-      log_printf(cw_g_log, "\"-l\" and \"-d\" are incompatible\n");
-      usage(basename(argv[0]));
-    }
+    log_printf(cw_g_log, "\"-l\" and \"-d\" are incompatible\n");
+    usage(basename(argv[0]));
     retval = 1;
     goto CLERROR;
   }
-  _cw_marker("Got here");
 
   if ((NULL != opt_dirname) && (512 < strlen(opt_dirname)))
   {
-    if (dbg_is_registered(cw_g_dbg, "prog_error"))
-    {
-      log_printf(cw_g_log,
-		 "Argument to \"-d\" flag is too long (512 bytes max)\n");
-      usage(basename(argv[0]));
-    }
+    log_printf(cw_g_log,
+	       "Argument to \"-d\" flag is too long (512 bytes max)\n");
+    usage(basename(argv[0]));
     retval = 1;
     goto CLERROR;
   }
-  _cw_marker("Got here");
   
   /* Set the per-thread signal masks such that only one thread will catch the
    * signal. */
@@ -280,8 +264,7 @@ main(int argc, char ** argv)
   {
     conn = _cw_malloc(sizeof(connection_t));
     bzero(conn, sizeof(conn));
-/*      sock_new(&conn->client_sock, 16384); */
-    sock_new(&conn->client_sock, 4096);
+    sock_new(&conn->client_sock, 16384);
     
     if (NULL == socks_accept_block(socks, &conn->client_sock))
     {
@@ -1032,8 +1015,7 @@ handle_client_send(void * a_arg)
 	     conn->rhost, conn->rport);
       
   /* Connect to the remote end. */
-/*    sock_new(&conn->remote_sock, 16384); */
-  sock_new(&conn->remote_sock, 4096);
+  sock_new(&conn->remote_sock, 16384);
   if (TRUE == sock_connect(&conn->remote_sock, conn->rhost, conn->rport))
   {
     log_eprintf(conn->log, __FILE__, __LINE__, __FUNCTION__,
@@ -1071,7 +1053,7 @@ handle_client_send(void * a_arg)
 	log_printf(conn->log, "%s", str);
       }
       
-      if (-1 == sock_write(&conn->remote_sock, &buf))
+      if (TRUE == sock_write(&conn->remote_sock, &buf))
       {
 	mtx_lock(&conn->lock);
 	conn->should_quit = TRUE;
@@ -1148,7 +1130,7 @@ handle_client_recv(void * a_arg)
 	log_printf(conn->log, "%s", str);
       }
       
-      if (-1 == sock_write(&conn->client_sock, &buf))
+      if (TRUE == sock_write(&conn->client_sock, &buf))
       {
 	mtx_lock(&conn->lock);
 	conn->should_quit = TRUE;
@@ -1177,17 +1159,17 @@ usage(const char * a_progname)
      "    %s -V\n"
      "    %s [-v | -q] [-p <port>] [-r [<rhost>:]<rport>] [-l | -d <dirpath>]\n"
      "\n"
-     "    Option               : Description\n"
-     "    ---------------------:------------------------------------------\n"
-     "    -h                   : Print usage and exit.\n"
-     "    -V                   : Print version information and exit.\n"
-     "    -v                   : Verbose.\n"
-     "    -q                   : Quiet.\n"
-     "    -p <port>            : Listen on port <port>.\n"
-     "    -r [<rhost>:]<rport> : Forward to host <rhost> or localhost,\n"
-     "                         : port <rport>.\n"
-     "    -l                   : Write logs to stderr.\n"
-     "    -d <dirpath>         : Write logs to \"<dirpath>/proxy.*\".\n",
+     "    Option               | Description\n"
+     "    ---------------------+------------------------------------------\n"
+     "    -h                   | Print usage and exit.\n"
+     "    -V                   | Print version information and exit.\n"
+     "    -v                   | Verbose.\n"
+     "    -q                   | Quiet.\n"
+     "    -p <port>            | Listen on port <port>.\n"
+     "    -r [<rhost>:]<rport> | Forward to host <rhost> or localhost,\n"
+     "                         | port <rport>.\n"
+     "    -l                   | Write logs to stderr.\n"
+     "    -d <dirpath>         | Write logs to \"<dirpath>/proxy.*\".\n",
      a_progname, a_progname, a_progname, a_progname
      );
 }

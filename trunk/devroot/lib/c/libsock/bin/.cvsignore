@@ -1,0 +1,4 @@
+*.d
+*.core
+core
+proxy

@@ -630,7 +630,10 @@ sockb_p_entry_func(void * a_arg)
 	    iovec = buf_get_iovec(&buf_in, max_read, &iovec_count);
 
 	    bytes_read = readv(i, iovec, iovec_count);
-	    
+
+/*  	    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
+/*  			"max_read == %u, did read %u\n", max_read, bytes_read); */
+
 	    if (bytes_read >= 0)
 	    {
 	      _cw_assert(buf_get_size(&tmp_buf) == 0);

@@ -1411,7 +1411,7 @@ fi
 fi
 if eval "test \"`echo '$ac_cv_file_'$ac_safe`\" = yes"; then
   echo "$ac_t""yes" 1>&6
-  TEST_LIBS="-lstash_r_d"
+  TEST_LIBS="-static -lstash_r_d"
 else
   echo "$ac_t""no" 1>&6
 echo Was hoping for $ac_config_dir/lib/libstash
@@ -1446,7 +1446,7 @@ LIBS="$ac_save_LIBS"
 fi
 if eval "test \"`echo '$ac_cv_lib_'$ac_lib_var`\" = yes"; then
   echo "$ac_t""yes" 1>&6
-  TEST_LIBS="-lstash_r_d"
+  TEST_LIBS="-static -lstash_r_d"
 else
   echo "$ac_t""no" 1>&6
 \
@@ -1457,23 +1457,24 @@ fi
 
 
 
+
 if test "x$with_debug" = "xyes"; then
   
   for ac_hdr in libstash/libstash_r.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
-echo "configure:1467: checking for $ac_hdr" >&5
+echo "configure:1468: checking for $ac_hdr" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1472 "configure"
+#line 1473 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1477: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1478: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -1505,7 +1506,7 @@ done
   
 ac_safe=`echo "../libstash" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for ../libstash""... $ac_c" 1>&6
-echo "configure:1509: checking for ../libstash" >&5
+echo "configure:1510: checking for ../libstash" >&5
 if eval "test \"`echo '$''{'ac_cv_file_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1521,12 +1522,12 @@ fi
 fi
 if eval "test \"`echo '$ac_cv_file_'$ac_safe`\" = yes"; then
   echo "$ac_t""yes" 1>&6
-  BIN_LIBS="-lstash_r_d"
+  BIN_LIBS="-static -lstash_r_d"
 else
   echo "$ac_t""no" 1>&6
 echo Was hoping for $ac_config_dir/lib/libstash
     echo $ac_n "checking for main in -lstash_d""... $ac_c" 1>&6
-echo "configure:1530: checking for main in -lstash_d" >&5
+echo "configure:1531: checking for main in -lstash_d" >&5
 ac_lib_var=`echo stash_d'_'main | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -1534,14 +1535,14 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lstash_d  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1538 "configure"
+#line 1539 "configure"
 #include "confdefs.h"
 
 int main() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:1545: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:1546: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -1556,7 +1557,7 @@ LIBS="$ac_save_LIBS"
 fi
 if eval "test \"`echo '$ac_cv_lib_'$ac_lib_var`\" = yes"; then
   echo "$ac_t""yes" 1>&6
-  BIN_LIBS="-lstash_r_d"
+  BIN_LIBS="-static -lstash_r_d"
 else
   echo "$ac_t""no" 1>&6
 \
@@ -1575,17 +1576,17 @@ else
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
-echo "configure:1579: checking for $ac_hdr" >&5
+echo "configure:1580: checking for $ac_hdr" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1584 "configure"
+#line 1585 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1589: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1590: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -1617,7 +1618,7 @@ done
   
 ac_safe=`echo "../libstash" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for ../libstash""... $ac_c" 1>&6
-echo "configure:1621: checking for ../libstash" >&5
+echo "configure:1622: checking for ../libstash" >&5
 if eval "test \"`echo '$''{'ac_cv_file_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1633,12 +1634,12 @@ fi
 fi
 if eval "test \"`echo '$ac_cv_file_'$ac_safe`\" = yes"; then
   echo "$ac_t""yes" 1>&6
-  BIN_LIBS="-lstash_r"
+  BIN_LIBS="-static -lstash_r"
 else
   echo "$ac_t""no" 1>&6
 echo Was hoping for $ac_config_dir/lib/libstash
     echo $ac_n "checking for main in -lstash""... $ac_c" 1>&6
-echo "configure:1642: checking for main in -lstash" >&5
+echo "configure:1643: checking for main in -lstash" >&5
 ac_lib_var=`echo stash'_'main | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -1646,14 +1647,14 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lstash  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1650 "configure"
+#line 1651 "configure"
 #include "confdefs.h"
 
 int main() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:1657: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:1658: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -1668,7 +1669,7 @@ LIBS="$ac_save_LIBS"
 fi
 if eval "test \"`echo '$ac_cv_lib_'$ac_lib_var`\" = yes"; then
   echo "$ac_t""yes" 1>&6
-  BIN_LIBS="-lstash_r"
+  BIN_LIBS="-static -lstash_r"
 else
   echo "$ac_t""no" 1>&6
 \
@@ -1682,7 +1683,6 @@ fi
   BIN_DEFINES=""
   BIN_CFLAGS="\$(ST_CFLAGS) \$(O_CFLAGS)"
 fi
-
 
 
 

@@ -466,6 +466,7 @@ sock_read_block(cw_sock_t * a_sock, cw_buf_t * a_spare)
     }
     else
     {
+    /* XXX Should we disconnect here? */
       retval = -1;
     }
 

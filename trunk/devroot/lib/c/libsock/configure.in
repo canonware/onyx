@@ -47,6 +47,7 @@ AC_ARG_WITH(debug, [  --with-debug            Define debugging macros and link b
 
 dnl Check for libraries.
 SQRL_USE_LIBSTASH_R(_d, TEST_LIBS, ..)
+AC_SUBST(TEST_LIBS)
 
 if test "x$with_debug" = "xyes"; then
   SQRL_USE_LIBSTASH_R(_d, BIN_LIBS, ..)
@@ -59,7 +60,6 @@ else
   BIN_DEFINES=""
   BIN_CFLAGS="\$(ST_CFLAGS) \$(O_CFLAGS)"
 fi
-AC_SUBST(TEST_LIBS)
 AC_SUBST(BIN_LIBS)
 AC_SUBST(BIN_LIBSOCK)
 AC_SUBST(BIN_DEFINES)
