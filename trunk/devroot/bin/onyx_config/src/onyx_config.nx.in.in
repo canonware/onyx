@@ -30,12 +30,14 @@ $usage {
     write pop
 } def
 
-# Print a string, after stripping off leading and trailing whitespace.
+# Print a string, after stripping off leading, trailing, and extra internal
+# whitespace.
 #
 # #string strip_print -
 @enable_regex@ 1 eq {
     $strip_print {
 	`^\s*(\S.*\S)\s*$' `\1' <$s true> subst pop
+	`\s+' ` ' <$s true> subst pop
 	print
     } def
 }{
@@ -72,10 +74,10 @@ $flags <
 	`@LDFLAGS@'
 	@enable_regex@ 1 eq {
 	    dup `-L@prefix@/lib\\b' match not {
-		` -L@prefix@/lib' cat
+		`-L@prefix@/lib ' exch cat
 	    } if
 	}{
-	    `-L@prefix@/lib' cat
+	    `-L@prefix@/lib ' exch cat
 	} ifelse
 	strip_print
     }

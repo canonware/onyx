@@ -124,7 +124,7 @@ LIBONYX_L = ;
 #endif
 LIBONYX_S = @objroot@/lib/libonyx/lib/[LIBONYX_SNAME];
 
-LDFLAGS = [LDFLAGS] -L@objroot@/lib/libonyx/lib;
+LDFLAGS = -L@objroot@/lib/libonyx/lib [LDFLAGS];
 
 /*
  * User cook'ables.
