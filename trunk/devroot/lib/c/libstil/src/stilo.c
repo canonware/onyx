@@ -3274,7 +3274,7 @@ stilo_p_string_print(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilo_t
 	len = stilo_string_len_get(a_stilo);
 
 	if (a_syntactic) {
-		stilo_file_output(a_file, a_stilt, "\"");
+		stilo_file_output(a_file, a_stilt, "(");
 		for (i = 0; i < len; i++) {
 			switch (str[i]) {
 			case '\n':
@@ -3295,8 +3295,11 @@ stilo_p_string_print(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilo_t
 			case '\\':
 				stilo_file_output(a_file, a_stilt, "\\\\");
 				break;
-			case '"':
-				stilo_file_output(a_file, a_stilt, "\\\"");
+			case '(':
+				stilo_file_output(a_file, a_stilt, "\\(");
+				break;
+			case ')':
+				stilo_file_output(a_file, a_stilt, "\\)");
 				break;
 			default:
 				if (isprint(str[i]))
@@ -3309,7 +3312,7 @@ stilo_p_string_print(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilo_t
 				break;
 			}
 		}
-		stilo_file_output(a_file, a_stilt, "\"[c]", newline);
+		stilo_file_output(a_file, a_stilt, ")[c]", newline);
 	} else {
 		if (len > 0)
 			stilo_file_output_n(a_file, a_stilt, len, "[s]", str);

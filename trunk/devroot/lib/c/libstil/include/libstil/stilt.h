@@ -171,6 +171,7 @@ struct cw_stilt_s {
 			cw_uint32_t	b_off;	/* Depends on sign, radix. */
 		}       n;	/* number. */
 		struct {
+			cw_uint32_t	p_depth;
 			cw_uint8_t	hex_val;
 		}	s;	/* string. */
 		struct {

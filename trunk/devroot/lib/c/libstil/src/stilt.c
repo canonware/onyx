@@ -110,11 +110,12 @@ static void		stilt_p_reset(cw_stilt_t *a_stilt);
 #ifdef _CW_STILT_SCANNER_DEBUG
 static void		stilt_p_token_print(cw_stilt_t *a_stilt, cw_stilts_t
     *a_stilts, cw_uint32_t a_length, const cw_uint8_t *a_note);
-#else
-#define	stilt_p_token_print(a, b, c, d)
-#endif
 static void		stilt_p_syntax_error_print(cw_stilt_t *a_stilt,
     cw_uint8_t a_c);
+#else
+#define			stilt_p_token_print(a, b, c, d)
+#define			stilt_p_syntax_error_print(a, b)
+#endif
 static void		*stilt_p_entry(void *a_arg);
 static void		stilt_p_special_accept(cw_stilt_t *a_stilt, const
     cw_uint8_t *a_token, cw_uint32_t a_len);
@@ -738,9 +739,15 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 			a_stilt->tok_column = a_stilts->column;
 
 			switch (c) {
-			case '"':
+			case '(':
 				a_stilt->state = STILTTS_ASCII_STRING;
+				a_stilt->m.s.p_depth = 1;
 				break;
+			case ')':
+				stilt_p_syntax_error_print(a_stilt, c);
+				stilt_p_reset(a_stilt);
+				stilt_error(a_stilt, STILTE_SYNTAXERROR);
+				_cw_not_reached();
 			case '`':
 				a_stilt->state = STILTTS_LIT_STRING;
 				break;
@@ -776,6 +783,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 					a_stilt->defer_count--;
 				else {
 					/* Missing '{'. */
+					stilt_p_syntax_error_print(a_stilt, c);
+					stilt_p_reset(a_stilt);
 					stilt_error(a_stilt,
 					    STILTE_SYNTAXERROR);
 				}
@@ -851,7 +860,9 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				break;
 			default:
 				stilt_p_syntax_error_print(a_stilt, c);
-				break;
+				stilt_p_reset(a_stilt);
+				stilt_error(a_stilt, STILTE_SYNTAXERROR);
+				_cw_not_reached();
 			}
 			break;
 		case STILTTS_GT_CONT:
@@ -865,7 +876,9 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				break;
 			default:
 				stilt_p_syntax_error_print(a_stilt, c);
-				break;
+				stilt_p_reset(a_stilt);
+				stilt_error(a_stilt, STILTE_SYNTAXERROR);
+				_cw_not_reached();
 			}
 			break;
 		case STILTTS_SLASH_CONT:
@@ -877,15 +890,20 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				a_stilt->m.m.action = ACTION_EVALUATE;
 				break;
 			case '\n':
-				stilt_p_syntax_error_print(a_stilt, c);
-
 				_CW_STILT_NEWLINE();
-				break;
-			case '\0': case '\t': case '\f': case '\r': case ' ':
-			case '"': case '`': case '\'': case '<': case '>':
-			case '[': case ']': case '{': case '}': case '%':
+
 				stilt_p_syntax_error_print(a_stilt, c);
-				break;
+				stilt_p_reset(a_stilt);
+				stilt_error(a_stilt, STILTE_SYNTAXERROR);
+				_cw_not_reached();
+			case '\0': case '\t': case '\f': case '\r': case ' ':
+			case '(': case ')': case '`': case '\'': case '<':
+			case '>': case '[': case ']': case '{': case '}':
+			case '%':
+				stilt_p_syntax_error_print(a_stilt, c);
+				stilt_p_reset(a_stilt);
+				stilt_error(a_stilt, STILTE_SYNTAXERROR);
+				_cw_not_reached();
 			default:
 				a_stilt->state = STILTTS_NAME;
 				a_stilt->m.m.action = ACTION_LITERAL;
@@ -965,8 +983,9 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				restart = TRUE; /* Inverted below. */
 				_CW_STILT_NEWLINE();
 				/* Fall through. */
-			case '"': case '`': case '<': case '>': case '[':
-			case ']': case '{': case '}': case '/': case '%':
+			case '(': case ')': case '`': case '\'': case '<':
+			case '>': case '[': case ']': case '{': case '}':
+			case '/': case '%':
 				/* New token. */
 				/*
 				 * Invert, in case we fell through from
@@ -992,9 +1011,11 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 					val = strtoq(a_stilt->tok_str, NULL,
 					    10);
 					if ((errno == ERANGE) && ((val ==
-					    QUAD_MIN) || (val == QUAD_MAX)))
+					    QUAD_MIN) || (val == QUAD_MAX))) {
+						stilt_p_reset(a_stilt);
 						stilt_error(a_stilt,
 						    STILTE_RANGECHECK);
+					}
 
 					stilo =
 					    stils_push(&a_stilt->ostack,
@@ -1053,8 +1074,9 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				restart = TRUE; /* Inverted below. */
 				_CW_STILT_NEWLINE();
 				/* Fall through. */
-			case '"': case '`': case '<': case '>': case '[':
-			case ']': case '{': case '}': case '/': case '%':
+			case '(': case ')': case '`': case '\'': case '<':
+			case '>': case '[': case ']': case '{': case '}':
+			case '/': case '%':
 				/* New token. */
 				/*
 				 * Invert, in case we fell through from
@@ -1082,9 +1104,11 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 					    NULL,
 					    a_stilt->m.n.base);
 					if ((errno == ERANGE) && ((val ==
-					    QUAD_MIN) || (val == QUAD_MAX)))
+					    QUAD_MIN) || (val == QUAD_MAX))) {
+						stilt_p_reset(a_stilt);
 						stilt_error(a_stilt,
 						    STILTE_RANGECHECK);
+					}
 
 					stilo =
 					    stils_push(&a_stilt->ostack,
@@ -1119,16 +1143,25 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 			case '\\':
 				a_stilt->state = STILTTS_ASCII_STRING_PROT_CONT;
 				break;
-			case '"':
-				stilt_p_token_print(a_stilt, a_stilts,
-				    a_stilt->index, "string");
-				stilo = stils_push(&a_stilt->ostack, a_stilt);
-				stilo_string_new(stilo, a_stilt,
-				    a_stilt->index);
-				stilo_string_set(stilo, a_stilt, 0,
-				    a_stilt->tok_str, a_stilt->index);
+			case '(':
+				a_stilt->m.s.p_depth++;
+				_CW_STILT_PUTC(c);
+				break;
+			case ')':
+				a_stilt->m.s.p_depth--;
+				if (a_stilt->m.s.p_depth == 0) {
+					stilt_p_token_print(a_stilt, a_stilts,
+					    a_stilt->index, "string");
+					stilo = stils_push(&a_stilt->ostack,
+					    a_stilt);
+					stilo_string_new(stilo, a_stilt,
+					    a_stilt->index);
+					stilo_string_set(stilo, a_stilt, 0,
+					    a_stilt->tok_str, a_stilt->index);
 
-				stilt_p_reset(a_stilt);
+					stilt_p_reset(a_stilt);
+				} else
+					_CW_STILT_PUTC(c);
 				break;
 			case '\r':
 				a_stilt->state =
@@ -1161,6 +1194,10 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 			break;
 		case STILTTS_ASCII_STRING_PROT_CONT:
 			switch (c) {
+			case '(': case ')': case '\\':
+				a_stilt->state = STILTTS_ASCII_STRING;
+				_CW_STILT_PUTC(c);
+				break;
 			case 'n':
 				a_stilt->state = STILTTS_ASCII_STRING;
 				_CW_STILT_PUTC('\n');
@@ -1180,14 +1217,6 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 			case 'f':
 				a_stilt->state = STILTTS_ASCII_STRING;
 				_CW_STILT_PUTC('\f');
-				break;
-			case '\\':
-				a_stilt->state = STILTTS_ASCII_STRING;
-				_CW_STILT_PUTC('\\');
-				break;
-			case '"':
-				a_stilt->state = STILTTS_ASCII_STRING;
-				_CW_STILT_PUTC('"');
 				break;
 			case 'x':
 				a_stilt->state = STILTTS_ASCII_STRING_HEX_CONT;
@@ -1232,7 +1261,9 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				break;
 			default:
 				stilt_p_syntax_error_print(a_stilt, c);
-				break;
+				stilt_p_reset(a_stilt);
+				stilt_error(a_stilt, STILTE_SYNTAXERROR);
+				_cw_not_reached();
 			}
 			break;
 		case STILTTS_ASCII_STRING_HEX_FINISH:
@@ -1278,7 +1309,9 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 			}
 			default:
 				stilt_p_syntax_error_print(a_stilt, c);
-				break;
+				stilt_p_reset(a_stilt);
+				stilt_error(a_stilt, STILTE_SYNTAXERROR);
+				_cw_not_reached();
 			}
 			break;
 		case STILTTS_LIT_STRING:
@@ -1411,7 +1444,9 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				break;
 			default:
 				stilt_p_syntax_error_print(a_stilt, c);
-				break;
+				stilt_p_reset(a_stilt);
+				stilt_error(a_stilt, STILTE_SYNTAXERROR);
+				_cw_not_reached();
 			}
 			break;
 		case STILTTS_BASE64_STRING:
@@ -1454,7 +1489,10 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 					 * padding character.
 					 */
 					stilt_p_syntax_error_print(a_stilt, c);
-					break;
+					stilt_p_reset(a_stilt);
+					stilt_error(a_stilt,
+					    STILTE_SYNTAXERROR);
+					_cw_not_reached();
 				case 2:
 					a_stilt->m.b.nodd = 1;
 					a_stilt->state =
@@ -1471,7 +1509,9 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				break;
 			default:
 				stilt_p_syntax_error_print(a_stilt, c);
-				break;
+				stilt_p_reset(a_stilt);
+				stilt_error(a_stilt, STILTE_SYNTAXERROR);
+				_cw_not_reached();
 			}
 			break;
 		case STILTTS_BASE64_STRING_PAD:
@@ -1488,7 +1528,9 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				break;
 			default:
 				stilt_p_syntax_error_print(a_stilt, c);
-				break;
+				stilt_p_reset(a_stilt);
+				stilt_error(a_stilt, STILTE_SYNTAXERROR);
+				_cw_not_reached();
 			}
 			break;
 		case STILTTS_BASE64_STRING_TILDE:
@@ -1505,7 +1547,9 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				break;
 			default:
 				stilt_p_syntax_error_print(a_stilt, c);
-				break;
+				stilt_p_reset(a_stilt);
+				stilt_error(a_stilt, STILTE_SYNTAXERROR);
+				_cw_not_reached();
 			}
 			break;
 		case STILTTS_BASE64_STRING_FINISH:
@@ -1579,7 +1623,9 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 			}
 			default:
 				stilt_p_syntax_error_print(a_stilt, c);
-				break;
+				stilt_p_reset(a_stilt);
+				stilt_error(a_stilt, STILTE_SYNTAXERROR);
+				_cw_not_reached();
 			}
 			break;
 		case STILTTS_NAME: {
@@ -1590,8 +1636,9 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				restart = TRUE;	/* Inverted below. */
 				_CW_STILT_NEWLINE();
 				/* Fall through. */
-			case '"': case '`': case '<': case '>': case '[':
-			case ']': case '{': case '}': case '/': case '%':
+			case '(': case ')': case '`': case '\'': case '<':
+			case '>': case '[': case ']': case '{': case '}':
+			case '/': case '%':
 				/* New token. */
 				/*
 				 * Invert, in case we fell through from
@@ -1608,6 +1655,9 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				} else {
 					stilt_p_syntax_error_print(a_stilt, c);
 					stilt_p_reset(a_stilt);
+					stilt_error(a_stilt,
+					    STILTE_SYNTAXERROR);
+					_cw_not_reached();
 				}
 				if (restart)
 					goto RESTART;
@@ -1639,7 +1689,6 @@ stilt_p_token_print(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t
 	    a_stilt->tok_line, a_stilt->tok_column, a_stilts->line,
 	    (a_stilts->column != -1) ? a_stilts->column : 0);
 }
-#endif
 
 static void
 stilt_p_syntax_error_print(cw_stilt_t *a_stilt, cw_uint8_t a_c)
@@ -1649,8 +1698,8 @@ stilt_p_syntax_error_print(cw_stilt_t *a_stilt, cw_uint8_t a_c)
 	_cw_out_put_n(a_stilt->index, "[s]", a_stilt->tok_str);
 	_cw_out_put("<-- (starts at line [i], column [i])\n",
 	    a_stilt->tok_line, a_stilt->tok_column);
-	stilt_p_reset(a_stilt);
 }
+#endif
 
 static void
 stilt_p_tok_str_expand(cw_stilt_t *a_stilt)
@@ -1833,6 +1882,7 @@ stilt_p_name_accept(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts)
 		stilo = stils_push(&a_stilt->ostack, a_stilt);
 		if (stilt_dict_stack_search(a_stilt, &key, stilo)) {
 			stils_pop(&a_stilt->ostack, a_stilt);
+			stilt_p_reset(a_stilt);
 			stilt_error(a_stilt, STILTE_UNDEFINED);
 		}
 

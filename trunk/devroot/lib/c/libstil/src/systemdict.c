@@ -1784,7 +1784,7 @@ systemdict_print(cw_stilt_t *a_stilt)
 void
 systemdict_product(cw_stilt_t *a_stilt)
 {
-	soft_code("`Canonware stil'");
+	soft_code("(Canonware stil)");
 }
 
 void
@@ -1796,7 +1796,7 @@ systemdict_prompt(cw_stilt_t *a_stilt)
 void
 systemdict_promptstring(cw_stilt_t *a_stilt)
 {
-	soft_code("`s> '");
+	soft_code("(s> )");
 }
 
 void
@@ -2155,7 +2155,7 @@ systemdict_roll(cw_stilt_t *a_stilt)
 void
 systemdict_run(cw_stilt_t *a_stilt)
 {
-	soft_code("`r' file cvx exec");
+	soft_code("(r) file cvx exec");
 }
 
 void
@@ -2560,7 +2560,7 @@ systemdict_usertime(cw_stilt_t *a_stilt)
 void
 systemdict_version(cw_stilt_t *a_stilt)
 {
-	soft_code("`" _LIBSTIL_VERSION "'");
+	soft_code("(" _LIBSTIL_VERSION ")");
 }
 
 void

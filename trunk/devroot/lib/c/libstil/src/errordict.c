@@ -161,11 +161,11 @@ errordict_generic(cw_stilt_t *a_stilt)
 		estack = stilt_estack_get(a_stilt);
 		dstack = stilt_dstack_get(a_stilt);
 
-		/* Set command to top of estack. */
+		/* Set command to second element of estack. */
 		stilo_name_new(tname, a_stilt, stiln_str(STILN_command),
 		    stiln_len(STILN_command), TRUE);
-		stilo_dict_def(derror, a_stilt, tname, stils_get(estack,
-		    a_stilt));
+		stilo_dict_def(derror, a_stilt, tname, stils_nget(estack,
+		    a_stilt, 1));
 
 		/*
 		 * If recordstacks is TRUE, snapshot the stacks (unless
@@ -244,20 +244,20 @@ errordict_handleerror(cw_stilt_t *a_stilt)
 {
 	soft_code("
 $error begin
-`newerror: ' print
+(newerror\t: ) print
 newerror ==
-`errorname: ' print
+(errorname\t: ) print
 errorname ==
-`recordstacks: ' print
+(recordstacks\t: ) print
 recordstacks ==
-`command: ' print
+(command\t\t: ) print
 //command ==
 
-`ostack: ' print
+(ostack\t\t: ) print
 ostack ==
-`estack: ' print
+(estack\t\t: ) print
 estack ==
-`dstack: ' print
+(dstack\t\t: ) print
 dstack ==
 end
 ");
