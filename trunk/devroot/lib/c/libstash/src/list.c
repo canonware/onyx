@@ -19,7 +19,6 @@
 #include <list_priv.h>
 
 /****************************************************************************
- * <<< Description >>>
  *
  * list_item constructor.
  *
@@ -35,7 +34,6 @@ list_item_new()
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * list_item_destructor.
  *
@@ -49,7 +47,6 @@ list_item_delete(cw_list_item_t * a_list_item_o)
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * Get the value of the data pointer.
  *
@@ -63,7 +60,6 @@ list_item_get(cw_list_item_t * a_list_item_o)
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * Set the value of the data pointer.
  *
@@ -78,7 +74,6 @@ list_item_set(cw_list_item_t * a_list_item_o, void * a_data)
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * list constructor.
  *
@@ -128,7 +123,6 @@ list_new(cw_list_t * a_list_o, cw_bool_t a_is_thread_safe)
 }
      
 /****************************************************************************
- * <<< Description >>>
  *
  * list destructor.
  *
@@ -176,7 +170,6 @@ list_delete(cw_list_t * a_list_o)
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * Returns the number of items in the list.
  *
@@ -202,7 +195,6 @@ list_count(cw_list_t * a_list_o)
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * Pushes an item onto the head of the list.
  *
@@ -268,7 +260,6 @@ list_hpush(cw_list_t * a_list_o, void * a_data)
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * Pops an item off the head of the list.
  *
@@ -302,7 +293,6 @@ list_hpop(cw_list_t * a_list_o)
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * Returns the item at the head of the list, without removing it.
  *
@@ -344,7 +334,6 @@ list_hpeek(cw_list_t * a_list_o)
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * Pushes an item onto the tail of the list.
  *
@@ -410,7 +399,6 @@ list_tpush(cw_list_t * a_list_o, void * a_data)
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * Pops an item off the tail of the list.
  *
@@ -444,7 +432,6 @@ list_tpop(cw_list_t * a_list_o)
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * Returns the item at the tail of the list without removing it.
  *
@@ -486,7 +473,6 @@ list_tpeek(cw_list_t * a_list_o)
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * Inserts an item after the list node pointed to by a_in_list.
  *
@@ -553,7 +539,6 @@ list_insert_after(cw_list_t * a_list_o,
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * Given a pointer to an item, removes the item from the list and returns
  * the data pointer.
@@ -613,7 +598,6 @@ list_remove(cw_list_t * a_list_o, cw_list_item_t * a_to_remove)
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * Free the space used by the free item list.
  *
@@ -651,7 +635,6 @@ list_purge_spares(cw_list_t * a_list_o)
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * Print debugging spew.  Note that the 64 bit values don't print correctly 
  * when using long long for 64 bit variables.
@@ -701,7 +684,6 @@ list_dump(cw_list_t * a_list_o)
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * Pop an item of the head of the list, without locking.
  *
@@ -764,7 +746,6 @@ list_p_hpop(cw_list_t * a_list_o)
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * Pop an item off the tail of the list, without locking.
  *
