@@ -1,0 +1,356 @@
+################################################################################
+#
+# <Copyright = jasone>
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+#module
+
+$clopt class systemdict 3 idup :def
+clopt vclass setsuper
+clopt $clopt setclassname
+clopt <
+> setdata
+clopt <
+    # Constructor.
+    #
+    #class :new #instance
+    $new {
+	:rnew
+	#instance
+
+	<
+	    $error false
+	    $argv null
+	    $packing true
+	    # Dictionary of the format:
+	    #
+	    #   `--flag' --> [arg? handler]
+	    $handlers dict
+	    $index 0
+	    $arg null
+	> over data copy pop
+    } bind
+
+    # Get the packing mode for single character options.
+    #
+    #instance :packing_get #packing?
+    $packing_get {
+	data $packing get
+    } bind
+
+    # Set the packing mode for single character options.
+    #
+    #packing? #instance :packing_set -
+    $packing_set {
+	data $packing dn put
+    } bind
+
+    # Add an option handler.
+    #
+    #opt #arg? #handler #instance :handler_add -
+    $handler_add {
+	data $handlers get 4 nup
+	#handlers #opt #arg? #handler
+	[ up ]
+	#handlers #opt [#arg? #handler]
+	put
+    } bind
+
+    # Remove an option handler.
+    #
+    #opt #instance :handler_remove -
+    $handler_remove {
+	data $handlers get exch
+    } bind
+
+    # Print an error.
+    #
+    #errstr #instance :error_print -
+    $error_print {
+	data $argv get 0 get
+	`/' split
+	dup length dec get
+
+	`: ' cat
+	exch cat
+	`\n' cat
+
+	stderr exch write pop
+    }
+
+    # Handle an error, and unwind to :parse.
+    #
+    #errstr #instance :p_error
+    $p_error {
+	:error_print
+	
+	# Unwind to :parse.
+	true escape
+    }
+
+    # Parse #argv, and clean up from errors.
+    #
+    #argv #instance :parse #remainder false
+    #argv #instance :parse true
+    $parse {
+	{
+	    :p_parse
+	} trapped {
+	    nip nip
+	}{
+	    false
+	} ifelse
+    }
+
+    # Parse #argv.
+    #
+    #argv #instance :p_parse #remainder
+    $p_parse {
+	# Store a reference to #argv.
+	dup data $argv 3 idup put
+
+	# Clear the error flag.
+	dup data $error false put
+
+	# Iterate over #argv (skip element 0).
+	1 {dup 3 idup length lt}{
+	    #argv #instance #i
+
+	    # Set index.
+	    over data $index 2 idup put
+
+	    # Reset arg.
+	    over data $arg null put
+
+	    2 idup over get
+	    #argv #instance #i #elm
+
+	    dup `^(--[^=]+)=?(.+)?' match {
+		# Long format option.
+		pop
+		#argv #instance #i
+		1 submatch
+		2 submatch
+		3 idup
+		#argv #instance #i #opt #arg #instance
+		:p_longopt_dispatch
+		#argv #instance #i
+	    }{
+	    dup `^-..*' match {
+		# Short format option.
+		#argv #instance #i #elm
+		3 idup up 3 idup
+		#argv #instance #argv #i #elm #instance
+		:p_shortopt_dispatch
+		#argv #instance #i
+	    }{
+		# Not an option.
+		pop
+		#argv #instance #i
+		exit
+	    } ifelse
+	    } ifelse
+	    #argv #instance #i
+
+	    # Increment index.
+	    inc
+	} while
+	#argv #instance #i
+	2 idup length over sub
+	#argv #instance #i #remlen
+	2 ipop
+	getinterval
+	#remainder
+    } bind
+
+    # Dispatch a long format option.
+    #
+    #opt #arg #instance :p_longopt_dispatch -
+    $p_longopt_dispatch {
+	dup isa
+	#opt #arg #instance #class
+	dup 4 idup cvn implements {
+	    # Handler found for option with no argument.
+
+	    # Was an argument specified?
+	    2 idup null ne {
+		`Argument ("' 3 idup cat
+		`") unexpected for option ' cat
+		4 idup cat
+		#opt #arg #instance #class #errstr
+		2 idup :p_error
+	    } if
+
+	    # Get the handler.
+	    3 idup cvn method
+	}{
+	dup 4 idup `?' cat cvn implements {
+	    # Handler found for option with optional argument.
+
+	    # Get the handler.
+	    3 idup `?' cat cvn method
+	}{
+	dup 4 idup `=' cat cvn implements {
+	    # Handler found for option with mandatory argument.
+
+	    # Is argument missing?
+	    2 idup null eq {
+		`Argument missing for option ' 4 idup cat
+		#opt #arg #instance #class #errstr
+		2 idup :p_error
+	    } if
+
+	    # Get the handler.
+	    3 idup `=' cat cvn method
+	}{
+	    # No handler found.
+	    pop
+	    #opt #arg #instance
+	    
+	    `Error interpreting option '
+	    4 ndn cat
+	    dn dup null ne {
+		`=' exch 3 ncat
+	    }{
+		pop
+	    } ifelse
+	    #instance #errstr
+	    exch :p_error
+	} ifelse
+	} ifelse
+	} ifelse
+	#opt #arg #instance #handler
+    
+	# Store the argument.
+	over data $arg 4 idup put
+
+	# Call the handler.
+	eval
+	#opt #arg
+
+	# Clean up.
+	2 npop
+    } bind
+
+    # Dispatch a short format option.
+    #
+    #argv #i #elm #instance :p_shortopt_dispatch #i
+    $p_shortopt_dispatch {
+	dup data $packing get {
+	    :p_packed_shortopt_dispatch
+	}{
+	    :p_unpacked_shortopt_dispatch
+	} ifelse
+    } bind
+
+    # Dispatch a short format option in packed mode.
+    #
+    #argv #i #elm #instance :p_packed_shortopt_dispatch #i
+    $p_packed_shortopt_dispatch {
+	# XXX
+    } bind
+
+    # Dispatch a short format option in unpacked mode.
+    #
+    #argv #i #elm #instance :p_unpacked_shortopt_dispatch #i
+    $p_unpacked_shortopt_dispatch {
+	dup isa
+	#argv #i #elm #instance #class
+
+	2 idup `^(-.)(.+)?' match pop
+
+	dup 1 submatch cvn implements {
+	    # Handler found for option with no argument.
+
+	    # Was an argument specified?
+	    2 submatch null ne {
+		`Argument ("' 2 submatch cat
+		`") unexpected for option ' cat
+		1 submatch cat
+		#argv #i #elm #instance #class #errstr
+		2 idup :p_error
+	    } if
+
+	    # Get the handler.
+	    1 submatch cvn method
+	}{
+	dup 1 submatch `=' cat cvn implements {
+	    # Handler found for option with mandatory argument.
+
+	    # Is argument missing?
+	    2 submatch null eq {
+		# The argument isn't in the same argv element.  If argv has
+		# remaining elements, get the next element and treat it as the
+		# argument.
+		3 idup inc 5 idup length lt {
+		    #argv #i #elm #instance #class
+		    # Get next argv element.
+		    4 idup 5 ndn inc dup 6 nup
+		    #argv #i #elm #instance #class #argv #i
+		    get
+		    #argv #i #elm #instance #class #arg
+
+		    # Set argument.
+		    2 idup data $arg dn put
+		}{
+		    # No argument specified.
+		    `Argument missing for option ' 1 submatch cat
+		    #argv #i #elm #instance #class #errstr
+		    2 idup :p_error
+		} ifelse
+	    }{
+		# Set argument.
+		over data $arg 2 submatch put
+	    } ifelse
+	    #argv #i #elm #instance #class
+
+	    # Get handler.
+	    1 submatch `=' cat cvn method
+	}{
+	    # No handler found.
+	    pop
+	    #argv #i #elm #instance
+	    `Error interpreting option '
+	    0 submatch cat
+	    #argv #i #elm #instance #errstr
+	    exch :p_error
+	} ifelse
+	} ifelse
+	#argv #i #elm #instance #handler
+
+	# Call the handler.
+	eval
+	#argv #i #elm
+
+	# Clean up.
+	pop nip
+    } bind
+
+    # Return argv.  This is provided to aid option handlers.
+    #
+    #instance :argv_get #argv
+    $argv_get {
+	data $argv get
+    } bind
+
+    # Return the current argv index.  This is provided to aid option handlers.
+    #
+    #instance :index_get #index
+    $index_get {
+	data $index get
+    } bind
+
+    # Return the current option argument.  This is provided to aid option
+    # handlers.
+    #
+    #instance :arg_get #arg
+    $arg_get {
+	data $arg get
+    } bind
+> setmethods
