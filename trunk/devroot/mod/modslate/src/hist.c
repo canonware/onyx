@@ -258,32 +258,6 @@ hist_p_bufv_print(const cw_bufv_t *a_bufv, cw_uint32_t a_bufvcnt)
 	}
     }
 }
-
-#if (0)
-static void
-hist_p_bufv_rprint(const cw_bufv_t *a_bufv, cw_uint32_t a_bufvcnt)
-{
-    const char hchars[] = "0123456789abcdef";
-    cw_uint32_t i, j;
-    cw_uint8_t c;
-
-    for (i = a_bufvcnt - 1; i != 0xffffffff; i--)
-    {
-	for (j = a_bufv[i].len - 1; j != 0xffffffff; j--)
-	{
-	    c = a_bufv[i].data[j];
-	    if (isprint(c))
-	    {
-		fprintf(stderr, "%c", c);
-	    }
-	    else
-	    {
-		fprintf(stderr, "\\x%c%c", hchars[c >> 4], hchars[c & 0xf]);
-	    }
-	}
-    }
-}
-#endif
 #endif
 
 CW_P_INLINE cw_uint8_t
