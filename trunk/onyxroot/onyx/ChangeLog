@@ -1,3 +1,9 @@
+2003-03-15 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/nxo_thread.c:nxo_thread_loop() : Make some
+	  performance improvements by reducing nxo dup's, array
+	  locking/unlocking, and the number of branches.
+
 2003-03-12 : Jason Evans <jasone@canonware.com>
 
 	* lib/libonyx/include/libonyx/mem.h : Add the mema class, which reduces
