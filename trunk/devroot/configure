@@ -534,7 +534,7 @@ objdir=.
 abs_objdir=`pwd`
 
 
-cfgoutputs="Cookfile doc/latex/manual.tex doc/latex/ltx2e test/verify"
+cfgoutputs="Cookfile doc/latex/manual.tex test/verify"
 cfghdrs=
 bins=
 libs=
@@ -3281,6 +3281,3 @@ test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1
 
 echo chmod u+x $objdir/test/verify
 chmod u+x $objdir/test/verify
-
-echo chmod u+x $objdir/doc/latex/ltx2e
-chmod u+x $objdir/doc/latex/ltx2e

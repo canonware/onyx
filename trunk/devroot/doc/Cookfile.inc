@@ -87,6 +87,7 @@ doc_clean :
   rm -f [objdir]/doc/latex/manual.dvi;
   rm -f [objdir]/doc/latex/manual.idx;
   rm -f [objdir]/doc/latex/manual.idx-prev;
+  rm -f [objdir]/doc/latex/manual.idx-sorted;
   rm -f [objdir]/doc/latex/manual.ilg;
   rm -f [objdir]/doc/latex/manual.ind;
   rm -f [objdir]/doc/latex/manual.lof;
@@ -100,7 +101,6 @@ doc_clean :
 doc_distclean :
 {
   rm -f [objdir]/doc/latex/manual.tex;
-  rm -f [objdir]/doc/latex/ltx2e;
 }
 
 doc_relclean :
@@ -118,13 +118,9 @@ doc_relclean :
   [FIG2DEV] -L ps [objdir]/%0%.fig [objdir]/%0%.ps;
 }
 
-/*
- * This all has to be one rule in order to avoid build races if building in
- * parallel.
- */
-[objdir]/%0ps/%.ps [objdir]/%0pdf/%.pdf
-    : [objdir]/%0latex/%.tex [TEX_SRCS]
-      [fromto [srcdir]/%0latex/%.fig [objdir]/%0latex/%.ps [FIG_SRCS]]
+[objdir]/%0ps/%.ps : [objdir]/%0latex/%.tex [TEX_SRCS]
+                     [fromto [srcdir]/%0latex/%.fig [objdir]/%0latex/%.ps
+                             [FIG_SRCS]]
   set mkdir
 {
   /*
@@ -140,6 +136,7 @@ doc_relclean :
   rm -f [objdir]/%0latex/%.aux-prev;
   rm -f [objdir]/%0latex/%.idx;
   rm -f [objdir]/%0latex/%.idx-prev;
+  rm -f [objdir]/%0latex/%.idx-sorted;
   rm -f [objdir]/%0latex/%.ilg;
   rm -f [objdir]/%0latex/%.ind;
   rm -f [objdir]/%0latex/%.lof;
@@ -148,16 +145,39 @@ doc_relclean :
   rm -f [objdir]/%0latex/%.toc;
   rm -f [objdir]/%0latex/texput.log;
 
-  cd [objdir]/%0latex/\; ./ltx2e [LATEX] %.tex;
-  cd [objdir]/%0latex/\; [MAKEINDEX] -c -l -s [abs_srcdir]/%0latex/%.mst %.idx;
-  cd [objdir]/%0latex/\; ./ltx2e [LATEX] %.tex;
+  cd [objdir]/%0latex/\; [PERL] [abs_srcdir]/%0latex/ltx2e [LATEX] %.tex;
+  cat [objdir]/%0latex/%.idx | [PERL] [srcdir]/%0latex/idx_sort
+      > [objdir]/%0latex/%.idx-sorted;
+  cd [objdir]/%0latex/\; [MAKEINDEX] -c -l -s [abs_srcdir]/%0latex/%.mst
+     %.idx-sorted;
+  cd [objdir]/%0latex/\; [PERL] [abs_srcdir]/%0latex/ltx2e [LATEX] %.tex;
   [DVIPS] [objdir]/%0latex/%.dvi -o [objdir]/%0ps/%.ps;
+}
+
+/*
+ * This rule depends on the PostScript version of the manual so that the two
+ * rules will not run in parallel.  This is necessary in order to keep them
+ * from stomping all over each others' temporory files.
+ */
+[objdir]/%0pdf/%.pdf : [objdir]/%0latex/%.tex [objdir]/%0ps/%.ps [TEX_SRCS]
+                       [fromto [srcdir]/%0latex/%.fig [objdir]/%0latex/%.ps
+                               [FIG_SRCS]]
+  set mkdir
+{
+  /*
+   * Clean up the temp files to keep {pdf}latex from stumbling over the output
+   * of each other.
+   *
+   * Change directory to the object tree, since latex can't be made to use a
+   * different location for output files.
+   */
 
   rm -f [objdir]/%0latex/%.alg;
   rm -f [objdir]/%0latex/%.aux;
   rm -f [objdir]/%0latex/%.aux-prev;
   rm -f [objdir]/%0latex/%.idx;
   rm -f [objdir]/%0latex/%.idx-prev;
+  rm -f [objdir]/%0latex/%.idx-sorted;
   rm -f [objdir]/%0latex/%.ilg;
   rm -f [objdir]/%0latex/%.ind;
   rm -f [objdir]/%0latex/%.lof;
@@ -166,13 +186,15 @@ doc_relclean :
   rm -f [objdir]/%0latex/%.toc;
   rm -f [objdir]/%0latex/texput.log;
 
-  cd [objdir]/%0latex/\; ./ltx2e [PDFLATEX] %.tex;
-  cd [objdir]/%0latex/\; [MAKEINDEX] -c -l %.idx;
-  cd [objdir]/%0latex/\; ./ltx2e [PDFLATEX] %.tex;
+  cd [objdir]/%0latex/\; [PERL] [abs_srcdir]/%0latex/ltx2e [PDFLATEX] %.tex;
+  cat [objdir]/%0latex/%.idx | [PERL] [srcdir]/%0latex/idx_sort
+      > [objdir]/%0latex/%.idx-sorted;
+  cd [objdir]/%0latex/\; [MAKEINDEX] -c -l %.idx-sorted;
+  cd [objdir]/%0latex/\; [PERL] [abs_srcdir]/%0latex/ltx2e [PDFLATEX] %.tex;
   cp [objdir]/%0latex/%.pdf [objdir]/%0pdf/%.pdf;
 }
 
-[objdir]/%0html/%.html : [objdir]/%0pdf/%.pdf
+[objdir]/%0html/%.html : [objdir]/%0ps/%.ps
   set mkdir
 {
   [LATEX2HTML] -init_file [srcdir]/%0latex/.latex2html-init

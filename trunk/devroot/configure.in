@@ -15,7 +15,7 @@ AC_SUBST(objdir)
 abs_objdir=`pwd`
 AC_SUBST(abs_objdir)
 
-cfgoutputs="Cookfile doc/latex/manual.tex doc/latex/ltx2e test/verify"
+cfgoutputs="Cookfile doc/latex/manual.tex test/verify"
 cfghdrs=
 bins=
 libs=
@@ -208,6 +208,3 @@ dnl autoconf doesn't keep the execute bit if it's set for the input files, so do
 dnl it manually.
 echo chmod u+x $objdir/test/verify
 chmod u+x $objdir/test/verify
-
-echo chmod u+x $objdir/doc/latex/ltx2e
-chmod u+x $objdir/doc/latex/ltx2e
