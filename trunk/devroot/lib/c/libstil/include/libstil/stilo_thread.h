@@ -222,12 +222,14 @@ void	stilo_thread_error(cw_stilo_t *a_stilo, cw_stilo_threade_t a_threade);
 cw_bool_t stilo_thread_dstack_search(cw_stilo_t *a_stilo, cw_stilo_t *a_key,
     cw_stilo_t *r_value);
 
+#ifndef _CW_USE_INLINES
 cw_stil_t *stilo_thread_stil_get(cw_stilo_t *a_stilo);
 
 cw_stilo_t *stilo_thread_ostack_get(cw_stilo_t *a_stilo);
 cw_stilo_t *stilo_thread_dstack_get(cw_stilo_t *a_stilo);
 cw_stilo_t *stilo_thread_estack_get(cw_stilo_t *a_stilo);
 cw_stilo_t *stilo_thread_tstack_get(cw_stilo_t *a_stilo);
+#endif
 
 cw_stilo_t *stilo_thread_threaddict_get(cw_stilo_t *a_stilo);
 cw_stilo_t *stilo_thread_userdict_get(cw_stilo_t *a_stilo);
@@ -236,3 +238,80 @@ cw_stilo_t *stilo_thread_currenterror_get(cw_stilo_t *a_stilo);
 
 cw_bool_t stilo_thread_currentlocking(cw_stilo_t *a_stilo);
 void	stilo_thread_setlocking(cw_stilo_t *a_stilo, cw_bool_t a_locking);
+
+#if (defined(_CW_USE_INLINES) || defined(_STILO_THREAD_C_))
+_CW_INLINE cw_stil_t *
+stilo_thread_stil_get(cw_stilo_t *a_stilo)
+{
+	cw_stiloe_thread_t	*thread;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+
+	thread = (cw_stiloe_thread_t *)a_stilo->o.stiloe;
+	_cw_assert(thread->stiloe.magic == _CW_STILOE_MAGIC);
+	_cw_assert(thread->stiloe.type == STILOT_THREAD);
+
+	return thread->stil;
+}
+
+_CW_INLINE cw_stilo_t *
+stilo_thread_ostack_get(cw_stilo_t *a_stilo)
+{
+	cw_stiloe_thread_t	*thread;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+
+	thread = (cw_stiloe_thread_t *)a_stilo->o.stiloe;
+	_cw_assert(thread->stiloe.magic == _CW_STILOE_MAGIC);
+	_cw_assert(thread->stiloe.type == STILOT_THREAD);
+
+	return &thread->ostack;
+}
+
+_CW_INLINE cw_stilo_t *
+stilo_thread_dstack_get(cw_stilo_t *a_stilo)
+{
+	cw_stiloe_thread_t	*thread;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+
+	thread = (cw_stiloe_thread_t *)a_stilo->o.stiloe;
+	_cw_assert(thread->stiloe.magic == _CW_STILOE_MAGIC);
+	_cw_assert(thread->stiloe.type == STILOT_THREAD);
+
+	return &thread->dstack;
+}
+
+_CW_INLINE cw_stilo_t *
+stilo_thread_estack_get(cw_stilo_t *a_stilo)
+{
+	cw_stiloe_thread_t	*thread;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+
+	thread = (cw_stiloe_thread_t *)a_stilo->o.stiloe;
+	_cw_assert(thread->stiloe.magic == _CW_STILOE_MAGIC);
+	_cw_assert(thread->stiloe.type == STILOT_THREAD);
+
+	return &thread->estack;
+}
+
+_CW_INLINE cw_stilo_t *
+stilo_thread_tstack_get(cw_stilo_t *a_stilo)
+{
+	cw_stiloe_thread_t	*thread;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+
+	thread = (cw_stiloe_thread_t *)a_stilo->o.stiloe;
+	_cw_assert(thread->stiloe.magic == _CW_STILOE_MAGIC);
+	_cw_assert(thread->stiloe.type == STILOT_THREAD);
+
+	return &thread->tstack;
+}
+#endif	/* (defined(_CW_USE_INLINES) || defined(_STILO_THREAD_C_)) */

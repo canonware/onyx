@@ -9,6 +9,8 @@
  *
  ******************************************************************************/
 
+#define	_SYSTEMDICT_C_
+
 #include "../include/libstil/libstil.h"
 
 #include <sys/time.h>	/* For realtime operator. */
@@ -318,21 +320,7 @@ systemdict_abs(cw_stilo_t *a_thread)
 void
 systemdict_add(cw_stilo_t *a_thread)
 {
-	cw_stilo_t	*ostack;
-	cw_stilo_t	*a, *b;
-
-	ostack = stilo_thread_ostack_get(a_thread);
-	
-	STILO_STACK_GET(b, ostack, a_thread);
-	STILO_STACK_DOWN_GET(a, ostack, a_thread, b);
-	if (stilo_type_get(a) != STILOT_INTEGER || stilo_type_get(b) !=
-	    STILOT_INTEGER) {
-		stilo_thread_error(a_thread, STILO_THREADE_TYPECHECK);
-		return;
-	}
-
-	stilo_integer_set(a, stilo_integer_get(a) + stilo_integer_get(b));
-	stilo_stack_pop(ostack);
+	systemdict_inline_add(a_thread);
 }
 
 void
@@ -1215,14 +1203,7 @@ systemdict_dstack(cw_stilo_t *a_thread)
 void
 systemdict_dup(cw_stilo_t *a_thread)
 {
-	cw_stilo_t	*ostack;
-	cw_stilo_t	*orig, *dup;
-
-	ostack = stilo_thread_ostack_get(a_thread);
-
-	STILO_STACK_GET(orig, ostack, a_thread);
-	dup = stilo_stack_push(ostack);
-	stilo_dup(dup, orig);
+	systemdict_inline_dup(a_thread);
 }
 
 void
@@ -1308,16 +1289,7 @@ systemdict_eval(cw_stilo_t *a_thread)
 void
 systemdict_exch(cw_stilo_t *a_thread)
 {
-	cw_stilo_t	*ostack;
-
-	ostack = stilo_thread_ostack_get(a_thread);
-
-	if (stilo_stack_count(ostack) < 2) {
-		stilo_thread_error(a_thread, STILO_THREADE_STACKUNDERFLOW);
-		return;
-	}
-
-	stilo_stack_roll(ostack, 2, 1);
+	systemdict_inline_exch(a_thread);
 }
 
 void
@@ -2057,24 +2029,7 @@ systemdict_ifelse(cw_stilo_t *a_thread)
 void
 systemdict_index(cw_stilo_t *a_thread)
 {
-	cw_stilo_t	*ostack;
-	cw_stilo_t	*stilo, *orig;
-	cw_stiloi_t	index;
-
-	ostack = stilo_thread_ostack_get(a_thread);
-	STILO_STACK_GET(stilo, ostack, a_thread);
-	if (stilo_type_get(stilo) != STILOT_INTEGER) {
-		stilo_thread_error(a_thread, STILO_THREADE_TYPECHECK);
-		return;
-	}
-	index = stilo_integer_get(stilo);
-	if (index < 0) {
-		stilo_thread_error(a_thread, STILO_THREADE_RANGECHECK);
-		return;
-	}
-
-	STILO_STACK_NGET(orig, ostack, a_thread, index + 1);
-	stilo_dup(stilo, orig);
+	systemdict_inline_index(a_thread);
 }
 
 void
@@ -2582,11 +2537,7 @@ systemdict_or(cw_stilo_t *a_thread)
 void
 systemdict_pop(cw_stilo_t *a_thread)
 {
-	cw_stilo_t	*ostack;
-
-	ostack = stilo_thread_ostack_get(a_thread);
-
-	STILO_STACK_POP(ostack, a_thread);
+	systemdict_inline_pop(a_thread);
 }
 
 void
@@ -3032,35 +2983,7 @@ systemdict_repeat(cw_stilo_t *a_thread)
 void
 systemdict_roll(cw_stilo_t *a_thread)
 {
-	cw_stilo_t	*ostack;
-	cw_stilo_t	*stilo;
-	cw_stiloi_t	count, amount;
-
-	ostack = stilo_thread_ostack_get(a_thread);
-
-	STILO_STACK_GET(stilo, ostack, a_thread);
-	if (stilo_type_get(stilo) != STILOT_INTEGER) {
-		stilo_thread_error(a_thread, STILO_THREADE_TYPECHECK);
-		return;
-	}
-	amount = stilo_integer_get(stilo);
-	STILO_STACK_DOWN_GET(stilo, ostack, a_thread, stilo);
-	if (stilo_type_get(stilo) != STILOT_INTEGER) {
-		stilo_thread_error(a_thread, STILO_THREADE_TYPECHECK);
-		return;
-	}
-	count = stilo_integer_get(stilo);
-	if (count < 1) {
-		stilo_thread_error(a_thread, STILO_THREADE_RANGECHECK);
-		return;
-	}
-	if (count > stilo_stack_count(ostack) - 2) {
-		stilo_thread_error(a_thread, STILO_THREADE_STACKUNDERFLOW);
-		return;
-	}
-
-	stilo_stack_npop(ostack, 2);
-	stilo_stack_roll(ostack, count, amount);
+	systemdict_inline_roll(a_thread);
 }
 
 void
