@@ -54,7 +54,8 @@ SRCS = [SRCS] [ONYX_SRCS];
  */
 {
   local otests = catenate_a.nx.in catenate_b.nx.in catenate_c.nx.in
-                 catenate_d.nx.in copy_a.nx.in count_a.nx.in counttomark_a.nx.in
+                 catenate_d.nx.in clear_a.nx.in cleartomark_a.nx.in
+                 copy_a.nx.in count_a.nx.in counttomark_a.nx.in
                  counttomark_b.nx.in counttomark_c.nx.in dup_a.nx.in dup_b.nx.in
                  eval.nx.in fino_a.nx.in gc_roll.nx.in hello.nx.in index_a.nx.in
                  index_b.nx.in index_c.nx.in index_d.nx.in index_e.nx.in

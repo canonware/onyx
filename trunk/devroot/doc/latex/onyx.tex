@@ -1715,9 +1715,11 @@ object & Duplicate object on ostack at a given index. \\
 any & {\bf \htmlref{pop}{systemdict:pop}} & -- & Remove the top object from the
 operand stack. \\
 \hline
-& {\bf \htmlref{clear}{systemdict:clear}} & & \\
+objects & {\bf \htmlref{clear}{systemdict:clear}} & -- & Pop all objects off
+ostack. \\
 \hline
-& {\bf \htmlref{cleartomark}{systemdict:cleartomark}} & & \\
+mark \dots & {\bf \htmlref{cleartomark}{systemdict:cleartomark}} & -- & Remove
+objects from ostack through topmost mark. \\
 \hline \hline
 \multicolumn{4}{|l|}{Execution, control, and execution stack operators} \\
 \hline \hline
@@ -1800,7 +1802,7 @@ stack & {\bf \htmlref{sclear}{systemdict:sclear}} & stack & Remove all objects
 on stack. \\
 \hline
 stack & {\bf \htmlref{scleartomark}{systemdict:scleartomark}} & stack & Remove
-objecs from stack down through first mark. \\
+objecs from stack down through topmost mark. \\
 \hline \hline
 \multicolumn{4}{|l|}{Polymorphic operators} \\
 \hline \hline
@@ -2566,23 +2568,25 @@ onyx:0>
 	\end{description}
 \label{systemdict:clear}
 \index{clear@\onyxop{}{clear}{}}
-\item[{\onyxop{--}{clear}{--}}: ]
+\item[{\onyxop{objects}{clear}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[objects: ]
+			All objects on ostack.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Output(s): ] None.
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Pop all objects off of ostack.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> 1 2 3 pstack
+3
+2
+1
+onyx:3> clear pstack
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:cleardstack}
@@ -2608,23 +2612,33 @@ onyx:0>
 	\end{description}
 \label{systemdict:cleartomark}
 \index{cleartomark@\onyxop{}{cleartomark}{}}
-\item[{\onyxop{--}{cleartomark}{--}}: ]
+\item[{\onyxop{mark \dots}{cleartomark}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[mark: ]
+			A mark object.
+		\item[\dots: ]
+			Zero or more non-mark objects.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{unmatchedmark}{unmatchedmark}.]
 		\end{description}
 	\item[Description: ]
+		Remove objects from ostack down to and including the topmost
+		mark.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> 3 mark 1 0 pstack
+0
+1
+-mark-
+3
+onyx:4> cleartomark pstack
+3
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:close}
