@@ -81,6 +81,8 @@
 \newcommand{\filename}[1]{{\em #1}}
 \newcommand{\classname}[1]{{\em #1}}
 \newcommand{\dbgsym}[1]{{``#1''}}
+\newcommand{\stilop}[3]{{\em #1}\ifthenelse{\equal{}{#1}}{}{ }{\bf #2}\ifthenelse{\equal{}{#3}}{}{ }{\em #3}}
+\newcommand{\oparg}[1]{{\em #1}}
 
 % TeX doesn't have '<', '>', '|', and '~' in its text fonts.  For PS output, use
 % math mode to get the characters.  For html output, it works correctly
