@@ -197,7 +197,7 @@ kasit_p_feed(cw_kasit_t * a_kasit, const char * a_str, cw_uint32_t a_len)
     /* If a special character causes the end of the previous token, the state
      * machine builds the object, then restarts the state machine without
      * incrementing the input character index.  This is done in order to avoid
-     * having to duplicate the _CW_KASIT_STATE_START code in many places. */
+     * having to duplicate the _CW_KASIT_STATE_START code. */
     RESTART:
     
     switch (a_kasit->state)
