@@ -213,6 +213,24 @@ sock_disconnect(cw_sock_t * a_sock);
  *
  * a_sock : Pointer to a cw_sock_t instance.
  *
+ * <<< Output(s) >>>
+ *
+ * retval : Number of bytes of buffered incoming data.
+ *
+ * <<< Description >>>
+ *
+ * Return the number of bytes of buffered incoming data.
+ *
+ ****************************************************************************/
+cw_uint32_t
+sock_buffered_in(cw_sock_t * a_sock);
+
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_sock : Pointer to a cw_sock_t instance.
+ *
  * a_spare : Pointer to a spare cw_buf_t, to which data may be appended.
  *
  * a_max_read : Maximum number of bytes to read into a_spare, or 0 for no limit.

@@ -471,6 +471,20 @@ sock_disconnect(cw_sock_t * a_sock)
   return retval;
 }
 
+cw_uint32_t
+sock_buffered_in(cw_sock_t * a_sock)
+{
+  cw_uint32_t retval;
+
+  _cw_check_ptr(a_sock);
+  
+  mtx_lock(&a_sock->in_lock);
+  retval = buf_get_size(&a_sock->in_buf);
+  mtx_unlock(&a_sock->in_lock);
+
+  return retval;
+}
+
 cw_sint32_t
 sock_read(cw_sock_t * a_sock, cw_buf_t * a_spare, cw_sint32_t a_max_read,
 	  struct timespec * a_timeout)
