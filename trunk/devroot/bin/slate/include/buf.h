@@ -121,10 +121,9 @@ cw_uint8_t *bufm_after_get(cw_bufm_t *a_bufm);
 cw_bufv_t *bufm_range_get(cw_bufm_t *a_start, cw_bufm_t *a_end, cw_uint32_t
     *r_iovcnt);
 
-/* XXX Use bufv's. */
-void	bufm_before_insert(cw_bufm_t *a_bufm, const cw_uint8_t *a_str,
-    cw_uint64_t a_len);
-void	bufm_after_insert(cw_bufm_t *a_bufm, const cw_uint8_t *a_str,
-    cw_uint64_t a_len);
+void	bufm_before_insert(cw_bufm_t *a_bufm, const cw_bufv_t *a_bufv,
+    cw_uint32_t a_bufvcnt, cw_uint32_t a_elmsize);
+void	bufm_after_insert(cw_bufm_t *a_bufm, const cw_bufv_t *a_bufv,
+    cw_uint32_t a_bufvcnt, cw_uint32_t a_elmsize);
 
 void	bufm_remove(cw_bufm_t *a_start, cw_bufm_t *a_end);

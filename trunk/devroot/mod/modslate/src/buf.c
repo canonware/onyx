@@ -732,7 +732,7 @@ buf_hist_group_end(cw_buf_t *a_buf)
 /* bufm. */
 void
 bufm_l_insert(cw_bufm_t *a_bufm, cw_bool_t a_record, cw_bool_t a_after, const
-    cw_uint8_t *a_str, cw_uint64_t a_len)
+    cw_bufv_t *a_bufv, cw_uint32_t a_bufvcnt, cw_uint32_t a_elmsize)
 {
 	cw_uint64_t	i, nlines;
 	cw_buf_t	*buf;
@@ -1639,16 +1639,17 @@ bufm_range_get(cw_bufm_t *a_start, cw_bufm_t *a_end, cw_uint32_t *r_bufvcnt)
 }
 
 void
-bufm_before_insert(cw_bufm_t *a_bufm, const cw_uint8_t *a_str, cw_uint64_t
-    a_len)
+bufm_before_insert(cw_bufm_t *a_bufm, const cw_bufv_t *a_bufv, cw_uint32_t
+    a_bufvcnt, cw_uint32_t a_elmsize)
 {
-	bufm_l_insert(a_bufm, TRUE, FALSE, a_str, a_len);
+	bufm_l_insert(a_bufm, TRUE, FALSE, a_bufv, a_bufvcnt, a_elmsize);
 }
 
 void
-bufm_after_insert(cw_bufm_t *a_bufm, const cw_uint8_t *a_str, cw_uint64_t a_len)
+bufm_after_insert(cw_bufm_t *a_bufm, const cw_bufv_t *a_bufv, cw_uint32_t
+    a_bufvcnt, cw_uint32_t a_elmsize)
 {
-	bufm_l_insert(a_bufm, TRUE, TRUE, a_str, a_len);
+	bufm_l_insert(a_bufm, TRUE, TRUE, a_bufv, a_bufvcnt, a_elmsize);
 }
 
 void

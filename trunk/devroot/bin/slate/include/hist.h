@@ -41,12 +41,12 @@ void	hist_flush(cw_hist_t *a_hist, cw_buf_t *a_buf);
 void	hist_group_beg(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_bufm_t *a_bufm);
 cw_bool_t hist_group_end(cw_hist_t *a_hist, cw_buf_t *a_buf);
 void	hist_ins(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos, const
-    cw_uint8_t *a_str, cw_uint64_t a_len);
+    cw_bufv_t *a_bufv, cw_uint32_t a_bufvcnt, cw_uint32_t a_elmsize);
 void	hist_ynk(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos, const
-    cw_uint8_t *a_str, cw_uint64_t a_len);
+    cw_bufv_t *a_bufv, cw_uint32_t a_bufvcnt, cw_uint32_t a_elmsize);
 void	hist_rem(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos, const
-    cw_uint8_t *a_str, cw_uint64_t a_len);
+    cw_bufv_t *a_bufv, cw_uint32_t a_bufvcnt, cw_uint32_t a_elmsize);
 void	hist_del(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos, const
-    cw_uint8_t *a_str, cw_uint64_t a_len);
+    cw_bufv_t *a_bufv, cw_uint32_t a_bufvcnt, cw_uint32_t a_elmsize);
 
 void	hist_dump(cw_hist_t *a_hist, cw_buf_t *a_buf);
