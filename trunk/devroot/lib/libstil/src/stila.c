@@ -819,6 +819,10 @@ stila_p_collect(cw_stila_t *a_stila, cw_bool_t a_shutdown)
 	if (garbage != NULL)
 		stila_p_sweep(garbage, a_stila->stil);
 
+	/* Drain the pools. */
+	pool_drain(&a_stila->chi_pool);
+	pool_drain(&a_stila->dicto_pool);
+
 	if (a_shutdown) {
 		/*
 		 * All objects were just swept away, so don't update the
