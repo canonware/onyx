@@ -1,5 +1,9 @@
 2003-03-03 : Jason Evans <jasone@canonware.com>
 
+	* Add support for calling preprompt in interactive onyx sessions.
+
+	* Make calls to promptstring resilient to errors.
+
 	* lib/libonyx/src/systemdict.c:systemdict_{copy,get}() : Use
 	  nxo_stack_remove() rather than nxo_stack_exch()/nxo_stack_pop().  In
 	  the case of systemdict_copy(), this change fixes undesired behavior if

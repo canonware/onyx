@@ -304,6 +304,23 @@ modprompt_read(void *a_data, cw_nxo_t *a_file, cw_uint32_t a_len,
 
     if (synth->buffer_count == 0)
     {
+	/* Call preprompt if the conditions are right.  Take lots of care not
+	 * to let an error in preprompt cause recursion into the error handling
+	 * machinery. */
+	if ((nxo_thread_deferred(synth->thread) == FALSE)
+	    && (nxo_thread_state(synth->thread) == THREADTS_START))
+	{
+	    cw_onyx_code(synth->thread,
+			 "$preprompt where {\n"
+			     "pop\n"
+			     "<$errordict <$handleerror {} $stop $stop load>>\n"
+			     "begin\n"
+			     "{preprompt} stopped pop\n"
+			     "end\n"
+			 "}\n"
+			 "if");
+	}
+
 	/* Read more data. */
 	while ((str = el_gets(synth->el, &count)) == NULL)
 	{
@@ -393,7 +410,14 @@ modprompt_prompt(EditLine *a_el)
     if ((nxo_thread_deferred(synth->thread) == FALSE)
 	&& (nxo_thread_state(synth->thread) == THREADTS_START))
     {
-	static const cw_uint8_t code[] = "promptstring";
+	static const cw_uint8_t code[] =
+	    "$promptstring where {\n"
+	        "pop <$errordict <$handleerror {} $stop $stop load>> begin\n"
+	        "{promptstring} stopped {`'} if\n"
+	        "end\n"
+	    "}{\n"
+	        "`'\n"
+	    "} ifelse\n";
 	cw_uint8_t *pstr;
 	cw_uint32_t plen, maxlen;
 	cw_nxo_t *nxo;
@@ -553,6 +577,23 @@ modprompt_entry(void *a_arg)
 	if (synth->quit)
 	{
 	    break;
+	}
+
+	/* Call preprompt if the conditions are right.  Take lots of care not
+	 * to let an error in preprompt cause recursion into the error handling
+	 * machinery. */
+	if ((nxo_thread_deferred(synth->thread) == FALSE)
+	    && (nxo_thread_state(synth->thread) == THREADTS_START))
+	{
+	    cw_onyx_code(synth->thread,
+			 "$preprompt where {\n"
+			     "pop\n"
+			     "<$errordict <$handleerror {} $stop $stop load>>\n"
+			     "begin\n"
+			     "{preprompt} stopped pop\n"
+			     "end\n"
+			 "}\n"
+			 "if");
 	}
 
 	/* Read data. */

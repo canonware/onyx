@@ -297,19 +297,6 @@ interactive_run(int argc, char **argv, char **envp, cw_nxinit_t *a_init,
     interactive_nxcode(&thread);
 
 #ifdef CW_POSIX_FILE
-    /* Run RC ("run commands") file specified by ONYXRC environment variable,
-     * if any. */
-    init = getenv("ONYXRC");
-    if (init != NULL)
-    {
-	if (file_setup(&nx, &thread, init))
-	{
-	    retval = 1;
-	    goto RETURN;
-	}
-	nxo_thread_start(&thread);
-    }
-
     /* Run initialization scripts, if any. */
     for (i = 0; i < a_ninit; i++)
     {
@@ -330,6 +317,19 @@ interactive_run(int argc, char **argv, char **envp, cw_nxinit_t *a_init,
 		retval = 1;
 		goto RETURN;
 	    }
+	}
+	nxo_thread_start(&thread);
+    }
+
+    /* Run RC ("run commands") file specified by ONYXRC environment variable,
+     * if any. */
+    init = getenv("ONYXRC");
+    if (init != NULL)
+    {
+	if (file_setup(&nx, &thread, init))
+	{
+	    retval = 1;
+	    goto RETURN;
 	}
 	nxo_thread_start(&thread);
     }
@@ -555,7 +555,18 @@ nx_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str)
 	    && (nxo_thread_deferred(arg->thread) == FALSE)
 	    && (nxo_thread_state(arg->thread) == THREADTS_START))
 	{
-	    cw_onyx_code(arg->thread, "promptstring print flush");
+	/* Call preprompt if the conditions are right.  Take lots of care not
+	 * to let an error in preprompt or promptstring cause recursion into the
+	 * error handling machinery. */
+	if ((nxo_thread_deferred(synth->thread) == FALSE)
+	    && (nxo_thread_state(synth->thread) == THREADTS_START))
+	{
+	    cw_onyx_code(arg->thread, "\
+$preprompt where {\n\
+pop <$errordict <$handleerror {} $stop $stop load>> begin\n\
+{preprompt promptstring print flush} stopped {`'} if\n\
+end}\n\
+if");
 	}
 
 	/* Read data until there are no more. */
