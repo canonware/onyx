@@ -38,7 +38,7 @@
 systemdict begin
 # - promptstring #string
 $promptstring {
-    count cvs `onyx:' exch cat `> ' cat
+    count cvs `onyx:' exch `> ' 3 ncat
 } bind def
 end
 
@@ -54,21 +54,12 @@ errordict begin
 	stdin cvx stopped pop
     } bind def
 end
-
-# Print the product and version info.
-product print `, version ' print version print `.\n' print flush
 ' cat
 @enable_modprompt@ 1 eq {
     `
     `modprompt/modprompt.nx' require
     ' cat
 } if
-`
-# Push an executable stdin on ostack to prepare for the start operator.  This
-# must be done after loading modprompt, so that if stdin was replaced, we will
-# get the new version.
-stdin cvx
-' cat
 
 # Final closing brace.
 `}' cat cvx eval
