@@ -156,6 +156,8 @@ AC_TRY_LINK([
    AC_DEFINE(_CW_LIBONYX_USE_DIRENT_RECLEN),
    AC_MSG_RESULT(no)
    AC_MSG_ERROR(struct dirent too deviant)))
+
+  AC_CHECK_FUNCS(unsetenv)
 fi
 
 if test "x$build_onyx" = "xyes" ; then

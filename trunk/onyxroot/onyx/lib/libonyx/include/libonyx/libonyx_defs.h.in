@@ -10,3 +10,5 @@
  ******************************************************************************/
 
 #undef _CW_LIBONYX_USE_DIRENT_RECLEN
+
+#undef HAVE_UNSETENV

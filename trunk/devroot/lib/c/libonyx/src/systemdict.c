@@ -5693,6 +5693,7 @@ systemdict_unsetenv(cw_nxo_t *a_thread)
 		return;
 	}
 
+#ifdef HAVE_UNSETENV
 	/*
 	 * Create a copy of the key with an extra byte to store a '\0'
 	 * terminator.
@@ -5705,6 +5706,20 @@ systemdict_unsetenv(cw_nxo_t *a_thread)
 
 	/* Do the unsetenv(). */
 	unsetenv(nxo_string_get(tkey));
+#else
+	/*
+	 * Create a copy of the key with an extra 2 bytes to append "=\0".
+	 */
+	len = nxo_name_len_get(key);
+	tkey = nxo_stack_push(tstack);
+	nxo_string_new(tkey, nx, FALSE, len + 2);
+	nxo_string_set(tkey, 0, nxo_name_str_get(key), len);
+	nxo_string_set(tkey, len, "=\0", 2);
+
+	/* Do the putenv(). */
+	if (putenv(nxo_string_get(tkey)) == -1)
+		xep_throw(_CW_STASHX_OOM);
+#endif
 	nxo_stack_pop(tstack);
 
 	/* Undefine the key/value pair in envdict. */

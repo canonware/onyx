@@ -1,5 +1,8 @@
 2001-07-30  Jason Evans  <jasone@canonware.com>
 
+	* configure.in: Check for the unsetenv() function, which Solaris
+	does not have.
+
 	* doc/latex/onyx.tex: Document unsafeness of removing objects from
 	a concurrently accessed stack.
 
