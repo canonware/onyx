@@ -199,10 +199,10 @@ main()
     bufc_new(&bufc, NULL, NULL);
     buffer = bufpool_get_buffer(&bufpool);
     bufc_set_buffer(&bufc,
-		      buffer,
-		      bufpool_get_buffer_size(&bufpool),
-		      bufpool_put_buffer,
-		      (void *) &bufpool);
+		    buffer,
+		    bufpool_get_buffer_size(&bufpool),
+		    bufpool_put_buffer,
+		    (void *) &bufpool);
 
     bufel_set_bufc(bufel_p, &bufc);
     _cw_assert(4096 == bufel_get_size(bufel_p));
@@ -232,10 +232,10 @@ main()
     bufc_p = bufc_new(NULL, NULL, NULL);
     buffer = bufpool_get_buffer(&bufpool);
     bufc_set_buffer(bufc_p,
-		      buffer,
-		      bufpool_get_buffer_size(&bufpool),
-		      bufpool_put_buffer,
-		      (void *) &bufpool);
+		    buffer,
+		    bufpool_get_buffer_size(&bufpool),
+		    bufpool_put_buffer,
+		    (void *) &bufpool);
 
     bufel_set_bufc(bufel_p, bufc_p);
     
@@ -297,10 +297,10 @@ main()
     bufc_p = _cw_malloc(sizeof(cw_bufc_t));
     bufc_new(bufc_p, mem_dealloc, cw_g_mem);
     bufc_set_buffer(bufc_p,
-		      string,
-		      bufpool_get_buffer_size(&bufpool),
-		      bufpool_put_buffer,
-		      (void *) &bufpool);
+		    string,
+		    bufpool_get_buffer_size(&bufpool),
+		    bufpool_put_buffer,
+		    (void *) &bufpool);
     bufel_set_bufc(bufel_p, bufc_p);
     
     _cw_assert((void *) string == bufel_get_data_ptr(bufel_p));
