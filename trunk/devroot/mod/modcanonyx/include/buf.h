@@ -46,8 +46,11 @@ struct cw_bufq_s {
 
 struct cw_bufm_s {
 	ql_elm(cw_bufm_t) link;
+	cw_buf_t	*buf;
 
-	cw_nxo_t	*buf;
+	cw_opaque_dealloc_t *dealloc;
+	const void	*arg;
+
 	cw_uint64_t	offset;
 
 	/* Message queue to send notifications to. */
@@ -56,6 +59,10 @@ struct cw_bufm_s {
 
 struct cw_bufe_s {
 	ql_elm(cw_bufe_t) link;
+	cw_buf_t	*buf;
+
+	cw_opaque_dealloc_t *dealloc;
+	const void	*arg;
 
 	cw_bufm_t	beg;
 	cw_bufm_t	end;
@@ -115,80 +122,85 @@ struct cw_bufh_s {
 	}		data;
 };
 
-/* Make each bufb structure exactly 4 K. */
-#define	_CW_BUFB_SIZE	(4096 - 24)
+struct cw_bufbh_s {
+};
+
+/*
+ * Make each bufb structure exactly 4 K, which avoids memory fragmentation with
+ * most malloc implementations.
+ */
+#define	_CW_BUFB_SIZE		4096
+#ifdef _CW_DBG
+#define	_CW_BUFB_OVERHEAD	  28
+#else
+#define	_CW_BUFB_OVERHEAD	  24
+#endif
+#define	_CW_BUFB_DATA	(_CW_BUFB_SIZE - _CW_BUFB_OVERHEAD)
 struct cw_bufb_s {
+#ifdef _CW_DBG
+	cw_uint32_t	magic;
+#define _CW_BUFB_MAGIC	0x28da3e88
+#endif
 	cw_uint64_t	offset;
 	cw_uint64_t	line;
 	cw_uint32_t	gap_off;
 	cw_uint32_t	gap_len;
-	cw_bufc_t	data[_CW_BUFB_SIZE];
+	cw_bufc_t	data[_CW_BUFB_DATA];
 };
 
 struct cw_buf_s {
-	cw_mtx_t	mtx;
+#ifdef _CW_DBG
+	cw_uint32_t	magic;
+#define _CW_BUF_MAGIC	0x348279bd
+#endif
 
-	cw_bufe_t	narrowing;
+	cw_bool_t	alloced:1;
+	cw_opaque_alloc_t *alloc;
+	cw_opaque_realloc_t *realloc;
+	cw_opaque_dealloc_t *dealloc;
+	const void	*arg;
 
-	cw_bool_t	indirect;
-	union {
-		/* Indirect. */
-		struct {
-			ql_elm(cw_buf_t) link;
-			cw_buf_t	*parent;
-			cw_bufq_t	bufq;
-		} i;
-		/* Base buf. */
-		struct {
-			/* Actual data. */
-			cw_uint64_t	nchars;
-			cw_uint64_t	nbufbs;
-			cw_bufb_t	*bufbs;
-			/*
-			 * Number of bufb's that have a valid cached offset and
-			 * line.
-			 */
-			cw_uint64_t	ncached;
+	/* Actual data. */
+	cw_uint64_t	len;
+	cw_uint64_t	bufb_count;
+	cw_uint64_t	bufb_veclen;
+	cw_bufb_t	**bufb_vec;
+	/*
+	 * Offset of last bufb that has a valid cached offset and line.  The
+	 * first bufb's cache is always valid.
+	 */
+	cw_uint64_t	last_cached;
 
-			/* History. */
-			qs_head(cw_bufh_t) undo;
-			qs_head(cw_bufh_t) redo;
+	/* History. */
+	cw_bool_t	hist_active:1;
+	cw_bufh_t	hist;
 
-			/* Child indirect buffers. */
-			ql_head(cw_buf_t) bufs;
-			/* Ordered list of all marks. */
-			ql_head(cw_bufm_t) bufms;
-			
-			/* Forward/reverse ordered lists of extents. */
-			ql_head(cw_bufe_t) bufes_fwd;
-			ql_head(cw_bufe_t) bufes_rev;
+	/* Ordered list of all marks. */
+	ql_head(cw_bufm_t) bufms;
 
-			/* Detached but not yet deleted. */
-			ql_head(cw_bufe_t) bufes_detached;
-		} b;
-	} d;
+	/* Forward/reverse ordered lists of extents. */
+	ql_head(cw_bufe_t) bufes_fwd;
+	ql_head(cw_bufe_t) bufes_rev;
+
+	/* Detached but not yet deleted. */
+	ql_head(cw_bufe_t) bufes_det;
 };
 
 /* buf. */
-void	buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc, cw_opaque_dealloc_t
-    *a_dealloc, void *a_arg);
-void	buf_subbuf(cw_buf_t *a_buf, cw_bufe_t *a_bufe);
+cw_buf_t *buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc,
+    cw_opaque_realloc_t *a_realloc, cw_opaque_dealloc_t *a_dealloc, void
+    *a_arg);
 void	buf_delete(cw_buf_t *a_buf);
-cw_buf_t *buf_buf(cw_buf_t *a_buf);
-
-#define	buf_lock(a_buf)		mtx_lock(&(a_buf)->mtx)
-#define	buf_unlock(a_buf)	mtx_unlock(&(a_buf)->mtx)
 
 cw_uint64_t buf_count(cw_buf_t *a_buf);
 
-cw_bool_t buf_undo_active_get(cw_buf_t *a_buf);
-void	buf_undo_active_set(cw_buf_t *a_buf, cw_bool_t a_active);
+cw_bool_t buf_hist_active_get(cw_buf_t *a_buf);
+void	buf_hist_active_set(cw_buf_t *a_buf, cw_bool_t a_active);
 cw_bool_t buf_undo(cw_buf_t *a_buf);
 cw_bool_t buf_redo(cw_buf_t *a_buf);
-void	buf_history_boundary(cw_buf_t *a_buf);
-cw_bool_t buf_group_undo(cw_buf_t *a_buf);
-cw_bool_t buf_group_redo(cw_buf_t *a_buf);
-void	buf_history_flush(cw_buf_t *a_buf);
+void	buf_hist_group_beg(cw_buf_t *a_buf);
+void	buf_hist_group_end(cw_buf_t *a_buf);
+void	buf_hist_flush(cw_buf_t *a_buf);
 
 cw_bufe_t *buf_bufe_next(cw_buf_t *a_buf, cw_bufe_t *a_bufe);
 cw_bufe_t *buf_bufe_prev(cw_buf_t *a_buf, cw_bufe_t *a_bufe);

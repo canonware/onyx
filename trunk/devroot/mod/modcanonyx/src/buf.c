@@ -11,88 +11,262 @@
 
 #include "modcanonyx.h"
 
-/* buf. */
-void
-buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc, cw_opaque_dealloc_t
-    *a_dealloc, void *a_arg)
+/* bufb. */
+static void
+bufb_p_new(cw_bufb_t *a_bufb)
 {
+	_cw_check_ptr(a_bufb);
+	_cw_assert(sizeof(cw_bufb_t) == _CW_BUFB_SIZE);
+
+	a_bufb->gap_off = 0;
+	a_bufb->gap_len = _CW_BUFB_DATA;
+
+#ifdef _CW_DBG
+	a_bufb->magic = _CW_BUFB_MAGIC;
+#endif
 }
 
-void
-buf_subbuf(cw_buf_t *a_buf, cw_bufe_t *a_bufe)
+static void
+bufb_p_cache_set(cw_bufb_t *a_bufb, cw_uint64_t a_offset, cw_uint64_t a_line)
 {
+	_cw_check_ptr(a_bufb);
+	_cw_dassert(a_bufb->magic == _CW_BUFB_MAGIC);
+
+	a_bufb->offset = a_offset;
+	a_bufb->line = a_line;
+}
+
+static cw_uint64_t
+bufb_p_len_get(cw_bufb_t *a_bufb)
+{
+	_cw_check_ptr(a_bufb);
+	_cw_dassert(a_bufb->magic == _CW_BUFB_MAGIC);
+
+	return _CW_BUFB_DATA - a_bufb->gap_len;
+}
+
+static cw_uint64_t
+bufb_p_newlines_count(cw_bufb_t *a_bufb)
+{
+	cw_uint32_t	retval, i;
+
+	_cw_check_ptr(a_bufb);
+	_cw_dassert(a_bufb->magic == _CW_BUFB_MAGIC);
+
+	/* Count the number of '\n' characters.  Avoid the gap. */
+	for (i = retval = 0; i < a_bufb->gap_off; i++) {
+		if (a_bufb->data[i] == '\n')
+			retval++;
+	}
+
+	for (i = a_bufb->gap_off + a_bufb->gap_len; i < _CW_BUFB_DATA; i++) {
+		if (a_bufb->data[i] == '\n')
+			retval++;
+	}
+
+	return (cw_uint64_t)retval;
+}
+
+/* bufh. */
+static void
+bufh_p_new(cw_bufh_t *a_bufh)
+{
+	/* XXX */
+}
+
+static void
+bufh_p_delete(cw_bufh_t *a_bufh)
+{
+	/* XXX */
+}
+
+/* buf. */
+cw_buf_t *
+buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc, cw_opaque_realloc_t
+    *a_realloc, cw_opaque_dealloc_t *a_dealloc, void *a_arg)
+{
+	cw_buf_t	*retval;
+
+	/*
+	 * The memset() isn't strictly necessary, since we initialize all
+	 * fields, but it may clean up some clutter that could be confusing when
+	 * debugging.
+	 */
+	if (a_buf != NULL) {
+		retval = a_buf;
+		memset(retval, 0, sizeof(cw_buf_t));
+		retval->alloced = FALSE;
+	} else {
+		retval = (cw_buf_t *)a_alloc(a_arg, sizeof(cw_buf_t), __FILE__,
+		    __LINE__);
+		memset(retval, 0, sizeof(cw_buf_t));
+		retval->alloced = TRUE;
+	}
+
+	retval->alloc = a_alloc;
+	retval->realloc = a_realloc;
+	retval->dealloc = a_dealloc;
+	retval->arg = a_arg;
+
+	/* Set up the bufb vector. */
+	retval->len = 0;
+	retval->bufb_count = 1;
+	retval->bufb_veclen = 1;
+	retval->bufb_vec = (cw_bufb_t **)a_alloc(a_arg, sizeof(cw_bufb_t *),
+	    __FILE__, __LINE__);
+
+	/* Initialize a bufb. */
+	retval->bufb_vec[0] = (cw_bufb_t *)a_alloc(a_arg, sizeof(cw_bufb_t),
+	    __FILE__, __LINE__);
+	bufb_p_new(retval->bufb_vec[0]);
+	bufb_p_cache_set(retval->bufb_vec[0], 0, 1);
+
+	retval->last_cached = 0;
+
+	/* Initialize history. */
+	retval->hist_active = FALSE;
+	bufh_p_new(&retval->hist);
+
+	/* Initialize lists. */
+	ql_new(&retval->bufms);
+	ql_new(&retval->bufes_fwd);
+	ql_new(&retval->bufes_rev);
+	ql_new(&retval->bufes_det);
+
+#ifdef _CW_DBG
+	retval->magic = _CW_BUF_MAGIC;
+#endif
+
+	return retval;
 }
 
 void
 buf_delete(cw_buf_t *a_buf)
 {
-}
+	cw_bufe_t	*bufe;
+	cw_bufm_t	*bufm;
+	cw_uint64_t	i;
 
-cw_buf_t *
-buf_buf(cw_buf_t *a_buf)
-{
-	return NULL; /* XXX */
+	_cw_check_ptr(a_buf);
+	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
+
+	/*
+	 * Set the buf pointers of all objects that point to this one to NULL,
+	 * so that they won't try to disconnect during destruction.  All objects
+	 * that reference this one effectively become invalid, but they can (and
+	 * should) be destroyed even though this base buf is gone.
+	 */
+	ql_foreach(bufe, &a_buf->bufes_det, link) {
+		bufe->buf = NULL;
+	}
+
+	ql_foreach(bufe, &a_buf->bufes_fwd, link) {
+		bufe->buf = NULL;
+	}
+
+	ql_foreach(bufm, &a_buf->bufms, link) {
+		bufm->buf = NULL;
+	}
+
+	/* Destroy the bufb vector. */
+	for (i = 0; i < a_buf->bufb_count; i++) {
+		a_buf->dealloc(a_buf->arg, a_buf->bufb_vec[i],
+		    __FILE__, __LINE__);
+	}
+	a_buf->dealloc(a_buf->arg, a_buf->bufb_vec, __FILE__,
+	    __LINE__);
+
+	if (a_buf->alloced)
+		a_buf->dealloc(a_buf->arg, a_buf, __FILE__, __LINE__);
+#ifdef _CW_DBG
+	else
+		memset(a_buf, 0x5a, sizeof(cw_buf_t));
+#endif
 }
 
 cw_uint64_t
 buf_count(cw_buf_t *a_buf)
 {
-	return 0; /* XXX */
+	_cw_check_ptr(a_buf);
+	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
+	
+	return a_buf->len;
 }
 
 cw_bool_t
-buf_undo_active_get(cw_buf_t *a_buf)
+buf_hist_active_get(cw_buf_t *a_buf)
 {
-	return TRUE; /* XXX */
+	_cw_check_ptr(a_buf);
+	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
+
+	return a_buf->hist_active;
 }
 
 void
-buf_undo_active_set(cw_buf_t *a_buf, cw_bool_t a_active)
+buf_hist_active_set(cw_buf_t *a_buf, cw_bool_t a_active)
 {
+	_cw_check_ptr(a_buf);
+	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
+
 }
 
-cw_bool_t buf_undo(cw_buf_t *a_buf)
+cw_bool_t
+buf_undo(cw_buf_t *a_buf)
 {
+	_cw_check_ptr(a_buf);
+	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
+
 	return TRUE; /* XXX */
 }
 
 cw_bool_t
 buf_redo(cw_buf_t *a_buf)
 {
+	_cw_check_ptr(a_buf);
+	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
+
 	return TRUE; /* XXX */
 }
 
 void
-buf_history_boundary(cw_buf_t *a_buf)
+buf_hist_group_beg(cw_buf_t *a_buf)
 {
-}
+	_cw_check_ptr(a_buf);
+	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
 
-cw_bool_t
-buf_group_undo(cw_buf_t *a_buf)
-{
-	return TRUE; /* XXX */
-}
-
-cw_bool_t
-buf_group_redo(cw_buf_t *a_buf)
-{
-	return TRUE; /* XXX */
 }
 
 void
-buf_history_flush(cw_buf_t *a_buf)
+buf_hist_group_end(cw_buf_t *a_buf)
 {
+	_cw_check_ptr(a_buf);
+	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
+
+}
+
+void
+buf_hist_flush(cw_buf_t *a_buf)
+{
+	_cw_check_ptr(a_buf);
+	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
+
 }
 
 cw_bufe_t *
 buf_bufe_next(cw_buf_t *a_buf, cw_bufe_t *a_bufe)
 {
+	_cw_check_ptr(a_buf);
+	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
+
 	return NULL; /* XXX */
 }
 
 cw_bufe_t *
 buf_bufe_prev(cw_buf_t *a_buf, cw_bufe_t *a_bufe)
 {
+	_cw_check_ptr(a_buf);
+	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
+
 	return NULL; /* XXX */
 }
 
