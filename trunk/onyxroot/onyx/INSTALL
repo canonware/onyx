@@ -288,6 +288,11 @@ CFLAGS="?"
 	Pass these flags to the compiler.  You probably shouldn't define this
 	unless you know what you are doing.
 
+EXTRA_CFLAGS="?"
+	Append these flags to CFLAGS.  This makes it possible to add flags such
+	as -Werror, while allowing the configure script to determine what other
+	flags are appropriate for the specified configuration.
+
 CPPFLAGS="?"
 	Pass these flags to the C preprocessor.  Note that CFLAGS is not passed
 	to 'cpp' when 'configure' is looking for include files, so you must use
