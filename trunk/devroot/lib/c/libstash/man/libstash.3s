@@ -1,11 +1,11 @@
 .ig \" -*-mode:nroff-*-
 
-<Copyright = "jasone">
+<Copyright = jasone>
 <License>
 
 Version: <Version>
 ..
-.Id $Id: libstash.3s 235 1998-10-13 17:39:13Z jasone $
+.Id $Id: libstash.3s 348 1999-03-08 07:23:55Z jasone $
 .TH libstash 3s
 .SH NAME
 libstash - Library of algorithms and data structures designed for transaction
