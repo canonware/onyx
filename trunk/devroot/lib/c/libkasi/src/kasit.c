@@ -12,100 +12,66 @@
 
 #include "../include/libkasi/libkasi.h"
 
-/* Convert from buf if necessary. */
-#define _CW_KASIT_RESET_TOK_BUFFER()                                        \
-  do                                                                        \
-  {                                                                         \
-    if (_CW_KASI_BUFC_SIZE < a_kasit->index)                                \
-    {                                                                       \
-      buf_delete(&a_kasit->tok_buffer.buf);                                 \
-    }                                                                       \
-    a_kasit->index = 0;                                                     \
-  } while (0)
+/* If defined, inline oft-used functions for improved performance (and increased
+ * code size). */
+#define _CW_KASIT_INLINE
 
-#define _CW_KASIT_GETC(a_i)                                                 \
-  ((_CW_KASI_BUFC_SIZE > a_kasit->index)                                    \
+#ifdef _CW_KASIT_INLINE
+#  define _CW_KASIT_GETC(a_i)                                               \
+  ((_CW_KASI_BUFC_SIZE >= a_kasit->index)                                   \
    ? a_kasit->tok_buffer.str[(a_i)]                                         \
    : buf_get_uint8(&a_kasit->tok_buffer.buf, (a_i)))
+#else
+#  define _CW_KASIT_GETC(a_i)                                               \
+  kasit_p_getc(a_kasit, a_i)
+#endif
 
-#define _CW_KASIT_PUTC(a_c)                                                 \
+#ifdef _CW_KASIT_INLINE
+#  define _CW_KASIT_PUTC(a_c)                                               \
   do                                                                        \
   {                                                                         \
     if (_CW_KASI_BUFC_SIZE > a_kasit->index)                                \
     {                                                                       \
       a_kasit->tok_buffer.str[a_kasit->index] = (a_c);                      \
+      a_kasit->index++;                                                     \
     }                                                                       \
     else                                                                    \
     {                                                                       \
-      if (_CW_KASI_BUFC_SIZE == a_kasit->index)                             \
+      if (-1 == kasit_p_putc(a_kasit, a_c))                                 \
       {                                                                     \
-	cw_kasi_bufc_t * kbufc;                                             \
-	kbufc = kasi_get_kasi_bufc(a_kasit->kasi);                          \
-	memcpy(kbufc->buffer, a_kasit->tok_buffer.str, _CW_KASI_BUFC_SIZE); \
-	buf_new(&a_kasit->tok_buffer.buf);                                  \
-	if (TRUE == buf_append_bufc(&a_kasit->tok_buffer.buf, &kbufc->bufc, \
-			            0, _CW_KASI_BUFC_SIZE))                 \
-        {                                                                   \
-	  bufc_delete(&kbufc->bufc);                                        \
-	  retval = -1;                                                      \
-	  goto RETURN;                                                      \
-	}                                                                   \
-        bufc_delete(&kbufc->bufc);                                          \
+        retval = -1;                                                        \
+        goto RETURN;                                                        \
       }                                                                     \
-      if (buf_get_size(&a_kasit->tok_buffer.buf) == a_kasit->index)         \
-      {                                                                     \
-	cw_kasi_bufc_t * kbufc;                                             \
-	kbufc = kasi_get_kasi_bufc(a_kasit->kasi);                          \
-	if (TRUE == buf_append_bufc(&a_kasit->tok_buffer.buf, &kbufc->bufc, \
-			            0, _CW_KASI_BUFC_SIZE))                 \
-        {                                                                   \
-	  bufc_delete(&kbufc->bufc);                                        \
-	  retval = -1;                                                      \
-	  goto RETURN;                                                      \
-	}                                                                   \
-        bufc_delete(&kbufc->bufc);                                          \
-      }                                                                     \
-      buf_set_uint8(&a_kasit->tok_buffer.buf, a_kasit->index, (a_c));       \
     }                                                                       \
-    a_kasit->index++;                                                       \
-  } while (0)
-
-#ifdef _LIBKASI_DBG
-#define _CW_PRINT_TOKEN(a_l, a_t)                                           \
-  do                                                                        \
-  {                                                                         \
-    out_put(cw_g_out, "-->");                                               \
-    if (_CW_KASI_BUFC_SIZE >= a_kasit->index)                               \
-    {                                                                       \
-      out_put_n(cw_g_out, (a_l), "[s]", a_kasit->tok_buffer.str);           \
-    }                                                                       \
-    else                                                                    \
-    {                                                                       \
-      out_put_n(cw_g_out, (a_l), "[b]", &a_kasit->tok_buffer.buf);          \
-    }                                                                       \
-    out_put(cw_g_out, "<-- [s]\n", (a_t));                                  \
   } while (0)
 #else
-#define _CW_PRINT_TOKEN(a_l, a_t)
-#endif
-
-#define _CW_SYNTAX_ERROR()                                                  \
+#  define _CW_KASIT_PUTC(a_c)                                               \
   do                                                                        \
   {                                                                         \
-    _cw_out_put_e("Syntax error for '[c]' (0x[i|b:16]), following -->",     \
-		  c, c);                                                    \
-    if (_CW_KASI_BUFC_SIZE >= a_kasit->index)                               \
+    if (-1 == kasit_p_putc(a_kasit, a_c))                                   \
     {                                                                       \
-      out_put_n(cw_g_out, a_kasit->index, "[s]", a_kasit->tok_buffer.str);  \
+      retval = -1;                                                          \
+      goto RETURN;                                                          \
     }                                                                       \
-    else                                                                    \
-    {                                                                       \
-      out_put_n(cw_g_out, a_kasit->index, "[b]", &a_kasit->tok_buffer.buf); \
-    }                                                                       \
-    out_put(cw_g_out, "<--\n");                                             \
-    a_kasit->state = _CW_KASIT_STATE_START;                                 \
-    _CW_KASIT_RESET_TOK_BUFFER();                                           \
-  } while (0);
+  } while (0)
+#endif
+
+cw_sint32_t
+kasit_p_feed(cw_kasit_t * a_kasit, const char * a_str, cw_uint32_t a_len);
+void
+kasit_p_reset_tok_buffer(cw_kasit_t * a_kasit);
+cw_uint8_t
+kasit_p_getc(cw_kasit_t * a_kasit, cw_uint32_t a_index);
+cw_sint32_t
+kasit_p_putc(cw_kasit_t * a_kasit, cw_uint32_t a_c);
+void
+kasit_p_print_token(cw_kasit_t * a_kasit, cw_uint32_t a_length,
+		    const char * a_note);
+void
+kasit_p_print_syntax_error(cw_kasit_t * a_kasit, cw_uint8_t a_c);
+void *
+kasit_p_entry(cw_kasit_t * a_kasit, void * a_arg);
+
 
 cw_kasit_t *
 kasit_new(cw_kasit_t * a_kasit,
@@ -236,7 +202,7 @@ kasit_p_feed(cw_kasit_t * a_kasit, const char * a_str, cw_uint32_t a_len)
 	  }
 	  case ')':
 	  {
-	    _CW_SYNTAX_ERROR();
+	    kasit_p_print_syntax_error(a_kasit, c);
 	    break;
 	  }
 	  case '<':
@@ -251,22 +217,22 @@ kasit_p_feed(cw_kasit_t * a_kasit, const char * a_str, cw_uint32_t a_len)
 	  }
 	  case '[':
 	  {
-	    _CW_PRINT_TOKEN(0, "[");
+	    kasit_p_print_token(a_kasit, 0, "[");
 	    break;
 	  }
 	  case ']':
 	  {
-	    _CW_PRINT_TOKEN(0, "]");
+	    kasit_p_print_token(a_kasit, 0, "]");
 	    break;
 	  }
 	  case '{':
 	  {
-	    _CW_PRINT_TOKEN(0, "{");
+	    kasit_p_print_token(a_kasit, 0, "{");
 	    break;
 	  }
 	  case '}':
 	  {
-	    _CW_PRINT_TOKEN(0, "}");
+	    kasit_p_print_token(a_kasit, 0, "}");
 	    break;
 	  }
 	  case '/':
@@ -345,7 +311,7 @@ kasit_p_feed(cw_kasit_t * a_kasit, const char * a_str, cw_uint32_t a_len)
 	  case '<':
 	  {
 	    a_kasit->state = _CW_KASIT_STATE_START;
-	    _CW_PRINT_TOKEN(0, "<<");
+	    kasit_p_print_token(a_kasit, 0, "<<");
 	    break;
 	  }
 	  case '~':
@@ -375,7 +341,7 @@ kasit_p_feed(cw_kasit_t * a_kasit, const char * a_str, cw_uint32_t a_len)
 	  }
 	  default:
 	  {
-	    _CW_SYNTAX_ERROR();
+	    kasit_p_print_syntax_error(a_kasit, c);
 	    break;
 	  }
 	}
@@ -390,12 +356,12 @@ kasit_p_feed(cw_kasit_t * a_kasit, const char * a_str, cw_uint32_t a_len)
 	  case '>':
 	  {
 	    a_kasit->state = _CW_KASIT_STATE_START;
-	    _CW_PRINT_TOKEN(0, ">>");
+	    kasit_p_print_token(a_kasit, 0, ">>");
 	    break;
 	  }
 	  default:
 	  {
-	    _CW_SYNTAX_ERROR();
+	    kasit_p_print_syntax_error(a_kasit, c);
 	    break;
 	  }
 	}
@@ -418,7 +384,7 @@ kasit_p_feed(cw_kasit_t * a_kasit, const char * a_str, cw_uint32_t a_len)
 	  case '(': case ')': case '<': case '>': case '[': case ']':
 	  case '{': case '}': case '%':
 	  {
-	    _CW_SYNTAX_ERROR();
+	    kasit_p_print_syntax_error(a_kasit, c);
 	    break;
 	  }
 	  default:
@@ -580,14 +546,14 @@ kasit_p_feed(cw_kasit_t * a_kasit, const char * a_str, cw_uint32_t a_len)
 		|| ((0 < (a_kasit->index - a_kasit->meta.number.begin_offset))
 		    && (-1 == a_kasit->meta.number.point_offset)))
 	    {
-	      _CW_PRINT_TOKEN(a_kasit->index, "number");
+	      kasit_p_print_token(a_kasit, a_kasit->index, "number");
 	    }
 	    else
 	    {
 	      /* No number specified, so a name. */
-	      _CW_PRINT_TOKEN(a_kasit->index, "name");
+	      kasit_p_print_token(a_kasit, a_kasit->index, "name");
 	    }
-	    _CW_KASIT_RESET_TOK_BUFFER();
+	    kasit_p_reset_tok_buffer(a_kasit);
 	    goto RESTART;
 	  }
 	  case '\0': case '\t': case '\n': case '\f': case '\r': case ' ':
@@ -597,14 +563,14 @@ kasit_p_feed(cw_kasit_t * a_kasit, const char * a_str, cw_uint32_t a_len)
 		|| ((0 < (a_kasit->index - a_kasit->meta.number.begin_offset))
 		    && (-1 == a_kasit->meta.number.point_offset)))
 	    {
-	      _CW_PRINT_TOKEN(a_kasit->index, "number");
+	      kasit_p_print_token(a_kasit, a_kasit->index, "number");
 	    }
 	    else
 	    {
 	      /* No number specified, so a name. */
-	      _CW_PRINT_TOKEN(a_kasit->index, "name");
+	      kasit_p_print_token(a_kasit, a_kasit->index, "name");
 	    }
-	    _CW_KASIT_RESET_TOK_BUFFER();
+	    kasit_p_reset_tok_buffer(a_kasit);
 	    break;
 	  }
 	  default:
@@ -644,8 +610,8 @@ kasit_p_feed(cw_kasit_t * a_kasit, const char * a_str, cw_uint32_t a_len)
 	    {
 	      /* Matched opening paren; not part of the string. */
 	      a_kasit->state = _CW_KASIT_STATE_START;
-	      _CW_PRINT_TOKEN(a_kasit->index, "string");
-	      _CW_KASIT_RESET_TOK_BUFFER();
+	      kasit_p_print_token(a_kasit, a_kasit->index, "string");
+	      kasit_p_reset_tok_buffer(a_kasit);
 	    }
 	    else
 	    {
@@ -775,7 +741,7 @@ kasit_p_feed(cw_kasit_t * a_kasit, const char * a_str, cw_uint32_t a_len)
 	  }
 	  default:
 	  {
-	    _CW_SYNTAX_ERROR();
+	    kasit_p_print_syntax_error(a_kasit, c);
 	    break;
 	  }
 	}
@@ -839,7 +805,7 @@ kasit_p_feed(cw_kasit_t * a_kasit, const char * a_str, cw_uint32_t a_len)
 	  }
 	  default:
 	  {
-	    _CW_SYNTAX_ERROR();
+	    kasit_p_print_syntax_error(a_kasit, c);
 	    break;
 	  }
 	}
@@ -852,8 +818,8 @@ kasit_p_feed(cw_kasit_t * a_kasit, const char * a_str, cw_uint32_t a_len)
 	  case '>':
 	  {
 	    a_kasit->state = _CW_KASIT_STATE_START;
-	    _CW_PRINT_TOKEN(a_kasit->index, "hex string");
-	    _CW_KASIT_RESET_TOK_BUFFER();
+	    kasit_p_print_token(a_kasit, a_kasit->index, "hex string");
+	    kasit_p_reset_tok_buffer(a_kasit);
 	    break;
 	  }
 	  case 'A': case 'B': case 'C': case 'D': case 'E': case 'F':
@@ -876,7 +842,7 @@ kasit_p_feed(cw_kasit_t * a_kasit, const char * a_str, cw_uint32_t a_len)
 	  }
 	  default:
 	  {
-	    _CW_SYNTAX_ERROR();
+	    kasit_p_print_syntax_error(a_kasit, c);
 	    break;
 	  }
 	}
@@ -905,7 +871,7 @@ kasit_p_feed(cw_kasit_t * a_kasit, const char * a_str, cw_uint32_t a_len)
 	    }
 	    else
 	    {
-	      _CW_SYNTAX_ERROR();
+	      kasit_p_print_syntax_error(a_kasit, c);
 	    }
 	    break;
 	  }
@@ -919,13 +885,13 @@ kasit_p_feed(cw_kasit_t * a_kasit, const char * a_str, cw_uint32_t a_len)
 	  case '>':
 	  {
 	    a_kasit->state = _CW_KASIT_STATE_START;
-	    _CW_PRINT_TOKEN(a_kasit->index, "base 85 string");
-	    _CW_KASIT_RESET_TOK_BUFFER();
+	    kasit_p_print_token(a_kasit, a_kasit->index, "base 85 string");
+	    kasit_p_reset_tok_buffer(a_kasit);
 	    break;
 	  }
 	  default:
 	  {
-	    _CW_SYNTAX_ERROR();
+	    kasit_p_print_syntax_error(a_kasit, c);
 	    break;
 	  }
 	}
@@ -941,13 +907,13 @@ kasit_p_feed(cw_kasit_t * a_kasit, const char * a_str, cw_uint32_t a_len)
 	    a_kasit->state = _CW_KASIT_STATE_START;
 	    if (a_kasit->index > 0)
 	    {
-	      _CW_PRINT_TOKEN(a_kasit->index, "name");
+	      kasit_p_print_token(a_kasit, a_kasit->index, "name");
 	    }
 	    else
 	    {
-	      _CW_SYNTAX_ERROR();
+	      kasit_p_print_syntax_error(a_kasit, c);
 	    }
-	    _CW_KASIT_RESET_TOK_BUFFER();
+	    kasit_p_reset_tok_buffer(a_kasit);
 	    break;
 	  }
 	  case '(': case ')': case '<': case '>': case '[': case ']':
@@ -957,13 +923,13 @@ kasit_p_feed(cw_kasit_t * a_kasit, const char * a_str, cw_uint32_t a_len)
 	    a_kasit->state = _CW_KASIT_STATE_START;
 	    if (a_kasit->index > 0)
 	    {
-	      _CW_PRINT_TOKEN(a_kasit->index, "name");
+	      kasit_p_print_token(a_kasit, a_kasit->index, "name");
 	    }
 	    else
 	    {
-	      _CW_SYNTAX_ERROR();
+	      kasit_p_print_syntax_error(a_kasit, c);
 	    }
-	    _CW_KASIT_RESET_TOK_BUFFER();
+	    kasit_p_reset_tok_buffer(a_kasit);
 	    goto RESTART;
 	  }
 	  default:
@@ -985,6 +951,118 @@ kasit_p_feed(cw_kasit_t * a_kasit, const char * a_str, cw_uint32_t a_len)
   retval = 0;
   RETURN:
   return retval;
+}
+
+void
+kasit_p_reset_tok_buffer(cw_kasit_t * a_kasit)
+{
+  if (_CW_KASI_BUFC_SIZE < a_kasit->index)
+  {
+    buf_delete(&a_kasit->tok_buffer.buf);
+  }
+  a_kasit->index = 0;
+}
+
+cw_uint8_t
+kasit_p_getc(cw_kasit_t * a_kasit, cw_uint32_t a_index)
+{
+  cw_uint8_t retval;
+  
+  if (_CW_KASI_BUFC_SIZE > a_kasit->index)
+  {
+    retval = a_kasit->tok_buffer.str[a_index];
+  }
+  else
+  {
+    retval = buf_get_uint8(&a_kasit->tok_buffer.buf, a_index);
+  }
+  
+  return retval;
+}
+
+cw_sint32_t
+kasit_p_putc(cw_kasit_t * a_kasit, cw_uint32_t a_c)
+{
+  cw_sint32_t retval;
+
+#ifndef _CW_KASIT_INLINE
+  if (_CW_KASI_BUFC_SIZE > a_kasit->index)
+  {
+    a_kasit->tok_buffer.str[a_kasit->index] = a_c;
+  }
+  else
+#endif
+  {
+    if (_CW_KASI_BUFC_SIZE == a_kasit->index)
+    {
+      cw_kasi_bufc_t * kbufc;
+      kbufc = kasi_get_kasi_bufc(a_kasit->kasi);
+      memcpy(kbufc->buffer, a_kasit->tok_buffer.str, _CW_KASI_BUFC_SIZE);
+      buf_new(&a_kasit->tok_buffer.buf);
+      if (TRUE == buf_append_bufc(&a_kasit->tok_buffer.buf, &kbufc->bufc,
+				  0, _CW_KASI_BUFC_SIZE))
+      {
+	bufc_delete(&kbufc->bufc);
+	retval = -1;
+	goto RETURN;
+      }
+      bufc_delete(&kbufc->bufc);
+    }
+    if (buf_get_size(&a_kasit->tok_buffer.buf) == a_kasit->index)
+    {
+      cw_kasi_bufc_t * kbufc;
+      kbufc = kasi_get_kasi_bufc(a_kasit->kasi);
+      if (TRUE == buf_append_bufc(&a_kasit->tok_buffer.buf, &kbufc->bufc,
+				  0, _CW_KASI_BUFC_SIZE))
+      {
+	bufc_delete(&kbufc->bufc);
+	retval = -1;
+	goto RETURN;
+      }
+      bufc_delete(&kbufc->bufc);
+    }
+    buf_set_uint8(&a_kasit->tok_buffer.buf, a_kasit->index, a_c);
+  }
+  a_kasit->index++;
+
+  retval = 0;
+  RETURN:
+  return retval;
+}
+
+void
+kasit_p_print_token(cw_kasit_t * a_kasit, cw_uint32_t a_length,
+		    const char * a_note)
+{
+#ifdef _LIBKASI_DBG
+  out_put(cw_g_out, "-->");
+  if (_CW_KASI_BUFC_SIZE >= a_kasit->index)
+  {
+    out_put_n(cw_g_out, a_length, "[s]", a_kasit->tok_buffer.str);
+  }
+  else
+  {
+    out_put_n(cw_g_out, a_length, "[b]", &a_kasit->tok_buffer.buf);
+  }
+  out_put(cw_g_out, "<-- [s]\n", a_note);
+#endif
+}
+
+void
+kasit_p_print_syntax_error(cw_kasit_t * a_kasit, cw_uint8_t a_c)
+{
+  _cw_out_put_e("Syntax error for '[c]' (0x[i|b:16]), following -->", a_c, a_c);
+  if (_CW_KASI_BUFC_SIZE >= a_kasit->index)
+  {
+    out_put_n(cw_g_out, a_kasit->index, "[s]", a_kasit->tok_buffer.str);
+  }
+  else
+  {
+    out_put_n(cw_g_out, a_kasit->index, "[b]", &a_kasit->tok_buffer.buf);
+  }
+  out_put(cw_g_out, "<--\n");
+  a_kasit->state = _CW_KASIT_STATE_START;
+  kasit_p_reset_tok_buffer(a_kasit);
 }
 
 void *
