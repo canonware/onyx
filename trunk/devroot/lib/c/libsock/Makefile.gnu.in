@@ -246,8 +246,8 @@ check :
 	printf "%s\\n" "---------------------------------------------" \
 	'
 
-install : install_stat_dbg install_stat_opt install_shar_opt install_stat_prof
-
+install : install_stat_dbg install_stat_opt install_stat_prof \
+	@disable_shared@install_shar_opt
 install_common : libs bins
 	$(SHELL) -c \
 	'@INSTALL@ -d @prefix@/lib; \
