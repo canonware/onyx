@@ -124,9 +124,7 @@ SRCS = [SRCS] [LIBONYX_SRCS];
 }
 
 /* Libraries. */
-LIBONYX_MJR = 1;
-LIBONYX_MNR = 0;
-LIBONYX_REV = [LIBONYX_MJR].[LIBONYX_MNR];
+LIBONYX_REV = 1;
 
 LIBONYX_A = [objdir]/lib/c/libonyx/lib/libonyx.a;
 LIBONYX_S = [objdir]/lib/c/libonyx/lib/libonyx.so.[LIBONYX_REV];
@@ -135,8 +133,7 @@ LDFLAGS = [LDFLAGS] -L[objdir]/lib/c/libonyx/lib;
 LIBS = [LIBS] -lonyx;
 A_LIBS = [A_LIBS] [LIBONYX_A];
 S_LIBS = [S_LIBS] [LIBONYX_S];
-S_LINKS = [S_LINKS] [objdir]/lib/c/libonyx/lib/libonyx.so
-                    [objdir]/lib/c/libonyx/lib/libonyx.so.[LIBONYX_MJR];
+S_LINKS = [S_LINKS] [objdir]/lib/c/libonyx/lib/libonyx.so;
 
 /*
  * User cook'ables.
@@ -220,9 +217,6 @@ libonyx_install_s : [LIBONYX_S] libonyx_install_common
 {
   [INSTALL] -m 0444 [LIBONYX_S] [PREFIX]/lib;
 
-  rm -f [PREFIX]/lib/libonyx.so.[LIBONYX_MJR];
-  [LN] -s libonyx.so.[LIBONYX_REV] [PREFIX]/lib/libonyx.so.[LIBONYX_MJR];
-
   rm -f [PREFIX]/lib/libonyx.so;
   [LN] -s libonyx.so.[LIBONYX_REV] [PREFIX]/lib/libonyx.so;
 }
@@ -242,10 +236,6 @@ libonyx_install_s : [LIBONYX_S] libonyx_install_common
   set mkdir
 {
   [CC] -shared -soname libonyx.so.[LIBONYX_REV] -o [target] [need];
-
-  rm -f [objdir]/lib/c/libonyx/lib/libonyx.so.[LIBONYX_MJR];
-  [LN] -s libonyx.so.[LIBONYX_REV]
-          [objdir]/lib/c/libonyx/lib/libonyx.so.[LIBONYX_MJR];
 
   rm -f [objdir]/lib/c/libonyx/lib/libonyx.so;
   [LN] -s libonyx.so.[LIBONYX_REV] [objdir]/lib/c/libonyx/lib/libonyx.so;

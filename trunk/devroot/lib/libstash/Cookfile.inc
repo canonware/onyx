@@ -123,9 +123,7 @@ SRCS = [SRCS] [LIBSTASH_SRCS];
 }
 
 /* Libraries. */
-LIBSTASH_MJR = 1;
-LIBSTASH_MNR = 0;
-LIBSTASH_REV = [LIBSTASH_MJR].[LIBSTASH_MNR];
+LIBSTASH_REV = 1;
 
 LIBSTASH_A = [objdir]/lib/c/libstash/lib/libstash.a;
 LIBSTASH_S = [objdir]/lib/c/libstash/lib/libstash.so.[LIBSTASH_REV];
@@ -134,8 +132,7 @@ LDFLAGS = [LDFLAGS] -L[objdir]/lib/c/libstash/lib;
 LIBS = [LIBS] -lstash;
 A_LIBS = [A_LIBS] [LIBSTASH_A];
 S_LIBS = [S_LIBS] [LIBSTASH_S];
-S_LINKS = [S_LINKS] [objdir]/lib/c/libstash/lib/libstash.so
-                    [objdir]/lib/c/libstash/lib/libstash.so.[LIBSTASH_MJR];
+S_LINKS = [S_LINKS] [objdir]/lib/c/libstash/lib/libstash.so;
 
 /*
  * User cook'ables.
@@ -207,9 +204,6 @@ libstash_install_s : [LIBSTASH_S] libstash_install_common
 {
   [INSTALL] -m 0444 [LIBSTASH_S] [PREFIX]/lib;
 
-  rm -f [PREFIX]/lib/libstash.so.[LIBSTASH_MJR];
-  [LN] -s libstash.so.[LIBSTASH_REV] [PREFIX]/lib/libstash.so.[LIBSTASH_MJR];
-
   rm -f [PREFIX]/lib/libstash.so;
   [LN] -s libstash.so.[LIBSTASH_REV] [PREFIX]/lib/libstash.so;
 }
@@ -229,10 +223,6 @@ libstash_install_s : [LIBSTASH_S] libstash_install_common
   set mkdir
 {
   [CC] -shared -soname libstash.so.[LIBSTASH_REV] -o [target] [need];
-
-  rm -f [objdir]/lib/c/libstash/lib/libstash.so.[LIBSTASH_MJR];
-  [LN] -s libstash.so.[LIBSTASH_REV]
-          [objdir]/lib/c/libstash/lib/libstash.so.[LIBSTASH_MJR];
 
   rm -f [objdir]/lib/c/libstash/lib/libstash.so;
   [LN] -s libstash.so.[LIBSTASH_REV] [objdir]/lib/c/libstash/lib/libstash.so;

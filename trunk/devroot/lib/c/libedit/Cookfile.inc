@@ -108,9 +108,7 @@ SRCS = [SRCS] [LIBEDIT_SRCS];
 }
 
 /* Libraries. */
-LIBEDIT_MJR = 1;
-LIBEDIT_MNR = 0;
-LIBEDIT_REV = [LIBEDIT_MJR].[LIBEDIT_MNR];
+LIBEDIT_REV = 1;
 
 LIBEDIT_A = [objdir]/lib/c/libedit/lib/libedit.a;
 LIBEDIT_S = [objdir]/lib/c/libedit/lib/libedit.so.[LIBEDIT_REV];
@@ -119,8 +117,7 @@ LDFLAGS = [LDFLAGS] -L[objdir]/lib/c/libedit/lib;
 /* LIBS = [LIBS] -ledit; */
 A_LIBS = [A_LIBS] [LIBEDIT_A];
 /* S_LIBS = [S_LIBS] [LIBEDIT_S]; */
-/* S_LINKS = [S_LINKS] [objdir]/lib/c/libedit/lib/libedit.so
-                       [objdir]/lib/c/libedit/lib/libedit.so.[LIBEDIT_MJR]; */
+/* S_LINKS = [S_LINKS] [objdir]/lib/c/libedit/lib/libedit.so; */
 
 /*
  * User cook'ables.
@@ -191,9 +188,6 @@ libedit_install_s : [LIBEDIT_S] libedit_install_common
 {
   [INSTALL] -m 0444 [LIBEDIT_S] [PREFIX]/lib;
 
-  rm -f [PREFIX]/lib/libedit.so.[LIBEDIT_MJR];
-  [LN] -s libedit.so.[LIBEDIT_REV] [PREFIX]/lib/libedit.so.[LIBEDIT_MJR];
-
   rm -f [PREFIX]/lib/libedit.so;
   [LN] -s libedit.so.[LIBEDIT_REV] [PREFIX]/lib/libedit.so;
 }
@@ -213,10 +207,6 @@ libedit_install_s : [LIBEDIT_S] libedit_install_common
   set mkdir
 {
   [CC] -shared -soname libedit.so.[LIBEDIT_REV] -o [target] [need];
-
-  rm -f [objdir]/lib/c/libedit/lib/libedit.so.[LIBEDIT_MJR];
-  [LN] -s libedit.so.[LIBEDIT_REV]
-          [objdir]/lib/c/libedit/lib/libedit.so.[LIBEDIT_MJR];
 
   rm -f [objdir]/lib/c/libedit/lib/libedit.so;
   [LN] -s libedit.so.[LIBEDIT_REV] [objdir]/lib/c/libedit/lib/libedit.so;
