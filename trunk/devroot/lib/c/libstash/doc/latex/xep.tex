@@ -12,8 +12,9 @@
 %              
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\label{xep}
 \subsection{xep}
+\label{xep}
+\index{\classname{xep}{}}
 The \classname{xep} class implements exception handling, with support for
 \cppdef{xep\_try}, \cppmacro{xep\_catch}{}, and \cppdef{xep\_finally} blocks.
 Minimal use must include at least:
@@ -31,12 +32,12 @@ xep_begin();
 xep_try {
         /* Code that might throw an exception. */
 }
-xep_catch(_CW_XEPV_SOME_EXCEPTION) {
+xep_catch(SOME_EXCEPTION) {
         /* Handle exception... */
         xep_handled();
 }
-xep_catch(_CW_XEPV_ANOTHER_EXCEPTION)
-xep_mcatch(_CW_XEPV_YET_ANOTHER) {
+xep_catch(ANOTHER_EXCEPTION)
+xep_mcatch(YET_ANOTHER) {
         /* React to exception, but propagate... */
 }
 xep_acatch {
