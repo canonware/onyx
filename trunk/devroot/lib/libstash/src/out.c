@@ -1772,7 +1772,13 @@ out_p_metric_int32(const char * a_format, cw_uint32_t a_len,
 		   const void * a_arg)
 {
   cw_sint32_t retval;
-  cw_uint64_t arg = (cw_uint64_t) *(const cw_uint32_t *) a_arg;
+  cw_uint64_t arg;
+
+  _cw_check_ptr(a_format);
+  _cw_assert(0 < a_len);
+  _cw_check_ptr(a_arg);
+  
+  arg = (cw_uint64_t) *(const cw_uint32_t *) a_arg;
   
   retval = out_p_metric_int(a_format, a_len, arg, 32, 10);
 
@@ -1784,8 +1790,15 @@ out_p_render_int32(const char * a_format, cw_uint32_t a_len,
 		   const void * a_arg, char * r_buf)
 {
   char * retval;
-  cw_uint64_t arg = (cw_uint64_t) *(const cw_uint32_t *) a_arg;
+  cw_uint64_t arg;
 
+  _cw_check_ptr(a_format);
+  _cw_assert(0 < a_len);
+  _cw_check_ptr(a_arg);
+  _cw_check_ptr(r_buf);
+
+  arg = (cw_uint64_t) *(const cw_uint32_t *) a_arg;
+  
   retval = out_p_render_int(a_format, a_len, arg, r_buf, 32, 10);
 
   return retval;
@@ -1796,7 +1809,13 @@ out_p_metric_int64(const char * a_format, cw_uint32_t a_len,
 		   const void * a_arg)
 {
   cw_sint32_t retval;
-  cw_uint64_t arg = *(const cw_uint64_t *) a_arg;
+  cw_uint64_t arg;
+  
+  _cw_check_ptr(a_format);
+  _cw_assert(0 < a_len);
+  _cw_check_ptr(a_arg);
+  
+  arg = *(const cw_uint64_t *) a_arg;
   
   retval = out_p_metric_int(a_format, a_len, arg, 64, 10);
 
@@ -1808,8 +1827,15 @@ out_p_render_int64(const char * a_format, cw_uint32_t a_len,
 		   const void * a_arg, char * r_buf)
 {
   char * retval;
-  cw_uint64_t arg = *(const cw_uint64_t *) a_arg;
+  cw_uint64_t arg;
 
+  _cw_check_ptr(a_format);
+  _cw_assert(0 < a_len);
+  _cw_check_ptr(a_arg);
+  _cw_check_ptr(r_buf);
+
+  arg = *(const cw_uint64_t *) a_arg;
+  
   retval = out_p_render_int(a_format, a_len, arg, r_buf, 64, 10);
 
   return retval;
@@ -1823,6 +1849,10 @@ out_p_metric_char(const char * a_format, cw_uint32_t a_len,
   cw_uint32_t width;
   const char * val;
 
+  _cw_check_ptr(a_format);
+  _cw_assert(0 < a_len);
+  _cw_check_ptr(a_arg);
+  
   if (-1 != (val_len = spec_get_val(a_format, a_len, "w", 1, &val)))
   {
     /* Width specified. */
@@ -1850,8 +1880,15 @@ out_p_render_char(const char * a_format, cw_uint32_t a_len,
   cw_uint32_t width;
   cw_sint32_t val_len;
   const char * val;
-  cw_uint8_t pad, c = *(const cw_uint32_t *) a_arg;
+  cw_uint8_t pad, c;
 
+  _cw_check_ptr(a_format);
+  _cw_assert(0 < a_len);
+  _cw_check_ptr(a_arg);
+  _cw_check_ptr(r_buf);
+
+  c = *(const cw_uint32_t *) a_arg;
+  
   width = out_p_metric_char(a_format, a_len, a_arg);
 
   if (1 < width)
@@ -1916,12 +1953,14 @@ out_p_metric_string(const char * a_format, cw_uint32_t a_len,
 {
   cw_sint32_t retval, val_len;
   cw_uint32_t len, width;
-  const char * val, * str = *(const char **) a_arg;
+  const char * val, * str;
 
   _cw_check_ptr(a_format);
   _cw_assert(0 < a_len);
   _cw_check_ptr(a_arg);
 
+  str = *(const char **) a_arg;
+  
   len = strlen(str);
   
   if (-1 != (val_len = spec_get_val(a_format, a_len, "w", 1, &val)))
@@ -1951,13 +1990,15 @@ out_p_render_string(const char * a_format, cw_uint32_t a_len,
   cw_sint32_t val_len;
   const char * val;
   cw_uint32_t len, width;
-  const char * str = *(const char **) a_arg;
+  const char * str;
 
   _cw_check_ptr(a_format);
   _cw_assert(0 < a_len);
   _cw_check_ptr(a_arg);
   _cw_check_ptr(r_buf);
 
+  str = *(const char **) a_arg;
+  
   len = strlen(str);
   
   width = out_p_metric_string(a_format, a_len, a_arg);
@@ -2024,7 +2065,13 @@ out_p_metric_pointer(const char * a_format, cw_uint32_t a_len,
 {
   cw_sint32_t retval;
   /* Assumes 32 bit pointer. */
-  cw_uint64_t arg = (cw_uint64_t) (cw_uint32_t) *(const void **) a_arg;
+  cw_uint64_t arg;
+  
+  _cw_check_ptr(a_format);
+  _cw_assert(0 < a_len);
+  _cw_check_ptr(a_arg);
+  
+  arg = (cw_uint64_t) (cw_uint32_t) *(const void **) a_arg;
   
   retval = out_p_metric_int(a_format, a_len, arg, 32, 16);
 
@@ -2037,8 +2084,15 @@ out_p_render_pointer(const char * a_format, cw_uint32_t a_len,
 {
   char * retval;
   /* Assumes 32 bit pointer. */
-  cw_uint64_t arg = (cw_uint64_t) (cw_uint32_t) *(const void **) a_arg;
+  cw_uint64_t arg;
 
+  _cw_check_ptr(a_format);
+  _cw_assert(0 < a_len);
+  _cw_check_ptr(a_arg);
+  _cw_check_ptr(r_buf);
+
+  arg = (cw_uint64_t) (cw_uint32_t) *(const void **) a_arg;
+  
   retval = out_p_render_int(a_format, a_len, arg, r_buf, 32, 16);
 
   return retval;
