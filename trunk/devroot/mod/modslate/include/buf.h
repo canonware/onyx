@@ -112,10 +112,6 @@ struct cw_bufp_s
     /* Gap offset, in elements. */
     cw_uint32_t gap_off;
 
-    /* Gap length, in elements. */
-    /* XXX Use len instead? */
-    cw_uint32_t gap_len;
-
     /* Text buffer, with gap. */
 #define CW_BUFP_SIZE 65536
     cw_uint8_t *b;
