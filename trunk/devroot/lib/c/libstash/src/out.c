@@ -971,8 +971,8 @@ out_p_put_fvle(cw_out_t * a_out, cw_sint32_t a_fd,
       if (-1 == out_put_sa(a_out, &format,
 			   "[s]At [s], line [i32]: [s](): [s]",
 			   timestamp,
-			   a_file_name, a_line_num,
-			   a_func_name, a_format))
+			   a_file_name, a_line_num, a_func_name,
+			   a_format))
       {
 	retval = -1;
 	goto RETURN;
@@ -984,7 +984,8 @@ out_p_put_fvle(cw_out_t * a_out, cw_sint32_t a_fd,
       if (-1 == out_put_sa(a_out, &format,
 			   "[s]At [s], line [i32]: [s]",
 			   timestamp,
-			   a_file_name, a_line_num, a_format))
+			   a_file_name, a_line_num,
+			   a_format))
       {
 	retval = -1;
 	goto RETURN;
@@ -997,7 +998,8 @@ out_p_put_fvle(cw_out_t * a_out, cw_sint32_t a_fd,
     if (-1 == out_put_sa(a_out, &format,
 			 "[s][s](): [s]",
 			 timestamp,
-			 a_func_name, a_format))
+			 a_func_name,
+			 a_format))
     {
       retval = -1;
       goto RETURN;
@@ -1008,7 +1010,8 @@ out_p_put_fvle(cw_out_t * a_out, cw_sint32_t a_fd,
     /* Make no modifications. */
     if (-1 == out_put_sa(a_out, &format,
 			 "[s][s]",
-			 timestamp, a_format))
+			 timestamp,
+			 a_format))
     {
       retval = -1;
       goto RETURN;
@@ -1360,55 +1363,6 @@ out_p_get_ent(cw_out_t * a_out, const char * a_format, cw_uint32_t a_len)
   return retval;
 }
 
-static void
-out_p_add(cw_uint32_t a_base, cw_uint32_t a_ndigits,
-	  char * r_result, const char * a_a, const char * a_b)
-{
-  cw_sint32_t i, j, k;
-  int a, b;
-  cw_uint32_t digit, carry;
-  cw_uint8_t * syms = "0123456789abcdefghijklmnopqrstuvwxyz";
-
-  _cw_assert(a_base >= 2);
-  _cw_assert(a_base <= 36);
-  _cw_check_ptr(r_result);
-  _cw_check_ptr(a_a);
-  _cw_check_ptr(a_b);
-
-  for (i = a_ndigits - 1, carry = 0; i >= 0; i--)
-  {
-    /* This is slower than it could be if ascii were assumed, but it always
-     * works. */
-    for (j = k = 0, a = a_a[i], b = a_b[i], digit = carry;
-	 k < 2 && j < 36;
-	 j++)
-    {
-      if (a == syms[j])
-      {
-	digit += j;
-	k++;
-      }
-      if (b == syms[j])
-      {
-	digit += j;
-	k++;
-      }
-    }
-    _cw_assert(2 == k);
-
-    if (digit > (a_base - 1))
-    {
-      digit -= a_base;
-      carry = 1;
-    }
-    else
-    {
-      carry = 0;
-    }
-    r_result[i] = syms[digit];
-  }
-}
-
 static cw_sint32_t
 out_p_metric_int(const char * a_format, cw_uint32_t a_len,
 		 cw_uint64_t a_arg,
@@ -1419,27 +1373,15 @@ out_p_metric_int(const char * a_format, cw_uint32_t a_len,
   cw_uint64_t arg = a_arg;
   cw_bool_t is_negative, show_sign;
   const char * val;
-  char * zero, s_zero[65] =
-    "00000000000000000000000000000000"
-    "00000000000000000000000000000000";
-  char * curr_add, s_curr_add[65] =
-    "00000000000000000000000000000000"
-    "00000000000000000000000000000001";
+  cw_uint8_t * syms = "0123456789abcdefghijklmnopqrstuvwxyz";
   char * result, s_result[65] =
-    "00000000000000000000000000000000"
-    "00000000000000000000000000000000";
-  char * temp, s_temp[65] =
-    "00000000000000000000000000000000"
-    "00000000000000000000000000000000";
+    "0000000000000000000000000000000000000000000000000000000000000000";
 
   _cw_assert((8 == a_nbits) || (16 == a_nbits)
 	     || (32 == a_nbits) || (64 == a_nbits));
 
-  /* Move the pointers forward so that unnecessary digits can be ignored. */
-  zero = &s_zero[64 - a_nbits];
-  curr_add = &s_curr_add[64 - a_nbits];
+  /* Move the pointer forward so that unnecessary digits can be ignored. */
   result = &s_result[64 - a_nbits];
-  temp = &s_temp[64 - a_nbits];
 
   if (-1 != (val_len = spec_get_val(a_format, a_len, "w", &val)))
   {
@@ -1493,22 +1435,28 @@ out_p_metric_int(const char * a_format, cw_uint32_t a_len,
   {
     base = a_default_base;
   }
-  
-  for (i = 0; i < a_nbits; i++)
-  {
-    if ((arg >> i) & 1)
-    {
-      /* Copy the result for use in the next call. */
-      out_p_add(base, a_nbits, temp, result, zero);
-      
-      /* Add this digit into the result. */
-      out_p_add(base, a_nbits, result, temp, curr_add);
-    }
-    /* Copy curr_add for use in the next call. */
-    out_p_add(base, a_nbits, temp, curr_add, zero);
 
-    /* Double curr_add. */
-    out_p_add(base, a_nbits, curr_add, temp, temp);
+  /* Treat 64 bit numbers separately, since they're much slower on 32 bit
+   * architectures. */
+  if (64 != a_nbits)
+  {
+    cw_uint32_t rval = (cw_uint32_t) arg;
+    
+    for (i = a_nbits - 1; rval != 0; i--)
+    {
+      result[i] = syms[rval % base];
+      rval /= base;
+    }
+  }
+  else
+  {
+    cw_uint64_t rval = (cw_uint64_t) arg;
+    
+    for (i = a_nbits - 1; rval != 0; i--)
+    {
+      result[i] = syms[rval % base];
+      rval /= base;
+    }
   }
 
   /* Find the first non-zero digit. */
@@ -1544,27 +1492,15 @@ out_p_render_int(const char * a_format, cw_uint32_t a_len,
   cw_uint64_t arg = a_arg;
   cw_bool_t is_negative, show_sign;
   const char * val;
-  char * zero, s_zero[65] =
-    "00000000000000000000000000000000"
-    "00000000000000000000000000000000";
-  char * curr_add, s_curr_add[65] =
-    "00000000000000000000000000000000"
-    "00000000000000000000000000000001";
+  cw_uint8_t * syms = "0123456789abcdefghijklmnopqrstuvwxyz";
   char * result, s_result[65] =
-    "00000000000000000000000000000000"
-    "00000000000000000000000000000000";
-  char * temp, s_temp[65] =
-    "00000000000000000000000000000000"
-    "00000000000000000000000000000000";
+    "0000000000000000000000000000000000000000000000000000000000000000";
 
   _cw_assert((8 == a_nbits) || (16 == a_nbits)
 	     || (32 == a_nbits) || (64 == a_nbits));
 
-  /* Move the pointers forward so that unnecessary digits can be ignored. */
-  zero = &s_zero[64 - a_nbits];
-  curr_add = &s_curr_add[64 - a_nbits];
+  /* Move the pointer forward so that unnecessary digits can be ignored. */
   result = &s_result[64 - a_nbits];
-  temp = &s_temp[64 - a_nbits];
 
   if (-1 != (val_len = spec_get_val(a_format, a_len, "b", &val)))
   {
@@ -1606,24 +1542,30 @@ out_p_render_int(const char * a_format, cw_uint32_t a_len,
   {
     show_sign = FALSE;
   }
-    
-  for (i = 0; i < a_nbits; i++)
+
+  /* Treat 64 bit numbers separately, since they're much slower on 32 bit
+   * architectures. */
+  if (64 != a_nbits)
   {
-    if ((arg >> i) & 1)
+    cw_uint32_t rval = (cw_uint32_t) arg;
+    
+    for (i = a_nbits - 1; rval != 0; i--)
     {
-      /* Copy the result for use in the next call. */
-      out_p_add(base, a_nbits, temp, result, zero);
-      
-      /* Add this digit into the result. */
-      out_p_add(base, a_nbits, result, temp, curr_add);
+      result[i] = syms[rval % base];
+      rval /= base;
     }
-    /* Copy curr_add for use in the next call. */
-    out_p_add(base, a_nbits, temp, curr_add, zero);
-
-    /* Double curr_add. */
-    out_p_add(base, a_nbits, curr_add, temp, temp);
   }
-
+  else
+  {
+    cw_uint64_t rval = arg;
+    
+    for (i = a_nbits - 1; rval != 0; i--)
+    {
+      result[i] = syms[rval % base];
+      rval /= base;
+    }
+  }
+  
   /* Find the first non-zero digit. */
   for (i = 0; i < (a_nbits - 1); i++)
   {
@@ -2042,52 +1984,16 @@ spec_p_has_specifier(const char * a_format)
 {
   cw_sint32_t retval;
   cw_uint32_t i;
-  enum
-  {
-    NORMAL,
-    BRACKET
-  } state;
   
   _cw_check_ptr(a_format);
 
-  for (i = 0, state = NORMAL; a_format[i] != '\0'; i++)
+  for (i = 0; a_format[i] != '\0'; i++)
   {
-    switch (state)
+    if ('[' == a_format[i])
     {
-      case NORMAL:
-      {
-	if ('[' == a_format[i])
-	{
-	  state = BRACKET;
-	}
-	
-	break;
-      }
-      case BRACKET:
-      {
-	if ('[' == a_format[i])
-	{
-	  state = NORMAL;
-	}
-	else
-	{
-	  retval = -1;
-	  goto RETURN;
-	}
-
-	break;
-      }
-      default:
-      {
-	_cw_error("Programming error");
-      }
+      retval = -1;
+      goto RETURN;
     }
-  }
-
-  if (NORMAL != state)
-  {
-    retval = -1;
-    goto RETURN;
   }
 
   retval = i;

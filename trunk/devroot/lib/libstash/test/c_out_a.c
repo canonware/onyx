@@ -116,8 +116,7 @@ main()
 
 /*      _cw_assert(0 < out_put_le(out_p, "<file>", 42, "<function>", */
 /*  			      "Timestamped output [s]\n", "[s]")); */
-/*      _cw_assert(0 < out_put_le(out_p, NULL, 42, NULL, "")); */
-/*      _cw_assert(0 < out_put(out_p, "\n")); */
+/*      _cw_assert(0 < out_put_le(out_p, NULL, 42, NULL, "\n")); */
     
     out_delete(out_p);
   }

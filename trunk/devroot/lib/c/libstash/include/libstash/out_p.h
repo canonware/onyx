@@ -44,10 +44,6 @@ out_p_metric(cw_out_t * a_out, const char * a_format, char ** r_format,
 static cw_out_ent_t *
 out_p_get_ent(cw_out_t * a_out, const char * a_format, cw_uint32_t a_len);
 
-static void
-out_p_add(cw_uint32_t a_base, cw_uint32_t a_ndigits,
-	  char * r_result, const char * a_a, const char * a_b);
-
 static cw_sint32_t
 out_p_metric_int(const char * a_format, cw_uint32_t a_len,
 		 cw_uint64_t a_arg,

@@ -1,3 +1,16 @@
+1999-07-21  J. Owen Evans  <jasone@canonware.com>
+
+	* src/out.c (out_p_metric_int, out_p_render_int): Use modulus and
+	division to generate text versions of integers, rather than the
+	amazingly slow out_p_add()-based method.  This speeds up integer
+	printing by approximatly two orders of magnitude.
+
+1999-07-20  J. Owen Evans  <jasone@canonware.com>
+
+	* src/out.c (spec_p_has_specifier): Return -1 if there is a '['
+	anywhere in the string, since "[[" needs interpreted as well as
+	specifiers.
+
 1999-07-20  Jason Evans  <jasone@canonware.com>
 
 	* src/res.c (res_dump): Add file mode argument to open() call.
