@@ -1815,48 +1815,43 @@ stilo_file_read(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_uint32_t a_len,
 	if (file->fd == -1)
 		stilt_error(a_stilt, STILTE_IOERROR);
 
-	if (file->fd == -2) {
-		retval = file->read_f(file->arg, a_stilo, a_stilt,
-		    a_len, r_str);
-		if (retval == 0) {
-			file->fd = -1;
-			file->read_f = NULL;
-			file->write_f = NULL;
-			file->arg = NULL;
-			file->position = 0;
-		}
-		file->position += a_len;
-	} else {
-		/*
-		 * Use the internal buffer if it exists.  If there aren't enough
-		 * data in the buffer to fill r_str, copy what we have to r_str,
-		 * then do a readv() to fill r_str and the buffer.  If the
-		 * buffer is empty, also do a readv() to replenish it.
-		 */
-		if (file->buffer != NULL) {
-			if ((file->buffer_mode == BUFFER_READ) && (a_len <=
-			    file->buffer_offset)) {
-				/* We had enough buffered data. */
-				memcpy(r_str, file->buffer, a_len);
-				memcpy(file->buffer,
-				    &file->buffer[file->buffer_offset],
-				    file->buffer_offset - a_len);
-				retval = a_len;
-				file->buffer_offset -= a_len;
-			} else {
-				ssize_t		nread;
-				struct iovec	iov[2];
+	/*
+	 * Use the internal buffer if it exists.  If there aren't enough data in
+	 * the buffer to fill r_str, copy what we have to r_str, then do a
+	 * readv() to fill r_str and the buffer.  If the buffer is empty, also
+	 * do a readv() to replenish it.
+	 */
+	if (file->buffer != NULL) {
+		if ((file->buffer_mode == BUFFER_READ) && (a_len <=
+		    file->buffer_offset)) {
+			/* We had enough buffered data. */
+			memcpy(r_str, file->buffer, a_len);
+			memmove(file->buffer, &file->buffer[a_len],
+			    file->buffer_offset - a_len);
+			retval = a_len;
+			file->buffer_offset -= a_len;
+			if (file->buffer_offset == 0)
+				file->buffer_mode = BUFFER_EMPTY;
+		} else {
+			ssize_t		nread;
 
-				/*
-				 * Copy what we have buffered before reading
-				 * more data.
-				 */
+			/*
+			 * Copy any buffered before reading more data.
+			 */
+			if (file->buffer_mode == BUFFER_READ) {
 				memcpy(r_str, file->buffer,
 				    file->buffer_offset);
 				retval = file->buffer_offset;
 				r_str += file->buffer_offset;
 				a_len -= file->buffer_offset;
-				file->buffer_offset = 0;
+			} else
+				retval = 0;
+			/* Clear the buffer. */
+			file->buffer_offset = 0;
+			file->buffer_mode = BUFFER_EMPTY;
+
+			if (file->fd >= 0) {
+				struct iovec	iov[2];
 
 				/*
 				 * Finish filling r_str and replenish the
@@ -1868,40 +1863,53 @@ stilo_file_read(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_uint32_t a_len,
 				iov[1].iov_len = file->buffer_size;
 
 				nread = readv(file->fd, iov, 2);
-				if (nread == -1) {
-					/*
-					 * There was an error, but we already
-					 * managed to provide some data, so
-					 * don't report an error this time
-					 * around.
-					 */
-				} else if (nread <= a_len) {
-					/*
-					 * We didn't get enough data to start
-					 * filling the internal buffer.
-					 */
-					retval += nread;
-				} else {
-					retval += a_len;
-					file->buffer_offset = nread - a_len;
-				}
+			} else {
+				/* Use the read wrapper function. */
+				nread = file->read_f(file->arg, a_stilo,
+				    a_stilt, a_len, r_str);
 			}
-			if (file->buffer_offset == 0)
-				file->buffer_mode = BUFFER_EMPTY;
-		} else {
+
+			/* Handle various read return values. */
+			if (nread == -1) {
+				if (retval == 0)
+					stilt_error(a_stilt, STILTE_IOERROR);
+				/*
+				 * There was an error, but we already managed to
+				 * provide some data, so don't report an error
+				 * this time around.
+				 */
+			} else if (nread <= a_len) {
+				/*
+				 * We didn't get enough data to start filling
+				 * the internal buffer.
+				 */
+				retval += nread;
+			} else {
+				retval += a_len;
+				file->buffer_offset = nread - a_len;
+				file->buffer_mode = BUFFER_READ;
+			}
+		}
+	} else {
+		if (file->fd >= 0)
 			retval = read(file->fd, r_str, a_len);
-		}
-		if (retval == 0) {
-			file->fd = -1;
-			if (file->buffer != NULL) {
-				file->buffer_offset = 0;
-				file->buffer_mode = BUFFER_EMPTY;
-			}
-		}
+		else
+			retval = file->read_f(file->arg, a_stilo, a_stilt,
+			    a_len, r_str);
 	}
 
+	if (retval == 0) {
+		file->fd = -1;
+		if (file->buffer != NULL) {
+			file->buffer_offset = 0;
+			file->buffer_mode = BUFFER_EMPTY;
+		}
+	}
 	if (retval == -1)
 		stilt_error(a_stilt, STILTE_IOERROR);
+/*  	_cw_out_put("retval [i|s:s|+:+] :", retval); */
+/*  	_cw_out_put_n(retval, "[s]", r_str); */
+/*  	_cw_out_put(":\n"); */
 	return retval;
 }
 
