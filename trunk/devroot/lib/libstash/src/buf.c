@@ -1337,57 +1337,90 @@ buf_p_get_data_position(cw_buf_t * a_buf,
       = (bufel_get_end_offset(&a_buf->bufel_array[a_buf->cached_bufel])
 	- (a_buf->cumulative_index[a_buf->cached_bufel] - a_offset));
   }
-  /* XXX Don't take this out (yet).  It avoids an edge condition of the binary
-   * search below that causes an infinite loop.  Ugh, must figure out the
-   * heinous binary search loop... */
-  else if (a_offset
-	   < bufel_get_valid_data_size(&a_buf->bufel_array[a_buf->array_start]))
-  {
-    /* What we're looking for is in the first bufel. */
-    *a_array_element = a_buf->array_start;
-    *a_bufel_offset
-      = (a_offset
-	 + bufel_get_beg_offset(&a_buf->bufel_array[a_buf->array_start]));
-  }
   else
   {
-    cw_uint32_t i, adjust, index, index_prev;
-
+    cw_uint32_t first, last;
+    
     if (FALSE == a_buf->is_cumulative_valid)
     {
       buf_p_rebuild_cumulative_index(a_buf);
     }
-
-    /* Do a binary search through the cumulative index to find the bufel we
-     * want. */
-    for (i = 1,
-	   adjust = (((a_buf->array_num_valid >> i) > 0)
-		     ? (a_buf->array_num_valid >> i) : 1),
-	   index = (a_buf->array_start + adjust) % a_buf->array_size,
-	   index_prev = (index + a_buf->array_size - 1) % a_buf->array_size;
-	 !((a_buf->cumulative_index[index] > a_offset)
-	   && (a_buf->cumulative_index[index_prev] <= a_offset));
-	 i++,
-	   adjust = ((adjust >> 1) > 0) ? (adjust >> 1) : 1,
-	   index = ((a_buf->cumulative_index[index] <= a_offset)
-		    ? (index + adjust) % a_buf->array_size
-		    : (index + a_buf->array_size - adjust) % a_buf->array_size),
-	   index_prev = (index + a_buf->array_size - 1) % a_buf->array_size)
+    
+    if (a_buf->array_start < a_buf->array_end)
     {
-/*        log_printf(cw_g_log, */
-/*  		 "i : %lu, adjust : %lu, index : %lu, index_prev %lu\n", */
-/*  		 i, adjust, index, index_prev); */
-/*        log_printf(cw_g_log, "Looking for offset %lu, total size %lu\n", */
-/*  		 a_offset, a_buf->size); */
+      /* bufel_array is not wrapped, which means we can do a standard binary
+       * search without lots of modulus operations. */
+      first = a_buf->array_start;
+      last = a_buf->array_end;
+    }
+    else if (a_buf->array_end == 0)
+    {
+      /* bufel_array is not wrapped, which means we can do a standard binary
+       * search without lots of modulus operations. */
+      first = a_buf->array_start;
+      last = a_buf->array_size;
+    }
+    else if (a_buf->cumulative_index[a_buf->array_size - 1] > a_offset)
+    {
+      /* bufel_array is wrapped, but the byte we want is not in the wrapped
+       * portion. */
+      first = a_buf->array_start;
+      last = a_buf->array_size;
+    }
+    else
+    {
+      /* bufel_array is wrapped, and the byte we want is in the wrapped
+       * portion. */
+      first = 0;
+      last = a_buf->array_end;
     }
     
-    *a_array_element = index;
-    *a_bufel_offset = (a_offset
-		       - a_buf->cumulative_index[index_prev]
-		       + bufel_get_beg_offset(&a_buf->bufel_array[index]));
-    
-    a_buf->is_cached_bufel_valid = TRUE;
-    a_buf->cached_bufel = index;
+    {
+      cw_uint32_t adjust, index;
+      
+      /* Binary search, where "first" is the index of the first element in the
+       * range to search, and "last" is one plus the index of the last element
+       * in the range to search. */
+      adjust = (last - first) >> 1;
+      index = first + adjust;
+      while (1)
+      {
+	if (a_buf->cumulative_index[index] <= a_offset)
+	{
+	  adjust >>= 1;
+	  if (adjust != 0)
+	  {
+	    index += adjust;
+	  }
+	  else
+	  {
+	    index++;
+	  }
+	}
+	else if (a_buf->cumulative_index[index - 1] > a_offset)
+	{
+	  adjust >>= 1;
+	  if (adjust != 0)
+	  {
+	    index -= adjust;
+	  }
+	  else
+	  {
+	    index--;
+	  }
+	}
+	else
+	{
+	  *a_array_element = index;
+	  *a_bufel_offset = (bufel_get_end_offset(&a_buf->bufel_array[index])
+			     - (a_buf->cumulative_index[index] - a_offset));
+
+	  a_buf->is_cached_bufel_valid = TRUE;
+	  a_buf->cached_bufel = index;
+	  break;
+	}
+      }
+    }
   }
 }
 
