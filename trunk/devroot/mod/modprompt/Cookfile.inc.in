@@ -1,0 +1,112 @@
+/******************************************************************************
+ *
+ * <Copyright = jasone>
+ * <License>
+ *
+ ******************************************************************************
+ *
+ * Version: Onyx <Version = onyx>
+ *
+ * Cookfile for modprompt.
+ *
+ ******************************************************************************/
+
+/* Include generated dependency files. */
+#include-cooked [glob @objroot@/mod/modprompt/src/"*.d_*"]
+
+/*
+ * File lists.
+ */
+
+/* Source files. */
+MODPROMPT_SRCS = [addprefix @srcroot@/mod/modprompt/src/
+                            modprompt.c
+                            ];
+
+/* Generated source code (created by configure). */
+MODPROMPT_NX_GEN = [fromto %.nx.in @objroot@/mod/modprompt/nx/modprompt/%.nx
+                           modprompt_defs.nx.in
+                           ];
+
+MODPROMPT_NX = [addprefix @srcroot@/mod/modprompt/nx/modprompt/
+                          modprompt.nx
+                          ];
+
+/* Modules. */
+MODPROMPT = @objroot@/mod/modprompt/nxm/modprompt.nxm;
+
+/*
+ * User cook'ables.
+ */
+
+modprompt : [MODPROMPT];
+
+modprompt_mods_tests :
+{
+
+}
+
+modprompt_mods_check :
+{
+
+}
+
+modprompt_mods_check_update :
+{
+
+}
+
+modprompt_mods_install : [MODPROMPT]
+{
+  @INSTALL@ -d [PREFIX]/share/onyx-@onyx_version@/nxm;
+  @INSTALL@ -m 0444 [MODPROMPT] [PREFIX]/share/onyx-@onyx_version@/nxm;
+  @INSTALL@ -d [PREFIX]/share/onyx-@onyx_version@/nx/modprompt;
+
+  loop local f = [MODPROMPT_NX] [MODPROMPT_NX_GEN]
+  {
+    @INSTALL@ -m 0644 [f] [PREFIX]/share/onyx-@onyx_version@/nx/modprompt/;
+  }
+}
+
+modprompt_mods_uninstall :
+{
+  rm -f [PREFIX]/share/onyx-@onyx_version@/nxm/modprompt.nxm;
+  rm -rf [PREFIX]/share/onyx-@onyx_version@/nx/modprompt;
+}
+
+modprompt_mods_clean :
+{
+  rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.d_s [MODPROMPT_SRCS]];
+  rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.o_s [MODPROMPT_SRCS]];
+  rm -f [MODPROMPT];
+}
+
+modprompt_mods_distclean :
+{
+}
+
+/*
+ * Various flags.
+ */
+MODPROMPT_CPPFLAGS = @PROMPT_CFLAGS@;
+MODPROMPT_LDFLAGS = @PROMPT_LIBS@ @LIBS@;
+
+CPPFLAGS = [CPPFLAGS] -I@srcroot@/mod/modprompt/include
+                      -I@objroot@/mod/modprompt/include
+                      [MODPROMPT_CPPFLAGS];
+
+/*
+ * Dependencies.
+ */
+
+[MODPROMPT] : [fromto @srcroot@/%0%.c @objroot@/%0%.o_s [MODPROMPT_SRCS]]
+  set mkdir
+{
+  [CC]
+#if [matches elf @abi@]
+       -shared
+#elif [matches macho @abi@]
+       -undefined suppress -flat_namespace -bundle -all_load
+#endif
+       -o [target] [need] [MODPROMPT_LDFLAGS];
+}

@@ -62,9 +62,6 @@ CW_ENABLE_INLINES
 dnl Build libonyx by default.
 CW_ENABLE_LIBONYX
 
-dnl Use libedit by default.
-CW_ENABLE_LIBEDIT
-
 dnl Build onyx by default.
 CW_ENABLE_ONYX
 
@@ -98,9 +95,6 @@ dnl works on the link line (-lonyx -ledit).
 if test "x$enable_onyx" = "x1" ; then
   CW_BUILD_LIB(libonyx, lib_onyx)
 fi
-if test "x$enable_libedit" = "x1" ; then
-  CW_BUILD_LIB(libedit, lib_edit)
-fi
 
 dnl Look for modules.
 enable_modules="yes"
@@ -109,43 +103,103 @@ AC_CHECK_FUNCS(dlopen, AC_DEFINE(HAVE_DLOPEN), \
     [enable_modules="no"
     AC_MSG_RESULT(Modules disabled since dlopen is missing)]))
 
+dnl modgtk.
 if test "x$enable_modules" = "xyes" -a "x$enable_threads" = "x1" \
      -a "x$enable_real" = "x1" -a "x$enable_posix" = "x1" \
      -a "x$enable_posix_file" = "x1" ; then
-
-  dnl modgtk.
   PKG_CHECK_MODULES(GTK, gtk+-2.0 >= $GTK_VERSION_MIN, \
     CW_BUILD_MOD(modgtk, mod_gtk), \
     AC_MSG_RESULT(gtk+ $GTK_VERSION_MIN or newer not found))
+fi
 
-  dnl modpcre.
-  AC_PATH_PROG(PCRE_CONFIG, pcre-config, , $PATH)
-  if test "x$PCRE_CONFIG" != "x" ; then
-    dnl Make sure the version of pcre found is sufficient.
-    AC_MSG_CHECKING(for pcre >= $PCRE_VERSION_MIN)
-    PCRE_MAJOR=`pcre-config --version | tr . " " | awk '{print $1}'`
-    PCRE_MINOR=`pcre-config --version | tr . " " | awk '{print $2}'`
-    PCRE_MAJOR_MIN=`echo $PCRE_VERSION_MIN | tr . " " | awk '{print $1}'`
-    PCRE_MINOR_MIN=`echo $PCRE_VERSION_MIN | tr . " " | awk '{print $2}'`
-    if test $PCRE_MAJOR -gt $PCRE_MAJOR_MIN \
-         -o $PCRE_MAJOR -eq $PCRE_MAJOR_MIN \
-         -a $PCRE_MINOR -ge $PCRE_MINOR_MIN ; then
-      AC_MSG_RESULT($PCRE_MAJOR.$PCRE_MINOR)
-      CW_BUILD_MOD(modpcre, mod_pcre)
-      if test "x$mod_pcre" = "x1" ; then
-        PCRE_CFLAGS=`pcre-config --cflags`
-        PCRE_LIBS=`pcre-config --libs`
-        AC_SUBST(PCRE_CFLAGS)
-        AC_SUBST(PCRE_LIBS)
+dnl modpcre.
+if test "x$enable_modules" = "xyes" -a "x$enable_threads" = "x1" \
+     -a "x$enable_real" = "x1" -a "x$enable_posix" = "x1" \
+     -a "x$enable_posix_file" = "x1" ; then
+  AC_ARG_ENABLE(modpcre, [  --disable-modpcre       Do not use modpcre],
+  if test "x$enable_modpcre" = "xno" ; then
+    enable_modpcre="0"
+  else
+    enable_modpcre="1"
+  fi
+  ,
+  enable_modpcre="1"
+  )
+  if test "x$enable_modpcre" = "x1" ; then
+    AC_PATH_PROG(PCRE_CONFIG, pcre-config, , $PATH)
+    if test "x$PCRE_CONFIG" != "x" ; then
+      dnl Make sure the version of pcre found is sufficient.
+      AC_MSG_CHECKING(for pcre >= $PCRE_VERSION_MIN)
+      PCRE_MAJOR=`pcre-config --version | tr . " " | awk '{print $1}'`
+      PCRE_MINOR=`pcre-config --version | tr . " " | awk '{print $2}'`
+      PCRE_MAJOR_MIN=`echo $PCRE_VERSION_MIN | tr . " " | awk '{print $1}'`
+      PCRE_MINOR_MIN=`echo $PCRE_VERSION_MIN | tr . " " | awk '{print $2}'`
+      if test $PCRE_MAJOR -gt $PCRE_MAJOR_MIN \
+           -o $PCRE_MAJOR -eq $PCRE_MAJOR_MIN \
+           -a $PCRE_MINOR -ge $PCRE_MINOR_MIN ; then
+        AC_MSG_RESULT($PCRE_MAJOR.$PCRE_MINOR)
+        CW_BUILD_MOD(modpcre, mod_pcre)
+        if test "x$mod_pcre" = "x1" ; then
+          PCRE_CFLAGS=`pcre-config --cflags`
+          PCRE_LIBS=`pcre-config --libs`
+          AC_SUBST(PCRE_CFLAGS)
+          AC_SUBST(PCRE_LIBS)
+        else
+          enable_modpcre="0"
+        fi
+      else
+        AC_MSG_RESULT(no)
+        enable_modpcre="0"
       fi
-    else
-      AC_MSG_RESULT(no)
     fi
   fi
-
+  if test "x$enable_modpcre" = "x1" ; then
+    AC_DEFINE(CW_USE_MODPCRE)
+  fi
 else
-  AC_MSG_RESULT(Missing configuration options necessary for modules)
+  enable_modpcre="0"
 fi
+AC_SUBST(enable_modpcre)
+
+dnl modprompt.
+if test "x$enable_modules" = "xyes" -a "x$enable_posix" = "x1" \
+     -a "x$enable_posix_file" = "x1" ; then
+  AC_ARG_ENABLE(modprompt, [  --disable-modprompt     Do not use modprompt],
+  if test "x$enable_modprompt" = "xno" ; then
+    enable_modprompt="0"
+  else
+    enable_modprompt="1"
+  fi
+  ,
+  enable_modprompt="1"
+  )
+  if test "x$enable_modprompt" = "x1" ; then
+    PROMPT_CFLAGS=
+    AC_CHECK_HEADERS(histedit.h, , enable_modprompt="0")
+    AC_CHECK_LIB(edit, el_init, \
+      AC_CHECK_LIB(termcap, tgetent, PROMPT_LIBS="-ltermcap -ledit", \
+        AC_CHECK_LIB(tinfo, tgetent, PROMPT_LIBS="-ltinfo -ledit", \
+          AC_CHECK_LIB(curses, tgetent, PROMPT_LIBS="-lcurses -ledit", \
+            AC_CHECK_LIB(ncurses, tgetent, PROMPT_LIBS="-lncurses -ledit", \
+              enable_modprompt="0")))), \
+      enable_modprompt="0")
+    if test "x$enable_modprompt" = "x1" ; then
+      CW_BUILD_MOD(modprompt, mod_prompt)
+      if test "x$mod_prompt" = "x1" ; then
+        AC_SUBST(PROMPT_CFLAGS)
+        AC_SUBST(PROMPT_LIBS)
+      else
+        enable_modprompt="0"
+      fi
+    fi
+  fi
+  if test "x$enable_modprompt" = "x1" ; then
+    AC_DEFINE(CW_USE_MODPROMPT)
+  fi
+else
+  enable_modprompt="0"
+fi
+AC_SUBST(enable_modprompt)
 
 dnl Look for binaries.
 if test "x$enable_onyx" = "x1" ; then
@@ -389,20 +443,6 @@ if test "x$bin_slate" = "x1" ; then
 fi
 
 dnl 
-dnl modgtk configuration.
-dnl 
-if test "x$mod_gtk" = "x1" ; then
-  cfgoutputs="$cfgoutputs mod/modgtk/nx/modgtk/modgtk_defs.nx"
-fi
-
-dnl 
-dnl modpcre configuration.
-dnl 
-if test "x$mod_pcre" = "x1" ; then
-  cfgoutputs="$cfgoutputs mod/modpcre/nx/modpcre/modpcre_defs.nx"
-fi
-
-dnl 
 dnl Print out the results of configuration.
 dnl 
 AC_MSG_RESULT(===============================================================================)
@@ -434,7 +474,6 @@ AC_MSG_RESULT(real          : ${enable_real})
 AC_MSG_RESULT(posix         : ${enable_posix})
 AC_MSG_RESULT(posix-file    : ${enable_posix_file})
 AC_MSG_RESULT(inlines       : ${enable_inlines})
-AC_MSG_RESULT(libedit       : ${enable_libedit})
 AC_MSG_RESULT(libonyx       : ${enable_libonyx})
 AC_MSG_RESULT(debug         : ${enable_debug})
 AC_MSG_RESULT(profile       : ${enable_profile})

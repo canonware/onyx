@@ -1,4 +1,5 @@
-/******************************************************************************
+/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
+ ******************************************************************************
  *
  * <Copyright = jasone>
  * <License>
@@ -9,6 +10,7 @@
  *
  ******************************************************************************/
 
-#include "onyx_defs.h"
+#include "modprompt_defs.h"
 
-#include <libonyx/libonyx.h>
+void
+modprompt_init(void *a_arg, cw_nxo_t *a_thread);

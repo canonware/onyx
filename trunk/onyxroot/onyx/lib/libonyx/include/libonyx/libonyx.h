@@ -13,7 +13,7 @@
  ******************************************************************************/
 
 #ifdef __cplusplus
-extern  "C" {
+extern "C" {
 #endif
 
 #ifndef CW_LIBONYX_H_

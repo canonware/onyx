@@ -215,30 +215,6 @@ if test "x$enable_libonyx" = "x1" ; then
 fi
 ])
 
-dnl Use libedit by default.
-AC_DEFUN(CW_ENABLE_LIBEDIT,
-[
-AC_ARG_ENABLE(libedit, [  --disable-libedit       Do not use libedit],
-if test "x$enable_libedit" = "xno" ; then
-  enable_libedit="0"
-else
-  enable_libedit="1"
-fi
-,
-enable_libedit="1"
-)
-AC_CHECK_HEADERS(curses.h, , enable_libedit="0")
-AC_CHECK_HEADERS(term.h, , enable_libedit="0")
-AC_SEARCH_LIBS(tigetflag, ncurses curses, , enable_libedit="0")
-AC_SEARCH_LIBS(tigetnum, ncursese curses, , enable_libedit="0")
-AC_SEARCH_LIBS(tigetstr, ncurses curses, , enable_libedit="0")
-
-AC_SUBST(enable_libedit)
-if test "x$enable_libedit" = "x1" ; then
-  AC_DEFINE(CW_USE_LIBEDIT)
-fi
-])
-
 dnl Build onyx by default.
 AC_DEFUN(CW_ENABLE_ONYX,
 [
@@ -336,7 +312,7 @@ AC_MSG_CHECKING(whether to include $1 in build)
 if test -d "$srcroot/mod/$1" ; then
   build_$1="yes"
   $2=1
-  cfgoutputs="$cfgoutputs mod/$1/Cookfile.inc"
+  cfgoutputs="$cfgoutputs mod/$1/Cookfile.inc mod/$1/nx/$1/$1_defs.nx"
   if test -f "$srcroot/mod/$1/doc/latex/manual.tex.in" ; then
     mkdir -p "$objroot/mod/$1/doc/latex"
     cfgoutputs="$cfgoutputs mod/$1/doc/latex/manual.tex"

@@ -123,12 +123,13 @@ Optionally, pass any of the following (not a definitive list) arguments to
 --disable-libonyx
 	Use an installed copy of libonyx rather than building it.
 
---disable-libedit
-	Do not use the libedit library for interactive onyx command line
-	editing.  This reduces the size of the onyx binary, at the expense of
-	the command line editing functionality.  If the onyx binary is rarely
-	used interactively, using this option may make sense.  The documentation
-	does not mention the effects of this option.
+--disable-modprompt
+	Do not build the prompt module, which provides command line editing
+	functionality for interactive invocations of onyx.  There is little
+	benefit to disabling modprompt under normal circumstances, since there
+	is virtually no overhead involved for non-interactive invocations of
+	onyx (less than 50 bytes).  The documentation does not mention the
+	effects of this option.
 
 --disable-onyx
 	Use an installed copy of onyx rather than building it.

@@ -212,9 +212,6 @@ onyx_bins_install : [ONYX]
   [CC] [A_CFLAGS] -o [PREFIX]/bin/onyx-@onyx_version@
        [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [ONYX_COMMON_SRCS]]
        [fromto %0%.c %0%.o_a [ONYX_ONLY_SRCS]]
-#if @enable_libedit@
-       [LIBEDIT_A]
-#endif
 #if @enable_libonyx@
 #if [count @RPATH@]
        @RPATH@[PREFIX]/lib
@@ -280,9 +277,6 @@ onyx_bins_distclean :
 [BONYX] : [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [ONYX_COMMON_SRCS]]
           [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [BONYX_ONLY_SRCS]]
           [LIBBONYX_A]
-#if @enable_libedit@
-          [LIBEDIT_A]
-#endif
   set mkdir
 {
   [CC] [A_CFLAGS] -o [target] [need] [LDFLAGS] @LIBS@;
@@ -291,17 +285,11 @@ onyx_bins_distclean :
 [ONYX] : [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [ONYX_COMMON_SRCS]]
          [fromto @objroot@/%0%.c @objroot@/%0%.o_a [ONYX_ONLY_SRCS]]
          libonyx_libs_s
-#if @enable_libedit@
-          [LIBEDIT_A]
-#endif
   set mkdir
 {
   [CC] [A_CFLAGS] -o [target]
        [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [ONYX_COMMON_SRCS]]
        [fromto @objroot@/%0%.c @objroot@/%0%.o_a [ONYX_ONLY_SRCS]]
-#if @enable_libedit@
-       [LIBEDIT_A]
-#endif
 #if [count @RPATH@]
        @RPATH@@abs_objroot@/lib/libonyx/lib
 #endif

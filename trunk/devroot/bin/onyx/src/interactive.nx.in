@@ -57,8 +57,16 @@ end
 
 % Print the product and version info.
 product print `, version ' print version print `.\n' print flush
-
-% Push an executable stdin on ostack to prepare for the start operator.
+' catenate
+@enable_modprompt@ 1 eq {
+    `
+    `modprompt/modprompt.nx' require
+    ' catenate
+} if
+`
+% Push an executable stdin on ostack to prepare for the start operator.  This
+% must be done after loading modprompt, so that if stdin was replaced, we will
+% get the new version.
 stdin cvx
 ' catenate
 
