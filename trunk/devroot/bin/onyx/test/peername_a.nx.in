@@ -12,7 +12,7 @@
 
 $AF_LOCAL $SOCK_STREAM socketpair
 
-dup peername 1 sprint
-over peername 1 sprint
+dup peername $family get 1 sprint
+over peername $family get 1 sprint
 
 2 npop

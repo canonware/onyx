@@ -1,4 +1,4 @@
 Test begin
-<$family $AF_LOCAL $path `'>
-<$family $AF_LOCAL $path `'>
+$AF_LOCAL
+$AF_LOCAL
 Test end
