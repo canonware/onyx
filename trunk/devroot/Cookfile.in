@@ -55,6 +55,7 @@ A_CFLAGS = [CFLAGS] -O;
 P_CFLAGS = [CFLAGS] -O -pg;
 S_CFLAGS = [CFLAGS] -fPIC -DPIC;
 
+ENABLE_SHARED = @enable_shared@;
 LDFLAGS = @LDFLAGS@;
 EXTRALIBS = @LIBS@;
 
@@ -76,9 +77,11 @@ EXTRALIBS = @LIBS@;
  * User targets.
  */
 
-default : libs bins_a;
+standard : libs bins_a
+  set default
+;
 
-all : libs bins tests release;
+all : libs bins tests doc;
 
 libs_d : [D_LIBS];
 libs_a : [A_LIBS];

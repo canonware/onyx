@@ -7,7 +7,8 @@
  *
  * Version: <Version>
  *
- * Documentation build rules.
+ * Documentation build rules.  The install targets do not depend on the
+ * manual build targets, so that the manual won't be automatically rebuilt.
  *
  ******************************************************************************/
 
@@ -39,13 +40,13 @@ H_MANUAL = [objdir]/doc/html/manual.html;
 }
 
 install_doc : install_doc_p install_doc_h;
-install_doc_p : [P_MANUAL]
+install_doc_p : /* [P_MANUAL] */
 {
   [INSTALL] -d [PREFIX]/share/canonware/doc/ps;
   [INSTALL] -m 0444 [P_MANUAL] [PREFIX]/share/canonware/doc/ps;
 }
 
-install_doc_h : [H_MANUAL]
+install_doc_h : /* [H_MANUAL] */
 {
   [SHELL] -e;
 data

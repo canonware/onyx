@@ -23,7 +23,6 @@ A_LIBS = ;
 P_LIBS = ;
 S_LIBS = ;
 S_LINKS = ;
-ENABLE_SHARED = @enable_shared@;
 
 /*
  * Build rules for library C files --> object files.
