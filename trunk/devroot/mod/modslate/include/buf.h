@@ -11,6 +11,7 @@
  ******************************************************************************/
 
 typedef struct cw_hist_s cw_hist_t;
+typedef struct cw_bufe_s cw_bufe_t;
 typedef struct cw_bufm_s cw_bufm_t;
 typedef struct cw_buf_s cw_buf_t;
 
@@ -36,6 +37,41 @@ typedef enum
     /* Offset from EOB, must be negative. */
     BUFW_END
 } cw_bufw_t;
+
+struct cw_bufe_s
+{
+#ifdef CW_DBG
+    cw_uint32_t magic;
+#define CW_BUFE_MAGIC 0x8a94e34c
+#endif
+
+    /* Ordered bufe list linkage.  flink: forward, rlink: reverse. */
+    ql_elm(cw_bufe_t) flink;
+    ql_elm(cw_bufe_t) rlink;
+
+    /* Buffer this extent is in. */
+    cw_buf_t *buf;
+
+    /* Allocator state. */
+    cw_opaque_dealloc_t *dealloc;
+    const void *arg;
+
+    /* Gap movement can change this. */
+    cw_uint64_t beg_apos;
+    cw_uint64_t end_apos;
+
+    /* Always kept up to date. */
+    cw_uint64_t beg_line;
+    cw_uint64_t end_line;
+
+    /* Extents are either open or closed at each end. */
+    cw_bool_t beg_open:1;
+    cw_bool_t end_open:1;
+
+    /* A detachable extent is removed from the buffer if its size reaches 0. */
+    cw_bool_t detachable:1;
+    cw_bool_t detached:1;
+};
 
 struct cw_bufm_s
 {
@@ -98,6 +134,10 @@ struct cw_buf_s
 
     /* Ordered list of all markers. */
     ql_head(cw_bufm_t) bufms;
+
+    /* Ordered lists of all extents, in forward and reverse order. */
+    ql_head(cw_bufe_t) fbufes;
+    ql_head(cw_bufe_t) rbufes;
 
     /* History (undo/redo), if non-NULL. */
     cw_hist_t *hist;
@@ -194,3 +234,70 @@ bufm_after_insert(cw_bufm_t *a_bufm, const cw_bufv_t *a_bufv,
 
 void
 bufm_remove(cw_bufm_t *a_start, cw_bufm_t *a_end);
+
+/* bufe. */
+cw_bufe_t *
+bufe_new(cw_bufe_t *a_bufe, cw_buf_t *a_buf);
+
+void
+bufe_dup(cw_bufe_t *a_to, cw_bufe_t *a_from);
+
+void
+bufe_delete(cw_bufe_t *a_bufe);
+
+cw_buf_t *
+bufe_buf(cw_bufe_t *a_bufe);
+
+cw_uint64_t
+bufe_beg_get(cw_bufe_t *a_bufe);
+
+void
+bufe_beg_set(cw_bufe_t *a_bufe, cw_uint64_t a_beg);
+
+cw_uint64_t
+bufe_end_get(cw_bufe_t *a_bufe);
+
+void
+bufe_end_set(cw_bufe_t *a_bufe, cw_uint64_t a_end);
+
+cw_bool_t
+bufe_beg_open_get(cw_bufe_t *a_bufe);
+
+void
+bufe_beg_open_set(cw_bufe_t *a_bufe, cw_bool_t a_beg_open);
+
+cw_bool_t
+bufe_end_open_get(cw_bufe_t *a_bufe);
+
+void
+bufe_end_open_set(cw_bufe_t *a_bufe, cw_bool_t a_end_open);
+
+cw_bool_t
+bufe_detachable_get(cw_bufe_t *a_bufe);
+
+void
+bufe_detachable_set(cw_bufe_t *a_bufe, cw_bool_t a_detachable);
+
+cw_bool_t
+bufe_detached_get(cw_bufe_t *a_bufe);
+
+void
+bufe_detached_set(cw_bufe_t *a_bufe, cw_bool_t a_detached);
+
+void
+bufe_detach(cw_bufe_t *a_bufe);
+
+cw_bufe_t *
+bufe_before_get(cw_bufe_t *a_bufe, cw_bufm_t *a_bufm);
+
+cw_bufe_t *
+bufe_at_get(cw_bufe_t *a_bufe, cw_bufm_t *a_bufm);
+
+cw_bufe_t *
+bufe_after_get(cw_bufe_t *a_bufe, cw_bufm_t *a_bufm);
+
+cw_bufe_t *
+bufe_prev_get(cw_bufe_t *a_bufe);
+
+cw_bufe_t *
+bufe_next_get(cw_bufe_t *a_bufe);

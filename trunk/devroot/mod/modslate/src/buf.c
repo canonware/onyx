@@ -550,6 +550,8 @@ buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc,
 
     /* Initialize lists. */
     ql_new(&retval->bufms);
+    ql_new(&retval->fbufes);
+    ql_new(&retval->rbufes);
 
 #ifdef CW_DBG
     retval->magic = CW_BUF_MAGIC;
@@ -572,7 +574,7 @@ buf_delete(cw_buf_t *a_buf)
 
     cw_opaque_dealloc(a_buf->dealloc, a_buf->arg, a_buf->b,
 		      (a_buf->len + a_buf->gap_len));
-	
+
     if (a_buf->alloced)
     {
 	cw_opaque_dealloc(a_buf->dealloc, a_buf->arg, a_buf, sizeof(cw_buf_t));
@@ -1736,4 +1738,137 @@ void
 bufm_remove(cw_bufm_t *a_start, cw_bufm_t *a_end)
 {
     bufm_l_remove(a_start, a_end, TRUE);
+}
+
+/* bufe. */
+cw_bufe_t *
+bufe_new(cw_bufe_t *a_bufe, cw_buf_t *a_buf)
+{
+    cw_error("XXX Not implemented");
+}
+
+void
+bufe_dup(cw_bufe_t *a_to, cw_bufe_t *a_from)
+{
+    cw_error("XXX Not implemented");
+}
+
+void
+bufe_delete(cw_bufe_t *a_bufe)
+{
+    cw_error("XXX Not implemented");
+}
+
+cw_buf_t *
+bufe_buf(cw_bufe_t *a_bufe)
+{
+    cw_error("XXX Not implemented");
+}
+
+cw_uint64_t
+bufe_beg_get(cw_bufe_t *a_bufe)
+{
+    cw_error("XXX Not implemented");
+}
+
+void
+bufe_beg_set(cw_bufe_t *a_bufe, cw_uint64_t a_beg)
+{
+    cw_error("XXX Not implemented");
+}
+
+cw_uint64_t
+bufe_end_get(cw_bufe_t *a_bufe)
+{
+    cw_error("XXX Not implemented");
+}
+
+void
+bufe_end_set(cw_bufe_t *a_bufe, cw_uint64_t a_end)
+{
+    cw_error("XXX Not implemented");
+}
+
+cw_bool_t
+bufe_beg_open_get(cw_bufe_t *a_bufe)
+{
+    cw_error("XXX Not implemented");
+}
+
+void
+bufe_beg_open_set(cw_bufe_t *a_bufe, cw_bool_t a_beg_open)
+{
+    cw_error("XXX Not implemented");
+}
+
+cw_bool_t
+bufe_end_open_get(cw_bufe_t *a_bufe)
+{
+    cw_error("XXX Not implemented");
+}
+
+void
+bufe_end_open_set(cw_bufe_t *a_bufe, cw_bool_t a_end_open)
+{
+    cw_error("XXX Not implemented");
+}
+
+cw_bool_t
+bufe_detachable_get(cw_bufe_t *a_bufe)
+{
+    cw_error("XXX Not implemented");
+}
+
+void
+bufe_detachable_set(cw_bufe_t *a_bufe, cw_bool_t a_detachable)
+{
+    cw_error("XXX Not implemented");
+}
+
+cw_bool_t
+bufe_detached_get(cw_bufe_t *a_bufe)
+{
+    cw_error("XXX Not implemented");
+}
+
+void
+bufe_detached_set(cw_bufe_t *a_bufe, cw_bool_t a_detached)
+{
+    cw_error("XXX Not implemented");
+}
+
+void
+bufe_detach(cw_bufe_t *a_bufe)
+{
+    cw_error("XXX Not implemented");
+}
+
+cw_bufe_t *
+bufe_before_get(cw_bufe_t *a_bufe, cw_bufm_t *a_bufm)
+{
+    cw_error("XXX Not implemented");
+}
+
+cw_bufe_t *
+bufe_at_get(cw_bufe_t *a_bufe, cw_bufm_t *a_bufm)
+{
+    cw_error("XXX Not implemented");
+}
+
+cw_bufe_t *
+bufe_after_get(cw_bufe_t *a_bufe, cw_bufm_t *a_bufm)
+{
+    cw_error("XXX Not implemented");
+}
+
+cw_bufe_t *
+bufe_prev_get(cw_bufe_t *a_bufe)
+{
+    cw_error("XXX Not implemented");
+}
+
+cw_bufe_t *
+bufe_next_get(cw_bufe_t *a_bufe)
+{
+    cw_error("XXX Not implemented");
 }

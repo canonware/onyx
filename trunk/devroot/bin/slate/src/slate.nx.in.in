@@ -42,7 +42,7 @@ userdict begin
 
 % %=buffer= buffer_name %name
 /buffer_name {
-	buffer_aux /name get
+	buffer_aux_get /name get
 } def
 
 % - status_line -
@@ -238,7 +238,7 @@ userdict begin
 
 scratch <
 	/name	`*scratch*'
-> buffer_setaux
+> buffer_aux_set
 
 2 gcdict /setperiod get eval
 

@@ -22,6 +22,9 @@ buffer_type(cw_nxo_t *a_nxo);
 cw_nxn_t
 marker_type(cw_nxo_t *a_nxo);
 
+cw_nxn_t
+extent_type(cw_nxo_t *a_nxo);
+
 /* Hooks. */
 
 /* buffer. */
@@ -29,10 +32,13 @@ void
 modslate_buffer(void *a_data, cw_nxo_t *a_thread);
 
 void
-modslate_buffer_aux(void *a_data, cw_nxo_t *a_thread);
+modslate_buffer_p(void *a_data, cw_nxo_t *a_thread);
 
 void
-modslate_buffer_setaux(void *a_data, cw_nxo_t *a_thread);
+modslate_buffer_aux_get(void *a_data, cw_nxo_t *a_thread);
+
+void
+modslate_buffer_aux_set(void *a_data, cw_nxo_t *a_thread);
 
 void
 modslate_buffer_seq(void *a_data, cw_nxo_t *a_thread);
@@ -42,6 +48,9 @@ modslate_buffer_length(void *a_data, cw_nxo_t *a_thread);
 
 void
 modslate_buffer_lines(void *a_data, cw_nxo_t *a_thread);
+
+void
+modslate_buffer_extents(void *a_data, cw_nxo_t *a_thread);
 
 void
 modslate_buffer_undoable(void *a_data, cw_nxo_t *a_thread);
@@ -73,6 +82,9 @@ modslate_buffer_history_flush(void *a_data, cw_nxo_t *a_thread);
 /* marker. */
 void
 modslate_marker(void *a_data, cw_nxo_t *a_thread);
+
+void
+modslate_marker_p(void *a_data, cw_nxo_t *a_thread);
 
 void
 modslate_marker_seq(void *a_data, cw_nxo_t *a_thread);
@@ -118,3 +130,73 @@ modslate_marker_range_get(void *a_data, cw_nxo_t *a_thread);
 
 void
 modslate_marker_range_cut(void *a_data, cw_nxo_t *a_thread);
+
+/* extent. */
+void
+modslate_extent(void *a_data, cw_nxo_t *a_thread);
+
+void
+modslate_extent_p(void *a_data, cw_nxo_t *a_thread);
+
+void
+modslate_extent_copy(void *a_data, cw_nxo_t *a_thread);
+
+void
+modslate_extent_aux_get(void *a_data, cw_nxo_t *a_thread);
+
+void
+modslate_extent_aux_set(void *a_data, cw_nxo_t *a_thread);
+
+void
+modslate_extent_buffer(void *a_data, cw_nxo_t *a_thread);
+
+void
+modslate_extent_beg_get(void *a_data, cw_nxo_t *a_thread);
+
+void
+modslate_extent_beg_set(void *a_data, cw_nxo_t *a_thread);
+
+void
+modslate_extent_end_get(void *a_data, cw_nxo_t *a_thread);
+
+void
+modslate_extent_end_set(void *a_data, cw_nxo_t *a_thread);
+
+void
+modslate_extent_beg_open_get(void *a_data, cw_nxo_t *a_thread);
+
+void
+modslate_extent_beg_open_set(void *a_data, cw_nxo_t *a_thread);
+
+void
+modslate_extent_end_open_get(void *a_data, cw_nxo_t *a_thread);
+
+void
+modslate_extent_end_open_set(void *a_data, cw_nxo_t *a_thread);
+
+void
+modslate_extent_before_get(void *a_data, cw_nxo_t *a_thread);
+
+void
+modslate_extent_at_get(void *a_data, cw_nxo_t *a_thread);
+
+void
+modslate_extent_after_get(void *a_data, cw_nxo_t *a_thread);
+
+void
+modslate_extent_prev_get(void *a_data, cw_nxo_t *a_thread);
+
+void
+modslate_extent_next_get(void *a_data, cw_nxo_t *a_thread);
+
+void
+modslate_extent_detachable_get(void *a_data, cw_nxo_t *a_thread);
+
+void
+modslate_extent_detachable_set(void *a_data, cw_nxo_t *a_thread);
+
+void
+modslate_extent_detached_get(void *a_data, cw_nxo_t *a_thread);
+
+void
+modslate_extent_detach(void *a_data, cw_nxo_t *a_thread);
