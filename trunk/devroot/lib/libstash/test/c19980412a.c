@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 204 $
- * $Date: 1998-09-07 11:02:46 -0700 (Mon, 07 Sep 1998) $
+ * $Revision: 212 $
+ * $Date: 1998-09-08 20:22:03 -0700 (Tue, 08 Sep 1998) $
  *
  * <<< Description >>>
  *
@@ -22,35 +22,38 @@
 #define _INC_THREAD_H_
 #include <libstash.h>
 
-#define NUM_STRINGS 1000
+/* XXX This test leaks memory, but it doesn't affect the results. */
+
+#define NUM_STRINGS 20
 #define NUM_THREADS 100
 
-struct foo
+struct foo_s
 {
+  cw_rwl_t * lock;
   cw_oh_t * hash_o;
   cw_uint32_t thread_num;
 };
 
-
 void *
-insert_items(void * arg)
+insert_items(void * a_arg)
 {
-  cw_uint32_t i, thread_num;
+  cw_uint32_t i;
   char * string;
-  cw_oh_t * hash_o;
-  struct foo * bar = (struct foo *) arg;
-
-  hash_o = (cw_oh_t *) bar->hash_o;
-  thread_num = (cw_uint32_t) bar->thread_num;
+  struct foo_s * foo_var = (struct foo_s *) a_arg;
 
   for (i = 0; i < NUM_STRINGS; i++)
   {
     string = (char *) _cw_malloc(40);
-    sprintf(string, "%d String %d", thread_num, i);
-    _cw_assert(oh_item_insert(hash_o, (void *) string, (void *) string)
-	       == FALSE);
-/*     log_printf(g_log_o, "End of insertion loop, i == %u\n", i); */
+    sprintf(string, "thread %u, string %u",
+	    foo_var->thread_num, i);
+    rwl_wlock(foo_var->lock);
+    _cw_assert(FALSE == oh_item_insert(foo_var->hash_o,
+				       (void *) string, (void *) string));
+    rwl_wunlock(foo_var->lock);
+/*     log_eprintf(g_log_o, NULL, 0, "insert_items", */
+/* 		"thread %u, end iteration %u\n", foo_var->thread_num, i); */
   }
+  
   return NULL;
 }
 
@@ -60,32 +63,39 @@ main()
   cw_oh_t * hash_o;
   cw_thd_t threads[NUM_THREADS];
   cw_uint32_t i;
-  struct foo * bar;
+  struct foo_s * foo_var;
+  cw_rwl_t lock;
 
   glob_new();
   hash_o = oh_new(NULL, TRUE);
+  rwl_new(&lock);
 
   for (i = 0; i < NUM_THREADS; i++)
   {
-    bar = (struct foo *) _cw_malloc(sizeof(struct foo));
-    bar->hash_o = hash_o;
-    bar->thread_num = i;
+    foo_var = (struct foo_s *) _cw_malloc(sizeof(struct foo_s));
+    foo_var->lock = &lock;
+    foo_var->hash_o = hash_o;
+    foo_var->thread_num = i;
     
-    thd_new(&threads[i], insert_items, (void *) bar);
+    thd_new(&threads[i], insert_items, (void *) foo_var);
 /*     log_printf(g_log_o, "Got to end of for loop, i == %u\n", i); */
   }
 
   /* Join on threads, then delete them. */
-
   for (i = 0; i < NUM_THREADS; i++)
   {
     thd_join(&threads[i]);
     thd_delete(&threads[i]);
   }
-
-  log_printf(g_log_o, "Number of items in hash table: %d\n",
-	     oh_get_num_items(hash_o));
   
+  {
+    char buf[21];
+    
+    log_printf(g_log_o, "Number of items in hash table: %s\n",
+	       log_print_uint64(oh_get_num_items(hash_o), 10, buf));
+  }
+
+  rwl_delete(&lock);
   oh_delete(hash_o);
   glob_delete();
   
