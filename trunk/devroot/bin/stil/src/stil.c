@@ -179,7 +179,7 @@ end
 		case 'h':
 			usage(basename(argv[0]));
 			retval = 0;
-			goto RETURN;
+			goto CLERROR;
 		case 'V':
 			opt_version = TRUE;
 			break;
@@ -189,7 +189,7 @@ end
 				    "arguments\n", basename(argv[0]));
 				usage(basename(argv[0]));
 				retval = 1;
-				goto RETURN;
+				goto CLERROR;
 			}
 
 			opt_expression = optarg;
@@ -202,7 +202,7 @@ end
 			    basename(argv[0]));
 			usage(basename(argv[0]));
 			retval = 1;
-			goto RETURN;
+			goto CLERROR;
 		}
 
 		/*
@@ -214,7 +214,7 @@ end
 			    basename(argv[0]));
 			usage(basename(argv[0]));
 			retval = 1;
-			goto RETURN;
+			goto CLERROR;
 		}
 
 		/*
@@ -301,6 +301,7 @@ end
 	RETURN:
 	stilts_delete(&stilts, stilt);
 	stil_delete(&stil);
+	CLERROR:
 #ifdef _STIL_SIGHANDLER
 	/*
 	 * Tell the signal handler thread to quit, then join on it.
