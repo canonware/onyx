@@ -942,6 +942,25 @@ Sequence & Description \\
 {\tt {\bs}1..{\bs}9} & Refer to captured expressions 1 through 9. \\
 \end{longtable}
 
+\section{Object-oriented programming}
+
+Onyx provides basic mechanisms for programming in an object-oriented style.  The
+class and instance types, a set of operators, and \htmlref{vclass}{sec:vclass},
+provide all the necessary functionality.  The object-oriented programming
+support can be summarized by the following feature list:
+
+\begin{itemize}
+\item{Single inheritance.}
+\item{Reasonably fast fully dynamic method dispach.}
+\item{No hindrances, such as private/protected/public data/method distinctions.}
+\item{Full introspection capabilities.}
+\end{itemize}
+
+Very little policy is built into the operators that implement the foundation for
+object-oriented programming support.  See Section~\ref{sec:vclass} for details
+on the policies that are set by vclass, which is provided as a default base
+class.
+
 \section{Dictionary reference}
 
 All operators built in to Onyx have corresponding names that are composed
@@ -966,3 +985,9 @@ name lookups.
 \input{@abs_srcroot@/doc/latex/onyx/lang_dict_threaddict}
 \input{@abs_srcroot@/doc/latex/onyx/lang_dict_threadsdict}
 \input{@abs_srcroot@/doc/latex/onyx/lang_dict_userdict}
+
+\section{Class reference}
+
+The following documents the classes that are built into Onyx.
+
+\input{/home/jasone/cw/devroot/doc/latex/onyx/lang_class_vclass}

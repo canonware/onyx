@@ -1424,7 +1424,7 @@ operators} \\
 \optableent
 	{instance}
 	{{\bf \htmlref{isa}{systemdict:isa}}}
-	{class}
+	{class/null}
 	{Get class for instance.}
 \hline
 \optableent
@@ -1444,6 +1444,12 @@ operators} \\
 	{{\bf \htmlref{handletag}{systemdict:handletag}}}
 	{tag}
 	{Get handle tag.}
+\hline
+\optableent
+	{--}
+	{{\bf \htmlref{vclass}{systemdict:vclass}}}
+	{class}
+	{Get vclass.}
 \hline \hline
 \multicolumn{2}{|l|}{\label{subsec:systemdict:file}File and filesystem
 operators} \\
@@ -3495,7 +3501,7 @@ onyx:0>
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[class: ]
-			A \classname{class} object.
+			A class object.
 		\end{description}
 	\item[Errors(s): ] None.
 	\item[Description: ]
@@ -3947,24 +3953,30 @@ onyx:0>
 	\end{description}
 \label{systemdict:cvc}
 \index{cvc@\onyxop{}{cvc}{}}
-\item[{\onyxop{OPARGS}{cvc}{OPOUTS}}: ]
+\item[{\onyxop{obj}{cvc}{obj}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[obj: ]
+			An object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[obj: ]
+			The same object that was passed in, but with the
+			callable attribute set.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
-		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Set the callable attribute for \oparg{obj}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> $foo cvc 1 sprint
+:foo
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:cvds}
@@ -5791,15 +5803,19 @@ onyx:0>
 	\end{description}
 \label{systemdict:implementor}
 \index{implementor@\onyxop{}{implementor}{}}
-\item[{\onyxop{OPARGS}{implementor}{OPOUTS}}: ]
+\item[{\onyxop{class name}{implementor}{class/null}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[class: ]
+			A class object.
+		\item[name: ]
+			An object of any type, usually a name object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[class/null: ]
+			A class or null object.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
@@ -5807,21 +5823,33 @@ onyx:0>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Search up \oparg{class}'s inheritance hierarchy and return the
+		first class that implements \oparg{name}, or a null object if
+		\oparg{name} is not implemented.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> class dup vclass setsuper
+onyx:1> $new implementor classname 1 sprint
+$vclass
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:implements}
 \index{implements@\onyxop{}{implements}{}}
-\item[{\onyxop{OPARGS}{implements}{OPOUTS}}: ]
+\item[{\onyxop{class name}{implements}{boolean}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[class: ]
+			A class object.
+		\item[name: ]
+			An object of any type, usually a name object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[boolean: ]
+			True if \oparg{name} is implemented by \oparg{class},
+			false otherwise.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
@@ -5829,8 +5857,15 @@ onyx:0>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Return true if \oparg{name} is implemented by \oparg{class};
+		return false otherwise.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:1> vclass $new implements 1 sprint
+true
+onyx:1> vclass $foo implements 1 sprint
+false
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:inc}
@@ -5863,24 +5898,21 @@ onyx:0>
 	\end{description}
 \label{systemdict:instance}
 \index{instance@\onyxop{}{instance}{}}
-\item[{\onyxop{OPARGS}{instance}{OPOUTS}}: ]
+\item[{\onyxop{--}{instance}{instance}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[instance: ]
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{stackunderflow}{stackunderflow}.]
-		\item[\htmlref{typecheck}{typecheck}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Create an instance object.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> instance 1 sprint
+-instance-
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:iobuf}
@@ -5945,7 +5977,7 @@ onyx:2>
 	\end{description}
 \label{systemdict:isa}
 \index{isa@\onyxop{}{isa}{}}
-\item[{\onyxop{instance}{isa}{class}}: ]
+\item[{\onyxop{instance}{isa}{class/null}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -5954,8 +5986,8 @@ onyx:2>
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[class: ]
-			A class object.
+		\item[class/null: ]
+			A class or null object.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
@@ -6024,15 +6056,20 @@ onyx:0>
 	\end{description}
 \label{systemdict:kind}
 \index{kind@\onyxop{}{kind}{}}
-\item[{\onyxop{OPARGS}{kind}{OPOUTS}}: ]
+\item[{\onyxop{instance class}{kind}{boolean}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[instance: ]
+			An instance object.
+		\item[class: ]
+			A class object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[boolean: ]
+			True if \oparg{class} is in \oparg{instance}'s 
+			inheritance hierarchy, false otherwise.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
@@ -6040,8 +6077,17 @@ onyx:0>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Determine whether \oparg{class} is in \oparg{instance}'s
+		inheritance hierarchy.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> $fooclass class dup vclass setsuper def
+onyx:0> instance dup fooclass setisa
+onyx:1> dup fooclass kind 1 sprint
+true
+onyx:1> dup vclass kind 1 sprint
+true
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:known}
@@ -6649,24 +6695,36 @@ onyx:0>
 	\end{description}
 \label{systemdict:method}
 \index{method@\onyxop{}{method}{}}
-\item[{\onyxop{OPARGS}{method}{OPOUTS}}: ]
+\item[{\onyxop{class name}{method}{method}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[class: ]
+			A class object.
+		\item[name: ]
+			An object of any type, usually a name object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[method: ]
+			The bottommost method associated with \oparg{name} in
+			\oparg{class}'s inheritance hierarchy.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{undefined}{undefined}.]
 		\end{description}
 	\item[Description: ]
+		Get the bottommost method associated with \oparg{name} in
+		\oparg{class}'s inheritance hierarchy.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> $fooclass class dup vclass setsuper def
+onyx:0> fooclass $new method 1 sprint
+{--instance-- --dup-- --dn-- --setisa-- --dup-- --dict-- --setdata--}
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:methods}
@@ -9298,6 +9356,8 @@ onyx:0>
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
+		\item[class: ]
+			A class object.
 		\item[name/null: ]
 			A name or null object.
 		\end{description}
@@ -12648,6 +12708,26 @@ onyx:4>
 
 onyx:0> userdict 1 sprint
 <>
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:vclass}
+\index{vclass@\onyxop{}{vclass}{}}
+\item[{\onyxop{--}{vclass}{class}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[dict: ]
+			A class.
+		\end{description}
+	\item[Errors(s): ] None.
+	\item[Description: ]
+		Get vclass.  See Section~\ref{sec:vclass} for details on vclass.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> vclass 1 sprint
+-class-
 onyx:0>
 		\end{verbatim}
 	\end{description}
