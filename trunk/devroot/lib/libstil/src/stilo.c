@@ -347,11 +347,11 @@ static void	stilo_p_name_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd,
 
 static cw_stiloe_name_t *stilo_p_name_gref(cw_stilt_t *a_stilt, const char
     *a_str, cw_uint32_t a_len, cw_bool_t a_is_static);
-static cw_bool_t stilo_p_name_kref_insert(cw_stilo_t *a_stilo, cw_stilt_t
+static void stilo_p_name_kref_insert(cw_stilo_t *a_stilo, cw_stilt_t
     *a_stilt, const cw_stiloe_dict_t *a_dict);
-static cw_bool_t stilo_p_name_kref_search(cw_stilo_t *a_stilo, const
+static cw_bool_t stilo_p_name_kref_search(const cw_stilo_t *a_stilo, const
     cw_stiloe_dict_t *a_dict);
-static cw_bool_t stilo_p_name_kref_remove(cw_stilo_t *a_stilo, cw_stilt_t
+static cw_bool_t stilo_p_name_kref_remove(const cw_stilo_t *a_stilo, cw_stilt_t
     *a_stilt, const cw_stiloe_dict_t *a_dict);
 
 /* null. */
@@ -1342,6 +1342,9 @@ stilo_dict_def(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilo_t *a_key,
 			/* Insert. */
 			dch_insert(&dict->e.d.hash, (void *)&dicto->key,
 			    (void *)dicto, chi);
+
+			if (dict->stiloe.global)
+				stilo_p_name_kref_insert(a_key, a_stilt, dict);
 		}
 		stiloe_p_unlock(&dict->stiloe);
 	}
@@ -1373,6 +1376,9 @@ stilo_dict_undef(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const cw_stilo_t
 			_cw_stilt_dicto_put(a_stilt, dicto);
 			_cw_stilt_chi_put(a_stilt, chi);
 		}
+		if (dict->stiloe.global)
+			stilo_p_name_kref_remove(a_key, a_stilt, dict);
+
 		stiloe_p_unlock(&dict->stiloe);
 	}
 }
@@ -1393,7 +1399,8 @@ stilo_dict_lookup(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const cw_stilo_t
 	if (dict->stiloe.indirect) {
 		retval = stilo_dict_lookup(&dict->e.i.stilo, a_stilt, a_key,
 		    r_stilo);
-	} else {
+	} else if ((dict->stiloe.global == FALSE) ||
+	    (stilo_p_name_kref_search(a_key, dict) == FALSE)) {
 		cw_stiloe_dicto_t	*dicto;
 
 		stiloe_p_lock(&dict->stiloe);
@@ -1405,7 +1412,8 @@ stilo_dict_lookup(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const cw_stilo_t
 		} else
 			retval = TRUE;
 		stiloe_p_unlock(&dict->stiloe);
-	}
+	} else
+		retval = TRUE;
 	
 	return retval;
 }
@@ -1979,11 +1987,10 @@ stilo_p_name_gref(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len,
 }
 
 /* Insert a keyed reference. */
-static cw_bool_t
+static void
 stilo_p_name_kref_insert(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const
     cw_stiloe_dict_t *a_dict)
 {
-	cw_bool_t		retval;
 	cw_stiloe_name_t	*name;
 
 	/* Chase down the name. */
@@ -2003,19 +2010,17 @@ stilo_p_name_kref_insert(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const
 
 	if (dch_insert(name->e.n.keyed_refs, (void *)a_dict, NULL,
 	    _cw_stilt_chi_get(a_stilt))) {
-		retval = TRUE;
-		goto RETURN;
+		/* Attempted double insertion. */
+		_cw_error("Programming error");
 	}
 
-	retval = FALSE;
-	RETURN:
 	stiloe_p_unlock(&name->stiloe);
-	return retval;
 }
 
 /* Search for a keyed reference matching a_dict. */
 static cw_bool_t
-stilo_p_name_kref_search(cw_stilo_t *a_stilo, const cw_stiloe_dict_t *a_dict)
+stilo_p_name_kref_search(const cw_stilo_t *a_stilo, const cw_stiloe_dict_t
+    *a_dict)
 {
 	cw_bool_t		retval;
 	cw_stiloe_name_t	*name;
@@ -2040,7 +2045,7 @@ stilo_p_name_kref_search(cw_stilo_t *a_stilo, const cw_stiloe_dict_t *a_dict)
 
 /* Remove a keyed reference. */
 static cw_bool_t
-stilo_p_name_kref_remove(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const
+stilo_p_name_kref_remove(const cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const
     cw_stiloe_dict_t *a_dict)
 {
 	cw_bool_t		retval;
