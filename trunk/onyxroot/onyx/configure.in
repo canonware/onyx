@@ -736,8 +736,8 @@ if test "x$bin_onyx" = "x1" ; then
   tmpath=ONYX_MPATH=
   trpath=ONYX_RPATH=
   for i in $mods ; do
-    tmpath=$tmpath:$abs_objroot/mod/$i/nxm
-    trpath=$trpath:$abs_objroot/mod/$i/nx
+    tmpath=$tmpath:$abs_srcroot/mod/$i/nxm:$abs_objroot/mod/$i/nxm
+    trpath=$trpath:$abs_srcroot/mod/$i/nx:$abs_objroot/mod/$i/nx
   done
   dnl Remove leading ':'.
   tmpath=`echo $tmpath | sed s/://`
