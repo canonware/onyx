@@ -32,10 +32,10 @@ struct cw_histh_s
 #define HISTH_TAG_SYNK		 6
 #define HISTH_TAG_SREM		 7
 #define HISTH_TAG_SDEL		 8
-#define HISTH_TAG_INS		 9
-#define HISTH_TAG_YNK		10
-#define HISTH_TAG_REM		11
-#define HISTH_TAG_DEL		12
+#define HISTH_TAG_LINS		 9
+#define HISTH_TAG_LYNK		10
+#define HISTH_TAG_LREM		11
+#define HISTH_TAG_LDEL		12
     cw_uint8_t tag;
 
     /* Auxiliary field (bpos or data byte count). */
