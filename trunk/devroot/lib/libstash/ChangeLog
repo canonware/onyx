@@ -1,3 +1,8 @@
+2000-02-12  Jason Evans  <jasone@canonware.com>
+
+	* include/libstash/libstash.h (_cw_marker): Remove, since
+	_cw_out_put_e() is a superior alternative.
+
 2000-02-11  Jason Evans  <jasone@canonware.com>
 
 	* : Add the dch (dynamic chained hashing) class.

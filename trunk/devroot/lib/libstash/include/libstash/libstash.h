@@ -214,13 +214,6 @@ extern cw_out_t * cw_g_out;
       } \
   }
 
-/* Macro to ease the drudgery of printing out debugging spew to trace the
- * execution path. */
-#  define _cw_marker(a) \
-  { \
-    out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__, "[s]\n", a); \
-  }
-
 /* Macro to do the drudgery of assuring that a pointer is non-NULL. */
 #  define _cw_check_ptr(x) \
   do \
@@ -236,7 +229,6 @@ extern cw_out_t * cw_g_out;
   } while (0);
 #else
 #  define _cw_assert(a)
-#  define _cw_marker(a)
 #  define _cw_check_ptr(a)
 #endif
 
