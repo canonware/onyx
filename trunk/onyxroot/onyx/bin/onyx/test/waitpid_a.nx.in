@@ -16,7 +16,7 @@
 
 # Test successful child.
 [
-    argv 1 get `/b_waitpid_a_a.nx' cat
+    argv 2 get `/b_waitpid_a_a.nx' cat
 ] forkexec
 
 waitpid dup 0 ne {
@@ -27,7 +27,7 @@ waitpid dup 0 ne {
 
 # Test error child.
 [
-    argv 1 get `/b_waitpid_a_b.nx' cat
+    argv 2 get `/b_waitpid_a_b.nx' cat
 ] forkexec
 
 waitpid dup 0 ne {
@@ -38,7 +38,7 @@ waitpid dup 0 ne {
 
 # Test signal-terminated child.
 [
-    argv 1 get `/b_waitpid_a_c.nx' cat
+    argv 2 get `/b_waitpid_a_c.nx' cat
 ] forkexec
 
 dup $SIGKILL kill

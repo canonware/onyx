@@ -17,7 +17,7 @@
 `Test begin\n' print flush
 
 [
-    argv 1 get `/b_ppid_a.nx' cat
+    argv 2 get `/b_ppid_a.nx' cat
     pid cvs
 ] forkexec
 

@@ -15,7 +15,7 @@
 `Test begin\n' print flush
 
 [
-    argv 1 get `/b_system_a.nx' cat
+    argv 2 get `/b_system_a.nx' cat
 ] system
 
 dup 0 ne {

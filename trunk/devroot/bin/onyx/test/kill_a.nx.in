@@ -16,7 +16,7 @@
 
 # Signal number.
 [
-    argv 1 get `/b_kill_a.nx' cat
+    argv 2 get `/b_kill_a.nx' cat
 ] forkexec
 
 dup 9 kill
@@ -29,7 +29,7 @@ waitpid dup 0 ne {
 
 # Signal name.
 [
-    argv 1 get `/b_kill_a.nx' cat
+    argv 2 get `/b_kill_a.nx' cat
 ] forkexec
 
 dup $SIGKILL kill

@@ -15,7 +15,7 @@
 `Test begin\n' print flush
 
 [
-    argv 1 get `/b_forkexec_a.nx' cat
+    argv 2 get `/b_forkexec_a.nx' cat
 ] forkexec
 
 waitpid dup 0 ne {
