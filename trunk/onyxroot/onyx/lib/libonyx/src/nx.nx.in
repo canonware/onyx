@@ -1185,7 +1185,7 @@ $module vclass <
     #instance#
     #version version_set -
     $version_set {
-	this data $version dn put
+	$version exch ;def
     } bind
 
     #instance#
@@ -1235,7 +1235,7 @@ $module vclass <
 	#depname
 	dup cvx eval
 	#depname #depmod
-	this data up put
+	,deps up put
     } bind
 
     # Store a reference to #hook, and evaluate it at the beginning of :unload.
@@ -1243,7 +1243,7 @@ $module vclass <
     #instance#
     #hook pre_unload_hook_set -
     $pre_unload_hook_set {
-	this data $pre_unload_hook dn put
+	$pre_unload_hook exch ;def
     } bind
 
     # Store a reference to #hook, and evaluate it at the end of :unload.
@@ -1251,7 +1251,7 @@ $module vclass <
     #instance#
     #hook post_unload_hook_set -
     $post_unload_hook_set {
-	this data $post_unload_hook dn put
+	$post_unload_hook exch ;def
     } bind
 
     # Unload the module.
