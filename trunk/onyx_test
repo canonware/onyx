@@ -66,46 +66,44 @@ bins="onyx"
 #
 # Test everything with every allowable combination of configure options.
 #
-for h in 0 1 2 3 4 5 ; do
+for h in 0 1 2 3 4 5 6 7 8 9 10 11 ; do
 	# --enable-debug
 	case $h in
-	0|2|3|5)
+	*)
 		conf="$conf"
 		;;
-	1|4)
+	4|5|6|7)
 		conf="$conf --enable-debug"
-		;;
-	*)
-		echo "RELEASE error"
-		exit 1
 		;;
 	esac
 
 	# --enable-profile
 	case $h in
-	0|1|3|4)
+	*)
 		conf="$conf"
 		;;
-	2|5)
+	8|9|10|11)
 		conf="$conf --enable-profile"
 		;;
+	esac
+
+	# --disable-threads
+	case $h in
 	*)
-		echo "RELEASE error"
-		exit 1
+		conf="$conf"
+		;;
+	0|1|4|5|8|9)
+		conf="$conf --disable-threads"
 		;;
 	esac
 
 	# --disable-inlines
 	case $h in
-	0|1|2)
+	*)
 		conf="$conf"
 		;;
-	3|4|5)
+	1|3|5|7|9|11)
 		conf="$conf --disable-inlines"
-		;;
-	*)
-		echo "RELEASE error"
-		exit 1
 		;;
 	esac
 

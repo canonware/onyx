@@ -139,7 +139,7 @@ if (defined($opt_tag) && !defined($opt_cvsnotag))
     $opt_pkgname = $opt_pkgname . "-" . $opt_tag;
     $tag_cvs = $opt_tag;
     $tag_cvs =~ s/\./_/g;
-    $tag_cvs = "SNAP_$tag_cvs";
+    $tag_cvs = "ONYX_$tag_cvs";
     $tag_cmd = "-r $tag_cvs";
 }
 elsif (defined($opt_tag) && defined($opt_cvsnotag))
