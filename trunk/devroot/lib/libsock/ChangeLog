@@ -1,7 +1,9 @@
 1999-08-25  Jason Evans  <jasone@canonware.com>
 
-	* src/socks.c (socks_listen): Don't specify -1 backlog to
-	listen(), since it doesn't do the right thing on Solaris.
+	* : Completely get rid of select() usage.
+
+	* src/socks.c (socks_listen): Use 511 backlog for listen(), since
+	-1 doesn't do the right thing on Solaris.
 
 	* : Get rid of some more artifacts of the now non-existent
 	FD_SETSIZE limitation workarounds.

@@ -22,6 +22,7 @@
 #include <fcntl.h>
 #include <sys/time.h>
 #include <sys/types.h>
+#include <poll.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -169,7 +170,8 @@ socks_accept(cw_socks_t * a_socks, struct timeval * a_timeout,
 	     cw_sock_t * r_sock)
 {
   cw_sock_t * retval;
-  fd_set fd_read_set;
+  struct pollfd pfd;
+  int timeout, nready;
 
   _cw_check_ptr(a_socks);
   _cw_check_ptr(r_sock);
@@ -181,14 +183,38 @@ socks_accept(cw_socks_t * a_socks, struct timeval * a_timeout,
     goto RETURN;
   }
 
-  /* Clear the file descriptor set and add our descriptor. */
-  FD_ZERO(&fd_read_set);
-  FD_SET(a_socks->sockfd, &fd_read_set);
+  bzero(&pfd, sizeof(struct pollfd));
+  pfd.fd = a_socks->sockfd;
+  pfd.events = POLLIN;
 
-  /* See if someone wants to connect. */
-  if (select(a_socks->sockfd + 1,
-	     &fd_read_set, NULL, NULL,
-	     a_timeout))
+  /* Convert a_timeout to something useful to poll(). */
+  if (NULL == a_timeout)
+  {
+    timeout = -1;
+  }
+  else
+  {
+    timeout = (a_timeout->tv_sec * 1000) + (a_timeout->tv_usec / 1000000);
+
+    if (0 > timeout)
+    {
+      timeout = INT_MAX;
+    }
+  }
+  
+  nready = poll(&pfd, 1, timeout);
+  if (-1 == nready)
+  {
+    if (dbg_is_registered(cw_g_dbg, "socks_error"))
+    {
+      out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+		"Error in poll(): [s]\n", strerror(errno));
+    }
+    retval = NULL;
+    goto RETURN;
+  }
+
+  if (0 < nready)
   {
     int sockfd;
     struct sockaddr_in client_addr;

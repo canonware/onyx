@@ -98,7 +98,7 @@ sockb_init(cw_uint32_t a_max_fds, cw_uint32_t a_bufc_size,
     signal(SIGPIPE, SIG_IGN);
   
     /* Create a pipe that will be used in conjunction with the message queues to
-     * make the back end thread return from the select() call. */
+     * make the back end thread return from the poll() call. */
     {
       int filedes[2];
 
@@ -153,7 +153,7 @@ sockb_init(cw_uint32_t a_max_fds, cw_uint32_t a_bufc_size,
     g_sockb->should_quit = FALSE;
 
     /* Create the semaphore used for determining whether data should be written
-     * to the pipe in order to force a return from select(). */
+     * to the pipe in order to force a return from poll(). */
     sem_new(&g_sockb->pipe_sem, 1);
 
     /* Create the spare bufc pool and initialize associated variables. */
@@ -617,7 +617,7 @@ sockb_p_entry_func(void * a_arg)
   }
 
   /* Add g_sockb->pipe_out for readingg, so that this thread will return from
-   * select() when data is written to g_sockb->pipe_in. */
+   * poll() when data is written to g_sockb->pipe_in. */
   fds[0].fd = g_sockb->pipe_out;
   fds[0].events = POLLIN;
   nfds = 1;
@@ -856,7 +856,7 @@ sockb_p_entry_func(void * a_arg)
       {
 	/* This is an error that should never happen. */
 	out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-		  "Fatal error in select(): [s]\n", strerror(errno));
+		  "Fatal error in poll(): [s]\n", strerror(errno));
 	abort();
       }
     }
@@ -885,8 +885,8 @@ sockb_p_entry_func(void * a_arg)
 	/* Read the data out of the pipe so that the next call doesn't
 	 * immediately return just because of data already in the pipe.  Note
 	 * that there is no risk of deadlock due to emptying data from the pipe
-	 * that is written after the select call, since the message queues are
-	 * checked after emptying the pipe, but before calling select()
+	 * that is written after the poll() call, since the message queues are
+	 * checked after emptying the pipe, but before calling poll()
 	 * again. */
 	bytes_read = read(g_sockb->pipe_out, t_buf, 2);
 	if (bytes_read == -1)
@@ -900,11 +900,11 @@ sockb_p_entry_func(void * a_arg)
 	else if (bytes_read > 0)
 	{
 	  /* Set the semaphore to one.  This will cause one, and only one byte
-	   * to be written to g_sockb->pipe_in and cause a return from select()
-	   * if one or more messages needs handled.  Note that we must post the
+	   * to be written to g_sockb->pipe_in and cause a return from poll() if
+	   * one or more messages needs handled.  Note that we must post the
 	   * semophore before handling the message queues, since it is possible
 	   * to have new messages come in and miss them otherwise.  Posting
-	   * first means that we may execute the select() loop once without
+	   * first means that we may execute the poll() loop once without
 	   * doing anything, since the message that caused data to be written to
 	   * the pipe may have already been read. */
 	  sem_post(&g_sockb->pipe_sem);

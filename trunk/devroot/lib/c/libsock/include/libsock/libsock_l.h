@@ -26,8 +26,8 @@
  *
  * <<< Description >>>
  *
- * If no data has been written to the pipe that causes select() to return, write
- * a byte.  This function makes it possible to use a non-polling select loop.
+ * If no data has been written to the pipe that causes poll() to return, write
+ * a byte.  This function makes it possible to use a non-polling poll loop.
  *
  ****************************************************************************/
 void

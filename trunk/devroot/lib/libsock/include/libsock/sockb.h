@@ -24,7 +24,7 @@
  * one sockb instance, a global (g_sockb) is implicitly used by the methods in
  * this class.
  *
- * The goal of sockb is to centrally handle all of the select() waiting in one
+ * The goal of sockb is to centrally handle all of the poll() waiting in one
  * thread to improve performance, at the same time as making reading and writing
  * seem completely asynchronous at the sock interface level.
  *

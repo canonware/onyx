@@ -16,6 +16,7 @@
 #include <fcntl.h>
 #include <sys/time.h>
 #include <sys/types.h>
+#include <poll.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -211,28 +212,42 @@ sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port,
      * hack out once we no longer care about that platform. */
     if ((errno == EINPROGRESS) || (errno == EAGAIN))
     {
-      fd_set fd_read_set, fd_write_set;
+      struct pollfd pfd;
+      int timeout;
 
-      /* Need to select() on the sockfd until the connect() completes. */
-      FD_ZERO(&fd_read_set);
-      FD_ZERO(&fd_write_set);
-      FD_SET(a_sock->sockfd, &fd_read_set);
-      FD_SET(a_sock->sockfd, &fd_write_set);
-      if (0 > select(a_sock->sockfd + 1, &fd_read_set, &fd_write_set,
-		     NULL, a_timeout))
+      bzero(&pfd, sizeof(struct pollfd));
+      pfd.fd = a_sock->sockfd;
+      pfd.events = POLLIN | POLLOUT;
+
+      /* Convert a_timeout to something useful to poll(). */
+      if (NULL == a_timeout)
+      {
+	timeout = -1;
+      }
+      else
+      {
+	timeout = (a_timeout->tv_sec * 1000) + (a_timeout->tv_usec / 1000000);
+
+	if (0 > timeout)
+	{
+	  timeout = INT_MAX;
+	}
+      }
+      
+      if (0 > poll(&pfd, 1, timeout))
       {
 	if (dbg_is_registered(cw_g_dbg, "sock_error"))
 	{
 	  out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-		    "Error in select(): [s]\n", strerror(errno));
+		    "Error in poll(): [s]\n", strerror(errno));
 	}
 	a_sock->sockfd = -1;
 	retval = TRUE;
 	goto RETURN;
       }
-      else if (FD_ISSET(a_sock->sockfd, &fd_write_set))
+      else if (pfd.revents & POLLOUT)
       {
-	if (FD_ISSET(a_sock->sockfd, &fd_read_set))
+	if (pfd.revents & POLLIN)
 	{
 	  int error, len;
 
@@ -272,7 +287,7 @@ sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port,
 	if (dbg_is_registered(cw_g_dbg, "sock_error"))
 	{
 	  out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-		    "select() timeout.  Connection failed\n");
+		    "poll() timeout.  Connection failed\n");
 	}
 	a_sock->sockfd = -1;
 	retval = TRUE;
@@ -948,7 +963,7 @@ sock_p_config_socket(cw_sock_t * a_sock)
   }
 
   /* Set the socket to non-blocking, so that we don't have to worry about
-   * sockb's select loop locking up. */
+   * sockb's poll loop locking up. */
   val = fcntl(a_sock->sockfd, F_GETFL, 0);
   if (val == -1)
   {
@@ -972,8 +987,9 @@ sock_p_config_socket(cw_sock_t * a_sock)
   }
 
   /* Tell the socket to wait and try to flush buffered data before closing at
-   * the end. */
-  /* XXX 10 seconds is a bit arbitrary, eh? */
+   * the end.
+   *
+   * 10 seconds is a bit arbitrary, eh? */
   linger_struct.l_onoff = 1;
   linger_struct.l_linger = 10;
   if (setsockopt(a_sock->sockfd, SOL_SOCKET, SO_LINGER,

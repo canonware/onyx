@@ -86,7 +86,7 @@ sockb_p_notify(cw_mq_t * a_mq, int a_sockfd);
  * <<< Description >>>
  *
  * Entry point for the back end thread.  The back end thread essentially
- * executes a select() loop and communicates with other threads via message
+ * executes a poll() loop and communicates with other threads via message
  * queues (list's).
  *
  ****************************************************************************/
