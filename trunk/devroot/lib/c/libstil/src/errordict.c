@@ -117,15 +117,17 @@ errordict_p_generic(cw_stilo_t *a_thread, cw_stilo_threade_t a_threade,
 	stilo_boolean_new(tstilo, TRUE);
 	stilo_name_new(tname, stilo_thread_stil_get(a_thread),
 	    stiln_str(STILN_newerror), stiln_len(STILN_newerror), TRUE);
-	stilo_dict_def(currenterror, stilo_thread_stil_get(a_thread), tname, tstilo);
+	stilo_dict_def(currenterror, stilo_thread_stil_get(a_thread), tname,
+	    tstilo);
 
 	/* Set errorname. */
 	stilo_name_new(tname, stilo_thread_stil_get(a_thread),
 	    stiln_str(STILN_errorname), stiln_len(STILN_errorname), TRUE);
 	stiln = stilo_threade_stiln(a_threade);
-	stilo_name_new(tstilo, stilo_thread_stil_get(a_thread), stiln_str(stiln),
-	    stiln_len(stiln), TRUE);
-	stilo_dict_def(currenterror, stilo_thread_stil_get(a_thread), tname, tstilo);
+	stilo_name_new(tstilo, stilo_thread_stil_get(a_thread),
+	    stiln_str(stiln), stiln_len(stiln), TRUE);
+	stilo_dict_def(currenterror, stilo_thread_stil_get(a_thread), tname,
+	    tstilo);
 	
 	if (a_record) {
 		cw_stilo_t	*ostack, *estack, *dstack;
@@ -137,8 +139,8 @@ errordict_p_generic(cw_stilo_t *a_thread, cw_stilo_threade_t a_threade,
 		/* Set command to second element of estack. */
 		stilo_name_new(tname, stilo_thread_stil_get(a_thread),
 		    stiln_str(STILN_command), stiln_len(STILN_command), TRUE);
-		stilo_dict_def(currenterror, stilo_thread_stil_get(a_thread), tname,
-		    stilo_stack_nget(estack, 1));
+		stilo_dict_def(currenterror, stilo_thread_stil_get(a_thread),
+		    tname, stilo_stack_nget(estack, 1));
 
 		/*
 		 * If recordstacks is TRUE, snapshot the stacks.
@@ -155,24 +157,31 @@ errordict_p_generic(cw_stilo_t *a_thread, cw_stilo_threade_t a_threade,
 			xep_throw(_CW_STILX_CURRENTERROR);
 		}
 		if (stilo_boolean_get(tstilo) && a_threade) {
-			cw_stilo_t	*arr, *stilo;
+			cw_stilo_t	*stack, *stilo, *nstilo;
 			cw_sint32_t	i, count;
 
-			arr = stilo_stack_push(tstack);
+			stack = stilo_stack_push(tstack);
 
 			/* ostack. */
 			stilo_name_new(tname, stilo_thread_stil_get(a_thread),
 			    stiln_str(STILN_ostack), stiln_len(STILN_ostack),
 			    TRUE);
 			count = stilo_stack_count(ostack);
-			stilo_array_new(arr, stilo_thread_stil_get(a_thread),
-			    stilo_thread_currentlocking(a_thread), count);
-			for (i = count - 1, stilo = NULL; i >= 0; i--) {
+			for (i = 0, stilo = NULL; i < count; i++) {
 				stilo = stilo_stack_down_get(ostack, stilo);
-				stilo_array_el_set(arr, stilo, i);
+				nstilo = stilo_stack_push(tstack);
+				stilo_dup(nstilo, stilo);
 			}
-			stilo_dict_def(currenterror, stilo_thread_stil_get(a_thread),
-			    tname, arr);
+			stilo_stack_new(stack, stilo_thread_stil_get(a_thread),
+			    FALSE);
+			for (i = 0; i < count; i++) {
+				stilo = stilo_stack_get(tstack);
+				nstilo = stilo_stack_push(stack);
+				stilo_dup(nstilo, stilo);
+				stilo_stack_pop(tstack);
+			}
+			stilo_dict_def(currenterror,
+			    stilo_thread_stil_get(a_thread), tname, stack);
 
 			/*
 			 * estack.  Don't include the top element, which is
@@ -182,29 +191,43 @@ errordict_p_generic(cw_stilo_t *a_thread, cw_stilo_threade_t a_threade,
 			    stiln_str(STILN_estack), stiln_len(STILN_estack),
 			    TRUE);
 			count = stilo_stack_count(estack) - 1;
-			stilo_array_new(arr, stilo_thread_stil_get(a_thread),
-			    stilo_thread_currentlocking(a_thread), count);
-			for (i = count - 1, stilo = stilo_stack_get(estack);
-			     i >= 0; i--) {
+			for (i = 0, stilo = stilo_stack_get(estack); i < count;
+			    i++) {
 				stilo = stilo_stack_down_get(estack, stilo);
-				stilo_array_el_set(arr, stilo, i);
+				nstilo = stilo_stack_push(tstack);
+				stilo_dup(nstilo, stilo);
 			}
-			stilo_dict_def(currenterror, stilo_thread_stil_get(a_thread),
-			    tname, arr);
+			stilo_stack_new(stack, stilo_thread_stil_get(a_thread),
+			    FALSE);
+			for (i = 0; i < count; i++) {
+				stilo = stilo_stack_get(tstack);
+				nstilo = stilo_stack_push(stack);
+				stilo_dup(nstilo, stilo);
+				stilo_stack_pop(tstack);
+			}
+			stilo_dict_def(currenterror,
+			    stilo_thread_stil_get(a_thread), tname, stack);
 
 			/* dstack. */
 			stilo_name_new(tname, stilo_thread_stil_get(a_thread),
 			    stiln_str(STILN_dstack), stiln_len(STILN_dstack),
 			    TRUE);
 			count = stilo_stack_count(dstack);
-			stilo_array_new(arr, stilo_thread_stil_get(a_thread),
-			    stilo_thread_currentlocking(a_thread), count);
-			for (i = count - 1, stilo = NULL; i >= 0; i--) {
+			for (i = 0, stilo = NULL; i < count; i++) {
 				stilo = stilo_stack_down_get(dstack, stilo);
-				stilo_array_el_set(arr, stilo, i);
+				nstilo = stilo_stack_push(tstack);
+				stilo_dup(nstilo, stilo);
 			}
-			stilo_dict_def(currenterror, stilo_thread_stil_get(a_thread),
-			    tname, arr);
+			stilo_stack_new(stack, stilo_thread_stil_get(a_thread),
+			    FALSE);
+			for (i = 0; i < count; i++) {
+				stilo = stilo_stack_get(tstack);
+				nstilo = stilo_stack_push(stack);
+				stilo_dup(nstilo, stilo);
+				stilo_stack_pop(tstack);
+			}
+			stilo_dict_def(currenterror,
+			    stilo_thread_stil_get(a_thread), tname, stack);
 
 			stilo_stack_pop(tstack);
 		}
@@ -238,14 +261,14 @@ errorname /syntaxerror eq {
 	column cvs print
 	(: ) print
 } if
-(Error /) print errorname cvs print ( in ) print /command load 1 spop
+(Error /) print errorname cvs print ( in ) print /command load 1 sprint
 recordstacks {
 	(ostack: ) print
-	ostack 1 spop
+	ostack 1 sprint
 	(estack: ) print
-	estack 1 spop
+	estack 1 sprint
 	(dstack: ) print
-	dstack 1 spop
+	dstack 1 sprint
 } if
 end
 ");

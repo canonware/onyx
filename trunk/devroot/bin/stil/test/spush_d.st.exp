@@ -1,0 +1,4 @@
+Error /typecheck in --spush--
+ostack: <[1 2 --spush--]>
+estack: <[-file- --spush--]>
+dstack: <[-dict- -dict- -dict- -dict-]>

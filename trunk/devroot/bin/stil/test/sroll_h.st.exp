@@ -1,0 +1,4 @@
+Error /rangecheck in --sroll--
+ostack: <[-stack- 0 1 --sroll--]>
+estack: <[-file- --sroll--]>
+dstack: <[-dict- -dict- -dict- -dict-]>

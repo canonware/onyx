@@ -1,0 +1,5 @@
+<[mark]> scounttomark pstack clear
+<[mark 1]> scounttomark pstack clear
+<[mark 1 mark]> scounttomark pstack clear
+<[mark 1 mark 2]> scounttomark pstack clear
+<[mark 1 mark 2 3]> scounttomark pstack clear

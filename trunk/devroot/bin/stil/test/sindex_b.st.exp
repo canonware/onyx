@@ -1,0 +1,4 @@
+Error /stackunderflow in --sindex--
+ostack: <[--sindex--]>
+estack: <[-file- --sindex--]>
+dstack: <[-dict- -dict- -dict- -dict-]>

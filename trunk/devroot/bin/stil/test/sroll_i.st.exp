@@ -1,0 +1,4 @@
+Error /stackunderflow in --sroll--
+ostack: <[-stack- 1 0 --sroll--]>
+estack: <[-file- --sroll--]>
+dstack: <[-dict- -dict- -dict- -dict-]>

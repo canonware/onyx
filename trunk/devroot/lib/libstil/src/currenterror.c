@@ -58,20 +58,17 @@ currenterror_l_populate(cw_stilo_t *a_dict, cw_stilo_t *a_thread)
 
 	stilo_name_new(name, stilo_thread_stil_get(a_thread),
 	    stiln_str(STILN_ostack), stiln_len(STILN_ostack), TRUE);
-	stilo_array_new(val, stilo_thread_stil_get(a_thread),
-	    stilo_thread_currentlocking(a_thread), 0);
+	stilo_stack_new(val, stilo_thread_stil_get(a_thread), FALSE);
 	stilo_dict_def(a_dict, stilo_thread_stil_get(a_thread), name, val);
 
 	stilo_name_new(name, stilo_thread_stil_get(a_thread),
 	    stiln_str(STILN_estack), stiln_len(STILN_estack), TRUE);
-	stilo_array_new(val, stilo_thread_stil_get(a_thread),
-	    stilo_thread_currentlocking(a_thread), 0);
+	stilo_stack_new(val, stilo_thread_stil_get(a_thread), FALSE);
 	stilo_dict_def(a_dict, stilo_thread_stil_get(a_thread), name, val);
 
 	stilo_name_new(name, stilo_thread_stil_get(a_thread),
 	    stiln_str(STILN_dstack), stiln_len(STILN_dstack), TRUE);
-	stilo_array_new(val, stilo_thread_stil_get(a_thread),
-	    stilo_thread_currentlocking(a_thread), 0);
+	stilo_stack_new(val, stilo_thread_stil_get(a_thread), FALSE);
 	stilo_dict_def(a_dict, stilo_thread_stil_get(a_thread), name, val);
 
 	stilo_name_new(name, stilo_thread_stil_get(a_thread),

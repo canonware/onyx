@@ -49,10 +49,12 @@ stilo_threade_stiln(cw_stilo_threade_t a_threade)
 		STILN_undefined,
 		STILN_undefinedfilename,
 		STILN_undefinedresult,
+		STILN_unmatchedfino,
 		STILN_unmatchedmark,
 		STILN_unregistered
 	};
-
+	_cw_assert(sizeof(threade_stiln) / sizeof(cw_stiln_t) ==
+	    STILO_THREADE_LAST + 1);
 	_cw_assert(a_threade > 0 && a_threade <= STILO_THREADE_LAST);
 	return threade_stiln[a_threade];
 }

@@ -130,13 +130,23 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(repeat),
 	ENTRY(roll),
 	ENTRY(run),
+	ENTRY(sclear),
+	ENTRY(scleartomark),
+	ENTRY(scount),
+	ENTRY(scounttomark),
+	ENTRY(sdup),
 	ENTRY(seek),
 	ENTRY(self),
 	ENTRY(setlocking),
+	ENTRY(sexch),
 	ENTRY(shift),
 	ENTRY(signal),
+	ENTRY(sindex),
 	ENTRY(spop),
+	ENTRY(sprint),
+	ENTRY(spush),
 	ENTRY(srand),
+	ENTRY(sroll),
 	ENTRY(stack),
 	ENTRY(start),
 	ENTRY(stat),
@@ -832,7 +842,7 @@ systemdict_counttomark(cw_stilo_t *a_thread)
 	ostack = stilo_thread_ostack_get(a_thread);
 
 	for (i = 0, depth = stilo_stack_count(ostack), stilo = NULL; i < depth;
-	     i++) {
+	    i++) {
 		stilo = stilo_stack_down_get(ostack, stilo);
 		if (stilo_type_get(stilo) == STILOT_MARK)
 			break;
@@ -3055,6 +3065,112 @@ systemdict_run(cw_stilo_t *a_thread)
 }
 
 void
+systemdict_sclear(cw_stilo_t *a_thread)
+{
+	cw_stilo_t	*ostack, *stack;
+	cw_uint32_t	count;
+
+	ostack = stilo_thread_ostack_get(a_thread);
+	STILO_STACK_GET(stack, ostack, a_thread);
+	if (stilo_type_get(stack) != STILOT_STACK) {
+		stilo_thread_error(a_thread, STILO_THREADE_TYPECHECK);
+		return;
+	}
+
+	count = stilo_stack_count(stack);
+	if (count > 0)
+		stilo_stack_npop(stack, count);
+}
+
+void
+systemdict_scleartomark(cw_stilo_t *a_thread)
+{
+	cw_stilo_t	*ostack, *stack, *stilo;
+	cw_uint32_t	i, depth;
+
+	ostack = stilo_thread_ostack_get(a_thread);
+	STILO_STACK_GET(stack, ostack, a_thread);
+	if (stilo_type_get(stack) != STILOT_STACK) {
+		stilo_thread_error(a_thread, STILO_THREADE_TYPECHECK);
+		return;
+	}
+
+	for (i = 0, depth = stilo_stack_count(stack), stilo = NULL; i < depth;
+	     i++) {
+		stilo = stilo_stack_down_get(stack, stilo);
+		if (stilo_type_get(stilo) == STILOT_MARK)
+			break;
+	}
+	if (i == depth) {
+		stilo_thread_error(a_thread, STILO_THREADE_UNMATCHEDMARK);
+		return;
+	}
+
+	stilo_stack_npop(stack, i + 1);
+}
+
+void
+systemdict_scount(cw_stilo_t *a_thread)
+{
+	cw_stilo_t	*ostack, *stack, *stilo;
+
+	ostack = stilo_thread_ostack_get(a_thread);
+	STILO_STACK_GET(stack, ostack, a_thread);
+	if (stilo_type_get(stack) != STILOT_STACK) {
+		stilo_thread_error(a_thread, STILO_THREADE_TYPECHECK);
+		return;
+	}
+
+	stilo = stilo_stack_push(ostack);
+	stilo_integer_new(stilo, stilo_stack_count(stack));
+}
+
+void
+systemdict_scounttomark(cw_stilo_t *a_thread)
+{
+	cw_stilo_t	*ostack, *stack, *stilo;
+	cw_uint32_t	i, depth;
+
+	ostack = stilo_thread_ostack_get(a_thread);
+	STILO_STACK_GET(stack, ostack, a_thread);
+	if (stilo_type_get(stack) != STILOT_STACK) {
+		stilo_thread_error(a_thread, STILO_THREADE_TYPECHECK);
+		return;
+	}
+
+	for (i = 0, depth = stilo_stack_count(stack), stilo = NULL; i < depth;
+	    i++) {
+		stilo = stilo_stack_down_get(stack, stilo);
+		if (stilo_type_get(stilo) == STILOT_MARK)
+			break;
+	}
+	if (i == depth) {
+		stilo_thread_error(a_thread, STILO_THREADE_UNMATCHEDMARK);
+		return;
+	}
+
+	stilo = stilo_stack_push(ostack);
+	stilo_integer_new(stilo, i);
+}
+
+void
+systemdict_sdup(cw_stilo_t *a_thread)
+{
+	cw_stilo_t	*ostack, *stack, *orig, *dup;
+
+	ostack = stilo_thread_ostack_get(a_thread);
+	STILO_STACK_GET(stack, ostack, a_thread);
+	if (stilo_type_get(stack) != STILOT_STACK) {
+		stilo_thread_error(a_thread, STILO_THREADE_TYPECHECK);
+		return;
+	}
+
+	STILO_STACK_GET(orig, stack, a_thread);
+	dup = stilo_stack_push(stack);
+	stilo_dup(dup, orig);
+}
+
+void
 systemdict_self(cw_stilo_t *a_thread)
 {
 	cw_stilo_t	*ostack;
@@ -3110,6 +3226,25 @@ systemdict_setlocking(cw_stilo_t *a_thread)
 }
 
 void
+systemdict_sexch(cw_stilo_t *a_thread)
+{
+	cw_stilo_t	*ostack, *stack;
+
+	ostack = stilo_thread_ostack_get(a_thread);
+	STILO_STACK_GET(stack, ostack, a_thread);
+	if (stilo_type_get(stack) != STILOT_STACK) {
+		stilo_thread_error(a_thread, STILO_THREADE_TYPECHECK);
+		return;
+	}
+	if (stilo_stack_count(stack) < 2) {
+		stilo_thread_error(a_thread, STILO_THREADE_STACKUNDERFLOW);
+		return;
+	}
+
+	stilo_stack_roll(stack, 2, 1);
+}
+
+void
 systemdict_shift(cw_stilo_t *a_thread)
 {
 	cw_stilo_t	*ostack;
@@ -3156,7 +3291,46 @@ systemdict_signal(cw_stilo_t *a_thread)
 }
 
 void
+systemdict_sindex(cw_stilo_t *a_thread)
+{
+	cw_stilo_t	*ostack, *stilo, *stack, *orig;
+	cw_stiloi_t	index;
+
+	ostack = stilo_thread_ostack_get(a_thread);
+	STILO_STACK_GET(stilo, ostack, a_thread);
+	STILO_STACK_DOWN_GET(stack, ostack, a_thread, stilo);
+	if (stilo_type_get(stilo) != STILOT_INTEGER || stilo_type_get(stack) !=
+	    STILOT_STACK) {
+		stilo_thread_error(a_thread, STILO_THREADE_TYPECHECK);
+		return;
+	}
+	index = stilo_integer_get(stilo);
+	if (index < 0) {
+		stilo_thread_error(a_thread, STILO_THREADE_RANGECHECK);
+		return;
+	}
+
+	STILO_STACK_NGET(orig, stack, a_thread, index);
+	stilo_dup(stilo, orig);
+}
+
+void
 systemdict_spop(cw_stilo_t *a_thread)
+{
+	cw_stilo_t	*ostack, *stack;
+
+	ostack = stilo_thread_ostack_get(a_thread);
+	STILO_STACK_GET(stack, ostack, a_thread);
+	if (stilo_type_get(stack) != STILOT_STACK) {
+		stilo_thread_error(a_thread, STILO_THREADE_TYPECHECK);
+		return;
+	}
+
+	STILO_STACK_POP(stack, a_thread);
+}
+
+void
+systemdict_sprint(cw_stilo_t *a_thread)
 {
 	cw_stilo_t		*ostack;
 	cw_stilo_t		*stilo, *depth, *stdout_stilo;
@@ -3188,6 +3362,24 @@ systemdict_spop(cw_stilo_t *a_thread)
 }
 
 void
+systemdict_spush(cw_stilo_t *a_thread)
+{
+	cw_stilo_t	*ostack, *stilo, *stack, *nstilo;
+
+	ostack = stilo_thread_ostack_get(a_thread);
+	STILO_STACK_GET(stilo, ostack, a_thread);
+	STILO_STACK_DOWN_GET(stack, ostack, a_thread, stilo);
+	if (stilo_type_get(stack) != STILOT_STACK) {
+		stilo_thread_error(a_thread, STILO_THREADE_TYPECHECK);
+		return;
+	}
+
+	nstilo = stilo_stack_push(stack);
+	stilo_dup(nstilo, stilo);
+	stilo_stack_pop(ostack);
+}
+
+void
 systemdict_srand(cw_stilo_t *a_thread)
 {
 	cw_stilo_t	*ostack;
@@ -3198,6 +3390,41 @@ systemdict_srand(cw_stilo_t *a_thread)
 	STILO_STACK_GET(seed, ostack, a_thread);
 	srandom(stilo_integer_get(seed));
 	stilo_stack_pop(ostack);
+}
+
+void
+systemdict_sroll(cw_stilo_t *a_thread)
+{
+	cw_stilo_t	*ostack, *stack, *stilo;
+	cw_stiloi_t	count, amount;
+
+	ostack = stilo_thread_ostack_get(a_thread);
+	
+	STILO_STACK_GET(stilo, ostack, a_thread);
+	if (stilo_type_get(stilo) != STILOT_INTEGER) {
+		stilo_thread_error(a_thread, STILO_THREADE_TYPECHECK);
+		return;
+	}
+	amount = stilo_integer_get(stilo);
+	STILO_STACK_DOWN_GET(stilo, ostack, a_thread, stilo);
+	STILO_STACK_DOWN_GET(stack, ostack, a_thread, stilo);
+	if (stilo_type_get(stilo) != STILOT_INTEGER || stilo_type_get(stack) !=
+	    STILOT_STACK) {
+		stilo_thread_error(a_thread, STILO_THREADE_TYPECHECK);
+		return;
+	}
+	count = stilo_integer_get(stilo);
+	if (count < 1) {
+		stilo_thread_error(a_thread, STILO_THREADE_RANGECHECK);
+		return;
+	}
+	if (count > stilo_stack_count(stack)) {
+		stilo_thread_error(a_thread, STILO_THREADE_STACKUNDERFLOW);
+		return;
+	}
+
+	stilo_stack_npop(ostack, 2);
+	stilo_stack_roll(stack, count, amount);
 }
 
 void

@@ -2,8 +2,8 @@
 
 (Test begin\n) print
 
-((hi) 1 spop) cvx eval
-(`bye' 1 spop) cvx eval
+((hi) 1 sprint) cvx eval
+(`bye' 1 sprint) cvx eval
 
 pstack % Make sure the stack is empty.
 (Test end\n) print

@@ -1,0 +1,4 @@
+Error /typecheck in --sdup--
+ostack: <[1 --sdup--]>
+estack: <[-file- --sdup--]>
+dstack: <[-dict- -dict- -dict- -dict-]>

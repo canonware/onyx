@@ -48,13 +48,13 @@ stdin cvx eval
 % Stash the number of objects on ostack at the bottom of ostack.
 count dup dup 2 add 1 roll
 
-% spop all the objects on the stack from bottom to top (to preserve final
+% sprint all the objects on the stack from bottom to top (to preserve final
 % order).
 -1 1 {
 	-1 roll
 	% Choose a recursion depth large enough to meet or exceed the depth of
 	% any nested braces in the code.
-	1000 spop
+	1000 sprint
 } for
 
 `systemdict begin ' print
