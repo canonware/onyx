@@ -1,0 +1,142 @@
+# -*-mode:makefile-*-
+# @configure_input@
+#############################################################################
+#
+# <Copyright = jasone>
+# <License>
+#
+#############################################################################
+#
+# Version: <Version>
+#
+# Description: Master GNU-compatible Makefile for xvx.
+#
+##############################################################################
+
+#
+# File lists.
+#
+
+# Include files.
+INCS := board.h move.h xvx.h
+
+# Source files.
+SRCS := board.c move.c
+
+# Source files with main() defined.  Binary executable names drop the .c suffix.
+BINS := xvx.c
+
+# Manual pages.
+MANPAGES :=
+
+# Munge the filename lists so that they are prefixed by the directory they're
+# in, relative to @top_srcdir@.  Also, convert the binary names to their final
+# names.
+INCS := $(addprefix include/,$(INCS))
+SRCS := $(addprefix src/,$(SRCS))
+override BINS := $(addprefix src/,$(BINS:.c=))
+MANPAGES := $(addprefix man/man1/,$(MANPAGES))
+
+#
+# Standard definitions.
+#
+
+SHELL    := /bin/sh
+CC	 := @CC@
+INSTALL	 := @INSTALL@
+CAT      := @CAT@
+PERL     := @PERL@
+BASENAME := @BASENAME@
+DIFF     := @DIFF@
+
+CFLAGS   := @CFLAGS@
+CPPFLAGS := @CPPFLAGS@ -Iinclude
+LIBS     := @LIBS@
+LDFLAGS  := @LDFLAGS@
+
+# Clear out all vpaths, then set just one (default vpath) for the main build
+# directory.
+vpath
+vpath % .
+
+# Need this here since the includes have dependencies in them, but there's
+# stuff in the includes that we need to see before using $(TARGETS).
+all : default
+
+#
+# Common rules
+#
+
+.SUFFIXES :
+.SUFFIXES : .c .h .o .d
+
+#
+# Build rules.
+#
+
+src/% : src/%.o
+	$(CC) -o $@ $< $(SRCS:%.c=%.o) $(CFLAGS) $(LDFLAGS) $(LIBS)
+
+src/%.o : src/%.c
+	$(CC) -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
+	@$(SHELL) -ec "$(CC) -M $(CPPFLAGS) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o \2/g\" > $(@:%.o=%.d)"
+
+#
+# Dependencies (not rules).
+#
+
+ifneq ($(strip $(SRCS)),)
+-include $(SRCS:%.c=%.d)
+endif
+ifneq ($(strip $(BINS)),)
+-include $(BINS:%=%.d)
+endif
+
+FORCE :
+
+#
+# user 'make'ables
+#
+
+default : bins
+
+bins : $(BINS)
+
+$(BINS) : $(SRCS:%.c=%.o)
+
+install : bins
+	$(SHELL) -c \
+	'$(INSTALL) -d @prefix@/bin; \
+	$(INSTALL) -d @prefix@/man/man1; \
+	for i in $(BINS); do \
+	$(INSTALL) -m 0755 $$i @prefix@/bin/; \
+	done; \
+	for i in $(MANPAGES); do \
+	$(INSTALL) -m 0644 $$i @prefix@/man/man1/; \
+	done; \
+	'
+uninstall :
+	$(SHELL) -c \
+	'for i in $(BINS); do \
+	rm -f @prefix@/bin/$$i; \
+	done;
+	for i in $(MANPAGES); do \
+	rm -f @prefix@/man/man1/$$i; \
+	done;
+	'
+
+clean :
+	rm -f *~ */*~
+	rm -f *.core core src/*.core src/core
+	rm -f src/*.[do]
+	rm -f $(BINS)
+
+distclean : clean
+	rm -f "#"*"#" src/"#"*"#" include/"#"*"#"
+	rm -f Makefile
+	rm -f config.cache config.log config.status
+	rm -f include/config.h
+	rm -f TAGS
+
+etags : $(INCS) $(SRCS) $(BINS:%=%.c)
+	@ETAGS@ $(INCS) $(SRCS) $(BINS:%=%.c)
