@@ -9,117 +9,61 @@
  *
  ******************************************************************************/
 
-typedef struct cw_bufqm_s cw_bufqm_t;
-typedef struct cw_bufq_s cw_bufq_t;
+typedef struct cw_bufc_s cw_bufc_t;
 typedef struct cw_bufm_s cw_bufm_t;
 typedef struct cw_bufe_s cw_bufe_t;
 typedef struct cw_bufhi_s cw_bufhi_t;
 typedef struct cw_bufh_s cw_bufh_t;
 typedef struct cw_bufb_s cw_bufb_t;
-typedef cw_uint8_t cw_bufc_t;
 typedef struct cw_buf_s cw_buf_t;
 
-typedef enum {
-	BUFQMT_NONE,
+/* This structure is not opaque; its internals can be mucked with. */
+struct cw_bufc_s {
+	cw_uint8_t	c:8;
 
-	BUFQMT_BUFE_CUT,
-	BUFQMT_BUFE_PASTE,
-	BUFQMT_BUFE_MODIFY,
-	BUFQMT_BUFE_DETACH,
-
-	BUFQMT_BUFM_MOVE
-} cw_bufqmt_t;
-
-struct cw_bufqm_s {
-	cw_opaque_dealloc_t	*dealloc;
-	const void		*dealloc_arg;
-
-	cw_bufqmt_t		event;
-	union {
-		cw_bufe_t	*bufe;
-		cw_bufm_t	*bufm;
-	}			data;
-};
-
-struct cw_bufq_s {
-	cw_mq_t		mq;
+	cw_uint32_t	fg:8;		/* Foreground color. */
+	cw_uint32_t	bg:8;		/* Background color. */
+	cw_bool_t	bold:1;		/* Bold if TRUE. */
+	cw_bool_t	emph:1;		/* Emphasized (italic) if TRUE. */
+	cw_bool_t	ul:1;		/* Underlined if TRUE. */
 };
 
 struct cw_bufm_s {
+#ifdef _CW_DBG
+	cw_uint32_t	magic;
+#define _CW_BUFM_MAGIC	0x2e84a3c9
+#endif
+
 	ql_elm(cw_bufm_t) link;
 	cw_buf_t	*buf;
 
 	cw_opaque_dealloc_t *dealloc;
 	const void	*arg;
 
-	cw_uint64_t	offset;
+	cw_uint64_t	cpos;
 
 	/* Message queue to send notifications to. */
-	cw_bufq_t	*bufq;
-};
-
-struct cw_bufe_s {
-	ql_elm(cw_bufe_t) link;
-	cw_buf_t	*buf;
-
-	cw_opaque_dealloc_t *dealloc;
-	const void	*arg;
-
-	cw_uint64_t	beg_offset;
-	cw_uint64_t	end_offset;
-
-	/* bufes are either open or closed at each end. */
-	cw_bool_t	beg_open:1;
-	cw_bool_t	end_open:1;
-
-	/* Used for precedence in extent stacks. */
-	cw_sint32_t	priority;
-
-	/* If TRUE, save in undo/redo history. */
-	cw_bool_t	duplicable:1;
-
-	/*
-	 * A detachable extent is removed from the buffer if its size reaches 0.
-	 */
-	cw_bool_t	detachable:1;
-	cw_bool_t	detached:1;
-
-	cw_uint32_t	foreground;
-	cw_uint32_t	background;
-	cw_bool_t	bold:1;
-	cw_bool_t	italic:1;
-	cw_bool_t	underline:1;
-
-	/* Message queue to send notifications to. */
-	cw_bufq_t	*bufq;
+	cw_msgq_t	*msgq;
 };
 
 struct cw_bufhi_s {
 	qs_elm(cw_bufhi_t) link;
+
 	enum {
-		BUFH_BOUNDARY,
+		BUFH_GROUP_START,
+		BUFH_GROUP_END,
 		BUFH_SEEK,
 		BUFH_INSERT,
-		BUFH_REMOVE,
-		BUFH_EXTENT
+		BUFH_REMOVE
 	}		mod;
 	union {
 		struct {
-			cw_uint64_t	offset;
+			cw_uint64_t	from;
+			cw_uint64_t	to;
 		}	seek;
 		struct {
 			cw_bufc_t	c;
 		}	insert;
-		struct {
-			/*
-			 * The internal bufe state isn't complete, so must be
-			 * hanadled with care when restored.
-			 *
-			 * We use a pointer instead of embedding the bufe in
-			 * order to keep bufh's small.
-			 */
-			cw_bufe_t	*bufe;
-		}	extent;
 	}		data;
 };
 
@@ -129,23 +73,27 @@ struct cw_bufh_s {
 };
 
 /*
- * Make each bufb structure exactly 4 K, which avoids memory fragmentation with
- * most malloc implementations.
+ * Make each bufb structure exactly one page, which avoids memory fragmentation
+ * with most malloc implementations.
  */
-#define	_CW_BUFB_SIZE		4096
-#define	_CW_BUFB_OVERHEAD	  28
-#define	_CW_BUFB_DATA	(_CW_BUFB_SIZE - _CW_BUFB_OVERHEAD)
+#ifndef PAGESIZE
+#define	PAGESIZE		4096
+#endif
+#define	_CW_BUFB_SIZE		PAGESIZE
+#define	_CW_BUFB_OVERHEAD	28
+#define	_CW_BUFB_DATA		(_CW_BUFB_SIZE - _CW_BUFB_OVERHEAD)
+#define	_CW_BUFB_NCHAR		(_CW_BUFB_DATA / sizeof(cw_bufc_t))
 struct cw_bufb_s {
 	/*
-	 * The eoff and eline fields aren't maintained by the bufb code at all;
+	 * The epos and eline fields aren't maintained by the bufb code at all;
 	 * for them to be valid, they must be explicitly set by external logic.
 	 */
-	cw_uint64_t	eoff;			/* Last byte offset. */
+	cw_uint64_t	ecpos;			/* Last character position. */
 	cw_uint64_t	eline;			/* Last line number. */
 	cw_uint32_t	nlines;			/* Number of newlines. */
-	cw_uint32_t	gap_off;		/* Gap offset. */
-	cw_uint32_t	gap_len;		/* Gap length. */
-	cw_bufc_t	data[_CW_BUFB_DATA];	/* Text data, with gap. */
+	cw_uint32_t	gap_off;		/* Gap offset, in bufc's. */
+	cw_uint32_t	gap_len;		/* Gap length, in bufc's. */
+	cw_bufc_t	data[_CW_BUFB_NCHAR];	/* Text data, with gap. */
 };
 
 struct cw_buf_s {
@@ -154,33 +102,29 @@ struct cw_buf_s {
 #define _CW_BUF_MAGIC	0x348279bd
 #endif
 
+	/* Allocator state. */
 	cw_bool_t	alloced:1;
 	cw_opaque_alloc_t *alloc;
 	cw_opaque_realloc_t *realloc;
 	cw_opaque_dealloc_t *dealloc;
 	const void	*arg;
 
-	/* Actual data. */
-	cw_uint64_t	len;
-	cw_uint64_t	bufb_count;
-	cw_uint64_t	bufb_veclen;
-	cw_bufb_t	**bufb_vec;
-	/* Number of bufb's for which the cached offset and line are valid */
-	cw_uint64_t	ncached;
+	/* Implicit lock. */
+	cw_mtx_t	mtx;
 
-	/* History. */
-	cw_bool_t	hist_active:1;
-	cw_bufh_t	hist;
+	/* Actual data. */
+	cw_uint64_t	len;		/* Number of characters. */
+	cw_uint64_t	bufb_count;	/* Number of valid bufb's. */
+	cw_uint64_t	bufb_veclen;	/* Number of elements in bufb_vec. */
+	cw_bufb_t	**bufb_vec;	/* Vector of bufb pointers. */
+	cw_uint64_t	ncached;	/* # of bufb's w/ valid ecpos/eline. */
 
 	/* Ordered list of all marks. */
 	ql_head(cw_bufm_t) bufms;
 
-	/* Forward/reverse ordered lists of extents. */
-	ql_head(cw_bufe_t) bufes_fwd;
-	ql_head(cw_bufe_t) bufes_rev;
-
-	/* Detached but not yet deleted. */
-	ql_head(cw_bufe_t) bufes_det;
+	/* History. */
+	cw_bool_t	hist_active:1;
+	cw_bufh_t	hist;
 };
 
 /* buf. */
@@ -199,73 +143,22 @@ void	buf_hist_group_beg(cw_buf_t *a_buf);
 void	buf_hist_group_end(cw_buf_t *a_buf);
 void	buf_hist_flush(cw_buf_t *a_buf);
 
-cw_bufe_t *buf_bufe_next(cw_buf_t *a_buf, cw_bufe_t *a_bufe);
-cw_bufe_t *buf_bufe_prev(cw_buf_t *a_buf, cw_bufe_t *a_bufe);
-
 /* bufm. */
-cw_bufm_t *bufm_new(cw_bufm_t *a_bufm, cw_buf_t *a_buf, cw_bufq_t *a_bufq);
-cw_bufm_t *bufm_dup(cw_bufm_t *a_bufm, const cw_bufm_t *a_orig, cw_bufq_t
-    *a_bufq);
+cw_bufm_t *bufm_new(cw_bufm_t *a_bufm, cw_buf_t *a_buf, cw_msgq_t *a_msgq);
+void	bufm_dup(cw_bufm_t *a_to, cw_bufm_t *a_from);
 void	bufm_delete(cw_bufm_t *a_bufm);
 cw_buf_t *bufm_buf(cw_bufm_t *a_bufm);
-cw_uint64_t bufm_line(const cw_bufm_t *a_bufm);
+cw_uint64_t bufm_line(cw_bufm_t *a_bufm);
 
 cw_uint64_t bufm_rel_seek(cw_bufm_t *a_bufm, cw_sint64_t a_amount);
-cw_uint64_t bufm_abs_seek(cw_bufm_t *a_bufm, cw_uint64_t a_amount);
+cw_uint64_t bufm_abs_seek(cw_bufm_t *a_bufm, cw_uint64_t a_pos);
 cw_uint64_t bufm_pos(cw_bufm_t *a_bufm);
 
 cw_bufc_t bufm_bufc_get(cw_bufm_t *a_bufm);
 void	bufm_bufc_set(cw_bufm_t *a_bufm, cw_bufc_t a_bufc);
+/* XXX Provide accessors for individual bufc fields. */
 void	bufm_bufc_insert(cw_bufm_t *a_bufm, const cw_bufc_t *a_data, cw_uint64_t
     a_count);
-
-cw_bufe_t *bufm_bufe_down(cw_bufm_t *a_bufm, cw_bufe_t *a_bufe);
-cw_bufe_t *bufm_bufe_up(cw_bufm_t *a_bufm, cw_bufe_t *a_bufe);
-
-/* bufe. */
-void	bufe_new(cw_bufe_t *a_bufe, cw_bufm_t *a_beg, cw_bufm_t *a_end,
-    cw_bool_t a_beg_open, cw_bool_t a_end_open, cw_bool_t a_detachable,
-    cw_bufq_t *a_bufq);
-void	bufe_dup(cw_bufe_t *a_bufe, cw_bufe_t *a_orig, cw_bufq_t *a_bufq);
-void	bufe_delete(cw_bufe_t *a_bufe);
-cw_buf_t *bufe_buf(cw_bufm_t *a_bufm);
-
-const cw_bufm_t *bufe_beg(cw_bufe_t *a_bufe);
-const cw_bufm_t *bufe_end(cw_bufe_t *a_bufe);
-
-cw_bufe_t *bufe_bufe_next(cw_bufe_t *a_bufe, cw_bufe_t *a_curr);
-cw_bufe_t *bufe_bufe_prev(cw_bufe_t *a_bufe, cw_bufe_t *a_curr);
-
-/* XXX This should be a marker operation, with two markers. */
-void	bufe_cut(cw_bufe_t *a_bufe);
-
-cw_uint32_t bufe_foreground_get(cw_bufe_t *a_bufe);
-void	bufe_foreground_set(cw_bufe_t *a_bufe, cw_uint32_t a_foreground);
-cw_uint32_t bufe_background_get(cw_bufe_t *a_bufe);
-void	bufe_background_set(cw_bufe_t *a_bufe, cw_uint32_t a_background);
-cw_bool_t bufe_bold_get(cw_bufe_t *a_bufe);
-void	bufe_bold_set(cw_bufe_t *a_bufe, cw_bool_t a_bold);
-cw_bool_t bufe_italic_get(cw_bufe_t *a_bufe);
-void	bufe_italic_set(cw_bufe_t *a_bufe, cw_bool_t a_italic);
-cw_bool_t bufe_underline_get(cw_bufe_t *a_bufe);
-void	bufe_underline_set(cw_bufe_t *a_bufe, cw_bool_t a_underline);
-
-/* bufq. */
-void	bufq_new(cw_bufq_t *a_bufq);
-void	bufq_delete(cw_bufq_t *a_bufq);
-
-cw_bufqm_t *bufq_get(cw_bufq_t *a_bufq);
-cw_bufqm_t *bufq_tryget(cw_bufq_t *a_bufq);
-cw_bufqm_t *bufq_timedget(cw_bufq_t *a_bufq, const struct timespec *a_timeout);
-void	bufq_put(cw_bufq_t *a_bufq, cw_bufqm_t *a_bufqm);
-
-/* bufqm. */
-void	bufqm_bufe_new(cw_bufqm_t *a_bufqm, cw_opaque_dealloc_t *a_dealloc,
-    const void *a_dealloc_arg, cw_bufe_t *a_bufe, cw_bufqmt_t a_event);
-void	bufqm_bufm_new(cw_bufqm_t *a_bufqm, cw_opaque_dealloc_t *a_dealloc,
-    const void *a_dealloc_arg, cw_bufm_t *a_bufm, cw_bufqmt_t a_event);
-void	bufqm_delete(cw_bufqm_t *a_bufqm);
-
-cw_bufqmt_t bufqm_event(cw_bufqm_t *a_bufqm);
-cw_bufe_t *bufqm_bufe(cw_bufqm_t *a_bufqm);
-cw_bufm_t *bufqm_bufm(cw_bufqm_t *a_bufqm);
+void	bufm_uint8_insert(cw_bufm_t *a_bufm, const cw_uint8_t *a_data,
+    cw_uint64_t a_count);
+void	bufm_remove(cw_bufm_t *a_start, cw_bufm_t *a_end);

@@ -28,7 +28,7 @@
 
 /* Include files that are _not_ installed. */
 {
-  local priv_incs = buf.h nxe.h;
+  local priv_incs = buf.h msgq.h nxe.h;
   priv_incs = [fromto % [srcdir]/bin/nxe/include/% [priv_incs]];
   priv_incs = [priv_incs] [objdir]/bin/nxe/include/nxe_defs.h;
 
@@ -39,7 +39,7 @@
 }
 
 /* Source files. */
-NXE_SRCS = buf.c buffer.c nxe.c nxe_ops.c;
+NXE_SRCS = buf.c buffer.c msgq.c nxe.c nxe_ops.c;
 NXE_SRCS = [fromto % [srcdir]/bin/nxe/src/% [NXE_SRCS]];
 SRCS = [SRCS] [NXE_SRCS];
 
