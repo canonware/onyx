@@ -11,8 +11,8 @@
  * editor.  The code is broken up into the following classes:
  *
  * buf  : Main buffer class.
- * bufb : Buffer block.  Internally, buf data are composed of bufb's, which
- *        store buf data in a paged buffer gap format.
+ * bufp : Buffer page.  Internally, buf data are composed of bufp's, which store
+ *        buf data in a paged buffer gap format.
  * bufc : Character.  Characters are merely 8 bit values.
  * bufm : Marker.  Markers are used as handles for many buf operations.
  * bufh : History.  The bufh class provides an abstract history mechanism to the
@@ -22,7 +22,7 @@
  *
  * Buffer/character position numbering starts at 1.
  *
- * bufc pos:  0           1     0   1   2   3         0   1   2
+ * bufp pos:  0           1     0   1   2   3         0   1   2
  *
  * Char pos:  1           2     3   4   5   6         7   8   9
  *            |           |     |   |   |   |         |   |   |
@@ -36,20 +36,21 @@
  *
  * Position 0 is invalid, and that there is one more buffer position than there
  * are character positions.  Externally, character positions are never
- * mentioned, but internally, the difference matters at bufb boundaries.  When
+ * mentioned, but internally, the difference matters at bufp boundaries.  When
  * inserting, we use buffer positions, and when reading/writing/removing, we use
  * character positions.
  *
- * Buffer position N and character position N - 1 are always in the same bufb,
+ * Buffer position N and character position N - 1 are always in the same bufp,
  * so internally we use character positions everywhere.  Special care must be
  * given to buffer position 1, since there is no actual character 0.
  *
  * Position rules:
  *
- * *) bufb's start counting at 0; it's up to the buf code to translate.
+ * *) ppos (bufp position) start counting at 0; it's up to the buf code to
+ *    translate.
  * *) bpos refers to buffer position.
  * *) cpos refers to character position.
- * *) If a position isn't specified as bpos or cpos, then it is bpos.
+ * *) If a position isn't specified as bpos, cpos, or ppos, then it is bpos.
  *
  ******************************************************************************/
 
@@ -58,62 +59,74 @@
 /*
  * Prototypes.
  */
-/* bufb. */
-static void	bufb_p_new(cw_bufb_t *a_bufb);
-static void	bufb_p_gap_move(cw_bufb_t *a_bufb, cw_uint32_t a_pos);
-static cw_bufc_t bufb_p_get(cw_bufb_t *a_bufb, cw_uint32_t a_pos);
-static void	bufb_p_insert(cw_bufb_t *a_bufb, cw_uint32_t a_pos, const
-    cw_bufc_t *a_data, cw_uint64_t a_count);
-static void	bufb_p_split(cw_bufb_t *a_bufb, cw_bufb_t *a_after, cw_uint32_t
-    a_pos);
-static void	bufb_p_remove(cw_bufb_t *a_bufb, cw_uint32_t a_pos,
-    cw_uint32_t a_count);
-static cw_bufc_t bufb_p_bufc_at_cpos(cw_bufb_t *a_bufb, cw_uint64_t a_cpos);
-static cw_uint64_t bufb_p_line_at_pos(cw_bufb_t *a_bufb, cw_uint64_t
-    a_pos);
 
-#define	bufb_p_gap_len_get(a_bufb) (a_bufb)->gap_len
-#define	bufb_p_len_get(a_bufb)						\
-	(_CW_BUFB_NCHAR - bufb_p_gap_len_get(a_bufb))
-#define	bufb_p_nlines_get(a_bufb) ((cw_uint64_t)(a_bufb)->nlines)
-#define	bufb_p_ecpos_get(a_bufb) (a_bufb)->ecpos
-#define	bufb_p_ecpos_set(a_bufb, a_ecpos)				\
-	(a_bufb)->ecpos = (a_ecpos) + bufb_p_len_get(a_bufb)
-#define	bufb_p_eline_get(a_bufb) (a_bufb)->eline
-#define	bufb_p_eline_set(a_bufb, a_eline)				\
-	(a_bufb)->eline = (a_eline) + bufb_p_nlines_get(a_bufb)
+/* bufp. */
+static void	bufp_p_new(cw_bufp_t *a_bufp);
+static void	bufp_p_gap_move(cw_bufp_t *a_bufp, cw_uint32_t a_ppos);
+static cw_bufc_t *bufp_p_ppos_get(cw_bufp_t *a_bufp, cw_uint32_t a_ppos);
+static void	bufp_p_insert(cw_bufp_t *a_bufp, cw_uint32_t a_ppos, const
+    cw_bufc_t *a_data, cw_uint64_t a_len);
+static void	bufp_p_split(cw_bufp_t *a_bufp, cw_bufp_t *a_after, cw_uint32_t
+    a_ppos);
+static void	bufp_p_remove(cw_bufp_t *a_bufp, cw_uint32_t a_ppos,
+    cw_uint32_t a_len);
+static cw_bufc_t *bufp_p_cpos_get(cw_bufp_t *a_bufp, cw_uint64_t a_cpos);
+static cw_uint64_t bufp_p_line_at_cpos(cw_bufp_t *a_bufp, cw_uint64_t a_cpos);
+
+#define	bufp_p_gap_len_get(a_bufp) (a_bufp)->gap_len
+#define	bufp_p_len_get(a_bufp)						\
+	(_CW_BUFP_NBUFC - bufp_p_gap_len_get(a_bufp))
+#define	bufp_p_nlines_get(a_bufp) ((cw_uint64_t)(a_bufp)->nlines)
+#define	bufp_p_ecpos_get(a_bufp) (a_bufp)->ecpos
+#define	bufp_p_ecpos_set(a_bufp, a_ecpos)				\
+	(a_bufp)->ecpos = (a_ecpos) + bufp_p_len_get(a_bufp)
+#define	bufp_p_eline_get(a_bufp) (a_bufp)->eline
+#define	bufp_p_eline_set(a_bufp, a_eline)				\
+	(a_bufp)->eline = (a_eline) + bufp_p_nlines_get(a_bufp)
 
 /* bufh. */
 static void	bufh_p_new(cw_bufh_t *a_bufh);
 static void	bufh_p_delete(cw_bufh_t *a_bufh);
 
 /* buf. */
-static cw_uint64_t buf_p_bufb_at_cpos(cw_buf_t *a_buf, cw_uint64_t a_cpos);
+static cw_uint64_t buf_p_bufp_at_cpos(cw_buf_t *a_buf, cw_uint64_t a_cpos);
 static cw_uint64_t buf_p_line_at_cpos(cw_buf_t *a_buf, cw_uint64_t a_cpos);
-static void	buf_p_bufb_cache_update(cw_buf_t *a_buf, cw_uint64_t a_cpos);
+static void	buf_p_bufp_cache_update(cw_buf_t *a_buf, cw_uint64_t a_cpos);
 static void	buf_p_bufm_insert(cw_buf_t *a_buf, cw_bufm_t *a_bufm);
+static void	buf_p_bufms_update(cw_buf_t *a_buf, cw_bufm_t *a_valid,
+    cw_sint64_t a_amount);
 
-/* bufb. */
+/* bufm. */
+static void	bufm_p_bufp_cache(cw_bufm_t *a_bufm);
+static void	bufm_p_rel_seek(cw_bufm_t *a_bufm, cw_sint64_t a_amount);
+static void	bufm_p_insert(cw_bufm_t *a_bufm, const cw_char_t *a_str,
+    cw_uint64_t a_count);
+
+/*
+ * Code.
+ */
+
+/* bufp. */
 static void
-bufb_p_new(cw_bufb_t *a_bufb)
+bufp_p_new(cw_bufp_t *a_bufp)
 {
-	_cw_check_ptr(a_bufb);
-	_cw_assert(sizeof(cw_bufb_t) == _CW_BUFB_SIZE);
+	_cw_check_ptr(a_bufp);
+	_cw_assert(sizeof(cw_bufp_t) == _CW_BUFP_SIZE);
 
-	a_bufb->nlines = 0;
-	a_bufb->gap_off = 0;
-	a_bufb->gap_len = _CW_BUFB_NCHAR;
+	a_bufp->nlines = 0;
+	a_bufp->gap_off = 0;
+	a_bufp->gap_len = _CW_BUFP_NBUFC;
 }
 
 static void
-bufb_p_gap_move(cw_bufb_t *a_bufb, cw_uint32_t a_pos)
+bufp_p_gap_move(cw_bufp_t *a_bufp, cw_uint32_t a_ppos)
 {
-	_cw_check_ptr(a_bufb);
-	_cw_assert(a_pos <= bufb_p_len_get(a_bufb));
+	_cw_check_ptr(a_bufp);
+	_cw_assert(a_ppos <= bufp_p_len_get(a_bufp));
 
 	/* Move the gap if it isn't already at the point of insertion. */
-	if (a_bufb->gap_off != a_pos) {
-		if (a_bufb->gap_off < a_pos) {
+	if (a_bufp->gap_off != a_ppos) {
+		if (a_bufp->gap_off < a_ppos) {
 			/*
 			 * Move the gap forward.
 			 *
@@ -124,14 +137,14 @@ bufb_p_gap_move(cw_bufb_t *a_bufb, cw_uint32_t a_pos)
 			 * ooooooo________XXXXXXXXXXXoo
 			 *                   ^
 			 *                   |
-			 *                   a_pos
+			 *                   a_ppos
 			 *                   |
 			 *                   v
 			 * oooooooXXXXXXXXXXX________oo
 			 */
-			memmove(&a_bufb->data[a_bufb->gap_off],
-			    &a_bufb->data[a_bufb->gap_off + a_bufb->gap_len],
-			    (a_pos - a_bufb->gap_off) * sizeof(cw_bufc_t));
+			memmove(&a_bufp->data[a_bufp->gap_off],
+			    &a_bufp->data[a_bufp->gap_off + a_bufp->gap_len],
+			    (a_ppos - a_bufp->gap_off) * sizeof(cw_bufc_t));
 		} else {
 			/*
 			 * Move the gap backward.
@@ -143,114 +156,114 @@ bufb_p_gap_move(cw_bufb_t *a_bufb, cw_uint32_t a_pos)
 			 * ooooXXXXXXXXX___________oooo
 			 *     ^
 			 *     |
-			 *     a_pos
+			 *     a_ppos
 			 *     |
 			 *     v
 			 * oooo___________XXXXXXXXXoooo
 			 */
-			memmove(&a_bufb->data[a_bufb->gap_len + a_pos],
-			    &a_bufb[a_pos],
-			    (a_bufb->gap_off - a_pos) * sizeof(cw_bufc_t));
+			memmove(&a_bufp->data[a_bufp->gap_len + a_ppos],
+			    &a_bufp[a_ppos],
+			    (a_bufp->gap_off - a_ppos) * sizeof(cw_bufc_t));
 		}
-		a_bufb->gap_off = a_pos;
+		a_bufp->gap_off = a_ppos;
 	}
 }
 
-static cw_bufc_t
-bufb_p_get(cw_bufb_t *a_bufb, cw_uint32_t a_pos)
+static cw_bufc_t *
+bufp_p_ppos_get(cw_bufp_t *a_bufp, cw_uint32_t a_ppos)
 {
-	cw_bufc_t	retval;
+	cw_bufc_t	*retval;
 
-	_cw_check_ptr(a_bufb);
-	_cw_assert(a_pos < bufb_p_len_get(a_bufb));
+	_cw_check_ptr(a_bufp);
+	_cw_assert(a_ppos < bufp_p_len_get(a_bufp));
 
-	if (a_pos < a_bufb->gap_off)
-		retval = a_bufb->data[a_pos];
+	if (a_ppos < a_bufp->gap_off)
+		retval = &a_bufp->data[a_ppos];
 	else
-		retval = a_bufb->data[a_pos + a_bufb->gap_len];
+		retval = &a_bufp->data[a_ppos + a_bufp->gap_len];
 
 	return retval;
 }
 
 static void
-bufb_p_insert(cw_bufb_t *a_bufb, cw_uint32_t a_pos, const cw_bufc_t *a_data,
-    cw_uint64_t a_count)
+bufp_p_insert(cw_bufp_t *a_bufp, cw_uint32_t a_ppos, const cw_bufc_t *a_data,
+    cw_uint64_t a_len)
 {
 	cw_uint32_t	i;
 
-	_cw_check_ptr(a_bufb);
-	_cw_assert(a_count <= a_bufb->gap_len);
-	_cw_assert(a_pos + a_count <= _CW_BUFB_NCHAR);
+	_cw_check_ptr(a_bufp);
+	_cw_assert(a_len <= a_bufp->gap_len);
+	_cw_assert(a_ppos + a_len <= _CW_BUFP_NBUFC);
 
-	bufb_p_gap_move(a_bufb, a_pos);
-	for (i = 0; i < a_count; i++) {
-		a_bufb->data[a_pos + i] = a_data[i];
-		if (a_data[i].c == '\n')
-			a_bufb->nlines++;
+	bufp_p_gap_move(a_bufp, a_ppos);
+	for (i = 0; i < a_len; i++) {
+		a_bufp->data[a_ppos + i] = a_data[i];
+		if (bufc_char_get(a_data[i]) == '\n')
+			a_bufp->nlines++;
 	}
-	a_bufb->gap_off += a_count;
-	a_bufb->gap_len -= a_count;
+	a_bufp->gap_off += a_len;
+	a_bufp->gap_len -= a_len;
 }
 
 /*
- * Split a_bufb into two bufb's at position a_pos.  a_after is assumed to have
+ * Split a_bufp into two bufp's at position a_ppos.  a_after is assumed to have
  * enough space.
  */
 static void
-bufb_p_split(cw_bufb_t *a_bufb, cw_bufb_t *a_after, cw_uint32_t a_pos)
+bufp_p_split(cw_bufp_t *a_bufp, cw_bufp_t *a_after, cw_uint32_t a_ppos)
 {
-	_cw_check_ptr(a_bufb);
+	_cw_check_ptr(a_bufp);
 	_cw_check_ptr(a_after);
-	_cw_assert(bufb_p_gap_len_get(a_after) >= _CW_BUFB_NCHAR -
-	    a_bufb->gap_off - a_bufb->gap_len);
-	_cw_assert(a_pos <= _CW_BUFB_NCHAR - a_bufb->gap_len);
+	_cw_assert(bufp_p_gap_len_get(a_after) >= _CW_BUFP_NBUFC -
+	    a_bufp->gap_off - a_bufp->gap_len);
+	_cw_assert(a_ppos <= _CW_BUFP_NBUFC - a_bufp->gap_len);
 
-	bufb_p_gap_move(a_bufb, a_pos);
-	bufb_p_insert(a_after, 0, &a_bufb->data[a_bufb->gap_off +
-	    a_bufb->gap_len], _CW_BUFB_NCHAR - a_bufb->gap_off -
-	    a_bufb->gap_len);
+	bufp_p_gap_move(a_bufp, a_ppos);
+	bufp_p_insert(a_after, 0, &a_bufp->data[a_bufp->gap_off +
+	    a_bufp->gap_len], _CW_BUFP_NBUFC - a_bufp->gap_off -
+	    a_bufp->gap_len);
 
-	a_bufb->gap_len = _CW_BUFB_NCHAR - a_bufb->gap_off;
-	a_bufb->nlines -= bufb_p_nlines_get(a_after);
+	a_bufp->gap_len = _CW_BUFP_NBUFC - a_bufp->gap_off;
+	a_bufp->nlines -= bufp_p_nlines_get(a_after);
 }
 
 static void
-bufb_p_remove(cw_bufb_t *a_bufb, cw_uint32_t a_pos, cw_uint32_t a_count)
+bufp_p_remove(cw_bufp_t *a_bufp, cw_uint32_t a_ppos, cw_uint32_t a_len)
 {
 	cw_uint32_t	i;
 
-	_cw_check_ptr(a_bufb);
-	_cw_assert(a_pos + a_count <= bufb_p_len_get(a_bufb));
+	_cw_check_ptr(a_bufp);
+	_cw_assert(a_ppos + a_len <= bufp_p_len_get(a_bufp));
 
-	bufb_p_gap_move(a_bufb, a_pos);
-	for (i = 0; i < a_count; i++) {
-		if (a_bufb->data[a_bufb->gap_off + a_bufb->gap_len + i].c ==
-		    '\n')
-			a_bufb->nlines--;
+	bufp_p_gap_move(a_bufp, a_ppos);
+	for (i = 0; i < a_len; i++) {
+		if (bufc_char_get(a_bufp->data[a_bufp->gap_off + a_bufp->gap_len
+		    + i]) == '\n')
+			a_bufp->nlines--;
 	}
-	a_bufb->gap_len += a_count;
+	a_bufp->gap_len += a_len;
 }
 
-static cw_bufc_t
-bufb_p_bufc_at_cpos(cw_bufb_t *a_bufb, cw_uint64_t a_cpos)
+static cw_bufc_t *
+bufp_p_cpos_get(cw_bufp_t *a_bufp, cw_uint64_t a_cpos)
 {
-	_cw_check_ptr(a_bufb);
-	_cw_assert(a_cpos <= a_bufb->ecpos);
+	_cw_check_ptr(a_bufp);
+	_cw_assert(a_cpos <= a_bufp->ecpos);
 	
 	/*
 	 * We can assume that ecpos is valid.
 	 */
-	return bufb_p_get(a_bufb, a_cpos + bufb_p_len_get(a_bufb) -
-	    a_bufb->ecpos);
+	return bufp_p_ppos_get(a_bufp, a_cpos + bufp_p_len_get(a_bufp) -
+	    a_bufp->ecpos);
 }
 
 static cw_uint64_t
-bufb_p_line_at_cpos(cw_bufb_t *a_bufb, cw_uint64_t a_cpos)
+bufp_p_line_at_cpos(cw_bufp_t *a_bufp, cw_uint64_t a_cpos)
 {
 	cw_uint64_t	i, count, retval;
 
-	_cw_assert(a_cpos <= a_bufb->ecpos);
-	_cw_assert(a_cpos > a_bufb->ecpos - bufb_p_len_get(a_bufb));
+	_cw_assert(a_cpos <= a_bufp->ecpos);
+	_cw_assert(a_cpos > a_bufp->ecpos - bufp_p_len_get(a_bufp));
 
 	/*
 	 * We can assume that ecpos and eline are valid.
@@ -258,16 +271,16 @@ bufb_p_line_at_cpos(cw_bufb_t *a_bufb, cw_uint64_t a_cpos)
 	 * Iterate upward, since it is faster on many architectures.  Avoid the
 	 * gap.
 	 */
-	retval = a_bufb->eline - a_bufb->nlines;
-	count = a_cpos - a_bufb->ecpos + bufb_p_len_get(a_bufb);
+	retval = a_bufp->eline - a_bufp->nlines;
+	count = a_cpos - a_bufp->ecpos + bufp_p_len_get(a_bufp);
 
-	for (i = 0; i < count && i < a_bufb->gap_off; i++) {
-		if (a_bufb->data[i].c == '\n')
+	for (i = 0; i < count && i < a_bufp->gap_off; i++) {
+		if (bufc_char_get(a_bufp->data[i]) == '\n')
 			retval++;
 	}
 
-	for (i = a_bufb->gap_off + a_bufb->gap_len; i < count; i++) {
-		if (a_bufb->data[i].c == '\n')
+	for (i = a_bufp->gap_off + a_bufp->gap_len; i < count; i++) {
+		if (bufc_char_get(a_bufp->data[i]) == '\n')
 			retval++;
 	}
 
@@ -278,18 +291,135 @@ bufb_p_line_at_cpos(cw_bufb_t *a_bufb, cw_uint64_t a_cpos)
 static void
 bufh_p_new(cw_bufh_t *a_bufh)
 {
-	_cw_error("XXX Not implemented");
 	/* XXX */
 }
 
 static void
 bufh_p_delete(cw_bufh_t *a_bufh)
 {
-	_cw_error("XXX Not implemented");
 	/* XXX */
 }
 
 /* buf. */
+static cw_uint64_t
+buf_p_bufp_at_cpos(cw_buf_t *a_buf, cw_uint64_t a_cpos)
+{
+	cw_uint64_t	index, first, last;
+
+	/*
+	 * Make sure the cache reaches far enough to be useful for the
+	 * search.
+	 */
+	buf_p_bufp_cache_update(a_buf, a_cpos);
+
+	/*
+	 * Do a binary search for the correct bufp using the bufp character
+	 * position cache.  "first" is the index of the first element in the
+	 * range to search, and "last" is one plus the index of the last element
+	 * in the range to search.
+	 */
+	first = 0;
+	last = a_buf->bufp_count;
+	if (a_cpos < bufp_p_ecpos_get(a_buf->bufp_vec[first]))
+		index = first;
+	else if (a_cpos == a_buf->len)
+		index = last - 1;
+	else {
+		for (;;) {
+			index = (first + last) >> 1;
+
+			_cw_assert(index < a_buf->bufp_count);
+			if (bufp_p_ecpos_get(a_buf->bufp_vec[index]) < a_cpos) {
+				first = index + 1;
+			} else if (bufp_p_ecpos_get(a_buf->bufp_vec[index - 1])
+			    > a_cpos) {
+				last = index;
+			} else
+				break;
+		}
+	}
+	_cw_assert(index < a_buf->bufp_count);
+
+	return index;
+}
+
+static cw_uint64_t
+buf_p_line_at_cpos(cw_buf_t *a_buf, cw_uint64_t a_cpos)
+{
+	cw_uint64_t	retval, index;
+
+	_cw_assert(a_cpos <= a_buf->len);
+
+	if (a_cpos == 0) {
+		retval = 1;
+		goto RETURN;
+	}
+
+	index = buf_p_bufp_at_cpos(a_buf, a_cpos);
+	retval = bufp_p_line_at_cpos(a_buf->bufp_vec[index], a_cpos);
+	RETURN:
+	return retval;
+}
+
+static void
+buf_p_bufp_cache_update(cw_buf_t *a_buf, cw_uint64_t a_cpos)
+{
+	cw_uint64_t	ecpos, eline;
+
+	_cw_assert(a_cpos <= a_buf->len);
+
+	/*
+	 * Update the cache so that it can be used for searches up to and
+	 * including a_cpos.
+	 */
+	if (a_buf->ncached > 0) {
+		ecpos = bufp_p_ecpos_get(a_buf->bufp_vec[a_buf->ncached - 1]);
+		eline = bufp_p_eline_get(a_buf->bufp_vec[a_buf->ncached - 1]);
+	} else {
+		ecpos = 0;
+		eline = 1;
+	}
+	for (; ecpos <= a_cpos && a_buf->ncached < a_buf->bufp_count;
+	     a_buf->ncached++) {
+		bufp_p_ecpos_set(a_buf->bufp_vec[a_buf->ncached], ecpos);
+		ecpos = bufp_p_ecpos_get(a_buf->bufp_vec[a_buf->ncached]);
+
+		bufp_p_eline_set(a_buf->bufp_vec[a_buf->ncached], eline);
+		eline = bufp_p_eline_get(a_buf->bufp_vec[a_buf->ncached]);
+	}
+}
+
+static void
+buf_p_bufm_insert(cw_buf_t *a_buf, cw_bufm_t *a_bufm)
+{
+	cw_bufm_t	*bufm;
+
+	ql_foreach(bufm, &a_buf->bufms, link) {
+		if (a_bufm->bpos >= bufm->bpos) {
+			ql_after_insert(bufm, a_bufm, link);
+			return;
+		}
+	}
+	ql_head_insert(&a_buf->bufms, a_bufm, link);
+}
+
+/*
+ * Update the position of all bufm's after a_valid, and invalidate their cached
+ * bufp pointers as well.
+ */
+static void
+buf_p_bufms_update(cw_buf_t *a_buf, cw_bufm_t *a_valid, cw_sint64_t a_amount)
+{
+	cw_bufm_t	*bufm;
+
+	ql_reverse_foreach(bufm, &a_buf->bufms, link) {
+		if (bufm == a_valid)
+			break;
+		bufm->bpos += a_amount;
+		bufm->bufp = NULL;
+	}
+}
+
 cw_buf_t *
 buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc, cw_opaque_realloc_t
     *a_realloc, cw_opaque_dealloc_t *a_dealloc, void *a_arg, cw_msgq_t *a_msgq)
@@ -321,26 +451,23 @@ buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc, cw_opaque_realloc_t
 
 	mtx_new(&retval->mtx);
 
-	/* Set up the bufb vector. */
+	/* Set up the bufp vector. */
 	retval->len = 0;
-	retval->bufb_count = 1;
-	retval->bufb_veclen = 1;
-	retval->bufb_vec = (cw_bufb_t **)a_alloc(a_arg, sizeof(cw_bufb_t *),
-	    __FILE__, __LINE__);
+	retval->bufp_count = 1;
+	retval->bufp_veclen = 1;
+	retval->bufp_vec = (cw_bufp_t **)_cw_opaque_alloc(a_alloc, a_arg,
+	    sizeof(cw_bufp_t *));
 
-	/* Initialize a bufb. */
-	retval->bufb_vec[0] = (cw_bufb_t *)a_alloc(a_arg, sizeof(cw_bufb_t),
-	    __FILE__, __LINE__);
-	bufb_p_new(retval->bufb_vec[0]);
-/*  	bufb_p_ecpos_set(retval->bufb_vec[0], 0); */
-/*  	bufb_p_eline_set(retval->bufb_vec[0], 1); */
+	/* Initialize a bufp. */
+	retval->bufp_vec[0] = (cw_bufp_t *)_cw_opaque_alloc(a_alloc, a_arg,
+	    sizeof(cw_bufp_t));
+	bufp_p_new(retval->bufp_vec[0]);
 
 	retval->ncached = 0;
 
 	/* Initialize history. */
 	retval->hist_active = FALSE;
-	/* XXX */
-/*  	bufh_p_new(&retval->hist); */
+	bufh_p_new(&retval->hist);
 
 	/* Initialize lists. */
 	ql_new(&retval->bufms);
@@ -361,8 +488,7 @@ buf_delete(cw_buf_t *a_buf)
 	_cw_check_ptr(a_buf);
 	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
 
-	/* XXX */
-/*  	bufh_p_delete(&a_buf->hist); */
+	bufh_p_delete(&a_buf->hist);
 
 	/*
 	 * Set the buf pointers of all objects that point to this one to NULL,
@@ -374,13 +500,13 @@ buf_delete(cw_buf_t *a_buf)
 		bufm->buf = NULL;
 	}
 
-	/* Destroy the bufb vector. */
-	for (i = 0; i < a_buf->bufb_count; i++) {
+	/* Destroy the bufp vector. */
+	for (i = 0; i < a_buf->bufp_count; i++) {
 		_cw_opaque_dealloc(a_buf->dealloc, a_buf->arg,
-		    a_buf->bufb_vec[i], sizeof(cw_bufb_t));
+		    a_buf->bufp_vec[i], sizeof(cw_bufp_t));
 	}
-	_cw_opaque_dealloc(a_buf->dealloc, a_buf->arg, a_buf->bufb_vec,
-	    sizeof(cw_bufb_t *) * a_buf->bufb_veclen);
+	_cw_opaque_dealloc(a_buf->dealloc, a_buf->arg, a_buf->bufp_vec,
+	    sizeof(cw_bufp_t *) * a_buf->bufp_veclen);
 
 	mtx_delete(&a_buf->mtx);
 
@@ -395,21 +521,33 @@ buf_delete(cw_buf_t *a_buf)
 }
 
 cw_uint64_t
-buf_count(cw_buf_t *a_buf)
+buf_len(cw_buf_t *a_buf)
 {
+	cw_uint64_t	retval;
+
 	_cw_check_ptr(a_buf);
 	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
-	
-	return a_buf->len;
+
+	mtx_lock(&a_buf->mtx);
+	retval = a_buf->len;
+	mtx_unlock(&a_buf->mtx);
+
+	return retval;
 }
 
 cw_bool_t
 buf_hist_active_get(cw_buf_t *a_buf)
 {
+	cw_bool_t	retval;
+
 	_cw_check_ptr(a_buf);
 	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
 
-	return a_buf->hist_active;
+	mtx_lock(&a_buf->mtx);
+	retval = a_buf->hist_active;
+	mtx_unlock(&a_buf->mtx);
+
+	return retval;
 }
 
 void
@@ -418,10 +556,11 @@ buf_hist_active_set(cw_buf_t *a_buf, cw_bool_t a_active)
 	_cw_check_ptr(a_buf);
 	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
 
+	mtx_lock(&a_buf->mtx);
 	if (a_active == FALSE && a_buf->hist_active)
 		buf_hist_flush(a_buf);
-
 	a_buf->hist_active = a_active;
+	mtx_unlock(&a_buf->mtx);
 }
 
 cw_bool_t
@@ -471,109 +610,79 @@ buf_hist_flush(cw_buf_t *a_buf)
 	_cw_error("XXX Not implemented");
 }
 
-static cw_uint64_t
-buf_p_bufb_at_cpos(cw_buf_t *a_buf, cw_uint64_t a_cpos)
-{
-	cw_uint64_t	index, first, last;
-
-	/*
-	 * Make sure the cache reaches far enough to be useful for the
-	 * search.
-	 */
-	buf_p_bufb_cache_update(a_buf, a_cpos);
-
-	/*
-	 * Do a binary search for the correct bufb using the bufb character
-	 * position cache.  "first" is the index of the first element in the
-	 * range to search, and "last" is one plus the index of the last element
-	 * in the range to search.
-	 */
-	first = 0;
-	last = a_buf->bufb_count;
-	if (a_cpos < bufb_p_ecpos_get(a_buf->bufb_vec[first]))
-		index = first;
-	else if (a_cpos == a_buf->len)
-		index = last - 1;
-	else {
-		for (;;) {
-			index = (first + last) >> 1;
-
-			_cw_assert(index < a_buf->bufb_count);
-			if (bufb_p_ecpos_get(a_buf->bufb_vec[index]) < a_cpos) {
-				first = index + 1;
-			} else if (bufb_p_ecpos_get(a_buf->bufb_vec[index - 1])
-			    > a_cpos) {
-				last = index;
-			} else
-				break;
-		}
-	}
-	_cw_assert(index < a_buf->bufb_count);
-
-	return index;
-}
-
-static cw_uint64_t
-buf_p_line_at_cpos(cw_buf_t *a_buf, cw_uint64_t a_cpos)
-{
-	cw_uint64_t	retval, index;
-
-	_cw_assert(a_cpos <= a_buf->len);
-
-	if (a_cpos == 0) {
-		retval = 1;
-		goto RETURN;
-	}
-
-	index = buf_p_bufb_at_cpos(a_buf, a_cpos);
-	retval = bufb_p_line_at_cpos(a_buf->bufb_vec[index], a_cpos);
-	RETURN:
-	return retval;
-}
-
-static void
-buf_p_bufb_cache_update(cw_buf_t *a_buf, cw_uint64_t a_cpos)
-{
-	cw_uint64_t	ecpos, eline;
-
-	_cw_assert(a_cpos <= a_buf->len);
-
-	/*
-	 * Update the cache so that it can be used for searches up to and
-	 * including a_cpos.
-	 */
-	if (a_buf->ncached > 0) {
-		ecpos = bufb_p_ecpos_get(a_buf->bufb_vec[a_buf->ncached - 1]);
-		eline = bufb_p_eline_get(a_buf->bufb_vec[a_buf->ncached - 1]);
-	} else {
-		ecpos = 0;
-		eline = 1;
-	}
-	for (; ecpos <= a_cpos && a_buf->ncached < a_buf->bufb_count;
-	     a_buf->ncached++) {
-		bufb_p_ecpos_set(a_buf->bufb_vec[a_buf->ncached], ecpos);
-		ecpos = bufb_p_ecpos_get(a_buf->bufb_vec[a_buf->ncached]);
-
-		bufb_p_eline_set(a_buf->bufb_vec[a_buf->ncached], eline);
-		eline = bufb_p_eline_get(a_buf->bufb_vec[a_buf->ncached]);
-	}
-}
-
-static void
-buf_p_bufm_insert(cw_buf_t *a_buf, cw_bufm_t *a_bufm)
-{
-	cw_bufm_t	*bufm;
-
-	ql_foreach(bufm, &a_buf->bufms, link) {
-		if (a_bufm->cpos >= bufm->cpos) {
-			ql_after_insert(bufm, a_bufm, link);
-			return;
-		}
-	}
-	ql_head_insert(&a_buf->bufms, a_bufm, link);
-}
-
 /* bufm. */
+static void
+bufm_p_bufp_cache(cw_bufm_t *a_bufm)
+{
+	a_bufm->bufp = a_bufm->buf->bufp_vec[buf_p_bufp_at_cpos(a_bufm->buf,
+	    a_bufm->bpos - 1)];
+}
+
+static void
+bufm_p_rel_seek(cw_bufm_t *a_bufm, cw_sint64_t a_amount)
+{
+	a_bufm->bpos += a_amount;
+
+	/*
+	 * XXX We should be able to do better than this, since most relative
+	 * seeks will be very nearby, meaning that we don't always need to
+	 * re-insert into the bufm list.
+	 */
+	ql_remove(&a_bufm->buf->bufms, a_bufm, link);
+	buf_p_bufm_insert(a_bufm->buf, a_bufm);
+
+	if (a_bufm->msgq != NULL) {
+		/* Send a message. */
+		_cw_error("XXX Not implemented");
+	}
+}
+
+static void
+bufm_p_insert(cw_bufm_t *a_bufm, const cw_char_t *a_str, cw_uint64_t a_count)
+{
+	/*
+	 * Get the bufp at which the insertion starts.  If the a_bufm points at
+	 * the end of a full bufp, then first try to insert into the next bufp.
+	 * If that bufp is full or doesn't exist, create a new bufp.
+	 */
+	if (a_bufm->bufp == NULL)
+		bufm_p_bufp_cache(a_bufm);
+
+	if (a_bufm->bpos > a_bufm->bufp->ecpos &&
+	    bufp_p_gap_len_get(a_bufm->bufp) == 0) {
+		/* At end of full bufp. */
+		if (a_bufm->bpos > a_bufm->buf->len) {
+			/* At EOB. */
+			/* XXX Append a bufp. */
+		} else {
+			
+		}
+	}
+
+	/*
+	 * Check that there is enough room to insert the string into the bufp.
+	 * If so, simply insert the string.
+	 */
+
+
+	/*
+	 * There is not enough space in the bufp for the entire string.  Split
+	 * the bufp.  Taking into account the space made available by the split,
+	 * make sure there is enough space to insert the string, and if not,
+	 * insert enough additional bufp's to make room for the string.
+	 */
+
+	/*
+	 * The above code has guaranteed that there is enough space to insert
+	 * the entire string.  Insert as much of the string as will fit in each
+	 * consecutive bufp until the entire string has been inserted.  The text
+	 * inserted into the first bufp is inserted at the end, but for all
+	 * subsequent bufp's it is inserted at the beginning.
+	 */
+
+	_cw_error("XXX Not implemented");
+}
+
 cw_bufm_t *
 bufm_new(cw_bufm_t *a_bufm, cw_buf_t *a_buf, cw_msgq_t *a_msgq)
 {
@@ -595,7 +704,8 @@ bufm_new(cw_bufm_t *a_bufm, cw_buf_t *a_buf, cw_msgq_t *a_msgq)
 
 	ql_elm_new(retval, link);
 	retval->buf = a_buf;
-	retval->cpos = 0;
+	retval->bpos = 1;
+	retval->bufp = NULL;
 	retval->msgq = a_msgq;
 
 	ql_head_insert(&a_buf->bufms, retval, link);
@@ -618,7 +728,7 @@ bufm_dup(cw_bufm_t *a_to, cw_bufm_t *a_from)
 	_cw_check_ptr(a_from->buf);
 	_cw_assert(a_to->buf == a_from->buf);
 
-	a_to->cpos = a_from->cpos;
+	a_to->bpos = a_from->bpos;
 
 	ql_remove(&a_to->buf->bufms, a_to, link);
 	ql_after_insert(a_from, a_to, link);
@@ -641,6 +751,10 @@ bufm_delete(cw_bufm_t *a_bufm)
 		_cw_opaque_dealloc(a_bufm->dealloc, a_bufm->arg, a_bufm,
 		    sizeof(cw_bufm_t));
 	}
+#ifdef _CW_DBG
+	else
+		memset(a_bufm, 0x5a, sizeof(cw_bufm_t));
+#endif
 }
 
 cw_buf_t *
@@ -654,6 +768,32 @@ bufm_buf(cw_bufm_t *a_bufm)
 }
 
 cw_uint64_t
+bufm_line_seek(cw_bufm_t *a_bufm, cw_uint64_t a_line)
+{
+	cw_uint64_t	retval;
+
+	_cw_check_ptr(a_bufm);
+	_cw_dassert(a_bufm->magic == _CW_BUFM_MAGIC);
+	_cw_check_ptr(a_bufm->buf);
+	_cw_assert(a_line > 0);
+
+	mtx_lock(&a_bufm->buf->mtx);
+
+	_cw_error("XXX Not implemented");
+
+	if (a_bufm->msgq != NULL) {
+		/* Send a message. */
+		_cw_error("XXX Not implemented");
+	}
+
+	retval = a_bufm->bpos; /* XXX */
+
+	mtx_unlock(&a_bufm->buf->mtx);
+
+	return retval;
+}
+
+cw_uint64_t
 bufm_line(cw_bufm_t *a_bufm)
 {
 	cw_uint64_t	retval;
@@ -663,8 +803,9 @@ bufm_line(cw_bufm_t *a_bufm)
 	_cw_check_ptr(a_bufm->buf);
 
 	mtx_lock(&a_bufm->buf->mtx);
-	retval = buf_p_line_at_cpos(a_bufm->buf, a_bufm->cpos);
+	retval = buf_p_line_at_cpos(a_bufm->buf, a_bufm->bpos);
 	mtx_unlock(&a_bufm->buf->mtx);
+
 	return retval;
 }
 
@@ -681,24 +822,15 @@ bufm_rel_seek(cw_bufm_t *a_bufm, cw_sint64_t a_amount)
 
 	/* Make sure not to go out of buf bounds. */
 	if (a_amount >= 0) {
-		if (a_bufm->cpos + a_amount > a_bufm->buf->len)
-			a_amount = a_bufm->buf->len;
+		if (a_bufm->bpos + a_amount > a_bufm->buf->len + 1)
+			a_amount = a_bufm->buf->len + 1 - a_bufm->bpos;
 	} else {
-		if (a_amount * -1 > a_bufm->cpos)
-			a_amount = -a_bufm->cpos;
+		if (a_amount * -1 + 1 > a_bufm->bpos)
+			a_amount = -a_bufm->bpos + 1;
 	}
 
-	a_bufm->cpos += a_amount;
-
-	/*
-	 * XXX We should be able to do better than this, since most relative
-	 * seeks will be very nearby, meaning that we don't always need to
-	 * re-insert into the bufm list.
-	 */
-	ql_remove(&a_bufm->buf->bufms, a_bufm, link);
-	buf_p_bufm_insert(a_bufm->buf, a_bufm);
-
-	retval = a_bufm->cpos;
+	bufm_p_rel_seek(a_bufm, a_amount);
+	retval = a_bufm->bpos;
 
 	mtx_unlock(&a_bufm->buf->mtx);
 
@@ -717,16 +849,21 @@ bufm_abs_seek(cw_bufm_t *a_bufm, cw_uint64_t a_pos)
 
 	mtx_lock(&a_bufm->buf->mtx);
 
-	a_bufm->cpos = a_pos - 1;
+	a_bufm->bpos = a_pos;
 
 	/* Make sure not to go out of buf bounds. */
-	if (a_bufm->cpos > a_bufm->buf->len)
-		a_bufm->cpos = a_bufm->buf->len;
+	if (a_bufm->bpos > a_bufm->buf->len + 1)
+		a_bufm->bpos = a_bufm->buf->len + 1;
 
 	ql_remove(&a_bufm->buf->bufms, a_bufm, link);
 	buf_p_bufm_insert(a_bufm->buf, a_bufm);
 
-	retval = a_bufm->cpos;
+	if (a_bufm->msgq != NULL) {
+		/* Send a message. */
+		_cw_error("XXX Not implemented");
+	}
+
+	retval = a_bufm->bpos;
 
 	mtx_unlock(&a_bufm->buf->mtx);
 
@@ -743,17 +880,18 @@ bufm_pos(cw_bufm_t *a_bufm)
 	_cw_check_ptr(a_bufm->buf);
 
 	mtx_lock(&a_bufm->buf->mtx);
-	retval = a_bufm->cpos + 1;
+	retval = a_bufm->bpos;
 	mtx_unlock(&a_bufm->buf->mtx);
 
 	return retval;
 }
 
-cw_bufc_t
-bufm_bufc_get(cw_bufm_t *a_bufm)
+cw_bool_t
+bufm_before_get(cw_bufm_t *a_bufm, cw_bufc_t *r_bufc)
 {
-	cw_bufc_t	retval;
+	cw_bool_t	retval;
 	cw_uint64_t	index;
+	cw_bufc_t	*bufc;
 
 	_cw_check_ptr(a_bufm);
 	_cw_dassert(a_bufm->magic == _CW_BUFM_MAGIC);
@@ -761,36 +899,215 @@ bufm_bufc_get(cw_bufm_t *a_bufm)
 
 	mtx_lock(&a_bufm->buf->mtx);
 
-	index = buf_p_bufb_at_cpos(a_bufm->buf, a_bufm->cpos);
-	retval = bufb_p_bufc_at_cpos(a_bufm->buf->bufb_vec[index],
-	    a_bufm->cpos);
+	/* Make sure the marker isn't at BOB. */
+	if (a_bufm->bpos == 1) {
+		retval = TRUE;
+		goto RETURN;
+	}
 
+	index = buf_p_bufp_at_cpos(a_bufm->buf, a_bufm->bpos - 1);
+	bufc = bufp_p_cpos_get(a_bufm->buf->bufp_vec[index], a_bufm->bpos - 1);
+	*r_bufc = *bufc;
+
+	retval = FALSE;
+	RETURN:
 	mtx_unlock(&a_bufm->buf->mtx);
-
 	return retval;
 }
 
-void
-bufm_bufc_set(cw_bufm_t *a_bufm, cw_bufc_t a_bufc)
+cw_bool_t
+bufm_after_get(cw_bufm_t *a_bufm, cw_bufc_t *r_bufc)
 {
+	cw_bool_t	retval;
+	cw_uint64_t	index;
+	cw_bufc_t	*bufc;
+
 	_cw_check_ptr(a_bufm);
 	_cw_dassert(a_bufm->magic == _CW_BUFM_MAGIC);
 	_cw_check_ptr(a_bufm->buf);
 
-	_cw_error("XXX Not implemented");
+	mtx_lock(&a_bufm->buf->mtx);
+
+	/* Make sure the marker isn't at EOB. */
+	if (a_bufm->bpos == a_bufm->buf->len + 1) {
+		retval = TRUE;
+		goto RETURN;
+	}
+
+	index = buf_p_bufp_at_cpos(a_bufm->buf, a_bufm->bpos);
+	bufc = bufp_p_cpos_get(a_bufm->buf->bufp_vec[index], a_bufm->bpos);
+	*r_bufc = *bufc;
+
+	retval = FALSE;
+	RETURN:
+	mtx_unlock(&a_bufm->buf->mtx);
+	return retval;
+}
+
+cw_bool_t
+bufm_before_set(cw_bufm_t *a_bufm, cw_char_t a_char)
+{
+	cw_bool_t	retval;
+	cw_uint64_t	index;
+	cw_bufc_t	*bufc;
+
+	_cw_check_ptr(a_bufm);
+	_cw_dassert(a_bufm->magic == _CW_BUFM_MAGIC);
+	_cw_check_ptr(a_bufm->buf);
+
+	mtx_lock(&a_bufm->buf->mtx);
+
+	/* Make sure the marker isn't at BOB. */
+	if (a_bufm->bpos == 1) {
+		retval = TRUE;
+		goto RETURN;
+	}
+
+	index = buf_p_bufp_at_cpos(a_bufm->buf, a_bufm->bpos - 1);
+	bufc = bufp_p_cpos_get(a_bufm->buf->bufp_vec[index], a_bufm->bpos -
+	    1);
+	bufc_char_set(*bufc, a_char);
+
+	retval = FALSE;
+	RETURN:
+	mtx_unlock(&a_bufm->buf->mtx);
+	return retval;
+}
+
+cw_bool_t
+bufm_after_set(cw_bufm_t *a_bufm, cw_char_t a_char)
+{
+	cw_bool_t	retval;
+	cw_uint64_t	index;
+	cw_bufc_t	*bufc;
+
+	_cw_check_ptr(a_bufm);
+	_cw_dassert(a_bufm->magic == _CW_BUFM_MAGIC);
+	_cw_check_ptr(a_bufm->buf);
+
+	mtx_lock(&a_bufm->buf->mtx);
+
+	/* Make sure the marker isn't at EOB. */
+	if (a_bufm->bpos == a_bufm->buf->len + 1) {
+		retval = TRUE;
+		goto RETURN;
+	}
+
+	index = buf_p_bufp_at_cpos(a_bufm->buf, a_bufm->bpos);
+	bufc = bufp_p_cpos_get(a_bufm->buf->bufp_vec[index], a_bufm->bpos);
+	bufc_char_set(*bufc, a_char);
+
+	retval = FALSE;
+	RETURN:
+	mtx_unlock(&a_bufm->buf->mtx);
+	return retval;
+}
+
+cw_bool_t
+bufm_before_attrs_set(cw_bufm_t *a_bufm, cw_bufc_t a_bufc)
+{
+	cw_bool_t	retval;
+	cw_uint64_t	index;
+	cw_bufc_t	*bufc;
+
+	_cw_check_ptr(a_bufm);
+	_cw_dassert(a_bufm->magic == _CW_BUFM_MAGIC);
+	_cw_check_ptr(a_bufm->buf);
+
+	mtx_lock(&a_bufm->buf->mtx);
+
+	/* Make sure the marker isn't at BOB. */
+	if (a_bufm->bpos == 1) {
+		retval = TRUE;
+		goto RETURN;
+	}
+
+	index = buf_p_bufp_at_cpos(a_bufm->buf, a_bufm->bpos - 1);
+	bufc = bufp_p_cpos_get(a_bufm->buf->bufp_vec[index], a_bufm->bpos - 1);
+	bufc_attrs_copy(*bufc, a_bufc);
+
+	retval = FALSE;
+	RETURN:
+	mtx_unlock(&a_bufm->buf->mtx);
+	return retval;
+}
+
+cw_bool_t
+bufm_after_attrs_set(cw_bufm_t *a_bufm, cw_bufc_t a_bufc)
+{
+	cw_bool_t	retval;
+	cw_uint64_t	index;
+	cw_bufc_t	*bufc;
+
+	_cw_check_ptr(a_bufm);
+	_cw_dassert(a_bufm->magic == _CW_BUFM_MAGIC);
+	_cw_check_ptr(a_bufm->buf);
+
+	mtx_lock(&a_bufm->buf->mtx);
+
+	/* Make sure the marker isn't at EOB. */
+	if (a_bufm->bpos == a_bufm->buf->len + 1) {
+		retval = TRUE;
+		goto RETURN;
+	}
+
+	index = buf_p_bufp_at_cpos(a_bufm->buf, a_bufm->bpos);
+	bufc = bufp_p_cpos_get(a_bufm->buf->bufp_vec[index], a_bufm->bpos);
+	bufc_attrs_copy(*bufc, a_bufc);
+
+	retval = FALSE;
+	RETURN:
+	mtx_unlock(&a_bufm->buf->mtx);
+	return retval;
 }
 
 void
-bufm_bufc_insert(cw_bufm_t *a_bufm, const cw_bufc_t *a_data, cw_uint64_t
+bufm_before_insert(cw_bufm_t *a_bufm, const cw_char_t *a_str, cw_uint64_t
     a_count)
 {
 	_cw_check_ptr(a_bufm);
 	_cw_dassert(a_bufm->magic == _CW_BUFM_MAGIC);
 	_cw_check_ptr(a_bufm->buf);
 
-	/* XXX Temporary hack! */
-	bufb_p_insert(a_bufm->buf->bufb_vec[0], 0, a_data, a_count);
-	a_bufm->buf->len = a_count;
+	mtx_lock(&a_bufm->buf->mtx);
+
+	bufm_p_insert(a_bufm, a_str, a_count);
+
+	/* Move the marker forward so that it is after the inserted text. */
+	bufm_p_rel_seek(a_bufm, a_count);
+
+	mtx_unlock(&a_bufm->buf->mtx);
+}
+
+void
+bufm_after_insert(cw_bufm_t *a_bufm, const cw_char_t *a_str, cw_uint64_t
+    a_count)
+{
+	_cw_check_ptr(a_bufm);
+	_cw_dassert(a_bufm->magic == _CW_BUFM_MAGIC);
+	_cw_check_ptr(a_bufm->buf);
+
+	mtx_lock(&a_bufm->buf->mtx);
+
+	bufm_p_insert(a_bufm, a_str, a_count);
 	
-/*  	_cw_error("XXX Not implemented"); */
+	mtx_unlock(&a_bufm->buf->mtx);
+}
+
+void
+bufm_remove(cw_bufm_t *a_start, cw_bufm_t *a_end)
+{
+	_cw_check_ptr(a_start);
+	_cw_dassert(a_start->magic == _CW_BUFM_MAGIC);
+	_cw_check_ptr(a_start->buf);
+	_cw_check_ptr(a_end);
+	_cw_dassert(a_end->magic == _CW_BUFM_MAGIC);
+	_cw_check_ptr(a_end->buf);
+	_cw_assert(a_start->buf == a_end->buf);
+
+	mtx_lock(&a_start->buf->mtx);
+
+	_cw_error("XXX Not implemented");
+
+	mtx_unlock(&a_start->buf->mtx);
 }

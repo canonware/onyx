@@ -9,24 +9,89 @@
  *
  ******************************************************************************/
 
-typedef struct cw_bufc_s cw_bufc_t;
+typedef cw_uint8_t cw_char_t;
+typedef cw_uint32_t cw_bufc_t;
 typedef struct cw_bufm_s cw_bufm_t;
 typedef struct cw_bufe_s cw_bufe_t;
 typedef struct cw_bufhi_s cw_bufhi_t;
 typedef struct cw_bufh_s cw_bufh_t;
-typedef struct cw_bufb_s cw_bufb_t;
+typedef struct cw_bufp_s cw_bufp_t;
 typedef struct cw_buf_s cw_buf_t;
 
-/* This structure is not opaque; its internals can be mucked with. */
-struct cw_bufc_s {
-	cw_uint8_t	c:8;
+/*
+ * The bits of a bufc are defined as follows:
+ *
+ * . : Unused.
+ *
+ * U : Underlined.
+ *
+ * I : Invisible.
+ *
+ * D : Dim.
+ *
+ * B : Bold.
+ *
+ * C : Colored (foreground and background are ignored if this is set).
+ *
+ * f : Foreground color.
+ *
+ * b : Background color.
+ *
+ * c : Character.
+ *
+ * ...UIDBC ffffffff bbbbbbbb cccccccc
+ *
+ */
+#define	bufc_clear(a_bufc)		(a_bufc) = 0
+#define	bufc_attrs_clear(a_bufc)	(a_bufc) &= 0xff
+#define	bufc_attrs_copy(a_to, a_from)					\
+	(a_to) = ((a_to) & 0xff) | ((a_from) & 0xffffff00)
 
-	cw_uint32_t	fg:8;		/* Foreground color. */
-	cw_uint32_t	bg:8;		/* Background color. */
-	cw_bool_t	bold:1;		/* Bold if TRUE. */
-	cw_bool_t	emph:1;		/* Emphasized (italic) if TRUE. */
-	cw_bool_t	ul:1;		/* Underlined if TRUE. */
-};
+#define	bufc_char_get(a_bufc)		((cw_char_t)((a_bufc) & 0xff))
+#define	bufc_char_set(a_bufc, a_char)					\
+	(a_bufc) = (((a_bufc) & 0xffffff00) | (a_char))
+
+#define	bufc_fg_get(a_bufc)		(((a_bufc) >> 16) & 0xff)
+#define	bufc_fg_set(a_bufc, a_fg) do {					\
+	_cw_assert(((a_fg) & 0xffffff) == 0);				\
+	(a_bufc) = ((a_bufc) & 0xff00ffff) | ((a_fg) << 16);		\
+} while (0)
+
+#define	bufc_bg_get(a_bufc)		(((a_bufc) >> 8) & 0xff)
+#define	bufc_bg_set(a_bufc, a_bg) do {					\
+	_cw_assert(((a_bg) & 0xffffff) == 0);				\
+	(a_bufc) = ((a_bufc) & 0xffff00ff) | ((a_bg) << 8);		\
+} while (0)
+
+#define	bufc_colored_get(a_bufc)	((a_bufc) >> 24) & 1
+#define	bufc_colored_set(a_bufc, a_colored) do {			\
+	_cw_assert(((a_colored) & 0xfffffffe) = 0);			\
+	(a_bufc) = ((a_bufc) & 0xfeffffff) | ((a_colored) << 24);	\
+} while (0)
+
+#define	bufc_bold_get(a_bufc)	((a_bufc) >> 25) & 1
+#define	bufc_bold_set(a_bufc, a_bold) do {				\
+	_cw_assert(((a_bold) & 0xfffffffe) = 0);			\
+	(a_bufc) = ((a_bufc) & 0xfdffffff) | ((a_bold) << 25);		\
+} while (0)
+
+#define	bufc_dim_get(a_bufc)	((a_bufc) >> 26) & 1
+#define	bufc_dim_set(a_bufc, a_dim) do {				\
+	_cw_assert(((a_dim) & 0xfffffffe) = 0);				\
+	(a_bufc) = ((a_bufc) & 0xfbffffff) | ((a_dim) << 26);		\
+} while (0)
+
+#define	bufc_invisible_get(a_bufc)	((a_bufc) >> 27) & 1
+#define	bufc_invisible_set(a_bufc, a_invisible) do {			\
+	_cw_assert(((a_invisible) & 0xfffffffe) = 0);			\
+	(a_bufc) = ((a_bufc) & 0xf7ffffff) | ((a_invisible) << 27);	\
+} while (0)
+
+#define	bufc_underlined_get(a_bufc)	((a_bufc) >> 28) & 1
+#define	bufc_underlined_set(a_bufc, a_underlined) do {			\
+	_cw_assert(((a_underlined) & 0xfffffffe) = 0);			\
+	(a_bufc) = ((a_bufc) & 0xefffffff) | ((a_underlined) << 28);	\
+} while (0)
 
 struct cw_bufm_s {
 #ifdef _CW_DBG
@@ -40,7 +105,12 @@ struct cw_bufm_s {
 	cw_opaque_dealloc_t *dealloc;
 	const void	*arg;
 
-	cw_uint64_t	cpos;
+	cw_uint64_t	bpos;
+
+	/*
+	 * If non-NULL, this points to the bufp that corresponds to the bufm.
+	 */
+	cw_bufp_t	*bufp;
 
 	/* Message queue to send notifications to. */
 	cw_msgq_t	*msgq;
@@ -62,7 +132,7 @@ struct cw_bufhi_s {
 			cw_uint64_t	to;
 		}	seek;
 		struct {
-			cw_bufc_t	c;
+			cw_bufc_t	bufc;
 		}	insert;
 	}		data;
 };
@@ -73,19 +143,19 @@ struct cw_bufh_s {
 };
 
 /*
- * Make each bufb structure exactly one page, which avoids memory fragmentation
- * with most malloc implementations.
+ * Make each bufp structure a multiple of the page size, which avoids memory
+ * fragmentation with most malloc implementations.
  */
 #ifndef PAGESIZE
 #define	PAGESIZE		4096
 #endif
-#define	_CW_BUFB_SIZE		PAGESIZE
-#define	_CW_BUFB_OVERHEAD	28
-#define	_CW_BUFB_DATA		(_CW_BUFB_SIZE - _CW_BUFB_OVERHEAD)
-#define	_CW_BUFB_NCHAR		(_CW_BUFB_DATA / sizeof(cw_bufc_t))
-struct cw_bufb_s {
+#define	_CW_BUFP_SIZE		PAGESIZE
+#define	_CW_BUFP_OVERHEAD	28
+#define	_CW_BUFP_DATA		(_CW_BUFP_SIZE - _CW_BUFP_OVERHEAD)
+#define	_CW_BUFP_NBUFC		(_CW_BUFP_DATA / sizeof(cw_bufc_t))
+struct cw_bufp_s {
 	/*
-	 * The epos and eline fields aren't maintained by the bufb code at all;
+	 * The epos and eline fields aren't maintained by the bufp code at all;
 	 * for them to be valid, they must be explicitly set by external logic.
 	 */
 	cw_uint64_t	ecpos;			/* Last character position. */
@@ -93,7 +163,7 @@ struct cw_bufb_s {
 	cw_uint32_t	nlines;			/* Number of newlines. */
 	cw_uint32_t	gap_off;		/* Gap offset, in bufc's. */
 	cw_uint32_t	gap_len;		/* Gap length, in bufc's. */
-	cw_bufc_t	data[_CW_BUFB_NCHAR];	/* Text data, with gap. */
+	cw_bufc_t	data[_CW_BUFP_NBUFC];	/* Text data, with gap. */
 };
 
 struct cw_buf_s {
@@ -117,10 +187,10 @@ struct cw_buf_s {
 
 	/* Actual data. */
 	cw_uint64_t	len;		/* Number of characters. */
-	cw_uint64_t	bufb_count;	/* Number of valid bufb's. */
-	cw_uint64_t	bufb_veclen;	/* Number of elements in bufb_vec. */
-	cw_bufb_t	**bufb_vec;	/* Vector of bufb pointers. */
-	cw_uint64_t	ncached;	/* # of bufb's w/ valid ecpos/eline. */
+	cw_uint64_t	bufp_count;	/* Number of valid bufp's. */
+	cw_uint64_t	bufp_veclen;	/* Number of elements in bufp_vec. */
+	cw_bufp_t	**bufp_vec;	/* Vector of bufp pointers. */
+	cw_uint64_t	ncached;	/* # of bufp's w/ valid ecpos/eline. */
 
 	/* Ordered list of all marks. */
 	ql_head(cw_bufm_t) bufms;
@@ -136,7 +206,7 @@ cw_buf_t *buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc,
     *a_arg, cw_msgq_t *a_msgq);
 void	buf_delete(cw_buf_t *a_buf);
 
-cw_uint64_t buf_count(cw_buf_t *a_buf);
+cw_uint64_t buf_len(cw_buf_t *a_buf);
 
 cw_bool_t buf_hist_active_get(cw_buf_t *a_buf);
 void	buf_hist_active_set(cw_buf_t *a_buf, cw_bool_t a_active);
@@ -151,17 +221,26 @@ cw_bufm_t *bufm_new(cw_bufm_t *a_bufm, cw_buf_t *a_buf, cw_msgq_t *a_msgq);
 void	bufm_dup(cw_bufm_t *a_to, cw_bufm_t *a_from);
 void	bufm_delete(cw_bufm_t *a_bufm);
 cw_buf_t *bufm_buf(cw_bufm_t *a_bufm);
+
+cw_uint64_t bufm_line_seek(cw_bufm_t *a_bufm, cw_uint64_t a_line);
 cw_uint64_t bufm_line(cw_bufm_t *a_bufm);
 
 cw_uint64_t bufm_rel_seek(cw_bufm_t *a_bufm, cw_sint64_t a_amount);
 cw_uint64_t bufm_abs_seek(cw_bufm_t *a_bufm, cw_uint64_t a_pos);
 cw_uint64_t bufm_pos(cw_bufm_t *a_bufm);
 
-cw_bufc_t bufm_bufc_get(cw_bufm_t *a_bufm);
-void	bufm_bufc_set(cw_bufm_t *a_bufm, cw_bufc_t a_bufc);
-/* XXX Provide accessors for individual bufc fields. */
-void	bufm_bufc_insert(cw_bufm_t *a_bufm, const cw_bufc_t *a_data, cw_uint64_t
-    a_count);
-void	bufm_uint8_insert(cw_bufm_t *a_bufm, const cw_uint8_t *a_data,
+cw_bool_t bufm_before_get(cw_bufm_t *a_bufm, cw_bufc_t *r_bufc);
+cw_bool_t bufm_after_get(cw_bufm_t *a_bufm, cw_bufc_t *r_bufc);
+
+cw_bool_t bufm_before_set(cw_bufm_t *a_bufm, cw_char_t a_char);
+cw_bool_t bufm_after_set(cw_bufm_t *a_bufm, cw_char_t a_char);
+
+cw_bool_t bufm_before_attrs_set(cw_bufm_t *a_bufm, cw_bufc_t a_bufc);
+cw_bool_t bufm_after_attrs_set(cw_bufm_t *a_bufm, cw_bufc_t a_bufc);
+
+void	bufm_before_insert(cw_bufm_t *a_bufm, const cw_char_t *a_str,
     cw_uint64_t a_count);
+void	bufm_after_insert(cw_bufm_t *a_bufm, const cw_char_t *a_str,
+    cw_uint64_t a_count);
+
 void	bufm_remove(cw_bufm_t *a_start, cw_bufm_t *a_end);
