@@ -116,8 +116,6 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(or),
 	ENTRY(pop),
 	ENTRY(print),
-	ENTRY(product),
-	ENTRY(promptstring),
 	ENTRY(pstack),
 	ENTRY(put),
 	ENTRY(putinterval),
@@ -144,6 +142,8 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(store),
 	ENTRY(string),
 	ENTRY(sub),
+	{STILN_sym_hash_bang, systemdict_mark},
+	{STILN_sym_bang_hash, systemdict_cleartomark},
 	ENTRY(sym_rb_gt),
 	ENTRY(sym_gt_gt),
 	{STILN_sym_lb, systemdict_mark},
@@ -162,7 +162,6 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(undef),
 	ENTRY(unlink),
 	ENTRY(unlock),
-	ENTRY(version),
 	ENTRY(wait),
 	ENTRY(waitpid),
 	ENTRY(where),
@@ -1024,8 +1023,15 @@ systemdict_cvs(cw_stilo_t *a_thread)
 		cw_uint8_t	result[21];
 		cw_sint32_t	len;
 
+#if (_CW_STILOI_SIZEOF == 8)
 		len = _cw_out_put_s(result, "[q|s:s]",
 		    stilo_integer_get(stilo));
+#elif (_CW_STILOI_SIZEOF == 4)
+		len = _cw_out_put_s(result, "[i|s:s]",
+		    stilo_integer_get(stilo));
+#else
+#error "Unsupported integer size"
+#endif
 		stilo_string_new(stilo, stilo_thread_stil_get(a_thread),
 		    stilo_thread_currentlocking(a_thread), len);
 		stilo_string_lock(stilo);
@@ -2612,18 +2618,6 @@ systemdict_print(cw_stilo_t *a_thread)
 }
 
 void
-systemdict_product(cw_stilo_t *a_thread)
-{
-	_cw_stil_code(a_thread, "(Canonware stil)");
-}
-
-void
-systemdict_promptstring(cw_stilo_t *a_thread)
-{
-	_cw_stil_code(a_thread, "(s> )");
-}
-
-void
 systemdict_pstack(cw_stilo_t *a_thread)
 {
 	cw_stilo_t		*ostack;
@@ -3984,12 +3978,6 @@ systemdict_unlock(cw_stilo_t *a_thread)
 	stilo_mutex_unlock(mutex);
 
 	stilo_stack_pop(ostack);
-}
-
-void
-systemdict_version(cw_stilo_t *a_thread)
-{
-	_cw_stil_code(a_thread, "(" _LIBSTIL_VERSION ")");
 }
 
 void

@@ -17,6 +17,8 @@ extern const cw_uint8_t *cw_g_stil_names[];
 /* Same order as in stiln.c. */
 typedef enum {
 	STILN_ZERO,
+	STILN_sym_bang_hash,
+	STILN_sym_hash_bang,
 	STILN_sym_lb,
 	STILN_sym_rb,
 	STILN_sym_rb_gt,

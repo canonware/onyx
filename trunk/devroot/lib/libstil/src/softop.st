@@ -162,4 +162,21 @@ systemdict begin
 	} ifelse
 } bind def
 
+% - promptstring <string>
+/promptstring {
+	count cvs dup length 4 add string
+	dup 0 (s:) putinterval dup dup length 2 sub (> )
+	putinterval dup 3 2 roll 2 exch putinterval
+} bind def
+
+% - product <string>
+/product {
+	(Canonware stil)
+} bind def
+
+% - version <string>
+/version {
+	(<Version>)
+} bind def
+
 end % systemdict

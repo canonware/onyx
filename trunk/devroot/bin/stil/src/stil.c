@@ -105,11 +105,6 @@ errordict begin
 		//estackoverflow quit
 	} def
 end
-/promptstring {
-	count cvs dup length 4 add string
-	dup 0 (s:) putinterval dup dup length 2 sub (> )
-	putinterval dup 3 2 roll 2 exch putinterval
-} bind def
 ";
 		struct stil_arg_s	arg = {NULL, 0, 0};
 		char			*editor;
@@ -162,8 +157,6 @@ end
 			_cw_free(arg.buffer);
 	} else {
 		cw_stilo_t		*file;
-		static const cw_uint8_t	magic[] =
-		    "/#! {mark} def /!# {cleartomark} def";
 		int			c;
 		cw_bool_t		opt_version = FALSE;
 		cw_uint8_t		*opt_expression = NULL;
@@ -291,11 +284,6 @@ end
 			stilo_attrs_set(file, STILOA_EXECUTABLE);
 		} else
 			_cw_not_reached();
-
-		/* Create procedures to handle #! magic. */
-		stilo_thread_interpret(&thread, &threadp, magic, sizeof(magic) -
-		    1);
-		stilo_thread_flush(&thread, &threadp);
 
 		/* Run the interpreter non-interactively. */
 		systemdict_start(&thread);
