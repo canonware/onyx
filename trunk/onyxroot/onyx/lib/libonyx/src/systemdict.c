@@ -1196,11 +1196,10 @@ systemdict_cvrs(cw_nxo_t *a_thread)
 	cw_nxo_t	*ostack;
 	cw_nxo_t	*num, *radix;
 	cw_uint64_t	val;
-	cw_uint32_t	i, rlen, base;
+	cw_uint32_t	rlen, base;
 	cw_uint8_t	*str;
-	static const cw_uint8_t *syms = "0123456789abcdefghijklmnopqrstuvwxyz";
-	cw_uint8_t	*result, s_result[65] =
-	    "0000000000000000000000000000000000000000000000000000000000000000";
+	cw_uint8_t	format[13];  /* "[q|s:s|b:??]" */
+	cw_uint8_t	result[66]; /* Sign, 64 bits, terminator. */
 
 	ostack = nxo_thread_ostack_get(a_thread);
 	NXO_STACK_GET(radix, ostack, a_thread);
@@ -1215,31 +1214,13 @@ systemdict_cvrs(cw_nxo_t *a_thread)
 		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
 		return;
 	}
-	val = (cw_uint64_t)nxo_integer_get(num);
+	val = nxo_integer_get(num);
 
-	/*
-	 * Handle radix 16 specially, since it can be done quickly, and is
-	 * commonly used.
-	 */
-	result = s_result;
-	if (base == 16) {
-		for (i = 63; val != 0; i--) {
-			result[i] = syms[val & 0xf];
-			val >>= 4;
-		}
-	} else {
-		for (i = 63; val != 0; i--) {
-			result[i] = syms[val % base];
-			val /= base;
-		}
-	}
-	result += i + 1;
-	rlen = 64 - (result - s_result);
-	/* Print a 0 if the number is 0. */
-	if (rlen == 0) {
-		rlen++;
-		result--;
-	}
+	/* Create a format string with the base embedded. */
+	_cw_out_put_s(format, "[[q|s:s|b:[i]]", base);
+
+	rlen = _cw_out_put_s(result, format, val);
+	_cw_assert(rlen <= 65);
 
 	nxo_string_new(num, nxo_thread_nx_get(a_thread),
 	    nxo_thread_currentlocking(a_thread), rlen);

@@ -3872,7 +3872,9 @@ onyx:0>
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[string: ]
+			A string representation of \oparg{integer} in base
+			\oparg{radix}.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
@@ -3882,9 +3884,7 @@ onyx:0>
 		\end{description}
 	\item[Description: ]
 		Convert \oparg{integer} to a string representation in base
-		\oparg{radix}.  \oparg{integer} is treated as a 64 bit unsigned
-		integer, so the results for negative integers will not generally
-		be useful.
+		\oparg{radix}.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> 42 2 cvrs 1 sprint
