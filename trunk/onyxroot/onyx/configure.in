@@ -87,7 +87,7 @@ AC_SUBST(libs)
 
 AC_CANONICAL_HOST
 case "${host}" in
-  i386-*-freebsd*)
+  *-*-freebsd*)
 	AC_DEFINE(_CW_OS_FREEBSD, )
 	RPATH="-Wl,-rpath,"
         ;;
@@ -104,6 +104,9 @@ case "${host}" in
 		LIBS="$LIBS -lthread"
 	fi
         ;;
+  *)
+	AC_MSG_ERROR(Unsupported operating system: ${host})
+	;;
 esac
 AC_SUBST(RPATH)
 
