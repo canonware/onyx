@@ -154,7 +154,7 @@ case "${host}" in
 	RPATH="-Wl,-R,"
 	dnl Solaris needs this for sigwait().
 	CPPFLAGS="$CPPFLAGS -D_POSIX_PTHREAD_SEMANTICS"
-	LIBS="$LIBS -lposix4"
+	LIBS="$LIBS -lposix4 -lsocket -lnsl"
 	;;
   *)
 	AC_MSG_RESULT([Unsupported operating system: ${host}])
