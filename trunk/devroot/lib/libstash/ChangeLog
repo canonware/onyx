@@ -1,3 +1,7 @@
+2001-07-10  Jason Evans  <jasone@canonware.com>
+
+	* src/thd.c: Make sure thread stacks aren't too small.
+
 2001-06-16  Jason Evans  <jasone@canonware.com>
 
 	* include/libstash/libstash_defs.h.in: Add _CW_HAVE_LIBSTASH_BUF

@@ -44,6 +44,9 @@ struct cw_thd_s {
 static cw_bool_t cw_g_thd_initialized = FALSE;
 #endif
 
+/* Thread attribute object used for all thread creations. */
+static pthread_attr_t cw_g_thd_attr;
+
 /* Special thd structure for initial thread, needed for critical sections. */
 static cw_thd_t	cw_g_thd;
 
@@ -87,6 +90,8 @@ static void	thd_p_sr_handle(int a_signal);
 void
 thd_l_init(void)
 {
+	int			stacksize;
+
 #ifdef _CW_THD_GENERIC_SR
 	int			error;
 	struct sigaction	action;
@@ -107,9 +112,18 @@ thd_l_init(void)
 #endif
 	_cw_assert(cw_g_thd_initialized == FALSE);
 
+	/*
+	 * Create a thread attribute object to be used for all thread
+	 * creations.  Make sure that the thread stack size isn't too tiny.
+	 */
+	pthread_attr_init(&cw_g_thd_attr);
+	pthread_attr_getstacksize(&cw_g_thd_attr, &stacksize);
+	if (stacksize < _CW_THD_MINSTACK)
+		pthread_attr_setstacksize(&cw_g_thd_attr, _CW_THD_MINSTACK);
+
 	mtx_new(&cw_g_thd_single_lock);
 	tsd_new(&cw_g_thd_self_key, NULL);
-	
+
 	/* Initialize the main thread's thd structure. */
 	cw_g_thd.thread = pthread_self();
 	cw_g_thd.start_func = NULL;
@@ -145,6 +159,9 @@ thd_l_shutdown(void)
 #endif
 
 	_cw_assert(cw_g_thd_initialized);
+
+	pthread_attr_destroy(&cw_g_thd_attr);
+
 	mtx_delete(&cw_g_thd.crit_lock);
 #ifdef _CW_THD_GENERIC_SR
 	error = sem_destroy(&cw_g_thd.sem);
@@ -191,8 +208,8 @@ thd_new(void *(*a_start_func)(void *), void *a_arg, cw_bool_t a_suspendible)
 	retval->magic = _CW_THD_MAGIC;
 #endif
 
-	error = pthread_create(&retval->thread, NULL, thd_p_start_func,
-	    (void *)retval);
+	error = pthread_create(&retval->thread, &cw_g_thd_attr,
+	    thd_p_start_func, (void *)retval);
 	if (error) {
 		out_put_e(NULL, NULL, 0, __FUNCTION__,
 		    "Error in pthread_create(): [s]\n", strerror(error));
