@@ -106,7 +106,7 @@ CPPFLAGS = [CPPFLAGS] -I@srcroot@/mod/modgtk/include
 #if [matches elf @abi@]
        -shared
 #elif [matches macho @abi@]
-       -undefined suppress -flat_namespace -bundle -all_load
+       -undefined suppress -flat_namespace -bundle -all_load -bind_at_load
 #endif
        -o [target] [need] [MODGTK_LDFLAGS];
 }

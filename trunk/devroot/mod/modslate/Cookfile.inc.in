@@ -116,7 +116,7 @@ CPPFLAGS = [CPPFLAGS] -I@srcroot@/mod/modslate/include
 #if [matches elf @abi@]
        -shared
 #elif [matches macho @abi@]
-       -undefined suppress -flat_namespace -bundle -all_load
+       -undefined suppress -flat_namespace -bundle -all_load -bind_at_load
 #endif
        -o [target] [need] [MODSLATE_LDFLAGS];
 }
