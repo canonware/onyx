@@ -17,6 +17,11 @@
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
+#ifdef CW_REAL
+/* This is necessary for HUGE_VAL, at least on FreeBSD, though the documentation
+ * seems to indicate that stdlib.h should be enough. */
+#include <math.h>
+#endif
 
 #include "../include/libonyx/nx_l.h"
 #include "../include/libonyx/nxa_l.h"
@@ -2379,6 +2384,7 @@ nxoe_p_thread_integer_accept(cw_nxoe_thread_t *a_thread)
 	    val = sum;
 	}
 
+	/* Create an integer on ostack. */
 	nxo = nxo_stack_push(&a_thread->ostack);
  	nxo_integer_new(nxo, val);
 	nxoe_p_thread_reset(a_thread);
@@ -2400,33 +2406,50 @@ static cw_bool_t
 nxoe_p_thread_real_accept(cw_nxoe_thread_t *a_thread)
 {
     cw_bool_t retval;
+    cw_nxo_t *nxo;
+    cw_nxor_t val;
 
-    fprintf(stderr,
- 	    "mant_neg: %s, radix_base: %u, whole: %s/%u/%u, frac: %s/%u/%u, exp: %s/%u/%u",
- 	    a_thread->m.n.mant_neg ? "TRUE" : "FALSE",
- 	    a_thread->m.n.radix_base,
- 	    a_thread->m.n.whole ? "TRUE" : "FALSE",
- 	    a_thread->m.n.whole_off,
- 	    a_thread->m.n.whole_len,
- 	    a_thread->m.n.frac ? "TRUE" : "FALSE",
- 	    a_thread->m.n.frac_off,
- 	    a_thread->m.n.frac_len,
- 	    a_thread->m.n.exp ? "TRUE" : "FALSE",
- 	    a_thread->m.n.exp_off,
- 	    a_thread->m.n.exp_len);
+/*     fprintf(stderr, */
+/*  	    "mant_neg: %s, radix_base: %u, whole: %s/%u/%u, frac: %s/%u/%u, exp: %s/%u/%u", */
+/*  	    a_thread->m.n.mant_neg ? "TRUE" : "FALSE", */
+/*  	    a_thread->m.n.radix_base, */
+/*  	    a_thread->m.n.whole ? "TRUE" : "FALSE", */
+/*  	    a_thread->m.n.whole_off, */
+/*  	    a_thread->m.n.whole_len, */
+/*  	    a_thread->m.n.frac ? "TRUE" : "FALSE", */
+/*  	    a_thread->m.n.frac_off, */
+/*  	    a_thread->m.n.frac_len, */
+/*  	    a_thread->m.n.exp ? "TRUE" : "FALSE", */
+/*  	    a_thread->m.n.exp_off, */
+/*  	    a_thread->m.n.exp_len); */
 	    
-    fprintf(stderr, ", raw :");
-    write(2, a_thread->tok_str, a_thread->index);
-    fprintf(stderr, ":\n");
+/*     fprintf(stderr, ", raw :"); */
+/*     write(2, a_thread->tok_str, a_thread->index); */
+/*     fprintf(stderr, ":\n"); */
 
-//    cw_error("XXX Not implemented");
-    /* XXX Hack! */
-    a_thread->m.m.action = ACTION_LITERAL;
-    a_thread->state = THREADTS_NAME;
-    nxoe_p_thread_name_accept(a_thread);
+    /* Convert string to real.  Do the conversion before mucking with the stack
+     * in case there is a conversion error.
+     *
+     * The state created by the scanner is enough to allow us to do the
+     * conversion more efficiently than possible via strtod(), but the
+     * conversion process is quite complex, so just use strtod().
+     */
+    a_thread->tok_str[a_thread->index] = '\0';
+    errno = 0;
+    val = strtod(a_thread->tok_str, NULL);
+    if (errno == ERANGE && (val == HUGE_VAL || val == -HUGE_VAL))
+    {
+	retval = TRUE;
+	goto RETURN;
+    }
+
+    /* Create a real on ostack. */
+    nxo = nxo_stack_push(&a_thread->ostack);
+    nxo_real_new(nxo, val);
+    nxoe_p_thread_reset(a_thread);
 
     retval = FALSE;
-
+    RETURN:
     return retval;
 }
 #endif
