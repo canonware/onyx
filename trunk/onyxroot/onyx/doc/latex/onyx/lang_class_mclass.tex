@@ -17,7 +17,9 @@
 \index{systemdict@\onyxop{}{mclass}{}}
 
 The \classname{mclass} class uses the singleton pattern to provide an
-application-wide interface for loading, querying, and unloading modules.
+application-wide interface for loading modules.  Additionally, the
+\htmlref{\method{mclass:modules}}{mclass:modules} method makes it possible to
+find out what modules are currently loaded.
 
 \begin{longtable}{\optableformat{4.10}}
 \caption{mclass summary}
@@ -90,10 +92,17 @@ application-wide interface for loading, querying, and unloading modules.
 	\item[Output(s): ] None.
 	\item[Error(s): ]
 		\begin{description}\item[]
+		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
+		\item[\htmlref{ioerror}{ioerror}.]
+		\item[\htmlref{limitcheck}{limitcheck}.]
+		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{undefinedfilename}{undefinedfilename}.]
 		\end{description}
 	\item[Description: ]
-		Load the module named \oparg{modname}.
+		Load the module named \oparg{modname}, and define the module
+		name as the module in currentdict.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> $modclopt mclass:singleton:load
