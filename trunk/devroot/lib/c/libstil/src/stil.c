@@ -124,7 +124,8 @@ stil_delete(cw_stil_t *a_stil)
 	}
 	dch_delete(&a_stil->stiln_dch);
 	pezz_delete(&a_stil->stiln_pezz);
-
+	
+	pezz_delete(&a_stil->chi_pezz);
 	pezz_delete(&a_stil->stil_bufc_pezz);
 
 	mtx_delete(&a_stil->lock);

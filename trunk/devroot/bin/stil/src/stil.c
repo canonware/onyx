@@ -114,6 +114,7 @@ main(int argc, char **argv)
 		stilt_interp_str(&stilt, input, (cw_uint32_t)bytes_read);
 	}
 
+	stilt_delete(&stilt);
 	stil_delete(&stil);
 	libstash_shutdown();
 	return 0;

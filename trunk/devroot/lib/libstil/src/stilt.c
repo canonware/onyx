@@ -105,6 +105,7 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 		retval = (cw_stilt_t *)_cw_malloc(sizeof(cw_stilt_t));
 		if (retval == NULL)
 			goto OOM_1;
+		bzero(a_stilt, sizeof(cw_stilt_t));
 		retval->is_malloced = TRUE;
 	}
 
@@ -145,6 +146,30 @@ stilt_delete(cw_stilt_t *a_stilt)
 	dch_delete(&a_stilt->stiln_dch);
 	if (a_stilt->is_malloced)
 		_cw_free(a_stilt);
+}
+
+void
+stilt_get_position(cw_stilt_t *a_stilt, cw_uint32_t *r_line, cw_uint32_t *r_col)
+{
+	_cw_check_ptr(a_stilt);
+	_cw_assert(a_stilt->magic == _CW_STILT_MAGIC);
+
+	*r_line = a_stilt->nlines + 1;
+	*r_col = a_stilt->nchars - a_stilt->line_offset;
+}
+
+void
+stilt_reset_position(cw_stilt_t *a_stilt)
+{
+	_cw_check_ptr(a_stilt);
+	_cw_assert(a_stilt->magic == _CW_STILT_MAGIC);
+
+	/* Set line_offset to be negative, so that offset calculations work
+	 * before another '\n' has been seen. */
+	a_stilt->line_offset = (a_stilt->line_offset - a_stilt->nchars);
+	
+	a_stilt->nchars = 0;
+	a_stilt->nlines = 0;
 }
 
 cw_bool_t
@@ -244,7 +269,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 	cw_uint32_t i;
 	cw_uint8_t c;
 
-	for (i = 0; i < a_len; i++) {
+	for (i = 0; i < a_len; i++, a_stilt->nchars++) {
 		c = a_str[i];
 
 #if (0)
@@ -288,6 +313,11 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 		case _CW_STILT_STATE_START:
 			_cw_assert(a_stilt->index == 0);
 
+			/* Record where this token starts. */
+			a_stilt->tok_line_start = a_stilt->nlines + 1;
+			a_stilt->tok_col_start = a_stilt->nchars -
+			    a_stilt->line_offset;
+
 			switch (c) {
 			case '(':
 				a_stilt->state = _CW_STILT_STATE_ASCII_STRING;
@@ -320,8 +350,11 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 			case '%':
 				a_stilt->state = _CW_STILT_STATE_COMMENT;
 				break;
-			case '\0': case '\t': case '\n': case '\f': case '\r':
-			case ' ':
+			case '\n':
+				a_stilt->nlines++;
+				a_stilt->line_offset = a_stilt->nchars + 1;
+				/* Fall through. */
+			case '\0': case '\t': case '\f': case '\r': case ' ':
 				/* Swallow. */
 				break;
 			case '+':
@@ -392,8 +425,11 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 				a_stilt->state = _CW_STILT_STATE_HEX_STRING;
 				_CW_STILT_PUTC(c);
 				break;
-			case '\0': case '\t': case '\n': case '\f': case '\r':
-			case ' ':
+			case '\n':
+				a_stilt->nlines++;
+				a_stilt->line_offset = a_stilt->nchars + 1;
+				/* Fall through. */
+			case '\0': case '\t': case '\f': case '\r': case ' ':
 				/* Whitespace within a hex string. */
 				a_stilt->state = _CW_STILT_STATE_HEX_STRING;
 				break;
@@ -424,9 +460,15 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 				a_stilt->meta.name.is_literal = FALSE;
 				a_stilt->meta.name.is_immediate = TRUE;
 				break;
-			case '\0': case '\t': case '\n': case '\f': case '\r':
-			case ' ': case '(': case ')': case '<': case '>':
-			case '[': case ']': case '{': case '}': case '%':
+			case '\n':
+				stilt_p_print_syntax_error(a_stilt, c);
+
+				a_stilt->nlines++;
+				a_stilt->line_offset = a_stilt->nchars + 1;
+				break;
+			case '\0': case '\t': case '\f': case '\r': case ' ':
+			case '(': case ')': case '<': case '>': case '[':
+			case ']': case '{': case '}': case '%':
 				stilt_p_print_syntax_error(a_stilt, c);
 				break;
 			default:
@@ -441,7 +483,11 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 			_cw_assert(a_stilt->index == 0);
 
 			switch (c) {
-			case '\n': case '\r':
+			case '\n':
+				a_stilt->nlines++;
+				a_stilt->line_offset = a_stilt->nchars + 1;
+				/* Fall through. */
+			case '\r':
 				a_stilt->state = _CW_STILT_STATE_START;
 				break;
 			default:
@@ -591,8 +637,11 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 				}
 				stilt_p_reset_tok_buffer(a_stilt);
 				goto RESTART;
-			case '\0': case '\t': case '\n': case '\f': case '\r':
-			case ' ':
+			case '\n':
+				a_stilt->nlines++;
+				a_stilt->line_offset = a_stilt->nchars + 1;
+				/* Fall through. */
+			case '\0': case '\t': case '\f': case '\r': case ' ':
 				a_stilt->state = _CW_STILT_STATE_START;
 				if ((a_stilt->index -
 				    a_stilt->meta.number.begin_offset > 1) ||
@@ -660,6 +709,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 			a_stilt->state = _CW_STILT_STATE_ASCII_STRING;
 			switch (c) {
 			case '\n':
+				a_stilt->nlines++;
+				a_stilt->line_offset = a_stilt->nchars + 1;
 				break;
 			default:
 				/*
@@ -713,6 +764,9 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 				    _CW_STILT_STATE_ASCII_STRING_CRLF_CONT;
 				break;
 			case '\n':
+				a_stilt->nlines++;
+				a_stilt->line_offset = a_stilt->nchars + 1;
+
 				/* Ignore. */
 				a_stilt->state = _CW_STILT_STATE_ASCII_STRING;
 				break;
@@ -725,6 +779,9 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 		case _CW_STILT_STATE_ASCII_STRING_CRLF_CONT:
 			switch (c) {
 			case '\n':
+				a_stilt->nlines++;
+				a_stilt->line_offset = a_stilt->nchars + 1;
+
 				/* Ignore. */
 				a_stilt->state = _CW_STILT_STATE_ASCII_STRING;
 				break;
@@ -824,8 +881,11 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 			case 'f':
 				_CW_STILT_PUTC(c);
 				break;
-			case '\0': case '\t': case '\n': case '\f': case '\r':
-			case ' ':
+			case '\n':
+				a_stilt->nlines++;
+				a_stilt->line_offset = a_stilt->nchars + 1;
+				/* Fall through. */
+			case '\0': case '\t': case '\f': case '\r': case ' ':
 				break;
 			default:
 				stilt_p_print_syntax_error(a_stilt, c);
@@ -838,7 +898,11 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 				a_stilt->state =
 				    _CW_STILT_STATE_BASE85_STRING_CONT;
 				break;
-			case '\0': case '\t': case '\n': case '\f': case '\r':
+			case '\n':
+				a_stilt->nlines++;
+				a_stilt->line_offset = a_stilt->nchars + 1;
+				/* Fall through. */
+			case '\0': case '\t': case '\f': case '\r':
 			case ' ':
 				/* Ignore. */
 				break;
@@ -865,8 +929,11 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 			break;
 		case _CW_STILT_STATE_NAME:
 			switch (c) {
-			case '\0': case '\t': case '\n': case '\f': case '\r':
-			case ' ':
+			case '\n':
+				a_stilt->nlines++;
+				a_stilt->line_offset = a_stilt->nchars + 1;
+				/* Fall through. */
+			case '\0': case '\t': case '\f': case '\r': case ' ':
 				/* End of name. */
 				a_stilt->state = _CW_STILT_STATE_START;
 				if (a_stilt->index > 0) {
@@ -978,12 +1045,16 @@ stilt_p_print_token(cw_stilt_t *a_stilt, cw_uint32_t a_length,
     const char *a_note)
 {
 #ifdef _LIBSTIL_DBG
+	cw_uint32_t line, col;
+
+	stilt_get_position(a_stilt, &line, &col);
 	_cw_out_put("-->");
 	if (a_stilt->index <= _CW_STIL_BUFC_SIZE)
 		_cw_out_put_n(a_length, "[s]", a_stilt->tok_buffer.str);
 	else
 		_cw_out_put_n(a_length, "[b]", &a_stilt->tok_buffer.buf);
-	_cw_out_put("<-- [s]\n", a_note);
+	_cw_out_put("<-- [s] (line [i], column [i])\n", a_note,
+	    a_stilt->tok_line_start, a_stilt->tok_col_start);
 #endif
 }
 
@@ -996,7 +1067,8 @@ stilt_p_print_syntax_error(cw_stilt_t *a_stilt, cw_uint8_t a_c)
 		_cw_out_put_n(a_stilt->index, "[s]", a_stilt->tok_buffer.str);
 	else
 		_cw_out_put_n(a_stilt->index, "[b]", &a_stilt->tok_buffer.buf);
-	_cw_out_put("<--\n");
+	_cw_out_put("<-- (starts at line [i], column [i])\n",
+	    a_stilt->tok_line_start, a_stilt->tok_col_start);
 	a_stilt->state = _CW_STILT_STATE_START;
 	stilt_p_reset_tok_buffer(a_stilt);
 }
