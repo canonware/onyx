@@ -2534,6 +2534,7 @@ cw_uint64_t
 mkr_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence)
 {
     cw_uint64_t bpos;
+    cw_uint32_t ppos, pline;
     cw_buf_t *buf;
     cw_bufp_t *bufp;
 
@@ -2621,20 +2622,101 @@ mkr_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence)
 	}
     }
 
-    /* Get the bufp that contains bpos. */
+    /* Determine the new values for a_mkr's internals. */
     bufp = buf_p_bufp_at_bpos(buf, bpos);
+    ppos = bufp_p_pos_b2p(bufp, bpos);
+    /* pline. */
+    if (bufp == a_mkr->bufp)
+    {
+	cw_uint32_t rpos, orpos;
 
-    /* Remove a_mkr from the tree and list of the bufp at its old location. */
+	orpos = bufp_p_pos_p2r(bufp, a_mkr->ppos);
+	rpos = bufp_p_pos_p2r(bufp, ppos);
+
+	/* If the distance between the old position and the new position isn't
+	 * larger than the distance from the new position to either end of the
+	 * bufp, calculate pline relative to the previous position. */
+	if (a_offset <= rpos && a_offset <= CW_BUFP_SIZE - rpos)
+	{
+	    cw_uint32_t lppos, hppos, i, nlines;
+
+	    /* Determine low and high end of range. */
+	    if (ppos > a_mkr->ppos)
+	    {
+		lppos = a_mkr->ppos;
+		hppos = ppos;
+	    }
+	    else
+	    {
+		lppos = ppos;
+		hppos = a_mkr->ppos;
+	    }
+
+	    /* Count newlines in range. */
+	    nlines = 0;
+	    if (hppos < bufp->gap_off
+		|| lppos >= bufp->gap_off + (CW_BUFP_SIZE - bufp->len))
+	    {
+		/* All data before or after the gap. */
+		for (i = lppos; i < hppos; i++)
+		{
+		    if (bufp->b[i] == '\n')
+		    {
+			nlines++;
+		    }
+		}
+	    }
+	    else
+	    {
+		/* Data before and after the gap. */
+		for (i = lppos; i < bufp->gap_off; i++)
+		{
+		    if (bufp->b[i] == '\n')
+		    {
+			nlines++;
+		    }
+		}
+
+		for (i = bufp->gap_off + (CW_BUFP_SIZE - bufp->len);
+		     i < hppos;
+		     i++)
+		{
+		    if (bufp->b[i] == '\n')
+		    {
+			nlines++;
+		    }
+		}
+	    }
+
+	    /* Finally, set pline. */
+	    if (ppos > a_mkr->ppos)
+	    {
+		pline = a_mkr->pline + nlines;
+	    }
+	    else
+	    {
+		pline = a_mkr->pline - nlines;
+	    }
+	}
+	else
+	{
+	    /* Relative calculation of pline isn't worthwhile. */
+	    pline = bufp_p_ppos2pline(bufp, ppos);
+	}
+    }
+    else
+    {
+	/* Determine pline without any attempt to use the previous position to
+	 * speed things up. */
+	pline = bufp_p_ppos2pline(bufp, ppos);
+    }
+
+    /* Move a_mkr, potentially to a different bufp. */
     mkr_p_remove(a_mkr);
-
-    /* Update the internal state of a_mkr. */
     a_mkr->bufp = bufp;
-    a_mkr->ppos = bufp_p_pos_b2p(bufp, bpos);
-    /* XXX Bottleneck for small seeks. */
-    a_mkr->pline = bufp_p_ppos2pline(bufp, a_mkr->ppos);
+    a_mkr->ppos = ppos;
+    a_mkr->pline = pline;
     rb_node_new(&bufp->mtree, a_mkr, mnode);
-
-    /* Insert a_mkr into the bufp's tree and list. */
     mkr_p_insert(a_mkr);
 
     RETURN:
