@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 173 $
- * $Date: 1998-08-26 12:34:42 -0700 (Wed, 26 Aug 1998) $
+ * $Revision: 191 $
+ * $Date: 1998-09-01 18:15:02 -0700 (Tue, 01 Sep 1998) $
  *
  * <<< Description >>>
  *
@@ -39,14 +39,14 @@ struct cw_brblk_s
 #ifdef _STASH_DBG
 #  define brblk_slock _CW_NS_ANY(brblk_slock)
 #  define brblk_tlock _CW_NS_ANY(brblk_tlock)
-#  define brblk_sunlock _CW_NS_ANY(brblk_sunlock)
-#  define brblk_tunlock _CW_NS_ANY(brblk_tunlock)
 #  define brblk_get_is_dirty _CW_NS_ANY(brblk_get_is_dirty)
 #  define brblk_set_is_dirty _CW_NS_ANY(brblk_set_is_dirty)
 #  define brblk_s2dlock _CW_NS_ANY(brblk_s2dlock)
 #  define brblk_2rlock _CW_NS_ANY(brblk_2rlock)
 #  define brblk_2wlock _CW_NS_ANY(brblk_2wlock)
 #  define brblk_2xlock _CW_NS_ANY(brblk_2xlock)
+#  define brblk_sunlock _CW_NS_ANY(brblk_sunlock)
+#  define brblk_tunlock _CW_NS_ANY(brblk_tunlock)
 #  define brblk_dunlock _CW_NS_ANY(brblk_dunlock)
 #  define brblk_runlock _CW_NS_ANY(brblk_runlock)
 #  define brblk_wunlock _CW_NS_ANY(brblk_wunlock)
@@ -65,39 +65,39 @@ void brblk_delete(cw_brblk_t * a_brblk_o);
 #ifdef _STASH_DBG
 void brblk_slock(cw_brblk_t * a_brblk_o);
 void brblk_tlock(cw_brblk_t * a_brblk_o);
-void brblk_sunlock(cw_brblk_t * a_brblk_o);
-void brblk_tunlock(cw_brblk_t * a_brblk_o);
-
-cw_bool_t brblk_get_is_dirty(cw_brblk_t * a_brblk_o);
-void brblk_set_is_dirty(cw_brblk_t * a_brblk_o, cw_bool_t a_is_dirty);
 #else
 #  define brblk_slock(a) jtl_slock(&(a)->jt_lock)
 #  define brblk_tlock(a) jtl_tlock(&(a)->jt_lock)
-#  define brblk_sunlock(a) jtl_sunlock(&(a)->jt_lock)
-#  define brblk_tunlock(a) jtl_tunlock(&(a)->jt_lock)
-
-#  define brblk_get_is_dirty(a) (a)->is_dirty
-#  define brblk_set_is_dirty(a, b) (a)->is_dirty = (b)
 #endif
 
 /* The following functions are safe for use outside of the br code.  The
  * above ones should only be used by br though. */
 #ifdef _STASH_DBG
+cw_bool_t brblk_get_is_dirty(cw_brblk_t * a_brblk_o);
+void brblk_set_is_dirty(cw_brblk_t * a_brblk_o, cw_bool_t a_is_dirty);
+
 void brblk_s2dlock(cw_brblk_t * a_brblk_o);
 void brblk_2rlock(cw_brblk_t * a_brblk_o);
 void brblk_2wlock(cw_brblk_t * a_brblk_o);
 void brblk_2xlock(cw_brblk_t * a_brblk_o);
 
+void brblk_sunlock(cw_brblk_t * a_brblk_o);
+void brblk_tunlock(cw_brblk_t * a_brblk_o);
 void brblk_dunlock(cw_brblk_t * a_brblk_o);
 void brblk_runlock(cw_brblk_t * a_brblk_o);
 void brblk_wunlock(cw_brblk_t * a_brblk_o);
 void brblk_xunlock(cw_brblk_t * a_brblk_o);
 #else
+#  define brblk_get_is_dirty(a) (a)->is_dirty
+#  define brblk_set_is_dirty(a, b) (a)->is_dirty = (b)
+
 #  define brblk_s2dlock(a) jtl_s2dlock(&(a)->jt_lock)
 #  define brblk_2rlock(a) jtl_2rlock(&(a)->jt_lock)
 #  define brblk_2wlock(a) jtl_2wlock(&(a)->jt_lock), (a)->is_dirty = TRUE
 #  define brblk_2xlock(a) jtl_2xlock(&(a)->jt_lock), (a)->is_dirty = TRUE
 
+#  define brblk_sunlock(a) jtl_sunlock(&(a)->jt_lock)
+#  define brblk_tunlock(a) jtl_tunlock(&(a)->jt_lock)
 #  define brblk_dunlock(a) jtl_lock(&(a)->jt_lock)
 #  define brblk_runlock(a) jtl_lock(&(a)->jt_lock)
 #  define brblk_wunlock(a) jtl_lock(&(a)->jt_lock)
