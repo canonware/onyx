@@ -15,8 +15,7 @@ thd - Thread.
 .I cw_thd_t *
 .br
 .B thd_new
-.RI ( "cw_thd_t *a_thd" ", " "void *(*a_start_func)(void *)" ", " 
-.IR "void *a_arg" )
+.RI ( "void *(*a_start_func)(void *)" ", " "void *a_arg" )
 .PP
 .I void
 .br
@@ -85,15 +84,10 @@ None.
 .I cw_thd_t *
 .br
 .B thd_new
-.RI ( "cw_thd_t *a_thd" ", " "void *(*a_start_func)(void *)" ", " 
-.IR "void *a_arg" )
+.RI ( "void *(*a_start_func)(void *)" ", " "void *a_arg" )
 .RS
 Input(s):
 .RS
-.IR a_thd :
-.RS
-Pointer to space for a thd.
-.RE
 .IR a_start_func :
 .RS
 Pointer to a start function.

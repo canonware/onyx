@@ -15,13 +15,13 @@
 
 #include <time.h>
 
-cw_thd_t	thd;
+cw_thd_t	*thd;
 cw_uint32_t	i;
 
 void *
 thread_entry_func(void *a_arg)
 {
-	for (i = 1; i != 0;) {
+	for (i = 1; i < 10000000;) {
 		thd_crit_enter();
 		i++;
 		thd_crit_leave();
@@ -49,38 +49,39 @@ main()
 	thd_crit_enter();
 	thd_crit_leave();
 
-	thd_new(&thd, thread_entry_func, NULL);
+	thd = thd_new(thread_entry_func, NULL);
 	nanosleep(&tout, NULL);
 
 	_cw_out_put("thd_suspend()\n");
 	for (j = 0; j < 7; j++) {
-		thd_suspend(&thd);
+		thd_suspend(thd);
 		count = i;
 		nanosleep(&tout, NULL);
 /*  		_cw_out_put("count([i]) == i([i])\n", count, i); */
 		_cw_assert(count == i);
-		thd_resume(&thd);
+		thd_resume(thd);
 		nanosleep(&tout, NULL);
-		thd_suspend(&thd);
+		thd_suspend(thd);
 /*  		_cw_out_put("count([i]) != i([i])\n", count, i); */
 		_cw_assert(count != i);
-		thd_resume(&thd);
+		thd_resume(thd);
 	}
 	
 	_cw_out_put("thd_trysuspend()\n");
 	for (j = 0; j < 7; j++) {
-		while (thd_trysuspend(&thd));
+		while (thd_trysuspend(thd));
 		count = i;
 		nanosleep(&tout, NULL);
 /*  		_cw_out_put("count([i]) == i([i])\n", count, i); */
 		_cw_assert(count == i);
-		thd_resume(&thd);
+		thd_resume(thd);
 		nanosleep(&tout, NULL);
-		while (thd_trysuspend(&thd));
+		while (thd_trysuspend(thd));
 /*  		_cw_out_put("count([i]) != i([i])\n", count, i); */
 		_cw_assert(count != i);
-		thd_resume(&thd);
+		thd_resume(thd);
 	}
+	thd_join(thd);
 
 	_cw_out_put("Test end\n");
 	libstash_shutdown();

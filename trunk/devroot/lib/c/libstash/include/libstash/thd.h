@@ -36,9 +36,10 @@ struct cw_thd_s {
 	cw_mtx_t	crit_lock;
 	cw_bool_t	singled:1;	/* Suspended by thd_single_enter()? */
 	qr(cw_thd_t)	link;
+	cw_bool_t	delete:1;
 };
 
-void	thd_new(cw_thd_t *a_thd, void *(*a_start_func)(void *), void *a_arg);
+cw_thd_t *thd_new(void *(*a_start_func)(void *), void *a_arg);
 void	thd_delete(cw_thd_t *a_thd);
 void	*thd_join(cw_thd_t *a_thd);
 cw_thd_t *thd_self(void);

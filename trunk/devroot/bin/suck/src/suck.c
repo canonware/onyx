@@ -39,7 +39,7 @@ main(int argc, char **argv)
 	struct timespec	tout;
 	cw_buf_t	buf;
 	cw_bool_t	did_work;
-	cw_thd_t	accept_thd;
+	cw_thd_t	*accept_thd;
 
 	/* Command line parsing variables. */
 	int		c;
@@ -119,7 +119,7 @@ main(int argc, char **argv)
 	if (mq == NULL)
 		_cw_error("Memory allocation error");
 	/* Start thread to accept connections. */
-	thd_new(&accept_thd, accept_entry_func, NULL);
+	accept_thd = thd_new(accept_entry_func, NULL);
 
 	for (;;) {
 		did_work = FALSE;

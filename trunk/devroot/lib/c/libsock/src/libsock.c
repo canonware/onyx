@@ -66,7 +66,7 @@ struct cw_libsock_entry_s {
 
 struct cw_libsock_s {
 	cw_bool_t	should_quit;
-	cw_thd_t	thread;
+	cw_thd_t	*thread;
 	int		pipe_in;
 	int		pipe_out;
 	cw_sema_t	pipe_sema;
@@ -227,7 +227,7 @@ libsock_init(cw_uint32_t a_max_fds, cw_uint32_t a_bufc_size, cw_uint32_t
 			 * Create a new thread to handle all of the back end
 			 * socket foo.
 			 */
-			thd_new(&g_libsock->thread, libsock_p_entry_func, (void
+			g_libsock->thread = thd_new(libsock_p_entry_func, (void
 			    *)arg);
 		}
 	}
@@ -264,7 +264,7 @@ libsock_shutdown(void)
 		/* Tell the back end thread to quit, then join on it. */
 		g_libsock->should_quit = TRUE;
 		libsock_l_wakeup();
-		thd_join(&g_libsock->thread);
+		thd_join(g_libsock->thread);
 
 		sema_delete(&g_libsock->pipe_sema);
 

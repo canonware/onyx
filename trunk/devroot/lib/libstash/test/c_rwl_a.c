@@ -30,7 +30,7 @@ thread_entry_func(void *a_arg)
 int
 main()
 {
-	cw_thd_t	threads[_LIBSTASH_TEST_NUM_THREADS];
+	cw_thd_t	*threads[_LIBSTASH_TEST_NUM_THREADS];
 	cw_rwl_t	lock_a, lock_b;
 	cw_uint32_t	i;
 
@@ -51,7 +51,7 @@ main()
 	rwl_rlock(&lock_a);
 	rwl_rlock(&lock_a);
 	for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
-		thd_new(&threads[i], thread_entry_func, (void *)&lock_a);
+		threads[i] = thd_new(thread_entry_func, (void *)&lock_a);
 	out_put_e(cw_g_out, NULL, 0, "main", "About to release rlock\n");
 	rwl_runlock(&lock_a);
 	usleep(1);
@@ -62,17 +62,17 @@ main()
 	rwl_runlock(&lock_a);
 
 	for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
-		thd_join(&threads[i]);
+		thd_join(threads[i]);
 
 	rwl_wlock(&lock_a);
 	for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
-		thd_new(&threads[i], thread_entry_func, (void *)&lock_a);
+		threads[i] = thd_new(thread_entry_func, (void *)&lock_a);
 	out_put_e(cw_g_out, NULL, 0, "main", "About to release wlock\n");
 	usleep(1);
 	rwl_wunlock(&lock_a);
 
 	for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
-		thd_join(&threads[i]);
+		thd_join(threads[i]);
 
 	rwl_delete(&lock_a);
 

@@ -1,3 +1,8 @@
+2001-02-07  Jason Evans  <jasone@canonware.com>
+
+	* src/thd.c (thd_new): Return a pointer to a cw_thd_t rather than
+	requiring that space be passed in for it.
+
 2001-02-06  Jason Evans  <jasone@canonware.com>
 
 	* src/libstash.c (libstash_init): Set the default file descriptor

@@ -96,7 +96,7 @@ main(int argc, char **argv)
 	cw_uint32_t	i, j, n;
 	char		*buffer;
 	struct foo_s	foo_a, foo_b;
-	cw_thd_t	thd_a, thd_b;
+	cw_thd_t	*thd_a, *thd_b;
 	cw_uint32_t	c;
 	cw_mtx_t	rand_lock;
 	cw_uint32_t	seed;
@@ -142,11 +142,11 @@ main(int argc, char **argv)
 	foo_b.rand_lock = &rand_lock;
 	foo_b.thread_name = "*";
 
-	thd_new(&thd_a, thread_entry_func, (void *)&foo_a);
-	thd_new(&thd_b, thread_entry_func, (void *)&foo_b);
+	thd_a = thd_new(thread_entry_func, (void *)&foo_a);
+	thd_b = thd_new(thread_entry_func, (void *)&foo_b);
 
-	thd_join(&thd_a);
-	thd_join(&thd_b);
+	thd_join(thd_a);
+	thd_join(thd_b);
 
 	/* Make sure the data hasn't been corrupted. */
 	if (buf_size_get(buf_a) != _LIBSTASH_TEST_NUM_BUFELS *

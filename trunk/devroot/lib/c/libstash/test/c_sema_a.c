@@ -30,7 +30,7 @@ int
 main()
 {
 	cw_sema_t	sema_a, sema_b;
-	cw_thd_t	threads[_LIBSTASH_TEST_NUM_THREADS];
+	cw_thd_t	*threads[_LIBSTASH_TEST_NUM_THREADS];
 	cw_uint32_t	i;
 	struct timespec	timeout;
 
@@ -62,21 +62,21 @@ main()
 	sema_new(&sema_a, 0);
 
 	for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
-		thd_new(&threads[i], thread_entry_func, (void *)&sema_a);
+		threads[i] = thd_new(thread_entry_func, (void *)&sema_a);
 
 	sema_adjust(&sema_a, _LIBSTASH_TEST_NUM_THREADS);
 
 	for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
-		thd_join(&threads[i]);
+		thd_join(threads[i]);
 
 	for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
-		thd_new(&threads[i], thread_entry_func, (void *)&sema_a);
+		threads[i] = thd_new(thread_entry_func, (void *)&sema_a);
 
 	for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
 		sema_post(&sema_a);
 
 	for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
-		thd_join(&threads[i]);
+		thd_join(threads[i]);
 
 	sema_delete(&sema_a);
 

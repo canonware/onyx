@@ -37,7 +37,7 @@ thread_entry_func(void *a_arg)
 int
 main()
 {
-	cw_thd_t	thds[NTHREADS];
+	cw_thd_t	*thds[NTHREADS];
 	cw_uint32_t	i;
 
 	libstash_init();
@@ -46,10 +46,10 @@ main()
 	tsd_new(&tsd, NULL);
 
 	for (i = 0; i < NTHREADS; i++)
-		thd_new(&thds[i], thread_entry_func, NULL);
+		thds[i] = thd_new(thread_entry_func, NULL);
 	
 	for (i = 0; i < NTHREADS; i++)
-		thd_join(&thds[i]);
+		thd_join(thds[i]);
 
 	tsd_delete(&tsd);
 

@@ -34,7 +34,7 @@
 
 struct handler_s {
 	sigset_t	hupset;
-	cw_thd_t	sig_thd;
+	cw_thd_t	*sig_thd;
 };
 
 typedef enum {
@@ -42,8 +42,8 @@ typedef enum {
 }       format_t;
 
 typedef struct {
-	cw_thd_t	send_thd;
-	cw_thd_t	recv_thd;
+	cw_thd_t	*send_thd;
+	cw_thd_t	*recv_thd;
 	cw_mtx_t	lock;
 	cw_bool_t	should_quit;
 	cw_out_t	*out;
@@ -276,7 +276,7 @@ main(int argc, char **argv)
 	sigaddset(&handler_arg.hupset, SIGHUP);
 	sigaddset(&handler_arg.hupset, SIGINT);
 	thd_sigmask(SIG_BLOCK, &handler_arg.hupset, NULL);
-	thd_new(&handler_arg.sig_thd, sig_handler, (void *)&handler_arg);
+	handler_arg.sig_thd = thd_new(sig_handler, (void *)&handler_arg);
 
 	if (opt_dirname != NULL) {
 		cw_sint32_t	fd;
@@ -363,12 +363,12 @@ main(int argc, char **argv)
 				conn->is_verbose = TRUE;
 			conn->format = opt_format;
 
-			thd_new(&conn->send_thd, handle_client_send, (void
+			conn->send_thd = thd_new(handle_client_send, (void
 			    *)conn);
 		}
 	}
 
-	thd_join(&handler_arg.sig_thd);
+	thd_join(handler_arg.sig_thd);
 
 	socks_delete(socks);
 
@@ -674,7 +674,7 @@ handle_client_send(void *a_arg)
 	 * client.  That allows both this thread and the new one to block,
 	 * waiting for data, rather than polling.
 	 */
-	thd_new(&conn->recv_thd, handle_client_recv, (void *)conn);
+	conn->recv_thd = thd_new(handle_client_recv, (void *)conn);
 
 	/*
 	 * Continually read data from the socket, create an out string, print to
@@ -722,14 +722,14 @@ handle_client_send(void *a_arg)
 	if (str != NULL)
 		_cw_free(str);
 	/* Join on the recv thread. */
-	thd_join(&conn->recv_thd);
+	thd_join(conn->recv_thd);
 
 	RETURN:
 	/* Don't do this if the socket wasn't created. */
 	sock_delete(&conn->remote_sock);
 
 	/* Delete this thread. */
-	thd_delete(&conn->send_thd);
+	thd_delete(conn->send_thd);
 
 	/* Finish cleaning up conn. */
 	mtx_delete(&conn->lock);

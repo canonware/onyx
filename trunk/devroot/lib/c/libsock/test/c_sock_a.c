@@ -50,7 +50,7 @@ main()
 	cw_socks_t	*socks = NULL;
 	int		port = 0;
 	cw_sock_t	sock;
-	cw_thd_t	thd;
+	cw_thd_t	*thd;
 	cw_buf_t	buf;
 	cw_uint32_t	i;
 
@@ -72,7 +72,7 @@ main()
 		out_put(cw_g_out, "Error listening on port [i]\n", port);
 		goto RETURN;
 	}
-	thd_new(&thd, handle_client, (void *)socks);
+	thd = thd_new(handle_client, (void *)socks);
 
 	_cw_assert(sock_new(&sock, 16384) != NULL);
 	for (i = 0; i < _CW_NCONNS; i++) {
@@ -86,7 +86,7 @@ main()
 		_cw_assert(sock_disconnect(&sock) == FALSE);
 	}
 	sock_delete(&sock);
-	thd_join(&thd);
+	thd_join(thd);
 
 	RETURN:
 	if (socks != NULL)

@@ -38,7 +38,7 @@ thread_entry_func(void *a_arg)
 int
 main()
 {
-	cw_thd_t	thread_a, thread_b;
+	cw_thd_t	*thread_a, *thread_b;
 	cw_mtx_t	mutex_a, mutex_b;
 
 	libstash_init();
@@ -73,11 +73,11 @@ main()
 	 */
 	mtx_new(&mutex_a);
 
-	thd_new(&thread_a, thread_entry_func, (void *)&mutex_a);
-	thd_new(&thread_b, thread_entry_func, (void *)&mutex_a);
+	thread_a = thd_new(thread_entry_func, (void *)&mutex_a);
+	thread_b = thd_new(thread_entry_func, (void *)&mutex_a);
 
-	thd_join(&thread_a);
-	thd_join(&thread_b);
+	thd_join(thread_a);
+	thd_join(thread_b);
 	mtx_delete(&mutex_a);
 
 	_cw_out_put("g_count: [i]\n", g_count);

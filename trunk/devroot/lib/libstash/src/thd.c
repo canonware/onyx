@@ -35,6 +35,7 @@ static cw_mtx_t	cw_g_thd_single_lock;
 /* For thd_self(). */
 cw_tsd_t	cw_g_thd_self_key;
 
+static void	thd_p_delete(cw_thd_t *a_thd);
 static void	*thd_p_start_func(void *a_arg);
 static void	thd_p_suspend(cw_thd_t *a_thd);
 
@@ -142,44 +143,49 @@ thd_l_shutdown(void)
 #endif
 }
 
-void
-thd_new(cw_thd_t *a_thd, void *(*a_start_func)(void *), void *a_arg)
+cw_thd_t *
+thd_new(void *(*a_start_func)(void *), void *a_arg)
 {
-	int	error;
+	cw_thd_t	*retval;
+	int		error;
 
-	_cw_check_ptr(a_thd);
 	_cw_assert(cw_g_thd_initialized);
 
-	a_thd->start_func = a_start_func;
-	a_thd->start_arg = a_arg;
+	retval = (cw_thd_t *)_cw_malloc(sizeof(cw_thd_t));
+
+	retval->start_func = a_start_func;
+	retval->start_arg = a_arg;
 #ifdef _CW_THD_GENERIC_SR
-	error = sem_init(&a_thd->sem, 0, 0);
+	error = sem_init(&retval->sem, 0, 0);
 	if (error) {
 		out_put_e(NULL, NULL, 0, __FUNCTION__,
 		    "Error in sem_init(): [s]\n", strerror(error));
 		abort();
 	}
 #endif
-	a_thd->suspended = FALSE;
-	mtx_new(&a_thd->crit_lock);
-	a_thd->singled = FALSE;
+	retval->suspended = FALSE;
+	mtx_new(&retval->crit_lock);
+	retval->singled = FALSE;
+	retval->delete = FALSE;
 #ifdef _LIBSTASH_DBG
-	a_thd->magic = _CW_THD_MAGIC;
+	retval->magic = _CW_THD_MAGIC;
 #endif
 
-	error = pthread_create(&a_thd->thread, NULL, thd_p_start_func,
-	    (void *)a_thd);
+	error = pthread_create(&retval->thread, NULL, thd_p_start_func,
+	    (void *)retval);
 	if (error) {
 		out_put_e(NULL, NULL, 0, __FUNCTION__,
 		    "Error in pthread_create(): [s]\n", strerror(error));
 		abort();
 	}
+
+	return retval;
 }
 
 void
 thd_delete(cw_thd_t *a_thd)
 {
-	int	error;
+	int		error;
 
 	_cw_check_ptr(a_thd);
 	_cw_assert(a_thd->magic == _CW_THD_MAGIC);
@@ -192,18 +198,7 @@ thd_delete(cw_thd_t *a_thd)
 		abort();
 	}
 
-	mtx_delete(&a_thd->crit_lock);
-#ifdef _CW_THD_GENERIC_SR
-	error = sem_destroy(&a_thd->sem);
-	if (error) {
-		out_put_e(NULL, NULL, 0, __FUNCTION__,
-		    "Error in sem_destroy(): [s]\n", strerror(error));
-		abort();
-	}
-#endif
-#ifdef _LIBSTASH_DBG
-	memset(a_thd, 0x5a, sizeof(cw_thd_t));
-#endif
+	thd_p_delete(a_thd);
 }
 
 void *
@@ -232,9 +227,7 @@ thd_join(cw_thd_t *a_thd)
 		abort();
 	}
 #endif
-#ifdef _LIBSTASH_DBG
-	memset(a_thd, 0x5a, sizeof(cw_thd_t));
-#endif
+	_cw_free(a_thd);
 	return retval;
 }
 
@@ -382,6 +375,35 @@ thd_resume(cw_thd_t *a_thd)
 	mtx_unlock(&a_thd->crit_lock);
 }
 
+static void
+thd_p_delete(cw_thd_t *a_thd)
+{
+	cw_bool_t	delete;
+
+	/* Determine whether to delete the object now. */
+	mtx_lock(&a_thd->crit_lock);
+	if (a_thd->delete)
+		delete = TRUE;
+	else {
+		delete = FALSE;
+		a_thd->delete = TRUE;
+	}
+	mtx_unlock(&a_thd->crit_lock);
+	
+	if (delete) {
+		mtx_delete(&a_thd->crit_lock);
+#ifdef _CW_THD_GENERIC_SR
+		error = sem_destroy(&a_thd->sem);
+		if (error) {
+			out_put_e(NULL, NULL, 0, __FUNCTION__,
+			    "Error in sem_destroy(): [s]\n", strerror(error));
+			abort();
+		}
+#endif
+		_cw_free(a_thd);
+	}
+}
+
 static void *
 thd_p_start_func(void *a_arg)
 {
@@ -403,6 +425,8 @@ thd_p_start_func(void *a_arg)
 	mtx_lock(&cw_g_thd_single_lock);
 	qr_remove(thd, link);
 	mtx_unlock(&cw_g_thd_single_lock);
+
+	thd_p_delete(thd);
 
 	return retval;
 }
