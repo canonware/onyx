@@ -12,25 +12,53 @@
 
 #include "xvx.h"
 
+cw_bool_t
+oom_handler(const void * a_data, cw_uint32_t a_size);
+
 int
 main(int argc, char ** argv)
 {
-  cw_board_t board;
+  cw_game_t game;
 
   libstash_init();
-
-  board_new(&board);
-  board_vertex_set(&board, _XVX_XY2I(9, 9), _XVX_EMPTY);
-  board_vertex_set(&board, _XVX_XY2I(10, 10), _XVX_P1);
-  board_vertex_set(&board, _XVX_XY2I(11, 11), _XVX_P2);
-  board_vertex_set(&board, _XVX_XY2I(12, 12), _XVX_P3);
-  board_vertex_set(&board, _XVX_XY2I(13, 13), _XVX_P4);
-  board_vertex_set(&board, _XVX_XY2I(14, 14), _XVX_P5);
-  board_vertex_set(&board, _XVX_XY2I(15, 15), _XVX_P6);
+  mem_set_oom_handler(cw_g_mem, oom_handler, NULL);
   
-  board_dump(&board);
-  board_delete(&board);
+  out_register(cw_g_out, "move", sizeof(cw_move_t *), move_out_metric,
+	       move_out_render);
+  
+  game_new(&game, 2, FALSE, 10, TRUE, FALSE, FALSE, FALSE);
+  game_dump(&game);
 
+  _cw_assert(0 == game_move(&game, 9, 9));
+  game_dump(&game);
+
+  _cw_assert(0 == game_move(&game, 13, 10));
+  game_dump(&game);
+
+  _cw_assert(0 == game_move(&game, 9, 13));
+  game_dump(&game);
+
+  _cw_assert(0 == game_move(&game, 9, 14));
+  game_dump(&game);
+
+  _cw_assert(0 == game_move(&game, 9, 15));
+  game_dump(&game);
+
+  game_delete(&game);
+  
   libstash_shutdown();
   return 0;
+}
+
+cw_bool_t
+oom_handler(const void * a_data, cw_uint32_t a_size)
+{
+  if (dbg_is_registered(cw_g_dbg, "ncat_error"))
+  {
+    out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+	      "Memory allocation error for size [i]\n", a_size);
+  }
+  exit(1);
+  
+  return FALSE;
 }
