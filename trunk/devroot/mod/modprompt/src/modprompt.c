@@ -50,10 +50,6 @@ struct cw_modprompt_synth_s {
     cw_uint8_t prompt_str[CW_PROMPT_STRLEN];
 };
 
-/* This has to be global due to the libedit API not providing a way to pass data
- * to the prompt function. */
-static struct cw_modprompt_synth_s g_synth;
-
 /* Function prototypes. */
 static cw_nxoe_t *
 modprompt_synth_ref_iter(void *a_data, cw_bool_t a_reset);
@@ -77,10 +73,16 @@ void
 modprompt_init(void *a_arg, cw_nxo_t *a_thread)
 {
     cw_nxo_t *estack, *file;
-    struct cw_modprompt_synth_s *synth = &g_synth;
+    struct cw_modprompt_synth_s *synth;
     char *editor;
 #ifdef CW_THREADS
     sigset_t set, oset;
+#endif
+
+    synth = (struct cw_modprompt_synth_s *)
+	cw_malloc(sizeof(struct cw_modprompt_synth_s));
+#ifdef CW_DBG
+    memset(synth, 0xa5, sizeof(struct cw_modprompt_synth_s));
 #endif
 
     /* Initialize stdin.  Only convert the initial thread's stdin, since it
@@ -92,11 +94,6 @@ modprompt_init(void *a_arg, cw_nxo_t *a_thread)
     nxo_file_synthetic(file, modprompt_read, NULL, modprompt_synth_ref_iter,
 		       modprompt_synth_delete, synth);
     nxo_attr_set(file, NXOA_EXECUTABLE);
-
-    /* Initialize synth. */
-#ifdef CW_DBG
-    memset(synth, 0xa5, sizeof(struct cw_modprompt_synth_s));
-#endif
 
     /* The interpreter is currently executing a hook that holds a reference to
      * the dynamically loaded module.  Keep a reference to it, so that this
@@ -130,6 +127,7 @@ modprompt_init(void *a_arg, cw_nxo_t *a_thread)
     synth->el = el_init("onyx", stdin, stdout, stderr);
     el_set(synth->el, EL_HIST, history, synth->hist);
     el_set(synth->el, EL_PROMPT, modprompt_prompt);
+    el_set(synth->el, EL_CLIENTDATA, synth);
 
     editor = getenv("ONYX_EDITOR");
     if (editor == NULL || (strcmp(editor, "emacs") && strcmp(editor, "vi")))
@@ -228,9 +226,7 @@ modprompt_synth_delete(void *a_data, cw_nx_t *a_nx)
     el_end(synth->el);
     history_end(synth->hist);
 
-#ifdef CW_DBG
-    memset(synth, 0x5a, sizeof(struct cw_modprompt_synth_s));
-#endif
+    cw_free(synth);
 }
 
 #ifdef CW_THREADS
@@ -375,8 +371,9 @@ modprompt_read(void *a_data, cw_nxo_t *a_file, cw_uint32_t a_len,
 static char *
 modprompt_prompt(EditLine *a_el)
 {
-    struct cw_modprompt_synth_s *synth
-	= (struct cw_modprompt_synth_s *) &g_synth;
+    struct cw_modprompt_synth_s *synth;
+
+    el_get(a_el, EL_CLIENTDATA, (void **)&synth);
 
     cw_check_ptr(synth);
     cw_dassert(synth->magic == CW_MODPROMPT_SYNTH_MAGIC);
@@ -449,11 +446,6 @@ modprompt_entry(void *a_arg)
 
     cw_check_ptr(synth);
     cw_dassert(synth->magic == CW_MODPROMPT_SYNTH_MAGIC);
-
-    /* Set up signal handlers. */
-#ifdef NOT_YET /* XXX This makes things break.  Try again with newer libedit. */
-    el_set(synth->el, EL_SIGNAL, 1);
-#endif
 
     mtx_lock(&synth->mtx);
     for (;;)
