@@ -381,6 +381,12 @@ foo     % executable
 //biz   % immediately evaluated
 \end{verbatim}
 
+If the result of an immediately evaluated name is an executable array, the
+evaluatable attribute is set for the array so that when the array is
+interpreted, it is executed.  This allows immediate evaluation to be
+indiscriminately used without concern for whether the result is an executable
+array or, say, an executable operator.
+
 \item[{\lt}string{\gt} ::= ] `'-delimited string.  Ticks may
 be embedded in the string without escaping them, as long as the unescaped ticks
 are balanced.  The following sequences have special meaning when escaped by a

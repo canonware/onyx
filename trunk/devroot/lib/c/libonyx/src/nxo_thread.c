@@ -1951,6 +1951,13 @@ nxoe_p_thread_name_accept(cw_nxoe_thread_t *a_thread)
 
 			nxo_thread_error(&a_thread->self,
 			    NXO_THREADE_UNDEFINED);
+		} else if (nxo_type_get(nxo) == NXOT_ARRAY && nxo_attr_get(nxo)
+		    == NXOA_EXECUTABLE) {
+			/*
+			 * Set the evaluatable attribute so that the array will
+			 * still be executed when interpreted.
+			 */
+			nxo_attr_set(nxo, NXOA_EVALUATABLE);
 		}
 		nxo_stack_pop(&a_thread->tstack);
 

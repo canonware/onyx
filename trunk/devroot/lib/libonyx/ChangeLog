@@ -1,5 +1,9 @@
 2001-07-29  Jason Evans  <jasone@canonware.com>
 
+	* src/nxo_thread.c (nxoe_p_thread_name_accept): When the result of
+	immediate name evaluation is an executable array, set the
+	evaluatable attribute.
+
 	* : Add an additional attribute.  Objects are now literal,
 	executable, or evaluatable.  The addition of the evaluatable
 	attribute allows the bind operator to replace executable names
