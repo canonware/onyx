@@ -12,7 +12,6 @@
 /*
  * Typedef's to allow easy function pointer passing.
  */
-
 typedef cw_uint32_t cw_out_render_t(const char *a_format, cw_uint32_t
     a_format_len, const void *a_arg, cw_uint32_t a_max_len, cw_uint8_t *r_str);
 

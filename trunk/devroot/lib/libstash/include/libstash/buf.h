@@ -92,9 +92,6 @@ void		buf_delete(cw_buf_t *a_buf);
 
 void		buf_dump(cw_buf_t *a_buf, const char *a_prefix);
 
-cw_uint32_t	buf_out_render(const char *a_format, cw_uint32_t a_len, const
-    void *a_arg, cw_uint32_t a_max_len, cw_uint8_t *r_buf);
-
 cw_uint32_t	buf_get_size(cw_buf_t *a_buf);
 
 cw_uint32_t	buf_get_num_bufels(cw_buf_t *a_buf);

@@ -111,6 +111,9 @@ static cw_sint32_t	out_p_format_scan(cw_out_t *a_out, const char *a_format,
      cw_out_key_t *a_key, va_list a_p);
 static cw_out_ent_t	*out_p_get_ent(cw_out_t *a_out, const char *a_format,
     cw_uint32_t a_len);
+static void		out_p_common_render(const char *a_format, cw_uint32_t
+    a_len, cw_uint32_t a_max_len, cw_uint32_t a_rlen, cw_uint8_t *r_buf,
+    cw_uint32_t *r_width, cw_uint32_t *r_owidth, cw_uint32_t *r_offset);
 static cw_uint32_t	out_p_render_int(const char *a_format, cw_uint32_t
     a_len, cw_uint64_t a_arg, cw_uint32_t a_max_len, cw_uint8_t *r_buf,
     cw_uint32_t a_nbits, cw_uint32_t a_default_base);
@@ -124,6 +127,8 @@ static cw_uint32_t	out_p_render_string(const char *a_format, cw_uint32_t
     a_len, const void *a_arg, cw_uint32_t a_max_len, cw_uint8_t *r_buf);
 static cw_uint32_t	out_p_render_pointer(const char *a_format, cw_uint32_t
     a_len, const void *a_arg, cw_uint32_t a_max_len, cw_uint8_t *r_buf);
+static cw_uint32_t	out_p_buf_render(const char *a_format, cw_uint32_t
+    a_len, const void *a_arg, cw_uint32_t a_max_len, cw_uint8_t *r_buf);
 
 static cw_out_ent_t cw_g_out_builtins[] = {
 	{"s",	1,	sizeof(cw_uint8_t *),	out_p_render_string},
@@ -131,7 +136,7 @@ static cw_out_ent_t cw_g_out_builtins[] = {
 	{"p",	1,	sizeof(void *),		out_p_render_pointer},
 	{"c",	1,	sizeof(cw_uint8_t),	out_p_render_char},
 	{"q",	1,	sizeof(cw_uint64_t),	out_p_render_int64},
-	{"b",	1,	sizeof(cw_buf_t *),	buf_out_render},
+	{"b",	1,	sizeof(cw_buf_t *),	out_p_buf_render},
 
 #ifdef _TYPE_FP32_DEFINED
 	{"f32",	3,	sizeof(cw_fp32_t),	NULL},
@@ -1307,6 +1312,81 @@ out_p_get_ent(cw_out_t *a_out, const char *a_format, cw_uint32_t a_len)
 	return retval;
 }
 
+static void
+out_p_common_render(const char *a_format, cw_uint32_t a_len, cw_uint32_t
+    a_max_len, cw_uint32_t a_rlen, cw_uint8_t *r_buf, cw_uint32_t *r_width,
+    cw_uint32_t *r_owidth, cw_uint32_t *r_offset)
+{
+	cw_uint32_t	width, owidth, offset;
+	cw_sint32_t	val_len;
+	const cw_uint8_t *val;
+
+	/*
+	 * Calculate the width of what we'll print, assuming that it will fit in
+	 * r_buf.
+	 */
+	if ((val_len = spec_get_val(a_format, a_len, "w", 1, &val)) != -1) {
+		/* Width specified. */
+		/*
+		 * The next character after val is either `|' or `]', so we
+		 * don't have to worry about terminating the string that val
+		 * points to.
+		 */
+		width = strtoul(val, NULL, 10);
+		if (width < a_rlen)
+			width = a_rlen;
+	} else
+		width = a_rlen;
+
+	/* Determine the total number of bytes to actually output. */
+	if (width <= a_max_len)
+		owidth = width;
+	else
+		owidth = a_max_len;
+
+	if (width > a_rlen) {
+		cw_uint8_t	pad, justify;
+
+		/*
+		 * Padding needed.  memset() the output string to the padding
+		 * character, then determine where to render the integer based
+		 * on justification.
+		 */
+		if ((val_len = spec_get_val(a_format, a_len, "p", 1, &val)) !=
+		    -1)
+			pad = val[0];
+		else
+			pad = ' ';
+
+		memset(r_buf, pad, owidth);
+
+		if ((val_len = spec_get_val(a_format, a_len, "j", 1, &val)) !=
+		    -1)
+			justify = val[0];
+		else
+			justify = 'r';
+
+		switch (justify) {
+		case 'r':
+			offset = width - a_rlen;
+			break;
+		case 'l':
+			offset = 0;
+			break;
+		case 'c':
+			offset = (width - a_rlen) / 2;
+			break;
+		default:
+			_cw_error("Unknown justification");
+		}
+	} else
+		offset = 0;
+
+	*r_width = width;
+	*r_owidth = owidth;
+	*r_offset = offset;
+}
+
 static cw_uint32_t
 out_p_render_int(const char *a_format, cw_uint32_t a_len, cw_uint64_t a_arg,
     cw_uint32_t a_max_len, cw_uint8_t *r_buf, cw_uint32_t a_nbits, cw_uint32_t
@@ -1393,71 +1473,8 @@ out_p_render_int(const char *a_format, cw_uint32_t a_len, cw_uint64_t a_arg,
 	rlen = &s_result[65] - result;
 	_cw_assert(rlen <= 65);
 
-	/*
-	 * At this point, 'result' points to the completely rendered integer,
-	 * including sign, and 'rlen' is the length of 'result'.
-	 */
-
-	/*
-	 * Calculate the width of what we'll print, assuming that it will fit in
-	 * r_buf.
-	 */
-	if ((val_len = spec_get_val(a_format, a_len, "w", 1, &val)) != -1) {
-		/* Width specified. */
-		/*
-		 * The next character after val is either `|' or `]', so we
-		 * don't have to worry about terminating the string that val
-		 * points to.
-		 */
-		width = strtoul(val, NULL, 10);
-		if (width < rlen)
-			width = rlen;
-	} else
-		width = rlen;
-
-	/* Determine the total number of bytes to actually output. */
-	if (width <= a_max_len)
-		owidth = width;
-	else
-		owidth = a_max_len;
-
-	if (width > rlen) {
-		cw_uint8_t	pad, justify;
-
-		/*
-		 * Padding needed.  memset() the output string to the padding
-		 * character, then determine where to render the integer based
-		 * on justification.
-		 */
-		if ((val_len = spec_get_val(a_format, a_len, "p", 1, &val)) !=
-		    -1)
-			pad = val[0];
-		else
-			pad = ' ';
-
-		memset(r_buf, pad, owidth);
-
-		if ((val_len = spec_get_val(a_format, a_len, "j", 1, &val)) !=
-		    -1)
-			justify = val[0];
-		else
-			justify = 'r';
-
-		switch (justify) {
-		case 'r':
-			offset = width - rlen;
-			break;
-		case 'l':
-			offset = 0;
-			break;
-		case 'c':
-			offset = (width - rlen) / 2;
-			break;
-		default:
-			_cw_error("Unknown justification");
-		}
-	} else
-		offset = 0;
+	out_p_common_render(a_format, a_len, a_max_len, rlen, r_buf, &width,
+	    &owidth, &offset);
 
 	if (offset < owidth) {
 		if (offset + rlen <= owidth)
@@ -1527,59 +1544,8 @@ out_p_render_char(const char *a_format, cw_uint32_t a_len, const void *a_arg,
 
 	rlen = 1;
 
-	if ((val_len = spec_get_val(a_format, a_len, "w", 1, &val)) != -1) {
-		/* Width specified. */
-		/*
-		 * The next character after val is either `|' or `]', so we
-		 * don't have to worry about terminating the string that val
-		 * points to.
-		 */
-		width = strtoul(val, NULL, 10);
-		if (width < rlen)
-			width = rlen;
-	} else
-		width = rlen;
-
-	/* Determine the number of bytes to actually output. */
-	if (width <= a_max_len)
-		owidth = width;
-	else
-		owidth = a_max_len;
-
-	if (width > rlen) {
-		cw_uint8_t	pad, justify;
-
-		/* Padding character. */
-		if ((val_len = spec_get_val(a_format, a_len, "p", 1, &val)) !=
-		    -1)
-			pad = val[0];
-		else
-			pad = ' ';
-
-		memset(r_buf, pad, owidth);
-
-		/* Justification. */
-		if ((val_len = spec_get_val(a_format, a_len, "j", 1, &val)) !=
-		    -1)
-			justify = val[0];
-		else
-			justify = 'r';
-
-		switch (justify) {
-		case 'r':
-			offset = width - rlen;
-			break;
-		case 'l':
-			offset = 0;
-			break;
-		case 'c':
-			offset = (width - rlen) / 2;
-			break;
-		default:
-			_cw_error("Unknown justification");
-		}
-	} else
-		offset = 0;
+	out_p_common_render(a_format, a_len, a_max_len, rlen, r_buf, &width,
+	    &owidth, &offset);
 
 	if (offset < owidth)
 		r_buf[offset] = c;
@@ -1618,48 +1584,8 @@ out_p_render_string(const char *a_format, cw_uint32_t a_len, const void *a_arg,
 	} else
 		width = rlen;
 
-	/*
-	 * Determine the number of bytes to actually output.
-	 */
-	if (width <= a_max_len)
-		owidth = width;
-	else
-		owidth = a_max_len;
-
-	if (width > rlen) {
-		cw_uint8_t	pad, justify;
-
-		/* Padding character. */
-		if ((val_len = spec_get_val(a_format, a_len, "p", 1, &val)) !=
-		    -1)
-			pad = val[0];
-		else
-			pad = ' ';
-
-		memset(r_buf, pad, owidth);
-
-		/* Justification. */
-		if ((val_len = spec_get_val(a_format, a_len, "j", 1, &val)) !=
-		    -1)
-			justify = val[0];
-		else
-			justify = 'r';
-
-		switch (justify) {
-		case 'r':
-			offset = width - rlen;
-			break;
-		case 'l':
-			offset = 0;
-			break;
-		case 'c':
-			offset = (width - rlen) / 2;
-			break;
-		default:
-			_cw_error("Unknown justification");
-		}
-	} else
-		offset = 0;
+	out_p_common_render(a_format, a_len, a_max_len, rlen, r_buf, &width,
+	    &owidth, &offset);
 
 	if (offset < owidth) {
 		if (offset + rlen <= owidth)
@@ -1704,4 +1630,61 @@ out_p_render_pointer(const char *a_format, cw_uint32_t a_len, const void *a_arg,
 #endif
 
 	return retval;
+}
+
+static cw_uint32_t
+out_p_buf_render(const char *a_format, cw_uint32_t a_len, const void *a_arg,
+    cw_uint32_t a_max_len, cw_uint8_t *r_buf)
+{
+	cw_sint32_t	val_len;
+	const cw_uint8_t *val;
+	cw_uint32_t	olen, rlen, owidth, width, offset;
+	cw_buf_t	*buf;
+	const struct iovec *iov;
+	int		iov_cnt, i;
+
+	_cw_check_ptr(a_format);
+	_cw_assert(a_len > 0);
+	_cw_check_ptr(a_arg);
+	_cw_check_ptr(r_buf);
+
+	buf = *(cw_buf_t **)a_arg;
+	_cw_check_ptr(buf);
+
+	rlen = buf_get_size(buf);
+
+	if ((val_len = spec_get_val(a_format, a_len, "w", 1, &val)) != -1) {
+		/* Width specified. */
+		/*
+		 * The next character after val is either `|' or `]', so we
+		 * don't have to worry about terminating the string that val
+		 * points to.
+		 */
+		width = strtoul(val, NULL, 10);
+		if (width < rlen)
+			width = rlen;
+	} else
+		width = rlen;
+
+	out_p_common_render(a_format, a_len, a_max_len, rlen, r_buf, &width,
+	    &owidth, &offset);
+
+	if (offset < owidth) {
+		/*
+		 * Copy bytes from the buf to the output string.  Use the buf's
+		 * iovec and memcpy for efficiency.
+		 */
+		if (offset + rlen <= owidth)
+			olen = rlen;
+		else
+			olen = owidth - offset;
+		iov = buf_get_iovec(buf, olen, FALSE, &iov_cnt);
+		r_buf += offset;
+		for (i = 0; i < iov_cnt; i++) {
+			memcpy(r_buf, iov[i].iov_base, iov[i].iov_len);
+			r_buf += iov[i].iov_len;
+		}
+	}
+
+	return width;
 }

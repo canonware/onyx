@@ -45,8 +45,8 @@ main()
 		out_p = out_new(NULL, cw_g_mem);
 		_cw_check_ptr(out_p);
 
-		_cw_assert(out_register(out_p, "buf", sizeof(cw_buf_t *),
-		    buf_out_render) == FALSE);
+/*  		_cw_assert(out_register(out_p, "buf", sizeof(cw_buf_t *), */
+/*  		    out_p_buf_render) == FALSE); */
 
 		_cw_assert(out_merge(out_p, cw_g_out) == FALSE);
 
