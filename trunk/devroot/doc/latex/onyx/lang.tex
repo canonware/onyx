@@ -3865,11 +3865,23 @@ socket. \\
 family type proto & {\bf \htmlref{socket}{systemdict:socket}} & sock & Create a
 socket. \\
 \hline
-OPARGS & {\bf \htmlref{bindsocket}{systemdict:bindsocket}} & OPOUTS & \\
+sock addr port & {\bf \htmlref{bindsocket}{systemdict:bindsocket}} & -- & Bind
+socket to address/port. \\
 \hline
-OPARGS & {\bf \htmlref{listen}{systemdict:listen}} & OPOUTS & \\
+sock addr & {\bf \htmlref{bindsocket}{systemdict:bindsocket}} & -- & Bind
+socket to address. \\
 \hline
-OPARGS & {\bf \htmlref{accept}{systemdict:accept}} & OPOUTS & \\
+sock path & {\bf \htmlref{bindsocket}{systemdict:bindsocket}} & -- & Bind socket
+to port. \\
+\hline
+sock backlog & {\bf \htmlref{listen}{systemdict:listen}} & -- & Listen for
+socket connections. \\
+\hline
+sock & {\bf \htmlref{listen}{systemdict:listen}} & -- & Listen for socket
+connections. \\
+\hline
+sock & {\bf \htmlref{accept}{systemdict:accept}} & sock & Accept a socket
+connection. \\
 \hline
 sock addr port & {\bf \htmlref{connect}{systemdict:connect}} & -- & Connect a
 socket. \\
@@ -3898,9 +3910,16 @@ Set socket option. \\
 sock & {\bf \htmlref{peername}{systemdict:peername}} & dict & Get peer socket
 information. \\
 \hline
-OPARGS & {\bf \htmlref{send}{systemdict:send}} & OPOUTS & \\
+sock mesg flags & {\bf \htmlref{send}{systemdict:send}} & nsend & Send a
+message. \\
 \hline
-OPARGS & {\bf \htmlref{recv}{systemdict:recv}} & OPOUTS & \\
+sock mesg & {\bf \htmlref{send}{systemdict:send}} & count & Send a message. \\
+\hline
+sock string flags & {\bf \htmlref{recv}{systemdict:recv}} & substring & Receive
+a message. \\
+\hline
+sock string & {\bf \htmlref{recv}{systemdict:recv}} & substring & Receive a
+message. \\
 \hline
 family type & {\bf \htmlref{socketpair}{systemdict:socketpair}} & sock sock &
 Create a socket pair. \\
