@@ -23,6 +23,7 @@ cw_stilo_threade_t stilo_file_open(cw_stilo_t *a_stilo, const cw_uint8_t
     *a_filename, cw_uint32_t a_nlen, const cw_uint8_t *a_flags, cw_uint32_t
     a_flen);
 cw_stilo_threade_t stilo_file_close(cw_stilo_t *a_stilo);
+cw_sint32_t	stilo_file_fd_get(cw_stilo_t *a_stilo);
 cw_sint32_t	stilo_file_read(cw_stilo_t *a_stilo, cw_uint32_t a_len,
     cw_uint8_t *r_str);
 cw_stilo_threade_t stilo_file_readline(cw_stilo_t *a_stilo, cw_stil_t *a_stil,

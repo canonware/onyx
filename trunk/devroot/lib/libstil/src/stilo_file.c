@@ -365,6 +365,35 @@ stilo_file_close(cw_stilo_t *a_stilo)
 	return retval;
 }
 
+cw_sint32_t
+stilo_file_fd_get(cw_stilo_t *a_stilo)
+{
+	cw_sint32_t		retval;
+	cw_stiloe_file_t	*file;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_stilo->type == STILOT_FILE);
+
+	file = (cw_stiloe_file_t *)a_stilo->o.stiloe;
+
+	_cw_check_ptr(file);
+	_cw_assert(file->stiloe.magic == _CW_STILOE_MAGIC);
+	_cw_assert(file->stiloe.type == STILOT_FILE);
+
+	stiloe_p_file_lock(file);
+	if (file->fd < 0) {
+		retval = -1;
+		goto RETURN;
+	}
+
+	retval = file->fd;
+
+	RETURN:
+	stiloe_p_file_unlock(file);
+	return retval;
+}
+
 /* -1: STILO_THREADE_IOERROR */
 cw_sint32_t
 stilo_file_read(cw_stilo_t *a_stilo, cw_uint32_t a_len, cw_uint8_t *r_str)
