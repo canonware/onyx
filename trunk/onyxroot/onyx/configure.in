@@ -21,11 +21,14 @@ dnl   exec ../configure $@
 dnl fi
 
 cfghdrs=
+targets=
 
+dnl Look for libraries.
 CW_BUILD_LIB(libstash, lib_stash)
 CW_BUILD_LIB(libsock, lib_sock)
 CW_BUILD_LIB(libstil, lib_stil)
 
+dnl Look for binaries.
 CW_BUILD_BIN(blow, bin_blow)
 CW_BUILD_BIN(echos, bin_echos)
 CW_BUILD_BIN(ncat, bin_ncat)
@@ -75,7 +78,6 @@ VERIFY="$objdir/test/verify"
 AC_SUBST(VERIFY)
 
 CW_USE_PTHREADS()
-AC_CHECK_FUNCS(poll, , AC_MSG_ERROR(Cannot build without poll))
 
 dnl Do not build shared libraries by default.
 CW_DISABLE_SHARED()
@@ -90,23 +92,24 @@ AC_CHECK_HEADERS(unistd.h, , AC_MSG_ERROR(Cannot build without poll.h))
 dnl Check for typedefs, structures, and compiler characteristics.
 AC_C_BIGENDIAN
 
-AC_CHECK_SIZEOF(signed char, 1)
-AC_CHECK_SIZEOF(unsigned char, 1)
-AC_CHECK_SIZEOF(signed short, 2)
-AC_CHECK_SIZEOF(unsigned short, 2)
-AC_CHECK_SIZEOF(int, 4) dnl defines SIZEOF_INT
-AC_CHECK_SIZEOF(unsigned, 4)
-AC_CHECK_SIZEOF(long, 4)
-AC_CHECK_SIZEOF(unsigned long, 4)
-AC_CHECK_SIZEOF(long long, 4)
-AC_CHECK_SIZEOF(unsigned long long, 4)
-AC_CHECK_SIZEOF(int *, 4) dnl defines SIZEOF_INT_P
-AC_CHECK_SIZEOF(float, 4)
-AC_CHECK_SIZEOF(double, 8)
-AC_CHECK_SIZEOF(long double, 12)
+if test "x$build_libstash" = "xyes" ; then
+  AC_CHECK_SIZEOF(signed char, 1)
+  AC_CHECK_SIZEOF(unsigned char, 1)
+  AC_CHECK_SIZEOF(signed short, 2)
+  AC_CHECK_SIZEOF(unsigned short, 2)
+  AC_CHECK_SIZEOF(int, 4) dnl defines SIZEOF_INT
+  AC_CHECK_SIZEOF(unsigned, 4)
+  AC_CHECK_SIZEOF(long, 4)
+  AC_CHECK_SIZEOF(unsigned long, 4)
+  AC_CHECK_SIZEOF(long long, 4)
+  AC_CHECK_SIZEOF(unsigned long long, 4)
+  AC_CHECK_SIZEOF(int *, 4) dnl defines SIZEOF_INT_P
+  AC_CHECK_SIZEOF(float, 4)
+  AC_CHECK_SIZEOF(double, 8)
+  AC_CHECK_SIZEOF(long double, 12)
 
-dnl Find maximum iovec compatible with readv()/writev().
-AC_TRY_RUN([
+  dnl Find maximum iovec compatible with readv()/writev().
+  AC_TRY_RUN([
 #include <stdio.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -143,10 +146,15 @@ main()
   return 0;
 }
 ])
-maxiov=`cat _CW_MAX_IOV`
-AC_MSG_RESULT(_CW_MAX_IOV... $maxiov)
-AC_DEFINE_UNQUOTED(_CW_MAX_IOV, $maxiov)
-rm -f _CW_MAX_IOV
+  maxiov=`cat _CW_MAX_IOV`
+  AC_MSG_RESULT(_CW_MAX_IOV... $maxiov)
+  AC_DEFINE_UNQUOTED(_CW_MAX_IOV, $maxiov)
+  rm -f _CW_MAX_IOV
+fi
+
+if test "x$build_libsock" = "xyes" ; then
+  AC_CHECK_FUNCS(poll, , AC_MSG_ERROR(Cannot build without poll))
+fi
 
 dnl
 dnl Print out the results of configuration.
@@ -160,6 +168,8 @@ AC_MSG_RESULT()
 AC_MSG_RESULT(objdir   : ${srcdir})
 AC_MSG_RESULT(srcdir   : ${objdir})
 AC_MSG_RESULT(prefix   : ${prefix})
+AC_MSG_RESULT()
+AC_MSG_RESULT(Targets  :${targets})
 AC_MSG_RESULT(===============================================================================)
 
 dnl Process the following files.

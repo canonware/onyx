@@ -61,14 +61,16 @@ dnl var : Name of variable to substitute in configure output.
 AC_DEFUN(CW_BUILD_LIB,
 [
 if test -d "$srcdir/lib/c/$1" ; then
-  AC_MSG_RESULT(include $1 in build... yes)
+  build_$1="yes"
   $2=1
   cfghdrs="$cfghdrs $objdir/lib/c/$1/include/$1/$1_defs.h"
+  targets="$targets $1"
   mkdir -p $objdir/lib/c/$1/include/$1
 else
-  AC_MSG_RESULT(include $1 in build... no)
+  build_$1="no"
   $2=0
 fi
+AC_MSG_RESULT(include $1 in build... $build_$1)
 AC_SUBST($2)
 ])
 
@@ -78,13 +80,15 @@ dnl var : Name of variable to substitute in configure output.
 AC_DEFUN(CW_BUILD_BIN,
 [
 if test -d "$srcdir/bin/$1" ; then
-  AC_MSG_RESULT(include $1 in build... yes)
+  build_$1="yes"
   $2=1
   cfghdrs="$cfghdrs $objdir/bin/$1/include/$1_defs.h"
+  targets="$targets $1"
   mkdir -p $objdir/bin/$1/include
 else
-  AC_MSG_RESULT(include $1 in build... no)
+  build_$1="no"
   $2=0
 fi
+AC_MSG_RESULT(include $1 in build... $build_$1)
 AC_SUBST($2)
 ])
