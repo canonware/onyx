@@ -252,30 +252,24 @@ shar_opt_r : $(LIB_SH_R_O)
 stat_prof_r : $(LIB_ST_R_P)
 
 #
-# autoconf rules.
+# autoconf-related rules.
 #
 configure : configure.in
 	autoconf
 
-# autoheader might not change libstash.h.in, so touch a stamp file.
-include/libstash/libstash.h.in : stamp.in
-stamp.in : configure.in
-	echo timestamp > stamp.in
-
-include/libstash/libstash.h : stamp
-stamp : include/libstash/libstash.h.in config.status
-	./config.status
+config.status : configure
+	./config.status --recheck
 
 Makefile : Makefile.in config.status
 	./config.status
 
-config.status : configure
-	./config.status --recheck
+stamp.in : configure.in
+	echo timestamp > stamp.in
 
-# Link the autoconf dependency tree with the user targets, so that make doesn't
-# have to be run twice.  GNU make in all of its glory seems to notice that 
-# Makefile has been updated, and it rereads it before continuing.
-% : stamp.in
+stamp : include/libstash/libstash.h.in config.status
+	./config.status
+
+include/libstash/libstash.h : stamp
 
 FORCE :
 

@@ -172,8 +172,13 @@ libstash_shutdown(void);
 /*
  * Global variables.
  */
+#define g_mem _CW_NS_STASH(g_mem)
 extern cw_mem_t * g_mem;
+
+#define g_dbg _CW_NS_STASH(g_dbg)
 extern cw_dbg_t * g_dbg;
+
+#define g_log _CW_NS_STASH(g_log)
 extern cw_log_t * g_log;
 
 /*
