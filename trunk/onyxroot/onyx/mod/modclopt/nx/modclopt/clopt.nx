@@ -111,6 +111,7 @@ clopt <
 		pop
 		#argv #i
 		1 submatch
+
 		# Use the `=' opt/arg separator to determine whether an argument
 		# was passed, so that an empty (`') argument can be handled
 		# correctly.
@@ -240,6 +241,9 @@ clopt <
 
 	over `^(-.)(.+)?' match pop
 
+	# Set flag.
+	$flag 1 submatch ;def
+
 	dup 1 submatch implements {
 	    # Handler found for option with no argument.
 
@@ -271,9 +275,6 @@ clopt <
 		    get
 		    #argv #i #elm #class #arg
 
-		    # Set flag.
-		    $flag 1 submatch ;def
-
 		    # Set argument.
 		    $arg exch ;def
 		}{
@@ -283,9 +284,6 @@ clopt <
 		    ;error_escape
 		} ifelse
 	    }{
-		# Set flag.
-		$flag 1 submatch ;def
-
 		# Set argument.
 		$arg 2 submatch ;def
 	    } ifelse

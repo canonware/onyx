@@ -57,7 +57,7 @@ progname usage:
     #- `--foo' -
     `--foo' {
 	this:index_get cvs print
-	` --> --foo ==> ' print
+	` --> ' ;flag_get ` ==> ' 3 ncat print
 	this:arg_get 1 sprint
     }
 
@@ -65,7 +65,7 @@ progname usage:
     #- `--bar?' -
     `--bar?' {
 	this:index_get cvs print
-	` --> --bar ==> ' print
+	` --> ' ;flag_get ` ==> ' 3 ncat print
 	this:arg_get 1 sprint
     }
 
@@ -73,7 +73,7 @@ progname usage:
     #- `--biz=' -
     `--biz=' {
 	this:index_get cvs print
-	` --> --biz ==> ' print
+	` --> ' ;flag_get ` ==> ' 3 ncat print
 	this:arg_get 1 sprint
     }
 
@@ -81,7 +81,7 @@ progname usage:
     #- `-a' -
     `-a' {
 	this:index_get cvs print
-	` --> -a ==> ' print
+	` --> ' ;flag_get ` ==> ' 3 ncat print
 	this:arg_get 1 sprint
     }
 
@@ -89,7 +89,7 @@ progname usage:
     #- `-b:' -
     `-b:' {
 	this:index_get cvs print
-	` --> -b ==> ' print
+	` --> ' ;flag_get ` ==> ' 3 ncat print
 	this:arg_get 1 sprint
     }
 
@@ -97,7 +97,7 @@ progname usage:
     #- `--enum?' -
     `--enum?' {
 	this:index_get cvs print
-	` --> --enum ==> ' print
+	` --> ' ;flag_get ` ==> ' 3 ncat print
 	<
 	    $default `default'
 	    `hi' `HI'
@@ -109,7 +109,7 @@ progname usage:
     #- `--int=' -
     `--int=' {
 	this:index_get cvs print
-	` --> --int ==> ' print
+	` --> ' ;flag_get ` ==> ' 3 ncat print
 	;arg_int_get 1 sprint
     }
 
@@ -117,7 +117,7 @@ progname usage:
     #- `--uint=' -
     `--uint=' {
 	this:index_get cvs print
-	` --> --uint ==> ' print
+	` --> ' ;flag_get ` ==> ' 3 ncat print
 	;arg_uint_get 1 sprint
     }
 > cdef
