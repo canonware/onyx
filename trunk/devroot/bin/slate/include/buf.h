@@ -9,6 +9,7 @@
  *
  ******************************************************************************/
 
+typedef struct cw_hist_s cw_hist_t;
 typedef struct cw_bufm_s cw_bufm_t;
 typedef struct cw_buf_s cw_buf_t;
 
@@ -41,8 +42,6 @@ struct cw_bufm_s {
 
 	cw_uint64_t	apos;		/* Gap movement can change this. */
 	cw_uint64_t	line;		/* Always kept up to date. */
-
-	cw_msgq_t	*msgq;		/* Notify of manual marker movement. */
 };
 
 #define	_CW_BUF_MINELMS		4096
@@ -59,8 +58,6 @@ struct cw_buf_s {
 	cw_opaque_dealloc_t *dealloc;
 	void		*arg;
 
-	cw_msgq_t	*msgq;		/* Notify of buffer changes. */
-
 	cw_mtx_t	mtx;		/* Explicit lock. */
 
 	/* Internal buffer state. */
@@ -75,11 +72,7 @@ struct cw_buf_s {
 
 	ql_head(cw_bufm_t) bufms;	/* Ordered list of all markers. */
 
-	/* History (undo/redo) state. */
-	cw_buf_t	*h;		/* History buffer, if non-NULL. */
-	cw_bufm_t	hcur;		/* Marker at current position in h. */
-	cw_bufm_t	htmp;		/* Temporary marker in h. */
-	cw_uint64_t	hbpos;		/* Current history bpos. */
+	cw_hist_t	*hist;		/* History (undo/redo), if non-NULL. */
 };
 
 /* bufv. */
@@ -99,9 +92,6 @@ void	buf_unlock(cw_buf_t *a_buf);
 cw_uint32_t buf_elmsize_get(cw_buf_t *a_buf);
 void	buf_elmsize_set(cw_buf_t *a_buf, cw_uint32_t a_elmsize);
 
-cw_msgq_t *buf_msgq_get(cw_buf_t *a_buf);
-void	buf_msgq_set(cw_buf_t *a_buf, cw_msgq_t *a_msgq);
-
 cw_uint64_t buf_len(cw_buf_t *a_buf);
 cw_uint64_t buf_nlines(cw_buf_t *a_buf);
 
@@ -111,12 +101,12 @@ cw_bool_t buf_undoable(cw_buf_t *a_buf);
 cw_bool_t buf_redoable(cw_buf_t *a_buf);
 cw_uint64_t buf_undo(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_uint64_t a_count);
 cw_uint64_t buf_redo(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_uint64_t a_count);
+void	buf_hist_flush(cw_buf_t *a_buf);
 void	buf_hist_group_beg(cw_buf_t *a_buf, cw_bufm_t *a_bufm);
 void	buf_hist_group_end(cw_buf_t *a_buf);
-void	buf_hist_flush(cw_buf_t *a_buf);
 
 /* bufm. */
-cw_bufm_t *bufm_new(cw_bufm_t *a_bufm, cw_buf_t *a_buf, cw_msgq_t *a_msgq);
+cw_bufm_t *bufm_new(cw_bufm_t *a_bufm, cw_buf_t *a_buf);
 void	bufm_dup(cw_bufm_t *a_to, cw_bufm_t *a_from);
 void	bufm_delete(cw_bufm_t *a_bufm);
 cw_buf_t *bufm_buf(cw_bufm_t *a_bufm);

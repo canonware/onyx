@@ -623,7 +623,7 @@ slate_marker(void *a_data, cw_nxo_t *a_thread)
 	nxo_no_new(&marker->buffer_nxo);
 	nxo_dup(&marker->buffer_nxo, nxo);
 	buf_lock(&buffer->buf);
-	bufm_new(&marker->bufm, &buffer->buf, NULL);
+	bufm_new(&marker->bufm, &buffer->buf);
 	buf_unlock(&buffer->buf);
 
 	/*
@@ -680,7 +680,7 @@ slate_marker_copy(void *a_data, cw_nxo_t *a_thread)
 
 	buf = bufm_buf(&marker->bufm);
 	buf_lock(buf);
-	bufm_new(&marker_copy->bufm, buf, NULL);
+	bufm_new(&marker_copy->bufm, buf);
 	bufm_dup(&marker_copy->bufm, &marker->bufm);
 	buf_unlock(buf);
 

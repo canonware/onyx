@@ -13,8 +13,8 @@
 
 #include <libonyx/libonyx.h>
 
-#include "msgq.h"
 #include "buf.h"
+#include "hist.h"
 
 #include "buffer.h"
 
