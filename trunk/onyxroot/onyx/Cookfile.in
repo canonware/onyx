@@ -97,18 +97,6 @@ uninstall : [addsuffix _uninstall bins mods libs docs];
 
 clean : [addsuffix _clean docs tests bins mods libs]
 {
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_d [SRCS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_a [SRCS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_p [SRCS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_s [SRCS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [SRCS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [SRCS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [SRCS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_s [SRCS]];
-
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_s [MSRCS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_s [MSRCS]];
-
   /*
    * Delete .cook.fp files from the source tree and object tree.
    * Delete Cookfile.list files from the object tree. 

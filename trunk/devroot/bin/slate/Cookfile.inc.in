@@ -26,12 +26,9 @@ TSLATE_SRCS = tslate.c;
 TSLATE_SRCS = [fromto % [srcdir]/bin/slate/src/% [TSLATE_SRCS]];
 
 /* LaTeX source files. */
-{
-  local tex_srcs = ;
-  tex_srcs = [fromto % [srcdir]/bin/slate/doc/latex/% [tex_srcs]];
-
-  SLATE_TEX_SRCS = [tex_srcs];
-}
+SLATE_TEX_SRCS = ;
+SLATE_TEX_SRCS = [fromto % [srcdir]/bin/slate/doc/latex/% [SLATE_TEX_SRCS]];
+/* SLATE_TEX_SRCS = [SLATE_TEX_SRCS] [objdir]/bin/slate/doc/latex/manual.tex; */
 
 /* Binaries. */
 SLATE = [objdir]/bin/slate/bin/slate;
@@ -45,7 +42,19 @@ TSLATE = [objdir]/bin/slate/bin/tslate;
 
 slate : [SLATE] [TSLATE];
 
-slate_bins_bootstrap : [ONYX]
+slate_bins_tests :
+{
+}
+
+slate_bins_check :
+{
+}
+
+slate_bins_check_update :
+{
+}
+
+slate_bins_bootstrap : onyx
 {
   cat [srcdir]/bin/slate/src/slate_nxcode.nx
     | [ONYX] [srcdir]/bin/slate/src/slate_nxcode_gen.nx
@@ -82,6 +91,9 @@ slate_bins_uninstall :
 
 slate_bins_clean :
 {
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_a [SLATE_SRCS] [TSLATE_SRCS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [SLATE_SRCS] [TSLATE_SRCS]];
+  rm -f [SLATE] [TSLATE];
 }
 
 slate_bins_distclean :

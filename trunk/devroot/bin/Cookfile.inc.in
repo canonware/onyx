@@ -20,6 +20,10 @@ bins : @bins@;
 
 bins_bootstrap : [addsuffix _bins_bootstrap @bins@];
 
+bins_tests : [addsuffix _bins_tests @bins@];
+bins_check : [addsuffix _bins_check @bins@];
+bins_check_update : [addsuffix _bins_check_update @bins@];
+
 bins_install : [addsuffix _bins_install @bins@];
 
 bins_uninstall : [addsuffix _bins_uninstall @bins@];

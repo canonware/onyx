@@ -19,9 +19,8 @@
  */
 
 /* Source files. */
-MODGTK_MSRCS = modgtk.c;
-
-MODGTK_MSRCS = [fromto % [srcdir]/mod/modgtk/src/% [MODGTK_MSRCS]];
+MODGTK_SRCS = modgtk.c;
+MODGTK_SRCS = [fromto % [srcdir]/mod/modgtk/src/% [MODGTK_SRCS]];
 
 /* Generated source code (created by configure). */
 MODGTK_NX_GEN = modgtk_defs.nx.in;
@@ -39,6 +38,21 @@ MODGTK = [objdir]/mod/modgtk/nxm/modgtk.nxm;
  */
 
 modgtk : [MODGTK];
+
+modgtk_mods_tests :
+{
+
+}
+
+modgtk_mods_check :
+{
+
+}
+
+modgtk_mods_check_update :
+{
+
+}
 
 modgtk_mods_install : [MODGTK]
 {
@@ -70,6 +84,9 @@ modgtk_mods_uninstall :
 
 modgtk_mods_clean :
 {
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_s [MODGTK_SRCS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_s [MODGTK_SRCS]];
+  rm -f [MODGTK];
 }
 
 modgtk_mods_distclean :
@@ -90,7 +107,7 @@ CPPFLAGS = [CPPFLAGS] -I[srcdir]/mod/modgtk/include
  * Dependencies.
  */
 
-[MODGTK] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_s [MODGTK_MSRCS]]
+[MODGTK] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_s [MODGTK_SRCS]]
   set mkdir
 {
   [CC]

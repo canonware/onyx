@@ -37,9 +37,21 @@ LDFLAGS = [LDFLAGS] -L[objdir]/lib/libedit/lib;
 
 libedit_libs_a : [LIBEDIT_A];
 libedit_libs_s : ;
-libedit : libedit_libs_a libedit_libs_s;
+libedit : libedit_libs_a;
 
 libedit_libs_bootstrap :
+{
+}
+
+libedit_libs_tests :
+{
+}
+
+libedit_libs_check :
+{
+}
+
+libedit_libs_check_update :
 {
 }
 
@@ -53,6 +65,9 @@ libedit_libs_uninstall :
 
 libedit_libs_clean :
 {
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_a [LIBEDIT_SRCS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [LIBEDIT_SRCS]];
+  rm -f [LIBEDIT_A];
 }
 
 libedit_libs_distclean :

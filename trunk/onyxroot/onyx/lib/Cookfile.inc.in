@@ -20,6 +20,10 @@ libs_a : [addsuffix _libs_a @libs@];
 libs_s : [addsuffix _libs_s @libs@];
 libs : libs_a libs_s;
 
+libs_tests : [addsuffix _libs_tests @libs@];
+libs_check : [addsuffix _libs_check @libs@];
+libs_check_update : [addsuffix _libs_check_update @libs@];
+
 libs_bootstrap : [addsuffix _libs_bootstrap @libs@];
 
 libs_install : [addsuffix _libs_install @libs@];

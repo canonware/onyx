@@ -59,8 +59,7 @@ LIBONYX_SRCS = libonyx.c ch.c dch.c gcdict.c mem.c nx.c nxa.c nxn.c nxo.c
 LIBONYX_SRCS = [fromto % [srcdir]/lib/libonyx/src/% [LIBONYX_SRCS]];
 
 /* Simple C tests.  Output is diff'ed with the expected (.exp file) output. */
-{
-  local ctests = ch_a.c dch_a.c libonyx_a.c ql_a.c qr_a.c qs_a.c xep_a.c
+LIBONYX_CTESTS = ch_a.c dch_a.c libonyx_a.c ql_a.c qr_a.c qs_a.c xep_a.c
 #if @enable_threads@
                  cnd_a.c mq_a.c mtx_a.c thd_a.c thd_b.c thd_c.c tsd_a.c
 #endif
@@ -68,10 +67,7 @@ LIBONYX_SRCS = [fromto % [srcdir]/lib/libonyx/src/% [LIBONYX_SRCS]];
                  hook_a.c
 #endif
                  ;
-  ctests = [fromto % [srcdir]/lib/libonyx/test/% [ctests]];
-
-  CTESTS = [CTESTS] [ctests];
-}
+LIBONYX_CTESTS = [fromto % [srcdir]/lib/libonyx/test/% [LIBONYX_CTESTS]];
 
 /* LaTeX source files. */
 {
@@ -113,6 +109,10 @@ LDFLAGS = [LDFLAGS] -L[objdir]/lib/libonyx/lib;
  * User cook'ables.
  */
 
+libonyx_libs_a : [LIBONYX_A];
+libonyx_libs_s : [LIBONYX_S];
+libonyx : libonyx_libs_a libonyx_libs_s;
+
 libonyx_libs_bootstrap : onyx
 {
   cat [srcdir]/lib/libonyx/src/nx_nxcode.nx
@@ -123,9 +123,19 @@ libonyx_libs_bootstrap : onyx
     > [srcdir]/lib/libonyx/src/nxo_thread_nxcode.c;
 }
 
-libonyx_libs_a : [LIBONYX_A];
-libonyx_libs_s : [LIBONYX_S];
-libonyx : libonyx_libs_a libonyx_libs_s;
+libonyx_libs_tests : [fromto [srcdir]/%0%.c [objdir]/%0% [LIBONYX_CTESTS]];
+
+libonyx_libs_check : libonyx_libs_tests
+{
+  [VERIFY] -s [srcdir] -o [objdir]
+           [fromto [srcdir]/%0%.c [objdir]/%0% [LIBONYX_CTESTS]];
+}
+
+libonyx_libs_check_update : libonyx_libs_tests
+{
+  [VERIFY] -u -s [srcdir] -o [objdir]
+           [fromto [srcdir]/%0%.c [objdir]/%0% [LIBONYX_CTESTS]];
+}
 
 libonyx_libs_install : libonyx_install_a libonyx_install_s;
 
@@ -145,11 +155,23 @@ dataend
 
 libonyx_libs_clean :
 {
-  rm -f [LIBONYX_L];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_a [LIBONYX_SRCS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_s [LIBONYX_SRCS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [LIBONYX_SRCS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_s [LIBONYX_SRCS]];
+
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_a [LIBONYX_CTESTS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [LIBONYX_CTESTS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.out [LIBONYX_CTESTS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.diff [LIBONYX_CTESTS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0% [LIBONYX_CTESTS]];
+
+  rm -f [LIBONYX_A] [LIBONYX_S] [LIBONYX_L];
 }
 
 libonyx_libs_distclean :
 {
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.perf [LIBONYX_CTESTS]];
 }
 
 /*

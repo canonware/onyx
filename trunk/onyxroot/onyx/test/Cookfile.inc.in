@@ -16,73 +16,24 @@ DIFF = @DIFF@;
 VERIFY = @VERIFY@;
 
 /*
- * Global variables.
+ * Targets.
  */
-CTESTS = ;
-OTESTS = ;
-PTESTS = ;
-CBTESTS = ;
-OBTESTS = ;
-
-tests : bins_onyx mods
-        [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS] [CBTESTS]]
-        [fromto [srcdir]/%0%.nx.in [objdir]/%0%.nx [OTESTS] [OBTESTS]]
-        [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]];
-
-check : tests
-{
-  [VERIFY] -s [srcdir] -o [objdir]
-           [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS]]
-           [fromto [srcdir]/%0%.nx.in [objdir]/%0%.nx [OTESTS]]
-           [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]];
-}
-
-check_update : tests
-{
-  [VERIFY] -u -s [srcdir] -o [objdir]
-           [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS]]
-           [fromto [srcdir]/%0%.nx.in [objdir]/%0%.nx [OTESTS]]
-           [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]];
-}
+tests : onyx mods [addsuffix _tests bins mods libs];
+check : tests [addsuffix _check bins mods libs];
+check_update : tests [addsuffix _check_update bins mods libs];
 
 tests_clean :
 {
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_a [CTESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [CTESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.out [CTESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.diff [CTESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS]];
-
-  rm -f [fromto [srcdir]/%0%.nx.in [objdir]/%0%.nx.out [OTESTS]];
-  rm -f [fromto [srcdir]/%0%.nx.in [objdir]/%0%.nx.diff [OTESTS]];
-  rm -f [fromto [srcdir]/%0%.nx.in [objdir]/%0%.nx [OTESTS]];
-
-  rm -f [fromto [srcdir]/%0%.pl.in [objdir]/%0%.out [PTESTS]];
-  rm -f [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl.out [PTESTS]];
-  rm -f [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]];
-
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_a [CBTESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [CBTESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.out [CBTESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.diff [CBTESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0% [CBTESTS]];
-
-  rm -f [fromto [srcdir]/%0%.nx.in [objdir]/%0%.nx.out [OBTESTS]];
-  rm -f [fromto [srcdir]/%0%.nx.in [objdir]/%0%.nx.diff [OBTESTS]];
-  rm -f [fromto [srcdir]/%0%.nx.in [objdir]/%0%.nx [OBTESTS]];
 }
 
 tests_distclean :
 {
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.perf [CTESTS]];
-  rm -f [fromto [srcdir]/%0%.nx.in [objdir]/%0%.nx.perf [OTESTS]];
-  rm -f [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl.perf [PTESTS]];
 }
 
 /*
  * Build rules for tests.
  */
-[objdir]/%0test/%1 : [objdir]/%0test/%1.o_a libs_s
+[objdir]/%0test/%1 : [objdir]/%0test/%1.o_a libs
   set mkdir
 {
   [CC] [A_CFLAGS] -o [target]

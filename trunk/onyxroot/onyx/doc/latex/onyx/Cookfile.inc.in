@@ -22,21 +22,12 @@
 #endif
 
 /* LaTeX source files. */
-{
-  local tex_srcs = onyx_front.tex onyx_back.tex onyx_lang.tex onyx_tut.tex
-                   onyx_ex.tex;
-  tex_srcs = [fromto % [srcdir]/doc/latex/% [tex_srcs]];
-
-  ONYX_TEX_SRCS = [tex_srcs];
-}
+ONYX_TEX_SRCS = front.tex back.tex lang.tex tut.tex ex.tex;
+ONYX_TEX_SRCS = [fromto % [srcdir]/doc/latex/% [ONYX_TEX_SRCS]];
 
 /* xfig source files. */
-{
-  local fig_srcs = ;
-  fig_srcs = [fromto % [srcdir]/doc/latex/% [fig_srcs]];
-
-  ONYX_FIG_SRCS = [fig_srcs];
-}
+ONYX_FIG_SRCS = ;
+ONYX_FIG_SRCS = [fromto % [srcdir]/doc/latex/% [ONYX_FIG_SRCS]];
 
 /*
  * Targets.
