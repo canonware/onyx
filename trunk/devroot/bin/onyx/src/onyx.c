@@ -96,22 +96,22 @@ interactive_run(int argc, char **argv, char **envp)
 	 *
 	 * Push an executable stdin on ostack to prepare for the start operator.
 	 */
-	static const cw_uint8_t	code[] = "
-systemdict begin
-/promptstring {
-	count cvs `onyx:' exch catenate `> ' catenate
-} bind def
-end
-threaddict begin
-/resume //stop def
-end
-errordict begin
-	/stop {
-		stdin cvx stopped pop
-	} bind def
-end
-product print `, version ' print version print `.\n' print flush
-stdin cvx
+	static const cw_uint8_t	code[] = "\n\
+systemdict begin\n\
+/promptstring {\n\
+	count cvs `onyx:' exch catenate `> ' catenate\n\
+} bind def\n\
+end\n\
+threaddict begin\n\
+/resume //stop def\n\
+end\n\
+errordict begin\n\
+	/stop {\n\
+		stdin cvx stopped pop\n\
+	} bind def\n\
+end\n\
+product print `, version ' print version print `.\n' print flush\n\
+stdin cvx\n\
 ";
 	struct nx_arg_s	arg;
 	struct sigaction action;
@@ -300,7 +300,6 @@ prompt(EditLine *a_el)
 void
 cl_read(struct nx_arg_s *a_arg)
 {
-	cw_sint32_t		retval;
 	const char		*str;
 	int			count = 0;
 	static cw_bool_t	continuation = FALSE;
@@ -318,10 +317,8 @@ cl_read(struct nx_arg_s *a_arg)
 		 * Read data.
 		 */
 		_cw_assert(arg->buffer_count == 0);
-		if ((str = el_gets(el, &count)) == NULL) {
-			retval = 0;
-			goto RETURN;
-		}
+		if ((str = el_gets(el, &count)) == NULL)
+			break;
 		_cw_assert(count > 0);
 
 		/*
@@ -373,8 +370,6 @@ cl_read(struct nx_arg_s *a_arg)
 		a_arg->have_data = TRUE;
 		cnd_signal(&a_arg->nx_cnd);
 	}
-
-	RETURN:
 }
 
 /*
@@ -470,12 +465,12 @@ batch_run(int argc, char **argv, char **envp)
 	/*
 	 * Die with an exit code of 1 on error.
 	 */
-	static const cw_uint8_t	code[] = "
-currenterror begin
-	/stop {
-		1 die
-	} def
-end
+	static const cw_uint8_t	code[] = "\n\
+currenterror begin\n\
+	/stop {\n\
+		1 die\n\
+	} def\n\
+end\n\
 ";
 	int		retval;
 	cw_nxo_t	*file;

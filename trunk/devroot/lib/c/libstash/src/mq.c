@@ -278,9 +278,8 @@ mq_put(cw_mq_t *a_mq, ...)
 {
 	cw_bool_t	retval;
 	union {
-		cw_uint32_t	*four;
-		cw_uint64_t	*eight;
-		void		*x;	/* Don't care. */
+		cw_uint32_t	four;
+		cw_uint64_t	eight;
 	}		a_msg;
 	va_list		ap;
 
@@ -288,7 +287,18 @@ mq_put(cw_mq_t *a_mq, ...)
 	_cw_assert(a_mq->magic == _CW_MQ_MAGIC);
 
 	va_start(ap, a_mq);
-	a_msg.x = (void *)&va_arg(ap, void *);
+	switch (a_mq->msg_size) {
+	case 1: /* Compiler-promoted to 32 bits. */
+	case 2: /* Compiler-promoted to 32 bits. */
+	case 4:
+		a_msg.four = va_arg(ap, cw_uint32_t);
+		break;
+	case 8:
+		a_msg.eight = va_arg(ap, cw_uint64_t);
+		break;
+	default:
+		_cw_not_reached();
+	}
 	va_end(ap);
 
 	mtx_lock(&a_mq->lock);
@@ -362,17 +372,17 @@ mq_put(cw_mq_t *a_mq, ...)
 		switch (a_mq->msg_size) {
 		case 1:
 			/* The compiler promotes 8 bit args to 32 bits. */
-			a_mq->msgs.one[a_mq->msgs_end] = *a_msg.four;
+			a_mq->msgs.one[a_mq->msgs_end] = a_msg.four;
 			break;
 		case 2:
 			/* The compiler promotes 16 bit args to 32 bits. */
-			a_mq->msgs.two[a_mq->msgs_end] = *a_msg.four;
+			a_mq->msgs.two[a_mq->msgs_end] = a_msg.four;
 			break;
 		case 4:
-			a_mq->msgs.four[a_mq->msgs_end] = *a_msg.four;
+			a_mq->msgs.four[a_mq->msgs_end] = a_msg.four;
 			break;
 		case 8:
-			a_mq->msgs.eight[a_mq->msgs_end] = *a_msg.eight;
+			a_mq->msgs.eight[a_mq->msgs_end] = a_msg.eight;
 			break;
 		default:
 			_cw_not_reached();

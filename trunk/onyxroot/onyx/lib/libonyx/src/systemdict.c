@@ -737,6 +737,7 @@ systemdict_p_bind(cw_nxo_t *a_proc, cw_nxo_t *a_thread)
 			    nxo_attr_get(val) != NXOA_EXECUTABLE)))
 				nxo_array_el_set(a_proc, val, i);
 		default:
+			break;
 		}
 	}
 

@@ -778,6 +778,10 @@ out_p_put_svn(cw_out_t *a_out, char **a_str, cw_uint32_t a_size, cw_uint32_t
 			cw_sint32_t	type_len;
 			const char	*type;
 			cw_out_ent_t	*ent;
+			union {
+				cw_uint32_t	four;
+				cw_uint64_t	eight;
+			}		uarg;
 			void		*arg;
 
 			/* Specifier el. */
@@ -796,10 +800,14 @@ out_p_put_svn(cw_out_t *a_out, char **a_str, cw_uint32_t a_size, cw_uint32_t
 
 			switch (ent->size) {
 			case 1: case 2: case 4:
-				arg = (void *)&va_arg(a_p, cw_uint32_t);
+				uarg.four = va_arg(a_p, cw_uint32_t);
+				arg = &uarg.four;
+/*  				arg = (void *)&va_arg(a_p, cw_uint32_t); */
 				break;
 			case 8:
-				arg = (void *)&va_arg(a_p, cw_uint64_t);
+				uarg.eight = va_arg(a_p, cw_uint64_t);;
+				arg = &uarg.eight;
+/*  				arg = (void *)&va_arg(a_p, cw_uint64_t); */
 				break;
 			default:
 				arg = NULL;	/*
