@@ -110,9 +110,6 @@ doc_relclean :
   rm -rf [objdir]/doc/ps;
 }
 
-[PS_MANUAL] [PDF_MANUAL] : [T_MANUAL] [TEX_SRCS]
-                           [fromto [srcdir]/%0%.fig [objdir]/%0%.ps [FIG_SRCS]];
-
 [HTML_MANUAL] : [PS_MANUAL];
 
 [objdir]/%0%.ps : [objdir]/%0%.fig
@@ -121,15 +118,21 @@ doc_relclean :
   [FIG2DEV] -L ps [objdir]/%0%.fig [objdir]/%0%.ps;
 }
 
-[objdir]/%0ps/%.ps [objdir]/%0latex/%.dvi : [objdir]/%0latex/%.tex
+/*
+ * This all has to be one rule in order to avoid build races if building in
+ * parallel.
+ */
+[objdir]/%0ps/%.ps [objdir]/%0pdf/%.pdf
+    : [objdir]/%0latex/%.tex [TEX_SRCS]
+      [fromto [srcdir]/%0latex/%.fig [objdir]/%0latex/%.ps [FIG_SRCS]]
   set mkdir
 {
   /*
+   * Clean up the temp files to keep {pdf}latex from stumbling over the output
+   * of each other.
+   *
    * Change directory to the object tree, since latex can't be made to use a
    * different location for output files.
-   *
-   * Clean up the temp files to keep latex from stumbling over them, in case
-   * the last run was building a pdf.
    */
 
   rm -f [objdir]/%0latex/manual.alg;
@@ -148,20 +151,7 @@ doc_relclean :
   cd [objdir]/%0latex/\; ./ltx2e [LATEX] [objdir]/%.tex;
   cd [objdir]/%0latex/\; [MAKEINDEX] -c -l [objdir]/%.idx;
   cd [objdir]/%0latex/\; ./ltx2e [LATEX] [objdir]/%.tex;
-
   [DVIPS] [objdir]/%0latex/%.dvi -o [objdir]/%0ps/%.ps;
-}
-
-[objdir]/%0pdf/%.pdf [objdir]/%0latex/%.pdf : [objdir]/%0latex/%.tex
-  set mkdir
-{
-  /*
-   * Change directory to the object tree, since latex can't be made to use a
-   * different location for output files.
-   *
-   * Clean up the temp files to keep latex from stumbling over them, in case
-   * the last run was building a dvi.
-   */
 
   rm -f [objdir]/%0latex/manual.alg;
   rm -f [objdir]/%0latex/manual.aux;
@@ -179,7 +169,6 @@ doc_relclean :
   cd [objdir]/%0latex/\; ./ltx2e [PDFLATEX] [objdir]/%.tex;
   cd [objdir]/%0latex/\; [MAKEINDEX] -c -l [objdir]/%.idx;
   cd [objdir]/%0latex/\; ./ltx2e [PDFLATEX] [objdir]/%.tex;
-
   cp [objdir]/%0latex/%.pdf [objdir]/%0pdf/%.pdf;
 }
 
