@@ -52,7 +52,7 @@ void	stila_new(cw_stila_t *a_stila, cw_stil_t *a_stil);
 void	stila_delete(cw_stila_t *a_stila);
 
 void	stila_collect(cw_stila_t *a_stila);
-void	stila_dump(cw_stila_t *a_stila, cw_stilt_t *a_stilt);
+void	stila_dump(cw_stila_t *a_stila, cw_stilo_t *a_thread);
 
 cw_bool_t stila_active_get(cw_stila_t *a_stila);
 void	stila_active_set(cw_stila_t *a_stila, cw_bool_t a_active);

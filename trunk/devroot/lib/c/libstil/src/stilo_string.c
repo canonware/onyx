@@ -136,14 +136,14 @@ stiloe_l_string_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t a_reset)
 	return retval;
 }
 
-cw_stilte_t
+cw_stilo_threade_t
 stilo_l_string_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_uint32_t
     a_depth)
 {
-	cw_stilte_t	retval;
-	cw_uint8_t	*str;
-	cw_sint32_t	len;
-	cw_uint32_t	i;
+	cw_stilo_threade_t	retval;
+	cw_uint8_t		*str;
+	cw_sint32_t		len;
+	cw_uint32_t		i;
 
 	str = stilo_string_get(a_stilo);
 	len = stilo_string_len_get(a_stilo);
@@ -196,7 +196,7 @@ stilo_l_string_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_uint32_t
 	if (retval)
 		goto RETURN;
 
-	retval = STILTE_NONE;
+	retval = STILO_THREADE_NONE;
 	RETURN:
 	return retval;
 }

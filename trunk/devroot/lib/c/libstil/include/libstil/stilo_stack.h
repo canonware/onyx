@@ -403,40 +403,45 @@ stilo_stack_roll(cw_stilo_t *a_stilo, cw_uint32_t a_count, cw_sint32_t a_amount)
  * Convenience wrapper macros for use where errors should cause an error and
  * immediate return.
  */
-#define	STILO_STACK_POP(a_stilo, a_stilt) do {				\
+#define	STILO_STACK_POP(a_stilo, a_thread) do {				\
 	if (stilo_stack_pop(a_stilo)) {					\
-		stilt_error((a_stilt), STILTE_STACKUNDERFLOW);		\
+		stilo_thread_error((a_thread),				\
+		    STILO_THREADE_STACKUNDERFLOW);			\
 		return;							\
 	}								\
 } while (0)
 
-#define	STILO_STACK_NPOP(a_stilo, a_stilt, a_count) do {		\
+#define	STILO_STACK_NPOP(a_stilo, a_thread, a_count) do {		\
 	if (stilo_stack_npop((a_stilo), (a_count)) {			\
-		stilt_error((a_stilt), STILTE_STACKUNDERFLOW);		\
+		stilo_thread_error((a_thread),				\
+		    STILO_THREADE_STACKUNDERFLOW);			\
 		return;							\
 	}								\
 } while (0)
 
-#define	STILO_STACK_GET(r_stilo, a_stilo, a_stilt) do {			\
+#define	STILO_STACK_GET(r_stilo, a_stilo, a_thread) do {		\
 	(r_stilo) = stilo_stack_get(a_stilo);				\
 	if ((r_stilo) == NULL) {					\
-		stilt_error((a_stilt), STILTE_STACKUNDERFLOW);		\
+		stilo_thread_error((a_thread),				\
+		    STILO_THREADE_STACKUNDERFLOW);			\
 		return;							\
 	}								\
 } while (0)
 
-#define	STILO_STACK_NGET(r_stilo, a_stilo, a_stilt, a_index) do {	\
+#define	STILO_STACK_NGET(r_stilo, a_stilo, a_thread, a_index) do {	\
 	(r_stilo) = stilo_stack_nget((a_stilo), (a_index));		\
 	if ((r_stilo) == NULL) {					\
-		stilt_error((a_stilt), STILTE_STACKUNDERFLOW);		\
+		stilo_thread_error((a_thread),				\
+		    STILO_THREADE_STACKUNDERFLOW);			\
 		return;							\
 	}								\
 } while (0)
 
-#define	STILO_STACK_DOWN_GET(r_stilo, a_stilo, a_stilt, a_object) do {	\
+#define	STILO_STACK_DOWN_GET(r_stilo, a_stilo, a_thread, a_object) do {	\
 	(r_stilo) = stilo_stack_down_get((a_stilo), (a_object));	\
 	if ((r_stilo) == NULL) {					\
-		stilt_error((a_stilt), STILTE_STACKUNDERFLOW);		\
+		stilo_thread_error((a_thread),				\
+		    STILO_THREADE_STACKUNDERFLOW);			\
 		return;							\
 	}								\
 } while (0)

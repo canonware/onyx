@@ -119,11 +119,11 @@ stiloe_l_dict_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t a_reset)
 	return retval;
 }
 
-cw_stilte_t
+cw_stilo_threade_t
 stilo_l_dict_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_uint32_t
     a_depth)
 {
-	cw_stilte_t	retval;
+	cw_stilo_threade_t	retval;
 
 	if (a_depth > 0) {
 		cw_stilo_t	key, val;
@@ -163,7 +163,7 @@ stilo_l_dict_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_uint32_t
 			goto RETURN;
 	}
 
-	retval = STILTE_NONE;
+	retval = STILO_THREADE_NONE;
 	RETURN:
 	return retval;
 }
@@ -419,6 +419,8 @@ stilo_p_dict_hash(const void *a_key)
 	case STILOT_HOOK:
 	case STILOT_MUTEX:
 	case STILOT_NAME:
+	case STILOT_STACK:
+	case STILOT_THREAD:
 		retval = ch_direct_hash((void *)key->o.stiloe);
 		break;
 	case STILOT_OPERATOR:

@@ -36,7 +36,10 @@
 static void
 stil_p_soft_init(cw_stil_t *a_stil)
 {
-	_cw_stil_code(&a_stil->stilt, "
+	cw_stilo_t	thread;
+
+	stilo_thread_new(&thread, a_stil);
+	_cw_stil_code(&thread, "
 ' print
 
 % Read in the code.
@@ -56,7 +59,8 @@ count dup dup 2 add 1 roll
 
 `systemdict begin ' print
 2 div cvs print
-` {bind def} repeat end
-");
+` {bind def} repeat end"
+	);
+	stilo_thread_exit(&thread);
 }
 ' print

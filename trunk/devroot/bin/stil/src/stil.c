@@ -43,8 +43,8 @@ struct stil_arg_s {
  * Globals.  These are global due to the libedit API not providing a way to pass
  * them to the prompt function.
  */
-cw_stilt_t	*stilt;
-cw_stilts_t	stilts;
+cw_stilo_t	thread;
+cw_stilo_threadp_t threadp;
 EditLine	*el;
 History		*hist;
 cw_uint8_t	prompt_str[_PROMPT_STRLEN];
@@ -139,18 +139,20 @@ end
 
 		stil_new(&stil, argc, argv, envp, cl_read, NULL, NULL, (void
 		    *)&arg, NULL);
-		stilt = stil_stilt_get(&stil);
-		stilts_new(&stilts);
+		stilo_thread_new(&thread, &stil);
+		stilo_threadp_new(&threadp);
 
 		/*
 		 * Print product and version info.  Redefine stop so that the
 		 * interpreter won't exit on error.
 		 */
-		stilt_interpret(stilt, &stilts, version, sizeof(version) - 1);
-		stilt_interpret(stilt, &stilts, code, sizeof(code) - 1);
-		stilt_flush(stilt, &stilts);
+		stilo_thread_interpret(&thread, &threadp, version,
+		    sizeof(version) - 1);
+		stilo_thread_interpret(&thread, &threadp, code, sizeof(code) -
+		    1);
+		stilo_thread_flush(&thread, &threadp);
 		/* Run the interpreter such that it will not exit on errors. */
-		stilt_start(stilt);
+		stilo_thread_start(&thread);
 
 		/* Clean up the command editor. */
 		el_end(el);
@@ -221,8 +223,8 @@ end
 		 */
 		stil_new(&stil, argc - optind, &argv[optind], envp, NULL, NULL,
 		    NULL, NULL, NULL);
-		stilt = stil_stilt_get(&stil);
-		stilts_new(&stilts);
+		stilo_thread_new(&thread, &stil);
+		stilo_threadp_new(&threadp);
 
 		/*
 		 * Act on the command line arguments, now that the interpreter
@@ -232,9 +234,9 @@ end
 			/*
 			 * Print the version and exit.
 			 */
-			stilt_interpret(stilt, &stilts, version,
+			stilo_thread_interpret(&thread, &threadp, version,
 			    sizeof(version) - 1);
-			stilt_flush(stilt, &stilts);
+			stilo_thread_flush(&thread, &threadp);
 			retval = 0;
 			goto RETURN;
 		} else if (opt_expression != NULL) {
@@ -244,7 +246,8 @@ end
 			/*
 			 * Push the string onto the execution stack.
 			 */
-			string = stilo_stack_push(stilt_ostack_get(stilt));
+			string =
+			    stilo_stack_push(stilo_thread_ostack_get(&thread));
 			stilo_string_new(string, &stil, FALSE,
 			    strlen(opt_expression));
 			stilo_attrs_set(string, STILOA_EXECUTABLE);
@@ -268,7 +271,8 @@ end
 				retval = 1;
 				goto RETURN;
 			}
-			file = stilo_stack_push(stilt_ostack_get(stilt));
+			file =
+			    stilo_stack_push(stilo_thread_ostack_get(&thread));
 			stilo_file_new(file, &stil, FALSE);
 			stilo_attrs_set(file, STILOA_EXECUTABLE);
 			stilo_file_fd_wrap(file, src_fd);
@@ -281,23 +285,25 @@ end
 			 * In other words, there were no arguments specified,
 			 * and this isn't a tty.
 			 */
-			file = stilo_stack_push(stilt_ostack_get(stilt));
+			file =
+			    stilo_stack_push(stilo_thread_ostack_get(&thread));
 			stilo_dup(file, stil_stdin_get(&stil));
 			stilo_attrs_set(file, STILOA_EXECUTABLE);
 		} else
 			_cw_not_reached();
 
 		/* Create procedures to handle #! magic. */
-		stilt_interpret(stilt, &stilts, magic, sizeof(magic) - 1);
-		stilt_flush(stilt, &stilts);
+		stilo_thread_interpret(&thread, &threadp, magic, sizeof(magic) -
+		    1);
+		stilo_thread_flush(&thread, &threadp);
 
 		/* Run the interpreter non-interactively. */
-		systemdict_start(stilt);
+		systemdict_start(&thread);
 	}
 
 	retval = 0;
 	RETURN:
-	stilts_delete(&stilts, stilt);
+	stilo_threadp_delete(&threadp, &thread);
 	stil_delete(&stil);
 	CLERROR:
 #ifdef _STIL_SIGHANDLER
@@ -315,25 +321,29 @@ end
 char *
 prompt(EditLine *a_el)
 {
-	if ((stilt_deferred(stilt) == FALSE) && (stilt_state(stilt) ==
-	    STILTTS_START)) {
+	if ((stilo_thread_deferred(&thread) == FALSE) &&
+	    (stilo_thread_state(&thread) == THREADTS_START)) {
 		static const cw_uint8_t	code[] = "promptstring";
 		cw_uint8_t		*pstr;
 		cw_uint32_t		plen, maxlen;
 		cw_stilo_t		*stilo;
-		cw_stilo_t		*stack = stilt_ostack_get(stilt);
+		cw_stilo_t		*stack;
+
+		stack = stilo_thread_ostack_get(&thread);
 
 		/* Push the prompt onto the data stack. */
-		stilt_interpret(stilt, &stilts, code, sizeof(code) - 1);
-		stilt_flush(stilt, &stilts);
+		stilo_thread_interpret(&thread, &threadp, code, sizeof(code) -
+		    1);
+		stilo_thread_flush(&thread, &threadp);
 
 		/* Get the actual prompt string. */
 		stilo = stilo_stack_get(stack);
 		if (stilo == NULL) {
-			stilt_error(stilt, STILTE_STACKUNDERFLOW);
+			stilo_thread_error(&thread,
+			    STILO_THREADE_STACKUNDERFLOW);
 			maxlen = 0;
 		} else if (stilo_type_get(stilo) != STILOT_STRING) {
-			stilt_error(stilt, STILTE_TYPECHECK);
+			stilo_thread_error(&thread, STILO_THREADE_TYPECHECK);
 			maxlen = 0;
 		} else {
 			pstr = stilo_string_get(stilo);
@@ -385,8 +395,8 @@ cl_read(void *a_arg, cw_stilo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str)
 		/*
 		 * Update the command line history.
 		 */
-		if ((stilt_deferred(stilt) == FALSE) &&
-		    (stilt_state(stilt) == STILTTS_START)) {
+		if ((stilo_thread_deferred(&thread) == FALSE) &&
+		    (stilo_thread_state(&thread) == THREADTS_START)) {
 			const HistEvent	*hevent;
 
 			/*

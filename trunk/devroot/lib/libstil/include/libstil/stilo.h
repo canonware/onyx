@@ -20,34 +20,32 @@ typedef struct cw_stiloe_s cw_stiloe_t;
 /* Declared here to avoid circular header dependencies. */
 typedef struct cw_stil_s cw_stil_t;
 typedef struct cw_stila_s cw_stila_t;
-typedef struct cw_stilt_s cw_stilt_t;
-typedef struct cw_stilsc_s cw_stilsc_t;
-typedef void cw_op_t(cw_stilt_t *);
+typedef void cw_op_t(cw_stilo_t *);
 
 /* Interpreter errors. */
 typedef enum {
-	STILTE_NONE,			/* No error. */
-	STILTE_DSTACKUNDERFLOW,		/* No poppable dictionary on dstack. */
-	STILTE_ESTACKOVERFLOW,		/* estack too deep. */
-	STILTE_INTERRUPT,		/* Interrupt. */
-	STILTE_INVALIDACCESS,		/* Permission error. */
-	STILTE_INVALIDCONTEXT,		/* Bad thread context. */
-	STILTE_INVALIDEXIT,		/* exit operator called outside loop. */
-	STILTE_INVALIDFILEACCESS,	/* Insufficient file permissions. */
-	STILTE_IOERROR,			/* read()/write()/etc. error. */
-	STILTE_LIMITCHECK,		/* Value outside legal range. */
-	STILTE_RANGECHECK,		/* Out of bounds string or array use. */
-	STILTE_STACKUNDERFLOW,		/* Not enough objects on ostack. */
-	STILTE_SYNTAXERROR,		/* Scanner syntax error. */
-	STILTE_TIMEOUT,			/* Timeout. */
-	STILTE_TYPECHECK,		/* Incorrect argument type. */
-	STILTE_UNDEFINED,		/* Object not found in dstack. */
-	STILTE_UNDEFINEDFILENAME,	/* Bad filename. */
-	STILTE_UNDEFINEDRESULT,		/* Divide by 0. */
-	STILTE_UNMATCHEDMARK,		/* No mark on ostack. */
-	STILTE_UNREGISTERED		/* Other non-enumerated error. */
-#define	STILTE_LAST	STILTE_UNREGISTERED
-} cw_stilte_t;
+	STILO_THREADE_NONE,		/* No error. */
+	STILO_THREADE_DSTACKUNDERFLOW,	/* No poppable dictionary on dstack. */
+	STILO_THREADE_ESTACKOVERFLOW,	/* estack too deep. */
+	STILO_THREADE_INTERRUPT,	/* Interrupt. */
+	STILO_THREADE_INVALIDACCESS,	/* Permission error. */
+	STILO_THREADE_INVALIDCONTEXT,	/* Bad thread context. */
+	STILO_THREADE_INVALIDEXIT,	/* exit operator called outside loop. */
+	STILO_THREADE_INVALIDFILEACCESS, /* Insufficient file permissions. */
+	STILO_THREADE_IOERROR,		/* read()/write()/etc. error. */
+	STILO_THREADE_LIMITCHECK,	/* Value outside legal range. */
+	STILO_THREADE_RANGECHECK,	/* Out of bounds string or array use. */
+	STILO_THREADE_STACKUNDERFLOW,	/* Not enough objects on ostack. */
+	STILO_THREADE_SYNTAXERROR,	/* Scanner syntax error. */
+	STILO_THREADE_TIMEOUT,		/* Timeout. */
+	STILO_THREADE_TYPECHECK,	/* Incorrect argument type. */
+	STILO_THREADE_UNDEFINED,	/* Object not found in dstack. */
+	STILO_THREADE_UNDEFINEDFILENAME, /* Bad filename. */
+	STILO_THREADE_UNDEFINEDRESULT,	/* Divide by 0. */
+	STILO_THREADE_UNMATCHEDMARK,	/* No mark on ostack. */
+	STILO_THREADE_UNREGISTERED	/* Other non-enumerated error. */
+#define	STILO_THREADE_LAST	STILO_THREADE_UNREGISTERED
+} cw_stilo_threade_t;
 
 typedef enum {
 	STILOT_NO,
@@ -125,7 +123,7 @@ struct cw_stilo_s {
 	cw_stilot_t	type:5;
 	/*
 	 * If type is STILOT_OPERARTOR and fast_op is TRUE, this operator can be
-	 * handled specially in stilt_loop().
+	 * handled specially in stilo_thread_loop().
 	 */
 	cw_bool_t	fast_op:1;
 	/*
@@ -216,5 +214,5 @@ cw_bool_t	stilo_lcheck(cw_stilo_t *a_stilo);
 #define		stilo_attrs_get(a_stilo) (a_stilo)->attrs
 #define		stilo_attrs_set(a_stilo, a_attrs) (a_stilo)->attrs = (a_attrs)
 
-cw_stilte_t	stilo_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_uint32_t
-    a_depth, cw_bool_t a_newline);
+cw_stilo_threade_t stilo_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file,
+    cw_uint32_t a_depth, cw_bool_t a_newline);

@@ -29,7 +29,7 @@
 #include "../include/libstil/stilo_operator_l.h"
 #include "../include/libstil/stilo_stack_l.h"
 #include "../include/libstil/stilo_string_l.h"
-#include "../include/libstil/stilt_l.h"
+#include "../include/libstil/stilo_thread_l.h"
 
 /*
  * vtable setup for the various operations on stilo's that are polymorphic.
@@ -38,10 +38,10 @@ typedef void		cw_stilot_delete_t(cw_stiloe_t *a_stiloe, cw_stil_t
     *a_stil);
 typedef cw_stiloe_t	*cw_stilot_ref_iter_t(cw_stiloe_t *a_stiloe,
     cw_bool_t a_reset);
-typedef cw_stilte_t	cw_stilot_copy_t(cw_stilo_t *a_to, cw_stilo_t *a_from,
-    cw_stilt_t *a_stilt);
-typedef cw_stilte_t	cw_stilot_print_t(cw_stilo_t *a_stilo, cw_stilo_t
-    *a_file, cw_uint32_t a_depth);
+typedef cw_stilo_threade_t	cw_stilot_copy_t(cw_stilo_t *a_to, cw_stilo_t
+    *a_from, cw_stilo_t *a_thread);
+typedef cw_stilo_threade_t	cw_stilot_print_t(cw_stilo_t *a_stilo,
+    cw_stilo_t *a_file, cw_uint32_t a_depth);
 
 typedef struct cw_stilot_vtable_s cw_stilot_vtable_t;
 struct  cw_stilot_vtable_s {
@@ -137,7 +137,12 @@ static const cw_stilot_vtable_t stilot_vtable[] = {
 	/* STILOT_STRING */
 	{stiloe_l_string_delete,
 	 stiloe_l_string_ref_iter,
-	 stilo_l_string_print}
+	 stilo_l_string_print},
+
+	/* STILOT_THREAD */
+	{stiloe_l_thread_delete,
+	 stiloe_l_thread_ref_iter,
+	 stilo_l_thread_print}
 };
 
 /*
@@ -156,6 +161,7 @@ stilo_compare(cw_stilo_t *a_a, cw_stilo_t *a_b)
 	case STILOT_HOOK:
 	case STILOT_MUTEX:
 	case STILOT_STACK:
+	case STILOT_THREAD:
 		if (a_a->type == a_b->type && a_a->o.stiloe == a_b->o.stiloe)
 			retval = 0;
 		else
@@ -276,6 +282,7 @@ stilo_stiloe_get(cw_stilo_t *a_stilo)
 	case STILOT_NAME:
 	case STILOT_STACK:
 	case STILOT_STRING:
+	case STILOT_THREAD:
 		retval = a_stilo->o.stiloe;
 		break;
 	default:
@@ -312,11 +319,11 @@ stilo_lcheck(cw_stilo_t *a_stilo)
 	return retval;
 }
 
-cw_stilte_t
+cw_stilo_threade_t
 stilo_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_uint32_t a_depth,
     cw_bool_t a_newline)
 {
-	cw_stilte_t	retval;
+	cw_stilo_threade_t	retval;
 
 	retval = stilot_vtable[a_stilo->type].print_f(a_stilo, a_file, a_depth);
 	if (retval)

@@ -22,8 +22,7 @@
 #include <libstash/libstash.h>
 
 /*
- * Include files.  These must be listed in reverse dependency order (for
- * example, stilo.h must come before stilt.h.
+ * Include files.  These must be listed in reverse dependency order.
  */
 
 #include "stiln.h"
@@ -44,8 +43,8 @@
 #include "stilo_operator.h"
 #include "stilo_stack.h"
 #include "stilo_string.h"
+#include "stilo_thread.h"
 #include "stila.h"
-#include "stilt.h"
 #include "stil.h"
 #include "systemdict.h"
 #include "errordict.h"

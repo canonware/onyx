@@ -79,51 +79,51 @@ gcdict_l_populate(cw_stilo_t *a_dict, cw_stila_t *a_stila)
 }
 
 void
-gcdict_active(cw_stilt_t *a_stilt)
+gcdict_active(cw_stilo_t *a_thread)
 {
 	cw_stilo_t	*ostack;
 	cw_stila_t	*stila;
 	cw_stilo_t	*active;
 
-	ostack = stilt_ostack_get(a_stilt);
-	stila = stil_stila_get(stilt_stil_get(a_stilt));
+	ostack = stilo_thread_ostack_get(a_thread);
+	stila = stil_stila_get(stilo_thread_stil_get(a_thread));
 	active = stilo_stack_push(ostack);
 	stilo_boolean_new(active, stila_active_get(stila));
 }
 
 void
-gcdict_collect(cw_stilt_t *a_stilt)
+gcdict_collect(cw_stilo_t *a_thread)
 {
-	stila_collect(stil_stila_get(stilt_stil_get(a_stilt)));
+	stila_collect(stil_stila_get(stilo_thread_stil_get(a_thread)));
 }
 
 void
-gcdict_collections(cw_stilt_t *a_stilt)
+gcdict_collections(cw_stilo_t *a_thread)
 {
 	cw_stilo_t	*ostack;
 	cw_stila_t	*stila;
 	cw_stilo_t	*collections;
 
-	ostack = stilt_ostack_get(a_stilt);
-	stila = stil_stila_get(stilt_stil_get(a_stilt));
+	ostack = stilo_thread_ostack_get(a_thread);
+	stila = stil_stila_get(stilo_thread_stil_get(a_thread));
 	collections = stilo_stack_push(ostack);
 	stilo_integer_new(collections, stila_collections_get(stila));
 }
 
 void
-gcdict_current(cw_stilt_t *a_stilt)
+gcdict_current(cw_stilo_t *a_thread)
 {
 	cw_stilo_t	*ostack;
 	cw_stila_t	*stila;
 	cw_stilo_t	*current, tstilo;
 	cw_stiloi_t	count, mark, sweep;
 
-	ostack = stilt_ostack_get(a_stilt);
-	stila = stil_stila_get(stilt_stil_get(a_stilt));
+	ostack = stilo_thread_ostack_get(a_thread);
+	stila = stil_stila_get(stilo_thread_stil_get(a_thread));
 	stila_current_get(stila, &count, &mark, &sweep);
 	current = stilo_stack_push(ostack);
-	stilo_array_new(current, stilt_stil_get(a_stilt),
-	    stilt_currentlocking(a_stilt), 3);
+	stilo_array_new(current, stilo_thread_stil_get(a_thread),
+	    stilo_thread_currentlocking(a_thread), 3);
 
 	stilo_integer_new(&tstilo, count);
 	stilo_array_el_set(current, &tstilo, 0);
@@ -134,25 +134,25 @@ gcdict_current(cw_stilt_t *a_stilt)
 }
 
 void
-gcdict_dump(cw_stilt_t *a_stilt)
+gcdict_dump(cw_stilo_t *a_thread)
 {
-	stila_dump(stil_stila_get(stilt_stil_get(a_stilt)), a_stilt);
+	stila_dump(stil_stila_get(stilo_thread_stil_get(a_thread)), a_thread);
 }
 
 void
-gcdict_maximum(cw_stilt_t *a_stilt)
+gcdict_maximum(cw_stilo_t *a_thread)
 {
 	cw_stilo_t	*ostack;
 	cw_stila_t	*stila;
 	cw_stilo_t	*maximum, tstilo;
 	cw_stiloi_t	count, mark, sweep;
 
-	ostack = stilt_ostack_get(a_stilt);
-	stila = stil_stila_get(stilt_stil_get(a_stilt));
+	ostack = stilo_thread_ostack_get(a_thread);
+	stila = stil_stila_get(stilo_thread_stil_get(a_thread));
 	stila_maximum_get(stila, &count, &mark, &sweep);
 	maximum = stilo_stack_push(ostack);
-	stilo_array_new(maximum, stilt_stil_get(a_stilt),
-	    stilt_currentlocking(a_stilt), 3);
+	stilo_array_new(maximum, stilo_thread_stil_get(a_thread),
+	    stilo_thread_currentlocking(a_thread), 3);
 
 	stilo_integer_new(&tstilo, count);
 	stilo_array_el_set(maximum, &tstilo, 0);
@@ -163,112 +163,112 @@ gcdict_maximum(cw_stilt_t *a_stilt)
 }
 
 void
-gcdict_new(cw_stilt_t *a_stilt)
+gcdict_new(cw_stilo_t *a_thread)
 {
 	cw_stilo_t	*ostack;
 	cw_stila_t	*stila;
 	cw_stilo_t	*new;
 
-	ostack = stilt_ostack_get(a_stilt);
-	stila = stil_stila_get(stilt_stil_get(a_stilt));
+	ostack = stilo_thread_ostack_get(a_thread);
+	stila = stil_stila_get(stilo_thread_stil_get(a_thread));
 	new = stilo_stack_push(ostack);
 	stilo_integer_new(new, stila_new_get(stila));
 }
 
 void
-gcdict_period(cw_stilt_t *a_stilt)
+gcdict_period(cw_stilo_t *a_thread)
 {
 	cw_stilo_t	*ostack;
 	cw_stila_t	*stila;
 	cw_stilo_t	*period;
 
-	ostack = stilt_ostack_get(a_stilt);
-	stila = stil_stila_get(stilt_stil_get(a_stilt));
+	ostack = stilo_thread_ostack_get(a_thread);
+	stila = stil_stila_get(stilo_thread_stil_get(a_thread));
 	period = stilo_stack_push(ostack);
 	stilo_integer_new(period, stila_period_get(stila));
 }
 
 void
-gcdict_setactive(cw_stilt_t *a_stilt)
+gcdict_setactive(cw_stilo_t *a_thread)
 {
 	cw_stilo_t	*ostack;
 	cw_stilo_t	*active;
 
-	ostack = stilt_ostack_get(a_stilt);
-	STILO_STACK_GET(active, ostack, a_stilt);
+	ostack = stilo_thread_ostack_get(a_thread);
+	STILO_STACK_GET(active, ostack, a_thread);
 	if (stilo_type_get(active) != STILOT_BOOLEAN) {
-		stilt_error(a_stilt, STILTE_TYPECHECK);
+		stilo_thread_error(a_thread, STILO_THREADE_TYPECHECK);
 		return;
 	}
 
-	stila_active_set(stil_stila_get(stilt_stil_get(a_stilt)),
+	stila_active_set(stil_stila_get(stilo_thread_stil_get(a_thread)),
 	    stilo_boolean_get(active));
 
 	stilo_stack_pop(ostack);
 }
 
 void
-gcdict_setperiod(cw_stilt_t *a_stilt)
+gcdict_setperiod(cw_stilo_t *a_thread)
 {
 	cw_stilo_t	*ostack;
 	cw_stilo_t	*period;
 
-	ostack = stilt_ostack_get(a_stilt);
-	STILO_STACK_GET(period, ostack, a_stilt);
+	ostack = stilo_thread_ostack_get(a_thread);
+	STILO_STACK_GET(period, ostack, a_thread);
 	if (stilo_type_get(period) != STILOT_INTEGER) {
-		stilt_error(a_stilt, STILTE_TYPECHECK);
+		stilo_thread_error(a_thread, STILO_THREADE_TYPECHECK);
 		return;
 	}
 	if (stilo_integer_get(period) < 0 || stilo_integer_get(period) >
 	    UINT_MAX) {
-		stilt_error(a_stilt, STILTE_LIMITCHECK);
+		stilo_thread_error(a_thread, STILO_THREADE_LIMITCHECK);
 		    return;
 	}
 
-	stila_period_set(stil_stila_get(stilt_stil_get(a_stilt)),
+	stila_period_set(stil_stila_get(stilo_thread_stil_get(a_thread)),
 	    stilo_integer_get(period));
 
 	stilo_stack_pop(ostack);
 }
 
 void
-gcdict_setthreshold(cw_stilt_t *a_stilt)
+gcdict_setthreshold(cw_stilo_t *a_thread)
 {
 	cw_stilo_t	*ostack;
 	cw_stilo_t	*threshold;
 
-	ostack = stilt_ostack_get(a_stilt);
-	STILO_STACK_GET(threshold, ostack, a_stilt);
+	ostack = stilo_thread_ostack_get(a_thread);
+	STILO_STACK_GET(threshold, ostack, a_thread);
 	if (stilo_type_get(threshold) != STILOT_INTEGER) {
-		stilt_error(a_stilt, STILTE_TYPECHECK);
+		stilo_thread_error(a_thread, STILO_THREADE_TYPECHECK);
 		return;
 	}
 	if (stilo_integer_get(threshold) < 0 || stilo_integer_get(threshold) >
 	    UINT_MAX) {
-		stilt_error(a_stilt, STILTE_LIMITCHECK);
+		stilo_thread_error(a_thread, STILO_THREADE_LIMITCHECK);
 		    return;
 	}
 
-	stila_threshold_set(stil_stila_get(stilt_stil_get(a_stilt)),
+	stila_threshold_set(stil_stila_get(stilo_thread_stil_get(a_thread)),
 	    stilo_integer_get(threshold));
 
 	stilo_stack_pop(ostack);
 }
 
 void
-gcdict_sum(cw_stilt_t *a_stilt)
+gcdict_sum(cw_stilo_t *a_thread)
 {
 	cw_stilo_t	*ostack;
 	cw_stila_t	*stila;
 	cw_stilo_t	*sum, tstilo;
 	cw_stiloi_t	count, mark, sweep;
 
-	ostack = stilt_ostack_get(a_stilt);
-	stila = stil_stila_get(stilt_stil_get(a_stilt));
+	ostack = stilo_thread_ostack_get(a_thread);
+	stila = stil_stila_get(stilo_thread_stil_get(a_thread));
 	stila_sum_get(stila, &count, &mark, &sweep);
 	sum = stilo_stack_push(ostack);
-	stilo_array_new(sum, stilt_stil_get(a_stilt),
-	    stilt_currentlocking(a_stilt), 3);
+	stilo_array_new(sum, stilo_thread_stil_get(a_thread),
+	    stilo_thread_currentlocking(a_thread), 3);
 
 	stilo_integer_new(&tstilo, count);
 	stilo_array_el_set(sum, &tstilo, 0);
@@ -279,14 +279,14 @@ gcdict_sum(cw_stilt_t *a_stilt)
 }
 
 void
-gcdict_threshold(cw_stilt_t *a_stilt)
+gcdict_threshold(cw_stilo_t *a_thread)
 {
 	cw_stilo_t	*ostack;
 	cw_stila_t	*stila;
 	cw_stilo_t	*threshold;
 
-	ostack = stilt_ostack_get(a_stilt);
-	stila = stil_stila_get(stilt_stil_get(a_stilt));
+	ostack = stilo_thread_ostack_get(a_thread);
+	stila = stil_stila_get(stilo_thread_stil_get(a_thread));
 	threshold = stilo_stack_push(ostack);
 	stilo_integer_new(threshold, stila_threshold_get(stila));
 }

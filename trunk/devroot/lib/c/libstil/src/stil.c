@@ -24,7 +24,7 @@ static void stil_p_soft_init(cw_stil_t *a_stil);
 cw_stil_t *
 stil_new(cw_stil_t *a_stil, int a_argc, char **a_argv, char **a_envp,
     cw_stilo_file_read_t *a_stdin, cw_stilo_file_write_t *a_stdout,
-    cw_stilo_file_write_t *a_stderr, void *a_arg, cw_op_t *a_stilt_init)
+    cw_stilo_file_write_t *a_stderr, void *a_arg, cw_op_t *a_thread_init)
 {
 	cw_stil_t		*retval;
 	volatile cw_uint32_t	try_stage = 0;
@@ -43,9 +43,6 @@ stil_new(cw_stil_t *a_stil, int a_argc, char **a_argv, char **a_envp,
 		}
 		v_retval = retval;
 		try_stage = 1;
-
-		/* Initialize the global stilt list. */
-		ql_new(&retval->stilt_head);
 
 		/* Initialize the global name cache. */
 		mtx_new(&retval->name_lock);
@@ -106,15 +103,13 @@ stil_new(cw_stil_t *a_stil, int a_argc, char **a_argv, char **a_envp,
 		    a_argv);
 		try_stage = 9;
 
-		/*
-		 * Set the stilt initialization hook pointer before
-		 * creating the first thread.
-		 */
-		retval->stilt_init = a_stilt_init;
-
-		/* Create initial thread. */
-		stilt_new(&retval->stilt, retval);
+		/* Initialize threadsdict. */
+		stilo_dict_new(&retval->threadsdict, retval, TRUE,
+		    _LIBSTIL_THREADSDICT_HASH);
 		try_stage = 10;
+
+		/* Set the thread initialization hook pointer. */
+		retval->thread_init = a_thread_init;
 
 		/* Now that we have an initial thread, activate the GC. */
 		stila_active_set(&retval->stila, TRUE);
@@ -126,7 +121,6 @@ stil_new(cw_stil_t *a_stil, int a_argc, char **a_argv, char **a_envp,
 		retval = (cw_stil_t *)v_retval;
 		switch (try_stage) {
 		case 10:
-			stilt_delete(&retval->stilt);
 		case 9:
 		case 8:
 		case 7:
@@ -158,22 +152,15 @@ stil_new(cw_stil_t *a_stil, int a_argc, char **a_argv, char **a_envp,
 void
 stil_delete(cw_stil_t *a_stil)
 {
-	cw_stilte_t	error;
-
 	_cw_check_ptr(a_stil);
 	_cw_assert(a_stil->magic == _CW_STIL_MAGIC);
 	
-	/* Flush stdout. */
-	error = stilo_file_buffer_flush(&a_stil->stdout_stilo);
-	if (error) {
-		/*
-		 * There are no other threads at this point, so report the error
-		 * to the initial thread for lack of a better place.
-		 */
-		stilt_error(&a_stil->stilt, error);
-	}
+	/*
+	 * Flush stdout.  There's nowhere to report an error, so don't even
+	 * check whether an error occurs.
+	 */
+	stilo_file_buffer_flush(&a_stil->stdout_stilo);
 
-	stilt_delete(&a_stil->stilt);
 	stila_delete(&a_stil->stila);
 	dch_delete(&a_stil->name_hash);
 	mtx_delete(&a_stil->name_lock);
@@ -186,27 +173,47 @@ stil_delete(cw_stil_t *a_stil)
 #endif
 }
 
-cw_stilt_t *
+cw_stiloe_t *
 stil_l_ref_iter(cw_stil_t *a_stil, cw_bool_t a_reset)
 {
-	cw_stilt_t	*retval;
+	cw_stiloe_t	*retval;
 
 	_cw_check_ptr(a_stil);
 	_cw_assert(a_stil->magic == _CW_STIL_MAGIC);
 
 	if (a_reset)
-		ql_first(&a_stil->ref_iter) = ql_first(&a_stil->stilt_head);
+		a_stil->ref_iter = 0;
 
-	/*
-	 * Iterate through the stilt's.
-	 */
-	retval = ql_first(&a_stil->ref_iter);
-
-	if (retval != NULL) {
-		ql_first(&a_stil->ref_iter) = ql_next(&a_stil->stilt_head,
-		    retval, link);
+	for (retval = NULL; retval == NULL; a_stil->ref_iter++) {
+		switch (a_stil->ref_iter) {
+		case 0:
+			retval = stilo_stiloe_get(&a_stil->threadsdict);
+			break;
+		case 1:
+			retval = stilo_stiloe_get(&a_stil->systemdict);
+			break;
+		case 2:
+			retval = stilo_stiloe_get(&a_stil->globaldict);
+			break;
+		case 3:
+			retval = stilo_stiloe_get(&a_stil->envdict);
+			break;
+		case 4:
+			retval = stilo_stiloe_get(&a_stil->stdin_stilo);
+			break;
+		case 5:
+			retval = stilo_stiloe_get(&a_stil->stdout_stilo);
+			break;
+		case 6:
+			retval = stilo_stiloe_get(&a_stil->stderr_stilo);
+			break;
+		default:
+			retval = NULL;
+			goto RETURN;
+		}
 	}
 
+	RETURN:
 	return retval;
 }
 

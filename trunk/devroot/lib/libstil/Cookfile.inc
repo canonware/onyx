@@ -27,7 +27,7 @@
                stilo_dict.h stilo_file.h stilo_fino.h stilo_hook.h
                stilo_integer.h stilo_mark.h stilo_mutex.h stilo_name.h
                stilo_no.h stilo_null.h stilo_operator.h stilo_stack.h
-               stilo_string.h stilt.h systemdict.h;
+               stilo_string.h stilo_thread.h systemdict.h;
   incs = [fromto % [srcdir]/lib/c/libstil/include/libstil/% [incs]];
   incs = [incs] [objdir]/lib/c/libstil/include/libstil/libstil_defs.h;
 
@@ -44,7 +44,7 @@
                     stilo_integer_l.h stilo_mark_l.h stilo_mutex_l.h
                     stilo_name_l.h stilo_no_l.h stilo_null_l.h
                     stilo_operator_l.h stilo_stack_l.h stilo_string_l.h
-                    stilt_l.h systemdict_l.h threaddict_l.h;
+                    stilo_thread_l.h systemdict_l.h threaddict_l.h;
   priv_incs = [fromto % [srcdir]/lib/c/libstil/include/libstil/% [priv_incs]];
 
   PRIV_INCS = [PRIV_INCS] [priv_incs];
@@ -56,7 +56,7 @@ LIBSTIL_SRCS = currenterror.c envdict.c errordict.c gcdict.c stil.c stila.c
                stilo_dict.c stilo_file.c stilo_fino.c stilo_hook.c
                stilo_integer.c stilo_mark.c stilo_mutex.c stilo_name.c
                stilo_no.c stilo_null.c stilo_operator.c stilo_stack.c
-               stilo_string.c stilt.c systemdict.c threaddict.c;
+               stilo_string.c stilo_thread.c systemdict.c threaddict.c;
 LIBSTIL_SRCS = [fromto % [srcdir]/lib/c/libstil/src/% [LIBSTIL_SRCS]];
 SRCS = [SRCS] [LIBSTIL_SRCS];
 
@@ -106,7 +106,7 @@ SRCS = [SRCS] [LIBSTIL_SRCS];
 /* LaTeX source files. */
 {
   local tex_srcs = envdict.tex gcdict.tex stil.tex stila.tex stilo.tex
-                   stilt.tex systemdict.tex;
+                   systemdict.tex;
   tex_srcs = [fromto % [srcdir]/lib/c/libstil/doc/latex/% [tex_srcs]];
   tex_srcs = [tex_srcs] [objdir]/lib/c/libstil/doc/latex/manual.tex;
 

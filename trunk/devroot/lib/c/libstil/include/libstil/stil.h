@@ -19,7 +19,7 @@ struct cw_stil_s {
 	/*
 	 * Used for remembering the current state of reference iteration.
 	 */
-	ql_head(cw_stilt_t) ref_iter;
+	cw_uint32_t	ref_iter;
 
         /*
          * Global hash of names (key: {name, len}, value: (stiloe_name *)).
@@ -27,18 +27,9 @@ struct cw_stil_s {
          * machine.  When a name object is created, it actually adds a reference
          * to a stiloe_name in this hash and uses a pointer to that stiloe_name
          * as a unique key.
-         *
-         * Note that each stilt maintains a cache of stiloe_name's, so that
-         * under normal circumstances, all locally allocated objects in a stilt
-         * refer to a single reference to the global stiloe_name.
          */
 	cw_mtx_t	name_lock;
 	cw_dch_t	name_hash;
-
-	/*
-	 * List of all stilt's.
-	 */
-	ql_head(cw_stilt_t) stilt_head;
 
 	/* Memory allocator. */
 	cw_stila_t	stila;
@@ -46,6 +37,7 @@ struct cw_stil_s {
 	/*
 	 * Dictionaries.
 	 */
+	cw_stilo_t	threadsdict;
 	cw_stilo_t	systemdict;
 	cw_stilo_t	globaldict;
 	cw_stilo_t	envdict;
@@ -58,23 +50,17 @@ struct cw_stil_s {
 	cw_stilo_t	stderr_stilo;
 
 	/*
-	 * Initial thread.
-	 */
-	cw_stilt_t	stilt;
-
-	/*
 	 * Thread initialization hook.
 	 */
-	cw_op_t		*stilt_init;
+	cw_op_t		*thread_init;
 };
 
 /* stil. */
 cw_stil_t *stil_new(cw_stil_t *a_stil, int a_argc, char **a_argv, char **a_envp,
     cw_stilo_file_read_t *a_stdin, cw_stilo_file_write_t *a_stdout,
-    cw_stilo_file_write_t *a_stderr, void *a_arg, cw_op_t *a_stilt_init);
+    cw_stilo_file_write_t *a_stderr, void *a_arg, cw_op_t *a_thread_init);
 void	stil_delete(cw_stil_t *a_stil);
 
-#define	stil_stilt_get(a_stil) (&(a_stil)->stilt)
 #define	stil_stila_get(a_stil) (&(a_stil)->stila)
 
 #define	stil_systemdict_get(a_stil) (&(a_stil)->systemdict)

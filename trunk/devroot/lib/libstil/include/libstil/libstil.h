@@ -63,6 +63,12 @@ extern  "C" {
 #define	_LIBSTIL_GLOBALDICT_HASH	  64
 
 /*
+ * Initial size of threadsdict.  Most applications don't use many threads, so
+ * the initial size is set pretty low.
+ */
+#define	_LIBSTIL_THREADSDICT_HASH	  16
+
+/*
  * Initial size initial name cache hash table.  We know for sure that there will
  * be about 175 names referenced by systemdict, threaddict, errordict, and
  * currenterror to begin with.
@@ -101,14 +107,15 @@ extern  "C" {
 #include "libstil_incs.h"
 
 /* Convenience macro for static embedded stil code. */
-#define	_cw_stil_code(a_stilt, a_code) do {				\
-	cw_stilts_t		stilts;					\
+#define	_cw_stil_code(a_thread, a_code) do {				\
+	cw_stilo_threadp_t	threadp;				\
 	static const cw_uint8_t	code[] = (a_code);			\
 									\
-	stilts_new(&stilts);						\
-	stilt_interpret((a_stilt), &stilts, code, sizeof(code) - 1);	\
-	stilt_flush((a_stilt), &stilts);				\
-	stilts_delete(&stilts, (a_stilt));				\
+	stilo_threadp_new(&threadp);					\
+	stilo_thread_interpret((a_thread), &threadp, code,		\
+	    sizeof(code) - 1);						\
+	stilo_thread_flush((a_thread), &threadp);			\
+	stilo_threadp_delete(&threadp, (a_thread));			\
 } while (0)
 
 #endif	/* _LIBSTIL_H_ */

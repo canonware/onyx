@@ -21,11 +21,11 @@ stilo_operator_new(cw_stilo_t *a_stilo, cw_op_t *a_op, cw_stiln_t a_stiln)
 	a_stilo->op_code = a_stiln;
 }
 
-cw_stilte_t
+cw_stilo_threade_t
 stilo_l_operator_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_uint32_t
     a_depth)
 {
-	cw_stilte_t	retval;
+	cw_stilo_threade_t	retval;
 	
 	if (a_stilo->op_code != STILN_ZERO) {
 		_cw_assert(a_stilo->op_code <= STILN_LAST);

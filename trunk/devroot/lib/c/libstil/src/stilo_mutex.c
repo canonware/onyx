@@ -57,11 +57,11 @@ stiloe_l_mutex_ref_iter(cw_stiloe_t *a_stilo, cw_bool_t a_reset)
 	return NULL;
 }
 
-cw_stilte_t
+cw_stilo_threade_t
 stilo_l_mutex_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_uint32_t
     a_depth)
 {
-	cw_stilte_t	retval;
+	cw_stilo_threade_t	retval;
 
 	retval = stilo_file_output(a_file, "-mutex-");
 

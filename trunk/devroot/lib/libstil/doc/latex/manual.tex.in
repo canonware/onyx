@@ -144,7 +144,6 @@ more details.
 \input{@abs_srcdir@/lib/c/libstil/doc/latex/stil}
 \input{@abs_srcdir@/lib/c/libstil/doc/latex/stila}
 \input{@abs_srcdir@/lib/c/libstil/doc/latex/stilo}
-\input{@abs_srcdir@/lib/c/libstil/doc/latex/stilt}
 
 \section{Dictionaries}
 \input{@abs_srcdir@/lib/c/libstil/doc/latex/envdict}

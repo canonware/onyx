@@ -80,7 +80,7 @@
 #include "../include/libstil/stilo_l.h"
 #include "../include/libstil/stilo_dict_l.h"
 #include "../include/libstil/stilo_stack_l.h"
-#include "../include/libstil/stilt_l.h"
+#include "../include/libstil/stilo_thread_l.h"
 
 #ifdef _LIBSTIL_DBG
 #define	_CW_STILA_MAGIC		0x63935743
@@ -201,8 +201,9 @@ stila_collect(cw_stila_t *a_stila)
 	mq_put(&a_stila->gc_mq, STILAM_COLLECT);
 }
 
+/* XXX a_thread is unused. */
 void
-stila_dump(cw_stila_t *a_stila, cw_stilt_t *a_stilt)
+stila_dump(cw_stila_t *a_stila, cw_stilo_t *a_thread)
 {
 	cw_stilo_t	*file;
 
@@ -510,15 +511,11 @@ _CW_INLINE cw_bool_t
 stila_p_roots(cw_stila_t *a_stila, cw_uint32_t *r_nroot)
 {
 	cw_bool_t	retval;
-	cw_stilt_t	*stilt;
 	cw_stiloe_t	*stiloe, *gray;
 	cw_uint32_t	nroot = 0;
 
 	/*
-	 * Iterate through the root set and mark it gray.  This requires a 2
-	 * level loop, due to the relationship:
-	 *
-	 * stil --> stilt --> stiloe
+	 * Iterate through the root set and mark it gray.
 	 *
 	 * Each set of *_ref_iter() calls on a particular object must start with
 	 * a call with (a_reset == TRUE), and repeated calls until NULL is
@@ -529,30 +526,19 @@ stila_p_roots(cw_stila_t *a_stila, cw_uint32_t *r_nroot)
 	 * Get a root object, so that we can create an invariant for the main
 	 * iteration: 'gray' does not point to a white object.
 	 */
-
-	/*
-	 * Iterate through stilt's.
-	 */
-	for (stilt = stil_l_ref_iter(a_stila->stil, TRUE); stilt != NULL; stilt
-	    = stil_l_ref_iter(a_stila->stil, FALSE)) {
-		/*
-		 * Iterate through stiloe's on the stilt.
-		 */
-		for (stiloe = stilt_l_ref_iter(stilt, TRUE); stiloe !=
-			 NULL; stiloe = stilt_l_ref_iter(stilt, FALSE)) {
-			if (stiloe_l_registered_get(stiloe)) {
-				/*
-				 * Paint object gray.
-				 */
-				nroot++;
-				_cw_assert(stiloe_l_color_get(stiloe) ==
-				    a_stila->white);
-				stiloe_l_color_set(stiloe,
-				    !a_stila->white);
-				ql_first(&a_stila->seq_set) = stiloe;
-				gray = stiloe;
-				goto HAVE_ROOT;
-			}
+	for (stiloe = stil_l_ref_iter(a_stila->stil, TRUE); stiloe != NULL;
+	     stiloe = stil_l_ref_iter(a_stila->stil, FALSE)) {
+		if (stiloe_l_registered_get(stiloe)) {
+			/*
+			 * Paint object gray.
+			 */
+			nroot++;
+			_cw_assert(stiloe_l_color_get(stiloe) ==
+			    a_stila->white);
+			stiloe_l_color_set(stiloe, !a_stila->white);
+			ql_first(&a_stila->seq_set) = stiloe;
+			gray = stiloe;
+			goto HAVE_ROOT;
 		}
 	}
 	/*
@@ -568,31 +554,22 @@ stila_p_roots(cw_stila_t *a_stila, cw_uint32_t *r_nroot)
 	HAVE_ROOT:
 
 	/*
-	 * Iterate through stilt's.
+	 * Iterate through stiloe's.
 	 */
-	for (stilt = stil_l_ref_iter(a_stila->stil, TRUE); stilt != NULL; stilt
-	    = stil_l_ref_iter(a_stila->stil, FALSE)) {
-		/*
-		 * Iterate through stiloe's on the stilt.
-		 */
-		for (stiloe = stilt_l_ref_iter(stilt, TRUE); stiloe !=
-			 NULL; stiloe = stilt_l_ref_iter(stilt, FALSE)) {
-			if (stiloe_l_color_get(stiloe) ==
-			    a_stila->white &&
-			    stiloe_l_registered_get(stiloe)) {
-				nroot++;
-				/*
-				 * Paint object gray.
-				 */
-				stiloe_l_color_set(stiloe,
-				    !a_stila->white);
-				if (stiloe != qr_next(gray, link)) {
-					qr_remove(stiloe, link);
-					qr_after_insert(gray, stiloe,
-					    link);
-				}
-				gray = qr_next(gray, link);
+	for (stiloe = stil_l_ref_iter(a_stila->stil, TRUE); stiloe != NULL;
+	     stiloe = stil_l_ref_iter(a_stila->stil, FALSE)) {
+		if (stiloe_l_color_get(stiloe) == a_stila->white &&
+		    stiloe_l_registered_get(stiloe)) {
+			nroot++;
+			/*
+			 * Paint object gray.
+			 */
+			stiloe_l_color_set(stiloe, !a_stila->white);
+			if (stiloe != qr_next(gray, link)) {
+				qr_remove(stiloe, link);
+				qr_after_insert(gray, stiloe, link);
 			}
+			gray = qr_next(gray, link);
 		}
 	}
 

@@ -72,11 +72,11 @@ stiloe_l_hook_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t a_reset)
 	return retval;
 }
 
-cw_stilte_t
+cw_stilo_threade_t
 stilo_l_hook_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_uint32_t
     a_depth)
 {
-	cw_stilte_t	retval;
+	cw_stilo_threade_t	retval;
 
 	retval = stilo_file_output(a_file, "-hook-");
 
@@ -104,10 +104,10 @@ stilo_hook_get(cw_stilo_t *a_stilo)
 	return retval;
 }
 
-cw_stilte_t
-stilo_hook_exec(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
+cw_stilo_threade_t
+stilo_hook_exec(cw_stilo_t *a_stilo, cw_stilo_t *a_thread)
 {
-	cw_stilte_t	retval;
+	cw_stilo_threade_t	retval;
 	cw_stiloe_hook_t	*hook;
 
 	_cw_check_ptr(a_stilo);
@@ -121,11 +121,11 @@ stilo_hook_exec(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 	_cw_assert(hook->stiloe.type == STILOT_FILE);
 
 	if (hook->exec_f == NULL) {
-		retval = STILTE_INVALIDACCESS;
+		retval = STILO_THREADE_INVALIDACCESS;
 		goto RETURN;
 	}
 
-	retval = hook->exec_f(hook->data, a_stilt);
+	retval = hook->exec_f(hook->data, a_thread);
 	RETURN:
 	return retval;
 }
