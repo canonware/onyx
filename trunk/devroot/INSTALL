@@ -13,7 +13,7 @@ see:
 	http://www.canb.auug.org.au/~millerp/cook/cook.html
 
 Optional: Regular expression support in Onyx depends on the pcre library.  pcre
-is distributed separately, and needs to be installed before building the
+is distributed separately, and needs to be installed before building this
 software:
 
 	ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/
@@ -198,7 +198,7 @@ diff -ru pcre-3.9/pcre.in pcre-3.9-extra/pcre.in
 --disable-posix-file
 	As much as possible, avoid using POSIX file operations (open(), close(),
 	read(), write()).  This option is incompatible with the posix option, so
-	implies --disable-posix.  This option is useful when embedding onyx in
+	implies --disable-posix.  This option is useful when embedding Onyx in
 	an application that does not have complete I/O capabilities.  With the
 	exception of calls to printf() and fprintf(stderr, ...) in debug
 	versions of libonyx, no POSIX file operations are used.  The
@@ -329,7 +329,7 @@ MANDIR="?"
 
 HCC="?"
 	Use this to invoke the host C compiler (used for building a bootstrap
-	interpreter).
+	Onyx interpreter).
 
 TCC="?"
 	Use this to invoke the target C compiler.
