@@ -32,7 +32,7 @@ systemdict begin
 /sprint {
 	1 index type sprintdict exch get eval
 	`\n' print flush
-} bind def
+} def
 
 % :: and : implement a simple mechanism for qualified namespaces.  For example,
 % one can type:
@@ -41,7 +41,7 @@ systemdict begin
 %
 /:: {
 	mark
-} bind def
+} def
 
 /: {
 	% Prime the loop.
@@ -68,19 +68,19 @@ systemdict begin
 		exch pop
 		eval
 	} ifelse
-} bind def
+} def
 
 % - product <string>
 /product {
 	`Canonware onyx'
-} bind def
+} def
 
 /pstack {
 	ostack {
 		1 sprint
 	} foreach
 	flush
-} bind def
+} def
 
 %
 % <string> <pattern> search <post> <pattern> <pre> true
@@ -166,7 +166,7 @@ systemdict begin
 		% Substring is too long.
 		pop false
 	} ifelse
-} bind def
+} def
 
 % [(<path>) (<args>)...] system <exit_code>
 /system {
@@ -179,7 +179,7 @@ systemdict begin
 	}{
 		exch pop waitpid
 	} ifelse
-} bind def
+} def
 
 % /errorname throw -
 /throw {
@@ -257,12 +257,12 @@ systemdict begin
 
 	% Stop.
 	/currenterror load /stop get eval
-} bind def
+} def
 
 % - version <string>
 /version {
 	`<Version>'
-} bind def
+} def
 
 end % systemdict
 

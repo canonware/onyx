@@ -198,7 +198,6 @@ typedef enum {
 	NXN_size,
 	NXN_sload,
 	NXN_spop,
-	NXN_sprint,
 	NXN_sprintdict,
 	NXN_spush,
 	NXN_srand,

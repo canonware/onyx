@@ -153,7 +153,6 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(sindex),
 	ENTRY(sload),
 	ENTRY(spop),
-	ENTRY(sprint),
 	ENTRY(spush),
 	ENTRY(srand),
 	ENTRY(sroll),
@@ -4118,41 +4117,6 @@ systemdict_spop(cw_nxo_t *a_thread)
 	nxo_dup(onxo, snxo);
 
 	NXO_STACK_POP(stack, a_thread);
-}
-
-void
-systemdict_sprint(cw_nxo_t *a_thread)
-{
-	cw_nxo_t		*ostack;
-	cw_nxo_t		*nxo, *depth, *stdout_nxo;
-	cw_nxo_threade_t	error;
-
-	ostack = nxo_thread_ostack_get(a_thread);
-	stdout_nxo = nxo_thread_stdout_get(a_thread);
-
-	/*
-	 * depth and nxo aren't used, but accessing them causes a more
-	 * intelligible error than the embedded onyx code would.
-	 */
-	NXO_STACK_GET(depth, ostack, a_thread);
-	NXO_STACK_DOWN_GET(nxo, ostack, a_thread, depth);
-	if (nxo_type_get(depth) != NXOT_INTEGER) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
-		return;
-	}
-
-	/* object depth sprint - */
-	_cw_onyx_code(a_thread, "1 index type sprintdict exch get eval");
-	error = nxo_file_output(stdout_nxo, "\n");
-	if (error) {
-		nxo_thread_error(a_thread, error);
-		return;
-	}
-	error = nxo_file_buffer_flush(stdout_nxo);
-	if (error) {
-		nxo_thread_error(a_thread, error);
-		return;
-	}
 }
 
 void

@@ -123,7 +123,6 @@ void	systemdict_signal(cw_nxo_t *a_thread);
 void	systemdict_sindex(cw_nxo_t *a_thread);
 void	systemdict_sload(cw_nxo_t *a_thread);
 void	systemdict_spop(cw_nxo_t *a_thread);
-void	systemdict_sprint(cw_nxo_t *a_thread);
 void	systemdict_spush(cw_nxo_t *a_thread);
 void	systemdict_srand(cw_nxo_t *a_thread);
 void	systemdict_sroll(cw_nxo_t *a_thread);

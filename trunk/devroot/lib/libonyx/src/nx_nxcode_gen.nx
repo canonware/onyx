@@ -46,7 +46,7 @@ stdin cvx eval
 1000 sprint
 
 % Output the footer.
-`eval");
+`bind eval");
 	nxo_thread_exit(&thread);
 }
 ' print
