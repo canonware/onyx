@@ -116,8 +116,8 @@ LIBEDIT_S = [objdir]/lib/c/libedit/lib/libedit.so.[LIBEDIT_REV];
 LDFLAGS = [LDFLAGS] -L[objdir]/lib/c/libedit/lib;
 /* LIBS = [LIBS] -ledit; */
 A_LIBS = [A_LIBS] [LIBEDIT_A];
-S_LIBS = [S_LIBS] [LIBEDIT_S];
-S_LINKS = [S_LINKS] [objdir]/lib/c/libedit/lib/libedit.so;
+/* S_LIBS = [S_LIBS] [LIBEDIT_S]; */
+/* S_LINKS = [S_LINKS] [objdir]/lib/c/libedit/lib/libedit.so; */
 
 /*
  * User cook'ables.
