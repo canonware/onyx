@@ -403,30 +403,30 @@ log_leprintf(cw_log_t * a_log,
   curr_time = time(NULL);
   cts = localtime(&curr_time);
 #if (defined(_CW_OS_FREEBSD))
-    sprintf(time_str, "[%4d/%02d/%02d %02d:%02d:%02d (%s)]: ",
-	    cts->tm_year + 1900, cts->tm_mon + 1, cts->tm_mday,
-	    cts->tm_hour, cts->tm_min, cts->tm_sec, cts->tm_zone);
+  sprintf(time_str, "[%4d/%02d/%02d %02d:%02d:%02d (%s)]: ",
+	  cts->tm_year + 1900, cts->tm_mon + 1, cts->tm_mday,
+	  cts->tm_hour, cts->tm_min, cts->tm_sec, cts->tm_zone);
 #elif (defined(_CW_OS_SOLARIS) || defined(_CW_OS_LINUX))
-    sprintf(time_str, "[%4d/%02d/%02d %02d:%02d:%02d (%s)]: ",
-	    cts->tm_year + 1900, cts->tm_mon + 1, cts->tm_mday,
-	    cts->tm_hour, cts->tm_min, cts->tm_sec, tzname[0]);
+  sprintf(time_str, "[%4d/%02d/%02d %02d:%02d:%02d (%s)]: ",
+	  cts->tm_year + 1900, cts->tm_mon + 1, cts->tm_mday,
+	  cts->tm_hour, cts->tm_min, cts->tm_sec, tzname[0]);
 #else
 #  error "Unsupported OS"
 #endif
-
+  
+  retval += fprintf(fp, "%s", time_str);
+    
   if (a_filename != NULL)
   {
     retval += fprintf(fp,
-		      "%sAt %s, line %d: ",
-		      time_str,
+		      "At %s, line %d: ",
 		      a_filename,
 		      a_line_num);
   }
   if (a_func_name != NULL)
   {
     retval += fprintf(fp,
-		      "%s%s(): ",
-		      time_str,
+		      "%s(): ",
 		      a_func_name);
   }
 
