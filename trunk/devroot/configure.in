@@ -434,8 +434,12 @@ if test "x$enable_modules" = "xyes" ; then
   else
     enable_modpcre="0"
   fi
-  AC_SUBST(enable_modpcre)
+else
+  enable_modpcre="0"
+fi
+AC_SUBST(enable_modpcre)
 
+if test "x$enable_modules" = "xyes" ; then
   dnl modprompt.
   if test "x$enable_posix" = "x1" ; then
     AC_ARG_WITH(libedit-prefix, [  --with-libedit-prefix   Prefix for libedit],
@@ -527,8 +531,10 @@ if test "x$enable_modules" = "xyes" ; then
   else
     enable_modprompt="0"
   fi
-  AC_SUBST(enable_modprompt)
+else
+  enable_modprompt="0"
 fi
+AC_SUBST(enable_modprompt)
 
 dnl Look for binaries.
 if test "x$enable_onyx" = "x1" ; then
