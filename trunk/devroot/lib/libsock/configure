@@ -1516,10 +1516,10 @@ fi
 fi
 if eval "test \"`echo '$ac_cv_file_'$ac_safe`\" = yes"; then
   echo "$ac_t""yes" 1>&6
-  TEST_LIBS="-lstash_r_d"
+  TEST_LIBS="$TEST_LIBS -lstash_r_d"
 else
   echo "$ac_t""no" 1>&6
-echo Was hoping for $ac_config_dir/lib/libstash
+echo Was hoping for ../libstash
     echo $ac_n "checking for main in -lstash_d""... $ac_c" 1>&6
 echo "configure:1525: checking for main in -lstash_d" >&5
 ac_lib_var=`echo stash_d'_'main | sed 'y%./+-%__p_%'`
@@ -1551,7 +1551,7 @@ LIBS="$ac_save_LIBS"
 fi
 if eval "test \"`echo '$ac_cv_lib_'$ac_lib_var`\" = yes"; then
   echo "$ac_t""yes" 1>&6
-  TEST_LIBS="-lstash_r_d"
+  TEST_LIBS="$TEST_LIBS -lstash_r_d"
 else
   echo "$ac_t""no" 1>&6
 \
@@ -1627,10 +1627,10 @@ fi
 fi
 if eval "test \"`echo '$ac_cv_file_'$ac_safe`\" = yes"; then
   echo "$ac_t""yes" 1>&6
-  BIN_LIBS="-lstash_r_d"
+  BIN_LIBS="$BIN_LIBS -lstash_r_d"
 else
   echo "$ac_t""no" 1>&6
-echo Was hoping for $ac_config_dir/lib/libstash
+echo Was hoping for ../libstash
     echo $ac_n "checking for main in -lstash_d""... $ac_c" 1>&6
 echo "configure:1636: checking for main in -lstash_d" >&5
 ac_lib_var=`echo stash_d'_'main | sed 'y%./+-%__p_%'`
@@ -1662,7 +1662,7 @@ LIBS="$ac_save_LIBS"
 fi
 if eval "test \"`echo '$ac_cv_lib_'$ac_lib_var`\" = yes"; then
   echo "$ac_t""yes" 1>&6
-  BIN_LIBS="-lstash_r_d"
+  BIN_LIBS="$BIN_LIBS -lstash_r_d"
 else
   echo "$ac_t""no" 1>&6
 \
@@ -1739,10 +1739,10 @@ fi
 fi
 if eval "test \"`echo '$ac_cv_file_'$ac_safe`\" = yes"; then
   echo "$ac_t""yes" 1>&6
-  BIN_LIBS="-lstash_r"
+  BIN_LIBS="$BIN_LIBS -lstash_r"
 else
   echo "$ac_t""no" 1>&6
-echo Was hoping for $ac_config_dir/lib/libstash
+echo Was hoping for ../libstash
     echo $ac_n "checking for main in -lstash""... $ac_c" 1>&6
 echo "configure:1748: checking for main in -lstash" >&5
 ac_lib_var=`echo stash'_'main | sed 'y%./+-%__p_%'`
@@ -1774,7 +1774,7 @@ LIBS="$ac_save_LIBS"
 fi
 if eval "test \"`echo '$ac_cv_lib_'$ac_lib_var`\" = yes"; then
   echo "$ac_t""yes" 1>&6
-  BIN_LIBS="-lstash_r"
+  BIN_LIBS="$BIN_LIBS -lstash_r"
 else
   echo "$ac_t""no" 1>&6
 \

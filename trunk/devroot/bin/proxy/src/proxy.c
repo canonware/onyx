@@ -1088,7 +1088,7 @@ handle_client_send(void * a_arg)
       
   /* Connect to the remote end. */
   sock_new(&conn->remote_sock, 4096);
-  if (TRUE == sock_connect(&conn->remote_sock, conn->rhost, conn->rport, NULL))
+  if (0 != sock_connect(&conn->remote_sock, conn->rhost, conn->rport, NULL))
   {
     out_put_e(conn->out, __FILE__, __LINE__, __FUNCTION__,
 	      "Error in sock_connect(&conn->remote_sock, \"[s]\", [i])\n",

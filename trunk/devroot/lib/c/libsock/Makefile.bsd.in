@@ -239,6 +239,10 @@ install_common : libs bins
 	for i in $(INCS); do \
 	@INSTALL@ -m 0644 $$i @prefix@/include/libsock/; \
 	done; \
+	@INSTALL@ -d @prefix@/bin; \
+	for i in $(BINS); do \
+	@INSTALL@ -m 0755 $$i @prefix@/bin/; \
+	done; \
 	'
 
 install_stat_dbg : stat_dbg install_common

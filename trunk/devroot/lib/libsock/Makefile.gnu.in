@@ -228,12 +228,17 @@ check :
 
 install : install_stat_dbg install_stat_opt install_stat_prof \
 	@disable_shared@install_shar_opt
+
 install_common : libs bins
 	$(SHELL) -c \
 	'@INSTALL@ -d @prefix@/lib; \
 	@INSTALL@ -d @prefix@/include/libsock; \
 	for i in $(INCS); do \
 	@INSTALL@ -m 0644 $$i @prefix@/include/libsock/; \
+	done; \
+	@INSTALL@ -d @prefix@/bin; \
+	for i in $(BINS); do \
+	@INSTALL@ -m 0755 $$i @prefix@/bin/; \
 	done; \
 	'
 

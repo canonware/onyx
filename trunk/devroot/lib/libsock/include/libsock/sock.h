@@ -29,6 +29,7 @@ struct cw_sock_s
   cw_mtx_t state_lock;
   int sockfd;
   cw_bool_t is_connected;
+  cw_bool_t in_progress;
   cw_bool_t error;
 
   cw_mtx_t lock;
@@ -138,20 +139,24 @@ sock_get_port(cw_sock_t * a_sock);
  *
  * <<< Output(s) >>>
  *
- * retval : FALSE == success, TRUE == error.
- *          TRUE : Already connected.
- *               : socket() error.
- *               : close() error.
- *               : sock_p_config_socket() error.
- *               : sockb_l_get_host_ip() error.
- *               : connect() error.
+ * retval : -1 : Already connected.
+ *             : socket() error.
+ *             : close() error.
+ *             : sock_p_config_socket() error.
+ *             : sockb_l_get_host_ip() error.
+ *             : connect() error.
+ *             :
+ *           0 : Success.
+ *             :
+ *           1 : Timeout.
  *
  * <<< Description >>>
  *
- * Connect to a remote socket.
+ * Connect to a remote socket.  If (1 == retval), sock_connect() can be called
+ * again in order to attempt completing a non-blocking connect.
  *
  ****************************************************************************/
-cw_bool_t
+cw_sint32_t
 sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port,
 	     struct timeval * a_timeout);
 

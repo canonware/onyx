@@ -1,7 +1,7 @@
 /* -*- mode: c ; c-file-style: "canonware-c-style" -*-
  ****************************************************************************
  *
- * <Copyright = "jasone">
+ * <Copyright = jasone>
  * <License>
  *
  ****************************************************************************
@@ -179,7 +179,7 @@ main(int argc, char ** argv)
     sock_new(&sock_array[i], opt_bsize);
     timeout.tv_sec = 10;
     timeout.tv_usec = 0;
-    if (TRUE == sock_connect(&sock_array[i], opt_rhost, opt_rport, &timeout))
+    if (0 != sock_connect(&sock_array[i], opt_rhost, opt_rport, &timeout))
     {
       out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
 		"Error in sock_connect()\n");

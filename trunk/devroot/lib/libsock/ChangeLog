@@ -1,3 +1,9 @@
+1999-09-12  Jason Evans  <jasone@canonware.com>
+
+	* include/libsock/src/sock.c (sock_connect): Change retval from
+	cw_bool_t to cw_sint32_t, in order to make non-blocking connect
+	useful.
+
 1999-09-08  Jason Evans  <jasone@canonware.com>
 
 	* src/sock.c (sock_write): Try to write data immediately instead

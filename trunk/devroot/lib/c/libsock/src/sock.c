@@ -73,6 +73,7 @@ sock_new(cw_sock_t * a_sock, cw_uint32_t a_in_max_buf_size)
   mtx_new(&retval->state_lock);
   retval->sockfd = -1;
   retval->is_connected = FALSE;
+  retval->in_progress = FALSE;
   retval->error = TRUE;
 
   retval->in_max_buf_size = a_in_max_buf_size;
@@ -145,11 +146,12 @@ sock_get_port(cw_sock_t * a_sock)
   return a_sock->port;
 }
 
-cw_bool_t
+cw_sint32_t
 sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port,
 	     struct timeval * a_timeout)
 {
-  cw_bool_t retval;
+  cw_sint32_t retval;
+  int error = 0;
   cw_uint32_t server_ip;
   struct sockaddr_in server_addr;
   
@@ -160,59 +162,61 @@ sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port,
   if (TRUE == a_sock->is_connected)
   {
     /* We're already connected to someone! */
-    retval = TRUE;
+    retval = -1;
     goto RETURN;
   }
 
-  a_sock->sockfd = socket(AF_INET, SOCK_STREAM, 0);
-  if (a_sock->sockfd < 0)
+  if (FALSE == a_sock->in_progress)
   {
-    if (dbg_is_registered(cw_g_dbg, "sock_error"))
-    {
-      out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-		"Error in socket(): [s]\n", strerror(errno));
-    }
-    retval = TRUE;
-    goto RETURN;
-  }
-
-  if (sock_p_config_socket(a_sock))
-  {
-    a_sock->sockfd = -1;
-    retval = TRUE;
-    goto RETURN;
-  }
-
-  /* Figure out the server's IP address. */
-  if (sockb_l_get_host_ip(a_server_host, &server_ip))
-  {
-    if (close(a_sock->sockfd))
+    a_sock->sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (a_sock->sockfd < 0)
     {
       if (dbg_is_registered(cw_g_dbg, "sock_error"))
       {
 	out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-		  "Error in close(): [s]\n", strerror(errno));
+		  "Error in socket(): [s]\n", strerror(errno));
       }
+      retval = -1;
+      goto RETURN;
     }
-    a_sock->sockfd = -1;
-    retval = TRUE;
-    goto RETURN;
+
+    if (sock_p_config_socket(a_sock))
+    {
+      a_sock->sockfd = -1;
+      retval = -1;
+      goto RETURN;
+    }
+
+    /* Figure out the server's IP address. */
+    if (sockb_l_get_host_ip(a_server_host, &server_ip))
+    {
+      if (close(a_sock->sockfd))
+      {
+	if (dbg_is_registered(cw_g_dbg, "sock_error"))
+	{
+	  out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+		    "Error in close(): [s]\n", strerror(errno));
+	}
+      }
+      a_sock->sockfd = -1;
+      retval = -1;
+      goto RETURN;
+    }
+  
+    bzero(&server_addr, sizeof(struct sockaddr_in));
+    server_addr.sin_family = AF_INET;
+  
+    (server_addr.sin_addr).s_addr = server_ip;
+    server_addr.sin_port = htons(a_port);
+
+    error = connect(a_sock->sockfd,
+		    (struct sockaddr *) &server_addr,
+		    sizeof(struct sockaddr_in));
   }
   
-  bzero(&server_addr, sizeof(struct sockaddr_in));
-  server_addr.sin_family = AF_INET;
-  
-  (server_addr.sin_addr).s_addr = server_ip;
-  server_addr.sin_port = htons(a_port);
-
-  if (0 > connect(a_sock->sockfd,
-		  (struct sockaddr *) &server_addr,
-		  sizeof(struct sockaddr_in)))
+  if ((0 > error) || (TRUE == a_sock->in_progress))
   {
-    /* XXX According to the connect() manpage, EAGAIN is never returned.
-     * However, reality begs to differ under FreeBSD 2.2.8-stable.  Take this
-     * hack out once we no longer care about that platform. */
-    if ((errno == EINPROGRESS) || (errno == EAGAIN))
+    if ((errno == EINPROGRESS) || (TRUE == a_sock->in_progress))
     {
       struct pollfd pfd;
       int timeout;
@@ -244,7 +248,7 @@ sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port,
 		    "Error in poll(): [s]\n", strerror(errno));
 	}
 	a_sock->sockfd = -1;
-	retval = TRUE;
+	retval = -1;
 	goto RETURN;
       }
       else if (pfd.revents & POLLOUT)
@@ -266,7 +270,7 @@ sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port,
 			"Error in getsockopt(): [s]\n", strerror(errno));
 	    }
 	    a_sock->sockfd = -1;
-	    retval = TRUE;
+	    retval = -1;
 	    goto RETURN;
 	  }
 	  else if (error > 0)
@@ -278,7 +282,7 @@ sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port,
 			strerror(error));
 	    }
 	    a_sock->sockfd = -1;
-	    retval = TRUE;
+	    retval = -1;
 	    goto RETURN;
 	  }
 	}
@@ -291,8 +295,8 @@ sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port,
 	  out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
 		    "poll() timeout.  Connection failed\n");
 	}
-	a_sock->sockfd = -1;
-	retval = TRUE;
+	a_sock->in_progress = TRUE;
+	retval = 1;
 	goto RETURN;
       }
     }
@@ -314,7 +318,7 @@ sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port,
       }
       
       a_sock->sockfd = -1;
-      retval = TRUE;
+      retval = -1;
       goto RETURN;
     }
   }
@@ -332,7 +336,7 @@ sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port,
 	out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
 		  "Error in getsockname(): [s]\n", strerror(errno));
       }
-      retval = TRUE;
+      retval = -1;
       goto RETURN;
     }
     else
@@ -345,27 +349,28 @@ sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port,
    * so we can unconditionally toggle a_sock->is_connected here and only
    * here. */
   a_sock->is_connected = TRUE;
+  a_sock->in_progress = FALSE;
   a_sock->error = FALSE;
   
   mtx_lock(&a_sock->lock);
   if (TRUE == sockb_l_register_sock(a_sock))
   {
     mtx_unlock(&a_sock->lock);
-    retval = TRUE;
+    retval = -1;
     goto RETURN;
   }
   cnd_wait(&a_sock->callback_cnd, &a_sock->lock);
   if (TRUE == a_sock->error)
   {
     mtx_unlock(&a_sock->lock);
-    retval = TRUE;
+    retval = -1;
     goto RETURN;
   }
   
   a_sock->is_registered = TRUE;
   mtx_unlock(&a_sock->lock);
     
-  retval = FALSE;
+  retval = 0;
 
   RETURN:
   mtx_unlock(&a_sock->state_lock);
