@@ -23,10 +23,9 @@
 
 /*
  * Include files.  These must be listed in reverse dependency order (for
- * example, stilo.h must come before stild.h.
+ * example, stilo.h must come before stilt.h.
  */
 
-#include "stiln.h"
 #include "stilo.h"
 #include "stila.h"
 #include "stil.h"

@@ -45,8 +45,12 @@ struct cw_stilt_s {
 	/* Allocator. */
 	cw_stilat_t	stilat;
 
-	/* Thread-specific name cache. */
-	cw_stilnt_t	stilnt;
+        /*
+         * Thread-specific name cache hash (key: {name, len}, value:
+         * (stiloe_name *)).  This hash table keeps track of name "values" that
+         * are in existence within a particular local VM.
+         */
+	cw_dch_t	name_hash;
 
 	/*
 	 * Stacks.
@@ -171,7 +175,7 @@ cw_bool_t	stilt_detach_buf(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts,
     cw_buf_t *a_buf);
 
 #define		stilt_stil_get(a_stilt) (a_stilt)->stil
-#define		stilt_stilnt_get(a_stilt) &(a_stilt)->stilnt
+#define		stilt_name_hash_get(a_stilt) &(a_stilt)->name_hash
 #define		stilt_stdout_get(a_stilt) (a_stilt)->stdout_fd
 #define		stilt_data_stack_get(a_stilt) (&((a_stilt)->data_stils))
 

@@ -1705,6 +1705,91 @@ stilo_name_key_comp(const void *a_k1, const void *a_k2)
 }
 
 /*
+ * Names are kept in a global hash table of stiloe_name's, and there is only one
+ * stiloe_name per unique character string.  This allows the address of each
+ * stiloe_name in the global hash table to be used as a unique key, so
+ * regardless of the string length of a name, once it has been converted to a
+ * stiloe_name pointer, name comparisons are a constant time operation.
+ *
+ * The following diagram shows the various name-related object relationships
+ * that are possible.  Locally allocated name objects use a thread-specific
+ * cache.  Globally allocated name objects refer directly to the global table.
+ *
+ * The reason for the thread-specific cache is that all operations on the global
+ * table require locking.  By caching references to the global table on a
+ * per-thread basis, we amortize the cost of locking the global table.
+ *
+ * The garbage collector periodically cleans out unused cached references from
+ * the thread-specific hashes.  This means that any cached references not
+ * referred to at GC time will be collected.  The frequency of local GC should
+ * be low enough that repopulating the name cache after each GC doesn't add
+ * significant overhead.
+ *
+ * /-----------------\                     /-----------------\
+ * | stil.name_hash  |                     | stilt.name_hash |
+ * |                 |                     |                 |
+ * | /-------------\ |                     | /-------------\ |
+ * | | stiloe_name | |                     | | stiloe_name | |
+ * | |             | |                     | |             | |
+ * | | /------\    | |                     | | /-------\   | |
+ * | | | name |    | |            /------------| stilo |   | |
+ * | | \------/    | |           /         | | \-------/   | |
+ * | |             | |          /          | |             | |
+ * | \-------------/ |          |          | \-------------/ |
+ * |                 |          |          |                 |
+ * | ............... |          |          | ............... |
+ * | ............... |          |          | ............... |
+ * | ............... |          |          | ............... |
+ * |                 |          |          |                 |
+ * | /-------------\ |          |          | /-------------\ |
+ * | | stiloe_name | |          |          | | stiloe_name | |
+ * | |             | |          /          | |             | |
+ * | | /------\    | |         /           | | /-------\   | |
+ * | | | name |    |<---------/   /------------| stilo |   | |
+ * | | \------/    | |           /         | | \-------/   | |
+ * | |             | |          /          | |             | |
+ * | \-------------/ |          |          | \-------------/ |
+ * |                 |          |          |                 |
+ * | ............... |          |          \-----------------/
+ * | ............... |          |
+ * | ............... |          |
+ * |                 |          |
+ * | /-------------\ |          |          /-----------------\
+ * | | stiloe_name | |          |          | stilt.name_hash |
+ * | |             | |          |          |                 |
+ * | | /------\    | |          |          | /-------------\ |
+ * | | | name |    |<-----------+--\       | | stiloe_name | |
+ * | | \------/    | |          |   \      | |             | |
+ * | |             | |          |    \     | | /-------\   | |
+ * | \-------------/ |          |     \--------| stilo |   | |
+ * |                 |          |          | | \-------/   | |
+ * | ............... |          |          | |             | |
+ * | ............... |          |          | \-------------/ |
+ * | ............... |          |          |                 |
+ * |                 |          |          | ............... |
+ * | /-------------\ |          /          | ............... |
+ * | | stiloe_name | |         /           | ............... |
+ * | |             |<---------/            |                 |
+ * | | /------\    | |                     | /-------------\ |
+ * | | | name |    | |                     | | stiloe_name | |
+ * | | \------/    |<-----------\          | |             | |
+ * | |             | |           \         | | /-------\   | |
+ * | \-------------/ |            \------------| stilo |   | |
+ * |       ^         |                     | | \-------/   | |
+ * \-------|---------/                     | |             | |
+ *         |                               | \-------------/ |
+ *         |                               |        ^        |
+ *         |                               \--------|--------/
+ *         |                                        |
+ * /-------------------\                            |
+ * | stilo (global VM) |                            |
+ * | (possibly keyed)  |                            |
+ * \-------------------/                   /------------------\
+ *                                         | stilo (local VM) |
+ *                                         \------------------/
+ */
+
+/*
  * a_stilt's allocation mode (local/global) is used to determine how the object
  * is allocated.
  */
@@ -1721,7 +1806,7 @@ stilo_name_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const cw_uint8_t
 	key.e.n.len = a_len;
 
 	if (stilt_currentglobal(a_stilt) == FALSE) {
-		cw_stilnt_t		*stilnt;
+		cw_dch_t		*name_hash;
 		cw_stiloe_name_t	*gname;
 
 		/*
@@ -1730,8 +1815,8 @@ stilo_name_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const cw_uint8_t
 		 * hash for the name.  Create the name in the global hash if
 		 * necessary, then create a cached reference if necessary.
 		 */
-		stilnt = stilt_stilnt_get(a_stilt);
-		if (dch_search(&stilnt->hash, (void *)&key, (void **)&name)) {
+		name_hash = stilt_name_hash_get(a_stilt);
+		if (dch_search(name_hash, (void *)&key, (void **)&name)) {
 			/* Not found in the per-thread name cache. */
 			gname = stilo_p_name_gref(a_stilt, a_name, a_len,
 			    a_is_static);
@@ -1751,8 +1836,8 @@ stilo_name_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const cw_uint8_t
 			/*
 			 * Insert a cached entry for this thread.
 			 */
-			dch_insert(&stilnt->hash, (void *)gname, (void
-			    **)name, _cw_stilt_chi_get(a_stilt));
+			dch_insert(name_hash, (void *)gname, (void **)name,
+			    _cw_stilt_chi_get(a_stilt));
 		}
 	} else
 		name = stilo_p_name_gref(a_stilt, a_name, a_len, a_is_static);
@@ -1832,7 +1917,8 @@ stilo_p_name_gref(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len,
     cw_bool_t a_is_static)
 {
 	cw_stiloe_name_t	*retval, key;
-	cw_stilng_t		*stilng;
+	cw_mtx_t		*name_lock;
+	cw_dch_t		*name_hash;
 
 /*  	_cw_out_put_e("Reference ([s] VM) \"", stilt_currentglobal(a_stilt) ? */
 /*  	    "global" : "local"); */
@@ -1843,14 +1929,15 @@ stilo_p_name_gref(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len,
 	key.e.n.name = a_str;
 	key.e.n.len = a_len;
 
-	stilng = stil_stilng_get(stilt_stil_get(a_stilt));
+	name_lock = stil_name_lock_get(stilt_stil_get(a_stilt));
+	name_hash = stil_name_hash_get(stilt_stil_get(a_stilt));
 
 	/*
 	 * Look in the global hash for the name.  If the name doesn't exist,
 	 * create it.
 	 */
-	mtx_lock(&stilng->lock);
-	if (dch_search(&stilng->hash, (void *)&key, (void **)&retval)) {
+	mtx_lock(name_lock);
+	if (dch_search(name_hash, (void *)&key, (void **)&retval)) {
 		cw_stilag_t	*stilag;
 
 		/*
@@ -1883,10 +1970,10 @@ stilo_p_name_gref(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len,
 
 		stiloe_p_new(&retval->stiloe, STILOT_NAME);
 
-		dch_insert(&stilng->hash, (void *)retval, (void
+		dch_insert(name_hash, (void *)retval, (void
 		    **)retval, _cw_stilt_chi_get(a_stilt));
 	}
-	mtx_unlock(&stilng->lock);
+	mtx_unlock(name_lock);
 
 	return retval;
 }

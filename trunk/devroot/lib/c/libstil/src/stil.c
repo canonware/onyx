@@ -19,6 +19,15 @@
 #define _CW_STIL_STILSC_COUNT		 16
 
 /*
+ * Size and fullness control of initial name cache hash table.  We know for sure
+ * that there will be about 175 names referenced by systemdict and threaddict to
+ * begin with.
+ */
+#define _CW_STIL_NAME_BASE_TABLE	512
+#define _CW_STIL_NAME_BASE_GROW		400
+#define _CW_STIL_NAME_BASE_SHRINK	128
+
+/*
  * Size and fullness control of initial root set for global VM.  Global VM is
  * empty to begin with.
  */
@@ -26,9 +35,11 @@
 #define _CW_STIL_ROOTS_BASE_GROW	 24
 #define _CW_STIL_ROOTS_BASE_SHRINK	  8
 
-/* Used only by stil. */
-cw_bool_t	stilng_l_new(cw_stilng_t *a_stilng, cw_mem_t *a_mem);
-void		stilng_l_delete(cw_stilng_t *a_stilng);
+/*
+ * Initial size of globaldict.  This is a bit arbitrary, and some applications
+ * could benefit from making it larger or smaller.
+ */
+#define	_CW_STIL_GLOBALDICT_SIZE	 64
 
 cw_stil_t *
 stil_new(cw_stil_t *a_stil)
@@ -50,9 +61,14 @@ stil_new(cw_stil_t *a_stil)
 
 	if (stilag_new(&retval->stilag))
 		goto OOM_2;
-	if (stilng_l_new(&retval->stilng, stilag_mem_get(&retval->stilag)))
-		goto OOM_3;
 
+	mtx_new(&retval->name_lock);
+	if (dch_new(&retval->name_hash, stilag_mem_get(&retval->stilag),
+	    _CW_STIL_NAME_BASE_TABLE, _CW_STIL_NAME_BASE_GROW,
+	    _CW_STIL_NAME_BASE_SHRINK, stilo_name_hash, stilo_name_key_comp) ==
+	    NULL)
+		goto OOM_3;
+	
 	/*
 	 * Create a temporary thread in order to be able to initialize
 	 * systemdict, and destroy the thread as soon as we're done.
@@ -67,6 +83,7 @@ stil_new(cw_stil_t *a_stil)
 	stilt_setglobal(&stilt, TRUE);
 	/* XXX No way to catch OOM here. */
 	systemdict_populate(&retval->systemdict, &stilt);
+	stilo_dict_new(&retval->globaldict, &stilt, _CW_STIL_GLOBALDICT_SIZE);
 	stilt_delete(&stilt);
 
 	mtx_new(&retval->lock);
@@ -77,8 +94,9 @@ stil_new(cw_stil_t *a_stil)
 
 	return retval;
 	OOM_4:
-	stilng_l_delete(&retval->stilng);
+	dch_delete(&retval->name_hash);
 	OOM_3:
+	mtx_delete(&retval->name_lock);
 	stilag_delete(&retval->stilag);
 	OOM_2:
 	if (retval->is_malloced)
@@ -90,10 +108,27 @@ stil_new(cw_stil_t *a_stil)
 void
 stil_delete(cw_stil_t *a_stil)
 {
+	cw_stilt_t	stilt;
+
 	_cw_check_ptr(a_stil);
 	_cw_assert(a_stil->magic == _CW_STIL_MAGIC);
+	
+	/*
+	 * Create a temporary thread in order to be able to destroy systemdict
+	 * and globaldict.
+	 */
+	if (stilt_new(&stilt, a_stil) == NULL)
+		_cw_error("XXX OOM unhandled");
+	stilt_setglobal(&stilt, TRUE);
+	/* XXX No way to catch OOM here. */
+	stilo_delete(&a_stil->globaldict, &stilt);
+	stilo_delete(&a_stil->systemdict, &stilt);
+	stilt_delete(&stilt);
 
-	stilng_l_delete(&a_stil->stilng);
+	/* XXX Run the GC one last time. */
+
+	dch_delete(&a_stil->name_hash);
+	mtx_delete(&a_stil->name_lock);
 	stilag_delete(&a_stil->stilag);
 	mtx_delete(&a_stil->lock);
 

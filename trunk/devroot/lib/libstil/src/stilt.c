@@ -14,10 +14,6 @@
 #include <ctype.h>
 #include <limits.h>
 
-cw_bool_t	stilnt_l_new(cw_stilnt_t *a_stilnt, cw_mem_t *a_mem,
-    cw_stilng_t *a_stilng);
-void		stilnt_l_delete(cw_stilnt_t *a_stilnt);
-
 #define _CW_STILT_GETC(a_i)						\
 	a_stilt->tok_str[(a_i)]
 
@@ -72,12 +68,13 @@ static cw_bool_t	stilt_p_dict_stack_search(cw_stilt_t *a_stilt,
 #endif
 
 /*
- * Size and fullness control of initial name cache hash table.  This starts out
- * empty, but should be expected to grow rather quickly to start with.
+ * Size and fullness control of initial thread-specific name cache hash table.
+ * This starts out empty, but should be expected to grow rather quickly to start
+ * with.
  */
-#define _CW_STILT_STILN_BASE_TABLE	256
-#define _CW_STILT_STILN_BASE_GROW	200
-#define _CW_STILT_STILN_BASE_SHRINK	 64
+#define _CW_STILT_NAME_BASE_TABLE	512
+#define _CW_STILT_NAME_BASE_GROW	400
+#define _CW_STILT_NAME_BASE_SHRINK	128
 
 /*
  * Size and fullness control of initial root set for local VM.  Local VM is
@@ -184,8 +181,10 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 	if (stilat_new(&retval->stilat, a_stilt, stil_stilag_get(a_stil)))
 		goto OOM_2;
 
-	if (stilnt_l_new(&retval->stilnt, stilat_mem_get(&retval->stilat),
-	    stil_stilng_get(a_stil)))
+	if (dch_new(&retval->name_hash, stilat_mem_get(&retval->stilat),
+	    _CW_STILT_NAME_BASE_TABLE, _CW_STILT_NAME_BASE_GROW,
+	    _CW_STILT_NAME_BASE_SHRINK, ch_direct_hash, ch_direct_key_comp) ==
+	    NULL)
 		goto OOM_3;
 
 	if (stils_new(&retval->exec_stils,
@@ -222,7 +221,7 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 	OOM_5:
 	stils_delete(&retval->exec_stils, retval);
 	OOM_4:
-	stilnt_l_delete(&retval->stilnt);
+	dch_delete(&retval->name_hash);
 	OOM_3:
 	stilat_delete(&retval->stilat);
 	OOM_2:
@@ -250,7 +249,7 @@ stilt_delete(cw_stilt_t *a_stilt)
 	stils_delete(&a_stilt->dict_stils, a_stilt);
 	stils_delete(&a_stilt->data_stils, a_stilt);
 	stils_delete(&a_stilt->exec_stils, a_stilt);
-	stilnt_l_delete(&a_stilt->stilnt);
+	dch_delete(&a_stilt->name_hash);
 	stilat_delete(&a_stilt->stilat);
 	if (a_stilt->is_malloced)
 		_cw_free(a_stilt);
