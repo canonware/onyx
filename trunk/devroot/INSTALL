@@ -103,6 +103,23 @@ Optionally, pass any of the following (not a definitive list) arguments to
 	functionality.  The documentation does not mention the effects of this
 	option -- UTSL.
 
+--enable-pth
+	Use the GNU pth cooperative threading library rather than POSIX
+	threads.  This has some minor impacts on the available functionality.
+	For example, periodic garbage collection is not available, and garbage
+	collection is synchronous rather than asynchronous.
+
+	To build pth such that it works correctly for libonyx, use something
+	like the following to build it:
+
+		./configure --enable-syscall-hard
+		make
+		make install
+
+	As of pth 1.4.1, there are some problems with poll().  A patch has been
+	submitted to the pth maintainer, which will hopefully be incorporated in
+	later releases.
+
 --disable-real
 	Do not include the "real" Onyx type, which supports double precision
 	floating point operations.  The documentation does not mention the
@@ -179,7 +196,8 @@ Optionally, pass any of the following (not a definitive list) arguments to
 
 	This option should only be necessary when there are multiple versions of
 	libpcre installed on the system, and the desired version does not come
-	first in the default library search path.
+	first in the default library search path, or if the library is not in
+	the default library search path.
 
 --with-libedit-prefix=<prefix>
 	If specified, modprompt will be built using the copy of libedit in
@@ -197,7 +215,8 @@ Optionally, pass any of the following (not a definitive list) arguments to
 
 	This option should only be necessary when there are multiple versions of
 	libedit installed on the system, and the desired version does not come
-	first in the default library search path.
+	first in the default library search path, or if the library is not in
+	the default library search path.
 
 Optionally, define environment variables, including (not exclusively):
 

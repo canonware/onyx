@@ -15,7 +15,12 @@ typedef struct cw_mtx_s cw_mtx_t;
 
 struct cw_mtx_s
 {
+#ifdef CW_PTH
+    pth_mutex_t mutex;
+#endif
+#ifdef CW_PTHREADS
     pthread_mutex_t mutex;
+#endif
 };
 
 void

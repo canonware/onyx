@@ -35,6 +35,9 @@ struct cw_thd_s
     void *(*start_func)(void *);
     void *start_arg;
     cw_mtx_t mtx;
+#ifdef CW_PTH
+    pth_t pth;
+#endif
 #ifdef CW_PTHREADS
     pthread_t pthread;
 #endif
@@ -50,6 +53,11 @@ struct cw_thd_s
 
 #ifdef CW_DBG
 static cw_bool_t cw_g_thd_initialized = FALSE;
+#endif
+
+#ifdef CW_PTH
+/* Thread attribute object used for all thread creations. */
+static pth_attr_t cw_g_thd_attr;
 #endif
 
 #ifdef CW_PTHREADS
@@ -90,6 +98,9 @@ thd_p_resume_handle(int a_signal);
 void
 thd_l_init(void)
 {
+#ifdef CW_PTH
+    unsigned stacksize;
+#endif
 #ifdef CW_PTHREADS
     size_t stacksize;
 #endif
@@ -134,6 +145,34 @@ thd_l_init(void)
 #endif
     cw_assert(cw_g_thd_initialized == FALSE);
 
+#ifdef CW_PTH
+    if (pth_init() == FALSE)
+    {
+	fprintf(stderr, "%s:%u:%s(): Error in pth_init(): %s\n",
+		__FILE__, __LINE__, __FUNCTION__, strerror(errno));
+	abort();
+    }
+
+    /* Create a thread attribute object to be used for all thread creations.
+     * Make sure that the thread stack size isn't too tiny. */
+    cw_g_thd_attr = pth_attr_new();
+    if (pth_attr_get(cw_g_thd_attr, PTH_ATTR_STACK_SIZE, &stacksize) == FALSE)
+    {
+	fprintf(stderr, "%s:%u:%s(): Error in pth_attr_get(): %s\n",
+		__FILE__, __LINE__, __FUNCTION__, strerror(errno));
+	abort();
+    }
+    if (stacksize < CW_THD_MINSTACK)
+    {
+	if (pth_attr_set(cw_g_thd_attr, PTH_ATTR_STACK_SIZE, CW_THD_MINSTACK)
+	    == FALSE)
+	{
+	    fprintf(stderr, "%s:%u:%s(): Error in pth_attr_set(): %s\n",
+		    __FILE__, __LINE__, __FUNCTION__, strerror(errno));
+	    abort();
+	}
+    }
+#endif
 #ifdef CW_PTHREADS
     /* Create a thread attribute object to be used for all thread creations.
      * Make sure that the thread stack size isn't too tiny. */
@@ -153,6 +192,9 @@ thd_l_init(void)
     cw_g_thd.start_arg = NULL;
     mtx_new(&cw_g_thd.mtx);
     mtx_lock(&cw_g_thd.mtx);
+#ifdef CW_PTH
+    cw_g_thd.pth = pth_self();
+#endif
 #ifdef CW_PTHREADS
     cw_g_thd.pthread = pthread_self();
 #endif
@@ -187,6 +229,21 @@ thd_l_shutdown(void)
 #ifdef CW_PTHREADS
     pthread_attr_destroy(&cw_g_thd_attr);
 #endif
+#ifdef CW_PTH
+    if (pth_attr_destroy(cw_g_thd_attr) == FALSE)
+    {
+	fprintf(stderr, "%s:%u:%s(): Error in pth_attr_destroy(): %s\n",
+		__FILE__, __LINE__, __FUNCTION__, strerror(errno));
+	abort();
+    }
+
+    if (pth_kill() == FALSE)
+    {
+	fprintf(stderr, "%s:%u:%s(): Error in pth_kill(): %s\n",
+		__FILE__, __LINE__, __FUNCTION__, strerror(errno));
+	abort();
+    }
+#endif
 
     mtx_delete(&cw_g_thd.mtx);
 #ifdef CW_THD_GENERIC_SR
@@ -197,7 +254,6 @@ thd_l_shutdown(void)
 		__FILE__, __LINE__, __FUNCTION__, strerror(error));
 	abort();
     }
-
 #endif
     tsd_delete(&cw_g_thd_self_key);
     mtx_delete(&cw_g_thd_single_lock);
@@ -211,6 +267,9 @@ cw_thd_t *
 thd_new(void *(*a_start_func)(void *), void *a_arg, cw_bool_t a_suspendible)
 {
     cw_thd_t *retval;
+#ifdef CW_PTH
+    pth_t pth;
+#endif
 #ifdef CW_PTHREADS
     pthread_t pthread;
     int error;
@@ -233,7 +292,6 @@ thd_new(void *(*a_start_func)(void *), void *a_arg, cw_bool_t a_suspendible)
 #endif
     mtx_unlock(&retval->mtx);
 
-#ifdef CW_PTHREADS
     /* Thread creation and setting retval->pthread must be atomic with respect
      * to thread suspension if the new thread is suspendible.  There are
      * multiple ways of trying to write this code, and all of them end up
@@ -244,6 +302,21 @@ thd_new(void *(*a_start_func)(void *), void *a_arg, cw_bool_t a_suspendible)
      * cw_g_thd_single_lock. */
     mtx_lock(&cw_g_thd_single_lock);
 
+#ifdef CW_PTH
+    pth = pth_spawn(cw_g_thd_attr, thd_p_start_func, (void *) retval);
+    if (pth == NULL)
+    {
+	fprintf(stderr, "%s:%u:%s(): Error in pth_spawn(): %s\n",
+		__FILE__, __LINE__, __FUNCTION__, strerror(errno));
+	abort();
+    }
+
+    /* Set retval->pthread here rather than in thd_p_start_func(), since it's
+     * possible to call something like thd_join() before the new thread even
+     * gets as far as initializing itself. */
+    retval->pth = pth;
+#endif
+#ifdef CW_PTHREADS
     error = pthread_create(&pthread, &cw_g_thd_attr,
 			   thd_p_start_func, (void *) retval);
     if (error)
@@ -257,9 +330,9 @@ thd_new(void *(*a_start_func)(void *), void *a_arg, cw_bool_t a_suspendible)
      * possible to call something like thd_join() before the new thread even
      * gets as far as initializing itself. */
     retval->pthread = pthread;
+#endif
 
     mtx_unlock(&cw_g_thd_single_lock);
-#endif
 
     return retval;
 }
@@ -267,6 +340,10 @@ thd_new(void *(*a_start_func)(void *), void *a_arg, cw_bool_t a_suspendible)
 void
 thd_delete(cw_thd_t *a_thd)
 {
+#ifdef CW_PTH
+    pth_t pth;
+    pth_attr_t attr;
+#endif
 #ifdef CW_PTHREADS
     pthread_t pthread;
     int error;
@@ -276,6 +353,31 @@ thd_delete(cw_thd_t *a_thd)
     cw_dassert(a_thd->magic == CW_THD_MAGIC);
     cw_assert(cw_g_thd_initialized);
 
+#ifdef CW_PTH
+    mtx_lock(&cw_g_thd_single_lock);
+    pth = a_thd->pth;
+    mtx_unlock(&cw_g_thd_single_lock);
+
+    attr = pth_attr_of(pth);
+    if (attr == NULL)
+    {
+	fprintf(stderr, "%s:%u:%s(): Error in pth_attr_of(): %s\n",
+		__FILE__, __LINE__, __FUNCTION__, strerror(errno));
+	abort();
+    }
+    if (pth_attr_set(attr, PTH_ATTR_JOINABLE, FALSE) == FALSE)
+    {
+	fprintf(stderr, "%s:%u:%s(): Error in pth_attr_set(): %s\n",
+		__FILE__, __LINE__, __FUNCTION__, strerror(errno));
+	abort();
+    }	
+    if (pth_attr_destroy(attr) == FALSE)
+    {
+	fprintf(stderr, "%s:%u:%s(): Error in pth_attr_destroy(): %s\n",
+		__FILE__, __LINE__, __FUNCTION__, strerror(errno));
+	abort();
+    }
+#endif
 #ifdef CW_PTHREADS
     mtx_lock(&cw_g_thd_single_lock);
     pthread = a_thd->pthread;
@@ -297,6 +399,9 @@ void *
 thd_join(cw_thd_t *a_thd)
 {
     void *retval;
+#ifdef CW_PTH
+    pth_t pth;
+#endif
 #ifdef CW_PTHREADS
     pthread_t pthread;
     int error;
@@ -306,6 +411,18 @@ thd_join(cw_thd_t *a_thd)
     cw_dassert(a_thd->magic == CW_THD_MAGIC);
     cw_assert(cw_g_thd_initialized);
 
+#ifdef CW_PTH
+    mtx_lock(&cw_g_thd_single_lock);
+    pth = a_thd->pth;
+    mtx_unlock(&cw_g_thd_single_lock);
+
+    if (pth_join(pth, &retval) == FALSE)
+    {
+	fprintf(stderr, "%s:%u:%s(): Error in pth_join(): %s\n",
+		__FILE__, __LINE__, __FUNCTION__, strerror(errno));
+	abort();
+    }
+#endif
 #ifdef CW_PTHREADS
     mtx_lock(&cw_g_thd_single_lock);
     pthread = a_thd->pthread;
@@ -344,6 +461,9 @@ thd_sigmask(int a_how, const sigset_t *a_set, sigset_t *r_oset)
     cw_assert(a_how == SIG_BLOCK || a_how == SIG_UNBLOCK
 	      || a_how == SIG_SETMASK);
 
+#ifdef CW_PTH
+    pth_sigmask(a_how, a_set, r_oset);
+#endif
 #ifdef CW_PTHREADS
 #ifdef CW_THD_GENERIC_SR
     {
@@ -368,7 +488,7 @@ thd_crit_enter(void)
     cw_thd_t *thd;
 
     cw_assert(cw_g_thd_initialized);
-	
+
     thd = thd_self();
     cw_check_ptr(thd);
     cw_dassert(thd->magic == CW_THD_MAGIC);
@@ -558,6 +678,14 @@ thd_p_suspend(cw_thd_t *a_thd)
 #endif
 
     a_thd->suspended = TRUE;
+#ifdef CW_PTH
+    if (pth_suspend(a_thd->pth) == FALSE)
+    {
+	fprintf(stderr, "%s:%u:%s(): Error in pth_suspend(): %s\n",
+		__FILE__, __LINE__, __FUNCTION__, strerror(errno));
+	abort();
+    }
+#endif
 #ifdef CW_THD_GENERIC_SR
     error = pthread_kill(a_thd->pthread, CW_THD_SIGSUSPEND);
     if (error != 0)
@@ -605,6 +733,14 @@ thd_p_suspend(cw_thd_t *a_thd)
 static void
 thd_p_resume(cw_thd_t *a_thd)
 {
+#ifdef CW_PTH
+    if (pth_resume(a_thd->pth) == FALSE)
+    {
+	fprintf(stderr, "%s:%u:%s(): Error in pth_resume(): %s\n",
+		__FILE__, __LINE__, __FUNCTION__, strerror(errno));
+	abort();
+    }
+#endif
 #ifdef CW_THD_GENERIC_SR
     int error;
 

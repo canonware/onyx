@@ -15,7 +15,12 @@ typedef struct cw_cnd_s cw_cnd_t;
 
 struct cw_cnd_s
 {
+#ifdef CW_PTH
+    pth_cond_t condition;
+#endif
+#ifdef CW_PTHREADS
     pthread_cond_t condition;
+#endif
 };
 
 void

@@ -232,6 +232,9 @@ typedef enum
 #ifdef HAVE_MACHINE_ENDIAN_H
 #include <machine/endian.h> /* For htonl() and ntohl() on Darwin. */
 #endif
+#ifdef CW_PTH
+#include <pth.h>
+#endif
 #ifdef CW_PTHREADS
 #include <pthread.h>
 #include <semaphore.h>

@@ -16,7 +16,7 @@ gcdict_active(cw_nxo_t *a_thread);
 void
 gcdict_collect(cw_nxo_t *a_thread);
 
-#ifdef CW_THREADS
+#ifdef CW_PTHREADS
 void
 gcdict_period(cw_nxo_t *a_thread);
 #endif
@@ -24,7 +24,7 @@ gcdict_period(cw_nxo_t *a_thread);
 void
 gcdict_setactive(cw_nxo_t *a_thread);
 
-#ifdef CW_THREADS
+#ifdef CW_PTHREADS
 void
 gcdict_setperiod(cw_nxo_t *a_thread);
 #endif

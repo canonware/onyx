@@ -15,6 +15,9 @@
 #ifndef CW_THREADS
 /* No memory barriers are necessary for single-threaded code. */
 #define mb_write()
+#elif (defined CW_PTH)
+/* No memory barriers are necessary for cooperative threading. */
+#define mb_write()
 #else
 
 #ifndef CW_USE_INLINES

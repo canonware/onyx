@@ -279,7 +279,7 @@ typedef enum
 #ifdef CW_POSIX
     NXN_peername,
 #endif
-#ifdef CW_THREADS
+#ifdef CW_PTHREADS
     NXN_period,
 #endif
 #ifdef CW_POSIX
@@ -376,7 +376,7 @@ typedef enum
     NXN_setlocking,
 #endif
     NXN_setnonblocking,
-#ifdef CW_THREADS
+#ifdef CW_PTHREADS
     NXN_setperiod,
 #endif
 #ifdef CW_POSIX

@@ -33,6 +33,11 @@ typedef struct cw_thd_s cw_thd_t;
 #undef CW_THD_GENERIC_SR
 #endif
 
+/* GNU pth. */
+#ifdef CW_PTH
+#undef CW_THD_GENERIC_SR
+#endif
+
 #ifdef CW_THD_GENERIC_SR
 /* The generic suspend/resume mechanism uses signals (using pthread_kill()).
  * This is rather expensive, depending on the OS, but it does not violate
@@ -58,7 +63,11 @@ thd_join(cw_thd_t *a_thd);
 cw_thd_t *
 thd_self(void);
 
+#ifdef CW_PTH
+#define thd_yield() pth_yield(NULL)
+#else
 #define thd_yield() sched_yield()
+#endif
 
 void thd_sigmask(int a_how, const sigset_t *a_set, sigset_t *r_oset);
 

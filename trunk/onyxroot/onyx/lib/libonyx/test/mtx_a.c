@@ -54,7 +54,11 @@ main()
     /* Unlocked. */
     cw_assert(mtx_trylock(&mutex_a) == FALSE);
     /* Locked. */
+#ifndef CW_PTH
+    /* pth only has recursive mutexes, so don't check for failure of recursive
+     * locks when using pth. */
     cw_assert(mtx_trylock(&mutex_a));
+#endif
     mtx_unlock(&mutex_a);
     /* Unlocked. */
     cw_assert(mtx_trylock(&mutex_a) == FALSE);
@@ -65,7 +69,11 @@ main()
 
     mtx_new(&mutex_b);
     mtx_lock(&mutex_b);
+#ifndef CW_PTH
+    /* pth only has recursive mutexes, so don't check for failure of recursive
+     * locks when using pth. */
     cw_assert(mtx_trylock(&mutex_b));
+#endif
     mtx_unlock(&mutex_b);
     mtx_delete(&mutex_b);
 

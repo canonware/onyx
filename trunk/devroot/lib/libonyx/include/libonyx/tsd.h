@@ -15,7 +15,12 @@ typedef struct cw_tsd_s cw_tsd_t;
 
 struct cw_tsd_s
 {
+#ifdef CW_PTH
+    pth_key_t key;
+#endif
+#ifdef CW_PTHREADS
     pthread_key_t key;
+#endif
 };
 
 void

@@ -83,7 +83,7 @@ main()
     while (num_waiting < 1)
     {
 	mtx_unlock(&mutex);
-	usleep(10000);
+	thd_yield();
 	mtx_lock(&mutex);
     }
 
@@ -103,7 +103,7 @@ main()
     while (num_waiting < CW_TEST_NUM_THREADS)
     {
 	mtx_unlock(&mutex);
-	usleep(10000);
+	thd_yield();
 	mtx_lock(&mutex);
     }
 

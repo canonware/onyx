@@ -28,7 +28,7 @@ struct cw_nxa_s
 
     /* Actual state of gcdict. */
     cw_bool_t gcdict_active;
-#ifdef CW_THREADS
+#ifdef CW_PTHREADS
     cw_nxoi_t gcdict_period;
 #endif
     cw_nxoi_t gcdict_threshold;
@@ -45,14 +45,14 @@ struct cw_nxa_s
     ql_head(cw_nxoe_t) seq_set;
     cw_bool_t white; /* Current value for white (alternates). */
 
-#ifdef CW_THREADS
+#ifdef CW_PTHREADS
     cw_mq_t gc_mq;
 #endif
     cw_bool_t gc_pending;
     cw_bool_t gc_allocated;
 
     cw_nx_t *nx;
-#ifdef CW_THREADS
+#ifdef CW_PTHREADS
     cw_thd_t *gc_thd;
 #endif
 };
@@ -90,7 +90,7 @@ nxa_active_get(cw_nxa_t *a_nxa);
 void
 nxa_active_set(cw_nxa_t *a_nxa, cw_bool_t a_active);
 
-#ifdef CW_THREADS
+#ifdef CW_PTHREADS
 cw_nxoi_t
 nxa_period_get(cw_nxa_t *a_nxa);
 

@@ -280,7 +280,7 @@ const cw_uint8_t *cw_g_nx_names[] = {
 #ifdef CW_POSIX
     "peername",
 #endif
-#ifdef CW_THREADS
+#ifdef CW_PTHREADS
     "period",
 #endif
 #ifdef CW_POSIX
@@ -377,7 +377,7 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "setlocking",
 #endif
     "setnonblocking",
-#ifdef CW_THREADS
+#ifdef CW_PTHREADS
     "setperiod",
 #endif
 #ifdef CW_POSIX

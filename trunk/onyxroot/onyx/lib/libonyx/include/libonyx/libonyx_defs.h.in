@@ -30,6 +30,7 @@
 #undef CW_FTHREADS
 #undef CW_MTHREADS
 #undef CW_STHREADS
+#undef CW_PTH
 
 #undef CW_REAL
 
