@@ -1787,8 +1787,8 @@ nxoe_p_thread_syntax_error(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t
     *a_threadp, cw_uint32_t a_defer_base, cw_uint8_t *a_prefix, cw_uint8_t
     *a_suffix, cw_sint32_t a_c)
 {
-	cw_nxo_t	*nxo, *currenterror, *key, *val;
-	cw_uint32_t	line, column;
+	cw_nxo_t	*nxo;
+	cw_uint32_t	defer_count, line, column;
 
 	nxo = nxo_stack_push(&a_thread->ostack);
 
@@ -1818,68 +1818,43 @@ nxoe_p_thread_syntax_error(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t
 	nxoe_p_thread_reset(a_thread);
 
 	/*
-	 * Set line and column in currenterror.  Look up currenterror on dstack,
-	 * since there is the possibility that the user has done something silly
-	 * like undef it.
+	 * Push line and column onto ostack.  They are used in the embedded onyx
+	 * code below to set line and column in currenterror.
 	 */
 	nxo_threadp_position_get(a_threadp, &line, &column);
 
-	currenterror = nxo_stack_push(&a_thread->tstack);
-	key = nxo_stack_push(&a_thread->tstack);
-	val = nxo_stack_push(&a_thread->tstack);
+	/* line. */
+	nxo = nxo_stack_push(&a_thread->ostack);
+	nxo_integer_new(nxo, (cw_nxoi_t)line);
 
-	nxo_name_new(key, a_thread->nx, nxn_str(NXN_currenterror),
-	    nxn_len(NXN_currenterror), TRUE);
-	if (nxo_thread_dstack_search(&a_thread->self, key, currenterror)) {
-		/* XXX Let throw do this. */
-		/*
-		 * Our choices here are to abort or ignore the error.
-		 */
-		_cw_error("currenterror not found");
-	} else if (nxo_type_get(currenterror) != NXOT_DICT) {
-		cw_nxo_t	*tnxo;
-
-		/* Evaluate currenterror to get its value. */
-		tnxo = nxo_stack_push(&a_thread->estack);
-		nxo_dup(tnxo, currenterror);
-		nxo_thread_loop(&a_thread->self);
-		tnxo = nxo_stack_get(&a_thread->ostack);
-		if (tnxo != NULL) {
-			nxo_dup(currenterror, tnxo);
-			nxo_stack_pop(&a_thread->ostack);
-		}
-
-		if (nxo_type_get(currenterror) != NXOT_DICT) {
-			/* XXX Let throw do this. */
-			/*
-			 * Our choices here are to abort or ignore the error.
-			 */
-			_cw_error("currenterror not found");
-		}
-	}
-
-	nxo_name_new(key, a_thread->nx, nxn_str(NXN_line), nxn_len(NXN_line),
-	    TRUE);
-	
-	nxo_integer_new(val, (cw_nxoi_t)line);
-	nxo_dict_def(currenterror, a_thread->nx, key, val);
-
-	nxo_name_new(key, a_thread->nx, nxn_str(NXN_column),
-	    nxn_len(NXN_column), TRUE);
+	/* column. */
+	nxo = nxo_stack_push(&a_thread->ostack);
 	/*
 	 * If the syntax error happened at a newline, the column number won't
 	 * be correct, so use 0.
 	 */
 	if (column == -1)
-		nxo_integer_new(val, 0);
+		nxo_integer_new(nxo, 0);
 	else
-		nxo_integer_new(val, (cw_nxoi_t)column);
-	nxo_dict_def(currenterror, a_thread->nx, key, val);
+		nxo_integer_new(nxo, (cw_nxoi_t)column);
 
-	nxo_stack_npop(&a_thread->tstack, 3);
+	/*
+	 * Shut off deferral temporarily.  It is possible for this C stack frame
+	 * to never be returned to, due to an exception (stop, quit, exit), in
+	 * which case, deferral will never be turned back on.  That's fine,
+	 * since the user is going to have to patch things up by hand in that
+	 * case anyway.
+	 */
+	defer_count = a_thread->defer_count;
+	a_thread->defer_count = 0;
 
-	/* Finally, throw a syntaxerror. */
-	nxo_thread_error(&a_thread->self, NXO_THREADE_SYNTAXERROR);
+	_cw_onyx_code(&a_thread->self,
+	    "currenterror begin /column exch def /line exch def end"
+	    " /syntaxerror throw");
+
+
+	/* Turn deferral back on. */
+	a_thread->defer_count = defer_count;
 }
 
 static void

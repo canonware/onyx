@@ -112,11 +112,9 @@ systemdict begin
 end
 errordict begin
 	/estackoverflow {
-		currenterror begin
-		/stop {flush quit} def
-		end
-
-		//estackoverflow
+		errordict begin
+		handleerror
+		1 die
 	} def
 end
 product print `, version ' print version print `.\n' print flush

@@ -407,18 +407,21 @@ recursion.
 \section{Error handling}
 
 The error handling mechanisms in onyx are simple but flexible.  When an error
-occurs, the following operations are performed:
+occurs, the following operations are performed as a result of executing
+\htmlref{\onyxop{}{throw}{}}{systemdict:throw}:
 \begin{enumerate}
-\item{Find an error handler in errordict corresponding to the current error.}
+\item{Store a snapshot of the thread state in the currenterror dictionary.}
 \item{Push the object whose execution caused the error onto the operand stack.}
-\item{Execute the error handler.}
+\item{Find an error handler in errordict corresponding to the current error.}
+\item{Execute the error handler.  The standard error handlers in turn execute
+errordict's \htmlref{\onyxop{}{handleerror}{}}{errordict:handleerror}.}
 \item{Execute errordict's stop operator.}
 \end{enumerate}
 
 The onyx scanner handles syntax errors specially, in that it pushes an
-executable string that represents the code that caused the syntax error onto the
-operand stack before invoking
-\htmlref{\onyxop{}{syntaxerror}{}}{errordict:syntaxerror}.
+executable string onto the operand stack that represents the code that caused
+the syntax error and records the line and column numbers in currenterror before
+invoking \htmlref{\onyxop{}{throw}{}}{systemdict:throw}.
 
 \section{Threads}
 
@@ -566,9 +569,6 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 \hline \hline
 -- & {\bf \htmlref{stop}{currenterror:stop}} & -- & Last operation during error
 handling. \\
-\hline
--- & {\bf \htmlref{recordstacks}{currenterror:recordstacks}} & boolean & Control
-stack snapshotting. \\
 \hline \hline
 \multicolumn{4}{|l|}{State operators} \\
 \hline \hline
@@ -577,6 +577,12 @@ during error handling. \\
 \hline
 -- & {\bf \htmlref{errorname}{currenterror:errorname}} & name & Name of most
 recent error. \\
+\hline
+-- & {\bf \htmlref{line}{currenterror:line}} & number & Get line number of
+syntax error. \\
+\hline
+-- & {\bf \htmlref{column}{currenterror:column}} & number & Get column number of
+syntax error. \\
 \hline
 -- & {\bf \htmlref{ostack}{currenterror:ostack}} & stack & ostack snapshot. \\
 \hline
@@ -782,40 +788,6 @@ estack/istack trace (0..2):
 onyx:1> currenterror begin ostack end 1 sprint
 ()
 onyx:1>
-		\end{verbatim}
-	\end{description}
-\label{currenterror:recordstacks}
-\index{recordstacks@\onyxop{}{recordstacks}{}}
-\item[{\onyxop{--}{recordstacks}{boolean}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ] None.
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[boolean: ]
-			True if stacks are snapshotted when an error occurs;
-			false otherwise.
-		\end{description}
-	\item[Errors(s): ] None.
-	\item[Description: ]
-		Get a boolean that represents whether stacks are snapshotted
-		during error handling.
-	\item[Example(s): ]\begin{verbatim}
-
-onyx:0> currenterror begin
-onyx:0> /recordstacks false def
-onyx:0> x
-Error /undefined
-onyx:1> resume
-onyx:1> /recordstacks true def
-onyx:1> x
-Error /undefined
-ostack: (x)
-dstack: (-dict- -dict- -dict- -dict- -dict-)
-estack/istack trace (0..2):
-0:      x
-1:      -file-
-2:      --start--
-onyx:2>
 		\end{verbatim}
 	\end{description}
 \label{currenterror:stop}

@@ -189,7 +189,6 @@ systemdict begin
 		{/errordict where {pop true}{false} ifelse}
 		{/errordict load /handleerror known}
 		{/currenterror where {pop true}{false} ifelse}
-		{/currenterror load /recordstacks known}
 		{/currenterror load /stop known}
 	}{
 		eval not {
@@ -226,34 +225,30 @@ systemdict begin
 	/newerror true def
 
 	% Set errorname to the argument passed in.
-	/errorname exch cvlit def
+	dup /errorname exch cvlit def
 
-	% If recordstacks is true, snapshot the stacks.
-	/recordstacks load {
-		% ostack.  The order of operations keeps ostack pristine for the
-		% snapshot.
-		ostack /ostack cvx exch def
+	% ostack.  Get rid of /errorname in the snapshot.
+	ostack spop pop /ostack exch def
 
-		% dstack.  Don't include the top element, which is the copy of
-		% currenterror that we pushed.
-		/dstack cvx dstack spop pop def
+	% dstack.  Don't include the top element, which is the copy of
+	% currenterror that we pushed.
+	/dstack dstack spop pop def
 
-		% estack.  Don't include the top two elements, which are this
-		% procedure and this conditionally executed array.
-		/estack cvx estack spop pop spop pop def
+	% estack.  Get rid of extra elements that were pushed within the error
+	% handling machinery.
+	estack spop pop /estack exch def
 
-		% istack.  Don't include the top two elements, which are this
-		% procedure and this conditionally executed array.
-		/istack cvx istack spop pop spop pop def
-	} if
+	% istack.  Get rid of extra elements that were pushed within the error
+	% handling machinery.
+	istack spop pop /istack exch def
+
+	% Push the offending object onto ostack.
+	/estack load sdup spop exch pop
 
 	end % currenterror.
 
-	% Push the offending object onto ostack.
-	estack 1 sindex spop exch pop
-
 	% Call the error handler.
-	/errordict load /handleerror get eval
+	exch /errordict load exch get eval
 
 	% Stop.
 	/currenterror load /stop get eval
@@ -264,6 +259,6 @@ systemdict begin
 	`<Version>'
 } def
 
-end % systemdict
+end % systemdict.
 
 } % End deferral.
