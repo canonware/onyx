@@ -1,3 +1,9 @@
+2003-03-02 : Jason Evans <jasone@canonware.com>
+
+	* For Linux, define _GNU_SOURCE in CFLAGS rather than in a header, so
+	  that it is set before *any* headers are included.  This is important
+	  for resilience to system header polution.
+
 2003-03-01 : Jason Evans <jasone@canonware.com>
 
 	* Update to use PCRE 4.0.

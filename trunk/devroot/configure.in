@@ -109,7 +109,12 @@ case "${host}" in
 	;;
   *-*-linux*)
 	abi="elf"
-	AC_DEFINE(_GNU_SOURCE)
+	dnl Define _GNU_SOURCE in CFLAGS, rather than doing
+	dnl AC_DEFINE(_GNU_SOURCE), since the definition needs to be seen before
+	dnl and headers are included, which is a pain to make happen otherwise.
+	dnl Ideally, this would be defined in CPPFLAGS, but that causes c_incl
+	dnl to fail.
+	CFLAGS="$CFLAGS -D_GNU_SOURCE"
 	RPATH="-Wl,-rpath,"
 	;;
   *-*-netbsd*)
