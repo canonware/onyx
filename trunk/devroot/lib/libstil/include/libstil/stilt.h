@@ -207,7 +207,6 @@ void	stilts_position_set(cw_stilts_t *a_stilt, cw_uint32_t a_line,
 cw_stilt_t *stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil);
 void	stilt_delete(cw_stilt_t *a_stilt);
 void	stilt_start(cw_stilt_t *a_stilt);
-#define	stilt_executive(a_stilt) systemdict_executive(a_stilt)
 
 void	stilt_thread(cw_stilt_t *a_stilt);
 void	stilt_detach(cw_stilt_t *a_stilt);
@@ -216,7 +215,6 @@ void	stilt_join(cw_stilt_t *a_stilt);
 #define	stilt_state(a_stilt) (a_stilt)->state
 #define	stilt_deferred(a_stilt) ((a_stilt)->defer_count ? TRUE : FALSE)
 void	stilt_reset(cw_stilt_t *a_stilt);
-void	stilt_undefer(cw_stilt_t *a_stilt);
 void	stilt_loop(cw_stilt_t *a_stilt);
 void	stilt_interpret(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const
     cw_uint8_t *a_str, cw_uint32_t a_len);
@@ -230,22 +228,12 @@ cw_bool_t stilt_dict_stack_search(cw_stilt_t *a_stilt, cw_stilo_t *a_key,
 
 #define	stilt_stil_get(a_stilt) (a_stilt)->stil
 
-#define	stilt_stdin_get(a_stilt) stil_stdin_get((a_stilt)->stil)
-#define	stilt_stdout_get(a_stilt) stil_stdout_get((a_stilt)->stil)
-#define	stilt_stderr_get(a_stilt) stil_stderr_get((a_stilt)->stil)
-
 #define	stilt_ostack_get(a_stilt) (&((a_stilt)->ostack))
 #define	stilt_dstack_get(a_stilt) (&((a_stilt)->dstack))
 #define	stilt_estack_get(a_stilt) (&((a_stilt)->estack))
 #define	stilt_tstack_get(a_stilt) (&((a_stilt)->tstack))
 
 #define	stilt_threaddict_get(a_stilt) (&((a_stilt)->threaddict))
-#define	stilt_systemdict_get(a_stilt)					\
-	(stil_systemdict_get((a_stilt)->stil))
-#define	stilt_globaldict_get(a_stilt)					\
-	(stil_globaldict_get((a_stilt)->stil))
-#define	stilt_envdict_get(a_stilt)					\
-	(stil_envdict_get((a_stilt)->stil))
 #define	stilt_userdict_get(a_stilt) (&((a_stilt)->userdict))
 #define	stilt_errordict_get(a_stilt) (&((a_stilt)->errordict))
 #define	stilt_currenterror_get(a_stilt) (&((a_stilt)->currenterror))
@@ -258,13 +246,3 @@ cw_bool_t stilt_dict_stack_search(cw_stilt_t *a_stilt, cw_stilo_t *a_key,
 #define	stilt_setlocking(a_stilt, a_locking) do {			\
 	(a_stilt)->locking = (a_locking);				\
 } while (0);
-
-#define	stilt_chi_get(a_stilt)						\
-	stila_chi_get(stil_stila_get((a_stilt)->stil))
-#define	stilt_chi_put(a_stilt, a_chi)					\
-	stila_chi_put(stil_stila_get((a_stilt)->stil), (a_chi))
-
-#define	stilt_dicto_get(a_stilt)					\
-	stila_dicto_get(stil_stila_get((a_stilt)->stil))
-#define	stilt_dicto_put(a_stilt, a_dicto)				\
-	stila_dicto_put(stil_stila_get((a_stilt)->stil), (a_dicto))

@@ -1379,12 +1379,15 @@ systemdict_exec(cw_stilt_t *a_stilt)
 		key = stils_push(tstack);
 		val = stils_push(tstack);
 
-		dcount = stilo_dict_count(stilt_envdict_get(a_stilt));
+		dcount =
+		    stilo_dict_count(stil_envdict_get(stilt_stil_get(a_stilt)));
 		envp = (char **)_cw_malloc(sizeof(char *) * (dcount + 1));
 		for (i = 0; i < dcount; i++) {
 			/* Get key and val. */
-			stilo_dict_iterate(stilt_envdict_get(a_stilt), key);
-			stilo_dict_lookup(stilt_envdict_get(a_stilt), key, val);
+			stilo_dict_iterate(stil_envdict_get(stilt_stil_get(a_stilt)),
+			    key);
+			stilo_dict_lookup(stil_envdict_get(stilt_stil_get(a_stilt)),
+			    key, val);
 			if (stilo_type_get(key) != STILOT_NAME ||
 			    stilo_type_get(val) != STILOT_STRING) {
 				stilt_error(a_stilt, STILTE_TYPECHECK);
@@ -1476,7 +1479,7 @@ systemdict_flush(cw_stilt_t *a_stilt)
 {
 	cw_stilte_t	error;
 
-	error = stilo_file_buffer_flush(stilt_stdout_get(a_stilt));
+	error = stilo_file_buffer_flush(stil_stdout_get(stilt_stil_get(a_stilt)));
 	if (error)
 		stilt_error(a_stilt, error);
 }
@@ -2565,7 +2568,7 @@ systemdict_print(cw_stilt_t *a_stilt)
 	cw_stilte_t	error;
 
 	ostack = stilt_ostack_get(a_stilt);
-	stdout_stilo = stilt_stdout_get(a_stilt);
+	stdout_stilo = stil_stdout_get(stilt_stil_get(a_stilt));
 
 	STILS_GET(stilo, ostack, a_stilt);
 	if (stilo_type_get(stilo) != STILOT_STRING) {
@@ -2605,7 +2608,7 @@ systemdict_pstack(cw_stilt_t *a_stilt)
 	cw_stilte_t	error;
 
 	ostack = stilt_ostack_get(a_stilt);
-	stdout_stilo = stilt_stdout_get(a_stilt);
+	stdout_stilo = stil_stdout_get(stilt_stil_get(a_stilt));
 
 	for (stilo = stils_down_get(ostack, NULL); stilo != NULL; stilo =
 	     stils_down_get(ostack, stilo)) {
@@ -3226,7 +3229,7 @@ systemdict_spop(cw_stilt_t *a_stilt)
 	cw_stilte_t	error;
 
 	ostack = stilt_ostack_get(a_stilt);
-	stdout_stilo = stilt_stdout_get(a_stilt);
+	stdout_stilo = stil_stdout_get(stilt_stil_get(a_stilt));
 
 	STILS_GET(depth, ostack, a_stilt);
 	STILS_DOWN_GET(stilo, ostack, a_stilt, depth);
@@ -3639,12 +3642,15 @@ dup 0 eq {
 		key = stils_push(tstack);
 		val = stils_push(tstack);
 
-		dcount = stilo_dict_count(stilt_envdict_get(a_stilt));
+		dcount =
+		    stilo_dict_count(stil_envdict_get(stilt_stil_get(a_stilt)));
 		envp = (char **)_cw_malloc(sizeof(char *) * (dcount + 1));
 		for (i = 0; i < dcount; i++) {
 			/* Get key and val. */
-			stilo_dict_iterate(stilt_envdict_get(a_stilt), key);
-			stilo_dict_lookup(stilt_envdict_get(a_stilt), key, val);
+			stilo_dict_iterate(stil_envdict_get(stilt_stil_get(a_stilt)),
+			    key);
+			stilo_dict_lookup(stil_envdict_get(stilt_stil_get(a_stilt)),
+			    key, val);
 			if (stilo_type_get(key) != STILOT_NAME ||
 			    stilo_type_get(val) != STILOT_STRING) {
 				stilt_error(a_stilt, STILTE_TYPECHECK);

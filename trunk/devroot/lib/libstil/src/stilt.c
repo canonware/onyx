@@ -336,7 +336,7 @@ stilt_start(cw_stilt_t *a_stilt)
 	_cw_assert(a_stilt->magic == _CW_STILT_MAGIC);
 
 	file = stils_push(&a_stilt->ostack);
-	stilo_dup(file, stilt_stdin_get(a_stilt));
+	stilo_dup(file, stil_stdin_get(a_stilt->stil));
 	stilo_attrs_set(file, STILOA_EXECUTABLE);
 
 	systemdict_start(a_stilt);
