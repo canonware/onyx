@@ -136,8 +136,11 @@ struct cw_stilo_s {
 	}	o;
 };
 
+/*
+ * The ... arg is only used for array and dict construction.
+ */
 void		stilo_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilot_t
-    a_type);
+    a_type, ...);
 void		stilo_delete(cw_stilo_t *a_stilo);
 
 cw_stilot_t	stilo_type_get(cw_stilo_t *a_stilo);
@@ -165,7 +168,6 @@ cw_stiloe_t	*stiloe_l_ref_iterate(cw_stiloe_t *a_stiloe, cw_bool_t a_reset);
  * array.
  */
 cw_sint32_t	stilo_array_len_get(cw_stilo_t *a_stilo);
-void		stilo_array_len_set(cw_stilo_t *a_stilo, cw_uint32_t a_len);
 cw_stilo_t	*stilo_array_el_get(cw_stilo_t *a_stilo, cw_uint32_t a_offset);
 cw_stilo_t	*stilo_array_get(cw_stilo_t *a_stilo);
 void		stilo_array_set(cw_stilo_t *a_stilo, cw_uint32_t a_offset,

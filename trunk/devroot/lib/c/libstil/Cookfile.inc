@@ -22,8 +22,7 @@
 
 /* Include files that _are_ installed. */
 {
-  local incs = libstil.h libstil_incs.h stil.h stilo.h stils.h stilt.h
-               stil_op.h;
+  local incs = libstil.h libstil_incs.h stil.h stilo.h stils.h stilt.h op.h;
   incs = [fromto % [srcdir]/lib/c/libstil/include/libstil/% [incs]];
   incs = [incs] [objdir]/lib/c/libstil/include/libstil/libstil_defs.h;
 
@@ -40,7 +39,7 @@
 }
 
 /* Source files. */
-LIBSTIL_SRCS = stil.c stilo.c stils.c stilt.c stil_op.c;
+LIBSTIL_SRCS = stil.c stilo.c stils.c stilt.c op.c;
 LIBSTIL_SRCS = [fromto % [srcdir]/lib/c/libstil/src/% [LIBSTIL_SRCS]];
 SRCS = [SRCS] [LIBSTIL_SRCS];
 

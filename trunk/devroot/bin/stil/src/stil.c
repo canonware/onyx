@@ -108,9 +108,9 @@ main(int argc, char **argv)
 			break;
 		stilt_interp_str(&stilt, input, (cw_uint32_t)bytes_read);
 /*  		_cw_out_put("pstack:\n"); */
-		stil_op_pstack(&stilt);
+		op_pstack(&stilt);
 /*  		_cw_out_put("stack:\n"); */
-/*  		stil_op_stack(&stilt); */
+/*  		op_stack(&stilt); */
 	}
 
 	stilt_delete(&stilt);

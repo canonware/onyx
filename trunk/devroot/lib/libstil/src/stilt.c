@@ -1172,9 +1172,8 @@ stilt_p_procedure_accept(cw_stilt_t *a_stilt)
 	 */
 	nelements = i;
 
-	stilo_new(&t_stilo, a_stilt, _CW_STILOT_ARRAYTYPE);
+	stilo_new(&t_stilo, a_stilt, _CW_STILOT_ARRAYTYPE, nelements);
 	stilo_executable_set(&t_stilo, TRUE);
-	stilo_array_len_set(&t_stilo, nelements);
 	arr = stilo_array_get(&t_stilo);
 
 	/*
