@@ -49,11 +49,12 @@
  * Undo/redo history:
  *
  * Since nxe supports infinite undo (within the memory limitations of the
- * system), buffer history can become quite long.  Therefore, the buffer history
- * mechanism aims to be as compact as possible, at the expense of complexity.
- * Internally, the history mechanism is a combination of a state machine that
- * maintains enough state to be able to play the history in either direction,
- * along with a compact log of buffer changes.
+ * system, or up to 4 GB of history storage, whichever is less), buffer history
+ * can become quite long.  Therefore, the buffer history mechanism aims to be as
+ * compact as possible, at the expense of complexity.  Internally, the history
+ * mechanism is a combination of a state machine that maintains enough state to
+ * be able to play the history in either direction, along with a compact log of
+ * buffer changes.
  *
  * User input that does not involve explicit point movement causes the history
  * log to grow by approximately one byte per inserted/deleted character
@@ -66,8 +67,9 @@
  * necessary:
  *
  * *) Buffer position.
- * *) Number of character insertions/deletions in undo and redo directions.
  * *) Log state (none, insert, remove).
+ * *) Number of character insertions/deletions in undo and redo directions, if
+ *    in an insert or remove state.
  *
  * Following are some examples of history logs/states.  They use the following
  * notation:
@@ -522,7 +524,7 @@ buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc, cw_opaque_realloc_t
 	retval->gap_len = _CW_BUF_MINELMS;
 
 	/* Initialize history. */
-	retval->hist_buf = NULL;
+	retval->h = NULL;
 
 	/* Initialize lists. */
 	ql_new(&retval->bufms);
@@ -542,7 +544,7 @@ buf_delete(cw_buf_t *a_buf)
 	_cw_check_ptr(a_buf);
 	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
 
-	if (a_buf->hist_buf != NULL) {
+	if (a_buf->h != NULL) {
 		/* XXX Clean up history. */
 	}
 
@@ -702,7 +704,7 @@ buf_hist_active_get(cw_buf_t *a_buf)
 	_cw_check_ptr(a_buf);
 	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
 
-	if (a_buf->hist_buf != NULL)
+	if (a_buf->h != NULL)
 		retval = TRUE;
 	else
 		retval = FALSE;
@@ -716,11 +718,49 @@ buf_hist_active_set(cw_buf_t *a_buf, cw_bool_t a_active)
 	_cw_check_ptr(a_buf);
 	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
 
-	if (a_active == TRUE && a_buf->hist_buf == NULL) {
+	if (a_active == TRUE && a_buf->h == NULL) {
 		_cw_error("XXX Not implemented");
-	} else if (a_active == FALSE && a_buf->hist_buf != NULL) {
+	} else if (a_active == FALSE && a_buf->h != NULL) {
 		_cw_error("XXX Not implemented");
 	}
+}
+
+cw_bool_t
+buf_undoable(cw_buf_t *a_buf)
+{
+	cw_bool_t	retval;
+
+	_cw_check_ptr(a_buf);
+	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
+
+	if (a_buf->h == NULL) {
+		retval = FALSE;
+		goto RETURN;
+	}
+
+	_cw_error("XXX Not implemented");
+	retval = FALSE; /* XXX */
+	RETURN:
+	return retval;
+}
+
+cw_bool_t
+buf_redoable(cw_buf_t *a_buf)
+{
+	cw_bool_t	retval;
+
+	_cw_check_ptr(a_buf);
+	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
+
+	if (a_buf->h == NULL) {
+		retval = FALSE;
+		goto RETURN;
+	}
+
+	_cw_error("XXX Not implemented");
+	retval = FALSE; /* XXX */
+	RETURN:
+	return retval;
 }
 
 cw_bool_t

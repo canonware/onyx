@@ -20,6 +20,17 @@ typedef enum {
 	BUFW_END	/* Offset from EOB, must be negative. */
 } cw_bufw_t;
 
+/* Buffer history record types. */
+typedef enum {
+	BUFH_B,
+	BUFH_E,
+	BUFH_P,
+	BUFH_I,
+	BUFH_Y,
+	BUFH_R,
+	BUFH_K
+} cw_bufh_t;
+
 struct cw_bufm_s {
 #ifdef _CW_DBG
 	cw_uint32_t	magic;
@@ -57,6 +68,7 @@ struct cw_buf_s {
 
 	cw_mtx_t	mtx;		/* Implicit lock. */
 
+	/* Internal buffer state. */
 	cw_uint32_t	elmsize;	/* Number of bytes per element, >= 1. */
 	cw_uint8_t	*b;		/* Text buffer, with gap. */
 	cw_uint64_t	len;		/* Length (also last valid cpos). */
@@ -66,10 +78,13 @@ struct cw_buf_s {
 
 	ql_head(cw_bufm_t) bufms;	/* Ordered list of all markers. */
 
-	cw_uint8_t	*hist_buf;	/* History buffer, if non-NULL. */
-	cw_uint64_t	hist_buflen;	/* Total size of hist_buf. */
-	cw_uint64_t	hist_len;	/* Amount of hist_buf used. */
-	
+	/* History (undo/redo) state. */
+	cw_buf_t	*h;		/* History buffer, if non-NULL. */
+	cw_bufm_t	*hend;		/* Marker at end of h. */
+	cw_bufm_t	*hcur;		/* Marker at current position in h. */
+	cw_bufh_t	hstate;		/* Current history state. */
+	cw_uint32_t	ucount;		/* # of undo chars in current record. */
+	cw_uint32_t	rcount;		/* # of redo chars in current record. */
 };
 
 /* buf. */
@@ -92,6 +107,8 @@ cw_uint64_t buf_nlines(cw_buf_t *a_buf);
 
 cw_bool_t buf_hist_active_get(cw_buf_t *a_buf);
 void	buf_hist_active_set(cw_buf_t *a_buf, cw_bool_t a_active);
+cw_bool_t buf_undoable(cw_buf_t *a_buf);
+cw_bool_t buf_redoable(cw_buf_t *a_buf);
 cw_bool_t buf_undo(cw_buf_t *a_buf, cw_bufm_t *a_bufm);
 cw_bool_t buf_redo(cw_buf_t *a_buf, cw_bufm_t *a_bufm);
 void	buf_hist_group_beg(cw_buf_t *a_buf);
