@@ -127,21 +127,10 @@ Dynamic typing has advantages in the flexibility that it offers, but it also
 means that type errors can go undetected in code for long periods of time before
 the invalid code is executed.
 
-The Onyx type system is not extensible.  There is no way to add new types in a
-program.  However, there are techniques that can be combined with the built in
-types to simulate an extensible type system.  For example, dictionaries can be
-created with, say, a {\tt \_type} field that indicates the type of the object:
-
-\begin{verbatim}
-<
-    $_type  $fraction
-    $num    3
-    $den    4
->
-\end{verbatim}
-
-Logical extensions of this can be used to create object hierarchies with single
-or multiple inheritance.
+Onyx has a fixed set of basic types which cannot be extended.  However,
+object-oriented programming is supported, so the fixed set of object types is
+not a limitation in practice.  Object-oriented programming is discussed more in
+Section~\ref{onyxtut:object_oriented_programming}.
 
 \section{Execution}
 
@@ -231,11 +220,11 @@ onyx:3>
 Learning to efficiently (and accurately) manage stacks is a mind-warping process
 that no amount of reading is likely to impress upon the reader.  There are
 general concepts presented here, but ultimately, the reader will have to write a
-good bit of code to get a handle on stacks.  Even the author of Onyx found
-himself stumbling over stacks well after Onyx was complete, despite limited
-exposure to stack-based languages beforehand.  The problem seems to be that
-programmers learn to think in a different way that doesn't exercise the parts of
-the brain necessary for stack manipulation.  Some people might argue that stack
+good bit of code to get a handle on stacks.  Tthe author of Onyx found himself
+stumbling over stacks well after Onyx was complete, despite limited exposure to
+stack-based languages beforehand.  The problem seems to be that programmers
+learn to think in a different way that doesn't exercise the parts of the brain
+necessary for stack manipulation.  Some people might argue that stack
 manipulation is the job of the compiler.  In any case, stack manipulation is an
 acquired skill that requires practice.
 
@@ -301,6 +290,38 @@ onyx:1>
 \end{verbatim}
 
 When the second key/value pair is inserted, it replaces the first pair.
+
+Actually, there is one way to create a dictionary, then modify it such that
+multiple entries have the same key.  However, doing so is a very bad idea, and
+is only discussed here as an example of something {\em not} to do.  Dictionary
+keys are merely references (in the case of composite objects), so if a string is
+modified after being used as a dictionary key, the dictionary will no longer be
+able to access the key/value pair associated with that string.  The following
+code creates a dictionary with two key/value pairs, then changes one of the
+keys.
+
+\begin{verbatim}
+onyx:0> $foostr `foo' def
+onyx:0> $barstr `bar' def
+onyx:0> $d <foostr 0 barstr 1> def
+onyx:0> foostr barstr copy pop
+onyx:0> d 1 sprint
+<`foo' 1 `foo' 1>
+onyx:0> d `foo' undef
+onyx:0> d 1 sprint
+<`foo' 0>
+onyx:0>
+\end{verbatim}
+
+Bad things are clearly happening here, and in fact there are other similar
+problems that surface, even if a key remains unique after being changed.  This
+is because during insertion, the key string is hashed, and inserted into a hash
+table accordingly.  A different string is likely to hash to a different slot in
+the hash table, which means that the key/value pair becomes inaccessible.
+
+In summary, do not change strings while they are being used as dictionary keys.
+Onyx does not prevent the use of strings for dictionary keys, since it would be
+limiting, but this feature can be abused.
 
 \subsection{Efficiency issues}
 
@@ -431,9 +452,9 @@ This generates the following output:
 
 \section{Code organization}
 
-As mentioned earlier, Onyx does not have named variables in the same way as many
-other languages.  However, it does have the dictionary stack (dstack), which is
-dynamically used for name lookups whenever an executable name is interpreted.
+As mentioned earlier, Onyx does not have named variables in the same way as most
+other languages do.  However, it does have the dictionary stack (dstack), which
+is dynamically used for name lookups whenever an executable name is interpreted.
 This section talks about how to effectively manage the namespace provided by
 dstack.
 
@@ -480,7 +501,14 @@ when manipulating the garbage collector, so those definitions are stashed out of
 the way.  Your program can do the same for definitions that are not of regular
 interest.
 
+\subsection{Object-oriented programming}
+\label{onyxtut:object_oriented_programming}
+XXX
+
 \subsection{Modules}
+XXX This section needs substantial revision, given the mclass and module
+classes.
+
 Onyx provides the infrastructure for loadable modules, which can be implemented
 in Onyx and/or dynamically loaded machine code (shared libraries).  See the
 \htmlref{\onyxop{}{require}{}}{systemdict:require} and
@@ -608,7 +636,7 @@ globaldict that can be used as a simple message queue.
 
 \begin{verbatim}
 currentlocking # Save for later restoration.
-true currentlocking
+true setlocking
 
 # Push globaldict onto dstack before calling def.
 globaldict begin
@@ -632,24 +660,6 @@ With some effort, it is possible to crash the Onyx interpreter without the use
 of threads.  However, it requires skill and discipline to {\em not} crash the
 Onyx interpreter when using threads.  This was a conscious design decision for
 Onyx; doing otherwise would have limited the scalability of threading.
-
-Now prepare for some discouraging pontification on why threaded programming is
-generally harmful.  In the author's experience, the vast majority of developers
-do not have a solid enough grasp of threading concepts to be seriously engaging
-in the practice.  As a first step to becoming proficient at threaded
-programming, much reading and thought are necessary.  The next step is to
-implement several non-trivial threaded programs that are doomed to be complete
-disasters.  After that, it may be possible for a programmer to write threaded
-programs that do the right thing most of the time.  However, even the most
-skilled developers still will be unable to consistently write code that is free
-of race conditions, deadlocks, livelocks, locksteps, etc.  Finally, there are
-some developers who, despite being otherwise proficient, will {\em never} obtain
-a solid grasp of threaded programming, regardless of how many times the basic
-concepts are reviewed.
-
-In summary, don't use threads unless there are significant measurable gains in
-performance or code complexity.  Otherwise, threaded programming just is not
-worth the unavoidable pain that it inflicts.
 
 \section{Optimization}
 

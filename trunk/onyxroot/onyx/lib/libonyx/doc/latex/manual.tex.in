@@ -18,13 +18,13 @@
 
 The \libname{libonyx} library implements an embeddable \htmlref{Onyx}{onyxlang}
 interpreter.  \libname{libonyx} is designed to allow multiple interpreter
-instances in the same program, though since \htmlref{Onyx}{onyxlang} is a
-multi-threaded language, in most cases it makes more sense to use a single
-interpreter instance with multiple threads.
+instances in the same program, though since Onyx is a multi-threaded language,
+in most cases it makes more sense to use a single interpreter instance with
+multiple threads.
 
-The \htmlref{Onyx}{onyxlang} language is described elsewhere in this manual, so
-this chapter documents the C API with as little information about the
-\htmlref{Onyx}{onyxlang} language as possible.
+The Onyx language is described elsewhere in this manual, so this chapter
+documents the C API with as little information about the Onyx language as
+possible.
 
 A minimal program that runs the Onyx interpreter interactively looks like:
 \begin{verbatim}
@@ -95,10 +95,12 @@ sizes:
 \libname{libonyx} defines the following global variables, which can be used by
 the application:
 \begin{description}
-\item[cw\_g\_mema: ] \classname{mema} instance, wraps the generic global
-allocator (also accessible via the \classname{mem} APIs).
+\item[cw\_g\_mema: ] \htmlref{\classname{mema}}{mema} instance, wraps the
+generic global allocator (also accessible via the \htmlref{\classname{mem}}{mem}
+APIs).
 \item[cw\_g\_nxaa: ] \classname{mema} instance, wraps the global allocator that
-is tied to the garbage collector (also accessible via the \classname{nxa} APIs).
+is tied to the garbage collector (also accessible via the
+\htmlref{\classname{nxa}}{nxa} APIs).
 \end{description}
 
 \section{Multiple interpreters}
@@ -113,9 +115,10 @@ interpreter, and no problems will result (normal object synchronization issues
 not withstanding).
 
 \section{Threads}
-\libname{libonyx} encapsulates each interpreter instance in an \classname{nx}
-object.  An \classname{nx} object supports running multiple concurrent threads.
-Each thread context is encapsulated by an \classname{nxo} thread object.
+\libname{libonyx} encapsulates each interpreter instance in an
+\htmlref{\classname{nx}}{nx} object.  An \classname{nx} object supports running
+multiple concurrent threads.  Each thread context is encapsulated by an
+\htmlref{\classname{nxo} thread}{nxo_thread} object.
 
 In general, each process thread should execute in its own \classname{nxo} thread
 object context, though the only explicit restriction placed on \classname{nxo}
@@ -128,10 +131,10 @@ there is normally no reason for multiple threads to execute in the same
 \section{Garbage collection}
 Since there can be arbitrary threads executing in the interpreter concurrently,
 there are two ways to implement safe garbage collection: concurrent or atomic.
-\libname{libonyx} uses atomic garbage collection, which means that the thread
-doing garbage collection suspends all other threads that are created via
-\cfunc{\htmlref{thd\_new}{thd_new}}{..., TRUE} during the mark phase.  In order
-for this to work, the garbage collector must not do any locking while the other
+\libname{libonyx} uses atomic garbage collection, which means that during the
+mark phase, the thread doing garbage collection suspends all other threads that
+are created via \cfunc{\htmlref{thd\_new}{thd_new}}{..., TRUE}.  In order for
+this to work, the garbage collector must not do any locking while the other
 threads are suspended, or else there is a high probability of eventual deadlock.
 \libname{libonyx} itself meets these criteria, as must any C extensions to the
 interpreter that are executed by the garbage collector during the mark phase
@@ -190,7 +193,7 @@ by default, since socket operations can cause \cvar{SIGPIPE} signals, for which
 the library has no use.
 
 \section{Guidelines for writing extensions}
-When embedding \libname{libonyx} in an application, it is usually desireable to
+When embedding \libname{libonyx} in an application, it is usually desirable to
 add some operators so that the interpreter can interact with the rest of the
 application.  The \libname{libonyx} source code contains hundreds of operators
 that can be used as examples when writing new operators.  However, there are

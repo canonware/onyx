@@ -17,10 +17,9 @@
 \index{nx@\classname{nx}{}}
 
 The \classname{nx} class encapsulates an Onyx interpreter instance.  It contains
-a number of interpreter-global objects, as well as the garbage collector.
-Reclamation of all objects associated with an \classname{nx} instance is managed
-by a garbage collector, so when an \classname{nx} is destroyed, all associated
-objects are deallocated.
+a number of interpreter-global objects.  The garbage collector is shared among
+all \classname{nx} instances, so when an \classname{nx} is destroyed, only the
+objects which no other \classname{nx} references are destroyed.
 
 \subsubsection{API}
 \begin{capi}
