@@ -673,7 +673,7 @@ thd_p_suspend(cw_thd_t *a_thd)
 #ifdef CW_MTHREADS
     kern_return_t mach_error;
 #endif
-#ifdef CW_PTHREADS
+#if (defined(CW_THD_GENERIC_SR) || defined(CW_FTHREADS) || defined(CW_STHREADS))
     int error;
 #endif
 
