@@ -33,9 +33,10 @@ make
 
 %install
 rm -fr %{buildroot}
-make PREFIX=%{buildroot} install
-mkdir %{buildroot}/%{_prefix}/share
-mv %{buildroot}/%{_prefix}/man %{buildroot}/%{_prefix}/share
+make PREFIX=%{buildroot}/%{_prefix} install
+mkdir %{buildroot}/%{_datadir}
+mv %{buildroot}/%{_prefix}/man %{buildroot}/%{_datadir}
+find %{buildroot}/%{_mandir} -type l |xargs rm
 
 %clean
 rm -fr %{buildroot}
