@@ -7,6 +7,9 @@
           advantage of the possibilities afforded.  On the down side, this makes
           it easier to accidentally get the interpreter into an unusable state.
 
+	* Add operators:
+	  + inc, dec
+
 	* Remove operators:
 	  + cleardstack
 

@@ -2268,7 +2268,16 @@ systemdict_cvx(cw_nxo_t *a_thread)
 void
 systemdict_dec(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *nxo;
+    
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    if (nxo_type_get(nxo) != NXOT_INTEGER)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    nxo_integer_set(nxo, nxo_integer_get(nxo) - 1);
 }
 
 void
@@ -3901,7 +3910,16 @@ systemdict_ifelse(cw_nxo_t *a_thread)
 void
 systemdict_inc(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *nxo;
+    
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    if (nxo_type_get(nxo) != NXOT_INTEGER)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    nxo_integer_set(nxo, nxo_integer_get(nxo) + 1);
 }
 
 void
