@@ -153,7 +153,6 @@ typedef enum {
 	STILN_rangecheck,
 	STILN_read,
 	STILN_readline,
-	STILN_readstring,
 	STILN_realtime,
 	STILN_recordstacks,
 	STILN_renamefile,
@@ -213,7 +212,6 @@ typedef enum {
 	STILN_wait,
 	STILN_where,
 	STILN_write,
-	STILN_writestring,
 	STILN_xcheck,
 	STILN_xor,
 	STILN_yield

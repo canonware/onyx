@@ -150,7 +150,6 @@ const cw_uint8_t *cw_g_stil_names[] = {
 	"rangecheck",
 	"read",
 	"readline",
-	"readstring",
 	"realtime",
 	"recordstacks",
 	"renamefile",
@@ -210,7 +209,6 @@ const cw_uint8_t *cw_g_stil_names[] = {
 	"wait",
 	"where",
 	"write",
-	"writestring",
 	"xcheck",
 	"xor",
 	"yield"

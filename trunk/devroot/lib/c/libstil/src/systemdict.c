@@ -121,7 +121,6 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(rand),
 	ENTRY(read),
 	ENTRY(readline),
-	ENTRY(readstring),
 	ENTRY(realtime),
 	ENTRY(renamefile),
 	ENTRY(repeat),
@@ -162,7 +161,6 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(wait),
 	ENTRY(where),
 	ENTRY(write),
-	ENTRY(writestring),
 	ENTRY(xcheck),
 	ENTRY(xor),
 	ENTRY(yield)
@@ -2633,37 +2631,93 @@ void
 systemdict_read(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack;
-	cw_stilo_t	*file, *value, *code;
+	cw_stilo_t	*file;
 	cw_uint8_t	val;
 	cw_sint32_t	nread;
 
 	ostack = stilt_ostack_get(a_stilt);
 
 	STILS_GET(file, ostack, a_stilt);
-	if (stilo_type_get(file) != STILOT_FILE) {
+	switch (stilo_type_get(file)) {
+	case STILOT_FILE: {
+		cw_stilo_t	*value, *code;
+
+		/* Character read. */
+		value = stils_push(ostack);
+		code = stils_push(ostack);
+		
+		nread = stilo_file_read(file, 1, &val);
+		if (nread == -1) {
+			stils_npop(ostack, 2);
+			stilt_error(a_stilt, STILTE_IOERROR);
+			return;
+		}
+
+		if (nread == 0) {
+			stilo_integer_new(value, 0);
+			stilo_boolean_new(code, FALSE);
+		} else {
+			stilo_integer_new(value, (cw_sint64_t)val);
+			stilo_boolean_new(code, TRUE);
+		}
+
+		stils_roll(ostack, 3, 2);
+		stils_pop(ostack);
+		break;
+	}
+	case STILOT_STRING: {
+		cw_stilo_t	*string;
+
+		/* String read. */
+		string = file;
+		STILS_DOWN_GET(file, ostack, a_stilt, string);
+		if (stilo_type_get(file) != STILOT_FILE) {
+			stilt_error(a_stilt, STILTE_TYPECHECK);
+			return;
+		}
+
+		stilo_string_lock(string);
+		nread = stilo_file_read(file, stilo_string_len_get(string),
+		    stilo_string_get(string));
+		stilo_string_unlock(string);
+		if (nread == -1) {
+			stilt_error(a_stilt, STILTE_IOERROR);
+			return;
+		}
+
+		if (nread == 0) {
+			/* EOF. */
+			stilo_boolean_new(file, TRUE);
+			stilo_string_new(string, stilt_stil_get(a_stilt),
+			    stilt_currentlocking(a_stilt), 0);
+			stils_roll(ostack, 2, 1);
+		} else if (nread < stilo_string_len_get(string)) {
+			cw_stilo_t	*value, *code;
+
+			/*
+			 * We didn't fill the string, so we can't just use it as
+			 * the result.  Create a copy.
+			 */
+			value = stils_under_push(ostack, file);
+			stilo_string_substring_new(value, string,
+			    stilt_stil_get(a_stilt), 0, nread);
+			code = stils_under_push(ostack, file);
+			stilo_boolean_new(code, FALSE);
+
+			stils_npop(ostack, 2);
+		} else {
+			/*
+			 * The string is full, so doesn't need modified.
+			 */
+			stilo_boolean_new(file, FALSE);
+			stils_roll(ostack, 2, 1);
+		}
+		break;
+	}
+	default:
 		stilt_error(a_stilt, STILTE_TYPECHECK);
 		return;
 	}
-
-	value = stils_push(ostack);
-	code = stils_push(ostack);
-
-	nread = stilo_file_read(file, 1, &val);
-	if (nread == -1) {
-		stilt_error(a_stilt, STILTE_IOERROR);
-		return;
-	}
-
-	if (nread == 0) {
-		stilo_integer_new(value, 0);
-		stilo_boolean_new(code, FALSE);
-	} else {
-		stilo_integer_new(value, (cw_sint64_t)val);
-		stilo_boolean_new(code, TRUE);
-	}
-
-	stils_roll(ostack, 3, 2);
-	stils_pop(ostack);
 }
 
 void
@@ -2696,62 +2750,6 @@ systemdict_readline(cw_stilt_t *a_stilt)
 
 	stilo = stils_push(ostack);
 	stilo_boolean_new(stilo, eof);
-}
-
-void
-systemdict_readstring(cw_stilt_t *a_stilt)
-{
-	cw_stils_t	*ostack;
-	cw_stilo_t	*file, *string;
-	cw_sint32_t	nread;
-
-	ostack = stilt_ostack_get(a_stilt);
-
-	STILS_GET(string, ostack, a_stilt);
-	STILS_DOWN_GET(file, ostack, a_stilt, string);
-
-	if (stilo_type_get(file) != STILOT_FILE || stilo_type_get(string) !=
-	    STILOT_STRING) {
-		stilt_error(a_stilt, STILTE_TYPECHECK);
-		return;
-	}
-
-	stilo_string_lock(string);
-	nread = stilo_file_read(file, stilo_string_len_get(string),
-	    stilo_string_get(string));
-	stilo_string_unlock(string);
-	if (nread == -1) {
-		stilt_error(a_stilt, STILTE_IOERROR);
-		return;
-	}
-
-	if (nread == 0) {
-		/* EOF. */
-		stilo_boolean_new(file, TRUE);
-		stilo_string_new(string, stilt_stil_get(a_stilt),
-		    stilt_currentlocking(a_stilt), 0);
-		stils_roll(ostack, 2, 1);
-	} else if (nread < stilo_string_len_get(string)) {
-		cw_stilo_t	*value, *code;
-
-		/*
-		 * We didn't fill the string, so we can't just use it as the
-		 * result.  Create a copy.
-		 */
-		value = stils_under_push(ostack, file);
-		stilo_string_substring_new(value, string,
-		    stilt_stil_get(a_stilt), 0, nread);
-		code = stils_under_push(ostack, file);
-		stilo_boolean_new(code, FALSE);
-
-		stils_npop(ostack, 2);
-	} else {
-		/*
-		 * The string is full, so doesn't need modified.
-		 */
-		stilo_boolean_new(file, FALSE);
-		stils_roll(ostack, 2, 1);
-	}
 }
 
 void
@@ -4034,52 +4032,41 @@ systemdict_write(cw_stilt_t *a_stilt)
 	cw_stils_t	*ostack;
 	cw_stilo_t	*file, *value;
 	cw_stilte_t	error;
-	cw_uint8_t	val;
 
 	ostack = stilt_ostack_get(a_stilt);
 
 	STILS_GET(value, ostack, a_stilt);
 	STILS_DOWN_GET(file, ostack, a_stilt, value);
 	
-	if (stilo_type_get(file) != STILOT_FILE || stilo_type_get(value) !=
-	    STILOT_INTEGER) {
+	if (stilo_type_get(file) != STILOT_FILE) {
 		stilt_error(a_stilt, STILTE_TYPECHECK);
 		return;
 	}
 
-	val = (cw_uint8_t)stilo_integer_get(value);
-	error = stilo_file_write(file, &val, 1);
-	if (error) {
-		stilt_error(a_stilt, error);
-		return;
+	switch (stilo_type_get(value)) {
+	case STILOT_INTEGER: {
+		cw_uint8_t	val;
+
+		val = (cw_uint8_t)stilo_integer_get(value);
+		error = stilo_file_write(file, &val, 1);
+		if (error) {
+			stilt_error(a_stilt, error);
+			return;
+		}
+		break;
 	}
-
-	stils_npop(ostack, 2);
-}
-
-void
-systemdict_writestring(cw_stilt_t *a_stilt)
-{
-	cw_stils_t	*ostack;
-	cw_stilo_t	*file, *string;
-	cw_stilte_t	error;
-
-	ostack = stilt_ostack_get(a_stilt);
-	STILS_GET(string, ostack, a_stilt);
-	STILS_DOWN_GET(file, ostack, a_stilt, string);
-
-	if (stilo_type_get(string) != STILOT_STRING || stilo_type_get(file) !=
-	    STILOT_FILE) {
+	case STILOT_STRING:
+		stilo_string_lock(value);
+		error = stilo_file_write(file, stilo_string_get(value),
+		    stilo_string_len_get(value));
+		stilo_string_unlock(value);
+		if (error) {
+			stilt_error(a_stilt, error);
+			return;
+		}
+		break;
+	default:
 		stilt_error(a_stilt, STILTE_TYPECHECK);
-		return;
-	}
-
-	stilo_string_lock(string);
-	error = stilo_file_write(file, stilo_string_get(string),
-	    stilo_string_len_get(string));
-	stilo_string_unlock(string);
-	if (error) {
-		stilt_error(a_stilt, error);
 		return;
 	}
 
