@@ -1,16 +1,16 @@
 /* -*- mode: c ; c-file-style: "canonware-c-style" -*-
-******************************************************************************
-*
-* <Copyright = jasone>
-* <License>
-*
-******************************************************************************
-*
-* Version: Onyx <Version = onyx>
-*
-* Initialization and shutdown functions for the whole library.
-*
-******************************************************************************/
+ ******************************************************************************
+ *
+ * <Copyright = jasone>
+ * <License>
+ *
+ ******************************************************************************
+ *
+ * Version: Onyx <Version = onyx>
+ *
+ * Initialization and shutdown functions for the whole library.
+ *
+ ******************************************************************************/
 
 #include "../include/libonyx/libonyx.h"
 
