@@ -80,7 +80,6 @@ void	systemdict_load(cw_nxo_t *a_thread);
 void	systemdict_lock(cw_nxo_t *a_thread);
 void	systemdict_loop(cw_nxo_t *a_thread);
 void	systemdict_lt(cw_nxo_t *a_thread);
-void	systemdict_mark(cw_nxo_t *a_thread);
 void	systemdict_mkdir(cw_nxo_t *a_thread);
 void	systemdict_mod(cw_nxo_t *a_thread);
 void	systemdict_monitor(cw_nxo_t *a_thread);

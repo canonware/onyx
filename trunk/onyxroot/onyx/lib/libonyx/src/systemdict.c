@@ -119,7 +119,6 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(lock),
 	ENTRY(loop),
 	ENTRY(lt),
-	ENTRY(mark),
 	ENTRY(mkdir),
 	ENTRY(mod),
 	ENTRY(monitor),
@@ -174,13 +173,10 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(store),
 	ENTRY(string),
 	ENTRY(sub),
-	{NXN_sym_hash_bang, systemdict_mark},
 	{NXN_sym_bang_hash, systemdict_cleartomark},
 	ENTRY(sym_lp),
 	ENTRY(sym_rp),
-	{NXN_sym_lt, systemdict_mark},
 	ENTRY(sym_gt),
-	{NXN_sym_lb, systemdict_mark},
 	ENTRY(sym_rb),
 	ENTRY(symlink),
 	ENTRY(tell),
@@ -210,7 +206,7 @@ systemdict_l_populate(cw_nxo_t *a_dict, cw_nx_t *a_nx, int a_argc, char
 	cw_uint32_t	i;
 	cw_nxo_t	name, value;
 
-#define	NEXTRA	9
+#define	NEXTRA	13
 #define NFASTOPS							\
 	(sizeof(systemdict_fastops) / sizeof(struct cw_systemdict_entry))
 #define NOPS								\
@@ -311,6 +307,29 @@ systemdict_l_populate(cw_nxo_t *a_dict, cw_nx_t *a_nx, int a_argc, char
 	/* false. */
 	nxo_name_new(&name, a_nx, nxn_str(NXN_false), nxn_len(NXN_false), TRUE);
 	nxo_boolean_new(&value, FALSE);
+	nxo_dict_def(a_dict, a_nx, &name, &value);
+
+	/* mark. */
+	nxo_name_new(&name, a_nx, nxn_str(NXN_mark), nxn_len(NXN_mark), TRUE);
+	nxo_mark_new(&value);
+	nxo_dict_def(a_dict, a_nx, &name, &value);
+
+	/* #!. */
+	nxo_name_new(&name, a_nx, nxn_str(NXN_sym_hash_bang),
+	    nxn_len(NXN_sym_hash_bang), TRUE);
+	nxo_mark_new(&value);
+	nxo_dict_def(a_dict, a_nx, &name, &value);
+
+	/* <. */
+	nxo_name_new(&name, a_nx, nxn_str(NXN_sym_lt), nxn_len(NXN_sym_lt),
+	    TRUE);
+	nxo_mark_new(&value);
+	nxo_dict_def(a_dict, a_nx, &name, &value);
+
+	/* [. */
+	nxo_name_new(&name, a_nx, nxn_str(NXN_sym_lb), nxn_len(NXN_sym_lb),
+	    TRUE);
+	nxo_mark_new(&value);
 	nxo_dict_def(a_dict, a_nx, &name, &value);
 
 	/* null. */
@@ -518,15 +537,10 @@ systemdict_p_bind(cw_nxo_t *a_proc, cw_nxo_t *a_thread)
 				systemdict_p_bind(el, a_thread);
 			break;
 		case NXOT_NAME:
-			if (nxo_thread_dstack_search(a_thread, el, val) ==
-			    FALSE) {
-				if (nxo_type_get(val) == NXOT_OPERATOR)
-					nxo_array_el_set(a_proc, val, i);
-				else if (nxo_attr_get(val) != NXOA_EXECUTABLE) {
-					/* Replace el with val. */
-					nxo_dup(el, val);
-				}
-			}
+			if ((nxo_thread_dstack_search(a_thread, el, val) ==
+			    FALSE) && ((nxo_type_get(val) == NXOT_OPERATOR ||
+			    nxo_attr_get(val) != NXOA_EXECUTABLE)))
+				nxo_array_el_set(a_proc, val, i);
 		default:
 		}
 	}
@@ -2842,17 +2856,6 @@ systemdict_lt(cw_nxo_t *a_thread)
 	nxo_boolean_new(nxo_a, lt);
 
 	nxo_stack_pop(ostack);
-}
-
-void
-systemdict_mark(cw_nxo_t *a_thread)
-{
-	cw_nxo_t	*ostack;
-	cw_nxo_t	*nxo;
-
-	ostack = nxo_thread_ostack_get(a_thread);
-	nxo = nxo_stack_push(ostack);
-	nxo_mark_new(nxo);
 }
 
 void
