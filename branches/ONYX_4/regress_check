@@ -24,9 +24,11 @@ $conf [
 	argv 3 argv length 3 sub getinterval {} foreach
     } if
     `--prefix=' PREFIX `/dst' 3 ncat
+    `-q'
 ] def
 
 $COOK `/usr/bin/cook' def
+$COOKOPT [`-nte'] def
 #$COOKPAR [`-par' `8'] def
 $COOKPAR [] def
 
@@ -70,6 +72,7 @@ $cook {
     [
 	exch
 	COOK exch
+	COOKOPT {exch} foreach
     ] call
 } def
 
@@ -78,6 +81,7 @@ $cookpar {
     [
 	exch
 	COOK exch
+	COOKOPT {exch} foreach
 	COOKPAR {exch} foreach
     ] call
 } def
