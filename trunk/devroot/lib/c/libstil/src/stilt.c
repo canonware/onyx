@@ -1087,6 +1087,7 @@ static void
 stilt_p_print_token(cw_stilt_t *a_stilt, cw_uint32_t a_length, const char
     *a_note)
 {
+#if (0)
 #ifdef _LIBSTIL_DBG
 	cw_uint32_t	line, col;
 
@@ -1096,6 +1097,7 @@ stilt_p_print_token(cw_stilt_t *a_stilt, cw_uint32_t a_length, const char
 	_cw_out_put("<-- [s] ([i]:[i] [[--> [i]:[i])\n", a_note,
 	    a_stilt->tok_line, a_stilt->tok_column, a_stilt->line,
 	    (a_stilt->column != -1) ? a_stilt->column : 0);
+#endif
 #endif
 }
 

@@ -235,6 +235,11 @@ struct cw_stiloe_string_s {
  * Prototypes for private methods.
  */
 
+/* stilo. */
+static void	stilo_p_new(cw_stilo_t *a_stilo, cw_stilot_t a_type);
+static cw_uint32_t stilo_p_hash(const void *a_key);
+static cw_bool_t stilo_p_key_comp(const void *a_k1, const void *a_k2);
+
 /* stiloe. */
 static void	stiloe_p_new(cw_stiloe_t *a_stiloe, cw_stilot_t a_type);
 static void	stiloe_p_delete(cw_stiloe_t *a_stiloe, cw_stilt_t *a_stilt);
@@ -518,20 +523,6 @@ static cw_stilot_vtable_t stilot_vtable[] = {
  * stilo.
  */
 
-/* Call before other initialization. */
-static void
-stilo_p_new(cw_stilo_t *a_stilo, cw_stilot_t a_type)
-{
-	_cw_check_ptr(a_stilo);
-
-	memset(a_stilo, 0, sizeof(cw_stilo_t));
-	a_stilo->type = a_type;
-
-#ifdef _LIBSTIL_DBG
-	a_stilo->magic = _CW_STILO_MAGIC;
-#endif
-}
-
 void
 stilo_clobber(cw_stilo_t *a_stilo)
 {
@@ -698,6 +689,81 @@ stilo_l_stiloe_get(cw_stilo_t *a_stilo)
 		break;
 	default:
 		retval = NULL;
+	}
+
+	return retval;
+}
+
+/* Call before other initialization. */
+static void
+stilo_p_new(cw_stilo_t *a_stilo, cw_stilot_t a_type)
+{
+	_cw_check_ptr(a_stilo);
+
+	memset(a_stilo, 0, sizeof(cw_stilo_t));
+	a_stilo->type = a_type;
+
+#ifdef _LIBSTIL_DBG
+	a_stilo->magic = _CW_STILO_MAGIC;
+#endif
+}
+
+/* Hash any stilo, but optimize for name hashing. */
+static cw_uint32_t
+stilo_p_hash(const void *a_key)
+{
+	cw_uint32_t	retval;
+	cw_stilo_t	*key = (cw_stilo_t *)a_key;
+
+	_cw_check_ptr(key);
+	_cw_assert(key->magic == _CW_STILO_MAGIC);
+
+	if (key->type == _CW_STILOT_NAMETYPE) {
+		cw_stiloe_name_t	*name;
+
+		/* Chase down the name. */
+		name = (cw_stiloe_name_t *)key->o.stiloe;
+		name = name->val;
+		_cw_assert(name == name->val);
+
+		retval = stilo_name_hash((void *)name);
+	} else {
+		/* XXX Implement. */
+		_cw_error("Unimplemented");
+	}
+
+	return retval;
+}
+
+/* Compare stilo's, but optimize for name comparison. */
+static cw_bool_t
+stilo_p_key_comp(const void *a_k1, const void *a_k2)
+{
+	cw_bool_t	retval;
+	cw_stilo_t	*k1 = (cw_stilo_t *)a_k1;
+	cw_stilo_t	*k2 = (cw_stilo_t *)a_k2;
+
+	_cw_check_ptr(k1);
+	_cw_assert(k1->magic == _CW_STILO_MAGIC);
+	_cw_check_ptr(k2);
+	_cw_assert(k2->magic == _CW_STILO_MAGIC);
+
+	if ((k1->type == _CW_STILOT_NAMETYPE) && (k1->type ==
+	    _CW_STILOT_NAMETYPE)) {
+		cw_stiloe_name_t	*n1, *n2;
+		
+		/* Chase down the names. */
+		n1 = (cw_stiloe_name_t *)k1->o.stiloe;
+		n1 = n1->val;
+		_cw_assert(n1 == n1->val);
+		n2 = (cw_stiloe_name_t *)k2->o.stiloe;
+		n2 = n2->val;
+		_cw_assert(n2 == n2->val);
+
+		retval = stilo_name_key_comp((void *)n1, (void *)n2);
+	} else {
+		/* XXX Implement. */
+		_cw_error("Unimplemented");
 	}
 
 	return retval;
@@ -1097,11 +1163,11 @@ stilo_dict_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_uint32_t
 	 */
 	if (a_dict_size > 16) {
 		dch_new(&dict->e.d.hash, stilt_mem_get(a_stilt), a_dict_size *
-		    1.25, a_dict_size, a_dict_size / 4, ch_direct_hash,
-		    ch_direct_key_comp);
+		    1.25, a_dict_size, a_dict_size / 4, stilo_p_hash,
+		    stilo_p_key_comp);
 	} else {
 		dch_new(&dict->e.d.hash, stilt_mem_get(a_stilt), 20, 16, 4,
-		    ch_direct_hash, ch_direct_key_comp);
+		    stilo_p_hash, stilo_p_key_comp);
 	}
 
 	a_stilo->o.stiloe = (cw_stiloe_t *)dict;

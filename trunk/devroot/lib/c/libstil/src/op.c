@@ -749,6 +749,16 @@ op_pop(cw_stilt_t *a_stilt)
 void
 op_print(cw_stilt_t *a_stilt)
 {
+	cw_stils_t	*stack;
+	cw_stilo_t	*stilo;
+	cw_sint32_t	fd;
+
+	stack = stilt_data_stack_get(a_stilt);
+	fd = stilt_stdout_get(a_stilt);
+
+	stilo = stils_get(stack, 0);
+	/* XXX Make sure stilo is a string. */
+	stilo_print(stilo, fd, FALSE, FALSE);
 }
 
 void

@@ -104,7 +104,7 @@ main(int argc, char **argv)
 			break;
 		stilt_interp_str(&stilt, input, (cw_uint32_t)bytes_read);
 /*  		_cw_out_put("pstack:\n"); */
-		op_pstack(&stilt);
+/*  		op_pstack(&stilt); */
 /*  		_cw_out_put("stack:\n"); */
 /*  		op_stack(&stilt); */
 	}
