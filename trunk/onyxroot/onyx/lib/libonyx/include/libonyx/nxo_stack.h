@@ -53,7 +53,7 @@ struct cw_nxoe_stack_s
     cw_nxoe_stacko_t *ref_stacko;
 
 #ifdef CW_THREADS
-    cw_nxoe_stacko_t *noroll;
+    cw_nxoe_stacko_t *below;
 #endif
 };
 
@@ -71,22 +71,43 @@ cw_nxo_t *
 nxo_stack_push(cw_nxo_t *a_nxo);
 
 cw_nxo_t *
+nxo_stack_bpush(cw_nxo_t *a_nxo);
+
+cw_nxo_t *
 nxo_stack_under_push(cw_nxo_t *a_nxo, cw_nxo_t *a_object);
 
 cw_bool_t
 nxo_stack_pop(cw_nxo_t *a_nxo);
 
 cw_bool_t
+nxo_stack_bpop(cw_nxo_t *a_nxo);
+
+cw_bool_t
 nxo_stack_npop(cw_nxo_t *a_nxo, cw_uint32_t a_count);
+
+cw_bool_t
+nxo_stack_bnpop(cw_nxo_t *a_nxo, cw_uint32_t a_count);
+
+void
+nxo_stack_remove(cw_nxo_t *a_nxo, cw_nxo_t *a_object);
 
 cw_nxo_t *
 nxo_stack_get(cw_nxo_t *a_nxo);
 
 cw_nxo_t *
+nxo_stack_bget(cw_nxo_t *a_nxo);
+
+cw_nxo_t *
 nxo_stack_nget(cw_nxo_t *a_nxo, cw_uint32_t a_index);
 
 cw_nxo_t *
+nxo_stack_bnget(cw_nxo_t *a_nxo, cw_uint32_t a_index);
+
+cw_nxo_t *
 nxo_stack_down_get(cw_nxo_t *a_nxo, cw_nxo_t *a_object);
+
+cw_nxo_t *
+nxo_stack_up_get(cw_nxo_t *a_nxo, cw_nxo_t *a_object);
 
 cw_bool_t
 nxo_stack_exch(cw_nxo_t *a_nxo);
@@ -99,11 +120,17 @@ nxo_stack_roll(cw_nxo_t *a_nxo, cw_uint32_t a_count, cw_sint32_t a_amount);
 cw_nxoe_stacko_t *
 nxoe_p_stack_push(cw_nxoe_stack_t *a_stack);
 
+cw_nxoe_stacko_t *
+nxoe_p_stack_bpush(cw_nxoe_stack_t *a_stack);
+
 void
 nxoe_p_stack_pop(cw_nxoe_stack_t *a_stack);
 
 void
 nxoe_p_stack_npop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count);
+
+void
+nxoe_p_stack_bnpop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count);
 
 
 #if (defined(CW_USE_INLINES) || defined(CW_NXO_STACK_C_))
@@ -170,6 +197,52 @@ nxo_stack_push(cw_nxo_t *a_nxo)
     {
 	/* Use spare. */
 	stacko = qr_prev(ql_first(&stack->stack), link);
+	nxo_no_new(&stacko->nxo);
+	stack->nspare--;
+    }
+    else
+    {
+	/* A spare needs to be created.  Do this in a separate function to keep
+	 * this one small, since this code path is rarely executed. */
+	stacko = nxoe_p_stack_push(stack);
+    }
+
+    ql_first(&stack->stack) = stacko;
+    stack->count++;
+    retval = &stacko->nxo;
+
+#ifdef CW_THREADS
+    nxoe_p_stack_unlock(stack);
+#endif
+
+    return retval;
+}
+
+CW_INLINE cw_nxo_t *
+nxo_stack_bpush(cw_nxo_t *a_nxo)
+{
+    cw_nxo_t *retval;
+    cw_nxoe_stack_t *stack;
+    cw_nxoe_stacko_t *stacko;
+
+    cw_check_ptr(a_nxo);
+    cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+
+    stack = (cw_nxoe_stack_t *) a_nxo->o.nxoe;
+    cw_dassert(stack->nxoe.magic == CW_NXOE_MAGIC);
+    cw_assert(stack->nxoe.type == NXOT_STACK);
+
+#ifdef CW_THREADS
+    nxoe_p_stack_lock(stack);
+#endif
+
+    /* Get an unused stacko. */
+    if (qr_prev(ql_first(&stack->stack), link) != &stack->under)
+    {
+	/* Use spare. */
+	stacko = qr_prev(ql_first(&stack->stack), link);
+	qr_remove(stacko, link);
+
 	stack->nspare--;
     }
     else
@@ -180,7 +253,7 @@ nxo_stack_push(cw_nxo_t *a_nxo)
     }
 
     nxo_no_new(&stacko->nxo);
-    ql_first(&stack->stack) = stacko;
+    qr_before_insert(&stack->under, stacko, link);
     stack->count++;
     retval = &stacko->nxo;
 
@@ -293,6 +366,60 @@ nxo_stack_pop(cw_nxo_t *a_nxo)
 }
 
 CW_INLINE cw_bool_t
+nxo_stack_bpop(cw_nxo_t *a_nxo)
+{
+    cw_bool_t retval;
+    cw_nxoe_stack_t *stack;
+    cw_nxoe_stacko_t *stacko;
+
+    cw_check_ptr(a_nxo);
+    cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+
+    stack = (cw_nxoe_stack_t *) a_nxo->o.nxoe;
+    cw_dassert(stack->nxoe.magic == CW_NXOE_MAGIC);
+    cw_assert(stack->nxoe.type == NXOT_STACK);
+
+#ifdef CW_THREADS
+    nxoe_p_stack_lock(stack);
+#endif
+    if (stack->count == 0)
+    {
+	retval = TRUE;
+	goto RETURN;
+    }
+
+    stacko = qr_prev(&stack->under, link);
+
+    if (stacko == ql_first(&stack->stack))
+    {
+	ql_first(&stack->stack) = &stack->under;
+    }
+
+    /* This is non-optimal for the case of popping the last object, but it
+     * probably isn't worth the extra conditional logic to handle that case
+     * specially. */
+    qr_remove(stacko, link);
+    if (stack->nspare < CW_LIBONYX_STACK_CACHE)
+    {
+	qr_meld(ql_first(&stack->stack), stacko, link);
+	stack->nspare++;
+    }
+    else
+    {
+	nxa_free(stack->nxa, stacko, sizeof(cw_nxoe_stacko_t));
+    }
+
+    stack->count--;
+
+    retval = FALSE;
+    RETURN:
+#ifdef CW_THREADS
+    nxoe_p_stack_unlock(stack);
+#endif
+    return retval;
+}
+
+CW_INLINE cw_bool_t
 nxo_stack_npop(cw_nxo_t *a_nxo, cw_uint32_t a_count)
 {
     cw_bool_t retval;
@@ -313,12 +440,12 @@ nxo_stack_npop(cw_nxo_t *a_nxo, cw_uint32_t a_count)
 	retval = TRUE;
 	goto RETURN;
     }
-    /* Get a pointer to what will be the new stack top. */
     if (stack->nspare + a_count <= CW_LIBONYX_STACK_CACHE)
     {
 	cw_nxoe_stacko_t *top;
 	cw_uint32_t i;
 
+	/* Get a pointer to what will be the new stack top. */
 	for (i = 0, top = ql_first(&stack->stack); i < a_count; i++)
 	{
 	    top = qr_next(top, link);
@@ -342,6 +469,119 @@ nxo_stack_npop(cw_nxo_t *a_nxo, cw_uint32_t a_count)
     nxoe_p_stack_unlock(stack);
 #endif
     return retval;
+}
+
+CW_INLINE cw_bool_t
+nxo_stack_bnpop(cw_nxo_t *a_nxo, cw_uint32_t a_count)
+{
+    cw_bool_t retval;
+    cw_nxoe_stack_t *stack;
+
+    cw_check_ptr(a_nxo);
+    cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+
+    stack = (cw_nxoe_stack_t *) a_nxo->o.nxoe;
+    cw_dassert(stack->nxoe.magic == CW_NXOE_MAGIC);
+    cw_assert(stack->nxoe.type == NXOT_STACK);
+
+#ifdef CW_THREADS
+    nxoe_p_stack_lock(stack);
+#endif
+    if (a_count > stack->count)
+    {
+	retval = TRUE;
+	goto RETURN;
+    }
+    /* Popping 0 objects is legal, but the algorithm below can't handle it, so
+     * check for this case specially. */
+    if (a_count == 0)
+    {
+	retval = FALSE;
+	goto RETURN;
+    }
+    if (stack->nspare + a_count <= CW_LIBONYX_STACK_CACHE)
+    {
+	cw_nxoe_stacko_t *bottom;
+	cw_uint32_t i;
+
+	/* Get a pointer to what will be the topmost object removed. */
+	for (i = 0, bottom = &stack->under; i < a_count; i++)
+	{
+	    bottom = qr_prev(bottom, link);
+	}
+
+	if (bottom != ql_first(&stack->stack))
+	{
+	    qr_split(&stack->under, bottom, link);
+	    /* Reinsert the spares in the spares region. */
+	    qr_meld(ql_first(&stack->stack), bottom, link);
+	}
+	else
+	{
+	    /* There's no need to split and meld. */
+	    ql_first(&stack->stack) = &stack->under;
+	}
+
+	stack->nspare += a_count;
+    }
+    else
+    {
+	/* Spares need to be discarded.  Do this in a separate function to keep
+	 * this one small, since this code path is rarely executed. */
+	nxoe_p_stack_bnpop(stack, a_count);
+    }
+
+    stack->count -= a_count;
+
+    retval = FALSE;
+    RETURN:
+#ifdef CW_THREADS
+    nxoe_p_stack_unlock(stack);
+#endif
+    return retval;
+}
+
+CW_INLINE void
+nxo_stack_remove(cw_nxo_t *a_nxo, cw_nxo_t *a_object)
+{
+    cw_nxoe_stack_t *stack;
+
+    cw_check_ptr(a_nxo);
+    cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+
+    stack = (cw_nxoe_stack_t *) a_nxo->o.nxoe;
+    cw_dassert(stack->nxoe.magic == CW_NXOE_MAGIC);
+    cw_assert(stack->nxoe.type == NXOT_STACK);
+
+#ifdef CW_THREADS
+    nxoe_p_stack_lock(stack);
+#endif
+
+    if (ql_first(&stack->stack) == (cw_nxoe_stacko_t *) a_object)
+    {
+	ql_first(&stack->stack) = qr_next(ql_first(&stack->stack), link);
+    }
+    qr_remove((cw_nxoe_stacko_t *) a_object, link);
+
+    /* This is non-optimal for the case of removing the top object, but it's
+     * probabaly not worth the extra conditional logic to optimize that case
+     * specially. */
+    if (stack->nspare < CW_LIBONYX_STACK_CACHE)
+    {
+	qr_before_insert(ql_first(&stack->stack),
+			 (cw_nxoe_stacko_t *) a_object, link);
+	stack->nspare++;
+    }
+    else
+    {
+	nxa_free(stack->nxa, a_object, sizeof(cw_nxoe_stacko_t));
+    }
+
+    stack->count--;
+
+#ifdef CW_THREADS
+    nxoe_p_stack_unlock(stack);
+#endif
 }
 
 CW_INLINE cw_nxo_t *
@@ -378,6 +618,39 @@ nxo_stack_get(cw_nxo_t *a_nxo)
 }
 
 CW_INLINE cw_nxo_t *
+nxo_stack_bget(cw_nxo_t *a_nxo)
+{
+    cw_nxo_t *retval;
+    cw_nxoe_stack_t *stack;
+    cw_nxoe_stacko_t *stacko;
+
+    cw_check_ptr(a_nxo);
+    cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+
+    stack = (cw_nxoe_stack_t *) a_nxo->o.nxoe;
+    cw_dassert(stack->nxoe.magic == CW_NXOE_MAGIC);
+    cw_assert(stack->nxoe.type == NXOT_STACK);
+
+#ifdef CW_THREADS
+    nxoe_p_stack_lock(stack);
+#endif
+    if (stack->count == 0)
+    {
+	retval = NULL;
+	goto RETURN;
+    }
+
+    stacko = qr_prev(&stack->under, link);
+
+    retval = &stacko->nxo;
+    RETURN:
+#ifdef CW_THREADS
+    nxoe_p_stack_unlock(stack);
+#endif
+    return retval;
+}
+
+CW_INLINE cw_nxo_t *
 nxo_stack_nget(cw_nxo_t *a_nxo, cw_uint32_t a_index)
 {
     cw_nxo_t *retval;
@@ -404,6 +677,43 @@ nxo_stack_nget(cw_nxo_t *a_nxo, cw_uint32_t a_index)
     for (i = 0, stacko = ql_first(&stack->stack); i < a_index; i++)
     {
 	stacko = qr_next(stacko, link);
+    }
+
+    retval = &stacko->nxo;
+    RETURN:
+#ifdef CW_THREADS
+    nxoe_p_stack_unlock(stack);
+#endif
+    return retval;
+}
+
+CW_INLINE cw_nxo_t *
+nxo_stack_bnget(cw_nxo_t *a_nxo, cw_uint32_t a_index)
+{
+    cw_nxo_t *retval;
+    cw_nxoe_stack_t *stack;
+    cw_nxoe_stacko_t *stacko;
+    cw_uint32_t i;
+
+    cw_check_ptr(a_nxo);
+    cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+
+    stack = (cw_nxoe_stack_t *) a_nxo->o.nxoe;
+    cw_dassert(stack->nxoe.magic == CW_NXOE_MAGIC);
+    cw_assert(stack->nxoe.type == NXOT_STACK);
+
+#ifdef CW_THREADS
+    nxoe_p_stack_lock(stack);
+#endif
+    if (a_index >= stack->count)
+    {
+	retval = NULL;
+	goto RETURN;
+    }
+
+    for (i = 0, stacko = qr_prev(&stack->under, link); i < a_index; i++)
+    {
+	stacko = qr_prev(stacko, link);
     }
 
     retval = &stacko->nxo;
@@ -466,12 +776,64 @@ nxo_stack_down_get(cw_nxo_t *a_nxo, cw_nxo_t *a_object)
     return retval;
 }
 
+CW_INLINE cw_nxo_t *
+nxo_stack_up_get(cw_nxo_t *a_nxo, cw_nxo_t *a_object)
+{
+    cw_nxo_t *retval;
+    cw_nxoe_stack_t *stack;
+    cw_nxoe_stacko_t *stacko;
+
+    cw_check_ptr(a_nxo);
+    cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+
+    stack = (cw_nxoe_stack_t *) a_nxo->o.nxoe;
+    cw_dassert(stack->nxoe.magic == CW_NXOE_MAGIC);
+    cw_assert(stack->nxoe.type == NXOT_STACK);
+
+#ifdef CW_THREADS
+    nxoe_p_stack_lock(stack);
+#endif
+    if (a_object != NULL)
+    {
+	if (stack->count <= 1)
+	{
+	    retval = NULL;
+	    goto RETURN;
+	}
+	stacko = (cw_nxoe_stacko_t *) a_object;
+	if (stacko == ql_first(&stack->stack))
+	{
+	    retval = NULL;
+	    goto RETURN;
+	}
+	stacko = qr_prev(stacko, link);
+    }
+    else
+    {
+	/* Same as nxo_stack_bget(). */ /* XXX Verify. */
+	if (stack->count == 0)
+	{
+	    retval = NULL;
+	    goto RETURN;
+	}
+
+	stacko = qr_prev(&stack->under, link);
+    }
+
+    retval = &stacko->nxo;
+    RETURN:
+#ifdef CW_THREADS
+    nxoe_p_stack_unlock(stack);
+#endif
+    return retval;
+}
+
 CW_INLINE cw_bool_t
 nxo_stack_exch(cw_nxo_t *a_nxo)
 {
     cw_bool_t retval;
     cw_nxoe_stack_t *stack;
-    cw_nxoe_stacko_t *top, *noroll;
+    cw_nxoe_stacko_t *top, *below;
 
     cw_check_ptr(a_nxo);
     cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
@@ -496,7 +858,7 @@ nxo_stack_exch(cw_nxo_t *a_nxo)
 
     top = ql_first(&stack->stack);
     top = qr_next(top, link);
-    noroll = qr_next(top, link);
+    below = qr_next(top, link);
 
     /* We now have:
      *
@@ -514,7 +876,7 @@ nxo_stack_exch(cw_nxo_t *a_nxo)
      *                             |          | |
      *                             |          | |
      *                             \----------/ /
-     *                  noroll --> /----------\
+     *                   below --> /----------\
      *                             |          |
      *                             |          |
      *                             |          |
@@ -522,18 +884,18 @@ nxo_stack_exch(cw_nxo_t *a_nxo)
      *                             |          |
      *                             \----------/
      *
-     * Set stack->noroll so that if the GC runs during the following code,
-     * it can get at the noroll region. */
+     * Set stack->below so that if the GC runs during the following code, it can
+     * get at the below region. */
 #ifdef CW_THREADS
-    stack->noroll = noroll;
+    stack->below = below;
     mb_write();
 #endif
-    qr_split(ql_first(&stack->stack), noroll, link);
+    qr_split(ql_first(&stack->stack), below, link);
     ql_first(&stack->stack) = top;
-    qr_meld(top, noroll, link);
+    qr_meld(top, below, link);
 #ifdef CW_THREADS
     mb_write();
-    stack->noroll = NULL;
+    stack->below = NULL;
     nxoe_p_stack_unlock(stack);
 #endif
 
@@ -547,7 +909,7 @@ nxo_stack_roll(cw_nxo_t *a_nxo, cw_uint32_t a_count, cw_sint32_t a_amount)
 {
     cw_bool_t retval;
     cw_nxoe_stack_t *stack;
-    cw_nxoe_stacko_t *top, *noroll;
+    cw_nxoe_stacko_t *top, *below;
     cw_uint32_t i;
 
     cw_check_ptr(a_nxo);
@@ -602,11 +964,11 @@ nxo_stack_roll(cw_nxo_t *a_nxo, cw_uint32_t a_count, cw_sint32_t a_amount)
     {
 	top = qr_next(top, link);
     }
-    noroll = top;
+    below = top;
 
     for (i = 0; i < a_count - a_amount; i++)
     {
-	noroll = qr_next(noroll, link);
+	below = qr_next(below, link);
     }
 
     /* We now have:
@@ -625,7 +987,7 @@ nxo_stack_roll(cw_nxo_t *a_nxo, cw_uint32_t a_count, cw_sint32_t a_amount)
      *                             |          | |
      *                             |          | |
      *                             \----------/ /
-     *                  noroll --> /----------\
+     *                   below --> /----------\
      *                             |          |
      *                             |          |
      *                             |          |
@@ -633,18 +995,18 @@ nxo_stack_roll(cw_nxo_t *a_nxo, cw_uint32_t a_count, cw_sint32_t a_amount)
      *                             |          |
      *                             \----------/
      *
-     * Set stack->noroll so that if the GC runs during the following code,
-     * it can get at the noroll region. */
+     * Set stack->below so that if the GC runs during the following code, it can
+     * get at the below region. */
 #ifdef CW_THREADS
-    stack->noroll = noroll;
+    stack->below = below;
     mb_write();
 #endif
-    qr_split(ql_first(&stack->stack), noroll, link);
+    qr_split(ql_first(&stack->stack), below, link);
     ql_first(&stack->stack) = top;
-    qr_meld(top, noroll, link);
+    qr_meld(top, below, link);
 #ifdef CW_THREADS
     mb_write();
-    stack->noroll = NULL;
+    stack->below = NULL;
     nxoe_p_stack_unlock(stack);
 #endif
 

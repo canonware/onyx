@@ -102,6 +102,29 @@ cw\_bool\_t a\_locking}}
 		Push a no \classname{nxo} onto \cvar{a\_nxo} and return a
 		pointer to it.
 	\end{capilist}
+\label{nxo_stack_bpush}
+\index{nxo_stack_bpush@\cfunc{nxo\_stack\_bpush}{}}
+\citem{\cfunc[cw\_nxo\_t *]{nxo\_stack\_bpush}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a stack \classname{nxo}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to a no \classname{nxo} that has been pushed
+			onto the bottom of \cvar{a\_nxo}.
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{CW\_ONYXX\_OOM}{CW_ONYXX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Push a no \classname{nxo} onto the bottom of \cvar{a\_nxo} and
+		return a pointer to it.
+	\end{capilist}
 \label{nxo_stack_under_push}
 \index{nxo_stack_under_push@\cfunc{nxo\_stack\_under\_push}{}}
 \citem{\cfunc[cw\_nxo\_t *]{nxo\_stack\_under\_push}{cw\_nxo\_t *a\_nxo,
@@ -151,9 +174,33 @@ cw\_nxo\_t *a\_object}}
 	\item[Description: ]
 		Pop an object off of \cvar{a\_nxo}.
 	\end{capilist}
+\label{nxo_stack_bpop}
+\index{nxo_stack_bpop@\cfunc{nxo\_stack\_bpop}{}}
+\citem{\cfunc[cw\_bool\_t]{nxo\_stack\_bpop}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a stack \classname{nxo}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[FALSE: ]
+				Success.
+			\item[TRUE: ]
+				Stack underflow.
+			\end{description}
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Pop an object off the bottom of \cvar{a\_nxo}.
+	\end{capilist}
 \label{nxo_stack_npop}
 \index{nxo_stack_npop@\cfunc{nxo\_stack\_npop}{}}
-\citem{\cfunc[cw\_bool\_t]{nxo\_stack\_npop}{cw\_nxo\_t *a\_nxo, cw\_uint32\_t a\_count}}
+\citem{\cfunc[cw\_bool\_t]{nxo\_stack\_npop}{cw\_nxo\_t *a\_nxo, cw\_uint32\_t
+a\_count}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -175,6 +222,50 @@ cw\_nxo\_t *a\_object}}
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Pop \cvar{a\_count} objects off of \cvar{a\_nxo}.
+	\end{capilist}
+\label{nxo_stack_bnpop}
+\index{nxo_stack_bnpop@\cfunc{nxo\_stack\_bnpop}{}}
+\citem{\cfunc[cw\_bool\_t]{nxo\_stack\_bnpop}{cw\_nxo\_t *a\_nxo, cw\_uint32\_t
+a\_count}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a stack \classname{nxo}.
+		\item[a\_count: ]
+			Number of objects to pop off the bottom of
+			\cvar{a\_nxo}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[FALSE: ]
+				Success.
+			\item[TRUE: ]
+				Stack underflow.
+			\end{description}
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Pop \cvar{a\_count} objects off the bottom of \cvar{a\_nxo}.
+	\end{capilist}
+\label{nxo_stack_remove}
+\index{nxo_stack_remove@\cfunc{nxo\_stack\_remove}{}}
+\citem{\cfunc[void]{nxo\_stack\_remove}{cw\_nxo\_t *a\_nxo, cw\_nxo\_t
+*a\_object}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a stack \classname{nxo}.
+		\item[a\_object: ]
+			Pointer to an object on \cvar{a\_nxo}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+		Remove \cvar{a\_object} from \cvar{a\_nxo}.
+	\item[Description: ]
 	\end{capilist}
 \label{nxo_stack_get}
 \index{nxo_stack_get@\cfunc{nxo\_stack\_get}{}}
@@ -199,6 +290,30 @@ cw\_nxo\_t *a\_object}}
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Return a pointer to the top \cvar{nxo} on \cvar{a\_nxo}.
+	\end{capilist}
+\label{nxo_stack_bget}
+\index{nxo_stack_bget@\cfunc{nxo\_stack\_bget}{}}
+\citem{\cfunc[cw\_nxo\_t *]{nxo\_stack\_bget}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a stack \classname{nxo}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[non-NULL: ]
+				Pointer to the bottom \classname{nxo} on
+				\cvar{a\_nxo}.
+			\item[NULL: ]
+				Stack underflow.
+			\end{description}
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return a pointer to the bottom \cvar{nxo} on \cvar{a\_nxo}.
 	\end{capilist}
 \label{nxo_stack_nget}
 \index{nxo_stack_nget@\cfunc{nxo\_stack\_nget}{}}
@@ -228,6 +343,35 @@ a\_index}}
 		Return a pointer to the \cvar{nxo} on \cvar{a\_nxo} at index
 		\cvar{a\_index}.
 	\end{capilist}
+\label{nxo_stack_bnget}
+\index{nxo_stack_bnget@\cfunc{nxo\_stack\_bnget}{}}
+\citem{\cfunc[cw\_nxo\_t *]{nxo\_stack\_bnget}{cw\_nxo\_t *a\_nxo, cw\_uint32\_t
+a\_index}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a stack \classname{nxo}.
+		\item[a\_index: ]
+			Index, counting from the bottom, of object in
+			\cvar{a\_nxo} to return a pointer to.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[non-NULL: ]
+				Pointer to the \cvar{nxo} on \cvar{a\_nxo} at
+				index \cvar{a\_index}, counting from the bottom.
+			\item[NULL: ]
+				Stack underflow.
+			\end{description}
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return a pointer to the \cvar{nxo} on \cvar{a\_nxo} at index
+		\cvar{a\_index}, counting from the bottom.
+	\end{capilist}
 \label{nxo_stack_down_get}
 \index{nxo_stack_down_get@\cfunc{nxo\_stack\_down\_get}{}}
 \citem{\cfunc[cw\_nxo\_t *]{nxo\_stack\_down\_get}{cw\_nxo\_t *a\_nxo,
@@ -254,6 +398,35 @@ cw\_nxo\_t *a\_object}}
 		\end{description}
 	\item[Exception(s): ] None.
 		Return a pointer to the \cvar{nxo} on \cvar{a\_nxo} under
+		\cvar{a\_object}.
+	\item[Description: ]
+	\end{capilist}
+\label{nxo_stack_up_get}
+\index{nxo_stack_up_get@\cfunc{nxo\_stack\_up\_get}{}}
+\citem{\cfunc[cw\_nxo\_t *]{nxo\_stack\_up\_get}{cw\_nxo\_t *a\_nxo,
+cw\_nxo\_t *a\_object}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a stack \classname{nxo}.
+		\item[a\_object: ]
+			Pointer to an object on \cvar{a\_nxo}, or NULL for the
+			bottom object on \cvar{a\_nxo}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[non-NULL: ]
+				Pointer to the \cvar{nxo} on \cvar{a\_nxo} over
+				\cvar{a\_object}.
+			\item[NULL: ]
+				Stack underflow.
+			\end{description}
+		\end{description}
+	\item[Exception(s): ] None.
+		Return a pointer to the \cvar{nxo} on \cvar{a\_nxo} over
 		\cvar{a\_object}.
 	\item[Description: ]
 	\end{capilist}

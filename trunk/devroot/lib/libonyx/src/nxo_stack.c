@@ -57,7 +57,7 @@ nxo_stack_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking)
     ql_head_insert(&stack->stack, &stack->under, link);
 
 #ifdef CW_THREADS
-    stack->noroll = NULL;
+    stack->below = NULL;
 #endif
 
     nxo_no_new(a_nxo);
@@ -113,10 +113,10 @@ nxoe_l_stack_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
     if (a_reset)
     {
 #ifdef CW_THREADS
-	if (stack->noroll != NULL)
+	if (stack->below != NULL)
 	{
 	    /* We're in the middle of a roll operation, so need to handle the
-	     * noroll region specially.  It's entirely possible that we'll end
+	     * below region specially.  It's entirely possible that we'll end
 	     * up reporting some/all stack elements twice, but that doesn't
 	     * cause a correctness problem, whereas not reporting them at all
 	     * does. */
@@ -136,13 +136,13 @@ nxoe_l_stack_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 	case 0:
 	{
 	    /* Set up for stage 1. */
-	    stack->ref_stacko = stack->noroll;
+	    stack->ref_stacko = stack->below;
 	    stack->ref_stage++;
 	    /* Fall through. */
 	}
 	case 1:
 	{
-	    /* noroll region stack iteration. */
+	    /* below region stack iteration. */
 	    for (; retval == NULL && stack->ref_stacko != &stack->under;
 		 stack->ref_stacko = qr_next(stack->ref_stacko, link))
 	    {
@@ -242,7 +242,23 @@ nxoe_p_stack_push(cw_nxoe_stack_t *a_stack)
     retval = (cw_nxoe_stacko_t *) nxa_malloc(a_stack->nxa,
 					     sizeof(cw_nxoe_stacko_t));
     qr_new(retval, link);
+    nxo_no_new(&retval->nxo);
     qr_after_insert(&a_stack->under, retval, link);
+
+    return retval;
+}
+
+/* This function handles a special case for nxo_stack_bpush(), but is done as a
+ * separate function to keep nxo_stack_bpush() small. */
+cw_nxoe_stacko_t *
+nxoe_p_stack_bpush(cw_nxoe_stack_t *a_stack)
+{
+    cw_nxoe_stacko_t *retval;
+
+    /* No spares.  Allocate and insert one. */
+    retval = (cw_nxoe_stacko_t *) nxa_malloc(a_stack->nxa,
+					     sizeof(cw_nxoe_stacko_t));
+    qr_new(retval, link);
 
     return retval;
 }
@@ -316,6 +332,74 @@ nxoe_p_stack_npop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
     for (i = 0; i < a_stack->nspare + a_count - CW_LIBONYX_STACK_CACHE; i++)
     {
 	tstacko = qr_next(stacko, link);
+	qr_remove(tstacko, link);
+	nxa_free(a_stack->nxa, tstacko, sizeof(cw_nxoe_stacko_t));
+    }
+
+    a_stack->nspare = CW_LIBONYX_STACK_CACHE;
+}
+
+/* This function handles a special case for nxo_stack_bnpop(), but is done as a
+ * separate function to keep nxo_stack_bnpop() small. */
+void
+nxoe_p_stack_bnpop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
+{
+    cw_uint32_t i;
+    cw_nxoe_stacko_t *bottom, *stacko, *tstacko;
+
+    /* We need to discard some spares, so get a pointer to the beginning of the
+     * region to be removed from the ring. */
+    for (i = 0, stacko = &a_stack->under;
+	 i < CW_LIBONYX_STACK_CACHE - a_stack->nspare;
+	 i++)
+    {
+	stacko = qr_prev(stacko, link);
+    }
+    for (bottom = stacko; i < a_count; i++)
+    {
+	bottom = qr_prev(bottom, link);
+    }
+
+    /* We now have:
+     *
+     * ql_first(&a_stack->stack) --> /----------\
+     *                               |          |
+     *                               |          |
+     *                               |          |
+     *                               |          |
+     *                               |          |
+     *                               \----------/
+     *                    bottom --> /----------\ \
+     *                               |          | |
+     *                               |          | |
+     *                               |          | |
+     *                               |          | |
+     *                               |          | |
+     *                               \----------/  \ a_count
+     *                    stacko --> /----------\  / \
+     *                               |          | |  |
+     *                               |          | |  |
+     *                               |          | |   \ max cache - nspare
+     *                               |          | |   /
+     *                               |          | |  |
+     *                               \----------/ /  /
+     *               stack.under --> /----------\
+     *                               |          |
+     *                               :          :
+     *                               :          :
+     *
+     * 1) Split bottom/under.
+     * 2) Split bottom/stacko.
+     * 3) Meld first/stacko.
+     * 4) Deallocate the ring pointed to by bottom. */
+
+    qr_split(bottom, &a_stack->under, link);
+    qr_split(bottom, stacko, link);
+    qr_meld(ql_first(&a_stack->stack), stacko, link);
+    
+    for (i = 0; i < a_stack->nspare + a_count - CW_LIBONYX_STACK_CACHE; i++)
+    {
+	tstacko = qr_next(bottom, link);
 	qr_remove(tstacko, link);
 	nxa_free(a_stack->nxa, tstacko, sizeof(cw_nxoe_stacko_t));
     }

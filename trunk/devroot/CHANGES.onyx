@@ -1,5 +1,14 @@
 2002-04-06 : Jason Evans <jasone@canonware.com>
 
+	* lib/libonyx/include/libonyx/nxo_stack.h : Add functions:
+	  + nxo_stack_bget()
+	  + nxo_stack_bnget()
+	  + nxo_stack_up_get()
+	  + nxo_stack_bpop()
+	  + nxo_stack_bnpop()
+	  + nxo_stack_remove()
+	  + nxo_stack_bpush()
+
 	* Rename operators:
 	  + index --> idup
 	  + sindex --> sidup

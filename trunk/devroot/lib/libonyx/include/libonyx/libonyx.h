@@ -410,10 +410,10 @@ extern cw_mem_t *cw_g_mem;
 #ifdef CW_REAL
 #include "nxo_real.h"
 #endif
+#include "nxa.h"
 #include "nxo_stack.h"
 #include "nxo_string.h"
 #include "nxo_thread.h"
-#include "nxa.h"
 #include "nx.h"
 #include "systemdict.h"
 #include "gcdict.h"
