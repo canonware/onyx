@@ -24,7 +24,7 @@ AC_SUBST(abs_objroot)
 
 cfgoutputs="Cookfile Cookfile.inc bin/Cookfile.inc doc/Cookfile.inc"
 cfgoutputs="$cfgoutputs examples/Cookfile.inc lib/Cookfile.inc mod/Cookfile.inc"
-cfgoutputs="$cfgoutputs test/Cookfile.inc test/verify"
+cfgoutputs="$cfgoutputs test/Cookfile.inc"
 cfghdrs="config.stamp"
 bins=
 mods=
@@ -194,7 +194,6 @@ CW_BUILD_DOC(onyx, doc_onyx)
 CW_BUILD_DOC(slate, doc_slate)
 
 VERIFY="$objroot/test/verify"
-mkdir -p "$objroot/test"
 AC_SUBST(VERIFY)
 
 dnl Find libraries.
@@ -409,11 +408,11 @@ AC_MSG_RESULT(==================================================================
 
 dnl Process .in files.
 AC_SUBST(cfghdrs)
-AC_SUBST(cfgoutputs)
 AC_CONFIG_HEADER($cfghdrs)
-AC_OUTPUT($cfgoutputs)
 
-dnl autoconf doesn't keep the execute bit if it's set for the input files, so do
-dnl it manually.
-echo chmod u+x "$objroot/test/verify"
-chmod u+x "$objroot/test/verify"
+dnl verify is handled separately, since it must be executable.
+AC_CONFIG_FILES($cfgoutputs, chmod +x $objroot/test/verify)
+AC_CONFIG_FILES(test/verify, chmod +x test/verify)
+cfgoutputs="$cfgoutputs test/verify"
+AC_SUBST(cfgoutputs)
+AC_OUTPUT
