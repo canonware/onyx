@@ -21,11 +21,6 @@ extern "C" {
 
 #define CW_LIBONYX_VERSION "<Version = onyx>"
 
-/* Must be defined for pthreads. */
-#ifndef _REENTRANT
-#define _REENTRANT
-#endif
-
 #include "libonyx_defs.h"
 
 /* Global typedefs. */
