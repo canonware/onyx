@@ -37,7 +37,7 @@ main(int argc, char **argv)
 
 	is_tty = (cw_bool_t)isatty(0);
 
-	out_new(&out);
+	out_new(&out, cw_g_mem);
 	out_set_default_fd(&out, 1);
 
 	if (is_tty) {
@@ -46,7 +46,7 @@ main(int argc, char **argv)
 		    "See http://www.canonware.com/stil/ for information.\n");
 	}
 	stil_new(&stil);
-	stilt_new(&stilt, &stil);
+	stilt_new(&stilt, &stil, stil_stila_get(&stil));
 
 #if (0)
 	_cw_out_put("sizeof(cw_stilo_t): [i]\n", sizeof(cw_stilo_t));

@@ -13,6 +13,7 @@ typedef struct cw_stilo_s cw_stilo_t;
 typedef struct cw_stiloe_s cw_stiloe_t;
 
 /* Defined here to resolve circular dependencies. */
+typedef struct cw_stila_s cw_stila_t;
 typedef struct cw_stiln_s cw_stiln_t;
 typedef struct cw_stilt_s cw_stilt_t;
 
@@ -117,13 +118,6 @@ struct cw_stilo_s {
 			cw_sint32_t	fd;
 		}	file;
 		struct {
-			cw_stiln_t	*stiln;
-			cw_stilt_t	*stilt;	/*
-						 * Only used for locally
-						 * allocated names.
-						 */
-		}	name;
-		struct {
 			cw_sint32_t	s32;
 		}	number;
 		struct {
@@ -153,7 +147,8 @@ cw_bool_t	stilo_literal_get(cw_stilo_t *a_stilo);
 void		stilo_literal_set(cw_stilo_t *a_stilo, cw_bool_t a_literal);
 
 void		stilo_cast(cw_stilo_t *a_stilo, cw_stilot_t a_stilot);
-void		stilo_copy(cw_stilo_t *a_to, cw_stilo_t *a_from);
+void		stilo_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t
+    *a_stilt);
 void		stilo_dup(cw_stilo_t *a_to, cw_stilo_t *a_from);
 void		stilo_move(cw_stilo_t *a_to, cw_stilo_t *a_from);
 
@@ -171,14 +166,14 @@ cw_sint32_t	stilo_array_len_get(cw_stilo_t *a_stilo);
 cw_stilo_t	*stilo_array_el_get(cw_stilo_t *a_stilo, cw_uint32_t a_offset);
 cw_stilo_t	*stilo_array_get(cw_stilo_t *a_stilo);
 void		stilo_array_set(cw_stilo_t *a_stilo, cw_uint32_t a_offset,
-    cw_stilo_t *a_arr, cw_uint32_t a_len);
+    cw_stilo_t *a_arr, cw_uint32_t a_len, cw_stilt_t *a_stilt);
 
 /*
  * dict.
  */
 /* Destroys a_key and a_val. */
-void		stilo_dict_def(cw_stilo_t *a_stilo, cw_stilo_t *a_key,
-    cw_stilo_t *a_val);
+void		stilo_dict_def(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
+    cw_stilo_t *a_key, cw_stilo_t *a_val);
 void		stilo_dict_undef(cw_stilo_t *a_stilo, const cw_stilo_t *a_key);
 const cw_stilo_t *stilo_dict_lookup(cw_stilo_t *a_stilo, const cw_stilo_t
     *a_key);

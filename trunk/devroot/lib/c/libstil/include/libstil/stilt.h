@@ -22,8 +22,20 @@ struct cw_stilt_s {
 	cw_stil_t	*stil;
 
 	/*
-	 * Hash of cached stiln references.  Keys are (cw_stilnk_t *),
-	 * direct hashed; values are (cw_stiltn_t *).
+	 * If TRUE, in global allocation mode for this stilt.  Otherwise,
+	 * allocation mode is local.
+	 */
+	cw_bool_t	galloc;
+
+	/*
+	 * Local allocator.  For global allocation, use the main stil's
+	 * allocator.
+	 */
+	cw_stila_t	stila;
+
+	/*
+	 * Hash of cached stiln references.  Keys are (cw_stilnk_t *), direct
+	 * hashed; values are (cw_stiltn_t *).
 	 */
 	cw_dch_t	stiln_dch;
 
@@ -141,8 +153,8 @@ struct cw_stiltn_s {
 	cw_stilnk_t	key;
 };
 
-cw_stilt_t	*stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil);
-
+cw_stilt_t	*stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil, cw_stila_t
+    *a_stila);
 void		stilt_delete(cw_stilt_t *a_stilt);
 
 void		stilt_get_position(cw_stilt_t *a_stilt, cw_uint32_t *r_line,
@@ -162,6 +174,9 @@ cw_bool_t	stilt_detach_str(cw_stilt_t *a_stilt, const char *a_str,
 cw_bool_t	stilt_detach_buf(cw_stilt_t *a_stilt, cw_buf_t *a_buf);
 
 #define		stilt_get_stil(a_stilt) (a_stilt)->stil
+
+#define		stilt_stila_get(a_stilt)				\
+	((a_stilt)->galloc) ? stila_gget(&(a_stilt)->stila) : &(a_stilt)->stila
 
 void		*stilt_malloc(cw_stilt_t *a_stilt, size_t a_size, const char
     *a_filename, cw_uint32_t a_line_num);

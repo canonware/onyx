@@ -61,22 +61,21 @@ stil_new(cw_stil_t *a_stil)
 		retval->is_malloced = TRUE;
 	}
 
-	if (pool_new(&retval->stil_bufc_pool, sizeof(cw_stil_bufc_t)) == NULL)
+	if (stila_gnew(&retval->stila, &retval->stil_bufc_pool,
+	    &retval->chi_pool, &retval->stiln_pool, &retval->stilsc_pool,
+	    &retval->dicto_pool))
 		goto OOM_2;
-	if (pool_new(&retval->chi_pool, sizeof(cw_chi_t)) == NULL)
+
+	if (dch_new(&retval->stiln_dch, stila_mem_get(&a_stil->stila),
+	    _CW_STIL_STILN_BASE_TABLE, _CW_STIL_STILN_BASE_GROW,
+	    _CW_STIL_STILN_BASE_SHRINK, stilnk_p_hash, stilnk_p_key_comp) ==
+	    NULL)
 		goto OOM_3;
-	if (pool_new(&retval->stiln_pool, sizeof(cw_stiln_t)) == NULL)
+	if (dch_new(&retval->roots_dch, stila_mem_get(&a_stil->stila),
+	    _CW_STIL_ROOTS_BASE_TABLE, _CW_STIL_ROOTS_BASE_GROW,
+	    _CW_STIL_ROOTS_BASE_SHRINK, ch_hash_direct, ch_key_comp_direct) ==
+	    NULL)
 		goto OOM_4;
-	if (pool_new(&retval->stilsc_pool, sizeof(cw_stilsc_t)) == NULL)
-		goto OOM_5;
-	if (dch_new(&retval->stiln_dch, _CW_STIL_STILN_BASE_TABLE,
-	    _CW_STIL_STILN_BASE_GROW, _CW_STIL_STILN_BASE_SHRINK, stilnk_p_hash,
-	    stilnk_p_key_comp) == NULL)
-		goto OOM_6;
-	if (dch_new(&retval->roots_dch, _CW_STIL_ROOTS_BASE_TABLE,
-	    _CW_STIL_ROOTS_BASE_GROW, _CW_STIL_ROOTS_BASE_SHRINK,
-	    ch_hash_direct, ch_key_comp_direct) == NULL)
-		goto OOM_7;
 	mtx_new(&retval->lock);
 
 #ifdef _LIBSTIL_DBG
@@ -85,16 +84,10 @@ stil_new(cw_stil_t *a_stil)
 
 	return retval;
 
-	OOM_7:
-	dch_delete(&retval->stiln_dch);
-	OOM_6:
-	pool_delete(&retval->stilsc_pool);
-	OOM_5:
-	pool_delete(&retval->stiln_pool);
 	OOM_4:
-	pool_delete(&retval->chi_pool);
+	dch_delete(&retval->stiln_dch);
 	OOM_3:
-	pool_delete(&retval->stil_bufc_pool);
+	stila_delete(&retval->stila);
 	OOM_2:
 	if (retval->is_malloced)
 		_cw_free(retval);
@@ -154,8 +147,8 @@ stil_stil_bufc_get(cw_stil_t *a_stil)
 	retval = (cw_stil_bufc_t *)_cw_pool_get(&a_stil->stil_bufc_pool);
 	if (retval == NULL)
 		goto RETURN;
-	bufc_new(&retval->bufc, (cw_opaque_dealloc_t *)pool_put,
-	    &a_stil->stil_bufc_pool);
+	bufc_new(&retval->bufc, stila_mem_get(&a_stil->stila),
+	    (cw_opaque_dealloc_t *)pool_put, &a_stil->stil_bufc_pool);
 	bzero(retval->buffer, sizeof(retval->buffer));
 	bufc_set_buffer(&retval->bufc, retval->buffer, _CW_STIL_BUFC_SIZE, TRUE,
 	    NULL, NULL);
@@ -417,7 +410,9 @@ stil_p_stiln_kref(cw_stil_t *a_stil, cw_stiln_t *a_stiln, const void *a_key,
 		is_new_dch = TRUE;
 
 		/* XXX Magic numbers here. */
-		a_stiln->keyed_refs = dch_new(NULL, 4, 3, 1, ch_hash_direct,
+		/* XXX NULL pointer. */
+		a_stiln->keyed_refs = dch_new(NULL,
+		    stila_mem_get(&a_stil->stila), 4, 3, 1, ch_hash_direct,
 		    ch_key_comp_direct);
 		if (a_stiln->keyed_refs == NULL) {
 			retval = TRUE;

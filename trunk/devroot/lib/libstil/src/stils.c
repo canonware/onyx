@@ -272,7 +272,8 @@ stils_roll(cw_stils_t *a_stils, cw_uint32_t a_count, cw_sint32_t a_amount)
 }
 
 cw_bool_t
-stils_dup(cw_stils_t *a_stils, cw_uint32_t a_count, cw_uint32_t a_index)
+stils_dup(cw_stils_t *a_stils, cw_stilt_t *a_stilt, cw_uint32_t a_count,
+    cw_uint32_t a_index)
 {
 	cw_bool_t	retval;
 	cw_stilso_t	*orig, *dup;
@@ -295,7 +296,7 @@ stils_dup(cw_stils_t *a_stils, cw_uint32_t a_count, cw_uint32_t a_index)
 	a_stils->count++;
 
 	/* Copy the object contents. */
-	stilo_copy((cw_stilo_t *)dup, (cw_stilo_t *)orig);
+	stilo_copy((cw_stilo_t *)dup, (cw_stilo_t *)orig, a_stilt);
 
 	retval = FALSE;
 	RETURN:

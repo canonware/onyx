@@ -27,6 +27,7 @@
  */
 
 #include "stilo.h"
+#include "stila.h"
 #include "stil.h"
 #include "stils.h"
 #include "stilt.h"

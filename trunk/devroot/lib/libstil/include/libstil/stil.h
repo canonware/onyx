@@ -23,6 +23,9 @@ struct cw_stil_s {
 	cw_bool_t	is_malloced;
 	cw_mtx_t	lock;
 
+	/* Global allocator. */
+	cw_stila_t	stila;
+
 	cw_pool_t	stil_bufc_pool;
 	cw_pool_t	chi_pool;
 
@@ -36,13 +39,12 @@ struct cw_stil_s {
 	cw_pool_t	dicto_pool; /* XXX Initialize! */
 
 	/*
-	 * Hash of names ((cw_stilnk_t *) string is hashed) to (cw_stiln_t ).
-	 * *This hash table keeps track of *all* name "values" in the * virtual
-	 * *machine.  When a name object is created, it actually adds * a
-	 * *reference to a stiln and uses a pointer to that stiln as a * unique
-	 * *key.  Note that each stilt maintains a cache of stiln's, * so that
-	 * *under normal circumstances, all objects in a stilt share * a single
-	 * *reference.
+	 * Hash of names ((cw_stilnk_t *) string is hashed) to (cw_stiln_t).
+	 * This hash table keeps track of *all* name "values" in the virtual
+	 * machine.  When a name object is created, it actually adds a reference
+	 * to a stiln and uses a pointer to that stiln as a unique key.  Note
+	 * that each stilt maintains a cache of stiln's, so that under normal
+	 * circumstances, all objects in a stilt share a single reference.
 	 */
 	cw_dch_t	stiln_dch;
 
@@ -110,6 +112,8 @@ cw_stil_t	*stil_new(cw_stil_t *a_stil);
 void		stil_delete(cw_stil_t *a_stil);
 
 cw_stil_bufc_t	*stil_stil_bufc_get(cw_stil_t *a_stil);
+
+#define stil_stila_get(a_stil) (&(a_stil)->stila)
 
 #define stil_chi_pool_get(a_stil) (&(a_stil)->chi_pool)
 #define stil_stilsc_pool_get(a_stil) (&(a_stil)->stilsc_pool)

@@ -88,8 +88,8 @@ cw_bool_t	stils_pop(cw_stils_t *a_stils, cw_uint32_t a_count);
 cw_bool_t	stils_roll(cw_stils_t *a_stils, cw_uint32_t a_count, cw_sint32_t
     a_amount);
 
-cw_bool_t	stils_dup(cw_stils_t *a_stils, cw_uint32_t a_count, cw_uint32_t
-    a_index);
+cw_bool_t	stils_dup(cw_stils_t *a_stils, cw_stilt_t *a_stilt, cw_uint32_t
+    a_count, cw_uint32_t a_index);
 
 cw_uint32_t	stils_count(cw_stils_t *a_stils);
 
