@@ -77,8 +77,13 @@ main(int argc, char **argv, char **envp)
 	handler_arg.quit = FALSE;
 	sigemptyset(&handler_arg.hupset);
 	sigaddset(&handler_arg.hupset, SIGHUP);
-	sigaddset(&handler_arg.hupset, SIGINT);
 	sigaddset(&handler_arg.hupset, SIGWINCH);
+	sigaddset(&handler_arg.hupset, SIGTSTP);
+	sigaddset(&handler_arg.hupset, SIGCONT);
+	sigaddset(&handler_arg.hupset, SIGINT);
+	sigaddset(&handler_arg.hupset, SIGQUIT);
+	sigaddset(&handler_arg.hupset, SIGTERM);
+
 	thd_sigmask(SIG_BLOCK, &handler_arg.hupset, NULL);
 	handler_arg.sig_thd = thd_new(sig_handler, (void *)&handler_arg, FALSE);
 #endif
@@ -147,7 +152,9 @@ stdin cvx
 			editor = "emacs";
 		}
 		el_set(el, EL_EDITOR, editor);
-/*  		el_set(el, EL_SIGNAL, 1); */
+#ifdef _ONYX_SIGHANDLER
+		el_set(el, EL_SIGNAL, 1);
+#endif
 
 		nx_new(&nx, argc, argv, envp, cl_read, NULL, NULL, (void *)&arg,
 		    NULL);
@@ -496,12 +503,19 @@ sig_handler(void *a_arg)
 				exit(0);
 			} else
 				goto RETURN;
-		case SIGINT:
-			exit(0);
 		case SIGWINCH:
 			/* XXX Doesn't return until cl_read() returns. */
 			el_resize(el);
 			break;
+		case SIGTSTP:
+			raise(SIGSTOP);
+			break;
+		case SIGCONT:
+			break;
+		case SIGINT:
+		case SIGQUIT:
+		case SIGTERM:
+			exit(0);
 		default:
 			_cw_not_reached();
 		}
