@@ -552,6 +552,25 @@ Each Onyx thread has four program-visible stacks associated with it:
 The application can also create additional stacks and manipulate them in much
 the same way as the operand stack can be manipulated.
 
+\section{Standard I/O}
+
+Onyx provides operators to access the standard I/O file objects:
+\htmlref{\onyxop{}{stdin}{}}{systemdict:stdin},
+\htmlref{\onyxop{}{stdout}{}}{systemdict:stdout}, and
+\htmlref{\onyxop{}{stderr}{}}{systemdict:stderr}.  Under normal circumstances,
+these operators are adequate for all standard I/O operations.  However, it may
+be desirable to replace these files on a per-thread basis.  This can be
+accomplished using \htmlref{\onyxop{}{setstdin}{}}{systemdict:setstdin},
+\htmlref{\onyxop{}{setstdout}{}}{systemdict:setstdout}, and
+\htmlref{\onyxop{}{setstderr}{}}{systemdict:setstderr}.  Furthermore, the file
+objects that are inherited by new threads can be accessed and modified via
+\htmlref{\onyxop{}{gstdin}{}}{systemdict:gstdin},
+\htmlref{\onyxop{}{gstdout}{}}{systemdict:gstdout},
+\htmlref{\onyxop{}{gstderr}{}}{systemdict:gstderr},
+\htmlref{\onyxop{}{setgstdin}{}}{systemdict:setgstdin},
+\htmlref{\onyxop{}{setgstdout}{}}{systemdict:setgstdout}, and
+\htmlref{\onyxop{}{setgstderr}{}}{systemdict:setgstderr}.
+
 \section{Interpreter recursion}
 
 During typical Onyx interpreter initialization, the
@@ -3608,11 +3627,17 @@ directory. \\
 path & {\bf \htmlref{cd}{systemdict:cd}} & -- & Change present working
 directory. \\
 \hline
--- & {\bf \htmlref{stdin}{systemdict:stdin}} & file & Get stdin. \\
+-- & {\bf \htmlref{stdin}{systemdict:stdin}} & file & Get thread's stdin. \\
 \hline
--- & {\bf \htmlref{stdout}{systemdict:stdout}} & file & Get stdout. \\
+-- & {\bf \htmlref{stdout}{systemdict:stdout}} & file & Get thread's stdout. \\
 \hline
--- & {\bf \htmlref{stderr}{systemdict:stderr}} & file & Get stderr. \\
+-- & {\bf \htmlref{stderr}{systemdict:stderr}} & file & Get thread's stderr. \\
+\hline
+-- & {\bf \htmlref{gstdin}{systemdict:gstdin}} & file & Get global stdin. \\
+\hline
+-- & {\bf \htmlref{gstdout}{systemdict:gstdout}} & file & Get global stdout. \\
+\hline
+-- & {\bf \htmlref{gstderr}{systemdict:gstderr}} & file & Get global stderr. \\
 \hline \hline
 \multicolumn{4}{|l|}{Logical and bitwise operators} \\
 \hline \hline
@@ -6174,6 +6199,66 @@ onyx:0>
 onyx:0> globaldict 1 sprint
 <>
 onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:gstderr}
+\index{gstderr@\onyxop{}{gstderr}{}}
+\item[{\onyxop{--}{gstderr}{file}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[file: ]
+			A file object corresponding to the global stderr.
+		\end{description}
+	\item[Errors(s): ] None.
+	\item[Description: ]
+		Get the global stderr that is inherited by new threads.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> gstderr pstack
+-file-
+onyx:1>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:gstdin}
+\index{gstdin@\onyxop{}{gstdin}{}}
+\item[{\onyxop{--}{gstdin}{file}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[file: ]
+			A file object corresponding to the global stdin.
+		\end{description}
+	\item[Errors(s): ] None.
+	\item[Description: ]
+		Get the global stdin that is inherited by new threads.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> gstdin pstack
+-file-
+onyx:1>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:gstdout}
+\index{gstdout@\onyxop{}{gstdout}{}}
+\item[{\onyxop{--}{gstdout}{file}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[file: ]
+			A file object corresponding to the global stdout.
+		\end{description}
+	\item[Errors(s): ] None.
+	\item[Description: ]
+		Get the global stdout that is inherited by new threads.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> gstdout pstack
+-file-
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:gt}
@@ -9294,11 +9379,12 @@ onyx:0>
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[file: ]
-			A file object corresponding to stderr.
+			A file object corresponding to the calling thread's
+			stderr.
 		\end{description}
 	\item[Errors(s): ] None.
 	\item[Description: ]
-		Get stdout.
+		Get the thread's stderr.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> stderr pstack
@@ -9314,11 +9400,12 @@ onyx:1>
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[file: ]
-			A file object corresponding to stdin.
+			A file object corresponding to the calling thread's
+			stdin.
 		\end{description}
 	\item[Errors(s): ] None.
 	\item[Description: ]
-		Get stdin.
+		Get the thread's stdin.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> stdin pstack
@@ -9334,11 +9421,12 @@ onyx:1>
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[file: ]
-			A file object corresponding to stdout.
+			A file object corresponding to the calling thread's
+			stdout.
 		\end{description}
 	\item[Errors(s): ] None.
 	\item[Description: ]
-		Get stdout.
+		Get the thread's stdout.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> stdout pstack
