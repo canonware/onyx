@@ -1,5 +1,4 @@
-/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
- ****************************************************************************
+/****************************************************************************
  *
  * <Copyright = jasone>
  * <License>
@@ -21,20 +20,18 @@
  *
  * <<< Description >>>
  *
- * Private method.  Parses the resources contained either in a string or in 
+ * Private method.  Parses the resources contained either in a string or in
  * a file and inserts the results into the hash table.
  *
  ****************************************************************************/
-static cw_bool_t
-res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file);
+static cw_bool_t res_p_parse_res(cw_res_t *a_res, cw_bool_t a_is_file);
 
 /****************************************************************************
  *
  * Returns the "type" of a_char.
  *
  ****************************************************************************/
-static cw_uint32_t
-res_p_char_type(char a_char);
+static cw_uint32_t res_p_char_type(char a_char);
 
 /****************************************************************************
  *
@@ -43,5 +40,5 @@ res_p_char_type(char a_char);
  * methods external to res to give us valid resources.
  *
  ****************************************************************************/
-static cw_bool_t
-res_p_merge_res(cw_res_t * a_res, const char * a_name, const char * a_val);
+static cw_bool_t res_p_merge_res(cw_res_t *a_res, const char *a_name, const
+    char *a_val);

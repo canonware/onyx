@@ -1,5 +1,4 @@
-/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
- ****************************************************************************
+/****************************************************************************
  *
  * <Copyright = jasone>
  * <License>
@@ -15,54 +14,39 @@
  ****************************************************************************/
 
 #ifdef _LIBSTASH_DBG
-#  define _CW_BUF_MAGIC 0xb00f0001
-#  define _CW_BUFEL_MAGIC 0xb00f0002
-#  define _CW_BUFC_MAGIC 0xb00f0003
+#define _CW_BUF_MAGIC 0xb00f0001
+#define _CW_BUFEL_MAGIC 0xb00f0002
+#define _CW_BUFC_MAGIC 0xb00f0003
 #endif
 
-static cw_buf_t *
-buf_p_new(cw_buf_t * a_buf, cw_bool_t a_is_threadsafe);
+static cw_buf_t *buf_p_new(cw_buf_t *a_buf, cw_bool_t a_is_threadsafe);
 
-static void
-buf_p_rebuild_cumulative_index(cw_buf_t * a_buf);
+static void buf_p_rebuild_cumulative_index(cw_buf_t *a_buf);
 
-static void
-buf_p_get_data_position(cw_buf_t * a_buf,
-			cw_uint32_t a_offset,
-			cw_uint32_t * a_array_element,
-			cw_uint32_t * a_bufel_offset);
+static void buf_p_get_data_position(cw_buf_t *a_buf, cw_uint32_t a_offset,
+    cw_uint32_t *a_array_element, cw_uint32_t *a_bufel_offset);
 
-static cw_bool_t
-buf_p_fit_array(cw_buf_t * a_buf, cw_uint32_t a_min_array_size);
+static cw_bool_t buf_p_fit_array(cw_buf_t *a_buf, cw_uint32_t a_min_array_size);
 
-static cw_bool_t
-buf_p_catenate_buf(cw_buf_t * a_a, cw_buf_t * a_b, cw_bool_t a_preserve);
+static cw_bool_t buf_p_catenate_buf(cw_buf_t *a_a, cw_buf_t *a_b, cw_bool_t
+    a_preserve);
 
 #if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
-static void
-buf_p_copy_array(cw_buf_t * a_a, cw_buf_t * a_b,
-		 cw_uint32_t a_num_elements,
-		 cw_uint32_t a_a_start, cw_uint32_t a_b_start,
-		 cw_bool_t a_is_destructive);
+static void buf_p_copy_array(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t
+    a_num_elements, cw_uint32_t a_a_start, cw_uint32_t a_b_start, cw_bool_t
+    a_is_destructive);
 #else
-static void
-buf_p_copy_array(cw_buf_t * a_a, cw_buf_t * a_b,
-		 cw_uint32_t a_num_elements,
-		 cw_uint32_t a_a_start, cw_uint32_t a_b_start);
+static void buf_p_copy_array(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t
+    a_num_elements, cw_uint32_t a_a_start, cw_uint32_t a_b_start);
 #endif
 
-static cw_bool_t
-buf_p_make_range_writeable(cw_buf_t * a_buf, cw_uint32_t a_offset,
-			   cw_uint32_t a_length);
+static cw_bool_t buf_p_make_range_writeable(cw_buf_t *a_buf, cw_uint32_t
+    a_offset, cw_uint32_t a_length);
 
-static void
-bufc_p_dump(cw_bufc_t * a_bufc, const char * a_prefix);
+static void bufc_p_dump(cw_bufc_t *a_bufc, const char *a_prefix);
 
-static cw_bool_t
-bufc_p_get_is_writeable(cw_bufc_t * a_bufc);
+static cw_bool_t bufc_p_get_is_writeable(cw_bufc_t *a_bufc);
 
-static cw_uint32_t
-bufc_p_get_ref_count(cw_bufc_t * a_bufc);
+static cw_uint32_t bufc_p_get_ref_count(cw_bufc_t *a_bufc);
 
-static void
-bufc_p_ref_increment(cw_bufc_t * a_bufc);
+static void bufc_p_ref_increment(cw_bufc_t *a_bufc);

@@ -1,5 +1,4 @@
-/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
- ****************************************************************************
+/****************************************************************************
  *
  * <Copyright = jasone>
  * <License>
@@ -13,57 +12,49 @@
 /* Pseudo-opaque type. */
 typedef struct cw_treen_s cw_treen_t;
 
-struct cw_treen_s
-{
+struct cw_treen_s {
 #if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
-  cw_uint32_t magic_a;
+	cw_uint32_t magic_a;
 #endif
 
-  /* Automatic deallocation hooks. */
-  void (*dealloc_func)(void *, void *);
-  void * dealloc_arg;
+	/* Automatic deallocation hooks. */
+	void    (*dealloc_func) (void *, void *);
+	void   *dealloc_arg;
 
-  /* Pointer to the parent. */
-  cw_treen_t * parent;
-  
-  /* Pointer to one child.  Getting to other children is achieved by iterating
-   * on the child's sibling ring. */
-  cw_treen_t * child;
+	/* Pointer to the parent. */
+	cw_treen_t *parent;
 
-  /* Linkage for the sibling ring. */
-  cw_ring_t siblings;
+	/*
+	 * Pointer to one child.  Getting to other children is achieved by
+	 * iterating on the child's sibling ring.
+	 */
+	cw_treen_t *child;
 
-  /* The payload. */
-  void * data;
-  
+	/* Linkage for the sibling ring. */
+	cw_ring_t siblings;
+
+	/* The payload. */
+	void   *data;
+
 #if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
-  cw_uint32_t size_of;
-  cw_uint32_t magic_b;
+	cw_uint32_t size_of;
+	cw_uint32_t magic_b;
 #endif
 };
 
-cw_treen_t *
-treen_new(cw_treen_t * a_treen,
-	  void (*a_dealloc_func)(void * dealloc_arg, void * treen),
-	  void * a_dealloc_arg);
+cw_treen_t *treen_new(cw_treen_t *a_treen, void (*a_dealloc_func) (void
+    *dealloc_arg, void *treen), void *a_dealloc_arg);
 
-void
-treen_delete(cw_treen_t * a_treen);
+void    treen_delete(cw_treen_t *a_treen);
 
-void
-treen_link(cw_treen_t * a_treen, cw_treen_t * a_parent);
+void    treen_link(cw_treen_t *a_treen, cw_treen_t *a_parent);
 
-cw_treen_t *
-treen_get_parent(cw_treen_t * a_treen);
+cw_treen_t *treen_get_parent(cw_treen_t *a_treen);
 
-cw_treen_t *
-treen_get_child(cw_treen_t * a_treen);
+cw_treen_t *treen_get_child(cw_treen_t *a_treen);
 
-cw_treen_t *
-treen_get_sibling(cw_treen_t * a_treen);
+cw_treen_t *treen_get_sibling(cw_treen_t *a_treen);
 
-void *
-treen_get_data_ptr(cw_treen_t * a_treen);
+void   *treen_get_data_ptr(cw_treen_t *a_treen);
 
-void
-treen_set_data_ptr(cw_treen_t * a_treen, void * a_data);
+void    treen_set_data_ptr(cw_treen_t *a_treen, void *a_data);

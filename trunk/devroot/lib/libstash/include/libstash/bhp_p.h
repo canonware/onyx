@@ -1,5 +1,4 @@
-/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
- ****************************************************************************
+/****************************************************************************
  *
  * <Copyright = jasone>
  * <License>
@@ -15,22 +14,18 @@
  ****************************************************************************/
 
 #ifdef _LIBSTASH_DBG
-#  define _LIBSTASH_BHP_MAGIC 0xbf917ca1
-#  define _LIBSTASH_BHPI_MAGIC 0xbf90ec15
+#define _LIBSTASH_BHP_MAGIC 0xbf917ca1
+#define _LIBSTASH_BHPI_MAGIC 0xbf90ec15
 #endif
 
-static cw_bhp_t *
-bhp_p_new(cw_bhp_t * a_bhp, bhp_prio_comp_t * a_prio_comp,
-	  cw_bool_t a_is_thread_safe);
+static cw_bhp_t *bhp_p_new(cw_bhp_t *a_bhp, bhp_prio_comp_t *a_prio_comp,
+    cw_bool_t a_is_thread_safe);
 
-static cw_bhpi_t *
-bhp_p_dump(cw_bhpi_t * a_bhpi, cw_uint32_t a_depth, cw_bhpi_t * a_last_printed);
+static cw_bhpi_t *bhp_p_dump(cw_bhpi_t *a_bhpi, cw_uint32_t a_depth, cw_bhpi_t
+    *a_last_printed);
 
-static void
-bhp_p_bin_link(cw_bhpi_t * a_root, cw_bhpi_t * a_non_root);
+static void bhp_p_bin_link(cw_bhpi_t *a_root, cw_bhpi_t *a_non_root);
 
-static void
-bhp_p_merge(cw_bhp_t * a_bhp, cw_bhp_t * a_other);
+static void bhp_p_merge(cw_bhp_t *a_bhp, cw_bhp_t *a_other);
 
-static void
-bhp_p_union(cw_bhp_t * a_bhp, cw_bhp_t * a_other);
+static void bhp_p_union(cw_bhp_t *a_bhp, cw_bhp_t *a_other);
