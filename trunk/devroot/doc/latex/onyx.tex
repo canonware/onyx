@@ -18,17 +18,17 @@
 
 Onyx is a stack-based, threaded, interpreted language.  Its closest relative is
 Adobe PostScript, followed by Forth.  Experienced PostScript programmers should
-find most aspects of onyx familiar, but there are significant differences that
-will prevent a knowledgeable PostScript programmer from programming in onyx
+find most aspects of Onyx familiar, but there are significant differences that
+will prevent a knowledgeable PostScript programmer from programming in Onyx
 without first skimming this chapter.  This chapter does not assume specific
 knowledge of other programming languages, so stands as a definitive reference
-manual for onyx.
+manual for Onyx.
 
 Onyx is different from most languages in that it is not compiled, but rather
 consumed.  For example, there are mechanisms for creating the equivalent of
 named procedures that can be called at a later time, but behind the scenes, the
 code is actually being interpreted as it is scanned in such a way that an
-executable object is created.  As such, onyx is not suited for compilation,
+executable object is created.  As such, Onyx is not suited for compilation,
 native or byte code.  However, the language syntax is very simple and the
 scanner/parser is extremely fast.  There is also a mechanism for binding
 procedures, which makes interpreter performance approximately the same as would
@@ -44,7 +44,7 @@ later in this manual:
 
 \begin{itemize}
 \item{Stack-based.  There are no named variables as in procedural languages.
-Operations are done using various stacks, so onyx operations are coded in
+Operations are done using various stacks, so Onyx operations are coded in
 postfix order.}
 \item{Threaded.  Onyx's threading uses the native POSIX threads implementation
 of the operating system.}
@@ -58,7 +58,7 @@ collector.}
 \section{Objects}
 \label{sec:onyx_objects}
 
-An onyx object has three aspects: type, attribute, and value.
+An Onyx object has three aspects: type, attribute, and value.
 
 Objects fall into two categories according to type: simple and composite.  A
 simple object takes up no memory of its own; it uses space within a stack,
@@ -145,13 +145,13 @@ also be of any type.
 \item[file: ] A file is a handle to an ordered sequence of bytes with a current
 position.  Read and write permissions are set when a file object is created.
 
-When an executable file is executed, it is used as a source of onyx code.  Data
+When an executable file is executed, it is used as a source of Onyx code.  Data
 are sequentially read from the file and interpreted until the end of the file is
 reached.
 
 \item[fino: ] A fino is used as a stack marker when constructing stacks.
 
-\item[hook: ] The hook type is not used by the core onyx language.  It can be
+\item[hook: ] The hook type is not used by the core Onyx language.  It can be
 used by applications that extend the interpreter as a container object.  Hooks
 can be executed, but the results are application dependent.
 
@@ -210,7 +210,7 @@ After the code executes, the string left on the operand stack looks like:
 `bcd'
 \end{verbatim}
 
-When a string is executed, its contents are used as a source of onyx code.
+When a string is executed, its contents are used as a source of Onyx code.
 
 \item[thread: ] A thread object serves as a handle for operations such as
 detaching and joining.
@@ -235,7 +235,7 @@ characters including non-printing characters are considered regular characters.
 A comment starts with a \% character outside of a string context and extends to
 the next newline or formfeed.
 
-Procedures are actually executable arrays, but onyx provides special syntax for
+Procedures are actually executable arrays, but Onyx provides special syntax for
 declaring procedures.  Procedures are delimited by \{ and \}, and can be
 nested.  Normally, the interpreter executes code as it is scanned, but inside of
 procedure declarations, execution is deferred.  Instead of executing a procedure
@@ -361,11 +361,11 @@ their construction.  Examples of stack contstruction include:
 
 \section{Stacks}
 
-Stacks in onyx are the core data structure that programs act on.  Stacks store
+Stacks in Onyx are the core data structure that programs act on.  Stacks store
 objects in a last in, first out (LIFO) fashion.  Onyx includes a number of
 operators that manipulate stacks.
 
-Each onyx thread has four program-visible stacks associated with it:
+Each Onyx thread has four program-visible stacks associated with it:
 \begin{description}
 \item[Operand stack: ] Most direct object manipulations are done using the
 	operand stack.  Operators use the operand stack for inputs and outputs,
@@ -402,7 +402,7 @@ the same way as the operand stack can be manipulated.
 
 \section{Interpretation, execution and evaluation}
 
-During onyx interpreter initialization, an object file object corresponding to
+During Onyx interpreter initialization, an object file object corresponding to
 stdin is usually pushed onto the execution stack.  However, depending on how the
 interpreter is invoked, the initial object on the execution stack may be any
 object.  The interpreter loop can be recursively invoked.  For example, if the
@@ -418,7 +418,7 @@ recursion.
 
 \section{Error handling}
 
-The error handling mechanisms in onyx are simple but flexible.  When an error
+The error handling mechanisms in Onyx are simple but flexible.  When an error
 occurs, the following operations are performed as a result of executing
 \htmlref{\onyxop{}{throw}{}}{systemdict:throw}:
 \begin{enumerate}
@@ -430,12 +430,12 @@ errordict's \htmlref{\onyxop{}{handleerror}{}}{errordict:handleerror}.}
 \item{Execute errordict's stop operator.}
 \end{enumerate}
 
-The onyx scanner handles syntax errors specially, in that it pushes an
+The Onyx scanner handles syntax errors specially, in that it pushes an
 executable string onto the operand stack that represents the code that caused
 the syntax error and records the line and column numbers in currenterror before
 invoking \htmlref{\onyxop{}{throw}{}}{systemdict:throw}.
 
-The onyx scanner also handles immediate name evaluation errors specially, in
+The Onyx scanner also handles immediate name evaluation errors specially, in
 that it pushes the name that could not be evaluated onto ostack before invoking
 \htmlref{\onyxop{}{throw}{}}{systemdict:throw}.
 
@@ -555,9 +555,9 @@ is described in Section~\ref{sec:gcdict}.
 
 \section{Dictionary reference}
 
-All operators built in to onyx have corresponding names that are composed
+All operators built in to Onyx have corresponding names that are composed
 entirely of lower case letters.  In order to avoid any possibility of namespace
-collisions names defined by current and future versions of onyx, use at least
+collisions names defined by current and future versions of Onyx, use at least
 one character that is not a lower case letter in names (for example, capital
 letters, numbers, underscore, etc.).
 
@@ -1527,7 +1527,7 @@ onyx:0>
 \label{sec:globaldict}
 
 All threads share the same globaldict, which is meant as a repository for
-globally shared objects.  globaldict is empty when the onyx interpreter is
+globally shared objects.  globaldict is empty when the Onyx interpreter is
 initialized, and is implicitly locked.
 
 \subsection{sprintdict}
@@ -1537,7 +1537,7 @@ The sprintdict dictionary is primarily used to support
 \htmlref{\onyxop{}{sprint}{}}{systemdict:sprint}, but its contents may be of use
 to an application that wishes to extend or modify syntactical printing.
 
-There is an entry in sprintdict for each onyx type.  Each operator takes two
+There is an entry in sprintdict for each Onyx type.  Each operator takes two
 arguments: an object to print and an integer that represents printing recursion
 depth.  Each operator removes the two arguments from ostack upon completion.  If
 there is a syntactically valid representation for an object and the recursion
