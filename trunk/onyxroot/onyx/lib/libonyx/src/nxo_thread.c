@@ -1967,6 +1967,13 @@ nxoe_p_thread_name_accept(cw_nxoe_thread_t *a_thread)
 			 * source.
 			 */
 			nxo_dup(nxo, key);
+
+			/*
+			 * Reset the deferral count before throwing the
+			 * error.
+			 */
+			a_thread->defer_count = 0;
+
 			nxo_thread_error(&a_thread->self,
 			    NXO_THREADE_UNDEFINED);
 		}
