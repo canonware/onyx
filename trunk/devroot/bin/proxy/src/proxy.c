@@ -84,7 +84,7 @@ main(int argc, char **argv)
 	mem_set_oom_handler(cw_g_mem, oom_handler, NULL);
 	g_progname = basename(argv[0]);
 	dbg_register(cw_g_dbg, "prog_error");
-	dbg_register(cw_g_dbg, "sockb_error");
+	dbg_register(cw_g_dbg, "libsock_error");
 	dbg_register(cw_g_dbg, "socks_error");
 	dbg_register(cw_g_dbg, "sock_error");
 /*  	dbg_register(cw_g_dbg, "sock_sockopt"); */
@@ -104,7 +104,7 @@ main(int argc, char **argv)
 			opt_verbose = TRUE;
 			dbg_register(cw_g_dbg, "prog_verbose");
 /*  			dbg_register(cw_g_dbg, "mem_verbose"); */
-			dbg_register(cw_g_dbg, "sockb_verbose");
+			dbg_register(cw_g_dbg, "libsock_verbose");
 			dbg_register(cw_g_dbg, "socks_verbose");
 /*  			dbg_register(cw_g_dbg, "sock_sockopt"); */
 			break;
@@ -113,7 +113,7 @@ main(int argc, char **argv)
 			dbg_unregister(cw_g_dbg, "prog_error");
 			dbg_unregister(cw_g_dbg, "mem_error");
 			dbg_unregister(cw_g_dbg, "pezz_error");
-			dbg_unregister(cw_g_dbg, "sockb_error");
+			dbg_unregister(cw_g_dbg, "libsock_error");
 			dbg_unregister(cw_g_dbg, "socks_error");
 			dbg_unregister(cw_g_dbg, "sock_error");
 			break;
@@ -232,7 +232,7 @@ main(int argc, char **argv)
 	}
 	if (dbg_is_registered(cw_g_dbg, "prog_verbose"))
 		_cw_out_put("pid: [i]\n", getpid());
-	if (sockb_init(1024, 2048, 4096))
+	if (libsock_init(1024, 2048, 4096))
 		_cw_error("Initialization failure");
 	socks = socks_new();
 	if (socks_listen(socks, INADDR_ANY, &opt_port))
@@ -296,7 +296,7 @@ main(int argc, char **argv)
 
 	socks_delete(socks);
 
-	sockb_shutdown();
+	libsock_shutdown();
 	CLERROR:
 	libstash_shutdown();
 	return retval;

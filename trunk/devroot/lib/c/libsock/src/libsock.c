@@ -23,14 +23,14 @@
 #include <arpa/inet.h>
 #include <signal.h>
 
-#include "../include/libsock/sockb_l.h"
+#include "../include/libsock/libsock_l.h"
 #include "../include/libsock/sock_l.h"
 
 #ifdef _LIBSOCK_DBG
-#define _LIBSOCK_SOCKB_MSG_MAGIC 0xf0010725
+#define _LIBSOCK_MSG_MAGIC 0xf0010725
 #endif
 
-struct cw_sockb_msg_s {
+struct cw_libsock_msg_s {
 #ifdef _LIBSOCK_DBG
 	cw_uint32_t	magic;
 #endif
@@ -49,7 +49,7 @@ struct cw_sockb_msg_s {
 	}	data;
 };
 
-struct cw_sockb_reg_s {
+struct cw_libsock_reg_s {
 	cw_sock_t	*sock;	/* sock pointer. */
 	cw_sint32_t	pollfd_pos; /*
 				     * Offset in the pollfd struct passed into
@@ -61,13 +61,13 @@ struct cw_sockb_reg_s {
 				     */
 };
 
-struct cw_sockb_entry_s {
+struct cw_libsock_entry_s {
 	cw_uint32_t	max_fds;
-	struct cw_sockb_reg_s *regs;
+	struct cw_libsock_reg_s *regs;
 	struct pollfd	*fds;
 };
 
-struct cw_sockb_s {
+struct cw_libsock_s {
 	cw_bool_t	should_quit;
 	cw_thd_t	thread;
 	int		pipe_in;
@@ -84,7 +84,7 @@ struct cw_sockb_s {
 	cw_mtx_t	get_ip_addr_lock;
 };
 
-static cw_bool_t sockb_p_notify(cw_mq_t *a_mq, int a_sockfd);
+static cw_bool_t libsock_p_notify(cw_mq_t *a_mq, int a_sockfd);
 
 /****************************************************************************
  *
@@ -103,33 +103,33 @@ static cw_bool_t sockb_p_notify(cw_mq_t *a_mq, int a_sockfd);
  * queues (list's).
  *
  ****************************************************************************/
-static void	*sockb_p_entry_func(void *a_arg);
+static void	*libsock_p_entry_func(void *a_arg);
 
 /* Global. */
-cw_sockb_t	*g_sockb = NULL;
+cw_libsock_t	*g_libsock = NULL;
 
 cw_bool_t
-sockb_init(cw_uint32_t a_max_fds, cw_uint32_t a_bufc_size, cw_uint32_t
+libsock_init(cw_uint32_t a_max_fds, cw_uint32_t a_bufc_size, cw_uint32_t
     a_max_spare_bufcs)
 {
-	struct cw_sockb_entry_s *arg;
+	struct cw_libsock_entry_s *arg;
 	int		filedes[2];
 	int		val;
 
 	_cw_assert(a_bufc_size > 0);
 
-	arg = (struct cw_sockb_entry_s *)_cw_malloc(sizeof(struct
-	    cw_sockb_entry_s));
+	arg = (struct cw_libsock_entry_s *)_cw_malloc(sizeof(struct
+	    cw_libsock_entry_s));
 
 	if (arg == NULL)
 		goto OOM_1;
 	arg->max_fds = a_max_fds;
-	arg->regs = (struct cw_sockb_reg_s *)_cw_calloc(a_max_fds, sizeof(struct
-	    cw_sockb_reg_s));
+	arg->regs = (struct cw_libsock_reg_s *)_cw_calloc(a_max_fds,
+	    sizeof(struct cw_libsock_reg_s));
 
 	if (arg->regs == NULL)
 		goto OOM_2;
-	memset(arg->regs, 0, a_max_fds * sizeof(struct cw_sockb_reg_s));
+	memset(arg->regs, 0, a_max_fds * sizeof(struct cw_libsock_reg_s));
 
 	arg->fds = (struct pollfd *)_cw_calloc(a_max_fds, sizeof(struct
 	    pollfd));
@@ -138,11 +138,11 @@ sockb_init(cw_uint32_t a_max_fds, cw_uint32_t a_bufc_size, cw_uint32_t
 		goto OOM_3;
 	memset(arg->fds, 0, a_max_fds * sizeof(struct pollfd));
 
-	if (g_sockb == NULL) {
-		g_sockb = (cw_sockb_t *)_cw_malloc(sizeof(cw_sockb_t));
-		if (g_sockb == NULL)
+	if (g_libsock == NULL) {
+		g_libsock = (cw_libsock_t *)_cw_malloc(sizeof(cw_libsock_t));
+		if (g_libsock == NULL)
 			goto OOM_4;
-		memset(g_sockb, 0, sizeof(cw_sockb_t));
+		memset(g_libsock, 0, sizeof(cw_libsock_t));
 
 		/*
 		 * Ignore SIGPIPE, so that writing to a closed socket won't
@@ -161,82 +161,82 @@ sockb_init(cw_uint32_t a_max_fds, cw_uint32_t a_bufc_size, cw_uint32_t
 			    strerror(errno));
 			abort();
 		}
-		g_sockb->pipe_out = filedes[0];
-		g_sockb->pipe_in = filedes[1];
+		g_libsock->pipe_out = filedes[0];
+		g_libsock->pipe_in = filedes[1];
 
-		/* Set g_sockb->pipe_in to non-blocking. */
-		val = fcntl(g_sockb->pipe_in, F_GETFL, 0);
+		/* Set g_libsock->pipe_in to non-blocking. */
+		val = fcntl(g_libsock->pipe_in, F_GETFL, 0);
 		if (val == -1) {
 			_cw_out_put_e("Fatal error for F_GETFL in fcntl(): "
 			    "[s]\n", strerror(errno));
 			abort();
 		}
-		if (fcntl(g_sockb->pipe_in, F_SETFL, val | O_NONBLOCK)) {
+		if (fcntl(g_libsock->pipe_in, F_SETFL, val | O_NONBLOCK)) {
 			_cw_out_put_e("Fatal error for F_SETFL in fcntl(): "
 			    "[s]\n", strerror(errno));
 			abort();
 		}
 
-		val = fcntl(g_sockb->pipe_out, F_GETFL, 0);
+		val = fcntl(g_libsock->pipe_out, F_GETFL, 0);
 		if (val == -1) {
 			_cw_out_put_e("Fatal error for F_GETFL in fcntl(): "
 			    "[s]\n", strerror(errno));
 			abort();
 		}
-		if (fcntl(g_sockb->pipe_in, F_SETFL, val | O_NONBLOCK)) {
+		if (fcntl(g_libsock->pipe_in, F_SETFL, val | O_NONBLOCK)) {
 			_cw_out_put_e("Fatal error for F_SETFL in fcntl(): "
 			    "[s]\n", strerror(errno));
 			abort();
 		}
 
-		g_sockb->should_quit = FALSE;
+		g_libsock->should_quit = FALSE;
 
 		/*
 		 * Create the semaphore used for determining whether data should
 		 * be written to the pipe in order to force a return from
 		 * poll().
 		 */
-		sema_new(&g_sockb->pipe_sema, 1);
+		sema_new(&g_libsock->pipe_sema, 1);
 
 		/*
 		 * Create the spare bufc pool and initialize associated
 		 * variables.
 		 */
-		if (pezz_new(&g_sockb->bufc_pool, cw_g_mem, sizeof(cw_bufc_t),
+		if (pezz_new(&g_libsock->bufc_pool, cw_g_mem, sizeof(cw_bufc_t),
 		    (a_max_spare_bufcs)? a_max_spare_bufcs : 1) == NULL)
 			goto OOM_5;
-		if (pezz_new(&g_sockb->buffer_pool, cw_g_mem, a_bufc_size,
+		if (pezz_new(&g_libsock->buffer_pool, cw_g_mem, a_bufc_size,
 		    (a_max_spare_bufcs) ? a_max_spare_bufcs : 1) == NULL)
 			goto OOM_6;
 		/* Create the message queues. */
-		if (pezz_new(&g_sockb->messages_pezz, cw_g_mem, sizeof(struct
-		    cw_sockb_msg_s), 8) == NULL)
+		if (pezz_new(&g_libsock->messages_pezz, cw_g_mem, sizeof(struct
+		    cw_libsock_msg_s), 8) == NULL)
 			goto OOM_7;
-		if (mq_new(&g_sockb->messages, cw_g_mem, sizeof(struct
-		    cw_sockb_msg_s *)) == NULL)
+		if (mq_new(&g_libsock->messages, cw_g_mem, sizeof(struct
+		    cw_libsock_msg_s *)) == NULL)
 			goto OOM_8;
 
 		/* Create the lock used for protecting gethostbyname(). */
-		mtx_new(&g_sockb->get_ip_addr_lock);
+		mtx_new(&g_libsock->get_ip_addr_lock);
 
 		/*
 		 * Create a new thread to handle all of the back end socket
 		 * foo.
 		 */
-		thd_new(&g_sockb->thread, sockb_p_entry_func, (void *)arg);
+		thd_new(&g_libsock->thread, libsock_p_entry_func, (void *)arg);
 	}
 
 	return FALSE;
 
 	OOM_8:
-	pezz_delete(&g_sockb->messages_pezz);
+	pezz_delete(&g_libsock->messages_pezz);
 	OOM_7:
-	pezz_delete(&g_sockb->buffer_pool);
+	pezz_delete(&g_libsock->buffer_pool);
 	OOM_6:
-	pezz_delete(&g_sockb->bufc_pool);
+	pezz_delete(&g_libsock->bufc_pool);
 	OOM_5:
-	_cw_free(g_sockb);
-	g_sockb = NULL;
+	_cw_free(g_libsock);
+	g_libsock = NULL;
 	OOM_4:
 	_cw_free(arg->fds);
 	OOM_3:
@@ -248,82 +248,82 @@ sockb_init(cw_uint32_t a_max_fds, cw_uint32_t a_bufc_size, cw_uint32_t
 }
 
 void
-sockb_shutdown(void)
+libsock_shutdown(void)
 {
-	if (g_sockb != NULL) {
+	if (g_libsock != NULL) {
 		/* Tell the back end thread to quit, then join on it. */
-		g_sockb->should_quit = TRUE;
-		sockb_l_wakeup();
-		thd_join(&g_sockb->thread);
+		g_libsock->should_quit = TRUE;
+		libsock_l_wakeup();
+		thd_join(&g_libsock->thread);
 
-		sema_delete(&g_sockb->pipe_sema);
+		sema_delete(&g_libsock->pipe_sema);
 
 		/* Clean up the spare bufc's. */
-		pezz_delete(&g_sockb->bufc_pool);
-		pezz_delete(&g_sockb->buffer_pool);
+		pezz_delete(&g_libsock->bufc_pool);
+		pezz_delete(&g_libsock->buffer_pool);
 
-		pezz_delete(&g_sockb->messages_pezz);
-		mq_delete(&g_sockb->messages);
+		pezz_delete(&g_libsock->messages_pezz);
+		mq_delete(&g_libsock->messages);
 
 		/* Delete the gethostbyname() protection lock. */
-		mtx_delete(&g_sockb->get_ip_addr_lock);
+		mtx_delete(&g_libsock->get_ip_addr_lock);
 
-		_cw_free(g_sockb);
+		_cw_free(g_libsock);
 	}
 }
 
 cw_bufc_t *
-sockb_get_spare_bufc(void)
+libsock_get_spare_bufc(void)
 {
 	cw_bufc_t	*retval;
 	void		*buffer;
 
-	_cw_check_ptr(g_sockb);
+	_cw_check_ptr(g_libsock);
 
-	retval = bufc_new((cw_bufc_t *)_cw_pezz_get(&g_sockb->bufc_pool),
+	retval = bufc_new((cw_bufc_t *)_cw_pezz_get(&g_libsock->bufc_pool),
 	    cw_g_mem, (cw_opaque_dealloc_t *)pezz_put, (void
-	    *)&g_sockb->bufc_pool);
+	    *)&g_libsock->bufc_pool);
 	if (retval == NULL) {
 		retval = NULL;
 		goto RETURN;
 	}
-	buffer = _cw_pezz_get(&g_sockb->buffer_pool);
+	buffer = _cw_pezz_get(&g_libsock->buffer_pool);
 	if (buffer == NULL) {
 		bufc_delete(retval);
 		retval = NULL;
 		goto RETURN;
 	}
 	bufc_set_buffer(retval,
-	    buffer,pezz_get_buffer_size(&g_sockb->buffer_pool), TRUE,
-	    (cw_opaque_dealloc_t *)pezz_put, (void *)&g_sockb->buffer_pool);
+	    buffer,pezz_get_buffer_size(&g_libsock->buffer_pool), TRUE,
+	    (cw_opaque_dealloc_t *)pezz_put, (void *)&g_libsock->buffer_pool);
 
 	RETURN:
 	return retval;
 }
 
 cw_bool_t
-sockb_in_notify(cw_mq_t *a_mq, int a_sockfd)
+libsock_in_notify(cw_mq_t *a_mq, int a_sockfd)
 {
 	cw_bool_t	retval;
-	struct cw_sockb_msg_s *message;
+	struct cw_libsock_msg_s *message;
 	cw_mtx_t	mtx;
 	cw_cnd_t	cnd;
 
-	_cw_check_ptr(g_sockb);
+	_cw_check_ptr(g_libsock);
 	_cw_assert(a_sockfd >= 0);
 
 	mtx_new(&mtx);
 	cnd_new(&cnd);
 
-	message = (struct cw_sockb_msg_s
-	    *)_cw_pezz_get(&g_sockb->messages_pezz);
+	message = (struct cw_libsock_msg_s
+	    *)_cw_pezz_get(&g_libsock->messages_pezz);
 
 	if (message == NULL) {
 		retval = TRUE;
 		goto RETURN;
 	}
 #ifdef _LIBSOCK_DBG
-	message->magic = _LIBSOCK_SOCKB_MSG_MAGIC;
+	message->magic = _LIBSOCK_MSG_MAGIC;
 #endif
 	message->type = IN_NOTIFY;
 	message->data.in_notify.sockfd = a_sockfd;
@@ -332,12 +332,12 @@ sockb_in_notify(cw_mq_t *a_mq, int a_sockfd)
 	message->data.in_notify.cnd = &cnd;
 
 	mtx_lock(&mtx);
-	if (mq_put(&g_sockb->messages, message) != 0) {
-		_cw_pezz_put(&g_sockb->messages_pezz, (void *)message);
+	if (mq_put(&g_libsock->messages, message) != 0) {
+		_cw_pezz_put(&g_libsock->messages_pezz, (void *)message);
 		retval = TRUE;
 		goto RETURN;
 	}
-	sockb_l_wakeup();
+	libsock_l_wakeup();
 
 	cnd_wait(&cnd, &mtx);
 	mtx_unlock(&mtx);
@@ -351,11 +351,11 @@ sockb_in_notify(cw_mq_t *a_mq, int a_sockfd)
 }
 
 void
-sockb_l_wakeup(void)
+libsock_l_wakeup(void)
 {
-	if (sema_trywait(&g_sockb->pipe_sema) == FALSE) {
-		if (write(g_sockb->pipe_in, "X", 1) == -1) {
-			if (dbg_is_registered(cw_g_dbg, "sockb_error")) {
+	if (sema_trywait(&g_libsock->pipe_sema) == FALSE) {
+		if (write(g_libsock->pipe_in, "X", 1) == -1) {
+			if (dbg_is_registered(cw_g_dbg, "libsock_error")) {
 				_cw_out_put_e("Error in write(): [s]\n",
 				    strerror(errno));
 			}
@@ -364,33 +364,33 @@ sockb_l_wakeup(void)
 }
 
 cw_bool_t
-sockb_l_register_sock(cw_sock_t *a_sock)
+libsock_l_register_sock(cw_sock_t *a_sock)
 {
 	cw_bool_t		retval;
-	struct cw_sockb_msg_s	*message;
+	struct cw_libsock_msg_s	*message;
 
 	_cw_check_ptr(a_sock);
-	_cw_check_ptr(g_sockb);
+	_cw_check_ptr(g_libsock);
 	_cw_assert(sock_get_fd(a_sock) >= 0);
 
-	message = (struct cw_sockb_msg_s
-	    *)_cw_pezz_get(&g_sockb->messages_pezz);
+	message = (struct cw_libsock_msg_s
+	    *)_cw_pezz_get(&g_libsock->messages_pezz);
 
 	if (message == NULL) {
 		retval = TRUE;
 		goto RETURN;
 	}
 #ifdef _LIBSOCK_DBG
-	message->magic = _LIBSOCK_SOCKB_MSG_MAGIC;
+	message->magic = _LIBSOCK_MSG_MAGIC;
 #endif
 	message->type = REGISTER;
 	message->data.sock = a_sock;
-	if (mq_put(&g_sockb->messages, message) != 0) {
-		_cw_pezz_put(&g_sockb->messages_pezz, (void *)message);
+	if (mq_put(&g_libsock->messages, message) != 0) {
+		_cw_pezz_put(&g_libsock->messages_pezz, (void *)message);
 		retval = TRUE;
 		goto RETURN;
 	}
-	sockb_l_wakeup();
+	libsock_l_wakeup();
 
 	retval = FALSE;
 
@@ -399,31 +399,31 @@ sockb_l_register_sock(cw_sock_t *a_sock)
 }
 
 cw_bool_t
-sockb_l_unregister_sock(cw_uint32_t a_sockfd)
+libsock_l_unregister_sock(cw_uint32_t a_sockfd)
 {
 	cw_bool_t		retval;
-	struct cw_sockb_msg_s	*message;
+	struct cw_libsock_msg_s	*message;
 
-	_cw_check_ptr(g_sockb);
+	_cw_check_ptr(g_libsock);
 
-	message = (struct cw_sockb_msg_s
-	    *)_cw_pezz_get(&g_sockb->messages_pezz);
+	message = (struct cw_libsock_msg_s
+	    *)_cw_pezz_get(&g_libsock->messages_pezz);
 
 	if (message == NULL) {
 		retval = TRUE;
 		goto RETURN;
 	}
 #ifdef _LIBSOCK_DBG
-	message->magic = _LIBSOCK_SOCKB_MSG_MAGIC;
+	message->magic = _LIBSOCK_MSG_MAGIC;
 #endif
 	message->type = UNREGISTER;
 	message->data.sockfd = a_sockfd;
-	if (mq_put(&g_sockb->messages, message) != 0) {
-		_cw_pezz_put(&g_sockb->messages_pezz, (void *)message);
+	if (mq_put(&g_libsock->messages, message) != 0) {
+		_cw_pezz_put(&g_libsock->messages_pezz, (void *)message);
 		retval = TRUE;
 		goto RETURN;
 	}
-	sockb_l_wakeup();
+	libsock_l_wakeup();
 
 	retval = FALSE;
 	RETURN:
@@ -431,31 +431,31 @@ sockb_l_unregister_sock(cw_uint32_t a_sockfd)
 }
 
 cw_bool_t
-sockb_l_out_notify(cw_uint32_t a_sockfd)
+libsock_l_out_notify(cw_uint32_t a_sockfd)
 {
 	cw_bool_t		retval;
-	struct cw_sockb_msg_s	*message;
+	struct cw_libsock_msg_s	*message;
 
-	_cw_check_ptr(g_sockb);
+	_cw_check_ptr(g_libsock);
 
-	message = (struct cw_sockb_msg_s
-	    *)_cw_pezz_get(&g_sockb->messages_pezz);
+	message = (struct cw_libsock_msg_s
+	    *)_cw_pezz_get(&g_libsock->messages_pezz);
 
 	if (NULL == message) {
 		retval = TRUE;
 		goto RETURN;
 	}
 #ifdef _LIBSOCK_DBG
-	message->magic = _LIBSOCK_SOCKB_MSG_MAGIC;
+	message->magic = _LIBSOCK_MSG_MAGIC;
 #endif
 	message->type = OUT_NOTIFY;
 	message->data.sockfd = a_sockfd;
-	if (mq_put(&g_sockb->messages, message) != 0) {
-		_cw_pezz_put(&g_sockb->messages_pezz, (void *)message);
+	if (mq_put(&g_libsock->messages, message) != 0) {
+		_cw_pezz_put(&g_libsock->messages_pezz, (void *)message);
 		retval = TRUE;
 		goto RETURN;
 	}
-	sockb_l_wakeup();
+	libsock_l_wakeup();
 
 	retval = FALSE;
 	RETURN:
@@ -463,31 +463,31 @@ sockb_l_out_notify(cw_uint32_t a_sockfd)
 }
 
 cw_bool_t
-sockb_l_in_space(cw_uint32_t a_sockfd)
+libsock_l_in_space(cw_uint32_t a_sockfd)
 {
 	cw_bool_t retval;
-	struct cw_sockb_msg_s *message;
+	struct cw_libsock_msg_s *message;
 
-	_cw_check_ptr(g_sockb);
+	_cw_check_ptr(g_libsock);
 
-	message = (struct cw_sockb_msg_s
-	    *)_cw_pezz_get(&g_sockb->messages_pezz);
+	message = (struct cw_libsock_msg_s
+	    *)_cw_pezz_get(&g_libsock->messages_pezz);
 
 	if (message == NULL) {
 		retval = TRUE;
 		goto RETURN;
 	}
 #ifdef _LIBSOCK_DBG
-	message->magic = _LIBSOCK_SOCKB_MSG_MAGIC;
+	message->magic = _LIBSOCK_MSG_MAGIC;
 #endif
 	message->type = IN_SPACE;
 	message->data.sockfd = a_sockfd;
-	if (mq_put(&g_sockb->messages, message) != 0) {
-		_cw_pezz_put(&g_sockb->messages_pezz, (void *)message);
+	if (mq_put(&g_libsock->messages, message) != 0) {
+		_cw_pezz_put(&g_libsock->messages_pezz, (void *)message);
 		retval = TRUE;
 		goto RETURN;
 	}
-	sockb_l_wakeup();
+	libsock_l_wakeup();
 
 	retval = FALSE;
 	RETURN:
@@ -495,12 +495,12 @@ sockb_l_in_space(cw_uint32_t a_sockfd)
 }
 
 cw_bool_t
-sockb_l_get_host_ip(const char *a_host_str, cw_uint32_t *r_host_ip)
+libsock_l_get_host_ip(const char *a_host_str, cw_uint32_t *r_host_ip)
 {
 	cw_bool_t	retval;
 	cw_uint32_t	host_ip;
 
-	_cw_check_ptr(g_sockb);
+	_cw_check_ptr(g_libsock);
 
 	host_ip = inet_addr(a_host_str);
 
@@ -517,11 +517,11 @@ sockb_l_get_host_ip(const char *a_host_str, cw_uint32_t *r_host_ip)
 		 */
 
 		/* Lock the mutex first. */
-		mtx_lock(&g_sockb->get_ip_addr_lock);
+		mtx_lock(&g_libsock->get_ip_addr_lock);
 
 		host_entry = gethostbyname(a_host_str);
 		if (host_entry == NULL) {
-			if (dbg_is_registered(cw_g_dbg, "sockb_error")) {
+			if (dbg_is_registered(cw_g_dbg, "libsock_error")) {
 #ifdef _CW_OS_SOLARIS
 				_cw_out_put_e("Error in gethostbyname(): [i]\n",
 				    h_errno);
@@ -549,13 +549,13 @@ sockb_l_get_host_ip(const char *a_host_str, cw_uint32_t *r_host_ip)
 		 * We're done with h_errno and the global structure pointed to
 		 * by host_entry, so unlock the mutex now.
 		 */
-		mtx_unlock(&g_sockb->get_ip_addr_lock);
+		mtx_unlock(&g_libsock->get_ip_addr_lock);
 	} else {
 		*r_host_ip = host_ip;
 		retval = FALSE;
 	}
 
-	if (dbg_is_registered(cw_g_dbg, "sockb_verbose")) {
+	if (dbg_is_registered(cw_g_dbg, "libsock_verbose")) {
 		cw_uint32_t	t_host_ip = ntohl(*r_host_ip);
 
 		out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
@@ -566,7 +566,7 @@ sockb_l_get_host_ip(const char *a_host_str, cw_uint32_t *r_host_ip)
 }
 
 static cw_bool_t
-sockb_p_notify(cw_mq_t *a_mq, int a_sockfd)
+libsock_p_notify(cw_mq_t *a_mq, int a_sockfd)
 {
 	cw_bool_t	retval;
 	cw_sint32_t	error;
@@ -578,7 +578,7 @@ sockb_p_notify(cw_mq_t *a_mq, int a_sockfd)
 		 * We can't afford to lose the message, since it could end up
 		 * causing deadlock.
 		 */
-		if (dbg_is_registered(cw_g_dbg, "sockb_error"))
+		if (dbg_is_registered(cw_g_dbg, "libsock_error"))
 			_cw_out_put_e("Memory allocation error; yielding\n");
 		thd_yield();
 	}
@@ -601,17 +601,17 @@ sockb_p_notify(cw_mq_t *a_mq, int a_sockfd)
 }
 
 static void *
-sockb_p_entry_func(void *a_arg)
+libsock_p_entry_func(void *a_arg)
 {
-	struct cw_sockb_entry_s	*arg = (struct cw_sockb_entry_s *)a_arg;
+	struct cw_libsock_entry_s *arg = (struct cw_libsock_entry_s *)a_arg;
 	cw_uint32_t		max_fds = arg->max_fds;
-	struct cw_sockb_reg_s	*regs = arg->regs;
+	struct cw_libsock_reg_s	*regs = arg->regs;
 	struct pollfd		*fds = arg->fds;
 	unsigned		nfds;
 	cw_sock_t		*sock;
 	int			sockfd, num_ready;
 	cw_buf_t		tmp_buf, buf_in;
-	struct cw_sockb_msg_s	*message;
+	struct cw_libsock_msg_s	*message;
 
 	_cw_free(a_arg);
 
@@ -626,16 +626,16 @@ sockb_p_entry_func(void *a_arg)
 	}
 
 	/*
-	 * Add g_sockb->pipe_out for readingg, so that this thread will return
-	 * from poll() when data is written to g_sockb->pipe_in.
+	 * Add g_libsock->pipe_out for readingg, so that this thread will return
+	 * from poll() when data is written to g_libsock->pipe_in.
 	 */
-	fds[0].fd = g_sockb->pipe_out;
+	fds[0].fd = g_libsock->pipe_out;
 	fds[0].events = POLLIN;
 	nfds = 1;
 
-	while (g_sockb->should_quit == FALSE) {
+	while (g_libsock->should_quit == FALSE) {
 		/* Check for messages in the message queues. */
-		while (mq_tryget(&g_sockb->messages, &message)) {
+		while (mq_tryget(&g_libsock->messages, &message)) {
 			switch (message->type) {
 			case REGISTER:
 				sock = message->data.sock;
@@ -731,7 +731,7 @@ sockb_p_entry_func(void *a_arg)
 					 * notifications.
 					 */
 					if (regs[sockfd].notify_mq != NULL) {
-						sockb_p_notify(regs[sockfd].notify_mq,
+						libsock_p_notify(regs[sockfd].notify_mq,
 						    sockfd);
 						regs[sockfd].notify_mq = NULL;
 					}
@@ -816,7 +816,7 @@ sockb_p_entry_func(void *a_arg)
 							 * there are data
 							 * already queued up.
 							 */
-							if (sockb_p_notify(regs[sockfd].notify_mq,
+							if (libsock_p_notify(regs[sockfd].notify_mq,
 							    sockfd)) {
 								regs[sockfd].notify_mq
 								    = NULL;
@@ -839,7 +839,7 @@ sockb_p_entry_func(void *a_arg)
 					 */
 					if (message->data.in_notify.mq !=
 					    NULL) {
-						sockb_p_notify(message->data.in_notify.mq,
+						libsock_p_notify(message->data.in_notify.mq,
 						    sockfd);
 					}
 #ifdef _LIBSOCK_CONFESS
@@ -857,7 +857,7 @@ sockb_p_entry_func(void *a_arg)
 #ifdef _LIBSOCK_DBG
 			message->magic = 0;
 #endif
-			_cw_pezz_put(&g_sockb->messages_pezz, (void *)message);
+			_cw_pezz_put(&g_libsock->messages_pezz, (void *)message);
 		}
 
 #ifdef _LIBSOCK_CONFESS
@@ -911,7 +911,7 @@ sockb_p_entry_func(void *a_arg)
 				ssize_t	bytes_read;
 
 #ifdef _LIBSOCK_CONFESS
-				_cw_out_put(" ([i|s:s]r)", g_sockb->pipe_out);
+				_cw_out_put(" ([i|s:s]r)", g_libsock->pipe_out);
 #endif
 
 				/*
@@ -930,10 +930,11 @@ sockb_p_entry_func(void *a_arg)
 				 * queues are checked after emptying the pipe,
 				 * but before calling poll() again.
 				 */
-				bytes_read = read(g_sockb->pipe_out, t_buf, 2);
+				bytes_read = read(g_libsock->pipe_out, t_buf,
+				    2);
 				if (bytes_read == -1) {
 					if (dbg_is_registered(cw_g_dbg,
-					    "sockb_error")) {
+					    "libsock_error")) {
 						_cw_out_put_e("Error in read(): [s]\n",
 						    strerror(errno));
 					}
@@ -941,20 +942,21 @@ sockb_p_entry_func(void *a_arg)
 					/*
 					 * Set the semaphore to one.  This will
 					 * cause one, and only one byte to be
-					 * written to g_sockb->pipe_in and cause
-					 * a return from poll() if one or more
-					 * messages needs handled.  Note that we
-					 * must post the semaophore before
-					 * handling the message queues, since it
-					 * is possible to have new messages come
-					 * in and miss them otherwise.  Posting
-					 * first means that we may execute the
-					 * poll() loop once without doing
-					 * anything, since the message that
-					 * caused data to be written to the pipe
-					 * may have already been read.
+					 * written to g_libsock->pipe_in and
+					 * cause a return from poll() if one or
+					 * more messages needs handled.  Note
+					 * that we must post the semaophore
+					 * before handling the message queues,
+					 * since it is possible to have new
+					 * messages come in and miss them
+					 * otherwise.  Posting first means that
+					 * we may execute the poll() loop once
+					 * without doing anything, since the
+					 * message that caused data to be
+					 * written to the pipe may have already
+					 * been read.
 					 */
-					sema_post(&g_sockb->pipe_sema);
+					sema_post(&g_libsock->pipe_sema);
 				}
 				_cw_assert(bytes_read <= 1);
 			}
@@ -1040,19 +1042,19 @@ sockb_p_entry_func(void *a_arg)
 					while (buf_get_size(&buf_in) <
 					    max_read) {
 						while ((bufc =
-						    sockb_get_spare_bufc()) ==
+						    libsock_get_spare_bufc()) ==
 						    NULL) {
 							if (dbg_is_registered(cw_g_dbg,
-							    "sockb_error"))
+							    "libsock_error"))
 								_cw_out_put_e("Memory allocation error; yielding\n");
 							thd_yield();
 						}
 
 						while (buf_append_bufc(&buf_in,
 						        bufc, 0,
-							pezz_get_buffer_size(&g_sockb->buffer_pool))) {
+							pezz_get_buffer_size(&g_libsock->buffer_pool))) {
 							if (dbg_is_registered(cw_g_dbg,
-								    "sockb_error"))
+								    "libsock_error"))
 								_cw_out_put_e("Memory allocation error; yielding\n");
 							thd_yield();
 						}
@@ -1089,7 +1091,7 @@ sockb_p_entry_func(void *a_arg)
 						while (buf_split(&tmp_buf,
 						    &buf_in, bytes_read)) {
 							if (dbg_is_registered(cw_g_dbg,
-							    "sockb_error"))
+							    "libsock_error"))
 								_cw_out_put_e("Memory allocation error; yielding\n");
 							thd_yield();
 						}
@@ -1126,7 +1128,7 @@ sockb_p_entry_func(void *a_arg)
 							if (regs[sockfd].notify_mq
 								    != NULL) {
 								
-								if (sockb_p_notify(regs[sockfd].notify_mq,
+								if (libsock_p_notify(regs[sockfd].notify_mq,
 								    sockfd)) {
 									regs[sockfd].notify_mq
 									    = NULL;
@@ -1138,7 +1140,7 @@ sockb_p_entry_func(void *a_arg)
 					} else if (bytes_read == 0) {
 						/* readv() error. */
 						if (dbg_is_registered(cw_g_dbg,
-						    "sockb_verbose")) {
+						    "libsock_verbose")) {
 							_cw_out_put_e("EOF in readv().  Closing sockfd [i]\n",
 							    sockfd);
 						}
@@ -1168,7 +1170,7 @@ sockb_p_entry_func(void *a_arg)
 
 						if (regs[sockfd].notify_mq !=
 						    NULL) {
-							if (sockb_p_notify(regs[sockfd].notify_mq,
+							if (libsock_p_notify(regs[sockfd].notify_mq,
 							    sockfd)) {
 								regs[sockfd].notify_mq
 								    = NULL;
@@ -1181,7 +1183,7 @@ sockb_p_entry_func(void *a_arg)
 					} else {/* if (bytes_read == -1) */
 						/* readv() error. */
 						if (dbg_is_registered(cw_g_dbg,
-						    "sockb_error")) {
+						    "libsock_error")) {
 							_cw_out_put_e("Error in readv(): [s]\n",
 							    strerror(errno));
 						}
@@ -1213,7 +1215,8 @@ sockb_p_entry_func(void *a_arg)
 					 * attention.
 					 */
 
-					buffer_size = pezz_get_buffer_size(&g_sockb->buffer_pool);
+					buffer_size =
+					    pezz_get_buffer_size(&g_libsock->buffer_pool);
 
 					do {
 						/*
@@ -1223,9 +1226,10 @@ sockb_p_entry_func(void *a_arg)
 						if (buf_get_size(&buf_in) ==
 						    0) {
 							while ((bufc =
-							    sockb_get_spare_bufc()) == NULL) {
+							    libsock_get_spare_bufc())
+							    == NULL) {
 								if (dbg_is_registered(cw_g_dbg,
-								    "sockb_error"))
+								    "libsock_error"))
 									_cw_out_put_e("Memory allocation error; yielding\n");
 								thd_yield();
 							}
@@ -1235,7 +1239,7 @@ sockb_p_entry_func(void *a_arg)
 							    buffer_size)) {
 
 								if (dbg_is_registered(cw_g_dbg,
-								    "sockb_error"))
+								    "libsock_error"))
 									_cw_out_put_e("Memory allocation error; yielding\n");
 								thd_yield();
 							}
@@ -1262,7 +1266,7 @@ sockb_p_entry_func(void *a_arg)
 						while (buf_split(&tmp_buf,
 						    &buf_in, bytes_read)) {
 							if (dbg_is_registered(cw_g_dbg,
-							    "sockb_error"))
+							    "libsock_error"))
 								_cw_out_put_e("Memory allocation error; yielding\n");
 							thd_yield();
 						}
@@ -1275,7 +1279,7 @@ sockb_p_entry_func(void *a_arg)
 #endif
 
 					if (dbg_is_registered(cw_g_dbg,
-					    "sockb_verbose")) {
+					    "libsock_verbose")) {
 						_cw_out_put_e("POLLHUP.  Closing sockfd [i]\n",
 						    sockfd);
 					}
@@ -1301,7 +1305,7 @@ sockb_p_entry_func(void *a_arg)
 					sock_l_error_callback(regs[sockfd].sock);
 
 					if (regs[sockfd].notify_mq != NULL) {
-						if (sockb_p_notify(regs[sockfd].notify_mq,
+						if (libsock_p_notify(regs[sockfd].notify_mq,
 						    sockfd)) {
 							regs[sockfd].notify_mq
 							    = NULL;
@@ -1379,7 +1383,7 @@ sockb_p_entry_func(void *a_arg)
 						    buf_get_size(&tmp_buf));
 
 						if (dbg_is_registered(cw_g_dbg,
-						    "sockb_verbose")) {
+						    "libsock_verbose")) {
 							_cw_out_put_e("Error in writev(): [s]\n",
 							    strerror(errno));
 							_cw_out_put_e("Closing sockfd [i]\n",
@@ -1408,7 +1412,7 @@ sockb_p_entry_func(void *a_arg)
 						sock_l_error_callback(regs[sockfd].sock);
 
 						if (regs[sockfd].notify_mq != NULL) {
-							if (sockb_p_notify(regs[sockfd].notify_mq,
+							if (libsock_p_notify(regs[sockfd].notify_mq,
 							    sockfd)) {
 								regs[sockfd].notify_mq
 								    = NULL;

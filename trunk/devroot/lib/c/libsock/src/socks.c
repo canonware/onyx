@@ -23,7 +23,7 @@
 #include <errno.h>
 #include <limits.h>
 
-#include "../include/libsock/sockb_l.h"
+#include "../include/libsock/libsock_l.h"
 
 #define _LIBSOCK_SOCKS_MAGIC 0x19730803
 

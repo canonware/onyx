@@ -60,7 +60,7 @@ main()
 /*  	dbg_register(cw_g_dbg, "sock_error"); */
 /*  	dbg_register(cw_g_dbg, "sock_sockopt"); */
 	out_put(cw_g_out, "Test begin\n");
-	sockb_init(1024,	/* a_max_fds */
+	libsock_init(1024,	/* a_max_fds */
 	    4096,		/* a_bufc_size */
 	    16			/* a_max_spare_bufcs */
 	    );
@@ -92,10 +92,9 @@ main()
 	thd_join(thd);
 
 	RETURN:
-	if (socks != NULL) {
+	if (socks != NULL)
 		socks_delete(socks);
-	}
-	sockb_shutdown();
+	libsock_shutdown();
 	buf_delete(&buf);
 	out_put(cw_g_out, "Test end\n");
 	libstash_shutdown();

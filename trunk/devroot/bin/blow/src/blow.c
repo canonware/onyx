@@ -126,8 +126,8 @@ main(int argc, char **argv)
 		retval = 1;
 		goto CLERROR;
 	}
-	if (sockb_init(100000, opt_bsize, 8))
-		_cw_error("Initialization failure in sockb_init()");
+	if (libsock_init(100000, opt_bsize, 8))
+		_cw_error("Initialization failure in libsock_init()");
 	/* Open the connections. */
 	sock_array = (cw_sock_t *)_cw_calloc(opt_nsocks, sizeof(cw_sock_t));
 	if (sock_array == NULL)
@@ -209,7 +209,7 @@ main(int argc, char **argv)
 	RETURN:
 	if (sock_array != NULL)
 		_cw_free(sock_array);
-	sockb_shutdown();
+	libsock_shutdown();
 	CLERROR:
 	libstash_shutdown();
 	return retval;

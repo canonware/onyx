@@ -81,9 +81,10 @@ cw_uint32_t	sock_l_get_in_max_buf_size(cw_sock_t *a_sock);
  * Get the data that is buffered in out_buf.  If there is no data buffered, then
  * signal flush_cond.
  *
- * Note that this assumes sockb will write all data that it has before asking
- * for more.  If for some reason this needs to change, then a more sophisticated
- * message passing scheme will be necessary for flushing the output buffer.
+ * Note that this assumes the I/O thread will write all data that it has before
+ * asking for more.  If for some reason this needs to change, then a more
+ * sophisticated message passing scheme will be necessary for flushing the
+ * output buffer.
  *
  ****************************************************************************/
 void		sock_l_get_out_data(cw_sock_t *a_sock, cw_buf_t *r_buf);
@@ -140,7 +141,8 @@ cw_uint32_t	sock_l_put_in_data(cw_sock_t *a_sock, cw_buf_t *a_buf);
  *
  * <<< Description >>>
  *
- * sockb calls this function to notify the sock of the result of a message.
+ * The I/O thread calls this function to notify the sock of the result of a
+ * message.
  *
  ****************************************************************************/
 void		sock_l_message_callback(cw_sock_t *a_sock, cw_bool_t a_error);
@@ -157,7 +159,7 @@ void		sock_l_message_callback(cw_sock_t *a_sock, cw_bool_t a_error);
  *
  * <<< Description >>>
  *
- * sockb calls this to notify a_sock that there was an error.
+ * The I/O thread calls this to notify a_sock that there was an error.
  *
  ****************************************************************************/
 void		sock_l_error_callback(cw_sock_t *a_sock);

@@ -230,7 +230,7 @@ main(int argc, char **argv)
 	}
 	if (dbg_is_registered(cw_g_dbg, "ncat_verbose"))
 		_cw_out_put("[s]: pid: [i]\n", g_progname, getpid());
-	sockb_init(16, 4096, 4);
+	libsock_init(16, 4096, 4);
 
 	if (opt_client) {
 		/* Try to connect to the server. */
@@ -263,13 +263,13 @@ main(int argc, char **argv)
 		sock_stdin = sock_new(NULL, 16384);
 		sock_wrap(sock_stdin, dup(0), FALSE);
 		fd_sock_stdin = sock_get_fd(sock_stdin);
-		sockb_in_notify(mq, fd_sock_stdin);
+		libsock_in_notify(mq, fd_sock_stdin);
 
 		sock_stdout = sock_new(NULL, 0);
 		sock_wrap(sock_stdout, 1, FALSE);
 
 		fd_sock = sock_get_fd(sock);
-		sockb_in_notify(mq, fd_sock);
+		libsock_in_notify(mq, fd_sock);
 
 		zero.tv_sec = 0;
 		zero.tv_nsec = 0;
@@ -400,7 +400,7 @@ main(int argc, char **argv)
 		close(out_get_default_fd(log_out));
 		out_delete(log_out);
 	}
-	sockb_shutdown();
+	libsock_shutdown();
 	libstash_shutdown();
 	return retval;
 }

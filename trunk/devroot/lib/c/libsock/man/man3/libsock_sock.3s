@@ -103,7 +103,7 @@ Pointer to a sock.
 .IR a_in_max_buf_size :
 .RS
 Maximum number of bytes of incoming data to buffer.  A value of 0 will prevent
-the sockb thread from ever trying to read from the discriptor.
+the I/O thread from ever trying to read from the discriptor.
 .RE
 .RE
 Output(s):
@@ -225,7 +225,7 @@ Output(s):
 .IR retval :
 .RS
 -1: Already connected, \fBsocket\fR() error, \fBclose\fR() error,
-\fBsock_p_config_socket\fR() error, \fBsockb_l_get_host_ip\fR() error, or
+\fBsock_p_config_socket\fR() error, \fBlibsock_l_get_host_ip\fR() error, or
 \fBconnect\fR() error.
 .br
 0: Success.
@@ -403,7 +403,7 @@ TRUE: Error.
 Description:
 .RS
 Queue the data in a_buf for writing.  Once the data has been added to the write
-queue, notify cw_g_sockb.
+queue, notify the I/O thread.
 .RE
 .RE
 

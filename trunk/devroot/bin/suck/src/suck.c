@@ -97,8 +97,8 @@ main(int argc, char **argv)
 		retval = 1;
 		goto CLERROR;
 	}
-	if (sockb_init(100000, opt_bsize, 8))
-		_cw_error("Initialization failure in sockb_init()");
+	if (libsock_init(100000, opt_bsize, 8))
+		_cw_error("Initialization failure in libsock_init()");
 	socks = socks_new();
 	if (socks == NULL)
 		_cw_error("Memory allocation error");
@@ -135,7 +135,7 @@ main(int argc, char **argv)
 					/* Throw the data away. */
 					buf_release_head_data(&buf, bytes_read);
 				} else if (bytes_read < 0) {
-					while (sockb_in_notify(NULL, sockfd))
+					while (libsock_in_notify(NULL, sockfd))
 						thd_yield();
 
 					sock_delete(sock_vec[sockfd]);
@@ -149,7 +149,7 @@ main(int argc, char **argv)
 	mq_delete(mq);
 	buf_delete(&buf);
 
-	sockb_shutdown();
+	libsock_shutdown();
 	CLERROR:
 	libstash_shutdown();
 	return retval;
@@ -169,7 +169,7 @@ accept_entry_func(void *a_arg)
 
 			sock_vec[sock_get_fd(sock)] = sock;
 
-			while (sockb_in_notify(mq, sock_get_fd(sock)))
+			while (libsock_in_notify(mq, sock_get_fd(sock)))
 				thd_yield();
 
 			/*

@@ -22,7 +22,7 @@
 
 /* Include files that _are_ installed. */
 {
-  local incs = libsock.h libsock_incs.h sock.h sockb.h socks.h;
+  local incs = libsock.h libsock_incs.h sock.h socks.h;
   incs = [fromto % [srcdir]/lib/c/libsock/include/libsock/% [incs]];
   incs = [incs] [objdir]/lib/c/libsock/include/libsock/libsock_defs.h;
 
@@ -32,14 +32,14 @@
 
 /* Include files that are _not_ installed. */
 {
-  local priv_incs = ;
+  local priv_incs = libsock_l.h sock_l.h;
   priv_incs = [fromto % [srcdir]/lib/c/libsock/include/libsock/% [priv_incs]];
 
   PRIV_INCS = [PRIV_INCS] [priv_incs];
 }
 
 /* Source files. */
-LIBSOCK_SRCS = sock.c sockb.c socks.c;
+LIBSOCK_SRCS = libsock.c sock.c socks.c;
 LIBSOCK_SRCS = [fromto % [srcdir]/lib/c/libsock/src/% [LIBSOCK_SRCS]];
 SRCS = [SRCS] [LIBSOCK_SRCS];
 
@@ -69,8 +69,7 @@ SRCS = [SRCS] [LIBSOCK_SRCS];
 
 /* Man pages. */
 {
-  local manpages_3 = libsock.3s libsock_sock.3s libsock_sockb.3s
-                     libsock_socks.3s;
+  local manpages_3 = libsock.3s libsock_sock.3s libsock_socks.3s;
   manpages_3 = [fromto % [srcdir]/lib/c/libsock/man/man3/% [manpages_3]];
 
   LIBSOCK_MANPAGES_3 = [manpages_3];

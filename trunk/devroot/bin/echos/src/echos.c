@@ -71,10 +71,10 @@ main(int argc, char **argv)
 		port = strtol(argv[1], (char **)NULL, 10);
 
 	libstash_init();
-	sockb_init(64, 512, 0);
+	libsock_init(64, 512, 0);
 
-	dbg_register(cw_g_dbg, "sockb_verbose");
-	dbg_register(cw_g_dbg, "sockb_error");
+	dbg_register(cw_g_dbg, "libsock_verbose");
+	dbg_register(cw_g_dbg, "libsock_error");
 	dbg_register(cw_g_dbg, "socks_verbose");
 	dbg_register(cw_g_dbg, "socks_error");
 	dbg_register(cw_g_dbg, "sock_verbose");
@@ -105,7 +105,7 @@ main(int argc, char **argv)
 	socks_delete(socks);
 
 	RETURN:
-	sockb_shutdown();
+	libsock_shutdown();
 	libstash_shutdown();
 	return 0;
 }

@@ -22,7 +22,7 @@
 #include <limits.h>
 
 #include "../include/libsock/sock_l.h"
-#include "../include/libsock/sockb_l.h"
+#include "../include/libsock/libsock_l.h"
 
 #ifdef _LIBSOCK_DBG
 #define _LIBSOCK_SOCK_MAGIC 0x12348765
@@ -115,7 +115,7 @@ sock_new(cw_sock_t *a_sock, cw_uint32_t a_in_max_buf_size)
 	cnd_new(&retval->in_cnd);
 
 	mtx_new(&retval->out_lock);
-	retval->sockb_in_progress = FALSE;
+	retval->io_in_progress = FALSE;
 	retval->out_need_broadcast_count = 0;
 	retval->out_is_flushed = TRUE;
 	cnd_new(&retval->out_cnd);
@@ -224,7 +224,7 @@ sock_connect(cw_sock_t *a_sock, const char *a_server_host, int a_port, struct
 			goto RETURN;
 		}
 		/* Figure out the server's IP address. */
-		if (sockb_l_get_host_ip(a_server_host, &server_ip)) {
+		if (libsock_l_get_host_ip(a_server_host, &server_ip)) {
 			if (close(a_sock->sockfd)) {
 				if (dbg_is_registered(cw_g_dbg, "sock_error")) {
 					out_put_e(cw_g_out, NULL, 0,
@@ -383,7 +383,7 @@ sock_connect(cw_sock_t *a_sock, const char *a_server_host, int a_port, struct
 	a_sock->error = FALSE;
 
 	mtx_lock(&a_sock->lock);
-	if (sockb_l_register_sock(a_sock)) {
+	if (libsock_l_register_sock(a_sock)) {
 		mtx_unlock(&a_sock->lock);
 		retval = -1;
 		goto RETURN;
@@ -452,7 +452,7 @@ sock_wrap(cw_sock_t *a_sock, int a_sockfd, cw_bool_t a_init)
 		a_sock->error = FALSE;
 
 		mtx_lock(&a_sock->lock);
-		if (sockb_l_register_sock(a_sock)) {
+		if (libsock_l_register_sock(a_sock)) {
 			mtx_unlock(&a_sock->lock);
 			retval = TRUE;
 			goto RETURN;
@@ -561,7 +561,7 @@ sock_read(cw_sock_t *a_sock, cw_buf_t *a_spare, cw_sint32_t a_max_read, struct
 				 * The incoming buffer was maxed, but now there
 				 * is space.
 				 */
-				while (sockb_l_in_space(a_sock->sockfd));
+				while (libsock_l_in_space(a_sock->sockfd));
 			}
 			if ((a_max_read == 0) || (size < a_max_read)) {
 				if ((buf_catenate_buf(a_spare, &a_sock->in_buf,
@@ -580,7 +580,7 @@ sock_read(cw_sock_t *a_sock, cw_buf_t *a_spare, cw_sint32_t a_max_read, struct
 			mtx_unlock(&a_sock->in_lock);
 
 			if (size >= a_sock->in_max_buf_size)
-				sockb_l_wakeup();
+				libsock_l_wakeup();
 		} else {
 			/* Make sure there wasn't an error. */
 			if (a_sock->error)
@@ -618,7 +618,7 @@ sock_write(cw_sock_t *a_sock, cw_buf_t *a_buf)
 		}
 		out_buf_size = buf_get_size(&a_sock->out_buf);
 
-		if ((a_sock->sockb_in_progress == FALSE)
+		if ((a_sock->io_in_progress == FALSE)
 		    && (a_sock->out_is_flushed)) {
 			const struct iovec	*iovec;
 			int			iovec_count;
@@ -626,7 +626,7 @@ sock_write(cw_sock_t *a_sock, cw_buf_t *a_buf)
 
 			/*
 			 * Try to write the data immediately, instead of always
-			 * context switching to the sockb thread.
+			 * context switching to the I/O thread.
 			 */
 			iovec = buf_get_iovec(&a_sock->out_buf, out_buf_size,
 			    TRUE, &iovec_count);
@@ -659,10 +659,10 @@ sock_write(cw_sock_t *a_sock, cw_buf_t *a_buf)
 			if (out_buf_size > 0) {
 				if (a_sock->out_is_flushed) {
 					/*
-					 * Notify the sockb that we now have
-					 * data.
+					 * Notify the I/O thread that we now
+					 * have data.
 					 */
-					if (sockb_l_out_notify(a_sock->sockfd)) {
+					if (libsock_l_out_notify(a_sock->sockfd)) {
 						retval = TRUE;
 						goto RETURN;
 					}
@@ -671,8 +671,8 @@ sock_write(cw_sock_t *a_sock, cw_buf_t *a_buf)
 			} else
 				a_sock->out_is_flushed = TRUE;
 		} else if (a_sock->out_is_flushed) {
-			/* Notify the sockb that we now have data. */
-			if (sockb_l_out_notify(a_sock->sockfd)) {
+			/* Notify the I/O thread that we now have data. */
+			if (libsock_l_out_notify(a_sock->sockfd)) {
 				retval = TRUE;
 				goto RETURN;
 			}
@@ -780,7 +780,7 @@ sock_l_get_out_data(cw_sock_t *a_sock, cw_buf_t *r_buf)
 
 	/*
 	 * If buf_split() or buf_catenate() has a memory allocation, it isn't
-	 * fatal, since it will simply cause the sockb thread to try to write 0
+	 * fatal, since it will simply cause the I/O thread to try to write 0
 	 * bytes.  In actuality, this is extremely unlikely to happen in the
 	 * steady state, but even if it does, oh well.
 	 */
@@ -789,8 +789,8 @@ sock_l_get_out_data(cw_sock_t *a_sock, cw_buf_t *r_buf)
 	else
 		buf_catenate_buf(r_buf, &a_sock->out_buf, FALSE);
 
-	/* Make a note that the sockb thread currently has data. */
-	a_sock->sockb_in_progress = TRUE;
+	/* Make a note that the I/O thread currently has data. */
+	a_sock->io_in_progress = TRUE;
 
 	mtx_unlock(&a_sock->out_lock);
 }
@@ -807,10 +807,10 @@ sock_l_put_back_out_data(cw_sock_t *a_sock, cw_buf_t *a_buf)
 	mtx_lock(&a_sock->out_lock);
 
 	/*
-	 * Make a note that the sockb thread gave our data back, or got rid of
-	 * it for us.
+	 * Make a note that the I/O thread gave our data back, or got rid of it
+	 * for us.
 	 */
-	a_sock->sockb_in_progress = FALSE;
+	a_sock->io_in_progress = FALSE;
 
 	/*
 	 * It's very unlikely that a memory error would occur in
@@ -869,9 +869,9 @@ sock_l_put_in_data(cw_sock_t *a_sock, cw_buf_t *a_buf)
 		cnd_signal(&a_sock->in_cnd);
 	}
 	/*
-	 * If a socket is closed by the peer, it is possible that the sockb
-	 * thread will be forced to over-fill our input buffer.  If we're
-	 * over-full, avoid wrapping the retval.
+	 * If a socket is closed by the peer, it is possible that the I/O thread
+	 * will be forced to over-fill our input buffer.  If we're over-full,
+	 * avoid wrapping the retval.
 	 */
 	buffered_in = buf_get_size(&a_sock->in_buf);
 	if (buffered_in < a_sock->in_max_buf_size)
@@ -1043,7 +1043,7 @@ sock_p_config_socket(cw_sock_t *a_sock, cw_bool_t a_init)
 	}
 	/*
 	 * Get the size of the OS's incoming buffer, so that we don't place undo
-	 * strain on the sockb thread when it asks how much it should try to
+	 * strain on the I/O thread when it asks how much it should try to
 	 * read.
 	 */
 	{
@@ -1059,7 +1059,7 @@ sock_p_config_socket(cw_sock_t *a_sock, cw_bool_t a_init)
 
 	/*
 	 * Get the size of the OS's outgoing buffer, so that we can hand no more
-	 * than that amount to sockb each time it asks for data.
+	 * than that amount to the I/O thread each time it asks for data.
 	 */
 	{
 		int	len;
@@ -1074,7 +1074,7 @@ sock_p_config_socket(cw_sock_t *a_sock, cw_bool_t a_init)
 
 	/*
 	 * Set the socket to non-blocking, so that we don't have to worry about
-	 * sockb's poll loop locking up.
+	 * the I/O thread's poll loop locking up.
 	 */
 	val = fcntl(a_sock->sockfd, F_GETFL, 0);
 	if (val == -1) {
@@ -1109,7 +1109,7 @@ sock_p_disconnect(cw_sock_t *a_sock)
 	int		val;
 
 	if (a_sock->is_connected) {
-		/* Unregister the sock with sockb. */
+		/* Unregister the sock with the I/O thread. */
 		mtx_lock(&a_sock->state_lock);
 		mtx_lock(&a_sock->lock);
 		if (a_sock->error == FALSE) {
@@ -1120,7 +1120,7 @@ sock_p_disconnect(cw_sock_t *a_sock)
 			mtx_unlock(&a_sock->in_lock);
 			mtx_unlock(&a_sock->state_lock);
 
-			if (sockb_l_unregister_sock(a_sock->sockfd)) {
+			if (libsock_l_unregister_sock(a_sock->sockfd)) {
 				mtx_unlock(&a_sock->lock);
 				retval = TRUE;
 				goto RETURN;

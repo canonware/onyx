@@ -30,5 +30,4 @@
  */
 
 #include "sock.h"
-#include "sockb.h"
 #include "socks.h"
