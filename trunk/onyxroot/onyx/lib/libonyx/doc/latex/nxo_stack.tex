@@ -453,7 +453,25 @@ cw\_nxo\_t *a\_object}}
 	\item[Description: ]
 		Exchange the top two objects on \cvar{a\_nxo}.
 	\end{capilist}
-\label{nxo_stack_rool}
+\label{nxo_stack_rot}
+\index{nxo_stack_rot@\cfunc{nxo\_stack\_rot}{}}
+\citem{\cfunc[void]{nxo\_stack\_rot}{cw\_nxo\_t *a\_nxo, cw\_sint32\_t
+a\_amount}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a stack \classname{nxo}.
+		\item[a\_amount: ]
+			Amount to rotate upward.  A negative value rotates
+			downward.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Rotate \cvar{a\_nxo} up by \cvar{a\_amount}.
+	\end{capilist}
+\label{nxo_stack_roll}
 \index{nxo_stack_roll@\cfunc{nxo\_stack\_roll}{}}
 \citem{\cfunc[cw\_bool\_t]{nxo\_stack\_roll}{cw\_nxo\_t *a\_nxo, cw\_uint32\_t
 a\_count, cw\_sint32\_t a\_amount}}
