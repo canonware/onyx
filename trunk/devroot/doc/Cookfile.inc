@@ -133,7 +133,6 @@ docs_relclean :
    *
    * Delete the index file so that it won't trip up the first run of ltx2e.
    */
-/*  rm -f [objdir]/%0/manual.ind; */
   cd [objdir]/%0\; ./ltx2e [objdir]/%.tex;
   cd [objdir]/%0\; [MAKEINDEX] -c -l [objdir]/%.idx;
   cd [objdir]/%0\; ./ltx2e [objdir]/%.tex;
