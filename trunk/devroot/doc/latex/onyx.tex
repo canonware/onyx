@@ -2520,6 +2520,8 @@ string. \\
 \hline
 proc & {\bf \htmlref{bind}{systemdict:bind}} & proc & Bind names to
 operators. \\
+\hline
+-- & {\bf \htmlref{null}{systemdict:null}} & null & Create a null object. \\
 \end{longtable}
 
 \begin{description}
@@ -4764,6 +4766,26 @@ onyx:0>
 
 onyx:0> 1000 nsleep
 onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:null}
+\index{null@\onyxop{}{null}{}}
+\item[{\onyxop{--}{null}{null}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[null: ]
+			A null object.
+		\end{description}
+	\item[Errors(s): ] None.
+	\item[Description: ]
+		Create a null object.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> null pstack
+null
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:open}
