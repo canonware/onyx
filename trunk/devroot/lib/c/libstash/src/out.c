@@ -111,16 +111,21 @@ static cw_uint32_t	out_p_string_render(const char *a_format, cw_uint32_t
     a_len, const void *a_arg, cw_uint32_t a_max_len, cw_uint8_t *r_buf);
 static cw_uint32_t	out_p_pointer_render(const char *a_format, cw_uint32_t
     a_len, const void *a_arg, cw_uint32_t a_max_len, cw_uint8_t *r_buf);
+#ifdef _CW_HAVE_LIBSTASH_BUF
 static cw_uint32_t	out_p_buf_render(const char *a_format, cw_uint32_t
     a_len, const void *a_arg, cw_uint32_t a_max_len, cw_uint8_t *r_buf);
+#endif
 
 static cw_out_ent_t cw_g_out_builtins[] = {
 	{"s",	1,	sizeof(cw_uint8_t *),	out_p_string_render},
 	{"i",	1,	sizeof(cw_uint32_t),	out_p_int32_render},
 	{"p",	1,	sizeof(void *),		out_p_pointer_render},
 	{"c",	1,	sizeof(cw_uint8_t),	out_p_char_render},
-	{"q",	1,	sizeof(cw_uint64_t),	out_p_int64_render},
+	{"q",	1,	sizeof(cw_uint64_t),	out_p_int64_render}
+#ifdef _CW_HAVE_LIBSTASH_BUF
+	,
 	{"b",	1,	sizeof(cw_buf_t *),	out_p_buf_render}
+#endif
 };
 
 cw_out_t *
@@ -1400,6 +1405,7 @@ out_p_pointer_render(const char *a_format, cw_uint32_t a_len, const void *a_arg,
 	return retval;
 }
 
+#ifdef _CW_HAVE_LIBSTASH_BUF
 static cw_uint32_t
 out_p_buf_render(const char *a_format, cw_uint32_t a_len, const void *a_arg,
     cw_uint32_t a_max_len, cw_uint8_t *r_buf)
@@ -1456,3 +1462,4 @@ out_p_buf_render(const char *a_format, cw_uint32_t a_len, const void *a_arg,
 
 	return width;
 }
+#endif

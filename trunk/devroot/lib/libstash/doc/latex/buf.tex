@@ -53,6 +53,12 @@ Once a \classname{bufc} has been passed to \cfunc{buf\_\{pre,ap\}pend\_bufc}{},
 its data must be treated as read-only.  That is, the \classname{bufc} must be
 treated as opaque as soon as any \classname{buf} has a reference to it.
 
+\label{_CW_HAVE_LIBSTASH_BUF}
+\index{_CW_HAVE_LIBSTASH_BUF@\cppdef{\_CW\_HAVE\_LIBSTASH\_BUF}}
+It is possible to compile \libname{libstash} without the \classname{buf} class.
+The \cppdef{\_CW\_HAVE\_LIBSTASH\_BUF} cpp macro is defined if the
+\classname{buf} class is available.
+
 \subsubsection{API}
 \begin{capi}
 \label{buf_new}

@@ -1,3 +1,8 @@
+2001-06-16  Jason Evans  <jasone@canonware.com>
+
+	* include/libstash/libstash_defs.h.in: Add _CW_HAVE_LIBSTASH_BUF
+	feature test, which is set by a configure-time option.
+
 2001-06-02  Jason Evans  <jasone@canonware.com>
 
 	* src/thd.c : Fix race conditions between various combinations of
