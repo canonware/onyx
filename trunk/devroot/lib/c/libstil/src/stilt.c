@@ -905,9 +905,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 					break;
 				case 'a': case 'b': case 'c': case 'd':
 				case 'e': case 'f':
-					val =
-					    (a_stilt->meta.string.hex_val
-					    - 'a') << 4;
+					val = ((a_stilt->meta.string.hex_val -
+					    'a') + 10) << 4;
 					break;
 				default:
 					_cw_error("Programming error");
@@ -920,7 +919,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 					break;
 				case 'a': case 'b': case 'c': case 'd':
 				case 'e': case 'f':
-					val |= (c - 'a');
+					val |= ((c - 'a') + 10);
 					break;
 				default:
 					_cw_error("Programming error");
