@@ -9,7 +9,7 @@
  *
  ******************************************************************************/
 
-#define	_SYSTEMDICT_C_
+#define	CW_SYSTEMDICT_C_
 
 #include "../include/libonyx/libonyx.h"
 

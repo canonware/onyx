@@ -15,8 +15,8 @@
 extern  "C" {
 #endif
 
-#ifndef _LIBONYX_H_
-#define _LIBONYX_H_
+#ifndef CW_LIBONYX_H_
+#define CW_LIBONYX_H_
 
 #define CW_LIBONYX_VERSION "<Version>"
 
@@ -419,7 +419,7 @@ extern cw_mem_t	*cw_g_mem;
 	nxo_threadp_delete(&threadp, (a_thread));			\
 } while (0)
 
-#endif	/* _LIBONYX_H_ */
+#endif	/* CW_LIBONYX_H_ */
 
 #ifdef __cplusplus
 };

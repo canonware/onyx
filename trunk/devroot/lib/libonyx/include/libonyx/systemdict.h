@@ -289,7 +289,7 @@ void	systemdict_inline_pop(cw_nxo_t *a_thread);
 void	systemdict_inline_roll(cw_nxo_t *a_thread);
 #endif
 
-#if (defined(CW_USE_INLINES) || defined(_SYSTEMDICT_C_))
+#if (defined(CW_USE_INLINES) || defined(CW_SYSTEMDICT_C_))
 CW_INLINE void
 systemdict_inline_add(cw_nxo_t *a_thread)
 {
@@ -409,4 +409,4 @@ systemdict_inline_roll(cw_nxo_t *a_thread)
 		nxo_thread_nerror(a_thread, NXN_stackunderflow);
 	}
 }
-#endif	/* (defined(CW_USE_INLINES) || defined(_SYSTEMDICT_C_)) */
+#endif	/* (defined(CW_USE_INLINES) || defined(CW_SYSTEMDICT_C_)) */

@@ -98,7 +98,7 @@ cw_nx_t *nxa_nx_get(cw_nxa_t *a_nxa);
 cw_nxo_t *nxa_gcdict_get(cw_nxa_t *a_nxa);
 #endif
 
-#if (defined(CW_USE_INLINES) || defined(_NXA_C_))
+#if (defined(CW_USE_INLINES) || defined(CW_NXA_C_))
 CW_INLINE cw_nx_t *
 nxa_nx_get(cw_nxa_t *a_nxa)
 {
@@ -116,4 +116,4 @@ nxa_gcdict_get(cw_nxa_t *a_nxa)
 
 	return &a_nxa->gcdict;
 }
-#endif	/* (defined(CW_USE_INLINES) || defined(_NXA_C_)) */
+#endif	/* (defined(CW_USE_INLINES) || defined(CW_NXA_C_)) */

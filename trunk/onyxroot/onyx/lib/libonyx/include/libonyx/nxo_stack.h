@@ -65,7 +65,7 @@ void	nxoe_p_stack_pop(cw_nxoe_stack_t *a_stack);
 void	nxoe_p_stack_npop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count);
 
 
-#if (defined(CW_USE_INLINES) || defined(_NXO_STACK_C_))
+#if (defined(CW_USE_INLINES) || defined(CW_NXO_STACK_C_))
 #ifdef CW_THREADS
 /* Private, but defined here for the inline functions. */
 CW_INLINE void
@@ -592,7 +592,7 @@ nxo_stack_roll(cw_nxo_t *a_nxo, cw_uint32_t a_count, cw_sint32_t a_amount)
 	ERROR:
 	return retval;
 }
-#endif	/* (defined(CW_USE_INLINES) || defined(_NXO_STACK_C_)) */
+#endif	/* (defined(CW_USE_INLINES) || defined(CW_NXO_STACK_C_)) */
 
 /*
  * Convenience wrapper macros for use where errors should cause an error and

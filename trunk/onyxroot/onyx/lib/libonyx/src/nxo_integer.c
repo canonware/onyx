@@ -9,6 +9,6 @@
  *
  ******************************************************************************/
 
-#define	_NXO_INTEGER_C_
+#define	CW_NXO_INTEGER_C_
 
 #include "../include/libonyx/libonyx.h"

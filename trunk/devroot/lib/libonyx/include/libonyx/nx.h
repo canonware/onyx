@@ -83,7 +83,7 @@ cw_nxo_t *nx_stdout_get(cw_nx_t *a_nx);
 cw_nxo_t *nx_stderr_get(cw_nx_t *a_nx);
 #endif
 
-#if (defined(CW_USE_INLINES) || defined(_NX_C_))
+#if (defined(CW_USE_INLINES) || defined(CW_NX_C_))
 CW_INLINE cw_nxa_t *
 nx_nxa_get(cw_nx_t *a_nx)
 {
@@ -148,4 +148,4 @@ nx_stderr_get(cw_nx_t *a_nx)
 
 	return &a_nx->stderr_nxo;
 }
-#endif	/* (defined(CW_USE_INLINES) || defined(_NX_C_)) */
+#endif	/* (defined(CW_USE_INLINES) || defined(CW_NX_C_)) */

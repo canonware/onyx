@@ -35,8 +35,8 @@
 /*
  * el.h: Internal structures.
  */
-#ifndef _LIBEDIT_H_
-#define _LIBEDIT_H_
+#ifndef CW_LIBEDIT_H_
+#define CW_LIBEDIT_H_
 /*
  * Local defaults
  */
@@ -110,4 +110,4 @@ struct editline {
     void         *data;		/* user data */
 };
 
-#endif /* _LIBEDIT_H_ */
+#endif /* CW_LIBEDIT_H_ */

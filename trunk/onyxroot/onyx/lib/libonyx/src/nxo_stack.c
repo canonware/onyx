@@ -23,7 +23,7 @@
  ******************************************************************************/
 
 /* Compile non-inlined functions if not using inlines. */
-#define	_NXO_STACK_C_
+#define	CW_NXO_STACK_C_
 
 #include "../include/libonyx/libonyx.h"
 #include "../include/libonyx/nxa_l.h"

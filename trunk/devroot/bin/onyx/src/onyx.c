@@ -25,8 +25,8 @@
 #include "batch_nxcode.c"
 #include "interactive_nxcode.c"
 
-#define	_PROMPT_STRLEN	 80
-#define	_BUFFER_SIZE	512
+#define	CW_PROMPT_STRLEN	 80
+#define	CW_BUFFER_SIZE	512
 
 struct nx_read_arg_s {
 #if (defined(CW_USE_LIBEDIT) && defined(CW_THREADS))
@@ -369,7 +369,7 @@ nx_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str)
 					/* Initialize the buffer. */
 					arg->buffer = (cw_uint8_t
 					    *)cw_malloc(_BUFFER_SIZE);
-					arg->buffer_size = _BUFFER_SIZE;
+					arg->buffer_size = CW_BUFFER_SIZE;
 					arg->buffer_count = 0;
 				}
 
@@ -749,9 +749,9 @@ prompt(EditLine *a_el)
 			plen = nxo_string_len_get(nxo);
 
 			/* Copy the prompt string to a global buffer. */
-			maxlen = (plen > _PROMPT_STRLEN - 1) ? _PROMPT_STRLEN -
-			    1 : plen;
-			strncpy(prompt_str, pstr, _PROMPT_STRLEN - 1);
+			maxlen = (plen > CW_PROMPT_STRLEN - 1) ?
+			    CW_PROMPT_STRLEN - 1 : plen;
+			strncpy(prompt_str, pstr, CW_PROMPT_STRLEN - 1);
 		}
 
 		prompt_str[maxlen] = '\0';

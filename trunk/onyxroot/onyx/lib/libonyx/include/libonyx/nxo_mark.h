@@ -13,7 +13,7 @@
 void	nxo_mark_new(cw_nxo_t *a_nxo);
 #endif
 
-#if (defined(CW_USE_INLINES) || defined(_NXO_MARK_C_))
+#if (defined(CW_USE_INLINES) || defined(CW_NXO_MARK_C_))
 CW_INLINE void
 nxo_mark_new(cw_nxo_t *a_nxo)
 {
@@ -21,4 +21,4 @@ nxo_mark_new(cw_nxo_t *a_nxo)
 
 	nxo_p_new(a_nxo, NXOT_MARK);
 }
-#endif	/* (defined(CW_USE_INLINES) || defined(_NXO_MARK_C_)) */
+#endif	/* (defined(CW_USE_INLINES) || defined(CW_NXO_MARK_C_)) */

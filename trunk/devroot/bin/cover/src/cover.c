@@ -51,10 +51,10 @@ const char	*basename(const char *a_str);
 /* Global variables. */
 cw_uint64_t	g_tries = 0;
 cw_uint32_t	opt_nnodes = NUM_NODES;
-cw_uint32_t	opt_ngens = _GENERATIONS;
-cw_uint32_t	opt_seed = _SEED;
-cw_uint32_t	opt_mutate = _MUTATE_PROBABILITY_INV;
-cw_uint32_t	opt_psize = _POP_SIZE;
+cw_uint32_t	opt_ngens = CW_GENERATIONS;
+cw_uint32_t	opt_seed = CW_SEED;
+cw_uint32_t	opt_mutate = CW_MUTATE_PROBABILITY_INV;
+cw_uint32_t	opt_psize = CW_POP_SIZE;
 cw_uint32_t	opt_key = FALSE;
 cw_uint32_t	opt_matrix = FALSE;
 
@@ -823,7 +823,7 @@ genetic_cover(cw_matrix_t *matrix, cw_matrix_t *x_index, cw_matrix_t *y_index)
 	srandom(opt_seed);
 	cw_out_put("pool size: [i], generations: [i], crossover == [i]%, "
 		"mutate == 1/[i], opt_seed == [i]\n", opt_psize, opt_ngens,
-	    _CROSSOVER_PROBABILITY, opt_mutate, opt_seed);
+	    CW_CROSSOVER_PROBABILITY, opt_mutate, opt_seed);
 
 	for (i = 0; i < opt_psize; i++) {
 		for (j = 0; j < matrix_get_y_size(matrix); j++)
@@ -1019,7 +1019,7 @@ genetic_reproduce(cw_matrix_t *matrix, cw_matrix_t *a_y_index, pack_t *a_pack,
 		gene_copy(&tga[j + 1], &genes[sel_b]);
 
 		/* Maybe do crossover. */
-		if ((random() % 100) < _CROSSOVER_PROBABILITY) {
+		if ((random() % 100) < CW_CROSSOVER_PROBABILITY) {
 			cw_uint32_t m, crossover_point, temp;
 
 			crossover_point = random() % a_gene_size;
@@ -1084,8 +1084,8 @@ usage(const char *a_progname)
 	    "                         | (Default is [i]\n"
 	    ,
 	    a_progname, a_progname, a_progname,
-	    NUM_NODES, _GENERATIONS, _SEED,
-	    _CROSSOVER_PROBABILITY, _MUTATE_PROBABILITY_INV, _POP_SIZE
+	    NUM_NODES, CW_GENERATIONS, CW_SEED,
+	    CW_CROSSOVER_PROBABILITY, CW_MUTATE_PROBABILITY_INV, CW_POP_SIZE
 	     );
 }
 

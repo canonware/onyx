@@ -20,7 +20,7 @@ cw_dch_t *nx_l_name_hash_get(cw_nx_t *a_nx);
 cw_op_t *nx_l_thread_init(cw_nx_t *a_nx);
 #endif
 
-#if (defined(CW_USE_INLINES) || defined(_NX_C_))
+#if (defined(CW_USE_INLINES) || defined(CW_NX_C_))
 CW_INLINE cw_nxoe_t *
 nx_l_ref_iter(cw_nx_t *a_nx, cw_bool_t a_reset)
 {
@@ -130,4 +130,4 @@ nx_l_thread_init(cw_nx_t *a_nx)
 
 	return a_nx->thread_init;
 }
-#endif	/* (defined(CW_USE_INLINES) || defined(_NX_C_)) */
+#endif	/* (defined(CW_USE_INLINES) || defined(CW_NX_C_)) */

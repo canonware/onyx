@@ -169,7 +169,7 @@ void	nxo_attr_set(cw_nxo_t *a_nxo, cw_nxoa_t a_attr);
 void	nxo_p_new(cw_nxo_t *a_nxo, cw_nxot_t a_type);
 #endif
 
-#if (defined(CW_USE_INLINES) || defined(_NXO_C_))
+#if (defined(CW_USE_INLINES) || defined(CW_NXO_C_))
 CW_INLINE void
 nxo_dup(cw_nxo_t *a_to, cw_nxo_t *a_from)
 {
@@ -235,4 +235,4 @@ nxo_p_new(cw_nxo_t *a_nxo, cw_nxot_t a_type)
 	a_nxo->o.integer.i = 0;
 	a_nxo->flags = a_type;
 }
-#endif	/* (defined(CW_USE_INLINES) || defined(_NXO_C_)) */
+#endif	/* (defined(CW_USE_INLINES) || defined(CW_NXO_C_)) */

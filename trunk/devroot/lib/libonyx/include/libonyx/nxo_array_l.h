@@ -65,7 +65,7 @@ cw_bool_t nxo_l_array_bound_get(cw_nxo_t *a_nxo);
 void	nxo_l_array_bound_set(cw_nxo_t *a_nxo);
 #endif
 
-#if (defined(CW_USE_INLINES) || defined(_NXO_ARRAY_C_))
+#if (defined(CW_USE_INLINES) || defined(CW_NXO_ARRAY_C_))
 CW_INLINE void
 nxo_l_array_el_get(cw_nxo_t *a_nxo, cw_nxoi_t a_offset, cw_nxo_t *r_el)
 {
@@ -115,4 +115,4 @@ nxo_l_array_bound_set(cw_nxo_t *a_nxo)
 
 	a_nxo->flags = (a_nxo->flags & 0xfffffeff) | (1 << 8);
 }
-#endif	/* (defined(CW_USE_INLINES) || defined(_NXO_ARRAY_C_)) */
+#endif	/* (defined(CW_USE_INLINES) || defined(CW_NXO_ARRAY_C_)) */

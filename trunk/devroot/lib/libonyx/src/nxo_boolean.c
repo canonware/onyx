@@ -9,6 +9,6 @@
  *
  ******************************************************************************/
 
-#define	_NXO_BOOLEAN_C_
+#define	CW_NXO_BOOLEAN_C_
 
 #include "../include/libonyx/libonyx.h"

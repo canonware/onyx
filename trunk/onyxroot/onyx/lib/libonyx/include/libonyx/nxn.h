@@ -382,7 +382,7 @@ const cw_uint8_t *nxn_str(cw_nxn_t a_nxn);
 cw_uint32_t nxn_len(cw_nxn_t a_nxn);
 #endif
 
-#if (defined(CW_USE_INLINES) || defined(_NXN_C_))
+#if (defined(CW_USE_INLINES) || defined(CW_NXN_C_))
 CW_INLINE const cw_uint8_t *
 nxn_str(cw_nxn_t a_nxn)
 {
@@ -398,4 +398,4 @@ nxn_len(cw_nxn_t a_nxn)
 
 	return strlen(cw_g_nx_names[a_nxn]);
 }
-#endif	/* (defined(CW_USE_INLINES) || defined(_NXN_C_)) */
+#endif	/* (defined(CW_USE_INLINES) || defined(CW_NXN_C_)) */

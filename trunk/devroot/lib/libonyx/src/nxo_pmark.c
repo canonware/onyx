@@ -9,6 +9,6 @@
  *
  ******************************************************************************/
 
-#define	_NXO_PMARK_C_
+#define	CW_NXO_PMARK_C_
 
 #include "../include/libonyx/libonyx.h"

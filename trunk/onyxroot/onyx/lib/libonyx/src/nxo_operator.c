@@ -9,7 +9,7 @@
  *
  ******************************************************************************/
 
-#define	_NXO_OPERATOR_C_
+#define	CW_NXO_OPERATOR_C_
 
 #include "../include/libonyx/libonyx.h"
 #include "../include/libonyx/nxo_l.h"

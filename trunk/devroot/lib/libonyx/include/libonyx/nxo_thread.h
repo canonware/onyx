@@ -219,7 +219,7 @@ cw_nxo_t *nxo_thread_stdout_get(cw_nxo_t *a_nxo);
 cw_nxo_t *nxo_thread_stderr_get(cw_nxo_t *a_nxo);
 #endif
 
-#if (defined(CW_USE_INLINES) || defined(_NXO_THREAD_C_))
+#if (defined(CW_USE_INLINES) || defined(CW_NXO_THREAD_C_))
 CW_INLINE cw_nx_t *
 nxo_thread_nx_get(cw_nxo_t *a_nxo)
 {
@@ -354,4 +354,4 @@ nxo_thread_stderr_get(cw_nxo_t *a_nxo)
 
 	return &thread->stderr_nxo;
 }
-#endif	/* (defined(CW_USE_INLINES) || defined(_NXO_THREAD_C_)) */
+#endif	/* (defined(CW_USE_INLINES) || defined(CW_NXO_THREAD_C_)) */

@@ -9,7 +9,7 @@
  *
  ******************************************************************************/
 
-#define	_NXO_C_
+#define	CW_NXO_C_
 
 #include "../include/libonyx/libonyx.h"
 #include "../include/libonyx/nx_l.h"

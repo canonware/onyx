@@ -9,7 +9,7 @@
  *
  ******************************************************************************/
 
-#define	_NX_C_
+#define	CW_NX_C_
 
 #include "../include/libonyx/libonyx.h"
 #ifdef CW_POSIX

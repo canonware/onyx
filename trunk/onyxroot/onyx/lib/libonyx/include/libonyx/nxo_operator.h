@@ -15,7 +15,7 @@ void	nxo_operator_new(cw_nxo_t *a_nxo, cw_op_t *a_op, cw_nxn_t a_nxn);
 cw_op_t *nxo_operator_f(cw_nxo_t *a_nxo);
 #endif
 
-#if (defined(CW_USE_INLINES) || defined(_NXO_OPERATOR_C_))
+#if (defined(CW_USE_INLINES) || defined(CW_NXO_OPERATOR_C_))
 CW_INLINE cw_op_t *
 nxo_operator_f(cw_nxo_t *a_nxo)
 {
@@ -25,4 +25,4 @@ nxo_operator_f(cw_nxo_t *a_nxo)
 
 	return a_nxo->o.operator.f;
 }
-#endif	/* (defined(CW_USE_INLINES) || defined(_NXO_OPERATOR_C_)) */
+#endif	/* (defined(CW_USE_INLINES) || defined(CW_NXO_OPERATOR_C_)) */

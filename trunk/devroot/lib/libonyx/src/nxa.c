@@ -71,7 +71,7 @@
  *
  ******************************************************************************/
 
-#define	_NXA_C_
+#define	CW_NXA_C_
 
 #include "../include/libonyx/libonyx.h"
 
