@@ -42,13 +42,9 @@ typedef enum
 #endif
     NXN_bdup,
     NXN_begin,
-    NXN_bidup,
     NXN_bind,
 #ifdef CW_POSIX
     NXN_bindsocket,
-#endif
-    NXN_bipop,
-#ifdef CW_POSIX
     NXN_blksize,
     NXN_blocks,
 #endif
@@ -187,10 +183,12 @@ typedef enum
 #endif
     NXN_gt,
     NXN_hooktag,
+    NXN_hooktype,
 #ifdef CW_POSIX
     NXN_hostbyname,
 #endif
-    NXN_hooktype,
+    NXN_ibdup,
+    NXN_ibpop,
     NXN_idiv,
     NXN_idup,
     NXN_if,
@@ -351,8 +349,6 @@ typedef enum
     NXN_round,
 #endif
     NXN_sbdup,
-    NXN_sbidup,
-    NXN_sbipop,
     NXN_sbpop,
     NXN_sbpush,
     NXN_sclear,
@@ -400,6 +396,8 @@ typedef enum
 #endif
     NXN_sexch,
     NXN_shift,
+    NXN_sibdup,
+    NXN_sibpop,
     NXN_sidup,
 #ifdef CW_THREADS
     NXN_signal,

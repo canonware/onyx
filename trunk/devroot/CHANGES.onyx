@@ -2,9 +2,9 @@
 
 	* lib/libonyx/src/systemdict.c : Add operators:
 	  + bpop, nbpop, ipop, nip, tuck, under, over, up, nup, dn, ndn, bdup,
-	    bidup, bipop, bpush
+	    ibdup, ibpop, bpush
 	  + sbpop, snbpop, sipop, snip, stuck, sunder, sover, sup, snup, sdn, 
-	    sndn, sndup, snpop, sbdup, sbidup, sbipop, sbpush
+	    sndn, sndup, snpop, sbdup, sibdup, sibpop, sbpush
 
 	* lib/libonyx/include/libonyx/nxo_stack.h : Add functions:
 	  + nxo_stack_bget()

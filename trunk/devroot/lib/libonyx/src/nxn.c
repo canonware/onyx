@@ -43,13 +43,9 @@ const cw_uint8_t *cw_g_nx_names[] = {
 #endif
     "bdup",
     "begin",
-    "bidup",
     "bind",
 #ifdef CW_POSIX
     "bindsocket",
-#endif
-    "bipop",
-#ifdef CW_POSIX
     "blksize",
     "blocks",
 #endif
@@ -188,10 +184,12 @@ const cw_uint8_t *cw_g_nx_names[] = {
 #endif
     "gt",
     "hooktag",
+    "hooktype",
 #ifdef CW_POSIX
     "hostbyname",
 #endif
-    "hooktype",
+    "ibdup",
+    "ibpop",
     "idiv",
     "idup",
     "if",
@@ -352,8 +350,6 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "round",
 #endif
     "sbdup",
-    "sbidup",
-    "sbipop",
     "sbpop",
     "sbpush",
     "sclear",
@@ -401,6 +397,8 @@ const cw_uint8_t *cw_g_nx_names[] = {
 #endif
     "sexch",
     "shift",
+    "sibdup",
+    "sibpop",
     "sidup",
 #ifdef CW_THREADS
     "signal",

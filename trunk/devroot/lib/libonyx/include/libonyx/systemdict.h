@@ -45,18 +45,12 @@ void
 systemdict_begin(cw_nxo_t *a_thread);
 
 void
-systemdict_bidup(cw_nxo_t *a_thread);
-
-void
 systemdict_bind(cw_nxo_t *a_thread);
 
 #ifdef CW_POSIX
 void
 systemdict_bindsocket(cw_nxo_t *a_thread);
 #endif
-
-void
-systemdict_bipop(cw_nxo_t *a_thread);
 
 void
 systemdict_bpop(cw_nxo_t *a_thread);
@@ -328,6 +322,12 @@ systemdict_hostbyname(cw_nxo_t *a_thread);
 #endif
 
 void
+systemdict_ibdup(cw_nxo_t *a_thread);
+
+void
+systemdict_ibpop(cw_nxo_t *a_thread);
+
+void
 systemdict_idiv(cw_nxo_t *a_thread);
 
 void
@@ -575,12 +575,6 @@ void
 systemdict_sbdup(cw_nxo_t *a_thread);
 
 void
-systemdict_sbidup(cw_nxo_t *a_thread);
-
-void
-systemdict_sbipop(cw_nxo_t *a_thread);
-
-void
 systemdict_sbpop(cw_nxo_t *a_thread);
 
 void
@@ -691,6 +685,12 @@ systemdict_sexch(cw_nxo_t *a_thread);
 
 void
 systemdict_shift(cw_nxo_t *a_thread);
+
+void
+systemdict_sibdup(cw_nxo_t *a_thread);
+
+void
+systemdict_sibpop(cw_nxo_t *a_thread);
 
 void
 systemdict_sidup(cw_nxo_t *a_thread);
