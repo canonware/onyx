@@ -651,9 +651,9 @@ sockb_p_entry_func(void * a_arg)
 	    if (0 != sock_l_get_in_max_buf_size(sock))
 	    {
 #ifdef _LIBSOCK_CONFESS
-	            out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
-			      "Register [i] ([i] byte input buffer)\n",
-			      sockfd, sock_l_get_in_max_buf_size(sock));
+	      out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
+			"Register [i] ([i] byte input buffer)\n",
+			sockfd, sock_l_get_in_max_buf_size(sock));
 #endif
 	      fds[nfds].events = POLLIN;
 	    }

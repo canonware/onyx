@@ -62,7 +62,7 @@ sock_l_get_in_size(cw_sock_t * a_sock);
  *
  * <<< Description >>>
  *
- * Return the number of maximum number of bytes of data to buffer for a_sock.
+ * Return the maximum number of bytes of data to buffer for a_sock.
  *
  ****************************************************************************/
 cw_uint32_t
