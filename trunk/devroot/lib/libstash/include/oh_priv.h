@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 57 $
- * $Date: 1998-05-01 03:17:44 -0700 (Fri, 01 May 1998) $
+ * $Revision: 71 $
+ * $Date: 1998-05-02 02:10:52 -0700 (Sat, 02 May 1998) $
  *
  * <<< Description >>>
  *
@@ -63,18 +63,16 @@
 #define _OH_BASE_REHASH_POINT 192;
 
 cw_bool_t oh_coalesce_priv(cw_oh_t * a_oh_o);
-cw_bool_t oh_grow_priv(cw_oh_t * a_oh_o,
-		       cw_sint32_t a_num_doublings);
-cw_bool_t oh_shrink_priv(cw_oh_t * a_oh_o,
-			 cw_sint32_t a_num_halvings);
+cw_bool_t oh_grow_priv(cw_oh_t * a_oh_o);
+cw_bool_t oh_shrink_priv(cw_oh_t * a_oh_o);
 
-cw_uint32_t oh_h1_priv(cw_oh_t * a_oh_o, void * a_key);
+cw_uint64_t oh_h1_priv(cw_oh_t * a_oh_o, void * a_key);
 cw_bool_t oh_key_compare_priv(void * a_k1, void * a_k2);
 cw_bool_t oh_item_insert_priv(cw_oh_t * a_oh_o,
 			      cw_oh_item_t * a_item);
 cw_bool_t oh_item_search_priv(cw_oh_t * a_oh_o,
 			      void * a_key,
-			      cw_uint32_t * a_slot);
+			      cw_uint64_t * a_slot);
 cw_bool_t oh_rehash_priv(cw_oh_t * a_oh_o, cw_bool_t a_force);
 
 #endif /* _OH_PRIV_H_ */

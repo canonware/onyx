@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 57 $
- * $Date: 1998-05-01 03:17:44 -0700 (Fri, 01 May 1998) $
+ * $Revision: 71 $
+ * $Date: 1998-05-02 02:10:52 -0700 (Sat, 02 May 1998) $
  *
  * <<< Description >>>
  *
@@ -49,6 +49,7 @@ typedef struct cw_oh_s cw_oh_t;
 typedef struct
 {
   cw_bool_t is_valid;
+  cw_uint64_t jumps;
   void * key;
   void * data;
 } cw_oh_item_t;
@@ -56,37 +57,39 @@ typedef struct
 struct cw_oh_s
 {
   cw_bool_t is_malloced;
+  cw_bool_t is_thread_safe;
   cw_rwl_t rw_lock;
+  cw_bool_t should_shuffle;
   cw_oh_item_t ** items;
 
-  cw_uint32_t (*base_h1)(cw_oh_t *, void *);
-  cw_uint32_t (*curr_h1)(cw_oh_t *, void *);
+  cw_uint64_t (*base_h1)(cw_oh_t *, void *);
+  cw_uint64_t (*curr_h1)(cw_oh_t *, void *);
   cw_bool_t (*key_compare)(void *, void *);
 
-  cw_uint32_t size;
-  cw_uint32_t num_items;
-  cw_uint32_t num_invalid;
+  cw_uint64_t size;
+  cw_uint64_t num_items;
+  cw_uint64_t num_invalid;
 
-  cw_uint32_t base_power;
-  cw_uint32_t base_h2;
-  cw_uint32_t base_shrink_point;
-  cw_uint32_t base_grow_point;
-  cw_uint32_t base_rehash_point;
+  cw_uint64_t base_power;
+  cw_uint64_t base_h2;
+  cw_uint64_t base_shrink_point;
+  cw_uint64_t base_grow_point;
+  cw_uint64_t base_rehash_point;
 
-  cw_uint32_t curr_power;
-  cw_uint32_t curr_h2;
-  cw_uint32_t curr_shrink_point;
-  cw_uint32_t curr_grow_point;
-  cw_uint32_t curr_rehash_point;
+  cw_uint64_t curr_power;
+  cw_uint64_t curr_h2;
+  cw_uint64_t curr_shrink_point;
+  cw_uint64_t curr_grow_point;
+  cw_uint64_t curr_rehash_point;
 
 #ifdef _OH_PERF_  
   /* Counters used to get an idea of performance. */
-  cw_uint32_t num_collisions;
-  cw_uint32_t num_inserts;
-  cw_uint32_t num_deletes;
-  cw_uint32_t num_grows;
-  cw_uint32_t num_shrinks;
-  cw_uint32_t num_rehashes;
+  cw_uint64_t num_collisions;
+  cw_uint64_t num_inserts;
+  cw_uint64_t num_deletes;
+  cw_uint64_t num_grows;
+  cw_uint64_t num_shrinks;
+  cw_uint64_t num_rehashes;
 #endif
 };
 
@@ -128,35 +131,36 @@ struct cw_oh_s
 #endif
 
 /* Typedefs to allow easy function pointer passing. */
-typedef cw_uint32_t oh_h1_t(cw_oh_t *, void *);
+typedef cw_uint64_t oh_h1_t(cw_oh_t *, void *);
 typedef cw_bool_t oh_key_comp_t(void *, void *);
 
-cw_oh_t * oh_new(cw_oh_t * a_oh_o);
+cw_oh_t * oh_new(cw_oh_t * a_oh_o, cw_bool_t a_is_thread_safe,
+		 cw_bool_t a_should_shuffle);
 void oh_delete(cw_oh_t * a_oh_o);
 cw_bool_t oh_rehash(cw_oh_t * a_oh_o);
-cw_uint32_t oh_get_size(cw_oh_t * a_oh_o);
-cw_uint32_t oh_get_num_items(cw_oh_t * a_oh_o);
-cw_uint32_t oh_get_num_invalid(cw_oh_t * a_oh_o);
+cw_uint64_t oh_get_size(cw_oh_t * a_oh_o);
+cw_uint64_t oh_get_num_items(cw_oh_t * a_oh_o);
+cw_uint64_t oh_get_num_invalid(cw_oh_t * a_oh_o);
 
 oh_h1_t * oh_get_h1(cw_oh_t * a_oh_o);
 oh_key_comp_t * oh_get_key_compare(cw_oh_t * a_oh_o);
-cw_sint32_t oh_get_base_h2(cw_oh_t * a_oh_o);
-cw_sint32_t oh_get_base_shrink_point(cw_oh_t * a_oh_o);
-cw_sint32_t oh_get_base_grow_point(cw_oh_t * a_oh_o);
-cw_sint32_t oh_get_base_rehash_point(cw_oh_t * a_oh_o);
+cw_sint64_t oh_get_base_h2(cw_oh_t * a_oh_o);
+cw_sint64_t oh_get_base_shrink_point(cw_oh_t * a_oh_o);
+cw_sint64_t oh_get_base_grow_point(cw_oh_t * a_oh_o);
+cw_sint64_t oh_get_base_rehash_point(cw_oh_t * a_oh_o);
 
 cw_bool_t oh_set_h1(cw_oh_t * a_oh_o,
 		    oh_h1_t * a_new_h1);
 void oh_set_key_compare(cw_oh_t * a_oh_o,
 			oh_key_comp_t * a_new_key_compare);
 cw_bool_t oh_set_base_h2(cw_oh_t * a_oh_o,
-			 cw_uint32_t a_h2);
+			 cw_uint64_t a_h2);
 cw_bool_t oh_set_base_shrink_point(cw_oh_t * a_oh_o,
-				   cw_sint32_t a_shrink_point);
+				   cw_sint64_t a_shrink_point);
 cw_bool_t oh_set_base_grow_point(cw_oh_t * a_oh_o,
-				 cw_sint32_t a_grow_point);
+				 cw_sint64_t a_grow_point);
 cw_bool_t oh_set_base_rehash_point(cw_oh_t * a_oh_o,
-				   cw_sint32_t a_rehash_point);
+				   cw_sint64_t a_rehash_point);
 
 cw_bool_t oh_item_insert(cw_oh_t * a_oh_o, void * a_key,
 			 void * a_data);
@@ -170,12 +174,12 @@ cw_bool_t oh_item_delete_iterate(cw_oh_t * a_oh_o, void ** a_key,
 void oh_dump(cw_oh_t * a_oh_o, cw_bool_t a_all);
 
 #ifdef _OH_PERF_
-cw_uint32_t oh_get_num_collisions(cw_oh_t * a_oh_o);
-cw_uint32_t oh_get_num_inserts(cw_oh_t * a_oh_o);
-cw_uint32_t oh_get_num_deletes(cw_oh_t * a_oh_o);
-cw_uint32_t oh_get_num_grows(cw_oh_t * a_oh_o);
-cw_uint32_t oh_get_num_shrinks(cw_oh_t * a_oh_o);
-cw_uint32_t oh_get_num_rehashes(cw_oh_t * a_oh_o);
+cw_uint64_t oh_get_num_collisions(cw_oh_t * a_oh_o);
+cw_uint64_t oh_get_num_inserts(cw_oh_t * a_oh_o);
+cw_uint64_t oh_get_num_deletes(cw_oh_t * a_oh_o);
+cw_uint64_t oh_get_num_grows(cw_oh_t * a_oh_o);
+cw_uint64_t oh_get_num_shrinks(cw_oh_t * a_oh_o);
+cw_uint64_t oh_get_num_rehashes(cw_oh_t * a_oh_o);
 #endif
 
 #endif /* _OH_H_ */

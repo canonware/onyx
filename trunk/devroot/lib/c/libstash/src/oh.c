@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 57 $
- * $Date: 1998-05-01 03:17:44 -0700 (Fri, 01 May 1998) $
+ * $Revision: 71 $
+ * $Date: 1998-05-02 02:10:52 -0700 (Sat, 02 May 1998) $
  *
  * <<< Description >>>
  *
@@ -47,7 +47,7 @@
  * than storing pointers to them.  With the current implementation, this
  * would introduce a copying overhead, but since this will eventually be
  * converted to shuffle slots to alleviate invalid slots, the copying
- * overhead will go away.
+ * overhead will be there anyway.
  *
  ****************************************************************************/
 
@@ -60,7 +60,7 @@
 #include <oh_priv.h>
 
 cw_oh_t *
-oh_new(cw_oh_t * a_oh_o)
+oh_new(cw_oh_t * a_oh_o, cw_bool_t a_is_thread_safe, cw_bool_t a_should_shuffle)
 {
   cw_oh_t * retval;
 
@@ -80,7 +80,17 @@ oh_new(cw_oh_t * a_oh_o)
     retval->is_malloced = FALSE;
   }
 
-  rwl_new(&retval->rw_lock);
+  if (a_is_thread_safe)
+  {
+    retval->is_thread_safe = TRUE;
+    rwl_new(&retval->rw_lock);
+  }
+  else
+  {
+    retval->is_thread_safe = FALSE;
+  }
+
+  retval->should_shuffle = a_should_shuffle;
 
   retval->size = 1 << _OH_BASE_POWER;
   
@@ -131,7 +141,7 @@ oh_new(cw_oh_t * a_oh_o)
 void
 oh_delete(cw_oh_t * a_oh_o)
 {
-  cw_uint32_t i;
+  cw_uint64_t i;
 
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
   {
@@ -139,7 +149,10 @@ oh_delete(cw_oh_t * a_oh_o)
   }
   _cw_check_ptr(a_oh_o);
 
-  rwl_delete(&a_oh_o->rw_lock);
+  if (a_oh_o->is_thread_safe)
+  {
+    rwl_delete(&a_oh_o->rw_lock);
+  }
 
   /* Iteratively delete the items in the table. */
   for (i = 0; i < a_oh_o->size; i++)
@@ -172,11 +185,17 @@ oh_rehash(cw_oh_t * a_oh_o)
   }
   _cw_check_ptr(a_oh_o);
 
-  rwl_wlock(&a_oh_o->rw_lock);
+  if (a_oh_o->is_thread_safe)
+  {
+    rwl_wlock(&a_oh_o->rw_lock);
+  }
 
   retval = oh_rehash_priv(a_oh_o, TRUE);
 
-  rwl_wunlock(&a_oh_o->rw_lock);
+  if (a_oh_o->is_thread_safe)
+  {
+    rwl_wunlock(&a_oh_o->rw_lock);
+  }
   
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
   {
@@ -185,7 +204,7 @@ oh_rehash(cw_oh_t * a_oh_o)
   return retval;
 }
 
-cw_uint32_t
+cw_uint64_t
 oh_get_size(cw_oh_t * a_oh_o)
 {
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
@@ -200,7 +219,7 @@ oh_get_size(cw_oh_t * a_oh_o)
   return a_oh_o->size;
 }
 
-cw_uint32_t
+cw_uint64_t
 oh_get_num_invalid(cw_oh_t * a_oh_o)
 {
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
@@ -215,7 +234,7 @@ oh_get_num_invalid(cw_oh_t * a_oh_o)
   return a_oh_o->num_invalid;
 }
 
-cw_uint32_t
+cw_uint64_t
 oh_get_num_items(cw_oh_t * a_oh_o)
 {
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
@@ -270,7 +289,7 @@ oh_get_key_compare(cw_oh_t * a_oh_o)
   return retval;
 }
 
-cw_sint32_t
+cw_sint64_t
 oh_get_base_h2(cw_oh_t * a_oh_o)
 {
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
@@ -285,7 +304,7 @@ oh_get_base_h2(cw_oh_t * a_oh_o)
   return a_oh_o->base_h2;
 }
 
-cw_sint32_t
+cw_sint64_t
 oh_get_base_shrink_point(cw_oh_t * a_oh_o)
 {
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
@@ -300,7 +319,7 @@ oh_get_base_shrink_point(cw_oh_t * a_oh_o)
   return a_oh_o->base_shrink_point;
 }
 
-cw_sint32_t
+cw_sint64_t
 oh_get_base_grow_point(cw_oh_t * a_oh_o)
 {
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
@@ -315,7 +334,7 @@ oh_get_base_grow_point(cw_oh_t * a_oh_o)
   return a_oh_o->base_grow_point;
 }
 
-cw_sint32_t
+cw_sint64_t
 oh_get_base_rehash_point(cw_oh_t * a_oh_o)
 {
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
@@ -343,7 +362,10 @@ oh_set_h1(cw_oh_t * a_oh_o,
   _cw_check_ptr(a_oh_o);
   _cw_check_ptr(a_new_h1);
 
-  rwl_wlock(&a_oh_o->rw_lock);
+  if (a_oh_o->is_thread_safe)
+  {
+    rwl_wlock(&a_oh_o->rw_lock);
+  }
 
   if (a_oh_o->curr_h1 != a_new_h1)
   {
@@ -360,7 +382,10 @@ oh_set_h1(cw_oh_t * a_oh_o,
     retval = TRUE;
   }
 
-  rwl_wunlock(&a_oh_o->rw_lock);
+  if (a_oh_o->is_thread_safe)
+  {
+    rwl_wunlock(&a_oh_o->rw_lock);
+  }
 
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
   {
@@ -379,11 +404,17 @@ oh_set_key_compare(cw_oh_t * a_oh_o,
   }
   _cw_check_ptr(a_oh_o);
   _cw_check_ptr(a_new_key_compare);
-  rwl_wlock(&a_oh_o->rw_lock);
+  if (a_oh_o->is_thread_safe)
+  {
+    rwl_wlock(&a_oh_o->rw_lock);
+  }
 
   a_oh_o->key_compare = a_new_key_compare;
   
-  rwl_wunlock(&a_oh_o->rw_lock);
+  if (a_oh_o->is_thread_safe)
+  {
+    rwl_wunlock(&a_oh_o->rw_lock);
+  }
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
   {
     _cw_marker("Exit oh_set_key_compare()");
@@ -392,7 +423,7 @@ oh_set_key_compare(cw_oh_t * a_oh_o,
 
 cw_bool_t
 oh_set_base_h2(cw_oh_t * a_oh_o,
-	       cw_uint32_t a_h2)
+	       cw_uint64_t a_h2)
 {
   cw_bool_t retval;
   
@@ -402,7 +433,10 @@ oh_set_base_h2(cw_oh_t * a_oh_o,
   }
   _cw_check_ptr(a_oh_o);
 
-  rwl_wlock(&a_oh_o->rw_lock);
+  if (a_oh_o->is_thread_safe)
+  {
+    rwl_wlock(&a_oh_o->rw_lock);
+  }
   
   if (((a_h2 % 2) != 0)
       || (a_h2 > (1 << a_oh_o->base_power)))
@@ -419,8 +453,10 @@ oh_set_base_h2(cw_oh_t * a_oh_o,
     retval = oh_rehash_priv(a_oh_o, TRUE);
   }
 
-  rwl_wunlock(&a_oh_o->rw_lock);
-
+  if (a_oh_o->is_thread_safe)
+  {
+    rwl_wunlock(&a_oh_o->rw_lock);
+  }
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
   {
     _cw_marker("Exit oh_set_base_h2()");
@@ -430,7 +466,7 @@ oh_set_base_h2(cw_oh_t * a_oh_o,
 
 cw_bool_t
 oh_set_base_shrink_point(cw_oh_t * a_oh_o,
-			 cw_sint32_t a_shrink_point)
+			 cw_sint64_t a_shrink_point)
 {
   cw_bool_t retval;
   
@@ -440,7 +476,10 @@ oh_set_base_shrink_point(cw_oh_t * a_oh_o,
   }
   _cw_check_ptr(a_oh_o);
 
-  rwl_wlock(&a_oh_o->rw_lock);
+  if (a_oh_o->is_thread_safe)
+  {
+    rwl_wlock(&a_oh_o->rw_lock);
+  }
 
   if ((a_shrink_point < 0)
       || (a_shrink_point >= (1 << a_oh_o->base_power)))
@@ -453,10 +492,13 @@ oh_set_base_shrink_point(cw_oh_t * a_oh_o,
     a_oh_o->curr_shrink_point
       = (a_oh_o->base_shrink_point
 	 << (a_oh_o->curr_power - a_oh_o->base_power));
-    retval = oh_shrink_priv(a_oh_o, 0);
+    retval = oh_shrink_priv(a_oh_o);
   }
 
-  rwl_wunlock(&a_oh_o->rw_lock);
+  if (a_oh_o->is_thread_safe)
+  {
+    rwl_wunlock(&a_oh_o->rw_lock);
+  }
 
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
   {
@@ -467,7 +509,7 @@ oh_set_base_shrink_point(cw_oh_t * a_oh_o,
 
 cw_bool_t
 oh_set_base_grow_point(cw_oh_t * a_oh_o,
-		       cw_sint32_t a_grow_point)
+		       cw_sint64_t a_grow_point)
 {
   cw_bool_t retval;
   
@@ -477,7 +519,10 @@ oh_set_base_grow_point(cw_oh_t * a_oh_o,
   }
   _cw_check_ptr(a_oh_o);
 
-  rwl_wlock(&a_oh_o->rw_lock);
+  if (a_oh_o->is_thread_safe)
+  {
+    rwl_wlock(&a_oh_o->rw_lock);
+  }
 
   if ((a_grow_point <= 0)
       || (a_grow_point >= (1 << a_oh_o->base_power)))
@@ -490,10 +535,13 @@ oh_set_base_grow_point(cw_oh_t * a_oh_o,
     a_oh_o->curr_grow_point
       = (a_oh_o->base_grow_point
 	 << (a_oh_o->curr_power - a_oh_o->base_power));
-    retval = oh_grow_priv(a_oh_o, 0);
+    retval = oh_grow_priv(a_oh_o);
   }
 
-  rwl_wunlock(&a_oh_o->rw_lock);
+  if (a_oh_o->is_thread_safe)
+  {
+    rwl_wunlock(&a_oh_o->rw_lock);
+  }
 
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
   {
@@ -504,7 +552,7 @@ oh_set_base_grow_point(cw_oh_t * a_oh_o,
 
 cw_bool_t
 oh_set_base_rehash_point(cw_oh_t * a_oh_o,
-			 cw_sint32_t a_rehash_point)
+			 cw_sint64_t a_rehash_point)
 {
   cw_bool_t retval;
   
@@ -514,7 +562,10 @@ oh_set_base_rehash_point(cw_oh_t * a_oh_o,
   }
   _cw_check_ptr(a_oh_o);
 
-  rwl_wlock(&a_oh_o->rw_lock);
+  if (a_oh_o->is_thread_safe)
+  {
+    rwl_wlock(&a_oh_o->rw_lock);
+  }
 
   if ((a_rehash_point <= 0)
       || (a_rehash_point >= (1 << a_oh_o->base_power)))
@@ -530,7 +581,10 @@ oh_set_base_rehash_point(cw_oh_t * a_oh_o,
     retval = oh_rehash_priv(a_oh_o, FALSE);
   }
 
-  rwl_wunlock(&a_oh_o->rw_lock);
+  if (a_oh_o->is_thread_safe)
+  {
+    rwl_wunlock(&a_oh_o->rw_lock);
+  }
 
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
   {
@@ -557,7 +611,10 @@ oh_item_insert(cw_oh_t * a_oh_o, void * a_key,
     _cw_marker("Enter oh_item_insert()");
   }
   _cw_check_ptr(a_oh_o);
-  rwl_wlock(&a_oh_o->rw_lock);
+  if (a_oh_o->is_thread_safe)
+  {
+    rwl_wlock(&a_oh_o->rw_lock);
+  }
 
   retval = oh_coalesce_priv(a_oh_o);
   if (retval == TRUE)
@@ -579,7 +636,10 @@ oh_item_insert(cw_oh_t * a_oh_o, void * a_key,
   }
 
  RETURN:
-  rwl_wunlock(&a_oh_o->rw_lock);
+  if (a_oh_o->is_thread_safe)
+  {
+    rwl_wunlock(&a_oh_o->rw_lock);
+  }
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
   {
     _cw_marker("Exit oh_item_insert()");
@@ -600,7 +660,7 @@ oh_item_delete(cw_oh_t * a_oh_o,
 	       void ** a_key,
 	       void ** a_data)
 {
-  cw_uint32_t slot;
+  cw_uint64_t slot;
   cw_bool_t error, retval = FALSE;
   
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
@@ -608,35 +668,92 @@ oh_item_delete(cw_oh_t * a_oh_o,
     _cw_marker("Enter oh_item_delete()");
   }
   _cw_check_ptr(a_oh_o);
+  if (a_oh_o->is_thread_safe)
+  {
+    rwl_wlock(&a_oh_o->rw_lock);
+  }
 
-  rwl_wlock(&a_oh_o->rw_lock);
-
+  /* Get the slot number for what we want to delete (if it exists). */
   error = oh_item_search_priv(a_oh_o, a_search_key, &slot);
-
   if (error == FALSE)
   {
+    /* Found the item. */
 #ifdef _OH_PERF_
     a_oh_o->num_deletes++;
 #endif
-    a_oh_o->items[slot]->is_valid = FALSE;
-    a_oh_o->num_invalid++;
-    a_oh_o->num_items--;
-    *a_key = a_oh_o->items[slot]->key;
-    *a_data = a_oh_o->items[slot]->data;
-    if (dbg_fmatch(g_dbg_o, _CW_DBG_R_OH_SLOT))
+    if (a_oh_o->should_shuffle)
     {
-      log_printf(g_log_o, "oh_item_delete(): Deleting in slot %d\n", slot);
+      cw_uint64_t i, curr_empty, curr_look, curr_distance;
+
+      /* Set the return variables, decrement the item count, and delete the
+         item. */
+      *a_key = a_oh_o->items[slot]->key;
+      *a_data = a_oh_o->items[slot]->data;
+      a_oh_o->num_items--;
+      _cw_free(a_oh_o->items[slot]);
+      a_oh_o->items[slot] = NULL;
+
+      if (dbg_fmatch(g_dbg_o, _CW_DBG_R_OH_SLOT))
+      {
+	log_printf(g_log_o,
+		   "oh_item_delete(): Marking invalid in slot %d\n", slot);
+      }
+
+      /* Figure out whether there are any items that bounced past this slot
+       * using the secondary hash.  If so, shuffle things backward to fill
+       * this slot in.  We know we've looked far enough forward when we hit
+       * an empty slot. */
+      for(i = 0,
+	    curr_distance = 1,
+	    curr_empty = slot,
+	    curr_look = ((curr_empty + a_oh_o->curr_h2) % a_oh_o->size);
+	  ((a_oh_o->items[curr_look] != NULL) && (i < a_oh_o->size));
+	  i++,
+	    curr_distance++,
+	    curr_look = (curr_look + a_oh_o->curr_h2) % a_oh_o->size)
+      {
+	/* See if this item had to jump at least the current distance to
+	 * the last empty slot in this secondary hash chain. */
+	if (a_oh_o->items[curr_look]->jumps >= curr_distance)
+	{
+	  /* This item should be shuffled back to the previous empty slot.
+	   * Do so, and reset curr_distance and curr_empty.  Also, update
+	   * the jumps field of the item we just shuffled. */
+	  a_oh_o->items[curr_empty] = a_oh_o->items[curr_look];
+	  a_oh_o->items[curr_empty]->jumps -= curr_distance;
+	  a_oh_o->items[curr_look] = NULL;
+
+	  curr_empty = curr_look;
+	  curr_distance = 0;
+	}
+      }
+    }
+    else
+    {
+      a_oh_o->items[slot]->is_valid = FALSE;
+      a_oh_o->num_invalid++;
+      a_oh_o->num_items--;
+      *a_key = a_oh_o->items[slot]->key;
+      *a_data = a_oh_o->items[slot]->data;
+      if (dbg_fmatch(g_dbg_o, _CW_DBG_R_OH_SLOT))
+      {
+	log_printf(g_log_o,
+		   "oh_item_delete(): Marking invalid in slot %d\n", slot);
+      }
     }
   }
   else
   {
+    /* The item doesn't exist.  Return an error. */
     *a_key = NULL;
     *a_data = NULL;
     retval = TRUE;
   }
 
-  rwl_wunlock(&a_oh_o->rw_lock);
-
+  if (a_oh_o->is_thread_safe)
+  {
+    rwl_wunlock(&a_oh_o->rw_lock);
+  }
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
   {
     _cw_marker("Exit oh_item_delete()");
@@ -656,7 +773,7 @@ oh_item_search(cw_oh_t * a_oh_o,
 	       void * a_key,
 	       void ** a_data)
 {
-  cw_uint32_t slot;
+  cw_uint64_t slot;
   cw_bool_t error, retval = FALSE;
   
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
@@ -665,7 +782,10 @@ oh_item_search(cw_oh_t * a_oh_o,
   }
   _cw_check_ptr(a_oh_o);
 
-  rwl_rlock(&a_oh_o->rw_lock);
+  if (a_oh_o->is_thread_safe)
+  {
+    rwl_rlock(&a_oh_o->rw_lock);
+  }
 
   error = oh_item_search_priv(a_oh_o, a_key, &slot);
   if (error == FALSE)
@@ -683,7 +803,10 @@ oh_item_search(cw_oh_t * a_oh_o,
     retval = TRUE;
   }
 
-  rwl_runlock(&a_oh_o->rw_lock);
+  if (a_oh_o->is_thread_safe)
+  {
+    rwl_runlock(&a_oh_o->rw_lock);
+  }
 
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
   {
@@ -703,14 +826,17 @@ cw_bool_t
 oh_item_delete_iterate(cw_oh_t * a_oh_o, void ** a_key, void ** a_data)
 {
   cw_bool_t retval;
-  cw_uint32_t i;
+  cw_uint64_t i;
   
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
   {
     _cw_marker("Enter oh_item_delete_iterate()");
   }
   _cw_check_ptr(a_oh_o);
-  rwl_wlock(&a_oh_o->rw_lock);
+  if (a_oh_o->is_thread_safe)
+  {
+    rwl_wlock(&a_oh_o->rw_lock);
+  }
 
   if (a_oh_o->num_items > 0)
   {
@@ -730,7 +856,10 @@ oh_item_delete_iterate(cw_oh_t * a_oh_o, void ** a_key, void ** a_data)
     retval = TRUE;
   }
   
-  rwl_wunlock(&a_oh_o->rw_lock);
+  if (a_oh_o->is_thread_safe)
+  {
+    rwl_wunlock(&a_oh_o->rw_lock);
+  }
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
   {
     _cw_marker("Exit oh_item_delete_iterate()");
@@ -747,7 +876,7 @@ oh_item_delete_iterate(cw_oh_t * a_oh_o, void ** a_key, void ** a_data)
 void
 oh_dump(cw_oh_t * a_oh_o, cw_bool_t a_all)
 {
-  cw_uint32_t i;
+  cw_uint64_t i;
 
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
   {
@@ -755,7 +884,10 @@ oh_dump(cw_oh_t * a_oh_o, cw_bool_t a_all)
   }
   _cw_check_ptr(a_oh_o);
   
-  rwl_rlock(&a_oh_o->rw_lock);
+  if (a_oh_o->is_thread_safe)
+  {
+    rwl_rlock(&a_oh_o->rw_lock);
+  }
 
   log_printf(g_log_o,
 	     "============================================================\n");
@@ -845,7 +977,10 @@ oh_dump(cw_oh_t * a_oh_o, cw_bool_t a_all)
   }
   log_printf(g_log_o,
 	     "============================================================\n");
-  rwl_runlock(&a_oh_o->rw_lock);
+  if (a_oh_o->is_thread_safe)
+  {
+    rwl_runlock(&a_oh_o->rw_lock);
+  }
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
   {
     _cw_marker("Exit oh_dump()");
@@ -859,10 +994,10 @@ oh_dump(cw_oh_t * a_oh_o, cw_bool_t a_all)
  * being used for an oh instance aren't strings, don't use this.
  *
  ****************************************************************************/
-cw_uint32_t
+cw_uint64_t
 oh_h1_priv(cw_oh_t * a_oh_o, void * a_key)
 {
-  cw_uint32_t retval;
+  cw_uint64_t retval;
   char * str;
 
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
@@ -900,10 +1035,10 @@ oh_h1_priv(cw_oh_t * a_oh_o, void * a_key)
   return retval;
 }
 #if (0)
-cw_uint32_t
+cw_uint64_t
 oh_h1_priv(cw_oh_t * a_oh_o, void * a_key)
 {
-  cw_uint32_t retval;
+  cw_uint64_t retval;
 
   _cw_check_ptr(a_oh_o);
 
@@ -958,7 +1093,7 @@ oh_coalesce_priv(cw_oh_t * a_oh_o)
   {
     _cw_marker("Enter oh_coalesce_priv()");
   }
-  retval = oh_shrink_priv(a_oh_o, 0);
+  retval = oh_shrink_priv(a_oh_o);
   if (retval == TRUE)
   {
     goto RETURN;
@@ -970,7 +1105,7 @@ oh_coalesce_priv(cw_oh_t * a_oh_o)
     goto RETURN;
   }
 
-  retval = oh_grow_priv(a_oh_o, 0);
+  retval = oh_grow_priv(a_oh_o);
   if (retval == TRUE)
   {
     goto RETURN;
@@ -991,11 +1126,10 @@ oh_coalesce_priv(cw_oh_t * a_oh_o)
  *
  ****************************************************************************/
 cw_bool_t
-oh_grow_priv(cw_oh_t * a_oh_o,
-	     cw_sint32_t a_num_doublings)
+oh_grow_priv(cw_oh_t * a_oh_o)
 {
   cw_oh_item_t ** old_items;
-  cw_uint32_t old_size, i;
+  cw_uint64_t old_size, i;
   cw_bool_t retval;
 
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
@@ -1003,24 +1137,11 @@ oh_grow_priv(cw_oh_t * a_oh_o,
     _cw_marker("Enter oh_grow_priv()");
   }
   _cw_check_ptr(a_oh_o);
-  _cw_assert
-    (a_num_doublings + a_oh_o->curr_power < sizeof(cw_uint32_t) * 8);
-  _cw_assert(a_num_doublings >= 0);
 
-  if (a_num_doublings == 0)
+  /* Should we grow? */
+  if (a_oh_o->num_items < a_oh_o->curr_grow_point)
   {
-    /* Should we grow? */
-    if (a_oh_o->num_items >= a_oh_o->curr_grow_point)
-    {
-      _cw_assert(a_oh_o->curr_grow_point != 0);
-      retval = oh_grow_priv(a_oh_o,
-			    (a_oh_o->num_items
-			     / a_oh_o->curr_grow_point));
-    }
-    else
-    {
-      retval = FALSE;
-    }
+    retval = FALSE;
     goto RETURN;
   }
   
@@ -1031,7 +1152,7 @@ oh_grow_priv(cw_oh_t * a_oh_o,
   old_items = a_oh_o->items;
 
   old_size = a_oh_o->size;
-  a_oh_o->size <<= a_num_doublings;
+  a_oh_o->size <<= 1;
   
   /* Allocate new table */
   a_oh_o->items
@@ -1041,17 +1162,17 @@ oh_grow_priv(cw_oh_t * a_oh_o,
   bzero(a_oh_o->items, (a_oh_o->size * sizeof(cw_oh_item_t *)));
 
   /* Re-calculate curr_* fields. */
-  a_oh_o->curr_power += a_num_doublings;
+  a_oh_o->curr_power += 1;
   a_oh_o->curr_h2 = (((a_oh_o->base_h2 + 1)
 		      << (a_oh_o->curr_power
 			  - a_oh_o->base_power))
 		     - 1);
   a_oh_o->curr_shrink_point
-    = a_oh_o->curr_shrink_point << a_num_doublings;
+    = a_oh_o->curr_shrink_point << 1;
   a_oh_o->curr_grow_point
-    = a_oh_o->curr_grow_point << a_num_doublings;
+    = a_oh_o->curr_grow_point << 1;
   a_oh_o->curr_rehash_point
-    = a_oh_o->curr_rehash_point << a_num_doublings;
+    = a_oh_o->curr_rehash_point << 1;
 
   /* Reset other fields. */
   a_oh_o->num_items = 0;
@@ -1095,59 +1216,50 @@ oh_grow_priv(cw_oh_t * a_oh_o,
  *
  ****************************************************************************/
 cw_bool_t
-oh_shrink_priv(cw_oh_t * a_oh_o,
-	       cw_sint32_t a_num_halvings)
+oh_shrink_priv(cw_oh_t * a_oh_o)
 {
   cw_oh_item_t ** old_items;
-  cw_uint32_t old_size, i;
+  cw_uint64_t old_size, i;
   cw_bool_t retval;
+  cw_uint32_t num_halvings;
 
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
   {
     _cw_marker("Enter oh_shrink_priv()");
   }
   _cw_check_ptr(a_oh_o);
-  _cw_assert(a_num_halvings >= 0);
 
-  if (a_num_halvings == 0)
+  /* Should we shrink? */
+  if ((a_oh_o->num_items < a_oh_o->curr_shrink_point)
+      && (a_oh_o->curr_power > a_oh_o->base_power))
   {
-    /* Should we shrink? */
-    if ((a_oh_o->num_items < a_oh_o->curr_shrink_point)
-	&& (a_oh_o->curr_power > a_oh_o->base_power))
-    {
-      if (a_oh_o->num_items == 0)
-      {
-	retval = oh_shrink_priv(a_oh_o,
-				(a_oh_o->curr_power
-				 - a_oh_o->base_power));
-      }
-      else
-      {
-	retval = oh_shrink_priv(a_oh_o,
-				(a_oh_o->curr_shrink_point
-				 / a_oh_o->num_items));
-      }
-    }
-    else
-    {
-      retval = FALSE;
-    }
+    cw_uint32_t j;
+
+    for (j = a_oh_o->curr_power - a_oh_o->base_power;
+	 (((a_oh_o->curr_grow_point >> j) < a_oh_o->num_items)
+	   && (j > 0));
+	 j--);
+    num_halvings = j;
+  }
+  else
+  {
+    retval = FALSE;
     goto RETURN;
   }
-
+  
 #ifdef _OH_PERF_
   a_oh_o->num_shrinks++;
 #endif
 
-  if (a_num_halvings - a_oh_o->curr_power
+  if (num_halvings - a_oh_o->curr_power
       < a_oh_o->base_power)
   {
-    a_num_halvings = a_oh_o->curr_power - a_oh_o->base_power;
+    num_halvings = a_oh_o->curr_power - a_oh_o->base_power;
   }
 
   old_items = a_oh_o->items;
   old_size = a_oh_o->size;
-  a_oh_o->size >>= a_num_halvings;
+  a_oh_o->size >>= num_halvings;
   
   /* Allocate new table */
   a_oh_o->items
@@ -1157,17 +1269,17 @@ oh_shrink_priv(cw_oh_t * a_oh_o,
   bzero(a_oh_o->items, (a_oh_o->size * sizeof(cw_oh_item_t *)));
   
   /* Re-calculate curr_* fields. */
-  a_oh_o->curr_power -= a_num_halvings;
+  a_oh_o->curr_power -= num_halvings;
   a_oh_o->curr_h2 = (((a_oh_o->base_h2 + 1)
 		      << (a_oh_o->curr_power
 			  - a_oh_o->base_power))
 		     - 1);
   a_oh_o->curr_shrink_point
-    = a_oh_o->curr_shrink_point >> a_num_halvings;
+    = a_oh_o->curr_shrink_point >> num_halvings;
   a_oh_o->curr_grow_point
-    = a_oh_o->curr_grow_point >> a_num_halvings;
+    = a_oh_o->curr_grow_point >> num_halvings;
   a_oh_o->curr_rehash_point
-    = a_oh_o->curr_rehash_point >> a_num_halvings;
+    = a_oh_o->curr_rehash_point >> num_halvings;
 
   /* Reset other fields. */
   a_oh_o->num_items = 0;
@@ -1213,7 +1325,7 @@ cw_bool_t
 oh_item_insert_priv(cw_oh_t * a_oh_o,
 		    cw_oh_item_t * a_item)
 {
-  cw_uint32_t slot, i, j, junk;
+  cw_uint64_t slot, i, j, junk;
   cw_bool_t retval = TRUE;
   
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
@@ -1237,6 +1349,9 @@ oh_item_insert_priv(cw_oh_t * a_oh_o,
     if (a_oh_o->items[j] == NULL)
     {
       /* This slot is unused, so insert. */
+      a_item->jumps = i; /* For deletion shuffling.  Only needed in this
+			  * case, since there are no invalid slots when
+			  * shuffling. */
       a_oh_o->items[j] = a_item;
       a_oh_o->num_items++;
       retval = FALSE;
@@ -1271,6 +1386,8 @@ oh_item_insert_priv(cw_oh_t * a_oh_o,
       {
 	/* Detected attempt to insert a duplicate. */
 /* 	retval = TRUE; */
+	_cw_assert(retval != TRUE);
+	_cw_marker("Got here.");
 	break;
       }
     }
@@ -1286,7 +1403,6 @@ oh_item_insert_priv(cw_oh_t * a_oh_o,
   {
     _cw_marker("Exit oh_item_insert_priv()");
   }
-  _cw_assert(retval != TRUE);
   
   return retval;
 }
@@ -1301,9 +1417,9 @@ oh_item_insert_priv(cw_oh_t * a_oh_o,
 cw_bool_t
 oh_item_search_priv(cw_oh_t * a_oh_o,
 		    void * a_key,
-		    cw_uint32_t * a_slot)
+		    cw_uint64_t * a_slot)
 {
-  cw_uint32_t slot, i, j;
+  cw_uint64_t slot, i, j;
   cw_bool_t retval;
   
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
@@ -1355,7 +1471,7 @@ cw_bool_t
 oh_rehash_priv(cw_oh_t * a_oh_o, cw_bool_t a_force)
 {
   cw_oh_item_t ** old_items;
-  cw_uint32_t i;
+  cw_uint64_t i;
   cw_bool_t retval = FALSE;
 
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
@@ -1426,7 +1542,7 @@ oh_rehash_priv(cw_oh_t * a_oh_o, cw_bool_t a_force)
 }
 
 #ifdef _OH_PERF_
-cw_uint32_t
+cw_uint64_t
 oh_get_num_collisions(cw_oh_t * a_oh_o)
 {
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
@@ -1441,7 +1557,7 @@ oh_get_num_collisions(cw_oh_t * a_oh_o)
   return a_oh_o->num_collisions;
 }
 
-cw_uint32_t
+cw_uint64_t
 oh_get_num_inserts(cw_oh_t * a_oh_o)
 {
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
@@ -1456,7 +1572,7 @@ oh_get_num_inserts(cw_oh_t * a_oh_o)
   return a_oh_o->num_inserts;
 }
 
-cw_uint32_t
+cw_uint64_t
 oh_get_num_deletes(cw_oh_t * a_oh_o)
 {
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
@@ -1471,7 +1587,7 @@ oh_get_num_deletes(cw_oh_t * a_oh_o)
   return a_oh_o->num_deletes;
 }
 
-cw_uint32_t
+cw_uint64_t
 oh_get_num_grows(cw_oh_t * a_oh_o)
 {
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
@@ -1486,7 +1602,7 @@ oh_get_num_grows(cw_oh_t * a_oh_o)
   return a_oh_o->num_grows;
 }
 
-cw_uint32_t
+cw_uint64_t
 oh_get_num_shrinks(cw_oh_t * a_oh_o)
 {
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
@@ -1501,7 +1617,7 @@ oh_get_num_shrinks(cw_oh_t * a_oh_o)
   return a_oh_o->num_shrinks;
 }
 
-cw_uint32_t
+cw_uint64_t
 oh_get_num_rehashes(cw_oh_t * a_oh_o)
 {
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
