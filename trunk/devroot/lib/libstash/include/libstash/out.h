@@ -49,7 +49,7 @@ struct cw_out_ent_s {
 cw_out_t	*out_new(cw_out_t *a_out, cw_mem_t *a_mem);
 void		out_delete(cw_out_t *a_out);
 void		out_register(cw_out_t *a_out, const char *a_type, cw_uint32_t
-    a_size, cw_out_render_t * a_render_func);
+    a_size, cw_out_render_t *a_render_func);
 void		out_merge(cw_out_t *a_a, cw_out_t *a_b);
 cw_sint32_t	out_default_fd_get(cw_out_t *a_out);
 void		out_default_fd_set(cw_out_t *a_out, cw_sint32_t a_fd);
@@ -62,16 +62,6 @@ cw_sint32_t	out_put(cw_out_t *a_out, const char *a_format,...);
 	out_put_e(out_err, __FILE__, __LINE__, __FUNCTION__, a_format	\
 	    , ## a_args)
 cw_sint32_t	out_put_e(cw_out_t *a_out, const char *a_file_name, cw_uint32_t
-    a_line_num, const char *a_func_name, const char *a_format,...);
-
-#define		_cw_out_put_l(a_format, a_args...)			\
-	out_put_l(out_std, a_format , ## a_args)
-cw_sint32_t	out_put_l(cw_out_t *a_out, const char *a_format,...);
-
-#define		_cw_out_put_le(a_format, a_args...)			\
-	out_put_le(out_err, __FILE__, __LINE__, __FUNCTION__, a_format	\
-	    , ## a_args)
-cw_sint32_t	out_put_le(cw_out_t *a_out, const char *a_file_name, cw_uint32_t
     a_line_num, const char *a_func_name, const char *a_format,...);
 
 #define		_cw_out_put_n(a_size, a_format, a_args...)		\

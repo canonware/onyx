@@ -132,7 +132,7 @@ main(int argc, char **argv)
 					sock_delete(sock_vec[sockfd]);
 					sock_vec[sockfd] = NULL;
 
-					_cw_out_put_l("Connection closed\n");
+					_cw_out_put("Connection closed\n");
 				}
 			}
 		}
@@ -156,7 +156,7 @@ accept_entry_func(void *a_arg)
 		_cw_error("Memory allocation error");
 	for (;;) {
 		if (socks_accept(socks, NULL, sock) == sock) {
-			_cw_out_put_l("New connection\n");
+			_cw_out_put("New connection\n");
 
 			sock_vec[sock_fd_get(sock)] = sock;
 

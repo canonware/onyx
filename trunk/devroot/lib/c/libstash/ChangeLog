@@ -1,3 +1,10 @@
+2001-04-20  Jason Evans  <jasone@canonware.com>
+
+	* src/out.c (out_put_l): Remove.
+	(out_put_le): Remove.
+	(out_put_fl): Remove.
+	(out_put_fle): Remove.
+
 2001-04-19  Jason Evans  <jasone@canonware.com>
 
 	* src/mq.c (mq_new): Do not internally allocate the mq structure.

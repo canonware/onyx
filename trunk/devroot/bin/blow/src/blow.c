@@ -138,7 +138,7 @@ main(int argc, char **argv)
 				sock_delete(&sock_array[j]);
 			goto RETURN;
 		} else
-			_cw_out_put_l("New connection ([i])\n", i);
+			_cw_out_put("New connection ([i])\n", i);
 	}
 
 	buf_new(&buf, cw_g_mem);
@@ -192,7 +192,7 @@ main(int argc, char **argv)
 	for (i = 0; i < opt_nsocks; i++) {
 		sock_out_flush(&sock_array[i]);
 		sock_delete(&sock_array[i]);
-		_cw_out_put_l("Connection closed ([i])\n", i);
+		_cw_out_put("Connection closed ([i])\n", i);
 	}
 
 	RETURN:

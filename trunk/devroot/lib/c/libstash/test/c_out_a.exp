@@ -10,8 +10,6 @@ At <file>, line 42: <function>(): Extended output with filename and funcname
 At <file>, line 42: Extended output with filename
 <function>(): Extended output with funcname
 Extended output, NULL args
-out_put_l()
-out_put_le()
 out_put_n()
 012345678901234567890123456789012345678901234567890123456789:
 0123456789012345678901234567890123456789012345678901234567890123456789:

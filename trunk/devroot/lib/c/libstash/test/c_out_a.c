@@ -100,36 +100,6 @@ main()
 		out_delete(out_p);
 	}
 
-	/* out_put_l(). */
-	out_put(out_err, "out_put_l()\n");
-	{
-		cw_out_t	*out_p;
-
-		out_p = out_new(NULL, cw_g_mem);
-		_cw_check_ptr(out_p);
-
-/*  		_cw_assert(out_put_l(out_p, "Timestamped output [s]\n", "[s]") > */
-/*  		    0); */
-/*  		_cw_assert(out_put_l(out_p, "\n") > 0); */
-
-		out_delete(out_p);
-	}
-
-	/* out_put_le(). */
-	out_put(out_err, "out_put_le()\n");
-	{
-		cw_out_t	*out_p;
-
-		out_p = out_new(NULL, cw_g_mem);
-		_cw_check_ptr(out_p);
-
-/*  		_cw_assert(out_put_le(out_p, "<file>", 42, "<function>", */
-/*  		    "Timestamped output [s]\n", "[s]") > 0); */
-/*  		_cw_assert(out_put_le(out_p, NULL, 42, NULL, "\n") > 0); */
-
-		out_delete(out_p);
-	}
-
 	/* out_put_n(). */
 	out_put(out_err, "out_put_n()\n");
 	{

@@ -295,7 +295,7 @@ main(int argc, char **argv)
 	if (socks_listen(socks, opt_ip, &opt_port))
 		exit(1);
 	if (g_verbosity == 2) {
-		_cw_out_put_l("[s]: Listening on port [i]\n", g_progname,
+		_cw_out_put("[s]: Listening on port [i]\n", g_progname,
 		    opt_port);
 	}
 
