@@ -729,15 +729,7 @@ out_put_svn(cw_out_t * a_out, char * a_str, cw_uint32_t a_size,
 	  switch (ent->size)
 	  {
 	    case 1:
-	    {
-	      arg = (void *) &va_arg(a_p, cw_uint8_t);
-	      break;
-	    }
 	    case 2:
-	    {
-	      arg = (void *) &va_arg(a_p, cw_uint16_t);
-	      break;
-	    }
 	    case 4:
 	    {
 	      arg = (void *) &va_arg(a_p, cw_uint32_t);
@@ -1264,15 +1256,7 @@ out_p_metric(cw_out_t * a_out, const char * a_format, char ** r_format,
 	    switch (ent->size)
 	    {
 	      case 1:
-	      {
-		arg = (void *) &va_arg(a_p, cw_uint8_t);
-		break;
-	      }
 	      case 2:
-	      {
-		arg = (void *) &va_arg(a_p, cw_uint16_t);
-		break;
-	      }
 	      case 4:
 	      {
 		arg = (void *) &va_arg(a_p, cw_uint32_t);
