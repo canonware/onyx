@@ -12,7 +12,6 @@
 /* Defined in stilo.h to resolve a circular dependency. */
 #if (0)
 typedef struct cw_stiloe_mstate_s cw_stiloe_mstate_t;
-
 #endif
 
 struct cw_stiloe_mstate_s {
