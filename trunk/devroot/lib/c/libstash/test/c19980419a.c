@@ -7,14 +7,18 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 86 $
- * $Date: 1998-06-23 17:40:29 -0700 (Tue, 23 Jun 1998) $
+ * $Revision: 123 $
+ * $Date: 1998-07-02 16:25:29 -0700 (Thu, 02 Jul 1998) $
  *
  * <<< Description >>>
  *
  *
  *
  ****************************************************************************/
+
+#ifndef _CW_DEBUG
+#  define _CW_DEBUG
+#endif
 
 #define _INC_GLOB_H_
 #define _INC_LIST_H_

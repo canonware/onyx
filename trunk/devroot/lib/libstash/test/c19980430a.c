@@ -7,14 +7,18 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 121 $
- * $Date: 1998-07-01 17:22:38 -0700 (Wed, 01 Jul 1998) $
+ * $Revision: 123 $
+ * $Date: 1998-07-02 16:25:29 -0700 (Thu, 02 Jul 1998) $
  *
  * <<< Description >>>
  *
  * Test for the res class.
  *
  ****************************************************************************/
+
+#ifndef _CW_DEBUG
+#  define _CW_DEBUG
+#endif
 
 #define _INC_GLOB_H_
 #define _INC_STRING_H_

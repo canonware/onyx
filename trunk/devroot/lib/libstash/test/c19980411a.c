@@ -7,14 +7,18 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 110 $
- * $Date: 1998-06-30 00:08:06 -0700 (Tue, 30 Jun 1998) $
+ * $Revision: 123 $
+ * $Date: 1998-07-02 16:25:29 -0700 (Thu, 02 Jul 1998) $
  *
  * <<< Description >>>
  *
  * Simple test to make sure the test harness is working.
  *
  ****************************************************************************/
+
+#ifndef _CW_DEBUG
+#  define _CW_DEBUG
+#endif
 
 #define _INC_OH_H_
 #define _INC_GLOB_H_
