@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 201 $
- * Last modified: $Date: 1998-09-07 10:19:08 -0700 (Mon, 07 Sep 1998) $
+ * Current revision: $Revision: 222 $
+ * Last modified: $Date: 1998-09-15 17:25:47 -0700 (Tue, 15 Sep 1998) $
  *
  * <<< Description >>>
  *
@@ -459,13 +459,39 @@ res_dump(cw_res_t * a_res_o, char * a_filename)
   {
     cw_uint64_t num_items, i;
     char * key, * val;
+    cw_uint32_t j, curr_offset, val_len;
     
     num_items = oh_get_num_items(&a_res_o->hash_o);
 
     for (i = 0; i < num_items; i++)
     {
       oh_item_delete_iterate(&a_res_o->hash_o, (void *) &key, (void *) &val);
-      log_printf(t_log_o, "%s:%s\n", key, val);
+
+      log_printf(t_log_o, "%s:", key);
+      
+      for (j = 0, curr_offset = 0, val_len = strlen(val);
+	   j < val_len + 1;
+	   j++)
+      {
+	if (val[j] == '\n')
+	{
+	  val[j] = '\0';
+	  if ((j < val_len) && (val[j + 1] != '\0'))
+	  {
+	    log_printf(t_log_o, "%s\\n\\\n", (char *) (val + curr_offset));
+	  }
+	  else
+	  {
+	    log_printf(t_log_o, "%s\\n", (char *) (val + curr_offset));
+	  }
+	  curr_offset = j + 1;
+	}
+	else if (val[j] == '\0')
+	{
+	  log_printf(t_log_o, "%s\n", (char *) (val + curr_offset));
+	}
+      }
+      
       oh_item_insert(&a_res_o->hash_o, key, val);
     }
   }

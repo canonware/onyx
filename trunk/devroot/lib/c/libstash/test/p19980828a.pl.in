@@ -8,8 +8,8 @@
 #
 # $Source$
 # $Author: jasone $
-# $Revision: 206 $
-# $Date: 1998-09-07 23:55:11 -0700 (Mon, 07 Sep 1998) $
+# $Revision: 222 $
+# $Date: 1998-09-15 17:25:47 -0700 (Tue, 15 Sep 1998) $
 #
 # <<< Description >>>
 #
@@ -29,6 +29,7 @@ if ((-s "./b19980828a.diff") || (-s "./p19980828a.diff"))
 else
 {
     &passed(1);
-    unlink("./b19980828a.diff");
     unlink("./p19980828a.diff");
 }
+unlink("./b19980828a.diff");
+unlink("./b19980828a.dump");
