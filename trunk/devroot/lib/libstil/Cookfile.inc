@@ -191,7 +191,7 @@ libstil_install_p : [LIBSTIL_P] libstil_install_common
 	[INSTALL] -m 0444 [LIBSTIL_P] [PREFIX]/lib;
 }
 
-libstil_install_s : [LIBSTIL_D] libstil_install_common
+libstil_install_s : [LIBSTIL_S] libstil_install_common
 {
 	[INSTALL] -m 0444 [LIBSTIL_S] [PREFIX]/lib;
 	[LN] -sf libstil.so.[LIBSTIL_REV] [PREFIX]/lib/libstil.so;

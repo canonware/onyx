@@ -189,7 +189,7 @@ libsock_install_p : [LIBSOCK_P] libsock_install_common
 	[INSTALL] -m 0444 [LIBSOCK_P] [PREFIX]/lib;
 }
 
-libsock_install_s : [LIBSOCK_D] libsock_install_common
+libsock_install_s : [LIBSOCK_S] libsock_install_common
 {
 	[INSTALL] -m 0444 [LIBSOCK_S] [PREFIX]/lib;
 	[LN] -sf libsock.so.[LIBSOCK_REV] [PREFIX]/lib/libsock.so;

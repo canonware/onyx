@@ -205,7 +205,7 @@ libstash_install_p : [LIBSTASH_P] libstash_install_common
 	[INSTALL] -m 0444 [LIBSTASH_P] [PREFIX]/lib;
 }
 
-libstash_install_s : [LIBSTASH_D] libstash_install_common
+libstash_install_s : [LIBSTASH_S] libstash_install_common
 {
 	[INSTALL] -m 0444 [LIBSTASH_S] [PREFIX]/lib;
 	[LN] -sf libstash.so.[LIBSTASH_REV] [PREFIX]/lib/libstash.so;

@@ -193,7 +193,7 @@ libedit_install_p : [LIBEDIT_P] libedit_install_common
 	[INSTALL] -m 0444 [LIBEDIT_P] [PREFIX]/lib;
 }
 
-libedit_install_s : [LIBEDIT_D] libedit_install_common
+libedit_install_s : [LIBEDIT_S] libedit_install_common
 {
 	[INSTALL] -m 0444 [LIBEDIT_S] [PREFIX]/lib;
 	[LN] -sf libedit.so.[LIBEDIT_REV] [PREFIX]/lib/libedit.so;
