@@ -320,11 +320,6 @@ main(int argc, char ** argv)
   for (conn_num = 0; should_quit == FALSE; conn_num++)
   {
     conn = _cw_malloc(sizeof(connection_t));
-    if (NULL == conn)
-    {
-      out_put(cw_g_out, "malloc() error\n");
-      exit(1);
-    }
     
     bzero(conn, sizeof(connection_t));
     sock_new(&conn->client_sock, 4096);
@@ -347,11 +342,6 @@ main(int argc, char ** argv)
 	conn->is_verbose = TRUE;
 	
 	conn->out = out_new(NULL);
-	if (NULL == conn->out)
-	{
-	  out_put(cw_g_out, "malloc() error\n");
-	  exit(1);
-	}
 
 	out_put_s(cw_g_out, logfile, "[s]/[s].pid_[i].conn[i]",
 		  opt_dirname, g_progname, getpid(), conn_num);
@@ -441,21 +431,11 @@ get_out_str_pretty(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str)
   {
     /* Allocate for the first time. */
     retval = _cw_malloc(str_len);
-    if (NULL == retval)
-    {
-      out_put(cw_g_out, "malloc() error\n");
-      exit(1);
-    }
   }
   else
   {
     /* Re-use a_str. */
     retval = _cw_realloc(a_str, str_len);
-    if (NULL == retval)
-    {
-      out_put(cw_g_out, "malloc() error\n");
-      exit(1);
-    }
   }
   /* Clear the string. */
   retval[0] = '\0';
@@ -976,21 +956,11 @@ get_out_str_hex(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str)
   {
     /* Allocate for the first time. */
     retval = _cw_malloc(str_len);
-    if (NULL == retval)
-    {
-      out_put(cw_g_out, "malloc() error\n");
-      exit(1);
-    }
   }
   else
   {
     /* Re-use a_str. */
     retval = _cw_realloc(a_str, str_len);
-    if (NULL == retval)
-    {
-      out_put(cw_g_out, "malloc() error\n");
-      exit(1);
-    }
   }
   /* Clear the string. */
   retval[0] = '\0';
@@ -1048,21 +1018,11 @@ get_out_str_ascii(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str)
   {
     /* Allocate for the first time. */
     retval = _cw_malloc(str_len);
-    if (NULL == retval)
-    {
-      out_put(cw_g_out, "malloc() error\n");
-      exit(1);
-    }
   }
   else
   {
     /* Re-use a_str. */
     retval = _cw_realloc(a_str, str_len);
-    if (NULL == retval)
-    {
-      out_put(cw_g_out, "malloc() error\n");
-      exit(1);
-    }
   }
   /* Clear the string. */
   retval[0] = '\0';
