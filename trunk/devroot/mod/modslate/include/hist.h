@@ -44,10 +44,10 @@ void
 hist_delete(cw_hist_t *a_hist);
 
 cw_bool_t
-hist_undoable(cw_hist_t *a_hist, cw_buf_t *a_buf);
+hist_undoable(const cw_hist_t *a_hist, const cw_buf_t *a_buf);
 
 cw_bool_t
-hist_redoable(cw_hist_t *a_hist, cw_buf_t *a_buf);
+hist_redoable(const cw_hist_t *a_hist, const cw_buf_t *a_buf);
 
 cw_uint64_t
 hist_undo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,

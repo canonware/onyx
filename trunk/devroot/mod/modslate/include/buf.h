@@ -13,14 +13,14 @@
 typedef struct cw_hist_s cw_hist_t;
 typedef struct cw_ext_s cw_ext_t;
 typedef struct cw_mkr_s cw_mkr_t;
-typedef struct cw_bufb_s cw_bufb_t;
+typedef struct cw_bufp_s cw_bufp_t;
 typedef struct cw_buf_s cw_buf_t;
 
-/* Similar to struct iovec, but with 64 bit lengths. */
+/* Similar to struct iovec. */
 typedef struct
 {
     cw_uint8_t *data;
-    cw_uint64_t len;
+    cw_uint32_t len;
 } cw_bufv_t;
 
 /* Enumeration for seek operations. */
@@ -39,6 +39,27 @@ typedef enum
     BUFW_END
 } cw_bufw_t;
 
+struct cw_mkr_s
+{
+#ifdef CW_DBG
+    cw_uint32_t magic;
+#define CW_MKR_MAGIC 0x2e84a3c9
+#endif
+
+    /* bufp this marker is in. */
+    cw_bufp_t *bufp;
+
+    /* Gap movement can change this. */
+    cw_uint64_t ppos;
+
+    /* Line number, relative to the beginning of bufp (>= 0). */
+    cw_uint64_t line;
+
+    /* Ordered mkr tree and list linkage. */
+    rb_node(cw_mkr_t) node;
+    ql_elm(cw_mkr_t) link;
+};
+
 struct cw_ext_s
 {
 #ifdef CW_DBG
@@ -46,23 +67,12 @@ struct cw_ext_s
 #define CW_EXT_MAGIC 0x8a94e34c
 #endif
 
-    /* Ordered ext list linkage.  flink: forward, rlink: reverse. */
-    ql_elm(cw_ext_t) flink;
-    ql_elm(cw_ext_t) rlink;
-
-    /* Buffer this extent is in. */
-    cw_buf_t *buf;
-
     /* Allocator state. */
     cw_bool_t malloced:1;
 
-    /* Gap movement can change this. */
-    cw_uint64_t beg_apos;
-    cw_uint64_t end_apos;
-
-    /* Always kept up to date. */
-    cw_uint64_t beg_line;
-    cw_uint64_t end_line;
+    /* Beginning and ending markers. */
+    cw_mkr_t beg;
+    cw_mkr_t end;
 
     /* Extents are either open or closed at each end. */
     cw_bool_t beg_open:1;
@@ -71,32 +81,62 @@ struct cw_ext_s
     /* A detachable extent is removed from the buffer if its size reaches 0. */
     cw_bool_t detachable:1;
     cw_bool_t detached:1;
+
+    /* Forward- and reverse-ordered ext tree and list linkage. */
+    rb_node(cw_ext_t) fnode;
+    ql_elm(cw_ext_t) flink;
+    rb_node(cw_ext_t) rnode;
+    ql_elm(cw_ext_t) rlink;
 };
 
-struct cw_mkr_s
+/* Text buffers are composed of contiguous pages, of size CW_BUFP_PAGESIZE.
+ * Each bufp starts out with CW_BUFP_MINPAGES pages, and iteratively doubles the
+ * number of pages, up to CW_BUFP_MAXPAGES, before splitting into multiple
+ * bufp's. */
+#define CW_BUFP_PAGESIZE 4096
+#define CW_BUFP_MINPAGES    1
+#define CW_BUFP_MAXPAGES   16
+struct cw_bufp_s
 {
 #ifdef CW_DBG
     cw_uint32_t magic;
-#define CW_MKR_MAGIC 0x2e84a3c9
+#define CW_BUFP_MAGIC 0xda7d87d3
 #endif
 
-    /* Ordered mkr list linkage. */
-    ql_elm(cw_mkr_t) link;
-
-    /* Buffer this marker is in. */
+    /* Parent buf. */
     cw_buf_t *buf;
 
-    /* Allocator state. */
-    cw_bool_t malloced:1;
+    /* Offset into the buf's bufps array. */
+    cw_uint32_t index;
 
-    /* Gap movement can change this. */
-    cw_uint64_t apos;
-
-    /* Always kept up to date. */
+    /* Cached position of the beginning of the bufp, relative to the entire buf.
+     * The validity of these values is determined by the bob_cached and
+     * eob_cached fields of the buf. */
+    cw_uint64_t bpos;
     cw_uint64_t line;
+
+    /* Length. */
+    cw_uint32_t len;
+
+    /* Number of newlines. */
+    cw_uint32_t nlines;
+
+    /* Gap offset, in elements. */
+    cw_uint32_t gap_off;
+
+    /* Gap length, in elements. */
+    cw_uint32_t gap_len;
+
+    /* Text buffer, with gap. */
+    cw_uint8_t *b;
+
+    /* Tree and list of mkr's that point into the bufp.  Both of these are
+     * ordered and kept up to date.  Random access is done via the tree, and
+     * iteration is done via the list. */
+    rb_tree(cw_mkr_t) mkr_tree;
+    ql_head(cw_mkr_t) mkr_list;
 };
 
-#define CW_BUF_MINELMS 4096
 struct cw_buf_s
 {
 #ifdef CW_DBG
@@ -111,32 +151,48 @@ struct cw_buf_s
     cw_opaque_dealloc_t *dealloc;
     void *arg;
 
-    /* Internal buffer state. */
-
-    /* Text buffer, with gap. */
-    cw_uint8_t *b;
-
     /* Length. */
     cw_uint64_t len;
 
     /* Number of lines (>= 1). */
     cw_uint64_t nlines;
 
-    /* Gap offset, in elements. */
-    cw_uint64_t gap_off;
+    /* Array of pointers to bufp's.  There are nbufps elements. */
+    cw_bufp_t **bufps;
+    cw_uint32_t nbufps;
 
-    /* Gap length, in elements. */
-    cw_uint64_t gap_len;
+    /* Index of first and last bufp with valid caches.  The first bufp always
+     * has a valid cache, which allows bob_cached to be unsigned.  If no bufp's
+     * at the end have a valid cache, then eob_cached is set to nbufps. */
+    cw_uint32_t bob_cached;
+    cw_uint32_t eob_cached;
 
-    /* Returned by mkr_range_get(). */
-    cw_bufv_t bufv[2];
+    /* An array of (2 * nbufps) bufv's.  This is large enough to create a vector
+     * for the entire buf, even if all bufp's are split by their gaps. */
+    cw_bufv_t *bufv;
 
-    /* Ordered list of all markers. */
-    ql_head(cw_mkr_t) mkrs;
-
-    /* Ordered lists of all extents, in forward and reverse order. */
-    ql_head(cw_ext_t) fexts;
-    ql_head(cw_ext_t) rexts;
+    /* Extent trees and lists.  ftree and flist are ordered in forward order.
+     * rtree and rlist are ordered in reverse order.
+     *
+     * For ext's A and B, where beg(X) is the beginning position of X and end(X)
+     * is the ending position of X:
+     *
+     *   Forward order : if ((beg(A) < beg(B))
+     *                       || (start(A) == start(B) && end(A) > end(B)))
+     *                   {
+     *                       A < B
+     *                   }
+     *
+     *   Reverse order : if ((end(A) < end(B))
+     *                       || (end(A) == end(B) && beg(A) > beg(B)))
+     *                   {
+     *                       A < B
+     *                   }
+     */
+    rb_tree(cw_ext_t) ftree;
+    ql_head(cw_ext_t) flist;
+    rb_tree(cw_ext_t) rtree;
+    ql_head(cw_ext_t) rlist;
 
     /* History (undo/redo), if non-NULL. */
     cw_hist_t *hist;
@@ -157,22 +213,22 @@ void
 buf_delete(cw_buf_t *a_buf);
 
 cw_uint64_t
-buf_len(cw_buf_t *a_buf);
+buf_len(const cw_buf_t *a_buf);
 
 cw_uint64_t
-buf_nlines(cw_buf_t *a_buf);
+buf_nlines(const cw_buf_t *a_buf);
 
 cw_bool_t
-buf_hist_active_get(cw_buf_t *a_buf);
+buf_hist_active_get(const cw_buf_t *a_buf);
 
 void
 buf_hist_active_set(cw_buf_t *a_buf, cw_bool_t a_active);
 
 cw_bool_t
-buf_undoable(cw_buf_t *a_buf);
+buf_undoable(const cw_buf_t *a_buf);
 
 cw_bool_t
-buf_redoable(cw_buf_t *a_buf);
+buf_redoable(const cw_buf_t *a_buf);
 
 cw_uint64_t
 buf_undo(cw_buf_t *a_buf, cw_mkr_t *a_mkr, cw_uint64_t a_count);
@@ -190,17 +246,17 @@ cw_bool_t
 buf_hist_group_end(cw_buf_t *a_buf);
 
 /* mkr. */
-cw_mkr_t *
+void
 mkr_new(cw_mkr_t *a_mkr, cw_buf_t *a_buf);
 
 void
-mkr_dup(cw_mkr_t *a_to, cw_mkr_t *a_from);
+mkr_dup(cw_mkr_t *a_to, const cw_mkr_t *a_from);
 
 void
 mkr_delete(cw_mkr_t *a_mkr);
 
 cw_buf_t *
-mkr_buf(cw_mkr_t *a_mkr);
+mkr_buf(const cw_mkr_t *a_mkr);
 
 cw_uint64_t
 mkr_line_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence);
@@ -212,16 +268,17 @@ cw_uint64_t
 mkr_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence);
 
 cw_uint64_t
-mkr_pos(cw_mkr_t *a_mkr);
+mkr_pos(const cw_mkr_t *a_mkr);
 
 cw_uint8_t *
-mkr_before_get(cw_mkr_t *a_mkr);
+mkr_before_get(const cw_mkr_t *a_mkr);
 
 cw_uint8_t *
-mkr_after_get(cw_mkr_t *a_mkr);
+mkr_after_get(const cw_mkr_t *a_mkr);
 
 cw_bufv_t *
-mkr_range_get(cw_mkr_t *a_start, cw_mkr_t *a_end, cw_uint32_t *r_iovcnt);
+mkr_range_get(const cw_mkr_t *a_start, const cw_mkr_t *a_end,
+	      cw_uint32_t *r_iovcnt);
 
 void
 mkr_before_insert(cw_mkr_t *a_mkr, const cw_bufv_t *a_bufv,
@@ -245,40 +302,40 @@ void
 ext_delete(cw_ext_t *a_ext);
 
 cw_buf_t *
-ext_buf(cw_ext_t *a_ext);
+ext_buf(const cw_ext_t *a_ext);
 
-cw_uint64_t
+const cw_mkr_t *
 ext_beg_get(cw_ext_t *a_ext);
 
 void
-ext_beg_set(cw_ext_t *a_ext, cw_uint64_t a_beg);
+ext_beg_set(cw_ext_t *a_ext, const cw_mkr_t *a_beg);
 
-cw_uint64_t
+const cw_mkr_t *
 ext_end_get(cw_ext_t *a_ext);
 
 void
-ext_end_set(cw_ext_t *a_ext, cw_uint64_t a_end);
+ext_end_set(cw_ext_t *a_ext, const cw_mkr_t *a_end);
 
 cw_bool_t
-ext_beg_open_get(cw_ext_t *a_ext);
+ext_beg_open_get(const cw_ext_t *a_ext);
 
 void
 ext_beg_open_set(cw_ext_t *a_ext, cw_bool_t a_beg_open);
 
 cw_bool_t
-ext_end_open_get(cw_ext_t *a_ext);
+ext_end_open_get(const cw_ext_t *a_ext);
 
 void
 ext_end_open_set(cw_ext_t *a_ext, cw_bool_t a_end_open);
 
 cw_bool_t
-ext_detachable_get(cw_ext_t *a_ext);
+ext_detachable_get(const cw_ext_t *a_ext);
 
 void
 ext_detachable_set(cw_ext_t *a_ext, cw_bool_t a_detachable);
 
 cw_bool_t
-ext_detached_get(cw_ext_t *a_ext);
+ext_detached_get(const cw_ext_t *a_ext);
 
 void
 ext_detached_set(cw_ext_t *a_ext, cw_bool_t a_detached);
@@ -286,17 +343,15 @@ ext_detached_set(cw_ext_t *a_ext, cw_bool_t a_detached);
 void
 ext_detach(cw_ext_t *a_ext);
 
+/* Get the first and last ext's that overlap a_mkr.  retval is the length of the
+ * run.  r_beg and r_end are NULL if there are no extents overlapping the
+ * run. */
+cw_uint64_t
+ext_run_get(const cw_mkr_t *a_mkr, cw_ext_t *r_beg, cw_ext_t *r_end);
+
+/* Iterate in f-order. */
 cw_ext_t *
-ext_before_get(cw_ext_t *a_ext, cw_mkr_t *a_mkr);
+ext_prev_get(const cw_ext_t *a_ext);
 
 cw_ext_t *
-ext_at_get(cw_ext_t *a_ext, cw_mkr_t *a_mkr);
-
-cw_ext_t *
-ext_after_get(cw_ext_t *a_ext, cw_mkr_t *a_mkr);
-
-cw_ext_t *
-ext_prev_get(cw_ext_t *a_ext);
-
-cw_ext_t *
-ext_next_get(cw_ext_t *a_ext);
+ext_next_get(const cw_ext_t *a_ext);

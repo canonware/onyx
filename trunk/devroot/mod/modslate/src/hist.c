@@ -297,7 +297,7 @@ hist_delete(cw_hist_t *a_hist)
 }
 
 cw_bool_t
-hist_undoable(cw_hist_t *a_hist, cw_buf_t *a_buf)
+hist_undoable(const cw_hist_t *a_hist, const cw_buf_t *a_buf)
 {
     cw_bool_t retval;
 
@@ -319,7 +319,7 @@ hist_undoable(cw_hist_t *a_hist, cw_buf_t *a_buf)
 }
 
 cw_bool_t
-hist_redoable(cw_hist_t *a_hist, cw_buf_t *a_buf)
+hist_redoable(const cw_hist_t *a_hist, const cw_buf_t *a_buf)
 {
     cw_bool_t retval;
 
@@ -459,7 +459,7 @@ hist_undo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 			{
 			    bufv.data = &c;
 			    bufv.len = sizeof(c);
-			    mkr_l_insert(a_mkr, FALSE, FALSE, &bufv, 1, 1);
+			    mkr_l_insert(a_mkr, FALSE, FALSE, &bufv, 1);
 			    a_hist->hbpos++;
 			    break;
 			}
@@ -475,7 +475,7 @@ hist_undo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 			{
 			    bufv.data = &c;
 			    bufv.len = sizeof(c);
-			    mkr_l_insert(a_mkr, FALSE, TRUE, &bufv, 1, 1);
+			    mkr_l_insert(a_mkr, FALSE, TRUE, &bufv, 1);
 			    break;
 			}
 			case HST_TAG_DEL:
@@ -679,7 +679,7 @@ hist_redo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 			{
 			    bufv.data = &c;
 			    bufv.len = sizeof(c);
-			    mkr_l_insert(a_mkr, FALSE, FALSE, &bufv, 1, 1);
+			    mkr_l_insert(a_mkr, FALSE, FALSE, &bufv, 1);
 			    a_hist->hbpos++;
 			    break;
 			}
@@ -695,7 +695,7 @@ hist_redo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 			{
 			    bufv.data = &c;
 			    bufv.len = sizeof(c);
-			    mkr_l_insert(a_mkr, FALSE, TRUE, &bufv, 1, 1);
+			    mkr_l_insert(a_mkr, FALSE, TRUE, &bufv, 1);
 			    break;
 			}
 			case HST_TAG_DEL:
