@@ -45,15 +45,8 @@ struct cw_stilso_s {
 #if (defined(_LIBSTIL_DBG) || defined(_LIBSTIL_DEBUG))
 	cw_uint32_t magic;
 #endif
-
-	/*
-	 * Stack linkage.  If a spare slot, this field is used to link into
-	 * the stils-wide spares ring.  If this stilso is empty/invalid, the
-	 * least significant bit of the data pointer is 1.  This allows the
-	 * GC to deallocate completely unused stilsc's by iteratively
-	 * unlinking all stilso's in an empty stilsc.
-	 */
-	cw_ring_t link;
+	/* Stack linkage, or spares linkage. */
+	RING_ENTRY(cw_stilso_s)	link;
 };
 
 struct cw_stilsc_s {
@@ -61,18 +54,8 @@ struct cw_stilsc_s {
 	cw_uint32_t magic;
 #endif
 
-	/* Pointer to the stils's spares linkage. */
-	cw_ring_t *spares;
-
-	/*
-	 * Linkage into a ring of stilsc's in the same stils.  The GC uses
-	 * this ring to iterate through the stils, and potentially
-	 * deallocate empty stilsc's.
-	 */
-	cw_ring_t link;
-
-	/* stils this stilsc is part of. */
-	cw_stils_t *stils;
+	/* Linkage for the list of stilsc's. */
+	SLIST_ENTRY(cw_stilsc_s) link;
 
 	/*
 	 * Must be last field, since it is used for array indexing of
@@ -86,13 +69,16 @@ struct cw_stils_s {
 	cw_uint32_t magic;
 #endif
 
-	/* Linkage to the top of the stack. */
-	cw_ring_t top;
+	/* Pointer to the top of the stack. */
+	cw_stilso_t	*stack;
 
-	/* Linkage to the ring of spare slots. */
-	cw_ring_t spares;
+	/* Pointer to the ring of spare slots. */
+	cw_stilso_t	*spares;
 
 	cw_pezz_t *stilsc_pezz;
+
+	/* Pointer to the list of chunks. */
+	SLIST_HEAD(cw_stilsc_slist_s, cw_stilsc_s) chunks;
 
 	/* Number of stack elements. */
 	cw_uint32_t count;
