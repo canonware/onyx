@@ -109,6 +109,9 @@ struct cw_buf_s {
 	cw_opaque_dealloc_t *dealloc;
 	const void	*arg;
 
+	/* Message queue to send notifications to. */
+	cw_msgq_t	*msgq;
+
 	/* Implicit lock. */
 	cw_mtx_t	mtx;
 
@@ -130,7 +133,7 @@ struct cw_buf_s {
 /* buf. */
 cw_buf_t *buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc,
     cw_opaque_realloc_t *a_realloc, cw_opaque_dealloc_t *a_dealloc, void
-    *a_arg);
+    *a_arg, cw_msgq_t *a_msgq);
 void	buf_delete(cw_buf_t *a_buf);
 
 cw_uint64_t buf_count(cw_buf_t *a_buf);

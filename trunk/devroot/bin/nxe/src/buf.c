@@ -68,6 +68,7 @@ static void	bufb_p_split(cw_bufb_t *a_bufb, cw_bufb_t *a_after, cw_uint32_t
     a_pos);
 static void	bufb_p_remove(cw_bufb_t *a_bufb, cw_uint32_t a_pos,
     cw_uint32_t a_count);
+static cw_bufc_t bufb_p_bufc_at_cpos(cw_bufb_t *a_bufb, cw_uint64_t a_cpos);
 static cw_uint64_t bufb_p_line_at_pos(cw_bufb_t *a_bufb, cw_uint64_t
     a_pos);
 
@@ -87,6 +88,7 @@ static void	bufh_p_new(cw_bufh_t *a_bufh);
 static void	bufh_p_delete(cw_bufh_t *a_bufh);
 
 /* buf. */
+static cw_uint64_t buf_p_bufb_at_cpos(cw_buf_t *a_buf, cw_uint64_t a_cpos);
 static cw_uint64_t buf_p_line_at_cpos(cw_buf_t *a_buf, cw_uint64_t a_cpos);
 static void	buf_p_bufb_cache_update(cw_buf_t *a_buf, cw_uint64_t a_cpos);
 static void	buf_p_bufm_insert(cw_buf_t *a_buf, cw_bufm_t *a_bufm);
@@ -187,6 +189,7 @@ bufb_p_insert(cw_bufb_t *a_bufb, cw_uint32_t a_pos, const cw_bufc_t *a_data,
 			a_bufb->nlines++;
 	}
 	a_bufb->gap_off += a_count;
+	a_bufb->gap_len -= a_count;
 }
 
 /*
@@ -228,13 +231,26 @@ bufb_p_remove(cw_bufb_t *a_bufb, cw_uint32_t a_pos, cw_uint32_t a_count)
 	a_bufb->gap_len += a_count;
 }
 
+static cw_bufc_t
+bufb_p_bufc_at_cpos(cw_bufb_t *a_bufb, cw_uint64_t a_cpos)
+{
+	_cw_check_ptr(a_bufb);
+	_cw_assert(a_cpos <= a_bufb->ecpos);
+	
+	/*
+	 * We can assume that ecpos is valid.
+	 */
+	return bufb_p_get(a_bufb, a_cpos + bufb_p_len_get(a_bufb) -
+	    a_bufb->ecpos);
+}
+
 static cw_uint64_t
-bufb_p_line_at_pos(cw_bufb_t *a_bufb, cw_uint64_t a_pos)
+bufb_p_line_at_cpos(cw_bufb_t *a_bufb, cw_uint64_t a_cpos)
 {
 	cw_uint64_t	i, count, retval;
 
-	_cw_assert(a_pos < a_bufb->ecpos);
-	_cw_assert(a_pos >= a_bufb->ecpos - bufb_p_len_get(a_bufb));
+	_cw_assert(a_cpos <= a_bufb->ecpos);
+	_cw_assert(a_cpos > a_bufb->ecpos - bufb_p_len_get(a_bufb));
 
 	/*
 	 * We can assume that ecpos and eline are valid.
@@ -243,7 +259,7 @@ bufb_p_line_at_pos(cw_bufb_t *a_bufb, cw_uint64_t a_pos)
 	 * gap.
 	 */
 	retval = a_bufb->eline - a_bufb->nlines;
-	count = a_pos - a_bufb->ecpos + bufb_p_len_get(a_bufb);
+	count = a_cpos - a_bufb->ecpos + bufb_p_len_get(a_bufb);
 
 	for (i = 0; i < count && i < a_bufb->gap_off; i++) {
 		if (a_bufb->data[i].c == '\n')
@@ -276,7 +292,7 @@ bufh_p_delete(cw_bufh_t *a_bufh)
 /* buf. */
 cw_buf_t *
 buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc, cw_opaque_realloc_t
-    *a_realloc, cw_opaque_dealloc_t *a_dealloc, void *a_arg)
+    *a_realloc, cw_opaque_dealloc_t *a_dealloc, void *a_arg, cw_msgq_t *a_msgq)
 {
 	cw_buf_t	*retval;
 
@@ -300,6 +316,8 @@ buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc, cw_opaque_realloc_t
 	retval->realloc = a_realloc;
 	retval->dealloc = a_dealloc;
 	retval->arg = a_arg;
+
+	retval->msgq = a_msgq;
 
 	mtx_new(&retval->mtx);
 
@@ -454,16 +472,9 @@ buf_hist_flush(cw_buf_t *a_buf)
 }
 
 static cw_uint64_t
-buf_p_line_at_cpos(cw_buf_t *a_buf, cw_uint64_t a_cpos)
+buf_p_bufb_at_cpos(cw_buf_t *a_buf, cw_uint64_t a_cpos)
 {
-	cw_uint64_t	retval, index, first, last;
-
-	_cw_assert(a_cpos <= a_buf->len);
-
-	if (a_cpos == 0) {
-		retval = 1;
-		goto RETURN;
-	}
+	cw_uint64_t	index, first, last;
 
 	/*
 	 * Make sure the cache reaches far enough to be useful for the
@@ -487,8 +498,8 @@ buf_p_line_at_cpos(cw_buf_t *a_buf, cw_uint64_t a_cpos)
 		for (;;) {
 			index = (first + last) >> 1;
 
-			if (bufb_p_ecpos_get(a_buf->bufb_vec[index]) <=
-			    a_cpos) {
+			_cw_assert(index < a_buf->bufb_count);
+			if (bufb_p_ecpos_get(a_buf->bufb_vec[index]) < a_cpos) {
 				first = index + 1;
 			} else if (bufb_p_ecpos_get(a_buf->bufb_vec[index - 1])
 			    > a_cpos) {
@@ -499,7 +510,23 @@ buf_p_line_at_cpos(cw_buf_t *a_buf, cw_uint64_t a_cpos)
 	}
 	_cw_assert(index < a_buf->bufb_count);
 
-	retval = bufb_p_line_at_pos(a_buf->bufb_vec[index], a_cpos);
+	return index;
+}
+
+static cw_uint64_t
+buf_p_line_at_cpos(cw_buf_t *a_buf, cw_uint64_t a_cpos)
+{
+	cw_uint64_t	retval, index;
+
+	_cw_assert(a_cpos <= a_buf->len);
+
+	if (a_cpos == 0) {
+		retval = 1;
+		goto RETURN;
+	}
+
+	index = buf_p_bufb_at_cpos(a_buf, a_cpos);
+	retval = bufb_p_line_at_cpos(a_buf->bufb_vec[index], a_cpos);
 	RETURN:
 	return retval;
 }
@@ -629,11 +656,16 @@ bufm_buf(cw_bufm_t *a_bufm)
 cw_uint64_t
 bufm_line(cw_bufm_t *a_bufm)
 {
+	cw_uint64_t	retval;
+
 	_cw_check_ptr(a_bufm);
 	_cw_dassert(a_bufm->magic == _CW_BUFM_MAGIC);
 	_cw_check_ptr(a_bufm->buf);
 
-	return buf_p_line_at_cpos(a_bufm->buf, a_bufm->cpos);
+	mtx_lock(&a_bufm->buf->mtx);
+	retval = buf_p_line_at_cpos(a_bufm->buf, a_bufm->cpos);
+	mtx_unlock(&a_bufm->buf->mtx);
+	return retval;
 }
 
 cw_uint64_t
@@ -658,6 +690,11 @@ bufm_rel_seek(cw_bufm_t *a_bufm, cw_sint64_t a_amount)
 
 	a_bufm->cpos += a_amount;
 
+	/*
+	 * XXX We should be able to do better than this, since most relative
+	 * seeks will be very nearby, meaning that we don't always need to
+	 * re-insert into the bufm list.
+	 */
 	ql_remove(&a_bufm->buf->bufms, a_bufm, link);
 	buf_p_bufm_insert(a_bufm->buf, a_bufm);
 
@@ -716,14 +753,20 @@ cw_bufc_t
 bufm_bufc_get(cw_bufm_t *a_bufm)
 {
 	cw_bufc_t	retval;
+	cw_uint64_t	index;
 
 	_cw_check_ptr(a_bufm);
 	_cw_dassert(a_bufm->magic == _CW_BUFM_MAGIC);
 	_cw_check_ptr(a_bufm->buf);
 
-	retval.c = 'X'; /* XXX */
+	mtx_lock(&a_bufm->buf->mtx);
 
-	_cw_error("XXX Not implemented");
+	index = buf_p_bufb_at_cpos(a_bufm->buf, a_bufm->cpos);
+	retval = bufb_p_bufc_at_cpos(a_bufm->buf->bufb_vec[index],
+	    a_bufm->cpos);
+
+	mtx_unlock(&a_bufm->buf->mtx);
+
 	return retval;
 }
 
@@ -745,5 +788,9 @@ bufm_bufc_insert(cw_bufm_t *a_bufm, const cw_bufc_t *a_data, cw_uint64_t
 	_cw_dassert(a_bufm->magic == _CW_BUFM_MAGIC);
 	_cw_check_ptr(a_bufm->buf);
 
-	_cw_error("XXX Not implemented");
+	/* XXX Temporary hack! */
+	bufb_p_insert(a_bufm->buf->bufb_vec[0], 0, a_data, a_count);
+	a_bufm->buf->len = a_count;
+	
+/*  	_cw_error("XXX Not implemented"); */
 }
