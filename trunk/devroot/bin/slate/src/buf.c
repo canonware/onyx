@@ -499,24 +499,6 @@ buf_delete(cw_buf_t *a_buf)
 #endif
 }
 
-void
-buf_lock(cw_buf_t *a_buf)
-{
-	_cw_check_ptr(a_buf);
-	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
-
-	mtx_lock(&a_buf->mtx);
-}
-
-void
-buf_unlock(cw_buf_t *a_buf)
-{
-	_cw_check_ptr(a_buf);
-	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
-
-	mtx_unlock(&a_buf->mtx);
-}
-
 cw_uint32_t
 buf_elmsize_get(cw_buf_t *a_buf)
 {

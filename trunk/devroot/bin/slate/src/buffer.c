@@ -17,6 +17,7 @@
 struct cw_buffer {
 	cw_uint32_t	iter;	/* For GC iteration. */
 	cw_buf_t	buf;
+	cw_mtx_t	mtx;	/* Protects all buf operations. */
 	cw_nxo_t	hook;	/* Ref to =buffer=, prevents mod unload. */
 	cw_nxo_t	aux;	/* Auxiliary data for buffer_{set}aux. */
 	cw_nxoi_t	seq;	/* Sequence number. */
@@ -85,6 +86,18 @@ slate_buffer_init(cw_nxo_t *a_thread)
 	    sizeof(struct cw_slate_entry)));
 }
 
+_CW_INLINE void
+buffer_p_lock(struct cw_buffer *a_buffer)
+{
+	mtx_lock(&a_buffer->mtx);
+}
+
+_CW_INLINE void
+buffer_p_unlock(struct cw_buffer *a_buffer)
+{
+	mtx_unlock(&a_buffer->mtx);
+}
+
 static void
 buffer_p_eval(void *a_data, cw_nxo_t *a_thread)
 {
@@ -136,6 +149,7 @@ buffer_p_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t a_iter)
 		goto RETURN;
 	}
 
+	mtx_delete(&buffer->mtx);
 	buf_delete(&buffer->buf);
 	nxa_free(nx_nxa_get(a_nx), buffer, sizeof(struct cw_buffer));
 
@@ -204,6 +218,9 @@ slate_buffer(void *a_data, cw_nxo_t *a_thread)
 	buf_new(&buffer->buf, (cw_opaque_alloc_t *)nxa_malloc_e,
 	    (cw_opaque_realloc_t *)nxa_realloc_e, (cw_opaque_dealloc_t
 	    *)nxa_free_e, (void *)nx_nxa_get(nx));
+
+	/* Initialize the protection mutex; buf's aren't thread-safe. */
+	mtx_new(&buffer->mtx);
 
 	/* Create a reference to the buffer. */
 	nxo = nxo_stack_push(ostack);
@@ -290,9 +307,9 @@ slate_buffer_seq(void *a_data, cw_nxo_t *a_thread)
 	}
 	buffer = (struct cw_buffer *)nxo_hook_data_get(nxo);
 
-	buf_lock(&buffer->buf);
+	buffer_p_lock(buffer);
 	seq = buffer->seq;
-	buf_unlock(&buffer->buf);
+	buffer_p_unlock(buffer);
 
 	nxo_integer_new(nxo, seq);
 }
@@ -314,9 +331,9 @@ slate_buffer_length(void *a_data, cw_nxo_t *a_thread)
 	}
 	buffer = (struct cw_buffer *)nxo_hook_data_get(nxo);
 
-	buf_lock(&buffer->buf);
+	buffer_p_lock(buffer);
 	length = buf_len(&buffer->buf);
-	buf_unlock(&buffer->buf);
+	buffer_p_unlock(buffer);
 
 	nxo_integer_new(nxo, length);
 }
@@ -338,9 +355,9 @@ slate_buffer_lines(void *a_data, cw_nxo_t *a_thread)
 	}
 	buffer = (struct cw_buffer *)nxo_hook_data_get(nxo);
 
-	buf_lock(&buffer->buf);
+	buffer_p_lock(buffer);
 	lines = buf_nlines(&buffer->buf);
-	buf_unlock(&buffer->buf);
+	buffer_p_unlock(buffer);
 
 	nxo_integer_new(nxo, lines);
 }
@@ -362,9 +379,9 @@ slate_buffer_undoable(void *a_data, cw_nxo_t *a_thread)
 	}
 	buffer = (struct cw_buffer *)nxo_hook_data_get(nxo);
 
-	buf_lock(&buffer->buf);
+	buffer_p_lock(buffer);
 	undoable = buf_undoable(&buffer->buf);
-	buf_unlock(&buffer->buf);
+	buffer_p_unlock(buffer);
 
 	nxo_boolean_new(nxo, undoable);
 }
@@ -386,9 +403,9 @@ slate_buffer_redoable(void *a_data, cw_nxo_t *a_thread)
 	}
 	buffer = (struct cw_buffer *)nxo_hook_data_get(nxo);
 
-	buf_lock(&buffer->buf);
+	buffer_p_lock(buffer);
 	redoable = buf_redoable(&buffer->buf);
-	buf_unlock(&buffer->buf);
+	buffer_p_unlock(buffer);
 
 	nxo_boolean_new(nxo, redoable);
 }
@@ -399,7 +416,6 @@ slate_buffer_undo(void *a_data, cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *nxo;
 	cw_nxn_t		error;
-	cw_buf_t		*buf;
 	struct cw_marker	*marker;
 	struct cw_buffer	*buffer;
 
@@ -413,12 +429,11 @@ slate_buffer_undo(void *a_data, cw_nxo_t *a_thread)
 	marker = (struct cw_marker *)nxo_hook_data_get(nxo);
 	buffer = (struct cw_buffer *)nxo_hook_data_get(&marker->buffer_nxo);
 
-	buf = bufm_buf(&marker->bufm);
-	buf_lock(buf);
-	buf_undo(buf, &marker->bufm, 1);
+	buffer_p_lock(buffer);
+	buf_undo(&buffer->buf, &marker->bufm, 1);
 	buffer->seq++;
 	marker->seq++;
-	buf_unlock(buf);
+	buffer_p_unlock(buffer);
 
 	nxo_stack_pop(ostack);
 }
@@ -429,7 +444,6 @@ slate_buffer_redo(void *a_data, cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *nxo;
 	cw_nxn_t		error;
-	cw_buf_t		*buf;
 	struct cw_marker	*marker;
 	struct cw_buffer	*buffer;
 
@@ -440,16 +454,14 @@ slate_buffer_redo(void *a_data, cw_nxo_t *a_thread)
 		nxo_thread_nerror(a_thread, error);
 		return;
 	}
-
 	marker = (struct cw_marker *)nxo_hook_data_get(nxo);
 	buffer = (struct cw_buffer *)nxo_hook_data_get(&marker->buffer_nxo);
 
-	buf = bufm_buf(&marker->bufm);
-	buf_lock(buf);
-	buf_redo(buf, &marker->bufm, 1);
+	buffer_p_lock(buffer);
+	buf_redo(&buffer->buf, &marker->bufm, 1);
 	buffer->seq++;
 	marker->seq++;
-	buf_unlock(buf);
+	buffer_p_unlock(buffer);
 
 	nxo_stack_pop(ostack);
 }
@@ -471,9 +483,9 @@ slate_buffer_history_active(void *a_data, cw_nxo_t *a_thread)
 	}
 	buffer = (struct cw_buffer *)nxo_hook_data_get(nxo);
 
-	buf_lock(&buffer->buf);
+	buffer_p_lock(buffer);
 	history_active = buf_hist_active_get(&buffer->buf);
-	buf_unlock(&buffer->buf);
+	buffer_p_unlock(buffer);
 
 	nxo_boolean_new(nxo, history_active);
 }
@@ -500,13 +512,12 @@ slate_buffer_history_setactive(void *a_data, cw_nxo_t *a_thread)
 		nxo_thread_nerror(a_thread, error);
 		return;
 	}
-
 	buffer = (struct cw_buffer *)nxo_hook_data_get(nxo);
 
-	buf_lock(&buffer->buf);
+	buffer_p_lock(buffer);
 	buf_hist_active_set(&buffer->buf, active);
 	buffer->seq++;
-	buf_unlock(&buffer->buf);
+	buffer_p_unlock(buffer);
 
 	nxo_stack_npop(ostack, 2);
 }
@@ -541,13 +552,13 @@ slate_buffer_history_startgroup(void *a_data, cw_nxo_t *a_thread)
 	}
 	buffer = (struct cw_buffer *)nxo_hook_data_get(nxo);
 
-	buf_lock(&buffer->buf);
+	buffer_p_lock(buffer);
 	if (marker != NULL)
 		buf_hist_group_beg(&buffer->buf, &marker->bufm);
 	else
 		buf_hist_group_beg(&buffer->buf, NULL);
 	buffer->seq++;
-	buf_unlock(&buffer->buf);
+	buffer_p_unlock(buffer);
 
 	nxo_stack_npop(ostack, npop);
 }
@@ -568,10 +579,10 @@ slate_buffer_history_endgroup(void *a_data, cw_nxo_t *a_thread)
 	}
 	buffer = (struct cw_buffer *)nxo_hook_data_get(nxo);
 
-	buf_lock(&buffer->buf);
+	buffer_p_lock(buffer);
 	buf_hist_group_end(&buffer->buf);
 	buffer->seq++;
-	buf_unlock(&buffer->buf);
+	buffer_p_unlock(buffer);
 
 	nxo_stack_pop(ostack);
 }
@@ -592,10 +603,10 @@ slate_buffer_history_flush(void *a_data, cw_nxo_t *a_thread)
 	}
 	buffer = (struct cw_buffer *)nxo_hook_data_get(nxo);
 
-	buf_lock(&buffer->buf);
+	buffer_p_lock(buffer);
 	buf_hist_flush(&buffer->buf);
 	buffer->seq++;
-	buf_unlock(&buffer->buf);
+	buffer_p_unlock(buffer);
 }
 
 static cw_nxoe_t *
@@ -628,9 +639,15 @@ marker_p_ref_iter(void *a_data, cw_bool_t a_reset)
 static cw_bool_t
 marker_p_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t a_iter)
 {
-	struct cw_marker	*marker= (struct cw_marker *)a_data;
+	struct cw_marker	*marker;
+	struct cw_buffer	*buffer;
 
+	marker = (struct cw_marker *)a_data;
+	buffer = (struct cw_buffer *)nxo_hook_data_get(&marker->buffer_nxo);
+
+	buffer_p_lock(buffer);
 	bufm_delete(&marker->bufm);
+	buffer_p_unlock(buffer);
 	nxa_free(nx_nxa_get(a_nx), marker, sizeof(struct cw_marker));
 
 	return FALSE;
@@ -723,7 +740,6 @@ slate_marker(void *a_data, cw_nxo_t *a_thread)
 		return;
 	}
 	buffer = (struct cw_buffer *)nxo_hook_data_get(nxo);
-
 	marker = (struct cw_marker *)nxa_malloc(nx_nxa_get(nx),
 	    sizeof(struct cw_marker));
 	
@@ -736,9 +752,9 @@ slate_marker(void *a_data, cw_nxo_t *a_thread)
 
 	nxo_no_new(&marker->buffer_nxo);
 	nxo_dup(&marker->buffer_nxo, nxo);
-	buf_lock(&buffer->buf);
+	buffer_p_lock(buffer);
 	bufm_new(&marker->bufm, &buffer->buf);
-	buf_unlock(&buffer->buf);
+	buffer_p_unlock(buffer);
 
 	/*
 	 * Create a reference to the marker; keep a reference to the buf on
@@ -764,8 +780,8 @@ slate_marker_seq(void *a_data, cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *nxo;
 	cw_nxn_t		error;
-	cw_buf_t		*buf;
 	struct cw_marker	*marker;
+	struct cw_buffer	*buffer;
 	cw_nxoi_t		seq;
 
 	ostack = nxo_thread_ostack_get(a_thread);
@@ -776,11 +792,11 @@ slate_marker_seq(void *a_data, cw_nxo_t *a_thread)
 		return;
 	}
 	marker = (struct cw_marker *)nxo_hook_data_get(nxo);
+	buffer = (struct cw_buffer *)nxo_hook_data_get(&marker->buffer_nxo);
 
-	buf = bufm_buf(&marker->bufm);
-	buf_lock(buf);
+	buffer_p_lock(buffer);
 	seq = marker->seq;
-	buf_unlock(buf);
+	buffer_p_unlock(buffer);
 
 	nxo_integer_new(nxo, seq);
 }
@@ -792,8 +808,8 @@ slate_marker_copy(void *a_data, cw_nxo_t *a_thread)
 	cw_nxo_t		*estack, *ostack, *tstack, *nxo, *tnxo, *tag;
 	cw_nx_t			*nx;
 	cw_nxn_t		error;
-	cw_buf_t		*buf;
 	struct cw_marker	*marker, *marker_copy;
+	struct cw_buffer	*buffer;
 
 	estack = nxo_thread_estack_get(a_thread);
 	ostack = nxo_thread_ostack_get(a_thread);
@@ -807,6 +823,7 @@ slate_marker_copy(void *a_data, cw_nxo_t *a_thread)
 	}
 
 	marker = (struct cw_marker *)nxo_hook_data_get(nxo);
+	buffer = (struct cw_buffer *)nxo_hook_data_get(&marker->buffer_nxo);
 
 	marker_copy = (struct cw_marker *)nxa_malloc(nx_nxa_get(nx),
 	    sizeof(struct cw_marker));
@@ -821,12 +838,11 @@ slate_marker_copy(void *a_data, cw_nxo_t *a_thread)
 	nxo_no_new(&marker_copy->buffer_nxo);
 	nxo_dup(&marker_copy->buffer_nxo, &marker->buffer_nxo);
 
-	buf = bufm_buf(&marker->bufm);
-	buf_lock(buf);
-	bufm_new(&marker_copy->bufm, buf);
+	buffer_p_lock(buffer);
+	bufm_new(&marker_copy->bufm, &buffer->buf);
 	bufm_dup(&marker_copy->bufm, &marker->bufm);
 	marker_copy->seq++;
-	buf_unlock(buf);
+	buffer_p_unlock(buffer);
 
 	/*
 	 * Create a reference to the new marker; keep a reference to the
@@ -873,8 +889,8 @@ slate_marker_line(void *a_data, cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *nxo;
 	cw_nxn_t		error;
-	cw_buf_t		*buf;
 	struct cw_marker	*marker;
+	struct cw_buffer	*buffer;
 	cw_nxoi_t		line;
 
 	ostack = nxo_thread_ostack_get(a_thread);
@@ -885,11 +901,11 @@ slate_marker_line(void *a_data, cw_nxo_t *a_thread)
 		return;
 	}
 	marker = (struct cw_marker *)nxo_hook_data_get(nxo);
+	buffer = (struct cw_buffer *)nxo_hook_data_get(&marker->buffer_nxo);
 
-	buf = bufm_buf(&marker->bufm);
-	buf_lock(buf);
+	buffer_p_lock(buffer);
 	line = bufm_line(&marker->bufm);
-	buf_unlock(buf);
+	buffer_p_unlock(buffer);
 
 	nxo_integer_new(nxo, line);
 }
@@ -901,8 +917,8 @@ slate_marker_seekline(void *a_data, cw_nxo_t *a_thread)
 	cw_nxo_t		*ostack, *nxo;
 	cw_uint32_t		npop;
 	cw_nxn_t		error;
-	cw_buf_t		*buf;
 	struct cw_marker	*marker;
+	struct cw_buffer	*buffer;
 	cw_sint64_t		offset, pos;
 	cw_bufw_t		whence;
 
@@ -940,16 +956,16 @@ slate_marker_seekline(void *a_data, cw_nxo_t *a_thread)
 		return;
 	}
 	marker = (struct cw_marker *)nxo_hook_data_get(nxo);
+	buffer = (struct cw_buffer *)nxo_hook_data_get(&marker->buffer_nxo);
 	if (whence == BUFW_NONE) {
 		nxo_thread_nerror(a_thread, NXN_limitcheck);
 		return;
 	}
 
-	buf = bufm_buf(&marker->bufm);
-	buf_lock(buf);
+	buffer_p_lock(buffer);
 	pos = bufm_line_seek(&marker->bufm, offset, whence);
 	marker->seq++;
-	buf_unlock(buf);
+	buffer_p_unlock(buffer);
 
 	nxo_integer_new(nxo, (cw_nxoi_t)pos);
 
@@ -962,8 +978,8 @@ slate_marker_position(void *a_data, cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *nxo;
 	cw_nxn_t		error;
-	cw_buf_t		*buf;
 	struct cw_marker	*marker;
+	struct cw_buffer	*buffer;
 	cw_nxoi_t		position;
 
 	ostack = nxo_thread_ostack_get(a_thread);
@@ -974,11 +990,11 @@ slate_marker_position(void *a_data, cw_nxo_t *a_thread)
 		return;
 	}
 	marker = (struct cw_marker *)nxo_hook_data_get(nxo);
+	buffer = (struct cw_buffer *)nxo_hook_data_get(&marker->buffer_nxo);
 
-	buf = bufm_buf(&marker->bufm);
-	buf_lock(buf);
+	buffer_p_lock(buffer);
 	position = (cw_nxoi_t)bufm_pos(&marker->bufm);
-	buf_unlock(buf);
+	buffer_p_unlock(buffer);
 
 	nxo_integer_new(nxo, position);
 }
@@ -990,8 +1006,8 @@ slate_marker_seek(void *a_data, cw_nxo_t *a_thread)
 	cw_nxo_t		*ostack, *nxo;
 	cw_uint32_t		npop;
 	cw_nxn_t		error;
-	cw_buf_t		*buf;
 	struct cw_marker	*marker, *whence_marker = NULL;
+	struct cw_buffer	*buffer;
 	cw_sint64_t		offset, pos;
 	cw_bufw_t		whence;
 
@@ -1041,13 +1057,13 @@ slate_marker_seek(void *a_data, cw_nxo_t *a_thread)
 		return;
 	}
 	marker = (struct cw_marker *)nxo_hook_data_get(nxo);
+	buffer = (struct cw_buffer *)nxo_hook_data_get(&marker->buffer_nxo);
 	if (whence == BUFW_NONE) {
 		nxo_thread_nerror(a_thread, NXN_limitcheck);
 		return;
 	}
 
-	buf = bufm_buf(&marker->bufm);
-	buf_lock(buf);
+	buffer_p_lock(buffer);
 	if (whence_marker != NULL) {
 		/*
 		 * Move to the location of the whence marker before doing a
@@ -1057,7 +1073,7 @@ slate_marker_seek(void *a_data, cw_nxo_t *a_thread)
 	}
 	pos = bufm_seek(&marker->bufm, offset, whence);
 	marker->seq++;
-	buf_unlock(buf);
+	buffer_p_unlock(buffer);
 
 	nxo_integer_new(nxo, (cw_nxoi_t)pos);
 
@@ -1070,8 +1086,8 @@ slate_marker_before_get(void *a_data, cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *nxo;
 	cw_nxn_t		error;
-	cw_buf_t		*buf;
 	struct cw_marker	*marker;
+	struct cw_buffer	*buffer;
 	cw_uint8_t		*bp, c;
 
 	ostack = nxo_thread_ostack_get(a_thread);
@@ -1082,17 +1098,17 @@ slate_marker_before_get(void *a_data, cw_nxo_t *a_thread)
 		return;
 	}
 	marker = (struct cw_marker *)nxo_hook_data_get(nxo);
+	buffer = (struct cw_buffer *)nxo_hook_data_get(&marker->buffer_nxo);
 
-	buf = bufm_buf(&marker->bufm);
-	buf_lock(buf);
+	buffer_p_lock(buffer);
 	bp = bufm_before_get(&marker->bufm);
 	if (bp == NULL) {
-		buf_unlock(buf);
+		buffer_p_unlock(buffer);
 		nxo_thread_nerror(a_thread, NXN_rangecheck);
 		return;
 	}
 	c = *bp;
-	buf_unlock(buf);
+	buffer_p_unlock(buffer);
 
 	nxo_integer_new(nxo, (cw_nxoi_t)c);
 }
@@ -1103,8 +1119,8 @@ slate_marker_after_get(void *a_data, cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *nxo;
 	cw_nxn_t		error;
-	cw_buf_t		*buf;
 	struct cw_marker	*marker;
+	struct cw_buffer	*buffer;
 	cw_uint8_t		*bp, c;
 
 	ostack = nxo_thread_ostack_get(a_thread);
@@ -1114,19 +1130,18 @@ slate_marker_after_get(void *a_data, cw_nxo_t *a_thread)
 		nxo_thread_nerror(a_thread, error);
 		return;
 	}
-
 	marker = (struct cw_marker *)nxo_hook_data_get(nxo);
+	buffer = (struct cw_buffer *)nxo_hook_data_get(&marker->buffer_nxo);
 
-	buf = bufm_buf(&marker->bufm);
-	buf_lock(buf);
+	buffer_p_lock(buffer);
 	bp = bufm_after_get(&marker->bufm);
 	if (bp == NULL) {
-		buf_unlock(buf);
+		buffer_p_unlock(buffer);
 		nxo_thread_nerror(a_thread, NXN_rangecheck);
 		return;
 	}
 	c = *bp;
-	buf_unlock(buf);
+	buffer_p_unlock(buffer);
 
 	nxo_integer_new(nxo, (cw_nxoi_t)c);
 }
@@ -1137,7 +1152,6 @@ slate_marker_before_set(void *a_data, cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *nxo;
 	cw_nxn_t		error;
-	cw_buf_t		*buf;
 	struct cw_marker	*marker;
 	struct cw_buffer	*buffer;
 	cw_uint8_t		*bp, c;
@@ -1162,17 +1176,16 @@ slate_marker_before_set(void *a_data, cw_nxo_t *a_thread)
 	marker = (struct cw_marker *)nxo_hook_data_get(nxo);
 	buffer = (struct cw_buffer *)nxo_hook_data_get(&marker->buffer_nxo);
 
-	buf = bufm_buf(&marker->bufm);
-	buf_lock(buf);
+	buffer_p_lock(buffer);
 	bp = bufm_before_get(&marker->bufm);
 	if (bp == NULL) {
-		buf_unlock(buf);
+		buffer_p_unlock(buffer);
 		nxo_thread_nerror(a_thread, NXN_rangecheck);
 		return;
 	}
 	*bp = c;
 	buffer->seq++;
-	buf_unlock(buf);
+	buffer_p_unlock(buffer);
 
 	nxo_stack_npop(ostack, 2);
 }
@@ -1183,7 +1196,6 @@ slate_marker_after_set(void *a_data, cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *nxo;
 	cw_nxn_t		error;
-	cw_buf_t		*buf;
 	struct cw_marker	*marker;
 	struct cw_buffer	*buffer;
 	cw_uint8_t		*bp, c;
@@ -1208,17 +1220,16 @@ slate_marker_after_set(void *a_data, cw_nxo_t *a_thread)
 	marker = (struct cw_marker *)nxo_hook_data_get(nxo);
 	buffer = (struct cw_buffer *)nxo_hook_data_get(&marker->buffer_nxo);
 
-	buf = bufm_buf(&marker->bufm);
-	buf_lock(buf);
+	buffer_p_lock(buffer);
 	bp = bufm_after_get(&marker->bufm);
 	if (bp == NULL) {
-		buf_unlock(buf);
+		buffer_p_unlock(buffer);
 		nxo_thread_nerror(a_thread, NXN_rangecheck);
 		return;
 	}
 	*bp = c;
 	buffer->seq++;
-	buf_unlock(buf);
+	buffer_p_unlock(buffer);
 
 	nxo_stack_npop(ostack, 2);
 }
@@ -1229,7 +1240,6 @@ slate_marker_before_insert(void *a_data, cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *nxo;
 	cw_nxn_t		error;
-	cw_buf_t		*buf;
 	struct cw_marker	*marker;
 	struct cw_buffer	*buffer;
 	cw_uint8_t		*str;
@@ -1256,12 +1266,11 @@ slate_marker_before_insert(void *a_data, cw_nxo_t *a_thread)
 	marker = (struct cw_marker *)nxo_hook_data_get(nxo);
 	buffer = (struct cw_buffer *)nxo_hook_data_get(&marker->buffer_nxo);
 
-	buf = bufm_buf(&marker->bufm);
-	buf_lock(buf);
+	buffer_p_lock(buffer);
 	bufm_before_insert(&marker->bufm, str, str_len);
 	buffer->seq++;
 	marker->seq++;
-	buf_unlock(buf);
+	buffer_p_unlock(buffer);
 
 	nxo_stack_npop(ostack, 2);
 }
@@ -1272,7 +1281,6 @@ slate_marker_after_insert(void *a_data, cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *nxo;
 	cw_nxn_t		error;
-	cw_buf_t		*buf;
 	struct cw_marker	*marker;
 	struct cw_buffer	*buffer;
 	cw_uint8_t		*str;
@@ -1299,11 +1307,10 @@ slate_marker_after_insert(void *a_data, cw_nxo_t *a_thread)
 	marker = (struct cw_marker *)nxo_hook_data_get(nxo);
 	buffer = (struct cw_buffer *)nxo_hook_data_get(&marker->buffer_nxo);
 
-	buf = bufm_buf(&marker->bufm);
-	buf_lock(buf);
+	buffer_p_lock(buffer);
 	bufm_after_insert(&marker->bufm, str, str_len);
 	buffer->seq++;
-	buf_unlock(buf);
+	buffer_p_unlock(buffer);
 
 	nxo_stack_npop(ostack, 2);
 }
@@ -1314,71 +1321,6 @@ slate_marker_range_get(void *a_data, cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *nxo;
 	cw_nxn_t		error;
-	cw_buf_t		*buf;
-	struct cw_marker	*marker_a, *marker_b;
-	cw_uint64_t		pos_a, pos_b, str_len;
-	cw_bufv_t		*bufv, sbufv;
-	cw_uint32_t		bufvcnt;
-
-	ostack = nxo_thread_ostack_get(a_thread);
-
-	/* marker_b. */
-	NXO_STACK_GET(nxo, ostack, a_thread);
-	error = marker_p_type(nxo);
-	if (error) {
-		nxo_thread_nerror(a_thread, error);
-		return;
-	}
-	marker_b = (struct cw_marker *)nxo_hook_data_get(nxo);
-
-	/* marker_a. */
-	NXO_STACK_DOWN_GET(nxo, ostack, a_thread, nxo);
-	error = marker_p_type(nxo);
-	if (error) {
-		nxo_thread_nerror(a_thread, error);
-		return;
-	}
-	marker_a = (struct cw_marker *)nxo_hook_data_get(nxo);
-
-	buf = bufm_buf(&marker_a->bufm);
-	if (buf != bufm_buf(&marker_b->bufm)) {
-		/* XXX Throw /argcheck or something similar. */
-		nxo_thread_nerror(a_thread, NXN_typecheck);
-		return;
-	}
-
-	buf_lock(buf);
-
-	/* Get a pointer to the buffer range and calculate its length. */
-	bufv = bufm_range_get(&marker_a->bufm, &marker_b->bufm, &bufvcnt);
-	pos_a = bufm_pos(&marker_a->bufm);
-	pos_b = bufm_pos(&marker_b->bufm);
-	str_len = (pos_a < pos_b) ? pos_b - pos_a : pos_a - pos_b;
-
-	/*
-	 * Create an Onyx string to store the result.  Since there are two
-	 * markers on the stack that have references to the buffer, it is safe
-	 * to trash one of them here.
-	 */
-	nxo_string_new(nxo, nxo_thread_nx_get(a_thread),
-	    nxo_thread_currentlocking(a_thread), str_len);
-
-	sbufv.data = nxo_string_get(nxo);
-	sbufv.len = str_len;
-	bufv_copy(&sbufv, 1, 1, bufv, bufvcnt, buf_elmsize_get(buf), 0);
-
-	buf_unlock(buf);
-
-	nxo_stack_pop(ostack);
-}
-
-/* %=marker= %=marker= marker_range_get %string */
-void
-slate_marker_range_cut(void *a_data, cw_nxo_t *a_thread)
-{
-	cw_nxo_t		*ostack, *nxo;
-	cw_nxn_t		error;
-	cw_buf_t		*buf;
 	struct cw_marker	*marker_a, *marker_b;
 	struct cw_buffer	*buffer;
 	cw_uint64_t		pos_a, pos_b, str_len;
@@ -1406,14 +1348,14 @@ slate_marker_range_cut(void *a_data, cw_nxo_t *a_thread)
 	}
 	marker_a = (struct cw_marker *)nxo_hook_data_get(nxo);
 
-	buf = bufm_buf(&marker_a->bufm);
-	if (buf != bufm_buf(&marker_b->bufm)) {
+	if (buffer != (struct cw_buffer
+	    *)nxo_hook_data_get(&marker_b->buffer_nxo)) {
 		/* XXX Throw /argcheck or something similar. */
 		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
 
-	buf_lock(buf);
+	buffer_p_lock(buffer);
 
 	/* Get a pointer to the buffer range and calculate its length. */
 	bufv = bufm_range_get(&marker_a->bufm, &marker_b->bufm, &bufvcnt);
@@ -1431,7 +1373,74 @@ slate_marker_range_cut(void *a_data, cw_nxo_t *a_thread)
 
 	sbufv.data = nxo_string_get(nxo);
 	sbufv.len = str_len;
-	bufv_copy(&sbufv, 1, 1, bufv, bufvcnt, buf_elmsize_get(buf), 0);
+	bufv_copy(&sbufv, 1, 1, bufv, bufvcnt, buf_elmsize_get(&buffer->buf),
+	    0);
+
+	buffer_p_unlock(buffer);
+
+	nxo_stack_pop(ostack);
+}
+
+/* %=marker= %=marker= marker_range_get %string */
+void
+slate_marker_range_cut(void *a_data, cw_nxo_t *a_thread)
+{
+	cw_nxo_t		*ostack, *nxo;
+	cw_nxn_t		error;
+	struct cw_marker	*marker_a, *marker_b;
+	struct cw_buffer	*buffer;
+	cw_uint64_t		pos_a, pos_b, str_len;
+	cw_bufv_t		*bufv, sbufv;
+	cw_uint32_t		bufvcnt;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+
+	/* marker_b. */
+	NXO_STACK_GET(nxo, ostack, a_thread);
+	error = marker_p_type(nxo);
+	if (error) {
+		nxo_thread_nerror(a_thread, error);
+		return;
+	}
+	marker_b = (struct cw_marker *)nxo_hook_data_get(nxo);
+	buffer = (struct cw_buffer *)nxo_hook_data_get(&marker_b->buffer_nxo);
+
+	/* marker_a. */
+	NXO_STACK_DOWN_GET(nxo, ostack, a_thread, nxo);
+	error = marker_p_type(nxo);
+	if (error) {
+		nxo_thread_nerror(a_thread, error);
+		return;
+	}
+	marker_a = (struct cw_marker *)nxo_hook_data_get(nxo);
+
+	if (buffer != (struct cw_buffer
+	    *)nxo_hook_data_get(&marker_b->buffer_nxo)) {
+		/* XXX Throw /argcheck or something similar. */
+		nxo_thread_nerror(a_thread, NXN_typecheck);
+		return;
+	}
+
+	buffer_p_lock(buffer);
+
+	/* Get a pointer to the buffer range and calculate its length. */
+	bufv = bufm_range_get(&marker_a->bufm, &marker_b->bufm, &bufvcnt);
+	pos_a = bufm_pos(&marker_a->bufm);
+	pos_b = bufm_pos(&marker_b->bufm);
+	str_len = (pos_a < pos_b) ? pos_b - pos_a : pos_a - pos_b;
+
+	/*
+	 * Create an Onyx string to store the result.  Since there are two
+	 * markers on the stack that have references to the buffer, it is safe
+	 * to trash one of them here.
+	 */
+	nxo_string_new(nxo, nxo_thread_nx_get(a_thread),
+	    nxo_thread_currentlocking(a_thread), str_len);
+
+	sbufv.data = nxo_string_get(nxo);
+	sbufv.len = str_len;
+	bufv_copy(&sbufv, 1, 1, bufv, bufvcnt, buf_elmsize_get(&buffer->buf),
+	    0);
 
 	/* Remove the buffer range. */
 	bufm_remove(&marker_a->bufm, &marker_b->bufm);
@@ -1439,7 +1448,7 @@ slate_marker_range_cut(void *a_data, cw_nxo_t *a_thread)
 	buffer->seq++;
 	marker_a->seq++;
 	marker_b->seq++;
-	buf_unlock(buf);
+	buffer_p_unlock(buffer);
 
 	nxo_stack_pop(ostack);
 }

@@ -86,9 +86,6 @@ cw_buf_t *buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc,
     *a_arg);
 void	buf_delete(cw_buf_t *a_buf);
 
-void	buf_lock(cw_buf_t *a_buf);
-void	buf_unlock(cw_buf_t *a_buf);
-
 cw_uint32_t buf_elmsize_get(cw_buf_t *a_buf);
 void	buf_elmsize_set(cw_buf_t *a_buf, cw_uint32_t a_elmsize);
 
