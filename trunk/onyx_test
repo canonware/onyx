@@ -1,0 +1,272 @@
+#!/bin/sh
+#
+# Use the following steps in order to create and test a release:
+
+COOK="cook"
+COOKPAR="-par 8"
+
+SRCDIR="onyx-latest"
+
+PREFIX="$HOME/onyx_test"
+
+#
+# Set up.
+#
+echo "rm -rf $PREFIX"
+rm -rf $PREFIX
+
+#echo "cd $SRCDIR"
+#cd $SRCDIR
+
+echo "rm -rf obj"
+rm -rf obj
+
+echo "mkdir obj"
+mkdir obj
+
+echo "cd obj"
+cd obj
+
+#
+# Documentation.
+#
+echo "===> ../$SRCDIR/configure --prefix=$PREFIX"
+../$SRCDIR/configure --prefix=$PREFIX
+if [ "x$?" != "x0" ] ; then
+	echo "===> Error in configure"
+	exit 2
+fi
+# Parallelizable.
+for i in docs ; do
+	echo "===> $COOK $COOKPAR $i"
+	$COOK $COOKPAR $i
+	if [ "x$?" != "x0" ] ; then
+		echo "===> Error cooking $i"
+		exit 2
+	fi
+done
+# Non-parallelizable.
+for i in install_docs uninstall distclean ; do
+	echo "===> $COOK $i"
+	$COOK $i
+	if [ "x$?" != "x0" ] ; then
+		echo "===> Error cooking $i"
+		exit 2
+	fi
+done
+echo "===> find $PREFIX -type f |grep ."
+find $PREFIX -type f |grep .
+if [ "x$?" = "x0" ] ; then
+	echo "===> uninstall didn't clean up well enough"
+	exit 2
+fi
+
+#
+# Test everything with every allowable combination of configure options.
+#
+for h in 0 1 2 3 4 5 6 7 ; do
+	# --disable-libstash-buf
+	case $h in
+	0|1|2|3|4|5)
+		libs="libstash libsock libonyx"
+		bins="ncat onyx proxy"
+		conf=""
+		;;
+	6|7|8|9|10|11)
+		libs="libstash libonyx"
+		bins="onyx"
+		conf="--disable-libstash-buf"
+		;;
+	*)
+		echo "RELEASE error"
+		exit 1
+		;;
+	esac
+
+
+	# --enable-debug
+	case $h in
+	0|2|3|5|6|8|9|11)
+		conf="$conf"
+		;;
+	1|4|7|10)
+		conf="$conf --enable-debug"
+		;;
+	*)
+		echo "RELEASE error"
+		exit 1
+		;;
+	esac
+
+	# --enable-profile
+	case $h in
+	0|1|3|4|6|7|9|10)
+		conf="$conf"
+		;;
+	2|5|8|11)
+		conf="$conf --enable-profile"
+		;;
+	*)
+		echo "RELEASE error"
+		exit 1
+		;;
+	esac
+
+	# --disable-inlines
+	case $h in
+	0|1|2|6|7|8)
+		conf="$conf"
+		;;
+	3|4|5|9|10|11)
+		conf="$conf --disable-inlines"
+		;;
+	*)
+		echo "RELEASE error"
+		exit 1
+		;;
+	esac
+
+	echo "===> ../$SRCDIR/configure $conf --prefix=$PREFIX"
+	../$SRCDIR/configure $conf --prefix=$PREFIX
+	if [ "x$?" != "x0" ] ; then
+		echo "===> Error in configure"
+		exit 2
+	fi
+
+	# Libraries.
+	for i in $libs ; do
+		echo "===> $i"
+		# Parallelizable.
+		for j in $i ; do
+			echo "===> $COOK $COOKPAR $j"
+			$COOK $COOKPAR $j
+			if [ "x$?" != "x0" ] ; then
+				echo "===> Error cooking $j"
+				exit 2
+			fi
+		done
+		# Non-parallelizable.
+		for j in $i\_install $i\_uninstall clean ; do
+			echo "===> $COOK $j"
+			$COOK $j
+			if [ "x$?" != "x0" ] ; then
+				echo "===> Error cooking $j"
+				exit 2
+			fi
+		done
+		echo "===> find $PREFIX -type f |grep ."
+		find $PREFIX -type f |grep .
+		if [ "x$?" = "x0" ] ; then
+			echo "===> uninstall didn't clean up well enough"
+			exit 2
+		fi
+	done
+
+	# Binaries.
+	for i in $bins ; do
+		echo "===> $i"
+		# Parallelizable.
+		for j in $i ; do
+			echo "===> $COOK $COOKPAR $j"
+			$COOK $COOKPAR $j
+			if [ "x$?" != "x0" ] ; then
+				echo "===> Error cooking $j"
+				exit 2
+			fi
+		done
+		# Non-parallelizable.
+		for j in $i\_install ; do
+			echo "===> $COOK $j"
+			$COOK $j
+			if [ "x$?" != "x0" ] ; then
+				echo "===> Error cooking $j"
+				exit 2
+			fi
+		done
+
+		# Make sure the application runs.
+		echo "===> $PREFIX/bin/$i -h"
+		$PREFIX/bin/$i -h
+		if [ "x$?" != "x0" ] ; then
+			echo "===> Error running $i"
+			exit 2
+		fi
+
+		for j in uninstall clean ; do
+			echo "===> $COOK $j"
+			$COOK $j
+			if [ "x$?" != "x0" ] ; then
+				echo "===> Error cooking $j"
+				exit 2
+			fi
+		done
+		echo "===> find $PREFIX -type f |grep ."
+		find $PREFIX -type f |grep .
+		if [ "x$?" = "x0" ] ; then
+			echo "===> uninstall didn't clean up well enough"
+			exit 2
+		fi
+	done
+
+	# General targets.
+	# Parallelizable.
+	for i in bins libs tests check ; do
+		echo "===> $COOK $COOKPAR $i"
+		$COOK $COOKPAR $i
+		if [ "x$?" != "x0" ] ; then
+			echo "===> Error cooking $i"
+			exit 2
+		fi
+	done
+	# Non-parallelizable.
+	for i in install uninstall distclean ; do
+		echo "===> $COOK $i"
+		$COOK $i
+		if [ "x$?" != "x0" ] ; then
+			echo "===> Error cooking $i"
+			exit 2
+		fi
+	done
+	echo "===> find $PREFIX -type f |grep ."
+	find $PREFIX -type f |grep .
+	if [ "x$?" = "x0" ] ; then
+		echo "===> uninstall didn't clean up well enough"
+		exit 2
+	fi
+done
+
+#
+# Documentation.
+#
+echo "===> ../$SRCDIR/configure --prefix=$PREFIX"
+../$SRCDIR/configure --prefix=$PREFIX
+if [ "x$?" != "x0" ] ; then
+	echo "===> Error in configure"
+	exit 2
+fi
+# Non-parallelizable.
+for i in install_docs uninstall relclean ; do
+	echo "===> $COOK $i"
+	$COOK $i
+	if [ "x$?" != "x0" ] ; then
+		echo "===> Error cooking $i"
+		exit 2
+	fi
+done
+echo "===> find $PREFIX -type f |grep ."
+find $PREFIX -type f |grep .
+if [ "x$?" = "x0" ] ; then
+	echo "===> uninstall didn't clean up well enough"
+	exit 2
+fi
+echo "===> find . -type f |grep ."
+find . -type f |grep .
+if [ "x$?" = "x0" ] ; then
+	echo "===> relclean didn't clean up well enough"
+	exit 2
+fi
+
+cd ..
+rm -rf obj
+rm -rf $PREFIX
+#cd ..
