@@ -148,7 +148,7 @@ nxa_new(cw_nxa_t *a_nxa, cw_nx_t *a_nx)
 		 */
 		sigfillset(&sig_mask);
 		thd_sigmask(SIG_BLOCK, &sig_mask, &old_mask);
-		a_nxa->gc_thd = thd_new(nxa_p_gc_entry, (void *)a_nxa, TRUE);
+		a_nxa->gc_thd = thd_new(nxa_p_gc_entry, (void *)a_nxa, FALSE);
 		thd_sigmask(SIG_SETMASK, &old_mask, NULL);
 		try_stage = 7;
 	}
