@@ -53,19 +53,11 @@ without_threads=""
 )
 AC_SUBST(without_threads)
 
-dnl Check for libraries.
-if test "$without_threads" != "[#]" ; then
-fi
-
-
 dnl Define preprocessor macros.
 
 dnl Check for header files.
 dnl AC_HEADER_STDC
 AC_CHECK_HEADERS(unistd.h, , AC_MSG_ERROR(Cannot build without unistd.h))
-if test "$without_threads" != "[#]" ;
- then
-fi
 
 dnl Check for typedefs, structures, and compiler characteristics.
 AC_C_BIGENDIAN
