@@ -1,3 +1,7 @@
+2001-07-12  Jason Evans  <jasone@canonware.com>
+
+	* : Rename module from nxgtk to gtk.
+
 2001-07-12  Chris Toshok  <toshok@toshok.org>
 
 	* include/gtkdict.h: more prototypes.

@@ -1,3 +1,7 @@
+2001-07-12  Jason Evans  <jasone@canonware.com>
+
+	* : Remove libsock, ncat, and proxy.
+
 2001-07-11  Jason Evans  <jasone@canonware.com>
 
 	* configure.in: Add test for inet_aton().

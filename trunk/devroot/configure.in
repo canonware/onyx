@@ -36,7 +36,7 @@ CW_BUILD_LIB(libstash, lib_stash)
 
 dnl Look for modules.
 CW_BUILD_MOD(modncurses, mod_ncurses)
-CW_BUILD_MOD(modnxgtk, mod_nxgtk)
+CW_BUILD_MOD(modgtk, mod_gtk)
 
 dnl Look for binaries.
 CW_BUILD_BIN(cover, bin_cover)
@@ -231,7 +231,7 @@ if test "x$build_modncurses" = "xyes" ; then
   AC_CHECK_HEADERS(ncurses.h, , AC_MSG_ERROR(Cannot build without ncurses.h))
 fi
 
-if test "x$build_modnxgtk" = "xyes" ; then
+if test "x$build_modgtk" = "xyes" ; then
   AC_PATH_PROGS(GTKCONFIG, gtk-config gtk12-config, , $PATH)
 fi
 
