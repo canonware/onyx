@@ -420,6 +420,11 @@ nxa_l_init(void)
     s_gcdict_sum[0] = 0;
     s_gcdict_sum[1] = 0;
 
+    /* Initialize the name machinery before creating the GC thread.  If a GC
+     * were to occur before the name machinery were initialized, bad things
+     * would happen. */
+    nxo_name_l_init();
+
 #ifdef CW_PTHREADS
     /* Block all signals during thread creation, so that the GC thread does
      * not receive any signals.  Doing this here rather than in the GC
@@ -430,8 +435,6 @@ nxa_l_init(void)
     s_gc_thd = thd_new(nxa_p_gc_entry, NULL, FALSE);
     thd_sigmask(SIG_SETMASK, &old_mask, NULL);
 #endif
-
-    nxo_name_l_init();
 }
 
 void
@@ -1134,13 +1137,17 @@ nxa_p_collect(cw_bool_t a_shutdown)
     s_iter = 0;
     s_target_count = s_gcdict_count;
 
+    /* Prune all garbage names before resuming the mutators or releasing
+     * cw_g_nxa_name_lock.  Since the mutators may immediately start sweeping
+     * objects once they are resumed, unreferenced name objects must already be
+     * pruned; otherwise they could be deleted without being processed by the
+     * pruning function, which would corrupt the name hash. */
+    nxo_l_name_list_prune(s_white);
+
 #ifdef CW_THREADS
     /* Allow mutator threads to run. */
     thd_single_leave();
 #endif
-
-    /* Remove all garbage names before releasing cw_g_nxa_name_lock. */
-    nxo_l_name_list_prune(s_white);
 
     /* Flip the value of white. */
     s_white = !s_white;
