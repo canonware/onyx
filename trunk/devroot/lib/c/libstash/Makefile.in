@@ -9,8 +9,8 @@
 #
 # $Source$
 # $Author: jasone $
-# Current revision: $Revision: 131 $
-# Last modified: $Date: 1998-07-07 13:43:45 -0700 (Tue, 07 Jul 1998) $
+# Current revision: $Revision: 132 $
+# Last modified: $Date: 1998-07-07 13:53:32 -0700 (Tue, 07 Jul 1998) $
 #
 # Description: Master Makefile for libhungry.
 #              
@@ -170,39 +170,32 @@ clean: FORCE
 	rm -f core
 	rm -f *.core
 	rm -f $(notdir $(CTESTS))
-	rm -f $(CTESTS:=.o) $(CTESTS:=.lo)
-	rm -f $(CTESTS:=.d)
-	rm -f $(LSRCS:.c=.d)
-	rm -f $(LOBJS) $(LOBJS:.lo=.o)
 	rm -f $(PTESTS)
 	rm -f $(ALLDIRS:=/*~) bin/*~
+	rm -f $(ALLDIRS:=/*.d)
+	rm -f $(ALLDIRS:=/*.lo) $(ALLDIRS:=/*.o)
 	rm -f $(ALLDIRS:=/*.bak)
 	rm -f $(ALLDIRS:=/*.BAK)
 	rm -f $(ALLDIRS:=/*.out)
 	rm -f $(ALLDIRS:=/core)
 	rm -f $(ALLDIRS:=/*.core)
 	rm -f $(ALLDIRS:=/*.diff)
+	rm -rf .libs
+	rm -f $(LIBS)
 
-#	rm -f $(OBJS)
-#	rm -f $(OBJS:.o=.d)
 #	rm -f $(EXECS)
 #	rm -f $(BTESTS)
-#	rm -f $(BTESTS:=.o)
-#	rm -f $(BTESTS:=.d)
 
 distclean: clean
 	rm -f "#"*"#"
-	rm -f $(ALLDIRS:=/"#"*"#")
+	rm -f $(ALLDIRS:=/"#"*"#") bin/"#"*"#"
 	rm -f Makefile Makefile.common
 	rm -f config.cache config.log config.status libhungry.h
 	rm -f TAGS
-	rm -rf .libs
-	rm -f $(LIBS)
 	rm -f $(PMERGE)
 	rm -f $(PSTUB)
 
 #	rm -f $(TARGETS)
-#	rm -f $(ALLDIRS:=/Makefile.mk)
 
 etags: $(SRCS) $(INCS) $(LSRCS) $(LINCS)
 	@ETAGS@ $(SRCS) $(INCS)
@@ -233,12 +226,6 @@ $(LEXERS): $(PARSERS:.y=.tab.h)
 
 $(EXECS): $(LIBS)
 	$(CC) -o $@ $($(subst /_,_,$(strip $(dir $@)_OBJS))) $(LIBPATH) $(LNKLIBS) $(EXTRALIBS)
-
-#junk: $(LIBS)
-#	@echo Junk up to date now.
-#	@echo LIBS == $(LIBS)
-#	@echo LIB == $(LIB)
-#	@echo GARBAGE == $(GARBAGE)
 
 # Make sure that the tests are rebuilt if the libraries change.  Also force
 # the libraries to be built if they haven't already been.

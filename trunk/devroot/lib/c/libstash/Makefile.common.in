@@ -9,8 +9,8 @@
 #
 # $Source$
 # $Author: jasone $
-# Current revision: $Revision: 131 $
-# Last modified: $Date: 1998-07-07 13:43:45 -0700 (Tue, 07 Jul 1998) $
+# Current revision: $Revision: 132 $
+# Last modified: $Date: 1998-07-07 13:53:32 -0700 (Tue, 07 Jul 1998) $
 #
 # Description: Stub included by every Makefile.mk.
 #              
@@ -32,28 +32,12 @@ vpath %.h $(CURRDIR)
 endif
 
 #
-# Sources
-#
-#ifneq ($(strip $($(CURRDIR)_SRCS)),) # Source files in this directory.
-#$(CURRDIR)_SRCS := $(addprefix $(CURRDIR)/,$($(CURRDIR)_SRCS))
-#$(CURRDIR)_OBJS := $($(CURRDIR)_SRCS:.c=.o)
-#SRCS := $(SRCS) $($(CURRDIR)_SRCS)
-#OBJS := $(OBJS) $($(CURRDIR)_OBJS)
-
-#vpath %.d $(CURRDIR)
-#vpath %.c $(CURRDIR)
-#vpath %.o $(CURRDIR)
-#endif
-
-#
 # Library
 #
 ifneq ($(strip $(LIB)),) # Library source files in this subdirectory.
 
 ifeq ($(strip $($(LIB)_LIB)),)
 $(LIB)_LIB := $(LIB)
-#LIBPATH := $(LIBPATH) -L$(CURRDIR)
-#LNKLIBS := -l$(strip $(notdir $(subst lib,,$(LIB)))) $(LNKLIBS)
 LNKLIBS := lib$(LIB).la $(LNKLIBS)
 LIBS := $(LIBS) $(LIB:%=lib%.la)
 endif
@@ -84,12 +68,9 @@ LOBJS := $(LOBJS) $($(CURRDIR)_LOBJS)
 lib$(LIB).la : $($(CURRDIR)_LOBJS)
 	$(LIBTOOL) $(CC) -o $@ $? $(LIBPATH) $(EXTRALIBS) -rpath @prefix@/lib
 
-#	mv $@ lib
-
 vpath %.d $(CURRDIR)
 vpath %.c $(CURRDIR)
 vpath %.lo $(CURRDIR)
-#vpath %.la $(CURRDIR)
 endif
 
 $(LIB) :=# Clear out the variable.
