@@ -2500,64 +2500,74 @@ under the protection of a mutex. \\
 \hline \hline
 \multicolumn{4}{|l|}{Miscellaneous operators} \\
 \hline \hline
-& {\bf \htmlref{version}{systemdict:version}} & & \\
+-- & {\bf \htmlref{\#!}{systemdict:sym_hash_bang}} & mark & Begin interpreter
+magic. \\
 \hline
-& {\bf \htmlref{product}{systemdict:product}} & & \\
+mark names & {\bf \htmlref{!\#}{systemdict:sym_bang_hash}} & -- & End
+interpreter magic. \\
 \hline
-& {\bf \htmlref{handleerror}{systemdict:handleerror}} & & \\
+-- & {\bf \htmlref{product}{systemdict:product}} & string & Get the product
+string. \\
 \hline
-& {\bf \htmlref{currenterror}{systemdict:currenterror}} & & \\
+-- & {\bf \htmlref{version}{systemdict:version}} & string & Get the version
+string. \\
 \hline
-& {\bf \htmlref{bind}{systemdict:bind}} & & \\
-\hline
-& {\bf \htmlref{\#!}{systemdict:sym_hash_bang}} & & \\
-\hline
-& {\bf \htmlref{!\#}{systemdict:sym_bang_hash}} & & \\
-\hline
-& {\bf \htmlref{bind}{systemdict:bind}} & & \\
+proc & {\bf \htmlref{bind}{systemdict:bind}} & proc & Bind names to
+operators. \\
 \end{longtable}
 
 \begin{description}
 \label{systemdict:sym_bang_hash}
 \index{"!#@\onyxop{}{"!\#}{}}
-\item[{\onyxop{--}{!\#}{--}}: ]
+\item[{\onyxop{mark names}{!\#}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[mark: ]
+			A mark object.
+		\item[names: ]
+			Zero or more name objects.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{unmatchedmark}{unmatchedmark}.]
 		\end{description}
 	\item[Description: ]
+		Remove mark and name objects constructed as a side effect of
+		interpreter magic.  This operator is an alias of
+		\htmlref{cleartomark}{systemdict:cleartomark}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> #!/usr/local/bin/onyx pstack
+/onyx
+/bin
+/local
+/usr
+-mark-
+onyx:5> !#
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sym_hash_bang}
 \index{#"!@\onyxop{}{\#"!}{}}
-\item[{\onyxop{--}{\#!}{--}}: ]
+\item[{\onyxop{--}{\#!}{mark}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[mark: ]
+			A mark object.
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Create a mark object in preparation for an interpreter path.
+		This operator is an alias of \htmlref{mark}{systemdict:mark}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> #! pstack
+-mark-
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sym_lp}
@@ -2880,17 +2890,24 @@ onyx:0>
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[proc: ]
+			A procedure (executable array).
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[proc: ]
+			The same procedure as was passed in.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Recursively bind unbound procedures.  Objects within a procedure
+		are replaced with their values 
+Binding entails replacing
+		executable names
 	\item[Example(s): ]\begin{verbatim}
 
 		\end{verbatim}
@@ -4072,27 +4089,6 @@ onyx:2>
 
 		\end{verbatim}
 	\end{description}
-\label{systemdict:handleerror}
-\index{handleerror@\onyxop{}{handleerror}{}}
-\item[{\onyxop{--}{handleerror}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
-	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
-	\end{description}
 \label{systemdict:if}
 \index{if@\onyxop{}{if}{}}
 \item[{\onyxop{--}{if}{--}}: ]
@@ -4735,6 +4731,28 @@ onyx:1>
 	\item[Description: ]
 	\item[Example(s): ]\begin{verbatim}
 
+		\end{verbatim}
+	\end{description}
+\label{systemdict:product}
+\index{product@\onyxop{}{product}{}}
+\item[{\onyxop{--}{product}{string}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[string: ]
+			A string that contains the product name, normally
+			`Canonware onyx'.
+		\end{description}
+	\item[Errors(s): ] None.
+	\item[Description: ]
+		Get the product string.  The string returned is a reference to
+		the original product string.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> product pstack
+`Canonware onyx'
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:put}
@@ -6086,6 +6104,27 @@ onyx:1> pstack
 	\item[Description: ]
 	\item[Example(s): ]\begin{verbatim}
 
+		\end{verbatim}
+	\end{description}
+\label{systemdict:version}
+\index{version@\onyxop{}{version}{}}
+\item[{\onyxop{--}{version}{string}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[string: ]
+			A string that contains the version name.
+		\end{description}
+	\item[Errors(s): ] None.
+	\item[Description: ]
+		Get the version string.  The string returned is a reference to
+		the original version string.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> version pstack
+`2.0.0'
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:wait}
