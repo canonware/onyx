@@ -14,7 +14,7 @@ cc
 .I file
 -lsock -lstash -lpthread
 .br
-cc -g -D_LIBSTASH_DEBUG -D_LIBSOCK_DEBUG
+cc -g -D_LIBSTASH_DBG -D_LIBSOCK_DBG
 .I file
 -lsock_d -lstash_d -lpthread
 .br

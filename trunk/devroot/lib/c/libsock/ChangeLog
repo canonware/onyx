@@ -1,3 +1,7 @@
+2001-02-03  Jason Evans  <jasone@canonware.com>
+
+	* : Fold _LIBSOCK_DEBUG into _LIBSOCK_DBG.
+
 2000-11-28  Jason Evans  <jasone@canonware.com>
 
 	* : Update OOM handling to use exceptions.
