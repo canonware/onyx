@@ -72,7 +72,8 @@ SRCS = [SRCS] [ONYX_SRCS];
                  sroll_g.nx.in sroll_h.nx.in sroll_i.nx.in syntaxerror_a.nx.in
                  syntaxerror_b.nx.in syntaxerror_c.nx.in syntaxerror_d.nx.in
                  syntaxerror_e.nx.in syntaxerror_f.nx.in syntaxerror_g.nx.in
-                 syntaxerror_h.nx.in syntaxerror_i.nx.in syntaxerror_j.nx.in;
+                 syntaxerror_h.nx.in syntaxerror_i.nx.in syntaxerror_j.nx.in
+                 syntaxerror_k.nx.in;
   otests = [fromto % [srcdir]/bin/onyx/test/% [otests]];
 
   OTESTS = [OTESTS] [otests];

@@ -138,7 +138,19 @@ nxo_threadp_delete(cw_nxo_threadp_t *a_threadp, cw_nxo_t *a_thread)
 		/* No problem. */
 		nxoe_p_thread_reset(thread);
 		break;
-	case THREADTS_SLASH_CONT:
+	case THREADTS_SLASH_CONT: {
+		cw_nxoe_thread_t	*thread;
+
+		_cw_check_ptr(a_thread);
+		_cw_assert(a_thread->magic == _CW_NXO_MAGIC);
+
+		thread = (cw_nxoe_thread_t *)a_thread->o.nxoe;
+		_cw_assert(thread->nxoe.magic == _CW_NXOE_MAGIC);
+		_cw_assert(thread->nxoe.type == NXOT_THREAD);
+
+		nxoe_p_thread_syntax_error(thread, a_threadp, 0, "/", "", -1);
+		break;
+	}
 	case THREADTS_STRING:
 	case THREADTS_STRING_NEWLINE_CONT:
 	case THREADTS_STRING_PROT_CONT:
