@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 90 $
- * $Date: 1998-06-24 23:45:26 -0700 (Wed, 24 Jun 1998) $
+ * $Revision: 95 $
+ * $Date: 1998-06-26 17:18:58 -0700 (Fri, 26 Jun 1998) $
  *
  * <<< Description >>>
  *
@@ -27,7 +27,7 @@
  * rwq : Same as rwl, except write lock waiters are queued, to ensure
  * serialization.
  *
- * btl : B-tree lock.  These are used by the block repository to provide
+ * jtl : B-tree lock.  These are used by the block repository to provide
  * the necessary locking semantics for concurrent B-trees.  The following
  * lock types are encapsulated by btl:
  *   s : Non-serialized place holder lock.
