@@ -130,7 +130,6 @@ void	systemdict_stdin(cw_nxo_t *a_thread);
 void	systemdict_stdout(cw_nxo_t *a_thread);
 void	systemdict_stop(cw_nxo_t *a_thread);
 void	systemdict_stopped(cw_nxo_t *a_thread);
-void	systemdict_store(cw_nxo_t *a_thread);
 void	systemdict_string(cw_nxo_t *a_thread);
 void	systemdict_sub(cw_nxo_t *a_thread);
 void	systemdict_sym_lp(cw_nxo_t *a_thread);

@@ -181,7 +181,6 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(stdout),
 	ENTRY(stop),
 	ENTRY(stopped),
-	ENTRY(store),
 	ENTRY(string),
 	ENTRY(sub),
 	{NXN_sym_bang_hash, systemdict_cleartomark},
@@ -900,8 +899,8 @@ systemdict_cleardstack(cw_nxo_t *a_thread)
 
 	dstack = nxo_thread_dstack_get(a_thread);
 	count = nxo_stack_count(dstack);
-	if (count > 3)
-		nxo_stack_npop(dstack, count - 3);
+	if (count > 4)
+		nxo_stack_npop(dstack, count - 4);
 }
 
 void
@@ -1635,7 +1634,7 @@ systemdict_end(cw_nxo_t *a_thread)
 
 	dstack = nxo_thread_dstack_get(a_thread);
 
-	/* systemdict, globaldict, and userdict cannot be popped. */
+	/* threaddict, systemdict, globaldict, and userdict cannot be popped. */
 	if (nxo_stack_count(dstack) <= 4) {
 		nxo_thread_error(a_thread, NXO_THREADE_DSTACKUNDERFLOW);
 		return;
@@ -2724,6 +2723,7 @@ systemdict_load(cw_nxo_t *a_thread)
 	val = nxo_stack_push(tstack);
 
 	if (nxo_thread_dstack_search(a_thread, key, val)) {
+		nxo_stack_pop(tstack);
 		nxo_thread_error(a_thread, NXO_THREADE_UNDEFINED);
 		return;
 	}
@@ -4444,40 +4444,6 @@ systemdict_stopped(cw_nxo_t *a_thread)
 }
 
 void
-systemdict_store(cw_nxo_t *a_thread)
-{
-	cw_nxo_t	*ostack, *dstack;
-	cw_nxo_t	*dict, *key, *val;
-	cw_uint32_t	i, depth;
-
-	ostack = nxo_thread_ostack_get(a_thread);
-	dstack = nxo_thread_dstack_get(a_thread);
-
-	NXO_STACK_GET(val, ostack, a_thread);
-	NXO_STACK_DOWN_GET(key, ostack, a_thread, val);
-
-	/*
-	 * Iteratively search the dictionaries on the dictionary stack for key,
-	 * and replace its value with val.
-	 */
-	for (i = 0, depth = nxo_stack_count(dstack), dict = NULL; i < depth;
-	    i++) {
-		dict = nxo_stack_down_get(dstack, dict);
-		if (nxo_dict_lookup(dict, key, NULL) == FALSE) {
-			/* Found. */
-			nxo_dict_def(dict, nxo_thread_nx_get(a_thread), key,
-			    val);
-			return;
-		}
-	}
-	/* Not found.  Create a new entry in currentdict. */
-	dict = nxo_stack_get(dstack);
-	nxo_dict_def(dict, nxo_thread_nx_get(a_thread), key, val);
-
-	nxo_stack_npop(ostack, 2);
-}
-
-void
 systemdict_string(cw_nxo_t *a_thread)
 {
 	cw_nxo_t	*ostack;
@@ -5466,7 +5432,7 @@ systemdict_where(cw_nxo_t *a_thread)
 			return;
 		}
 	}
-	/* Not found.  Create a new entry in currentdict. */
+	/* Not found. */
 	nxo_boolean_new(key, FALSE);
 }
 

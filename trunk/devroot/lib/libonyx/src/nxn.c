@@ -201,7 +201,6 @@ const cw_uint8_t *cw_g_nx_names[] = {
 	"stdout",
 	"stop",
 	"stopped",
-	"store",
 	"string",
 	"stringtype",
 	"sub",

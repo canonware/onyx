@@ -2288,8 +2288,6 @@ objecs from stack down through topmost mark. \\
 \hline
 & {\bf \htmlref{token}{systemdict:token}} & & \\
 \hline
-& {\bf \htmlref{store}{systemdict:store}} & & \\
-\hline
 & {\bf \htmlref{put}{systemdict:put}} & & \\
 \hline
 & {\bf \htmlref{putinterval}{systemdict:putinterval}} & & \\
@@ -2347,41 +2345,52 @@ length & {\bf \htmlref{array}{systemdict:array}} & array & Create an array. \\
 \hline \hline
 \multicolumn{4}{|l|}{Dictionary and dictionary stack operators} \\
 \hline \hline
-& {\bf \htmlref{envdict}{systemdict:envdict}} & & \\
+-- & {\bf \htmlref{envdict}{systemdict:envdict}} & dict & Get envdict. \\
 \hline
-& {\bf \htmlref{gcdict}{systemdict:gcdict}} & & \\
+-- & {\bf \htmlref{gcdict}{systemdict:gcdict}} & dict & Get gcdict. \\
 \hline
-& {\bf \htmlref{globaldict}{systemdict:globaldict}} & & \\
+-- & {\bf \htmlref{globaldict}{systemdict:globaldict}} & dict & Get
+globaldict. \\
 \hline
-& {\bf \htmlref{sprintdict}{systemdict:sprintdict}} & & \\
+-- & {\bf \htmlref{sprintdict}{systemdict:sprintdict}} & dict & Get
+sprintdict. \\
 \hline
-& {\bf \htmlref{where}{systemdict:where}} & & \\
+-- & {\bf \htmlref{{\lt}}{systemdict:sym_lt}} & mark & Begin a dictionary
+declaration. \\
 \hline
-& {\bf \htmlref{undef}{systemdict:undef}} & & \\
+mark kvpairs & {\bf \htmlref{{\gt}}{systemdict:sym_gt}} & dict & Construct a
+dictionary. \\
 \hline
-& {\bf \htmlref{{\lt}}{systemdict:sym_lt}} & & \\
+-- & {\bf \htmlref{dict}{systemdict:dict}} & dict & Create a dictionary. \\
 \hline
-& {\bf \htmlref{{\gt}}{systemdict:sym_gt}} & & \\
+dict & {\bf \htmlref{begin}{systemdict:begin}} & -- & Pust dict onto dstack. \\
 \hline
-& {\bf \htmlref{load}{systemdict:load}} & & \\
+-- & {\bf \htmlref{end}{systemdict:end}} & -- & Pop a dictionary off dstack. \\
 \hline
-& {\bf \htmlref{known}{systemdict:known}} & & \\
+key val & {\bf \htmlref{def}{systemdict:def}} & -- & Define key/value pair. \\
 \hline
-& {\bf \htmlref{end}{systemdict:end}} & & \\
+dict key & {\bf \htmlref{undef}{systemdict:undef}} & -- & Undefine key in
+dict. \\
 \hline
-& {\bf \htmlref{dstack}{systemdict:dstack}} & & \\
+key & {\bf \htmlref{load}{systemdict:load}} & val & Look up a key's value. \\
 \hline
-& {\bf \htmlref{dict}{systemdict:dict}} & & \\
+dict key & {\bf \htmlref{known}{systemdict:known}} & boolean & Check for key in
+dict. \\
 \hline
-& {\bf \htmlref{def}{systemdict:def}} & & \\
+key & {\bf \htmlref{where}{systemdict:where}} & false & Get topmost dstack
+dictionary that \\
+key & {\bf \htmlref{where}{systemdict:where}} & dict true & defines key. \\
 \hline
-& {\bf \htmlref{currentdict}{systemdict:currentdict}} & & \\
+-- & {\bf \htmlref{currentdict}{systemdict:currentdict}} & dict & Get topmost
+dstack dictionary. \\
 \hline
-& {\bf \htmlref{countdstack}{systemdict:countdstack}} & & \\
+-- & {\bf \htmlref{dstack}{systemdict:dstack}} & stack & Get dstack snapshot. \\
 \hline
-& {\bf \htmlref{begin}{systemdict:begin}} & & \\
+-- & {\bf \htmlref{countdstack}{systemdict:countdstack}} & count & Get number of
+stacks on dstack. \\
 \hline
-& {\bf \htmlref{cleardstack}{systemdict:cleardstack}} & & \\
+-- & {\bf \htmlref{cleardstack}{systemdict:cleardstack}} & -- & Pop all dstack
+elements pushed by \htmlref{\onyxop{}{begin}{}}{systemdict:begin}. \\
 \hline \hline
 \multicolumn{4}{|l|}{File and filesystem operators} \\
 \hline \hline
@@ -2674,44 +2683,61 @@ onyx:0>
 	\end{description}
 \label{systemdict:sym_lt}
 \index{<@\onyxop{}{{\lt}}{}}
-\item[{\onyxop{--}{{\lt}}{--}}: ]
+\item[{\onyxop{--}{{\lt}}{mark}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[mark: ]
+			A mark object.
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Begin a dictionary declaration.  See the
+		\htmlref{\onyxop{}{>}{}}{systemdict:sym_gt} operator
+		documentation for more details on dictionary construction.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> < 1 sprint
+-mark-
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sym_gt}
 \index{>@\onyxop{}{{\gt}}{}}
-\item[{\onyxop{--}{{\gt}}{--}}: ]
+\item[{\onyxop{mark kvpairs}{{\gt}}{dict}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[mark: ]
+			A mark object.
+		\item[kvpairs: ]
+			Zero or more pairs of non-mark objects, where the first
+			is a key and the second is an associated value.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[dict: ]
+			A dictionary that contains \oparg{kvpairs}.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\item[\htmlref{unmatchedmark}{unmatchedmark}.]
 		\end{description}
 	\item[Description: ]
+		Construct a dictionary that contains \oparg{kvpairs}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> <
+onyx:1> /foo `foo'
+onyx:3> /bar `bar'
+onyx:5> /biz `biz'
+onyx:7> /pop //pop
+onyx:9> >
+onyx:1> pstack
+</pop --pop-- /biz `biz' /bar `bar' /foo `foo'>
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sym_lb}
@@ -2920,23 +2946,28 @@ onyx:0>
 	\end{description}
 \label{systemdict:begin}
 \index{begin@\onyxop{}{begin}{}}
-\item[{\onyxop{--}{begin}{--}}: ]
+\item[{\onyxop{dict}{begin}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[dict: ]
+			A dictionary.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Push \oparg{dict} onto dstack, thereby adding its keys to the
+		namespace.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> </foo `foo'> begin
+onyx:0> foo 1 sprint
+`foo'
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:bind}
@@ -3158,21 +3189,24 @@ onyx:0>
 \index{cleardstack@\onyxop{}{cleardstack}{}}
 \item[{\onyxop{--}{cleardstack}{--}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Pop all dictionaries on dstack that were pushed by
+		\htmlref{\onyxop{}{begin}{}}{systemdict:begin}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> dict begin
+onyx:0> dstack 1 sprint
+(-dict- -dict- -dict- -dict- -dict-)
+onyx:0> cleardstack
+onyx:0> dstack 1 sprint
+(-dict- -dict- -dict- -dict-)
+onyx:0> cleardstack
+onyx:0> dstack 1 sprint
+(-dict- -dict- -dict- -dict-)
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:cleartomark}
@@ -3294,23 +3328,25 @@ onyx:4>
 	\end{description}
 \label{systemdict:countdstack}
 \index{countdstack@\onyxop{}{countdstack}{}}
-\item[{\onyxop{--}{countdstack}{--}}: ]
+\item[{\onyxop{--}{countdstack}{count}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[count: ]
+			Number of dictionaries on dstack.
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Get the number of dictionaries on dstack.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> countdstack 1 sprint
+4
+onyx:0> dict begin
+onyx:0> countdstack 1 sprint
+5
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:countestack}
@@ -3371,23 +3407,23 @@ onyx:5>
 	\end{description}
 \label{systemdict:currentdict}
 \index{currentdict@\onyxop{}{currentdict}{}}
-\item[{\onyxop{--}{currentdict}{--}}: ]
+\item[{\onyxop{--}{currentdict}{dict}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[dict: ]
+			Topmost stack on dstack.
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Get the topmost dictionary on dstack.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> </foo `foo'> begin 
+onyx:0> currentdict 1 sprint
+</foo `foo'>
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:currentfile}
@@ -3600,23 +3636,33 @@ onyx:0>
 	\end{description}
 \label{systemdict:def}
 \index{def@\onyxop{}{def}{}}
-\item[{\onyxop{--}{def}{--}}: ]
+\item[{\onyxop{key val}{def}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[key: ]
+			An object.
+		\item[val: ]
+			A value associated with \oparg{key}.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
 	\item[Description: ]
+		Define \oparg{key} with associated value \oparg{val} in the
+		topmost dictionary on dstack.  If \oparg{key} is already defined
+		in that dictionary, the old definition is replaced.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> /foo `foo' def
+onyx:0> foo 1 sprint
+`foo'
+onyx:0> /foo `FOO' def
+onyx:0> foo 1 sprint
+`FOO'
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:detach}
@@ -3642,23 +3688,22 @@ onyx:0>
 	\end{description}
 \label{systemdict:dict}
 \index{dict@\onyxop{}{dict}{}}
-\item[{\onyxop{--}{dict}{--}}: ]
+\item[{\onyxop{--}{dict}{dict}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[dict: ]
+			An empty dictionary.
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Create an empty dictionary.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> dict 1 sprint
+<>
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:die}
@@ -3778,23 +3823,22 @@ onyx:3>
 	\end{description}
 \label{systemdict:dstack}
 \index{dstack@\onyxop{}{dstack}{}}
-\item[{\onyxop{--}{dstack}{--}}: ]
+\item[{\onyxop{--}{dstack}{stack}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[stack: ]
+			A snapshot of dstack.
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Get a snapshot of dstack.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> dstack 1 sprint
+(-dict- -dict- -dict- -dict-)
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:dup}
@@ -3831,42 +3875,51 @@ onyx:2>
 \index{end@\onyxop{}{end}{}}
 \item[{\onyxop{--}{end}{--}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{dstackunderflow}{dstackunderflow}.]
 		\end{description}
 	\item[Description: ]
+		Pop the topmost dictionary off dstack, thereby removing its
+		contents from the namespace.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> </foo `foo'> begin
+onyx:0> foo 1 sprint
+`foo'
+onyx:0> end
+onyx:0> foo 1 sprint
+Error /undefined
+ostack: ()
+dstack: (-dict- -dict- -dict- -dict-)
+estack/istack trace (0..2):
+0:      foo
+1:      -file-
+2:      --start--
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:envdict}
 \index{envdict@\onyxop{}{envdict}{}}
-\item[{\onyxop{--}{envdict}{--}}: ]
+\item[{\onyxop{--}{envdict}{dict}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[dict: ]
+			A dictionary.
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Get envdict.  See Section~\ref{sec:envdict} for details on
+		envdict.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> envdict 0 sprint
+-dict-
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:eq}
@@ -4275,23 +4328,23 @@ onyx:0>
 	\end{description}
 \label{systemdict:gcdict}
 \index{gcdict@\onyxop{}{gcdict}{}}
-\item[{\onyxop{--}{gcdict}{--}}: ]
+\item[{\onyxop{--}{gcdict}{dict}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[dict: ]
+			A dictionary.
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Get gcdict.  See Section~\ref{sec:envdict} for details on
+		envdict.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> gcdict 0 sprint
+-dict-
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:ge}
@@ -4375,6 +4428,27 @@ onyx:0>
 	\item[Description: ]
 	\item[Example(s): ]\begin{verbatim}
 
+		\end{verbatim}
+	\end{description}
+\label{systemdict:globaldict}
+\index{globaldict@\onyxop{}{globaldict}{}}
+\item[{\onyxop{--}{globaldict}{dict}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[dict: ]
+			A dictionary.
+		\end{description}
+	\item[Errors(s): ] None.
+	\item[Description: ]
+		Get globaldict.  See Section~\ref{sec:envdict} for details on
+		envdict.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> globaldict 1 sprint
+<>
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:gt}
@@ -4557,23 +4631,35 @@ onyx:0>
 	\end{description}
 \label{systemdict:known}
 \index{known@\onyxop{}{known}{}}
-\item[{\onyxop{--}{known}{--}}: ]
+\item[{\onyxop{dict key}{known}{boolean}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[dict: ]
+			A dictionary.
+		\item[key: ]
+			A key to look for in \oparg{dict}.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[boolean: ]
+			True if \oparg{key} is defined in \oparg{dict}, false
+			otherwise.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Check whether \oparg{key} is defined in \oparg{dict}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:1> </foo `foo'> /foo known 1 sprint
+true
+onyx:1> </foo `foo'> /bar known 1 sprint
+false
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:lcheck}
@@ -4694,23 +4780,33 @@ onyx:0>
 	\end{description}
 \label{systemdict:load}
 \index{load@\onyxop{}{load}{}}
-\item[{\onyxop{--}{load}{--}}: ]
+\item[{\onyxop{key}{load}{val}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[key: ]
+			A key to look up in dstack.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[val: ]
+			The value associated with the topmost definition of
+			\oparg{key} in dstack.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{undefined}{undefined}.]
 		\end{description}
 	\item[Description: ]
+		Get the topmost definition of \oparg{key} in dstack.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:1> </foo `foo'> begin
+onyx:1> </foo `FOO'> begin
+onyx:1> /foo load 1 sprint
+`FOO'
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:lock}
@@ -5997,21 +6093,18 @@ onyx:2>
 	\end{description}
 \label{systemdict:sprintdict}
 \index{sprintdict@\onyxop{}{sprintdict}{}}
-\item[{\onyxop{--}{sprintdict}{--}}: ]
+\item[{\onyxop{--}{sprintdict}{dict}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[dict: ]
+			A dictionary.
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Get sprintdict.  See Section~\ref{sec:sprintdict} for details on
+		sprintdict.
 	\item[Example(s): ]\begin{verbatim}
 
 		\end{verbatim}
@@ -6319,27 +6412,6 @@ true
 onyx:0> {} stopped 1 sprint
 false
 onyx:0>
-		\end{verbatim}
-	\end{description}
-\label{systemdict:store}
-\index{store@\onyxop{}{store}{}}
-\item[{\onyxop{--}{store}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
-	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
 		\end{verbatim}
 	\end{description}
 \label{systemdict:string}
@@ -6771,23 +6843,29 @@ onyx:0>
 	\end{description}
 \label{systemdict:undef}
 \index{undef@\onyxop{}{undef}{}}
-\item[{\onyxop{--}{undef}{--}}: ]
+\item[{\onyxop{dict key}{undef}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[dict: ]
+			A dictionary.
+		\item[val: ]
+			A key in \oparg{dict} to undefine.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		If \oparg{key} is defined in \oparg{dict}, undefine it.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> /foo `foo' def
+onyx:0> currentdict /foo undef
+onyx:0> currentdict /foo undef
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:unlink}
@@ -6912,23 +6990,40 @@ onyx:0>
 	\end{description}
 \label{systemdict:where}
 \index{where@\onyxop{}{where}{}}
-\item[{\onyxop{--}{where}{--}}: ]
+\item[{\onyxop{key}{where}{false}}: ]
+\item[{\onyxop{key}{where}{dict true}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[key: ]
+			A key to search for in dstack.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[dict: ]
+			The topmost dictionary in dstack that contains a
+			definition for \oparg{key}.
+		\item[false/true: ]
+			If false, no definition of \oparg{key} was found in
+			dstack.  Otherwise \oparg{dict} is the topmost
+			dictionary in dstack that contains a definition for
+			\oparg{key}.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
 	\item[Description: ]
+		Get the topmost dictionary in dstack that defines \oparg{key}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> /foo where pstack clear
+false
+onyx:0> /threaddict where pstack clear
+true
+</threaddict -dict- /userdict -dict- /currenterror -dict- /errordict -dict-
+/resume --stop-->
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:write}

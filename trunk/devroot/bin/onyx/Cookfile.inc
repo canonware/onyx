@@ -57,16 +57,22 @@ SRCS = [SRCS] [ONYX_SRCS];
 {
   local otests = abs_a.nx.in abs_b.nx.in abs_c.nx.in add_a.nx.in add_b.nx.in
                  add_c.nx.in add_d.nx.in and_a.nx.in and_b.nx.in and_c.nx.in
-                 and_d.nx.in and_e.nx.in and_f.nx.in bind_a.nx.in
+                 and_d.nx.in and_e.nx.in and_f.nx.in begin_a.nx.in begin_b.nx.in
+                 begin_c.nx.in bind_a.nx.in
                  catenate_a.nx.in catenate_b.nx.in catenate_c.nx.in
-                 catenate_d.nx.in clear_a.nx.in cleartomark_a.nx.in copy_a.nx.in
-                 count_a.nx.in countestack_a.nx.in counttomark_a.nx.in
+                 catenate_d.nx.in clear_a.nx.in cleardstack_a.nx.in
+                 cleartomark_a.nx.in copy_a.nx.in
+                 count_a.nx.in countdstack_a.nx.in countestack_a.nx.in
+                 counttomark_a.nx.in
                  counttomark_b.nx.in counttomark_c.nx.in cvlit_a.nx.in
                  cvlit_b.nx.in cvn_a.nx.in cvn_b.nx.in cvn_c.nx.in cvrs_a.nx.in
                  cvrs_b.nx.in cvrs_c.nx.in cvrs_d.nx.in cvrs_e.nx.in
                  cvrs_f.nx.in cvs_a.nx.in cvs_b.nx.in cvx_a.nx.in cvx_b.nx.in
-                 div_a.nx.in div_b.nx.in div_c.nx.in div_d.nx.in div_e.nx.in
-                 dup_a.nx.in dup_b.nx.in eq_a.nx.in eq_b.nx.in eval.nx.in
+                 def_a.nx.in def_b.nx.in dict_a.nx.in div_a.nx.in
+                 div_b.nx.in div_c.nx.in div_d.nx.in
+                 div_e.nx.in dstack_a.nx.in
+                 dup_a.nx.in dup_b.nx.in end_a.nx.in end_b.nx.in eq_a.nx.in
+                 eq_b.nx.in eval.nx.in
                  eval_a.nx.in eval_b.nx.in exch_a.nx.in exch_b.nx.in
                  exch_c.nx.in exit_a.nx.in exp_a.nx.in exp_b.nx.in exp_c.nx.in
                  exp_d.nx.in exp_e.nx.in for_a.nx.in for_b.nx.in for_c.nx.in
@@ -78,7 +84,8 @@ SRCS = [SRCS] [ONYX_SRCS];
                  ifelse_c.nx.in immediate_a.nx.in immediate_b.nx.in
                  index_a.nx.in index_b.nx.in index_c.nx.in index_d.nx.in
                  index_e.nx.in index_f.nx.in integer.nx.in integer_a.nx.in
-                 integer_b.nx.in integer_c.nx.in integer_d.nx.in le_a.nx.in
+                 integer_b.nx.in integer_c.nx.in integer_d.nx.in known_a.nx.in
+                 known_b.nx.in known_c.nx.in le_a.nx.in
                  le_b.nx.in le_c.nx.in le_d.nx.in le_e.nx.in le_f.nx.in
                  le_g.nx.in le_h.nx.in loop_a.nx.in loop_b.nx.in lt_a.nx.in
                  lt_b.nx.in lt_c.nx.in lt_d.nx.in lt_e.nx.in lt_f.nx.in
@@ -111,12 +118,15 @@ SRCS = [SRCS] [ONYX_SRCS];
                  stopped_a.nx.in stopped_b.nx.in stopped_c.nx.in string_a.nx.in
                  string_b.nx.in string_c.nx.in string_d.nx.in sub_a.nx.in
                  sub_b.nx.in sub_c.nx.in sub_d.nx.in sym_lp_a.nx.in
+                 sym_gt_a.nx.in sym_gt_b.nx.in sym_gt_c.nx.in sym_lt_a.nx.in
                  sym_rp_a.nx.in sym_rp_b.nx.in syntaxerror_a.nx.in
                  syntaxerror_b.nx.in syntaxerror_c.nx.in syntaxerror_d.nx.in
                  syntaxerror_e.nx.in syntaxerror_f.nx.in syntaxerror_g.nx.in
                  syntaxerror_h.nx.in syntaxerror_i.nx.in syntaxerror_j.nx.in
                  syntaxerror_k.nx.in throw_a.nx.in throw_b.nx.in throw_c.nx.in
-                 throw_d.nx.in type_a.nx.in type_b.nx.in xcheck_a.nx.in
+                 throw_d.nx.in type_a.nx.in type_b.nx.in undef_a.nx.in
+                 undef_b.nx.in undef_c.nx.in where_a.nx.in where_b.nx.in
+                 xcheck_a.nx.in
                  xcheck_b.nx.in xor_a.nx.in xor_b.nx.in xor_c.nx.in xor_d.nx.in
                  xor_e.nx.in xor_f.nx.in;
 

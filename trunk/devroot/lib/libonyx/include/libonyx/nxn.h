@@ -199,7 +199,6 @@ typedef enum {
 	NXN_stdout,
 	NXN_stop,
 	NXN_stopped,
-	NXN_store,
 	NXN_string,
 	NXN_stringtype,
 	NXN_sub,
