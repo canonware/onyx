@@ -548,7 +548,7 @@ letters, numbers, underscore, etc.).
 \label{sec:currenterror}
 
 Each thread has its own currenterror dictionary, which is used by the error
-handling machinery.
+handling machinery to store error state.
 
 \begin{longtable}{\optableformat{3}}
 \caption[currenterror summary]{currenterror summary}
@@ -788,8 +788,22 @@ onyx:1>
 \subsection{envdict}
 \label{sec:envdict}
 
+The envdict dictionary contains keys of type name and values of type string that
+correspond to the environment passed into the program.  The contents of envdict
+are propagated as the environment to sub-processes by
+\htmlref{\onyxop{}{exec}{}}{systemdict:exec}.  All threads share the same
+envdict, which is implicitly locked.
+
 \subsection{errordict}
 \label{sec:errordict}
+
+Each thread has its own errordict, which is used by default by the error
+handling machinery.  \htmlref{\onyxop{}{throw}{}}{systemdict:throw} calls the
+error handlers, which call errordict's
+\htmlref{\onyxop{}{handleerror}{}}{errordict:handleerror}, after which
+\htmlref{\onyxop{}{\onyxop{}{throw}{}}{}}{systemdict:throw} calls errordict's
+\htmlref{\onyxop{}{stop}{}}{errordict:stop}.  Any of the names in errordict can
+be redefined to suit the thread's or application's error handling requirements.
 
 \begin{longtable}{\optableformat{3}}
 \caption{errordict summary by functional group} \\
@@ -807,48 +821,63 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 %end{latexonly}
 \multicolumn{4}{|l|}{Control operators} \\
 \hline \hline
-& {\bf \htmlref{handleerror}{errordict:handleerror}} & & \\
+-- & {\bf \htmlref{handleerror}{errordict:handleerror}} & -- & Print a state
+dump. \\
 \hline
 -- & {\bf \htmlref{stop}{errordict:stop}} & -- & Last operation during error
 handling. \\
 \hline \hline
 \multicolumn{4}{|l|}{Error operators} \\
 \hline \hline
-& {\bf \htmlref{dstackunderflow}{errordict:dstackunderflow}} & & \\
+-- & {\bf \htmlref{dstackunderflow}{errordict:dstackunderflow}} & -- &
+Dictionary stack underflow. \\
 \hline
-& {\bf \htmlref{estackunderflow}{errordict:estackunderflow}} & & \\
+-- & {\bf \htmlref{estackoverflow}{errordict:estackoverflow}} & -- & Maximum
+recursion depth exceeded. \\
 \hline
-& {\bf \htmlref{invalidaccess}{errordict:invalidaccess}} & & \\
+-- & {\bf \htmlref{invalidaccess}{errordict:invalidaccess}} & -- & Permission
+error. \\
 \hline
-& {\bf \htmlref{invalidcontext}{errordict:invalidcontext}} & & \\
+-- & {\bf \htmlref{invalidexit}{errordict:invalidexit}} & -- & Exit outside of
+any loop. \\
 \hline
-& {\bf \htmlref{invalidexit}{errordict:invalidexit}} & & \\
+-- & {\bf \htmlref{invalidfileaccess}{errordict:invalidfileaccess}} & -- &
+Insufficient file permissions. \\
 \hline
-& {\bf \htmlref{invalidfileaccess}{errordict:invalidfileaccess}} & & \\
+-- & {\bf \htmlref{ioerror}{errordict:ioerror}} & -- & I/O error. \\
 \hline
-& {\bf \htmlref{ioerror}{errordict:ioerror}} & & \\
+-- & {\bf \htmlref{limitcheck}{errordict:limitcheck}} & -- & Value outside of
+legal range. \\
 \hline
-& {\bf \htmlref{limitcheck}{errordict:limitcheck}} & & \\
+-- & {\bf \htmlref{rangecheck}{errordict:rangecheck}} & -- & Out of bounds
+string or array access. \\
 \hline
-& {\bf \htmlref{rangecheck}{errordict:rangecheck}} & & \\
+-- & {\bf \htmlref{stackunderflow}{errordict:stackunderflow}} & -- & Not enough
+objects on ostack. \\
 \hline
-& {\bf \htmlref{stackunderflow}{errordict:stackunderflow}} & & \\
+-- & {\bf \htmlref{syntaxerror}{errordict:syntaxerror}} & -- & Scanner syntax
+error. \\
 \hline
-& {\bf \htmlref{syntaxerror}{errordict:syntaxerror}} & & \\
+-- & {\bf \htmlref{typecheck}{errordict:typecheck}} & -- & Incorrect argument
+type. \\
 \hline
-& {\bf \htmlref{typecheck}{errordict:typecheck}} & & \\
+-- & {\bf \htmlref{undefined}{errordict:undefined}} & -- & Name not defined in
+dstack. \\
 \hline
-& {\bf \htmlref{undefined}{errordict:undefined}} & & \\
+-- & {\bf \htmlref{undefinedfilename}{errordict:undefinedfilename}} & -- & Bad
+filename. \\
 \hline
-& {\bf \htmlref{undefinedfilename}{errordict:undefinedfilename}} & & \\
+-- & {\bf \htmlref{undefinedresult}{errordict:undefinedresult}} & -- & Divide by
+0. \\
 \hline
-& {\bf \htmlref{undefinedresult}{errordict:undefinedresult}} & & \\
+-- & {\bf \htmlref{unmatchedfino}{errordict:unmatchedfino}} & -- & No fino on
+ostack. \\
 \hline
-& {\bf \htmlref{unmatchedfino}{errordict:unmatchedfino}} & & \\
+-- & {\bf \htmlref{unmatchedmark}{errordict:unmatchedmark}} & -- & No mark on
+ostack. \\
 \hline
-& {\bf \htmlref{unmatchedmark}{errordict:unmatchedmark}} & & \\
-\hline
-& {\bf \htmlref{unregistered}{errordict:unregistered}} & & \\
+-- & {\bf \htmlref{unregistered}{errordict:unregistered}} & -- & Non-enumerated
+error. \\
 \end{longtable}
 
 \begin{description}
@@ -857,65 +886,78 @@ handling. \\
 \index{dstackunderflow@\onyxop{}{dstackunderflow}{}}
 \item[{\onyxop{--}{dstackunderflow}{--}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
+	\item[Errors(s): ] None.
 	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
+		An attempt was made to remove one of the initial dictionaries
+		from dstack.
 	\end{description}
-\label{estackunderflow}
-\label{errordict:estackunderflow}
-\index{estackunderflow@\onyxop{}{estackunderflow}{}}
-\item[{\onyxop{--}{estackunderflow}{--}}: ]
+\label{estackoverflow}
+\label{errordict:estackoverflow}
+\index{estackoverflow@\onyxop{}{estackoverflow}{}}
+\item[{\onyxop{--}{estackoverflow}{--}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
+	\item[Errors(s): ] None.
 	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
+		Maximum interpreter recursion was exceeded.
 	\end{description}
 \label{handleerror}
 \label{errordict:handleerror}
 \index{handleerror@\onyxop{}{handleerror}{}}
 \item[{\onyxop{--}{handleerror}{--}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+		Under normal conditions, no errors occur.  However, it is
+		possible for the application to corrupt the error handling
+		machinery to the point that an error will occur.  If that
+		happens, the result is possible infinite recursion, and program
+		crashes are a real possibility.
 	\item[Description: ]
+		Print a dump of the most recent error recorded in the
+		currenterror dictionary.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> {true {true 1 sprint x y} if} eval
+true
+Error /undefined
+ostack: ()
+dstack: (-dict- -dict- -dict- -dict-)
+estack/istack trace (0..5):
+0:      x
+1: {
+        true
+        1
+        sprint
+ 3:-->  x
+        y
+}
+2:      --if--
+3:      --eval--
+4:      -file-
+5:      --start--
+onyx:1> errordict begin handleerror end
+Error /undefined
+ostack: ()
+dstack: (-dict- -dict- -dict- -dict-)
+estack/istack trace (0..5):
+0:      x
+1: {
+        true
+        1
+        sprint
+ 3:-->  x
+        y
+}
+2:      --if--
+3:      --eval--
+4:      -file-
+5:      --start--
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{invalidaccess}
@@ -923,176 +965,79 @@ handling. \\
 \index{invalidaccess@\onyxop{}{invalidaccess}{}}
 \item[{\onyxop{--}{invalidaccess}{--}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
+	\item[Errors(s): ] None.
 	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
-	\end{description}
-\label{invalidcontext}
-\label{errordict:invalidcontext}
-\index{invalidcontext@\onyxop{}{invalidcontext}{}}
-\item[{\onyxop{--}{invalidcontext}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
-	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
+		Permission error.
 	\end{description}
 \label{invalidexit}
 \label{errordict:invalidexit}
 \index{invalidexit@\onyxop{}{invalidexit}{}}
 \item[{\onyxop{--}{invalidexit}{--}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
+	\item[Errors(s): ] None.
 	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
+		Exit was called outside of any loop.  This error is generated as
+		a result of catching an exit, so the execution state for where
+		the error really happened is gone.
 	\end{description}
 \label{invalidfileaccess}
 \label{errordict:invalidfileaccess}
 \index{invalidfileaccess@\onyxop{}{invalidfileaccess}{}}
 \item[{\onyxop{--}{invalidfileaccess}{--}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
+	\item[Errors(s): ] None.
 	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
+		Insufficient file permissions.
 	\end{description}
 \label{ioerror}
 \label{errordict:ioerror}
 \index{ioerror@\onyxop{}{ioerror}{}}
 \item[{\onyxop{--}{ioerror}{--}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
+	\item[Errors(s): ] None.
 	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
+		I/O error (read(), write(), etc.).
 	\end{description}
 \label{limitcheck}
 \label{errordict:limitcheck}
 \index{limitcheck@\onyxop{}{limitcheck}{}}
 \item[{\onyxop{--}{limitcheck}{--}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
+	\item[Errors(s): ] None.
 	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
+		Value outside of legal range.
 	\end{description}
 \label{rangecheck}
 \label{errordict:rangecheck}
 \index{rangecheck@\onyxop{}{rangecheck}{}}
 \item[{\onyxop{--}{rangecheck}{--}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
+	\item[Errors(s): ] None.
 	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
+		Out of bounds string or array access.
 	\end{description}
 \label{stackunderflow}
 \label{errordict:stackunderflow}
 \index{stackunderflow@\onyxop{}{stackunderflow}{}}
 \item[{\onyxop{--}{stackunderflow}{--}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
+	\item[Errors(s): ] None.
 	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
+		Not enough objects on ostack.
 	\end{description}
 \label{errordict:stop}
 \index{stop@\onyxop{}{stop}{}}
@@ -1126,176 +1071,88 @@ Custom stop
 \index{syntaxerror@\onyxop{}{syntaxerror}{}}
 \item[{\onyxop{--}{syntaxerror}{--}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
+	\item[Errors(s): ] None.
 	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
+		Scanner syntax error.
 	\end{description}
 \label{typecheck}
 \label{errordict:typecheck}
 \index{typecheck@\onyxop{}{typecheck}{}}
 \item[{\onyxop{--}{typecheck}{--}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
+	\item[Errors(s): ] None.
 	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
+		Incorrect argument type.
 	\end{description}
 \label{undefined}
 \label{errordict:undefined}
 \index{undefined@\onyxop{}{undefined}{}}
 \item[{\onyxop{--}{undefined}{--}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
+	\item[Errors(s): ] None.
 	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
+		Name not defined in any of the dictionaries on dstack.
 	\end{description}
 \label{undefinedfilename}
 \label{errordict:undefinedfilename}
 \index{undefinedfilename@\onyxop{}{undefinedfilename}{}}
 \item[{\onyxop{--}{undefinedfilename}{--}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
+	\item[Errors(s): ] None.
 	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
+		Bad filename.
 	\end{description}
 \label{undefinedresult}
 \label{errordict:undefinedresult}
 \index{undefinedresult@\onyxop{}{undefinedresult}{}}
 \item[{\onyxop{--}{undefinedresult}{--}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
+	\item[Errors(s): ] None.
 	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
+		Attempt to divide by 0.
 	\end{description}
 \label{unmatchedfino}
 \label{errordict:unmatchedfino}
 \index{unmatchedfino@\onyxop{}{unmatchedfino}{}}
 \item[{\onyxop{--}{unmatchedfino}{--}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
+	\item[Errors(s): ] None.
 	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
+		No fino on ostack.
 	\end{description}
 \label{unmatchedmark}
 \label{errordict:unmatchedmark}
 \index{unmatchedmark@\onyxop{}{unmatchedmark}{}}
 \item[{\onyxop{--}{unmatchedmark}{--}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
+	\item[Errors(s): ] None.
 	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
+		No mark on ostack.
 	\end{description}
 \label{unregistered}
 \label{errordict:unregistered}
 \index{unregistered@\onyxop{}{unregistered}{}}
 \item[{\onyxop{--}{unregistered}{--}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
+	\item[Errors(s): ] None.
 	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
+		Non-enumerated error.
 	\end{description}
 \end{description}
 
@@ -1624,8 +1481,8 @@ syntactically, care should be taken to insert whitespace delimiters.
 All threads share the same systemdict, which contains most of the operators that
 are of general use.  Although there are no mechanisms that prevent modification
 of systemdict, programs should not normally need to modify systemdict, since
-globaldict provides a place for storing globally shared objects.  systemdict is
-implicitly locked.
+globaldict provides a place for storing globally shared objects.  All threads
+share the same systemdict, which is implicitly locked.
 
 \begin{longtable}{\optableformat{2.5}}
 \caption[systemdict summary]{systemdict summary by functional group} \\
@@ -1718,6 +1575,8 @@ nanoseconds & {\bf \htmlref{nsleep}{systemdict:nsleep}} & -- & Nanosleep. \\
 & {\bf \htmlref{eval}{systemdict:eval}} & & \\
 \hline
 & {\bf \htmlref{countestack}{systemdict:countestack}} & & \\
+\hline
+& {\bf \htmlref{throw}{systemdict:throw}} & & \\
 \hline \hline
 \multicolumn{4}{|l|}{Stack operators} \\
 \hline \hline
@@ -5307,6 +5166,27 @@ onyx:1> pstack
 \label{systemdict:thread}
 \index{thread@\onyxop{}{thread}{}}
 \item[{\onyxop{--}{thread}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{systemdict:throw}
+\index{throw@\onyxop{}{throw}{}}
+\item[{\onyxop{--}{throw}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
