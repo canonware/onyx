@@ -77,29 +77,10 @@ typedef long long cw_sint64_t;
 typedef unsigned long long cw_uint64_t;
 #  endif
 
-#  if (SIZEOF_FLOAT == 4)
-#    define _TYPE_FLOAT4_DEFINED
-typedef float cw_float4_t;
-#  endif
-
-#  if (SIZEOF_DOUBLE == 8)
-#    define _TYPE_FLOAT8_DEFINED
-typedef double cw_float8_t;
-#  endif
-
-#  if (SIZEOF_LONG_DOUBLE == 12)
-#    define _TYPE_FLOAT12_DEFINED
-typedef long double cw_float12_t;
-#  elif (SIZEOF_LONG_DOUBLE == 16)
-#  define _TYPE_FLOAT16_DEFINED
-typedef long double cw_float16_t;
-#  endif
-
 #  if (!defined(_TYPE_SINT8_DEFINED) || !defined(_TYPE_UINT8_DEFINED) \
   || !defined(_TYPE_SINT16_DEFINED) || !defined(_TYPE_UINT16_DEFINED) \
   || !defined(_TYPE_SINT32_DEFINED) || !defined(_TYPE_UINT32_DEFINED) \
-  || !defined(_TYPE_SINT64_DEFINED) || !defined(_TYPE_UINT64_DEFINED) \
-  || !defined(_TYPE_FLOAT4_DEFINED) || !defined(_TYPE_FLOAT8_DEFINED))
+  || !defined(_TYPE_SINT64_DEFINED) || !defined(_TYPE_UINT64_DEFINED))
 #    error "Lacking mandatory typedefs"
 #  endif
 

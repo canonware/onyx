@@ -74,9 +74,6 @@ AC_CHECK_SIZEOF(long, 4)
 AC_CHECK_SIZEOF(unsigned long, 4)
 AC_CHECK_SIZEOF(long long, 4)
 AC_CHECK_SIZEOF(unsigned long long, 4)
-AC_CHECK_SIZEOF(float, 4)
-AC_CHECK_SIZEOF(double, 8)
-AC_CHECK_SIZEOF(long double, 12)
 AC_CHECK_SIZEOF(int *, 4) dnl defines SIZEOF_INT_P
 
 AC_MSG_RESULT(================================================================)
@@ -92,8 +89,6 @@ SQRL_SET_MAKEFILE
 dnl Process the following files.
 AC_OUTPUT(Makefile.bsd \
 Makefile.gnu \
-test/pmerge \
-test/pstub \
 test/verify)
 
 dnl autoconf doesn't keep the execute bit if it's set for the input file, so do

@@ -39,7 +39,7 @@ $opt_retval =
 	    );
 
 $mode = "d";
-for ($i = 0; $i < $#ARGV; $i++)
+for ($i = 0; $i <= $#ARGV; $i++)
 {
     if (($ARGV[$i] eq "-s") || ($ARGV[$i] eq "--sequence"))
     {
@@ -128,23 +128,87 @@ foreach $test (@STESTS)
     # sequence mode.
     $okay = 1;
 
-    &run_test();
-
-#      if (open (STEST_OUT, "<./$test.out"))
-#      {
-	# XXX
-#  	print STDERR "Unimplemented\n";
-#  	exit 1;
-#      }
-
-    &print_stats();
-}
-foreach $test (@DTESTS)
-{
-    # Diff mode.
-    $okay = 1;
-
     ($okay, $utime, $stime) = &run_test($test);
+
+    if (open (STEST_OUT, "<./$test.out"))
+    {
+	$num_failed_subtests = 0;
+
+	$_ = <STEST_OUT>;
+
+	if ($_ =~ /1\.\.(\d+)/)
+	{
+	    $num_subtests = $1;
+	}
+	else
+	{
+	    $num_subtests = 0;
+	    $okay = 0;
+	    if ($opt_verbose)
+	    {
+		print STDERR "Malformed 1..n line\n";
+	    }
+	}
+	for ($subtest = 1; $subtest <= $num_subtests; $subtest++)
+	{
+	    while (defined($line = <STEST_OUT>))
+	    {
+		if ($line =~ /^not\s+ok\s+(\d+)?/)
+		{
+		    $not = 1;
+		    $test_num = $1;
+		    last;
+		}
+		elsif ($line =~ /^ok\s+(\d+)?/)
+		{
+		    $not = 0;
+		    $test_num = $1;
+		    last;
+		}
+	    }
+	    if (defined($line))
+	    {
+		if (defined($test_num) && ($test_num != $subtest))
+		{
+		    # There was no output printed for one or more tests.
+		    for (; $subtest < $test_num; $subtest++)
+		    {
+			$num_failed_subtests++;
+		    }
+		}
+		if ($not)
+		{
+		    $num_failed_subtests++;
+		}
+	    }
+	    else
+	    {
+		for (; $subtest <= $num_subtests; $subtest++)
+		{
+		    $num_failed_subtests++;
+		}
+	    }
+	}
+
+	if (0 < $num_failed_subtests)
+	{
+	    $okay = 0;
+	}
+    }
+    else
+    {
+	if (!$opt_quiet)
+	{
+	    print STDERR "Cannot open output file \"$test.out\"\n";
+	}
+	exit 1;
+    }
+
+    ($hutime, $hstime) = &print_stats($test, $okay, 
+				      $num_failed_subtests, $num_subtests,
+				      $utime, $stime);
+    $total_hutime += $hutime;
+    $total_hstime += $hstime;
 
     if ($okay)
     {
@@ -156,22 +220,26 @@ foreach $test (@DTESTS)
 	@FAILED_TESTS = (@FAILED_TESTS, $test);
     }
 
+    # If there were historical data, add the run time to the total time to 
+    # compare against the historical run time.
+    if (0 < ($hutime + $hstime))
+    {
+	$total_ntime += $utime + $stime;
+    }
+}
+foreach $test (@DTESTS)
+{
+    # Diff mode.
+    $okay = 1;
+
+    ($okay, $utime, $stime) = &run_test($test);
+
     if (-e "./$test.out" && -e "./$test.exp")
     {
 	`diff ./$test.out ./$test.exp > ./$test.diff 2>&1`;
 	if ($?)
 	{
-	    $okay = 0;
-	    if ($opt_verbose)
-	    {
-		print STDERR
-		    "Unable to run \"diff ./$test.out ./$test.exp > " 
-			. "./$test.diff 2>&1\"\n";
-	    }
-	}
-
-	if (-s "$test.diff")
-	{
+	    # diff returns non-zero if there is a difference.
 	    $okay = 0;
 	}
     }
@@ -184,9 +252,19 @@ foreach $test (@DTESTS)
 	}
     }
 
-    ($hutime, $hstime) = &print_stats($test, $okay, $utime, $stime);
+    ($hutime, $hstime) = &print_stats($test, $okay, 0, 0, $utime, $stime);
     $total_hutime += $hutime;
     $total_hstime += $hstime;
+
+    if ($okay)
+    {
+	$total_utime += $utime;
+	$total_stime += $stime;
+    }
+    else
+    {
+	@FAILED_TESTS = (@FAILED_TESTS, $test);
+    }
 
     # If there were historical data, add the run time to the total time to 
     # compare against the historical run time.
@@ -204,10 +282,10 @@ $tt_str = sprintf ("%d / %d passed (%5.2f%%%%)",
 		   / ($#STESTS + $#DTESTS + 2) * 100);
 
 $t_str = sprintf ("Totals                         %7.2f  %7.2f %7.2f  %7.2f\n"
-		  . "%s %7.2f  %7.2f %7.2f %7.2f%%%%\n",
+		  . " %s %7.2f  %7.2f %7.2f %7.2f%%%%\n",
 		  $total_utime, $total_stime, $total_utime + $total_stime,
 		  ($total_ntime - ($total_hutime + $total_hstime)),
-		  $tt_str . ' ' x (31 - length($tt_str)),
+		  $tt_str . ' ' x (30 - length($tt_str)),
 		  $total_hutime, $total_hstime, $total_hutime + $total_hstime,
 		  ($total_hutime + $total_hstime == 0.0) ? 0.0 :
 		  (($total_ntime
@@ -272,12 +350,19 @@ sub run_test
 
 sub print_stats
 {
-    my ($test, $okay, $utime, $stime) = @_;
+    my ($test, $okay, $failed_subtests, $subtests, $utime, $stime) = @_;
     my ($hutime, $hstime);
 #    my (TEST_PERF);
     my (@TSTATS);
-    my ($t_str);
+    my ($t_str, $pass_str);
 
+    $pass_str = $okay ? "passed" : "*** FAILED ***";
+    if ((0 != $subtests) && (!$okay))
+    {
+	$pass_str = $pass_str . " ($failed_subtests/$subtests failed)";
+    }
+    $pass_str = $pass_str . ' ' x (29 - length($pass_str));
+    
     if (-r "$test.perf")
     {
 	if (!open (TEST_PERF, "<./$test.perf"))
@@ -291,12 +376,10 @@ sub print_stats
 	close TEST_PERF;
 
 	$t_str = sprintf (" %7.2f  %7.2f %7.2f  %7.2f\n"
-			  . " %s%s %7.2f  %7.2f %7.2f %7.2f%%%%\n",
+			  . " %s %7.2f  %7.2f %7.2f %7.2f%%%%\n",
 			  $utime, $stime, $utime + $stime,
 			  ($utime + $stime) - ($hutime + $hstime),
-			  ($okay ? "passed" : "*** FAILED ***",
-			   ' ' x (29 - length($okay ? "passed" 
-					      : "*** FAILED ***"))),
+			  $pass_str,
 			  $hutime, $hstime, $hutime + $hstime,
 			  (($hutime + $hstime) == 0.0) ? 0.0 :
 			  ((($utime + $stime) - ($hutime + $hstime))
@@ -308,11 +391,9 @@ sub print_stats
 	$hstime = 0.0;
 
 	$t_str = sprintf (" %7.2f  %7.2f %7.2f        \n"
-			  . " %s%s\n",
+			  . " %s\n",
 			  $utime, $stime, $utime + $stime,
-			  $okay ? "passed" : "*** FAILED ***",
-			  ' ' x (29 - length($okay ? "passed" 
-					     : "*** FAILED ***")));
+			  $pass_str);
     }
     @TSTATS = ($t_str);
     if (!$opt_quiet)
@@ -363,13 +444,16 @@ $0 usage:
                   | 
                   | -----------------
                   | 1..<n>
-                  | {not}* ok [1]
-                  | {not}* ok [2]
+                  | {not} ok [1]
+                  | {not} ok [2]
                   | ...
-                  | {not}* ok [n]
+                  | {not} ok [n]
                   | -----------------
                   | 
                   | 1 <= <n> < 2^31
+                  | 
+                  | Lines which do not match the patterns shown above are
+                  | ignored.
                   | 
     -d --diff     | Diff mode (incompatible with sequence mode).
                   | If <test>.exp exists, diff it with the output from <test> to

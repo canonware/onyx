@@ -26,8 +26,8 @@ main()
   dbg_register(cw_g_dbg, "res_error");
   
   res_new(&res);
-  _cw_assert(FALSE == res_merge_file(&res, "b19980828a.res"));
-  _cw_assert(FALSE == res_dump(&res, "b19980828a.dump"));
+  _cw_assert(FALSE == res_merge_file(&res, "b_res_a.res"));
+  _cw_assert(FALSE == res_dump(&res, "b_res_a.dump"));
   res_delete(&res);
       
   libstash_shutdown();

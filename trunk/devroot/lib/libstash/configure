@@ -2051,125 +2051,8 @@ cat >> confdefs.h <<EOF
 EOF
 
 
-echo $ac_n "checking size of float""... $ac_c" 1>&6
-echo "configure:2056: checking size of float" >&5
-if eval "test \"`echo '$''{'ac_cv_sizeof_float'+set}'`\" = set"; then
-  echo $ac_n "(cached) $ac_c" 1>&6
-else
-  if test "$cross_compiling" = yes; then
-  ac_cv_sizeof_float=4
-else
-  cat > conftest.$ac_ext <<EOF
-#line 2064 "configure"
-#include "confdefs.h"
-#include <stdio.h>
-main()
-{
-  FILE *f=fopen("conftestval", "w");
-  if (!f) exit(1);
-  fprintf(f, "%d\n", sizeof(float));
-  exit(0);
-}
-EOF
-if { (eval echo configure:2075: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
-then
-  ac_cv_sizeof_float=`cat conftestval`
-else
-  echo "configure: failed program was:" >&5
-  cat conftest.$ac_ext >&5
-  rm -fr conftest*
-  ac_cv_sizeof_float=0
-fi
-rm -fr conftest*
-fi
-
-fi
-echo "$ac_t""$ac_cv_sizeof_float" 1>&6
-cat >> confdefs.h <<EOF
-#define SIZEOF_FLOAT $ac_cv_sizeof_float
-EOF
-
-
-echo $ac_n "checking size of double""... $ac_c" 1>&6
-echo "configure:2095: checking size of double" >&5
-if eval "test \"`echo '$''{'ac_cv_sizeof_double'+set}'`\" = set"; then
-  echo $ac_n "(cached) $ac_c" 1>&6
-else
-  if test "$cross_compiling" = yes; then
-  ac_cv_sizeof_double=8
-else
-  cat > conftest.$ac_ext <<EOF
-#line 2103 "configure"
-#include "confdefs.h"
-#include <stdio.h>
-main()
-{
-  FILE *f=fopen("conftestval", "w");
-  if (!f) exit(1);
-  fprintf(f, "%d\n", sizeof(double));
-  exit(0);
-}
-EOF
-if { (eval echo configure:2114: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
-then
-  ac_cv_sizeof_double=`cat conftestval`
-else
-  echo "configure: failed program was:" >&5
-  cat conftest.$ac_ext >&5
-  rm -fr conftest*
-  ac_cv_sizeof_double=0
-fi
-rm -fr conftest*
-fi
-
-fi
-echo "$ac_t""$ac_cv_sizeof_double" 1>&6
-cat >> confdefs.h <<EOF
-#define SIZEOF_DOUBLE $ac_cv_sizeof_double
-EOF
-
-
-echo $ac_n "checking size of long double""... $ac_c" 1>&6
-echo "configure:2134: checking size of long double" >&5
-if eval "test \"`echo '$''{'ac_cv_sizeof_long_double'+set}'`\" = set"; then
-  echo $ac_n "(cached) $ac_c" 1>&6
-else
-  if test "$cross_compiling" = yes; then
-  ac_cv_sizeof_long_double=12
-else
-  cat > conftest.$ac_ext <<EOF
-#line 2142 "configure"
-#include "confdefs.h"
-#include <stdio.h>
-main()
-{
-  FILE *f=fopen("conftestval", "w");
-  if (!f) exit(1);
-  fprintf(f, "%d\n", sizeof(long double));
-  exit(0);
-}
-EOF
-if { (eval echo configure:2153: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
-then
-  ac_cv_sizeof_long_double=`cat conftestval`
-else
-  echo "configure: failed program was:" >&5
-  cat conftest.$ac_ext >&5
-  rm -fr conftest*
-  ac_cv_sizeof_long_double=0
-fi
-rm -fr conftest*
-fi
-
-fi
-echo "$ac_t""$ac_cv_sizeof_long_double" 1>&6
-cat >> confdefs.h <<EOF
-#define SIZEOF_LONG_DOUBLE $ac_cv_sizeof_long_double
-EOF
-
-
 echo $ac_n "checking size of int *""... $ac_c" 1>&6
-echo "configure:2173: checking size of int *" >&5
+echo "configure:2056: checking size of int *" >&5
 if eval "test \"`echo '$''{'ac_cv_sizeof_int_p'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -2177,7 +2060,7 @@ else
   ac_cv_sizeof_int_p=4
 else
   cat > conftest.$ac_ext <<EOF
-#line 2181 "configure"
+#line 2064 "configure"
 #include "confdefs.h"
 #include <stdio.h>
 main()
@@ -2188,7 +2071,7 @@ main()
   exit(0);
 }
 EOF
-if { (eval echo configure:2192: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
+if { (eval echo configure:2075: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
 then
   ac_cv_sizeof_int_p=`cat conftestval`
 else
@@ -2238,7 +2121,7 @@ else { echo "configure: error: can not run $ac_config_sub" 1>&2; exit 1; }
 fi
 
 echo $ac_n "checking host system type""... $ac_c" 1>&6
-echo "configure:2242: checking host system type" >&5
+echo "configure:2125: checking host system type" >&5
 
 host_alias=$host
 case "$host_alias" in
@@ -2402,8 +2285,6 @@ ac_given_INSTALL="$INSTALL"
 
 trap 'rm -fr `echo "Makefile.bsd \
 Makefile.gnu \
-test/pmerge \
-test/pstub \
 test/verify include/libstash/libstash_defs.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
 EOF
 cat >> $CONFIG_STATUS <<EOF
@@ -2499,8 +2380,6 @@ cat >> $CONFIG_STATUS <<EOF
 
 CONFIG_FILES=\${CONFIG_FILES-"Makefile.bsd \
 Makefile.gnu \
-test/pmerge \
-test/pstub \
 test/verify"}
 EOF
 cat >> $CONFIG_STATUS <<\EOF

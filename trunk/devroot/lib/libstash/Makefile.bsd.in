@@ -36,22 +36,19 @@ SRCS := libstash.c bhp.c buf.c dbg.c lex.c list.c log.c matrix.c mem.c oh.c \
 SRCS_R := locks.c thread.c
 
 # Simple tests.  Output is diff'ed with the expected (.exp file) output.
-CTESTS := c_buf_a.c c_buf_b.c c_buf_c.c \
+CTESTS := c_buf_a.c c_buf_b.c c_buf_c.c c_cnd_a.c \
 	c_jtl_a.c c_list_a.c c_log_a.c c_matrix_a.c \
 	c_mtx_a.c c_oh_a.c c_oh_b.c c_oh_c.c c_pezz_a.c c_res_a.c c_ring_a.c \
 	c_rwl_a.c c_sem_a.c c_thd_a.c c_treen_a.c
-
-# Deadlocks on FreeBSD due to a libc_r bug in pthread_cond_timed_wait().
-# c_cnd_a.c
 
 # Hopelessly broken.
 # c_bhp_a.c 
 
 # Perl scripts that drive the BTESTS.
-PTESTS := p19980828a.pl.in
+PTESTS := p_res_a.pl.in
 
 # Backend test programs that are driven by the PTESTS.
-BTESTS := b19980828a.c
+BTESTS := b_res_a.c
 
 # Munge the filename lists so that they are prefixed by the directory they're
 # in, relative to @top_srcdir@.  Also, convert the test names to their final
@@ -99,8 +96,8 @@ PERL    := @PERL@
 BASENAME:= @BASENAME@
 DIFF    := @DIFF@
 VERIFY  := test/verify
-PMERGE  := test/pmerge
-PSTUB   := test/pstub
+#PMERGE  := test/pmerge
+#PSTUB   := test/pstub
 
 #
 # Compiler flags.
@@ -195,7 +192,9 @@ $(srcfile:R:S/$/&.o_st_r_p/) : $(srcfile)
 .endfor
 
 .pl.in.pl :
-	$(PERL) -w $(PMERGE) $(PERL) $(PSTUB) $< $@
+	echo "#!$(PERL) -w" > $@
+	$(CAT) $< >> $@
+	chmod u+x $@
 
 #
 # Dependencies (not rules).
@@ -288,35 +287,7 @@ bins :
 tests : $(CTESTS) $(PTESTS) $(BTESTS)
 
 check : tests
-	@$(VERIFY) -- -d $(CTESTS)
-
-# 	@$(SHELL) -c \
-# 	'printf "Running regression tests:\\n" ;\
-# 	printf "%s\\n" "---------------------------------------------" ;\
-# 	for i in $(PTESTS); do \
-# 	printf "%s" "$$i..." ;\
-# 	$$i ;\
-# 	done ;\
-# 	for i in $(CTESTS); do \
-# 	printf "%s" "$$i..."; \
-# 	$$i > $$i.out 2>&1 ;\
-# 	$(DIFF) $$i.out $$i.exp > $$i.diff ;\
-# 	if [ -s $$i.diff ] ; then \
-# 	printf "%s\\n" "failed. ****************" ;\
-# 	else \
-# 	printf "%s\\n" "passed." ;\
-# 	rm $$i.diff ;\
-# 	fi \
-# 	done ;\
-# 	printf "%s\\n\\n" "---------------------------------------------" ;\
-# 	printf "%s\\n" "The following regression tests failed:" ;\
-# 	printf "%s\\n" "---------------------------------------------" ;\
-# 	for i in `find ./test -print | grep "\.diff$$"`; do \
-# 	echo `echo $$i | sed "s/\.\/\(.*\)\.diff/\1/g"` ;\
-# 	done ;\
-# 	printf "%s\\n" "---------------------------------------------" ;\
-# 	cd - \
-# 	'
+	@$(VERIFY) -- -d $(CTESTS) -s $(PTESTS)
 
 install : install_s @without_threads@install_r
 
@@ -395,8 +366,6 @@ distclean : clean
 	rm -f include/libstash/libstash_defs.h
 	rm -f TAGS
 	rm -f $(VERIFY) test/*.perf
-	rm -f $(PMERGE)
-	rm -f $(PSTUB)
 
 etags : $(INCS) $(INCS_R) $(PRIV_INCS) $(PRIV_INCS_R) $(SRCS) $(SRCS_R)
 	@ETAGS@ $(INCS) $(INCS_R) $(PRIV_INCS) $(PRIV_INCS_R) $(SRCS) $(SRCS_R)

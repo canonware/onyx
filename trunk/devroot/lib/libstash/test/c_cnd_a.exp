@@ -1,3 +1,4 @@
+Test begin
 thread_entry_func(): After cnd_wait() call
 thread_entry_func(): After cnd_wait() call
 thread_entry_func(): After cnd_wait() call
@@ -9,3 +10,4 @@ thread_entry_func(): After cnd_wait() call
 thread_entry_func(): After cnd_wait() call
 thread_entry_func(): After cnd_wait() call
 thread_entry_func(): After cnd_wait() call
+Test end
