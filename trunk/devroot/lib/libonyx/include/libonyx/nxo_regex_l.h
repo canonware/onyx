@@ -131,11 +131,11 @@ nxoe_l_regex_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
 	free(regex->extra);
     }
     /* Tell the GC that pcre has been deallocated. */
-    nxa_l_count_adjust(a_nxa, -(regex->size
+    nxa_l_count_adjust(a_nxa, -(cw_nxoi_t)(regex->size
 #ifdef PCRE_INFO_EXTRASIZE
-				+ regex->extrasize
+					   + regex->extrasize
 #endif
-				));
+					   ));
 
     nxa_free(a_nxa, regex, sizeof(cw_nxoe_regex_t));
 
