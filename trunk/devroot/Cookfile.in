@@ -82,7 +82,7 @@ standard : libs bins_a
   set default
 ;
 
-all : libs bins tests doc;
+all : libs bins tests docs;
 
 libs_d : [D_LIBS];
 libs_a : [A_LIBS];
@@ -120,28 +120,25 @@ check_update : tests
            [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]];
 }
 
-release : doc;
+release : docs;
 
-doc : manual_p manual_f manual_h;
-
-manual_p : [P_MANUAL];
-
-manual_f : [F_MANUAL];
-
-manual_h : [H_MANUAL];
+docs : doc_p doc_f doc_h;
+doc_p : [P_MANUAL];
+doc_f : [F_MANUAL];
+doc_h : [H_MANUAL];
 
 install_bins : [addsuffix _install_a @bins@];
 install_libs : [addsuffix _install @libs@];
-install : install_bins install_libs install_doc;
+install : install_bins install_libs install_docs;
 
 uninstall_bins : [addsuffix _uninstall @bins@];
 uninstall_libs : [addsuffix _uninstall @libs@];
-uninstall : uninstall_bins uninstall_libs uninstall_doc
+uninstall : uninstall_bins uninstall_libs uninstall_docs
 {
   rm -rf [PREFIX]/share/canonware;
 }
 
-clean : [addsuffix _clean doc test @bins@ @libs@]
+clean : [addsuffix _clean docs test @bins@ @libs@]
 {
   rm -f core *.core;
   rm -f TAGS;
@@ -188,7 +185,7 @@ done
 dataend
 }
 
-distclean : clean [addsuffix _distclean doc test @bins@ @libs@]
+distclean : clean [addsuffix _distclean docs test @bins@ @libs@]
 {
   rm -f [objdir]/Cookfile;
   rm -f [objdir]/config.cache;
@@ -198,7 +195,7 @@ distclean : clean [addsuffix _distclean doc test @bins@ @libs@]
   rm -f @cfghdrs@;
 }
 
-relclean : distclean [addsuffix _relclean doc]
+relclean : distclean [addsuffix _relclean docs]
 {
 }
 

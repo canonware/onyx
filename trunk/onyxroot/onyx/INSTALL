@@ -40,16 +40,17 @@ Additional build targets of finer granularity include:
 
 Additional install targets of finer granularity include:
 
-	install_{bins,libs}
+	install_{bins,libs,docs}
 	<binname>_install
 	<binname>_install_[dap]
 	<libname>_install
 	<libname>_install_[daps]
+	doc_install_[pfh]
 
 Uninstall targets include:
 
 	uninstall
-	uninstall_{bins,libs}
+	uninstall_{bins,libs,docs}
 	<binname>_uninstall
 	<libname>_uninstall
 
@@ -62,8 +63,8 @@ Cleanup targets include:
 Targets that depend on optional supporting software include:
 
 	all
-	doc
-	manual_[pfh]
+	docs
+	doc_[pfh]
 	release
 	check
 	check_update

@@ -40,20 +40,20 @@ H_MANUAL = [objdir]/doc/html/manual.html;
   FIG_SRCS = [FIG_SRCS] [fig_srcs];
 }
 
-install_doc : install_doc_p install_doc_f install_doc_h;
-install_doc_p : /* [P_MANUAL] */
+install_docs : doc_install_p doc_install_f doc_install_h;
+doc_install_p : /* [P_MANUAL] */
 {
   [INSTALL] -d [PREFIX]/share/canonware/doc/ps;
   [INSTALL] -m 0444 [P_MANUAL] [PREFIX]/share/canonware/doc/ps;
 }
 
-install_doc_f : /* [F_MANUAL] */
+doc_install_f : /* [F_MANUAL] */
 {
   [INSTALL] -d [PREFIX]/share/canonware/doc/pdf;
   [INSTALL] -m 0444 [F_MANUAL] [PREFIX]/share/canonware/doc/pdf;
 }
 
-install_doc_h : /* [H_MANUAL] */
+doc_install_h : /* [H_MANUAL] */
 {
   [SHELL] -e;
 data
@@ -69,7 +69,7 @@ done
 dataend
 }
 
-uninstall_doc :
+uninstall_docs :
 {
   [SHELL] -e;
 data
@@ -80,7 +80,7 @@ rm -rf [PREFIX]/share/canonware/doc
 dataend
 }
 
-doc_clean :
+docs_clean :
 {
   rm -f [objdir]/doc/latex/manual.alg;
   rm -f [objdir]/doc/latex/manual.aux;
@@ -96,13 +96,13 @@ doc_clean :
   rm -f [objdir]/doc/latex/texput.log;
 }
 
-doc_distclean :
+docs_distclean :
 {
   rm -f [objdir]/doc/latex/manual.tex;
   rm -f [objdir]/doc/latex/ltx2e;
 }
 
-doc_relclean :
+docs_relclean :
 {
   rm -rf [objdir]/doc/html;
   rm -rf [objdir]/doc/pdf;
