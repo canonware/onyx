@@ -1009,6 +1009,7 @@ get_out_str_ascii(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str)
 	     + buf_size /* Data. */
 	     + 1 /* Newline. */
 	     + 81 /* Last dashed line. */
+	     + 1 /* Null terminator. */
 	     );
 
   if (NULL == a_str)
@@ -1053,7 +1054,6 @@ get_out_str_ascii(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str)
     "----------------------------------------"
     "----------------------------------------\n";
   strcpy(p, t_str);
-/*    p += strlen(t_str); */
   
   return retval;
 }
