@@ -17,22 +17,26 @@
 int
 main()
 {
+    cw_mema_t mema;
+
     libonyx_init();
     fprintf(stderr, "Test begin\n");
+
+    mema_new(&mema, (cw_opaque_alloc_t *) mem_malloc_e,
+	     (cw_opaque_calloc_t *) mem_calloc_e,
+	     (cw_opaque_realloc_t *) mem_realloc_e,
+	     (cw_opaque_dealloc_t *) mem_free_e, cw_g_mem);
 
     /* ch_new(), ch_delete(). */
     {
 	cw_ch_t *ch_a, ch_b;
 
-	ch_a = ch_new(NULL, (cw_opaque_alloc_t *) mem_malloc_e,
-		      (cw_opaque_dealloc_t *) mem_free_e, cw_g_mem, 2,
-		      ch_string_hash, ch_string_key_comp);
+	ch_a = ch_new(NULL, &mema, 2, ch_string_hash, ch_string_key_comp);
 	cw_check_ptr(ch_a);
 	ch_delete(ch_a);
 
-	cw_assert(ch_new(&ch_b, (cw_opaque_alloc_t *) mem_malloc_e,
-			 (cw_opaque_dealloc_t *) mem_free_e, cw_g_mem, 1,
-			 ch_direct_hash, ch_direct_key_comp) == &ch_b);
+	cw_assert(ch_new(&ch_b, &mema, 1, ch_direct_hash, ch_direct_key_comp)
+		  == &ch_b);
 	ch_delete(&ch_b);
     }
 
@@ -44,9 +48,7 @@ main()
 	char *c = "two of these";
 	char *d = "two of these\0foo";
 
-	ch = ch_new(NULL, (cw_opaque_alloc_t *) mem_malloc_e,
-		    (cw_opaque_dealloc_t *) mem_free_e, cw_g_mem, 4,
-		    ch_string_hash, ch_string_key_comp);
+	ch = ch_new(NULL, &mema, 4, ch_string_hash, ch_string_key_comp);
 	cw_check_ptr(ch);
 	cw_assert(ch_count(ch) == 0);
 
@@ -77,9 +79,7 @@ main()
 	char *d = "two of these\0foo";
 	char *k, *v;
 
-	ch = ch_new(NULL, (cw_opaque_alloc_t *) mem_malloc_e,
-		    (cw_opaque_dealloc_t *) mem_free_e, cw_g_mem, 4,
-		    ch_string_hash, ch_string_key_comp);
+	ch = ch_new(NULL, &mema, 4, ch_string_hash, ch_string_key_comp);
 	cw_check_ptr(ch);
 	cw_assert(ch_count(ch) == 0);
 
@@ -130,9 +130,7 @@ main()
 	char *d = "two of these\0foo";
 	char *v;
 
-	ch = ch_new(NULL, (cw_opaque_alloc_t *) mem_malloc_e,
-		    (cw_opaque_dealloc_t *) mem_free_e, cw_g_mem, 4,
-		    ch_string_hash, ch_string_key_comp);
+	ch = ch_new(NULL, &mema, 4, ch_string_hash, ch_string_key_comp);
 	cw_check_ptr(ch);
 
 	ch_insert(ch, a, a, NULL);
@@ -170,9 +168,7 @@ main()
 	char *d = "two of these\0foo";
 	char *k, *v;
 
-	ch = ch_new(NULL, (cw_opaque_alloc_t *) mem_malloc_e,
-		    (cw_opaque_dealloc_t *) mem_free_e, cw_g_mem, 4,
-		    ch_string_hash, ch_string_key_comp);
+	ch = ch_new(NULL, &mema, 4, ch_string_hash, ch_string_key_comp);
 	cw_check_ptr(ch);
 
 	/* Iterate with 0 items. */
@@ -263,6 +259,8 @@ main()
 
 	ch_delete(ch);
     }
+
+    mema_delete(&mema);
 
     fprintf(stderr, "Test end\n");
     libonyx_shutdown();

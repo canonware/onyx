@@ -64,9 +64,8 @@ a\_table\_size}}
 	\end{capilist}
 \label{ch_new}
 \index{ch_new@\cfunc{ch\_new}{}}
-\citem{\cfunc[]{ch\_new}{cw\_ch\_t *a\_ch, cw\_opaque\_alloc\_t *a\_alloc,
-cw\_opaque\_dealloc\_t *a\_dealloc, void *a\_arg, cw\_uint32\_t a\_table\_size,
-cw\_ch\_hash\_t *a\_hash, cw\_ch\_key\_comp\_t  *a\_key\_comp}}
+\citem{\cfunc[]{ch\_new}{cw\_ch\_t *a\_ch, cw\_mema\_t *a\_mema, cw\_uint32\_t
+a\_table\_size, cw\_ch\_hash\_t *a\_hash, cw\_ch\_key\_comp\_t *a\_key\_comp}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -75,13 +74,8 @@ cw\_ch\_hash\_t *a\_hash, cw\_ch\_key\_comp\_t  *a\_key\_comp}}
 			\cvar{a\_table\_size} slots, or NULL.  Use the
 			\cppmacro{CW\_CH\_TABLE2SIZEOF}{} macro to calculate
 			the total space needed for a given table size.
-		\item[a\_alloc: ]
-			Pointer to an allocation function to use internally.
-		\item[a\_dealloc: ]
-			Pointer to a deallocation function to use internally.
-		\item[a\_arg: ]
-			Opaque pointer to pass to \cfunc{a\_alloc}{} and
-			\cfunc{a\_dealloc}{}.
+		\item[a\_mema: ]
+			Pointer to a memory allocator.
 		\item[a\_table\_size: ]
 			Number of slots in the hash table.
 		\item[a\_hash: ]

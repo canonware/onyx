@@ -35,9 +35,7 @@ struct cw_dch_s
 #endif
 
     /* Opaque allocation/deallocation pointers. */
-    cw_opaque_alloc_t *alloc;
-    cw_opaque_dealloc_t *dealloc;
-    void *arg;
+    cw_mema_t *mema;
 
     cw_bool_t is_malloced:1;
 
@@ -61,8 +59,7 @@ struct cw_dch_s
 };
 
 cw_dch_t *
-dch_new(cw_dch_t *a_dch, cw_opaque_alloc_t *a_alloc,
-	cw_opaque_dealloc_t *a_dealloc, void *a_arg, cw_uint32_t a_base_table,
+dch_new(cw_dch_t *a_dch, cw_mema_t *a_mema, cw_uint32_t a_base_table,
 	cw_uint32_t a_base_grow, cw_uint32_t a_base_shrink,
 	cw_ch_hash_t *a_hash, cw_ch_key_comp_t *a_key_comp);
 
