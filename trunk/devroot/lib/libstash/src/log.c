@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 9 $
- * Last modified: $Date: 1998-02-08 22:18:43 -0800 (Sun, 08 Feb 1998) $
+ * Current revision: $Revision: 15 $
+ * Last modified: $Date: 1998-03-29 05:26:45 -0800 (Sun, 29 Mar 1998) $
  *
  * Description: 
  *              
@@ -42,7 +42,7 @@
 
 #define _INC_STDARG_H_
 /* #define _INC_STRING_H_ */
-#include <inc_common.h>
+#include <config.h>
 
 #define G_ERROR_BUFF_SIZE 512
 
@@ -139,6 +139,7 @@ lprintf(char * arg_format, ...)
       va_start(ap, arg_format);
       retval = vfprintf(g_log_fp, arg_format, ap);
       va_end(ap);
+      fflush(g_log_fp);
     }
   else
     {
@@ -180,6 +181,7 @@ leprintf(char * arg_filename,
       va_start(ap, arg_format);
       retval = vfprintf(g_log_fp, arg_format, ap);
       va_end(ap);
+      fflush(g_log_fp);
     }
   else
     {

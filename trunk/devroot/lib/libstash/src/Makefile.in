@@ -30,8 +30,8 @@
 #
 # $Source$
 # $Author: jasone $
-# Current revision: $Revision: 12 $
-# Last modified: $Date: 1998-02-20 01:33:18 -0800 (Fri, 20 Feb 1998) $
+# Current revision: $Revision: 15 $
+# Last modified: $Date: 1998-03-29 05:26:45 -0800 (Sun, 29 Mar 1998) $
 #
 # Description: Makefile for SQuirreL source code.
 #              
@@ -53,7 +53,7 @@ INSTALL	= @INSTALL@
 INCS    = -I@top_srcdir@ -I@top_srcdir@/lib_common/include
 CFLAGS  = @CFLAGS@
 
-DEFINES = -D_REENTRANT @DEFS@
+DEFINES = @DEFS@
 LIBS    = -L@top_srcdir@/src $(STATLIB:%=-l%) @LIBS@
 
 FLEXFLAGS = -CF
@@ -64,7 +64,7 @@ BISONFLAGS = -d
 #
 
 # file lists
-SRCS     = log.c resource.c $(LEXERS:.l=.yy.c) $(PARSERS:.y=.tab.c)
+SRCS     = dbg.c log.c mem.c # resource.c $(LEXERS:.l=.yy.c) $(PARSERS:.y=.tab.c)
 LEXERS   = res_lexer.l
 PARSERS  = res_parser.y
 OBJS     = $(SRCS:.c=.o)
