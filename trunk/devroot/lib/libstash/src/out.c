@@ -1071,8 +1071,8 @@ out_p_put_svn(cw_out_t * a_out, char * a_str, cw_uint32_t a_size,
 	  cw_sint32_t spec_len, type_len;
 	  const char * type;
 	  cw_out_ent_t * ent;
-	  void * arg = NULL; /* Shut up the optimizer. */
-	
+	  void * arg;
+
 	  if (_LIBSTASH_OUT_ENT_CACHE > enti)
 	  {
 	    spec_len = a_key->ents[enti].spec_len;
@@ -1124,6 +1124,7 @@ out_p_put_svn(cw_out_t * a_out, char * a_str, cw_uint32_t a_size,
 #endif
 	    default:
 	    {
+	      arg = NULL; /* Keep the optimizer quiet. */
 	      _cw_error("Programming error");
 	    }
 	  }
