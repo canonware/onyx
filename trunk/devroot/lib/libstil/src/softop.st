@@ -79,7 +79,7 @@ systemdict begin
 				% Success.
 				3 2 roll pop
 				% <s> <s_i> <s_sub>
-				
+
 				% Contstruct pre string <s_pre>.
 				3 1 roll dup 2 index exch 0 exch
 				% <s_sub> <s> <s_i> <s> 0 <s_i>
