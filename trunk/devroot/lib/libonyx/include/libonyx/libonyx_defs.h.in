@@ -38,6 +38,8 @@
 
 #undef CW_POSIX_FILE
 
+#undef CW_SOCKET
+
 #undef CW_MODULES
 
 /* If using gcc and inlines weren't disabled by configure, use inline

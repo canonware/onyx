@@ -24,7 +24,7 @@
 #include <sys/resource.h>
 #include <sys/stat.h>
 #include <dirent.h> /* For dirforeach operator. */
-#ifdef CW_POSIX
+#ifdef CW_SOCKET
 #include <netdb.h> /* For socket, socketpair, connect, serviceport operators. */
 #include <sys/socket.h> /* For socket and socketpair operators. */
 #ifndef CW_HAVE_SOCKLEN_T
@@ -56,7 +56,7 @@ typedef int socklen_t;
 #include "../include/libonyx/nxo_operator_l.h"
 #include "../include/libonyx/nxo_thread_l.h"
 
-#ifdef CW_POSIX
+#ifdef CW_SOCKET
 struct cw_systemdict_name_arg
 {
     cw_nxn_t nxn;
@@ -102,7 +102,7 @@ struct cw_systemdict_entry
 static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(abs),
     ENTRY(add),
-#ifdef CW_POSIX
+#ifdef CW_SOCKET
     ENTRY(accept),
 #endif
     ENTRY(adn),
@@ -115,7 +115,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(bdup),
     ENTRY(begin),
     ENTRY(bind),
-#ifdef CW_POSIX
+#ifdef CW_SOCKET
     ENTRY(bindsocket),
 #endif
     ENTRY(bpop),
@@ -143,7 +143,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #ifdef CW_THREADS
     ENTRY(condition),
 #endif
-#ifdef CW_POSIX
+#ifdef CW_SOCKET
     ENTRY(connect),
 #endif
     ENTRY(copy),
@@ -250,6 +250,8 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(length),
 #ifdef CW_POSIX
     ENTRY(link),
+#endif
+#ifdef CW_SOCKET
     ENTRY(listen),
 #endif
 #ifdef CW_REAL
@@ -298,8 +300,10 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(or),
     ENTRY(ostack),
     ENTRY(over),
-#ifdef CW_POSIX
+#ifdef CW_SOCKET
     ENTRY(peername),
+#endif
+#ifdef CW_POSIX
     ENTRY(pid),
     ENTRY(pipe),
     ENTRY(poll),
@@ -321,7 +325,11 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #ifdef CW_POSIX
     ENTRY(readlink),
     ENTRY(realtime),
+#endif
+#ifdef CW_SOCKET
     ENTRY(recv),
+#endif
+#ifdef CW_POSIX
     ENTRY(rename),
 #endif
     ENTRY(repeat),
@@ -348,9 +356,11 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(seek),
 #endif
     ENTRY(self),
-#ifdef CW_POSIX
+#ifdef CW_SOCKET
     ENTRY(send),
     ENTRY(serviceport),
+#endif
+#ifdef CW_POSIX
     ENTRY(setegid),
     ENTRY(setenv),
     ENTRY(seteuid),
@@ -366,7 +376,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(setlocking),
 #endif
     ENTRY(setnonblocking),
-#ifdef CW_POSIX
+#ifdef CW_SOCKET
     ENTRY(setsockopt),
 #endif
     ENTRY(setstderr),
@@ -393,7 +403,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(snip),
     ENTRY(snpop),
     ENTRY(snup),
-#ifdef CW_POSIX
+#ifdef CW_SOCKET
     ENTRY(socket),
     ENTRY(socketpair),
     ENTRY(sockname),
@@ -651,7 +661,7 @@ systemdict_abs(cw_nxo_t *a_thread)
     }
 }
 
-#ifdef CW_POSIX
+#ifdef CW_SOCKET
 void
 systemdict_accept(cw_nxo_t *a_thread)
 {
@@ -1016,7 +1026,7 @@ systemdict_bind(cw_nxo_t *a_thread)
     }
 }
 
-#ifdef CW_POSIX
+#ifdef CW_SOCKET
 void
 systemdict_bindsocket(cw_nxo_t *a_thread)
 {
@@ -1561,7 +1571,7 @@ systemdict_condition(cw_nxo_t *a_thread)
 }
 #endif
 
-#ifdef CW_POSIX
+#ifdef CW_SOCKET
 static cw_bool_t
 systemdict_p_sock_family(cw_nxo_t *a_thread, int a_fd, cw_bool_t a_peer,
 			 sa_family_t *r_family)
@@ -4612,7 +4622,7 @@ systemdict_link(cw_nxo_t *a_thread)
 }
 #endif
 
-#ifdef CW_POSIX
+#ifdef CW_SOCKET
 void
 systemdict_listen(cw_nxo_t *a_thread)
 {
@@ -5906,7 +5916,7 @@ systemdict_over(cw_nxo_t *a_thread)
     nxo_dup(nxo, under);
 }
 
-#ifdef CW_POSIX
+#ifdef CW_SOCKET
 static void
 systemdict_p_peername(cw_nxo_t *a_thread, cw_bool_t a_peer)
 {
@@ -7426,7 +7436,7 @@ systemdict_self(cw_nxo_t *a_thread)
     nxo_dup(thread, a_thread);
 }
 
-#ifdef CW_POSIX
+#ifdef CW_SOCKET
 void
 systemdict_send(cw_nxo_t *a_thread)
 {
@@ -7434,7 +7444,7 @@ systemdict_send(cw_nxo_t *a_thread)
 }
 #endif
 
-#ifdef CW_POSIX
+#ifdef CW_SOCKET
 void
 systemdict_serviceport(cw_nxo_t *a_thread)
 {
@@ -7747,7 +7757,7 @@ systemdict_setnonblocking(cw_nxo_t *a_thread)
     nxo_stack_npop(ostack, 2);
 }
 
-#ifdef CW_POSIX
+#ifdef CW_SOCKET
 static const struct cw_systemdict_name_arg sock_opt[] =
 {
     {NXN_SO_DEBUG, SO_DEBUG},
@@ -8635,7 +8645,7 @@ systemdict_snup(cw_nxo_t *a_thread)
     nxo_stack_npop(ostack, 2);
 }
 
-#ifdef CW_POSIX
+#ifdef CW_SOCKET
 static const struct cw_systemdict_name_arg socket_family[] =
 {
     {NXN_AF_INET, AF_INET},
@@ -8844,7 +8854,7 @@ systemdict_p_socket(cw_nxo_t *a_thread, cw_bool_t a_pair)
 }
 #endif
 
-#ifdef CW_POSIX
+#ifdef CW_SOCKET
 void
 systemdict_socket(cw_nxo_t *a_thread)
 {
@@ -8852,7 +8862,7 @@ systemdict_socket(cw_nxo_t *a_thread)
 }
 #endif
 
-#ifdef CW_POSIX
+#ifdef CW_SOCKET
 void
 systemdict_socketpair(cw_nxo_t *a_thread)
 {
@@ -8860,13 +8870,15 @@ systemdict_socketpair(cw_nxo_t *a_thread)
 }
 #endif
 
-#ifdef CW_POSIX
+#ifdef CW_SOCKET
 void
 systemdict_sockopt(cw_nxo_t *a_thread)
 {
     systemdict_p_sockopt(a_thread, FALSE);
 }
+#endif
 
+#ifdef CW_SOCKET
 void
 systemdict_sockname(cw_nxo_t *a_thread)
 {

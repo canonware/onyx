@@ -227,6 +227,25 @@ fi
 AC_SUBST(enable_posix)
 if test "x$enable_posix" = "x1" ; then
   AC_DEFINE(CW_POSIX)
+fi
+
+dnl Support sockets by default.
+AC_ARG_ENABLE(socket, [  --disable-socket        Disable socket support],
+if test "x$enable_socket" = "xyes" ; then
+  enable_socket="1"
+else
+  enable_socket="0"
+fi
+,
+enable_socket="1"
+)
+dnl Socket support requires POSIX support.
+if test "x$enable_posix" = "x0" ; then
+  enable_socket="0"
+fi
+AC_SUBST(enable_socket)
+if test "x$enable_socket" = "x1" ; then
+  AC_DEFINE(CW_SOCKET)
   AC_CHECK_TYPE(socklen_t, AC_DEFINE(CW_HAVE_SOCKLEN_T), , [
 #include <sys/socket.h>
 ])
@@ -761,6 +780,7 @@ AC_MSG_RESULT(threads       : ${enable_threads})
 AC_MSG_RESULT(real          : ${enable_real})
 AC_MSG_RESULT(posix         : ${enable_posix})
 AC_MSG_RESULT(posix-file    : ${enable_posix_file})
+AC_MSG_RESULT(socket        : ${enable_socket})
 AC_MSG_RESULT(inlines       : ${enable_inlines})
 AC_MSG_RESULT(libonyx       : ${enable_libonyx})
 AC_MSG_RESULT(modules       : ${enable_modules})

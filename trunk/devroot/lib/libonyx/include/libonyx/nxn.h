@@ -39,7 +39,7 @@ typedef enum
     NXN_SENTRY(sym_gt, ">"),
     NXN_SENTRY(sym_lb, "["),
     NXN_SENTRY(sym_rb, "]"),
-#ifdef CW_POSIX
+#ifdef CW_SOCKET
     NXN_ENTRY(AF_INET),
 #ifdef AF_INET6
     NXN_ENTRY(AF_INET6),
@@ -51,7 +51,7 @@ typedef enum
     NXN_ENTRY(AF_ROUTE),
 #endif
     NXN_ENTRY(abs),
-#ifdef CW_POSIX
+#ifdef CW_SOCKET
     NXN_ENTRY(accept),
 #endif
     NXN_ENTRY(active),
@@ -75,8 +75,10 @@ typedef enum
     NXN_ENTRY(bdup),
     NXN_ENTRY(begin),
     NXN_ENTRY(bind),
-#ifdef CW_POSIX
+#ifdef CW_SOCKET
     NXN_ENTRY(bindsocket),
+#endif
+#ifdef CW_POSIX
     NXN_ENTRY(blksize),
     NXN_ENTRY(blocks),
 #endif
@@ -108,7 +110,7 @@ typedef enum
     NXN_ENTRY(condition),
     NXN_ENTRY(conditiontype),
 #endif
-#ifdef CW_POSIX
+#ifdef CW_SOCKET
     NXN_ENTRY(connect),
 #endif
     NXN_ENTRY(copy),
@@ -270,6 +272,8 @@ typedef enum
     NXN_ENTRY(limitcheck),
 #ifdef CW_POSIX
     NXN_ENTRY(link),
+#endif
+#ifdef CW_SOCKET
     NXN_ENTRY(listen),
 #endif
 #ifdef CW_REAL
@@ -354,6 +358,8 @@ typedef enum
     NXN_ENTRY(POLLRDNORM),
     NXN_ENTRY(POLLWRNORM),
     NXN_ENTRY(POLLWRBAND),
+#endif
+#ifdef CW_SOCKET
     NXN_ENTRY(peername),
 #endif
 #ifdef CW_PTHREADS
@@ -396,8 +402,10 @@ typedef enum
 #ifdef CW_REAL
     NXN_ENTRY(realtype),
 #endif
-#ifdef CW_POSIX
+#ifdef CW_SOCKET
     NXN_ENTRY(recv),
+#endif
+#ifdef CW_POSIX
     NXN_ENTRY(rename),
 #endif
     NXN_ENTRY(repeat),
@@ -409,7 +417,7 @@ typedef enum
 #ifdef CW_REAL
     NXN_ENTRY(round),
 #endif
-#ifdef CW_POSIX
+#ifdef CW_SOCKET
     NXN_ENTRY(SO_BROADCAST),
     NXN_ENTRY(SO_DEBUG),
     NXN_ENTRY(SO_DONTROUTE),
@@ -437,8 +445,8 @@ typedef enum
     NXN_ENTRY(SOCK_SEQPACKET),
 #endif
     NXN_ENTRY(SOCK_STREAM),
-#endif
     NXN_ENTRY(SOL_SOCKET),
+#endif
     NXN_ENTRY(sadn),
     NXN_ENTRY(saup),
     NXN_ENTRY(sbdup),
@@ -454,7 +462,7 @@ typedef enum
     NXN_ENTRY(seek),
 #endif
     NXN_ENTRY(self),
-#ifdef CW_POSIX
+#ifdef CW_SOCKET
     NXN_ENTRY(send),
     NXN_ENTRY(serviceport),
 #endif
@@ -478,7 +486,7 @@ typedef enum
 #ifdef CW_PTHREADS
     NXN_ENTRY(setperiod),
 #endif
-#ifdef CW_POSIX
+#ifdef CW_SOCKET
     NXN_ENTRY(setsockopt),
 #endif
     NXN_ENTRY(setstderr),
@@ -509,7 +517,7 @@ typedef enum
     NXN_ENTRY(snip),
     NXN_ENTRY(snpop),
     NXN_ENTRY(snup),
-#ifdef CW_POSIX
+#ifdef CW_SOCKET
     NXN_ENTRY(socket),
     NXN_ENTRY(socketpair),
     NXN_ENTRY(sockname),

@@ -142,6 +142,12 @@ Optionally, pass any of the following (not a definitive list) arguments to
 	versions of libonyx, no POSIX file operations are used.  The
 	documentation does not mention the effects of this option -- UTSL.
 
+--disable-socket
+	Do not include networking socket support.  The socket support relies on
+	POSIX functionality, so this option is automatically disabled if the
+	--disable-posix option is set.  The documentation does not mention the
+	effects of this option -- UTSL.
+
 --disable-inlines
 	Do not use inline functions.  This reduces the size of binaries at the
 	expense of performance.
