@@ -1026,8 +1026,8 @@ modslate_marker_copy(void *a_data, cw_nxo_t *a_thread)
 
     /* Create a reference to this hook in order to prevent the module from being
      * prematurely unloaded. */
-    nxo_no_new(&marker->hook);
-    nxo_dup(&marker->hook, nxo_stack_get(estack));
+    nxo_no_new(&marker_copy->hook);
+    nxo_dup(&marker_copy->hook, nxo_stack_get(estack));
 
     nxo_no_new(&marker_copy->buffer_nxo);
     nxo_dup(&marker_copy->buffer_nxo, &marker->buffer_nxo);
@@ -1035,7 +1035,7 @@ modslate_marker_copy(void *a_data, cw_nxo_t *a_thread)
     buffer_p_lock(buffer);
     mkr_new(&marker_copy->mkr, &buffer->buf);
     mkr_dup(&marker_copy->mkr, &marker->mkr);
-    marker_copy->seq++;
+    marker_copy->seq = 0;
     buffer_p_unlock(buffer);
 
     /* Create a reference to the new marker; keep a reference to the original
@@ -1386,7 +1386,7 @@ modslate_marker_before_set(void *a_data, cw_nxo_t *a_thread)
 	nxo_thread_nerror(a_thread, NXN_typecheck);
 	return;
     }
-    c = (cw_uint8_t)nxo_integer_get(nxo);
+    c = (cw_uint8_t) nxo_integer_get(nxo);
 
     /* marker. */
     NXO_STACK_DOWN_GET(nxo, ostack, a_thread, nxo);
@@ -1433,7 +1433,7 @@ modslate_marker_after_set(void *a_data, cw_nxo_t *a_thread)
 	nxo_thread_nerror(a_thread, NXN_typecheck);
 	return;
     }
-    c = (cw_uint8_t)nxo_integer_get(nxo);
+    c = (cw_uint8_t) nxo_integer_get(nxo);
 
     /* marker. */
     NXO_STACK_DOWN_GET(nxo, ostack, a_thread, nxo);
@@ -1609,9 +1609,13 @@ modslate_marker_range_get(void *a_data, cw_nxo_t *a_thread)
     nxo_string_new(nxo, nxo_thread_nx_get(a_thread),
 		   nxo_thread_currentlocking(a_thread), str_len);
 
-    sbufv.data = nxo_string_get(nxo);
-    sbufv.len = str_len;
-    bufv_copy(&sbufv, 1, bufv, bufvcnt, 0);
+    /* Only copy if bufv isn't NULL.  The string is zero length in that case. */
+    if (bufv != NULL)
+    {
+	sbufv.data = nxo_string_get(nxo);
+	sbufv.len = str_len;
+	bufv_copy(&sbufv, 1, bufv, bufvcnt, 0);
+    }
 
     buffer_p_unlock(buffer);
 
@@ -1673,9 +1677,13 @@ modslate_marker_range_cut(void *a_data, cw_nxo_t *a_thread)
     nxo_string_new(nxo, nxo_thread_nx_get(a_thread),
 		   nxo_thread_currentlocking(a_thread), str_len);
 
-    sbufv.data = nxo_string_get(nxo);
-    sbufv.len = str_len;
-    bufv_copy(&sbufv, 1, bufv, bufvcnt, 0);
+    /* Only copy if bufv isn't NULL.  The string is zero length in that case. */
+    if (bufv != NULL)
+    {
+	sbufv.data = nxo_string_get(nxo);
+	sbufv.len = str_len;
+	bufv_copy(&sbufv, 1, bufv, bufvcnt, 0);
+    }
 
     /* Remove the buffer range. */
     mkr_remove(&marker_a->mkr, &marker_b->mkr);

@@ -27,14 +27,14 @@ userdict begin
 
 # - hs -
 /hs {
-	# ANSI home cursor sequence: `\x1b[H'
-	`\x1b[H' print
+	# ANSI home cursor sequence: `\e[H'
+	`\e[H' print
 } def
 
 # - cs -
 /cs {
-	# ANSI clear screen sequence: `\x1b[2J'
-	`\x1b[2J' print
+	# ANSI clear screen sequence: `\e[2J'
+	`\e[2J' print
 	hs
 } def
 
@@ -46,7 +46,7 @@ userdict begin
 # - status_line -
 /status_line {
 	# Reverse video.
-	`\x1b[7m' print
+	`\e[7m' print
 	
 	# History.
 	scratch buffer_undoable {
@@ -85,7 +85,7 @@ userdict begin
 	` c' print
 	bpoint marker_position cvs print
 	`/' print
-	scratch marker 0 /SEEK_END marker_seek cvs print
+	scratch marker 0 /SEEK_EOB marker_seek cvs print
 
 	# Mark.
 	` m' print
@@ -97,7 +97,7 @@ userdict begin
 
 	`\r\n' print
 	# Reset attributes.
-	`\x1b[m' print
+	`\e[m' print
 
 #	`-------------------------------------------------------------------------------' print
 #	`\r\n' print
@@ -106,7 +106,7 @@ userdict begin
 # #=buffer= b2s #string
 /b2s {
 	marker dup marker_copy
-	dup 0 /SEEK_END marker_seek pop
+	dup 0 /SEEK_EOB marker_seek pop
 	marker_range_get
 } def
 
@@ -131,7 +131,7 @@ userdict begin
 
 	hs
 	`\r\n' print
-	bob dup 0 /SEEK_SET marker_seek pop bpoint marker_range_get
+	bob dup 0 /SEEK_REL marker_seek pop bpoint marker_range_get
 #	1 sprint
 	srender flush
 } def
@@ -161,7 +161,7 @@ userdict begin
 		marker_range_cut pop
 #		`Cut -->' exch cat `<--\n' cat stderr exch write
 	}
-	`' {
+	`\cd' {
 		bmark dup 0 bpoint marker_seek pop
 		bpoint dup 1 marker_seek pop
 		marker_range_cut pop
@@ -170,24 +170,24 @@ userdict begin
 		`\n' insert_string
 	}
 	# C-q
-	`\x11' {
+	`\cq' {
 		`\r\n' print gcdict /stats get eval 2 sprint flush
 		quit
 	}
 	# C-u
-	`\x15' {
+	`\cu' {
 		bpoint buffer_undo
 	}
 	# C-r
-	`\x12' {
+	`\cr' {
 		bpoint buffer_redo
 	}
 	# C-b
-	`\x02' {
+	`\cb' {
 		bpoint -1 marker_seek pop
 	}
 	# C-f
-	`\x06' {
+	`\cf' {
 		bpoint 1 marker_seek pop
 	}
 	# C-space
@@ -195,26 +195,26 @@ userdict begin
 		/bmark bpoint marker_copy def
 	}
 	# C-w
-	`' {
+	`\cw' {
 		scratch bpoint buffer_history_startgroup
 		bmark bpoint marker_range_cut pop
 		scratch buffer_history_endgroup
 	}
 	# C-a
-	`' {
+	`\ca' {
 		bpoint -1 marker_seekline
 	}
 	# C-e
-	`' {
+	`\ce' {
 		bpoint 1 marker_seekline
 	}
 	# C-y
-	`' {
+	`\cy' {
 		scratch dup buffer_history_active
 		not buffer_history_setactive
 	}
 	# C-c
-	`\x03' {
+	`\cc' {
 		
 		quit
 	}
@@ -245,7 +245,7 @@ scratch true buffer_history_setactive
 stdin 0 setiobuf
 {
 	redisplay
-#	`\x1b[H\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\r\n' print gcdict /stats get eval 2 sprints print flush
+#	`\e[H\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\r\n' print gcdict /stats get eval 2 sprints print flush
 	getc
 	interpc
 } loop

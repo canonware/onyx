@@ -260,6 +260,9 @@
 
 #include "../include/modslate.h"
 
+/* XXX */
+/* #define NOT_YET */
+
 /* Prototypes. */
 /* XXX */
 static cw_sint32_t
@@ -434,7 +437,12 @@ bufp_p_mkrs_ppos_adjust(cw_bufp_t *a_bufp, cw_sint32_t a_adjust,
     cw_assert(a_beg_ppos < a_end_ppos);
 
     /* Find the first affected mkr. */
+    key.bufp = a_bufp;
     key.ppos = a_beg_ppos;
+#ifdef CW_DBG
+    key.magic = CW_MKR_MAGIC;
+#endif
+
     rb_nsearch(&a_bufp->mtree, &key, mkr_p_comp, cw_mkr_t, mnode, mkr);
 
     for (;
@@ -460,6 +468,10 @@ bufp_p_mkrs_pline_adjust(cw_bufp_t *a_bufp, cw_sint32_t a_adjust,
 
     /* Find the first affected mkr. */
     key.pline = a_beg_pline;
+#ifdef CW_DBG
+    key.magic = CW_MKR_MAGIC;
+#endif
+
     rb_nsearch(&a_bufp->mtree, &key, mkr_p_line_comp, cw_mkr_t, mnode, mkr);
 
     for (;
@@ -539,6 +551,8 @@ bufp_p_new(cw_buf_t *a_buf)
     retval = (cw_bufp_t *) cw_opaque_alloc(a_buf->alloc, a_buf->arg,
 					   sizeof(cw_bufp_t));
 
+    retval->buf = a_buf;
+
     /* Don't bother initializing bob_relative, bpos, or line, since they are
      * explicitly set later. */
 
@@ -606,6 +620,7 @@ bufp_p_delete(cw_bufp_t *a_bufp)
 {
     cw_check_ptr(a_bufp);
     cw_dassert(a_bufp->magic == CW_BUFP_MAGIC);
+#ifdef NOT_YET
 #ifdef CW_DBG
     {
 	cw_mkr_t *first;
@@ -613,8 +628,9 @@ bufp_p_delete(cw_bufp_t *a_bufp)
 	cw_assert(first == NULL);
     }
 #endif
+#endif
     cw_assert(ql_first(&a_bufp->mlist) == NULL);
-    cw_assert(qr_next(a_bufp, plink) == NULL);
+    cw_assert(qr_next(a_bufp, plink) == a_bufp);
 
     cw_opaque_dealloc(a_bufp->buf->dealloc, a_bufp->buf->arg, a_bufp->b,
 		      CW_BUFP_SIZE);
@@ -701,9 +717,18 @@ buf_p_bufp_at_bpos(cw_buf_t *a_buf, cw_uint64_t a_bpos)
 
     /* Initialize enough of key for searching. */
     key.bpos = a_bpos;
+#ifdef CW_DBG
+    key.magic = CW_BUFP_MAGIC;
+#endif
 
     rb_search(&a_buf->ptree, &key, buf_p_bufp_at_bpos_comp, pnode, retval);
-    cw_check_ptr(retval);
+    if (retval == rb_tree_nil(&a_buf->ptree))
+    {
+	/* The only time this can happen is when searching for a bpos past EOB,
+	 * or when searching for bpos 1 in an empty buffer. */
+	cw_assert(a_bpos <= a_buf->len + 1);
+	retval = ql_first(&a_buf->plist);
+    }
 
     return retval;
 }
@@ -739,9 +764,18 @@ buf_p_bpos_before_lf(cw_buf_t *a_buf, cw_uint64_t a_line, cw_bufp_t **r_bufp)
 
     /* Initialize enough of key for searching. */
     key.line = a_line;
+#ifdef CW_DBG
+    key.magic = CW_BUFP_MAGIC;
+#endif
 
     rb_search(&a_buf->ptree, &key, buf_p_bpos_lf_comp, pnode, bufp);
-    cw_check_ptr(bufp);
+    if (bufp == rb_tree_nil(&a_buf->ptree))
+    {
+	/* The only time this can happen is when searching for a bpos past EOB,
+	 * or when searching for bpos 1 in an empty buffer. */
+	cw_assert(a_line <= a_buf->nlines);
+	bufp = ql_first(&a_buf->plist);
+    }
 
     bufp_line = bufp_p_line(bufp);
 
@@ -1090,6 +1124,7 @@ buf_delete(cw_buf_t *a_buf)
 
     cw_check_ptr(a_buf);
     cw_dassert(a_buf->magic == CW_BUF_MAGIC);
+#ifdef NOT_YET
 #ifdef CW_DBG
     {
 	cw_ext_t *first;
@@ -1106,6 +1141,7 @@ buf_delete(cw_buf_t *a_buf)
     }
 #endif
     cw_assert(ql_first(&a_buf->rlist) == NULL);
+#endif
 
     /* Delete history if it exists. */
     if (a_buf->hist != NULL)
@@ -1371,6 +1407,8 @@ mkr_p_comp(cw_mkr_t *a_a, cw_mkr_t *a_b)
     else
     {
 	/* XXX Does this code ever get used anywhere? */
+	/* XXX If not, remove bufp initialization of temp keys before calling
+	 * this function. */
 	if (bufp_p_bpos(a_a->bufp) < bufp_p_bpos(a_b->bufp))
 	{
 	    retval = -1;
@@ -1483,7 +1521,7 @@ mkr_p_simple_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
     bufp_p_gap_move(bufp, a_mkr->ppos);
 
     /* Insert. */
-    bufp_p_simple_insert(bufp, a_bufv, a_bufvcnt, a_count);
+    nlines = bufp_p_simple_insert(bufp, a_bufv, a_bufvcnt, a_count);
 
     /* Find the first mkr that is at the same ppos as a_mkr.  This may be
      * a_mkr. */
@@ -1525,6 +1563,7 @@ mkr_p_simple_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
 		 mkr != NULL && mkr->ppos == a_mkr->ppos;
 		 mkr = ql_next(&bufp->mlist, mkr, mlink))
 	    {
+		fprintf(stderr, "%s:%d:%s(): from: %llu --> %llu\n", __FILE__, __LINE__, __FUNCTION__, mkr->pline, mkr->pline + nlines);
 		mkr->pline += nlines;
 	    }
 	}
@@ -1544,6 +1583,7 @@ mkr_p_simple_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
 	     mkr != NULL;
 	     mkr = ql_next(&bufp->mlist, mkr, mlink))
 	{
+	    fprintf(stderr, "%s:%d:%s(): from: %llu --> %llu\n", __FILE__, __LINE__, __FUNCTION__, mkr->pline, mkr->pline + nlines);
 	    mkr->pline += nlines;
 	}
     }
@@ -1917,11 +1957,11 @@ mkr_new(cw_mkr_t *a_mkr, cw_buf_t *a_buf)
     rb_node_new(&bufp->mtree, a_mkr, mnode);
     ql_elm_new(a_mkr, mlink);
 
-    mkr_p_insert(a_mkr);
-
 #ifdef CW_DBG
     a_mkr->magic = CW_MKR_MAGIC;
 #endif
+
+    mkr_p_insert(a_mkr);
 }
 
 void
@@ -1931,6 +1971,7 @@ mkr_dup(cw_mkr_t *a_to, const cw_mkr_t *a_from)
     cw_dassert(a_to->magic == CW_MKR_MAGIC);
     cw_check_ptr(a_from);
     cw_dassert(a_from->magic == CW_MKR_MAGIC);
+    cw_assert(a_to != a_from);
     cw_assert(a_to->bufp->buf == a_from->bufp->buf);
 
     mkr_p_remove(a_to);
@@ -1967,7 +2008,7 @@ mkr_buf(const cw_mkr_t *a_mkr)
 cw_uint64_t
 mkr_line_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence)
 {
-    cw_uint64_t bpos;
+    cw_uint64_t bpos, line;
     cw_buf_t *buf;
     cw_bufp_t *bufp = NULL;
 
@@ -1983,11 +2024,13 @@ mkr_line_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence)
 	    if (a_offset <= 0)
 	    {
 		/* Attempt to move to or before BOB.  Move to BOB. */
+		line = 1;
 		bpos = 1;
 	    }
 	    else if (a_offset >= buf->nlines)
 	    {
 		/* Attempt to move to or past EOB.  Move to EOB. */
+		line = buf->nlines;
 		bpos = buf->len + 1;
 	    }
 	    else
@@ -1999,7 +2042,8 @@ mkr_line_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence)
 		 *   hello\ngoodbye\nyadda\nblah
 		 *                /\
 		 */
-		bpos = buf_p_bpos_before_lf(buf, a_offset, &bufp);
+		line = a_offset;
+		bpos = buf_p_bpos_before_lf(buf, line, &bufp);
 	    }
 	    break;
 	}
@@ -2010,6 +2054,7 @@ mkr_line_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence)
 		if (mkr_p_line(a_mkr) + a_offset > buf->nlines)
 		{
 		    /* Attempt to move to or after EOB.  Move to EOB. */
+		    line = buf->nlines;
 		    bpos = buf->len + 1;
 		}
 		else
@@ -2022,10 +2067,8 @@ mkr_line_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence)
 		     *   hello\ngoodbye\nyadda\nblah
 		     *                       /\
 		     */
-		    bpos = buf_p_bpos_before_lf(buf,
-						mkr_p_line(a_mkr) - 1
-						+ a_offset,
-						&bufp);
+		    line = mkr_p_line(a_mkr) + a_offset - 1;
+		    bpos = buf_p_bpos_before_lf(buf, line, &bufp);
 		}
 	    }
 	    else if (a_offset < 0)
@@ -2033,6 +2076,7 @@ mkr_line_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence)
 		if (-a_offset >= mkr_p_line(a_mkr))
 		{
 		    /* Attempt to move to or before BOB.  Move to BOB. */
+		    line = 1;
 		    bpos = 1;
 		}
 		else
@@ -2045,14 +2089,14 @@ mkr_line_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence)
 		     *   hello\ngoodbye\nyadda\nblah
 		     *         /\
 		     */
-		    bpos = buf_p_bpos_after_lf(buf,
-					       mkr_p_line(a_mkr) - a_offset + 1,
-					       &bufp);
+		    line = mkr_p_line(a_mkr) + a_offset + 1;
+		    bpos = buf_p_bpos_after_lf(buf, line, &bufp);
 		}
 	    }
 	    else
 	    {
 		/* Do nothing. */
+		line = mkr_p_line(a_mkr);
 		bpos = mkr_p_bpos(a_mkr);
 		goto RETURN;
 	    }
@@ -2063,11 +2107,13 @@ mkr_line_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence)
 	    if (a_offset >= 0)
 	    {
 		/* Attempt to move to or after EOB.  Move to EOB. */
+		line = buf->nlines;
 		bpos = buf->len + 1;
 	    }
 	    else if (-a_offset >= buf->nlines)
 	    {
 		/* Attempt to move to or past BOB.  Move to BOB. */
+		line = 1;
 		bpos = 1;
 	    }
 	    else
@@ -2079,8 +2125,8 @@ mkr_line_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence)
 		 *   hello\ngoodbye\nyadda\nblah
 		 *                  /\
 		 */
-		bpos = buf_p_bpos_after_lf(buf, buf->nlines + a_offset + 1,
-					   &bufp);
+		line = buf->nlines + a_offset + 1;
+		bpos = buf_p_bpos_after_lf(buf, line, &bufp);
 	    }
 	    break;
 	}
@@ -2102,7 +2148,12 @@ mkr_line_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence)
     /* Update the internal state of a_mkr. */
     a_mkr->bufp = bufp;
     a_mkr->ppos = bpos - bufp_p_bpos(bufp);
-    a_mkr->pline = 1 + a_offset - bufp_p_line(bufp);
+    fprintf(stderr, "%s:%d:%s(): pline %llu --> %llu (%llu - %llu)\n",
+	    __FILE__, __LINE__, __FUNCTION__,
+	    a_mkr->pline,
+	    line - bufp_p_line(bufp),
+	    line, bufp_p_line(bufp));
+    a_mkr->pline = line - bufp_p_line(bufp);
 
     /* Insert a_mkr into the bufp's tree and list. */
     mkr_p_insert(a_mkr);
