@@ -22,7 +22,7 @@
 
 /* Include files that _are_ installed. */
 {
-  local incs = libstash.h libstash_incs.h arena.h bhp.h buf.h cnd.h dbg.h
+  local incs = libstash.h libstash_incs.h arena.h bhp.h buf.h ch.h cnd.h dbg.h
                list.h mem.h mq.h mtx.h oh.h out.h pezz.h res.h ring.h rwl.h
                sem.h thd.h treen.h tsd.h;
   incs = [fromto % [srcdir]/lib/c/libstash/include/libstash/% [incs]];
@@ -41,7 +41,7 @@
 }
 
 /* Source files. */
-LIBSTASH_SRCS = libstash.c arena.c bhp.c buf.c cnd.c dbg.c list.c mem.c
+LIBSTASH_SRCS = libstash.c arena.c bhp.c buf.c ch.c cnd.c dbg.c list.c mem.c
                 mq.c mtx.c oh.c out.c pezz.c res.c ring.c rwl.c sem.c thd.c
                 treen.c tsd.c;
 LIBSTASH_SRCS = [fromto % [srcdir]/lib/c/libstash/src/% [LIBSTASH_SRCS]];

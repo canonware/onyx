@@ -1,3 +1,7 @@
+2000-02-08  Jason Evans  <jasone@canonware.com>
+
+	* : Add the ch (chained hashing) class.
+
 2000-02-05  Jason Evans  <jasone@canonware.com>
 
 	* : Remove the jtl class.
