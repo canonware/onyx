@@ -32,11 +32,10 @@
 #
 # This script does all the necessary work to create a snapshot release of a 
 # source tree that is under cvs control.  It also does string substitution 
-# for certain tags, such as <Copyright = "Author">, <License>, and <Version>.
+# for certain tags, such as <Copyright = Author>, <License>, and <Version>.
 #
 #############################################################################
 
-use Cwd; # For pwd().
 use File::Find; # For find().
 use FileHandle; # For file manipulation.
 use Getopt::Long;
