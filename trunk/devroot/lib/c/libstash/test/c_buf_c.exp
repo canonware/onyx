@@ -1,0 +1,5 @@
+Test begin
+246016 bytes of data in buf_a (various sized bufc's)
+262144 bytes of data in buf_b (4kB bufc's)
+262144 bytes of data in buf_c (16B bufc's)
+Test end
