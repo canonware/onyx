@@ -35,7 +35,7 @@ systemdict begin
 } def
 
 % - product <string>
-/product `Canonware onyx' def
+/product `Canonware Onyx' def
 
 /pstack {
 	ostack {
