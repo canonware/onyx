@@ -111,7 +111,7 @@ struct cw_nxo_s
 	struct
 	{
 	    cw_op_t *f;
-	} operator;
+	} oper;
 	cw_nxoe_t *nxoe;
     } o;
 };

@@ -56,7 +56,7 @@ nxo_compare(const cw_nxo_t *a_a, const cw_nxo_t *a_b)
 	case NXOT_OPERATOR:
 	{
 	    if (nxo_type_get(a_b) == NXOT_OPERATOR
-		&& a_a->o.operator.f == a_b->o.operator.f)
+		&& a_a->o.oper.f == a_b->o.oper.f)
 	    {
 		retval = 0;
 	    }
