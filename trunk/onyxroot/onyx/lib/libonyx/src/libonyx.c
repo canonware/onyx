@@ -13,7 +13,7 @@
 
 #include "../include/libonyx/libonyx.h"
 
-/*  #define _CW_MEM_DBG */
+/* #define _CW_MEM_DBG */
 
 #ifdef _CW_THREADS
 void	thd_l_init(void);

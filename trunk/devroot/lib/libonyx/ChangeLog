@@ -1,3 +1,9 @@
+2001-11-17  Jason Evans  <jasone@canonware.com>
+
+	* src/mem.c: Allocate copies of the filenames that are passed in
+	for debugging, so that leaks in dlopen()ed code that has been
+	unloaded won't cause the leak reporting to segfault.
+
 2001-11-13  Jason Evans  <jasone@canonware.com>
 
 	* src/nxa.c (nxa_p_sweep): Fix sweep iteration problems when

@@ -34,7 +34,7 @@
 #ifdef _CW_MEM_ERROR
 struct cw_mem_item_s {
 	size_t		size;
-        const char	*filename;
+        char		*filename;
 	cw_uint32_t	line_num;
 	cw_chi_t	chi;		/* For internal ch linkage. */
 };
@@ -114,6 +114,7 @@ mem_delete(cw_mem_t *a_mem)
 			    "(allocated at %s:%u)\n", __FUNCTION__, a_mem, addr,
 			    allocation->size, allocation->filename,
 			    allocation->line_num);
+			mem_free(a_mem->mem, allocation->filename);
 			mem_free(a_mem->mem, allocation);
 		}
 		dch_delete(a_mem->addr_hash);
@@ -169,7 +170,10 @@ mem_malloc_e(cw_mem_t *a_mem, size_t a_size, const char *a_filename,
 			memset(retval, 0xa5, a_size);
 
 			allocation->size = a_size;
-			allocation->filename = a_filename;
+			allocation->filename = mem_malloc(a_mem->mem,
+			    strlen(a_filename) + 1);
+			memcpy(allocation->filename, a_filename,
+			    strlen(a_filename) + 1);
 			allocation->line_num = a_line_num;
 
 #ifdef _CW_MEM_VERBOSE
@@ -234,7 +238,10 @@ mem_calloc_e(cw_mem_t *a_mem, size_t a_number, size_t a_size, const char
 			 */
 
 			allocation->size = a_number * a_size;
-			allocation->filename = a_filename;
+			allocation->filename = mem_malloc(a_mem->mem,
+			    strlen(a_filename) + 1);
+			memcpy(allocation->filename, a_filename,
+			    strlen(a_filename) + 1);
 			allocation->line_num = a_line_num;
 
 #ifdef _CW_MEM_VERBOSE
@@ -288,14 +295,17 @@ mem_realloc_e(cw_mem_t *a_mem, void *a_ptr, size_t a_size, size_t a_old_size,
 			fprintf(stderr, "%s(%p): %p not allocated\n",
 			    __FUNCTION__, a_mem, a_ptr);
 		} else {
-			const char	*old_filename;
+			char		*old_filename;
 			size_t		old_size;
 			cw_uint32_t	old_line_num;
 
 			old_filename = allocation->filename;
 			old_size = allocation->size;
 			old_line_num = allocation->line_num;
-			allocation->filename = a_filename;
+			allocation->filename = mem_malloc(a_mem->mem,
+			    strlen(a_filename) + 1);
+			memcpy(allocation->filename, a_filename,
+			    strlen(a_filename) + 1);
 			allocation->size = a_size;
 			allocation->line_num = a_line_num;
 
@@ -319,6 +329,7 @@ mem_realloc_e(cw_mem_t *a_mem, void *a_ptr, size_t a_size, size_t a_old_size,
 			    a_filename, a_line_num, old_size, old_filename,
 			    old_line_num);
 #endif
+			mem_free(a_mem->mem, old_filename);
 		}
 	}
 #ifdef _CW_THREADS
@@ -366,6 +377,7 @@ mem_free_e(cw_mem_t *a_mem, void *a_ptr, size_t a_size, const char *a_filename,
 			    allocation->line_num);
 #endif
 			memset(a_ptr, 0x5a, allocation->size);
+			mem_free(a_mem->mem, allocation->filename);
 			mem_free(a_mem->mem, allocation);
 		}
 	}
