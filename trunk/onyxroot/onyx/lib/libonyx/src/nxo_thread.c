@@ -84,7 +84,7 @@ nxo_threade_nxn(cw_nxo_threade_t a_threade)
 #define _CW_NXO_THREAD_NEWLINE()					\
 		newline = 1
 
-static void	nxo_p_thread_join(cw_nxoe_thread_t *a_nxoe);
+static void	*nxo_p_thread_entry(void *a_arg);
 static cw_uint32_t nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread,
     cw_nxo_threadp_t *a_threadp, cw_bool_t a_token, const cw_uint8_t *a_str,
     cw_uint32_t a_len);
@@ -312,14 +312,6 @@ nxoe_l_thread_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 		_cw_free(thread->tok_str);
 	}
 
-	if (thread->entry != NULL) {
-		/*
-		 * The thread wasn't joined or detached.  This will never happen
-		 * except at interpreter shutdown, so we can safely join the
-		 * thread to clean things up.
-		 */
-		nxo_p_thread_join(thread);
-	}
 	_CW_NXOE_FREE(thread);
 }
 
@@ -419,49 +411,41 @@ nxo_thread_start(cw_nxo_t *a_nxo)
 void
 nxo_thread_exit(cw_nxo_t *a_nxo)
 {
-	cw_nxoe_thread_t	*thread;
-
-	_cw_check_ptr(a_nxo);
-	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
-
-	thread = (cw_nxoe_thread_t *)a_nxo->o.nxoe;
-	_cw_dassert(thread->nxoe.magic == _CW_NXOE_MAGIC);
-	_cw_assert(thread->nxoe.type == NXOT_THREAD);
-
-	nx_l_thread_remove(thread->nx, &thread->self);
+	nx_l_thread_remove(nxo_thread_nx_get(a_nxo), a_nxo);
 }
 
 static void *
 nxo_p_thread_entry(void *a_arg)
 {
-	cw_nxo_thread_entry_t	*arg = (cw_nxo_thread_entry_t *)a_arg;
+	cw_nxoe_thread_t	*thread = (cw_nxoe_thread_t *)a_arg;
+
+	_cw_dassert(thread->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_assert(thread->nxoe.type == NXOT_THREAD);
 
 	/* Run. */
-	nxo_thread_start(arg->thread);
+	nxo_thread_start(&thread->self);
 
 	/* Wait to be joined or detated, if not already so. */
-	mtx_lock(&arg->lock);
-	arg->done = TRUE;
-	while (arg->detached == FALSE && arg->joined == FALSE) {
-		cnd_wait(&arg->done_cnd, &arg->lock);
+	mtx_lock(&thread->lock);
+	thread->done = TRUE;
+	while (thread->detached == FALSE && thread->joined == FALSE) {
+		cnd_wait(&thread->done_cnd, &thread->lock);
 	}
-	if (arg->detached) {
-		mtx_unlock(&arg->lock);
+	if (thread->detached) {
+		mtx_unlock(&thread->lock);
 
 		/* Clean up. */
-		cnd_delete(&arg->join_cnd);
-		cnd_delete(&arg->done_cnd);
-		mtx_delete(&arg->lock);
-		nx_l_thread_remove(nxo_thread_nx_get(arg->thread),
-		    arg->thread);
-		thd_delete(arg->thd);
-		_cw_free(arg);
-	} else if (arg->joined) {
+		cnd_delete(&thread->join_cnd);
+		cnd_delete(&thread->done_cnd);
+		mtx_delete(&thread->lock);
+		nx_l_thread_remove(thread->nx, &thread->self);
+		thd_delete(thread->thd);
+	} else if (thread->joined) {
 		/* Wake the joiner back up. */
-		cnd_signal(&arg->join_cnd);
+		cnd_signal(&thread->join_cnd);
 		/* We're done.  The joiner will clean up. */
-		arg->gone = TRUE;
-		mtx_unlock(&arg->lock);
+		thread->gone = TRUE;
+		mtx_unlock(&thread->lock);
 	} else
 		_cw_not_reached();
 
@@ -480,20 +464,15 @@ nxo_thread_thread(cw_nxo_t *a_nxo)
 	_cw_dassert(thread->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(thread->nxoe.type == NXOT_THREAD);
 
-	thread->entry = (cw_nxo_thread_entry_t
-	    *)_cw_malloc(sizeof(cw_nxo_thread_entry_t));
+	mtx_new(&thread->lock);
+	cnd_new(&thread->done_cnd);
+	cnd_new(&thread->join_cnd);
+	thread->done = FALSE;
+	thread->gone = FALSE;
+	thread->detached = FALSE;
+	thread->joined = FALSE;
 
-	thread->entry->thread = a_nxo;
-	mtx_new(&thread->entry->lock);
-	cnd_new(&thread->entry->done_cnd);
-	cnd_new(&thread->entry->join_cnd);
-	thread->entry->done = FALSE;
-	thread->entry->gone = FALSE;
-	thread->entry->detached = FALSE;
-	thread->entry->joined = FALSE;
-
-	thread->entry->thd = thd_new(nxo_p_thread_entry, (void
-	    *)thread->entry, TRUE);
+	thread->thd = thd_new(nxo_p_thread_entry, (void *)thread, TRUE);
 }
 
 void
@@ -508,38 +487,13 @@ nxo_thread_detach(cw_nxo_t *a_nxo)
 	_cw_dassert(thread->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(thread->nxoe.type == NXOT_THREAD);
 
-	_cw_check_ptr(thread->entry);
-
-	mtx_lock(&thread->entry->lock);
-	thread->entry->detached = TRUE;
-	if (thread->entry->done) {
+	mtx_lock(&thread->lock);
+	thread->detached = TRUE;
+	if (thread->done) {
 		/* The thread is already done, so wake it back up. */
-		cnd_signal(&thread->entry->done_cnd);
+		cnd_signal(&thread->done_cnd);
 	}
-	mtx_unlock(&thread->entry->lock);
-}
-
-static void
-nxo_p_thread_join(cw_nxoe_thread_t *a_nxoe)
-{
-	mtx_lock(&a_nxoe->entry->lock);
-	a_nxoe->entry->joined = TRUE;
-	if (a_nxoe->entry->done) {
-		/* The thread is already done, so wake it back up. */
-		cnd_signal(&a_nxoe->entry->done_cnd);
-	}
-	/* Wait for the thread to totally go away. */
-	while (a_nxoe->entry->gone == FALSE)
-		cnd_wait(&a_nxoe->entry->join_cnd, &a_nxoe->entry->lock);
-	mtx_unlock(&a_nxoe->entry->lock);
-
-	/* Clean up. */
-	cnd_delete(&a_nxoe->entry->join_cnd);
-	cnd_delete(&a_nxoe->entry->done_cnd);
-	mtx_delete(&a_nxoe->entry->lock);
-	thd_join(a_nxoe->entry->thd);
-	_cw_free(a_nxoe->entry);
-	a_nxoe->entry = NULL;
+	mtx_unlock(&thread->lock);
 }
 
 void
@@ -554,9 +508,23 @@ nxo_thread_join(cw_nxo_t *a_nxo)
 	_cw_dassert(thread->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(thread->nxoe.type == NXOT_THREAD);
 
-	_cw_check_ptr(thread->entry);
+	mtx_lock(&thread->lock);
+	thread->joined = TRUE;
+	if (thread->done) {
+		/* The thread is already done, so wake it back up. */
+		cnd_signal(&thread->done_cnd);
+	}
+	/* Wait for the thread to totally go away. */
+	while (thread->gone == FALSE)
+		cnd_wait(&thread->join_cnd, &thread->lock);
+	mtx_unlock(&thread->lock);
 
-	nxo_p_thread_join(thread);
+	/* Clean up. */
+	cnd_delete(&thread->join_cnd);
+	cnd_delete(&thread->done_cnd);
+	mtx_delete(&thread->lock);
+	thd_join(thread->thd);
+
 	nx_l_thread_remove(nxo_thread_nx_get(a_nxo), a_nxo);
 }
 

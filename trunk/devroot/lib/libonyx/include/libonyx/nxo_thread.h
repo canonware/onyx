@@ -15,21 +15,8 @@
 #define	_CW_NXO_THREAD_BUFFER_SIZE	256
 #endif
 
-typedef struct cw_nxo_thread_entry_s cw_nxo_thread_entry_t;
 typedef struct cw_nxo_threadp_s cw_nxo_threadp_t;
 typedef struct cw_nxoe_thread_s cw_nxoe_thread_t;
-
-struct cw_nxo_thread_entry_s {
-	cw_nxo_t	*thread;
-	cw_thd_t	*thd;
-	cw_mtx_t	lock;
-	cw_cnd_t	done_cnd;
-	cw_cnd_t	join_cnd;
-	cw_bool_t	done:1;
-	cw_bool_t	gone:1;
-	cw_bool_t	detached:1;
-	cw_bool_t	joined:1;
-};
 
 typedef struct cw_nxoe_threadts_s cw_nxoe_threadts_t;
 typedef enum {
@@ -77,7 +64,14 @@ struct cw_nxoe_thread_s {
 	 * Used by nxo_thread_thread(), nxo_thread_detach(), and
 	 * nxo_thread_join().
 	 */
-	cw_nxo_thread_entry_t *entry;
+	cw_thd_t	*thd;
+	cw_mtx_t	lock;
+	cw_cnd_t	done_cnd;
+	cw_cnd_t	join_cnd;
+	cw_bool_t	done:1;
+	cw_bool_t	gone:1;
+	cw_bool_t	detached:1;
+	cw_bool_t	joined:1;
 
 	/*
 	 * Used for remembering the current state of reference iteration.
