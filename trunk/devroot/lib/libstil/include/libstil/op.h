@@ -9,6 +9,8 @@
  *
  ****************************************************************************/
 
+typedef void cw_op_t (cw_stilt_t *);
+
 void	op_abort(cw_stilt_t *a_stilt);
 void	op_abs(cw_stilt_t *a_stilt);
 void	op_add(cw_stilt_t *a_stilt);

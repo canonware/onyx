@@ -137,7 +137,7 @@ struct cw_stilo_s {
 };
 
 /*
- * The ... arg is only used for array and dict construction.
+ * The ... arg is only used for array, dict, and string construction.
  */
 void		stilo_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilot_t
     a_type, ...);
@@ -176,13 +176,14 @@ void		stilo_array_set(cw_stilo_t *a_stilo, cw_uint32_t a_offset,
 /*
  * dict.
  */
-cw_bool_t	stilo_dict_def(cw_stilo_t *a_stilo, cw_stilo_t *a_key,
+/* Destroys a_key and a_val. */
+void		stilo_dict_def(cw_stilo_t *a_stilo, cw_stilo_t *a_key,
     cw_stilo_t *a_val);
-cw_bool_t	stilo_dict_undef(cw_stilo_t *a_stilo, cw_stilo_t *a_key);
-cw_stilo_t	*stilo_dict_lookup(cw_stilo_t *a_stilo, cw_stilo_t *a_key);
-cw_bool_t	stilo_dict_copy(cw_stilo_t *a_from, cw_stilo_t *a_to);
+void		stilo_dict_undef(cw_stilo_t *a_stilo, const cw_stilo_t *a_key);
+const cw_stilo_t *stilo_dict_lookup(cw_stilo_t *a_stilo, const cw_stilo_t
+    *a_key);
 cw_uint32_t	stilo_dict_count(cw_stilo_t *a_stilo);
-cw_stilo_t	*stilo_dict_iterate(cw_stilo_t *a_stilo);
+const cw_stilo_t *stilo_dict_iterate(cw_stilo_t *a_stilo);
 
 /*
  * string.
