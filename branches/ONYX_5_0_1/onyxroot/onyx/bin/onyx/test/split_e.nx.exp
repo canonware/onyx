@@ -1,0 +1,3 @@
+Test begin
+Error $stackunderflow
+ostack: (`pattern' -dict- 1)
