@@ -165,14 +165,9 @@ stils_pop(cw_stils_t *a_stils, cw_stilt_t *a_stilt, cw_uint32_t a_count)
 	if (a_count > a_stils->count)
 		xep_throw(_CW_XEPV_STACKUNDERFLOW);
 
-	/*
-	 * Get a pointer to what will be the new stack top, and delete the
-	 * stilo's on the way down.
-	 */
-	for (i = 0, stilso = a_stils->stack; i < a_count; i++) {
-		stilo_delete(&stilso->stilo, a_stilt);
+	/* Get a pointer to what will be the new stack top. */
+	for (i = 0, stilso = a_stils->stack; i < a_count; i++)
 		stilso = qr_next(stilso, link);
-	}
 
 	if (a_count != a_stils->count) {
 		/*

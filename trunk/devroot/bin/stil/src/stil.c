@@ -51,7 +51,7 @@ main(int argc, char **argv)
 	if (isatty(0)) {
 		cw_uint8_t	code[] =
 		    "product print `, version ' print version print \".\n\""
-		    " print flush\n";
+		    " print flush";
 		EditLine	*el;
 		History		*hist;
 		const char	*str;
@@ -60,6 +60,7 @@ main(int argc, char **argv)
 
 		/* Print product and version info. */
 		stilt_interpret(&stilt, &estilts, code, sizeof(code) - 1);
+		stilt_flush(&stilt, &estilts);
 
 		/*
 		 * Initialize the command editor.
@@ -107,6 +108,7 @@ main(int argc, char **argv)
 			stilt_interpret(&stilt, &stilts, str,
 			    (cw_uint32_t)count);
 		}
+		stilt_flush(&stilt, &stilts);
 
 		/* Clean up the command editor. */
 		el_end(el);
@@ -123,6 +125,7 @@ main(int argc, char **argv)
 			stilt_interpret(&stilt, &stilts, input,
 			    (cw_uint32_t)bytes_read);
 		}
+		stilt_flush(&stilt, &stilts);
 	}
 
 	stilts_delete(&estilts, &stilt);
@@ -138,7 +141,7 @@ prompt(EditLine *a_el)
 {
 	if ((stilt_deferred(&stilt) == FALSE) && (stilt_state(&stilt) ==
 	    STATE_START)) {
-		cw_uint8_t	code[] = "prompt\n";
+		cw_uint8_t	code[] = "prompt";
 		cw_uint8_t	*pstr;
 		cw_uint32_t	plen, maxlen;
 		cw_stilo_t	*stilo;
@@ -146,6 +149,7 @@ prompt(EditLine *a_el)
 
 		/* Push the prompt onto the data stack. */
 		stilt_interpret(&stilt, &estilts, code, sizeof(code) - 1);
+		stilt_flush(&stilt, &estilts);
 
 		/* Get the actual prompt string. */
 		stilo = stils_get(stack, 0);

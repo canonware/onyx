@@ -131,12 +131,8 @@ stil_delete(cw_stil_t *a_stil)
 	 * Create a temporary thread in order to be able to destroy systemdict
 	 * and globaldict.
 	 */
-	if (stilt_new(&stilt, a_stil) == NULL)
-		_cw_error("XXX OOM unhandled");
+	stilt_new(&stilt, a_stil);
 	stilt_setglobal(&stilt, TRUE);
-	/* XXX No way to catch OOM here. */
-	stilo_delete(&a_stil->globaldict, &stilt);
-	stilo_delete(&a_stil->systemdict, &stilt);
 	stilt_delete(&stilt);
 
 	/* XXX Run the GC one last time. */

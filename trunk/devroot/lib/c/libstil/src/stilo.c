@@ -270,8 +270,6 @@ static void	stilo_p_file_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
 static cw_stiloe_t *stiloe_p_file_ref_iterate(cw_stiloe_t *a_stiloe, cw_bool_t
     a_reset);
 static void	stilo_p_file_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type);
-static void	stilo_p_file_copy(cw_stilo_t *a_to, cw_stilo_t *a_from,
-    cw_stilt_t *a_stilt);
 static void	stilo_p_file_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd,
     cw_bool_t a_syntactic, cw_bool_t a_newline);
 
@@ -315,8 +313,6 @@ static void	stilo_p_name_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
 static cw_stiloe_t *stiloe_p_name_ref_iterate(cw_stiloe_t *a_stiloe, cw_bool_t
     a_reset);
 static void	stilo_p_name_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type);
-static void	stilo_p_name_copy(cw_stilo_t *a_to, cw_stilo_t *a_from,
-    cw_stilt_t *a_stilt);
 static void	stilo_p_name_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd,
     cw_bool_t a_syntactic, cw_bool_t a_newline);
 
@@ -417,7 +413,7 @@ static cw_stilot_vtable_t stilot_vtable[] = {
 	{stilo_p_file_delete,
 	 stiloe_p_file_ref_iterate,
 	 stilo_p_file_cast,
-	 stilo_p_file_copy,
+	 NULL,
 	 stilo_p_file_print},
 
 	/* STILOT_HOOK */
@@ -452,7 +448,7 @@ static cw_stilot_vtable_t stilot_vtable[] = {
 	{stilo_p_name_delete,
 	 stiloe_p_name_ref_iterate,
 	 stilo_p_name_cast,
-	 stilo_p_name_copy,
+	 NULL,
 	 stilo_p_name_print},
 
 	/* STILOT_NULL */
@@ -800,17 +796,13 @@ static void
 stilo_p_array_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 {
 	cw_stiloe_array_t	*array;
-	cw_uint32_t		i;
 
 	array = (cw_stiloe_array_t *)a_stilo->o.stiloe;
 	_cw_check_ptr(array);
 	_cw_assert(array->stiloe.magic == _CW_STILOE_MAGIC);
 
-	if ((array->stiloe.indirect == FALSE)) {
-		for (i = 0; i < array->e.a.len; i++)
-			stilo_delete(&array->e.a.arr[i], a_stilt);
-	}
-	stilt_free(a_stilt, array->e.a.arr);
+	if (array->e.a.len > 0)
+		stilt_free(a_stilt, array->e.a.arr);
 
 /*  	stiloe_p_delete(&array->stiloe, a_stilt); */
 }
@@ -865,8 +857,7 @@ stilo_p_array_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
 	array = (cw_stiloe_array_t *)a_from->o.stiloe;
 
 	/*
-	 * Set arr_from and len according to whether this is an indirect
-         * object.
+	 * Set arr_from and len according to whether this is an indirect object.
 	 */
 	if (array->stiloe.indirect) {
 		cw_stiloe_array_t	*array_indir;
@@ -1179,8 +1170,6 @@ stilo_p_dict_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 
 		while (dch_remove_iterate(&dict->e.d.hash, NULL, (void
 		    **)&dicto, &chi) == FALSE) {
-			stilo_delete(&dicto->key, a_stilt);
-			stilo_delete(&dicto->val, a_stilt);
 			stilt_chi_put(a_stilt, chi);
 		}
 	}
@@ -1317,7 +1306,6 @@ stilo_dict_def(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilo_t *a_key,
 			 * possibly happen in real use, so just assert.
 			 */
 			_cw_assert(a_key != &dicto->val);
-			stilo_delete(a_key, a_stilt);
 		} else {
 			cw_chi_t	*chi;
 
@@ -1361,8 +1349,6 @@ stilo_dict_undef(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const cw_stilo_t
 		stiloe_p_lock(&dict->stiloe);
 		if (dch_remove(&dict->e.d.hash, (void *)a_key, NULL, (void
 		    **)&dicto, &chi) == FALSE) {
-			stilo_delete(&dicto->key, a_stilt);
-			stilo_delete(&dicto->val, a_stilt);
 			stilt_dicto_put(a_stilt, dicto);
 			stilt_chi_put(a_stilt, chi);
 		}
@@ -1487,12 +1473,6 @@ stilo_p_file_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type)
 }
 
 static void
-stilo_p_file_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
-{
-	_cw_error("XXX Not implemented");
-}
-
-static void
 stilo_p_file_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t a_syntactic,
     cw_bool_t a_newline)
 {
@@ -1564,6 +1544,10 @@ stilo_integer_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_sint64_t a_val)
 static void
 stilo_p_integer_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type)
 {
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_stilo->type == STILOT_INTEGER);
+
 	_cw_error("XXX Not implemented");
 }
 
@@ -1612,10 +1596,37 @@ stilo_p_integer_calc(const cw_stilo_t *a_a, const cw_stilo_t *a_b, cw_uint32_t
 	r_sum->o.integer.i = r;
 }
 
+cw_sint64_t
+stilo_integer_get(cw_stilo_t *a_stilo)
+{
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_stilo->type == STILOT_INTEGER);
+
+	return a_stilo->o.integer.i;
+}
+
+void
+stilo_integer_set(cw_stilo_t *a_stilo, cw_sint64_t a_val)
+{
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_stilo->type == STILOT_INTEGER);
+
+	a_stilo->o.integer.i = a_val;
+}
+
 void
 stilo_integer_add(const cw_stilo_t *a_a, const cw_stilo_t *a_b, cw_stilo_t
     *r_sum)
 {
+	_cw_check_ptr(a_a);
+	_cw_assert(a_a->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_a->type == STILOT_INTEGER);
+	_cw_check_ptr(a_b);
+	_cw_assert(a_b->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_b->type == STILOT_INTEGER);
+
 	stilo_p_integer_calc(a_a, a_b, _STILO_CALC_ADD, r_sum);
 }
 
@@ -1623,6 +1634,13 @@ void
 stilo_integer_sub(const cw_stilo_t *a_num, const cw_stilo_t *a_sub, cw_stilo_t
     *r_result)
 {
+	_cw_check_ptr(a_num);
+	_cw_assert(a_num->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_num->type == STILOT_INTEGER);
+	_cw_check_ptr(a_sub);
+	_cw_assert(a_sub->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_sub->type == STILOT_INTEGER);
+
 	stilo_p_integer_calc(a_num, a_sub, _STILO_CALC_SUB, r_result);
 }
 
@@ -1630,6 +1648,13 @@ void
 stilo_integer_mul(const cw_stilo_t *a_a, const cw_stilo_t *a_b, cw_stilo_t
     *r_product)
 {
+	_cw_check_ptr(a_a);
+	_cw_assert(a_a->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_a->type == STILOT_INTEGER);
+	_cw_check_ptr(a_b);
+	_cw_assert(a_b->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_b->type == STILOT_INTEGER);
+
 	stilo_p_integer_calc(a_a, a_b, _STILO_CALC_MUL, r_product);
 }
 
@@ -1637,6 +1662,13 @@ void
 stilo_integer_div(const cw_stilo_t *a_num, const cw_stilo_t *a_div, cw_stilo_t
     *r_quotient)
 {
+	_cw_check_ptr(a_num);
+	_cw_assert(a_num->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_num->type == STILOT_INTEGER);
+	_cw_check_ptr(a_div);
+	_cw_assert(a_div->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_div->type == STILOT_INTEGER);
+
 	stilo_p_integer_calc(a_num, a_div, _STILO_CALC_DIV, r_quotient);
 }
 	
@@ -1644,6 +1676,13 @@ void
 stilo_integer_mod(const cw_stilo_t *a_num, const cw_stilo_t *a_div, cw_stilo_t
     *r_mod)
 {
+	_cw_check_ptr(a_num);
+	_cw_assert(a_num->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_num->type == STILOT_INTEGER);
+	_cw_check_ptr(a_div);
+	_cw_assert(a_div->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_div->type == STILOT_INTEGER);
+
 	stilo_p_integer_calc(a_num, a_div, _STILO_CALC_MOD, r_mod);
 }
 
@@ -1651,6 +1690,13 @@ void
 stilo_integer_exp(const cw_stilo_t *a_num, const cw_stilo_t *a_exp, cw_stilo_t
     *r_result)
 {
+	_cw_check_ptr(a_num);
+	_cw_assert(a_num->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_num->type == STILOT_INTEGER);
+	_cw_check_ptr(a_exp);
+	_cw_assert(a_exp->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_exp->type == STILOT_INTEGER);
+
 	_cw_error("XXX Not implemented");
 }
 
@@ -1658,6 +1704,13 @@ void
 stilo_integer_abs(const cw_stilo_t *a_a, const cw_stilo_t *a_b, cw_stilo_t
     *r_abs)
 {
+	_cw_check_ptr(a_a);
+	_cw_assert(a_a->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_a->type == STILOT_INTEGER);
+	_cw_check_ptr(a_b);
+	_cw_assert(a_b->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_b->type == STILOT_INTEGER);
+
 	_cw_error("XXX Not implemented");
 }
 	
@@ -1665,12 +1718,23 @@ void
 stilo_integer_neg(const cw_stilo_t *a_a, const cw_stilo_t *a_b, cw_stilo_t
     *r_neg)
 {
+	_cw_check_ptr(a_a);
+	_cw_assert(a_a->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_a->type == STILOT_INTEGER);
+	_cw_check_ptr(a_b);
+	_cw_assert(a_b->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_b->type == STILOT_INTEGER);
+
 	_cw_error("XXX Not implemented");
 }
 
 void
 stilo_integer_srand(const cw_stilo_t *a_seed)
 {
+	_cw_check_ptr(a_seed);
+	_cw_assert(a_seed->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_seed->type == STILOT_INTEGER);
+
 	if (a_seed->type != STILOT_INTEGER)
 		xep_throw(_CW_XEPV_TYPECHECK);
 
@@ -1680,6 +1744,10 @@ stilo_integer_srand(const cw_stilo_t *a_seed)
 void
 stilo_integer_rand(cw_stilo_t *r_num)
 {
+	_cw_check_ptr(r_num);
+	_cw_assert(r_num->magic == _CW_STILO_MAGIC);
+	_cw_assert(r_num->type == STILOT_INTEGER);
+
 	if (r_num->type != STILOT_INTEGER)
 		xep_throw(_CW_XEPV_TYPECHECK);
 
@@ -1993,12 +2061,6 @@ stilo_p_name_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type)
 }
 
 static void
-stilo_p_name_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
-{
-	_cw_error("XXX Not implemented");
-}
-
-static void
 stilo_p_name_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t
     a_syntactic, cw_bool_t a_newline)
 {
@@ -2307,7 +2369,38 @@ stilo_p_string_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type)
 static void
 stilo_p_string_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
 {
-	stilo_dup(a_to, a_from, a_stilt);
+	cw_stiloe_string_t	*string;
+	cw_uint8_t		*str_from, *str_to;
+	cw_uint32_t		len;
+
+	string = (cw_stiloe_string_t *)a_from->o.stiloe;
+
+	/*
+	 * Set str_from and len according to whether this is an indirect object.
+	 */
+	if (string->stiloe.indirect) {
+		cw_stiloe_string_t	*string_indir;
+
+		string_indir = (cw_stiloe_string_t *)string->e.i.stilo.o.stiloe;
+
+		str_from =
+		    &string_indir->e.s.str[string->e.i.beg_offset];
+		len = string->e.i.len;
+		_cw_assert(len + string->e.i.beg_offset <=
+		    string_indir->e.s.len);
+	} else {
+		str_from = string->e.s.str;
+		len = string->e.s.len;
+	}
+
+	str_to = ((cw_stiloe_string_t *)a_to->o.stiloe)->e.s.str;
+
+	/* Make sure destination is large enough. */
+	if (((cw_stiloe_string_t *)a_to->o.stiloe)->e.s.len < len)
+		xep_throw(_CW_XEPV_RANGECHECK);
+
+	/* Copy the appropriate range. */
+	memcpy(str_to, str_from, len);
 }
 
 static void

@@ -182,7 +182,7 @@ void
 systemdict_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 {
 	cw_uint32_t	i;
-	cw_stilo_t	name, operator;
+	cw_stilo_t	name, operator;	/* XXX GC-unsafe. */
 #define NENTRIES							\
 	((sizeof(systemdict_ops) / sizeof(struct cw_systemdict_entry)))
 
@@ -228,7 +228,6 @@ systemdict_add(cw_stilt_t *a_stilt)
 	stilo_move(&t_stilo, a);
 	stilo_integer_add(&t_stilo, b, a);
 	stils_pop(stack, a_stilt, 1);
-	stilo_delete(&t_stilo, a_stilt);
 }
 
 void
@@ -253,7 +252,7 @@ void
 systemdict_array(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*stack;
-	cw_stilo_t	t_stilo, *stilo, *arr;
+	cw_stilo_t	t_stilo, *stilo, *arr;	/* XXX GC-unsafe.*/
 	cw_uint32_t	nelements, i;
 
 	stack = stilt_data_stack_get(a_stilt);
@@ -287,9 +286,6 @@ systemdict_array(cw_stilt_t *a_stilt)
 	/* Push the array onto the stack. */
 	stilo = stils_push(stack);
 	stilo_move(stilo, &t_stilo);
-
-	/* Clean up. */
-	stilo_delete(&t_stilo, a_stilt);
 }
 
 void
@@ -360,10 +356,12 @@ systemdict_copy(cw_stilt_t *a_stilt)
 		/* Copy a range of the stack. */
 		/* XXX Check that number is > 0. */
 		/* XXX Implement. */
+		_cw_not_reached();	/* XXX */
 	} else {
 		switch (stilo_type_get(copy)) {
 		case STILOT_ARRAY:
 		case STILOT_DICT:
+		case STILOT_HOOK:
 		case STILOT_STRING:
 			stilo_copy(copy, orig, a_stilt);
 			break;
@@ -531,7 +529,6 @@ systemdict_div(cw_stilt_t *a_stilt)
 	stilo_move(&t_stilo, a);
 	stilo_integer_div(&t_stilo, b, a);
 	stils_pop(stack, a_stilt, 1);
-	stilo_delete(&t_stilo, a_stilt);
 }
 
 void
@@ -568,7 +565,11 @@ systemdict_eq(cw_stilt_t *a_stilt)
 void
 systemdict_exch(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*stack;
+
+	stack = stilt_data_stack_get(a_stilt);
+
+	stils_roll(stack, 2, 1);
 }
 
 void
@@ -818,7 +819,6 @@ systemdict_mod(cw_stilt_t *a_stilt)
 	stilo_move(&t_stilo, a);
 	stilo_integer_mod(&t_stilo, b, a);
 	stils_pop(stack, a_stilt, 1);
-	stilo_delete(&t_stilo, a_stilt);
 }
 
 void
@@ -837,7 +837,6 @@ systemdict_mul(cw_stilt_t *a_stilt)
 	stilo_move(&t_stilo, a);
 	stilo_integer_mul(&t_stilo, b, a);
 	stils_pop(stack, a_stilt, 1);
-	stilo_delete(&t_stilo, a_stilt);
 }
 
 void
@@ -928,10 +927,11 @@ void
 systemdict_product(cw_stilt_t *a_stilt)
 {
 	cw_stilts_t	stilts;
-	cw_uint8_t	code[] = "`Canonware stil'\n";
+	cw_uint8_t	code[] = "`Canonware stil'";
 
 	stilts_new(&stilts, a_stilt);
 	stilt_interpret(a_stilt, &stilts, code, sizeof(code) - 1);
+	stilt_flush(a_stilt, &stilts);
 	stilts_delete(&stilts, a_stilt);
 }
 
@@ -939,24 +939,22 @@ void
 systemdict_prompt(cw_stilt_t *a_stilt)
 {
 	cw_stilts_t	stilts;
-	cw_uint8_t	code[] = "`s> '\n";
+	cw_uint8_t	code[] = "`s> '";
 
 	stilts_new(&stilts, a_stilt);
 	stilt_interpret(a_stilt, &stilts, code, sizeof(code) - 1);
+	stilt_flush(a_stilt, &stilts);
 	stilts_delete(&stilts, a_stilt);
 }
 
 void
 systemdict_pstack(cw_stilt_t *a_stilt)
 {
-	/*
-	 * XXX The correct implementation depends on stilo_p_*_copy() working.
-	 */
-#if (1)
+#if (0)
 	cw_stilts_t	stilts;
 	cw_stils_t	*stack;
 	cw_uint32_t	i, count;
-	cw_uint8_t	code[] = "==\n";
+	cw_uint8_t	code[] = "==";
 
 	stilts_new(&stilts, a_stilt);
 	stack = stilt_data_stack_get(a_stilt);
@@ -965,6 +963,7 @@ systemdict_pstack(cw_stilt_t *a_stilt)
 	for (i = 0; i < count; i++) {
 		systemdict_dup(a_stilt);
 		stilt_interpret(a_stilt, &stilts, code, sizeof(code) - 1);
+		stilt_flush(a_stilt, &stilts);
 		stils_roll(stack, count, 1);
 	}
 	stilts_delete(&stilts, a_stilt);
@@ -1088,7 +1087,21 @@ systemdict_resourcestatus(cw_stilt_t *a_stilt)
 void
 systemdict_roll(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*stack;
+	cw_stilo_t	*stilo;
+	cw_sint64_t	count, amount;
+
+	stack = stilt_data_stack_get(a_stilt);
+
+	stilo = stils_get(stack, 0);
+	amount = stilo_integer_get(stilo);
+	stils_pop(stack, a_stilt, 1);
+
+	stilo = stils_get(stack, 0);
+	count = stilo_integer_get(stilo);
+	stils_pop(stack, a_stilt, 1);
+
+	stils_roll(stack, count, amount);
 }
 
 void
@@ -1152,7 +1165,7 @@ systemdict_stack(cw_stilt_t *a_stilt)
 	cw_stilts_t	stilts;
 	cw_stils_t	*stack;
 	cw_uint32_t	i, count;
-	cw_uint8_t	code[] = "=\n";
+	cw_uint8_t	code[] = "=";
 
 	stilts_new(&stilts, a_stilt);
 	stack = stilt_data_stack_get(a_stilt);
@@ -1161,6 +1174,7 @@ systemdict_stack(cw_stilt_t *a_stilt)
 	for (i = 0; i < count; i++) {
 		systemdict_dup(a_stilt);
 		stilt_interpret(a_stilt, &stilts, code, sizeof(code) - 1);
+		stilt_flush(a_stilt, &stilts);
 		stils_roll(stack, count, 1);
 	}
 	stilts_delete(&stilts, a_stilt);
@@ -1218,7 +1232,6 @@ systemdict_sub(cw_stilt_t *a_stilt)
 	stilo_move(&t_stilo, a);
 	stilo_integer_sub(&t_stilo, b, a);
 	stils_pop(stack, a_stilt, 1);
-	stilo_delete(&t_stilo, a_stilt);
 }
 
 /* = */
@@ -1323,10 +1336,11 @@ void
 systemdict_version(cw_stilt_t *a_stilt)
 {
 	cw_stilts_t	stilts;
-	cw_uint8_t	code[] = "`" _LIBSTIL_VERSION "'\n";
+	cw_uint8_t	code[] = "`" _LIBSTIL_VERSION "'";
 
 	stilts_new(&stilts, a_stilt);
 	stilt_interpret(a_stilt, &stilts, code, sizeof(code) - 1);
+	stilt_flush(a_stilt, &stilts);
 	stilts_delete(&stilts, a_stilt);
 }
 
@@ -1383,7 +1397,7 @@ systemdict_xcheck(cw_stilt_t *a_stilt)
 	stilo = stils_get(stack, 0);
 	
 	attr = stilo_attrs_get(stilo);
-	stilo_delete(stilo, a_stilt);
+	stilo_clobber(stilo);
 
 	if (attr == STILOA_EXECUTABLE)
 		stilo_boolean_new(stilo, TRUE);

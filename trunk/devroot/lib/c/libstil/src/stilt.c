@@ -23,11 +23,8 @@
 
 #define _CW_STILT_PUTC(a_c)						\
 	do {								\
-		if ((a_stilt->index >= _CW_STILT_BUFFER_SIZE) &&	\
-		    (stilt_p_tok_str_expand(a_stilt) ==	 -1)) {		\
-			retval = -1;					\
-			goto RETURN;					\
-		}							\
+		if (a_stilt->index >= _CW_STILT_BUFFER_SIZE)		\
+			stilt_p_tok_str_expand(a_stilt);		\
 		a_stilt->tok_str[a_stilt->index] = (a_c);		\
 		a_stilt->index++;					\
 	} while (0)
@@ -70,9 +67,9 @@ static cw_sint32_t cw_g_b64_codes[] = {
 };
 #define	stilt_p_b64b(a) cw_g_b64_codes[(a) - 43]
 	
-static cw_sint32_t	stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts,
+static void		stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts,
     const cw_uint8_t *a_str, cw_uint32_t a_len);
-static cw_sint32_t	stilt_p_tok_str_expand(cw_stilt_t *a_stilt);
+static void		stilt_p_tok_str_expand(cw_stilt_t *a_stilt);
 static void		stilt_p_reset(cw_stilt_t *a_stilt);
 #ifdef _CW_STILT_SCANNER_DEBUG
 static void		stilt_p_token_print(cw_stilt_t *a_stilt, cw_stilts_t
@@ -334,6 +331,7 @@ stilt_exec(cw_stilt_t *a_stilt)
 				 * Iterate through the array and execute each
 				 * element in turn.
 				 */
+				array = stilo_array_get(stilo);
 				for (i = 0; i < stilo_array_len_get(stilo) - 1;
 				     i++) {
 					tstilo =
@@ -362,6 +360,7 @@ stilt_exec(cw_stilt_t *a_stilt)
 				stilt_interpret(a_stilt, &stilts,
 				    stilo_string_get(stilo),
 				    stilo_string_len_get(stilo));
+				stilt_flush(a_stilt, &stilts);
 				stilts_delete(&stilts, a_stilt);
 				stils_pop(&a_stilt->exec_stils, a_stilt, 1);
 
@@ -398,18 +397,25 @@ stilt_exec(cw_stilt_t *a_stilt)
 	}
 }
 
-cw_bool_t
+void
 stilt_interpret(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
     *a_str, cw_uint32_t a_len)
 {
-	cw_bool_t	retval;
+	_cw_check_ptr(a_stilt);
+	_cw_assert(a_stilt->magic == _CW_STILT_MAGIC);
+
+	stilt_p_feed(a_stilt, a_stilts, a_str, a_len);
+}
+
+void
+stilt_flush(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts)
+{
+	cw_uint8_t	str[2] = "\n";
 
 	_cw_check_ptr(a_stilt);
 	_cw_assert(a_stilt->magic == _CW_STILT_MAGIC);
 
-	retval = stilt_p_feed(a_stilt, a_stilts, a_str, a_len);
-
-	return retval;
+	stilt_p_feed(a_stilt, a_stilts, str, sizeof(str) - 1);
 }
 
 void
@@ -457,11 +463,10 @@ stilt_dict_stack_search(cw_stilt_t *a_stilt, cw_stilo_t *a_key, cw_stilo_t
 	return retval;
 }
 
-static cw_sint32_t
+static void
 stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
     *a_str, cw_uint32_t a_len)
 {
-	cw_sint32_t	retval;
 	cw_uint32_t	i;
 	cw_uint8_t	c;
 	cw_stilo_t	*stilo;
@@ -1405,10 +1410,6 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 			break;
 		}
 	}
-
-	retval = 0;
-	RETURN:
-	return retval;
 }
 
 #ifdef _CW_STILT_SCANNER_DEBUG
@@ -1438,11 +1439,9 @@ stilt_p_syntax_error_print(cw_stilt_t *a_stilt, cw_uint8_t a_c)
 	stilt_p_reset(a_stilt);
 }
 
-static cw_sint32_t
+static void
 stilt_p_tok_str_expand(cw_stilt_t *a_stilt)
 {
-	cw_sint32_t	retval;
-
 	if (a_stilt->index == _CW_STILT_BUFFER_SIZE) {
 		/*
 		 * First overflow, initial expansion needed.
@@ -1465,9 +1464,6 @@ stilt_p_tok_str_expand(cw_stilt_t *a_stilt)
 		stilt_free(a_stilt, a_stilt->tok_str);
 		a_stilt->tok_str = t_str;
 	}
-
-	retval = 0;
-	return retval;
 }
 
 static void
@@ -1487,6 +1483,7 @@ stilt_p_entry(void *a_arg)
 	struct cw_stilt_entry_s	*arg = (struct cw_stilt_entry_s *)a_arg;
 
 	stilt_interpret(arg->stilt, arg->stilts, arg->str, arg->len);
+	stilt_flush(arg->stilt, arg->stilts);
 
 	stilts_delete(arg->stilts, arg->stilt);
 	stilt_delete(arg->stilt);
@@ -1500,7 +1497,10 @@ static void
 stilt_p_special_accept(cw_stilt_t *a_stilt, const cw_uint8_t *a_token,
     cw_uint32_t a_len)
 {
-	cw_stilo_t	*stilo, key;
+	cw_stilo_t	*stilo, key;	/*
+					 * XXX In theory, GC-unsafe.  In
+					 * practice, just bad practice.
+					 */
 
 	stilo_name_new(&key, a_stilt, a_token, a_len, TRUE);
 
@@ -1510,14 +1510,13 @@ stilt_p_special_accept(cw_stilt_t *a_stilt, const cw_uint8_t *a_token,
 		xep_throw(_CW_XEPV_UNDEFINED);
 	}
 
-	stilo_delete(&key, a_stilt);
 	stilt_exec(a_stilt);
 }
 
 static void
 stilt_p_procedure_accept(cw_stilt_t *a_stilt)
 {
-	cw_stilo_t	t_stilo, *stilo, *arr;
+	cw_stilo_t	t_stilo, *stilo, *arr;	/* XXX GC-unsafe. */
 	cw_uint32_t	nelements, i;
 
 	/* Find the "mark". */
@@ -1552,9 +1551,6 @@ stilt_p_procedure_accept(cw_stilt_t *a_stilt)
 	/* Push the array onto the stack. */
 	stilo = stils_push(&a_stilt->data_stils);
 	stilo_move(stilo, &t_stilo);
-
-	/* Clean up. */
-	stilo_delete(&t_stilo, a_stilt);
 }
 
 static void
@@ -1594,7 +1590,7 @@ stilt_p_name_accept(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts)
 		stilt_p_reset(a_stilt);
 		break;
 	case ACTION_EVALUATE: {
-		cw_stilo_t	key;
+		cw_stilo_t	key;	/* XXX GC-unsafe. */
 
 		/*
 		 * Find the value associated with the name in the dictionary
@@ -1607,7 +1603,6 @@ stilt_p_name_accept(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts)
 		if (stilt_dict_stack_search(a_stilt, &key, stilo))
 			xep_throw(_CW_XEPV_UNDEFINED);
 
-		stilo_delete(&key, a_stilt);
 		stilt_p_reset(a_stilt);
 		break;
 	}

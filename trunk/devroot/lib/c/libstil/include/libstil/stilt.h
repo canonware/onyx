@@ -171,8 +171,9 @@ void		stilt_delete(cw_stilt_t *a_stilt);
 
 void		stilt_exec(cw_stilt_t *a_stilt);
 
-cw_bool_t	stilt_interpret(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts,
+void		stilt_interpret(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts,
     const cw_uint8_t *a_str, cw_uint32_t a_len);
+void		stilt_flush(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts);
 void		stilt_detach(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts,
     const cw_uint8_t *a_str, cw_uint32_t a_len);
 
