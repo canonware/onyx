@@ -34,11 +34,11 @@ main()
 
 	/* ch_count(), ch_insert(). */
 	{
-		cw_ch_t		*ch;
-		char		*a = "a string";
-		char		*b = "A string";
-		char		*c = "two of these";
-		char		*d = "two of these\0foo";
+		cw_ch_t	*ch;
+		char	*a = "a string";
+		char	*b = "A string";
+		char	*c = "two of these";
+		char	*d = "two of these\0foo";
 
 		ch = ch_new(NULL, 4, ch_hash_string, ch_key_comp_string);
 		_cw_check_ptr(ch);
@@ -64,12 +64,12 @@ main()
 
 	/* ch_count, ch_remove(). */
 	{
-		cw_ch_t		*ch;
-		char		*a = "a string";
-		char		*b = "A string";
-		char		*c = "two of these";
-		char		*d = "two of these\0foo";
-		char		*k, *v;
+		cw_ch_t	*ch;
+		char	*a = "a string";
+		char	*b = "A string";
+		char	*c = "two of these";
+		char	*d = "two of these\0foo";
+		char	*k, *v;
 
 		ch = ch_new(NULL, 4, ch_hash_string, ch_key_comp_string);
 		_cw_check_ptr(ch);

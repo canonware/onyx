@@ -23,7 +23,7 @@ main()
 
 	/* ring_new(), ring_delete(). */
 	{
-		cw_ring_t ring_a;
+		cw_ring_t	ring_a;
 
 		ring_new(&ring_a);
 		ring_delete(&ring_a);
@@ -31,26 +31,26 @@ main()
 
 	/* ring_get_data(), ring_set_data(). */
 	{
-		cw_ring_t ring;
-		char   *str = "Hi";
+		cw_ring_t	ring;
+		char		*str = "Hi";
 
 		ring_new(&ring);
 
 		ring_set_data(&ring, str);
-		_cw_assert(str == ring_get_data(&ring));
+		_cw_assert(ring_get_data(&ring) == str);
 
 		ring_delete(&ring);
 	}
 
 	/* ring_meld(), ring_cut(), ring_split(). */
 	{
-		cw_ring_t *ring_a, *ring_b, *t_ring;
-		char    str[11] = "abcdefghij", c;
-		cw_uint32_t i;
+		cw_ring_t	*ring_a, *ring_b, *t_ring;
+		char		str[11] = "abcdefghij", c;
+		cw_uint32_t	i;
 
 		ring_a = (cw_ring_t *)_cw_malloc(sizeof(cw_ring_t));
 		ring_new(ring_a);
-		_cw_assert(ring_a == ring_cut(ring_a));
+		_cw_assert(ring_cut(ring_a) == ring_a);
 
 		for (i = 0; i < 10; i++) {
 			t_ring = (cw_ring_t *)_cw_malloc(sizeof(cw_ring_t));
@@ -72,9 +72,8 @@ main()
 		} while (t_ring != ring_a);
 		_cw_out_put("\n");
 
-		for (i = 0, ring_b = ring_a; i < 2; i++) {
+		for (i = 0, ring_b = ring_a; i < 2; i++)
 			ring_b = ring_next(ring_b);
-		}
 
 		ring_split(ring_a, ring_b);
 
@@ -148,19 +147,19 @@ main()
 
 	/* ring_next(), ring_prev(). */
 	{
-		cw_ring_t ring_a, ring_b;
+		cw_ring_t	ring_a, ring_b;
 
 		ring_new(&ring_a);
 		ring_new(&ring_b);
 
-		_cw_assert(&ring_a == ring_next(&ring_a));
-		_cw_assert(&ring_a == ring_prev(&ring_a));
+		_cw_assert(ring_next(&ring_a) == &ring_a);
+		_cw_assert(ring_prev(&ring_a) == &ring_a);
 
 		ring_meld(&ring_a, &ring_b);
-		_cw_assert(&ring_b == ring_next(&ring_a));
-		_cw_assert(&ring_b == ring_prev(&ring_a));
-		_cw_assert(&ring_a == ring_next(&ring_b));
-		_cw_assert(&ring_a == ring_prev(&ring_b));
+		_cw_assert(ring_next(&ring_a) == &ring_b);
+		_cw_assert(ring_prev(&ring_a) == &ring_b);
+		_cw_assert(ring_next(&ring_b) == &ring_a);
+		_cw_assert(ring_prev(&ring_b) == &ring_a);
 
 		ring_delete(&ring_a);
 		ring_delete(&ring_b);

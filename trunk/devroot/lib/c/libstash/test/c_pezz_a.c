@@ -22,30 +22,30 @@ main()
 	_cw_out_put("Test begin\n");
 
 	dbg_register(cw_g_dbg, "pezz_error");
-/*    dbg_register(cw_g_dbg, "pezz_verbose"); */
+/*  	dbg_register(cw_g_dbg, "pezz_verbose"); */
 
 	/* pezz_new(), pezz_delete(), pezz_get_buffer_size(). */
 	{
-		cw_pezz_t pezz, *pezz_p;
+		cw_pezz_t	pezz, *pezz_p;
 
-		_cw_assert(&pezz == pezz_new(&pezz, 123, 7));
-		_cw_assert(123 == pezz_get_buffer_size(&pezz));
+		_cw_assert(pezz_new(&pezz, 123, 7) == &pezz);
+		_cw_assert(pezz_get_buffer_size(&pezz) == 123);
 		pezz_delete(&pezz);
 
 		pezz_p = pezz_new(NULL, 234, 11);
 		_cw_check_ptr(pezz_p);
-		_cw_assert(234 == pezz_get_buffer_size(pezz_p));
+		_cw_assert(pezz_get_buffer_size(pezz_p) == 234);
 		pezz_delete(pezz_p);
 	}
 
 	/* pezz_get(), pezz_put(). */
 	{
-		cw_pezz_t pezz;
-		void   *pointers[100];
-		cw_uint32_t i;
+		cw_pezz_t	pezz;
+		void		*pointers[100];
+		cw_uint32_t	i;
 
 		pezz_new(&pezz, 4096, 10);
-		_cw_assert(4096 == pezz_get_buffer_size(&pezz));
+		_cw_assert(pezz_get_buffer_size(&pezz) == 4096);
 		for (i = 0; i < 100; i++) {
 			pointers[i] = _cw_pezz_get(&pezz);
 			_cw_check_ptr(pointers[i]);

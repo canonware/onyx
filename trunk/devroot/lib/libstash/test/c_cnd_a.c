@@ -23,7 +23,7 @@ struct cw_foo_s {
 	cw_mtx_t	*mutex;
 };
 
-void   *
+void *
 thread_entry_func(void *a_arg)
 {
 	struct cw_foo_s	*foo_var = (struct cw_foo_s *)a_arg;

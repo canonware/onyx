@@ -17,10 +17,10 @@
 
 #define _LIBSTASH_TEST_NUM_THREADS 10
 
-void   *
+void *
 thread_entry_func(void *a_arg)
 {
-	cw_sem_t *sem = (cw_sem_t *)a_arg;
+	cw_sem_t	*sem = (cw_sem_t *)a_arg;
 
 	sem_wait(sem);
 	_cw_out_put("Got semaphore.\n");
@@ -31,25 +31,25 @@ thread_entry_func(void *a_arg)
 int
 main()
 {
-	cw_sem_t sem_a, *sem_b;
-	cw_thd_t threads[_LIBSTASH_TEST_NUM_THREADS];
-	cw_uint32_t i;
-	struct timespec timeout;
+	cw_sem_t	sem_a, *sem_b;
+	cw_thd_t	threads[_LIBSTASH_TEST_NUM_THREADS];
+	cw_uint32_t	i;
+	struct timespec	timeout;
 
 	libstash_init();
 	_cw_out_put("Test begin\n");
 
 	sem_b = sem_new(NULL, 0);
 	_cw_check_ptr(sem_b);
-	_cw_assert(0 == sem_getvalue(sem_b));
+	_cw_assert(sem_getvalue(sem_b) == 0);
 	sem_post(sem_b);
-	_cw_assert(1 == sem_getvalue(sem_b));
+	_cw_assert(sem_getvalue(sem_b) == 1);
 	sem_adjust(sem_b, -2);
-	_cw_assert(-1 == sem_getvalue(sem_b));
+	_cw_assert(sem_getvalue(sem_b) == -1);
 	sem_post(sem_b);
-	_cw_assert(TRUE == sem_trywait(sem_b));
+	_cw_assert(sem_trywait(sem_b));
 	sem_post(sem_b);
-	_cw_assert(FALSE == sem_trywait(sem_b));
+	_cw_assert(sem_trywait(sem_b) == FALSE);
 	sem_post(sem_b);
 	sem_wait(sem_b);
 	sem_post(sem_b);
@@ -58,13 +58,13 @@ main()
 	timeout.tv_sec = 2;
 	timeout.tv_nsec = 0;
 
-	_cw_assert(FALSE == sem_timedwait(sem_b, &timeout));
-	_cw_assert(TRUE == sem_timedwait(sem_b, &timeout));
+	_cw_assert(sem_timedwait(sem_b, &timeout) == FALSE);
+	_cw_assert(sem_timedwait(sem_b, &timeout));
 	sem_delete(sem_b);
 
-	_cw_assert(&sem_a == sem_new(&sem_a, 0));
+	_cw_assert(sem_new(&sem_a, 0) == &sem_a);
 
-	for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++) 
+	for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
 		thd_new(&threads[i], thread_entry_func, (void *)&sem_a);
 
 	sem_adjust(&sem_a, _LIBSTASH_TEST_NUM_THREADS);

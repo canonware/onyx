@@ -23,7 +23,7 @@ main()
 
 	/* treen_new(), treen_delete(). */
 	{
-		cw_treen_t *treen_a, treen_b;
+		cw_treen_t	*treen_a, treen_b;
 
 		treen_a = treen_new(NULL, NULL, NULL);
 		_cw_check_ptr(treen_a);
@@ -35,7 +35,7 @@ main()
 		treen_delete(treen_a);
 
 		treen_a = treen_new(&treen_b, NULL, NULL);
-		_cw_assert(&treen_b == treen_a);
+		_cw_assert(treen_a == &treen_b);
 		treen_delete(&treen_b);
 	}
 
@@ -44,7 +44,7 @@ main()
 	 * treen_get_sibling().
 	 */
 	{
-		cw_treen_t *treen_a, *treen_b, *treen_c, *treen_d;
+		cw_treen_t	*treen_a, *treen_b, *treen_c, *treen_d;
 
 		treen_a = treen_new(NULL, NULL, NULL);
 		_cw_check_ptr(treen_a);
@@ -56,43 +56,43 @@ main()
 		_cw_check_ptr(treen_d);
 
 		treen_link(treen_b, treen_a);
-		_cw_assert(treen_b == treen_get_child(treen_a));
-		_cw_assert(treen_b == treen_get_sibling(treen_b));
+		_cw_assert(treen_get_child(treen_a) == treen_b);
+		_cw_assert(treen_get_sibling(treen_b) == treen_b);
 
 		treen_link(treen_c, treen_a);
-		_cw_assert(treen_b == treen_get_child(treen_a));
-		_cw_assert(treen_c == treen_get_sibling(treen_b));
-		_cw_assert(treen_b == treen_get_sibling(treen_c));
+		_cw_assert(treen_get_child(treen_a) == treen_b);
+		_cw_assert(treen_get_sibling(treen_b) == treen_c);
+		_cw_assert(treen_get_sibling(treen_c) == treen_b);
 
 		treen_link(treen_d, treen_a);
-		_cw_assert(treen_b == treen_get_child(treen_a));
-		_cw_assert(treen_c == treen_get_sibling(treen_b));
-		_cw_assert(treen_d == treen_get_sibling(treen_c));
-		_cw_assert(treen_b == treen_get_sibling(treen_d));
-		_cw_assert(treen_a == treen_get_parent(treen_b));
-		_cw_assert(treen_a == treen_get_parent(treen_c));
-		_cw_assert(treen_a == treen_get_parent(treen_d));
+		_cw_assert(treen_get_child(treen_a) == treen_b);
+		_cw_assert(treen_get_sibling(treen_b) == treen_c);
+		_cw_assert(treen_get_sibling(treen_c) == treen_d);
+		_cw_assert(treen_get_sibling(treen_d) == treen_b);
+		_cw_assert(treen_get_parent(treen_b) == treen_a);
+		_cw_assert(treen_get_parent(treen_c) == treen_a);
+		_cw_assert(treen_get_parent(treen_d) == treen_a);
 
 		treen_link(treen_a, NULL);
 		treen_link(treen_b, NULL);
 		treen_link(treen_d, NULL);
-		_cw_assert(treen_c == treen_get_child(treen_a));
+		_cw_assert(treen_get_child(treen_a) == treen_c);
 
-		_cw_assert(NULL == treen_get_child(treen_c));
+		_cw_assert(treen_get_child(treen_c) == NULL);
 		treen_link(treen_b, treen_c);
 		_cw_assert(treen_b == treen_get_child(treen_c));
 
 		treen_link(treen_d, treen_c);
-		_cw_assert(treen_b == treen_get_child(treen_c));
-		_cw_assert(treen_c == treen_get_sibling(treen_c));
-		_cw_assert(treen_d == treen_get_sibling(treen_b));
-		_cw_assert(treen_b == treen_get_sibling(treen_d));
-		_cw_assert(treen_c == treen_get_parent(treen_b));
-		_cw_assert(treen_c == treen_get_parent(treen_d));
+		_cw_assert(treen_get_child(treen_c) == treen_b);
+		_cw_assert(treen_get_sibling(treen_c) == treen_c);
+		_cw_assert(treen_get_sibling(treen_b) == treen_d);
+		_cw_assert(treen_get_sibling(treen_d) == treen_b);
+		_cw_assert(treen_get_parent(treen_b) == treen_c);
+		_cw_assert(treen_get_parent(treen_d) == treen_c);
 
 		treen_link(treen_c, NULL);
-		_cw_assert(NULL == treen_get_child(treen_a));
-		_cw_assert(NULL == treen_get_parent(treen_c));
+		_cw_assert(treen_get_child(treen_a) == NULL);
+		_cw_assert(treen_get_parent(treen_c) == NULL);
 
 		treen_link(treen_a, treen_d);
 		treen_link(treen_a, treen_c);
@@ -102,15 +102,15 @@ main()
 
 	/* treen_get_data_ptr(), treen_set_data_ptr(). */
 	{
-		cw_treen_t *treen_a;
+		cw_treen_t	*treen_a;
 
 		treen_a = treen_new(NULL, NULL, NULL);
 		_cw_check_ptr(treen_a);
 
-		_cw_assert(NULL == treen_get_data_ptr(treen_a));
+		_cw_assert(treen_get_data_ptr(treen_a) == NULL);
 
 		treen_set_data_ptr(treen_a, (void *)treen_a);
-		_cw_assert(treen_a == treen_get_data_ptr(treen_a));
+		_cw_assert(treen_get_data_ptr(treen_a) == treen_a);
 
 		treen_delete(treen_a);
 	}
