@@ -54,7 +54,7 @@ extern  "C" {
  * Default number of bytes of allocation since last collection that will cause
  * an immediate collection.
  */
-#define	_CW_LIBONYX_GCDICT_THRESHOLD	65536
+#define	_CW_LIBONYX_GCDICT_THRESHOLD   262144
 
 /*
  * Initial size of globaldict.  This is a bit arbitrary, and some applications
