@@ -166,12 +166,10 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(shift),
 	ENTRY(signal),
 	ENTRY(sindex),
-	ENTRY(sload),
 	ENTRY(spop),
 	ENTRY(spush),
 	ENTRY(srand),
 	ENTRY(sroll),
-	ENTRY(sstore),
 	ENTRY(stack),
 	ENTRY(start),
 	ENTRY(status),
@@ -3957,30 +3955,6 @@ systemdict_sindex(cw_nxo_t *a_thread)
 }
 
 void
-systemdict_sload(cw_nxo_t *a_thread)
-{
-	cw_nxo_t	*ostack, *tstack, *stack, *ttstack;
-
-	ostack = nxo_thread_ostack_get(a_thread);
-	tstack = nxo_thread_tstack_get(a_thread);
-	NXO_STACK_GET(stack, ostack, a_thread);
-	if (nxo_type_get(stack) != NXOT_STACK) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
-		return;
-	}
-
-	ttstack = nxo_stack_push(tstack);
-	nxo_dup(ttstack, stack);
-	nxo_stack_pop(ostack);
-
-	nxo_stack_copy(ostack, ttstack);
-
-	stack = nxo_stack_push(ostack);
-	nxo_dup(stack, ttstack);
-	nxo_stack_pop(tstack);
-}
-
-void
 systemdict_spop(cw_nxo_t *a_thread)
 {
 	cw_nxo_t	*ostack, *stack, *snxo, *onxo;
@@ -4074,30 +4048,6 @@ systemdict_sroll(cw_nxo_t *a_thread)
 	}
 
 	nxo_stack_npop(ostack, 2);
-}
-
-void
-systemdict_sstore(cw_nxo_t *a_thread)
-{
-	cw_nxo_t	*ostack, *tstack, *stack, *ttstack;
-
-	ostack = nxo_thread_ostack_get(a_thread);
-	tstack = nxo_thread_tstack_get(a_thread);
-	NXO_STACK_GET(stack, ostack, a_thread);
-	if (nxo_type_get(stack) != NXOT_STACK) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
-		return;
-	}
-
-	ttstack = nxo_stack_push(tstack);
-	nxo_dup(ttstack, stack);
-	nxo_stack_pop(ostack);
-
-	nxo_stack_copy(ttstack, ostack);
-
-	stack = nxo_stack_push(ostack);
-	nxo_dup(stack, ttstack);
-	nxo_stack_pop(tstack);
 }
 
 void
