@@ -46,7 +46,7 @@ are delimited by whitespace or a list of self-delimiting tokens (see
 Section~\ref{sec:onyx_syntax} for details).  As such, there are very few ways
 for a syntax error to occur, but typographical mistakes may instead produce
 other errors.  For example, say that a C programmer forgets he is writing Onyx
-code and types the following at the interactive \progname{onyx} prompt:
+code and types the following at the interactive \binname{onyx} prompt:
 
 \begin{verbatim}
 onyx:0> 1000L {`Hello\n' print} repeat
@@ -115,13 +115,13 @@ Onyx code is never compiled, nor is it preprocessed by the interpreter.  Onyx
 code is simply consumed.  This has some interesting implications, some of which
 are not typical of even other interpreted languages:
 
-\begin{\itemize}
+\begin{itemize}
 \item{If a source file is modified during interpreter execution, the changes may
 affect the currently running program, usually in unpleasant ways.}
 \item{Syntax errors are not discovered until the malformed code is scanned.  In
 order to be sure that there are no syntax errors, a source file must be
 completely scanned.}
-\end{\itemize}
+\end{itemize}
 
 In practice, these are only minor inconveniences, but it is important to keep
 them in mind when developing.
