@@ -46,8 +46,12 @@ use Getopt::Long;
 # <Copyright = jasone>
 #
 $COPYRIGHT{"jasone", 0}
-= "Copyright (C) 1996-2002 Jason Evans <jasone\@canonware.com>.";
+= "Copyright (C) 1996-2003 Jason Evans <jasone\@canonware.com>.";
 $COPYRIGHT{"jasone", 1}
+= "All rights reserved.";
+$COPYRIGHT{"mordor", 0}
+= "Copyright (C) 2002 Zeljko Vrba <mordor@fly.srk.fer.hr>.";
+$COPYRIGHT{"mordor", 1}
 = "All rights reserved.";
 $COPYRIGHT{"nectar", 0}
 = "Copyright (C) 2001 Jacques A. Vidrine <nectar\@freebsd.org>.";

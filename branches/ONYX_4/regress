@@ -132,6 +132,10 @@ $worker_entry {
     )
     (
 	`'
+	`--disable-regex'
+    )
+    (
+	`'
 	`--enable-debug'
     )
     (
