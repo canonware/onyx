@@ -1,3 +1,13 @@
+2001-12-23  Jason Evans  <jasone@canonware.com>
+
+	* include/libonyx/nx_l.h (nx_l_ref_iter): Don't skip over gcdict
+	during root set iteration.  This bug caused threadsdict to be the
+	first object returned during root set iteration, which obscured
+	the bug in nxa_p_roots(), mentioned below.
+
+	* src/nxa.c (nxa_p_roots): Iterate over the entire root set,
+	rather than short-circuiting after finding the first root.
+
 2001-11-17  Jason Evans  <jasone@canonware.com>
 
 	* src/mem.c: Allocate copies of the filenames that are passed in

@@ -45,6 +45,7 @@ nx_l_ref_iter(cw_nx_t *a_nx, cw_bool_t a_reset)
 		switch (a_nx->ref_iter) {
 		case 0:
 			retval = nxo_nxoe_get(nxa_gcdict_get(&a_nx->nxa));
+			break;
 		case 1:
 			retval = nxo_nxoe_get(&a_nx->threadsdict);
 			break;

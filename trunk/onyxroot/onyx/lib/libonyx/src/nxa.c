@@ -549,7 +549,7 @@ nxa_l_white_get(cw_nxa_t *a_nxa)
 CW_INLINE cw_bool_t
 nxa_p_roots(cw_nxa_t *a_nxa, cw_uint32_t *r_nroot)
 {
-	cw_bool_t	retval;
+	cw_bool_t	retval = FALSE;
 	cw_nxoe_t	*nxoe, *gray;
 	cw_uint32_t	nroot = 0;
 
@@ -559,11 +559,6 @@ nxa_p_roots(cw_nxa_t *a_nxa, cw_uint32_t *r_nroot)
 	 * Each set of *_ref_iter() calls on a particular object must start with
 	 * a call with (a_reset == TRUE), and repeated calls until NULL is
 	 * returned.
-	 */
-
-	/*
-	 * Get a root object, so that we can create an invariant for the main
-	 * iteration: 'gray' does not point to a white object.
 	 */
 	for (nxoe = nx_l_ref_iter(a_nxa->nx, TRUE); nxoe != NULL; nxoe =
 	    nx_l_ref_iter(a_nxa->nx, FALSE)) {
@@ -575,16 +570,21 @@ nxa_p_roots(cw_nxa_t *a_nxa, cw_uint32_t *r_nroot)
 			nroot++;
 			cw_assert(nxoe_l_color_get(nxoe) == a_nxa->white);
 			nxoe_l_color_set(nxoe, !a_nxa->white);
-			ql_first(&a_nxa->seq_set) = nxoe;
+			if (retval) {
+				qr_remove(nxoe, link);
+				qr_after_insert(gray, nxoe, link);
+			} else {
+				ql_first(&a_nxa->seq_set) = nxoe;
+				retval = TRUE;
+			}
+			/*
+			 * Set gray to nxoe, since we inserted at the head of
+			 * the list.
+			 */
 			gray = nxoe;
-			retval = TRUE;
-			goto RETURN;
 		}
 	}
-	/* If we completed the above loop, there are no roots. */
 
-	retval = FALSE;
-	RETURN:
 	*r_nroot = nroot;
 	return retval;
 }
