@@ -48,7 +48,7 @@ libstash_init(void)
     if (NULL != cw_g_out)
     {
       if (TRUE == out_register(cw_g_out, "buf", sizeof(cw_buf_t *),
-			       buf_metric, buf_render))
+			       buf_out_metric, buf_out_render))
       {
 	retval = TRUE;
       }

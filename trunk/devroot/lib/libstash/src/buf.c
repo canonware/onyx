@@ -275,7 +275,7 @@ buf_dump(cw_buf_t * a_buf, const char * a_prefix)
 }
 
 cw_sint32_t
-buf_metric(const char * a_format, cw_uint32_t a_len, const void * a_arg)
+buf_out_metric(const char * a_format, cw_uint32_t a_len, const void * a_arg)
 {
   cw_sint32_t retval;
 
@@ -287,8 +287,8 @@ buf_metric(const char * a_format, cw_uint32_t a_len, const void * a_arg)
 }
 
 char *
-buf_render(const char * a_format, cw_uint32_t a_len, const void * a_arg,
-	   char * r_buf)
+buf_out_render(const char * a_format, cw_uint32_t a_len, const void * a_arg,
+	       char * r_buf)
 {
   char * retval;
 

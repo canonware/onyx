@@ -25,13 +25,18 @@
 #define _LIBSTASH_OUT_DES_WHITEOUT  'w'
 
 cw_sint32_t
-out_p_put_vfe(cw_out_t * a_out, cw_sint32_t a_fd,
-	      const char * a_file_name,
-	      cw_uint32_t a_line_num,
-	      const char * a_func_name,
-	      const char * a_format,
-	      va_list a_p);
+out_p_put_fvle(cw_out_t * a_out, cw_sint32_t a_fd,
+	       cw_bool_t a_time_stamp,
+	       const char * a_file_name,
+	       cw_uint32_t a_line_num,
+	       const char * a_func_name,
+	       const char * a_format,
+	       va_list a_p);
 
+cw_sint32_t
+out_p_put_fvn(cw_out_t * a_out, cw_sint32_t a_fd, cw_uint32_t a_size,
+	      const char * a_format, va_list a_p);
+  
 static cw_sint32_t
 out_p_metric(cw_out_t * a_out, const char * a_format, char ** r_format,
 	     va_list a_p);

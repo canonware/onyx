@@ -159,43 +159,69 @@ cw_bool_t
 out_merge(cw_out_t * a_a, cw_out_t * a_b)
 {
   cw_bool_t retval;
+  cw_sint32_t i;
   
   _cw_check_ptr(a_a);
   _cw_assert(_LIBSTASH_OUT_MAGIC == a_a->magic);
   _cw_check_ptr(a_b);
   _cw_assert(_LIBSTASH_OUT_MAGIC == a_b->magic);
 
-  if (NULL == a_a->extensions)
+  if (0 < a_b->nextensions)
   {
-    a_a->extensions = (cw_out_ent_t *) _cw_calloc(a_b->nextensions,
-						  sizeof(cw_out_ent_t));
     if (NULL == a_a->extensions)
     {
-      retval = TRUE;
-      goto RETURN;
+      a_a->extensions = (cw_out_ent_t *) _cw_calloc(a_b->nextensions,
+						    sizeof(cw_out_ent_t));
+      if (NULL == a_a->extensions)
+      {
+	retval = TRUE;
+	goto RETURN;
+      }
     }
-  }
-  else
-  {
-    cw_out_ent_t * t_ptr;
-
-    t_ptr = (cw_out_ent_t *) _cw_realloc(a_a->extensions,
-					 ((a_a->nextensions + a_b->nextensions)
-					  * sizeof(cw_out_ent_t)));
-    if (NULL == t_ptr)
+    else
     {
-      retval = TRUE;
-      goto RETURN;
+      cw_out_ent_t * t_ptr;
+
+      t_ptr = (cw_out_ent_t *) _cw_realloc(a_a->extensions,
+					   ((a_a->nextensions
+					     + a_b->nextensions)
+					    * sizeof(cw_out_ent_t)));
+      if (NULL == t_ptr)
+      {
+	retval = TRUE;
+	goto RETURN;
+      }
+
+      a_a->extensions = t_ptr;
     }
 
-    a_a->extensions = t_ptr;
+    memcpy(&a_a->extensions[a_a->nextensions],
+	   a_b->extensions,
+	   a_b->nextensions * sizeof(cw_out_ent_t));
+
+    /* Make copies of the type strings. */
+    for (i = 0; i < a_b->nextensions; i++)
+    {
+      a_a->extensions[i + a_a->nextensions].type
+	= (char *) _cw_malloc(strlen(a_b->extensions[i].type) + 1);
+      if (NULL == a_a->extensions[i + a_a->nextensions].type)
+      {
+	/* Back out all the typ string allocations we just did. */
+	for (i--; i >= 0; i--)
+	{
+	  _cw_free(a_a->extensions[i + a_a->nextensions].type);
+	}
+	retval = TRUE;
+	goto RETURN;
+      }
+      memcpy(a_b->extensions[i].type,
+	     a_a->extensions[i + a_a->nextensions].type,
+	     strlen(a_b->extensions[i].type) + 1);
+    }
+    
+    a_a->nextensions += a_b->nextensions;
   }
-
-  memcpy(&a_a->extensions[a_a->nextensions],
-	 a_b->extensions,
-	 a_b->nextensions * sizeof(cw_out_ent_t));
-  a_a->nextensions += a_b->nextensions;
-
+  
   retval = FALSE;
 
   RETURN:
@@ -278,10 +304,67 @@ out_put_e(cw_out_t * a_out,
   }
   
   va_start(ap, a_format);
-  retval = out_p_put_vfe(a_out, fd, a_file_name, a_line_num, a_func_name,
-			 a_format, ap);
+  retval = out_p_put_fvle(a_out, fd, FALSE, a_file_name, a_line_num,
+			  a_func_name, a_format, ap);
   va_end(ap);
   
+  return retval;
+}
+
+cw_sint32_t
+out_put_le(cw_out_t * a_out,
+	   const char * a_file_name,
+	   cw_uint32_t a_line_num,
+	   const char * a_func_name,
+	   const char * a_format,
+	   ...)
+{
+  cw_sint32_t retval, fd;
+  va_list ap;
+
+  _cw_check_ptr(a_format);
+  
+  if (NULL != a_out)
+  {
+    _cw_assert(_LIBSTASH_OUT_MAGIC == a_out->magic);
+    fd = a_out->fd;
+  }
+  else
+  {
+    fd = 2;
+  }
+  
+  va_start(ap, a_format);
+  retval = out_p_put_fvle(a_out, fd, TRUE, a_file_name, a_line_num,
+			  a_func_name, a_format, ap);
+  va_end(ap);
+
+  return retval;
+}
+
+cw_sint32_t
+out_put_n(cw_out_t * a_out, cw_uint32_t a_size, const char * a_format, ...)
+{
+  cw_sint32_t retval, fd;
+  va_list ap;
+
+  _cw_assert(0 < a_size);
+  _cw_check_ptr(a_format);
+  
+  if (NULL != a_out)
+  {
+    _cw_assert(_LIBSTASH_OUT_MAGIC == a_out->magic);
+    fd = a_out->fd;
+  }
+  else
+  {
+    fd = 2;
+  }
+  
+  va_start(ap, a_format);
+  retval = out_p_put_fvn(a_out, fd, a_size, a_format, ap);
+  va_end(ap);
+
   return retval;
 }
 
@@ -316,8 +399,8 @@ out_put_fe(cw_out_t * a_out, cw_sint32_t a_fd,
   _cw_check_ptr(a_format);
   
   va_start(ap, a_format);
-  retval = out_p_put_vfe(a_out, a_fd, a_file_name, a_line_num, a_func_name,
-			 a_format, ap);
+  retval = out_p_put_fvle(a_out, a_fd, FALSE, a_file_name, a_line_num,
+			  a_func_name, a_format, ap);
   va_end(ap);
 
   return retval;
@@ -333,37 +416,15 @@ out_put_fle(cw_out_t * a_out, cw_sint32_t a_fd,
 {
   cw_sint32_t retval;
   va_list ap;
-  char * format = NULL;
-  time_t curr_time;
-  struct tm * cts;
 
   _cw_assert(0 <= a_fd);
   _cw_check_ptr(a_format);
   
-  curr_time = time(NULL);
-  cts = localtime(&curr_time);
-  if (-1 == out_put_sa(a_out, &format,
-		       "\[[i32|w:4]/[i32|w:2|p:0]/[i32|w:2|p:0] "
-		       "[i32|w:2|p:0]:[i32|w:2|p:0]:[i32|w:2|p:0] "
-		       "([s])]: [s]",
-		       cts->tm_year + 1900, cts->tm_mon + 1, cts->tm_mday,
-		       cts->tm_hour, cts->tm_min, cts->tm_sec, tzname[0],
-		       a_format))
-  {
-    retval = -1;
-    goto RETURN;
-  }
-
   va_start(ap, a_format);
-  retval = out_p_put_vfe(a_out, a_fd, a_file_name, a_line_num, a_func_name,
-			 format, ap);
+  retval = out_p_put_fvle(a_out, a_fd, TRUE, a_file_name, a_line_num,
+			  a_func_name, a_format, ap);
   va_end(ap);
 
-  RETURN:
-  if (NULL != format)
-  {
-    _cw_free(format);
-  }
   return retval;
 }
 
@@ -371,66 +432,17 @@ cw_sint32_t
 out_put_fn(cw_out_t * a_out, cw_sint32_t a_fd, cw_uint32_t a_size,
 	   const char * a_format, ...)
 {
-  cw_sint32_t retval, i, out_size, nwritten;
+  cw_sint32_t retval;
   va_list ap;
-  char * output;
 
   _cw_assert(0 <= a_fd);
   _cw_assert(0 < a_size);
   _cw_check_ptr(a_format);
   
   va_start(ap, a_format);
-  
-  output = (char *) _cw_malloc(a_size);
-  if (NULL == output)
-  {
-    retval = -1;
-    goto RETURN;
-  }
-
-  if (-1 == (out_size = out_put_svn(a_out, output, a_size, a_format, ap)))
-  {
-    retval = -1;
-    goto RETURN;
-  }
-
-#ifdef _CW_REENTRANT
-  if (NULL != a_out)
-  {
-    mtx_lock(&a_out->lock);
-  }
-#endif
-
-/*    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
-/*  	      "len == %d, output \"", out_size); */
-/*    log_nprintf(cw_g_log, out_size, "%s", output); */
-/*    log_printf(cw_g_log, "\"\n"); */
-  i = 0;
-  do
-  {
-    nwritten = write(a_fd, &output[i], out_size - i);
-    if (-1 != nwritten)
-    {
-      i += nwritten;
-    }
-  } while ((i < out_size) && (-1 == nwritten) && (EAGAIN == errno));
-
-#ifdef _CW_REENTRANT
-  if (NULL != a_out)
-  {
-    mtx_unlock(&a_out->lock);
-  }
-#endif
-/*    fsync(a_fd); */
-
-  retval = i;
-  
-  RETURN:
+  retval = out_p_put_fvn(a_out, a_fd, a_size, a_format, ap);
   va_end(ap);
-  if (NULL != output)
-  {
-    _cw_free(output);
-  }
+
   return retval;
 }
 
@@ -543,7 +555,7 @@ out_put_sva(cw_out_t * a_out, char ** r_str,
   _cw_check_ptr(a_p);
   
   out_size = out_p_metric(a_out, a_format, NULL, a_p);
-  if (0 >= out_size)
+  if (0 > out_size)
   {
     retval = out_size;
     goto RETURN;
@@ -561,7 +573,10 @@ out_put_sva(cw_out_t * a_out, char ** r_str,
   RETURN:
   if (0 <= retval)
   {
-    output[retval] = '\0';
+    if (NULL != output)
+    {
+      output[retval] = '\0';
+    }
     *r_str = output;
   }
   else
@@ -580,7 +595,7 @@ out_put_svn(cw_out_t * a_out, char * a_str, cw_uint32_t a_size,
   char * format;
 
   _cw_check_ptr(a_str);
-  _cw_assert(0 < a_size);
+  _cw_assert(0 <= a_size);
   _cw_check_ptr(a_format);
   _cw_check_ptr(a_p);
 
@@ -700,14 +715,32 @@ out_put_svn(cw_out_t * a_out, char * a_str, cw_uint32_t a_size,
 	}
 	else
 	{
+	  char * t_buf;
+	  
 	  /* The printout of this item will not fit in the string.  Therefore,
 	   * allocate a temporary buffer, render the item there, then copy as
 	   * much as will fit into the output string. */
-	  log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-		      "Unfit\n");
+	  t_buf = (char *) _cw_malloc(metric);
+	  if (NULL == t_buf)
+	  {
+	    retval = -1;
+	    goto RETURN;
+	  }
+
+	  if (NULL == ent->render_func(&a_format[i], spec_len, arg, t_buf))
+	  {
+	    retval = -1;
+	    goto RETURN;
+	  }
+	  memcpy(&a_str[j], t_buf, size - j);
+	  
+	  _cw_free(t_buf);
+	  
+/*  	  log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
+/*  		      "Unfit\n"); */
 
 	  /* XXX */
-	  memset(&a_str[j], 'X', size - j);
+/*  	  memset(&a_str[j], 'X', size - j); */
 	}
 	
 	j += metric;
@@ -883,26 +916,50 @@ spec_get_val(const char * a_spec, cw_uint32_t a_spec_len,
 }
 
 cw_sint32_t
-out_p_put_vfe(cw_out_t * a_out, cw_sint32_t a_fd,
-	      const char * a_file_name,
-	      cw_uint32_t a_line_num,
-	      const char * a_func_name,
-	      const char * a_format,
-	      va_list a_p)
+out_p_put_fvle(cw_out_t * a_out, cw_sint32_t a_fd,
+	       cw_bool_t a_time_stamp,
+	       const char * a_file_name,
+	       cw_uint32_t a_line_num,
+	       const char * a_func_name,
+	       const char * a_format,
+	       va_list a_p)
 {
   cw_sint32_t retval;
-  char * format = NULL;
+  char * format = NULL, timestamp[30];
 
   _cw_assert(0 <= a_fd);
   _cw_check_ptr(a_format);
-  
+
+  if (TRUE == a_time_stamp)
+  {
+    time_t curr_time;
+    struct tm * cts;
+    
+    curr_time = time(NULL);
+    cts = localtime(&curr_time);
+    if (-1 == out_put_s(a_out, timestamp,
+			"[[[[[i32|w:4]/[i32|w:2|p:0]/[i32|w:2|p:0] "
+			"[i32|w:2|p:0]:[i32|w:2|p:0]:[i32|w:2|p:0] ([s])]: ",
+			cts->tm_year + 1900, cts->tm_mon + 1, cts->tm_mday,
+			cts->tm_hour, cts->tm_min, cts->tm_sec, tzname[0]))
+    {
+      retval = -1;
+      goto RETURN;
+    }
+  }
+  else
+  {
+    timestamp[0] = '\0';
+  }
+    
   if (NULL != a_file_name)
   {
     if (NULL != a_func_name)
     {
       /* Print filename, line number, and function name. */
       if (-1 == out_put_sa(a_out, &format,
-			   "At [s], line [i32]: [s](): [s]",
+			   "[s]At [s], line [i32]: [s](): [s]",
+			   timestamp,
 			   a_file_name, a_line_num,
 			   a_func_name, a_format))
       {
@@ -915,7 +972,8 @@ out_p_put_vfe(cw_out_t * a_out, cw_sint32_t a_fd,
     {
       /* Print filename and line number. */
       if (-1 == out_put_sa(a_out, &format,
-			   "At [s], line [i32]: [s]",
+			   "[s]At [s], line [i32]: [s]",
+			   timestamp,
 			   a_file_name, a_line_num, a_format))
       {
 	retval = -1;
@@ -928,7 +986,8 @@ out_p_put_vfe(cw_out_t * a_out, cw_sint32_t a_fd,
   {
     /* Print function name. */
     if (-1 == out_put_sa(a_out, &format,
-			 "[s](): [s]",
+			 "[s][s](): [s]",
+			 timestamp,
 			 a_func_name, a_format))
     {
       retval = -1;
@@ -939,13 +998,83 @@ out_p_put_vfe(cw_out_t * a_out, cw_sint32_t a_fd,
   else
   {
     /* Make no modifications. */
-    retval = out_put_fv(a_out, a_fd, a_format, a_p);
+    if (-1 == out_put_sa(a_out, &format,
+			 "[s][s]",
+			 timestamp, a_format))
+    {
+      retval = -1;
+      goto RETURN;
+    }
+    retval = out_put_fv(a_out, a_fd, format, a_p);
   }
   
   RETURN:
   if (NULL != format)
   {
     _cw_free(format);
+  }
+  return retval;
+}
+
+cw_sint32_t
+out_p_put_fvn(cw_out_t * a_out, cw_sint32_t a_fd, cw_uint32_t a_size,
+	      const char * a_format, va_list a_p)
+{
+  cw_sint32_t retval, i, out_size, nwritten;
+  char * output;
+
+  _cw_assert(0 <= a_fd);
+  _cw_assert(0 < a_size);
+  _cw_check_ptr(a_format);
+  
+  output = (char *) _cw_malloc(a_size);
+  if (NULL == output)
+  {
+    retval = -1;
+    goto RETURN;
+  }
+
+  if (-1 == (out_size = out_put_svn(a_out, output, a_size, a_format, a_p)))
+  {
+    retval = -1;
+    goto RETURN;
+  }
+
+#ifdef _CW_REENTRANT
+  if (NULL != a_out)
+  {
+    mtx_lock(&a_out->lock);
+  }
+#endif
+
+/*    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
+/*  	      "len == %d, output \"", out_size); */
+/*    log_nprintf(cw_g_log, out_size, "%s", output); */
+/*    log_printf(cw_g_log, "\"\n"); */
+  i = 0;
+  do
+  {
+    nwritten = write(a_fd, &output[i], out_size - i);
+    if (-1 != nwritten)
+    {
+      i += nwritten;
+    }
+  } while ((i < out_size) && (-1 == nwritten) && (EAGAIN == errno));
+
+#ifdef _CW_REENTRANT
+  if (NULL != a_out)
+  {
+    mtx_unlock(&a_out->lock);
+  }
+#endif
+/*    fsync(a_fd); */
+
+  retval = i;
+  
+  RETURN:
+  if (NULL != output)
+  {
+    _cw_free(output);
   }
   return retval;
 }
@@ -957,7 +1086,7 @@ out_p_metric(cw_out_t * a_out, const char * a_format, char ** r_format,
   cw_sint32_t retval, metric;
   cw_uint32_t i, format_len, spec_len;
   cw_uint32_t out_size; /* Total number of bytes to be printed. */
-  char * format; /* After parsing, each byte contains a code. */
+  char * format = NULL; /* After parsing, each byte contains a code. */
   enum
   {
     NORMAL,
@@ -967,11 +1096,11 @@ out_p_metric(cw_out_t * a_out, const char * a_format, char ** r_format,
   } state;
   
   format_len = strlen(a_format);
-  if (0 == format_len)
-  {
-    retval = 0;
-    goto RETURN;
-  }
+/*    if (0 == format_len) */
+/*    { */
+/*      retval = 0; */
+/*      goto RETURN; */
+/*    } */
 
   format = (char *) _cw_malloc(format_len + 1);
   if (NULL == format)
@@ -1082,6 +1211,11 @@ out_p_metric(cw_out_t * a_out, const char * a_format, char ** r_format,
 	  {
 	    /* No handler. */
 	    _cw_marker("Error");
+	    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
+			"type \"");
+	    log_nprintf(cw_g_log, val_len, "%s", val);
+	    log_printf(cw_g_log, "\"\n");
+	    
 	    retval = -2;
 	    goto RETURN;
 	  }
@@ -1187,7 +1321,10 @@ out_p_metric(cw_out_t * a_out, const char * a_format, char ** r_format,
     }
     else
     {
-      _cw_free(format);
+      if (NULL != format)
+      {
+	_cw_free(format);
+      }
     }
   }
   return retval;

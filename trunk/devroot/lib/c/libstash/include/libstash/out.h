@@ -332,7 +332,7 @@ out_set_default_fd(cw_out_t * a_out, cw_sint32_t a_fd);
  *            -1 : Memory allocation error.
  *            -2 : Parse error.
  *
- * Output printed to a_out's default file descriptor.
+ * Output printed to a_out's default file descriptor (2 if (NULL == a_out)).
  * 
  * <<< Description >>>
  *
@@ -366,7 +366,7 @@ out_put(cw_out_t * a_out, const char * a_format, ...);
  *            -1 : Memory allocation error.
  *            -2 : Parse error.
  *
- * Output printed to a_out's default file descriptor.
+ * Output printed to a_out's default file descriptor (2 if (NULL == a_out)).
  *
  * <<< Description >>>
  *
@@ -382,6 +382,76 @@ out_put_e(cw_out_t * a_out,
 	  const char * a_func_name,
 	  const char * a_format,
 	  ...);
+
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_out : Pointer to an out, or NULL.
+ *
+ * a_file_name : Pointer to a string that represents the source file name,
+ *               or NULL.
+ *
+ * a_line_num : Source file line number.  Ignored if (NULL == a_file_name).
+ *
+ * a_func_name : Pointer to a string that represents the source function name,
+ *               or NULL.
+ *
+ * a_format : Pointer to a formatting string.
+ *
+ * ... : Arguments that correspond to the specifiers in a_format.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : >= 0 : Number of bytes output
+ *            -1 : Memory allocation error.
+ *            -2 : Parse error.
+ *
+ * Output printed to a_out's default file descriptor (2 if (NULL == a_out)).
+ *
+ * <<< Description >>>
+ *
+ * Print formatted output, with "[yy/mm/dd hh:mm:ss (zz)]: "
+ * and optional "At <file>, line <line>: <function>(): " prepended to the
+ * output.
+ *
+ ****************************************************************************/
+cw_sint32_t
+out_put_le(cw_out_t * a_out,
+	   const char * a_file_name,
+	   cw_uint32_t a_line_num,
+	   const char * a_func_name,
+	   const char * a_format,
+	   ...);
+
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_out : Pointer to an out, or NULL.
+ *
+ * a_size : Maximum number of characters out output.
+ *
+ * a_format : Pointer to a formatting string.
+ *
+ * ... : Arguments that correspond to the specifiers in a_format.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : >= 0 : Number of bytes output
+ *            -1 : Memory allocation error.
+ *            -2 : Parse error.
+ *
+ * Output printed to a_out's default file descriptor (2 if (NULL == a_out)).
+ *
+ * <<< Description >>>
+ *
+ * Print at most a_size bytes of formatted output.
+ *
+ ****************************************************************************/
+cw_sint32_t
+out_put_n(cw_out_t * a_out, cw_uint32_t a_size,
+	  const char * a_format, ...);
 
 /****************************************************************************
  *

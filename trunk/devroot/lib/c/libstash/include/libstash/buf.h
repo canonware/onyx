@@ -161,12 +161,12 @@ buf_dump(cw_buf_t * a_buf, const char * a_prefix);
 
 /* XXX */
 cw_sint32_t
-buf_metric(const char * a_format, cw_uint32_t a_len, const void * a_arg);
+buf_out_metric(const char * a_format, cw_uint32_t a_len, const void * a_arg);
 
 /* XXX */
 char *
-buf_render(const char * a_format, cw_uint32_t a_len, const void * a_arg,
-	   char * r_buf);
+buf_out_render(const char * a_format, cw_uint32_t a_len, const void * a_arg,
+	       char * r_buf);
 
 /****************************************************************************
  *
