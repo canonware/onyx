@@ -1625,9 +1625,9 @@ buf_p_buf_catenate(cw_buf_t *a_a, cw_buf_t *a_b, cw_bool_t a_preserve)
 
 		if ((a_a->bufel_array[last_element_index].bufc->buf != NULL)
 		    && (a_a->bufel_array[last_element_index].bufc->buf
-			== a_b->bufel_array[a_b->array_start].bufc->buf)
+		    == a_b->bufel_array[a_b->array_start].bufc->buf)
 		    && (a_a->bufel_array[last_element_index].end_offset
-			== a_b->bufel_array[a_b->array_start].beg_offset)) {
+		    == a_b->bufel_array[a_b->array_start].beg_offset)) {
 			/*
 			 * These two bufel's reference the same bufc, and the
 			 * buffer regions they refer to are consecutive and
@@ -2172,7 +2172,7 @@ buf_p_writeable_range_make(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint32_t
 			bufel->beg_offset = 0;
 		}
 		_cw_assert(bufel->bufc->is_writeable);
-		_cw_assert(1 == bufc_p_ref_count_get(bufel->bufc));
+		_cw_assert(bufc_p_ref_count_get(bufel->bufc) == 1);
 	}
 }
 
