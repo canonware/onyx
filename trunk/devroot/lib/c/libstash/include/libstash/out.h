@@ -15,19 +15,34 @@
  ****************************************************************************/
 
 /* Typedef's to allow easy function pointer passing. */
-typedef cw_uint32_t out_metric_t(const char *, const void *);
-typedef void out_render_t(const char *, char *, char **);
+typedef cw_uint32_t cw_out_metric_t(const char *, const void *);
+typedef char * cw_out_render_t(const char *, const void *, char *);
 
 typedef struct cw_out_s cw_out_t;
+typedef struct cw_out_ent_s cw_out_ent_t;
 
 struct cw_out_s
 {
 #if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
   cw_uint32_t magic;
 #endif
+
+  cw_bool_t is_malloced;
+  cw_sint32_t fd;
+
 #ifdef _CW_REENTRANT
   cw_mtx_t lock;
 #endif
+
+  cw_out_ent_t * extentions;
+};
+
+struct cw_out_ent_s
+{
+  char * type;
+  cw_uint32_t size;
+  cw_out_metric_t * metric_func;
+  cw_out_render_t * render_func;
 };
 
 cw_out_t *
@@ -39,12 +54,12 @@ out_delete(cw_out_t * a_out);
 cw_bool_t
 out_register(cw_out_t * a_out,
 	     const char * a_type,
-	     cw_uint32_t a_sizeof,
-	     out_metric_t * a_metric_func,
-	     out_render_t * a_render_func);
+	     cw_uint32_t a_size,
+	     cw_out_metric_t * a_metric_func,
+	     cw_out_render_t * a_render_func);
 
-cw_bool_t
-out_unregister(cw_out_t * a_out, const char * a_type);
+void
+out_set_default_fd(cw_out_t * a_out, cw_sint32_t a_fd);
 
 cw_sint32_t
 out_put_f(cw_out_t * a_out, cw_sint32_t a_fd, const char * a_format, ...);
