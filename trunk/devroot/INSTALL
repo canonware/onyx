@@ -98,6 +98,10 @@ Optionally, pass any of the following (not a definitive list) arguments to
 	programs that depend on libsock (ncat and proxy) will be left out of
 	the build, even if present in the source tree.
 
+	The main use of this flag is for statically embedding a minimally
+	small onyx interpreter.  It should not be specified when building
+	and installing libraries meant for general use.
+
 --enable-debug
 	Build debugging code and turn assertions on (controlled by the
 	_CW_ASSERT cpp macro).  The resulting libraries and modules will not be
