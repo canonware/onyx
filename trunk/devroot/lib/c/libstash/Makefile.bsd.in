@@ -64,8 +64,6 @@ PERL    := @PERL@
 BASENAME:= @BASENAME@
 DIFF    := @DIFF@
 VERIFY  := test/verify
-#PMERGE  := test/pmerge
-#PSTUB   := test/pstub
 
 #
 # Compiler flags.

@@ -61,8 +61,6 @@ PERL    := @PERL@
 BASENAME:= @BASENAME@
 DIFF    := @DIFF@
 VERIFY  := test/verify
-PMERGE  := test/pmerge
-PSTUB   := test/pstub
 
 #
 # Compiler flags.
@@ -351,8 +349,6 @@ distclean : clean
 	rm -f include/libstash/libstash_defs.h
 	rm -f TAGS
 	rm -f $(VERIFY) test/*.perf
-	rm -f $(PMERGE)
-	rm -f $(PSTUB)
 
 etags : $(INCS) $(INCS_R) $(PRIV_INCS) $(PRIV_INCS_R) $(SRCS) $(SRCS_R)
 	@ETAGS@ $(INCS) $(INCS_R) $(PRIV_INCS) $(PRIV_INCS_R) $(SRCS) $(SRCS_R)

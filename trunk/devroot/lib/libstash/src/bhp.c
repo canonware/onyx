@@ -8,10 +8,6 @@
  *
  * Version: <Version>
  *
- * <<< Description >>>
- *
- * Implementation of binomial heaps.
- *
  ****************************************************************************/
 
 #ifdef _CW_REENTRANT
@@ -52,7 +48,9 @@ bhpi_new(cw_bhpi_t * a_bhpi, const void * a_priority, const void * a_data,
   retval->data = a_data;
 
 #ifdef _LIBSTASH_DBG
-  retval->magic = _LIBSTASH_BHPI_MAGIC;
+  retval->magic_a = _LIBSTASH_BHPI_MAGIC;
+  retval->size_of = sizeof(cw_bhpi_t);
+  retval->magic_b = _LIBSTASH_BHPI_MAGIC;
 #endif
 
   RETURN:
@@ -63,7 +61,9 @@ void
 bhpi_delete(cw_bhpi_t * a_bhpi)
 {
   _cw_check_ptr(a_bhpi);
-  _cw_assert(_LIBSTASH_BHPI_MAGIC == a_bhpi->magic);
+  _cw_assert(_LIBSTASH_BHPI_MAGIC == a_bhpi->magic_a);
+  _cw_assert(sizeof(cw_bhpi_t) == a_bhpi->size_of);
+  _cw_assert(_LIBSTASH_BHPI_MAGIC == a_bhpi->magic_b);
 
   if (NULL != a_bhpi->dealloc_func)
   {
@@ -93,7 +93,9 @@ void
 bhp_delete(cw_bhp_t * a_bhp)
 {
   _cw_check_ptr(a_bhp);
-  _cw_assert(_LIBSTASH_BHP_MAGIC == a_bhp->magic);
+  _cw_assert(_LIBSTASH_BHP_MAGIC == a_bhp->magic_a);
+  _cw_assert(sizeof(cw_bhp_t) == a_bhp->size_of);
+  _cw_assert(_LIBSTASH_BHP_MAGIC == a_bhp->magic_b);
 
   /* Empty the heap. */
   if (NULL != a_bhp->head)
@@ -121,7 +123,9 @@ void
 bhp_dump(cw_bhp_t * a_bhp)
 {
   _cw_check_ptr(a_bhp);
-  _cw_assert(_LIBSTASH_BHP_MAGIC == a_bhp->magic);
+  _cw_assert(_LIBSTASH_BHP_MAGIC == a_bhp->magic_a);
+  _cw_assert(sizeof(cw_bhp_t) == a_bhp->size_of);
+  _cw_assert(_LIBSTASH_BHP_MAGIC == a_bhp->magic_b);
   
 #ifdef _CW_REENTRANT
   if (a_bhp->is_thread_safe == TRUE)
@@ -153,8 +157,13 @@ bhp_insert(cw_bhp_t * a_bhp, cw_bhpi_t * a_bhpi)
   cw_bhp_t temp_heap;
   
   _cw_check_ptr(a_bhp);
-  _cw_assert(_LIBSTASH_BHP_MAGIC == a_bhp->magic);
+  _cw_assert(_LIBSTASH_BHP_MAGIC == a_bhp->magic_a);
+  _cw_assert(sizeof(cw_bhp_t) == a_bhp->size_of);
+  _cw_assert(_LIBSTASH_BHP_MAGIC == a_bhp->magic_b);
   _cw_check_ptr(a_bhpi);
+  _cw_assert(_LIBSTASH_BHPI_MAGIC == a_bhpi->magic_a);
+  _cw_assert(sizeof(cw_bhpi_t) == a_bhpi->size_of);
+  _cw_assert(_LIBSTASH_BHPI_MAGIC == a_bhpi->magic_b);
 #ifdef _CW_REENTRANT
   if (a_bhp->is_thread_safe == TRUE)
   {
@@ -189,7 +198,9 @@ bhp_find_min(cw_bhp_t * a_bhp, void ** r_priority, void ** r_data)
   cw_bhpi_t * curr_min, * curr_pos;
   
   _cw_check_ptr(a_bhp);
-  _cw_assert(_LIBSTASH_BHP_MAGIC == a_bhp->magic);
+  _cw_assert(_LIBSTASH_BHP_MAGIC == a_bhp->magic_a);
+  _cw_assert(sizeof(cw_bhp_t) == a_bhp->size_of);
+  _cw_assert(_LIBSTASH_BHP_MAGIC == a_bhp->magic_b);
 #ifdef _CW_REENTRANT
   if (a_bhp->is_thread_safe == TRUE)
   {
@@ -251,7 +262,9 @@ bhp_del_min(cw_bhp_t * a_bhp, void ** r_priority, void ** r_data)
   cw_bhp_t temp_heap;
   
   _cw_check_ptr(a_bhp);
-  _cw_assert(_LIBSTASH_BHP_MAGIC == a_bhp->magic);
+  _cw_assert(_LIBSTASH_BHP_MAGIC == a_bhp->magic_a);
+  _cw_assert(sizeof(cw_bhp_t) == a_bhp->size_of);
+  _cw_assert(_LIBSTASH_BHP_MAGIC == a_bhp->magic_b);
 #ifdef _CW_REENTRANT
   if (a_bhp->is_thread_safe == TRUE)
   {
@@ -363,7 +376,9 @@ bhp_get_size(cw_bhp_t * a_bhp)
   cw_uint64_t retval;
 
   _cw_check_ptr(a_bhp);
-  _cw_assert(_LIBSTASH_BHP_MAGIC == a_bhp->magic);
+  _cw_assert(_LIBSTASH_BHP_MAGIC == a_bhp->magic_a);
+  _cw_assert(sizeof(cw_bhp_t) == a_bhp->size_of);
+  _cw_assert(_LIBSTASH_BHP_MAGIC == a_bhp->magic_b);
 #ifdef _CW_REENTRANT
   if (a_bhp->is_thread_safe == TRUE)
   {
@@ -386,9 +401,13 @@ void
 bhp_union(cw_bhp_t * a_a, cw_bhp_t * a_b)
 {
   _cw_check_ptr(a_a);
-  _cw_assert(_LIBSTASH_BHP_MAGIC == a_a->magic);
+  _cw_assert(_LIBSTASH_BHP_MAGIC == a_a->magic_a);
+  _cw_assert(sizeof(cw_bhp_t) == a_a->size_of);
+  _cw_assert(_LIBSTASH_BHP_MAGIC == a_a->magic_b);
   _cw_check_ptr(a_b);
-  _cw_assert(_LIBSTASH_BHP_MAGIC == a_b->magic);
+  _cw_assert(_LIBSTASH_BHP_MAGIC == a_b->magic_a);
+  _cw_assert(sizeof(cw_bhp_t) == a_b->size_of);
+  _cw_assert(_LIBSTASH_BHP_MAGIC == a_b->magic_b);
 #ifdef _CW_REENTRANT
   if (a_a->is_thread_safe == TRUE)
   {
@@ -539,7 +558,9 @@ bhp_p_new(cw_bhp_t * a_bhp, bhp_prio_comp_t * a_prio_comp,
   retval->priority_compare = a_prio_comp;
 
 #ifdef _LIBSTASH_DBG
-  retval->magic = _LIBSTASH_BHP_MAGIC;
+  retval->magic_a = _LIBSTASH_BHP_MAGIC;
+  retval->size_of = sizeof(cw_bhp_t);
+  retval->magic_b = _LIBSTASH_BHP_MAGIC;
 #endif
 
   RETURN:

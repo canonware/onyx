@@ -22,6 +22,9 @@ typedef struct cw_list_s cw_list_t;
 
 struct cw_list_s
 {
+#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
+  cw_uint32_t magic_a;
+#endif
   cw_bool_t is_malloced;
 #ifdef _CW_REENTRANT
   cw_bool_t is_thread_safe;
@@ -32,6 +35,10 @@ struct cw_list_s
   cw_uint64_t count;
   cw_list_item_t * spares_head;
   cw_uint64_t spares_count;
+#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
+  cw_uint32_t size_of;
+  cw_uint32_t magic_b;
+#endif
 };
 
 cw_list_item_t *

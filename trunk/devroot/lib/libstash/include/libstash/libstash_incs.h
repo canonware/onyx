@@ -46,7 +46,6 @@
 #endif
 #include "oh.h"
 #include "dbg.h"
-#include "log.h"
 #include "out.h"
 #include "mem.h"
 #include "list.h"

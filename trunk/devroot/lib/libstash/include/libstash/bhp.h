@@ -24,10 +24,10 @@ typedef struct cw_bhpi_s cw_bhpi_t;
 
 struct cw_bhp_s
 {
-  cw_bool_t is_malloced;
 #if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
-  cw_uint32_t magic;
+  cw_uint32_t magic_a;
 #endif
+  cw_bool_t is_malloced;
 #ifdef _CW_REENTRANT
   cw_bool_t is_thread_safe;
   cw_mtx_t lock;
@@ -35,12 +35,16 @@ struct cw_bhp_s
   cw_bhpi_t * head;
   cw_uint64_t num_nodes;
   bhp_prio_comp_t * priority_compare;
+#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
+  cw_uint32_t size_of;
+  cw_uint32_t magic_b;
+#endif
 };
 
 struct cw_bhpi_s
 {
 #if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
-  cw_uint32_t magic;
+  cw_uint32_t magic_a;
 #endif
   void (*dealloc_func)(void *, void *);
   void * dealloc_arg;
@@ -51,6 +55,10 @@ struct cw_bhpi_s
   struct cw_bhpi_s * child;
   struct cw_bhpi_s * sibling;
   cw_uint32_t degree;
+#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
+  cw_uint32_t size_of;
+  cw_uint32_t magic_b;
+#endif
 };
 
 cw_bhpi_t *

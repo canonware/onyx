@@ -14,11 +14,23 @@
  *
  ****************************************************************************/
 
+#ifdef _LIBSTASH_DBG
+#  define _CW_LIST_ITEM_MAGIC 0x06161979
+#  define _CW_LIST_MAGIC 0x06171979
+#endif
+
 struct cw_list_item_s
 {
+#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
+  cw_uint32_t magic_a;
+#endif
   struct cw_list_item_s * next;
   struct cw_list_item_s * prev;
   void * item;
+#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
+  cw_uint32_t size_of;
+  cw_uint32_t magic_b;
+#endif
 };
 
 #define list_item_p_get_prev(a) (a)->prev

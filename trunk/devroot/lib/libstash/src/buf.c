@@ -2173,7 +2173,7 @@ buf_p_copy_array(cw_buf_t * a_a, cw_buf_t * a_b,
 		 cw_uint32_t a_a_start, cw_uint32_t a_b_start,
 		 cw_bool_t a_is_destructive)
 #else
-  static void
+static void
 buf_p_copy_array(cw_buf_t * a_a, cw_buf_t * a_b,
 		 cw_uint32_t a_num_elements,
 		 cw_uint32_t a_a_start, cw_uint32_t a_b_start)

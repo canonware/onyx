@@ -166,7 +166,7 @@ TRUE: Memory allocation error.
 Description:
 .RS
 Initialize various global variables.  In particular, initialize cw_g_mem,
-cw_g_dbg, cw_g_log, and cw_g_out.
+cw_g_dbg, and cw_g_out.
 .RE
 .RE
 
@@ -533,29 +533,28 @@ lb | lb | lb.
 _
 .T&
 l | l | l.
+ arena@libstash_arena(3s)@Arena (memory allocation).
  bhp@libstash_bhp(3s)@Binomial heap.
  bhpi@libstash_bhp(3s)@Binomial heap node.
  buf@libstash_buf(3s)@Extensible buffer.
  bufc@libstash_buf(3s)@Reference-counted memory buffer.
- cnd@libstash_thread(3s)@Condition.
+ cnd@libstash_cnd(3s)@Condition.
  dbg@libstash_dbg(3s)@Runtime debugging symbol lookup.
- jtl@libstash_locks(3s)@JOE-tree lock.
  list@libstash_list(3s)@Doubly linked list.
- log@libstash_log(3s)@Logging (printf(3) wrapper).
  matrix@libstash_matrix(3s)@Matrix.
  mem@libstash_mem(3s)@Memory allocation (malloc(3) wrapper).
  mq@libstash_mq(3s)@Message queue.
- mtx@libstash_thread(3s)@Mutex.
+ mtx@libstash_mtx(3s)@Mutex.
  oh@libstash_oh(3s)@Open hashing.
  out@libstash_out(3s)@Output (printf(3) replacement).
  pezz@libstash_pezz(3s)@Cached memory allocation.
  res@libstash_res(3s)@Resource (name/value pairs).
  ring@libstash_ring(3s)@Ring (similar uses as for lists).
- rwl@libstash_locks(3s)@Read/write lock.
- sem@libstash_thread(3s)@Semaphore.
- thd@libstash_thread(3s)@Thread.
+ rwl@libstash_rwl(3s)@Read/write lock.
+ sem@libstash_sem(3s)@Semaphore.
+ thd@libstash_thd(3s)@Thread.
  treen@libstash_treen(3s)@Arbitrary tree.
- tsd@libstash_thread(3s)@Thread-specific data.
+ tsd@libstash_tsd(3s)@Thread-specific data.
 .TE
 
 \"  .SH DIAGNOSTICS

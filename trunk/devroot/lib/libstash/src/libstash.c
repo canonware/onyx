@@ -19,7 +19,6 @@
 /* Globals. */
 cw_mem_t * cw_g_mem = NULL;
 cw_dbg_t * cw_g_dbg = NULL;
-cw_log_t * cw_g_log = NULL;
 cw_out_t * cw_g_out = NULL;
 
 cw_bool_t
@@ -31,10 +30,6 @@ libstash_init(void)
   if (cw_g_out == NULL)
   {
     cw_g_out = out_new(NULL);
-  }
-  if (cw_g_log == NULL)
-  {
-    cw_g_log = log_new();
   }
   if (cw_g_dbg == NULL)
   {
@@ -56,7 +51,6 @@ libstash_init(void)
   }
 
   if ((NULL == cw_g_out)
-      || (NULL == cw_g_log)
       || (NULL == cw_g_dbg)
       || (NULL == cw_g_mem))
   {
@@ -75,9 +69,6 @@ libstash_shutdown(void)
 
   dbg_delete(cw_g_dbg);
   cw_g_dbg = NULL;
-
-  log_delete(cw_g_log);
-  cw_g_log = NULL;
 
   out_delete(cw_g_out);
   cw_g_out = NULL;

@@ -1,3 +1,7 @@
+1999-10-02  Jason Evans  <jasone@canonware.com>
+
+	* : Remove the log class (was deprecated on 29 July 1999).
+
 1999-09-30  Jason Evans  <jasone@canonware.com>
 
 	* : Remove all _LIBSTASH_USE_* macros.  All headers are now always

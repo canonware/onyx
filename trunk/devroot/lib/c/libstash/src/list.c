@@ -29,6 +29,12 @@ list_item_new(void)
     bzero(retval, sizeof(cw_list_item_t));
   }
   
+#ifdef _LIBSTASH_DBG
+  retval->magic_a = _CW_LIST_ITEM_MAGIC;
+  retval->size_of = sizeof(cw_list_item_t);
+  retval->magic_b = _CW_LIST_ITEM_MAGIC;
+#endif
+  
   return retval;
 }
 
@@ -36,6 +42,9 @@ void
 list_item_delete(cw_list_item_t * a_list_item)
 {
   _cw_check_ptr(a_list_item);
+  _cw_assert(a_list_item->magic_a == _CW_LIST_ITEM_MAGIC);
+  _cw_assert(a_list_item->size_of == sizeof(cw_list_item_t));
+  _cw_assert(a_list_item->magic_b == _CW_LIST_ITEM_MAGIC);
 
   _cw_free(a_list_item);
 }
@@ -44,6 +53,9 @@ void *
 list_item_get(cw_list_item_t * a_list_item)
 {
   _cw_check_ptr(a_list_item);
+  _cw_assert(a_list_item->magic_a == _CW_LIST_ITEM_MAGIC);
+  _cw_assert(a_list_item->size_of == sizeof(cw_list_item_t));
+  _cw_assert(a_list_item->magic_b == _CW_LIST_ITEM_MAGIC);
 
   return a_list_item->item;
 }
@@ -52,6 +64,9 @@ void
 list_item_set(cw_list_item_t * a_list_item, void * a_data)
 {
   _cw_check_ptr(a_list_item);
+  _cw_assert(a_list_item->magic_a == _CW_LIST_ITEM_MAGIC);
+  _cw_assert(a_list_item->size_of == sizeof(cw_list_item_t));
+  _cw_assert(a_list_item->magic_b == _CW_LIST_ITEM_MAGIC);
 
   a_list_item->item = a_data;
 }
@@ -73,7 +88,11 @@ list_delete(cw_list_t * a_list)
 {
   cw_list_item_t * item;
   cw_uint64_t i;
+  
   _cw_check_ptr(a_list);
+  _cw_assert(a_list->magic_a == _CW_LIST_MAGIC);
+  _cw_assert(a_list->size_of == sizeof(cw_list_t));
+  _cw_assert(a_list->magic_b == _CW_LIST_MAGIC);
 
   /* Delete whatever items are still in the list.  This does *not* free
    * memory pointed to by the item pointers. */
@@ -102,6 +121,12 @@ list_delete(cw_list_t * a_list)
   {
     _cw_free(a_list);
   }
+#ifdef _LIBSTASH_DBG
+  else
+  {
+    memset(a_list, 0x5a, sizeof(cw_list_t));
+  }
+#endif
 }
 
 cw_uint64_t
@@ -110,6 +135,9 @@ list_count(cw_list_t * a_list)
   cw_uint64_t retval;
 
   _cw_check_ptr(a_list);
+  _cw_assert(a_list->magic_a == _CW_LIST_MAGIC);
+  _cw_assert(a_list->size_of == sizeof(cw_list_t));
+  _cw_assert(a_list->magic_b == _CW_LIST_MAGIC);
 #ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
@@ -132,7 +160,13 @@ void
 list_catenate_list(cw_list_t * a_a, cw_list_t * a_b)
 {
   _cw_check_ptr(a_a);
+  _cw_assert(a_a->magic_a == _CW_LIST_MAGIC);
+  _cw_assert(a_a->size_of == sizeof(cw_list_t));
+  _cw_assert(a_a->magic_b == _CW_LIST_MAGIC);
   _cw_check_ptr(a_b);
+  _cw_assert(a_b->magic_a == _CW_LIST_MAGIC);
+  _cw_assert(a_b->size_of == sizeof(cw_list_t));
+  _cw_assert(a_b->magic_b == _CW_LIST_MAGIC);
 
 #ifdef _CW_REENTRANT
   if (a_a->is_thread_safe)
@@ -185,6 +219,9 @@ list_hpush(cw_list_t * a_list, void * a_data)
   cw_list_item_t * retval;
   
   _cw_check_ptr(a_list);
+  _cw_assert(a_list->magic_a == _CW_LIST_MAGIC);
+  _cw_assert(a_list->size_of == sizeof(cw_list_t));
+  _cw_assert(a_list->magic_b == _CW_LIST_MAGIC);
 #ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
@@ -246,6 +283,9 @@ list_hpop(cw_list_t * a_list)
   void * retval;
 
   _cw_check_ptr(a_list);
+  _cw_assert(a_list->magic_a == _CW_LIST_MAGIC);
+  _cw_assert(a_list->size_of == sizeof(cw_list_t));
+  _cw_assert(a_list->magic_b == _CW_LIST_MAGIC);
 #ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
@@ -270,6 +310,9 @@ list_hpeek(cw_list_t * a_list)
   void * retval;
 
   _cw_check_ptr(a_list);
+  _cw_assert(a_list->magic_a == _CW_LIST_MAGIC);
+  _cw_assert(a_list->size_of == sizeof(cw_list_t));
+  _cw_assert(a_list->magic_b == _CW_LIST_MAGIC);
 #ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
@@ -302,6 +345,9 @@ list_tpush(cw_list_t * a_list, void * a_data)
   cw_list_item_t * retval;
 
   _cw_check_ptr(a_list);
+  _cw_assert(a_list->magic_a == _CW_LIST_MAGIC);
+  _cw_assert(a_list->size_of == sizeof(cw_list_t));
+  _cw_assert(a_list->magic_b == _CW_LIST_MAGIC);
 #ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
@@ -363,6 +409,9 @@ list_tpop(cw_list_t * a_list)
   void * retval;
 
   _cw_check_ptr(a_list);
+  _cw_assert(a_list->magic_a == _CW_LIST_MAGIC);
+  _cw_assert(a_list->size_of == sizeof(cw_list_t));
+  _cw_assert(a_list->magic_b == _CW_LIST_MAGIC);
 #ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
@@ -387,6 +436,9 @@ list_tpeek(cw_list_t * a_list)
   void * retval;
 
   _cw_check_ptr(a_list);
+  _cw_assert(a_list->magic_a == _CW_LIST_MAGIC);
+  _cw_assert(a_list->size_of == sizeof(cw_list_t));
+  _cw_assert(a_list->magic_b == _CW_LIST_MAGIC);
 #ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
@@ -419,6 +471,9 @@ list_get_next(cw_list_t * a_list, cw_list_item_t * a_in_list)
   cw_list_item_t * retval;
   
   _cw_check_ptr(a_list);
+  _cw_assert(a_list->magic_a == _CW_LIST_MAGIC);
+  _cw_assert(a_list->size_of == sizeof(cw_list_t));
+  _cw_assert(a_list->magic_b == _CW_LIST_MAGIC);
 #ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
@@ -450,6 +505,9 @@ list_get_prev(cw_list_t * a_list, cw_list_item_t * a_in_list)
   cw_list_item_t * retval;
   
   _cw_check_ptr(a_list);
+  _cw_assert(a_list->magic_a == _CW_LIST_MAGIC);
+  _cw_assert(a_list->size_of == sizeof(cw_list_t));
+  _cw_assert(a_list->magic_b == _CW_LIST_MAGIC);
 #ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
@@ -483,7 +541,13 @@ list_insert_before(cw_list_t * a_list,
   cw_list_item_t * retval;
   
   _cw_check_ptr(a_list);
+  _cw_assert(a_list->magic_a == _CW_LIST_MAGIC);
+  _cw_assert(a_list->size_of == sizeof(cw_list_t));
+  _cw_assert(a_list->magic_b == _CW_LIST_MAGIC);
   _cw_check_ptr(a_in_list);
+  _cw_assert(a_in_list->magic_a == _CW_LIST_ITEM_MAGIC);
+  _cw_assert(a_in_list->size_of == sizeof(cw_list_item_t));
+  _cw_assert(a_in_list->magic_b == _CW_LIST_ITEM_MAGIC);
 #ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
@@ -546,7 +610,13 @@ list_insert_after(cw_list_t * a_list,
   cw_list_item_t * retval;
   
   _cw_check_ptr(a_list);
+  _cw_assert(a_list->magic_a == _CW_LIST_MAGIC);
+  _cw_assert(a_list->size_of == sizeof(cw_list_t));
+  _cw_assert(a_list->magic_b == _CW_LIST_MAGIC);
   _cw_check_ptr(a_in_list);
+  _cw_assert(a_in_list->magic_a == _CW_LIST_ITEM_MAGIC);
+  _cw_assert(a_in_list->size_of == sizeof(cw_list_item_t));
+  _cw_assert(a_in_list->magic_b == _CW_LIST_ITEM_MAGIC);
 #ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
@@ -608,7 +678,9 @@ list_remove_item(cw_list_t * a_list, void * a_data)
   cw_list_item_t * t;
 
   _cw_check_ptr(a_list);
-  _cw_check_ptr(a_data);
+  _cw_assert(a_list->magic_a == _CW_LIST_MAGIC);
+  _cw_assert(a_list->size_of == sizeof(cw_list_t));
+  _cw_assert(a_list->magic_b == _CW_LIST_MAGIC);
 
 #ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
@@ -642,7 +714,13 @@ list_remove_container(cw_list_t * a_list, cw_list_item_t * a_to_remove)
   void * retval;
 
   _cw_check_ptr(a_list);
+  _cw_assert(a_list->magic_a == _CW_LIST_MAGIC);
+  _cw_assert(a_list->size_of == sizeof(cw_list_t));
+  _cw_assert(a_list->magic_b == _CW_LIST_MAGIC);
   _cw_check_ptr(a_to_remove);
+  _cw_assert(a_to_remove->magic_a == _CW_LIST_ITEM_MAGIC);
+  _cw_assert(a_to_remove->size_of == sizeof(cw_list_item_t));
+  _cw_assert(a_to_remove->magic_b == _CW_LIST_ITEM_MAGIC);
 #ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
@@ -667,6 +745,9 @@ list_purge_spares(cw_list_t * a_list)
   cw_list_item_t * item;
 
   _cw_check_ptr(a_list);
+  _cw_assert(a_list->magic_a == _CW_LIST_MAGIC);
+  _cw_assert(a_list->size_of == sizeof(cw_list_t));
+  _cw_assert(a_list->magic_b == _CW_LIST_MAGIC);
 #ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
@@ -693,6 +774,9 @@ void
 list_dump(cw_list_t * a_list)
 {
   _cw_check_ptr(a_list);
+  _cw_assert(a_list->magic_a == _CW_LIST_MAGIC);
+  _cw_assert(a_list->size_of == sizeof(cw_list_t));
+  _cw_assert(a_list->magic_b == _CW_LIST_MAGIC);
 #ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
@@ -776,6 +860,12 @@ list_p_new(cw_list_t * a_list, cw_bool_t a_is_thread_safe)
   retval->spares_head = NULL;
   retval->spares_count = 0;
 
+#ifdef _LIBSTASH_DBG
+  retval->magic_a = _CW_LIST_MAGIC;
+  retval->size_of = sizeof(cw_list_t);
+  retval->magic_b = _CW_LIST_MAGIC;
+#endif
+  
   RETURN:
   return retval;
 }
