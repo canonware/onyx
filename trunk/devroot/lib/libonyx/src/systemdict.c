@@ -1770,8 +1770,9 @@ systemdict_dirforeach(cw_nxo_t *a_thread)
 			 * directory entry.
 			 */
 			entry = nxo_stack_push(ostack);
-			nxo_string_new(entry, nx, currentlocking, ent.d_namlen);
-			nxo_string_set(entry, 0, ent.d_name, ent.d_namlen);
+			nxo_string_new(entry, nx, currentlocking,
+			    entp->d_namlen);
+			nxo_string_set(entry, 0, entp->d_name, entp->d_namlen);
 
 			/*
 			 * Evaluate proc.
