@@ -1,3 +1,8 @@
+2001-05-14  Jason Evans  <jasone@canonware.com>
+
+	* : Fix the mq and sema classes to handle spurious wakeups from
+	cnd_{timed}wait().
+
 2001-04-22  Jason Evans  <jasone@canonware.com>
 
 	* : Remove the treen class.

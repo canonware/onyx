@@ -147,7 +147,7 @@ mq_tryget(cw_mq_t *a_mq, ...)
 cw_bool_t
 mq_timedget(cw_mq_t *a_mq, const struct timespec *a_timeout, ...)
 {
-	cw_bool_t	retval;
+	cw_bool_t	retval, timed_out;
 	union {
 		cw_uint8_t	*one;
 		cw_uint16_t	*two;
@@ -171,8 +171,14 @@ mq_timedget(cw_mq_t *a_mq, const struct timespec *a_timeout, ...)
 		retval = TRUE;
 		goto RETURN;
 	}
-	if (a_mq->msg_count == 0) {
-		cnd_timedwait(&a_mq->cond, &a_mq->lock, a_timeout);
+	/*
+	 * A spurious wakeup will cause the timeout interval to start over.
+	 * This isn't a big deal as long as spurious wakeups don't occur
+	 * continuously, since the timeout period is merely a lower bound on how
+	 * long to wait.
+	 */
+	for (timed_out = FALSE; a_mq->msg_count == 0 && timed_out == FALSE;) {
+		timed_out = cnd_timedwait(&a_mq->cond, &a_mq->lock, a_timeout);
 		if (a_mq->get_stop) {
 			retval = TRUE;
 			goto RETURN;

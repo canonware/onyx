@@ -68,16 +68,23 @@ sema_wait(cw_sema_t *a_sema)
 cw_bool_t
 sema_timedwait(cw_sema_t *a_sema, struct timespec *a_timeout)
 {
-	cw_bool_t	retval;
+	cw_bool_t	retval, timed_out;
 
         _cw_check_ptr(a_sema);
         _cw_check_ptr(a_timeout);
 
         mtx_lock(&a_sema->lock);
 
-	if (a_sema->count <= 0) {
+	/*
+	 * A spurious wakeup will cause the timeout interval to start over.
+	 * This isn't a big deal as long as spurious wakeups don't occur
+	 * continuously, since the timeout period is merely a lower bound on how
+	 * long to wait.
+	 */
+	for (timed_out = FALSE; a_sema->count <= 0 && timed_out == FALSE;) {
 		a_sema->waiters++;
-		cnd_timedwait(&a_sema->gtzero, &a_sema->lock, a_timeout);
+		timed_out = cnd_timedwait(&a_sema->gtzero, &a_sema->lock,
+		    a_timeout);
 		a_sema->waiters--;
 	}
 	if (a_sema->count > 0) {
