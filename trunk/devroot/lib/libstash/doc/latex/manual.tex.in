@@ -85,7 +85,7 @@ performance and cache locality, but if misunderstood, can result in mysterious
 memory corruption and leaks.
 
 \section{Exceptions}
-\libname{libstash} reserves \htmlref{xep}{xep} exception numbers -1 to -127 and
+\libname{libstash} reserves \htmlref{xep}{xep} exception numbers 0 to 127 and
 defines the following exceptions:
 \begin{description}
 \label{_CW_STASHX_OOM}
