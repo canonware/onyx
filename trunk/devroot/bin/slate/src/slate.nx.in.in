@@ -221,7 +221,9 @@ $keytable <
 	insert_string
     }
     `\cv' {
-	`ABCDEFGH' insert_string
+	`<12345678901234567890123456789012345678901234567890123456789012>'
+	insert_string
+#	`ABCDEFGH' insert_string
     }
     `\cx' {
 	scratch `dump ' buffer_dump
@@ -256,7 +258,9 @@ scratch <
     $name	`*scratch*'
 > buffer_aux_set
 
-2 gcdict $setperiod get eval
+# XXX
+#2 gcdict $setperiod get eval
+# false gcdict $setactive get eval
 
 scratch true buffer_history_setactive
 
@@ -264,6 +268,6 @@ stdin 0 setiobuf {
     redisplay
     getc
     interpc
-    scratch `' buffer_dump
+#    scratch `' buffer_dump
     scratch buffer_validate
 } loop
