@@ -15,10 +15,8 @@
 #include "../include/slate.h"
 
 struct cw_buffer {
-	cw_uint32_t	iter;	/* For GC iteration. */
 	cw_buf_t	buf;
 	cw_mtx_t	mtx;	/* Protects all buf operations. */
-	cw_nxo_t	hook;	/* Ref to =buffer=, prevents mod unload. */
 	cw_nxo_t	aux;	/* Auxiliary data for buffer_{set}aux. */
 	cw_nxoi_t	seq;	/* Sequence number. */
 };
@@ -29,7 +27,6 @@ struct cw_buffer {
  */
 struct cw_marker {
 	cw_uint32_t	iter;	/* For reference iteration. */
-	cw_nxo_t	hook;	/* Ref to =marker=, prevents mod unload. */
 	cw_nxo_t	buffer_nxo;
 	cw_bufm_t	bufm;
 	cw_nxoi_t	seq;	/* Sequence number. */
@@ -115,20 +112,9 @@ buffer_p_ref_iter(void *a_data, cw_bool_t a_reset)
 	struct cw_buffer	*buffer = (struct cw_buffer *)a_data;
 
 	if (a_reset)
-		buffer->iter = 0;
-
-	switch (buffer->iter) {
-	case 0:
-		retval = nxo_nxoe_get(&buffer->hook);
-		cw_check_ptr(retval);
-		break;
-	case 1:
 		retval = nxo_nxoe_get(&buffer->aux);
-		break;
-	default:
+	else
 		retval = NULL;
-	}
-	buffer->iter++;
 
 	return retval;
 }
@@ -205,13 +191,6 @@ slate_buffer(cw_nxo_t *a_thread)
 
 	buffer = (struct cw_buffer *)nxa_malloc(nx_nxa_get(nx),
 	    sizeof(struct cw_buffer));
-
-	/*
-	 * Create a reference to this operator in order to prevent the module
-	 * from being prematurely unloaded.
-	 */
-	nxo_no_new(&buffer->hook);
-	nxo_dup(&buffer->hook, nxo_stack_get(estack));
 
 	/* Initialize the buf. */
 	buf_new(&buffer->buf, (cw_opaque_alloc_t *)nxa_malloc_e,
@@ -639,23 +618,10 @@ marker_p_ref_iter(void *a_data, cw_bool_t a_reset)
 	struct cw_marker	*marker = (struct cw_marker *)a_data;
 
 	if (a_reset)
-		marker->iter = 0;
-
-	switch (marker->iter) {
-	case 0:
-		marker->iter++;
-		retval = nxo_nxoe_get(&marker->hook);
-		if (retval != NULL)
-			break;
-		/* Fall through. */
-	case 1:
-		marker->iter++;
 		retval = nxo_nxoe_get(&marker->buffer_nxo);
-		break;
-	default:
+	else
 		retval = NULL;
-	}
-		
+
 	return retval;
 }
 
@@ -766,13 +732,6 @@ slate_marker(cw_nxo_t *a_thread)
 	marker = (struct cw_marker *)nxa_malloc(nx_nxa_get(nx),
 	    sizeof(struct cw_marker));
 	
-	/*
-	 * Create a reference to this operator in order to prevent the module
-	 * from being prematurely unloaded.
-	 */
-	nxo_no_new(&marker->hook);
-	nxo_dup(&marker->hook, nxo_stack_get(estack));
-
 	nxo_no_new(&marker->buffer_nxo);
 	nxo_dup(&marker->buffer_nxo, nxo);
 	buffer_p_lock(buffer);
@@ -850,13 +809,6 @@ slate_marker_copy(cw_nxo_t *a_thread)
 
 	marker_copy = (struct cw_marker *)nxa_malloc(nx_nxa_get(nx),
 	    sizeof(struct cw_marker));
-
-	/*
-	 * Create a reference to this operator in order to prevent the module
-	 * from being prematurely unloaded.
-	 */
-	nxo_no_new(&marker_copy->hook);
-	nxo_dup(&marker_copy->hook, nxo_stack_get(estack));
 
 	nxo_no_new(&marker_copy->buffer_nxo);
 	nxo_dup(&marker_copy->buffer_nxo, &marker->buffer_nxo);
