@@ -130,7 +130,7 @@ the invalid code is executed.
 Onyx has a fixed set of basic types which cannot be extended.  However,
 object-oriented programming is supported, so the fixed set of object types is
 not a limitation in practice.  Object-oriented programming is discussed more in
-Section~\ref{onyxtut:object_oriented_programming}.
+Section~\ref{sec:onyx_oop}.
 
 \section{Execution}
 
@@ -501,19 +501,20 @@ when manipulating the garbage collector, so those definitions are stashed out of
 the way.  Your program can do the same for definitions that are not of regular
 interest.
 
-\subsection{Object-oriented programming}
-\label{onyxtut:object_oriented_programming}
-XXX
+%%\subsection{Object-oriented programming}
+%%\label{onyxtut:object_oriented_programming}
 
 \subsection{Modules}
-XXX This section needs substantial revision, given the mclass and module
-classes.
-
 Onyx provides the infrastructure for loadable modules, which can be implemented
-in Onyx and/or dynamically loaded machine code (shared libraries).  See the
-\htmlref{\onyxop{}{require}{}}{systemdict:require} and
-\htmlref{\onyxop{}{mrequire}{}}{systemdict:mrequire} documentation for details
-on how to load modules.
+in Onyx and/or dynamically loaded machine code (shared libraries).  At the
+lowest level, \htmlref{\onyxop{}{modload}{}}{systemdict:modload} can be used to
+load a shared object.  At a higher level,
+\htmlref{\onyxop{}{mrequire}{}}{systemdict:mrequire} can be used to find a
+shared object in one of the directories specified by the module path, then
+\onyxop{}{modload}{} it.  At the highest level, the \classname{mclass} and
+\classname{module} classes provide methods for loading, introspecting, and
+unloading modules.  The lower level APIs are typically only utilized when
+writing modules, and the highest level APIs are utilized when using modules.
 
 When writing a module that is meant as a library of additional functionality,
 some choices have to be made about how to organize the module.  Some of the
@@ -523,10 +524,6 @@ obvious choices for how to organize the loaded definitions are:
 \item{Insert definitions into globaldict.}
 \item{Create a new dictionary full of definitions, and insert the dictionary
   into globaldict as, say, foodict.}
-\item{Create a new dictionary full of definitions, and put the dictionary on
-  dstack somewhere, such as directly above or below systemdict.  Note that this
-  can be done by the application manually, so simply creating the dictionary and
-  letting the application insert it where it pleases could be a better choice.}
 \item{Insert definitions into systemdict (questionable practice).}
 \end{itemize}
 
