@@ -33,43 +33,46 @@ ONYX_FIG_SRCS = [fromto % [srcdir]/doc/latex/% [ONYX_FIG_SRCS]];
  * Targets.
  */
 
-onyx_docs_ps : [ONYX_PS];
-onyx_docs_pdf : [ONYX_PDF];
-onyx_docs_html : [ONYX_HTML];
-
-onyx_docs_install_ps :
+onyx_docs_ps :
 #if @with_docs@
-                       [ONYX_PS]
+               [ONYX_PS]
 #endif
+               ;
+onyx_docs_pdf :
+#if @with_docs@
+                [ONYX_PDF]
+#endif
+                ;
+onyx_docs_html :
+#if @with_docs@
+                 [ONYX_HTML]
+#endif
+                 ;
+
+onyx_docs_install_ps : onyx_docs_ps
 {
-  [INSTALL] -d [PREFIX]/share/onyx/doc/ps;
-  [INSTALL] -m 0444 [ONYX_PS] [PREFIX]/share/onyx/doc/ps;
+  @INSTALL@ -d [PREFIX]/share/onyx/doc/ps;
+  @INSTALL@ -m 0444 [ONYX_PS] [PREFIX]/share/onyx/doc/ps;
 }
 
-onyx_docs_install_pdf :
-#if @with_docs@
-                        [ONYX_PDF]
-#endif
+onyx_docs_install_pdf : onyx_docs_pdf
 {
-  [INSTALL] -d [PREFIX]/share/onyx/doc/pdf;
-  [INSTALL] -m 0444 [ONYX_PDF] [PREFIX]/share/onyx/doc/pdf;
+  @INSTALL@ -d [PREFIX]/share/onyx/doc/pdf;
+  @INSTALL@ -m 0444 [ONYX_PDF] [PREFIX]/share/onyx/doc/pdf;
 }
 
-onyx_docs_install_html :
-#if @with_docs@
-                         [ONYX_HTML]
-#endif
+onyx_docs_install_html : onyx_docs_html
 {
   [SHELL] -e;
 data
 #![SHELL]
 
-echo [INSTALL] -d [PREFIX]/share/onyx/doc/html
-[INSTALL] -d [PREFIX]/share/onyx/doc/html
+echo @INSTALL@ -d [PREFIX]/share/onyx/doc/html
+@INSTALL@ -d [PREFIX]/share/onyx/doc/html
 
 for i in `find [dirname [ONYX_HTML]] -type f`; do
-  echo [INSTALL] -m 0444 $i [PREFIX]/share/onyx/doc/html
-  [INSTALL] -m 0444 $i [PREFIX]/share/onyx/doc/html
+  echo @INSTALL@ -m 0444 $i [PREFIX]/share/onyx/doc/html
+  @INSTALL@ -m 0444 $i [PREFIX]/share/onyx/doc/html
 done
 dataend
 }

@@ -66,7 +66,7 @@ slate_bins_install : [SLATE]
                 libonyx_libs_install_s
 #endif
 {
-  [INSTALL] -d [PREFIX]/bin;
+  @INSTALL@ -d [PREFIX]/bin;
 
   [CC] [A_CFLAGS] -o [PREFIX]/bin/slate
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [SLATE_SRCS]]
@@ -77,10 +77,10 @@ slate_bins_install : [SLATE]
 #endif
        [LDFLAGS] -lonyx
        [EXTRALIBS];
-  [CHMOD] 0755 [PREFIX]/bin/slate;
+  chmod 0755 [PREFIX]/bin/slate;
 
-  [INSTALL] -d [PREFIX]/man/man1;
-  [INSTALL] -m 0444 [objdir]/bin/slate/man/man1/slate.1 [PREFIX]/man/man1;
+  @INSTALL@ -d [PREFIX]/man/man1;
+  @INSTALL@ -m 0444 [objdir]/bin/slate/man/man1/slate.1 [PREFIX]/man/man1;
 }
 
 slate_bins_uninstall :

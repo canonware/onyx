@@ -197,7 +197,7 @@ onyx_bins_install : [ONYX]
                libonyx_libs_install_s
 #endif
 {
-  [INSTALL] -d [PREFIX]/bin;
+  @INSTALL@ -d [PREFIX]/bin;
 
   [CC] [A_CFLAGS] -o [PREFIX]/bin/onyx
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [ONYX_SRCS]]
@@ -211,10 +211,10 @@ onyx_bins_install : [ONYX]
 #endif
        [LDFLAGS] -lonyx
        [EXTRALIBS];
-  [CHMOD] 0755 [PREFIX]/bin/onyx;
+  chmod 0755 [PREFIX]/bin/onyx;
 
-  [INSTALL] -d [PREFIX]/man/man1;
-  [INSTALL] -m 0444 [objdir]/bin/onyx/man/man1/onyx.1 [PREFIX]/man/man1;
+  @INSTALL@ -d [PREFIX]/man/man1;
+  @INSTALL@ -m 0444 [objdir]/bin/onyx/man/man1/onyx.1 [PREFIX]/man/man1;
 }
 
 onyx_bins_uninstall :

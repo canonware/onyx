@@ -60,18 +60,18 @@ modgtk_mods_install : [MODGTK]
 data
 #![SHELL]
 
-echo [INSTALL] -d [PREFIX]/share/onyx/nxm
-[INSTALL] -d [PREFIX]/share/onyx/nxm
+echo @INSTALL@ -d [PREFIX]/share/onyx/nxm
+@INSTALL@ -d [PREFIX]/share/onyx/nxm
 
-echo [INSTALL] -m 0444 [MODGTK] [PREFIX]/share/onyx/nxm
-[INSTALL] -m 0444 [MODGTK] [PREFIX]/share/onyx/nxm
+echo @INSTALL@ -m 0444 [MODGTK] [PREFIX]/share/onyx/nxm
+@INSTALL@ -m 0444 [MODGTK] [PREFIX]/share/onyx/nxm
 
-echo [INSTALL] -d [PREFIX]/share/onyx/nx/modgtk
-[INSTALL] -d [PREFIX]/share/onyx/nx/modgtk
+echo @INSTALL@ -d [PREFIX]/share/onyx/nx/modgtk
+@INSTALL@ -d [PREFIX]/share/onyx/nx/modgtk
 
 for i in [MODGTK_NX] [MODGTK_NX_GEN]; do
-	echo [INSTALL] -m 0644 $i [PREFIX]/share/onyx/nx/modgtk/
-	[INSTALL] -m 0644 $i [PREFIX]/share/onyx/nx/modgtk/
+	echo @INSTALL@ -m 0644 $i [PREFIX]/share/onyx/nx/modgtk/
+	@INSTALL@ -m 0644 $i [PREFIX]/share/onyx/nx/modgtk/
 done
 dataend
 }

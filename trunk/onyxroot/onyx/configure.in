@@ -167,11 +167,7 @@ AC_PROG_INSTALL
 AC_PROG_RANLIB
 AC_PATH_PROG(AR, ar, , $PATH)
 AC_PATH_PROG(LD, ld, , $PATH)
-AC_PATH_PROG(LN, ln, , $PATH)
 AC_PATH_PROG(PERL, perl, , $PATH)
-AC_PATH_PROG(BASENAME, basename, , $PATH)
-AC_PATH_PROG(CHMOD, chmod, , $PATH)
-AC_PATH_PROG(CAT, cat, , $PATH)
 AC_PATH_PROG(DIFF, diff, , $PATH)
 
 dnl Do not build documentaion by default; instead use the prebuilt

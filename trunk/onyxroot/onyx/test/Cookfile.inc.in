@@ -61,24 +61,6 @@ tests_distclean :
 }
 
 /*
- * Add magic to perl files.
- */
-[objdir]/%0%.pl : [srcdir]/%0%.pl.in
-  set mkdir
-{
-  [SHELL] -e;
-data
-#![SHELL]
-
-echo \"[srcdir]/%0%.pl.in --> [target]\"
-
-echo \"#![PERL] -w\" > [target]
-[CAT] [srcdir]/%0%.pl.in >> [target];
-chmod u+x [target];
-dataend
-}
-
-/*
  * Add magic to onyx files.
  */
 [objdir]/%0test/%.nx : [srcdir]/%0test/%.nx.in
@@ -92,7 +74,7 @@ echo \"[srcdir]/%0test/%.nx.in --> [target]\"
 
 echo \"#![abs_objdir]/[TONYX]\" > [target]
 echo \"!#\" >> [target]
-[CAT] [srcdir]/%0test/%.nx.in >> [target];
+cat [srcdir]/%0test/%.nx.in >> [target];
 chmod u+x [target];
 dataend
 }

@@ -30,15 +30,6 @@ abi = @abi@;
 SHELL = /bin/sh;
 if [not [defined CC]] then
   CC = [split " " [strip "@CC@"]];
-AR = @AR@;
-LD = @LD@;
-LN = @LN@;
-RANLIB = @RANLIB@;
-BASENAME = @BASENAME@;
-CHMOD = @CHMOD@;
-INSTALL = @INSTALL@;
-PERL = @PERL@;
-CAT = @CAT@;
 
 /* Build parameters. */
 if [not [defined CPPFLAGS]] then

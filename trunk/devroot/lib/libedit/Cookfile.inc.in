@@ -88,6 +88,6 @@ CPPFLAGS = [CPPFLAGS] -I[srcdir]/lib/libedit/include
 [LIBEDIT_A] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [LIBEDIT_SRCS]]
   set mkdir
 {
-  [AR] cru [target] [younger];
-  [RANLIB] [target];
+  @AR@ cru [target] [younger];
+  @RANLIB@ [target];
 }
