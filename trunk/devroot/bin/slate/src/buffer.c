@@ -1147,9 +1147,9 @@ slate_marker_range_get(void *a_data, cw_nxo_t *a_thread)
 	cw_nxn_t		error;
 	cw_buf_t		*buf;
 	struct cw_marker	*marker_a, *marker_b;
-	cw_uint8_t		*str, *ostr;
 	cw_uint64_t		pos_a, pos_b, str_len;
-	cw_uint32_t		elmsize;
+	struct iovec		*iov, siov;
+	cw_uint32_t		iovcnt;
 
 	ostack = nxo_thread_ostack_get(a_thread);
 
@@ -1181,7 +1181,7 @@ slate_marker_range_get(void *a_data, cw_nxo_t *a_thread)
 	buf_lock(buf);
 
 	/* Get a pointer to the buffer range and calculate its length. */
-	str = bufm_range_get(&marker_a->bufm, &marker_b->bufm);
+	iov = bufm_range_get(&marker_a->bufm, &marker_b->bufm, &iovcnt);
 	pos_a = bufm_pos(&marker_a->bufm);
 	pos_b = bufm_pos(&marker_b->bufm);
 	str_len = (pos_a < pos_b) ? pos_b - pos_a : pos_a - pos_b;
@@ -1194,22 +1194,9 @@ slate_marker_range_get(void *a_data, cw_nxo_t *a_thread)
 	nxo_string_new(nxo, nxo_thread_nx_get(a_thread),
 	    nxo_thread_currentlocking(a_thread), str_len);
 
-	elmsize = buf_elmsize_get(buf);
-	ostr = nxo_string_get(nxo);
-	if (elmsize == 1) {
-		/* Use memcpy() to copy the buffer contents to the string. */
-		memcpy(ostr, str, str_len);
-	} else {
-		cw_uint32_t	i;
-
-		/*
-		 * Iteratively copy bytes from the buffer into the string.  It
-		 * is not safe to memcpy(), since elmsize is not 1.
-		 */
-		ostr = nxo_string_get(nxo);
-		for (i = 0; i < str_len; i++)
-			ostr[i] = str[i * elmsize];
-	}
+	siov.iov_base = nxo_string_get(nxo);
+	siov.iov_len = str_len;
+	buf_vec_copy(&siov, 1, 1, iov, iovcnt, buf_elmsize_get(buf), 0);
 
 	buf_unlock(buf);
 
@@ -1224,9 +1211,9 @@ slate_marker_range_cut(void *a_data, cw_nxo_t *a_thread)
 	cw_nxn_t		error;
 	cw_buf_t		*buf;
 	struct cw_marker	*marker_a, *marker_b;
-	cw_uint8_t		*str, *ostr;
 	cw_uint64_t		pos_a, pos_b, str_len;
-	cw_uint32_t		elmsize;
+	struct iovec		*iov, siov;
+	cw_uint32_t		iovcnt;
 
 	ostack = nxo_thread_ostack_get(a_thread);
 
@@ -1258,7 +1245,7 @@ slate_marker_range_cut(void *a_data, cw_nxo_t *a_thread)
 	buf_lock(buf);
 
 	/* Get a pointer to the buffer range and calculate its length. */
-	str = bufm_range_get(&marker_a->bufm, &marker_b->bufm);
+	iov = bufm_range_get(&marker_a->bufm, &marker_b->bufm, &iovcnt);
 	pos_a = bufm_pos(&marker_a->bufm);
 	pos_b = bufm_pos(&marker_b->bufm);
 	str_len = (pos_a < pos_b) ? pos_b - pos_a : pos_a - pos_b;
@@ -1271,22 +1258,9 @@ slate_marker_range_cut(void *a_data, cw_nxo_t *a_thread)
 	nxo_string_new(nxo, nxo_thread_nx_get(a_thread),
 	    nxo_thread_currentlocking(a_thread), str_len);
 
-	elmsize = buf_elmsize_get(buf);
-	ostr = nxo_string_get(nxo);
-	if (elmsize == 1) {
-		/* Use memcpy() to copy the buffer contents to the string. */
-		memcpy(ostr, str, str_len);
-	} else {
-		cw_uint32_t	i;
-
-		/*
-		 * Iteratively copy bytes from the buffer into the string.  It
-		 * is not safe to memcpy(), since elmsize is not 1.
-		 */
-		ostr = nxo_string_get(nxo);
-		for (i = 0; i < str_len; i++)
-			ostr[i] = str[i * elmsize];
-	}
+	siov.iov_base = nxo_string_get(nxo);
+	siov.iov_len = str_len;
+	buf_vec_copy(&siov, 1, 1, iov, iovcnt, buf_elmsize_get(buf), 0);
 
 	/* Remove the buffer range. */
 	bufm_remove(&marker_a->bufm, &marker_b->bufm);

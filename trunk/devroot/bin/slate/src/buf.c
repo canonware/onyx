@@ -282,13 +282,21 @@ static void bufm_p_remove(cw_bufm_t *a_start, cw_bufm_t *a_end, cw_bool_t
 static void
 buf_p_hist_dump(cw_buf_t *a_buf)
 {
-	cw_uint8_t	*p, hdr;
+	cw_uint8_t	hdr, *p;
 	union {
 		cw_uint64_t	bpos;
 		cw_uint8_t	str[8];
 	}	u;
+	struct iovec	*iov, piov, ciov;
+	cw_uint8_t	text[32];
 	cw_bufm_t	tbufm, ttbufm;
-	cw_uint32_t	i;
+	cw_uint32_t	i, iovcnt;
+
+	piov.iov_base = u.str;
+	piov.iov_len = 8;
+
+	ciov.iov_base = text;
+	ciov.iov_len = 32;
 
 	bufm_new(&tbufm, a_buf->h, NULL);
 	bufm_new(&ttbufm, a_buf->h, NULL);
@@ -311,48 +319,52 @@ buf_p_hist_dump(cw_buf_t *a_buf)
 		case HDR_TAG_POS:
 			bufm_dup(&ttbufm, &tbufm);
 			bufm_seek(&tbufm, -9, BUFW_REL);
-			p = bufm_range_get(&tbufm, &ttbufm);
-			memcpy(u.str, p, 8);
+			iov = bufm_range_get(&tbufm, &ttbufm, &iovcnt);
+			buf_vec_copy(&piov, 1, 1, iov, iovcnt, 1, 0);
 			fprintf(stderr, "P(%llu)", u.bpos);
 			break;
 		case HDR_TAG_INS:
 			fprintf(stderr, "I%d(", hdr_cnt_get(hdr));
 			bufm_dup(&ttbufm, &tbufm);
 			bufm_seek(&tbufm, -1 - hdr_cnt_get(hdr), BUFW_REL);
-			p = bufm_range_get(&tbufm, &ttbufm);
+			iov = bufm_range_get(&tbufm, &ttbufm, &iovcnt);
+			buf_vec_copy(&ciov, 1, 1, iov, iovcnt, 1, 0);
 			for (i = 0; i < hdr_cnt_get(hdr); i++)
 				fprintf(stderr, "%c",
-				    p[hdr_cnt_get(hdr) - 1 - i]);
+				    text[hdr_cnt_get(hdr) - 1 - i]);
 			fprintf(stderr, ")");
 			break;
 		case HDR_TAG_YNK:
 			fprintf(stderr, "Y%d(", hdr_cnt_get(hdr));
 			bufm_dup(&ttbufm, &tbufm);
 			bufm_seek(&tbufm, -1 - hdr_cnt_get(hdr), BUFW_REL);
-			p = bufm_range_get(&tbufm, &ttbufm);
+			iov = bufm_range_get(&tbufm, &ttbufm, &iovcnt);
+			buf_vec_copy(&ciov, 1, 1, iov, iovcnt, 1, 0);
 			for (i = 0; i < hdr_cnt_get(hdr); i++)
 				fprintf(stderr, "%c",
-				    p[hdr_cnt_get(hdr) - 1 - i]);
+				    text[hdr_cnt_get(hdr) - 1 - i]);
 			fprintf(stderr, ")");
 			break;
 		case HDR_TAG_REM:
 			fprintf(stderr, "R%d(", hdr_cnt_get(hdr));
 			bufm_dup(&ttbufm, &tbufm);
 			bufm_seek(&tbufm, -1 - hdr_cnt_get(hdr), BUFW_REL);
-			p = bufm_range_get(&tbufm, &ttbufm);
+			iov = bufm_range_get(&tbufm, &ttbufm, &iovcnt);
+			buf_vec_copy(&ciov, 1, 1, iov, iovcnt, 1, 0);
 			for (i = 0; i < hdr_cnt_get(hdr); i++)
 				fprintf(stderr, "%c",
-				    p[hdr_cnt_get(hdr) - 1 - i]);
+				    text[hdr_cnt_get(hdr) - 1 - i]);
 			fprintf(stderr, ")");
 			break;
 		case HDR_TAG_DEL:
 			fprintf(stderr, "D%d(", hdr_cnt_get(hdr));
 			bufm_dup(&ttbufm, &tbufm);
 			bufm_seek(&tbufm, -1 - hdr_cnt_get(hdr), BUFW_REL);
-			p = bufm_range_get(&tbufm, &ttbufm);
+			iov = bufm_range_get(&tbufm, &ttbufm, &iovcnt);
+			buf_vec_copy(&ciov, 1, 1, iov, iovcnt, 1, 0);
 			for (i = 0; i < hdr_cnt_get(hdr); i++)
 				fprintf(stderr, "%c",
-				    p[hdr_cnt_get(hdr) - 1 - i]);
+				    text[hdr_cnt_get(hdr) - 1 - i]);
 			fprintf(stderr, ")");
 			break;
 
@@ -380,44 +392,49 @@ buf_p_hist_dump(cw_buf_t *a_buf)
 		case HDR_TAG_POS:
 			bufm_dup(&ttbufm, &tbufm);
 			bufm_seek(&tbufm, 9, BUFW_REL);
-			p = bufm_range_get(&ttbufm, &tbufm);
-			memcpy(u.str, &p[1], 8);
+			bufm_seek(&ttbufm, 1, BUFW_REL);
+			iov = bufm_range_get(&tbufm, &ttbufm, &iovcnt);
+			buf_vec_copy(&piov, 1, 1, iov, iovcnt, 1, 0);
 			fprintf(stderr, "P(%llu)", u.bpos);
 			break;
 		case HDR_TAG_INS:
 			fprintf(stderr, "I%d(", hdr_cnt_get(hdr));
 			bufm_dup(&ttbufm, &tbufm);
 			bufm_seek(&tbufm, 1 + hdr_cnt_get(hdr), BUFW_REL);
-			p = bufm_range_get(&ttbufm, &tbufm);
+			iov = bufm_range_get(&tbufm, &ttbufm, &iovcnt);
+			buf_vec_copy(&ciov, 1, 1, iov, iovcnt, 1, 0);
 			for (i = 0; i < hdr_cnt_get(hdr); i++)
-				fprintf(stderr, "%c", p[i + 1]);
+				fprintf(stderr, "%c", text[i + 1]);
 			fprintf(stderr, ")");
 			break;
 		case HDR_TAG_YNK:
 			fprintf(stderr, "Y%d(", hdr_cnt_get(hdr));
 			bufm_dup(&ttbufm, &tbufm);
 			bufm_seek(&tbufm, 1 + hdr_cnt_get(hdr), BUFW_REL);
-			p = bufm_range_get(&ttbufm, &tbufm);
+			iov = bufm_range_get(&tbufm, &ttbufm, &iovcnt);
+			buf_vec_copy(&ciov, 1, 1, iov, iovcnt, 1, 0);
 			for (i = 0; i < hdr_cnt_get(hdr); i++)
-				fprintf(stderr, "%c", p[i + 1]);
+				fprintf(stderr, "%c", text[i + 1]);
 			fprintf(stderr, ")");
 			break;
 		case HDR_TAG_REM:
 			fprintf(stderr, "R%d(", hdr_cnt_get(hdr));
 			bufm_dup(&ttbufm, &tbufm);
 			bufm_seek(&tbufm, 1 + hdr_cnt_get(hdr), BUFW_REL);
-			p = bufm_range_get(&ttbufm, &tbufm);
+			iov = bufm_range_get(&tbufm, &ttbufm, &iovcnt);
+			buf_vec_copy(&ciov, 1, 1, iov, iovcnt, 1, 0);
 			for (i = 0; i < hdr_cnt_get(hdr); i++)
-				fprintf(stderr, "%c", p[i + 1]);
+				fprintf(stderr, "%c", text[i + 1]);
 			fprintf(stderr, ")");
 			break;
 		case HDR_TAG_DEL:
 			fprintf(stderr, "D%d(", hdr_cnt_get(hdr));
 			bufm_dup(&ttbufm, &tbufm);
 			bufm_seek(&tbufm, 1 + hdr_cnt_get(hdr), BUFW_REL);
-			p = bufm_range_get(&ttbufm, &tbufm);
+			iov = bufm_range_get(&tbufm, &ttbufm, &iovcnt);
+			buf_vec_copy(&ciov, 1, 1, iov, iovcnt, 1, 0);
 			for (i = 0; i < hdr_cnt_get(hdr); i++)
-				fprintf(stderr, "%c", p[i + 1]);
+				fprintf(stderr, "%c", text[i + 1]);
 			fprintf(stderr, ")");
 			break;
 
@@ -1191,6 +1208,55 @@ buf_unlock(cw_buf_t *a_buf)
 	mtx_unlock(&a_buf->mtx);
 }
 
+cw_uint64_t
+buf_vec_copy(struct iovec *a_to, cw_uint32_t a_to_len, cw_uint32_t a_to_sizeof,
+    const struct iovec *a_fr, cw_uint32_t a_fr_len, cw_uint32_t a_fr_sizeof,
+    cw_uint64_t a_maxlen)
+{
+	cw_uint64_t	retval;
+	cw_uint32_t	to_el, fr_el, to_off, fr_off, cpysizeof;
+
+	_cw_check_ptr(a_to);
+	_cw_check_ptr(a_fr);
+
+	if (a_to_sizeof <= a_fr_sizeof)
+		cpysizeof = a_to_sizeof;
+	else
+		cpysizeof = a_fr_sizeof;
+
+	retval = 0;
+	to_el = 0;
+	to_off = 0;
+	/* Iterate over iovec elements. */
+	for (fr_el = 0; fr_el < a_fr_len; fr_el++) {
+		/* Iterate over iovec element contents. */
+		for (fr_off = 0; fr_off < a_fr[fr_el].iov_len; fr_off++) {
+			memcpy(&a_to[to_el].iov_base[to_off],
+			    &a_fr[fr_el].iov_base[fr_off], cpysizeof);
+
+			/*
+			 * Copy no more than a_maxlen elements (unless a_maxlen
+			 * is 0).
+			 */
+			retval++;
+			if (retval == a_maxlen)
+				goto RETURN;
+
+			/* Increment the position to copy to. */
+			to_off++;
+			if (to_off == a_to[to_el].iov_len) {
+				to_off = 0;
+				to_el++;
+				if (to_el == a_to_len)
+					goto RETURN;
+			}
+		}
+	}
+
+	RETURN:
+	return retval;
+}
+
 cw_uint32_t
 buf_elmsize_get(cw_buf_t *a_buf)
 {
@@ -1541,22 +1607,34 @@ buf_undo(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_uint64_t a_count)
 					cw_uint64_t	bpos;
 					cw_uint8_t	str[8];
 				}	u;
+				struct iovec	*iov, piov;
+				cw_uint32_t	iovcnt;
+
+				/* Set up the iovec. */
+				piov.iov_base = u.str;
+				piov.iov_len = 8;
 
 				/* Read the history record. */
 				bufm_dup(&a_buf->htmp, &a_buf->hcur);
 				bufm_seek(&a_buf->htmp, -9, BUFW_REL);
-				p = bufm_range_get(&a_buf->htmp, &a_buf->hcur);
-				bufm_dup(&a_buf->hcur, &a_buf->htmp);
+				iov = bufm_range_get(&a_buf->htmp,
+				    &a_buf->hcur, &iovcnt);
 
 				/* Swap from and to. */
-				memcpy(u.str, p, 8);
+				buf_vec_copy(&piov, 1, 1, iov, iovcnt, 1, 0);
 				from = a_buf->hbpos;
 				a_buf->hbpos = u.bpos;
 				u.bpos = from;
 
 				/* Invert the history record. */
-				*p = p[8];
-				memcpy(&p[1], u.str, 8);
+				bufm_seek(&a_buf->htmp, 1, BUFW_REL);
+				iov = bufm_range_get(&a_buf->htmp,
+				    &a_buf->hcur, &iovcnt);
+				bufm_seek(&a_buf->htmp, -1, BUFW_REL);
+				buf_vec_copy(iov, iovcnt, 1, &piov, 1, 1, 0);
+				p = bufm_after_get(&a_buf->htmp);
+				*p = uhdr;
+				bufm_dup(&a_buf->hcur, &a_buf->htmp);
 
 				/* Move. */
 				bufm_seek(a_bufm, a_buf->hbpos - 1, BUFW_BEG);
@@ -1737,22 +1815,34 @@ buf_redo(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_uint64_t a_count)
 					cw_uint64_t	bpos;
 					cw_uint8_t	str[8];
 				}	u;
+				struct iovec	*iov, piov;
+				cw_uint32_t	iovcnt;
+
+				/* Set up the iovec. */
+				piov.iov_base = u.str;
+				piov.iov_len = 8;
 
 				/* Read the history record. */
 				bufm_dup(&a_buf->htmp, &a_buf->hcur);
+				bufm_seek(&a_buf->hcur, 1, BUFW_REL);
 				bufm_seek(&a_buf->htmp, 9, BUFW_REL);
-				p = bufm_range_get(&a_buf->hcur, &a_buf->htmp);
-				bufm_dup(&a_buf->hcur, &a_buf->htmp);
+				iov = bufm_range_get(&a_buf->htmp,
+				    &a_buf->hcur, &iovcnt);
+				bufm_seek(&a_buf->hcur, -1, BUFW_REL);
 
 				/* Swap from and to. */
-				memcpy(u.str, &p[1], 8);
+				buf_vec_copy(&piov, 1, 1, iov, iovcnt, 1, 0);
 				from = a_buf->hbpos;
 				a_buf->hbpos = u.bpos;
 				u.bpos = from;
 
 				/* Invert the history record. */
-				p[8] = *p;
-				memcpy(p, u.str, 8);
+				iov = bufm_range_get(&a_buf->htmp,
+				    &a_buf->hcur, &iovcnt);
+				buf_vec_copy(iov, iovcnt, 1, &piov, 1, 1, 0);
+				p = bufm_before_get(&a_buf->htmp);
+				*p = rhdr;
+				bufm_dup(&a_buf->hcur, &a_buf->htmp);
 
 				/* Move. */
 				bufm_seek(a_bufm, a_buf->hbpos - 1, BUFW_BEG);
@@ -2690,10 +2780,9 @@ bufm_after_get(cw_bufm_t *a_bufm)
 	return retval;
 }
 
-cw_uint8_t *
-bufm_range_get(cw_bufm_t *a_start, cw_bufm_t *a_end)
+struct iovec *
+bufm_range_get(cw_bufm_t *a_start, cw_bufm_t *a_end, cw_uint32_t *r_iovcnt)
 {
-	cw_uint8_t	*retval;
 	cw_bufm_t	*start, *end;
 	cw_buf_t	*buf;
 
@@ -2704,6 +2793,7 @@ bufm_range_get(cw_bufm_t *a_start, cw_bufm_t *a_end)
 	_cw_dassert(a_end->magic == _CW_BUFM_MAGIC);
 	_cw_check_ptr(a_end->buf);
 	_cw_assert(a_start->buf == a_end->buf);
+	_cw_check_ptr(r_iovcnt);
 
 	buf = a_start->buf;
 
@@ -2715,26 +2805,34 @@ bufm_range_get(cw_bufm_t *a_start, cw_bufm_t *a_end)
 		end = a_start;
 	} else {
 		/* There are no characters between the two bufm's. */
-		retval = NULL;
+		*r_iovcnt = 0;
 		goto RETURN;
 	}
 
-	/* Move the gap if any part of it is between the two bufm's. */
+	/*
+	 * Set the iovec according to whether the range is split accros the gap.
+	 */
 	if (buf->gap_off + buf->gap_len <= start->apos || buf->gap_off >
 	    end->apos) {
-		/*
-		 * Do nothing.  Inverting the logic in the conditional above
-		 * isn't worth the obfuscation it causes.
-		 */
+		/* Not split. */
+		buf->iov[0].iov_base = &buf->b[start->apos * buf->elmsize];
+		buf->iov[0].iov_len = end->apos - start->apos;
+
+		*r_iovcnt = 1;
 	} else {
-		/* Move the gap to just past the end bufm. */
-		buf_p_gap_move(buf, end, buf_p_pos_a2b(buf, end->apos));
+		/* Split. */
+		buf->iov[0].iov_base = &buf->b[start->apos * buf->elmsize];
+		buf->iov[0].iov_len = buf->gap_off - start->apos;
+
+		buf->iov[1].iov_base = &buf->b[(buf->gap_off + buf->gap_len)
+		    * buf->elmsize];
+		buf->iov[1].iov_len = end->apos - buf->gap_off - buf->gap_len;
+
+		*r_iovcnt = 2;
 	}
 
-	retval = &buf->b[start->apos * buf->elmsize];
-
 	RETURN:
-	return retval;
+	return buf->iov;
 }
 
 void

@@ -65,6 +65,8 @@ struct cw_buf_s {
 	cw_uint64_t	gap_off;	/* Gap offset, in elements. */
 	cw_uint64_t	gap_len;	/* Gap length, in elements. */
 
+	struct iovec	iov[2];		/* Returned by bufm_range_get(). */
+
 	ql_head(cw_bufm_t) bufms;	/* Ordered list of all markers. */
 
 	/* History (undo/redo) state. */
@@ -82,6 +84,10 @@ void	buf_delete(cw_buf_t *a_buf);
 
 void	buf_lock(cw_buf_t *a_buf);
 void	buf_unlock(cw_buf_t *a_buf);
+
+cw_uint64_t buf_vec_copy(struct iovec *a_to, cw_uint32_t a_to_len, cw_uint32_t
+    a_to_sizeof, const struct iovec *a_fr, cw_uint32_t a_fr_len, cw_uint32_t
+    a_fr_sizeof, cw_uint64_t a_maxlen);
 
 cw_uint32_t buf_elmsize_get(cw_buf_t *a_buf);
 void	buf_elmsize_set(cw_buf_t *a_buf, cw_uint32_t a_elmsize);
@@ -118,7 +124,8 @@ cw_uint64_t bufm_pos(cw_bufm_t *a_bufm);
 
 cw_uint8_t *bufm_before_get(cw_bufm_t *a_bufm);
 cw_uint8_t *bufm_after_get(cw_bufm_t *a_bufm);
-cw_uint8_t *bufm_range_get(cw_bufm_t *a_start, cw_bufm_t *a_end);
+struct iovec *bufm_range_get(cw_bufm_t *a_start, cw_bufm_t *a_end, cw_uint32_t
+    *r_iovcnt);
 
 void	bufm_before_insert(cw_bufm_t *a_bufm, const cw_uint8_t *a_str,
     cw_uint64_t a_len);
