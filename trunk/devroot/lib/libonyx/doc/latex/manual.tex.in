@@ -160,7 +160,7 @@ make any assumptions about interruptible system calls always completing with a
 full result.  See the \htmlref{\classname{thd}}{thd} class documentation for
 more details.
 
-\section{Guidlines for writing extensions}
+\section{Guidelines for writing extensions}
 When embedding \libname{libonyx} in an application, it is usually desireable to
 add some operators so that the interpreter can interact with the rest of the
 application.  The \libname{libonyx} source code contains hundreds of operators
@@ -191,6 +191,14 @@ pointer to a composite object, then destroys the last known internal Onyx
 reference (pops it off a stack, redefines it in a dict, replaces an element of
 an array, etc.), the pointer is no longer safe to use.  The \libname{libonyx}
 API is structured such that it is invalid to do such a thing, for this reason.}
+
+\item{tstack must be cleaned up before returning from a function.  This
+constraint is placed on the code in order to avoid leaking space on tstack.  In
+debug versions of \libname{libonyx}, this is enforced by assertions.  The one
+exception to this rule has to do with \classname{xep} exceptions, in which case
+the catchers of the exceptions is responsible for cleaning up tstack.
+Therefore, it is not necessary to catch exceptions merely to avoid tstack
+leakage.}
 \end{itemize}
 
 Since Onyx type checking is dynamic, it is the responsibility of the operators
