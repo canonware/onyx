@@ -492,7 +492,12 @@ systemdict_currentfile(cw_stilt_t *a_stilt)
 void
 systemdict_currentglobal(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*stack;
+	cw_stilo_t	*stilo;
+
+	stack = stilt_data_stack_get(a_stilt);
+	stilo = stils_push(stack);
+	stilo_boolean_new(stilo, stilt_currentglobal(a_stilt));
 }
 
 void
