@@ -2,8 +2,8 @@
 
 $Source$
 $Author: jasone $
-Current revision: $Revision: 134 $
-Last modified: $Date: 1998-07-07 15:53:16 -0700 (Tue, 07 Jul 1998) $
+Current revision: $Revision: 153 $
+Last modified: $Date: 1998-07-29 16:55:49 -0700 (Wed, 29 Jul 1998) $
 
 -----------------------------------------------------------------------------
 <Copyright = "jasone">
@@ -24,8 +24,6 @@ Port to Linux and Solaris.
 Write JOE-tree code.
 
 Write JOE-tree paper.
-
-Write a (curses-based) GUI library.
 
 Enhance flex to create re-entrant C lexers, or write a lexer generator.
 
