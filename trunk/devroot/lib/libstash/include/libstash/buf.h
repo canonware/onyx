@@ -19,6 +19,30 @@
 typedef struct cw_buf_s cw_buf_t;
 typedef struct cw_bufel_s cw_bufel_t;
 
+typedef struct
+{
+#ifdef _CW_REENTRANT
+  cw_mtx_t lock;
+#endif
+  cw_uint32_t ref_count;
+  cw_uint32_t buf_size;
+  cw_uint32_t * buf;
+} cw_bufc_t;
+
+struct cw_bufel_s
+{
+  cw_bool_t is_malloced;
+  cw_uint32_t beg_offset;
+  cw_uint32_t end_offset;
+  cw_bufc_t * bufc;
+};
+
+typedef struct
+{
+  cw_bufel_t bufel;
+  cw_uint32_t cumulative_size;
+} cw_bufel_array_el_t;
+
 struct cw_buf_s
 {
   cw_bool_t is_malloced;
@@ -27,16 +51,13 @@ struct cw_buf_s
   cw_mtx_t lock;
 #endif
   cw_uint32_t size;
-  cw_list_t bufels;
-};
 
-struct cw_bufel_s
-{
-  cw_bool_t is_malloced;
-  cw_uint32_t buf_size;
-  cw_uint32_t beg_offset;
-  cw_uint32_t end_offset;
-  cw_uint32_t * buf;
+  cw_uint32_t array_size;
+  cw_uint32_t array_num_valid;
+  cw_uint32_t array_start;
+  cw_uint32_t array_end;
+  cw_bool_t is_cumulative_valid;
+  cw_bufel_array_el_t * array;
 };
 
 /****************************************************************************
@@ -73,45 +94,47 @@ buf_get_size(cw_buf_t * a_buf);
 
 /****************************************************************************
  *
- * Concatenates two bufs.  After this function call, a_other is empty, but
- * it still exists.
+ * <<< Input(s) >>>
  *
- ****************************************************************************/
-#define buf_prepend_buf _CW_NS_STASH(buf_prepend_buf)
-void
-buf_prepend_buf(cw_buf_t * a_a, cw_buf_t * a_b);
-
-/****************************************************************************
+ * a_a : Pointer to a buf.
  *
- * Concatenates two bufs.  After this function call, a_other is empty, but
- * it still exists.
+ * a_b : Pointer to a buf.
+ *
+ * a_try_bufel_merge : If TRUE, try to copy data from a_b into a_a, if there is
+ *                     enough space in the last bufel in a_a.  This keeps the
+ *                     reference count for at least some of the data in a_b from
+ *                     being incremented, so that it may be possible to free up
+ *                     memory when a_b is deleted.  In short, specifying TRUE
+ *                     can save memory at the cost of memcpy()'s.
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
+ * <<< Description >>>
+ *
+ * Catenate two bufs.  a_b is left unmodified.
  *
  ****************************************************************************/
 #define buf_append_buf _CW_NS_STASH(buf_append_buf)
 void
-buf_append_buf(cw_buf_t * a_a, cw_buf_t * a_b);
+buf_catenate_buf(cw_buf_t * a_a, cw_buf_t * a_b, cw_bool_t a_try_bufel_merge);
 
 /****************************************************************************
  *
- * Removes the first bufel from a_buf and returns a pointer to it.
+ * <<< Input(s) >>>
  *
- ****************************************************************************/
-#define buf_rm_head_bufel _CW_NS_STASH(buf_rm_head_bufel)
-cw_bufel_t *
-buf_rm_head_bufel(cw_buf_t * a_buf);
-
-/****************************************************************************
+ * a_buf : Pointer to a buf.
  *
- * Removes the last bufel from a_buf and returns a pointer to it.
+ * a_bufel : Pointer to a bufel.
  *
- ****************************************************************************/
-#define buf_rm_tail_bufel _CW_NS_STASH(buf_rm_tail_bufel)
-cw_bufel_t *
-buf_rm_tail_bufel(cw_buf_t * a_buf);
-
-/****************************************************************************
+ * <<< Output(s) >>>
  *
- * Prepends a bufel to a_buf.
+ * None.
+ *
+ * <<< Description >>>
+ *
+ * Prepend the data from a_bufel to a_buf.  a_bufel is not modified.
  *
  ****************************************************************************/
 #define buf_prepend_bufel _CW_NS_STASH(buf_prepend_bufel)
@@ -120,7 +143,19 @@ buf_prepend_bufel(cw_buf_t * a_buf, cw_bufel_t * a_bufel);
 
 /****************************************************************************
  *
- * Appends a bufel to a_buf.
+ * <<< Input(s) >>>
+ *
+ * a_buf : Pointer to a buf.
+ *
+ * a_bufel : Pointer to a bufel.
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
+ * <<< Description >>>
+ *
+ * Append the data from a_bufel to a_buf.  a_bufel is not modified.
  *
  ****************************************************************************/
 #define buf_append_bufel _CW_NS_STASH(buf_append_bufel)
@@ -128,6 +163,190 @@ void
 buf_append_bufel(cw_buf_t * a_buf, cw_bufel_t * a_bufel);
 
 /****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_buf : Pointer to a buf.
+ *
+ * a_amount : Number of bytes of data to release from the head of a_buf.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : FALSE == success, TRUE == error.
+ *
+ * <<< Description >>>
+ *
+ * Release a_amount bytes from the head of a_buf.
+ *
+ ****************************************************************************/
+#define buf_release_head_data _CW_NS_STASH(buf_release_head_data)
+cw_bool_t
+buf_release_head_data(cw_buf_t * a_buf, cw_uint32_t a_amount);
+
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_buf : Pointer to a buf.
+ *
+ * a_amount : Number of bytes of data to release from the tail of a_buf.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : FALSE == success, TRUE == error.
+ *
+ * <<< Description >>>
+ *
+ * Release a_amount bytes from the tail of a_buf.
+ *
+ ****************************************************************************/
+#define buf_release_tail_data _CW_NS_STASH(buf_release_tail_data)
+cw_bool_t
+buf_release_tail_data(cw_buf_t * a_buf, cw_uint32_t a_amount);
+
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_buf : Pointer to a buf.
+ *
+ * a_offset : Offset in bytes of uint8 to return.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Value of the uint8 at offset a_offset in a_buf.
+ *
+ * <<< Description >>>
+ *
+ * Return the uint8 at offset a_offset.
+ *
+ ****************************************************************************/
+#define buf_get_uint8 _CW_NS_STASH(buf_get_uint8)
+cw_uint8_t
+buf_get_uint8(cw_buf_t * a_buf, cw_uint32_t a_offset);
+
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_buf : Pointer to a buf.
+ *
+ * a_offset : Offset in bytes of uint8 to set.
+ *
+ * a_val : Value to set the uint8 at offset a_offset in a_buf.
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
+ * <<< Description >>>
+ *
+ * Set the uint8 at offset a_offset to a_val.
+ *
+ ****************************************************************************/
+#define buf_set_uint8 _CW_NS_STASH(buf_set_uint8)
+void
+buf_set_uint8(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint8_t a_val);
+
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_buf : Pointer to a buf.
+ *
+ * a_offset : Offset in bytes of uint32 to return.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Value of the uint32 at offset a_offset in a_buf.
+ *
+ * <<< Description >>>
+ *
+ * Return the uint32 at offset a_offset.
+ *
+ ****************************************************************************/
+#define buf_get_uint32 _CW_NS_STASH(buf_get_uint32)
+cw_uint32_t
+buf_get_uint32(cw_buf_t * a_buf, cw_uint32_t a_offset);
+
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_buf : Pointer to a buf.
+ *
+ * a_offset : Offset in bytes of uint32 to set.
+ *
+ * a_val : Value to set the uint32 at offset a_offset in a_buf.
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
+ * <<< Description >>>
+ *
+ * Set the uint32 at offset a_offset to a_val.
+ *
+ ****************************************************************************/
+#define buf_set_uint32 _CW_NS_STASH(buf_set_uint32)
+void
+buf_set_uint32(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint32_t a_val);
+
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_buf : Pointer to a buf.
+ *
+ * a_offset : Offset in bytes of uint64 to return.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Value of the uint64 at offset a_offset in a_buf.
+ *
+ * <<< Description >>>
+ *
+ * Return the uint64 at offset a_offset.
+ *
+ ****************************************************************************/
+#define buf_get_uint64 _CW_NS_STASH(buf_get_uint64)
+cw_uint64_t
+buf_get_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset);
+
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_buf : Pointer to a buf.
+ *
+ * a_offset : Offset in bytes of uint64 to set.
+ *
+ * a_val : Value to set the uint64 at offset a_offset in a_buf.
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
+ * <<< Description >>>
+ *
+ * Set the uint64 at offset a_offset to a_val.
+ *
+ ****************************************************************************/
+#define buf_set_uint64 _CW_NS_STASH(buf_set_uint64)
+void
+buf_set_uint64(cw_buf_t * a_buf, cw_uint64_t a_offset, cw_uint32_t a_val);
+
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_bufel : Pointer to space for a bufel, or NULL.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Pointer to a bufel.
+ *
+ * <<< Description >>>
  *
  * bufel constructor.
  *
@@ -138,6 +357,16 @@ bufel_new(cw_bufel_t * a_bufel);
 
 /****************************************************************************
  *
+ * <<< Input(s) >>>
+ *
+ * a_bufel : Pointer to a bufel.
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
+ * <<< Description >>>
+ *
  * bufel destructor.
  *
  ****************************************************************************/
@@ -147,9 +376,18 @@ bufel_delete(cw_bufel_t * a_bufel);
 
 /****************************************************************************
  *
- * Returns total size of a_bufel's internal buffer.  This is _not_
- * necessarily the same as the amount of valid data.
+ * <<< Input(s) >>>
  *
+ * a_bufel : Pointer to a bufel.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Size of a_bufel's buffer, in bytes.
+ *
+ * <<< Description >>>
+ *
+ * Return the total size of a_bufel's buffer.
+ * 
  ****************************************************************************/
 #define bufel_get_size _CW_NS_STASH(bufel_get_size)
 cw_uint32_t
@@ -157,9 +395,21 @@ bufel_get_size(cw_bufel_t * a_bufel);
 
 /****************************************************************************
  *
- * Either malloc()s or realloc()s the internal buffer to be of size a_size.  If
- * shrinking the bufel would chop off valid data as indicated by end_offset,
- * return TRUE.
+ * <<< Input(s) >>>
+ *
+ * a_bufel : Pointer to a bufel.
+ *
+ * a_size : Size in bytes to set a_bufel's buffer to.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : FALSE == success, TRUE == error.
+ *          TRUE : Shrinking the bufel would chop off valid data as indicated by
+ *                 end_offset.
+ *
+ * <<< Description >>>
+ *
+ * Either malloc() or realloc() the internal buffer to be of size a_size.
  *
  ****************************************************************************/
 #define bufel_set_size _CW_NS_STASH(bufel_set_size)
@@ -168,7 +418,18 @@ bufel_set_size(cw_bufel_t * a_bufel, cw_uint32_t a_size);
 
 /****************************************************************************
  *
- * Returns the offset to the begin pointer.
+ * <<< Input(s) >>>
+ *
+ * a_bufel : Pointer to a bufel.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Offset from the beginning of the internal buffer to the begin
+ *          pointer.
+ *
+ * <<< Description >>>
+ *
+ * Return the offset to the begin pointer.
  *
  ****************************************************************************/
 #define bufel_get_beg_offset _CW_NS_STASH(bufel_get_beg_offset)
@@ -177,8 +438,22 @@ bufel_get_beg_offset(cw_bufel_t * a_bufel);
 
 /****************************************************************************
  *
- * Sets the begin pointer offset.  If an attempt is made to set the beg_offset
- * to something greater than end_offset, return TRUE.
+ * <<< Input(s) >>>
+ *
+ * a_bufel : Pointer to a bufel.
+ *
+ * a_offset : Offset in bytes from the beginning of the internal buffer to set
+ *            the begin pointer to.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : FALSE == success, TRUE == error.
+ *          TRUE : Attempted to set the begin offset to something greater than
+ *                 the end offset.
+ *
+ * <<< Description >>>
+ *
+ * Set the begin pointer offset.
  *
  ****************************************************************************/
 #define bufel_set_beg_offset _CW_NS_STASH(bufel_set_beg_offset)
@@ -187,7 +462,17 @@ bufel_set_beg_offset(cw_bufel_t * a_bufel, cw_uint32_t a_offset);
 
 /****************************************************************************
  *
- * Returns the offset to the end pointer.
+ * <<< Input(s) >>>
+ *
+ * a_bufel : Pointer to a bufel.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Offset from the beginning of the internal buffer to the end pointer.
+ *
+ * <<< Description >>>
+ *
+ * Return the offset to the end pointer.
  *
  ****************************************************************************/
 #define bufel_get_end_offset _CW_NS_STASH(bufel_get_end_offset)
@@ -196,10 +481,22 @@ bufel_get_end_offset(cw_bufel_t * a_bufel);
 
 /****************************************************************************
  *
- * Sets the end pointer offset.  If an attempt is made to set the end_offset
- * to something less than beg_offset, return TRUE.  If an attempt is made to set
- * end_offset to something greater than one past the end of the buffer
- * (buf_size), return TRUE.
+ * <<< Input(s) >>>
+ *
+ * a_bufel : Pointer to a bufel.
+ *
+ * a_offset : Offset in bytes from the beginning of the internal buffer to set
+ *            the end pointer to.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : FALSE == success, TRUE == error.
+ *          TRUE : Attempted to set the end offset to something less than
+ *                 the begin offset.
+ *
+ * <<< Description >>>
+ *
+ * Set the end pointer offset.
  *
  ****************************************************************************/
 #define bufel_set_end_offset _CW_NS_STASH(bufel_set_end_offset)
@@ -208,7 +505,18 @@ bufel_set_end_offset(cw_bufel_t * a_bufel, cw_uint32_t a_offset);
 
 /****************************************************************************
  *
- * Returns the number of bytes between the beginning offset marker and the end
+ * <<< Input(s) >>>
+ *
+ * a_bufel : Pointer to a bufel.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Number of valid data bytes (data between the begin offset and end
+ *          offset).
+ *
+ * <<< Description >>>
+ *
+ * Return the number of bytes between the beginning offset marker and the end
  * offset marker.
  *
  ****************************************************************************/
@@ -218,7 +526,17 @@ bufel_get_valid_data_size(cw_bufel_t * a_bufel);
 
 /****************************************************************************
  *
- * Returns a pointer to the internal buffer.
+ * <<< Input(s) >>>
+ *
+ * a_bufel : Pointer to a bufel.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Pointer to a_bufel's internal buffer
+ *
+ * <<< Description >>>
+ *
+ * Return a pointer to the internal buffer.
  *
  ****************************************************************************/
 #define bufel_get_data_ptr _CW_NS_STASH(bufel_get_data_ptr)
@@ -227,10 +545,24 @@ bufel_get_data_ptr(cw_bufel_t * a_bufel);
 
 /****************************************************************************
  *
- * Sets the internal buffer to a_buf, assumes the a_buf is a_size bytes long,
- * and sets the beginning offset to 0 and the end offset to a_size.  If there is
- * already an internal buffer, the old one is freed.  Note that a_buf _must_ be
- * allocated on the heap, since the bufel class will eventually free it.
+ * <<< Input(s) >>>
+ *
+ * a_bufel : Pointer to a bufel.
+ *
+ * a_buf : Pointer to a memory buffer.
+ *
+ * a_size : Size in bytes of a_buf.
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
+ * <<< Description >>>
+ *
+ * Set the internal buffer to a_buf.  Assume the a_buf is a_size bytes long, and
+ * set the beginning offset to 0 and the end offset to a_size.  If there is
+ * already an internal buffer, unreference the old one.  Note that a_buf _must_
+ * be allocated on the heap, since the bufel class will eventually free it.
  *
  ****************************************************************************/
 #define bufel_set_data_ptr _CW_NS_STASH(bufel_set_data_ptr)
@@ -241,9 +573,9 @@ bufel_set_data_ptr(cw_bufel_t * a_bufel, void * a_buf, cw_uint32_t a_size);
  *
  * <<< Input(s) >>>
  *
- * a_bufel : Pointer to a bufel instance.
+ * a_a : Pointer to a bufel.
  *
- * a_other_bufel : Pointer to a bufel instance.
+ * a_b : Pointer to a bufel.
  *
  * <<< Output(s) >>>
  *
@@ -251,49 +583,9 @@ bufel_set_data_ptr(cw_bufel_t * a_bufel, void * a_buf, cw_uint32_t a_size);
  *
  * <<< Description >>>
  *
- * Append a_other_bufel to a_bufel, and realloc if necessary.  a_other_bufel is
- * not modified by this function.
+ * Catenate a_b to a_a, and realloc if necessary.  a_b is not modified.
  *
  ****************************************************************************/
-#define bufel_append_bufel _CW_NS_STASH(bufel_append_bufel)
+#define bufel_catenate_bufel _CW_NS_STASH(bufel_catenate_bufel)
 void
-bufel_append_bufel(cw_bufel_t * a_bufel, cw_bufel_t * a_other_bufel);
-
-/****************************************************************************
- *
- * Returns the uint8 at offset a_offset.
- *
- ****************************************************************************/
-#define bufel_get_uint8 _CW_NS_STASH(bufel_get_uint8)
-cw_uint8_t
-bufel_get_uint8(cw_bufel_t * a_bufel, cw_uint32_t a_offset);
-
-/****************************************************************************
- *
- * Sets the uint8 at a_offset to a_val.
- *
- ****************************************************************************/
-#define bufel_set_uint8 _CW_NS_STASH(bufel_set_uint8)
-void
-bufel_set_uint8(cw_bufel_t * a_bufel, cw_uint32_t a_offset, cw_uint8_t a_val);
-
-/****************************************************************************
- *
- * Returns the uint32 at offset a_offset.  If a_offset is not a multiple of 4,
- * behavior is undefined.  If the buffer size is not a multiple
- * of 4, reading the last bytes of the buffer has undefined behavior.  That is,
- * segmentation faults could ensue.
- *
- ****************************************************************************/
-#define bufel_get_uint32 _CW_NS_STASH(bufel_get_uint32)
-cw_uint32_t
-bufel_get_uint32(cw_bufel_t * a_bufel, cw_uint32_t a_offset);
-
-/****************************************************************************
- *
- * Sets the uint32 at a_offset to a_val.
- *
- ****************************************************************************/
-#define bufel_set_uint32 _CW_NS_STASH(bufel_set_uint32)
-void
-bufel_set_uint32(cw_bufel_t * a_bufel, cw_uint32_t a_offset, cw_uint32_t a_val);
+bufel_catenate_bufel(cw_bufel_t * a_a, cw_bufel_t * a_b);

@@ -24,7 +24,7 @@ cw_buf_t *
 #ifdef _CW_REENTRANT
 buf_new(cw_buf_t * a_buf, cw_bool_t a_is_threadsafe)
 #else
-buf_new(cw_buf_t * a_buf)
+  buf_new(cw_buf_t * a_buf)
 #endif
 {
   cw_buf_t * retval;
@@ -46,12 +46,16 @@ buf_new(cw_buf_t * a_buf)
   {
     mtx_new(&retval->lock);
   }
-  list_new(&retval->bufels, FALSE);
-#else
-  list_new(&retval->bufels);
 #endif
 
   retval->size = 0;
+
+  retval->array_size = 2;
+  retval->array_num_valid = 0;
+  retval->array_start = 0;
+  retval->array_end = 0;
+  retval->is_cumulative_valid = FALSE;
+  retval->array = _cw_malloc(2 * sizeof(cw_bufel_array_el_t));
   
   return retval;
 }
@@ -59,6 +63,8 @@ buf_new(cw_buf_t * a_buf)
 void
 buf_delete(cw_buf_t * a_buf)
 {
+  cw_uint32_t i;
+  
   _cw_check_ptr(a_buf);
 
 #ifdef _CW_REENTRANT
@@ -68,105 +74,20 @@ buf_delete(cw_buf_t * a_buf)
   }
 #endif
 
-  while (list_count(&a_buf->bufels) > 0)
+  for (i = 0;
+       i < a_buf->array_num_valid;
+       i++)
   {
-    bufel_delete(list_hpop(&a_buf->bufels));
+    bufel_delete(&a_buf->array[(i + a_buf->array_start)
+			     % a_buf->array_size].bufel);
   }
-  list_delete(&a_buf->bufels);
 }
 
 cw_uint32_t
 buf_get_size(cw_buf_t * a_buf)
 {
-  _cw_check_ptr(a_buf);
-  return a_buf->size;
-}
-
-void
-buf_prepend_buf(cw_buf_t * a_buf, cw_buf_t * a_other)
-{
-  cw_uint64_t i, count;
+  cw_uint32_t retval;
   
-  _cw_check_ptr(a_buf);
-  _cw_check_ptr(a_other);
-#ifdef _CW_REENTRANT
-  if (a_buf->is_threadsafe == TRUE)
-  {
-    mtx_lock(&a_buf->lock);
-  }
-  if (a_other->is_threadsafe == TRUE)
-  {
-    mtx_lock(&a_other->lock);
-  }
-#endif
-
-  for (i = 0, count = list_count(&a_other->bufels);
-       i < count;
-       i++)
-  {
-    list_hpush(&a_buf->bufels, list_tpop(&a_other->bufels));
-  }
-
-  a_buf->size += a_other->size;
-  a_other->size = 0;
-  
-#ifdef _CW_REENTRANT
-  if (a_other->is_threadsafe == TRUE)
-  {
-    mtx_unlock(&a_other->lock);
-  }
-  if (a_buf->is_threadsafe == TRUE)
-  {
-    mtx_unlock(&a_buf->lock);
-  }
-#endif
-}
-
-void
-buf_append_buf(cw_buf_t * a_buf, cw_buf_t * a_other)
-{
-  cw_uint64_t i, count;
-  
-  _cw_check_ptr(a_buf);
-  _cw_check_ptr(a_other);
-#ifdef _CW_REENTRANT
-  if (a_buf->is_threadsafe == TRUE)
-  {
-    mtx_lock(&a_buf->lock);
-  }
-  if (a_other->is_threadsafe == TRUE)
-  {
-    mtx_lock(&a_other->lock);
-  }
-#endif
-
-  for (i = 0, count = list_count(&a_other->bufels);
-       i < count;
-       i++)
-  {
-    list_tpush(&a_buf->bufels, list_hpop(&a_other->bufels));
-  }
-
-  a_buf->size += a_other->size;
-  a_other->size = 0;
-  
-#ifdef _CW_REENTRANT
-  if (a_other->is_threadsafe == TRUE)
-  {
-    mtx_unlock(&a_other->lock);
-  }
-  if (a_buf->is_threadsafe == TRUE)
-  {
-    mtx_unlock(&a_buf->lock);
-  }
-#endif
-}
-
-cw_bufel_t *
-buf_rm_head_bufel(cw_buf_t * a_buf)
-{
-  cw_bufel_t * retval;
-
   _cw_check_ptr(a_buf);
 #ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe == TRUE)
@@ -175,17 +96,8 @@ buf_rm_head_bufel(cw_buf_t * a_buf)
   }
 #endif
 
-  if (a_buf->size > 0) /* Make sure there is valid data. */
-  {
-    retval = (cw_bufel_t *) list_hpop(&a_buf->bufels);
-    a_buf->size -= bufel_get_valid_data_size(retval);
-    _cw_assert((cw_sint32_t) a_buf->size >= 0);
-  }
-  else
-  {
-    retval = NULL;
-  }
-  
+  retval = a_buf->size;
+
 #ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe == TRUE)
   {
@@ -195,37 +107,123 @@ buf_rm_head_bufel(cw_buf_t * a_buf)
   return retval;
 }
 
-cw_bufel_t *
-buf_rm_tail_bufel(cw_buf_t * a_buf)
+void
+buf_catenate_buf(cw_buf_t * a_a, cw_buf_t * a_b, cw_bool_t a_try_bufel_merge)
 {
-  cw_bufel_t * retval;
-
-  _cw_check_ptr(a_buf);
+  cw_uint32_t i;
+  
+  _cw_check_ptr(a_a);
+  _cw_check_ptr(a_b);
 #ifdef _CW_REENTRANT
-  if (a_buf->is_threadsafe == TRUE)
+  if (a_a->is_threadsafe == TRUE)
   {
-    mtx_lock(&a_buf->lock);
+    mtx_lock(&a_a->lock);
+  }
+  if (a_b->is_threadsafe == TRUE)
+  {
+    mtx_lock(&a_b->lock);
   }
 #endif
 
-  if (a_buf->size > 0) /* Make sure there is valid data. */
+  /* Make sure a_a's array is big enough.  Even if we're trying to merge
+   * bufel's, make the array big enough that it doesn't matter how successful
+   * the bufel merging is. */
+  if (a_a->array_num_valid + a_b->array_num_valid > a_a->array_size)
   {
-    retval = (cw_bufel_t *) list_tpop(&a_buf->bufels);
-    a_buf->size -= bufel_get_valid_data_size(retval);
-    _cw_assert((cw_sint32_t) a_buf->size >= 0);
+    /* Double i until it is big enough to accomodate our needs. */
+    for (i = 2 * a_a->array_size;
+	 i < a_a->array_num_valid + a_b->array_num_valid;
+	 i *= 2);
+
+    a_a->array
+      = (cw_bufel_array_el_t *) _cw_realloc(a_a,
+					    i * sizeof(cw_bufel_array_el_t *));
+    
+    if ((a_a->array_start >= a_a->array_end) && (a_a->array_num_valid > 0))
+    {
+      /* The array was wrapped, so we need to move the wrapped part to sit
+       * directly after where the end of the array used to be.  Since we at
+       * least doubled the size of the array, there is no worry of writing past
+       * the end of the array. */
+      memcpy(&a_a->array[a_a->array_size],
+	     a_a->array,
+	     a_a->array_end * sizeof(cw_bufel_array_el_t *));
+      a_a->array_end += a_a->array_size;
+    }
+
+    /* This must happen last, since the old value is used for some calculations
+     * above. */
+    a_a->array_size = i;
   }
-  else
+
+  if (TRUE == a_try_bufel_merge)
   {
-    retval = NULL;
+    /* This looks ugly because we have to be careful to not decrement past the
+     * beginning of the array. */
+    cw_uint32_t last_element_index = (((a_a->array_end + a_a->array_size) - 1)
+				      % a_a->array_size);
+
+    if ((bufel_get_size(&a_a->array[last_element_index].bufel)
+	 -
+	 bufel_get_end_offset(&a_a->array[last_element_index].bufel))
+	>= bufel_get_valid_data_size(&a_b->array[a_b->array_start].bufel))
+    {
+      /* Woohoo, there's enough space to merge a_b's first bufel into a_a's last
+       * bufel. */
+      bufel_catenate_bufel(&a_a->array[last_element_index].bufel,
+			   &a_b->array[a_b->array_start].bufel);
+      
+      a_a->size
+	+= bufel_get_valid_data_size(&a_b->array[a_b->array_start].bufel);
+
+      a_a->array[last_element_index].cumulative_size = a_a->size;
+    }
   }
   
-#ifdef _CW_REENTRANT
-  if (a_buf->is_threadsafe == TRUE)
+  /* Iterate through a_b's array, creating bufel's in a_a and adding references
+   * to a_b's bufel data. */
+  for (i = 0; i < a_b->array_num_valid; i++)
   {
-    mtx_unlock(&a_buf->lock);
+    memcpy(&a_a->array[(i + a_a->array_start) % a_a->array_size].bufel,
+	   &a_b->array[(i + a_b->array_start) % a_b->array_size].bufel,
+	   sizeof(cw_bufel_t));
+
+    a_a->size
+      += bufel_get_valid_data_size(&a_a->array[(i + a_a->array_start)
+					      % a_a->array_size].bufel);
+
+    a_a->array[(i + a_a->array_start) % a_a->array_size].cumulative_size
+      = a_a->size;
+
+    a_a->array_num_valid++;
+
+#ifdef _CW_REENTRANT
+    mtx_lock(&a_a->array[(i + a_a->array_start)
+			% a_a->array_size].bufel.bufc->lock);
+#endif
+
+    a_a->array[(i + a_a->array_start)
+	      % a_a->array_size].bufel.bufc->ref_count++;
+    
+#ifdef _CW_REENTRANT
+    mtx_unlock(&a_a->array[(i + a_a->array_start)
+			  % a_a->array_size].bufel.bufc->lock);
+#endif
+  }
+
+  /* Finish making a_a's state consistent. */
+  a_a->array_end = (i + a_a->array_start) % a_a->array_size;
+  
+#ifdef _CW_REENTRANT
+  if (a_b->is_threadsafe == TRUE)
+  {
+    mtx_unlock(&a_b->lock);
+  }
+  if (a_a->is_threadsafe == TRUE)
+  {
+    mtx_unlock(&a_a->lock);
   }
 #endif
-  return retval;
 }
 
 void
@@ -240,8 +238,50 @@ buf_prepend_bufel(cw_buf_t * a_buf, cw_bufel_t * a_bufel)
   }
 #endif
 
-  list_hpush(&a_buf->bufels, a_bufel);
+  /* Make sure there is space in a_buf's array. */
+  if (a_buf->array_size <= a_buf->array_num_valid)
+  {
+    a_buf->array
+      = (cw_bufel_array_el_t *) _cw_realloc(a_buf,
+					    2 * sizeof(cw_bufel_array_el_t *));
+    
+    if (a_buf->array_start >= a_buf->array_end)
+    {
+      /* The array was wrapped, so we need to move the wrapped part to sit
+       * directly after where the end of the array used to be.  Since we doubled
+       * the size of the array, there is no worry of writing past the end of the
+       * array. */
+      memcpy(&a_buf->array[a_buf->array_size],
+	     a_buf->array,
+	     a_buf->array_end * sizeof(cw_bufel_array_el_t *));
+      a_buf->array_end += a_buf->array_size;
+    }
+
+    /* This must happen last, since the old value is used for some calculations
+     * above. */
+    a_buf->array_size *= 2;
+  }
+  
+  /* Now prepend the bufel. */
+  a_buf->array_start = (((a_buf->array_end + a_buf->array_size) - 1)
+			% a_buf->array_size);
+  a_buf->array_num_valid++;
+  memcpy(&a_buf->array[a_buf->array_start].bufel,
+	 a_bufel,
+	 sizeof(cw_bufel_t));
+
   a_buf->size += bufel_get_valid_data_size(a_bufel);
+  a_buf->is_cumulative_valid = FALSE;
+
+#ifdef _CW_REENTRANT
+  mtx_lock(a_bufel->bufc->lock);
+#endif
+
+  a_bufel->bufc->ref_count++;
+    
+#ifdef _CW_REENTRANT
+  mtx_unlock(a_bufel->bufc->lock);
+#endif
   
 #ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe == TRUE)
@@ -263,8 +303,6 @@ buf_append_bufel(cw_buf_t * a_buf, cw_bufel_t * a_bufel)
   }
 #endif
 
-  list_tpush(&a_buf->bufels, a_bufel);
-  a_buf->size += bufel_get_valid_data_size(a_bufel);
   
 #ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe == TRUE)
@@ -282,19 +320,16 @@ bufel_new(cw_bufel_t * a_bufel)
   if (a_bufel == NULL)
   {
     retval = (cw_bufel_t *) _cw_malloc(sizeof(cw_bufel_t));
+    bzero(retval, sizeof(cw_bufel_t));
     retval->is_malloced = TRUE;
   }
   else
   {
     retval = a_bufel;
+    bzero(retval, sizeof(cw_bufel_t));
     retval->is_malloced = FALSE;
   }
 
-  retval->buf_size = 0;
-  retval->beg_offset = 0;
-  retval->end_offset = 0;
-  retval->buf = NULL;
-  
   return retval;
 }
 
@@ -303,8 +338,9 @@ bufel_delete(cw_bufel_t * a_bufel)
 {
   _cw_check_ptr(a_bufel);
 
-  if (a_bufel->buf != NULL)
+  if (a_bufel->bufc != NULL)
   {
+    
     _cw_free(a_bufel->buf);
   }
   if (a_bufel->is_malloced == TRUE)
@@ -470,36 +506,35 @@ bufel_set_data_ptr(cw_bufel_t * a_bufel, void * a_buf, cw_uint32_t a_size)
 }
 
 void
-bufel_append_bufel(cw_bufel_t * a_bufel, cw_bufel_t * a_other_bufel)
+bufel_catenate_bufel(cw_bufel_t * a_a, cw_bufel_t * a_b)
 {
-  _cw_check_ptr(a_bufel);
-  _cw_check_ptr(a_other_bufel);
+  _cw_check_ptr(a_a);
+  _cw_check_ptr(a_b);
 
-  if (a_bufel->end_offset + bufel_get_valid_data_size(a_other_bufel)
-      > a_bufel->buf_size)
+  if (a_a->end_offset + bufel_get_valid_data_size(a_b)
+      > a_a->buf_size)
   {
     /* Need more space. */
-    a_bufel->buf
-      = (cw_uint32_t *) _cw_realloc(a_bufel->buf,
-				    a_bufel->buf_size
-				    + bufel_get_valid_data_size(a_other_bufel));
+    a_a->buf
+      = (cw_uint32_t *) _cw_realloc(a_a->buf,
+				    a_a->buf_size
+				    + bufel_get_valid_data_size(a_b));
 
-    memcpy(((cw_uint8_t *) a_bufel->buf) + a_bufel->end_offset,
-	   ((cw_uint8_t *) a_other_bufel->buf) + a_other_bufel->beg_offset,
-	   bufel_get_valid_data_size(a_other_bufel));
+    memcpy(((cw_uint8_t *) a_a->buf) + a_a->end_offset,
+	   ((cw_uint8_t *) a_b->buf) + a_b->beg_offset,
+	   bufel_get_valid_data_size(a_b));
 
-    a_bufel->buf_size += bufel_get_valid_data_size(a_other_bufel);
-    a_bufel->end_offset += bufel_get_valid_data_size(a_other_bufel);
+    a_a->buf_size += bufel_get_valid_data_size(a_b);
+    a_a->end_offset += bufel_get_valid_data_size(a_b);
   }
   else
   {
-    memcpy(((cw_uint8_t *) a_bufel->buf) + a_bufel->end_offset,
-	   ((cw_uint8_t *) a_other_bufel->buf) + a_other_bufel->beg_offset,
-	   bufel_get_valid_data_size(a_other_bufel));
+    memcpy(((cw_uint8_t *) a_a->buf) + a_a->end_offset,
+	   ((cw_uint8_t *) a_b->buf) + a_b->beg_offset,
+	   bufel_get_valid_data_size(a_b));
     
-    a_bufel->end_offset += bufel_get_valid_data_size(a_other_bufel);
+    a_a->end_offset += bufel_get_valid_data_size(a_b);
   }
-  
 }
 
 cw_uint8_t
