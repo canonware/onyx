@@ -795,24 +795,24 @@ $search {
     `
 # [`<path>' `<args>'...] system #exit_code
 $system {
-    # Make sure argument is an array.
-    dup type $arraytype ne {
-	$typecheck throw
-    } if
-    # Make sure array is non-empty.
-    dup length 0 eq {
-	$rangecheck throw
-    } if
-    # Make sure array elements are strings.
-    dup {
-	{
-	    type $stringtype ne {
-		stop
-	    } if
-	} foreach
-    } stopped {
-	$typecheck throw
-    } if
+#    # Make sure argument is an array.
+#    dup type $arraytype ne {
+#	$typecheck throw
+#    } if
+#    # Make sure array is non-empty.
+#    dup length 0 eq {
+#	$rangecheck throw
+#    } if
+#    # Make sure array elements are strings.
+#    dup {
+#	{
+#	    type $stringtype ne {
+#		stop
+#	    } if
+#	} foreach
+#    } stopped {
+#	$typecheck throw
+#    } if
 
     forkexec
     waitpid
