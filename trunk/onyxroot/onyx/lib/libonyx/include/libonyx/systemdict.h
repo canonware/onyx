@@ -16,6 +16,13 @@ typedef struct
     void *dlhandle;
 } cw_nxmod_t;
 
+/* Global variables. */
+#if (defined(CW_POSIX) && defined(CW_THREADS))
+extern cw_mtx_t cw_g_gethostbyname_mtx;
+extern cw_mtx_t cw_g_getprotobyname_mtx;
+extern cw_mtx_t cw_g_getservbyname_mtx;
+#endif
+
 void
 systemdict_abs(cw_nxo_t *a_thread);
 
