@@ -86,6 +86,7 @@ main()
   cw_uint32_t i;
   
   libstash_init();
+  log_printf(cw_g_log, "Test begin\n");
 
   _cw_assert(&jtl_a == jtl_new(&jtl_a));
   
@@ -143,6 +144,7 @@ main()
 
   jtl_delete(jtl_b);
   
+  log_printf(cw_g_log, "Test end\n");
   libstash_shutdown();
   return 0;
 }

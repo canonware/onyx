@@ -58,7 +58,6 @@ struct cw_bufpool_s
 
 typedef struct
 {
-  cw_bool_t is_malloced;
 #if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
   cw_uint32_t magic;
 #endif
@@ -80,7 +79,6 @@ struct cw_bufel_s
 #if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
   cw_uint32_t magic;
 #endif
-  cw_bool_t is_malloced;
 
   void (*dealloc_func)(void *, void *);
   void * dealloc_arg;

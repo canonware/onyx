@@ -49,6 +49,7 @@ main()
     es16[80] = "name:value\\:";
 
   libstash_init();
+  log_printf(cw_g_log, "Test begin\n");
 
 /*   dbg_register(cw_g_dbg, "res_state"); */
   
@@ -85,6 +86,7 @@ main()
   _cw_assert(TRUE == res_merge_list(&res, es16, NULL));
   
   res_delete(&res);
+  log_printf(cw_g_log, "Test end\n");
   libstash_shutdown();
 
   return 0;

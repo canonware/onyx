@@ -33,8 +33,8 @@ mem_new()
 #  else
   oh_new(&retval->addr_hash);
 #  endif
-  oh_set_h1(&retval->addr_hash, mem_p_oh_h1);
-  oh_set_key_compare(&retval->addr_hash, mem_p_oh_key_compare);
+  oh_set_h1(&retval->addr_hash, oh_h1_direct);
+  oh_set_key_compare(&retval->addr_hash, oh_key_compare_direct);
 #endif
 
   return retval;
@@ -96,6 +96,8 @@ mem_malloc(cw_mem_t * a_mem, size_t a_size)
 #endif
 {
   void * retval;
+
+  _cw_assert(a_size > 0);
   
   retval = _cw_malloc(a_size);
   
@@ -152,12 +154,6 @@ mem_malloc(cw_mem_t * a_mem, size_t a_size)
 					 allocation));
     }
   }
-#else
-  if (dbg_is_registered(cw_g_dbg, "mem_verbose"))
-  {
-    log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		"%p <-- malloc(%u)\n", retval, a_size);
-  }
 #endif
   
   if (retval == NULL)
@@ -185,6 +181,8 @@ mem_calloc(cw_mem_t * a_mem, size_t a_number, size_t a_size)
 {
   void * retval;
 
+  _cw_assert(a_size * a_number > 0);
+  
   retval = _cw_calloc(a_number, a_size);
 
 #ifdef _LIBSTASH_DBG
@@ -241,12 +239,6 @@ mem_calloc(cw_mem_t * a_mem, size_t a_number, size_t a_size)
 					 allocation));
     }
   }
-#else
-  if (dbg_is_registered(cw_g_dbg, "mem_verbose"))
-  {
-    log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		"%p <-- calloc(%u, %u)\n", retval, a_number, a_size);
-  }
 #endif
 
   if (retval == NULL)
@@ -275,6 +267,7 @@ mem_realloc(cw_mem_t * a_mem, void * a_ptr, size_t a_size)
   void * retval;
 
   _cw_check_ptr(a_ptr);
+  _cw_assert(a_size > 0);
 
   retval = _cw_realloc(a_ptr, a_size);
   
@@ -338,12 +331,6 @@ mem_realloc(cw_mem_t * a_mem, void * a_ptr, size_t a_size)
       }
     }
   }
-#else
-  if (dbg_is_registered(cw_g_dbg, "mem_verbose"))
-  {
-    log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		"%p <-- realloc(%p, %u)\n", retval, a_ptr, a_size);
-  }
 #endif
   
   if (retval == NULL)
@@ -401,12 +388,6 @@ mem_free(cw_mem_t * a_mem, void * a_ptr)
       _cw_free(allocation);
     }
   }
-#else
-  if (dbg_is_registered(cw_g_dbg, "mem_verbose"))
-  {
-    log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		"free(%p)\n", a_ptr);
-  }
 #endif
 
   _cw_free(a_ptr);
@@ -421,21 +402,3 @@ mem_dealloc(void * a_mem, void * a_ptr)
   mem_free((cw_mem_t *) a_mem, a_ptr);
 #endif
 }
-
-#ifdef _LIBSTASH_DBG
-static cw_uint64_t
-mem_p_oh_h1(cw_oh_t * a_oh, const void * a_key)
-{
-  cw_uint64_t retval, key = (cw_uint32_t) a_key;
-
-  retval = key >> 4;
-
-  return retval;
-}
-
-static cw_bool_t
-mem_p_oh_key_compare(const void * a_k1, const void * a_k2)
-{
-  return (a_k1 == a_k2) ?  TRUE : FALSE;
-}
-#endif

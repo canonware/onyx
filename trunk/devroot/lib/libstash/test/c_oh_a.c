@@ -29,6 +29,7 @@ main()
   cw_bool_t error;
 
   libstash_init();
+  log_printf(cw_g_log, "Test begin\n");
   
   oh_new(&hash, FALSE);
 /*   dbg_register(cw_g_dbg, "oh_slot"); */
@@ -119,6 +120,7 @@ main()
   _cw_free(strings);
 
   oh_delete(&hash);
+  log_printf(cw_g_log, "Test end\n");
   libstash_shutdown();
   
   return 0;

@@ -40,6 +40,7 @@ main(int argc, char * argv[])
   map_el_t * map;
 
   libstash_init();
+  log_printf(cw_g_log, "Test begin\n");
 
 #if (0)
   if (argc != 2)
@@ -557,7 +558,8 @@ recurse(cw_matrix_t * a_m, cw_uint32_t a_curr_selected, cw_uint32_t a_best)
       {
 	char buf[65];
 	log_printf(cw_g_log, "Try %s\n", log_print_uint64(g_tries, 10, buf));
-	exit(0);
+	log_printf(cw_g_log, "Test end\n");
+ 	exit(0);
       }
     }
 

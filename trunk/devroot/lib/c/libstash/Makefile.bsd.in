@@ -275,9 +275,9 @@ FORCE :
 # user 'make'ables
 #
 
-all_s : stat_dbg stat_opt shar_opt stat_prof
+all_s : stat_dbg stat_opt stat_prof @disable_shared@shar_opt
 
-all_r : stat_dbg_r stat_opt_r shar_opt_r stat_prof_r
+all_r : stat_dbg_r stat_opt_r stat_prof_r @disable_shared@shar_opt_r
 
 libs : all
 

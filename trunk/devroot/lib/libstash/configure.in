@@ -53,6 +53,8 @@ without_threads=""
 )
 AC_SUBST(without_threads)
 
+SQRL_DISABLE_SHARED()
+
 dnl Define preprocessor macros.
 
 dnl Check for header files.

@@ -33,6 +33,7 @@ main()
   cw_thd_t * thread_a, thread_b;
   
   libstash_init();
+  log_printf(cw_g_log, "Test begin\n");
 
   thread_a = thd_new(NULL, thread_entry_func, (void *) "Thread A argument");
   _cw_assert(NULL == thd_join(thread_a));
@@ -41,6 +42,7 @@ main()
 				  (void *) "Thread B argument"));
   _cw_assert(NULL == thd_join(&thread_b));
 
+  log_printf(cw_g_log, "Test end\n");
   libstash_shutdown();
 
   return 0;

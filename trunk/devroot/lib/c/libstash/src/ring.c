@@ -104,7 +104,7 @@ ring_dump(cw_ring_t * a_ring, const char * a_prefix)
 	     a_prefix);
 }
 
-_CW_INLINE void *
+void *
 ring_get_data(cw_ring_t * a_ring)
 {
   _cw_check_ptr(a_ring);
@@ -113,7 +113,7 @@ ring_get_data(cw_ring_t * a_ring)
   return a_ring->data;
 }
 
-_CW_INLINE void
+void
 ring_set_data(cw_ring_t * a_ring, void * a_data)
 {
   _cw_check_ptr(a_ring);
@@ -122,7 +122,7 @@ ring_set_data(cw_ring_t * a_ring, void * a_data)
   a_ring->data = a_data;
 }
 
-_CW_INLINE cw_ring_t *
+cw_ring_t *
 ring_next(cw_ring_t * a_ring)
 {
   _cw_check_ptr(a_ring);
@@ -131,7 +131,7 @@ ring_next(cw_ring_t * a_ring)
   return a_ring->next;
 }
 
-_CW_INLINE cw_ring_t *
+cw_ring_t *
 ring_prev(cw_ring_t * a_ring)
 {
   _cw_check_ptr(a_ring);
@@ -140,7 +140,7 @@ ring_prev(cw_ring_t * a_ring)
   return a_ring->prev;
 }
 
-_CW_INLINE void
+void
 ring_meld(cw_ring_t * a_a, cw_ring_t * a_b)
 {
   cw_ring_t * t_ring;
@@ -158,7 +158,7 @@ ring_meld(cw_ring_t * a_a, cw_ring_t * a_b)
   a_b->prev = t_ring;
 }
 
-_CW_INLINE cw_ring_t *
+cw_ring_t *
 ring_cut(cw_ring_t * a_ring)
 {
   cw_ring_t * retval;
@@ -176,7 +176,7 @@ ring_cut(cw_ring_t * a_ring)
   return retval;
 }
 
-_CW_INLINE void
+void
 ring_split(cw_ring_t * a_a, cw_ring_t * a_b)
 {
   cw_ring_t * t_ring;

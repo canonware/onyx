@@ -30,6 +30,7 @@ int
 main()
 {
   libstash_init();
+  log_printf(cw_g_log, "Test begin\n");
 
 /*    dbg_register(cw_g_dbg, "mem_verbose"); */
 
@@ -988,6 +989,7 @@ main()
     bufpool_delete(&bufpool);
   }
 
+  log_printf(cw_g_log, "Test end\n");
   libstash_shutdown();
   return 0;
 }

@@ -46,6 +46,7 @@ main()
   cw_mtx_t mutex_a, * mutex_b;
   
   libstash_init();
+  log_printf(cw_g_log, "Test begin\n");
 
   _cw_assert(&mutex_a == mtx_new(&mutex_a));
   /* Unlocked. */
@@ -83,6 +84,7 @@ main()
 
   log_printf(cw_g_log, "g_count: %u\n", g_count);
   
+  log_printf(cw_g_log, "Test end\n");
   libstash_shutdown();
   return 0;
 }

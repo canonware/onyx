@@ -120,6 +120,7 @@ main(int argc, char ** argv)
   cw_uint32_t seed;
   
   libstash_init();
+  log_printf(cw_g_log, "Test begin\n");
 
 /*    dbg_register(cw_g_dbg, "mem_verbose"); */
 
@@ -212,6 +213,7 @@ main(int argc, char ** argv)
   buf_delete(&buf_b);
   mtx_delete(&rand_lock);
   
+  log_printf(cw_g_log, "Test end\n");
   libstash_shutdown();
   return 0;
 }

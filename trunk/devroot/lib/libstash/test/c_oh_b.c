@@ -18,8 +18,6 @@
 #define _LIBSTASH_USE_THREAD
 #include <libstash/libstash_r.h>
 
-/* XXX This test leaks memory, but it doesn't affect the results. */
-
 #define NUM_STRINGS 20
 #define NUM_THREADS 100
 
@@ -62,6 +60,7 @@ main()
   cw_rwl_t lock;
 
   libstash_init();
+  log_printf(cw_g_log, "Test begin\n");
   hash = oh_new(NULL, TRUE);
   rwl_new(&lock);
 
@@ -104,6 +103,7 @@ main()
 
   rwl_delete(&lock);
   oh_delete(hash);
+  log_printf(cw_g_log, "Test end\n");
   libstash_shutdown();
   
   return 0;

@@ -751,7 +751,6 @@ buf_prepend_bufel(cw_buf_t * a_buf, cw_bufel_t * a_bufel)
 	     a_bufel,
 	     sizeof(cw_bufel_t));
       /* Make sure that we don't try to free this bufel during destruction. */
-      a_buf->array[a_buf->array_start].bufel.is_malloced = FALSE;
       a_buf->array[a_buf->array_start].bufel.dealloc_func = NULL;
 
       a_buf->size += bufel_get_valid_data_size(a_bufel);
@@ -832,7 +831,6 @@ buf_append_bufel(cw_buf_t * a_buf, cw_bufel_t * a_bufel)
       a_buf->array[a_buf->array_end].cumulative_size = a_buf->size;
 
       /* Make sure that we don't try to free this bufel during destruction. */
-      a_buf->array[a_buf->array_end].bufel.is_malloced = FALSE;
       a_buf->array[a_buf->array_end].bufel.dealloc_func = NULL;
 	      
       a_buf->array_end = ((a_buf->array_end + 1) % a_buf->array_size);
@@ -1819,21 +1817,20 @@ bufel_new(cw_bufel_t * a_bufel,
   {
     retval = (cw_bufel_t *) _cw_malloc(sizeof(cw_bufel_t));
     bzero(retval, sizeof(cw_bufel_t));
-    retval->is_malloced = TRUE;
+    retval->dealloc_func = mem_dealloc;
+    retval->dealloc_arg = cw_g_mem;
   }
   else
   {
     retval = a_bufel;
     bzero(retval, sizeof(cw_bufel_t));
-    retval->is_malloced = FALSE;
+    retval->dealloc_func = a_dealloc_func;
+    retval->dealloc_arg = a_dealloc_arg;
   }
 
 #ifdef _LIBSTASH_DBG
   retval->magic = _CW_BUFEL_MAGIC;
 #endif
-
-  retval->dealloc_func = a_dealloc_func;
-  retval->dealloc_arg = a_dealloc_arg;
   
   return retval;
 }
@@ -1849,14 +1846,7 @@ bufel_delete(cw_bufel_t * a_bufel)
     bufc_p_ref_decrement(a_bufel->bufc);
   }
 
-  if (a_bufel->is_malloced == TRUE)
-  {
-#ifdef _LIBSTASH_DBG
-    bzero(a_bufel, sizeof(cw_bufel_t));
-#endif
-    _cw_free(a_bufel);
-  }
-  else if (NULL != a_bufel->dealloc_func)
+  if (NULL != a_bufel->dealloc_func)
   {
     a_bufel->dealloc_func(a_bufel->dealloc_arg, (void *) a_bufel);
   }
@@ -1882,9 +1872,6 @@ bufel_dump(cw_bufel_t * a_bufel, const char * a_prefix)
 	     "%s|--> magic : 0x%x\n",
 	     a_prefix, a_bufel->magic);
 #endif
-  log_printf(cw_g_log,
-	     "%s|--> is_malloced : %s\n",
-	     a_prefix, (a_bufel->is_malloced) ? "TRUE" : "FALSE");
   log_printf(cw_g_log,
 	     "%s|--> free_func : %p\n",
 	     a_prefix, a_bufel->dealloc_func);
@@ -2098,13 +2085,13 @@ bufc_new(cw_bufc_t * a_bufc,
   {
     retval = (cw_bufc_t *) _cw_malloc(sizeof(cw_bufc_t));
     bzero(retval, sizeof(cw_bufc_t));
-    retval->is_malloced = TRUE;
+    retval->dealloc_func = mem_dealloc;
+    retval->dealloc_arg = cw_g_mem;
   }
   else
   {
     retval = a_bufc;
     bzero(retval, sizeof(cw_bufc_t));
-    retval->is_malloced = FALSE;
     retval->dealloc_func = a_dealloc_func;
     retval->dealloc_arg = a_dealloc_arg;
   }
@@ -2138,14 +2125,7 @@ bufc_delete(cw_bufc_t * a_bufc)
 				  (void *) a_bufc->buf);
     }
     
-    if (a_bufc->is_malloced)
-    {
-#ifdef _LIBSTASH_DBG
-      bzero(a_bufc, sizeof(cw_bufc_t));
-#endif
-      _cw_free(a_bufc);
-    }
-    else if (NULL != a_bufc->dealloc_func)
+    if (NULL != a_bufc->dealloc_func)
     {
       a_bufc->dealloc_func(a_bufc->dealloc_arg, (void *) a_bufc);
     }

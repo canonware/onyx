@@ -23,6 +23,7 @@ main()
   char a[65], b[65];
     
   libstash_init();
+  log_printf(cw_g_log, "Test begin\n");
 
   /* The following grossness shuts the compiler up.  IMO the compiler is
    * out of line in generating warnings on these. */
@@ -45,6 +46,7 @@ main()
   log_printf(cw_g_log, "42 --> %s (10)\n",
 	     log_print_uint64(l, 10, a));
 
+  log_printf(cw_g_log, "Test end\n");
   libstash_shutdown();
 
   return 0;

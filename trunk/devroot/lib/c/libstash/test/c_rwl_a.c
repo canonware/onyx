@@ -39,6 +39,7 @@ main()
   cw_uint32_t i;
   
   libstash_init();
+  log_printf(cw_g_log, "Test begin\n");
 
   lock_b = rwl_new(NULL);
   _cw_check_ptr(lock_b);
@@ -88,6 +89,7 @@ main()
   
   rwl_delete(&lock_a);
 
+  log_printf(cw_g_log, "Test end\n");
   libstash_shutdown();
   return 0;
 }

@@ -1,5 +1,17 @@
 1999-04-09  Jason Evans  <jasone@canonware.com>
 
+	* src/oh.c (oh_item_delete): Deal with NULL pointer for a_key
+	and/or a_data.
+	(oh_item_search): Deal with NULL pointer for a_data.
+	(oh_item_get_iterate): Deal with NULL pointer for a_data.
+	(oh_item_delete_iterate): Deal with NULL pointer for a_data.
+	(oh_h1_direct): Bit shift right until one 1 bit has been shifted
+	out.  This should increase the variation for keys that tend to
+	have lots of 0 bits at the low end, thus spreading distribution,
+	at least with smaller hash tables.
+
+	* configure.in: Add --disable-shared.
+
 	* src/ring.c: Add the ring class.
 
 1999-04-05  Jason Evans  <jasone@canonware.com>

@@ -1,3 +1,4 @@
+Test begin
 thread_entry_func(): Thread 0 has tlock
 thread_entry_func(): Thread 1 has tlock
 thread_entry_func(): Thread 2 has tlock
@@ -98,3 +99,4 @@ thread_entry_func(): Thread 96 has tlock
 thread_entry_func(): Thread 97 has tlock
 thread_entry_func(): Thread 98 has tlock
 thread_entry_func(): Thread 99 has tlock
+Test end

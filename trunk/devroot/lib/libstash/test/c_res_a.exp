@@ -1,3 +1,4 @@
+Test begin
 Merging in a list...
 Searching for a resource...
 simple:value
@@ -18,3 +19,4 @@ res_p_parse_res(): Illegal character while in _LIBSTASH_RES_STATE_VALUE_BACKSLAS
 res_p_parse_res(): Illegal character while in _LIBSTASH_RES_STATE_VALUE_BACKSLASH, line 1, column 12
 res_p_parse_res(): Illegal character while in _LIBSTASH_RES_STATE_VALUE_BACKSLASH, line 1, column 12
 res_p_parse_res(): Illegal character while in _LIBSTASH_RES_STATE_VALUE_BACKSLASH, line 1, column 12
+Test end

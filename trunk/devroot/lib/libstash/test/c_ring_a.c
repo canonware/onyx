@@ -100,7 +100,19 @@ main()
     } while (t_ring != ring_a);
     log_printf(cw_g_log, "\n");
 
-    log_printf(cw_g_log, "ring_b contents (3): ");
+    ring_split(ring_a, ring_a);
+    
+    log_printf(cw_g_log, "ring_a contents (3): ");
+    t_ring = ring_a;
+    do 
+    {
+      c = *(char *) ring_get_data(t_ring);
+      log_printf(cw_g_log, "%c ", c);
+      t_ring = ring_next(t_ring);
+    } while (t_ring != ring_a);
+    log_printf(cw_g_log, "\n");
+    
+    log_printf(cw_g_log, "ring_b contents (4): ");
     t_ring = ring_b;
     do 
     {
@@ -113,7 +125,7 @@ main()
     t_ring = ring_next(ring_a);
     ring_split(ring_a, t_ring);
     ring_delete(t_ring);
-    log_printf(cw_g_log, "ring_a contents (4): ");
+    log_printf(cw_g_log, "ring_a contents (5): ");
     t_ring = ring_a;
     do 
     {
@@ -125,7 +137,7 @@ main()
 
     t_ring = ring_next(ring_a);
     ring_split(ring_a, t_ring);
-    log_printf(cw_g_log, "ring_a contents (5): ");
+    log_printf(cw_g_log, "ring_a contents (6): ");
     t_ring = ring_a;
     do 
     {

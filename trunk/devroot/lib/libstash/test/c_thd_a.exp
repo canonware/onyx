@@ -1,2 +1,4 @@
+Test begin
 thread_entry_func(): Argument string: "Thread A argument"
 thread_entry_func(): Argument string: "Thread B argument"
+Test end
