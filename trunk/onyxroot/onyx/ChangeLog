@@ -24,6 +24,10 @@
 	     if deadlocks in dyld start appearing, this change is probably the
 	     cause.
 
+2004-01-17 : Jason Evans <jasone@canonware.com>
+
+	* Onyx 5.0.1 released.
+
 2004-01-16 : Jason Evans <jasone@canonware.com>
 
 	* lib/libonyx/src/nxo_dict.c:nxoe_p_dict_def() : Fix a race
