@@ -1374,7 +1374,7 @@ operators} \\
 	{Get class's name.}
 \hline
 \optableent
-	{class classname/null}
+	{class name/null}
 	{{\bf \htmlref{setclassname}{systemdict:setclassname}}}
 	{--}
 	{Set class's name.}
@@ -1382,7 +1382,7 @@ operators} \\
 \optableent
 	{class}
 	{{\bf \htmlref{super}{systemdict:super}}}
-	{class/null}
+	{super/null}
 	{Get class's superclass.}
 \hline
 \optableent
@@ -1410,10 +1410,10 @@ operators} \\
 	{Get data for class/instance.}
 \hline
 \optableent
-	{class/instance data/null}
+	{class/instance dict/null}
 	{{\bf \htmlref{setdata}{systemdict:setdata}}}
 	{--}
-	{Set data dict for class/instance.}
+	{Set data for class/instance.}
 \hline
 \optableent
 	{--}
@@ -3489,37 +3489,37 @@ onyx:0>
 	\end{description}
 \label{systemdict:class}
 \index{class@\onyxop{}{class}{}}
-\item[{\onyxop{OPARGS}{class}{OPOUTS}}: ]
+\item[{\onyxop{--}{class}{class}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[class: ]
+			A \classname{class} object.
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{stackunderflow}{stackunderflow}.]
-		\item[\htmlref{typecheck}{typecheck}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Create a class object.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> class 1 sprint
+-class-
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:classname}
 \index{classname@\onyxop{}{classname}{}}
-\item[{\onyxop{OPARGS}{classname}{OPOUTS}}: ]
+\item[{\onyxop{class}{classname}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[class: ]
+			A class object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[name/null: ]
+			A name or null object.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
@@ -3527,8 +3527,14 @@ onyx:0>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Get \oparg{class}'s name.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> class classname 1 sprint
+null
+onyx:0> vclass classname 1 sprint
+$vclass
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:clear}
@@ -4239,15 +4245,17 @@ onyx:0>
 	\end{description}
 \label{systemdict:data}
 \index{data@\onyxop{}{data}{}}
-\item[{\onyxop{OPARGS}{data}{OPOUTS}}: ]
+\item[{\onyxop{class/instance}{data}{dict/null}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[class/instance: ]
+			A class or instance object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[dict/null: ]
+			A dict or null object.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
@@ -4255,8 +4263,12 @@ onyx:0>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Get the data associated with \oparg{class} or \oparg{instance}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> vclass data 1 sprint
+<>
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:dec}
@@ -5933,15 +5945,17 @@ onyx:2>
 	\end{description}
 \label{systemdict:isa}
 \index{isa@\onyxop{}{isa}{}}
-\item[{\onyxop{OPARGS}{isa}{OPOUTS}}: ]
+\item[{\onyxop{instance}{isa}{class}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[instance: ]
+			An instance object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[class: ]
+			A class object.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
@@ -5949,8 +5963,16 @@ onyx:2>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Get the class \oparg{object} that \oparg{instance} is an
+		instance of.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> instance isa 1 sprint
+null
+onyx:0> instance dup vclass setisa
+onyx:1> isa classname 1 sprint
+$vclass
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:istack}
@@ -6649,15 +6671,17 @@ onyx:0>
 	\end{description}
 \label{systemdict:methods}
 \index{methods@\onyxop{}{methods}{}}
-\item[{\onyxop{OPARGS}{methods}{OPOUTS}}: ]
+\item[{\onyxop{class}{methods}{dict/null}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[class: ]
+			A class object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[dict/null: ]
+			A dict or null object.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
@@ -6665,8 +6689,12 @@ onyx:0>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Get the methods associated with \oparg{class}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> vclass methods 0 sprint
+-dict-
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:mkdir}
@@ -9266,46 +9294,54 @@ onyx:0>
 	\end{description}
 \label{systemdict:setclassname}
 \index{setclassname@\onyxop{}{setclassname}{}}
-\item[{\onyxop{OPARGS}{setclassname}{OPOUTS}}: ]
+\item[{\onyxop{class name/null}{setclassname}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[name/null: ]
+			A name or null object.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Set \oparg{class}'s name.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> class dup $foo setclassname
+onyx:1> classname 1 sprint
+$foo
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:setdata}
 \index{setdata@\onyxop{}{setdata}{}}
-\item[{\onyxop{OPARGS}{setdata}{OPOUTS}}: ]
+\item[{\onyxop{class/instance dict/null}{setdata}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[class/instance: ]
+			A class or instance object.
+		\item[dict/null: ]
+			A dict or null object.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Set the data associated with \oparg{class} or \oparg{instance}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> class dup <$foo `foo'> setdata
+onyx:1> data 1 sprint
+<$foo `foo'>
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:setegid}
@@ -9593,24 +9629,29 @@ onyx:0>
 	\end{description}
 \label{systemdict:setisa}
 \index{setisa@\onyxop{}{setisa}{}}
-\item[{\onyxop{OPARGS}{setisa}{OPOUTS}}: ]
+\item[{\onyxop{instance class/null}{setisa}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[instance: ]
+			An instance object.
+		\item[class/null: ]
+			A class or null object.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Set the class associated with \oparg{instance}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> instance dup vclass setisa
+onyx:1> isa classname 1 sprint
+$vclass
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:setlocking}
@@ -9668,24 +9709,29 @@ onyx:0>
 	\end{description}
 \label{systemdict:setmethods}
 \index{setmethods@\onyxop{}{setmethods}{}}
-\item[{\onyxop{OPARGS}{setmethods}{OPOUTS}}: ]
+\item[{\onyxop{class dict/null}{setmethods}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[class: ]
+			A class object.
+		\item[dict/null: ]
+			A dict or null object.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Set the methods associated with \oparg{class}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> class dup <$foo `foo'> setmethods
+onyx:1> methods 1 sprint
+<$foo `foo'>
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:setnonblocking}
@@ -9887,24 +9933,29 @@ onyx:0>
 	\end{description}
 \label{systemdict:setsuper}
 \index{setsuper@\onyxop{}{setsuper}{}}
-\item[{\onyxop{OPARGS}{setsuper}{OPOUTS}}: ]
+\item[{\onyxop{class super/null}{setsuper}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[class: ]
+			A class object.
+		\item[super/null: ]
+			A class or null object.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Set \oparg{class}'s superclass.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> class dup vclass setsuper
+onyx:1> super classname 1 sprint
+$vclass
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:setuid}
@@ -11437,15 +11488,17 @@ onyx:1>
 	\end{description}
 \label{systemdict:super}
 \index{super@\onyxop{}{super}{}}
-\item[{\onyxop{OPARGS}{super}{OPOUTS}}: ]
+\item[{\onyxop{class}{super}{super/null}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[class: ]
+			A class object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[super/null: ]
+			A class or null object.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
@@ -11453,8 +11506,15 @@ onyx:1>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Get the superclass of \oparg{class}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> class super 1 sprint
+null
+onyx:0> class dup vclass setsuper
+onyx:1> super classname 1 sprint
+$vclass
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:symlink}
