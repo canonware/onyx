@@ -188,9 +188,8 @@ onyx : [ONYX];
 tonyx : [TONYX];
 
 onyx_install : [ONYX]
-#if [matches macho [abi]]
-/* Make sure install_name is set correctly before relinking. */
-               install_libs
+#if [enable_libonyx]
+               libonyx_install_s
 #endif
 {
   [INSTALL] -d [PREFIX]/bin;
