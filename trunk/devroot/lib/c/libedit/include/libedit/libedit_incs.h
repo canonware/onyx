@@ -49,7 +49,9 @@
 			/* When we want to hide everything	*/
 #endif
 
-#include <sys/cdefs.h>
+#ifndef __P
+#define	__P(a) a
+#endif
 
 #ifndef _PTR_T
 # define _PTR_T

@@ -41,13 +41,12 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <curses.h>
+#include <term.h>
 #include <sys/types.h>
 #include <sys/ioctl.h>
 
 #include "../include/libedit/libedit.h"
-
-#include <curses.h>
-#include <term.h>
 
 /*
  * IMPORTANT NOTE: these routines are allowed to look at the current screen
