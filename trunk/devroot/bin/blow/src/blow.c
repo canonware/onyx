@@ -153,7 +153,8 @@ main(int argc, char **argv)
 	buffer = _cw_malloc(opt_bsize);
 	if (NULL == buffer)
 		_cw_error("Memory allocation error");
-	bufc_set_buffer(&bufc, buffer, opt_bsize, TRUE, mem_dealloc, cw_g_mem);
+	bufc_set_buffer(&bufc, buffer, opt_bsize, TRUE, (cw_opaque_dealloc_t
+	    *)mem_free, cw_g_mem);
 	if (TRUE == buf_append_bufc(&buf, &bufc, 0, opt_bsize))
 		_cw_error("Memory allocation error");
 	bufc_delete(&bufc);

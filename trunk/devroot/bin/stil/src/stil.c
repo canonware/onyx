@@ -93,7 +93,6 @@ main(int argc, char **argv)
 
 	_cw_out_put("sizeof(cw_buf_t): [i]\n", sizeof(cw_buf_t));
 	_cw_out_put("sizeof(cw_ring_t): [i]\n", sizeof(cw_ring_t));
-	_cw_out_put("sizeof(cw_oh_t): [i]\n", sizeof(cw_oh_t));
 	_cw_out_put("sizeof(cw_ch_t): [i]\n", sizeof(cw_ch_t));
 	_cw_out_put("sizeof(cw_chi_t): [i]\n", sizeof(cw_chi_t));
 	_cw_out_put("sizeof(cw_ch_t)[[[i]]: [i]\n", 256,

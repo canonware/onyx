@@ -122,12 +122,12 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 
 	if (dch_new(&retval->stiln_dch, _CW_STILT_STILN_BASE_TABLE,
 	    _CW_STILT_STILN_BASE_GROW, _CW_STILT_STILN_BASE_SHRINK,
-	    stilt_get_chi_pezz(a_stil), ch_hash_direct, ch_key_comp_direct) ==
+	    ch_hash_direct, ch_key_comp_direct) ==
 	    NULL)
 		goto OOM_2;
 	if (dch_new(&retval->roots_dch, _CW_STILT_ROOTS_BASE_TABLE,
 	    _CW_STILT_ROOTS_BASE_GROW, _CW_STILT_ROOTS_BASE_SHRINK,
-	    stilt_get_chi_pezz(a_stil), ch_hash_direct, ch_key_comp_direct) ==
+	    ch_hash_direct, ch_key_comp_direct) ==
 	    NULL)
 		goto OOM_3;
 	retval->stil = a_stil;

@@ -226,8 +226,7 @@ sockb_get_spare_bufc(void)
 	_cw_check_ptr(g_sockb);
 
 	retval = bufc_new((cw_bufc_t *)_cw_pezz_get(&g_sockb->bufc_pool),
-	    pezz_put,
-	    (void *)&g_sockb->bufc_pool);
+	    (cw_opaque_dealloc_t *)pezz_put, (void *)&g_sockb->bufc_pool);
 	if (NULL == retval) {
 		retval = NULL;
 		goto RETURN;
@@ -239,11 +238,8 @@ sockb_get_spare_bufc(void)
 		goto RETURN;
 	}
 	bufc_set_buffer(retval,
-	    buffer,
-	    pezz_get_buffer_size(&g_sockb->buffer_pool),
-	    TRUE,
-	    pezz_put,
-	    (void *)&g_sockb->buffer_pool);
+	    buffer,pezz_get_buffer_size(&g_sockb->buffer_pool), TRUE,
+	    (cw_opaque_dealloc_t *)pezz_put, (void *)&g_sockb->buffer_pool);
 
 RETURN:
 	return retval;
