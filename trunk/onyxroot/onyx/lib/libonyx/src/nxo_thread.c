@@ -394,9 +394,8 @@ nxo_p_thread_entry(void *a_arg)
 	/* Wait to be joined or detated, if not already so. */
 	mtx_lock(&thread->lock);
 	thread->done = TRUE;
-	while (thread->detached == FALSE && thread->joined == FALSE) {
+	while (thread->detached == FALSE && thread->joined == FALSE)
 		cnd_wait(&thread->done_cnd, &thread->lock);
-	}
 	if (thread->detached) {
 		mtx_unlock(&thread->lock);
 
