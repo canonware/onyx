@@ -339,10 +339,10 @@ nxoe_p_stack_npop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
     a_stack->nspare = CW_LIBONYX_STACK_CACHE;
 }
 
-/* This function handles a special case for nxo_stack_bnpop(), but is done as a
- * separate function to keep nxo_stack_bnpop() small. */
+/* This function handles a special case for nxo_stack_nbpop(), but is done as a
+ * separate function to keep nxo_stack_nbpop() small. */
 void
-nxoe_p_stack_bnpop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
+nxoe_p_stack_nbpop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
 {
     cw_uint32_t i;
     cw_nxoe_stacko_t *bottom, *stacko, *tstacko;
