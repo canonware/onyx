@@ -552,21 +552,9 @@ if test "x$lib_onyx" = "x1" ; then
     struct dirent ent;
 
     ent.d_namlen = 0;
-], AC_MSG_RESULT(yes), AC_MSG_RESULT(no)
-
-    dnl d_namlen doesn't exist, so try d_reclen.
-    AC_MSG_CHECKING(for (struct dirent).d_reclen)
-    AC_TRY_LINK([
-#include <sys/types.h>
-#include <dirent.h>
-], [
-    struct dirent ent;
-
-    ent.d_reclen = 0;
 ], AC_MSG_RESULT(yes)
-   AC_DEFINE(CW_LIBONYX_USE_DIRENT_RECLEN),
-   AC_MSG_RESULT(no)
-   AC_MSG_ERROR(struct dirent too deviant)))
+   AC_DEFINE(CW_HAVE_DIRENT_NAMLEN),
+   AC_MSG_RESULT(no))
 
     dnl Look for nanosecond resolution of atime in struct stat.
     AC_MSG_CHECKING(for (struct stat).st_atimespec)
