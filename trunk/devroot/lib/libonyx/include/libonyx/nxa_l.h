@@ -21,6 +21,9 @@ typedef enum
 } cw_nxam_t;
 #endif
 
+/* Global variables. */
+extern cw_nxa_t *cw_g_nxa;
+
 void
 nxa_l_nx_insert(cw_nx_t *a_nx);
 
