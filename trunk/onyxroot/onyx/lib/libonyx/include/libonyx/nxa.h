@@ -72,11 +72,15 @@ nxa_free_e(cw_nxa_t *a_nxa, void *a_ptr, size_t a_size, const char *a_filename,
 #ifdef CW_DBG
 #define nxa_malloc(a_nxa, a_size)					\
     nxa_malloc_e((a_nxa), (a_size), __FILE__, __LINE__)
+#define nxa_realloc(a_nxa, a_ptr, a_size, a_old_size)			\
+    nxa_realloc_e((a_nxa), (a_ptr), (a_size), (a_old_size), __FILE__, __LINE__)
 #define nxa_free(a_nxa, a_ptr, a_size)					\
     nxa_free_e((a_nxa), (a_ptr), (a_size), __FILE__, __LINE__)
 #else
 #define nxa_malloc(a_nxa, a_size)					\
     nxa_malloc_e((a_nxa), (a_size), NULL, 0)
+#define nxa_realloc(a_nxa, a_ptr, a_size, a_old_size)			\
+    nxa_realloc_e((a_nxa), (a_ptr), (a_size), (a_old_size), NULL, 0)
 #define nxa_free(a_nxa, a_ptr, a_size)					\
     nxa_free_e((a_nxa), (a_ptr), (a_size), NULL, 0)
 #endif
