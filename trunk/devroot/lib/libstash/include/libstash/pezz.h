@@ -39,7 +39,7 @@ struct cw_pezz_s {
 
 	/*
 	 * Number of blocks allocated (number of elements in the
-	 * mem_blocks[] and ring_blocks[] arrays.
+	 * mem_blocks[] array.
 	 */
 	cw_uint32_t	num_blocks;
 
