@@ -252,7 +252,7 @@ void		stilo_dict_undef(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const
 cw_bool_t	stilo_dict_lookup(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
     const cw_stilo_t *a_key, cw_stilo_t *r_stilo);
 cw_uint32_t	stilo_dict_count(cw_stilo_t *a_stilo);
-cw_bool_t	stilo_dict_iterate(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
+void		stilo_dict_iterate(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
     cw_stilo_t *r_stilo);
 
 /*
