@@ -1,0 +1,49 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+`Test begin\n' print flush
+
+[
+    {`Some input text.' `.' <>}
+    {`Some input text.' `.' <> regex}
+    {`Some input text.' `.'}
+    {`Some input text.' `.' regex}
+
+    {`INPUT Input input' `input' <$l 0>}
+    {`INPUT Input input' `input' <$l 0> regex}
+    {`INPUT Input input' `input' <$l 0 $i true>}
+    {`INPUT Input input' `input' <$l 0 $i true> regex}
+
+    {`Some multiline\ninput text.' `^\w+' <$l 0>}
+    {`Some multiline\ninput text.' `^\w+' <$l 0> regex}
+    {`Some multiline\ninput text.' `^\w+' <$l 0 $m true> regex}
+    {`Some multiline\ninput text.' `^\w+' <$l 0 $m true>}
+
+    {`Some multiline\ninput text.' `\w+.' <$l 0>}
+    {`Some multiline\ninput text.' `\w+.' <$l 0> regex}
+    {`Some multiline\ninput text.' `\w+.' <$l 0 $s true>}
+    {`Some multiline\ninput text.' `\w+.' <$l 0 $s true> regex}
+
+    {`Some input text.' `.'}
+    {`Some input text.' `.' regex}
+    {`Some input text.' `.' <$l 2>}
+    {`Some input text.' `.' <$l 2> regex}
+    {`Some input text.' `.' <$l 0>}
+    {`Some input text.' `.' <$l 0> regex}
+]{
+    dup 1 sprint
+    eval match
+    1 sprint
+} foreach
+
+`Test end\n' print
+pstack

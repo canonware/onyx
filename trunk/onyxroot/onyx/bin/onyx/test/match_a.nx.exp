@@ -1,0 +1,46 @@
+Test begin
+{`Some input text.' `.' < >}
+[`S']
+{`Some input text.' `.' < > regex}
+[`S']
+{`Some input text.' `.'}
+[`S']
+{`Some input text.' `.' regex}
+[`S']
+{`INPUT Input input' `input' < $l 0 >}
+[`input']
+{`INPUT Input input' `input' < $l 0 > regex}
+[`input']
+{`INPUT Input input' `input' < $l 0 $i true >}
+[`INPUT' `Input' `input']
+{`INPUT Input input' `input' < $l 0 $i true > regex}
+[`INPUT' `Input' `input']
+{`Some multiline\ninput text.' `^\\w+' < $l 0 >}
+[`Some']
+{`Some multiline\ninput text.' `^\\w+' < $l 0 > regex}
+[`Some']
+{`Some multiline\ninput text.' `^\\w+' < $l 0 $m true > regex}
+[`Some' `input']
+{`Some multiline\ninput text.' `^\\w+' < $l 0 $m true >}
+[`Some' `input']
+{`Some multiline\ninput text.' `\\w+.' < $l 0 >}
+[`Some ' `multiline' `input ' `text.']
+{`Some multiline\ninput text.' `\\w+.' < $l 0 > regex}
+[`Some ' `multiline' `input ' `text.']
+{`Some multiline\ninput text.' `\\w+.' < $l 0 $s true >}
+[`Some ' `multiline\n' `input ' `text.']
+{`Some multiline\ninput text.' `\\w+.' < $l 0 $s true > regex}
+[`Some ' `multiline\n' `input ' `text.']
+{`Some input text.' `.'}
+[`S']
+{`Some input text.' `.' regex}
+[`S']
+{`Some input text.' `.' < $l 2 >}
+[`S' `o']
+{`Some input text.' `.' < $l 2 > regex}
+[`S' `o']
+{`Some input text.' `.' < $l 0 >}
+[`S' `o' `m' `e' ` ' `i' `n' `p' `u' `t' ` ' `t' `e' `x' `t' `.']
+{`Some input text.' `.' < $l 0 > regex}
+[`S' `o' `m' `e' ` ' `i' `n' `p' `u' `t' ` ' `t' `e' `x' `t' `.']
+Test end
