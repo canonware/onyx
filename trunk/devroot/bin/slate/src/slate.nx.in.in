@@ -199,6 +199,12 @@ $keytable <
     `\ce' {
 	bpoint 1 marker_seekline
     }
+    `\cs' {
+	scratch bpoint buffer_history_startgroup
+    }
+    `\cg' {
+	scratch buffer_history_endgroup
+    }
     `\ct' {
 	stdin readline pop
 	dup length dec 0 1 dn {
@@ -248,7 +254,7 @@ scratch <
 
 2 gcdict $setperiod get eval
 
-# scratch true buffer_history_setactive
+scratch true buffer_history_setactive
 
 stdin 0 setiobuf {
     redisplay
