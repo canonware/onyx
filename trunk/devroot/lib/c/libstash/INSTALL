@@ -3,8 +3,8 @@
 #
 # $Source$
 # $Author: jasone $
-# $Revision: 141 $
-# $Date: 1998-07-10 15:34:34 -0700 (Fri, 10 Jul 1998) $
+# $Revision: 171 $
+# $Date: 1998-08-24 18:05:46 -0700 (Mon, 24 Aug 1998) $
 #
 # <<< Description >>>
 #
@@ -32,7 +32,3 @@ Optionally, pass any of the following arguments to 'configure':
 
 	will install SQRL into /usr/local/lib, /usr/local/include/libstash,
 	/usr/local/man, and /usr/local/share/libstash.
-
---disable-shared
-
-	Build only static libraries.  Do not build shared libraries.
