@@ -12,59 +12,104 @@
 #
 ################################################################################
 
+# Define usage string.
+#
+# - usage_string #string
 $usage_string
 `\
 Usage: onyx_config [--help] [--version] [--prefix]\n\
                    [--cppflags] [--cflags] [--ldflags] [--libs]\n'
 def
 
+# Print usage to stderr.
+#
+# - usage -
 $usage {
     stderr
     usage_string
     write pop
 } def
 
+# Print a string, after stripping off leading and trailing whitespace.
+#
+# #string strip_print -
+@enable_regex@ 1 eq {
+    $strip_print {
+	`^\s*(\S.*\S)\s*$' `\1' <$s true> subst pop
+	print
+    } def
+}{
+    $strip_print $print load def
+} ifelse
+
+# Dictionary of procedures associated with command line flags.
 $flags <
     `--help' {
 	usage_string print flush
 	0 die
     }
     `--prefix' {
-	`@prefix@' print
+	`@prefix@' strip_print
     }
     `--version' {
-	`Canonware Onyx, version <Version = onyx>.' print
+	`Canonware Onyx, version <Version = onyx>.' strip_print
     }
     `--cppflags' {
-	`@CPPFLAGS@ -I@prefix@/include' print
+	`@CPPFLAGS@'
+	@enable_regex@ 1 eq {
+	    dup `-I@prefix@/include\\b' match not {
+		` -I@prefix@/include' cat
+	    } if
+	}{
+	    ` -I@prefix@/include' cat
+	} ifelse
+	strip_print
     }
     `--cflags' {
-	`@CFLAGS@' print
+	`@CFLAGS@' strip_print
     }
     `--ldflags' {
-	`@LDFLAGS@ -L@prefix@/lib' print
+	`@LDFLAGS@'
+	@enable_regex@ 1 eq {
+	    dup `-L@prefix@/lib\\b' match not {
+		` -L@prefix@/lib' cat
+	    } if
+	}{
+	    `-L@prefix@/lib' cat
+	} ifelse
+	strip_print
     }
     `--libs' {
-	`-lonyx @LIBS@' print
+	`-lonyx @LIBS@' strip_print
     }
 > def
 
+# Make sure at least one argument was specified.
 argv length 2 lt {
     # No arguments specified.
     usage
     1 die
 } if
 
-# Iteratively process arguments.
-argv dup length dec 1 exch getinterval {
-    flags over known {
+# Iteratively process command line arguments.
+argv dup length dec 1 exch getinterval
+0 1 2 idup length dec {
+    # #args #index
+    dup 0 gt {
+	# Print a spacer between iterations.
 	` ' print
+    } if
+    under get
+    # #args #arg
+    flags over known {
+	# Call procedure associated with flag.
 	flags exch get eval
     }{
 	# Unknown flag.
 	usage
 	1 die
     } ifelse
-} foreach
+} for
 
+# Finish up with a newline.
 `\n' print
