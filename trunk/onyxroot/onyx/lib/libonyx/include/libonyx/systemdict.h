@@ -160,8 +160,10 @@ void
 systemdict_dirforeach(cw_nxo_t *a_thread);
 #endif
 
+#ifdef CW_REAL
 void
 systemdict_div(cw_nxo_t *a_thread);
+#endif
 
 void
 systemdict_dstack(cw_nxo_t *a_thread);
@@ -250,13 +252,8 @@ systemdict_gt(cw_nxo_t *a_thread);
 void
 systemdict_hooktag(cw_nxo_t *a_thread);
 
-#ifdef CW_REAL
 void
 systemdict_idiv(cw_nxo_t *a_thread);
-
-void
-systemdict_iexp(cw_nxo_t *a_thread);
-#endif
 
 void
 systemdict_if(cw_nxo_t *a_thread);
@@ -697,19 +694,88 @@ CW_INLINE void
 systemdict_inline_add(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack;
-    cw_nxo_t *a, *b;
+    cw_nxo_t *nxo_a, *nxo_b;
+    cw_nxoi_t integer_a, integer_b;
+#ifdef CW_REAL
+    cw_bool_t do_real;
+    cw_nxor_t real_a, real_b;
+#endif
 
     ostack = nxo_thread_ostack_get(a_thread);
-	
-    NXO_STACK_GET(b, ostack, a_thread);
-    NXO_STACK_DOWN_GET(a, ostack, a_thread, b);
-    if (nxo_type_get(a) != NXOT_INTEGER || nxo_type_get(b) != NXOT_INTEGER)
+    NXO_STACK_GET(nxo_b, ostack, a_thread);
+    NXO_STACK_DOWN_GET(nxo_a, ostack, a_thread, nxo_b);
+    switch (nxo_type_get(nxo_a))
     {
-	nxo_thread_nerror(a_thread, NXN_typecheck);
-	return;
+	case NXOT_INTEGER:
+	{
+#ifdef CW_REAL
+	    do_real = FALSE;
+#endif
+	    integer_a = nxo_integer_get(nxo_a);
+	    break;
+	}
+#ifdef CW_REAL
+	case NXOT_REAL:
+	{
+	    do_real = TRUE;
+	    real_a = nxo_real_get(nxo_a);
+	    break;
+	}
+#endif
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+    switch (nxo_type_get(nxo_b))
+    {
+	case NXOT_INTEGER:
+	{
+#ifdef CW_REAL
+	    if (do_real)
+	    {
+		real_b = (cw_nxor_t) nxo_integer_get(nxo_b);
+	    }
+	    else
+#endif
+	    {
+		integer_b = nxo_integer_get(nxo_b);
+	    }
+	    break;
+	}
+#ifdef CW_REAL
+	case NXOT_REAL:
+	{
+	    real_b = nxo_real_get(nxo_b);
+	    if (do_real == FALSE)
+	    {
+		do_real = TRUE;
+		real_a = (cw_nxor_t) integer_a;
+	    }
+	    break;
+	}
+#endif
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
     }
 
-    nxo_integer_set(a, nxo_integer_get(a) + nxo_integer_get(b));
+#ifdef CW_REAL
+    if (do_real)
+    {
+	/* nxo_a may be an integer, so use nxo_real_new() rather than
+	 * nxo_real_set(). */
+	nxo_real_new(nxo_a, real_a + real_b);
+    }
+#endif
+    else
+    {
+	nxo_integer_set(nxo_a, integer_a + integer_b);
+    }
+
     nxo_stack_pop(ostack);
 }
 

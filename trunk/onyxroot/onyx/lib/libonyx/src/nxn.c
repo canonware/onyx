@@ -111,7 +111,9 @@ const cw_uint8_t *cw_g_nx_names[] = {
 #ifdef CW_POSIX
     "dirforeach",
 #endif
+#ifdef CW_REAL
     "div",
+#endif
     "dstack",
     "dstackunderflow",
     "dup",
@@ -161,10 +163,7 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "gt",
     "hooktag",
     "hooktype",
-#ifdef CW_REAL
     "idiv",
-    "iexp",
-#endif
     "if",
     "ifelse",
     "index",

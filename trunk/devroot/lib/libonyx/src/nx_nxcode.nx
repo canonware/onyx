@@ -399,7 +399,7 @@ systemdict begin
 				}{
 					% Center.
 					% %str %flags %width %len %pstr
-					3 1 roll sub 2 div
+					3 1 roll sub 2 idiv
 				} ifelse
 				} ifelse
 				% %str %flags %pstr %offset

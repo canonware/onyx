@@ -18,8 +18,6 @@
 #include <errno.h>
 #include <limits.h>
 #ifdef CW_REAL
-/* This is necessary for HUGE_VAL, at least on FreeBSD, though the documentation
- * seems to indicate that stdlib.h should be enough. */
 #include <math.h>
 #endif
 

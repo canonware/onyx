@@ -110,7 +110,9 @@ typedef enum
 #ifdef CW_POSIX
     NXN_dirforeach,
 #endif
+#ifdef CW_REAL
     NXN_div,
+#endif
     NXN_dstack,
     NXN_dstackunderflow,
     NXN_dup,
@@ -160,10 +162,7 @@ typedef enum
     NXN_gt,
     NXN_hooktag,
     NXN_hooktype,
-#ifdef CW_REAL
     NXN_idiv,
-    NXN_iexp,
-#endif
     NXN_if,
     NXN_ifelse,
     NXN_index,

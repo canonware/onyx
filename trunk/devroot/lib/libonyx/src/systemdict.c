@@ -26,6 +26,9 @@
 #ifdef HAVE_DLOPEN
 #include <dlfcn.h> /* For modload operator. */
 #endif
+#ifdef CW_REAL
+#include <math.h>
+#endif
 
 #include "../include/libonyx/nxo_l.h"
 #include "../include/libonyx/nxo_array_l.h"
@@ -132,7 +135,9 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #ifdef CW_POSIX
     ENTRY(dirforeach),
 #endif
+#ifdef CW_REAL
     ENTRY(div),
+#endif
     ENTRY(dstack),
     ENTRY(echeck),
 #ifdef CW_POSIX
@@ -168,10 +173,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #endif
     ENTRY(gt),
     ENTRY(hooktag),
-#ifdef CW_REAL
     ENTRY(idiv),
-    ENTRY(iexp),
-#endif
     ENTRY(if),
     ENTRY(ifelse),
     ENTRY(iobuf),
@@ -508,15 +510,31 @@ systemdict_abs(cw_nxo_t *a_thread)
     ostack = nxo_thread_ostack_get(a_thread);
 	
     NXO_STACK_GET(a, ostack, a_thread);
-    if (nxo_type_get(a) != NXOT_INTEGER)
+    switch (nxo_type_get(a))
     {
-	nxo_thread_nerror(a_thread, NXN_typecheck);
-	return;
-    }
-
-    if (nxo_integer_get(a) < 0)
-    {
-	nxo_integer_set(a, -nxo_integer_get(a));
+	case NXOT_INTEGER:
+	{
+	    if (nxo_integer_get(a) < 0)
+	    {
+		nxo_integer_set(a, -nxo_integer_get(a));
+	    }
+	    break;
+	}
+#ifdef CW_REAL
+	case NXOT_REAL:
+	{
+	    if (nxo_real_get(a) < 0)
+	    {
+		nxo_real_set(a, -nxo_real_get(a));
+	    }
+	    break;
+	}
+#endif
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
     }
 }
 
@@ -598,7 +616,31 @@ systemdict_array(cw_nxo_t *a_thread)
 void
 systemdict_atan(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack;
+    cw_nxo_t *nxo;
+    cw_nxor_t real;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    switch (nxo_type_get(nxo))
+    {
+	case NXOT_INTEGER:
+	{
+	    real = (cw_nxor_t) nxo_integer_get(nxo);
+	    break;
+	}
+	case NXOT_REAL:
+	{
+	    real = nxo_real_get(nxo);
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+    nxo_real_new(nxo, atan(real));
 }
 #endif
 
@@ -912,7 +954,28 @@ systemdict_cd(cw_nxo_t *a_thread)
 void
 systemdict_ceiling(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack;
+    cw_nxo_t *nxo;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    switch (nxo_type_get(nxo))
+    {
+	case NXOT_INTEGER:
+	{
+	    break;
+	}
+	case NXOT_REAL:
+	{
+	    nxo_integer_new(nxo, (cw_nxoi_t) ceil(nxo_real_get(nxo)));
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
 }
 #endif
 
@@ -1289,7 +1352,31 @@ systemdict_copy(cw_nxo_t *a_thread)
 void
 systemdict_cos(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack;
+    cw_nxo_t *nxo;
+    cw_nxor_t real;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    switch (nxo_type_get(nxo))
+    {
+	case NXOT_INTEGER:
+	{
+	    real = (cw_nxor_t) nxo_integer_get(nxo);
+	    break;
+	}
+	case NXOT_REAL:
+	{
+	    real = nxo_real_get(nxo);
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+    nxo_real_new(nxo, cos(real));
 }
 #endif
 
@@ -1388,7 +1475,37 @@ systemdict_currentlocking(cw_nxo_t *a_thread)
 void
 systemdict_cvds(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack;
+    cw_nxo_t *real, *precision;
+    char *result;
+    cw_sint32_t len;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(precision, ostack, a_thread);
+    NXO_STACK_DOWN_GET(real, ostack, a_thread, precision);
+    if (nxo_type_get(precision) != NXOT_INTEGER
+	|| nxo_type_get(real) != NXOT_REAL)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+
+    len = asprintf(&result, "%.*f", (int) nxo_integer_get(precision),
+		   nxo_real_get(real));
+    if (len == -1)
+    {
+	nxo_thread_nerror(a_thread, NXN_rangecheck);
+	return;
+    }
+
+    nxo_string_new(real, nxo_thread_nx_get(a_thread),
+		   nxo_thread_currentlocking(a_thread), len);
+    nxo_string_lock(real);
+    nxo_string_set(real, 0, result, len);
+    nxo_string_unlock(real);
+    free(result);
+
+    nxo_stack_pop(ostack);
 }
 #endif
 
@@ -1407,7 +1524,37 @@ systemdict_cve(cw_nxo_t *a_thread)
 void
 systemdict_cves(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack;
+    cw_nxo_t *real, *precision;
+    char *result;
+    cw_sint32_t len;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(precision, ostack, a_thread);
+    NXO_STACK_DOWN_GET(real, ostack, a_thread, precision);
+    if (nxo_type_get(precision) != NXOT_INTEGER
+	|| nxo_type_get(real) != NXOT_REAL)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+
+    len = asprintf(&result, "%.*e", (int) nxo_integer_get(precision),
+		   nxo_real_get(real));
+    if (len == -1)
+    {
+	nxo_thread_nerror(a_thread, NXN_rangecheck);
+	return;
+    }
+
+    nxo_string_new(real, nxo_thread_nx_get(a_thread),
+		   nxo_thread_currentlocking(a_thread), len);
+    nxo_string_lock(real);
+    nxo_string_set(real, 0, result, len);
+    nxo_string_unlock(real);
+    free(result);
+
+    nxo_stack_pop(ostack);
 }
 #endif
 
@@ -1649,7 +1796,7 @@ systemdict_cvs(cw_nxo_t *a_thread)
 	    cw_uint8_t result[15]; /* "-9.999999e+307\0" */
 	    cw_sint32_t len;
 
-	    len = snprintf(result, sizeof(result), "%6e", nxo_real_get(nxo));
+	    len = snprintf(result, sizeof(result), "%e", nxo_real_get(nxo));
 
 	    nxo_string_new(nxo, nxo_thread_nx_get(a_thread),
 			   nxo_thread_currentlocking(a_thread), len);
@@ -2029,30 +2176,64 @@ systemdict_dirforeach(cw_nxo_t *a_thread)
 }
 #endif
 
+#ifdef CW_REAL
 void
 systemdict_div(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack;
-    cw_nxo_t *a, *b;
+    cw_nxo_t *nxo_a, *nxo_b;
+    cw_nxor_t real_a, real_b;
 
     ostack = nxo_thread_ostack_get(a_thread);
-	
-    NXO_STACK_GET(b, ostack, a_thread);
-    NXO_STACK_DOWN_GET(a, ostack, a_thread, b);
-    if (nxo_type_get(a) != NXOT_INTEGER || nxo_type_get(b) != NXOT_INTEGER)
+    NXO_STACK_GET(nxo_b, ostack, a_thread);
+    NXO_STACK_DOWN_GET(nxo_a, ostack, a_thread, nxo_b);
+    switch (nxo_type_get(nxo_a))
     {
-	nxo_thread_nerror(a_thread, NXN_typecheck);
-	return;
+	case NXOT_INTEGER:
+	{
+	    real_a = (cw_nxor_t) nxo_integer_get(nxo_a);
+	    break;
+	}
+	case NXOT_REAL:
+	{
+	    real_a = nxo_real_get(nxo_a);
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
     }
-    if (nxo_integer_get(b) == 0)
+    switch (nxo_type_get(nxo_b))
+    {
+	case NXOT_INTEGER:
+	{
+	    real_b = (cw_nxor_t) nxo_integer_get(nxo_b);
+	    break;
+	}
+	case NXOT_REAL:
+	{
+	    real_b = nxo_real_get(nxo_b);
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+
+    if (real_b == 0)
     {
 	nxo_thread_nerror(a_thread, NXN_undefinedresult);
 	return;
     }
 
-    nxo_integer_set(a, nxo_integer_get(a) / nxo_integer_get(b));
+    nxo_real_new(nxo_a, real_a / real_b);
     nxo_stack_pop(ostack);
 }
+#endif
 
 void
 systemdict_dstack(cw_nxo_t *a_thread)
@@ -2357,39 +2538,116 @@ void
 systemdict_exp(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack;
-    cw_nxo_t *a, *b;
-    cw_uint32_t i;
-    cw_nxoi_t r;
+    cw_nxo_t *base, *exp;
+    cw_nxoi_t integer_base, integer_exp;
+#ifdef CW_REAL
+    cw_bool_t do_real;
+    cw_nxor_t real_base, real_exp;
+#endif
 
     ostack = nxo_thread_ostack_get(a_thread);
 	
-    NXO_STACK_GET(b, ostack, a_thread);
-    NXO_STACK_DOWN_GET(a, ostack, a_thread, b);
-    if (nxo_type_get(a) != NXOT_INTEGER
-	|| nxo_type_get(b) != NXOT_INTEGER)
+    NXO_STACK_GET(exp, ostack, a_thread);
+    NXO_STACK_DOWN_GET(base, ostack, a_thread, exp);
+    switch (nxo_type_get(base))
     {
-	nxo_thread_nerror(a_thread, NXN_typecheck);
-	return;
-    }
-
-    if (nxo_integer_get(b) < 0)
-    {
-	nxo_thread_nerror(a_thread, NXN_rangecheck);
-	return;
-    }
-    else if (nxo_integer_get(b) > 0)
-    {
-	for (i = 1, r = nxo_integer_get(a); i < nxo_integer_get(b); i++)
+	case NXOT_INTEGER:
 	{
-	    r *= nxo_integer_get(a);
+#ifdef CW_REAL
+	    do_real = FALSE;
+#endif
+	    integer_base = nxo_integer_get(base);
+	    break;
+	}
+#ifdef CW_REAL
+	case NXOT_REAL:
+	{
+	    do_real = TRUE;
+	    real_base = nxo_real_get(base);
+	    break;
+	}
+#endif
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
 	}
     }
-    else
+    switch (nxo_type_get(exp))
     {
-	r = 1;
+	case NXOT_INTEGER:
+	{
+#ifdef CW_REAL
+	    if (do_real)
+	    {
+		real_exp = (cw_nxor_t) nxo_integer_get(exp);
+	    }
+	    else
+#endif
+	    {
+		integer_exp = nxo_integer_get(exp);
+		if (integer_exp < 0)
+		{
+#ifdef CW_REAL
+		    do_real = TRUE;
+		    real_base = (cw_nxor_t) integer_base;
+		    real_exp = (cw_nxor_t) integer_exp;
+#else
+		    nxo_thread_nerror(a_thread, NXN_rangecheck);
+		    return;
+#endif
+		}
+	    }
+	    break;
+	}
+#ifdef CW_REAL
+	case NXOT_REAL:
+	{
+	    real_exp = nxo_real_get(exp);
+	    if (do_real == FALSE)
+	    {
+		do_real = TRUE;
+		real_base = (cw_nxor_t) integer_base;
+	    }
+	    break;
+	}
+#endif
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
     }
 
-    nxo_integer_set(a, r);
+#ifdef CW_REAL
+    if (do_real)
+    {
+	/* base may be an integer, so use nxo_real_new() rather than
+	 * nxo_real_set(). */
+	nxo_real_new(base, pow(real_base, real_exp));
+    }
+    else
+#endif
+    {
+	cw_uint32_t i;
+	cw_nxoi_t r;
+
+	if (integer_exp != 0)
+	{
+	    for (i = 1, r = integer_base; i < integer_exp; i++)
+	    {
+		r *= integer_base;
+	    }
+	}
+	else
+	{
+	    /* base^0 --> 1. */
+	    r = 1;
+	}
+
+	nxo_integer_set(base, r);
+    }
+
     nxo_stack_pop(ostack);
 }
 
@@ -2397,7 +2655,28 @@ systemdict_exp(cw_nxo_t *a_thread)
 void
 systemdict_floor(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack;
+    cw_nxo_t *nxo;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    switch (nxo_type_get(nxo))
+    {
+	case NXOT_INTEGER:
+	{
+	    break;
+	}
+	case NXOT_REAL:
+	{
+	    nxo_integer_new(nxo, (cw_nxoi_t) floor(nxo_real_get(nxo)));
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
 }
 #endif
 
@@ -3006,19 +3285,30 @@ systemdict_hooktag(cw_nxo_t *a_thread)
     nxo_stack_pop(tstack);
 }
 
-#ifdef CW_REAL
 void
 systemdict_idiv(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
-}
+    cw_nxo_t *ostack;
+    cw_nxo_t *a, *b;
 
-void
-systemdict_iexp(cw_nxo_t *a_thread)
-{
-    cw_error("XXX Not implemented");
+    ostack = nxo_thread_ostack_get(a_thread);
+	
+    NXO_STACK_GET(b, ostack, a_thread);
+    NXO_STACK_DOWN_GET(a, ostack, a_thread, b);
+    if (nxo_type_get(a) != NXOT_INTEGER || nxo_type_get(b) != NXOT_INTEGER)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    if (nxo_integer_get(b) == 0)
+    {
+	nxo_thread_nerror(a_thread, NXN_undefinedresult);
+	return;
+    }
+
+    nxo_integer_set(a, nxo_integer_get(a) / nxo_integer_get(b));
+    nxo_stack_pop(ostack);
 }
-#endif
 
 void
 systemdict_if(cw_nxo_t *a_thread)
@@ -3416,13 +3706,61 @@ systemdict_lock(cw_nxo_t *a_thread)
 void
 systemdict_log(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack;
+    cw_nxo_t *nxo;
+    cw_nxor_t real;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    switch (nxo_type_get(nxo))
+    {
+	case NXOT_INTEGER:
+	{
+	    real = (cw_nxor_t) nxo_integer_get(nxo);
+	    break;
+	}
+	case NXOT_REAL:
+	{
+	    real = nxo_real_get(nxo);
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+    nxo_real_new(nxo, log10(real));
 }
 
 void
 systemdict_ln(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack;
+    cw_nxo_t *nxo;
+    cw_nxor_t real;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    switch (nxo_type_get(nxo))
+    {
+	case NXOT_INTEGER:
+	{
+	    real = (cw_nxor_t) nxo_integer_get(nxo);
+	    break;
+	}
+	case NXOT_REAL:
+	{
+	    real = nxo_real_get(nxo);
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+    nxo_real_new(nxo, log(real));
 }
 #endif
 
@@ -3786,19 +4124,88 @@ void
 systemdict_mul(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack;
-    cw_nxo_t *a, *b;
+    cw_nxo_t *nxo_a, *nxo_b;
+    cw_nxoi_t integer_a, integer_b;
+#ifdef CW_REAL
+    cw_bool_t do_real;
+    cw_nxor_t real_a, real_b;
+#endif
 
     ostack = nxo_thread_ostack_get(a_thread);
-	
-    NXO_STACK_GET(b, ostack, a_thread);
-    NXO_STACK_DOWN_GET(a, ostack, a_thread, b);
-    if (nxo_type_get(a) != NXOT_INTEGER || nxo_type_get(b) != NXOT_INTEGER)
+    NXO_STACK_GET(nxo_b, ostack, a_thread);
+    NXO_STACK_DOWN_GET(nxo_a, ostack, a_thread, nxo_b);
+    switch (nxo_type_get(nxo_a))
     {
-	nxo_thread_nerror(a_thread, NXN_typecheck);
-	return;
+	case NXOT_INTEGER:
+	{
+#ifdef CW_REAL
+	    do_real = FALSE;
+#endif
+	    integer_a = nxo_integer_get(nxo_a);
+	    break;
+	}
+#ifdef CW_REAL
+	case NXOT_REAL:
+	{
+	    do_real = TRUE;
+	    real_a = nxo_real_get(nxo_a);
+	    break;
+	}
+#endif
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+    switch (nxo_type_get(nxo_b))
+    {
+	case NXOT_INTEGER:
+	{
+#ifdef CW_REAL
+	    if (do_real)
+	    {
+		real_b = (cw_nxor_t) nxo_integer_get(nxo_b);
+	    }
+	    else
+#endif
+	    {
+		integer_b = nxo_integer_get(nxo_b);
+	    }
+	    break;
+	}
+#ifdef CW_REAL
+	case NXOT_REAL:
+	{
+	    real_b = nxo_real_get(nxo_b);
+	    if (do_real == FALSE)
+	    {
+		do_real = TRUE;
+		real_a = (cw_nxor_t) integer_a;
+	    }
+	    break;
+	}
+#endif
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
     }
 
-    nxo_integer_set(a, nxo_integer_get(a) * nxo_integer_get(b));
+#ifdef CW_REAL
+    if (do_real)
+    {
+	/* nxo_a may be an integer, so use nxo_real_new() rather than
+	 * nxo_real_set(). */
+	nxo_real_new(nxo_a, real_a * real_b);
+    }
+#endif
+    else
+    {
+	nxo_integer_set(nxo_a, integer_a * integer_b);
+    }
+
     nxo_stack_pop(ostack);
 }
 
@@ -3889,13 +4296,26 @@ systemdict_neg(cw_nxo_t *a_thread)
     ostack = nxo_thread_ostack_get(a_thread);
 	
     NXO_STACK_GET(a, ostack, a_thread);
-    if (nxo_type_get(a) != NXOT_INTEGER)
+    switch (nxo_type_get(a))
     {
-	nxo_thread_nerror(a_thread, NXN_typecheck);
-	return;
+	case NXOT_INTEGER:
+	{
+	    nxo_integer_set(a, -nxo_integer_get(a));
+	    break;
+	}
+#ifdef CW_REAL
+	case NXOT_REAL:
+	{
+	    nxo_real_set(a, -nxo_real_get(a));
+	    break;
+	}
+#endif
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
     }
-
-    nxo_integer_set(a, -nxo_integer_get(a));
 }
 
 void
@@ -4692,7 +5112,28 @@ systemdict_roll(cw_nxo_t *a_thread)
 void
 systemdict_round(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack;
+    cw_nxo_t *nxo;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    switch (nxo_type_get(nxo))
+    {
+	case NXOT_INTEGER:
+	{
+	    break;
+	}
+	case NXOT_REAL:
+	{
+	    nxo_integer_new(nxo, (cw_nxoi_t) rint(nxo_real_get(nxo)));
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
 }
 #endif
 
@@ -5155,7 +5596,31 @@ systemdict_signal(cw_nxo_t *a_thread)
 void
 systemdict_sin(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack;
+    cw_nxo_t *nxo;
+    cw_nxor_t real;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    switch (nxo_type_get(nxo))
+    {
+	case NXOT_INTEGER:
+	{
+	    real = (cw_nxor_t) nxo_integer_get(nxo);
+	    break;
+	}
+	case NXOT_REAL:
+	{
+	    real = nxo_real_get(nxo);
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+    nxo_real_new(nxo, sin(real));
 }
 #endif
 
@@ -5231,7 +5696,31 @@ systemdict_spush(cw_nxo_t *a_thread)
 void
 systemdict_sqrt(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack;
+    cw_nxo_t *nxo;
+    cw_nxor_t real;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    switch (nxo_type_get(nxo))
+    {
+	case NXOT_INTEGER:
+	{
+	    real = (cw_nxor_t) nxo_integer_get(nxo);
+	    break;
+	}
+	case NXOT_REAL:
+	{
+	    real = nxo_real_get(nxo);
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+    nxo_real_new(nxo, sqrt(real));
 }
 #endif
 
@@ -5654,19 +6143,88 @@ void
 systemdict_sub(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack;
-    cw_nxo_t *a, *b;
+    cw_nxo_t *nxo_a, *nxo_b;
+    cw_nxoi_t integer_a, integer_b;
+#ifdef CW_REAL
+    cw_bool_t do_real;
+    cw_nxor_t real_a, real_b;
+#endif
 
     ostack = nxo_thread_ostack_get(a_thread);
-	
-    NXO_STACK_GET(b, ostack, a_thread);
-    NXO_STACK_DOWN_GET(a, ostack, a_thread, b);
-    if (nxo_type_get(a) != NXOT_INTEGER || nxo_type_get(b) != NXOT_INTEGER)
+    NXO_STACK_GET(nxo_b, ostack, a_thread);
+    NXO_STACK_DOWN_GET(nxo_a, ostack, a_thread, nxo_b);
+    switch (nxo_type_get(nxo_a))
     {
-	nxo_thread_nerror(a_thread, NXN_typecheck);
-	return;
+	case NXOT_INTEGER:
+	{
+#ifdef CW_REAL
+	    do_real = FALSE;
+#endif
+	    integer_a = nxo_integer_get(nxo_a);
+	    break;
+	}
+#ifdef CW_REAL
+	case NXOT_REAL:
+	{
+	    do_real = TRUE;
+	    real_a = nxo_real_get(nxo_a);
+	    break;
+	}
+#endif
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+    switch (nxo_type_get(nxo_b))
+    {
+	case NXOT_INTEGER:
+	{
+#ifdef CW_REAL
+	    if (do_real)
+	    {
+		real_b = (cw_nxor_t) nxo_integer_get(nxo_b);
+	    }
+	    else
+#endif
+	    {
+		integer_b = nxo_integer_get(nxo_b);
+	    }
+	    break;
+	}
+#ifdef CW_REAL
+	case NXOT_REAL:
+	{
+	    real_b = nxo_real_get(nxo_b);
+	    if (do_real == FALSE)
+	    {
+		do_real = TRUE;
+		real_a = (cw_nxor_t) integer_a;
+	    }
+	    break;
+	}
+#endif
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
     }
 
-    nxo_integer_set(a, nxo_integer_get(a) - nxo_integer_get(b));
+#ifdef CW_REAL
+    if (do_real)
+    {
+	/* nxo_a may be an integer, so use nxo_real_new() rather than
+	 * nxo_real_set(). */
+	nxo_real_new(nxo_a, real_a - real_b);
+    }
+#endif
+    else
+    {
+	nxo_integer_set(nxo_a, integer_a - integer_b);
+    }
+
     nxo_stack_pop(ostack);
 }
 
@@ -6440,7 +6998,28 @@ systemdict_token(cw_nxo_t *a_thread)
 void
 systemdict_trunc(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack;
+    cw_nxo_t *nxo;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    switch (nxo_type_get(nxo))
+    {
+	case NXOT_INTEGER:
+	{
+	    break;
+	}
+	case NXOT_REAL:
+	{
+	    nxo_integer_new(nxo, (cw_nxoi_t) nxo_real_get(nxo));
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
 }
 #endif
 
