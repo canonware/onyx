@@ -1480,6 +1480,136 @@ All threads share the same globaldict, which is meant as a repository for
 globally shared objects.  globaldict is empty when the Onyx interpreter is
 initialized, and is implicitly locked.
 
+\subsection{onyxdict}
+\label{sec:onyxdict}
+
+Various portions of Onyx use the onyxdict dictionary for storage of
+miscellaneous objects that normally should not be part of the namespace visible
+to dstack searches.
+
+\begin{longtable}{\optableformat{3}}
+\caption[onyxdict summary]{onyxdict summary}
+\\
+\hline
+Input(s) & Op/Proc/Var & Output(s) & Description \\
+\hline \hline
+%begin{latexonly}
+\endfirsthead
+\caption[]{\emph{continued}} \\
+\hline
+Input(s) & Op/Proc/Var & Output(s) & Description \\
+\hline \endhead
+\multicolumn{4}{r}{\emph{Continued on next page...}} \endfoot
+\hline \endlastfoot
+%end{latexonly}
+-- & {\bf \htmlref{mpath\_post}{onyxdict:mpath_post}} & array & Get path
+searched by \htmlref{mrequire}{systemdict:mrequire}. \\
+\hline
+-- & {\bf \htmlref{mpath\_pre}{onyxdict:mpath_pre}} & array & Get path searched
+by \htmlref{mrequire}{systemdict:mrequire}. \\
+\hline
+-- & {\bf \htmlref{rpath\_post}{onyxdict:rpath_post}} & array & Get path
+searched by \htmlref{require}{systemdict:require}. \\
+\hline
+-- & {\bf \htmlref{rpath\_pre}{onyxdict:rpath_pre}} & array & Get path searched
+by \htmlref{require}{systemdict:require}. \\
+\end{longtable}
+
+\begin{description}
+\label{onyxdict:mpath_post}
+\index{mpath_post@\onyxop{}{mpath\_post}{}}
+\item[{\onyxop{--}{mpath\_post}{array}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[array: ]
+			An array of strings.
+		\end{description}
+	\item[Errors(s): ] None.
+	\item[Description: ]
+		Get an array of strings used by
+		\htmlref{mrequire}{systemdict:mrequire} as prefixes for file
+		searches.  The elements of the array are tried in the order
+		listed.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> onyxdict /mpath_post get 1 sprint
+[`/usr/local/share/onyx-3.0.0/nxm']
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{onyxdict:mpath_pre}
+\index{mpath_pre@\onyxop{}{mpath\_pre}{}}
+\item[{\onyxop{--}{mpath\_pre}{array}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[array: ]
+			An array of strings.
+		\end{description}
+	\item[Errors(s): ] None.
+	\item[Description: ]
+		Get an array of strings used by
+		\htmlref{mrequire}{systemdict:mrequire} as prefixes for file
+		searches.  The elements of the array are tried in the order
+		listed.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> onyxdict /mpath_pre get 1 sprint
+[`' `.']
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{onyxdict:rpath_post}
+\index{rpath_post@\onyxop{}{rpath\_post}{}}
+\item[{\onyxop{--}{rpath\_post}{array}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[array: ]
+			An array of strings.
+		\end{description}
+	\item[Errors(s): ] None.
+	\item[Description: ]
+		Get an array of strings used by
+		\htmlref{require}{systemdict:require} as prefixes for file
+		searches.  The elements of the array are tried in the order
+		listed.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> onyxdict /rpath_post get 1 sprint
+[`/usr/local/share/onyx-3.0.0/nx']
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{onyxdict:rpath_pre}
+\index{rpath_pre@\onyxop{}{rpath\_pre}{}}
+\item[{\onyxop{--}{rpath\_pre}{array}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[array: ]
+			An array of strings.
+		\end{description}
+	\item[Errors(s): ] None.
+	\item[Description: ]
+		Get an array of strings used by
+		\htmlref{require}{systemdict:require} as prefixes for file
+		searches.  The elements of the array are tried in the order
+		listed.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> onyxdict /rpath_pre get 1 sprint
+[`' `.']
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\end{description}
+
 \subsection{outputsdict}
 \label{sec:outputsdict}
 
@@ -3085,6 +3215,12 @@ status & {\bf \htmlref{die}{systemdict:die}} & -- & Exit program. \\
 path symbol & {\bf \htmlref{modload}{systemdict:modload}} & -- & Load a
 module. \\
 \hline
+file symbol & {\bf \htmlref{mrequire}{systemdict:mrequire}} & -- & Search for
+and load a module. \\
+\hline
+file & {\bf \htmlref{require}{systemdict:require}} & -- & Search for and
+evaluate a source file. \\
+\hline
 -- & {\bf \htmlref{fork}{systemdict:fork}} & pid & Fork a new process. \\
 \hline
 args & {\bf \htmlref{exec}{systemdict:exec}} & -- & Overlay a new program and
@@ -3298,6 +3434,8 @@ array. \\
 \hline
 -- & {\bf \htmlref{globaldict}{systemdict:globaldict}} & dict & Get
 globaldict. \\
+\hline
+-- & {\bf \htmlref{onyxdict}{systemdict:onyxdict}} & dict & Get onyxdict. \\
 \hline
 -- & {\bf \htmlref{sprintsdict}{systemdict:sprintsdict}} & dict & Get
 sprintsdict. \\
@@ -5849,8 +5987,8 @@ onyx:0>
 		\end{description}
 	\item[Errors(s): ] None.
 	\item[Description: ]
-		Get gcdict.  See Section~\ref{sec:envdict} for details on
-		envdict.
+		Get gcdict.  See Section~\ref{sec:gcdict} for details on
+		gcdict.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> gcdict 0 sprint
@@ -6031,8 +6169,8 @@ onyx:0>
 		\end{description}
 	\item[Errors(s): ] None.
 	\item[Description: ]
-		Get globaldict.  See Section~\ref{sec:envdict} for details on
-		envdict.
+		Get globaldict.  See Section~\ref{sec:globaldict} for details on
+		globaldict.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> globaldict 1 sprint
@@ -6883,6 +7021,48 @@ hello
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:mrequire}
+\index{mrequire@\onyxop{}{mrequire}{}}
+\item[{\onyxop{file symbol}{mrequire}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[file: ]
+			A string that represents a module filename.
+		\item[symbol: ]
+			A string that represents the symbol name of a
+			module initialization function to be executed.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{undefined}{undefined}.]
+		\item[\htmlref{undefinedfilename}{undefinedfilename}.]
+		\end{description}
+	\item[Description: ]
+		Search for and load a module.  The module is searched for by
+		catenating a prefix, a ``/'', and \oparg{file} to form a file
+		path.  Prefixes are tried in the following order:
+		\begin{enumerate}
+			\item{The ordered elements of the
+			\htmlref{mpath\_pre}{onyxdict:mpath_pre} array, which is
+			defined in \htmlref{onyxdict}{sec:onyxdict}.}
+			\item{If defined, the ordered elements of the
+			ONYX\_MPATH environment variable, which is a
+			colon-separated list.}
+			\item{The ordered elements of the
+			\htmlref{mpath\_post}{onyxdict:mpath_post} array, which
+			is defined in \htmlref{onyxdict}{sec:onyxdict}.}
+		\end{enumerate}
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> `modgtk.nxm' `modgtk_init' mrequire
+onyx:0>
+	\end{verbatim}
+	\end{description}
 \label{systemdict:mul}
 \index{mul@\onyxop{}{mul}{}}
 \item[{\onyxop{a b}{mul}{r}}: ]
@@ -7180,6 +7360,27 @@ onyx:0>
 onyx:0> null pstack
 null
 onyx:1>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:onyxdict}
+\index{onyxdict@\onyxop{}{onyxdict}{}}
+\item[{\onyxop{--}{onyxdict}{dict}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[dict: ]
+			A dictionary.
+		\end{description}
+	\item[Errors(s): ] None.
+	\item[Description: ]
+		Get onyxdict.  See Section~\ref{sec:onyxdict} for details on
+		onyxdict.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> onyxdict 1 sprint
+</rpath_pre -array- /rpath_post -array- /mpath_pre -array- /mpath_post -array->
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:open}
@@ -7864,6 +8065,45 @@ onyx:0> 3 {`hi' 1 sprint} repeat
 `hi'
 onyx:0>
 		\end{verbatim}
+	\end{description}
+\label{systemdict:require}
+\index{require@\onyxop{}{require}{}}
+\item[{\onyxop{file}{require}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[file: ]
+			A string that represents a module filename.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{undefined}{undefined}.]
+		\item[\htmlref{undefinedfilename}{undefinedfilename}.]
+		\end{description}
+	\item[Description: ]
+		Search for and evaluate an Onyx source file.  The file is
+		searched for by catenating a prefix, a ``/'', and \oparg{file}
+		to form a file path.  Prefixes are tried in the following order:
+		\begin{enumerate}
+			\item{The ordered elements of the
+			\htmlref{rpath\_pre}{onyxdict:rpath_pre} array, which is
+			defined in \htmlref{onyxdict}{sec:onyxdict}.}
+			\item{If defined, the ordered elements of the
+			ONYX\_RPATH environment variable, which is a
+			colon-separated list.}
+			\item{The ordered elements of the
+			\htmlref{rpath\_post}{onyxdict:rpath_post} array, which
+			is defined in \htmlref{onyxdict}{sec:onyxdict}.}
+		\end{enumerate}
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> `modgtk/modgtk_defs.nx' require
+onyx:0>
+	\end{verbatim}
 	\end{description}
 \label{systemdict:rmdir}
 \index{rmdir@\onyxop{}{rmdir}{}}

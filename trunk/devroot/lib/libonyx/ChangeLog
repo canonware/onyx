@@ -1,3 +1,10 @@
+2002-01-28  Jason Evans  <jasone@canonware.com>
+
+	* src/nx.nx.in: Move require and mrequire from onyx to libonyx.
+	Also, clean up the searching mechanisms.
+
+	Add onyxdict.
+
 2002-01-13  Jason Evans  <jasone@canonware.com>
 
 	* : Add support for reals, which are double precision floating

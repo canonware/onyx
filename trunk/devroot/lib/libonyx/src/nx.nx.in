@@ -510,7 +510,7 @@ systemdict begin
 	% %flags %object %rdepth
 	/sprints cvx /exch cvx
 	% %str %flags
-	/_s load /eval cvx
+	/_s load cve
 	% %str
     ] cvx bind
     [
@@ -728,6 +728,153 @@ systemdict begin
 	% Parent.
 	exch pop waitpid
     } ifelse
+} def
+
+% Define require and mrequire configuration parameters in onyxdict.  By default,
+% the search order is:
+%
+% 1) Absolute path: `'.
+% 2) Relative path: `.'.
+% 3) /ONYX_[MR]PATH: Colon-separated string in envdict.
+% 4) `@prefix@/share/@onyx_version@/nx[m]': Standard installation location.
+onyxdict begin
+/rpath_pre [`' `.'] def
+/rpath_post [@rpath_post@] def
+
+/mpath_pre [`' `.'] def
+/mpath_post [@mpath_post@] def
+end % onyxdict.
+
+% %filename require -
+/require {
+    % Make sure the argument is a string.
+    dup type /stringtype ne {
+	/typecheck throw
+    } if
+
+    {
+	[
+	    onyxdict /rpath_pre get
+
+	    envdict /ONYX_RPATH 2 ndup known {
+		get
+
+		% Push mark that denotes start of array.
+		[ exch
+		{
+		    % [ ... %cpath
+		    `:' search {
+			% %post `:' %dir
+			exch pop exch
+			% [ ... %dir %post
+		    }{
+			% Last path component.
+			% %dir
+			exit
+		    } ifelse
+		} loop
+		% Create array.
+		]
+	    }{
+		2 npop
+	    } ifelse
+
+	    onyxdict /rpath_post get
+	]{
+	    % %filename %path
+	    {
+		% %filename %dir
+		`/' catenate
+		1 index catenate
+		% %filename %full_path
+		dup `f' test {
+		    % Found.
+		    % %filename %full_path
+		    `r' open cvx eval
+		    % %filename
+		    pop
+		    stop % Success.
+		}{
+		    % Not found.
+		    % %filename %full_path
+		    pop
+		} ifelse
+	    } foreach
+	} foreach
+    } stopped not {
+	% Failure.
+	/undefinedfilename throw
+    } if
+    1 pop % XXX Avoid tail call optimization.
+} def
+
+% %filename %symbol mrequire -
+/mrequire {
+    % Make sure the arguments are strings.
+    1 index type /stringtype ne {
+	/typecheck throw
+    } if
+    dup type /stringtype ne {
+	/typecheck throw
+    } if
+
+    exch
+    % %symbol %filename
+    {
+	[
+	    onyxdict /mpath_pre get
+
+	    envdict /ONYX_MPATH 2 ndup known {
+		get
+
+		% Push mark that denotes start of array.
+		[ exch
+		{
+		    % [ ... %cpath
+		    `:' search {
+			% %post `:' %dir
+			exch pop exch
+			% [ ... %dir %post
+		    }{
+			% Last path component.
+			% %dir
+			exit
+		    } ifelse
+		} loop
+		% Create array.
+		]
+	    }{
+		2 npop
+	    } ifelse
+
+	    onyxdict /mpath_post get
+	]{
+	    % %symbol %filename %path
+	    {
+		% %symbol %filename %dir
+		`/' catenate
+		1 index catenate
+		% %symbol %filename %full_path
+		dup `f' test {
+		    % Found.
+		    % %symbol %filename %full_path
+		    3 2 roll modload
+		    % %filename
+		    pop
+		    stop % Success.
+		}{
+		    % Not found.
+		    % %symbol %filename %full_path
+		    pop
+		} ifelse
+	    } foreach
+	} foreach
+    } stopped not {
+	% Failure.
+	% %symbol %filename
+	exch
+	/undefinedfilename throw
+    } if
 } def
     ' catenate
 } if

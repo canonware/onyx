@@ -239,6 +239,7 @@ typedef enum
 #endif
     NXN_null,
     NXN_nulltype,
+    NXN_onyxdict,
 #ifdef CW_POSIX
     NXN_open,
 #endif

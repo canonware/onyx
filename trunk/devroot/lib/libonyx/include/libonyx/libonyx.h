@@ -165,6 +165,20 @@ typedef enum
  * could benefit from making it larger or smaller. */
 #define CW_LIBONYX_GLOBALDICT_HASH 64
 
+/* Initial size of onyxdict.  Onyx uses this dictionary as a separate namespace
+ * for configuration parameters and variables that shouldn't normally be seen by
+ * dstack name lookups. */
+#define CW_LIBONYX_ONYXDICT_HASH 16
+
+/* Extra slots in systemdict left open at creation time.  The embedded Onyx
+ * initialization code uses several slots, so if adding additional entries to
+ * systemdict and memory usage of the hash table is critical, it will be
+ * necessary to count the number of slots used by the embedded Onyx
+ * initialization code for the particular configuration, and add that number to
+ * the number of extra slots needed by the application.  In general, there
+ * should be no reason to change this value though. */
+#define CW_LIBONYX_SYSTEMDICT_HASH_SPARE 16
+
 /* Initial size of threadsdict.  Most applications don't use many threads, so
  * the initial size is set pretty low. */
 #define CW_LIBONYX_THREADSDICT_HASH 16

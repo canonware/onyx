@@ -369,22 +369,18 @@ systemdict_l_populate(cw_nxo_t *a_dict, cw_nx_t *a_nx, int a_argc,
     cw_uint32_t i;
     cw_nxo_t name, value;
 
-/* Number of spare slots to leave for names that are defined by embedded onyx
- * initialization code. */
-#define NSPARE 8
-
 /* Number of names that are defined below, but not as operators. */
 #ifdef CW_POSIX
-#define NEXTRA 12
+#define NEXTRA 13
 #else
-#define NEXTRA 11
+#define NEXTRA 12
 #endif
 #define NFASTOPS							\
 	(sizeof(systemdict_fastops) / sizeof(struct cw_systemdict_entry))
 #define NOPS								\
 	(sizeof(systemdict_ops) / sizeof(struct cw_systemdict_entry))
 
-    nxo_dict_new(a_dict, a_nx, TRUE, NFASTOPS + NOPS + NEXTRA + NSPARE);
+    nxo_dict_new(a_dict, a_nx, TRUE, NFASTOPS + NOPS + NEXTRA + CW_LIBONYX_SYSTEMDICT_HASH_SPARE);
 
     /* Fast operators. */
     for (i = 0; i < NFASTOPS; i++)
@@ -435,6 +431,12 @@ systemdict_l_populate(cw_nxo_t *a_dict, cw_nx_t *a_nx, int a_argc,
     nxo_dup(&value, nx_envdict_get(a_nx));
     nxo_dict_def(a_dict, a_nx, &name, &value);
 #endif
+
+    /* onyxdict. */
+    nxo_name_new(&name, a_nx, nxn_str(NXN_onyxdict), nxn_len(NXN_onyxdict),
+		 TRUE);
+    nxo_dict_new(&value, a_nx, TRUE, CW_LIBONYX_ONYXDICT_HASH);
+    nxo_dict_def(a_dict, a_nx, &name, &value);
 
     /* argv. */
     {
@@ -500,7 +502,6 @@ systemdict_l_populate(cw_nxo_t *a_dict, cw_nx_t *a_nx, int a_argc,
 #undef NOPS
 #undef NFASTOPS
 #undef NEXTRA
-#undef NSPARE
 }
 
 void
