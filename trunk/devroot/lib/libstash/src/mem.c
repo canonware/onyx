@@ -231,7 +231,8 @@ mem_malloc(cw_mem_t * a_mem, size_t a_size)
 	      out_put_sn(cw_g_out, buf, 1024,
 			 "[s](): 0x[p] multiply-allocated "
 			 "(was at [s], line [i], size [i];"
-			 " now at [s], line [i], size [i])\n",
+			 " now at [s], line [i], size [i])."
+			 "  Suspect a race condition\n",
 			 __FUNCTION__, retval,
 			 old_allocation->filename,
 			 old_allocation->line_num,
@@ -241,20 +242,6 @@ mem_malloc(cw_mem_t * a_mem, size_t a_size)
 			 a_size);
 	      out_put(cw_g_out, buf);
 	    }
-	  }
-	  /* XXX */
-	  if (dbg_is_registered(cw_g_dbg, "mem_error"))
-	  {
-	    char buf[1025];
-
-	    bzero(buf, sizeof(buf));
-
-	    out_put_sn(cw_g_out, buf, 1024,
-		       "[s](): MemoryProgramming error during "
-		       "allocation (0x[p] (size [i]) from [s], line [i]\n",
-		       __FUNCTION__,
-		       retval, a_size, a_filename, a_line_num);
-	    out_put(cw_g_out, buf);
 	  }
         }
       }
