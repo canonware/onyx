@@ -38,7 +38,7 @@
 
 #undef CW_POSIX_FILE
 
-#undef HAVE_DLOPEN
+#undef CW_MODULES
 
 /* If using gcc and inlines weren't disabled by configure, use inline
  * functions. */

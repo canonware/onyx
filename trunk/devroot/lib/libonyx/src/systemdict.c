@@ -32,7 +32,7 @@
 #include "asprintf.c"
 #endif
 #endif
-#ifdef HAVE_DLOPEN
+#ifdef CW_MODULES
 #include <dlfcn.h> /* For modload operator. */
 #endif
 #ifdef CW_POSIX
@@ -232,7 +232,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(mkdir),
 #endif
     ENTRY(mod),
-#ifdef HAVE_DLOPEN
+#ifdef CW_MODULES
     ENTRY(modload),
 #endif
 #ifdef CW_THREADS
@@ -4901,7 +4901,7 @@ systemdict_mod(cw_nxo_t *a_thread)
     nxo_stack_pop(ostack);
 }
 
-#ifdef HAVE_DLOPEN
+#ifdef CW_MODULES
 static cw_nxmod_t *
 systemdict_p_nxmod_new(cw_nx_t *a_nx, void *a_handle)
 {

@@ -289,7 +289,7 @@ typedef enum
 #ifdef CW_POSIX
     NXN_ENTRY(mode),
 #endif
-#ifdef HAVE_DLOPEN
+#ifdef CW_MODULES
     NXN_ENTRY(modload),
 #endif
 #ifdef CW_THREADS

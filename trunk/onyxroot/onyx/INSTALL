@@ -149,6 +149,11 @@ Optionally, pass any of the following (not a definitive list) arguments to
 --disable-libonyx
 	Use an installed copy of libonyx rather than building it.
 
+--disable-modules
+	Do not include support for dynamically loadable modules.  This leaves
+	out modload, require, and mrequire.  The documentation does not mention
+	the effects of this option -- UTSL.
+
 --disable-modprompt
 	Do not build the prompt module, which provides command line editing
 	functionality for interactive invocations of onyx.  There is little

@@ -721,7 +721,11 @@ $system {
     forkexec
     waitpid
 } def
+    ' cat
+} if
 
+@enable_modules@ 1 eq {
+    `
 # Define require and mrequire configuration parameters in onyxdict.  By default,
 # the search order is:
 #

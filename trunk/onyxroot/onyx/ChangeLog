@@ -1,3 +1,7 @@
+2002-07-17 : Jason Evans <jasone@canonware.com>
+
+	* Add the --disable-modules configure option.
+
 2002-07-14 : Jason Evans <jasone@canonware.com>
 
 	* Add the ncat operator.

@@ -407,7 +407,7 @@ systemdict_mkfifo(cw_nxo_t *a_thread);
 void
 systemdict_mod(cw_nxo_t *a_thread);
 
-#ifdef HAVE_DLOPEN
+#ifdef CW_MODULES
 void
 systemdict_modload(cw_nxo_t *a_thread);
 #endif
