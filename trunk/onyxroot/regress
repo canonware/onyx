@@ -1,4 +1,5 @@
 #!/usr/bin/env oonyx
+# -*-mode:onyx-*-
 #
 # regress [<srcdir>] [<par>]
 
@@ -16,8 +17,8 @@ argv length 3 ge {
 
 $PREFIX pwd `/regress_' SRCDIR 3 ncat def
 
-$CONFIGURE_FLAGS [`--with-libedit-prefix=/usr/local'] def
-#$CONFIGURE_FLAGS [] def
+#$CONFIGURE_FLAGS [`--with-libedit-prefix=/usr/local'] def
+$CONFIGURE_FLAGS [] def
 
 # Set this specifically for -Werror, so that build warnings get noticed.
 $CFLAGS `-Wall -Werror -Wno-uninitialized -Wno-strict-aliasing -g3' setenv
