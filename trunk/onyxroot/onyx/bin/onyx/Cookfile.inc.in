@@ -42,24 +42,6 @@ ONYX_ONLY_SRCS = [fromto @srcroot@/%0%.nx.in @objroot@/%0%_nxcode.c
  * Onyx tests.
  */
 ONYX_OTESTS =
-/* The following tests are time consuming, and really don't need to be run for
- * all configuration permutations. */
-#if [and @enable_oop@ \
-         @enable_handle@ \
-         @enable_threads@ \
-         @enable_real@ \
-         @enable_regex@ \
-         @enable_posix@ \
-         @enable_posix_file@ \
-         @enable_socket@ \
-         @enable_inlines@ \
-         @enable_modules@ \
-    ]
-
-              gc_roll.nx.in
-
-#endif
-         
 #if [and @enable_threads@ @enable_posix@]
 
               setgstderr_a.nx.in setgstderr_b.nx.in setgstderr_c.nx.in
@@ -70,9 +52,10 @@ ONYX_OTESTS =
 #if @enable_threads@
 
               gmaxestack_a.nx.in gstderr_a.nx.in gstdin_a.nx.in gstdout_a.nx.in
-              monitor_a.nx.in monitor_b.nx.in monitor_c.nx.in
+              gtailopt_a.nx.in monitor_a.nx.in monitor_b.nx.in monitor_c.nx.in
               setgmaxestack_a.nx.in setgmaxestack_b.nx.in setgmaxestack_c.nx.in
-              setgmaxestack_d.nx.in threadsdict_a.nx.in
+              setgmaxestack_d.nx.in setgtailopt_a.nx.in setgtailopt_b.nx.in
+              setgtailopt_c.nx.in threadsdict_a.nx.in
 
 #endif
 #if @enable_real@
@@ -215,6 +198,7 @@ ONYX_OTESTS =
               setstderr_a.nx.in setstderr_b.nx.in setstderr_c.nx.in
               setstdin_a.nx.in setstdin_b.nx.in setstdin_c.nx.in
               setstdout_a.nx.in setstdout_b.nx.in setstdout_c.nx.in
+              settailopt_a.nx.in settailopt_b.nx.in settailopt_c.nx.in
               sexch_a.nx.in sexch_b.nx.in sexch_c.nx.in sexch_d.nx.in
               shift_a.nx.in shift_b.nx.in shift_c.nx.in shift_d.nx.in
               sibdup_a.nx.in sibdup_b.nx.in sibdup_c.nx.in sibdup_d.nx.in
@@ -253,19 +237,20 @@ ONYX_OTESTS =
               syntaxerror_k.nx.in syntaxerror_l.nx.in syntaxerror_m.nx.in
               syntaxerror_n.nx.in syntaxerror_o.nx.in syntaxerror_p.nx.in
               syntaxerror_q.nx.in syntaxerror_r.nx.in syntaxerror_s.nx.in
-              threaddstack_a.nx.in threaddstack_b.nx.in threaddstack_c.nx.in
-              threadestack_a.nx.in threadestack_b.nx.in threadestack_c.nx.in
-              threadistack_a.nx.in threadistack_b.nx.in threadistack_c.nx.in
-              threadostack_a.nx.in threadostack_b.nx.in threadostack_c.nx.in
-              throw_a.nx.in throw_b.nx.in throw_c.nx.in token_a.nx.in
-              token_b.nx.in token_c.nx.in tuck_a.nx.in tuck_b.nx.in tuck_c.nx.in
-              type_a.nx.in type_b.nx.in undef_a.nx.in undef_b.nx.in
-              undef_c.nx.in under_a.nx.in under_b.nx.in unless_a.nx.in
-              unless_b.nx.in unless_c.nx.in until_a.nx.in until_b.nx.in
-              until_c.nx.in until_d.nx.in up_a.nx.in up_b.nx.in where_a.nx.in
-              where_b.nx.in while_a.nx.in while_b.nx.in while_c.nx.in
-              while_d.nx.in xcheck_a.nx.in xcheck_b.nx.in xor_a.nx.in
-              xor_b.nx.in xor_c.nx.in xor_d.nx.in xor_e.nx.in xor_f.nx.in
+              tailopt_a.nx.in threaddstack_a.nx.in threaddstack_b.nx.in
+              threaddstack_c.nx.in threadestack_a.nx.in threadestack_b.nx.in
+              threadestack_c.nx.in threadistack_a.nx.in threadistack_b.nx.in
+              threadistack_c.nx.in threadostack_a.nx.in threadostack_b.nx.in
+              threadostack_c.nx.in throw_a.nx.in throw_b.nx.in throw_c.nx.in
+              token_a.nx.in token_b.nx.in token_c.nx.in tuck_a.nx.in
+              tuck_b.nx.in tuck_c.nx.in type_a.nx.in type_b.nx.in undef_a.nx.in
+              undef_b.nx.in undef_c.nx.in under_a.nx.in under_b.nx.in
+              unless_a.nx.in unless_b.nx.in unless_c.nx.in until_a.nx.in
+              until_b.nx.in until_c.nx.in until_d.nx.in up_a.nx.in up_b.nx.in
+              where_a.nx.in where_b.nx.in while_a.nx.in while_b.nx.in
+              while_c.nx.in while_d.nx.in xcheck_a.nx.in xcheck_b.nx.in
+              xor_a.nx.in xor_b.nx.in xor_c.nx.in xor_d.nx.in xor_e.nx.in
+              xor_f.nx.in
 
               ;
 
