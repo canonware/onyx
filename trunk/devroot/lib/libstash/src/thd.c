@@ -103,7 +103,7 @@ static void	thd_p_sr_handle(int a_signal);
 void
 thd_l_init(void)
 {
-	int			stacksize;
+	size_t			stacksize;
 
 #ifdef _CW_THD_GENERIC_SR
 	int			error;
