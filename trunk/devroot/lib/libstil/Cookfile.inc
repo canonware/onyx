@@ -41,7 +41,6 @@
 }
 
 /* Source files. */
-/*LIBSTIL_SRCS = stil.c stild.c stilo.c stils.c stilt.c;*/
 LIBSTIL_SRCS = stil.c stilo.c stiloe.c stiloe_array.c stiloe_condition.c
                stiloe_dict.c stiloe_hook.c stiloe_lock.c stiloe_mstate.c
                stiloe_number.c stiloe_packedarray.c stiloe_string.c stils.c
@@ -51,7 +50,7 @@ SRCS = [SRCS] [LIBSTIL_SRCS];
 
 /* Executables. */
 {
-  local bins = stil.c;
+  local bins = ;
   bins = [fromto % [srcdir]/lib/c/libstil/bin/% [bins]];
 
   BINS = [BINS] [bins];

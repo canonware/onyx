@@ -44,7 +44,7 @@ SRCS = [SRCS] [LIBSOCK_SRCS];
 
 /* Executables. */
 {
-  local bins = proxy.c ncat.c blow.c suck.c echos.c;
+  local bins = ;
   bins = [fromto % [srcdir]/lib/c/libsock/bin/% [bins]];
 
   BINS = [BINS] [bins];
@@ -60,7 +60,7 @@ SRCS = [SRCS] [LIBSOCK_SRCS];
 
 /* Perl scripts that drive the BTESTS. */
 {
-  local ptests =;
+  local ptests = ;
   ptests = [fromto % [srcdir]/lib/c/libsock/test/% [ptests]];
 
   PTESTS = [PTESTS] [ptests];
@@ -68,7 +68,7 @@ SRCS = [SRCS] [LIBSOCK_SRCS];
 
 /* Backend test programs that are driven by the PTESTS. */
 {
-  local btests =;
+  local btests = ;
   btests = [fromto % [srcdir]/lib/c/libsock/test/% [btests]];
 
   BTESTS = [BTESTS] [btests];

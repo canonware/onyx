@@ -21,20 +21,18 @@ dnl   exec ../configure $@
 dnl fi
 
 cfghdrs=
-if test -d "$srcdir/lib/c/libstash" ; then
-  mkdir -p $objdir/lib/c/libstash/include/libstash
-  cfghdrs="$cfghdrs $objdir/lib/c/libstash/include/libstash/libstash_defs.h"
-fi
 
-if test -d "$srcdir/lib/c/libsock" ; then
-  mkdir -p $objdir/lib/c/libsock/include/libsock
-  cfghdrs="$cfghdrs $objdir/lib/c/libsock/include/libsock/libsock_defs.h"
-fi
+CW_BUILD_LIB(libstash, lib_stash)
+CW_BUILD_LIB(libsock, lib_sock)
+CW_BUILD_LIB(libstil, lib_stil)
 
-if test -d "$srcdir/lib/c/libstil" ; then
-  mkdir -p $objdir/lib/c/libstil/include/libstil
-  cfghdrs="$cfghdrs $objdir/lib/c/libstil/include/libstil/libstil_defs.h"
-fi
+CW_BUILD_BIN(blow, bin_blow)
+CW_BUILD_BIN(echos, bin_echos)
+CW_BUILD_BIN(ncat, bin_ncat)
+CW_BUILD_BIN(proxy, bin_proxy)
+CW_BUILD_BIN(stil, bin_stil)
+CW_BUILD_BIN(suck, bin_suck)
+
 AC_CONFIG_HEADER($cfghdrs)
 AC_SUBST(cfghdrs)
 
@@ -74,6 +72,7 @@ AC_SUBST(VERIFY)
 CW_USE_PTHREADS()
 AC_CHECK_FUNCS(poll, , AC_MSG_ERROR(Cannot build without poll))
 
+dnl Do not build shared libraries by default.
 CW_DISABLE_SHARED()
 
 dnl Define preprocessor macros.
