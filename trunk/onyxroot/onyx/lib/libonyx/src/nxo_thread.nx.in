@@ -91,23 +91,23 @@ $errordict <
 
 	# For each element in estack:
 	0 1 dn {
-	    # #edepth
+	    #edepth
 	    # If this element is an array, print it specially.
 	    dup cvs stderr exch {write}{} until
 	    dup !estack dup dn sidup spop
-	    # #edepth #array
+	    #edepth #array
 
 	    dup type $arraytype eq {
 		# Array.
 		`: {\n' stderr exch {write}{} until
-		# #edepth #array
+		#edepth #array
 		dup length 1 sub 0 1 dn {
-		    # #edepth #array #aindex
+		    #edepth #array #aindex
 		    2 idup !istack
 		    dup dn sidup spop
-		    # #edepth #array #aindex #iindex
+		    #edepth #array #aindex #iindex
 		    over
-		    # #edepth #array #aindex #iindex #aindex
+		    #edepth #array #aindex #iindex #aindex
 		    eq {
 			dup <$w 3> outputs
 			stderr exch {write}{} until
@@ -116,25 +116,25 @@ $errordict <
 			`\t'
 		    } ifelse
 		    stderr exch {write}{} until
-		    # #edepth #array #aindex
+		    #edepth #array #aindex
 		    over exch get 1 sprints
 		    stderr exch {write}{} until
 		    stderr `\n' {write}{} until
-		    # #edepth #array
+		    #edepth #array
 		} for
 		stderr `}\n' {write}{} until
-		# #edepth #array
+		#edepth #array
 		pop
-		# #edepth
+		#edepth
 	    }{
 		# Non-array.
 		stderr `:\t' {write}{} until
-		# #edepth #array
+		#edepth #array
 		1 sprints stderr exch {write}{} until
 		stderr `\n' {write}{} until
-		# #edepth
+		#edepth
 	    } ifelse
-	    # #edepth
+	    #edepth
 	    pop
 	} for
 

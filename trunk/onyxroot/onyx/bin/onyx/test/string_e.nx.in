@@ -30,22 +30,22 @@
     # Lower case control character.
     `a' 0 get 1 `z' 0 get {
 	`\`\\c'
-	# #c #string
+	#c #string
 	exch
-	# #string #c
+	#string #c
 	`?' dup 0 4 ndn put cat
-	# #string
+	#string
 	`\'' cat
     } for
 
     # Upper case control character.
     `A' 0 get 1 `Z' 0 get {
 	`\`\\c'
-	# #c #string
+	#c #string
 	exch
-	# #string #c
+	#string #c
 	`?' dup 0 4 ndn put cat
-	# #string
+	#string
 	`\'' cat
     } for
 
@@ -56,19 +56,19 @@
     
     0 1 21 {
 	0 1 21 {
-	    # #key #Y #Z
+	    #key #Y #Z
 	    `\`\\x'
 	    3 idup 3 idup get cat
 	    exch 3 idup exch get cat
 	    `\'' cat
 
 	    up
-	    # #string #key #Y
+	    #string #key #Y
 	} for
-	# #key #Y
+	#key #Y
 	pop
     } for
-    # #key
+    #key
     pop
 ]{
     dup 1 sprints print

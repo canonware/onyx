@@ -33,7 +33,7 @@ $usage {
 # Print a string, after stripping off leading, trailing, and extra internal
 # whitespace.
 #
-# #string strip_print -
+#string strip_print -
 @enable_regex@ 1 eq {
     $strip_print {
 	`^\s*(\S.*\S)\s*$' `\1' <$s true> subst pop
@@ -130,13 +130,13 @@ argv length 2 lt {
 # Iteratively process command line arguments.
 argv dup length dec 1 exch getinterval
 0 1 2 idup length dec {
-    # #args #index
+    #args #index
     dup 0 gt {
 	# Print a spacer between iterations.
 	` ' print
     } if
     under get
-    # #args #arg
+    #args #arg
     flags over known {
 	# Call procedure associated with flag.
 	flags exch get eval

@@ -74,20 +74,20 @@ $_encdict <
     $xcheck		$q	# 3
 > def
 
-# #proc _encarr -
+#proc _encarr -
 $_encarr {
     0 1 2 idup length 1 sub {
-	# #proc #i
+	#proc #i
 	1 idup 1 idup get
-	# #proc #i #el
+	#proc #i #el
 	dup type $nametype eq {
 	    dup dup xcheck exch echeck not and {
 		# Executable Name.  Try to replace.
 		_encdict 1 idup known {
 		    _encdict exch get cvx
-		    # #proc #i #e
+		    #proc #i #e
 		    2 idup up
-		    # #proc #proc #i #e
+		    #proc #proc #i #e
 		    put
 		}{
 		    pop pop
@@ -105,7 +105,7 @@ $_encarr {
 		pop pop
 	    } ifelse
 	} ifelse
-	# #proc
+	#proc
     } for
     pop
 } def

@@ -539,10 +539,10 @@ and you will have a terrible time debugging the problem.  Be careful.
 The following code defines a named procedure that calculates factorials.
 
 \begin{verbatim}
-# #n factorial #result
+#n factorial #result
 $factorial {
     dup 1 gt {
-        # #n-1 factorial
+        #n-1 factorial
         dup 1 sub factorial
     }{
         # Terminate recursion.

@@ -43,7 +43,7 @@ $cs {
     hs
 } def
 
-# #=buffer= buffer_name #name
+#=buffer= buffer_name #name
 $buffer_name {
     buffer_aux_get $name get
 } def
@@ -106,14 +106,14 @@ $status_line {
     `\e[m' print
 } def
 
-# #=buffer= b2s #string
+#=buffer= b2s #string
 $b2s {
     tmark dup 0 $SEEK_BOB marker_seek pop
     tpoint dup 0 $SEEK_EOB marker_seek pop
     marker_range_get
 } def
 
-# #string srender -
+#string srender -
 $srender {
     {
 	dup 16@a eq {
@@ -147,7 +147,7 @@ $getc {
     } if
 } def
 
-# #string self_insert_char -
+#string self_insert_char -
 $insert_string {
     bpoint exch marker_before_insert
 #    scratch `insert_string ' buffer_dump
@@ -260,7 +260,7 @@ $keytable <
     }
 > def
 
-# #string interpc -
+#string interpc -
 $interpc {
 #    stderr 1 idup cvs write pop stderr `\n' write pop
 #    scratch `interpc ' buffer_dump

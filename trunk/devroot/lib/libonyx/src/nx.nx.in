@@ -40,7 +40,7 @@ systemdict begin
 #
 $sprintsdict <
     $arraytype {
-	# #array #depth
+	#array #depth
 	dup 0 gt {
 	    over dup echeck {
 		pop
@@ -53,33 +53,33 @@ $sprintsdict <
 	    } ifelse
 	    } ifelse
 
-	    # #array #depth #accum
+	    #array #depth #accum
 	    2 idup length 1 gt {
-		# #array #depth #accum
+		#array #depth #accum
 		0 1 4 idup length 2 sub {
-		    # #array #depth #accum #i
+		    #array #depth #accum #i
 		    3 idup exch get
 		    2 idup 1 sub
-		    # #array #depth #accum #el #rdepth
+		    #array #depth #accum #el #rdepth
 		    over type sprintsdict exch get eval
 		    cat
-		    # #array #depth #accum #el #rdepth
+		    #array #depth #accum #el #rdepth
 		` ' cat
 		} for
 	    } if
-	    # #array #depth #accum
+	    #array #depth #accum
 
 	    2 idup length 0 gt {
 		2 idup dup length 1 sub get
 		2 idup 1 sub
-		# #array #depth #accum #el #rdepth
+		#array #depth #accum #el #rdepth
 		over type sprintsdict exch get eval
 		cat
 	    } if
-	    # #array #depth #accum
+	    #array #depth #accum
 
 	    nip
-	    # #array #accum
+	    #array #accum
 	    exch dup echeck {
 		pop
 		`}_'
@@ -91,7 +91,7 @@ $sprintsdict <
 	    } ifelse
 	    } ifelse
 	    cat
-	    # #accum
+	    #accum
 	}{
 	    pop pop
 	    `-array-'
@@ -112,7 +112,7 @@ $sprintsdict <
 } if
 `
     $dicttype {
-	# #dict #depth
+	#dict #depth
 	dup 0 gt {
 	    # Update recursion depth.
 	    1 sub
@@ -120,40 +120,40 @@ $sprintsdict <
 	    0
 	    `<'
 
-	    # #dict #rdepth #i #accum
+	    #dict #rdepth #i #accum
 	    3 idup {
-		# #dict #rdepth #i #accum #key #value
+		#dict #rdepth #i #accum #key #value
 		exch 4 idup
-		# #dict #rdepth #i #accum #value #key #rdepth
+		#dict #rdepth #i #accum #value #key #rdepth
 		over type sprintsdict exch get eval
 		` ' cat
-		# #dict #rdepth #accum #i #value #keystr
+		#dict #rdepth #accum #i #value #keystr
 		exch 4 idup
-		# #dict #rdepth #i #accum #keystr #value #rdepth
+		#dict #rdepth #i #accum #keystr #value #rdepth
 		over type sprintsdict exch get eval
-		# #dict #rdepth #i #accum #keystr #valstr
+		#dict #rdepth #i #accum #keystr #valstr
 		cat cat
-		# #dict #rdepth #i #accum
+		#dict #rdepth #i #accum
 
 		# Update counter.
 		exch 1 add dup 4 idup length lt {
-		    # #dict #rdepth #accum #i
+		    #dict #rdepth #accum #i
 		    exch
 		    ` ' cat
-		    # #dict #rdepth #i #accum
+		    #dict #rdepth #i #accum
 		}{
 		    # Last element.
 		    exch
-		    # #dict #rdepth #accum
+		    #dict #rdepth #accum
 		} ifelse
 	    } foreach
-	    # #dict #rdepth #i #accum
+	    #dict #rdepth #i #accum
 
 	    4 nup pop pop pop
-	    # #accum
+	    #accum
 	    `>'
 	    cat
-	    # #accum
+	    #accum
 	}{
 	    pop pop
 	    `-dict-'
@@ -168,14 +168,14 @@ $sprintsdict <
 	`-fino-'
     }
     $hooktype {
-	# #hook #depth
+	#hook #depth
 	exch hooktag
-	# #depth #tag
+	#depth #tag
 	dup type $nulltype ne {
 	    exch 1 sub
-	    # #tag #rdepth
+	    #tag #rdepth
 	    over type sprintsdict exch get eval
-	    # #tagstr
+	    #tagstr
 	    `=' exch cat
 	    `=' cat
 	}{
@@ -202,10 +202,10 @@ $sprintsdict <
 } if
 `
     $nametype {
-	# #name #depth
+	#name #depth
 	pop
 	dup cvs exch
-	# #str #name
+	#str #name
 	dup xcheck not {
 	    # Literal.
 	    pop
@@ -257,40 +257,40 @@ $sprintsdict <
 } if
 `
     $stacktype {
-	# #stack #depth
+	#stack #depth
 	dup 0 gt {
 	    `('
 
-	    # #stack #depth #accum
+	    #stack #depth #accum
 	    2 idup scount 1 gt {
-		# #stack #depth #accum
+		#stack #depth #accum
 		2 idup scount 1 sub -1 1 {
-		    # #stack #depth #accum #i
+		    #stack #depth #accum #i
 		    3 idup dup dn sidup spop
 		    2 idup 1 sub
-		    # #stack #depth #accum #el #rdepth
+		    #stack #depth #accum #el #rdepth
 		    over type sprintsdict exch get eval
 		    cat
-		    # #stack #depth #accum #el #rdepth
+		    #stack #depth #accum #el #rdepth
 		` ' cat
 		} for
 	    } if
-	    # #stack #depth #accum
+	    #stack #depth #accum
 
 	    2 idup scount 0 gt {
 		2 idup dup sdup spop
 		2 idup 1 sub
-		# #stack #depth #accum #el #rdepth
+		#stack #depth #accum #el #rdepth
 		over type sprintsdict exch get eval
 		cat
 	    } if
-	    # #stack #depth #accum
+	    #stack #depth #accum
 
 	    up 2 npop
-	    # #accum
+	    #accum
 	    `)'
 	    cat
-	    # #accum
+	    #accum
 	}{
 	    pop pop
 	    `-stack-'
@@ -306,7 +306,7 @@ $sprintsdict <
     }
 > def
 
-# #object #depth sprints #string
+#object #depth sprints #string
 $sprints {
     over type sprintsdict exch get eval
 } def
@@ -321,7 +321,7 @@ $sprint {
 #
 $outputsdict <
     $integertype {
-	# #int #flags
+	#int #flags
 
 	# Get the base.
 	dup $b known {
@@ -329,10 +329,10 @@ $outputsdict <
 	}{
 	    10
 	} ifelse
-	# #int #flags #base
+	#int #flags #base
 
 	2 idup exch cvrs
-	# #int #flags #str
+	#int #flags #str
 
 	# Prepend the sign if necessary.
 	over $s known {
@@ -342,19 +342,19 @@ $outputsdict <
 		} if
 	    } if
 	} if
-	# #int #flags #str
+	#int #flags #str
 	dn pop
-	# #flags #str
+	#flags #str
 	exch
-	# #str #flags
+	#str #flags
 	outputsdict $stringtype get eval
-	# #str
+	#str
     }
 ' cat
 @enable_real@ 1 eq {
     `
     $realtype {
-	# #real #flags
+	#real #flags
 
 	# Determine precision past decimal point.
 	dup $d known {
@@ -362,7 +362,7 @@ $outputsdict <
 	}{
 	6
 	} ifelse
-	# #real #flags #precision
+	#real #flags #precision
 	
 	# Determine whether to use decimal or exponential notation.
 	over $e known {
@@ -370,10 +370,10 @@ $outputsdict <
 	}{
 	false
 	} ifelse
-	# #real #flags #precision #exp?
+	#real #flags #precision #exp?
 
 	3 idup up
-	# #real #flags #real #precision #exp?
+	#real #flags #real #precision #exp?
 	{
 	# Use exponential notation.
 	cves
@@ -381,7 +381,7 @@ $outputsdict <
 	# Use decimal notation.
 	cvds
 	} ifelse
-	# #real #flags #str
+	#real #flags #str
 
 	# Prepend the sign if necessary.
 	over $s known {
@@ -391,12 +391,12 @@ $outputsdict <
 	    } if
 	} if
 	} if
-	# #real #flags #str
+	#real #flags #str
 	dn pop exch
-	# #str #flags
+	#str #flags
 
 	outputsdict $stringtype get eval
-	# #str
+	#str
     }
     ' cat
 } if
@@ -411,27 +411,27 @@ $outputsdict <
 	    }{
 		` '
 	    } ifelse
-	    # #str #flags #pad
+	    #str #flags #pad
 
 	    over $w get
-	    # #str #flags #pad #width
+	    #str #flags #pad #width
 	    3 idup length
-	    # #str #flags #pad #width #len
+	    #str #flags #pad #width #len
 
 	    dup 2 idup le {
 		# Pad string.
-		# #str #flags #pad #width #len
+		#str #flags #pad #width #len
 
 		over string
-		# #str #flags #pad #width #len #pstr
+		#str #flags #pad #width #len #pstr
 
 		# Fill #pstr with #pad.
 		0 1 4 idup 1 sub {
 		    over exch 5 idup putinterval
 		} for
-		# #str #flags #pad #width #len #pstr
+		#str #flags #pad #width #len #pstr
 		3 ipop
-		# #str #flags #width #len #pstr
+		#str #flags #width #len #pstr
 
 		# Get the justification.
 		3 idup $j known {
@@ -439,74 +439,74 @@ $outputsdict <
 		}{
 		    $r
 		} ifelse
-		# #str #flags #width #len #pstr #just
+		#str #flags #width #len #pstr #just
 
 		dup $r eq {
 		    pop
 		    # Right justify.
-		    # #str #flags #width #len #pstr
+		    #str #flags #width #len #pstr
 		    up sub
 		}{
 		$l eq {
 		    # Left justify.
-		    # #str #flags #width #len #pstr
+		    #str #flags #width #len #pstr
 		    up 2 npop
 		    0
 		}{
 		    # Center.
-		    # #str #flags #width #len #pstr
+		    #str #flags #width #len #pstr
 		    up sub 2 idiv
 		} ifelse
 		} ifelse
-		# #str #flags #pstr #offset
+		#str #flags #pstr #offset
 
 		over exch
-		# #str #flags #pstr #pstr #offset
+		#str #flags #pstr #pstr #offset
 		5 ndn
-		# #flags #pstr #pstr #offset #str
+		#flags #pstr #pstr #offset #str
 		putinterval
-		# #flags #pstr
+		#flags #pstr
 		exch
-		# #pstr #flags
+		#pstr #flags
 	    }{
 		# No padding necessary.
 		pop pop pop
 	    } ifelse
-	    # #str #flags
+	    #str #flags
 	}{
-	    # #str #flags
+	    #str #flags
 	    dup $n known {
 		# Truncate the string if it is too long.
 		over length
 		over $n get
-		# #str #flags #len #max
+		#str #flags #len #max
 		dup 2 idup lt {
 		    # Truncate.
 		    nip
 		    dup string
-		    # #str #flags #max #nstr
+		    #str #flags #max #nstr
 		    dup
-		    # #str #flags #max #nstr #nstr
+		    #str #flags #max #nstr #nstr
 		    5 ndn
-		    # #flags #max #nstr #nstr #str
+		    #flags #max #nstr #nstr #str
 		    4 ndn
-		    # #flags #nstr #nstr #str #max
+		    #flags #nstr #nstr #str #max
 		    0 exch getinterval
-		    # #flags #nstr #nstr #substr
+		    #flags #nstr #nstr #substr
 		    0 exch putinterval
-		    # #flags #nstr
+		    #flags #nstr
 		    exch
 		}{
 		    pop pop
 		} ifelse
-		# #nstr #flags
+		#nstr #flags
 	    } if
-	    # #str #flags
+	    #str #flags
 	} ifelse
-	# #str #flags
+	#str #flags
 
 	pop
-	# #str
+	#str
     } def
     $stringtype $_s load
 
@@ -517,7 +517,7 @@ $outputsdict <
     # execution in order to "bind" things correctly (we cannot use immediate
     # evaluation in this file).
     [
-	# #object #flags
+	#object #flags
 
 	# Get recursion depth.
 	$dup cvx $r $known cvx [
@@ -525,14 +525,14 @@ $outputsdict <
 	] cvx [
 	    1
 	] cvx $ifelse cvx
-	# #object #flags #rdepth
+	#object #flags #rdepth
 
 	$dn cvx $exch cvx
-	# #flags #object #rdepth
+	#flags #object #rdepth
 	$sprints cvx $exch cvx
-	# #str #flags
+	#str #flags
 	$_s load cve
-	# #str
+	#str
     ] cvx bind
     [
 	$arraytype
@@ -571,9 +571,9 @@ $outputsdict <
 	$stacktype
 	$threadtype
     ]{
-	# #proc #name
+	#proc #name
 	exch dup
-	# #name #proc #proc
+	#name #proc #proc
     } foreach
     # Get rid of the extra copy of #proc.
     pop
@@ -612,13 +612,13 @@ $outputsdict <
 # $e : exponential notation
 #    : #boolean (default false)
 #
-# #obj #flags outputs #string
+#obj #flags outputs #string
 $outputs {
     dup type $dicttype ne {
 	$typecheck throw
     } if
     over type
-    # #obj #flags #type
+    #obj #flags #type
     outputsdict exch get eval
 } def
 
@@ -639,8 +639,8 @@ $pstack {
 } def
 
 #
-# #string #pattern search #post #pattern #pre true
-# #string #pattern search #string false
+#string #pattern search #post #pattern #pre true
+#string #pattern search #string false
 #
 $search {
     # Make sure the arguments are strings.
@@ -661,17 +661,17 @@ $search {
 	#
 	# Take care not to cause a rangecheck error.
 	0 1 3 idup length 3 idup length sub {
-	    # #s #p #s_i
+	    #s #p #s_i
 
 	    # Create a substring #s_sub of #s that is the same
 	    # length as #p, starting at #s_i.
 	    dup 3 idup exch 3 idup length getinterval
 
-	    # #s #p #s_i #s_sub
+	    #s #p #s_i #s_sub
 	    dup length 1 sub 0 1
 	    dn
 	    {
-		# #s #p #s_i #s_sub #offset
+		#s #p #s_i #s_sub #offset
 		dup 2 idup exch get
 		exch 4 idup exch get
 		ne {
@@ -682,32 +682,32 @@ $search {
 
 	    # Check to see if the substring match failed.
 	    dup type $booleantype eq {
-		# #s #p #s_i #s_sub# false
+		#s #p #s_i #s_sub false
 		# Failure.  Clean up.
 		pop pop pop
 	    }{
-		# #s #p #s_i #s_sub
+		#s #p #s_i #s_sub
 		# Success.
 		2 ipop
-		# #s #s_i# #s_sub
+		#s #s_i #s_sub
 
 		# Contstruct pre string #s_pre.
 		up dup 2 idup exch 0 exch
-		# #s_sub #s #s_i #s 0 #s_i
+		#s_sub #s #s_i #s 0 #s_i
 		getinterval
-		# #s_sub #s #s_i #s_pre
+		#s_sub #s #s_i #s_pre
 		up
-		# #s_sub #s_pre #s #s_i
+		#s_sub #s_pre #s #s_i
 
 		# Contstruct post string #s_post.
 		3 idup length add dup
 		2 idup length exch sub
 		getinterval
-		# #s_sub #s_pre #s_post
+		#s_sub #s_pre #s_post
 		up
 
 		true
-		# #s_post #s_sub #s_pre true
+		#s_post #s_sub #s_pre true
 		exit
 	    } ifelse
 	} for
@@ -770,7 +770,7 @@ $mpath_pre [`' `.'] def
 $mpath_post [@mpath_post@] def
 end # onyxdict.
 
-# #filename require -
+#filename require -
 $require {
     # Make sure the argument is a string.
     dup type $stringtype ne {
@@ -789,12 +789,12 @@ $require {
 		{
 		    # [ ... #cpath
 		    `:' search {
-			# #post `:' #dir
+			#post `:' #dir
 			nip exch
 			# [ ... #dir #post
 		    }{
 			# Last path component.
-			# #dir
+			#dir
 			exit
 		    } ifelse
 		} loop
@@ -806,22 +806,22 @@ $require {
 
 	    onyxdict $rpath_post get
 	]{
-	    # #filename #path
+	    #filename #path
 	    {
-		# #filename #dir
+		#filename #dir
 		`/' cat
 		over cat
-		# #filename #full_path
+		#filename #full_path
 		dup `f' test {
 		    # Found.
-		    # #filename #full_path
+		    #filename #full_path
 		    nip
-		    # #full_path
+		    #full_path
 		    `r' open cvx eval
 		    stop # Success.
 		}{
 		    # Not found.
-		    # #filename #full_path
+		    #filename #full_path
 		    pop
 		} ifelse
 	    } foreach
@@ -832,7 +832,7 @@ $require {
     } if
 } def
 
-# #filename #symbol mrequire -
+#filename #symbol mrequire -
 $mrequire {
     # Make sure the arguments are strings.
     over type $stringtype ne {
@@ -843,7 +843,7 @@ $mrequire {
     } if
 
     exch
-    # #symbol #filename
+    #symbol #filename
     {
 	[
 	    onyxdict $mpath_pre get
@@ -856,12 +856,12 @@ $mrequire {
 		{
 		    # [ ... #cpath
 		    `:' search {
-			# #post `:' #dir
+			#post `:' #dir
 			nip exch
 			# [ ... #dir #post
 		    }{
 			# Last path component.
-			# #dir
+			#dir
 			exit
 		    } ifelse
 		} loop
@@ -873,29 +873,29 @@ $mrequire {
 
 	    onyxdict $mpath_post get
 	]{
-	    # #symbol #filename #path
+	    #symbol #filename #path
 	    {
-		# #symbol #filename #dir
+		#symbol #filename #dir
 		`/' cat
 		over cat
-		# #symbol #filename #full_path
+		#symbol #filename #full_path
 		dup `f' test {
 		    # Found.
-		    # #symbol #filename #full_path
+		    #symbol #filename #full_path
 		    nip
-		    # #symbol #full_path
+		    #symbol #full_path
 		    exch modload
 		    stop # Success.
 		}{
 		    # Not found.
-		    # #symbol #filename #full_path
+		    #symbol #filename #full_path
 		    pop
 		} ifelse
 	    } foreach
 	} foreach
     } stopped not {
 	# Failure.
-	# #symbol #filename
+	#symbol #filename
 	exch
 	$undefinedfilename throw
     } if
@@ -967,14 +967,14 @@ $throw {
     # Push the offending object onto ostack.
     !estack dup sdup spop
     exch
-    # #object #errorname
+    #object #errorname
 
     end # currenterror.
 
     # If there is an error handler for the error name, call it.  Otherwise,
     # call the errordict handleerror, then call the errordict stop.
     !errordict
-    # #object #errorname #errordict
+    #object #errorname #errordict
     dup 2 idup known {
 	# Call error handler.
 	exch get eval

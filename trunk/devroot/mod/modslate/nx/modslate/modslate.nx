@@ -11,7 +11,7 @@
 
 # Make sure that implicit locking is on.
 currentlocking true setlocking
-# #currentlocking
+#currentlocking
 
 # Define slatedict in globaldict, and push it onto dstack.
 globaldict $slatedict dict dup begin put

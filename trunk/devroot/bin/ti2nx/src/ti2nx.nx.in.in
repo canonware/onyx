@@ -42,7 +42,7 @@ $aliases <> def
 $uses () def
 $tuses () def
 
-# #str vwrite -
+#str vwrite -
 $vwrite {
     opt_v true eq {
 	print flush
@@ -51,12 +51,12 @@ $vwrite {
     } ifelse
 } bind def
 
-# #str owrite -
+#str owrite -
 $owrite {
     outfile exch write pop
 } bind def
 
-# #ofile usage -
+#ofile usage -
 $usage {
     `ti2nx usage:\n'
     `    ti2nx [-h]\n'
@@ -89,7 +89,7 @@ $parse_opts {
 	`-v' {
 	    $opt_v true def
 	}
-	# #arg -- #(arg + 1)
+	#arg -- #(arg + 1)
 	`-t' {
 	    inc
 	    argv over get
@@ -106,19 +106,19 @@ $parse_opts {
 	    >
 	    $opt_t exch def
 	}
-	# #arg -- #(arg + 1)
+	#arg -- #(arg + 1)
 	`-i' {
 	    inc
 	    argv over get
 	    $opt_i exch def
 	}
-	# #arg -- #(arg + 1)
+	#arg -- #(arg + 1)
 	`-o' {
 	    inc
 	    argv over get
 	    $opt_o exch def
 	}
-	# #arg -- #(arg + 1)
+	#arg -- #(arg + 1)
 	`-d' {
 	    inc
 	    argv over get
@@ -128,7 +128,7 @@ $parse_opts {
 
     # Iterate over command line arguments.
     argv length 1 {2 ndup gt}{
-	# #handlers #argc #arg
+	#handlers #argc #arg
 	argv over get
 	bdup over known {
 	    bdup exch get eval
@@ -139,10 +139,10 @@ $parse_opts {
 	    1 die
 	} ifelse
 
-	# #arg++
+	#arg++
 	inc
     } while
-    # #handlers #argc #arg
+    #handlers #argc #arg
     3 npop
 
     # Enforce argument incompatibility.
@@ -180,7 +180,7 @@ $read_input {
     [] # Initial empty names array.
     <> # Capabilities dictionary.
     {infile readline not}{
-	# #names #caps #line
+	#names #caps #line
 	dup `^#' match not # Ignore full comment lines.
 	over `\S' match # Ignore blank lines.
 	and
@@ -201,7 +201,7 @@ $read_input {
 		# If the names array is non-empty, deal with it and the
 		# associated capabilities dictionary.
 		2 idup length 0 gt {
-		    # #names #caps #line
+		    #names #caps #line
 		    up insert_aliases
 
 		    <> exch
@@ -209,10 +209,10 @@ $read_input {
 		    # Get rid of initial empty names array.
 		    2 ipop
 		} ifelse
-		# #caps #line
+		#caps #line
 
 		parse_names
-		# #caps #names_arr #str_rem
+		#caps #names_arr #str_rem
 
 		# Handle trailing capabilities, if any.
 		dup length 0 gt {
@@ -220,25 +220,25 @@ $read_input {
 		}{
 		    pop
 		} ifelse
-		# #caps #names_arr
+		#caps #names_arr
 
 		exch
-		# #names #caps
+		#names #caps
 	    }{
 		# Capabilities line.
 
-		# #names #caps #str
+		#names #caps #str
 		up 2 ndup 5 ndn
-		# #names #caps #names #caps #str
+		#names #caps #names #caps #str
 		parse_caps
-		# #names #caps
+		#names #caps
 	    } ifelse
 	}{
 	    pop
 	} ifelse
     } while
     pop # Clean up last readline output.
-    # #names #caps
+    #names #caps
 
     # If the capabilities dictionary is non-empty, deal with it and the
     # associated names array.
@@ -247,7 +247,7 @@ $read_input {
     } if
 } bind def
 
-# #str parse_names #names_arr #str_rem
+#str parse_names #names_arr #str_rem
 $parse_names {
     # Split comma-separated fields.
     `(?<!\xff), *' 2 split
@@ -261,11 +261,11 @@ $parse_names {
 
     # Get the names.
     exch 0 get
-    # #str_rem #names_str
+    #str_rem #names_str
 
     # Split names.
     `(?<!\xff)\|' split
-    # #str_rem #names_arr
+    #str_rem #names_arr
 
     # Throw away description, if more than one field, and last field has
     # whitespace in it.
@@ -275,14 +275,14 @@ $parse_names {
 	    0 over length dec getinterval
 	} if
     } if
-    # #str_rem #names_arr
+    #str_rem #names_arr
 
     exch
-    # #names_arr #str_rem
+    #names_arr #str_rem
 } bind def
 
-# #names_arr #capdict #str parse_cap #key #val true
-# #names_arr #capdict #str parse_cap false
+#names_arr #capdict #str parse_cap #key #val true
+#names_arr #capdict #str parse_cap false
 $parse_cap {
     # Remove leading whitespace.
     `\s*(.*)' `\1' subst pop
@@ -294,11 +294,11 @@ $parse_cap {
 	    # Handle use= capabilities specially.  There can be more than one
 	    # per terminal, so they must be handled here, rather than later.
 	    dup 0 get `use' eq {
-		# #names_arr #cap_dict [`uses' #uses]
+		#names_arr #cap_dict [`uses' #uses]
 		# Since this is a use= capability, just make a note in the uses
 		# stack.
 		1 get
-		# #names_arr #cap_dict #uses
+		#names_arr #cap_dict #uses
 
 		# Use #cap_dict to get the set of canceled capabilities.
 		< # Mark for start of array.
@@ -315,7 +315,7 @@ $parse_cap {
 			} ifelse
 		    } foreach
 		> # Finish constructing dictionary of canceled capabilities.
-		# #names_arr #uses #canceled_dict
+		#names_arr #uses #canceled_dict
 
 		# Push triplet onto uses stack.
 		uses 4 ndn spush
@@ -362,7 +362,7 @@ $parse_cap {
     } ifelse
 } bind def
 
-# #names_arr #capdict #str parse_caps -
+#names_arr #capdict #str parse_caps -
 $parse_caps {
     # Split comma-separated fields.
     `(?<!\xff), *' split
@@ -370,19 +370,19 @@ $parse_caps {
     # Iterate over the capability strings, parse them, and insert the results
     # into the capabilities dictionary.
     {
-	# #names_arr #capdict #cap_str
+	#names_arr #capdict #cap_str
 	3 ndup pop dn
-	# #names_arr #capdict #names_arr #capdict #cap_str
+	#names_arr #capdict #names_arr #capdict #cap_str
 	parse_cap {
 	    2 idup up
 	    put
 	} if
-	# #names_arr #capdict
+	#names_arr #capdict
     } foreach
     2 npop
 } bind def
 
-# #names #caps insert_aliases -
+#names #caps insert_aliases -
 $insert_aliases {
     # Define #names-->#caps entry in aliases dictionary.
     aliases up put
@@ -393,12 +393,12 @@ $subst_caps {
     # Construct a new aliases dict, since inserting into a dict that we're
     # iterating over at the same time has potentially unpredictable results.
     <> aliases {
-	# #aliases #names #caps
+	#aliases #names #caps
 
 	# Construct a new dict, since inserting into a dict that we're iterating
 	# over at the same time has potentially unpredictable results.
 	<> exch {
-	    # #aliases #names #caps #key #value
+	    #aliases #names #caps #key #value
 
 	    # Only do substitutions on string capabilities.
 	    dup type $stringtype eq {
@@ -454,26 +454,26 @@ $subst_caps {
 		# preserving the separators, modify the separators, then
 		# catenate the results.
 		`(\\\\[0-7]{3,3})' split
-		# #arr
+		#arr
 		
 		1 2 2 idup length dec {
-			# #arr #ind
+			#arr #ind
 			2 ndup get
-			# #arr #ind #elm
+			#arr #ind #elm
 		
 			# Calculate the value of the octal escape.
 			dup 3 get
 			over 2 get 8 mul add
 			exch 1 get 64 mul add
-			# #arr #ind #val
+			#arr #ind #val
 		
 			# Create a string for the result.
 			`?' dup 0 4 ndn put
-			# #arr #ind #str
+			#arr #ind #str
 		
 			# Insert result into the split array.
 			2 idup up put
-			# #arr
+			#arr
 		} for
 		dup length aup
 		{} foreach
@@ -483,12 +483,12 @@ $subst_caps {
 	    # Insert into new #caps.
 	    2 idup up put
 	} foreach # caps
-	# #aliases #names #caps
+	#aliases #names #caps
 
 	# Insert into new #aliases.
 	2 idup up put
     } foreach # aliases
-    # #aliases
+    #aliases
 
     # Redefine aliases.
     $aliases exch def
@@ -497,9 +497,9 @@ $subst_caps {
 # - populate_terms -
 $populate_terms {
     aliases {
-	# #term_arr #caps
+	#term_arr #caps
 	exch {
-	    # #caps #term
+	    #caps #term
 	    over terms up put
 	} foreach
 	pop
@@ -537,19 +537,19 @@ $process_uses {
 	    tuses spop
 	    tuses spop
 	    tuses spop
-	    # #canceled #use #names
+	    #canceled #use #names
 
 	    # Get capability dictionary to merge into.
 	    aliases exch get
-	    # #canceled #use #caps
+	    #canceled #use #caps
 
 	    # Get capability dictionary to merge from.
 	    terms dn get
-	    # #canceled #caps #merge
+	    #canceled #caps #merge
 
 	    # Iterate over the dictionary to merge from.
 	    {
-		# #canceled #caps #key #val
+		#canceled #caps #key #val
 
 		# Merge the capability unless it is canceled.
 		3 idup 2 idup known {
@@ -560,7 +560,7 @@ $process_uses {
 		    2 idup up put
 		} ifelse
 	    } foreach
-	    # #canceled #caps
+	    #canceled #caps
 	    2 npop
 	} repeat
     } while
@@ -603,13 +603,13 @@ $remove_obsolete {
     } foreach
 } bind def
 
-# #ofile #caps write_caps -
+#ofile #caps write_caps -
 $write_caps {
     # Capabilities.
     over `<\n' write pop
     {
 	exch
-	# #ofile #val #cap
+	#ofile #val #cap
 
 	# Capability name.
 	`\t'
@@ -622,12 +622,12 @@ $write_caps {
 
 	5 ncat
 	under write pop
-	# #ofile
+	#ofile
     } foreach
     `>\n' write pop
 } bind def
 
-# #name should_output #boolean
+#name should_output #boolean
 $should_output {
     # Only output a terminal description if it is in the list specified by
     # the -t option, or if -t wasn't specified at all.  Additionally, only
@@ -641,20 +641,20 @@ $should_output {
     and
 } bind def
 
-# #dirpath install_dir -
+#dirpath install_dir -
 $install_dir {
     # Split path into its components, then iteratively test for existence,
     # creating directories as necessary.
     `/+' `/' <$g true> subst pop
     `(?<!^)/' split
     `' exch {
-	# #path #component
+	#path #component
 	over length 0 gt {
 	    `/' exch 3 ncat
 	}{
 	    cat
 	} ifelse
-	# #path
+	#path
 
 	dup `d' test not {
 	    # Create directory.
@@ -668,7 +668,7 @@ $install_dir {
 $write_dir {
     aliases {
 	exch
-	# #caps #names
+	#caps #names
 
 	# Iterate over the names.  The first time that a terminal description is
 	# written, create a file with the #caps dict contents, and replace #caps
@@ -676,7 +676,7 @@ $write_dir {
 	# terminal names, create a hard link, rather than writing the same
 	# capability dictionary to multiple files.
 	{
-	    # #caps/filename #name
+	    #caps/filename #name
 	    dup should_output {
 		over type $dicttype eq {
 		    # Output the capabilities to a file.
@@ -694,14 +694,14 @@ $write_dir {
 		    dn
 		    3 ncat
 		    dup `w' open
-		    # #caps #filename #file
+		    #caps #filename #file
 
 		    # Write the capabilities to the file, then close it to force
 		    # data flushing.
 		    dup 4 ndn write_caps
-		    # #filename #file
+		    #filename #file
 		    close
-		    # #filename
+		    #filename
 		}{
 		    # A file has already been output; create a hard link to it.
 		    dup ` --> ' 3 idup `\n' 4 ncat vwrite
@@ -731,7 +731,7 @@ $write_dir {
 # - write_file -
 $write_file {
     terms {
-	# #term #caps
+	#term #caps
 	over should_output {
 	    # Names.
 	    exch 1 sprints
