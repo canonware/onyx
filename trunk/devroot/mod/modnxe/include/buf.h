@@ -14,6 +14,7 @@ typedef struct cw_buf_s cw_buf_t;
 
 /* Enumeration for seek operations. */
 typedef enum {
+	BUFW_NONE,	/* Invalid. */
 	BUFW_BEG,	/* Offset from BOB, must be positive. */
 	BUFW_REL,	/* Relative to marker, positive or negative. */
 	BUFW_END	/* Offset from EOB, must be negative. */
@@ -121,29 +122,3 @@ void	bufm_after_insert(cw_bufm_t *a_bufm, const cw_uint8_t *a_str,
     cw_uint64_t a_count);
 
 void	bufm_remove(cw_bufm_t *a_start, cw_bufm_t *a_end);
-
-/* Operators. */
-void	nxe_buffer(cw_nxo_t *a_thread);
-void	nxe_buffer_length(cw_nxo_t *a_thread);
-void	nxe_buffer_lines(cw_nxo_t *a_thread);
-void	nxe_buffer_undo(cw_nxo_t *a_thread);
-void	nxe_buffer_redo(cw_nxo_t *a_thread);
-void	nxe_buffer_history_active(cw_nxo_t *a_thread);
-void	nxe_buffer_history_setactive(cw_nxo_t *a_thread);
-void	nxe_buffer_history_startgroup(cw_nxo_t *a_thread);
-void	nxe_buffer_history_endgroup(cw_nxo_t *a_thread);
-void	nxe_buffer_history_flush(cw_nxo_t *a_thread);
-
-void	nxe_marker(cw_nxo_t *a_thread);
-void	nxe_marker_copy(cw_nxo_t *a_thread);
-void	nxe_marker_buffer(cw_nxo_t *a_thread);
-void	nxe_marker_line(cw_nxo_t *a_thread);
-void	nxe_marker_seekline(cw_nxo_t *a_thread);
-void	nxe_marker_position(cw_nxo_t *a_thread);
-void	nxe_marker_seek(cw_nxo_t *a_thread);
-void	nxe_marker_before_get(cw_nxo_t *a_thread);
-void	nxe_marker_after_get(cw_nxo_t *a_thread);
-void	nxe_marker_before_put(cw_nxo_t *a_thread);
-void	nxe_marker_after_put(cw_nxo_t *a_thread);
-void	nxe_marker_range_get(cw_nxo_t *a_thread);
-void	nxe_marker_range_cut(cw_nxo_t *a_thread);
