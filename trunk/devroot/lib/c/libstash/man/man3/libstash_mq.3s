@@ -197,7 +197,7 @@ Output(s):
 .RS
 FALSE: Succes.
 .br
-NULL: No messages in the queue, or get is in the stop state.
+TRUE: No messages in the queue, or get is in the stop state.
 .RE
 .IR *... :
 .RS
@@ -317,7 +317,7 @@ None.
 Description:
 .RS
 Change the get operation to the start state (\fBmq_get\fR() will not return
-NULL).
+TRUE).
 .RE
 .RE
 .PP
@@ -348,7 +348,7 @@ None.
 .RE
 Description:
 .RS
-Change the get operation to the stop state (\fBmq_get\fR() will return NULL).
+Change the get operation to the stop state (\fBmq_get\fR() will return TRUE).
 .RE
 .RE
 .PP
