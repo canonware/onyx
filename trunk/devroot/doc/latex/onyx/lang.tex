@@ -7639,24 +7639,45 @@ onyx:1>
 	\end{description}
 \label{systemdict:ndn}
 \index{ndn@\onyxop{}{ndn}{}}
-\item[{\onyxop{OPARGS}{ndn}{OPOUTS}}: ]
+\item[{\onyxop{a \dots b count}{ndn}{\dots b a}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a: ]
+			An object.
+		\item[\dots: ]
+			$count - 2$ objects.
+		\item[b: ]
+			An object.
+		\item[count: ]
+			Number of objects to rotate downward.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[\dots: ]
+			$count - 2$ objects.
+		\item[b: ]
+			An object.
+		\item[a: ]
+			An object.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
+		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Rotate \oparg{count} objects on ostack down one position.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> `a' `b' `c' `d' `e' 4 ndn pstack
+`b'
+`e'
+`d'
+`c'
+`a'
+onyx:5>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:ndup}
@@ -7935,7 +7956,7 @@ onyx:1>
 	\end{description}
 \label{systemdict:nup}
 \index{nup@\onyxop{}{nup}{}}
-\item[{\onyxop{a \dots b count}{nup}{\dots b a}}: ]
+\item[{\onyxop{a \dots b count}{nup}{b a \dots}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -7950,12 +7971,12 @@ onyx:1>
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[\dots: ]
-			$count - 2$ objects.
 		\item[b: ]
 			An object.
 		\item[a: ]
 			An object.
+		\item[\dots: ]
+			$count - 2$ objects.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
