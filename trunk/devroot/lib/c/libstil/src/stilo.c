@@ -543,6 +543,99 @@ stilo_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 	stilo_clobber(a_stilo);
 }
 
+cw_sint32_t
+stilo_compare(cw_stilo_t *a_a, cw_stilo_t *a_b, cw_stilt_t *a_stilt)
+{
+	cw_sint32_t	retval;
+
+	switch (a_a->type) {
+	case STILOT_ARRAY:
+	case STILOT_CONDITION:
+	case STILOT_DICT:
+	case STILOT_FILE:
+	case STILOT_HOOK:
+	case STILOT_LOCK:
+	case STILOT_OPERATOR:
+		if (a_a->type == a_b->type && a_a->o.stiloe == a_b->o.stiloe)
+			retval = 0;
+		else
+			retval = 2;
+		break;
+	case STILOT_NAME:
+	case STILOT_STRING: {
+		const cw_uint8_t	*str_a, *str_b;
+		cw_uint32_t		len_a, len_b;
+
+		if (a_a->type == STILOT_NAME) {
+			str_a = stilo_name_str_get(a_a);
+			len_a = stilo_name_len_get(a_a);
+		} else {
+			str_a = stilo_string_get(a_a);
+			len_a = stilo_string_len_get(a_a);
+		}
+			
+		if (a_b->type == STILOT_NAME) {
+			str_b = stilo_name_str_get(a_b);
+			len_b = stilo_name_len_get(a_b);
+		} else if (a_b->type == STILOT_STRING) {
+			str_b = stilo_string_get(a_b);
+			len_b = stilo_string_len_get(a_b);
+		} else {
+			retval = 2;
+			break;
+		}
+
+		if (len_a == len_b)
+			retval = strncmp(str_a, str_b, len_a);
+		else if (len_a < len_b) {
+			retval = strncmp(str_a, str_b, len_a);
+			if (retval == 0)
+				retval = -1;
+		} else {
+			retval = strncmp(str_a, str_b, len_b);
+			if (retval == 0)
+				retval = 1;
+		}
+		break;
+	}
+	case STILOT_BOOLEAN:
+		if (a_a->type != a_b->type) {
+			retval = 2;
+			break;
+		}
+
+		if (a_a->o.boolean.val == a_b->o.boolean.val)
+			retval = 0;
+		else
+			retval = 1;
+		break;
+	case STILOT_INTEGER:
+		if (a_a->type != a_b->type) {
+			retval = 2;
+			break;
+		}
+
+		if (a_a->o.integer.i < a_b->o.integer.i)
+			retval = -1;
+		else if (a_a->o.integer.i == a_b->o.integer.i)
+			retval = 0;
+		else
+			retval = 1;
+		break;
+	case STILOT_MARK:
+	case STILOT_NULL:
+		if (a_a->type == a_b->type)
+			retval = 0;
+		else
+			retval = 2;
+		break;
+	default:
+		_cw_not_reached();
+	}
+	
+	return retval;
+}
+
 void
 stilo_cast(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilot_t a_stilot)
 {
@@ -1441,8 +1534,10 @@ stilo_dict_lookup(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const cw_stilo_t
 		stiloe_p_lock(&dict->stiloe);
 		if (dch_search(&dict->e.d.hash, (void *)a_key, (void **)&dicto)
 		    == FALSE) {
-			stilo_no_new(r_stilo);
-			stilo_dup(r_stilo, &dicto->val);
+			if (r_stilo != NULL) {
+				stilo_no_new(r_stilo);
+				stilo_dup(r_stilo, &dicto->val);
+			}
 			retval = FALSE;
 		} else
 			retval = TRUE;
@@ -2893,6 +2988,22 @@ stilo_p_name_print(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilo_t *a_file,
 		stilo_file_output(a_file, a_stilt, "\n");
 }
 
+const cw_uint8_t *
+stilo_name_str_get(cw_stilo_t *a_stilo)
+{
+	const cw_uint8_t	*retval;
+	cw_stiloe_name_t	*name;
+
+	/* Chase down the name. */
+	name = (cw_stiloe_name_t *)a_stilo->o.stiloe;
+	name = name->val;
+	_cw_assert(name == name->val);
+
+	retval = name->e.n.name;
+
+	return retval;
+}
+
 cw_uint32_t
 stilo_name_len_get(cw_stilo_t *a_stilo)
 {
@@ -3316,6 +3427,7 @@ stilo_p_string_print(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilo_t
 	} else {
 		if (len > 0)
 			stilo_file_output_n(a_file, a_stilt, len, "[s]", str);
+		stilo_file_output(a_file, a_stilt, "[c]", newline);
 	}
 }
 
