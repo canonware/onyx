@@ -21,42 +21,30 @@
 	stdout <
 	    /POLLIN false
 	    /POLLRDNORM false
-	    /POLLRDBAND false
-	    /POLLPRI false
 	    /POLLOUT false
 	    /POLLWRNORM false
-	    /POLLWRBAND false
 	>
     >
     <
 	stdout <
 	    /POLLIN true
 	    /POLLRDNORM true
-	    /POLLRDBAND true
-	    /POLLPRI true
 	    /POLLOUT true
 	    /POLLWRNORM true
-	    /POLLWRBAND true
 	>
     >
     <
 	stdout <
 	    /POLLIN false
 	    /POLLRDNORM false
-	    /POLLRDBAND false
-	    /POLLPRI false
 	    /POLLOUT false
 	    /POLLWRNORM false
-	    /POLLWRBAND false
 	>
 	stderr <
 	    /POLLIN false
 	    /POLLRDNORM false
-	    /POLLRDBAND false
-	    /POLLPRI false
 	    /POLLOUT false
 	    /POLLWRNORM false
-	    /POLLWRBAND false
 	>
     >
 ]{
