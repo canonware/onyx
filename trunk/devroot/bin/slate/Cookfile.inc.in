@@ -33,7 +33,6 @@ SLATE_TEX_SRCS = [addprefix @srcroot@/bin/slate/doc/latex/ [SLATE_TEX_SRCS]];
 SLATE = @objroot@/bin/slate/bin/slate;
 TSLATE = @objroot@/bin/slate/bin/tslate;
 
-[TSLATE] : [SLATE];
 
 /*
  * User cook'ables.
@@ -110,9 +109,7 @@ slate_bins_distclean :
  */
 
 [TSLATE] : [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [TSLATE_SRCS]]
-#if @enable_modprompt@
-          modprompt
-#endif
+           [SLATE]
   set mkdir
 {
   [CC] [A_CFLAGS] -o [target]
@@ -121,7 +118,7 @@ slate_bins_distclean :
 
 [SLATE] : [fromto @srcroot@/%0%.nx.in.in @objroot@/%0%.nx.in [SLATE_NSRCS]] mods
 #if @enable_onyx@
-          onyx
+          tonyx
 #endif
   set mkdir
 {
