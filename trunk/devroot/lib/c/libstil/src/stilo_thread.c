@@ -851,7 +851,7 @@ stilo_thread_loop(cw_stilo_t *a_stilo)
 		case STILOT_HOOK: {
 			cw_stilo_threade_t	error;
 			
-			error = stilo_hook_exec(stilo, a_stilo);
+			error = stilo_hook_eval(stilo, a_stilo);
 			if (error)
 				stilo_thread_error(a_stilo, error);
 

@@ -13,8 +13,13 @@ typedef struct cw_stiloe_hook_s cw_stiloe_hook_t;
 
 struct cw_stiloe_hook_s {
 	cw_stiloe_t	stiloe;
+	/*
+	 * Used for remembering the current state of reference iteration.
+	 */
+	cw_uint32_t	ref_iter;
+	cw_stilo_t	tag;
 	void		*data;
-	cw_stilo_hook_exec_t *exec_f;
+	cw_stilo_hook_eval_t *eval_f;
 	cw_stilo_hook_ref_iter_t *ref_iter_f;
 	cw_stilo_hook_delete_t *delete_f;
 };
