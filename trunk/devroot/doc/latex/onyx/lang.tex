@@ -13445,6 +13445,16 @@ onyx:0>
 	\end{description}
 \end{description}
 
+\subsection{threadsdict}
+\label{sec:threadsdict}
+\index{threadsdict@\onyxop{}{threadsdict}{}}
+
+There is one entry in threadsdict for each thread.  The key is the thread, and
+the value is null by default.  The value can be safely changed, which can be
+useful when debugging.  However, the key must not be changed, or garbage
+collection will trigger a horrible death, since the root set will not be
+complete.
+
 \subsection{userdict}
 \label{sec:userdict}
 \index{userdict@\onyxop{}{userdict}{}}
