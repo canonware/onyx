@@ -83,18 +83,72 @@ check : tests
            -s [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]];
 }
 
+check_update : tests
+{
+  [VERIFY] -u -s [srcdir] --
+           -d [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS]]
+           -s [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]];
+}
+
 clean :
 {
   rm -f core *.core;
-  rm -rf bin lib test;
-  [srcdir]/configure;
 
-  /* XXX Delete .cook.fp files from the source tree. */
+  rm -f [D_LIBS];
+  rm -f [A_LIBS];
+  rm -f [P_LIBS];
+  rm -f [S_LIBS];
+
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_d [SRCS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_a [SRCS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_p [SRCS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_s [SRCS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [SRCS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [SRCS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [SRCS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_s [SRCS]];
+
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_d [BINS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_a [BINS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_p [BINS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_s [BINS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [BINS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [BINS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [BINS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_s [BINS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0% [BINS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.dbg [BINS]];
+
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_d [CTESTS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_a [CTESTS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_p [CTESTS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_s [CTESTS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [CTESTS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [CTESTS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [CTESTS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_s [CTESTS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS]];
+
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_d [BTESTS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_a [BTESTS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_p [BTESTS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_s [BTESTS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [BTESTS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [BTESTS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [BTESTS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_s [BTESTS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0% [BTESTS]];
+
+  /* Delete .cook.fp files from the source tree and object tree. */
   [SHELL] -e;
 data
 #![SHELL]
 
 for i in `find [srcdir] -type f -name .cook.fp` ; do
+  echo rm $i;
+  rm $i;
+done
+for i in `find [objdir] -type f -name .cook.fp` ; do
   echo rm $i;
   rm $i;
 done

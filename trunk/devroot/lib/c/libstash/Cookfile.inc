@@ -58,7 +58,7 @@ SRCS = [SRCS] [LIBSTASH_SRCS];
 /* Simple tests.  Output is diff'ed with the expected (.exp file) output. */
 {
   local ctests = c_arena_a.c c_bhp_a.c c_bhp_b.c c_buf_a.c c_buf_b.c c_buf_c.c 
-                 c_buf_d.c c_buf_e.c c_cnd_a.c c_libstash_a.c
+                 c_buf_d.c c_buf_e.c c_ch_a.c c_cnd_a.c c_libstash_a.c
                  c_list_a.c c_mq_a.c c_mtx_a.c c_oh_a.c c_oh_b.c c_oh_c.c
                  c_out_a.c c_pezz_a.c c_res_a.c c_ring_a.c c_rwl_a.c c_sem_a.c
                  c_thd_a.c c_treen_a.c;
