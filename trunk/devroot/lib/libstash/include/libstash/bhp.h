@@ -268,9 +268,9 @@ bhp_get_size(cw_bhp_t * a_bhp);
  *
  * <<< Input(s) >>>
  *
- * a_bhp : Pointer to a bhp.
+ * a_a : Pointer to a bhp.
  *
- * a_other : Pointer to a bhp.
+ * a_b : Pointer to a bhp.
  *
  * <<< Output(s) >>>
  *
@@ -278,12 +278,12 @@ bhp_get_size(cw_bhp_t * a_bhp);
  *
  * <<< Description >>>
  *
- * Merge a_other into a_bhp.  a_other is invalid after this call, and does not
+ * Merge a_b into a_a.  a_b is invalid after this call, and does not
  * need to be deleted.
  *
  ****************************************************************************/
 void
-bhp_union(cw_bhp_t * a_bhp, cw_bhp_t * a_other);
+bhp_union(cw_bhp_t * a_a, cw_bhp_t * a_b);
 
 /****************************************************************************
  *

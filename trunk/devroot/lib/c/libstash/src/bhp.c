@@ -215,6 +215,10 @@ bhp_insert(cw_bhp_t * a_bhp, cw_bhpi_t * a_bhpi)
 
   /* Combine this heap and temp_heap. */
   bhp_p_union(a_bhp, &temp_heap);
+  
+  /* Destroy the old heap. */
+  temp_heap.head = NULL;
+  bhp_delete(&temp_heap);
 
 #ifdef _CW_REENTRANT
   if (a_bhp->is_thread_safe == TRUE)
@@ -374,6 +378,11 @@ bhp_del_min(cw_bhp_t * a_bhp, void ** r_priority, void ** r_data)
 #endif
     temp_heap.head = prev_pos;
     bhp_p_union(a_bhp, &temp_heap);
+
+    /* Destroy the old heap. */
+    temp_heap.head = NULL;
+    bhp_delete(&temp_heap);
+
     a_bhp->num_nodes--;
 
     /* Now point *r_priority and *r_data to the item and free the space taken 
@@ -424,33 +433,40 @@ bhp_get_size(cw_bhp_t * a_bhp)
 }
 
 void
-bhp_union(cw_bhp_t * a_bhp, cw_bhp_t * a_other)
+bhp_union(cw_bhp_t * a_a, cw_bhp_t * a_b)
 {
-  _cw_check_ptr(a_bhp);
-  _cw_assert(_LIBSTASH_BHP_MAGIC == a_bhp->magic);
-  _cw_check_ptr(a_other);
-  _cw_assert(_LIBSTASH_BHP_MAGIC == a_other->magic);
+  _cw_check_ptr(a_a);
+  _cw_assert(_LIBSTASH_BHP_MAGIC == a_a->magic);
+  _cw_check_ptr(a_b);
+  _cw_assert(_LIBSTASH_BHP_MAGIC == a_b->magic);
 #ifdef _CW_REENTRANT
-  if (a_bhp->is_thread_safe == TRUE)
+  if (a_a->is_thread_safe == TRUE)
   {
-    mtx_lock(&a_bhp->lock);
+    mtx_lock(&a_a->lock);
   }
-  if (a_other->is_thread_safe == TRUE)
+  if (a_b->is_thread_safe == TRUE)
   {
-    mtx_lock(&a_other->lock);
+    mtx_lock(&a_b->lock);
   }
 #endif
 
-  bhp_p_union(a_bhp, a_other);
+  bhp_p_union(a_a, a_b);
 
 #ifdef _CW_REENTRANT
-  if (a_other->is_thread_safe == TRUE)
+  if (a_b->is_thread_safe == TRUE)
   {
-    mtx_unlock(&a_other->lock);
+    mtx_unlock(&a_b->lock);
   }
-  if (a_bhp->is_thread_safe == TRUE)
+#endif
+  
+  /* Destroy the old heap. */
+  a_b->head = NULL;
+  bhp_delete(a_b);
+
+#ifdef _CW_REENTRANT
+  if (a_a->is_thread_safe == TRUE)
   {
-    mtx_unlock(&a_bhp->lock);
+    mtx_unlock(&a_a->lock);
   }
 #endif
 }
@@ -657,29 +673,25 @@ bhp_p_merge(cw_bhp_t * a_a, cw_bhp_t * a_b)
 
   /* Adjust the size. */
   a_a->num_nodes += a_b->num_nodes;
-
-  /* Destroy the old heap. */
-  a_b->head = NULL;
-  bhp_delete(a_b);
 }
 
 static void
-bhp_p_union(cw_bhp_t * a_bhp, cw_bhp_t * a_other)
+bhp_p_union(cw_bhp_t * a_a, cw_bhp_t * a_b)
 {
   cw_bhpi_t * prev_node, * curr_node, * next_node;
   
-  _cw_assert(a_bhp->priority_compare == a_other->priority_compare);
+  _cw_assert(a_a->priority_compare == a_b->priority_compare);
   
-  bhp_p_merge(a_bhp, a_other);
+  bhp_p_merge(a_a, a_b);
 
-  if (a_bhp->head == NULL)
+  if (a_a->head == NULL)
   {
     /* Empty heap.  We're done. */
     goto RETURN;
   }
 
   prev_node = NULL;
-  curr_node = a_bhp->head;
+  curr_node = a_a->head;
   next_node = curr_node->sibling;
   while(next_node != NULL)
   {
@@ -693,7 +705,7 @@ bhp_p_union(cw_bhp_t * a_bhp, cw_bhp_t * a_other)
       prev_node = curr_node;
       curr_node = next_node;
     }
-    else if (1 != a_bhp->priority_compare(curr_node->priority,
+    else if (1 != a_a->priority_compare(curr_node->priority,
 					  next_node->priority)) /* <= */
     {
       /* The priority of the root of curr_node is <= the priority of the root of
@@ -707,7 +719,7 @@ bhp_p_union(cw_bhp_t * a_bhp, cw_bhp_t * a_other)
        * next_node. */
       if (prev_node == NULL)
       {
-	a_bhp->head = next_node;
+	a_a->head = next_node;
       }
       else
       {
