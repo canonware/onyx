@@ -8,17 +8,6 @@ dnl Process this file with autoconf to produce a configure script.
 AC_INIT(include/libsock/libsock.h)
 AC_CONFIG_HEADER(include/libsock/libsock_defs.h)
 
-AC_CANONICAL_HOST
-case "${host}" in
-  i386-*-freebsd*)
-        ;;
-  *-*-linux*)
-        ;;
-  *-*-solaris2*)
-	LIBS="$LIBS -lsocket -lnsl -lposix4"
-        ;;
-esac
-
 dnl Check for programs.
 dnl Trick AC_PROG_CC into not defining CFLAGS, even if it wasn't specified on
 dnl the command line.
@@ -85,7 +74,7 @@ case "${host}" in
   *-*-linux*)
         ;;
   *-*-solaris2*)
-	LIBS="$LIBS -lsocket -lnsl"
+	LIBS="$LIBS -lsocket -lnsl -lposix4"
         ;;
 esac
 
