@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 173 $
- * $Date: 1998-08-26 12:34:42 -0700 (Wed, 26 Aug 1998) $
+ * $Revision: 177 $
+ * $Date: 1998-08-29 20:58:01 -0700 (Sat, 29 Aug 1998) $
  *
  * <<< Description >>>
  *
@@ -57,6 +57,7 @@ main()
   glob_new();
 
   dbg_clear(g_dbg_o);
+  dbg_turn_on(g_dbg_o, _STASH_DBG_C_RES_ERROR);
 /*   dbg_turn_on(g_dbg_o, _STASH_DBG_C_OH_FUNC); */
 /*   dbg_turn_on(g_dbg_o, _STASH_DBG_C_OH_SLOT); */
 /*   dbg_turn_on(g_dbg_o, _STASH_DBG_C_RES_STATE); */
