@@ -1309,6 +1309,7 @@ buf_p_bufv_insert(cw_buf_t *a_buf, cw_bufp_t *a_bufp, cw_bufp_t *a_pastp,
 	    vsplit.len = CW_BUFP_SIZE - bufp->len;
 	    vremain.data = &vsplit.data[vsplit.len];
 	    vremain.len = a_bufv[v].len - vsplit.len;
+	    v++;
 
 	    nlines += (cw_uint64_t) bufp_p_simple_insert(bufp, &vsplit, 1,
 							 vsplit.len);
@@ -2169,7 +2170,6 @@ mkr_p_split_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
     
     nextp->bpos = bufp->bpos; /* Not actual bpos, but needed for insertion. */
     nextp->line = bufp->line; /* Not actual line. */
-    cw_assert(ql_next(&buf->plist, bufp, plink) == nextp);
     buf_p_bufp_insert(buf, nextp);
     cw_assert(ql_next(&buf->plist, bufp, plink) == nextp);
 
