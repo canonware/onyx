@@ -481,7 +481,6 @@ oh_item_insert(cw_oh_t * a_oh, const void * a_key, const void * a_data)
   cw_uint64_t junk;
 
   _cw_check_ptr(a_oh);
-  _cw_check_ptr(a_key);
 #ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
@@ -592,7 +591,6 @@ oh_item_search(cw_oh_t * a_oh,
   cw_bool_t retval;
 
   _cw_check_ptr(a_oh);
-  _cw_check_ptr(a_key);
 #ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
