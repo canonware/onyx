@@ -18,9 +18,6 @@
 % Onyx Language Tutorial.
 \input{@abs_srcroot@/doc/latex/onyx/tut}
 
-% Onyx Language Examples.
-\input{@abs_srcroot@/doc/latex/onyx/ex}
-
 % Onyx Language Reference.
 \input{@abs_srcroot@/doc/latex/onyx/lang}
 
