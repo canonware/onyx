@@ -647,10 +647,8 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 
 	for (sdepth = cdepth = nxo_stack_count(&thread->estack);
 	     cdepth >= sdepth; cdepth = nxo_stack_count(&thread->estack)) {
-		if (cdepth == _CW_LIBONYX_ESTACK_MAX + 1) {
-			nxo_thread_error(a_nxo,
-			    NXO_THREADE_ESTACKOVERFLOW);
-		}
+		if (cdepth == _CW_LIBONYX_ESTACK_MAX + 1)
+			nxo_thread_error(a_nxo, NXO_THREADE_ESTACKOVERFLOW);
 
 		nxo = nxo_stack_get(&thread->estack);
 		if (nxo_attr_get(nxo) == NXOA_LITERAL) {

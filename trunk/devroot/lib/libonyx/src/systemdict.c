@@ -524,7 +524,6 @@ systemdict_p_autoload_dlsym_ref_iter(void *a_data, cw_bool_t a_reset)
 static void
 systemdict_p_autoload_dlsym_delete(void *a_data, cw_nx_t *a_nx)
 {
-	/* XXX Check return? */
 	dlclose(a_data);
 }
 
@@ -669,7 +668,6 @@ systemdict_autoload(cw_nxo_t *a_thread)
 		/*
 		 * Couldn't find the init function.  Someone screwed up badly.
 		 */
-		/* XXX Check return? */
 		dlclose(handle);
 		nxo_thread_error(a_thread, NXO_THREADE_UNREGISTERED);
 		return;
