@@ -49,36 +49,148 @@ The \classname{module} class XXX
 	{instance}
 	{Constructor.}
 \hline \hline
-\multicolumn{2}{|l|}{Class/instance-context methods} \\
-\hline \hline
-\optableent
-	{XXX}
-	{{\bf \htmlref{XXX}{module:XXX}}}
-	{XXX}
-	{XXX.}
-\hline
-\optableent
-	{XXX}
-	{{\bf \htmlref{XXX}{module:XXX}}}
-	{XXX}
-	{XXX.}
-\hline \hline
 \multicolumn{2}{|l|}{Instance-context methods} \\
 \hline \hline
 \optableent
 	{XXX}
-	{{\bf \htmlref{XXX}{module:XXX}}}
+	{{\bf \htmlref{version\_get}{module:version_get}}}
 	{XXX}
 	{XXX.}
 \hline
 \optableent
 	{XXX}
-	{{\bf \htmlref{XXX}{module:XXX}}}
+	{{\bf \htmlref{version\_set}{module:version_set}}}
+	{XXX}
+	{XXX.}
+\hline
+\optableent
+	{XXX}
+	{{\bf \htmlref{deps\_get}{module:deps_get}}}
+	{XXX}
+	{XXX.}
+\hline
+\optableent
+	{XXX}
+	{{\bf \htmlref{mdefs\_get}{module:mdefs_get}}}
+	{XXX}
+	{XXX.}
+\hline
+\optableent
+	{XXX}
+	{{\bf \htmlref{mdef}{module:mdef}}}
+	{XXX}
+	{XXX.}
+\hline
+\optableent
+	{XXX}
+	{{\bf \htmlref{dep\_load}{module:dep_load}}}
+	{XXX}
+	{XXX.}
+\hline
+\optableent
+	{XXX}
+	{{\bf \htmlref{pre\_unload\_hook\_set}{module:pre_unload_hook_set}}}
+	{XXX}
+	{XXX.}
+\hline
+\optableent
+	{XXX}
+	{{\bf \htmlref{post\_unload\_hook\_set}{module:post_unload_hook_set}}}
+	{XXX}
+	{XXX.}
+\hline
+\optableent
+	{XXX}
+	{{\bf \htmlref{unload}{module:unload}}}
 	{XXX}
 	{XXX.}
 \end{longtable}
 
 \begin{description}
+\label{module:dep_load}
+\index{dep_load@\onyxop{}{dep\_load}{}}
+\item[{\onyxop{METHODINS}{dep\_load}{METHODOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Error(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{module:deps_get}
+\index{deps_get@\onyxop{}{deps\_get}{}}
+\item[{\onyxop{METHODINS}{deps\_get}{METHODOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Error(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{module:mdefs_get}
+\index{mdefs_get@\onyxop{}{mdefs\_get}{}}
+\item[{\onyxop{METHODINS}{mdefs\_get}{METHODOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Error(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{module:mdef}
+\index{mdef@\onyxop{}{mdef}{}}
+\item[{\onyxop{METHODINS}{mdef}{METHODOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Error(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
 \label{module:new}
 \index{new@\onyxop{}{new}{}}
 \item[{\onyxop{--}{new}{instance}}: ]
@@ -102,9 +214,93 @@ onyx:0> module:new 1 sprint
 onyx:0>
 		\end{verbatim}
 	\end{description}
-\label{module:XXX}
-\index{XXX@\onyxop{}{XXX}{}}
-\item[{\onyxop{METHODINS}{XXX}{METHODOUTS}}: ]
+\label{module:post_unload_hook_set}
+\index{post_unload_hook_set@\onyxop{}{post\_unload\_hook\_set}{}}
+\item[{\onyxop{METHODINS}{post\_unload\_hook\_set}{METHODOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Error(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{module:pre_unload_hook_set}
+\index{pre_unload_hook_set@\onyxop{}{pre\_unload\_hook\_set}{}}
+\item[{\onyxop{METHODINS}{pre\_unload\_hook\_set}{METHODOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Error(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{module:unload}
+\index{unload@\onyxop{}{unload}{}}
+\item[{\onyxop{METHODINS}{unload}{METHODOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Error(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{module:version_get}
+\index{version_get@\onyxop{}{version\_get}{}}
+\item[{\onyxop{METHODINS}{version\_get}{METHODOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Error(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{module:version_set}
+\index{version_set@\onyxop{}{version\_set}{}}
+\item[{\onyxop{METHODINS}{version\_set}{METHODOUTS}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
