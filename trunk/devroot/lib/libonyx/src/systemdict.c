@@ -6104,7 +6104,21 @@ systemdict_setgid(cw_nxo_t *a_thread)
 void
 systemdict_setgstderr(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack;
+    cw_nxo_t *file;
+    
+    ostack = nxo_thread_ostack_get(a_thread);
+
+    NXO_STACK_GET(file, ostack, a_thread);
+    if (nxo_type_get(file) != NXOT_FILE)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    
+    nx_stderr_set(nxo_thread_nx_get(a_thread), file);
+
+    nxo_stack_pop(ostack);
 }
 #endif
 
@@ -6112,7 +6126,21 @@ systemdict_setgstderr(cw_nxo_t *a_thread)
 void
 systemdict_setgstdin(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack;
+    cw_nxo_t *file;
+    
+    ostack = nxo_thread_ostack_get(a_thread);
+
+    NXO_STACK_GET(file, ostack, a_thread);
+    if (nxo_type_get(file) != NXOT_FILE)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    
+    nx_stdin_set(nxo_thread_nx_get(a_thread), file);
+
+    nxo_stack_pop(ostack);
 }
 #endif
 
@@ -6120,7 +6148,21 @@ systemdict_setgstdin(cw_nxo_t *a_thread)
 void
 systemdict_setgstdout(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack;
+    cw_nxo_t *file;
+    
+    ostack = nxo_thread_ostack_get(a_thread);
+
+    NXO_STACK_GET(file, ostack, a_thread);
+    if (nxo_type_get(file) != NXOT_FILE)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    
+    nx_stdout_set(nxo_thread_nx_get(a_thread), file);
+
+    nxo_stack_pop(ostack);
 }
 #endif
 
@@ -6171,19 +6213,61 @@ systemdict_setsockopt(cw_nxo_t *a_thread)
 void
 systemdict_setstderr(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack;
+    cw_nxo_t *file;
+    
+    ostack = nxo_thread_ostack_get(a_thread);
+
+    NXO_STACK_GET(file, ostack, a_thread);
+    if (nxo_type_get(file) != NXOT_FILE)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    
+    nxo_thread_stderr_set(a_thread, file);
+
+    nxo_stack_pop(ostack);
 }
 
 void
 systemdict_setstdin(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack;
+    cw_nxo_t *file;
+    
+    ostack = nxo_thread_ostack_get(a_thread);
+
+    NXO_STACK_GET(file, ostack, a_thread);
+    if (nxo_type_get(file) != NXOT_FILE)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    
+    nxo_thread_stdin_set(a_thread, file);
+
+    nxo_stack_pop(ostack);
 }
 
 void
 systemdict_setstdout(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack;
+    cw_nxo_t *file;
+    
+    ostack = nxo_thread_ostack_get(a_thread);
+
+    NXO_STACK_GET(file, ostack, a_thread);
+    if (nxo_type_get(file) != NXOT_FILE)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    
+    nxo_thread_stdout_set(a_thread, file);
+
+    nxo_stack_pop(ostack);
 }
 
 #ifdef CW_POSIX
