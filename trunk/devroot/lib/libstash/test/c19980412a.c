@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 47 $
- * $Date: 1998-04-26 22:54:46 -0700 (Sun, 26 Apr 1998) $
+ * $Revision: 58 $
+ * $Date: 1998-05-01 03:18:42 -0700 (Fri, 01 May 1998) $
  *
  * <<< Description >>>
  *
@@ -44,7 +44,7 @@
 #include <config.h>
 
 #define NUM_STRINGS 100
-#define NUM_THREADS 100
+#define NUM_THREADS 20
 
 void *
 insert_items(void * arg)

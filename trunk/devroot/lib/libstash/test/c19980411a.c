@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 48 $
- * $Date: 1998-04-26 22:55:06 -0700 (Sun, 26 Apr 1998) $
+ * $Revision: 58 $
+ * $Date: 1998-05-01 03:18:42 -0700 (Fri, 01 May 1998) $
  *
  * <<< Description >>>
  *
@@ -42,7 +42,7 @@
 #define _INC_GLOB_H_
 #include <config.h>
 
-#define NUM_STRINGS 10000
+#define NUM_STRINGS 2000
 
 int
 main()
@@ -55,6 +55,7 @@ main()
 
   glob_new();
   oh_new(&hash_o);
+/*   _cw_error("Got here."); */
   
   strings = (char **) _cw_malloc(sizeof(char *) * NUM_STRINGS);
 
@@ -81,7 +82,7 @@ main()
   for (i = 0; i < (NUM_STRINGS / 2); i++)
   {
     error = oh_item_delete(&hash_o, (void *) strings[i],
-			   (void **) &junk);
+			   (void **) &junk, (void **) &junk);
     if (error == TRUE)
     {
       log_printf(g_log_o, "(2) Error at i == %d\n", i);
@@ -103,7 +104,7 @@ main()
   for (i = 0; i < NUM_STRINGS; i++)
   {
     error = oh_item_delete(&hash_o, (void *) strings[i],
-				 (void **) &junk);
+				 (void **) &junk, (void **) &junk);
     if (error == TRUE)
     {
       log_printf(g_log_o, "(4) Error at i == %d\n", i);
