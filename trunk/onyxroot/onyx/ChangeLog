@@ -1,3 +1,9 @@
+2003-12-28 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/nxm.c : Add the nxm class, which abstracts
+	  loadable module functionality.  Remove cw_nxmod_t, which is
+	  obsoleted by this change.
+
 2003-12-26 : Jason Evans <jasone@canonware.com>
 
 	* Add operators:
@@ -28,7 +34,7 @@
 	  + cw_uint64_t	--> uint64_t
 	  + cw_sint64_t	--> int64_t
 	  + cw_fp64_t	--> double
-	  + cw_bool_t	--> bool (requires stdbool.h)
+	  + cw_bool_t	--> bool
 
 	  Use false and true, rather than FALSE and TRUE.
 

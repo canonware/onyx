@@ -39,9 +39,6 @@ typedef int socklen_t;
 #endif
 #ifdef CW_REAL
 #endif
-#ifdef CW_MODULES
-#include <dlfcn.h> /* For modload operator. */
-#endif
 #ifdef CW_POSIX
 #ifdef HAVE_POLL
 #include <sys/poll.h>
@@ -7332,129 +7329,31 @@ systemdict_mod(cw_nxo_t *a_thread)
 }
 
 #ifdef CW_MODULES
-/* #define CW_MODLOAD_VERBOSE */
-static cw_nxmod_t *
-systemdict_p_nxmod_new(void *a_handle)
-{
-    cw_nxmod_t *retval;
-
-    retval = (cw_nxmod_t *) nxa_malloc(sizeof(cw_nxmod_t));
-    /* Set the default iteration for module destruction to 1.  This number can
-     * be overridden on a per-module basis in the module initialization code. */
-    retval->iter = 1;
-    /* There is no pre-unload hook called by default. */
-    retval->pre_unload_hook = NULL;
-    retval->dlhandle = a_handle;
-
-    return retval;
-}
-
-static cw_nxoe_t *
-systemdict_p_nxmod_ref_iter(void *a_data, bool a_reset)
-{
-    return NULL;
-}
-
-static bool
-systemdict_p_nxmod_delete(void *a_data, uint32_t a_iter)
-{
-    bool retval;
-    cw_nxmod_t *nxmod = (cw_nxmod_t *) a_data;
-
-    if (a_iter != nxmod->iter)
-    {
-	retval = true;
-	goto RETURN;
-    }
-
-    if (nxmod->pre_unload_hook != NULL)
-    {
-	nxmod->pre_unload_hook();
-    }
-
-#ifdef CW_MODLOAD_VERBOSE
-    fprintf(stderr, "dlclose(%p)\n", nxmod->dlhandle);
-#endif
-    dlclose(nxmod->dlhandle);
-    nxa_free(a_data, sizeof(cw_nxmod_t));
-
-    retval = false;
-    RETURN:
-    return retval;
-}
-
 void
 systemdict_modload(cw_nxo_t *a_thread)
 {
-    cw_nxo_t *ostack, *estack, *tstack;
+    cw_nxo_t *ostack, *estack;
     cw_nxo_t *path, *sym, *nxo;
-    cw_nxmod_t *nxmod;
-    uint8_t *str;
-    void *symbol, *handle = NULL;
+    cw_nxn_t error;
 
     ostack = nxo_thread_ostack_get(a_thread);
     estack = nxo_thread_estack_get(a_thread);
-    tstack = nxo_thread_tstack_get(a_thread);
     NXO_STACK_GET(sym, ostack, a_thread);
     NXO_STACK_NGET(path, ostack, a_thread, 1);
-    if (nxo_type_get(path) != NXOT_STRING)
+    if (nxo_type_get(path) != NXOT_STRING || nxo_type_get(sym) != NXOT_STRING)
     {
 	nxo_thread_nerror(a_thread, NXN_typecheck);
 	return;
     }
 
-    /* Create '\0'-terminated copy of path. */
-    nxo = nxo_stack_push(tstack);
-    nxo_string_cstring(nxo, path, a_thread);
-    str = nxo_string_get(nxo);
-
-    /* Try to dlopen(). */
-    handle = dlopen(str, RTLD_LAZY);
-    if (handle == NULL)
-    {
-#ifdef CW_DBG
-	fprintf(stderr, "dlopen() error: %s\n", dlerror());
-#endif
-	nxo_stack_pop(tstack);
-	nxo_thread_nerror(a_thread, NXN_invalidfileaccess);
-	return;
-    }
-#ifdef CW_MODLOAD_VERBOSE
-    fprintf(stderr, "dlopen(\"%s\") handle: %p\n", str, handle);
-#endif
-
-    /* Create '\0'-terminated copy of sym. */
-    nxo_string_cstring(nxo, sym, a_thread);
-    str = nxo_string_get(nxo);
-
-    /* Look up symbol. */
-#ifdef CW_MODLOAD_VERBOSE
-    fprintf(stderr, "dlsym(\"%s\")\n", str);
-#endif
-    symbol = dlsym(handle, str);
-
-    /* Pop nxo. */
-    nxo_stack_pop(tstack);
-
-    if (symbol == NULL)
-    {
-	/* Couldn't find the symbol. */
-#ifdef CW_DBG
-	fprintf(stderr, "dlsym() error: %s\n", dlerror());
-#endif
-	dlclose(handle);
-	nxo_thread_nerror(a_thread, NXN_undefined);
-	return;
-    }
-
-    /* Create a handle whose data pointer is a (cw_nxmod_t), and whose
-     * evaluation function is the symbol we just looked up. */
-    nxmod = systemdict_p_nxmod_new(handle);
     nxo = nxo_stack_push(estack);
-    nxo_handle_new(nxo, nxmod, symbol, systemdict_p_nxmod_ref_iter,
-		   systemdict_p_nxmod_delete);
-    nxo_dup(nxo_handle_tag_get(nxo), sym);
-    nxo_attr_set(nxo, NXOA_EXECUTABLE);
+    error = nxm_new(nxo, path, sym);
+    if (error)
+    {
+	nxo_stack_pop(estack);
+	nxo_thread_nerror(a_thread, error);
+	return;
+    }
 
     /* Pop the arguments before recursing. */
     nxo_stack_npop(ostack, 2);

@@ -10,13 +10,6 @@
  *
  ******************************************************************************/
 
-typedef struct
-{
-    uint32_t iter;
-    void (*pre_unload_hook)(void);
-    void *dlhandle;
-} cw_nxmod_t;
-
 /* Global variables. */
 #if (defined(CW_POSIX) && defined(CW_THREADS))
 extern cw_mtx_t cw_g_gethostbyname_mtx;

@@ -711,6 +711,7 @@ void *a\_mem, void *a\_ptr, size\_t a\_size}}
 \input{@abs_srcroot@/lib/libonyx/doc/latex/mtx}
 \input{@abs_srcroot@/lib/libonyx/doc/latex/nx}
 \input{@abs_srcroot@/lib/libonyx/doc/latex/nxa}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/nxm}
 \input{@abs_srcroot@/lib/libonyx/doc/latex/nxn}
 \input{@abs_srcroot@/lib/libonyx/doc/latex/nxo}
 \input{@abs_srcroot@/lib/libonyx/doc/latex/nxo_array}

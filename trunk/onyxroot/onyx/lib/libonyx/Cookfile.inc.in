@@ -44,6 +44,9 @@
 #if @enable_regex@
                nxo_regex.h nxo_regsub.h
 #endif
+#if @enable_modules@
+               nxm.h
+#endif
                ;
   incs = [addprefix @srcroot@/lib/libonyx/include/libonyx/ [incs]];
   incs = [incs] @objroot@/lib/libonyx/include/libonyx/libonyx_defs.h;
@@ -77,6 +80,9 @@ LIBONYX_COMMON_SRCS = [addprefix @srcroot@/lib/libonyx/src/
 #endif
 #if @enable_posix@
                                  envdict.c
+#endif
+#if @enable_modules@
+                                 nxm.c
 #endif
                                  ];
 
@@ -119,8 +125,8 @@ LIBONYX_CTESTS = [addprefix @srcroot@/lib/libonyx/test/ [LIBONYX_CTESTS]];
 /* LaTeX source files. */
 ONYX_TEX_SRCS += [addprefix @srcroot@/lib/libonyx/doc/latex/
                             ch.tex cnd.tex dch.tex gcdict.tex mb.tex mem.tex
-                            mq.tex mtx.tex nx.tex nxa.tex nxn.tex nxo.tex
-                            nxo_array.tex nxo_boolean.tex nxo_class.tex
+                            mq.tex mtx.tex nx.tex nxa.tex nxm.tex nxn.tex
+                            nxo.tex nxo_array.tex nxo_boolean.tex nxo_class.tex
                             nxo_dict.tex nxo_file.tex nxo_fino.tex
                             nxo_handle.tex nxo_instance.tex nxo_integer.tex
                             nxo_mark.tex nxo_mutex.tex nxo_name.tex nxo_no.tex

@@ -333,6 +333,9 @@ typedef struct cw_mema_s cw_mema_t;
 
 #include "nxn.h"
 #include "nxo.h"
+#ifdef CW_MODULES
+#include "nxm.h"
+#endif
 #include "nxo_no.h"
 #include "nxo_array.h"
 #include "nxo_boolean.h"
