@@ -255,9 +255,6 @@ onyx_install_self : [ONYX]
        [RPATH][PREFIX]/lib
 #endif
        [LDFLAGS] -lonyx
-#if [enable_libedit]
-       -lcurses
-#endif
        [EXTRALIBS];
   [CHMOD] 0755 [PREFIX]/bin/onyx;
 
@@ -308,12 +305,8 @@ onyx_distclean :
        [LIBEDIT_A]
 #endif
 #if [matches elf [abi]]
-/*       [RPATH][abs_objdir]/lib/c/libedit/lib */
        [RPATH][abs_objdir]/lib/c/libonyx/lib
 #endif
        [LDFLAGS] -lonyx
-#if [enable_libedit]
-       -lcurses
-#endif
        [EXTRALIBS];
 }
