@@ -2430,7 +2430,7 @@ systemdict_ppop(cw_stilt_t *a_stilt)
 	stdout_stilo = stilt_stdout_get(a_stilt);
 
 	STILS_GET(stilo, ostack, a_stilt);
-	error = stilo_print(stilo, stdout_stilo, FALSE, TRUE);
+	error = stilo_print(stilo, stdout_stilo, TRUE, FALSE);
 	if (error) {
 		stilt_error(a_stilt, error);
 		return;
