@@ -210,7 +210,7 @@ main(int argc, char **argv, char **envp)
 		 */
 		stil_new(&stil, argc - optind, &argv[optind], envp, NULL, NULL,
 		    NULL, NULL);
-		stilt_new(stilt, &stil);
+		stilt = stil_stilt_get(&stil);
 		stilts_new(&stilts);
 
 		/*
