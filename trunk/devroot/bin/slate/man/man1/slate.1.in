@@ -20,7 +20,8 @@ interpreter.
 This manual page only documents the command line usage for
 .BR slate ;
 much more extensive documentation is available in HTML, PostScript, and PDF
-formats.  See the FILES section below.
+formats.
+See the FILES section below.
 .SS Command line flags:
 .PP
 .IP \-h
