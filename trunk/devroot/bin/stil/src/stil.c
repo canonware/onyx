@@ -130,33 +130,17 @@ end
 		char			*editor;
 
 		/*
-		 * Read from the environment before passing it to stil_new(),
-		 * since stil_new() will munge it.
-		 */
-		editor = getenv("STIL_EDITOR");
-
-		stil_new(&stil, argc, argv, envp, cl_read, NULL, NULL, (void
-		    *)&arg);
-		stilt = stil_stilt_get(&stil);
-		stilts_new(&stilts);
-
-		/*
-		 * Print product and version info.  Redefine stop so that the
-		 * interpreter won't exit on error.
-		 */
-		stilt_interpret(stilt, &stilts, version, sizeof(version) - 1);
-		stilt_interpret(stilt, &stilts, code, sizeof(code) - 1);
-		stilt_flush(stilt, &stilts);
-
-		/*
-		 * Initialize the command editor.
+		 * Initialize the command editor.  Do this before initializing
+		 * the stil interpreter, since libstil munges the environment.
 		 */
 		hist = history_init();
 		history(hist, H_EVENT, 512);
 
-		el = el_init(basename(argv[0]), 0, 1);
+		el = el_init(basename(argv[0]), stdin, stdout);
 		el_set(el, EL_HIST, history, hist);
 		el_set(el, EL_PROMPT, prompt);
+
+		editor = getenv("STIL_EDITOR");
 		if (editor == NULL || (strcmp(editor, "emacs") && strcmp(editor,
 		    "vi"))) {
 			/*
@@ -168,6 +152,20 @@ end
 		el_set(el, EL_EDITOR, editor);
 /*  		el_set(el, EL_SIGNAL, 1); */
 
+/*  		stil_new(&stil, argc, argv, envp, cl_read, NULL, NULL, (void */
+/*  		    *)&arg); */
+		stil_new(&stil, argc, argv, NULL, cl_read, NULL, NULL, (void
+		    *)&arg);
+		stilt = stil_stilt_get(&stil);
+		stilts_new(&stilts);
+
+		/*
+		 * Print product and version info.  Redefine stop so that the
+		 * interpreter won't exit on error.
+		 */
+		stilt_interpret(stilt, &stilts, version, sizeof(version) - 1);
+		stilt_interpret(stilt, &stilts, code, sizeof(code) - 1);
+		stilt_flush(stilt, &stilts);
 		/* Run the interpreter such that it will not exit on errors. */
 		stilt_start(stilt);
 
