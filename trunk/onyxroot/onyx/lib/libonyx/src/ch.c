@@ -40,10 +40,6 @@ ch_new(cw_ch_t *a_ch, cw_opaque_alloc_t *a_alloc,
     {
 	retval = (cw_ch_t *) a_alloc(a_arg, CW_CH_TABLE2SIZEOF(a_table_size),
 				     __FILE__, __LINE__);
-	if (NULL == retval)
-	{
-	    goto RETURN;
-	}
 	memset(retval, 0, CW_CH_TABLE2SIZEOF(a_table_size));
 	retval->is_malloced = TRUE;
     }
@@ -59,7 +55,6 @@ ch_new(cw_ch_t *a_ch, cw_opaque_alloc_t *a_alloc,
     retval->magic = CW_CH_MAGIC;
 #endif
 
-    RETURN:
     return retval;
 }
 
