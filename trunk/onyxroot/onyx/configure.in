@@ -23,8 +23,7 @@ abs_objroot=`pwd`
 AC_SUBST(abs_objroot)
 
 cfgoutputs="Cookfile Cookfile.inc bin/Cookfile.inc doc/Cookfile.inc"
-cfgoutputs="$cfgoutputs examples/Cookfile.inc lib/Cookfile.inc mod/Cookfile.inc"
-cfgoutputs="$cfgoutputs test/Cookfile.inc"
+cfgoutputs="$cfgoutputs lib/Cookfile.inc mod/Cookfile.inc test/Cookfile.inc"
 cfghdrs="config.stamp"
 bins=
 mods=
