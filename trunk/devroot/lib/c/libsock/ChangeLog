@@ -1,3 +1,13 @@
+1999-03-16  Jason Evans  <jasone@canonware.com>
+
+	* bin/proxy.c : Add command line interface.  Add ability to log to
+	files.  Parsing of options sent through the socket stream does not
+	work yet (it was broken when the new buf cod was integrated).
+
+	* : Fix some lingering deadlock problems.  Correctly implement
+	ability to stop reading from a socket once the sock's incoming
+	buffer is full.  Finish integration with libstash's new buf code.
+
 1999-03-04  Jason Evans  <jasone@canonware.com>
 
 	* include/libsock/libsock.h: Remove namespace mangling.

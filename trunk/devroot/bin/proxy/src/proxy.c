@@ -116,7 +116,7 @@ main(int argc, char ** argv)
 	dbg_register(cw_g_dbg, "sockb_verbose");
 /*  	dbg_register(cw_g_dbg, "sockb_maxfd"); */
 	dbg_register(cw_g_dbg, "socks_verbose");
-	dbg_register(cw_g_dbg, "sock_sockopt");
+/*  	dbg_register(cw_g_dbg, "sock_sockopt"); */
 	/* Nothing uses this flag. */
 /*      dbg_register(cw_g_dbg, "sock_verbose"); */
 	break;
@@ -266,8 +266,7 @@ main(int argc, char ** argv)
   {
     conn = _cw_malloc(sizeof(connection_t));
     bzero(conn, sizeof(conn));
-/*      sock_new(&conn->client_sock, 16384); */
-    sock_new(&conn->client_sock, 512);
+    sock_new(&conn->client_sock, 16384);
     
     if (NULL == socks_accept_block(socks, &conn->client_sock)
 	|| should_quit)
@@ -991,8 +990,7 @@ handle_client_send(void * a_arg)
 	     conn->rhost, conn->rport);
       
   /* Connect to the remote end. */
-/*    sock_new(&conn->remote_sock, 16384); */
-  sock_new(&conn->remote_sock, 512);
+  sock_new(&conn->remote_sock, 16384);
   if (TRUE == sock_connect(&conn->remote_sock, conn->rhost, conn->rport))
   {
     log_eprintf(conn->log, __FILE__, __LINE__, __FUNCTION__,
@@ -1030,7 +1028,8 @@ handle_client_send(void * a_arg)
 	log_printf(conn->log, "%s", str);
       }
       
-      if (TRUE == sock_write(&conn->remote_sock, &buf))
+      if ((TRUE == sock_write(&conn->remote_sock, &buf))
+	  || (TRUE == sock_flush_out(&conn->remote_sock)))
       {
 	mtx_lock(&conn->lock);
 	conn->should_quit = TRUE;
@@ -1107,7 +1106,8 @@ handle_client_recv(void * a_arg)
 	log_printf(conn->log, "%s", str);
       }
       
-      if (TRUE == sock_write(&conn->client_sock, &buf))
+      if ((TRUE == sock_write(&conn->client_sock, &buf))
+	  || (TRUE == sock_flush_out(&conn->client_sock)))
       {
 	mtx_lock(&conn->lock);
 	conn->should_quit = TRUE;

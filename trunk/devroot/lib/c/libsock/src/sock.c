@@ -280,6 +280,7 @@ sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port)
   mtx_lock(&a_sock->lock);
   sockb_l_register_sock(a_sock);
   cnd_wait(&a_sock->callback_cnd, &a_sock->lock);
+  a_sock->is_registered = TRUE;
   mtx_unlock(&a_sock->lock);
     
   retval = FALSE;
@@ -342,6 +343,7 @@ sock_wrap(cw_sock_t * a_sock, int a_sockfd)
     mtx_lock(&a_sock->lock);
     sockb_l_register_sock(a_sock);
     cnd_wait(&a_sock->callback_cnd, &a_sock->lock);
+    a_sock->is_registered = TRUE;
     mtx_unlock(&a_sock->lock);
     
     retval = FALSE;
@@ -397,22 +399,18 @@ sock_read_noblock(cw_sock_t * a_sock, cw_buf_t * a_spare)
       retval = size;
       buf_catenate_buf(a_spare, &a_sock->in_buf, FALSE);
 
-      if (size == a_sock->in_max_buf_size)
+      mtx_unlock(&a_sock->in_lock);
+      
+      if (size >= a_sock->in_max_buf_size)
       {
-	/* The socket was possibly unregistered by sockb, since there was no
-	 * more room to stuff data.  Register the sock again. */
-	mtx_lock(&a_sock->lock);
-	sockb_l_register_sock(a_sock);
-	cnd_wait(&a_sock->callback_cnd, &a_sock->lock);
-	mtx_unlock(&a_sock->lock);
+	/* XXX Notify sockb to wake up. */
       }
     }
     else
     {
       retval = -1;
+      mtx_unlock(&a_sock->in_lock);
     }
-  
-    mtx_unlock(&a_sock->in_lock);
   }
   
   return retval;
@@ -425,7 +423,7 @@ sock_read_block(cw_sock_t * a_sock, cw_buf_t * a_spare)
   
   _cw_check_ptr(a_sock);
   _cw_check_ptr(a_spare);
-
+  
   if (a_sock->error)
   {
     retval = -1;
@@ -454,23 +452,19 @@ sock_read_block(cw_sock_t * a_sock, cw_buf_t * a_spare)
       retval = size;
       buf_catenate_buf(a_spare, &a_sock->in_buf, FALSE);
 
-      if (size == a_sock->in_max_buf_size)
+      mtx_unlock(&a_sock->in_lock);
+      
+      if (size >= a_sock->in_max_buf_size)
       {
-	/* The socket was possibly unregistered by sockb, since there was no
-	 * more room to stuff data.  Register the sock again. */
-	mtx_lock(&a_sock->lock);
-	sockb_l_register_sock(a_sock);
-	cnd_wait(&a_sock->callback_cnd, &a_sock->lock);
-	mtx_unlock(&a_sock->lock);
+	/* XXX Notify sockb to wake up. */
       }
     }
     else
     {
     /* XXX Should we disconnect here? */
       retval = -1;
+      mtx_unlock(&a_sock->in_lock);
     }
-
-    mtx_unlock(&a_sock->in_lock);
   }
   
   return retval;
@@ -603,6 +597,12 @@ sock_l_get_in_size(cw_sock_t * a_sock)
 
   mtx_lock(&a_sock->in_lock);
   retval = buf_get_size(&a_sock->in_buf);
+  if (retval > a_sock->in_max_buf_size)
+  {
+    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
+		"Have %lu in bytes buffered, should have max %lu\n",
+		retval, a_sock->in_max_buf_size);
+  }
   mtx_unlock(&a_sock->in_lock);
 
   return retval;
@@ -911,6 +911,7 @@ sock_p_disconnect(cw_sock_t * a_sock)
     mtx_lock(&a_sock->lock);
     sockb_l_unregister_sock(&a_sock->sockfd);
     cnd_wait(&a_sock->callback_cnd, &a_sock->lock);
+    a_sock->is_registered = FALSE;
     mtx_unlock(&a_sock->lock);
     
     /* Make sure there are no threads blocked inside a_sock before cleaning

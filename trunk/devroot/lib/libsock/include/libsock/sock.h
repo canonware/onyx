@@ -24,6 +24,7 @@ struct cw_sock_s
 
   cw_mtx_t lock;
   cw_cnd_t callback_cnd;
+  cw_bool_t is_registered;
 
   cw_uint32_t os_outbuf_size;
   cw_uint16_t port;
@@ -262,7 +263,7 @@ sock_write(cw_sock_t * a_sock, cw_buf_t * a_buf);
  *
  * <<< Output(s) >>>
  *
- * None.
+ * None. XXX
  *
  * <<< Description >>>
  *

@@ -399,7 +399,7 @@ sockb_p_entry_func(void * a_arg)
   fd_set fd_m_exception_set, fd_exception_set;
   cw_sock_t * sock;
   int sockfd, max_fd = 0, num_ready;
-  cw_uint64_t num_msgs, i;
+  cw_uint32_t num_msgs, i;
   cw_sint32_t j;
   cw_buf_t tmp_buf, buf_in;
 
@@ -509,6 +509,7 @@ sockb_p_entry_func(void * a_arg)
 	
       /* Notify the sock that it's unregistered. */
       sock_l_message_callback(socks[sockfd]);
+      socks[sockfd] = NULL;
     }
 
     /* Out-going data notifications. */
@@ -535,6 +536,28 @@ sockb_p_entry_func(void * a_arg)
     bcopy(&fd_m_exception_set, &fd_exception_set, sizeof(fd_m_exception_set));
 #endif
 
+    {
+      cw_uint32_t i;
+
+      for (i = 0; i <= max_fd; i++)
+      {
+	if (FD_ISSET(i, &fd_read_set))
+	{
+	  /* Check to see if socks[i] is non-null so that we don't get confused
+	   * by the pipe. */
+	  if (NULL != socks[i])
+	  {
+	    /* Is any space available? */
+	    if (0 >= (sock_l_get_in_max_buf_size(socks[i])
+			- sock_l_get_in_size(socks[i])))
+	    {
+	      FD_CLR(i, &fd_read_set);
+	    }
+	  }
+	}
+      }
+    }
+    
     num_ready = select(max_fd + 1,
 		       &fd_read_set, &fd_write_set, &fd_exception_set,
 		       NULL);
@@ -571,6 +594,7 @@ sockb_p_entry_func(void * a_arg)
 	/* Clear the read bit to avoid attempting to handle it in the loop
 	 * below. */
 	FD_CLR(g_sockb->pipe_out, &fd_read_set);
+	num_ready--;
 
 	/* Read the data out of the pipe so that the next call doesn't
 	 * immediately return just because of data already in the pipe.  Note
@@ -607,7 +631,7 @@ sockb_p_entry_func(void * a_arg)
 	  const struct iovec * iovec;
 	  int iovec_count;
 	  ssize_t bytes_read;
-	  cw_uint32_t max_read;
+	  cw_sint32_t max_read;
 	  cw_bufel_t * bufel;
 	  
 	  j++;
@@ -616,88 +640,54 @@ sockb_p_entry_func(void * a_arg)
 
 	  /* Figure out how much data we're willing to shove into this sock's
 	   * incoming buffer. */
+	  /* XXX We could cache this from above, though there could potentially
+	   * be more room now... */
 	  max_read = (sock_l_get_in_max_buf_size(socks[i])
 		      - sock_l_get_in_size(socks[i]));
 
-	  if (max_read == 0)
-	  {
-	    /* Unregister the socket, since its input buffer is full.  The
-	     * socket will register itself again once there is some room. */
-	    
-	    FD_CLR(i, &fd_m_read_set);
-	    FD_CLR(i, &fd_m_write_set); /* May not be set. */
-	    /* XXX Uncomment this if adding out of band data support. */
-	    /* FD_CLR(sockfd, &fd_m_exception_set); */
+	  _cw_assert(max_read > 0);
 
-	    /* Lower max_fd to the next highest fd, if necessary. */
-	    if (i == max_fd)
-	    {
-	      cw_sint32_t new_max;
-	      
-	      max_fd = -1; /* In case there aren't any more registered
-			    * sockets. */
-	      for (new_max = i - 1; new_max >= 0; j--)
-	      {
-		if (FD_ISSET(new_max, &fd_m_read_set))
-		{
-		  max_fd = new_max;
-		  break;
-		}
-	      }
-	      if (dbg_is_registered(cw_g_dbg, "sockb_maxfd"))
-	      {
-		log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-			    "max_fd: %d\n", max_fd);
-	      }
-	    }
+	  /* Build up buf_in to be at least large enough for the readv(). */
+	  while (buf_get_size(&buf_in) < max_read)
+	  {
+	    bufel = sockb_get_spare_bufel();
+	    buf_append_bufel(&buf_in, bufel);
+	    bufel_delete(bufel);
 	  }
-	  else
-	  {
-	    /* Build up buf_in to be at least large enough for the readv(). */
-	    while (buf_get_size(&buf_in) < max_read)
-	    {
-	      bufel = sockb_get_spare_bufel();
-	      buf_append_bufel(&buf_in, bufel);
-	      bufel_delete(bufel);
-	    }
 
-	    /* Get an iovec for reading.  This somewhat goes against the idea of
+	  /* Get an iovec for reading.  This somewhat goes against the idea of
 	     * never writing the internals of a buf after the buffers have been
 	     * inserted.  However, this is quite safe, since as a result of how
 	     * we use buf_in, we know for sure that there are no other
 	     * references to the byte ranges of the buffers we are writing
 	     * to. */
-	    iovec = buf_get_iovec(&buf_in, max_read, &iovec_count);
+	  iovec = buf_get_iovec(&buf_in, max_read, &iovec_count);
 
-	    /* Make sure not to exceed the max iovec size. */
-	    if (iovec_count > _LIBSOCK_SOCKB_MAX_IOV)
-	    {
-	      iovec_count = _LIBSOCK_SOCKB_MAX_IOV;
-	    }
+	  /* Make sure not to exceed the max iovec size. */
+	  if (iovec_count > _LIBSOCK_SOCKB_MAX_IOV)
+	  {
+	    iovec_count = _LIBSOCK_SOCKB_MAX_IOV;
+	  }
 	    
-	    bytes_read = readv(i, iovec, iovec_count);
+	  bytes_read = readv(i, iovec, iovec_count);
 
-/*  	    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
-/*  			"max_read == %u, did read %u\n", max_read, bytes_read); */
-
-	    if (bytes_read >= 0)
-	    {
-	      _cw_assert(buf_get_size(&tmp_buf) == 0);
+	  if (bytes_read >= 0)
+	  {
+	    _cw_assert(buf_get_size(&tmp_buf) == 0);
 	    
-	      buf_split(&tmp_buf, &buf_in, bytes_read);
+	    buf_split(&tmp_buf, &buf_in, bytes_read);
 
-	      /* Append to the sock's in_buf. */
-	      sock_l_put_in_data(socks[i], &tmp_buf);
-	      _cw_assert(buf_get_size(&tmp_buf) == 0);
-	    }
-	    else if (bytes_read == -1)
+	    /* Append to the sock's in_buf. */
+	    sock_l_put_in_data(socks[i], &tmp_buf);
+	    _cw_assert(buf_get_size(&tmp_buf) == 0);
+	  }
+	  else if (bytes_read == -1)
+	  {
+	    /* readv() error. */
+	    if (dbg_is_registered(cw_g_dbg, "sockb_error"))
 	    {
-	      /* readv() error. */
-	      if (dbg_is_registered(cw_g_dbg, "sockb_error"))
-	      {
-		log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-			    "Error in readv(): %s\n", strerror(errno));
-	      }
+	      log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
+			  "Error in readv(): %s\n", strerror(errno));
 	    }
 	  }
 	}
