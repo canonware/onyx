@@ -33,6 +33,9 @@ AC_PROG_CPP
 dnl Use threads by default.
 CW_ENABLE_THREADS
 
+dnl Support POSIX by default.
+CW_ENABLE_POSIX
+
 dnl Enable inline functions by default.
 CW_ENABLE_INLINES
 
@@ -47,11 +50,11 @@ CW_DISABLE_PROFILE
 
 dnl Only optimize if not debugging.
 if test "x$enable_debug" = "x0" ; then
-	CFLAGS="$CFLAGS -O"
+  CFLAGS="$CFLAGS -O"
 fi
 
 if test "x$enable_profile" = "x1" ; then
-	CFLAGS="$CFLAGS -pg"
+  CFLAGS="$CFLAGS -pg"
 fi
 
 dnl Look for libraries.  Order matters.  They should appear in an order that
@@ -63,15 +66,18 @@ fi
 CW_BUILD_LIB(libstash, lib_stash)
 
 dnl Look for modules.
-if test "x$enable_threads" = "x1" ; then
+if test "x$enable_threads" = "x1" -a "x$enable_posix" = "x1" ; then
   CW_BUILD_MOD(modcanonyx, mod_canonyx)
   CW_BUILD_MOD(modgtk, mod_gtk)
   CW_BUILD_MOD(modncurses, mod_ncurses)
 fi
 
 dnl Look for binaries.
-CW_BUILD_BIN(cover, bin_cover)
-CW_BUILD_BIN(onyx, bin_onyx)
+if test "x$enable_posix" = "x1" ; then
+  CW_BUILD_BIN(cover, bin_cover)
+  CW_BUILD_BIN(onyx, bin_onyx)
+fi
+CW_BUILD_BIN(nx, bin_nx)
 
 AC_CONFIG_HEADER($cfghdrs)
 AC_SUBST(cfghdrs)
@@ -126,11 +132,9 @@ AC_SUBST(VERIFY)
 
 dnl Find libraries.
 
-if test "x$enable_libedit" = "x1" ; then
-  if test "x$build_libedit" = "xyes" ; then
-    AC_CHECK_LIB(curses, tigetstr, LIBS="$LIBS", \
-      AC_MSG_ERROR(Cannot find the curses library))
-  fi
+if test "x$enable_libedit" = "x1" -a "x$build_libedit" = "xyes" ; then
+  AC_CHECK_LIB(curses, tigetstr, LIBS="$LIBS", \
+    AC_MSG_ERROR(Cannot find the curses library))
 fi
 
 dnl Define preprocessor macros.
@@ -233,6 +237,7 @@ AC_MSG_RESULT(mods         :${mods})
 AC_MSG_RESULT(bins         :${bins})
 AC_MSG_RESULT()
 AC_MSG_RESULT(threads      : ${enable_threads})
+AC_MSG_RESULT(posix        : ${enable_posix})
 AC_MSG_RESULT(inlines      : ${enable_inlines})
 AC_MSG_RESULT(libedit      : ${enable_libedit})
 AC_MSG_RESULT(debug        : ${enable_debug})

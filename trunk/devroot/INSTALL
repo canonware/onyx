@@ -95,6 +95,12 @@ Optionally, pass any of the following (not a definitive list) arguments to
 	significant functionality.  The documentation does not mention the
 	effects of this option -- UTSL.
 
+--disable-posix
+	As much as possible, avoid using any external library functions.  This
+	option is useful when embedding onyx in an application where libc isn't
+	available.  Specifying this option disables significant functionality.
+	The documentation does not mention the effects of this option -- UTSL.
+
 --disable-inlines
 	Do not use inline functions.  This reduces the size of binaries at the
 	expense of performance.

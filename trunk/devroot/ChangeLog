@@ -1,5 +1,9 @@
 2001-08-17  Jason Evans  <jasone@canonware.com>
 
+	* : Add the --disable-posix configure option.  This option
+	disables significant functionality in order to make onyx more
+	easily embeddable in applications that to not have libc available.
+
 	* : Add the --disable-threads configure option.  This option
 	disables significant functionality in order to run without
 	threads.

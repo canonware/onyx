@@ -22,6 +22,24 @@ if test "x$enable_threads" = "x1" ; then
 fi
 ])
 
+dnl Support POSIX by default.
+AC_DEFUN(CW_ENABLE_POSIX,
+[
+AC_ARG_ENABLE(posix, [  --disable-posix         Disable POSIX support],
+if test "x$enable_posix" = "xyes" ; then
+  enable_posix="1"
+else
+  enable_posix="0"
+fi
+,
+enable_posix="1"
+)
+AC_SUBST(enable_posix)
+if test "x$enable_posix" = "x1" ; then
+  AC_DEFINE(_CW_POSIX)
+fi
+])
+
 dnl Do not compile with debugging by default.
 AC_DEFUN(CW_DISABLE_DEBUG,
 [
@@ -81,7 +99,7 @@ else
   enable_libedit="1"
 fi
 ,
-if test "x$enable_threads" = "x1" ; then
+if test "x$enable_threads" = "x1" -a "x$enable_posix" = "x1" ; then
   enable_libedit="1"
 else
   enable_libedit="0"

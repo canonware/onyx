@@ -731,11 +731,10 @@ batch_run(int argc, char **argv, char **envp)
 	} else if (argc == 1) {
 		/*
 		 * No source file specified, and there there was no -e
-		 * expression specified either, so treat stdin as the
-		 * source.
+		 * expression specified either, so treat stdin as the source.
 		 *
-		 * In other words, there were no arguments specified,
-		 * and this isn't a tty.
+		 * In other words, there were no arguments specified, and this
+		 * isn't a tty.
 		 */
 		file = nxo_stack_push(nxo_thread_ostack_get(&thread));
 		nxo_dup(file, nx_stdin_get(&nx));
