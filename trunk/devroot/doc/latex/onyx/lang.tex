@@ -3669,6 +3669,8 @@ filename flags & {\bf \htmlref{open}{systemdict:open}} & file & Open a file. \\
 filename flags mode & {\bf \htmlref{open}{systemdict:open}} & file & Open a
 file, creation mode specified. \\
 \hline
+-- & {\bf \htmlref{pipe}{systemdict:pipe}} & rfile wfile & Create a pipe. \\
+\hline
 file & {\bf \htmlref{close}{systemdict:close}} & -- & Close file. \\
 \hline
 %begin{latexonly}
@@ -3727,8 +3729,15 @@ pointer. \\
 file & {\bf \htmlref{tell}{systemdict:tell}} & offset & Get file position
 pointer offset. \\
 \hline
-path mode & {\bf \htmlref{mkdir}{systemdict:mkdir}} & -- & Create a
-directory. \\
+path & {\bf \htmlref{mkdir}{systemdict:mkdir}} & -- & Create a directory. \\
+\hline
+path mode & {\bf \htmlref{mkdir}{systemdict:mkdir}} & -- & Create a directory,
+mode specified. \\
+\hline
+path & {\bf \htmlref{mkfifo}{systemdict:mkfifo}} & -- & Create a named pipe. \\
+\hline
+path mode & {\bf \htmlref{mkfifo}{systemdict:mkfifo}} & -- & Create a named
+pipe, mode specified. \\
 \hline
 old new & {\bf \htmlref{rename}{systemdict:rename}} & -- & Rename a file or
 directory. \\
@@ -3756,6 +3765,8 @@ file. \\
 file/filename & {\bf \htmlref{status}{systemdict:status}} & dict & Get file
 information. \\
 \hline
+linkname & {\bf \htmlref{readlink}{systemdict:readlink}} & string & Get symbolic
+link data. \\
 path proc & {\bf \htmlref{dirforeach}{systemdict:dirforeach}} & -- & Iterate on
 directory entries. \\
 \hline
@@ -3763,6 +3774,9 @@ directory entries. \\
 directory. \\
 \hline
 path & {\bf \htmlref{cd}{systemdict:cd}} & -- & Change present working
+directory. \\
+\hline
+path & {\bf \htmlref{chroot}{systemdict:chroot}} & -- & Change root
 directory. \\
 \hline
 -- & {\bf \htmlref{stdin}{systemdict:stdin}} & file & Get thread's stdin. \\
@@ -4783,6 +4797,36 @@ onyx:1> dup /uid get 1 sprint
 1001
 onyx:1> /gid get 1 sprint
 1001
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:chroot}
+\index{chroot@\onyxop{}{chroot}{}}
+\item[{\onyxop{path}{chroot}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[path: ]
+			A string that represents a filesystem path.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{invalidaccess}{invalidaccess}.]
+		\item[\htmlref{ioerror}{ioerror}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Change the root directory to \oparg{path}.  This operator
+		requires super-user priviledges.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> pwd 1 sprint
+`/home/jasone/cw/devroot'
+onyx:0> `/home/jasone' chroot
+onyx:0> pwd 1 sprint
+`/cw/devroot'
 onyx:0>
 		\end{verbatim}
 	\end{description}
@@ -7412,6 +7456,7 @@ onyx:1>
 	\end{description}
 \label{systemdict:mkdir}
 \index{mkdir@\onyxop{}{mkdir}{}}
+\item[{\onyxop{path}{mkdir}{--}}: ]
 \item[{\onyxop{path mode}{mkdir}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
@@ -7439,6 +7484,36 @@ onyx:0> `/tmp/tdir' 8@755 mkdir
 onyx:0> `/tmp/tdir' {1 sprint} dirforeach
 `.'
 `..'
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:mkfifo}
+\index{mkfifo@\onyxop{}{mkfifo}{}}
+\item[{\onyxop{path}{mkfifo}{--}}: ]
+\item[{\onyxop{path mode}{mkfifo}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[path: ]
+			A string object that represents a directory path.
+		\item[mode: ]
+			An integer that represents a Unix file mode.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
+		\item[\htmlref{ioerror}{ioerror}.]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{unregistered}{unregistered}.]
+		\end{description}
+	\item[Description: ]
+		Create a named pipe.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> `/tmp/fifo' mkfifo
 onyx:0>
 		\end{verbatim}
 	\end{description}
@@ -8342,6 +8417,39 @@ onyx:0> pid 1 sprint
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:pipe}
+\index{pipe@\onyxop{}{pipe}{}}
+\item[{\onyxop{--}{pipe}{rfile wfile}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[rfile: ]
+			A readable file object.  Data read from \oparg{rfile}
+			were previously written to \oparg{wfile}.
+		\item[wfile: ]
+			A writeable file object.  Data written to \oparg{wfile}
+			can subsequently be read from \oparg{rfile}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{ioerror}{ioerror}.]
+		\item[\htmlref{unregistered}{unregistered}.]
+		\end{description}
+	\item[Description: ]
+		Create a pipe.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> pipe
+onyx:2> /wfile exch def
+onyx:1> /rfile exch def
+onyx:0> wfile `foo\n' write
+onyx:0> wfile flushfile
+onyx:0> rfile readline pop 1 sprint
+`foo'
+onyx:0>
+		\end{verbatim}
+	\end{description}
 \label{systemdict:pop}
 \index{pop@\onyxop{}{pop}{}}
 \item[{\onyxop{obj}{pop}{--}}: ]
@@ -8798,6 +8906,41 @@ onyx:1> dup readline 1 sprint 1 sprint
 true
 `'
 onyx:1>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:readlink}
+\index{readlink@\onyxop{}{readlink}{}}
+\item[{\onyxop{linkname}{readlink}{string}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[linkname: ]
+			A string that represents the path of a symbolic link.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[string: ]
+			A string that represents the link data associated with
+			\oparg{linkname}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{invalidaccess}{invalidaccess}.]
+		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
+		\item[\htmlref{ioerror}{ioerror}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{undefinedfilename}{undefinedfilename}.]
+		\item[\htmlref{unregistered}{unregistered}.]
+		\end{description}
+	\item[Description: ]
+		Get the data for the symbolic link at \oparg{linkname}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> `bar' `foo' symlink
+onyx:0> `foo' readlink 1 sprint
+`bar'
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:realtime}
