@@ -11,14 +11,11 @@ AC_CONFIG_HEADER(include/libsock/libsock_defs.h)
 AC_CANONICAL_HOST
 case "${host}" in
   i386-*-freebsd*)
-	AC_DEFINE(_CW_OS_FREEBSD, )
         ;;
   *-*-linux*)
-	AC_DEFINE(_CW_OS_LINUX, )
         ;;
   *-*-solaris2*)
-	AC_DEFINE(_CW_OS_SOLARIS, )
-	LIBS="$LIBS -lposix4"
+	LIBS="$LIBS -lsocket -lnsl -lposix4"
         ;;
 esac
 
