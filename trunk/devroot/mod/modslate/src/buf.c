@@ -568,16 +568,17 @@ bufp_p_new(cw_buf_t *a_buf)
     return retval;
 }
 
-/* Insert data into a single bufp, without moving the gap.  This function
- * assumes that the bufp internals are consistent, and that the data will
- * fit. */
-/* XXX CW_INLINE? */
+/* Insert data into a single bufp, without moving the gap, but do keep any mkr's
+ * after the gap consistent.  This function assumes that data will fit.  The
+ * cached bpos/line are not used, nor are they updated. */
 static cw_uint32_t
 bufp_p_simple_insert(cw_bufp_t *a_bufp, const cw_bufv_t *a_bufv,
-		 cw_uint32_t a_bufvcnt, cw_uint32_t a_count)
+		     cw_uint32_t a_bufvcnt, cw_uint32_t a_count)
 {
-    cw_uint32_t nlines;
+    cw_uint32_t nlines, gap_end;
     cw_bufv_t bufv;
+
+    gap_end = a_bufp->len - a_bufp->gap_off;
 
     /* Insert. */
     bufv.data = &a_bufp->b[a_bufp->gap_off];
@@ -590,6 +591,12 @@ bufp_p_simple_insert(cw_bufp_t *a_bufp, const cw_bufv_t *a_bufv,
     /* Adjust the buf's length and line count. */
     a_bufp->len += a_count;
     a_bufp->nlines += nlines;
+
+    if (gap_end < CW_BUFP_SIZE && nlines > 0)
+    {
+	/* Adjust the line numbers of all mkr's after the gap. */
+	bufp_p_mkrs_pline_adjust(a_bufp, a_count, gap_end, CW_BUFP_SIZE);
+    }
 
     return nlines;
 }
@@ -793,6 +800,11 @@ buf_p_bpos_after_lf(cw_buf_t *a_buf, cw_uint64_t a_line, cw_bufp_t **r_bufp)
     return bpos + 1;
 }
 
+/* This function modifies the cached position information in the bufp list such
+ * that a_bufp is the last bufp to store its position relative to BOB.  The
+ * cached position of a_bufp must be correct when this function is called, but
+ * there is no need for the other bufp's in the affected range to have accurate
+ * cached positions. */
 static void
 buf_p_bufp_cur_set(cw_buf_t *a_buf, cw_bufp_t *a_bufp)
 {
@@ -851,23 +863,24 @@ buf_p_bufp_cur_set(cw_buf_t *a_buf, cw_bufp_t *a_bufp)
 /* This function inserts a_bufv into a series of contiguous bufp's.  The first
  * and last bufp's must have their gaps moved to the end and begin,
  * respectively, and the intermediate bufp's must be empty.  This allows
- * bufp_p_simple_insert() to be used. */
-/* XXX pline isn't adjusted. */
+ * bufp_p_simple_insert() to be used.  a_buf->bufp_cur must be == a_bufp so that
+ * cached positions can be updated during insertion.*/
 static void
 buf_p_bufv_insert(cw_buf_t *a_buf, cw_bufp_t *a_bufp, cw_bufp_t *a_pastp,
 		  const cw_bufv_t *a_bufv, cw_uint32_t a_bufvcnt)
 {
     cw_uint32_t i, v, cnt;
     cw_bufp_t *bufp;
+    cw_uint64_t bpos, line;
     cw_bufv_t vsplit, vremain;
 
-    /* Iteratively call mkr_p_simple_insert(), taking care never to insert more
+    /* Iteratively call bufp_p_simple_insert(), taking care never to insert more
      * data than will fit in the bufp being inserted into.  The approach taken
      * here is to use the elements of a_bufv directly, exept when an element
      * would overflow the space available in the bufp being inserted into.  In
      * that case, the offending element is iteratively broken into pieces and
      * inserted into bufp's, until it has been completely inserted.  In the
-     * worst case, this means three calls to mkr_p_simple_insert() per bufp.
+     * worst case, this means three calls to bufp_p_simple_insert() per bufp.
      *
      * The following diagrams show examples of various cases of how a_bufv can
      * be split up.  For the purposes of these diagrams, all characters,
@@ -901,7 +914,7 @@ buf_p_bufv_insert(cw_buf_t *a_buf, cw_bufp_t *a_bufp, cw_bufp_t *a_pastp,
      * original bufp on which insertion was attempted before the split. */
     v = 0;
     vremain.len = 0;
-    for (bufp = a_bufp;
+    for (bufp = a_bufp, bpos = bufp->bpos, line = bufp->line;
 	 bufp != a_pastp;
 	 bufp = ql_next(&a_buf->plist, bufp, plink))
     {
@@ -925,7 +938,7 @@ buf_p_bufv_insert(cw_buf_t *a_buf, cw_bufp_t *a_bufp, cw_bufp_t *a_pastp,
 	    if (CW_BUFP_SIZE - bufp->len == 0)
 	    {
 		/* No more space in this bufp. */
-		continue;
+		goto CONTINUE;
 	    }
 	}
 
@@ -956,7 +969,19 @@ buf_p_bufv_insert(cw_buf_t *a_buf, cw_bufp_t *a_bufp, cw_bufp_t *a_pastp,
 
 	    bufp_p_simple_insert(bufp, &vsplit, 1, vsplit.len);
 	}
+
+	CONTINUE:
+	/* Update the cached position. */
+	bufp->bob_relative = TRUE;
+	bufp->bpos = bpos;
+	bpos += bufp->len;
+	bufp->line = line;
+	line += bufp->nlines;
     }
+
+    /* This can safely be done outside the loop, since it isn't used in the
+     * loop. */
+    a_buf->bufp_cur = ql_prev(&a_buf->plist, a_pastp, plink);
 }
 
 /* bufv resizing must be done manually. */
@@ -1451,6 +1476,7 @@ mkr_p_simple_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
     buf = bufp->buf;
 
     /* Move bufp_cur. */
+    /* XXX Assert that this is already done. */
     buf_p_bufp_cur_set(buf, bufp);
 
     /* Move the gap. */
@@ -1805,6 +1831,9 @@ mkr_l_insert(cw_mkr_t *a_mkr, cw_bool_t a_record, cw_bool_t a_after,
 
     bufp = a_mkr->bufp;
     buf = bufp->buf;
+
+    /* Move bufp_cur. */
+    buf_p_bufp_cur_set(buf, bufp);
 
     /* Record the undo information before inserting so that the apos is still
      * unmodified. */
