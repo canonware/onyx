@@ -65,6 +65,65 @@ main()
     list_delete(list_b);
   }
 
+  /* list_catenate_list(),
+   * list_count(). */
+  {
+    cw_list_t * list_a, * list_b;
+    cw_sint32_t ints[13], i;
+
+    list_a = list_new(NULL, TRUE);
+    list_b = list_new(NULL, TRUE);
+
+    _cw_assert(0 == list_count(list_a));
+    _cw_assert(0 == list_count(list_b));
+
+    /* Push all the ints onto the lists. */
+    for (i = 0; i < 6; i++)
+    {
+      ints[i] = i;
+      _cw_assert(i == list_count(list_a));
+      _cw_assert(NULL != list_hpush(list_a, &ints[i]));
+      _cw_assert((i + 1) == list_count(list_a));
+      _cw_assert(&ints[i] == list_hpeek(list_a));
+      _cw_assert((i + 1) == list_count(list_a));
+      _cw_assert(&ints[i] == list_hpop(list_a));
+      _cw_assert(i == list_count(list_a));
+      _cw_assert(NULL != list_hpush(list_a, &ints[i]));
+      _cw_assert((i + 1) == list_count(list_a));
+    }
+    for (;i < 13; i++)
+    {
+      ints[i] = i;
+      _cw_assert((i - 6) == list_count(list_b));
+      _cw_assert(NULL != list_hpush(list_b, &ints[i]));
+      _cw_assert(((i - 6) + 1) == list_count(list_b));
+      _cw_assert(&ints[i] == list_hpeek(list_b));
+      _cw_assert(((i - 6) + 1) == list_count(list_b));
+      _cw_assert(&ints[i] == list_hpop(list_b));
+      _cw_assert((i - 6) == list_count(list_b));
+      _cw_assert(NULL != list_hpush(list_b, &ints[i]));
+      _cw_assert(((i - 6) + 1) == list_count(list_b));
+    }
+
+    _cw_assert(6 == list_count(list_a));
+    _cw_assert(7 == list_count(list_b));
+
+    list_catenate_list(list_a, list_b);
+    _cw_assert(13 == list_count(list_a));
+    _cw_assert(0 == list_count(list_b));
+    
+    list_catenate_list(list_a, list_b);
+    _cw_assert(13 == list_count(list_a));
+    _cw_assert(0 == list_count(list_b));
+    
+    list_catenate_list(list_b, list_a);
+    _cw_assert(0 == list_count(list_a));
+    _cw_assert(13 == list_count(list_b));
+    
+    list_delete(list_a);
+    list_delete(list_b);
+  }
+
   /* list_hpush(), list_hpop, list_hpeek(),
    * list_count(). */
   {

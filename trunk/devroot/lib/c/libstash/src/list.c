@@ -140,10 +140,73 @@ list_count(cw_list_t * a_list)
   cw_uint64_t retval;
 
   _cw_check_ptr(a_list);
+#ifdef _CW_REENTRANT
+  if (a_list->is_thread_safe)
+  {
+    mtx_lock(&a_list->lock);
+  }
+#endif
 
   retval = a_list->count;
   
+#ifdef _CW_REENTRANT
+  if (a_list->is_thread_safe)
+  {
+    mtx_unlock(&a_list->lock);
+  }
+#endif
   return retval;
+}
+
+void
+list_catenate_list(cw_list_t * a_a, cw_list_t * a_b)
+{
+  _cw_check_ptr(a_a);
+  _cw_check_ptr(a_b);
+
+#ifdef _CW_REENTRANT
+  if (a_a->is_thread_safe)
+  {
+    mtx_lock(&a_a->lock);
+  }
+  if (a_b->is_thread_safe)
+  {
+    mtx_lock(&a_b->lock);
+  }
+#endif
+
+  if (0 < a_a->count)
+  {
+    if (0 < a_b->count)
+    {
+      list_item_p_set_next(a_a->tail, a_b->head);
+      list_item_p_set_prev(a_b->head, a_a->tail);
+      a_a->tail = a_b->tail;
+      a_a->count += a_b->count;
+    }
+  }
+  else
+  {
+    /* a_a is empty.  Straight copy, regardless of the state of a_b. */
+    a_a->head = a_b->head;
+    a_a->tail = a_b->tail;
+    a_a->count = a_b->count;
+  }
+
+  a_b->head = NULL;
+  a_b->tail = NULL;
+  a_b->count = 0;
+
+#ifdef _CW_REENTRANT
+  if (a_b->is_thread_safe)
+  {
+    mtx_unlock(&a_b->lock);
+  }
+  if (a_a->is_thread_safe)
+  {
+    mtx_unlock(&a_a->lock);
+  }
+#endif
 }
 
 cw_list_item_t *
