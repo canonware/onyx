@@ -25,6 +25,10 @@ thd_new(cw_thd_t * a_thd,
   if (a_thd == NULL)
   {
     retval = (cw_thd_t *) _cw_malloc(sizeof(cw_thd_t));
+    if (NULL == retval)
+    {
+      goto RETURN;
+    }
     retval->is_malloced = TRUE;
   }
   else
@@ -40,7 +44,8 @@ thd_new(cw_thd_t * a_thd,
 		"Error in pthread_create(): %s\n", strerror(error));
     abort();
   }
-  
+
+  RETURN:
   return retval;
 }
 
@@ -97,6 +102,10 @@ mtx_new(cw_mtx_t * a_mtx)
   if (a_mtx == NULL)
   {
     retval = (cw_mtx_t *) _cw_malloc(sizeof(cw_mtx_t));
+    if (NULL == retval)
+    {
+      goto RETURN;
+    }
     retval->is_malloced = TRUE;
   }
   else
@@ -113,6 +122,7 @@ mtx_new(cw_mtx_t * a_mtx)
     abort();
   }
 
+  RETURN:
   return retval;
 }
 
@@ -205,6 +215,10 @@ cnd_new(cw_cnd_t * a_cnd)
   if (a_cnd == NULL)
   {
     retval = (cw_cnd_t *) _cw_malloc(sizeof(cw_cnd_t));
+    if (NULL == retval)
+    {
+      goto RETURN;
+    }
     retval->is_malloced = TRUE;
   }
   else
@@ -221,6 +235,7 @@ cnd_new(cw_cnd_t * a_cnd)
     abort();
   }
 
+  RETURN:
   return retval;
 }
 
@@ -331,6 +346,10 @@ sem_new(cw_sem_t * a_sem, cw_sint32_t a_count)
   if (a_sem == NULL)
   {
     retval = (cw_sem_t *) _cw_malloc(sizeof(cw_sem_t));
+    if (NULL == retval)
+    {
+      goto RETURN;
+    }
     retval->is_malloced = TRUE;
   }
   else
@@ -344,7 +363,8 @@ sem_new(cw_sem_t * a_sem, cw_sint32_t a_count)
 
   mtx_new(&retval->lock);
   cnd_new(&retval->gtzero);
-  
+
+  RETURN:
   return retval;
 }
 
@@ -466,6 +486,10 @@ tsd_new(cw_tsd_t * a_tsd, void (*a_func)(void *))
   if (a_tsd == NULL)
   {
     retval = (cw_tsd_t *) _cw_malloc(sizeof(cw_tsd_t));
+    if (NULL == retval)
+    {
+      goto RETURN;
+    }
     retval->is_malloced = TRUE;
   }
   else
@@ -481,7 +505,8 @@ tsd_new(cw_tsd_t * a_tsd, void (*a_func)(void *))
 		"Error in pthread_key_create(): %s\n", strerror(error));
     abort();
   }
-  
+
+  RETURN:
   return retval;
 }
 

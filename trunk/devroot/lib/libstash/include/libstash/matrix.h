@@ -34,11 +34,11 @@ matrix_new(cw_matrix_t * a_matrix);
 void
 matrix_delete(cw_matrix_t * a_matrix);
 
-void
+cw_bool_t
 matrix_init(cw_matrix_t * a_matrix, cw_uint32_t a_x_size,
 	    cw_uint32_t a_y_size, cw_bool_t a_should_zero);
 
-void
+cw_bool_t
 matrix_rebuild(cw_matrix_t * a_matrix);
 
 #ifdef _LIBSTASH_DBG

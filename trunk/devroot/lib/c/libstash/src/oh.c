@@ -32,7 +32,10 @@ oh_new(cw_oh_t * a_oh, cw_bool_t a_is_thread_safe)
   if (a_oh == NULL)
   {
     retval = (cw_oh_t *) _cw_malloc(sizeof(cw_oh_t));
-    _cw_mem_check_ptr(retval);
+    if (NULL == retval)
+    {
+      goto RETURN;
+    }
     retval->is_malloced = TRUE;
   }
   else
@@ -61,7 +64,12 @@ oh_new(cw_oh_t * a_oh, cw_bool_t a_is_thread_safe)
   /* Create the items pointer array. */
   retval->items = (cw_oh_item_t **) _cw_malloc(retval->size
 					       * sizeof(cw_oh_item_t *));
-  _cw_mem_check_ptr(retval->items);
+  if (NULL == retval->items)
+  {
+    _cw_free(retval);
+    retval = NULL;
+    goto RETURN;
+  }
   bzero(retval->items, retval->size * sizeof(cw_oh_item_t *));
 
   retval->spares_ring = NULL;
@@ -90,6 +98,7 @@ oh_new(cw_oh_t * a_oh, cw_bool_t a_is_thread_safe)
     = retval->num_shrinks
     = 0;
 
+  RETURN:
   return retval;
 }
 
@@ -461,7 +470,10 @@ oh_set_base_grow_point(cw_oh_t * a_oh,
     a_oh->curr_grow_point
       = (a_oh->base_grow_point
 	 << (a_oh->curr_power - a_oh->base_power));
-    oh_p_grow(a_oh);
+    if (oh_p_grow(a_oh))
+    {
+      retval = TRUE;
+    }
   }
 
 #ifdef _CW_REENTRANT
@@ -473,11 +485,11 @@ oh_set_base_grow_point(cw_oh_t * a_oh,
   return retval;
 }
 
-cw_bool_t
+cw_sint32_t
 oh_item_insert(cw_oh_t * a_oh, const void * a_key, const void * a_data)
 {
   cw_oh_item_t * item;
-  cw_bool_t retval;
+  cw_sint32_t retval;
   cw_uint64_t junk;
 
   _cw_check_ptr(a_oh);
@@ -490,12 +502,16 @@ oh_item_insert(cw_oh_t * a_oh, const void * a_key, const void * a_data)
 
   /* Quiesce. */
   oh_p_shrink(a_oh);
-  oh_p_grow(a_oh);
+  if (oh_p_grow(a_oh))
+  {
+    retval = -1;
+    goto RETURN;
+  }
 
   if (oh_p_item_search(a_oh, a_key, &junk) == TRUE)
   {
     /* Item isn't a duplicate key.  Go ahead and insert it. */
-    retval = FALSE;
+    retval = 0;
 
     /* Grab an item off the spares ring, if there are any. */
     if (0 < a_oh->spares_count)
@@ -511,7 +527,11 @@ oh_item_insert(cw_oh_t * a_oh, const void * a_key, const void * a_data)
     else
     {
       item = (cw_oh_item_t *) _cw_malloc(sizeof(cw_oh_item_t));
-      _cw_mem_check_ptr(item);
+      if (NULL == item)
+      {
+	retval = -1;
+	goto RETURN;
+      }
       ring_new(&item->ring_item, NULL, NULL);
       ring_set_data(&item->ring_item, (void *) item);
     }
@@ -524,9 +544,10 @@ oh_item_insert(cw_oh_t * a_oh, const void * a_key, const void * a_data)
   else
   {
     /* An item with this key already exists. */
-    retval = TRUE;
+    retval = 1;
   }
-  
+
+  RETURN:
 #ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
@@ -1011,9 +1032,12 @@ oh_key_compare_direct(const void * a_k1, const void * a_k2)
   return (a_k1 == a_k2) ? TRUE : FALSE;
 }
 
-static void
+static cw_bool_t
 oh_p_grow(cw_oh_t * a_oh)
 {
+  cw_bool_t retval;
+  void * t_ptr;
+  
   /* Should we grow? */
   if (a_oh->items_count >= a_oh->curr_grow_point)
   {
@@ -1022,10 +1046,17 @@ oh_p_grow(cw_oh_t * a_oh)
     a_oh->size <<= 1;
   
     /* Allocate new table */
-    a_oh->items
-      = (cw_oh_item_t **) _cw_realloc(a_oh->items,
-				      a_oh->size * sizeof(cw_oh_item_t *));
-    _cw_mem_check_ptr(a_oh->items);
+    t_ptr = _cw_realloc(a_oh->items, a_oh->size * sizeof(cw_oh_item_t *));
+    if (NULL == t_ptr)
+    {
+      retval = TRUE;
+      goto RETURN;
+    }
+    else
+    {
+      a_oh->items = (cw_oh_item_t **) t_ptr;
+    }
+    
     bzero(a_oh->items, (a_oh->size * sizeof(cw_oh_item_t *)));
 
     /* Re-calculate curr_* fields. */
@@ -1056,6 +1087,10 @@ oh_p_grow(cw_oh_t * a_oh)
       }
     }
   }
+  retval = FALSE;
+
+  RETURN:
+  return retval;
 }
 
 static void
@@ -1086,6 +1121,8 @@ oh_p_shrink(cw_oh_t * a_oh)
     a_oh->items
       = (cw_oh_item_t **) _cw_realloc(a_oh->items,
 				      a_oh->size * sizeof(cw_oh_item_t *));
+
+    /* We're always shrinking, so there should never be an error. */
     _cw_mem_check_ptr(a_oh->items);
     bzero(a_oh->items, (a_oh->size * sizeof(cw_oh_item_t *)));
   

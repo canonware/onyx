@@ -117,7 +117,8 @@ struct cw_buf_s
  *
  * <<< Output(s) >>>
  *
- * retval : Pointer to a bufpool.
+ * retval : Pointer to a bufpool, or NULL.
+ *          NULL : Memory allocation error.
  *
  * <<< Description >>>
  *
@@ -211,7 +212,8 @@ bufpool_set_max_spare_buffers(cw_bufpool_t * a_bufpool,
  *
  * <<< Output(s) >>>
  *
- * retval : Pointer to a buffer.
+ * retval : Pointer to a buffer, or NULL.
+ *          NULL : Memory allocation error.
  *
  * <<< Description >>>
  *
@@ -251,7 +253,8 @@ bufpool_put_buffer(void * a_bufpool, void * a_buffer);
  *
  * <<< Output(s) >>>
  *
- * retval : Pointer to a buf.
+ * retval : Pointer to a buf, or NULL.
+ *          NULL : Memory allocation error.
  *
  * <<< Description >>>
  *
@@ -381,14 +384,15 @@ buf_get_iovec(cw_buf_t * a_buf, cw_uint32_t a_max_data,
  *
  * <<< Output(s) >>>
  *
- * None.
+ * retval : FALSE == success, TRUE == error.
+ *          TRUE : Memory allocation error.
  *
  * <<< Description >>>
  *
  * Catenate two bufs.  a_b is left unmodified if a_preserve is TRUE.
  *
  ****************************************************************************/
-void
+cw_bool_t
 buf_catenate_buf(cw_buf_t * a_a, cw_buf_t * a_b, cw_bool_t a_preserve);
 
 /****************************************************************************
@@ -403,7 +407,9 @@ buf_catenate_buf(cw_buf_t * a_a, cw_buf_t * a_b, cw_bool_t a_preserve);
  *
  * <<< Output(s) >>>
  *
- * None.
+ * retval : FALSE == success, TRUE == error.
+ *          TRUE : Memory allocation error.  a_a and a_b are returned to their
+ *                 original states.
  *
  * <<< Description >>>
  *
@@ -411,7 +417,7 @@ buf_catenate_buf(cw_buf_t * a_a, cw_buf_t * a_b, cw_bool_t a_preserve);
  * leave the remainder in a_b.
  *
  ****************************************************************************/
-void
+cw_bool_t
 buf_split(cw_buf_t * a_a, cw_buf_t * a_b, cw_uint32_t a_offset);
 
 /****************************************************************************
@@ -424,14 +430,15 @@ buf_split(cw_buf_t * a_a, cw_buf_t * a_b, cw_uint32_t a_offset);
  *
  * <<< Output(s) >>>
  *
- * None.
+ * retval : FALSE == success, TRUE == error.
+ *          TRUE : Memory allocation error.
  *
  * <<< Description >>>
  *
  * Prepend the data from a_bufel to a_buf.  a_bufel is not modified.
  *
  ****************************************************************************/
-void
+cw_bool_t
 buf_prepend_bufel(cw_buf_t * a_buf, cw_bufel_t * a_bufel);
 
 /****************************************************************************
@@ -444,14 +451,15 @@ buf_prepend_bufel(cw_buf_t * a_buf, cw_bufel_t * a_bufel);
  *
  * <<< Output(s) >>>
  *
- * None.
+ * retval : FALSE == success, TRUE == error.
+ *          TRUE : Memory allocation error.
  *
  * <<< Description >>>
  *
  * Append the data from a_bufel to a_buf.  a_bufel is not modified.
  *
  ****************************************************************************/
-void
+cw_bool_t
 buf_append_bufel(cw_buf_t * a_buf, cw_bufel_t * a_bufel);
 
 /****************************************************************************
@@ -558,6 +566,101 @@ buf_get_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset);
  *
  * <<< Input(s) >>>
  *
+ * a_buf : Pointer to a buf.
+ *
+ * a_offset : Offset in bytes of data to set. (a_offset <= buf_get_size(a_buf))
+ *
+ * a_val : Value to set data at a_offset to.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : FALSE == success, TRUE == error.
+ *          TRUE : memory allocation error.
+ *
+ * <<< Description >>>
+ *
+ * Set the uint8 at a_offset to a_val.
+ *
+ ****************************************************************************/
+cw_bool_t
+buf_set_uint8(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint8_t a_val);
+
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_buf : Pointer to a buf.
+ *
+ * a_offset : Offset in bytes of data to set. (a_offset <= buf_get_size(a_buf))
+ *
+ * a_val : Value to set data at a_offset to.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : FALSE == success, TRUE == error.
+ *          TRUE : memory allocation error.
+ *
+ * <<< Description >>>
+ *
+ * Set the uint32 at a_offset to a_val.
+ *
+ ****************************************************************************/
+cw_bool_t
+buf_set_uint32(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint32_t a_val);
+
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_buf : Pointer to a buf.
+ *
+ * a_offset : Offset in bytes of data to set. (a_offset <= buf_get_size(a_buf))
+ *
+ * a_val : Value to set data at a_offset to.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : FALSE == success, TRUE == error.
+ *          TRUE : memory allocation error.
+ *
+ * <<< Description >>>
+ *
+ * Set the uint32 at a_offset to a_val.
+ *
+ ****************************************************************************/
+cw_bool_t
+buf_set_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint64_t a_val);
+
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_buf : Pointer to a buf.
+ *
+ * a_offset : Offset in bytes of data to set. (a_offset <= buf_get_size(a_buf))
+ *
+ * a_length : Number of bytes to copy from a_val.
+ *
+ * a_val : Value to set data at a_offset to.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : FALSE == success, TRUE == error.
+ *          TRUE : memory allocation error.
+ *
+ * <<< Description >>>
+ *
+ * Copy a_offset bytes from a_val to a_buf at offset a_offset.
+ *
+ ****************************************************************************/
+cw_bool_t
+buf_set_range(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint32_t a_length,
+	      cw_uint8_t * a_val);
+
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
  * a_bufel : Pointer to space for a bufel, or NULL.
  *
  * a_dealloc_func : Pointer to a deallocation function for a_bufel, or NULL.
@@ -567,7 +670,8 @@ buf_get_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset);
  *
  * <<< Output(s) >>>
  *
- * retval : Pointer to a bufel.
+ * retval : Pointer to a bufel, or NULL.
+ *          NULL : Memory allocation error.
  *
  * <<< Description >>>
  *
@@ -796,7 +900,8 @@ bufel_set_bufc(cw_bufel_t * a_bufel, cw_bufc_t * a_bufc);
  *
  * <<< Output(s) >>>
  *
- * retval : Pointer to an initialized bufc.
+ * retval : Pointer to an initialized bufc, or NULL.
+ *          NULL : Memory allocation error.
  *
  * <<< Description >>>
  *

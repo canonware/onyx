@@ -21,6 +21,10 @@ rwl_new(cw_rwl_t * a_rwl)
   if (a_rwl == NULL)
   {
     retval = (cw_rwl_t *) _cw_malloc(sizeof(cw_rwl_t));
+    if (NULL == retval)
+    {
+      goto RETURN;
+    }
     retval->is_malloced = TRUE;
   }
   else
@@ -37,7 +41,8 @@ rwl_new(cw_rwl_t * a_rwl)
   retval->num_writers = 0;
   retval->read_waiters = 0;
   retval->write_waiters = 0;
-  
+
+  RETURN:
   return retval;
 }
 
@@ -141,6 +146,10 @@ jtl_new(cw_jtl_t * a_jtl)
   if (a_jtl == NULL)
   {
     retval = (cw_jtl_t *) _cw_malloc(sizeof(cw_jtl_t));
+    if (NULL == retval)
+    {
+      goto RETURN;
+    }
     bzero(retval, sizeof(cw_jtl_t));
     retval->is_malloced = TRUE;
   }
@@ -161,6 +170,7 @@ jtl_new(cw_jtl_t * a_jtl)
   cnd_new(&retval->wlock_wait);
   cnd_new(&retval->xlock_wait);
 
+  RETURN:
   return retval;
 }
 
@@ -214,6 +224,11 @@ jtl_get_tq_el(cw_jtl_t * a_jtl)
   mtx_lock(&a_jtl->lock);
 
   retval = (cw_jtl_tq_el_t *) _cw_malloc(sizeof(cw_jtl_tq_el_t));
+  if (NULL == retval)
+  {
+    goto RETURN;
+  }
+  
   retval->is_blocked = FALSE;
   cnd_new(&retval->tlock_wait);
   ring_new(&retval->ring_item, NULL, NULL);
@@ -228,7 +243,8 @@ jtl_get_tq_el(cw_jtl_t * a_jtl)
     a_jtl->tlock_wait_ring = &retval->ring_item;
   }
   a_jtl->tlock_wait_count++;
-  
+
+  RETURN:
   mtx_unlock(&a_jtl->lock);
   return retval;
 }

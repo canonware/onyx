@@ -42,6 +42,10 @@ bufpool_new(cw_bufpool_t * a_bufpool, cw_uint32_t a_buffer_size,
   if (NULL == a_bufpool)
   {
     retval = (cw_bufpool_t *) _cw_malloc(sizeof(cw_bufpool_t));
+    if (NULL == retval)
+    {
+      goto RETURN;
+    }
     retval->is_malloced = TRUE;
   }
   else
@@ -66,7 +70,8 @@ bufpool_new(cw_bufpool_t * a_bufpool, cw_uint32_t a_buffer_size,
 #else
   list_new(&retval->spare_buffers);
 #endif
-  
+
+  RETURN:
   return retval;
 }
 
@@ -181,11 +186,16 @@ bufpool_get_buffer(cw_bufpool_t * a_bufpool)
   if (NULL == retval)
   {
     retval = _cw_malloc(a_bufpool->buffer_size);
+    if (NULL == retval)
+    {
+      goto RETURN;
+    }
 #ifdef _LIBSTASH_DBG
     bzero(retval, a_bufpool->buffer_size);
 #endif
   }
   
+  RETURN:
 #ifdef _CW_REENTRANT
   mtx_unlock(&a_bufpool->lock);
 #endif
@@ -230,10 +240,15 @@ buf_new(cw_buf_t * a_buf, cw_bool_t a_is_threadsafe)
 #endif
 {
   cw_buf_t * retval;
+  void * t_ptr;
 
   if (a_buf == NULL)
   {
     retval = (cw_buf_t *) _cw_malloc(sizeof(cw_buf_t));
+    if (NULL == retval)
+    {
+      goto RETURN;
+    }
     retval->is_malloced = TRUE;
   }
   else
@@ -264,13 +279,44 @@ buf_new(cw_buf_t * a_buf, cw_bool_t a_is_threadsafe)
   retval->is_cached_bufel_valid = FALSE;
 /*    retval->cached_bufel = 0; */
 
-  retval->bufel_array = (cw_bufel_t *) _cw_calloc(_LIBSTASH_BUF_ARRAY_MIN_SIZE,
-						  sizeof(cw_bufel_t));
-  retval->cumulative_index
-    = (cw_uint32_t *) _cw_calloc(_LIBSTASH_BUF_ARRAY_MIN_SIZE,
-				 sizeof(cw_uint32_t));
-  retval->iov = (struct iovec *) _cw_calloc(_LIBSTASH_BUF_ARRAY_MIN_SIZE,
-					    sizeof(struct iovec));
+  t_ptr = _cw_calloc(_LIBSTASH_BUF_ARRAY_MIN_SIZE, sizeof(cw_bufel_t));
+  if (NULL == t_ptr)
+  {
+    _cw_free(retval);
+    retval = NULL;
+    goto RETURN;
+  }
+  else
+  {
+    retval->bufel_array = (cw_bufel_t *) t_ptr;
+  }
+
+  t_ptr = _cw_calloc(_LIBSTASH_BUF_ARRAY_MIN_SIZE, sizeof(cw_uint32_t));
+  if (NULL == t_ptr)
+  {
+    _cw_free(retval->bufel_array);
+    _cw_free(retval);
+    retval = NULL;
+    goto RETURN;
+  }
+  else
+  {
+    retval->cumulative_index = (cw_uint32_t *) t_ptr;
+  }
+
+  t_ptr = _cw_calloc(_LIBSTASH_BUF_ARRAY_MIN_SIZE, sizeof(struct iovec));
+  if (NULL == t_ptr)
+  {
+    _cw_free(retval->cumulative_index);
+    _cw_free(retval->bufel_array);
+    _cw_free(retval);
+    retval = NULL;
+    goto RETURN;
+  }
+  else
+  {
+    retval->iov = (struct iovec *) t_ptr;
+  }
 
 #ifdef _LIBSTASH_DBG
   bzero(retval->bufel_array,
@@ -280,7 +326,8 @@ buf_new(cw_buf_t * a_buf, cw_bool_t a_is_threadsafe)
   bzero(retval->iov,
 	 _LIBSTASH_BUF_ARRAY_MIN_SIZE * sizeof(struct iovec));
 #endif
-  
+
+  RETURN:
   return retval;
 }
 
@@ -329,8 +376,15 @@ buf_dump(cw_buf_t * a_buf, const char * a_prefix)
   _cw_check_ptr(a_prefix);
 
   sub_prefix = _cw_malloc(strlen(a_prefix) + 1 + 2);
-  strcpy(sub_prefix, a_prefix);
-  strcat(sub_prefix, "| | ");
+  if (NULL == sub_prefix)
+  {
+    sub_prefix = "";
+  }
+  else
+  {
+    strcpy(sub_prefix, a_prefix);
+    strcat(sub_prefix, "| | ");
+  }
   
 #ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe == TRUE)
@@ -507,9 +561,11 @@ buf_get_iovec(cw_buf_t * a_buf, cw_uint32_t a_max_data,
   return a_buf->iov;
 }
 
-void
+cw_bool_t
 buf_catenate_buf(cw_buf_t * a_a, cw_buf_t * a_b, cw_bool_t a_preserve)
 {
+  cw_bool_t retval;
+  
   _cw_check_ptr(a_a);
   _cw_assert(a_a->magic == _CW_BUF_MAGIC);
   _cw_check_ptr(a_b);
@@ -527,7 +583,7 @@ buf_catenate_buf(cw_buf_t * a_a, cw_buf_t * a_b, cw_bool_t a_preserve)
   }
 #endif
 
-  buf_p_catenate_buf(a_a, a_b, a_preserve);
+  retval = buf_p_catenate_buf(a_a, a_b, a_preserve);
   
 #ifdef _CW_REENTRANT
   if (a_b->is_threadsafe == TRUE)
@@ -539,11 +595,13 @@ buf_catenate_buf(cw_buf_t * a_a, cw_buf_t * a_b, cw_bool_t a_preserve)
     mtx_unlock(&a_a->lock);
   }
 #endif
+  return retval;
 }
 
-void
+cw_bool_t
 buf_split(cw_buf_t * a_a, cw_buf_t * a_b, cw_uint32_t a_offset)
 {
+  cw_bool_t retval;
   cw_uint32_t array_element, bufel_offset, num_bufels_to_move;
   cw_uint32_t i, a_a_index, a_b_index;
   cw_bool_t did_bufel_merge = FALSE;
@@ -577,6 +635,16 @@ buf_split(cw_buf_t * a_a, cw_buf_t * a_b, cw_uint32_t a_offset)
     if (bufel_offset != 0)
     {
       num_bufels_to_move++;
+    }
+
+    /* Make sure that a_a's array is big enough.  Doing this here instead of
+     * after trying to do a bufel merge means that we might be expanding the
+     * arrays unnecessarily.  However, error recovery after the bufel merge is
+     * particularly nasty. */
+    if (buf_p_fit_array(a_a, a_a->array_num_valid + num_bufels_to_move))
+    {
+      retval = TRUE;
+      goto RETURN;
     }
 
     /* Try to merge first bufel of a_b and last bufel of a_a. */
@@ -657,9 +725,6 @@ buf_split(cw_buf_t * a_a, cw_buf_t * a_b, cw_uint32_t a_offset)
 
     if (num_bufels_to_move > 0)
     {
-      /* Make sure that a_a's array is big enough. */
-      buf_p_fit_array(a_a, a_a->array_num_valid + num_bufels_to_move);
-
 #ifdef _LIBSTASH_DBG
       /* Non-destructively copy all the bufel's we care about. */
       buf_p_copy_array(a_a,
@@ -756,9 +821,16 @@ buf_split(cw_buf_t * a_a, cw_buf_t * a_b, cw_uint32_t a_offset)
   else if ((a_offset > 0) && (a_offset == a_b->size))
   {
     /* Same as catenation. */
-    buf_p_catenate_buf(a_a, a_b, FALSE);
+    if (buf_p_catenate_buf(a_a, a_b, FALSE))
+    {
+      retval = TRUE;
+      goto RETURN;
+    }
   }
   
+  retval = FALSE;
+  
+  RETURN:
 #ifdef _CW_REENTRANT
   if (a_b->is_threadsafe == TRUE)
   {
@@ -769,11 +841,14 @@ buf_split(cw_buf_t * a_a, cw_buf_t * a_b, cw_uint32_t a_offset)
     mtx_unlock(&a_a->lock);
   }
 #endif
+  return retval;
 }
 
-void
+cw_bool_t
 buf_prepend_bufel(cw_buf_t * a_buf, cw_bufel_t * a_bufel)
 {
+  cw_bool_t retval;
+  
   _cw_check_ptr(a_buf);
   _cw_assert(a_buf->magic == _CW_BUF_MAGIC);
   _cw_check_ptr(a_bufel);
@@ -810,7 +885,11 @@ buf_prepend_bufel(cw_buf_t * a_buf, cw_bufel_t * a_bufel)
     }
     else
     {
-      buf_p_fit_array(a_buf, a_buf->array_num_valid + 1);
+      if (buf_p_fit_array(a_buf, a_buf->array_num_valid + 1))
+      {
+	retval = TRUE;
+	goto RETURN;
+      }
   
       /* Now prepend the bufel. */
       a_buf->array_start = (((a_buf->array_start + a_buf->array_size) - 1)
@@ -831,17 +910,22 @@ buf_prepend_bufel(cw_buf_t * a_buf, cw_bufel_t * a_bufel)
     }
   }
   
+  retval = FALSE;
+
+  RETURN:
 #ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe == TRUE)
   {
     mtx_unlock(&a_buf->lock);
   }
 #endif
+  return retval;
 }
 
-void
+cw_bool_t
 buf_append_bufel(cw_buf_t * a_buf, cw_bufel_t * a_bufel)
 {
+  cw_bool_t retval;
   cw_bool_t did_bufel_merge = FALSE;
   
   _cw_check_ptr(a_buf);
@@ -890,7 +974,11 @@ buf_append_bufel(cw_buf_t * a_buf, cw_bufel_t * a_bufel)
   
     if (FALSE == did_bufel_merge)
     {
-      buf_p_fit_array(a_buf, a_buf->array_num_valid + 1);
+      if (buf_p_fit_array(a_buf, a_buf->array_num_valid + 1))
+      {
+	retval = TRUE;
+	goto RETURN;
+      }
   
       /* Now append the bufel. */
       memcpy(&a_buf->bufel_array[a_buf->array_end],
@@ -910,12 +998,16 @@ buf_append_bufel(cw_buf_t * a_buf, cw_bufel_t * a_bufel)
     }
   }
 
+  retval = FALSE;
+
+  RETURN:
 #ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe == TRUE)
   {
     mtx_unlock(&a_buf->lock);
   }
 #endif
+  return retval;
 }
 
 cw_bool_t
@@ -1313,6 +1405,31 @@ buf_get_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset)
   return retval;
 }
 
+cw_bool_t
+buf_set_uint8(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint8_t a_val)
+{
+  return TRUE; /* XXX */
+}
+
+cw_bool_t
+buf_set_uint32(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint32_t a_val)
+{
+  return TRUE; /* XXX */
+}
+
+cw_bool_t
+buf_set_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint64_t a_val)
+{
+  return TRUE; /* XXX */
+}
+
+cw_bool_t
+buf_set_range(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint32_t a_length,
+	      cw_uint8_t * a_val)
+{
+  return TRUE; /* XXX */
+}
+
 static void
 buf_p_rebuild_cumulative_index(cw_buf_t * a_buf)
 {
@@ -1424,10 +1541,12 @@ buf_p_get_data_position(cw_buf_t * a_buf,
   }
 }
 
-static void
+static cw_bool_t
 buf_p_fit_array(cw_buf_t * a_buf, cw_uint32_t a_min_array_size)
 {
+  cw_bool_t retval;
   cw_uint32_t i;
+  void * t_ptr;
 
   /* Make sure a_buf's array is big enough.  Even if we're trying to merge
    * bufel's, make the array big enough that it doesn't matter how successful
@@ -1439,13 +1558,38 @@ buf_p_fit_array(cw_buf_t * a_buf, cw_uint32_t a_min_array_size)
 	 i < a_min_array_size;
 	 i <<= 1);
 
-    a_buf->bufel_array
-      = (cw_bufel_t *) _cw_realloc(a_buf->bufel_array, i * sizeof(cw_bufel_t));
-    a_buf->cumulative_index
-      = (cw_uint32_t *) _cw_realloc(a_buf->cumulative_index,
-				    i * sizeof(cw_uint32_t));
-    a_buf->iov = (struct iovec *) _cw_realloc(a_buf->iov,
-					      i * sizeof(struct iovec));
+    t_ptr = _cw_realloc(a_buf->bufel_array, i * sizeof(cw_bufel_t));
+    if (NULL == t_ptr)
+    {
+      retval = TRUE;
+      goto RETURN;
+    }
+    else
+    {
+      a_buf->bufel_array = (cw_bufel_t *) t_ptr;
+    }
+
+    t_ptr = _cw_realloc(a_buf->cumulative_index, i * sizeof(cw_uint32_t));
+    if (NULL == t_ptr)
+    {
+      retval = TRUE;
+      goto RETURN;
+    }
+    else
+    {
+      a_buf->cumulative_index = (cw_uint32_t *) t_ptr;
+    }
+
+    t_ptr = _cw_realloc(a_buf->iov, i * sizeof(struct iovec));
+    if (NULL == t_ptr)
+    {
+      retval = TRUE;
+      goto RETURN;
+    }
+    else
+    {
+      a_buf->iov = (struct iovec *) t_ptr;
+    }
     
 #ifdef _LIBSTASH_DBG
     bzero(&a_buf->bufel_array[a_buf->array_size],
@@ -1485,15 +1629,25 @@ buf_p_fit_array(cw_buf_t * a_buf, cw_uint32_t a_min_array_size)
      * above. */
     a_buf->array_size = i;
   }
+
+  retval = FALSE;
+  
+  RETURN:
+  return retval;
 }
 
-static void
+static cw_bool_t
 buf_p_catenate_buf(cw_buf_t * a_a, cw_buf_t * a_b, cw_bool_t a_preserve)
 {
+  cw_bool_t retval;
   cw_uint32_t i, a_a_index, a_b_index;
   cw_uint32_t did_bufel_merge = 0;
   
-  buf_p_fit_array(a_a, a_a->array_num_valid + a_b->array_num_valid);
+  if (buf_p_fit_array(a_a, a_a->array_num_valid + a_b->array_num_valid))
+  {
+    retval = TRUE;
+    goto RETURN;
+  }
     
   /* Try to merge the last bufel in a_a and the first bufel in a_b into one
    * bufel in a_a. */
@@ -1584,6 +1738,11 @@ buf_p_catenate_buf(cw_buf_t * a_a, cw_buf_t * a_b, cw_bool_t a_preserve)
     a_b->is_cached_bufel_valid = FALSE;
 /*      a_b->cached_bufel = 0; */
   }
+
+  retval = FALSE;
+  
+  RETURN:
+  return retval;
 }
 
 #ifdef _LIBSTASH_DBG
@@ -1941,6 +2100,13 @@ buf_p_copy_array(cw_buf_t * a_a, cw_buf_t * a_b,
   }
 }
 
+static cw_bool_t
+buf_p_uniquify_range(cw_buf_t * a_buf, cw_uint32_t a_offset,
+		     cw_uint32_t a_length)
+{
+  return TRUE; /* XXX */
+}
+
 cw_bufel_t *
 bufel_new(cw_bufel_t * a_bufel,
 	  void (*a_dealloc_func)(void * dealloc_arg, void * bufel),
@@ -1951,6 +2117,10 @@ bufel_new(cw_bufel_t * a_bufel,
   if (a_bufel == NULL)
   {
     retval = (cw_bufel_t *) _cw_malloc(sizeof(cw_bufel_t));
+    if (NULL == retval)
+    {
+      goto RETURN;
+    }
     bzero(retval, sizeof(cw_bufel_t));
     retval->dealloc_func = mem_dealloc;
     retval->dealloc_arg = cw_g_mem;
@@ -1966,7 +2136,8 @@ bufel_new(cw_bufel_t * a_bufel,
 #ifdef _LIBSTASH_DBG
   retval->magic = _CW_BUFEL_MAGIC;
 #endif
-  
+
+  RETURN:
   return retval;
 }
 
@@ -1996,8 +2167,15 @@ bufel_dump(cw_bufel_t * a_bufel, const char * a_prefix)
   _cw_check_ptr(a_prefix);
 
   sub_prefix = _cw_malloc(strlen(a_prefix) + 1 + 2);
-  strcpy(sub_prefix, a_prefix);
-  strcat(sub_prefix, "  ");
+  if (NULL == sub_prefix)
+  {
+    sub_prefix = "  ";
+  }
+  else
+  {
+    strcpy(sub_prefix, a_prefix);
+    strcat(sub_prefix, "  ");
+  }
   
   log_printf(cw_g_log,
 	     "%s| bufel_dump()\n",
@@ -2214,6 +2392,10 @@ bufc_new(cw_bufc_t * a_bufc,
   if (NULL == a_bufc)
   {
     retval = (cw_bufc_t *) _cw_malloc(sizeof(cw_bufc_t));
+    if (NULL == retval)
+    {
+      goto RETURN;
+    }
     bzero(retval, sizeof(cw_bufc_t));
     retval->dealloc_func = mem_dealloc;
     retval->dealloc_arg = cw_g_mem;
@@ -2233,7 +2415,8 @@ bufc_new(cw_bufc_t * a_bufc,
 #ifdef _CW_REENTRANT
   mtx_new(&retval->lock);
 #endif
-
+  
+  RETURN:
   return retval;
 }
 

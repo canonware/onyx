@@ -61,6 +61,10 @@ res_new(cw_res_t * a_res)
   if (a_res == NULL)
   {
     retval = (cw_res_t *) _cw_malloc(sizeof(cw_res_t));
+    if (NULL == retval)
+    {
+      goto RETURN;
+    }
     retval->is_malloced = TRUE;
   }
   else
@@ -81,6 +85,7 @@ res_new(cw_res_t * a_res)
   oh_new(&retval->hash);
 #endif
 
+  RETURN:
   return retval;
 }
 
@@ -174,10 +179,15 @@ res_is_equal(cw_res_t * a_res, cw_res_t * a_other)
 	retval = TRUE;
       }
 
-      oh_item_insert(&a_res->hash, key, val);
+      if (0 != oh_item_insert(&a_res->hash, key, val))
+      {
+	retval = TRUE;
+	goto RETURN;
+      }
     }
   }
-  
+
+  RETURN:
 #ifdef _CW_REENTRANT
   rwl_runlock(&a_other->rw_lock);
   rwl_wunlock(&a_res->rw_lock);
@@ -386,14 +396,23 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
   cw_bool_t retval = FALSE;
   size_t i, name_pos = 0, val_pos = 0;
   cw_uint32_t state = _LIBSTASH_RES_STATE_START, col_num, line_num = 1;
-  char c, * name, * val;
+  char c, * name = NULL, * val = NULL;
   cw_uint32_t name_bufsize, val_bufsize;
 
   name_bufsize = _LIBSTASH_RES_BUFFSIZE;
   val_bufsize = _LIBSTASH_RES_BUFFSIZE;
 
   name = (char *) _cw_malloc(name_bufsize);
+  if (NULL == name)
+  {
+    goto RETURN;
+  }
+  
   val = (char *) _cw_malloc(val_bufsize);
+  if (NULL == val)
+  {
+    goto RETURN;
+  }
 
   for (i = 0, col_num = 1;
        ((state != _LIBSTASH_RES_STATE_FINISH) && (retval != TRUE));
@@ -405,11 +424,19 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
     {
       name_bufsize <<= 1;
       name = (char *) _cw_realloc(name, name_bufsize);
+      if (NULL == name)
+      {
+	goto RETURN;
+      }
     }
     if (val_pos >= val_bufsize)
     {
       val_bufsize <<= 1;
       val = (char *) _cw_realloc(val, val_bufsize);
+      if (NULL == val)
+      {
+	goto RETURN;
+      }
     }
     
     /* Read the next character in. */
@@ -741,7 +768,11 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	    /* Empty value.  NULL-terminate the string and jump to the
 	     * trailing comment state. */
 	    val[val_pos] = '\0';
-	    res_p_merge_res(a_res, name, val);
+	    if (res_p_merge_res(a_res, name, val))
+	    {
+	      retval = TRUE;
+	      goto RETURN;
+	    }
 	    state = _LIBSTASH_RES_STATE_TRAILING_COMMENT;
 	    break;
 	  }
@@ -758,7 +789,11 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	    line_num++;
 	    col_num = 1;
 	    val[val_pos] = '\0';
-	    res_p_merge_res(a_res, name, val);
+	    if (res_p_merge_res(a_res, name, val))
+	    {
+	      retval = TRUE;
+	      goto RETURN;
+	    }
 	    state = _LIBSTASH_RES_STATE_START;
 	    break;
 	  }
@@ -766,7 +801,11 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	  {
 	    /* Empty value, and end of input.  Insert the resource. */
 	    val[val_pos] = '\0';
-	    res_p_merge_res(a_res, name, val);
+	    if (res_p_merge_res(a_res, name, val))
+	    {
+	      retval = TRUE;
+	      goto RETURN;
+	    }
 	    state = _LIBSTASH_RES_STATE_FINISH;
 	    break;
 	  }
@@ -811,7 +850,11 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	     * NULL-terminate the string, insert the resource, and jump to
 	     * the trailing comment state. */
 	    val[val_pos] = '\0';
-	    res_p_merge_res(a_res, name, val);
+	    if (res_p_merge_res(a_res, name, val))
+	    {
+	      retval = TRUE;
+	      goto RETURN;
+	    }
 	    state = _LIBSTASH_RES_STATE_TRAILING_COMMENT;
 	    break;
 	  }
@@ -829,7 +872,12 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	    line_num++;
 	    col_num = 1;
 	    val[val_pos] = '\0';
-	    res_p_merge_res(a_res, name, val);
+	    if (res_p_merge_res(a_res, name, val))
+	    {
+	      retval = TRUE;
+	      goto RETURN;
+	    }
+	    
 	    state = _LIBSTASH_RES_STATE_START;
 	    break;
 	  }
@@ -838,7 +886,11 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	    /* Do the same thing as for a newline, except that we want the
 	     * state machine to exit. */
 	    val[val_pos] = '\0';
-	    res_p_merge_res(a_res, name, val);
+	    if (res_p_merge_res(a_res, name, val))
+	    {
+	      retval = TRUE;
+	      goto RETURN;
+	    }
 	    state = _LIBSTASH_RES_STATE_FINISH;
 	    break;
 	  }
@@ -1037,8 +1089,15 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
     }
   }
 
-  _cw_free(name);
-  _cw_free(val);
+  RETURN:
+  if (NULL != name)
+  {
+    _cw_free(name);
+  }
+  if (NULL != val)
+  {
+    _cw_free(val);
+  }
   return retval;
 }
 
@@ -1154,16 +1213,29 @@ res_p_char_type(char a_char)
   return retval;
 }
 
-static void
+static cw_bool_t
 res_p_merge_res(cw_res_t * a_res, const char * a_name, const char * a_val)
 {
+  cw_bool_t retval;
   char * temp_name, * temp_val;
-  cw_bool_t error;
+  cw_sint32_t error;
 	    
   /* Make copies to insert into the hash table. */
   temp_name = (char *) _cw_malloc(strlen(a_name) + 1);
+  if (NULL == temp_name)
+  {
+    retval = TRUE;
+    goto RETURN;
+  }
   strcpy(temp_name, a_name);
+  
   temp_val = (char *) _cw_malloc(strlen(a_val) + 1);
+  if (NULL == temp_val)
+  {
+    _cw_free(temp_name);
+    retval = TRUE;
+    goto RETURN;
+  }
   strcpy(temp_val, a_val);
 
   if (dbg_is_registered(cw_g_dbg, "res_state"))
@@ -1176,7 +1248,7 @@ res_p_merge_res(cw_res_t * a_res, const char * a_name, const char * a_val)
   /* Insert the resource into the hash table. */
   error = oh_item_insert(&a_res->hash, (void *) temp_name,
 			 (void *) temp_val);
-  if (error == TRUE)
+  if (error == 1)
   {
     char * old_name, * old_val;
 	      
@@ -1189,7 +1261,18 @@ res_p_merge_res(cw_res_t * a_res, const char * a_name, const char * a_val)
     _cw_free(old_name);
     _cw_free(old_val);
 
-    oh_item_insert(&a_res->hash, (void *) temp_name,
-		   (void *) temp_val);
+    error = oh_item_insert(&a_res->hash, (void *) temp_name,
+			   (void *) temp_val);
   }
+
+  if (error == -1)
+  {
+    _cw_free(temp_name);
+    _cw_free(temp_val);
+  }
+
+  retval = FALSE;
+
+  RETURN:
+  return retval;
 }

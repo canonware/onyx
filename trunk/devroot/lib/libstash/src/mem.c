@@ -102,7 +102,14 @@ mem_malloc(cw_mem_t * a_mem, size_t a_size)
   retval = _cw_malloc(a_size);
   
 #ifdef _LIBSTASH_DBG
-  if (NULL != a_mem)
+  if (NULL == a_mem)
+  {
+    log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
+		"malloc(%lu) returned NULL at %s, line %d\n",
+		a_size,
+		a_filename, a_line_num);
+  }
+  else
   {
     struct cw_mem_item_s * old_allocation;
     
@@ -135,38 +142,37 @@ mem_malloc(cw_mem_t * a_mem, size_t a_size)
       if (allocation == NULL)
       {
 	log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-		    "malloc(%d) returned NULL\n", sizeof(struct cw_mem_item_s));
-	abort();
+		    "malloc(%d) returned NULL\n",
+		    sizeof(struct cw_mem_item_s));
       }
-	
-      allocation->size = a_size;
-      allocation->filename = a_filename;
-      allocation->line_num = a_line_num;
-      
-      if (dbg_is_registered(cw_g_dbg, "mem_verbose"))
+      else
       {
-	log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		    "%p <-- malloc(%u) at %s, line %d\n", retval, a_size,
-		    (NULL == a_filename) ? "<?>" : a_filename, a_line_num);
-      }
+	memset(retval, 0xa5, a_size);
+	
+	allocation->size = a_size;
+	allocation->filename = a_filename;
+	allocation->line_num = a_line_num;
       
-      _cw_assert(FALSE == oh_item_insert(&a_mem->addr_hash, retval,
-					 allocation));
+	if (dbg_is_registered(cw_g_dbg, "mem_verbose"))
+	{
+	  log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
+		      "%p <-- malloc(%u) at %s, line %d\n", retval, a_size,
+		      (NULL == a_filename) ? "<?>" : a_filename, a_line_num);
+	}
+      
+	_cw_assert(0 == oh_item_insert(&a_mem->addr_hash, retval,
+				       allocation));
+      }
     }
   }
-#endif
-  
+#else
   if (retval == NULL)
   {
     log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
 		"malloc(%d) returned NULL\n", a_size);
-    abort();
   }
-
-#ifdef _LIBSTASH_DBG
-  memset(retval, 0xa5, a_size);
 #endif
-  
+
   return retval;
 }
 
@@ -186,7 +192,14 @@ mem_calloc(cw_mem_t * a_mem, size_t a_number, size_t a_size)
   retval = _cw_calloc(a_number, a_size);
 
 #ifdef _LIBSTASH_DBG
-  if (NULL != a_mem)
+  if (NULL == a_mem)
+  {
+    log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
+		"calloc(%lu, %lu) returned NULL at %s, line %d\n",
+		a_number, a_size,
+		a_filename, a_line_num);
+  }
+  else
   {
     struct cw_mem_item_s * old_allocation;
     
@@ -219,39 +232,38 @@ mem_calloc(cw_mem_t * a_mem, size_t a_number, size_t a_size)
       if (allocation == NULL)
       {
 	log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-		    "malloc(%d) returned NULL\n", sizeof(struct cw_mem_item_s));
-	abort();
+		    "malloc(%d) returned NULL\n",
+		    sizeof(struct cw_mem_item_s));
       }
-	
-      allocation->size = a_size;
-      allocation->filename = a_filename;
-      allocation->line_num = a_line_num;
-      
-      if (dbg_is_registered(cw_g_dbg, "mem_verbose"))
+      else
       {
-	log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		    "%p <-- calloc(%u, %u) at %s, line %d\n",
-		    retval, a_number, a_size,
-		    (NULL == a_filename) ? "<?>" : a_filename, a_line_num);
-      }
+	memset(retval, 0xa5, a_number * a_size);
+	
+	allocation->size = a_size;
+	allocation->filename = a_filename;
+	allocation->line_num = a_line_num;
       
-      _cw_assert(FALSE == oh_item_insert(&a_mem->addr_hash, retval,
-					 allocation));
+	if (dbg_is_registered(cw_g_dbg, "mem_verbose"))
+	{
+	  log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
+		      "%p <-- calloc(%u, %u) at %s, line %d\n",
+		      retval, a_number, a_size,
+		      (NULL == a_filename) ? "<?>" : a_filename, a_line_num);
+	}
+      
+	_cw_assert(0 == oh_item_insert(&a_mem->addr_hash, retval,
+				       allocation));
+      }
     }
   }
-#endif
-
+#else
   if (retval == NULL)
   {
     log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
 		"calloc(%d, %d) returned NULL\n", a_number, a_size);
-    abort();
   }
-
-#ifdef _LIBSTASH_DBG
-  memset(retval, 0xa5, a_number * a_size);
 #endif
-  
+
   return retval;
 }
 
@@ -272,7 +284,14 @@ mem_realloc(cw_mem_t * a_mem, void * a_ptr, size_t a_size)
   retval = _cw_realloc(a_ptr, a_size);
   
 #ifdef _LIBSTASH_DBG
-  if (NULL != a_mem)
+  if (NULL == a_mem)
+  {
+    log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
+		"realloc(%p, %lu) returned NULL at %s, line %d\n",
+		a_ptr, a_size,
+		a_filename, a_line_num);
+  }
+  else
   {
     void * junk;
     struct cw_mem_item_s * allocation;
@@ -300,7 +319,7 @@ mem_realloc(cw_mem_t * a_mem, void * a_ptr, size_t a_size)
       allocation->size = a_size;
       allocation->line_num = a_line_num;
       
-      if (TRUE == oh_item_insert(&a_mem->addr_hash, retval, allocation))
+      if (1 == oh_item_insert(&a_mem->addr_hash, retval, allocation))
       {
 	if (dbg_is_registered(cw_g_dbg, "mem_error"))
 	{
@@ -336,15 +355,14 @@ mem_realloc(cw_mem_t * a_mem, void * a_ptr, size_t a_size)
       }
     }
   }
-#endif
-  
+#else
   if (retval == NULL)
   {
     log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
 		"realloc(%p, %d) returned NULL\n", a_ptr, a_size);
-    abort();
   }
-  
+#endif
+
   return retval;
 }
 

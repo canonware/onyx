@@ -215,8 +215,10 @@ oh_set_base_grow_point(cw_oh_t * a_oh, cw_uint32_t a_grow_point);
  *
  * Insert an item, unless an item with the same key already exists.
  *
+ * retval : -1 == allocation error, 0 == success, 1 == already exists.
+ *
  ****************************************************************************/
-cw_bool_t
+cw_sint32_t
 oh_item_insert(cw_oh_t * a_oh, const void * a_key, const void * a_data);
 
 /****************************************************************************

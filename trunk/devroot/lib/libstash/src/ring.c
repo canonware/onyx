@@ -31,6 +31,10 @@ ring_new(cw_ring_t * a_ring,
   if (NULL == a_ring)
   {
     retval = (cw_ring_t *) _cw_malloc(sizeof(cw_ring_t));
+    if (NULL == retval)
+    {
+      goto RETURN;
+    }
     retval->dealloc_func = mem_dealloc;
     retval->dealloc_arg = cw_g_mem;
   }
@@ -46,6 +50,7 @@ ring_new(cw_ring_t * a_ring,
   retval->magic = _CW_RING_MAGIC;
 #endif
 
+  RETURN:
   return retval;
 }
 

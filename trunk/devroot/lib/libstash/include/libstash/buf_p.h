@@ -35,10 +35,10 @@ buf_p_get_data_position(cw_buf_t * a_buf,
 			cw_uint32_t * a_array_element,
 			cw_uint32_t * a_bufel_offset);
 
-static void
+static cw_bool_t
 buf_p_fit_array(cw_buf_t * a_buf, cw_uint32_t a_min_array_size);
 
-static void
+static cw_bool_t
 buf_p_catenate_buf(cw_buf_t * a_a, cw_buf_t * a_b, cw_bool_t a_preserve);
 
 #if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
@@ -54,6 +54,10 @@ buf_p_copy_array(cw_buf_t * a_a, cw_buf_t * a_b,
 		 cw_uint32_t a_a_start, cw_uint32_t a_b_start);
 #endif
 
+static cw_bool_t
+buf_p_uniquify_range(cw_buf_t * a_buf, cw_uint32_t a_offset,
+		     cw_uint32_t a_length);
+  
 static cw_bool_t
 bufel_p_merge_bufel(cw_bufel_t * a_a, cw_bufel_t * a_b);
 

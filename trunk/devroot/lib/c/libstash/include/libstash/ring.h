@@ -50,7 +50,8 @@ struct cw_ring_s
  *
  * <<< Output(s) >>>
  *
- * retval : Pointer to a ring.
+ * retval : Pointer to a ring, or NULL.
+ *          NULL : Memory allocation error.
  *
  * <<< Description >>>
  *

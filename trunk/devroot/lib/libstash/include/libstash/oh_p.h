@@ -29,7 +29,7 @@
  * If the table is too full, double in size and insert into the new table.
  *
  ****************************************************************************/
-static void
+static cw_bool_t
 oh_p_grow(cw_oh_t * a_oh);
 
 /****************************************************************************

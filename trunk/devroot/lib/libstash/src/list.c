@@ -25,7 +25,10 @@ list_item_new()
   cw_list_item_t * retval;
 
   retval = (cw_list_item_t *) _cw_malloc(sizeof(cw_list_item_t));
-  bzero(retval, sizeof(cw_list_item_t));
+  if (NULL != retval)
+  {
+    bzero(retval, sizeof(cw_list_item_t));
+  }
   
   return retval;
 }
@@ -66,6 +69,10 @@ list_new(cw_list_t * a_list, cw_bool_t a_is_thread_safe)
   if (a_list == NULL)
   {
     retval = (cw_list_t *) _cw_malloc(sizeof(cw_list_t));
+    if (NULL == retval)
+    {
+      goto RETURN;
+    }
     retval->is_malloced = TRUE;
   }
   else
@@ -92,6 +99,7 @@ list_new(cw_list_t * a_list, cw_bool_t a_is_thread_safe)
   retval->spares_head = NULL;
   retval->spares_count = 0;
 
+  RETURN:
   return retval;
 }
      
@@ -231,6 +239,10 @@ list_hpush(cw_list_t * a_list, void * a_data)
   {
     /* No spares available.  Create a new item. */
     retval = list_item_new();
+    if (NULL == retval)
+    {
+      goto RETURN;
+    }
   }
   list_item_set(retval, a_data);
 
@@ -253,6 +265,7 @@ list_hpush(cw_list_t * a_list, void * a_data)
   }
   a_list->count++;
 
+  RETURN:
 #ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
@@ -343,6 +356,10 @@ list_tpush(cw_list_t * a_list, void * a_data)
   {
     /* No spares available.  Create a new item. */
     retval = list_item_new();
+    if (NULL == retval)
+    {
+      goto RETURN;
+    }
   }
   list_item_set(retval, a_data);
   
@@ -365,6 +382,7 @@ list_tpush(cw_list_t * a_list, void * a_data)
   }
   a_list->count++;
 
+  RETURN:
 #ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
@@ -520,6 +538,10 @@ list_insert_before(cw_list_t * a_list,
   {
     /* No spares available.  Create a new item. */
     retval = list_item_new();
+    if (NULL == retval)
+    {
+      goto RETURN;
+    }
   }
   list_item_set(retval, a_data);
 
@@ -541,6 +563,7 @@ list_insert_before(cw_list_t * a_list,
   }
   a_list->count++;
 
+  RETURN:
 #ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {
@@ -578,6 +601,10 @@ list_insert_after(cw_list_t * a_list,
   {
     /* No spares available.  Create a new item. */
     retval = list_item_new();
+    if (NULL == retval)
+    {
+      goto RETURN;
+    }
   }
   list_item_set(retval, a_data);
   
@@ -599,6 +626,7 @@ list_insert_after(cw_list_t * a_list,
   }
   a_list->count++;
 
+  RETURN:
 #ifdef _CW_REENTRANT
   if (a_list->is_thread_safe)
   {

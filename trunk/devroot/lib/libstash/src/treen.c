@@ -23,6 +23,10 @@ treen_new(cw_bool_t a_is_thread_safe)
   cw_treen_t * retval;
 
   retval = (cw_treen_t *) _cw_malloc(sizeof(cw_treen_t));
+  if (NULL == retval)
+  {
+    goto RETURN;
+  }
   bzero(retval, sizeof(cw_treen_t));
   
 #ifdef _CW_REENTRANT
@@ -36,7 +40,8 @@ treen_new(cw_bool_t a_is_thread_safe)
     retval->is_thread_safe = FALSE;
   }
 #endif
-  
+
+  RETURN:
   return retval;
 }
 
@@ -132,12 +137,29 @@ treen_link_child(cw_treen_t * a_treen, cw_treen_t * a_child,
     {
       a_treen->children = _cw_malloc(a_treen->num_children
 				       * sizeof(cw_treen_t *));
+      if (NULL == a_treen->children)
+      {
+	retval = TRUE;
+	goto RETURN;
+      }
     }
     else
     {
-      a_treen->children = _cw_realloc(a_treen->children,
-					a_treen->num_children
-					* sizeof(cw_treen_t *));
+      void * t_ptr;
+
+      
+      t_ptr = _cw_realloc(a_treen->children,
+			  a_treen->num_children
+			  * sizeof(cw_treen_t *));
+      if (NULL == t_ptr)
+      {
+	retval = TRUE;
+	goto RETURN;
+      }
+      else
+      {
+	a_treen->children = (cw_treen_t **) t_ptr;
+      }
     }
     
     /* Shuffle things forward to make room. */
@@ -149,7 +171,8 @@ treen_link_child(cw_treen_t * a_treen, cw_treen_t * a_child,
     /* Plop the new child pointer in place. */
     a_treen->children[a_position] = a_child;
   }
-  
+
+  RETURN:
 #ifdef _CW_REENTRANT
   if (a_treen->is_thread_safe)
   {
@@ -204,6 +227,8 @@ treen_unlink_child(cw_treen_t * a_treen, cw_uint32_t a_position,
       a_treen->children = _cw_realloc(a_treen->children,
 					a_treen->num_children
 					* sizeof(cw_treen_t *));
+      /* Shrinking, so there should be no error. */
+      _cw_check_ptr(a_treen->children);
     }
 
 #ifdef _CW_REENTRANT

@@ -1,3 +1,12 @@
+1999-05-03  J. Owen Evans  <jasone@canonware.com>
+
+	* src/buf.c: Add buf_set_{uint{8,32,64},range}().
+
+	* : Memory allocation is no longer guaranteed safe (NULL can be
+	returned).  This makes it possible to catch memory errors and
+	continue processing.  Many, many functions changed, including
+	almost all class conststructors.
+
 1999-04-28  J. Owen Evans  <jasone@canonware.com>
 
 	* src/res.c: Remove static buffers.

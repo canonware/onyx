@@ -39,7 +39,7 @@ insert_items(void * a_arg)
     string = (char *) _cw_malloc(40);
     sprintf(string, "thread %u, string %u",
 	    foo_var->thread_num, i);
-    _cw_assert(FALSE == oh_item_insert(foo_var->hash,
+    _cw_assert(0 == oh_item_insert(foo_var->hash,
 				       (void *) string, (void *) string));
 /*     log_eprintf(cw_g_log, NULL, 0, "insert_items", */
 /* 		"thread %u, end iteration %u\n", foo_var->thread_num, i); */

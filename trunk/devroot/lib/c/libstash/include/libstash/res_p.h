@@ -43,5 +43,5 @@ res_p_char_type(char a_char);
  * methods external to res to give us valid resources.
  *
  ****************************************************************************/
-static void
+static cw_bool_t
 res_p_merge_res(cw_res_t * a_res, const char * a_name, const char * a_val);

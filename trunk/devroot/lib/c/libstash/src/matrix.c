@@ -33,10 +33,15 @@ matrix_new(cw_matrix_t * a_matrix)
   else
   {
     retval = (cw_matrix_t *) _cw_malloc(sizeof(cw_matrix_t));
+    if (NULL == retval)
+    {
+      goto RETURN;
+    }
     bzero(retval, sizeof(cw_matrix_t));
     retval->is_malloced = TRUE;
   }
-  
+
+  RETURN:
   return retval;
 }
 
@@ -58,10 +63,13 @@ matrix_delete(cw_matrix_t * a_matrix)
   }
 }
 
-void
+cw_bool_t
 matrix_init(cw_matrix_t * a_matrix, cw_uint32_t a_x_size,
 	    cw_uint32_t a_y_size, cw_bool_t a_should_zero)
 {
+  cw_bool_t retval;
+  void * t_ptr;
+  
   _cw_check_ptr(a_matrix);
   _cw_assert(a_x_size != 0);
   _cw_assert(a_y_size != 0);
@@ -69,12 +77,44 @@ matrix_init(cw_matrix_t * a_matrix, cw_uint32_t a_x_size,
   if (a_matrix->grid == NULL)
   {
     /* Fresh start, create a matrix. */
-    a_matrix->grid = (cw_sint32_t *) _cw_malloc(sizeof(cw_sint32_t)
-						  * a_x_size * a_y_size);
-    a_matrix->x_index = (cw_uint32_t *) _cw_malloc(sizeof(cw_uint32_t)
-						     * a_x_size);
-    a_matrix->y_index = (cw_uint32_t *) _cw_malloc(sizeof(cw_uint32_t)
-						     * a_y_size);
+    t_ptr = _cw_malloc(sizeof(cw_sint32_t) * a_x_size * a_y_size);
+    if (NULL == t_ptr)
+    {
+      retval = TRUE;
+      goto RETURN;
+    }
+    else
+    {
+      a_matrix->grid = (cw_sint32_t *) t_ptr;
+    }
+
+    t_ptr = _cw_malloc(sizeof(cw_uint32_t) * a_x_size);
+    if (NULL == t_ptr)
+    {
+      _cw_free(a_matrix->grid);
+      a_matrix->grid = NULL;
+      retval = TRUE;
+      goto RETURN;
+    }
+    else
+    {
+      a_matrix->x_index = (cw_uint32_t *) t_ptr;
+    }
+
+    t_ptr = _cw_malloc(sizeof(cw_uint32_t) * a_y_size);
+    if (NULL == t_ptr)
+    {
+      _cw_free(a_matrix->grid);
+      a_matrix->grid = NULL;
+      _cw_free(a_matrix->x_index);
+      a_matrix->x_index = NULL; /* Probably not necessary. */
+      retval = TRUE;
+      goto RETURN;
+    }
+    else
+    {
+      a_matrix->y_index = (cw_uint32_t *) t_ptr;
+    }
   }
   else if ((a_x_size == a_matrix->grid_x_size)
 	   && (a_y_size == a_matrix->grid_y_size))
@@ -84,15 +124,39 @@ matrix_init(cw_matrix_t * a_matrix, cw_uint32_t a_x_size,
   else
   {
     /* realloc(). */
-    a_matrix->grid = (cw_sint32_t *) _cw_realloc(a_matrix->grid,
-						   sizeof(cw_bool_t)
-						   * a_x_size * a_y_size);
-    a_matrix->x_index = (cw_uint32_t *) _cw_realloc(a_matrix->x_index,
-						      sizeof(cw_uint32_t)
-						      * a_x_size);
-    a_matrix->y_index = (cw_uint32_t *) _cw_realloc(a_matrix->y_index,
-						      sizeof(cw_uint32_t)
-						      * a_y_size);
+    t_ptr = _cw_realloc(a_matrix->grid,
+			sizeof(cw_bool_t) * a_x_size * a_y_size);
+    if (NULL == t_ptr)
+    {
+      retval = TRUE;
+      goto RETURN;
+    }
+    else
+    {
+      a_matrix->grid = (cw_sint32_t *) t_ptr;
+    }
+
+    t_ptr = _cw_realloc(a_matrix->x_index, sizeof(cw_uint32_t) * a_x_size);
+    if (NULL == t_ptr)
+    {
+      retval = TRUE;
+      goto RETURN;
+    }
+    else
+    {
+      a_matrix->x_index = (cw_uint32_t *) t_ptr;
+    }
+
+    t_ptr = _cw_realloc(a_matrix->y_index, sizeof(cw_uint32_t) * a_y_size);
+    if (NULL == t_ptr)
+    {
+      retval = TRUE;
+      goto RETURN;
+    }
+    else
+    {
+      a_matrix->y_index = (cw_uint32_t *) t_ptr;
+    }
   }
   
   a_matrix->x_size
@@ -120,11 +184,19 @@ matrix_init(cw_matrix_t * a_matrix, cw_uint32_t a_x_size,
       a_matrix->y_index[i] = i;
     }
   }
+  
+  retval = FALSE;
+  
+  RETURN:
+  return retval;
 }
 
-void
+cw_bool_t
 matrix_rebuild(cw_matrix_t * a_matrix)
 {
+  cw_bool_t retval;
+  void * t_ptr;
+  
   _cw_check_ptr(a_matrix);
 
   if ((a_matrix->x_size != a_matrix->grid_x_size)
@@ -134,9 +206,18 @@ matrix_rebuild(cw_matrix_t * a_matrix)
 
     /* Create new grid and indices. */
     old_grid = a_matrix->grid;
-    a_matrix->grid = (cw_sint32_t *) _cw_malloc(sizeof(cw_sint32_t)
-						  * a_matrix->x_size
-						  * a_matrix->y_size);
+    t_ptr = _cw_malloc(sizeof(cw_sint32_t)
+		       * a_matrix->x_size
+		       * a_matrix->y_size);
+    if (NULL == t_ptr)
+    {
+      retval = TRUE;
+      goto RETURN;
+    }
+    else
+    {
+      a_matrix->grid = (cw_sint32_t *) t_ptr;
+    }
 
     /* Copy valid parts of old grid to new grid. */
     for (j = 0; j < a_matrix->y_size; j++)
@@ -155,6 +236,9 @@ matrix_rebuild(cw_matrix_t * a_matrix)
     a_matrix->x_index
       = (cw_uint32_t *) _cw_realloc(a_matrix->x_index,
 				    sizeof(cw_uint32_t) * a_matrix->x_size);
+    /* We're never growing the allocation, so we should never fail. */
+    _cw_check_ptr(a_matrix->x_index);
+    
     for (i = 0; i < a_matrix->x_size; i++)
     {
       a_matrix->x_index[i] = i;
@@ -163,6 +247,9 @@ matrix_rebuild(cw_matrix_t * a_matrix)
     a_matrix->y_index
       = (cw_uint32_t *) _cw_realloc(a_matrix->y_index,
 				    sizeof(cw_uint32_t) * a_matrix->y_size);
+    /* We're never growing the allocation, so we should never fail. */
+    _cw_check_ptr(a_matrix->y_index);
+    
     for (i = 0; i < a_matrix->y_size; i++)
     {
       a_matrix->y_index[i] = i;
@@ -172,6 +259,11 @@ matrix_rebuild(cw_matrix_t * a_matrix)
     a_matrix->grid_x_size = a_matrix->x_size;
     a_matrix->grid_y_size = a_matrix->y_size;
   }
+  
+  retval = FALSE;
+
+  RETURN:
+  return retval;
 }
 
 #ifdef _LIBSTASH_DBG

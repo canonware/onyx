@@ -36,6 +36,10 @@ pezz_new(cw_pezz_t * a_pezz, cw_uint32_t a_buffer_size,
   if (NULL == a_pezz)
   {
     retval = (cw_pezz_t *) _cw_malloc(sizeof(cw_pezz_t));
+    if (NULL == retval)
+    {
+      goto RETURN;
+    }
     bzero(retval, sizeof(cw_pezz_t));
     retval->is_malloced = TRUE;
   }
@@ -60,8 +64,23 @@ pezz_new(cw_pezz_t * a_pezz, cw_uint32_t a_buffer_size,
   /* Calculate how big to make the memory block and allocate it. */
   retval->rings
     = (cw_ring_t *) _cw_calloc(retval->num_buffers, sizeof(cw_ring_t));
+  if (NULL == retval->rings)
+  {
+    _cw_free(retval);
+    retval = NULL;
+    goto RETURN;
+  }
+  
   retval->mem_base
     = (void *) _cw_calloc(retval->num_buffers, retval->buffer_size);
+  if (NULL == retval->mem_base)
+  {
+    _cw_free(retval->rings);
+    _cw_free(retval);
+    retval = NULL;
+    goto RETURN;
+  }
+  
   retval->mem_end = (retval->mem_base
 		     + (retval->buffer_size * retval->num_buffers));
 
@@ -84,7 +103,8 @@ pezz_new(cw_pezz_t * a_pezz, cw_uint32_t a_buffer_size,
       ring_meld(retval->spare_buffers, ring);
     }
   }
-    
+
+  RETURN:
   return retval;
 }
 
@@ -203,15 +223,17 @@ pezz_get(cw_pezz_t * a_pezz)
   else
   {
     /* No buffers available.  malloc() one. */
+    retval = _cw_malloc(a_pezz->buffer_size);
 #ifdef _LIBSTASH_DBG
-    a_pezz->num_overflow++;
-    if (a_pezz->num_overflow > a_pezz->max_overflow)
+    if (NULL != retval)
     {
-      a_pezz->max_overflow = a_pezz->num_overflow;
+      a_pezz->num_overflow++;
+      if (a_pezz->num_overflow > a_pezz->max_overflow)
+      {
+	a_pezz->max_overflow = a_pezz->num_overflow;
+      }
     }
 #endif
-
-    retval = _cw_malloc(a_pezz->buffer_size);
   }
   
 #ifdef _CW_REENTRANT
@@ -289,11 +311,22 @@ pezz_dump(cw_pezz_t * a_pezz, const char * a_prefix)
 
     log_printf(cw_g_log, "%sspare_buffers : \n",
 	       a_prefix);
-    sprintf(prefix,    "%s              : ", a_prefix);
+
+    if (NULL == prefix)
+    {
+      sprintf(prefix,    "%s              : ", a_prefix);
+    }
+    else
+    {
+      prefix = (char *) a_prefix;
+    }
     
     ring_dump(a_pezz->spare_buffers, prefix);
 
-    _cw_free(prefix);
+    if (NULL != prefix)
+    {
+      _cw_free(prefix);
+    }
   }
   else
   {

@@ -27,6 +27,7 @@ main()
 /*   oh_h1_t * h1_ptr; */
   int i;
   cw_bool_t error;
+  cw_sint32_t ins_error;
 
   libstash_init();
   log_printf(cw_g_log, "Test begin\n");
@@ -49,9 +50,9 @@ main()
   for (i = 0; i < NUM_STRINGS; i++)
   {
 /*     log_printf(cw_g_log, "<<< Iteration %d >>>\n", i); */
-    error = oh_item_insert(&hash, (void *) strings[i],
+    ins_error = oh_item_insert(&hash, (void *) strings[i],
 				 (void *) &(strings[i]));
-    if (error == TRUE)
+    if (ins_error == 1)
     {
       log_printf(cw_g_log, "(1) Error at i == %d\n", i);
       oh_dump(&hash, FALSE);
@@ -75,9 +76,9 @@ main()
 /*   log_printf(cw_g_log, "<<< Begin second insertion loop >>>\n"); */
   for (i = 0; i < NUM_STRINGS / 2; i++)
   {
-    error = oh_item_insert(&hash, (void *) strings[i],
+    ins_error = oh_item_insert(&hash, (void *) strings[i],
 				 (void *) &(strings[i]));
-    if (error == TRUE)
+    if (ins_error == 1)
     {
       log_printf(cw_g_log, "(3) Error at i == %d\n", i);
       oh_dump(&hash, FALSE);
@@ -99,7 +100,7 @@ main()
   }
 
 /*   log_printf(cw_g_log, "<<< Final insertion >>>\n"); */
-  error = oh_item_insert(&hash, (void *) strings[0],
+  ins_error = oh_item_insert(&hash, (void *) strings[0],
 			       (void *) &(strings[0]));
   
   {
