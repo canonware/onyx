@@ -57,7 +57,7 @@ end
 ' cat
 @enable_modprompt@ 1 eq {
     `
-    `modprompt/modprompt.nx' require
+    $prompt mclass:singleton:load pop
     ' cat
 } if
 
