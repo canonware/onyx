@@ -112,7 +112,7 @@ main(int argc, char ** argv)
       {
 	opt_verbose = TRUE;
 	dbg_register(cw_g_dbg, "prog_verbose");
-	dbg_register(cw_g_dbg, "mem_verbose");
+/*  	dbg_register(cw_g_dbg, "mem_verbose"); */
 	dbg_register(cw_g_dbg, "sockb_verbose");
 	dbg_register(cw_g_dbg, "socks_verbose");
 	/* Nothing uses this flag. */
@@ -266,7 +266,8 @@ main(int argc, char ** argv)
     bzero(conn, sizeof(conn));
     sock_new(&conn->client_sock, 16384);
     
-    if (NULL == socks_accept_block(socks, &conn->client_sock))
+    if (NULL == socks_accept_block(socks, &conn->client_sock)
+	|| should_quit)
     {
       if (dbg_is_registered(cw_g_dbg, "prog_verbose"))
       {
@@ -349,9 +350,7 @@ get_log_str(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str)
   char c_trans[4], line_a[81], line_b[81],
     line_sep[81]
     = "         |                 |                 |                 |\n";
-/*    cw_buf_t t_buf; */
-/*    cw_bufel_t * bufel; */
-  cw_uint32_t str_len, buf_size, /*  bufel_offset,  */i, j;
+  cw_uint32_t str_len, buf_size, i, j;
   cw_uint8_t c;
 
 /*    buf_new(&t_buf, NULL); */
@@ -395,11 +394,6 @@ get_log_str(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str)
   /* Blank line. */
   strcat(retval, "\n");
 
-/*    bufel = buf_rm_head_bufel(a_buf); */
-/*    if (bufel != NULL) */
-/*    { */
-/*      bufel_offset = bufel_get_beg_offset(bufel); */
-/*    } */
   for (i = 0; i < buf_size; i += j)
   {
     /* Clear the line buffers and get them set up for printing character
@@ -419,18 +413,7 @@ get_log_str(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str)
 	strcat(line_b, " |");
       }
 	
-      /* Get a bufel with data in it if necessary. */
-/*        while (bufel_offset >= bufel_get_end_offset(bufel)) */
-/*        { */
-/*  	buf_append_bufel(&t_buf, bufel); */
-/*  	bufel = buf_rm_head_bufel(a_buf); */
-/*  	_cw_check_ptr(bufel); */
-/*  	bufel_offset = bufel_get_beg_offset(bufel); */
-/*        } */
-
-      /* Print the next character. */
-/*        c = bufel_get_uint8(bufel, bufel_offset); */
-      c = buf_get_uint8(a_buf, i);
+      c = buf_get_uint8(a_buf, i + j);
       
       switch (c)
       {
@@ -834,7 +817,6 @@ get_log_str(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str)
       sprintf(line_a + strlen(line_a), "  %02x", c);
       sprintf(line_b + strlen(line_b), " %3s", c_trans);
 
-/*        bufel_offset++; */
     }
     /* Actually copy the strings to the final output string. */
     strcat(retval, line_a);
@@ -853,19 +835,10 @@ get_log_str(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str)
     }
   }
 
-/*    if (bufel != NULL) */
-/*    { */
-/*      buf_append_bufel(&t_buf, bufel); */
-/*    } */
-
   /* Last dashed line. */
   strcat(retval,
 	 "----------------------------------------"
 	 "----------------------------------------\n");
-
-  /* Move all the data back to a_buf. */
-/*    buf_append_buf(a_buf, &t_buf); */
-/*    buf_delete(&t_buf); */
 
   return retval;
 }
