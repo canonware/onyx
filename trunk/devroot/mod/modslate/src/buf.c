@@ -1153,7 +1153,6 @@ buf_p_bufp_cur_set(cw_buf_t *a_buf, cw_bufp_t *a_bufp)
 
 	cw_assert(bufp_p_bpos(a_bufp) != bufp_p_bpos(a_buf->bufp_cur));
 //	fprintf(stderr, "%s:%d:%s(): %p(%llu) > %p(%llu) ?\n", __FILE__, __LINE__, __FUNCTION__, a_bufp, bufp_p_bpos(a_bufp), a_buf->bufp_cur, bufp_p_bpos(a_buf->bufp_cur));
-//	buf_dump(a_buf, "blah ", NULL, NULL);
 	if (bufp_p_bpos(a_bufp) > bufp_p_bpos(a_buf->bufp_cur))
 	{
 	    /* Move forward. */
@@ -1162,7 +1161,6 @@ buf_p_bufp_cur_set(cw_buf_t *a_buf, cw_bufp_t *a_bufp)
 	    line = bufp->line;
 	    do
 	    {
-    fprintf(stderr, "%s:%d:%s()\n", __FILE__, __LINE__, __FUNCTION__);
 		bpos += (cw_uint64_t) bufp->len;
 		line += (cw_uint64_t) bufp->nlines;
 
@@ -1183,7 +1181,6 @@ buf_p_bufp_cur_set(cw_buf_t *a_buf, cw_bufp_t *a_bufp)
 	    bpos = a_buf->len + 1 - bufp->bpos;
 	    line = a_buf->nlines - bufp->line;
 	    do {
-//    fprintf(stderr, "%s:%d:%s()\n", __FILE__, __LINE__, __FUNCTION__);
 		bufp->bob_relative = FALSE;
 		bufp->bpos = bpos;
 		bufp->line = line;
@@ -2039,7 +2036,7 @@ mkr_p_before_slide_insert(cw_mkr_t *a_mkr, cw_bool_t a_after,
 
     if (a_after)
     {
-	mkr_seek(a_mkr, -a_count, BUFW_REL);
+	mkr_seek(a_mkr, -(cw_sint64_t) a_count, BUFW_REL);
     }
 
     return nlines;
@@ -2138,7 +2135,7 @@ mkr_p_after_slide_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, cw_bufp_t *a_nextp,
 
     if (a_after)
     {
-	mkr_seek(a_mkr, -a_count, BUFW_REL);
+	mkr_seek(a_mkr, -(cw_sint64_t) a_count, BUFW_REL);
     }
 
     return nlines;
@@ -2172,6 +2169,7 @@ mkr_p_split_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
     
     nextp->bpos = bufp->bpos; /* Not actual bpos, but needed for insertion. */
     nextp->line = bufp->line; /* Not actual line. */
+    cw_assert(ql_next(&buf->plist, bufp, plink) == nextp);
     buf_p_bufp_insert(buf, nextp);
     cw_assert(ql_next(&buf->plist, bufp, plink) == nextp);
 
@@ -2237,10 +2235,10 @@ mkr_p_split_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
 	{
 	    newp = bufp_p_new(buf);
 	    newp->bob_relative = TRUE;
-	    newp->bpos = nextp->bpos;
-	    newp->line = nextp->line;
-
-	    buf_p_bufp_insert(buf, bufp);
+	    newp->bpos = bufp->bpos;
+	    newp->line = bufp->line;
+	    buf_p_bufp_insert(buf, newp);
+	    cw_assert(ql_next(&buf->plist, newp, plink) == nextp);
 	}
     }
     else
@@ -2263,7 +2261,7 @@ mkr_p_split_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
 
     if (a_after)
     {
-	mkr_seek(a_mkr, -a_count, BUFW_REL);
+	mkr_seek(a_mkr, -(cw_sint64_t) a_count, BUFW_REL);
     }
 
     return nlines;
@@ -2429,12 +2427,10 @@ mkr_l_remove(cw_mkr_t *a_start, cw_mkr_t *a_end, cw_bool_t a_record)
 	}
     }
 
-//    fprintf(stderr, "%s:%d:%s()\n", __FILE__, __LINE__, __FUNCTION__);
     /* Remove data. */
     if (start->bufp == end->bufp)
     {
 	cw_uint32_t gap_end, nlines;
-//    fprintf(stderr, "%s:%d:%s()\n", __FILE__, __LINE__, __FUNCTION__);
 
 	/* All data to be removed are in the same bufp. */
 
@@ -2455,7 +2451,6 @@ mkr_l_remove(cw_mkr_t *a_start, cw_mkr_t *a_end, cw_bool_t a_record)
 		 mkr != NULL && mkr->ppos >= gap_end;
 		 mkr = ql_prev(&bufp->mlist, mkr, mlink))
 	    {
-//    fprintf(stderr, "%s:%d:%s(): mkr: %p\n", __FILE__, __LINE__, __FUNCTION__, mkr);
 		mkr->pline -= nlines;
 	    }
 	}
@@ -2467,7 +2462,6 @@ mkr_l_remove(cw_mkr_t *a_start, cw_mkr_t *a_end, cw_bool_t a_record)
 	     mkr != NULL && mkr->ppos < gap_end;
 	     mkr = ql_next(&bufp->mlist, mkr, mlink))
 	{
-//    fprintf(stderr, "%s:%d:%s(): mkr: %p\n", __FILE__, __LINE__, __FUNCTION__, mkr);
 	    mkr->ppos = gap_end;
 	    mkr->pline = start->pline;
 	}
@@ -2475,7 +2469,6 @@ mkr_l_remove(cw_mkr_t *a_start, cw_mkr_t *a_end, cw_bool_t a_record)
 	     mkr != NULL && mkr->ppos >= bufp->gap_off;
 	     mkr = ql_prev(&bufp->mlist, mkr, mlink))
 	{
-//    fprintf(stderr, "%s:%d:%s(): mkr: %p\n", __FILE__, __LINE__, __FUNCTION__, mkr);
 	    mkr->ppos = gap_end;
 	    mkr->pline = start->pline;
 	}
@@ -2485,7 +2478,6 @@ mkr_l_remove(cw_mkr_t *a_start, cw_mkr_t *a_end, cw_bool_t a_record)
 	cw_bufp_t *prevp;
 	cw_uint32_t nlines;
 
-//    fprintf(stderr, "%s:%d:%s()\n", __FILE__, __LINE__, __FUNCTION__);
 	/* Data are to be removed from two or more bufp's.  Work backwards
 	 * through the affected bufp's.  This order reduces the amount of work
 	 * necessary in processing mkr's. */
@@ -2554,7 +2546,6 @@ mkr_l_remove(cw_mkr_t *a_start, cw_mkr_t *a_end, cw_bool_t a_record)
 	    buf->nlines -= (cw_uint64_t) bufp->nlines;
 
 	    /* Remove and delete bufp. */
-//	    fprintf(stderr, "%s:%d:%s() delete %p\n", __FILE__, __LINE__, __FUNCTION__, bufp);
 	    buf_p_bufp_remove(buf, bufp);
 	    bufp_p_delete(bufp);
 	    nrem++;
@@ -2601,7 +2592,6 @@ mkr_l_remove(cw_mkr_t *a_start, cw_mkr_t *a_end, cw_bool_t a_record)
 	 nextp != pastp;
 	 bufp = nextp, nextp = ql_next(&buf->plist, bufp, plink))
     {
-//	fprintf(stderr, "%s:%d:%s(): bufp: %p\n", __FILE__, __LINE__, __FUNCTION__, bufp);
 	while (bufp->len + nextp->len <= CW_BUFP_SIZE / 2
 	       || bufp->len == 0
 	       || nextp->len == 0)
@@ -3132,21 +3122,20 @@ mkr_before_get(const cw_mkr_t *a_mkr)
 cw_uint8_t *
 mkr_after_get(const cw_mkr_t *a_mkr)
 {
-    cw_uint32_t offset;
+    cw_uint8_t *retval;
 
     cw_check_ptr(a_mkr);
     cw_dassert(a_mkr->magic == CW_MKR_MAGIC);
 
-    if (a_mkr->ppos <= a_mkr->bufp->gap_off)
+    if (a_mkr->ppos == CW_BUFP_SIZE)
     {
-	offset = a_mkr->ppos;
+	retval = NULL;
+	goto RETURN;
     }
-    else
-    {
-	offset = a_mkr->ppos - (CW_BUFP_SIZE - a_mkr->bufp->len);
-    }
-    
-    return &a_mkr->bufp->b[offset];
+
+    retval = &a_mkr->bufp->b[a_mkr->ppos];
+    RETURN:
+    return retval;
 }
 
 cw_bufv_t *
