@@ -3455,6 +3455,9 @@ objects from stack down through topmost mark. \\
 \hline
 (a) (b) & {\bf \htmlref{cat}{systemdict:cat}} & (a b) & Catenate two stacks. \\
 \hline
+stacks count & {\bf \htmlref{ncat}{systemdict:ncat}} & stack & Catenate
+stacks. \\
+\hline
 srcstack dststack & {\bf \htmlref{copy}{systemdict:copy}} & dststack & Copy
 stack contents. \\
 \hline \hline
@@ -3533,6 +3536,9 @@ string index substring & {\bf \htmlref{putinterval}{systemdict:putinterval}} &
 \hline
 `a' `b' & {\bf \htmlref{cat}{systemdict:cat}} & `ab' & Catenate two strings. \\
 \hline
+strings count & {\bf \htmlref{ncat}{systemdict:ncat}} & string & Catenate
+strings. \\
+\hline
 srcstring dststring & {\bf \htmlref{copy}{systemdict:copy}} & dstsubstring &
 Copy string. \\
 \hline
@@ -3578,6 +3584,9 @@ array index subarray & {\bf \htmlref{putinterval}{systemdict:putinterval}} & --
 & Copy subarray into array. \\
 \hline
 [a] [b] & {\bf \htmlref{cat}{systemdict:cat}} & [a b] & Catenate two arrays. \\
+\hline
+arrays count & {\bf \htmlref{ncat}{systemdict:ncat}} & array & Catenate
+arrays. \\
 \hline
 srcarray dstarray & {\bf \htmlref{copy}{systemdict:copy}} & dstsubarray & Copy
 array. \\
@@ -7922,21 +7931,28 @@ onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:ncat}
-\index{ncat@\onyxop{objects count}{ncat}{obj}}
-\item[{\onyxop{OPARGS}{ncat}{OPOUTS}}: ]
+\index{ncat@\onyxop{}{ncat}{}}
+\item[{\onyxop{arrays count}{ncat}{array}}: ]
+\item[{\onyxop{stacks count}{ncat}{stack}}: ]
+\item[{\onyxop{strings count}{ncat}{string}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[objects: ]
-			\oparg{count} objects, all of one type: array, stack, or
-			string.
+		\item[arrays: ]
+			\oparg{count} arrays.
+		\item[stacks: ]
+			\oparg{count} stacks.
+		\item[strings: ]
+			\oparg{count} strings.
 		\item[count: ]
-			Number of \oparg{objects} to catenate.
+			Number of \oparg{arrays}, \oparg{stacks}, or
+			\oparg{strings} to catenate.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[obj: ]
-			The catenation of \oparg{objects}.
+			The catenation of \oparg{arrays}, \oparg{stacks}, or
+			\oparg{strings}.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
@@ -7945,7 +7961,8 @@ onyx:1>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Catenate \oparg{count} \oparg{objects}.
+		Catenate \oparg{count} \oparg{arrays}, \oparg{stacks}, or
+		\oparg{strings}.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> [`a'] [`b'] [`c'] 3 ncat 1 sprint
