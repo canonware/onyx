@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
 #-*-mode:perl-*-
 #############################################################################
 #
@@ -30,8 +30,8 @@
 #
 # $Source$
 # $Author: jasone $
-# $Revision: 197 $
-# $Date: 1998-09-05 18:27:14 -0700 (Sat, 05 Sep 1998) $
+# $Revision: 211 $
+# $Date: 1998-09-08 12:36:49 -0700 (Tue, 08 Sep 1998) $
 #
 # <<< Description >>>
 #
@@ -49,8 +49,10 @@ use Getopt::Long;
 # project.
 $dot = "stashmaster";
 
-$COPYRIGHT{"jasone"} 
-= ("Copyright (C) 1996-1998 Jason Evans.  All rights reserved.");
+$COPYRIGHT{"jasone", 0} 
+= "Copyright (C) 1996-1998 Jason Evans <jasone\@canonware.com>.";
+$COPYRIGHT{"jasone", 1}
+= "All rights reserved.";
 
 @LICENSE = 
 (
@@ -197,13 +199,19 @@ sub expand_copyright
 	    if (/^(.*)\<Copyright([ \t]*=[ \t]*\"([A-Za-z0-9]+)\")?\>(.*)\n/)
 	      {
 		$did_subst = 1;
-		if (defined($COPYRIGHT{$3}))
+		if (defined($COPYRIGHT{$3, 0}))
 		  {
-		    print $ofh "$1$COPYRIGHT{$3}\n";
+		    for ($i = 0; defined($COPYRIGHT{$3, $i}); $i++)
+		      {
+			print $ofh "$1$COPYRIGHT{$3, $i}$4\n";
+		      }
 		  }
 		else
 		  {
-		    print $ofh "$1$COPYRIGHT{\"jasone\"}$4\n";
+		    for ($i = 0; defined($COPYRIGHT{"jasone", $i}); $i++)
+		      {
+			print $ofh "$1$COPYRIGHT{\"jasone\", $i}$4\n";
+		      }
 		  }
 	      }
 	    elsif (/^(.*)\<License\>(.*)\n/)
