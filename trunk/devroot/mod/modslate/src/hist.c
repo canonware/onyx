@@ -1069,14 +1069,33 @@ hist_p_ins_ynk_rem_del(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos,
     /* Insert the data. */
     mkr_before_insert(&a_hist->htmp, a_bufv, a_bufvcnt);
 
-    /* Now that there is space for the data, do a bufv_rcopy() to get the data
-     * written in the proper order. */
-    mkr_dup(&tmkr, &a_hist->htmp);
-    mkr_seek(&tmkr, -(cw_sint64_t)cnt, BUFW_REL);
-    bufv = mkr_range_get(&tmkr, &a_hist->htmp, &bufvcnt);
-    if (bufv != NULL)
+    /* Reverse the data, if the record type requires it. */
+    switch (a_tag)
     {
-	bufv_rcopy(bufv, bufvcnt, a_bufv, a_bufvcnt, 0);
+	case HST_TAG_YNK:
+	case HST_TAG_REM:
+	{
+	    break;
+	}
+	case HST_TAG_INS:
+	case HST_TAG_DEL:
+	{
+	    /* Now that there is space for the data, do a bufv_rcopy() to get
+	     * the data written in the proper order. */
+	    mkr_dup(&tmkr, &a_hist->htmp);
+	    mkr_seek(&tmkr, -(cw_sint64_t)cnt, BUFW_REL);
+	    bufv = mkr_range_get(&tmkr, &a_hist->htmp, &bufvcnt);
+	    if (bufv != NULL)
+	    {
+		bufv_rcopy(bufv, bufvcnt, a_bufv, a_bufvcnt, 0);
+	    }
+
+	    break;
+	}
+	default:
+	{
+	    cw_not_reached();
+	}
     }
 
     /* Write the undo record header. */
