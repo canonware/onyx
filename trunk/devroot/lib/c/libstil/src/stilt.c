@@ -240,31 +240,31 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 		    stilat_stilsc_pool_get(&a_stilt->stilat));
 		try_stage = 7;
 
-		/* Create errordict.  threaddict needs this. */
+		/*
+		 * Create errordict, derror, and userdict.  threaddict
+		 * initialization needs these to already be initialized.
+		 */
 		errordict_populate(&retval->errordict, retval);
-
-		/* Create derrordict.  threaddict needs this. */
-		/* XXX */
-/*  		derror_populate(&retval->derrordict, retval); */
-
-		/* Create userdict. threaddict needs this. */
+		derror_populate(&retval->derror, retval);
 		stilo_dict_new(&retval->userdict, retval,
 		    _CW_STILT_USERDICT_SIZE);
 
-		/* Create and push threaddict onto the dictionary stack. */
+		/* Create threaddict. */
 		threaddict_populate(&retval->threaddict, retval);
+
+		/*
+		 * Push threaddict, systemdict, globaldict, and userdict onto
+		 * the dictionary stack.
+		 */
 		stilo = stils_push(&retval->dstack, retval);
 		stilo_dup(stilo, &retval->threaddict);
 
-		/* Push systemdict onto the dictionary stack. */
 		stilo = stils_push(&retval->dstack, retval);
 		stilo_dup(stilo, stil_systemdict_get(a_stil));
 
-		/* Push globaldict onto the dictionary stack. */
 		stilo = stils_push(&retval->dstack, retval);
 		stilo_dup(stilo, stil_globaldict_get(a_stil));
 
-		/* Push userdict onto the dictionary stack. */
 		stilo = stils_push(&retval->dstack, retval);
 		stilo_dup(stilo, &retval->userdict);
 	}
@@ -454,7 +454,7 @@ stilt_loop(cw_stilt_t *a_stilt)
 			break;
 		}
 		case STILOT_NAME: {
-			cw_stilo_t	val;
+			cw_stilo_t	val; /* XXX GC-unsafe. */
 
 			/*
 			 * Search for a value associated with the name
@@ -558,157 +558,164 @@ stilt_error(cw_stilt_t *a_stilt, cw_stilte_t a_error)
 	 * Get errordict.  We can't throw an undefined error here because it
 	 * would go infinitely recursive.
 	 */
+	errordict = stils_push(&a_stilt->tstack, a_stilt);
 	key = stils_push(&a_stilt->tstack, a_stilt);
 	{
-		cw_uint8_t	keystr[] = "errordict";
+		static const cw_uint8_t	keystr[] = "errordict";
 
 		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
 	}
 	if (stilt_dict_stack_search(a_stilt, key, errordict)) {
-		stils_pop(&a_stilt->tstack, a_stilt);
+		stils_npop(&a_stilt->tstack, a_stilt, 2);
 		xep_throw(_CW_STILX_ERRORDICT);
 	}
+
+	/*
+	 * Set the error in case our generic error handler gets called (not to
+	 * mention for general use).
+	 */
+	a_stilt->error = a_error;
 
 	/*
 	 * Find handler corresponding to error.
 	 */
 	switch (a_error) {
 	case STILTE_DICTSTACKOVERFLOW: {
-		cw_uint8_t	keystr[] = "dictstackoverflow";
+		static const cw_uint8_t	keystr[] = "dictstackoverflow";
 
 		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
 		break;
 	}
 	case STILTE_DICTSTACKUNDERFLOW: {
-		cw_uint8_t	keystr[] = "dictstackunderflow";
+		static const cw_uint8_t	keystr[] = "dictstackunderflow";
 
 		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
 		break;
 	}
 	case STILTE_EXECSTACKOVERFLOW: {
-		cw_uint8_t	keystr[] = "execstackoverflow";
+		static const cw_uint8_t	keystr[] = "execstackoverflow";
 
 		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
 		break;
 	}
 	case STILTE_INTERRUPT: {
-		cw_uint8_t	keystr[] = "interrupt";
+		static const cw_uint8_t	keystr[] = "interrupt";
 
 		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
 		ostack_push = FALSE;
 		break;
 	}
 	case STILTE_INVALIDACCESS: {
-		cw_uint8_t	keystr[] = "invalidaccess";
+		static const cw_uint8_t	keystr[] = "invalidaccess";
 
 		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
 		break;
 	}
 	case STILTE_INVALIDCONTEXT: {
-		cw_uint8_t	keystr[] = "invalidcontext";
+		static const cw_uint8_t	keystr[] = "invalidcontext";
 
 		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
 		break;
 	}
 	case STILTE_INVALIDEXIT: {
-		cw_uint8_t	keystr[] = "invalidexit";
+		static const cw_uint8_t	keystr[] = "invalidexit";
 
 		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
 		break;
 	}
 	case STILTE_INVALIDFILEACCESS: {
-		cw_uint8_t	keystr[] = "invalidfileaccess";
+		static const cw_uint8_t	keystr[] = "invalidfileaccess";
 
 		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
 		break;
 	}
 	case STILTE_IOERROR: {
-		cw_uint8_t	keystr[] = "ioerror";
+		static const cw_uint8_t	keystr[] = "ioerror";
 
 		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
 		break;
 	}
 	case STILTE_LIMITCHECK: {
-		cw_uint8_t	keystr[] = "limitcheck";
+		static const cw_uint8_t	keystr[] = "limitcheck";
 
 		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
 		break;
 	}
 	case STILTE_RANGECHECK: {
-		cw_uint8_t	keystr[] = "rangecheck";
+		static const cw_uint8_t	keystr[] = "rangecheck";
 
 		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
 		break;
 	}
 	case STILTE_STACKOVERFLOW: {
-		cw_uint8_t	keystr[] = "stackoverflow";
+		static const cw_uint8_t	keystr[] = "stackoverflow";
 
 		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
 		break;
 	}
 	case STILTE_STACKUNDERFLOW: {
-		cw_uint8_t	keystr[] = "stackunderflow";
+		static const cw_uint8_t	keystr[] = "stackunderflow";
 
 		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
 		break;
 	}
 	case STILTE_SYNTAXERROR: {
-		cw_uint8_t	keystr[] = "syntaxerror";
+		static const cw_uint8_t	keystr[] = "syntaxerror";
 
 		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
 		break;
 	}
 	case STILTE_TIMEOUT: {
-		cw_uint8_t	keystr[] = "timeout";
+		static const cw_uint8_t	keystr[] = "timeout";
 
 		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
 		ostack_push = FALSE;
 		break;
 	}
 	case STILTE_TYPECHECK: {
-		cw_uint8_t	keystr[] = "typecheck";
+		static const cw_uint8_t	keystr[] = "typecheck";
 
 		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
 		break;
 	}
 	case STILTE_UNDEFINED: {
-		cw_uint8_t	keystr[] = "undefined";
+		static const cw_uint8_t	keystr[] = "undefined";
 
 		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
 		break;
 	}
 	case STILTE_UNDEFINEDFILENAME: {
-		cw_uint8_t	keystr[] = "undefinedfilename";
+		static const cw_uint8_t	keystr[] = "undefinedfilename";
 
 		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
 		break;
 	}
 	case STILTE_UNDEFINEDRESOURCE: {
-		cw_uint8_t	keystr[] = "undefinedresource";
+		static const cw_uint8_t	keystr[] = "undefinedresource";
 
 		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
 		break;
 	}
 	case STILTE_UNDEFINEDRESULT: {
-		cw_uint8_t	keystr[] = "undefinedresult";
+		static const cw_uint8_t	keystr[] = "undefinedresult";
 
 		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
 		break;
 	}
 	case STILTE_UNMATCHEDMARK: {
-		cw_uint8_t	keystr[] = "unmatchedmark";
+		static const cw_uint8_t	keystr[] = "unmatchedmark";
 
 		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
 		break;
 	}
 	case STILTE_UNREGISTERED: {
-		cw_uint8_t	keystr[] = "unregistered";
+		static const cw_uint8_t	keystr[] = "unregistered";
 
 		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
 		break;
 	}
 	case STILTE_VMERROR: {
-		cw_uint8_t	keystr[] = "vmerror";
+		static const cw_uint8_t	keystr[] = "vmerror";
 
 		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
 		break;
@@ -727,23 +734,12 @@ stilt_error(cw_stilt_t *a_stilt, cw_stilte_t a_error)
 	}
 
 	/*
-	 * Get the handler for this particular error.  We could potentially
-	 * throw another error here without going infinitely recursive, but it's
-	 * not worth the risk.  After all, the user has done some really hokey
-	 * management of errordict if this happens.
+	 * Get the handler for this particular error and push it onto estack.
+	 * We could potentially throw another error here without going
+	 * infinitely recursive, but it's not worth the risk.  After all, the
+	 * user has done some really hokey management of errordict if this
+	 * happens.
 	 */
-
-	/* Execute errordict in order to make sure we have the value. */
-	stilo = stils_push(&a_stilt->estack, a_stilt);
-	stilo_dup(stilo, errordict);
-	stilt_loop(a_stilt);
-
-	/* Move errordict from ostack to tstack. */
-	errordict = stils_push(&a_stilt->tstack, a_stilt);
-	stilo = stils_get(&a_stilt->ostack, a_stilt);
-	stilo_dup(errordict, stilo);
-
-	/* Get the handler and push it onto estack. */
 	handler = stils_push(&a_stilt->estack, a_stilt);
 	if (stilo_dict_lookup(errordict, a_stilt, key, handler)) {
 		stils_npop(&a_stilt->tstack, a_stilt, 2);
@@ -768,19 +764,8 @@ stilt_dict_stack_search(cw_stilt_t *a_stilt, cw_stilo_t *a_key, cw_stilo_t
 	 * Iteratively search the dictionaries on the dictionary stack for
 	 * a_key.
 	 */
-	/* XXX We're guaranteed that dstack is >= 4 deep. */
-	i = 0;
-	depth = stils_count(&a_stilt->dstack);
-	_cw_assert(depth >= 4);
-
-	dict = stils_get(&a_stilt->dstack, a_stilt);
-	if (stilo_dict_lookup(dict, a_stilt, a_key, r_value) == FALSE) {
-		/* Found. */
-		retval = FALSE;
-		goto RETURN;
-	}
-
-	for (i = 1; i < depth; i++) {
+	for (i = 0, depth = stils_count(&a_stilt->dstack), dict = NULL; i <
+	    depth; i++) {
 		dict = stils_down_get(&a_stilt->dstack, a_stilt, dict);
 		if (stilo_dict_lookup(dict, a_stilt, a_key, r_value) ==
 		    FALSE) {
@@ -1957,8 +1942,10 @@ stilt_p_name_accept(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts)
 		    a_stilt->index, FALSE);
 		
 		stilo = stils_push(&a_stilt->ostack, a_stilt);
-		if (stilt_dict_stack_search(a_stilt, &key, stilo))
+		if (stilt_dict_stack_search(a_stilt, &key, stilo)) {
+			stils_pop(&a_stilt->ostack, a_stilt);
 			stilt_error(a_stilt, STILTE_UNDEFINED);
+		}
 
 		stilt_p_reset(a_stilt);
 		break;

@@ -23,7 +23,7 @@ struct cw_systemdict_entry {
 
 #define soft_operator(a_str) do {					\
 	cw_stilts_t	stilts;						\
-	cw_uint8_t	code[] = (a_str);				\
+	static const cw_uint8_t	code[] = (a_str);			\
 									\
 	stilts_new(&stilts, a_stilt);					\
 	stilt_interpret(a_stilt, &stilts, code, sizeof(code) - 1);	\
@@ -36,7 +36,7 @@ struct cw_systemdict_entry {
 /*
  * Array of operators in systemdict.
  */
-static struct cw_systemdict_entry systemdict_ops[] = {
+static const struct cw_systemdict_entry systemdict_ops[] = {
 	_SYSTEMDICT_ENTRY(abort),
 	_SYSTEMDICT_ENTRY(abs),
 	_SYSTEMDICT_ENTRY(add),
@@ -207,7 +207,6 @@ systemdict_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 
 		stilo_dict_def(a_dict, a_stilt, &name, &operator);
 	}
-
 #undef NENTRIES
 }
 
@@ -2232,6 +2231,30 @@ systemdict_start(cw_stilt_t *a_stilt)
 		stils_npop(estack, a_stilt, i + 1);
 
 		xep_handled();
+	}
+	xep_catch(_CW_STILX_STOP) {
+		xep_handled();
+
+		soft_operator("
+$error begin
+`newerror: ' print
+newerror ==
+`errorname: ' print
+errorname ==
+`recordstacks: ' print
+recordstacks ==
+`command: ' print
+//command ==
+
+`ostack: ' print
+ostack ==
+`estack: ' print
+estack ==
+`dstack: ' print
+dstack ==
+end
+");
+/*  		stilt_loop(a_stilt); */
 	}
 	/* XXX Set up exception handling. */
 	xep_end();

@@ -569,6 +569,7 @@ stilo_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
 	stilot_vtable[a_from->type].copy_f(a_to, a_from, a_stilt);
 }
 
+/* XXX Unused? */
 void
 stilo_move(cw_stilo_t *a_to, cw_stilo_t *a_from)
 {
@@ -1356,7 +1357,7 @@ stilo_dict_def(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilo_t *a_key,
 		if (dch_search(&dict->e.d.hash, (void *)a_key, (void **)&dicto)
 		    == FALSE) {
 			/* a_key is already defined. */
-			stilo_move(&dicto->val, a_val);
+			stilo_dup(&dicto->val, a_val);
 
 			/*
 			 * If (a_key == &dicto->val), things will break badly.
@@ -1371,9 +1372,9 @@ stilo_dict_def(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilo_t *a_key,
 			dicto = stilt_dicto_get(a_stilt);
 			chi = stilt_chi_get(a_stilt);
 			stilo_no_new(&dicto->key);
-			stilo_move(&dicto->key, a_key);
+			stilo_dup(&dicto->key, a_key);
 			stilo_no_new(&dicto->val);
-			stilo_move(&dicto->val, a_val);
+			stilo_dup(&dicto->val, a_val);
 
 			/* Insert. */
 			dch_insert(&dict->e.d.hash, (void *)&dicto->key,

@@ -26,6 +26,8 @@ extern  "C" {
 
 /* errordict not found, or handler not found in errordict. */
 #define	_CW_STILX_ERRORDICT		-128
+/* Error accessing $error. */
+#define	_CW_STILX_DERROR		-129
 
 /* Internal use, for the exit operator. */
 #define	_CW_STILX_EXIT			-129

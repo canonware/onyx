@@ -23,7 +23,7 @@
 /* Include files that _are_ installed. */
 {
   local incs = libstil.h libstil_incs.h stil.h stila.h stilo.h stils.h
-               stilt.h systemdict.h errordict.h threaddict.h;
+               stilt.h systemdict.h errordict.h derror.h threaddict.h;
   incs = [fromto % [srcdir]/lib/c/libstil/include/libstil/% [incs]];
   incs = [incs] [objdir]/lib/c/libstil/include/libstil/libstil_defs.h;
 
@@ -41,7 +41,7 @@
 
 /* Source files. */
 LIBSTIL_SRCS = stil.c stila.c stilo.c stils.c stilt.c systemdict.c errordict.c
-               threaddict.c;
+               derror.c threaddict.c;
 LIBSTIL_SRCS = [fromto % [srcdir]/lib/c/libstil/src/% [LIBSTIL_SRCS]];
 SRCS = [SRCS] [LIBSTIL_SRCS];
 

@@ -55,7 +55,7 @@ main(int argc, char **argv)
 	 * the interpreter do its thing.
 	 */
 	if (isatty(0)) {
-		cw_uint8_t		code[] =
+		static const cw_uint8_t	code[] =
 		    "product print `, version ' print version print \".\n\""
 		    " print flush";
 		struct stil_arg_s	arg = {NULL, 0, 0};
@@ -110,11 +110,11 @@ prompt(EditLine *a_el)
 {
 	if ((stilt_deferred(&stilt) == FALSE) && (stilt_state(&stilt) ==
 	    STILTTS_START)) {
-		cw_uint8_t	code[] = "promptstring";
-		cw_uint8_t	*pstr;
-		cw_uint32_t	plen, maxlen;
-		cw_stilo_t	*stilo;
-		cw_stils_t	*stack = stilt_ostack_get(&stilt);
+		static const cw_uint8_t	code[] = "promptstring";
+		cw_uint8_t		*pstr;
+		cw_uint32_t		plen, maxlen;
+		cw_stilo_t		*stilo;
+		cw_stils_t		*stack = stilt_ostack_get(&stilt);
 
 		/* Push the prompt onto the data stack. */
 		stilt_interpret(&stilt, &stilts, code, sizeof(code) - 1);
