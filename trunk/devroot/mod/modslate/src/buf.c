@@ -109,20 +109,12 @@
  * bufp's, mkr's, and ext's are all organized using both red-black trees and
  * doubly linked lists, so that random access and iteration are fast.
  *
- * Searching for a bufp by bpos or line is somewhat tricky, since not all nodes
- * necessarily have valid caches.  However, it is still possible to do such
- * searches by taking a bit of extra care in the node comparison function.
- * Since each bufp has an index number, nodes that fall outside the range of
- * those with valid caches are known to be greater than the result for searches
- * within the range starting at BOB, and less than the result for searches
- * within the range ending at EOB.
- *
  ******************************************************************************
  *
  * Each bufp keeps track of its bpos and line to speed up many operations.  buf
  * modifications can require the values stored in bufp's to be converted between
  * being relative to BOB/EOB.  At any given time, the ranges of bufp's with
- * valid caches may look something like:
+ * caches relative to BOB versus EOD may look something like:
  *
  *    0           1           2           3           4           5
  * /------\    /------\    /------\    /------\    /------\    /------\
@@ -535,8 +527,6 @@ bufp_p_mkrs_pline_adjust(cw_bufp_t *a_bufp, cw_sint32_t a_adjust,
 	 mkr != NULL && mkr->pline < a_end_pline;
 	 mkr = ql_next(&a_bufp->mlist, mkr, mlink))
     {
-	fprintf(stderr, "%s:%d:%s() pline: %llu --> %llu\n", __FILE__, __LINE__, __FUNCTION__, mkr->pline, mkr->pline + a_adjust);
-	
 	mkr->pline += a_adjust;
     }
 }
@@ -746,7 +736,6 @@ bufp_p_pos_b2p(cw_bufp_t *a_bufp, cw_uint64_t a_bpos)
 	ppos = rel_bpos + (CW_BUFP_SIZE - a_bufp->len);
     }
 
-    buf_dump(a_bufp->buf, __FUNCTION__ " A ");
     cw_assert(ppos < CW_BUFP_SIZE
 	      || (a_bufp == ql_last(&a_bufp->buf->plist, plink)
 		  && ppos == CW_BUFP_SIZE));
@@ -950,17 +939,14 @@ buf_p_bufp_at_bpos_comp(cw_bufp_t *a_key, cw_bufp_t *a_bufp)
 
     if (a_key->bpos < bpos)
     {
-	fprintf(stderr, "%s:%d:%s(): %llu < %llu (<)\n", __FILE__, __LINE__, __FUNCTION__, a_key->bpos, bpos);
 	retval = -1;
     }
     else if (a_key->bpos < bpos + a_bufp->len)
     {
-	fprintf(stderr, "%s:%d:%s(): %llu < %llu (==)\n", __FILE__, __LINE__, __FUNCTION__, a_key->bpos, bpos + a_bufp->len);
 	retval = 0;
     }
     else
     {
-	fprintf(stderr, "%s:%d:%s(): (>)\n", __FILE__, __LINE__, __FUNCTION__);
 	retval = 1;
     }
 
@@ -1037,7 +1023,6 @@ buf_p_bpos_before_lf(cw_buf_t *a_buf, cw_uint64_t a_line, cw_bufp_t **r_bufp)
     {
 	/* The only time this can happen is when searching for a bpos past EOB,
 	 * or when searching for bpos 1 in an empty buffer. */
-	buf_dump(a_buf, __FUNCTION__ " A ");
 	cw_assert(a_line <= a_buf->nlines);
 	bufp = ql_first(&a_buf->plist);
     }
@@ -1854,7 +1839,6 @@ mkr_p_simple_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
     {
 	mkr_p_remove(a_mkr);
 	a_mkr->ppos -= CW_BUFP_SIZE - bufp->len;
-	fprintf(stderr, "%s:%d:%s() pline: %llu --> %llu\n", __FILE__, __LINE__, __FUNCTION__, a_mkr->pline, a_mkr->pline - nlines);
 	a_mkr->pline -= nlines;
 	mkr_p_insert(a_mkr);
     }
@@ -1943,11 +1927,9 @@ fprintf(stderr, "%s:%d:%s():\n", __FILE__, __LINE__, __FUNCTION__);
     nlines = buf_p_bufv_insert(buf, a_prevp, ql_next(&buf->plist, bufp, plink),
 			       a_bufv, a_bufvcnt);
 
-    if (a_after == FALSE)
+    if (a_after)
     {
-	/* Move a_mkr to just past the data that were just inserted. */
-	/* XXX This can be done more efficiently.  Does it matter? */
-	mkr_seek(a_mkr, mkr_p_bpos(a_mkr) + a_count, BUFW_REL);
+	mkr_seek(a_mkr, -a_count, BUFW_REL);
     }
 
     return nlines;
@@ -2032,18 +2014,15 @@ fprintf(stderr, "%s:%d:%s():\n", __FILE__, __LINE__, __FUNCTION__);
     nlines = buf_p_bufv_insert(buf, bufp, ql_next(&buf->plist, a_nextp, plink),
 			       a_bufv, a_bufvcnt);
 
-    if (a_after == FALSE)
+    if (a_after)
     {
-	/* Move a_mkr to just past the data that were just inserted. */
-	/* XXX This can be done more efficiently.  Does it matter? */
-	mkr_seek(a_mkr, mkr_p_bpos(a_mkr) + a_count, BUFW_REL);
+	mkr_seek(a_mkr, -a_count, BUFW_REL);
     }
 
     return nlines;
 }
 
-/* a_bufv won't fit in the a_mkr's bufp, so split it. */
-/* XXX Doesn't move a_mkr if a_after is FALSE. */
+/* a_bufv won't fit in a_mkr's bufp, so split it. */
 static cw_uint64_t
 mkr_p_split_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
 		   cw_uint32_t a_bufvcnt, cw_uint32_t a_count)
@@ -2102,7 +2081,7 @@ mkr_p_split_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
     /* Starting at the end of bufp's marker list, remove the markers and insert
      * them into nextp until all markers that are in the gap have been moved. */
     for (mkr = ql_last(&bufp->mlist, mlink);
-	 mkr->ppos >= bufp->gap_off;)
+	 mkr != NULL && mkr->ppos >= bufp->gap_off;)
     {
 	/* Get the previous mkr before removing mkr from the list. */
 	mmkr = mkr;
@@ -2110,7 +2089,6 @@ mkr_p_split_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
 
 	mkr_p_remove(mmkr);
 	mmkr->bufp = nextp;
-	fprintf(stderr, "%s:%d:%s() pline: %llu --> %llu\n", __FILE__, __LINE__, __FUNCTION__, mkr->pline, mkr->pline - bufp->nlines);
 	mmkr->pline -= bufp->nlines;
 	rb_node_new(&nextp->mtree, mmkr, mnode);
 	mkr_p_insert(mmkr);
@@ -2122,6 +2100,7 @@ mkr_p_split_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
 				 + (CW_BUFP_SIZE - nextp->len)))
     {
 	cw_bufp_t *newp;
+    fprintf(stderr, "%s:%d:%s()\n", __FILE__, __LINE__, __FUNCTION__);
 
 	/* Splitting bufp didn't provide enough space.  Calculate how many more
 	 * bufp's are needed. */
@@ -2156,8 +2135,8 @@ mkr_p_split_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
      * inserted (including the extra one from splitting). */
     buf->bufv = (cw_bufv_t *) cw_opaque_realloc(buf->realloc, buf->bufv,
 						buf->arg,
-						buf->bufvcnt
-						+ ((nextra + 1) * 2)
+						(buf->bufvcnt
+						 + ((nextra + 1) * 2))
 						* sizeof(cw_bufv_t),
 						buf->bufvcnt
 						* sizeof(cw_bufv_t));
@@ -2165,11 +2144,10 @@ mkr_p_split_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
 
     nlines = buf_p_bufv_insert(buf, bufp, pastp, a_bufv, a_bufvcnt);
 
-    if (a_after == FALSE)
+    if (a_after)
     {
-	/* Move a_mkr to just past the data that were just inserted. */
 	/* XXX This can be done more efficiently.  Does it matter? */
-	mkr_seek(a_mkr, mkr_p_bpos(a_mkr) + a_count, BUFW_REL);
+	mkr_seek(a_mkr, -a_count, BUFW_REL);
     }
 
     return nlines;
@@ -2273,6 +2251,7 @@ mkr_l_insert(cw_mkr_t *a_mkr, cw_bool_t a_record, cw_bool_t a_after,
 
     buf->len += cnt;
     buf->nlines += nlines;
+    buf_dump(buf, __FUNCTION__ "");
 }
 
 void
@@ -2489,12 +2468,6 @@ mkr_line_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence)
     /* Update the internal state of a_mkr. */
     a_mkr->bufp = bufp;
     a_mkr->ppos = bpos - bufp_p_bpos(bufp);
-/*     fprintf(stderr, "%s:%d:%s(): pline %llu --> %llu (%llu - %llu)\n", */
-/* 	    __FILE__, __LINE__, __FUNCTION__, */
-/* 	    a_mkr->pline, */
-/* 	    line - bufp_p_line(bufp), */
-/* 	    line, bufp_p_line(bufp)); */
-	fprintf(stderr, "%s:%d:%s() pline: %llu --> %llu\n", __FILE__, __LINE__, __FUNCTION__, a_mkr->pline, line - bufp_p_line(bufp));
     a_mkr->pline = line - bufp_p_line(bufp);
     rb_node_new(&bufp->mtree, a_mkr, mnode);
 
@@ -2618,8 +2591,6 @@ mkr_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence)
     /* Update the internal state of a_mkr. */
     a_mkr->bufp = bufp;
     a_mkr->ppos = bufp_p_pos_b2p(bufp, bpos);
-    fprintf(stderr, "%s:%d:%s(): pline: %llu --> %u\n", __FILE__, __LINE__, __FUNCTION__, a_mkr->pline, bufp_p_ppos2pline(bufp, a_mkr->ppos));
-    
     a_mkr->pline = bufp_p_ppos2pline(bufp, a_mkr->ppos);
     rb_node_new(&bufp->mtree, a_mkr, mnode);
 
@@ -2734,6 +2705,7 @@ mkr_range_get(const cw_mkr_t *a_start, const cw_mkr_t *a_end,
 	      cw_uint32_t *r_bufvcnt)
 {
     cw_bufv_t *retval;
+    cw_uint32_t bufvcnt;
     const cw_mkr_t *start, *end;
     cw_uint32_t alg;
 
@@ -2803,14 +2775,15 @@ mkr_range_get(const cw_mkr_t *a_start, const cw_mkr_t *a_end,
 	}
 	alg = 3;
     }
+    fprintf(stderr, "%s:%d:%s(): alg %u\n", __FILE__, __LINE__, __FUNCTION__, alg);
 
+    bufvcnt = 0;
     switch (alg)
     {
 	case 1:
 	{
 	    /* Zero-length range. */
 	    retval = NULL;
-	    *r_bufvcnt = 0;
 	    break;
 	}
 	case 2:
@@ -2824,15 +2797,15 @@ mkr_range_get(const cw_mkr_t *a_start, const cw_mkr_t *a_end,
 		&& end->ppos >= bufp->gap_off + (CW_BUFP_SIZE - bufp->len))
 	    {
 		/* Two ranges. */
-		retval[0].data = &bufp->b[start->ppos];
-		retval[0].len = bufp->gap_off - start->ppos;
+		retval[bufvcnt].data = &bufp->b[start->ppos];
+		retval[bufvcnt].len = bufp->gap_off - start->ppos;
+		bufvcnt++;
 
-		retval[1].data = &bufp->b[bufp->gap_off
+		retval[bufvcnt].data = &bufp->b[bufp->gap_off
 					  + (CW_BUFP_SIZE - bufp->len)];
-		retval[1].len = end->ppos - (bufp->gap_off
+		retval[bufvcnt].len = end->ppos - (bufp->gap_off
 					     + (CW_BUFP_SIZE - bufp->len));
-
-		*r_bufvcnt = 2;
+		bufvcnt++;
 	    }
 	    else
 	    {
@@ -2840,7 +2813,7 @@ mkr_range_get(const cw_mkr_t *a_start, const cw_mkr_t *a_end,
 		retval[0].data = &bufp->b[start->ppos];
 		retval[0].len = end->ppos - start->ppos;
 
-		*r_bufvcnt = 1;
+		bufvcnt++;
 	    }
 	    break;
 	}
@@ -2848,7 +2821,6 @@ mkr_range_get(const cw_mkr_t *a_start, const cw_mkr_t *a_end,
 	{
 	    cw_buf_t *buf;
 	    cw_bufp_t *bufp;
-	    cw_uint32_t bufvcnt;
 
 	    /* Two or more bufp's involved. */
 	    buf = start->bufp->buf;
@@ -2856,34 +2828,29 @@ mkr_range_get(const cw_mkr_t *a_start, const cw_mkr_t *a_end,
 
 	    /* First bufp. */
 	    bufp = start->bufp;
-	    retval[0].data = &bufp->b[start->ppos];
-	    if (start->ppos < start->bufp->gap_off && bufp->gap_off < bufp->len)
+	    retval[bufvcnt].data = &bufp->b[start->ppos];
+	    if (start->ppos < bufp->gap_off)
 	    {
-		/* Two ranges. */
-		retval[0].len = bufp->gap_off - start->ppos;
+		/* Before gap. */
+		retval[bufvcnt].len = bufp->gap_off - start->ppos;
+//		fprintf(stderr, "%s:%d:%s(): %u --> %u\n", __FILE__, __LINE__, __FUNCTION__, bufvcnt, bufvcnt + 1);
+		bufvcnt++;
 
-		retval[1].data = &bufp->b[bufp->gap_off
-					  + (CW_BUFP_SIZE - bufp->len)];
-		retval[1].len = CW_BUFP_SIZE - (bufp->gap_off
-						+ (CW_BUFP_SIZE - bufp->len));
-
-		bufvcnt = 2;
+		if (bufp->gap_off + (CW_BUFP_SIZE - bufp->len) < CW_BUFP_SIZE)
+		{
+		    retval[bufvcnt].data
+			= &bufp->b[bufp->gap_off + (CW_BUFP_SIZE - bufp->len)];
+		    retval[bufvcnt].len = bufp->len - bufp->gap_off;
+//		    fprintf(stderr, "%s:%d:%s(): %u --> %u\n", __FILE__, __LINE__, __FUNCTION__, bufvcnt, bufvcnt + 1);
+		    bufvcnt++;
+		}
 	    }
 	    else
 	    {
-		/* One range. */
-		if (start->ppos < bufp->gap_off)
-		{
-		    /* Before gap. */
-		    retval[0].len = bufp->len - start->ppos;
-		}
-		else
-		{
-		    /* After gap. */
-		    retval[0].len = CW_BUFP_SIZE - start->ppos;
-		}
-
-		bufvcnt = 1;
+		/* After gap. */
+		retval[bufvcnt].len = CW_BUFP_SIZE - start->ppos;
+//		fprintf(stderr, "%s:%d:%s(): %u --> %u\n", __FILE__, __LINE__, __FUNCTION__, bufvcnt, bufvcnt + 1);
+		bufvcnt++;
 	    }
 
 	    /* Intermediate bufp's. */
@@ -2896,9 +2863,9 @@ mkr_range_get(const cw_mkr_t *a_start, const cw_mkr_t *a_end,
 		if (bufp->gap_off == 0)
 		{
 		    /* Gap at beginning. */
-		    retval[bufvcnt].data = &bufp->b[bufp->gap_off];
+		    retval[bufvcnt].data = &bufp->b[CW_BUFP_SIZE - bufp->len];
 		    retval[bufvcnt].len = bufp->len;
-
+//		    fprintf(stderr, "%s:%d:%s(): %u --> %u\n", __FILE__, __LINE__, __FUNCTION__, bufvcnt, bufvcnt + 1);
 		    bufvcnt++;
 		}
 		else if (bufp->gap_off == bufp->len)
@@ -2906,7 +2873,7 @@ mkr_range_get(const cw_mkr_t *a_start, const cw_mkr_t *a_end,
 		    /* Gap at end. */
 		    retval[bufvcnt].data = &bufp->b[0];
 		    retval[bufvcnt].len = bufp->len;
-
+//		    fprintf(stderr, "%s:%d:%s(): %u --> %u\n", __FILE__, __LINE__, __FUNCTION__, bufvcnt, bufvcnt + 1);
 		    bufvcnt++;
 		}
 		else
@@ -2914,50 +2881,47 @@ mkr_range_get(const cw_mkr_t *a_start, const cw_mkr_t *a_end,
 		    /* Gap splits bufp into two regions. */
 		    retval[bufvcnt].data = &bufp->b[0];
 		    retval[bufvcnt].len = bufp->gap_off;
+//		    fprintf(stderr, "%s:%d:%s(): %u --> %u\n", __FILE__, __LINE__, __FUNCTION__, bufvcnt, bufvcnt + 1);
+		    bufvcnt++;
 
-		    retval[bufvcnt + 1].data = &bufp->b[bufp->gap_off
-							+ (CW_BUFP_SIZE
-							   - bufp->len)];
-		    retval[bufvcnt + 1].len = CW_BUFP_SIZE - (bufp->gap_off
-							      + (CW_BUFP_SIZE
-								 - bufp->len));
-
-		    bufvcnt += 2;
+		    retval[bufvcnt].data = &bufp->b[bufp->gap_off
+						    + (CW_BUFP_SIZE
+						       - bufp->len)];
+		    retval[bufvcnt].len = bufp->len - bufp->gap_off;
+//		    fprintf(stderr, "%s:%d:%s(): %u --> %u\n", __FILE__, __LINE__, __FUNCTION__, bufvcnt, bufvcnt + 1);
+		    bufvcnt++;
 		}
 	    }
 
 	    /* Last bufp. */
-	    retval[bufvcnt].data = &bufp->b[end->ppos];
-	    if (end->ppos < end->bufp->gap_off
-		&& bufp->gap_off < bufp->len)
+	    if (end->ppos < end->bufp->gap_off)
 	    {
-		/* Two ranges. */
-		retval[bufvcnt].len = bufp->gap_off - end->ppos;
-
-		retval[bufvcnt + 1].data = &bufp->b[bufp->gap_off
-						    + (CW_BUFP_SIZE
-						       - bufp->len)];
-		retval[bufvcnt + 1].len = CW_BUFP_SIZE - (bufp->gap_off
-							  + (CW_BUFP_SIZE
-							     - bufp->len));
-
-		bufvcnt += 2;
+		/* Before gap. */
+		retval[bufvcnt].data = &bufp->b[0];
+		retval[bufvcnt].len = end->ppos;
+//		fprintf(stderr, "%s:%d:%s(): %u --> %u\n", __FILE__, __LINE__, __FUNCTION__, bufvcnt, bufvcnt + 1);
+		bufvcnt++;
 	    }
 	    else
 	    {
-		/* One range. */
-		if (end->ppos < bufp->gap_off)
+		/* After gap. */
+		if (bufp->gap_off > 0)
 		{
-		    /* Before gap. */
-		    retval[bufvcnt].len = bufp->len - end->ppos;
-		}
-		else
-		{
-		    /* After gap. */
-		    retval[bufvcnt].len = CW_BUFP_SIZE - end->ppos;
+		    retval[bufvcnt].data = &bufp->b[0];
+		    retval[bufvcnt].len = bufp->gap_off;
+//		    fprintf(stderr, "%s:%d:%s(): %u --> %u\n", __FILE__, __LINE__, __FUNCTION__, bufvcnt, bufvcnt + 1);
+		    bufvcnt++;
 		}
 
-		bufvcnt++;
+		if (bufp->gap_off + (CW_BUFP_SIZE - bufp->len) < CW_BUFP_SIZE)
+		{
+		    retval[bufvcnt].data
+			= &bufp->b[bufp->gap_off + (CW_BUFP_SIZE - bufp->len)];
+		    retval[bufvcnt].len
+			= end->ppos - (bufp->len - bufp->gap_off);
+//		    fprintf(stderr, "%s:%d:%s(): %u --> %u\n", __FILE__, __LINE__, __FUNCTION__, bufvcnt, bufvcnt + 1);
+		    bufvcnt++;
+		}
 	    }
 
 	    break;
@@ -2968,6 +2932,8 @@ mkr_range_get(const cw_mkr_t *a_start, const cw_mkr_t *a_end,
 	}
     }
 
+    fprintf(stderr, "%s:%d:%s(): bufvcnt: %u\n", __FILE__, __LINE__, __FUNCTION__, bufvcnt);
+    *r_bufvcnt = bufvcnt;
     return retval;
 }
 
