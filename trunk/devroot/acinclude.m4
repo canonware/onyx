@@ -1,9 +1,9 @@
 dnl CW_BUILD_LIB(lib, var)
 dnl lib : Name of library.
 dnl var : Name of variable to substitute in configure output.
-AC_DEFUN(CW_BUILD_LIB,
+AC_DEFUN([CW_BUILD_LIB],
 [
-AC_MSG_CHECKING(whether to include $1 in build)
+AC_MSG_CHECKING([whether to include $1 in build])
 if test -d "$srcroot/lib/$1" ; then
   build_$1="yes"
   $2=1
@@ -19,16 +19,16 @@ else
   build_$1="no"
   $2=0
 fi
-AC_MSG_RESULT($build_$1)
-AC_SUBST($2)
+AC_MSG_RESULT([$build_$1])
+AC_SUBST([$2])
 ])
 
 dnl CW_BUILD_MOD(mod, var)
 dnl mod : Name of module.
 dnl var : Name of variable to substitute in configure output.
-AC_DEFUN(CW_BUILD_MOD,
+AC_DEFUN([CW_BUILD_MOD],
 [
-AC_MSG_CHECKING(whether to include $1 in build)
+AC_MSG_CHECKING([whether to include $1 in build])
 if test -d "$srcroot/mod/$1" ; then
   build_$1="yes"
   $2=1
@@ -44,16 +44,16 @@ else
   build_$1="no"
   $2=0
 fi
-AC_MSG_RESULT($build_$1)
-AC_SUBST($2)
+AC_MSG_RESULT([$build_$1])
+AC_SUBST([$2])
 ])
 
 dnl CW_BUILD_BIN(bin, var)
 dnl bin : Name of binary.
 dnl var : Name of variable to substitute in configure output.
-AC_DEFUN(CW_BUILD_BIN,
+AC_DEFUN([CW_BUILD_BIN],
 [
-AC_MSG_CHECKING(whether to include $1 in build)
+AC_MSG_CHECKING([whether to include $1 in build])
 if test -d "$srcroot/bin/$1" ; then
   build_$1="yes"
   $2=1
@@ -75,16 +75,16 @@ else
   build_$1="no"
   $2=0
 fi
-AC_MSG_RESULT($build_$1)
-AC_SUBST($2)
+AC_MSG_RESULT([$build_$1])
+AC_SUBST([$2])
 ])
 
 dnl CW_BUILD_DOC(doc, var)
 dnl bin : Name of document.
 dnl var : Name of variable to substitute in configure output.
-AC_DEFUN(CW_BUILD_DOC,
+AC_DEFUN([CW_BUILD_DOC],
 [
-AC_MSG_CHECKING(whether to include $1 document in build)
+AC_MSG_CHECKING([whether to include $1 document in build])
 if test -d "$srcroot/doc/latex/$1" ; then
   build_$1="yes"
   $2=1
@@ -97,6 +97,6 @@ else
   build_$1="no"
   $2=0
 fi
-AC_MSG_RESULT($build_$1)
-AC_SUBST($2)
+AC_MSG_RESULT([$build_$1])
+AC_SUBST([$2])
 ])
