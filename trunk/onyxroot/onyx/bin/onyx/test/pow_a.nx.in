@@ -12,7 +12,20 @@
 
 `Test begin\n' print flush
 
-mark 1 atan
+[
+	`0 0 pow'
+	`4 0 pow'
+	`4 1 pow'
+	`4 2 pow'
+	`4 3 pow'
+	`5 3 pow'
+	`-5 1 pow'
+	`-5 2 pow'
+	`-5 3 pow'
+]{
+	dup 1 sprint
+	cvx eval
+	1 sprint
+} foreach
 
 `Test end\n' print
-pstack

@@ -12,20 +12,6 @@
 
 `Test begin\n' print flush
 
-[
-	`0 0 exp'
-	`4 0 exp'
-	`4 1 exp'
-	`4 2 exp'
-	`4 3 exp'
-	`5 3 exp'
-	`-5 1 exp'
-	`-5 2 exp'
-	`-5 3 exp'
-]{
-	dup 1 sprint
-	cvx eval
-	1 sprint
-} foreach
+1 pow
 
 `Test end\n' print

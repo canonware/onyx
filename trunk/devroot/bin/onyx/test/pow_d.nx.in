@@ -12,22 +12,6 @@
 
 `Test begin\n' print flush
 
-[
-    `0999.9'
-    `42.5'
-    `0.0'
-    `-55.9'
-    `666.66666666'
-]{
-    dup 1 sprint
-    cvx eval
-    -8 1 8 {
-	1 idup exch
-	cvds
-	1 sprint
-    } for
-    pop
-} foreach
+mark 1 pow
 
 `Test end\n' print
-pstack

@@ -901,13 +901,14 @@ Sequence & Description \\
 \section{Dictionary reference}
 
 All operators built in to Onyx have corresponding names that are composed
-entirely of lower case letters (with the exception of syntax-supporting
-operators like {\lb}).  In order to avoid any possibility of namespace
-collisions with names defined by current and future versions of Onyx, use at
-least one character that is not a lower case letter in names (for example,
-capital letters, numbers, underscore, etc.).  In practice, namespace collisions
-usually aren't a problem, even if they happen, since the only effect is that the
-program-defined definition shadows the built in definition during name lookups.
+entirely of lower case letters and numbers (with the exception of
+syntax-supporting operators like {\lb}).  In order to avoid any possibility of
+namespace collisions with names defined by current and future versions of Onyx,
+use at least one character that is not a lower case letter or a number in names
+(for example, capital letters, underscore, etc.).  In practice, namespace
+collisions usually aren't a problem, even if they happen, since the only effect
+is that the program-defined definition shadows the built in definition during
+name lookups.
 
 \subsection{currenterror}
 \label{sec:currenterror}
@@ -4373,13 +4374,19 @@ same systemdict, which is implicitly locked.
 	{a b}
 	{{\bf \htmlref{mod}{systemdict:mod}}}
 	{r}
-	{Mod a by b (integers).}
+	{Mod a by b (integers and reals).}
 \hline
 \optableent
 	{a b}
-	{{\bf \htmlref{exp}{systemdict:exp}}}
+	{{\bf \htmlref{exp}{systemdict:pow}}}
 	{r}
 	{Raise a to the power of b.}
+\hline
+\optableent
+	{x}
+	{{\bf \htmlref{exp}{systemdict:exp}}}
+	{r}
+	{$e$ (base of natural logarithm) raised to x.}
 \hline
 \optableent
 	{a}
@@ -4443,15 +4450,75 @@ same systemdict, which is implicitly locked.
 \hline
 \optableent
 	{a}
+	{{\bf \htmlref{sinh}{systemdict:sinh}}}
+	{r}
+	{Hyperbolic sine.}
+\hline
+\optableent
+	{a}
+	{{\bf \htmlref{asin}{systemdict:asin}}}
+	{r}
+	{Arcsine.}
+\hline
+\optableent
+	{a}
+	{{\bf \htmlref{asinh}{systemdict:asinh}}}
+	{r}
+	{Hyperbolic arcsine.}
+\hline
+\optableent
+	{a}
 	{{\bf \htmlref{cos}{systemdict:cos}}}
 	{r}
 	{Cosine in radians.}
 \hline
 \optableent
-	{y x}
+	{a}
+	{{\bf \htmlref{cosh}{systemdict:cosh}}}
+	{r}
+	{Hyperbolic cosine.}
+\hline
+\optableent
+	{a}
+	{{\bf \htmlref{acos}{systemdict:acos}}}
+	{r}
+	{Arc cosine.}
+\hline
+\optableent
+	{a}
+	{{\bf \htmlref{acosh}{systemdict:acosh}}}
+	{r}
+	{Hyperbolic arc cosine.}
+\hline
+\optableent
+	{x}
+	{{\bf \htmlref{tan}{systemdict:tan}}}
+	{r}
+	{Tangent of x in radians.}
+\hline
+\optableent
+	{x}
+	{{\bf \htmlref{tanh}{systemdict:tanh}}}
+	{r}
+	{Hyperbolic tangent.}
+\hline
+\optableent
+	{x}
 	{{\bf \htmlref{atan}{systemdict:atan}}}
 	{r}
-	{Arctangent in radians of $y/x$.}
+	{Arctangent.}
+\hline
+\optableent
+	{y x}
+	{{\bf \htmlref{atan2}{systemdict:atan2}}}
+	{r}
+	{Arctangent in radians of $\frac{y}{x}$.}
+\hline
+\optableent
+	{x}
+	{{\bf \htmlref{atanh}{systemdict:atanh}}}
+	{r}
+	{Hyperbolic arctangent.}
 \hline
 \optableent
 	{seed}
@@ -5916,6 +5983,60 @@ onyx:2> dup peername 1 sprint
 onyx:2>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:acos}
+\index{acos@\onyxop{}{acos}{}}
+\item[{\onyxop{a}{acos}{r}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a: ]
+			An integer or real.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[r: ]
+			Arc cosine of \oparg{a} in radians.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Return the arc cosine of \oparg{a} in radians.
+	\item[Example(s): ]\begin{verbatim}
+
+XXX
+		\end{verbatim}
+	\end{description}
+\label{systemdict:acosh}
+\index{acosh@\onyxop{}{acosh}{}}
+\item[{\onyxop{a}{acosh}{r}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a: ]
+			An integer or real.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[r: ]
+			Hyperbolic arc cosine of \oparg{a}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Return the hyperbolic arc cosine of \oparg{a}.
+	\item[Example(s): ]\begin{verbatim}
+
+XXX
+		\end{verbatim}
+	\end{description}
 \label{systemdict:add}
 \index{add@\onyxop{}{add}{}}
 \item[{\onyxop{a b}{add}{r}}: ]
@@ -6076,9 +6197,88 @@ onyx:0> 0 array 1 sprint
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:asin}
+\index{asin@\onyxop{}{asin}{}}
+\item[{\onyxop{a}{asin}{r}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a: ]
+			An integer or real.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[r: ]
+			Arc sine of \oparg{a} in radians.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Return the arc sine of \oparg{a} in radians.
+	\item[Example(s): ]\begin{verbatim}
+
+XXX
+		\end{verbatim}
+	\end{description}
+\label{systemdict:asinh}
+\index{asinh@\onyxop{}{asinh}{}}
+\item[{\onyxop{a}{cos}{r}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a: ]
+			An integer or real.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[r: ]
+			Hyperbolic arc sine of \oparg{a}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Return the hyperbolic arc sine of \oparg{a}.
+	\item[Example(s): ]\begin{verbatim}
+
+XXX
+		\end{verbatim}
+	\end{description}
 \label{systemdict:atan}
 \index{atan@\onyxop{}{atan}{}}
-\item[{\onyxop{y x}{atan}{r}}: ]
+\item[{\onyxop{x}{atan}{r}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[x: ]
+			An integer or real.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[r: ]
+			Arctangent of \oparg{x} in radians.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Return the arctangent of \oparg{x} in radians.
+	\item[Example(s): ]\begin{verbatim}
+
+XXX
+		\end{verbatim}
+	\end{description}
+\label{systemdict:atan2}
+\index{atan2@\onyxop{}{atan2}{}}
+\item[{\onyxop{y x}{atan2}{r}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -6090,7 +6290,7 @@ onyx:0>
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[r: ]
-			Arctangent of $y/x$ in radians.
+			Arctangent of $\frac{y}{x}$ in radians.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
@@ -6098,16 +6298,43 @@ onyx:0>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Return the arctangent of $y/x$ in radians.
+		Return the arctangent of $\frac{y}{x}$ in radians.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> 1 1 atan 1 sprint
+onyx:0> 1 1 atan2 1 sprint
 7.853982e-01
-onyx:0> 0 1 atan 1 sprint
+onyx:0> 0 1 atan2 1 sprint
 0.000000e+00
-onyx:0> -1.0 0 atan 1 sprint
+onyx:0> -1.0 0 atan2 1 sprint
 -1.570796e+00
 onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:atanh}
+\index{atanh@\onyxop{}{atanh}{}}
+\item[{\onyxop{x}{atanh}{r}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[x: ]
+			An integer or real.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[r: ]
+			Hyperbolic arctangent of \oparg{x}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\end{description}
+	\item[Description: ]
+		Return the hyperbolic arctangent of \oparg{x}.
+	\item[Example(s): ]\begin{verbatim}
+
+XXX
 		\end{verbatim}
 	\end{description}
 \label{systemdict:aup}
@@ -6854,6 +7081,32 @@ onyx:0> 3.1415927 cos 1 sprint
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:cosh}
+\index{cosh@\onyxop{}{cosh}{}}
+\item[{\onyxop{a}{cosh}{r}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a: ]
+			An integer or real.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[r: ]
+			Hyperbolic cosine of \oparg{a} in radians.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Return the hyperbolic cosine of \oparg{a} in radians.
+	\item[Example(s): ]\begin{verbatim}
+
+XXX
+		\end{verbatim}
+	\end{description}
 \label{systemdict:count}
 \index{count@\onyxop{}{count}{}}
 \item[{\onyxop{--}{count}{count}}: ]
@@ -7013,7 +7266,8 @@ onyx:0>
 		\item[real: ]
 			A real.
 		\item[precision: ]
-			Number of digits after the decimal point to show.
+			Number of digits after the decimal point to show.  If
+			negative, do not show trailing zeros.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
@@ -7037,6 +7291,8 @@ onyx:0> 42.3 1 cvds 1 sprint
 `42.3'
 onyx:0> -42.3 4 cvds 1 sprint
 `-42.3000'
+onyx:0> -43.3 -4 cvds 1 sprint
+`-42.3'
 onyx:0>
 		\end{verbatim}
 	\end{description}
@@ -7904,19 +8160,17 @@ onyx:0>
 	\end{description}
 \label{systemdict:exp}
 \index{exp@\onyxop{}{exp}{}}
-\item[{\onyxop{a b}{exp}{r}}: ]
+\item[{\onyxop{b}{exp}{r}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a: ]
 			An integer or real.
-		\item[b: ]
-			An integer or real.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[r: ]
-			\oparg{a} to the \oparg{b} power.
+			$e$ raised to the \oparg{b} power.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
@@ -7924,26 +8178,11 @@ onyx:0>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Return \oparg{a} to the \oparg{b} power.  If a negative exponent
-		is specified, the result will always be a real, even if both
-		arguments are integers.
+		Return $e$ (the base of natural logarithm) raised to the
+		\oparg{b} power.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> 5 0 exp 1 sprint
-1
-onyx:0> 5 1 exp 1 sprint
-5
-onyx:0> 5 2 exp 1 sprint
-25
-onyx:0> -5 3 exp 1 sprint
--125
-onyx:0> 5 -3 exp 1 sprint
-8.000000e-03
-onyx:0> 2.1 3.5 exp 1 sprint
-1.342046e+01
-onyx:0> 100 .01 exp 1 sprint
-1.000000e+02
-onyx:0>
+XXX
 		\end{verbatim}
 	\end{description}
 \label{systemdict:false}
@@ -9449,9 +9688,9 @@ onyx:0>
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a: ]
-			An integer.
+			An integer or real.
 		\item[b: ]
-			A non-zero integer.
+			A non-zero integer or real.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
@@ -9465,7 +9704,9 @@ onyx:0>
 		\item[\htmlref{undefinedresult}{undefinedresult}.]
 		\end{description}
 	\item[Description: ]
-			Return the modulus of \oparg{a} and \oparg{b}.
+			Return the modulus of \oparg{a} and \oparg{b}.  Note
+			that \oparg{a} and \oparg{b} can be any combination of
+			integers and reals.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> 4 2 mod 1 sprint
@@ -10529,34 +10770,6 @@ onyx:0> rfile readline pop 1 sprint
 onyx:0>
 		\end{verbatim}
 	\end{description}
-\label{systemdict:pop}
-\index{pop@\onyxop{}{pop}{}}
-\item[{\onyxop{obj}{pop}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[obj: ]
-			An object.
-		\end{description}
-	\item[Output(s): ] None.
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{stackunderflow}{stackunderflow}.]
-		\end{description}
-	\item[Description: ]
-		Remove the top object from ostack and discard it.
-	\item[Example(s): ]\begin{verbatim}
-
-onyx:0> 1 2
-onyx:2> pstack
-2
-1
-onyx:2> pop
-onyx:1> pstack
-1
-onyx:1>
-		\end{verbatim}
-	\end{description}
 \label{systemdict:poll}
 \index{poll@\onyxop{}{poll}{}}
 \item[{\onyxop{{\lt}file flags \dots{\gt} timeout}{poll}{{\lb}file
@@ -10646,6 +10859,78 @@ onyx:0> <stdout <$POLLOUT null> stderr <$POLLWRNORM null>> dup 0 poll
 onyx:2> 2 sprint 2 sprint
 [-file- -file-]
 <-file- <$POLLWRNORM true> -file- <$POLLOUT true>>
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:pop}
+\index{pop@\onyxop{}{pop}{}}
+\item[{\onyxop{obj}{pop}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[obj: ]
+			An object.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\end{description}
+	\item[Description: ]
+		Remove the top object from ostack and discard it.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> 1 2
+onyx:2> pstack
+2
+1
+onyx:2> pop
+onyx:1> pstack
+1
+onyx:1>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:pow}
+\index{pow@\onyxop{}{pow}{}}
+\item[{\onyxop{a b}{pow}{r}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a: ]
+			An integer or real.
+		\item[b: ]
+			An integer or real.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[r: ]
+			\oparg{a} to the \oparg{b} power.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Return \oparg{a} to the \oparg{b} power.  If a negative exponent
+		is specified, the result will always be a real, even if both
+		arguments are integers.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> 5 0 pow 1 sprint
+1
+onyx:0> 5 1 pow 1 sprint
+5
+onyx:0> 5 2 pow 1 sprint
+25
+onyx:0> -5 3 pow 1 sprint
+-125
+onyx:0> 5 -3 pow 1 sprint
+8.000000e-03
+onyx:0> 2.1 3.5 pow 1 sprint
+1.342046e+01
+onyx:0> 100 .01 pow 1 sprint
+1.000000e+02
 onyx:0>
 		\end{verbatim}
 	\end{description}
@@ -12654,6 +12939,32 @@ onyx:0> 0.7853982 sin 1 sprint
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:sinh}
+\index{sinh@\onyxop{}{sinh}{}}
+\item[{\onyxop{a}{sinh}{r}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a: ]
+			An integer or real.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[r: ]
+			Hyperbolic sine of \oparg{a}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Return the hyperbolic sine of \oparg{a}.
+	\item[Example(s): ]\begin{verbatim}
+
+XXX
+		\end{verbatim}
+	\end{description}
 \label{systemdict:sipop}
 \index{sipop@\onyxop{}{sipop}{}}
 \item[{\onyxop{stack index}{sipop}{obj}}: ]
@@ -14011,6 +14322,59 @@ onyx:0> systemdict 0 sprint
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:tan}
+\index{tan@\onyxop{}{tan}{}}
+\item[{\onyxop{a}{sinh}{r}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a: ]
+			An integer or real.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[r: ]
+			Tangent of \oparg{a} in radians.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Return the tangent of \oparg{a} in radians.
+	\item[Example(s): ]\begin{verbatim}
+
+XXX
+		\end{verbatim}
+	\end{description}
+\label{systemdict:tanh}
+\index{tanh@\onyxop{}{tanh}{}}
+\item[{\onyxop{a}{tanh}{r}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a: ]
+			An integer or real.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[r: ]
+			Hyperbolic tangent of \oparg{a}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Return the hyperbolic tangent of \oparg{a}.
+	\item[Example(s): ]\begin{verbatim}
+
+XXX
+		\end{verbatim}
+ 	\end{description}
 \label{systemdict:tell}
 \index{tell@\onyxop{}{tell}{}}
 \item[{\onyxop{file}{tell}{offset}}: ]

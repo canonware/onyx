@@ -54,7 +54,7 @@
     `-1.0 0.0'
 ]{
     dup 1 sprint
-    cvx eval atan
+    cvx eval atan2
     1 sprint
 } foreach
 

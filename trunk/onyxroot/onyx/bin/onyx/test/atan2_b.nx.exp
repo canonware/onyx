@@ -1,8 +1,8 @@
 Test begin
-Error $typecheck
-ostack: (-mark- 1)
+Error $stackunderflow
+ostack: (5)
 dstack: (-dict- -dict- -dict- -dict-)
 estack/istack trace (0..2):
-0:	--atan--
+0:	--atan2--
 1:	-file-
 2:	--start--

@@ -12,6 +12,7 @@
 
 `Test begin\n' print flush
 
-mark 1 exp
+mark 1 atan2
 
 `Test end\n' print
+pstack

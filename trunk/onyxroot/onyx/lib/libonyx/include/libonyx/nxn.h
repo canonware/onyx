@@ -47,6 +47,10 @@ typedef enum
 #ifdef CW_SOCKET
     NXN_ENTRY(accept),
 #endif
+#ifdef CW_REAL
+    NXN_ENTRY(acos),
+    NXN_ENTRY(acosh),
+#endif
     NXN_ENTRY(active),
     NXN_ENTRY(add),
 #ifdef CW_SOCKET
@@ -59,7 +63,11 @@ typedef enum
     NXN_ENTRY(array),
     NXN_ENTRY(arraytype),
 #ifdef CW_REAL
+    NXN_ENTRY(asin),
+    NXN_ENTRY(asinh),
     NXN_ENTRY(atan),
+    NXN_ENTRY(atan2),
+    NXN_ENTRY(atanh),
 #endif
 #ifdef CW_POSIX
     NXN_ENTRY(atime),
@@ -112,6 +120,7 @@ typedef enum
     NXN_ENTRY(copy),
 #ifdef CW_REAL
     NXN_ENTRY(cos),
+    NXN_ENTRY(cosh),
 #endif
     NXN_ENTRY(count),
     NXN_ENTRY(countdstack),
@@ -396,6 +405,11 @@ typedef enum
     NXN_ENTRY(pop),
 #ifdef CW_POSIX
     NXN_ENTRY(port),
+#endif
+#ifdef CW_REAL
+    NXN_ENTRY(pow),
+#endif
+#ifdef CW_POSIX
     NXN_ENTRY(ppid),
 #endif
     NXN_ENTRY(print),
@@ -529,6 +543,7 @@ typedef enum
 #endif
 #ifdef CW_REAL
     NXN_ENTRY(sin),
+    NXN_ENTRY(sinh),
 #endif
     NXN_ENTRY(sipop),
 #ifdef CW_POSIX
@@ -589,6 +604,10 @@ typedef enum
     NXN_ENTRY(syntaxerror),
     NXN_ENTRY(system),
     NXN_ENTRY(systemdict),
+#ifdef CW_REAL
+    NXN_ENTRY(tan),
+    NXN_ENTRY(tanh),
+#endif
     NXN_ENTRY(tell),
 #ifdef CW_POSIX
     NXN_ENTRY(test),

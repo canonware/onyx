@@ -13,15 +13,15 @@
 `Test begin\n' print flush
 
 [
-	`0 0 exp'
-	`4 0 exp'
-	`4 1 exp'
-	`4 2 exp'
-	`4 3 exp'
-	`5 3 exp'
-	`-5 1 exp'
-	`-5 2 exp'
-	`-5 3 exp'
+	`0 0 pow'
+	`4 0 pow'
+	`4 1 pow'
+	`4 2 pow'
+	`4 3 pow'
+	`5 3 pow'
+	`-5 1 pow'
+	`-5 2 pow'
+	`-5 3 pow'
 ]{
 	dup 1 sprint
 	cvx eval
