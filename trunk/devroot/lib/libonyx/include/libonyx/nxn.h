@@ -652,6 +652,7 @@ typedef enum
     NXN_ENTRY(undefinedfilename),
     NXN_ENTRY(undefinedresult),
     NXN_ENTRY(under),
+    NXN_ENTRY(unless),
 #ifdef CW_POSIX
     NXN_ENTRY(unlink),
 #endif

@@ -3870,6 +3870,12 @@ same systemdict, which is implicitly locked.
 	{Conditionally evaluate object.}
 \hline
 \optableent
+	{boolean obj}
+	{{\bf \htmlref{unless}{systemdict:unless}}}
+	{--}
+	{Conditionally evaluate object.}
+\hline
+\optableent
 	{boolean a b}
 	{{\bf \htmlref{ifelse}{systemdict:ifelse}}}
 	{--}
@@ -15185,6 +15191,33 @@ onyx:0> 0 1 2 under pstack
 1
 0
 onyx:4>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:unless}
+\index{unless@\onyxop{}{unless}{}}
+\item[{\onyxop{boolean obj}{unless}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[boolean: ]
+			A boolean.
+		\item[obj: ]
+			An object.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Evaluate \oparg{obj} unless \oparg{boolean} is true.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> false {`yes' 1 sprint} unless
+`yes'
+onyx:0> true {`yes' 1 sprint} unless
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:unlink}

@@ -1,3 +1,8 @@
+2003-03-16 : Jason Evans <jasone@canonware.com>
+
+	* Add operator:
+	  + unless
+
 2003-03-15 : Jason Evans <jasone@canonware.com>
 
 	* Use __func__ rather than __FUNCTION__, in order to comply with C99.
@@ -433,17 +438,17 @@
 	* lib/libonyx/src/systemdict.c :
 
 	  Add operators:
-	  + rot, srot
-	  + adn, aup
-	  + saup, sadn
+	    + rot, srot
+	    + adn, aup
+	    + saup, sadn
 
 	  Rename/replace operators:
-	  + push --> adn
-	  + npush/nbpush --> rot
-	  + snpush/snbpush --> srot
+	    + push --> adn
+	    + npush/nbpush --> rot
+	    + snpush/snbpush --> srot
 
 	  Remove operators:
-	  + push
+	    + push
 
 	* lib/libonyx/include/libonyx/nxo_stack.h: Add nxo_stack_rot().
 

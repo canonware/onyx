@@ -511,6 +511,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #endif
     ENTRY(undef),
     ENTRY(under),
+    ENTRY(unless),
 #ifdef CW_POSIX
     ENTRY(unlink),
 #endif
@@ -12357,6 +12358,38 @@ systemdict_under(cw_nxo_t *a_thread)
     NXO_STACK_NGET(under, ostack, a_thread, 1);
     nxo = nxo_stack_under_push(ostack, under);
     nxo_dup(nxo, under);
+}
+
+void
+systemdict_unless(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack;
+    cw_nxo_t *cond, *exec;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(exec, ostack, a_thread);
+    NXO_STACK_DOWN_GET(cond, ostack, a_thread, exec);
+    if (nxo_type_get(cond) != NXOT_BOOLEAN)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+
+    if (nxo_boolean_get(cond) == FALSE)
+    {
+	cw_nxo_t *estack;
+	cw_nxo_t *nxo;
+
+	estack = nxo_thread_estack_get(a_thread);
+	nxo = nxo_stack_push(estack);
+	nxo_dup(nxo, exec);
+	nxo_stack_npop(ostack, 2);
+	nxo_thread_loop(a_thread);
+    }
+    else
+    {
+	nxo_stack_npop(ostack, 2);
+    }
 }
 
 #ifdef CW_POSIX
