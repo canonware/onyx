@@ -1,3 +1,17 @@
+2003-02-09 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/systemdict.c:systemdict_foreach() : Make a snapshot
+	  for stack iteration and iterate over the snapshot, in order to avoid
+	  crashes if the application removes stack objects during iteration.
+
+	* lib/libonyx/src/systemdict.c:systemdict_repeat() : Re-order some code
+	  to avoid popping objects off ostack until they are no longer needed.
+
+	* lib/libonyx/include/libonyx/nxo_stack.h and
+	  lib/libonyx/src/nxo_stack.c : Add debug code to overwrite cached stack
+	  object containers, in order to make erroneous access of invalid
+	  objects more apparent.
+
 2003-02-08 : Jason Evans <jasone@canonware.com>
 
 	* lib/libonyx/include/libonyx/nxo_dict_l.h:nxoe_l_dict_delete() : Make
