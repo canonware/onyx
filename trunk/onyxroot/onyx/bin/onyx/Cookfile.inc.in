@@ -182,14 +182,18 @@ onyx_bins_tests : [fromto [srcdir]/%0%.nx.in [objdir]/%0%.nx [ONYX_OTESTS]];
 
 onyx_bins_check : onyx_bins_tests
 {
+#if [count [ONYX_OTESTS]]
   [VERIFY] -s [srcdir] -o [objdir]
            [fromto [srcdir]/%0%.nx.in [objdir]/%0%.nx [ONYX_OTESTS]];
+#endif
 }
 
 onyx_bins_check_update : onyx_bins_tests
 {
+#if [count [ONYX_OTESTS]]
   [VERIFY] -u -s [srcdir] -o [objdir]
            [fromto [srcdir]/%0%.nx.in [objdir]/%0%.nx [ONYX_OTESTS]];
+#endif
 }
 
 onyx_bins_install : [ONYX]
