@@ -11099,6 +11099,8 @@ systemdict_p_sockopt(cw_nxo_t *a_thread, bool a_set)
 
     if (a_set)
     {
+	int optsizeof;
+
 	npop++;
 
 	switch (opt)
@@ -11125,6 +11127,7 @@ systemdict_p_sockopt(cw_nxo_t *a_thread, bool a_set)
 		    return;
 		}
 
+		optsizeof = sizeof(optval.i);
 		optval.i = nxo_integer_get(nxoval);
 
 		break;
@@ -11157,6 +11160,7 @@ systemdict_p_sockopt(cw_nxo_t *a_thread, bool a_set)
 		    nxo_thread_nerror(a_thread, NXN_typecheck);
 		    return;
 		}
+		optsizeof = sizeof(optval.l);
 		optval.l.l_onoff = nxo_boolean_get(tval);
 
 		/* time. */
@@ -11187,6 +11191,7 @@ systemdict_p_sockopt(cw_nxo_t *a_thread, bool a_set)
 		    return;
 		}
 
+		optsizeof = sizeof(optval.t);
 		optval.t.tv_sec = nxo_integer_get(nxoval) / 1000000000LL;
 		optval.t.tv_usec = (nxo_integer_get(nxoval) % 1000000000LL)
 		    / 1000;
@@ -11198,8 +11203,8 @@ systemdict_p_sockopt(cw_nxo_t *a_thread, bool a_set)
 	    }
 	}
 
-	if (setsockopt(nxo_file_fd_get(nxo), level, opt, &optval,
-		       sizeof(optval)) == -1)
+	if (setsockopt(nxo_file_fd_get(nxo), level, opt, &optval, optsizeof)
+	    == -1)
 	{
 	    switch (errno)
 	    {
