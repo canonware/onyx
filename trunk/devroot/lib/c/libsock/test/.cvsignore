@@ -1,10 +1,8 @@
-*.[do]
+*.[do]_d
 *.out
 *.diff
-c_*_a
-c_*_b
-c_*_c
+*.perf
+c_*_[a-z]
+b_*_[a-z]
 p*.pl
-*.core
-core
 .cook.fp

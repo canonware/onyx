@@ -1,4 +1,4 @@
-*.[do]
+*.[do]_d
 *.out
 *.diff
 *.perf
