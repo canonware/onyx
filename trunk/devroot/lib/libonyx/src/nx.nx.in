@@ -891,12 +891,10 @@ $mrequire {
 } if
 @enable_oop@ 1 eq opt_bootstrap not and {
     `\
+
 # Define vclass, which is provided as the top level base class.
-$vclass class dup up def
-dup $vclass setclassname
-dup <
-> setdata
-<
+$vclass null <
+><
     #class#
     #- new #instance
     $new {
@@ -1043,21 +1041,17 @@ dup <
     $kind {
 	this exch kind
     } bind
-> setmethods
+> cdef
 ' cat
 } if
 @enable_oop@ 1 eq @enable_modules@ 1 eq and opt_bootstrap not and {
     `\
 
 # Singleton responsible for tracking all loaded modules.
-$mclass class dup up def
-dup $mclass setclassname
-dup vclass setsuper
-dup <
+$mclass vclass <
     # Dictionary of classname-->singleton associations.
     $singletons dict
-> setdata
-<
+><
     # This is a singleton class, so do not allow new to be called.
     #
     #class#
@@ -1127,16 +1121,12 @@ dup <
     $modules {
 	,modules
     } bind
-> setmethods
+> cdef
 
 # Each loaded module has a corresponding instance of this class, which can be
 # accessed via mclass:singleton:modules.
-$module class dup up def
-dup $module setclassname
-dup vclass setsuper
-dup <
-> setdata
-<
+$module vclass <
+><
     #class#
     #modname #mclass_singleton new #instance
     $new {
@@ -1280,7 +1270,7 @@ dup <
 	# Notify mclass_singleton of the unload.
 	,name ,mclass_singleton:unload_notify
     } bind
-> setmethods
+> cdef
 ' cat
 } if
 `\
