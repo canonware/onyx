@@ -31,11 +31,22 @@ cw_uint32_t	reduce(cw_matrix_t *a_m, cw_matrix_t ** r_x_index, cw_matrix_t
     ** r_y_index);
 void		remove_essential(cw_matrix_t *a_m, cw_matrix_t *a_x_index,
     cw_matrix_t *a_y_index, cw_uint32_t a_essential);
+void		genetic_cover(cw_matrix_t *matrix);
+cw_uint32_t	genetic_score(cw_matrix_t *matrix, cw_matrix_t *a_y_index,
+    pack_t *a_pack, gene_t *genes, cw_uint32_t a_gene_size);
+void		genetic_reproduce(cw_matrix_t *matrix, cw_matrix_t *a_y_index,
+    pack_t *a_pack, gene_t *genes, gene_t *tga, cw_uint32_t a_gene_size,
+    cw_uint32_t a_score_sum);
 void		usage(const char *a_progname);
 const char	*basename(const char *a_str);
 
 /* Global variables. */
-cw_uint64_t g_tries = 0;
+cw_uint64_t	g_tries = 0;
+cw_uint32_t	opt_nnodes = NUM_NODES;
+cw_uint32_t	opt_ngens = _GENERATIONS;
+cw_uint32_t	opt_seed = _SEED;
+cw_uint32_t	opt_mutate = _MUTATE_PROBABILITY_INV;
+cw_uint32_t	opt_psize = _POP_SIZE;
 
 int
 main(int argc, char **argv)
@@ -47,12 +58,7 @@ main(int argc, char **argv)
 	int		c;
 	cw_bool_t	cl_error = FALSE;
 	cw_bool_t	opt_help = FALSE;
-	cw_uint32_t	opt_nnodes = NUM_NODES;
-	cw_uint32_t	opt_ngens = _GENERATIONS;
-	cw_uint32_t	opt_seed = _SEED;
-	cw_uint32_t	opt_mutate = _MUTATE_PROBABILITY_INV;
-	cw_uint32_t	opt_psize = _POP_SIZE;
-  
+
 	libstash_init();
 
 	/* Parse command line. */
@@ -103,257 +109,7 @@ main(int argc, char **argv)
 	matrix = build_full_matrix(opt_nnodes, &graphs);
 /*  	matrix_dump(matrix, TRUE); */
 
-	/*
-	 * The following block uses a genetic algorithm to create generations of
-	 * partial solutions.
-	 */
-	{
-		cw_uint32_t	num_essentials, i, j, score_sum;
-		cw_uint32_t	gen_best, gen_best_score;
-		gene_t		*genes1, *genes2, *genes, *tga, *tgb;
-		cw_uint32_t	gene_size;
-		cw_matrix_t	temp_matrix;
-		pack_t		pack;
-		cw_matrix_t	*x_index, *y_index;
-    
-		num_essentials = reduce(matrix, &x_index, &y_index);
-		_cw_out_put("[i] essentials\n", num_essentials);
-		matrix_rebuild(matrix);
-		_cw_out_put("Matrix size == [i] x [i]\n",
-		    matrix_get_x_size(matrix), matrix_get_y_size(matrix));
-
-		matrix_new(&temp_matrix);
-
-		genes1 = (gene_t *) _cw_malloc(opt_psize * sizeof(gene_t));
-		genes2 = (gene_t *) _cw_malloc(opt_psize * sizeof(gene_t));
-		for (i = 0; i < opt_psize; i++) {
-			gene_new(&genes1[i], matrix_get_y_size(matrix));
-			gene_new(&genes2[i], matrix_get_y_size(matrix));
-		}
-    
-		/* Randomly fill all the bits in the genes. */
-		genes = genes1;
-		tga = genes2;
-		srandom(opt_seed);
-		_cw_out_put(
-		    "pool size: [i], generations: [i], crossover == [i]%, "
-		    "mutate == 1/[i], opt_seed == [i]\n",
-		    opt_psize, opt_ngens, _CROSSOVER_PROBABILITY,
-		    opt_mutate, opt_seed);
-    
-		for (i = 0; i < opt_psize; i++) {
-			for (j = 0; j < matrix_get_y_size(matrix); j++)
-				gene_set_locus(&genes[i], j, random() & 0x1);
-		}
-
-		pack_new(&pack, matrix_get_x_size(matrix),
-		    matrix_get_y_size(matrix));
-		/*
-		 * Create the packed version of the reduced matrix.  This only
-		 * works for n=5, but the fitness function is _much_ faster when
-		 * using this.
-		 */
-		for (i = 0; i < matrix_get_x_size(matrix); i++) {
-			for (j = 0; j < matrix_get_y_size(matrix); j++) {
-				if (matrix_get_element(matrix, i, j)) {
-					pack_set_el(pack, i, j);
-					_cw_assert(pack_get_el(pack, i, j) == 1);
-				} else {
-					_cw_assert(pack_get_el(pack, i, j) == 0);
-				}
-			}
-		}
-
-		gene_size = matrix_get_y_size(matrix);
-		/* Generation loop. */
-		for (i = 0, gen_best = gene_size, gen_best_score = 0;
-		     i < opt_ngens;
-		     i++) {
-			cw_uint32_t	gen_total, num_solutions;
-      
-			_cw_out_put("Generation [i]\n", i);
-      
-			/*
-			 * Score all of the genes, keeping a running total of
-                         * the scores.
-			 */
-/*  			_cw_out_put("Scoring...\n", i); */
-			for (j = score_sum = gen_total = num_solutions = 0; j <
-				 opt_psize; j++) {
-				cw_uint32_t	row, col;
-
-				row = row_score(&genes[j], gene_size);
-				col = gene_pack_col_score(&pack, &genes[j]);
-	
-				genes[j].score = fitness(matrix, row, col);
-				score_sum += genes[j].score;
-				genes[j].total = score_sum;
-
-				if (matrix_get_x_size(matrix) == col)
-				{
-					static cw_uint32_t	best = 0xffffffff;
-
-					if ((gene_size - row) < best)
-					{
-						best = (gene_size - row);
-						_cw_out_put("-----------------------------------------------\n");
-						_cw_out_put("<<< genes[[[i]] covers using [i|s:s] rows >>>\n",
-						    j, matrix_get_y_size(matrix) - row);
-						{
-							cw_uint32_t i;
-
-							_cw_out_put("Rows:");
-							for (i = 0; i < matrix_get_y_size(matrix); i++)
-							{
-								if (gene_get_locus(&genes[j], i))
-								{
-/*  									_cw_out_put(" [i]", i); */
-									_cw_out_put(" [i]",
-									    matrix_get_element(y_index, 0, i));
-								}
-							}
-							_cw_out_put("\n");
-						}
-	    
-						_cw_out_put("-----------------------------------------------\n");
-					}
-					if ((gene_size - row) < gen_best)
-					{
-						gen_best = (gene_size - row);
-						gen_best_score = genes[j].score;
-					}
-					gen_total += (matrix_get_y_size(matrix) - row);
-					num_solutions++;
-				}
-			}
-
-			_cw_out_put("  Solutions/Total = [i]/[i], Best Solution = [i], Average solution = [i]\n",
-			    num_solutions, opt_psize,
-			    gen_best,
-			    num_solutions ? (gen_total / num_solutions) : 0
-				);
-			_cw_out_put("  Best score = [i], Average score = [i]\n",
-			    gen_best_score,
-			    score_sum / opt_psize
-				);
-      
-			/*
-			 * Create a new generation.  Randomly select two genes, then create
-			 * children with crossover and mutation.
-			 */
-/*  			_cw_out_put("Reproducing...\n", i); */
-			{
-				cw_uint32_t	k, l, z, sel_a, sel_b, offset;
-	
-				for (j = 0; j < opt_psize; j += 2) {
-					/* Select first gene. */
-					offset = random() % score_sum;
-	  
-					for (l = (opt_psize / 2) - 1,
-						 z = 2,
-						 k = opt_psize >> z;
-					     ;
-					     z++,
-					     k = ((opt_psize >> z) > 0)  ? (opt_psize >> z) : 1) {
-						if (offset > genes[l].total) {
-							/* Jump forward. */
-							l += k;
-						} else {
-							if (l == 0) {
-								/* We're at the first element, so this is it. */
-								break;
-							} else {
-								if (offset > genes[l - 1].total) {
-									/* This is it. */
-									break;
-								} else {
-									/* Need to jump backward. */
-									l -= k;
-								}
-							}
-						}
-					}
-					sel_a = l;
-	  
-					/* Select second gene. */
-					offset = random() % score_sum;
-					for (l = (opt_psize / 2) - 1,
-						 z = 2,
-						 k = opt_psize >> z;
-					     ;
-					     z++,
-					     k = ((opt_psize >> z) > 0)  ? (opt_psize >> z) : 1) {
-						if (offset > genes[l].total) {
-							/* Jump forward. */
-							l += k;
-						} else {
-							if (l == 0) {
-								/* We're at the first element, so this is it. */
-								break;
-							} else {
-								if (offset > genes[l - 1].total) {
-									/* This is it. */
-									break;
-								} else {
-									/* Need to jump backward. */
-									l -= k;
-								}
-							}
-						}
-					}
-					sel_b = l;
-
-					/* Copy the old genes into place in the new pool. */
-					gene_copy(&tga[j], &genes[sel_a]);
-					gene_copy(&tga[j + 1], &genes[sel_b]);
-
-					/* Maybe do crossover. */
-					if ((random() % 100) < _CROSSOVER_PROBABILITY) {
-						cw_uint32_t m, crossover_point, temp;
-
-						crossover_point = random() % gene_size;
-
-						for (m = 0; m < gene_size; m++) {
-							if (m < crossover_point) {
-								/* Before crossover point.  Don't need to do anything. */
-							} else {
-								/* After crossover point. */
-								temp = gene_get_locus(&tga[j], m);
-								gene_set_locus(&tga[j], m, gene_get_locus(&tga[j + 1], m));
-								gene_set_locus(&tga[j + 1], m, temp);
-							}
-						}
-					}
-
-					/* Mutate. */
-					for (k = 0; k < gene_size; k++) {
-						if ((random() % opt_mutate) == 0)
-							gene_set_locus(&tga[j], k, ! gene_get_locus(&tga[j], k));
-					}
-					for (k = 0; k < gene_size; k++) {
-						if ((random() % opt_mutate) == 0)
-							gene_set_locus(&tga[j + 1], k, ! gene_get_locus(&tga[j + 1], k));
-					}
-				}
-			}
-      
-			/* Switch to the new gene pool. */
-			tgb = genes;
-			genes = tga;
-			tga = tgb;
-		}
-
-		for (i = 0; i < opt_psize; i++) {
-			gene_delete(&genes1[i]);
-			gene_delete(&genes2[i]);
-		}
-		_cw_free(genes1);
-		_cw_free(genes2);
-		pack_delete(&pack);
-		matrix_delete(&temp_matrix);
-		matrix_delete(x_index);
-		matrix_delete(y_index);
-	}
+	genetic_cover(matrix);
 
 	retval = 0;
   
@@ -722,7 +478,7 @@ is_min_span_tree(cw_matrix_t *a_matrix, cw_uint32_t a_nnodes)
 }
 
 cw_uint32_t
-reduce(cw_matrix_t *a_m, cw_matrix_t ** r_x_index, cw_matrix_t ** r_y_index)
+reduce(cw_matrix_t *a_m, cw_matrix_t **r_x_index, cw_matrix_t **r_y_index)
 {
 	cw_uint32_t	num_essentials = 0;
 	cw_bool_t	did_reduce;
@@ -730,8 +486,8 @@ reduce(cw_matrix_t *a_m, cw_matrix_t ** r_x_index, cw_matrix_t ** r_y_index)
 
 	/*
 	 * Create indices that can be used to figure out the origins of rows and
-	 * colums.  Every time a row or column is removed from the big matrix, so
-	 * should that row or column be removed from the indices.
+	 * colums.  Every time a row or column is removed from the big matrix,
+	 * so should that row or column be removed from the indices.
 	 */
 	{
 		cw_uint32_t	i;
@@ -918,16 +674,286 @@ remove_essential(cw_matrix_t *a_m, cw_matrix_t *a_x_index,
 	matrix_remove_row(a_y_index, a_essential);
 }
 
+/*
+ * Use a genetic algorithm to create generations of partial solutions.
+ */
+void
+genetic_cover(cw_matrix_t *matrix)
+{
+	cw_uint32_t	num_essentials, i, j;
+	gene_t		*genes1, *genes2, *genes, *tga, *tgb;
+	cw_uint32_t	gene_size, score_sum;
+	cw_matrix_t	temp_matrix;
+	pack_t		pack;
+	cw_matrix_t	*x_index, *y_index;
+    
+	num_essentials = reduce(matrix, &x_index, &y_index);
+	_cw_out_put("[i] essentials\n", num_essentials);
+	matrix_rebuild(matrix);
+	_cw_out_put("Matrix size == [i] x [i]\n",
+	    matrix_get_x_size(matrix), matrix_get_y_size(matrix));
+
+	matrix_new(&temp_matrix);
+
+	genes1 = (gene_t *) _cw_malloc(opt_psize * sizeof(gene_t));
+	genes2 = (gene_t *) _cw_malloc(opt_psize * sizeof(gene_t));
+	for (i = 0; i < opt_psize; i++) {
+		gene_new(&genes1[i], matrix_get_y_size(matrix));
+		gene_new(&genes2[i], matrix_get_y_size(matrix));
+	}
+    
+	/* Randomly fill all the bits in the genes. */
+	genes = genes1;
+	tga = genes2;
+	srandom(opt_seed);
+	_cw_out_put("pool size: [i], generations: [i], crossover == [i]%, "
+		"mutate == 1/[i], opt_seed == [i]\n", opt_psize, opt_ngens,
+	    _CROSSOVER_PROBABILITY, opt_mutate, opt_seed);
+
+	for (i = 0; i < opt_psize; i++) {
+		for (j = 0; j < matrix_get_y_size(matrix); j++)
+			gene_set_locus(&genes[i], j, random() & 0x1);
+	}
+
+	pack_new(&pack, matrix_get_x_size(matrix),
+	    matrix_get_y_size(matrix));
+	/*
+	 * Create the packed version of the reduced matrix.  This only works for
+	 * n=5, but the fitness function is _much_ faster when using this.
+	 */
+	for (i = 0; i < matrix_get_x_size(matrix); i++) {
+		for (j = 0; j < matrix_get_y_size(matrix); j++) {
+			if (matrix_get_element(matrix, i, j)) {
+				pack_set_el(pack, i, j);
+				_cw_assert(pack_get_el(pack, i, j) == 1);
+			} else {
+				_cw_assert(pack_get_el(pack, i, j) == 0);
+			}
+		}
+	}
+
+	gene_size = matrix_get_y_size(matrix);
+	/* Generation loop. */
+	for (i = 0; i < opt_ngens; i++) {
+      
+		_cw_out_put("Generation [i]\n", i);
+      
+/*  		_cw_out_put("Scoring...\n", i); */
+		score_sum = genetic_score(matrix, y_index, &pack, genes,
+		    gene_size);
+      
+/*  		_cw_out_put("Reproducing...\n", i); */
+		genetic_reproduce(matrix, y_index, &pack, genes, tga,
+		    gene_size, score_sum);
+      
+		/* Switch to the new gene pool. */
+		tgb = genes;
+		genes = tga;
+		tga = tgb;
+	}
+
+	for (i = 0; i < opt_psize; i++) {
+		gene_delete(&genes1[i]);
+		gene_delete(&genes2[i]);
+	}
+	_cw_free(genes1);
+	_cw_free(genes2);
+	pack_delete(&pack);
+	matrix_delete(&temp_matrix);
+	matrix_delete(x_index);
+	matrix_delete(y_index);
+}
+
+/*
+ * Score all of the genes, keeping a running total of the scores.
+ */
+cw_uint32_t
+genetic_score(cw_matrix_t *matrix, cw_matrix_t *a_y_index, pack_t *a_pack,
+    gene_t *genes, cw_uint32_t a_gene_size)
+{
+	cw_uint32_t	i, j;
+	cw_uint32_t	gen_best = a_gene_size;
+	cw_uint32_t	gen_total;
+	cw_uint32_t	gen_best_score;
+	cw_uint32_t	num_solutions;
+	cw_uint32_t	score_sum;
+	cw_uint32_t	row, col;
+
+	for (j = score_sum = gen_best_score = gen_total = num_solutions = 0; j <
+	    opt_psize; j++) {
+		row = row_score(&genes[j], a_gene_size);
+		col = gene_pack_col_score(a_pack, &genes[j]);
+	
+		genes[j].score = fitness(matrix, row, col);
+		score_sum += genes[j].score;
+		genes[j].total = score_sum;
+
+		if (matrix_get_x_size(matrix) == col) {
+			static cw_uint32_t	best = 0xffffffff;
+
+			if ((a_gene_size - row) < best) {
+				best = (a_gene_size - row);
+				_cw_out_put("---------------------------------"
+				    "--------------\n");
+				_cw_out_put("<<< genes[[[i]] covers using "
+				    "[i|s:s] rows >>>\n",
+				    j, matrix_get_y_size(matrix) - row);
+				_cw_out_put("Rows:");
+				for (i = 0; i <
+					 matrix_get_y_size(matrix); i++) {
+					if (gene_get_locus(&genes[j],
+					    i)) {
+						_cw_out_put(" [i]",
+						    matrix_get_element(a_y_index,
+						    0, i));
+					}
+				}
+				_cw_out_put("\n");
+	    
+				_cw_out_put("---------------------------------"
+				    "--------------\n");
+			}
+			if ((a_gene_size - row) < gen_best) {
+				gen_best = (a_gene_size - row);
+				gen_best_score = genes[j].score;
+			}
+			gen_total += (matrix_get_y_size(matrix) - row);
+			num_solutions++;
+		}
+	}
+
+	_cw_out_put("  Solutions/Total = [i]/[i], Best Solution = [i], "
+	    "Average solution = [i]\n", num_solutions, opt_psize,
+	    gen_best, num_solutions ? (gen_total / num_solutions) : 0);
+	_cw_out_put("  Best score = [i], Average score = [i]\n",
+	    gen_best_score, score_sum / opt_psize);
+
+	return score_sum;
+}
+
+/*
+ * Create a new generation.  Randomly select two genes, then create children
+ * with crossover and mutation.
+ */
+void
+genetic_reproduce(cw_matrix_t *matrix, cw_matrix_t *a_y_index, pack_t *a_pack,
+    gene_t *genes, gene_t *tga, cw_uint32_t a_gene_size, cw_uint32_t
+    a_score_sum)
+{
+	cw_uint32_t	j, k, l, z, sel_a, sel_b, offset;
+
+	for (j = 0; j < opt_psize; j += 2) {
+		/* Select first gene. */
+		offset = random() % a_score_sum;
+	  
+		for (l = (opt_psize / 2) - 1, z = 2, k = opt_psize >> z; ;
+		     z++, k = ((opt_psize >> z) > 0)  ? (opt_psize >> z) : 1) {
+			if (offset > genes[l].total) {
+				/* Jump forward. */
+				l += k;
+			} else {
+				if (l == 0) {
+					/*
+					 * We're at the first element, so this
+					 * is it.
+					 */
+					break;
+				} else {
+					if (offset > genes[l - 1].total) {
+						/* This is it. */
+						break;
+					} else {
+						/* Need to jump backward. */
+						l -= k;
+					}
+				}
+			}
+		}
+		sel_a = l;
+	  
+				/* Select second gene. */
+		offset = random() % a_score_sum;
+		for (l = (opt_psize / 2) - 1,
+			 z = 2,
+			 k = opt_psize >> z;
+		     ;
+		     z++,
+		     k = ((opt_psize >> z) > 0)  ? (opt_psize >> z) : 1) {
+			if (offset > genes[l].total) {
+				/* Jump forward. */
+				l += k;
+			} else {
+				if (l == 0) {
+					/*
+					 * We're at the first element, so this
+					 * is it.
+					 */
+					break;
+				} else {
+					if (offset > genes[l - 1].total) {
+						/* This is it. */
+						break;
+					} else {
+						/* Need to jump backward. */
+						l -= k;
+					}
+				}
+			}
+		}
+		sel_b = l;
+
+		/* Copy the old genes into place in the new pool. */
+		gene_copy(&tga[j], &genes[sel_a]);
+		gene_copy(&tga[j + 1], &genes[sel_b]);
+
+		/* Maybe do crossover. */
+		if ((random() % 100) < _CROSSOVER_PROBABILITY) {
+			cw_uint32_t m, crossover_point, temp;
+
+			crossover_point = random() % a_gene_size;
+
+			for (m = 0; m < a_gene_size; m++) {
+				if (m < crossover_point) {
+					/*
+					 * Before crossover point.  Don't need
+					 * to do anything.
+					 */
+				} else {
+					/* After crossover point. */
+					temp = gene_get_locus(&tga[j], m);
+					gene_set_locus(&tga[j], m,
+					    gene_get_locus(&tga[j + 1], m));
+					gene_set_locus(&tga[j + 1], m, temp);
+				}
+			}
+		}
+
+				/* Mutate. */
+		for (k = 0; k < a_gene_size; k++) {
+			if ((random() % opt_mutate) == 0)
+				gene_set_locus(&tga[j], k, !
+				    gene_get_locus(&tga[j], k));
+		}
+		for (k = 0; k < a_gene_size; k++) {
+			if ((random() % opt_mutate) == 0)
+				gene_set_locus(&tga[j + 1], k, !
+				    gene_get_locus(&tga[j + 1], k));
+		}
+	}
+}
+	
 void
 usage(const char *a_progname)
 {
 	_cw_out_put(
 	    "[s] usage:\n"
 	    "    [s] -h\n"
-	    "    [s] [[-n <nnodes>] [[-g <ngens>] [[-s <seed>] [[-c <crossover>] [[-m <mutate>] [[-p <psize>]\n"
+	    "    [s] [[-n <nnodes>] [[-g <ngens>] [[-s <seed>] "
+	    "[[-c <crossover>] [[-m <mutate>] [[-p <psize>]\n"
 	    "\n"
 	    "    Option               | Description\n"
-	    "    ---------------------+-----------------------------------------------------\n"
+	    "    ---------------------+--------------------------------------"
+	    "---------------\n"
 	    "    -h                   | Print usage and exit.\n"
 	    "    -n <nnodes>          | Use a graph with <nnodes> nodes.\n"
 	    "                         | (Default is [i].)\n"
@@ -935,7 +961,8 @@ usage(const char *a_progname)
 	    "                         | (Default is [i].)\n"
 	    "    -s <seed>            | Use initial random seed <seed>.\n"
 	    "                         | (Default is [i].)\n"
-	    "    -c <crossover>       | Do crossover with <crossover> percent probability.\n"
+	    "    -c <crossover>       | Do crossover with <crossover> percent"
+	    " probability.\n"
 	    "                         | (Default is [i]%.)\n"
 	    "    -m <mutate>          | Mutate with probability 1/<mutate>.\n"
 	    "                         | (Default is 1/[i].)\n"
