@@ -2092,7 +2092,6 @@ mkr_p_split_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
     cw_buf_t *buf;
     cw_bufp_t *bufp, *nextp, *pastp;
     cw_mkr_t *mkr, *mmkr;
-    cw_bufv_t bufv_to, bufv_from;
 
     bufp = a_mkr->bufp;
     buf = bufp->buf;
@@ -2119,13 +2118,10 @@ mkr_p_split_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
 
     /* Insert the data after bufp's gap to the same offset in nextp. */
     nextp->len = bufp->len - bufp->gap_off;
-    bufv_to.data = &nextp->b[bufp->gap_off + (CW_BUFP_SIZE - bufp->len)];
-    bufv_to.len = nextp->len;
-    bufv_from.data = &bufp->b[bufp->gap_off + (CW_BUFP_SIZE - bufp->len)];
-    bufv_from.len = nextp->len;
-    /* XXX nlines can be calculated in constant time using a_mkr's line, which
-     * means memcpy() can be used here. */
-    nextp->nlines = bufv_p_copy(&bufv_to, 1, &bufv_from, 1);
+    nextp->nlines = bufp->nlines - a_mkr->pline;
+    memcpy(&nextp->b[bufp->gap_off + (CW_BUFP_SIZE - bufp->len)],
+	   &bufp->b[bufp->gap_off + (CW_BUFP_SIZE - bufp->len)],
+	   nextp->len);
 
     /* Subtract nextp's nlines from bufp's nlines. */
     bufp->nlines -= nextp->nlines;
