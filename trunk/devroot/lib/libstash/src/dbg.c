@@ -16,6 +16,7 @@
 #  include "libstash/libstash.h"
 #endif
 
+#include "libstash/dbg_p.h"
 #include "libstash/mem_l.h"
 
 cw_dbg_t *

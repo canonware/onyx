@@ -24,7 +24,10 @@ mem_new(void)
   cw_mem_t * retval;
 
   retval = (cw_mem_t *) _cw_malloc(sizeof(cw_mem_t));
-  _cw_check_ptr(retval);
+  if (NULL == retval)
+  {
+    goto RETURN;
+  }
 
 #ifdef _CW_REENTRANT
   mtx_new(&retval->lock);
@@ -38,7 +41,8 @@ mem_new(void)
 
   retval->oom_handler = NULL;
   retval->handler_data = NULL;
-  
+
+  RETURN:
   return retval;
 }
 
@@ -98,7 +102,7 @@ mem_delete(cw_mem_t * a_mem)
 }
 
 void
-mem_set_oom_handler(cw_mem_t * a_mem, mem_oom_handler_t * a_oom_handler,
+mem_set_oom_handler(cw_mem_t * a_mem, cw_mem_oom_handler_t * a_oom_handler,
 		    const void * a_data)
 {
   _cw_check_ptr(a_mem);

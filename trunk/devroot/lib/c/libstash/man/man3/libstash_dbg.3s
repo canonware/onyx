@@ -1,0 +1,200 @@
+.ig \" -*-mode:nroff-*-
+
+<Copyright = jasone>
+<License>
+
+Version: <Version>
+..
+.TH libstash_dbg 3s "libstash, version <Version>"
+.Nm libstash_dbg
+.hy 1
+.SH NAME
+dbg - Dynamic debug spew.
+
+.SH SYNOPSIS
+.SS Single-threaded
+#define _LIBSTASH_USE_DBG
+.br
+\fB#include <libstash/libstash.h>\fR
+
+.SS Multi-threaded
+#define _LIBSTASH_USE_DBG
+.br
+\fB#include <libstash/libstash_r.h>\fR
+
+.SS General
+.I cw_dbg_t *
+.br
+.B dbg_new
+.RI ( "void" )
+
+.I void
+.br
+.B dbg_delete
+.RI ( "cw_dbg_t * a_dbg" )
+
+.I cw_bool_t
+.br
+.B dbg_register
+.RI ( "cw_dbg_t * a_dbg" ", " "const char * a_flag" )
+
+.I void
+.br
+.B dbg_unregister
+.RI ( "cw_dbg_t * a_dbg" ", " "const char * a_flag" )
+
+.I cw_bool_t
+.br
+.B dbg_is_registered
+.RI ( "cw_dbg_t * a_dbg" ", " "const char * a_flag" )
+
+.SS Debugging (dbg) symbols
+N/A.
+
+.SH DESCRIPTION
+Dynamic debug class.  \fBdbg\fR makes it easy to turn various types of debug
+spew on and off on the fly, without recompilation, without even restarting the
+program.  This is achieved via a simple symbol registry.  Symbols (strings) are
+registered and unregistered, and runtime decisions can be made on whether a
+symbol is registered.
+
+.SH USAGE
+.I cw_dbg_t *
+.br
+.B dbg_new
+.RI ( "void" )
+.br
+Input(s):
+.RS
+None.
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+non-NULL: Pointer to a dbg.
+.br
+NULL: Memory allocation error.
+.RE
+.RE
+Description:
+.RS
+Constructor.
+.RE
+.RE
+
+.I void
+.br
+.B dbg_delete
+.RI ( "cw_dbg_t * a_dbg" )
+.br
+Input(s):
+.RS
+.IR a_dbg :
+.RS
+Pointer to a dbg.
+.RE
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Destructor.
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B dbg_register
+.RI ( "cw_dbg_t * a_dbg" ", " "const char * a_flag" )
+.br
+Input(s):
+.RS
+.IR a_dbg :
+.RS
+Pointer to a dbg.
+.RE
+.IR a_flag :
+.RS
+Pointer to a string that represents a debugging flag.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+FALSE: Success.
+.br
+TRUE: Memory allocation error, or a_dbg is NULL.
+.RE
+.RE
+Description:
+.RS
+Register a debug flag string (turn it on).
+.RE
+.RE
+
+.I void
+.br
+.B dbg_unregister
+.RI ( "cw_dbg_t * a_dbg" ", " "const char * a_flag" )
+.br
+Input(s):
+.RS
+.IR a_dbg :
+.RS
+Pointer to a dbg.
+.RE
+.IR a_flag :
+.RS
+Pointer to a string that represents a debugging flag.
+.RE
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Unregister a flag (turn it off) if it is registered.
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B dbg_is_registered
+.RI ( "cw_dbg_t * a_dbg" ", " "const char * a_flag" )
+.br
+Input(s):
+.RS
+.IR a_dbg :
+.RS
+Pointer to a dbg.
+.RE
+.IR a_flag :
+.RS
+Pointer to a string that represents a debugging flag.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+TRUE: Registered.
+.br
+FALSE: Not registered, or a_dbg is NULL.
+.RE
+.RE
+Description:
+.RS
+Return TRUE if a_flag is registered, FALSE, otherwise.
+.RE
+.RE
+
+.SH SEE ALSO
+libstash(3s).
+
+.SH HISTORY
+Written by Jason Evans <jasone@canonware.com>.

@@ -8,12 +8,6 @@
  *
  * Version: <Version>
  *
- * <<< Description >>>
- *
- * Public interface for the pezz class.  pezz provides cached allocation for
- * many equal-size buffers.  It does incremental block allocation, then carves
- * buffers from those blocks.  No memory is freed until pezz_delete() is called.
- *
  ****************************************************************************/
 
 /* Pseudo-opaque type. */
@@ -66,133 +60,29 @@ typedef struct
 } cw_pezz_item_t;
 #endif
 
-/****************************************************************************
- *
- * <<< Input(s) >>>
- *
- * a_pezz : Pointer to space for a pezz, or NULL.
- *
- * a_buffer_size : Size of buffers to allocate and return from pezz_get().
- *
- * a_num_buffers : Number of buffers to allocate space for each time a new
- *                 memory block is allocated.
- *
- * <<< Output(s) >>>
- *
- * retval : Pointer to a pezz, or NULL.
- *          NULL : Memory allocation error.
- *
- * <<< Description >>>
- *
- * Constructor.
- *
- ****************************************************************************/
 cw_pezz_t *
 pezz_new(cw_pezz_t * a_pezz, cw_uint32_t a_buffer_size,
 	 cw_uint32_t a_num_buffers);
 
-/****************************************************************************
- *
- * <<< Input(s) >>>
- *
- * a_pezz : Pointer to a pezz.
- *
- * <<< Output(s) >>>
- *
- * None.
- *
- * <<< Description >>>
- *
- * Destructor.
- *
- ****************************************************************************/
 void
 pezz_delete(cw_pezz_t * a_pezz);
 
-/****************************************************************************
- *
- * <<< Input(s) >>>
- *
- * a_pezz : Pointer to a pezz.
- *
- * <<< Output(s) >>>
- *
- * retval : Size of buffers that a_pezz is using.
- *
- * <<< Description >>>
- *
- * Return the size of the buffers that a_pezz is using.
- *
- ****************************************************************************/
 cw_uint32_t
 pezz_get_buffer_size(cw_pezz_t * a_pezz);
 
-/****************************************************************************
- *
- * <<< Input(s) >>>
- *
- * a_pezz : Pointer to a pezz.
- *
- * <<< Output(s) >>>
- *
- * retval : Pointer to a memory buffer.
- *
- * <<< Description >>>
- *
- * Return a memory buffer.
- *
- ****************************************************************************/
 void *
 pezz_get(cw_pezz_t * a_pezz);
-
 void *
 pezz_get_e(cw_pezz_t * a_pezz, const char * a_filename, cw_uint32_t a_line_num);
-
 #define _cw_pezz_get(a_pezz) pezz_get_e((a_pezz), __FILE__, __LINE__)
 
-/****************************************************************************
- *
- * <<< Input(s) >>>
- *
- * a_pezz : Pointer to a pezz.
- *
- * a_buffer : Pointer to a memory buffer.
- *
- * <<< Output(s) >>>
- *
- * None.
- *
- * <<< Description >>>
- *
- * Put back (deallocate) a_buffer.
- *
- ****************************************************************************/
 void
 pezz_put(void * a_pezz, void * a_buffer);
-
 void
 pezz_put_e(cw_pezz_t * a_pezz, void * a_buffer, const char * a_filename,
 	   cw_uint32_t a_line_num);
-
 #define _cw_pezz_put(a_pezz, a_buffer) \
                      pezz_put_e((a_pezz), (a_buffer), __FILE__, __LINE__)
 
-/****************************************************************************
- *
- * <<< Input(s) >>>
- *
- * a_pezz : Pointer to a pezz.
- *
- * a_prefix : Pointer to a string which is used as a prefix for all output.
- *
- * <<< Output(s) >>>
- *
- * None.
- *
- * <<< Description >>>
- *
- * Dump the internal state of a_pezz to cw_g_out.
- *
- ****************************************************************************/
 void
 pezz_dump(cw_pezz_t * a_pezz, const char * a_prefix);

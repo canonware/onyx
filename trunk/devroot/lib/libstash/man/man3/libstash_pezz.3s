@@ -1,0 +1,299 @@
+.ig \" -*-mode:nroff-*-
+
+<Copyright = jasone>
+<License>
+
+Version: <Version>
+..
+.TH libstash_pezz 3s "libstash, version <Version>"
+.Nm libstash_pezz
+.hy 1
+.SH NAME
+pezz - Grouped memory allocation of equal-size buffers.
+.SH SYNOPSIS
+.SS Single-threaded
+#define _LIBSTASH_USE_PEZZ
+.br
+\fB#include <libstash/libstash.h>\fR
+
+.SS Multi-threaded
+#define _LIBSTASH_USE_PEZZ
+.br
+\fB#include <libstash/libstash_r.h>\fR
+
+.SS General
+.I cw_pezz_t *
+.br
+.B pezz_new
+.RI ( "cw_pezz_t * a_pezz" ", " "cw_uint32_t a_buffer_size" ", "
+.IR "cw_uint32_t a_num_buffers" )
+
+.I void
+.br
+.B pezz_delete
+.RI ( "cw_pezz_t * a_pezz" )
+
+.I cw_uint32_t
+.br
+.B pezz_get_buffer_size
+.RI ( "cw_pezz_t * a_pezz" )
+
+.I void *
+.br
+.B pezz_get
+.RI ( "cw_pezz_t * a_pezz" )
+.br
+.I void *
+.br
+.B pezz_get_e
+.RI ( "cw_pezz_t * a_pezz" ", " "const char * a_filename" ", " 
+.IR "cw_uint32_t a_line_num" )
+.br
+.I void *
+.br
+.B _cw_pezz_get
+.RI ( "cw_pezz_t * a_pezz" )
+
+.I void
+.br
+.B pezz_put
+.RI ( "cw_pezz_t * a_pezz" ", " "void * a_buffer" )
+.br
+.I void
+.br
+.B pezz_put
+.RI ( "cw_pezz_t * a_pezz" ", " "void * a_buffer" ", " 
+.IR "const char * a_filename" ", " "cw_uint32_t a_line_num" )
+.br
+.I void
+.br
+.B _cw_pezz_put
+.RI ( "cw_pezz_t * a_pezz" ", " "void * a_buffer" )
+
+.I void
+.br
+.B pezz_dump
+.RI ( "cw_pezz_t * a_pezz" ", " "const char * a_prefix" )
+
+.SS Debugging (dbg) symbols
+.TP
+\*(lqpezz_verbose\*(rq
+In the debug versions of libstash, print out full tracking information for every
+allocation and deallocation.
+.TP
+\*(lqpezz_error\*(rq
+In the debug versions of libstash, print out information about memory leaks and
+other detectable errors or inconsistencies.
+
+.SH DESCRIPTION
+The \fBpezz\fR class provides cached allocation for equal-size buffers.  It does
+incremental block allocation, then carves buffers from those blocks.  No memory
+is freed until \fBpezz_delete\fR() is called.
+
+.SH USAGE
+.I cw_pezz_t *
+.br
+.B pezz_new
+.RI ( "cw_pezz_t * a_pezz" ", " "cw_uint32_t a_buffer_size" ", "
+.IR "cw_uint32_t a_num_buffers" )
+.br
+Input(s):
+.RS
+.IR a_pezz :
+.RS
+Pointer to space for a pezz, or NULL.
+.RE
+.IR a_buffer_size :
+.RS
+Size of buffers to allocate and return from pezz_get().
+.RE
+.IR a_num_buffers :
+.RS
+Number of buffers to allocate space for each time a new memory block is
+allocated.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+non-NULL: Pointer to a pezz.
+.br
+NULL: Memory allocation error.
+.RE
+.RE
+Description:
+.RS
+Constructor.
+.RE
+.RE
+
+.I void
+.br
+.B pezz_delete
+.RI ( "cw_pezz_t * a_pezz" )
+.br
+Input(s):
+.RS
+.IR a_pezz :
+.RS
+Pointer to a pezz.
+.RE
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Destructor.
+.RE
+.RE
+
+.I cw_uint32_t
+.br
+.B pezz_get_buffer_size
+.RI ( "cw_pezz_t * a_pezz" )
+.br
+Input(s):
+.RS
+.IR a_pezz :
+.RS
+Pointer to a pezz.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+Size of buffers that a_pezz is using.
+.RE
+.RE
+Description:
+.RS
+Return the size of the buffers that a_pezz is using.
+.RE
+.RE
+
+.I void *
+.br
+.B pezz_get
+.RI ( "cw_pezz_t * a_pezz" )
+.br
+.I void *
+.br
+.B pezz_get_e
+.RI ( "cw_pezz_t * a_pezz" ", " "const char * a_filename" ", " 
+.IR "cw_uint32_t a_line_num" )
+.br
+.I void *
+.br
+.B _cw_pezz_get
+.RI ( "cw_pezz_t * a_pezz" )
+.br
+Input(s):
+.RS
+.IR a_pezz :
+.RS
+Pointer to a pezz.
+.RE
+.IR a_filename :
+.RS
+Should be __FILE__.
+.RE
+.IR a_line_num :
+.RS
+Should be __LINE__.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+non-NULL: Pointer to a memory buffer.
+.br
+NULL: Memory allocation error.
+.RE
+.RE
+Description:
+.RS
+Allocate a memory buffer and return a pointer to it.
+.RE
+.RE
+
+.I void
+.br
+.B pezz_put
+.RI ( "cw_pezz_t * a_pezz" ", " "void * a_buffer" )
+.br
+.I void
+.br
+.B pezz_put
+.RI ( "cw_pezz_t * a_pezz" ", " "void * a_buffer" ", " 
+.IR "const char * a_filename" ", " "cw_uint32_t a_line_num" )
+.br
+.I void
+.br
+.B _cw_pezz_put
+.RI ( "cw_pezz_t * a_pezz" ", " "void * a_buffer" )
+.br
+Input(s):
+.RS
+.IR a_pezz :
+.RS
+Pointer to a pezz.
+.RE
+.IR a_buffer :
+.RS
+Pointer to a memory buffer.
+.RE
+.IR a_filename :
+.RS
+Should be __FILE__.
+.RE
+.IR a_line_num :
+.RS
+Should be __LINE__.
+.RE
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Put back (deallocate) a_buffer.
+.RE
+.RE
+
+.I void
+.br
+.B pezz_dump
+.RI ( "cw_pezz_t * a_pezz" ", " "const char * a_prefix" )
+.br
+Input(s):
+.RS
+.IR a_pezz :
+.RS
+Pointer to a pezz.
+.RE
+.IR a_prefix :
+.RS
+Pointer to a string which is used as a prefix for all output.
+.RE
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Dump the internal state of a_pezz to cw_g_out.
+.RE
+.RE
+
+.SH SEE ALSO
+libstash(3s).
+
+.SH HISTORY
+Written by Jason Evans <jasone@canonware.com>.

@@ -24,7 +24,7 @@ struct cw_mem_s
   cw_oh_t addr_hash;
 #endif
 
-  mem_oom_handler_t * oom_handler;
+  cw_mem_oom_handler_t * oom_handler;
   const void * handler_data;
 };
 

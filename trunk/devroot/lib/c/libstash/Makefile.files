@@ -19,8 +19,8 @@ INCS := libstash.h libstash_defs.h libstash_incs.h arena.h bhp.h buf.h dbg.h \
 INCS_R := libstash_r.h locks.h thread.h
 
 # Include files that are _not_ installed.
-PRIV_INCS := arena_p.h bhp_p.h buf_p.h list_p.h log_p.h mem_l.h mem_p.h oh_p.h \
-	out_p.h res_p.h treen_p.h
+PRIV_INCS := arena_p.h bhp_p.h buf_p.h dbg_p.h list_p.h log_p.h mem_l.h \
+	mem_p.h oh_p.h out_p.h res_p.h treen_p.h
 
 PRIV_INCS_R := locks_p.h
 
