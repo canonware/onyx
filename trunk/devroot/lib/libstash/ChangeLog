@@ -1,3 +1,9 @@
+2000-02-04  Jason Evans  <jasone@canonware.com>
+
+	* include/libstash/ring.h: Remove automatic deallocation code for
+	the ring class, since it wasn't getting used anywhere, and it took
+	up significant extra space.
+
 2000-02-03  Jason Evans  <jasone@canonware.com>
 
 	* : Remove _CW_REENTRANT and only build threaded versions of libstash.

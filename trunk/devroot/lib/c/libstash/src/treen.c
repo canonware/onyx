@@ -39,7 +39,7 @@ treen_new(cw_treen_t * a_treen,
     retval->dealloc_arg = cw_g_mem;
   }
   
-  ring_new(&retval->siblings, NULL, NULL);
+  ring_new(&retval->siblings);
   ring_set_data(&retval->siblings, (void *) retval);
 
 #ifdef _LIBSTASH_DBG

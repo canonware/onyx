@@ -48,7 +48,7 @@ oh_delete(cw_oh_t * a_oh)
       a_oh->items_ring = ring_cut(t_ring);
       
       item = (cw_oh_item_t *) ring_get_data(t_ring);
-      ring_delete(&item->ring_item);
+      ring_delete(&item->ring_item); /* Not absolutely necessary. */
       _cw_free(item);
     }
   }
@@ -65,7 +65,7 @@ oh_delete(cw_oh_t * a_oh)
       a_oh->spares_ring = ring_cut(t_ring);
       
       item = (cw_oh_item_t *) ring_get_data(t_ring);
-      ring_delete(&item->ring_item);
+      ring_delete(&item->ring_item); /* Not absolutely necessary. */
       _cw_free(item);
     }
   }
@@ -412,7 +412,7 @@ oh_item_insert(cw_oh_t * a_oh, const void * a_key, const void * a_data)
 	retval = -1;
 	goto RETURN;
       }
-      ring_new(&item->ring_item, NULL, NULL);
+      ring_new(&item->ring_item);
       ring_set_data(&item->ring_item, (void *) item);
     }
 
@@ -1133,7 +1133,7 @@ oh_p_shrink(cw_oh_t * a_oh)
 	}
 	
 	item = (cw_oh_item_t *) ring_get_data(t_ring);
-	ring_delete(&item->ring_item);
+	ring_delete(&item->ring_item); /* Not absolutely necessary. */
 	_cw_free(item);
       }
     }

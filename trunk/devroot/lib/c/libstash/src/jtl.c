@@ -106,7 +106,7 @@ jtl_get_tq_el(cw_jtl_t * a_jtl)
   
   retval->is_blocked = FALSE;
   cnd_new(&retval->tlock_wait);
-  ring_new(&retval->ring_item, NULL, NULL);
+  ring_new(&retval->ring_item);
   ring_set_data(&retval->ring_item, retval);
 
   if (0 < a_jtl->tlock_wait_count)

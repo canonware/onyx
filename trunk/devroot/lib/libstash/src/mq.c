@@ -55,6 +55,8 @@ mq_new(cw_mq_t * a_mq)
 void
 mq_delete(cw_mq_t * a_mq)
 {
+  cw_ring_t * t_ring;
+  
   _cw_check_ptr(a_mq);
   _cw_assert(_LIBSTASH_MQ_MAGIC == a_mq->magic);
 
@@ -63,11 +65,23 @@ mq_delete(cw_mq_t * a_mq)
 
   if (NULL != a_mq->ring)
   {
-    ring_delete(a_mq->ring);
+    do
+    {
+      t_ring = a_mq->ring;
+      a_mq->ring = ring_cut(t_ring);
+      ring_delete(t_ring);
+      _cw_free(t_ring);
+    } while (t_ring != a_mq->ring);
   }
   if (NULL != a_mq->spares_ring)
   {
-    ring_delete(a_mq->spares_ring);
+    do
+    {
+      t_ring = a_mq->spares_ring;
+      a_mq->spares_ring = ring_cut(t_ring);
+      ring_delete(t_ring);
+      _cw_free(t_ring);
+    } while (t_ring != a_mq->spares_ring);
   }
   
   if (TRUE == a_mq->is_malloced)
@@ -256,12 +270,13 @@ mq_put(cw_mq_t * a_mq, const void * a_message)
     }
     else
     {
-      t_ring = ring_new(NULL, NULL, NULL);
+      t_ring = (cw_ring_t *) _cw_malloc(sizeof(cw_ring_t));
       if (NULL == t_ring)
       {
 	retval = -1;
 	goto RETURN;
       }
+      ring_new(t_ring);
     }
     
     ring_set_data(t_ring, (void *) a_message);

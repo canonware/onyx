@@ -164,9 +164,8 @@ extern cw_out_t * cw_g_out;
 #  define _cw_malloc(a) mem_malloc(cw_g_mem, a, __FILE__, __LINE__)
 #  define _cw_calloc(a, b) mem_calloc(cw_g_mem, a, b, __FILE__, __LINE__)
 #  define _cw_realloc(a, b) mem_realloc(cw_g_mem, a, b, __FILE__, __LINE__)
-#  define _cw_free(a) {mem_free(cw_g_mem, a, __FILE__, __LINE__); (a) = NULL;}
-#  define _cw_dealloc(a) {mem_dealloc((void *) cw_g_mem, a, \
-                                      __FILE__, __LINE__); (a) = NULL;}
+#  define _cw_free(a) mem_free(cw_g_mem, a, __FILE__, __LINE__)
+#  define _cw_dealloc(a) mem_dealloc((void *) cw_g_mem, a, __FILE__, __LINE__)
 #else
 #  define _cw_malloc(a) mem_malloc(cw_g_mem, a)
 #  define _cw_calloc(a, b) mem_calloc(cw_g_mem, a, b)

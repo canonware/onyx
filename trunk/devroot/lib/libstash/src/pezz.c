@@ -105,13 +105,13 @@ pezz_new(cw_pezz_t * a_pezz, cw_uint32_t a_buffer_size,
 
     /* Initialize spare_buffers to have something in it. */
     retval->spare_buffers = retval->ring_blocks[0];
-    ring_new(retval->spare_buffers, NULL, NULL);
+    ring_new(retval->spare_buffers);
     ring_set_data(retval->spare_buffers, retval->mem_blocks[0]);
     
     for (i = 1; i < retval->block_num_buffers; i++)
     {
       t_ring = &retval->ring_blocks[0][i];
-      ring_new(t_ring, NULL, NULL);
+      ring_new(t_ring);
       ring_set_data(t_ring, (((cw_uint8_t *) retval->mem_blocks[0])
 			     + (i * retval->buffer_size)));
       ring_meld(retval->spare_buffers, t_ring);
@@ -269,14 +269,14 @@ pezz_get_e(cw_pezz_t * a_pezz, const char * a_filename, cw_uint32_t a_line_num)
 
       /* Initialize spare_buffers to have something in it. */
       a_pezz->spare_buffers = a_pezz->ring_blocks[a_pezz->num_blocks];
-      ring_new(a_pezz->spare_buffers, NULL, NULL);
+      ring_new(a_pezz->spare_buffers);
       ring_set_data(a_pezz->spare_buffers,
 		    a_pezz->mem_blocks[a_pezz->num_blocks]);
 
       for (i = 1; i < a_pezz->block_num_buffers; i++)
       {
 	t_ring = &a_pezz->ring_blocks[a_pezz->num_blocks][i];
-	ring_new(t_ring, NULL, NULL);
+	ring_new(t_ring);
 	ring_set_data(t_ring,
 		      (((cw_uint8_t *) a_pezz->mem_blocks[a_pezz->num_blocks])
 		       + (i * a_pezz->buffer_size)));
