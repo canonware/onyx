@@ -5164,6 +5164,7 @@ systemdict_truncate(cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack;
 	cw_nxo_t		*file, *length;
+	cw_nxoi_t		len;
 	cw_nxo_threade_t	error;
 
 	ostack = nxo_thread_ostack_get(a_thread);
@@ -5174,12 +5175,13 @@ systemdict_truncate(cw_nxo_t *a_thread)
 		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
 		return;
 	}
-	if (nxo_integer_get(length) < 0) {
+	len = nxo_integer_get(length);
+	if (len < 0) {
 		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
 		return;
 	}
 
-	error = nxo_file_truncate(file, nxo_integer_get(length));
+	error = nxo_file_truncate(file, len);
 	if (error) {
 		nxo_thread_error(a_thread, error);
 		return;

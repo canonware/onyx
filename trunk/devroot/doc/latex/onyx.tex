@@ -2468,7 +2468,8 @@ elements pushed by \htmlref{\onyxop{}{begin}{}}{systemdict:begin}. \\
 \hline \hline
 \multicolumn{4}{|l|}{File and filesystem operators} \\
 \hline \hline
-& {\bf \htmlref{truncate}{systemdict:truncate}} & & \\
+file length & {\bf \htmlref{truncate}{systemdict:truncate}} & -- & Truncate
+file. \\
 \hline
 & {\bf \htmlref{unlink}{systemdict:unlink}} & & \\
 \hline
@@ -2512,8 +2513,6 @@ path & {\bf \htmlref{cd}{systemdict:cd}} & -- & \\
 \hline
 path proc & {\bf \htmlref{dirforeach}{systemdict:dirforeach}} & -- & \\
 \hline
-& {\bf \htmlref{currentfile}{systemdict:currentfile}} & & \\
-\hline
 & {\bf \htmlref{bytesavailable}{systemdict:bytesavailable}} & & \\
 \hline
 & {\bf \htmlref{chmod}{systemdict:chmod}} & & \\
@@ -2548,7 +2547,7 @@ a b & {\bf \htmlref{or}{systemdict:or}} & r & Logical/bitwise or.
 (boolean/integer) \\
 \hline
 a b & {\bf \htmlref{xor}{systemdict:xor}} & r & Logical/bitwise exclusive or.
-(boolean/ integer) \\
+(boolean/integer) \\
 \hline
 a & {\bf \htmlref{not}{systemdict:not}} & r & Logical/bitwise not.
 (boolean/integer) \\
@@ -3558,27 +3557,6 @@ onyx:0> </foo `foo'> begin
 onyx:0> currentdict 1 sprint
 </foo `foo'>
 onyx:0>
-		\end{verbatim}
-	\end{description}
-\label{systemdict:currentfile}
-\index{currentfile@\onyxop{}{currentfile}{}}
-\item[{\onyxop{--}{currentfile}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
-	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
 		\end{verbatim}
 	\end{description}
 \label{systemdict:currentlocking}
@@ -7135,7 +7113,7 @@ onyx:0>
 	\end{description}
 \label{systemdict:truncate}
 \index{truncate@\onyxop{}{truncate}{}}
-\item[{\onyxop{--}{truncate}{--}}: ]
+\item[{\onyxop{file length}{truncate}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -7147,7 +7125,10 @@ onyx:0>
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{ioerror}{ioerror}.]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
 	\item[Example(s): ]\begin{verbatim}
