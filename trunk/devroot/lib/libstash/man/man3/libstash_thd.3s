@@ -41,7 +41,7 @@ thd - Thread.
 .I int
 .br
 .B thd_sigmask
-.RI ( "int a_action" ", " "sigset_t *a_sigset" )
+.RI ( "int a_action" ", " "sigset_t *a_sigset" ", " "sigset_t *a_old_sigset" )
 .PP
 .I void
 .br
@@ -227,7 +227,7 @@ Give up the rest of this thread's time slice.
 .I int
 .br
 .B thd_sigmask
-.RI ( "int a_action" ", " "sigset_t *a_sigset" )
+.RI ( "int a_action" ", " "sigset_t *a_sigset" ", " "sigset_t *a_old_sigset" )
 .RS
 Input(s):
 .RS
@@ -242,6 +242,12 @@ SIG_SETMASK: Set signal mask to a_sigset.
 .IR a_sigset :
 .RS
 Pointer to a signal set (sigset_t *).
+.RE
+.IR a_old_sigset :
+.RS
+non-NULL: Pointer space to store the old signal mask.
+.br
+NULL: Ignored.
 .RE
 .RE
 Output(s):

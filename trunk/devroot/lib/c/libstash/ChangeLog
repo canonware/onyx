@@ -1,3 +1,8 @@
+2001-02-06  Jason Evans  <jasone@canonware.com>
+
+	* include/libstash/thd.h (thd_sigmask): Add argument to allow
+	retrieval of the old signal mask.
+
 2001-02-03  Jason Evans  <jasone@canonware.com>
 
 	* src/thd.c (thd_single_enter): Add.

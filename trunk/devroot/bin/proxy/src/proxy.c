@@ -275,7 +275,7 @@ main(int argc, char **argv)
 	sigemptyset(&handler_arg.hupset);
 	sigaddset(&handler_arg.hupset, SIGHUP);
 	sigaddset(&handler_arg.hupset, SIGINT);
-	thd_sigmask(SIG_BLOCK, &handler_arg.hupset);
+	thd_sigmask(SIG_BLOCK, &handler_arg.hupset, NULL);
 	thd_new(&handler_arg.sig_thd, sig_handler, (void *)&handler_arg);
 
 	if (opt_dirname != NULL) {
