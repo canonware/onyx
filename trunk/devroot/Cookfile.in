@@ -65,7 +65,7 @@ EXTRALIBS = @LIBS@;
  * User targets.
  */
 
-all : libs bins;
+all : bins_a;
 
 everything : libs bins tests;
 
@@ -289,6 +289,9 @@ dataend
 #  include [srcdir]/bin/proxy/Howto.cook
 #endif
 #if @bin_stil@
+#  include [srcdir]/bin/stil/Howto.cook
+#endif
+#if @bin_stile@
 #  include [srcdir]/bin/stil/Howto.cook
 #endif
 #if @bin_suck@
