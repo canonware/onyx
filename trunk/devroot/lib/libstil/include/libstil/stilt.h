@@ -126,6 +126,8 @@ cw_bool_t	stilt_detach_str(cw_stilt_t *a_stilt, const char *a_str,
 
 cw_bool_t	stilt_detach_buf(cw_stilt_t *a_stilt, cw_buf_t *a_buf);
 
+#define stilt_get_stil(a_stilt) (a_stilt)->stil
+
 const cw_stiln_t	*stiltn_ref(cw_stilt_t *a_stilt, const cw_uint8_t
     *a_name, cw_uint32_t a_len, cw_bool_t a_force);
 

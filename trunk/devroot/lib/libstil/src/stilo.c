@@ -31,45 +31,62 @@ stilo_delete(cw_stilo_t *a_stilo)
 {
 	_cw_check_ptr(a_stilo);
 	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
-
-	switch (a_stilo->type) {
-	case _CW_STILOT_NOTYPE:
-	case _CW_STILOT_BOOLEANTYPE:
-	case _CW_STILOT_FILETYPE:
-	case _CW_STILOT_MARKTYPE:
-	case _CW_STILOT_NULLTYPE:
-	case _CW_STILOT_OPERATORTYPE:
-		/* Simple type; do nothing. */
-		break;
-	case _CW_STILOT_ARRAYTYPE:
-		stiloe_array_unref(a_stilo->o.array.stiloe);
-		break;
-	case _CW_STILOT_CONDITIONTYPE:
-		stiloe_condition_unref(a_stilo->o.condition.stiloe);
-		break;
-	case _CW_STILOT_DICTTYPE:
-		break;
-	case _CW_STILOT_HOOKTYPE:
-		stiloe_hook_unref(a_stilo->o.hook.stiloe);
-		break;
-	case _CW_STILOT_LOCKTYPE:
-		break;
-	case _CW_STILOT_MSTATETYPE:
-		if (a_stilo->extended)
-			;/* XXX */
-		break;
-	case _CW_STILOT_NAMETYPE:
-		break;
-	case _CW_STILOT_NUMBERTYPE:
-		if (a_stilo->extended)
-			;/* XXX */
-		break;
-	case _CW_STILOT_PACKEDARRAYTYPE:
-		break;
-	case _CW_STILOT_STRINGTYPE:
-		break;
-	default:
-		_cw_error("Programming error");
+	
+	/*
+	 * Delete extended types if they only have one reference.  Otherwise,
+	 * the GC is responsible for determining when an object can be
+	 * deleted.
+	 */
+	if (a_stilo->ref_count == 0) {
+		switch (a_stilo->type) {
+		case _CW_STILOT_NOTYPE:
+		case _CW_STILOT_BOOLEANTYPE:
+		case _CW_STILOT_FILETYPE:
+		case _CW_STILOT_MARKTYPE:
+		case _CW_STILOT_NULLTYPE:
+		case _CW_STILOT_OPERATORTYPE:
+			/* Simple type; do nothing. */
+			break;
+		case _CW_STILOT_ARRAYTYPE:
+			stiloe_array_delete(a_stilo->o.array.stiloe);
+			break;
+		case _CW_STILOT_CONDITIONTYPE:
+			stiloe_condition_delete(a_stilo->o.condition.stiloe);
+			break;
+		case _CW_STILOT_DICTTYPE:
+			break;
+		case _CW_STILOT_HOOKTYPE:
+			stiloe_hook_delete(a_stilo->o.hook.stiloe);
+			break;
+		case _CW_STILOT_LOCKTYPE:
+			stiloe_lock_delete(a_stilo->o.lock.stiloe);
+			break;
+		case _CW_STILOT_MSTATETYPE:
+			if (a_stilo->extended)
+				stiloe_mstate_delete(a_stilo->o.mstate.stiloe);
+			break;
+		case _CW_STILOT_NAMETYPE:
+			if (a_stilo->indirect_name) {
+				stiltn_unref(a_stilo->o.name.s.stilt,
+				    a_stilo->o.name.stiln);
+			} else {
+				stil_stiln_unref(stilt_get_stil(a_stilo->o.name.s.stilt),
+				    a_stilo->o.name.stiln,
+				    a_stilo->o.name.s.key); 
+			}	
+			break;
+		case _CW_STILOT_NUMBERTYPE:
+			if (a_stilo->extended)
+				stiloe_number_delete(a_stilo->o.number.val.stiloe);
+			break;
+		case _CW_STILOT_PACKEDARRAYTYPE:
+			stiloe_packedarray_delete(a_stilo->o.packedarray.stiloe);
+			break;
+		case _CW_STILOT_STRINGTYPE:
+			break;
+		default:
+			_cw_error("Programming error");
+		}
 	}
 
 #ifdef _LIBSTIL_DBG

@@ -12,6 +12,7 @@
 typedef struct cw_stilo_s cw_stilo_t;
 
 /* Defined here to resolve circular dependencies. */
+typedef struct cw_stiloe_s cw_stiloe_t;
 typedef struct cw_stiloe_array_s cw_stiloe_array_t;
 typedef struct cw_stiloe_condition_s cw_stiloe_condition_t;
 typedef struct cw_stiloe_dict_s cw_stiloe_dict_t;
@@ -60,11 +61,12 @@ struct cw_stilo_s {
 	cw_bool_t extended:1;
 	/*
 	 * Name objects use this bit to indicate if a name is an indirect
-	 * reference. Each stilt maintains a cache of stiln pointers, each
+	 * reference.  Each stilt maintains a cache of stiln pointers, each
 	 * holding a single reference to the names hash in stil.  If this is
 	 * an indirect reference, the unreferencing operation should
 	 * actually be done with the stilt's stiln cache.  Note that this is
-	 * the (very) common case.  Use the stiln pointer to get the actual
+	 * the (very) common case.  Only global dictionaries have direct
+	 * references.  Use the stiln pointer to get the actual
 	 * name "value" for the unreferencing operation.  This is safe,
 	 * because this stilt is guaranteed to be holding a reference to the
 	 * stiln.
@@ -87,7 +89,7 @@ struct cw_stilo_s {
 	/*
 	 * Reference count.  We use only one bit:
 	 *
-	 * 1 == One reference. 0 == Overflow (GC knows about the stiloe).
+	 * 0 == One reference. 1 == Overflow (GC knows about the stiloe).
 	 */
 	cw_uint32_t ref_count:1;
 	/* Reference to a local or global object? */
@@ -138,6 +140,10 @@ struct cw_stilo_s {
 			cw_stiloe_mstate_t *stiloe;
 		}       mstate;
 		struct {
+			union {
+				const void *key; /* Key used for global names. */
+				cw_stilt_t *stilt;
+			}	s;
 			cw_stiln_t *stiln;
 		}       name;
 		struct {
@@ -171,6 +177,7 @@ void		stilo_new(cw_stilo_t *a_stilo);
 void		stilo_delete(cw_stilo_t *a_stilo);
 
 cw_stilot_t	stilo_type(cw_stilo_t *a_stilo);
+cw_stiloe_t	*stilo_get_extended(cw_stilo_t *a_stilo);
 
 void		stilo_copy(cw_stilo_t *a_to, cw_stilo_t *a_from);
 void		stilo_move(cw_stilo_t *a_to, cw_stilo_t *a_from);

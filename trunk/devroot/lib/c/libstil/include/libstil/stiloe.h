@@ -9,7 +9,9 @@
  *
  ****************************************************************************/
 
+#if (0)
 typedef struct cw_stiloe_s cw_stiloe_t;
+#endif
 typedef struct cw_stiloer_s cw_stiloer_t;
 
 typedef enum {
