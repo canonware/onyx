@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 158 $
- * Last modified: $Date: 1998-07-29 17:57:57 -0700 (Wed, 29 Jul 1998) $
+ * Current revision: $Revision: 165 $
+ * Last modified: $Date: 1998-08-11 17:09:33 -0700 (Tue, 11 Aug 1998) $
  *
  * <<< Description >>>
  *
@@ -29,18 +29,18 @@
  */
 
 #  ifndef _STDIO_H_
-#    include "stdio.h"
+#    include <stdio.h>
 #    define _STDIO_H_
 #  endif
 
 #  ifndef _STDLIB_H_
-#    include "stdlib.h"
+#    include <stdlib.h>
 #    define _STDLIB_H_
 #  endif
 
 #  if (HAVE_UNISTD_H)
 #    ifndef _UNISTD_H_
-#      include "unistd.h"
+#      include <unistd.h>
 #      define _UNISTD_H_
 #    endif
 #  else
@@ -52,31 +52,31 @@
  */
 
 #ifndef _THREAD_H_
-#  include "thread.h"
+#  include <thread.h>
 #  define _THREAD_H_
 #endif
 
 #ifndef _LOCKS_H_
 #  ifndef _LIST_H_
-#    include "list.h"
+#    include <list.h>
 #    define _LIST_H_
 #  endif
-#  include "locks.h"
+#  include <locks.h>
 #  define _LOCKS_H_
 #endif
 
 #ifndef _DBG_H_
-#  include "dbg.h"
+#  include <dbg.h>
 #  define _DBG_H_
 #endif
 
 #ifndef _LOG_H_
-#  include "log.h"
+#  include <log.h>
 #  define _LOG_H_
 #endif
 
 #ifndef _MEM_H_
-#  include "mem.h"
+#  include <mem.h>
 #  define _MEM_H_
 #endif
 
@@ -86,7 +86,7 @@
 
 #if (defined(_INC_BHP_H_))
 #  ifndef _BHP_H_
-#    include "bhp.h"
+#    include <bhp.h>
 #    define _BHP_H_
 #  endif
 #endif
@@ -94,19 +94,19 @@
 #if (defined(_INC_BR_H_))
 #  ifndef _BR_H_
 #    ifndef _BRBLK_H_
-#      include "brblk.h"
+#      include <brblk.h>
 #    endif
 #    ifndef _BRBS_H_
-#      include "brbs.h"
+#      include <brbs.h>
 #    endif
-#    include "br.h"
+#    include <br.h>
 #    define _BR_H_
 #  endif
 #endif
 
 #if (defined(_INC_BRBLK_H_))
 #  ifndef _BRBLK_H_
-#    include "brblk.h"
+#    include <brblk.h>
 #    define _BRBLK_H_
 #  endif
 #endif
@@ -114,9 +114,9 @@
 #if (defined(_INC_BRBS_H_))
 #  ifndef _BRBS_H_
 #    ifndef _BRBLK_H_
-#      include "brblk.h"
+#      include <brblk.h>
 #    endif
-#    include "brbs.h"
+#    include <brbs.h>
 #    define _BRBS_H_
 #  endif
 #endif
@@ -124,37 +124,44 @@
 #if (defined(_INC_BUF_H_))
 #  ifndef _BUF_H_
 #    ifndef _LIST_H_
-#      include "list.h"
+#      include <list.h>
 #    endif
-#    include "buf.h"
+#    include <buf.h>
 #    define _BUF_H_
 #  endif
 #endif
 
 #if (defined(_INC_GLOB_H_))
 #  ifndef _GLOB_H_
-#    include "glob.h"
+#    include <glob.h>
 #    define _GLOB_H_
 #  endif
 #endif
 
 #if (defined(_INC_BT_H_))
 #  ifndef _JT_H_
-#    include "jt.h"
+#    include <jt.h>
 #    define _JT_H_
 #  endif
 #endif
 
 #if (defined(_INC_LIST_H_))
 #  ifndef _LIST_H_
-#    include "list.h"
+#    include <list.h>
 #    define _LIST_H_
+#  endif
+#endif
+
+#if (defined(_INC_MATRIX_H_))
+#  ifndef _MATRIX_H_
+#    include <matrix.h>
+#    define _MATRIX_H_
 #  endif
 #endif
 
 #if (defined(_INC_OH_H_))
 #  ifndef _OH_H_
-#    include "oh.h"
+#    include <oh.h>
 #    define _OH5_H_
 #  endif
 #endif
@@ -162,10 +169,10 @@
 #if (defined(_INC_RES_H_))
 #  ifndef _RES_H_
 #    ifndef _OH_H_
-#      include "oh.h"
+#      include <oh.h>
 #      define _OH_H_
 #    endif
-#    include "res.h"
+#    include <res.h>
 #    define _RES_H_
 #  endif
 #endif
@@ -173,10 +180,10 @@
 #if (defined(_INC_SOCK_H_))
 #  ifndef _SOCK_H_
 #    ifndef _BUF_H_
-#      include "buf.h"
+#      include <buf.h>
 #      define _BUF_H_
 #    endif
-#    include "sock.h"
+#    include <sock.h>
 #    define _SOCK_H_
 #  endif
 #endif
@@ -185,20 +192,20 @@
 #  ifndef _SOCKS_H_
 #    ifndef _SOCK_H_
 #      ifndef _BUF_H_
-#        include "buf.h"
+#        include <buf.h>
 #        define _BUF_H_
 #      endif
-#      include "sock.h"
+#      include <sock.h>
 #      define _SOCK_H_
 #    endif
-#    include "socks.h"
+#    include <socks.h>
 #    define _SOCKS_H_
 #  endif
 #endif
 
 #if (defined(_INC_ZT_H_))
 #  ifndef _ZT_H_
-#    include "zt.h"
+#    include <zt.h>
 #    define _ZT_H_
 #  endif
 #endif
@@ -208,7 +215,7 @@
 
 #if (defined(_INC_?_H_))
 #  ifndef _?_H_
-#    include "?.h"
+#    include <?.h>
 #    define _?_H_
 #  endif
 #endif
