@@ -18,6 +18,27 @@ ql - <XXX Description>
 .B ql_<func>
 .RI ( "cw_ql_t *a_ql" ", " <args> )
 
+ql_head
+ql_head_initializer
+ql_elm
+
+ql_new
+ql_elm_new
+ql_first
+ql_last
+ql_next
+ql_prev
+ql_before_insert
+ql_after_insert
+ql_head_insert
+ql_tail_insert
+ql_remove
+ql_head_remove
+ql_tail_remove
+ql_foreach
+ql_reverse_foreach
+
+
 .SS Debugging (dbg) symbols
 .TP \" XXX
 \*(lq<XXX symbol>\*(rq
