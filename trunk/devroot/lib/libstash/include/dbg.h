@@ -29,67 +29,43 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 14 $
- * Last modified: $Date: 1998-03-29 05:26:20 -0800 (Sun, 29 Mar 1998) $
+ * $Revision: 14 $
+ * $Date: 1998-03-29 05:26:20 -0800 (Sun, 29 Mar 1998) $
  *
- * Description: 
- *              
- *              
- *              
- *              
- ****************************************************************************
+ * <<< Description >>>
+ *
+ *
+ *
+ ****************************************************************************/
+
+#ifndef _DBG_H_
+#define _DBG_H_
+
+/*
+ * Debug flags.
  */
 
-#ifndef _LOG_H_
-#define _LOG_H_
+#define _CW_DBG_FUNC_ENTRY 0
+#define _CW_DBG_FUNC_EXIT 1
+#define _CW_DBG_MISC 2
+#define _CW_DBG_FUNC 3
 
-int set_g_error(char * arg_format, ...);
-char * get_g_error();
+typedef struct cw_dbg_s cw_dbg_t;
 
-int log_init(char * arg_logfile); /* Pass NULL to use stderr. */
-int log_close();
-int lprintf(char * arg_format, ...);
-int leprintf(char * arg_filename, /* Optional, pass NULL if not used. */
-	     int arg_line_num, /* Only used if (arg_filename != NULL) */
-	     char * arg_func_name, /* Optional, pass NULL if not used. */
-	     char * arg_format, 
-	     ...);
+#define dbg_new _CW_NS_CMN(dbg_new)
+#define dbg_delete _CW_NS_CMN(dbg_delete)
+#define dbg_fmatch _CW_NS_CMN(dbg_fmatch)
+#define dbg_pmatch _CW_NS_CMN(dbg_pmatch)
+#define dbg_turn_on _CW_NS_CMN(dbg_turn_on)
+#define dbg_turn_off _CW_NS_CMN(dbg_turn_off)
+#define dbg_clear _CW_NS_CMN(dbg_clear)
 
-/* 
- * My version of assert().  It's a bit prettier and cleaner, but the same idea.
- */
+cw_dbg_t * dbg_new();
+void dbg_delete(cw_dbg_t * arg_dbg_obj);
+cw_bool_t dbg_fmatch(cw_dbg_t * arg_dbg_obj, cw_uint32_t arg_flag);
+cw_bool_t dbg_pmatch(cw_dbg_t * arg_dbg_obj, cw_uint32_t arg_flag);
+cw_bool_t dbg_turn_on(cw_dbg_t * arg_dbg_obj, cw_uint32_t arg_flag);
+cw_bool_t dbg_turn_off(cw_dbg_t * arg_dbg_obj, cw_uint32_t arg_flag);
+void dbg_clear(cw_dbg_t * arg_dbg_obj);
 
-#define _cw_error(a) \
-  { \
-    leprintf(__FILE__, __LINE__, NULL, "Error: %s\n", a); \
-    log_close(); \
-    abort(); \
-  }
-
-#define _cw_assert(a) \
-  { \
-    if (!(a)) \
-      { \
-        leprintf(__FILE__, __LINE__, NULL, "Failed assertion: \"%s\"\n", #a); \
-	log_close(); \
-        abort(); \
-      } \
-  }
-
-#define _cw_marker(a) \
-  { \
-    leprintf(__FILE__, __LINE__, NULL, "%s\n", a); \
-  }
-
-/* Macro to do the drudgery of checking whether a pointer is null. */
-#define _cw_check_ptr(x) \
-  { \
-    if ((x) == NULL) \
-      { \
-	leprintf(__FILE__, __LINE__, NULL, "%s is a NULL pointer\n", #x); \
-	log_close(); \
-        abort(); \
-      } \
-  }
-
-#endif /* _LOG_H_ */
+#endif /* _DBG_H_ */

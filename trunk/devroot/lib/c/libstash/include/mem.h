@@ -29,67 +29,32 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 14 $
- * Last modified: $Date: 1998-03-29 05:26:20 -0800 (Sun, 29 Mar 1998) $
+ * $Revision: 14 $
+ * $Date: 1998-03-29 05:26:20 -0800 (Sun, 29 Mar 1998) $
  *
- * Description: 
- *              
- *              
- *              
- *              
- ****************************************************************************
- */
+ * <<< Description >>>
+ *
+ *
+ *
+ ****************************************************************************/
 
-#ifndef _LOG_H_
-#define _LOG_H_
+#ifndef _MEM_H_
+#define _MEM_H_
 
-int set_g_error(char * arg_format, ...);
-char * get_g_error();
+typedef struct cw_mem_s cw_mem_t;
 
-int log_init(char * arg_logfile); /* Pass NULL to use stderr. */
-int log_close();
-int lprintf(char * arg_format, ...);
-int leprintf(char * arg_filename, /* Optional, pass NULL if not used. */
-	     int arg_line_num, /* Only used if (arg_filename != NULL) */
-	     char * arg_func_name, /* Optional, pass NULL if not used. */
-	     char * arg_format, 
-	     ...);
+#define mem_new _CW_NS_CMN(mem_new)
+#define mem_delete _CW_NS_CMN(mem_delete)
+#define mem_malloc _CW_NS_CMN(mem_malloc)
+#define mem_calloc _CW_NS_CMN(mem_calloc)
+#define mem_realloc _CW_NS_CMN(mem_realloc)
+#define mem_free _CW_NS_CMN(mem_free)
 
-/* 
- * My version of assert().  It's a bit prettier and cleaner, but the same idea.
- */
+cw_mem_t * mem_new();
+void mem_delete(cw_mem_t * arg_mem_obj);
+void * mem_malloc(cw_mem_t * arg_mem_obj, size_t arg_size);
+void * mem_calloc(cw_mem_t * arg_mem_obj, size_t arg_number, size_t arg_size);
+void * mem_realloc(cw_mem_t * arg_mem_obj, void * arg_ptr, size_t arg_size);
+void mem_free(cw_mem_t * arg_mem_obj, void * arg_ptr);
 
-#define _cw_error(a) \
-  { \
-    leprintf(__FILE__, __LINE__, NULL, "Error: %s\n", a); \
-    log_close(); \
-    abort(); \
-  }
-
-#define _cw_assert(a) \
-  { \
-    if (!(a)) \
-      { \
-        leprintf(__FILE__, __LINE__, NULL, "Failed assertion: \"%s\"\n", #a); \
-	log_close(); \
-        abort(); \
-      } \
-  }
-
-#define _cw_marker(a) \
-  { \
-    leprintf(__FILE__, __LINE__, NULL, "%s\n", a); \
-  }
-
-/* Macro to do the drudgery of checking whether a pointer is null. */
-#define _cw_check_ptr(x) \
-  { \
-    if ((x) == NULL) \
-      { \
-	leprintf(__FILE__, __LINE__, NULL, "%s is a NULL pointer\n", #x); \
-	log_close(); \
-        abort(); \
-      } \
-  }
-
-#endif /* _LOG_H_ */
+#endif /* _MEM_H_ */

@@ -29,64 +29,22 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 7 $
- * Last modified: $Date: 1998-01-16 00:20:54 -0800 (Fri, 16 Jan 1998) $
+ * $Revision: 14 $
+ * $Date: 1998-03-29 05:26:20 -0800 (Sun, 29 Mar 1998) $
  *
- * Description: The idea here is to keep cpp from having to process a header
- *              file more than once.  The tradeoff is that every header gets
- *              processed once.  If this eventually proves too much overhead,
- *              we can go to a macro definition system like TurboVision uses
- *              to keep from including headers unless we need them.
+ * <<< Description >>>
  *
- ****************************************************************************
- */
+ *
+ *
+ ****************************************************************************/
 
-/* 
- * Don't wrap this file, because it needs to be re-entrant since we're not
- * automatically including everything.
- */
+#ifndef _MEM_PRIV_H_
+#define _MEM_PRIV_H_
 
-/*
- * Always include these once per run.
- */
+struct cw_mem_s
+{
+  int garbage;
+};
 
-#ifndef _CONFIG_H_
-#  include <config.h>
-#  define _CONFIG_H_
-#endif
 
-#ifndef _LOG_H_
-#  include <log.h>
-#  define _LOG_H_
-#endif
-
-#ifndef _RESOURCE_H_
-#  include <resource.h>
-#  define _RESOURCE_H_
-#endif
-
-/*
- * The main header for the whole project.
- */
-
-#ifndef _CONFIG_H_
-#  include <config.h>
-#  define _CONFIG_H_
-#endif
-
-/* 
- * Other project headers we don't always want to include.
- */
-
-/* Skeleton */
-
-#if (0)
-
-#if (defined(_INC_?_H_) || defined(_INC_ALL_))
-#  ifndef _?_H_
-#    include <?.h>
-#    define _?_H_
-#  endif
-#endif
-
-#endif
+#endif /* _MEM_PRIV_H_ */

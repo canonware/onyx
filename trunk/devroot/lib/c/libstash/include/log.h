@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 10 $
- * Last modified: $Date: 1998-02-20 00:01:34 -0800 (Fri, 20 Feb 1998) $
+ * Current revision: $Revision: 14 $
+ * Last modified: $Date: 1998-03-29 05:26:20 -0800 (Sun, 29 Mar 1998) $
  *
  * Description: 
  *              
@@ -78,7 +78,7 @@ int leprintf(char * arg_filename, /* Optional, pass NULL if not used. */
 
 #define _cw_marker(a) \
   { \
-    leprintf(__FILE__, __LINE__, NULL, a); \
+    leprintf(__FILE__, __LINE__, NULL, "%s\n", a); \
   }
 
 /* Macro to do the drudgery of checking whether a pointer is null. */

@@ -32,64 +32,74 @@
  * Current revision: $Revision: 14 $
  * Last modified: $Date: 1998-03-29 05:26:20 -0800 (Sun, 29 Mar 1998) $
  *
- * Description: 
- *              
- *              
- *              
- *              
+ * Description: The idea here is to keep cpp from having to process a header
+ *              file more than once.  The tradeoff is that every header gets
+ *              processed once.  If this eventually proves too much overhead,
+ *              we can go to a macro definition system like TurboVision uses
+ *              to keep from including headers unless we need them.
+ *
  ****************************************************************************
  */
 
-#ifndef _LOG_H_
-#define _LOG_H_
-
-int set_g_error(char * arg_format, ...);
-char * get_g_error();
-
-int log_init(char * arg_logfile); /* Pass NULL to use stderr. */
-int log_close();
-int lprintf(char * arg_format, ...);
-int leprintf(char * arg_filename, /* Optional, pass NULL if not used. */
-	     int arg_line_num, /* Only used if (arg_filename != NULL) */
-	     char * arg_func_name, /* Optional, pass NULL if not used. */
-	     char * arg_format, 
-	     ...);
-
 /* 
- * My version of assert().  It's a bit prettier and cleaner, but the same idea.
+ * Don't wrap this file, because it needs to be re-entrant since we're not
+ * automatically including everything.
  */
 
-#define _cw_error(a) \
-  { \
-    leprintf(__FILE__, __LINE__, NULL, "Error: %s\n", a); \
-    log_close(); \
-    abort(); \
-  }
+#ifndef _INC_COMMON_H_
+#  define _INC_COMMON_H_
+#endif
 
-#define _cw_assert(a) \
-  { \
-    if (!(a)) \
-      { \
-        leprintf(__FILE__, __LINE__, NULL, "Failed assertion: \"%s\"\n", #a); \
-	log_close(); \
-        abort(); \
-      } \
-  }
+/*
+ * Always include these once per run.
+ */
 
-#define _cw_marker(a) \
-  { \
-    leprintf(__FILE__, __LINE__, NULL, "%s\n", a); \
-  }
+#ifndef _DBG_H_
+#  include <dbg.h>
+#  define _DBG_H_
+#endif
 
-/* Macro to do the drudgery of checking whether a pointer is null. */
-#define _cw_check_ptr(x) \
-  { \
-    if ((x) == NULL) \
-      { \
-	leprintf(__FILE__, __LINE__, NULL, "%s is a NULL pointer\n", #x); \
-	log_close(); \
-        abort(); \
-      } \
-  }
+#ifndef _LOG_H_
+#  include <log.h>
+#  define _LOG_H_
+#endif
 
-#endif /* _LOG_H_ */
+#ifndef _MEM_H_
+#  include <mem.h>
+#  define _MEM_H_
+#endif
+
+/* #ifndef _RESOURCE_H_ */
+/* #  include <resource.h> */
+/* #  define _RESOURCE_H_ */
+/* #endif */
+
+/* 
+ * Other project headers we don't always want to include.
+ */
+
+#if (defined(_INC_DBG_PRIV_H_) || defined(_INC_ALL_))
+#  ifndef _DBG_PRIV_H_
+#    include <dbg_priv.h>
+#    define _DBG_PRIV_H_
+#  endif
+#endif
+
+#if (defined(_INC_MEM_PRIV_H_) || defined(_INC_ALL_))
+#  ifndef _MEM_PRIV_H_
+#    include <mem_priv.h>
+#    define _MEM_PRIV_H_
+#  endif
+#endif
+
+/* Skeleton */
+#if (0)
+
+#if (defined(_INC_?_H_) || defined(_INC_ALL_))
+#  ifndef _?_H_
+#    include <?.h>
+#    define _?_H_
+#  endif
+#endif
+
+#endif

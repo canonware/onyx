@@ -29,67 +29,66 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 14 $
- * Last modified: $Date: 1998-03-29 05:26:20 -0800 (Sun, 29 Mar 1998) $
+ * $Revision: 14 $
+ * $Date: 1998-03-29 05:26:20 -0800 (Sun, 29 Mar 1998) $
  *
- * Description: 
- *              
- *              
- *              
- *              
- ****************************************************************************
+ * <<< Description >>>
+ *
+ *
+ *
+ ****************************************************************************/
+
+#ifndef _DBG_PRIV_H_
+#define _DBG_PRIV_H_
+
+/*
+ * Row definitions for debug flag table.
  */
 
-#ifndef _LOG_H_
-#define _LOG_H_
+#define _CW_DBG_T_FUNC_ENTRY 0, -1
+#define _CW_DBG_T_FUNC_EXIT 1, -1
+#define _CW_DBG_T_MISC 2, -1
+#define _CW_DBG_T_FUNC 0, 1, -1
 
-int set_g_error(char * arg_format, ...);
-char * get_g_error();
+#define _CW_DBG_T_MAX 3 /* Highest numbered row in table. */
+#define _CW_DBG_C_MAX 2 /* Highest numbered column in table. */
 
-int log_init(char * arg_logfile); /* Pass NULL to use stderr. */
-int log_close();
-int lprintf(char * arg_format, ...);
-int leprintf(char * arg_filename, /* Optional, pass NULL if not used. */
-	     int arg_line_num, /* Only used if (arg_filename != NULL) */
-	     char * arg_func_name, /* Optional, pass NULL if not used. */
-	     char * arg_format, 
-	     ...);
+#define dbg_raw_tbl _CW_NS_CMN(dbg_raw_tbl)
+#define dbg_raw_on _CW_NS_CMN(dbg_raw_on)
+#define dbg_build_tbl _CW_NS_CMN(dbg_build_tbl)
+#define dbg_recalc_fpmatch _CW_NS_CMN(dbg_recalc_fpmatch)
 
-/* 
- * My version of assert().  It's a bit prettier and cleaner, but the same idea.
+/*
+ * Array used to construct the debug table.
  */
+cw_sint32_t dbg_raw_tbl[] =
+{
+  _CW_DBG_T_FUNC_ENTRY,
+  _CW_DBG_T_FUNC_EXIT,
+  _CW_DBG_T_MISC,
+  _CW_DBG_T_FUNC,
+  -1
+};
 
-#define _cw_error(a) \
-  { \
-    leprintf(__FILE__, __LINE__, NULL, "Error: %s\n", a); \
-    log_close(); \
-    abort(); \
-  }
+/*
+ * Debug flags that are turned on by default.
+ */
+cw_sint32_t dbg_raw_on[] =
+{
+  _CW_DBG_FUNC,
+  -1
+};
 
-#define _cw_assert(a) \
-  { \
-    if (!(a)) \
-      { \
-        leprintf(__FILE__, __LINE__, NULL, "Failed assertion: \"%s\"\n", #a); \
-	log_close(); \
-        abort(); \
-      } \
-  }
+struct cw_dbg_s
+{
+  cw_bool_t is_current;
+  cw_bool_t curr_settings[_CW_DBG_C_MAX + 1];
+  cw_bool_t fmatch[_CW_DBG_T_MAX + 1];
+  cw_bool_t pmatch[_CW_DBG_T_MAX + 1];
+  cw_bool_t tbl[_CW_DBG_C_MAX + 1][_CW_DBG_T_MAX + 1];
+};
 
-#define _cw_marker(a) \
-  { \
-    leprintf(__FILE__, __LINE__, NULL, "%s\n", a); \
-  }
+void dbg_build_tbl(cw_dbg_t * arg_dbg_obj);
+void dbg_recalc_fpmatch(cw_dbg_t * arg_dbg_obj);
 
-/* Macro to do the drudgery of checking whether a pointer is null. */
-#define _cw_check_ptr(x) \
-  { \
-    if ((x) == NULL) \
-      { \
-	leprintf(__FILE__, __LINE__, NULL, "%s is a NULL pointer\n", #x); \
-	log_close(); \
-        abort(); \
-      } \
-  }
-
-#endif /* _LOG_H_ */
+#endif /* _DBG_PRIV_H_ */
