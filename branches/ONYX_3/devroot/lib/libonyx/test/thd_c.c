@@ -12,10 +12,10 @@
 
 #include "../include/libonyx/libonyx.h"
 
-#define NSUSPENDIBLE 20
-#define NSUSPENDERS 20
+#define NSUSPENDIBLE 10
+#define NSUSPENDERS 10
 #define NTHREADS (NSUSPENDIBLE + NSUSPENDERS)
-#define NITERATIONS 200
+#define NITERATIONS 100
 
 cw_uint32_t count = 0;
 

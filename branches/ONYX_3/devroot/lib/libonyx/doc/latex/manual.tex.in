@@ -222,7 +222,7 @@ behavior and likely crashes.
 		\end{description}
 	\item[Description: ]
 		Initialize various global variables.  In particular, initialize
-		\cvar{cw\_g\_mem}, \cvar{out\_std}, and \cvar{out\_err}.
+		\cvar{cw\_g\_mem}.
 	\end{capilist}
 \label{libonyx_shutdown}
 \index{libonyx_shutdown@\cfunc{libonyx\_shutdown}{}}
@@ -447,6 +447,7 @@ a\_size, const char *a\_filename, cw\_uint32\_t a\_line\_num}}
 \input{@abs_srcroot@/lib/libonyx/doc/latex/ch}
 \input{@abs_srcroot@/lib/libonyx/doc/latex/cnd}
 \input{@abs_srcroot@/lib/libonyx/doc/latex/dch}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/mb}
 \input{@abs_srcroot@/lib/libonyx/doc/latex/mem}
 \input{@abs_srcroot@/lib/libonyx/doc/latex/mq}
 \input{@abs_srcroot@/lib/libonyx/doc/latex/mtx}

@@ -198,7 +198,9 @@ nxo_dup(cw_nxo_t *a_to, cw_nxo_t *a_from)
 
     /* The order of operations is important in order to avoid a GC race. */
     a_to->flags = 0;
+    mb_write();
     a_to->o = a_from->o;
+    mb_write();
     a_to->flags = a_from->flags;
 }
 
@@ -242,6 +244,7 @@ nxo_p_new(cw_nxo_t *a_nxo, cw_nxot_t a_type)
     /* o.integer.i is assumed to be at least as big as all the other fields in
      * the union. */
     a_nxo->o.integer.i = 0;
+    mb_write();
     a_nxo->flags = a_type;
 }
 #endif /* (defined(CW_USE_INLINES) || defined(CW_NXO_C_)) */

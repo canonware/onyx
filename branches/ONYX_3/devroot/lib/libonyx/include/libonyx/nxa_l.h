@@ -36,5 +36,8 @@ nxa_l_delete(cw_nxa_t *a_nxa);
 void
 nxa_l_gc_register(cw_nxa_t *a_nxa, cw_nxoe_t *a_nxoe);
 
+void
+nxa_l_gc_reregister(cw_nxa_t *a_nxa, cw_nxoe_t *a_nxoe);
+
 cw_bool_t
 nxa_l_white_get(cw_nxa_t *a_nxa);
