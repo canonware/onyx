@@ -116,7 +116,7 @@ buf_dump(cw_buf_t * a_buf, const char * a_prefix)
 	  "[s]|--> magic_b : 0x[i|b:16]\n",
 	  a_prefix, a_buf->magic_b);
   out_put(cw_g_out,
-	  "[s]|--> size_of : 0x[i]\n",
+	  "[s]|--> size_of : [i]\n",
 	  a_prefix, a_buf->size_of);
 #endif
   out_put(cw_g_out,
@@ -173,7 +173,7 @@ buf_dump(cw_buf_t * a_buf, const char * a_prefix)
 	    "[s]|   |--> magic_b : 0x[i|b:16]\n",
 	    a_prefix, a_buf->bufel_array[i].magic_b);
     out_put(cw_g_out,
-	    "[s]|   |--> size_of : 0x[i|b:16]\n",
+	    "[s]|   |--> size_of : [i]\n",
 	    a_prefix, a_buf->bufel_array[i].size_of);
 #endif
     out_put(cw_g_out,
@@ -2806,7 +2806,7 @@ bufc_p_dump(cw_bufc_t * a_bufc, const char * a_prefix)
 	  "[s]|--> magic_b : 0x[i|b:16]\n",
 	  a_prefix, a_bufc->magic_b);
   out_put(cw_g_out,
-	  "[s]|--> size_of : 0x[i|b:16]\n",
+	  "[s]|--> size_of : [i]\n",
 	  a_prefix, a_bufc->size_of);
 #endif
   out_put(cw_g_out,
