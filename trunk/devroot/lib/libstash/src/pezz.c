@@ -127,7 +127,7 @@ pezz_delete(cw_pezz_t *a_pezz)
 		    (dbg_is_registered(cw_g_dbg, "pezz_error") && (0 <
 		    num_addrs))) {
 			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-			    "[q] leaked buffer[s]\n",
+			    "[i] leaked buffer[s]\n",
 			    num_addrs, num_addrs != 1 ? "s" : "");
 		}
 		for (i = 0; i < num_addrs; i++) {

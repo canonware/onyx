@@ -78,7 +78,7 @@ mem_delete(cw_mem_t *a_mem)
 
 #ifdef _LIBSTASH_DBG
 	{
-		cw_uint64_t	i, num_addrs;
+		cw_uint32_t	i, num_addrs;
 		void		*addr;
 		struct cw_mem_item_s *allocation;
 
@@ -91,7 +91,7 @@ mem_delete(cw_mem_t *a_mem)
 
 			bzero(buf, sizeof(buf));
 			_cw_out_put_sn(buf, 1024,
-			    "[s](): [q] unfreed allocation[s]\n", __FUNCTION__,
+			    "[s](): [i] unfreed allocation[s]\n", __FUNCTION__,
 			    num_addrs, num_addrs != 1 ? "s" : "");
 			_cw_out_put(buf);
 		}
