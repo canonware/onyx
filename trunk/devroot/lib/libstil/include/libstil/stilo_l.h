@@ -68,7 +68,9 @@ struct cw_stiloe_s {
 	 */
 	cw_bool_t	color:1;
 	/*
-	 * TRUE if this object has been registered with the GC.
+	 * TRUE if this object has been registered with the GC.  It is possible
+	 * for an object to be reachable by the GC (on a stack, for instance),
+	 * but not be registered yet.
 	 */
 	cw_bool_t	registered:1;
 	/*
