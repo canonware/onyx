@@ -24,6 +24,12 @@
 #define	_BUF_SIZE	4096
 #define	_PROMPT_STRLEN	  80
 
+struct handler_s {
+	cw_bool_t	quit;
+	sigset_t	hupset;
+	cw_thd_t	*sig_thd;
+};
+
 struct stil_arg_s {
 	cw_uint8_t	*buffer;
 	cw_uint32_t	buffer_len;
@@ -45,6 +51,7 @@ void		envdict_init(cw_stilt_t *a_stilt, char **a_envp);
 char		*prompt(EditLine *a_el);
 cw_sint32_t	cl_read(void *a_arg, cw_stilo_t *a_file, cw_uint32_t a_len,
     cw_uint8_t *r_str);
+void		*sig_handler(void *a_arg);
 void		usage(const char *a_progname);
 const char	*basename(const char *a_str);
 
@@ -52,6 +59,7 @@ int
 main(int argc, char **argv, char **envp)
 {
 	int		retval;
+	struct handler_s handler_arg;
 	cw_stil_t	stil;
 	static const cw_uint8_t	version[] =
 	    "product print (, version ) print version print (.\n) print flush";
@@ -65,6 +73,17 @@ main(int argc, char **argv, char **envp)
 	dbg_unregister(cw_g_dbg, "mem_error");
 	dbg_unregister(cw_g_dbg, "pool_error");
 #endif
+
+	/*
+	 * Set the per-thread signal masks such that only one thread will catch
+	 * SIGHUP and SIGINT.
+	 */
+	handler_arg.quit = FALSE;
+	sigemptyset(&handler_arg.hupset);
+	sigaddset(&handler_arg.hupset, SIGHUP);
+	sigaddset(&handler_arg.hupset, SIGINT);
+	thd_sigmask(SIG_BLOCK, &handler_arg.hupset, NULL);
+	handler_arg.sig_thd = thd_new(sig_handler, (void *)&handler_arg);
 
 	/*
 	 * Do a bunch of extra setup work to hook in command editing
@@ -230,6 +249,13 @@ main(int argc, char **argv, char **envp)
 	stilts_delete(&stilts, &stilt);
 	stilt_delete(&stilt);
 	stil_delete(&stil);
+	/*
+	 * Tell the signal handler thread to quit, then join on it.
+	 */
+	handler_arg.quit = TRUE;
+	raise(SIGINT);
+	thd_join(handler_arg.sig_thd);
+
 	libstash_shutdown();
 	return retval;
 }
@@ -473,6 +499,25 @@ cl_read(void *a_arg, cw_stilo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str)
 
 	RETURN:
 	return retval;
+}
+
+void *
+sig_handler(void *a_arg)
+{
+	struct handler_s	*arg = (struct handler_s *)a_arg;
+	int			sig, error;
+
+	error = sigwait(&arg->hupset, &sig);
+	if (error || (!sigismember(&arg->hupset, sig)))
+		_cw_error("sigwait() error");
+	if (arg->quit == FALSE) {
+		/*
+		 * We've received a signal from somewhere outside this program.
+		 */
+		exit(0);
+	}
+
+	return NULL;
 }
 
 void

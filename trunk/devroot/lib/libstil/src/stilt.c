@@ -402,6 +402,8 @@ stilt_p_thread_entry(void *a_arg)
 void
 stilt_thread(cw_stilt_t *a_stilt)
 {
+	sigset_t		sig_mask, old_mask;
+
 	a_stilt->entry = (cw_stilt_thread_entry_t
 	    *)_cw_malloc(sizeof(cw_stilt_thread_entry_t));
 
@@ -414,8 +416,17 @@ stilt_thread(cw_stilt_t *a_stilt)
 	a_stilt->entry->detached = FALSE;
 	a_stilt->entry->joined = FALSE;
 
+	/*
+	 * Block all signals during thread creation, so that the thread doesn't
+	 * swallow signals.  Doing this here rather than in the new thread
+	 * itself avoids a race condition where signals can be delivered to the
+	 * new thread.
+	 */
+	sigfillset(&sig_mask);
+	thd_sigmask(SIG_BLOCK, &sig_mask, &old_mask);
 	a_stilt->entry->thd = thd_new(stilt_p_thread_entry, (void
 	    *)a_stilt->entry);
+	thd_sigmask(SIG_SETMASK, &old_mask, NULL);
 }
 
 void

@@ -84,10 +84,10 @@ stila_new(cw_stila_t *a_stila, cw_stil_t *a_stil)
 		 * than in the GC thread itself avoids a race condition where
 		 * signals can be delivered to the GC thread.
 		 */
-		sigemptyset(&sig_mask);
+		sigfillset(&sig_mask);
 		thd_sigmask(SIG_BLOCK, &sig_mask, &old_mask);
 		a_stila->gc_thd = thd_new(stila_p_gc_entry, (void *)a_stila);
-		thd_sigmask(SIG_UNBLOCK, &old_mask, NULL);
+		thd_sigmask(SIG_SETMASK, &old_mask, NULL);
 		try_stage = 6;
 
 #ifdef _LIBSTIL_DBG
