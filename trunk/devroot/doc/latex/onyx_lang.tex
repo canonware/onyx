@@ -3186,6 +3186,12 @@ a b & {\bf \htmlref{mod}{systemdict:mod}} & r & Mod a by b (integers). \\
 \hline
 a b & {\bf \htmlref{exp}{systemdict:exp}} & r & Raise a to the power of b. \\
 \hline
+a & {\bf \htmlref{sqrt}{systemdict:sqrt}} & r & Square root. \\
+\hline
+a & {\bf \htmlref{ln}{systemdict:ln}} & r & Natural log. \\
+\hline
+a & {\bf \htmlref{log}{systemdict:log}} & r & Base 10 log. \\
+\hline
 a & {\bf \htmlref{abs}{systemdict:abs}} & r & Get the absolute value of a. \\
 \hline
 a & {\bf \htmlref{neg}{systemdict:neg}} & r & Get the negative of a. \\
@@ -3199,6 +3205,13 @@ a & {\bf \htmlref{round}{systemdict:round}} & r & Real rounded to integer. \\
 \hline
 a & {\bf \htmlref{trunc}{systemdict:trunc}} & r & Integer from real with
 truncated fractional. \\
+\hline
+a & {\bf \htmlref{sin}{systemdict:sin}} & r & Sine in radians. \\
+\hline
+a & {\bf \htmlref{cos}{systemdict:cos}} & r & Cosine in radians. \\
+\hline
+y x & {\bf \htmlref{atan}{systemdict:atan}} & r & Arctangent in radians of
+$y/x$. \\
 \hline
 seed & {\bf \htmlref{srand}{systemdict:srand}} & -- & Seed pseudo-random number
 generator. \\
@@ -3519,10 +3532,16 @@ string & {\bf \htmlref{cvn}{systemdict:cvn}} & name & Convert string to name. \\
 object & {\bf \htmlref{cvs}{systemdict:cvs}} & string & Convert object to
 string. \\
 \hline
-hook & {\bf \htmlref{hooktag}{systemdict:hooktag}} & tag & Get hook tag. \\
-\hline
 integer radix & {\bf \htmlref{cvrs}{systemdict:cvrs}} & string & Convert integer
 to radix string. \\
+\hline
+real precision & {\bf \htmlref{cvds}{systemdict:cvds}} & string & Convert real
+to decimal string. \\
+\hline
+real precision & {\bf \htmlref{cves}{systemdict:cves}} & string & Convert real
+to exponential string. \\
+\hline
+hook & {\bf \htmlref{hooktag}{systemdict:hooktag}} & tag & Get hook tag. \\
 \hline \hline
 \multicolumn{4}{|l|}{Threading and synchronization operators} \\
 \hline \hline
@@ -3980,6 +3999,40 @@ onyx:0> 3 array 1 sprint
 [null null null]
 onyx:0> 0 array 1 sprint
 []
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:atan}
+\index{atan@\onyxop{}{atan}{}}
+\item[{\onyxop{y x}{atan}{r}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[y: ]
+			An integer or real.
+		\item[x: ]
+			An integer or real.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[r: ]
+			Arctangent of $y/x$ in radians.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Return the arctangent of $y/x$ in radians.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> 1 1 atan 1 sprint
+7.853982e-01
+onyx:0> 0 1 atan 1 sprint
+0.000000e+00
+onyx:0> -1.0 0 atan 1 sprint
+-1.570796e+00
 onyx:0>
 		\end{verbatim}
 	\end{description}
@@ -4485,6 +4538,38 @@ onyx:1> `a' `bc' copy 1 sprint
 onyx:1>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:cos}
+\index{cos@\onyxop{}{cos}{}}
+\item[{\onyxop{a}{cos}{r}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a: ]
+			An integer or real.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[r: ]
+			Cosine of \oparg{a} in radians.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Return the cosine of \oparg{a} in radians.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> 0 cos 1 sprint
+1.000000e+00
+onyx:0> 3.14 cos 1 sprint
+-9.999987e-01
+onyx:0> 3.1415927 cos 1 sprint
+-1.000000e+00
+onyx:0>
+		\end{verbatim}
+	\end{description}
 \label{systemdict:count}
 \index{count@\onyxop{}{count}{}}
 \item[{\onyxop{--}{count}{count}}: ]
@@ -4632,6 +4717,82 @@ false
 onyx:0> true setlocking
 onyx:0> currentlocking 1 sprint
 true
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:cvds}
+\index{cvds@\onyxop{}{cvds}{}}
+\item[{\onyxop{real precision}{cvds}{string}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[real: ]
+			A real.
+		\item[precision: ]
+			Number of digits after the decimal point to show.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[string: ]
+			A string representation of \oparg{real} in decimal form
+			with \oparg{precision} digits of decimal precision.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Convert \oparg{real} to a string representation in decimal
+		notation, with \oparg{precision} digits of decimal precision.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> 42.3 0 cvds 1 sprint
+`42'
+onyx:0> 42.3 1 cvds 1 sprint
+`42.3'
+onyx:0> -42.3 4 cvds 1 sprint
+`-42.3000'
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:cves}
+\index{cves@\onyxop{}{cves}{}}
+\item[{\onyxop{real precision}{cves}{string}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[real: ]
+			A real.
+		\item[precision: ]
+			Number of digits after the decimal point to show.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[string: ]
+			A string representation of \oparg{real} in exponential
+			form with \oparg{precision} digits of decimal precision.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Convert \oparg{real} to a string representation in exponential
+		notation, with \oparg{precision} digits of decimal precision.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> 42.3 0 cves 1 sprint
+`4e+01'
+onyx:0> 42.3 1 cves 1 sprint
+`4.2e+01'
+onyx:0> 42.3 2 cves 1 sprint
+`4.23e+01'
+onyx:0> -42.3 5 cves 1 sprint
+`-4.23000e+01'
 onyx:0>
 		\end{verbatim}
 	\end{description}
@@ -6364,6 +6525,36 @@ false
 onyx:2>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:ln}
+\index{ln@\onyxop{}{ln}{}}
+\item[{\onyxop{a}{ln}{r}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a: ]
+			An integer or real.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[r: ]
+			Natural logarithm of \oparg{a}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Return the natural logarithm of \oparg{a}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> 5 ln 1 sprint
+1.609438e+00
+onyx:0> 8.5 ln 1 sprint
+2.140066e+00
+onyx:0>
+		\end{verbatim}
+	\end{description}
 \label{systemdict:load}
 \index{load@\onyxop{}{load}{}}
 \item[{\onyxop{key}{load}{val}}: ]
@@ -6417,6 +6608,36 @@ onyx:1>
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> mutex dup lock unlock
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:log}
+\index{log@\onyxop{}{log}{}}
+\item[{\onyxop{a}{log}{r}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a: ]
+			An integer or real.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[r: ]
+			Base 10 logarithm of \oparg{a}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Return the base 10 logarithm of \oparg{a}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> 5 log 1 sprint
+6.989700e-01
+onyx:0> 8.5 log 1 sprint
+9.294189e-01
 onyx:0>
 		\end{verbatim}
 	\end{description}
@@ -8311,6 +8532,38 @@ onyx:4> wait unlock join
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:sin}
+\index{sin@\onyxop{}{sin}{}}
+\item[{\onyxop{a}{sin}{r}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a: ]
+			An integer or real.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[r: ]
+			Sine of \oparg{a} in radians.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Return the sine of \oparg{a} in radians.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> 0 sin 1 sprint
+0.000000e+00
+onyx:0> 1.570796 sin 1 sprint
+1.000000e+00
+onyx:0> 0.7853982 sin 1 sprint
+7.071068e-01
+onyx:0>
+		\end{verbatim}
+	\end{description}
 \label{systemdict:sindex}
 \index{sindex@\onyxop{}{sindex}{}}
 \item[{\onyxop{stack index}{sindex}{--}}: ]
@@ -8484,6 +8737,37 @@ onyx:0> () dup 1 spush
 onyx:1> pstack
 (1)
 onyx:1>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:sqrt}
+\index{sqrt@\onyxop{}{sqrt}{}}
+\item[{\onyxop{a}{sqrt}{r}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a: ]
+			A non-negative integer or real.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[r: ]
+			Square root of \oparg{a}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Return the square root of \oparg{a}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> 4 sqrt 1 sprint
+2.000000e+00
+onyx:0> 2.0 sqrt 1 sprint
+1.414214e+00
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:srand}
