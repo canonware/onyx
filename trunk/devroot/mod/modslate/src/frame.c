@@ -241,7 +241,7 @@ modslate_frame_aux_set(void *a_data, cw_nxo_t *a_thread)
 }
 
 void
-slate_frame_focus(void *a_data, cw_nxo_t *a_thread)
+modslate_frame_focus(void *a_data, cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack, *nxo;
     cw_nxn_t error;
