@@ -98,7 +98,7 @@ indistinguishable, but for arrays and strings, composite objects may only be
 able to access a subset of the total memory backing them.  This behavior is
 described in detail later.
 
-All objects have a literal, executable, or evaluatable attribute associated with
+All objects have a literal, executable, or evaluable attribute associated with
 them.  Composite objects each have their own attribute, even for composite
 objects that share the same backing memory.  Objects are ``interpreted'' when
 they are encountered directly by the interpreter.  Objects can also be
@@ -126,7 +126,7 @@ Attributes are not considered in equality test operations.
 \hline
 Type		& \multicolumn{3}{|c|}{Attribute}	\\
 \cline{2-4}
-		& literal & executable & evaluatable	\\
+		& literal & executable & evaluable	\\
 \hline \hline
 array		& data	& data	& code	\\
 \hline
@@ -180,7 +180,7 @@ Interpretation of objects by type and attribute}
 \hline
 Type		& \multicolumn{3}{|c|}{Attribute}	\\
 \cline{2-4}
-		& literal & executable & evaluatable	\\
+		& literal & executable & evaluable	\\
 \hline \hline
 array		& data	& code	& code	\\
 \hline
@@ -395,9 +395,9 @@ follows:
 
 \item[{\lt}name{\gt} : ] Any token that cannot be interpreted as a number or a
 string is interpreted as an executable name.  There are four syntaxes for names:
-executable, evaluatable, literal, and immediately evaluated.  Executable and
-evaluatable names are looked up in the dictionary stack and executed (unless
-execution is deferred).  Evaluatable names behave the same as executable names,
+executable, evaluable, literal, and immediately evaluated.  Executable and
+evaluable names are looked up in the dictionary stack and executed (unless
+execution is deferred).  Evaluable names behave the same as executable names,
 except when being processed by the \htmlref{\onyxop{}{bind}{}}{systemdict:bind}
 operator.  Literal names are simply pushed onto the operand stack.  Immediately
 evaluated names are replaced by their values as defined in the dictionary stack,
@@ -405,13 +405,13 @@ even if execution is deferred.  Examples include:
 \begin{verbatim}
 foo     # executable
 4noth3r # executable
-!bar    # evaluatable
+!bar    # evaluable
 $biz    # literal
 ~baz    # immediately evaluated
 \end{verbatim}
 
 If the result of an immediately evaluated name is an executable array, the
-evaluatable attribute is set for the array so that when the array is
+evaluable attribute is set for the array so that when the array is
 interpreted, it is executed.  This allows immediate evaluation to be
 indiscriminately used without concern for whether the result is an executable
 array or, say, an executable operator.
@@ -5468,7 +5468,7 @@ attribute operators} \\
 	{obj}
 	{{\bf \htmlref{echeck}{systemdict:echeck}}}
 	{boolean}
-	{Evaluatable?}
+	{Evaluable?}
 \hline
 \optableent
 	{obj}
@@ -5480,7 +5480,7 @@ attribute operators} \\
 	{obj}
 	{{\bf \htmlref{cve}{systemdict:cve}}}
 	{obj}
-	{Set evaluatable attribute.}
+	{Set evaluable attribute.}
 \hline
 \optableent
 	{obj}
@@ -6526,9 +6526,9 @@ onyx:0>
 		in any of the following cases:
 		\begin{itemize}
 		\item{The value is a literal object.}
-		\item{The value is an executable or evaluatable operator.}
-		\item{The value is an executable or evaluatable hook.}
-		\item{The value is an executable or evaluatable array.}
+		\item{The value is an executable or evaluable operator.}
+		\item{The value is an executable or evaluable hook.}
+		\item{The value is an executable or evaluable array.}
 		\end{itemize}
 
 		Binding has a large positive impact on performance, since name
@@ -6545,7 +6545,7 @@ onyx:0>
 		complete understanding of what procedures reference each other
 		can result in undesired bound procedures.  For this reason, it
 		is generally best to make dynamic behavior explicit by using
-		evaluatable names.}
+		evaluable names.}
 		\item{There are situations where a program needs to do some
 		setup before binding a procedure, and providing manual control
 		over when binding happens allows more sophisticated use of
@@ -7376,14 +7376,14 @@ onyx:0>
 		\begin{description}\item[]
 		\item[obj: ]
 			The same object that was passed in, but with the
-			evaluatable attribute set.
+			evaluable attribute set.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
 	\item[Description: ]
-		Set the evaluatable attribute for \oparg{obj}.
+		Set the evaluable attribute for \oparg{obj}.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> [1 2 3] cve 1 sprint
@@ -7918,7 +7918,7 @@ onyx:2>
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[boolean: ]
-			True if \oparg{obj} has the evaluatable attribute,
+			True if \oparg{obj} has the evaluable attribute,
 			false otherwise.
 		\end{description}
 	\item[Errors(s): ]
@@ -7926,7 +7926,7 @@ onyx:2>
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
 	\item[Description: ]
-		Check \oparg{obj} for evaluatable attribute.
+		Check \oparg{obj} for evaluable attribute.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> {1 2 3} cve
@@ -15743,7 +15743,7 @@ onyx:1>
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[boolean: ]
-			True if \oparg{obj} has the executable or evaluatable
+			True if \oparg{obj} has the executable or evaluable
 			attribute, false otherwise.
 		\end{description}
 	\item[Errors(s): ]
@@ -15751,7 +15751,7 @@ onyx:1>
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
 	\item[Description: ]
-		Check \oparg{obj} for executable or evaluatable attribute.
+		Check \oparg{obj} for executable or evaluable attribute.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> {1 2 3} xcheck 1 sprint

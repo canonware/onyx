@@ -46,7 +46,7 @@
 # order to support output that differs according to configuration options, a
 # string is constructed, then evaluated.
 #
-# The output of running sprints on the procedure must be evaluatable, which
+# The output of running sprints on the procedure must be evaluable, which
 # means that certain language features such as immediate evaluation must be
 # avoided.
 #

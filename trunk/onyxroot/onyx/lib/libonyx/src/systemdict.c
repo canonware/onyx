@@ -1407,9 +1407,9 @@ systemdict_p_bind(cw_nxo_t *a_proc, cw_nxo_t *a_thread)
 	    }
 	    case NXOT_NAME:
 	    {
-		if (attr == NXOA_EVALUATABLE)
+		if (attr == NXOA_EVALUABLE)
 		{
-		    /* Do not bind evaluatable names. */
+		    /* Do not bind evaluable names. */
 		    continue;
 		}
 
@@ -1425,7 +1425,7 @@ systemdict_p_bind(cw_nxo_t *a_proc, cw_nxo_t *a_thread)
 		     *
 		     * 3) Hook.
 		     *
-		     * 4) Array.  (Set attribute to evaluatable.) */
+		     * 4) Array.  (Set attribute to evaluable.) */
 		    if (nxo_attr_get(val) == NXOA_LITERAL
 			|| type == NXOT_OPERATOR
 #ifdef CW_HOOK
@@ -1437,7 +1437,7 @@ systemdict_p_bind(cw_nxo_t *a_proc, cw_nxo_t *a_thread)
 		    }
 		    else if (type == NXOT_ARRAY)
 		    {
-			nxo_attr_set(val, NXOA_EVALUATABLE);
+			nxo_attr_set(val, NXOA_EVALUABLE);
 			nxo_array_el_set(a_proc, val, i);
 		    }
 		}
@@ -2670,7 +2670,7 @@ systemdict_cve(cw_nxo_t *a_thread)
 
     ostack = nxo_thread_ostack_get(a_thread);
     NXO_STACK_GET(nxo, ostack, a_thread);
-    nxo_attr_set(nxo, NXOA_EVALUATABLE);
+    nxo_attr_set(nxo, NXOA_EVALUABLE);
 }
 
 #ifdef CW_REAL
@@ -3549,7 +3549,7 @@ systemdict_echeck(cw_nxo_t *a_thread)
     ostack = nxo_thread_ostack_get(a_thread);
     NXO_STACK_GET(nxo, ostack, a_thread);
 	
-    if (nxo_attr_get(nxo) == NXOA_EVALUATABLE)
+    if (nxo_attr_get(nxo) == NXOA_EVALUABLE)
     {
 	nxo_boolean_new(nxo, TRUE);
     }

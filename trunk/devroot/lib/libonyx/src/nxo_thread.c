@@ -651,8 +651,8 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 			case NXOT_ARRAY:
 			{
 			    /* Only execute nested arrays that have the
-			     * evaluatable attribute. */
-			    if (attr == NXOA_EVALUATABLE)
+			     * evaluable attribute. */
+			    if (attr == NXOA_EVALUABLE)
 			    {
 				tnxo = nxo_stack_push(&thread->estack);
 				nxo_dup(tnxo, el);
@@ -831,7 +831,7 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 			&& attr == NXOA_EXECUTABLE))
 		{
 		    /* Always push literal objects and nested executable (not
-		     * evaluatable) arrays onto the operand stack. */
+		     * evaluable) arrays onto the operand stack. */
 		    tnxo = nxo_stack_push(&thread->ostack);
 		    nxo_dup(tnxo, el);
 #ifdef CW_THREADS
@@ -2743,9 +2743,9 @@ nxoe_p_thread_name_accept(cw_nxoe_thread_t *a_thread)
 	    else if (nxo_type_get(nxo) == NXOT_ARRAY
 		     && nxo_attr_get(nxo) == NXOA_EXECUTABLE)
 	    {
-		/* Set the evaluatable attribute so that the array will still be
+		/* Set the evaluable attribute so that the array will still be
 		 * executed when interpreted. */
-		nxo_attr_set(nxo, NXOA_EVALUATABLE);
+		nxo_attr_set(nxo, NXOA_EVALUABLE);
 	    }
 	    nxo_stack_pop(&a_thread->tstack);
 

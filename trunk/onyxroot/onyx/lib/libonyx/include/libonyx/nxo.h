@@ -59,7 +59,7 @@ typedef enum
 {
     NXOA_LITERAL,
     NXOA_EXECUTABLE,
-    NXOA_EVALUATABLE
+    NXOA_EVALUABLE
 } cw_nxoa_t;
 
 typedef cw_sint64_t cw_nxoi_t;
@@ -84,7 +84,7 @@ struct cw_nxo_s
      *     op code corresponds to the name of this operator.  This can be used
      *     to print the operator name.
      *
-     * A : Attribute.  An nxo is LITERAL, EXECUTABLE, or EVALUATABLE.
+     * A : Attribute.  An nxo is LITERAL, EXECUTABLE, or EVALUABLE.
      *
      * B : Array bound.  TRUE if the bind operator has processed this array.
      *     This is used to avoid infinite recursion in the bind operator
