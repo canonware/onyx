@@ -1244,8 +1244,6 @@ $throw {
     # in the error handling machinery.
     {
 	{$errordict where {pop true}{false} ifelse}
-	{!errordict $handleerror known}
-	{!errordict $stop known}
 	{$currenterror where {pop true}{false} ifelse}
     }{
 	eval not {
@@ -1332,8 +1330,23 @@ $throw {
     }{
 	# No error handler.
 	nip
-	dup $handleerror get eval
-	$stop get eval
+	#object #errordict
+
+	dup $handleerror known {
+	    dup $handleerror get eval
+	} if
+	dup $stop known {
+	    $stop get eval
+	}{
+	    `Onyx: Missing stop in errordict\n' {stderr exch write}{} until
+
+	    # Print errordict
+	    `errordict: ' {stderr exch write}{} until
+	    2 sprints {stderr exch write}{} until
+
+	    `\nOnyx: dieing\n' {stderr exch write}{} until
+	    1 die
+	} ifelse
     } ifelse
 } def
 
