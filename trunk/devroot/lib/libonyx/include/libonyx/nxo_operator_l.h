@@ -12,10 +12,10 @@
 /*
  * Private, but needed below.
  */
-#define	nxo_p_opcode_get(a_nxo) (((a_nxo)->flags >> 8) & 0x3ff)
+#define	nxo_p_opcode_get(a_nxo) (((a_nxo)->flags >> 9) & 0x3ff)
 #define	nxo_p_opcode_set(a_nxo, a_opcode) do {				\
-	(a_nxo)->flags = ((a_nxo)->flags & 0xfffc00ff) |		\
-	    ((a_opcode) << 8);						\
+	(a_nxo)->flags = ((a_nxo)->flags & 0xfff801ff) |		\
+	    ((a_opcode) << 9);						\
 } while (0)
 
 #define	nxo_p_fastop_get(a_nxo) (((a_nxo)->flags >> 5) & 1)

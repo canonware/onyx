@@ -619,6 +619,7 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 		case NXOT_ARRAY: {
 			cw_uint32_t	i, len;
 			cw_nxo_t	*el;
+			cw_nxoa_t	attr;
 
 			len = nxo_array_len_get(nxo);
 			if (len == 0) {
@@ -638,7 +639,8 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 			el = nxo_stack_push(&thread->tstack);
 			for (i = 0; i < len - 1; i++) {
 				nxo_l_array_el_get(nxo, i, el);
-				if (nxo_attr_get(el) == NXOA_LITERAL) {
+				attr = nxo_attr_get(el);
+				if (attr == NXOA_LITERAL) {
 					/*
 					 * Always push literal objects onto the
 					 * data stack.
@@ -654,10 +656,19 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 				switch (nxo_type_get(el)) {
 				case NXOT_ARRAY:
 					/*
-					 * Don't execute nested arrays.
+					 * Only execute nested arrays that have
+					 * the evaluatable attribute.
 					 */
-					tnxo = nxo_stack_push(&thread->ostack);
-					nxo_dup(tnxo, el);
+					if (attr == NXOA_EVALUATABLE) {
+						tnxo = nxo_stack_push(
+						    &thread->estack);
+						nxo_dup(tnxo, el);
+						nxo_thread_loop(a_nxo);
+					} else {
+						tnxo = nxo_stack_push(
+						    &thread->ostack);
+						nxo_dup(tnxo, el);
+					}
 					break;
 				case NXOT_OPERATOR:
 #ifdef _CW_USE_INLINES
@@ -721,11 +732,13 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 			 * element before executing the last element.
 			 */
 			nxo_l_array_el_get(nxo, i, el);
-			if ((nxo_attr_get(el) == NXOA_LITERAL) ||
-			    (nxo_type_get(el) == NXOT_ARRAY)) {
+			attr = nxo_attr_get(el);
+			if ((attr == NXOA_LITERAL) || (nxo_type_get(el) ==
+			    NXOT_ARRAY && attr == NXOA_EXECUTABLE)) {
 				/*
-				 * Always push literal objects and nested arrays
-				 * onto the data stack.
+				 * Always push literal objects and nested
+				 * executable (not evaluatable) arrays onto the
+				 * data stack.
 				 */
 				tnxo = nxo_stack_push(&thread->ostack);
 				nxo_dup(tnxo, el);

@@ -1,5 +1,13 @@
 2001-07-29  Jason Evans  <jasone@canonware.com>
 
+	* : Add an additional attribute.  Objects are now literal,
+	executable, or evaluatable.  The addition of the evaluatable
+	attribute allows the bind operator to replace executable names
+	with associated executable arrays by converting the executable
+	arrays to evaluatable arrays.
+
+	* src/systemdict.c: Add the cve and echeck operators.
+
 	* src/nxa.c: Add nxa_malloc_e() and nxa_free_e().
 
 2001-07-27  Jason Evans  <jasone@canonware.com>

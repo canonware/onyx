@@ -84,9 +84,9 @@ pmark	& string	\\
 	& thread	\\
 \hline
 \end{tabular}
-\label{simple-composite}
 \end{center}
-\caption{Simple and composite types}
+\caption{\label{simple-composite}
+Simple and composite types}
 \end{table}
 
 There can be multiple references that refer to the same memory backing composite
@@ -95,18 +95,123 @@ indistinguishable, but for arrays and strings, composite objects may only be
 able to access a subset of the total memory backing them.  This behavior is
 described in detail later.
 
-All objects have a literal or executable attribute associated with them.
-Composite objects each have their own attribute, even for composite objects that
-share the same backing memory.  When an executable file, hook, name, operator,
-or string is interpreted (encountered directly by the interpreter), it is pushed
-onto the execution stack and executed; otherwise the object is pushed onto the
-operand stack.  When an executable array, file, hook, name, operator, or string
-is evaluated, it is pushed onto the execution stack and executed; otherwise the
-object is pushed onto the operand stack.  Note that executable arrays are the
+All objects have a literal, executable, or evaluatable attribute associated with
+them.  Composite objects each have their own attribute, even for composite
+objects that share the same backing memory.  Objects are ``interpreted'' when
+they are encountered directly by the interpreter.  Objects can also be
+``evaluated''.  One of two actions is taken when an object is interpreted or
+evaluated:
+
+\begin{itemize}
+\item{The object may be treated as code (executed).  When executed, an object is
+pushed onto the execution stack and executed.}
+\item{The object may be treated as data.  A data object is push onto the operand
+stack.}
+\end{itemize}
+
+Table~\ref{interp-act} enumerates under what circumstances object interpretation
+results in execution.  Table~\ref{eval-act} enumerates under what circumstances
+object evaluation results in execution.  Note that executable arrays are the
 only objects that behave differently when interpreted versus evaluated.
 
 In practice, attributes are only useful for types that can be executed.
 Attributes are not considered in equality test operations.
+
+\begin{table}[htb]
+\begin{center}
+\begin{tabular}{|l|c|c|c|}
+\hline
+Type		& \multicolumn{3}{|c|}{Attribute}	\\
+\cline{2-4}
+		& literal & executable & evaluatable	\\
+\hline \hline
+array		& data	& data	& code	\\
+\hline
+boolean		& data	& data	& data	\\
+\hline
+condition	& data	& data	& data	\\
+\hline
+dict		& data	& data	& data	\\
+\hline
+file		& data	& code	& code	\\
+\hline
+fino		& data	& data	& data	\\
+\hline
+hook		& data	& code	& code	\\
+\hline
+integer		& data	& data	& data	\\
+\hline
+mark		& data	& data	& data	\\
+\hline
+mutex		& data	& data	& data	\\
+\hline
+name		& data	& code	& code	\\
+\hline
+null		& data	& code	& code	\\
+\hline
+operator	& data	& code	& code	\\
+\hline
+pmark		& data	& data	& data	\\
+\hline
+stack		& data	& data	& data	\\
+\hline
+string		& data	& code	& code	\\
+\hline
+thread		& data	& data	& data	\\
+\hline
+\end{tabular}
+\end{center}
+\caption{\label{interp-act}
+Interpretation of objects by type and attribute}
+\end{table}
+
+\begin{table}[htb]
+\begin{center}
+\begin{tabular}{|l|c|c|c|}
+\hline
+Type		& \multicolumn{3}{|c|}{Attribute}	\\
+\cline{2-4}
+		& literal & executable & evaluatable	\\
+\hline \hline
+array		& data	& code	& code	\\
+\hline
+boolean		& data	& data	& data	\\
+\hline
+condition	& data	& data	& data	\\
+\hline
+dict		& data	& data	& data	\\
+\hline
+file		& data	& code	& code	\\
+\hline
+fino		& data	& data	& data	\\
+\hline
+hook		& data	& code	& code	\\
+\hline
+integer		& data	& data	& data	\\
+\hline
+mark		& data	& data	& data	\\
+\hline
+mutex		& data	& data	& data	\\
+\hline
+name		& data	& code	& code	\\
+\hline
+null		& data	& code	& code	\\
+\hline
+operator	& data	& code	& code	\\
+\hline
+pmark		& data	& data	& data	\\
+\hline
+stack		& data	& data	& data	\\
+\hline
+string		& data	& code	& code	\\
+\hline
+thread		& data	& data	& data	\\
+\hline
+\end{tabular}
+\end{center}
+\caption{\label{eval-act}
+Evaluation of objects by type and attribute}
+\end{table}
 
 \begin{description}
 
@@ -127,9 +232,7 @@ After the code executes, the array left on the operand stack looks like:
 \end{verbatim}
 
 Executable arrays are in effect procedures.  When an array is executed, its
-elements are sequentially interpreted.  Executable arrays are uniquely handled
-in comparison to other executable objects, in that they are only executed when
-evaluated.
+elements are sequentially interpreted.
 
 \item[boolean: ] A boolean can have two values: true or false.
 
@@ -3457,7 +3560,12 @@ a shift & {\bf \htmlref{shift}{systemdict:shift}} & integer & Bitwise shift. \\
 \hline \hline
 object & {\bf \htmlref{type}{systemdict:type}} & name & Get object type. \\
 \hline
+object & {\bf \htmlref{echeck}{systemdict:echeck}} & boolean & Evaluatable? \\
+\hline
 object & {\bf \htmlref{xcheck}{systemdict:xcheck}} & boolean & Executable? \\
+\hline
+object & {\bf \htmlref{cve}{systemdict:cve}} & object & Set evaluatable
+attribute. \\
 \hline
 object & {\bf \htmlref{cvx}{systemdict:cvx}} & object & Set executable
 attribute. \\
@@ -3978,17 +4086,18 @@ onyx:0>
 		procedure are replaced with their values if defined in dstack,
 		in any of the following cases:
 		\begin{itemize}
-		\item{The value is an executable operator.}
 		\item{The value is a literal object.}
+		\item{The value is an executable or evaluatable operator.}
+		\item{The value is an evaluatable array.}
 		\end{itemize}
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> {pop product globaldict {pop product globaldict}}
+onyx:0> {pop sprint {pop sprint}}
 onyx:1> dup 2 sprint
-{pop product globaldict {pop product globaldict}}
+{pop sprint {pop sprint}}
 onyx:1> bind
 onyx:1> dup 2 sprint
-{--pop-- `Canonware Onyx' <> {--pop-- `Canonware Onyx' -dict-}}
+{--pop-- _{sprints --print-- `\n' --print-- --flush--}_ {--pop-- -array-}}
 onyx:1>
 		\end{verbatim}
 	\end{description}
@@ -4540,6 +4649,34 @@ true
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:cve}
+\index{cve@\onyxop{}{cve}{}}
+\item[{\onyxop{object}{cve}{object}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[object: ]
+			An object.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[object: ]
+			The same object that was passed in, but with the
+			evaluatable attribute set.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\end{description}
+	\item[Description: ]
+		Set the evaluatable attribute for \oparg{object}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> [1 2 3] cve 1 sprint
+_{1 2 3}_
+onyx:0>
+		\end{verbatim}
+	\end{description}
 \label{systemdict:cvlit}
 \index{cvlit@\onyxop{}{cvlit}{}}
 \item[{\onyxop{object}{cvlit}{object}}: ]
@@ -4949,6 +5086,41 @@ onyx:0> 1 dup pstack
 1
 1
 onyx:2>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:echeck}
+\index{echeck@\onyxop{}{echeck}{}}
+\item[{\onyxop{object}{echeck}{boolean}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[object: ]
+			An object.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[boolean: ]
+			True if \oparg{object} has the evaluatable attribute,
+			false otherwise.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\end{description}
+	\item[Description: ]
+		Check \oparg{object} for evaluatable attribute.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> {1 2 3} cve
+onyx:1> dup 1 sprint
+_{1 2 3}_
+onyx:1> echeck 1 sprint
+true
+onyx:0> {1 2 3} echeck 1 sprint
+false
+onyx:0> [1 2 3] echeck 1 sprint
+false
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:egid}
@@ -9271,15 +9443,15 @@ onyx:1>
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[boolean: ]
-			True if \oparg{object} has the executable attribute,
-			false otherwise.
+			True if \oparg{object} has the executable or evaluatable
+			attribute, false otherwise.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
 	\item[Description: ]
-		Check \oparg{object} for executable attribute.
+		Check \oparg{object} for executable or evaluatable attribute.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> {1 2 3} xcheck 1 sprint

@@ -65,7 +65,8 @@ typedef enum {
 /* Attribute. */
 typedef enum {
 	NXOA_LITERAL,
-	NXOA_EXECUTABLE
+	NXOA_EXECUTABLE,
+	NXOA_EVALUATABLE
 }	cw_nxoa_t;
 
 typedef cw_sint64_t cw_nxoi_t;
@@ -96,14 +97,14 @@ struct cw_nxo_s {
 	 *     This is used to avoid infinite recursion in the bind operator
 	 *     when binding recursive procedures.
 	 *
-	 * A : Attribute.  An nxo is either LITERAL or EXECUTABLE.
+	 * A : Attribute.  An nxo is LITERAL, EXECUTABLE, or EVALUATABLE.
 	 *
 	 * P : Fast op.  If type is NXOT_OPERATOR and fast op is TRUE, this
 	 *     operator can be handled specially in nxo_thread_loop().
 	 *
 	 * T : Type.
 	 *
-	 * ........ ......CC CCCCCCCC BAPTTTTT
+	 * ........ .....CCC CCCCCCCB AAPTTTTT
 	 *
 	 */
 	cw_uint32_t	flags;
@@ -216,7 +217,7 @@ nxo_attr_get(cw_nxo_t *a_nxo)
 	_cw_check_ptr(a_nxo);
 	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 
-	return ((cw_nxoa_t)(((a_nxo)->flags >> 6) & 1));
+	return ((cw_nxoa_t)(((a_nxo)->flags >> 6) & 3));
 }
 
 _CW_INLINE void
@@ -225,7 +226,7 @@ nxo_attr_set(cw_nxo_t *a_nxo, cw_nxoa_t a_attr)
 	_cw_check_ptr(a_nxo);
 	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 
-	a_nxo->flags = (a_nxo->flags & 0xffffffbf) | (a_attr << 6);
+	a_nxo->flags = (a_nxo->flags & 0xffffff3f) | (a_attr << 6);
 }
 
 /*

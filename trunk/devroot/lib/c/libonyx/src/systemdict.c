@@ -91,6 +91,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(counttomark),
 	ENTRY(currentdict),
 	ENTRY(currentlocking),
+	ENTRY(cve),
 	ENTRY(cvlit),
 	ENTRY(cvn),
 	ENTRY(cvrs),
@@ -103,6 +104,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(dirforeach),
 	ENTRY(div),
 	ENTRY(dstack),
+	ENTRY(echeck),
 	ENTRY(egid),
 	ENTRY(end),
 	ENTRY(eq),
@@ -484,6 +486,7 @@ systemdict_p_bind(cw_nxo_t *a_proc, cw_nxo_t *a_thread)
 	cw_nxo_t	*tstack;
 	cw_nxo_t	*el, *val;
 	cw_uint32_t	i, count;
+	cw_nxot_t	type;
 
 	tstack = nxo_thread_tstack_get(a_thread);
 
@@ -494,7 +497,7 @@ systemdict_p_bind(cw_nxo_t *a_proc, cw_nxo_t *a_thread)
 
 	for (i = 0, count = nxo_array_len_get(a_proc); i < count; i++) {
 		nxo_array_el_get(a_proc, i, el);
-		if (nxo_attr_get(el) != NXOA_EXECUTABLE)
+		if (nxo_attr_get(el) == NXOA_LITERAL)
 			continue;
 
 		switch (nxo_type_get(el)) {
@@ -503,10 +506,27 @@ systemdict_p_bind(cw_nxo_t *a_proc, cw_nxo_t *a_thread)
 				systemdict_p_bind(el, a_thread);
 			break;
 		case NXOT_NAME:
-			if ((nxo_thread_dstack_search(a_thread, el, val) ==
-			    FALSE) && ((nxo_type_get(val) == NXOT_OPERATOR ||
-			    nxo_attr_get(val) != NXOA_EXECUTABLE)))
-				nxo_array_el_set(a_proc, val, i);
+			if (nxo_thread_dstack_search(a_thread, el, val) ==
+			    FALSE) {
+				type = nxo_type_get(val);
+
+				/*
+				 * Bind under any of the following conditions:
+				 *
+				 * 1) Literal object.
+				 *
+				 * 2) Operator.
+				 *
+				 * 3) Array.  (Set attribute to evaluatable.)
+				 */
+				if (nxo_attr_get(val) == NXOA_LITERAL || type ==
+				    NXOT_OPERATOR)
+					nxo_array_el_set(a_proc, val, i);
+				else if (type == NXOT_ARRAY) {
+					nxo_attr_set(val, NXOA_EVALUATABLE);
+					nxo_array_el_set(a_proc, val, i);
+				}
+			}
 		default:
 			break;
 		}
@@ -1140,6 +1160,17 @@ systemdict_currentlocking(cw_nxo_t *a_thread)
 }
 
 void
+systemdict_cve(cw_nxo_t *a_thread)
+{
+	cw_nxo_t	*ostack;
+	cw_nxo_t	*nxo;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	NXO_STACK_GET(nxo, ostack, a_thread);
+	nxo_attr_set(nxo, NXOA_EVALUATABLE);
+}
+
+void
 systemdict_cvlit(cw_nxo_t *a_thread)
 {
 	cw_nxo_t	*ostack;
@@ -1664,6 +1695,21 @@ systemdict_dup(cw_nxo_t *a_thread)
 	systemdict_inline_dup(a_thread);
 }
 #endif
+
+void
+systemdict_echeck(cw_nxo_t *a_thread)
+{
+	cw_nxo_t	*ostack;
+	cw_nxo_t	*nxo;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	NXO_STACK_GET(nxo, ostack, a_thread);
+	
+	if (nxo_attr_get(nxo) == NXOA_EVALUATABLE)
+		nxo_boolean_new(nxo, TRUE);
+	else
+		nxo_boolean_new(nxo, FALSE);
+}
 
 void
 systemdict_egid(cw_nxo_t *a_thread)
@@ -5841,10 +5887,10 @@ systemdict_xcheck(cw_nxo_t *a_thread)
 	ostack = nxo_thread_ostack_get(a_thread);
 	NXO_STACK_GET(nxo, ostack, a_thread);
 	
-	if (nxo_attr_get(nxo) == NXOA_EXECUTABLE)
-		nxo_boolean_new(nxo, TRUE);
-	else
+	if (nxo_attr_get(nxo) == NXOA_LITERAL)
 		nxo_boolean_new(nxo, FALSE);
+	else
+		nxo_boolean_new(nxo, TRUE);
 }
 
 void

@@ -32,10 +32,15 @@ systemdict begin
 	/arraytype {
 		% %array %depth
 		dup 0 gt {
-			1 index xcheck {
+			1 index dup echeck {
+				pop
+				`_{'
+			}{
+			xcheck {
 				`{'
 			}{
 				`['
+			} ifelse
 			} ifelse
 
 			% %array %depth %accum
@@ -65,10 +70,15 @@ systemdict begin
 
 			exch pop
 			% %array %accum
-			exch xcheck {
+			exch dup echeck {
+				pop
+				`}_'
+			}{
+			xcheck {
 				`}'
 			}{
 				`]'
+			} ifelse
 			} ifelse
 			catenate
 			% %accum
