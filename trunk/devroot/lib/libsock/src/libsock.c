@@ -65,7 +65,7 @@ sockb_init(cw_uint32_t a_bufel_size, cw_uint32_t a_max_spare_bufels)
     if (tmpfile_name == NULL)
     {
       out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-		  "Fatal error in tmpnam(): %s\n", strerror(errno));
+		"Fatal error in tmpnam(): [s]\n", strerror(errno));
       abort();
     }
 
@@ -75,7 +75,7 @@ sockb_init(cw_uint32_t a_bufel_size, cw_uint32_t a_max_spare_bufels)
     if (g_sockb->poser_fd < 0)
     {
       out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-		  "Fatal error in open(): %s\n", strerror(errno));
+		"Fatal error in open(): [s]\n", strerror(errno));
       abort();
     }
 
@@ -85,7 +85,7 @@ sockb_init(cw_uint32_t a_bufel_size, cw_uint32_t a_max_spare_bufels)
       if (dbg_is_registered(cw_g_dbg, "sockb_error"))
       {
 	out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-		    "Error in unlink(): %s\n", strerror(errno));
+		  "Error in unlink(): [s]\n", strerror(errno));
       }
     }
 
@@ -101,7 +101,7 @@ sockb_init(cw_uint32_t a_bufel_size, cw_uint32_t a_max_spare_bufels)
       if (-1 == pipe(filedes))
       {
 	out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-		    "Fatal error in pipe(): %s\n", strerror(errno));
+		  "Fatal error in pipe(): [s]\n", strerror(errno));
 	abort();
       }
       g_sockb->pipe_out = filedes[0];
@@ -114,15 +114,15 @@ sockb_init(cw_uint32_t a_bufel_size, cw_uint32_t a_max_spare_bufels)
 	if (val == -1)
 	{
 	  out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-		      "Fatal error for F_GETFL in fcntl(): %s\n",
-		      strerror(errno));
+		    "Fatal error for F_GETFL in fcntl(): [s]\n",
+		    strerror(errno));
 	  abort();
 	}
 	if (fcntl(g_sockb->pipe_in, F_SETFL, val | O_NONBLOCK))
 	{
 	  out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-		      "Fatal error for F_SETFL in fcntl(): %s\n",
-		      strerror(errno));
+		    "Fatal error for F_SETFL in fcntl(): [s]\n",
+		    strerror(errno));
 	  abort();
 	}
       }
@@ -132,15 +132,15 @@ sockb_init(cw_uint32_t a_bufel_size, cw_uint32_t a_max_spare_bufels)
 	if (val == -1)
 	{
 	  out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-		      "Fatal error for F_GETFL in fcntl(): %s\n",
-		      strerror(errno));
+		    "Fatal error for F_GETFL in fcntl(): [s]\n",
+		    strerror(errno));
 	  abort();
 	}
 	if (fcntl(g_sockb->pipe_in, F_SETFL, val | O_NONBLOCK))
 	{
 	  out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-		      "Fatal error for F_SETFL in fcntl(): %s\n",
-		      strerror(errno));
+		    "Fatal error for F_SETFL in fcntl(): [s]\n",
+		    strerror(errno));
 	  abort();
 	}
       }
@@ -224,7 +224,7 @@ sockb_shutdown(void)
     if (dbg_is_registered(cw_g_dbg, "sockb_error"))
     {
       out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-		  "Error in close(): %s\n", strerror(errno));
+		"Error in close(): [s]\n", strerror(errno));
     }
   }
 
@@ -248,8 +248,8 @@ sockb_get_spare_bufc(void)
   retval = bufc_new(NULL, NULL, NULL);
 #else
   retval = bufc_new((cw_bufc_t *) pezz_get(&g_sockb->bufc_pool),
-		  pezz_put,
-		  (void *) &g_sockb->bufc_pool);
+		    pezz_put,
+		    (void *) &g_sockb->bufc_pool);
 #endif
   if (NULL == retval)
   {
@@ -350,7 +350,7 @@ sockb_l_wakeup(void)
       if (dbg_is_registered(cw_g_dbg, "sockb_error"))
       {
 	out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-		    "Error in write(): %s\n", strerror(errno));
+		  "Error in write(): [s]\n", strerror(errno));
       }
     }
   }
@@ -496,14 +496,14 @@ sockb_l_get_host_ip(char * a_host_str, cw_uint32_t * r_host_ip)
       {
 #ifdef _CW_OS_SOLARIS
 	out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-		    "Error in gethostbyname(): %d\n", h_errno);
+		  "Error in gethostbyname(): [i32]\n", h_errno);
 #else
 	out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-		    "Error in gethostbyname(): %s\n", hstrerror(h_errno));
+		  "Error in gethostbyname(): [s]\n", hstrerror(h_errno));
 #endif
 	out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-		    "Host \"%s\" isn't an IP address or a hostname\n",
-		    a_host_str);
+		  "Host \"[s]\" isn't an IP address or a hostname\n",
+		  a_host_str);
       }
       retval = TRUE;
     }
@@ -532,11 +532,11 @@ sockb_l_get_host_ip(char * a_host_str, cw_uint32_t * r_host_ip)
   if (dbg_is_registered(cw_g_dbg, "sockb_verbose"))
   {
     out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-		"IP address: %d.%d.%d.%d\n",
-		*r_host_ip & 0xff,
-		(*r_host_ip >> 8) & 0xff,
-		(*r_host_ip >> 16) & 0xff,
-		*r_host_ip >> 24);
+	      "IP address: [i32].[i32].[i32].[i32]\n",
+	      *r_host_ip & 0xff,
+	      (*r_host_ip >> 8) & 0xff,
+	      (*r_host_ip >> 16) & 0xff,
+	      *r_host_ip >> 24);
   }
 
   return retval;
@@ -556,7 +556,7 @@ sockb_l_get_spare_fd(void)
     if (dbg_is_registered(cw_g_dbg, "sockb_error"))
     {
       out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-		  "Error in dup(): %s\n", strerror(errno));
+		"Error in dup(): [s]\n", strerror(errno));
     }
     retval = -1;
   }
@@ -565,7 +565,7 @@ sockb_l_get_spare_fd(void)
     if (dbg_is_registered(cw_g_dbg, "sockb_error"))
     {
       out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-		  "Reached maximum number of connections (%d)\n", FD_SETSIZE);
+		"Reached maximum number of connections ([i32])\n", FD_SETSIZE);
     }
     retval = -1;
   }
@@ -658,7 +658,7 @@ sockb_p_entry_func(void * a_arg)
 	    /* The sock isn't registered.  Register it. */
 #ifdef _LIBSTASH_SOCKB_CONFESS
 	    out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
-			"Register %d\n", sockfd);
+		      "Register [i32]\n", sockfd);
 #endif
 
 	    FD_SET(sockfd, &registered_set);
@@ -683,7 +683,7 @@ sockb_p_entry_func(void * a_arg)
 	  else
 	  {
 	    out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
-			"Refuse to register %d\n", sockfd);
+		      "Refuse to register [i32]\n", sockfd);
 	  }
 #endif
 	  break;
@@ -696,7 +696,7 @@ sockb_p_entry_func(void * a_arg)
 	  {
 #ifdef _LIBSTASH_SOCKB_CONFESS
 	    out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
-			"Unregister %d\n", sockfd);
+		      "Unregister [i32]\n", sockfd);
 #endif
 	
 	    FD_CLR(sockfd, &registered_set);
@@ -731,7 +731,7 @@ sockb_p_entry_func(void * a_arg)
 	  else
 	  {
 	    out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
-			"Refuse to unregister %d\n", sockfd);
+		      "Refuse to unregister [i32]\n", sockfd);
 	  }
 #endif      
 
@@ -748,7 +748,7 @@ sockb_p_entry_func(void * a_arg)
 	  {
 #ifdef _LIBSTASH_SOCKB_CONFESS
 	    out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
-			"Set %dw\n", sockfd);
+		      "Set [i32]w\n", sockfd);
 #endif
 	
 	    FD_SET(sockfd, &fd_m_write_set);
@@ -757,7 +757,7 @@ sockb_p_entry_func(void * a_arg)
 	  else
 	  {
 	    out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
-			"Refuse to set %dw\n", sockfd);
+		      "Refuse to set [i32]w\n", sockfd);
 	  }
 #endif
 	  break;
@@ -768,9 +768,9 @@ sockb_p_entry_func(void * a_arg)
 	    = message->data.in_notify.mq;
 #ifdef _LIBSTASH_SOCKB_CONFESS
 	  out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
-		      "notify_vec[%d] = %p\n",
-		      message->data.in_notify.sockfd,
-		      notify_vec[message->data.in_notify.sockfd]);
+		    "notify_vec[[[i32]] = 0x[p]\n",
+		    message->data.in_notify.sockfd,
+		    notify_vec[message->data.in_notify.sockfd]);
 #endif
 	  mtx_lock(message->data.in_notify.mtx);
 	  cnd_signal(message->data.in_notify.cnd);
@@ -808,14 +808,14 @@ sockb_p_entry_func(void * a_arg)
 
 #ifdef _LIBSTASH_SOCKB_CONFESS
       out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
-		  "select fd's:");
+		"select fd's:");
 #endif
       for (i = 0; i <= max_fd; i++)
       {
 	if (FD_ISSET(i, &registered_set))
 	{
 #ifdef _LIBSTASH_SOCKB_CONFESS
-	  out_put(cw_g_out, " %dR", i);
+	  out_put(cw_g_out, " [i32]R", i);
 #endif
 	  
 	  /* Is any space available? */
@@ -855,19 +855,19 @@ sockb_p_entry_func(void * a_arg)
 	}
       }
 #ifdef _LIBSTASH_SOCKB_CONFESS
-      out_put(cw_g_out, " (%dr)\n", g_sockb->pipe_out);
+      out_put(cw_g_out, " ([i32]r)\n", g_sockb->pipe_out);
 #endif
     }
 
 #ifdef _LIBSTASH_SOCKB_CONFESS
     out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
-		"select(%lu)", max_fd + 1);
+	      "select([i32])", max_fd + 1);
 #endif
     num_ready = select(max_fd + 1,
 		       &fd_read_set, &fd_write_set, &fd_exception_set,
 		       NULL);
 #ifdef _LIBSTASH_SOCKB_CONFESS
-    out_put(cw_g_out, "-->(%lu)\n", num_ready);
+    out_put(cw_g_out, "-->([i32])\n", num_ready);
 #endif
     
     if (num_ready == -1)
@@ -876,7 +876,7 @@ sockb_p_entry_func(void * a_arg)
       {
 	/* This is an error that should never happen. */
 	out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-		    "Fatal error in select(): %s\n", strerror(errno));
+		  "Fatal error in select(): [s]\n", strerror(errno));
 	abort();
       }
     }
@@ -888,7 +888,7 @@ sockb_p_entry_func(void * a_arg)
       if (dbg_is_registered(cw_g_dbg, "sockb_error"))
       {
 	out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-		    "select() timeout expired\n");
+		  "select() timeout expired\n");
       }
     }
 #endif
@@ -898,7 +898,7 @@ sockb_p_entry_func(void * a_arg)
       
 #ifdef _LIBSTASH_SOCKB_CONFESS
       out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
-		  "Check fd:");
+		"Check fd:");
 #endif
       
       /* Ready descriptors. */
@@ -908,7 +908,7 @@ sockb_p_entry_func(void * a_arg)
 	ssize_t bytes_read;
 
 #ifdef _LIBSTASH_SOCKB_CONFESS
-	out_put(cw_g_out, " (%dr)", g_sockb->pipe_out);
+	out_put(cw_g_out, " ([i32]r)", g_sockb->pipe_out);
 #endif
 	
 	/* Clear the read bit to avoid attempting to handle it in the loop
@@ -928,7 +928,7 @@ sockb_p_entry_func(void * a_arg)
 	  if (dbg_is_registered(cw_g_dbg, "sockb_error"))
 	  {
 	    out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-			"Error in read(): %s\n", strerror(errno));
+		      "Error in read(): [s]\n", strerror(errno));
 	  }
 	}
 	else if (bytes_read > 0)
@@ -951,7 +951,7 @@ sockb_p_entry_func(void * a_arg)
       for (i = max_fd, j = 0; (j < num_ready) && (i >= 0); i--)
       {
 #ifdef _LIBSTASH_SOCKB_CONFESS
-	out_put(cw_g_out, " %d", i);
+	out_put(cw_g_out, " [i32]", i);
 #endif
 
 	/* XXX Yuck, fix this. */
@@ -975,13 +975,13 @@ sockb_p_entry_func(void * a_arg)
 #endif
 	  /* Ready for reading. */
 
-	    /* Figure out how much data we're willing to shove into this sock's
-	     * incoming buffer. */
+	  /* Figure out how much data we're willing to shove into this sock's
+	   * incoming buffer. */
 	  max_read = sock_l_get_in_space(socks[i]);
 	  
 	  _cw_assert(max_read > 0);
 
-	    /* Build up buf_in to be at least large enough for the readv(). */
+	  /* Build up buf_in to be at least large enough for the readv(). */
 	  while (buf_get_size(&buf_in) < max_read)
 	  {
 	    bufc = sockb_get_spare_bufc();
@@ -995,9 +995,9 @@ sockb_p_entry_func(void * a_arg)
 	      if (dbg_is_registered(cw_g_dbg, "sockb_error"))
 	      {
 		out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-			    "Allocation error.  Got %lu/%l desired bytes"
-			    " buffer space\n",
-			    buf_get_size(&buf_in), max_read);
+			  "Allocation error.  Got [i32]/[i32] desired bytes"
+			  " buffer space\n",
+			  buf_get_size(&buf_in), max_read);
 	      }
 	      
 	      if (0 < buf_get_size(&buf_in))
@@ -1020,9 +1020,9 @@ sockb_p_entry_func(void * a_arg)
 	      if (dbg_is_registered(cw_g_dbg, "sockb_error"))
 	      {
 		out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-			    "Allocation error.  Got %lu/%l desired bytes"
-			    " buffer space\n",
-			    buf_get_size(&buf_in), max_read);
+			  "Allocation error.  Got [i32]/[i32] desired bytes"
+			  " buffer space\n",
+			  buf_get_size(&buf_in), max_read);
 	      }
 	      
 	      if (0 < buf_get_size(&buf_in))
@@ -1046,7 +1046,7 @@ sockb_p_entry_func(void * a_arg)
 
 	  bytes_read = readv(i, iovec, iovec_count);
 #ifdef _LIBSTASH_SOCKB_CONFESS
-	  out_put(cw_g_out, "(%d)", bytes_read);
+	  out_put(cw_g_out, "([i32])", bytes_read);
 #endif
 
 	  if (bytes_read > 0)
@@ -1076,7 +1076,7 @@ sockb_p_entry_func(void * a_arg)
 	    if (dbg_is_registered(cw_g_dbg, "sockb_verbose"))
 	    {
 	      out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-			  "EOF in readv().  Closing sockfd %d\n", i);
+			"EOF in readv().  Closing sockfd [i32]\n", i);
 	    }
 	    FD_CLR(i, &registered_set);
 	    FD_CLR(i, &fd_m_read_set);
@@ -1088,7 +1088,7 @@ sockb_p_entry_func(void * a_arg)
 	    {
 #ifdef _LIBSTASH_SOCKB_CONFESS
 	      out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
-			  "max_fd: %d", max_fd);
+			"max_fd: [i32]", max_fd);
 #endif
 	      max_fd = g_sockb->pipe_out;
 	      for (k = i - 1; k > g_sockb->pipe_out; k--)
@@ -1100,7 +1100,7 @@ sockb_p_entry_func(void * a_arg)
 		}
 	      }
 #ifdef _LIBSTASH_SOCKB_CONFESS
-	      out_put(cw_g_out, "-->%d\n", max_fd);
+	      out_put(cw_g_out, "-->[i32]\n", max_fd);
 #endif
 	    }
 
@@ -1115,7 +1115,7 @@ sockb_p_entry_func(void * a_arg)
 	    }
 
 	    /* Make sure not to try to handle outgoing data on this socket,
-	       * since we just set the sock pointer to NULL. */
+	     * since we just set the sock pointer to NULL. */
 	    if (FD_ISSET(i, &fd_write_set))
 	    {
 	      j++;
@@ -1128,7 +1128,7 @@ sockb_p_entry_func(void * a_arg)
 	    if (dbg_is_registered(cw_g_dbg, "sockb_error"))
 	    {
 	      out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-			  "Error in readv(): %s\n", strerror(errno));
+			"Error in readv(): [s]\n", strerror(errno));
 	    }
 	  }
 	}
@@ -1157,8 +1157,8 @@ sockb_p_entry_func(void * a_arg)
 
 	  bytes_written = writev(i, iovec, iovec_count);
 #ifdef _LIBSTASH_SOCKB_CONFESS
-	  out_put(cw_g_out, "(%d/%lu)", bytes_written,
-		     buf_get_size(&tmp_buf));
+	  out_put(cw_g_out, "([i32]/[i32])", bytes_written,
+		  buf_get_size(&tmp_buf));
 #endif
 
 	  if (bytes_written >= 0)
@@ -1189,9 +1189,9 @@ sockb_p_entry_func(void * a_arg)
 	    if (dbg_is_registered(cw_g_dbg, "sockb_error"))
 	    {
 	      out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-			  "Error in writev(): %s\n", strerror(errno));
+			"Error in writev(): [s]\n", strerror(errno));
 	      out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-			  "Closing sockfd %d\n", i);
+			"Closing sockfd [i32]\n", i);
 	    }
 	    
 	    FD_CLR(i, &registered_set);
@@ -1204,7 +1204,7 @@ sockb_p_entry_func(void * a_arg)
 	    {
 #ifdef _LIBSTASH_SOCKB_CONFESS
 	      out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
-			  "max_fd: %d", max_fd);
+			"max_fd: [i32]", max_fd);
 #endif
 	      max_fd = g_sockb->pipe_out;
 	      for (k = i - 1; k > g_sockb->pipe_out; k--)
@@ -1216,7 +1216,7 @@ sockb_p_entry_func(void * a_arg)
 		}
 	      }
 #ifdef _LIBSTASH_SOCKB_CONFESS
-	      out_put(cw_g_out, "-->%d\n", max_fd);
+	      out_put(cw_g_out, "-->[i32]\n", max_fd);
 #endif
 	    }
 

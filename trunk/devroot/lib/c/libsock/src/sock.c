@@ -161,7 +161,7 @@ sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port,
     if (dbg_is_registered(cw_g_dbg, "sock_error"))
     {
       out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-		"Error in socket(): %s\n", strerror(errno));
+		"Error in socket(): [s]\n", strerror(errno));
     }
     retval = TRUE;
     goto RETURN;
@@ -173,7 +173,7 @@ sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port,
     if (dbg_is_registered(cw_g_dbg, "sock_error"))
     {
       out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-		"Exceded maximum number of simultaneous connections (%d)\n",
+		"Exceded maximum number of simultaneous connections ([i32])\n",
 		FD_SETSIZE);
     }
     if (close(a_sock->sockfd))
@@ -181,7 +181,7 @@ sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port,
       if (dbg_is_registered(cw_g_dbg, "sock_error"))
       {
 	out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-		  "Error in close(): %s\n", strerror(errno));
+		  "Error in close(): [s]\n", strerror(errno));
       }
     }
     a_sock->sockfd = -1;
@@ -204,7 +204,7 @@ sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port,
       if (dbg_is_registered(cw_g_dbg, "sock_error"))
       {
 	out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-		  "Error in close(): %s\n", strerror(errno));
+		  "Error in close(): [s]\n", strerror(errno));
       }
     }
     a_sock->sockfd = -1;
@@ -240,7 +240,7 @@ sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port,
 	if (dbg_is_registered(cw_g_dbg, "sock_error"))
 	{
 	  out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-		    "Error in select(): %s\n", strerror(errno));
+		    "Error in select(): [s]\n", strerror(errno));
 	}
 	a_sock->sockfd = -1;
 	retval = TRUE;
@@ -262,7 +262,7 @@ sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port,
 	    if (dbg_is_registered(cw_g_dbg, "sock_error"))
 	    {
 	      out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-			"Error in getsockopt(): %s\n", strerror(errno));
+			"Error in getsockopt(): [s]\n", strerror(errno));
 	    }
 	    a_sock->sockfd = -1;
 	    retval = TRUE;
@@ -273,7 +273,7 @@ sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port,
 	    if (dbg_is_registered(cw_g_dbg, "sock_error"))
 	    {
 	      out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-			"Error in getsockopt() due to connect(): %s\n",
+			"Error in getsockopt() due to connect(): [s]\n",
 			strerror(error));
 	    }
 	    a_sock->sockfd = -1;
@@ -300,7 +300,7 @@ sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port,
       if (dbg_is_registered(cw_g_dbg, "sock_error"))
       {
 	out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-		  "Error in connect(): %s\n", strerror(errno));
+		  "Error in connect(): [s]\n", strerror(errno));
       }
       /* XXX close(a_sock->sockfd); ? */
       a_sock->sockfd = -1;
@@ -320,7 +320,7 @@ sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port,
       if (dbg_is_registered(cw_g_dbg, "sock_error"))
       {
 	out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-		  "Error in getsockname(): %s\n", strerror(errno));
+		  "Error in getsockname(): [s]\n", strerror(errno));
       }
       retval = TRUE;
       goto RETURN;
@@ -391,7 +391,7 @@ sock_wrap(cw_sock_t * a_sock, int a_sockfd)
 	if (dbg_is_registered(cw_g_dbg, "sock_error"))
 	{
 	  out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-		    "Error in getsockname(): %s\n", strerror(errno));
+		    "Error in getsockname(): [s]\n", strerror(errno));
 	}
 	retval = TRUE;
 	goto RETURN;
@@ -778,14 +778,15 @@ sock_p_config_socket(cw_sock_t * a_sock)
 		   (void *) &val, &len)) \
     { \
       out_put_e(cw_g_out, NULL, 0, __FUNCTION__, \
-		  "Error for %s in getsockopt(): %s\n", #a, strerror(errno)); \
+		  "Error for [s] in getsockopt(): [s]\n", \
+                  #a, strerror(errno)); \
       retval = TRUE; \
       goto RETURN; \
     } \
     else \
     { \
       out_put_e(cw_g_out, NULL, 0, __FUNCTION__, \
-		  "%s: %d\n", #a, val); \
+		  "[s]: [i32]\n", #a, val); \
     }
 
     _CW_SOCK_GETSOCKOPT(SO_REUSEADDR);
@@ -822,7 +823,7 @@ sock_p_config_socket(cw_sock_t * a_sock)
 		   (void *) &a_sock->os_inbuf_size, &len))
     {
       out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-		"Error for SO_RCVBUF in getsockopt(): %s\n", strerror(errno));
+		"Error for SO_RCVBUF in getsockopt(): [s]\n", strerror(errno));
       retval = TRUE;
       goto RETURN;
     }
@@ -840,7 +841,7 @@ sock_p_config_socket(cw_sock_t * a_sock)
       if (dbg_is_registered(cw_g_dbg, "sock_error"))
       {
 	out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-		  "Error for SO_SNDBUF in getsockopt(): %s\n",
+		  "Error for SO_SNDBUF in getsockopt(): [s]\n",
 		  strerror(errno));
       }
       retval = TRUE;
@@ -856,7 +857,7 @@ sock_p_config_socket(cw_sock_t * a_sock)
     if (dbg_is_registered(cw_g_dbg, "sock_error"))
     {
       out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-		"Error for F_GETFL in fcntl(): %s\n", strerror(errno));
+		"Error for F_GETFL in fcntl(): [s]\n", strerror(errno));
     }
     retval = TRUE;
     goto RETURN;
@@ -866,7 +867,7 @@ sock_p_config_socket(cw_sock_t * a_sock)
     if (dbg_is_registered(cw_g_dbg, "sock_error"))
     {
       out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-		"Error for F_SETFL in fcntl(): %s\n", strerror(errno));
+		"Error for F_SETFL in fcntl(): [s]\n", strerror(errno));
     }
     retval = TRUE;
     goto RETURN;
@@ -883,7 +884,7 @@ sock_p_config_socket(cw_sock_t * a_sock)
     if (dbg_is_registered(cw_g_dbg, "sock_error"))
     {
       out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-		"Error for SO_LINGER in setsockopt(): %s\n", strerror(errno));
+		"Error for SO_LINGER in setsockopt(): [s]\n", strerror(errno));
     }
     retval = TRUE;
     goto RETURN;
@@ -891,7 +892,7 @@ sock_p_config_socket(cw_sock_t * a_sock)
   else if (dbg_is_registered(cw_g_dbg, "sock_sockopt"))
   {
     out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-	      "SO_LINGER: %s, %d second%s\n",
+	      "SO_LINGER: [s], [i32] second[s]\n",
 	      linger_struct.l_onoff ? "on" : "off",
 	      linger_struct.l_linger,
 	      linger_struct.l_linger != 1 ? "s" : "");
@@ -906,7 +907,7 @@ sock_p_config_socket(cw_sock_t * a_sock)
     if (dbg_is_registered(cw_g_dbg, "sock_error"))
     {
       out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-		"Error for SO_SNDLOWAT in setsockopt(): %s\n",
+		"Error for SO_SNDLOWAT in setsockopt(): [s]\n",
 		strerror(errno));
     }
     retval = TRUE;
@@ -915,7 +916,7 @@ sock_p_config_socket(cw_sock_t * a_sock)
   else if (dbg_is_registered(cw_g_dbg, "sock_sockopt"))
   {
     out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-	      "SO_SNDLOWAT: %d\n", val);
+	      "SO_SNDLOWAT: [d]\n", val);
   }
 #endif
 
@@ -925,7 +926,7 @@ sock_p_config_socket(cw_sock_t * a_sock)
 		     (void *) &val, sizeof(val)))
   {
     out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-	      "Error for SO_REUSEADDR in setsockopt(): %s\n",
+	      "Error for SO_REUSEADDR in setsockopt(): [s]\n",
 	      strerror(errno));
     retval = TRUE;
     goto RETURN;
@@ -1008,7 +1009,7 @@ sock_p_disconnect(cw_sock_t * a_sock)
       if (dbg_is_registered(cw_g_dbg, "sock_error"))
       {
 	out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-		  "Error for F_GETFL in fcntl(): %s\n", strerror(errno));
+		  "Error for F_GETFL in fcntl(): [s]\n", strerror(errno));
       }
       retval = TRUE;
     }
@@ -1017,7 +1018,7 @@ sock_p_disconnect(cw_sock_t * a_sock)
       if (dbg_is_registered(cw_g_dbg, "sock_error"))
       {
 	out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-		  "Error for F_SETFL in fcntl(): %s\n", strerror(errno));
+		  "Error for F_SETFL in fcntl(): [s]\n", strerror(errno));
       }
       retval = TRUE;
     }
@@ -1026,7 +1027,7 @@ sock_p_disconnect(cw_sock_t * a_sock)
       if (dbg_is_registered(cw_g_dbg, "sock_error"))
       {
 	out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-		  "Error in close(): %s\n", strerror(errno));
+		  "Error in close(): [s]\n", strerror(errno));
       }
       retval = TRUE;
     }

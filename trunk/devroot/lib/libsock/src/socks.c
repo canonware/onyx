@@ -61,8 +61,8 @@ socks_delete(cw_socks_t * a_socks)
     {
       if (dbg_is_registered(cw_g_dbg, "socks_error"))
       {
-	out_put_e(cw_g_out, NULL, 0, "socks_delete",
-		  "Error in close(): %s\n", strerror(error));
+	out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+		  "Error in close(): [s]\n", strerror(error));
       }
     }
   }
@@ -87,8 +87,8 @@ socks_listen(cw_socks_t * a_socks, int * r_port)
   {
     if (dbg_is_registered(cw_g_dbg, "socks_error"))
     {
-      out_put_e(cw_g_out, NULL, 0, "socks_listen",
-		"Error in socket(): %s\n", strerror(errno));
+      out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+		"Error in socket(): [s]\n", strerror(errno));
     }
     retval = TRUE;
     goto RETURN;
@@ -100,7 +100,7 @@ socks_listen(cw_socks_t * a_socks, int * r_port)
 		     (void *) &val, sizeof(val)))
   {
     out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-	      "Error for SO_REUSEADDR in setsockopt(): %s\n",
+	      "Error for SO_REUSEADDR in setsockopt(): [s]\n",
 	      strerror(errno));
     retval = TRUE;
     goto RETURN;
@@ -117,8 +117,8 @@ socks_listen(cw_socks_t * a_socks, int * r_port)
   {
     if (dbg_is_registered(cw_g_dbg, "socks_error"))
     {
-      out_put_e(cw_g_out, NULL, 0, "socks_listen",
-		"Error in bind(): %s\n", strerror(errno));
+      out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+		"Error in bind(): [s]\n", strerror(errno));
     }
     retval = TRUE;
     goto RETURN;
@@ -135,8 +135,8 @@ socks_listen(cw_socks_t * a_socks, int * r_port)
     {
       if (dbg_is_registered(cw_g_dbg, "socks_error"))
       {
-	out_put_e(cw_g_out, NULL, 0, "socks_listen",
-		  "Error in getsockname(): %s\n", strerror(errno));
+	out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+		  "Error in getsockname(): [s]\n", strerror(errno));
       }
       retval = TRUE;
       goto RETURN;
@@ -191,8 +191,9 @@ socks_accept(cw_socks_t * a_socks, struct timeval * a_timeout,
     {
       if (dbg_is_registered(cw_g_dbg, "socks_verbose"))
       {
-	out_put_e(cw_g_out, NULL, 0, "socks_accept_block",
-		  "Exceded maximum number of simultaneous connections (%d)\n",
+	out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+		  "Exceded maximum number of simultaneous connections "
+		  "([i32])\n",
 		  FD_SETSIZE);
       }
       retval = NULL;
@@ -207,8 +208,8 @@ socks_accept(cw_socks_t * a_socks, struct timeval * a_timeout,
     {
       if (dbg_is_registered(cw_g_dbg, "socks_error"))
       {
-	out_put_e(cw_g_out, NULL, 0, "socks_accept_noblock",
-		  "Error in accept(): %s\n", strerror(errno));
+	out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+		  "Error in accept(): [s]\n", strerror(errno));
       }
       retval = NULL;
       goto RETURN;
@@ -220,16 +221,16 @@ socks_accept(cw_socks_t * a_socks, struct timeval * a_timeout,
        * over to spare_fd. */
       if (dup2(new_sockfd, spare_fd))
       {
-	out_put_e(cw_g_out, __FILE__, __LINE__, "socks_accept_noblock",
-		  "Fatal error in dup2(): %s\n", strerror(errno));
+	out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
+		  "Fatal error in dup2(): [s]\n", strerror(errno));
 	abort();
       }
       if (close(new_sockfd))
       {
 	if (dbg_is_registered(cw_g_dbg, "socks_error"))
 	{
-	  out_put_e(cw_g_out, __FILE__, __LINE__, "socks_accept_noblock",
-		    "Error in close(): %s\n", strerror(errno));
+	  out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
+		    "Error in close(): [s]\n", strerror(errno));
 	}
       }
     }
@@ -240,8 +241,8 @@ socks_accept(cw_socks_t * a_socks, struct timeval * a_timeout,
       {
 	if (dbg_is_registered(cw_g_dbg, "socks_error"))
 	{
-	  out_put_e(cw_g_out, __FILE__, __LINE__, "socks_accept_noblock",
-		    "Error in close(): %s\n", strerror(errno));
+	  out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
+		    "Error in close(): [s]\n", strerror(errno));
 	}
       }
     }
