@@ -20,6 +20,8 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <poll.h>
 
 #ifdef _LIBSTIL_DBG
 #define _CW_STILOE_MAGIC	0x0fa6e798
@@ -2054,6 +2056,7 @@ stilo_file_read(cw_stilo_t *a_stilo, cw_uint32_t a_len, cw_uint8_t *r_str)
 			file->buffer_mode = BUFFER_EMPTY;
 
 			if (file->fd >= 0) {
+				struct pollfd	events;
 				struct iovec	iov[2];
 
 				/*
@@ -2065,7 +2068,34 @@ stilo_file_read(cw_stilo_t *a_stilo, cw_uint32_t a_len, cw_uint8_t *r_str)
 				iov[1].iov_base = file->buffer;
 				iov[1].iov_len = file->buffer_size;
 
-				nread = readv(file->fd, iov, 2);
+				/*
+				 * Make sure that data are available before
+				 * reading.
+				 */
+				events.fd = file->fd;
+				events.events = POLLRDNORM;
+				while (poll(&events, 1, INFTIM) == -1)
+					; /* EINTR; retry. */
+
+				if (events.revents & POLLRDNORM) {
+					int	val;
+
+					/* Do a non-blocking readv(). */
+					val = fcntl(file->fd, F_GETFL, 0);
+					fcntl(file->fd, F_SETFL, val |
+					    O_NONBLOCK);
+
+					nread = readv(file->fd, iov, 2);
+
+					/*
+					 * Switch the fd back to blocking
+					 * mode.
+					 */
+					fcntl(file->fd, F_SETFL, val);
+				} else {
+					/* The fd is no longer valid. */
+					nread = -1;
+				}
 			} else {
 				/* Use the read wrapper function. */
 				nread = file->read_f(file->arg, a_stilo, a_len,
@@ -3713,7 +3743,6 @@ stilo_p_string_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
 	cw_sint32_t	len;
 	cw_uint32_t	i;
 
-	stilo_string_lock(a_stilo);
 	str = stilo_string_get(a_stilo);
 	len = stilo_string_len_get(a_stilo);
 
@@ -3773,7 +3802,6 @@ stilo_p_string_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
 
 	retval = STILTE_NONE;
 	RETURN:
-	stilo_string_unlock(a_stilo);
 	return retval;
 }
 
