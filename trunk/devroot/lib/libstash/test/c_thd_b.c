@@ -50,7 +50,7 @@ main()
 	thd_crit_enter();
 	thd_crit_leave();
 
-	thd = thd_new(thread_entry_func, NULL);
+	thd = thd_new(thread_entry_func, NULL, TRUE);
 	nanosleep(&tout, NULL);
 
 	out_put(out_err, "thd_suspend()\n");

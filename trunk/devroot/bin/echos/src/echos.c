@@ -87,7 +87,7 @@ main(int argc, char **argv)
 		sock_ptr = socks_accept(socks, NULL, sock);
 		_cw_check_ptr(sock_ptr);
 
-		thd = thd_new(handle_client, (void *)sock);
+		thd = thd_new(handle_client, (void *)sock, TRUE);
 
 		/* Detach the thread. */
 		thd_delete(thd);

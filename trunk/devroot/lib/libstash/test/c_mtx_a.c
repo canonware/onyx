@@ -73,8 +73,8 @@ main()
 	 */
 	mtx_new(&mutex_a);
 
-	thread_a = thd_new(thread_entry_func, (void *)&mutex_a);
-	thread_b = thd_new(thread_entry_func, (void *)&mutex_a);
+	thread_a = thd_new(thread_entry_func, (void *)&mutex_a, TRUE);
+	thread_b = thd_new(thread_entry_func, (void *)&mutex_a, TRUE);
 
 	thd_join(thread_a);
 	thd_join(thread_b);

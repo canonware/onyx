@@ -140,8 +140,8 @@ main(int argc, char **argv)
 	foo_b.rand_lock = &rand_lock;
 	foo_b.thread_name = "*";
 
-	thd_a = thd_new(thread_entry_func, (void *)&foo_a);
-	thd_b = thd_new(thread_entry_func, (void *)&foo_b);
+	thd_a = thd_new(thread_entry_func, (void *)&foo_a, TRUE);
+	thd_b = thd_new(thread_entry_func, (void *)&foo_b, TRUE);
 
 	thd_join(thd_a);
 	thd_join(thd_b);

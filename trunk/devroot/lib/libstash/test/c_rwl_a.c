@@ -51,7 +51,7 @@ main()
 	rwl_rlock(&lock_a);
 	rwl_rlock(&lock_a);
 	for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
-		threads[i] = thd_new(thread_entry_func, (void *)&lock_a);
+		threads[i] = thd_new(thread_entry_func, (void *)&lock_a, TRUE);
 	out_put_e(out_err, NULL, 0, "main", "About to release rlock\n");
 	rwl_runlock(&lock_a);
 	usleep(1);
@@ -66,7 +66,7 @@ main()
 
 	rwl_wlock(&lock_a);
 	for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
-		threads[i] = thd_new(thread_entry_func, (void *)&lock_a);
+		threads[i] = thd_new(thread_entry_func, (void *)&lock_a, TRUE);
 	out_put_e(out_err, NULL, 0, "main", "About to release wlock\n");
 	usleep(1);
 	rwl_wunlock(&lock_a);

@@ -37,11 +37,13 @@ main()
 	out_put(out_err, "Test begin\n");
 
 	thread_b = NULL;
-	thread_a = thd_new(thread_entry_func, (void *)"Thread A argument");
+	thread_a = thd_new(thread_entry_func, (void *)"Thread A argument",
+	    TRUE);
 	_cw_assert(thd_join(thread_a) == NULL);
 	thread_a = NULL;
 
-	thread_b = thd_new(thread_entry_func, (void *)"Thread B argument");
+	thread_b = thd_new(thread_entry_func, (void *)"Thread B argument",
+	    TRUE);
 	_cw_assert(thd_join(thread_b) == NULL);
 
 	out_put(out_err, "Test end\n");

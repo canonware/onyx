@@ -40,7 +40,7 @@ main()
 	out_put(out_err, "Test begin\n");
 
 	for (i = 0; i < NTHREADS; i++)
-		thds[i] = thd_new(thread_entry_func, NULL);
+		thds[i] = thd_new(thread_entry_func, NULL, FALSE);
 
 	thread_entry_func(NULL);
 

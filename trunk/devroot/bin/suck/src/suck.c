@@ -113,7 +113,7 @@ main(int argc, char **argv)
 	if (mq == NULL)
 		_cw_error("Memory allocation error");
 	/* Start thread to accept connections. */
-	accept_thd = thd_new(accept_entry_func, NULL);
+	accept_thd = thd_new(accept_entry_func, NULL, TRUE);
 
 	for (;;) {
 		did_work = FALSE;

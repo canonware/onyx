@@ -22,7 +22,8 @@ typedef struct cw_thd_s cw_thd_t;
 #define _CW_THD_GENERIC_SR
 #endif
 
-cw_thd_t *thd_new(void *(*a_start_func)(void *), void *a_arg);
+cw_thd_t *thd_new(void *(*a_start_func)(void *), void *a_arg, cw_bool_t
+    a_suspendible);
 void	thd_delete(cw_thd_t *a_thd);
 void	*thd_join(cw_thd_t *a_thd);
 cw_thd_t *thd_self(void);

@@ -234,7 +234,8 @@ stila_new(cw_stila_t *a_stila, cw_stil_t *a_stil)
 		 */
 		sigfillset(&sig_mask);
 		thd_sigmask(SIG_BLOCK, &sig_mask, &old_mask);
-		a_stila->gc_thd = thd_new(stila_p_gc_entry, (void *)a_stila);
+		a_stila->gc_thd = thd_new(stila_p_gc_entry, (void *)a_stila,
+		    TRUE);
 		thd_sigmask(SIG_SETMASK, &old_mask, NULL);
 		try_stage = 7;
 	}

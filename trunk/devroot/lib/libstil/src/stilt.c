@@ -410,7 +410,7 @@ stilt_thread(cw_stilt_t *a_stilt)
 	sigfillset(&sig_mask);
 	thd_sigmask(SIG_BLOCK, &sig_mask, &old_mask);
 	a_stilt->entry->thd = thd_new(stilt_p_thread_entry, (void
-	    *)a_stilt->entry);
+	    *)a_stilt->entry, TRUE);
 	thd_sigmask(SIG_SETMASK, &old_mask, NULL);
 }
 

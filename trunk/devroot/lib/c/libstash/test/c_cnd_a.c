@@ -75,7 +75,7 @@ main()
 	foo_var.mutex = &mutex;
 
 	/* Test cnd_signal. */
-	thread = thd_new(thread_entry_func, (void *)&foo_var);
+	thread = thd_new(thread_entry_func, (void *)&foo_var, TRUE);
 
 	/* Bad programming practice, but it works for this test. */
 	mtx_lock(&mutex);
@@ -92,7 +92,7 @@ main()
 	/* Test cnd_broadcast. */
 	num_waiting = 0;
 	for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
-		threads[i] = thd_new(thread_entry_func, (void *)&foo_var);
+		threads[i] = thd_new(thread_entry_func, (void *)&foo_var, TRUE);
 
 	/* Bad programming practice, but it works for this test. */
 	mtx_lock(&mutex);

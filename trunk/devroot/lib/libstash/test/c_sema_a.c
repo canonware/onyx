@@ -62,7 +62,7 @@ main()
 	sema_new(&sema_a, 0);
 
 	for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
-		threads[i] = thd_new(thread_entry_func, (void *)&sema_a);
+		threads[i] = thd_new(thread_entry_func, (void *)&sema_a, TRUE);
 
 	sema_adjust(&sema_a, _LIBSTASH_TEST_NUM_THREADS);
 
@@ -70,7 +70,7 @@ main()
 		thd_join(threads[i]);
 
 	for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
-		threads[i] = thd_new(thread_entry_func, (void *)&sema_a);
+		threads[i] = thd_new(thread_entry_func, (void *)&sema_a, TRUE);
 
 	for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
 		sema_post(&sema_a);

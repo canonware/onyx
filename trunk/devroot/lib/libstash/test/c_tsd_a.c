@@ -46,7 +46,7 @@ main()
 	tsd_new(&tsd, NULL);
 
 	for (i = 0; i < NTHREADS; i++)
-		thds[i] = thd_new(thread_entry_func, NULL);
+		thds[i] = thd_new(thread_entry_func, NULL, TRUE);
 	
 	for (i = 0; i < NTHREADS; i++)
 		thd_join(thds[i]);

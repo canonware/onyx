@@ -29,8 +29,9 @@ struct cw_thd_s {
 	pthread_t	thread;
 	void		*(*start_func)(void *);
 	void		*start_arg;
+	cw_bool_t	suspendible:1;
 #ifdef _CW_THD_GENERIC_SR
-	sem_t		sem;	/* For suspend/resume. */
+	sem_t		sem;		/* For suspend/resume. */
 	cw_bool_t	suspended:1;
 #endif
 	cw_mtx_t	crit_lock;
@@ -162,7 +163,7 @@ thd_l_shutdown(void)
 }
 
 cw_thd_t *
-thd_new(void *(*a_start_func)(void *), void *a_arg)
+thd_new(void *(*a_start_func)(void *), void *a_arg, cw_bool_t a_suspendible)
 {
 	cw_thd_t	*retval;
 	int		error;
@@ -173,6 +174,7 @@ thd_new(void *(*a_start_func)(void *), void *a_arg)
 
 	retval->start_func = a_start_func;
 	retval->start_arg = a_arg;
+	retval->suspendible = a_suspendible;
 #ifdef _CW_THD_GENERIC_SR
 	error = sem_init(&retval->sem, 0, 0);
 	if (error) {
@@ -463,17 +465,20 @@ thd_p_start_func(void *a_arg)
 
 	tsd_set(&cw_g_thd_self_key, (void *)thd);
 
-	/* Insert this thread into the thread ring. */
-	mtx_lock(&cw_g_thd_single_lock);
-	qr_before_insert(&cw_g_thd, thd, link);
-	mtx_unlock(&cw_g_thd_single_lock);
+	if (thd->suspendible) {
+		/* Insert this thread into the thread ring. */
+		mtx_lock(&cw_g_thd_single_lock);
+		qr_before_insert(&cw_g_thd, thd, link);
+		mtx_unlock(&cw_g_thd_single_lock);
 	
-	retval = thd->start_func(thd->start_arg);
+		retval = thd->start_func(thd->start_arg);
 
-	/* Remove this thread from the thread ring. */
-	mtx_lock(&cw_g_thd_single_lock);
-	qr_remove(thd, link);
-	mtx_unlock(&cw_g_thd_single_lock);
+		/* Remove this thread from the thread ring. */
+		mtx_lock(&cw_g_thd_single_lock);
+		qr_remove(thd, link);
+		mtx_unlock(&cw_g_thd_single_lock);
+	} else
+		retval = thd->start_func(thd->start_arg);
 
 	thd_p_delete(thd);
 

@@ -261,7 +261,7 @@ main(int argc, char **argv)
 	sigaddset(&handler_arg.hupset, SIGHUP);
 	sigaddset(&handler_arg.hupset, SIGINT);
 	thd_sigmask(SIG_BLOCK, &handler_arg.hupset, NULL);
-	handler_arg.sig_thd = thd_new(sig_handler, (void *)&handler_arg);
+	handler_arg.sig_thd = thd_new(sig_handler, (void *)&handler_arg, FALSE);
 
 	if (opt_dirname != NULL) {
 		cw_sint32_t	fd;
@@ -348,7 +348,7 @@ main(int argc, char **argv)
 			conn->format = opt_format;
 
 			conn->send_thd = thd_new(handle_client_send, (void
-			    *)conn);
+			    *)conn, TRUE);
 		}
 	}
 
@@ -658,7 +658,7 @@ handle_client_send(void *a_arg)
 	 * client.  That allows both this thread and the new one to block,
 	 * waiting for data, rather than polling.
 	 */
-	conn->recv_thd = thd_new(handle_client_recv, (void *)conn);
+	conn->recv_thd = thd_new(handle_client_recv, (void *)conn, TRUE);
 
 	/*
 	 * Continually read data from the socket, create an out string, print to

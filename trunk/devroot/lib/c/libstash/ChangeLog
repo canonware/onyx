@@ -3,6 +3,10 @@
 	* src/thd.c (thd_sigmask): Implement as a C function and mask the
 	suspend/resume signal if suspend/resume is signal-based.
 
+	(thd_new): Add a_suspendible parameter.  Most threads should be
+	suspendible; the notable exception is signal handler threads in a
+	sigwait() loop.
+
 	* src/out.c : Change the default padding character for [p] from
 	' ' to '0'.
 

@@ -79,7 +79,7 @@ main(int argc, char **argv, char **envp)
 	sigaddset(&handler_arg.hupset, SIGHUP);
 	sigaddset(&handler_arg.hupset, SIGINT);
 	thd_sigmask(SIG_BLOCK, &handler_arg.hupset, NULL);
-	handler_arg.sig_thd = thd_new(sig_handler, (void *)&handler_arg);
+	handler_arg.sig_thd = thd_new(sig_handler, (void *)&handler_arg, FALSE);
 #endif
 
 	/*

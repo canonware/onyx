@@ -228,7 +228,7 @@ libsock_init(cw_uint32_t a_max_fds, cw_uint32_t a_bufc_size, cw_uint32_t
 			 * socket foo.
 			 */
 			g_libsock->thread = thd_new(libsock_p_entry_func, (void
-			    *)arg);
+			    *)arg, TRUE);
 		}
 	}
 	xep_catch(_CW_STASHX_OOM) {
