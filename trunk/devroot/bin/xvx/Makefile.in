@@ -18,10 +18,10 @@
 #
 
 # Include files.
-INCS := board.h move.h xvx.h
+INCS := board.h game.h move.h xvx.h
 
 # Source files.
-SRCS := board.c move.c
+SRCS := board.c game.c move.c
 
 # Source files with main() defined.  Binary executable names drop the .c suffix.
 BINS := xvx.c

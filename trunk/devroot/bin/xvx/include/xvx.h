@@ -31,3 +31,4 @@ typedef enum
 
 #include "move.h"
 #include "board.h"
+#include "game.h"
