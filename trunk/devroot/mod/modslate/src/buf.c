@@ -321,8 +321,6 @@ buf_p_rb_recurse_gen(buf_p_rtree_dump, cw_ext_t, rnode)
 
 /* Prototypes. */
 /* bufp. */
-static cw_sint32_t
-bufp_p_comp(cw_bufp_t *a_a, cw_bufp_t *a_b);
 static void
 bufp_p_mkrs_ppos_adjust(cw_bufp_t *a_bufp, cw_sint32_t a_adjust,
 			cw_uint32_t a_beg_ppos, cw_uint32_t a_end_ppos);
@@ -365,6 +363,8 @@ static cw_uint64_t
 buf_p_bpos_after_lf(cw_buf_t *a_buf, cw_uint64_t a_lf, cw_bufp_t **r_bufp);
 static void
 buf_p_bufp_cur_set(cw_buf_t *a_buf, cw_bufp_t *a_bufp);
+static cw_sint32_t
+buf_p_bufp_insert_comp(cw_bufp_t *a_a, cw_bufp_t *a_b);
 static cw_uint64_t
 buf_p_bufv_insert(cw_buf_t *a_buf, cw_bufp_t *a_bufp, cw_bufp_t *a_pastp,
 		  const cw_bufv_t *a_bufv, cw_uint32_t a_bufvcnt);
@@ -546,27 +546,6 @@ bufp_p_line(cw_bufp_t *a_bufp)
     else
     {
 	retval = a_bufp->buf->nlines - a_bufp->line;
-    }
-
-    return retval;
-}
-
-static cw_sint32_t
-bufp_p_comp(cw_bufp_t *a_a, cw_bufp_t *a_b)
-{
-    cw_sint32_t retval;
-
-    if (bufp_p_bpos(a_a) < bufp_p_bpos(a_b))
-    {
-	retval = -1;
-    }
-    else
-    {
-	/* New bufp's are empty when they are inserted by mkr_l_insert().  As a
-	 * result, this function will claim that a_a is greater than a_b.  This
-	 * is important, since the empty bufp must come after the non-empty
-	 * bufp. */
-	retval = 1;
     }
 
     return retval;
@@ -768,7 +747,7 @@ bufp_p_simple_insert(cw_bufp_t *a_bufp, const cw_bufv_t *a_bufv,
     if (nlines > 0)
     {
 	/* Adjust the line numbers of all mkr's after the gap. */
-	bufp_p_mkrs_pline_adjust(a_bufp, a_count,
+	bufp_p_mkrs_pline_adjust(a_bufp, nlines,
 				 a_bufp->gap_off
 				 + (CW_BUFP_SIZE - a_bufp->len));
     }
@@ -1434,14 +1413,33 @@ buf_p_bufv_insert(cw_buf_t *a_buf, cw_bufp_t *a_bufp, cw_bufp_t *a_pastp,
     return nlines;
 }
 
-/* bufv resizing must be done manually. */
+static cw_sint32_t
+buf_p_bufp_insert_comp(cw_bufp_t *a_a, cw_bufp_t *a_b)
+{
+    cw_sint32_t retval;
+
+    if (a_b->bob_relative)
+    {
+	retval = 1;
+    }
+    else
+    {
+	retval = -1;
+    }
+
+    return retval;
+}
+
+/* Insert a_bufp just after a_buf->bufp_cur.
+ *
+ * bufv resizing must be done manually. */
 static void
 buf_p_bufp_insert(cw_buf_t *a_buf, cw_bufp_t *a_bufp)
 {
     cw_bufp_t *next;
 
     /* Insert into tree. */
-    rb_insert(&a_buf->ptree, a_bufp, bufp_p_comp, cw_bufp_t, pnode);
+    rb_insert(&a_buf->ptree, a_bufp, buf_p_bufp_insert_comp, cw_bufp_t, pnode);
 
     /* Insert into list. */
     rb_next(&a_buf->ptree, a_bufp, cw_bufp_t, pnode, next);
@@ -2415,8 +2413,14 @@ mkr_p_split_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
 	    newp->bob_relative = TRUE;
 	    newp->bpos = bufp->bpos;
 	    newp->line = bufp->line;
+
+	    /* Temporarily set nextp->bob_relative to FALSE so that the
+	     * buf_p_bufp_insert() calls will insert bufp's just before
+	     * nextp. */
+	    nextp->bob_relative = FALSE;
 	    buf_p_bufp_insert(buf, newp);
 	    cw_assert(ql_next(&buf->plist, newp, plink) == nextp);
+	    nextp->bob_relative = TRUE;
 	}
     }
     else
