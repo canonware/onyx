@@ -26,6 +26,7 @@
 #include "../include/libstil/stilo_no_l.h"
 #include "../include/libstil/stilo_null_l.h"
 #include "../include/libstil/stilo_operator_l.h"
+#include "../include/libstil/stilo_stack_l.h"
 #include "../include/libstil/stilo_string_l.h"
 #include "../include/libstil/stilt_l.h"
 
@@ -122,6 +123,11 @@ static const cw_stilot_vtable_t stilot_vtable[] = {
 	 NULL,
 	 stilo_l_operator_print},
 
+	/* STILOT_STACK */
+	{stiloe_l_stack_delete,
+	 stiloe_l_stack_ref_iter,
+	 stilo_l_stack_print},
+
 	/* STILOT_STRING */
 	{stiloe_l_string_delete,
 	 stiloe_l_string_ref_iter,
@@ -143,6 +149,7 @@ stilo_compare(cw_stilo_t *a_a, cw_stilo_t *a_b)
 	case STILOT_FILE:
 	case STILOT_HOOK:
 	case STILOT_MUTEX:
+	case STILOT_STACK:
 		if (a_a->type == a_b->type && a_a->o.stiloe == a_b->o.stiloe)
 			retval = 0;
 		else
@@ -260,6 +267,7 @@ stilo_stiloe_get(cw_stilo_t *a_stilo)
 	case STILOT_HOOK:
 	case STILOT_MUTEX:
 	case STILOT_NAME:
+	case STILOT_STACK:
 	case STILOT_STRING:
 		retval = a_stilo->o.stiloe;
 		break;
@@ -283,6 +291,7 @@ stilo_lcheck(cw_stilo_t *a_stilo)
 	case STILOT_ARRAY:
 	case STILOT_DICT:
 	case STILOT_FILE:
+	case STILOT_STACK:
 	case STILOT_STRING:
 		retval = a_stilo->o.stiloe->locking;
 		break;

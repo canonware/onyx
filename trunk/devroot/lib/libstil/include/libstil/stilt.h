@@ -107,10 +107,10 @@ struct cw_stilt_s {
 	/*
 	 * Stacks.
 	 */
-	cw_stils_t	estack;	/* Execution stack. */
-	cw_stils_t	ostack;	/* Operand stack. */
-	cw_stils_t	dstack;	/* Dictionary stack. */
-	cw_stils_t	tstack;	/* Temp stack. */
+	cw_stilo_t	estack;	/* Execution stack. */
+	cw_stilo_t	ostack;	/* Operand stack. */
+	cw_stilo_t	dstack;	/* Dictionary stack. */
+	cw_stilo_t	tstack;	/* Temp stack. */
 
 	/*
 	 * Local dictionaries.

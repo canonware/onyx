@@ -79,7 +79,7 @@
 #include "../include/libstil/stil_l.h"
 #include "../include/libstil/stilo_l.h"
 #include "../include/libstil/stilo_dict_l.h"
-#include "../include/libstil/stils_l.h"
+#include "../include/libstil/stilo_stack_l.h"
 #include "../include/libstil/stilt_l.h"
 
 #ifdef _LIBSTIL_DBG
@@ -114,7 +114,8 @@ stila_new(cw_stila_t *a_stila, cw_stil_t *a_stil)
 		pool_new(&a_stila->dicto_pool, NULL, sizeof(cw_stiloe_dicto_t));
 		try_stage = 3;
 
-		pool_new(&a_stila->stilsc_pool, NULL, sizeof(cw_stilsc_t));
+		pool_new(&a_stila->stackc_pool, NULL,
+		    sizeof(cw_stiloe_stackc_t));
 		try_stage = 4;
 
 		ql_new(&a_stila->seq_set);
@@ -161,7 +162,7 @@ stila_new(cw_stila_t *a_stila, cw_stil_t *a_stil)
 		case 5:
 			mq_delete(&a_stila->gc_mq);
 		case 4:
-			pool_delete(&a_stila->stilsc_pool);
+			pool_delete(&a_stila->stackc_pool);
 		case 3:
 			pool_delete(&a_stila->dicto_pool);
 		case 2:
@@ -186,7 +187,7 @@ stila_delete(cw_stila_t *a_stila)
 	thd_join(a_stila->gc_thd);
 	mq_delete(&a_stila->gc_mq);
 
-	pool_delete(&a_stila->stilsc_pool);
+	pool_delete(&a_stila->stackc_pool);
 	pool_delete(&a_stila->dicto_pool);
 	pool_delete(&a_stila->chi_pool);
 }
@@ -510,15 +511,14 @@ stila_p_roots(cw_stila_t *a_stila, cw_uint32_t *r_nroot)
 {
 	cw_bool_t	retval;
 	cw_stilt_t	*stilt;
-	cw_stils_t	*stils;
 	cw_stiloe_t	*stiloe, *gray;
 	cw_uint32_t	nroot = 0;
 
 	/*
-	 * Iterate through the root set and mark it gray.  This requires a 3
+	 * Iterate through the root set and mark it gray.  This requires a 2
 	 * level loop, due to the relationship:
 	 *
-	 * stil --> stilt --> stils --> stiloe
+	 * stil --> stilt --> stiloe
 	 *
 	 * Each set of *_ref_iter() calls on a particular object must start with
 	 * a call with (a_reset == TRUE), and repeated calls until NULL is
@@ -536,28 +536,22 @@ stila_p_roots(cw_stila_t *a_stila, cw_uint32_t *r_nroot)
 	for (stilt = stil_l_ref_iter(a_stila->stil, TRUE); stilt != NULL; stilt
 	    = stil_l_ref_iter(a_stila->stil, FALSE)) {
 		/*
-		 * Iterate through stils's.
+		 * Iterate through stiloe's on the stilt.
 		 */
-		for (stils = stilt_l_ref_iter(stilt, TRUE); stils != NULL; stils
-		    = stilt_l_ref_iter(stilt, FALSE)) {
-			/*
-			 * Iterate through stiloe's on the stils.
-			 */
-			for (stiloe = stils_l_ref_iter(stils, TRUE); stiloe !=
-			    NULL; stiloe = stils_l_ref_iter(stils, FALSE)) {
-				if (stiloe_l_registered_get(stiloe)) {
-					/*
-					 * Paint object gray.
-					 */
-					nroot++;
-					_cw_assert(stiloe_l_color_get(stiloe) ==
-					    a_stila->white);
-					stiloe_l_color_set(stiloe,
-					    !a_stila->white);
-					ql_first(&a_stila->seq_set) = stiloe;
-					gray = stiloe;
-					goto HAVE_ROOT;
-				}
+		for (stiloe = stilt_l_ref_iter(stilt, TRUE); stiloe !=
+			 NULL; stiloe = stilt_l_ref_iter(stilt, FALSE)) {
+			if (stiloe_l_registered_get(stiloe)) {
+				/*
+				 * Paint object gray.
+				 */
+				nroot++;
+				_cw_assert(stiloe_l_color_get(stiloe) ==
+				    a_stila->white);
+				stiloe_l_color_set(stiloe,
+				    !a_stila->white);
+				ql_first(&a_stila->seq_set) = stiloe;
+				gray = stiloe;
+				goto HAVE_ROOT;
 			}
 		}
 	}
@@ -579,31 +573,25 @@ stila_p_roots(cw_stila_t *a_stila, cw_uint32_t *r_nroot)
 	for (stilt = stil_l_ref_iter(a_stila->stil, TRUE); stilt != NULL; stilt
 	    = stil_l_ref_iter(a_stila->stil, FALSE)) {
 		/*
-		 * Iterate through stils's.
+		 * Iterate through stiloe's on the stilt.
 		 */
-		for (stils = stilt_l_ref_iter(stilt, TRUE); stils != NULL; stils
-		    = stilt_l_ref_iter(stilt, FALSE)) {
-			/*
-			 * Iterate through stiloe's on the stils.
-			 */
-			for (stiloe = stils_l_ref_iter(stils, TRUE); stiloe !=
-			    NULL; stiloe = stils_l_ref_iter(stils, FALSE)) {
-				if (stiloe_l_color_get(stiloe) ==
-				    a_stila->white &&
-				    stiloe_l_registered_get(stiloe)) {
-					nroot++;
-					/*
-					 * Paint object gray.
-					 */
-					stiloe_l_color_set(stiloe,
-					    !a_stila->white);
-					if (stiloe != qr_next(gray, link)) {
-						qr_remove(stiloe, link);
-						qr_after_insert(gray, stiloe,
-						    link);
-					}
-					gray = qr_next(gray, link);
+		for (stiloe = stilt_l_ref_iter(stilt, TRUE); stiloe !=
+			 NULL; stiloe = stilt_l_ref_iter(stilt, FALSE)) {
+			if (stiloe_l_color_get(stiloe) ==
+			    a_stila->white &&
+			    stiloe_l_registered_get(stiloe)) {
+				nroot++;
+				/*
+				 * Paint object gray.
+				 */
+				stiloe_l_color_set(stiloe,
+				    !a_stila->white);
+				if (stiloe != qr_next(gray, link)) {
+					qr_remove(stiloe, link);
+					qr_after_insert(gray, stiloe,
+					    link);
 				}
+				gray = qr_next(gray, link);
 			}
 		}
 	}
@@ -747,7 +735,7 @@ stila_p_collect(cw_stila_t *a_stila)
 	/* Drain the pools. */
 	pool_drain(&a_stila->chi_pool);
 	pool_drain(&a_stila->dicto_pool);
-	pool_drain(&a_stila->stilsc_pool);
+	pool_drain(&a_stila->stackc_pool);
 
 	/* Record the sweep finish time and calculate sweep_us. */
 	gettimeofday(&t_tv, NULL);

@@ -244,7 +244,7 @@ end
 			/*
 			 * Push the string onto the execution stack.
 			 */
-			string = stils_push(stilt_ostack_get(stilt));
+			string = stilo_stack_push(stilt_ostack_get(stilt));
 			stilo_string_new(string, &stil, FALSE,
 			    strlen(opt_expression));
 			stilo_attrs_set(string, STILOA_EXECUTABLE);
@@ -268,7 +268,7 @@ end
 				retval = 1;
 				goto RETURN;
 			}
-			file = stils_push(stilt_ostack_get(stilt));
+			file = stilo_stack_push(stilt_ostack_get(stilt));
 			stilo_file_new(file, &stil, FALSE);
 			stilo_attrs_set(file, STILOA_EXECUTABLE);
 			stilo_file_fd_wrap(file, src_fd);
@@ -281,7 +281,7 @@ end
 			 * In other words, there were no arguments specified,
 			 * and this isn't a tty.
 			 */
-			file = stils_push(stilt_ostack_get(stilt));
+			file = stilo_stack_push(stilt_ostack_get(stilt));
 			stilo_dup(file, stil_stdin_get(&stil));
 			stilo_attrs_set(file, STILOA_EXECUTABLE);
 		} else
@@ -321,14 +321,14 @@ prompt(EditLine *a_el)
 		cw_uint8_t		*pstr;
 		cw_uint32_t		plen, maxlen;
 		cw_stilo_t		*stilo;
-		cw_stils_t		*stack = stilt_ostack_get(stilt);
+		cw_stilo_t		*stack = stilt_ostack_get(stilt);
 
 		/* Push the prompt onto the data stack. */
 		stilt_interpret(stilt, &stilts, code, sizeof(code) - 1);
 		stilt_flush(stilt, &stilts);
 
 		/* Get the actual prompt string. */
-		stilo = stils_get(stack);
+		stilo = stilo_stack_get(stack);
 		if (stilo == NULL) {
 			stilt_error(stilt, STILTE_STACKUNDERFLOW);
 			maxlen = 0;
@@ -348,7 +348,7 @@ prompt(EditLine *a_el)
 		prompt_str[maxlen] = '\0';
 
 		/* Pop the prompt string off the data stack. */
-		stils_pop(stack);
+		stilo_stack_pop(stack);
 	} else {
 		/*
 		 * One or both of:

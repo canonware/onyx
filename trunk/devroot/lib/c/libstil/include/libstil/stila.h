@@ -21,7 +21,7 @@ struct cw_stila_s {
 	/* Various pools. */
 	cw_pool_t	chi_pool;
 	cw_pool_t	dicto_pool;
-	cw_pool_t	stilsc_pool;
+	cw_pool_t	stackc_pool;
 
 	/*
 	 * Dictionary that contains stats and flags, available from within the
@@ -87,7 +87,7 @@ void	stila_sum_get(cw_stila_t *a_stila, cw_stiloi_t *r_count, cw_stiloi_t
 #define	stila_dicto_put(a_stila, a_dicto)				\
 	pool_put(&(a_stila)->dicto_pool, (a_dicto))
 
-#define	stila_stilsc_get(a_stila)					\
-	(cw_stilsc_t *)pool_get(&(a_stila)->stilsc_pool)
-#define	stila_stilsc_put(a_stila, a_stilsc)				\
-	pool_put(&(a_stila)->stilsc_pool, (a_stilsc))
+#define	stila_stackc_get(a_stila)					\
+	(cw_stiloe_stackc_t *)pool_get(&(a_stila)->stackc_pool)
+#define	stila_stackc_put(a_stila, a_stackc)				\
+	pool_put(&(a_stila)->stackc_pool, (a_stackc))

@@ -14,15 +14,15 @@
 void
 threaddict_l_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 {
-	cw_stils_t	*tstack;
+	cw_stilo_t	*tstack;
 	cw_stilo_t	*name, *value;
 
 #define NENTRIES	4	/* Number of entries in threaddict. */
 	stilo_dict_new(a_dict, stilt_stil_get(a_stilt), FALSE, NENTRIES);
 
 	tstack = stilt_tstack_get(a_stilt);
-	name = stils_push(tstack);
-	value = stils_push(tstack);
+	name = stilo_stack_push(tstack);
+	value = stilo_stack_push(tstack);
 
 	/*
 	 * Initialize entries that are not operators.
@@ -53,7 +53,7 @@ threaddict_l_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 	stilo_dup(value, stilt_userdict_get(a_stilt));
 	stilo_dict_def(a_dict, stilt_stil_get(a_stilt), name, value);
 
-	stils_npop(tstack, 2);
+	stilo_stack_npop(tstack, 2);
 
 #ifdef _LIBSTIL_DBG
 	if (stilo_dict_count(a_dict) != NENTRIES) {

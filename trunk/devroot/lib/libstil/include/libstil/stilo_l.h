@@ -9,57 +9,6 @@
  *
  ******************************************************************************/
 
-#ifdef _LIBSTIL_DBG
-#define _CW_STILOE_MAGIC	0x0fa6e798
-#endif
-
-/*
- * All extended type objects contain a stiloe.  This provides a poor man's
- * inheritance.  Since stil's type system is static, this idiom is adequate.
- */
-struct cw_stiloe_s {
-#ifdef _LIBSTIL_DBG
-	cw_uint32_t	magic;
-#endif
-
-	/*
-	 * Linkage for GC.  All stiloe's are in a single ring, which the GC uses
-	 * to implement a Baker's Treadmill collector.
-	 */
-	qr(cw_stiloe_t)	link;
-	/*
-	 * Object type.  We store this in stiloe's as well as stilo's, since
-	 * various functions access stiloe's directly, rather than going through
-	 * a referring stilo.
-	 */
-	cw_stilot_t	type:4;
-	/*
-	 * If TRUE, the string in the key is statically allocated, and should
-	 * not be deallocated during destruction.
-	 */
-	cw_bool_t	name_static:1;
-	/*
-	 * The GC toggles this value at each collection in order to maintain
-	 * state.
-	 */
-	cw_bool_t	color:1;
-	/*
-	 * TRUE if this object has been registered with the GC.  It is possible
-	 * for an object to be reachable by the GC (on a stack, for instance),
-	 * but not be registered yet.
-	 */
-	cw_bool_t	registered:1;
-	/*
-	 * If true, accesses to this object are locked.  This applies to arrays,
-	 * dictionaries, files, and strings.
-	 */
-	cw_bool_t	locking:1;
-	/*
-	 * If TRUE, this stiloe is a reference to another stiloe.
-	 */
-	cw_bool_t	indirect:1;
-};
-
 /*
  * Don't actually free stiloe's if debugging GC.  Instead, just reset the
  * stiloe magic.  This way, we should still core dump when we hit collected

@@ -17,7 +17,7 @@
 void
 currenterror_l_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 {
-	cw_stils_t	*tstack;
+	cw_stilo_t	*tstack;
 	cw_stilo_t	*name, *val;
 
 #define NENTRIES	10	/* Number of entries in currenterror. */
@@ -25,8 +25,8 @@ currenterror_l_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 	    stilt_currentlocking(a_stilt), NENTRIES);
 
 	tstack = stilt_tstack_get(a_stilt);
-	name = stils_push(tstack);
-	val = stils_push(tstack);
+	name = stilo_stack_push(tstack);
+	val = stilo_stack_push(tstack);
 
 	/*
 	 * Initialize operators.
@@ -89,7 +89,7 @@ currenterror_l_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 	stilo_integer_new(val, 1);
 	stilo_dict_def(a_dict, stilt_stil_get(a_stilt), name, val);
 	
-	stils_npop(tstack, 2);
+	stilo_stack_npop(tstack, 2);
 
 #ifdef _LIBSTIL_DBG
 	if (stilo_dict_count(a_dict) != NENTRIES) {

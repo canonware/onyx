@@ -70,9 +70,9 @@ extern  "C" {
 #define _LIBSTIL_NAME_HASH		1024
 
 /*
- * Number of objects to allocate in a chunk for internal stils use.
+ * Number of objects to allocate in a chunk for internal stack use.
  */
-#define	_LIBSTIL_STILSC_COUNT		  32
+#define	_LIBSTIL_STACKC_COUNT		  32
 
 /*
  * Initial size of userdict.
