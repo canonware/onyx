@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 29 $
- * $Date: 1998-04-13 01:24:02 -0700 (Mon, 13 Apr 1998) $
+ * $Revision: 35 $
+ * $Date: 1998-04-19 14:08:14 -0700 (Sun, 19 Apr 1998) $
  *
  * <<< Description >>>
  *
@@ -49,7 +49,7 @@
 #define oh_coalesce_priv EXTOS(oh_coalesce_priv)
 #define oh_grow_priv EXTOS(oh_grow_priv)
 #define oh_shrink_priv EXTOS(oh_shrink_priv)
-#define oh_h1_priv EXTOS(oh_h1)
+#define oh_h1_priv EXTOS(oh_h1_priv)
 #define oh_insert_priv EXTOS(oh_insert_priv)
 #define oh_search_priv EXTOS(oh_search_priv)
 #define oh_rehash_priv EXTOS(oh_rehash_priv)
@@ -81,8 +81,8 @@ struct oh_s
   cw_rwl_t rw_lock;
   cw_oh_item_t ** items;
 
-  cw_uint32_t (*base_h1)(oh_t *, cw_uint32_t);
-  cw_uint32_t (*curr_h1)(oh_t *, cw_uint32_t);
+  cw_uint32_t (*base_h1)(oh_t *, void *);
+  cw_uint32_t (*curr_h1)(oh_t *, void *);
 
   cw_uint32_t size;
   cw_uint32_t num_items;
@@ -117,7 +117,7 @@ cw_bool_t oh_grow_priv(oh_t * arg_oh_obj,
 cw_bool_t oh_shrink_priv(oh_t * arg_oh_obj,
 			    cw_sint32_t arg_num_halvings);
 
-cw_uint32_t oh_h1_priv(oh_t * arg_oh_obj, cw_uint32_t arg_key);
+cw_uint32_t oh_h1_priv(oh_t * arg_oh_obj, void * arg_key);
 cw_bool_t oh_item_insert_priv(oh_t * arg_oh_obj,
 			      cw_oh_item_t * arg_item);
 cw_bool_t oh_item_search_priv(oh_t * arg_oh_obj,

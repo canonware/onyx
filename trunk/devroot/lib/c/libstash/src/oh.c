@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 29 $
- * $Date: 1998-04-13 01:24:02 -0700 (Mon, 13 Apr 1998) $
+ * $Revision: 35 $
+ * $Date: 1998-04-19 14:08:14 -0700 (Sun, 19 Apr 1998) $
  *
  * <<< Description >>>
  *
@@ -453,112 +453,121 @@ oh_dump(oh_t * arg_oh_obj, cw_bool_t arg_all)
   
   rwl_rlock(&arg_oh_obj->rw_lock);
 
-  fprintf(stderr,
-	  "============================================================\n");
-  fprintf(stderr, "Size: [%d]  Slots filled: [%d]  Invalid slots: [%d]\n\n",
-	  arg_oh_obj->size,
-	  arg_oh_obj->num_items,
-	  arg_oh_obj->num_invalid);
-  fprintf(stderr, "      pow h1         h2    shrink grow  rehash\n");
-  fprintf(stderr, "      --- ---------- ----- ------ ----- ------\n");
+  log_printf(g_log_obj,
+	     "============================================================\n");
+  log_printf(g_log_obj,
+	     "Size: [%d]  Slots filled: [%d]  Invalid slots: [%d]\n\n",
+	     arg_oh_obj->size,
+	     arg_oh_obj->num_items,
+	     arg_oh_obj->num_invalid);
+  log_printf(g_log_obj, "      pow h1         h2    shrink grow  rehash\n");
+  log_printf(g_log_obj, "      --- ---------- ----- ------ ----- ------\n");
 #ifdef _PEDANTIC
-  fprintf(stderr, "Base: %2d  %10p %5d %5d  %5d %5d\n",
-	  arg_oh_obj->base_power,
-	  arg_oh_obj->base_h1,
-	  arg_oh_obj->base_h2,
-	  arg_oh_obj->base_shrink_point,
-	  arg_oh_obj->base_grow_point,
-	  arg_oh_obj->base_rehash_point);
-  fprintf(stderr, "Curr: %2d  %10p %5d %5d  %5d %5d\n\n",
-	  arg_oh_obj->curr_power,
-	  arg_oh_obj->curr_h1,
-	  arg_oh_obj->curr_h2,
-	  arg_oh_obj->curr_shrink_point,
-	  arg_oh_obj->curr_grow_point,
-	  arg_oh_obj->curr_rehash_point);
+  log_printf(g_log_obj, "Base: %2d  %10p %5d %5d  %5d %5d\n",
+	     arg_oh_obj->base_power,
+	     arg_oh_obj->base_h1,
+	     arg_oh_obj->base_h2,
+	     arg_oh_obj->base_shrink_point,
+	     arg_oh_obj->base_grow_point,
+	     arg_oh_obj->base_rehash_point);
+  log_printf(g_log_obj, "Curr: %2d  %10p %5d %5d  %5d %5d\n\n",
+	     arg_oh_obj->curr_power,
+	     arg_oh_obj->curr_h1,
+	     arg_oh_obj->curr_h2,
+	     arg_oh_obj->curr_shrink_point,
+	     arg_oh_obj->curr_grow_point,
+	     arg_oh_obj->curr_rehash_point);
 #else
-  fprintf(stderr, "Base: %2d  %010p %5d %5d  %5d %5d\n",
-	  arg_oh_obj->base_power,
-	  arg_oh_obj->base_h1,
-	  arg_oh_obj->base_h2,
-	  arg_oh_obj->base_shrink_point,
-	  arg_oh_obj->base_grow_point,
-	  arg_oh_obj->base_rehash_point);
-  fprintf(stderr, "Curr: %2d  %010p %5d %5d  %5d %5d\n\n",
-	  arg_oh_obj->curr_power,
-	  arg_oh_obj->curr_h1,
-	  arg_oh_obj->curr_h2,
-	  arg_oh_obj->curr_shrink_point,
-	  arg_oh_obj->curr_grow_arg,
-	  point_oh_obj->curr_rehash_point);
+  log_printf(g_log_obj, "Base: %2d  %010p %5d %5d  %5d %5d\n",
+	     arg_oh_obj->base_power,
+	     arg_oh_obj->base_h1,
+	     arg_oh_obj->base_h2,
+	     arg_oh_obj->base_shrink_point,
+	     arg_oh_obj->base_grow_point,
+	     arg_oh_obj->base_rehash_point);
+  log_printf(g_log_obj, "Curr: %2d  %010p %5d %5d  %5d %5d\n\n",
+	     arg_oh_obj->curr_power,
+	     arg_oh_obj->curr_h1,
+	     arg_oh_obj->curr_h2,
+	     arg_oh_obj->curr_shrink_point,
+	     arg_oh_obj->curr_grow_arg,
+	     point_oh_obj->curr_rehash_point);
 #endif
   
 #ifdef _OH_PERF_
-  fprintf(stderr, "Counters: collisions[%d] inserts[%d] deletes[%d]\n",
-	  arg_oh_obj->num_collisions,
-	  arg_oh_obj->num_inserts,
-	  arg_oh_obj->num_deletes);
-  fprintf(stderr, "          grows[%d] shrinks[%d] rehashes[%d]\n\n",
-	  arg_oh_obj->num_grows,
-	  arg_oh_obj->num_shrinks,
-	  arg_oh_obj->num_rehashes);
+  log_printf(g_log_obj, "Counters: collisions[%d] inserts[%d] deletes[%d]\n",
+	     arg_oh_obj->num_collisions,
+	     arg_oh_obj->num_inserts,
+	     arg_oh_obj->num_deletes);
+  log_printf(g_log_obj, "          grows[%d] shrinks[%d] rehashes[%d]\n\n",
+	     arg_oh_obj->num_grows,
+	     arg_oh_obj->num_shrinks,
+	     arg_oh_obj->num_rehashes);
 #endif
 
   if (arg_all)
   {
-    fprintf(stderr, "slot is_valid key        value\n");
-    fprintf(stderr, "---- -------- ---------- ----------\n");
+    log_printf(g_log_obj, "slot is_valid key        value\n");
+    log_printf(g_log_obj, "---- -------- ---------- ----------\n");
   
     for (i = 0; i < arg_oh_obj->size; i++)
     {
-      fprintf(stderr, "%4d ", i);
+      log_printf(g_log_obj, "%4d ", i);
       if (arg_oh_obj->items[i] != NULL)
       {
 	if (arg_oh_obj->items[i]->is_valid == FALSE)
 	{
-	  fprintf(stderr, "FALSE    ");
+	  log_printf(g_log_obj, "FALSE    ");
 	}
 	else
 	{
-	  fprintf(stderr, "TRUE     ");
+	  log_printf(g_log_obj, "TRUE     ");
 	}
 #ifdef _PEDANTIC
-	fprintf(stderr, "0x%08x %10p\n",
-		arg_oh_obj->items[i]->key,
-		arg_oh_obj->items[i]->data);
+	log_printf(g_log_obj, "0x%08x %10p\n",
+		   arg_oh_obj->items[i]->key,
+		   arg_oh_obj->items[i]->data);
 #else
-	fprintf(stderr, "0x%08x %010p\n",
-		arg_oh_obj->items[i]->key,
-		arg_oh_obj->items[i]->data);
+	log_printf(g_log_obj, "0x%08x %010p\n",
+		   arg_oh_obj->items[i]->key,
+		   arg_oh_obj->items[i]->data);
 #endif
       }
       else
       {
-	fprintf(stderr, "\n");
-	/*       fprintf(stderr, "<-------------------------->\n"); */
+	log_printf(g_log_obj, "\n");
       }
     }
   }
-  fprintf(stderr,
-	  "============================================================\n");
+  log_printf(g_log_obj,
+	     "============================================================\n");
   rwl_runlock(&arg_oh_obj->rw_lock);
 }
 
+/* cw_uint32_t */
+/* oh_h1_priv(oh_t * arg_oh_obj, void * arg_key) */
+/* { */
+/*   cw_uint32_t retval; */
+
+/*   _cw_check_ptr(arg_oh_obj); */
+
+/*   retval = (arg_key >> 4) % (1 << arg_oh_obj->curr_power); */
+
+/*   return retval; */
+/* } */
+
 cw_uint32_t
-oh_h1_priv(oh_t * arg_oh_obj, cw_uint32_t arg_key)
+oh_h1_priv(oh_t * arg_oh_obj, void * arg_key)
 {
   cw_uint32_t retval;
+  char * str;
 
-  _cw_check_ptr(arg_oh_obj);
+  for (str = (char *) arg_key, retval = 0; *str != 0; str++)
+  {
+    retval = retval * 33 + *str;
+  }
 
-  /*   retval = arg_key >> ((sizeof(cw_uint32_t) * 8) - arg_oh_obj->curr_power); */
-  /*   retval = (arg_key >> 4) & ((1 << arg_oh_obj->curr_power) - 1); */
-  /*   retval = (arg_key >> 4) % (1 << arg_oh_obj->curr_power); */
-  /*   retval = (arg_key >> 6) % (1 << arg_oh_obj->curr_power); */
-  retval = (arg_key >> 4) % (1 << arg_oh_obj->curr_power);
-
-  /*   fprintf(stderr, "generating key: 0x%08x --> 0x%08x\n", */
-  /* 	  arg_key, retval); */
+  retval = retval % (1 << arg_oh_obj->curr_power);
   return retval;
 }
 

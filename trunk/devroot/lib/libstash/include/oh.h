@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 24 $
- * $Date: 1998-04-12 01:44:39 -0700 (Sun, 12 Apr 1998) $
+ * $Revision: 35 $
+ * $Date: 1998-04-19 14:08:14 -0700 (Sun, 19 Apr 1998) $
  *
  * <<< Description >>>
  *
@@ -79,7 +79,7 @@ typedef struct oh_s oh_t;
 #  define oh_get_num_rehashes _CW_NS_CMN(oh_get_num_rehashes)
 #endif
 
-typedef cw_uint32_t oh_h1_t(oh_t *, cw_uint32_t);
+typedef cw_uint32_t oh_h1_t(oh_t *, void *);
 
 oh_t * oh_new();
 void oh_delete(oh_t * arg_oh_obj);

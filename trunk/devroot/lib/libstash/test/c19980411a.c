@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 25 $
- * $Date: 1998-04-12 01:45:06 -0700 (Sun, 12 Apr 1998) $
+ * $Revision: 35 $
+ * $Date: 1998-04-19 14:08:14 -0700 (Sun, 19 Apr 1998) $
  *
  * <<< Description >>>
  *
@@ -55,13 +55,12 @@ main()
 
   glob_new();
   
-  strings = (char **) malloc(sizeof(char *) * NUM_STRINGS);
-  _cw_check_ptr(strings);
+  strings = (char **) _cw_malloc(sizeof(char *) * NUM_STRINGS);
 
   for (i = 0; i < NUM_STRINGS; i++)
   {
-    strings[i] = (char *) malloc(sizeof(char) * 2);
-    _cw_check_ptr(strings[i]);
+    strings[i] = (char *) _cw_malloc(sizeof(char) * 50);
+    sprintf(strings[i], "(%d) This is string %d", i, i);
   }
   
   hash_obj = oh_new();
@@ -122,6 +121,11 @@ main()
 	     oh_get_num_items(hash_obj));
   log_printf(g_log_obj, "Number of invalid slots: %d\n",
 	     oh_get_num_invalid(hash_obj));
+
+  for (i = 0; i < NUM_STRINGS; i++)
+  {
+    _cw_free(strings[i]);
+  }
 
   glob_delete();
   
