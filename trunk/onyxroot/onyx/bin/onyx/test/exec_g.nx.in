@@ -15,7 +15,7 @@
 `Test begin\n' print flush
 
 [
-    argv 1 get `/b_exec_a_no_such_name.nx' cat
+    argv 1 get `/b_exec_g_no_such_name.nx' cat
 ] exec
 
 `Test end\n' print
