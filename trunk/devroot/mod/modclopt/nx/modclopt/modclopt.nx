@@ -9,9 +9,5 @@
 #
 ################################################################################
 
-#module
-
 `modclopt/modclopt_defs.nx' require
 `modclopt/clopt.nx' require
-
-#module

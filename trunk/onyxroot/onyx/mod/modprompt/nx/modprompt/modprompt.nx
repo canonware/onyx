@@ -20,4 +20,4 @@
 {
     $invalidaccess throw
 }
-over :pre_unload_hook_set
+this:pre_unload_hook_set

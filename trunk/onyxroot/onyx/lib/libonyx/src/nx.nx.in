@@ -1107,29 +1107,40 @@ dup <
 	;rnew
 	#modname #mclass_singleton #instance
 
+	# Initialize the module instance.
+	:p_module_init
+	#instance
+    }
+
+    #instance:
+    #modname #mclass_singleton p_init #instance
+    $p_module_init {
 	# Define instance data.
 	<
-	    #modname #mclass_singleton #instance #<
-	    $name 4 idup
-	    $mclass_singleton 5 idup
+	    #modname #mclass_singleton <
+	    $name 4 ndn
+	    #mclass_singleton < $name #modname
+	    $mclass_singleton 5 ndn
+	    #< $name #modname $mclass_singleton #mclass_singleton 
 	    $mdefs dict
 	    $deps dict
 	    $pre_unload_hook null cvx
 	    $post_unload_hook null cvx
 	    $version 0
-	> over data copy pop
+	>{
+	    ;def
+	} foreach
 
 	# Load the module.
-	`X/X.nx' `X' 4 idup cvx cvs <$g true> subst pop
-	#modname #mclass_singleton #instance `mod#modname/#modname.nx'
+	`X/X.nx' `X' ,name cvx cvs <$g true> subst pop
+	#`mod#modname/#modname.nx'
 	require
-	#modname #mclass_singleton #instance
 
 	# Associate the module with its name in currentdict, in order to make
 	# later module access easier.
-	dn over currentdict over :mdef
-	#mclass_singleton #instance
-	nip
+	,name this currentdict ;mdef
+
+	this
 	#instance
     }
 

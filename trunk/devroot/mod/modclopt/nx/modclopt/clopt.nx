@@ -9,9 +9,7 @@
 #
 ################################################################################
 
-#module
-
-$clopt class currentdict 3 idup :mdef
+$clopt class currentdict ;mdef
 clopt vclass setsuper
 clopt $clopt setclassname
 clopt <
