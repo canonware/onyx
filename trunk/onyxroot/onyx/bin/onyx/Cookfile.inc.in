@@ -62,14 +62,15 @@ ONYX_OTESTS =
               cos_a.nx.in cos_b.nx.in cos_c.nx.in cvds_a.nx.in cvds_b.nx.in
               cvds_c.nx.in cvds_d.nx.in cves_a.nx.in cves_b.nx.in cves_c.nx.in
               cves_d.nx.in cvs_c.nx.in dec_c.nx.in div_a.nx.in div_b.nx.in
-              div_c.nx.in div_d.nx.in div_e.nx.in eq_c.nx.in floor_a.nx.in
-              floor_b.nx.in floor_c.nx.in ge_i.nx.in gt_i.nx.in inc_c.nx.in
-              le_i.nx.in ln_a.nx.in ln_b.nx.in ln_c.nx.in ln_d.nx.in log_a.nx.in
-              log_b.nx.in log_c.nx.in log_d.nx.in lt_i.nx.in mul_e.nx.in
-              ne_c.nx.in neg_d.nx.in output_b.nx.in pow_e.nx.in round_a.nx.in
-              round_b.nx.in round_c.nx.in sin_a.nx.in sin_b.nx.in sin_c.nx.in
-              sprint_b.nx.in sqrt_a.nx.in sqrt_b.nx.in sqrt_c.nx.in sqrt_d.nx.in
-              sub_e.nx.in trunc_a.nx.in trunc_b.nx.in trunc_c.nx.in
+              div_c.nx.in div_d.nx.in div_e.nx.in eq_c.nx.in exp_a.nx.in
+              exp_b.nx.in exp_c.nx.in floor_a.nx.in floor_b.nx.in floor_c.nx.in
+              ge_i.nx.in gt_i.nx.in inc_c.nx.in le_i.nx.in ln_a.nx.in ln_b.nx.in
+              ln_c.nx.in ln_d.nx.in log_a.nx.in log_b.nx.in log_c.nx.in
+              log_d.nx.in lt_i.nx.in mul_e.nx.in ne_c.nx.in neg_d.nx.in
+              output_b.nx.in pow_e.nx.in round_a.nx.in round_b.nx.in
+              round_c.nx.in sin_a.nx.in sin_b.nx.in sin_c.nx.in sprint_b.nx.in
+              sqrt_a.nx.in sqrt_b.nx.in sqrt_c.nx.in sqrt_d.nx.in sub_e.nx.in
+              trunc_a.nx.in trunc_b.nx.in trunc_c.nx.in
 
 #endif
 #if @enable_regex@
@@ -105,10 +106,11 @@ ONYX_OTESTS =
 
               argv_a.nx.in argv_b.nx.in chroot_a.nx.in chroot_b.nx.in
               dirforeach_a.nx.in dirforeach_b.nx.in dirforeach_c.nx.in
-              exec_a.nx.in exec_b.nx.in exec_c.nx.in exec_d.nx.in exec_e.nx.in
-              exec_f.nx.in exec_g.nx.in forkexec_a.nx.in forkexec_b.nx.in
-              forkexec_c.nx.in forkexec_d.nx.in forkexec_e.nx.in
-              forkexec_f.nx.in forkexec_g.nx.in kill_a.nx.in kill_b.nx.in
+              egid_a.nx.in euid_a.nx.in exec_a.nx.in exec_b.nx.in exec_c.nx.in
+              exec_d.nx.in exec_e.nx.in exec_f.nx.in exec_g.nx.in
+              forkexec_a.nx.in forkexec_b.nx.in forkexec_c.nx.in
+              forkexec_d.nx.in forkexec_e.nx.in forkexec_f.nx.in
+              forkexec_g.nx.in gid_a.nx.in kill_a.nx.in kill_b.nx.in
               kill_c.nx.in kill_d.nx.in kill_e.nx.in kill_f.nx.in
               localtime_a.nx.in localtime_b.nx.in localtime_c.nx.in
               localtime_d.nx.in mkfifo_a.nx.in mkfifo_b.nx.in mkfifo_c.nx.in
@@ -117,14 +119,18 @@ ONYX_OTESTS =
               poll_a.nx.in poll_b.nx.in poll_c.nx.in poll_d.nx.in poll_e.nx.in
               poll_f.nx.in poll_g.nx.in poll_h.nx.in poll_i.nx.in poll_j.nx.in
               ppid_a.nx.in rand_a.nx.in readlink_a.nx.in readlink_b.nx.in
-              readlink_c.nx.in readlink_d.nx.in setenv_a.nx.in setenv_b.nx.in
-              setenv_c.nx.in srand_a.nx.in srand_b.nx.in srand_c.nx.in
-              srand_d.nx.in system_a.nx.in system_b.nx.in system_c.nx.in
-              system_d.nx.in system_e.nx.in system_f.nx.in system_g.nx.in
-              truncate_a.nx.in truncate_b.nx.in truncate_c.nx.in
-              truncate_d.nx.in truncate_e.nx.in umask_a.nx.in umask_b.nx.in
-              umask_c.nx.in unsetenv_a.nx.in unsetenv_b.nx.in waitpid_a.nx.in
-              waitpid_b.nx.in waitpid_c.nx.in
+              readlink_c.nx.in readlink_d.nx.in realtime_a.nx.in setegid_a.nx.in
+              setegid_b.nx.in setegid_c.nx.in setegid_d.nx.in setenv_a.nx.in
+              setenv_b.nx.in setenv_c.nx.in seteuid_a.nx.in seteuid_b.nx.in
+              seteuid_c.nx.in seteuid_d.nx.in setgid_a.nx.in setgid_b.nx.in
+              setgid_c.nx.in setgid_d.nx.in setuid_a.nx.in setuid_b.nx.in
+              setuid_c.nx.in setuid_d.nx.in srand_a.nx.in srand_b.nx.in
+              srand_c.nx.in srand_d.nx.in system_a.nx.in system_b.nx.in
+              system_c.nx.in system_d.nx.in system_e.nx.in system_f.nx.in
+              system_g.nx.in truncate_a.nx.in truncate_b.nx.in truncate_c.nx.in
+              truncate_d.nx.in truncate_e.nx.in uid_a.nx.in umask_a.nx.in
+              umask_b.nx.in umask_c.nx.in unsetenv_a.nx.in unsetenv_b.nx.in
+              waitpid_a.nx.in waitpid_b.nx.in waitpid_c.nx.in
 
 #endif
 
