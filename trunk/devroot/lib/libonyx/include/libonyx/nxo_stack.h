@@ -75,7 +75,7 @@ struct cw_nxoe_stack_s
     cw_uint32_t rbeg;
 
     /* r[rbase + rend] is the first element in 'r' past the range begin
-     * protected agains GC. */
+     * protected against GC. */
     cw_uint32_t rend;
 
     /* Object pointer array, usually (but not during some very small windows)
@@ -827,7 +827,7 @@ nxoe_p_stack_exch(cw_nxoe_stack_t *a_stack)
     /* Protect the region that is being modified.  Do the exchange operation at
      * the same time, in order to be consistent with nxo_stack_roll(). */
     a_stack->rbeg = a_stack->abeg;
-    a_stack->rend = a_stack->aend;
+    a_stack->rend = a_stack->abeg + 2;
     a_stack->r[a_stack->rbase + a_stack->rbeg]
 	= a_stack->a[a_stack->abase + a_stack->abeg + 1];
     a_stack->r[a_stack->rbase + a_stack->rbeg + 1]
@@ -839,10 +839,9 @@ nxoe_p_stack_exch(cw_nxoe_stack_t *a_stack)
 #endif
 
     /* Exchange. */
-    a_stack->a[a_stack->abase + a_stack->abeg]
-	= a_stack->r[a_stack->rbase + a_stack->rbeg];
-    a_stack->a[a_stack->abase + a_stack->abeg + 1]
-	= a_stack->r[a_stack->rbase + a_stack->rbeg + 1];
+    memcpy(&a_stack->a[a_stack->abase + a_stack->abeg],
+	   &a_stack->r[a_stack->rbase + a_stack->rbeg],
+	   2 * sizeof(cw_nxo_t *));
 
 #ifdef CW_THREADS
     /* Unprotect. */
