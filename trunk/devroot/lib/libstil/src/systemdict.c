@@ -71,6 +71,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(end),
 	ENTRY(eq),
 	ENTRY(estack),
+	ENTRY(eval),
 	ENTRY(exch),
 	ENTRY(exec),
 	ENTRY(executeonly),
@@ -80,6 +81,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(flushfile),
 	ENTRY(for),
 	ENTRY(foreach),
+	ENTRY(fork),
 	ENTRY(gcheck),
 	ENTRY(ge),
 	ENTRY(get),
@@ -1263,6 +1265,23 @@ systemdict_estack(cw_stilt_t *a_stilt)
 }
 
 void
+systemdict_eval(cw_stilt_t *a_stilt)
+{
+	cw_stils_t	*ostack, *estack;
+	cw_stilo_t	*orig, *new;
+
+	ostack = stilt_ostack_get(a_stilt);
+	estack = stilt_estack_get(a_stilt);
+
+	STILS_GET(orig, ostack, a_stilt);
+	new = stils_push(estack);
+	stilo_dup(new, orig);
+	stils_pop(ostack);
+
+	stilt_loop(a_stilt);
+}
+
+void
 systemdict_exch(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack;
@@ -1280,18 +1299,7 @@ systemdict_exch(cw_stilt_t *a_stilt)
 void
 systemdict_exec(cw_stilt_t *a_stilt)
 {
-	cw_stils_t	*ostack, *estack;
-	cw_stilo_t	*orig, *new;
-
-	ostack = stilt_ostack_get(a_stilt);
-	estack = stilt_estack_get(a_stilt);
-
-	STILS_GET(orig, ostack, a_stilt);
-	new = stils_push(estack);
-	stilo_dup(new, orig);
-	stils_pop(ostack);
-
-	stilt_loop(a_stilt);
+	_cw_error("XXX Not implemented");
 }
 
 void
@@ -1620,6 +1628,12 @@ systemdict_foreach(cw_stilt_t *a_stilt)
 		stils_npop(tstack, 2);
 	}
 	xep_end();
+}
+
+void
+systemdict_fork(cw_stilt_t *a_stilt)
+{
+	_cw_error("XXX Not implemented");
 }
 
 void
