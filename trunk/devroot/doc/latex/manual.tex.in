@@ -32,7 +32,7 @@
 % stil Language Reference.
 \clearemptydoublepage
 \part{Languages}
-\input{@abs_objdir@/doc/latex/stil}
+\input{@abs_srcdir@/doc/latex/stil}
 
 % Back matter.
 \clearemptydoublepage
