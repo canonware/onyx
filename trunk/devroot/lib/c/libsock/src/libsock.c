@@ -560,6 +560,11 @@ sockb_p_notify(cw_mq_t * a_mq, int a_sockfd)
   {
     /* We can't afford to lose the message, since it could end up causing
      * deadlock. */
+    if (dbg_is_registered(cw_g_dbg, "sockb_error"))
+    {
+      out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
+		"Memory allocation error; yielding\n");
+    }
     thd_yield();
   }
   
@@ -641,15 +646,14 @@ sockb_p_entry_func(void * a_arg)
 	    regs[sockfd].notify_mq = NULL;
 
 	    fds[nfds].fd = sockfd;
-	    /* There are no data queued for this sock yet, so it's safe to
-	     * assume that sock_l_get_in_space() tells us the maximum buffer
-	     * size for this sock.  If the buffer size is 0, don't ever try to
-	     * read on this descriptor. */
-	    if (0 != sock_l_get_in_space(sock))
+	    /* If the buffer size is 0, don't ever try to read on this
+	     * descriptor. */
+	    if (0 != sock_l_get_in_max_buf_size(sock))
 	    {
 #ifdef _LIBSOCK_CONFESS
-	      out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
-			"Register [i]\n", sockfd);
+	            out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
+			      "Register [i] ([i] byte input buffer)\n",
+			      sockfd, sock_l_get_in_max_buf_size(sock));
 #endif
 	      fds[nfds].events = POLLIN;
 	    }
@@ -1075,7 +1079,8 @@ sockb_p_entry_func(void * a_arg)
 
 	    /* Only send a message if the sock buffer was empty before we put
 	     * data in it. */
-	    if (0 == (max_read - (in_buf_free + bytes_read)))
+	    if (0 == (sock_l_get_in_max_buf_size(regs[sockfd].sock)
+		      - (in_buf_free + bytes_read)))
 	    {
 	      if (NULL != regs[sockfd].notify_mq)
 	      {

@@ -1,5 +1,11 @@
 1999-11-10  Jason Evans  <jasone@canonware.com>
 
+	* src/sockb.c (sockb_p_entry_func): Correctly calculate whether
+	the sock's input buffer was empty before data were appended in
+	order to decide whether to send a notification.  This bug showed
+	up if the sock's input buffer was larger than the OS's maximum
+	incoming data buffer for the corresponding socket.
+
 	* src/sock.c: Add magic to the cw_sock_t structure.
 
 1999-11-02  Jason Evans  <jasone@canonware.com>
