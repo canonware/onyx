@@ -386,6 +386,24 @@ execution stack operators} \\
 	{Unwind to innermost stopped or start context.}
 \hline
 \optableent
+	{obj}
+	{{\bf \htmlref{trapped}{systemdict:trapped}}}
+	{false}
+	{Snapshot stacks and evaluate object.}
+\optableent
+	{obj}
+	{{\bf \htmlref{trapped}{systemdict:trapped}}}
+	{arg true}
+	{Snapshot stacks, evaluate object, catch \onyxop{}{escape}{}, restore
+	snapshot.}
+\hline
+\optableent
+	{arg}
+	{{\bf \htmlref{escape}{systemdict:escape}}}
+	{--}
+	{Unwind to innermost trapped or start context.}
+\hline
+\optableent
 	{name}
 	{{\bf \htmlref{throw}{systemdict:throw}}}
 	{obj}
@@ -4916,24 +4934,29 @@ onyx:0>
 	\end{description}
 \label{systemdict:escape}
 \index{escape@\onyxop{}{escape}{}}
-\item[{\onyxop{OPARGS}{escape}{OPOUTS}}: ]
+\item[{\onyxop{arg}{escape}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[arg: ]
+			Argument to be returned by the
+			\htmlref{\onyxop{}{trapped}{}}{systemdict:trapped}
+			operator invocation that traps this \onyxop{}{escape}{}.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
-		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Unwind the execution stack to the innermost
+		\htmlref{\onyxop{}{trapped}{}}{systemdict:trapped} or
+		\htmlref{\onyxop{}{start}{}}{systemdict:start} context.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> {$arg escape} trapped {1 sprint} if
+$arg
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:eq}
@@ -11665,7 +11688,8 @@ onyx:0>
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[boolean: ]
-			True if stop operator was executed, false otherwise.
+			True if \htmlref{\onyxop{}{stop}{}}{systemdict:stop}
+			operator was executed, false otherwise.
 		\end{description}
 	\item[Error(s): ]
 		\begin{description}\item[]
@@ -11676,8 +11700,8 @@ onyx:0>
 	\item[Description: ]
 		Evaluate \oparg{obj}.  This operator provides a context that
 		terminates execution stack unwinding due to the
-		\htmlref{\onyxop{}{stop}{}}{systemdict:stop}.  It will also
-		terminate execution stack unwinding due to the
+		\htmlref{\onyxop{}{stop}{}}{systemdict:stop} operator.  It will
+		also terminate execution stack unwinding due to the
 		\htmlref{\onyxop{}{continue}{}}{systemdict:continue} and
 		\htmlref{\onyxop{}{exit}{}}{systemdict:exit} operators, but will
 		throw an \htmlref{invalidcontinue}{invalidcontinue} or
@@ -12646,24 +12670,57 @@ onyx:0>
 	\end{description}
 \label{systemdict:trapped}
 \index{trapped@\onyxop{}{trapped}{}}
-\item[{\onyxop{OPARGS}{trapped}{OPOUTS}}: ]
+\item[{\onyxop{obj}{trapped}{false}}: ]
+\item[{\onyxop{obj}{trapped}{arg true}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[obj: ]
+			An object to evaluate.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[arg: ]
+			The argument that was passed to the
+			\htmlref{\onyxop{}{escape}{}}{systemdict:escape}
+			operator that caused unwinding to this
+			\onyxop{}{trapped}{} context.
+		\item[false: ]
+			The \htmlref{\onyxop{}{escape}{}}{systemdict:escape}
+			operator was not executed.
+		\item[true: ]
+			The \htmlref{\onyxop{}{escape}{}}{systemdict:escape}
+			operator was executed.
 		\end{description}
 	\item[Error(s): ]
 		\begin{description}\item[]
+		\item[\htmlref{invalidcontinue}{invalidcontinue}.]
+		\item[\htmlref{invalidexit}{invalidexit}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
-		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Evaluate \oparg{obj}.  This operator provides a context that
+		snapshots the state of ostack, dstack, and cstack, then restores
+		those snapshotted states if the
+		\htmlref{\onyxop{}{escape}{}}{systemdict:escape} operator causes
+		the execution stack to unwind to the point where
+		\onyxop{}{trapped}{} was called.  It will also terminate
+		execution stack unwinding due to the
+		\htmlref{\onyxop{}{continue}{}}{systemdict:continue} and
+		\htmlref{\onyxop{}{exit}{}}{systemdict:exit} operators, but will
+		throw an \htmlref{invalidcontinue}{invalidcontinue} or
+		\htmlref{invalidexit}{invalidexit} error, respectively, then do
+		the equivalent of calling
+		\htmlref{\onyxop{}{quit}{}}{systemdict:quit}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> {1 2 3 $arg escape} trapped {1 sprint} if
+$arg
+onyx:0> {1 2 3} trapped {1 sprint}{pstack clear} ifelse
+3
+2
+1
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:trunc}
