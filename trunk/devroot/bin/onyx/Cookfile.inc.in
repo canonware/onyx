@@ -150,7 +150,8 @@ ONYX_OTESTS =
               roll_e.nx.in roll_f.nx.in roll_g.nx.in rot_a.nx.in rot_b.nx.in
               rot_c.nx.in rot_d.nx.in sadn_a.nx.in sadn_b.nx.in sadn_c.nx.in
               sadn_d.nx.in saup_a.nx.in saup_b.nx.in saup_c.nx.in saup_d.nx.in
-              sclear_a.nx.in sbpush_a.nx.in sbpush_b.nx.in sbpush_c.nx.in
+              sclear_a.nx.in sbpop_a.nx.in sbpop_b.nx.in sbpop_c.nx.in
+              sbpop_d.nx.in sbpush_a.nx.in sbpush_b.nx.in sbpush_c.nx.in
               sbpush_d.nx.in sclear_b.nx.in sclear_c.nx.in scleartomark_a.nx.in
               scleartomark_b.nx.in scleartomark_c.nx.in scleartomark_d.nx.in
               scount_a.nx.in scount_b.nx.in scount_c.nx.in scounttomark_a.nx.in
@@ -162,7 +163,14 @@ ONYX_OTESTS =
               sexch_a.nx.in sexch_b.nx.in sexch_c.nx.in sexch_d.nx.in
               shift_a.nx.in shift_b.nx.in shift_c.nx.in shift_d.nx.in
               sidup_a.nx.in sidup_b.nx.in sidup_c.nx.in sidup_d.nx.in
-              sidup_e.nx.in sidup_f.nx.in sidup_g.nx.in spop_a.nx.in
+              sidup_e.nx.in sidup_f.nx.in sidup_g.nx.in sibpop_a.nx.in
+              sibpop_b.nx.in sibpop_c.nx.in sibpop_d.nx.in sibpop_e.nx.in
+              sibpop_f.nx.in sibpop_g.nx.in sipop_a.nx.in sipop_b.nx.in
+              sipop_c.nx.in sipop_d.nx.in sipop_e.nx.in sipop_f.nx.in
+              sipop_g.nx.in snbpop_a.nx.in snbpop_b.nx.in snbpop_c.nx.in
+              snbpop_d.nx.in snbpop_e.nx.in snbpop_f.nx.in snbpop_g.nx.in
+              snpop_a.nx.in snpop_b.nx.in snpop_c.nx.in snpop_d.nx.in
+              snpop_e.nx.in snpop_f.nx.in snpop_g.nx.in spop_a.nx.in
               spop_b.nx.in spop_c.nx.in spop_d.nx.in sprint_a.nx.in
               spush_a.nx.in spush_b.nx.in spush_c.nx.in spush_d.nx.in
               sroll_a.nx.in sroll_b.nx.in sroll_c.nx.in sroll_d.nx.in

@@ -1,0 +1,8 @@
+Test begin
+Error /stackunderflow
+ostack: (-stack- 1)
+dstack: (-dict- -dict- -dict- -dict-)
+estack/istack trace (0..2):
+0:	--sipop--
+1:	-file-
+2:	--start--

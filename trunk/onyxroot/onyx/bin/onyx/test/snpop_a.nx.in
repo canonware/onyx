@@ -1,0 +1,39 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% <Copyright = jasone>
+%
+% <License>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Version: Onyx <Version = onyx>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+`Test begin\n' print flush
+
+[
+    ()
+    (1)
+    (1 2)
+    (1 2 3)
+    (1 2 3 4)
+    (1 2 3 4 5)
+]{
+    dup scount 0 1 dn {
+	over 1 sprints print
+	` ' print
+	dup cvs print
+	` snpop --> ' print
+
+	over () copy dup dn snpop
+	
+	exch 1 sprints print
+	` ' print
+	1 sprint
+    } for
+    clear
+} foreach
+
+`Test end\n' print
+pstack
