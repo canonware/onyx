@@ -33,7 +33,10 @@ free_buffer(void * a_blah, void * a_buffer)
 int
 main()
 {
-/*    libstash_init(); */
+  libstash_init();
+
+  dbg_register(cw_g_dbg, "mem_verbose");
+  dbg_register(cw_g_dbg, "mem_error");
 
   /* bufpool_new(), bufpool_delete(). */
   {
@@ -148,10 +151,10 @@ main()
   {
     cw_bufel_t bufel, * bufel_p;
 
-    _cw_assert(&bufel == bufel_new(&bufel));
+    _cw_assert(&bufel == bufel_new(&bufel, NULL, NULL));
     bufel_delete(&bufel);
 
-    bufel_p = bufel_new(NULL);
+    bufel_p = bufel_new(NULL, NULL, NULL);
     _cw_check_ptr(bufel_p);
     bufel_delete(bufel_p);
   }
@@ -164,7 +167,7 @@ main()
 
     bufpool_new(&bufpool, 4096, 10);
     
-    bufel_p = bufel_new(NULL);
+    bufel_p = bufel_new(NULL, NULL, NULL);
     _cw_assert(0 == bufel_get_size(bufel_p));
 
     buffer = bufpool_get_buffer(&bufpool);
@@ -195,7 +198,7 @@ main()
 
     bufpool_new(&bufpool, 4096, 10);
 
-    bufel_p = bufel_new(NULL);
+    bufel_p = bufel_new(NULL, NULL, NULL);
 
     buffer = bufpool_get_buffer(&bufpool);
     
@@ -252,7 +255,7 @@ main()
 
     bufpool_new(&bufpool, 50, 10);
 
-    bufel_p = bufel_new(NULL);
+    bufel_p = bufel_new(NULL, NULL, NULL);
 
     string = (char *) bufpool_get_buffer(&bufpool);
     strcpy(string, "Hi ho hum.");
@@ -285,7 +288,7 @@ main()
 
     bufpool_new(&bufpool, 512, 10);
 
-    bufel_p = bufel_new(NULL);
+    bufel_p = bufel_new(NULL, NULL, NULL);
     buf_p = buf_new(NULL, TRUE);
 
     buffer = (char *) bufpool_get_buffer(&bufpool);
@@ -388,14 +391,14 @@ main()
 
     a = (cw_uint8_t *) _cw_malloc(1);
     a[0] = 0;
-    bufel_new(&bufel);
+    bufel_new(&bufel, NULL, NULL);
     bufel_set_data_ptr(&bufel, (void *) a, 1, free_buffer, NULL);
     buf_append_bufel(&buf, &bufel);
     bufel_delete(&bufel);
 
     b[0] = 1;
     b[1] = 2;
-    bufel_new(&bufel);
+    bufel_new(&bufel, NULL, NULL);
     bufel_set_data_ptr(&bufel, (void *) b, 2, NULL, NULL);
     buf_append_bufel(&buf, &bufel);
     bufel_delete(&bufel);
@@ -403,7 +406,7 @@ main()
     c[0] = 3;
     c[1] = 4;
     c[2] = 5;
-    bufel_new(&bufel);
+    bufel_new(&bufel, NULL, NULL);
     bufel_set_data_ptr(&bufel, (void *) c, 3, NULL, NULL);
     buf_append_bufel(&buf, &bufel);
     bufel_delete(&bufel);
@@ -413,7 +416,7 @@ main()
     d[1] = 7;
     d[2] = 8;
     d[3] = 9;
-    bufel_new(&bufel);
+    bufel_new(&bufel, NULL, NULL);
     bufel_set_data_ptr(&bufel, (void *) d, 4, free_buffer, NULL);
     buf_append_bufel(&buf, &bufel);
     bufel_delete(&bufel);
@@ -424,7 +427,7 @@ main()
     e[2] = 12;
     e[3] = 13;
     e[4] = 14;
-    bufel_new(&bufel);
+    bufel_new(&bufel, NULL, NULL);
     bufel_set_data_ptr(&bufel, (void *) e, 5, bufpool_put_buffer, &bufpool);
     buf_append_bufel(&buf, &bufel);
     bufel_delete(&bufel);
@@ -440,14 +443,17 @@ main()
     f[8] = 22;
     f[9] = 23;
     f[10] = 42;
-    bufel_new(&bufel);
+    bufel_new(&bufel, NULL, NULL);
     bufel_set_data_ptr(&bufel, (void *) f, 11, NULL, NULL);
     bufel_set_beg_offset(&bufel, 1);
     bufel_set_end_offset(&bufel, 10);
     buf_append_bufel(&buf, &bufel);
     bufel_delete(&bufel);
 
-    iov = buf_get_iovec(&buf, &iov_count);
+    iov = buf_get_iovec(&buf, 0, &iov_count);
+    _cw_assert(iov_count == 0);
+    
+    iov = buf_get_iovec(&buf, buf_get_size(&buf), &iov_count);
     _cw_assert(iov_count == 6);
     _cw_assert(iov[0].iov_base == (char *) a);
     _cw_assert(iov[0].iov_len == 1);
@@ -461,6 +467,47 @@ main()
     _cw_assert(iov[4].iov_len == 5);
     _cw_assert(iov[5].iov_base == (char *) &f[1]);
     _cw_assert(iov[5].iov_len == 9);
+
+    iov = buf_get_iovec(&buf, buf_get_size(&buf) + 10, &iov_count);
+    _cw_assert(iov_count == 6);
+    _cw_assert(iov[0].iov_base == (char *) a);
+    _cw_assert(iov[0].iov_len == 1);
+    _cw_assert(iov[1].iov_base == (char *) b);
+    _cw_assert(iov[1].iov_len == 2);
+    _cw_assert(iov[2].iov_base == (char *) c);
+    _cw_assert(iov[2].iov_len == 3);
+    _cw_assert(iov[3].iov_base == (char *) d);
+    _cw_assert(iov[3].iov_len == 4);
+    _cw_assert(iov[4].iov_base == (char *) e);
+    _cw_assert(iov[4].iov_len == 5);
+    _cw_assert(iov[5].iov_base == (char *) &f[1]);
+    _cw_assert(iov[5].iov_len == 9);
+
+    iov = buf_get_iovec(&buf, buf_get_size(&buf) - 5, &iov_count);
+    _cw_assert(iov_count == 6);
+    _cw_assert(iov[0].iov_base == (char *) a);
+    _cw_assert(iov[0].iov_len == 1);
+    _cw_assert(iov[1].iov_base == (char *) b);
+    _cw_assert(iov[1].iov_len == 2);
+    _cw_assert(iov[2].iov_base == (char *) c);
+    _cw_assert(iov[2].iov_len == 3);
+    _cw_assert(iov[3].iov_base == (char *) d);
+    _cw_assert(iov[3].iov_len == 4);
+    _cw_assert(iov[4].iov_base == (char *) e);
+    _cw_assert(iov[4].iov_len == 5);
+    _cw_assert(iov[5].iov_base == (char *) &f[1]);
+    _cw_assert(iov[5].iov_len == 4);
+
+    iov = buf_get_iovec(&buf, buf_get_size(&buf) - 15, &iov_count);
+    _cw_assert(iov_count == 4);
+    _cw_assert(iov[0].iov_base == (char *) a);
+    _cw_assert(iov[0].iov_len == 1);
+    _cw_assert(iov[1].iov_base == (char *) b);
+    _cw_assert(iov[1].iov_len == 2);
+    _cw_assert(iov[2].iov_base == (char *) c);
+    _cw_assert(iov[2].iov_len == 3);
+    _cw_assert(iov[3].iov_base == (char *) d);
+    _cw_assert(iov[3].iov_len == 3);
 
     _cw_assert(24 == buf_get_size(&buf));
 
@@ -524,21 +571,21 @@ main()
     buf_p = buf_new(NULL, TRUE);
     _cw_assert(0 == buf_get_size(buf_p));
 
-    bufel_p_a = bufel_new(NULL);
+    bufel_p_a = bufel_new(NULL, NULL, NULL);
     bufel_set_data_ptr(bufel_p_a,
 		       (void *) str_a,
 		       bufpool_get_buffer_size(&bufpool),
 		       bufpool_put_buffer,
 		       (void *) &bufpool);
     
-    bufel_p_b = bufel_new(NULL);
+    bufel_p_b = bufel_new(NULL, NULL, NULL);
     bufel_set_data_ptr(bufel_p_b,
 		       (void *) str_b,
 		       bufpool_get_buffer_size(&bufpool),
 		       bufpool_put_buffer,
 		       (void *) &bufpool);
     
-    bufel_p_c = bufel_new(NULL);
+    bufel_p_c = bufel_new(NULL, NULL, NULL);
     bufel_set_data_ptr(bufel_p_c,
 		       (void *) str_c,
 		       bufpool_get_buffer_size(&bufpool),
@@ -597,21 +644,21 @@ main()
     _cw_assert(0 == buf_get_size(buf_p_a));
     _cw_assert(0 == buf_get_size(buf_p_b));
 
-    bufel_p_a = bufel_new(NULL);
+    bufel_p_a = bufel_new(NULL, NULL, NULL);
     bufel_set_data_ptr(bufel_p_a,
 		       (void *) str_a,
 		       bufpool_get_buffer_size(&bufpool),
 		       bufpool_put_buffer,
 		       (void *) &bufpool);
     
-    bufel_p_b = bufel_new(NULL);
+    bufel_p_b = bufel_new(NULL, NULL, NULL);
     bufel_set_data_ptr(bufel_p_b,
 		       (void *) str_b,
 		       bufpool_get_buffer_size(&bufpool),
 		       bufpool_put_buffer,
 		       (void *) &bufpool);
     
-    bufel_p_c = bufel_new(NULL);
+    bufel_p_c = bufel_new(NULL, NULL, NULL);
     bufel_set_data_ptr(bufel_p_c,
 		       (void *) str_c,
 		       bufpool_get_buffer_size(&bufpool),
@@ -626,6 +673,9 @@ main()
     buf_catenate_buf(buf_p_a, buf_p_b, TRUE);
     _cw_assert(3 == buf_get_size(buf_p_a));
     _cw_assert(1 == buf_get_size(buf_p_b));
+    buf_catenate_buf(buf_p_a, buf_p_b, FALSE);
+    _cw_assert(4 == buf_get_size(buf_p_a));
+    _cw_assert(0 == buf_get_size(buf_p_b));
     buf_catenate_buf(buf_p_a, buf_p_b, FALSE);
     _cw_assert(4 == buf_get_size(buf_p_a));
     _cw_assert(0 == buf_get_size(buf_p_b));
@@ -653,7 +703,7 @@ main()
 
     for (i = 0; i < 3; i++)
     {
-      bufel_new(&bufel);
+      bufel_new(&bufel, NULL, NULL);
       bufel_set_data_ptr(&bufel,
 			 bufpool_get_buffer(&bufpool),
 			 bufpool_get_buffer_size(&bufpool),
@@ -714,7 +764,7 @@ main()
 
     for (i = 0; i < 3; i++)
     {
-      bufel_new(&bufel);
+      bufel_new(&bufel, NULL, NULL);
       bufel_set_data_ptr(&bufel,
 			 bufpool_get_buffer(&bufpool),
 			 bufpool_get_buffer_size(&bufpool),
@@ -805,6 +855,38 @@ main()
     buf_catenate_buf(&buf_a, &buf_c, FALSE);
     _cw_assert(0 == buf_get_size(&buf_c));
     _cw_assert(56 == buf_get_size(&buf_a));
+
+
+    buf_catenate_buf(&buf_c, &buf_b, TRUE);
+    _cw_assert(56 == buf_get_size(&buf_a));
+    _cw_assert(56 == buf_get_size(&buf_b));
+    _cw_assert(56 == buf_get_size(&buf_c));
+    
+    _cw_assert(FALSE == buf_release_head_data(&buf_a, 56));
+    _cw_assert(0 == buf_get_size(&buf_a));
+    
+    buf_catenate_buf(&buf_a, &buf_c, FALSE);
+    _cw_assert(56 == buf_get_size(&buf_a));
+    _cw_assert(0 == buf_get_size(&buf_c));
+    buf_catenate_buf(&buf_c, &buf_a, FALSE);
+    _cw_assert(0 == buf_get_size(&buf_a));
+    _cw_assert(56 == buf_get_size(&buf_c));
+    buf_catenate_buf(&buf_a, &buf_c, TRUE);
+    _cw_assert(56 == buf_get_size(&buf_a));
+    _cw_assert(56 == buf_get_size(&buf_c));
+    
+    _cw_assert(FALSE == buf_release_tail_data(&buf_b, 56));
+    _cw_assert(0 == buf_get_size(&buf_b));
+
+    buf_catenate_buf(&buf_b, &buf_c, FALSE);
+    _cw_assert(56 == buf_get_size(&buf_b));
+    _cw_assert(0 == buf_get_size(&buf_c));
+    buf_catenate_buf(&buf_c, &buf_b, FALSE);
+    _cw_assert(0 == buf_get_size(&buf_b));
+    _cw_assert(56 == buf_get_size(&buf_c));
+    buf_catenate_buf(&buf_b, &buf_c, TRUE);
+    _cw_assert(56 == buf_get_size(&buf_b));
+    _cw_assert(56 == buf_get_size(&buf_c));
     
     buf_delete(&buf_a);
     buf_delete(&buf_b);
@@ -812,6 +894,6 @@ main()
     bufpool_delete(&bufpool);
   }
 
-/*    libstash_shutdown(); */
+  libstash_shutdown();
   return 0;
 }

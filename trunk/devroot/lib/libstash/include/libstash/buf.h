@@ -51,8 +51,8 @@ typedef struct
 #ifdef _CW_REENTRANT
   cw_mtx_t lock;
 #endif
-  void (*free_func)(void *, void *);
-  void * free_arg;
+  void (*dealloc_func)(void *, void *);
+  void * dealloc_arg;
   cw_uint32_t ref_count;
   cw_uint32_t buf_size;
   char * buf;
@@ -64,6 +64,10 @@ struct cw_bufel_s
   cw_uint32_t magic;
 #endif
   cw_bool_t is_malloced;
+
+  void (*dealloc_func)(void *, void *);
+  void * dealloc_arg;
+
   cw_uint32_t beg_offset;
   cw_uint32_t end_offset;
   cw_bufc_t * bufc;
@@ -330,6 +334,8 @@ buf_get_size(cw_buf_t * a_buf);
  *
  * a_buf : Pointer to a buf.
  *
+ * a_max_data : Maximum number of bytes of space to include in the iovec.
+ *
  * a_iovec_count : Pointer to an int.
  *
  * <<< Output(s) >>>
@@ -342,12 +348,12 @@ buf_get_size(cw_buf_t * a_buf);
  * <<< Description >>>
  *
  * Build an iovec array that represents the valid data in a_buf's internal
- * buffers and return a pointer to it.
+ * buffers (up to a_max_data bytes) and return a pointer to it.
  *
  ****************************************************************************/
 #define buf_get_iovec _CW_NS_LIBSTASH(buf_get_iovec)
 const struct iovec *
-buf_get_iovec(cw_buf_t * a_buf, int * a_iovec_count);
+buf_get_iovec(cw_buf_t * a_buf, cw_uint32_t a_max_data, int * a_iovec_count);
 
 /****************************************************************************
  *
@@ -550,6 +556,11 @@ buf_get_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset);
  *
  * a_bufel : Pointer to space for a bufel, or NULL.
  *
+ * a_dealloc_func : Pointer to a deallocation function for a_bufel, or NULL.
+ *                  Ignored if a_bufel == NULL.
+ *
+ * a_dealloc_arg : First argument to a_dealloc_func.
+ *
  * <<< Output(s) >>>
  *
  * retval : Pointer to a bufel.
@@ -561,7 +572,9 @@ buf_get_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset);
  ****************************************************************************/
 #define bufel_new _CW_NS_LIBSTASH(bufel_new)
 cw_bufel_t *
-bufel_new(cw_bufel_t * a_bufel);
+bufel_new(cw_bufel_t * a_bufel,
+	  void (*a_dealloc_func)(void * dealloc_arg, void * bufel),
+	  void * a_dealloc_arg);
 
 /****************************************************************************
  *
@@ -776,5 +789,5 @@ bufel_get_data_ptr(cw_bufel_t * a_bufel);
 #define bufel_set_data_ptr _CW_NS_LIBSTASH(bufel_set_data_ptr)
 void
 bufel_set_data_ptr(cw_bufel_t * a_bufel, void * a_buf, cw_uint32_t a_size,
-		   void (*a_free_func)(void * free_arg, void * buffer_p),
-		   void * a_free_arg);
+		   void (*a_dealloc_func)(void * delloc_arg, void * buffer_p),
+		   void * a_dealloc_arg);

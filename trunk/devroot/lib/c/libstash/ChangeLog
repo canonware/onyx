@@ -1,3 +1,8 @@
+1999-02-25  Jason Evans  <jasone@canonware.com>
+
+	* src/mem.c : Add intelligence and logging to mem class that
+	detects memory leaks due to never free()ing.
+
 1999-02-24  Jason Evans  <jasone@canonware.com>
 
 	* : Fully implement and test buf, bufel, and bufpool.

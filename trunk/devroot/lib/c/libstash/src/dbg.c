@@ -16,6 +16,8 @@
 #  include "libstash/libstash.h"
 #endif
 
+#include "libstash/mem_l.h"
+
 cw_dbg_t *
 dbg_new()
 {
@@ -29,6 +31,10 @@ dbg_new()
   oh_new(&retval->flag_hash);
 #endif
 
+#ifdef _LIBSTASH_DBG
+  dbg_register(retval, "mem_error");
+#endif
+  
   return retval;
 }
 
@@ -49,8 +55,8 @@ dbg_register(cw_dbg_t * a_dbg, const char * a_flag)
   if (NULL != a_dbg)
   {
     /* Ignore the return value, since we don't care if the flag is already
-   * registered.  Pass a NULL data pointer since we don't need any additional
-   * info stored with the flag. */
+     * registered.  Pass a NULL data pointer since we don't need any additional
+     * info stored with the flag. */
     oh_item_insert(&a_dbg->flag_hash, (void *) a_flag, NULL);
   }
 }

@@ -188,6 +188,7 @@ extern cw_log_t * cw_g_log;
 #  define _cw_calloc(a, b) mem_calloc(cw_g_mem, a, b)
 #  define _cw_realloc(a, b) mem_realloc(cw_g_mem, a, b)
 #  define _cw_free(a) mem_free(cw_g_mem, a)
+#  define _cw_dealloc(a) mem_dealloc((void *) cw_g_mem, a)
 
 #  define _cw_ntohq(a) (cw_uint64_t) \
                        ((((cw_uint64_t) \

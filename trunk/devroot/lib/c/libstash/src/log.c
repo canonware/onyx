@@ -24,6 +24,7 @@
 #include <time.h>
 
 #include "libstash/log_p.h"
+#include "libstash/mem_l.h"
 
 cw_log_t *
 log_new()

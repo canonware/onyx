@@ -17,6 +17,7 @@
 #  include "libstash/libstash.h"
 #endif
 
+#include "libstash/mem_l.h"
 #include "libstash/oh_p.h"
 
 cw_oh_t *
@@ -1055,7 +1056,7 @@ oh_p_item_insert(cw_oh_t * a_oh,
   cw_bool_t retval = TRUE;
   
   /* Primary hash to first possible location to insert. */
-  slot = a_oh->curr_h1(a_oh, a_item->key);
+  slot = a_oh->curr_h1(a_oh, a_item->key) % a_oh->size;
 
   for (i = 0, j = slot;
        i < a_oh->size;
@@ -1094,7 +1095,7 @@ oh_p_item_search(cw_oh_t * a_oh,
   cw_bool_t retval;
   
   /* Primary hash to the first location to look. */
-  slot = a_oh->curr_h1(a_oh, a_key);
+  slot = a_oh->curr_h1(a_oh, a_key) % a_oh->size;
 
   /* Jump by the secondary hash value until we either find what we're
    * looking for, or hit an empty slot. */

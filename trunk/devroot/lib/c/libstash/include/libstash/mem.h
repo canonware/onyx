@@ -39,3 +39,8 @@ mem_realloc(cw_mem_t * a_mem, void * a_ptr, size_t a_size);
 #define mem_free _CW_NS_LIBSTASH(mem_free)
 void
 mem_free(cw_mem_t * a_mem, void * a_ptr);
+
+#define mem_dealloc _CW_NS_LIBSTASH(mem_dealloc)
+void
+mem_dealloc(void * a_mem, void * a_ptr);
+

@@ -17,6 +17,7 @@
 #  include "libstash/libstash.h"
 #endif
 
+#include "libstash/mem_l.h"
 #include "libstash/list_p.h"
 
 cw_list_item_t *

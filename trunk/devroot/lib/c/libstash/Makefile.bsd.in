@@ -24,7 +24,8 @@ INCS := libstash.h libstash_defs.h libstash_incs.h bhp.h buf.h dbg.h lex.h \
 INCS_R := libstash_r.h locks.h thread.h
 
 # Include files that are _not_ installed.
-PRIV_INCS := bhp_p.h buf_p.h lex_p.h list_p.h log_p.h mem_p.h oh_p.h res_p.h
+PRIV_INCS := bhp_p.h buf_p.h lex_p.h list_p.h log_p.h mem_l.h mem_p.h oh_p.h \
+	res_p.h
 
 PRIV_INCS_R := locks_p.h
 
@@ -395,7 +396,7 @@ uninstall : makefile
 doc :
 
 clean : makefile FORCE
-	rm -f $(.CURDIR)/*~ $(.CURDIR)/*/*~
+	rm -f $(.CURDIR)/*~ $(.CURDIR)/*/*~ $(.CURDIR)/*/*/*~
 	rm -f $(.CURDIR)/*.bak $(.CURDIR)/*.BAK
 	rm -f $(.CURDIR)/core $(.CURDIR)/test/core
 	rm -f $(.CURDIR)/*.core $(.CURDIR)/test/*.core
