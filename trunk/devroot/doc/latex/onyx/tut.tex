@@ -102,18 +102,19 @@ reader.
 Onyx includes a rich set of data types.  In fact, Onyx code is represented as
 data, which means that there is a whole range of possibilities when writing Onyx
 programs that are difficult or impossible with compiled languages such as C.
-This aspect of Onyx is discussed in Section\~ref{onyxtut:introspection}.
+This aspect of Onyx is discussed in Section~\ref{onyxtut:introspection}.
 
 Onyx is dynamically typed, which means that errors due to object type
 incompatibilities are detected during program execution.  For example, the
 following code will always run without an error, even though the arguments that
-would be passed to the \onyxop{add} operator are invalid.
+would be passed to the \htmlref{\onyxop{}{add}{}}{systemdict:add} operator are
+invalid.
 
 \begin{verbatim}
 false {
-        `a string' [1] add
+    `a string' [1] add
 }{
-        `This is always printed' 1 sprint
+    `This is always printed' 1 sprint
 } ifelse
 \end{verbatim}
 
@@ -128,9 +129,9 @@ created with, say, a {\tt \_type} field that indicates the type of the object:
 
 \begin{verbatim}
 <
-        $_type  $fraction
-        $num    3
-        $den    4
+    $_type  $fraction
+    $num    3
+    $den    4
 >
 \end{verbatim}
 
@@ -194,8 +195,8 @@ used as a place to store objects, pass arguments into operators and procedures,
 and return results.
 
 Onyx is a postfix language, which means that code is written such that operands
-precede operators.  For example, the following code Calculates $5 x (3 + 4)$ and
-prints the result:
+precede operators.  For example, the following code Calculates $5 \times (3 +
+4)$ and prints the result:
 
 \begin{verbatim}
 onyx:0> 5 3 4 add mul
@@ -242,7 +243,7 @@ this means that stacks are suitable for use as queues.
 
 \subsection{Efficiency issues}
 
-Since stacks are stored internally as a doubly linked list, the cost of indexed
+Since stacks are stored internally as doubly linked lists, the cost of indexed
 access to an object on a stack is proportional to its offset from the top or
 bottom of the stack, depending on the operator being used.  Therefore, stacks
 are not ideal in situations where arbitrary access to an object is a common
@@ -290,7 +291,7 @@ When the second key/value pair is inserted, it replaces the first pair.
 
 Although dictionaries can handle keys of any type, they are optimized to use
 names as keys.  The performance penalty for other key types is slight, but can
-be exacerbated by the cost of comparison for other types.  Names comparison is a
+be exacerbated by the cost of comparison for other types.  Name comparison is a
 constant time operation, but string comparison is not.  Therefore, use names
 rather than strings whenever possible.
 
