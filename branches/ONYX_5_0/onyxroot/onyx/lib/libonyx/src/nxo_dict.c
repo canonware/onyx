@@ -114,14 +114,20 @@ nxoe_p_dict_def(cw_nxoe_dict_t *a_dict, cw_nxo_t *a_key, cw_nxo_t *a_val)
 	    nxo_no_new(&dicth->val);
 	    nxo_dup(&dicth->val, a_val);
 
+	    /* This insertion is GC-safe because the order of pointer
+	     * assignments is done such that the list can always be traversed
+	     * in forward order, which is what reference iteration does.
+	     *
+	     * Insertion into the list must happen before insertion into the
+	     * dch, since dch_count() is used to limit reference iteration, but
+	     * the list is used to actually iterate. */
+	    mb_write(); /* Make sure item is initialized before insertion. */
+	    ql_tail_insert(&a_dict->data.h.list, dicth, link);
+	    mb_write(); /* Make sure list is updated before dch. */
+
 	    /* Insert. */
 	    dch_insert(&a_dict->data.h.hash, (void *) &dicth->key,
 		       (void *) dicth, &dicth->chi);
-	    /* This insertion is GC-safe because the order of pointer
-	     * assignments is done such that the list can always be traversed
-	     * in forward order, which is what reference iteration does. */
-	    ql_tail_insert(&a_dict->data.h.list, dicth, link);
-	    mb_write();
 	}
     }
     else
