@@ -1048,6 +1048,42 @@ stilo_p_dict_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t a_syntactic,
 		_cw_out_put_f(a_fd, "--nostringval--[c]", newline);
 }
 
+cw_bool_t
+stilo_dict_def(cw_stilo_t *a_stilo, cw_stilo_t *a_key, cw_stilo_t *a_val)
+{
+	return TRUE; /* XXX */
+}
+
+cw_bool_t
+stilo_dict_undef(cw_stilo_t *a_stilo, cw_stilo_t *a_key)
+{
+	return TRUE; /* XXX */
+}
+
+cw_stilo_t *
+stilo_dict_lookup(cw_stilo_t *a_stilo, cw_stilo_t *a_key)
+{
+	return NULL; /* XXX */
+}
+
+cw_bool_t
+stilo_dict_copy(cw_stilo_t *a_from, cw_stilo_t *a_to)
+{
+	return TRUE; /* XXX */
+}
+
+cw_uint32_t
+stilo_dict_count(cw_stilo_t *a_stilo)
+{
+	return 0xffffffff; /* XXX */
+}
+
+cw_stilo_t *
+stilo_dict_iterate(cw_stilo_t *a_stilo)
+{
+	return NULL; /* XXX */
+}
+
 /*
  * file.
  */

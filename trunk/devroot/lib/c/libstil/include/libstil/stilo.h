@@ -174,11 +174,10 @@ void		stilo_array_set(cw_stilo_t *a_stilo, cw_uint32_t a_offset,
 /*
  * dict.
  */
-/* XXX Keys are arbitrary stilo's, not names. */
-cw_bool_t	stilo_dict_def(cw_stilo_t *a_stilo, cw_stilo_t *a_name,
+cw_bool_t	stilo_dict_def(cw_stilo_t *a_stilo, cw_stilo_t *a_key,
     cw_stilo_t *a_val);
-cw_bool_t	stilo_dict_undef(cw_stilo_t *a_stilo, cw_stilo_t *a_name);
-cw_stilo_t	*stilo_dict_lookup(cw_stilo_t *a_stilo, cw_stilo_t *a_name);
+cw_bool_t	stilo_dict_undef(cw_stilo_t *a_stilo, cw_stilo_t *a_key);
+cw_stilo_t	*stilo_dict_lookup(cw_stilo_t *a_stilo, cw_stilo_t *a_key);
 cw_bool_t	stilo_dict_copy(cw_stilo_t *a_from, cw_stilo_t *a_to);
 cw_uint32_t	stilo_dict_count(cw_stilo_t *a_stilo);
 cw_stilo_t	*stilo_dict_iterate(cw_stilo_t *a_stilo);
