@@ -18,6 +18,10 @@
 #include <pthread_np.h>
 #endif
 
+#ifdef _CW_OS_SOLARIS
+#include <thread.h>
+#endif
+
 #ifdef _CW_DBG
 #define _CW_THD_MAGIC 0x5638638e
 #endif
@@ -542,8 +546,16 @@ thd_p_suspend(cw_thd_t *a_thd)
 	error = pthread_suspend_np(a_thd->thread);
 	if (error) {
 		out_put_e(NULL, NULL, 0, __FUNCTION__,
-		    "Error in pthread_suspend_np(): [s]\n",
-		    strerror(error));
+		    "Error in pthread_suspend_np(): [s]\n", strerror(error));
+		abort();
+	}
+#endif
+#ifdef _CW_THD_SOLARIS_SR
+	a_thd->suspended = TRUE;
+	error = thr_suspend(a_thd->thread);
+	if (error) {
+		out_put_e(NULL, NULL, 0, __FUNCTION__,
+		    "Error in thr_suspend(): [s]\n", strerror(error));
 		abort();
 	}
 #endif
@@ -580,8 +592,15 @@ thd_p_resume(cw_thd_t *a_thd)
 	error = pthread_resume_np(a_thd->thread);
 	if (error) {
 		out_put_e(NULL, NULL, 0, __FUNCTION__,
-		    "Error in pthread_resume_np(): [s]\n",
-		    strerror(error));
+		    "Error in pthread_resume_np(): [s]\n", strerror(error));
+		abort();
+	}
+#endif
+#ifdef _CW_THD_SOLARIS_SR
+	error = thr_continue(a_thd->thread);
+	if (error) {
+		out_put_e(NULL, NULL, 0, __FUNCTION__,
+		    "Error in thr_continue(): [s]\n", strerror(error));
 		abort();
 	}
 #endif

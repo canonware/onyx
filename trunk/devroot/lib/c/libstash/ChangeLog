@@ -1,3 +1,7 @@
+2001-07-13  Jason Evans  <jasone@canonware.com>
+
+	* src/thd.c: Use thr_suspend()/thr_continue() on Solaris.
+
 2001-07-12  Jason Evans  <jasone@canonware.com>
 
 	* : Rename the sema class to sma, in order to avoid namespace

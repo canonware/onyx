@@ -18,6 +18,8 @@ typedef struct cw_thd_s cw_thd_t;
  */
 #ifdef _CW_OS_FREEBSD
 #define _CW_THD_FREEBSD_SR
+#elif (defined(_CW_OS_SOLARIS))
+#define _CW_THD_SOLARIS_SR
 #else
 #define _CW_THD_GENERIC_SR
 #endif
