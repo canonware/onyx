@@ -855,10 +855,18 @@ nxa_l_count_adjust(cw_nxoi_t a_adjust)
 CW_P_INLINE void
 nxa_p_root_add(cw_nxoe_t *a_nxoe, cw_nxoe_t **r_gray, cw_bool_t *r_roots)
 {
-    if (nxoe_l_registered_get(a_nxoe))
+    /* If this object is registered and isn't already in the root set, paint it
+     * gray and insert it into the root set.  It is very rare for an object to
+     * be reported more than once during root set iteration.  The only way this
+     * can normally happen is if multiple interpreters happen to be initializing
+     * systemdict, and they happen to be initializing the same key/value pair.
+     *
+     * Explicitly allow a root to be reported more than once, since it is also
+     * possible (if perhaps unusual) for the program to define one or more of
+     * stdin/stdout/stderr to be the same across interpreters. */
+    if (nxoe_l_registered_get(a_nxoe) && nxoe_l_color_get(a_nxoe) == s_white)
     {
 	/* Paint object gray. */
-	cw_assert(nxoe_l_color_get(a_nxoe) == s_white);
 	nxoe_l_color_set(a_nxoe, !s_white);
 	if (*r_roots)
 	{
