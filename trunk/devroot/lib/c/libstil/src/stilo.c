@@ -856,7 +856,7 @@ stiloe_p_array_delete(cw_stiloe_t *a_stiloe, cw_stil_t *a_stil)
 	_cw_assert(array->stiloe.magic == _CW_STILOE_MAGIC);
 	_cw_assert(array->stiloe.type == STILOT_ARRAY);
 
-	if (array->e.a.len > 0)
+	if (array->stiloe.indirect == FALSE && array->e.a.len > 0)
 		_CW_FREE(array->e.a.arr);
 
 	_CW_STILOE_FREE(array);
@@ -3651,7 +3651,7 @@ stiloe_p_string_delete(cw_stiloe_t *a_stiloe, cw_stil_t *a_stil)
 	_cw_assert(string->stiloe.magic == _CW_STILOE_MAGIC);
 	_cw_assert(string->stiloe.type == STILOT_STRING);
 
-	if (string->e.s.len > 0)
+	if (string->stiloe.indirect == FALSE && string->e.s.len > 0)
 		_CW_FREE(string->e.s.str);
 
 	_CW_STILOE_FREE(string);
