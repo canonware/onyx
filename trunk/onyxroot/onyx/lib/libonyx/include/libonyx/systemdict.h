@@ -223,12 +223,8 @@ systemdict_inline_exch(cw_nxo_t *a_thread)
 
 	ostack = nxo_thread_ostack_get(a_thread);
 
-	if (nxo_stack_count(ostack) < 2) {
+	if (nxo_stack_exch(ostack))
 		nxo_thread_error(a_thread, NXO_THREADE_STACKUNDERFLOW);
-		return;
-	}
-
-	nxo_stack_roll(ostack, 2, 1);
 }
 
 _CW_INLINE void
@@ -289,12 +285,21 @@ systemdict_inline_roll(cw_nxo_t *a_thread)
 		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
 		return;
 	}
-	if (count > nxo_stack_count(ostack) - 2) {
-		nxo_thread_error(a_thread, NXO_THREADE_STACKUNDERFLOW);
-		return;
-	}
 
 	nxo_stack_npop(ostack, 2);
-	nxo_stack_roll(ostack, count, amount);
+	if (nxo_stack_roll(ostack, count, amount)) {
+		cw_nxo_t	*nxo;
+
+		/*
+		 * Stack underflow.  Restore the stack to its original state,
+		 * then throw an error.
+		 */
+		nxo = nxo_stack_push(ostack);
+		nxo_integer_new(nxo, count);
+		nxo = nxo_stack_push(ostack);
+		nxo_integer_new(nxo, amount);
+
+		nxo_thread_error(a_thread, NXO_THREADE_STACKUNDERFLOW);
+	}
 }
 #endif	/* (defined(_CW_USE_INLINES) || defined(_SYSTEMDICT_C_)) */

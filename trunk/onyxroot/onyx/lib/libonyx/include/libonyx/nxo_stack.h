@@ -53,7 +53,6 @@ struct cw_nxoe_stack_s {
 void	nxo_stack_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking);
 void	nxo_stack_copy(cw_nxo_t *a_to, cw_nxo_t *a_from);
 cw_uint32_t nxo_stack_count(cw_nxo_t *a_nxo);
-cw_uint32_t nxo_stack_index_get(cw_nxo_t *a_nxo, cw_nxo_t *a_object);
 
 #ifndef _CW_USE_INLINES
 cw_nxo_t *nxo_stack_push(cw_nxo_t *a_nxo);
@@ -63,7 +62,8 @@ cw_bool_t nxo_stack_npop(cw_nxo_t *a_nxo, cw_uint32_t a_count);
 cw_nxo_t *nxo_stack_get(cw_nxo_t *a_nxo);
 cw_nxo_t *nxo_stack_nget(cw_nxo_t *a_nxo, cw_uint32_t a_index);
 cw_nxo_t *nxo_stack_down_get(cw_nxo_t *a_nxo, cw_nxo_t *a_object);
-void	nxo_stack_roll(cw_nxo_t *a_nxo, cw_uint32_t a_count, cw_sint32_t
+cw_bool_t nxo_stack_exch(cw_nxo_t *a_nxo);
+cw_bool_t nxo_stack_roll(cw_nxo_t *a_nxo, cw_uint32_t a_count, cw_sint32_t
     a_amount);
 #endif
 
@@ -334,9 +334,79 @@ nxo_stack_down_get(cw_nxo_t *a_nxo, cw_nxo_t *a_object)
 	return retval;
 }
 
-_CW_INLINE void
+_CW_INLINE cw_bool_t
+nxo_stack_exch(cw_nxo_t *a_nxo)
+{
+	cw_bool_t		retval;
+	cw_nxoe_stack_t		*stack;
+	cw_nxoe_stacko_t	*top, *noroll;
+
+	_cw_check_ptr(a_nxo);
+	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+
+	stack = (cw_nxoe_stack_t *)a_nxo->o.nxoe;
+	_cw_assert(stack->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_assert(stack->nxoe.type == NXOT_STACK);
+
+	/*
+	 * Get a pointer to the new top of the stack.  Then continue on to find
+	 * the end of the roll region.
+	 */
+	nxoe_p_stack_lock(stack);
+	if (stack->count < 2) {
+		nxoe_p_stack_unlock(stack);
+		retval = TRUE;
+		goto ERROR;
+	}
+
+	top = ql_first(&stack->stack);
+	top = qr_next(top, link);
+	noroll = qr_next(top, link);
+
+	/*
+	 * We now have:
+	 *
+	 * ql_first(&stack->stack) --> /----------\ \  \
+	 *                             |          | |  |
+	 *                             |          | |   \
+	 *                             |          | |   / 1
+	 *                             |          | |  |
+	 *                             |          | |  /
+	 *                             \----------/  \
+	 *                     top --> /----------\  / 2
+	 *                             |          | |
+	 *                             |          | |
+	 *                             |          | |
+	 *                             |          | |
+	 *                             |          | |
+	 *                             \----------/ /
+	 *                  noroll --> /----------\
+	 *                             |          |
+	 *                             |          |
+	 *                             |          |
+	 *                             |          |
+	 *                             |          |
+	 *                             \----------/
+	 *
+	 * Set stack->noroll so that if the GC runs during the following code,
+	 * it can get at the noroll region.
+	 */
+	stack->noroll = noroll;
+	qr_split(ql_first(&stack->stack), noroll, link);
+	ql_first(&stack->stack) = top;
+	qr_meld(top, noroll, link);
+	stack->noroll = NULL;
+	nxoe_p_stack_unlock(stack);
+
+	retval = FALSE;
+	ERROR:
+	return retval;
+}
+
+_CW_INLINE cw_bool_t
 nxo_stack_roll(cw_nxo_t *a_nxo, cw_uint32_t a_count, cw_sint32_t a_amount)
 {
+	cw_bool_t		retval;
 	cw_nxoe_stack_t		*stack;
 	cw_nxoe_stacko_t	*top, *noroll;
 	cw_uint32_t		i;
@@ -349,7 +419,6 @@ nxo_stack_roll(cw_nxo_t *a_nxo, cw_uint32_t a_count, cw_sint32_t a_amount)
 	_cw_assert(stack->nxoe.type == NXOT_STACK);
 
 	_cw_assert(a_count > 0);
-	_cw_assert(a_count <= stack->count);
 
 	/*
 	 * Calculate the current index of the element that will end up on top of
@@ -384,6 +453,11 @@ nxo_stack_roll(cw_nxo_t *a_nxo, cw_uint32_t a_count, cw_sint32_t a_amount)
 	 * the end of the roll region.
 	 */
 	nxoe_p_stack_lock(stack);
+	if (a_count > stack->count) {
+		nxoe_p_stack_unlock(stack);
+		retval = TRUE;
+		goto ERROR;
+	}
 	for (i = 0, top = ql_first(&stack->stack); i < a_amount; i++)
 		top = qr_next(top, link);
 	noroll = top;
@@ -427,6 +501,9 @@ nxo_stack_roll(cw_nxo_t *a_nxo, cw_uint32_t a_count, cw_sint32_t a_amount)
 	nxoe_p_stack_unlock(stack);
 
 	RETURN:
+	retval = FALSE;
+	ERROR:
+	return retval;
 }
 #endif	/* (defined(_CW_USE_INLINES) || defined(_NXO_STACK_C_)) */
 

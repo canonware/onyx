@@ -19,8 +19,8 @@
  * stack operations very fast.
  *
  * Using a ring makes it relatively simple to make all the stack operations
- * GC-safe.  One disadvantage of using rings, however, is that
- * nxo_stack_roll() re-orders stack elements, and over time, the elements
+ * GC-safe.  One disadvantage of using rings, however, is that nxo_stack_exch()
+ * and nxo_stack_roll() re-order stack elements, and over time, the elements
  * become jumbled enough that it is possible that additional cache misses
  * result.  However, since only a relatively small number of spare elements is
  * kept, the cache effects of jumbling should be negligible under normal
@@ -273,29 +273,6 @@ nxo_stack_count(cw_nxo_t *a_nxo)
 	retval = stack->count;
 
 	return retval;
-}
-
-cw_uint32_t
-nxo_stack_index_get(cw_nxo_t *a_nxo, cw_nxo_t *a_object)
-{
-	cw_uint32_t		i;
-	cw_nxoe_stack_t	*stack;
-	cw_nxoe_stacko_t	*stacko;
-
-	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-
-	stack = (cw_nxoe_stack_t *)a_nxo->o.nxoe;
-	_cw_assert(stack->nxoe.magic == _CW_NXOE_MAGIC);
-	_cw_assert(stack->nxoe.type == NXOT_STACK);
-
-	for (i = 0, stacko = ql_first(&stack->stack); (stacko !=
-	    (cw_nxoe_stacko_t *)a_object) && (i < stack->count); stacko =
-	     qr_next(stacko, link), i++)
-		;
-	_cw_assert(i < stack->count);
-
-	return i;
 }
 
 void

@@ -1059,7 +1059,7 @@ systemdict_copy(cw_nxo_t *a_thread)
 
 		nxo_array_copy(nxo, orig);
 
-		nxo_stack_roll(ostack, 2, 1);
+		nxo_stack_exch(ostack);
 		nxo_stack_pop(ostack);
 		break;
 	}
@@ -1086,7 +1086,7 @@ systemdict_copy(cw_nxo_t *a_thread)
 
 		nxo_stack_copy(nxo, orig);
 
-		nxo_stack_roll(ostack, 2, 1);
+		nxo_stack_exch(ostack);
 		nxo_stack_pop(ostack);
 		break;
 	}
@@ -1105,7 +1105,7 @@ systemdict_copy(cw_nxo_t *a_thread)
 
 		nxo_string_copy(nxo, orig);
 
-		nxo_stack_roll(ostack, 2, 1);
+		nxo_stack_exch(ostack);
 		nxo_stack_pop(ostack);
 		break;
 	}
@@ -2307,7 +2307,7 @@ systemdict_get(cw_nxo_t *a_thread)
 		}
 		nxo_array_el_get(from, index, with);
 
-		nxo_stack_roll(ostack, 2, 1);
+		nxo_stack_exch(ostack);
 		nxo_stack_pop(ostack);
 		break;
 	}
@@ -2341,7 +2341,7 @@ systemdict_get(cw_nxo_t *a_thread)
 		nxo_string_el_get(from, index, &el);
 		nxo_integer_set(with, (cw_nxoi_t)el);
 
-		nxo_stack_roll(ostack, 2, 1);
+		nxo_stack_exch(ostack);
 		nxo_stack_pop(ostack);
 		break;
 	}
@@ -3472,7 +3472,7 @@ systemdict_read(cw_nxo_t *a_thread)
 			nxo_boolean_new(file, TRUE);
 			nxo_string_new(string, nxo_thread_nx_get(a_thread),
 			    nxo_thread_currentlocking(a_thread), 0);
-			nxo_stack_roll(ostack, 2, 1);
+			nxo_stack_exch(ostack);
 		} else if (nread < nxo_string_len_get(string)) {
 			cw_nxo_t	*value, *code;
 
@@ -3492,7 +3492,7 @@ systemdict_read(cw_nxo_t *a_thread)
 			 * The string is full, so doesn't need modified.
 			 */
 			nxo_boolean_new(file, FALSE);
-			nxo_stack_roll(ostack, 2, 1);
+			nxo_stack_exch(ostack);
 		}
 		break;
 	}
@@ -3965,12 +3965,9 @@ systemdict_sexch(cw_nxo_t *a_thread)
 		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
 		return;
 	}
-	if (nxo_stack_count(stack) < 2) {
-		nxo_thread_error(a_thread, NXO_THREADE_STACKUNDERFLOW);
-		return;
-	}
 
-	nxo_stack_roll(stack, 2, 1);
+	if (nxo_stack_exch(stack)) 
+		nxo_thread_error(a_thread, NXO_THREADE_STACKUNDERFLOW);
 }
 
 void
@@ -4181,13 +4178,13 @@ systemdict_sroll(cw_nxo_t *a_thread)
 		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
 		return;
 	}
-	if (count > nxo_stack_count(stack)) {
+
+	if (nxo_stack_roll(stack, count, amount)) {
 		nxo_thread_error(a_thread, NXO_THREADE_STACKUNDERFLOW);
 		return;
 	}
 
 	nxo_stack_npop(ostack, 2);
-	nxo_stack_roll(stack, count, amount);
 }
 
 void
@@ -5233,7 +5230,7 @@ systemdict_token(cw_nxo_t *a_thread)
 			/* Success. */
 			SUCCESS:
 			nxo_boolean_new(nxo, TRUE);
-			nxo_stack_roll(ostack, 2, 1);
+			nxo_stack_exch(ostack);
 		} else {
 			cw_uint32_t	i;
 
