@@ -165,7 +165,7 @@ S_LINKS = [S_LINKS] [objdir]/lib/c/libonyx/lib/libonyx.so;
 
 BOOTSTRAP = [BOOTSTRAP] libonyx_bootstrap;
 
-libonyx_bootstrap : [ONYX]
+libonyx_bootstrap : [TONYX]
 {
   cat [srcdir]/lib/c/libonyx/src/nx_nxcode.nx
     | [ONYX] [srcdir]/lib/c/libonyx/src/nx_nxcode_gen.nx

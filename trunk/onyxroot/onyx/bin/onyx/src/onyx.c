@@ -16,7 +16,7 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include "onyx.h"
+#include "../include/onyx.h"
 
 /* Include generated code. */
 #ifdef _CW_POSIX

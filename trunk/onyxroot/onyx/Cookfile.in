@@ -105,7 +105,7 @@ bins : [BINS];
 
 bootstrap : [BOOTSTRAP];
 
-tests : [ONYX] [MODS]
+tests : [TONYX] [MODS]
         [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS] [CBTESTS]]
         [fromto [srcdir]/%0%.nx.in [objdir]/%0%.nx [OTESTS] [OBTESTS]]
         [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]];

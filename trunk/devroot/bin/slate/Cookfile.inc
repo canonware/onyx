@@ -74,7 +74,7 @@ BINS = [BINS] [SLATE];
 
 slate : [SLATE];
 
-slate_install_self : [ONYX]
+slate_install_self :
 {
   [INSTALL] -d [PREFIX]/bin;
 
@@ -84,7 +84,7 @@ data
 
 echo \"[srcdir]/bin/slate/src/slate.nx --> [PREFIX]/bin/slate\"
 
-echo \"#![abs_objdir]/[ONYX]\" > [PREFIX]/bin/slate
+echo \"#![prefix]/bin/onyx\" > [PREFIX]/bin/slate
 echo \"!#\" >> [PREFIX]/bin/slate
 [CAT] [srcdir]/bin/slate/src/slate.nx >> [PREFIX]/bin/slate;
 chmod u+x [PREFIX]/bin/slate;
@@ -119,7 +119,7 @@ slate_distclean :
  * Dependencies.
  */
 
-[objdir]/bin/slate/bin/% : [srcdir]/bin/slate/src/%.nx [ONYX] [MODSLATE]
+[objdir]/bin/slate/bin/% : [srcdir]/bin/slate/src/%.nx [TONYX] [MODSLATE]
   set mkdir
 {
   [SHELL] -e;
@@ -128,7 +128,7 @@ data
 
 echo \"[srcdir]/bin/slate/src/%.nx --> [target]\"
 
-echo \"#![abs_objdir]/[ONYX]\" > [target]
+echo \"#![abs_objdir]/[TONYX]\" > [target]
 echo \"!#\" >> [target]
 [CAT] [srcdir]/bin/slate/src/%.nx >> [target];
 chmod u+x [target];

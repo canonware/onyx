@@ -112,7 +112,7 @@ data
 
 echo \"[srcdir]/%0test/%.nx.in --> [target]\"
 
-echo \"#![abs_objdir]/[ONYX]\" > [target]
+echo \"#![abs_objdir]/[TONYX]\" > [target]
 echo \"!#\" >> [target]
 [CAT] [srcdir]/%0test/%.nx.in >> [target];
 chmod u+x [target];

@@ -15,7 +15,7 @@ AC_SUBST(objdir)
 abs_objdir=`pwd`
 AC_SUBST(abs_objdir)
 
-cfgoutputs="Cookfile doc/latex/onyx.tex test/verify"
+cfgoutputs="Cookfile test/verify"
 cfghdrs=
 bins=
 mods=
@@ -195,6 +195,8 @@ fi
 fi
 
 if test "x$build_onyx" = "xyes" ; then
+  cfgoutputs="$cfgoutputs doc/latex/onyx.tex"
+
   if test "x$enable_posix" = "x1" ; then
     AC_CHECK_FUNCS(dlopen, , \
       AC_CHECK_LIB(dl, dlopen, LIBS="$LIBS -ldl" ; AC_DEFINE(HAVE_DLOPEN), \
@@ -212,6 +214,17 @@ if test "x$build_onyx" = "xyes" ; then
   fi
   AC_DEFINE_UNQUOTED(_CW_ONYX_RPATH, "$_CW_ONYX_RPATH")
   AC_DEFINE_UNQUOTED(_CW_ONYX_MPATH, "$_CW_ONYX_MPATH")
+
+  AC_DEFINE_UNQUOTED(_CW_TONYX_ONYX, "$abs_objdir/bin/onyx/bin/onyx")
+
+  tmpath=ONYX_MPATH=:.
+  trpath=ONYX_RPATH=:.
+  for i in $mods ; do
+    tmpath=$tmpath:$abs_objdir/mod/$i/nxmod
+    trpath=$trpath:$abs_objdir/mod/$i/src
+  done
+  AC_DEFINE_UNQUOTED(_CW_TONYX_RPATH, "$trpath")
+  AC_DEFINE_UNQUOTED(_CW_TONYX_MPATH, "$tmpath")
 fi
 
 if test "x$build_modgtk" = "xyes" ; then

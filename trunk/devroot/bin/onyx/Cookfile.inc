@@ -49,7 +49,11 @@ ONYX_SRCS = onyx.c
 #endif
             ;
 ONYX_SRCS = [fromto % [srcdir]/bin/onyx/src/% [ONYX_SRCS]];
-SRCS = [SRCS] [ONYX_SRCS];
+
+TONYX_SRCS = tonyx.c;
+TONYX_SRCS = [fromto % [srcdir]/bin/onyx/src/% [TONYX_SRCS]];
+
+SRCS = [SRCS] [ONYX_SRCS] [TONYX_SRCS];
 
 /* Simple C tests.  Output is diff'ed with the expected (.exp file) output. */
 {
@@ -210,7 +214,10 @@ SRCS = [SRCS] [ONYX_SRCS];
 
 /* Binaries. */
 ONYX = [objdir]/bin/onyx/bin/onyx;
-BINS = [BINS] [ONYX];
+TONYX = [objdir]/bin/onyx/bin/tonyx;
+BINS = [BINS] [ONYX] [TONYX];
+
+[TONYX] : [ONYX];
 
 /*
  * User cook'ables.
@@ -234,6 +241,7 @@ onyx_bootstrap : [ONYX]
 }
 
 onyx : [ONYX];
+tonyx : [TONYX];
 
 onyx_install_self : [ONYX]
 {
@@ -274,12 +282,18 @@ onyx_distclean :
  * Dependencies.
  */
 
+[TONYX] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [TONYX_SRCS]]
+  set mkdir
+{
+  [CC] [A_CFLAGS] -o [target]
+       [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [TONYX_SRCS]];
+}
+
 [ONYX] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [ONYX_SRCS]]
-         [LIBONYX_S]
+          [LIBONYX_S]
 #if [enable_libedit]
-         [LIBEDIT_A]
+          [LIBEDIT_A]
 #endif
-         [MODS]
   set mkdir
 {
   [CC] [A_CFLAGS] -o [target]

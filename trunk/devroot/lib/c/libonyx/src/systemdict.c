@@ -4293,7 +4293,7 @@ systemdict_setenv(cw_nxo_t *a_thread)
 
 	tstr[klen + vlen + 1] = '\0';
 
-	/* Do the puttenv(). */
+	/* Do the putenv(). */
 	if (putenv(tstr) == -1)
 		xep_throw(_CW_ONYXX_OOM);
 	nxo_stack_pop(tstack);
