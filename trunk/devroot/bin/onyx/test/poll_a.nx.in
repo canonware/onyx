@@ -55,7 +55,18 @@ tmpfile_a 3 seek
     dup 2 sprint
     dup 0 poll
     `out:\n' print
-    1 sprint 2 sprint
+    1 sprint
+    # Strip $POLLWRNORM out of the results.  FreeBSD uses the same value for POLLOUT and
+    # POLLWRNORM, which causes $POLLWRNORM to show up in the output.
+    dup {
+	dup $POLLWRNORM known {
+	    $POLLWRNORM undef
+	}{
+	    pop
+	} ifelse
+	pop # Key.
+    } foreach
+    2 sprint
 } foreach
 
 tmpfile_a close
