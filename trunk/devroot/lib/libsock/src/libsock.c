@@ -212,7 +212,9 @@ sockb_init(cw_uint32_t a_max_fds, cw_uint32_t a_bufc_size, cw_uint32_t
 		if (pezz_new(&g_sockb->messages_pezz, sizeof(struct
 		    cw_sockb_msg_s), 8) == NULL)
 			goto OOM_7;
-		mq_new(&g_sockb->messages);
+		if (mq_new(&g_sockb->messages, sizeof(struct cw_sockb_msg_s *))
+		    == NULL)
+			goto OOM_8;
 
 		/* Create the lock used for protecting gethostbyname(). */
 		mtx_new(&g_sockb->get_ip_addr_lock);
@@ -226,6 +228,8 @@ sockb_init(cw_uint32_t a_max_fds, cw_uint32_t a_bufc_size, cw_uint32_t
 
 	return FALSE;
 
+	OOM_8:
+	pezz_delete(&g_sockb->messages_pezz);
 	OOM_7:
 	pezz_delete(&g_sockb->buffer_pool);
 	OOM_6:
@@ -327,7 +331,7 @@ sockb_in_notify(cw_mq_t *a_mq, int a_sockfd)
 	message->data.in_notify.cnd = &cnd;
 
 	mtx_lock(&mtx);
-	if (mq_put(&g_sockb->messages, (const void *)message) != 0) {
+	if (mq_put(&g_sockb->messages, message) != 0) {
 		_cw_pezz_put(&g_sockb->messages_pezz, (void *)message);
 		retval = TRUE;
 		goto RETURN;
@@ -380,7 +384,7 @@ sockb_l_register_sock(cw_sock_t *a_sock)
 #endif
 	message->type = REGISTER;
 	message->data.sock = a_sock;
-	if (mq_put(&g_sockb->messages, (const void *)message) != 0) {
+	if (mq_put(&g_sockb->messages, message) != 0) {
 		_cw_pezz_put(&g_sockb->messages_pezz, (void *)message);
 		retval = TRUE;
 		goto RETURN;
@@ -413,7 +417,7 @@ sockb_l_unregister_sock(cw_uint32_t a_sockfd)
 #endif
 	message->type = UNREGISTER;
 	message->data.sockfd = a_sockfd;
-	if (mq_put(&g_sockb->messages, (const void *)message) != 0) {
+	if (mq_put(&g_sockb->messages, message) != 0) {
 		_cw_pezz_put(&g_sockb->messages_pezz, (void *)message);
 		retval = TRUE;
 		goto RETURN;
@@ -445,7 +449,7 @@ sockb_l_out_notify(cw_uint32_t a_sockfd)
 #endif
 	message->type = OUT_NOTIFY;
 	message->data.sockfd = a_sockfd;
-	if (mq_put(&g_sockb->messages, (const void *)message) != 0) {
+	if (mq_put(&g_sockb->messages, message) != 0) {
 		_cw_pezz_put(&g_sockb->messages_pezz, (void *)message);
 		retval = TRUE;
 		goto RETURN;
@@ -477,7 +481,7 @@ sockb_l_in_space(cw_uint32_t a_sockfd)
 #endif
 	message->type = IN_SPACE;
 	message->data.sockfd = a_sockfd;
-	if (mq_put(&g_sockb->messages, (const void *)message) != 0) {
+	if (mq_put(&g_sockb->messages, message) != 0) {
 		_cw_pezz_put(&g_sockb->messages_pezz, (void *)message);
 		retval = TRUE;
 		goto RETURN;
@@ -568,7 +572,7 @@ sockb_p_notify(cw_mq_t *a_mq, int a_sockfd)
 
 	_cw_check_ptr(a_mq);
 
-	while ((error = mq_put(a_mq, (void *)a_sockfd)) == -1) {
+	while ((error = mq_put(a_mq, a_sockfd)) == -1) {
 		/*
 		 * We can't afford to lose the message, since it could end up
 		 * causing deadlock.
@@ -630,8 +634,7 @@ sockb_p_entry_func(void *a_arg)
 
 	while (g_sockb->should_quit == FALSE) {
 		/* Check for messages in the message queues. */
-		while ((message = (struct cw_sockb_msg_s
-		    *)mq_tryget(&g_sockb->messages)) != NULL) {
+		while (mq_tryget(&g_sockb->messages, &message)) {
 			switch (message->type) {
 			case REGISTER:
 				sock = message->data.sock;

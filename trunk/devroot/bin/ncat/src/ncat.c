@@ -257,7 +257,7 @@ main(int argc, char **argv)
 		cw_bool_t	done_reading = FALSE;
 		char		*str = NULL;
 
-		mq = mq_new(NULL);
+		mq = mq_new(NULL, sizeof(int));
 		buf = buf_new(NULL);
 
 		sock_stdin = sock_new(NULL, 16384);
@@ -277,12 +277,13 @@ main(int argc, char **argv)
 		for (;;) {
 			if ((tout != NULL) && (done_reading)) {
 				/*
-				 * If mq_timedget() times out, fd will be set to
-				 * 0, which will cause the program to quit.
+				 * If mq_timedget() times out, set fd to 0,
+				 * which will cause the program to quit.
 				 */
-				fd = (int)mq_timedget(mq, tout);
+				if (mq_timedget(mq, tout, &fd))
+					fd = 0;
 			} else
-				fd = (int)mq_get(mq);
+				mq_get(mq, &fd);
 
 			if (fd == fd_sock_stdin) {
 				do {

@@ -116,7 +116,7 @@ main(int argc, char **argv)
 	 */
 	buf_new(&buf);
 
-	mq = mq_new(NULL);
+	mq = mq_new(NULL, sizeof(int));
 	if (mq == NULL)
 		_cw_error("Memory allocation error");
 	/* Start thread to accept connections. */
@@ -125,7 +125,7 @@ main(int argc, char **argv)
 	for (;;) {
 		did_work = FALSE;
 
-		while ((void *)(sockfd = (int)mq_get(mq)) != NULL) {
+		while (mq_get(mq, &sockfd) == FALSE) {
 			did_work = TRUE;
 
 			if (sock_vec[sockfd] != NULL) {
