@@ -73,6 +73,7 @@ cw_tsd_t	cw_g_thd_self_key;
 static void	thd_p_delete(cw_thd_t *a_thd);
 static void	*thd_p_start_func(void *a_arg);
 static void	thd_p_suspend(cw_thd_t *a_thd);
+static void	thd_p_resume(cw_thd_t *a_thd);
 
 #ifdef _CW_THD_GENERIC_SR
 /*
@@ -382,7 +383,7 @@ thd_single_leave(void)
 	qr_foreach(thd, &cw_g_thd, link) {
 		if (thd->singled) {
 			thd->singled = FALSE;
-			thd_resume(thd);
+			thd_p_resume(thd);
 		}
 	}
 	mtx_unlock(&cw_g_thd_single_lock);
@@ -432,34 +433,19 @@ thd_trysuspend(cw_thd_t *a_thd)
 void
 thd_resume(cw_thd_t *a_thd)
 {
-	int	error;
-
 	_cw_check_ptr(a_thd);
 	_cw_dassert(a_thd->magic == _CW_THD_MAGIC);
 	_cw_assert(cw_g_thd_initialized);
 
 #ifdef _CW_THD_GENERIC_SR
-	error = pthread_kill(a_thd->thread, _CW_THD_SIGSR);
-	if (error != 0) {
-		_cw_out_put_e("Error in pthread_kill(): [s]\n",
-		    strerror(error));
-		abort();
-	}
-	if (sem_wait(&a_thd->sem) != 0) {
-		_cw_out_put_e("Error in sem_wait(): [s]\n", strerror(errno));
-		abort();
-	}
+	mtx_lock(&cw_g_thd_single_lock);
 #endif
-#ifdef _CW_THD_FREEBSD_SR
-	error = pthread_resume_np(a_thd->thread);
-	if (error) {
-		out_put_e(NULL, NULL, 0, __FUNCTION__,
-		    "Error in pthread_resume_np(): [s]\n",
-		    strerror(error));
-		abort();
-	}
+
+	thd_p_resume(a_thd);
+
+#ifdef _CW_THD_GENERIC_SR
+	mtx_unlock(&cw_g_thd_single_lock);
 #endif
-	mtx_unlock(&a_thd->crit_lock);
 }
 
 static void
@@ -532,10 +518,9 @@ thd_p_suspend(cw_thd_t *a_thd)
 #ifdef _CW_THD_GENERIC_SR
 	/*
 	 * Save the thread's pointer in a place that the signal handler can
-	 * get to it.  We don't have to worry about other threads writing
-	 * to cw_g_sr_self, since we're under the protection of
-	 * cw_g_thd_single_lock, but we need a memory barrier to make sure
-	 * that the signal handler gets a clean read.
+	 * get to it.  cw_g_thd_sr_lock is used as a memory barrier;
+	 * cw_g_thd_single_lock protects us from other suspend/resume
+	 * activity.
 	 */
 	mtx_lock(&cw_g_thd_sr_lock);
 	cw_g_sr_self = a_thd;
@@ -562,6 +547,45 @@ thd_p_suspend(cw_thd_t *a_thd)
 		abort();
 	}
 #endif
+}
+
+static void
+thd_p_resume(cw_thd_t *a_thd)
+{
+	int	error;
+
+#ifdef _CW_THD_GENERIC_SR
+	/*
+	 * Save the thread's pointer in a place that the signal handler can
+	 * get to it.  cw_g_thd_sr_lock is used as a memory barrier;
+	 * cw_g_thd_single_lock protects us from other suspend/resume
+	 * activity.
+	 */
+	mtx_lock(&cw_g_thd_sr_lock);
+	cw_g_sr_self = a_thd;
+	mtx_unlock(&cw_g_thd_sr_lock);
+
+	error = pthread_kill(a_thd->thread, _CW_THD_SIGSR);
+	if (error != 0) {
+		_cw_out_put_e("Error in pthread_kill(): [s]\n",
+		    strerror(error));
+		abort();
+	}
+	if (sem_wait(&a_thd->sem) != 0) {
+		_cw_out_put_e("Error in sem_wait(): [s]\n", strerror(errno));
+		abort();
+	}
+#endif
+#ifdef _CW_THD_FREEBSD_SR
+	error = pthread_resume_np(a_thd->thread);
+	if (error) {
+		out_put_e(NULL, NULL, 0, __FUNCTION__,
+		    "Error in pthread_resume_np(): [s]\n",
+		    strerror(error));
+		abort();
+	}
+#endif
+	mtx_unlock(&a_thd->crit_lock);
 }
 
 #ifdef _CW_THD_GENERIC_SR
