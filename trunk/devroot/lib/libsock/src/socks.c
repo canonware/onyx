@@ -44,6 +44,10 @@ socks_new(void)
 
   bzero(retval, sizeof(cw_socks_t));
 
+#ifdef _LIBSOCK_DBG
+  retval->magic = _LIBSOCK_SOCKS_MAGIC;
+#endif
+
   RETURN:
   return retval;
 }
@@ -69,6 +73,10 @@ socks_delete(cw_socks_t * a_socks)
     }
   }
 
+#ifdef _LIBSOCK_DBG
+  a_socks->magic = 0;
+#endif
+  
   _cw_free(a_socks);
 }
 
@@ -80,6 +88,7 @@ socks_listen(cw_socks_t * a_socks, int * r_port)
   struct sockaddr_in server_addr;
 
   _cw_check_ptr(a_socks);
+  _cw_assert(_LIBSOCK_SOCKS_MAGIC == a_socks->magic);
   _cw_check_ptr(r_port);
   _cw_assert(a_socks->is_listening == FALSE);
 
@@ -146,7 +155,8 @@ socks_listen(cw_socks_t * a_socks, int * r_port)
     *r_port = ntohs(server_addr.sin_port);
   }
   
-  /* Now listen. */
+  /* Now listen.  Use 511 for the backlog just in case only the lower 8 bits are
+   * heeded. */
   if (-1 == listen(a_socks->sockfd, 511))
   {
     if (dbg_is_registered(cw_g_dbg, "socks_error"))
@@ -174,6 +184,7 @@ socks_accept(cw_socks_t * a_socks, struct timeval * a_timeout,
   int timeout, nready;
 
   _cw_check_ptr(a_socks);
+  _cw_assert(_LIBSOCK_SOCKS_MAGIC == a_socks->magic);
   _cw_check_ptr(r_sock);
   
   /* Are we even listening right now? */

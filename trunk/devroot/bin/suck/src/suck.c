@@ -17,6 +17,8 @@
 #define _LIBSOCK_USE_SOCKS
 #include "libsock/libsock.h"
 
+#define _LIBSOCK_SUCK_MAX_CONNS 100000
+
 /* Command line defaults. */
 #define _LIBSOCK_BLOW_DEFAULT_BSIZE 4096
 
@@ -31,7 +33,7 @@ const char *
 basename(const char * a_str);
 
 /* Global. */
-cw_sock_t * sock_vec[FD_SETSIZE];
+cw_sock_t * sock_vec[_LIBSOCK_SUCK_MAX_CONNS];
 cw_mq_t * mq;
 cw_socks_t * socks;
 cw_uint32_t opt_bsize = _LIBSOCK_BLOW_DEFAULT_BSIZE;
@@ -50,7 +52,7 @@ main(int argc, char ** argv)
   cw_bool_t cl_error = FALSE, opt_help = FALSE, opt_version = FALSE;
   int opt_port = 0;
 
-  bzero(sock_vec, FD_SETSIZE * sizeof(cw_sock_t *));
+  bzero(sock_vec, _LIBSOCK_SUCK_MAX_CONNS * sizeof(cw_sock_t *));
   
   libstash_init();
   dbg_register(cw_g_dbg, "mem_error");

@@ -278,7 +278,6 @@ main(int argc, char ** argv)
   return retval;
 }
 
-
 void
 usage(const char * a_progname)
 {
