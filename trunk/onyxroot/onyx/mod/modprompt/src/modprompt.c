@@ -50,6 +50,10 @@ struct cw_modprompt_synth_s {
     cw_uint8_t prompt_str[CW_PROMPT_STRLEN];
 };
 
+/* Globals. */
+/* This must be global so that the signal handler can get to it. */
+static struct cw_modprompt_synth_s *synth;
+
 /* Function prototypes. */
 static cw_nxoe_t *
 modprompt_synth_ref_iter(void *a_data, cw_bool_t a_reset);
@@ -64,6 +68,12 @@ modprompt_read(void *a_data, cw_nxo_t *a_file, cw_uint32_t a_len,
 static char *
 modprompt_prompt(EditLine *a_el);
 
+static void
+modprompt_handlers_install(void);
+
+static void
+modprompt_signal_handle(int a_signal);
+
 #ifdef CW_THREADS
 static void *
 modprompt_entry(void *a_arg);
@@ -73,7 +83,6 @@ void
 modprompt_init(void *a_arg, cw_nxo_t *a_thread)
 {
     cw_nxo_t *estack, *file;
-    struct cw_modprompt_synth_s *synth;
     char *editor;
 #ifdef CW_THREADS
     sigset_t set, oset;
@@ -155,6 +164,9 @@ modprompt_init(void *a_arg, cw_nxo_t *a_thread)
     sigaddset(&set, SIGWINCH);
     thd_sigmask(SIG_BLOCK, &set, &oset);
     synth->read_thd = thd_new(modprompt_entry, synth, TRUE);
+#else
+    /* Install signal handlers. */
+    modprompt_handlers_install();
 #endif
 
     /* stdin is now a synthetic file.  This does not change any file objects
@@ -436,6 +448,85 @@ modprompt_prompt(EditLine *a_el)
     return synth->prompt_str;
 }
 
+static void
+modprompt_handlers_install(void)
+{
+    struct sigaction action;
+#ifdef CW_THREADS
+    sigset_t set, oset;
+#endif
+
+    /* Set up a signal handler for various signals that are important to an
+     * interactive program. */
+    memset(&action, 0, sizeof(struct sigaction));
+    action.sa_handler = modprompt_signal_handle;
+    sigemptyset(&action.sa_mask);
+#define HANDLER_INSTALL(a_signal)					\
+    if (sigaction((a_signal), &action, NULL) == -1)			\
+    {									\
+	fprintf(stderr, "Error in sigaction(%s, ...): %s\n",		\
+		#a_signal, strerror(errno));				\
+	abort();							\
+    }
+    HANDLER_INSTALL(SIGHUP);
+    HANDLER_INSTALL(SIGWINCH);
+    HANDLER_INSTALL(SIGTSTP);
+    HANDLER_INSTALL(SIGCONT);
+    HANDLER_INSTALL(SIGINT);
+    HANDLER_INSTALL(SIGQUIT);
+    HANDLER_INSTALL(SIGTERM);
+#undef HANDLER_INSTALL
+
+#ifdef CW_THREADS
+    sigemptyset(&set);
+    sigaddset(&set, SIGINT);
+    sigaddset(&set, SIGTSTP);
+    sigaddset(&set, SIGSTOP);
+    sigaddset(&set, SIGQUIT);
+    sigaddset(&set, SIGHUP);
+    sigaddset(&set, SIGTERM);
+    sigaddset(&set, SIGCONT);
+    sigaddset(&set, SIGWINCH);
+    thd_sigmask(SIG_UNBLOCK, &set, &oset);
+#endif
+}
+
+static void
+modprompt_signal_handle(int a_signal)
+{
+    switch (a_signal)
+    {
+	case SIGWINCH:
+	{
+ 	    el_resize(synth->el);
+	    break;
+	}
+	case SIGTSTP:
+	{
+	    /* Signal the process group. */
+	    kill(0, SIGSTOP);
+	    break;
+	}
+	case SIGCONT:
+	{
+	    break;
+	}
+	case SIGHUP:
+	case SIGINT:
+	case SIGQUIT:
+	case SIGTERM:
+	{
+	    el_end(synth->el);
+	    exit(0);
+	}
+	default:
+	{
+	    fprintf(stderr, "Unexpected signal %d\n", a_signal);
+	    abort();
+	}
+    }
+}
+
 #ifdef CW_THREADS
 static void *
 modprompt_entry(void *a_arg)
@@ -446,6 +537,9 @@ modprompt_entry(void *a_arg)
 
     cw_check_ptr(synth);
     cw_dassert(synth->magic == CW_MODPROMPT_SYNTH_MAGIC);
+
+    /* Install signal handlers. */
+    modprompt_handlers_install();
 
     mtx_lock(&synth->mtx);
     for (;;)

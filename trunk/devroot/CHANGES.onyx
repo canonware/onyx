@@ -1,5 +1,9 @@
 2002-07-12 : Jason Evans <jasone@canonware.com>
 
+	* mod/modprompt/src/modprompt.c : Implement terminal-related signal
+	  handling on so that suspending, resizing, interrupting, etc. work
+	  correctly.
+
 	* Revise string and pointer hashing functions to marginally improve
 	  performance.
 
