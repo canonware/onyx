@@ -119,6 +119,10 @@ nxm_new(cw_nxo_t *a_nxo, cw_nxo_t *a_path, cw_nxo_t *a_sym)
     nxo_dup(nxo_handle_tag_get(a_nxo), a_sym);
     nxo_attr_set(a_nxo, NXOA_EXECUTABLE);
 
+#ifdef CW_DBG
+    nxm->magic = CW_NXM_MAGIC;
+#endif
+
     retval = NXN_ZERO;
     RETURN:
     return retval;
