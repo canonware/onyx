@@ -2598,7 +2598,11 @@ onyx:0>
 		Create a formatted string representation of \oparg{regex}.
 	\item[Example(s): ]\begin{verbatim}
 
-XXX
+onyx:0> outputsdict begin
+onyx:0> `' regex
+onyx:1> <$w 30 $p `.' $j $c> regextype print `\n' print flush
+...........-regex-............
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{outputsdict:regsubtype}
@@ -2626,7 +2630,11 @@ XXX
 		Create a formatted string representation of \oparg{regsub}.
 	\item[Example(s): ]\begin{verbatim}
 
-XXX
+onyx:0> outputsdict begin
+onyx:0> `' `' regsub
+onyx:1> <$w 30 $p `.' $j $c> regsubtype print `\n' print flush
+...........-regsub-...........
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{outputsdict:stacktype}
@@ -3428,7 +3436,13 @@ onyx:1>
 		Create a syntactical string representation of \oparg{regex}.
 	\item[Example(s): ]\begin{verbatim}
 
-XXX
+onyx:0> sprintsdict begin
+onyx:0> `' regex
+onyx:1> dup 0 regextype print `\n' print flush
+-regex-
+onyx:1> dup 1 regextype print `\n' print flush
+-regex-
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{sprintsdict:regsubtype}
@@ -3456,7 +3470,13 @@ XXX
 		Create a syntactical string representation of \oparg{regsub}.
 	\item[Example(s): ]\begin{verbatim}
 
-XXX
+onyx:0> sprintsdict begin
+onyx:0> `' `' regsub
+onyx:1> dup 0 regsubtype print `\n' print flush
+-regsub-
+onyx:1> dup 1 regsubtype print `\n' print flush
+-regsub-
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{sprintsdict:realtype}
