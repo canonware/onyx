@@ -2308,8 +2308,8 @@ objecs from stack down through topmost mark. \\
 (a) (b) & {\bf \htmlref{catenate}{systemdict:catenate}} & (a b) & Catenate two
 stacks. \\
 \hline
-(a) (b) & {\bf \htmlref{copy}{systemdict:copy}} & (b a) & Copy stack
-contents. \\
+srcstack dststack & {\bf \htmlref{copy}{systemdict:copy}} & dststack & Copy
+stack contents. \\
 \hline \hline
 \multicolumn{4}{|l|}{Integer and math operators} \\
 \hline \hline
@@ -2358,7 +2358,8 @@ string index substring & {\bf \htmlref{putinterval}{systemdict:putinterval}} &
 `a' `b' & {\bf \htmlref{catenate}{systemdict:catenate}} & `ab' & Catenate two
 strings. \\
 \hline
-a b & {\bf \htmlref{copy}{systemdict:copy}} & substring & Copy string. \\
+srcstring dststring & {\bf \htmlref{copy}{systemdict:copy}} & dstsubstring &
+Copy string. \\
 \hline \hline
 \multicolumn{4}{|l|}{Name operators} \\
 \hline \hline
@@ -2393,7 +2394,8 @@ array index subarray & {\bf \htmlref{putinterval}{systemdict:putinterval}} & --
 [a] [b] & {\bf \htmlref{catenate}{systemdict:catenate}} & [a b] & Catenate two
 arrays. \\
 \hline
-a b & {\bf \htmlref{copy}{systemdict:copy}} & subarray & Copy array. \\
+srcarray dstarray & {\bf \htmlref{copy}{systemdict:copy}} & dstsubarray & Copy
+array. \\
 \hline \hline
 \multicolumn{4}{|l|}{Dictionary and dictionary stack operators} \\
 \hline \hline
@@ -2450,7 +2452,8 @@ associate with key. \\
 dict key value & {\bf \htmlref{put}{systemdict:put}} & -- & Set dict key/value
 pair. \\
 \hline
-a b & {\bf \htmlref{copy}{systemdict:copy}} & b & Copy dictionary contents. \\
+srcdict dstdict & {\bf \htmlref{copy}{systemdict:copy}} & dstdict & Copy
+dictionary contents. \\
 \hline
 -- & {\bf \htmlref{currentdict}{systemdict:currentdict}} & dict & Get topmost
 dstack dictionary. \\
@@ -3373,25 +3376,65 @@ onyx:0>
 	\end{description}
 \label{systemdict:copy}
 \index{copy@\onyxop{}{copy}{}}
-\item[{\onyxop{a b}{copy}{subarray}}: ]
-\item[{\onyxop{a b}{copy}{b}}: ]
-\item[{\onyxop{(a) (b)}{copy}{(b a)}}: ]
+\item[{\onyxop{srcarray dstarray}{copy}{dstsubarray}}: ]
+\item[{\onyxop{srcdict dstdict}{copy}{dstdict}}: ]
+\item[{\onyxop{srcstack dststack}{copy}{dststack}}: ]
+\item[{\onyxop{srcstring dststring}{copy}{dstsubstring}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[srcarray: ]
+			An array object.
+		\item[srcdict: ]
+			A dict object.
+		\item[srcstack: ]
+			A stack object.
+		\item[srcstring: ]
+			A string object.
+		\item[dstarray: ]
+			An array object, at least as long as \oparg{srcarray}.
+		\item[dstdict: ]
+			A dict object.
+		\item[dststack: ]
+			A stack object.
+		\item[dststring: ]
+			A string object, at least as long as \oparg{srcstring}.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[dstsubarray: ]
+			A subarray of \oparg{dstarray}, with the same contents
+			as \oparg{srcarray}.
+		\item[dstdict: ]
+			The same object as the input \oparg{dstdict}, but with
+			the contents of \oparg{srcdict} inserted.
+		\item[dststack: ]
+			The same object as the input \oparg{dststack}, but with
+			the contents of \oparg{srcstack} pushed.
+		\item[dstsubstring: ]
+			A substring of \oparg{dststring}, with the same contents
+			as \oparg{srcstring}.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Copy from one object to another.  Array and string copying are
+		destructive; dictionary and stack copying are not.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> [`a'] [`b' `c'] copy 1 sprint
+[`a']
+onyx:0> </foo `foo'> </bar `bar'> copy 1 sprint
+</bar `bar' /foo `foo'>
+onyx:1> (1 2) (3 4) copy 1 sprint
+(3 4 1 2)
+onyx:1> `a' `bc' copy 1 sprint
+`a'
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:count}
@@ -4860,19 +4903,42 @@ onyx:0>
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[array: ]
+			An array object.
+		\item[dict: ]
+			A dict object.
+		\item[name: ]
+			A name object.
+		\item[string: ]
+			A string object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[count: ]
+			Number of elements in \oparg{array}, number of entries
+			in \oparg{dict}, number of characters in \oparg{name},
+			or number of characters in \oparg{string}.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Get the umber of elements in \oparg{array}, number of entries in
+		\oparg{dict}, number of characters in \oparg{name}, or number of
+		characters in \oparg{string}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> [1 2 3] length 1 sprint
+3
+onyx:0> </foo `foo' /bar `bar'> length 1 sprint
+2
+onyx:0> /foo length 1 sprint
+3
+onyx:0> `foo' length 1 sprint
+3
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:link}
@@ -6913,6 +6979,7 @@ onyx:0>
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{syntaxerror}{syntaxerror}.]
 		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{undefined}{undefined}.]
 		\end{description}
 	\item[Description: ]
 		Scan a token from a file or string, using onyx syntax rules.  If
