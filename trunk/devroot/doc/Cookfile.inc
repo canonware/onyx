@@ -186,12 +186,9 @@ doc_relclean :
   cp [objdir]/%0latex/%.pdf [objdir]/%0pdf/%.pdf;
 }
 
-/*
- * This rule depends on the PostScript version of the manual because latex2html
- * behaves unpredictably if fed invalid latex code.  By adding this dependency,
- * we assure that latex2html doesn't get run unless the latex code is okay.
- */
-[objdir]/%0html/%.html : [objdir]/%0ps/%.ps
+[objdir]/%0html/%.html : [objdir]/%0latex/%.tex [TEX_SRCS]
+                         [fromto [srcdir]/%0latex/%.fig [objdir]/%0latex/%.ps
+                                 [FIG_SRCS]]
   set mkdir
 {
   [LATEX2HTML] -init_file [srcdir]/%0latex/.latex2html-init
