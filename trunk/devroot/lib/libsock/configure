@@ -1714,7 +1714,7 @@ case "${host}" in
   *-*-linux*)
         ;;
   *-*-solaris2*)
-	LIBS="$LIBS -lsocket -lnsl -lposix4"
+	LIBS="$LIBS -lposix4 -lsocket -lnsl"
         ;;
 esac
 
