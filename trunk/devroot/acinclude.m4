@@ -34,7 +34,7 @@ if test -d "$srcdir/lib/c/$1" ; then
   build_$1="yes"
   $2=1
   cfghdrs="$cfghdrs $objdir/lib/c/$1/include/$1/$1_defs.h"
-  targets="$targets $1"
+  libs="$libs $1"
   mkdir -p $objdir/lib/c/$1/include/$1
 else
   build_$1="no"
@@ -54,7 +54,7 @@ if test -d "$srcdir/bin/$1" ; then
   build_$1="yes"
   $2=1
   cfghdrs="$cfghdrs $objdir/bin/$1/include/$1_defs.h"
-  targets="$targets $1"
+  bins="$bins $1"
   mkdir -p $objdir/bin/$1/include
 else
   build_$1="no"
