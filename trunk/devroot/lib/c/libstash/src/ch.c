@@ -16,8 +16,8 @@
 #endif
 
 cw_ch_t *
-ch_new(cw_ch_t *a_ch, cw_uint32_t a_table_size, cw_pezz_t *a_chi_pezz,
-    cw_ch_hash_t *a_hash, cw_ch_key_comp_t *a_key_comp)
+ch_new(cw_ch_t *a_ch, cw_uint32_t a_table_size, cw_ch_hash_t *a_hash,
+    cw_ch_key_comp_t *a_key_comp)
 {
 	cw_ch_t *retval;
 
@@ -28,7 +28,8 @@ ch_new(cw_ch_t *a_ch, cw_uint32_t a_table_size, cw_pezz_t *a_chi_pezz,
 		bzero(retval, _CW_CH_TABLE2SIZEOF(a_table_size));
 		retval->is_malloced = FALSE;
 	} else {
-		retval = (cw_ch_t *)_cw_malloc(_CW_CH_TABLE2SIZEOF(a_table_size));
+		retval = (cw_ch_t
+		    *)_cw_malloc(_CW_CH_TABLE2SIZEOF(a_table_size));
 		if (NULL == retval)
 			goto RETURN;
 		bzero(retval, _CW_CH_TABLE2SIZEOF(a_table_size));
@@ -36,13 +37,6 @@ ch_new(cw_ch_t *a_ch, cw_uint32_t a_table_size, cw_pezz_t *a_chi_pezz,
 	}
 
 	retval->table_size = a_table_size;
-	retval->chi_pezz = a_chi_pezz;
-#ifdef _LIBSTASH_DBG
-	if (NULL != retval->chi_pezz) {
-		_cw_assert(sizeof(cw_chi_t) <=
-		    pezz_get_buffer_size(retval->chi_pezz));
-	}
-#endif
 	retval->hash = a_hash;
 	retval->key_comp = a_key_comp;
 
@@ -63,23 +57,22 @@ ch_delete(cw_ch_t *a_ch)
 	_cw_check_ptr(a_ch);
 	_cw_assert(_CW_CH_MAGIC == a_ch->magic);
 
-	if (NULL != a_ch->chi_ring) {
-		if (NULL != a_ch->chi_pezz) {
-			do {
-				t_ring = a_ch->chi_ring;
-				a_ch->chi_ring = ring_cut(t_ring);
-				chi = (cw_chi_t *) ring_get_data(t_ring);
-				_cw_pezz_put(a_ch->chi_pezz, chi);
-			} while (a_ch->chi_ring != t_ring);
-		} else {
-			do {
-				t_ring = a_ch->chi_ring;
-				a_ch->chi_ring = ring_cut(t_ring);
-				chi = ring_get_data(t_ring);
-				_cw_free(chi);
-			} while (a_ch->chi_ring != t_ring);
-		}
+	if (NULL != a_ch->chi_qr) {
+		do {
+			t_chi = a_ch->chi_qr;
+			a_ch->chi_qr = qr_next(a_ch->chi_qr);
+			qr_remove(t_chi, ch_link);
+			if (t_chi->is_malloced) {
+				_cw_free(t_chi);
+			}
+#ifdef _LIBSTASH_DBG
+			else {
+				memset(t_chi, 0x5a, sizeof(cw_chi_t));
+			}
+#endif
+		} while (a_ch->chi_qr != t_chi);
 	}
+
 	if (TRUE == a_ch->is_malloced)
 		_cw_free(a_ch);
 #ifdef _LIBSTASH_DBG
@@ -98,7 +91,8 @@ ch_count(cw_ch_t *a_ch)
 }
 
 cw_bool_t
-ch_insert(cw_ch_t *a_ch, const void *a_key, const void *a_data)
+ch_insert(cw_ch_t *a_ch, const void *a_key, const void *a_data, cw_chi_t
+    *a_linkage)
 {
 	cw_bool_t retval;
 	cw_uint32_t slot;
@@ -108,14 +102,18 @@ ch_insert(cw_ch_t *a_ch, const void *a_key, const void *a_data)
 	_cw_assert(_CW_CH_MAGIC == a_ch->magic);
 
 	/* Initialize chi. */
-	if (NULL != a_ch->chi_pezz)
-		chi = (cw_chi_t *) _cw_pezz_get(a_ch->chi_pezz);
-	else
-		chi = (cw_chi_t *) _cw_malloc(sizeof(cw_chi_t));
-	if (NULL == chi) {
-		retval = TRUE;
-		goto RETURN;
+	if (a_linkage != NULL) {
+		chi = a_linkage;
+		chi->is_malloced = FALSE;
+	} else {
+		chi = (cw_chi_t *)_cw_malloc(sizeof(cw_chi_t));
+		if (NULL == chi) {
+			retval = TRUE;
+			goto RETURN;
+		}
+		chi->is_malloced = TRUE;
 	}
+	/* XXX */
 	chi->key = a_key;
 	chi->data = a_data;
 	ring_new(&chi->ch_link);

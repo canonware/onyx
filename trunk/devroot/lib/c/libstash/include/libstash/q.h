@@ -424,7 +424,7 @@ struct {								\
 	    (var) != (void *)(head);					\
 	    (var) = (var)->field.cqe_next)
 
-#define qc_foreach_REVERSE(var, head, field)				\
+#define qc_foreach_reverse(var, head, field)				\
 	for((var) = (head)->cqh_last;					\
 	    (var) != (void *)(head);					\
 	    (var) = (var)->field.cqe_prev)
@@ -520,7 +520,7 @@ struct {								\
 	    (var) = (((var)->field.r_next != (elm))			\
 	    ? (elm)->field.r_next : NULL)))
 
-#define qr_foreach_REVERSE(var, elm, field)				\
+#define qr_foreach_reverse(var, elm, field)				\
 	for ((var) = (elm);						\
 	    (var) != NULL;						\
 	    (var) = (((var)->field.r_prev != (elm))			\
