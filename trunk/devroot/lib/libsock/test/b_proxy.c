@@ -728,7 +728,7 @@ handle_client_send(void * a_arg)
   cw_buf_t buf;
   connection_t * conn = (connection_t *) a_arg;
   char * str = NULL;
-  char * hostname, * port_str;
+  char * hostname = NULL, * port_str = NULL;
   cw_bool_t parse_error = TRUE;
 
   log_printf(cw_g_log, "New connection\n");
@@ -759,14 +759,13 @@ handle_client_send(void * a_arg)
       PORT,
       DONE
     } state;
-#endif
+
     hostname = (char *) _cw_malloc(1);
     hostname[0] = '\0';
 
     port_str = (char *) _cw_malloc(1);
     port_str[0] = '\0';
 
-#if (0)
     for (bufel = NULL, state = SERVER;
 	 state != DONE;
 	 )
@@ -863,7 +862,7 @@ handle_client_send(void * a_arg)
     }
 #endif
     /* XXX */
-    hostname = "donner";
+    hostname = "localhost";
 /*      port = 23; */
     port = 6000;
     
@@ -929,8 +928,8 @@ handle_client_send(void * a_arg)
   thd_delete(&conn->recv_thd);
 
   RETURN:
-  _cw_free(hostname);
-  _cw_free(port_str);
+/*    _cw_free(hostname); */
+/*    _cw_free(port_str); */
   
   /* Delete this thread. */
   thd_delete(&conn->send_thd);
@@ -939,10 +938,9 @@ handle_client_send(void * a_arg)
   mtx_delete(&conn->lock);
 /*   log_delete(conn->log); */
   sock_delete(&conn->client_sock);
-  if (FALSE == parse_error)
-  {
-    sock_delete(&conn->remote_sock);
-  }
+  /* XXX Don't do this if the socket wasn't created. */
+  sock_delete(&conn->remote_sock);
+  
   _cw_free(conn);
   
   buf_delete(&buf);

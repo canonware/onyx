@@ -29,6 +29,7 @@ struct cw_sockb_s
   cw_sem_t pipe_sem;
 
   cw_bufpool_t bufel_pool;
+  cw_bufpool_t bufc_pool;
   cw_bufpool_t buffer_pool;
   
   cw_list_t registrations;

@@ -202,7 +202,9 @@ FORCE :
 
 default : stat_dbg stat_opt shar_opt stat_prof
 
-check : $(CTESTS) $(PTESTS) $(BTESTS)
+tests : $(CTESTS) $(PTESTS) $(BTESTS)
+
+check : tests
 	@$(SHELL) -c \
 	'echo Running regression tests: ; \
 	echo "---------------------------------------------" ;\

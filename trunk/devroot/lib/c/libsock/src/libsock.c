@@ -138,6 +138,7 @@ sockb_init(cw_uint32_t a_bufel_size, cw_uint32_t a_max_spare_bufels)
 
   /* Create the spare bufel pool and initialize associated variables. */
   bufpool_new(&g_sockb->bufel_pool, sizeof(cw_bufel_t), a_max_spare_bufels);
+  bufpool_new(&g_sockb->bufc_pool, sizeof(cw_bufc_t), a_max_spare_bufels);
   bufpool_new(&g_sockb->buffer_pool, a_bufel_size, a_max_spare_bufels);
   
   /* Create the message queues. */
@@ -167,6 +168,7 @@ sockb_shutdown(void)
   
   /* Clean up the spare bufel's. */
   bufpool_delete(&g_sockb->bufel_pool);
+  bufpool_delete(&g_sockb->bufc_pool);
   bufpool_delete(&g_sockb->buffer_pool);
   
   list_delete(&g_sockb->registrations);
@@ -189,17 +191,22 @@ cw_bufel_t *
 sockb_get_spare_bufel(void)
 {
   cw_bufel_t * retval;
+  cw_bufc_t * bufc;
   
   _cw_check_ptr(g_sockb);
 
   retval = bufel_new((cw_bufel_t *) bufpool_get_buffer(&g_sockb->bufel_pool),
 		     bufpool_put_buffer,
 		     (void *) &g_sockb->bufel_pool);
-  bufel_set_data_ptr(retval,
-		     bufpool_get_buffer(&g_sockb->buffer_pool),
-		     bufpool_get_buffer_size(&g_sockb->buffer_pool),
-		     bufpool_put_buffer,
-		     (void *) &g_sockb->buffer_pool);
+  bufc = bufc_new((cw_bufc_t *) bufpool_get_buffer(&g_sockb->bufc_pool),
+		  bufpool_put_buffer,
+		  (void *) &g_sockb->bufc_pool);
+  bufc_set_buffer(bufc,
+		  bufpool_get_buffer(&g_sockb->buffer_pool),
+		  bufpool_get_buffer_size(&g_sockb->buffer_pool),
+		  bufpool_put_buffer,
+		  (void *) &g_sockb->buffer_pool);
+  bufel_set_bufc(retval, bufc);
   bufel_set_beg_offset(retval, 0);
 
   return retval;
