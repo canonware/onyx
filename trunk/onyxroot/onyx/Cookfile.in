@@ -127,13 +127,16 @@ manual_p : [P_MANUAL];
 
 manual_h : [H_MANUAL];
 
-install : install_bins install_libs;
 install_bins : [addsuffix _install_a @bins@];
 install_libs : [addsuffix _install @libs@];
+install : install_bins install_libs install_doc;
 
-uninstall : uninstall_bins uninstall_libs;
 uninstall_bins : [addsuffix _uninstall @bins@];
 uninstall_libs : [addsuffix _uninstall @libs@];
+uninstall : uninstall_bins uninstall_libs uninstall_doc
+{
+  rm -rf [PREFIX]/share/canonware;
+}
 
 clean : [addsuffix _clean doc test @bins@ @libs@]
 {

@@ -38,6 +38,40 @@ H_MANUAL = [objdir]/doc/html/manual.html;
   FIG_SRCS = [FIG_SRCS] [fig_srcs];
 }
 
+install_doc : install_doc_p install_doc_h;
+install_doc_p : [P_MANUAL]
+{
+  [INSTALL] -d [PREFIX]/share/canonware/doc/ps;
+  [INSTALL] -m 0444 [P_MANUAL] [PREFIX]/share/canonware/doc/ps;
+}
+
+install_doc_h : [H_MANUAL]
+{
+  [SHELL] -e;
+data
+#![SHELL]
+
+echo [INSTALL] -d [PREFIX]/share/canonware/doc/html
+[INSTALL] -d [PREFIX]/share/canonware/doc/html
+
+for i in `find [objdir]/doc/html -type f`; do
+  echo [INSTALL] -m 0444 $i [PREFIX]/share/canonware/doc/html
+  [INSTALL] -m 0444 $i [PREFIX]/share/canonware/doc/html
+done
+dataend
+}
+
+uninstall_doc :
+{
+  [SHELL] -e;
+data
+#![SHELL]
+
+echo rm -rf [PREFIX]/share/canonware/doc
+rm -rf [PREFIX]/share/canonware/doc
+dataend
+}
+
 doc_clean :
 {
   rm -f [objdir]/doc/latex/manual.alg;
