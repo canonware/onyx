@@ -10,6 +10,7 @@ AC_INIT(Cookfile.in)
 dnl 
 dnl Version requirements for external software we depend on.
 dnl 
+LIBEDIT_VERSION_MIN=2.6
 
 srcroot=$srcdir
 AC_SUBST(srcroot)
@@ -379,7 +380,40 @@ if test "x$enable_modules" = "xyes" ; then
     )
     if test "x$enable_modprompt" = "x1" ; then
       MODPROMPT_CPPFLAGS=
+
+      TEMP_CPPFLAGS="$CPPFLAGS"
+      CPPFLAGS="$LIBEDIT_CPPFLAGS $CPPFLAGS"
       AC_CHECK_HEADERS(histedit.h, , enable_modprompt="0")
+      dnl Check if this version of libedit is known to be compatible.
+      LIBEDIT_MAJOR_MIN=`echo $LIBEDIT_VERSION_MIN | tr . " " | awk '{print $1}'`
+      LIBEDIT_MINOR_MIN=`echo $LIBEDIT_VERSION_MIN | tr . " " | awk '{print $2}'`
+      AC_MSG_CHECKING(for libedit >= $LIBEDIT_MAJOR_MIN.$LIBEDIT_MINOR_MIN)
+      AC_EGREP_CPP(bad_libedit,
+[#include <histedit.h>
+#if (defined(LIBEDIT_MAJOR) && defined(LIBEDIT_MINOR))
+#if (LIBEDIT_MAJOR > $LIBEDIT_MAJOR_MIN || LIBEDIT_MAJOR == $LIBEDIT_MAJOR_MIN && LIBEDIT_MINOR >= $LIBEDIT_MINOR_MIN)
+  good_libedit
+#else
+  bad_libedit
+#endif
+#else
+  unknown_libedit
+#endif
+], [enable_modprompt="0" ; AC_MSG_RESULT(Obsolete libedit found)], \
+        AC_EGREP_CPP(unknown_libedit,
+[#include <histedit.h>
+#if (defined(LIBEDIT_MAJOR) && defined(LIBEDIT_MINOR))
+#if (LIBEDIT_MAJOR > $LIBEDIT_MAJOR_MIN || LIBEDIT_MAJOR == $LIBEDIT_MAJOR_MIN && LIBEDIT_MINOR >= $LIBEDIT_MINOR_MIN)
+  good_libedit
+#else
+  bad_libedit
+#endif
+#else
+  unknown_libedit
+#endif
+], AC_MSG_RESULT(Unknown libedit; modprompt build may fail), \
+   AC_MSG_RESULT(yes)))
+      CPPFLAGS="$TEMP_CPPFLAGS"
 
       TEMP_LIBS="$LIBS"
       LIBS=
