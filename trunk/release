@@ -78,6 +78,11 @@ if (defined($opt_verbose))
 
 `$run`;
 
+if ($? != 0)
+{
+    exit 1;
+}
+
 # End of main execution.
 
 sub print_usage
