@@ -44,13 +44,6 @@ struct cw_stiloe_s {
 	 */
 	cw_bool_t	dict_locked:1;
 	/*
-	 * It is critical to not delete names until all keyed references have
-	 * been removed.  If there are still keyed references when the name is
-	 * deleted, set this variable, so that when the last keyed reference is
-	 * removed, the name will be deleted.
-	 */
-	cw_bool_t	name_delete:1;
-	/*
 	 * If TRUE, the string in the key is statically allocated, and should
 	 * not be deallocated during destruction.
 	 */

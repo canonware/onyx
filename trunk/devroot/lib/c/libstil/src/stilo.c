@@ -144,15 +144,6 @@ struct cw_stiloe_mutex_s {
 	cw_mtx_t	lock;
 };
 
-/*
- * Size and fullness control for keyed reference hashes.  For each keyed
- * reference, there is a global dictionary with a key that corresponds to the
- * name, so in most cases, these hashes are quite small.
- */
-#define _CW_STILO_NAME_KREF_TABLE	  8
-#define _CW_STILO_NAME_KREF_GROW	  6
-#define _CW_STILO_NAME_KREF_SHRINK	  2
-
 struct cw_stiloe_name_s {
 	cw_stiloe_t	stiloe;
 	/*
@@ -321,12 +312,6 @@ static cw_stilte_t stilo_p_name_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file,
 
 static cw_stiloe_name_t *stilo_p_name_gref(cw_stilt_t *a_stilt, const char
     *a_str, cw_uint32_t a_len, cw_bool_t a_is_static);
-static void stilo_p_name_kref_insert(cw_stilo_t *a_stilo, cw_stilt_t
-    *a_stilt, const cw_stiloe_dict_t *a_dict);
-static cw_bool_t stilo_p_name_kref_search(const cw_stilo_t *a_stilo, const
-    cw_stiloe_dict_t *a_dict);
-static cw_bool_t stilo_p_name_kref_remove(const cw_stilo_t *a_stilo, cw_stilt_t
-    *a_stilt, const cw_stiloe_dict_t *a_dict);
 
 #define		stiloe_p_name_lock(a_name) do {				\
 	if ((a_name)->stiloe.global)					\
@@ -1618,9 +1603,6 @@ stilo_dict_def(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilo_t *a_key,
 		/* Insert. */
 		dch_insert(&dict->hash, (void *)&dicto->key, (void *)dicto,
 		    chi);
-
-		if (dict->stiloe.global)
-			stilo_p_name_kref_insert(a_key, a_stilt, dict);
 	}
 	stiloe_p_dict_unlock(dict);
 }
@@ -1649,8 +1631,6 @@ stilo_dict_undef(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const cw_stilo_t
 		stilt_dicto_put(a_stilt, dicto);
 		stilt_chi_put(a_stilt, chi);
 	}
-	if (dict->stiloe.global)
-		stilo_p_name_kref_remove(a_key, a_stilt, dict);
 
 	stiloe_p_dict_unlock(dict);
 }
@@ -1661,6 +1641,7 @@ stilo_dict_lookup(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const cw_stilo_t
 {
 	cw_bool_t		retval;
 	cw_stiloe_dict_t	*dict;
+	cw_stiloe_dicto_t	*dicto;
 
 	_cw_check_ptr(a_stilo);
 	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
@@ -1672,23 +1653,17 @@ stilo_dict_lookup(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const cw_stilo_t
 	_cw_assert(dict->stiloe.magic == _CW_STILOE_MAGIC);
 	_cw_assert(dict->stiloe.type == STILOT_DICT);
 
-	if ((dict->stiloe.global == FALSE) || (stilo_p_name_kref_search(a_key,
-	    dict) == FALSE)) {
-		cw_stiloe_dicto_t	*dicto;
-
-		stiloe_p_dict_lock(dict);
-		if (dch_search(&dict->hash, (void *)a_key, (void **)&dicto)
-		    == FALSE) {
-			if (r_stilo != NULL) {
-				stilo_no_new(r_stilo);
-				stilo_dup(r_stilo, &dicto->val);
-			}
-			retval = FALSE;
-		} else
-			retval = TRUE;
-		stiloe_p_dict_unlock(dict);
+	stiloe_p_dict_lock(dict);
+	if (dch_search(&dict->hash, (void *)a_key, (void **)&dicto)
+	    == FALSE) {
+		if (r_stilo != NULL) {
+			stilo_no_new(r_stilo);
+			stilo_dup(r_stilo, &dicto->val);
+		}
+		retval = FALSE;
 	} else
 		retval = TRUE;
+	stiloe_p_dict_unlock(dict);
 
 	return retval;
 }
@@ -3520,16 +3495,8 @@ stiloe_p_name_delete(cw_stiloe_t *a_stiloe, cw_stil_t *a_stil)
 	/*
 	 * XXX Remove from hash table.
 	 */
-	if ((name == name->val) && name->keyed_refs != NULL) {
-		/*
-		 * Make a note to delete this name as soon as all keyed
-		 * references have been removed.
-		 */
-		name->stiloe.name_delete = TRUE;
-	} else {
-		mtx_delete(&name->lock);
-		_CW_STILOE_FREE(name);
-	}
+	mtx_delete(&name->lock);
+	_CW_STILOE_FREE(name);
 }
 
 static cw_stiloe_t *
@@ -3790,112 +3757,6 @@ stilo_p_name_gref(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len,
 	}
 	mtx_unlock(name_lock);
 
-	return retval;
-}
-
-/* Insert a keyed reference. */
-static void
-stilo_p_name_kref_insert(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const
-    cw_stiloe_dict_t *a_dict)
-{
-	cw_stiloe_name_t	*name;
-
-	/* Chase down the name. */
-	name = (cw_stiloe_name_t *)a_stilo->o.stiloe;
-	_cw_check_ptr(name);
-	_cw_assert(name->stiloe.magic == _CW_STILOE_MAGIC);
-	_cw_assert(name->stiloe.type == STILOT_NAME);
-	/* Only global dict's can create keys. */
-	_cw_assert(name == name->val);
-
-	stiloe_p_name_lock(name);
-	if (name->keyed_refs == NULL) {
-		/* No keyed references.  Create the hash. */
-		name->keyed_refs = dch_new(NULL, NULL,
-		    _CW_STILO_NAME_KREF_TABLE, _CW_STILO_NAME_KREF_GROW,
-		    _CW_STILO_NAME_KREF_SHRINK, ch_direct_hash,
-		    ch_direct_key_comp);
-		/* XXX Check dch_new() return. */
-	}
-
-	dch_insert(name->keyed_refs, (void *)a_dict, NULL,
-	    stilt_chi_get(a_stilt));
-
-	stiloe_p_name_unlock(name);
-}
-
-/* Search for a keyed reference matching a_dict. */
-static cw_bool_t
-stilo_p_name_kref_search(const cw_stilo_t *a_stilo, const cw_stiloe_dict_t
-    *a_dict)
-{
-	cw_bool_t		retval;
-	cw_stiloe_name_t	*name;
-
-	/* Chase down the name. */
-	name = (cw_stiloe_name_t *)a_stilo->o.stiloe;
-	_cw_check_ptr(name);
-	_cw_assert(name->stiloe.magic == _CW_STILOE_MAGIC);
-	_cw_assert(name->stiloe.type == STILOT_NAME);
-	name = name->val;
-
-	stiloe_p_name_lock(name);
-	if ((name->keyed_refs == NULL) || dch_search(name->keyed_refs,
-	    (void *)a_dict, NULL)) {
-		/* Not found. */
-		retval = TRUE;
-	} else {
-		/* Found. */
-		retval = TRUE;
-	}
-	stiloe_p_name_unlock(name);
-
-	return retval;
-}
-
-/* Remove a keyed reference. */
-static cw_bool_t
-stilo_p_name_kref_remove(const cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const
-    cw_stiloe_dict_t *a_dict)
-{
-	cw_bool_t		retval;
-	cw_chi_t		*chi;
-	cw_stiloe_name_t	*name;
-
-	/* Chase down the name. */
-	name = (cw_stiloe_name_t *)a_stilo->o.stiloe;
-	_cw_check_ptr(name);
-	_cw_assert(name->stiloe.magic == _CW_STILOE_MAGIC);
-	_cw_assert(name->stiloe.type == STILOT_NAME);
-	/* Only global dict's can create keys. */
-	_cw_assert(name == name->val);
-
-	stiloe_p_name_lock(name);
-	_cw_check_ptr(name->keyed_refs);
-
-	if ((retval = dch_remove(name->keyed_refs, (void *)a_dict, NULL,
-	    NULL, &chi)) == FALSE)
-		stilt_chi_put(a_stilt, chi);
-
-	/* If there are no more keyed references, delete the hash. */
-	if (dch_count(name->keyed_refs) == 0) {
-		dch_delete(name->keyed_refs);
-		name->keyed_refs = NULL;
-
-		/*
-		 * If this name has been marked for delayed deletion, do so now.
-		 */
-		if (name->stiloe.name_delete) {
-			/* XXX Remove from hash table. */
-			stiloe_p_name_unlock(name);
-			mtx_delete(&name->lock);
-			_CW_STILOE_FREE(name);
-			goto RETURN;
-		}
-	}
-	stiloe_p_name_unlock(name);
-
-	RETURN:
 	return retval;
 }
 
