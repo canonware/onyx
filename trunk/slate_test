@@ -61,7 +61,7 @@ for d in 0 1 ; do
         fi
     done
     # Non-parallelizable.
-    for i in install_docs uninstall $clean_target ; do
+    for i in docs_install uninstall $clean_target ; do
         echo "===> $COOK $i"
         $COOK $i
         if [ "x$?" != "x0" ] ; then
