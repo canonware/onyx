@@ -16,24 +16,204 @@
 \label{mem}
 \index{\classname{mem}{}}
 
+The \classname{mem} class implements a memory allocation (malloc) wrapper.  For
+the debug version of \libname{libstash}, extra information is hashed for each
+memory allocation that allows tracking of the following:
+
+\begin{itemize}
+\item{File/line number of allocation.}
+\item{Double allocation/deallocation of the same address.}
+\item{Memory leaks (memory left allocated at mem destruction time).}
+\end{itemize}
+
+If any memory leaks are detected, diagnostic output is printed to
+\cvar{out\_err}.
+
+Also, the debug version of \libname{libstash} sets all newly allocated bytes to
+{\tt 0xa5}, and all deallocated bytes to {\tt 0x5a} (except in the case of
+\cfunc{mem\_calloc}{}).  This tends to cause things to break sooner when
+uninitialized or deallocated memory is referenced.
+
+In general, the \classname{mem} class doesn't need to be used directly.
+Instead, there are several preprocessor macros that can be used:
+\cppmacro{\_cw\_malloc}{}, \cppmacro{\_cw\_calloc}{},
+\cppmacro{\_cw\_realloc}{}, and \cppmacro{\_cw\_free}{}.
+
 \subsubsection{API}
 \begin{description}
-\label{mem_}
-\index{\cfunc{mem\_}{}}
-\item[{\cfunc[]{mem\_}{}}: ]
+\label{mem_new}
+\index{\cfunc{mem\_new}{}}
+\item[{\cfunc[cw\_mem\_t *]{mem\_new}{cw\_mem\_t *a\_mem, cw\_mem\_t
+*a\_internal}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a\_mem: ]
+			Pointer to space for a \classname{mem}, or NULL.
+		\item[a\_internal: ]
+			Pointer to a \classname{mem} to use for internal
+			memory allocation, or NULL.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[retval: ]
+			Pointer to a \classname{mem}.
 		\end{description}
 	\item[Exception(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
 		\end{description}
 	\item[Description: ]
+		Constructor.
+	\end{description}
+\label{mem_delete}
+\index{\cfunc{mem\_delete}{}}
+\item[{\cfunc[void]{mem\_delete}{cw\_mem\_t *a\_mem}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_mem: ]
+			Pointer to a \classname{mem}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Destructor.
+	\end{description}
+\label{mem_malloc_e}
+\index{\cfunc{mem\_malloc\_e}{}}
+\item[{\cfunc[void *]{mem\_malloc\_e}{cw\_mem\_t *a\_mem, size\_t a\_size, const
+char *a\_filename, cw\_uint32\_t a\_line\_num}}: ]
+\label{mem_malloc}
+\index{\cfunc{mem\_malloc}{}}
+\item[{\cfunc[void *]{mem\_malloc}{cw\_mem\_t *a\_mem, , size\_t a\_size}}: ]
+\label{_cw_malloc}
+\index{\cppmacro{\_cw\_malloc}{}}
+\item[{\cppmacro[void *]{\_cw\_malloc}{size\_t a\_size}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_mem: ]
+			Pointer to a \classname{mem}.
+		\item[a\_size: ]
+			Size of memory range to allocate.
+		\item[a\_filename: ]
+			Should be \_\_FILE\_\_.
+		\item[a\_line\_num: ]
+			Should be \_\_LINE\_\_.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to a memory range.
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		\cfunc{malloc}{} wrapper.
+	\end{description}
+\label{mem_calloc_e}
+\index{\cfunc{mem\_calloc\_e}{}}
+\item[{\cfunc[void *]{mem\_calloc\_e}{cw\_mem\_t *a\_mem, size\_t a\_number,
+size\_t a\_size, const char *a\_filename, cw\_uint32\_t a\_line\_num}}: ]
+\label{mem_calloc}
+\index{\cfunc{mem\_calloc}{}}
+\item[{\cfunc[void *]{mem\_calloc}{cw\_mem\_t *a\_mem, size\_t a\_number,
+size\_t a\_size}}: ]
+\label{_cw_calloc}
+\index{\cppmacro{\_cw\_calloc}{}}
+\item[{\cppmacro[void *]{\_cw\_calloc}{size\_t a\_number,
+size\_t a\_size}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_mem: ]
+			Pointer to a \classname{mem}.
+		\item[a\_number: ]
+			Number of elements to allocate.
+		\item[a\_size: ]
+			Size of each element to allocate.
+		\item[a\_filename: ]
+			Should be \_\_FILE\_\_.
+		\item[a\_line\_num: ]
+			Should be \_\_LINE\_\_.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to a zeroed memory range.
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		\cfunc{calloc}{} wrapper.
+	\end{description}
+\label{mem_realloc_e}
+\index{\cfunc{mem\_realloc\_e}{}}
+\item[{\cfunc[void *]{mem\_realloc\_e}{cw\_mem\_t *a\_mem, void *a\_ptr, size\_t
+a\_size, const char *a\_filename, cw\_uint32\_t a\_line\_num}}: ]
+\label{mem_realloc}
+\index{\cfunc{mem\_realloc}{}}
+\item[{\cfunc[void *]{mem\_realloc}{cw\_mem\_t *a\_mem, void *a\_ptr, size\_t
+a\_size}}: ]
+\label{_cw_realloc}
+\index{\cppmacro{\_cw\_realloc}{}}
+\item[{\cppmacro[void *]{\_cw\_realloc}{void *a\_ptr, size\_t a\_size}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_mem: ]
+			Pointer to a \classname{mem}.
+		\item[a\_ptr: ]
+			Pointer to memory range to be reallocated.
+		\item[a\_size: ]
+			Size of memory range to allocate.
+		\item[a\_filename: ]
+			Should be \_\_FILE\_\_.
+		\item[a\_line\_num: ]
+			Should be \_\_LINE\_\_.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to a memory range.
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		\cfunc{realloc}{} wrapper.
+	\end{description}
+\label{mem_free_e}
+\index{\cfunc{mem\_free\_e}{}}
+\item[{\cfunc[void]{mem\_free\_e}{cw\_mem\_t *a\_mem, void *a\_ptr, const char
+*a\_filename, cw\_uint32\_t a\_line\_num}}: ]
+\label{mem_free}
+\index{\cfunc{mem\_free}{}}
+\item[{\cfunc[void]{mem\_free}{cw\_mem\_t *a\_mem, void *a\_ptr}}: ]
+\label{_cw_free}
+\index{\cppmacro{\_cw\_free}{}}
+\item[{\cppmacro[void]{\_cw\_free}{void *a\_ptr}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_mem: ]
+			Pointer to a \classname{mem}.
+		\item[a\_ptr: ]
+			Pointer to to memory range to be freed.
+		\item[a\_filename: ]
+			Should be \_\_FILE\_\_.
+		\item[a\_line\_num: ]
+			Should be \_\_LINE\_\_.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		\cfunc{free}{} wrapper.
 	\end{description}
 \end{description}
