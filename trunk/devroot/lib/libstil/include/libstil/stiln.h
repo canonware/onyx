@@ -23,7 +23,96 @@ typedef struct cw_stilsc_s cw_stilsc_t;
 typedef struct cw_stiloe_dict_s cw_stiloe_dict_t;
 
 /*
- * Name.
+ * The following diagram shows the various name-related object relationships
+ * that are possible.  Locally allocated name objects use a thread-specific
+ * cache.  Globally allocated name objects refer directly to the global table.
+ *
+ * The reason for the thread-specific cache is that all operations on the global
+ * table require locking.  By caching references to the global table on a
+ * per-thread basis, we amortize the cost of locking the global table.
+ *
+ * /------\                                /-------\
+ * | stil |                                | stilt |
+ * \------/                                \-------/
+ *    |                                        |
+ *    |                                        |
+ *    |                                        |
+ *    v                                        v
+ * /-----------------\                     /-----------------\
+ * | stilng          |                     | stilnt          |
+ * |                 |                     |                 |
+ * | /-------------\ |                     | /-------------\ |
+ * | | stiloe_name | |                     | | stiloe_name | |
+ * | |             | |                     | |             | |
+ * | | /-------\   | |                     | | /-------\   | |
+ * | | | stiln |   | |            /------------| stilo |   | |
+ * | | \-------/   | |           /         | | \-------/   | |
+ * | |             | |          /          | |             | |
+ * | \-------------/ |          |          | \-------------/ |
+ * |                 |          |          |                 |
+ * | ............... |          |          | ............... |
+ * | ............... |          |          | ............... |
+ * | ............... |          |          | ............... |
+ * |                 |          |          |                 |
+ * | /-------------\ |          |          | /-------------\ |
+ * | | stiloe_name | |          |          | | stiloe_name | |
+ * | |             | |          /          | |             | |
+ * | | /-------\   | |         /           | | /-------\   | |
+ * | | | stiln |   |<---------/   /------------| stilo |   | |
+ * | | \-------/   | |           /         | | \-------/   | |
+ * | |             | |          /          | |             | |
+ * | \-------------/ |          |          | \-------------/ |
+ * |                 |          |          |                 |
+ * | ............... |          |          \-----------------/
+ * | ............... |          |
+ * | ............... |          |          /-------\
+ * |                 |          |          | stilt |
+ * | /-------------\ |          |          \-------/
+ * | | stiloe_name | |          |             |
+ * | |             | |          |             |
+ * | | /-------\   | |          |             |
+ * | | | stiln |   |<-----------+--\          v
+ * | | \-------/   | |          |   \      /-----------------\
+ * | |             | |          |    \     | stilnt          |
+ * | \-------------/ |          |    |     |                 |
+ * |                 |          |    |     | /-------------\ |
+ * | ............... |          |    |     | | stiloe_name | |
+ * | ............... |          |    \     | |             | |
+ * | ............... |          |     \    | | /-------\   | |
+ * |                 |          |      \-------| stilo |   | |
+ * | /-------------\ |          /          | | \-------/   | |
+ * | | stiloe_name | |         /           | |             | |
+ * | |             |<---------/            | \-------------/ |
+ * | | /-------\   | |                     |                 |
+ * | | | stiln |   | |                     | ............... |
+ * | | \-------/   |<---------\            | ............... |
+ * | |             | |         \           | ............... |
+ * | \-------------/ |          \          |                 |
+ * |       ^         |          |          | /-------------\ |
+ * \-------|---------/          |          | | stiloe_name | |
+ *         |                    \          | |             | |
+ *         |                     \         | | /-------\   | |
+ *         |                      \------------| stilo |   | |
+ *         |                               | | \-------/   | |
+ * /-------------------\                   | |             | |
+ * | stilo (global VM) |                   | \-------------/ |
+ * | (possibly keyed)  |                   |        ^        |
+ * \-------------------/                   \--------|--------/
+ *                                                  |
+ *                                                  |
+ *                                                  |
+ *                                                  |
+ *                                         /------------------\
+ *                                         | stilo (local VM) |
+ *                                         \------------------/
+ */
+
+/*
+ * Name.  stiln's are kept in a global hash table, and there is only one stiln
+ * per unique character string.  This allows the address of each stiloe_name
+ * container object in the global hash table to be used as a unique key, so
+ * regardless of the string length of a name, once it has been converted to a
+ * stiloe_name pointer, name comparisons are a constant time operation.
  */
 struct cw_stiln_s {
 	/* Must be held during access to keyed_refs. */
@@ -52,15 +141,18 @@ struct cw_stiln_s {
  * Global name cache.
  */
 struct cw_stilng_s {
+	/* Protects hash. */
+	cw_mtx_t	lock;
 	/*
-	 * Hash of names ({name, len} --> stiloe_name).  This hash table keeps
-	 * track of *all* name "values" in the virtual machine.  When a name
-	 * object is created, it actually adds a reference to a stiloe_name and
-	 * uses a pointer to that stiloe_name as a unique key.
+	 * Hash of names (key: {name, len}, value: (stiloe_name *)).  This hash
+	 * table keeps track of *all* name "values" in the virtual machine.
+	 * When a name object is created, it actually adds a reference to a
+	 * stiloe_name in this hash and uses a pointer to that stiloe_name as a
+	 * unique key.
 	 *
-	 * Note that each stilt maintains a cache of stiln's (via stilnt), so
-	 * that under normal circumstances, all objects in a stilt refer to a
-	 * single reference to the global stiloe_name.
+	 * Note that each stilt maintains a cache of stiloe_name's (via stilnt),
+	 * so that under normal circumstances, all locally allocated objects in
+	 * a stilt refer to a single reference to the global stiloe_name.
 	 */
 	cw_dch_t	hash;
 };
@@ -70,28 +162,9 @@ struct cw_stilng_s {
  */
 struct cw_stilnt_s {
 	/*
-	 * Hash of names ((stiln *) --> stiloe_name).  This hash table keeps
-	 * track of name "values" that are in existence within a particular
-	 * local VM.
+	 * Hash of names (key: {name, len}, value: (stiloe_name *)).  This hash
+	 * table keeps track of name "values" that are in existence within a
+	 * particular local VM.
 	 */
 	cw_dch_t	hash;
-
-	cw_stilng_t	*stilng;
 };
-
-/* stiln. */
-void		stiln_new(cw_stiln_t *a_stiln, cw_stilt_t *a_stilt, const
-    cw_uint32_t *a_name, cw_uint32_t a_len, cw_bool_t a_is_static);
-void		stiln_delete(cw_stiln_t *a_stiln);
-
-#define		stiln_val_get(a_stiln)	(a_stiln)->name
-#define		stiln_len_get(a_stiln)	(a_stiln)->len
-
-/* stilng. */
-cw_bool_t	stilng_new(cw_stilng_t *a_stilng, cw_mem_t *a_mem);
-void		stilng_delete(cw_stilng_t *a_stilng);
-
-/* stilnt. */
-cw_bool_t	stilnt_new(cw_stilnt_t *a_stilnt, cw_mem_t *a_mem,
-    cw_stilng_t *a_stilng);
-void		stilnt_delete(cw_stilnt_t *a_stilnt);

@@ -138,6 +138,12 @@ cw_bool_t	stilt_detach_buf(cw_stilt_t *a_stilt, cw_buf_t *a_buf);
 #define		stilt_stdout_get(a_stilt) (a_stilt)->stdout_fd
 #define		stilt_data_stack_get(a_stilt) (&((a_stilt)->data_stils))
 
+/*
+ * If TRUE, allocation for the stilt is global.  Otherwise, allocation is
+ * local.
+ */
+#define		stilt_currentglobal(a_stilt)				\
+	stilat_currentglobal(&(a_stilt)->stilat)
 #define		stilt_mem_get(a_stilt)					\
 	stilat_mem_get(&(a_stilt)->stilat)
 

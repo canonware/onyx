@@ -20,38 +20,175 @@
 #define _CW_STILN_BASE_GROW	400
 #define _CW_STILN_BASE_SHRINK	128
 
-/* stiln. */
 /* For stilo only. */
-cw_bool_t	stiln_l_gdict_insert(cw_stiln_t *a_stiln, const cw_stiloe_dict_t
-    *a_dict);
+cw_stiloe_name_t *stiln_l_ref(cw_stilt_t *a_stilt, const char *a_str,
+    cw_uint32_t a_len, cw_bool_t a_is_static);
+cw_bool_t	stiln_l_gdict_insert(cw_stiln_t *a_stiln, cw_stilt_t *a_stilt,
+    const cw_stiloe_dict_t *a_dict);
 cw_bool_t	stiln_l_gdict_search(cw_stiln_t *a_stiln, const cw_stiloe_dict_t
     *a_dict);
-cw_bool_t	stiln_l_gdict_remove(cw_stiln_t *a_stiln, const cw_stiloe_dict_t
-    *a_dict);
+cw_bool_t	stiln_l_gdict_remove(cw_stiln_t *a_stiln, cw_stilt_t *a_stilt,
+    const cw_stiloe_dict_t *a_dict);
+#define		stiln_l_val_get(a_stiln)	(a_stiln)->name
+#define		stiln_l_len_get(a_stiln)	(a_stiln)->len
 
-/* Hashing functions for stiln's. */
-static cw_uint32_t	stiln_p_hash(const void *a_key);
-static cw_bool_t	stiln_p_key_comp(const void *a_k1, const void *a_k2);
+static void	stiln_p_new(cw_stiln_t *a_stiln, cw_stilt_t *a_stilt,
+    const cw_uint32_t *a_name, cw_uint32_t a_len, cw_bool_t a_is_static);
+static void	stiln_p_delete(cw_stiln_t *a_stiln);
+static cw_uint32_t stiln_p_hash(const void *a_key);
+static cw_bool_t stiln_p_key_comp(const void *a_k1, const void *a_k2);
 
 /* stilng. */
 /* For stil only. */
-cw_bool_t	stilng_l_name_sref(cw_stilng_t *a_stilng, const cw_uint8_t
-    *a_name, cw_uint32_t a_len, const void *a_key, const void *a_data,
-    cw_stilo_t *r_stilo);
-/* For stilo only. */
-cw_bool_t	stilng_l_name_ref(cw_stilng_t *a_stilng, const cw_uint8_t
-    *a_name, cw_uint32_t a_len, cw_stilo_t *r_stilo);
-cw_bool_t	stilng_l_gdict_search(cw_stilng_t *a_stilng, const cw_uint8_t
-    *a_name, cw_uint32_t a_len);
+cw_bool_t	stilng_l_new(cw_stilng_t *a_stilng, cw_mem_t *a_mem);
+void		stilng_l_delete(cw_stilng_t *a_stilng);
 
 /* stilnt. */
 /* For stilo only. */
-cw_bool_t	stilnt_l_name_ref(cw_stilnt_t *a_stilnt, cw_stilt_t * a_stilt,
-    const cw_uint8_t *a_name, cw_uint32_t a_len, cw_stilo_t *r_stilo);
+cw_bool_t	stilnt_l_new(cw_stilnt_t *a_stilnt, cw_mem_t *a_mem,
+    cw_stilng_t *a_stilng);
+void		stilnt_l_delete(cw_stilnt_t *a_stilnt);
 
-/* stiln. */
-void
-stiln_new(cw_stiln_t *a_stiln, cw_stilt_t *a_stilt, const cw_uint32_t *a_name,
+/* Return a reference to a stiln. */
+cw_stiloe_name_t *
+stiln_l_ref(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len, cw_bool_t
+    a_is_static)
+{
+	cw_stiloe_name_t	*retval;
+	cw_stiln_t		key;
+
+	/* Fake up a key so that we can search the hash tables. */
+	key.name = a_name;
+	key.len = a_len;
+	   
+	if (stilt_currentglobal(a_stilt) == FALSE) {
+		cw_stilnt_t	*stilnt;
+		/*
+		 * Look in the per-thread name cache for a cached reference to
+		 * the name.  If there is no cached reference, check the global
+		 * hash for the name.  Create the name in the global hash if
+		 * necessary, then create a cached reference if necessary.
+		 */
+		stilnt = stilt_stilnt_get(a_stilt);
+		if (dch_search(&stilnt->hash, (void *)&key, (void **)&retval)) {
+			/* Not found in the per-thread name cache. */
+			retval = stiln_p_gref(a_stilt, a_str, a_len,
+			    a_is_static);
+
+			/*
+			 * Insert a cached entry for this thread.
+			 */
+			dch_insert(&stilnt->hash, (void *)&retval->key, (void
+			    **)retval, _cw_stilt_chi_get(a_stilt));
+		}
+	} else
+		retval = stiln_p_gref(a_stilt, a_str, a_len, a_is_static);
+
+	RETURN:
+	return retval;
+}
+
+static cw_stiloe_name_t *
+stiln_p_gref(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len,
+    cw_bool_t a_is_static)
+{
+	cw_stiloe_name_t	*retval;
+	cw_stiln_t		key;
+	cw_stilng_t		*stilng;
+
+	/* Fake up a key so that we can search the hash tables. */
+	key.name = a_name;
+	key.len = a_len;
+
+	stilng = stil_stilng_get(stilt_stil_get(a_stilt));
+	
+	/*
+	 * Look in the global hash for the name.  If the name doesn't exist,
+	 * create it.
+	 */
+	mtx_lock(&stilng->lock);
+	if (dch_search(&stilng->hash, (void *)&key, (void **)&retval)) {
+		cw_stilag_t	*stilag;
+
+		/*
+		 * Not found in the global hash.  Create, initialize, and insert
+		 * a new entry.
+		 */
+		stilag = stil_stilag_get(stilt_stil_get(a_stilt));
+		retval = (cw_stiloe_name_t *)_cw_stilag_malloc(stilag,
+		    sizeof(cw_stiloe_name_t));
+
+		stiln_p_new(&retval->key, a_stilt, a_name, a_len,
+		    a_is_static);
+
+		/* XXX */
+		stiloe_p_new(retval, _CW_STILOT_NAMETYPE);
+
+		dch_insert(&stilng->hash, (void *)&retval->key, (void
+		    **)retval, _cw_stilt_chi_get(a_stilt));
+	}
+	mtx_unlock(&stilng->lock);
+
+	return retval;
+}
+
+/* Insert a keyed reference. */
+cw_bool_t
+stiln_l_gdict_insert(cw_stiln_t *a_stiln, const cw_stiloe_dict_t *a_dict)
+{
+	
+	return TRUE;	/* XXX */
+}
+
+/* Search for a keyed reference matching a_dict. */
+cw_bool_t
+stiln_l_gdict_search(cw_stiln_t *a_stiln, const cw_stiloe_dict_t *a_dict)
+{
+	cw_bool_t	retval;
+
+	mtx_lock(&a_stiln->lock);
+	if ((a_stiln->keyed_refs == NULL) || dch_search(a_stiln->keyed_refs,
+	    (void *)a_dict)) {
+		/* Not found. */
+		retval = TRUE;
+	} else {
+		/* Found. */
+		retval = TRUE;
+	}
+	mtx_unlock(&a_stiln->lock);
+
+	return retval;
+}
+
+/* Remove a keyed reference. */
+cw_bool_t
+stiln_l_gdict_remove(cw_stiln_t *a_stiln, cw_stilt_t *a_stilt, const
+    cw_stiloe_dict_t *a_dict)
+{
+	cw_bool_t	retval;
+	cw_chi_t	*chi;
+
+	mtx_lock(&a_stiln->lock);
+	_cw_check_ptr(a_stiln->keyed_refs);
+
+	if ((retval = dch_remove(a_stiln->keyed_refs, (void *)a_dict, NULL,
+	    NULL, &chi)) == FALSE)
+		/* XXX Need stilag, not a_stilt. */
+		_cw_stilt_chi_put(a_stilt, chi);
+
+	/* If there are no more keyed references, delete the hash. */
+	if (dch_count(a_stiln->keyed_refs) == 0) {
+		dch_delete(a_stiln->keyed_refs);
+		a_stiln->keyed_refs = NULL;
+	}
+	mtx_unlock(&a_stiln->lock);
+
+	return retval;
+}
+
+/* Constructor. */
+static void
+stiln_p_new(cw_stiln_t *a_stiln, cw_stilt_t *a_stilt, const cw_uint32_t *a_name,
     cw_uint32_t a_len, cw_bool_t a_is_static)
 {
 	_cw_check_ptr(a_stiln);
@@ -71,8 +208,9 @@ stiln_new(cw_stiln_t *a_stiln, cw_stilt_t *a_stilt, const cw_uint32_t *a_name,
 		a_stiln->name = a_name;
 }
 
-void
-stiln_delete(cw_stiln_t *a_stiln)
+/* Destructor. */
+static void
+stiln_p_delete(cw_stiln_t *a_stiln)
 {
 #ifdef _LIBSTIL_DBG
 	if (a_stiln->keyed_refs != NULL) {
@@ -95,25 +233,7 @@ stiln_delete(cw_stiln_t *a_stiln)
 	mtx_delete(&a_stiln->lock);
 }
 
-cw_bool_t
-stiln_l_gdict_insert(cw_stiln_t *a_stiln, const cw_stiloe_dict_t *a_dict)
-{
-	
-	return TRUE;	/* XXX */
-}
-
-cw_bool_t
-stiln_l_gdict_search(cw_stiln_t *a_stiln, const cw_stiloe_dict_t *a_dict)
-{
-	return TRUE;	/* XXX */
-}
-
-cw_bool_t
-stiln_l_gdict_remove(cw_stiln_t *a_stiln, const cw_stiloe_dict_t *a_dict)
-{
-	return TRUE;	/* XXX */
-}
-
+/* Hash {name string, length}. */
 static cw_uint32_t
 stiln_p_hash(const void *a_key)
 {
@@ -129,6 +249,7 @@ stiln_p_hash(const void *a_key)
 	return retval;
 }
 
+/* Compare keys {name string, length}. */
 static cw_bool_t
 stiln_p_key_comp(const void *a_k1, const void *a_k2)
 {
@@ -149,8 +270,9 @@ stiln_p_key_comp(const void *a_k1, const void *a_k2)
 
 /* stilng. */
 cw_bool_t
-stilng_new(cw_stilng_t *a_stilng, cw_mem_t *a_mem)
+stilng_l_new(cw_stilng_t *a_stilng, cw_mem_t *a_mem)
 {
+	mtx_new(&a_stilng->lock);
 	if (dch_new(&a_stilng->hash, a_mem, _CW_STILN_BASE_TABLE,
 	    _CW_STILN_BASE_GROW, _CW_STILN_BASE_SHRINK, stiln_p_hash,
 	    stiln_p_key_comp) == NULL)
@@ -162,59 +284,23 @@ stilng_new(cw_stilng_t *a_stilng, cw_mem_t *a_mem)
 }
 
 void
-stilng_delete(cw_stilng_t *a_stilng)
+stilng_l_delete(cw_stilng_t *a_stilng)
 {
-}
-
-cw_bool_t
-stilng_l_name_sref(cw_stilng_t *a_stilng, const cw_uint8_t *a_name, cw_uint32_t
-    a_len, const void *a_key, const void *a_data, cw_stilo_t *r_stilo)
-{
-	return TRUE;	/* XXX */
-}
-
-cw_bool_t
-stilng_l_name_ref(cw_stilng_t *a_stilng, const cw_uint8_t *a_name, cw_uint32_t
-    a_len, cw_stilo_t *r_stilo)
-{
-	cw_stiln_t		stiln;
-	cw_stiloe_name_t	*name;
-
-	/*
-	 * XXX There's a race condition here.  We can find a name in the hash
-	 * table, then have it deleted out of under us before we get around to
-	 * setting r_stilo.
-	 */
-
-	/* Fake up a key so we can search through the global name cache. */
-	stiln.name = a_name;
-	stiln.len = a_len;
-
-	/* Search. */
-	if (dch_search(&a_stilng->hash, (void *)&stiln, (void **)&name)) {
-		/* Not found.  Create a stiloe_name that can be inserted. */
-		name = stiloe_
-
-	} else {
-		/* Found.  
-		thd_crit_enter();
-		r_stilo->o.stiloe = (cw_stiloe_t *)name;
-		thd_crit_leave();
-	}
-	return TRUE;	/* XXX */
+	/* XXX Clean up the hash table if it isn't empty. */
+	dch_delete(&a_stilng->hash);
+	mtx_delete(&a_stilng->lock);
 }
 
 /* stilnt. */
 cw_bool_t
-stilnt_new(cw_stilnt_t *a_stilnt, cw_mem_t *a_mem, cw_stilng_t *a_stilng)
+stilnt_l_new(cw_stilnt_t *a_stilnt, cw_mem_t *a_mem, cw_stilng_t *a_stilng)
 {
 	if (dch_new(&a_stilnt->hash, a_mem, _CW_STILN_BASE_TABLE,
 	    _CW_STILN_BASE_GROW, _CW_STILN_BASE_SHRINK, ch_direct_hash,
 	    ch_direct_key_comp) == NULL)
 		goto OOM;
 
-	/* XXX Need handle for allocation.  stilat, mem, or stilt? */
-/*  	a_stilnt->stilng = a_stilng; */
+	a_stilnt->stilng = a_stilng;
 
 	return FALSE;
 	OOM:
@@ -222,13 +308,7 @@ stilnt_new(cw_stilnt_t *a_stilnt, cw_mem_t *a_mem, cw_stilng_t *a_stilng)
 }
 
 void
-stilnt_delete(cw_stilnt_t *a_stilnt)
+stilnt_l_delete(cw_stilnt_t *a_stilnt)
 {
-}
-
-cw_bool_t
-stilnt_l_name_ref(cw_stilnt_t *a_stilnt, cw_stilt_t * a_stilt, const cw_uint8_t
-    *a_name, cw_uint32_t a_len, cw_stilo_t *r_stilo)
-{
-	return TRUE;	/* XXX */
+	dch_delete(&a_stilnt->hash);
 }

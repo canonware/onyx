@@ -156,29 +156,13 @@ struct cw_stiloe_s {
 struct cw_stiloe_name_s {
 	cw_stiloe_t	stiloe;
 	/*
-	 * Always the value of the root name stiloe, regardless of whether this
-	 * is a reference (local) or the root (global).  This allows fast access
-	 * to what is effectively the key for name comparisions.
+	 * Key.  The value is a pointer to this stiloe.
 	 */
-	cw_stiloe_t	*val;
-	union {
-		/* Thread-specific (local) name.  Indirect object. */
-		struct {
-			cw_stilo_t	stilo;
-		}	i;
-		/* Root (global) name.  Direct object. */
-		struct {
-			/*
-			 * Key.  The value is a pointer to this stiloe, and is
-			 * always available via val (above).
-			 */
-			cw_stiln_t	key;
-		}	n;
-	}	e;
+	cw_stiln_t	key;
 };
 
 /*
- * The ... arg is only used for array, dict, and string construction.
+ * The ... arg is only used for array, dict, name, and string construction.
  */
 void		stilo_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilot_t
     a_type, ...);

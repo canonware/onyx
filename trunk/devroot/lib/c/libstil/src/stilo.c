@@ -507,9 +507,12 @@ stilo_delete(cw_stilo_t *a_stilo)
 {
 	_cw_check_ptr(a_stilo);
 	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
-#ifdef _LIBSTIL_DBG
-	a_stilo->magic = _CW_STILO_MAGIC;
-#endif
+
+	stilot_vtable[a_stilo->type].delete_f(a_stilo, a_stilt);
+
+	thd_crit_enter();
+	memset(a_stilo, 0, sizeof(cw_stilo_t));
+	thd_crit_leave();
 }
 
 cw_stilot_t
@@ -1494,57 +1497,37 @@ stilo_p_mstate_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t
 /*
  * name.
  *
- * If this is a local (per thread) name, the arguments contained in a_p are:
+ * a_stilt's allocation mode (local/global) is used to determine how the object
+ * is allocated.
  *
- *   const cw_uint8_t *name, cw_uint32_t len, cw_bool_t is_global
+ * The arguments contained in a_p are:
  *
- * If this a global name, the arguments contained in a_p are:
- *
- *   const cw_uint8_t *name_str, cw_uint32_t len, cw_bool_t is_global,
- *   cw_bool_t is_static
+ *   const cw_uint8_t *name, cw_uint32_t len, cw_bool_t is_static
  */
 static void
 stilo_p_name_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, va_list a_p)
 {
 	const cw_uint8_t	*name_str;
 	cw_uint32_t		len;
-	cw_bool_t		is_global;
+	cw_bool_t		is_static;
+	cw_stiloe_name_t	*name;
 
 	/* Get varargs. */
 	name_str = (cw_uint8_t *)va_arg(a_p, cw_uint8_t *);
 	len = (cw_uint32_t)va_arg(a_p, cw_uint32_t);
-	is_global = (cw_bool_t)va_arg(a_p, cw_bool_t);
+	is_static = (cw_bool_t)va_arg(a_p, cw_bool_t);
 
-	name = (cw_stiloe_name_t *)_cw_stilt_malloc(a_stilt,
-	    sizeof(cw_stiloe_name_t));
+	name = stiln_l_ref(a_stilt, name_str, len, is_static);
 
-	if (is_global == FALSE) {
-		stilo_new(&name->e.i.stilo, a_stilt, _CW_STILOT_NAME);
-		stilng_l_name_ref(stil_stilng_get(_cw_stilt_stil_get(a_stilt)),
-		    name_str, len, &name->e.i.stilo);
-
-		XXX
-		name->e.i.stilo.o.stiloe = XXX lookup name stiloe;
-		name->val = name->e.i.stilo.o.stiloe;
-	} else {
-		cw_bool_t	is_static = (cw_bool_t)va_arg(a_p, cw_bool_t);
-
-		stiln_new(&name->e.n.key, a_stilt, name_str, len, is_static);
-	}
+	thd_crit_enter();
+	a_stilo->o.stiloe = name;
+	thd_crit_leave();
 }
 
 static void
 stilo_p_name_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 {
-#if (0) /* XXX */
-	if (a_stilo->indirect_name)
-		stiltn_unref(a_stilo->o.name.s.stilt, a_stilo->o.name.stiln);
-	else {
-		/* XXX Bad union usage. */
-		stil_stiln_unref(stilt_get_stil(a_stilo->o.name.stilt),
-		    a_stilo->o.name.stiln, NULL);
-	}
-#endif
+	/* Do nothing. */
 }
 
 static void
@@ -1561,12 +1544,24 @@ static void
 stilo_p_name_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t
     a_syntactic, cw_bool_t a_newline)
 {
-	cw_uint8_t	newline = (a_newline) ? '\n' : '\0';
+	cw_stiloe_name_t	*stiloe;
+	const char		*name;
+	cw_uint32_t		len;
+
+	/* Chase down the stiln. */
+	stiloe = (cw_stiloe_name_t *)a_stilo->o.stiloe;
+	stiloe = (cw_stiloe_name_t *)stiloe->val;
 	
+	name = stiln_l_val_get(&stiloe->e.n.key);
+	len = stiln_l_len_get(&stiloe->e.n.key);
+
 	if (a_syntactic)
-		_cw_out_put_f(a_fd, "-XXX name-[c]", newline);
-	else
-		_cw_out_put_f(a_fd, "/-XXX name-[c]", newline);
+		_cw_out_put_f(a_fd, "/");
+
+	_cw_out_put_fn(a_fd, len, "[s]", name);
+
+	if (a_newline)
+		_cw_output_f(a_fd, "\n");
 }
 
 /*

@@ -9,6 +9,9 @@
  *
  ******************************************************************************/
 
+/*
+ * Book keeping for GC.
+ */
 struct cw_stila_s {
 #if (defined(_LIBSTIL_DBG) || defined(_LIBSTIL_DEBUG))
 	cw_uint32_t	magic;
@@ -19,6 +22,9 @@ struct cw_stila_s {
 	cw_dch_t	seq_set;
 };
 
+/*
+ * Global memory allocator.
+ */
 struct cw_stilag_s {
 #if (defined(_LIBSTIL_DBG) || defined(_LIBSTIL_DEBUG))
 	cw_uint32_t	magic;
@@ -26,8 +32,8 @@ struct cw_stilag_s {
 	cw_mtx_t	lock;
 
 	/*
-	 * Head of list of stila's for all stilt's.  This is needed in order to
-	 * supsend threads and recurse when doing GC.
+	 * Head of list of stilat's for all stilt's.  This is needed in order to
+	 * suspend threads and recurse when doing GC.
 	 */
 	ql_head(cw_stilat_t)	head;
 
@@ -44,6 +50,9 @@ struct cw_stilag_s {
 	cw_stila_t	stila;
 };
 
+/*
+ * Per-thread memory allocator.
+ */
 struct cw_stilat_s {
 #if (defined(_LIBSTIL_DBG) || defined(_LIBSTIL_DEBUG))
 	cw_uint32_t	magic;
@@ -159,6 +168,8 @@ cw_bool_t	stilat_gc_register(cw_stilat_t *a_stilat, cw_stiloe_t
 void		stilat_free(cw_stilat_t *a_stilat, void *a_ptr, const char
     *a_filename, cw_uint32_t a_line_num);
 
+#define		stilat_currentglobal(a_stilat)				\
+	(a_stilat)->global
 #define		stilat_mem_get(a_stilat)				\
 	stilag_mem_get((a_stilat)->stilag)
 #define		stilat_stil_bufc_pool_get(a_stilat)			\
