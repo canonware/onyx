@@ -146,6 +146,7 @@ nxoe_p_stack_npop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
     cw_nxoe_stacko_t *top, *stacko, *tstacko;
 #ifdef CW_DBG
     cw_nxoe_stacko_t *spare = ql_first(&a_stack->stack);
+    cw_uint32_t nspares;
 #endif
 
     /* We need to discard some spares, so get a pointer to the beginning of the
@@ -156,6 +157,9 @@ nxoe_p_stack_npop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
     {
 	stacko = qr_next(stacko, link);
     }
+#ifdef CW_DBG
+    nspares = i;
+#endif
     for (top = stacko; i < a_count; i++)
     {
 	top = qr_next(top, link);
@@ -200,7 +204,7 @@ nxoe_p_stack_npop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
     a_stack->nspare = CW_LIBONYX_STACK_CACHE;
 
 #ifdef CW_DBG
-    for (; spare != ql_first(&a_stack->stack); spare = qr_next(spare, link))
+    for (i = 0; i < nspares; i++, spare = qr_next(spare, link))
     {
 	memset(&spare->nxo, 0x5a, sizeof(cw_nxo_t));
     }
@@ -214,6 +218,9 @@ nxoe_p_stack_nbpop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
 {
     cw_uint32_t i;
     cw_nxoe_stacko_t *bottom, *stacko, *tstacko;
+#ifdef CW_DBG
+    cw_uint32_t nspares;
+#endif
 
     /* We need to discard some spares, so get a pointer to the beginning of the
      * region to be removed from the ring. */
@@ -223,6 +230,9 @@ nxoe_p_stack_nbpop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
     {
 	stacko = qr_prev(stacko, link);
     }
+#ifdef CW_DBG
+    nspares = i;
+#endif
     for (bottom = stacko; i < a_count; i++)
     {
 	bottom = qr_prev(bottom, link);
@@ -275,9 +285,9 @@ nxoe_p_stack_nbpop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
     a_stack->nspare = CW_LIBONYX_STACK_CACHE;
 
 #ifdef CW_DBG
-    for (; bottom != ql_first(&a_stack->stack); bottom = qr_next(bottom, link))
+    for (i = 0; i < nspares; i++, stacko = qr_next(stacko, link))
     {
-	memset(&bottom->nxo, 0x5a, sizeof(cw_nxo_t));
+	memset(&stacko->nxo, 0x5a, sizeof(cw_nxo_t));
     }
 #endif
 }
