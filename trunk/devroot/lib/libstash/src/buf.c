@@ -24,16 +24,6 @@
 #  include <sys/uio.h>
 #endif
 
-#ifdef UIO_MAXIOV
-#  define _LIBSTASH_BUF_MAX_IOV UIO_MAXIOV
-#else
-#  ifdef _CW_OS_FREEBSD
-#    define _LIBSTASH_BUF_MAX_IOV 1024
-#  else
-#    define _LIBSTASH_BUF_MAX_IOV 64
-#  endif
-#endif
-
 cw_buf_t *
 #ifdef _CW_REENTRANT
 buf_new(cw_buf_t * a_buf, cw_bool_t a_is_threadsafe)
@@ -385,9 +375,9 @@ buf_get_iovec(cw_buf_t * a_buf, cw_uint32_t a_max_data,
     a_buf->iov[i - 1].iov_len -= (num_bytes - a_max_data);
   }
 
-  if ((TRUE == a_is_sys_iovec) && (i > _LIBSTASH_BUF_MAX_IOV))
+  if ((TRUE == a_is_sys_iovec) && (i > _LIBSTASH_MAX_IOV))
   {
-    *r_iovec_count = _LIBSTASH_BUF_MAX_IOV;
+    *r_iovec_count = _LIBSTASH_MAX_IOV;
   }
   else
   {

@@ -6,3 +6,4 @@ Makefile.gnu
 config.cache
 config.log
 config.status
+_LIBSTASH_MAX_IOV

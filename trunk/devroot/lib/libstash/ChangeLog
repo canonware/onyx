@@ -1,5 +1,8 @@
 1999-07-29  Jason Evans  <jasone@canonware.com>
 
+	* configure.in (_LIBSTASH_MAX_IOV): Add test to detect the maximum
+	iovec size compatible with readv()/writev().
+
 	* : The `log' class is now deprecated.  The `out' class replaces it.
 
 	* src/out.c (out_put_l): Add.

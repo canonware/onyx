@@ -2095,6 +2095,67 @@ cat >> confdefs.h <<EOF
 EOF
 
  
+if test "$cross_compiling" = yes; then
+    { echo "configure: error: can not run test program while cross compiling" 1>&2; exit 1; }
+else
+  cat > conftest.$ac_ext <<EOF
+#line 2103 "configure"
+#include "confdefs.h"
+
+#include <stdio.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/uio.h>
+#include <unistd.h>
+
+int
+main()
+{
+  int i, fd, nwrite;
+  char buf[1024];
+  struct iovec iov[1024];
+
+  for (i = 0; i < 1024; i++)
+  {
+    iov[i].iov_base = &buf[i];
+    iov[i].iov_len = 1;
+  }
+
+  fd = open("_LIBSTASH_MAX_IOV", O_RDWR | O_CREAT | O_TRUNC, 0644);
+  
+  for (i = 1024; i > 16; i >>= 1)
+    if (-1 != writev(fd, iov, i))
+      break;
+
+  fprintf(stderr, "iovcnt: %d\n", i);
+
+  ftruncate(fd, 0);
+  nwrite = sprintf(buf, "%d\n", i);
+  write(fd, buf, nwrite);
+
+  close(fd);
+  return 0;
+}
+
+EOF
+if { (eval echo configure:2142: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
+then
+  :
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+fi
+rm -fr conftest*
+fi
+
+maxiov=`cat _LIBSTASH_MAX_IOV`
+echo "$ac_t""_LIBSTASH_MAX_IOV... $maxiov" 1>&6
+cat >> confdefs.h <<EOF
+#define _LIBSTASH_MAX_IOV $maxiov
+EOF
+
+rm -f _LIBSTASH_MAX_IOV
+
 echo "$ac_t""================================================================" 1>&6
 echo "$ac_t""Extra libraries to link in: ${LIBS}" 1>&6
 echo "$ac_t""Extra ld flags: ${LDFLAGS}" 1>&6
@@ -2125,7 +2186,7 @@ else { echo "configure: error: can not run $ac_config_sub" 1>&2; exit 1; }
 fi
 
 echo $ac_n "checking host system type""... $ac_c" 1>&6
-echo "configure:2129: checking host system type" >&5
+echo "configure:2190: checking host system type" >&5
 
 host_alias=$host
 case "$host_alias" in
