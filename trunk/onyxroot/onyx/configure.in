@@ -29,7 +29,6 @@ CW_BUILD_LIB(libstash, lib_stash)
 dnl Look for binaries.
 CW_BUILD_BIN(blow, bin_blow)
 CW_BUILD_BIN(cover, bin_cover)
-CW_BUILD_BIN(edittest, bin_edittest)
 CW_BUILD_BIN(echos, bin_echos)
 CW_BUILD_BIN(ncat, bin_ncat)
 CW_BUILD_BIN(proxy, bin_proxy)
