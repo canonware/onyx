@@ -1,3 +1,13 @@
+2003-05-13 : Jason Evans <jasone@canonware.com>
+
+	* Add the "class" and "instance" Onyx types.
+
+	* configure.in : Add --disable-oop.
+
+	* lib/libonyx/include/libonyx/nxo_handle.h : Rename
+	  nxo_hande_data_[gs]et() to nxo_handle_opaque_[gs]et(), in order to be
+	  consistent with class/instance function names.
+
 2003-05-07 : Jason Evans <jasone@canonware.com>
 
 	* Add operators:
