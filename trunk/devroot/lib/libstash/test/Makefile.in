@@ -30,8 +30,8 @@
 #
 # $Source$
 # $Author: jasone $
-# Current revision: $Revision: 12 $
-# Last modified: $Date: 1998-02-20 01:33:18 -0800 (Fri, 20 Feb 1998) $
+# Current revision: $Revision: 16 $
+# Last modified: $Date: 1998-03-29 05:26:59 -0800 (Sun, 29 Mar 1998) $
 #
 # Description: Makefile for ttalk regression tests.
 #              
@@ -52,8 +52,8 @@ DIFF    = @DIFF@
 INCS    = -I@top_srcdir@/../include
 CFLAGS  = @CFLAGS@
 
-DEFINES = -D_REENTRANT @DEFS@
-STATLIB = ttalk
+DEFINES = @DEFS@
+STATLIB =
 LIBS    = -L@top_srcdir@/../src -l$(STATLIB) @LIBS@
 
 #
@@ -70,8 +70,8 @@ DIRS     =
 # b* : backend C code driven by the perl scripts
 # c* : stand alone C tests
 # p*.pl : perl scripts that drive the b* programs
-CTESTS   = c19971207a
-PTESTS   = 
+CTESTS   =
+PTESTS   =
 
 #
 # implicit rules
