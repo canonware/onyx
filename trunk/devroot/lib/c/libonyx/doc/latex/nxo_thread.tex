@@ -343,17 +343,36 @@ a\_len}}
 		force acceptance of the previous token if no whitespace has yet
 		followed.
 	\end{capilist}
-\label{nxo_thread_error}
-\index{nxo_thread_error@\cfunc{nxo\_thread\_error}{}}
-\citem{\cfunc[void]{nxo\_thread\_error}{cw\_nxo\_t *a\_nxo, cw\_nxo\_threade\_t
-a\_threade}}
+\label{nxo_thread_nerror}
+\index{nxo_thread_nerror@\cfunc{nxo\_thread\_nerror}{}}
+\citem{\cfunc[void]{nxo\_thread\_nerror}{cw\_nxo\_t *a\_nxo, cw\_nxn\_t a\_nxn}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_nxo: ]
 			Pointer to a thread \classname{nxo}.
-		\item[a\_threade: ]
-			An error code.
+		\item[a\_nxn: ]
+			An nxn corresponding to the name of an error.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] Application dependent.
+	\item[Description: ]
+		Throw an error.
+	\end{capilist}
+\label{nxo_thread_serror}
+\index{nxo_thread_serror@\cfunc{nxo\_thread\_serror}{}}
+\citem{\cfunc[void]{nxo\_thread\_serror}{cw\_nxo\_t *a\_nxo, const cw\_uint8\_t
+a\_str, cw\_uint32\_t a\_len}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[a\_str: ]
+			Pointer to a string that represents the name of an
+			error.
+		\item[a\_len: ]
+			The length of \cvar{a\_str}.
 		\end{description}
 	\item[Output(s): ] None.
 	\item[Exception(s): ] Application dependent.
