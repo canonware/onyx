@@ -36,10 +36,10 @@ struct cw_pezz_s
   /* Pointer one byte past the end of the memory block pointed to by
    * mem_base. */
   void * mem_end;
-  
-  /* Total space allocated for one buffer, from an internal perspective. */
-  cw_uint32_t internal_buffer_size;
 
+  /* Pointer to base of the rings memory block. */
+  cw_ring_t * rings;
+  
   /* Size of one buffer, from the user's perspective. */
   cw_uint32_t buffer_size;
 

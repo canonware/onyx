@@ -1122,49 +1122,52 @@ buf_get_uint32(cw_buf_t * a_buf, cw_uint32_t a_offset)
       < 
       a_buf->bufel_array[array_element].end_offset)
   {
-    retval = ((cw_uint32_t)
-	      *(bufel_get_data_ptr(&a_buf->bufel_array[array_element])
-		+ bufel_offset))
-		  << 24;
-    
+    retval = (((cw_uint32_t)
+	       *(bufel_get_data_ptr(&a_buf->bufel_array[array_element])
+		 + bufel_offset))
+	      & 0xff);
+  
     retval |= (((cw_uint32_t)
 		*(bufel_get_data_ptr(&a_buf->bufel_array[array_element])
 		  + bufel_offset + 1))
-	       << 16) & 0x00ff0000;
-    
+	       << 8) & 0x0000ff00;
+  
     retval |= (((cw_uint32_t)
 		*(bufel_get_data_ptr(&a_buf->bufel_array[array_element])
 		  + bufel_offset + 2))
-	       << 8) & 0x0000ff00;
-    
-    retval |= ((cw_uint32_t)
-	       *(bufel_get_data_ptr(&a_buf->bufel_array[array_element])
-		 + bufel_offset + 3))
-      & 0x000000ff;
+	       << 16) & 0x00ff0000;
+  
+    retval |= (((cw_uint32_t)
+		*(bufel_get_data_ptr(&a_buf->bufel_array[array_element])
+		  + bufel_offset + 3))
+	       << 24) & 0xff000000;
   }
   else
   {
-    /* The data is spread across two to four buffers. */
-    retval = (*(bufel_get_data_ptr(&a_buf->bufel_array[array_element])
-		+ bufel_offset)
-	      << 24);
-    
+    retval = (((cw_uint32_t)
+	       *(bufel_get_data_ptr(&a_buf->bufel_array[array_element])
+		 + bufel_offset))
+	      & 0xff);
+  
     buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
-    retval |= ((*(bufel_get_data_ptr(&a_buf->bufel_array[array_element])
-		  + bufel_offset)
-		<< 16) & 0x00ff0000);
-    
+    retval |= (((cw_uint32_t)
+		*(bufel_get_data_ptr(&a_buf->bufel_array[array_element])
+		  + bufel_offset))
+	       << 8) & 0x0000ff00;
+  
     buf_p_get_data_position(a_buf, a_offset + 2, &array_element, &bufel_offset);
-    retval |= ((*(bufel_get_data_ptr(&a_buf->bufel_array[array_element])
-		  + bufel_offset)
-		<< 8) & 0x0000ff00);
-    
+    retval |= (((cw_uint32_t)
+		*(bufel_get_data_ptr(&a_buf->bufel_array[array_element])
+		  + bufel_offset))
+	       << 16) & 0x00ff0000;
+  
     buf_p_get_data_position(a_buf, a_offset + 3, &array_element, &bufel_offset);
-    retval |= (*(bufel_get_data_ptr(&a_buf->bufel_array[array_element])
-		 + bufel_offset)
-	       & 0x000000ff);
+    retval |= (((cw_uint32_t)
+		*(bufel_get_data_ptr(&a_buf->bufel_array[array_element])
+		  + bufel_offset))
+	       << 24) & 0xff000000;
   }
-
+  
 #ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe)
   {
@@ -1172,7 +1175,6 @@ buf_get_uint32(cw_buf_t * a_buf, cw_uint32_t a_offset)
   }
 #endif
   
-/*    return ntohl(retval); */
   return retval;
 }
 
@@ -1199,95 +1201,95 @@ buf_get_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset)
       < 
       a_buf->bufel_array[array_element].end_offset)
   {
-    retval = ((cw_uint64_t)
+    retval = (((cw_uint64_t)
 	      *(bufel_get_data_ptr(&a_buf->bufel_array[array_element])
 		+ bufel_offset))
-		  << 56;
+	      & 0xff);
     
     retval |= (((cw_uint64_t)
 		*(bufel_get_data_ptr(&a_buf->bufel_array[array_element])
 		  + bufel_offset + 1))
-	       << 48) & (((cw_uint64_t) 0x00ff0000 << 32) | 0x00000000);
+	       << 8) & (((cw_uint64_t) 0x00000000 << 32) | 0x0000ff00);
 
     retval |= (((cw_uint64_t)
 		*(bufel_get_data_ptr(&a_buf->bufel_array[array_element])
 		  + bufel_offset + 2))
-	       << 40) & (((cw_uint64_t) 0x0000ff00 << 32) | 0x00000000);
-
-    retval |= (((cw_uint64_t)
-		*(bufel_get_data_ptr(&a_buf->bufel_array[array_element])
-		  + bufel_offset + 3))
-	       << 32) & (((cw_uint64_t) 0x000000ff << 32) | 0x00000000);
-
-    retval |= (((cw_uint64_t)
-		*(bufel_get_data_ptr(&a_buf->bufel_array[array_element])
-		  + bufel_offset + 4))
-	       << 24) & (((cw_uint64_t) 0x00000000 << 32) | 0xff000000);
-
-    retval |= (((cw_uint64_t)
-		*(bufel_get_data_ptr(&a_buf->bufel_array[array_element])
-		  + bufel_offset + 5))
 	       << 16) & (((cw_uint64_t) 0x00000000 << 32) | 0x00ff0000);
 
     retval |= (((cw_uint64_t)
 		*(bufel_get_data_ptr(&a_buf->bufel_array[array_element])
-		  + bufel_offset + 6))
-	       << 8) & (((cw_uint64_t) 0x00000000 << 32) | 0x0000ff00);
+		  + bufel_offset + 3))
+	       << 24) & (((cw_uint64_t) 0x00000000 << 32) | 0xff000000);
 
-    retval |= ((cw_uint64_t)
-	       *(bufel_get_data_ptr(&a_buf->bufel_array[array_element])
-		 + bufel_offset + 7))
-      & (((cw_uint64_t) 0x00000000 << 32) | 0x000000ff);
+    retval |= (((cw_uint64_t)
+		*(bufel_get_data_ptr(&a_buf->bufel_array[array_element])
+		  + bufel_offset + 4))
+	       << 32) & (((cw_uint64_t) 0x000000ff << 32) | 0x00000000);
+
+    retval |= (((cw_uint64_t)
+		*(bufel_get_data_ptr(&a_buf->bufel_array[array_element])
+		  + bufel_offset + 5))
+	       << 40) & (((cw_uint64_t) 0x0000ff00 << 32) | 0x00000000);
+
+    retval |= (((cw_uint64_t)
+		*(bufel_get_data_ptr(&a_buf->bufel_array[array_element])
+		  + bufel_offset + 6))
+	       << 48) & (((cw_uint64_t) 0x00ff0000 << 32) | 0x00000000);
+
+    retval |= (((cw_uint64_t)
+		*(bufel_get_data_ptr(&a_buf->bufel_array[array_element])
+		  + bufel_offset + 7))
+	       << 56) & (((cw_uint64_t) 0xff000000 << 32) | 0x00000000);
   }
   else
   {
     /* The data is spread across two to eight buffers. */
-    retval = ((cw_uint64_t)
+    retval = (((cw_uint64_t)
 	      *(bufel_get_data_ptr(&a_buf->bufel_array[array_element])
 		+ bufel_offset))
-		  << 56;
+	      & 0xff);
     
     buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
     retval |= (((cw_uint64_t)
 		*(bufel_get_data_ptr(&a_buf->bufel_array[array_element])
 		  + bufel_offset))
-	       << 48) & (((cw_uint64_t) 0x00ff0000 << 32) | 0x00000000);
+	       << 8) & (((cw_uint64_t) 0x00000000 << 32) | 0x0000ff00);
 
     buf_p_get_data_position(a_buf, a_offset + 2, &array_element, &bufel_offset);
     retval |= (((cw_uint64_t)
 		*(bufel_get_data_ptr(&a_buf->bufel_array[array_element])
 		  + bufel_offset))
-	       << 40) & (((cw_uint64_t) 0x0000ff00 << 32) | 0x00000000);
+	       << 16) & (((cw_uint64_t) 0x00000000 << 32) | 0x00ff0000);
 
     buf_p_get_data_position(a_buf, a_offset + 3, &array_element, &bufel_offset);
     retval |= (((cw_uint64_t)
 		*(bufel_get_data_ptr(&a_buf->bufel_array[array_element])
 		  + bufel_offset))
-	       << 32) & (((cw_uint64_t) 0x000000ff << 32) | 0x00000000);
+	       << 24) & (((cw_uint64_t) 0x00000000 << 32) | 0xff000000);
 
     buf_p_get_data_position(a_buf, a_offset + 4, &array_element, &bufel_offset);
     retval |= (((cw_uint64_t)
 		*(bufel_get_data_ptr(&a_buf->bufel_array[array_element])
 		  + bufel_offset))
-	       << 24) & (((cw_uint64_t) 0x00000000 << 32) | 0xff000000);
+	       << 32) & (((cw_uint64_t) 0x000000ff << 32) | 0x00000000);
 
     buf_p_get_data_position(a_buf, a_offset + 5, &array_element, &bufel_offset);
     retval |= (((cw_uint64_t)
 		*(bufel_get_data_ptr(&a_buf->bufel_array[array_element])
 		  + bufel_offset))
-	       << 16) & (((cw_uint64_t) 0x00000000 << 32) | 0x00ff0000);
+	       << 40) & (((cw_uint64_t) 0x0000ff00 << 32) | 0x00000000);
 
     buf_p_get_data_position(a_buf, a_offset + 6, &array_element, &bufel_offset);
     retval |= (((cw_uint64_t)
 		*(bufel_get_data_ptr(&a_buf->bufel_array[array_element])
 		  + bufel_offset))
-	       << 8) & (((cw_uint64_t) 0x00000000 << 32) | 0x0000ff00);
+	       << 48) & (((cw_uint64_t) 0x00ff0000 << 32) | 0x00000000);
 
     buf_p_get_data_position(a_buf, a_offset + 7, &array_element, &bufel_offset);
-    retval |= ((cw_uint64_t)
-	       *(bufel_get_data_ptr(&a_buf->bufel_array[array_element])
-		 + bufel_offset))
-      & (((cw_uint64_t) 0x00000000 << 32) | 0x000000ff);
+    retval |= (((cw_uint64_t)
+		*(bufel_get_data_ptr(&a_buf->bufel_array[array_element])
+		  + bufel_offset))
+	       << 56) & (((cw_uint64_t) 0xff000000 << 32) | 0x00000000);
   }
 
 #ifdef _CW_REENTRANT
@@ -1296,7 +1298,6 @@ buf_get_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset)
     mtx_unlock(&a_buf->lock);
   }
 #endif
-/*    return _cw_ntohq(retval); */
   return retval;
 }
 

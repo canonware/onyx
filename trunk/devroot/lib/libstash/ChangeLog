@@ -1,12 +1,19 @@
 1999-04-10  Jason Evans  <jasone@canonware.com>
 
-	* include/libstash/buf.h: Split cw_buf_t's "array" into
+	* include/libstash/pezz.h (cw_pezz_t): Split memory buffers and
+	ring elements into separate memory chunks to simplify memory
+	management.
+
+	* src/buf.c (buf_get_uint32): Fix endianness bug.
+	(buf_get_uint64): Fix endianness bug.
+
+	* include/libstash/buf.h (cw_buf_t): Split "array" into
 	"bufel_array" and "cumulative_index".  For large data sets, this
 	may improve cache locality of the binary search through the
 	cumulative index.  Benchmarks show no slowdown for data sets that
 	fit entirely in L2 cache.
 
-	Add "bufc_buf" to cw_bufel_t in order to decrease the amount of
+	(cw_bufel_t): Add "bufc_buf" in order to decrease the amount of
 	pointer chasing necessary when looking up data buffers.  This may
 	improve performance for large data sets.  Benchmarks show no
 	slowdown for data sets that fit entirely in L2 cache.
