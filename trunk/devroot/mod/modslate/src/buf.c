@@ -2943,8 +2943,8 @@ mkr_p_split_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
 
     /* Resize bufv to make enough room for all of the bufp's that were just
      * inserted (including the extra one from splitting). */
-    buf->bufv = (cw_bufv_t *) cw_opaque_realloc(buf->realloc, buf->bufv,
-						buf->arg,
+    buf->bufv = (cw_bufv_t *) cw_opaque_realloc(buf->realloc, buf->arg,
+						buf->bufv,
 						(buf->bufvcnt
 						 + ((nextra + 1) * 2))
 						* sizeof(cw_bufv_t),
@@ -3485,8 +3485,8 @@ mkr_l_remove(cw_mkr_t *a_start, cw_mkr_t *a_end, cw_bool_t a_record)
     /* Resize bufv if any bufp's were removed. */
     if (nrem != 0)
     {
-	buf->bufv = (cw_bufv_t *) cw_opaque_realloc(buf->realloc, buf->bufv,
-						    buf->arg,
+	buf->bufv = (cw_bufv_t *) cw_opaque_realloc(buf->realloc, buf->arg,
+						    buf->bufv,
 						    (buf->bufvcnt - (nrem * 2))
 						    * sizeof(cw_bufv_t),
 						    buf->bufvcnt
