@@ -14,6 +14,7 @@
 #if (0)
 typedef struct cw_kasit_s cw_kasit_t;
 #endif
+typedef struct cw_kasitn_s cw_kasitn_t;
 
 struct cw_kasit_s
 {
@@ -23,6 +24,10 @@ struct cw_kasit_s
 
   /* kasi this kasit is part of. */
   cw_kasi_t * kasi;
+
+  /* Hash of cached kasin references.  Keys are (cw_kasink_t *); values are
+   * (cw_kasitn_t *). */
+  cw_dch_t * names;
 
 /*    cw_mtx_t lock; */
   void (*dealloc_func)(void *, void *);
@@ -88,6 +93,20 @@ struct cw_kasit_s
   cw_bool_t procedure_depth;
 };
 
+struct cw_kasitn_s
+{
+#if (defined(_LIBKASI_DBG) || defined(_LIBKASI_DEBUG))
+  cw_uint32_t magic;
+#endif
+
+  /* Number of simple references to this object. */
+  cw_uint32_t ref_count;
+
+  /* Key.  This is a copy of the kasink in the main kasi's names hash.  The
+   * value is stored as the data pointer in the hash table. */
+  cw_kasink_t key;
+};
+
 cw_kasit_t *
 kasit_new(cw_kasit_t * a_kasit,
 	  void (*a_dealloc_func)(void * dealloc_arg, void * kasit),
@@ -108,3 +127,10 @@ kasit_detach_str(cw_kasit_t * a_kasit, const char * a_str, cw_uint32_t a_len);
 
 void
 kasit_detach_buf(cw_kasit_t * a_kasit, cw_buf_t * a_buf);
+
+const cw_kasin_t *
+kasitn_ref(cw_kasit_t * a_kasit, const cw_uint8_t * a_name, cw_uint32_t a_len,
+	   cw_bool_t a_force);
+
+void
+kasitn_unref(cw_kasit_t * a_kasit, const cw_kasin_t * a_kasin);

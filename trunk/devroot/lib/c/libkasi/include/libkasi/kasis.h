@@ -48,7 +48,7 @@ struct cw_kasiso_s
   cw_uint32_t magic;
 #endif
   
-  /* chunk this op is contained in. */
+  /* chunk this kasisco is contained in. */
   cw_kasisc_t * chunk;
 
   /* Stack linkage.  If a spare slot, this field is used to link into the
@@ -71,7 +71,7 @@ struct cw_kasisc_s
 
   /* Must be last field, since it is used for array indexing of kasiso's beyond
    * the end of the structure. */
-  cw_kasiso_t ops;
+  cw_kasiso_t objects[1];
 };
 
 cw_kasis_t *

@@ -28,8 +28,16 @@
  * example, kasio.h must come before kasid.h.
  */
 
-#include "kasi.h"
 #include "kasio.h"
-#include "kasid.h"
+#include "kasioe.h"
+#include "kasioe_array.h"
+#include "kasioe_condition.h"
+#include "kasioe_dict.h"
+#include "kasioe_lock.h"
+#include "kasioe_mstate.h"
+#include "kasioe_number.h"
+#include "kasioe_packedarray.h"
+#include "kasioe_string.h"
+#include "kasi.h"
 #include "kasis.h"
 #include "kasit.h"

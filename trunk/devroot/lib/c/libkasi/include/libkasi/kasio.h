@@ -12,109 +12,36 @@
 
 typedef struct cw_kasio_s cw_kasio_t;
 
-typedef struct cw_kasioe_s cw_kasioe_t;
+/* Defined here to resolve circular dependencies. */
 typedef struct cw_kasioe_array_s cw_kasioe_array_t;
 typedef struct cw_kasioe_condition_s cw_kasioe_condition_t;
 typedef struct cw_kasioe_dict_s cw_kasioe_dict_t;
 typedef struct cw_kasioe_lock_s cw_kasioe_lock_t;
 typedef struct cw_kasioe_mstate_s cw_kasioe_mstate_t;
-typedef struct cw_kasioe_name_s cw_kasioe_name_t;
 typedef struct cw_kasioe_number_s cw_kasioe_number_t;
 typedef struct cw_kasioe_packedarray_s cw_kasioe_packedarray_t;
 typedef struct cw_kasioe_string_s cw_kasioe_string_t;
-
-struct cw_kasioe_s
-{
-  void (*dealloc_func)(void *, void *);
-  void * dealloc_arg;
-
-  /* If TRUE, then this object must be locked during access. */
-  cw_bool_t is_global;
-  cw_mtx_t lock;
-  
-  cw_uint32_t ref_count;
-  cw_dch_t * keyed_refs;
-  enum
-  {
-    _CW_KASIOE_UNLIMITED,
-    _CW_KASIOE_READONLY,
-    _CW_KASIOE_EXECUTEONLY,
-    _CW_KASIOE_NONE
-  } access;
-  cw_bool_t is_watchpoint;
-};
-
-struct cw_kasioe_array_s
-{
-  cw_kasioe_t kasioe;
-};
-
-struct cw_kasioe_condition_s
-{
-  cw_kasioe_t kasioe;
-  cw_cnd_t condition;
-};
-
-/* Defined in kasid.h, in order to resolve a circular dependency. */
-#if (0)
-struct cw_kasioe_dict_s
-{
-  cw_kasioe_t kasioe;
-  /* Must come last, since its size varies. */
-  cw_kasid_t dict;
-};
-#endif
-
-struct cw_kasioe_lock_s
-{
-  cw_kasioe_t kasioe;
-  cw_mtx_t lock;
-};
-
-struct cw_kasioe_mstate_s
-{
-  cw_kasioe_t kasioe;
-  cw_uint32_t accuracy;
-  cw_uint32_t point;
-  cw_uint32_t base;
-};
-
-struct cw_kasioe_name_s
-{
-  cw_kasioe_t kasioe;
-  cw_uint32_t len;
-  cw_uint8_t * name;
-};
-
-struct cw_kasioe_number_s
-{
-  cw_kasioe_t kasioe;
-  /* Offset in val that the "decimal point" precedes. */
-  cw_uint32_t point;
-  /* Base.  Can be from 2 to 36, inclusive. */
-  cw_uint32_t base;
-  /* Number of bytes that val points to. */
-  cw_uint32_t val_len;
-  /* Offset of most significant non-zero digit. */
-  cw_uint32_t val_msd;
-  /* The least significant digit is at val[0].  Each byte can range in value
-   * from 0 to 35, depending on the base.  This representation is not compact,
-   * but it is easy to work with. */
-  cw_uint8_t * val;
-};
-
-struct cw_kasioe_packedarray_s
-{
-  cw_kasioe_t kasioe;
-};
-
-struct cw_kasioe_string_s
-{
-  cw_kasioe_t kasioe;
-};
-
-/* Defined here (instead of in kasit.h) to resolve a circular dependency. */
+typedef struct cw_kasin_s cw_kasin_t;
 typedef struct cw_kasit_s cw_kasit_t;
+
+typedef enum
+{
+  _CW_KASIOT_NOTYPE          =  0,
+  _CW_KASIOT_ARRAYTYPE       =  1,
+  _CW_KASIOT_BOOLEANTYPE     =  2,
+  _CW_KASIOT_CONDITIONTYPE   =  3,
+  _CW_KASIOT_DICTTYPE        =  4,
+  _CW_KASIOT_FILETYPE        =  5,
+  _CW_KASIOT_LOCKTYPE        =  6,
+  _CW_KASIOT_MARKTYPE        =  7,
+  _CW_KASIOT_MSTATETYPE      =  8,
+  _CW_KASIOT_NAMETYPE        =  9,
+  _CW_KASIOT_NULLTYPE        = 10,
+  _CW_KASIOT_NUMBERTYPE      = 11,
+  _CW_KASIOT_OPERATORTYPE    = 12,
+  _CW_KASIOT_PACKEDARRAYTYPE = 13,
+  _CW_KASIOT_STRINGTYPE      = 14
+} cw_kasiot_t;
 
 /*
  * Main object structure.
@@ -127,25 +54,21 @@ struct cw_kasio_s
 
   struct
   {
-    /* Not an enumerated type, since that would make it a full machine word. */
-#define _CW_KASIO_ARRAYTYPE        1
-#define _CW_KASIO_BOOLEANTYPE      2
-#define _CW_KASIO_CONDITIONTYPE    3
-#define _CW_KASIO_DICTTYPE         4
-#define _CW_KASIO_FILETYPE         5
-#define _CW_KASIO_LOCKTYPE         6
-#define _CW_KASIO_MARKTYPE         7
-#define _CW_KASIO_MSTATETYPE       8
-#define _CW_KASIO_NAMETYPE         9
-#define _CW_KASIO_NULLTYPE        10
-#define _CW_KASIO_NUMBERTYPE      11
-#define _CW_KASIO_OPERATORTYPE    12
-#define _CW_KASIO_PACKEDARRAYTYPE 13
-#define _CW_KASIO_STRINGTYPE      14
+    /* Not an enumerated type, since that would make it a full machine word.
+     * Instead, cw_kasiot_t is cast to a cw_uint8_t before being stored here. */
     cw_uint8_t type;
-    /* If non-zero, this is an extended type.  This field is only used for
-     * number and mstate objects, since no other types can switch between simple
-     * and extended. */
+    /* If non-zero, this is an extended type.  This field is used for number and
+     * mstate objects, which can both switch between simple and extended
+     * representations.
+     *
+     * In addition, name objects use it to indicate if a name is an indirect
+     * reference.  Each kasit maintains a cache of kasin pointers, each holding
+     * a single reference to the names hash in kasi.  If this is an indirect
+     * reference (1 == flags.extended), the unreferencing operation should
+     * actually be done with the kasit's kasin cache.  Note that this is the
+     * (very) common case.  Use the kasin pointer to get the actual name "value"
+     * for the unreferencing operation.  This is safe, because this kasit is
+     * guaranteed to be holding a reference to the kasin. */
     cw_uint8_t extended;
     /* If non-zero, there is a breakpoint set on this object.  In general, this
      * field is not looked at unless the interpreter has been put into debugging
@@ -201,7 +124,7 @@ struct cw_kasio_s
     } mstate;
     struct
     {
-      cw_kasioe_name_t * kasioe;
+      cw_kasin_t * kasin;
     } name;
     struct
     {
@@ -231,3 +154,18 @@ struct cw_kasio_s
     } string;
   } o;
 };
+
+void
+kasio_new(cw_kasio_t * a_kasio);
+
+void
+kasio_delete(cw_kasio_t * a_kasio);
+
+cw_kasio_t
+kasio_type(cw_kasio_t * a_kasio);
+
+void
+kasio_copy(cw_kasio_t * a_to, cw_kasio_t * a_from);
+
+cw_bool_t
+kasio_cast(cw_kasio_t * a_kasio, cw_kasiot_t a_kasiot);
