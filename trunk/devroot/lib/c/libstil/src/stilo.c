@@ -1763,7 +1763,8 @@ stilo_p_name_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t
 	if (a_syntactic)
 		_cw_out_put_f(a_fd, "/");
 
-	_cw_out_put_fn(a_fd, name->e.n.len, "[s]", name->e.n.name);
+	_cw_out_put_f(a_fd, "0x[p], len [i]\n", name->e.n.name, name->e.n.len);
+/*  	_cw_out_put_fn(a_fd, name->e.n.len, "[s]", name->e.n.name); */
 
 	if (a_newline)
 		_cw_out_put_f(a_fd, "\n");
@@ -1775,6 +1776,10 @@ stilo_p_name_gref(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len,
 {
 	cw_stiloe_name_t	*retval, key;
 	cw_stilng_t		*stilng;
+
+	_cw_out_put_e("Reference \"");
+	_cw_out_put_n(a_len, "[s]", a_str);
+	_cw_out_put("\"\n");
 
 	/* Fake up a key so that we can search the hash tables. */
 	key.e.n.name = a_str;

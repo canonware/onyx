@@ -99,21 +99,16 @@ struct cw_stilt_s {
 
 	union {
 		struct {
-			enum {
-				_CW_STILS_NUMBER_POS,
-				_CW_STILS_NUMBER_NEG
-			}	sign;
+			enum {POS, NEG}	sign;
 			cw_uint32_t	base;
 			cw_sint32_t	point_offset;
 			cw_uint32_t	begin_offset;
 		}       number;
 		struct {
-			cw_uint32_t	paren_depth;
 			cw_uint8_t	hex_val;
 		}	string;
 		struct {
-			cw_bool_t	is_literal;
-			cw_bool_t	is_immediate;
+			enum {EXEC, LITERAL, EVAL} action;
 		}	name;
 	}       meta;
 	cw_bool_t	procedure_depth;
