@@ -150,6 +150,7 @@ const cw_uint8_t *cw_g_stil_names[] = {
 	"repeat",
 	"roll",
 	"run",
+	"setcollect",
 	"setfileposition",
 	"setglobal",
 	"shift",

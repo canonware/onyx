@@ -51,6 +51,11 @@ struct cw_stiloe_s {
 	 */
 	cw_bool_t	name_delete:1;
 	/*
+	 * If TRUE, the string in the key is statically allocated, and should
+	 * not be deallocated during destruction.
+	 */
+	cw_bool_t	name_static:1;
+	/*
 	 * If TRUE, there is a watchpoint set on this object.  In general, this
 	 * field is not looked at unless the interpreter has been put into
 	 * debugging mode. Note that setting a watchpoint on an extended type
@@ -94,3 +99,9 @@ cw_stiloe_t *stiloe_l_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t a_reset);
 #define	stiloe_l_registered_get(a_stiloe) (a_stiloe)->registered
 #define	stiloe_l_registered_set(a_stiloe, a_registered)			\
 	(a_stiloe)->registered = (a_registered)
+
+/*
+ * name.
+ */
+cw_uint32_t	stilo_l_name_hash(const void *a_key);
+cw_bool_t	stilo_l_name_key_comp(const void *a_k1, const void *a_k2);

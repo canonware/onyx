@@ -11,6 +11,7 @@
 
 #include "../include/libstil/libstil.h"
 #include "../include/libstil/stil_l.h"
+#include "../include/libstil/stilo_l.h"
 
 #include <ctype.h>
 #include <errno.h>
@@ -249,7 +250,7 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 
 		dch_new(&retval->name_hash, NULL, _CW_STILT_NAME_BASE_TABLE,
 		    _CW_STILT_NAME_BASE_GROW, _CW_STILT_NAME_BASE_SHRINK,
-		    stilo_name_hash, stilo_name_key_comp);
+		    stilo_l_name_hash, stilo_l_name_key_comp);
 		try_stage = 2;
 
 		stils_new(&retval->estack,

@@ -20,6 +20,9 @@ extern  "C" {
 
 #define _LIBSTIL_VERSION "<Version>"
 
+/* Causes verbose GC-related output. */
+#define	_LIBSTIL_CONFESS
+
 /* Exception numbers.  libstil reserves -128 to -255. */
 #define	_CW_STILX_MAX			-128
 #define	_CW_STILX_MIN			-255

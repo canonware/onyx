@@ -10,6 +10,7 @@
  ******************************************************************************/
 
 #include "../include/libstil/libstil.h"
+#include "../include/libstil/stilo_l.h"
 
 #ifdef _LIBSTIL_DBG
 #define _CW_STIL_MAGIC 0xae9678fd
@@ -75,7 +76,7 @@ stil_new(cw_stil_t *a_stil, cw_stilo_file_read_t *a_stdin,
 		mtx_new(&retval->name_lock);
 		dch_new(&retval->name_hash, NULL, _CW_STIL_NAME_BASE_TABLE,
 		    _CW_STIL_NAME_BASE_GROW, _CW_STIL_NAME_BASE_SHRINK,
-		    stilo_name_hash, stilo_name_key_comp);
+		    stilo_l_name_hash, stilo_l_name_key_comp);
 		try_stage = 3;
 
 		/*
@@ -84,6 +85,8 @@ stil_new(cw_stil_t *a_stil, cw_stilo_file_read_t *a_stdin,
 		 * as soon as we're done.
 		 */
 
+		/* XXX OOM in dictionary initialization isn't handled. */
+
 		/* Initialize systemdict, since stilt_new() will access it. */
 		stilo_no_new(&retval->systemdict);
 		stilt_new(&stilt, retval);
@@ -91,7 +94,7 @@ stil_new(cw_stil_t *a_stil, cw_stilo_file_read_t *a_stdin,
 
 		stilt_setglobal(&stilt, TRUE);
 
-		systemdict_populate(&retval->systemdict, &stilt);
+		/* Initialize globaldict. */
 		stilo_dict_new(&retval->globaldict, retval,
 		    _CW_STIL_GLOBALDICT_SIZE);
 
@@ -125,6 +128,9 @@ stil_new(cw_stil_t *a_stil, cw_stilo_file_read_t *a_stdin,
 			stilo_file_interactive(&retval->stderr_stilo, NULL,
 			    a_stderr, a_arg);
 		}
+
+		/* Finish systemdict initialization. */
+		systemdict_populate(&retval->systemdict, &stilt);
 
 		stilt_delete(&stilt);
 	}

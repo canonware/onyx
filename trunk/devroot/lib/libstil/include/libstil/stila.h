@@ -38,7 +38,7 @@ void	stila_new(cw_stila_t *a_stila, cw_stil_t *a_stil);
 void	stila_delete(cw_stila_t *a_stila);
 
 void	stila_gc_register(cw_stila_t *a_stila, cw_stiloe_t *a_stiloe);
-#define	stila_gc_force(a_stila) mq_put(&(a_stila)->gc_mq, STILAM_FORCE)
+void	stila_collect_set(cw_stila_t *a_stila, cw_bool_t a_collect);
 #define	stila_gc_suspend(a_stila) thd_suspend(&(a_stila)->gc_thd)
 #define	stila_gc_resume(a_stila) thd_resume(&(a_stila)->gc_thd)
 

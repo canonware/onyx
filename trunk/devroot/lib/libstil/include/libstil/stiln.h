@@ -153,6 +153,7 @@ typedef enum {
 	STILN_repeat,
 	STILN_roll,
 	STILN_run,
+	STILN_setcollect,
 	STILN_setfileposition,
 	STILN_setglobal,
 	STILN_shift,

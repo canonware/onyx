@@ -339,8 +339,6 @@ void		stilo_name_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const
     cw_uint8_t *a_name, cw_uint32_t a_len, cw_bool_t a_is_static);
 const cw_uint8_t *stilo_name_str_get(cw_stilo_t *a_stilo);
 cw_uint32_t	stilo_name_len_get(cw_stilo_t *a_stilo);
-cw_uint32_t	stilo_name_hash(const void *a_key);
-cw_bool_t	stilo_name_key_comp(const void *a_k1, const void *a_k2);
 
 /*
  * null.
