@@ -1119,10 +1119,12 @@ oh_p_grow(cw_oh_t * a_oh)
     /* Iterate through old table and insert items into new table. */
     {
       cw_oh_item_t * item;
-      cw_uint64_t i;
+      cw_uint64_t i, count;
       cw_ring_t * t_ring;
 
-      for (i = 0; i < a_oh->items_count; i++)
+      for (i = 0, count = a_oh->items_count;
+	   i < count;
+	   i++)
       {
 	t_ring = a_oh->items_ring;
 	a_oh->items_ring = ring_cut(t_ring);
