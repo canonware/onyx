@@ -169,6 +169,10 @@ stil_delete(cw_stil_t *a_stil)
 	 * and globaldict.
 	 */
 	stilt_new(&stilt, a_stil);
+
+	/* Flush stdout. */
+	stilo_file_buffer_flush(&a_stil->stdout_stilo, &stilt);
+
 	stilt_setglobal(&stilt, TRUE);
 	stilt_delete(&stilt);
 
