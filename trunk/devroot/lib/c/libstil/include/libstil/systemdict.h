@@ -98,7 +98,6 @@ void	systemdict_not(cw_stilt_t *a_stilt);
 void	systemdict_notify(cw_stilt_t *a_stilt);
 void	systemdict_null(cw_stilt_t *a_stilt);
 void	systemdict_or(cw_stilt_t *a_stilt);
-void	systemdict_output(cw_stilt_t *a_stilt);
 void	systemdict_pop(cw_stilt_t *a_stilt);
 void	systemdict_print(cw_stilt_t *a_stilt);
 void	systemdict_product(cw_stilt_t *a_stilt);

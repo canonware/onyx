@@ -14,7 +14,40 @@
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
-#include <math.h>	/* For HUGE_VAL, though this is probably an OS bug. */
+
+static cw_stiln_t cw_g_stilte_stiln[] = {
+	0,
+	STILN_dictstackoverflow,
+	STILN_dictstackunderflow,
+	STILN_execstackoverflow,
+	STILN_interrupt,
+	STILN_invalidaccess,
+	STILN_invalidcontext,
+	STILN_invalidexit,
+	STILN_invalidfileaccess,
+	STILN_ioerror,
+	STILN_limitcheck,
+	STILN_rangecheck,
+	STILN_stackoverflow,
+	STILN_stackunderflow,
+	STILN_syntaxerror,
+	STILN_timeout,
+	STILN_typecheck,
+	STILN_undefined,
+	STILN_undefinedfilename,
+	STILN_undefinedresource,
+	STILN_undefinedresult,
+	STILN_unmatchedmark,
+	STILN_unregistered,
+	STILN_vmerror
+};
+
+cw_stiln_t
+stilte_stiln(cw_stilte_t a_stilte)
+{
+	_cw_assert(a_stilte > 0 && a_stilte <= STILTE_LAST);
+	return cw_g_stilte_stiln[a_stilte];
+}
 
 /*  #define	_CW_STILT_SCANNER_DEBUG */
 
@@ -549,6 +582,7 @@ void
 stilt_error(cw_stilt_t *a_stilt, cw_stilte_t a_error)
 {
 	cw_stilo_t	*stilo, *errordict, *key, *handler;
+	cw_stiln_t	stiln;
 	cw_bool_t	ostack_push = TRUE;
 
 	_cw_check_ptr(a_stilt);
@@ -560,11 +594,8 @@ stilt_error(cw_stilt_t *a_stilt, cw_stilte_t a_error)
 	 */
 	errordict = stils_push(&a_stilt->tstack, a_stilt);
 	key = stils_push(&a_stilt->tstack, a_stilt);
-	{
-		static const cw_uint8_t	keystr[] = "errordict";
-
-		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
-	}
+	stilo_name_new(key, a_stilt, stiln_str(STILN_errordict),
+	    stiln_len(STILN_errordict), TRUE);
 	if (stilt_dict_stack_search(a_stilt, key, errordict)) {
 		stils_npop(&a_stilt->tstack, a_stilt, 2);
 		xep_throw(_CW_STILX_ERRORDICT);
@@ -579,150 +610,8 @@ stilt_error(cw_stilt_t *a_stilt, cw_stilte_t a_error)
 	/*
 	 * Find handler corresponding to error.
 	 */
-	switch (a_error) {
-	case STILTE_DICTSTACKOVERFLOW: {
-		static const cw_uint8_t	keystr[] = "dictstackoverflow";
-
-		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
-		break;
-	}
-	case STILTE_DICTSTACKUNDERFLOW: {
-		static const cw_uint8_t	keystr[] = "dictstackunderflow";
-
-		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
-		break;
-	}
-	case STILTE_EXECSTACKOVERFLOW: {
-		static const cw_uint8_t	keystr[] = "execstackoverflow";
-
-		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
-		break;
-	}
-	case STILTE_INTERRUPT: {
-		static const cw_uint8_t	keystr[] = "interrupt";
-
-		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
-		ostack_push = FALSE;
-		break;
-	}
-	case STILTE_INVALIDACCESS: {
-		static const cw_uint8_t	keystr[] = "invalidaccess";
-
-		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
-		break;
-	}
-	case STILTE_INVALIDCONTEXT: {
-		static const cw_uint8_t	keystr[] = "invalidcontext";
-
-		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
-		break;
-	}
-	case STILTE_INVALIDEXIT: {
-		static const cw_uint8_t	keystr[] = "invalidexit";
-
-		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
-		break;
-	}
-	case STILTE_INVALIDFILEACCESS: {
-		static const cw_uint8_t	keystr[] = "invalidfileaccess";
-
-		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
-		break;
-	}
-	case STILTE_IOERROR: {
-		static const cw_uint8_t	keystr[] = "ioerror";
-
-		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
-		break;
-	}
-	case STILTE_LIMITCHECK: {
-		static const cw_uint8_t	keystr[] = "limitcheck";
-
-		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
-		break;
-	}
-	case STILTE_RANGECHECK: {
-		static const cw_uint8_t	keystr[] = "rangecheck";
-
-		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
-		break;
-	}
-	case STILTE_STACKOVERFLOW: {
-		static const cw_uint8_t	keystr[] = "stackoverflow";
-
-		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
-		break;
-	}
-	case STILTE_STACKUNDERFLOW: {
-		static const cw_uint8_t	keystr[] = "stackunderflow";
-
-		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
-		break;
-	}
-	case STILTE_SYNTAXERROR: {
-		static const cw_uint8_t	keystr[] = "syntaxerror";
-
-		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
-		break;
-	}
-	case STILTE_TIMEOUT: {
-		static const cw_uint8_t	keystr[] = "timeout";
-
-		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
-		ostack_push = FALSE;
-		break;
-	}
-	case STILTE_TYPECHECK: {
-		static const cw_uint8_t	keystr[] = "typecheck";
-
-		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
-		break;
-	}
-	case STILTE_UNDEFINED: {
-		static const cw_uint8_t	keystr[] = "undefined";
-
-		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
-		break;
-	}
-	case STILTE_UNDEFINEDFILENAME: {
-		static const cw_uint8_t	keystr[] = "undefinedfilename";
-
-		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
-		break;
-	}
-	case STILTE_UNDEFINEDRESOURCE: {
-		static const cw_uint8_t	keystr[] = "undefinedresource";
-
-		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
-		break;
-	}
-	case STILTE_UNDEFINEDRESULT: {
-		static const cw_uint8_t	keystr[] = "undefinedresult";
-
-		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
-		break;
-	}
-	case STILTE_UNMATCHEDMARK: {
-		static const cw_uint8_t	keystr[] = "unmatchedmark";
-
-		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
-		break;
-	}
-	case STILTE_UNREGISTERED: {
-		static const cw_uint8_t	keystr[] = "unregistered";
-
-		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
-		break;
-	}
-	case STILTE_VMERROR: {
-		static const cw_uint8_t	keystr[] = "vmerror";
-
-		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
-		break;
-	}
-	default:
-		_cw_not_reached();
-	}
+	stiln = stilte_stiln(a_error);
+	stilo_name_new(key, a_stilt, stiln_str(stiln), stiln_len(stiln), TRUE);
 
 	/*
 	 * Push the object being executed onto ostack unless this is an
@@ -1843,7 +1732,7 @@ stilt_p_procedure_accept(cw_stilt_t *a_stilt)
 	cw_stilo_t	t_stilo, *stilo, *arr;	/* XXX GC-unsafe. */
 	cw_uint32_t	nelements, i, depth;
 
-	/* Find the "mark". */
+	/* Find the no "mark". */
 	i = 0;
 	depth = stils_count(&a_stilt->ostack);
 	if (depth > 0) {

@@ -21,7 +21,6 @@ typedef struct cw_stiloe_dicto_s cw_stiloe_dicto_t;
 typedef struct cw_stila_s cw_stila_t;
 typedef struct cw_stilag_s cw_stilag_t;
 typedef struct cw_stilat_s cw_stilat_t;
-typedef struct cw_stiln_s cw_stiln_t;
 typedef struct cw_stilt_s cw_stilt_t;
 typedef struct cw_stilsc_s cw_stilsc_t;
 typedef struct cw_stiloe_dict_s cw_stiloe_dict_t;

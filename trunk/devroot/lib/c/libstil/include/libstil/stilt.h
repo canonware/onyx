@@ -17,7 +17,7 @@
 
 typedef enum {
 	/* Interpreter errors. */
-	STILTE_NONE = 0,		/* No error. */
+	STILTE_NONE,			/* No error. */
 	STILTE_DICTSTACKOVERFLOW,	/* dstack too deep. */
 	STILTE_DICTSTACKUNDERFLOW,	/* No poppable dictionary on dstack. */
 	STILTE_EXECSTACKOVERFLOW,	/* estack too deep. */
@@ -41,6 +41,7 @@ typedef enum {
 	STILTE_UNMATCHEDMARK,		/* No mark on ostack. */
 	STILTE_UNREGISTERED,		/* Other non-enumerated error. */
 	STILTE_VMERROR			/* Out of memory. */
+#define	STILTE_LAST	STILTE_VMERROR
 } cw_stilte_t;
 
 typedef struct cw_stilts_s cw_stilts_t;
@@ -184,6 +185,11 @@ struct cw_stilt_s {
 		}	m;	/* name. */
 	}       m;
 };
+
+/*
+ * stilte.
+ */
+cw_stiln_t	stilte_stiln(cw_stilte_t a_stilte);
 
 /*
  * stilts.

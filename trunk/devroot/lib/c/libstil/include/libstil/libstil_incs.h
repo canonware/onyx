@@ -26,6 +26,7 @@
  * example, stilo.h must come before stilt.h.
  */
 
+#include "stiln.h"
 #include "stilo.h"
 #include "stila.h"
 #include "stil.h"
