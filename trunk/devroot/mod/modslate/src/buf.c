@@ -142,55 +142,237 @@ bufv_copy(cw_bufv_t *a_to, cw_uint32_t a_to_len, const cw_bufv_t *a_fr,
 static cw_bufp_t *
 bufp_p_new(cw_buf_t *a_buf)
 {
-    cw_error("XXX Not implemented");
+    cw_bufp_t *retval;
+
+    /* Allocate. */
+    retval = (cw_bufp_t *) cw_opaque_alloc(a_buf->alloc, a_buf->arg,
+					   sizeof(cw_bufp_t));
+
+    /* Don't bother initializing index, bpos, or line, since they are explicitly
+     * set later. */
+
+    /* Initialize length and line count. */
+    retval->len = 0;
+    retval->nlines = 0;
+
+    /* Initialize buffer gap. */
+    retval->gap_off = 0;
+    retval->gap_len = CW_BUFP_SIZE;
+
+    /* Allocate buffer. */
+    retval->b = (cw_uint8_t *) cw_opaque_alloc(a_buf->alloc, a_buf->arg,
+					       CW_BUFP_SIZE);
+
+    /* Initialize marker tree and list. */
+    rb_tree_new(&retval->mtree, node);
+    ql_new(&retval->mlist);
+
+#ifdef CW_DBG
+    retval->magic = CW_BUFP_MAGIC;
+#endif
+
+    return retval;
 }
 
 static void
 bufp_p_delete(cw_bufp_t *a_bufp)
 {
-    cw_error("XXX Not implemented");
+    cw_check_ptr(a_bufp);
+    cw_dassert(a_bufp->magic == CW_BUFP_MAGIC);
+#ifdef CW_DBG
+    {
+	cw_mkr_t *first;
+	rb_first(&a_bufp->mtree, rb_root(&a_bufp->mtree), node, first);
+	cw_assert(first == NULL);
+    }
+#endif
+    cw_assert(ql_first(&a_bufp->mlist) == NULL);
+
+    cw_opaque_dealloc(a_bufp->buf->dealloc, a_bufp->buf->arg, a_bufp->b,
+		      CW_BUFP_SIZE);
+
+    cw_opaque_dealloc(a_bufp->buf->dealloc, a_bufp->buf->arg, a_bufp,
+		      sizeof(cw_bufp_t));
+}
+
+CW_INLINE cw_uint64_t
+bufp_p_index_get(cw_bufp_t *a_bufp)
+{
+    cw_check_ptr(a_bufp);
+    cw_dassert(a_bufp->magic == CW_BUFP_MAGIC);
+
+    return a_bufp->index;
+}
+
+CW_INLINE void
+bufp_p_index_set(cw_bufp_t *a_bufp, cw_uint64_t a_index)
+{
+    cw_check_ptr(a_bufp);
+    cw_dassert(a_bufp->magic == CW_BUFP_MAGIC);
+
+    a_bufp->index = a_index;
 }
 
 CW_INLINE cw_uint64_t
 bufp_p_bpos_get(cw_bufp_t *a_bufp)
 {
-    cw_error("XXX Not implemented");
+    cw_check_ptr(a_bufp);
+    cw_dassert(a_bufp->magic == CW_BUFP_MAGIC);
+
+    return a_bufp->bpos;
 }
 
 CW_INLINE void
 bufp_p_bpos_set(cw_bufp_t *a_bufp, cw_uint64_t a_bpos)
 {
-    cw_error("XXX Not implemented");
+    cw_check_ptr(a_bufp);
+    cw_dassert(a_bufp->magic == CW_BUFP_MAGIC);
+
+    a_bufp->bpos = a_bpos;
 }
 
 CW_INLINE cw_uint64_t
 bufp_p_line_get(cw_bufp_t *a_bufp)
 {
-    cw_error("XXX Not implemented");
+    cw_check_ptr(a_bufp);
+    cw_dassert(a_bufp->magic == CW_BUFP_MAGIC);
+
+    return a_bufp->line;
 }
 
 CW_INLINE void
 bufp_p_line_set(cw_bufp_t *a_bufp, cw_uint64_t a_line)
 {
-    cw_error("XXX Not implemented");
+    cw_check_ptr(a_bufp);
+    cw_dassert(a_bufp->magic == CW_BUFP_MAGIC);
+
+    a_bufp->line = a_line;
 }
 
 static void
 bufp_p_cache_validate(cw_bufp_t *a_bufp)
 {
-    cw_error("XXX Not implemented");
+    cw_buf_t *buf;
+
+    cw_check_ptr(a_bufp);
+    cw_dassert(a_bufp->magic == CW_BUFP_MAGIC);
+
+    /* If the cached values for bpos and line are not valid, update them in the
+     * quickest way possible.  This can be achieved by working forward or
+     * backward in the array of bufp's, so start at the closest bufp with a
+     * valid cache and work toward this bufp. */
+    buf = a_bufp->buf;
+    if (buf->bob_cached < a_bufp->index && buf->eob_cached > a_bufp->index)
+    {
+	cw_uint64_t bpos, line;
+
+	/* Invalid cache. */
+	if (a_bufp->index - buf->bob_cached <= buf->eob_cached - a_bufp->index)
+	{
+	    /* Work forward. */
+	    bpos = buf->bufps[buf->bob_cached]->bpos;
+	    line = buf->bufps[buf->bob_cached]->line;
+	    while (buf->bob_cached < a_bufp->index)
+	    {
+		buf->bob_cached++;
+
+		/* Update bpos. */
+		buf->bufps[buf->bob_cached]->bpos = bpos;
+		bpos += ((cw_uint64_t) CW_BUFP_SIZE
+			 - (cw_uint64_t) buf->bufps[buf->bob_cached]->gap_len);
+
+		/* Update line. */
+		buf->bufps[buf->bob_cached]->line = line;
+		line += ((cw_uint64_t) buf->bufps[buf->bob_cached]->nlines);
+	    }
+	}
+	else
+	{
+	    /* Work backward. */
+
+	    /* Take care to avoid looking past the end of the bufp array. */
+	    if (buf->eob_cached < buf->nbufps)
+	    {
+		bpos = buf->bufps[buf->eob_cached]->bpos;
+		line = buf->bufps[buf->eob_cached]->line;
+	    }
+	    else
+	    {
+		bpos = buf->len + 1;
+		line = buf->nlines;
+	    }
+
+	    while (buf->eob_cached > a_bufp->index)
+	    {
+		buf->eob_cached--;
+
+		/* Update bpos. */
+		bpos -= ((cw_uint64_t) CW_BUFP_SIZE
+			 - (cw_uint64_t) buf->bufps[buf->eob_cached]->gap_len);
+		buf->bufps[buf->eob_cached]->bpos = bpos;
+
+		/* Update line. */
+		line -= ((cw_uint64_t) buf->bufps[buf->eob_cached]->nlines);
+		buf->bufps[buf->eob_cached]->line = line;
+	    }
+	}
+    }
 }
 
 static cw_uint32_t
 bufp_p_pos_b2p(cw_bufp_t *a_bufp, cw_uint64_t a_bpos)
 {
-    cw_error("XXX Not implemented");
+    cw_uint32_t ppos, rel_bpos;
+
+    cw_check_ptr(a_bufp);
+    cw_dassert(a_bufp->magic == CW_BUFP_MAGIC);
+    cw_assert(a_bpos > 0);
+    cw_assert(a_bpos <= a_bufp->buf->len + 1);
+
+    /* Make sure the cached bpos for this bufp is valid before using it for
+     * calculations below. */
+    bufp_p_cache_validate(a_bufp);
+
+    /* Calculate the offset into bufp up front. */
+    cw_assert(a_bpos >= a_bufp->bpos);
+    rel_bpos = a_bpos - a_bufp->bpos;
+
+    if (rel_bpos <= a_bufp->gap_off)
+    {
+	ppos = rel_bpos;
+    }
+    else
+    {
+	ppos = rel_bpos + a_bufp->gap_len;
+    }
+
+    return ppos;
 }
 
 static cw_uint32_t
 bufp_p_pos_p2b(cw_bufp_t *a_bufp, cw_uint64_t a_ppos)
 {
-    cw_error("XXX Not implemented");
+    cw_uint32_t bpos;
+
+    cw_check_ptr(a_bufp);
+    cw_dassert(a_bufp->magic == CW_BUFP_MAGIC);
+    cw_assert(a_ppos <= a_bufp->gap_off
+	      || a_ppos >= a_bufp->gap_off + a_bufp->gap_len);
+
+    /* Make sure the cached bpos for this bufp is valid before using it for
+     * calculations below. */
+    bufp_p_cache_validate(a_bufp);
+
+    if (a_ppos <= a_bufp->gap_off)
+    {
+	bpos = a_ppos + a_bufp->bpos;
+    }
+    else
+    {
+	bpos = a_ppos - a_bufp->gap_len;
+    }
+
+    return bpos;
 }
 
 /* buf. */
@@ -230,6 +412,7 @@ buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc,
 						   sizeof(cw_bufp_t *));
     retval->nbufps = 1;
     retval->bufps[0] = bufp_p_new(retval);
+    bufp_p_index_set(retval->bufps[0], 0);
     bufp_p_bpos_set(retval->bufps[0], 1);
     bufp_p_line_set(retval->bufps[0], 1);
 
@@ -549,18 +732,18 @@ mkr_p_insert(cw_mkr_t *a_mkr)
     cw_mkr_t *next;
 
     /* Insert into tree. */
-    rb_insert(&bufp->mkr_tree, a_mkr, mkr_p_comp, cw_mkr_t, node);
+    rb_insert(&bufp->mtree, a_mkr, mkr_p_comp, cw_mkr_t, node);
 
     /* Insert into list.  Make sure that the tree and list orders are the same.
      */
-    rb_next(&bufp->mkr_tree, a_mkr, cw_mkr_t, node, next);
+    rb_next(&bufp->mtree, a_mkr, cw_mkr_t, node, next);
     if (next != NULL)
     {
-	ql_before_insert(&bufp->mkr_list, next, a_mkr, link);
+	ql_before_insert(&bufp->mlist, next, a_mkr, link);
     }
     else
     {
-	ql_head_insert(&bufp->mkr_list, a_mkr, link);
+	ql_head_insert(&bufp->mlist, a_mkr, link);
     }
 }
 
@@ -569,8 +752,8 @@ mkr_p_remove(cw_mkr_t *a_mkr)
 {
     cw_bufp_t *bufp = a_mkr->bufp;
 
-    rb_remove(&bufp->mkr_tree, a_mkr, cw_mkr_t, node);
-    ql_remove(&bufp->mkr_list, a_mkr, link);
+    rb_remove(&bufp->mtree, a_mkr, cw_mkr_t, node);
+    ql_remove(&bufp->mlist, a_mkr, link);
 }
 
 void
@@ -599,7 +782,7 @@ mkr_new(cw_mkr_t *a_mkr, cw_buf_t *a_buf)
     a_mkr->bufp = bufp;
     a_mkr->ppos = bufp_p_pos_b2p(bufp, 1);
     a_mkr->line = 0;
-    rb_node_new(&bufp->mkr_tree, a_mkr, node);
+    rb_node_new(&bufp->mtree, a_mkr, node);
     ql_elm_new(a_mkr, link);
 
     mkr_p_insert(a_mkr);
@@ -735,6 +918,7 @@ mkr_remove(cw_mkr_t *a_start, cw_mkr_t *a_end)
 }
 
 /* ext. */
+#ifdef NOT_YET
 static cw_sint32_t
 ext_p_fcomp(cw_ext_t *a_a, cw_ext_t *a_b)
 {
@@ -746,6 +930,7 @@ ext_p_rcomp(cw_ext_t *a_a, cw_ext_t *a_b)
 {
     cw_error("XXX Not implemented");
 }
+#endif
 
 cw_ext_t *
 ext_new(cw_ext_t *a_ext, cw_buf_t *a_buf)

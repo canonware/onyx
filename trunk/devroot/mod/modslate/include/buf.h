@@ -67,9 +67,6 @@ struct cw_ext_s
 #define CW_EXT_MAGIC 0x8a94e34c
 #endif
 
-    /* Allocator state. */
-    cw_bool_t malloced:1;
-
     /* Beginning and ending markers. */
     cw_mkr_t beg;
     cw_mkr_t end;
@@ -89,13 +86,6 @@ struct cw_ext_s
     ql_elm(cw_ext_t) rlink;
 };
 
-/* Text buffers are composed of contiguous pages, of size CW_BUFP_PAGESIZE.
- * Each bufp starts out with CW_BUFP_MINPAGES pages, and iteratively doubles the
- * number of pages, up to CW_BUFP_MAXPAGES, before splitting into multiple
- * bufp's. */
-#define CW_BUFP_PAGESIZE 4096
-#define CW_BUFP_MINPAGES    1
-#define CW_BUFP_MAXPAGES   16
 struct cw_bufp_s
 {
 #ifdef CW_DBG
@@ -128,13 +118,14 @@ struct cw_bufp_s
     cw_uint32_t gap_len;
 
     /* Text buffer, with gap. */
+#define CW_BUFP_SIZE 65536
     cw_uint8_t *b;
 
     /* Tree and list of mkr's that point into the bufp.  Both of these are
      * ordered and kept up to date.  Random access is done via the tree, and
      * iteration is done via the list. */
-    rb_tree(cw_mkr_t) mkr_tree;
-    ql_head(cw_mkr_t) mkr_list;
+    rb_tree(cw_mkr_t) mtree;
+    ql_head(cw_mkr_t) mlist;
 };
 
 struct cw_buf_s
