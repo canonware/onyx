@@ -1569,9 +1569,6 @@ buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc,
     rb_tree_new(&retval->rtree, rnode);
     ql_new(&retval->rlist);
 
-    /* Initialize extent stack. */
-    qs_new(&retval->sstack);
-
     /* Initialize history. */
     retval->hist = NULL;
 
@@ -3851,7 +3848,7 @@ ext_new(cw_ext_t *a_ext, cw_buf_t *a_buf)
     ql_elm_new(retval, rlink);
 
     /* Initialize extent stack linkage. */
-    qs_elm_new(retval, slink);
+    ql_elm_new(retval, elink);
 
 #ifdef CW_DBG
     retval->magic = CW_EXT_MAGIC;
@@ -3902,6 +3899,11 @@ ext_delete(cw_ext_t *a_ext)
     }
     mkr_delete(&a_ext->beg);
     mkr_delete(&a_ext->end);
+
+    /* Remove this extent from any ring it may be in.  This makes it possible to
+     * unconditionally insert and remove extents in the extent stack without
+     * worries of trying to access extents that have already been deleted. */
+    qr_remove(a_ext, elink);
 
     if (a_ext->alloced)
     {
@@ -4154,7 +4156,82 @@ ext_detachable_set(cw_ext_t *a_ext, cw_bool_t a_detachable)
 cw_uint32_t
 ext_stack_init(const cw_mkr_t *a_mkr)
 {
-    cw_error("XXX Not implemented");
+    cw_uint32_t retval = 0;
+    cw_ext_t *ext, *eext, key;
+    cw_buf_t *buf;
+    cw_bufp_t *bufp;
+
+    cw_check_ptr(a_mkr);
+    cw_dassert(a_mkr->magic == CW_MKR_MAGIC);
+
+    bufp = a_mkr->bufp;
+    buf = bufp->buf;
+
+    /* Initialize the extent stack. */
+    ql_new(&buf->elist);
+
+    /* Fake up a key for extent searching. */
+    memcpy(&key.beg, a_mkr, sizeof(cw_mkr_t));
+    memcpy(&key.end, a_mkr, sizeof(cw_mkr_t));
+#ifdef CW_DBG
+    key.magic = CW_EXT_MAGIC;
+#endif
+
+    /* Find the first extent in f-order. */
+    rb_nsearch(&buf->ftree, &key, ext_p_fcomp, cw_ext_t, fnode, ext);
+    if (ext != rb_tree_nil(&buf->ftree))
+    {
+	/* Iteratively add extents to the bottom of the stack. */
+	for (;
+	     ext != NULL
+		 && ext->beg.bufp == bufp
+		 && ext->beg.ppos == a_mkr->ppos;
+	     ext = ql_next(&buf->flist, ext, flink))
+	{
+	    qr_remove(ext, elink);
+	    ql_tail_insert(&buf->elist, ext, elink);
+	    retval++;
+	}
+    }
+
+    /* Find the first extent in r-order. */
+    rb_nsearch(&buf->rtree, &key, ext_p_rcomp, cw_ext_t, rnode, ext);
+    if (ext != rb_tree_nil(&buf->rtree))
+    {
+	cw_uint64_t bpos, ebpos, tbpos;
+
+	/* Iteratively insert extents into the stack. */
+	bpos = mkr_pos(a_mkr);
+	for (;
+	     ext != NULL
+		 && (ebpos = mkr_pos(&ext->beg)) <= bpos;
+	     ext = ql_next(&buf->rlist, ext, rlink))
+	{
+	    qr_remove(ext, elink);
+	    for (eext = ql_first(&buf->elist);
+		 eext != NULL
+		     && (((tbpos = mkr_pos(&eext->beg)) < ebpos)
+			 || (tbpos == ebpos
+			     && mkr_pos(&eext->end) < mkr_pos(&ext->end)));
+		 eext = ql_next(&buf->elist, eext, elink))
+	    {
+		/* Skip. */
+	    }
+
+	    /* Insert. */
+	    if (eext != NULL)
+	    {
+		ql_before_insert(&buf->elist, eext, ext, elink);
+	    }
+	    else
+	    {
+		ql_tail_insert(&buf->elist, ext, elink);
+	    }
+	    retval++;
+	}
+    }
+
+    return retval;
 }
 
 /* Get the extent in the stack that is below a_ext.  If a_ext is NULL, the top
@@ -4168,11 +4245,11 @@ ext_stack_down_get(cw_ext_t *a_ext)
     {
 	cw_dassert(a_ext->magic == CW_EXT_MAGIC);
 
-	retval = qs_down(a_ext, slink);
+	retval = ql_next(&a_ext->beg.bufp->buf->elist, a_ext, elink);
     }
     else
     {
-	retval = qs_top(&a_ext->beg.bufp->buf->sstack);
+	retval = ql_first(&a_ext->beg.bufp->buf->elist);
     }
 
     return retval;

@@ -117,7 +117,7 @@ struct cw_ext_s
     ql_elm(cw_ext_t) rlink;
 
     /* Extent stack linkage. */
-    qs_elm(cw_ext_t) slink;
+    ql_elm(cw_ext_t) elink;
 };
 
 struct cw_bufp_s
@@ -206,7 +206,7 @@ struct cw_buf_s
     ql_head(cw_ext_t) rlist;
 
     /* Extent stack. */
-    qs_head(cw_ext_t) sstack;
+    ql_head(cw_ext_t) elist;
 
     /* History (undo/redo), if non-NULL. */
     cw_hist_t *hist;
