@@ -159,6 +159,7 @@ case "${host}" in
         ;;
   *)
 	AC_MSG_RESULT(Unsupported operating system: ${host})
+	abi="elf"
 	RPATH="-Wl,-rpath,"
 	;;
 esac
