@@ -21,8 +21,8 @@ $s $AF_INET $SOCK_STREAM socket def
     $SO_DONTROUTE
     $SO_BROADCAST
     $SO_OOBINLINE
-    $SO_SNDBUF
-    $SO_RCVBUF
+#    $SO_SNDBUF
+#    $SO_RCVBUF
 #    $SO_SNDLOWAT
 #    $SO_RCVLOWAT
 #    $SO_TYPE
