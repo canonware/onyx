@@ -223,7 +223,7 @@ $sprintsdict <
     ' cat
 } if
 # Note code duplication.
-@enable_oop@ 1 eq opt_bootstrap not and {
+@enable_oop@ 1 eq {
     `
     $nametype {
 	#name #depth
@@ -241,6 +241,35 @@ $sprintsdict <
 	    `!' exch cat
 	}{
 	ccheck {
+	    # Callable.
+	    `:' exch cat
+	} if
+	} ifelse
+	} ifelse
+    }
+    ' cat
+}{
+opt_boostrap {
+    # This code should work correctly, regardless of whether oop is enabled.
+    # That way, regardless of configuration, the bootstrap interpreter prints
+    # names correctly (if a bit more slowly).
+    `
+    $nametype {
+	#name #depth
+	pop
+	dup cvs exch
+	#str #name
+	dup lcheck {
+	    # Literal.
+	    pop
+	    `$' exch cat
+	}{
+	dup echeck {
+	    # Evaluable.
+	    pop
+	    `!' exch cat
+	}{
+	xcheck not {
 	    # Callable.
 	    `:' exch cat
 	} if
@@ -267,6 +296,7 @@ $sprintsdict <
 	} ifelse
     }
     ' cat
+} ifelse
 } ifelse
 `
     $nulltype {
