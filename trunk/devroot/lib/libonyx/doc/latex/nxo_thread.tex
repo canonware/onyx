@@ -536,6 +536,42 @@ a\_maxestack}}
 		Set \cvar{a\_nxo}'s maximum allowable estack depth to
 		\cvar{a\_maxestack}.
 	\end{capilist}
+\label{nxo_thread_tailopt_get}
+\index{nxo_thread_tailopt_get@\cfunc{nxo\_thread\_tailopt\_get}{}}
+\citem{\cfunc[cw\_bool\_t]{nxo\_thread\_tailopt\_get}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Tail optimization setting.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return \cvar{a\_nxo}'s tail optimization setting.
+	\end{capilist}
+\label{nxo_thread_tailopt_set}
+\index{nxo_thread_tailopt_set@\cfunc{nxo\_thread\_tailopt\_set}{}}
+\citem{\cfunc[void]{nxo\_thread\_tailopt\_set}{cw\_nxo\_t *a\_nxo, cw\_bool\_t
+a\_tailopt}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[a\_tailopt: ]
+			Tail optimization setting.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Set \cvar{a\_nxo}'s tail optimization setting to
+		\cvar{a\_tailopt}.
+	\end{capilist}
 \label{nxo_thread_nx_get}
 \index{nxo_thread_nx_get@\cfunc{nxo\_thread\_nx\_get}{}}
 \citem{\cfunc[cw\_nx\_t *]{nxo\_thread\_nx\_get}{cw\_nxo\_t *a\_nxo}}

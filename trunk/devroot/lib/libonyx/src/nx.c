@@ -55,6 +55,9 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, cw_thread_start_t *a_thread_start)
 	/* Set initial maximum estack depth. */
 	retval->maxestack = CW_LIBONYX_ESTACK_MAX;
 
+	/* Set initial value for tail call optimization. */
+	retval->tailopt = CW_LIBONYX_TAILOPT;
+
 	/* Initialize the internals such that if a collection happens before
 	 * we're done, reference iteration will work correctly. */
 	nxo_no_new(&retval->gcdict);
@@ -182,6 +185,15 @@ nx_maxestack_set(cw_nx_t *a_nx, cw_nxoi_t a_maxestack)
     cw_assert(a_maxestack >= 0);
 
     a_nx->maxestack = a_maxestack;
+}
+
+void
+nx_tailopt_set(cw_nx_t *a_nx, cw_bool_t a_tailopt)
+{
+    cw_check_ptr(a_nx);
+    cw_dassert(a_nx->magic == CW_NX_MAGIC);
+
+    a_nx->tailopt = a_tailopt;
 }
 
 void

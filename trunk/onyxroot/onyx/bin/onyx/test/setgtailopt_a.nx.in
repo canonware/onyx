@@ -1,0 +1,43 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+`Test begin\n' print flush
+
+globaldict begin
+
+$bar {
+    estack 2 sprint
+} def
+
+$foo {
+    bar
+} def
+
+end # globaldict
+
+#- thread_entry -
+$thread_entry {
+    tailopt 1 sprint
+    foo
+} def
+
+gtailopt 1 sprint
+() ~thread_entry thread
+join
+
+false setgtailopt
+gtailopt 1 sprint
+() ~thread_entry thread
+join
+
+`Test end\n' print
+pstack

@@ -242,6 +242,9 @@ typedef enum
     NXN_ENTRY(gstdout),
 #endif
     NXN_ENTRY(gt),
+#ifdef CW_THREADS
+    NXN_ENTRY(gtailopt),
+#endif
 #ifdef CW_HANDLE
     NXN_ENTRY(handletag),
     NXN_ENTRY(handletype),
@@ -576,6 +579,7 @@ typedef enum
     NXN_ENTRY(setgstderr),
     NXN_ENTRY(setgstdin),
     NXN_ENTRY(setgstdout),
+    NXN_ENTRY(setgtailopt),
 #endif
     NXN_ENTRY(setiobuf),
 #ifdef CW_OOP
@@ -602,6 +606,7 @@ typedef enum
 #ifdef CW_OOP
     NXN_ENTRY(setsuper),
 #endif
+    NXN_ENTRY(settailopt),
 #ifdef CW_POSIX
     NXN_ENTRY(setuid),
 #endif
@@ -679,6 +684,7 @@ typedef enum
     NXN_ENTRY(syntaxerror),
     NXN_ENTRY(system),
     NXN_ENTRY(systemdict),
+    NXN_ENTRY(tailopt),
 #ifdef CW_REAL
     NXN_ENTRY(tan),
     NXN_ENTRY(tanh),

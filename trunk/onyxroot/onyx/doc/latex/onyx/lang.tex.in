@@ -642,9 +642,9 @@ The depth of the execution stack directly corresponds to the recursion depth of
 the interpreter.  Execution stack depth is limited in order to catch unbounded
 recursion.
 
-Onyx converts tail calls in order to prevent unbounded execution stack growth
-due to tail recursion.  For example, the following code does not cause the
-execution stack to grow:
+By default, Onyx converts tail calls in order to prevent unbounded execution
+stack growth due to tail recursion.  For example, the following code does not
+cause the execution stack to grow:
 
 \begin{verbatim}
 $foo {foo} def
@@ -657,6 +657,12 @@ The following code will result in an execution stack overflow:
 $foo {foo `filler'} def
 foo
 \end{verbatim}
+
+Whether tail call conversion is enabled can be queried and set via
+\htmlref{\onyxop{}{tailopt}{}}{systemdict:tailopt},
+\htmlref{\onyxop{}{gtailopt}{}}{systemdict:gtailopt},
+\htmlref{\onyxop{}{settailopt}{}}{systemdict:settailopt}, and
+\htmlref{\onyxop{}{setgtailopt}{}}{systemdict:setgtailopt}.
 
 \section{Error handling}
 

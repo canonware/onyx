@@ -25,6 +25,9 @@ struct cw_nx_s
     /* Initial maximum estack depth for new threads. */
     cw_nxoi_t maxestack;
 
+    /* Initial setting for tail call optimization. */
+    cw_bool_t tailopt;
+
     /* Dictionaries. */
     cw_nxo_t threadsdict;
     cw_nxo_t systemdict;
@@ -55,6 +58,9 @@ void
 nx_maxestack_set(cw_nx_t *a_nx, cw_nxoi_t a_maxestack);
 
 void
+nx_tailopt_set(cw_nx_t *a_nx, cw_bool_t a_tailopt);
+
+void
 nx_stdin_set(cw_nx_t *a_nx, cw_nxo_t *a_stdin);
 
 void
@@ -66,6 +72,9 @@ nx_stderr_set(cw_nx_t *a_nx, cw_nxo_t *a_stderr);
 #ifndef CW_USE_INLINES
 cw_nxoi_t
 nx_maxestack_get(cw_nx_t *a_nx);
+
+cw_bool_t
+nx_tailopt_get(cw_nx_t *a_nx);
 
 cw_nxo_t *
 nx_threadsdict_get(cw_nx_t *a_nx);
@@ -97,6 +106,15 @@ nx_maxestack_get(cw_nx_t *a_nx)
     cw_dassert(a_nx->magic == CW_NX_MAGIC);
 
     return a_nx->maxestack;
+}
+
+CW_INLINE cw_bool_t
+nx_tailopt_get(cw_nx_t *a_nx)
+{
+    cw_check_ptr(a_nx);
+    cw_dassert(a_nx->magic == CW_NX_MAGIC);
+
+    return a_nx->tailopt;
 }
 
 CW_INLINE cw_nxo_t *

@@ -261,6 +261,8 @@ nxo_thread_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx)
 
     thread->maxestack = nx_maxestack_get(a_nx);
 
+    thread->tailopt = nx_tailopt_get(a_nx);
+
     nxo_no_new(&thread->estack);
     nxo_no_new(&thread->istack);
     nxo_no_new(&thread->ostack);
@@ -616,7 +618,7 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 	{
 	    case NXOT_ARRAY:
 	    {
-		cw_uint32_t i, len;
+		cw_uint32_t i, len, tailopt;
 		cw_nxo_t *el;
 		cw_nxoa_t attr;
 
@@ -638,7 +640,12 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 		nxo_l_array_lock(nxo);
 #endif
 
-		for (i = 0; i < len - 1; i++)
+		/* thread->tailopt may change between now and when it is last
+		 * used for execution of this array, so a copy must be made and
+		 * used in order avoid problems that could ensue otherwise. */
+		for (i = 0, tailopt = thread->tailopt;
+		     i < len - tailopt;
+		     i++)
 		{
 		    el = nxo_l_array_el_get(nxo, i);
 		    attr = nxo_attr_get(el);
@@ -836,35 +843,47 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 		 * any more. */
 		nxo_integer_set(inxo, 0);
 
-		/* If recursion is possible and likely, make tail recursion safe
-		 * by replacing the array with its last element before executing
-		 * the last element. */
-		el = nxo_l_array_el_get(nxo, i);
-		attr = nxo_attr_get(el);
-		if ((attr == NXOA_LITERAL)
-		    || (nxo_type_get(el) == NXOT_ARRAY
-			&& attr == NXOA_EXECUTABLE))
+		if (tailopt)
 		{
-		    /* Always push literal objects and nested executable (not
-		     * evaluable) arrays onto the operand stack. */
-		    tnxo = nxo_stack_push(&thread->ostack);
-		    nxo_dup(tnxo, el);
+		    /* Optimize tail calls.  If recursion is possible and
+		     * likely, make tail recursion safe by replacing the array
+		     * with its last element before executing the last
+		     * element. */
+		    el = nxo_l_array_el_get(nxo, i);
+		    attr = nxo_attr_get(el);
+		    if ((attr == NXOA_LITERAL)
+			|| (nxo_type_get(el) == NXOT_ARRAY
+			    && attr == NXOA_EXECUTABLE))
+		    {
+			/* Always push literal objects and nested executable
+			 * (not evaluable) arrays onto the operand stack. */
+			tnxo = nxo_stack_push(&thread->ostack);
+			nxo_dup(tnxo, el);
+#ifdef CW_THREADS
+			nxo_l_array_unlock(nxo);
+#endif
+			nxo_stack_pop(&thread->estack);
+		    }
+		    else
+		    {
+			/* Possible recursion. */
+			tnxo = nxo_stack_push(&thread->tstack);
+			nxo_dup(tnxo, el);
+#ifdef CW_THREADS
+			nxo_l_array_unlock(nxo);
+#endif
+			nxo_dup(nxo, tnxo);
+			nxo_stack_pop(&thread->tstack);
+			goto RESTART;
+		    }
+		}
+		else
+		{
+		    /* Do not optimize tail calls. */
 #ifdef CW_THREADS
 		    nxo_l_array_unlock(nxo);
 #endif
 		    nxo_stack_pop(&thread->estack);
-		}
-		else
-		{
-		    /* Possible recursion. */
-		    tnxo = nxo_stack_push(&thread->tstack);
-		    nxo_dup(tnxo, el);
-#ifdef CW_THREADS
-		    nxo_l_array_unlock(nxo);
-#endif
-		    nxo_dup(nxo, tnxo);
-		    nxo_stack_pop(&thread->tstack);
-		    goto RESTART;
 		}
 		break;
 	    }
@@ -1249,6 +1268,28 @@ nxo_thread_maxestack_set(cw_nxo_t *a_nxo, cw_nxoi_t a_maxestack)
     cw_assert(thread->nxoe.type == NXOT_THREAD);
 
     thread->maxestack = a_maxestack;
+}
+
+void
+nxo_thread_tailopt_set(cw_nxo_t *a_nxo, cw_bool_t a_tailopt)
+{
+    cw_nxoe_thread_t *thread;
+
+    cw_check_ptr(a_nxo);
+    cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+
+    thread = (cw_nxoe_thread_t *) a_nxo->o.nxoe;
+    cw_dassert(thread->nxoe.magic == CW_NXOE_MAGIC);
+    cw_assert(thread->nxoe.type == NXOT_THREAD);
+
+    if (a_tailopt)
+    {
+	thread->tailopt = 1;
+    }
+    else
+    {
+	thread->tailopt = 0;
+    }
 }
 
 void

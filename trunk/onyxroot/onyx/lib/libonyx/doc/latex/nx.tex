@@ -127,6 +127,44 @@ objects are deallocated.
 		Set \cvar{a\_nx}'s default maximum allowable estack depth to
 		\cvar{a\_maxestack}.
 	\end{capilist}
+\label{nx_tailopt_get}
+\index{nx_tailopt_get@\cfunc{nx\_tailopt\_get}{}}
+\citem{\cfunc[cw\_bool\_t]{nx\_\htmlref{tailopt}{systemdict:gtailopt}\_get}{cw\_nx\_t
+*a\_nx}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nx: ]
+			Pointer to an \classname{nx}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Default tail optimization setting.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return the default tail optimization setting.  This value is
+		used when creating new threads.
+	\end{capilist}
+\label{nx_tailopt_set}
+\index{nx_tailopt_set@\cfunc{nx\_tailopt\_set}{}}
+\citem{\cfunc[void]{nx\_\htmlref{tailopt}{systemdict:setgtailopt}\_set}{cw\_nx\_t
+*a\_nx, cw\_bool\_t a\_tailopt}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nx: ]
+			Pointer to an \classname{nx}.
+		\item[a\_tailopt: ]
+			Default tail optimization setting.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Set \cvar{a\_nx}'s default tail optimization setting to
+		\cvar{a\_tailopt}.
+	\end{capilist}
 \label{nx_systemdict_get}
 \index{nx_systemdict_get@\cfunc{nx\_systemdict\_get}{}}
 \citem{\cfunc[cw\_nxo\_t

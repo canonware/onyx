@@ -114,13 +114,20 @@ typedef long double cw_fp64_t;
 
 typedef unsigned int cw_bool_t;
 
+/* If FALSE, do not optimize tail calls by default.  If TRUE, optimize tail
+ * calls by default.  The gtailopt, gsettailopt, tailopt, and settailopt
+ * operators can be used to control this at runtime. */
+#define CW_LIBONYX_TAILOPT TRUE
+
+/* Initial default maximum depth of estack.  The gmaxestack, gsetmaxestack,
+ * maxestack, and setmaxestack operators can be used to control this at
+ * runtime. */
+#define CW_LIBONYX_ESTACK_MAX 256
+
 /* Minimum initial size of dictionaries.  This number shouldn't be too large,
  * since for dictionaries below this size, an array is used internally instead
  * of a hash table, which means that operations require linear searches. */
 #define CW_LIBONYX_DICT_SIZE 8
-
-/* Initial default maximum depth of estack. */
-#define CW_LIBONYX_ESTACK_MAX 256
 
 /* Default file buffer size. */
 #define CW_LIBONYX_FILE_BUFFER_SIZE 512

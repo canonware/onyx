@@ -1,3 +1,11 @@
+2003-05-29 : Jason Evans <jasone@canonware.com>
+
+	* Add operators:
+	  + tailopt
+	  + gtailopt
+	  + settailopt
+	  + setgtailopt
+
 2003-05-13 : Jason Evans <jasone@canonware.com>
 
 	* Add vclass, which serves as a convenient base class.

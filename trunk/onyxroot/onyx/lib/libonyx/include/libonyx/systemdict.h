@@ -365,6 +365,11 @@ systemdict_gstdout(cw_nxo_t *a_thread);
 void
 systemdict_gt(cw_nxo_t *a_thread);
 
+#ifdef CW_THREADS
+void
+systemdict_gtailopt(cw_nxo_t *a_thread);
+#endif
+
 #ifdef CW_HANDLE
 void
 systemdict_handletag(cw_nxo_t *a_thread);
@@ -799,6 +804,11 @@ void
 systemdict_setgstdout(cw_nxo_t *a_thread);
 #endif
 
+#ifdef CW_THREADS
+void
+systemdict_setgtailopt(cw_nxo_t *a_thread);
+#endif
+
 void
 systemdict_setiobuf(cw_nxo_t *a_thread);
 
@@ -841,6 +851,9 @@ systemdict_setstdout(cw_nxo_t *a_thread);
 void
 systemdict_setsuper(cw_nxo_t *a_thread);
 #endif
+
+void
+systemdict_settailopt(cw_nxo_t *a_thread);
 
 #ifdef CW_POSIX
 void
@@ -1019,6 +1032,9 @@ systemdict_symlink(cw_nxo_t *a_thread);
 #endif
 
 #ifdef CW_REAL
+
+void
+systemdict_tailopt(cw_nxo_t *a_thread);
 
 void
 systemdict_tan(cw_nxo_t *a_thread);

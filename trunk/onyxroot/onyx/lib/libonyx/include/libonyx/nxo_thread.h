@@ -86,6 +86,9 @@ struct cw_nxoe_thread_s
     /* Current maximum estack depth. */
     cw_nxoi_t maxestack;
 
+    /* If 1, optimize tail calls; if 0, do not optimize tail calls. */
+    cw_uint32_t tailopt;
+
     /* Stacks. */
 
     /* Execution stack. */
@@ -297,6 +300,9 @@ void
 nxo_thread_maxestack_set(cw_nxo_t *a_nxo, cw_nxoi_t a_maxestack);
 
 void
+nxo_thread_tailopt_set(cw_nxo_t *a_nxo, cw_bool_t a_tailopt);
+
+void
 nxo_thread_stdin_set(cw_nxo_t *a_nxo, cw_nxo_t *a_stdin);
 
 void
@@ -311,6 +317,9 @@ nxo_thread_nx_get(cw_nxo_t *a_nxo);
 
 cw_nxoi_t
 nxo_thread_maxestack_get(cw_nxo_t *a_nxo);
+
+cw_bool_t
+nxo_thread_tailopt_get(cw_nxo_t *a_nxo);
 
 cw_nxo_t *
 nxo_thread_ostack_get(cw_nxo_t *a_nxo);
@@ -366,6 +375,31 @@ nxo_thread_maxestack_get(cw_nxo_t *a_nxo)
     cw_assert(thread->nxoe.type == NXOT_THREAD);
 
     return thread->maxestack;
+}
+
+CW_INLINE cw_bool_t
+nxo_thread_tailopt_get(cw_nxo_t *a_nxo)
+{
+    cw_bool_t retval;
+    cw_nxoe_thread_t *thread;
+
+    cw_check_ptr(a_nxo);
+    cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+
+    thread = (cw_nxoe_thread_t *) a_nxo->o.nxoe;
+    cw_dassert(thread->nxoe.magic == CW_NXOE_MAGIC);
+    cw_assert(thread->nxoe.type == NXOT_THREAD);
+
+    if (thread->tailopt)
+    {
+	retval = TRUE;
+    }
+    else
+    {
+	retval = FALSE;
+    }
+
+    return retval;
 }
 
 CW_INLINE cw_nxo_t *

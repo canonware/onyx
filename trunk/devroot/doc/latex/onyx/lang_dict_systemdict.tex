@@ -411,6 +411,30 @@ execution stack operators} \\
 \hline
 \optableent
 	{--}
+	{{\bf \htmlref{tailopt}{systemdict:tailopt}}}
+	{boolean}
+	{Get whether tail optimization is in effect.}
+\hline
+\optableent
+	{--}
+	{{\bf \htmlref{gtailopt}{systemdict:gtailopt}}}
+	{boolean}
+	{Get default tail optimization setting.}
+\hline
+\optableent
+	{boolean}
+	{{\bf \htmlref{settailopt}{systemdict:settailopt}}}
+	{--}
+	{Set whether to use tail optimization.}
+\hline
+\optableent
+	{boolean}
+	{{\bf \htmlref{setgtailopt}{systemdict:setgtailopt}}}
+	{--}
+	{Set default tail optimization setting.}
+\hline
+\optableent
+	{--}
 	{{\bf \htmlref{estack}{systemdict:estack}}}
 	{stack}
 	{Get a current estack snapshot.}
@@ -2458,6 +2482,28 @@ onyx:9> >
 onyx:1> pstack
 <$pop --pop-- $biz `biz' $bar `bar' $foo `foo'>
 onyx:1>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:gtailopt}
+\index{gtailopt@\onyxop{}{gtailopt}{}}
+\item[{\onyxop{--}{gtailopt}{boolean}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[boolean: ]
+			True if tail call optimization is enabled by default for
+			new threads, false otherwise.
+		\end{description}
+	\item[Errors(s): ] None.
+	\item[Description: ]
+		Get whether tail call optimization is enabled by default for new
+		threads.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> gtailopt 1 sprint
+true
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sym_lb}
@@ -9657,6 +9703,31 @@ onyx:0> `/tmp/stdout' `r' open readline pop 1 sprint
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:setgtailopt}
+\index{setgtailopt@\onyxop{}{setgtailopt}{}}
+\item[{\onyxop{boolean}{setgtailopt}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[boolean: ]
+			If true, enable tail call optimization by default for
+			new threads.  Otherwise, do not enable tail call
+			optimization by default for new threads.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Set whether to enable tail call optimization for new threads.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> false setgtailopt
+onyx:0>
+		\end{verbatim}
+	\end{description}
 \label{systemdict:setiobuf}
 \index{setiobuf@\onyxop{}{setiobuf}{}}
 \item[{\onyxop{file count}{setiobuf}{--}}: ]
@@ -10015,6 +10086,36 @@ onyx:0>
 onyx:0> class dup vclass setsuper
 onyx:1> super classname 1 sprint
 $vclass
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:settailopt}
+\index{settailopt@\onyxop{}{settailopt}{}}
+\item[{\onyxop{boolean}{settailopt}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[boolean: ]
+			If true, enable tail call optimization for this thread.
+			Otherwise, disable tail call optimization for this
+			thread.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> $bar {estack 2 sprint} def
+onyx:0> $foo {bar} def
+onyx:0> foo
+(--start-- -file- {estack 2 sprint} --estack--)
+onyx:0> false settailopt
+onyx:0> foo
+(--start-- -file- {bar} {estack 2 sprint} --estack--)
 onyx:0>
 		\end{verbatim}
 	\end{description}
@@ -11614,6 +11715,27 @@ onyx:2> pstack
 false
 `Hello'
 onyx:2>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:tailopt}
+\index{tailopt@\onyxop{}{tailopt}{}}
+\item[{\onyxop{--}{tailopt}{boolean}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[boolean: ]
+			True if tail call optimization is enabled for this
+			thread; false otherwise.
+		\end{description}
+	\item[Errors(s): ] None.
+	\item[Description: ]
+		Get whether tail call optimization is enabled for this thread.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> tailopt 1 sprint
+true
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:system}
