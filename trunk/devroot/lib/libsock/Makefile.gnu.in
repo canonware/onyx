@@ -210,7 +210,7 @@ FORCE :
 # user 'make'ables
 #
 
-default : libs bins
+default : libs
 
 libs : stat_dbg stat_opt shar_opt stat_prof
 
@@ -248,7 +248,7 @@ check :
 
 install : install_stat_dbg install_stat_opt install_shar_opt install_stat_prof
 
-install_common : 
+install_common : libs bins
 	$(SHELL) -c \
 	'@INSTALL@ -d @prefix@/lib; \
 	@INSTALL@ -d @prefix@/include/libsock; \

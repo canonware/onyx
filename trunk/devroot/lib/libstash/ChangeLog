@@ -1,3 +1,9 @@
+1999-03-07  Jason Evans  <jasone@canonware.com>
+
+	* include/libstash/dbg.h (dbg_is_registered): Revert change made
+	on 1999-03-01, since the change was not a valid approach, given
+	what the dbg class is being used for.
+
 1999-03-04  Jason Evans  <jasone@canonware.com>
 
 	* src/buf.c (buf_p_catenate_buf): Fix an off-by-one bug that
