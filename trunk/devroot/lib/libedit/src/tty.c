@@ -743,15 +743,15 @@ tty_bind_char(el, force)
 	    continue;
 	/* Put the old default binding back, and set the new binding */
 	key_clear(el, map, old);
-	map[old[0]] = dmap[old[0]];
+	map[(int)old[0]] = dmap[(int)old[0]];
 	key_clear(el, map, new);
 	/* MAP_VI == 1, MAP_EMACS == 0... */
-	map[new[0]] = tp->bind[el->el_map.type];
+	map[(int)new[0]] = tp->bind[el->el_map.type];
 	if (dalt) {
 	    key_clear(el, alt, old);
-	    alt[old[0]] = dalt[old[0]];
+	    alt[(int)old[0]] = dalt[(int)old[0]];
 	    key_clear(el, alt, new);
-	    alt[new[0]] = tp->bind[el->el_map.type+1];
+	    alt[(int)new[0]] = tp->bind[el->el_map.type+1];
 	}
     }
 }

@@ -115,4 +115,9 @@ int ficlLockDictionary(short fLock)
   
   return 0;
 }
+#else
+int ficlLockDictionary(short fLock)
+{
+  return 0;
+}
 #endif /* FICL_MULTITHREAD */

@@ -38,6 +38,7 @@
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
 #if __STDC__
 # include <stdarg.h>
 #else

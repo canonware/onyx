@@ -138,7 +138,7 @@ void ficlFreeVM(FICL_VM *pVM)
 	{
 		vmList = vmList->link;
 	}
-	else for (pList; pList != 0; pList = pList->link)
+	else for (; pList != 0; pList = pList->link)
 	{
 		if (pList->link == pVM)
 		{

@@ -1408,7 +1408,7 @@ static void listWords(FICL_VM *pVM)
         vmTextOut(pVM, pPad, 1);
     }
 
-    sprintf(pVM->pad, "Dictionary: %d words, %ld cells used of %lu total", 
+    sprintf(pVM->pad, "Dictionary: %d words, %d cells used of %u total", 
         nWords, dp->here - dp->dict, dp->size);
     vmTextOut(pVM, pVM->pad, 1);
     return;
@@ -1431,7 +1431,7 @@ static void listEnv(FICL_VM *pVM)
         }
     }
 
-    sprintf(pVM->pad, "Environment: %d words, %ld cells used of %lu total", 
+    sprintf(pVM->pad, "Environment: %d words, %d cells used of %u total", 
         nWords, dp->here - dp->dict, dp->size);
     vmTextOut(pVM, pVM->pad, 1);
     return;
@@ -2708,13 +2708,12 @@ static void count(FICL_VM *pVM)
 static void environmentQ(FICL_VM *pVM)
 {
     FICL_DICT *envp = ficlGetEnv();
-    FICL_COUNT  len = (FICL_COUNT)stackPopUNS(pVM->pStack);
+/*      FICL_COUNT  len = (FICL_COUNT)stackPopUNS(pVM->pStack); */
     char        *cp =  stackPopPtr(pVM->pStack);
     FICL_WORD  *pFW;
     STRINGINFO si;
 
 
-    &len;       /* silence compiler warning... */
     SI_PSZ(si, cp);
     pFW = dictLookup(envp, si);
 
@@ -3968,12 +3967,12 @@ static void seeColon(FICL_VM *pVM, CELL *pc)
             else if (pFW->code == loopParen) 
             {
                 CELL c = *++pc;
-                sprintf(pVM->pad, "    loop (branch rel %#ld)", c.i);
+                sprintf(pVM->pad, "    loop (branch rel %ld)", c.i);
             }
             else if (pFW->code == plusLoopParen) 
             {
                 CELL c = *++pc;
-                sprintf(pVM->pad, "    +loop (branch rel %#ld)", c.i);
+                sprintf(pVM->pad, "    +loop (branch rel %ld)", c.i);
             }
             else /* default: print word's name */
             {

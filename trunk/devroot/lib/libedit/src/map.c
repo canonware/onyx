@@ -984,7 +984,7 @@ map_init_meta(el)
 	    key_add(el, buf, key_map_cmd(el, (int) map[i]), XK_CMD);
 	    break;
 	}
-    map[buf[0]] = ED_SEQUENCE_LEAD_IN;
+    map[(int)buf[0]] = ED_SEQUENCE_LEAD_IN;
 }
 
 

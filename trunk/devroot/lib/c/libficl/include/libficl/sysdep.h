@@ -40,7 +40,7 @@
 #include <assert.h>
 
 #if !defined IGNORE		/* Macro to silence unused param warnings */
-#define IGNORE(x) &x
+#define IGNORE(x)
 #endif
 
 /*
@@ -287,11 +287,7 @@ void *ficlRealloc(void *p, size_t size);
 ** NOTE: this function must be implemented with lock counting
 ** semantics: nested calls must behave properly.
 */
-#if FICL_MULTITHREAD
 int ficlLockDictionary(short fLock);
-#else
-#define ficlLockDictionary(x) 0 /* ignore */
-#endif
 
 /*
 ** 64 bit integer math support routines: multiply two UNS32s
