@@ -18,6 +18,12 @@
 #  define _LIBSTASH_OUT_MAGIC 0x8293cade
 #endif
 
+/* Designator values.  These codes are used to designate the type of each
+ * byte in a_format by building a corresponding string during parsing. */
+#define _LIBSTASH_OUT_DES_NORMAL    'n'
+#define _LIBSTASH_OUT_DES_SPECIFIER 's'
+#define _LIBSTASH_OUT_DES_WHITEOUT  'w'
+
 cw_sint32_t
 out_p_put_vfe(cw_out_t * a_out, cw_sint32_t a_fd,
 	      const char * a_file_name,
@@ -29,6 +35,9 @@ out_p_put_vfe(cw_out_t * a_out, cw_sint32_t a_fd,
 static cw_sint32_t
 out_p_metric(cw_out_t * a_out, const char * a_format, char ** r_format,
 	     va_list a_p);
+
+static cw_out_ent_t *
+out_p_get_ent(cw_out_t * a_out, const char * a_format, cw_uint32_t a_len);
 
 static void
 out_p_add(cw_uint32_t a_base, cw_uint32_t a_ndigits,

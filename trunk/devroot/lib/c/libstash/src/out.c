@@ -22,7 +22,7 @@
 #include <ctype.h>
 
 #include "libstash/out_p.h"
-#include "libstash/mem_l.h"
+/*  #include "libstash/mem_l.h" */
 
 cw_out_t *
 out_new(cw_out_t * a_out)
@@ -354,10 +354,14 @@ out_put_fn(cw_out_t * a_out, cw_sint32_t a_fd, cw_uint32_t a_size,
   }
 #endif
 
+/*    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
+/*  	      "len == %d, output \"", out_size); */
+/*    log_nprintf(cw_g_log, out_size, "%s", output); */
+/*    log_printf(cw_g_log, "\"\n"); */
   i = 0;
   do
   {
-    nwritten = write(a_fd, &output[i], retval - i);
+    nwritten = write(a_fd, &output[i], out_size - i);
     if (-1 != nwritten)
     {
       i += nwritten;
@@ -393,9 +397,9 @@ out_put_fv(cw_out_t * a_out, cw_sint32_t a_fd,
   _cw_check_ptr(a_format);
   _cw_check_ptr(a_p);
   
-  if (-1 == (out_size = out_put_sva(a_out, &output, a_format, a_p)))
+  if (0 >= (out_size = out_put_sva(a_out, &output, a_format, a_p)))
   {
-    retval = -1;
+    retval = out_size;
     goto RETURN;
   }
 
@@ -472,6 +476,10 @@ out_put_sv(cw_out_t * a_out, char * a_str,
   out_size = out_p_metric(a_out, a_format, NULL, a_p);
 
   retval = out_put_svn(a_out, a_str, out_size, a_format, a_p);
+  if (0 <= retval)
+  {
+    a_str[retval] = '\0';
+  }
   
   return retval;
 }
@@ -480,15 +488,19 @@ cw_sint32_t
 out_put_sva(cw_out_t * a_out, char ** r_str,
 	    const char * a_format, va_list a_p)
 {
-  cw_sint32_t retval;
-  cw_uint32_t out_size;
+  cw_sint32_t retval, out_size;
   char * output;
 
   _cw_check_ptr(a_format);
   _cw_check_ptr(a_p);
   
   out_size = out_p_metric(a_out, a_format, NULL, a_p);
-  output = (char *) _cw_malloc(out_size);
+  if (0 >= out_size)
+  {
+    retval = out_size;
+    goto RETURN;
+  }
+  output = (char *) _cw_malloc(out_size + 1);
   if (NULL == output)
   {
     retval = -1;
@@ -496,10 +508,12 @@ out_put_sva(cw_out_t * a_out, char ** r_str,
   }
 
   retval = out_put_svn(a_out, output, out_size, a_format, a_p);
+  _cw_assert(out_size == retval);
 
   RETURN:
-  if (-1 != retval)
+  if (0 <= retval)
   {
+    output[retval] = '\0';
     *r_str = output;
   }
   else
@@ -513,15 +527,161 @@ cw_sint32_t
 out_put_svn(cw_out_t * a_out, char * a_str, cw_uint32_t a_size,
 	    const char * a_format, va_list a_p)
 {
-  cw_sint32_t retval;
+  cw_sint32_t retval, metric_size, size, format_len, i, j;
+  char * format;
 
   _cw_check_ptr(a_str);
   _cw_assert(0 < a_size);
   _cw_check_ptr(a_format);
   _cw_check_ptr(a_p);
+
+  metric_size = out_p_metric(a_out, a_format, &format, a_p);
+  if (0 >= metric_size)
+  {
+    retval = metric_size;
+    goto RETURN;
+  }
+
+  /* Choose the smaller of two possible sizes. */
+  if (metric_size < a_size)
+  {
+    size = metric_size;
+  }
+  else
+  {
+    size = (cw_sint32_t) a_size;
+  }
+  
+  for (i = j = 0, format_len = strlen(a_format);
+       (i < format_len) && (j < size);
+       )
+  {
+/*      log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
+/*  		"i == %d, j == %d\n", i, j); */
+    switch (format[i])
+    {
+      case _LIBSTASH_OUT_DES_NORMAL:
+      {
+	a_str[j] = a_format[i];
+	j++;
+	i++;
+	break;
+      }
+      case _LIBSTASH_OUT_DES_SPECIFIER:
+      {
+	cw_sint32_t spec_len, type_len;
+	cw_uint32_t metric;
+	const char * type;
+	cw_out_ent_t * ent;
+	void * arg;
+	
+	/* Calculate the specifier length.  We're guaranteed that there is a
+	 * whiteout character following the specifier. */
+	for (spec_len = 0;
+	     format[i + spec_len] == _LIBSTASH_OUT_DES_SPECIFIER;
+	     spec_len++);
+
+	/* Find the type string. */
+	type_len = spec_get_val(&a_format[i], spec_len, "t", &type);
+	_cw_assert(0 <= type_len);
+
+	ent = out_p_get_ent(a_out, type, type_len);
+	_cw_assert(NULL != ent);
+	
+	switch (ent->size)
+	{
+	  case 1:
+	  {
+	    arg = (void *) &va_arg(a_p, cw_uint8_t);
+	    break;
+	  }
+	  case 2:
+	  {
+	    arg = (void *) &va_arg(a_p, cw_uint16_t);
+	    break;
+	  }
+	  case 4:
+	  {
+	    arg = (void *) &va_arg(a_p, cw_uint32_t);
+	    break;
+	  }
+	  case 8:
+	  {
+	    arg = (void *) &va_arg(a_p, cw_uint64_t);
+	    break;
+	  }
+/*  	  case 12: */
+/*  	  { */
+/*  	    arg = (void *) va_arg(a_p, s_12); */
+/*  	    break; */
+/*  	  } */
+/*  	  case 16: */
+/*  	  { */
+/*  	    arg = (void *) va_arg(a_p, s_16); */
+/*  	    break; */
+/*  	  } */
+	  default:
+	  {
+	    _cw_error("Programming error");
+	  }
+	}
+
+/*  	log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
+/*  		    "metric == %lu\n", ent->metric_func(&a_format[i], */
+/*  							spec_len, arg)); */
+
+	metric = ent->metric_func(&a_format[i], spec_len, arg);
+	if (j + metric <= size)
+	{
+	  /* The printout of this item will fit in the output string. */
+/*  	  log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
+/*  		      "Fit\n"); */
+
+	  /* XXX */
+	  ent->render_func(&a_format[i], spec_len, arg, &a_str[j]);
+	  
+/*  	  memset(&a_str[j], 'X', metric); */
+	}
+	else
+	{
+	  /* The printout of this item will not fit in the string.  Therefore,
+	   * allocate a temporary buffer, render the item there, then copy as
+	   * much as will fit into the output string. */
+	  log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
+		      "Unfit\n");
+
+	  /* XXX */
+	  memset(&a_str[j], 'X', size - j);
+	}
+	
+	j += metric;
+	i += spec_len;
+	break;
+      }
+      case _LIBSTASH_OUT_DES_WHITEOUT:
+      {
+	i++;
+	break;
+      }
+      default:
+      {
+	_cw_error("Programming error");
+      }
+    }
+  }
   
   /* XXX */
+  retval = size;
 
+  RETURN:
+/*    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
+/*  	      "Output: \""); */
+/*    log_nprintf(cw_g_log, retval, "%s", a_str); */
+/*    log_printf(cw_g_log, "\"\n"); */
+  if (NULL != format)
+  {
+    _cw_free(format);
+  }
   return retval;
 }
 
@@ -730,31 +890,24 @@ out_p_metric(cw_out_t * a_out, const char * a_format, char ** r_format,
     VALUE_T  /* Value. "t" name has already been seen. */
   } state;
 
-/* Designator values.  `format' contains codes that indicate the type of each
- * byte in a_format. */
-#define _LIBSTASH_OUT_DES_NORMAL    'n'
-#define _LIBSTASH_OUT_DES_SPECIFIER 's'
-#define _LIBSTASH_OUT_DES_WHITEOUT  'w'
-
   format_len = strlen(a_format);
   if (0 == format_len)
   {
     retval = 0;
     goto RETURN;
   }
-  
+
   format = (char *) _cw_malloc(format_len + 1);
   if (NULL == format)
   {
-/*      _cw_marker("Error"); */
+    _cw_marker("Error");
     retval = -1;
     goto RETURN;
   }
   bzero(format, format_len + 1);
 
-  for (i = out_size = 0,
-	 state = START;
-       i < format_len + 1;
+  for (i = out_size = 0, state = START;
+       i < format_len;
        i++)
   {
     switch (state)
@@ -771,6 +924,9 @@ out_p_metric(cw_out_t * a_out, const char * a_format, char ** r_format,
 	else
 	{
 	  format[i] = _LIBSTASH_OUT_DES_NORMAL;
+/*  	  log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
+/*  		      "out_size++ (%lu --> %lu)\n", */
+/*  		      out_size, out_size + 1); */
 	  out_size++;
 	}
 	
@@ -781,6 +937,9 @@ out_p_metric(cw_out_t * a_out, const char * a_format, char ** r_format,
 	if ('[' == a_format[i])
 	{
 	  format[i] = _LIBSTASH_OUT_DES_NORMAL;
+/*  	  log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
+/*  		      "out_size++ (%lu --> %lu)\n", */
+/*  		      out_size, out_size + 1); */
 	  out_size++;
 	  state = START;
 	}
@@ -874,9 +1033,8 @@ out_p_metric(cw_out_t * a_out, const char * a_format, char ** r_format,
 	else if (']' == a_format[i])
 	{
 	  const char * val;
-	  cw_sint32_t val_len, j;
-	  cw_uint32_t val_size;
-	  cw_out_metric_t * metric_func;
+	  cw_sint32_t val_len;
+	  cw_out_ent_t * ent;
 	  
 	  format[i] = _LIBSTASH_OUT_DES_WHITEOUT;
 	  state = START;
@@ -892,7 +1050,7 @@ out_p_metric(cw_out_t * a_out, const char * a_format, char ** r_format,
 				 "t", &val);
 	  if (-1 == val_len)
 	  {
-/*  	    _cw_marker("Error"); */
+	    _cw_marker("Error");
 	    retval = -2;
 	    goto RETURN;
 	  }
@@ -901,55 +1059,19 @@ out_p_metric(cw_out_t * a_out, const char * a_format, char ** r_format,
 /*  	  log_nprintf(cw_g_log, val_len, "%s", val); */
 /*  	  log_printf(cw_g_log, "\"\n"); */
 
-	  /* Find a match for the type and call the corresponding metric
-	   * function.  Use the first match found by searching the extended
-	   * types, then the built in types.  If there is no match, return an
-	   * error, since we have no way of knowing the size of argument to
-	   * use. */
-	  if (NULL != a_out)
+	  ent = out_p_get_ent(a_out, val, val_len);
+	  if (NULL == ent)
 	  {
-	    for (j = 0;
-		 j < a_out->nextensions;
-		 j++)
-	    {
-	      if (0 == strncmp(val, a_out->extensions[j].type, val_len)
-		  && (val_len == strlen(a_out->extensions[j].type)))
-	      {
-/*  		log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
-/*  			    "Type: \"%s\", j == %d\n", */
-/*  			    a_out->extensions[j].type, j); */
-		val_size = a_out->extensions[j].size;
-		metric_func = a_out->extensions[j].metric_func;
-		goto MATCHED;
-	      }
-	    }
+	    /* No handler. */
+	    _cw_marker("Error");
+	    retval = -2;
+	    goto RETURN;
 	  }
-
-	  for (j = 0;
-	       j < (sizeof(cw_g_out_builtins) / sizeof(struct cw_out_ent_s));
-	       j++)
-	  {
-	    if (0 == strncmp(val, cw_g_out_builtins[j].type, val_len)
-		&& (val_len == strlen(cw_g_out_builtins[j].type)))
-	    {
-/*  	      log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
-/*  			  "Type: \"%s\", j == %d\n", */
-/*  			  cw_g_out_builtins[j].type, j); */
-	      val_size = cw_g_out_builtins[j].size;
-	      metric_func = cw_g_out_builtins[j].metric_func;
-	      goto MATCHED;
-	    }
-	  }
-
-	  /* No handler. */
-	  retval = -2;
-	  goto RETURN;
 	  
-	  MATCHED:
 	  {
 	    void * arg;
 
-	    switch (val_size)
+	    switch (ent->size)
 	    {
 	      case 1:
 	      {
@@ -983,17 +1105,20 @@ out_p_metric(cw_out_t * a_out, const char * a_format, char ** r_format,
 /*  	      } */
 	      default:
 	      {
-/*  		_cw_marker("Error"); */
+		_cw_marker("Error");
 /*  		log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
-/*  			    "val_size == %lu\n", val_size); */
+/*  			    "ent->size == %lu\n", ent->size); */
 		retval = -2;
 		goto RETURN;
 	      }
 	    }
 
 /*  	    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
-/*  			"out_size += %lu\n", metric_func(val, val_len, arg)); */
-	    out_size += metric_func(val, val_len, arg);
+/*  			"out_size += %lu\n", */
+/*  			ent->metric_func(&a_format[i - spec_len], */
+/*  					 spec_len, arg)); */
+	    out_size += ent->metric_func(&a_format[i - spec_len],
+					 spec_len, arg);
 	  }
 	}
 	else
@@ -1012,7 +1137,7 @@ out_p_metric(cw_out_t * a_out, const char * a_format, char ** r_format,
   }
   if (START != state)
   {
-/*      _cw_marker("Error"); */
+    _cw_marker("Error");
     retval = -2;
     goto RETURN;
   }
@@ -1020,9 +1145,10 @@ out_p_metric(cw_out_t * a_out, const char * a_format, char ** r_format,
   retval = out_size;
 
   RETURN:
-  log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-	      "\"%s\" retval == %d\n",
-	      a_format, retval);
+/*    _cw_marker("Before"); */
+/*    log_printf(cw_g_log, "\"%s\"\n\"%s\"\nretval == %d\n", */
+/*  	     a_format, format, retval); */
+/*    _cw_marker("After"); */
   if (0 > retval)
   {
     if (NULL != format)
@@ -1041,6 +1167,62 @@ out_p_metric(cw_out_t * a_out, const char * a_format, char ** r_format,
       _cw_free(format);
     }
   }
+  return retval;
+}
+
+static cw_out_ent_t *
+out_p_get_ent(cw_out_t * a_out, const char * a_format, cw_uint32_t a_len)
+{
+  cw_out_ent_t * retval;
+  cw_uint32_t i;
+
+  _cw_check_ptr(a_format);
+  _cw_assert(0 < a_len);
+
+  /* Find a match for the type and call the corresponding metric function.  Use
+   * the first match found by searching the extended types, then the built in
+   * types.  If there is no match, return an error, since we have no way of
+   * knowing the size of argument to use. */
+  if (NULL != a_out)
+  {
+    for (i = 0;
+	 i < a_out->nextensions;
+	 i++)
+    {
+      if (0 == strncmp(a_format, a_out->extensions[i].type, a_len)
+	  && (a_len == strlen(a_out->extensions[i].type)))
+      {
+/*  	log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
+/*  		    "Type: \"%s\", i == %d\n", */
+/*  		    a_out->extensions[i].type, i); */
+	retval = &a_out->extensions[i];
+	goto RETURN;
+      }
+    }
+  }
+
+  for (i = 0;
+       i < (sizeof(cw_g_out_builtins) / sizeof(struct cw_out_ent_s));
+       i++)
+  {
+    if (0 == strncmp(a_format, cw_g_out_builtins[i].type, a_len)
+	&& (a_len == strlen(cw_g_out_builtins[i].type)))
+    {
+/*        log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
+/*  		  "Type: \"%s\", i == %d\n", */
+/*  		  cw_g_out_builtins[i].type, i); */
+      retval = &cw_g_out_builtins[i];
+      goto RETURN;
+    }
+  }
+
+  retval = NULL;
+
+  RETURN:
+/*    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
+/*  	      "Search for \""); */
+/*    log_nprintf(cw_g_log, a_len, "%s", a_format); */
+/*    log_printf(cw_g_log, "\" --> %010p\n", retval); */
   return retval;
 }
 
@@ -1133,8 +1315,105 @@ static cw_uint32_t
 out_p_metric_int32(const char * a_format, cw_uint32_t a_len,
 		   const void * a_arg)
 {
-  cw_uint32_t retval;
+  cw_uint32_t retval, width, base, i, arg = *(const cw_uint32_t *) a_arg;
+  cw_sint32_t val_len;
+  cw_bool_t is_negative, show_sign;
+  const char * val;
+  char zero[33] =     "00000000000000000000000000000000";
+  char curr_add[33] = "00000000000000000000000000000001";
+  char result[33] =   "00000000000000000000000000000000";
+  char temp[33] =     "00000000000000000000000000000000";
 
+  if (-1 != (val_len = spec_get_val(a_format, a_len, "w", &val)))
+  {
+    /* Width specified. */
+    /* The next character after val is either `|' or `]', so we don't have to
+     * worry about terminating the string that val points to. */
+    width = strtoul(val, NULL, 10);
+  }
+  else
+  {
+    width = 0;
+  }
+
+  /* Determine sign. */
+  if ((-1 != (val_len = spec_get_val(a_format, a_len, "s", &val)))
+      && ('s' == val[0])
+      && (0 > (cw_sint32_t) arg))
+  {
+    is_negative = TRUE;
+    arg = -1 * ((cw_sint32_t) arg);
+  }
+  else
+  {
+    is_negative = FALSE;
+  }
+
+  /* Should we show the sign if the number is positive? */
+  if (((-1 != (val_len = spec_get_val(a_format, a_len, "+", &val)))
+       && ('+' == val[0]))
+      || (TRUE == is_negative))
+  {
+    show_sign = TRUE;
+  }
+  else
+  {
+    show_sign = FALSE;
+  }
+    
+  if (-1 != (val_len = spec_get_val(a_format, a_len, "b", &val)))
+  {
+    /* Base specified. */
+    /* The next character after val is either `|' or `]', so we don't have to
+     * worry about terminating the string that val points to. */
+    base = strtoul(val, NULL, 10);
+    _cw_assert(2 <= base);
+    _cw_assert(36 >= base);
+  }
+  else
+  {
+    /* Default to base 10. */
+    base = 10;
+  }
+  
+  for (i = 0; i < 32; i++)
+  {
+    if ((arg >> i) & 1)
+    {
+      /* Copy the result for use in the next call. */
+      out_p_add(base, 32, temp, result, zero);
+      
+      /* Add this digit into the result. */
+      out_p_add(base, 32, result, temp, curr_add);
+    }
+    /* Copy curr_add for use in the next call. */
+    out_p_add(base, 32, temp, curr_add, zero);
+
+    /* Double curr_add. */
+    out_p_add(base, 32, curr_add, temp, temp);
+  }
+
+  /* Find the first non-zero digit. */
+  for (i = 0; i < 31; i++)
+  {
+    if (result[i] != '0')
+    {
+      break;
+    }
+  }
+
+  retval = 32 - i;
+  if (TRUE == show_sign)
+  {
+    retval++;
+  }
+  if (width > retval)
+  {
+    retval = width;
+  }
+
+/*    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
+/*  	      "\"%s\"_%lu, metric %lu\n", &result[i], base, retval); */
   return retval;
 }
 
@@ -1143,7 +1422,161 @@ out_p_render_int32(const char * a_format, cw_uint32_t a_len,
 		   const void * a_arg, char * r_buf)
 {
   char * retval;
+  cw_uint32_t base, width, out_len, i, arg = *(const cw_uint32_t *) a_arg;
+  cw_sint32_t val_len;
+  cw_bool_t is_negative, show_sign;
+  const char * val;
+  char zero[33] =     "00000000000000000000000000000000";
+  char curr_add[33] = "00000000000000000000000000000001";
+  char result[33] =   "00000000000000000000000000000000";
+  char temp[33] =     "00000000000000000000000000000000";
 
+  if (-1 != (val_len = spec_get_val(a_format, a_len, "b", &val)))
+  {
+    /* Base specified. */
+    /* The next character after val is either `|' or `]', so we don't have to
+     * worry about terminating the string that val points to. */
+    base = strtoul(val, NULL, 10);
+    _cw_assert(2 <= base);
+    _cw_assert(36 >= base);
+  }
+  else
+  {
+    /* Default to base 10. */
+    base = 10;
+  }
+  
+  /* Determine sign. */
+  if ((-1 != (val_len = spec_get_val(a_format, a_len, "s", &val)))
+      && ('s' == val[0])
+      && (0 > (cw_sint32_t) arg))
+  {
+    is_negative = TRUE;
+    arg = -1 * ((cw_sint32_t) arg);
+  }
+  else
+  {
+    is_negative = FALSE;
+  }
+
+  /* Should we show the sign if the number is positive? */
+  if (((-1 != (val_len = spec_get_val(a_format, a_len, "+", &val)))
+       && ('+' == val[0]))
+      || (TRUE == is_negative))
+  {
+    show_sign = TRUE;
+  }
+  else
+  {
+    show_sign = FALSE;
+  }
+    
+  for (i = 0; i < 32; i++)
+  {
+    if ((arg >> i) & 1)
+    {
+      /* Copy the result for use in the next call. */
+      out_p_add(base, 32, temp, result, zero);
+      
+      /* Add this digit into the result. */
+      out_p_add(base, 32, result, temp, curr_add);
+    }
+    /* Copy curr_add for use in the next call. */
+    out_p_add(base, 32, temp, curr_add, zero);
+
+    /* Double curr_add. */
+    out_p_add(base, 32, curr_add, temp, temp);
+  }
+
+  /* Find the first non-zero digit. */
+  for (i = 0; i < 31; i++)
+  {
+    if (result[i] != '0')
+    {
+      break;
+    }
+  }
+
+  width = out_p_metric_int32(a_format, a_len, a_arg);
+  out_len = (32 - i) + (show_sign ? 1 : 0);
+
+  if (width > out_len)
+  {
+    char pad, justify, * output;
+    
+    /* Padding needed.  memset() the output string to the padding character,
+     * then determine where to render the integer based on justification. */
+    if (-1 != (val_len = spec_get_val(a_format, a_len, "p", &val)))
+    {
+      pad = val[0];
+    }
+    else
+    {
+      pad = ' ';
+    }
+    memset(r_buf, pad, width);
+
+    if (-1 != (val_len = spec_get_val(a_format, a_len, "j", &val)))
+    {
+      justify = val[0];
+    }
+    else
+    {
+      justify = 'r';
+    }
+
+    switch (justify)
+    {
+      case 'r':
+      {
+	output = &r_buf[width - out_len];
+	break;
+      }
+      case 'l':
+      {
+	output = r_buf;
+	break;
+      }
+      case 'c':
+      {
+	output = &r_buf[(width - out_len) / 2];
+	break;
+      }
+      default:
+      {
+	_cw_error("Unknown justification");
+      }
+    }
+
+    if (TRUE == show_sign)
+    {
+      output[0] = (is_negative) ? '-' : '+';
+      memcpy(&output[1], &result[i], 32 - i);
+    }
+    else
+    {
+      memcpy(output, &result[i], 32 - i);
+    }
+  }
+  else
+  {
+    if (TRUE == show_sign)
+    {
+      r_buf[0] = (is_negative) ? '-' : '+';
+      memcpy(&r_buf[1], &result[i], 32 - i);
+    }
+    else
+    {
+      memcpy(r_buf, &result[i], 32 - i);
+    }
+  }
+
+  retval = r_buf;
+
+/*    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
+/*  	      "r_buf \""); */
+/*    log_nprintf(cw_g_log, width, "%s", r_buf); */
+/*    log_printf(cw_g_log, "\"\n"); */
   return retval;
 }
 
@@ -1152,6 +1585,8 @@ out_p_metric_int64(const char * a_format, cw_uint32_t a_len,
 		   const void * a_arg)
 {
   cw_uint32_t retval;
+
+  retval = 21;
 
   return retval;
 }
@@ -1162,6 +1597,8 @@ out_p_render_int64(const char * a_format, cw_uint32_t a_len,
 {
   char * retval;
 
+  memset(r_buf, '6', 21);
+
   return retval;
 }
 
@@ -1169,10 +1606,36 @@ static cw_uint32_t
 out_p_metric_string(const char * a_format, cw_uint32_t a_len,
 		    const void * a_arg)
 {
-  cw_uint32_t retval;
+  cw_uint32_t retval, len, width;
+  cw_sint32_t val_len;
+  const char * val, * str = *(const char **) a_arg;
 
-  retval = 0;
+  _cw_check_ptr(a_format);
+  _cw_assert(0 < a_len);
+  _cw_check_ptr(a_arg);
 
+  len = strlen(str);
+  
+  if (-1 != (val_len = spec_get_val(a_format, a_len, "w", &val)))
+  {
+    /* Width specified. */
+    /* The next character after val is either `|' or `]', so we don't have to
+     * worry about terminating the string that val points to. */
+    width = strtoul(val, NULL, 10);
+    if (width < len)
+    {
+      retval = width;
+      goto RETURN;
+    }
+  }
+  
+  retval = len;
+
+  RETURN:
+/*    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
+/*  	      "str == %010p, retval == %lu: \"", str, retval); */
+/*    log_nprintf(cw_g_log, retval, "%s", str); */
+/*    log_printf(cw_g_log, "\"\n"); */
   return retval;
 }
 
@@ -1181,6 +1644,14 @@ out_p_render_string(const char * a_format, cw_uint32_t a_len,
 		    const void * a_arg, char * r_buf)
 {
   char * retval;
+  const char * str = *(const char **) a_arg;
+
+  _cw_check_ptr(a_format);
+  _cw_assert(0 < a_len);
+  _cw_check_ptr(a_arg);
+  _cw_check_ptr(r_buf);
+
+  memcpy(r_buf, str, out_p_metric_string(a_format, a_len, a_arg));
 
   return retval;
 }
