@@ -287,31 +287,30 @@ tests : $(CTESTS) $(PTESTS) $(BTESTS)
 
 check : tests
 	@$(SHELL) -c \
-	'echo Running regression tests: ; \
-	echo "---------------------------------------------" ;\
+	'printf "Running regression tests:\\n" ; \
+	printf "---------------------------------------------\\n" ;\
 	for i in $(PTESTS); do \
-	echo -n "$$i..."; \
+	printf "$$i..."; \
 	./$$i; \
 	done; \
 	for i in $(CTESTS); do \
-	echo -n "$$i..."; \
+	printf "$$i..."; \
 	./$$i > ./$$i.out 2>&1; \
 	$(DIFF) $$i.out $$i.exp > $$i.diff ; \
 	if [ -s $$i.diff ] ; then \
-	echo "failed. ****************" ; \
+	printf "failed. ****************\\n" ; \
 	else \
 	echo "passed." ; \
 	rm $$i.diff ; \
 	fi \
 	done ; \
-	echo "---------------------------------------------" ;\
-	echo ;\
-	echo The following regression tests failed: ; \
-	echo "---------------------------------------------" ;\
+	printf "---------------------------------------------\\n\\n" ;\
+	printf "The following regression tests failed:\\n" ; \
+	printf "---------------------------------------------\\n" ;\
 	for i in `find ./test -print | grep "\.diff$$"`; do \
 	echo `echo $$i | sed "s/\.\/\(.*\)\.diff/\1/g"`; \
 	done; \
-	echo "---------------------------------------------" \
+	printf "---------------------------------------------\\n" \
 	'
 
 install : install_s @without_threads@install_r

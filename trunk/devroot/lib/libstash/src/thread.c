@@ -81,6 +81,10 @@ thd_join(cw_thd_t * a_thd)
     abort();
   }
 
+  if (a_thd->is_malloced == TRUE)
+  {
+    _cw_free(a_thd);
+  }
   return retval;
 }
 
