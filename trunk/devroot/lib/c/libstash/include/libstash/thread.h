@@ -31,6 +31,11 @@
 #  define _PTHREAD_H_
 #endif
 
+#ifndef _SIGNAL_H_
+#  include <signal.h>
+#  define _SIGNAL_H_
+#endif
+
 /* Pseudo-opaque types. */
 typedef struct cw_thd_s cw_thd_t;
 typedef struct cw_mtx_s cw_mtx_t;
@@ -145,7 +150,26 @@ thd_join(cw_thd_t * a_thd);
  ****************************************************************************/
 #define thd_yield() pthread_yield()
 
-#define thd_sigmask(a, b, c) pthread_sigmask((a), (b), (c))
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a : SIG_BLOCK   : Block signals in b.
+ *     SIG_UNBLOCK : Unblock signals in b.
+ *     SIG_SETMASK : Set signal mask to b.
+ *
+ * b : Pointer to a signal set (sigset_t *).
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Always zero, unless the arguments are invalid.
+ *
+ * <<< Description >>>
+ *
+ * Set the current thread's signal mask.
+ *
+ ****************************************************************************/
+#define thd_sigmask(a, b) pthread_sigmask((a), (b), NULL)
 
 /****************************************************************************
  *

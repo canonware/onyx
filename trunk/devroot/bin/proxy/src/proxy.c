@@ -19,7 +19,6 @@
 #include "libsock/libsock.h"
 
 #include <sys/stat.h>
-#include <signal.h>
 #include <errno.h>
 #include <sys/types.h>
 #include <limits.h>
@@ -223,7 +222,7 @@ main(int argc, char ** argv)
   sigemptyset(&handler_arg.hupset);
   sigaddset(&handler_arg.hupset, SIGHUP);
   sigaddset(&handler_arg.hupset, SIGINT);
-  thd_sigmask(SIG_BLOCK, &handler_arg.hupset, NULL);
+  thd_sigmask(SIG_BLOCK, &handler_arg.hupset);
   thd_new(&handler_arg.sig_thd,
 	  sig_handler,
 	  (void *) &handler_arg);
