@@ -148,6 +148,9 @@ buf_delete(cw_buf_t * a_buf)
   
   _cw_check_ptr(a_buf);
 
+  log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
+	      "%p is_malloced: %s\n",
+	      a_buf, a_buf->is_malloced ? "TRUE" : "FALSE");
 #ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe == TRUE)
   {
@@ -175,8 +178,10 @@ buf_delete(cw_buf_t * a_buf)
   _cw_free(a_buf->cumulative_index);
   _cw_free(a_buf->iov);
   
+  _cw_marker("Got here");
   if (a_buf->is_malloced)
   {
+    _cw_marker("Got here");
 #ifdef _LIBSTASH_DBG
     bzero(a_buf, sizeof(cw_buf_t));
 #endif
@@ -255,66 +260,59 @@ buf_dump(cw_buf_t * a_buf, const char * a_prefix)
   {
     log_printf(cw_g_log,
 	       "%s|\\\n"
-	       "%s| |--> array[%d].bufel : \n"
-	       "%s| |\\\n",
-	       a_prefix, a_prefix, i, a_prefix);
+	       "%s| |--> cumulative_index[%lu] : %lu\n"
+	       "%s| |--> bufel_array[%lu] : \n"
+	       "%s|  \\\n",
+	       a_prefix,
+	       a_prefix, i, a_buf->cumulative_index[i],
+	       a_prefix, i,
+	       a_prefix);
 
     /* Dump bufel. */
-    {
-      char * sub_sub_prefix;
-  
-      _cw_check_ptr(&a_buf->bufel_array[i]);
-
-      sub_sub_prefix = _cw_malloc(strlen(a_prefix) + 1 + 2);
-      if (NULL == sub_sub_prefix)
-      {
-	sub_sub_prefix = "  ";
-      }
-      else
-      {
-	strcpy(sub_sub_prefix, a_prefix);
-	strcat(sub_sub_prefix, "  ");
-      }
-  
-      log_printf(cw_g_log,
-		 "%s| bufel_dump()\n",
-		 a_prefix);
 #ifdef _LIBSTASH_DBG
-      log_printf(cw_g_log,
-		 "%s|--> magic : 0x%x\n",
-		 a_prefix, a_buf->bufel_array[i].magic);
-#endif
-      log_printf(cw_g_log,
-		 "%s|--> beg_offset : %u\n",
-		 a_prefix, a_buf->bufel_array[i].beg_offset);
-      log_printf(cw_g_log,
-		 "%s|--> end_offset : %u\n",
-		 a_prefix, a_buf->bufel_array[i].end_offset);
-#ifdef _LIBSTASH_DBG
-      if ((NULL != a_buf->bufel_array[i].bufc)
-	  && (_CW_BUFEL_MAGIC == a_buf->bufel_array[i].magic))
-#else
-      if (NULL != a_buf->bufel_array[i].bufc)
-#endif
-      {
-	log_printf(cw_g_log,
-		   "%s|--> bufc : 0x%x\n"
-		   "%s \\\n",
-		   a_prefix, a_buf->bufel_array[i].bufc, a_prefix);
-	bufc_p_dump(a_buf->bufel_array[i].bufc, sub_sub_prefix);
-      }
-      else
-      {
-	log_printf(cw_g_log,
-		   "%s\\--> bufc : 0x%x\n",
-		   a_prefix, a_buf->bufel_array[i].bufc);
-      }
-      _cw_free(sub_sub_prefix);
-    }
-    
     log_printf(cw_g_log,
-	       "%s| \\--> array[%d].cumulative_size : %u\n",
-	       a_prefix, i, a_buf->cumulative_index[i]);
+	       "%s|   |--> magic : 0x%x\n",
+	       a_prefix, a_buf->bufel_array[i].magic);
+#endif
+    log_printf(cw_g_log,
+	       "%s|   |--> beg_offset : %lu\n",
+	       a_prefix, a_buf->bufel_array[i].beg_offset);
+    log_printf(cw_g_log,
+	       "%s|   |--> end_offset : %lu\n",
+	       a_prefix, a_buf->bufel_array[i].end_offset);
+#ifdef _LIBSTASH_DBG
+    if ((NULL != a_buf->bufel_array[i].bufc)
+	&& (_CW_BUFEL_MAGIC == a_buf->bufel_array[i].magic))
+#else
+    if (NULL != a_buf->bufel_array[i].bufc)
+#endif
+    {
+      char * sub_prefix;
+      
+      log_printf(cw_g_log,
+		 "%s|   |--> bufc : 0x%x\n"
+		 "%s|    \\\n",
+		 a_prefix, a_buf->bufel_array[i].bufc, a_prefix);
+      
+      sub_prefix = _cw_malloc(strlen(a_prefix) + 7);
+      if (NULL == sub_prefix)
+      {
+	bufc_p_dump(a_buf->bufel_array[i].bufc, "...");
+      }
+      else
+      {
+	
+	sprintf(sub_prefix, "%s|     ", a_prefix);
+	bufc_p_dump(a_buf->bufel_array[i].bufc, sub_prefix);
+	_cw_free(sub_prefix);
+      }
+    }
+    else
+    {
+      log_printf(cw_g_log,
+		 "%s|   \\--> bufc : 0x%x\n",
+		 a_prefix, a_buf->bufel_array[i].bufc);
+    }
   }
   
 #ifdef _CW_REENTRANT
@@ -908,7 +906,6 @@ buf_release_head_data(cw_buf_t * a_buf, cw_uint32_t a_amount)
   }
 #endif
 
-  _cw_marker("Got here");
   if (a_amount == 0)
   {
     retval = FALSE;
@@ -919,20 +916,17 @@ buf_release_head_data(cw_buf_t * a_buf, cw_uint32_t a_amount)
   }
   else
   {
-  _cw_marker("Got here");
     for (array_index = a_buf->array_start,
 	   amount_left = a_amount;
 	 amount_left > 0;
 	 array_index = (array_index + 1) & (a_buf->array_size - 1))
     {
-  _cw_marker("Got here");
       bufel_valid_data
 	= (a_buf->bufel_array[array_index].end_offset
 	   - a_buf->bufel_array[array_index].beg_offset);
 
       if (bufel_valid_data <= amount_left)
       {
-  _cw_marker("Got here");
 	/* Need to get rid of the bufel. */
 	if (NULL != a_buf->bufel_array[array_index].bufc)
 	{
@@ -948,7 +942,6 @@ buf_release_head_data(cw_buf_t * a_buf, cw_uint32_t a_amount)
       }
       else /* if (bufel_valid_data > amount_left) */
       {
-  _cw_marker("Got here");
 	/* This will finish things up. */
 	a_buf->bufel_array[array_index].beg_offset
 	  = a_buf->bufel_array[array_index].beg_offset + amount_left;
@@ -956,7 +949,6 @@ buf_release_head_data(cw_buf_t * a_buf, cw_uint32_t a_amount)
       }
     }
 
-  _cw_marker("Got here");
     /* Adjust the buf size. */
     a_buf->size -= a_amount;
       
@@ -978,7 +970,6 @@ buf_release_head_data(cw_buf_t * a_buf, cw_uint32_t a_amount)
     retval = FALSE;
   }
 
-  _cw_marker("Got here");
 #ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe)
   {
@@ -2318,7 +2309,6 @@ buf_p_make_range_writeable(cw_buf_t * a_buf, cw_uint32_t a_offset,
    * creating extends past the current end of the buf. */
   if (a_offset + a_length > a_buf->size)
   {
-    
     bufc = bufc_new(NULL, mem_dealloc, cw_g_mem);
     if (NULL == bufc)
     {
@@ -2345,7 +2335,13 @@ buf_p_make_range_writeable(cw_buf_t * a_buf, cw_uint32_t a_offset,
     }
 
     /* Initialize bufel. */
-    bzero(&a_buf->bufel_array[a_buf->array_end], sizeof(cw_bufel_t));
+/*      bzero(&a_buf->bufel_array[a_buf->array_end], sizeof(cw_bufel_t)); */
+#ifdef _LIBSTASH_DBG
+    a_buf->bufel_array[a_buf->array_end].magic = _CW_BUFEL_MAGIC;
+#endif
+    a_buf->bufel_array[a_buf->array_end].beg_offset = 0;
+    a_buf->bufel_array[a_buf->array_end].end_offset = ((a_offset + a_length)
+						       - a_buf->size);
     a_buf->bufel_array[a_buf->array_end].bufc = bufc;
 
     a_buf->size = a_offset + a_length;
@@ -2373,7 +2369,8 @@ buf_p_make_range_writeable(cw_buf_t * a_buf, cw_uint32_t a_offset,
   {
     bufel = &a_buf->bufel_array[((first_array_element + i)
 				 & (a_buf->array_size - 1))];
-    if (!bufc_p_get_is_writeable(bufel->bufc))
+    if ((FALSE == bufc_p_get_is_writeable(bufel->bufc))
+	|| (1 < bufc_p_get_ref_count(bufel->bufc)))
     {
       buffer = _cw_malloc(bufel->end_offset - bufel->beg_offset);
       if (NULL == buffer)
@@ -2564,6 +2561,9 @@ bufc_p_dump(cw_bufc_t * a_bufc, const char * a_prefix)
   log_printf(cw_g_log,
 	     "%s|--> ref_count : %u\n",
 	     a_prefix, a_bufc->ref_count);
+  log_printf(cw_g_log,
+	     "%s|--> is_writeable : %s\n",
+	     a_prefix, a_bufc->is_writeable ? "TRUE" : "FALSE");
   log_printf(cw_g_log,
 	     "%s|--> buf_size : %u\n",
 	     a_prefix, a_bufc->buf_size);

@@ -57,10 +57,11 @@ mem_delete(cw_mem_t * a_mem)
 	    && (0 < oh_get_num_items(&a_mem->addr_hash))))
     {
       log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		  "%s unfreed allocations\n",
+		  "%s unfreed allocation%s\n",
 		  log_print_uint64(oh_get_num_items(&a_mem->addr_hash),
 				   10,
-				   buf));
+				   buf),
+		  oh_get_num_items(&a_mem->addr_hash) != 1 ? "s" : "");
     }
     for (i = 0,
 	   num_addrs = oh_get_num_items(&a_mem->addr_hash);
@@ -378,10 +379,9 @@ mem_free(cw_mem_t * a_mem, void * a_ptr)
 #ifdef _LIBSTASH_DBG
   if (NULL != a_mem)
   {
-    void * junk;
     struct cw_mem_item_s * allocation;
     
-    if (TRUE == oh_item_delete(&a_mem->addr_hash, a_ptr, &junk,
+    if (TRUE == oh_item_delete(&a_mem->addr_hash, a_ptr, NULL,
 			       (void **) &allocation))
     {
       if (dbg_is_registered(cw_g_dbg, "mem_error"))

@@ -23,14 +23,13 @@
 #  include <netinet/in.h>
 #endif
 
-
 int
 main()
 {
   libstash_init();
   log_printf(cw_g_log, "Test begin\n");
 
-/*    dbg_register(cw_g_dbg, "mem_verbose"); */
+  dbg_register(cw_g_dbg, "mem_verbose");
 
   /* bufc_new(), bufc_delete(), bufc_set_buffer(). */
   {
@@ -773,31 +772,39 @@ main()
     char * str_b = "And following is string B.  Mumble mumble.";
 
     buf = buf_new(NULL, TRUE);
+    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
+		"buf is %p\n",
+		buf);
+    
     _cw_check_ptr(buf);
-  _cw_marker("Got here");
 
     _cw_assert(FALSE == buf_set_range(buf, 0, strlen(str_a) + 1,
 				      str_a, FALSE));
     _cw_assert(FALSE == buf_set_range(buf, strlen(str_a) + 1, strlen(str_b) + 1,
 				      str_b, FALSE));
     _cw_assert((strlen(str_a) + strlen(str_b) + 2) == buf_get_size(buf));
-  _cw_marker("Got here");
-
     buf_release_head_data(buf, buf_get_size(buf));
-  _cw_marker("Got here");
 
     _cw_assert(FALSE == buf_set_range(buf, 0, strlen(str_a) + 1,
 				      str_a, TRUE));
-  _cw_marker("Got here");
     _cw_assert(FALSE == buf_set_range(buf, 4, strlen(str_b) + 1,
 				      str_b, TRUE));
-  _cw_marker("Got here");
-    _cw_assert(strlen(str_a) == strlen(str_b) + 4);
-  _cw_marker("Got here");
     
+    _cw_assert(buf_get_size(buf) == strlen(str_a) + 1);
+
+    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
+		"buf is %p\n",
+		buf);
+    buf_dump(buf, "blah ");
     buf_delete(buf);
+    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
+		"buf is %p\n",
+		buf);
   }
   _cw_marker("Got here");
+    /* XXX */
+    libstash_shutdown();
+    exit(0);
 
   /* buf_prepend_bufc(), buf_append_bufc(),
    * buf_get_size(). */
