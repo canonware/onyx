@@ -60,8 +60,8 @@ tests_distclean :
  * Add magic to onyx files.
  */
 @objroot@/%0test/%.nx : @srcroot@/%0test/%.nx.in
-                        @srcroot@/%0test/test_header.nx.in
-                        @srcroot@/%0test/test_footer.nx.in
+                        [glob @srcroot@/%0test/test_header.nx.in]
+                        [glob @srcroot@/%0test/test_footer.nx.in]
                         [glob @srcroot@/%0test/%_test_header.nx.in]
                         [glob @srcroot@/%0test/%_test_footer.nx.in]
   set mkdir
