@@ -165,7 +165,7 @@ kasit_p_feed(cw_kasit_t * a_kasit, const char * a_str, cw_uint32_t a_len)
   {
     c = a_str[i];
 
-#if (1)
+#if (0)
 #define _CW_KASIS_PSTATE(a)           \
   do                                  \
   {                                   \
@@ -431,14 +431,6 @@ kasit_p_feed(cw_kasit_t * a_kasit, const char * a_str, cw_uint32_t a_len)
       }
       case _CW_KASIT_STATE_NUMBER:
       {
-/*  	out_put(cw_g_out, */
-/*  		"sign: [i], base: [i], point_offset: [i|s:s]: " */
-/*  		"begin_offset: [i]\n", */
-/*  		a_kasit->meta.number.sign, */
-/*  		a_kasit->meta.number.base, */
-/*  		a_kasit->meta.number.point_offset, */
-/*  		a_kasit->meta.number.begin_offset); */
-		
 	switch (c)
 	{
 	  case '.':
@@ -528,9 +520,6 @@ kasit_p_feed(cw_kasit_t * a_kasit, const char * a_str, cw_uint32_t a_len)
 		  digit *= 10;
 		}
 		a_kasit->meta.number.base += digit;
-		
-/*  		out_put(cw_g_out, "i: [i], digit: [i], base: [i]\n", */
-/*  			i, digit, a_kasit->meta.number.base); */
 		
 		if (((0 != digit)
 		     && ((a_kasit->index
@@ -873,10 +862,51 @@ kasit_p_feed(cw_kasit_t * a_kasit, const char * a_str, cw_uint32_t a_len)
       }
       case _CW_KASIT_STATE_BASE85_STRING:
       {
+	switch (c)
+	{
+	  case '~':
+	  {
+	    a_kasit->state = _CW_KASIT_STATE_BASE85_STRING_CONT;
+	    break;
+	  }
+	  case '\0': case '\t': case '\n': case '\f': case '\r': case ' ':
+	  {
+	    /* Ignore. */
+	    break;
+	  }
+	  default:
+	  {
+	    if ((('!' <= c) && ('u' >= c))
+		|| 'z' == c)
+	    {
+	      _CW_KASIT_PUTC(c);
+	    }
+	    else
+	    {
+	      _cw_marker("XXX Syntax error");
+	    }
+	    break;
+	  }
+	}
 	break;
       }
       case _CW_KASIT_STATE_BASE85_STRING_CONT:
       {
+	switch (c)
+	{
+	  case '>':
+	  {
+	    a_kasit->state = _CW_KASIT_STATE_START;
+	    _CW_PRINT_TOKEN(a_kasit->index, "base 85 string");
+	    _CW_KASIT_RESET_TOK_BUFFER();
+	    break;
+	  }
+	  default:
+	  {
+	    _cw_marker("XXX Syntax error");
+	    break;
+	  }
+	}
 	break;
       }
       case _CW_KASIT_STATE_NAME:
