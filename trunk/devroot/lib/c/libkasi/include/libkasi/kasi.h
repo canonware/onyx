@@ -10,6 +10,7 @@
  *
  ****************************************************************************/
 
+/* Size of buffer used for large extended objects. */
 #define _CW_KASI_BUFC_SIZE 256
 
 typedef struct cw_kasi_s cw_kasi_t;

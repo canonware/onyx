@@ -31,6 +31,8 @@ main(int argc, char ** argv)
   cw_bool_t is_tty;
   
   libstash_init();
+/*    dbg_register(cw_g_dbg, "pezz_verbose"); */
+  
   /* XXX Set up oom handler. */
 
   is_tty = (cw_bool_t) isatty(0);
@@ -38,37 +40,40 @@ main(int argc, char ** argv)
   out_new(&out);
   out_set_default_fd(&out, 1);
 
+  if (TRUE == is_tty)
+  {
+    out_put(&out, "kasi, version [s].\n", _LIBKASI_VERSION);
+    out_put(&out,
+	    "See http://www.canonware.com/software/kasi/ for information.\n");
+  }
+	    
   kasi_new(&kasi);
   kasit_new(&kasit, NULL, NULL, &kasi);
 
 #if (0)
-  out_put(cw_g_out, "sizeof(cw_kasio_t): [i]\n", sizeof(cw_kasio_t));
-  out_put(cw_g_out, "\n");
+  _cw_out_put("sizeof(cw_kasio_t): [i]\n", sizeof(cw_kasio_t));
+  _cw_out_put("\n");
 
-  out_put(cw_g_out, "sizeof(cw_kasis_t): [i]\n", sizeof(cw_kasis_t));
-  out_put(cw_g_out, "sizeof(cw_kasiso_t): [i]\n", sizeof(cw_kasiso_t));
-  out_put(cw_g_out, "sizeof(cw_kasisc_t): [i]\n",
-	  sizeof(cw_kasisc_t));
-  out_put(cw_g_out, "\n");
+  _cw_out_put("sizeof(cw_kasis_t): [i]\n", sizeof(cw_kasis_t));
+  _cw_out_put("sizeof(cw_kasiso_t): [i]\n", sizeof(cw_kasiso_t));
+  _cw_out_put("sizeof(cw_kasisc_t): [i]\n", sizeof(cw_kasisc_t));
+  _cw_out_put("\n");
   
-  out_put(cw_g_out, "sizeof(cw_kasid_t): [i]\n", sizeof(cw_kasid_t));
-  out_put(cw_g_out, "sizeof(cw_kasid_t)[[[i]]: [i]\n",
-	  256, _CW_KASID_ENTS2SIZEOF(256));
-  out_put(cw_g_out, "sizeof(cw_kasid_t)[[[i]]: [i]\n",
-	  16, _CW_KASID_ENTS2SIZEOF(16));
-  out_put(cw_g_out, "sizeof(cw_kasido_t): [i]\n", sizeof(cw_kasido_t));
-  out_put(cw_g_out, "\n");
+  _cw_out_put("sizeof(cw_kasid_t): [i]\n", sizeof(cw_kasid_t));
+  _cw_out_put("sizeof(cw_kasid_t)[[[i]]: [i]\n",
+	      256, _CW_KASID_ENTS2SIZEOF(256));
+  _cw_out_put("sizeof(cw_kasid_t)[[[i]]: [i]\n", 16, _CW_KASID_ENTS2SIZEOF(16));
+  _cw_out_put("sizeof(cw_kasido_t): [i]\n", sizeof(cw_kasido_t));
+  _cw_out_put("\n");
   
-  out_put(cw_g_out, "sizeof(cw_buf_t): [i]\n", sizeof(cw_buf_t));
-  out_put(cw_g_out, "sizeof(cw_ring_t): [i]\n", sizeof(cw_ring_t));
-  out_put(cw_g_out, "sizeof(cw_oh_t): [i]\n", sizeof(cw_oh_t));
-  out_put(cw_g_out, "sizeof(cw_ch_t): [i]\n", sizeof(cw_ch_t));
-  out_put(cw_g_out, "sizeof(cw_chi_t): [i]\n", sizeof(cw_chi_t));
-  out_put(cw_g_out, "sizeof(cw_ch_t)[[[i]]: [i]\n",
-	  256, _CW_CH_TABLE2SIZEOF(256));
-  out_put(cw_g_out, "sizeof(cw_ch_t)[[[i]]: [i]\n",
-	  16, _CW_CH_TABLE2SIZEOF(16));
-  out_put(cw_g_out, "\n");
+  _cw_out_put("sizeof(cw_buf_t): [i]\n", sizeof(cw_buf_t));
+  _cw_out_put("sizeof(cw_ring_t): [i]\n", sizeof(cw_ring_t));
+  _cw_out_put("sizeof(cw_oh_t): [i]\n", sizeof(cw_oh_t));
+  _cw_out_put("sizeof(cw_ch_t): [i]\n", sizeof(cw_ch_t));
+  _cw_out_put("sizeof(cw_chi_t): [i]\n", sizeof(cw_chi_t));
+  _cw_out_put("sizeof(cw_ch_t)[[[i]]: [i]\n", 256, _CW_CH_TABLE2SIZEOF(256));
+  _cw_out_put("sizeof(cw_ch_t)[[[i]]: [i]\n", 16, _CW_CH_TABLE2SIZEOF(16));
+  _cw_out_put("\n");
 #endif
   
   while (1)

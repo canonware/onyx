@@ -105,5 +105,5 @@ kasit_detach_str(cw_kasit_t * a_kasit, const char * a_str, cw_uint32_t a_len);
 void
 kasit_detach_buf(cw_kasit_t * a_kasit, cw_buf_t * a_buf);
 
-cw_bool_t
+cw_sint32_t
 kasit_p_feed(cw_kasit_t * a_kasit, const char * a_str, cw_uint32_t a_len);
