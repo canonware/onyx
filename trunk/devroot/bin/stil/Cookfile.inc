@@ -163,7 +163,7 @@ stil_install_a : [STIL_A] stil_install_common
 #endif
 {
 #if [ENABLE_SHARED]
-  [CC] [D_CFLAGS] -o [PREFIX]/bin/stil
+  [CC] [A_CFLAGS] -o [PREFIX]/bin/stil
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [STIL_SRCS]]
        -rpath [PREFIX]/lib
        [LDFLAGS] -lstil -ledit -lstash -ltermcap [EXTRALIBS];
@@ -199,7 +199,7 @@ stil_install_p : [STIL_P] stil_install_common
 #endif
   set mkdir
 {
-  [CC] [D_CFLAGS] -o [target]
+  [CC] [A_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [STIL_SRCS]]
 #if [ENABLE_SHARED]
        -rpath [objdir]/lib/c/libstil/lib
@@ -213,7 +213,7 @@ stil_install_p : [STIL_P] stil_install_common
            [LIBSTIL_P] [LIBEDIT_P] [LIBSTASH_P]
   set mkdir
 {
-  [CC] [D_CFLAGS] -o [target]
+  [CC] [P_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [STIL_SRCS]]
        [LDFLAGS] -lstil_p -ledit_p -lstash_p -ltermcap [EXTRALIBS];
 }
