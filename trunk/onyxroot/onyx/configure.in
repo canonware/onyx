@@ -713,6 +713,40 @@ dnl Check for typedefs, structures, and compiler characteristics.
 AC_C_BIGENDIAN
 
 dnl 
+dnl onyx configuration.
+dnl 
+if test "x$bin_onyx" = "x1" ; then
+  if echo "<Version = onyx>" | grep Version >/dev/null ; then
+    onyx_version=devel
+  else
+    onyx_version="<Version = onyx>"
+  fi
+  AC_SUBST([onyx_version])
+
+  ONYX="$abs_objroot/bin/onyx/bin/onyx"
+  AC_SUBST([ONYX])
+
+  TONYX="$abs_objroot/bin/onyx/bin/tonyx"
+  AC_SUBST([TONYX])
+
+  AC_DEFINE_UNQUOTED([CW_TONYX_ONYX], ["$abs_objroot/bin/onyx/bin/onyx"])
+
+  tmpath=ONYX_MPATH=
+  trpath=ONYX_RPATH=
+  for i in $mods ; do
+    tmpath=$tmpath:$abs_objroot/mod/$i/nxm
+    trpath=$trpath:$abs_objroot/mod/$i/nx
+  done
+  dnl Remove leading ':'.
+  tmpath=`echo $tmpath | sed s/://`
+  trpath=`echo $trpath | sed s/://`
+  AC_DEFINE_UNQUOTED([CW_TONYX_MPATH], ["$tmpath"])
+  AC_DEFINE_UNQUOTED([CW_TONYX_RPATH], ["$trpath"])
+
+  AC_CHECK_DECL([optreset])
+fi
+
+dnl 
 dnl libonyx configuration.
 dnl 
 if test "x$lib_onyx" = "x1" ; then
@@ -794,40 +828,6 @@ if test "x$lib_onyx" = "x1" ; then
 
     AC_CHECK_FUNCS([unsetenv])
   fi
-fi
-
-dnl 
-dnl onyx configuration.
-dnl 
-if test "x$bin_onyx" = "x1" ; then
-  if echo "<Version = onyx>" | grep Version >/dev/null ; then
-    onyx_version=devel
-  else
-    onyx_version="<Version = onyx>"
-  fi
-  AC_SUBST([onyx_version])
-
-  ONYX="$abs_objroot/bin/onyx/bin/onyx"
-  AC_SUBST([ONYX])
-
-  TONYX="$abs_objroot/bin/onyx/bin/tonyx"
-  AC_SUBST([TONYX])
-
-  AC_DEFINE_UNQUOTED([CW_TONYX_ONYX], ["$abs_objroot/bin/onyx/bin/onyx"])
-
-  tmpath=ONYX_MPATH=
-  trpath=ONYX_RPATH=
-  for i in $mods ; do
-    tmpath=$tmpath:$abs_objroot/mod/$i/nxm
-    trpath=$trpath:$abs_objroot/mod/$i/nx
-  done
-  dnl Remove leading ':'.
-  tmpath=`echo $tmpath | sed s/://`
-  trpath=`echo $trpath | sed s/://`
-  AC_DEFINE_UNQUOTED([CW_TONYX_MPATH], ["$tmpath"])
-  AC_DEFINE_UNQUOTED([CW_TONYX_RPATH], ["$trpath"])
-
-  AC_CHECK_DECL([optreset])
 fi
 
 dnl Process .in files.
