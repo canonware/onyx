@@ -1461,7 +1461,9 @@ hist_redo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 
     /* Iteratively redo a_count times. */
     for (retval = 0, redid = FALSE;
-	 retval < a_count && mkr_pos(&a_hist->hcur) < buf_len(&a_hist->h) + 1;
+	 retval < a_count
+	     && mkr_pos(&a_hist->hcur) + histh_p_bufvlen_get(&a_hist->hfoot)
+	     < buf_len(&a_hist->h) + 1;
 	 )
     {
 	/* Make a note that the redo loop was executed at least once, so that a
@@ -1931,8 +1933,7 @@ hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
 #ifdef CW_HIST_DUMP
     /* Allocator state. */
     fprintf(stderr, "%s|\n", mid);
-    fprintf(stderr, "%s|-> dealloc: %p\n", mid, a_hist->dealloc);
-    fprintf(stderr, "%s|-> arg: %p\n", mid, a_hist->arg);
+    fprintf(stderr, "%s|-> mema: %p\n", mid, a_hist->mema);
 #endif
 
     /* Initialize markers after buf_dump() in order to keep them from showing
