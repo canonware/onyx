@@ -54,7 +54,8 @@ SRCS = [SRCS] [STIL_SRCS];
  */
 {
   local stests = copy_a.st.in eval.st.in gc_roll.st.in hello.st.in
-                 integer.st.in sclear_a.st.in sclear_b.st.in sclear_c.st.in
+                 integer.st.in nsleep_a.st.in nsleep_b.st.in nsleep_c.st.in
+                 nsleep_d.st.in sclear_a.st.in sclear_b.st.in sclear_c.st.in
                  scleartomark_a.st.in scleartomark_b.st.in scleartomark_c.st.in
                  scleartomark_d.st.in scount_a.st.in scount_b.st.in
                  scount_c.st.in scounttomark_a.st.in scounttomark_b.st.in

@@ -621,7 +621,7 @@ operand stack. \\
 \hline
 & {\bf \htmlref{quit}{systemdict:quit}} & & \\
 \hline
-& {\bf \htmlref{nsleep}{systemdict:nsleep}} & & \\
+nanoseconds & {\bf \htmlref{nsleep}{systemdict:nsleep}} & -- & Nanosleep. \\
 \hline
 & {\bf \htmlref{loop}{systemdict:loop}} & & \\
 \hline
@@ -995,6 +995,31 @@ s:3> pstack
 s:3> )
 s:1> 1 sprint
 (1 2)
+s:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:nsleep}
+\index{\stilop{}{nsleep}{}}
+\item[{\stilop{nanoseconds}{nsleep}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[nanoseconds: ]
+			Minimum number of nanoseconds to sleep.  Must be greater
+			than 0.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Sleep for at least \oparg{nanoseconds} nanonseconds.
+	\item[Example(s): ]\begin{verbatim}
+
+s:0> 1000 nsleep
 s:0>
 		\end{verbatim}
 	\end{description}
