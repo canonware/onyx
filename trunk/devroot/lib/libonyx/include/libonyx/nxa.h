@@ -69,13 +69,7 @@ void	nxa_maximum_get(cw_nxa_t *a_nxa, cw_nxoi_t *r_count, cw_nxoi_t *r_mark,
 void	nxa_sum_get(cw_nxa_t *a_nxa, cw_nxoi_t *r_count, cw_nxoi_t *r_mark,
     cw_nxoi_t *r_sweep);
 
-#define	nxa_gc_suspend(a_nxa) thd_suspend(&(a_nxa)->gc_thd)
-#define	nxa_gc_resume(a_nxa) thd_resume(&(a_nxa)->gc_thd)
-
 #define	nxa_gcdict_get(a_nxa) &(a_nxa)->gcdict
-
-#define	nxa_chi_pool_get(a_nxa)	&(a_nxa)->chi_pool
-#define	nxa_dicto_pool_get(a_nxa)	&(a_nxa)->dicto_pool
 
 #define	nxa_chi_get(a_nxa)						\
 	(cw_chi_t *)pool_get(&(a_nxa)->chi_pool)
