@@ -40,27 +40,13 @@ main(int argc, char **argv)
 
 	libstash_init();
 
-	/* XXX Set up oom handler. */
-
 	out_new(&out, cw_g_mem);
 	out_set_default_fd(&out, 1);
 
-	if (stil_new(&stil) == NULL) {
-		_cw_out_put_e("Error in stil_new()\n");
-		exit(1);
-	}
-	if (stilt_new(&stilt, &stil) == NULL) {
-		_cw_out_put_e("Error in stilt_new()\n");
-		exit(1);
-	}
-	if (stilts_new(&stilts, &stilt) == NULL) {
-		_cw_out_put_e("Error in stilts_new()\n");
-		exit(1);
-	}
-	if (stilts_new(&estilts, &stilt) == NULL) {
-		_cw_out_put_e("Error in stilts_new()\n");
-		exit(1);
-	}
+	stil_new(&stil);
+	stilt_new(&stilt, &stil);
+	stilts_new(&stilts, &stilt);
+	stilts_new(&estilts, &stilt);
 
 	if (isatty(0)) {
 		cw_uint8_t	code[] =
@@ -73,7 +59,7 @@ main(int argc, char **argv)
 		cw_bool_t	continuation = FALSE;
 
 		/* Print product and version info. */
-		stilt_interp_str(&stilt, &estilts, code, sizeof(code) - 1);
+		stilt_interpret(&stilt, &estilts, code, sizeof(code) - 1);
 
 		/*
 		 * Initialize the command editor.
@@ -118,7 +104,7 @@ main(int argc, char **argv)
 				continuation = TRUE;
 			}
 
-			stilt_interp_str(&stilt, &stilts, str,
+			stilt_interpret(&stilt, &stilts, str,
 			    (cw_uint32_t)count);
 		}
 
@@ -134,7 +120,7 @@ main(int argc, char **argv)
 			bytes_read = read(0, input, _BUF_SIZE - 1);
 			if (bytes_read <= 0)
 				break;
-			stilt_interp_str(&stilt, &stilts, input,
+			stilt_interpret(&stilt, &stilts, input,
 			    (cw_uint32_t)bytes_read);
 		}
 	}
@@ -159,7 +145,7 @@ prompt(EditLine *a_el)
 		cw_stils_t	*stack = stilt_data_stack_get(&stilt);
 
 		/* Push the prompt onto the data stack. */
-		stilt_interp_str(&stilt, &estilts, code, sizeof(code) - 1);
+		stilt_interpret(&stilt, &estilts, code, sizeof(code) - 1);
 
 		/* Get the actual prompt string. */
 		stilo = stils_get(stack, 0);

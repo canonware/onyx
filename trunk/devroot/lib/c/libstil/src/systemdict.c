@@ -856,7 +856,7 @@ systemdict_product(cw_stilt_t *a_stilt)
 	cw_uint8_t	code[] = "`Canonware stil'\n";
 
 	stilts_new(&stilts, a_stilt);
-	stilt_interp_str(a_stilt, &stilts, code, sizeof(code) - 1);
+	stilt_interpret(a_stilt, &stilts, code, sizeof(code) - 1);
 	stilts_delete(&stilts, a_stilt);
 }
 
@@ -867,7 +867,7 @@ systemdict_prompt(cw_stilt_t *a_stilt)
 	cw_uint8_t	code[] = "`s> '\n";
 
 	stilts_new(&stilts, a_stilt);
-	stilt_interp_str(a_stilt, &stilts, code, sizeof(code) - 1);
+	stilt_interpret(a_stilt, &stilts, code, sizeof(code) - 1);
 	stilts_delete(&stilts, a_stilt);
 }
 
@@ -889,7 +889,7 @@ systemdict_pstack(cw_stilt_t *a_stilt)
 
 	for (i = 0; i < count; i++) {
 		systemdict_dup(a_stilt);
-		stilt_interp_str(a_stilt, &stilts, code, sizeof(code) - 1);
+		stilt_interpret(a_stilt, &stilts, code, sizeof(code) - 1);
 		stils_roll(stack, count, 1);
 	}
 	stilts_delete(&stilts, a_stilt);
@@ -1083,7 +1083,7 @@ systemdict_stack(cw_stilt_t *a_stilt)
 
 	for (i = 0; i < count; i++) {
 		systemdict_dup(a_stilt);
-		stilt_interp_str(a_stilt, &stilts, code, sizeof(code) - 1);
+		stilt_interpret(a_stilt, &stilts, code, sizeof(code) - 1);
 		stils_roll(stack, count, 1);
 	}
 	stilts_delete(&stilts, a_stilt);
@@ -1220,7 +1220,7 @@ systemdict_version(cw_stilt_t *a_stilt)
 	cw_uint8_t	code[] = "`" _LIBSTIL_VERSION "'\n";
 
 	stilts_new(&stilts, a_stilt);
-	stilt_interp_str(a_stilt, &stilts, code, sizeof(code) - 1);
+	stilt_interpret(a_stilt, &stilts, code, sizeof(code) - 1);
 	stilts_delete(&stilts, a_stilt);
 }
 
