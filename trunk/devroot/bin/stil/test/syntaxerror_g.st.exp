@@ -1,4 +1,4 @@
-At line 3, column 3: Error /syntaxerror in -file-
-ostack: (`(\\xr' -file-)
+At line 3, column 1: Error /syntaxerror in -file-
+ostack: (`/ ' -file-)
 estack: (-file-)
 dstack: (-dict- -dict- -dict- -dict-)
