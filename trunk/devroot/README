@@ -7,4 +7,11 @@
 The following files may be of direct interest to the user:
 
 * COPYING - Copyright and redistribution information.
+
 * INSTALL - Installation information.
+
+* doc/html/manual.html - Manual in html format.
+
+* doc/ps/manual.ps - Manual in PostScript format.
+
+* doc/pdf/manual.pdf - Manual in Portable Document Format.
