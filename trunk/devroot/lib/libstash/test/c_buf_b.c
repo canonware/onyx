@@ -84,7 +84,7 @@ thread_entry_func(void * a_arg)
     else
     {
       /* Hope for a context switch. */
-      thd_yield();
+      /*thd_yield();*/
     }
   }
 

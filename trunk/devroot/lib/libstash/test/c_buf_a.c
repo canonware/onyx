@@ -23,6 +23,11 @@
 #  include <netinet/in.h>
 #endif
 
+#ifdef _CW_OS_LINUX
+/* For ntohl(). */
+#  include <netinet/in.h>
+#endif
+
 int
 main()
 {
