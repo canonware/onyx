@@ -755,13 +755,10 @@ term_set(el, term)
 
     i = setupterm(term, 1, NULL);
 
-    if (i <= 0) {
-	if (i == -1)
-	    (void) fprintf(el->el_errfile, "Cannot read terminfo database;\n");
-	else if (i == 0)
-	    (void) fprintf(el->el_errfile,
-			   "No entry for terminal type \"%s\";\n", term);
-	(void) fprintf(el->el_errfile, "using dumb terminal settings.\n");
+    if (i != OK) {
+	(void) fprintf(el->el_errfile,
+	    "No entry for terminal type \"%s\"; using dumb terminal settings\n",
+	    term);
 	Val(T_co) = 80;		/* do a dumb terminal */
 	Val(T_pt) = Val(T_km) = Val(T_li) = 0;
 	Val(T_xt) = Val(T_MT);
