@@ -413,9 +413,10 @@ separators needs to be stripped out.  The following snippet does that:
 
 \begin{verbatim}
 `Jason Evans (jasone@canonware.com)
-Jason O. Evans ( jasone@canonware.com )'
+Jason O. Evans ( jasone@canonware.com )
+'
 
-`(\w[A-Za-z. ]*\w) \(\s*([^)])\s*\)' `"\1" <\2>' <$g true> subst
+`(\w[A-Za-z. ]*\w) \(\s*([^\s]+)\s*\)' `"\1" <\2>' <$g true> subst pop
 stdout exch write pop
 \end{verbatim}
 
