@@ -33,11 +33,6 @@ extern "C" {
  * included again inside libsock_incs.h.  Oh well, that's okay. */
 #  include <libstash/libstash_r.h>
 
-/* Namespace setup. */
-
-#  define _CW_LIBSOCK_PREFIX _libsock_
-#  define _CW_NS_LIBSOCK(x) _cw_ns_xglue(_CW_LIBSOCK_PREFIX,,x)
-
 /* Project headers to always be included. */
 
 #  include "libsock_incs.h"

@@ -32,9 +32,8 @@ typedef struct cw_socks_s cw_socks_t;
  *
  *
  ****************************************************************************/
-#define socks_new _CW_NS_LIBSOCK(socks_new)
 cw_socks_t *
-socks_new();
+socks_new(void);
 
 /****************************************************************************
  *
@@ -51,7 +50,6 @@ socks_new();
  *
  *
  ****************************************************************************/
-#define socks_delete _CW_NS_LIBSOCK(socks_delete)
 void
 socks_delete(cw_socks_t * a_socks);
 
@@ -70,7 +68,6 @@ socks_delete(cw_socks_t * a_socks);
  *
  *
  ****************************************************************************/
-#define socks_listen _CW_NS_LIBSOCK(socks_listen)
 cw_bool_t
 socks_listen(cw_socks_t * a_socks, int * a_port);
 
@@ -89,7 +86,6 @@ socks_listen(cw_socks_t * a_socks, int * a_port);
  *
  *
  ****************************************************************************/
-#define socks_accept_block _CW_NS_LIBSOCK(socks_accept_block)
 cw_sock_t *
 socks_accept_block(cw_socks_t * a_socks, cw_sock_t * a_sock);
 
@@ -108,6 +104,5 @@ socks_accept_block(cw_socks_t * a_socks, cw_sock_t * a_sock);
  *
  *
  ****************************************************************************/
-#define socks_accept_noblock _CW_NS_LIBSOCK(socks_accept_noblock)
 cw_sock_t *
 socks_accept_noblock(cw_socks_t * a_socks, cw_sock_t * a_sock);

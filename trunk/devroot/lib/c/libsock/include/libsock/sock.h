@@ -61,7 +61,6 @@ struct cw_sock_s
  * sock constructor.
  *
  ****************************************************************************/
-#define sock_new _CW_NS_LIBSOCK(sock_new)
 cw_sock_t *
 sock_new(cw_sock_t * a_sock, cw_uint32_t a_in_max_buf_size);
 
@@ -80,7 +79,6 @@ sock_new(cw_sock_t * a_sock, cw_uint32_t a_in_max_buf_size);
  * sock destructor.
  *
  ****************************************************************************/
-#define sock_delete _CW_NS_LIBSOCK(sock_delete)
 void
 sock_delete(cw_sock_t * a_sock);
 
@@ -99,7 +97,6 @@ sock_delete(cw_sock_t * a_sock);
  * Returns TRUE if a_sock is connected.
  *
  ****************************************************************************/
-#define sock_is_connected _CW_NS_LIBSOCK(sock_is_connected)
 cw_bool_t
 sock_is_connected(cw_sock_t * a_sock);
 
@@ -118,7 +115,6 @@ sock_is_connected(cw_sock_t * a_sock);
  * Return the local port number for the socket.
  *
  ****************************************************************************/
-#define sock_get_port _CW_NS_LIBSOCK(sock_get_port)
 cw_uint32_t
 sock_get_port(cw_sock_t * a_sock);
 
@@ -145,7 +141,6 @@ sock_get_port(cw_sock_t * a_sock);
  * Connect to a remote socket.
  *
  ****************************************************************************/
-#define sock_connect _CW_NS_LIBSOCK(sock_connect)
 cw_bool_t
 sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port);
 
@@ -167,7 +162,6 @@ sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port);
  * Wrap an open socket descriptor inside a sock.
  *
  ****************************************************************************/
-#define sock_wrap _CW_NS_LIBSOCK(sock_wrap)
 cw_bool_t
 sock_wrap(cw_sock_t * a_sock, int a_sockfd);
 
@@ -189,7 +183,6 @@ sock_wrap(cw_sock_t * a_sock, int a_sockfd);
  * Disconnect a_sock.
  *
  ****************************************************************************/
-#define sock_disconnect _CW_NS_LIBSOCK(sock_disconnect)
 cw_bool_t
 sock_disconnect(cw_sock_t * a_sock);
 
@@ -213,7 +206,6 @@ sock_disconnect(cw_sock_t * a_sock);
  * whether data is available.
  *
  ****************************************************************************/
-#define sock_read_noblock _CW_NS_LIBSOCK(sock_read_noblock)
 cw_sint32_t
 sock_read_noblock(cw_sock_t * a_sock, cw_buf_t * a_spare);
 
@@ -236,7 +228,6 @@ sock_read_noblock(cw_sock_t * a_sock, cw_buf_t * a_spare);
  * Read data from the socket, and don't return until there is data.
  *
  ****************************************************************************/
-#define sock_read_block _CW_NS_LIBSOCK(sock_read_block)
 cw_sint32_t
 sock_read_block(cw_sock_t * a_sock, cw_buf_t * a_spare);
 
@@ -258,7 +249,6 @@ sock_read_block(cw_sock_t * a_sock, cw_buf_t * a_spare);
  * write queue, notify g_sockb.
  *
  ****************************************************************************/
-#define sock_write _CW_NS_LIBSOCK(sock_write)
 cw_bool_t
 sock_write(cw_sock_t * a_sock, cw_buf_t * a_buf);
 
@@ -278,6 +268,5 @@ sock_write(cw_sock_t * a_sock, cw_buf_t * a_buf);
  * sent), and don't return until done.
  *
  ****************************************************************************/
-#define sock_flush_out _CW_NS_LIBSOCK(sock_flush_out)
 cw_bool_t
 sock_flush_out(cw_sock_t * a_sock);

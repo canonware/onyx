@@ -1,3 +1,7 @@
+1999-03-04  Jason Evans  <jasone@canonware.com>
+
+	* include/libsock/libsock.h: Remove namespace mangling.
+
 1999-02-24  Jason Evans  <jasone@canonware.com>
 
 	* : Convert to new buf code.

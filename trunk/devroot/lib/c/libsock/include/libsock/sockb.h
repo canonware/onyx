@@ -51,7 +51,6 @@ extern cw_sockb_t * g_sockb;
  * Global initializer for g_sockb.
  *
  ****************************************************************************/
-#define sockb_init _CW_NS_LIBSOCK(sockb_init)
 void
 sockb_init(cw_uint32_t a_bufel_size, cw_uint32_t a_max_spare_bufels);
 
@@ -70,7 +69,6 @@ sockb_init(cw_uint32_t a_bufel_size, cw_uint32_t a_max_spare_bufels);
  * Global shutdown for g_sockb.
  *
  ****************************************************************************/
-#define sockb_shutdown _CW_NS_LIBSOCK(sockb_shutdown)
 void
 sockb_shutdown(void);
 
@@ -91,6 +89,5 @@ sockb_shutdown(void);
  * beginning and end offsets are guaranteed to be 0.
  *
  ****************************************************************************/
-#define sockb_get_spare_bufel _CW_NS_LIBSOCK(sockb_get_spare_bufel)
 cw_bufel_t *
 sockb_get_spare_bufel(void);
