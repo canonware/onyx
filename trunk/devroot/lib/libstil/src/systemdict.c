@@ -821,7 +821,20 @@ systemdict_maxlength(cw_stilt_t *a_stilt)
 void
 systemdict_mod(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*stack;
+	cw_stilo_t	t_stilo, *a, *b;
+
+	stack = stilt_data_stack_get(a_stilt);
+	
+	b = stils_get(stack, 0);
+	a = stils_get_down(stack, b);
+	if (a == NULL)
+		xep_throw(_CW_XEPV_STACKUNDERFLOW);
+	stilo_no_new(&t_stilo);
+	stilo_move(&t_stilo, a);
+	stilo_integer_mod(&t_stilo, b, a);
+	stils_pop(stack, a_stilt, 1);
+	stilo_delete(&t_stilo, a_stilt);
 }
 
 void
@@ -955,7 +968,7 @@ systemdict_pstack(cw_stilt_t *a_stilt)
 	/*
 	 * XXX The correct implementation depends on stilo_p_*_copy() working.
 	 */
-#if (0)
+#if (1)
 	cw_stilts_t	stilts;
 	cw_stils_t	*stack;
 	cw_uint32_t	i, count;
@@ -1158,7 +1171,7 @@ systemdict_srand(cw_stilt_t *a_stilt)
 
 	seed = stils_get(stack, 0);
 	stilo_integer_srand(seed);
-	stils_pop(stack, 1);
+	stils_pop(stack, a_stilt, 1);
 }
 
 void
