@@ -168,6 +168,7 @@ histh_p_before_get(cw_histh_t *a_histh, cw_mkr_t *a_a, cw_mkr_t *a_b)
     mkr_dup(a_b, a_a);
     mkr_seek(a_b, -(cw_sint64_t)HISTH_LEN, BUFW_REL);
     bufv = mkr_range_get(a_b, a_a, &bufvcnt);
+    cw_check_ptr(bufv);
 
     bufv_copy(a_histh->bufv, 2, bufv, bufvcnt, 0);
 }
@@ -187,6 +188,7 @@ histh_p_after_get(cw_histh_t *a_histh, cw_mkr_t *a_a, cw_mkr_t *a_b)
     mkr_seek(a_b, HISTH_LEN, BUFW_REL);
     cw_assert(mkr_pos(a_a) + HISTH_LEN == mkr_pos(a_b));
     bufv = mkr_range_get(a_a, a_b, &bufvcnt);
+    cw_check_ptr(bufv);
 
     bufv_copy(a_histh->bufv, 2, bufv, bufvcnt, 0);
 }
@@ -312,7 +314,7 @@ histh_p_record_next(cw_histh_t *a_head, cw_histh_t *a_foot, cw_buf_t *a_buf,
 	    {
 		/* Skip data. */
 		mkr_dup(a_tmp, a_cur);
-		mkr_seek(a_tmp, histh_p_aux_get(a_foot), BUFW_REL);
+		mkr_seek(a_tmp, histh_p_aux_get(a_head), BUFW_REL);
 
 		/* Get footer. */
 		histh_p_after_get(a_foot, a_tmp, a_end);
@@ -387,18 +389,16 @@ hist_p_redo_flush(cw_hist_t *a_hist)
     if (mkr_pos(&a_hist->hcur) + HISTH_LEN < mkr_pos(&a_hist->hend))
     {
 	mkr_dup(&a_hist->htmp, &a_hist->hend);
-	mkr_seek(&a_hist->htmp, -HISTH_LEN, BUFW_REL);
+	mkr_seek(&a_hist->htmp, -(cw_sint64_t)HISTH_LEN, BUFW_REL);
 	mkr_remove(&a_hist->hcur, &a_hist->hend);
     }
-    else
+    else if (mkr_pos(&a_hist->hbeg) == mkr_pos(&a_hist->hend)
+	     && mkr_pos(&a_hist->hbeg) > 1)
     {
-	/* Move to the previous record (if one exists) in order to assure that
-	 * appending to the history doesn't inadvertently create consecutive
-	 * records of the same type. */
-	if (mkr_pos(&a_hist->hcur) > 1)
-	{
-	    hist_p_record_prev(a_hist);
-	}
+	/* Move to the previous record in order to assure that appending to the
+	 * history doesn't inadvertently create consecutive records of the same
+	 * type. */
+	hist_p_record_prev(a_hist);
     }
 }
 
@@ -417,21 +417,32 @@ hist_p_pos(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos)
 	return;
     }
 
-    /* Old position. */
+    /* Initialize header (old position). */
     histh_p_tag_set(&a_hist->hhead, HISTH_TAG_POS);
     histh_p_aux_set(&a_hist->hhead, a_hist->hbpos);
-    
-    mkr_dup(&a_hist->hbeg, &a_hist->hend);
-    mkr_before_insert(&a_hist->hend, histh_p_bufv_get(&a_hist->hhead),
-		      histh_p_bufvcnt_get(&a_hist->hhead));
 
-    /* New position. */
+    /* Relocate hbeg. */
+    mkr_dup(&a_hist->hbeg, &a_hist->hend);
+
+    /* Insert header. */
+    mkr_after_insert(&a_hist->hbeg, histh_p_bufv_get(&a_hist->hhead),
+		     histh_p_bufvcnt_get(&a_hist->hhead));
+
+    /* Relocate hcur. */
+    mkr_dup(&a_hist->hcur, &a_hist->hbeg);
+    mkr_seek(&a_hist->hcur, HISTH_LEN, BUFW_REL);
+
+    /* Initialize footer (new position). */
     histh_p_tag_set(&a_hist->hfoot, HISTH_TAG_POS);
     histh_p_aux_set(&a_hist->hfoot, a_bpos);
 
-    mkr_dup(&a_hist->hcur, &a_hist->hend);
-    mkr_before_insert(&a_hist->hend, histh_p_bufv_get(&a_hist->hfoot),
-		      histh_p_bufvcnt_get(&a_hist->hfoot));
+    /* Insert footer. */
+    mkr_after_insert(&a_hist->hcur, histh_p_bufv_get(&a_hist->hfoot),
+		     histh_p_bufvcnt_get(&a_hist->hfoot));
+
+    /* Relocate hend. */
+    mkr_dup(&a_hist->hend, &a_hist->hcur);
+    mkr_seek(&a_hist->hend, HISTH_LEN, BUFW_REL);
 
     /* Update hbpos now that the history record is complete. */
     a_hist->hbpos = a_bpos;
@@ -489,42 +500,58 @@ hist_p_ins_ynk_rem_del(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos,
 	}
     }
 
-    /* Get the undo header, or synthesize one.  Remove header if extending an
-     * existing record. */
+    /* Update the data count if extending an existing record.  Otherwise, create
+     * a new empty record. */
     if (mkr_pos(&a_hist->hend) > 1 && histh_p_tag_get(&a_hist->hhead) == a_tag)
     {
 	/* Update the data count. */
+
+	/* Header. */
 	histh_p_aux_set(&a_hist->hhead, histh_p_aux_get(&a_hist->hhead) + cnt);
 	mkr_dup(&a_hist->htmp, &a_hist->hbeg);
 	mkr_seek(&a_hist->htmp, HISTH_LEN, BUFW_REL);
 	bufv = mkr_range_get(&a_hist->hbeg, &a_hist->htmp, &bufvcnt);
+	cw_check_ptr(bufv);
 	bufv_copy(bufv, bufvcnt, histh_p_bufv_get(&a_hist->hhead),
 		  histh_p_bufvcnt_get(&a_hist->hhead), 0);
 
+	/* Footer. */
 	histh_p_aux_set(&a_hist->hfoot, histh_p_aux_get(&a_hist->hfoot) + cnt);
-	mkr_dup(&a_hist->htmp, &a_hist->hbeg);
-	mkr_seek(&a_hist->htmp, -HISTH_LEN, BUFW_REL);
-	bufv = mkr_range_get(&a_hist->htmp, &a_hist->hbeg, &bufvcnt);
+	mkr_dup(&a_hist->htmp, &a_hist->hend);
+	mkr_seek(&a_hist->htmp, -(cw_sint64_t)HISTH_LEN, BUFW_REL);
+	bufv = mkr_range_get(&a_hist->htmp, &a_hist->hend, &bufvcnt);
+	cw_check_ptr(bufv);
 	bufv_copy(bufv, bufvcnt, histh_p_bufv_get(&a_hist->hfoot),
 		  histh_p_bufvcnt_get(&a_hist->hfoot), 0);
     }
     else
     {
-	/* Insert header. */
+	/* Initialize header. */
 	histh_p_tag_set(&a_hist->hhead, a_tag);
 	histh_p_aux_set(&a_hist->hhead, cnt);
 
+	/* Relocate hbeg. */
 	mkr_dup(&a_hist->hbeg, &a_hist->hend);
-	mkr_before_insert(&a_hist->hend, histh_p_bufv_get(&a_hist->hhead),
-			  histh_p_bufvcnt_get(&a_hist->hhead));
 
-	/* Insert footer. */
+	/* Insert header. */
+	mkr_after_insert(&a_hist->hbeg, histh_p_bufv_get(&a_hist->hhead),
+			 histh_p_bufvcnt_get(&a_hist->hhead));
+
+	/* Relocate hcur. */
+	mkr_dup(&a_hist->hcur, &a_hist->hbeg);
+	mkr_seek(&a_hist->hcur, HISTH_LEN, BUFW_REL);
+
+	/* Initialize footer. */
 	histh_p_tag_set(&a_hist->hfoot, a_tag);
 	histh_p_aux_set(&a_hist->hfoot, cnt);
 
-        mkr_dup(&a_hist->hcur, &a_hist->hend);
-	mkr_before_insert(&a_hist->hend, histh_p_bufv_get(&a_hist->hfoot),
-			  histh_p_bufvcnt_get(&a_hist->hfoot));
+	/* Insert footer. */
+	mkr_after_insert(&a_hist->hcur, histh_p_bufv_get(&a_hist->hfoot),
+			 histh_p_bufvcnt_get(&a_hist->hfoot));
+
+	/* Relocate hend. */
+	mkr_dup(&a_hist->hend, &a_hist->hcur);
+	mkr_seek(&a_hist->hend, HISTH_LEN, BUFW_REL);
     }
 
     /* Insert the data. */
@@ -538,9 +565,9 @@ hist_p_ins_ynk_rem_del(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos,
 	{
 	    /* Now that there is space for the data, do a bufv_rcopy() to get
 	     * the data written in the proper order. */
-	    mkr_dup(&a_hist->htmp, &a_hist->htmp);
+	    mkr_dup(&a_hist->htmp, &a_hist->hcur);
 	    mkr_seek(&a_hist->htmp, -(cw_sint64_t)cnt, BUFW_REL);
-	    bufv = mkr_range_get(&a_hist->htmp, &a_hist->htmp, &bufvcnt);
+	    bufv = mkr_range_get(&a_hist->htmp, &a_hist->hcur, &bufvcnt);
 	    if (bufv != NULL)
 	    {
 		bufv_rcopy(bufv, bufvcnt, a_bufv, a_bufvcnt, 0);
@@ -1038,21 +1065,32 @@ hist_group_beg(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr)
 	hist_p_pos(a_hist, a_buf, mkr_pos(a_mkr));
     }
 
-    /* Header. */
+    /* Initialize header. */
     histh_p_tag_set(&a_hist->hhead, HISTH_TAG_GRP_BEG);
     histh_p_aux_set(&a_hist->hhead, 0);
-    
-    mkr_dup(&a_hist->hbeg, &a_hist->hend);
-    mkr_before_insert(&a_hist->hend, histh_p_bufv_get(&a_hist->hhead),
-		      histh_p_bufvcnt_get(&a_hist->hhead));
 
-    /* Footer. */
+    /* Relocate hbeg. */
+    mkr_dup(&a_hist->hbeg, &a_hist->hend);
+
+    /* Insert header. */
+    mkr_after_insert(&a_hist->hbeg, histh_p_bufv_get(&a_hist->hhead),
+		     histh_p_bufvcnt_get(&a_hist->hhead));
+
+    /* Relocate hcur. */
+    mkr_dup(&a_hist->hcur, &a_hist->hbeg);
+    mkr_seek(&a_hist->hcur, HISTH_LEN, BUFW_REL);
+
+    /* Initialize footer. */
     histh_p_tag_set(&a_hist->hfoot, HISTH_TAG_GRP_BEG);
     histh_p_aux_set(&a_hist->hfoot, 0);
 
-    mkr_dup(&a_hist->hcur, &a_hist->hend);
-    mkr_before_insert(&a_hist->hend, histh_p_bufv_get(&a_hist->hfoot),
-		      histh_p_bufvcnt_get(&a_hist->hfoot));
+    /* Insert footer. */
+    mkr_after_insert(&a_hist->hcur, histh_p_bufv_get(&a_hist->hfoot),
+		     histh_p_bufvcnt_get(&a_hist->hfoot));
+
+    /* Relocate hend. */
+    mkr_dup(&a_hist->hend, &a_hist->hcur);
+    mkr_seek(&a_hist->hend, HISTH_LEN, BUFW_REL);
 
     /* Increase depth. */
     a_hist->gdepth++;
@@ -1076,21 +1114,32 @@ hist_group_end(cw_hist_t *a_hist, cw_buf_t *a_buf)
 
     hist_p_redo_flush(a_hist);
 
-    /* Header. */
+    /* Initialize header. */
     histh_p_tag_set(&a_hist->hhead, HISTH_TAG_GRP_BEG);
     histh_p_aux_set(&a_hist->hhead, 0);
-    
-    mkr_dup(&a_hist->hbeg, &a_hist->hend);
-    mkr_before_insert(&a_hist->hend, histh_p_bufv_get(&a_hist->hhead),
-		      histh_p_bufvcnt_get(&a_hist->hhead));
 
-    /* Footer. */
+    /* Relocate hbeg. */
+    mkr_dup(&a_hist->hbeg, &a_hist->hend);
+
+    /* Insert header. */
+    mkr_after_insert(&a_hist->hbeg, histh_p_bufv_get(&a_hist->hhead),
+		     histh_p_bufvcnt_get(&a_hist->hhead));
+
+    /* Relocate hcur. */
+    mkr_dup(&a_hist->hcur, &a_hist->hbeg);
+    mkr_seek(&a_hist->hcur, HISTH_LEN, BUFW_REL);
+
+    /* Initialize footer. */
     histh_p_tag_set(&a_hist->hfoot, HISTH_TAG_GRP_BEG);
     histh_p_aux_set(&a_hist->hfoot, 0);
 
-    mkr_dup(&a_hist->hcur, &a_hist->hend);
-    mkr_before_insert(&a_hist->hend, histh_p_bufv_get(&a_hist->hfoot),
-		      histh_p_bufvcnt_get(&a_hist->hfoot));
+    /* Insert footer. */
+    mkr_after_insert(&a_hist->hcur, histh_p_bufv_get(&a_hist->hfoot),
+		     histh_p_bufvcnt_get(&a_hist->hfoot));
+
+    /* Relocate hend. */
+    mkr_dup(&a_hist->hend, &a_hist->hcur);
+    mkr_seek(&a_hist->hend, HISTH_LEN, BUFW_REL);
 
     /* Decrease depth. */
     a_hist->gdepth--;
@@ -1149,11 +1198,6 @@ hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
     histh_p_new(&thead);
     histh_p_new(&tfoot);
 
-    mkr_new(&tbeg, &a_hist->h);
-    mkr_new(&tcur, &a_hist->h);
-    mkr_new(&tend, &a_hist->h);
-    mkr_new(&ttmp, &a_hist->h);
-
     beg = (a_beg != NULL) ? a_beg : "";
     mid = (a_mid != NULL) ? a_mid : beg;
     end = (a_end != NULL) ? a_end : mid;
@@ -1190,84 +1234,106 @@ hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
     fprintf(stderr, "%s|-> arg: %p\n", mid, a_hist->arg);
 #endif
 
+    /* Initialize markers after buf_dump() in order to keep them from showing
+     * up. */
+    mkr_new(&tbeg, &a_hist->h);
+    mkr_new(&tcur, &a_hist->h);
+    mkr_new(&tend, &a_hist->h);
+    mkr_new(&ttmp, &a_hist->h);
+
     /* Undo. */
     fprintf(stderr, "%s|\n", mid);
     fprintf(stderr, "%s| [undo]:\n", mid);
     mkr_dup(&tbeg, &a_hist->hbeg);
     mkr_dup(&tcur, &a_hist->hcur);
     mkr_dup(&tend, &a_hist->hend);
-    histh_p_before_get(&tfoot, &tend, &ttmp);
-    histh_p_after_get(&thead, &tbeg, &ttmp);
-    while (mkr_pos(&tend) > 1)
+    if (mkr_pos(&tend) > 1)
     {
-	switch (histh_p_tag_get(&thead))
+	if (mkr_pos(&tbeg) == mkr_pos(&tend))
 	{
-	    case HISTH_TAG_GRP_BEG:
-	    {
-		fprintf(stderr, "%s|         B\n", mid);
-		break;
-	    }
-	    case HISTH_TAG_GRP_END:
-	    {
-		fprintf(stderr, "%s|         E\n", mid);
-		break;
-	    }
-	    case HISTH_TAG_POS:
-	    {
-		fprintf(stderr, "%s|         (%llu,%llu)P\n", mid,
-			histh_p_aux_get(&thead), histh_p_aux_get(&tfoot));
-		break;
-	    }
-	    case HISTH_TAG_INS:
-	    {
-		fprintf(stderr, "%s|         (", mid);
-		bufv = mkr_range_get(&ttmp, &tcur, &bufvcnt);
-		hist_p_bufv_print(bufv, bufvcnt);
-		fprintf(stderr, ")%lluI\n",
-			histh_p_aux_get(&thead));
-		break;
-	    }
-	    case HISTH_TAG_YNK:
-	    {
-		fprintf(stderr, "%s|         (", mid);
-		bufv = mkr_range_get(&ttmp, &tcur, &bufvcnt);
-		hist_p_bufv_print(bufv, bufvcnt);
-		fprintf(stderr, ")%lluY\n",
-			histh_p_aux_get(&thead));
-		break;
-	    }
-	    case HISTH_TAG_REM:
-	    {
-		fprintf(stderr, "%s|         (", mid);
-		bufv = mkr_range_get(&ttmp, &tcur, &bufvcnt);
-		hist_p_bufv_print(bufv, bufvcnt);
-		fprintf(stderr, ")%lluR\n",
-			histh_p_aux_get(&thead));
-		break;
-	    }
-	    case HISTH_TAG_DEL:
-	    {
-		fprintf(stderr, "%s|         (", mid);
-		bufv = mkr_range_get(&ttmp, &tcur, &bufvcnt);
-		hist_p_bufv_print(bufv, bufvcnt);
-		fprintf(stderr, ")%lluD\n",
-			histh_p_aux_get(&thead));
-		break;
-	    }
-	    case HISTH_TAG_SYNC:
-	    {
-		fprintf(stderr, "%s|         S\n", mid);
-		break;
-	    }
-	    default:
-	    {
-		cw_not_reached();
-	    }
+	    /* No current record.  Move back to previous one. */
+	    histh_p_record_prev(&thead, &tfoot, &a_hist->h, &tbeg, &tcur, &tend,
+				&ttmp);
+	}
+	else
+	{
+	    /* Get current record header/footer. */
+	    histh_p_before_get(&tfoot, &tend, &ttmp);
+	    histh_p_after_get(&thead, &tbeg, &ttmp);
 	}
 
-	/* Get previous record. */
-	histh_p_record_prev(&thead, &tfoot, &a_hist->h, &tbeg, &tcur, &tend,
-			    &ttmp);
+	/* Iterate through records. */
+	while (mkr_pos(&tend) > 1)
+	{
+	    switch (histh_p_tag_get(&thead))
+	    {
+		case HISTH_TAG_GRP_BEG:
+		{
+		    fprintf(stderr, "%s|         B\n", mid);
+		    break;
+		}
+		case HISTH_TAG_GRP_END:
+		{
+		    fprintf(stderr, "%s|         E\n", mid);
+		    break;
+		}
+		case HISTH_TAG_POS:
+		{
+		    fprintf(stderr, "%s|         (%llu,%llu)P\n", mid,
+			    histh_p_aux_get(&thead), histh_p_aux_get(&tfoot));
+		    break;
+		}
+		case HISTH_TAG_INS:
+		{
+		    fprintf(stderr, "%s|         (", mid);
+		    bufv = mkr_range_get(&ttmp, &tcur, &bufvcnt);
+		    hist_p_bufv_print(bufv, bufvcnt);
+		    fprintf(stderr, ")%lluI\n",
+			    histh_p_aux_get(&thead));
+		    break;
+		}
+		case HISTH_TAG_YNK:
+		{
+		    fprintf(stderr, "%s|         (", mid);
+		    bufv = mkr_range_get(&ttmp, &tcur, &bufvcnt);
+		    hist_p_bufv_print(bufv, bufvcnt);
+		    fprintf(stderr, ")%lluY\n",
+			    histh_p_aux_get(&thead));
+		    break;
+		}
+		case HISTH_TAG_REM:
+		{
+		    fprintf(stderr, "%s|         (", mid);
+		    bufv = mkr_range_get(&ttmp, &tcur, &bufvcnt);
+		    hist_p_bufv_print(bufv, bufvcnt);
+		    fprintf(stderr, ")%lluR\n",
+			    histh_p_aux_get(&thead));
+		    break;
+		}
+		case HISTH_TAG_DEL:
+		{
+		    fprintf(stderr, "%s|         (", mid);
+		    bufv = mkr_range_get(&ttmp, &tcur, &bufvcnt);
+		    hist_p_bufv_print(bufv, bufvcnt);
+		    fprintf(stderr, ")%lluD\n",
+			    histh_p_aux_get(&thead));
+		    break;
+		}
+		case HISTH_TAG_SYNC:
+		{
+		    fprintf(stderr, "%s|         S\n", mid);
+		    break;
+		}
+		default:
+		{
+		    cw_not_reached();
+		}
+	    }
+
+	    /* Get previous record. */
+	    histh_p_record_prev(&thead, &tfoot, &a_hist->h, &tbeg, &tcur, &tend,
+				&ttmp);
+	}
     }
 
     /* Redo. */
@@ -1276,78 +1342,94 @@ hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
     mkr_dup(&tbeg, &a_hist->hbeg);
     mkr_dup(&tcur, &a_hist->hcur);
     mkr_dup(&tend, &a_hist->hend);
-    histh_p_after_get(&thead, &tbeg, &ttmp);
-    histh_p_before_get(&tfoot, &tend, &ttmp);
-    while (mkr_pos(&tbeg) < buf_len(&a_hist->h) + 1)
+    if (mkr_pos(&tbeg) < buf_len(&a_hist->h) + 1)
     {
-	switch (histh_p_tag_get(&thead))
+	/* Initialize thead/tfoot. */
+	if (mkr_pos(&tbeg) == mkr_pos(&tend))
 	{
-	    case HISTH_TAG_GRP_BEG:
-	    {
-		fprintf(stderr, "%s|         B\n", mid);
-		break;
-	    }
-	    case HISTH_TAG_GRP_END:
-	    {
-		fprintf(stderr, "%s|         E\n", mid);
-		break;
-	    }
-	    case HISTH_TAG_POS:
-	    {
-		fprintf(stderr, "%s|         P(%llu,%llu)\n", mid,
-			histh_p_aux_get(&thead), histh_p_aux_get(&tfoot));
-		break;
-	    }
-	    case HISTH_TAG_INS:
-	    {
-		fprintf(stderr, "%s|         I%llu(", mid,
-			histh_p_aux_get(&thead));
-		bufv = mkr_range_get(&tcur, &ttmp, &bufvcnt);
-		hist_p_bufv_print(bufv, bufvcnt);
-		fprintf(stderr, ")\n");
-		break;
-	    }
-	    case HISTH_TAG_YNK:
-	    {
-		fprintf(stderr, "%s|         Y%llu(\n", mid,
-			histh_p_aux_get(&thead));
-		bufv = mkr_range_get(&tcur, &ttmp, &bufvcnt);
-		hist_p_bufv_print(bufv, bufvcnt);
-		fprintf(stderr, ")\n");
-		break;
-	    }
-	    case HISTH_TAG_REM:
-	    {
-		fprintf(stderr, "%s|         R%llu(", mid,
-			histh_p_aux_get(&thead));
-		bufv = mkr_range_get(&tcur, &ttmp, &bufvcnt);
-		hist_p_bufv_print(bufv, bufvcnt);
-		fprintf(stderr, ")\n");
-		break;
-	    }
-	    case HISTH_TAG_DEL:
-	    {
-		fprintf(stderr, "%s|         D%llu(", mid,
-			histh_p_aux_get(&thead));
-		bufv = mkr_range_get(&tcur, &ttmp, &bufvcnt);
-		hist_p_bufv_print(bufv, bufvcnt);
-		fprintf(stderr, ")\n");
-		break;
-	    }
-	    case HISTH_TAG_SYNC:
-	    {
-		fprintf(stderr, "%s|         S\n", mid);
-		break;
-	    }
-	    default:
-	    {
-		cw_not_reached();
-	    }
+	    /* No current record.  Move on to next one. */
+	    histh_p_record_next(&thead, &tfoot, &a_hist->h, &tbeg, &tcur, &tend,
+				&ttmp);
+	}
+	else
+	{
+	    /* Get current record header/footer. */
+	    histh_p_after_get(&thead, &tbeg, &ttmp);
+	    histh_p_before_get(&tfoot, &tend, &ttmp);
 	}
 
-	/* Get next record. */
-	histh_p_record_next(&thead, &tfoot, &a_hist->h, &tbeg, &tcur, &tend,
-			    &ttmp);
+	/* Iterate through records. */
+	while (mkr_pos(&tbeg) < buf_len(&a_hist->h) + 1)
+	{
+	    switch (histh_p_tag_get(&thead))
+	    {
+		case HISTH_TAG_GRP_BEG:
+		{
+		    fprintf(stderr, "%s|         B\n", mid);
+		    break;
+		}
+		case HISTH_TAG_GRP_END:
+		{
+		    fprintf(stderr, "%s|         E\n", mid);
+		    break;
+		}
+		case HISTH_TAG_POS:
+		{
+		    fprintf(stderr, "%s|         P(%llu,%llu)\n", mid,
+			    histh_p_aux_get(&thead), histh_p_aux_get(&tfoot));
+		    break;
+		}
+		case HISTH_TAG_INS:
+		{
+		    fprintf(stderr, "%s|         I%llu(", mid,
+			    histh_p_aux_get(&thead));
+		    bufv = mkr_range_get(&tcur, &ttmp, &bufvcnt);
+		    hist_p_bufv_print(bufv, bufvcnt);
+		    fprintf(stderr, ")\n");
+		    break;
+		}
+		case HISTH_TAG_YNK:
+		{
+		    fprintf(stderr, "%s|         Y%llu(\n", mid,
+			    histh_p_aux_get(&thead));
+		    bufv = mkr_range_get(&tcur, &ttmp, &bufvcnt);
+		    hist_p_bufv_print(bufv, bufvcnt);
+		    fprintf(stderr, ")\n");
+		    break;
+		}
+		case HISTH_TAG_REM:
+		{
+		    fprintf(stderr, "%s|         R%llu(", mid,
+			    histh_p_aux_get(&thead));
+		    bufv = mkr_range_get(&tcur, &ttmp, &bufvcnt);
+		    hist_p_bufv_print(bufv, bufvcnt);
+		    fprintf(stderr, ")\n");
+		    break;
+		}
+		case HISTH_TAG_DEL:
+		{
+		    fprintf(stderr, "%s|         D%llu(", mid,
+			    histh_p_aux_get(&thead));
+		    bufv = mkr_range_get(&tcur, &ttmp, &bufvcnt);
+		    hist_p_bufv_print(bufv, bufvcnt);
+		    fprintf(stderr, ")\n");
+		    break;
+		}
+		case HISTH_TAG_SYNC:
+		{
+		    fprintf(stderr, "%s|         S\n", mid);
+		    break;
+		}
+		default:
+		{
+		    cw_not_reached();
+		}
+	    }
+
+	    /* Get next record. */
+	    histh_p_record_next(&thead, &tfoot, &a_hist->h, &tbeg, &tcur, &tend,
+				&ttmp);
+	}
     }
     fprintf(stderr, "%sV\n", end);
 
@@ -1392,97 +1474,129 @@ hist_validate(cw_hist_t *a_hist, cw_buf_t *a_buf)
 	      || buf_len(&a_hist->h) == 0);
     cw_assert(a_hist->hbpos <= buf_len(a_buf) + 1);
 
-    
     /* Iterate through the undo history and validate record consistency. */
     mkr_dup(&tbeg, &a_hist->hbeg);
     mkr_dup(&tcur, &a_hist->hcur);
     mkr_dup(&tend, &a_hist->hend);
-    histh_p_before_get(&tfoot, &tend, &ttmp);
-    histh_p_after_get(&thead, &tbeg, &ttmp);
-    while (mkr_pos(&tend) > 1)
+    if (mkr_pos(&tend) > 1)
     {
-	cw_assert(histh_p_tag_get(&thead) == histh_p_tag_get(&tfoot));
-
-	switch (histh_p_tag_get(&thead))
+	if (mkr_pos(&tbeg) == mkr_pos(&tend))
 	{
-	    case HISTH_TAG_GRP_BEG:
-	    case HISTH_TAG_GRP_END:
-	    case HISTH_TAG_SYNC:
-	    {
-		cw_assert(histh_p_aux_get(&thead) == 0);
-		cw_assert(histh_p_aux_get(&tfoot) == 0);
-		break;
-	    }
-	    case HISTH_TAG_POS:
-	    {
-		cw_assert(histh_p_aux_get(&thead) != 0);
-		cw_assert(histh_p_aux_get(&tfoot) != 0);
-		break;
-	    }
-	    case HISTH_TAG_INS:
-	    case HISTH_TAG_YNK:
-	    case HISTH_TAG_REM:
-	    case HISTH_TAG_DEL:
-	    {
-		cw_assert(histh_p_aux_get(&thead) == histh_p_aux_get(&tfoot));
-		cw_assert(mkr_pos(&ttmp) < mkr_pos(&tcur));
-		break;
-	    }
-	    default:
-	    {
-		cw_not_reached();
-	    }
+	    /* No current record.  Move back to previous one. */
+	    histh_p_record_prev(&thead, &tfoot, &a_hist->h, &tbeg, &tcur, &tend,
+				&ttmp);
+	}
+	else
+	{
+	    /* Get current record header/footer. */
+	    histh_p_before_get(&tfoot, &tend, &ttmp);
+	    histh_p_after_get(&thead, &tbeg, &ttmp);
 	}
 
-	/* Get previous record. */
-	histh_p_record_prev(&thead, &tfoot, &a_hist->h, &tbeg, &tcur, &tend,
-			    &ttmp);
+	/* Iterate through records. */
+	while (mkr_pos(&tend) > 1)
+	{
+	    cw_assert(histh_p_tag_get(&thead) == histh_p_tag_get(&tfoot));
+
+	    switch (histh_p_tag_get(&thead))
+	    {
+		case HISTH_TAG_GRP_BEG:
+		case HISTH_TAG_GRP_END:
+		case HISTH_TAG_SYNC:
+		{
+		    cw_assert(histh_p_aux_get(&thead) == 0);
+		    cw_assert(histh_p_aux_get(&tfoot) == 0);
+		    break;
+		}
+		case HISTH_TAG_POS:
+		{
+		    cw_assert(histh_p_aux_get(&thead) != 0);
+		    cw_assert(histh_p_aux_get(&tfoot) != 0);
+		    break;
+		}
+		case HISTH_TAG_INS:
+		case HISTH_TAG_YNK:
+		case HISTH_TAG_REM:
+		case HISTH_TAG_DEL:
+		{
+		    cw_assert(histh_p_aux_get(&thead)
+			      == histh_p_aux_get(&tfoot));
+		    cw_assert(mkr_pos(&ttmp) < mkr_pos(&tcur));
+		    break;
+		}
+		default:
+		{
+		    cw_not_reached();
+		}
+	    }
+
+	    /* Get previous record. */
+	    histh_p_record_prev(&thead, &tfoot, &a_hist->h, &tbeg, &tcur, &tend,
+				&ttmp);
+	}
     }
 
     /* Iterate through the redo history and validate record consistency. */
     mkr_dup(&tbeg, &a_hist->hbeg);
     mkr_dup(&tcur, &a_hist->hcur);
     mkr_dup(&tend, &a_hist->hend);
-    histh_p_after_get(&thead, &tbeg, &ttmp);
-    histh_p_before_get(&tfoot, &tend, &ttmp);
-    while (mkr_pos(&tbeg) < buf_len(&a_hist->h) + 1)
+    if (mkr_pos(&tbeg) < buf_len(&a_hist->h) + 1)
     {
-	cw_assert(histh_p_tag_get(&thead) == histh_p_tag_get(&tfoot));
-
-	switch (histh_p_tag_get(&thead))
+	/* Initialize thead/tfoot. */
+	if (mkr_pos(&tbeg) == mkr_pos(&tend))
 	{
-	    case HISTH_TAG_GRP_BEG:
-	    case HISTH_TAG_GRP_END:
-	    case HISTH_TAG_SYNC:
-	    {
-		cw_assert(histh_p_aux_get(&thead) == 0);
-		cw_assert(histh_p_aux_get(&tfoot) == 0);
-		break;
-	    }
-	    case HISTH_TAG_POS:
-	    {
-		cw_assert(histh_p_aux_get(&thead) != 0);
-		cw_assert(histh_p_aux_get(&tfoot) != 0);
-		break;
-	    }
-	    case HISTH_TAG_INS:
-	    case HISTH_TAG_YNK:
-	    case HISTH_TAG_REM:
-	    case HISTH_TAG_DEL:
-	    {
-		cw_assert(histh_p_aux_get(&thead) == histh_p_aux_get(&tfoot));
-		cw_assert(mkr_pos(&tcur) < mkr_pos(&ttmp));
-		break;
-	    }
-	    default:
-	    {
-		cw_not_reached();
-	    }
+	    /* No current record.  Move on to next one. */
+	    histh_p_record_next(&thead, &tfoot, &a_hist->h, &tbeg, &tcur, &tend,
+				&ttmp);
+	}
+	else
+	{
+	    /* Get current record header/footer. */
+	    histh_p_after_get(&thead, &tbeg, &ttmp);
+	    histh_p_before_get(&tfoot, &tend, &ttmp);
 	}
 
-	/* Get next record. */
-	histh_p_record_next(&thead, &tfoot, &a_hist->h, &tbeg, &tcur, &tend,
-			    &ttmp);
+	/* Iterate through records. */
+	while (mkr_pos(&tbeg) < buf_len(&a_hist->h) + 1)
+	{
+	    cw_assert(histh_p_tag_get(&thead) == histh_p_tag_get(&tfoot));
+
+	    switch (histh_p_tag_get(&thead))
+	    {
+		case HISTH_TAG_GRP_BEG:
+		case HISTH_TAG_GRP_END:
+		case HISTH_TAG_SYNC:
+		{
+		    cw_assert(histh_p_aux_get(&thead) == 0);
+		    cw_assert(histh_p_aux_get(&tfoot) == 0);
+		    break;
+		}
+		case HISTH_TAG_POS:
+		{
+		    cw_assert(histh_p_aux_get(&thead) != 0);
+		    cw_assert(histh_p_aux_get(&tfoot) != 0);
+		    break;
+		}
+		case HISTH_TAG_INS:
+		case HISTH_TAG_YNK:
+		case HISTH_TAG_REM:
+		case HISTH_TAG_DEL:
+		{
+		    cw_assert(histh_p_aux_get(&thead)
+			      == histh_p_aux_get(&tfoot));
+		    cw_assert(mkr_pos(&tcur) <= mkr_pos(&ttmp));
+		    break;
+		}
+		default:
+		{
+		    cw_not_reached();
+		}
+	    }
+
+	    /* Get next record. */
+	    histh_p_record_next(&thead, &tfoot, &a_hist->h, &tbeg, &tcur, &tend,
+				&ttmp);
+	}
     }
 
     mkr_delete(&ttmp);
