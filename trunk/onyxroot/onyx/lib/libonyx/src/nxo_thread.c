@@ -27,16 +27,6 @@
 /* Include generated code. */
 #include "nxo_thread_nxcode.c"
 
-/*
- * These should be defined by the system headers, but Linux fails to do so.
- */
-#ifndef LLONG_MIN
-#define	LLONG_MIN (-0x7fffffffffffffffLL -1)
-#endif
-#ifndef LLONG_MAX
-#define	LLONG_MAX 0x7fffffffffffffffLL
-#endif
-
 cw_nxn_t
 nxo_threade_nxn(cw_nxo_threade_t a_threade)
 {
@@ -1311,9 +1301,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 					val = strtoll(a_thread->tok_str, NULL,
 					    10);
 					token = TRUE;
-					if ((errno == ERANGE) &&
-					    ((val == LLONG_MIN) || (val ==
-					    LLONG_MAX))) {
+					if (errno == ERANGE) {
 						/*
 						 * Number too big or too small.
 						 * Accept as a name.
@@ -1422,9 +1410,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 					    a_thread->m.n.b_off], NULL,
 					    a_thread->m.n.base);
 					token = TRUE;
-					if ((errno == ERANGE) &&
-					    ((val == LLONG_MIN) || (val ==
-					    LLONG_MAX))) {
+					if (errno == ERANGE) {
 						/*
 						 * Number too big or too small.
 						 * Accept as a name.
