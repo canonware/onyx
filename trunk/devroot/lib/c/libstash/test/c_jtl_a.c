@@ -36,39 +36,39 @@ thread_entry_func(void * a_arg)
     /* Grab tlock. */
     jtl_tlock(foo_var->lock, foo_var->tq_el);
     usleep(1);
-    log_eprintf(cw_g_log, NULL, 0, "thread_entry_func",
-		"Thread %u has tlock\n", foo_var->thd_num);
+    out_put_e(cw_g_out, NULL, 0, "thread_entry_func",
+	      "Thread [i32] has tlock\n", foo_var->thd_num);
     jtl_tunlock(foo_var->lock);
   }
   else
   {
     /* Grab slock. */
     jtl_slock(foo_var->lock);
-/*      log_eprintf(cw_g_log, NULL, 0, "thread_entry_func", */
-/*  		"Thread %u has slock\n", foo_var->thd_num); */
+/*      out_put_e(cw_g_out, NULL, 0, "thread_entry_func", */
+/*  		"Thread [i32] has slock\n", foo_var->thd_num); */
 
     jtl_2qlock(foo_var->lock);
-/*      log_eprintf(cw_g_log, NULL, 0, "thread_entry_func", */
-/*  		"Thread %u has qlock\n", foo_var->thd_num); */
+/*      out_put_e(cw_g_out, NULL, 0, "thread_entry_func", */
+/*  		"Thread [i32] has qlock\n", foo_var->thd_num); */
     jtl_qunlock(foo_var->lock);
 
     jtl_2rlock(foo_var->lock);
-/*      log_eprintf(cw_g_log, NULL, 0, "thread_entry_func", */
-/*  		"Thread %u has rlock\n", foo_var->thd_num); */
+/*      out_put_e(cw_g_out, NULL, 0, "thread_entry_func", */
+/*  		"Thread [i32] has rlock\n", foo_var->thd_num); */
     jtl_runlock(foo_var->lock);
 
     jtl_2wlock(foo_var->lock);
-/*      log_eprintf(cw_g_log, NULL, 0, "thread_entry_func", */
-/*  		"Thread %u has wlock\n", foo_var->thd_num); */
+/*      out_put_e(cw_g_out, NULL, 0, "thread_entry_func", */
+/*  		"Thread [i32] has wlock\n", foo_var->thd_num); */
     jtl_wunlock(foo_var->lock);
 
     jtl_2xlock(foo_var->lock);
-/*      log_eprintf(cw_g_log, NULL, 0, "thread_entry_func", */
-/*  		"Thread %u has xlock\n", foo_var->thd_num); */
+/*      out_put_e(cw_g_out, NULL, 0, "thread_entry_func", */
+/*  		"Thread [i32] has xlock\n", foo_var->thd_num); */
     jtl_xunlock(foo_var->lock);
   } 
-/*    log_eprintf(cw_g_log, NULL, 0, "thread_entry_func", */
-/*  	     "Thread %u is done\n", foo_var->thd_num); */
+/*    out_put_e(cw_g_out, NULL, 0, "thread_entry_func", */
+/*  	     "Thread [i32] is done\n", foo_var->thd_num); */
   _cw_free(foo_var);
     
   return NULL;
@@ -86,7 +86,7 @@ main()
   cw_uint32_t i;
   
   libstash_init();
-  log_printf(cw_g_log, "Test begin\n");
+  out_put(cw_g_out, "Test begin\n");
 
   _cw_assert(&jtl_a == jtl_new(&jtl_a));
 
@@ -144,7 +144,7 @@ main()
 
   jtl_delete(jtl_b);
   
-  log_printf(cw_g_log, "Test end\n");
+  out_put(cw_g_out, "Test end\n");
   libstash_shutdown();
   return 0;
 }

@@ -88,7 +88,7 @@ ring_dump(cw_ring_t * a_ring, const char * a_prefix)
   _cw_check_ptr(a_prefix);
 
   out_put(cw_g_out, "[s]begin ====================================\n",
-	     a_prefix);
+	  a_prefix);
   
   t_ring = a_ring;
   do
@@ -97,20 +97,20 @@ ring_dump(cw_ring_t * a_ring, const char * a_prefix)
     _cw_assert(t_ring->magic == _CW_RING_MAGIC);
 
     out_put(cw_g_out,
-	       "[s]prev: 0x[p], this: 0x[p], next: 0x[p], data: 0x[p], "
-	       "dealloc_func: 0x[p], dealloc_arg: 0x[p]\n",
-	       a_prefix,
-	       t_ring->prev,
-	       t_ring,
-	       t_ring->next,
-	       t_ring->data,
-	       t_ring->dealloc_func,
-	       t_ring->dealloc_arg);
+	    "[s]prev: 0x[p], this: 0x[p], next: 0x[p], data: 0x[p], "
+	    "dealloc_func: 0x[p], dealloc_arg: 0x[p]\n",
+	    a_prefix,
+	    t_ring->prev,
+	    t_ring,
+	    t_ring->next,
+	    t_ring->data,
+	    t_ring->dealloc_func,
+	    t_ring->dealloc_arg);
     
     t_ring = t_ring->next;
   } while (t_ring != a_ring);
   out_put(cw_g_out, "[s]end ======================================\n",
-	     a_prefix);
+	  a_prefix);
 }
 
 void *

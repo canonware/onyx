@@ -21,7 +21,7 @@ int
 main()
 {
   libstash_init();
-  log_printf(cw_g_log, "Test begin\n");
+  out_put(cw_g_out, "Test begin\n");
 
   /* list_item_new(), list_item_delete(). */
   {
@@ -365,7 +365,7 @@ main()
 							    (void *) &ints[0]));
     _cw_assert(10 == list_count(list));
     _cw_assert(ints[10] == *(cw_uint32_t *) list_remove_item(list, 
-							    (void *)
+							     (void *)
 							     &ints[10]));
     _cw_assert(9 == list_count(list));
     _cw_assert(ints[5] == *(cw_uint32_t *) list_remove_item(list, 
@@ -443,7 +443,7 @@ main()
     for (i = 0; i < NUM_ITEMS; i++)
     {
       strings[i] = (char *) _cw_malloc(NUM_ITEMS);
-      sprintf(strings[i], "This is string %d", i);
+      out_put_s(cw_g_out, strings[i], "This is string [i32]", i);
     }
 
     list1 = list_new(NULL, FALSE);
@@ -459,46 +459,41 @@ main()
     }
     _cw_assert(list_count(list1) == NUM_ITEMS);
   
-    log_printf(cw_g_log, "hpop()ping from list1 and hpush()ing to list2\n");
+    out_put(cw_g_out, "hpop()ping from list1 and hpush()ing to list2\n");
   
     for (i = 0; i < NUM_ITEMS; i++)
     {
       str_ptr = (char *) list_hpop(list1);
       _cw_check_ptr(str_ptr);
-      log_printf(cw_g_log, "%s\n", str_ptr);
+      out_put(cw_g_out, "[s]\n", str_ptr);
       list_hpush(&list2, (void *) str_ptr);
     }
 
     _cw_assert(list_count(list1) == 0);
     _cw_assert(list_count(&list2) == NUM_ITEMS);
 
-    log_printf(cw_g_log, "tpop()ping from list2 and hpush()ing to list2\n");
+    out_put(cw_g_out, "tpop()ping from list2 and hpush()ing to list2\n");
   
     for (i = 0; i < NUM_ITEMS; i++)
     {
       str_ptr = (char *) list_tpop(&list2);
       _cw_check_ptr(str_ptr);
-      log_printf(cw_g_log, "%s\n", str_ptr);
+      out_put(cw_g_out, "[s]\n", str_ptr);
       list_hpush(&list2, (void *) str_ptr);
     }
 
     _cw_assert(list_count(list1) == 0);
-    {
-      char t_buf[21];
-      
-      log_printf(cw_g_log, "list2->count == %s\n",
-		 log_print_uint64(list_count(&list2), 10, t_buf));
-    }
+    out_put(cw_g_out, "list2->count == [i64]\n", list_count(&list2));
     
     _cw_assert(list_count(&list2) == NUM_ITEMS);
 
-    log_printf(cw_g_log, "tpop()ping from list2 and tpush()ing to list1\n");
+    out_put(cw_g_out, "tpop()ping from list2 and tpush()ing to list1\n");
   
     for (i = 0; i < NUM_ITEMS; i++)
     {
       str_ptr = (char *) list_tpop(&list2);
       _cw_check_ptr(str_ptr);
-      log_printf(cw_g_log, "%s\n", str_ptr);
+      out_put(cw_g_out, "[s]\n", str_ptr);
       list_tpush(list1, (void *) str_ptr);
     }
 
@@ -514,7 +509,7 @@ main()
     }
   }
   
-  log_printf(cw_g_log, "Test end\n");
+  out_put(cw_g_out, "Test end\n");
   libstash_shutdown();
   
   return 0;

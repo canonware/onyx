@@ -30,4 +30,3 @@ bhp_p_merge(cw_bhp_t * a_bhp, cw_bhp_t * a_other);
 
 static void
 bhp_p_union(cw_bhp_t * a_bhp, cw_bhp_t * a_other);
-

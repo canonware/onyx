@@ -24,7 +24,7 @@ main()
   cw_uint32_t i;
   
   libstash_init();
-  log_printf(cw_g_log, "Test begin\n");
+  out_put(cw_g_out, "Test begin\n");
 
   treen_a = treen_new(FALSE);
   _cw_check_ptr(treen_a);
@@ -68,7 +68,7 @@ main()
 
   treen_delete(treens[0]);
 
-  log_printf(cw_g_log, "Test end\n");
+  out_put(cw_g_out, "Test end\n");
   libstash_shutdown();
   return 0;
 }

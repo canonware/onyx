@@ -24,7 +24,7 @@
 #define _LIBSTASH_OUT_DES_SPECIFIER 's'
 #define _LIBSTASH_OUT_DES_WHITEOUT  'w'
 
-cw_sint32_t
+static cw_sint32_t
 out_p_put_fvle(cw_out_t * a_out, cw_sint32_t a_fd,
 	       cw_bool_t a_time_stamp,
 	       const char * a_file_name,
@@ -33,10 +33,10 @@ out_p_put_fvle(cw_out_t * a_out, cw_sint32_t a_fd,
 	       const char * a_format,
 	       va_list a_p);
 
-cw_sint32_t
+static cw_sint32_t
 out_p_put_fvn(cw_out_t * a_out, cw_sint32_t a_fd, cw_uint32_t a_size,
 	      const char * a_format, va_list a_p);
-  
+
 static cw_sint32_t
 out_p_metric(cw_out_t * a_out, const char * a_format, char ** r_format,
 	     va_list a_p);
@@ -149,3 +149,6 @@ static cw_out_ent_t cw_g_out_builtins[] =
   {"pointer",  sizeof(void *),       out_p_metric_pointer, out_p_render_pointer},
   {"p",        sizeof(void *),       out_p_metric_pointer, out_p_render_pointer}
 };
+
+static cw_sint32_t
+spec_p_has_specifier(const char * a_format);

@@ -49,24 +49,24 @@ main()
     es16[80] = "name:value\\:";
 
   libstash_init();
-  log_printf(cw_g_log, "Test begin\n");
+  out_put(cw_g_out, "Test begin\n");
 
 /*   dbg_register(cw_g_dbg, "res_state"); */
   
   res_new(&res);
 
-  log_printf(cw_g_log, "Merging in a list...\n");
+  out_put(cw_g_out, "Merging in a list...\n");
   _cw_assert(FALSE == res_merge_list(&res, s1, s2, s3, s4, s5, s6, s7,
 				     s8, NULL));
 
-  log_printf(cw_g_log, "Searching for a resource...\n");
+  out_put(cw_g_out, "Searching for a resource...\n");
   str = res_get_res_val(&res, "simple");
 
   _cw_check_ptr(str);
-  log_printf(cw_g_log, "simple:%s\n", str);
+  out_put(cw_g_out, "simple:[s]\n", str);
   _cw_assert(!strcmp(str, "value"));
 
-  log_printf(cw_g_log, "Testing invalid resources handling...\n");
+  out_put(cw_g_out, "Testing invalid resources handling...\n");
 
   _cw_assert(TRUE == res_merge_list(&res, es1, NULL));
   _cw_assert(TRUE == res_merge_list(&res, es2, NULL));
@@ -86,7 +86,7 @@ main()
   _cw_assert(TRUE == res_merge_list(&res, es16, NULL));
   
   res_delete(&res);
-  log_printf(cw_g_log, "Test end\n");
+  out_put(cw_g_out, "Test end\n");
   libstash_shutdown();
 
   return 0;

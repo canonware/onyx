@@ -136,7 +136,7 @@ treen_link_child(cw_treen_t * a_treen, cw_treen_t * a_child,
     if (a_treen->children == NULL)
     {
       a_treen->children = _cw_malloc(a_treen->num_children
-				       * sizeof(cw_treen_t *));
+				     * sizeof(cw_treen_t *));
       if (NULL == a_treen->children)
       {
 	retval = TRUE;
@@ -225,8 +225,8 @@ treen_unlink_child(cw_treen_t * a_treen, cw_uint32_t a_position,
     else
     {
       a_treen->children = _cw_realloc(a_treen->children,
-					a_treen->num_children
-					* sizeof(cw_treen_t *));
+				      a_treen->num_children
+				      * sizeof(cw_treen_t *));
       /* Shrinking, so there should be no error. */
       _cw_check_ptr(a_treen->children);
     }

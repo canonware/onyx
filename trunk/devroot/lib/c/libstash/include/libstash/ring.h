@@ -95,7 +95,7 @@ ring_delete(cw_ring_t * a_ring);
  *
  * <<< Description >>>
  *
- * Dump the internals of a_ring to cw_g_log.
+ * Dump the internals of a_ring to cw_g_out.
  *
  ****************************************************************************/
 void

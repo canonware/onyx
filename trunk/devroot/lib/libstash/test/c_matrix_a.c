@@ -40,12 +40,12 @@ main(int argc, char * argv[])
   map_el_t * map;
 
   libstash_init();
-  log_printf(cw_g_log, "Test begin\n");
+  out_put(cw_g_out, "Test begin\n");
 
 #if (0)
   if (argc != 2)
   {
-    log_printf(cw_g_log, "Usage: %s <num_nodes>\n", argv[0]);
+    out_put(cw_g_out, "Usage: [s] <num_nodes>\n", argv[0]);
     exit(1);
   }
   num_nodes = strtol(argv[1], (char **) NULL, 10);
@@ -53,19 +53,19 @@ main(int argc, char * argv[])
 
   num_nodes = 5;
   
-  log_printf(cw_g_log, "num_nodes == %lu\n", num_nodes);
+  out_put(cw_g_out, "num_nodes == [i32]\n", num_nodes);
   if (num_nodes > 6)
   {
-    log_printf(cw_g_log,
-	       "Due to variable limits, we can't do (num_nodes > 6)\n");
+    out_put(cw_g_out,
+	    "Due to variable limits, we can't do (num_nodes > 6)\n");
     exit(1);
   }
   num_edges = num_nodes * ((num_nodes - 1) / 2)
     + (((num_nodes + 1) / 2) * ((num_nodes + 1) % 2));
-  log_printf(cw_g_log, "num_edges == %lu\n", num_edges);
+  out_put(cw_g_out, "num_edges == [i32]\n", num_edges);
   num_graphs = 1 << (num_nodes * ((num_nodes - 1) / 2)
 		     + (((num_nodes + 1) / 2) * ((num_nodes + 1) % 2)));
-  log_printf(cw_g_log, "num_graphs == %lu\n", num_graphs);
+  out_put(cw_g_out, "num_graphs == [i32]\n", num_graphs);
   
   /* Create adjacency matrix, given number of nodes. */
   matrix_new(&graph);
@@ -130,15 +130,15 @@ main(int argc, char * argv[])
       }
       if (is_min_span_tree(&graph, num_nodes))
       {
-	/* 	log_printf(cw_g_log, "Ding.\n"); */
+	/* 	out_put(cw_g_out, "Ding.\n"); */
 	graphs[num_min_graphs] = matrix_copy(&graph);
 	num_min_graphs++;
       }
     }
   }
   
-  log_printf(cw_g_log, "Matrix size == %lu x %lu\n", num_graphs,
-	     num_min_graphs);
+  out_put(cw_g_out, "Matrix size == [i32] x [i32]\n", num_graphs,
+	  num_min_graphs);
 
   /* Create the big bad matrix. */
   matrix_new(&cover);
@@ -201,10 +201,10 @@ main(int argc, char * argv[])
     cw_uint32_t num_essentials;
     
     num_essentials = reduce(&cover);
-    log_printf(cw_g_log, "%u essentials\n", num_essentials);
+    out_put(cw_g_out, "[i32] essentials\n", num_essentials);
     matrix_rebuild(&cover);
-    log_printf(cw_g_log, "Matrix size == %lu x %lu\n",
-	       matrix_get_x_size(&cover), matrix_get_y_size(&cover));
+    out_put(cw_g_out, "Matrix size == [i32] x [i32]\n",
+	    matrix_get_x_size(&cover), matrix_get_y_size(&cover));
 
     recurse(&cover, num_essentials, matrix_get_y_size(&cover));
   }
@@ -334,13 +334,13 @@ is_min_span_tree(cw_matrix_t * a_matrix, cw_uint32_t a_num_nodes)
       }
     }
 
-  CLEANUP:    
+    CLEANUP:    
     _cw_free(weights);
     _cw_free(curr_path);
     _cw_free(have_visited);
   }
 
- RETURN:
+  RETURN:
   _cw_free(class);
     
   return retval;
@@ -477,8 +477,8 @@ reduce(cw_matrix_t * a_m)
 	}
 	if (num_on == 0)
 	{
-	  log_printf(cw_g_log, "Empty column %u (iteration %u)\n",
-		     x, x);
+	  out_put(cw_g_out, "Empty column [i32] (iteration [i32])\n",
+		  x, x);
 	  exit(1);
 	}
 
@@ -540,13 +540,11 @@ recurse(cw_matrix_t * a_m, cw_uint32_t a_curr_selected, cw_uint32_t a_best)
     else if ((matrix_get_x_size(t_m) == 0)
 	     && (a_curr_selected + curr_essentials + 1 < a_best))
     {
-      char buf[65];
-      
       /* Found a new solution. */
       g_tries++;
-      log_printf(cw_g_log, "Solution with %u rows (try %s)\n",
-		 a_curr_selected + curr_essentials + 1,
-		 log_print_uint64(g_tries, 10, buf));
+      out_put(cw_g_out, "Solution with [i32] rows (try [i64])\n",
+	      a_curr_selected + curr_essentials + 1,
+	      g_tries);
       a_best = a_curr_selected + curr_essentials;
     }
     else
@@ -556,9 +554,8 @@ recurse(cw_matrix_t * a_m, cw_uint32_t a_curr_selected, cw_uint32_t a_best)
       g_tries++;
       if (g_tries % 2600 == 0)
       {
-	char buf[65];
-	log_printf(cw_g_log, "Try %s\n", log_print_uint64(g_tries, 10, buf));
-	log_printf(cw_g_log, "Test end\n");
+	out_put(cw_g_out, "Try [i64]\n", g_tries);
+	out_put(cw_g_out, "Test end\n");
  	exit(0);
       }
     }

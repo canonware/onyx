@@ -21,7 +21,7 @@ int
 main()
 {
   libstash_init();
-  log_printf(cw_g_log, "Test begin\n");
+  out_put(cw_g_out, "Test begin\n");
 
   dbg_register(cw_g_dbg, "pezz_error");
   dbg_register(cw_g_dbg, "pezz_verbose");
@@ -106,7 +106,7 @@ main()
     pezz_delete(&pezz);
   }
   
-  log_printf(cw_g_log, "Test end\n");
+  out_put(cw_g_out, "Test end\n");
   libstash_shutdown();
   return 0;
 }

@@ -19,6 +19,7 @@
 #endif
 
 #include <stdarg.h>
+#include <fcntl.h>
 
 #include "libstash/res_p.h"
 
@@ -314,7 +315,8 @@ cw_bool_t
 res_dump(cw_res_t * a_res, char * a_filename)
 {
   cw_bool_t retval;
-  cw_log_t * t_log;
+  int fd = -1;
+  cw_out_t * t_out = NULL;
   
   _cw_check_ptr(a_res);
 #ifdef _CW_REENTRANT
@@ -323,23 +325,32 @@ res_dump(cw_res_t * a_res, char * a_filename)
 
   if (a_filename != NULL)
   {
-    t_log = log_new();
-    if (log_set_logfile(t_log, a_filename, TRUE) == TRUE)
+    t_out = out_new(NULL);
+    if (NULL == t_out)
     {
-      out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-		  "Error opening file \"[s]\"\n", a_filename);
       retval = TRUE;
       goto RETURN;
     }
+    
+    fd = open(a_filename, O_RDWR | O_CREAT | O_TRUNC);
+    if (-1 == fd)
+    {
+      out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+		"Error opening file \"[s]\"\n", a_filename);
+      retval = TRUE;
+      goto RETURN;
+    }
+
+    out_set_default_fd(t_out, fd);
   }
   else
   {
-    t_log = cw_g_log;
+    t_out = NULL;
   }
 
   retval = FALSE;
 
-  /* Now dump the resources to t_log. */
+  /* Now dump the resources to t_out. */
   {
     cw_uint64_t num_items, i;
     char * key, * val;
@@ -351,7 +362,11 @@ res_dump(cw_res_t * a_res, char * a_filename)
     {
       oh_item_get_iterate(&a_res->hash, (void *) &key, (void *) &val);
 
-      log_printf(t_log, "%s:", key);
+      if (0 > out_put(t_out, "[s]:", key))
+      {
+	retval = TRUE;
+	goto RETURN;
+      }
       
       for (j = 0, curr_offset = 0, val_len = strlen(val);
 	   j < val_len + 1;
@@ -362,27 +377,44 @@ res_dump(cw_res_t * a_res, char * a_filename)
 	  val[j] = '\0';
 	  if ((j < val_len) && (val[j + 1] != '\0'))
 	  {
-	    log_printf(t_log, "%s\\n\\\n", (char *) (val + curr_offset));
+	    if (0 > out_put(t_out, "[s]\\n\\\n", (char *) (val + curr_offset)))
+	    {
+	      retval = TRUE;
+	      goto RETURN;
+	    }
 	  }
 	  else
 	  {
-	    log_printf(t_log, "%s\\n", (char *) (val + curr_offset));
+	    if (0 > out_put(t_out, "[s]\\n", (char *) (val + curr_offset)))
+	    {
+	      retval = TRUE;
+	      goto RETURN;
+	    }
+	      
 	  }
 	  val[j] = '\n';
 	  curr_offset = j + 1;
 	}
 	else if (val[j] == '\0')
 	{
-	  log_printf(t_log, "%s\n", (char *) (val + curr_offset));
+	  if (0 > out_put(t_out, "[s]\n", (char *) (val + curr_offset)))
+	  {
+	    retval = TRUE;
+	    goto RETURN;
+	  }
 	}
       }
     }
   }
 
- RETURN:  
-  if (a_filename != NULL)
+  RETURN:
+  if (NULL != t_out)
   {
-    log_delete(t_log);
+    out_delete(t_out);
+  }
+  if (fd != -1)
+  {
+    close(fd);
   }
 #ifdef _CW_REENTRANT
   rwl_wunlock(&a_res->rw_lock);
@@ -467,7 +499,7 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
     if (dbg_is_registered(cw_g_dbg, "res_state"))
     {
       out_put(cw_g_out, "res_parse_res(): State == [i32], Input == \'[c]\'\n",
-		 state, c);
+	      state, c);
     }
     
     switch (state)
@@ -529,9 +561,9 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	  {
 	    /* Error. */
 	    out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-			"Illegal character while in _LIBSTASH_RES_STATE_START,"
-			" line [i32], column [i32]\n",
-			line_num, col_num);
+		      "Illegal character while in _LIBSTASH_RES_STATE_START,"
+		      " line [i32], column [i32]\n",
+		      line_num, col_num);
 	    retval = TRUE;
 	    break;
 	  }
@@ -588,10 +620,10 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	  default:
 	  {
 	    out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-			"Illegal character while in "
-			"_LIBSTASH_RES_STATE_BEGIN_WHITESPACE,"
-			" line [i32], column [i32]\n",
-			line_num, col_num);
+		      "Illegal character while in "
+		      "_LIBSTASH_RES_STATE_BEGIN_WHITESPACE,"
+		      " line [i32], column [i32]\n",
+		      line_num, col_num);
 	    retval = TRUE;
 	    break;
 	  }
@@ -636,10 +668,10 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	  {
 	    /* Error. */
 	    out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-			"Illegal character while in "
-			"_LIBSTASH_RES_STATE_BEGIN_COMMENT, "
-			"line [i32], column [i32]\n",
-			line_num, col_num);
+		      "Illegal character while in "
+		      "_LIBSTASH_RES_STATE_BEGIN_COMMENT, "
+		      "line [i32], column [i32]\n",
+		      line_num, col_num);
 	    retval = TRUE;
 	    break;
 	  }
@@ -688,9 +720,9 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	  {
 	    /* Error. */
 	    out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-			"Illegal character while in _LIBSTASH_RES_STATE_NAME, "
-			"line [i32], column [i32]\n",
-			line_num, col_num);
+		      "Illegal character while in _LIBSTASH_RES_STATE_NAME, "
+		      "line [i32], column [i32]\n",
+		      line_num, col_num);
 	    retval = TRUE;
 	    break;
 	  }
@@ -729,10 +761,10 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	  {
 	    /* Error. */
 	    out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-			"Illegal character while in "
-			"_LIBSTASH_RES_STATE_POST_NAME_WHITESPACE, "
-			"line [i32], column [i32]\n",
-			line_num, col_num);
+		      "Illegal character while in "
+		      "_LIBSTASH_RES_STATE_POST_NAME_WHITESPACE, "
+		      "line [i32], column [i32]\n",
+		      line_num, col_num);
 	    retval = TRUE;
 	    break;
 	  }
@@ -814,10 +846,10 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	  {
 	    /* Error. */
 	    out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-			"Illegal character while in "
-			"_LIBSTASH_RES_STATE_POST_COLON_WHITESPACE, "
-			"line [i32], column [i32]\n",
-			line_num, col_num);
+		      "Illegal character while in "
+		      "_LIBSTASH_RES_STATE_POST_COLON_WHITESPACE, "
+		      "line [i32], column [i32]\n",
+		      line_num, col_num);
 	    retval = TRUE;
 	    break;
 	  }
@@ -899,9 +931,9 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	  {
 	    /* Error. */
 	    out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-			"Illegal character while in _LIBSTASH_RES_STATE_VALUE, "
-			"line [i32], column [i32]\n",
-			line_num, col_num);
+		      "Illegal character while in _LIBSTASH_RES_STATE_VALUE, "
+		      "line [i32], column [i32]\n",
+		      line_num, col_num);
 	    retval = TRUE;
 	    break;
 	  }
@@ -977,10 +1009,10 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	  {
 	    /* Error. */
 	    out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-			"Illegal character while in "
-			"_LIBSTASH_RES_STATE_VALUE_BACKSLASH, "
-			"line [i32], column [i32]\n",
-			line_num, col_num);
+		      "Illegal character while in "
+		      "_LIBSTASH_RES_STATE_VALUE_BACKSLASH, "
+		      "line [i32], column [i32]\n",
+		      line_num, col_num);
 	    retval = TRUE;
 	    break;
 	  }
@@ -1020,10 +1052,10 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	  {
 	    /* Error. */
 	    out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-			"Illegal character while in "
-			"_LIBSTASH_RES_STATE_BACKSLASH_WHITESPACE, "
-			"line [i32], column [i32]\n",
-			line_num, col_num);
+		      "Illegal character while in "
+		      "_LIBSTASH_RES_STATE_BACKSLASH_WHITESPACE, "
+		      "line [i32], column [i32]\n",
+		      line_num, col_num);
 	    retval = TRUE;
 	    break;
 	  }
@@ -1068,10 +1100,10 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	  {
 	    /* Error. */
 	    out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-			"Illegal character while in "
-			"_LIBSTASH_RES_STATE_TRAILING_COMMENT, "
-			"line [i32], column [i32]\n",
-			line_num, col_num);
+		      "Illegal character while in "
+		      "_LIBSTASH_RES_STATE_TRAILING_COMMENT, "
+		      "line [i32], column [i32]\n",
+		      line_num, col_num);
 	    retval = TRUE;
 	    break;
 	  }
@@ -1081,8 +1113,8 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
       default:
       {
 	out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-		    "Jumped to non-existant state, line [i32], column [i32]\n",
-		    line_num, col_num);
+		  "Jumped to non-existant state, line [i32], column [i32]\n",
+		  line_num, col_num);
 	retval = TRUE;
 	break;
       }
@@ -1241,8 +1273,8 @@ res_p_merge_res(cw_res_t * a_res, const char * a_name, const char * a_val)
   if (dbg_is_registered(cw_g_dbg, "res_state"))
   {
     out_put(cw_g_out,
-	       "res_merge_res(): Merging name == :[s]:, value == :[s]:\n",
-	       a_name, a_val);
+	    "res_merge_res(): Merging name == :[s]:, value == :[s]:\n",
+	    a_name, a_val);
   }
 
   /* Insert the resource into the hash table. */

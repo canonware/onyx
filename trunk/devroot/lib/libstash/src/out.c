@@ -348,7 +348,6 @@ out_put_n(cw_out_t * a_out, cw_uint32_t a_size, const char * a_format, ...)
   cw_sint32_t retval, fd;
   va_list ap;
 
-  _cw_assert(0 < a_size);
   _cw_check_ptr(a_format);
   
   if (NULL != a_out)
@@ -436,7 +435,6 @@ out_put_fn(cw_out_t * a_out, cw_sint32_t a_fd, cw_uint32_t a_size,
   va_list ap;
 
   _cw_assert(0 <= a_fd);
-  _cw_assert(0 < a_size);
   _cw_check_ptr(a_format);
   
   va_start(ap, a_format);
@@ -456,20 +454,28 @@ out_put_fv(cw_out_t * a_out, cw_sint32_t a_fd,
   _cw_assert(0 <= a_fd);
   _cw_check_ptr(a_format);
   _cw_check_ptr(a_p);
-  
-  if (0 >= (out_size = out_put_sva(a_out, &output, a_format, a_p)))
-  {
-    retval = out_size;
-    goto RETURN;
-  }
 
-  retval = out_put_fn(a_out, a_fd, (cw_uint32_t) out_size, "[s]", output);
+  if (-1 != (out_size = spec_p_has_specifier(a_format)))
+  {
+    /* The output string needs no processing, so pass it on directly to avoid
+     * allocation and lots of extra work. */
+    retval = out_put_fn(a_out, a_fd, (cw_uint32_t) out_size, a_format);
+  }
+  else
+  {
+    if (0 >= (out_size = out_put_sva(a_out, &output, a_format, a_p)))
+    {
+      retval = out_size;
+      goto RETURN;
+    }
+
+    retval = out_put_fn(a_out, a_fd, (cw_uint32_t) out_size, "[s]", output);
+  }
   
   RETURN:
   if (NULL != output)
   {
     /* This string was allocated using the mem class.  Free it as such. */
-/*      _cw_free(output); */
 #ifdef _LIBSTASH_DBG
     mem_free(cw_g_mem, output, __FILE__, __LINE__);
 #else
@@ -518,7 +524,6 @@ out_put_sn(cw_out_t * a_out, char * a_str, cw_uint32_t a_size,
   va_list ap;
 
   _cw_check_ptr(a_str);
-  _cw_assert(0 < a_size);
   _cw_check_ptr(a_format);
   
   va_start(ap, a_format);
@@ -532,16 +537,19 @@ cw_sint32_t
 out_put_sv(cw_out_t * a_out, char * a_str,
 	   const char * a_format, va_list a_p)
 {
-  cw_sint32_t retval;
-  cw_uint32_t out_size;
+  cw_sint32_t retval, out_size;
 
   _cw_check_ptr(a_str);
   _cw_check_ptr(a_format);
   _cw_check_ptr(a_p);
   
-  out_size = out_p_metric(a_out, a_format, NULL, a_p);
-
-  retval = out_put_svn(a_out, a_str, out_size, a_format, a_p);
+  if (-1 == (out_size = spec_p_has_specifier(a_format)))
+  {
+    out_size = out_p_metric(a_out, a_format, NULL, a_p);
+  }
+  
+  retval = out_put_svn(a_out, a_str, (cw_uint32_t) out_size, a_format, a_p);
+  
   if (0 <= retval)
   {
     a_str[retval] = '\0';
@@ -569,7 +577,6 @@ out_put_sva(cw_out_t * a_out, char ** r_str,
   /* Since this string will get passed out to the user, we must allocate it
    * using the mem class.  Otherwise, if the user tries to free the string with
    * mem_free(), an error will occur. */
-/*    output = (char *) _cw_malloc(out_size + 1); */
 #ifdef _LIBSTASH_DBG
   output = (char *) mem_malloc(cw_g_mem, out_size + 1, __FILE__, __LINE__);
 #else
@@ -613,78 +620,93 @@ out_put_svn(cw_out_t * a_out, char * a_str, cw_uint32_t a_size,
   _cw_check_ptr(a_format);
   _cw_check_ptr(a_p);
 
-  metric_size = out_p_metric(a_out, a_format, &format, a_p);
-  if (0 >= metric_size)
+  if (-1 != (format_len = spec_p_has_specifier(a_format)))
   {
-    retval = metric_size;
-    goto RETURN;
-  }
+    if (format_len > a_size)
+    {
+      size = a_size;
+    }
+    else
+    {
+      size = format_len;
+    }
 
-  /* Choose the smaller of two possible sizes. */
-  if (metric_size < a_size)
-  {
-    size = metric_size;
+    memcpy(a_str, a_format, size);
   }
   else
   {
-    size = (cw_sint32_t) a_size;
-  }
-  
-  for (i = j = 0, format_len = strlen(a_format);
-       (i < format_len) && (j < size);
-       )
-  {
-    switch (format[i])
+    metric_size = out_p_metric(a_out, a_format, &format, a_p);
+    if (0 >= metric_size)
     {
-      case _LIBSTASH_OUT_DES_NORMAL:
-      {
-	a_str[j] = a_format[i];
-	j++;
-	i++;
-	break;
-      }
-      case _LIBSTASH_OUT_DES_SPECIFIER:
-      {
-	cw_sint32_t spec_len, type_len;
-	const char * type;
-	cw_out_ent_t * ent;
-	void * arg;
-	
-	/* Calculate the specifier length.  We're guaranteed that there is a
-	 * whiteout character following the specifier. */
-	for (spec_len = 0;
-	     format[i + spec_len] == _LIBSTASH_OUT_DES_SPECIFIER;
-	     spec_len++);
+      retval = metric_size;
+      goto RETURN;
+    }
 
-	/* Find the type string. */
-	type_len = spec_get_type(&a_format[i], spec_len, &type);
-	_cw_assert(0 <= type_len);
-
-	ent = out_p_get_ent(a_out, type, type_len);
-	_cw_assert(NULL != ent);
-	
-	switch (ent->size)
+    /* Choose the smaller of two possible sizes. */
+    if (metric_size < a_size)
+    {
+      size = metric_size;
+    }
+    else
+    {
+      size = (cw_sint32_t) a_size;
+    }
+  
+    for (i = j = 0, format_len = strlen(a_format);
+	 (i < format_len) && (j < size);
+	 )
+    {
+      switch (format[i])
+      {
+	case _LIBSTASH_OUT_DES_NORMAL:
 	{
-	  case 1:
+	  a_str[j] = a_format[i];
+	  j++;
+	  i++;
+	  break;
+	}
+	case _LIBSTASH_OUT_DES_SPECIFIER:
+	{
+	  cw_sint32_t spec_len, type_len;
+	  const char * type;
+	  cw_out_ent_t * ent;
+	  void * arg;
+	
+	  /* Calculate the specifier length.  We're guaranteed that there is a
+	   * whiteout character following the specifier. */
+	  for (spec_len = 0;
+	       format[i + spec_len] == _LIBSTASH_OUT_DES_SPECIFIER;
+	       spec_len++);
+
+	  /* Find the type string. */
+	  type_len = spec_get_type(&a_format[i], spec_len, &type);
+	  _cw_assert(0 <= type_len);
+
+	  ent = out_p_get_ent(a_out, type, type_len);
+	  _cw_assert(NULL != ent);
+	
+	  switch (ent->size)
 	  {
-	    arg = (void *) &va_arg(a_p, cw_uint8_t);
-	    break;
-	  }
-	  case 2:
-	  {
-	    arg = (void *) &va_arg(a_p, cw_uint16_t);
-	    break;
-	  }
-	  case 4:
-	  {
-	    arg = (void *) &va_arg(a_p, cw_uint32_t);
-	    break;
-	  }
-	  case 8:
-	  {
-	    arg = (void *) &va_arg(a_p, cw_uint64_t);
-	    break;
-	  }
+	    case 1:
+	    {
+	      arg = (void *) &va_arg(a_p, cw_uint8_t);
+	      break;
+	    }
+	    case 2:
+	    {
+	      arg = (void *) &va_arg(a_p, cw_uint16_t);
+	      break;
+	    }
+	    case 4:
+	    {
+	      arg = (void *) &va_arg(a_p, cw_uint32_t);
+	      break;
+	    }
+	    case 8:
+	    {
+	      arg = (void *) &va_arg(a_p, cw_uint64_t);
+	      break;
+	    }
 /*  	  case 12: */
 /*  	  { */
 /*  	    arg = (void *) va_arg(a_p, s_12); */
@@ -695,64 +717,66 @@ out_put_svn(cw_out_t * a_out, char * a_str, cw_uint32_t a_size,
 /*  	    arg = (void *) va_arg(a_p, s_16); */
 /*  	    break; */
 /*  	  } */
-	  default:
-	  {
-	    _cw_error("Programming error");
-	  }
-	}
-
-	metric = ent->metric_func(&a_format[i], spec_len, arg);
-	if (0 > metric)
-	{
-	  retval = metric;
-	  goto RETURN;
-	}
-	
-	if (j + metric <= size)
-	{
-	  /* The printout of this item will fit in the output string. */
-	  if (NULL == ent->render_func(&a_format[i], spec_len, arg, &a_str[j]))
-	  {
-	    retval = -1;
-	    goto RETURN;
-	  }
-	}
-	else
-	{
-	  char * t_buf;
-	  
-	  /* The printout of this item will not fit in the string.  Therefore,
-	   * allocate a temporary buffer, render the item there, then copy as
-	   * much as will fit into the output string. */
-	  t_buf = (char *) _cw_malloc(metric);
-	  if (NULL == t_buf)
-	  {
-	    retval = -1;
-	    goto RETURN;
+	    default:
+	    {
+	      _cw_error("Programming error");
+	    }
 	  }
 
-	  if (NULL == ent->render_func(&a_format[i], spec_len, arg, t_buf))
+	  metric = ent->metric_func(&a_format[i], spec_len, arg);
+	  if (0 > metric)
 	  {
-	    retval = -1;
+	    retval = metric;
 	    goto RETURN;
 	  }
-	  memcpy(&a_str[j], t_buf, size - j);
-	  
-	  _cw_free(t_buf);
-	}
 	
-	j += metric;
-	i += spec_len;
-	break;
-      }
-      case _LIBSTASH_OUT_DES_WHITEOUT:
-      {
-	i++;
-	break;
-      }
-      default:
-      {
-	_cw_error("Programming error");
+	  if (j + metric <= size)
+	  {
+	    /* The printout of this item will fit in the output string. */
+	    if (NULL == ent->render_func(&a_format[i], spec_len, arg,
+					 &a_str[j]))
+	    {
+	      retval = -1;
+	      goto RETURN;
+	    }
+	  }
+	  else
+	  {
+	    char * t_buf;
+	  
+	    /* The printout of this item will not fit in the string.  Therefore,
+	     * allocate a temporary buffer, render the item there, then copy as
+	     * much as will fit into the output string. */
+	    t_buf = (char *) _cw_malloc(metric);
+	    if (NULL == t_buf)
+	    {
+	      retval = -1;
+	      goto RETURN;
+	    }
+
+	    if (NULL == ent->render_func(&a_format[i], spec_len, arg, t_buf))
+	    {
+	      retval = -1;
+	      goto RETURN;
+	    }
+	    memcpy(&a_str[j], t_buf, size - j);
+	  
+	    _cw_free(t_buf);
+	  }
+	
+	  j += metric;
+	  i += spec_len;
+	  break;
+	}
+	case _LIBSTASH_OUT_DES_WHITEOUT:
+	{
+	  i++;
+	  break;
+	}
+	default:
+	{
+	  _cw_error("Programming error");
+	}
       }
     }
   }
@@ -902,7 +926,7 @@ spec_get_val(const char * a_spec, cw_uint32_t a_spec_len,
   return retval;
 }
 
-cw_sint32_t
+static cw_sint32_t
 out_p_put_fvle(cw_out_t * a_out, cw_sint32_t a_fd,
 	       cw_bool_t a_time_stamp,
 	       const char * a_file_name,
@@ -953,7 +977,6 @@ out_p_put_fvle(cw_out_t * a_out, cw_sint32_t a_fd,
 	retval = -1;
 	goto RETURN;
       }
-      retval = out_put_fv(a_out, a_fd, format, a_p);
     }
     else
     {
@@ -966,7 +989,6 @@ out_p_put_fvle(cw_out_t * a_out, cw_sint32_t a_fd,
 	retval = -1;
 	goto RETURN;
       }
-      retval = out_put_fv(a_out, a_fd, format, a_p);
     }
   }
   else if (NULL != a_func_name)
@@ -980,7 +1002,6 @@ out_p_put_fvle(cw_out_t * a_out, cw_sint32_t a_fd,
       retval = -1;
       goto RETURN;
     }
-    retval = out_put_fv(a_out, a_fd, format, a_p);
   }
   else
   {
@@ -992,14 +1013,14 @@ out_p_put_fvle(cw_out_t * a_out, cw_sint32_t a_fd,
       retval = -1;
       goto RETURN;
     }
-    retval = out_put_fv(a_out, a_fd, format, a_p);
   }
+
+  retval = out_put_fv(a_out, a_fd, format, a_p);
   
   RETURN:
   if (NULL != format)
   {
     /* This string was allocated using the mem class.  Free it as such. */
-/*      _cw_free(format); */
 #ifdef _LIBSTASH_DBG
     mem_free(cw_g_mem, format, __FILE__, __LINE__);
 #else
@@ -1009,30 +1030,44 @@ out_p_put_fvle(cw_out_t * a_out, cw_sint32_t a_fd,
   return retval;
 }
 
-cw_sint32_t
+static cw_sint32_t
 out_p_put_fvn(cw_out_t * a_out, cw_sint32_t a_fd, cw_uint32_t a_size,
 	      const char * a_format, va_list a_p)
 {
   cw_sint32_t retval, i, out_size, nwritten;
+  cw_bool_t malloced_output;
   char * output;
 
   _cw_assert(0 <= a_fd);
-  _cw_assert(0 < a_size);
   _cw_check_ptr(a_format);
+
+  if (-1 != (out_size = spec_p_has_specifier(a_format)))
+  {
+    malloced_output = FALSE;
+    if (a_size < out_size)
+    {
+      /* Truncate the output. */
+      out_size = a_size;
+    }
+    output = (char *) a_format;
+  }
+  else
+  {
+    malloced_output = TRUE;
+    output = (char *) _cw_malloc(a_size);
+    if (NULL == output)
+    {
+      retval = -1;
+      goto RETURN;
+    }
+
+    if (-1 == (out_size = out_put_svn(a_out, output, a_size, a_format, a_p)))
+    {
+      retval = -1;
+      goto RETURN;
+    }
+  }
   
-  output = (char *) _cw_malloc(a_size);
-  if (NULL == output)
-  {
-    retval = -1;
-    goto RETURN;
-  }
-
-  if (-1 == (out_size = out_put_svn(a_out, output, a_size, a_format, a_p)))
-  {
-    retval = -1;
-    goto RETURN;
-  }
-
 #ifdef _CW_REENTRANT
   if (NULL != a_out)
   {
@@ -1061,7 +1096,7 @@ out_p_put_fvn(cw_out_t * a_out, cw_sint32_t a_fd, cw_uint32_t a_size,
   retval = i;
   
   RETURN:
-  if (NULL != output)
+  if ((NULL != output) && (TRUE == malloced_output))
   {
     _cw_free(output);
   }
@@ -1999,5 +2034,64 @@ out_p_render_pointer(const char * a_format, cw_uint32_t a_len,
 
   retval = out_p_render_int(a_format, a_len, arg, r_buf, 32, 16);
 
+  return retval;
+}
+
+static cw_sint32_t
+spec_p_has_specifier(const char * a_format)
+{
+  cw_sint32_t retval;
+  cw_uint32_t i;
+  enum
+  {
+    NORMAL,
+    BRACKET
+  } state;
+  
+  _cw_check_ptr(a_format);
+
+  for (i = 0, state = NORMAL; a_format[i] != '\0'; i++)
+  {
+    switch (state)
+    {
+      case NORMAL:
+      {
+	if ('[' == a_format[i])
+	{
+	  state = BRACKET;
+	}
+	
+	break;
+      }
+      case BRACKET:
+      {
+	if ('[' == a_format[i])
+	{
+	  state = NORMAL;
+	}
+	else
+	{
+	  retval = -1;
+	  goto RETURN;
+	}
+
+	break;
+      }
+      default:
+      {
+	_cw_error("Programming error");
+      }
+    }
+  }
+
+  if (NORMAL != state)
+  {
+    retval = -1;
+    goto RETURN;
+  }
+
+  retval = i;
+
+  RETURN:
   return retval;
 }

@@ -24,7 +24,7 @@ cw_oh_t *
 #ifdef _CW_REENTRANT
 oh_new(cw_oh_t * a_oh, cw_bool_t a_is_thread_safe)
 #else
-     oh_new(cw_oh_t * a_oh)
+  oh_new(cw_oh_t * a_oh)
 #endif
 {
   cw_oh_t * retval;
@@ -392,9 +392,9 @@ oh_set_base_h2(cw_oh_t * a_oh,
     
     a_oh->base_h2 = a_h2;
     a_oh->curr_h2 = (((a_oh->base_h2 + 1)
-			<< (a_oh->curr_power
-			    - a_oh->base_power))
-		       - 1);
+		      << (a_oh->curr_power
+			  - a_oh->base_power))
+		     - 1);
     oh_p_rehash(a_oh);
   }
 
@@ -807,7 +807,6 @@ void
 oh_dump(cw_oh_t * a_oh, cw_bool_t a_all)
 {
   cw_uint64_t i;
-  char buf_a[21], buf_b[21], buf_c[21];
 
   _cw_check_ptr(a_oh);
 #ifdef _CW_REENTRANT
@@ -817,33 +816,36 @@ oh_dump(cw_oh_t * a_oh, cw_bool_t a_all)
   }
 #endif
 
-  log_printf(cw_g_log,
-	     "============================================================\n");
-  log_printf(cw_g_log,
-	     "Size: [%s]  Slots filled: [%d]\n\n",
-	     log_print_uint64(a_oh->size, 10, buf_a),
-	     a_oh->items_count);
-  log_printf(cw_g_log, "      pow h1         h2    shrink grow \n");
-  log_printf(cw_g_log, "      --- ---------- ----- ------ -----\n");
-  log_printf(cw_g_log, "Base: %2d             %5d %5d  %5d\n",
-	     a_oh->base_power,
-	     a_oh->base_h2,
-	     a_oh->base_shrink_point,
-	     a_oh->base_grow_point);
-  log_printf(cw_g_log, "Curr: %2d  %10p %5s %5s  %5s\n\n",
-	     a_oh->curr_power,
-	     a_oh->curr_h1,
-	     log_print_uint64(a_oh->curr_h2, 10, buf_a),
-	     log_print_uint64(a_oh->curr_shrink_point, 10, buf_b),
-	     log_print_uint64(a_oh->curr_grow_point, 10, buf_c));
+  out_put(cw_g_out,
+	  "============================================================\n");
+  out_put(cw_g_out,
+	  "Size: [[[i64]]  Slots filled: [[[i32]]\n\n",
+	  a_oh->size,
+	  a_oh->items_count);
+  out_put(cw_g_out, "      pow h1         h2    shrink grow \n");
+  out_put(cw_g_out, "      --- ---------- ----- ------ -----\n");
+  out_put(cw_g_out,
+	  "Base: [i32|w:2]             [i32|w:5] [i32|w:5]  [i32|w:5]\n",
+	  a_oh->base_power,
+	  a_oh->base_h2,
+	  a_oh->base_shrink_point,
+	  a_oh->base_grow_point);
+  out_put(cw_g_out,
+	  "Curr: [i32|w:2]  0x[p|w:10] [i64|w:5] [i64|w:5]  [i64|w:5]\n\n",
+	  a_oh->curr_power,
+	  a_oh->curr_h1,
+	  a_oh->curr_h2,
+	  a_oh->curr_shrink_point,
+	  a_oh->curr_grow_point);
 
-  log_printf(cw_g_log, "Counters: collisions[%s] inserts[%s] deletes[%s]\n",
-	     log_print_uint64(a_oh->num_collisions, 10, buf_a),
-	     log_print_uint64(a_oh->num_inserts, 10, buf_b),
-	     log_print_uint64(a_oh->num_deletes, 10, buf_c));
-  log_printf(cw_g_log, "          grows[%s] shrinks[%s]\n\n",
-	     log_print_uint64(a_oh->num_grows, 10, buf_a),
-	     log_print_uint64(a_oh->num_shrinks, 10, buf_b));
+  out_put(cw_g_out,
+	  "Counters: collisions[[[i64]] inserts[[[i64]] deletes[[[i64]]\n",
+	  a_oh->num_collisions,
+	  a_oh->num_inserts,
+	  a_oh->num_deletes);
+  out_put(cw_g_out, "          grows[[[i64]] shrinks[[[i64]]\n\n",
+	  a_oh->num_grows,
+	  a_oh->num_shrinks);
 
   if (a_all)
   {
@@ -853,7 +855,7 @@ oh_dump(cw_oh_t * a_oh, cw_bool_t a_all)
     }
     else
     {
-      log_printf(cw_g_log, "NULL items_ring\n");
+      out_put(cw_g_out, "NULL items_ring\n");
     }
     
     if (NULL != a_oh->spares_ring)
@@ -862,29 +864,29 @@ oh_dump(cw_oh_t * a_oh, cw_bool_t a_all)
     }
     else
     {
-      log_printf(cw_g_log, "NULL spares_ring\n");
+      out_put(cw_g_out, "NULL spares_ring\n");
     }
     
-    log_printf(cw_g_log, "slot key        value\n");
-    log_printf(cw_g_log, "---- ---------- ----------\n");
+    out_put(cw_g_out, "slot key        value\n");
+    out_put(cw_g_out, "---- ---------- ----------\n");
   
     for (i = 0; i < a_oh->size; i++)
     {
-      log_printf(cw_g_log, "%4d ", i);
+      out_put(cw_g_out, "[i32|w:4] ", i);
       if (a_oh->items[i] != NULL)
       {
-	log_printf(cw_g_log, "0x%08x %10p\n",
-		   a_oh->items[i]->key,
-		   a_oh->items[i]->data);
+	out_put(cw_g_out, "0x[i32|w:8|p:0|b:16] 0x[p|w:10]\n",
+		a_oh->items[i]->key,
+		a_oh->items[i]->data);
       }
       else
       {
-	log_printf(cw_g_log, "\n");
+	out_put(cw_g_out, "\n");
       }
     }
   }
-  log_printf(cw_g_log,
-	     "============================================================\n");
+  out_put(cw_g_out,
+	  "============================================================\n");
 
 #ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
@@ -1097,9 +1099,9 @@ oh_p_grow(cw_oh_t * a_oh)
     /* Re-calculate curr_* fields. */
     a_oh->curr_power += 1;
     a_oh->curr_h2 = (((a_oh->base_h2 + 1)
-			<< (a_oh->curr_power
-			    - a_oh->base_power))
-		       - 1);
+		      << (a_oh->curr_power
+			  - a_oh->base_power))
+		     - 1);
     a_oh->curr_shrink_point
       = a_oh->curr_shrink_point << 1;
     a_oh->curr_grow_point
@@ -1168,9 +1170,9 @@ oh_p_shrink(cw_oh_t * a_oh)
     /* Re-calculate curr_* fields. */
     a_oh->curr_power -= num_halvings;
     a_oh->curr_h2 = (((a_oh->base_h2 + 1)
-			<< (a_oh->curr_power
-			    - a_oh->base_power))
-		       - 1);
+		      << (a_oh->curr_power
+			  - a_oh->base_power))
+		     - 1);
     a_oh->curr_shrink_point
       = a_oh->curr_shrink_point >> num_halvings;
     a_oh->curr_grow_point

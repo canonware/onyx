@@ -474,7 +474,7 @@ list_purge_spares(cw_list_t * a_list);
  *
  * <<< Description >>>
  *
- * Print debugging spew to cw_g_log.
+ * Print debugging spew to cw_g_out.
  *
  ****************************************************************************/
 void

@@ -249,7 +249,7 @@ matrix_copy(cw_matrix_t * a_matrix);
  *
  * <<< Description >>>
  *
- * Print a_matrix to cw_g_log.
+ * Print a_matrix to cw_g_out.
  *
  ****************************************************************************/
 void

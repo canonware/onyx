@@ -26,7 +26,7 @@ main()
   cw_buf_t * buf_a, * buf_b, * buf_c, * buf_d;
 
   libstash_init();
-  log_printf(cw_g_log, "Test begin\n");
+  out_put(cw_g_out, "Test begin\n");
   
   buf_a = buf_new(NULL, TRUE);
   buf_b = buf_new(NULL, TRUE);
@@ -77,12 +77,12 @@ main()
     }
   }
 
-  log_printf(cw_g_log, "%lu bytes of data in buf_a (various sized bufc's)\n",
-	     buf_get_size(buf_a));
-  log_printf(cw_g_log, "%lu bytes of data in buf_b (4kB bufc's)\n",
-	     buf_get_size(buf_b));
-  log_printf(cw_g_log, "%lu bytes of data in buf_c (16B bufc's)\n",
-	     buf_get_size(buf_c));
+  out_put(cw_g_out, "[i32] bytes of data in buf_a (various sized bufc's)\n",
+	  buf_get_size(buf_a));
+  out_put(cw_g_out, "[i32] bytes of data in buf_b (4kB bufc's)\n",
+	  buf_get_size(buf_b));
+  out_put(cw_g_out, "[i32] bytes of data in buf_c (16B bufc's)\n",
+	  buf_get_size(buf_c));
 
   /* buf_get_uint8() inc loop for each buf. */
   {
@@ -604,7 +604,7 @@ main()
   buf_delete(buf_c);
   buf_delete(buf_d);
 
-  log_printf(cw_g_log, "Test end\n");
+  out_put(cw_g_out, "Test end\n");
 
   libstash_shutdown();
   return 0;

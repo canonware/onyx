@@ -37,8 +37,8 @@ thread_entry_func(void * a_arg)
   
   cnd_wait(foo_var->cond, foo_var->mutex);
 
-  log_eprintf(cw_g_log, NULL, 0, "thread_entry_func",
-	      "After cnd_wait() call\n");
+  out_put_e(cw_g_out, NULL, 0, "thread_entry_func",
+	    "After cnd_wait() call\n");
 
   mtx_unlock(foo_var->mutex);
 
@@ -59,7 +59,7 @@ main()
   cw_bool_t num_waiting;
   
   libstash_init();
-  log_printf(cw_g_log, "Test begin\n");
+  out_put(cw_g_out, "Test begin\n");
 
   mtx_new(&mutex);
   
@@ -131,7 +131,7 @@ main()
   cnd_delete(&cond_a);
   mtx_delete(&mutex);
   
-  log_printf(cw_g_log, "Test end\n");
+  out_put(cw_g_out, "Test end\n");
   libstash_shutdown();
   return 0;
 }

@@ -24,7 +24,7 @@ thread_entry_func(void * a_arg)
   cw_sem_t * sem = (cw_sem_t *) a_arg;
 
   sem_wait(sem);
-  log_printf(cw_g_log, "Got semaphore.\n");
+  out_put(cw_g_out, "Got semaphore.\n");
   
   return NULL;
 }
@@ -37,7 +37,7 @@ main()
   cw_uint32_t i;
   
   libstash_init();
-  log_printf(cw_g_log, "Test begin\n");
+  out_put(cw_g_out, "Test begin\n");
 
   sem_b = sem_new(NULL, 0);
   _cw_check_ptr(sem_b);
@@ -85,7 +85,7 @@ main()
   
   sem_delete(&sem_a);
 
-  log_printf(cw_g_log, "Test end\n");
+  out_put(cw_g_out, "Test end\n");
   libstash_shutdown();
   return 0;
 }

@@ -21,7 +21,9 @@ int
 main()
 {
   libstash_init();
-  log_printf(cw_g_log, "Test begin\n");
+  out_put(cw_g_out, "Test begin\n");
+
+/*    dbg_register(cw_g_dbg, "mem_verbose"); */
 
   /* out_new(), out_delete(). */
   out_put(cw_g_out, "out_new(), out_delete()\n");
@@ -740,7 +742,7 @@ main()
 /*      cw_uint32_t i; */
 /*      char buf[65]; */
     
-/*      for (i = 0; i < 1000; i++) */
+/*      for (i = 0; i < 10000; i++) */
 /*      { */
 /*        out_put_s(cw_g_out, buf, "[i32|b:16]", (cw_uint32_t) 0xf2135123); */
 /*        out_put(cw_g_out, "."); */
@@ -748,7 +750,7 @@ main()
 /*      out_put(cw_g_out, "\n[s]\n", buf); */
 /*    } */
   
-  log_printf(cw_g_log, "Test end\n");
+  out_put(cw_g_out, "Test end\n");
   libstash_shutdown();
   return 0;
 }

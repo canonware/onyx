@@ -160,8 +160,6 @@ bhp_delete(cw_bhp_t * a_bhp)
 void
 bhp_dump(cw_bhp_t * a_bhp)
 {
-  char buf[21];
-  
   _cw_check_ptr(a_bhp);
   _cw_assert(_LIBSTASH_BHP_MAGIC == a_bhp->magic);
   
@@ -173,8 +171,8 @@ bhp_dump(cw_bhp_t * a_bhp)
 #endif
 
   out_put(cw_g_out, "=== bhp_dump() start ==============================\n");
-  out_put(cw_g_out, "num_nodes: [s]\n",
-	  log_print_uint64(a_bhp->num_nodes, 10, buf));
+  out_put(cw_g_out, "num_nodes: [i64]\n",
+	  a_bhp->num_nodes);
   if (NULL != a_bhp->head)
   {
     bhp_p_dump(a_bhp->head, 0, NULL);

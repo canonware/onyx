@@ -153,7 +153,7 @@ buf_delete(cw_buf_t * a_buf);
  *
  * <<< Description >>>
  *
- * Dump the internal state of a_buf to cw_g_log.
+ * Dump the internal state of a_buf to cw_g_out.
  *
  ****************************************************************************/
 void

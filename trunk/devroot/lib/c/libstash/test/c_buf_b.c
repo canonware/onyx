@@ -50,7 +50,7 @@ thread_entry_func(void * a_arg)
 	    * _LIBSTASH_TEST_NUM_CIRCULATIONS);
        /* Increment in the body. */)
   {
-/*      log_printf(cw_g_log, "%s", foo_struct->thread_name); */
+/*      out_put(cw_g_out, "[s]", foo_struct->thread_name); */
 
     size = buf_get_size(foo_struct->buf_a);
 
@@ -60,8 +60,8 @@ thread_entry_func(void * a_arg)
       buf_catenate_buf(buf, foo_struct->buf_a, FALSE);
     }
     else if ((size + i) < (_LIBSTASH_TEST_NUM_BUFELS *
-		      _LIBSTASH_TEST_SIZEOF_BUFFER 
-		      * _LIBSTASH_TEST_NUM_CIRCULATIONS))
+			   _LIBSTASH_TEST_SIZEOF_BUFFER 
+			   * _LIBSTASH_TEST_NUM_CIRCULATIONS))
     {
       buf_split(buf, foo_struct->buf_a, size);
     }
@@ -92,7 +92,7 @@ thread_entry_func(void * a_arg)
   }
 
   _cw_assert(i == (_LIBSTASH_TEST_NUM_BUFELS * _LIBSTASH_TEST_SIZEOF_BUFFER
-		  * _LIBSTASH_TEST_NUM_CIRCULATIONS));
+		   * _LIBSTASH_TEST_NUM_CIRCULATIONS));
   _cw_assert(0 == buf_get_size(buf));
   
   buf_delete(buf);
@@ -114,7 +114,7 @@ main(int argc, char ** argv)
   cw_uint32_t seed;
   
   libstash_init();
-  log_printf(cw_g_log, "Test begin\n");
+  out_put(cw_g_out, "Test begin\n");
 
 /*    dbg_register(cw_g_dbg, "mem_verbose"); */
 
@@ -151,7 +151,7 @@ main(int argc, char ** argv)
   {
     seed = getpid();
   }
-/*    log_printf(cw_g_log, "seed == %lu\n", seed); */
+/*    out_put(cw_g_out, "seed == [i32]\n", seed); */
   srandom(seed);
   
   foo_a.buf_a = buf_a;
@@ -174,18 +174,18 @@ main(int argc, char ** argv)
   if (_LIBSTASH_TEST_NUM_BUFELS * _LIBSTASH_TEST_SIZEOF_BUFFER
       != buf_get_size(buf_a))
   {
-    log_printf(cw_g_log, "buf_get_size(buf_a) == %lu (should be %lu)\n",
-	       buf_get_size(buf_a),
-	       _LIBSTASH_TEST_NUM_BUFELS * _LIBSTASH_TEST_SIZEOF_BUFFER);
+    out_put(cw_g_out, "buf_get_size(buf_a) == [i32] (should be [i32])\n",
+	    buf_get_size(buf_a),
+	    _LIBSTASH_TEST_NUM_BUFELS * _LIBSTASH_TEST_SIZEOF_BUFFER);
     buf_dump(buf_a, "buf_a ");
-    log_printf(cw_g_log, "seed == %lu\n", seed);
+    out_put(cw_g_out, "seed == [i32]\n", seed);
   }
   if (0 != buf_get_size(&buf_b))
   {
-    log_printf(cw_g_log, "buf_get_size(&buf_b) == %lu (should be 0)\n",
-	       buf_get_size(&buf_b));
+    out_put(cw_g_out, "buf_get_size(&buf_b) == [i32] (should be 0)\n",
+	    buf_get_size(&buf_b));
     buf_dump(&buf_b, "buf_b ");
-    log_printf(cw_g_log, "seed == %lu\n", seed);
+    out_put(cw_g_out, "seed == [i32]\n", seed);
   }
   
   for (i = 0; i < buf_get_size(buf_a); i++)
@@ -194,10 +194,10 @@ main(int argc, char ** argv)
     
     if (c != i % _LIBSTASH_TEST_DATA_MODULUS)
     {
-      log_printf(cw_g_log, "buf_a[%u] == %u, should be %u\n",
-		 i, c, i % _LIBSTASH_TEST_DATA_MODULUS);
+      out_put(cw_g_out, "buf_a[[[i32]] == %u, should be %u\n",
+	      i, c, i % _LIBSTASH_TEST_DATA_MODULUS);
       buf_dump(buf_a, "buf_a ");
-      log_printf(cw_g_log, "seed == %lu\n", seed);
+      out_put(cw_g_out, "seed == [i32]\n", seed);
       break;
     }
   }
@@ -206,7 +206,7 @@ main(int argc, char ** argv)
   buf_delete(&buf_b);
   mtx_delete(&rand_lock);
   
-  log_printf(cw_g_log, "Test end\n");
+  out_put(cw_g_out, "Test end\n");
   libstash_shutdown();
   return 0;
 }

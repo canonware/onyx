@@ -182,6 +182,49 @@ extern cw_out_t * cw_g_out;
                                 << 32))
 #endif
 
+/* 
+ * assert()-alike.  It's a bit prettier and cleaner, but the same idea.
+ */
+#define _cw_error(a) \
+  { \
+    out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__, "Error: [s]\n", a); \
+    abort(); \
+  }
+
+#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
+#define _cw_assert(a) \
+  { \
+    if (!(a)) \
+      { \
+        out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__, \
+		  "Failed assertion: \"[s]\"\n", #a); \
+        abort(); \
+      } \
+  }
+
+/* Macro to ease the drudgery of printing out debugging spew to trace the
+ * execution path. */
+#define _cw_marker(a) \
+  { \
+    out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__, "[s]\n", a); \
+  }
+
+/* Macro to do the drudgery of assuring that a pointer is non-NULL. */
+#define _cw_check_ptr(x) \
+  { \
+    if ((x) == NULL) \
+      { \
+	out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__, \
+		    "[s] is a NULL pointer\n", #x); \
+        abort(); \
+      } \
+  }
+#else
+#  define _cw_assert(a)
+#  define _cw_marker(a)
+#  define _cw_check_ptr(a)
+#endif
+
 #endif /* _LIBSTASH_H_B_ */
 
 #ifdef __cplusplus

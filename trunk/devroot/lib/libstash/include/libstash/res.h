@@ -252,7 +252,7 @@ res_extract_res(cw_res_t * a_res, char * a_res_key,
  * <<< Description >>>
  *
  * Dump the resource database.  If a_filename is non-NULL, attempt to open
- * the specified file and write to it.  Otherwise, use g_log.
+ * the specified file and write to it.  Otherwise, use cw_g_out.
  *
  ****************************************************************************/
 cw_bool_t

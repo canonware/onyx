@@ -30,7 +30,7 @@ main()
   cw_sint32_t ins_error;
 
   libstash_init();
-  log_printf(cw_g_log, "Test begin\n");
+  out_put(cw_g_out, "Test begin\n");
   
   oh_new(&hash, FALSE);
 /*   dbg_register(cw_g_dbg, "oh_slot"); */
@@ -40,76 +40,74 @@ main()
   for (i = 0; i < NUM_STRINGS; i++)
   {
     strings[i] = (char *) _cw_malloc(sizeof(char) * 50);
-    sprintf(strings[i], "(%d) This is string %d", i, i);
+    out_put_s(cw_g_out, strings[i], "([i32]) This is string [i32]", i, i);
   }
 
 /*   h1_ptr = oh_get_h1(hash); */
 /*   oh_set_h1(hash, new_h1); */
 
-/*   log_printf(cw_g_log, "<<< Begin first insertion loop >>>\n"); */
+/*   out_put(cw_g_out, "<<< Begin first insertion loop >>>\n"); */
   for (i = 0; i < NUM_STRINGS; i++)
   {
-/*     log_printf(cw_g_log, "<<< Iteration %d >>>\n", i); */
+/*     out_put(cw_g_out, "<<< Iteration [i32] >>>\n", i); */
     ins_error = oh_item_insert(&hash, (void *) strings[i],
-				 (void *) &(strings[i]));
+			       (void *) &(strings[i]));
     if (ins_error == 1)
     {
-      log_printf(cw_g_log, "(1) Error at i == %d\n", i);
+      out_put(cw_g_out, "(1) Error at i == [i32]\n", i);
       oh_dump(&hash, FALSE);
       exit(1);
     }
   }
 
-/*   log_printf(cw_g_log, "<<< Begin first deletion loop >>>\n"); */
+/*   out_put(cw_g_out, "<<< Begin first deletion loop >>>\n"); */
   for (i = 0; i < (NUM_STRINGS / 2); i++)
   {
     error = oh_item_delete(&hash, (void *) strings[i],
 			   (void **) &junk, (void **) &junk);
     if (error == TRUE)
     {
-      log_printf(cw_g_log, "(2) Error at i == %d\n", i);
+      out_put(cw_g_out, "(2) Error at i == [i32]\n", i);
       oh_dump(&hash, FALSE);
       exit(1);
     }
   }
 
-/*   log_printf(cw_g_log, "<<< Begin second insertion loop >>>\n"); */
+/*   out_put(cw_g_out, "<<< Begin second insertion loop >>>\n"); */
   for (i = 0; i < NUM_STRINGS / 2; i++)
   {
     ins_error = oh_item_insert(&hash, (void *) strings[i],
-				 (void *) &(strings[i]));
+			       (void *) &(strings[i]));
     if (ins_error == 1)
     {
-      log_printf(cw_g_log, "(3) Error at i == %d\n", i);
+      out_put(cw_g_out, "(3) Error at i == [i32]\n", i);
       oh_dump(&hash, FALSE);
       exit(1);
     }
   }
 
-/*   log_printf(cw_g_log, "<<< Begin second deletion loop >>>\n"); */
+/*   out_put(cw_g_out, "<<< Begin second deletion loop >>>\n"); */
   for (i = 0; i < NUM_STRINGS; i++)
   {
     error = oh_item_delete(&hash, (void *) strings[i],
-				 (void **) &junk, (void **) &junk);
+			   (void **) &junk, (void **) &junk);
     if (error == TRUE)
     {
-      log_printf(cw_g_log, "(4) Error at i == %d\n", i);
+      out_put(cw_g_out, "(4) Error at i == [i32]\n", i);
       oh_dump(&hash, FALSE);
       exit(1);
     }
   }
 
-/*   log_printf(cw_g_log, "<<< Final insertion >>>\n"); */
+/*   out_put(cw_g_out, "<<< Final insertion >>>\n"); */
   ins_error = oh_item_insert(&hash, (void *) strings[0],
-			       (void *) &(strings[0]));
+			     (void *) &(strings[0]));
   
   {
-    char t_buf[21];
-    
-    log_printf(cw_g_log, "Table size: %s\n",
-	       log_print_uint64(oh_get_size(&hash), 10, t_buf));
-    log_printf(cw_g_log, "Number of items: %s\n",
-	       log_print_uint64(oh_get_num_items(&hash), 10, t_buf));
+    out_put(cw_g_out, "Table size: [i64]\n",
+	    oh_get_size(&hash));
+    out_put(cw_g_out, "Number of items: [i64]\n",
+	    oh_get_num_items(&hash));
   }
 
 /*   oh_dump(&hash, FALSE); */
@@ -121,7 +119,7 @@ main()
   _cw_free(strings);
 
   oh_delete(&hash);
-  log_printf(cw_g_log, "Test end\n");
+  out_put(cw_g_out, "Test end\n");
   libstash_shutdown();
   
   return 0;

@@ -259,7 +259,7 @@ jtl_tlock(cw_jtl_t * a_jtl, cw_jtl_tq_el_t * a_tq_el)
   mtx_lock(&a_jtl->lock);
   
   if ((a_jtl->tlock_holders == 0)
-	   && (a_tq_el == ring_get_data(a_jtl->tlock_wait_ring)))
+      && (a_tq_el == ring_get_data(a_jtl->tlock_wait_ring)))
   {
     /* This thread is first in line. */
     a_jtl->tlock_wait_ring = ring_cut(a_jtl->tlock_wait_ring);

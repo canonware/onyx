@@ -170,7 +170,7 @@ pezz_put(void * a_pezz, void * a_buffer);
  *
  * <<< Description >>>
  *
- * Dump the internal state of a_pezz to cw_g_log.
+ * Dump the internal state of a_pezz to cw_g_out.
  *
  ****************************************************************************/
 void

@@ -165,7 +165,7 @@ bhp_delete(cw_bhp_t * a_bhp);
  *
  * <<< Description >>>
  *
- * Print the internal tree to cw_g_log.
+ * Print the internal tree to cw_g_out.
  *
  ****************************************************************************/
 void

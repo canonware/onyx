@@ -32,7 +32,7 @@ int
 main()
 {
   libstash_init();
-  log_printf(cw_g_log, "Test begin\n");
+  out_put(cw_g_out, "Test begin\n");
 
 /*    dbg_register(cw_g_dbg, "mem_verbose"); */
 
@@ -91,7 +91,6 @@ main()
     cw_uint64_t t_uint64;
     char * buffer;
     cw_uint32_t * buffer_cast;
-    char buf[17];
 
     buf_p = buf_new(NULL, TRUE);
 
@@ -119,58 +118,64 @@ main()
     buf_append_bufc(buf_p, &bufc, 0, 512);
     bufc_delete(&bufc);
     
-    log_printf(cw_g_log, "lower char dump:\n");
+    out_put(cw_g_out, "lower char dump:\n");
     for (i = 0; i < 256; i += 8)
     {
-      log_printf(cw_g_log,
-		 "%03u->0x%02x:%03u->0x%02x:%03u->0x%02x:%03u->0x%02x:"
-		 "%03u->0x%02x:%03u->0x%02x:%03u->0x%02x:%03u->0x%02x\n",
-		 i, buf_get_uint8(buf_p, i),
-		 i + 1, buf_get_uint8(buf_p, i + 1),
-		 i + 2, buf_get_uint8(buf_p, i + 2),
-		 i + 3, buf_get_uint8(buf_p, i + 3),
-		 i + 4, buf_get_uint8(buf_p, i + 4),
-		 i + 5, buf_get_uint8(buf_p, i + 5),
-		 i + 6, buf_get_uint8(buf_p, i + 6),
-		 i + 7, buf_get_uint8(buf_p, i + 7));
+      out_put(cw_g_out,
+	      "[i32|w:3|p:0]->0x[i8|w:2|p:0|b:16]:"
+	      "[i32|w:3|p:0]->0x[i8|w:2|p:0|b:16]:"
+	      "[i32|w:3|p:0]->0x[i8|w:2|p:0|b:16]:"
+	      "[i32|w:3|p:0]->0x[i8|w:2|p:0|b:16]:"
+	      "[i32|w:3|p:0]->0x[i8|w:2|p:0|b:16]:"
+	      "[i32|w:3|p:0]->0x[i8|w:2|p:0|b:16]:"
+	      "[i32|w:3|p:0]->0x[i8|w:2|p:0|b:16]:"
+	      "[i32|w:3|p:0]->0x[i8|w:2|p:0|b:16]\n",
+	      i, buf_get_uint8(buf_p, i),
+	      i + 1, buf_get_uint8(buf_p, i + 1),
+	      i + 2, buf_get_uint8(buf_p, i + 2),
+	      i + 3, buf_get_uint8(buf_p, i + 3),
+	      i + 4, buf_get_uint8(buf_p, i + 4),
+	      i + 5, buf_get_uint8(buf_p, i + 5),
+	      i + 6, buf_get_uint8(buf_p, i + 6),
+	      i + 7, buf_get_uint8(buf_p, i + 7));
     }
 
-    log_printf(cw_g_log, "upper long dump:\n");
+    out_put(cw_g_out, "upper long dump:\n");
     for (i = 256; i < 512; i += 8)
     {
       t_uint32_a = buf_get_uint32(buf_p, i);
       t_uint32_b = buf_get_uint32(buf_p, i + 4);
       
-      log_printf(cw_g_log, "%03u->0x%08x:%03u->0x%08x\n",
-		 i, t_uint32_a,
-		 i + 4, t_uint32_b);
+      out_put(cw_g_out, "[i32|w:3|p:0]->0x[i32|w:8|p:0|b:16]:[i32|w:3|p:0]->0x[i32|w:8|p:0|b:16]\n",
+	      i, t_uint32_a,
+	      i + 4, t_uint32_b);
     }
 
-    log_printf(cw_g_log, "upper quad dump:\n");
+    out_put(cw_g_out, "upper quad dump:\n");
     for (i = 256; i < 512; i += 8)
     {
       t_uint64 = buf_get_uint64(buf_p, i);
       
-      log_printf(cw_g_log, "%03u->0x%s\n",
-		 i, log_print_uint64(t_uint64, 16, buf));
+      out_put(cw_g_out, "[i32|w:3|p:0]->0x[i64|b:16|w:16|p:0]\n",
+	      i, t_uint64);
     }
     
     /* Unaligned gets. */
-    log_printf(cw_g_log, "Unaligned buf_get_uint32():\n");
+    out_put(cw_g_out, "Unaligned buf_get_uint32():\n");
     for (i = 1; i < 4; i++)
     {
       t_uint32_a = buf_get_uint32(buf_p, 256 + i);
       
-      log_printf(cw_g_log, "%03u->0x%08x\n",
-		 256 + i, t_uint32_a);
+      out_put(cw_g_out, "[i32|w:3|p:0]->0x[i32|w:8|p:0|b:16]\n",
+	      256 + i, t_uint32_a);
     }
     
-    log_printf(cw_g_log, "Unaligned buf_get_uint64():\n");
+    out_put(cw_g_out, "Unaligned buf_get_uint64():\n");
     for (i = 1; i < 8; i++)
     {
-      log_printf(cw_g_log, "%03u->0x%s\n",
-		 256 + i,
-		 log_print_uint64(buf_get_uint64(buf_p, 256 + i), 16, buf));
+      out_put(cw_g_out, "[i32|w:3|p:0]->0x[i64|b:16|w:16|p:0]\n",
+	      256 + i,
+	      buf_get_uint64(buf_p, 256 + i));
     }
     
     buf_delete(buf_p);
@@ -182,7 +187,6 @@ main()
     cw_buf_t buf;
     cw_bufc_t * bufc_p;
     cw_uint8_t * a, b[2], c[3], * d, * e, f[11];
-    cw_uint8_t t_buf[17];
     cw_uint32_t i;
     int iov_count;
     const struct iovec * iov;
@@ -329,19 +333,19 @@ main()
 
     _cw_assert(24 == buf_get_size(&buf));
 
-    log_printf(cw_g_log, "Hodge podge buf_get_uint32():\n");
+    out_put(cw_g_out, "Hodge podge buf_get_uint32():\n");
     for (i = 0; i <= 20; i++)
     {
-      log_printf(cw_g_log, "%03u->0x%08x\n",
-		 i, buf_get_uint32(&buf, i));
+      out_put(cw_g_out, "[i32|w:3|p:0]->0x[i32|w:8|p:0|b:16]\n",
+	      i, buf_get_uint32(&buf, i));
     }
     
-    log_printf(cw_g_log, "Hodge podge buf_get_uint64():\n");
+    out_put(cw_g_out, "Hodge podge buf_get_uint64():\n");
     for (i = 0; i <= 16; i++)
     {
-      log_printf(cw_g_log, "%03u->0x%s\n",
-		 i,
-		 log_print_uint64(buf_get_uint64(&buf, i), 16, t_buf));
+      out_put(cw_g_out, "[i32|w:3|p:0]->0x[i64|b:16|w:16|p:0]\n",
+	      i,
+	      buf_get_uint64(&buf, i));
     }
 
     buf_delete(&buf);
@@ -1150,7 +1154,7 @@ main()
     buf_delete(&buf_c);
   }
 
-  log_printf(cw_g_log, "Test end\n");
+  out_put(cw_g_out, "Test end\n");
   libstash_shutdown();
   return 0;
 }
