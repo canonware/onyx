@@ -1234,6 +1234,10 @@ sockb_p_entry_func(void * a_arg)
 				TRUE,
 				&iovec_count);
 
+	  /* XXX If the buf exceeds the maximum iovec, it's possible that we'll
+	   * only write part of the data, when we could have written it all.
+	   * This is in practice very unlikely though, and doesn't cause
+	   * erroneous behavior. */
 	  bytes_written = writev(sockfd, iovec, iovec_count);
 #ifdef _LIBSTASH_SOCKB_CONFESS
 	  out_put(cw_g_out, "([i|s:s]/[i])", bytes_written,

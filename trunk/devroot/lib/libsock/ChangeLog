@@ -1,3 +1,8 @@
+1999-09-08  Jason Evans  <jasone@canonware.com>
+
+	* src/sock.c (sock_write): Try to write data immediately instead
+	of always forcing a context switch to the sockb thread.
+
 1999-09-06  Jason Evans  <jasone@canonware.com>
 
 	* bin/proxy.c : Add the -f flag and support hex and ascii logging.

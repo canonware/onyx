@@ -42,6 +42,7 @@ struct cw_sock_s
   cw_cnd_t in_cnd;
 
   cw_mtx_t out_lock;
+  cw_bool_t sockb_in_progress;
   cw_buf_t out_buf;
   cw_uint32_t out_need_broadcast_count;
   cw_bool_t out_is_flushed;

@@ -81,6 +81,7 @@ sock_new(cw_sock_t * a_sock, cw_uint32_t a_in_max_buf_size)
   cnd_new(&retval->in_cnd);
 
   mtx_new(&retval->out_lock);
+  retval->sockb_in_progress = FALSE;
   retval->out_need_broadcast_count = 0;
   retval->out_is_flushed = TRUE;
   cnd_new(&retval->out_cnd);
@@ -556,6 +557,7 @@ cw_bool_t
 sock_write(cw_sock_t * a_sock, cw_buf_t * a_buf)
 {
   cw_bool_t retval;
+  cw_uint32_t out_buf_size;
   
   _cw_check_ptr(a_sock);
   _cw_check_ptr(a_buf);
@@ -570,6 +572,68 @@ sock_write(cw_sock_t * a_sock, cw_buf_t * a_buf)
 
   if (0 < buf_get_size(a_buf))
   {
+    if (TRUE == buf_catenate_buf(&a_sock->out_buf, a_buf, FALSE))
+    {
+      retval = TRUE;
+      goto RETURN;
+    }
+
+    out_buf_size = buf_get_size(&a_sock->out_buf);
+
+#if (1)
+    if ((FALSE == a_sock->sockb_in_progress)
+	&& (TRUE == a_sock->out_is_flushed))
+    {
+      const struct iovec * iovec;
+      int iovec_count;
+      cw_uint32_t bytes_written;
+     
+      /* Try to write the data immediately, instead of always context switching
+       * to the sockb thread. */
+      iovec = buf_get_iovec(&a_sock->out_buf,
+			    out_buf_size,
+			    TRUE,
+			    &iovec_count);
+      
+      bytes_written = writev(a_sock->sockfd, iovec, iovec_count);
+
+      if (0 <= bytes_written)
+      {
+	buf_release_head_data(&a_sock->out_buf, bytes_written);
+	out_buf_size -= bytes_written;
+      }
+      else
+      {
+	/* Socket error.  Unregister the socket. */
+
+	/* sock_p_disconnect() locks out_lock, so avoid deadlock. */
+	mtx_unlock(&a_sock->out_lock);
+	
+	sock_p_disconnect(a_sock);
+	retval = TRUE;
+	goto WRITE_ERROR;
+      }
+      
+      if (0 < out_buf_size)
+      {
+	if (TRUE == a_sock->out_is_flushed)
+	{
+	  /* Notify the sockb that we now have data. */
+	  if (TRUE == sockb_l_out_notify(a_sock->sockfd))
+	  {
+	    retval = TRUE;
+	    goto RETURN;
+	  }
+	  a_sock->out_is_flushed = FALSE;
+	}
+      }
+      else
+      {
+	a_sock->out_is_flushed = TRUE;
+      }
+    }
+    else
+#endif
     if (a_sock->out_is_flushed == TRUE)
     {
       /* Notify the sockb that we now have data. */
@@ -580,18 +644,13 @@ sock_write(cw_sock_t * a_sock, cw_buf_t * a_buf)
       }
       a_sock->out_is_flushed = FALSE;
     }
-    
-    if (TRUE == buf_catenate_buf(&a_sock->out_buf, a_buf, FALSE))
-    {
-      retval = TRUE;
-      goto RETURN;
-    }
   }
-    
+  
   retval = FALSE;
 
   RETURN:
   mtx_unlock(&a_sock->out_lock);
+  WRITE_ERROR:
   return retval;
 }
 
@@ -700,21 +759,9 @@ sock_l_get_out_data(cw_sock_t * a_sock, cw_buf_t * r_buf)
     buf_catenate_buf(r_buf, &a_sock->out_buf, FALSE);
   }
 
-  /* XXX This probably doesn't need to be here, since sock_l_put_back_out_data()
-   * is always called afterwards, at least in non-error situations. */
-#if (0)
-  if (buf_get_size(r_buf) == 0)
-  {
-    /* No data was available. */
-    a_sock->out_is_flushed = TRUE;
+  /* Make a note that the sockb thread currently has data. */
+  a_sock->sockb_in_progress = TRUE;
 
-    if (a_sock->out_need_broadcast_count > 0)
-    {
-      /* One or more threads want a signal. */
-      cnd_broadcast(&a_sock->out_cnd);
-    }
-  }
-#endif
   mtx_unlock(&a_sock->out_lock);
 }
 
@@ -727,6 +774,11 @@ sock_l_put_back_out_data(cw_sock_t * a_sock, cw_buf_t * a_buf)
   _cw_check_ptr(a_buf);
 
   mtx_lock(&a_sock->out_lock);
+
+  /* Make a note that the sockb thread gave our data back, or got rid of it for
+   * us. */
+  a_sock->sockb_in_progress = FALSE;
+  
   /* It's very unlikely that a memory error would occur in buf_catenate_buf()
    * here, since we previously had at least as much data buffered in a_sock, and
    * a_buf tends to have a sufficiently expanded bufel array.  However, an error
