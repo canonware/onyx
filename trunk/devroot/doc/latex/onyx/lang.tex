@@ -9135,24 +9135,27 @@ onyx:0>
 	\end{description}
 \label{systemdict:sbdup}
 \index{sbdup@\onyxop{}{sbdup}{}}
-\item[{\onyxop{OPARGS}{sbdup}{OPOUTS}}: ]
+\item[{\onyxop{stack}{sbdup}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[stack: ]
+			A stack object.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Duplicate the bottom object on \oparg{stack} and push it onto
+		\oparg{stack}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> (2 1 0) dup sbdup pstack
+(2 1 0 2)
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sbpop}
@@ -9320,24 +9323,26 @@ onyx:0>
 	\end{description}
 \label{systemdict:sdn}
 \index{sdn@\onyxop{}{sdn}{}}
-\item[{\onyxop{OPARGS}{sdn}{OPOUTS}}: ]
+\item[{\onyxop{stack}{sdn}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[stack: ]
+			A stack object.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Rotate the top three objects on \oparg{stack} down one position.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> (3 2 1 0) dup sdn pstack
+(3 1 0 2)
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sdup}
@@ -9952,24 +9957,32 @@ onyx:0>
 	\end{description}
 \label{systemdict:sibdup}
 \index{sibdup@\onyxop{}{sibdup}{}}
-\item[{\onyxop{OPARGS}{sibdup}{OPOUTS}}: ]
+\item[{\onyxop{stack index}{sibdup}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[stack: ]
+			A stack object.
+		\item[index: ]
+			Offset from bottom of \oparg{stack}, counting from 0, of
+			the object to duplicate.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
+		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Create a duplicate of the object on \oparg{stack} that is at
+		offset \oparg{index} from the bottom of \oparg{stack} and push
+		it onto \oparg{stack}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> (3 2 1 0) dup 2 sibdup pstack
+(3 2 1 0 1)
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sibpop}
@@ -10167,59 +10180,73 @@ onyx:2>
 	\end{description}
 \label{systemdict:sndn}
 \index{sndn@\onyxop{}{sndn}{}}
-\item[{\onyxop{OPARGS}{sndn}{OPOUTS}}: ]
+\item[{\onyxop{stack count}{sndn}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[stack: ]
+			A stack object.
+		\item[count: ]
+			Number of objects on \oparg{stack} to rotate down one
+			position.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Rotate \oparg{count} objects on \oparg{stack} down one position.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> (5 4 3 2 1 0) dup 4 sndn pstack
+(5 4 2 1 0 3)
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sndup}
 \index{sndup@\onyxop{}{sndup}{}}
-\item[{\onyxop{OPARGS}{sndup}{OPOUTS}}: ]
+\item[{\onyxop{stack count}{sndup}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[stack: ]
+			A stack object.
+		\item[count: ]
+			Number of objects on \oparg{stack} to duplicate.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
+		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Create duplicates of the top \oparg{count} objects on
+		\oparg{stack}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> (3 2 1 0) dup 2 sndup pstack
+(3 2 1 0 1 0)
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:snip}
 \index{snip@\onyxop{}{snip}{}}
-\item[{\onyxop{OPARGS}{snip}{OPOUTS}}: ]
+\item[{\onyxop{stack}{snip}{obj}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[stack: ]
+			A stack object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[obj: ]
+			The object that was the second to top object on
+			\oparg{stack}.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
@@ -10227,8 +10254,13 @@ onyx:2>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Remove the second to top object from \oparg{stack}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> (2 1 0) dup snip pstack
+1
+(2 0)
+onyx:2>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:snpop}
@@ -10267,46 +10299,55 @@ onyx:2>
 	\end{description}
 \label{systemdict:snup}
 \index{snup@\onyxop{}{snup}{}}
-\item[{\onyxop{OPARGS}{snup}{OPOUTS}}: ]
+\item[{\onyxop{stack count}{snup}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[stack: ]
+			A stack object.
+		\item[count: ]
+			Number of objects on \oparg{stack} to rotate up one
+			position.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
+		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Rotate \oparg{count} objects on \oparg{stack} up one position.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> (5 4 3 2 1 0) dup 4 snup pstack
+(5 4 0 3 2 1)
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sover}
 \index{sover@\onyxop{}{sover}{}}
-\item[{\onyxop{OPARGS}{sover}{OPOUTS}}: ]
+\item[{\onyxop{stack}{sover}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[stack: ]
+			A stack object.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Create a duplicate of the second object on \oparg{stack} and
+		push it onto \oparg{stack}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> (2 1 0) dup sover pstack
+(2 1 0 1)
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:spop}
@@ -10847,23 +10888,27 @@ onyx:0>
 	\end{description}
 \label{systemdict:stuck}
 \index{stuck@\onyxop{}{stuck}{}}
-\item[{\onyxop{OPARGS}{stuck}{OPOUTS}}: ]
+\item[{\onyxop{stack}{stuck}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[stack: ]
+			A stack object.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Tuck duplicate of top object on \oparg{stack} under second
+		object on \oparg{stack}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> (2 1 0) dup stuck pstack
+(2 0 1 0)
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sub}
@@ -10906,46 +10951,51 @@ onyx:0>
 	\end{description}
 \label{systemdict:sunder}
 \index{sunder@\onyxop{}{sunder}{}}
-\item[{\onyxop{OPARGS}{sunder}{OPOUTS}}: ]
+\item[{\onyxop{stack}{sunder}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[stack: ]
+			A stack object.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Create a duplicate of the second object on \oparg{stack} and put
+		it under the top object on \oparg{stack}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> (2 1 0) dup sunder pstack
+(2 1 1 0)
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sup}
 \index{sup@\onyxop{}{sup}{}}
-\item[{\onyxop{OPARGS}{sup}{OPOUTS}}: ]
+\item[{\onyxop{stack}{sup}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[stack: ]
+			A stack object.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Rotate the top three objects on \oparg{stack} up one position.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> (3 2 1 0) dup sup pstack
+(3 0 2 1)
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:symlink}
