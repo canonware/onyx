@@ -1,3 +1,12 @@
+2000-10-23  Jason Evans  <jasone@canonware.com>
+
+	* : Move (hopefully) all internal memory allocation error handling
+	to using the xep class.
+
+2000-10-19  Jason Evans  <jasone@canonware.com>
+
+	* include/libstash/libstash.h (_cw_not_reached): Add.
+
 2000-10-16  Jason Evans  <jasone@canonware.com>
 
 	* : libstash_init() now *must* be called in order for the thd and
@@ -22,7 +31,7 @@
 
 2000-07-22  Jason Evans  <jasone@canonware.com>
 
-	* : Re-order many funtion name components for consistency.
+	* : Re-order many function name components for consistency.
 
 	* test/c_tsd_a.c: Add tsd test.
 

@@ -72,10 +72,12 @@ Output(s):
 .RS
 .IR retval :
 .RS
-non-NULL: Pointer to a dbg.
-.br
-NULL: Memory allocation error.
+Pointer to a dbg.
 .RE
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -96,6 +98,10 @@ Pointer to a dbg.
 .RE
 .RE
 Output(s):
+.RS
+None.
+.RE
+Exception(s):
 .RS
 None.
 .RE
@@ -127,8 +133,12 @@ Output(s):
 .RS
 FALSE: Success.
 .br
-TRUE: Memory allocation error, or a_dbg is NULL.
+TRUE: a_dbg is NULL.
 .RE
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -153,6 +163,10 @@ Pointer to a string that represents a debugging flag.
 .RE
 .RE
 Output(s):
+.RS
+None.
+.RE
+Exception(s):
 .RS
 None.
 .RE
@@ -186,6 +200,10 @@ TRUE: Registered.
 .br
 FALSE: Not registered, or a_dbg is NULL.
 .RE
+.RE
+Exception(s):
+.RS
+None.
 .RE
 Description:
 .RS

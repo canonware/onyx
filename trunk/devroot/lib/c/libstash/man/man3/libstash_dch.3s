@@ -31,7 +31,7 @@ dch - Dynamic chained hashing.
 .B dch_count
 .RI ( "cw_dch_t *a_dch" )
 
-.I cw_bool_t
+.I void
 .br
 .B dch_insert
 .RI ( "cw_dch_t *a_dch" ", " "const void *a_key" ", " 
@@ -120,10 +120,12 @@ Output(s):
 .RS
 .IR retval :
 .RS
-non-NULL: Pointer to a dch.
-.br
-NULL: Memory allocation error.
+Pointer to a dch.
 .RE
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -144,6 +146,10 @@ Pointer to a dch.
 .RE
 .RE
 Output(s):
+.RS
+None.
+.RE
+Exception(s):
 .RS
 None.
 .RE
@@ -172,13 +178,17 @@ Output(s):
 Number of items in a_dch.
 .RE
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Return the number of items in a_dch.
 .RE
 .RE
 
-.I cw_bool_t
+.I void
 .br
 .B dch_insert
 .RI ( "cw_dch_t *a_dch" ", " "const void *a_key" ", " 
@@ -205,12 +215,11 @@ Pointer to space for a chi, or NULL.
 .RE
 Output(s):
 .RS
-.IR retval :
-.RS
-FALSE: Success.
-.br
-TRUE: Memory allocation error.
+None.
 .RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -274,6 +283,10 @@ If (r_chi != NULL) and (retval == FALSE): Pointer to space for a chi, or NULL.
 Otherwise: Undefined.
 .RE
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Remove the item from a_dch that was most recently inserted with key
@@ -314,6 +327,10 @@ TRUE: Item with key a_key not found in a_dch.
 .RS
 If (r_data != NULL) and (retval == FALSE): Pointer to data.
 .RE
+.RE
+Exception(s):
+.RS
+None.
 .RE
 Description:
 .RS
@@ -362,6 +379,10 @@ If (r_data != NULL) and (retval == FALSE): Pointer to data.
 .br
 Otherwise: Undefined.
 .RE
+.RE
+Exception(s):
+.RS
+None.
 .RE
 Description:
 .RS
@@ -422,6 +443,10 @@ If (r_chi != NULL) and (retval == FALSE): Pointer to a chi, or NULL.
 Otherwise: Undefined.
 .RE
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Set *r_key and *r_data to point to the oldest item in a_dch, and remove the item
@@ -448,6 +473,10 @@ A text string to prefix to all output.
 Output(s):
 .RS
 Internal state of a_dch printed to cw_g_out.
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS

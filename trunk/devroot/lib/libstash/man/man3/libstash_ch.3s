@@ -29,7 +29,7 @@ ch - Chained hashing.
 .B ch_count
 .RI ( "cw_ch_t *a_ch" )
 
-.I cw_bool_t
+.I void
 .br
 .B ch_insert
 .RI ( "cw_ch_t *a_ch" ", " "const void *a_key" ", " "const void *a_data" 
@@ -140,10 +140,12 @@ Output(s):
 .RS
 .IR retval :
 .RS
-non-NULL: Pointer to a ch.
-.br
-NULL: Memory allocation error.
+Pointer to a ch.
 .RE
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -164,6 +166,10 @@ Pointer to a ch.
 .RE
 .RE
 Output(s):
+.RS
+None.
+.RE
+Exception(s):
 .RS
 None.
 .RE
@@ -192,13 +198,17 @@ Output(s):
 Number of items in a_ch.
 .RE
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Return the number of items in a_ch.
 .RE
 .RE
 
-.I cw_bool_t
+.I void
 .br
 .B ch_insert
 .RI ( "cw_ch_t *a_ch" ", " "const void *a_key" ", " "const void *a_data"
@@ -225,12 +235,11 @@ Pointer to space for a chi, or NULL.
 .RE
 Output(s):
 .RS
-.IR retval :
-.RS
-FALSE: Success.
-.br
-TRUE: Memory allocation error.  Cannot occur if (a_chi != NULL).
+None.
 .RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -295,6 +304,10 @@ If (r_chi != NULL) and (retval == FALSE): Pointer to space for a chi, or NULL.
 Otherwise: Undefined.
 .RE
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Remove the item from a_ch that was most recently inserted with key
@@ -335,6 +348,10 @@ TRUE: Item with key a_key not found in a_ch.
 .RS
 If (r_data != NULL) and (retval == FALSE): Pointer to data.
 .RE
+.RE
+Exception(s):
+.RS
+None.
 .RE
 Description:
 .RS
@@ -383,6 +400,10 @@ If (r_data != NULL) and (retval == FALSE): Pointer to data.
 .br
 Otherwise: Undefined.
 .RE
+.RE
+Exception(s):
+.RS
+None.
 .RE
 Description:
 .RS
@@ -443,6 +464,10 @@ If (r_chi != NULL) and (retval == FALSE): Pointer to a chi, or NULL.
 Otherwise: Undefined.
 .RE
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Set *r_key and *r_data to point to the oldest item in a_ch, set *r_chi to point
@@ -470,6 +495,10 @@ Output(s):
 .RS
 Internal state of a_ch printed to cw_g_out.
 .RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
+.RE
 Description:
 .RS
 Print the internal state of a_ch.
@@ -495,6 +524,10 @@ Output(s):
 Hash result.
 .RE
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 NULL-terminated string hashing function.
@@ -519,6 +552,10 @@ Output(s):
 .RS
 Hash result.
 .RE
+.RE
+Exception(s):
+.RS
+None.
 .RE
 Description:
 .RS
@@ -551,6 +588,10 @@ FALSE: Not equal.
 TRUE: Equal.
 .RE
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Test two keys (NULL-terminated strings) for equality.
@@ -581,6 +622,10 @@ FALSE: Not equal.
 .br
 TRUE: Equal.
 .RE
+.RE
+Exception(s):
+.RS
+None.
 .RE
 Description:
 .RS

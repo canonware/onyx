@@ -52,7 +52,6 @@ void	*sig_handler(void *a_arg);
 char	*get_out_str_pretty(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str);
 char	*get_out_str_hex(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str);
 char	*get_out_str_ascii(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str);
-cw_bool_t oom_handler(const void *a_data, cw_uint32_t a_size);
 void	*handle_client_send(void *a_arg);
 void	*handle_client_recv(void *a_arg);
 void	usage(void);
@@ -79,7 +78,6 @@ main(int argc, char **argv)
 	char		*opt_rhost = NULL, *opt_dirname = NULL;
 
 	libstash_init();
-	mem_set_oom_handler(cw_g_mem, oom_handler, NULL);
 	g_progname = basename(argv[0]);
 	dbg_register(cw_g_dbg, "prog_error");
 	dbg_register(cw_g_dbg, "libsock_error");
@@ -940,19 +938,7 @@ get_out_str_ascii(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 	return retval;
 }
 
-cw_bool_t
-oom_handler(const void *a_data, cw_uint32_t a_size)
-{
-	if (dbg_is_registered(cw_g_dbg, "ncat_error")) {
-		_cw_out_put("[s]: Memory allocation error for size [i]\n",
-		    g_progname, a_size);
-	}
-	exit(1);
-
-	return FALSE;
-}
-
-void   *
+void *
 handle_client_send(void *a_arg)
 {
 	cw_buf_t	buf;
@@ -1014,7 +1000,7 @@ handle_client_send(void *a_arg)
 					    str);
 					break;
 				default:
-					_cw_error("Programming error");
+					_cw_not_reached();
 				}
 
 				out_put(conn->out, "[s]", str);
@@ -1091,7 +1077,7 @@ handle_client_recv(void *a_arg)
 					    str);
 					break;
 				default:
-					_cw_error("Programming error");
+					_cw_not_reached();
 				}
 
 				out_put(conn->out, "[s]", str);

@@ -482,8 +482,7 @@ main()
 
 		for (i = 0; i < 26; i++) {
 			_cw_assert(i == buf_uint8_get(&buf, i));
-			_cw_assert(buf_uint8_set(&buf, i, (~i) & 0xff) ==
-			    FALSE);
+			buf_uint8_set(&buf, i, (~i) & 0xff);
 			_cw_assert(buf_uint8_get(&buf, i) == ((~i) & 0xff));
 		}
 
@@ -626,7 +625,7 @@ main()
 		for (i = 0; i < 23; i++) {
 			t_uint32 = ~buf_uint32_get(&buf, i);
 
-			_cw_assert(buf_uint32_set(&buf, i, t_uint32) == FALSE);
+			buf_uint32_set(&buf, i, t_uint32);
 /*  			_cw_out_put("t_uint32: 0x[i|b:16], " */
 /*  			    "buf_uint32_get(&buf, [i]): 0x[i|b:16]\n", */
 /*  			    t_uint32, i, buf_uint32_get(&buf, i)); */
@@ -772,7 +771,7 @@ main()
 		for (i = 0; i < 19; i++) {
 			t_uint64 = ~buf_uint64_get(&buf, i);
 
-			_cw_assert(buf_uint64_set(&buf, i, t_uint64) == FALSE);
+			buf_uint64_set(&buf, i, t_uint64);
 			_cw_assert(buf_uint64_get(&buf, i) == t_uint64);
 		}
 
@@ -800,18 +799,18 @@ main()
 		buf = buf_new_r(NULL, cw_g_mem);
 		_cw_check_ptr(buf);
 
-		_cw_assert(buf_range_set(buf, 0, strlen(str_a) + 1, (cw_uint8_t
-		    *)str_a, FALSE) == FALSE);
-		_cw_assert(buf_range_set(buf, strlen(str_a) + 1, strlen(str_b) +
-		    1, (cw_uint8_t *)str_b, FALSE) == FALSE);
+		buf_range_set(buf, 0, strlen(str_a) + 1, (cw_uint8_t *)str_a,
+		    FALSE);
+		buf_range_set(buf, strlen(str_a) + 1, strlen(str_b) + 1,
+		    (cw_uint8_t *)str_b, FALSE);
 		_cw_assert(buf_size_get(buf) == (strlen(str_a) + strlen(str_b) +
 		    2));
 		buf_head_data_release(buf, buf_size_get(buf));
 
-		_cw_assert(buf_range_set(buf, 0, strlen(str_a) + 1, (cw_uint8_t
-		    *)str_a, TRUE) == FALSE);
-		_cw_assert(buf_range_set(buf, 4, strlen(str_b) + 1, (cw_uint8_t
-		    *)str_b, TRUE) == FALSE);
+		buf_range_set(buf, 0, strlen(str_a) + 1, (cw_uint8_t *)str_a,
+		    TRUE);
+		buf_range_set(buf, 4, strlen(str_b) + 1, (cw_uint8_t *)str_b,
+		    TRUE);
 
 		buf_delete(buf);
 	}

@@ -17,6 +17,7 @@ typedef cw_sint32_t cw_xepv_t;
 #define	_CW_XEPV_NONE		 0
 #define	_CW_XEPV_CODE		 _CW_XEPV_NONE
 #define	_CW_XEPV_FINALLY	-1
+#define	_CW_XEPV_OOM		-2
 /*
  * Exceptions should be numbered negatively, and care should be taken to avoid
  * duplicates.  -1 through -127 are reserved by libstash.
@@ -38,34 +39,31 @@ struct cw_xep_s {
 	cw_uint32_t	line_num;
 };
 
-#define	xep_value()	((cw_xepv_t)_xep.value)
+#define xep_begin()							\
+	{								\
+		cw_xep_t	_xep
 
 #define	xep_try								\
-	for (;;) {							\
-		cw_xep_t	_xep;					\
-									\
 		xep_p_link(&_xep);					\
-		switch (setjmp(_xep.context))
+		switch (setjmp(_xep.context)) {				\
+		case _CW_XEPV_CODE:
 
-#define	xep_end								\
-		if (xep_p_unlink(&_xep) == FALSE)			\
+#define xep_catch(a_value)						\
 			break;						\
-	}
+		case (a_value):
 
-#define	xep_rend							\
-		{							\
-			cw_xepv_t	value = xep_value();		\
-									\
-			if (xep_p_unlink(&_xep))			\
-				return xep_value();			\
-			else if (x <= 0)				\
-				break;					\
+#define xep_finally xep_catch(_CW_XEPV_FINALLY)
+
+#define	xep_end()							\
 		}							\
+		xep_p_unlink(&_xep);					\
 	}
 
-void	xep_raise_e(cw_xepv_t a_value, const char *a_filename, cw_uint32_t
+#define	xep_value()	((cw_xepv_t)_xep.value)
+
+void	xep_throw_e(cw_xepv_t a_value, const char *a_filename, cw_uint32_t
     a_line_num);
-#define xep_raise(a_value)	xep_raise_e((a_value), __FILE__, __LINE__)
+#define xep_throw(a_value)	xep_throw_e((a_value), __FILE__, __LINE__)
 void	xep_retry(void);
 void	xep_handled(void);
 
@@ -74,4 +72,4 @@ void	xep_handled(void);
  * compilation warnings.
  */ 
 void	xep_p_link(cw_xep_t *a_xep);
-cw_bool_t xep_p_unlink(cw_xep_t *a_xep);
+void	xep_p_unlink(cw_xep_t *a_xep);

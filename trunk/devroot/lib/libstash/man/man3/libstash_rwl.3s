@@ -69,6 +69,10 @@ Output(s):
 .RS
 None.
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Constructor.
@@ -88,6 +92,10 @@ Pointer to a rwl.
 .RE
 .RE
 Output(s):
+.RS
+None.
+.RE
+Exception(s):
 .RS
 None.
 .RE
@@ -113,6 +121,10 @@ Output(s):
 .RS
 None.
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Get a r-lock.
@@ -132,6 +144,10 @@ Pointer to a rwl.
 .RE
 .RE
 Output(s):
+.RS
+None.
+.RE
+Exception(s):
 .RS
 None.
 .RE
@@ -157,6 +173,10 @@ Output(s):
 .RS
 None.
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Get a w-lock.
@@ -176,6 +196,10 @@ Pointer to a rwl.
 .RE
 .RE
 Output(s):
+.RS
+None.
+.RE
+Exception(s):
 .RS
 None.
 .RE

@@ -38,7 +38,7 @@ helpers.
 .RI ( "cw_out_t *a_out" ", " "const char *a_type" ", " "cw_uint32_t a_size"
 .RI ", " "cw_out_render_t *a_render_func" )
 
-.I cw_bool_t
+.I void
 .br
 .B out_merge
 .RI ( "cw_out_t *a_a" ", " "cw_out_t *a_b" )
@@ -382,10 +382,12 @@ Output(s):
 >= 0: Number of bytes of output space that the corresponding rendering function
 needs.
 .br
--1: Memory allocation error.
-.br
--2: Other error.
+-2: Error.
 .RE
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -413,10 +415,12 @@ Output(s):
 .RS
 .IR retval :
 .RS
-non-NULL: Pointer to an out.
-.br
-NULL: Memory allocation error.  Can only occur if (NULL == a_out).
+Pointer to an out.
 .RE
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -437,6 +441,10 @@ Pointer to an out.
 .RE
 .RE
 Output(s):
+.RS
+None.
+.RE
+Exception(s):
 .RS
 None.
 .RE
@@ -476,12 +484,11 @@ Pointer to a rendering function.
 .RE
 Output(s):
 .RS
-.IR retval :
-.RS
-FALSE: Success.
-.br
-TRUE: Memory allocation error.
+None.
 .RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -490,7 +497,7 @@ embedded in formatting strings.
 .RE
 .RE
 
-.I cw_bool_t
+.I void
 .br
 .B out_merge
 .RI ( "cw_out_t *a_a" ", " "cw_out_t *a_b" )
@@ -508,12 +515,11 @@ Pointer to an out.
 .RE
 Output(s):
 .RS
-.IR retval :
-.RS
-FALSE: Success.
-.br
-TRUE: Memory allocation error.
+None.
 .RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -540,6 +546,10 @@ Output(s):
 File descriptor number.
 .RE
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Return a_out's default file descriptor.
@@ -563,6 +573,10 @@ File descriptor number.
 .RE
 .RE
 Output(s):
+.RS
+None.
+.RE
+Exception(s):
 .RS
 None.
 .RE
@@ -603,13 +617,15 @@ Output(s):
 .RS
 >= 0: Number of bytes output.
 .br
--1: Memory allocation error.
-.br
 -2: Parse error.
 .br
 -3: write() error.
 .RE
 Output printed to a_out's default file descriptor (2 if (NULL == a_out)).
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -664,13 +680,15 @@ Output(s):
 .RS
 >= 0: Number of bytes output.
 .br
--1: Memory allocation error.
-.br
 -2: Parse error.
 .br
 -3: write() error.
 .RE
 Output printed to a_out's default file descriptor (2 if (NULL == a_out)).
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -713,13 +731,15 @@ Output(s):
 .RS
 >= 0: Number of bytes output.
 .br
--1: Memory allocation error.
-.br
 -2: Parse error.
 .br
 -3: write() error.
 .RE
 Output printed to a_out's default file descriptor (2 if (NULL == a_out)).
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -775,13 +795,15 @@ Output(s):
 .RS
 >= 0: Number of bytes output.
 .br
--1: Memory allocation error.
-.br
 -2: Parse error.
 .br
 -3: write() error.
 .RE
 Output printed to a_out's default file descriptor (2 if (NULL == a_out)).
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -827,13 +849,15 @@ Output(s):
 .RS
 >= 0: Number of bytes output.
 .br
--1: Memory allocation error.
-.br
 -2: Parse error.
 .br
 -3: write() error.
 .RE
 Output printed to a_out's default file descriptor (2 if (NULL == a_out)).
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -878,13 +902,15 @@ Output(s):
 .RS
 >= 0: Number of bytes output.
 .br
--1: Memory allocation error.
-.br
 -2: Parse error.
 .br
 -3: write() error.
 .RE
 Output printed to a_fd.
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -936,13 +962,15 @@ Output(s):
 .RS
 >= 0: Number of bytes output.
 .br
--1: Memory allocation error.
-.br
 -2: Parse error.
 .br
 -3: write() error.
 .RE
 Output printed to a_fd.
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -985,13 +1013,15 @@ Output(s):
 .RS
 >= 0: Number of bytes output.
 .br
--1: Memory allocation error.
-.br
 -2: Parse error.
 .br
 -3: write() error.
 .RE
 Output printed to a_fd.
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -1044,13 +1074,15 @@ Output(s):
 .RS
 >= 0: Number of bytes output.
 .br
--1: Memory allocation error.
-.br
 -2: Parse error.
 .br
 -3: write() error.
 .RE
 Output printed to a_fd.
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -1100,13 +1132,15 @@ Output(s):
 .RS
 >= 0: Number of bytes output.
 .br
--1: Memory allocation error.
-.br
 -2: Parse error.
 .br
 -3: write() error.
 .RE
 Output printed to a_fd.
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -1145,13 +1179,15 @@ Output(s):
 .RS
 >= 0: Number of bytes output.
 .br
--1: Memory allocation error.
-.br
 -2: Parse error.
 .br
 -3: write() error.
 .RE
 Output printed to a_fd.
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -1196,14 +1232,16 @@ Output(s):
 .RS
 >= 0: Number of bytes output, not including the terminating '\\0'.
 .br
--1: Memory allocation error.
-.br
 -2: Parse error.
 .RE
 .IR a_str :
 .RS
 Formatted output.
 .RE
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -1242,14 +1280,16 @@ Output(s):
 .RS
 >= 0: Number of bytes output, not including the terminating '\\0'.
 .br
--1: Memory allocation error.
-.br
 -2: Parse error.
 .RE
 .IR *r_str :
 .RS
 Formatted output, or undefined if error.
 .RE
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -1303,14 +1343,16 @@ Output(s):
 .RS
 >= 0: Number of bytes output, not including the terminating '\\0'.
 .br
--1: Memory allocation error.
-.br
 -2: Parse error.
 .RE
 .IR a_str :
 .RS
 Formatted output.
 .RE
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -1350,14 +1392,16 @@ Output(s):
 .RS
 >= 0: Number of bytes output, not including the terminating '\\0'.
 .br
--1: Memory allocation error.
-.br
 -2: Parse error.
 .RE
 .IR a_str :
 .RS
 Formatted output.
 .RE
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -1396,14 +1440,16 @@ Output(s):
 .RS
 >= 0: Number of bytes output, not including the terminating '\\0'.
 .br
--1: Memory allocation error.
-.br
 -2: Parse error.
 .RE
 .IR *r_str :
 .RS
 Formatted output, or undefined if error.
 .RE
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -1451,14 +1497,16 @@ Output(s):
 .RS
 >= 0: Number of bytes output, not including the terminating '\\0'.
 .br
--1: Memory allocation error.
-.br
 -2: Parse error.
 .RE
 .IR a_str :
 .RS
 Formatted output.
 .RE
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -1497,6 +1545,10 @@ Length of type value string.
 .RS
 Pointer to type value string.
 .RE
+.RE
+Exception(s):
+.RS
+None.
 .RE
 Description:
 .RS
@@ -1546,6 +1598,10 @@ Output(s):
 .RS
 Pointer to value string.
 .RE
+.RE
+Exception(s):
+.RS
+None.
 .RE
 Description:
 .RS

@@ -100,10 +100,12 @@ Output(s):
 .RS
 .IR retval :
 .RS
-non-NULL: Pointer to a pool.
-.br
-NULL: Memory allocation error.
+Pointer to a pool.
 .RE
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -124,6 +126,10 @@ Pointer to a pool.
 .RE
 .RE
 Output(s):
+.RS
+None.
+.RE
+Exception(s):
 .RS
 None.
 .RE
@@ -152,6 +158,10 @@ Output(s):
 Size of buffers that a_pool is using.
 .RE
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Return the size of the buffers that a_pool is using.
@@ -171,6 +181,10 @@ Pointer to a pool.
 .RE
 .RE
 Output(s):
+.RS
+None.
+.RE
+Exception(s):
 .RS
 None.
 .RE
@@ -210,10 +224,12 @@ Output(s):
 .RS
 .IR retval :
 .RS
-non-NULL: Pointer to a memory buffer.
-.br
-NULL: Memory allocation error.
+Pointer to a memory buffer.
 .RE
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -255,6 +271,10 @@ Output(s):
 .RS
 None.
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Put back (deallocate) a_buffer.
@@ -280,6 +300,10 @@ Pointer to a string which is used as a prefix for all output.
 Output(s):
 .RS
 Output printed to cw_g_out.
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS

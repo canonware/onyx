@@ -88,11 +88,10 @@ ch_count(cw_ch_t *a_ch)
 	return a_ch->count;
 }
 
-cw_bool_t
+void
 ch_insert(cw_ch_t *a_ch, const void *a_key, const void *a_data, cw_chi_t
     *a_chi)
 {
-	cw_bool_t	retval;
 	cw_uint32_t	slot;
 	cw_chi_t	*chi;
 
@@ -105,10 +104,6 @@ ch_insert(cw_ch_t *a_ch, const void *a_key, const void *a_data, cw_chi_t
 		chi->is_malloced = FALSE;
 	} else {
 		chi = (cw_chi_t *)_cw_mem_malloc(a_ch->mem, sizeof(cw_chi_t));
-		if (chi == NULL) {
-			retval = TRUE;
-			goto RETURN;
-		}
 		chi->is_malloced = TRUE;
 	}
 	chi->key = a_key;
@@ -135,10 +130,6 @@ ch_insert(cw_ch_t *a_ch, const void *a_key, const void *a_data, cw_chi_t
 #ifdef _LIBSTASH_DBG
 	a_ch->num_inserts++;
 #endif
-
-	retval = FALSE;
-	RETURN:
-	return retval;
 }
 
 cw_bool_t

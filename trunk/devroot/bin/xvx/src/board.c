@@ -156,7 +156,7 @@ board_dump(cw_board_t *a_board)
 				c = '6';
 				break;
 			default:
-				_cw_error("Programming error");
+				_cw_not_reached();
 			}
 			_cw_out_put("  [c]", c);
 		}

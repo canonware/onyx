@@ -131,8 +131,6 @@ main(int argc, char **argv)
 		_cw_error("Initialization failure in libsock_init()");
 	/* Open the connections. */
 	sock_array = (cw_sock_t *)_cw_calloc(opt_nsocks, sizeof(cw_sock_t));
-	if (sock_array == NULL)
-		_cw_error("Memory allocation error");
 	for (i = 0; i < opt_nsocks; i++) {
 		sock_new(&sock_array[i], opt_bsize);
 		timeout.tv_sec = 10;
@@ -152,12 +150,9 @@ main(int argc, char **argv)
 	buf_new(&t_buf, cw_g_mem);
 	bufc_new(&bufc, cw_g_mem, NULL, NULL);
 	buffer = _cw_malloc(opt_bsize);
-	if (buffer == NULL)
-		_cw_error("Memory allocation error");
 	bufc_buffer_set(&bufc, buffer, opt_bsize, TRUE, (cw_opaque_dealloc_t
 	    *)mem_free, cw_g_mem);
-	if (buf_bufc_append(&buf, &bufc, 0, opt_bsize))
-		_cw_error("Memory allocation error");
+	buf_bufc_append(&buf, &bufc, 0, opt_bsize);
 	bufc_delete(&bufc);
 
 	/*
@@ -175,8 +170,7 @@ main(int argc, char **argv)
 					    "for connection [i]\n", j);
 					goto SHUTDOWN;
 				}
-				if (buf_buf_catenate(&t_buf, &buf, TRUE))
-					_cw_error("Memory allocation error");
+				buf_buf_catenate(&t_buf, &buf, TRUE);
 				if (sock_write(&sock_array[j], &t_buf)) {
 					out_put_e(cw_g_out, __FILE__, __LINE__,
 					    NULL, "Error in sock_write() "
@@ -186,8 +180,7 @@ main(int argc, char **argv)
 			}
 		} else {
 			for (j = 0; j < opt_nsocks; j++) {
-				if (buf_buf_catenate(&t_buf, &buf, TRUE))
-					_cw_error("Memory allocation error");
+				buf_buf_catenate(&t_buf, &buf, TRUE);
 				if (sock_write(&sock_array[j], &t_buf)) {
 					out_put_e(cw_g_out, __FILE__, __LINE__,
 					    NULL, "Error in sock_write() "

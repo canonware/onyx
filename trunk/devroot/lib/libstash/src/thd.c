@@ -23,11 +23,11 @@
 #endif
 
 #ifdef _LIBSTASH_DBG
-cw_bool_t	cw_g_thd_initialized = FALSE;
+static cw_bool_t cw_g_thd_initialized = FALSE;
 #endif
 
 /* Special thd structure for initial thread, needed for critical sections. */
-cw_thd_t	cw_g_thd;
+static cw_thd_t	cw_g_thd;
 
 /* For thd_self(). */
 cw_tsd_t	cw_g_thd_self_key;

@@ -14,40 +14,41 @@
 #define	_CW_XEPV_FOO	-128
 #define	_CW_XEPV_BAR	-129
 #define	_CW_XEPV_BIZ	-130
+#define	_CW_XEPV_BAZ	-131
 
 void
 func_a(void)
 {
-	xep_raise(_CW_XEPV_BIZ);
+	xep_throw(_CW_XEPV_BIZ);
 }
 
 void
 func_b(void)
 {
+	xep_begin();
 	xep_try {
-	case _CW_XEPV_CODE:
 		_cw_out_put_e("_CW_XEPV_CODE\n");
 		func_a();
-		break;
-	case _CW_XEPV_BIZ:
+	}
+	xep_catch(_CW_XEPV_BIZ) {
 		_cw_out_put_e("_CW_XEPV_BIZ\n");
 		xep_handled();
-		break;
-	} xep_end;
+	}
+	xep_end();
 }
 
 void
 func_c(void)
 {
+	xep_begin();
 	xep_try {
-	case _CW_XEPV_CODE:
 		_cw_out_put_e("_CW_XEPV_CODE\n");
 		func_a();
-		break;
-	case _CW_XEPV_FINALLY:
+	}
+	xep_finally {
 		_cw_out_put_e("_CW_XEPV_FINALLY\n");
-		break;
-	} xep_end;
+	}
+	xep_end();
 }
 
 int
@@ -58,37 +59,47 @@ main()
 	libstash_init();
 	_cw_out_put("Test begin\n");
 
-	for (i = 0; i < 8; i++) {
+	for (i = 0; i < 9; i++) {
 		_cw_out_put_e("i == [i]\n", i);
+		xep_begin();
 		xep_try {
-		case _CW_XEPV_CODE:
 			_cw_out_put_e("_CW_XEPV_CODE\n");
 			if (i == 2)
-				xep_raise(_CW_XEPV_FOO);
+				xep_throw(_CW_XEPV_FOO);
 			if (i == 3)
 				func_a();
 			if (i == 5)
 				func_b();
 			if (i == 6)
 				func_c();
-			break;
-		case _CW_XEPV_FOO:
+			if (i == 7)
+				xep_throw(_CW_XEPV_BAZ);
+		}
+		xep_catch(_CW_XEPV_FOO) {
+			_cw_assert(xep_value() == _CW_XEPV_FOO);
 			_cw_out_put_e("_CW_XEPV_FOO\n");
 			xep_handled();
-			xep_raise(_CW_XEPV_BAR);
-			break;
-		case _CW_XEPV_BAR:
+			xep_throw(_CW_XEPV_BAR);
+		}
+		xep_catch(_CW_XEPV_BAR) {
+			_cw_assert(xep_value() == _CW_XEPV_BAR);
 			_cw_out_put_e("_CW_XEPV_BAR\n");
 			xep_handled();
-			break;
-		case _CW_XEPV_BIZ:
+		}
+		xep_catch(_CW_XEPV_BIZ) {
+			_cw_assert(xep_value() == _CW_XEPV_BIZ);
 			_cw_out_put_e("_CW_XEPV_BIZ\n");
 			xep_handled();
-			break;
-		case _CW_XEPV_FINALLY:
+		}
+		xep_catch(_CW_XEPV_BAZ) {
+			_cw_assert(xep_value() == _CW_XEPV_BAZ);
+			_cw_out_put_e("_CW_XEPV_BAZ\n");
+			xep_retry();
+		}
+		xep_finally {
 			_cw_out_put_e("_CW_XEPV_FINALLY\n");
-			break;
-		} xep_end;
+		}
+		xep_end();
 	}
 	
 

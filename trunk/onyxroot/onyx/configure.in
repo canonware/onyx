@@ -52,10 +52,15 @@ case "${host}" in
 esac
 
 dnl Check for programs.
-dnl Trick AC_PROG_CC into not defining CFLAGS, even if it wasn't specified on
-dnl the command line.
+
+dnl If CFLAGS isn't defined and using gcc, set CFLAGS to something reasonable.
+dnl Otherwise, just prevent autoconf from molesting CFLAGS.
 CFLAGS=$CFLAGS
 AC_PROG_CC
+if test "x$CFLAGS" = "x" -a "x$GCC" = "xyes" ; then
+	CFLAGS="-Wall -Wno-uninitialized -pipe -g3"
+fi
+
 AC_PROG_CPP
 AC_PROG_INSTALL
 AC_PROG_RANLIB

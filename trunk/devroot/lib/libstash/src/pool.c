@@ -18,45 +18,54 @@
 cw_pool_t *
 pool_new(cw_pool_t *a_pool, cw_mem_t *a_mem, cw_uint32_t a_buffer_size)
 {
-	cw_pool_t	*retval;
+	cw_pool_t		*retval;
+	volatile cw_uint32_t	try_stage = 0;
 
 	_cw_assert(a_buffer_size > 0);
 
-	if (a_pool == NULL) {
-		retval = (cw_pool_t *)_cw_mem_malloc(a_mem, sizeof(cw_pool_t));
-		if (retval == NULL)
-			goto OOM_1;
-		memset(retval, 0, sizeof(cw_pool_t));
-		retval->is_malloced = TRUE;
-	} else {
-		retval = a_pool;
-		memset(retval, 0, sizeof(cw_pool_t));
-		retval->is_malloced = FALSE;
+	xep_begin();
+	volatile cw_pool_t	*v_retval;
+	xep_try {
+		if (a_pool != NULL) {
+			v_retval = retval = a_pool;
+			memset(retval, 0, sizeof(cw_pool_t));
+			retval->is_malloced = FALSE;
+		} else {
+			v_retval = retval = (cw_pool_t *)_cw_mem_malloc(a_mem,
+			    sizeof(cw_pool_t));
+			memset(retval, 0, sizeof(cw_pool_t));
+			retval->is_malloced = TRUE;
+		}
+		try_stage = 1;
+
+		retval->mem = a_mem;
+		mtx_new(&retval->lock);
+
+		retval->buffer_size = a_buffer_size;
+		qs_new(&retval->spares);
+
+#ifdef _LIBSTASH_DBG
+		dch_new(&retval->addr_hash, a_mem, 8, 6, 2, ch_direct_hash,
+		    ch_direct_key_comp);
+		try_stage = 2;
+
+		retval->magic = _CW_POOL_MAGIC;
+#endif
 	}
+	xep_catch(_CW_XEPV_OOM) {
+		retval = (cw_pool_t *)v_retval;
+		switch (try_stage) {
+		case 1:
+			if (retval->is_malloced)
+				_cw_mem_free(a_mem, retval);
+		case 0:
+			break;
+		default:
+			_cw_not_reached();
+		}
+	}
+	xep_end();
 
-	retval->mem = a_mem;
-	mtx_new(&retval->lock);
-
-	retval->buffer_size = a_buffer_size;
-	qs_new(&retval->spares);
-
-#ifdef _LIBSTASH_DBG
-	if (dch_new(&retval->addr_hash, a_mem, 8, 6, 2, ch_direct_hash,
-	    ch_direct_key_comp) == NULL)
-		goto OOM_2;
-
-	retval->magic = _CW_POOL_MAGIC;
-#endif
-
-	return retval;
-
-#ifdef _LIBSTASH_DBG
-	OOM_2:
-	if (retval->is_malloced)
-		_cw_mem_free(a_mem, retval);
-	retval = NULL;
-#endif
-	OOM_1:
 	return retval;
 }
 
@@ -190,19 +199,16 @@ pool_get(cw_pool_t *a_pool, const char *a_filename, cw_uint32_t a_line_num)
 				    a_line_num);
 			}
 		} else {
-			cw_pool_item_t	*allocation;
+			cw_pool_item_t		*allocation;
+			volatile cw_uint32_t	try_stage = 0;
 
-			allocation = _cw_mem_malloc(a_pool->mem,
-			    sizeof(cw_pool_item_t));
-			if (allocation == NULL) {
-				if (dbg_is_registered(cw_g_dbg, "pool_error")) {
-					_cw_out_put_e("Memory allocation error;"
-					    " unable to record pool allocation "
-					    "0x[p] at [s], line [i]\n",
-					    sizeof(cw_pool_item_t), retval,
-					    a_filename, a_line_num);
-				}
-			} else {
+			xep_begin();
+			volatile cw_pool_item_t	*v_allocation;
+			xep_try {
+				allocation = _cw_mem_malloc(a_pool->mem,
+				    sizeof(cw_pool_item_t));
+				try_stage = 1;
+				
 				memset(retval, 0xa5, a_pool->buffer_size);
 
 				allocation->filename = a_filename;
@@ -217,20 +223,24 @@ pool_get(cw_pool_t *a_pool, const char *a_filename, cw_uint32_t a_line_num)
 					    a_pool->buffer_size, a_filename,
 					    a_line_num);
 				}
-				if (dch_insert(&a_pool->addr_hash, retval,
-				    allocation, NULL) == TRUE) {
-					if (dbg_is_registered(cw_g_dbg,
-					    "pool_error")) {
-						_cw_out_put_e("Memory "
-						    "allocation error; unable "
-						    "to record pool allocation "
-						    "0x[p] at [s], line [i]\n",
-						    sizeof(cw_pool_item_t),
-						    retval, a_filename,
-						    a_line_num);
-					}
-				}
+
+				dch_insert(&a_pool->addr_hash, retval,
+				    allocation, NULL);
+				try_stage = 2;
 			}
+			xep_catch (_CW_XEPV_OOM) {
+				allocation = (cw_pool_item_t *)v_allocation;
+				switch (try_stage) {
+				case 1:
+					_cw_mem_free(a_pool->mem, allocation);
+				case 0:
+					break;
+				default:
+					_cw_not_reached();
+				}
+				xep_handled();
+			}
+			xep_end();
 		}
 	}
 #endif

@@ -101,10 +101,12 @@ Output(s):
 .RS
 .IR retval :
 .RS
-non-NULL: Pointer to a thd.
-.br
-NULL: Memory allocation error.  Can only occur if (NULL == a_thd).
+Pointer to a thd.
 .RE
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -125,6 +127,10 @@ Pointer to a thd.
 .RE
 .RE
 Output(s):
+.RS
+None.
+.RE
+Exception(s):
 .RS
 None.
 .RE
@@ -153,6 +159,10 @@ Output(s):
 Return value from thread entry function.
 .RE
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Join (wait for) the thread associated with a_thd.
@@ -175,6 +185,10 @@ Output(s):
 Pointer to the calling thread's thd structure.
 .RE
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Return a pointer to the thd structure that corresponds to the calling thread.
@@ -191,6 +205,10 @@ Input(s):
 None.
 .RE
 Output(s):
+.RS
+None.
+.RE
+Exception(s):
 .RS
 None.
 .RE
@@ -226,6 +244,10 @@ Output(s):
 .RS
 Always zero, unless the arguments are invalid.
 .RE
+.RE
+Exception(s):
+.RS
+None.
 .RE
 Description:
 .RS

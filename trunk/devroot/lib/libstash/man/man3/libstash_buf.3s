@@ -49,23 +49,23 @@ buf, bufc - Reference-counted extensible buffer.
 .RI ( "cw_buf_t *a_buf" ", " "cw_uint32_t a_max_data" ", "
 .IR "cw_bool_t a_is_sys_iovec" ", " "int *r_iovec_count" )
 
-.I cw_bool_t
+.I void
 .br
 .B buf_buf_catenate
 .RI ( "cw_buf_t *a_a" ", " "cw_buf_t *a_b" ", " "cw_bool_t a_preserve" )
 
-.I cw_bool_t
+.I void
 .br
 .B buf_split
 .RI ( "cw_buf_t *a_a" ", " "cw_buf_t *a_b" ", " "cw_uint32_t a_offset" )
 
-.I cw_bool_t
+.I void
 .br
 .B buf_bufc_prepend
 .RI ( "cw_buf_t *a_buf" ", " "cw_bufc_t *a_bufc" ", "
 .IR "cw_uint32_t a_beg_offset" ", " "cw_uint32_t a_end_offset" )
 
-.I cw_bool_t
+.I void
 .br
 .B buf_bufc_append
 .RI ( "cw_buf_t *a_buf" ", " "cw_bufc_t *a_bufc" ", "
@@ -96,25 +96,25 @@ buf, bufc - Reference-counted extensible buffer.
 .B buf_uint64_get
 .RI ( "cw_buf_t *a_buf" ", " "cw_uint32_t a_offset" )
 
-.I cw_bool_t
+.I void
 .br
 .B buf_uint8_set
 .RI ( "cw_buf_t *a_buf" ", " "cw_uint32_t a_offset" ", "
 .IR "cw_uint_t32 a_val" )
 
-.I cw_bool_t
+.I void
 .br
 .B buf_uint32_set
 .RI ( "cw_buf_t *a_buf" ", " "cw_uint32_t a_offset" ", "
 .IR "cw_uint32_t a_val" )
 
-.I cw_bool_t
+.I void
 .br
 .B buf_uint64_set
 .RI ( "cw_buf_t *a_buf" ", " "cw_uint32_t a_offset" ", "
 .IR "cw_uint64_t a_val" )
 
-.I cw_bool_t
+.I void
 .br
 .B buf_range_set
 .RI ( "cw_buf_t *a_buf" ", " "cw_uint32_t a_offset" ", "
@@ -208,10 +208,12 @@ Output(s):
 .RS
 .IR retval :
 .RS
-non-NULL: Pointer to a buf.
-.br
-NULL: Memory allocation.  Can only occur if (NULL == a_buf).
+Pointer to a buf.
 .RE
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -234,6 +236,11 @@ Pointer to a buf.
 Output(s):
 .RS
 None
+.RE
+.RE
+Exception(s):
+.RS
+None.
 .RE
 Description:
 .RS
@@ -262,6 +269,10 @@ Output(s):
 .RS
 a_buf's internals printed to cw_g_out.
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Dump the internal state of a_buf to cw_g_out.
@@ -286,6 +297,10 @@ Output(s):
 .RS
 Number of bytes of valid data.
 .RE
+.RE
+Exception(s):
+.RS
+None.
 .RE
 Description:
 .RS
@@ -312,6 +327,10 @@ Output(s):
 Number of bufel's (internal buffer elements) in a_buf (same as iovec count in
 \fBbuf_iovec_get\fR()).
 .RE
+.RE
+Exception(s):
+.RS
+None.
 .RE
 Description:
 .RS
@@ -356,6 +375,10 @@ Pointer to an iovec array that represents the internal data buffers in a_buf.
 Number of valid iovec structures in retval.
 .RE
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Build an iovec array that represents the valid data in a_buf's internal buffers
@@ -363,7 +386,7 @@ Build an iovec array that represents the valid data in a_buf's internal buffers
 .RE
 .RE
 
-.I cw_bool_t
+.I void
 .br
 .B buf_buf_catenate
 .RI ( "cw_buf_t *a_a" ", " "cw_buf_t *a_b" ", " "cw_bool_t a_preserve" )
@@ -386,12 +409,11 @@ after catenating a_b to a_a.
 .RE
 Output(s):
 .RS
-.IR retval :
-.RS
-FALSE: Success.
-.br
-TRUE: Memory allocation error.
+None.
 .RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -400,7 +422,7 @@ is emptied.
 .RE
 .RE
 
-.I cw_bool_t
+.I void
 .br
 .B buf_split
 .RI ( "cw_buf_t *a_a" ", " "cw_buf_t *a_b" ", " "cw_uint32_t a_offset" )
@@ -422,12 +444,11 @@ Offset at which to split a_b.
 .RE
 Output(s):
 .RS
-.IR retval :
-.RS
-FALSE: Success.
-.br
-TRUE: Memory allocation error.  a_a and a_b are unmodified.
+None.
 .RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -436,7 +457,7 @@ the remainder in a_b.
 .RE
 .RE
 
-.I cw_bool_t
+.I void
 .br
 .B buf_bufc_prepend
 .RI ( "cw_buf_t *a_buf" ", " "cw_bufc_t *a_bufc" ", "
@@ -463,12 +484,11 @@ Offset of first byte past the valid range of bytes in a_bufc's memory buffer.
 .RE
 Output(s):
 .RS
-.IR retval :
-.RS
-FALSE: Success.
-.br
-TRUE: Memory allocation error.  a_buf and a_bufc are unmodified.
+None.
 .RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -476,7 +496,7 @@ Prepend a_bufc, bytes a_beg_offset through (a_end_offset - 1) to a_buf.
 .RE
 .RE
 
-.I cw_bool_t
+.I void
 .br
 .B buf_bufc_append
 .RI ( "cw_buf_t *a_buf" ", " "cw_bufc_t *a_bufc" ", "
@@ -503,12 +523,11 @@ Offset of first byte past the valid range of bytes in a_bufc's memory buffer.
 .RE
 Output(s):
 .RS
-.IR retval :
-.RS
-FALSE: Success.
-.br
-TRUE: Memory allocation error.  a_buf and a_bufc are unmodified.
+None.
 .RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -541,6 +560,10 @@ FALSE: Success.
 TRUE: Error.  (a_amount > buf_size_get(a_buf)).
 .RE
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Release a_amount bytes from the head of a_buf.
@@ -572,6 +595,10 @@ FALSE: Success.
 TRUE: Error.  (a_amount > buf_size_get(a_buf)).
 .RE
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Release a_amount bytes from the tail of a_buf.
@@ -600,6 +627,10 @@ Output(s):
 .RS
 Value of the uint8 at offset a_offset in a_buf.
 .RE
+.RE
+Exception(s):
+.RS
+None.
 .RE
 Description:
 .RS
@@ -630,6 +661,10 @@ Output(s):
 Value of the uint32 at offset a_offset in a_buf.
 .RE
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Return the uint32 at offset a_offset.
@@ -659,13 +694,17 @@ Output(s):
 Value of the uint64 at offset a_offset in a_buf.
 .RE
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Return the uint64 at offset a_offset.
 .RE
 .RE
 
-.I cw_bool_t
+.I void
 .br
 .B buf_uint8_set
 .RI ( "cw_buf_t *a_buf" ", " "cw_uint32_t a_offset" ", "
@@ -688,12 +727,11 @@ Value to set data at a_offset to.
 .RE
 Output(s):
 .RS
-.IR retval :
-.RS
-FALSE: Success.
-.br
-TRUE: Memory allocation error.
+None.
 .RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -701,7 +739,7 @@ Set the uint8 at a_offset to a_val.
 .RE
 .RE
 
-.I cw_bool_t
+.I void
 .br
 .B buf_uint32_set
 .RI ( "cw_buf_t *a_buf" ", " "cw_uint32_t a_offset" ", "
@@ -724,12 +762,11 @@ Value to set data at a_offset to.
 .RE
 Output(s):
 .RS
-.IR retval :
-.RS
-FALSE: Success.
-.br
-TRUE: Memory allocation error.
+None.
 .RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -737,7 +774,7 @@ Set the uint32 at a_offset to a_val.
 .RE
 .RE
 
-.I cw_bool_t
+.I void
 .br
 .B buf_uint64_set
 .RI ( "cw_buf_t *a_buf" ", " "cw_uint32_t a_offset" ", "
@@ -760,12 +797,11 @@ Value to set data at a_offset to.
 .RE
 Output(s):
 .RS
-.IR retval :
-.RS
-FALSE: Success.
-.br
-TRUE: Memory allocation error.
+None.
 .RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -773,7 +809,7 @@ Set the uint64 at a_offset to a_val.
 .RE
 .RE
 
-.I cw_bool_t
+.I void
 .br
 .B buf_range_set
 .RI ( "cw_buf_t *a_buf" ", " "cw_uint32_t a_offset" ", "
@@ -807,12 +843,11 @@ TRUE: Writeable buffer.
 .RE
 Output(s):
 .RS
-.IR retval :
-.RS
-FALSE: Success.
-.br
-TRUE: Memory allocation error.
+None.
 .RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -854,10 +889,12 @@ Output(s):
 .RS
 .IR retval :
 .RS
-non-NULL: Pointer to a bufc.
-.br
-NULL: Memory allocation error.
+Pointer to a bufc.
 .RE
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -878,6 +915,10 @@ Pointer to a bufc.
 .RE
 .RE
 Output(s):
+.RS
+None.
+.RE
+Exception(s):
 .RS
 None.
 .RE
@@ -930,6 +971,10 @@ Output(s):
 .RS
 None.
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Set a_bufc's internal data buffer to a_buffer, with size a_size, and
@@ -959,6 +1004,10 @@ Output(s):
 .RS
 Size of a_bufc's internal buffer.
 .RE
+.RE
+Exception(s):
+.RS
+None.
 .RE
 Description:
 .RS

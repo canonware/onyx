@@ -48,9 +48,9 @@ struct cw_out_ent_s {
 
 cw_out_t	*out_new(cw_out_t *a_out, cw_mem_t *a_mem);
 void		out_delete(cw_out_t *a_out);
-cw_bool_t	out_register(cw_out_t *a_out, const char *a_type, cw_uint32_t
+void		out_register(cw_out_t *a_out, const char *a_type, cw_uint32_t
     a_size, cw_out_render_t * a_render_func);
-cw_bool_t	out_merge(cw_out_t *a_a, cw_out_t *a_b);
+void		out_merge(cw_out_t *a_a, cw_out_t *a_b);
 cw_sint32_t	out_get_default_fd(cw_out_t *a_out);
 void		out_set_default_fd(cw_out_t *a_out, cw_sint32_t a_fd);
 

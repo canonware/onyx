@@ -9,8 +9,6 @@
  *
  ******************************************************************************/
 
-typedef cw_bool_t cw_mem_oom_handler_t(const void *a_data, cw_uint32_t a_size);
-
 struct cw_mem_s {
 	cw_mem_t	*mem;
 	cw_bool_t	is_malloced;
@@ -22,14 +20,11 @@ struct cw_mem_s {
 	cw_ch_t		*addr_hash;
 #endif
 
-	cw_mem_oom_handler_t *oom_handler;
         const void	*handler_data;
 };
 
 cw_mem_t *mem_new(cw_mem_t *a_mem, cw_mem_t *a_internal);
 void	mem_delete(cw_mem_t *a_mem);
-void	mem_set_oom_handler(cw_mem_t *a_mem, cw_mem_oom_handler_t
-    *a_oom_handler, const void *a_data);
 void	*mem_malloc(cw_mem_t *a_mem, size_t a_size, const char *a_filename,
     cw_uint32_t a_line_num);
 void	*mem_calloc(cw_mem_t *a_mem, size_t a_number, size_t a_size, const

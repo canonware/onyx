@@ -297,11 +297,10 @@ stilt_interp_buf(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_buf_t *a_buf)
 	return retval;
 }
 
-cw_bool_t
+void
 stilt_detach_str(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
     *a_str, cw_uint32_t a_len)
 {
-	cw_bool_t	retval;
 	cw_buf_t	buf;
 
 	_cw_check_ptr(a_stilt);
@@ -309,18 +308,13 @@ stilt_detach_str(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 	_cw_check_ptr(a_str);
 
 	buf_new(&buf, stilt_mem_get(a_stilt));
-	if (buf_range_set(&buf, 0, a_len, (cw_uint8_t *)a_str, FALSE)) {
-		retval = TRUE;
-		goto RETURN;
-	}
-	retval = stilt_detach_buf(a_stilt, a_stilts, &buf);
+	buf_range_set(&buf, 0, a_len, (cw_uint8_t *)a_str, FALSE);
+	stilt_detach_buf(a_stilt, a_stilts, &buf);
 
-	RETURN:
 	buf_delete(&buf);
-	return retval;
 }
 
-cw_bool_t
+void
 stilt_detach_buf(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_buf_t *a_buf)
 {
 	struct cw_stilt_entry_s	*entry_arg;
@@ -331,23 +325,21 @@ stilt_detach_buf(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_buf_t *a_buf)
 
 	entry_arg = (struct cw_stilt_entry_s *)_cw_malloc(sizeof(struct
 	    cw_stilt_entry_s));
-
-	if (entry_arg == NULL)
-		goto OOM_1;
 	entry_arg->stilt = a_stilt;
 	entry_arg->stilts = a_stilts;
 	buf_new(&entry_arg->buf, stilt_mem_get(a_stilt));
-	if (buf_buf_catenate(&entry_arg->buf, a_buf, TRUE))
-		goto OOM_2;
+
+	xep_begin();
+	xep_try {
+		buf_buf_catenate(&entry_arg->buf, a_buf, TRUE);
+	}
+	xep_catch(_CW_XEPV_OOM) {
+		buf_delete(&entry_arg->buf);
+		_cw_free(entry_arg);
+	}
+	xep_end();
+
 	stilt_p_entry((void *)entry_arg);
-
-	return FALSE;
-
-	OOM_2:
-	buf_delete(&entry_arg->buf);
-	_cw_free(entry_arg);
-	OOM_1:
-	return TRUE;
 }
 
 cw_bool_t
@@ -927,7 +919,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 					    - 'a') + 10) << 4;
 					break;
 				default:
-					_cw_error("Programming error");
+					_cw_not_reached();
 				}
 				switch (c) {
 				case '0': case '1': case '2': case '3':
@@ -940,7 +932,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 					val |= ((c - 'a') + 10);
 					break;
 				default:
-					_cw_error("Programming error");
+					_cw_not_reached();
 				}
 				_CW_STILT_PUTC(val);
 				break;
@@ -1100,7 +1092,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 			}
 			break;
 		default:
-			_cw_error("Programming error");
+			_cw_not_reached();
 			break;
 		}
 	}
@@ -1324,6 +1316,6 @@ stilt_p_name_accept(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts)
 		break;
 	}
 	default:
-		_cw_error("Programming error");
+		_cw_not_reached();
 	}
 }

@@ -16,7 +16,7 @@
 
 static cw_bool_t	res_p_res_parse(cw_res_t *a_res, cw_bool_t a_is_file);
 static cw_uint32_t	res_p_char_type(char a_char);
-static cw_bool_t	res_p_res_merge(cw_res_t *a_res, const char *a_name,
+static void		res_p_res_merge(cw_res_t *a_res, const char *a_name,
     const char *a_val);
 
 /*
@@ -61,32 +61,45 @@ static cw_bool_t	res_p_res_merge(cw_res_t *a_res, const char *a_name,
 cw_res_t *
 res_new(cw_res_t *a_res, cw_mem_t *a_mem)
 {
-	cw_res_t	*retval;
+	cw_res_t		*retval;
+	volatile cw_uint32_t	try_stage = 0;
 
-	if (a_res == NULL) {
-		retval = (cw_res_t *)_cw_mem_malloc(a_mem, sizeof(cw_res_t));
-		if (retval == NULL)
-			goto OOM_1;
-		retval->is_malloced = TRUE;
-	} else {
-		retval = a_res;
-		retval->is_malloced = FALSE;
+	xep_begin();
+	volatile cw_res_t	*v_retval;
+	xep_try {
+		if (a_res != NULL) {
+			v_retval = retval = a_res;
+			retval->is_malloced = FALSE;
+		} else {
+			v_retval = retval = (cw_res_t *)_cw_mem_malloc(a_mem,
+			    sizeof(cw_res_t));
+			retval->is_malloced = TRUE;
+		}
+		try_stage = 1;
+
+		/* Initialize internals. */
+		retval->mem = a_mem;
+		rwl_new(&retval->rw_lock);
+		dch_new(&retval->hash, a_mem, _CW_RES_BASE_TABLE,
+		    _CW_RES_BASE_GROW, _CW_RES_BASE_SHRINK, ch_string_hash,
+		    ch_string_key_comp);
+		try_stage = 2;
 	}
-
-	/* Initialize internals. */
-	retval->mem = a_mem;
-	rwl_new(&retval->rw_lock);
-	if (dch_new(&retval->hash, a_mem, _CW_RES_BASE_TABLE,
-	    _CW_RES_BASE_GROW, _CW_RES_BASE_SHRINK, ch_string_hash,
-	    ch_string_key_comp) == NULL)
-		goto OOM_2;
+	xep_catch(_CW_XEPV_OOM) {
+		retval = (cw_res_t *)v_retval;
+		switch (try_stage) {
+		case 1:
+			if (retval->is_malloced)
+				_cw_mem_free(a_mem, retval);
+		case 0:
+			break;
+		default:
+			_cw_not_reached();
+		}
+	}
+	xep_end();
 
 	return retval;
-	OOM_2:
-	if (retval->is_malloced)
-		_cw_mem_free(a_mem, retval);
-	OOM_1:
-	return NULL;
 }
 
 void
@@ -157,14 +170,10 @@ res_is_equal(cw_res_t *a_a, cw_res_t *a_b)
 
 			if (res_res_val_get(a_b, key) == NULL)
 				retval = TRUE;
-			if (dch_insert(&a_a->hash, key, val, NULL)) {
-				retval = TRUE;
-				goto RETURN;
-			}
+			dch_insert(&a_a->hash, key, val, NULL);
 		}
 	}
 
-	RETURN:
 	rwl_runlock(&a_b->rw_lock);
 	rwl_wunlock(&a_a->rw_lock);
 	return retval;
@@ -659,10 +668,7 @@ res_p_res_parse(cw_res_t *a_res, cw_bool_t a_is_file)
 				 * jump to the trailing comment state.
 				 */
 				val[val_pos] = '\0';
-				if (res_p_res_merge(a_res, name, val)) {
-					retval = TRUE;
-					goto RETURN;
-				}
+				res_p_res_merge(a_res, name, val);
 				state = _LIBSTASH_RES_STATE_TRAILING_COMMENT;
 				break;
 			case _LIBSTASH_RES_CHAR_BACKSLASH:
@@ -677,10 +683,7 @@ res_p_res_parse(cw_res_t *a_res, cw_bool_t a_is_file)
 				line_num++;
 				col_num = 1;
 				val[val_pos] = '\0';
-				if (res_p_res_merge(a_res, name, val)) {
-					retval = TRUE;
-					goto RETURN;
-				}
+				res_p_res_merge(a_res, name, val);
 				state = _LIBSTASH_RES_STATE_START;
 				break;
 			case _LIBSTASH_RES_CHAR_NULL:
@@ -689,10 +692,7 @@ res_p_res_parse(cw_res_t *a_res, cw_bool_t a_is_file)
 				 * resource.
 				 */
 				val[val_pos] = '\0';
-				if (res_p_res_merge(a_res, name, val)) {
-					retval = TRUE;
-					goto RETURN;
-				}
+				res_p_res_merge(a_res, name, val);
 				state = _LIBSTASH_RES_STATE_FINISH;
 				break;
 			case _LIBSTASH_RES_CHAR_OTHER:
@@ -735,10 +735,7 @@ res_p_res_parse(cw_res_t *a_res, cw_bool_t a_is_file)
 				 * comment state.
 				 */
 				val[val_pos] = '\0';
-				if (res_p_res_merge(a_res, name, val)) {
-					retval = TRUE;
-					goto RETURN;
-				}
+				res_p_res_merge(a_res, name, val);
 				state = _LIBSTASH_RES_STATE_TRAILING_COMMENT;
 				break;
 			case _LIBSTASH_RES_CHAR_BACKSLASH:
@@ -755,10 +752,7 @@ res_p_res_parse(cw_res_t *a_res, cw_bool_t a_is_file)
 				line_num++;
 				col_num = 1;
 				val[val_pos] = '\0';
-				if (res_p_res_merge(a_res, name, val)) {
-					retval = TRUE;
-					goto RETURN;
-				}
+				res_p_res_merge(a_res, name, val);
 				state = _LIBSTASH_RES_STATE_START;
 				break;
 			case _LIBSTASH_RES_CHAR_NULL:
@@ -767,10 +761,7 @@ res_p_res_parse(cw_res_t *a_res, cw_bool_t a_is_file)
 				 * that we want the state machine to exit.
 				 */
 				val[val_pos] = '\0';
-				if (res_p_res_merge(a_res, name, val)) {
-					retval = TRUE;
-					goto RETURN;
-				}
+				res_p_res_merge(a_res, name, val);
 				state = _LIBSTASH_RES_STATE_FINISH;
 				break;
 			case _LIBSTASH_RES_CHAR_OTHER:
@@ -1050,26 +1041,25 @@ res_p_char_type(char a_char)
  * Merge a resource into the hash table, taking care to clean up any entry it
  * replaces.
  */
-static cw_bool_t
+static void
 res_p_res_merge(cw_res_t *a_res, const char *a_name, const char *a_val)
 {
-	cw_bool_t	retval;
-	char		*temp_name, *temp_val;
+	char	*temp_name, *temp_val;
 
 	/* Make copies to insert into the hash table. */
 	temp_name = (char *)_cw_mem_malloc(a_res->mem, strlen(a_name) + 1);
-	if (temp_name == NULL) {
-		retval = TRUE;
-		goto RETURN;
-	}
 	strcpy(temp_name, a_name);
 
-	temp_val = (char *)_cw_mem_malloc(a_res->mem, strlen(a_val) + 1);
-	if (temp_val == NULL) {
-		_cw_mem_free(a_res->mem, temp_name);
-		retval = TRUE;
-		goto RETURN;
+	xep_begin();
+	xep_try {
+		temp_val = (char *)_cw_mem_malloc(a_res->mem, strlen(a_val) +
+		    1);
 	}
+	xep_catch(_CW_XEPV_OOM) {
+		_cw_mem_free(a_res->mem, temp_name);
+	}
+	xep_end();
+
 	strcpy(temp_val, a_val);
 
 	if (dbg_is_registered(cw_g_dbg, "res_state")) {
@@ -1090,15 +1080,16 @@ res_p_res_merge(cw_res_t *a_res, const char *a_name, const char *a_val)
 		_cw_mem_free(a_res->mem, old_name);
 		_cw_mem_free(a_res->mem, old_val);
 
-		if (dch_insert(&a_res->hash, (void *)temp_name, (void
-		    *)temp_val, NULL)) {
-			retval = TRUE;
-			goto RETURN;
-		}
+		dch_insert(&a_res->hash, (void *)temp_name, (void *)temp_val,
+		    NULL);
 	}
 
-	if (dch_insert(&a_res->hash, (void *)temp_name, (void *)temp_val,
-	    NULL)) {
+	xep_begin();
+	xep_try {
+		dch_insert(&a_res->hash, (void *)temp_name, (void *)temp_val,
+		    NULL);
+	}
+	xep_catch(_CW_XEPV_OOM) {
 		/*
 		 * We may have removed the old definition of the resource
 		 * without inserting the new definition, which means that state
@@ -1107,11 +1098,6 @@ res_p_res_merge(cw_res_t *a_res, const char *a_name, const char *a_val)
 		 */
 		_cw_mem_free(a_res->mem, temp_name);
 		_cw_mem_free(a_res->mem, temp_val);
-		retval = TRUE;
-		goto RETURN;
 	}
-
-	retval = FALSE;
-	RETURN:
-	return retval;
+	xep_end();
 }

@@ -26,22 +26,21 @@ dbg_new(cw_mem_t *a_mem)
 	cw_dbg_t	*retval;
 
 	retval = (cw_dbg_t *)_cw_mem_malloc(a_mem, sizeof(cw_dbg_t));
-	if (retval == NULL)
-		goto RETURN;
 
 	retval->mem = a_mem;
 	mtx_new(&retval->lock);
 
-	retval->flag_hash = ch_new(NULL, a_mem, _CW_DBG_TABLE_SIZE,
-	    ch_string_hash, ch_string_key_comp);
-	if (retval->flag_hash == NULL) {
+	xep_begin();
+	xep_try {
+		retval->flag_hash = ch_new(NULL, a_mem, _CW_DBG_TABLE_SIZE,
+		    ch_string_hash, ch_string_key_comp);
+	}
+	xep_catch(_CW_XEPV_OOM) {
 		mtx_delete(&retval->lock);
 		_cw_mem_free(a_mem, retval);
-		retval = NULL;
-		goto RETURN;
 	}
+	xep_end();
 
-	RETURN:
 	return retval;
 }
 
@@ -70,12 +69,17 @@ dbg_register(cw_dbg_t *a_dbg, const char *a_flag)
 		mtx_lock(&a_dbg->lock);
 		if (ch_search(a_dbg->flag_hash, a_flag, NULL)) {
 			/* Flag not registered. */
-			chi = (cw_chi_t *)_cw_mem_malloc(a_dbg->mem,
-			    sizeof(cw_chi_t));
-			if (chi == NULL)
-				retval = TRUE;
-			else
-				ch_insert(a_dbg->flag_hash, a_flag, NULL, chi);
+			xep_begin();
+			xep_try {
+				chi = (cw_chi_t *)_cw_mem_malloc(a_dbg->mem,
+				    sizeof(cw_chi_t));
+			}
+			xep_catch(_CW_XEPV_OOM) {
+				mtx_unlock(&a_dbg->lock);
+			}
+			xep_end();
+
+			ch_insert(a_dbg->flag_hash, a_flag, NULL, chi);
 		}
 		mtx_unlock(&a_dbg->lock);
 	} else

@@ -523,15 +523,11 @@ sock_read(cw_sock_t *a_sock, cw_buf_t *a_spare, cw_sint32_t a_max_read, struct
 		if (size == 0)
 			retval = -2;
 		else if ((a_max_read == 0) || (size < a_max_read)) {
-			if ((buf_buf_catenate(a_spare, &a_sock->in_buf, FALSE)))
-				retval = -1;
-			else
-				retval = size;
+			buf_buf_catenate(a_spare, &a_sock->in_buf, FALSE);
+			retval = size;
 		} else {
-			if ((buf_split(a_spare, &a_sock->in_buf, a_max_read)))
-				retval = -1;
-			else
-				retval = a_max_read;
+			buf_split(a_spare, &a_sock->in_buf, a_max_read);
+			retval = a_max_read;
 		}
 
 		mtx_unlock(&a_sock->in_lock);
@@ -564,17 +560,12 @@ sock_read(cw_sock_t *a_sock, cw_buf_t *a_spare, cw_sint32_t a_max_read, struct
 				while (libsock_l_in_space(a_sock->sockfd));
 			}
 			if ((a_max_read == 0) || (size < a_max_read)) {
-				if ((buf_buf_catenate(a_spare, &a_sock->in_buf,
-				    FALSE)))
-					retval = -1;
-				else
-					retval = size;
+				buf_buf_catenate(a_spare, &a_sock->in_buf,
+				    FALSE);
+				retval = size;
 			} else {
-				if ((buf_split(a_spare, &a_sock->in_buf,
-				    a_max_read)))
-					retval = -1;
-				else
-					retval = a_max_read;
+				buf_split(a_spare, &a_sock->in_buf, a_max_read);
+				retval = a_max_read;
 			}
 
 			mtx_unlock(&a_sock->in_lock);
@@ -612,10 +603,7 @@ sock_write(cw_sock_t *a_sock, cw_buf_t *a_buf)
 		goto RETURN;
 	}
 	if (buf_size_get(a_buf) > 0) {
-		if (buf_buf_catenate(&a_sock->out_buf, a_buf, FALSE)) {
-			retval = TRUE;
-			goto RETURN;
-		}
+		buf_buf_catenate(&a_sock->out_buf, a_buf, FALSE);
 		out_buf_size = buf_size_get(&a_sock->out_buf);
 
 		if ((a_sock->io_in_progress == FALSE)
@@ -821,18 +809,30 @@ sock_l_out_data_put_back(cw_sock_t *a_sock, cw_buf_t *a_buf)
 	 */
 	if (0 < buf_size_get(&a_sock->out_buf)) {
 		/* There are still data in out_buf, so preserve the order. */
-		while (buf_buf_catenate(a_buf, &a_sock->out_buf, FALSE)) {
+		xep_begin();
+		xep_try {
+			buf_buf_catenate(a_buf, &a_sock->out_buf, FALSE);
+		}
+		xep_catch(_CW_XEPV_OOM) {
 			if (dbg_is_registered(cw_g_dbg, "sock_error"))
 				_cw_out_put_e("Memory allocation error; "
 				    "yielding\n");
 			thd_yield();
+			xep_retry();
 		}
+		xep_end();
 	}
-	while (buf_buf_catenate(&a_sock->out_buf, a_buf, FALSE)) {
+	xep_begin();
+	xep_try {
+		buf_buf_catenate(&a_sock->out_buf, a_buf, FALSE);
+	}
+	xep_catch(_CW_XEPV_OOM) {
 		if (dbg_is_registered(cw_g_dbg, "sock_error"))
 			_cw_out_put_e("Memory allocation error; yielding\n");
 		thd_yield();
+		xep_retry();
 	}
+	xep_end();
 	_cw_assert(0 == buf_size_get(a_buf));
 
 	retval = buf_size_get(&a_sock->out_buf);
@@ -858,11 +858,17 @@ sock_l_in_data_put(cw_sock_t *a_sock, cw_buf_t *a_buf)
 
 	mtx_lock(&a_sock->in_lock);
 
-	while (buf_buf_catenate(&a_sock->in_buf, a_buf, FALSE)) {
+	xep_begin();
+	xep_try {
+		buf_buf_catenate(&a_sock->in_buf, a_buf, FALSE);
+	}
+	xep_catch(_CW_XEPV_OOM) {
 		if (dbg_is_registered(cw_g_dbg, "sock_error"))
 			_cw_out_put_e("Memory allocation error; yielding\n");
 		thd_yield();
+		xep_retry();
 	}
+	xep_end();
 
 	if (a_sock->in_need_signal_count > 0) {
 		/* Someone wants to know that there are data available. */

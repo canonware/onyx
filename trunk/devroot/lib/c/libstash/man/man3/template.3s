@@ -47,6 +47,10 @@ Output(s):
 <retval description>
 .RE
 .RE
+Exception(s):
+.RS
+_CW_XEPV_XXX.
+.RE
 Description:
 .RS
 <description>

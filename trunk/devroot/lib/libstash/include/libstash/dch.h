@@ -50,7 +50,7 @@ cw_dch_t	*dch_new(cw_dch_t *a_dch, cw_mem_t *a_mem, cw_uint32_t
     cw_ch_hash_t *a_hash, cw_ch_key_comp_t *a_key_comp);
 void		dch_delete(cw_dch_t *a_dch);
 cw_uint32_t	dch_count(cw_dch_t *a_dch);
-cw_bool_t	dch_insert(cw_dch_t *a_dch, const void *a_key, const void
+void		dch_insert(cw_dch_t *a_dch, const void *a_key, const void
     *a_data, cw_chi_t *a_chi);
 cw_bool_t	dch_remove(cw_dch_t *a_dch, const void *a_search_key, void
     **r_key, void **r_data, cw_chi_t **r_chi);

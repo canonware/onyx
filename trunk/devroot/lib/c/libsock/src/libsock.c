@@ -566,20 +566,24 @@ libsock_l_host_ip_get(const char *a_host_str, cw_uint32_t *r_host_ip)
 static cw_bool_t
 libsock_p_notify(cw_mq_t *a_mq, int a_sockfd)
 {
-	cw_bool_t	retval;
-	cw_sint32_t	error;
+	cw_bool_t		retval;
+	volatile cw_sint32_t	error = 0;
 
 	_cw_check_ptr(a_mq);
 
-	while ((error = mq_put(a_mq, a_sockfd)) == -1) {
+	xep_begin();
+	xep_try {
+		error = mq_put(a_mq, a_sockfd);
+	}
+	xep_catch(_CW_XEPV_OOM) {
 		/*
 		 * We can't afford to lose the message, since it could end up
 		 * causing deadlock.
 		 */
-		if (dbg_is_registered(cw_g_dbg, "libsock_error"))
-			_cw_out_put_e("Memory allocation error; yielding\n");
 		thd_yield();
+		xep_retry();
 	}
+	xep_end();
 
 	if (error == 1) {
 		/*
@@ -605,9 +609,9 @@ libsock_p_entry_func(void *a_arg)
 	cw_uint32_t		max_fds = arg->max_fds;
 	struct cw_libsock_reg_s	*regs = arg->regs;
 	struct pollfd		*fds = arg->fds;
-	unsigned		nfds;
+	volatile unsigned	nfds;
 	cw_sock_t		*sock;
-	int			sockfd, num_ready;
+	volatile int		sockfd, num_ready;
 	cw_buf_t		tmp_buf, buf_in;
 	struct cw_libsock_msg_s	*message;
 
@@ -851,7 +855,7 @@ libsock_p_entry_func(void *a_arg)
 
 				break;
 			default:
-				_cw_error("Programming error");
+				_cw_not_reached();
 			}
 #ifdef _LIBSOCK_DBG
 			message->magic = 0;
@@ -897,7 +901,7 @@ libsock_p_entry_func(void *a_arg)
 				abort();
 			}
 		} else {
-			cw_sint32_t	i, j;
+			volatile cw_sint32_t	i, j;
 
 #ifdef _LIBSOCK_CONFESS
 			_cw_out_put_e("Check fd:");
@@ -1018,6 +1022,7 @@ libsock_p_entry_func(void *a_arg)
 					ssize_t		bytes_read;
 					cw_sint32_t	max_read;
 					cw_bufc_t	*bufc;
+					
 
 					j++;
 
@@ -1040,23 +1045,29 @@ libsock_p_entry_func(void *a_arg)
 					 */
 					while (buf_size_get(&buf_in) <
 					    max_read) {
-						while ((bufc =
-						    libsock_spare_bufc_get()) ==
-						    NULL) {
-							if (dbg_is_registered(cw_g_dbg,
-							    "libsock_error"))
-								_cw_out_put_e("Memory allocation error; yielding\n");
-							thd_yield();
+						xep_begin();
+						xep_try {
+							bufc =
+							    libsock_spare_bufc_get();
 						}
+						xep_catch(_CW_XEPV_OOM) {
+							thd_yield();
+							xep_retry();
+						}
+						xep_end();
 
-						while (buf_bufc_append(&buf_in,
-						        bufc, 0,
-							pezz_buffer_size_get(&g_libsock->buffer_pool))) {
-							if (dbg_is_registered(cw_g_dbg,
-								    "libsock_error"))
-								_cw_out_put_e("Memory allocation error; yielding\n");
-							thd_yield();
+						xep_begin();
+						xep_try {
+							buf_bufc_append(&buf_in,
+							    bufc, 0,
+							    pezz_buffer_size_get(&g_libsock->buffer_pool));
 						}
+						xep_catch(_CW_XEPV_OOM) {
+							thd_yield();
+							xep_retry();
+						}
+						xep_end();
+
 						bufc_delete(bufc);
 					}
 
@@ -1087,13 +1098,17 @@ libsock_p_entry_func(void *a_arg)
 						_cw_assert(buf_size_get(&tmp_buf)
 						    == 0);
 
-						while (buf_split(&tmp_buf,
-						    &buf_in, bytes_read)) {
-							if (dbg_is_registered(cw_g_dbg,
-							    "libsock_error"))
-								_cw_out_put_e("Memory allocation error; yielding\n");
-							thd_yield();
+						xep_begin();
+						xep_try {
+							buf_split(&tmp_buf,
+							    &buf_in,
+							    bytes_read);
 						}
+						xep_catch(_CW_XEPV_OOM) {
+							thd_yield();
+							xep_retry();
+						}
+						xep_end();
 
 						/*
 						 * Append to the sock's in_buf.
@@ -1188,11 +1203,11 @@ libsock_p_entry_func(void *a_arg)
 						}
 					}
 				} else if (fds[i].revents & POLLHUP) {
-					const struct iovec *iov;
-					int		iov_cnt;
-					ssize_t		bytes_read;
-					cw_bufc_t	*bufc = NULL;
-					cw_uint32_t	buffer_size;
+					const struct iovec	*iov;
+					int			iov_cnt;
+					ssize_t			bytes_read;
+					cw_uint32_t		buffer_size;
+					cw_bufc_t		*bufc;
 
 					j++;
 
@@ -1224,24 +1239,29 @@ libsock_p_entry_func(void *a_arg)
 						 */
 						if (buf_size_get(&buf_in) ==
 						    0) {
-							while ((bufc =
-							    libsock_spare_bufc_get())
-							    == NULL) {
-								if (dbg_is_registered(cw_g_dbg,
-								    "libsock_error"))
-									_cw_out_put_e("Memory allocation error; yielding\n");
-								thd_yield();
+							xep_begin();
+							xep_try {
+								bufc =
+								    libsock_spare_bufc_get();
 							}
-
-							while (buf_bufc_append(&buf_in,
-							    bufc, 0,
-							    buffer_size)) {
-
-								if (dbg_is_registered(cw_g_dbg,
-								    "libsock_error"))
-									_cw_out_put_e("Memory allocation error; yielding\n");
+							xep_catch(_CW_XEPV_OOM) {
 								thd_yield();
+								xep_retry();
 							}
+							xep_end();
+
+							xep_begin();
+							xep_try {
+								buf_bufc_append(&buf_in,
+								    bufc, 0,
+								    buffer_size);
+							}
+							xep_catch(_CW_XEPV_OOM) {
+								thd_yield();
+								xep_retry();
+							}
+							xep_end();
+
 							/*
 							 * Drop our reference.
 							 */
@@ -1262,13 +1282,18 @@ libsock_p_entry_func(void *a_arg)
 						_cw_assert(buf_size_get(&tmp_buf)
 						    == 0);
 
-						while (buf_split(&tmp_buf,
-						    &buf_in, bytes_read)) {
-							if (dbg_is_registered(cw_g_dbg,
-							    "libsock_error"))
-								_cw_out_put_e("Memory allocation error; yielding\n");
-							thd_yield();
+						xep_begin();
+						xep_try {
+							buf_split(&tmp_buf,
+							    &buf_in,
+							    bytes_read);
 						}
+						xep_catch(_CW_XEPV_OOM) {
+							thd_yield();
+							xep_retry();
+						}
+						xep_end();
+
 						sock_l_in_data_put(regs[sockfd].sock,
 						    &tmp_buf);
 					} while (bytes_read > 0);

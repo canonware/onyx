@@ -19,77 +19,87 @@ cw_pezz_t *
 pezz_new(cw_pezz_t *a_pezz, cw_mem_t *a_mem, cw_uint32_t a_buffer_size,
     cw_uint32_t a_num_buffers)
 {
-	cw_pezz_t	*retval;
-	cw_pezzi_t	*pezzi;
-	cw_uint32_t	i;
+	cw_pezz_t		*retval;
+	cw_pezzi_t		*pezzi;
+	cw_uint32_t		i;
+	volatile cw_uint32_t	try_stage = 0;
 
 	_cw_assert(0 != (a_buffer_size * a_num_buffers));
 
-	if (a_pezz == NULL) {
-		retval = (cw_pezz_t *)_cw_mem_malloc(a_mem, sizeof(cw_pezz_t));
-		if (retval == NULL)
-			goto OOM_1;
-		memset(retval, 0, sizeof(cw_pezz_t));
-		retval->is_malloced = TRUE;
-	} else {
-		retval = a_pezz;
-		memset(retval, 0, sizeof(cw_pezz_t));
-		retval->is_malloced = FALSE;
-	}
+	xep_begin();
+	volatile cw_pezz_t	*v_retval;
+	xep_try {
+		if (a_pezz != NULL) {
+			v_retval = retval = a_pezz;
+			memset(retval, 0, sizeof(cw_pezz_t));
+			retval->is_malloced = FALSE;
+		} else {
+			v_retval = retval = (cw_pezz_t *)_cw_mem_malloc(a_mem,
+			    sizeof(cw_pezz_t));
+			memset(retval, 0, sizeof(cw_pezz_t));
+			retval->is_malloced = TRUE;
+		}
+		try_stage = 1;
 
-	retval->mem = a_mem;
-	mtx_new(&retval->lock);
+		retval->mem = a_mem;
+		mtx_new(&retval->lock);
 
-	/* Make sure the elements are big enough to contain a pezzi. */
-	if (a_buffer_size >= sizeof(cw_pezzi_t))
-		retval->buffer_size = a_buffer_size;
-	else
-		retval->buffer_size = sizeof(cw_pezzi_t);
+		/* Make sure the elements are big enough to contain a pezzi. */
+		if (a_buffer_size >= sizeof(cw_pezzi_t))
+			retval->buffer_size = a_buffer_size;
+		else
+			retval->buffer_size = sizeof(cw_pezzi_t);
 
-	retval->block_num_buffers = a_num_buffers;
+		retval->block_num_buffers = a_num_buffers;
 
-	/* Allocate and initialize first block. */
-	retval->mem_blocks = (void **)_cw_mem_calloc(a_mem, 1, sizeof(void *));
-	if (retval->mem_blocks == NULL)
-		goto OOM_2;
-	retval->mem_blocks[0] = (void *)_cw_mem_calloc(a_mem,
-	    retval->block_num_buffers, retval->buffer_size);
-	if (retval->mem_blocks[0] == NULL)
-		goto OOM_3;
+		/* Allocate and initialize first block. */
+		retval->mem_blocks = (void **)_cw_mem_calloc(a_mem, 1,
+		    sizeof(void *));
+		try_stage = 2;
 
-	/* Initialize spares to have something in it. */
-	qs_new(&retval->spares);
+		retval->mem_blocks[0] = (void *)_cw_mem_calloc(a_mem,
+		    retval->block_num_buffers, retval->buffer_size);
+		try_stage = 3;
 
-	for (i = 0; i < retval->block_num_buffers; i++) {
-		pezzi = (cw_pezzi_t *)(((cw_uint8_t *)retval->mem_blocks[0]) +
-		    (i * retval->buffer_size));
-		qs_elm_new(pezzi, link);
-		qs_push(&retval->spares, pezzi, link);
-	}
-	retval->num_blocks = 1;
+		/* Initialize spares to have something in it. */
+		qs_new(&retval->spares);
 
-#ifdef _LIBSTASH_DBG
-	if (dch_new(&retval->addr_hash, a_mem, a_num_buffers * 3, a_num_buffers
-	    * 2, 0, ch_direct_hash, ch_direct_key_comp) == NULL)
-		goto OOM_4;
-
-	retval->magic = _CW_PEZZ_MAGIC;
-#endif
-
-	return retval;
+		for (i = 0; i < retval->block_num_buffers; i++) {
+			pezzi = (cw_pezzi_t *)(((cw_uint8_t
+			    *)retval->mem_blocks[0]) + (i *
+			    retval->buffer_size));
+			qs_elm_new(pezzi, link);
+			qs_push(&retval->spares, pezzi, link);
+		}
+		retval->num_blocks = 1;
 
 #ifdef _LIBSTASH_DBG
-	OOM_4:
-	_cw_mem_free(a_mem, retval->mem_blocks[0]);
+		dch_new(&retval->addr_hash, a_mem, a_num_buffers * 3,
+		    a_num_buffers * 2, 0, ch_direct_hash, ch_direct_key_comp);
+		try_stage = 4;
+
+		retval->magic = _CW_PEZZ_MAGIC;
 #endif
-	OOM_3:
-	_cw_mem_free(a_mem, retval->mem_blocks);
-	OOM_2:
-	mtx_delete(&retval->lock);
-	if (retval->is_malloced)
-		_cw_mem_free(a_mem, retval);
-	retval = NULL;
-	OOM_1:
+	}
+	xep_catch(_CW_XEPV_OOM) {
+		retval = (cw_pezz_t *)v_retval;
+		switch (try_stage) {
+		case 3:
+			_cw_mem_free(a_mem, retval->mem_blocks[0]);
+		case 2:
+			_cw_mem_free(a_mem, retval->mem_blocks);
+		case 1:
+			mtx_delete(&retval->lock);
+			if (retval->is_malloced)
+				_cw_mem_free(a_mem, retval);
+		case 0:
+			break;
+		default:
+			_cw_not_reached();
+		}
+	}
+	xep_end();
+
 	return retval;
 }
 
@@ -175,19 +185,11 @@ pezz_get(cw_pezz_t *a_pezz, const char *a_filename, cw_uint32_t a_line_num)
 		t_mem_blocks = (void **)_cw_mem_realloc(a_pezz->mem,
 		    a_pezz->mem_blocks, ((a_pezz->num_blocks + 1) * sizeof(void
 		    *)));
-		if (t_mem_blocks == NULL) {
-			retval = NULL;
-			goto RETURN;
-		}
 		a_pezz->mem_blocks = t_mem_blocks;
 
 		a_pezz->mem_blocks[a_pezz->num_blocks] = (void
 		    *)_cw_mem_calloc(a_pezz->mem, a_pezz->block_num_buffers,
 		    a_pezz->buffer_size);
-		if (a_pezz->mem_blocks[a_pezz->num_blocks] == NULL) {
-			retval = NULL;
-			goto RETURN;
-		}
 		/* All of the allocation succeeded. */
 
 		/* Initialize spares to have something in it. */
@@ -209,7 +211,6 @@ pezz_get(cw_pezz_t *a_pezz, const char *a_filename, cw_uint32_t a_line_num)
 	retval = (void *)qs_top(&a_pezz->spares);
 	qs_pop(&a_pezz->spares, link);
 
-	RETURN:
 #ifdef _LIBSTASH_DBG
 	if (a_filename == NULL)
 		a_filename = "<?>";
@@ -234,19 +235,17 @@ pezz_get(cw_pezz_t *a_pezz, const char *a_filename, cw_uint32_t a_line_num)
 				    a_line_num);
 			}
 		} else {
-			cw_pezz_item_t	*allocation;
+			cw_pool_item_t		*allocation;
+			volatile cw_uint32_t	try_stage = 0;
 
-			allocation = _cw_mem_malloc(a_pezz->mem,
-			    sizeof(cw_pezz_item_t));
-			if (allocation == NULL) {
-				if (dbg_is_registered(cw_g_dbg, "pezz_error")) {
-					_cw_out_put_e("Memory allocation error;"
-					    " unable to record pezz allocation "
-					    "0x[p] at [s], line [i]\n",
-					    sizeof(cw_pezz_item_t), retval,
-					    a_filename, a_line_num);
-				}
-			} else {
+			xep_begin();
+			volatile cw_pool_item_t	*v_allocation;
+			xep_try {
+				v_allocation = allocation =
+				    _cw_mem_malloc(a_pezz->mem,
+				    sizeof(cw_pezz_item_t));
+				try_stage = 1;
+
 				memset(retval, 0xa5, a_pezz->buffer_size);
 
 				allocation->filename = a_filename;
@@ -261,20 +260,24 @@ pezz_get(cw_pezz_t *a_pezz, const char *a_filename, cw_uint32_t a_line_num)
 					    a_pezz->buffer_size, a_filename,
 					    a_line_num);
 				}
-				if (dch_insert(&a_pezz->addr_hash, retval,
-				    allocation, NULL) == TRUE) {
-					if (dbg_is_registered(cw_g_dbg,
-					    "pezz_error")) {
-						_cw_out_put_e("Memory "
-						    "allocation error; unable "
-						    "to record pezz allocation "
-						    "0x[p] at [s], line [i]\n",
-						    sizeof(cw_pezz_item_t),
-						    retval, a_filename,
-						    a_line_num);
-					}
-				}
+
+				dch_insert(&a_pezz->addr_hash, retval,
+				    allocation, NULL);
+				try_stage = 2;
 			}
+			xep_catch (_CW_XEPV_OOM) {
+				allocation = (cw_pool_item_t *)v_allocation;
+				switch (try_stage) {
+				case 1:
+					_cw_mem_free(a_pezz->mem, allocation);
+				case 0:
+					break;
+				default:
+					_cw_not_reached();
+				}
+				xep_handled();
+			}
+			xep_end();
 		}
 	}
 #endif

@@ -44,7 +44,7 @@ cw_bool_t	mq_tryget(cw_mq_t *a_mq, ...);
 cw_bool_t	mq_timedget(cw_mq_t *a_mq, const struct timespec *a_timeout,
     ...);
 cw_bool_t	mq_get(cw_mq_t *a_mq, ...);
-cw_sint32_t	mq_put(cw_mq_t *a_mq, ...);
+cw_bool_t	mq_put(cw_mq_t *a_mq, ...);
 cw_bool_t	mq_get_start(cw_mq_t *a_mq);
 cw_bool_t	mq_get_stop(cw_mq_t *a_mq);
 cw_bool_t	mq_put_start(cw_mq_t *a_mq);

@@ -62,6 +62,10 @@ Output(s):
 .RS
 None.
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Constructor.
@@ -81,6 +85,10 @@ Pointer to a tsd.
 .RE
 .RE
 Output(s):
+.RS
+None.
+.RE
+Exception(s):
 .RS
 None.
 .RE
@@ -109,6 +117,10 @@ Output(s):
 Pointer to thread-specific data.
 .RE
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Get thread-specific data pointer.
@@ -132,6 +144,10 @@ Pointer to thread-specific data.
 .RE
 .RE
 Output(s):
+.RS
+None.
+.RE
+Exception(s):
 .RS
 None.
 .RE

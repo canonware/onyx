@@ -76,7 +76,7 @@ cw_ch_t		*ch_new(cw_ch_t *a_ch, cw_mem_t *a_mem, cw_uint32_t
     a_table_size, cw_ch_hash_t *a_hash, cw_ch_key_comp_t *a_key_comp);
 void		ch_delete(cw_ch_t *a_ch);
 cw_uint32_t	ch_count(cw_ch_t *a_ch);
-cw_bool_t	ch_insert(cw_ch_t *a_ch, const void *a_key, const void *a_data,
+void		ch_insert(cw_ch_t *a_ch, const void *a_key, const void *a_data,
     cw_chi_t *a_chi);
 cw_bool_t	ch_remove(cw_ch_t *a_ch, const void *a_search_key, void **r_key,
     void **r_data, cw_chi_t **r_chi);

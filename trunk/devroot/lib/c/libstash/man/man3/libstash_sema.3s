@@ -82,10 +82,12 @@ Output(s):
 .RS
 .IR retval :
 .RS
-non-NULL: Pointer to a sema.
-.br
-NULL: Memory allocation error.  Can only occur if (NULL == a_sema).
+Pointer to a sema.
 .RE
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -106,6 +108,10 @@ Pointer to a sema.
 .RE
 .RE
 Output(s):
+.RS
+None.
+.RE
+Exception(s):
 .RS
 None.
 .RE
@@ -131,6 +137,10 @@ Output(s):
 .RS
 None.
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Post (increment) a_sema.
@@ -150,6 +160,10 @@ Pointer to a sema.
 .RE
 .RE
 Output(s):
+.RS
+None.
+.RE
+Exception(s):
 .RS
 None.
 .RE
@@ -184,6 +198,10 @@ FALSE: Success.
 TRUE: Failure.
 .RE
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Try to wait on (decrement) a_sema, but return after a_timeout has expired if
@@ -212,6 +230,10 @@ FALSE: Success.
 TRUE: Failure.
 .RE
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Try to wait on (decrement) a_sema, but return immediately instead of blocking if
@@ -238,6 +260,10 @@ Output(s):
 Value of semaphore.
 .RE
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Get value of a_sema.
@@ -261,6 +287,10 @@ Amount to adjust the value of a_sema by.
 .RE
 .RE
 Output(s):
+.RS
+None.
+.RE
+Exception(s):
 .RS
 None.
 .RE

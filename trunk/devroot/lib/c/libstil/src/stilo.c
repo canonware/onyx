@@ -1998,11 +1998,8 @@ stilo_p_name_kref_insert(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const
 		/* XXX Check dch_new() return. */
 	}
 
-	if (dch_insert(name->e.n.keyed_refs, (void *)a_dict, NULL,
-	    _cw_stilt_chi_get(a_stilt))) {
-		/* Attempted double insertion. */
-		_cw_error("Programming error");
-	}
+	dch_insert(name->e.n.keyed_refs, (void *)a_dict, NULL,
+	    _cw_stilt_chi_get(a_stilt));
 
 	stiloe_p_unlock(&name->stiloe);
 }

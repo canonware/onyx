@@ -157,8 +157,8 @@ typedef void cw_opaque_dealloc_t (const void *, const void *, const char *,
 /*
  * libstash initialization and shutdown function prototypes.
  */
-cw_bool_t	libstash_init(void);
-void		libstash_shutdown(void);
+void	libstash_init(void);
+void	libstash_shutdown(void);
 
 /*
  * Global variables.
@@ -208,6 +208,13 @@ extern cw_out_t	*cw_g_out;
 	} while (0)
 
 #if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
+#define _cw_not_reached()						\
+	do {								\
+		out_put_e(NULL, __FILE__, __LINE__, __FUNCTION__,	\
+		    "Unreachable code reached\n");			\
+		abort();						\
+	} while (0)
+
 #define _cw_assert(a)							\
 	do {								\
 		if (!(a)) {						\
@@ -230,6 +237,7 @@ extern cw_out_t	*cw_g_out;
 		}							\
 	} while (0)
 #else
+#define _cw_not_reached()
 #define _cw_assert(a)
 #define _cw_check_ptr(a)
 #endif

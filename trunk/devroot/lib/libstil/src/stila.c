@@ -18,7 +18,7 @@
 
 static cw_bool_t stila_p_new(cw_stila_t *a_stila, cw_mem_t *a_mem);
 static void	stila_p_delete(cw_stila_t *a_stila);
-static cw_bool_t stila_p_gc_register(cw_stila_t *a_stila, cw_stilt_t *a_stilt,
+static void stila_p_gc_register(cw_stila_t *a_stila, cw_stilt_t *a_stilt,
     cw_stiloe_t *a_stiloe);
 
 /* stilag. */
@@ -91,17 +91,13 @@ stilag_gc_malloc(cw_stilag_t *a_stilag, size_t a_size, const char *a_filename,
 	return mem_malloc(&a_stilag->mem, a_size, a_filename, a_line_num);
 }
 
-cw_bool_t
+void
 stilag_gc_register(cw_stilag_t *a_stilag, cw_stilt_t *a_stilt, cw_stiloe_t
     *a_stiloe)
 {
-	cw_bool_t	retval;
-
 	mtx_lock(&a_stilag->lock);
-	retval = stila_p_gc_register(&a_stilag->stila, a_stilt, a_stiloe);
+	stila_p_gc_register(&a_stilag->stila, a_stilt, a_stiloe);
 	mtx_unlock(&a_stilag->lock);
-
-	return retval;
 }
 
 /* stilat. */
@@ -176,20 +172,16 @@ stilat_gc_malloc(cw_stilat_t *a_stilat, size_t a_size, const char *a_filename,
 	return retval;
 }
 
-cw_bool_t
+void
 stilat_gc_register(cw_stilat_t *a_stilat, cw_stiloe_t *a_stiloe)
 {
-	cw_bool_t	retval;
-
 	if (a_stilat->global == FALSE) {
-		retval = stila_p_gc_register(&a_stilat->stila, a_stilat->stilt,
+		stila_p_gc_register(&a_stilat->stila, a_stilat->stilt,
 		    a_stiloe);
 	} else {
-		retval = stilag_gc_register(a_stilat->stilag, a_stilat->stilt,
+		stilag_gc_register(a_stilat->stilag, a_stilat->stilt,
 		    a_stiloe);
 	}
-
-	return retval;
 }
 
 void
@@ -280,7 +272,7 @@ stila_p_delete(cw_stila_t *a_stila)
 	dch_delete(&a_stila->seq_set);
 }
 
-static cw_bool_t
+static void
 stila_p_gc_register(cw_stila_t *a_stila, cw_stilt_t *a_stilt, cw_stiloe_t
     *a_stiloe)
 {
@@ -289,15 +281,12 @@ stila_p_gc_register(cw_stila_t *a_stila, cw_stilt_t *a_stilt, cw_stiloe_t
 	_cw_assert(dch_search(&a_stila->seq_set, (void *)a_stiloe, NULL));
 
 	chi = _cw_stilt_chi_get(a_stilt);
-	if (chi == NULL)
-		goto OOM_1;
-
-	if (dch_insert(&a_stila->seq_set, (void *)a_stiloe, NULL, chi))
-		goto OOM_2;
-
-	return FALSE;
-	OOM_2:
-	_cw_stilt_chi_put(a_stilt, chi);
-	OOM_1:
-	return TRUE;
+	xep_begin();
+	xep_try {
+		dch_insert(&a_stila->seq_set, (void *)a_stiloe, NULL, chi);
+	}
+	xep_catch(_CW_XEPV_OOM) {
+	    _cw_stilt_chi_put(a_stilt, chi);
+	}
+	xep_end();
 }

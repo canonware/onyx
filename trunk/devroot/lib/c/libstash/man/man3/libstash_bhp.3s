@@ -140,10 +140,12 @@ Output(s):
 .RS
 .IR retval :
 .RS
-non-NULL: Pointer to a bhpi.
-.br
-NULL: Memory allocation error.  Can only occur if (NULL == a_bhpi).
+Pointer to a bhpi.
 .RE
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -164,6 +166,10 @@ Pointer to a bhpi.
 .RE
 .RE
 Output(s):
+.RS
+None.
+.RE
+Exception(s):
 .RS
 None.
 .RE
@@ -208,10 +214,12 @@ Output(s):
 .RS
 .IR retval :
 .RS
-non-NULL: Pointer to a bhp.
-.br
-NULL: Memory allocation error.  Can only occur if (NULL == a_bhp).
+Pointer to a bhp.
 .RE
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -232,6 +240,10 @@ Pointer to a bhp.
 .RE
 .RE
 Output(s):
+.RS
+None.
+.RE
+Exception(s):
 .RS
 None.
 .RE
@@ -257,6 +269,10 @@ Output(s):
 .RS
 Output printed to cw_g_out.
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Print the internal tree to cw_g_out.
@@ -280,6 +296,10 @@ Pointer to a bhpi.
 .RE
 .RE
 Output(s):
+.RS
+None.
+.RE
+Exception(s):
 .RS
 None.
 .RE
@@ -326,6 +346,10 @@ Pointer to the priority object.
 Pointer to the data object.
 .RE
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Set *r_priority and *r_data to point to a minimum node in a_bhp.
@@ -369,6 +393,10 @@ Pointer to the priority object.
 Pointer to the data object.
 .RE
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Set *r_priority and *r_data to point to a minimum node in a_bhp and remove the
@@ -395,6 +423,10 @@ Output(s):
 Number of items in a_bhp.
 .RE
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Return the number of items in a_bhp.
@@ -418,6 +450,10 @@ Pointer to a bhp.
 .RE
 .RE
 Output(s):
+.RS
+None.
+.RE
+Exception(s):
 .RS
 None.
 .RE
@@ -455,6 +491,10 @@ Output(s):
 1: *a_a > *a_b.
 .RE
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Compare *a_a and *a_b as unsigned 32 bit integers.
@@ -488,6 +528,10 @@ Output(s):
 1: *a_a > *a_b.
 .RE
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Compare *a_a and *a_b as signed 32 bit integers.
@@ -520,6 +564,10 @@ Output(s):
 .br
 1: *a_a > *a_b.
 .RE
+.RE
+Exception(s):
+.RS
+None.
 .RE
 Description:
 .RS

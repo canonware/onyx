@@ -38,7 +38,7 @@ mq - Message queue.
 .B mq_get
 .RI ( "cw_mq_t *a_mq" ", " "..." )
 
-.I cw_sint32_t
+.I cw_bool_t
 .br
 .B mq_put
 .RI ( "cw_mq_t *a_mq" ", " "..." )
@@ -97,10 +97,12 @@ Output(s):
 .RS
 .IR retval :
 .RS
-non-NULL: Pointer to a mq.
-.br
-NULL: Memory allocation error.
+Pointer to a mq.
 .RE
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -121,6 +123,10 @@ Pointer to a mq.
 .RE
 .RE
 Output(s):
+.RS
+None.
+.RE
+Exception(s):
 .RS
 None.
 .RE
@@ -158,6 +164,10 @@ TRUE: No messages in the queue, or get is in the stop state.
 .RS
 If (retval == FALSE), a message.  Otherwise, undefined.
 .RE
+.RE
+Exception(s):
+.RS
+None.
 .RE
 Description:
 .RS
@@ -198,6 +208,10 @@ NULL: No messages in the queue, or get is in the stop state.
 If (retval == FALSE), a message.  Otherwise, undefined.
 .RE
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Get a message.  If none are available, block until a message is available, or
@@ -234,13 +248,17 @@ TRUE: No messages in the queue, or get is in the stop state.
 If (retval == FALSE), a message.  Otherwise, undefined.
 .RE
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Get a message.  If none are available, block until a message is available.
 .RE
 .RE
 
-.I cw_sint32_t
+.I cw_bool_t
 .br
 .B mq_put
 .RI ( "cw_mq_t *a_mq" ", " "..." )
@@ -260,12 +278,14 @@ Output(s):
 .RS
 .IR retval :
 .RS
--1: Memory allocation error.
+FALSE: Success.
 .br
-0: Success.
-.br
-1: Failure due to put being in the stop state.
+TRUE: Failure due to put being in the stop state.
 .RE
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -293,6 +313,10 @@ FALSE: Success.
 .br
 TRUE: Error (already in start state).
 .RE
+.RE
+Exception(s):
+.RS
+None.
 .RE
 Description:
 .RS
@@ -322,6 +346,10 @@ FALSE: Success.
 TRUE: Error (already in the stop state).
 .RE
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Change the get operation to the stop state (\fBmq_get\fR() will return NULL).
@@ -348,6 +376,10 @@ FALSE: Success.
 .br
 TRUE: Error (already in start state).
 .RE
+.RE
+Exception(s):
+.RS
+None.
 .RE
 Description:
 .RS
@@ -376,6 +408,10 @@ FALSE: Success.
 TRUE: Error (already in the stop state).
 .RE
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Change the put operation to the stop state (mq_put() will return 1).
@@ -401,6 +437,10 @@ Pointer to a string to prefix to all lines of output.
 Output(s):
 .RS
 Output printed to cw_g_out.
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS

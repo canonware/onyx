@@ -37,8 +37,6 @@ bhpi_new(cw_bhpi_t *a_bhpi, cw_mem_t *a_mem, const void *a_priority, const void
 		retval->dealloc_arg = a_dealloc_arg;
 	} else {
 		retval = (cw_bhpi_t *)_cw_mem_malloc(a_mem, sizeof(cw_bhpi_t));
-		if (retval == NULL)
-			goto RETURN;
 		memset(retval, 0, sizeof(cw_bhpi_t));
 		retval->dealloc_func = (cw_opaque_dealloc_t *)mem_free;
 		retval->dealloc_arg = a_mem;
@@ -53,7 +51,6 @@ bhpi_new(cw_bhpi_t *a_bhpi, cw_mem_t *a_mem, const void *a_priority, const void
 	retval->magic_b = _LIBSTASH_BHPI_MAGIC;
 #endif
 
-	RETURN:
 	return retval;
 }
 
@@ -260,13 +257,13 @@ bhp_min_del(cw_bhp_t *a_bhp, void **r_priority, void **r_data)
 		curr_pos = curr_min->child;
 		if (curr_pos != NULL)
 			next_pos = curr_pos->sibling;
-		else {
+/*  		else { */
 			/*
 			 * Make optimizing compilers shut up about using
 			 * next_pos uninitialized.
 			 */
-			next_pos = NULL;	
-		}
+/*  			next_pos = NULL; */
+/*  		} */
 
 		while (curr_pos != NULL) {
 			curr_pos->parent = NULL;
@@ -424,8 +421,6 @@ bhp_p_new(cw_bhp_t *a_bhp, cw_mem_t *a_mem, bhp_prio_comp_t *a_prio_comp,
 
 	if (a_bhp == NULL) {
 		retval = (cw_bhp_t *)_cw_mem_malloc(a_mem, sizeof(cw_bhp_t));
-		if (retval == NULL)
-			goto RETURN;
 		retval->is_malloced = TRUE;
 	} else {
 		retval = a_bhp;
@@ -450,7 +445,6 @@ bhp_p_new(cw_bhp_t *a_bhp, cw_mem_t *a_mem, bhp_prio_comp_t *a_prio_comp,
 	retval->magic_b = _LIBSTASH_BHP_MAGIC;
 #endif
 
-	RETURN:
 	return retval;
 }
 

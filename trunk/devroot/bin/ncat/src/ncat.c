@@ -36,7 +36,6 @@ char		*get_out_str_hex(cw_buf_t *a_buf, cw_bool_t is_send, char
     *a_str);
 char		*get_out_str_ascii(cw_buf_t *a_buf, cw_bool_t is_send, char
     *a_str);
-cw_bool_t	oom_handler(const void *a_data, cw_uint32_t a_size);
 void		usage(void);
 void		version(void);
 const char	*basename(const char *a_str);
@@ -65,11 +64,7 @@ main(int argc, char **argv)
 	char		*opt_log = NULL;
 	format_t	opt_format = NONE;
 
-	if (libstash_init()) {
-		retval = 1;
-		goto RETURN;
-	}
-	mem_set_oom_handler(cw_g_mem, oom_handler, NULL);
+	libstash_init();
 
 	g_progname = basename(argv[0]);
 
@@ -308,7 +303,7 @@ main(int argc, char **argv)
 						out_put(log_out, str);
 						break;
 					default:
-						_cw_error("Programming error");
+						_cw_not_reached();
 					}
 
 					if (sock_write(sock, buf)) {
@@ -355,7 +350,7 @@ main(int argc, char **argv)
 						out_put(log_out, str);
 						break;
 					default:
-						_cw_error("Programming error");
+						_cw_not_reached();
 					}
 
 					if (sock_write(sock_stdout, buf))
@@ -1096,18 +1091,6 @@ get_out_str_ascii(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 	strcpy(p, t_str);
 
 	return retval;
-}
-
-cw_bool_t
-oom_handler(const void *a_data, cw_uint32_t a_size)
-{
-	if (dbg_is_registered(cw_g_dbg, "ncat_error")) {
-		_cw_out_put("[s]: Memory allocation error for size [i]\n",
-		    g_progname, a_size);
-	}
-	exit(1);
-
-	return FALSE;
 }
 
 void

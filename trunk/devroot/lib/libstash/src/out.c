@@ -99,7 +99,7 @@ static cw_uint8_t	*out_p_buffer_expand(cw_out_t *a_out, cw_uint32_t
     a_expand_size);
 static cw_sint32_t	out_p_format_scan(cw_out_t *a_out, const char *a_format,
      cw_out_key_t *a_key, va_list a_p);
-static cw_sint32_t	out_p_el_accept(cw_out_t *a_out, const char *a_format,
+static void	out_p_el_accept(cw_out_t *a_out, const char *a_format,
     cw_out_key_t *a_key, cw_out_el_type_t a_type, cw_uint32_t a_offset,
     cw_uint32_t a_len);
 static cw_out_ent_t	*out_p_ent_get(cw_out_t *a_out, const char *a_format,
@@ -155,8 +155,6 @@ out_new(cw_out_t *a_out, cw_mem_t *a_mem)
 		retval->is_malloced = FALSE;
 	} else {
 		retval = (cw_out_t *)_cw_mem_malloc(a_mem, sizeof(cw_out_t));
-		if (retval == NULL)
-			goto RETURN;
 		retval->is_malloced = TRUE;
 	}
 
@@ -172,7 +170,6 @@ out_new(cw_out_t *a_out, cw_mem_t *a_mem)
 	retval->magic = _CW_OUT_MAGIC;
 #endif
 
-	RETURN:
 	return retval;
 }
 
@@ -194,12 +191,10 @@ out_delete(cw_out_t *a_out)
 #endif
 }
 
-cw_bool_t
+void
 out_register(cw_out_t *a_out, const char *a_type, cw_uint32_t a_size,
     cw_out_render_t * a_render_func)
 {
-	cw_bool_t	retval;
-
 	_cw_check_ptr(a_out);
 	_cw_assert(a_out->magic == _CW_OUT_MAGIC);
 	_cw_check_ptr(a_type);
@@ -211,20 +206,12 @@ out_register(cw_out_t *a_out, const char *a_type, cw_uint32_t a_size,
 	if (a_out->extensions == NULL) {
 		a_out->extensions = (cw_out_ent_t
 		    *)_cw_mem_malloc(a_out->mem, sizeof(cw_out_ent_t));
-		if (a_out->extensions == NULL) {
-			retval = TRUE;
-			goto RETURN;
-		}
 	} else {
 		cw_out_ent_t	*t_ptr;
 
 		t_ptr = (cw_out_ent_t *)_cw_mem_realloc(a_out->mem,
 		    a_out->extensions, ((a_out->nextensions + 1) *
 		    sizeof(cw_out_ent_t)));
-		if (t_ptr == NULL) {
-			retval = TRUE;
-			goto RETURN;
-		}
 		a_out->extensions = t_ptr;
 	}
 
@@ -235,17 +222,11 @@ out_register(cw_out_t *a_out, const char *a_type, cw_uint32_t a_size,
 	a_out->extensions[a_out->nextensions].render_func = a_render_func;
 
 	a_out->nextensions++;
-
-	retval = FALSE;
-
-	RETURN:
-	return retval;
 }
 
-cw_bool_t
+void
 out_merge(cw_out_t *a_a, cw_out_t *a_b)
 {
-	cw_bool_t	retval;
 	cw_sint32_t	i;
 
 	_cw_check_ptr(a_a);
@@ -258,20 +239,12 @@ out_merge(cw_out_t *a_a, cw_out_t *a_b)
 			a_a->extensions = (cw_out_ent_t
 			    *)_cw_mem_calloc(a_a->mem, a_b->nextensions,
 			    sizeof(cw_out_ent_t));
-			if (a_a->extensions == NULL) {
-				retval = TRUE;
-				goto RETURN;
-			}
 		} else {
 			cw_out_ent_t	*t_ptr;
 
 			t_ptr = (cw_out_ent_t *)_cw_mem_realloc(a_a->mem,
 			    a_a->extensions, ((a_a->nextensions +
 			    a_b->nextensions) * sizeof(cw_out_ent_t)));
-			if (t_ptr == NULL) {
-				retval = TRUE;
-				goto RETURN;
-			}
 			a_a->extensions = t_ptr;
 		}
 
@@ -286,10 +259,6 @@ out_merge(cw_out_t *a_a, cw_out_t *a_b)
 
 		a_a->nextensions += a_b->nextensions;
 	}
-
-	retval = FALSE;
-	RETURN:
-	return retval;
 }
 
 cw_sint32_t
@@ -656,8 +625,6 @@ spec_get_val(const char *a_spec, cw_uint32_t a_spec_len, const char *a_name,
 	_cw_check_ptr(a_name);
 	_cw_check_ptr(r_val);
 
-	curr_name_len = 0;	/* Shut up the optimizer warnings. */
-
 	for (i = val_len = 0, match = FALSE, state = VALUE; i < a_spec_len;
 	    i++) {
 		switch (state) {
@@ -714,7 +681,7 @@ spec_get_val(const char *a_spec, cw_uint32_t a_spec_len, const char *a_name,
 
 			break;
 		default:
-			_cw_error("Programming error");
+			_cw_not_reached();
 		}
 	}
 
@@ -887,10 +854,6 @@ out_p_put_svn(cw_out_t *a_out, char **a_str, cw_uint32_t a_size, cw_uint32_t
 		 */
 		obuf = out_p_buffer_expand(a_out, &acount, NULL, 0,
 		    _CW_OUT_PRINT_BUF);
-		if (obuf == NULL) {
-			retval = -1;
-			goto RETURN;
-		}
 		osize = _CW_OUT_PRINT_BUF;
 	}
 
@@ -917,10 +880,6 @@ out_p_put_svn(cw_out_t *a_out, char **a_str, cw_uint32_t a_size, cw_uint32_t
 
 				obuf = out_p_buffer_expand(a_out, &acount, obuf,
 				    osize, esize);
-				if (obuf == NULL) {
-					retval = -1;
-					goto RETURN;
-				}
 				osize = esize;
 			}
 
@@ -983,7 +942,7 @@ out_p_put_svn(cw_out_t *a_out, char **a_str, cw_uint32_t a_size, cw_uint32_t
 						 * Keep the optimizer
 						 * quiet.
 						 */
-				_cw_error("Programming error");
+				_cw_not_reached();
 			}
 
 			/*
@@ -1019,10 +978,6 @@ out_p_put_svn(cw_out_t *a_out, char **a_str, cw_uint32_t a_size, cw_uint32_t
 
 				obuf = out_p_buffer_expand(a_out, &acount, obuf,
 				    i, osize);
-				if (obuf == NULL) {
-					retval = -1;
-					goto RETURN;
-				}
 
 				rcount = ent->render_func(&a_format[key.key_els[key_offset].el_offset],
 				    key.key_els[key_offset].el_len, arg, osize -
@@ -1048,10 +1003,6 @@ out_p_put_svn(cw_out_t *a_out, char **a_str, cw_uint32_t a_size, cw_uint32_t
 		if ((*a_str == NULL) && (osize != retval + 1)) {
 			obuf = out_p_buffer_expand(a_out, &acount, obuf, osize,
 			    retval + 1);
-			if (obuf == NULL) {
-				retval = -1;
-				goto RETURN;
-			}
 		}
 		*a_str = obuf;
 	}
@@ -1073,23 +1024,23 @@ out_p_buffer_expand(cw_out_t *a_out, cw_uint32_t *ar_acount, cw_uint8_t
 	if (*ar_acount == 0) {
 		retval = (cw_uint8_t *)_cw_mem_malloc((a_out != NULL) ?
 		    a_out->mem : NULL, a_expand_size);
-		if (retval == NULL)
-			goto RETURN;
 		if (a_copy_size > 0)
 			memcpy(retval, a_buffer, a_copy_size);
 	} else {
-		retval = (cw_uint8_t *)_cw_mem_realloc((a_out != NULL) ?
-		    a_out->mem : NULL, a_buffer, a_expand_size);
-		if (retval == NULL) {
+		xep_begin();
+		xep_try {
+			retval = (cw_uint8_t *)_cw_mem_realloc((a_out != NULL) ?
+			    a_out->mem : NULL, a_buffer, a_expand_size);
+			/* realloc() copies for us. */
+		}
+		xep_catch(_CW_XEPV_OOM) {
 			_cw_mem_free((a_out != NULL) ? a_out->mem : NULL,
 			    a_buffer);
-			goto RETURN;
 		}
-		/* realloc() copies for us. */
+		xep_end();
 	}
 	(*ar_acount)++;
 
-	RETURN:
 	return retval;
 }
 
@@ -1119,10 +1070,10 @@ out_p_format_scan(cw_out_t *a_out, const char *a_format, cw_out_key_t *a_key,
 				 * begun).  If the next character is also a '[',
 				 * it will mark the beginning of a new text el.
 				 */
-				if (i > 0 && (retval = out_p_el_accept(a_out,
-				    a_format, a_key, TEXT, el_offset, i
-				    - el_offset)) < 0)
-					goto RETURN;
+				if (i > 0) {
+					out_p_el_accept(a_out, a_format, a_key,
+					    TEXT, el_offset, i - el_offset);
+				}
 				el_offset = i + 1;
 				state = BRACKET;
 			}
@@ -1141,16 +1092,15 @@ out_p_format_scan(cw_out_t *a_out, const char *a_format, cw_out_key_t *a_key,
 			if (a_format[i] == '|')
 				state = NAME;
 			else if (a_format[i] == ']') {
-				if ((retval = out_p_el_accept(a_out, a_format,
-				    a_key, SPEC, el_offset, i - el_offset)) < 0)
-					goto RETURN;
+				out_p_el_accept(a_out, a_format, a_key, SPEC,
+				    el_offset, i - el_offset);
 				el_offset = i + 1;
 				state = NORMAL;
 			}
 
 			break;
 		default:
-			_cw_error("Programming error");
+			_cw_not_reached();
 		}
 	}
 	if (state != NORMAL) {
@@ -1161,20 +1111,18 @@ out_p_format_scan(cw_out_t *a_out, const char *a_format, cw_out_key_t *a_key,
 	 * Accept the last el, if there is one.
 	 */
 	if (i > el_offset) {
-		retval = out_p_el_accept(a_out, a_format, a_key, TEXT,
-		    el_offset, i - el_offset);
+		out_p_el_accept(a_out, a_format, a_key, TEXT, el_offset, i -
+		    el_offset);
 	}
 
 	RETURN:
 	return retval;
 }
 
-static cw_sint32_t
+static void
 out_p_el_accept(cw_out_t *a_out, const char *a_format, cw_out_key_t *a_key,
     cw_out_el_type_t a_type, cw_uint32_t a_offset, cw_uint32_t a_len)
 {
-	cw_sint32_t	retval;
-
 	/* Check for overflow of the stack-allocated els buffer. */
 	if (a_key->key_nels == _CW_OUT_ELS_BUF) {
 		cw_uint32_t	i, total_els = _CW_OUT_ELS_BUF + 2;
@@ -1205,10 +1153,6 @@ out_p_el_accept(cw_out_t *a_out, const char *a_format, cw_out_key_t *a_key,
 		}
 		a_key->key_els = (cw_out_el_t *)_cw_mem_malloc((a_out != NULL)
 		    ? a_out->mem : NULL, total_els * sizeof(cw_out_el_t));
-		if (a_key->key_els == NULL) {
-			retval = -1;
-			goto RETURN;
-		}
 #ifdef _LIBSTASH_DBG
 		memset(a_key->key_els, 0, total_els * sizeof(cw_out_el_t));
 #endif
@@ -1224,10 +1168,6 @@ out_p_el_accept(cw_out_t *a_out, const char *a_format, cw_out_key_t *a_key,
 	a_key->key_els[a_key->key_nels].el_offset = a_offset;
 	a_key->key_els[a_key->key_nels].el_len = a_len;
 	a_key->key_nels++;
-
-	retval = 0;
-	RETURN:
-	return retval;
 }
 
 static cw_out_ent_t *

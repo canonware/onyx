@@ -101,10 +101,12 @@ Output(s):
 .RS
 .IR retval :
 .RS
-non-NULL: Pointer to a treen.
-.br
-NULL: Memory allocation error.
+Pointer to a treen.
 .RE
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -125,6 +127,10 @@ Pointer to a treen.
 .RE
 .RE
 Output(s):
+.RS
+None.
+.RE
+Exception(s):
 .RS
 None.
 .RE
@@ -151,6 +157,10 @@ Pointer to a treen, or NULL (no parent).
 .RE
 .RE
 Output(s):
+.RS
+None.
+.RE
+Exception(s):
 .RS
 None.
 .RE
@@ -183,6 +193,10 @@ non-NULL: Pointer to a treen.
 NULL: No parent.
 .RE
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Return a pointer to a_treen's parent.
@@ -209,6 +223,10 @@ non-NULL: Pointer to a treen.
 .br
 NULL: No children.
 .RE
+.RE
+Exception(s):
+.RS
+None.
 .RE
 Description:
 .RS
@@ -237,6 +255,10 @@ Pointer to a treen.
 If (a_treen == retval), there are no siblings.
 .RE
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Return a pointer to a_treen's sibling.
@@ -262,6 +284,10 @@ Output(s):
 Pointer to data.
 .RE
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Return a pointer to the data for a_treen.
@@ -285,6 +311,10 @@ Pointer to data.
 .RE
 .RE
 Output(s):
+.RS
+None.
+.RE
+Exception(s):
 .RS
 None.
 .RE

@@ -68,6 +68,10 @@ Output(s):
 .RS
 None.
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Constructor.
@@ -87,6 +91,10 @@ Pointer to a cnd.
 .RE
 .RE
 Output(s):
+.RS
+None.
+.RE
+Exception(s):
 .RS
 None.
 .RE
@@ -112,6 +120,10 @@ Output(s):
 .RS
 None.
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Signal one thread waiting on a_cnd.
@@ -131,6 +143,10 @@ Pointer to a cnd.
 .RE
 .RE
 Output(s):
+.RS
+None.
+.RE
+Exception(s):
 .RS
 None.
 .RE
@@ -170,6 +186,10 @@ FALSE: Success.
 TRUE: Timeout.
 .RE
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Wait for a_cnd for at least a_time.
@@ -193,6 +213,10 @@ Pointer to a mtx.
 .RE
 .RE
 Output(s):
+.RS
+None.
+.RE
+Exception(s):
 .RS
 None.
 .RE

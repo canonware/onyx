@@ -225,10 +225,12 @@ Output(s):
 .RS
 .IR retval :
 .RS
-non-NULL: Pointer to a res.
-.br
-NULL: Memory allocation error.
+Pointer to a res.
 .RE
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -252,6 +254,10 @@ Output(s):
 .RS
 None.
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Destructor.
@@ -271,6 +277,10 @@ Pointer to a res.
 .RE
 .RE
 Output(s):
+.RS
+None.
+.RE
+Exception(s):
 .RS
 None.
 .RE
@@ -305,6 +315,10 @@ FALSE: Not equal.
 TRUE: Equal.
 .RE
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 If a_res and a_other are equivalent, return TRUE, otherwise FALSE.
@@ -335,6 +349,10 @@ FALSE: Success.
 .br
 TRUE: Error.
 .RE
+.RE
+Exception(s):
+.RS
+None.
 .RE
 Description:
 .RS
@@ -367,6 +385,10 @@ FALSE: Success.
 TRUE: Error.
 .RE
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Merge the resources (...) into the resource database (a_res).
@@ -397,6 +419,10 @@ non-NULL: Pointer to a string that represents a resource value.
 .br
 NULL: Resource does not exist.
 .RE
+.RE
+Exception(s):
+.RS
+None.
 .RE
 Description:
 .RS
@@ -450,6 +476,10 @@ Pointer to a string that represents a resource value, or undefined if (TRUE ==
 retval).
 .RE
 .RE
+Exception(s):
+.RS
+None.
+.RE
 Description:
 .RS
 Find a resource name/value pair, remove it from the resource database, and set
@@ -483,6 +513,10 @@ FALSE: Success.
 TRUE: Error opening output file.
 .RE
 Output printed to a file or to cw_g_out.
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS

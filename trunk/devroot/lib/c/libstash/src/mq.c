@@ -32,64 +32,75 @@
 cw_mq_t *
 mq_new(cw_mq_t *a_mq, cw_mem_t *a_mem, cw_uint32_t a_msg_size)
 {
-	cw_mq_t	*retval;
+	cw_mq_t			*retval;
+	volatile cw_uint32_t	try_stage = 0;
 
-	if (a_mq != NULL) {
-		retval = a_mq;
-		a_mq->is_malloced = FALSE;
-	} else {
-		retval = (cw_mq_t *)_cw_mem_malloc(a_mem, sizeof(cw_mq_t));
-		if (retval == NULL)
-			goto OOM_1;
-		retval->is_malloced = TRUE;
-	}
+	xep_begin();
+	volatile cw_mq_t	*v_retval;
+	xep_try {
+		if (a_mq != NULL) {
+			v_retval = retval = a_mq;
+			a_mq->is_malloced = FALSE;
+		} else {
+			v_retval = retval = (cw_mq_t *)_cw_mem_malloc(a_mem,
+			    sizeof(cw_mq_t));
+			retval->is_malloced = TRUE;
+		}
+		try_stage = 1;
+	
+		retval->mem = a_mem;
+		retval->msg_count = 0;
 
-	retval->mem = a_mem;
-	retval->msg_count = 0;
+		switch (a_msg_size) {
+		case 1:
+			retval->msg_size = 1;
+			break;
+		case 2:
+			retval->msg_size = 2;
+			break;
+		case 4:
+			retval->msg_size = 4;
+			break;
+		case 8:
+			retval->msg_size = 8;
+			break;
+		default:
+			_cw_not_reached();
+		}
 
-	switch (a_msg_size) {
-	case 1:
-		retval->msg_size = 1;
-		break;
-	case 2:
-		retval->msg_size = 2;
-		break;
-	case 4:
-		retval->msg_size = 4;
-		break;
-	case 8:
-		retval->msg_size = 8;
-		break;
-	default:
-		_cw_error("Programming error");
-	}
+		retval->msgs_vec_count = _LIBSTASH_MQ_ARRAY_MIN_SIZE;
+		retval->msgs_beg = 0;
+		retval->msgs_end = 0;
 
-	retval->msgs_vec_count = _LIBSTASH_MQ_ARRAY_MIN_SIZE;
-	retval->msgs_beg = 0;
-	retval->msgs_end = 0;
+		retval->msgs.x = (cw_uint32_t *)_cw_mem_malloc(a_mem,
+		    retval->msgs_vec_count * retval->msg_size);
+		try_stage = 2;
 
-	retval->msgs.x = (cw_uint32_t *)_cw_mem_malloc(a_mem,
-	    retval->msgs_vec_count * retval->msg_size);
-	if (retval->msgs.x == NULL)
-		goto OOM_2;
+		mtx_new(&retval->lock);
+		cnd_new(&retval->cond);
 
-	mtx_new(&retval->lock);
-	cnd_new(&retval->cond);
-
-	retval->get_stop = FALSE;
-	retval->put_stop = FALSE;
+		retval->get_stop = FALSE;
+		retval->put_stop = FALSE;
 
 #ifdef _LIBSTASH_DBG
-	retval->magic = _LIBSTASH_MQ_MAGIC;
+		retval->magic = _LIBSTASH_MQ_MAGIC;
 #endif
+	}
+	xep_catch(_CW_XEPV_OOM) {
+		retval = (cw_mq_t *)v_retval;
+		switch (try_stage) {
+		case 1:
+			if (a_mq->is_malloced)
+				_cw_mem_free(a_mem, retval);
+		case 0:
+			break;
+		default:
+			_cw_not_reached();
+		}
+		break;
+	}
+	xep_end();
 
-	return retval;
-
-	OOM_2:
-	if (a_mq->is_malloced)
-		_cw_mem_free(a_mem, retval);
-	retval = NULL;
-	OOM_1:
 	return retval;
 }
 
@@ -153,7 +164,7 @@ mq_tryget(cw_mq_t *a_mq, ...)
 			*r_msg.eight = a_mq->msgs.eight[a_mq->msgs_beg];
 			break;
 		default:
-			_cw_error("Programming error");
+			_cw_not_reached();
 		}
 		a_mq->msg_count--;
 		a_mq->msgs_beg = (a_mq->msgs_beg + 1) % a_mq->msgs_vec_count;
@@ -217,7 +228,7 @@ mq_timedget(cw_mq_t *a_mq, const struct timespec * a_timeout, ...)
 			*r_msg.eight = a_mq->msgs.eight[a_mq->msgs_beg];
 			break;
 		default:
-			_cw_error("Programming error");
+			_cw_not_reached();
 		}
 		a_mq->msg_count--;
 		a_mq->msgs_beg = (a_mq->msgs_beg + 1) % a_mq->msgs_vec_count;
@@ -280,7 +291,7 @@ mq_get(cw_mq_t *a_mq, ...)
 		*r_msg.eight = a_mq->msgs.eight[a_mq->msgs_beg];
 		break;
 	default:
-		_cw_error("Programming error");
+		_cw_not_reached();
 	}
 	a_mq->msg_count--;
 	a_mq->msgs_beg = (a_mq->msgs_beg + 1) % a_mq->msgs_vec_count;
@@ -291,10 +302,10 @@ mq_get(cw_mq_t *a_mq, ...)
 	return retval;
 }
 
-cw_sint32_t
+cw_bool_t
 mq_put(cw_mq_t *a_mq, ...)
 {
-	cw_sint32_t	retval;
+	cw_bool_t	retval;
 	union {
 		cw_uint32_t	*four;
 		cw_uint64_t	*eight;
@@ -314,7 +325,7 @@ mq_put(cw_mq_t *a_mq, ...)
 	if (a_mq->msg_count == 0)
 		cnd_broadcast(&a_mq->cond);
 	if (a_mq->put_stop) {
-		retval = 1;
+		retval = TRUE;
 		goto RETURN;
 	} else {
 		if (a_mq->msg_count >= a_mq->msgs_vec_count) {
@@ -333,10 +344,6 @@ mq_put(cw_mq_t *a_mq, ...)
 			 */
 			t_msgs.x = (void *)_cw_mem_malloc(a_mq->mem,
 			    a_mq->msgs_vec_count * 2 * a_mq->msg_size);
-			if (t_msgs.x == NULL) {
-				retval = -1;
-				goto RETURN;
-			}
 
 			switch (a_mq->msg_size) {
 			case 1:
@@ -372,7 +379,7 @@ mq_put(cw_mq_t *a_mq, ...)
 				}
 				break;
 			default:
-				_cw_error("Programming error");
+				_cw_not_reached();
 			}
 			_cw_free(a_mq->msgs.x);
 			a_mq->msgs.x = t_msgs.x;
@@ -397,13 +404,13 @@ mq_put(cw_mq_t *a_mq, ...)
 			a_mq->msgs.eight[a_mq->msgs_end] = *a_msg.eight;
 			break;
 		default:
-			_cw_error("Programming error");
+			_cw_not_reached();
 		}
 		a_mq->msg_count++;
 		a_mq->msgs_end = (a_mq->msgs_end + 1) % a_mq->msgs_vec_count;
 	}
 
-	retval = 0;
+	retval = FALSE;
 	RETURN:
 	mtx_unlock(&a_mq->lock);
 	return retval;
@@ -545,7 +552,7 @@ mq_dump(cw_mq_t *a_mq, const char *a_prefix)
 		}
 		break;
 	default:
-		_cw_error("Programming error");
+		_cw_not_reached();
 	}
 
 	_cw_out_put("[s]get_stop : [s]\n", a_prefix, a_mq->get_stop ? "TRUE" :

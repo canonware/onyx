@@ -43,41 +43,43 @@ struct cw_mem_item_s {
 cw_mem_t *
 mem_new(cw_mem_t *a_mem, cw_mem_t *a_internal)
 {
-	cw_mem_t	*retval;
+	cw_mem_t		*retval;
+	volatile cw_uint32_t	try_stage = 0;
 
-	if (a_mem != NULL) {
-		retval = a_mem;
-		retval->is_malloced = FALSE;
-	} else {
-		retval = (cw_mem_t *)_cw_mem_malloc(a_internal,
-		    sizeof(cw_mem_t));
-		if (retval == NULL)
-			goto OOM_1;
-		retval->is_malloced = TRUE;
+	xep_begin();
+	volatile cw_mem_t	*v_retval;
+	xep_try {
+		if (a_mem != NULL) {
+			v_retval = retval = a_mem;
+			retval->is_malloced = FALSE;
+		} else {
+			v_retval = retval = (cw_mem_t
+			    *)_cw_mem_malloc(a_internal, sizeof(cw_mem_t));
+			retval->is_malloced = TRUE;
+		}
+		retval->mem = a_internal;
+		mtx_new(&retval->lock);
+		try_stage = 1;
+
+#ifdef _LIBSTASH_DBG
+		retval->addr_hash = ch_new(NULL, a_internal, _CW_MEM_TABLE_SIZE,
+		    ch_direct_hash, ch_direct_key_comp);
+		try_stage = 2;
+#endif
+		retval->handler_data = NULL;
 	}
-	retval->mem = a_internal;
-	mtx_new(&retval->lock);
-
-#ifdef _LIBSTASH_DBG
-	retval->addr_hash = ch_new(NULL, a_internal, _CW_MEM_TABLE_SIZE,
-	    ch_direct_hash, ch_direct_key_comp);
-	if (retval->addr_hash == NULL)
-		goto OOM_2;
-#endif
-
-	retval->oom_handler = NULL;
-	retval->handler_data = NULL;
-
-	return retval;
-
-#ifdef _LIBSTASH_DBG
-	OOM_2:
-	mtx_delete(&retval->lock);
-	if (retval->is_malloced)
-		_cw_mem_free(a_internal, retval);
-	retval = NULL;
-#endif
-	OOM_1:
+	xep_catch(_CW_XEPV_OOM) {
+		retval = (cw_mem_t *)v_retval;
+		switch (try_stage) {
+		case 1:
+			mtx_delete(&retval->lock);
+			if (retval->is_malloced)
+				_cw_mem_free(a_internal, retval);
+		case 0:
+			break;
+		}
+	}
+	xep_end();
 	return retval;
 }
 
@@ -122,20 +124,6 @@ mem_delete(cw_mem_t *a_mem)
 		_cw_mem_free(a_mem->mem, a_mem);
 }
 
-void
-mem_set_oom_handler(cw_mem_t *a_mem, cw_mem_oom_handler_t * a_oom_handler, const
-    void *a_data)
-{
-	_cw_check_ptr(a_mem);
-
-	mtx_lock(&a_mem->lock);
-
-	a_mem->oom_handler = a_oom_handler;
-	a_mem->handler_data = a_data;
-
-	mtx_unlock(&a_mem->lock);
-}
-
 void *
 mem_malloc(cw_mem_t *a_mem, size_t a_size, const char *a_filename,
     cw_uint32_t a_line_num)
@@ -150,15 +138,9 @@ mem_malloc(cw_mem_t *a_mem, size_t a_size, const char *a_filename,
 #endif
 
 	retval = _cw_malloc(a_size);
+	if (retval == NULL)
+		xep_throw(_CW_XEPV_OOM);
 
-	if (retval == NULL && a_mem != NULL && a_mem->oom_handler != NULL) {
-		while (a_mem->oom_handler(a_mem->handler_data,
-		    a_size)) {
-			retval = _cw_malloc(a_size);
-			if (retval != NULL)
-				break;
-		}
-	}
 #ifdef _LIBSTASH_DBG
 	if (a_filename == NULL)
 		a_filename = "<?>";
@@ -233,15 +215,9 @@ mem_calloc(cw_mem_t *a_mem, size_t a_number, size_t a_size, const char
 #endif
 
 	retval = _cw_calloc(a_number, a_size);
+	if (retval == NULL)
+		xep_throw(_CW_XEPV_OOM);
 
-	if (retval == NULL && a_mem != NULL && a_mem->oom_handler != NULL) {
-		while (a_mem->oom_handler(a_mem->handler_data,
-		    a_size)) {
-			retval = _cw_calloc(a_number, a_size);
-			if (retval != NULL)
-				break;
-		}
-	}
 #ifdef _LIBSTASH_DBG
 	if (a_filename == NULL)
 		a_filename = "<?>";
@@ -321,15 +297,9 @@ mem_realloc(cw_mem_t *a_mem, void *a_ptr, size_t a_size, const char *a_filename,
 #endif
 
 	retval = _cw_realloc(a_ptr, a_size);
+	if (retval == NULL)
+		xep_throw(_CW_XEPV_OOM);
 
-	if (retval == NULL && a_mem != NULL && a_mem->oom_handler != NULL) {
-		while (a_mem->oom_handler(a_mem->handler_data,
-		    a_size)) {
-			retval = _cw_realloc(a_ptr, a_size);
-			if (retval != NULL)
-				break;
-		}
-	}
 #ifdef _LIBSTASH_DBG
 	if (a_filename == NULL)
 		a_filename = "<?>";

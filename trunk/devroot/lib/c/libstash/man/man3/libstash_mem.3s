@@ -14,11 +14,6 @@ mem - malloc wrapper.
 .SH SYNOPSIS
 \fB#include <libstash/libstash.h>\fR
 
-.SS Type definitions
-.I cw_bool_t
-.B cw_mem_oom_handler_t
-.RI ( "const void *a_data" ", " "cw_uint32_t a_size" )
-
 .SS General
 .I cw_mem_t *
 .br
@@ -29,12 +24,6 @@ mem - malloc wrapper.
 .br
 .B mem_delete
 .RI ( "cw_mem_t *a_mem" )
-
-.I void
-.br
-.B mem_set_oom_handler
-.RI ( "cw_mem_t *a_mem" ", " "cw_mem_oom_handler_t *a_oom_handler" ", "
-.IR "const void *a_data" )
 
 .I void *
 .br
@@ -133,39 +122,6 @@ several preprocessor macros that can be used: \fB_cw_malloc\fR(),
 \fB_cw_calloc\fR(), \fB_cw_realloc\fR(), and \fB_cw_free\fR().
 
 .SH USAGE
-.I typedef cw_bool_t
-.br
-.B cw_mem_oom_handler_t
-.RI ( "const void *a_data" ", " "cw_uint32_t a_size" )
-.RS
-Input(s):
-.RS
-.IR a_data :
-.RS
-Data pointer, as specified by the a_data argument of
-\fBmem_set_oom_handler\fR().
-.RE
-.IR a_size :
-.RS
-Size of failed memory allocation.
-.RE
-.RE
-Output(s):
-.RS
-.IR retval :
-.RS
-FALSE: Don't retry allocation.
-.br
-TRUE: Retry allocation.
-.RE
-.RE
-Description:
-.RS
-A function pointer of this type can be passed in via
-\fBmem_set_oom_handler\fR().
-.RE
-.RE
-
 .I cw_mem_t *
 .br
 .B mem_new
@@ -182,10 +138,12 @@ Output(s):
 .RS
 .IR retval :
 .RS
-non-NULL: Pointer to a mem.
-.br
-NULL: Memory allocation error.
+Pointer to a mem.
 .RE
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -209,42 +167,13 @@ Output(s):
 .RS
 None.
 .RE
-Description:
-.RS
-Destructor.
-.RE
-.RE
-
-.I void
-.br
-.B mem_set_oom_handler
-.RI ( "cw_mem_t *a_mem" ", " "cw_mem_oom_handler_t *a_oom_handler" ", "
-.IR "const void *a_data" )
-.RS
-Input(s):
-.RS
-.IR a_mem :
-.RS
-Pointer to a mem.
-.RE
-.IR a_oom_handler :
-.RS
-Pointer to an out of memory handler, or NULL.
-.RE
-.IR a_data :
-.RS
-Data pointer that is passed into a_oom_handler().
-.RE
-.RE
-Output(s):
+Exception(s):
 .RS
 None.
 .RE
 Description:
 .RS
-Set an out of memory handler function.  The handler function is called whenever
-memory allocation fails.  If the handler returns TRUE, alloction is
-re-attempted.
+Destructor.
 .RE
 .RE
 
@@ -287,10 +216,12 @@ Output(s):
 .RS
 .IR retval :
 .RS
-non-NULL: Pointer to a memory range.
-.br
-NULL: Memory allocation error.
+Pointer to a memory range.
 .RE
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -341,10 +272,12 @@ Output(s):
 .RS
 .IR retval :
 .RS
-non-NULL: Pointer to a zeroed memory range.
-.br
-NULL: Memory allocation error.
+Pointer to a zeroed memory range.
 .RE
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -395,10 +328,12 @@ Output(s):
 .RS
 .IR retval :
 .RS
-non-NULL: Pointer to a zeroed memory range.
-.br
-NULL: Memory allocation error.
+Pointer to a zeroed memory range.
 .RE
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -446,6 +381,10 @@ Should be __LINE__.
 .RE
 .RE
 Output(s):
+.RS
+None.
+.RE
+Exception(s):
 .RS
 None.
 .RE

@@ -25,56 +25,59 @@ cw_dbg_t	*cw_g_dbg = NULL;
 cw_mem_t	*cw_g_mem = NULL;
 cw_out_t	*cw_g_out = NULL;
 #ifdef _LIBSTASH_MEM_DBG
-cw_mem_t	*cw_g_mem_mem = NULL;
+static cw_mem_t	*cw_g_mem_mem = NULL;
 #endif
 
-cw_bool_t
+void
 libstash_init(void)
 {
+	volatile cw_uint32_t	try_stage = 0;
+
 	/* Start up global modules. */
 	thd_l_init();
 	xep_l_init();
 
-	cw_g_dbg = dbg_new(cw_g_mem);
-	if (cw_g_dbg == NULL)
-		goto OOM_1;
+	xep_begin();
+	xep_try {
+		cw_g_dbg = dbg_new(cw_g_mem);
+		try_stage = 1;
 #ifdef _LIBSTASH_DBG
-	dbg_register(cw_g_dbg, "mem_error");
-	dbg_register(cw_g_dbg, "pezz_error");
-
+		dbg_register(cw_g_dbg, "mem_error");
+		dbg_register(cw_g_dbg, "pezz_error");
 #endif
 #ifdef _LIBSTASH_MEM_DBG
-	cw_g_mem_mem = mem_new(NULL, NULL);
-	if (cw_g_mem_mem == NULL)
-		goto OOM_2;
+		cw_g_mem_mem = mem_new(NULL, NULL);
+		try_stage = 2;
 
-	cw_g_mem = mem_new(NULL, cw_g_mem_mem);
-	if (cw_g_mem == NULL)
-		goto OOM_3;
+		cw_g_mem = mem_new(NULL, cw_g_mem_mem);
+		try_stage = 3;
 #else
-	cw_g_mem = mem_new(NULL, NULL);
-	if (cw_g_mem == NULL)
-		goto OOM_3;
+		cw_g_mem = mem_new(NULL, NULL);
+		try_stage = 3;
 #endif
-
-	cw_g_out = out_new(NULL, cw_g_mem);
-	if (cw_g_out == NULL)
-		goto OOM_4;
-
-	return FALSE;
-	OOM_4:
-	mem_delete(cw_g_mem);
-	cw_g_mem = NULL;
-	OOM_3:
+		cw_g_out = out_new(NULL, cw_g_mem);
+		try_stage = 4;
+	}
+	xep_catch(_CW_XEPV_OOM) {
+		switch (try_stage) {
+		case 3:
+			mem_delete(cw_g_mem);
+			cw_g_mem = NULL;
+		case 2:
 #ifdef _LIBSTASH_MEM_DBG
-	mem_delete(cw_g_mem_mem);
-	cw_g_mem_mem = NULL;
-	OOM_2:
+			mem_delete(cw_g_mem_mem);
+			cw_g_mem_mem = NULL;
 #endif
-	dbg_delete(cw_g_dbg);
-	cw_g_dbg = NULL;
-	OOM_1:
-	return TRUE;
+		case 1:
+			dbg_delete(cw_g_dbg);
+			cw_g_dbg = NULL;
+		case 0:
+			break;
+		default:
+			_cw_not_reached();
+		}
+	}
+	xep_end();
 }
 
 void

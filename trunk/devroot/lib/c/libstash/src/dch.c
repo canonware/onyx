@@ -15,8 +15,8 @@
 #define _CW_DCH_MAGIC 0x4327589e
 #endif
 
-static cw_bool_t dch_p_grow(cw_dch_t *a_dch);
-static cw_bool_t dch_p_shrink(cw_dch_t *a_dch);
+static void dch_p_grow(cw_dch_t *a_dch);
+static void dch_p_shrink(cw_dch_t *a_dch);
 static void dch_p_insert(cw_ch_t *a_ch, cw_chi_t * a_chi);
 
 cw_dch_t *
@@ -36,8 +36,6 @@ dch_new(cw_dch_t *a_dch, cw_mem_t *a_mem, cw_uint32_t a_base_table, cw_uint32_t
 		retval->is_malloced = FALSE;
 	} else {
 		retval = (cw_dch_t *)_cw_mem_malloc(a_mem, sizeof(cw_dch_t));
-		if (retval == NULL)
-			goto RETURN;
 		memset(retval, 0, sizeof(cw_dch_t));
 		retval->is_malloced = TRUE;
 	}
@@ -50,18 +48,24 @@ dch_new(cw_dch_t *a_dch, cw_mem_t *a_mem, cw_uint32_t a_base_table, cw_uint32_t
 	retval->hash = a_hash;
 	retval->key_comp = a_key_comp;
 
-	retval->ch = ch_new(NULL, a_mem, retval->base_table, retval->hash,
-	    retval->key_comp);
-	if (retval == NULL) {
-		if (a_dch->is_malloced)
-			_cw_mem_free(a_mem, a_dch);
-		goto RETURN;
+	xep_begin();
+	volatile cw_dch_t	*v_retval;
+	xep_try {
+		v_retval = retval;
+		retval->ch = ch_new(NULL, a_mem, retval->base_table,
+		    retval->hash, retval->key_comp);
 	}
+	xep_catch(_CW_XEPV_OOM) {
+		retval = (cw_dch_t *)v_retval;
+		if (a_dch->is_malloced)
+			_cw_mem_free(a_mem, retval);
+	}
+	xep_end();
+
 #ifdef _LIBSTASH_DBG
 	retval->magic = _CW_DCH_MAGIC;
 #endif
 
-	RETURN:
 	return retval;
 }
 
@@ -90,26 +94,15 @@ dch_count(cw_dch_t *a_dch)
 	return ch_count(a_dch->ch);
 }
 
-cw_bool_t
+void
 dch_insert(cw_dch_t *a_dch, const void *a_key, const void *a_data, cw_chi_t
     *a_chi)
 {
-	cw_bool_t	retval;
-
 	_cw_check_ptr(a_dch);
 	_cw_assert(a_dch->magic == _CW_DCH_MAGIC);
 
-	if (dch_p_grow(a_dch)) {
-		retval = TRUE;
-		goto RETURN;
-	}
-	if (ch_insert(a_dch->ch, a_key, a_data, a_chi)) {
-		retval = TRUE;
-		goto RETURN;
-	}
-	retval = FALSE;
-	RETURN:
-	return retval;
+	dch_p_grow(a_dch);
+	ch_insert(a_dch->ch, a_key, a_data, a_chi);
 }
 
 cw_bool_t
@@ -121,10 +114,7 @@ dch_remove(cw_dch_t *a_dch, const void *a_search_key, void **r_key, void
 	_cw_check_ptr(a_dch);
 	_cw_assert(a_dch->magic == _CW_DCH_MAGIC);
 
-	if (dch_p_shrink(a_dch)) {
-		retval = TRUE;
-		goto RETURN;
-	}
+	dch_p_shrink(a_dch);
 	if (ch_remove(a_dch->ch, a_search_key, r_key, r_data, r_chi)) {
 		retval = TRUE;
 		goto RETURN;
@@ -161,10 +151,7 @@ dch_remove_iterate(cw_dch_t *a_dch, void **r_key, void **r_data, cw_chi_t
 	_cw_check_ptr(a_dch);
 	_cw_assert(a_dch->magic == _CW_DCH_MAGIC);
 
-	if (dch_p_shrink(a_dch)) {
-		retval = TRUE;
-		goto RETURN;
-	}
+	dch_p_shrink(a_dch);
 	if (ch_remove_iterate(a_dch->ch, r_key, r_data, r_chi)) {
 		retval = TRUE;
 		goto RETURN;
@@ -199,10 +186,9 @@ dch_dump(cw_dch_t *a_dch, const char *a_prefix)
 /* Given the ch API, there is no way to both safely and efficiently transfer the
  * contents of one ch to another.  Therefore, this function mucks with ch
  * internals. */
-static cw_bool_t
+static void
 dch_p_grow(cw_dch_t *a_dch)
 {
-	cw_bool_t	retval;
 	cw_ch_t		*t_ch;
 	cw_chi_t	*chi;
 	cw_uint32_t	count, i;
@@ -213,10 +199,6 @@ dch_p_grow(cw_dch_t *a_dch)
 		/* Too big.  Create a new ch twice as large and populate it. */
 		t_ch = ch_new(NULL, a_dch->mem, a_dch->base_table *
 		    a_dch->grow_factor * 2, a_dch->hash, a_dch->key_comp);
-		if (t_ch == NULL) {
-			retval = TRUE;
-			goto RETURN;
-		}
 		for (i = 0; i < count; i++) {
 			chi = ql_first(&a_dch->ch->chi_ql);
 			ql_remove(&a_dch->ch->chi_ql, chi, ch_link);
@@ -239,19 +221,14 @@ dch_p_grow(cw_dch_t *a_dch)
 		ch_delete(a_dch->ch);
 		a_dch->ch = t_ch;
 	}
-
-	retval = FALSE;
-	RETURN:
-	return retval;
 }
 
 /* Given the ch API, there is no way to both safely and efficiently transfer the
  * contents of one ch to another.  Therefore, this function mucks with ch
  * internals. */
-static cw_bool_t
+static void
 dch_p_shrink(cw_dch_t *a_dch)
 {
-	cw_bool_t	retval;
 	cw_ch_t		*t_ch;
 	cw_chi_t	*chi;
 	cw_uint32_t	count, i;
@@ -263,10 +240,6 @@ dch_p_shrink(cw_dch_t *a_dch)
 		/* Too big.  Create a new ch half as large and populate it. */
 		t_ch = ch_new(NULL, a_dch->mem, a_dch->base_table *
 		    a_dch->grow_factor / 2, a_dch->hash, a_dch->key_comp);
-		if (t_ch == NULL) {
-			retval = TRUE;
-			goto RETURN;
-		}
 		for (i = 0; i < count; i++) {
 			chi = ql_first(&a_dch->ch->chi_ql);
 			ql_remove(&a_dch->ch->chi_ql, chi, ch_link);
@@ -289,10 +262,6 @@ dch_p_shrink(cw_dch_t *a_dch)
 		ch_delete(a_dch->ch);
 		a_dch->ch = t_ch;
 	}
-
-	retval = FALSE;
-	RETURN:
-	return retval;
 }
 
 /* Given the ch API, there is no way to both safely and efficiently transfer the

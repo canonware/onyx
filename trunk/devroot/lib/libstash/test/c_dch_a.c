@@ -46,19 +46,19 @@ main()
 		_cw_check_ptr(dch);
 		_cw_assert(dch_count(dch) == 0);
 
-		_cw_assert(dch_insert(dch, a, a, NULL) == FALSE);
+		dch_insert(dch, a, a, NULL);
 		_cw_assert(dch_count(dch) == 1);
 
-		_cw_assert(dch_insert(dch, b, b, NULL) == FALSE);
+		dch_insert(dch, b, b, NULL);
 		_cw_assert(dch_count(dch) == 2);
 
-		_cw_assert(dch_insert(dch, c, c, NULL) == FALSE);
+		dch_insert(dch, c, c, NULL);
 		_cw_assert(dch_count(dch) == 3);
 
-		_cw_assert(dch_insert(dch, d, d, NULL) == FALSE);
+		dch_insert(dch, d, d, NULL);
 		_cw_assert(dch_count(dch) == 4);
 
-		_cw_assert(dch_insert(dch, d, d, NULL) == FALSE);
+		dch_insert(dch, d, d, NULL);
 		_cw_assert(dch_count(dch) == 5);
 
 		dch_delete(dch);
@@ -78,16 +78,16 @@ main()
 		_cw_check_ptr(dch);
 		_cw_assert(dch_count(dch) == 0);
 
-		_cw_assert(dch_insert(dch, a, a, NULL) == FALSE);
+		dch_insert(dch, a, a, NULL);
 		_cw_assert(dch_count(dch) == 1);
 
-		_cw_assert(dch_insert(dch, b, b, NULL) == FALSE);
+		dch_insert(dch, b, b, NULL);
 		_cw_assert(dch_count(dch) == 2);
 
-		_cw_assert(dch_insert(dch, c, c, NULL) == FALSE);
+		dch_insert(dch, c, c, NULL);
 		_cw_assert(dch_count(dch) == 3);
 
-		_cw_assert(dch_insert(dch, d, d, NULL) == FALSE);
+		dch_insert(dch, d, d, NULL);
 		_cw_assert(dch_count(dch) == 4);
 
 		_cw_assert(dch_remove(dch, a, (void **)&k, (void **)&v, NULL) ==
@@ -136,14 +136,10 @@ main()
 		    ch_string_key_comp);
 		_cw_check_ptr(dch);
 
-		_cw_assert(dch_insert(dch, a, a, (cw_chi_t
-		    *)_cw_pezz_get(chi_pezz)) == FALSE);
-		_cw_assert(dch_insert(dch, b, b, (cw_chi_t
-		    *)_cw_pezz_get(chi_pezz)) == FALSE);
-		_cw_assert(dch_insert(dch, c, c, (cw_chi_t
-		    *)_cw_pezz_get(chi_pezz)) == FALSE);
-		_cw_assert(dch_insert(dch, d, d, (cw_chi_t
-		    *)_cw_pezz_get(chi_pezz)) == FALSE);
+		dch_insert(dch, a, a, (cw_chi_t *)_cw_pezz_get(chi_pezz));
+		dch_insert(dch, b, b, (cw_chi_t *)_cw_pezz_get(chi_pezz));
+		dch_insert(dch, c, c, (cw_chi_t *)_cw_pezz_get(chi_pezz));
+		dch_insert(dch, d, d, (cw_chi_t *)_cw_pezz_get(chi_pezz));
 
 		_cw_assert(dch_search(dch, "foo", (void **)&v));
 
@@ -184,14 +180,10 @@ main()
 		    ch_string_key_comp);
 		_cw_check_ptr(dch);
 
-		_cw_assert(dch_insert(dch, a, a, (cw_chi_t
-		    *)_cw_pezz_get(chi_pezz)) == FALSE);
-		_cw_assert(dch_insert(dch, b, b, (cw_chi_t
-		    *)_cw_pezz_get(chi_pezz)) == FALSE);
-		_cw_assert(dch_insert(dch, c, c, (cw_chi_t
-		    *)_cw_pezz_get(chi_pezz)) == FALSE);
-		_cw_assert(dch_insert(dch, d, d, (cw_chi_t
-		    *)_cw_pezz_get(chi_pezz)) == FALSE);
+		dch_insert(dch, a, a, (cw_chi_t *)_cw_pezz_get(chi_pezz));
+		dch_insert(dch, b, b, (cw_chi_t *)_cw_pezz_get(chi_pezz));
+		dch_insert(dch, c, c, (cw_chi_t *)_cw_pezz_get(chi_pezz));
+		dch_insert(dch, d, d, (cw_chi_t *)_cw_pezz_get(chi_pezz));
 
 		_cw_assert(dch_get_iterate(dch, (void **)&k, (void **)&v) ==
 		    FALSE);

@@ -44,13 +44,13 @@ main()
 	bufc = bufc_new(NULL, cw_g_mem, NULL, NULL);
 	_cw_check_ptr(bufc);
 	bufc_buffer_set(bufc, longs, sizeof(longs), TRUE, NULL, NULL);
-	_cw_assert(buf_bufc_append(buf, bufc, 0, sizeof(longs)) == FALSE);
+	buf_bufc_append(buf, bufc, 0, sizeof(longs));
 	bufc_delete(bufc);
 
 	bufc = bufc_new(NULL, cw_g_mem, NULL, NULL);
 	_cw_check_ptr(bufc);
 	bufc_buffer_set(bufc, quads, sizeof(quads), TRUE, NULL, NULL);
-	_cw_assert(buf_bufc_append(buf, bufc, 0, sizeof(quads)) == FALSE);
+	buf_bufc_append(buf, bufc, 0, sizeof(quads));
 	bufc_delete(bufc);
 
 	_cw_out_put("longs[[0-3]: 0x[i|b:16|w:8|p:0] 0x[i|b:16|w:8|p:0] "

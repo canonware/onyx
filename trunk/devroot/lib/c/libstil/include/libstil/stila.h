@@ -84,7 +84,7 @@ void		stilag_free(cw_stilag_t *a_stilag, void *a_ptr, const char
 
 void		*stilag_gc_malloc(cw_stilag_t *a_stilag, size_t a_size, const
     char *a_filename, cw_uint32_t a_line_num);
-cw_bool_t	stilag_gc_register(cw_stilag_t *a_stilag, cw_stilt_t *a_stilt,
+void		stilag_gc_register(cw_stilag_t *a_stilag, cw_stilt_t *a_stilt,
     cw_stiloe_t *a_stiloe);
 
 #define		stilag_mem_get(a_stilag)				\
@@ -143,7 +143,7 @@ void		*stilat_malloc(cw_stilat_t *a_stilat, size_t a_size, const char
     *a_filename, cw_uint32_t a_line_num);
 void		*stilat_gc_malloc(cw_stilat_t *a_stilat, size_t a_size, const
     char *a_filename, cw_uint32_t a_line_num);
-cw_bool_t	stilat_gc_register(cw_stilat_t *a_stilat, cw_stiloe_t
+void		stilat_gc_register(cw_stilat_t *a_stilat, cw_stiloe_t
     *a_stiloe);
 void		stilat_free(cw_stilat_t *a_stilat, void *a_ptr, const char
     *a_filename, cw_uint32_t a_line_num);
