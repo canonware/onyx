@@ -47,8 +47,6 @@ struct cw_stils_s {
 #ifdef _LIBSTIL_DBG
 	cw_uint32_t		magic;
 #endif
-	cw_pool_t		*stilsc_pool; /* Allocator for stilsc's. */
-
 	ql_head(cw_stilso_t)	stack;	/* Stack. */
 	cw_uint32_t		count;	/* Number of stack elements. */
 	cw_stilso_t		under;	/* Not used, just under stack bottom. */
@@ -61,7 +59,7 @@ struct cw_stils_s {
 	cw_stilso_t		*ref_stilso;
 };
 
-void		stils_new(cw_stils_t *a_stils, cw_pool_t *a_stilsc_pool);
+void		stils_new(cw_stils_t *a_stils);
 void		stils_delete(cw_stils_t *a_stils);
 #define		stils_count(a_stils) (a_stils)->count
 cw_uint32_t	stils_index_get(cw_stils_t *a_stils, cw_stilo_t *a_stilo);

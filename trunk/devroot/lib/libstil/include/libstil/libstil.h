@@ -38,6 +38,11 @@ extern  "C" {
 #define	_LIBSTIL_GCDICT_THRESHOLD	50000
 
 /*
+ * Number of objects to allocate in a chunk for internal stils use.
+ */
+#define	_LIBSTIL_STILSC_COUNT		  32
+	
+/*
  * Exception numbers.  libstil reserves -128 to -255.
  */
 #define	_CW_STILX_MAX			-128

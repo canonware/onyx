@@ -267,11 +267,6 @@ cw_bool_t stilt_dict_stack_search(cw_stilt_t *a_stilt, cw_stilo_t *a_key,
 #define	stilt_chi_put(a_stilt, a_chi)					\
 	stila_chi_put(stil_stila_get((a_stilt)->stil), (a_chi))
 
-#define	stilt_stilsc_get(a_stilt)					\
-	stila_stilsc_get(stil_stila_get((a_stilt)->stil))
-#define	stilt_stilsc_put(a_stilt, a_stilsc)				\
-	stila_stilsc_put(stil_stila_get((a_stilt)->stil), (a_stilsc))
-
 #define	stilt_dicto_get(a_stilt)					\
 	stila_dicto_get(stil_stila_get((a_stilt)->stil))
 #define	stilt_dicto_put(a_stilt, a_dicto)				\

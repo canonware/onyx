@@ -15,10 +15,6 @@
  * stilsc's, but typical stack operations have the same effect anyway, so little
  * care is taken to keep stack object re-allocation contiguous, or even local.
  *
- * Since the GC must traverse the entire stack at every collection, we use that
- * opportunity to tidy things up.  The entire stack is re-written contiguously,
- * and the old stilsc's are returned to the global pool.
- *
  * By keeping the re-allocation algorithm simple, we are able to make common
  * stack operations very fast.
  *
@@ -27,12 +23,9 @@
 #include "../include/libstil/libstil.h"
 
 void
-stils_new(cw_stils_t *a_stils, cw_pool_t *a_stilsc_pool)
+stils_new(cw_stils_t *a_stils)
 {
 	_cw_check_ptr(a_stils);
-	_cw_check_ptr(a_stilsc_pool);
-
-	a_stils->stilsc_pool = a_stilsc_pool;
 
 	ql_new(&a_stils->stack);
 	qs_new(&a_stils->chunks);
@@ -68,7 +61,7 @@ stils_delete(cw_stils_t *a_stils)
 	while (qs_top(&a_stils->chunks) != NULL) {
 		stilsc = qs_top(&a_stils->chunks);
 		qs_pop(&a_stils->chunks, link);
-		pool_put(a_stils->stilsc_pool, stilsc);
+		_cw_free(stilsc);
 	}
 
 #ifdef _LIBSTILS_DBG
@@ -209,7 +202,8 @@ stils_p_spares_create(cw_stils_t *a_stils)
 	 * create a new stilsc, add it to the stilsc qs, and add its stilso's to
 	 * the stack.
 	 */
-	stilsc = (cw_stilsc_t *)pool_get(a_stils->stilsc_pool);
+	stilsc = (cw_stilsc_t
+	    *)_cw_malloc(_CW_STILSC_O2SIZEOF(_LIBSTIL_STILSC_COUNT));
 
 #ifdef _LIBSTIL_DBG
 	stilsc->magic = _CW_STILSC_MAGIC;
@@ -217,9 +211,7 @@ stils_p_spares_create(cw_stils_t *a_stils)
 	qs_elm_new(stilsc, link);
 
 	qr_new(&stilsc->objects[0], link);
-	for (i = 1, nstilso =
-		 _CW_STILSC_SIZEOF2O(pool_buffer_size_get(a_stils->stilsc_pool));
-	     i < nstilso; i++) {
+	for (i = 1, nstilso = _LIBSTIL_STILSC_COUNT; i < nstilso; i++) {
 		qr_new(&stilsc->objects[i], link);
 		qr_after_insert(&stilsc->objects[i - 1],
 		    &stilsc->objects[i], link);

@@ -241,20 +241,16 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 		retval->tok_str = retval->buffer;
 		try_stage = 1;
 
-		stils_new(&retval->estack,
-		    stila_stilsc_pool_get(stil_stila_get(a_stil)));
+		stils_new(&retval->estack);
 		try_stage = 2;
 
-		stils_new(&retval->ostack,
-		    stila_stilsc_pool_get(stil_stila_get(a_stil)));
+		stils_new(&retval->ostack);
 		try_stage = 3;
 
-		stils_new(&retval->dstack,
-		    stila_stilsc_pool_get(stil_stila_get(a_stil)));
+		stils_new(&retval->dstack);
 		try_stage = 4;
 
-		stils_new(&retval->tstack,
-		    stila_stilsc_pool_get(stil_stila_get(a_stil)));
+		stils_new(&retval->tstack);
 		try_stage = 5;
 
 		/*

@@ -20,7 +20,6 @@ struct cw_stila_s {
 
 	/* Various pools. */
 	cw_pool_t	chi_pool;
-	cw_pool_t	stilsc_pool;
 	cw_pool_t	dicto_pool;
 
 	/*
@@ -72,18 +71,12 @@ void	stila_threshold_set(cw_stila_t *a_stila, cw_uint32_t a_threshold);
 #define	stila_gcdict_get(a_stila) &(a_stila)->gcdict
 
 #define	stila_chi_pool_get(a_stila)	&(a_stila)->chi_pool
-#define	stila_stilsc_pool_get(a_stila)	&(a_stila)->stilsc_pool
 #define	stila_dicto_pool_get(a_stila)	&(a_stila)->dicto_pool
 
 #define	stila_chi_get(a_stila)						\
 	(cw_chi_t *)pool_get(&(a_stila)->chi_pool)
 #define	stila_chi_put(a_stila, a_chi)					\
 	pool_put(&(a_stila)->chi_pool, (a_chi))
-
-#define	stila_stilsc_get(a_stila)					\
-	(cw_stilsc_t *)pool_get(&(a_stila)->stilsc_pool)
-#define	stila_stilsc_put(a_stila, a_stilsc)				\
-	pool_put(&(a_stila)->stilsc_pool, (a_stilsc))
 
 #define	stila_dicto_get(a_stila)					\
 	(cw_stiloe_dicto_t *)pool_get(&(a_stila)->dicto_pool)
