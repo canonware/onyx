@@ -15,9 +15,9 @@
 
 typedef enum {
 	_CW_STILOEA_NONE = 0,
-	_CW_STILOEA_UNLIMITED = 1,
+	_CW_STILOEA_EXECUTEONLY = 1,
 	_CW_STILOEA_READONLY = 2,
-	_CW_STILOEA_EXECUTEONLY = 3
+	_CW_STILOEA_UNLIMITED = 3
 }	cw_stiloea_t;
 
 /*
@@ -79,3 +79,4 @@ cw_stiloe_t	*stiloe_new(cw_stilt_t *a_stilt, cw_stilot_t a_type);
 void	stiloe_delete(cw_stiloe_t *a_stiloe);
 
 void	stiloe_gc_register(cw_stiloe_t *a_stiloe);
+cw_stiloe_t	*stiloe_ref_iterate(cw_stiloe_t *a_stiloe, cw_bool_t a_reset);

@@ -24,9 +24,6 @@ struct cw_stiloe_string_s {
 	}	e;
 };
 
-cw_stiloe_t	*stiloe_string_ref_iterate(cw_stiloe_t *a_stiloe, cw_bool_t
-    a_reset);
-
 cw_sint32_t	stiloe_string_len_get(cw_stiloe_t *a_stiloe);
 
 void		stiloe_string_len_set(cw_stiloe_t *a_stiloe, cw_uint32_t a_len);

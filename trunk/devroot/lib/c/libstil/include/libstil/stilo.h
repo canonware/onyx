@@ -61,6 +61,14 @@ struct cw_stilo_s {
 	 */
 	cw_stilot_t	type:4;
 	/*
+	 * Every object is either literal (FALSE) or executable (TRUE).
+	 */
+	cw_bool_t	executable:1;
+	/*
+	 * A literal object if TRUE.
+	 */
+	cw_bool_t	literal:1;
+	/*
 	 * If TRUE, this is an extended object.  This has extra significance if
 	 * the object is a number or mstate.  Both number and mstate objects can
 	 * switch between simple and extended representations.
@@ -145,6 +153,13 @@ void		stilo_delete(cw_stilo_t *a_stilo);
 cw_stilot_t	stilo_type_get(cw_stilo_t *a_stilo);
 void		stilo_type_set(cw_stilo_t *a_stilo, cw_stilot_t a_stilot);
 
+cw_bool_t	stilo_executable_get(cw_stilo_t *a_stilo);
+void		stilo_executable_set(cw_stilo_t *a_stilo, cw_bool_t
+    a_executable);
+
+cw_bool_t	stilo_literal_get(cw_stilo_t *a_stilo);
+void		stilo_literal_set(cw_stilo_t *a_stilo, cw_bool_t a_literal);
+
 cw_stiloe_t	*stilo_extended_get(cw_stilo_t *a_stilo);
 void		stilo_extended_set(cw_stilo_t *a_stilo, cw_stiloe_t *a_stiloe);
 
@@ -153,3 +168,11 @@ void		stilo_move(cw_stilo_t *a_to, cw_stilo_t *a_from);
 
 void		stilo_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t
     a_syntactic, cw_bool_t a_newline);
+
+
+cw_sint32_t	stilo_array_len_get(cw_stilo_t *a_stilo);
+void		stilo_array_len_set(cw_stilo_t *a_stilo, cw_uint32_t a_len);
+cw_stilo_t	*stilo_array_el_get(cw_stilo_t *a_stilo, cw_uint32_t a_offset);
+cw_stilo_t	*stilo_array_get(cw_stilo_t *a_stilo);
+void		stilo_array_set(cw_stilo_t *a_stilo, cw_uint32_t a_offset,
+    cw_stilo_t *a_arr, cw_uint32_t a_len);

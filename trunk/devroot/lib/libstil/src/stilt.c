@@ -83,6 +83,7 @@ static void		stilt_p_print_token(cw_stilt_t *a_stilt, cw_uint32_t
 static void		stilt_p_print_syntax_error(cw_stilt_t *a_stilt,
     cw_uint8_t a_c);
 static void		*stilt_p_entry(void *a_arg);
+static void		stilt_p_procedure_accept(cw_stilt_t *a_stilt);
 
 #ifdef _LIBSTIL_DBG
 #define _CW_STILT_MAGIC 0x978fdbe0
@@ -111,13 +112,13 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 
 	if (a_stilt != NULL) {
 		retval = a_stilt;
-		bzero(a_stilt, sizeof(cw_stilt_t));
+		memset(a_stilt, 0, sizeof(cw_stilt_t));
 		retval->is_malloced = FALSE;
 	} else {
 		retval = (cw_stilt_t *)_cw_malloc(sizeof(cw_stilt_t));
 		if (retval == NULL)
 			goto OOM_1;
-		bzero(a_stilt, sizeof(cw_stilt_t));
+		memset(a_stilt, 0, sizeof(cw_stilt_t));
 		retval->is_malloced = TRUE;
 	}
 
@@ -382,69 +383,28 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 				stilo = stils_push(&a_stilt->data_stils);
 				stilo_type_set(stilo, _CW_STILOT_MARKTYPE);
 				break;
-			case ']': {
-				cw_stilo_t	t_stilo, *arr;
-				cw_uint32_t	nelements, j;
-
+			case ']':
 				stilt_p_print_token(a_stilt, 0, "]");
-				/* Find the mark. */
-				for (j = 0, stilo =
-				    stils_get(&a_stilt->data_stils, 0);
-				    stilo != NULL && stilo_type_get(stilo) !=
-				    _CW_STILOT_MARKTYPE; j++, stilo =
-				    stils_get_down(&a_stilt->data_stils,
-				    stilo));
-
-				if (stilo == NULL) {
-					/*
-					 * XXX No mark found.  Generate
-					 * error.
-					 */
-					_cw_error("XXX No mark");
-				}
-				/*
-				 * j is the index of the mark, and stilo points
-				 * to the mark.  Set nelements accordingly.
-				 * When we pop the stilo's off the stack, we'll
-				 * have to pop (nelements + 1) stilo's.
-				 */
-				nelements = j;
-
-				stilo_new(&t_stilo);
-				stilo_type_set(&t_stilo, _CW_STILOT_ARRAYTYPE);
-				stiloe = stiloe_new(a_stilt,
-				    _CW_STILOT_STRINGTYPE);
-				stiloe_array_len_set(stiloe, nelements);
-				stilo_extended_set(&t_stilo, stiloe);
-				arr = stiloe_array_get(stiloe);
-
-				/*
-				 * Traverse up the stack, moving stilo's to the
-				 * array.
-				 */
-				for (j = 0, stilo =
-				    stils_get_up(&a_stilt->data_stils, stilo); j
-				    < nelements; j++, stilo =
-				    stils_get_up(&a_stilt->data_stils,
-				    stilo))
-					stilo_move(&arr[j], stilo);
-
-				/* Pop the stilo's off the stack now. */
-				stils_pop(&a_stilt->data_stils, nelements + 1);
-
-				/* Push the array onto the stack. */
-				stilo = stils_push(&a_stilt->data_stils);
-				stilo_move(stilo, &t_stilo);
-
-				/* Clean up. */
-				stilo_delete(&t_stilo);
+				/* An operator, not the same as '}'. */
 				break;
-			}
 			case '{':
 				stilt_p_print_token(a_stilt, 0, "{");
+				a_stilt->defer_count++;
+				stilo = stils_push(&a_stilt->data_stils);
+				/*
+				 * Leave the stilo as notype in order to
+				 * differentiate from normal marks.
+				 */
 				break;
 			case '}':
 				stilt_p_print_token(a_stilt, 0, "}");
+				if (a_stilt->defer_count > 0)
+					a_stilt->defer_count--;
+				else {
+					/* XXX Missing '{'. */
+					_cw_error("XXX Missing '}'\n");
+				}
+				stilt_p_procedure_accept(a_stilt);
 				break;
 			case '/':
 				a_stilt->state = _CW_STILT_STATE_SLASH_CONT;
@@ -1196,4 +1156,51 @@ stilt_p_entry(void *a_arg)
 	thd_delete(&arg->thd);
 	_cw_free(arg);
 	return NULL;
+}
+static void
+stilt_p_procedure_accept(cw_stilt_t *a_stilt)
+{
+	cw_stilo_t	t_stilo, *stilo, *arr;
+	cw_stiloe_t	*stiloe;
+	cw_uint32_t	nelements, i;
+
+	/* Find the "mark". */
+	for (i = 0, stilo = stils_get(&a_stilt->data_stils, 0);
+	     stilo != NULL && stilo_type_get(stilo) != _CW_STILOT_NOTYPE;
+	     i++, stilo = stils_get_down(&a_stilt->data_stils, stilo));
+
+	_cw_assert(stilo != NULL);
+
+	/*
+	 * i is the index of the mark, and stilo points to the mark.  Set
+	 * nelements accordingly.  When we pop the stilo's off the stack, we'll
+	 * have to pop (nelements + 1) stilo's.
+	 */
+	nelements = i;
+
+	stilo_new(&t_stilo);
+	stilo_type_set(&t_stilo, _CW_STILOT_ARRAYTYPE);
+	stilo_executable_set(&t_stilo, TRUE);
+	stiloe = stiloe_new(a_stilt, _CW_STILOT_STRINGTYPE);
+	stiloe_array_len_set(stiloe, nelements);
+	stilo_extended_set(&t_stilo, stiloe);
+	arr = stiloe_array_get(stiloe);
+
+	/*
+	 * Traverse up the stack, moving stilo's to the array.
+	 */
+	for (i = 0, stilo = stils_get_up(&a_stilt->data_stils, stilo); i <
+	    nelements; i++, stilo = stils_get_up(&a_stilt->data_stils,
+	    stilo))
+		stilo_move(&arr[i], stilo);
+
+	/* Pop the stilo's off the stack now. */
+	stils_pop(&a_stilt->data_stils, nelements + 1);
+
+	/* Push the array onto the stack. */
+	stilo = stils_push(&a_stilt->data_stils);
+	stilo_move(stilo, &t_stilo);
+
+	/* Clean up. */
+	stilo_delete(&t_stilo);
 }

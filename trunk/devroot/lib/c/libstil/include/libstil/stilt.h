@@ -59,6 +59,14 @@ struct cw_stilt_s {
 	 */
 
 	/*
+	 * Every time a '{' token is encountered by the scanner, this value is
+	 * incremented, and this value is decremented every time the scanner
+	 * encounters a '}' token.  Execution of objects is deferred if this
+	 * value is non-zero.
+	 */
+	cw_uint32_t	defer_count;
+
+	/*
 	 * Current line number (counting starts at 1 by convention) and column
 	 * number (counting starts at 0).
 	 */

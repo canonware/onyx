@@ -30,8 +30,8 @@ main(int argc, char **argv)
 	cw_bool_t	is_tty;
 
 	libstash_init();
-	dbg_register(cw_g_dbg, "mem_verbose");
-	dbg_register(cw_g_dbg, "pezz_verbose");
+/*  	dbg_register(cw_g_dbg, "mem_verbose"); */
+/*  	dbg_register(cw_g_dbg, "pezz_verbose"); */
 
 	/* XXX Set up oom handler. */
 
@@ -99,7 +99,7 @@ main(int argc, char **argv)
 	_cw_out_put("\n");
 #endif
 
-	while (1) {
+	for (;;) {
 		if (is_tty)
 			out_put(&out, "stil> ");
 		/* Read input. */
@@ -107,10 +107,10 @@ main(int argc, char **argv)
 		if (bytes_read <= 0)
 			break;
 		stilt_interp_str(&stilt, input, (cw_uint32_t)bytes_read);
-		_cw_out_put("pstack:\n");
+/*  		_cw_out_put("pstack:\n"); */
 		stil_op_pstack(&stilt);
-		_cw_out_put("stack:\n");
-		stil_op_stack(&stilt);
+/*  		_cw_out_put("stack:\n"); */
+/*  		stil_op_stack(&stilt); */
 	}
 
 	stilt_delete(&stilt);

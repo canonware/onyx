@@ -137,6 +137,42 @@ stilo_type_set(cw_stilo_t *a_stilo, cw_stilot_t a_stilot)
 	}
 }
 
+cw_bool_t
+stilo_executable_get(cw_stilo_t *a_stilo)
+{
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+
+	return a_stilo->executable;
+}
+
+void
+stilo_executable_set(cw_stilo_t *a_stilo, cw_bool_t a_executable)
+{
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+
+	a_stilo->executable = a_executable;
+}
+
+cw_bool_t
+stilo_literal_get(cw_stilo_t *a_stilo)
+{
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+
+	return a_stilo->literal;
+}
+
+void
+stilo_literal_set(cw_stilo_t *a_stilo, cw_bool_t a_literal)
+{
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+
+	a_stilo->literal = a_literal;
+}
+
 cw_stiloe_t *
 stilo_extended_get(cw_stilo_t *a_stilo)
 {
@@ -323,19 +359,27 @@ stilo_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t a_syntactic,
 		cw_stiloe_t	*stiloe;
 		cw_stilo_t	*arr;
 		cw_uint32_t	nelms, i;
+		cw_bool_t	executable;
 
 		stiloe = stilo_extended_get(a_stilo);
+		executable = stilo_executable_get(a_stilo);
 		arr = stiloe_array_get(stiloe);
 		nelms = stiloe_array_len_get(stiloe);
 
 		if (a_syntactic) {
-			_cw_out_put_f(a_fd, "[[");
+			if (executable)
+				_cw_out_put_f(a_fd, "{");
+			else
+				_cw_out_put_f(a_fd, "[[");
 			for (i = 0; i < nelms; i++) {
 				stilo_print(&arr[i], a_fd, a_syntactic, FALSE);
 				if (i < nelms - 1)
 					_cw_out_put_f(a_fd, " ");
 			}
-			_cw_out_put_f(a_fd, "][c]", newline);
+			if (executable)
+				_cw_out_put_f(a_fd, "}[c]", newline);
+			else
+				_cw_out_put_f(a_fd, "][c]", newline);
 		} else
 			_cw_out_put_f(a_fd, "--nostringval--[c]", newline);
 		break;

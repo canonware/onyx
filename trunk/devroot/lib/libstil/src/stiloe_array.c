@@ -11,14 +11,19 @@
 
 #include "../include/libstil/libstil.h"
 
-void
-stiloe_l_array_init(cw_stiloe_t *a_stiloe)
+cw_stiloe_t *
+stiloe_l_array_new(cw_stilt_t *a_stilt)
 {
-	cw_stiloe_array_t	*stiloe = (cw_stiloe_array_t *)a_stiloe;
+	cw_stiloe_array_t	*retval;
 
-	stiloe->iterations = 0;
-	stiloe->e.a.arr = NULL;
-	stiloe->e.a.len = -1;
+	retval = (cw_stiloe_array_t *)_cw_stilt_malloc(a_stilt,
+	    sizeof(cw_stiloe_array_t));
+
+	retval->iterations = 0;
+	retval->e.a.arr = NULL;
+	retval->e.a.len = -1;
+
+	return (cw_stiloe_t *)retval;
 }
 
 void
@@ -38,7 +43,7 @@ stiloe_l_array_delete(cw_stiloe_t *a_stiloe)
 }
 
 cw_stiloe_t *
-stiloe_array_ref_iterate(cw_stiloe_t *a_stiloe, cw_bool_t a_reset)
+stiloe_l_array_ref_iterate(cw_stiloe_t *a_stiloe, cw_bool_t a_reset)
 {
 	cw_stiloe_t		*retval;
 	cw_stiloe_array_t	*stiloe = (cw_stiloe_array_t *)a_stiloe;
