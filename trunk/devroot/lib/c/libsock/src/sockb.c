@@ -818,7 +818,7 @@ sockb_p_entry_func(void * a_arg)
 	if (0 == (sock_l_get_in_max_buf_size(regs[sockfd].sock) - in_size))
 	{
 	  /* Nope, no space. */
-	  fds[i].events ^= POLLIN;
+	  fds[i].events ^= (fds[i].events & POLLIN);
 
 	  if (NULL != regs[sockfd].notify_mq)
 	  {
@@ -859,10 +859,10 @@ sockb_p_entry_func(void * a_arg)
     num_ready = poll(fds, nfds, INFTIM);
     
 #ifdef _LIBSTASH_SOCKB_CONFESS
-    out_put(cw_g_out, "-->([i])\n", num_ready);
+    out_put(cw_g_out, "-->([i|s:s])\n", num_ready);
 #endif
     
-    if (num_ready == -1)
+    if (-1 == num_ready)
     {
       if (errno != EINTR)
       {
@@ -875,7 +875,6 @@ sockb_p_entry_func(void * a_arg)
     else
     {
 	cw_sint32_t i, j;
-/*        cw_sint32_t i, j, k; */
       
 #ifdef _LIBSTASH_SOCKB_CONFESS
       out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
@@ -889,7 +888,7 @@ sockb_p_entry_func(void * a_arg)
 	ssize_t bytes_read;
 
 #ifdef _LIBSTASH_SOCKB_CONFESS
-	out_put(cw_g_out, " ([i]r)", g_sockb->pipe_out);
+	out_put(cw_g_out, " ([i|s:s]r)", g_sockb->pipe_out);
 #endif
 	
 	/* Decrement the number of fd's that need handled in the loop below. */
@@ -1020,7 +1019,7 @@ sockb_p_entry_func(void * a_arg)
 
 	  bytes_read = readv(sockfd, iovec, iovec_count);
 #ifdef _LIBSTASH_SOCKB_CONFESS
-	  out_put(cw_g_out, "([i])", bytes_read);
+	  out_put(cw_g_out, "([i|s:s])", bytes_read);
 #endif
 
 	  if (bytes_read > 0)
@@ -1113,14 +1112,14 @@ sockb_p_entry_func(void * a_arg)
 
 	  bytes_written = writev(sockfd, iovec, iovec_count);
 #ifdef _LIBSTASH_SOCKB_CONFESS
-	  out_put(cw_g_out, "([i]/[i])", bytes_written,
+	  out_put(cw_g_out, "([i|s:s]/[i])", bytes_written,
 		  buf_get_size(&tmp_buf));
 #endif
 
 	  if (bytes_written >= 0)
 	  {
 	    buf_release_head_data(&tmp_buf, bytes_written);
-	    
+a	    
 	    if (0 == sock_l_put_back_out_data(regs[sockfd].sock, &tmp_buf))
 	    {
 	      /* The socket has no more outgoing data, so turn the write bit
@@ -1128,7 +1127,7 @@ sockb_p_entry_func(void * a_arg)
 #ifdef _LIBSTASH_SOCKB_CONFESS
 	      out_put(cw_g_out, "u");
 #endif
-	      fds[i].events ^= POLLOUT;
+	      fds[i].events ^= (fds[i].events & POLLOUT);
 	    }
 #ifdef _LIBSTASH_SOCKB_CONFESS
 	    else
@@ -1440,7 +1439,7 @@ sockb_p_entry_func(void * a_arg)
 	}
       }
 #ifdef _LIBSTASH_SOCKB_CONFESS
-      out_put(cw_g_out, " ([i]r)\n", g_sockb->pipe_out);
+      out_put(cw_g_out, " ([i|s:s]r)\n", g_sockb->pipe_out);
 #endif
     }
 
@@ -1452,7 +1451,7 @@ sockb_p_entry_func(void * a_arg)
 		       &fd_read_set, &fd_write_set, &fd_exception_set,
 		       NULL);
 #ifdef _LIBSTASH_SOCKB_CONFESS
-    out_put(cw_g_out, "-->([i])\n", num_ready);
+    out_put(cw_g_out, "-->([i|s:s])\n", num_ready);
 #endif
     
     if (num_ready == -1)
@@ -1493,7 +1492,7 @@ sockb_p_entry_func(void * a_arg)
 	ssize_t bytes_read;
 
 #ifdef _LIBSTASH_SOCKB_CONFESS
-	out_put(cw_g_out, " ([i]r)", g_sockb->pipe_out);
+	out_put(cw_g_out, " ([i|s:s]r)", g_sockb->pipe_out);
 #endif
 	
 	/* Clear the read bit to avoid attempting to handle it in the loop
@@ -1631,7 +1630,7 @@ sockb_p_entry_func(void * a_arg)
 
 	  bytes_read = readv(i, iovec, iovec_count);
 #ifdef _LIBSTASH_SOCKB_CONFESS
-	  out_put(cw_g_out, "([i])", bytes_read);
+	  out_put(cw_g_out, "([i|s:s])", bytes_read);
 #endif
 
 	  if (bytes_read > 0)
@@ -1742,7 +1741,7 @@ sockb_p_entry_func(void * a_arg)
 
 	  bytes_written = writev(i, iovec, iovec_count);
 #ifdef _LIBSTASH_SOCKB_CONFESS
-	  out_put(cw_g_out, "([i]/[i])", bytes_written,
+	  out_put(cw_g_out, "([i|s:s]/[i])", bytes_written,
 		  buf_get_size(&tmp_buf));
 #endif
 

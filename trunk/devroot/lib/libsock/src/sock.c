@@ -687,13 +687,13 @@ sock_l_put_back_out_data(cw_sock_t * a_sock, cw_buf_t * a_buf)
     buf_catenate_buf(a_buf, &a_sock->out_buf, FALSE);
   }
   buf_catenate_buf(&a_sock->out_buf, a_buf, FALSE);
-  _cw_assert(buf_get_size(a_buf) == 0);
+  _cw_assert(0 == buf_get_size(a_buf));
   
   retval = buf_get_size(&a_sock->out_buf);
-  if (retval == 0)
+  if (0 == retval)
   {
     a_sock->out_is_flushed = TRUE;
-    if (a_sock->out_need_broadcast_count > 0)
+    if (0 < a_sock->out_need_broadcast_count)
     {
       cnd_broadcast(&a_sock->out_cnd);
     }
