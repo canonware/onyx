@@ -216,6 +216,32 @@ unless ($opt_noact)
     finddepth(\&expand_tags, "$opt_pkgname");
 }
 
+# cook release.
+if ($opt_verbose)
+{
+    print STDERR "cd $opt_pkgname && ./configure\n";
+}
+unless ($opt_noact)
+{
+    `cd $opt_pkgname && ./configure`;
+}
+if ($opt_verbose)
+{
+    print STDERR "cd $opt_pkgname && cook release\n";
+}
+unless ($opt_noact)
+{
+    `cd $opt_pkgname && cook release`;
+}
+if ($opt_verbose)
+{
+    print STDERR "cd $opt_pkgname && cook distclean\n";
+}
+unless ($opt_noact)
+{
+    `cd $opt_pkgname && cook distclean`;
+}
+
 if ($opt_verbose)
 {
     print STDERR "tar cvzf $opt_pkgname.tar.gz $opt_pkgname\n";
@@ -233,7 +259,7 @@ sub print_usage
 $0 usage:
 $0 [-hnv --help --noact --verbose] [--tag=<tag> | -t <tag>]
        {--pkgname=<name> | -p <pkgname>}
-       {--root=<treeroot> | -t <treeroot>}
+       {--root=<treeroot> | -r <treeroot>}
        {--filetree=<filetree> | -f <filetree>}+
 EOF
 }
