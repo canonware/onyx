@@ -126,6 +126,10 @@ $worker_entry {
     )
     (
 	`'
+	`--disable-handle'
+    )
+    (
+	`'
 	`--disable-real'
     )
     (
