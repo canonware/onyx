@@ -116,67 +116,72 @@ foreach $test (@OPT_STESTS)
 
     if (open (STEST_OUT, "<$opt_rootdir/$test.out"))
     {
+	$num_subtests = 0;
 	$num_failed_subtests = 0;
 
-	$_ = <STEST_OUT>;
-
-	if ($_ =~ /1\.\.(\d+)/)
+	while (defined($line = <STEST_OUT>))
 	{
-	    $num_subtests = $1;
+	    if ($line =~ /1\.\.(\d+)/)
+	    {
+		$num_subtests = $1;
+		last;
+	    }
 	}
-	else
+	if ($num_subtests == 0)
 	{
-	    $num_subtests = 0;
 	    $okay = 0;
 	    if ($opt_verbose)
 	    {
-		print STDERR "Malformed 1..n line: \"$_\"\n";
+		print STDERR "Malformed or missing 1..n line\n";
 	    }
 	}
-	for ($subtest = 1; $subtest <= $num_subtests; $subtest++)
+	else
 	{
-	    while (defined($line = <STEST_OUT>))
+	    for ($subtest = 1; $subtest <= $num_subtests; $subtest++)
 	    {
-		if ($line =~ /^not\s+ok\s+(\d+)?/)
+		while (defined($line = <STEST_OUT>))
 		{
-		    $not = 1;
-		    $test_num = $1;
-		    last;
+		    if ($line =~ /^not\s+ok\s+(\d+)?/)
+		    {
+			$not = 1;
+			$test_num = $1;
+			last;
+		    }
+		    elsif ($line =~ /^ok\s+(\d+)?/)
+		    {
+			$not = 0;
+			$test_num = $1;
+			last;
+		    }
 		}
-		elsif ($line =~ /^ok\s+(\d+)?/)
+		if (defined($line))
 		{
-		    $not = 0;
-		    $test_num = $1;
-		    last;
-		}
-	    }
-	    if (defined($line))
-	    {
-		if (defined($test_num) && ($test_num != $subtest))
-		{
-		    # There was no output printed for one or more tests.
-		    for (; $subtest < $test_num; $subtest++)
+		    if (defined($test_num) && ($test_num != $subtest))
+		    {
+			# There was no output printed for one or more tests.
+			for (; $subtest < $test_num; $subtest++)
+			{
+			    $num_failed_subtests++;
+			}
+		    }
+		    if ($not)
 		    {
 			$num_failed_subtests++;
 		    }
 		}
-		if ($not)
+		else
 		{
-		    $num_failed_subtests++;
+		    for (; $subtest <= $num_subtests; $subtest++)
+		    {
+			$num_failed_subtests++;
+		    }
 		}
 	    }
-	    else
-	    {
-		for (; $subtest <= $num_subtests; $subtest++)
-		{
-		    $num_failed_subtests++;
-		}
-	    }
-	}
 
-	if (0 < $num_failed_subtests)
-	{
-	    $okay = 0;
+	    if (0 < $num_failed_subtests)
+	    {
+		$okay = 0;
+	    }
 	}
     }
     else
@@ -450,8 +455,7 @@ $0 usage:
                   | 1 <= <n> < 2^31
                   | 
                   | Lines which do not match the patterns shown above are
-                  | ignored, except that the 1..<n> construct must be the first
-                  | line of output seen.
+                  | ignored.
                   | 
     -d --diff     | Diff mode (incompatible with sequence mode).
                   | If <test>.exp exists, diff it with the output from <test> to
