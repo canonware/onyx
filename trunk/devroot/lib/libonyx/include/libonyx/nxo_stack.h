@@ -386,7 +386,7 @@ nxoe_p_stack_pop(cw_nxoe_stack_t *a_stack)
     }
 
     /* Shrink the array, if necessary. */
-    if (a_stack->aend - a_stack->abeg < a_stack->ahlen / 8
+    if (a_stack->aend - a_stack->abeg < (a_stack->ahlen >> 3)
 	&& a_stack->ahlen > a_stack->ahmin)
     {
 	nxoe_p_stack_shrink(a_stack);
@@ -452,7 +452,7 @@ nxoe_p_stack_bpop(cw_nxoe_stack_t *a_stack)
     }
 
     /* Shrink the array, if necessary. */
-    if (a_stack->aend - a_stack->abeg < a_stack->ahlen / 8
+    if (a_stack->aend - a_stack->abeg < (a_stack->ahlen >> 3)
 	&& a_stack->ahlen > a_stack->ahmin)
     {
 	nxoe_p_stack_shrink(a_stack);
@@ -523,7 +523,7 @@ nxoe_p_stack_npop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
     }
 
     /* Shrink the array, if necessary. */
-    if (a_stack->aend - a_stack->abeg < a_stack->ahlen / 8
+    if (a_stack->aend - a_stack->abeg < (a_stack->ahlen >> 3)
 	&& a_stack->ahlen > a_stack->ahmin)
     {
 	nxoe_p_stack_shrink(a_stack);
@@ -595,7 +595,7 @@ nxoe_p_stack_nbpop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
     }
 
     /* Shrink the array, if necessary. */
-    if (a_stack->aend - a_stack->abeg < a_stack->ahlen / 8
+    if (a_stack->aend - a_stack->abeg < (a_stack->ahlen >> 3)
 	&& a_stack->ahlen > a_stack->ahmin)
     {
 	nxoe_p_stack_shrink(a_stack);
@@ -839,9 +839,10 @@ nxoe_p_stack_exch(cw_nxoe_stack_t *a_stack)
 #endif
 
     /* Exchange. */
-    memcpy(&a_stack->a[a_stack->abase + a_stack->abeg],
-	   &a_stack->r[a_stack->rbase + a_stack->rbeg],
-	   2 * sizeof(cw_nxo_t *));
+    a_stack->a[a_stack->abase + a_stack->abeg]
+	= a_stack->r[a_stack->rbase + a_stack->rbeg];
+    a_stack->a[a_stack->abase + a_stack->abeg + 1]
+	= a_stack->r[a_stack->rbase + a_stack->rbeg + 1];
 
 #ifdef CW_THREADS
     /* Unprotect. */
