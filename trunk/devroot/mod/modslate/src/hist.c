@@ -31,7 +31,7 @@
  * (s)I : Insert string s before point.
  * (s)Y : Insert (yank) string s after point.
  * (s)R : Remove string s before point.
- * (s)K : Remove (kill) string s after point.
+ * (s)D : Remove (delete) string s after point.
  *
  * History growth -------->
  *
@@ -102,7 +102,7 @@
  *   -------------
  *
  * Example:
- *   B(42)P(This is a string.)YEB(It gets replaced by this one.)KE
+ *   B(42)P(This is a string.)YEB(It gets replaced by this one.)DE
  *                                                               /\
  *
  * Translation:
