@@ -86,9 +86,9 @@ nxo_p_regex_init(cw_nxoe_regex_t *a_regex, cw_nxa_t *a_nxa,
 		       &capturecount) != 0)
 	|| (pcre_fullinfo(a_regex->pcre, a_regex->extra, PCRE_INFO_SIZE,
 			  &a_regex->size) != 0)
-#ifdef PCRE_INFO_EXTRASIZE
-	|| (pcre_fullinfo(a_regex->pcre, a_regex->extra, PCRE_INFO_EXTRASIZE,
-			  &a_regex->extrasize) != 0)
+#ifdef PCRE_INFO_STUDYSIZE
+	|| (pcre_fullinfo(a_regex->pcre, a_regex->extra, PCRE_INFO_STUDYSIZE,
+			  &a_regex->studysize) != 0)
 #endif
 	)
     {
@@ -415,8 +415,8 @@ nxo_regex_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_uint8_t *a_pattern,
     /* Tell the GC about the space being taken up by regex->pcre and
      * regex->extra. */
     nxa_l_count_adjust(nxa, (cw_nxoi_t) regex->size
-#ifdef PCRE_INFO_EXTRASIZE
-		       + regex->extrasize
+#ifdef PCRE_INFO_STUDYSIZE
+		       + regex->studysize
 #endif
 		       );
 

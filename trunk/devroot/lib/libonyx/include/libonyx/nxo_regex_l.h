@@ -32,8 +32,8 @@ struct cw_nxoe_regex_s
      * extra are allocated with plain old malloc().  Thus, their sizes have to
      * be queried and the GC informed of their size. */
     size_t size;
-#ifdef PCRE_INFO_EXTRASIZE
-    size_t extrasize;
+#ifdef PCRE_INFO_STUDYSIZE
+    size_t studysize;
 #endif
 
     /* Flags used when matching that determine where in the input string to
@@ -132,8 +132,8 @@ nxoe_l_regex_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
     }
     /* Tell the GC that pcre has been deallocated. */
     nxa_l_count_adjust(a_nxa, -(cw_nxoi_t)(regex->size
-#ifdef PCRE_INFO_EXTRASIZE
-					   + regex->extrasize
+#ifdef PCRE_INFO_STUDYSIZE
+					   + regex->studysize
 #endif
 					   ));
 

@@ -42,8 +42,8 @@ struct cw_nxoe_regsub_s
      * extra are allocated with plain old malloc().  Thus, their sizes have to
      * be queried and the GC informed of their size. */
     size_t size;
-#ifdef PCRE_INFO_EXTRASIZE
-    size_t extrasize;
+#ifdef PCRE_INFO_STUDYSIZE
+    size_t studysize;
 #endif
 
     /* Flag used when determining whether to substitute just one, or all
@@ -101,8 +101,8 @@ nxoe_l_regsub_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
     }
     /* Tell the GC that pcre has been deallocated. */
     nxa_l_count_adjust(a_nxa, -(cw_nxoi_t)(regsub->size
-#ifdef PCRE_INFO_EXTRASIZE
-					   + regsub->extrasize
+#ifdef PCRE_INFO_STUDYSIZE
+					   + regsub->studysize
 #endif
 					   ));
 

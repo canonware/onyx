@@ -1,5 +1,7 @@
 2003-03-01 : Jason Evans <jasone@canonware.com>
 
+	* Update to use PCRE 4.0.
+
 	* bin/onyx/src/onyx.c : Add -s command line flag.
 
 2003-02-26 : Jason Evans <jasone@canonware.com>
