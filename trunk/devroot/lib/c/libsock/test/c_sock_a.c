@@ -73,7 +73,8 @@ main()
 
   socks = socks_new();
   _cw_check_ptr(socks);
-  if (TRUE == socks_listen(socks, INADDR_LOOPBACK, &port))
+/*    if (TRUE == socks_listen(socks, INADDR_LOOPBACK, &port)) */
+  if (TRUE == socks_listen(socks, INADDR_ANY, &port))
   {
     out_put(cw_g_out, "Error listening on port [i]\n", port);
     goto RETURN;
