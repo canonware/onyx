@@ -10,6 +10,7 @@ AC_INIT(Cookfile.in)
 dnl 
 dnl Version requirements for external software we depend on.
 dnl 
+PCRE_VERSION_MIN=3.9
 LIBEDIT_VERSION_MIN=2.6
 
 srcroot=$srcdir
@@ -218,20 +219,66 @@ if test "x$enable_real" = "x1" ; then
   AC_CHECK_FUNCS(asprintf)
 fi
 
-dnl Enable regular expression support by default.
-AC_ARG_ENABLE(real, [  --disable-rx            Disable regular expression support],
-
-if test "x$enable_rx" = "xyes" ; then
-  enable_rx="1"
+dnl Check for pcre.
+AC_ARG_WITH(pcre-prefix, [  --with-pcre-prefix      Prefix for pcre],
+if test "x$with_pcre_prefix" = "xno" ; then
+  PCRE_PREFIX=
 else
-  enable_rx="0"
+  PCRE_PREFIX="$with_pcre_prefix"
 fi
 ,
-enable_rx="1"
+PCRE_PREFIX=
 )
-AC_SUBST(enable_rx)
-if test "x$enable_rx" = "x1" ; then
-  AC_DEFINE(CW_RX)
+AC_SUBST(PCRE_PREFIX)
+
+if test "x$PCRE_PREFIX" = "x" ; then
+  AC_PATH_PROG(PCRE_CONFIG, pcre-config, , $PATH)
+else
+  AC_PATH_PROG(PCRE_CONFIG, pcre-config, , "$PCRE_PREFIX/bin")
+fi
+if test "x$PCRE_CONFIG" != "x" ; then
+  dnl Make sure the version of pcre found is sufficient.
+  AC_MSG_CHECKING(for pcre >= $PCRE_VERSION_MIN)
+  PCRE_MAJOR=`$PCRE_CONFIG --version | tr . " " | awk '{print $1}'`
+  PCRE_MINOR=`$PCRE_CONFIG --version | tr . " " | awk '{print $2}'`
+  PCRE_MAJOR_MIN=`echo $PCRE_VERSION_MIN | tr . " " | awk '{print $1}'`
+  PCRE_MINOR_MIN=`echo $PCRE_VERSION_MIN | tr . " " | awk '{print $2}'`
+  if test $PCRE_MAJOR -gt $PCRE_MAJOR_MIN \
+       -o $PCRE_MAJOR -eq $PCRE_MAJOR_MIN \
+       -a $PCRE_MINOR -ge $PCRE_MINOR_MIN ; then
+    AC_MSG_RESULT($PCRE_MAJOR.$PCRE_MINOR)
+    PCRE_CPPFLAGS=`$PCRE_CONFIG --cflags`
+    PCRE_LDFLAGS=`$PCRE_CONFIG --libs | tr " " "\n" | grep "^\-L"`
+    PCRE_LIBS=`$PCRE_CONFIG --libs | tr " " "\n" | grep "^\-l"`
+    have_pcre="1"
+  else
+    AC_MSG_RESULT(no)
+    have_pcre="0"
+  fi
+else
+  have_pcre="0"
+fi
+
+dnl Enable regular expression support by default.
+AC_ARG_ENABLE(regex, [  --disable-regex         Disable regular expression support],
+
+if test "x$enable_regex" = "xyes" ; then
+  enable_regex="1"
+else
+  enable_regex="0"
+fi
+,
+enable_regex="1"
+)
+if test "x$have_pcre" = "x0" ; then
+  enable_regex="0"
+fi
+AC_SUBST(enable_regex)
+if test "x$enable_regex" = "x1" ; then
+  CPPFLAGS="$CPPFLAGS $PCRE_CPPFLAGS"
+  LDFLAGS="$LDFLAGS $PCRE_LDFLAGS"
+  LIBS="$LIBS $PCRE_LIBS"
+  AC_DEFINE(CW_REGEX)
 fi
 
 dnl Support POSIX file operations by default.
@@ -408,6 +455,7 @@ AC_SUBST(slate_version)
 if test "x$enable_slate" = "x1" ; then
   dnl Set up CPPFLAGS and LDFLAGS before doing header and library tests.
   TEMP_CPPFLAGS="$CPPFLAGS"
+  TEMP_LDFLAGS="$LDFLAGS"
   if test "x$MODSLATE_CPPFLAGS" = "x" ; then
     MODSLATE_CPPFLAGS=
   else
@@ -427,8 +475,8 @@ if test "x$enable_slate" = "x1" ; then
     AC_CHECK_LIB(curses, set_term, \
       MODSLATE_LDFLAGS="$MODSLATE_LDFLAGS -lcurses" , \
       enable_slate="0"))
-  AC_SEARCH_LIBS(new_panel, panel, \
-    MODSLATE_LDFLAGS="$MODSLATE_LDFLAGS -lpanel", \
+  AC_CHECK_LIB(panel, new_panel, \
+    MODSLATE_LDFLAGS="$MODSLATE_LDFLAGS -lpanel" , \
     enable_slate="0")
 
   dnl Check if necessary features are enabled.
@@ -843,6 +891,7 @@ AC_MSG_RESULT(docs          :${docs})
 AC_MSG_RESULT()
 AC_MSG_RESULT(threads       : ${enable_threads})
 AC_MSG_RESULT(real          : ${enable_real})
+AC_MSG_RESULT(regex         : ${enable_regex})
 AC_MSG_RESULT(posix         : ${enable_posix})
 AC_MSG_RESULT(posix-file    : ${enable_posix_file})
 AC_MSG_RESULT(socket        : ${enable_socket})

@@ -92,6 +92,10 @@
 #include "../include/libonyx/nxo_mutex_l.h"
 #endif
 #include "../include/libonyx/nxo_name_l.h"
+#ifdef CW_REGEX
+#include "../include/libonyx/nxo_regex_l.h"
+#include "../include/libonyx/nxo_regsub_l.h"
+#endif
 #include "../include/libonyx/nxo_stack_l.h"
 #include "../include/libonyx/nxo_string_l.h"
 #include "../include/libonyx/nxo_thread_l.h"
@@ -744,6 +748,18 @@ nxa_p_mark(cw_nxa_t *a_nxa, cw_uint32_t *r_nreachable)
 		    nxoe = nxoe_l_name_ref_iter(gray, reset);
 		    break;
 		}
+#ifdef CW_REGEX
+		case NXOT_REGEX:
+		{
+		    nxoe = nxoe_l_regex_ref_iter(gray, reset);
+		    break;
+		}
+		case NXOT_REGSUB:
+		{
+		    nxoe = nxoe_l_regsub_ref_iter(gray, reset);
+		    break;
+		}
+#endif
 		case NXOT_STACK:
 		{
 		    nxoe = nxoe_l_stack_ref_iter(gray, reset);
@@ -870,6 +886,18 @@ nxa_p_sweep(cw_nxa_t *a_nxa, cw_nxoe_t *a_garbage)
 		    notyet = nxoe_l_name_delete(nxoe, a_nxa, i);
 		    break;
 		}
+#ifdef CW_REGEX
+		case NXOT_REGEX:
+		{
+		    notyet = nxoe_l_regex_delete(nxoe, a_nxa, i);
+		    break;
+		}
+		case NXOT_REGSUB:
+		{
+		    notyet = nxoe_l_regsub_delete(nxoe, a_nxa, i);
+		    break;
+		}
+#endif
 		case NXOT_STACK:
 		{
 		    notyet = nxoe_l_stack_delete(nxoe, a_nxa, i);

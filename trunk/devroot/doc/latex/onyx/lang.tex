@@ -80,7 +80,7 @@ integer	& dict		\\
 mark	& file		\\
 name	& hook		\\
 null	& mutex		\\
-operator & regexp	\\
+operator & regex	\\
 pmark	& regsub	\\
 real	& stack		\\
 	& string	\\
@@ -158,7 +158,7 @@ pmark		& data	& data	& data	\\
 \hline
 real		& data	& data	& data	\\
 \hline
-regexp		& data	& data	& data	\\
+regex		& data	& data	& data	\\
 \hline
 regsub		& data	& data	& data	\\
 \hline
@@ -212,7 +212,7 @@ pmark		& data	& data	& data	\\
 \hline
 real		& data	& data	& data	\\
 \hline
-regexp		& data	& data	& data	\\
+regex		& data	& data	& data	\\
 \hline
 regsub		& data	& data	& data	\\
 \hline
@@ -311,7 +311,7 @@ reason for an application to explicitly create a pmark.
 
 \item[real: ] A real is a double precision (64 bit) floating point number.
 
-\item[regexp: ] A regexp encapsulates a regular expression and associated flags,
+\item[regex: ] A regex encapsulates a regular expression and associated flags,
 which can be used to find substring matches within an input string.
 
 \item[regsub: ] A regsub encapsulates a regular expression, substitution
@@ -823,9 +823,36 @@ dictionary, which is described in Section~\ref{sec:gcdict}.
 \section{Regular expressions}
 \label{sec:onyx_regular_expressions}
 
-There are two special Onyx object types that support regular expressions: regexp
+Regular expression support is provided by the PCRE library package, which is
+open source software, written by Philip Hazel, and copyright by the University
+of Cambridge, England.  PCRE stands for ``Perl-compatible regular
+expressions''.  This manual only documents how Onyx interfaces with PCRE.  For
+more information about how PCRE's regular expressions work, see the following:
+
+\begin{itemize}
+\item{The pcre(3) manual page.}
+\item{The official PCRE website: \htmlurl{http://www.pcre.org/}.}
+\item{The official PCRE download site:
+\htmlurl{ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/}.}
+\end{itemize}
+
+For general information about Perl regular expressions, the following are
+recommended:
+
+\begin{itemize}
+\item{Perl 5.6.1 regular expression documentation:
+\htmlurl{http://www.perldoc.com/perl5.6.1/pod/perlre.html}.}
+\item{\underline{Mastering Regular Expressions, 2nd Ed.}, by Jeffrey
+E. F. Friedl.  ISBN 0-596-00289-0.}
+\item{\underline{Perl 5 Pocket Reference, 3rd Ed.}, by Johan Vromans.  ISBN
+0-596-00032-4.}
+\item{\underline{Programming Perl, 3rd Ed.}, by Larry Wall, Tom Christiansen,
+and Jon Orwant.  ISBN 0-596-00027-8}
+\end{itemize}
+
+There are two special Onyx object types that support regular expressions: regex
 and regsub.  Objects of these types are created via the
-\htmlref{\onyxop{}{regexp}{}}{systemdict:regexp} and
+\htmlref{\onyxop{}{regex}{}}{systemdict:regex} and
 \htmlref{\onyxop{}{regsub}{}}{systemdict:regsub} operators, respectively.  The
 \htmlref{\onyxop{}{match}{}}{systemdict:match} operator applies a regular
 expression to an input string, and the
@@ -843,183 +870,7 @@ special sequences within strings are interpreted directly by the Onyx scanner.
 Note that the {\bs} character is only special within strings if it is followed
 by a special sequence.  This allows regular expressions to seamlessly extend the
 set of special sequences within strings while maintaining a reasonably
-consistent syntax.  An introductory summary of the characters that can have
-special meaning within strings that specify regular expressions follows:
-
-\begin{longtable}{\rxtableformat{5.50}}
-\caption{Regular expression special characters} \\
-\hline
-Character & Description \\
-\hline \hline
-%begin{latexonly}
-\endfirsthead
-\caption[]{\emph{continued}} \\
-\hline
-Character & Description \\
-\hline \hline \endhead
-\multicolumn{2}{r}{\emph{Continued on next page...}} \endfoot
-\hline \endlastfoot
-%end{latexonly}
-{\tt {\bs}} & Begin a special sequence. \\
-\hline
-{\tt {\pipe}} & Separate alternate patterns. \\
-\hline
-{\tt (} & Start a group. \\
-\hline
-{\tt )} & End a group. \\
-\hline
-{\tt {\lb}} & Start a character class special sequence. \\
-\hline
-{\tt \{} & Start a count specification. \\
-\hline
-{\tt {\carat}} & Anchor to the beginning of the input/line.  Negate a
-character class. \\
-\hline
-{\tt \$} & Anchor to the beginning of the input/line. \\
-\hline
-{\tt ?} & Match 0 or 1 times. \\
-\hline
-{\tt *} & Match 0 or more times. \\
-\hline
-{\tt +} & Match 1 or more times. \\
-\hline
-{\tt .} & Match any character but {\bs}N ({\bs}r{\bs}n or {\bs}n). \\
-\hline
-{\tt @} & Match any character. \\
-\end{longtable}
-
-The following sequences have special meaning within strings that specify regular
-expressions:
-\begin{longtable}{\rxtableformat{5.30}}
-\caption{Regular expression special sequences} \\
-\hline
-Sequence & Description \\
-\hline \hline
-%begin{latexonly}
-\endfirsthead
-\caption[]{\emph{continued}} \\
-\hline
-Sequence & Description \\
-\hline \hline \endhead
-\multicolumn{2}{r}{\emph{Continued on next page...}} \endfoot
-\hline \endlastfoot
-%end{latexonly}
-\multicolumn{2}{|l|}{Grouping} \\
-\hline \hline
-{\tt {\lb}\dots{\rb}} & Character set.  To include {\rb}, it must be {\bs}
-protected.  A range is separated by {\tt -} (A-Z, a-f, 0-9, etc.), so to include
-{\tt -} in a character set, place it  first. {\carat} must not come first,
-unless it is the only character in the set. \\
-\hline
-{\tt {\lb}{\carat}\dots{\rb}} & Inverted character set. \\
-\hline
-{\tt (\dots)} & Capture/group. \\
-{\tt (?\dots)} & Group, no capture. \\
-\hline
-{\tt \dots{\pipe}\dots} & Alternation, first match wins, as read left to
-right. \\
-\hline \hline
-\multicolumn{2}{|l|}{Counting} \\
-\hline \hline
-{\tt \{n,m\}} & Match at least {\tt n} times, at most {\tt m} times. \\
-\hline
-{\tt \{n,\}} & Match at least {\tt n} times. \\
-\hline
-{\tt \{,m\}} & Match at most {\tt m} times: {\tt \{0,m\}}. \\
-\hline
-{\tt \{n\}} & Match {\tt n} times: {\tt \{n,n\}}. \\
-\hline
-{\tt ?} & Match 0 or 1 times: {\tt \{0,1\}}. \\
-\hline
-{\tt *} & Match 0 or more times: {\tt \{0,\}}. \\
-\hline
-{\tt ??} & Non-greedy match 0 or 1 times: {\tt \{0,1\}}. \\
-\hline
-{\tt *?} & Non-greedy match 0 or more times: {\tt \{0,\}}. \\
-\hline
-{\tt +?} & Non-greedy match 1 or more times: {\tt \{1,\}}. \\
-\hline
-{\tt ?+} & Possessive match 0 or 1 times: {\tt \{0,1\}}. \\
-\hline
-{\tt *+} & Possessive match 0 or more times: {\tt \{0,\}}. \\
-\hline
-{\tt ++} & Possessive match 1 or more times: {\tt \{1,\}}. \\
-\hline \hline
-\multicolumn{2}{|l|}{Anchoring} \\
-\hline \hline
-{\tt {\carat}} & Anchor to beginning of input/line. \\
-\hline
-{\tt \$} & Anchor to end of input/line. \\
-\hline
-{\tt {\bs}A} & Anchor to beginning of input. \\
-\hline
-{\tt {\bs}Z} & Anchor to end of input. \\
-\hline
-{\tt {\bs}z} & Anchor to end of input, excluding {\bs}N. \\
-\hline
-{\tt {\bs}{\lt}} & Anchor to beginning of word boundary. \\
-\hline
-{\tt {\bs}{\gt}} & Anchor to end of word boundary. \\
-\hline
-{\tt {\bs}G} & Start where the previous match left off (or beginning of
-input). \\
-\hline \hline
-\multicolumn{2}{|l|}{Character classes} \\
-\hline \hline
-{\tt {\bs}N} & Newline: {\tt (?{\bs}n{\pipe}{\bs}r{\pipe}{\bs}r{\bs}n)}. \\
-\hline
-{\tt .} & Any character but {\tt {\bs}N}: {\tt
-{\lb}{\carat}{\bs}r{\bs}n{\rb}}. \\
-\hline
-{\tt @} & Any character: {\tt {\lb}{\bs}x00-{\bs}xff{\rb}} \\
-\hline
-{\tt {\lb}:alnum:{\rb}} & Alphanumeric character. \\
-\hline
-{\tt {\lb}:alpha:{\rb}} & Alphabetic character. \\
-\hline
-{\tt {\lb}:ascii:{\rb}} & ASCII character: {\tt {\lb}{\bs}x00-{\bs}x7f{\rb}}. \\
-\hline
-{\tt {\lb}:blank:{\rb}} & Space and tab: {\tt {\lb} {\bs}t{\rb}}. \\
-\hline
-{\tt {\lb}:cntrl:{\rb}} & Control character: {\tt
-{\lb}{\bs}x01-{\bs}x1a{\rb}}. \\
-\hline
-{\tt {\lb}:digit:{\rb}} & Digit character. \\
-\hline
-{\tt {\lb}:graph:{\rb}} & Visible character. \\
-\hline
-{\tt {\lb}:lower:{\rb}} & Lowercase character. \\
-\hline
-{\tt {\lb}:print:{\rb}} & Visible character or space: {\tt
-(?{\lb}:graph:{\rb}{\pipe} )}. \\
-\hline
-{\tt {\lb}:punct:{\rb}} & Punctuation character. \\
-\hline
-{\tt {\lb}:space:{\rb}} & Whitespace: {\tt {\lb} {\bs}t{\bs}r{\bs}n{\rb}}. \\
-\hline
-{\tt {\lb}:upper:{\rb}} & Uppercase character. \\
-\hline
-{\tt {\lb}:word:{\rb}} & Word character. \\
-\hline
-{\tt {\lb}:xdigit:{\rb}} & Hexadecimal digit: {\tt {\lb}0-9a-fA-F{\rb}}. \\
-\hline
-{\tt {\lb}:\{\dots\}:{\rb}} & Evaluate Onyx code to determine character class
-membership. \\
-\hline \hline
-\multicolumn{2}{|l|}{Character class short hands} \\
-\hline \hline
-{\tt {\bs}w} & Alphanumeric plus \_: {\tt {\lb}A-Za-z0-9\_{\rb}}. \\
-\hline
-{\tt {\bs}W} & Non-alphanumeric or \_: {\tt \lb}{\carat}A-Za-z0-9\_{\rb}. \\
-\hline
-{\tt {\bs}s} & Whitespace: {\tt {\lb}:space:{\rb}}. \\
-\hline
-{\tt {\bs}S} & Non-whitespace: {\tt {\lb}:{\carat}space:{\rb}} \\
-\hline
-{\tt {\bs}d} & Digit: {\tt {\lb}:digit:{\rb}} \\
-\hline
-{\tt {\bs}D} & Non-digit: {\tt {\lb}:{\carat}digit:{\rb}} \\
-\end{longtable}
+consistent syntax.
 
 The following sequences have special meaning within strings that specify
 substitution templates:
@@ -2178,10 +2029,10 @@ The following additional flags are supported for reals:
 	{Create formatted string from real.}
 \hline
 \optableent
-	{regexp flags}
-	{{\bf \htmlref{regexptype}{outputsdict:regexptype}}}
+	{regex flags}
+	{{\bf \htmlref{regextype}{outputsdict:regextype}}}
 	{string}
-	{Create formatted string from regexp.}
+	{Create formatted string from regex.}
 \hline
 \optableent
 	{regsub flags}
@@ -2718,21 +2569,21 @@ onyx:0> 6.022e23 <$d 4 $w 40 $p `0'> realtype print `\n' print flush
 onyx:0>
 		\end{verbatim}
 	\end{description}
-\label{outputsdict:regexptype}
-\index{regexptype@\onyxop{}{regexptype}{}}
-\item[{\onyxop{regexp flags}{regexptype}{string}}: ]
+\label{outputsdict:regextype}
+\index{regextype@\onyxop{}{regextype}{}}
+\item[{\onyxop{regex flags}{regextype}{string}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[regexp: ]
-			A regexp object.
+		\item[regex: ]
+			A regex object.
 		\item[flags: ]
 			Formatting flags.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[string: ]
-			Formatted string representation of \oparg{regexp}.
+			Formatted string representation of \oparg{regex}.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
@@ -2740,7 +2591,7 @@ onyx:0>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Create a formatted string representation of \oparg{regexp}.
+		Create a formatted string representation of \oparg{regex}.
 	\item[Example(s): ]\begin{verbatim}
 
 XXX
@@ -3014,10 +2865,10 @@ $sprints {
 	{Create syntactical string from real.}
 \hline
 \optableent
-	{regexp depth}
-	{{\bf \htmlref{regexptype}{sprintsdict:regexptype}}}
+	{regex depth}
+	{{\bf \htmlref{regextype}{sprintsdict:regextype}}}
 	{string}
-	{Create syntactical string from regexp.}
+	{Create syntactical string from regex.}
 \hline
 \optableent
 	{regsub depth}
@@ -3548,21 +3399,21 @@ onyx:1> dup 1 pmarktype print `\n' print flush
 onyx:1>
 		\end{verbatim}
 	\end{description}
-\label{sprintsdict:regexptype}
-\index{regexptype@\onyxop{}{regexptype}{}}
-\item[{\onyxop{regexp depth}{regexptype}{string}}: ]
+\label{sprintsdict:regextype}
+\index{regextype@\onyxop{}{regextype}{}}
+\item[{\onyxop{regex depth}{regextype}{string}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[regexp: ]
-			A regexp object.
+		\item[regex: ]
+			A regex object.
 		\item[depth: ]
 			Recursion depth.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[string: ]
-			Syntactical string representation of \oparg{regexp}.
+			Syntactical string representation of \oparg{regex}.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
@@ -3570,7 +3421,7 @@ onyx:1>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Create a syntactical string representation of \oparg{regexp}.
+		Create a syntactical string representation of \oparg{regex}.
 	\item[Example(s): ]\begin{verbatim}
 
 XXX
@@ -5651,14 +5502,14 @@ same systemdict, which is implicitly locked.
 \hline \hline
 \optableent
 	{string flags}
-	{{\bf \htmlref{regexp}{systemdict:regexp}}}
-	{regexp}
-	{Create a regexp object.}
+	{{\bf \htmlref{regex}{systemdict:regex}}}
+	{regex}
+	{Create a regex object.}
 \optableent
 	{string}
-	{{\bf \htmlref{regexp}{systemdict:regexp}}}
-	{regexp}
-	{Create a regexp object.}
+	{{\bf \htmlref{regex}{systemdict:regex}}}
+	{regex}
+	{Create a regex object.}
 \hline
 \optableent
 	{input pattern flags}
@@ -5671,10 +5522,10 @@ same systemdict, which is implicitly locked.
 	{matches}
 	{Find pattern matches in input string.}
 \optableent
-	{input regexp}
+	{input regex}
 	{{\bf \htmlref{match}{systemdict:match}}}
 	{matches}
-	{Find regexp matches in input string.}
+	{Find regex matches in input string.}
 \hline
 \optableent
 	{input matches}
@@ -9408,7 +9259,7 @@ onyx:1>
 \index{match@\onyxop{}{match}{}}
 \item[{\onyxop{input pattern flags}{match}{matches}}: ]
 \item[{\onyxop{input pattern}{match}{matches}}: ]
-\item[{\onyxop{input regexp}{match}{matches}}: ]
+\item[{\onyxop{input regex}{match}{matches}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -9426,8 +9277,8 @@ onyx:1>
 			\item[\$o: ] Allow matches to overlap.  Defaults to
 				false.
 			\end{description}
-		\item[regexp: ]
-			A regexp object.
+		\item[regex: ]
+			A regex object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
@@ -11154,10 +11005,10 @@ onyx:2> 1 sprint
 onyx:1>
 		\end{verbatim}
 	\end{description}
-\label{systemdict:regexp}
-\index{regexp@\onyxop{}{regexp}{}}
-\item[{\onyxop{string flags}{regexp}{regexp}}: ]
-\item[{\onyxop{string}{regexp}{regexp}}: ]
+\label{systemdict:regex}
+\index{regex@\onyxop{}{regex}{}}
+\item[{\onyxop{string flags}{regex}{regex}}: ]
+\item[{\onyxop{string}{regex}{regex}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -11176,8 +11027,8 @@ onyx:1>
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[regexp: ]
-			A regexp object.
+		\item[regex: ]
+			A regex object.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
@@ -11185,7 +11036,7 @@ onyx:1>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Create a regexp object, according to \oparg{string} and
+		Create a regex object, according to \oparg{string} and
 		\oparg{flags}.
 	\item[Example(s): ]\begin{verbatim}
 

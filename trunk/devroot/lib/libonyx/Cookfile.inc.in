@@ -35,8 +35,8 @@
 #if @enable_real@
                nxo_real.h
 #endif
-#if @enable_rx@
-               nxo_regexp.h nxo_regub.h rx.h
+#if @enable_regex@
+               nxo_regex.h nxo_regub.h
 #endif
                ;
   incs = [addprefix @srcroot@/lib/libonyx/include/libonyx/ [incs]];
@@ -60,8 +60,8 @@ LIBONYX_COMMON_SRCS = [addprefix @srcroot@/lib/libonyx/src/
 #if @enable_real@
                                  nxo_real.c
 #endif
-#if @enable_rx@
-                                 nxo_regexp.c nxo_regsub.c rx.c
+#if @enable_regex@
+                                 nxo_regex.c nxo_regsub.c
 #endif
 #if @enable_posix@
                                  envdict.c
@@ -99,10 +99,9 @@ ONYX_TEX_SRCS += [addprefix @srcroot@/lib/libonyx/doc/latex/
                             nxo_integer.tex nxo_mark.tex nxo_mutex.tex
                             nxo_name.tex nxo_no.tex nxo_null.tex
                             nxo_operator.tex nxo_pmark.tex nxo_real.tex
-                            nxo_regexp.tex nxo_regsub.tex nxo_stack.tex
+                            nxo_regex.tex nxo_regsub.tex nxo_stack.tex
                             nxo_string.tex nxo_thread.tex ql.tex qr.tex qs.tex
-                            rx.tex systemdict.tex thd.tex tsd.tex
-                            xep.tex]
+                            systemdict.tex thd.tex tsd.tex xep.tex]
                  @objroot@/lib/libonyx/doc/latex/manual.tex;
 
 /* Libraries. */
@@ -236,7 +235,7 @@ libonyx_libs_install_s : [LIBONYX_S] libonyx_libs_install_common
 {
 #if [matches macho @abi@]
   /* Set install_name correctly before installing. */
-  [CC] -undefined suppress -flat_namespace -dynamiclib
+  [CC] -undefined suppress -flat_namespace -dynamiclib -bind_at_load
        -compatibility_version [LIBONYX_REV]
        -current_version [LIBONYX_REV]
        -install_name [LIBDIR]/libonyx.[LIBONYX_REV].dylib

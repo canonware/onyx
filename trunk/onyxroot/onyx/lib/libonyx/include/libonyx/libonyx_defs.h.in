@@ -34,6 +34,8 @@
 
 #undef CW_REAL
 
+#undef CW_REGEX
+
 #undef CW_POSIX
 
 #undef CW_POSIX_FILE

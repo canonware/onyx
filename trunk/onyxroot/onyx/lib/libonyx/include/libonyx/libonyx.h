@@ -282,9 +282,6 @@ typedef void cw_opaque_dealloc_t (const void *, const void *, size_t,
 #ifdef CW_THREADS
 #include "mq.h"
 #endif
-#ifdef CW_RX
-#include "rx.h"
-#endif
 
 /* libonyx initialization and shutdown function prototypes. */
 void
@@ -432,8 +429,8 @@ extern cw_mtx_t cw_g_getservbyname_mtx;
 #ifdef CW_REAL
 #include "nxo_real.h"
 #endif
-#ifdef CW_RX
-#include "nxo_regexp.h"
+#ifdef CW_REGEX
+#include "nxo_regex.h"
 #include "nxo_regsub.h"
 #endif
 #include "nxa.h"

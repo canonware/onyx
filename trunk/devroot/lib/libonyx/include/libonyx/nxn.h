@@ -288,6 +288,9 @@ typedef enum
 #endif
     NXN_ENTRY(mark),
     NXN_ENTRY(marktype),
+#ifdef CW_REGEX
+    NXN_ENTRY(match),
+#endif
 #ifdef CW_POSIX
     NXN_ENTRY(mkdir),
     NXN_ENTRY(mkfifo),
@@ -334,6 +337,9 @@ typedef enum
     NXN_ENTRY(null),
     NXN_ENTRY(nulltype),
     NXN_ENTRY(nup),
+#ifdef CW_REGEX
+    NXN_ENTRY(offsets),
+#endif
 #ifdef CW_POSIX
     NXN_ENTRY(on),
 #endif
@@ -405,6 +411,12 @@ typedef enum
 #endif
 #ifdef CW_SOCKET
     NXN_ENTRY(recv),
+#endif
+#ifdef CW_REGEX
+    NXN_ENTRY(regex),
+    NXN_ENTRY(regextype),
+    NXN_ENTRY(regsub),
+    NXN_ENTRY(regsubtype),
 #endif
 #ifdef CW_POSIX
     NXN_ENTRY(rename),
@@ -546,6 +558,9 @@ typedef enum
     NXN_ENTRY(stringtype),
     NXN_ENTRY(stuck),
     NXN_ENTRY(sub),
+#ifdef CW_REGEX
+    NXN_ENTRY(subst),
+#endif
     NXN_ENTRY(sunder),
     NXN_ENTRY(sup),
 #ifdef CW_POSIX

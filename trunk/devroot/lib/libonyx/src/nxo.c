@@ -35,6 +35,10 @@ nxo_compare(const cw_nxo_t *a_a, const cw_nxo_t *a_b)
 #ifdef CW_THREADS
 	case NXOT_MUTEX:
 #endif
+#ifdef CW_REGEX
+	case NXOT_REGEX:
+	case NXOT_REGSUB:
+#endif
 	case NXOT_STACK:
 	case NXOT_THREAD:
 	{
@@ -308,6 +312,10 @@ nxo_nxoe_get(const cw_nxo_t *a_nxo)
 	case NXOT_MUTEX:
 #endif
 	case NXOT_NAME:
+#ifdef CW_REGEX
+	case NXOT_REGEX:
+	case NXOT_REGSUB:
+#endif
 	case NXOT_STACK:
 	case NXOT_STRING:
 	case NXOT_THREAD:

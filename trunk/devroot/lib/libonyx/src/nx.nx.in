@@ -243,9 +243,9 @@ $sprintsdict <
     }
     ' cat
 } if
-@enable_rx@ 1 eq {
+@enable_regex@ 1 eq {
     `
-    $regexptype {
+    $regextype {
 	pop
 	cvs
     }
@@ -561,9 +561,9 @@ $outputsdict <
 	$operatortype
 	$pmarktype
 ' cat
-@enable_rx@ 1 eq {
+@enable_regex@ 1 eq {
     `
-	$regexptype
+	$regextype
 	$regsubtype
     ' cat
 } if

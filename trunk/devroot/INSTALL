@@ -12,6 +12,12 @@ see:
 
 	http://www.canb.auug.org.au/~millerp/cook/cook.html
 
+Optional: Regular expression support in Onyx depends on the pcre library.  pcre
+is distributed separately, and needs to be installed before building the
+software:
+
+	ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/
+
 Optional: Interactive command line editing is implemented in modprompt, which
 relies on libedit.  libedit is distributed separately, and needs to be installed
 before building this software:
@@ -126,11 +132,14 @@ Optionally, pass any of the following (not a definitive list) arguments to
 	floating point operations.  The documentation does not mention the
 	effects of this option -- UTSL.
 
---disable-rx
-	Do not include support for regular expressions.  This excludes the
-	"regexp" and "regsub" Onyx types and associated operators, as well as
-	the rx C API.  The documentation does not mention the effects of this
-	option -- UTSL.
+--disable-regex
+	Do not use include support for regular expressions.  This excludes the
+	"regex" and "regsub" Onyx types and associated operators.  The
+	documentation does not mention the effects of this option -- UTSL.
+
+	Regular expression support is provided by the PCRE library package,
+	which is open source software, written by Philip Hazel, and copyright
+	by the University of Cambridge, England.
 
 --disable-posix
 	As much as reasonably possible, avoid using any external library
@@ -200,6 +209,15 @@ Optionally, pass any of the following (not a definitive list) arguments to
 	so in order to completely empty the objdir, the relclean target must be
 	used.  This option is only useful when modifications have been made to
 	the documentation source.
+
+--with-pcre-prefix=<prefix>
+	If specified, libonyx will be built using the copy of pcre in <prefix>.
+	Specifically, <prefix>/bin/pcre-config will be used to determine the
+	appropriate compiler and linker flags.
+
+	This option should only be necessary when <prefix>/bin is not in the
+	shell's PATH.  This option does not provide a mechanism to choose
+	between multiple installations of pcre.
 
 --with-libedit-prefix=<prefix>
 	If specified, modprompt will be built using the copy of libedit in
@@ -273,3 +291,6 @@ CFLAGS="?"
 
 LDFLAGS="?"
 	Pass these flags when linking.
+
+PATH="?"
+	Use this to search for programs used during configuration and building.
