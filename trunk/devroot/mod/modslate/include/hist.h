@@ -41,14 +41,16 @@ struct cw_histh_s
     /* Auxiliary field (bpos or data byte count). */
     union
     {
-	cw_uint64_t aux; /* Always network byte order. */
-	cw_uint8_t saux;
 	cw_uint8_t str[8];
+	cw_uint8_t saux;
+	cw_uint64_t aux; /* Always network byte order. */
     } u;
 
     /* Vector that is set up to contain the header data. */
     cw_bufv_t bufv[2];
     cw_uint32_t bufvcnt;
+    /* Total byte count for bufv. */
+    cw_uint32_t bufvlen;
 };
 
 struct cw_hist_s
