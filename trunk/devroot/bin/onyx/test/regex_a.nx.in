@@ -15,7 +15,7 @@
 [
     {`.'}
     {`.' <>}
-    {`.' <$i true $l 0 $m true $s true>}
+    {`.' <$c true $g true $i true $m true $s true>}
     {`([a-z]+)'}
 ]{
     dup 1 sprint

@@ -859,15 +859,17 @@ and regsub.  Objects of these types are created via the
 \htmlref{\onyxop{}{regex}{}}{systemdict:regex} and
 \htmlref{\onyxop{}{regsub}{}}{systemdict:regsub} operators, respectively.  The
 \htmlref{\onyxop{}{match}{}}{systemdict:match} operator applies a regular
-expression to an input string, and the
-\htmlref{\onyxop{}{offsets}{}}{systemdict:offsets} operator returns the offsets
-of the matches found within the input string.  The
+expression to an input string, the
+\htmlref{\onyxop{}{submatch}{}}{systemdict:submatch} operator returns a
+matched substring of the input string, and the
+\htmlref{\onyxop{}{offset}{}}{systemdict:offset} operator returns the offset
+of a substring match relative to the beginning of the input string.  The
+\htmlref{\onyxop{}{split}{}}{systemdict:split} operator creates an array of
+substrings that are separated by strings that match a regular expression.  The
 \htmlref{\onyxop{}{subst}{}}{systemdict:subst} operator finds regular expression
 matches within an input string and applies a substitution template to the
 matches, thereby creating an output string.  See Section~\ref{sec:systemdict}
-for detailed documentation on the above-mentioned operators.  The rest of this
-section documents the syntax and semantics of Onyx's flavor of regular
-expressions.
+for detailed documentation on the above-mentioned operators.
 
 Regular expressions are written as strings in Onyx, so all of the standard
 special sequences within strings are interpreted directly by the Onyx scanner.
@@ -5518,24 +5520,30 @@ same systemdict, which is implicitly locked.
 \optableent
 	{input pattern flags}
 	{{\bf \htmlref{match}{systemdict:match}}}
-	{matches}
+	{boolean}
 	{Find pattern matches in input string.}
 \optableent
 	{input pattern}
 	{{\bf \htmlref{match}{systemdict:match}}}
-	{matches}
+	{boolean}
 	{Find pattern matches in input string.}
 \optableent
 	{input regex}
 	{{\bf \htmlref{match}{systemdict:match}}}
-	{matches}
+	{boolean}
 	{Find regex matches in input string.}
 \hline
 \optableent
-	{input matches}
-	{{\bf \htmlref{offsets}{systemdict:offsets}}}
-	{offsets}
-	{Get match offsets from beginning of input.}
+	{integer}
+	{{\bf \htmlref{submatch}{systemdict:submatch}}}
+	{substring}
+	{Get capturing subpattern match.}
+\hline
+\optableent
+	{input submatch}
+	{{\bf \htmlref{offset}{systemdict:offset}}}
+	{offset}
+	{Get submatch offset from beginning of input.}
 \hline
 \optableent
 	{pattern template flags}
@@ -9261,9 +9269,9 @@ onyx:1>
 	\end{description}
 \label{systemdict:match}
 \index{match@\onyxop{}{match}{}}
-\item[{\onyxop{input pattern flags}{match}{matches}}: ]
-\item[{\onyxop{input pattern}{match}{matches}}: ]
-\item[{\onyxop{input regex}{match}{matches}}: ]
+\item[{\onyxop{input pattern flags}{match}{boolean}}: ]
+\item[{\onyxop{input pattern}{match}{boolean}}: ]
+\item[{\onyxop{input regex}{match}{boolean}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -9275,33 +9283,43 @@ onyx:1>
 		\item[flags: ]
 			A dictionary of optional flags:
 			\begin{description}%\item[]
+			\item[\$c: ]
+				Continue where previous match ended.  Don't
+				update the offset to start the next match from
+				unless this match is successful.  Defaults to
+				false.
+			\item[\$g: ]
+				Continue where previous match ended.  If the
+				match is unsuccessful, update the offset to
+				start the next match from to the beginning of
+				\oparg{input}.  Defaults to false.
 			\item[\$i: ] Case insensitive.  Defaults to false.
-			\item[\$l: ] Maximum number of matches (0 is treated as
-				infinity).  Defaults to 1.
 			\item[\$m: ] Treat input as a multi-line string.
 				Defaults to false.
 			\item[\$s: ] Treat input as a single line, so that
 				the dot metacharacter matches any character,
-				including a newline.
+				including a newline.  Defaults to false.
 			\end{description}
 		\item[regex: ]
 			A regex object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[matches: ]
-			An array of substring matches.
+		\item[boolean: ]
+			\begin{description}\item[]
+			\item[TRUE: ] Match successful.
+			\item[FALSE: ] No match found.
+			\end{description}
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{regexerror}{regexerror}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Create an array of substrings from \oparg{input} that match a
-		regular expression.
+		Look in \oparg{input} for a match to the regular expression
+		specified by \oparg{regex}/\oparg{pattern}/\oparg{flags}.
 	\item[Example(s): ]\begin{verbatim}
 
 		\end{verbatim}
@@ -10051,33 +10069,33 @@ onyx:0> `a' `b' `c' `d' `e' 4 nup pstack
 onyx:5>
 		\end{verbatim}
 	\end{description}
-\label{systemdict:offsets}
-\index{offsets@\onyxop{}{offsets}{}}
-\item[{\onyxop{input matches}{offsets}{offsets}}: ]
+\label{systemdict:offset}
+\index{offset@\onyxop{}{offset}{}}
+\item[{\onyxop{input submatch}{offset}{offset}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[input: ]
 			A string.
-		\item[matches: ]
-			An array of substrings in \oparg{input}.
+		\item[submatch: ]
+			A substring of \oparg{input}.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[offsets: ]
-			An array of integer offsets from the beginning of
-			\oparg{input} corresponding to the substrings in
-			\oparg{matches}.
+		\item[offset: ]
+			The integer offset of \oparg{submatch}, relative to the
+			beginning of \oparg{input}.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
+		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Create an array of integer offsets from the beginning of
-		\oparg{input} corresponding to the substrings in
-		\oparg{matches}.
+		Get the offset of \oparg{submatch}, relative to the beginning of
+		\oparg{input}.  \oparg{submatch} must be a substring of
+		\oparg{input}.
 	\item[Example(s): ]\begin{verbatim}
 
 		\end{verbatim}
@@ -11027,14 +11045,22 @@ onyx:1>
 		\item[flags: ]
 			A dictionary of optional flags:
 			\begin{description}%\item[]
+			\item[\$c: ]
+				Continue where previous match ended.  Don't
+				update the offset to start the next match from
+				unless this match is successful.  Defaults to
+				false.
+			\item[\$g: ]
+				Continue where previous match ended.  If the
+				match is unsuccessful, update the offset to
+				start the next match from to the beginning of
+				\oparg{input}.  Defaults to false.
 			\item[\$i: ] Case insensitive.  Defaults to false.
-			\item[\$l: ] Maximum number of matches (0 is treated as
-				infinity).  Defaults to 1.
 			\item[\$m: ] Treat input as a multi-line string.
 				Defaults to false.
 			\item[\$s: ] Treat input as a single line, so that
 				the dot metacharacter matches any character,
-				including a newline.
+				including a newline.  Defaults to false.
 			\end{description}
 		\end{description}
 	\item[Output(s): ]
@@ -11044,7 +11070,6 @@ onyx:1>
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{regexerror}{regexerror}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -12997,6 +13022,28 @@ onyx:0> (2 1 0) dup sover pstack
 onyx:1>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:split}
+\index{split@\onyxop{}{split}{}}
+\item[{\onyxop{OPARGS}{split}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
 \label{systemdict:spop}
 \index{spop@\onyxop{}{spop}{}}
 \item[{\onyxop{stack}{spop}{obj}}: ]
@@ -13594,6 +13641,44 @@ onyx:0> 5 1.0 sub 1 sprint
 onyx:0> -3.0 4.1 sub 1 sprint
 -7.100000e+00
 onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:submatch}
+\index{submatch@\onyxop{}{submatch}{}}
+\item[{\onyxop{integer}{submatch}{substring}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[integer: ]
+			\begin{description}\item[]
+			\item[0: ]
+				Get substring of text that matched the regular
+				expression.
+			\item[{\gt}0: ]
+				Get substring of text that matched the specified
+				capturing subpattern.
+			\end{description}
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[substring: ]
+			A substring of the string that was most recently matched
+			by the
+			\htmlref{\onyxop{}{match}{}}{systemdict:match},
+			\htmlref{\onyxop{}{split}{}}{systemdict:split}, or
+			\htmlref{\onyxop{}{subst}{}}{systemdict:subst}
+			operators.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Get a substring of the input string that was most recently
+		matched against.
+	\item[Example(s): ]\begin{verbatim}
+
 		\end{verbatim}
 	\end{description}
 \label{systemdict:subst}

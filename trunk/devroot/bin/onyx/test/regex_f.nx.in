@@ -12,7 +12,7 @@
 
 `Test begin\n' print flush
 
-`.' <$l false> regex
+`.' <$c 0> regex
 
 `Test end\n' print
 pstack

@@ -110,43 +110,55 @@ nxo_p_regex_init(cw_nxoe_regex_t *a_regex, cw_nxa_t *a_nxa,
     return retval;
 }
 
-static void
+/* Returns TRUE if match is successful. */
+static cw_bool_t
 nxo_p_regex_match(cw_nxoe_regex_t *a_regex, cw_nxo_t *a_thread,
-		  cw_nxo_t *a_input, cw_bool_t *r_match)
+		  cw_nxo_t *a_input)
 {
-    cw_nxo_t *tstack, *tnxo, *matches, *prev_input;
+    cw_bool_t retval;
+    cw_nxo_regex_cache_t *cache;
     cw_nx_t *nx;
-    cw_uint32_t i;
-    int *ovp, offset;
-    int mcnt = -1;
+    cw_nxa_t *nxa;
+    int offset;
+
+    cache = nxo_l_thread_regex_cache_get(a_thread);
+    nx = nxo_thread_nx_get(a_thread);
+    nxa = nx_nxa_get(nx);
 
     if (nxo_string_len_get(a_input) == 0)
     {
-	*r_match = FALSE;
-	return;
+	cache->mcnt = -1;
+	retval = FALSE;
+	goto RETURN;
     }
 
-    tstack = nxo_thread_tstack_get(a_thread);
-    tnxo = nxo_stack_push(tstack);
-    matches = nxo_thread_regex_matches_get(a_thread);
-    nx = nxo_thread_nx_get(a_thread);
-
-    /* Allocate a vector for passing to pcre_exec(). */
-    ovp = cw_malloc(sizeof(int) * a_regex->ovcnt);
+    /* Allocate or extend the vector for passing to pcre_exec(), if
+     * necessary. */
+    if (cache->ovp == NULL)
+    {
+	cache->ovp = nxa_malloc(nxa, sizeof(int) * a_regex->ovcnt);
+	cache->ovcnt = a_regex->ovcnt;
+    }
+    else if (cache->ovcnt < a_regex->ovcnt)
+    {
+	cache->ovp = nxa_realloc(nxa, cache->ovp, sizeof(int) * a_regex->ovcnt,
+				 sizeof(int) * cache->ovcnt);
+	cache->ovcnt = a_regex->ovcnt;
+    }
 
     /* Determine where in the string to start searching.  This depends on
      * whether $c or $g is set, as well as whether the previous match was
      * against the same string. */
     if (a_regex->cont || a_regex->global)
     {
-	prev_input = nxo_l_thread_regex_input_get(a_thread);
-	if (nxo_type_get(prev_input) == NXOT_STRING
-	    && nxo_compare(prev_input, a_input) == 0)
+	if (nxo_type_get(&cache->input) == NXOT_STRING
+	    && nxo_compare(&cache->input, a_input) == 0)
 	{
-	    offset = nxo_l_thread_regex_cont_get(a_thread);
-	    if (offset >= nxo_string_len_get(a_input))
+	    offset = cache->cont;
+	    if ((cw_uint32_t) offset >= nxo_string_len_get(a_input))
 	    {
-		*r_match = FALSE;
+		cache->mcnt = -1;
+		retval = FALSE;
 		goto NOMATCH;
 	    }
 	}
@@ -162,21 +174,21 @@ nxo_p_regex_match(cw_nxoe_regex_t *a_regex, cw_nxo_t *a_thread,
 
     /* Look for a match. */
     nxo_string_lock(a_input);
-    mcnt = pcre_exec(a_regex->pcre, a_regex->extra,
-		     (char *) nxo_string_get(a_input),
-		     (int) nxo_string_len_get(a_input),
-		     offset, 0, ovp, a_regex->ovcnt);
+    cache->mcnt = pcre_exec(a_regex->pcre, a_regex->extra,
+			    (char *) nxo_string_get(a_input),
+			    (int) nxo_string_len_get(a_input),
+			    offset, 0, cache->ovp, cache->ovcnt);
     nxo_string_unlock(a_input);
-    if (mcnt <= 0)
+    if (cache->mcnt <= 0)
     {
-	switch (mcnt)
+	switch (cache->mcnt)
 	{
 	    case 0:
 	    case PCRE_ERROR_NOMATCH:
 	    {
 		/* No match found.  Not an error. */
-		*r_match = FALSE;
-		goto NOMATCH;
+		retval = FALSE;
+		break;
 	    }
 	    case PCRE_ERROR_NOMEMORY:
 	    {
@@ -192,56 +204,49 @@ nxo_p_regex_match(cw_nxoe_regex_t *a_regex, cw_nxo_t *a_thread,
 	    }
 	}
     }
-    *r_match = TRUE;
+    else
+    {
+	retval = TRUE;
+    }
 
     NOMATCH:
-    /* Store the location to start the next search from, if $c or $g is set. */
-    if (a_regex->cont)
+    /* Store the location to start the next search from, if $c or $g is set.
+     * Also set the cached input string accordingly. */
+    if (a_regex->global)
     {
-	/* Only update the start location if this search was successful. */
-	if (mcnt > 0)
+	if (cache->mcnt > 0)
 	{
-	    nxo_l_thread_regex_input_set(a_thread, a_input);
-	    nxo_l_thread_regex_cont_set(a_thread, ovp[1]);
+	    nxo_dup(&cache->input, a_input);
+	    cache->cont = cache->ovp[1];
+	}
+	else
+	{
+	    nxo_no_new(&cache->input);
+	    cache->cont = 0;
 	}
     }
-    else if (a_regex->global && mcnt > 0)
+    else if (a_regex->cont)
     {
-	nxo_l_thread_regex_input_set(a_thread, a_input);
-	nxo_l_thread_regex_cont_set(a_thread, ovp[1]);
+	if (cache->mcnt > 0)
+	{
+	    nxo_dup(&cache->input, a_input);
+	    cache->cont = cache->ovp[1];
+	}
     }
     else
     {
-	/* Set to "no" object. */
-	nxo_l_thread_regex_input_set(a_thread, tnxo);
-    }
-
-    /* Set all array elements to null. */
-    nxo_null_new(tnxo);
-    for (i = 0; i < 10; i++)
-    {
-	nxo_array_el_set(matches, tnxo, i);
-    }
-
-    /* Save the captured subpatterns.  Take care to set unused elements of the
-     * array to null. */
-    if (mcnt > 0)
-    {
-	for (i = 0; i < mcnt && i < 10; i++)
+	if (cache->mcnt > 0)
 	{
-	    if (ovp[i * 2] != -1)
-	    {
-		nxo_string_substring_new(tnxo, a_input, nx, ovp[i * 2],
-					 ovp[i * 2 + 1] - ovp[i * 2]);
-		nxo_array_el_set(matches, tnxo, i);
-	    }
+	    nxo_dup(&cache->input, a_input);
+	}
+	else
+	{
+	    nxo_no_new(&cache->input);
 	}
     }
 
-    nxo_stack_pop(tstack);
-
-    /* Free the vector used with pcre_exec(). */
-    cw_free(ovp);
+    RETURN:
+    return retval;
 }
 
 cw_nxn_t
@@ -287,6 +292,25 @@ nxo_regex_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_uint8_t *a_pattern,
     return retval;
 }
 
+void
+nxo_regex_match(cw_nxo_t *a_nxo, cw_nxo_t *a_thread, cw_nxo_t *a_input,
+		cw_bool_t *r_match)
+{
+    cw_nxoe_regex_t *regex;
+
+    cw_check_ptr(a_nxo);
+    cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+    cw_assert(nxo_type_get(a_nxo) == NXOT_REGEX);
+
+    regex = (cw_nxoe_regex_t *) a_nxo->o.nxoe;
+
+    cw_check_ptr(regex);
+    cw_dassert(regex->nxoe.magic == CW_NXOE_MAGIC);
+    cw_assert(regex->nxoe.type == NXOT_REGEX);
+
+    *r_match = nxo_p_regex_match(regex, a_thread, a_input);
+}
+
 /* Do a match without creating a regex object, in order to avoid putting
  * pressure on the GC. */
 cw_nxn_t
@@ -311,7 +335,7 @@ nxo_regex_nonew_match(cw_nxo_t *a_thread, const cw_uint8_t *a_pattern,
 	goto RETURN;
     }
 
-    nxo_p_regex_match(&regex, a_thread, a_input, r_match);
+    *r_match = nxo_p_regex_match(&regex, a_thread, a_input);
 
     /* Clean up memory. */
     free(regex.pcre);
@@ -326,20 +350,27 @@ nxo_regex_nonew_match(cw_nxo_t *a_thread, const cw_uint8_t *a_pattern,
 }
 
 void
-nxo_regex_match(cw_nxo_t *a_nxo, cw_nxo_t *a_thread, cw_nxo_t *a_input,
-		cw_bool_t *r_match)
+nxo_regex_submatch(cw_nxo_t *a_thread, cw_uint32_t a_capture, cw_nxo_t *r_match)
 {
-    cw_nxoe_regex_t *regex;
+    cw_nxo_regex_cache_t *cache;
 
-    cw_check_ptr(a_nxo);
-    cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
-    cw_assert(nxo_type_get(a_nxo) == NXOT_REGEX);
+    cache = nxo_l_thread_regex_cache_get(a_thread);
 
-    regex = (cw_nxoe_regex_t *) a_nxo->o.nxoe;
-
-    cw_check_ptr(regex);
-    cw_dassert(regex->nxoe.magic == CW_NXOE_MAGIC);
-    cw_assert(regex->nxoe.type == NXOT_REGEX);
-
-    nxo_p_regex_match(regex, a_thread, a_input, r_match);
+    if ((int) a_capture < cache->mcnt
+	&& nxo_type_get(&cache->input) == NXOT_STRING
+	&& cache->ovp[a_capture * 2] != -1)
+    {
+	/* Create a substring for the capturing subpattern. */
+	nxo_string_substring_new(r_match, &cache->input,
+				 nxo_thread_nx_get(a_thread),
+				 cache->ovp[a_capture * 2],
+				 cache->ovp[a_capture * 2 + 1]
+				 - cache->ovp[a_capture * 2]);
+    }
+    else
+    {
+	/* This subpattern wasn't matched (possible when the capture is for an
+	 * alternative). */
+	nxo_null_new(r_match);
+    }
 }

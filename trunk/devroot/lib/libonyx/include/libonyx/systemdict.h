@@ -394,11 +394,6 @@ void
 systemdict_match(cw_nxo_t *a_thread);
 #endif
 
-#ifdef CW_REGEX
-void
-systemdict_matches(cw_nxo_t *a_thread);
-#endif
-
 #ifdef CW_POSIX
 void
 systemdict_mkdir(cw_nxo_t *a_thread);
@@ -470,7 +465,7 @@ systemdict_nup(cw_nxo_t *a_thread);
 
 #ifdef CW_REGEX
 void
-systemdict_offsets(cw_nxo_t *a_thread);
+systemdict_offset(cw_nxo_t *a_thread);
 #endif
 
 #ifdef CW_POSIX
@@ -831,6 +826,11 @@ systemdict_stuck(cw_nxo_t *a_thread);
 
 void
 systemdict_sub(cw_nxo_t *a_thread);
+
+#ifdef CW_REGEX
+void
+systemdict_submatch(cw_nxo_t *a_thread);
+#endif
 
 #ifdef CW_REGEX
 void

@@ -1,5 +1,5 @@
 Test begin
-Error $rangecheck
+Error $typecheck
 ostack: (`input' `pattern' -dict-)
 dstack: (-dict- -dict- -dict- -dict-)
 estack/istack trace (0..2):

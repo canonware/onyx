@@ -12,23 +12,7 @@
 
 `Test begin\n' print flush
 
-[
-    {`Input string of words' `.' <$l 0>}
-    {`Input string of words' `\w+'}
-    {`Input string of words' `\w+$'}
-    {`Input string of words' `\w+' <$l 0>}
-]{
-    `-------\n' print
-    dup 1 sprint
-    eval
-    bdup aup
-    match
-    2 ndup offsets
-
-    dn 1 sprint
-    exch 1 sprint
-    1 sprint
-} foreach
+`input' mark offset
 
 `Test end\n' print
 pstack

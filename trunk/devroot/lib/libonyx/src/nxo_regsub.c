@@ -457,6 +457,25 @@ nxo_regsub_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_uint8_t *a_pattern,
     return retval;
 }
 
+void
+nxo_regsub_subst(cw_nxo_t *a_nxo, cw_nxo_t *a_thread, cw_nxo_t *a_input,
+		 cw_nxo_t *r_output)
+{
+    cw_nxoe_regsub_t *regsub;
+
+    cw_check_ptr(a_nxo);
+    cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+    cw_assert(nxo_type_get(a_nxo) == NXOT_REGSUB);
+
+    regsub = (cw_nxoe_regsub_t *) a_nxo->o.nxoe;
+
+    cw_check_ptr(regsub);
+    cw_dassert(regsub->nxoe.magic == CW_NXOE_MAGIC);
+    cw_assert(regsub->nxoe.type == NXOT_REGSUB);
+
+    nxo_p_regsub_subst(regsub, a_thread, a_input, r_output);
+}
+
 /* Do a subst without creating a regsub object, in order to avoid putting
  * pressure on the GC. */
 cw_nxn_t
@@ -505,23 +524,4 @@ nxo_regex_nonew_subst(cw_nxo_t *a_thread, const cw_uint8_t *a_pattern,
     retval = NXN_ZERO;
     RETURN:
     return retval;
-}
-
-void
-nxo_regsub_subst(cw_nxo_t *a_nxo, cw_nxo_t *a_thread, cw_nxo_t *a_input,
-		 cw_nxo_t *r_output)
-{
-    cw_nxoe_regsub_t *regsub;
-
-    cw_check_ptr(a_nxo);
-    cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
-    cw_assert(nxo_type_get(a_nxo) == NXOT_REGSUB);
-
-    regsub = (cw_nxoe_regsub_t *) a_nxo->o.nxoe;
-
-    cw_check_ptr(regsub);
-    cw_dassert(regsub->nxoe.magic == CW_NXOE_MAGIC);
-    cw_assert(regsub->nxoe.type == NXOT_REGSUB);
-
-    nxo_p_regsub_subst(regsub, a_thread, a_input, r_output);
 }

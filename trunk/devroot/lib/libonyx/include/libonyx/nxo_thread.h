@@ -78,8 +78,7 @@ struct cw_nxoe_thread_s
 #endif
 
 #ifdef CW_THREADS
-    /* TRUE  : New array, dict, file, and string objects are implicitly
-     *         locked.
+    /* TRUE  : New array, dict, file, and string objects are implicitly locked.
      * FALSE : No implicit locking for new objects. */
     cw_bool_t locking:1;
 #endif
@@ -107,19 +106,27 @@ struct cw_nxoe_thread_s
     cw_nxo_t stderr_nxo;
 
 #ifdef CW_REGEX
-    /* Regular expression state used by the match operator.  Storing this here
-     * rather substantially improves performance without significant bloat. */
+    /* Cached regular expression state used by the match operator.  This needs
+     * to be stored here since the cache is per-thread, and there is no other
+     * reasonable place to store the information that provides adequate
+     * performance.  Stuffing this in threaddict would impose a huge performance
+     * penalty due to dstack lookup overhead.
+     *
+     * The thread object initializes this structure, reports object
+     * references during GC reference iteration, and frees allocated memory.  Otherwise, all operations on
+     * this structure are done by the regex class. */
+    cw_nxo_regex_cache_t regex_cache;
 
     /* A 10 element array that stores the matching substring and the first 9
      * capturing subpattern matches. */
-    cw_nxo_t regex_matches;
+//    cw_nxo_t regex_matches;
 
     /* A reference to the string that was most recently matched against.  */
-    cw_nxo_t regex_input;
+//    cw_nxo_t regex_input;
 
     /* Offset into regex_input to start the next match at.  This is only used if
      * the $c or $g flag is set. */
-    cw_uint32_t regex_cont;
+//    cw_uint32_t regex_cont;
 #endif
 
     /* Tokenizer state.  If a token is broken across two or more input strings,
@@ -320,11 +327,6 @@ nxo_thread_stdout_get(cw_nxo_t *a_nxo);
 
 cw_nxo_t *
 nxo_thread_stderr_get(cw_nxo_t *a_nxo);
-
-#ifdef CW_REGEX
-cw_nxo_t *
-nxo_thread_regex_matches_get(cw_nxo_t *a_nxo);
-#endif
 #endif
 
 #if (defined(CW_USE_INLINES) || defined(CW_NXO_THREAD_C_))
@@ -462,21 +464,4 @@ nxo_thread_stderr_get(cw_nxo_t *a_nxo)
 
     return &thread->stderr_nxo;
 }
-
-#ifdef CW_REGEX
-CW_INLINE cw_nxo_t *
-nxo_thread_regex_matches_get(cw_nxo_t *a_nxo)
-{
-    cw_nxoe_thread_t *thread;
-
-    cw_check_ptr(a_nxo);
-    cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
-
-    thread = (cw_nxoe_thread_t *) a_nxo->o.nxoe;
-    cw_dassert(thread->nxoe.magic == CW_NXOE_MAGIC);
-    cw_assert(thread->nxoe.type == NXOT_THREAD);
-
-    return &thread->regex_matches;
-}
-#endif
 #endif /* (defined(CW_USE_INLINES) || defined(CW_NXO_THREAD_C_)) */

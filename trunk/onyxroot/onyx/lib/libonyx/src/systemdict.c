@@ -52,9 +52,13 @@ typedef int socklen_t;
 #include <math.h>
 #endif
 
+#include "../include/libonyx/nxa_l.h"
 #include "../include/libonyx/nxo_l.h"
 #include "../include/libonyx/nxo_array_l.h"
 #include "../include/libonyx/nxo_operator_l.h"
+#ifdef CW_REGEX
+#include "../include/libonyx/nxo_regex_l.h"
+#endif
 #include "../include/libonyx/nxo_thread_l.h"
 
 #ifdef CW_SOCKET
@@ -266,7 +270,6 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(lt),
 #ifdef CW_REGEX
     ENTRY(match),
-    ENTRY(matches),
 #endif
 #ifdef CW_POSIX
     ENTRY(mkdir),
@@ -298,7 +301,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #endif
     ENTRY(nup),
 #ifdef CW_REGEX
-    ENTRY(offsets),
+    ENTRY(offset),
 #endif
 #ifdef CW_POSIX
     ENTRY(open),
@@ -444,6 +447,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(stuck),
     ENTRY(sub),
 #ifdef CW_REGEX
+    ENTRY(submatch),
     ENTRY(subst),
 #endif
     ENTRY(sunder),
@@ -5391,18 +5395,6 @@ systemdict_match(cw_nxo_t *a_thread)
 }
 #endif
 
-#ifdef CW_REGEX
-void
-systemdict_matches(cw_nxo_t *a_thread)
-{
-    cw_nxo_t *ostack, *nxo;
-
-    ostack = nxo_thread_ostack_get(a_thread);
-    nxo = nxo_stack_push(ostack);
-    nxo_dup(nxo, nxo_thread_regex_matches_get(a_thread));
-}
-#endif
-
 #ifdef CW_POSIX
 void
 systemdict_mkdir(cw_nxo_t *a_thread)
@@ -6341,18 +6333,16 @@ systemdict_nup(cw_nxo_t *a_thread)
 
 #ifdef CW_REGEX
 void
-systemdict_offsets(cw_nxo_t *a_thread)
+systemdict_offset(cw_nxo_t *a_thread)
 {
-    cw_nxo_t *ostack, *tstack, *offsets, *input, *matches, *tnxo, nxo;
-    cw_uint8_t *instr, *inend, *mstr;
-    cw_uint32_t i, mcnt;
+    cw_nxo_t *ostack, *input, *submatch;
+    cw_uint8_t *instr, *inend, *smstr, *smend;
 
     ostack = nxo_thread_ostack_get(a_thread);
-    tstack = nxo_thread_tstack_get(a_thread);
-    NXO_STACK_GET(matches, ostack, a_thread);
-    NXO_STACK_DOWN_GET(input, ostack, a_thread, matches);
+    NXO_STACK_GET(submatch, ostack, a_thread);
+    NXO_STACK_DOWN_GET(input, ostack, a_thread, submatch);
     if (nxo_type_get(input) != NXOT_STRING
-	|| nxo_type_get(matches) != NXOT_ARRAY)
+	|| nxo_type_get(submatch) != NXOT_STRING)
     {
 	nxo_thread_nerror(a_thread, NXN_typecheck);
 	return;
@@ -6362,49 +6352,23 @@ systemdict_offsets(cw_nxo_t *a_thread)
     instr = nxo_string_get(input);
     inend = &instr[nxo_string_len_get(input)];
 
-    /* Create offsets array. */
-    mcnt = nxo_array_len_get(matches);
-    offsets = nxo_stack_under_push(ostack, input);
-    nxo_array_new(offsets, nxo_thread_nx_get(a_thread),
-		  nxo_thread_currentlocking(a_thread), mcnt);
+    /* Get substring. */
+    smstr = nxo_string_get(submatch);
+    smend = &smstr[nxo_string_len_get(submatch)];
 
-    /* Create a temporary nxo for storing array elements. */
-    tnxo = nxo_stack_push(tstack);
-
-    for (i = 0; i < mcnt; i++)
+    /* Make sure smstr really is a substring of instr (or equal in position and
+     * length). */
+    if (smstr < instr || smstr >= inend || smend > inend)
     {
-	/* Get array element. */
-	nxo_array_el_get(matches, (cw_nxoi_t) i, tnxo);
-	if (nxo_type_get(tnxo) != NXOT_STRING)
-	{
-	    nxo_stack_pop(tstack);
-	    nxo_stack_remove(ostack, offsets);
-	    nxo_thread_nerror(a_thread, NXN_typecheck);
-	    return;
-	}
-	/* Get substring. */
-	mstr = nxo_string_get(tnxo);
-	/* Make sure mstr really is a substring of instr.  There is no need to
-	 * check whether mstr extends past inend, since horrible things (not
-	 * possible via nxo_string APIs) would have to happen for that to be
-	 * possible. */
-	if (mstr < instr || mstr >= inend)
-	{
-	    nxo_stack_pop(tstack);
-	    nxo_stack_remove(ostack, offsets);
-	    nxo_thread_nerror(a_thread, NXN_rangecheck);
-	    return;
-	}
-
-	/* Calculate the substring offset and store it into the offsets
-	 * array. */
-	nxo_integer_new(&nxo, (cw_nxoi_t) (mstr - instr));
-	nxo_array_el_set(offsets, &nxo, i);
+	nxo_thread_nerror(a_thread, NXN_rangecheck);
+	return;
     }
 
-    /* Clean up stacks. */
-    nxo_stack_pop(tstack);
-    nxo_stack_npop(ostack, 2);
+    /* Calculate the substring offset and store it on ostack. */
+    nxo_integer_new(input, (cw_nxoi_t) (smstr - instr));
+
+    /* Clean up ostack. */
+    nxo_stack_pop(ostack);
 }
 #endif
 
@@ -10456,6 +10420,23 @@ systemdict_sub(cw_nxo_t *a_thread)
 
     nxo_stack_pop(ostack);
 }
+
+#ifdef CW_REGEX
+void
+systemdict_submatch(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *nxo;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    if (nxo_type_get(nxo) != NXOT_INTEGER)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    nxo_regex_submatch(a_thread, nxo_integer_get(nxo), nxo);
+}
+#endif
 
 #ifdef CW_REGEX
 void

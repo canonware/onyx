@@ -12,7 +12,7 @@
 
 `Test begin\n' print flush
 
-`input' `pattern' <$l -1> match
+`input' `pattern' <$g 0> match
 
 `Test end\n' print
 pstack
