@@ -1,5 +1,7 @@
 1999-04-11  Jason Evans  <jasone@canonware.com>
 
+	* src/pezz.c (pezz_get_buffer_size): Add.
+
 	* src/buf.c (buf_p_get_data_position): Completely rewrite binary
 	search to improve performance.
 

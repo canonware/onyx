@@ -1397,7 +1397,9 @@ buf_p_get_data_position(cw_buf_t * a_buf,
 	    index++;
 	  }
 	}
-	else if (a_buf->cumulative_index[index - 1] > a_offset)
+	else if ((a_buf->cumulative_index[index]
+		  - bufel_get_valid_data_size(&a_buf->bufel_array[index]))
+		 > a_offset)
 	{
 	  adjust >>= 1;
 	  if (adjust != 0)

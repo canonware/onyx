@@ -59,9 +59,9 @@ pezz_new(cw_pezz_t * a_pezz, cw_uint32_t a_buffer_size,
   
   /* Calculate how big to make the memory block and allocate it. */
   retval->rings
-    = (cw_ring_t *) _cw_malloc(retval->buffer_size * retval->num_buffers);
+    = (cw_ring_t *) _cw_calloc(retval->num_buffers, sizeof(cw_ring_t));
   retval->mem_base
-    = (void *) _cw_malloc(retval->buffer_size * retval->num_buffers);
+    = (void *) _cw_calloc(retval->num_buffers, retval->buffer_size);
   retval->mem_end = (retval->mem_base
 		     + (retval->buffer_size * retval->num_buffers));
 
@@ -72,7 +72,7 @@ pezz_new(cw_pezz_t * a_pezz, cw_uint32_t a_buffer_size,
     cw_ring_t * ring;
 
     /* Initialize spare buffers ring to have something in it. */
-    retval->spare_buffers = (cw_ring_t *) retval->rings;
+    retval->spare_buffers = &retval->rings[0];
     ring_new(retval->spare_buffers, NULL, NULL);
     ring_set_data(retval->spare_buffers, retval->mem_base);
     
@@ -163,6 +163,19 @@ pezz_delete(cw_pezz_t * a_pezz)
   }
 }
 
+cw_uint32_t
+pezz_get_buffer_size(cw_pezz_t * a_pezz)
+{
+  cw_uint32_t retval;
+
+  _cw_check_ptr(a_pezz);
+  _cw_assert(a_pezz->magic == _CW_PEZZ_MAGIC);
+
+  retval = a_pezz->buffer_size;
+
+  return retval;
+}
+
 void *
 pezz_get(cw_pezz_t * a_pezz)
 {
@@ -208,42 +221,44 @@ pezz_get(cw_pezz_t * a_pezz)
 }
 
 void
-pezz_put(cw_pezz_t * a_pezz, void * a_buffer)
+pezz_put(void * a_pezz, void * a_buffer)
 {
-  _cw_check_ptr(a_pezz);
-  _cw_assert(a_pezz->magic == _CW_PEZZ_MAGIC);
+  cw_pezz_t * pezz = (cw_pezz_t *) a_pezz;
+  
+  _cw_check_ptr(pezz);
+  _cw_assert(pezz->magic == _CW_PEZZ_MAGIC);
 #ifdef _CW_REENTRANT
-  mtx_lock(&a_pezz->lock);
+  mtx_lock(&pezz->lock);
 #endif
 
-  if ((a_buffer >= a_pezz->mem_base) && (a_buffer < a_pezz->mem_end))
+  if ((a_buffer >= pezz->mem_base) && (a_buffer < pezz->mem_end))
   {
     cw_ring_t * t_ring;
     
     /* a_buffer was allocated from the memory block. */
-    t_ring = &a_pezz->rings[(a_buffer - a_pezz->mem_base)
-			   / a_pezz->buffer_size];
+    t_ring = &pezz->rings[(a_buffer - pezz->mem_base)
+			   / pezz->buffer_size];
     _cw_assert(ring_get_data(t_ring) == a_buffer);
 
-    if (NULL != a_pezz->spare_buffers)
+    if (NULL != pezz->spare_buffers)
     {
-      ring_meld(a_pezz->spare_buffers, t_ring);
+      ring_meld(pezz->spare_buffers, t_ring);
     }
     else
     {
-      a_pezz->spare_buffers = t_ring;
+      pezz->spare_buffers = t_ring;
     }
   }
   else
   {
     /* a_buffer was malloc()ed. */
 #ifdef _LIBSTASH_DBG
-    a_pezz->num_overflow--;
+    pezz->num_overflow--;
 #endif
     _cw_free(a_buffer);
   }
 #ifdef _CW_REENTRANT
-  mtx_unlock(&a_pezz->lock);
+  mtx_unlock(&pezz->lock);
 #endif
 }
 

@@ -105,6 +105,24 @@ pezz_delete(cw_pezz_t * a_pezz);
  *
  * <<< Output(s) >>>
  *
+ * retval : Size of buffers that a_pezz is using.
+ *
+ * <<< Description >>>
+ *
+ * Return the size of the buffers that a_pezz is using.
+ *
+ ****************************************************************************/
+cw_uint32_t
+pezz_get_buffer_size(cw_pezz_t * a_pezz);
+
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_pezz : Pointer to a pezz.
+ *
+ * <<< Output(s) >>>
+ *
  * retval : Pointer to a memory buffer.
  *
  * <<< Description >>>
@@ -133,7 +151,7 @@ pezz_get(cw_pezz_t * a_pezz);
  *
  ****************************************************************************/
 void
-pezz_put(cw_pezz_t * a_pezz, void * a_buffer);
+pezz_put(void * a_pezz, void * a_buffer);
 
 /****************************************************************************
  *
