@@ -25,7 +25,7 @@ main()
 	_cw_assert(dbg_is_registered(cw_g_dbg, "foo") == FALSE);
 	_cw_assert(dbg_register(cw_g_dbg, "foo") == FALSE);
 	_cw_assert(dbg_is_registered(cw_g_dbg, "foo"));
-	_cw_assert(dbg_register(cw_g_dbg, "foo"));
+	_cw_assert(dbg_register(cw_g_dbg, "foo") == FALSE);
 	_cw_assert(dbg_is_registered(cw_g_dbg, "foo"));
 	dbg_unregister(cw_g_dbg, "foo");
 	_cw_assert(dbg_is_registered(cw_g_dbg, "foo") == FALSE);
