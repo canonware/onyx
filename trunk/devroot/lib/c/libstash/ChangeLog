@@ -1,3 +1,9 @@
+2001-04-03  Jason Evans  <jasone@canonware.com>
+
+	* : Remove the res class.  It is not used anywhere, and its API
+	has shortcomings (no iterators) that aren't worth the effort to
+	fix at the moment.
+
 2001-03-05  Jason Evans  <jasone@canonware.com>
 
 	* include/libstash/xep.h (xep_acatch): Correctly handle the

@@ -51,6 +51,5 @@
 #include "pezz.h"
 #include "pool.h"
 #include "bhp.h"
-#include "res.h"
 #include "treen.h"
 #include "mq.h"

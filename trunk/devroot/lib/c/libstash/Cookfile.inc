@@ -23,7 +23,7 @@
 /* Include files that _are_ installed. */
 {
   local incs = libstash.h libstash_incs.h bhp.h buf.h ch.h cnd.h dch.h mem.h
-               mq.h mtx.h out.h pezz.h pool.h ql.h qr.h qs.h res.h rwl.h sema.h
+               mq.h mtx.h out.h pezz.h pool.h ql.h qr.h qs.h rwl.h sema.h
                thd.h treen.h tsd.h xep.h;
   incs = [fromto % [srcdir]/lib/c/libstash/include/libstash/% [incs]];
   incs = [incs] [objdir]/lib/c/libstash/include/libstash/libstash_defs.h;
@@ -42,7 +42,7 @@
 
 /* Source files. */
 LIBSTASH_SRCS = libstash.c bhp.c buf.c ch.c cnd.c dch.c mem.c mq.c mtx.c out.c
-                pezz.c pool.c res.c rwl.c sema.c thd.c treen.c tsd.c xep.c;
+                pezz.c pool.c rwl.c sema.c thd.c treen.c tsd.c xep.c;
 LIBSTASH_SRCS = [fromto % [srcdir]/lib/c/libstash/src/% [LIBSTASH_SRCS]];
 SRCS = [SRCS] [LIBSTASH_SRCS];
 
@@ -51,7 +51,7 @@ SRCS = [SRCS] [LIBSTASH_SRCS];
   local ctests = c_bhp_a.c c_bhp_b.c c_buf_a.c c_buf_b.c c_buf_c.c c_buf_d.c
                  c_buf_e.c c_ch_a.c c_cnd_a.c c_dch_a.c c_libstash_a.c c_mq_a.c
                  c_mtx_a.c c_out_a.c c_pezz_a.c c_pool_a.c c_ql_a.c c_qr_a.c
-                 c_qs_a.c c_res_a.c c_rwl_a.c c_sema_a.c c_thd_a.c c_thd_b.c
+                 c_qs_a.c c_rwl_a.c c_sema_a.c c_thd_a.c c_thd_b.c
                  c_thd_c.c c_treen_a.c c_tsd_a.c c_xep_a.c;
   ctests = [fromto % [srcdir]/lib/c/libstash/test/% [ctests]];
 
@@ -71,7 +71,7 @@ SRCS = [SRCS] [LIBSTASH_SRCS];
 
 /* Perl scripts that drive other tests and use the sequence mode of verify. */
 {
-  local ptests = p_res_a.pl.in;
+  local ptests = ;
   ptests = [fromto % [srcdir]/lib/c/libstash/test/% [ptests]];
 
   PTESTS = [PTESTS] [ptests];
@@ -79,7 +79,7 @@ SRCS = [SRCS] [LIBSTASH_SRCS];
 
 /* C programs that are driven by tests. */
 {
-  local cbtests = b_res_a.c;
+  local cbtests = ;
   cbtests = [fromto % [srcdir]/lib/c/libstash/test/% [cbtests]];
 
   CBTESTS = [CBTESTS] [cbtests];
@@ -96,7 +96,7 @@ SRCS = [SRCS] [LIBSTASH_SRCS];
 /* LaTeX source files. */
 {
   local tex_srcs = bhp.tex buf.tex ch.tex cnd.tex dch.tex mem.tex mq.tex mtx.tex
-                   out.tex pezz.tex pool.tex ql.tex qr.tex qs.tex res.tex
+                   out.tex pezz.tex pool.tex ql.tex qr.tex qs.tex
                    rwl.tex sema.tex thd.tex tsd.tex treen.tex xep.tex;
   tex_srcs = [fromto % [srcdir]/lib/c/libstash/doc/latex/% [tex_srcs]];
   tex_srcs = [tex_srcs] [objdir]/lib/c/libstash/doc/latex/manual.tex;
