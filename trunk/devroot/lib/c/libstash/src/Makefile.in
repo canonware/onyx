@@ -30,8 +30,8 @@
 #
 # $Source$
 # $Author: jasone $
-# Current revision: $Revision: 9 $
-# Last modified: $Date: 1998-02-08 22:18:43 -0800 (Sun, 08 Feb 1998) $
+# Current revision: $Revision: 12 $
+# Last modified: $Date: 1998-02-20 01:33:18 -0800 (Fri, 20 Feb 1998) $
 #
 # Description: Makefile for SQuirreL source code.
 #              
@@ -109,6 +109,8 @@ clean: subclean hereclean FORCE
 
 distclean: subdistclean hereclean heredistclean FORCE
 
+etags: subetags hereetags FORCE
+
 targets:
 	@echo "User 'make'ables: all (default)"
 	@echo "                  check"
@@ -116,6 +118,7 @@ targets:
 	@echo "                  uninstall"
 	@echo "                  clean"
 	@echo "                  distclean"
+	@echo "                  etags"
 	@echo "                  targets"
 
 #
@@ -177,6 +180,17 @@ heredistclean:
 	rm -f "#"*"#"
 	rm -f $(OBJS) $(TARGETS)
 	rm -f Makefile
+	rm -f TAGS
+
+# etags
+subetags:
+	@$(SHELL) -c \
+	'for i in $(DIRS); do cd $$i; $(MAKE) -i $@; cd -; done'
+
+hereetags:
+	rm -f TAGS
+	$(SHELL) -c \
+	'for i in $(SRCS) $(LEXERS) $(PARSERS); do @ETAGS@ -a $$i; done'
 
 #
 # The next 3 rules unfortunately make all lexers dependent on all parsers, so

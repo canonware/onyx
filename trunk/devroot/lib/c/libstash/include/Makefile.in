@@ -30,8 +30,8 @@
 #
 # $Source$
 # $Author: jasone $
-# Current revision: $Revision: 7 $
-# Last modified: $Date: 1998-01-16 00:20:54 -0800 (Fri, 16 Jan 1998) $
+# Current revision: $Revision: 12 $
+# Last modified: $Date: 1998-02-20 01:33:18 -0800 (Fri, 20 Feb 1998) $
 #
 # Description: Makefile for sqrl include dir.
 #              
@@ -49,6 +49,7 @@ MAKE  = @MAKE@
 #
 
 # file lists
+HDRS = inc_common.h log.h res_parser.tab.h resource.h
 DIRS =
 
 #
@@ -73,6 +74,8 @@ clean: subclean hereclean FORCE
 
 distclean: subdistclean hereclean heredistclean
 
+etags: subetags hereetags FORCE
+
 targets:
 	@echo "User 'make'ables: all (default)"
 	@echo "                  check"
@@ -80,6 +83,7 @@ targets:
 	@echo "                  uninstall"
 	@echo "                  clean"
 	@echo "                  distclean"
+	@echo "                  etags"
 	@echo "                  targets"
 
 #
@@ -133,3 +137,14 @@ subdistclean:
 heredistclean:
 	rm -f "#"*"#"
 	rm -f Makefile
+	rm -f TAGS
+
+# etags
+subetags:
+	@$(SHELL) -c \
+	'for i in $(DIRS); do cd $$i; $(MAKE) -i $@; cd -; done'
+
+hereetags:
+	rm -f TAGS
+	$(SHELL) -c \
+	'for i in $(HDRS); do @ETAGS@ -a $$i; done'

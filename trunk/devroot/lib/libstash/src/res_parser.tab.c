@@ -75,8 +75,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 11 $
- * Last modified: $Date: 1998-02-20 00:03:01 -0800 (Fri, 20 Feb 1998) $
+ * Current revision: $Revision: 12 $
+ * Last modified: $Date: 1998-02-20 01:33:18 -0800 (Fri, 20 Feb 1998) $
  *
  * Description: 
  *              
