@@ -712,6 +712,7 @@ sockb_p_entry_func(void * a_arg)
 			"Refuse to unregister %d\n", sockfd);
 	  }
 #endif      
+
 	  /* Notify the sock that it's unregistered. */
 	  sock_l_message_callback(socks[sockfd]);
 	  socks[sockfd] = NULL;
@@ -746,8 +747,8 @@ sockb_p_entry_func(void * a_arg)
 #ifdef _LIBSTASH_SOCKB_CONFESS
 	  log_eprintf(cw_g_log, __FILE__, __LINE__, NULL,
 		      "notify_vec[%d] = %p\n",
-		      message->in_notify.sockfd,
-		      notify_vec[message->in_notify.sockfd]);
+		      message->data.in_notify.sockfd,
+		      notify_vec[message->data.in_notify.sockfd]);
 #endif
 	  mtx_lock(message->data.in_notify.mtx);
 	  cnd_signal(message->data.in_notify.cnd);
@@ -1082,7 +1083,6 @@ sockb_p_entry_func(void * a_arg)
 	    }
 
 	    sock_l_error_callback(socks[i]);
-	    socks[i] = NULL;
 	    
 	    if (NULL != notify_vec[i])
 	    {
@@ -1199,7 +1199,6 @@ sockb_p_entry_func(void * a_arg)
 	    }
 
 	    sock_l_error_callback(socks[i]);
-	    socks[i] = NULL;
 	    
 	    if (NULL != notify_vec[i])
 	    {

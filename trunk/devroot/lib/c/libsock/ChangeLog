@@ -1,3 +1,10 @@
+1999-07-14  J. Owen Evans  <jasone@canonware.com>
+
+	* src/sockb.c (sockb_p_entry_func): Do not NULL out the sock
+	pointer when an error causes the corresponding socket to be
+	closed, since the pointer may still be needed for the
+	unregistration callback.
+
 1999-06-30  Jason Evans  <jasone@canonware.com>
 
 	* src/sockb.c (sockb_p_entry_func): Add notification for explicit
