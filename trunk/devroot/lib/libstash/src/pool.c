@@ -89,8 +89,9 @@ pool_delete(cw_pool_t *a_pool)
 		    (dbg_is_registered(cw_g_dbg, "pool_error") && (0 <
 		    num_addrs))) {
 			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-			    "[i] leaked buffer[s]\n",
-			    num_addrs, num_addrs != 1 ? "s" : "");
+			    "[i] leaked buffer[s] (buffer size [i] bytes)\n",
+			    num_addrs, num_addrs != 1 ? "s" : "",
+			    a_pool->buffer_size);
 		}
 		for (i = 0; i < num_addrs; i++) {
 			dch_remove_iterate(&a_pool->addr_hash, &addr,
