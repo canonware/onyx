@@ -9,8 +9,6 @@
  *
  ******************************************************************************/
 
-#define	_CW_BUFB_SIZE	4096
-
 typedef struct cw_bufqm_s cw_bufqm_t;
 typedef struct cw_bufq_s cw_bufq_t;
 typedef struct cw_bufm_s cw_bufm_t;
@@ -108,13 +106,20 @@ struct cw_bufh_s {
 			/*
 			 * The internal bufe state isn't complete, so must be
 			 * hanadled with care when restored.
+			 *
+			 * We use a pointer instead of embedding the bufe in
+			 * order to keep bufh's small.
 			 */
 			cw_bufe_t	*bufe;
 		}	extent;
 	}		data;
 };
 
+/* Make each bufb structure exactly 4 K. */
+#define	_CW_BUFB_SIZE	(4096 - 24)
 struct cw_bufb_s {
+	cw_uint64_t	offset;
+	cw_uint64_t	line;
 	cw_uint32_t	gap_off;
 	cw_uint32_t	gap_len;
 	cw_bufc_t	data[_CW_BUFB_SIZE];
@@ -139,6 +144,11 @@ struct cw_buf_s {
 			cw_uint64_t	nchars;
 			cw_uint64_t	nbufbs;
 			cw_bufb_t	*bufbs;
+			/*
+			 * Number of bufb's that have a valid cached offset and
+			 * line.
+			 */
+			cw_uint64_t	ncached;
 
 			/* History. */
 			qs_head(cw_bufh_t) undo;
@@ -188,6 +198,7 @@ void	bufm_new(cw_bufm_t *a_bufm, cw_buf_t *a_buf, cw_bufq_t *a_bufq);
 void	bufm_dup(cw_bufm_t *a_bufm, const cw_bufm_t *a_orig, cw_bufq_t *a_bufq);
 void	bufm_delete(cw_bufm_t *a_bufm);
 cw_buf_t *bufm_buf(cw_bufm_t *a_bufm);
+cw_uint64_t bufm_line(const cw_bufm_t *a_bufm);
 
 cw_uint64_t bufm_rel_seek(cw_bufm_t *a_bufm, cw_sint64_t a_amount);
 cw_uint64_t bufm_abs_seek(cw_bufm_t *a_bufm, cw_uint64_t a_amount);
