@@ -59,12 +59,12 @@ nxo_stack_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking)
 
 	stack->noroll = NULL;
 
-	memset(a_nxo, 0, sizeof(cw_nxo_t));
+	nxo_no_new(a_nxo);
 	a_nxo->o.nxoe = (cw_nxoe_t *)stack;
 #ifdef _LIBONYX_DBG
 	a_nxo->magic = _CW_NXO_MAGIC;
 #endif
-	a_nxo->type = NXOT_STACK;
+	nxo_p_type_set(a_nxo, NXOT_STACK);
 
 	nxa_l_gc_register(nx_nxa_get(a_nx), (cw_nxoe_t *)stack);
 }
@@ -72,7 +72,7 @@ nxo_stack_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking)
 void
 nxoe_l_stack_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 {
-	cw_nxoe_stack_t	*stack;
+	cw_nxoe_stack_t		*stack;
 	cw_nxoe_stackc_t	*stackc;
 
 	stack = (cw_nxoe_stack_t *)a_nxoe;
@@ -88,7 +88,7 @@ nxoe_l_stack_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 		cw_nxo_t	nxo;
 
 		/* Fake up a nxo. */
-		nxo_l_new(&nxo, NXOT_STACK);
+		nxo_p_new(&nxo, NXOT_STACK);
 		nxo.o.nxoe = (cw_nxoe_t *)stack;
 		
 		nxo_stack_npop(&nxo, stack->count);
@@ -109,7 +109,7 @@ nxoe_l_stack_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 cw_nxoe_t *
 nxoe_l_stack_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 {
-	cw_nxoe_t		*retval;
+	cw_nxoe_t	*retval;
 	cw_nxoe_stack_t	*stack;
 
 	stack = (cw_nxoe_stack_t *)a_nxoe;

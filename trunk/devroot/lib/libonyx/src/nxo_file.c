@@ -54,12 +54,12 @@ nxo_file_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking)
 	file->arg = NULL;
 	file->position = 0;
 
-	memset(a_nxo, 0, sizeof(cw_nxo_t));
+	nxo_no_new(a_nxo);
 	a_nxo->o.nxoe = (cw_nxoe_t *)file;
 #ifdef _LIBONYX_DBG
 	a_nxo->magic = _CW_NXO_MAGIC;
 #endif
-	a_nxo->type = NXOT_FILE;
+	nxo_p_type_set(a_nxo, NXOT_FILE);
 
 	nxa_l_gc_register(nx_nxa_get(a_nx), (cw_nxoe_t *)file);
 }
@@ -82,7 +82,7 @@ nxoe_l_file_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 			case -2: {
 				cw_nxo_t	tnxo;
 
-				nxo_l_new(&tnxo, NXOT_FILE);
+				nxo_p_new(&tnxo, NXOT_FILE);
 				tnxo.o.nxoe = (cw_nxoe_t *)file;
 
 				if (file->write_f(file->arg, &tnxo,
@@ -164,7 +164,7 @@ nxo_file_fd_wrap(cw_nxo_t *a_nxo, cw_uint32_t a_fd)
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_FILE);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
@@ -184,7 +184,7 @@ nxo_file_interactive(cw_nxo_t *a_nxo, cw_nxo_file_read_t *a_read,
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_FILE);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
@@ -237,7 +237,7 @@ nxo_file_open(cw_nxo_t *a_nxo, const cw_uint8_t *a_filename, cw_uint32_t a_nlen,
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_FILE);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
@@ -327,7 +327,7 @@ nxo_file_close(cw_nxo_t *a_nxo)
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_FILE);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
@@ -373,7 +373,7 @@ nxo_file_fd_get(cw_nxo_t *a_nxo)
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_FILE);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
@@ -403,7 +403,7 @@ nxo_file_read(cw_nxo_t *a_nxo, cw_uint32_t a_len, cw_uint8_t *r_str)
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_FILE);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
@@ -576,7 +576,7 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking, cw_nxo_t
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_FILE);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
@@ -815,7 +815,7 @@ nxo_file_write(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len)
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_FILE);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
@@ -914,7 +914,7 @@ nxo_file_output(cw_nxo_t *a_nxo, const char *a_format, ...)
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_FILE);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
@@ -1037,7 +1037,7 @@ nxo_file_output_n(cw_nxo_t *a_nxo, cw_uint32_t a_size, const char *a_format,
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_FILE);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
@@ -1146,7 +1146,7 @@ nxo_file_truncate(cw_nxo_t *a_nxo, off_t a_length)
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_FILE);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
@@ -1182,7 +1182,7 @@ nxo_file_position_get(cw_nxo_t *a_nxo)
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_FILE);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
@@ -1215,7 +1215,7 @@ nxo_file_position_set(cw_nxo_t *a_nxo, cw_nxoi_t a_position)
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_FILE);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
@@ -1252,7 +1252,7 @@ nxo_file_buffer_size_get(cw_nxo_t *a_nxo)
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_FILE);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
@@ -1274,7 +1274,7 @@ nxo_file_buffer_size_set(cw_nxo_t *a_nxo, cw_uint32_t a_size)
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_FILE);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
@@ -1308,7 +1308,7 @@ nxo_file_buffer_count(cw_nxo_t *a_nxo)
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_FILE);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
@@ -1336,7 +1336,7 @@ nxo_file_buffer_flush(cw_nxo_t *a_nxo)
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_FILE);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
@@ -1405,7 +1405,7 @@ nxo_file_buffer_reset(cw_nxo_t *a_nxo)
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_FILE);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
@@ -1417,70 +1417,4 @@ nxo_file_buffer_reset(cw_nxo_t *a_nxo)
 	file->buffer_mode = BUFFER_EMPTY;
 	file->buffer_offset = 0;
 	nxoe_p_file_unlock(file);
-}
-
-cw_bool_t
-nxo_file_status(cw_nxo_t *a_nxo)
-{
-	cw_bool_t		retval;
-	cw_nxoe_file_t		*file;
-
-	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_FILE);
-
-	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
-
-	_cw_check_ptr(file);
-	_cw_assert(file->nxoe.magic == _CW_NXOE_MAGIC);
-	_cw_assert(file->nxoe.type == NXOT_FILE);
-
-	nxoe_p_file_lock(file);
-	if (file->fd != -1)
-		retval = FALSE;
-	else
-		retval = TRUE;
-	nxoe_p_file_unlock(file);
-
-	return retval;
-}
-
-/* -1: NXO_THREADE_IOERROR */
-cw_nxoi_t
-nxo_file_mtime(cw_nxo_t *a_nxo)
-{
-	cw_nxoi_t	retval;
-	struct stat	sb;
-	cw_nxoe_file_t	*file;
-
-	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_FILE);
-
-	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
-
-	_cw_check_ptr(file);
-	_cw_assert(file->nxoe.magic == _CW_NXOE_MAGIC);
-	_cw_assert(file->nxoe.type == NXOT_FILE);
-
-	nxoe_p_file_lock(file);
-	if (file->fd < 0) {
-		retval = -1;
-		goto RETURN;
-	}
-
-	if (fstat(file->fd, &sb) == -1) {
-		retval = -1;
-		goto RETURN;
-	}
-	/* XXX Replace this function with generic status. */
-	/* Keep 63 bits of accuracy. */
-/*  	retval = sb.st_mtimespec.tv_sec; */
-/*  	retval <<= 31; */
-/*  	retval |= (sb.st_mtimespec.tv_nsec >> 1); */
-	retval = 0;
-
-	RETURN:
-	nxoe_p_file_unlock(file);
-	return retval;
 }

@@ -190,7 +190,7 @@ nxo_thread_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx)
 	 */
 
 	/* Fake up a nxo for self. */
-	nxo_l_new(&thread->self, NXOT_THREAD);
+	nxo_p_new(&thread->self, NXOT_THREAD);
 	thread->self.o.nxoe = (cw_nxoe_t *)thread;
 
 	thread->nx = a_nx;
@@ -215,12 +215,12 @@ nxo_thread_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx)
 	 * Register with the GC so that this thread will be iterated on during
 	 * GC.
 	 */
-	memset(a_nxo, 0, sizeof(cw_nxo_t));
+	nxo_no_new(a_nxo);
 	a_nxo->o.nxoe = (cw_nxoe_t *)thread;
 #ifdef _LIBONYX_DBG
 	a_nxo->magic = _CW_NXO_MAGIC;
 #endif
-	a_nxo->type = NXOT_THREAD;
+	nxo_p_type_set(a_nxo, NXOT_THREAD);
 
 	nxa_l_gc_register(nx_nxa_get(a_nx), (cw_nxoe_t *)thread);
 

@@ -39,5 +39,3 @@ void	nxo_file_buffer_size_set(cw_nxo_t *a_nxo, cw_uint32_t a_size);
 cw_nxoi_t nxo_file_buffer_count(cw_nxo_t *a_nxo);
 cw_nxo_threade_t nxo_file_buffer_flush(cw_nxo_t *a_nxo);
 void	nxo_file_buffer_reset(cw_nxo_t *a_nxo);
-cw_bool_t nxo_file_status(cw_nxo_t *a_nxo);
-cw_nxoi_t nxo_file_mtime(cw_nxo_t *a_nxo);

@@ -26,12 +26,12 @@ nxo_condition_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx)
 	nxoe_l_new(&condition->nxoe, NXOT_CONDITION, FALSE);
 	cnd_new(&condition->condition);
 
-	memset(a_nxo, 0, sizeof(cw_nxo_t));
+	nxo_no_new(a_nxo);
 	a_nxo->o.nxoe = (cw_nxoe_t *)condition;
 #ifdef _LIBONYX_DBG
 	a_nxo->magic = _CW_NXO_MAGIC;
 #endif
-	a_nxo->type = NXOT_CONDITION;
+	nxo_p_type_set(a_nxo, NXOT_CONDITION);
 
 	nxa_l_gc_register(nx_nxa_get(a_nx), (cw_nxoe_t *)condition);
 }
@@ -91,7 +91,7 @@ nxo_condition_signal(cw_nxo_t *a_nxo)
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_CONDITION);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_CONDITION);
 
 	condition = (cw_nxoe_condition_t *)a_nxo->o.nxoe;
 
@@ -109,7 +109,7 @@ nxo_condition_broadcast(cw_nxo_t *a_nxo)
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_CONDITION);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_CONDITION);
 
 	condition = (cw_nxoe_condition_t *)a_nxo->o.nxoe;
 
@@ -128,7 +128,7 @@ nxo_condition_wait(cw_nxo_t *a_nxo, cw_nxo_t *a_mutex)
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_CONDITION);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_CONDITION);
 
 	condition = (cw_nxoe_condition_t *)a_nxo->o.nxoe;
 
@@ -138,7 +138,7 @@ nxo_condition_wait(cw_nxo_t *a_nxo, cw_nxo_t *a_mutex)
 
 	_cw_check_ptr(a_mutex);
 	_cw_assert(a_mutex->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_mutex->type == NXOT_MUTEX);
+	_cw_assert(nxo_type_get(a_mutex) == NXOT_MUTEX);
 
 	mutex = (cw_nxoe_mutex_t *)a_mutex->o.nxoe;
 
@@ -159,7 +159,7 @@ nxo_condition_timedwait(cw_nxo_t *a_nxo, cw_nxo_t *a_mutex, const struct
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_CONDITION);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_CONDITION);
 
 	condition = (cw_nxoe_condition_t *)a_nxo->o.nxoe;
 
@@ -169,7 +169,7 @@ nxo_condition_timedwait(cw_nxo_t *a_nxo, cw_nxo_t *a_mutex, const struct
 
 	_cw_check_ptr(a_mutex);
 	_cw_assert(a_mutex->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_mutex->type == NXOT_MUTEX);
+	_cw_assert(nxo_type_get(a_mutex) == NXOT_MUTEX);
 
 	mutex = (cw_nxoe_mutex_t *)a_mutex->o.nxoe;
 

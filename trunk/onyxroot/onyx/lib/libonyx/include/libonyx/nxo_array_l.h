@@ -65,7 +65,7 @@ nxo_l_array_el_get(cw_nxo_t *a_nxo, cw_nxoi_t a_offset, cw_nxo_t *r_el)
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_ARRAY);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_ARRAY);
 	_cw_check_ptr(r_el);
 
 	array = (cw_nxoe_array_t *)a_nxo->o.nxoe;
@@ -88,5 +88,8 @@ nxo_l_array_el_get(cw_nxo_t *a_nxo, cw_nxoi_t a_offset, cw_nxo_t *r_el)
 
 cw_nxo_t *nxo_l_array_get(cw_nxo_t *a_nxo);
 
-#define	nxo_l_array_bound_get(a_nxo) (a_nxo)->array_bound
-#define	nxo_l_array_bound_set(a_nxo, a_bound) (a_nxo)->array_bound = (a_bound)
+#define	nxo_l_array_bound_get(a_nxo) (((a_nxo)->flags >> 7) & 1)
+#define	nxo_l_array_bound_set(a_nxo, a_abound) do {			\
+	(a_nxo)->flags = ((a_nxo)->flags & 0xffffff7f) |		\
+	    ((a_abound) << 7);						\
+} while (0)

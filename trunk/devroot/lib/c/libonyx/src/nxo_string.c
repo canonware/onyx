@@ -45,12 +45,12 @@ nxo_string_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking, cw_uint32_t
 	} else
 		string->e.s.str = NULL;
 
-	memset(a_nxo, 0, sizeof(cw_nxo_t));
+	nxo_no_new(a_nxo);
 	a_nxo->o.nxoe = (cw_nxoe_t *)string;
 #ifdef _LIBONYX_DBG
 	a_nxo->magic = _CW_NXO_MAGIC;
 #endif
-	a_nxo->type = NXOT_STRING;
+	nxo_p_type_set(a_nxo, NXOT_STRING);
 
 	nxa_l_gc_register(nx_nxa_get(a_nx), (cw_nxoe_t *)string);
 }
@@ -82,12 +82,12 @@ nxo_string_substring_new(cw_nxo_t *a_nxo, cw_nxo_t *a_string, cw_nx_t *a_nx,
 		string->e.i.beg_offset = a_offset;
 		string->e.i.len = a_len;
 
-		memset(a_nxo, 0, sizeof(cw_nxo_t));
+		nxo_no_new(a_nxo);
 		a_nxo->o.nxoe = (cw_nxoe_t *)string;
 #ifdef _LIBONYX_DBG
 		a_nxo->magic = _CW_NXO_MAGIC;
 #endif
-		a_nxo->type = NXOT_STRING;
+		nxo_p_type_set(a_nxo, NXOT_STRING);
 
 		nxa_l_gc_register(nx_nxa_get(a_nx), (cw_nxoe_t *)string);
 	}
@@ -286,7 +286,7 @@ nxo_string_len_get(cw_nxo_t *a_nxo)
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_STRING);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_STRING);
 
 	string = (cw_nxoe_string_t *)a_nxo->o.nxoe;
 
@@ -309,7 +309,7 @@ nxo_string_el_get(cw_nxo_t *a_nxo, cw_nxoi_t a_offset, cw_uint8_t *r_el)
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_STRING);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_STRING);
 
 	string = (cw_nxoe_string_t *)a_nxo->o.nxoe;
 
@@ -333,7 +333,7 @@ nxo_string_el_set(cw_nxo_t *a_nxo, cw_uint8_t a_el, cw_nxoi_t a_offset)
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_STRING);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_STRING);
 
 	string = (cw_nxoe_string_t *)a_nxo->o.nxoe;
 
@@ -357,7 +357,7 @@ nxo_string_lock(cw_nxo_t *a_nxo)
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_STRING);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_STRING);
 
 	string = (cw_nxoe_string_t *)a_nxo->o.nxoe;
 
@@ -378,7 +378,7 @@ nxo_string_unlock(cw_nxo_t *a_nxo)
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_STRING);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_STRING);
 
 	string = (cw_nxoe_string_t *)a_nxo->o.nxoe;
 
@@ -400,7 +400,7 @@ nxo_string_get(cw_nxo_t *a_nxo)
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_STRING);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_STRING);
 
 	string = (cw_nxoe_string_t *)a_nxo->o.nxoe;
 
@@ -427,7 +427,7 @@ nxo_string_set(cw_nxo_t *a_nxo, cw_uint32_t a_offset, const cw_uint8_t *a_str,
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_STRING);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_STRING);
 
 	string = (cw_nxoe_string_t *)a_nxo->o.nxoe;
 

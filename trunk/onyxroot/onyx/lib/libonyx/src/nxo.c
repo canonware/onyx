@@ -121,7 +121,7 @@ nxo_compare(cw_nxo_t *a_a, cw_nxo_t *a_b)
 {
 	cw_sint32_t	retval;
 
-	switch (a_a->type) {
+	switch (nxo_type_get(a_a)) {
 	case NXOT_ARRAY:
 	case NXOT_CONDITION:
 	case NXOT_DICT:
@@ -130,14 +130,15 @@ nxo_compare(cw_nxo_t *a_a, cw_nxo_t *a_b)
 	case NXOT_MUTEX:
 	case NXOT_STACK:
 	case NXOT_THREAD:
-		if (a_a->type == a_b->type && a_a->o.nxoe == a_b->o.nxoe)
+		if (nxo_type_get(a_a) == nxo_type_get(a_b) && a_a->o.nxoe ==
+		    a_b->o.nxoe)
 			retval = 0;
 		else
 			retval = 2;
 		break;
 	case NXOT_OPERATOR:
-		if (a_a->type == a_b->type && a_a->o.operator.f ==
-		    a_b->o.operator.f)
+		if (nxo_type_get(a_a) == nxo_type_get(a_b) && a_a->o.operator.f
+		    == a_b->o.operator.f)
 			retval = 0;
 		else
 			retval = 2;
@@ -148,7 +149,7 @@ nxo_compare(cw_nxo_t *a_a, cw_nxo_t *a_b)
 		cw_uint32_t		len_a, len_b;
 		cw_bool_t		lock_a, lock_b;
 
-		if (a_a->type == NXOT_NAME) {
+		if (nxo_type_get(a_a) == NXOT_NAME) {
 			str_a = nxo_name_str_get(a_a);
 			len_a = nxo_name_len_get(a_a);
 			lock_a = FALSE;
@@ -158,11 +159,11 @@ nxo_compare(cw_nxo_t *a_a, cw_nxo_t *a_b)
 			lock_a = TRUE;
 		}
 			
-		if (a_b->type == NXOT_NAME) {
+		if (nxo_type_get(a_b) == NXOT_NAME) {
 			str_b = nxo_name_str_get(a_b);
 			len_b = nxo_name_len_get(a_b);
 			lock_b = FALSE;
-		} else if (a_b->type == NXOT_STRING) {
+		} else if (nxo_type_get(a_b) == NXOT_STRING) {
 			str_b = nxo_string_get(a_b);
 			len_b = nxo_string_len_get(a_b);
 			lock_b = TRUE;
@@ -193,7 +194,7 @@ nxo_compare(cw_nxo_t *a_a, cw_nxo_t *a_b)
 		break;
 	}
 	case NXOT_BOOLEAN:
-		if (a_a->type != a_b->type) {
+		if (nxo_type_get(a_a) != nxo_type_get(a_b)) {
 			retval = 2;
 			break;
 		}
@@ -204,7 +205,7 @@ nxo_compare(cw_nxo_t *a_a, cw_nxo_t *a_b)
 			retval = 1;
 		break;
 	case NXOT_INTEGER:
-		if (a_a->type != a_b->type) {
+		if (nxo_type_get(a_a) != nxo_type_get(a_b)) {
 			retval = 2;
 			break;
 		}
@@ -219,7 +220,7 @@ nxo_compare(cw_nxo_t *a_a, cw_nxo_t *a_b)
 	case NXOT_FINO:
 	case NXOT_MARK:
 	case NXOT_NULL:
-		if (a_a->type == a_b->type)
+		if (nxo_type_get(a_a) == nxo_type_get(a_b))
 			retval = 0;
 		else
 			retval = 2;
@@ -237,9 +238,10 @@ nxo_nxoe_get(cw_nxo_t *a_nxo)
 	cw_nxoe_t	*retval;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC || a_nxo->type == NXOT_NO);
+	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC || nxo_type_get(a_nxo) ==
+	    NXOT_NO);
 
-	switch (a_nxo->type) {
+	switch (nxo_type_get(a_nxo)) {
 	case NXOT_ARRAY:
 	case NXOT_CONDITION:
 	case NXOT_DICT:
@@ -268,7 +270,7 @@ nxo_lcheck(cw_nxo_t *a_nxo)
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
 
 #ifdef _LIBONYX_DBG
-	switch (a_nxo->type) {
+	switch (nxo_type_get(a_nxo)) {
 	case NXOT_ARRAY:
 	case NXOT_DICT:
 	case NXOT_FILE:

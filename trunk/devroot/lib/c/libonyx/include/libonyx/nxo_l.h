@@ -26,19 +26,21 @@
 /*
  * nxo.
  */
-/* Call before other initialization. */
-#ifdef _LIBONYX_DBG
-#define	nxo_l_new(a_nxo, a_type) do {					\
-	memset((a_nxo), 0, sizeof(cw_nxo_t));				\
-	(a_nxo)->type = (a_type);					\
-	(a_nxo)->magic = _CW_NXO_MAGIC;					\
+#define	nxo_p_type_set(a_nxo, a_type) do {				\
+	(a_nxo)->flags = ((a_nxo)->flags & 0xffffffe0) | (a_type);	\
 } while (0)
-#else
-#define	nxo_l_new(a_nxo, a_type) do {					\
-	memset((a_nxo), 0, sizeof(cw_nxo_t));				\
-	(a_nxo)->type = (a_type);					\
+
+#define	nxo_p_opcode_get(a_nxo) (((a_nxo)->flags >> 8) & 0x3ff)
+#define	nxo_p_opcode_set(a_nxo, a_opcode) do {				\
+	(a_nxo)->flags = ((a_nxo)->flags & 0xfffc00ff) |		\
+	    ((a_opcode) << 8);						\
 } while (0)
-#endif
+
+#define	nxo_p_fastop_get(a_nxo) (((a_nxo)->flags >> 5) & 1)
+#define	nxo_p_fastop_set(a_nxo, a_fastop) do {				\
+	(a_nxo)->flags = ((a_nxo)->flags & 0xffffffdf) |		\
+	    ((a_fastop) << 5);						\
+} while (0)
 
 /*
  * nxoe.

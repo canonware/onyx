@@ -16,9 +16,9 @@
 void
 nxo_operator_new(cw_nxo_t *a_nxo, cw_op_t *a_op, cw_nxn_t a_nxn)
 {
-	nxo_l_new(a_nxo, NXOT_OPERATOR);
+	nxo_p_new(a_nxo, NXOT_OPERATOR);
 	a_nxo->o.operator.f = a_op;
-	a_nxo->op_code = a_nxn;
+	nxo_p_opcode_set(a_nxo, a_nxn);
 }
 
 void
@@ -37,14 +37,14 @@ nxo_l_operator_print(cw_nxo_t *a_thread)
 	}
 	stdout_nxo = nx_stdout_get(nxo_thread_nx_get(a_thread));
 
-	if (operator->op_code != NXN_ZERO) {
-		_cw_assert(operator->op_code <= NXN_LAST);
-		if (operator->fast_op) {
+	if (nxo_p_opcode_get(operator) != NXN_ZERO) {
+		_cw_assert(nxo_p_opcode_get(operator) <= NXN_LAST);
+		if (nxo_p_fastop_get(operator)) {
 			error = nxo_file_output(stdout_nxo, "---[s]---",
-			    nxn_str(operator->op_code));
+			    nxn_str(nxo_p_opcode_get(operator)));
 		} else {
 			error = nxo_file_output(stdout_nxo, "--[s]--",
-			    nxn_str(operator->op_code));
+			    nxn_str(nxo_p_opcode_get(operator)));
 		}
 	} else
 		error = nxo_file_output(stdout_nxo, "-operator-");

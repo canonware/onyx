@@ -54,12 +54,12 @@ nxo_dict_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking, cw_uint32_t
 	dch_new(&dict->hash, NULL, a_dict_size * 1.25, a_dict_size, a_dict_size
 	    / 4, nxo_p_dict_hash, nxo_p_dict_key_comp);
 
-	memset(a_nxo, 0, sizeof(cw_nxo_t));
+	nxo_no_new(a_nxo);
 	a_nxo->o.nxoe = (cw_nxoe_t *)dict;
 #ifdef _LIBONYX_DBG
 	a_nxo->magic = _CW_NXO_MAGIC;
 #endif
-	a_nxo->type = NXOT_DICT;
+	nxo_p_type_set(a_nxo, NXOT_DICT);
 
 	nxa_l_gc_register(nx_nxa_get(a_nx), (cw_nxoe_t *)dict);
 }
@@ -216,7 +216,7 @@ nxo_dict_copy(cw_nxo_t *a_to, cw_nxo_t *a_from, cw_nx_t *a_nx, cw_bool_t
 
 	_cw_check_ptr(a_to);
 	_cw_assert(a_to->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_to->type == NXOT_DICT);
+	_cw_assert(nxo_type_get(a_to) == NXOT_DICT);
 	_cw_assert(nxo_dict_count(a_to) == 0);
 
 	from = (cw_nxoe_dict_t *)a_from->o.nxoe;
@@ -257,7 +257,7 @@ nxo_dict_def(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_nxo_t *a_key, cw_nxo_t *a_val)
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_DICT);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_DICT);
 
 	dict = (cw_nxoe_dict_t *)a_nxo->o.nxoe;
 
@@ -307,7 +307,7 @@ nxo_dict_undef(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_nxo_t *a_key)
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_DICT);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_DICT);
 
 	dict = (cw_nxoe_dict_t *)a_nxo->o.nxoe;
 
@@ -337,7 +337,7 @@ nxo_dict_lookup(cw_nxo_t *a_nxo, const cw_nxo_t *a_key, cw_nxo_t *r_nxo)
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_DICT);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_DICT);
 
 	dict = (cw_nxoe_dict_t *)a_nxo->o.nxoe;
 
@@ -372,7 +372,7 @@ nxo_l_dict_lookup(cw_nxo_t *a_nxo, const cw_nxo_t *a_key)
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_DICT);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_DICT);
 
 	dict = (cw_nxoe_dict_t *)a_nxo->o.nxoe;
 
@@ -398,7 +398,7 @@ nxo_dict_count(cw_nxo_t *a_nxo)
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_DICT);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_DICT);
 
 	dict = (cw_nxoe_dict_t *)a_nxo->o.nxoe;
 
@@ -421,7 +421,7 @@ nxo_dict_iterate(cw_nxo_t *a_nxo, cw_nxo_t *r_nxo)
 	
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_DICT);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_DICT);
 
 	dict = (cw_nxoe_dict_t *)a_nxo->o.nxoe;
 
@@ -445,7 +445,7 @@ nxo_p_dict_hash(const void *a_key)
 	_cw_check_ptr(key);
 	_cw_assert(key->magic == _CW_NXO_MAGIC);
 
-	switch (key->type) {
+	switch (nxo_type_get(key)) {
 	case NXOT_ARRAY:
 	case NXOT_CONDITION:
 	case NXOT_DICT:
@@ -502,14 +502,15 @@ nxo_p_dict_key_comp(const void *a_k1, const void *a_k2)
 	_cw_check_ptr(k2);
 	_cw_assert(k2->magic == _CW_NXO_MAGIC);
 
-	if ((k1->type == NXOT_NAME) && (k1->type == NXOT_NAME)) {
+	if ((nxo_type_get(k1) == NXOT_NAME) && (nxo_type_get(k1) ==
+	    NXOT_NAME)) {
 		cw_nxoe_name_t	*n1, *n2;
 
 		n1 = (cw_nxoe_name_t *)k1->o.nxoe;
 		n2 = (cw_nxoe_name_t *)k2->o.nxoe;
 
 		retval = (n1 == n2) ? TRUE : FALSE;
-	} else if (k1->type != k2->type)
+	} else if (nxo_type_get(k1) != nxo_type_get(k2))
 		retval = FALSE;
 	else
 		retval = nxo_compare(k1, k2) ? FALSE : TRUE;

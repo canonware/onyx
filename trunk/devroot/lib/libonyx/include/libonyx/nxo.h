@@ -101,30 +101,33 @@ struct cw_nxo_s {
 #endif
 
 	/*
-	 * Type.
+	 * We can't use bit fields here, since we need explicit knowledge of
+	 * structure layout to avoid GC races in nxo_dup() and nxo_p_new().
+	 * Therefore, use a single 32 bit variable and do the bit manipulation
+	 * manually.
+	 *
+	 * . : Unused.
+	 *
+	 * C : Op code.  If this is an operator, and NXN_ZERO < op code <=
+	 *     NXN_LAST, op code corresponds to the name of this operator.  This
+	 *     can be used to print the operator name or inline fast_op's in the
+	 *     interpreter loop.
+	 *
+	 * B : Array bound.  TRUE if the bind operator has processed this array.
+	 *     This is used to avoid infinite recursion in the bind operator
+	 *     when binding recursive procedures.
+	 *
+	 * A : Attributes.  An nxo is either LITERAL or EXECUTABLE.
+	 *
+	 * P : Fast op.  If type is NXOT_OPERATOR and fast op is TRUE, this
+	 *     operator can be handled specially in nxo_thread_loop().
+	 *
+	 * T : Type.
+	 *
+	 * ........ ......CC CCCCCCCC BAPTTTTT
+	 *
 	 */
-	cw_nxot_t	type:5;
-	/*
-	 * If type is NXOT_OPERARTOR and fast_op is TRUE, this operator can be
-	 * handled specially in nxo_thread_loop().
-	 */
-	cw_bool_t	fast_op:1;
-	/*
-	 * If this is an operator, and op_code <= NXN_LAST, op_code
-	 * corresponds to the name of this operator.  This can be used to print
-	 * the operator name or inline fast_op's in the interpreter loop.
-	 */
-	cw_nxn_t	op_code:10;
-	/*
-	 * Attributes.  A nxo is either LITERAL or EXECUTABLE.
-	 */
-	cw_nxoa_t	attrs:1;
-	/*
-	 * TRUE if the bind operator has processed this array.  This is used to
-	 * avoid infinite recursion in the bind operator when binding recursive
-	 * procedures.
-	 */
-	cw_bool_t	array_bound:1;
+	cw_uint32_t	flags;
 
 	union {
 		struct {
@@ -191,49 +194,53 @@ struct cw_nxoe_s {
 cw_sint32_t nxo_compare(cw_nxo_t *a_a, cw_nxo_t *a_b);
 
 /*
- * The code for nxo_dup() is fragile in that it relies on the internal layout
- * of cw_nxo_t.  In order to fix this fragility, we would need to convert the
- * bit fields to a manually managed 32 bit variable with bits that represent
- * various flags.
+ * The order of operations is important in order to avoid a GC race.
+ */
+#ifdef _LIBONYX_DBG
+#define	nxo_dup(a_to, a_from) do {					\
+	(a_to)->flags = 0;						\
+	(a_to)->o = (a_from)->o;					\
+	(a_to)->flags = (a_from)->flags;				\
+	(a_to)->magic = (a_from)->magic;				\
+} while (0)
+#else
+#define	nxo_dup(a_to, a_from) do {					\
+	(a_to)->flags = 0;						\
+	(a_to)->o = (a_from)->o;					\
+	(a_to)->flags = (a_from)->flags;				\
+} while (0)
+#endif
+
+#define	nxo_type_get(a_nxo)	((a_nxo)->flags & 0x1f)
+cw_nxoe_t *nxo_nxoe_get(cw_nxo_t *a_nxo);
+cw_bool_t nxo_lcheck(cw_nxo_t *a_nxo);
+
+#define	nxo_attrs_get(a_nxo) (((a_nxo)->flags >> 6) & 1)
+#define	nxo_attrs_set(a_nxo, a_attrs) do {				\
+	(a_nxo)->flags = ((a_nxo)->flags & 0xffffffbf)			\
+	    | ((a_attrs) << 6);						\
+} while (0)
+
+/*
+ * Private, but various object constructor macros need its definition.
+ *
+ * o.integer.i is assumed to be at least as big as all the other fields in the
+ * union.
  *
  * The order of operations is important in order to avoid a GC race.
  */
 #ifdef _LIBONYX_DBG
-#define		nxo_dup(a_to, a_from) do {				\
-	struct {							\
-		cw_uint32_t	magic;					\
-		cw_uint32_t	flags;					\
-		cw_nxoi_t	data;					\
-	} *x_to, *x_from;						\
-	_cw_assert(sizeof(*x_to) == sizeof(cw_nxo_t));			\
-									\
-	x_to = (void *)(a_to);						\
-	x_from = (void *)(a_from);					\
-	_cw_assert((a_from)->magic == x_from->magic);			\
-	_cw_assert((a_from)->o.integer.i == x_from->data);		\
-	x_to->flags = 0;						\
-	x_to->data = x_from->data;					\
-	x_to->flags = x_from->flags;					\
-	x_to->magic = x_from->magic;					\
+#define	nxo_p_new(a_nxo, a_type) do {					\
+	(a_nxo)->flags = 0;						\
+	(a_nxo)->magic = 0;						\
+	(a_nxo)->o.integer.i = 0;					\
+	(a_nxo)->magic = _CW_NXO_MAGIC;					\
+	(a_nxo)->flags = (a_type);					\
 } while (0)
 #else
-#define		nxo_dup(a_to, a_from) do {				\
-	struct {							\
-		cw_uint32_t	flags;					\
-		cw_nxoi_t	data;					\
-	} *x_to, *x_from;						\
-									\
-	x_to = (void *)(a_to);						\
-	x_from = (void *)(a_from);					\
-	x_to->flags = 0;						\
-	x_to->data = x_from->data;					\
-	x_to->flags = x_from->flags;					\
+#define	nxo_p_new(a_nxo, a_type) do {					\
+	(a_nxo)->flags = 0;						\
+	(a_nxo)->o.integer.i = 0;					\
+	(a_nxo)->flags = (a_type);					\
 } while (0)
 #endif
-
-#define	nxo_type_get(a_nxo)	(a_nxo)->type
-cw_nxoe_t *nxo_nxoe_get(cw_nxo_t *a_nxo);
-cw_bool_t nxo_lcheck(cw_nxo_t *a_nxo);
-
-#define	nxo_attrs_get(a_nxo) (a_nxo)->attrs
-#define	nxo_attrs_set(a_nxo, a_attrs) (a_nxo)->attrs = (a_attrs)

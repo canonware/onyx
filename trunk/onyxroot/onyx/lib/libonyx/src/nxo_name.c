@@ -61,21 +61,21 @@ nxo_name_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_uint8_t *a_str,
 		dch_insert(name_hash, (void *)name, (void **)name,
 		    nxa_chi_get(nx_nxa_get(a_nx)));
 
-		memset(a_nxo, 0, sizeof(cw_nxo_t));
+		nxo_no_new(a_nxo);
 		a_nxo->o.nxoe = (cw_nxoe_t *)name;
 #ifdef _LIBONYX_DBG
 		a_nxo->magic = _CW_NXO_MAGIC;
 #endif
-		a_nxo->type = NXOT_NAME;
+		nxo_p_type_set(a_nxo, NXOT_NAME);
 
 		nxa_l_gc_register(nx_nxa_get(a_nx), (cw_nxoe_t *)name);
 	} else {
-		memset(a_nxo, 0, sizeof(cw_nxo_t));
+		nxo_no_new(a_nxo);
 		a_nxo->o.nxoe = (cw_nxoe_t *)name;
 #ifdef _LIBONYX_DBG
 		a_nxo->magic = _CW_NXO_MAGIC;
 #endif
-		a_nxo->type = NXOT_NAME;
+		nxo_p_type_set(a_nxo, NXOT_NAME);
 	}
 	thd_crit_leave();
 	mtx_unlock(name_lock);
@@ -157,7 +157,7 @@ nxo_l_name_print(cw_nxo_t *a_thread)
 	_cw_assert(name->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(name->nxoe.type == NXOT_NAME);
 
-	if (nnxo->attrs == NXOA_LITERAL) {
+	if (nxo_attrs_get(nnxo) == NXOA_LITERAL) {
 		error = nxo_file_output(stdout_nxo, "/");
 		if (error) {
 			nxo_thread_error(a_thread, error);
@@ -217,7 +217,7 @@ nxo_name_str_get(cw_nxo_t *a_nxo)
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_NAME);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_NAME);
 
 	name = (cw_nxoe_name_t *)a_nxo->o.nxoe;
 
@@ -238,7 +238,7 @@ nxo_name_len_get(cw_nxo_t *a_nxo)
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_NAME);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_NAME);
 
 	name = (cw_nxoe_name_t *)a_nxo->o.nxoe;
 

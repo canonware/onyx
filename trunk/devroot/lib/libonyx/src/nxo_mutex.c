@@ -25,12 +25,12 @@ nxo_mutex_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx)
 	nxoe_l_new(&mutex->nxoe, NXOT_MUTEX, FALSE);
 	mtx_new(&mutex->lock);
 
-	memset(a_nxo, 0, sizeof(cw_nxo_t));
+	nxo_no_new(a_nxo);
 	a_nxo->o.nxoe = (cw_nxoe_t *)mutex;
 #ifdef _LIBONYX_DBG
 	a_nxo->magic = _CW_NXO_MAGIC;
 #endif
-	a_nxo->type = NXOT_MUTEX;
+	nxo_p_type_set(a_nxo, NXOT_MUTEX);
 
 	nxa_l_gc_register(nx_nxa_get(a_nx), (cw_nxoe_t *)mutex);
 }
@@ -90,7 +90,7 @@ nxo_mutex_lock(cw_nxo_t *a_nxo)
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_MUTEX);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_MUTEX);
 
 	mutex = (cw_nxoe_mutex_t *)a_nxo->o.nxoe;
 
@@ -109,7 +109,7 @@ nxo_mutex_trylock(cw_nxo_t *a_nxo)
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_MUTEX);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_MUTEX);
 
 	mutex = (cw_nxoe_mutex_t *)a_nxo->o.nxoe;
 
@@ -129,7 +129,7 @@ nxo_mutex_unlock(cw_nxo_t *a_nxo)
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_MUTEX);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_MUTEX);
 
 	mutex = (cw_nxoe_mutex_t *)a_nxo->o.nxoe;
 

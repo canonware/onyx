@@ -27,6 +27,7 @@
 
 #include "nxn.h"
 #include "nxo.h"
+#include "nxo_no.h"
 #include "nxo_array.h"
 #include "nxo_boolean.h"
 #include "nxo_condition.h"
@@ -38,7 +39,6 @@
 #include "nxo_mark.h"
 #include "nxo_mutex.h"
 #include "nxo_name.h"
-#include "nxo_no.h"
 #include "nxo_null.h"
 #include "nxo_operator.h"
 #include "nxo_stack.h"

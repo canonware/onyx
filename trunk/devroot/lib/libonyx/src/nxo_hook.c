@@ -31,12 +31,12 @@ nxo_hook_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, void *a_data, cw_nxo_hook_eval_t
 	hook->ref_iter_f = a_ref_iter_f;
 	hook->delete_f = a_delete_f;
 
-	memset(a_nxo, 0, sizeof(cw_nxo_t));
+	nxo_no_new(a_nxo);
 	a_nxo->o.nxoe = (cw_nxoe_t *)hook;
 #ifdef _LIBONYX_DBG
 	a_nxo->magic = _CW_NXO_MAGIC;
 #endif
-	a_nxo->type = NXOT_HOOK;
+	nxo_p_type_set(a_nxo, NXOT_HOOK);
 
 	nxa_l_gc_register(nx_nxa_get(a_nx), (cw_nxoe_t *)hook);
 }
@@ -159,7 +159,7 @@ nxo_hook_tag_get(cw_nxo_t *a_nxo)
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_HOOK);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_HOOK);
 
 	hook = (cw_nxoe_hook_t *)a_nxo->o.nxoe;
 
@@ -180,7 +180,7 @@ nxo_hook_data_get(cw_nxo_t *a_nxo)
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_HOOK);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_HOOK);
 
 	hook = (cw_nxoe_hook_t *)a_nxo->o.nxoe;
 
@@ -201,7 +201,7 @@ nxo_hook_eval(cw_nxo_t *a_nxo, cw_nxo_t *a_thread)
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(a_nxo->type == NXOT_HOOK);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_HOOK);
 
 	hook = (cw_nxoe_hook_t *)a_nxo->o.nxoe;
 
