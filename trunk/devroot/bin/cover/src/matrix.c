@@ -11,9 +11,9 @@
  *
  ****************************************************************************/
 
-#include "cover.h"
-
 #include <limits.h>
+
+#include "cover.h"
 
 cw_matrix_t *
 matrix_new(cw_matrix_t *a_matrix)

@@ -14,6 +14,8 @@
 
 #include <libsock/libsock.h>
 
+#include "blow_defs.h"
+
 #define _LIBSOCK_BLOW_MAX_CONNS		1000
 
 /* Command line defaults. */

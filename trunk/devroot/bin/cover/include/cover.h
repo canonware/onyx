@@ -21,6 +21,8 @@
 
 #define NUM_NODES 5
 
+#include "cover_defs.h"
+
 #include "gene.h"
 #include "matrix.h"
 #include "pack.h"

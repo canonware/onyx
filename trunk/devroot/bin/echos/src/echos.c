@@ -14,6 +14,8 @@
 
 #include <libsock/libsock.h>
 
+#include "echos_defs.h"
+
 void *
 handle_client(void *a_arg)
 {

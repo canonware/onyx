@@ -12,6 +12,8 @@
 #include <libstil/libstil.h>
 #include <libstash/libstash.h>
 
+#include "stile_defs.h"
+
 int
 main(int argc, char **argv)
 {

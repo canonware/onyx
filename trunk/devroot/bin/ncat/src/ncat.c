@@ -12,6 +12,10 @@
  *
  ******************************************************************************/
 
+#include <libsock/libsock.h>
+
+#include "ncat_defs.h"
+
 #include <netdb.h>
 #ifdef _CW_OS_LINUX
 #include <netinet/in.h>
@@ -19,8 +23,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <fcntl.h>
-
-#include <libsock/libsock.h>
 
 typedef enum {
 	NONE, PRETTY, HEX, ASCII

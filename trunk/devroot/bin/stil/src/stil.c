@@ -9,14 +9,16 @@
  *
  ******************************************************************************/
 
-#include <libstil/libstil.h>
-#include <libedit/libedit.h>
-#include <libstash/libstash.h>
-
 #include <sys/types.h>
 #include <sys/uio.h>
 #include <unistd.h>
 #include <errno.h>
+
+#include <libstil/libstil.h>
+#include <libedit/libedit.h>
+#include <libstash/libstash.h>
+
+#include "stil_defs.h"
 
 #define	_BUF_SIZE	4096
 #define	_PROMPT_STRLEN	  80

@@ -26,6 +26,8 @@ typedef enum {
 #define	_XVX_I2X(i) ((i) % 19)
 #define	_XVX_I2Y(i) ((i) / 19)
 
+#include "xvx_defs.h"
+
 #include "move.h"
 #include "board.h"
 #include "game.h"

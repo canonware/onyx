@@ -9,9 +9,9 @@
  *
  ******************************************************************************/
 
-#include "cover.h"
-
 #include <limits.h>
+
+#include "cover.h"
 
 typedef struct
 {

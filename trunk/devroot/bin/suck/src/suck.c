@@ -13,6 +13,8 @@
 
 #include <libsock/libsock.h>
 
+#include "suck_defs.h"
+
 #define _LIBSOCK_SUCK_MAX_CONNS 1000
 
 /* Command line defaults. */

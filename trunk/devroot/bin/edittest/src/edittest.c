@@ -48,6 +48,8 @@
 
 #include <libedit/libedit.h>
 
+#include "edittest_defs.h"
+
 static int continuation = 0;
 static EditLine *el = NULL;
 
