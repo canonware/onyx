@@ -35,7 +35,6 @@ int
 main()
 {
     fprintf(stderr, "Test begin\n");
-    do_mem();
 
     fprintf(stderr, "libonyx_init()\n");
     libonyx_init();
@@ -43,7 +42,6 @@ main()
 
     fprintf(stderr, "libonyx_shutdown()\n");
     libonyx_shutdown();
-    do_mem();
 
     fprintf(stderr, "Test end\n");
     return 0;
