@@ -29,6 +29,11 @@ thd - Thread.
 .B thd_join
 .RI ( "cw_thd_t *a_thd" )
 
+.I cw_thd_t *
+.br
+.B thd_self
+.RI ( "void" )
+
 .I void
 .br
 .B thd_yield
@@ -42,12 +47,12 @@ thd - Thread.
 .I void
 .br
 .B thd_crit_enter
-.RI ( "cw_thd_t *a_thd" )
+.RI ( "void" )
 
 .I void
 .br
 .B thd_crit_leave
-.RI ( "cw_thd_t *a_thd" )
+.RI ( "void" )
 
 .I void
 .br
@@ -154,6 +159,28 @@ Join (wait for) the thread associated with a_thd.
 .RE
 .RE
 
+.I cw_thd_t *
+.br
+.B thd_self
+.RI ( "void" )
+.RS
+Input(s):
+.RS
+None.
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+Pointer to the calling thread's thd structure.
+.RE
+.RE
+Description:
+.RS
+Return a pointer to the thd structure that corresponds to the calling thread.
+.RE
+.RE
+
 .I void
 .br
 .B thd_yield
@@ -209,14 +236,11 @@ Set the current thread's signal mask.
 .I void
 .br
 .B thd_crit_enter
-.RI ( "cw_thd_t *a_thd" )
+.RI ( "void" )
 .RS
 Input(s):
 .RS
-.IR a_thd :
-.RS
-Pointer to a thd.
-.RE
+None.
 .RE
 Output(s):
 .RS
@@ -224,21 +248,18 @@ None.
 .RE
 Description:
 .RS
-Enter a critical region where a_thd may not be suspended.
+Enter a critical region where the calling thread may not be suspended.
 .RE
 .RE
 
 .I void
 .br
 .B thd_crit_leave
-.RI ( "cw_thd_t *a_thd" )
+.RI ( "void" )
 .RS
 Input(s):
 .RS
-.IR a_thd :
-.RS
-Pointer to a thd.
-.RE
+None.
 .RE
 Output(s):
 .RS
@@ -246,7 +267,7 @@ None.
 .RE
 Description:
 .RS
-Leave a critical section; a_thd may once again be suspended.
+Leave a critical section; the calling thread may once again be suspended.
 .RE
 .RE
 

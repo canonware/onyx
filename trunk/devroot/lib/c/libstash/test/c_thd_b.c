@@ -22,9 +22,9 @@ void *
 thread_entry_func(void *a_arg)
 {
 	for (i = 1; i != 0;) {
-		thd_crit_enter(&thd);
+		thd_crit_enter();
 		i++;
-		thd_crit_leave(&thd);
+		thd_crit_leave();
 
 		/*
 		 * For non-concurrent thread libraries, don't use up the whole

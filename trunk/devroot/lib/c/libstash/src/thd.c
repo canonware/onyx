@@ -163,29 +163,25 @@ thd_self(void)
 }
 
 void
-thd_crit_enter(cw_thd_t *a_thd)
+thd_crit_enter(void)
 {
 	cw_thd_t	*thd;
 
-	_cw_check_ptr(a_thd);
-	_cw_assert(a_thd->magic == _CW_THD_MAGIC);
-
 	thd = thd_self();
+	_cw_check_ptr(thd);
+	_cw_assert(thd->magic == _CW_THD_MAGIC);
 	mtx_lock(&thd->crit_lock);
-/*  	mtx_lock(&a_thd->crit_lock); */
 }
 
 void
-thd_crit_leave(cw_thd_t *a_thd)
+thd_crit_leave(void)
 {
 	cw_thd_t	*thd;
 
-	_cw_check_ptr(a_thd);
-	_cw_assert(a_thd->magic == _CW_THD_MAGIC);
-
 	thd = thd_self();
+	_cw_check_ptr(thd);
+	_cw_assert(thd->magic == _CW_THD_MAGIC);
 	mtx_unlock(&thd->crit_lock);
-/*  	mtx_unlock(&a_thd->crit_lock); */
 }
 
 
