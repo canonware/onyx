@@ -589,10 +589,10 @@ nxo_file_nonblocking_set(cw_nxo_t *a_nxo, cw_bool_t a_nonblocking)
 
     file->nonblocking = a_nonblocking;
     retval = FALSE;
+    RETURN:
 #else
     retval = TRUE;
 #endif
-    RETURN:
 #ifdef CW_THREADS
     nxoe_p_file_unlock(file);
 #endif
@@ -1164,7 +1164,9 @@ nxo_file_write(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len,
     cw_nxn_t retval;
     cw_uint32_t retcount;
     cw_nxoe_file_t *file;
+#ifdef CW_POSIX_FILE
     int count;
+#endif
 
     cw_check_ptr(a_nxo);
     cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
@@ -1221,54 +1223,57 @@ nxo_file_write(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len,
 
 		    /* a_str won't fit.  Do a writev(). */
 
-		    iov[0].iov_base = file->buffer;
-		    iov[0].iov_len = file->buffer_offset;
-		    iov[1].iov_base = (char *) a_str;
-		    iov[1].iov_len = a_len;
-
-		    /* XXX This probably isn't good enough.  In addition, this
-		     * code should check whether this is a nonblocking file, and
-		     * if not, keep writing until the full amount is at least
-		     * buffered. */
-		    while ((count = writev(file->f.p.fd, iov, 2)) == -1)
+		    retcount = 0;
+		    do
 		    {
-			if (errno != EINTR)
+			iov[0].iov_base = file->buffer;
+			iov[0].iov_len = file->buffer_offset;
+			iov[1].iov_base = (char *) &a_str[retcount];
+			iov[1].iov_len = a_len - retcount;
+
+			while ((count = writev(file->f.p.fd, iov, 2)) == -1)
 			{
-			    retval = NXN_ioerror;
-			    goto RETURN;
+			    if (errno != EINTR)
+			    {
+				retval = NXN_ioerror;
+				goto RETURN;
+			    }
 			}
-		    }
 
-		    if (count >= file->buffer_offset)
-		    {
-			/* At least the buffer got written. */
-			count -= file->buffer_offset;
-
-			if (count == a_len)
+			if (count >= file->buffer_offset)
 			{
-			    /* a_str got written too. */
-			    file->buffer_mode = BUFFER_EMPTY;
-			    file->buffer_offset = 0;
+			    /* At least the buffer got written. */
+			    count -= file->buffer_offset;
+
+			    if (count == a_len)
+			    {
+				/* a_str got written too. */
+				file->buffer_mode = BUFFER_EMPTY;
+				file->buffer_offset = 0;
+			    }
+			    else
+			    {
+				/* a_str didn't get completely written.  Copy of
+				 * much of it as possible to the buffer. */
+				memcpy(&file->buffer[0], &a_str[count],
+				       a_len - count);
+				file->buffer_offset = a_len - count;
+			    }
+			    retcount += count;
 			}
 			else
 			{
-			    /* a_str didn't get completely written.  Copy of
-			     * much of it as possible to the buffer. */
-			    memcpy(&file->buffer[0], &a_str[count],
-				   a_len - count);
-			    file->buffer_offset = a_len - count;
+			    /* Not all of the buffer got written.  Adjust the
+			     * buffer. */
+			    memmove(&file->buffer[0], &file->buffer[count],
+				    file->buffer_offset - count);
+			    file->buffer_offset -= count;
 			}
-			retcount = count;
-		    }
-		    else
-		    {
-			/* Not all of the buffer got written.  Adjust the
-			 * buffer, and set retcount to 0. */
-			memmove(&file->buffer[0], &file->buffer[count],
-				file->buffer_offset - count);
-			file->buffer_offset -= count;
-			retcount = 0;
-		    }
+
+			/* Writing to blocking files must always succeed in
+			 * full, unless there is an ioerror. */
+		    } while (retcount < a_len && file->nonblocking == FALSE);
+
 		    break;
 		}
 #endif
