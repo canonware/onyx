@@ -150,6 +150,7 @@ uninstall : uninstall_bins uninstall_mods uninstall_libs uninstall_docs
 clean : [addsuffix _clean docs test @bins@ @mods@ @libs@]
 {
   rm -f core *.core;
+  rm -f *.gmon;
   rm -f TAGS;
 
   rm -f [A_LIBS];
