@@ -74,7 +74,7 @@ if test "x$CFLAGS" = "x" ; then
   no_CFLAGS="yes"
 fi
 if test "x$no_CFLAGS" = "xyes" -a "x$GCC" = "xyes" ; then
-	CFLAGS="-Wall -Wno-uninitialized -pipe -g3"
+	CFLAGS="-Wall -Wno-uninitialized -Wno-strict-aliasing -pipe -g3"
 fi
 AC_PROG_CPP
 
