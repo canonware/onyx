@@ -1091,7 +1091,7 @@ out_p_put_svn(cw_out_t * a_out, char * a_str, cw_uint32_t a_size,
 	  cw_sint32_t spec_len, type_len;
 	  const char * type;
 	  cw_out_ent_t * ent;
-	  void * arg;
+	  void * arg = NULL; /* Shut up the optimizer. */
 	
 	  if (_LIBSTASH_OUT_ENT_CACHE > enti)
 	  {
