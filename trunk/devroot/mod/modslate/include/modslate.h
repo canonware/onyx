@@ -12,8 +12,6 @@
 
 #include <libonyx/libonyx.h>
 
-#include <pcre.h>
-
 #include "rb.h"
 #include "buf.h"
 #include "hist.h"
