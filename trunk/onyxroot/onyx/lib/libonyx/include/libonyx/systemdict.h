@@ -340,11 +340,6 @@ systemdict_inc(cw_nxo_t *a_thread);
 void
 systemdict_iobuf(cw_nxo_t *a_thread);
 
-#ifdef CW_POSIX
-void
-systemdict_ioctl(cw_nxo_t *a_thread);
-#endif
-
 void
 systemdict_ipop(cw_nxo_t *a_thread);
 

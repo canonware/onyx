@@ -199,9 +199,6 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "invalidexit",
     "invalidfileaccess",
     "iobuf",
-#ifdef CW_POSIX
-    "ioctl",
-#endif
     "ioerror",
     "ipop",
     "istack",

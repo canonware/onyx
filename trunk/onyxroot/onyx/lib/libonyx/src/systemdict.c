@@ -195,9 +195,6 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(ifelse),
     ENTRY(inc),
     ENTRY(iobuf),
-#ifdef CW_POSIX
-    ENTRY(ioctl),
-#endif
     ENTRY(ipop),
     ENTRY(istack),
 #ifdef CW_THREADS
@@ -4008,14 +4005,6 @@ systemdict_iobuf(cw_nxo_t *a_thread)
     }
     nxo_integer_new(nxo, nxo_file_buffer_size_get(nxo));
 }
-
-#ifdef CW_POSIX
-void
-systemdict_ioctl(cw_nxo_t *a_thread)
-{
-    cw_error("XXX Not implemented");
-}
-#endif
 
 void
 systemdict_ipop(cw_nxo_t *a_thread)

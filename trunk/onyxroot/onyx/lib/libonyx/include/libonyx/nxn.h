@@ -198,9 +198,6 @@ typedef enum
     NXN_invalidexit,
     NXN_invalidfileaccess,
     NXN_iobuf,
-#ifdef CW_POSIX
-    NXN_ioctl,
-#endif
     NXN_ioerror,
     NXN_ipop,
     NXN_istack,
