@@ -349,6 +349,7 @@ nxo_file_close(cw_nxo_t *a_nxo)
 
     switch (file->mode)
     {
+	default:
 	case FILE_NONE:
 	{
 	    cw_not_reached();
@@ -594,6 +595,7 @@ nxo_file_read(cw_nxo_t *a_nxo, cw_uint32_t a_len, cw_uint8_t *r_str)
 
 	    switch (file->mode)
 	    {
+		default:
 		case FILE_NONE:
 		{
 		    cw_not_reached();
@@ -714,6 +716,7 @@ nxo_file_read(cw_nxo_t *a_nxo, cw_uint32_t a_len, cw_uint8_t *r_str)
     {
 	switch (file->mode)
 	{
+	    default:
 	    case FILE_NONE:
 	    {
 		cw_not_reached();
@@ -839,6 +842,7 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_bool_t a_locking, cw_nxo_t *r_string,
 		/* Replenish the internal buffer. */
 		switch (file->mode)
 		{
+		    default:
 		    case FILE_NONE:
 		    {
 			cw_not_reached();
@@ -987,6 +991,7 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_bool_t a_locking, cw_nxo_t *r_string,
 
 	    switch (file->mode)
 	    {
+		default:
 		case FILE_NONE:
 		{
 		    cw_not_reached();
@@ -1138,6 +1143,7 @@ nxo_file_write(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len,
 	{
 	    switch (file->mode)
 	    {
+		default:
 		case FILE_NONE:
 		{
 		    cw_not_reached();
@@ -1244,6 +1250,7 @@ nxo_file_write(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len,
     {
 	switch (file->mode)
 	{
+	    default:
 	    case FILE_NONE:
 	    {
 		cw_not_reached();
@@ -1252,7 +1259,8 @@ nxo_file_write(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len,
 	    case FILE_POSIX:
 	    {
 		retcount = 0;
-		do {
+		do
+		{
 		    while ((count = write(file->f.p.fd, &a_str[retcount],
 					  a_len - retcount)) == -1)
 		    {
@@ -1604,6 +1612,7 @@ nxo_p_file_buffer_flush(cw_nxoe_file_t *a_file)
 	{
 	    switch (a_file->mode)
 	    {
+		default:
 		case FILE_NONE:
 		{
 		    cw_not_reached();
@@ -1611,7 +1620,7 @@ nxo_p_file_buffer_flush(cw_nxoe_file_t *a_file)
 #ifdef CW_POSIX_FILE
 		case FILE_POSIX:
 		{
-		    int flags;
+		    int flags, count, nwritten;
 
 		    if (a_file->nonblocking)
 		    {
@@ -1631,16 +1640,26 @@ nxo_p_file_buffer_flush(cw_nxoe_file_t *a_file)
 			}
 		    }
 
-		    while (write(a_file->f.p.fd, a_file->buffer,
-				 a_file->buffer_offset) == -1)
+		    nwritten = 0;
+		    do
 		    {
-			if (errno != EINTR)
+			while ((count = write(a_file->f.p.fd,
+					      &a_file->buffer[nwritten],
+					      a_file->buffer_offset - nwritten))
+			       == -1)
 			{
-			    a_file->nonblocking = FALSE;
-			    retval = NXN_ioerror;
-			    goto RETURN;
+			    if (errno != EINTR)
+			    {
+				a_file->nonblocking = FALSE;
+				retval = NXN_ioerror;
+				goto RETURN;
+			    }
 			}
-		    }
+
+			nwritten += count;
+			/* Keep writing if not all the data were written due to
+			 * a short write (caused by signal interruption). */
+		    } while (nwritten < a_file->buffer_offset);
 
 		    if (a_file->nonblocking)
 		    {
