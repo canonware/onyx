@@ -186,15 +186,35 @@ stilo_l_stack_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_uint32_t
     a_depth)
 {
 	cw_stilo_threade_t	retval;
+	cw_stilo_t		*stilo;
+	cw_uint32_t		i;
 
 	if (a_depth > 0) {
+		cw_stiloe_stack_t	*stack;
+
 		retval = stilo_file_output(a_file, "<[[");
 		if (retval)
 			goto RETURN;
 
-		retval = stilo_file_output(a_file, "XXX");
-		if (retval)
-			goto RETURN;
+		stack = (cw_stiloe_stack_t *)a_stilo->o.stiloe;
+		stiloe_p_stack_lock(stack);
+		for (i = stilo_stack_count(a_stilo); i > 0; i--) {
+			stilo = stilo_stack_nget(a_stilo, i - 1);
+			retval = stilo_print(stilo, a_file, a_depth - 1, FALSE);
+			if (retval) {
+				stiloe_p_stack_unlock(stack);
+				goto RETURN;
+			}
+
+			if (i > 1) {
+				retval = stilo_file_output(a_file, " ");
+				if (retval) {
+					stiloe_p_stack_unlock(stack);
+					goto RETURN;
+				}
+			}
+		}
+		stiloe_p_stack_unlock(stack);
 
 		retval = stilo_file_output(a_file, "]>");
 		if (retval)

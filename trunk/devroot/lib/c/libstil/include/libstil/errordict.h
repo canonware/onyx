@@ -27,5 +27,6 @@ void	errordict_typecheck(cw_stilo_t *a_thread);
 void	errordict_undefined(cw_stilo_t *a_thread);
 void	errordict_undefinedfilename(cw_stilo_t *a_thread);
 void	errordict_undefinedresult(cw_stilo_t *a_thread);
+void	errordict_unmatchedfino(cw_stilo_t *a_thread);
 void	errordict_unmatchedmark(cw_stilo_t *a_thread);
 void	errordict_unregistered(cw_stilo_t *a_thread);

@@ -42,6 +42,7 @@ typedef enum {
 	STILO_THREADE_UNDEFINED,	/* Object not found in dstack. */
 	STILO_THREADE_UNDEFINEDFILENAME, /* Bad filename. */
 	STILO_THREADE_UNDEFINEDRESULT,	/* Divide by 0. */
+	STILO_THREADE_UNMATCHEDFINO,	/* No fino on ostack. */
 	STILO_THREADE_UNMATCHEDMARK,	/* No mark on ostack. */
 	STILO_THREADE_UNREGISTERED	/* Other non-enumerated error. */
 #define	STILO_THREADE_LAST	STILO_THREADE_UNREGISTERED

@@ -142,8 +142,9 @@ stilo_l_array_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_uint32_t
 	cw_stilo_threade_t	retval;
 
 	if (a_depth > 0) {
-		cw_stilo_t	el;
-		cw_uint32_t	nelms, i;
+		cw_stiloe_array_t	*array;
+		cw_stilo_t		el;
+		cw_uint32_t		nelms, i;
 
 		if (a_stilo->attrs == STILOA_EXECUTABLE) {
 			retval = stilo_file_output(a_file, "{");
@@ -155,19 +156,27 @@ stilo_l_array_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_uint32_t
 				goto RETURN;
 		}
 
+		array = (cw_stiloe_array_t *)a_stilo->o.stiloe;
+		stiloe_p_array_lock(array);
 		nelms = stilo_array_len_get(a_stilo);
 		for (i = 0; i < nelms; i++) {
 			stilo_array_el_get(a_stilo, i, &el);
 			retval = stilo_print(&el, a_file, a_depth - 1, FALSE);
-			if (retval)
+			if (retval) {
+				stiloe_p_array_unlock(array);
 				goto RETURN;
+			}
 
 			if (i < nelms - 1) {
 				retval = stilo_file_output(a_file, " ");
-				if (retval)
+				if (retval) {
+					stiloe_p_array_unlock(array);
 					goto RETURN;
+				}
 			}
 		}
+		stiloe_p_array_unlock(array);
+
 		if (a_stilo->attrs == STILOA_EXECUTABLE) {
 			retval = stilo_file_output(a_file, "}");
 			if (retval)

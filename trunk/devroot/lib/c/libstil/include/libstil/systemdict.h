@@ -110,6 +110,7 @@ void	systemdict_shift(cw_stilo_t *a_thread);
 void	systemdict_signal(cw_stilo_t *a_thread);
 void	systemdict_spop(cw_stilo_t *a_thread);
 void	systemdict_srand(cw_stilo_t *a_thread);
+void	systemdict_stack(cw_stilo_t *a_thread);
 void	systemdict_start(cw_stilo_t *a_thread);
 void	systemdict_stat(cw_stilo_t *a_thread);
 void	systemdict_stop(cw_stilo_t *a_thread);

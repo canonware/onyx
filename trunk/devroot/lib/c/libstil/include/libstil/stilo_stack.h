@@ -75,10 +75,21 @@ void		stiloe_p_stack_spares_create(cw_stiloe_stack_t *a_stack);
 void		stiloe_p_stack_spares_destroy(cw_stiloe_stack_t *a_stack,
     cw_stiloe_stackc_t *a_stackc);
 
+/* Private, but defined here for the inline functions. */
+#define		stiloe_p_stack_lock(a_stiloe) do {			\
+	if ((a_stiloe)->stiloe.locking)					\
+		mtx_lock(&(a_stiloe)->lock);				\
+} while (0)
+#define		stiloe_p_stack_unlock(a_stiloe) do {			\
+	if ((a_stiloe)->stiloe.locking)					\
+		mtx_unlock(&(a_stiloe)->lock);				\
+} while (0)
+
 #if (defined(_CW_USE_INLINES) || defined(_STILO_STACK_C_))
 _CW_INLINE cw_stilo_t *
 stilo_stack_push(cw_stilo_t *a_stilo)
 {
+	cw_stilo_t		*retval;
 	cw_stiloe_stack_t	*stack;
 	cw_stiloe_stacko_t	*stacko;
 
@@ -90,6 +101,7 @@ stilo_stack_push(cw_stilo_t *a_stilo)
 	_cw_assert(stack->stiloe.type == STILOT_STACK);
 
 	/* Get an unused stacko.  If there are no spares, create some first. */
+	stiloe_p_stack_lock(stack);
 	if (qr_prev(ql_first(&stack->stack), link) == &stack->under)
 		stiloe_p_stack_spares_create(stack);
 	stacko = qr_prev(ql_first(&stack->stack), link);
@@ -98,13 +110,16 @@ stilo_stack_push(cw_stilo_t *a_stilo)
 	stacko->stackc->nused++;
 	stack->count++;
 	stack->nspare--;
+	retval = &stacko->stilo;
+	stiloe_p_stack_unlock(stack);
 
-	return &stacko->stilo;
+	return retval;
 }
 
 _CW_INLINE cw_stilo_t *
 stilo_stack_under_push(cw_stilo_t *a_stilo, cw_stilo_t *a_object)
 {
+	cw_stilo_t		*retval;
 	cw_stiloe_stack_t	*stack;
 	cw_stiloe_stacko_t	*stacko;
 
@@ -116,6 +131,7 @@ stilo_stack_under_push(cw_stilo_t *a_stilo, cw_stilo_t *a_object)
 	_cw_assert(stack->stiloe.type == STILOT_STACK);
 
 	/* Get an unused stacko.  If there are no spares, create some first. */
+	stiloe_p_stack_lock(stack);
 	if (qr_prev(ql_first(&stack->stack), link) == &stack->under)
 		stiloe_p_stack_spares_create(stack);
 	if (a_object != NULL) {
@@ -132,8 +148,10 @@ stilo_stack_under_push(cw_stilo_t *a_stilo, cw_stilo_t *a_object)
 	stacko->stackc->nused++;
 	stack->count++;
 	stack->nspare--;
+	retval = &stacko->stilo;
+	stiloe_p_stack_unlock(stack);
 
-	return &stacko->stilo;
+	return retval;
 }
 
 _CW_INLINE cw_bool_t
@@ -150,6 +168,7 @@ stilo_stack_pop(cw_stilo_t *a_stilo)
 	_cw_assert(stack->stiloe.magic == _CW_STILOE_MAGIC);
 	_cw_assert(stack->stiloe.type == STILOT_STACK);
 
+	stiloe_p_stack_lock(stack);
 	if (stack->count == 0) {
 		retval = TRUE;
 		goto RETURN;
@@ -166,6 +185,7 @@ stilo_stack_pop(cw_stilo_t *a_stilo)
 
 	retval = FALSE;
 	RETURN:
+	stiloe_p_stack_unlock(stack);
 	return retval;
 }
 
@@ -186,6 +206,7 @@ stilo_stack_npop(cw_stilo_t *a_stilo, cw_uint32_t a_count)
 
 	_cw_assert(a_count > 0);
 
+	stiloe_p_stack_lock(stack);
 	if (a_count > stack->count) {
 		retval = TRUE;
 		goto RETURN;
@@ -208,6 +229,7 @@ stilo_stack_npop(cw_stilo_t *a_stilo, cw_uint32_t a_count)
 
 	retval = FALSE;
 	RETURN:
+	stiloe_p_stack_unlock(stack);
 	return retval;
 }
 
@@ -225,6 +247,7 @@ stilo_stack_get(cw_stilo_t *a_stilo)
 	_cw_assert(stack->stiloe.magic == _CW_STILOE_MAGIC);
 	_cw_assert(stack->stiloe.type == STILOT_STACK);
 
+	stiloe_p_stack_lock(stack);
 	if (stack->count == 0) {
 		retval = NULL;
 		goto RETURN;
@@ -234,6 +257,7 @@ stilo_stack_get(cw_stilo_t *a_stilo)
 
 	retval = &stacko->stilo;
 	RETURN:
+	stiloe_p_stack_unlock(stack);
 	return retval;
 }
 
@@ -252,6 +276,7 @@ stilo_stack_nget(cw_stilo_t *a_stilo, cw_uint32_t a_index)
 	_cw_assert(stack->stiloe.magic == _CW_STILOE_MAGIC);
 	_cw_assert(stack->stiloe.type == STILOT_STACK);
 
+	stiloe_p_stack_lock(stack);
 	if (a_index >= stack->count) {
 		retval = NULL;
 		goto RETURN;
@@ -262,6 +287,7 @@ stilo_stack_nget(cw_stilo_t *a_stilo, cw_uint32_t a_index)
 
 	retval = &stacko->stilo;
 	RETURN:
+	stiloe_p_stack_unlock(stack);
 	return retval;
 }
 
@@ -279,6 +305,7 @@ stilo_stack_down_get(cw_stilo_t *a_stilo, cw_stilo_t *a_object)
 	_cw_assert(stack->stiloe.magic == _CW_STILOE_MAGIC);
 	_cw_assert(stack->stiloe.type == STILOT_STACK);
 
+	stiloe_p_stack_lock(stack);
 	if (a_object != NULL) {
 		if (stack->count <= 1) {
 			retval = NULL;
@@ -302,6 +329,7 @@ stilo_stack_down_get(cw_stilo_t *a_stilo, cw_stilo_t *a_object)
 
 	retval = &stacko->stilo;
 	RETURN:
+	stiloe_p_stack_unlock(stack);
 	return retval;
 }
 
@@ -354,6 +382,7 @@ stilo_stack_roll(cw_stilo_t *a_stilo, cw_uint32_t a_count, cw_sint32_t a_amount)
 	 * Get a pointer to the new top of the stack.  Then continue on to find
 	 * the end of the roll region.
 	 */
+	stiloe_p_stack_lock(stack);
 	for (i = 0, top = ql_first(&stack->stack); i < a_amount; i++)
 		top = qr_next(top, link);
 	noroll = top;
@@ -394,6 +423,7 @@ stilo_stack_roll(cw_stilo_t *a_stilo, cw_uint32_t a_count, cw_sint32_t a_amount)
 	ql_first(&stack->stack) = top;
 	qr_meld(top, noroll, link);
 	stack->noroll = NULL;
+	stiloe_p_stack_unlock(stack);
 
 	RETURN:
 }

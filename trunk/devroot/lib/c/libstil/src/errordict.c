@@ -43,6 +43,7 @@ static const struct cw_errordict_entry errordict_ops[] = {
 	ENTRY(undefinedfilename),
 	ENTRY(undefinedresult),
 	ENTRY(unmatchedmark),
+	ENTRY(unmatchedfino),
 	ENTRY(unregistered)
 };
 
@@ -338,6 +339,12 @@ void
 errordict_undefinedresult(cw_stilo_t *a_thread)
 {
 	errordict_p_generic(a_thread, STILO_THREADE_UNDEFINEDRESULT, TRUE);
+}
+
+void
+errordict_unmatchedfino(cw_stilo_t *a_thread)
+{
+	errordict_p_generic(a_thread, STILO_THREADE_UNMATCHEDFINO, TRUE);
 }
 
 void

@@ -137,6 +137,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(signal),
 	ENTRY(spop),
 	ENTRY(srand),
+	ENTRY(stack),
 	ENTRY(start),
 	ENTRY(stat),
 	ENTRY(stop),
@@ -3200,6 +3201,17 @@ systemdict_srand(cw_stilo_t *a_thread)
 }
 
 void
+systemdict_stack(cw_stilo_t *a_thread)
+{
+	cw_stilo_t	*ostack, *nstack;
+
+	ostack = stilo_thread_ostack_get(a_thread);
+	nstack = stilo_stack_push(ostack);
+	stilo_stack_new(nstack, stilo_thread_stil_get(a_thread),
+	    stilo_thread_currentlocking(a_thread));
+}
+
+void
 systemdict_start(cw_stilo_t *a_thread)
 {
 	cw_stilo_t	*ostack, *estack;
@@ -3381,7 +3393,61 @@ systemdict_sub(cw_stilo_t *a_thread)
 void
 systemdict_sym_rb_gt(cw_stilo_t *a_thread)
 {
-	_cw_error("XXX Not implemented");
+	cw_stilo_t	*ostack, *tstack;
+	cw_stilo_t	*nstack, *tstilo, *stilo;
+	cw_sint32_t	nelements, i, depth;
+
+	ostack = stilo_thread_ostack_get(a_thread);
+	tstack = stilo_thread_tstack_get(a_thread);
+	/* Find the fino. */
+	for (i = 0, depth = stilo_stack_count(ostack), stilo = NULL; i < depth;
+	     i++) {
+		stilo = stilo_stack_down_get(ostack, stilo);
+		if (stilo_type_get(stilo) == STILOT_FINO)
+			break;
+	}
+	if (i == depth) {
+		stilo_thread_error(a_thread, STILO_THREADE_UNMATCHEDFINO);
+		return;
+	}
+
+	/*
+	 * i is the index of the fino, and stilo points to the fino.  Set
+	 * nelements accordingly.
+	 */
+	nelements = i;
+
+	nstack = stilo_stack_push(tstack);
+	stilo_stack_new(nstack, stilo_thread_stil_get(a_thread),
+	    stilo_thread_currentlocking(a_thread));
+
+	/*
+	 * Push objects onto tstack and pop them off ostack.
+	 */
+	for (i = 0; i < nelements; i++) {
+		stilo = stilo_stack_get(ostack);
+		tstilo = stilo_stack_push(tstack);
+		stilo_dup(tstilo, stilo);
+		stilo_stack_pop(ostack);
+	}
+
+	/* Pop the fino off ostack. */
+	stilo_stack_pop(ostack);
+
+	/*
+	 * Push objects onto nstack and pop them off tstack.
+	 */
+	for (i = 0; i < nelements; i++) {
+		stilo = stilo_stack_get(tstack);
+		tstilo = stilo_stack_push(nstack);
+		stilo_dup(tstilo, stilo);
+		stilo_stack_pop(tstack);
+	}
+
+	/* Push nstack onto ostack and pop it off of tstack. */
+	stilo = stilo_stack_push(ostack);
+	stilo_dup(stilo, nstack);
+	stilo_stack_pop(tstack);
 }
 
 /* >> */
@@ -3532,7 +3598,9 @@ void
 systemdict_thread(cw_stilo_t *a_thread)
 {
 	cw_stilo_t	*ostack, *tstack;
-	cw_stilo_t	*stack, *entry, *thread;
+	cw_stilo_t	*stack, *testack, *tostack, *ttstack;
+	cw_stilo_t	*entry, *thread, *stilo;
+	cw_uint32_t	i, count;
 
 	ostack = stilo_thread_ostack_get(a_thread);
 	tstack = stilo_thread_tstack_get(a_thread);
@@ -3549,10 +3617,27 @@ systemdict_thread(cw_stilo_t *a_thread)
 	stilo_thread_new(thread, stilo_thread_stil_get(a_thread));
 
 	/* Set up the new thread's estack. */
-	_cw_error("XXX Not implemented");
+	testack = stilo_thread_estack_get(thread);
+	stilo = stilo_stack_push(testack);
+	stilo_dup(stilo, entry);
 
-	/* Set up the new thread's ostack. */
-	_cw_error("XXX Not implemented");
+	/*
+	 * Set up the new thread's ostack.
+	 */
+	tostack = stilo_thread_ostack_get(thread);
+	ttstack = stilo_thread_tstack_get(thread);
+	/* Move stack objects to new thread's tstack. */
+	for (i = 0, count = stilo_stack_count(stack); i < count; i++) {
+		stilo = stilo_stack_push(ttstack);
+		stilo_dup(stilo, stilo_stack_get(stack));
+		stilo_stack_pop(stack);
+	}
+	/* Move objects from new thread's tstack to ostack. */
+	for (i = 0; i < count; i++) {
+		stilo = stilo_stack_push(tostack);
+		stilo_dup(stilo, stilo_stack_get(ttstack));
+		stilo_stack_pop(ttstack);
+	}
 
 	/* Clean up. */
 	stilo_stack_npop(ostack, 2);
