@@ -49,7 +49,6 @@ private struct {
     char *name;
     int (*func) __P((EditLine *, int, char **));
 } cmds[] = {
-    {	"bind",		map_bind 	},
     {	"echotc",	term_echotc 	},
     {	"history",	hist_list	},
     {	"telltc",	term_telltc 	},
@@ -220,21 +219,4 @@ parse__string(out, in)
 	    *out++ = *in++;
 	    break;
 	}
-}
-
-/* parse_cmd():
- *	Return the command number for the command string given
- *	or -1 if one is not found
- */
-protected int
-parse_cmd(el, cmd)
-    EditLine *el;
-    const char *cmd;
-{
-    el_bindings_t *b;
-
-    for (b = el->el_map.help; b->name != NULL; b++)
-	if (strcmp(b->name, cmd) == 0)
-	    return b->func;
-    return -1;
 }

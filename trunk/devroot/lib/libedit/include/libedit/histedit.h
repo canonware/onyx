@@ -100,14 +100,11 @@ int 		 el_set		__P((EditLine *, int, ...));
 #define EL_TERMINAL	1	/* , const char *);		*/
 #define EL_EDITOR	2	/* , const char *);		*/
 #define EL_SIGNAL	3	/* , int);			*/
-#define	EL_BIND		4	/* , const char *, ..., NULL);	*/
-#define	EL_TELLTC	5	/* , const char *, ..., NULL);	*/
-#define	EL_SETTC	6	/* , const char *, ..., NULL);	*/
-#define	EL_ECHOTC	7	/* , const char *, ..., NULL);	*/
-#define	EL_SETTY	8	/* , const char *, ..., NULL);	*/
-#define	EL_ADDFN	9	/* , const char *, const char *	*/
-				/* , el_func_t);		*/
-#define EL_HIST		10	/* , hist_fun_t, const char *);	*/
+#define	EL_TELLTC	4	/* , const char *, ..., NULL);	*/
+#define	EL_SETTC	5	/* , const char *, ..., NULL);	*/
+#define	EL_ECHOTC	6	/* , const char *, ..., NULL);	*/
+#define	EL_SETTY	7	/* , const char *, ..., NULL);	*/
+#define EL_HIST		8	/* , hist_fun_t, const char *);	*/
 
 /*
  * Source named file or $PWD/.editrc or $HOME/.editrc

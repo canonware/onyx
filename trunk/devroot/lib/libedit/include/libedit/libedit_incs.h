@@ -134,4 +134,3 @@ extern char    *fgetline	__P((FILE *, int *));
 #include "map.h"
 #include "parse.h"
 #include "sig.h"
-#include "help.h"

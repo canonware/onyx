@@ -184,7 +184,6 @@ el_set(va_alist)
 	rv = 0;
 	break;
 
-    case EL_BIND:
     case EL_TELLTC:
     case EL_SETTC:
     case EL_ECHOTC:
@@ -197,11 +196,6 @@ el_set(va_alist)
 		     break;
 
 	    switch (op) {
-	    case EL_BIND:
-		argv[0] = "bind";
-		rv = map_bind(el, i, argv);
-		break;
-
 	    case EL_TELLTC:
 		argv[0] = "telltc";
 		rv = term_telltc(el, i, argv);
@@ -230,15 +224,6 @@ el_set(va_alist)
 	}
 	break;
 
-    case EL_ADDFN:
-	{
-	    char 	*name = va_arg(va, char *);
-	    char 	*help = va_arg(va, char *);
-	    el_func_t    func = va_arg(va, el_func_t);
-	    rv = map_addfunc(el, name, help, func);
-	}
-	break;
-
     case EL_HIST:
 	{
 	    hist_fun_t func = va_arg(va, hist_fun_t);
@@ -248,6 +233,7 @@ el_set(va_alist)
 	break;
 
     default:
+	    _cw_not_reached(); /* XXX jasone */
 	rv = -1;
     }
 

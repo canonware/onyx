@@ -603,11 +603,12 @@ key_kprint(el, key, val, ntype)
 					      ntype == XK_STR ? "\"\"" : "[]"));
 	    break;
 	case XK_CMD:
-	    for (fp = el->el_map.help; fp->name; fp++)
-		if (val->cmd == fp->func) {
-		    _cw_out_put_f(el->el_errfile, fmt, key, fp->name);
-		    break;
-		}
+		_cw_not_reached(); /* XXX jasone */
+/*  	    for (fp = el->el_map.help; fp->name; fp++) */
+/*  		if (val->cmd == fp->func) { */
+/*  		    _cw_out_put_f(el->el_errfile, fmt, key, fp->name); */
+/*  		    break; */
+/*  		} */
 #ifdef DEBUG_KEY
 	    if (fp->name == NULL)
 		_cw_out_put_f(el->el_errfile, "BUG! Command not found.\n");
