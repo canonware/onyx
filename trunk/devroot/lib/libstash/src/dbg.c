@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 173 $
- * $Date: 1998-08-26 12:34:42 -0700 (Wed, 26 Aug 1998) $
+ * $Revision: 179 $
+ * $Date: 1998-08-29 21:00:17 -0700 (Sat, 29 Aug 1998) $
  *
  * <<< Description >>>
  *
@@ -71,8 +71,8 @@ dbg_new()
   bzero(retval, sizeof(cw_dbg_t));
 
   rwl_new(&retval->rw_lock);
-  dbg_build_tbl(retval);
-  dbg_recalc_fpmatch(retval);
+  dbg_p_build_tbl(retval);
+  dbg_p_recalc_fpmatch(retval);
 
   return retval;
 }
@@ -107,7 +107,7 @@ dbg_turn_on(cw_dbg_t * a_dbg_o, cw_uint32_t a_flag)
   rwl_wlock(&a_dbg_o->rw_lock);
 
   a_dbg_o->curr_settings[a_flag] = TRUE;
-  dbg_recalc_fpmatch(a_dbg_o);
+  dbg_p_recalc_fpmatch(a_dbg_o);
 
   rwl_wunlock(&a_dbg_o->rw_lock);
 }
@@ -126,7 +126,7 @@ dbg_turn_off(cw_dbg_t * a_dbg_o, cw_uint32_t a_flag)
   rwl_wlock(&a_dbg_o->rw_lock);
 
   a_dbg_o->curr_settings[a_flag] = FALSE;
-  dbg_recalc_fpmatch(a_dbg_o);
+  dbg_p_recalc_fpmatch(a_dbg_o);
 
   rwl_wunlock(&a_dbg_o->rw_lock);
 }
@@ -149,7 +149,7 @@ dbg_clear(cw_dbg_t * a_dbg_o)
   {
     a_dbg_o->curr_settings[x] = FALSE;
   }
-  dbg_recalc_fpmatch(a_dbg_o);
+  dbg_p_recalc_fpmatch(a_dbg_o);
   
   rwl_wunlock(&a_dbg_o->rw_lock);
 }
@@ -161,7 +161,7 @@ dbg_clear(cw_dbg_t * a_dbg_o)
  *
  ****************************************************************************/
 void
-dbg_build_tbl(cw_dbg_t * a_dbg_o)
+dbg_p_build_tbl(cw_dbg_t * a_dbg_o)
 {
   cw_uint32_t x, y, i;
   extern cw_sint32_t dbg_raw_tbl[];
@@ -211,7 +211,7 @@ dbg_build_tbl(cw_dbg_t * a_dbg_o)
  *
  ****************************************************************************/
 void
-dbg_recalc_fpmatch(cw_dbg_t * a_dbg_o)
+dbg_p_recalc_fpmatch(cw_dbg_t * a_dbg_o)
 {
   cw_uint32_t x, y;
   cw_bool_t f, p;

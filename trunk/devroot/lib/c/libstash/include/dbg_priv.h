@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 173 $
- * $Date: 1998-08-26 12:34:42 -0700 (Wed, 26 Aug 1998) $
+ * $Revision: 179 $
+ * $Date: 1998-08-29 21:00:17 -0700 (Sat, 29 Aug 1998) $
  *
  * <<< Description >>>
  *
@@ -52,6 +52,7 @@ cw_sint32_t dbg_raw_tbl[] =
   _STASH_DBG_C_RES_FUNC, _STASH_DBG_C_FUNC, -1, /* _STASH_DBG_R_RES_FUNC */
   _STASH_DBG_C_SOCK_FUNC, _STASH_DBG_C_FUNC, -1, /* _STASH_DBG_R_SOCK_FUNC */
   _STASH_DBG_C_SOCKS_FUNC, _STASH_DBG_C_FUNC, -1, /* _STASH_DBG_R_SOCKS_FUNC */
+  _STASH_DBG_C_RES_ERROR, -1, /* _STASH_DBG_R_RES_ERROR */
   /* <ADD> */
   -1
 };
@@ -63,14 +64,15 @@ cw_sint32_t dbg_raw_on[] =
 {
   _STASH_DBG_C_DBG,
   _STASH_DBG_C_BRBS_ERROR,
+  _STASH_DBG_C_RES_ERROR,
   /* <ADD> */
   -1
 };
 
-#define dbg_build_tbl _CW_NS_ANY(dbg_build_tbl)
-#define dbg_recalc_fpmatch _CW_NS_ANY(dbg_recalc_fpmatch)
+#define dbg_p_build_tbl _CW_NS_ANY(dbg_p_build_tbl)
+#define dbg_p_recalc_fpmatch _CW_NS_ANY(dbg_p_recalc_fpmatch)
 
-void dbg_build_tbl(cw_dbg_t * a_dbg_o);
-void dbg_recalc_fpmatch(cw_dbg_t * a_dbg_o);
+void dbg_p_build_tbl(cw_dbg_t * a_dbg_o);
+void dbg_p_recalc_fpmatch(cw_dbg_t * a_dbg_o);
 
 #endif /* _DBG_PRIV_H_ */

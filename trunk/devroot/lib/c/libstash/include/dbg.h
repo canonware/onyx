@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 173 $
- * $Date: 1998-08-26 12:34:42 -0700 (Wed, 26 Aug 1998) $
+ * $Revision: 179 $
+ * $Date: 1998-08-29 21:00:17 -0700 (Sat, 29 Aug 1998) $
  *
  * <<< Description >>>
  *
@@ -41,6 +41,7 @@
 #define _STASH_DBG_C_RES_FUNC 16
 #define _STASH_DBG_C_SOCK_FUNC 17
 #define _STASH_DBG_C_SOCKS_FUNC 18
+#define _STASH_DBG_C_RES_ERROR 19
 /* <ADD> */
 
 /* Filters (rows).  Use these with calls to dbg_fmatch() and dbg_pmatch(). */
@@ -63,12 +64,13 @@
 #define _STASH_DBG_R_RES_FUNC 16
 #define _STASH_DBG_R_SOCK_FUNC 17
 #define _STASH_DBG_R_SOCKS_FUNC 18
+#define _STASH_DBG_R_RES_ERROR 19
 /* <ADD> */
 
 /* Put these here only because they're related to the above macros.  They
  * aren't directly useful to the caller. */
-#define _STASH_DBG_C_MAX 18 /* Highest numbered column in table. */
-#define _STASH_DBG_R_MAX 18 /* Highest numbered row in table. */
+#define _STASH_DBG_C_MAX 19 /* Highest numbered column in table. */
+#define _STASH_DBG_R_MAX 19 /* Highest numbered row in table. */
 /* <ADD> */
 
 typedef struct cw_dbg_s cw_dbg_t;
