@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 108 $
- * Last modified: $Date: 1998-06-30 00:07:07 -0700 (Tue, 30 Jun 1998) $
+ * Current revision: $Revision: 115 $
+ * Last modified: $Date: 1998-06-30 17:44:05 -0700 (Tue, 30 Jun 1998) $
  *
  * <<< Description >>>
  *
@@ -26,7 +26,7 @@
  * <comment> ::= <hash> { <caps> | <lower> | <numbers> | <under> | <period>
  *                        | <hash> | <whitespace> | <colon>
  *                        | <backslash> | <legal_in_name> }+
- *             | <e>
+ *             | <hash> <e>
  * <linebreak> ::= <backslash> <whitespaces> <newline>
  * <linebreaks> ::= <linebreak> <linebreaks>
  *                | <e>
