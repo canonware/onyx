@@ -453,7 +453,8 @@ $0 usage:
                   | 1 <= <n> < 2^31
                   | 
                   | Lines which do not match the patterns shown above are
-                  | ignored.
+                  | ignored, except that the 1..<n> construct must be the first
+                  | line of output seen.
                   | 
     -d --diff     | Diff mode (incompatible with sequence mode).
                   | If <test>.exp exists, diff it with the output from <test> to

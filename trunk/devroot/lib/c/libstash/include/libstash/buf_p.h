@@ -70,9 +70,6 @@ buf_p_make_range_writeable(cw_buf_t * a_buf, cw_uint32_t a_offset,
 static void
 bufc_p_dump(cw_bufc_t * a_bufc, const char * a_prefix);
 
-static cw_uint32_t
-bufc_p_get_size(cw_bufc_t * a_bufc);
-
 static cw_bool_t
 bufc_p_get_is_writeable(cw_bufc_t * a_bufc);
 

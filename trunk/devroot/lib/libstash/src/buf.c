@@ -293,7 +293,7 @@ buf_dump(cw_buf_t * a_buf, const char * a_prefix)
     else
     {
       log_printf(cw_g_log,
-		 "%s|   \\--> bufc : 0x%x\n",
+		 "%s|   \\--> bufc : 0x%x (invalid)\n",
 		 a_prefix, a_buf->bufel_array[i].bufc);
     }
   }
@@ -2566,15 +2566,6 @@ bufc_p_dump(cw_bufc_t * a_bufc, const char * a_prefix)
 #ifdef _CW_REENTRANT
   mtx_unlock(&a_bufc->lock);
 #endif
-}
-
-static cw_uint32_t
-bufc_p_get_size(cw_bufc_t * a_bufc)
-{
-  _cw_check_ptr(a_bufc);
-  _cw_assert(a_bufc->magic == _CW_BUFC_MAGIC);
-
-  return a_bufc->buf_size;
 }
 
 static cw_bool_t
