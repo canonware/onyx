@@ -1,3 +1,7 @@
+1999-09-18  Jason Evans  <jasone@canonware.com>
+
+	* src/mq.c (mq_timedget): Add.
+
 1999-09-16  Jason Evans  <jasone@canonware.com>
 
 	* man/man3/libstash_bhp.3s: Add.

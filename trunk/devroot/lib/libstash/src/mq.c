@@ -186,6 +186,60 @@ mq_get(cw_mq_t * a_mq)
   mtx_unlock(&a_mq->lock);
   return retval;
 }
+
+void *
+mq_timedget(cw_mq_t * a_mq, struct timespec * a_time)
+{
+  void * retval;
+  cw_ring_t * t_ring;
+  
+  _cw_check_ptr(a_mq);
+  _cw_assert(_LIBSTASH_MQ_MAGIC == a_mq->magic);
+  _cw_check_ptr(a_time);
+  
+  mtx_lock(&a_mq->lock);
+
+  if (a_mq->get_stop == TRUE)
+  {
+    retval = NULL;
+    goto RETURN;
+  }
+
+  if (NULL == a_mq->ring)
+  {
+    cnd_timedwait(&a_mq->cond, &a_mq->lock, a_time);
+    if (a_mq->get_stop == TRUE)
+    {
+      retval = NULL;
+      goto RETURN;
+    }
+  }
+
+  if (NULL != a_mq->ring)
+  {
+    t_ring = a_mq->ring;
+    a_mq->ring = ring_cut(t_ring);
+    if (a_mq->ring == t_ring)
+    {
+      a_mq->ring = NULL;
+    }
+    retval = ring_get_data(t_ring);
+
+    if (NULL != a_mq->spares_ring)
+    {
+      ring_meld(t_ring, a_mq->spares_ring);
+    }
+    a_mq->spares_ring = t_ring;
+  }
+  else
+  {
+    retval = NULL;
+  }
+  
+  RETURN:
+  mtx_unlock(&a_mq->lock);
+  return retval;
+}
 #endif
 
 cw_sint32_t

@@ -97,6 +97,32 @@ mq_tryget(cw_mq_t * a_mq);
  *
  * a_mq : Pointer to a mq.
  *
+ * a_time : Timeout.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Pointer to a message, or NULL.
+ *          NULL : get is in the stop state, or timeout.
+ *
+ * <<< Description >>>
+ *
+ * Get a message.  If none are available, block until a message is available, or
+ *                 until timeout.
+ *
+ * Note: This function is only available in the threaded versions of libstash.
+ *
+ ****************************************************************************/
+#ifdef _CW_REENTRANT
+void *
+mq_timedget(cw_mq_t * a_mq, struct timespec * a_time);
+#endif
+
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_mq : Pointer to a mq.
+ *
  * <<< Output(s) >>>
  *
  * retval : Pointer to a message, or NULL.
