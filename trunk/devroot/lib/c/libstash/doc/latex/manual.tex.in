@@ -14,3 +14,78 @@
 
 \clearemptydoublepage
 \chapter{libstash}
+The \libname{libstash} library defines a number of algorithms and data
+structures that are useful for many purposes.
+
+\libname{libstash} is designed to run on *nix platforms, and is known to work on
+FreeBSD, Linux, and Solaris.  The pthreads library is required.
+
+\section{Compilation}
+Use one of the following compiler command lines to compile applications with
+\libname{libstash}.
+\begin{description}
+\item[Normal: ] cc \filename{file} -lstash -lpthread
+\item[Debug: ] cc -g -D\_LIBSTASH\_DBG \filename{file} -lstash\_d -lpthread
+\item[Profile: ] cc -pg \filename{file} -lstash\_p -lpthread
+\end{description}
+
+\section{Usage}
+Regardless of what classes are used, at least the following minimal shell of C
+code should be used.
+
+\begin{verbatim}
+#include <libstash/libstash.h>
+
+int
+main()
+{
+	libstash_init();
+
+	/* Do stuff. */
+
+	libstash_shutdown();
+	return 0;
+}
+\end{verbatim}
+
+\cfunc{libstash\_init}{} must be called in order for things to work properly.
+
+\subsection{API}
+\begin{description}
+\label{libstash_init}
+\index{\cfunc[]{libstash\_init}{}}
+\item[{\cfunc[void]{libstash\_init}{void}}: ]
+	\begin{description}
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
+	\item[Exception(s): ]
+		\begin{description}
+		\item[\htmlref{\_CW\_XEPV\_OOM}{xep:oom}.]
+		\end{description}
+	\item[Description: ]
+		Initialize various global variables.  In particular, initialize
+		\cvar{cw\_g\_mem}, \cvar{cw\_g\_dbg}, and \cvar{cw\_g\_out}
+		(default output to file descriptor 1).
+	\end{description}
+\label{}
+\index{\cfunc[]{}{}}
+\item[{\cfunc[]{}{}}: ]
+	\begin{description}
+	\item[Input(s): ]
+		\begin{description}
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}
+		\item[: ]
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}
+		\item[\htmlref{\_CW\_XEPV\_}{xep:}.]
+		\end{description}
+	\item[Description: ]
+	\end{description}
+\end{description}
+
+\section{Classes}
+\input{@abs_srcdir@/lib/c/libstash/doc/latex/xep}

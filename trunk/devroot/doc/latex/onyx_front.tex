@@ -16,9 +16,11 @@
 \usepackage[dvips]{graphicx}
 \usepackage{longtable}
 \usepackage{float}
+\usepackage{html}
 %begin{latexonly}
 \usepackage{ncntrsbk}
 \usepackage{fancyheadings}
+\usepackage{ifthen}
 %end{latexonly}
 
 % For latex2html.
@@ -49,8 +51,8 @@
 % Title page setup
 %
 \title{Canonware Software Manual, Version <Version>}
-\author{by Jason Evans}
-%\date{\today}
+\author{Jason Evans}
+\date{\today}
 
 % Control what all ends up in the table of contents.
 \addtocounter{secnumdepth}{1}
@@ -74,12 +76,15 @@
 %\setlength{\footrulewidth}{2pt}
 %end{latexonly}
 
-%
-% Create the example float type.
-%
-%\newfloat{example}{htbp}{alg}[chapter]
-%\floatname{example}{Example}
-%\floatplacement{example}{H} % Since we couldn't do it in the \newfloat call.
+\providecommand{\ifthenelse}[3]{ } % For latex2html.
+\newcommand{\cfunc}[3][]{#1\ifthenelse{\equal{}{#1}}{}{ }{\em #2}(#3)}
+\newcommand{\cvar}[1]{{\em #1}}
+\newcommand{\binname}[1]{{\em #1}}
+\newcommand{\libname}[1]{{\em #1}}
+\newcommand{\filename}[1]{{\em #1}}
+
+% Generate an index.
+\makeindex
 
 \begin{document}
 \maketitle
@@ -102,25 +107,32 @@
 %\listoffigures
 %\clearemptydoublepage
 
-%\listof{example}{List of Examples}
-%\clearemptydoublepage
-
 \lhead[\bfseries\thepage]{\bfseries{Preface}}
 \rhead[\bfseries{Preface}]{\bfseries\thepage}
 
-\chapter{Preface}
-\addcontentsline{toc}{chapter}{Preface}
+\part*{Preface}
+\addcontentsline{toc}{}{Preface}
+The Canonware Software Distribution contains a number of programs and C
+libraries.  All of the programs and libraries are integrated into a single
+software distribution, though it is possible to install and use individual
+programs and libraries (subject to library dependencies).  This manual documents
+the entire distribution, regardless of which portions of the software are
+installed.
 
-\subsection*{What this manual is}
-Fu.
-
-\subsection*{How to use this manual}
-This manual is broken into two separate parts:
-
+This manual is broken into three separate parts:
 \begin{itemize}
 \item{\bf{Part I}: Programs}
 \item{\bf{Part II}: Libraries}
+\item{\bf{Part III}: stil Language Reference}
 \end{itemize}
+
+The stil language is implemented as \libname{libstil}, which is documented in
+Part II, and is made available as a stand-alone interpreter in \binname{stil},
+which is documented in Part I.  The stil language itself is documented in Part
+III.
+
+For distribution, news, and additional project information, see
+\htmlurl{http://www.canonware.com/canonware/}.
 
 %
 % Setup for main body of document.

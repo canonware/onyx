@@ -12,6 +12,9 @@
 %              
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\newcommand{\ainput}[1]{\input{@abs_srcdir@/#1}}
+\providecommand{\ainput}[1]{\input{@abs_srcdir@/#1}}
+
 % Definitions and front matter.
 \input{@abs_srcdir@/doc/latex/front}
 

@@ -78,6 +78,7 @@ doc_clean :
   rm -f [objdir]/doc/latex/manual.alg;
   rm -f [objdir]/doc/latex/manual.aux;
   rm -f [objdir]/doc/latex/manual.dvi;
+  rm -f [objdir]/doc/latex/manual.idx;
   rm -f [objdir]/doc/latex/manual.lof;
   rm -f [objdir]/doc/latex/manual.log;
   rm -f [objdir]/doc/latex/manual.toc;
@@ -128,7 +129,8 @@ doc_relclean :
 [objdir]/%0html/%.html : [objdir]/%0ps/%.ps
   set mkdir
 {
-  [LATEX2HTML] -dir [abs_objdir]/%0html -split 3 -toc_depth 4 -footnode
-    -noinfo -auto_link -transparent -image_type png -show_section_numbers
-    [abs_srcdir]/%0latex/%.tex;
+  [LATEX2HTML] -init_file [srcdir]/%0latex/.latex2html-init
+    -dir [abs_objdir]/%0html -split 3 -toc_depth 4
+    -footnode -noinfo -auto_link -transparent -image_type png
+    -show_section_numbers [abs_srcdir]/%0latex/%.tex;
 }
