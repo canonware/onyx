@@ -33,8 +33,9 @@ fi
 CW_BUILD_LIB(libstash, lib_stash)
 
 dnl Look for modules.
-CW_BUILD_MOD(modncurses, mod_ncurses)
+CW_BUILD_MOD(modcanonyx, mod_canonyx)
 CW_BUILD_MOD(modgtk, mod_gtk)
+CW_BUILD_MOD(modncurses, mod_ncurses)
 
 dnl Look for binaries.
 CW_BUILD_BIN(cover, bin_cover)
