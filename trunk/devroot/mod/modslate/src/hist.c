@@ -856,32 +856,25 @@ hist_p_pos(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos)
 	return;
     }
 
-    /* Initialize header (old position). */
+    /* Initialize and insert header (old position). */
     histh_p_header_tag_set(&a_hist->hhead, HISTH_TAG_POS);
     histh_p_aux_set(&a_hist->hhead, a_hist->hbpos);
+    mkr_before_insert(&a_hist->hend, histh_p_bufv_get(&a_hist->hhead),
+		      histh_p_bufvcnt_get(&a_hist->hhead));
 
-    /* Relocate hbeg. */
-    mkr_dup(&a_hist->hbeg, &a_hist->hend);
-
-    /* Insert header. */
-    mkr_after_insert(&a_hist->hbeg, histh_p_bufv_get(&a_hist->hhead),
-		     histh_p_bufvcnt_get(&a_hist->hhead));
-
-    /* Relocate hcur. */
-    mkr_dup(&a_hist->hcur, &a_hist->hbeg);
-    mkr_seek(&a_hist->hcur, histh_p_bufvlen_get(&a_hist->hhead), BUFW_REL);
-
-    /* Initialize footer (new position). */
+    /* Initialize and insert footer (new position). */
     histh_p_footer_tag_set(&a_hist->hfoot, HISTH_TAG_POS);
     histh_p_aux_set(&a_hist->hfoot, a_bpos);
+    mkr_before_insert(&a_hist->hend, histh_p_bufv_get(&a_hist->hfoot),
+		      histh_p_bufvcnt_get(&a_hist->hfoot));
 
-    /* Insert footer. */
-    mkr_after_insert(&a_hist->hcur, histh_p_bufv_get(&a_hist->hfoot),
-		     histh_p_bufvcnt_get(&a_hist->hfoot));
+    /* Relocate hbeg and hcur. */
+    mkr_dup(&a_hist->hbeg, &a_hist->hend);
+    mkr_dup(&a_hist->hcur, &a_hist->hend);
 
-    /* Relocate hend. */
-    mkr_dup(&a_hist->hend, &a_hist->hcur);
-    mkr_seek(&a_hist->hend, histh_p_bufvlen_get(&a_hist->hfoot), BUFW_REL);
+    /* Reset header and footer. */
+    histh_p_header_tag_set(&a_hist->hhead, HISTH_TAG_NONE);
+    histh_p_footer_tag_set(&a_hist->hhead, HISTH_TAG_NONE);
 
     /* Update hbpos now that the history record is complete. */
     a_hist->hbpos = a_bpos;
@@ -909,6 +902,7 @@ hist_p_ins_ynk_rem_del(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos,
 	hist_p_pos(a_hist, a_buf, a_bpos);
     }
 
+    /* Calculate insertion data count. */
     cnt = 0;
     for (i = 0; i < a_bufvcnt; i++)
     {
@@ -916,7 +910,7 @@ hist_p_ins_ynk_rem_del(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos,
     }
 
     /* Update the recorded position.  Also determine tag equivalence so that
-     * short records and regular records can be dealt with similarly. */
+     * short and long records can be dealt with similarly. */
     switch (a_tag)
     {
 	case HISTH_TAG_LINS:
@@ -1563,30 +1557,23 @@ hist_group_beg(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr)
 	hist_p_pos(a_hist, a_buf, mkr_pos(a_mkr));
     }
 
-    /* Initialize header. */
+    /* Initialize and insert header. */
     histh_p_header_tag_set(&a_hist->hhead, HISTH_TAG_GBEG);
+    mkr_before_insert(&a_hist->hend, histh_p_bufv_get(&a_hist->hhead),
+		      histh_p_bufvcnt_get(&a_hist->hhead));
 
-    /* Relocate hbeg. */
-    mkr_dup(&a_hist->hbeg, &a_hist->hend);
-
-    /* Insert header. */
-    mkr_after_insert(&a_hist->hbeg, histh_p_bufv_get(&a_hist->hhead),
-		     histh_p_bufvcnt_get(&a_hist->hhead));
-
-    /* Relocate hcur. */
-    mkr_dup(&a_hist->hcur, &a_hist->hbeg);
-    mkr_seek(&a_hist->hcur, histh_p_bufvlen_get(&a_hist->hhead), BUFW_REL);
-
-    /* Initialize footer. */
+    /* Initialize and insert footer. */
     histh_p_footer_tag_set(&a_hist->hfoot, HISTH_TAG_GBEG);
+    mkr_before_insert(&a_hist->hend, histh_p_bufv_get(&a_hist->hfoot),
+		      histh_p_bufvcnt_get(&a_hist->hfoot));
 
-    /* Insert footer. */
-    mkr_after_insert(&a_hist->hcur, histh_p_bufv_get(&a_hist->hfoot),
-		     histh_p_bufvcnt_get(&a_hist->hfoot));
+    /* Relocate hbeg and hcur. */
+    mkr_dup(&a_hist->hbeg, &a_hist->hend);
+    mkr_dup(&a_hist->hcur, &a_hist->hend);
 
-    /* Relocate hend. */
-    mkr_dup(&a_hist->hend, &a_hist->hcur);
-    mkr_seek(&a_hist->hend, histh_p_bufvlen_get(&a_hist->hfoot), BUFW_REL);
+    /* Reset header and footer. */
+    histh_p_header_tag_set(&a_hist->hhead, HISTH_TAG_NONE);
+    histh_p_footer_tag_set(&a_hist->hhead, HISTH_TAG_NONE);
 
     /* Increase depth. */
     a_hist->gdepth++;
@@ -1610,30 +1597,23 @@ hist_group_end(cw_hist_t *a_hist, cw_buf_t *a_buf)
 
     hist_p_redo_flush(a_hist);
 
-    /* Initialize header. */
+    /* Initialize and insert header. */
     histh_p_header_tag_set(&a_hist->hhead, HISTH_TAG_GEND);
+    mkr_before_insert(&a_hist->hend, histh_p_bufv_get(&a_hist->hhead),
+		      histh_p_bufvcnt_get(&a_hist->hhead));
 
-    /* Relocate hbeg. */
-    mkr_dup(&a_hist->hbeg, &a_hist->hend);
-
-    /* Insert header. */
-    mkr_after_insert(&a_hist->hbeg, histh_p_bufv_get(&a_hist->hhead),
-		     histh_p_bufvcnt_get(&a_hist->hhead));
-
-    /* Relocate hcur. */
-    mkr_dup(&a_hist->hcur, &a_hist->hbeg);
-    mkr_seek(&a_hist->hcur, histh_p_bufvlen_get(&a_hist->hhead), BUFW_REL);
-
-    /* Initialize footer. */
+    /* Initialize and insert footer. */
     histh_p_footer_tag_set(&a_hist->hfoot, HISTH_TAG_GEND);
+    mkr_before_insert(&a_hist->hend, histh_p_bufv_get(&a_hist->hfoot),
+		      histh_p_bufvcnt_get(&a_hist->hfoot));
 
-    /* Insert footer. */
-    mkr_after_insert(&a_hist->hcur, histh_p_bufv_get(&a_hist->hfoot),
-		     histh_p_bufvcnt_get(&a_hist->hfoot));
+    /* Relocate hbeg and hcur. */
+    mkr_dup(&a_hist->hbeg, &a_hist->hend);
+    mkr_dup(&a_hist->hcur, &a_hist->hend);
 
-    /* Relocate hend. */
-    mkr_dup(&a_hist->hend, &a_hist->hcur);
-    mkr_seek(&a_hist->hend, histh_p_bufvlen_get(&a_hist->hfoot), BUFW_REL);
+    /* Reset header and footer. */
+    histh_p_header_tag_set(&a_hist->hhead, HISTH_TAG_NONE);
+    histh_p_footer_tag_set(&a_hist->hhead, HISTH_TAG_NONE);
 
     /* Decrease depth. */
     a_hist->gdepth--;
