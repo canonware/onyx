@@ -79,9 +79,11 @@ ONYX_OTESTS =
               match_a.nx.in match_b.nx.in match_c.nx.in match_d.nx.in
               match_e.nx.in match_f.nx.in match_g.nx.in match_h.nx.in
               match_i.nx.in match_j.nx.in match_k.nx.in match_l.nx.in
-              match_m.nx.in match_n.nx.in regex_a.nx.in regex_b.nx.in
-              regex_c.nx.in regex_d.nx.in regex_e.nx.in regex_f.nx.in
-              regex_g.nx.in regex_h.nx.in regex_i.nx.in regex_j.nx.in
+              match_m.nx.in match_n.nx.in offsets_a.nx.in offsets_b.nx.in
+              offsets_c.nx.in offsets_d.nx.in offsets_e.nx.in offsets_f.nx.in
+              offsets_g.nx.in regex_a.nx.in regex_b.nx.in regex_c.nx.in
+              regex_d.nx.in regex_e.nx.in regex_f.nx.in regex_g.nx.in
+              regex_h.nx.in regex_i.nx.in regex_j.nx.in
 
 #endif
 #if @enable_posix@
