@@ -33,10 +33,10 @@ struct cw_chi_s
 #endif
     /* If space for a chi wasn't passed into ch_insert(), this is TRUE. */
     cw_bool_t is_malloced;
-    
+
     /* Key. */
     const void *key;
-    
+
     /* Data. */
     const void *data;
 
@@ -45,7 +45,7 @@ struct cw_chi_s
 
     /* Link into the slot's list of chi's. */
     ql_elm(cw_chi_t) slot_link;
-    
+
     /* Slot number. */
     cw_uint32_t slot;
 };
