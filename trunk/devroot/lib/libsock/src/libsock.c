@@ -280,14 +280,14 @@ libsock_spare_bufc_get(void)
 
 	_cw_check_ptr(g_libsock);
 
-	retval = bufc_new((cw_bufc_t *)_cw_pezz_get(&g_libsock->bufc_pool),
-	    cw_g_mem, (cw_opaque_dealloc_t *)pezz_put, (void
+	retval = bufc_new((cw_bufc_t *)pezz_get(&g_libsock->bufc_pool),
+	    cw_g_mem, (cw_opaque_dealloc_t *)pezz_put_e, (void
 	    *)&g_libsock->bufc_pool);
 	if (retval == NULL) {
 		retval = NULL;
 		goto RETURN;
 	}
-	buffer = _cw_pezz_get(&g_libsock->buffer_pool);
+	buffer = pezz_get(&g_libsock->buffer_pool);
 	if (buffer == NULL) {
 		bufc_delete(retval);
 		retval = NULL;
@@ -295,7 +295,7 @@ libsock_spare_bufc_get(void)
 	}
 	bufc_buffer_set(retval,
 	    buffer, pezz_buffer_size_get(&g_libsock->buffer_pool), TRUE,
-	    (cw_opaque_dealloc_t *)pezz_put, (void *)&g_libsock->buffer_pool);
+	    (cw_opaque_dealloc_t *)pezz_put_e, (void *)&g_libsock->buffer_pool);
 
 	RETURN:
 	return retval;
@@ -316,7 +316,7 @@ libsock_in_notify(cw_mq_t *a_mq, int a_sockfd)
 	cnd_new(&cnd);
 
 	message = (struct cw_libsock_msg_s
-	    *)_cw_pezz_get(&g_libsock->messages_pezz);
+	    *)pezz_get(&g_libsock->messages_pezz);
 
 	if (message == NULL) {
 		retval = TRUE;
@@ -333,7 +333,7 @@ libsock_in_notify(cw_mq_t *a_mq, int a_sockfd)
 
 	mtx_lock(&mtx);
 	if (mq_put(&g_libsock->messages, message) != 0) {
-		_cw_pezz_put(&g_libsock->messages_pezz, (void *)message);
+		pezz_put(&g_libsock->messages_pezz, (void *)message);
 		retval = TRUE;
 		goto RETURN;
 	}
@@ -374,7 +374,7 @@ libsock_l_sock_register(cw_sock_t *a_sock)
 	_cw_assert(sock_fd_get(a_sock) >= 0);
 
 	message = (struct cw_libsock_msg_s
-	    *)_cw_pezz_get(&g_libsock->messages_pezz);
+	    *)pezz_get(&g_libsock->messages_pezz);
 	if (message == NULL) {
 		retval = TRUE;
 		goto RETURN;
@@ -385,7 +385,7 @@ libsock_l_sock_register(cw_sock_t *a_sock)
 	message->type = REGISTER;
 	message->data.sock = a_sock;
 	if (mq_put(&g_libsock->messages, message) != 0) {
-		_cw_pezz_put(&g_libsock->messages_pezz, (void *)message);
+		pezz_put(&g_libsock->messages_pezz, (void *)message);
 		retval = TRUE;
 		goto RETURN;
 	}
@@ -406,7 +406,7 @@ libsock_l_sock_unregister(cw_uint32_t a_sockfd)
 	_cw_check_ptr(g_libsock);
 
 	message = (struct cw_libsock_msg_s
-	    *)_cw_pezz_get(&g_libsock->messages_pezz);
+	    *)pezz_get(&g_libsock->messages_pezz);
 	if (message == NULL) {
 		retval = TRUE;
 		goto RETURN;
@@ -417,7 +417,7 @@ libsock_l_sock_unregister(cw_uint32_t a_sockfd)
 	message->type = UNREGISTER;
 	message->data.sockfd = a_sockfd;
 	if (mq_put(&g_libsock->messages, message) != 0) {
-		_cw_pezz_put(&g_libsock->messages_pezz, (void *)message);
+		pezz_put(&g_libsock->messages_pezz, (void *)message);
 		retval = TRUE;
 		goto RETURN;
 	}
@@ -437,7 +437,7 @@ libsock_l_out_notify(cw_uint32_t a_sockfd)
 	_cw_check_ptr(g_libsock);
 
 	message = (struct cw_libsock_msg_s
-	    *)_cw_pezz_get(&g_libsock->messages_pezz);
+	    *)pezz_get(&g_libsock->messages_pezz);
 
 	if (NULL == message) {
 		retval = TRUE;
@@ -449,7 +449,7 @@ libsock_l_out_notify(cw_uint32_t a_sockfd)
 	message->type = OUT_NOTIFY;
 	message->data.sockfd = a_sockfd;
 	if (mq_put(&g_libsock->messages, message) != 0) {
-		_cw_pezz_put(&g_libsock->messages_pezz, (void *)message);
+		pezz_put(&g_libsock->messages_pezz, (void *)message);
 		retval = TRUE;
 		goto RETURN;
 	}
@@ -469,7 +469,7 @@ libsock_l_in_space(cw_uint32_t a_sockfd)
 	_cw_check_ptr(g_libsock);
 
 	message = (struct cw_libsock_msg_s
-	    *)_cw_pezz_get(&g_libsock->messages_pezz);
+	    *)pezz_get(&g_libsock->messages_pezz);
 
 	if (message == NULL) {
 		retval = TRUE;
@@ -481,7 +481,7 @@ libsock_l_in_space(cw_uint32_t a_sockfd)
 	message->type = IN_SPACE;
 	message->data.sockfd = a_sockfd;
 	if (mq_put(&g_libsock->messages, message) != 0) {
-		_cw_pezz_put(&g_libsock->messages_pezz, (void *)message);
+		pezz_put(&g_libsock->messages_pezz, (void *)message);
 		retval = TRUE;
 		goto RETURN;
 	}
@@ -860,7 +860,7 @@ libsock_p_entry_func(void *a_arg)
 #ifdef _LIBSOCK_DBG
 			message->magic = 0;
 #endif
-			_cw_pezz_put(&g_libsock->messages_pezz, (void *)message);
+			pezz_put(&g_libsock->messages_pezz, (void *)message);
 		}
 
 #ifdef _LIBSOCK_CONFESS
