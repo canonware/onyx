@@ -86,6 +86,9 @@ const cw_uint8_t *cw_g_nx_names[] = {
 #ifdef CW_THREADS
     "currentlocking",
 #endif
+#ifdef CW_REAL
+    "cvds",
+#endif
     "cve",
 #ifdef CW_REAL
     "cves",

@@ -303,20 +303,30 @@ systemdict begin
 	/realtype {
 	    % %real %flags
 
+	    % Determine precision past decimal point.
+	    dup /d known {
+		dup /d get
+	    }{
+		6
+	    } ifelse
+	    % %real %flags %precision
+	    
 	    % Determine whether to use decimal or exponential notation.
-	    dup /e known {
-		dup /e get
+	    1 index /e known {
+		1 index /e get
 	    }{
 		false
 	    } ifelse
-	    % %real %flags %exp?
+	    % %real %flags %precision %exp?
 
+	    3 index 3 1 roll
+	    % %real %flags %real %precision %exp?
 	    {
 		% Use exponential notation.
-		1 index cves
+		cves
 	    }{
 		% Use decimal notation.
-		1 index cvs
+		cvds
 	    } ifelse
 	    % %real %flags %str
 
@@ -521,6 +531,8 @@ systemdict begin
 %
 % Reals only:
 %
+% /d : digits of precision past decimal
+%    : %integer (default 6)
 % /e : exponential notation
 %    : %boolean (default false)
 %

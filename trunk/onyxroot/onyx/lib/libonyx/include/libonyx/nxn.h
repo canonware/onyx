@@ -85,6 +85,9 @@ typedef enum
 #ifdef CW_THREADS
     NXN_currentlocking,
 #endif
+#ifdef CW_REAL
+    NXN_cvds,
+#endif
     NXN_cve,
 #ifdef CW_REAL
     NXN_cves,

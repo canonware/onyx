@@ -113,6 +113,11 @@ void
 systemdict_currentlocking(cw_nxo_t *a_thread);
 #endif
 
+#ifdef CW_REAL
+void
+systemdict_cvds(cw_nxo_t *a_thread);
+#endif
+
 void
 systemdict_cve(cw_nxo_t *a_thread);
 

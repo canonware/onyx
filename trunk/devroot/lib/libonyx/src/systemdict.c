@@ -111,6 +111,9 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #ifdef CW_THREADS
     ENTRY(currentlocking),
 #endif
+#ifdef CW_REAL
+    ENTRY(cvds),
+#endif
     ENTRY(cve),
 #ifdef CW_REAL
     ENTRY(cves),
@@ -1381,6 +1384,14 @@ systemdict_currentlocking(cw_nxo_t *a_thread)
 }
 #endif
 
+#ifdef CW_REAL
+void
+systemdict_cvds(cw_nxo_t *a_thread)
+{
+    cw_error("XXX Not implemented");
+}
+#endif
+
 void
 systemdict_cve(cw_nxo_t *a_thread)
 {
@@ -1632,6 +1643,22 @@ systemdict_cvs(cw_nxo_t *a_thread)
 	    }
 	    break;
 	}
+#ifdef CW_REAL
+	case NXOT_REAL:
+	{
+	    cw_uint8_t result[15]; /* "-9.999999e+307\0" */
+	    cw_sint32_t len;
+
+	    len = snprintf(result, sizeof(result), "%6e", nxo_real_get(nxo));
+
+	    nxo_string_new(nxo, nxo_thread_nx_get(a_thread),
+			   nxo_thread_currentlocking(a_thread), len);
+	    nxo_string_lock(nxo);
+	    nxo_string_set(nxo, 0, result, len);
+	    nxo_string_unlock(nxo);
+	    break;
+	}
+#endif
 	case NXOT_STRING:
 	{
 	    cw_nxo_t *tstack, *tnxo;
