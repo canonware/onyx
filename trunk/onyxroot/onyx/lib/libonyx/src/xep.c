@@ -89,7 +89,7 @@ xep_throw_e(cw_xepv_t a_value, const char *a_filename, cw_uint32_t a_line_num)
 		/* Execute the handler. */
 		xep->value = a_value;
 		xep->state = CW_XEPS_CATCH;
-		longjmp(xep->context, (int)a_value);
+		siglongjmp(xep->context, (int)a_value);
 		cw_not_reached();
 	    }
 	    case CW_XEPS_CATCH:
@@ -97,7 +97,7 @@ xep_throw_e(cw_xepv_t a_value, const char *a_filename, cw_uint32_t a_line_num)
 		/* Re-throw, do finally first. */
 		xep->value = a_value;
 		xep->state = CW_XEPS_FINALLY;
-		longjmp(xep->context, (int)CW_XEPV_FINALLY);
+		siglongjmp(xep->context, (int)CW_XEPV_FINALLY);
 		cw_not_reached();
 	    }
 	    case CW_XEPS_FINALLY:
@@ -153,7 +153,7 @@ xep_retry(void)
     xep->value = CW_XEPV_NONE;
     xep->state = CW_XEPS_TRY;
     xep->is_handled = TRUE;
-    longjmp(xep->context, (int)CW_XEPV_CODE);
+    siglongjmp(xep->context, (int)CW_XEPV_CODE);
     cw_not_reached();
 }
 
@@ -245,7 +245,7 @@ xep_p_unlink(cw_xep_t *a_xep)
 	case CW_XEPS_CATCH:	/* Exception now handled. */
 	{
 	    a_xep->state = CW_XEPS_FINALLY;
-	    longjmp(a_xep->context, (int)CW_XEPV_FINALLY);
+	    siglongjmp(a_xep->context, (int)CW_XEPV_FINALLY);
 	    cw_not_reached();
 	}
 	case CW_XEPS_FINALLY:	/* Done. */
