@@ -106,7 +106,7 @@ tests : [STIL_D]
 
 check : tests
 {
-  [VERIFY] -z -r [srcdir] -o [objdir]
+  [VERIFY] -z -s [srcdir] -o [objdir]
            [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS]]
            [fromto [srcdir]/%0%.st.in [objdir]/%0%.st [STESTS]]
            [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]];
@@ -114,7 +114,7 @@ check : tests
 
 check_update : tests
 {
-  [VERIFY] -u -z -r [srcdir] -o [objdir]
+  [VERIFY] -u -z -s [srcdir] -o [objdir]
            [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS]]
            [fromto [srcdir]/%0%.st.in [objdir]/%0%.st [STESTS]]
            [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]];

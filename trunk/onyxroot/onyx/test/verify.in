@@ -36,7 +36,7 @@ $opt_retval =
 &GetOptions("h|help" => \$opt_help,
 	    "v|verbose" => \$opt_verbose,
 	    "q|quiet" => \$opt_quiet,
-	    "r|srcdir=s" => \$opt_srcdir,
+	    "s|srcdir=s" => \$opt_srcdir,
             "o|objdir=s" => \$opt_objdir,
 	    "u|ustats" => \$opt_ustats,
 	    "z|zero" => \$opt_zero
@@ -71,10 +71,9 @@ if ($#ARGV + 1 == 0)
 if ($opt_verbose)
 {
     print STDERR "Option values: h:$opt_help, v:$opt_verbose, "
-	. "t:\"$opt_srcdir\", o:\"$opt_objdir\" "
+	. "s:\"$opt_srcdir\", o:\"$opt_objdir\" "
 	. "q:$opt_quiet, u:$opt_ustats, z:$opt_zero\n";
     printf STDERR "Tests (%d total): @ARGV\n", $#ARGV + 1;
-    printf STDERR "srcdir:\"$opt_srcdir\", objdir:\"$opt_objdir\"\n";
 }
 
 #
@@ -426,7 +425,7 @@ $0 usage:
     -h --help     | Print usage and exit.
     -v --verbose  | Verbose (incompatible with quiet).
     -q --quiet    | Quiet (incompatible with verbose).
-    -r --srcdir   | Path to source tree (default is ".").
+    -s --srcdir   | Path to source tree (default is ".").
     -o --objdir   | Path to object tree (default is ".").
     -u --ustats   | Update historical statistics (stored in "<test>.perf".
     -z --zero     | Consider non-zero exit code to be an error.
