@@ -17,7 +17,7 @@
 #endif
 
 static cw_stilso_t	*stils_p_alloc_stilso(cw_stils_t *a_stils);
-static cw_stilsc_t	*stilsc_p_new(cw_pezz_t *a_stilsc_pezz);
+static cw_stilsc_t	*stilsc_p_new(cw_pool_t *a_stilsc_pool);
 static void		 stilso_p_new(cw_stilso_t *a_stilso);
 static void		 stilsc_p_delete(cw_stilsc_t *a_stilsc);
 static cw_uint32_t	 stilsc_p_get_nstilso(cw_stilsc_t *a_stilsc);
@@ -26,19 +26,19 @@ static cw_stilso_t	*stilsc_p_get_stilso(cw_stilsc_t *a_stilsc, cw_uint32_t
 static void		 stilso_p_new(cw_stilso_t *a_stilso);
 
 cw_stils_t *
-stils_new(cw_stils_t *a_stils, cw_pezz_t *a_stilsc_pezz)
+stils_new(cw_stils_t *a_stils, cw_pool_t *a_stilsc_pool)
 {
 	cw_stils_t	*retval;
 
 	_cw_check_ptr(a_stils);
-	_cw_check_ptr(a_stilsc_pezz);
+	_cw_check_ptr(a_stilsc_pool);
 
 	retval = a_stils;
 	retval->stack = NULL;
 	retval->count = 0;
 	retval->spares = NULL;
 	retval->nspares = 0;
-	retval->stilsc_pezz = a_stilsc_pezz;
+	retval->stilsc_pool = a_stilsc_pool;
 	qq_init(&retval->chunks);
 
 #ifdef _LIBSTIL_DBG
@@ -411,7 +411,7 @@ stils_p_alloc_stilso(cw_stils_t *a_stils)
 	if (a_stils->nspares == 0) {
 		cw_stilsc_t	*stilsc;
 
-		stilsc = stilsc_p_new(a_stils->stilsc_pezz);
+		stilsc = stilsc_p_new(a_stils->stilsc_pool);
 
 		qq_insert_head(&a_stils->chunks, stilsc, link);
 		a_stils->spares = stilsc_p_get_stilso(stilsc, 0);
@@ -430,12 +430,12 @@ stils_p_alloc_stilso(cw_stils_t *a_stils)
  * Initialize all embedded stilso's and link them into a ring.
  */
 static cw_stilsc_t *
-stilsc_p_new(cw_pezz_t *a_stilsc_pezz)
+stilsc_p_new(cw_pool_t *a_stilsc_pool)
 {
 	cw_stilsc_t	*retval;
 	cw_uint32_t	nstilso, i;
 
-	retval = (cw_stilsc_t *)_cw_pezz_get(a_stilsc_pezz);
+	retval = (cw_stilsc_t *)_cw_pool_get(a_stilsc_pool);
 	if (retval == NULL) {
 		/* XXX Report error. */
 	}
@@ -443,7 +443,7 @@ stilsc_p_new(cw_pezz_t *a_stilsc_pezz)
 #ifdef _LIBSTIL_DBG
 	retval->magic = _CW_STILSC_MAGIC;
 #endif
-	retval->allocator = a_stilsc_pezz;
+	retval->stilsc_pool = a_stilsc_pool;
 
 	stilso_p_new(&retval->objects[0]);
 	for (i = 1, nstilso = stilsc_p_get_nstilso(retval); i < nstilso; i++) {
@@ -460,7 +460,7 @@ stilsc_p_delete(cw_stilsc_t *a_stilsc)
 	_cw_check_ptr(a_stilsc);
 	_cw_assert(a_stilsc->magic == _CW_STILSC_MAGIC);
 
-	_cw_pezz_put(a_stilsc->allocator, a_stilsc);
+	_cw_pool_put(a_stilsc->stilsc_pool, a_stilsc);
 }
 
 static cw_uint32_t
@@ -469,7 +469,7 @@ stilsc_p_get_nstilso(cw_stilsc_t *a_stilsc)
 	_cw_check_ptr(a_stilsc);
 	_cw_assert(a_stilsc->magic == _CW_STILSC_MAGIC);
 
-	return _CW_STILSC_SIZEOF2O(pezz_get_buffer_size(a_stilsc->allocator));
+	return _CW_STILSC_SIZEOF2O(pool_get_buffer_size(a_stilsc->stilsc_pool));
 }
 
 static cw_stilso_t *

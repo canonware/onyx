@@ -46,7 +46,7 @@ struct cw_stilsc_s {
 	cw_uint32_t	magic;
 #endif
 
-	cw_pezz_t	*allocator;
+	cw_pool_t	*stilsc_pool;	/* stilsc allocator. */
 
 	qq_entry(cw_stilsc_t) link;	/* Linkage for the list of stilsc's. */
 
@@ -68,12 +68,12 @@ struct cw_stils_s {
 	cw_stilso_t	*spares;	/* Pointer to a ring of spare slots. */
 	cw_uint32_t	nspares;	/* Number of spares. */
 
-	cw_pezz_t	*stilsc_pezz;	/* Allocator for stilsc's. */
+	cw_pool_t	*stilsc_pool;	/* Allocator for stilsc's. */
 
 	qq_head(cw_stilsc_t) chunks;	/* List of stilsc's. */
 };
 
-cw_stils_t	*stils_new(cw_stils_t *a_stils, cw_pezz_t *a_stilsc_pezz);
+cw_stils_t	*stils_new(cw_stils_t *a_stils, cw_pool_t *a_stilsc_pool);
 
 void		stils_delete(cw_stils_t *a_stils);
 

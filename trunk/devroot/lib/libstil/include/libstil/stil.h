@@ -29,14 +29,14 @@ struct cw_stil_s {
 	cw_bool_t	is_malloced;
 	cw_mtx_t	lock;
 
-	cw_pezz_t	stil_bufc_pezz;
-	cw_pezz_t	chi_pezz;
+	cw_pool_t	stil_bufc_pool;
+	cw_pool_t	chi_pool;
 
-	/* pezz from which stiln's are allocated for the names hash. */
-	cw_pezz_t	stiln_pezz;
+	/* pool from which stiln's are allocated for the names hash. */
+	cw_pool_t	stiln_pool;
 
-	/* pezz from which stilsc's are allocated for stacks. */
-	cw_pezz_t	stilsc_pezz;
+	/* pool from which stilsc's are allocated for stacks. */
+	cw_pool_t	stilsc_pool;
 
 	/* pool from which dicto's are allocated for dicts. */
 	cw_pool_t	dicto_pool; /* XXX Initialize! */
@@ -112,9 +112,9 @@ void		stil_delete(cw_stil_t *a_stil);
 
 cw_stil_bufc_t	*stil_get_stil_bufc(cw_stil_t *a_stil);
 
-#define stil_get_chi_pezz(a_stil) (&(a_stil)->chi_pezz)
-#define stil_get_stilsc_pezz(a_stil) (&(a_stil)->stilsc_pezz)
-#define stil_get_dicto_pool(a_stil) (&(a_stil)->dicto_pool)
+#define stil_chi_pool_get(a_stil) (&(a_stil)->chi_pool)
+#define stil_stilsc_pool_get(a_stil) (&(a_stil)->stilsc_pool)
+#define stil_dicto_pool_get(a_stil) (&(a_stil)->dicto_pool)
 
 const cw_stiln_t *stil_stiln_ref(cw_stil_t *a_stil, const cw_uint8_t *a_name,
     cw_uint32_t a_len, cw_bool_t a_force, cw_bool_t a_is_static, const void

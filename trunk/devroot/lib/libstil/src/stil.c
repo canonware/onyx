@@ -16,9 +16,6 @@
 #define _CW_STILN_MAGIC 0xaeb78944
 #endif
 
-/* Number of stil_bufc structures to allocate at a time via the pezz code. */
-#define _CW_STIL_BUFC_CHUNK_COUNT	 16
-
 /* Number of stack elements per memory chunk. */
 #define _CW_STIL_STILSC_COUNT		 16
 
@@ -64,17 +61,13 @@ stil_new(cw_stil_t *a_stil)
 		retval->is_malloced = TRUE;
 	}
 
-	if (pezz_new(&retval->stil_bufc_pezz, sizeof(cw_stil_bufc_t),
-	    _CW_STIL_BUFC_CHUNK_COUNT) == NULL)
+	if (pool_new(&retval->stil_bufc_pool, sizeof(cw_stil_bufc_t)) == NULL)
 		goto OOM_2;
-	if (pezz_new(&retval->chi_pezz, sizeof(cw_chi_t),
-	    _CW_STIL_STILN_BASE_GROW / 4) == NULL)
+	if (pool_new(&retval->chi_pool, sizeof(cw_chi_t)) == NULL)
 		goto OOM_3;
-	if (pezz_new(&retval->stiln_pezz, sizeof(cw_stiln_t),
-	    _CW_STIL_STILN_BASE_GROW / 4) == NULL)
+	if (pool_new(&retval->stiln_pool, sizeof(cw_stiln_t)) == NULL)
 		goto OOM_4;
-	if (pezz_new(&retval->stilsc_pezz, sizeof(cw_stilsc_t),
-	    _CW_STIL_STILSC_COUNT) == NULL)
+	if (pool_new(&retval->stilsc_pool, sizeof(cw_stilsc_t)) == NULL)
 		goto OOM_5;
 	if (dch_new(&retval->stiln_dch, _CW_STIL_STILN_BASE_TABLE,
 	    _CW_STIL_STILN_BASE_GROW, _CW_STIL_STILN_BASE_SHRINK, stilnk_p_hash,
@@ -95,13 +88,13 @@ stil_new(cw_stil_t *a_stil)
 	OOM_7:
 	dch_delete(&retval->stiln_dch);
 	OOM_6:
-	pezz_delete(&retval->stilsc_pezz);
+	pool_delete(&retval->stilsc_pool);
 	OOM_5:
-	pezz_delete(&retval->stiln_pezz);
+	pool_delete(&retval->stiln_pool);
 	OOM_4:
-	pezz_delete(&retval->chi_pezz);
+	pool_delete(&retval->chi_pool);
 	OOM_3:
-	pezz_delete(&retval->stil_bufc_pezz);
+	pool_delete(&retval->stil_bufc_pool);
 	OOM_2:
 	if (retval->is_malloced)
 		_cw_free(retval);
@@ -131,14 +124,14 @@ stil_delete(cw_stil_t *a_stil)
 	while (dch_remove_iterate(&a_stil->stiln_dch, (void **)&key,
 	    (void **)&data, &chi) == FALSE) {
 		stil_p_stiln_delete(a_stil, data);
-		_cw_pezz_put(&a_stil->chi_pezz, chi);
+		_cw_pool_put(&a_stil->chi_pool, chi);
 	}
 	dch_delete(&a_stil->stiln_dch);
-	pezz_delete(&a_stil->stilsc_pezz);
-	pezz_delete(&a_stil->stiln_pezz);
+	pool_delete(&a_stil->stilsc_pool);
+	pool_delete(&a_stil->stiln_pool);
 	
-	pezz_delete(&a_stil->chi_pezz);
-	pezz_delete(&a_stil->stil_bufc_pezz);
+	pool_delete(&a_stil->chi_pool);
+	pool_delete(&a_stil->stil_bufc_pool);
 
 	mtx_delete(&a_stil->lock);
 
@@ -158,11 +151,11 @@ stil_get_stil_bufc(cw_stil_t *a_stil)
 	_cw_check_ptr(a_stil);
 	_cw_assert(a_stil->magic == _CW_STIL_MAGIC);
 
-	retval = (cw_stil_bufc_t *)_cw_pezz_get(&a_stil->stil_bufc_pezz);
+	retval = (cw_stil_bufc_t *)_cw_pool_get(&a_stil->stil_bufc_pool);
 	if (retval == NULL)
 		goto RETURN;
-	bufc_new(&retval->bufc, (cw_opaque_dealloc_t *)pezz_put,
-	    &a_stil->stil_bufc_pezz);
+	bufc_new(&retval->bufc, (cw_opaque_dealloc_t *)pool_put,
+	    &a_stil->stil_bufc_pool);
 	bzero(retval->buffer, sizeof(retval->buffer));
 	bufc_set_buffer(&retval->bufc, retval->buffer, _CW_STIL_BUFC_SIZE, TRUE,
 	    NULL, NULL);
@@ -242,7 +235,7 @@ stil_stiln_ref(cw_stil_t *a_stil, const cw_uint8_t *a_name, cw_uint32_t a_len,
 		}
 		/* Finally, insert the stiln into the hash table. */
 		if (dch_insert(&a_stil->stiln_dch, (void *)&data->key,
-		    (void *)data, (cw_chi_t *)_cw_pezz_get(&a_stil->chi_pezz)))
+		    (void *)data, (cw_chi_t *)_cw_pool_get(&a_stil->chi_pool)))
 			goto OOM_4;
 		retval = data;
 	} else
@@ -288,7 +281,7 @@ stil_stiln_unref(cw_stil_t *a_stil, const cw_stiln_t *a_stiln, const void
 			_cw_error("Trying to remove a non-existent keyed ref");
 #endif
 		}
-		_cw_pezz_put(&a_stil->chi_pezz, chi);
+		_cw_pool_put(&a_stil->chi_pool, chi);
 
 		if (dch_count(stiln->keyed_refs) == 0) {
 			dch_delete(stiln->keyed_refs);
@@ -302,7 +295,7 @@ stil_stiln_unref(cw_stil_t *a_stil, const cw_stiln_t *a_stiln, const void
 	else {
 		mtx_unlock(&stiln->lock);
 		dch_remove(&a_stil->stiln_dch, &stiln->key, NULL, NULL, &chi);
-		_cw_pezz_put(&a_stil->chi_pezz, chi);
+		_cw_pool_put(&a_stil->chi_pool, chi);
 		stil_p_stiln_delete(a_stil, stiln);
 	}
 
@@ -359,7 +352,7 @@ stil_p_stiln_new(cw_stil_t *a_stil)
 {
 	cw_stiln_t *retval;
 
-	retval = (cw_stiln_t *)_cw_pezz_get(&a_stil->stiln_pezz);
+	retval = (cw_stiln_t *)_cw_pool_get(&a_stil->stiln_pool);
 	if (retval == NULL)
 		goto RETURN;
 	bzero(retval, sizeof(cw_stiln_t));
@@ -403,7 +396,7 @@ stil_p_stiln_delete(cw_stil_t *a_stil, cw_stiln_t *a_stiln)
 #endif
 
 	mtx_delete(&a_stiln->lock);
-	_cw_pezz_put(&a_stil->stiln_pezz, a_stiln);
+	_cw_pool_put(&a_stil->stiln_pool, a_stiln);
 }
 
 static cw_bool_t
@@ -429,7 +422,7 @@ stil_p_stiln_kref(cw_stil_t *a_stil, cw_stiln_t *a_stiln, const void *a_key,
 		}
 	}
 	if (dch_insert(a_stiln->keyed_refs, a_key, a_data,
-	    (cw_chi_t *)_cw_pezz_get(&a_stil->chi_pezz))) {
+	    (cw_chi_t *)_cw_pool_get(&a_stil->chi_pool))) {
 		if (is_new_dch) {
 			dch_delete(a_stiln->keyed_refs);
 			a_stiln->keyed_refs = NULL;

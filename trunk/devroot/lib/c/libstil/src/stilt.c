@@ -132,9 +132,9 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 	    ch_hash_direct, ch_key_comp_direct) ==
 	    NULL)
 		goto OOM_3;
-	stils_new(&retval->exec_stils, stil_get_stilsc_pezz(a_stil));
-	stils_new(&retval->data_stils, stil_get_stilsc_pezz(a_stil));
-	stils_new(&retval->dict_stils, stil_get_stilsc_pezz(a_stil));
+	stils_new(&retval->exec_stils, stil_stilsc_pool_get(a_stil));
+	stils_new(&retval->data_stils, stil_stilsc_pool_get(a_stil));
+	stils_new(&retval->dict_stils, stil_stilsc_pool_get(a_stil));
 	retval->stdout_fd = 1;
 	retval->stil = a_stil;
 	retval->state = _CW_STILT_STATE_START;

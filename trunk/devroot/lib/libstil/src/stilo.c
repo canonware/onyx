@@ -21,6 +21,7 @@
 typedef struct cw_stiloe_array_s cw_stiloe_array_t;
 typedef struct cw_stiloe_condition_s cw_stiloe_condition_t;
 typedef struct cw_stiloe_dict_s cw_stiloe_dict_t;
+typedef struct cw_stiloe_dicto_s cw_stiloe_dicto_t;
 typedef struct cw_stiloe_hook_s cw_stiloe_hook_t;
 typedef struct cw_stiloe_lock_s cw_stiloe_lock_t;
 typedef struct cw_stiloe_mstate_s cw_stiloe_mstate_t;
@@ -91,15 +92,14 @@ struct cw_stiloe_condition_s {
 struct cw_stiloe_dict_s {
 	cw_stiloe_t	stiloe;
 
-	/* stiloe_dicto's are allocated from here. */
-	cw_pool_t	*dicto_pool;
-
 	/*
 	 * Name/value pairs.  The keys are (cw_stilo_t *), and the values are
 	 * (cw_stiloe_dicto_t *).  The stilo that the key points to resides in
 	 * the stiloe_dicto structure.
+	 *
+	 * This must be the last field, since its size varies.
 	 */
-	cw_dch_t	hash;
+	cw_ch_t		hash;
 };
 
 struct cw_stiloe_dicto_s {
@@ -108,10 +108,10 @@ struct cw_stiloe_dicto_s {
 #endif
 
 	/* stiloe_dict this stiloe_dicto is contained in. */
-	cw_stiloe_dict_t *stiloe_dict;
+/*  	cw_stiloe_dict_t *stiloe_dict; */
 
-	cw_stilo_t	name;
-	cw_stilo_t	value;
+	cw_stilo_t	key;
+	cw_stilo_t	val;
 };
 
 struct cw_stiloe_hook_s {
@@ -773,7 +773,7 @@ stilo_p_array_delete(cw_stilo_t *a_stilo)
 	_cw_check_ptr(array);
 	_cw_assert(array->stiloe.magic == _CW_STILOE_MAGIC);
 
-	if ((array->stiloe.indirect == FALSE) && (array->e.a.len != -1)) {
+	if ((array->stiloe.indirect == FALSE)) {
 		for (i = 0; i < array->e.a.len; i++)
 			stilo_delete(&array->e.a.arr[i]);
 	}
@@ -906,7 +906,6 @@ stilo_array_get(cw_stilo_t *a_stilo)
 	_cw_assert(array->stiloe.magic == _CW_STILOE_MAGIC);
 
 	if (array->stiloe.indirect == FALSE) {
-		_cw_assert(array->e.a.len != -1);
 		retval = array->e.a.arr;
 	} else {
 		retval = &stilo_array_get(&array->e.i.stilo)
@@ -1009,18 +1008,42 @@ static void
 stilo_p_dict_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, va_list a_p)
 {
 	cw_stiloe_dict_t	*dict;
+	cw_uint32_t		table_size;
+
+	table_size = (cw_uint32_t)va_arg(a_p, cw_uint32_t) * 2;
 
 	dict = (cw_stiloe_dict_t *)_cw_stilt_malloc(a_stilt,
-	    sizeof(cw_stiloe_dict_t));
+	    sizeof(cw_stiloe_dict_t) - sizeof(cw_ch_t) +
+	    _CW_CH_TABLE2SIZEOF(table_size));
 
-	dict->dicto_pool = stil_get_dicto_pool(stilt_get_stil(a_stilt));
-
-/*  	dch_new( */
+	ch_new(&dict->hash, table_size, ch_hash_direct,
+	    ch_key_comp_direct);
 }
 
 static void
 stilo_p_dict_delete(cw_stilo_t *a_stilo)
 {
+	cw_stiloe_dict_t	*dict;
+
+	_cw_check_ptr(dict);
+	_cw_assert(dict->stiloe.magic == _CW_STILOE_MAGIC);
+
+	dict = (cw_stiloe_dict_t *)a_stilo->o.stiloe;
+
+	if (dict->stiloe.indirect == FALSE) {
+		cw_pool_t		*chi_pool;
+		cw_stiloe_dicto_t	*dicto;
+		cw_chi_t		*chi;
+
+		chi_pool =
+		    stil_chi_pool_get(stilt_get_stil(dict->stiloe.stilt));
+		while (ch_remove_iterate(&dict->hash, NULL, (void **)&dicto,
+		    &chi) == FALSE) {
+			stilo_delete(&dicto->key);
+			stilo_delete(&dicto->val);
+			_cw_pool_put(chi_pool, chi);
+		}
+	}
 }
 
 static cw_stiloe_t *
