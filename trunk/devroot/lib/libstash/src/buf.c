@@ -243,7 +243,9 @@ buf_new(cw_buf_t * a_buf, cw_bool_t a_is_threadsafe)
   retval->array_start = 0;
   retval->array_end = 0;
   retval->is_cumulative_valid = FALSE;
-  retval->array = _cw_malloc(2 * sizeof(cw_bufel_array_el_t));
+  retval->array = (cw_bufel_array_el_t *)
+    _cw_malloc(2 * sizeof(cw_bufel_array_el_t));
+  retval->iov = (struct iovec *) _cw_malloc(2 * sizeof(struct iovec));
   
   return retval;
 }
@@ -303,6 +305,43 @@ buf_get_size(cw_buf_t * a_buf)
   }
 #endif
   return retval;
+}
+
+const struct iovec *
+buf_get_iovec(cw_buf_t * a_buf, int * a_iovec_count)
+{
+  cw_uint32_t i, array_index;
+  
+  _cw_check_ptr(a_buf);
+  _cw_assert(a_buf->magic == _CW_BUF_MAGIC);
+#ifdef _CW_REENTRANT
+  if (a_buf->is_threadsafe == TRUE)
+  {
+    mtx_lock(&a_buf->lock);
+  }
+#endif
+
+  for (i = 0; i < a_buf->array_num_valid; i++)
+  {
+    array_index = (a_buf->array_start + i) % a_buf->array_size;
+    
+    a_buf->iov[i].iov_base
+      = ((char *) bufel_get_data_ptr(&a_buf->array[array_index].bufel)
+	 + bufel_get_beg_offset(&a_buf->array[array_index].bufel));
+    a_buf->iov[i].iov_len
+      = (size_t) bufel_get_valid_data_size(&a_buf->array[array_index].bufel);
+  }
+
+  *a_iovec_count = (int) a_buf->array_num_valid;
+
+#ifdef _CW_REENTRANT
+  if (a_buf->is_threadsafe == TRUE)
+  {
+    mtx_unlock(&a_buf->lock);
+  }
+#endif
+  
+  return a_buf->iov;
 }
 
 void
@@ -438,8 +477,8 @@ buf_split(cw_buf_t * a_a, cw_buf_t * a_b, cw_uint32_t a_offset)
   buf_p_get_data_position(a_b, a_offset, &array_element, &bufel_offset);
 
   num_bufels_to_move = (((array_element >= a_b->array_start)
-			? array_element - a_b->array_start
-			: array_element + a_b->array_size - a_b->array_start));
+			 ? array_element - a_b->array_start
+			 : array_element + a_b->array_size - a_b->array_start));
   if (bufel_offset != 0)
   {
     num_bufels_to_move++;
@@ -682,7 +721,11 @@ buf_release_head_data(cw_buf_t * a_buf, cw_uint32_t a_amount)
     if (a_buf->array_num_valid == 0)
     {
       /* Shrink the array back down. */
-      a_buf->array = _cw_realloc(a_buf->array, 2 * sizeof(cw_bufel_array_el_t));
+      a_buf->array = (cw_bufel_array_el_t *)
+	_cw_realloc(a_buf->array, 2 * sizeof(cw_bufel_array_el_t));
+      a_buf->iov = (struct iovec *)
+	_cw_realloc(a_buf->iov, 2 * sizeof(struct iovec));
+      
       a_buf->array_size = 2;
     }
 
@@ -756,7 +799,10 @@ buf_release_tail_data(cw_buf_t * a_buf, cw_uint32_t a_amount)
     if (a_buf->array_num_valid == 0)
     {
       /* Shrink the array back down. */
-      a_buf->array = _cw_realloc(a_buf->array, 2 * sizeof(cw_bufel_array_el_t));
+      a_buf->array = (cw_bufel_array_el_t *)
+	_cw_realloc(a_buf->array, 2 * sizeof(cw_bufel_array_el_t));
+      a_buf->iov = (struct iovec *)
+	_cw_realloc(a_buf->iov, 2 * sizeof(struct iovec));
       a_buf->array_size = 2;
     }
 
@@ -884,22 +930,22 @@ buf_get_uint32(cw_buf_t * a_buf, cw_uint32_t a_offset)
     /* The data is spread across two to four buffers. */
 
     retval = (*(bufc_get_p(a_buf->array[array_element].bufel.bufc)
-	      + bufel_offset)
+		+ bufel_offset)
 	      << 24);
     
     buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
     retval |= ((*(bufc_get_p(a_buf->array[array_element].bufel.bufc)
-		 + bufel_offset)
+		  + bufel_offset)
 		<< 16) & 0x00ff0000);
     
     buf_p_get_data_position(a_buf, a_offset + 2, &array_element, &bufel_offset);
     retval |= ((*(bufc_get_p(a_buf->array[array_element].bufel.bufc)
-		 + bufel_offset)
+		  + bufel_offset)
 		<< 8) & 0x0000ff00);
     
     buf_p_get_data_position(a_buf, a_offset + 3, &array_element, &bufel_offset);
     retval |= (*(bufc_get_p(a_buf->array[array_element].bufel.bufc)
-		+ bufel_offset)
+		 + bufel_offset)
 	       & 0x000000ff);
   }
 
@@ -1017,8 +1063,8 @@ buf_get_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset)
     
     bit_alignment =
       (((cw_uint32_t)
-       (bufc_get_p(a_buf->array[array_element].bufel.bufc) + bufel_offset))
-	 & 0x7) * 8;
+	(bufc_get_p(a_buf->array[array_element].bufel.bufc) + bufel_offset))
+       & 0x7) * 8;
 
     retval = (a << (64 - bit_alignment));
     retval |= (b >> bit_alignment);
@@ -1028,48 +1074,48 @@ buf_get_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset)
     /* The data is spread across two to eight buffers. */
     retval = ((cw_uint64_t)
 	      *(bufc_get_p(a_buf->array[array_element].bufel.bufc)
-	       + bufel_offset))
-	      << 56;
+		+ bufel_offset))
+		  << 56;
     
     buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
     retval |= (((cw_uint64_t)
 		*(bufc_get_p(a_buf->array[array_element].bufel.bufc)
-		 + bufel_offset)
+		  + bufel_offset)
 		<< 48) & ((cw_uint64_t) 0x00ff0000 << 32) & 0x00000000);
 
     buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
     retval |= (((cw_uint64_t)
 		*(bufc_get_p(a_buf->array[array_element].bufel.bufc)
-		 + bufel_offset)
+		  + bufel_offset)
 		<< 40) & ((cw_uint64_t) 0x0000ff00 << 32) & 0x00000000);
 
     buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
     retval |= (((cw_uint64_t)
 		*(bufc_get_p(a_buf->array[array_element].bufel.bufc)
-		 + bufel_offset)
+		  + bufel_offset)
 		<< 32) & ((cw_uint64_t) 0x000000ff << 32) & 0x00000000);
 
     buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
     retval |= (((cw_uint64_t)
 		*(bufc_get_p(a_buf->array[array_element].bufel.bufc)
-		 + bufel_offset)
+		  + bufel_offset)
 		<< 24) & ((cw_uint64_t) 0x00000000 << 32) & 0xff000000);
 
     buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
     retval |= (((cw_uint64_t)
 		*(bufc_get_p(a_buf->array[array_element].bufel.bufc)
-		 + bufel_offset)
+		  + bufel_offset)
 		<< 16) & ((cw_uint64_t) 0x00000000 << 32) & 0x00ff0000);
 
     buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
     retval |= (((cw_uint64_t)
 		*(bufc_get_p(a_buf->array[array_element].bufel.bufc)
-		 + bufel_offset)
+		  + bufel_offset)
 		<< 8) & ((cw_uint64_t) 0x00000000 << 32) & 0x0000ff00);
 
     buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
     retval |= ((cw_uint64_t)
-		*(bufc_get_p(a_buf->array[array_element].bufel.bufc)
+	       *(bufc_get_p(a_buf->array[array_element].bufel.bufc)
 		 + bufel_offset)
 	       & ((cw_uint64_t) 0x00000000 << 32) & 0x000000ff);
   }
@@ -1250,8 +1296,10 @@ buf_p_fit_array(cw_buf_t * a_buf, cw_uint32_t a_min_array_size)
 	 i *= 2);
 
     a_buf->array
-      = (cw_bufel_array_el_t *) _cw_realloc(a_buf,
-					    i * sizeof(cw_bufel_array_el_t *));
+      = (cw_bufel_array_el_t *) _cw_realloc(a_buf->array,
+					    i * sizeof(cw_bufel_array_el_t));
+    a_buf->iov = (struct iovec *) _cw_realloc(a_buf->iov,
+					      i * sizeof(struct iovec));
     
     if ((a_buf->array_start >= a_buf->array_end)
 	&& (a_buf->array_num_valid > 0))
@@ -1536,13 +1584,13 @@ bufc_ref_increment(cw_bufc_t * a_bufc)
   _cw_assert(a_bufc->magic == _CW_BUFC_MAGIC);
       
 #ifdef _CW_REENTRANT
-      mtx_lock(&a_bufc->lock);
+  mtx_lock(&a_bufc->lock);
 #endif
 
-      a_bufc->ref_count++;
+  a_bufc->ref_count++;
     
 #ifdef _CW_REENTRANT
-      mtx_unlock(&a_bufc->lock);
+  mtx_unlock(&a_bufc->lock);
 #endif
 }
 
@@ -1550,38 +1598,38 @@ static void
 bufc_ref_decrement(cw_bufc_t * a_bufc)
 {
 #ifdef _CW_REENTRANT
-      cw_bool_t should_delete;
+  cw_bool_t should_delete;
 #endif
       
   _cw_check_ptr(a_bufc);
   _cw_assert(a_bufc->magic == _CW_BUFC_MAGIC);
       
 #ifdef _CW_REENTRANT
-      mtx_lock(&a_bufc->lock);
+  mtx_lock(&a_bufc->lock);
     
-      a_bufc->ref_count--;
-      if (0 == a_bufc->ref_count)
-      {
-	/* Make a note that we should delete the bufc once we've released the
-	 * mutex. */
-	should_delete = TRUE;
-      }
-      else
-      {
-	should_delete = FALSE;
-      }
+  a_bufc->ref_count--;
+  if (0 == a_bufc->ref_count)
+  {
+    /* Make a note that we should delete the bufc once we've released the
+     * mutex. */
+    should_delete = TRUE;
+  }
+  else
+  {
+    should_delete = FALSE;
+  }
 
-      mtx_unlock(&a_bufc->lock);
+  mtx_unlock(&a_bufc->lock);
 
-      if (TRUE == should_delete)
-      {
-	bufc_delete(a_bufc);
-      }
+  if (TRUE == should_delete)
+  {
+    bufc_delete(a_bufc);
+  }
 #else
-      a_bufc->ref_count--;
-      if (0 == a_bufc->ref_count)
-      {
-	bufc_delete(a_bufc);
-      }
+  a_bufc->ref_count--;
+  if (0 == a_bufc->ref_count)
+  {
+    bufc_delete(a_bufc);
+  }
 #endif
 }

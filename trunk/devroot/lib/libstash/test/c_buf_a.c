@@ -85,23 +85,24 @@ main()
 		       (void *) &bufpool);
 
     _cw_assert(0 == bufel_get_beg_offset(bufel_p));
-    _cw_assert(0 == bufel_get_end_offset(bufel_p));
-    _cw_assert(0 == bufel_get_valid_data_size(bufel_p));
-
-    _cw_assert(TRUE == bufel_set_end_offset(bufel_p, 4097));
-    _cw_assert(0 == bufel_get_end_offset(bufel_p));
-
-    _cw_assert(FALSE == bufel_set_end_offset(bufel_p, 4096));
     _cw_assert(4096 == bufel_get_end_offset(bufel_p));
     _cw_assert(4096 == bufel_get_valid_data_size(bufel_p));
+
+    _cw_assert(TRUE == bufel_set_end_offset(bufel_p, 4097));
+    _cw_assert(4096 == bufel_get_end_offset(bufel_p));
 
     _cw_assert(FALSE == bufel_set_end_offset(bufel_p, 2048));
     _cw_assert(2048 == bufel_get_end_offset(bufel_p));
     _cw_assert(2048 == bufel_get_valid_data_size(bufel_p));
 
-    _cw_assert(TRUE == bufel_set_beg_offset(bufel_p, 2049));
+    _cw_assert(FALSE == bufel_set_end_offset(bufel_p, 3500));
+    _cw_assert(3500 == bufel_get_end_offset(bufel_p));
+    _cw_assert(3500 == bufel_get_valid_data_size(bufel_p));
+
+    _cw_assert(TRUE == bufel_set_beg_offset(bufel_p, 3501));
     _cw_assert(0 == bufel_get_beg_offset(bufel_p));
-    
+
+    _cw_assert(FALSE == bufel_set_end_offset(bufel_p, 2048));
     _cw_assert(FALSE == bufel_set_beg_offset(bufel_p, 2048));
     _cw_assert(2048 == bufel_get_beg_offset(bufel_p));
     _cw_assert(0 == bufel_get_valid_data_size(bufel_p));

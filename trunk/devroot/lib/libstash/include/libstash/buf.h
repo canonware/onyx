@@ -16,21 +16,23 @@
  *
  ****************************************************************************/
 
-#ifdef _STASH_DBG
+#if (defined(_STASH_DBG) || defined(_STASH_DEBUG))
 #define _CW_BUF_MAGIC 0xb00f0001
 #define _CW_BUFEL_MAGIC 0xb00f0002
 #define _CW_BUFC_MAGIC 0xb00f0003
 #define _CW_BUFPOOL_MAGIC 0xb00f0004
 #endif
 
+/* Pseudo-opaque typedefs. */
 typedef struct cw_bufpool_s cw_bufpool_t;
 typedef struct cw_buf_s cw_buf_t;
 typedef struct cw_bufel_s cw_bufel_t;
 
+/* The following data types should be considered opaque. */
 struct cw_bufpool_s
 {
   cw_bool_t is_malloced;
-#ifdef _STASH_DBG
+#if (defined(_STASH_DBG) || defined(_STASH_DEBUG))
   cw_uint32_t magic;
 #endif
 #ifdef _CW_REENTRANT
@@ -43,7 +45,7 @@ struct cw_bufpool_s
 
 typedef struct
 {
-#ifdef _STASH_DBG
+#if (defined(_STASH_DBG) || defined(_STASH_DEBUG))
   cw_uint32_t magic;
 #endif
 #ifdef _CW_REENTRANT
@@ -58,7 +60,7 @@ typedef struct
 
 struct cw_bufel_s
 {
-#ifdef _STASH_DBG
+#if (defined(_STASH_DBG) || defined(_STASH_DEBUG))
   cw_uint32_t magic;
 #endif
   cw_bool_t is_malloced;
@@ -75,7 +77,7 @@ typedef struct
 
 struct cw_buf_s
 {
-#ifdef _STASH_DBG
+#if (defined(_STASH_DBG) || defined(_STASH_DEBUG))
   cw_uint32_t magic;
 #endif
   cw_bool_t is_malloced;
@@ -91,43 +93,169 @@ struct cw_buf_s
   cw_uint32_t array_end;
   cw_bool_t is_cumulative_valid;
   cw_bufel_array_el_t * array;
+  struct iovec * iov;
 };
 
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_bufpool : Pointer to space for a bufpool, or NULL.
+ *
+ * a_buffer_size : Size of buffers to use.
+ *
+ * a_max_spare_buffers : Maximum number of buffers to cache.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Pointer to a bufpool.
+ *
+ * <<< Description >>>
+ *
+ * Constructor.
+ *
+ ****************************************************************************/
 #define bufpool_new _CW_NS_STASH(bufpool_new)
 cw_bufpool_t *
 bufpool_new(cw_bufpool_t * a_bufpool, cw_uint32_t a_buffer_size,
 	    cw_uint32_t a_max_spare_buffers);
 
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_bufpool : Pointer to a bufpool.
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
+ * <<< Description >>>
+ *
+ * Destructor.
+ *
+ ****************************************************************************/
 #define bufpool_delete _CW_NS_STASH(bufpool_delete)
 void
 bufpool_delete(cw_bufpool_t * a_bufpool);
 
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_bufpool : Pointer to a bufpool.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Size of buffers that a_bufpool is using.
+ *
+ * <<< Description >>>
+ *
+ * Return the size of the buffers that a_bufpool is using.
+ *
+ ****************************************************************************/
 #define bufpool_get_buffer_size _CW_NS_STASH(bufpool_get_buffer_size)
 cw_uint32_t
 bufpool_get_buffer_size(cw_bufpool_t * a_bufpool);
 
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_bufpool : Pointer to a bufpool.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Maximum number of spare buffers that will be cached.
+ *
+ * <<< Description >>>
+ *
+ * Return the maximum number of spare buffers that will be cached.
+ *
+ ****************************************************************************/
 #define bufpool_get_max_spare_buffers \
         _CW_NS_STASH(bufpool_get_max_spare_buffers)
 cw_uint32_t
 bufpool_get_max_spare_buffers(cw_bufpool_t * a_bufpool);
 
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_bufpool : Pointer to a bufpool.
+ *
+ * a_max_spare_buffers : Maximum number of spare buffers to cache.
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
+ * <<< Description >>>
+ *
+ * Set the maximum number of spare buffers to cache to a_max_spare_buffers.
+ *
+ ****************************************************************************/
 #define bufpool_set_max_spare_buffers \
         _CW_NS_STASH(bufpool_set_max_spare_buffers)
 void
 bufpool_set_max_spare_buffers(cw_bufpool_t * a_bufpool,
 			      cw_uint32_t a_max_spare_buffers);
 
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_bufpool : Pointer to a bufpool.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Pointer to a buffer.
+ *
+ * <<< Description >>>
+ *
+ * Return a buffer of size bufpool_get_buffer_size(a_bufpool).
+ *
+ ****************************************************************************/
 #define bufpool_get_buffer _CW_NS_STASH(bufpool_get_buffer)
 void *
 bufpool_get_buffer(cw_bufpool_t * a_bufpool);
 
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_bufpool : Pointer to a bufpool.
+ *
+ * a_buffer : Pointer to a buffer (of size bufpool_get_buffer_size(a_bufpool)).
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
+ * <<< Description >>>
+ *
+ * Release a_buffer and let a_bufpool deal with it.
+ *
+ ****************************************************************************/
 #define bufpool_put_buffer _CW_NS_STASH(bufpool_put_buffer)
 void
 bufpool_put_buffer(void * a_bufpool, void * a_buffer);
 
 /****************************************************************************
  *
- * buf constructor.
+ * <<< Input(s) >>>
+ *
+ * a_buf : Pointer to space for a buf, or NULL.
+ *
+ * a_is_thread_safe : FALSE == not thread safe, TRUE == thread safe.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Pointer to a buf.
+ *
+ * <<< Description >>>
+ *
+ * Constructor.
  *
  ****************************************************************************/
 #define buf_new _CW_NS_STASH(buf_new)
@@ -141,7 +269,17 @@ buf_new(cw_buf_t * a_buf);
 
 /****************************************************************************
  *
- * buf destructor.
+ * <<< Input(s) >>>
+ *
+ * a_buf : Pointer to a buf.
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
+ * <<< Description >>>
+ *
+ * Destructor.
  *
  ****************************************************************************/
 #define buf_delete _CW_NS_STASH(buf_delete)
@@ -150,12 +288,47 @@ buf_delete(cw_buf_t * a_buf);
 
 /****************************************************************************
  *
- * Returns the amount of valid data in bytes.
+ * <<< Input(s) >>>
+ *
+ * a_buf : Pointer to a buf.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Number of bytes of valid data.
+ *
+ * <<< Description >>>
+ *
+ * Return the amount of valid data in bytes.
  *
  ****************************************************************************/
 #define buf_get_size _CW_NS_STASH(buf_get_size)
 cw_uint32_t
 buf_get_size(cw_buf_t * a_buf);
+
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_buf : Pointer to a buf.
+ *
+ * a_iovec_count : Pointer to an int.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Pointer to an iovec array that represents the internal data buffers
+ *          in a_buf.
+ *
+ * *a_iovec_count : Number of valid iovec structures in retval.
+ *
+ * <<< Description >>>
+ *
+ * Build an iovec array that represents the valid data in a_buf's internal
+ * buffers and return a pointer to it.
+ *
+ ****************************************************************************/
+#define buf_get_iovec _CW_NS_STASH(buf_get_iovec)
+const struct iovec *
+buf_get_iovec(cw_buf_t * a_buf, int * a_iovec_count);
 
 /****************************************************************************
  *
@@ -178,7 +351,7 @@ buf_get_size(cw_buf_t * a_buf);
  *
  * <<< Description >>>
  *
- * Catenate two bufs.  a_b is left unmodified.
+ * Catenate two bufs.  a_b is left unmodified if a_preserve is TRUE.
  *
  ****************************************************************************/
 #define buf_append_buf _CW_NS_STASH(buf_append_buf)
@@ -619,9 +792,9 @@ bufel_get_data_ptr(cw_bufel_t * a_bufel);
  *
  * a_size : Size in bytes of a_buf.
  *
- * a_free_func :
+ * a_free_func : Pointer to a function that handles reclamation of a_buf.
  *
- * a_free_arg :
+ * a_free_arg : First argument to a_free_func().
  *
  * <<< Output(s) >>>
  *
@@ -631,8 +804,7 @@ bufel_get_data_ptr(cw_bufel_t * a_bufel);
  *
  * Set the internal buffer to a_buf.  Assume the a_buf is a_size bytes long, and
  * set the beginning offset to 0 and the end offset to a_size.  If there is
- * already an internal buffer, unreference the old one.  Note that a_buf _must_
- * be allocated on the heap, since the bufel class will eventually free it.
+ * already an internal buffer, unreference the old one.
  *
  ****************************************************************************/
 #define bufel_set_data_ptr _CW_NS_STASH(bufel_set_data_ptr)
