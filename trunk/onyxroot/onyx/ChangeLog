@@ -1,3 +1,8 @@
+2002-03-17 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/nxo_name.c : Re-register name objects that are already
+          registered, in order to remove a race condition.
+
 2002-03-16 : Jason Evans <jasone@canonware.com>
 
 	* lib/libonyx/src/thd.c : Significantly rework the generic

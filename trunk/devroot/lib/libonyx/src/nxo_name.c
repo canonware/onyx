@@ -70,20 +70,15 @@ nxo_name_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_uint8_t *a_str,
 	dch_insert(name_hash, (void *) name, (void **) name,
 		   (cw_chi_t *) nxa_malloc(nx_nxa_get(a_nx), sizeof(cw_chi_t)));
 
-	nxo_no_new(a_nxo);
-	a_nxo->o.nxoe = (cw_nxoe_t *) name;
-	nxo_p_type_set(a_nxo, NXOT_NAME);
-
 	do_register = TRUE;
     }
     else
     {
-	nxo_no_new(a_nxo);
-	a_nxo->o.nxoe = (cw_nxoe_t *) name;
-	nxo_p_type_set(a_nxo, NXOT_NAME);
-
 	do_register = FALSE;
     }
+    nxo_no_new(a_nxo);
+    a_nxo->o.nxoe = (cw_nxoe_t *) name;
+    nxo_p_type_set(a_nxo, NXOT_NAME);
 #ifdef CW_THREADS
     thd_crit_leave();
 #endif
@@ -94,7 +89,11 @@ nxo_name_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_uint8_t *a_str,
     {
 	nxa_l_gc_register(nx_nxa_get(a_nx), (cw_nxoe_t *) name);
     }
-		
+    else
+    {
+	nxa_l_gc_reregister(nx_nxa_get(a_nx), (cw_nxoe_t *) name);
+    }
+
 #ifdef CW_THREADS
     mtx_unlock(name_lock);
 #endif
@@ -186,23 +185,31 @@ nxo_l_name_hash(const void *a_key)
 cw_bool_t
 nxo_l_name_key_comp(const void *a_k1, const void *a_k2)
 {
+    cw_bool_t retval;
     cw_nxoe_name_t *k1 = (cw_nxoe_name_t *) a_k1;
     cw_nxoe_name_t *k2 = (cw_nxoe_name_t *) a_k2;
-    size_t len;
 
     cw_check_ptr(a_k1);
     cw_check_ptr(a_k2);
 
-    if (k1->len > k2->len)
+    if (k1->len == k2->len)
     {
-	len = k1->len;
+	if (strncmp((char *) k1->str, (char *) k2->str, k1->len) == 0)
+	{
+	    retval = TRUE;
+	}
+	else
+	{
+	    retval = FALSE;
+	}
     }
     else
     {
-	len = k2->len;
+	retval = FALSE;
+
     }
 
-    return strncmp((char *) k1->str, (char *) k2->str, len) ? FALSE : TRUE;
+    return retval;
 }
 
 const cw_uint8_t *

@@ -43,6 +43,7 @@ ONYX_ONLY_SRCS = [fromto @srcroot@/%0%.nx.in @objroot@/%0%_nxcode.c
  */
 ONYX_OTESTS =
 #if @enable_threads@
+              name_unsweep.nx.in /* First in order to make races more likely. */
               gc_roll.nx.in monitor_a.nx.in monitor_b.nx.in monitor_c.nx.in
 #endif
 #if @enable_real@
