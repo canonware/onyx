@@ -13,25 +13,26 @@
 `Test begin\n' print flush
 
 [
-    {}
-    {0}
-    {1 0}
-    {2 1 0}
-    {3 2 1 0}
-    {4 3 2 1 0}
+    (1)
+    (1 2)
+    (1 2 3)
+    (1 2 3 4)
+    (1 2 3 4 5)
+    (1 2 3 4 5 6)
+    (1 2 3 4 5 6 7)
 ]{
-    /proc exch def
-    0 1 /proc load length {
+    dup scount
+    dup neg 1 dn {
+	over 1 sprints print
+	` ' print
 	dup cvs print
-	` nup: ' print
-	/proc load 1 sprints print
-	` --> ' print
+	` srot --> ' print
 
-	proc
-	adn nup
-	ostack 1 sprint
-	clear
+	over () copy dup dn srot
+
+	1 sprint
     } for
+    clear
 } foreach
 
 `Test end\n' print

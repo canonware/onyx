@@ -13,25 +13,19 @@
 `Test begin\n' print flush
 
 [
-    {}
-    {0}
-    {1 0}
-    {2 1 0}
-    {3 2 1 0}
-    {4 3 2 1 0}
+    `0 1'
+    `0 1 2'
+    `0 1 2 3'
 ]{
-    /proc exch def
-    0 1 /proc load length {
-	dup cvs print
-	` nup: ' print
-	/proc load 1 sprints print
-	` --> ' print
+    dup print
+    ` --> ' print
 
-	proc
-	adn nup
-	ostack 1 sprint
-	clear
-    } for
+    cvx eval
+    over
+
+    ostack 1 sprint
+
+    clear
 } foreach
 
 `Test end\n' print

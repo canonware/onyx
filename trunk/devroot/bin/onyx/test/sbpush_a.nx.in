@@ -12,27 +12,25 @@
 
 `Test begin\n' print flush
 
-[
-    {}
-    {0}
-    {1 0}
-    {2 1 0}
-    {3 2 1 0}
-    {4 3 2 1 0}
-]{
-    /proc exch def
-    0 1 /proc load length {
-	dup cvs print
-	` nup: ' print
-	/proc load 1 sprints print
-	` --> ' print
+()
 
-	proc
-	adn nup
-	ostack 1 sprint
-	clear
-    } for
+[
+    `true'
+    `[]'
+    `<>'
+    `('
+    `1'
+    `mark'
+    `/foo'
+    `null'
+    `//pop'
+    `()'
+    ``hi''
+]{
+	cvx eval
+	over exch sbpush
 } foreach
 
-`Test end\n' print
 pstack
+
+`Test end\n' print

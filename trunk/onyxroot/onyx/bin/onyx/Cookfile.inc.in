@@ -88,11 +88,11 @@ ONYX_OTESTS =
 #endif
 
               abs_a.nx.in abs_b.nx.in abs_c.nx.in add_a.nx.in add_b.nx.in
-              add_c.nx.in add_d.nx.in and_a.nx.in and_b.nx.in and_c.nx.in
-              and_d.nx.in and_e.nx.in and_f.nx.in bdup_a.nx.in bdup_b.nx.in
-              begin_a.nx.in begin_b.nx.in begin_c.nx.in bind_a.nx.in
-              bpop_a.nx.in bpop_b.nx.in bpush_a.nx.in bpush_b.nx.in cat_a.nx.in
-              cat_b.nx.in cat_c.nx.in cat_d.nx.in clear_a.nx.in
+              add_c.nx.in add_d.nx.in adn_a.nx.in adn_b.nx.in and_a.nx.in
+              and_b.nx.in and_c.nx.in and_d.nx.in and_e.nx.in and_f.nx.in
+              aup_a.nx.in aup_b.nx.in bdup_a.nx.in bdup_b.nx.in begin_a.nx.in
+              begin_b.nx.in begin_c.nx.in bind_a.nx.in bpop_a.nx.in bpop_b.nx.in
+              cat_a.nx.in cat_b.nx.in cat_c.nx.in cat_d.nx.in clear_a.nx.in
               cleardstack_a.nx.in cleartomark_a.nx.in copy_a.nx.in copy_b.nx.in
               copy_c.nx.in copy_d.nx.in copy_e.nx.in copy_f.nx.in copy_g.nx.in
               count_a.nx.in countdstack_a.nx.in countestack_a.nx.in
@@ -139,18 +139,21 @@ ONYX_OTESTS =
               not_c.nx.in npop_a.nx.in npop_b.nx.in npop_c.nx.in npop_d.nx.in
               npop_e.nx.in nup_a.nx.in nup_b.nx.in nup_c.nx.in nup_d.nx.in
               nup_e.nx.in nup_f.nx.in or_a.nx.in or_b.nx.in or_c.nx.in
-              or_d.nx.in or_e.nx.in or_f.nx.in output_a.nx.in pop_a.nx.in
-              pop_b.nx.in put_a.nx.in put_b.nx.in put_c.nx.in put_d.nx.in
-              put_e.nx.in put_f.nx.in put_g.nx.in put_h.nx.in
-              putinterval_a.nx.in putinterval_b.nx.in putinterval_c.nx.in
-              putinterval_d.nx.in putinterval_e.nx.in putinterval_f.nx.in
-              putinterval_g.nx.in putinterval_h.nx.in putinterval_i.nx.in
-              repeat_a.nx.in repeat_b.nx.in repeat_c.nx.in repeat_d.nx.in
-              roll_a.nx.in roll_b.nx.in roll_c.nx.in roll_d.nx.in roll_e.nx.in
-              roll_f.nx.in roll_g.nx.in sclear_a.nx.in sclear_b.nx.in
-              sclear_c.nx.in scleartomark_a.nx.in scleartomark_b.nx.in
-              scleartomark_c.nx.in scleartomark_d.nx.in scount_a.nx.in
-              scount_b.nx.in scount_c.nx.in scounttomark_a.nx.in
+              or_d.nx.in or_e.nx.in or_f.nx.in output_a.nx.in over_a.nx.in
+              over_b.nx.in pop_a.nx.in pop_b.nx.in put_a.nx.in put_b.nx.in
+              put_c.nx.in put_d.nx.in put_e.nx.in put_f.nx.in put_g.nx.in
+              put_h.nx.in putinterval_a.nx.in putinterval_b.nx.in
+              putinterval_c.nx.in putinterval_d.nx.in putinterval_e.nx.in
+              putinterval_f.nx.in putinterval_g.nx.in putinterval_h.nx.in
+              putinterval_i.nx.in repeat_a.nx.in repeat_b.nx.in repeat_c.nx.in
+              repeat_d.nx.in roll_a.nx.in roll_b.nx.in roll_c.nx.in roll_d.nx.in
+              roll_e.nx.in roll_f.nx.in roll_g.nx.in rot_a.nx.in rot_b.nx.in
+              rot_c.nx.in rot_d.nx.in sadn_a.nx.in sadn_b.nx.in sadn_c.nx.in
+              sadn_d.nx.in saup_a.nx.in saup_b.nx.in saup_c.nx.in saup_d.nx.in
+              sclear_a.nx.in sbpush_a.nx.in sbpush_b.nx.in sbpush_c.nx.in
+              sbpush_d.nx.in sclear_b.nx.in sclear_c.nx.in scleartomark_a.nx.in
+              scleartomark_b.nx.in scleartomark_c.nx.in scleartomark_d.nx.in
+              scount_a.nx.in scount_b.nx.in scount_c.nx.in scounttomark_a.nx.in
               scounttomark_b.nx.in scounttomark_c.nx.in sdup_a.nx.in
               sdup_b.nx.in sdup_c.nx.in sdup_d.nx.in search.nx.in
               setstderr_a.nx.in setstderr_b.nx.in setstderr_c.nx.in
@@ -164,7 +167,8 @@ ONYX_OTESTS =
               spush_a.nx.in spush_b.nx.in spush_c.nx.in spush_d.nx.in
               sroll_a.nx.in sroll_b.nx.in sroll_c.nx.in sroll_d.nx.in
               sroll_e.nx.in sroll_f.nx.in sroll_g.nx.in sroll_h.nx.in
-              sroll_i.nx.in stack_a.nx.in start_a.nx.in start_b.nx.in
+              sroll_i.nx.in srot_a.nx.in srot_b.nx.in srot_c.nx.in srot_d.nx.in
+              srot_e.nx.in stack_a.nx.in start_a.nx.in start_b.nx.in
               stderr_a.nx.in stdin_a.nx.in stdout_a.nx.in stopped_a.nx.in
               stopped_b.nx.in stopped_c.nx.in string_a.nx.in string_b.nx.in
               string_c.nx.in string_d.nx.in sub_a.nx.in sub_b.nx.in sub_c.nx.in
@@ -176,10 +180,10 @@ ONYX_OTESTS =
               syntaxerror_j.nx.in syntaxerror_k.nx.in throw_a.nx.in
               throw_b.nx.in throw_c.nx.in token_a.nx.in token_b.nx.in
               token_c.nx.in tuck_a.nx.in tuck_b.nx.in tuck_c.nx.in type_a.nx.in
-              type_b.nx.in undef_a.nx.in undef_b.nx.in undef_c.nx.in up_a.nx.in
-              up_b.nx.in where_a.nx.in where_b.nx.in xcheck_a.nx.in
-              xcheck_b.nx.in xor_a.nx.in xor_b.nx.in xor_c.nx.in xor_d.nx.in
-              xor_e.nx.in xor_f.nx.in
+              type_b.nx.in undef_a.nx.in undef_b.nx.in undef_c.nx.in
+              under_a.nx.in under_b.nx.in up_a.nx.in up_b.nx.in where_a.nx.in
+              where_b.nx.in xcheck_a.nx.in xcheck_b.nx.in xor_a.nx.in
+              xor_b.nx.in xor_c.nx.in xor_d.nx.in xor_e.nx.in xor_f.nx.in
 
               ;
 

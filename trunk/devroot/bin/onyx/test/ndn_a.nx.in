@@ -28,7 +28,7 @@
 	` --> ' print
 
 	proc
-	push ndn
+	adn ndn
 	ostack 1 sprint
 	clear
     } for
