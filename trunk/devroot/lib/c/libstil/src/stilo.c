@@ -3069,12 +3069,11 @@ stilo_p_string_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
 				break;
 			}
 		}
-		stilo_file_output(a_file, "\"");
+		stilo_file_output(a_file, "\"[c]", newline);
 	} else {
 		if (len > 0)
 			stilo_file_output_n(a_file, len, "[s]", str);
 	}
-	stilo_file_output(a_file, "[c]", newline);
 }
 
 cw_sint32_t
