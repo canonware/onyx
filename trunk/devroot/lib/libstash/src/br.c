@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 198 $
- * $Date: 1998-09-07 09:48:15 -0700 (Mon, 07 Sep 1998) $
+ * $Revision: 233 $
+ * $Date: 1998-09-23 16:22:28 -0700 (Wed, 23 Sep 1998) $
  *
  * <<< Description >>>
  *
@@ -79,12 +79,12 @@
  * Most of the complexity of the br is necessitated by the need for
  * atomicity guarantees on block updates.  All block writes are done in
  * such a way that other than due to media failure, committed data is never
- * lost, even during unexpected crashes.  This necessarily has a large
+ * lost, even during unexpected crashes.  This necessarily has a
  * performance impact, so the br also allows relaxation of these
- * constraints for cases where performance is more important than
- * recovery.  Both write policies can be used at the same time without any
- * worries of br corruption, though data can be lost during crashes for
- * those transactions that use the relaxed commit API.
+ * constraints for cases where performance is more important than recovery.
+ * Both write policies can be used at the same time without any worries of
+ * br corruption, though data can be lost during crashes for those
+ * transactions that use the relaxed commit API.
  *
  * The br provides complex locking modes for blocks.  This facilitates
  * implementation of complex concurrent algorithms such as the JOE-tree
@@ -188,36 +188,79 @@
  *
  * < P2V >
  *
- * The P2V maps paddrs to vaddrs.  This table (interleaved in the DS, shown
- * below) has embedded in it free lists similar to that in the V2P, except
- * that there is one free list for each brbs mapping.  The head, tail and
- * list size info is stored in the first 8 bytes of the first 3 P2V blocks, 
- * respectively.  This means that each brbs instance that maps into the DS
- * must be big enough to use at least 3 P2V blocks:
  *
- * ((((block size / 8) - 1) * 2) + 1) * block size
+ * The P2V maps paddrs to vaddrs.  This table is interleaved in the DS, as
+ * shown below.  Each P2V block contains all the metadata (other than that
+ * stored in the V2P) for an "extent group".  An "extent" is nothing more
+ * than a group of blocks.  The special aspect of extents is that they
+ * provide a means of allocating sets of contiguous blocks.
  *
- * For BS == 8 kB:
+ * Each extent group consists of one metadata block (unuseable space)
+ * followed by as many blocks as the metadata block is capable of handling
+ * (minus one).  The metadata block needs 8 bytes of space for each data
+ * block.  So, for 8 kB blocks, one extent group has 1023 data blocks,
+ * which is one block short of 8 MB.
  *
- * ((((2^13 / 2^3) - 1) * 2) + 1) * 2^13
- *  == 0xffe000 B
- *  == 16769024 B
- *  == 15.99 MB
+ * Extents themselves consist of 2^N blocks, where N is less than
+ * log_2(blocks in an extent group).  So, for 8 kB pages (8 MB extent
+ * groups), the largest possible extent is 512 blocks (4 MB).
  *
- * For BS == 512 B:
+ * Following is a diagram of what a P2V entry looks like for 8 kB blocks:
  *
- * ((((2^9 / 2^3) - 1) * 2) + 1) * 2^9
- *  == 0xfe00 B
- *  == 65024 B
- *  == 63 kB
+ * bit
+ * 63 62                                                    13   12           0
+ *  \ |                                                       \ /             |
+ *   UXXX XXXX XXXX XXXX XXXX XXXX XXXX XXXX XXXX XXXX XXXX XXXx xxTT TTTT TTTT
  *
- * In actuality, there is some additional complexity in how the list size
- * is stored.  Since every time the head or tail changes, it also changes
- * the list size, it would normally be necessary to write the list size
- * every time the list changes.  Instead the least significant 8 bits of
- * the head and tail are used as counters.  Every time the counter wraps
- * around, the list size is updated.  This almost halves the number of
- * writes that are necessary to keep the P2V consistent.
+ * U == free bit (0 == free, 1 == used)
+ * X == block vaddr
+ * x == unused
+ * T == extent tree bits
+ *
+ * The U, X and x bits are self-explanatory.  The T bits take some
+ * explaining.  As mentioned above, the number of blocks in an extent is
+ * always a power of 2.  This allows extents to be subdivided an
+ * recombined.  Such subdivisions can be represented as a sort of tree.
+ * For 8 kB blocks, the tree could look like the following.  The tree on
+ * the left is the least branched that a tree can be, due to the metadata
+ * block.
+ *
+ *                            X                           X
+ *                           / \                         / \
+ *                          X   512                     X   512
+ *                         / \                         / \______
+ *                        X   256                     X         X
+ *                       / \                         / \       / \
+ *                      X   128                     X   128 128   X
+ *                     / \                         / \           / \
+ *                    X   64                      X   64        X   64
+ *                   / \                         / \           / \
+ *                  X   32                      X   32        X   32
+ *                 / \                         / \           / \
+ *                X   16                      X   16       16   X
+ *               / \                         / \             __/ \__
+ *              X   8                       X   8           X       X
+ *             / \                         / \___          / \     / \
+ *            X   4                       X      X        4   4   X   4
+ *           / \                         / \    / \                  / \
+ *          X   2                       X   2  2   2                2   X
+ *         / \                         / \                             / \
+ * metadata   1                metadata   1                           1   1
+ *
+ * The T bits in the P2V entries that correspond to the first block of each
+ * extent are used to encode the size of the extents.  For example, if the
+ * T bits are set to 0x200, that indicates a 512 block extent, and 0x004
+ * would indicate a 4 block extent.
+ *
+ * Deallocated extents can be recombined with their neighbors (if the
+ * neighbors are also free) in logarithmic time.  This makes part of the
+ * extent fragmentation problem go away.  Since all data blocks are
+ * virtually addressed, compaction threads can work during idle time.  With
+ * one or more compactor threads running, fragmentation can essentially
+ * disappear as a problem, though for highly dynamic file stores,
+ * fragmentation may never surpass a less than ideal steady state.  Still,
+ * given enough free disk space, fragmentation should never become a
+ * serious problem.
  *
  * DS and P2V interleaving layout:
  *
@@ -245,6 +288,9 @@
  * is in multiples of (block size / 8) bytes.
  *
  * < TB >
+ *
+ * XXX Provisions need to be made for grouping multiple block writes as a
+ * single transaction.
  *
  * The TB contains temporary buffers.  Each buffer is 2 blocks.  The first
  * half of the first block and the last half of the second block contain
@@ -343,8 +389,9 @@
 #include <libstash.h>
 #include <br_priv.h>
 
+#include <string.h>
+
 /****************************************************************************
- * <<< Description >>>
  *
  * br constructor.
  *
@@ -362,36 +409,31 @@ br_new(cw_br_t * a_br_o)
   if (a_br_o == NULL)
   {
     retval = (cw_br_t *) _cw_malloc(sizeof(cw_br_t));
+    bzero(retval, sizeof(cw_br_t));
     retval->is_malloced = TRUE;
   }
   else
   {
     retval = a_br_o;
+    bzero(retval, sizeof(cw_br_t));
     retval->is_malloced = FALSE;
   }
 
   rwl_new(&retval->rw_lock);
+  res_new(&retval->res);
   /* Non-thread-safe hash table, since we're already taking care of the
    * locking. */
-/*   oh_new(&retval->vaddr_hash, FALSE); */
-  res_new(&retval->res);
-  retval->res_file_a
-    = retval->res_file_b
-    = retval->res_file_c
-    = NULL;
-
-  /* Initialize member variables. */
-  retval->is_open = FALSE;
+  oh_new(&retval->vaddr_hash, FALSE);
+  list_new(&retval->spare_brblk_list, FALSE);
   
   if (_cw_pmatch(_STASH_DBG_R_BR_FUNC))
   {
     _cw_marker("Exit br_new()");
   }
-  return NULL; /* XXX */
+  return retval;
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * br destructor.
  *
@@ -415,20 +457,24 @@ br_delete(cw_br_t * a_br_o)
   }
 
   rwl_delete(&a_br_o->rw_lock);
-/*   oh_delete(&a_br_o->vaddr_hash); */
   res_delete(&a_br_o->res);
-  if (a_br_o->res_file_a != NULL)
   {
-    _cw_free(a_br_o->res_file_a);
+    cw_uint32_t i;
+
+    for (i = 0; i < 3; i++)
+    {
+      if (a_br_o->res_files[i] != NULL)
+      {
+	_cw_free(a_br_o->res_files[i]);
+      }
+    }
   }
-  if (a_br_o->res_file_b != NULL)
+  oh_delete(&a_br_o->vaddr_hash);
+  if (a_br_o->map != NULL)
   {
-    _cw_free(a_br_o->res_file_b);
+    _cw_free(a_br_o->map);
   }
-  if (a_br_o->res_file_c != NULL)
-  {
-    _cw_free(a_br_o->res_file_c);
-  }
+  list_delete(&a_br_o->spare_brblk_list);
   
   if (a_br_o->is_malloced)
   {
@@ -442,7 +488,6 @@ br_delete(cw_br_t * a_br_o)
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * Create a new br.  The resource filenames must be set before calling this
  * function.
@@ -475,7 +520,8 @@ br_create(cw_br_t * a_br_o, cw_uint32_t a_block_size)
       case 0x8000:
       case 0x10000:
       case 0x20000:
-      case 0x40000: /* 256 kB */
+      case 0x40000:
+      case 0x80000: /* 512 kB */
       {
 	int bytes_written;
 	
@@ -499,9 +545,9 @@ br_create(cw_br_t * a_br_o, cw_uint32_t a_block_size)
 		   "brbs_list:.",
 		   "brbs_next_designator:0",
 		   NULL);
-    if (res_dump(&a_br_o->res, a_br_o->res_file_a)
-	|| res_dump(&a_br_o->res, a_br_o->res_file_b)
-	|| res_dump(&a_br_o->res, a_br_o->res_file_c))
+    if (res_dump(&a_br_o->res, a_br_o->res_files[0])
+	|| res_dump(&a_br_o->res, a_br_o->res_files[1])
+	|| res_dump(&a_br_o->res, a_br_o->res_files[2]))
     {
       retval = TRUE;
     }
@@ -521,7 +567,6 @@ br_create(cw_br_t * a_br_o, cw_uint32_t a_block_size)
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * Set arguments to point to the names of the resource files.  The string
  * pointers point to the internal copies, so they must not be modified by
@@ -529,21 +574,21 @@ br_create(cw_br_t * a_br_o, cw_uint32_t a_block_size)
  *
  ****************************************************************************/
 void
-br_get_res_files(cw_br_t * a_br_o, char ** a_res_file_a,
-		 char ** a_res_file_b, char ** a_res_file_c)
+br_get_res_files(cw_br_t * a_br_o, char * a_res_files[])
 {
   if (_cw_pmatch(_STASH_DBG_R_BR_FUNC))
   {
     _cw_marker("Enter br_get_res_files()");
   }
   _cw_check_ptr(a_br_o);
-  rwl_rlock(&a_br_o->rw_lock);
+  _cw_check_ptr(a_res_files);
+/*   rwl_rlock(&a_br_o->rw_lock); */
 
-  *a_res_file_a = a_br_o->res_file_a;
-  *a_res_file_b = a_br_o->res_file_b;
-  *a_res_file_c = a_br_o->res_file_c;
+  a_res_files[0] = a_br_o->res_files[0];
+  a_res_files[1] = a_br_o->res_files[1];
+  a_res_files[2] = a_br_o->res_files[2];
   
-  rwl_runlock(&a_br_o->rw_lock);
+/*   rwl_runlock(&a_br_o->rw_lock); */
   if (_cw_pmatch(_STASH_DBG_R_BR_FUNC))
   {
     _cw_marker("Exit br_get_res_files()");
@@ -551,7 +596,6 @@ br_get_res_files(cw_br_t * a_br_o, char ** a_res_file_a,
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * Set the resource filenames.  An internal copy of the strings is made, so
  * the caller is responsible for deallocating space used by the argument
@@ -559,56 +603,47 @@ br_get_res_files(cw_br_t * a_br_o, char ** a_res_file_a,
  *
  ****************************************************************************/
 cw_bool_t
-br_set_res_files(cw_br_t * a_br_o, char * a_res_file_a,
-		 char * a_res_file_b, char * a_res_file_c)
+br_set_res_files(cw_br_t * a_br_o, char * a_res_files[])
 {
-  cw_bool_t retval = FALSE; /* XXX Never used. */
+  cw_bool_t retval;
 
   if (_cw_pmatch(_STASH_DBG_R_BR_FUNC))
   {
     _cw_marker("Enter br_set_res_files()");
   }
   _cw_check_ptr(a_br_o);
+  _cw_check_ptr(a_res_files);
   rwl_wlock(&a_br_o->rw_lock);
 
-  if (a_res_file_a != NULL)
+  if (a_br_o->is_open)
   {
-    if (a_br_o->res_file_a == NULL)
-    {
-      a_br_o->res_file_a = (char *) _cw_malloc(strlen(a_res_file_a) + 1);
-    }
-    else
-    {
-      a_br_o->res_file_a = (char *) _cw_realloc(a_br_o->res_file_a,
-						strlen(a_res_file_a) + 1);
-    }
-    strcpy(a_br_o->res_file_a, a_res_file_a);
+    /* XXX This isn't really acceptable, since it would mean taking the br
+     * offline just to change the resource files. */
+    retval = TRUE;
   }
-  if (a_res_file_b != NULL)
+  else
   {
-    if (a_br_o->res_file_b == NULL)
+    cw_uint32_t i;
+    
+    retval = FALSE;
+
+    for (i = 0; i < 3; i++)
     {
-      a_br_o->res_file_b = (char *) _cw_malloc(strlen(a_res_file_b) + 1);
+      if (a_res_files[i] != NULL)
+      {
+	if (a_br_o->res_files[i] == NULL)
+	{
+	  a_br_o->res_files[i] = (char *) _cw_malloc(strlen(a_res_files[i])
+						     + 1);
+	}
+	else
+	{
+	  a_br_o->res_files[i] = (char *) _cw_realloc(a_br_o->res_files[i],
+						   strlen(a_res_files[i]) + 1);
+	}
+	strcpy(a_br_o->res_files[i], a_res_files[i]);
+      }
     }
-    else
-    {
-      a_br_o->res_file_b = (char *) _cw_realloc(a_br_o->res_file_b,
-						strlen(a_res_file_b) + 1);
-    }
-    strcpy(a_br_o->res_file_b, a_res_file_b);
-  }
-  if (a_res_file_c != NULL)
-  {
-    if (a_br_o->res_file_c == NULL)
-    {
-      a_br_o->res_file_c = (char *) _cw_malloc(strlen(a_res_file_c) + 1);
-    }
-    else
-    {
-      a_br_o->res_file_c = (char *) _cw_realloc(a_br_o->res_file_c,
-						strlen(a_res_file_c) + 1);
-    }
-    strcpy(a_br_o->res_file_c, a_res_file_c);
   }
   
   rwl_wunlock(&a_br_o->rw_lock);
@@ -620,7 +655,6 @@ br_set_res_files(cw_br_t * a_br_o, char * a_res_file_a,
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * Checks whether the br was shut down properly.  If not, rolls all pending
  * updates forward or backward in order to put the br in a consistent
@@ -630,177 +664,23 @@ br_set_res_files(cw_br_t * a_br_o, char * a_res_file_a,
 cw_bool_t
 br_fsck(cw_br_t * a_br_o)
 {
-  cw_bool_t retval = FALSE, is_clean = FALSE;
-  cw_bool_t error_a, error_b, error_c;
-  cw_res_t t_res_a, t_res_b, t_res_c;
-  cw_sint8_t which_valid;
+  cw_bool_t retval;
 
   if (_cw_pmatch(_STASH_DBG_R_BR_FUNC))
   {
     _cw_marker("Enter br_fsck()");
   }
   _cw_check_ptr(a_br_o);
-  _cw_check_ptr(a_br_o->res_file_a);
-  _cw_check_ptr(a_br_o->res_file_b);
-  _cw_check_ptr(a_br_o->res_file_c);
   rwl_wlock(&a_br_o->rw_lock);
-  
-  res_new(&t_res_a);
-  res_new(&t_res_b);
-  res_new(&t_res_c);
-  
-  error_a = res_merge_file(&t_res_a, a_br_o->res_file_a);
-  error_b = res_merge_file(&t_res_b, a_br_o->res_file_b);
-  error_c = res_merge_file(&t_res_c, a_br_o->res_file_c);
 
-  if (error_a || error_b || error_c)
+  if (a_br_o->is_open)
   {
-    /* At least one resource file can't be read.  Try to recover. */
-      
-    if ((error_a && error_b)
-	|| (error_a && error_c)
-	|| (error_b && error_c))
-    {
-      /* Unresolvable error.  There may still be one valid resource file, 
-       * but the standard procedures br uses ensure that at least two are 
-       * intact at any given time.  As such, there's no way to know
-       * whether to trust a single resource file. */
-      retval = TRUE;
-      goto RETURN;
-    }
-    else
-    {
-      if (error_a)
-      {
-	if (res_is_equal(&t_res_b, &t_res_c))
-	{
-	  /* The resource files are valid.  Assume the crash happened
-	   * while updating file A.  Roll backward and use file C.*/
-	  which_valid = 'c';
-	}
-	else
-	{
-	  /* Something bad happened.  An error in file A indicates it was
-	   * being written to during the crash, which means files B and C
-	   * should be identical. */
-	  retval = TRUE;
-	  goto RETURN;
-	}
-      }
-      else if (error_b)
-      {
-	/* Files A and C are likely (but not for sure) different.  Roll
-	 * forward and use file A. */
-	which_valid = 'a';
-      }
-      else /* (error_c) */
-      {
-	if (res_is_equal(&t_res_a, &t_res_b))
-	{
-	  /* Assume the crash happened while updating file C.  Files A
-	   * and B agree, so roll forward and use file A. */
-	  which_valid = 'a';
-	}
-	else
-	{
-	  /* Something bad happened.  An error in file C indicates it was 
-	   * being written to, which means files A and B should be
-	   * identical. */
-	  retval = TRUE;
-	  goto RETURN;
-	}
-      }
-    }
-  }
-  else if (res_is_equal(&t_res_a, &t_res_b)
-	   && res_is_equal(&t_res_a, &t_res_c)
-	   && strcmp(res_get_res_val(&t_res_a, "clean"), "yes"))
-  {
-    /* The br was shut down cleanly. */
-    is_clean = TRUE;
-    which_valid = 'a';
-  }
-  if (res_is_equal(&t_res_a, &t_res_b))
-  {
-    /* First and second copies (at least) are valid. */
-    which_valid = 'a';
-  }
-  else if (res_is_equal(&t_res_b, &t_res_c))
-  {
-    /* Second and third copies are valid. */
-    which_valid = 'b';
+    retval = TRUE;
   }
   else
   {
-    /* All three copies are different, so roll forward.  Use the first
-     * copy. */
-    which_valid = 'a';
+    retval = br_p_fsck(a_br_o);
   }
-
-  if (is_clean == FALSE)
-  {
-    res_clear(&a_br_o->res);
-    switch (which_valid)
-    {
-      case 'a':
-      {
-	if (res_merge_file(&a_br_o->res, a_br_o->res_file_a))
-	{
-	  retval = TRUE;
-	  goto RETURN;
-	}
-	break;
-      }
-      case 'b':
-      {
-	if (res_merge_file(&a_br_o->res, a_br_o->res_file_b))
-	{
-	  retval = TRUE;
-	  goto RETURN;
-	}
-	break;
-      }
-      case 'c':
-      {
-	if (res_merge_file(&a_br_o->res, a_br_o->res_file_c))
-	{
-	  retval = TRUE;
-	  goto RETURN;
-	}
-	break;
-      }
-      default:
-      {
-	_cw_error("Programming logic error");
-      }
-    }
-    /* Make sure that the resource files will have the clean flag set when 
-     * written later on. */
-    res_merge_list(&a_br_o->res, "clean:yes", NULL);
-    
-    /* Map the brbs instances into the paddr space. */
-
-    /* Find all valid TB buffers and roll forward the blocks they
-       correspond to, if necessary.  Mark each TP buffer valid only _after_
-       rolling forward its corresponding block. */
-
-    /* Sync up the V2P mirror. */
-
-    /* Clear the interim counters for the free lists and add their values
-     * to the main counters (not in that order =) ). */
-
-    /* Close the brbs instances. */
-
-    /* Set the clean resource to "yes", and write all three resource
-     * files. */
-
-    /* Merge the resources into &a_br_o->res. */
-  }
-
- RETURN:
-  res_delete(&t_res_a);
-  res_delete(&t_res_b);
-  res_delete(&t_res_c);
     
   rwl_wunlock(&a_br_o->rw_lock);
   if (_cw_pmatch(_STASH_DBG_R_BR_FUNC))
@@ -811,7 +691,6 @@ br_fsck(cw_br_t * a_br_o)
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * Write current status summary to g_log_o.
  *
@@ -826,6 +705,7 @@ br_dump(cw_br_t * a_br_o)
   _cw_check_ptr(a_br_o);
   rwl_rlock(&a_br_o->rw_lock);
 
+  /* XXX */
   _cw_error("Unimplemented");
   
   rwl_runlock(&a_br_o->rw_lock);
@@ -833,6 +713,60 @@ br_dump(cw_br_t * a_br_o)
   {
     _cw_marker("Exit br_dump()");
   }
+}
+
+/****************************************************************************
+ *
+ * Return the size of the brblk cache (number of blocks).
+ *
+ ****************************************************************************/
+cw_uint64_t
+br_get_num_cache_brblks(cw_br_t * a_br_o)
+{
+  cw_uint64_t retval;
+  
+  if (_cw_pmatch(_STASH_DBG_R_BR_FUNC))
+  {
+    _cw_marker("Enter br_get_num_cache_brblks()");
+  }
+  _cw_check_ptr(a_br_o);
+/*   rwl_rlock(&a_br_o->rw_lock); */
+
+  retval = a_br_o->num_cache_brblks;
+  
+/*   rwl_runlock(&a_br_o->rw_lock); */
+  if (_cw_pmatch(_STASH_DBG_R_BR_FUNC))
+  {
+    _cw_marker("Exit br_get_num_cache_brblks()");
+  }
+  return retval;
+}
+
+/****************************************************************************
+ *
+ * Set the size of the brblk cache.
+ *
+ ****************************************************************************/
+cw_bool_t
+br_set_num_cache_brblks(cw_br_t * a_br_o, cw_uint64_t a_num_brblks)
+{
+  cw_bool_t retval;
+  
+  if (_cw_pmatch(_STASH_DBG_R_BR_FUNC))
+  {
+    _cw_marker("Enter br_set_num_cache_brblks()");
+  }
+  _cw_check_ptr(a_br_o);
+  rwl_rlock(&a_br_o->rw_lock);
+
+  retval = 0; /* XXX */
+  
+  rwl_runlock(&a_br_o->rw_lock);
+  if (_cw_pmatch(_STASH_DBG_R_BR_FUNC))
+  {
+    _cw_marker("Exit br_set_num_cache_brblks()");
+  }
+  return retval;
 }
 
 /****************************************************************************
@@ -865,7 +799,6 @@ br_is_open(cw_br_t * a_br_o)
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * Opens the backing store for a br instance.  The config file for the
  * repository must be a plain file.
@@ -905,7 +838,6 @@ br_open(cw_br_t * a_br_o)
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * Closes the backing store for the repository.  All dirty buffers are
  * flushed.
@@ -934,7 +866,6 @@ br_close(cw_br_t * a_br_o)
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * Adds a file or device as backing store for the block repository.
  *
@@ -962,7 +893,6 @@ br_add_brbs(cw_br_t * a_br_o, cw_brbs_t * a_brbs_o, cw_uint64_t a_base_addr)
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * Set *a_brbs_o to the brbs with filename *a_filename, if it exists, and
  * return FALSE.  Otherwise, return TRUE.
@@ -991,15 +921,15 @@ br_get_brbs_p(cw_br_t * a_br_o, char * a_filename, cw_brbs_t ** a_brbs_o)
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
- * Removes a brbs from the repository.  First though, all valid blocks are
- * moved off of the file or device.  If there is not enough space to do so,
- * the call will eventually fail.
+ * Removes a brbs from the repository.  First though, if the brbs is mapped
+ * in the DS and portions of the brbs have no overlapping mappings, all
+ * valid blocks are moved off of the file or device.  If there is not
+ * enough space to do so, the call will eventually fail.
  *
  ****************************************************************************/
 cw_bool_t
-br_rm_brbs(cw_br_t * a_br_o, char * a_filename)
+br_rm_brbs(cw_br_t * a_br_o, cw_brbs_t * a_brbs_o)
 {
   if (_cw_pmatch(_STASH_DBG_R_BR_FUNC))
   {
@@ -1019,7 +949,6 @@ br_rm_brbs(cw_br_t * a_br_o, char * a_filename)
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * Allocates a block as used and points *a_brblk_o to it.  The block is
  * returned with a t-lock to assure that no other threads grab a lock on
@@ -1050,7 +979,6 @@ br_block_create(cw_br_t * a_br_o, cw_brblk_t ** a_brblk_o)
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * Permanently removes a block from the repository.  The physical block is
  * reclaimed for future use.
@@ -1079,7 +1007,6 @@ br_block_destroy(cw_br_t * a_br_o, cw_brblk_t * a_brblk_o)
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * s-locks a block, as well as pulling it into cache.
  *
@@ -1109,7 +1036,6 @@ br_block_slock(cw_br_t * a_br_o,
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * t-locks a block, as well as pulling it into cache.
  *
@@ -1139,7 +1065,6 @@ br_block_tlock(cw_br_t * a_br_o,
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * Flushes the block pointed to by a_brblk_o.  The caller must have already 
  * attained an s or t lock fo the block, or else the results of this
@@ -1164,6 +1089,275 @@ br_block_flush(cw_br_t * a_br_o, cw_brblk_t * a_brblk_o)
   if (_cw_pmatch(_STASH_DBG_R_BR_FUNC))
   {
     _cw_marker("Exit br_block_flush()");
+  }
+  return retval;
+}
+
+/****************************************************************************
+ *
+ * Check br consistency, and fix anything that needs fixed.
+ *
+ ****************************************************************************/
+cw_bool_t
+br_p_fsck(cw_br_t * a_br_o)
+{
+  cw_bool_t retval = FALSE, is_clean = FALSE;
+  cw_bool_t fix_file[3];
+  cw_bool_t error[3];
+  cw_res_t t_res[3];
+  cw_uint32_t which_valid;
+
+  fix_file[0] = FALSE;
+  fix_file[1] = FALSE;
+  fix_file[2] = FALSE;
+  
+  if (_cw_pmatch(_STASH_DBG_R_BR_FUNC))
+  {
+    _cw_marker("Enter br_p_fsck()");
+  }
+  _cw_check_ptr(a_br_o->res_files[0]);
+  _cw_check_ptr(a_br_o->res_files[1]);
+  _cw_check_ptr(a_br_o->res_files[2]);
+  
+  res_new(&t_res[0]);
+  res_new(&t_res[1]);
+  res_new(&t_res[2]);
+  
+  error[0] = res_merge_file(&t_res[0], a_br_o->res_files[0]);
+  error[1] = res_merge_file(&t_res[1], a_br_o->res_files[1]);
+  error[2] = res_merge_file(&t_res[2], a_br_o->res_files[2]);
+
+  if (error[0] || error[1] || error[2])
+  {
+    /* At least one resource file can't be read.  Try to recover. */
+      
+    if ((error[0] && error[1])
+	|| (error[0] && error[2])
+	|| (error[1] && error[2]))
+    {
+      /* Unresolvable error.  There may still be one valid resource file, 
+       * but the standard procedures br uses ensure that at least two are 
+       * intact at any given time.  As such, there's no way to know
+       * whether to trust a single resource file. */
+      log_eprintf(g_log_o, NULL, 0, "br_p_fsck",
+		  "Errors reading at least 2 resource files\n");
+      retval = TRUE;
+      goto RETURN;
+    }
+    else
+    {
+      if (error[0])
+      {
+	if (res_is_equal(&t_res[1], &t_res[2]))
+	{
+	  /* The resource files are valid.  Assume the crash happened
+	   * while updating file A.  Roll backward and use file C.*/
+	  which_valid = 2;
+	  fix_file[0] = TRUE;
+	}
+	else
+	{
+	  /* Something bad happened.  An error in file A indicates it was
+	   * being written to during the crash, which means files B and C
+	   * should be identical. */
+	  log_eprintf(g_log_o, NULL, 0, "br_p_fsck",
+		      "Error reading \"%s\", and \"%s\" and \"%s\" disagree\n",
+		      a_br_o->res_files[0], a_br_o->res_files[1],
+		      a_br_o->res_files[2]);
+	  retval = TRUE;
+	  goto RETURN;
+	}
+      }
+      else if (error[1])
+      {
+	/* Files A and C are likely (but not for sure) different.  Roll
+	 * forward and use file A. */
+	which_valid = 0;
+	fix_file[1] = TRUE;
+	fix_file[2] = TRUE;
+      }
+      else /* (error[2]) */
+      {
+	if (res_is_equal(&t_res[0], &t_res[1]))
+	{
+	  /* Assume the crash happened while updating file C.  Files A
+	   * and B agree, so roll forward and use file A. */
+	  which_valid = 0;
+	  fix_file[2] = TRUE;
+	}
+	else
+	{
+	  /* Something bad happened.  An error in file C indicates it was 
+	   * being written to, which means files A and B should be
+	   * identical. */
+	  log_eprintf(g_log_o, NULL, 0, "br_p_fsck",
+		      "Error reading \"%s\", and \"%s\" and \"%s\" disagree\n",
+		      a_br_o->res_files[2], a_br_o->res_files[0],
+		      a_br_o->res_files[1]);
+	  retval = TRUE;
+	  goto RETURN;
+	}
+      }
+    }
+  }
+  else if (res_is_equal(&t_res[0], &t_res[1])
+	   && res_is_equal(&t_res[0], &t_res[2])
+	   && strcmp(res_get_res_val(&t_res[0], "clean"), "yes"))
+  {
+    /* The br was shut down cleanly. */
+    is_clean = TRUE;
+    which_valid = 0;
+  }
+  else if (res_is_equal(&t_res[0], &t_res[1])
+	   && res_is_equal(&t_res[0], &t_res[2]))
+  {
+    /* All copies are valid. */
+    which_valid = 0;
+  }
+  else if (res_is_equal(&t_res[0], &t_res[1]))
+  {
+    /* First and second copies are valid. */
+    which_valid = 0;
+    fix_file[2] = TRUE;
+  }
+  else if (res_is_equal(&t_res[1], &t_res[2]))
+  {
+    /* Second and third copies are valid. */
+    which_valid = 1;
+    fix_file[0] = TRUE;
+  }
+  else
+  {
+    /* All three copies are probably different, so roll forward.  Use the
+     * first copy. */
+    which_valid = 0;
+    fix_file[1] = TRUE;
+    fix_file[2] = TRUE;
+  }
+
+  if (is_clean == FALSE)
+  {
+    /* Copy valid resources into &a_br_o->res and synchronize the res files. */
+    res_clear(&a_br_o->res);
+
+    if (res_merge_file(&a_br_o->res, a_br_o->res_files[which_valid]))
+    {
+      _cw_error("Unexpected error");
+    }
+    {
+      cw_uint32_t i, next;
+
+      /* This looks like a bunch of unnecessary complexity, but care must
+       * be taken that the res files are modified in an order that allows
+       * a subsequent run of this function to recover from write failures. */
+      for (i = 0, next = (which_valid + 1) % 3;
+	   i < 2;
+	   i++, next = (next + 1) % 3)
+      {	
+	if (fix_file[next])
+	{
+	  if (res_dump(&a_br_o->res, a_br_o->res_files[next]))
+	  {
+	    log_eprintf(g_log_o, NULL, 0, "br_p_fsck",
+			"Error writing to file \"%s\"\n",
+			a_br_o->res_files[next]);
+	    retval = TRUE;
+	    goto RETURN;
+	  }
+	}
+      }
+    }
+    
+    /* Map the brbs instances into the paddr space. */
+
+    /* Find all valid TB buffers and roll forward the blocks they
+       correspond to, if necessary.  Mark each TP buffer valid only _after_
+       rolling forward its corresponding block. */
+
+    /* Sync up the V2P mirror. */
+
+    /* Clear the interim counters for the free lists and add their values
+     * to the main counters (not in that order =) ). */
+
+    /* Close the brbs instances. */
+
+    /* Set the clean resource to "yes", and write all three resource
+     * files. */
+    res_merge_list(&a_br_o->res, "clean:yes", NULL);
+    {
+      cw_uint32_t i;
+
+      for (i = 0; i < 3; i++)
+      {
+	
+	if (res_dump(&a_br_o->res, a_br_o->res_files[i]))
+	{
+	  log_eprintf(g_log_o, NULL, 0, "br_p_fsck",
+		      "Error writing to file \"%s\"\n",
+		      a_br_o->res_files[i]);
+	  retval = TRUE;
+	  goto RETURN;
+	}
+      }
+    }
+  }
+  
+ RETURN:
+  res_delete(&t_res[0]);
+  res_delete(&t_res[1]);
+  res_delete(&t_res[2]);
+    
+  if (_cw_pmatch(_STASH_DBG_R_BR_FUNC))
+  {
+    _cw_marker("Exit br_p_fsck()");
+  }
+  return retval;
+}
+
+/****************************************************************************
+ *
+ * Map a brbs into the paddr space.
+ *
+ ****************************************************************************/
+cw_bool_t
+br_p_map_brbs(cw_br_t * a_br_o, cw_brbs_t * a_brbs_o, cw_uint64_t a_base_addr)
+{
+  cw_bool_t retval;
+
+  if (_cw_pmatch(_STASH_DBG_R_BR_FUNC))
+  {
+    _cw_marker("Enter br_p_map_brbs()");
+  }
+  
+  retval = TRUE; /* XXX */
+  
+  if (_cw_pmatch(_STASH_DBG_R_BR_FUNC))
+  {
+    _cw_marker("Exit br_p_map_brbs()");
+  }
+  return retval;
+}
+
+/****************************************************************************
+ *
+ * Unmap a brbs.
+ *
+ ****************************************************************************/
+cw_bool_t
+br_p_unmap_brbs(cw_br_t * a_br_o, cw_brbs_t * a_brbs_o)
+{
+  cw_bool_t retval;
+
+  if (_cw_pmatch(_STASH_DBG_R_BR_FUNC))
+  {
+    _cw_marker("Enter br_p_map_brbs()");
+  }
+  
+  retval = TRUE; /* XXX */
+  
+  if (_cw_pmatch(_STASH_DBG_R_BR_FUNC))
+  {
+    _cw_marker("Exit br_p_map_brbs()");
   }
   return retval;
 }

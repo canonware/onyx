@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 156 $
- * $Date: 1998-07-29 16:59:01 -0700 (Wed, 29 Jul 1998) $
+ * $Revision: 233 $
+ * $Date: 1998-09-23 16:22:28 -0700 (Wed, 23 Sep 1998) $
  *
  * <<< Description >>>
  *
@@ -29,6 +29,7 @@ struct cw_brbs_s
   cw_rwl_t rw_lock;
 
   cw_bool_t is_open;
+  cw_bool_t is_valid_data; /* XXX Add functions for this. */
   char * filename;
   int fd;
 

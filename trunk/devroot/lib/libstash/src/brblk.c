@@ -8,12 +8,12 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 219 $
- * $Date: 1998-09-11 00:24:44 -0700 (Fri, 11 Sep 1998) $
+ * $Revision: 233 $
+ * $Date: 1998-09-23 16:22:28 -0700 (Wed, 23 Sep 1998) $
  *
  * <<< Description >>>
  *
- *
+ * This class acts as a wrapper for br blocks when they are in memory.
  *
  ****************************************************************************/
 
@@ -47,9 +47,12 @@ brblk_new(cw_brblk_t * a_brblk_o, cw_uint32_t a_block_size)
     retval->is_malloced = FALSE;
   }
 
+  mtx_new(&retval->lock);
   jtl_new(&retval->jt_lock);
   retval->is_dirty = FALSE;
-  retval->logical_addr = 0;
+  retval->atomic_writes = TRUE;
+  retval->vaddr = 0;
+  retval->paddr = 0;
   retval->buf = (cw_uint8_t *) _cw_malloc(a_block_size);
   retval->buf_size = a_block_size;
   
@@ -75,6 +78,7 @@ brblk_delete(cw_brblk_t * a_brblk_o)
   }
   _cw_check_ptr(a_brblk_o);
 
+  mtx_delete(&a_brblk_o->lock);
   jtl_delete(&a_brblk_o->jt_lock);
   _cw_free(a_brblk_o->buf);
   
@@ -84,7 +88,6 @@ brblk_delete(cw_brblk_t * a_brblk_o)
   }
 }
 
-#ifdef _STASH_DBG
 /****************************************************************************
  * <<< Description >>>
  *
@@ -160,7 +163,7 @@ brblk_get_is_dirty(cw_brblk_t * a_brblk_o)
 /****************************************************************************
  * <<< Description >>>
  *
- * Return whether the buffer is dirty.
+ * Set the dirty flag to a_is_dirty.
  *
  ****************************************************************************/
 void
@@ -168,15 +171,68 @@ brblk_set_is_dirty(cw_brblk_t * a_brblk_o, cw_bool_t a_is_dirty)
 {
   if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
-    _cw_marker("Enter brblk_get_is_dirty()");
+    _cw_marker("Enter brblk_set_is_dirty()");
   }
   _cw_check_ptr(a_brblk_o);
 
+  mtx_lock(&a_brblk_o->lock);
   a_brblk_o->is_dirty = a_is_dirty;
+  mtx_unlock(&a_brblk_o->lock);
   
   if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
-    _cw_marker("Exit brblk_get_is_dirty()");
+    _cw_marker("Exit brblk_set_is_dirty()");
+  }
+}
+
+/****************************************************************************
+ * <<< Description >>>
+ *
+ * Return whether this block is flushed using atomic updates.
+ *
+ ****************************************************************************/
+cw_bool_t
+brblk_get_get_atomic_writes(cw_brblk_t * a_brblk_o)
+{
+  cw_bool_t retval;
+  
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
+  {
+    _cw_marker("Enter brblk_get_atomic_writes()");
+  }
+  _cw_check_ptr(a_brblk_o);
+
+  retval = a_brblk_o->atomic_writes;
+  
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
+  {
+    _cw_marker("Exit brblk_get_atomic_writes()");
+  }
+  return retval;
+}
+
+/****************************************************************************
+ * <<< Description >>>
+ *
+ * Set whether this block is using atomic updates.
+ *
+ ****************************************************************************/
+void
+brblk_set_atomic_writes(cw_brblk_t * a_brblk_o, cw_bool_t a_atomic_writes)
+{
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
+  {
+    _cw_marker("Enter brblk_set_atomic_writes()");
+  }
+  _cw_check_ptr(a_brblk_o);
+
+  mtx_lock(&a_brblk_o->lock);
+  a_brblk_o->atomic_writes = a_atomic_writes;
+  mtx_unlock(&a_brblk_o->lock);
+
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
+  {
+    _cw_marker("Exit brblk_set_atomic_writes()");
   }
 }
 
@@ -242,7 +298,6 @@ brblk_2wlock(cw_brblk_t * a_brblk_o)
   _cw_check_ptr(a_brblk_o);
   
   jtl_2wlock(&a_brblk_o->jt_lock);
-  a_brblk_o->is_dirty = TRUE;
 
   if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
@@ -266,7 +321,6 @@ brblk_2xlock(cw_brblk_t * a_brblk_o)
   _cw_check_ptr(a_brblk_o);
   
   jtl_2xlock(&a_brblk_o->jt_lock);
-  a_brblk_o->is_dirty = TRUE;
 
   if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
@@ -383,6 +437,10 @@ brblk_wunlock(cw_brblk_t * a_brblk_o)
   
   jtl_wunlock(&a_brblk_o->jt_lock);
 
+  mtx_lock(&a_brblk_o->lock);
+  a_brblk_o->is_dirty = TRUE;
+  mtx_unlock(&a_brblk_o->lock);
+
   if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Exit brblk_wunlock()");
@@ -405,6 +463,10 @@ brblk_xunlock(cw_brblk_t * a_brblk_o)
   _cw_check_ptr(a_brblk_o);
   
   jtl_xunlock(&a_brblk_o->jt_lock);
+
+  mtx_lock(&a_brblk_o->lock);
+  a_brblk_o->is_dirty = TRUE;
+  mtx_unlock(&a_brblk_o->lock);
 
   if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
@@ -457,7 +519,9 @@ brblk_set_byte(cw_brblk_t * a_brblk_o, cw_uint32_t a_offset,
   _cw_check_ptr(a_brblk_o);
 
   _cw_assert(a_offset < a_brblk_o->buf_size);
-  
+
+  /* No need to grab the mutex here, since the jt lock prevents race
+   * conditions. */
   a_brblk_o->buf[a_offset] = a_byte;
 
   if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
@@ -495,7 +559,7 @@ brblk_get_buf_p(cw_brblk_t * a_brblk_o)
 /****************************************************************************
  * <<< Description >>>
  *
- * Get the buffer size
+ * Get the buffer size.
  *
  ****************************************************************************/
 cw_uint32_t
@@ -517,18 +581,57 @@ brblk_get_buf_size(cw_brblk_t * a_brblk_o)
   }
   return retval;
 }
-#endif /* _STASH_DBG */
 
+/****************************************************************************
+ * <<< Description >>>
+ *
+ * Get the total number of dlocks for this brblk.
+ *
+ ****************************************************************************/
 cw_uint32_t
 brblk_get_dlocks(cw_brblk_t * a_brblk_o)
 {
-  _cw_error("Unimplemented");
+  cw_uint32_t retval;
+  
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
+  {
+    _cw_marker("Enter brblk_get_dlocks()");
+  }
+  _cw_check_ptr(a_brblk_o);
+
+  retval = jtl_get_max_dlocks(&a_brblk_o->jt_lock);
+  
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
+  {
+    _cw_marker("Exit brblk_get_dlocks()");
+  }
+  return retval;
 }
 
+/****************************************************************************
+ * <<< Description >>>
+ *
+ * Set the total number of dlocks for this brblk.
+ *
+ ****************************************************************************/
 cw_uint32_t
 brblk_set_dlocks(cw_brblk_t * a_brblk_o, cw_uint32_t a_dlocks)
 {
-  _cw_error("Unimplemented");
+  cw_uint32_t retval;
+  
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
+  {
+    _cw_marker("Enter brblk_set_dlocks()");
+  }
+  _cw_check_ptr(a_brblk_o);
+
+  retval = jtl_set_max_dlocks(&a_brblk_o->jt_lock, a_dlocks);
+  
+  if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
+  {
+    _cw_marker("Exit brblk_set_dlocks()");
+  }
+  return retval;
 }
 
 
