@@ -68,11 +68,10 @@ main(int argc, char ** argv)
 
   int c;
   cw_bool_t opt_client = FALSE, opt_server = FALSE;
-  cw_bool_t cl_error = FALSE, opt_help = FALSE, opt_version = FALSE;
+  cw_bool_t cl_error = FALSE;
   cw_bool_t opt_verbose = FALSE, opt_quiet = FALSE;
-  int opt_rport = 0, opt_port = 0;
+  int opt_port = 0;
   char * opt_rhost = "localhost";
-  cw_uint32_t opt_timeout = 0;
   char * opt_log = NULL;
   format_t opt_format = NONE;
 
@@ -93,13 +92,13 @@ main(int argc, char ** argv)
     {
       case 'h':
       {
-	opt_help = TRUE;
-	break;
+	usage();
+	goto RETURN;
       }
       case 'V':
       {
-	opt_version = TRUE;
-	break;
+	version();
+	goto RETURN;
       }
       case 'v':
       {
@@ -186,11 +185,11 @@ main(int argc, char ** argv)
 
 	if (NULL != (ent = getservbyname(port_str, "tcp")))
 	{
-	  opt_rport = (cw_uint32_t) ntohs(ent->s_port);
+	  opt_port = (cw_uint32_t) ntohs(ent->s_port);
 	}
 	else
 	{
-	  opt_rport = strtoul(port_str, NULL, 10);
+	  opt_port = strtoul(port_str, NULL, 10);
 	}
 	
 	break;
@@ -214,10 +213,8 @@ main(int argc, char ** argv)
       }
       case 't':
       {
-	opt_timeout = strtoul(optarg, NULL, 10);
-	
 	tout = _cw_malloc(sizeof(struct timespec));
-	tout->tv_sec = opt_timeout;
+	tout->tv_sec = strtoul(optarg, NULL, 10);
 	tout->tv_nsec = 0;
 	break;
       }
@@ -237,18 +234,6 @@ main(int argc, char ** argv)
     goto RETURN;
   }
   
-  if (TRUE == opt_help)
-  {
-    usage();
-    goto RETURN;
-  }
-
-  if (TRUE == opt_version)
-  {
-    version();
-    goto RETURN;
-  }
-
   /* Check validity of command line options. */
   if ((TRUE == opt_verbose) && (TRUE == opt_quiet))
   {
@@ -284,7 +269,7 @@ main(int argc, char ** argv)
     goto RETURN;
   }
 
-  /* Open hex dump file if specified. */
+  /* Open log file if specified. */
   if (NULL != opt_log)
   {
     int fd;
@@ -297,7 +282,7 @@ main(int argc, char ** argv)
     {
       if (dbg_is_registered(cw_g_dbg, "ncat_verbose"))
       {
-	out_put(cw_g_out, "[s]: Unable to open dump file \"[s]\"\n", opt_log);
+	out_put(cw_g_out, "[s]: Unable to open log file \"[s]\"\n", opt_log);
       }
       retval = 1;
       goto RETURN;
@@ -316,7 +301,7 @@ main(int argc, char ** argv)
   if (TRUE == opt_client)
   {
     /* Try to connect to the server. */
-    sock = client_setup(opt_rhost, opt_rport, tout);
+    sock = client_setup(opt_rhost, opt_port, tout);
   }
   else
   {
@@ -334,7 +319,7 @@ main(int argc, char ** argv)
   }
   else
   {
-    struct timespec timeout, zero;
+    struct timespec zero;
     int fd, fd_sock, fd_sock_stdin;
     cw_sint32_t bytes_read;
     cw_bool_t done_reading = FALSE;
@@ -359,36 +344,17 @@ main(int argc, char ** argv)
 
     while (1)
     {
-      if (NULL != tout)
+      if ((NULL != tout) && (TRUE == done_reading))
       {
-	timeout.tv_sec = opt_timeout;
-	timeout.tv_nsec = 0;
-
-	fd = (int) mq_timedget(mq, &timeout);
-	if (0 == fd)
-	{
-	  /* Timeout. */
-	  if (TRUE == done_reading)
-	  {
-	    /* We've sent all the input data to the peer, and have timed out
-	     * waiting for response data.  Give up. */
-	    break;
-	  }
-	  else
-	  {
-	    continue;
-	  }
-	}
+	/* If mq_timedget() times out, fd will be set to 0, which will cause the
+	 * program to quit. */
+	fd = (int) mq_timedget(mq, tout);
       }
       else
       {
 	fd = (int) mq_get(mq);
-	if (0 == fd)
-	{
-	  break;
-	}
       }
-
+      
       if (fd_sock_stdin == fd)
       {
 	do
@@ -494,8 +460,9 @@ main(int argc, char ** argv)
 	  break;
 	}
       }
-      else /*  if (-1 == fd) */
+      else
       {
+	/* Timeout. */
 	break;
       }
     }
