@@ -348,6 +348,21 @@ stilt_delete(cw_stilt_t *a_stilt)
 #endif
 }
 
+void
+stilt_start(cw_stilt_t *a_stilt)
+{
+	cw_stilo_t	*file;
+
+	_cw_check_ptr(a_stilt);
+	_cw_assert(a_stilt->magic == _CW_STILT_MAGIC);
+
+	file = stils_push(&a_stilt->estack);
+	stilo_dup(file, stilt_stdin_get(a_stilt));
+	stilo_attrs_set(file, STILOA_EXECUTABLE);
+
+	systemdict_start(a_stilt);
+}
+
 void *
 stilt_p_thread_entry(void *a_arg)
 {

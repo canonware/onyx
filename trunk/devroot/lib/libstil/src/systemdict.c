@@ -3258,13 +3258,11 @@ void
 systemdict_start(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*estack;
-	cw_stilo_t	*file;
+	cw_uint32_t	depth;
 
 	estack = stilt_estack_get(a_stilt);
 
-	file = stils_push(estack);
-	stilo_dup(file, stilt_stdin_get(a_stilt));
-	stilo_attrs_set(file, STILOA_EXECUTABLE);
+	depth = stils_count(estack);
 
 	xep_begin();
 	xep_try {
@@ -3275,20 +3273,11 @@ systemdict_start(cw_stilt_t *a_stilt)
 		xep_handled();
 	}
 	xep_catch(_CW_STILX_QUIT) {
-		cw_stilo_t	*stilo;
-		cw_uint32_t	i, depth;
-
 		/*
-		 * Pop objects off the exec stack, up to and including file.
+		 * Pop all objects off the exec stack that weren't there before
+		 * entering this function.
 		 */
-		for (i = 0, depth = stils_count(estack), stilo = NULL; i <
-		     depth; i++) {
-			stilo = stils_down_get(estack, stilo);
-			if (stilo == file)
-				break;
-		}
-		_cw_assert(i < depth);
-		stils_npop(estack, i + 1);
+		stils_npop(estack, stils_count(estack) - depth);
 
 		xep_handled();
 	}

@@ -212,7 +212,7 @@ void	stilts_position_set(cw_stilts_t *a_stilt, cw_uint32_t a_line,
  */
 cw_stilt_t *stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil);
 void	stilt_delete(cw_stilt_t *a_stilt);
-#define	stilt_start(a_stilt) systemdict_start(a_stilt)
+void	stilt_start(cw_stilt_t *a_stilt);
 #define	stilt_executive(a_stilt) systemdict_executive(a_stilt)
 
 void	stilt_thread(cw_stilt_t *a_stilt);

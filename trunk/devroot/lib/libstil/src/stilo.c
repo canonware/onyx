@@ -1759,7 +1759,6 @@ stiloe_p_file_delete(cw_stiloe_t *a_stiloe, cw_stil_t *a_stil)
 	 * Don't automatically close() predefined or wrapped descriptors.
 	 */
 	if (file->fd >= 3) {
-		_cw_out_put_e("close([i])\n", file->fd);
 		if (close(file->fd) == -1)
 			ioerror = TRUE;
 	}
