@@ -19,6 +19,10 @@
 /* Solaris needs this for sigwait(). */
 #undef _POSIX_PTHREAD_SEMANTICS
 
+/* GNU libc hides various prototypes, such as that for asprintf() unless this is
+ * defined. */
+#undef _GNU_SOURCE
+
 #undef WORDS_BIGENDIAN
 
 #undef CW_THREADS
@@ -68,3 +72,5 @@
 #undef HAVE_READDIR_R
 #undef HAVE_UNSETENV
 #undef HAVE_ASPRINTF
+
+#undef HAVE_ARPA_INET_H

@@ -60,6 +60,7 @@ case "${host}" in
 	;;
   *-*-linux*)
 	abi="elf"
+	AC_DEFINE(_GNU_SOURCE)
 	RPATH="-Wl,-rpath,"
 	;;
   *-*-netbsd*)
@@ -336,7 +337,7 @@ AC_SUBST(slate_version)
 if test "x$enable_slate" = "x1" ; then
   if test "x$enable_threads" = "x0" -o "x$enable_real" = "x0" \
      -o "x$enable_posix" = "x0" -o "x$enable_posix_file" = "x0" \
-     -o "x$enable_modules" = "x0" -o "x$have_libpcre" = "x0" ; then
+     -o "x$enable_modules" = "x0" ; then
     AC_MSG_RESULT(Missing features or onfiguration options necessary for slate)
     enable_slate=0
   else
@@ -624,6 +625,8 @@ if test "x$lib_onyx" = "x1" ; then
   AC_CHECK_SIZEOF(float, 4)
   AC_CHECK_SIZEOF(double, 8)
   AC_CHECK_SIZEOF(long double, 12)
+
+  AC_CHECK_HEADERS(arpa/inet.h)
 
   if test "x$enable_posix" = "x1" ; then
     if test "x$prefix" = "xNONE" ; then
