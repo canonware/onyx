@@ -115,6 +115,9 @@ install_bins :
 #if @bin_blow@
           blow_install_a
 #endif
+#if @bin_cover@
+          cover_install_a
+#endif
 #if @bin_edittest@
           edittest_install_a
 #endif
@@ -168,6 +171,9 @@ uninstall_bins :
 #if @bin_blow@
           blow_uninstall
 #endif
+#if @bin_cover@
+          cover_uninstall
+#endif
 #if @bin_edittest@
           edittest_uninstall
 #endif
@@ -218,6 +224,9 @@ uninstall_libs :
 clean :
 #if @bin_blow@
           blow_clean
+#endif
+#if @bin_cover@
+          cover_clean
 #endif
 #if @bin_edittest@
           edittest_clean
@@ -340,6 +349,9 @@ dataend
 distclean : clean
 #if @bin_blow@
           blow_distclean
+#endif
+#if @bin_cover@
+          cover_distclean
 #endif
 #if @bin_edittest@
           edittest_distclean
@@ -471,7 +483,7 @@ dataend
 
 /*
  * Libraries.  Order matters.  They should appear in an order that works on the
- * link line (-lalt -lstil -lcl -lsock -lstash).
+ * link line (-lstil -lficl -ledit -lsock -lstash).
  */
 #if @lib_stil@
 #  include [srcdir]/lib/c/libstil/Howto.cook.inc
@@ -494,6 +506,9 @@ dataend
  */
 #if @bin_blow@
 #  include [srcdir]/bin/blow/Howto.cook.inc
+#endif
+#if @bin_cover@
+#  include [srcdir]/bin/cover/Howto.cook.inc
 #endif
 #if @bin_edittest@
 #  include [srcdir]/bin/edittest/Howto.cook.inc
