@@ -14,16 +14,10 @@
 
 * NetBSD 1.5.
 
-  - Threading does not work due to NetBSD's lack of pthreads.
+  - POSIX threading does not work due to NetBSD's lack of pthreads.  However,
+    GNU pth threading should work.
 
-* Apple OS X 10.1.
-
-  - OS X's threading is incomplete.  For example, pthread_sigmask() is missing.
-    Unless --disable-threads is specified, the build will fail as a result.  The
-    one call to pthread_sigmask() in lib/libonyx/src/thd.c can be commented out,
-    but signal-related problems should then be expected.  Then again, signals
-    are very broken as well, so this should come as no big surprise.  The good
-    news is that OS X 10.2 is expected to have these problems mostly solved.
+* Apple OS X 10.2.
 
   - OS X uses the Mach-O binary format rather than ELF.  Therefore, dlopen() and
     friends do not natively exist.  Dynamically loadable modules and the modload
