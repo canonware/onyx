@@ -85,7 +85,7 @@ dbg_register(cw_dbg_t * a_dbg_o, char * a_flag)
 void
 dbg_unregister(cw_dbg_t * a_dbg_o, char * a_flag)
 {
-  char ** junk1, ** junk2;
+  char ** junk1 = NULL, ** junk2 = NULL;
 
   _cw_check_ptr(a_dbg_o);
 
@@ -104,7 +104,7 @@ dbg_unregister(cw_dbg_t * a_dbg_o, char * a_flag)
 cw_bool_t
 dbg_is_registered(cw_dbg_t * a_dbg_o, char * a_flag)
 {
-  char ** junk;
+  char ** junk = NULL;
 
   _cw_check_ptr(a_dbg_o);
 
