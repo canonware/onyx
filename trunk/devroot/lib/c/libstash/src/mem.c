@@ -147,7 +147,8 @@ mem_delete(cw_mem_t *a_mem)
 	}
 #endif
 
-	_cw_mem_free(a_mem->mem, a_mem);
+	if (a_mem->is_malloced)
+		_cw_mem_free(a_mem->mem, a_mem);
 }
 
 void

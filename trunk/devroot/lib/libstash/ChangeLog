@@ -1,3 +1,7 @@
+2000-07-15  Jason Evans  <jasone@canonware.com>
+
+	* src/mem.c (mem_delete): Only free the mem object if it was malloc()ed.
+
 2000-07-14  Jason Evans  <jasone@canonware.com>
 
 	* : Make it possible to explicitly set the memory allocator (of
