@@ -940,7 +940,7 @@ hist_p_ins_ynk_rem_del(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos,
 	}
 	default:
 	{
-	    cw_not_reached();
+	    tag_equiv = HISTH_TAG_NONE;
 	}
     }
     
