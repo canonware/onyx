@@ -254,4 +254,6 @@ stdin 0 setiobuf {
     redisplay
     getc
     interpc
+    scratch `pre-validate ' buffer_dump
+    scratch buffer_validate
 } loop
