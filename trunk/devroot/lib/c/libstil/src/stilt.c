@@ -126,12 +126,12 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 
 	return retval;
 
-OOM_3:
+	OOM_3:
 	dch_delete(&retval->stiln_dch);
-OOM_2:
+	OOM_2:
 	if (retval->is_malloced)
 		_cw_free(retval);
-OOM_1:
+	OOM_1:
 	return NULL;
 }
 
@@ -183,7 +183,7 @@ stilt_interp_buf(cw_stilt_t *a_stilt, cw_buf_t *a_buf)
 
 	retval = FALSE;
 
-RETURN:
+	RETURN:
 	return retval;
 }
 
@@ -204,7 +204,7 @@ stilt_detach_str(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 	}
 	retval = stilt_detach_buf(a_stilt, &buf);
 
-RETURN:
+	RETURN:
 	buf_delete(&buf);
 	return retval;
 }
@@ -230,10 +230,10 @@ stilt_detach_buf(cw_stilt_t *a_stilt, cw_buf_t *a_buf)
 
 	return FALSE;
 
-OOM_2:
+	OOM_2:
 	buf_delete(&entry_arg->buf);
 	_cw_free(entry_arg);
-OOM_1:
+	OOM_1:
 	return TRUE;
 }
 
@@ -276,13 +276,13 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 #endif
 
 		/*
-		 * If a special character causes the end of the previous
-		 * token, the state machine builds the object, then restarts
-		 * the state machine without incrementing the input
-		 * character index.  This is done in order to avoid having
-		 * to duplicate the _CW_STILT_STATE_START code.
+		 * If a special character causes the end of the previous token,
+		 * the state machine builds the object, then restarts the state
+		 * machine without incrementing the input character index.  This
+		 * is done in order to avoid having to duplicate the
+		 * _CW_STILT_STATE_START code.
 		 */
-RESTART:
+		RESTART:
 
 		switch (a_stilt->state) {
 		case _CW_STILT_STATE_START:
@@ -497,94 +497,81 @@ RESTART:
 				_CW_STILT_PUTC(c);
 				break;
 			case '#':{
-					cw_uint32_t ndigits;
+				cw_uint32_t ndigits;
 
-					ndigits = a_stilt->index -
-					    a_stilt->meta.number.begin_offset;
+				ndigits = a_stilt->index -
+				    a_stilt->meta.number.begin_offset;
 
-					if ((a_stilt->meta.number.point_offset
-					    != -1) ||
-					    (a_stilt->meta.number.begin_offset
-					    == a_stilt->index)) {
-						/*
-						 * Decimal point already
-						 * seen, or no base
-						 * specified.
-						 */
-						a_stilt->state =
-						    _CW_STILT_STATE_NAME;
-						a_stilt->meta.name.is_literal
-						    = FALSE;
-						a_stilt->meta.name.
-						    is_immediate = FALSE;
-					} else {
-						cw_uint32_t i, digit;
+				if ((a_stilt->meta.number.point_offset != -1) ||
+				    (a_stilt->meta.number.begin_offset ==
+				    a_stilt->index)) {
+					/*
+					 * Decimal point already seen, or no
+					 * base specified.
+					 */
+					a_stilt->state = _CW_STILT_STATE_NAME;
+					a_stilt->meta.name.is_literal = FALSE;
+					a_stilt->meta.name.is_immediate = FALSE;
+				} else {
+					cw_uint32_t i, digit;
 
-						/*
-						 * Convert the string to a
-						 * base (interpreted as base
-						 * 10).
-						 */
-						a_stilt->meta.number.base = 0;
+					/*
+					 * Convert the string to a base
+					 * (interpreted as base 10).
+					 */
+					a_stilt->meta.number.base = 0;
 
-						for (i = 0; i < ndigits; i++) {
-							digit =
-							    _CW_STILT_GETC(
-							    a_stilt->meta.number.begin_offset
-							    + i) - '0';
+					for (i = 0; i < ndigits; i++) {
+						digit =
+						    _CW_STILT_GETC(a_stilt->meta.number.begin_offset
+						    + i) - '0';
 
-							if (a_stilt->index -
-							    a_stilt->meta.number.begin_offset
-							    - i == 2)
-								digit *= 10;
-							a_stilt->meta.number.base
-							    += digit;
+						if (a_stilt->index -
+						    a_stilt->meta.number.begin_offset
+						    - i == 2)
+							digit *= 10;
+						a_stilt->meta.number.base +=
+						    digit;
 
-							if (((digit != 0) &&
-							    ((a_stilt->index -
-							    a_stilt->meta.number.begin_offset
-							    - i) > 2)) ||
-							    (a_stilt->meta.number.base > 36)) {
-								/*
-								 * Base too
-								 * large. Set
-								 * base to 0 so
-								 * that the
-								 * check for
-								 * too small a
-								 * base catches
-								 * this.
-								 */
-								a_stilt->meta.number.base
-								    = 0;
-								break;
-							}
-						}
-
-						if (a_stilt->meta.number.base <
-						    2) {
+						if (((digit != 0) &&
+						    ((a_stilt->index -
+						    a_stilt->meta.number.begin_offset
+						    - i) > 2)) ||
+						    (a_stilt->meta.number.base >
+						    36)) {
 							/*
-							 * Base too small (or
-							 * too large, as
-							 * detected in the for
-							 * loop above).
+							 * Base too large. Set
+							 * base to 0 so that the
+							 * check for too small a
+							 * base catches this.
 							 */
-							a_stilt->state =
-							    _CW_STILT_STATE_NAME;
-							a_stilt->meta.name.is_literal
-							    = FALSE;
-							a_stilt->meta.name.is_immediate
-							    = FALSE;
-						} else {
-							a_stilt->meta.number.begin_offset
-							    = a_stilt->index +
-							    1;
+							a_stilt->meta.number.base
+							    = 0;
+							break;
 						}
 					}
 
-					_CW_STILT_PUTC(c);
-					break;
+					if (a_stilt->meta.number.base < 2) {
+						/*
+						 * Base too small (or too large,
+						 * as detected in the for loop
+						 * above).
+						 */
+						a_stilt->state =
+						    _CW_STILT_STATE_NAME;
+						a_stilt->meta.name.is_literal =
+						    FALSE;
+						a_stilt->meta.name.is_immediate
+						    = FALSE;
+					} else {
+						a_stilt->meta.number.begin_offset
+						    = a_stilt->index + 1;
+					}
 				}
+
+				_CW_STILT_PUTC(c);
+				break;
+			}
 			case '(': case ')': case '<': case '>': case '[':
 			case ']': case '{': case '}': case '/': case '%':
 				/* New token. */
@@ -633,7 +620,7 @@ RESTART:
 			break;
 		case _CW_STILT_STATE_ASCII_STRING:
 			/* The CRLF code jumps here if there was no LF. */
-	ASCII_STRING_CONTINUE:
+			ASCII_STRING_CONTINUE:
 
 			switch (c) {
 			case '\\':
@@ -676,10 +663,9 @@ RESTART:
 				break;
 			default:
 				/*
-				 * '\r' was not followed by a '\n'.
-				 * Translate the '\r' to a '\n' and jump
-				 * back up to the string scanning state to
-				 * scan c again.
+				 * '\r' was not followed by a '\n'.  Translate
+				 * the '\r' to a '\n' and jump back up to the
+				 * string scanning state to scan c again.
 				 */
 				goto ASCII_STRING_CONTINUE;
 			}
@@ -777,43 +763,43 @@ RESTART:
 			case '5': case '6': case '7': case '8': case '9':
 			case 'a': case 'b': case 'c': case 'd': case 'e':
 			case 'f':{
-					cw_uint8_t val;
+				cw_uint8_t val;
 
-					a_stilt->state =
-					    _CW_STILT_STATE_ASCII_STRING;
-					switch (a_stilt->meta.string.hex_val) {
-					case '0': case '1': case '2': case '3':
-					case '4': case '5': case '6': case '7':
-					case '8': case '9':
-						val =
-						    (a_stilt->meta.string.hex_val
-						    - '0') << 4;
-						break;
-					case 'a': case 'b': case 'c': case 'd':
-					case 'e': case 'f':
-						val =
-						    (a_stilt->meta.string.hex_val
-						    - 'a') << 4;
-						break;
-					default:
-						_cw_error("Programming error");
-					}
-					switch (c) {
-					case '0': case '1': case '2': case '3':
-					case '4': case '5': case '6': case '7':
-					case '8': case '9':
-						val |= (c - '0');
-						break;
-					case 'a': case 'b': case 'c': case 'd':
-					case 'e': case 'f':
-						val |= (c - 'a');
-						break;
-					default:
-						_cw_error("Programming error");
-					}
-					_CW_STILT_PUTC(val);
+				a_stilt->state =
+				    _CW_STILT_STATE_ASCII_STRING;
+				switch (a_stilt->meta.string.hex_val) {
+				case '0': case '1': case '2': case '3':
+				case '4': case '5': case '6': case '7':
+				case '8': case '9':
+					val =
+					    (a_stilt->meta.string.hex_val
+					    - '0') << 4;
 					break;
+				case 'a': case 'b': case 'c': case 'd':
+				case 'e': case 'f':
+					val =
+					    (a_stilt->meta.string.hex_val
+					    - 'a') << 4;
+					break;
+				default:
+					_cw_error("Programming error");
 				}
+				switch (c) {
+				case '0': case '1': case '2': case '3':
+				case '4': case '5': case '6': case '7':
+				case '8': case '9':
+					val |= (c - '0');
+					break;
+				case 'a': case 'b': case 'c': case 'd':
+				case 'e': case 'f':
+					val |= (c - 'a');
+					break;
+				default:
+					_cw_error("Programming error");
+				}
+				_CW_STILT_PUTC(val);
+				break;
+			}
 			default:
 				stilt_p_print_syntax_error(a_stilt, c);
 				break;
@@ -849,7 +835,8 @@ RESTART:
 		case _CW_STILT_STATE_BASE85_STRING:
 			switch (c) {
 			case '~':
-				a_stilt->state = _CW_STILT_STATE_BASE85_STRING_CONT;
+				a_stilt->state =
+				    _CW_STILT_STATE_BASE85_STRING_CONT;
 				break;
 			case '\0': case '\t': case '\n': case '\f': case '\r':
 			case ' ':
@@ -912,7 +899,7 @@ RESTART:
 	}
 
 	retval = 0;
-RETURN:
+	RETURN:
 	return retval;
 }
 
@@ -982,7 +969,7 @@ stilt_p_putc(cw_stilt_t *a_stilt, cw_uint32_t a_c)
 	a_stilt->index++;
 
 	retval = 0;
-RETURN:
+	RETURN:
 	return retval;
 }
 
@@ -1003,14 +990,12 @@ stilt_p_print_token(cw_stilt_t *a_stilt, cw_uint32_t a_length,
 static void
 stilt_p_print_syntax_error(cw_stilt_t *a_stilt, cw_uint8_t a_c)
 {
-	_cw_out_put("Syntax error for '[c]' (0x[i|b:16]), following -->",
-	    a_c, a_c);
+	_cw_out_put("Syntax error for '[c]' (0x[i|b:16]), following -->", a_c,
+	    a_c);
 	if (a_stilt->index <= _CW_STIL_BUFC_SIZE)
-		_cw_out_put_n(a_stilt->index, "[s]",
-		    a_stilt->tok_buffer.str);
+		_cw_out_put_n(a_stilt->index, "[s]", a_stilt->tok_buffer.str);
 	else
-		_cw_out_put_n(a_stilt->index, "[b]",
-		    &a_stilt->tok_buffer.buf);
+		_cw_out_put_n(a_stilt->index, "[b]", &a_stilt->tok_buffer.buf);
 	_cw_out_put("<--\n");
 	a_stilt->state = _CW_STILT_STATE_START;
 	stilt_p_reset_tok_buffer(a_stilt);
