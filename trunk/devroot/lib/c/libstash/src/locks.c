@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 86 $
- * $Date: 1998-06-23 17:40:29 -0700 (Tue, 23 Jun 1998) $
+ * $Revision: 90 $
+ * $Date: 1998-06-24 23:45:26 -0700 (Wed, 24 Jun 1998) $
  *
  * <<< Description >>>
  *
@@ -408,24 +408,24 @@ rwq_wunlock(cw_rwq_t * a_rwq_o)
   mtx_unlock(&a_rwq_o->lock);
 }
 
-cw_btl_t *
-btl_new(cw_btl_t * a_btl_o)
+cw_jtl_t *
+jtl_new(cw_jtl_t * a_jtl_o)
 {
-  cw_btl_t * retval;
+  cw_jtl_t * retval;
 
-  if (a_btl_o == NULL)
+  if (a_jtl_o == NULL)
   {
-    retval = (cw_btl_t *) _cw_malloc(sizeof(cw_btl_t));
+    retval = (cw_jtl_t *) _cw_malloc(sizeof(cw_jtl_t));
     retval->is_malloced = TRUE;
   }
   else
   {
-    retval = a_btl_o;
+    retval = a_jtl_o;
     retval->is_malloced = FALSE;
   }
 
   /* Initialize various structures and variables. */
-  bzero(retval, sizeof(cw_btl_t)); /* So that we don't have to individually 
+  bzero(retval, sizeof(cw_jtl_t)); /* So that we don't have to individually 
 				    * set lots of variables to 0. */
   mtx_new(&retval->lock);
   rwq_new(&retval->stlock);
@@ -438,208 +438,208 @@ btl_new(cw_btl_t * a_btl_o)
 }
 
 void
-btl_delete(cw_btl_t * a_btl_o)
+jtl_delete(cw_jtl_t * a_jtl_o)
 {
-  _cw_check_ptr(a_btl_o);
+  _cw_check_ptr(a_jtl_o);
 
   /* Clean up structures. */
-  mtx_delete(&a_btl_o->lock);
-  rwq_delete(&a_btl_o->stlock);
-  sem_delete(&a_btl_o->dlock_sem);
-  rwl_delete(&a_btl_o->rxlock);
-  sem_delete(&a_btl_o->wlock_sem);
+  mtx_delete(&a_jtl_o->lock);
+  rwq_delete(&a_jtl_o->stlock);
+  sem_delete(&a_jtl_o->dlock_sem);
+  rwl_delete(&a_jtl_o->rxlock);
+  sem_delete(&a_jtl_o->wlock_sem);
   
-  if (a_btl_o->is_malloced == TRUE)
+  if (a_jtl_o->is_malloced == TRUE)
   {
-    _cw_free(a_btl_o);
+    _cw_free(a_jtl_o);
   }
 }
 
 void
-btl_slock(cw_btl_t * a_btl_o)
+jtl_slock(cw_jtl_t * a_jtl_o)
 {
-  _cw_check_ptr(a_btl_o);
+  _cw_check_ptr(a_jtl_o);
 
-  mtx_lock(&a_btl_o->lock);
-  rwq_rlock(&a_btl_o->stlock);
-  mtx_unlock(&a_btl_o->lock);
+  mtx_lock(&a_jtl_o->lock);
+  rwq_rlock(&a_jtl_o->stlock);
+  mtx_unlock(&a_jtl_o->lock);
 }
 
 void
-btl_tlock(cw_btl_t * a_btl_o)
+jtl_tlock(cw_jtl_t * a_jtl_o)
 {
-  _cw_check_ptr(a_btl_o);
+  _cw_check_ptr(a_jtl_o);
 
-  mtx_lock(&a_btl_o->lock);
-  rwq_wlock(&a_btl_o->stlock);
-  mtx_unlock(&a_btl_o->lock);
+  mtx_lock(&a_jtl_o->lock);
+  rwq_wlock(&a_jtl_o->stlock);
+  mtx_unlock(&a_jtl_o->lock);
 }
 
 void
-btl_s2dlock(cw_btl_t * a_btl_o)
+jtl_s2dlock(cw_jtl_t * a_jtl_o)
 {
-  _cw_check_ptr(a_btl_o);
+  _cw_check_ptr(a_jtl_o);
   
-  mtx_lock(&a_btl_o->lock);
-  sem_wait(&a_btl_o->dlock_sem);
-  mtx_unlock(&a_btl_o->lock);
+  mtx_lock(&a_jtl_o->lock);
+  sem_wait(&a_jtl_o->dlock_sem);
+  mtx_unlock(&a_jtl_o->lock);
 }
 
 void
-btl_s2rlock(cw_btl_t * a_btl_o)
+jtl_s2rlock(cw_jtl_t * a_jtl_o)
 {
-  _cw_check_ptr(a_btl_o);
+  _cw_check_ptr(a_jtl_o);
 
-  mtx_lock(&a_btl_o->lock);
-  rwl_rlock(&a_btl_o->rxlock);
-  mtx_unlock(&a_btl_o->lock);
+  mtx_lock(&a_jtl_o->lock);
+  rwl_rlock(&a_jtl_o->rxlock);
+  mtx_unlock(&a_jtl_o->lock);
 }
 
 void
-btl_s2wlock(cw_btl_t * a_btl_o)
+jtl_s2wlock(cw_jtl_t * a_jtl_o)
 {
-  _cw_check_ptr(a_btl_o);
+  _cw_check_ptr(a_jtl_o);
 
-  mtx_lock(&a_btl_o->lock);
+  mtx_lock(&a_jtl_o->lock);
   /* Grab an a read lock on rxlock to assure that there are no xlockers. */
-  rwl_rlock(&a_btl_o->rxlock);
-  sem_wait(&a_btl_o->wlock_sem);
-  mtx_unlock(&a_btl_o->lock);
+  rwl_rlock(&a_jtl_o->rxlock);
+  sem_wait(&a_jtl_o->wlock_sem);
+  mtx_unlock(&a_jtl_o->lock);
 }
 
 void
-btl_s2xlock(cw_btl_t * a_btl_o)
+jtl_s2xlock(cw_jtl_t * a_jtl_o)
 {
-  _cw_check_ptr(a_btl_o);
+  _cw_check_ptr(a_jtl_o);
 
-  mtx_lock(&a_btl_o->lock);
-  rwl_wlock(&a_btl_o->rxlock);
-  mtx_unlock(&a_btl_o->lock);
+  mtx_lock(&a_jtl_o->lock);
+  rwl_wlock(&a_jtl_o->rxlock);
+  mtx_unlock(&a_jtl_o->lock);
 }
 
 void
-btl_t2rlock(cw_btl_t * a_btl_o)
+jtl_t2rlock(cw_jtl_t * a_jtl_o)
 {
-  _cw_check_ptr(a_btl_o);
+  _cw_check_ptr(a_jtl_o);
 
-  mtx_lock(&a_btl_o->lock);
-  rwl_rlock(&a_btl_o->rxlock);
-  mtx_unlock(&a_btl_o->lock);
+  mtx_lock(&a_jtl_o->lock);
+  rwl_rlock(&a_jtl_o->rxlock);
+  mtx_unlock(&a_jtl_o->lock);
 }
 
 void
-btl_t2wlock(cw_btl_t * a_btl_o)
+jtl_t2wlock(cw_jtl_t * a_jtl_o)
 {
-  _cw_check_ptr(a_btl_o);
+  _cw_check_ptr(a_jtl_o);
 
-  mtx_lock(&a_btl_o->lock);
+  mtx_lock(&a_jtl_o->lock);
   /* Grab an a read lock on rxlock to assure that there are no xlockers. */
-  rwl_rlock(&a_btl_o->rxlock);
-  sem_wait(&a_btl_o->wlock_sem);
-  mtx_unlock(&a_btl_o->lock);
+  rwl_rlock(&a_jtl_o->rxlock);
+  sem_wait(&a_jtl_o->wlock_sem);
+  mtx_unlock(&a_jtl_o->lock);
 }
 
 void
-btl_t2xlock(cw_btl_t * a_btl_o)
+jtl_t2xlock(cw_jtl_t * a_jtl_o)
 {
-  _cw_check_ptr(a_btl_o);
+  _cw_check_ptr(a_jtl_o);
 
-  mtx_lock(&a_btl_o->lock);
-  rwl_wlock(&a_btl_o->rxlock);
-  mtx_unlock(&a_btl_o->lock);
+  mtx_lock(&a_jtl_o->lock);
+  rwl_wlock(&a_jtl_o->rxlock);
+  mtx_unlock(&a_jtl_o->lock);
 }
 
 void
-btl_sunlock(cw_btl_t * a_btl_o)
+jtl_sunlock(cw_jtl_t * a_jtl_o)
 {
-  _cw_check_ptr(a_btl_o);
+  _cw_check_ptr(a_jtl_o);
 
-  mtx_lock(&a_btl_o->lock);
-  rwq_runlock(&a_btl_o->stlock);
-  mtx_unlock(&a_btl_o->lock);
+  mtx_lock(&a_jtl_o->lock);
+  rwq_runlock(&a_jtl_o->stlock);
+  mtx_unlock(&a_jtl_o->lock);
 }
 
 void
-btl_tunlock(cw_btl_t * a_btl_o)
+jtl_tunlock(cw_jtl_t * a_jtl_o)
 {
-  _cw_check_ptr(a_btl_o);
+  _cw_check_ptr(a_jtl_o);
 
-  mtx_lock(&a_btl_o->lock);
-  rwq_wunlock(&a_btl_o->stlock);
-  mtx_unlock(&a_btl_o->lock);
+  mtx_lock(&a_jtl_o->lock);
+  rwq_wunlock(&a_jtl_o->stlock);
+  mtx_unlock(&a_jtl_o->lock);
 }
 
 void
-btl_dunlock(cw_btl_t * a_btl_o)
+jtl_dunlock(cw_jtl_t * a_jtl_o)
 {
-  _cw_check_ptr(a_btl_o);
+  _cw_check_ptr(a_jtl_o);
 
-  mtx_lock(&a_btl_o->lock);
-  sem_post(&a_btl_o->dlock_sem);
-  mtx_unlock(&a_btl_o->lock);
+  mtx_lock(&a_jtl_o->lock);
+  sem_post(&a_jtl_o->dlock_sem);
+  mtx_unlock(&a_jtl_o->lock);
 }
 
 void
-btl_runlock(cw_btl_t * a_btl_o)
+jtl_runlock(cw_jtl_t * a_jtl_o)
 {
-  _cw_check_ptr(a_btl_o);
+  _cw_check_ptr(a_jtl_o);
 
-  mtx_lock(&a_btl_o->lock);
-  rwl_runlock(&a_btl_o->rxlock);
-  mtx_unlock(&a_btl_o->lock);
+  mtx_lock(&a_jtl_o->lock);
+  rwl_runlock(&a_jtl_o->rxlock);
+  mtx_unlock(&a_jtl_o->lock);
 }
 
 void
-btl_wunlock(cw_btl_t * a_btl_o)
+jtl_wunlock(cw_jtl_t * a_jtl_o)
 {
-  _cw_check_ptr(a_btl_o);
+  _cw_check_ptr(a_jtl_o);
 
-  mtx_lock(&a_btl_o->lock);
+  mtx_lock(&a_jtl_o->lock);
 
-  sem_post(&a_btl_o->wlock_sem);
+  sem_post(&a_jtl_o->wlock_sem);
   /* Release the lock we grabbed earlier. */
-  rwl_runlock(&a_btl_o->rxlock);
+  rwl_runlock(&a_jtl_o->rxlock);
   
-  mtx_unlock(&a_btl_o->lock);
+  mtx_unlock(&a_jtl_o->lock);
 }
 
 void
-btl_xunlock(cw_btl_t * a_btl_o)
+jtl_xunlock(cw_jtl_t * a_jtl_o)
 {
-  _cw_check_ptr(a_btl_o);
+  _cw_check_ptr(a_jtl_o);
 
-  mtx_lock(&a_btl_o->lock);
-  rwl_wunlock(&a_btl_o->rxlock);
-  mtx_unlock(&a_btl_o->lock);
+  mtx_lock(&a_jtl_o->lock);
+  rwl_wunlock(&a_jtl_o->rxlock);
+  mtx_unlock(&a_jtl_o->lock);
 }
 
 cw_uint32_t
-btl_get_dlocks(cw_btl_t * a_btl_o)
+jtl_get_dlocks(cw_jtl_t * a_jtl_o)
 {
   cw_uint32_t retval;
   
-  _cw_check_ptr(a_btl_o);
+  _cw_check_ptr(a_jtl_o);
 
   /* No need to lock, since we're just reading. */
-/*   mtx_lock(&a_btl_o->lock); */
-  retval = a_btl_o->max_dlocks;
-/*   mtx_unlock(&a_btl_o->lock); */
+/*   mtx_lock(&a_jtl_o->lock); */
+  retval = a_jtl_o->max_dlocks;
+/*   mtx_unlock(&a_jtl_o->lock); */
 
   return retval;
 }
 
 cw_uint32_t
-btl_set_dlocks(cw_btl_t * a_btl_o, cw_uint32_t a_dlocks)
+jtl_set_dlocks(cw_jtl_t * a_jtl_o, cw_uint32_t a_dlocks)
 {
   cw_uint32_t retval;
   
-  _cw_check_ptr(a_btl_o);
+  _cw_check_ptr(a_jtl_o);
 
-  mtx_lock(&a_btl_o->lock);
-  retval = a_btl_o->max_dlocks;
-  a_btl_o->max_dlocks = a_dlocks;
-  sem_adjust(&a_btl_o->dlock_sem, retval - a_btl_o->max_dlocks);
-  mtx_unlock(&a_btl_o->lock);
+  mtx_lock(&a_jtl_o->lock);
+  retval = a_jtl_o->max_dlocks;
+  a_jtl_o->max_dlocks = a_dlocks;
+  sem_adjust(&a_jtl_o->dlock_sem, retval - a_jtl_o->max_dlocks);
+  mtx_unlock(&a_jtl_o->lock);
 
   return retval;
 }

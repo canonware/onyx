@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 86 $
- * $Date: 1998-06-23 17:40:29 -0700 (Tue, 23 Jun 1998) $
+ * $Revision: 90 $
+ * $Date: 1998-06-24 23:45:26 -0700 (Wed, 24 Jun 1998) $
  *
  * <<< Description >>>
  *
@@ -24,7 +24,7 @@
 typedef struct cw_lwq_s cw_lwq_t;
 typedef struct cw_rwl_s cw_rwl_t;
 typedef struct cw_rwq_s cw_rwq_t;
-typedef struct cw_btl_s cw_btl_t;
+typedef struct cw_jtl_s cw_jtl_t;
 
 struct cw_lwq_s
 {
@@ -58,7 +58,7 @@ struct cw_rwq_s
   cw_lwq_t write_waiters;
 };
 
-struct cw_btl_s
+struct cw_jtl_s
 {
   cw_bool_t is_malloced;
   cw_mtx_t lock;
@@ -95,25 +95,25 @@ struct cw_btl_s
 #define rwq_wlock _CW_NS_CMN(rwq_wlock)
 #define rwq_wunlock _CW_NS_CMN(rwq_wunlock)
 
-#define btl_new _CW_NS_CMN(btl_new)
-#define btl_delete _CW_NS_CMN(btl_delete)
-#define btl_slock _CW_NS_CMN(btl_slock)
-#define btl_tlock _CW_NS_CMN(btl_tlock)
-#define btl_s2dlock _CW_NS_CMN(btl_s2dlock)
-#define btl_s2rlock _CW_NS_CMN(btl_s2rlock)
-#define btl_s2wlock _CW_NS_CMN(btl_s2wlock)
-#define btl_s2xlock _CW_NS_CMN(btl_s2xlock)
-#define btl_t2rlock _CW_NS_CMN(btl_t2rlock)
-#define btl_t2wlock _CW_NS_CMN(btl_t2wlock)
-#define btl_t2xlock _CW_NS_CMN(btl_t2xlock)
-#define btl_sunlock _CW_NS_CMN(btl_sunlock)
-#define btl_tunlock _CW_NS_CMN(btl_tunlock)
-#define btl_dunlock _CW_NS_CMN(btl_dunlock)
-#define btl_runlock _CW_NS_CMN(btl_runlock)
-#define btl_wunlock _CW_NS_CMN(btl_wunlock)
-#define btl_xunlock _CW_NS_CMN(btl_xunlock)
-#define btl_get_dlocks _CW_NS_CMN(btl_get_dlocks)
-#define btl_set_dlocks _CW_NS_CMN(btl_set_dlocks)
+#define jtl_new _CW_NS_CMN(jtl_new)
+#define jtl_delete _CW_NS_CMN(jtl_delete)
+#define jtl_slock _CW_NS_CMN(jtl_slock)
+#define jtl_tlock _CW_NS_CMN(jtl_tlock)
+#define jtl_s2dlock _CW_NS_CMN(jtl_s2dlock)
+#define jtl_s2rlock _CW_NS_CMN(jtl_s2rlock)
+#define jtl_s2wlock _CW_NS_CMN(jtl_s2wlock)
+#define jtl_s2xlock _CW_NS_CMN(jtl_s2xlock)
+#define jtl_t2rlock _CW_NS_CMN(jtl_t2rlock)
+#define jtl_t2wlock _CW_NS_CMN(jtl_t2wlock)
+#define jtl_t2xlock _CW_NS_CMN(jtl_t2xlock)
+#define jtl_sunlock _CW_NS_CMN(jtl_sunlock)
+#define jtl_tunlock _CW_NS_CMN(jtl_tunlock)
+#define jtl_dunlock _CW_NS_CMN(jtl_dunlock)
+#define jtl_runlock _CW_NS_CMN(jtl_runlock)
+#define jtl_wunlock _CW_NS_CMN(jtl_wunlock)
+#define jtl_xunlock _CW_NS_CMN(jtl_xunlock)
+#define jtl_get_dlocks _CW_NS_CMN(jtl_get_dlocks)
+#define jtl_set_dlocks _CW_NS_CMN(jtl_set_dlocks)
 
 /* Function prototypes. */
 cw_lwq_t * lwq_new(cw_lwq_t * a_lwq_o);
@@ -137,24 +137,24 @@ void rwq_runlock(cw_rwq_t * a_rwq_o);
 void rwq_wlock(cw_rwq_t * a_rwq_o);
 void rwq_wunlock(cw_rwq_t * a_rwq_o);
 
-cw_btl_t * btl_new(cw_btl_t * a_btl_o);
-void btl_delete(cw_btl_t * a_btl_o);
-void btl_slock(cw_btl_t * a_btl_o);
-void btl_tlock(cw_btl_t * a_btl_o);
-void btl_s2dlock(cw_btl_t * a_btl_o);
-void btl_s2rlock(cw_btl_t * a_btl_o);
-void btl_s2wlock(cw_btl_t * a_btl_o);
-void btl_s2xlock(cw_btl_t * a_btl_o);
-void btl_t2rlock(cw_btl_t * a_btl_o);
-void btl_t2wlock(cw_btl_t * a_btl_o);
-void btl_t2xlock(cw_btl_t * a_btl_o);
-void btl_sunlock(cw_btl_t * a_btl_o);
-void btl_tunlock(cw_btl_t * a_btl_o);
-void btl_dunlock(cw_btl_t * a_btl_o);
-void btl_runlock(cw_btl_t * a_btl_o);
-void btl_wunlock(cw_btl_t * a_btl_o);
-void btl_xunlock(cw_btl_t * a_btl_o);
-cw_uint32_t btl_get_dlocks(cw_btl_t * a_btl_o);
-cw_uint32_t btl_set_dlocks(cw_btl_t * a_btl_o, cw_uint32_t a_dlocks);
+cw_jtl_t * jtl_new(cw_jtl_t * a_jtl_o);
+void jtl_delete(cw_jtl_t * a_jtl_o);
+void jtl_slock(cw_jtl_t * a_jtl_o);
+void jtl_tlock(cw_jtl_t * a_jtl_o);
+void jtl_s2dlock(cw_jtl_t * a_jtl_o);
+void jtl_s2rlock(cw_jtl_t * a_jtl_o);
+void jtl_s2wlock(cw_jtl_t * a_jtl_o);
+void jtl_s2xlock(cw_jtl_t * a_jtl_o);
+void jtl_t2rlock(cw_jtl_t * a_jtl_o);
+void jtl_t2wlock(cw_jtl_t * a_jtl_o);
+void jtl_t2xlock(cw_jtl_t * a_jtl_o);
+void jtl_sunlock(cw_jtl_t * a_jtl_o);
+void jtl_tunlock(cw_jtl_t * a_jtl_o);
+void jtl_dunlock(cw_jtl_t * a_jtl_o);
+void jtl_runlock(cw_jtl_t * a_jtl_o);
+void jtl_wunlock(cw_jtl_t * a_jtl_o);
+void jtl_xunlock(cw_jtl_t * a_jtl_o);
+cw_uint32_t jtl_get_dlocks(cw_jtl_t * a_jtl_o);
+cw_uint32_t jtl_set_dlocks(cw_jtl_t * a_jtl_o, cw_uint32_t a_dlocks);
 
 #endif /* _LOCKS_H_ */

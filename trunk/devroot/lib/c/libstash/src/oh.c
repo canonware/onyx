@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 86 $
- * $Date: 1998-06-23 17:40:29 -0700 (Tue, 23 Jun 1998) $
+ * $Revision: 90 $
+ * $Date: 1998-06-24 23:45:26 -0700 (Wed, 24 Jun 1998) $
  *
  * <<< Description >>>
  *
@@ -74,9 +74,9 @@ oh_new(cw_oh_t * a_oh_o, cw_bool_t a_is_thread_safe, cw_bool_t a_should_shuffle)
   /* Create the spare items list. */
   list_new(&retval->spares_list, FALSE);
   
-  retval->base_h1 = oh_h1_priv;
-  retval->curr_h1 = oh_h1_priv;
-  retval->key_compare = oh_key_compare_priv;
+  retval->base_h1 = oh_p_h1;
+  retval->curr_h1 = oh_p_h1;
+  retval->key_compare = oh_p_key_compare;
 
   retval->num_items
     = retval->num_invalid
@@ -178,7 +178,7 @@ oh_rehash(cw_oh_t * a_oh_o)
     rwl_wlock(&a_oh_o->rw_lock);
   }
 
-  oh_rehash_priv(a_oh_o, TRUE);
+  oh_p_rehash(a_oh_o, TRUE);
 
   if (a_oh_o->is_thread_safe)
   {
@@ -357,8 +357,8 @@ oh_set_h1(cw_oh_t * a_oh_o,
   if (a_oh_o->curr_h1 != a_new_h1)
   {
     a_oh_o->curr_h1 = a_new_h1;
-    oh_rehash_priv(a_oh_o, TRUE);
-    oh_coalesce_priv(a_oh_o);
+    oh_p_rehash(a_oh_o, TRUE);
+    oh_p_quiesce(a_oh_o);
   }
   else
   {
@@ -433,7 +433,7 @@ oh_set_base_h2(cw_oh_t * a_oh_o,
 			<< (a_oh_o->curr_power
 			    - a_oh_o->base_power))
 		       - 1);
-    oh_rehash_priv(a_oh_o, TRUE);
+    oh_p_rehash(a_oh_o, TRUE);
   }
 
   if (a_oh_o->is_thread_safe)
@@ -475,7 +475,7 @@ oh_set_base_shrink_point(cw_oh_t * a_oh_o,
     a_oh_o->curr_shrink_point
       = (a_oh_o->base_shrink_point
 	 << (a_oh_o->curr_power - a_oh_o->base_power));
-    oh_shrink_priv(a_oh_o);
+    oh_p_shrink(a_oh_o);
   }
 
   if (a_oh_o->is_thread_safe)
@@ -518,7 +518,7 @@ oh_set_base_grow_point(cw_oh_t * a_oh_o,
     a_oh_o->curr_grow_point
       = (a_oh_o->base_grow_point
 	 << (a_oh_o->curr_power - a_oh_o->base_power));
-    oh_grow_priv(a_oh_o);
+    oh_p_grow(a_oh_o);
   }
 
   if (a_oh_o->is_thread_safe)
@@ -561,7 +561,7 @@ oh_set_base_rehash_point(cw_oh_t * a_oh_o,
     a_oh_o->curr_rehash_point
       = (a_oh_o->base_rehash_point
 	 << (a_oh_o->curr_power - a_oh_o->base_power));
-    oh_rehash_priv(a_oh_o, FALSE);
+    oh_p_rehash(a_oh_o, FALSE);
   }
 
   if (a_oh_o->is_thread_safe)
@@ -599,7 +599,7 @@ oh_item_insert(cw_oh_t * a_oh_o, void * a_key,
     rwl_wlock(&a_oh_o->rw_lock);
   }
 
-  oh_coalesce_priv(a_oh_o);
+  oh_p_quiesce(a_oh_o);
 
   /* Grab an item off the spares list, if there are any. */
   if (list_count(&a_oh_o->spares_list) > 0)
@@ -615,10 +615,10 @@ oh_item_insert(cw_oh_t * a_oh_o, void * a_key,
   item->key = a_key;
   item->data = a_data;
 
-  retval = oh_item_insert_priv(a_oh_o, item);
+  retval = oh_p_item_insert(a_oh_o, item);
   if (retval == TRUE)
   {
-    oh_coalesce_priv(a_oh_o);
+    oh_p_quiesce(a_oh_o);
   }
 
   if (a_oh_o->is_thread_safe)
@@ -659,7 +659,7 @@ oh_item_delete(cw_oh_t * a_oh_o,
   }
 
   /* Get the slot number for what we want to delete (if it exists). */
-  error = oh_item_search_priv(a_oh_o, a_search_key, &slot);
+  error = oh_p_item_search(a_oh_o, a_search_key, &slot);
   if (error == FALSE)
   {
     /* Found the item. */
@@ -775,7 +775,7 @@ oh_item_search(cw_oh_t * a_oh_o,
     rwl_rlock(&a_oh_o->rw_lock);
   }
 
-  error = oh_item_search_priv(a_oh_o, a_key, &slot);
+  error = oh_p_item_search(a_oh_o, a_key, &slot);
   if (error == FALSE)
   {
     *a_data = a_oh_o->items[slot]->data;
@@ -982,14 +982,14 @@ oh_dump(cw_oh_t * a_oh_o, cw_bool_t a_all)
  *
  ****************************************************************************/
 cw_uint64_t
-oh_h1_priv(cw_oh_t * a_oh_o, void * a_key)
+oh_p_h1(cw_oh_t * a_oh_o, void * a_key)
 {
   cw_uint64_t retval;
   char * str;
 
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
   {
-    _cw_marker("Enter oh_h1_priv()");
+    _cw_marker("Enter oh_p_h1()");
   }
   
   for (str = (char *) a_key, retval = 0; *str != 0; str++)
@@ -1001,29 +1001,29 @@ oh_h1_priv(cw_oh_t * a_oh_o, void * a_key)
   
   if (dbg_fmatch(g_dbg_o, _CW_DBG_R_OH_SLOT))
   {
-    log_printf(g_log_o, "oh_h1_priv(): :%s: --> %d\n", a_key, retval);
+    log_printf(g_log_o, "oh_p_h1(): :%s: --> %d\n", a_key, retval);
     if (a_oh_o->items[retval] != NULL)
     {
-      log_printf(g_log_o, "oh_h1_priv(): items[%d]->is_valid == %d\n",
+      log_printf(g_log_o, "oh_p_h1(): items[%d]->is_valid == %d\n",
 		 retval, a_oh_o->items[retval]->is_valid);
-      log_printf(g_log_o, "oh_h1_priv(): items[%d]->key == :%s:\n",
+      log_printf(g_log_o, "oh_p_h1(): items[%d]->key == :%s:\n",
 		 retval, a_oh_o->items[retval]->key);
     }
     else
     {
-      log_printf(g_log_o, "oh_h1_priv(): Slot %d is empty.\n", retval);
+      log_printf(g_log_o, "oh_p_h1(): Slot %d is empty.\n", retval);
     }
   }
   
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
   {
-    _cw_marker("Exit oh_h1_priv()");
+    _cw_marker("Exit oh_p_h1()");
   }
   return retval;
 }
 #if (0)
 cw_uint64_t
-oh_h1_priv(cw_oh_t * a_oh_o, void * a_key)
+oh_p_h1(cw_oh_t * a_oh_o, void * a_key)
 {
   cw_uint64_t retval;
 
@@ -1046,7 +1046,7 @@ oh_h1_priv(cw_oh_t * a_oh_o, void * a_key)
  *
  ****************************************************************************/
 cw_bool_t
-oh_key_compare_priv(void * a_k1, void * a_k2)
+oh_p_key_compare(void * a_k1, void * a_k2)
 {
   cw_bool_t retval;
 
@@ -1072,20 +1072,20 @@ oh_key_compare_priv(void * a_k1, void * a_k2)
  *
  ****************************************************************************/
 void
-oh_coalesce_priv(cw_oh_t * a_oh_o)
+oh_p_quiesce(cw_oh_t * a_oh_o)
 {
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
   {
-    _cw_marker("Enter oh_coalesce_priv()");
+    _cw_marker("Enter oh_p_quiesce()");
   }
 
-  oh_shrink_priv(a_oh_o);
-  oh_rehash_priv(a_oh_o, FALSE);
-  oh_grow_priv(a_oh_o);
+  oh_p_shrink(a_oh_o);
+  oh_p_rehash(a_oh_o, FALSE);
+  oh_p_grow(a_oh_o);
 
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
   {
-    _cw_marker("Exit oh_coalesce_priv()");
+    _cw_marker("Exit oh_p_quiesce()");
   }
 }
 
@@ -1096,14 +1096,14 @@ oh_coalesce_priv(cw_oh_t * a_oh_o)
  *
  ****************************************************************************/
 void
-oh_grow_priv(cw_oh_t * a_oh_o)
+oh_p_grow(cw_oh_t * a_oh_o)
 {
   cw_oh_item_t ** old_items;
   cw_uint64_t old_size, i;
 
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
   {
-    _cw_marker("Enter oh_grow_priv()");
+    _cw_marker("Enter oh_p_grow()");
   }
   _cw_check_ptr(a_oh_o);
 
@@ -1153,7 +1153,7 @@ oh_grow_priv(cw_oh_t * a_oh_o)
     {
       if (old_items[i]->is_valid == TRUE)
       {
-	oh_item_insert_priv(a_oh_o, old_items[i]);
+	oh_p_item_insert(a_oh_o, old_items[i]);
       }
       else
       {
@@ -1166,7 +1166,7 @@ oh_grow_priv(cw_oh_t * a_oh_o)
  RETURN:
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
   {
-    _cw_marker("Exit oh_grow_priv()");
+    _cw_marker("Exit oh_p_grow()");
   }
 }
 
@@ -1178,7 +1178,7 @@ oh_grow_priv(cw_oh_t * a_oh_o)
  *
  ****************************************************************************/
 void
-oh_shrink_priv(cw_oh_t * a_oh_o)
+oh_p_shrink(cw_oh_t * a_oh_o)
 {
   cw_oh_item_t ** old_items;
   cw_uint64_t old_size, i;
@@ -1186,7 +1186,7 @@ oh_shrink_priv(cw_oh_t * a_oh_o)
 
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
   {
-    _cw_marker("Enter oh_shrink_priv()");
+    _cw_marker("Enter oh_p_shrink()");
   }
   _cw_check_ptr(a_oh_o);
 
@@ -1198,7 +1198,7 @@ oh_shrink_priv(cw_oh_t * a_oh_o)
 
     for (j = a_oh_o->curr_power - a_oh_o->base_power;
 	 (((a_oh_o->curr_grow_point >> j) < a_oh_o->num_items)
-	   && (j > 0));
+	  && (j > 0));
 	 j--);
     num_halvings = j;
   }
@@ -1250,7 +1250,7 @@ oh_shrink_priv(cw_oh_t * a_oh_o)
     {
       if (old_items[i]->is_valid == TRUE)
       {
-	oh_item_insert_priv(a_oh_o, old_items[i]);
+	oh_p_item_insert(a_oh_o, old_items[i]);
       }
       else
       {
@@ -1278,7 +1278,7 @@ oh_shrink_priv(cw_oh_t * a_oh_o)
  RETURN:
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
   {
-    _cw_marker("Exit oh_shrink_priv()");
+    _cw_marker("Exit oh_p_shrink()");
   }
 }
 
@@ -1289,15 +1289,15 @@ oh_shrink_priv(cw_oh_t * a_oh_o)
  *
  ****************************************************************************/
 cw_bool_t
-oh_item_insert_priv(cw_oh_t * a_oh_o,
-		    cw_oh_item_t * a_item)
+oh_p_item_insert(cw_oh_t * a_oh_o,
+		 cw_oh_item_t * a_item)
 {
   cw_uint64_t slot, i, j, junk;
   cw_bool_t retval = TRUE;
   
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
   {
-    _cw_marker("Enter oh_item_insert_priv()");
+    _cw_marker("Enter oh_p_item_insert()");
   }
   _cw_check_ptr(a_oh_o);
   _cw_check_ptr(a_item);
@@ -1324,7 +1324,7 @@ oh_item_insert_priv(cw_oh_t * a_oh_o,
       retval = FALSE;
       if (dbg_fmatch(g_dbg_o, _CW_DBG_R_OH_SLOT))
       {
-	log_printf(g_log_o, "oh_item_insert_priv(): Inserting in slot %d\n",
+	log_printf(g_log_o, "oh_p_item_insert(): Inserting in slot %d\n",
 		   slot);
       }
       break;
@@ -1333,8 +1333,8 @@ oh_item_insert_priv(cw_oh_t * a_oh_o,
     {
       /* Slot is invalid.  Before inserting, make sure that an entry with a
        * duplicate key doesn't already exist in the table. */
-      if (TRUE == oh_item_search_priv(a_oh_o, a_item->key,
-				      &junk))
+      if (TRUE == oh_p_item_search(a_oh_o, a_item->key,
+				   &junk))
       {
 	/* No duplicate in the table.  Go ahead and use this slot. */
 	free(a_oh_o->items[j]);
@@ -1344,7 +1344,7 @@ oh_item_insert_priv(cw_oh_t * a_oh_o,
 	retval = FALSE;
 	if (dbg_fmatch(g_dbg_o, _CW_DBG_R_OH_SLOT))
 	{
-	  log_printf(g_log_o, "oh_item_insert_priv(): Inserting in slot %d\n",
+	  log_printf(g_log_o, "oh_p_item_insert(): Inserting in slot %d\n",
 		     slot);
 	}
 	break;
@@ -1366,7 +1366,7 @@ oh_item_insert_priv(cw_oh_t * a_oh_o,
   
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
   {
-    _cw_marker("Exit oh_item_insert_priv()");
+    _cw_marker("Exit oh_p_item_insert()");
   }
   
   return retval;
@@ -1380,16 +1380,16 @@ oh_item_insert_priv(cw_oh_t * a_oh_o,
  *
  ****************************************************************************/
 cw_bool_t
-oh_item_search_priv(cw_oh_t * a_oh_o,
-		    void * a_key,
-		    cw_uint64_t * a_slot)
+oh_p_item_search(cw_oh_t * a_oh_o,
+		 void * a_key,
+		 cw_uint64_t * a_slot)
 {
   cw_uint64_t slot, i, j;
   cw_bool_t retval;
   
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
   {
-    _cw_marker("Enter oh_item_search_priv()");
+    _cw_marker("Enter oh_p_item_search()");
   }
   _cw_check_ptr(a_oh_o);
 
@@ -1420,7 +1420,7 @@ oh_item_search_priv(cw_oh_t * a_oh_o,
   
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
   {
-    _cw_marker("Exit oh_item_search_priv()");
+    _cw_marker("Exit oh_p_item_search()");
   }
   return retval;
 }
@@ -1433,14 +1433,14 @@ oh_item_search_priv(cw_oh_t * a_oh_o,
  *
  ****************************************************************************/
 void
-oh_rehash_priv(cw_oh_t * a_oh_o, cw_bool_t a_force)
+oh_p_rehash(cw_oh_t * a_oh_o, cw_bool_t a_force)
 {
   cw_oh_item_t ** old_items;
   cw_uint64_t i;
 
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
   {
-    _cw_marker("Enter oh_rehash_priv()");
+    _cw_marker("Enter oh_p_rehash()");
   }
   _cw_check_ptr(a_oh_o);
 
@@ -1477,7 +1477,7 @@ oh_rehash_priv(cw_oh_t * a_oh_o, cw_bool_t a_force)
       {
 	if (old_items[i]->is_valid == TRUE)
 	{
-	  oh_item_insert_priv(a_oh_o, old_items[i]);
+	  oh_p_item_insert(a_oh_o, old_items[i]);
 	}
 	else
 	{
@@ -1493,7 +1493,7 @@ oh_rehash_priv(cw_oh_t * a_oh_o, cw_bool_t a_force)
 
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
   {
-    _cw_marker("Exit oh_rehash_priv()");
+    _cw_marker("Exit oh_p_rehash()");
   }
 }
 

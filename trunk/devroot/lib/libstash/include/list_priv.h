@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 86 $
- * $Date: 1998-06-23 17:40:29 -0700 (Tue, 23 Jun 1998) $
+ * $Revision: 90 $
+ * $Date: 1998-06-24 23:45:26 -0700 (Wed, 24 Jun 1998) $
  *
  * <<< Description >>>
  *
@@ -26,10 +26,10 @@ struct cw_list_item_s
   void * item;
 };
 
-#define list_hpop_priv _CW_NS_CMN(list_hpop_priv)
-#define list_tpop_priv _CW_NS_CMN(list_tpop_priv)
+#define list_p_hpop _CW_NS_CMN(list_p_hpop)
+#define list_p_tpop _CW_NS_CMN(list_p_tpop)
 
-void * list_hpop_priv(cw_list_t * a_list_o);
-void * list_tpop_priv(cw_list_t * a_list_o);
+void * list_p_hpop(cw_list_t * a_list_o);
+void * list_p_tpop(cw_list_t * a_list_o);
 
 #endif /* _LIST_PRIV_H_ */

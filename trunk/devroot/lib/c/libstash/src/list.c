@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 86 $
- * $Date: 1998-06-23 17:40:29 -0700 (Tue, 23 Jun 1998) $
+ * $Revision: 90 $
+ * $Date: 1998-06-24 23:45:26 -0700 (Wed, 24 Jun 1998) $
  *
  * <<< Description >>>
  *
@@ -180,7 +180,7 @@ list_delete(cw_list_t * a_list_o)
    * memory pointed to by the item pointers. */
   for (; a_list_o->count > 0; a_list_o->count--)
   {
-    _cw_free(list_hpop_priv(a_list_o));
+    _cw_free(list_p_hpop(a_list_o));
   }
   
   /* Delete the spares list. */
@@ -322,7 +322,7 @@ list_hpop(cw_list_t * a_list_o)
     mtx_lock(&a_list_o->lock);
   }
 
-  retval = list_hpop_priv(a_list_o);
+  retval = list_p_hpop(a_list_o);
 
   if (a_list_o->is_thread_safe)
   {
@@ -422,7 +422,7 @@ list_tpop(cw_list_t * a_list_o)
     mtx_lock(&a_list_o->lock);
   }
 
-  retval = list_tpop_priv(a_list_o);
+  retval = list_p_tpop(a_list_o);
 
   if (a_list_o->is_thread_safe)
   {
@@ -528,12 +528,12 @@ list_remove(cw_list_t * a_list_o, cw_list_item_t * a_to_remove)
   if (a_to_remove->prev == NULL)
   {
     /* Removing from the beginning of the list. */
-    retval = list_hpop_priv(a_list_o);
+    retval = list_p_hpop(a_list_o);
   }
   else if (a_to_remove->next == NULL)
   {
     /* Removing from the end of the list. */
-    retval = list_tpop_priv(a_list_o);
+    retval = list_p_tpop(a_list_o);
   }
   else
   {
@@ -657,13 +657,13 @@ list_dump(cw_list_t * a_list_o)
  *
  ****************************************************************************/
 void *
-list_hpop_priv(cw_list_t * a_list_o)
+list_p_hpop(cw_list_t * a_list_o)
 {
   void * retval;
 
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_LIST_FUNC))
   {
-    _cw_marker("Enter list_hpop_priv()");
+    _cw_marker("Enter list_p_hpop()");
   }
 
   if (a_list_o->head == NULL)
@@ -709,7 +709,7 @@ list_hpop_priv(cw_list_t * a_list_o)
 
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_LIST_FUNC))
   {
-    _cw_marker("Exit list_hpop_priv()");
+    _cw_marker("Exit list_p_hpop()");
   }
   return retval;
 }
@@ -721,13 +721,13 @@ list_hpop_priv(cw_list_t * a_list_o)
  *
  ****************************************************************************/
 void *
-list_tpop_priv(cw_list_t * a_list_o)
+list_p_tpop(cw_list_t * a_list_o)
 {
   void * retval;
 
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_LIST_FUNC))
   {
-    _cw_marker("Enter list_tpop_priv()");
+    _cw_marker("Enter list_p_tpop()");
   }
 
   if (a_list_o->tail == NULL)
@@ -773,7 +773,7 @@ list_tpop_priv(cw_list_t * a_list_o)
 
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_LIST_FUNC))
   {
-    _cw_marker("Exit list_tpop_priv()");
+    _cw_marker("Exit list_p_tpop()");
   }
   return retval;
 }
