@@ -293,8 +293,7 @@ AC_SUBST([enable_real])
 if test "x$enable_real" = "x1" ; then
   AC_DEFINE([CW_REAL])
   LIBS="$LIBS -lm"
-  AC_CHECK_FUNCS([asprintf], ,
-		 [AC_MSG_ERROR([Cannot use real numbers without asprintf()])])
+  AC_CHECK_FUNCS([asprintf])
 fi
 
 dnl Support POSIX file operations by default.
