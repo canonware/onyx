@@ -267,6 +267,9 @@ if test "x$enable_onyx" = "x0" ; then
   if test "x$ONYX" = "x" ; then
     AC_MSG_ERROR(Cannot find onyx)
   fi
+else
+  ONYX="$abs_objroot/bin/onyx/bin/tonyx"
+  AC_SUBST(ONYX)
 fi
 
 if test `echo "<Version = onyx>" | grep Version` ; then
