@@ -51,8 +51,8 @@ clopt <
     # Handle an error, and unwind to :parse.
     #
     #instance#
-    #errstr p_error -
-    $p_error {
+    #errstr error_escape -
+    $error_escape {
 	;error_print
 
 	# Unwind to :parse.
@@ -163,7 +163,7 @@ clopt <
 		`") unexpected for option ' cat
 		3 idup cat
 		#opt #arg #class #errstr
-		;p_error
+		;error_escape
 	    } if
 
 	    # Get the handler.
@@ -182,7 +182,7 @@ clopt <
 	    over null eq {
 		`Argument missing for option ' 3 idup cat
 		#opt #arg #class #errstr
-		;p_error
+		;error_escape
 	    } if
 
 	    # Get the handler.
@@ -200,7 +200,7 @@ clopt <
 		pop
 	    } ifelse
 	    #errstr
-	    ;p_error
+	    ;error_escape
 	} ifelse
 	} ifelse
 	} ifelse
@@ -236,7 +236,7 @@ clopt <
 		`") unexpected for option ' cat
 		1 submatch cat
 		#argv #i #elm #class #errstr
-		;p_error
+		;error_escape
 	    } if
 
 	    # Get the handler.
@@ -264,7 +264,7 @@ clopt <
 		    # No argument specified.
 		    `Argument missing for option ' 1 submatch cat
 		    #argv #i #elm #instance #class #errstr
-		    ;p_error
+		    ;error_escape
 		} ifelse
 	    }{
 		# Set argument.
@@ -281,7 +281,7 @@ clopt <
 	    `Error interpreting option '
 	    0 submatch cat
 	    #argv #i #elm #errstr
-	    ;p_error
+	    ;error_escape
 	} ifelse
 	} ifelse
 	#argv #i #elm #handler
