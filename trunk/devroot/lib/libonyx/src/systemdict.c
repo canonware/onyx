@@ -27,8 +27,10 @@
 #ifdef CW_POSIX
 #include <netdb.h> /* For socket and socketpair operators. */
 #endif
+#ifdef CW_REAL
 #ifndef HAVE_ASPRINTF
 #include "asprintf.c"
+#endif
 #endif
 #ifdef HAVE_DLOPEN
 #include <dlfcn.h> /* For modload operator. */
