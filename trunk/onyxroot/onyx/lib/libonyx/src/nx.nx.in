@@ -113,8 +113,19 @@ $sprintsdict <
 @enable_oop@ 1 eq opt_bootstrap not and {
     `\
     $classtype {
-	2 npop
-	`-class-'
+	#instance #depth
+	exch classname
+	#depth #classname
+	dup type $nulltype ne {
+	    exch 1 sub
+	    #classname #rdepth
+	    over type sprintsdict exch get eval
+	    #tagstr
+	    `-class=' exch `-' 3 ncat
+	}{
+	    2 npop
+	    `-class-'
+	} ifelse
     } bind
 ' cat
 } if
@@ -195,8 +206,7 @@ $sprintsdict <
 	    #tag #rdepth
 	    over type sprintsdict exch get eval
 	    #tagstr
-	    `=' exch cat
-	    `=' cat
+	    `-handle=' exch `-' 3 ncat
 	}{
 	    2 npop
 	    `-handle-'
@@ -207,8 +217,19 @@ $sprintsdict <
 @enable_oop@ 1 eq opt_bootstrap not and {
     `\
     $instancetype {
-	2 npop
-	`-instance-'
+	#instance #depth
+	exch isa classname
+	#depth #classname
+	dup type $nulltype ne {
+	    exch 1 sub
+	    #classname #rdepth
+	    over type sprintsdict exch get eval
+	    #tagstr
+	    `-instance=' exch `-' 3 ncat
+	}{
+	    2 npop
+	    `-instance-'
+	} ifelse
     } bind
 ' cat
 } if
