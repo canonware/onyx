@@ -65,8 +65,6 @@ static void	thd_p_sr_handle(int a_signal);
 void
 thd_l_init(void)
 {
-	_cw_assert(cw_g_thd_initialized == FALSE);
-
 #ifdef _CW_THD_GENERIC_SR
 	int			error;
 	struct sigaction	action;
@@ -84,6 +82,8 @@ thd_l_init(void)
 		abort();
 	}
 #endif
+	_cw_assert(cw_g_thd_initialized == FALSE);
+
 	tsd_new(&cw_g_thd_self_key, NULL);
 	
 	/* Initialize the main thread's thd structure. */
