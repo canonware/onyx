@@ -309,7 +309,9 @@ dch_p_insert(cw_ch_t *a_ch, cw_chi_t *a_chi)
     /* Hook into the slot list. */
 #ifdef CW_DCH_COUNT
     if (ql_first(&a_ch->table[slot]) != NULL)
-    a_ch->num_collisions++;
+    {
+	a_ch->num_collisions++;
+    }
 #endif
     ql_head_insert(&a_ch->table[slot], a_chi, slot_link);
 
