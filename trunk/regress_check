@@ -1,5 +1,3 @@
-#!/home/jasone/cw/devroot/bin/onyx/bin/tonyx
-# -*- mode: onyx -*-
 #!/usr/bin/onyx
 #
 # regress_check <prefix> <srcdir> [<conf>...]
