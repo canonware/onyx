@@ -158,7 +158,7 @@
  *
  ******************************************************************************/
 
-#include "../include/nxe.h"
+#include "../include/modnxe.h"
 
 /*
  * The upper 3 bits are used to denote the record type, and the lower 5 bits are

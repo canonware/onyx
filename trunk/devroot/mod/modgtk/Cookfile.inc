@@ -101,7 +101,7 @@ modgtk_install : [MODGTK]
 
 modgtk_uninstall :
 {
-  rm -f [PREFIX]/share/onyx/nxmod/modgtk.nxm;
+  rm -f [PREFIX]/share/onyx/nxmod/gtk.nxm;
 }
 
 modgtk_clean :

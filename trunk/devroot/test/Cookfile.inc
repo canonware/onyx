@@ -103,18 +103,18 @@ dataend
 /*
  * Add magic to onyx files.
  */
-[objdir]/%0%.nx : [srcdir]/%0%.nx.in
+[objdir]/%0test/%.nx : [srcdir]/%0test/%.nx.in
   set mkdir
 {
   [SHELL] -e;
 data
 #![SHELL]
 
-echo \"[srcdir]/%0%.nx.in --> [target]\"
+echo \"[srcdir]/%0test/%.nx.in --> [target]\"
 
 echo \"#![abs_objdir]/[ONYX]\" > [target]
 echo \"!#\" >> [target]
-[CAT] [srcdir]/%0%.nx.in >> [target];
+[CAT] [srcdir]/%0test/%.nx.in >> [target];
 chmod u+x [target];
 dataend
 }

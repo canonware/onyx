@@ -70,6 +70,7 @@ fi
 dnl Look for modules.
 if test "x$enable_threads" = "x1" -a "x$enable_posix" = "x1" ; then
   CW_BUILD_MOD(modgtk, mod_gtk)
+  CW_BUILD_MOD(modnxe, mod_nxe)
 fi
 
 dnl Look for binaries.
@@ -202,17 +203,14 @@ if test "x$build_onyx" = "xyes" ; then
   fi
   AC_DEFINE_UNQUOTED(_CW_ONYX_RPATH, "$_CW_ONYX_RPATH")
   AC_DEFINE_UNQUOTED(_CW_ONYX_MPATH, "$_CW_ONYX_MPATH")
-
-  mkdir -p $objdir/bin/onyx/man/man1
-  cfgoutputs="$cfgoutputs bin/onyx/man/man1/onyx.1"
-fi
-
-if test "x$build_nxe" = "xyes" ; then
-  AC_CHECK_HEADERS(ncurses.h, , AC_MSG_ERROR(Cannot build without ncurses.h))
 fi
 
 if test "x$build_modgtk" = "xyes" ; then
   AC_PATH_PROGS(GTKCONFIG, gtk-config gtk12-config, , $PATH)
+fi
+
+if test "x$build_modnxe" = "xyes" ; then
+  AC_CHECK_HEADERS(ncurses.h, , AC_MSG_ERROR(Cannot build without ncurses.h))
 fi
 
 dnl 

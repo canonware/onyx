@@ -143,12 +143,12 @@ if test -d "$srcdir/lib/c/$1" ; then
   $2=1
   $2_manual=""
   if test -f "$srcdir/lib/c/$1/doc/latex/manual.tex.in" ; then
+    mkdir -p $objdir/lib/c/$1/doc/latex
     cfgoutputs="$cfgoutputs lib/c/$1/doc/latex/manual.tex"
   fi
+  mkdir -p $objdir/lib/c/$1/include/$1
   cfghdrs="$cfghdrs $objdir/lib/c/$1/include/$1/$1_defs.h"
   libs="$libs $1"
-  mkdir -p $objdir/lib/c/$1/include/$1
-  mkdir -p $objdir/lib/c/$1/doc/latex
 else
   build_$1="no"
   $2=0
@@ -170,12 +170,12 @@ if test -d "$srcdir/mod/$1" ; then
   $2=1
   $2_manual=""
   if test -f "$srcdir/mod/$1/doc/latex/manual.tex.in" ; then
+    mkdir -p $objdir/mod/$1/doc/latex
     cfgoutputs="$cfgoutputs mod/$1/doc/latex/manual.tex"
   fi
+  mkdir -p $objdir/mod/$1/include
   cfghdrs="$cfghdrs $objdir/mod/$1/include/$1_defs.h"
   mods="$mods $1"
-  mkdir -p $objdir/mod/$1/include
-  mkdir -p $objdir/mod/$1/doc/latex
 else
   build_$1="no"
   $2=0
@@ -197,12 +197,18 @@ if test -d "$srcdir/bin/$1" ; then
   $2=1
   $2_manual=""
   if test -f "$srcdir/bin/$1/doc/latex/manual.tex.in" ; then
+    mkdir -p $objdir/bin/$1/doc/latex
     cfgoutputs="$cfgoutputs bin/$1/doc/latex/manual.tex"
   fi
-  cfghdrs="$cfghdrs $objdir/bin/$1/include/$1_defs.h"
+  if test -f "$srcdir/bin/$1/man/man1/$1.1.in" ; then
+    mkdir -p $objdir/bin/$1/man/man1
+    cfgoutputs="$cfgoutputs bin/$1/man/man1/$1.1"
+  fi
+  if test -f "$srcdir/bin/$1/include/$1_defs.h.in" ; then
+    mkdir -p $objdir/bin/$1/include
+    cfghdrs="$cfghdrs $objdir/bin/$1/include/$1_defs.h"
+  fi
   bins="$bins $1"
-  mkdir -p $objdir/bin/$1/include
-  mkdir -p $objdir/bin/$1/doc/latex
 else
   build_$1="no"
   $2=0

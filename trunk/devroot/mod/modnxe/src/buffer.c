@@ -9,7 +9,7 @@
  *
  ******************************************************************************/
 
-#include "nxe.h"
+#include "../include/modnxe.h"
 
 static void
 buffer_p_eval(void *a_data, cw_nxo_t *a_thread)

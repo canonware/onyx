@@ -18,38 +18,9 @@
  * File lists.
  */
 
-/* Include files that _are_ installed. */
-{
-  local incs = ;
-  incs = [fromto % [srcdir]/bin/nxe/include/% [incs]];
-
-  INCS = [INCS] [incs];
-}
-
-/* Include files that are _not_ installed. */
-{
-  local priv_incs = buf.h msgq.h nxe.h;
-  priv_incs = [fromto % [srcdir]/bin/nxe/include/% [priv_incs]];
-  priv_incs = [priv_incs] [objdir]/bin/nxe/include/nxe_defs.h;
-
-  local priv_cincs = ;
-  prix_cincs = [fromto % [srcdir]/bin/nxe/src/% [priv_cincs]];
-
-  PRIV_INCS = [PRIV_INCS] [priv_incs] [priv_cincs];
-}
-
 /* Source files. */
-NXE_SRCS = buf.c buffer.c msgq.c nxe.c nxe_ops.c;
+NXE_SRCS = nxe.nx;
 NXE_SRCS = [fromto % [srcdir]/bin/nxe/src/% [NXE_SRCS]];
-SRCS = [SRCS] [NXE_SRCS];
-
-/* Simple C tests.  Output is diff'ed with the expected (.exp file) output. */
-{
-  local ctests = ;
-  ctests = [fromto % [srcdir]/bin/nxe/test/% [ctests]];
-
-  CTESTS = [CTESTS] [ctests];
-}
 
 /*
  * Onyx tests.
@@ -67,14 +38,6 @@ SRCS = [SRCS] [NXE_SRCS];
   ptests = [fromto % [srcdir]/bin/nxe/test/% [ptests]];
 
   PTESTS = [PTESTS] [ptests];
-}
-
-/* C programs that are driven by tests. */
-{
-  local cbtests = ;
-  cbtests = [fromto % [srcdir]/bin/nxe/test/% [cbtests]];
-
-  CBTESTS = [CBTESTS] [cbtests];
 }
 
 /* Onyx programs that are driven by tests. */
@@ -112,29 +75,35 @@ BINS = [BINS] [NXE];
 
 nxe : [NXE];
 
-nxe_install_self : [NXE]
+nxe_install_self : [ONYX]
 {
   [INSTALL] -d [PREFIX]/bin;
-  [CC] [A_CFLAGS] -o [PREFIX]/bin/nxe
-       [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [NXE_SRCS]]
-#if [enable_libedit]
-       [LIBEDIT_A]
-#endif
-       [RPATH][PREFIX]/lib
-       [LDFLAGS] -lonyx -lcurses [EXTRALIBS];
+
+  [SHELL] -e;
+data
+#![SHELL]
+
+echo \"[srcdir]/bin/nxe/src/nxe.nx --> [PREFIX]/bin/nxe\"
+
+echo \"#![abs_objdir]/[ONYX]\" > [PREFIX]/bin/nxe
+echo \"!#\" >> [PREFIX]/bin/nxe
+[CAT] [srcdir]/bin/nxe/src/nxe.nx >> [PREFIX]/bin/nxe;
+chmod u+x [PREFIX]/bin/nxe;
+dataend
+
   [CHMOD] 0755 [PREFIX]/bin/nxe;
 
-  [INSTALL] -d [PREFIX]/man/man1;
-  [INSTALL] -m 0444 [objdir]/bin/nxe/man/man1/nxe.1 [PREFIX]/man/man1;
+/*  [INSTALL] -d [PREFIX]/man/man1;
+  [INSTALL] -m 0444 [objdir]/bin/nxe/man/man1/nxe.1 [PREFIX]/man/man1; */
 }
 
 nxe_install : nxe_install_self
-               libonyx_install_s /* libedit_install_s */;
+              onyx_install modnxe_install;
 
 nxe_uninstall :
 {
   rm -f [PREFIX]/bin/nxe;
-  rm -f [PREFIX]/man/man1/nxe.1;
+/*  rm -f [PREFIX]/man/man1/nxe.1; */
 }
 
 nxe_clean :
@@ -144,27 +113,25 @@ nxe_clean :
 nxe_distclean :
 {
   rm -f [objdir]/bin/nxe/doc/latex/manual.tex;
-  rm -f [objdir]/bin/nxe/man/man1/nxe.1;
+/*  rm -f [objdir]/bin/nxe/man/man1/nxe.1; */
 }
 
 /*
  * Dependencies.
  */
 
-[NXE] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [NXE_SRCS]]
-         [LIBONYX_S]
-#if [enable_libedit]
-         [LIBEDIT_A]
-#endif
-         [MODS]
+[objdir]/bin/nxe/bin/% : [srcdir]/bin/nxe/src/%.nx [ONYX] [MODNXE]
   set mkdir
 {
-  [CC] [A_CFLAGS] -o [target]
-       [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [NXE_SRCS]]
-#if [enable_libedit]
-       [LIBEDIT_A]
-#endif
-/*       [RPATH][abs_objdir]/lib/c/libedit/lib */
-       [RPATH][abs_objdir]/lib/c/libonyx/lib
-       [LDFLAGS] -lonyx -lcurses [EXTRALIBS];
+  [SHELL] -e;
+data
+#![SHELL]
+
+echo \"[srcdir]/bin/nxe/src/%.nx --> [target]\"
+
+echo \"#![abs_objdir]/[ONYX]\" > [target]
+echo \"!#\" >> [target]
+[CAT] [srcdir]/bin/nxe/src/%.nx >> [target];
+chmod u+x [target];
+dataend
 }

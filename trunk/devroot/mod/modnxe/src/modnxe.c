@@ -9,7 +9,47 @@
  *
  ******************************************************************************/
 
-#include "nxe.h"
+#include "../include/modnxe.h"
+
+#define	ENTRY(name)	{#name, nxe_##name}
+
+struct cw_nxe_entry {
+	const cw_uint8_t	*op_n;
+	cw_op_t			*op_f;
+};
+
+static const struct cw_nxe_entry nxe_ops[] = {
+	ENTRY(buffer)
+};
+
+void
+nxe_ops_init(cw_nxo_t *a_thread)
+{
+	cw_nxo_t	*tstack;
+	cw_nxo_t	*globaldict, *name, *value;
+	cw_nx_t		*nx;
+	cw_uint32_t	i;
+
+#define	NENTRIES (sizeof(nxe_ops) / sizeof(struct cw_nxe_entry))
+
+	tstack = nxo_thread_tstack_get(a_thread);
+	nx = nxo_thread_nx_get(a_thread);
+	globaldict = nx_globaldict_get(nx);
+
+	name = nxo_stack_push(tstack);
+	value = nxo_stack_push(tstack);
+
+	for (i = 0; i < NENTRIES; i++) {
+		nxo_name_new(name, nx, nxe_ops[i].op_n,
+		    strlen(nxe_ops[i].op_n), FALSE);
+		nxo_operator_new(value, nxe_ops[i].op_f, NXN_ZERO);
+		nxo_attr_set(value, NXOA_EXECUTABLE);
+
+		nxo_dict_def(globaldict, nx, name, value);
+	}
+
+	nxo_stack_npop(tstack, 2);
+}
 
 void
 foo(cw_nx_t *a_nx, cw_nxo_t *a_thread)
@@ -103,21 +143,12 @@ foo(cw_nx_t *a_nx, cw_nxo_t *a_thread)
 	buf_delete(buf);
 }
 
-int
-main(int argc, char **argv, char **envp)
+void
+nxe_init (void *a_arg, cw_nxo_t *a_thread)
 {
-	cw_nx_t		nx;
-	cw_nxo_t	thread;
-
-	libonyx_init();
-	nx_new(&nx, NULL, argc, argv, envp);
-	nxo_thread_new(&thread, &nx);
-
-	_cw_onyx_code(&thread, "`Hello world!\\n' print flush");
-
-	foo(&nx, &thread);	/* XXX */
-
-	nx_delete(&nx);
-	libonyx_shutdown();
-	return 0;
+	fprintf(stderr, "%s:%u:%s(): Got here\n", __FILE__, __LINE__,
+	    __FUNCTION__);
+	nxe_ops_init(a_thread);
+	
+	foo(nxo_thread_nx_get(a_thread), a_thread);	/* XXX */
 }
