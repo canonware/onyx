@@ -354,42 +354,42 @@ dataend
  * link line (-lalt -lstil -lsock -lstash).
  */
 #if @lib_alt@
-#  include [srcdir]/lib/c/libalt/Howto.cook
+#  include [srcdir]/lib/c/libalt/Howto.cook.inc
 #endif
 #if @lib_stil@
-#  include [srcdir]/lib/c/libstil/Howto.cook
+#  include [srcdir]/lib/c/libstil/Howto.cook.inc
 #endif
 #if @lib_sock@
-#  include [srcdir]/lib/c/libsock/Howto.cook
+#  include [srcdir]/lib/c/libsock/Howto.cook.inc
 #endif
 #if @lib_stash@
-#  include [srcdir]/lib/c/libstash/Howto.cook
+#  include [srcdir]/lib/c/libstash/Howto.cook.inc
 #endif
 
 /*
  * Programs.
  */
 #if @bin_blow@
-#  include [srcdir]/bin/blow/Howto.cook
+#  include [srcdir]/bin/blow/Howto.cook.inc
 #endif
 #if @bin_echos@
-#  include [srcdir]/bin/echos/Howto.cook
+#  include [srcdir]/bin/echos/Howto.cook.inc
 #endif
 #if @bin_ncat@
-#  include [srcdir]/bin/ncat/Howto.cook
+#  include [srcdir]/bin/ncat/Howto.cook.inc
 #endif
 #if @bin_proxy@
-#  include [srcdir]/bin/proxy/Howto.cook
+#  include [srcdir]/bin/proxy/Howto.cook.inc
 #endif
 #if @bin_stil@
-#  include [srcdir]/bin/stil/Howto.cook
+#  include [srcdir]/bin/stil/Howto.cook.inc
 #endif
 #if @bin_stile@
-#  include [srcdir]/bin/stile/Howto.cook
+#  include [srcdir]/bin/stile/Howto.cook.inc
 #endif
 #if @bin_stilt@
-#  include [srcdir]/bin/stilt/Howto.cook
+#  include [srcdir]/bin/stilt/Howto.cook.inc
 #endif
 #if @bin_suck@
-#  include [srcdir]/bin/suck/Howto.cook
+#  include [srcdir]/bin/suck/Howto.cook.inc
 #endif
