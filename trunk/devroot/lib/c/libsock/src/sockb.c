@@ -276,20 +276,20 @@ sockb_wait(int * a_sock_vec, cw_uint32_t a_vec_len,
   struct timespec tout;
   struct timezone tz;
   struct cw_sockb_msg_s msg_wait;
-  cw_cnd_t cnd;
+  cw_cnd_t cnd_a;
   cw_mtx_t mtx;
   cw_bool_t did_timeout;
 
   _cw_check_ptr(a_sock_vec);
   
-  cnd_new(&cnd);
+  cnd_new(&cnd_a);
   mtx_new(&mtx);
 
 #ifdef _LIBSOCK_DBG
   msg_wait.magic = _LIBSOCK_SOCKB_MSG_MAGIC;
 #endif
   msg_wait.type = WAIT;
-  msg_wait.data.wait.cnd = &cnd;
+  msg_wait.data.wait.cnd = &cnd_a;
   msg_wait.data.wait.mtx = &mtx;
   msg_wait.data.wait.fd_array = a_sock_vec;
   msg_wait.data.wait.nfds = a_vec_len;
@@ -304,44 +304,41 @@ sockb_wait(int * a_sock_vec, cw_uint32_t a_vec_len,
 
   if (NULL != a_timeout)
   {
-    /* Set timeout for 1 second. */
+    /* Set timeout. */
     bzero(&tz, sizeof(struct timezone));
     gettimeofday(&now, &tz);
     tout.tv_sec = now.tv_sec + a_timeout->tv_sec;
     tout.tv_nsec = now.tv_usec * 1000 + a_timeout->tv_nsec;
 
-    did_timeout = cnd_timedwait(&cnd, &mtx, &tout);
+    did_timeout = cnd_timedwait(&cnd_a, &mtx, &tout);
   }
   else
   {
     did_timeout = FALSE;
-    cnd_wait(&cnd, &mtx);
+    cnd_wait(&cnd_a, &mtx);
   }
-  mtx_unlock(&mtx);
   
   if (FALSE == did_timeout)
   {
     /* We got something! */
+    mtx_unlock(&mtx);
     retval = FALSE;
   }
   else
   {
     struct cw_sockb_msg_s msg_unwait;
-    cw_cnd_t cnd;
-    cw_mtx_t mtx;
+    cw_cnd_t cnd_b;
 
     /* Timeout.  Now send an UNWAIT message to clean things up inside the sockb
      * thread. */
-    cnd_new(&cnd);
-    mtx_new(&mtx);
-    mtx_lock(&mtx);
+    cnd_new(&cnd_b);
     
 #ifdef _LIBSOCK_DBG
     msg_unwait.magic = _LIBSOCK_SOCKB_MSG_MAGIC;
 #endif
     msg_unwait.type = UNWAIT;
     msg_unwait.data.unwait.old_msg_p = &msg_wait;
-    msg_unwait.data.unwait.cnd = &cnd;
+    msg_unwait.data.unwait.cnd = &cnd_b;
     msg_unwait.data.unwait.mtx = &mtx;
 
     while (0 != mq_put(&g_sockb->messages, (const void *) &msg_unwait))
@@ -352,17 +349,16 @@ sockb_wait(int * a_sock_vec, cw_uint32_t a_vec_len,
       thd_yield();
     }
     sockb_l_wakeup();
-    cnd_wait(&cnd, &mtx);
-    
+    cnd_wait(&cnd_b, &mtx);
     mtx_unlock(&mtx);
-    cnd_delete(&cnd);
-    mtx_delete(&mtx);
+    
+    cnd_delete(&cnd_b);
 
     retval = TRUE;
   }
   
   RETURN:
-  cnd_delete(&cnd);
+  cnd_delete(&cnd_a);
   mtx_delete(&mtx);
   return retval;
 }

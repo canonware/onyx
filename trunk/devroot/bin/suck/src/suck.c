@@ -153,7 +153,10 @@ main(int argc, char ** argv)
   {
     if (NULL != sock_ring)
     {
-      sockb_wait(fd_vec, nfds, NULL);
+      tout.tv_sec = 1;
+      tout.tv_nsec = 0;
+      sockb_wait(fd_vec, nfds, &tout);
+/*        sockb_wait(fd_vec, nfds, NULL); */
       t_ring = sock_ring;
       do
       {
