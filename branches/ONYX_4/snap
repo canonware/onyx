@@ -50,7 +50,7 @@ $COPYRIGHT{"jasone", 0}
 $COPYRIGHT{"jasone", 1}
 = "All rights reserved.";
 $COPYRIGHT{"mordor", 0}
-= "Copyright (C) 2002 Zeljko Vrba <mordor@fly.srk.fer.hr>.";
+= "Copyright (C) 2002 Zeljko Vrba <mordor\@fly.srk.fer.hr>.";
 $COPYRIGHT{"mordor", 1}
 = "All rights reserved.";
 $COPYRIGHT{"nectar", 0}
