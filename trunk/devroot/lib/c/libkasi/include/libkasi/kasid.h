@@ -11,18 +11,19 @@
  ****************************************************************************/
 
 /* Number of op's per chunk. */
-#define _CW_KASIS_CHUNK_NOPS 64
+#define _CW_KASID_CHUNK_NOPS 64
 
 /* Padding for chunks.  Ideally, chunk's should be a power of two in size to
  * improve cache performance. */
-#define _CW_KASIS_CHUNK_PAD 0
+#define _CW_KASID_CHUNK_PAD 0
 
-typedef struct cw_kasis_s cw_kasis_t;
-typedef struct cw_kasis_chunk_spare_s cw_kasis_chunk_spare_t;
-typedef struct cw_kasis_op_s cw_kasis_op_t;
-typedef struct cw_kasis_chunk_s cw_kasis_chunk_t;
+/* Defined in kasio.h, where it is first used. */
+/*  typedef struct cw_kasid_s cw_kasid_t; */
+typedef struct cw_kasid_chunk_spare_s cw_kasid_chunk_spare_t;
+typedef struct cw_kasid_op_s cw_kasid_op_t;
+typedef struct cw_kasid_chunk_s cw_kasid_chunk_t;
 
-struct cw_kasis_s
+struct cw_kasid_s
 {
 #if (defined(_LIBKASI_DBG) || defined(_LIBKASI_DEBUG))
   cw_uint32_t magic_a;
@@ -39,7 +40,7 @@ struct cw_kasis_s
 #endif
 };
 
-struct cw_kasis_chunk_spare_s
+struct cw_kasid_chunk_spare_s
 {
 #if (defined(_LIBKASI_DBG) || defined(_LIBKASI_DEBUG))
   cw_uint32_t magic_a;
@@ -53,15 +54,15 @@ struct cw_kasis_chunk_spare_s
 #endif
 };
 
-struct cw_kasis_op_s
+struct cw_kasid_op_s
 {
   /* The payload.  This must be first in the structure, since pointers are cast
-   * between (cw_kasis_op_t *), (cw_kasis_chunk_spare_t *), and
+   * between (cw_kasid_op_t *), (cw_kasid_chunk_spare_t *), and
    * (cw_kasio_t *). */
   union
   {
     cw_kasio_t op;
-    cw_kasis_chunk_spare_t spare;
+    cw_kasid_chunk_spare_t spare;
   } data;
   
 #if (defined(_LIBKASI_DBG) || defined(_LIBKASI_DEBUG))
@@ -69,7 +70,7 @@ struct cw_kasis_op_s
 #endif
   
   /* chunk this op is contained in. */
-  cw_kasis_chunk_t * chunk;
+  cw_kasid_chunk_t * chunk;
 
   /* Stack linkage. */
   cw_ring_t stack;
@@ -79,60 +80,65 @@ struct cw_kasis_op_s
 #endif
 };
 
-struct cw_kasis_chunk_s
+struct cw_kasid_chunk_s
 {
 #if (defined(_LIBKASI_DBG) || defined(_LIBKASI_DEBUG))
   cw_uint32_t magic_a;
 #endif
 
-  /* kasis this chunk is part of. */
-  cw_kasis_t * kasis;
+  /* kasid this chunk is part of. */
+  cw_kasid_t * kasid;
 
   cw_uint32_t ref_count;
   
-  cw_kasis_chunk_spare_t * spares;
-  cw_kasis_op_t ops[_CW_KASIS_CHUNK_NOPS];
+  cw_kasid_chunk_spare_t * spares;
+  cw_kasid_op_t ops[_CW_KASID_CHUNK_NOPS];
   
 #if (defined(_LIBKASI_DBG) || defined(_LIBKASI_DEBUG))
   cw_uint32_t magic_b;
 #endif
-#if (0 != _CW_KASIS_CHUNK_PAD)
-  cw_uint8_t pad[_CW_KASIS_CHUNK_PAD];
+#if (0 != _CW_KASID_CHUNK_PAD)
+  cw_uint8_t pad[_CW_KASID_CHUNK_PAD];
 #endif
 };
 
-cw_kasis_t *
-kasis_new(cw_kasis_t * a_kasis, cw_pezz_t * a_chunks);
+cw_kasid_t *
+kasid_new(cw_kasid_t * a_kasid, cw_pezz_t * a_chunks);
 
 void
-kasis_delete(cw_kasis_t * a_kasis);
+kasid_delete(cw_kasid_t * a_kasid);
+
+/*  kasid_def */
+/*  kasid_lookup */
+/*  kasid_save */
+/*  kasid_restore */
 
 cw_kasio_t *
-kasis_push(cw_kasis_t * a_kasis);
+kasid_push(cw_kasid_t * a_kasid);
 
 cw_kasio_t *
-kasis_push_anon(cw_kasis_t * a_kasis);
+kasid_push_anon(cw_kasid_t * a_kasid);
 
 cw_bool_t
-kasis_pop(cw_kasis_t * a_kasis, cw_uint32_t a_count);
+kasid_pop(cw_kasid_t * a_kasid, cw_uint32_t a_count);
 
 cw_bool_t
-kasis_roll(cw_kasis_t * a_kasis, cw_sint32_t a_count);
+kasid_roll(cw_kasid_t * a_kasid, cw_sint32_t a_count);
 
 cw_bool_t
-kasis_dup(cw_kasis_t * a_kasis, cw_uint32_t a_count, cw_uint32_t a_index);
+kasid_dup(cw_kasid_t * a_kasid, cw_uint32_t a_count, cw_uint32_t a_index);
 
 cw_uint32_t
-kasis_count(cw_kasis_t * a_kasis);
+kasid_count(cw_kasid_t * a_kasid);
 
 cw_kasio_t *
-kasis_get(cw_kasis_t * a_kasis, cw_uint32_t a_index);
+kasid_get(cw_kasid_t * a_kasid, cw_uint32_t a_index);
 
 cw_kasio_t *
-kasis_get_down(cw_kasis_t * a_kasis, cw_kasio_t * a_kasio);
+kasid_get_down(cw_kasid_t * a_kasid, cw_kasio_t * a_kasio);
 
 cw_kasio_t *
-kasis_get_up(cw_kasis_t * a_kasis, cw_kasio_t * a_kasio);
+kasid_get_up(cw_kasid_t * a_kasid, cw_kasio_t * a_kasio);
 
 cw_bool_t
-kasis_get_index(cw_kasis_t * a_kasis, cw_kasio_t * a_kasio);
+kasid_get_index(cw_kasid_t * a_kasid, cw_kasio_t * a_kasio);

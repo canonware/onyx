@@ -22,7 +22,7 @@
 
 /* Include files that _are_ installed. */
 {
-  local incs = libkasi.h libkasi_incs.h kasi.h kasio.h kasis.h kasit.h;
+  local incs = libkasi.h libkasi_incs.h kasi.h kasid.h kasio.h kasis.h kasit.h;
   incs = [fromto % [srcdir]/lib/c/libkasi/include/libkasi/% [incs]];
   incs = [incs] [objdir]/lib/c/libkasi/include/libkasi/libkasi_defs.h;
 
@@ -38,7 +38,7 @@
 }
 
 /* Source files. */
-LIBKASI_SRCS = kasi.c kasit.c;
+LIBKASI_SRCS = kasi.c kasid.c kasio.c kasis.c kasit.c;
 LIBKASI_SRCS = [fromto % [srcdir]/lib/c/libkasi/src/% [LIBKASI_SRCS]];
 SRCS = [SRCS] [LIBKASI_SRCS];
 
