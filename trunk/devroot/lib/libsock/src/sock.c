@@ -256,7 +256,7 @@ sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port,
 	   * data has already arrived. */
 	  len = sizeof(error);
 	  error = getsockopt(a_sock->sockfd, SOL_SOCKET, SO_ERROR,
-			     &error, &len);
+			     (void *) &error, &len);
 	  if (error < 0)
 	  {
 	    if (dbg_is_registered(cw_g_dbg, "sock_error"))
