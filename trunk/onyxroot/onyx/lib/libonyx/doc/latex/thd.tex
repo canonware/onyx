@@ -23,9 +23,9 @@ allow implmentation of thread suspension/resumption, ``critical sections'', and
 ``single sections''.
 
 The suspendibility of each thread is determined by the arguments passed to
-\cfunc{thd\_new}{}.  The initial thread is always suspendible.  Other threads
+\cfunc{thd\_new}{}.  The initial thread is always suspensible.  Other threads
 that are created via some mechanism other than \cfunc{thd\_new}{} are not
-suspendible.
+suspensible.
 
 Depending on how \libname{libonyx} is built, the additional functionality is
 implemented with the aid of the \cvar{SIGUSR1} and \cvar{SIGUSR2} signals.  As a
@@ -43,16 +43,16 @@ interrupted: \cfunc{read}{}, \cfunc{write}{}, \cfunc{sendto}{},
 \label{thd_new}
 \index{thd_new@\cfunc{thd\_new}{}}
 \citem{\cfunc[cw\_thd\_t *]{thd\_new}{void *(*a\_start\_func)(void *), void
-*a\_arg, bool a\_suspendible}}
+*a\_arg, bool a\_suspensible}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_start\_func: ] Pointer to a start function.
 		\item[a\_arg: ] Argument passed to \cfunc{a\_start\_func}{}.
-		\item[a\_suspendible: ]
+		\item[a\_suspensible: ]
 		\begin{description}\item[]
-			\item[false: ] Not suspendible.
-			\item[true: ] Suspendible.
+			\item[false: ] Not suspensible.
+			\item[true: ] Suspensible.
 		\end{description}
 		\end{description}
 	\item[Output(s): ]
@@ -190,7 +190,7 @@ interrupted: \cfunc{read}{}, \cfunc{write}{}, \cfunc{sendto}{},
 	\item[Output(s): ] None.
 	\item[Exception(s): ] None.
 	\item[Description: ]
-		Enter a critical region where all other suspendible threads must
+		Enter a critical region where all other suspensible threads must
 		be suspended.
 	\end{capilist}
 \label{thd_single_leave}

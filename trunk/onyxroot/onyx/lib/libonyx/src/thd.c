@@ -44,7 +44,7 @@ struct cw_thd_s
 #ifdef CW_MTHREADS
     thread_t mthread;
 #endif
-    bool suspendible:1;
+    bool suspensible:1;
     bool suspended:1; /* Suspended by thd_suspend()? */
     bool singled:1; /* Suspended by thd_single_enter()? */
     qr(cw_thd_t) link;
@@ -201,7 +201,7 @@ thd_l_init(void)
 #ifdef CW_MTHREADS
     s_thd.mthread = mach_thread_self();
 #endif
-    s_thd.suspendible = true;
+    s_thd.suspensible = true;
     s_thd.suspended = false;
     s_thd.singled = false;
     qr_new(&s_thd, link);
@@ -264,7 +264,7 @@ thd_l_shutdown(void)
 }
 
 cw_thd_t *
-thd_new(void *(*a_start_func)(void *), void *a_arg, bool a_suspendible)
+thd_new(void *(*a_start_func)(void *), void *a_arg, bool a_suspensible)
 {
     cw_thd_t *retval;
 #ifdef CW_PTH
@@ -283,7 +283,7 @@ thd_new(void *(*a_start_func)(void *), void *a_arg, bool a_suspendible)
     retval->start_arg = a_arg;
     mtx_new(&retval->mtx);
     mtx_lock(&retval->mtx);
-    retval->suspendible = a_suspendible;
+    retval->suspensible = a_suspensible;
     retval->suspended = false;
     retval->singled = false;
     retval->delete = false;
@@ -293,7 +293,7 @@ thd_new(void *(*a_start_func)(void *), void *a_arg, bool a_suspendible)
     mtx_unlock(&retval->mtx);
 
     /* Thread creation and setting retval->pthread must be atomic with respect
-     * to thread suspension if the new thread is suspendible.  There are
+     * to thread suspension if the new thread is suspensible.  There are
      * multiple ways of trying to write this code, and all of them end up
      * requiring that an interlock be used (to avoid race conditions and/or
      * deadlocks, depending on the approach).  Since an interlock
@@ -651,7 +651,7 @@ thd_p_start_func(void *a_arg)
 
     tsd_set(&s_thd_self_key, (void *) thd);
 
-    if (thd->suspendible)
+    if (thd->suspensible)
     {
 	/* Insert this thread into the thread ring. */
 	mtx_lock(&s_thd_single_lock);

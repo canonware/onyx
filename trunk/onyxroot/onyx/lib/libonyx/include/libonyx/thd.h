@@ -52,7 +52,7 @@ typedef struct cw_thd_s cw_thd_t;
 #define CW_THD_MINSTACK 524288
 
 cw_thd_t *
-thd_new(void *(*a_start_func)(void *), void *a_arg, bool a_suspendible);
+thd_new(void *(*a_start_func)(void *), void *a_arg, bool a_suspensible);
 
 void
 thd_delete(cw_thd_t *a_thd);

@@ -12,9 +12,9 @@
 
 #include "../include/libonyx/libonyx.h"
 
-#define NSUSPENDIBLE 10
+#define NSUSPENSIBLE 10
 #define NSUSPENDERS 10
-#define NTHREADS (NSUSPENDIBLE + NSUSPENDERS)
+#define NTHREADS (NSUSPENSIBLE + NSUSPENDERS)
 #define NITERATIONS 100
 
 uint32_t count = 0;
@@ -44,7 +44,7 @@ main()
     fprintf(stderr, "Test begin\n");
 
     /* Create threads that can be suspended. */
-    for (i = 0; i < NSUSPENDIBLE; i++)
+    for (i = 0; i < NSUSPENSIBLE; i++)
     {
 	thds[i] = thd_new(thread_entry_func, NULL, true);
     }
@@ -54,7 +54,7 @@ main()
 	thds[i] = thd_new(thread_entry_func, NULL, false);
     }
 
-    /* The initial thread is suspendible. */
+    /* The initial thread is suspensible. */
     thread_entry_func(NULL);
 
     for (i = 0; i < NTHREADS; i++)
