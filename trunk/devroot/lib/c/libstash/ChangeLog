@@ -1,3 +1,8 @@
+2000-06-08  Jason Evans  <jasone@canonware.com>
+
+	* src/mem.c: Continue to retry memory allocation (loop) while the
+	OOM handler returns TRUE.
+
 2000-06-03  Jason Evans  <jasone@canonware.com>
 
 	* : Simplify pezz and mem APIs, so that the API is the same
