@@ -2140,6 +2140,7 @@ stilt_p_syntax_error(cw_stilt_t *a_stilt, cw_uint8_t *a_prefix, cw_uint8_t
 
 	stilo_string_new(stilo, a_stilt->stil, a_stilt->locking,
 	    strlen(a_prefix) + a_stilt->index + strlen(a_suffix) + 1);
+	stilo_attrs_set(stilo, STILOA_EXECUTABLE);
 
 	/* Prefix. */
 	stilo_string_set(stilo, 0, a_prefix, strlen(a_prefix));
