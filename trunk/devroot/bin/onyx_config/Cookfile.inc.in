@@ -11,9 +11,6 @@
  *
  ******************************************************************************/
 
-/* Include generated dependency files. */
-#include-cooked [glob @objroot@/bin/onyx_config/src/"*.d_*"]
-
 /*
  * File lists.
  */
