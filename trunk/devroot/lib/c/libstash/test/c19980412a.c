@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 86 $
- * $Date: 1998-06-23 17:40:29 -0700 (Tue, 23 Jun 1998) $
+ * $Revision: 106 $
+ * $Date: 1998-06-29 21:50:43 -0700 (Mon, 29 Jun 1998) $
  *
  * <<< Description >>>
  *
@@ -24,18 +24,30 @@
 #define NUM_STRINGS 100
 #define NUM_THREADS 20
 
+struct foo
+{
+  cw_oh_t * hash_o;
+  cw_uint32_t thread_num;
+};
+
+
 void *
 insert_items(void * arg)
 {
-  int i;
+  cw_uint32_t i, thread_num;
   char * string;
-  cw_oh_t * hash_o = (cw_oh_t *) arg;
+  cw_oh_t * hash_o;
+  struct foo * bar = (struct foo *) arg;
+
+  hash_o = (cw_oh_t *) bar->hash_o;
+  thread_num = (cw_uint32_t) bar->thread_num;
 
   for (i = 0; i < NUM_STRINGS; i++)
   {
     string = (char *) _cw_malloc(20);
-    sprintf(string, "String %d", i);
-    oh_item_insert(hash_o, (void *) string, (void *) string);
+    sprintf(string, "%d String %d", thread_num, i);
+    _cw_assert(oh_item_insert(hash_o, (void *) string, (void *) string)
+	       == FALSE);
   }
   return NULL;
 }
@@ -45,14 +57,19 @@ main()
 {
   cw_oh_t * hash_o;
   cw_thd_t threads[NUM_THREADS];
-  int i;
+  cw_uint32_t i;
+  struct foo * bar;
 
   glob_new();
-  hash_o = oh_new(NULL, TRUE, FALSE);
+  hash_o = oh_new(NULL, TRUE);
 
   for (i = 0; i < NUM_THREADS; i++)
   {
-    thd_new(&threads[i], insert_items, (void *) hash_o);
+    bar = (struct foo *) _cw_malloc(sizeof(struct foo));
+    bar->hash_o = hash_o;
+    bar->thread_num = i;
+    
+    thd_new(&threads[i], insert_items, (void *) bar);
   }
 
   /* Join on threads, then delete them. */
