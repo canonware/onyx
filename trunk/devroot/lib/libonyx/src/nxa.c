@@ -286,7 +286,8 @@ nxa_threshold_set(cw_nxa_t *a_nxa, cw_nxoi_t a_threshold)
 
 	mtx_lock(&a_nxa->lock);
 	a_nxa->gcdict_threshold = a_threshold;
-	if (a_threshold <= a_nxa->gcdict_new) {
+	if (a_threshold > 0 && a_threshold <= a_nxa->gcdict_new &&
+	    a_nxa->gcdict_active) {
 		mtx_lock(&a_nxa->interlock);
 		a_nxa->prev_new = 0;
 		mtx_unlock(&a_nxa->lock);
@@ -376,7 +377,7 @@ nxa_l_gc_register(cw_nxa_t *a_nxa, cw_nxoe_t *a_nxoe)
 	a_nxa->gcdict_sum[0]++;
 
 	/* Trigger a collection if the threshold was reached. */
-	if (a_nxa->gcdict_new == a_nxa->gcdict_threshold &&
+	if (a_nxa->gcdict_new >= a_nxa->gcdict_threshold &&
 	    a_nxa->gcdict_active && a_nxa->gcdict_threshold != 0) {
 		mtx_lock(&a_nxa->interlock);
 		a_nxa->prev_new = 0;
