@@ -18,7 +18,7 @@
 
 mutex
 iterations {
-	dup stack exch spush //thread_entry thread exch
+	dup stack dup 3 2 roll spush /thread_entry load thread exch
 } repeat
 pop
 

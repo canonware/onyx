@@ -208,11 +208,11 @@ systemdict begin
 			`('
 
 			% %stack %depth %accum
-			2 index scount exch pop 1 gt {
+			2 index scount 1 gt {
 				% %stack %depth %accum
-				2 index scount exch pop 1 sub -1 1 {
+				2 index scount 1 sub -1 1 {
 					% %stack %depth %accum %i
-					3 index exch sindex spop exch pop
+					3 index dup 3 2 roll sindex spop
 					2 index 1 sub
 					% %stack %depth %accum %el %rdepth
 					1 index type sprintsdict exch get eval
@@ -223,8 +223,8 @@ systemdict begin
 			} if
 			% %stack %depth %accum
 
-			2 index scount exch pop 0 gt {
-				2 index sdup spop exch pop
+			2 index scount 0 gt {
+				2 index dup sdup spop
 				2 index 1 sub
 				% %stack %depth %accum %el %rdepth
 				1 index type sprintsdict exch get eval
@@ -649,21 +649,22 @@ systemdict begin
 	% Set errorname to the argument passed in.
 	dup /errorname exch cvlit def
 
-	% ostack.  Get rid of /errorname in the snapshot.
-	ostack spop pop /ostack exch def
+	% ostack.  Get rid of /errorname in the snapshot.  Ordering is important
+	% to keep from polluting the snapshot.
+	ostack dup spop pop /ostack exch def
 
 	% dstack.  Don't include the top element, which is the copy of
 	% currenterror that we pushed.
-	/dstack dstack spop pop def
+	/dstack dstack dup spop pop def
 
 	% estack.  Remove this procedure from the snapshot.
-	estack spop pop /estack exch def
+	/estack estack dup spop pop def
 
 	% istack.  Remove this procedure from the snapshot.
-	istack spop pop /istack exch def
+	/istack istack dup spop pop def
 
 	% Push the offending object onto ostack.
-	/estack load sdup spop exch pop
+	/estack load dup sdup spop
 
 	end % currenterror.
 

@@ -3223,33 +3223,33 @@ fino objects & {\bf \htmlref{)}{systemdict:sym_rp}} & stack & Create a stack. \\
 \hline
 -- & {\bf \htmlref{stack}{systemdict:stack}} & stack & Create a stack. \\
 \hline
-stack object & {\bf \htmlref{spush}{systemdict:spush}} & stack & Push an object
+stack object & {\bf \htmlref{spush}{systemdict:spush}} & -- & Push an object
 onto a stack. \\
 \hline
-stack & {\bf \htmlref{scount}{systemdict:scount}} & stack count & Get the number
-of objects on a stack. \\
+stack & {\bf \htmlref{scount}{systemdict:scount}} & count & Get the number of
+objects on a stack. \\
 \hline
-stack & {\bf \htmlref{scounttomark}{systemdict:scounttomark}} & stack count &
-Get the depth of the topmost mark on stack. \\
+stack & {\bf \htmlref{scounttomark}{systemdict:scounttomark}} & count & Get the
+depth of the topmost mark on stack. \\
 \hline
-stack & {\bf \htmlref{sdup}{systemdict:sdup}} & stack & Duplicate an object. \\
+stack & {\bf \htmlref{sdup}{systemdict:sdup}} & -- & Duplicate an object. \\
 \hline
-stack index & {\bf \htmlref{sindex}{systemdict:sindex}} & stack & Duplicate
-object in a stack at a given index. \\
+stack index & {\bf \htmlref{sindex}{systemdict:sindex}} & -- & Duplicate object
+in a stack at a given index. \\
 \hline
-stack & {\bf \htmlref{sexch}{systemdict:sexch}} & stack & Exchange top objects
+stack & {\bf \htmlref{sexch}{systemdict:sexch}} & -- & Exchange top objects on
+stack. \\
+\hline
+stack count amount & {\bf \htmlref{sroll}{systemdict:sroll}} & -- & Roll objects
 on stack. \\
 \hline
-stack count amount & {\bf \htmlref{sroll}{systemdict:sroll}} & stack & Roll
-objects on stack. \\
+stack & {\bf \htmlref{spop}{systemdict:spop}} & object & Pop an object off
+stack. \\
 \hline
-stack & {\bf \htmlref{spop}{systemdict:spop}} & stack object & Pop an object off
-a stack. \\
+stack & {\bf \htmlref{sclear}{systemdict:sclear}} & -- & Remove all objects on
+stack. \\
 \hline
-stack & {\bf \htmlref{sclear}{systemdict:sclear}} & stack & Remove all objects
-on stack. \\
-\hline
-stack & {\bf \htmlref{scleartomark}{systemdict:scleartomark}} & stack & Remove
+stack & {\bf \htmlref{scleartomark}{systemdict:scleartomark}} & -- & Remove
 objects from stack down through topmost mark. \\
 \hline
 (a) (b) & {\bf \htmlref{catenate}{systemdict:catenate}} & (a b) & Catenate two
@@ -7547,18 +7547,14 @@ onyx:4>
 	\end{description}
 \label{systemdict:sclear}
 \index{sclear@\onyxop{}{sclear}{}}
-\item[{\onyxop{stack}{sclear}{stack}}: ]
+\item[{\onyxop{stack}{sclear}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[stack: ]
 			A stack object.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[stack: ]
-			The same stack that was passed in.
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -7568,27 +7564,21 @@ onyx:4>
 		Remove all objects on \oparg{stack}.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> (1 2 3 4) pstack
-(1 2 3 4)
-onyx:1> sclear pstack
+onyx:0> (1 2 3 4) dup sclear pstack
 ()
 onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:scleartomark}
 \index{scleartomark@\onyxop{}{scleartomark}{}}
-\item[{\onyxop{stack}{scleartomark}{stack}}: ]
+\item[{\onyxop{stack}{scleartomark}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[stack: ]
 			A stack object.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[stack: ]
-			The same stack that was passed in.
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -7600,14 +7590,14 @@ onyx:1>
 		topmost mark.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> (3 mark 1 0) scleartomark pstack
+onyx:0> (3 mark 1 0) dup scleartomark pstack
 (3)
 onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:scount}
 \index{scount@\onyxop{}{scount}{}}
-\item[{\onyxop{stack}{scount}{stack count}}: ]
+\item[{\onyxop{stack}{scount}{count}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -7616,8 +7606,6 @@ onyx:1>
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[stack: ]
-			The same stack that was passed in.
 		\item[count: ]
 			The number of objects on \oparg{stack}.
 		\end{description}
@@ -7630,16 +7618,14 @@ onyx:1>
 		Get the number of objects on \oparg{stack}.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> (1 2) scount
-onyx:2> pstack
+onyx:0> (1 2) scount 1 sprint
 2
-(1 2)
-onyx:2>
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:scounttomark}
 \index{scounttomark@\onyxop{}{scounttomark}{}}
-\item[{\onyxop{stack}{scounttomark}{stack count}}: ]
+\item[{\onyxop{stack}{scounttomark}{count}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -7648,8 +7634,6 @@ onyx:2>
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[stack: ]
-			The same stack that was passed in.
 		\item[count: ]
 			The depth of the topmost mark on \oparg{stack}.
 		\end{description}
@@ -7663,26 +7647,21 @@ onyx:2>
 		Get the depth of the topmost mark on \oparg{stack}.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> (3 mark 1 0) scounttomark pstack
+onyx:0> (3 mark 1 0) scounttomark 1 sprint
 2
-(3 -mark- 1 0)
-onyx:2>
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sdup}
 \index{sdup@\onyxop{}{sdup}{}}
-\item[{\onyxop{stack}{sdup}{stack}}: ]
+\item[{\onyxop{stack}{sdup}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[stack: ]
 			A stack object.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[stack: ]
-			The same stack that was passed in.
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -7693,10 +7672,9 @@ onyx:2>
 		\oparg{stack}.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> (1) sdup
-onyx:1> pstack
+onyx:0> (1) dup sdup 1 sprint
 (1 1)
-onyx:1>
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:seek}
@@ -7944,18 +7922,14 @@ onyx:0>
 	\end{description}
 \label{systemdict:sexch}
 \index{sexch@\onyxop{}{sexch}{}}
-\item[{\onyxop{stack}{sexch}{stack}}: ]
+\item[{\onyxop{stack}{sexch}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[stack: ]
 			A stack object.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[stack: ]
-			The same stack that was passed in.
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -7965,7 +7939,7 @@ onyx:0>
 		Exchange the top two objects on \oparg{stack}.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> (1 2 3) sexch pstack
+onyx:0> (1 2 3) dup sexch pstack
 (1 3 2)
 onyx:1>
 		\end{verbatim}
@@ -8034,7 +8008,7 @@ onyx:0>
 	\end{description}
 \label{systemdict:sindex}
 \index{sindex@\onyxop{}{sindex}{}}
-\item[{\onyxop{stack index}{sindex}{stack}}: ]
+\item[{\onyxop{stack index}{sindex}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -8044,11 +8018,7 @@ onyx:0>
 			Depth (count starts at 0) of the object to duplicate in
 			\oparg{stack}.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[stack: ]
-			The same stack that was passed in.
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
@@ -8060,15 +8030,15 @@ onyx:0>
 		\oparg{index} and push it onto \oparg{stack}.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> (3 2 1 0) 2 sindex
-onyx:1> pstack
+onyx:0> (3 2 1 0) dup 2 sindex
+onyx:1> 1 sprint
 (3 2 1 0 2)
-onyx:1>
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:spop}
 \index{spop@\onyxop{}{spop}{}}
-\item[{\onyxop{stack}{spop}{stack object}}: ]
+\item[{\onyxop{stack}{spop}{object}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -8077,8 +8047,6 @@ onyx:1>
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[stack: ]
-			The same stack that was passed in.
 		\item[object: ]
 			The object that was popped off of \oparg{stack}.
 		\end{description}
@@ -8091,7 +8059,7 @@ onyx:1>
 		Pop an object off of \oparg{stack} and push it onto ostack.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> (1 2) spop
+onyx:0> (1 2) dup spop
 onyx:2> pstack
 2
 (1)
@@ -8188,7 +8156,7 @@ onyx:0>
 	\end{description}
 \label{systemdict:spush}
 \index{spush@\onyxop{}{spush}{}}
-\item[{\onyxop{stack object}{spush}{stack}}: ]
+\item[{\onyxop{stack object}{spush}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -8197,11 +8165,7 @@ onyx:0>
 		\item[object: ]
 			An object.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[stack: ]
-			The same stack that was passed in.
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -8211,7 +8175,7 @@ onyx:0>
 		Push \oparg{object} onto \oparg{stack}.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> () 1 spush
+onyx:0> () dup 1 spush
 onyx:1> pstack
 (1)
 onyx:1>
@@ -8243,7 +8207,7 @@ onyx:0>
 	\end{description}
 \label{systemdict:sroll}
 \index{sroll@\onyxop{}{sroll}{}}
-\item[{\onyxop{stack count amount}{sroll}{stack}}: ]
+\item[{\onyxop{stack count amount}{sroll}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -8255,11 +8219,7 @@ onyx:0>
 			Amount by which to roll.  If positive, roll
 			upward.  If negative, roll downward.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[stack: ]
-			The same stack that was passed in.
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
@@ -8273,13 +8233,12 @@ onyx:0>
 		indicates a downward roll.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> (3 2 1 0) pstack
-(3 2 1 0)
-onyx:1> 3 1 sroll pstack
+onyx:0> (3 2 1 0)
+onyx:1> dup 3 1 sroll pstack
 (3 0 2 1)
-onyx:1> 3 -2 sroll pstack
+onyx:1> dup 3 -2 sroll pstack
 (3 1 0 2)
-onyx:1> 4 0 sroll pstack
+onyx:1> dup 4 0 sroll pstack
 (3 1 0 2)
 onyx:1>
 		\end{verbatim}

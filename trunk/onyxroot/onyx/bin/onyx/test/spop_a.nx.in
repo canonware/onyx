@@ -10,6 +10,6 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-(1) spop pstack clear
-(1 2) spop pstack clear
-(1 2 3) spop pstack clear
+(1) dup spop pstack clear
+(1 2) dup spop pstack clear
+(1 2 3) dup spop pstack clear

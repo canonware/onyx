@@ -11,7 +11,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 (mark 1 2 mark 3 4 5 mark mark) pstack
-scleartomark pstack
-scleartomark pstack
-scleartomark pstack
-scleartomark pstack
+dup scleartomark pstack
+dup scleartomark pstack
+dup scleartomark pstack
+dup scleartomark pstack

@@ -25,6 +25,7 @@ estack/istack trace (0..2):
 	--cvlit--
 	--def--
 	--ostack--
+	--dup--
 	--spop--
 	--pop--
 	/ostack
@@ -32,27 +33,27 @@ estack/istack trace (0..2):
 	--def--
 	/dstack
 	--dstack--
+	--dup--
 	--spop--
 	--pop--
 	--def--
-	--estack--
-	--spop--
-	--pop--
 	/estack
-	--exch--
-	--def--
-	--istack--
+	--estack--
+	--dup--
 	--spop--
 	--pop--
+	--def--
 	/istack
-	--exch--
+	--istack--
+	--dup--
+	--spop--
+	--pop--
 	--def--
 	/estack
 	--load--
+	--dup--
 	--sdup--
 	--spop--
-	--exch--
-	--pop--
 	--end--
 	--exch--
 	/errordict

@@ -3960,6 +3960,8 @@ systemdict_sclear(cw_nxo_t *a_thread)
 	count = nxo_stack_count(stack);
 	if (count > 0)
 		nxo_stack_npop(stack, count);
+
+	nxo_stack_pop(ostack);
 }
 
 void
@@ -3987,22 +3989,23 @@ systemdict_scleartomark(cw_nxo_t *a_thread)
 	}
 
 	nxo_stack_npop(stack, i + 1);
+
+	nxo_stack_pop(ostack);
 }
 
 void
 systemdict_scount(cw_nxo_t *a_thread)
 {
-	cw_nxo_t	*ostack, *stack, *nxo;
+	cw_nxo_t	*ostack, *nxo;
 
 	ostack = nxo_thread_ostack_get(a_thread);
-	NXO_STACK_GET(stack, ostack, a_thread);
-	if (nxo_type_get(stack) != NXOT_STACK) {
+	NXO_STACK_GET(nxo, ostack, a_thread);
+	if (nxo_type_get(nxo) != NXOT_STACK) {
 		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
 		return;
 	}
 
-	nxo = nxo_stack_push(ostack);
-	nxo_integer_new(nxo, nxo_stack_count(stack));
+	nxo_integer_new(nxo, nxo_stack_count(nxo));
 }
 
 void
@@ -4029,8 +4032,7 @@ systemdict_scounttomark(cw_nxo_t *a_thread)
 		return;
 	}
 
-	nxo = nxo_stack_push(ostack);
-	nxo_integer_new(nxo, i);
+	nxo_integer_new(stack, i);
 }
 
 void
@@ -4048,6 +4050,8 @@ systemdict_sdup(cw_nxo_t *a_thread)
 	NXO_STACK_GET(orig, stack, a_thread);
 	dup = nxo_stack_push(stack);
 	nxo_dup(dup, orig);
+
+	nxo_stack_pop(ostack);
 }
 
 void
@@ -4268,6 +4272,8 @@ systemdict_sexch(cw_nxo_t *a_thread)
 
 	if (nxo_stack_exch(stack)) 
 		nxo_thread_error(a_thread, NXO_THREADE_STACKUNDERFLOW);
+
+	nxo_stack_pop(ostack);
 }
 
 void
@@ -4350,7 +4356,7 @@ systemdict_sindex(cw_nxo_t *a_thread)
 	nxo = nxo_stack_push(stack);
 	nxo_dup(nxo, orig);
 
-	nxo_stack_pop(ostack);
+	nxo_stack_npop(ostack, 2);
 }
 
 void
@@ -4366,10 +4372,11 @@ systemdict_spop(cw_nxo_t *a_thread)
 	}
 
 	NXO_STACK_GET(snxo, stack, a_thread);
-	onxo = nxo_stack_push(ostack);
+	onxo = nxo_stack_under_push(ostack, stack);
 	nxo_dup(onxo, snxo);
 
-	NXO_STACK_POP(stack, a_thread);
+	nxo_stack_pop(stack);
+	nxo_stack_pop(ostack);
 }
 
 void
@@ -4387,7 +4394,7 @@ systemdict_spush(cw_nxo_t *a_thread)
 
 	nnxo = nxo_stack_push(stack);
 	nxo_dup(nnxo, nxo);
-	nxo_stack_pop(ostack);
+	nxo_stack_npop(ostack, 2);
 }
 
 void
@@ -4446,7 +4453,7 @@ systemdict_sroll(cw_nxo_t *a_thread)
 		return;
 	}
 
-	nxo_stack_npop(ostack, 2);
+	nxo_stack_npop(ostack, 3);
 }
 
 void

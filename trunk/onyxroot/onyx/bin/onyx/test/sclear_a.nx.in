@@ -11,6 +11,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 () pstack
-sclear pstack clear
+dup sclear pstack clear
 (1 2 3) pstack
-sclear pstack clear
+dup sclear pstack clear

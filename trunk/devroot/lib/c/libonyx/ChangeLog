@@ -1,3 +1,9 @@
+2001-07-30  Jason Evans  <jasone@canonware.com>
+
+	* src/systemdict.c: Change the API of the following operators to
+	not leave the input stack on ostack: spush, scount, scounttomark,
+	sdup, sindex, sexch, sroll, spop, sclear, and scleartomark.
+
 2001-07-29  Jason Evans  <jasone@canonware.com>
 
 	* src/nxo_thread.c (nxoe_p_thread_name_accept): When the result of

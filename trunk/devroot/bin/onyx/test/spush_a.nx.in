@@ -10,18 +10,29 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+`Test begin\n' print
+
 ()
-true spush
-[] spush
-condition spush
-<> spush
-( spush
-1 spush
-mark spush
-mutex spush
-/foo spush
-null spush
-//pop spush
-() spush
-`hi' spush
+
+[
+	`true'
+	`[]'
+	`condition'
+	`<>'
+	`('
+	`1'
+	`mark'
+	`mutex'
+	`/foo'
+	`null'
+	`//pop'
+	`()'
+	``hi''
+]{
+	cvx eval
+	1 index exch spush
+} foreach
+
 pstack
+
+`Test end\n' print
