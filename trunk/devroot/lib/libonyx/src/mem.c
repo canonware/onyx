@@ -166,6 +166,10 @@ mem_malloc_e(cw_mem_t *a_mem, size_t a_size, const char *a_filename,
     retval = cw_malloc(a_size);
     if (retval == NULL)
     {
+#ifdef CW_MEM_ERROR
+	fprintf(stderr, "%s(%p): %p <-- malloc(%u) at %s:%u\n",
+		__FUNCTION__, a_mem, retval, a_size, a_filename, a_line_num);
+#endif
 	xep_throw(CW_ONYXX_OOM);
     }
 
@@ -239,6 +243,11 @@ mem_calloc_e(cw_mem_t *a_mem, size_t a_number, size_t a_size,
     retval = cw_calloc(a_number, a_size);
     if (retval == NULL)
     {
+#ifdef CW_MEM_ERROR
+	fprintf(stderr, "%s(%p): %p <-- calloc(%u, %u) at %s:%u\n",
+		__FUNCTION__, a_mem, retval, a_number, a_size,
+		a_filename, a_line_num);
+#endif
 	xep_throw(CW_ONYXX_OOM);
     }
 
@@ -317,6 +326,11 @@ mem_realloc_e(cw_mem_t *a_mem, void *a_ptr, size_t a_size, size_t a_old_size,
     retval = cw_realloc(a_ptr, a_size);
     if (retval == NULL)
     {
+#ifdef CW_MEM_ERROR
+	fprintf(stderr, "%s(%p): %p <-- realloc(%p, %u) at %s:%u\n",
+		__FUNCTION__, a_mem, retval, a_ptr, a_size,
+		a_filename, a_line_num);
+#endif
 	xep_throw(CW_ONYXX_OOM);
     }
 
