@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 105 $
- * $Date: 1998-06-29 21:49:55 -0700 (Mon, 29 Jun 1998) $
+ * $Revision: 110 $
+ * $Date: 1998-06-30 00:08:06 -0700 (Tue, 30 Jun 1998) $
  *
  * <<< Description >>>
  *
@@ -20,7 +20,7 @@
 #define _INC_GLOB_H_
 #include <config.h>
 
-#define NUM_STRINGS 2000
+#define NUM_STRINGS 5000
 
 int
 main()
