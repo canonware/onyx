@@ -29,6 +29,23 @@ AC_DEFUN(SQRL_USE_LIBSTASH_R,
       AC_MSG_ERROR(Cannot find the stash_r$1 library)))
 ])
 
+
+AC_DEFUN(SQRL_DISABLE_SHARED,
+[
+dnl Comment out target dependencies on shared libraries if --disable-shared
+dnl is defined.
+AC_ARG_ENABLE(shared, [  --disable-shared        Do not build shared libraries],
+if test "x$enable_shared" = "xno" ; then
+  disable_shared="[#]"
+else
+  disable_shared=""
+fi
+,
+disable_shared=""
+)
+AC_SUBST(disable_shared)
+])
+
 AC_DEFUN(SQRL_SET_MAKEFILE,
 [
 AC_ARG_WITH(gnu-make, [  --with-gnu-make         Always generate a Makefile compatiple with gnu make],
