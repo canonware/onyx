@@ -25,41 +25,29 @@ tmpfile_a flushfile
 tmpfile_a 3 seek
 
 [
-    <tmpfile_a <$POLLOUT false $POLLWRNORM false>>
+    <tmpfile_a <$POLLOUT false>>
     <
-	tmpfile_a <$POLLOUT false $POLLWRNORM false>
-	tmpfile_b <$POLLOUT false $POLLWRNORM false>
+	tmpfile_a <$POLLOUT false>
+	tmpfile_b <$POLLOUT false>
     >
-    <tmpfile_a <$POLLOUT false $POLLWRNORM false>>
-    <tmpfile_a <$POLLOUT true $POLLWRNORM true $garbage `ignore me'>>
+    <tmpfile_a <$POLLOUT false>>
+    <tmpfile_a <$POLLOUT true $garbage `ignore me'>>
     <
 	tmpfile_a <
 	    $POLLIN false
-	    $POLLRDNORM false
-	    $POLLOUT false
-	    $POLLWRNORM false
 	>
     >
     <
 	tmpfile_a <
 	    $POLLIN true
-	    $POLLRDNORM true
-	    $POLLOUT true
-	    $POLLWRNORM true
 	>
     >
     <
 	tmpfile_a <
 	    $POLLIN false
-	    $POLLRDNORM false
-	    $POLLOUT false
-	    $POLLWRNORM false
 	>
 	tmpfile_b <
 	    $POLLIN false
-	    $POLLRDNORM false
-	    $POLLOUT false
-	    $POLLWRNORM false
 	>
     >
 ]{
