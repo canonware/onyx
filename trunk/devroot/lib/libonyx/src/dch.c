@@ -322,37 +322,3 @@ dch_search(cw_dch_t *a_dch, const void *a_key, void **r_data)
 
     return ch_search(a_dch->ch, a_key, r_data);
 }
-
-#if (0) /* XXX */
-cw_bool_t
-dch_get_iterate(cw_dch_t *a_dch, void **r_key, void **r_data)
-{
-    cw_check_ptr(a_dch);
-    cw_dassert(a_dch->magic == CW_DCH_MAGIC);
-
-    return ch_get_iterate(a_dch->ch, r_key, r_data);
-}
-
-cw_bool_t
-dch_remove_iterate(cw_dch_t *a_dch, void **r_key, void **r_data,
-		   cw_chi_t **r_chi)
-{
-    cw_bool_t retval;
-
-    cw_check_ptr(a_dch);
-    cw_dassert(a_dch->magic == CW_DCH_MAGIC);
-
-    if (a_dch->shrinkable)
-    {
-	dch_p_shrink(a_dch);
-    }
-    if (ch_remove_iterate(a_dch->ch, r_key, r_data, r_chi))
-    {
-	retval = TRUE;
-	goto RETURN;
-    }
-    retval = FALSE;
-    RETURN:
-    return retval;
-}
-#endif
