@@ -3180,9 +3180,9 @@ objects down one. \\
 region count amount & {\bf \htmlref{roll}{systemdict:roll}} & rolled & Roll
 \oparg{count} objects up by \oparg{amount}. \\
 \hline
-any & {\bf \htmlref{pop}{systemdict:pop}} & -- & Remove object. \\
+object & {\bf \htmlref{pop}{systemdict:pop}} & -- & Remove object. \\
 \hline
-any \dots & {\bf \htmlref{bpop}{systemdict:bpop}} & \dots & Remove bottom
+object \dots & {\bf \htmlref{bpop}{systemdict:bpop}} & \dots & Remove bottom
 object. \\
 \hline
 objects count & {\bf \htmlref{npop}{systemdict:npop}} & -- & Remove count
@@ -4339,24 +4339,34 @@ onyx:0>
 	\end{description}
 \label{systemdict:bdup}
 \index{bdup@\onyxop{}{bdup}{}}
-\item[{\onyxop{OPARGS}{bdup}{OPOUTS}}: ]
+\item[{\onyxop{object \dots}{bdup}{object \dots object}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[object: ]
+			An object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[object: ]
+			An object.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
-		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Create a duplicate of the bottom object on ostack and put it on
+		top of ostack.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> 1 2 3
+onyx:3> bdup pstack
+1
+3
+2
+1
+onyx:4>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:begin}
@@ -4446,46 +4456,53 @@ onyx:1>
 	\end{description}
 \label{systemdict:bpop}
 \index{bpop@\onyxop{}{bpop}{}}
-\item[{\onyxop{OPARGS}{bpop}{OPOUTS}}: ]
+\item[{\onyxop{object \dots}{bpop}{\dots}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[object: ]
+			An object.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
-		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Remove the bottom object from ostack and discard it.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> 1 2
+onyx:2> bpop pstack
+2
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:bpush}
 \index{bpush@\onyxop{}{bpush}{}}
-\item[{\onyxop{OPARGS}{bpush}{OPOUTS}}: ]
+\item[{\onyxop{\dots object}{bpush}{object \dots}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[object: ]
+			An object.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
-		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Push \oparg{object} onto the bottom of ostack.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> 1 2 3
+onyx:3> 0 bpush pstack
+3
+2
+1
+0
+onyx:4>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:broadcast}
@@ -4791,8 +4808,6 @@ onyx:0>
 		\begin{description}\item[]
 		\item[mark: ]
 			A mark object.
-		\item[\dots: ]
-			Zero or more non-mark objects.
 		\end{description}
 	\item[Output(s): ] None.
 	\item[Errors(s): ]
@@ -5031,15 +5046,11 @@ onyx:0>
 		\begin{description}\item[]
 		\item[mark: ]
 			A mark object.
-		\item[\dots: ]
-			Zero or more non-mark objects.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[mark: ]
 			The same mark that was passed in.
-		\item[\dots: ]
-			The same non-mark objects that were passed in.
 		\item[count: ]
 			The depth of \oparg{mark} on ostack.
 		\end{description}
@@ -6572,46 +6583,69 @@ onyx:0>
 	\end{description}
 \label{systemdict:ibdup}
 \index{ibdup@\onyxop{}{ibdup}{}}
-\item[{\onyxop{OPARGS}{ibdup}{OPOUTS}}: ]
+\item[{\onyxop{\dots object \dots index}{ibdup}{\dots object \dots object}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[object: ]
+			An object.
+		\item[index: ]
+			Offset from bottom of ostack, counting from 0.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[object: ]
+			An object.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
+		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Create a duplicate of the \oparg{object} on ostack that is at
+		offset \oparg{index} from the bottom of ostack.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:4> 2 ibdup pstack
+2
+3
+2
+1
+0
+onyx:5>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:ibpop}
 \index{ibpop@\onyxop{}{ibpop}{}}
-\item[{\onyxop{OPARGS}{ibpop}{OPOUTS}}: ]
+\item[{\onyxop{\dots object \dots index}{ibpop}{\dots \dots}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[object: ]
+			An object.
+		\item[index: ]
+			Offset from bottom of ostack, counting from 0.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
+		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Remove the \oparg{object} from ostack that is at offset
+		\oparg{index} from the bottom of ostack.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> 0 1 2 3
+onyx:4> 2 ibpop pstack
+3
+1
+0
+onyx:3>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:idiv}
@@ -6663,18 +6697,14 @@ onyx:3>
 		\begin{description}\item[]
 		\item[object: ]
 			An object.
-		\item[\dots: ]
-			\oparg{index} objects.
 		\item[index: ]
-			Depth (count starts at 0, not counting \oparg{index}) of
-			the object to duplicate on ostack.
+			Offset from top of ostack, counting from 0, not counting
+			\oparg{index}), of the object to duplicate on ostack.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[object: ]
 			The same object that was passed in.
-		\item[\dots: ]
-			The same \oparg{index} objects that were passed in.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
@@ -6683,7 +6713,7 @@ onyx:3>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Create a duplicate of the object on on ostack at depth
+		Create a duplicate of the \oparg{object} on ostack at
 		\oparg{index}.
 	\item[Example(s): ]\begin{verbatim}
 
@@ -6788,24 +6818,31 @@ onyx:0>
 	\end{description}
 \label{systemdict:ipop}
 \index{ipop@\onyxop{}{ipop}{}}
-\item[{\onyxop{OPARGS}{ipop}{OPOUTS}}: ]
+\item[{\onyxop{object \dots index}{ipop}{\dots}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[object: ]
+			An object.
+		\item[index: ]
+			Offset from top of ostack, counting from 0, not counting
+			\oparg{index}), of the object to remove from ostack.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Remove the \oparg{object} at \oparg{index} from ostack.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> 2 1 0 
+onyx:3> 1 ipop pstack
+0
+2
+onyx:2>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:istack}
@@ -7513,24 +7550,30 @@ onyx:0>
 	\end{description}
 \label{systemdict:nbpop}
 \index{nbpop@\onyxop{}{nbpop}{}}
-\item[{\onyxop{OPARGS}{nbpop}{OPOUTS}}: ]
+\item[{\onyxop{objects \dots count}{nbpop}{\dots}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[objects: ]
+			Zero or more objects.
+		\item[count: ]
+			Number of \oparg{objects} to pop.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
+		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Remove the bottom \oparg{count} \oparg{objects} from ostack and
+		discard them.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> `a' `b' `c' 2 nbpop pstack
+`c'
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:ndn}
@@ -7693,24 +7736,33 @@ onyx:0>
 	\end{description}
 \label{systemdict:nip}
 \index{nip@\onyxop{}{nip}{}}
-\item[{\onyxop{OPARGS}{nip}{OPOUTS}}: ]
+\item[{\onyxop{a b}{nip}{b}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a: ]
+			An object.
+		\item[b: ]
+			An object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[b: ]
+			An object.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
-		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Remove the second to top object from ostack.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> `a' `b' `c'
+onyx:3> nip pstack
+`c'
+`a'
+onyx:2>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:not}
@@ -7766,7 +7818,7 @@ onyx:0>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Remove the top \oparg{count} \oparg{objects} off ostack and
+		Remove the top \oparg{count} \oparg{objects} from ostack and
 		discard them.
 	\item[Example(s): ]\begin{verbatim}
 
@@ -8125,12 +8177,12 @@ onyx:0>
 	\end{description}
 \label{systemdict:pop}
 \index{pop@\onyxop{}{pop}{}}
-\item[{\onyxop{any}{pop}{--}}: ]
+\item[{\onyxop{object}{pop}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[any: ]
-			Any object.
+		\item[object: ]
+			An object.
 		\end{description}
 	\item[Output(s): ] None.
 	\item[Errors(s): ]
@@ -8138,7 +8190,7 @@ onyx:0>
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
 	\item[Description: ]
-		Remove the top object off ostack and discard it.
+		Remove the top object from ostack and discard it.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> 1 2
