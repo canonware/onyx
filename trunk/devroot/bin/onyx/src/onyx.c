@@ -368,7 +368,7 @@ nx_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str)
 				if (arg->buffer == NULL) {
 					/* Initialize the buffer. */
 					arg->buffer = (cw_uint8_t
-					    *)cw_malloc(_BUFFER_SIZE);
+					    *)cw_malloc(CW_BUFFER_SIZE);
 					arg->buffer_size = CW_BUFFER_SIZE;
 					arg->buffer_count = 0;
 				}
