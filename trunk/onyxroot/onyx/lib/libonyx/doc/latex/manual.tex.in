@@ -196,7 +196,7 @@ API is structured such that it is invalid to do such a thing, for this reason.}
 constraint is placed on the code in order to avoid leaking space on tstack.  In
 debug versions of \libname{libonyx}, this is enforced by assertions.  The one
 exception to this rule has to do with \classname{xep} exceptions, in which case
-the catchers of the exceptions is responsible for cleaning up tstack.
+the catchers of the exceptions are responsible for cleaning up tstack.
 Therefore, it is not necessary to catch exceptions merely to avoid tstack
 leakage.}
 \end{itemize}
