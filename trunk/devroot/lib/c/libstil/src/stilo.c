@@ -2031,7 +2031,7 @@ stilo_file_read(cw_stilo_t *a_stilo, cw_uint32_t a_len, cw_uint8_t *r_str)
 					 * data are available.
 					 */
 					events.fd = file->fd;
-					events.events = POLLIN;
+					events.events = POLLIN | POLLRDNORM;
 					while ((poll(&events, 1, -1)) == -1)
 						; /* EINTR; try again. */
 
@@ -2056,7 +2056,7 @@ stilo_file_read(cw_stilo_t *a_stilo, cw_uint32_t a_len, cw_uint8_t *r_str)
 					 * Only read if data are available.
 					 */
 					events.fd = file->fd;
-					events.events = POLLIN;
+					events.events = POLLIN | POLLRDNORM;
 					while ((nready = poll(&events, 1, 0)) ==
 					    -1)
 						; /* EINTR; try again. */
@@ -2120,12 +2120,9 @@ stilo_file_read(cw_stilo_t *a_stilo, cw_uint32_t a_len, cw_uint8_t *r_str)
 			retval = file->read_f(file->arg, a_stilo, a_len, r_str);
 	}
 
-	if (retval == 0) {
-		file->fd = -1;
-		if (file->buffer != NULL) {
-			file->buffer_offset = 0;
-			file->buffer_mode = BUFFER_EMPTY;
-		}
+	if (retval == 0 && file->buffer != NULL) {
+		file->buffer_offset = 0;
+		file->buffer_mode = BUFFER_EMPTY;
 	}
 	RETURN:
 	if (retval != -1)
