@@ -5,16 +5,16 @@
 
 $Source$
 $Author: jasone $
-$Revision: 147 $
-$Date: 1998-07-19 00:34:59 -0700 (Sun, 19 Jul 1998) $
+$Revision: 186 $
+$Date: 1998-08-30 23:02:21 -0700 (Sun, 30 Aug 1998) $
 ..
-.Id $Id: libstash.3s 147 1998-07-19 07:34:59Z jasone $
+.Id $Id: libstash.3s 186 1998-08-31 06:02:21Z jasone $
 .TH libstash 3s
 .SH NAME
 libstash - Library of algorithms and data structures designed for transaction
 processing.
 .SH SYNOPSIS
-\fB#include <libstash/libstash.h>\fR
+\fB#include <libstash.h>\fR
 .SH DESCRIPTION
 The \fBlibstash\fR library defines a number of algorithms and data structures
 that are useful for many purposes, but the library specifically targets the
@@ -24,8 +24,8 @@ needs of transaction processing.
 \fBlibstash\fR requires the \fBpthreads\fR library for operation.  Though
 any complete \fBpthreads\fR implementation will work, \fBlibstash\fR
 assumes that kernel threads are being used.  If this is not the case,
-\fBlibstash\fR will perform rather poorly due to the way blocking system
-calls are handled.
+\fBlibstash\fR may perform rather poorly due to the way blocking system
+calls are assumed to be handled.
 
 .SH CODE STRUCTURE
 .SS Object-oriented C
@@ -78,11 +78,11 @@ Print a string to the log.
 .TP
 \fB_cw_error(<double-quoted string>)\fR:
 .br
-Print a string to the log and exit.
+Print a string to the log and abort().
 .TP
 \fB_cw_check_ptr(<pointer>)\fR:
 .br
-Check whether a pointer is \fBNULL\fR, and if so, exit.
+Check whether a pointer is \fBNULL\fR, and if so, abort().
 .hy 1
 .SS Including headers
 Rather than directly including header files, preprocessor macros are defined
@@ -109,6 +109,6 @@ g_            Global variable.
 Written by Jason Evans <jasone@canonware.com>.
 
 .SH SEE ALSO
-stash_os(3s), stash_list(3s), stash_thread(3s), stash_log(3s), stash_bhp(3s),
+stash_oh(3s), stash_list(3s), stash_thread(3s), stash_log(3s), stash_bhp(3s),
 stash_br(3s), stash_dbg(3s), stash_glob(3s), stash_locks(3s), stash_mem(3s),
 stash_res(3s), stash_sock(3s), stash_zt(3s)
