@@ -16,8 +16,8 @@
 #include <unistd.h>
 #endif
 
+#include <libstash/libstash_r.h>
 #include "libficl/libficl.h"
-#include <libstash/libstash.h>
 
 /*
 ** Ficl interface to _getcwd (Win32)

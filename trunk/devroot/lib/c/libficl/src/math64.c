@@ -10,7 +10,6 @@
 #include "libficl/libficl.h"
 #include "libficl/math64.h"
 
-
 /**************************************************************************
                         m 6 4 A b s
 ** Returns the absolute value of an DPINT

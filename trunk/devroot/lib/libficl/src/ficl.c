@@ -66,6 +66,8 @@ static int defaultDict  = FICL_DEFAULT_DICT;
 **************************************************************************/
 void ficlInitSystem(int nDictCells)
 {
+  ficlSysdepInit();
+  
     if (dp)
         dictDelete(dp);
 
@@ -476,7 +478,7 @@ void ficlTermSystem(void)
         vmDelete(pVM);
     }
 
+    ficlSysdepTerm();
+
     return;
 }
-
-

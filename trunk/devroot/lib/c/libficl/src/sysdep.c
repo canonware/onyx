@@ -9,8 +9,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <libstash/libstash_r.h>
 #include "libficl/libficl.h"
-#include <libstash/libstash.h>
+
+cw_mtx_t * g_dict_lock = NULL;
 
 #if PORTABLE_LONGMULDIV == 0
 DPUNS ficlLongMul(FICL_UNS x, FICL_UNS y)
@@ -65,6 +67,25 @@ void *ficlRealloc(void *p, size_t size)
   return _cw_realloc(p, size);
 }
 
+void
+ficlSysdepInit(void)
+{
+  if (NULL == g_dict_lock)
+  {
+    g_dict_lock = mtx_new(NULL);
+  }
+}
+
+void
+ficlSysdepTerm(void)
+{
+  if (NULL != g_dict_lock)
+  {
+    mtx_delete(g_dict_lock);
+    g_dict_lock = NULL;
+  }
+}
+
 /*
 ** Stub function for dictionary access control - does nothing
 ** by default, user can redefine to guarantee exclusive dict
@@ -80,16 +101,20 @@ void *ficlRealloc(void *p, size_t size)
 #if FICL_MULTITHREAD
 int ficlLockDictionary(short fLock)
 {
+  extern cw_mtx_t * g_dict_lock;
+
+  _cw_check_ptr(g_dict_lock);
+  
   if (TRUE == fLock)
-    {
-      /* Lock. */
-      mtx_lock(XXX);
-    }
+  {
+    /* Lock. */
+    mtx_lock(g_dict_lock);
+  }
   else
-    {
-      /* Unlock. */
-      mtx_unlock(XXX);
-    }
+  {
+    /* Unlock. */
+    mtx_unlock(g_dict_lock);
+  }
   
   return 0;
 }

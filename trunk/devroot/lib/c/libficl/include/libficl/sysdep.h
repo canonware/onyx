@@ -128,14 +128,13 @@ typedef struct
     FICL_INT rem;
 } INTQR;
 
-
 /*
 ** Build controls
 ** FICL_MULTITHREAD enables dictionary mutual exclusion
-** wia the ficlLockDictionary system dependent function.
+** via the ficlLockDictionary system dependent function.
 */
 #if !defined FICL_MULTITHREAD
-#define FICL_MULTITHREAD 0
+#define FICL_MULTITHREAD 1
 #endif
 
 /*
@@ -265,6 +264,10 @@ void  ficlTextOut(struct vm *pVM, char *msg, int fNewline);
 void *ficlMalloc (size_t size);
 void  ficlFree   (void *p);
 void *ficlRealloc(void *p, size_t size);
+
+void ficlSysdepInit(void);
+void ficlSysdepTerm(void);
+
 /*
 ** Stub function for dictionary access control - does nothing
 ** by default, user can redefine to guarantee exclusive dict

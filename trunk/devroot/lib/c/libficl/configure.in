@@ -75,4 +75,4 @@ AC_MSG_RESULT(Prefix      : ${prefix})
 AC_MSG_RESULT(===============================================================================)
 
 dnl Process the following files.
-AC_OUTPUT(Makefile)
+AC_OUTPUT(Makefile Howto.cook)
