@@ -1589,13 +1589,14 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			case '0': case '1': case '2': case '3': case '4':
 			case '5': case '6': case '7': case '8': case '9':
 			case 'a': case 'b': case 'c': case 'd': case 'e':
-			case 'f':
+			case 'f': case 'A': case 'B': case 'C': case 'D':
+			case 'E': case 'F':
 				a_thread->state = THREADTS_STRING_HEX_FINISH;
 				a_thread->m.s.hex_val = c;
 				break;
 			default:
 				nxoe_p_thread_syntax_error(a_thread, a_threadp,
-				    defer_base, "(", "\\x", c);
+				    defer_base, "`", "\\x", c);
 				if (a_token)
 					goto RETURN;
 			}
@@ -1605,7 +1606,8 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			case '0': case '1': case '2': case '3': case '4':
 			case '5': case '6': case '7': case '8': case '9':
 			case 'a': case 'b': case 'c': case 'd': case 'e':
-			case 'f':{
+			case 'f': case 'A': case 'B': case 'C': case 'D':
+			case 'E': case 'F': {
 				cw_uint8_t	val;
 
 				a_thread->state = THREADTS_STRING;
@@ -1621,6 +1623,11 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 					val = ((a_thread->m.s.hex_val - 'a') +
 					    10) << 4;
 					break;
+				case 'A': case 'B': case 'C': case 'D':
+				case 'E': case 'F':
+					val = ((a_thread->m.s.hex_val - 'A') +
+					    10) << 4;
+					break;
 				default:
 					_cw_not_reached();
 				}
@@ -1634,6 +1641,10 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 				case 'e': case 'f':
 					val |= ((c - 'a') + 10);
 					break;
+				case 'A': case 'B': case 'C': case 'D':
+				case 'E': case 'F':
+					val |= ((c - 'A') + 10);
+					break;
 				default:
 					_cw_not_reached();
 				}
@@ -1645,7 +1656,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 
 				suffix[2] = a_thread->m.s.hex_val;
 				nxoe_p_thread_syntax_error(a_thread, a_threadp,
-				    defer_base, "(", suffix, c);
+				    defer_base, "`", suffix, c);
 				if (a_token)
 					goto RETURN;
 			}

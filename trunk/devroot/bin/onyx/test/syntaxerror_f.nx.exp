@@ -1,5 +1,5 @@
 At line 3, column 4: Error /syntaxerror
-ostack: (`(\\xar')
+ostack: (`\`\\xar')
 dstack: (-dict- -dict- -dict- -dict-)
 estack/istack trace (0..1):
 0:	-file-
