@@ -14,6 +14,9 @@
  *
  ****************************************************************************/
 
+#define _LIBSTASH_SOCKB_CONFESS
+
+
 #define _LIBSTASH_USE_PEZZ
 #define _LIBSTASH_USE_MQ
 #include "libstash/libstash_r.h"
@@ -23,6 +26,14 @@
 
 #include <sys/types.h>
 #include <poll.h>
+#ifdef _LIBSTASH_SOCKB_CONFESS
+#  ifdef _CW_OS_LINUX
+/* This pulls in definitions for POLLRDNORM, POLLRDBAND, POLLWRNORM, POLLWRBAND
+ * and POLLMSG.  We don't really care about these except for completeness when
+ * spewing debug info. */
+#    include <asm/poll.h>
+#  endif
+#endif
 #include <sys/time.h>
 #include <sys/uio.h>
 #include <fcntl.h>
@@ -39,8 +50,6 @@
 
 /* Global. */
 cw_sockb_t * g_sockb = NULL;
-
-#define _LIBSTASH_SOCKB_CONFESS
 
 cw_bool_t
 sockb_init(cw_uint32_t a_max_fds, cw_uint32_t a_bufc_size,
@@ -977,43 +986,48 @@ sockb_p_entry_func(void * a_arg)
 	out_put(cw_g_out, " [i][s][s][s][s][s][s][s][s][s][s]",
 		sockfd,
 #ifdef POLLIN
-		fds[i].revents & POLLIN ? "IN," :
+		fds[i].revents & POLLIN ? "<IN>" :
 #endif
 		"",
 #ifdef POLLRDNORM
-		fds[i].revents & POLLRDNORM ? "RDNORM," :
+		fds[i].revents & POLLRDNORM ? "<RDNORM>" :
 #endif
 		"",
 #ifdef POLLRDBAND
-		fds[i].revents & POLLRDBAND ? "RDBAND," :
+		fds[i].revents & POLLRDBAND ? "<RDBAND>" :
 #endif
 		"",
 #ifdef POLLPRI
-		fds[i].revents & POLLPRI ? "PRI," :
+		fds[i].revents & POLLPRI ? "<PRI>" :
 #endif
 		"",
 #ifdef POLLOUT
-		fds[i].revents & POLLOUT ? "OUT," :
+		fds[i].revents & POLLOUT ? "<OUT>" :
 #endif
 		"",
 #ifdef POLLWRNORM
-		fds[i].revents & POLLWRNORM ? "WRNORM," :
+		fds[i].revents & POLLWRNORM ? "<WRNORM>" :
 #endif
 		"",
 #ifdef POLLWRBAND
-		fds[i].revents & POLLWRBAND ? "WRBAND," :
+		fds[i].revents & POLLWRBAND ? "<WRBAND>" :
 #endif
 		"",
 #ifdef POLLERR
-		fds[i].revents & POLLERR ? "ERR," :
+		fds[i].revents & POLLERR ? "<ERR>" :
 #endif
 		"",
 #ifdef POLLHUP
-		fds[i].revents & POLLHUP ? "HUP," :
+		fds[i].revents & POLLHUP ? "<HUP>" :
 #endif
 		"",
 #ifdef POLLNVAL
-		fds[i].revents & POLLNVAL ? "NVAL," :
+		fds[i].revents & POLLNVAL ? "<NVAL>" :
+#endif
+		"",
+#ifdef POLLMSG
+		/* Linux-specific. */
+		fds[i].revents & POLLMSG ? "<MSG>" :
 #endif
 		"");
 #endif
