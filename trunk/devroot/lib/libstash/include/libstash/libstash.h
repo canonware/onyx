@@ -85,21 +85,10 @@ typedef unsigned long long cw_uint64_t;
 #endif
 #endif
 
-#if (SIZEOF_FLOAT == 4)
-#define _TYPE_FP32_DEFINED
-typedef float cw_fp32_t;
-#endif
-
-#if (SIZEOF_DOUBLE == 8)
-#define _TYPE_FP64_DEFINED
-typedef double cw_fp64_t;
-#endif
-
 #if (!defined(_TYPE_SINT8_DEFINED) || !defined(_TYPE_UINT8_DEFINED) ||	\
     !defined(_TYPE_SINT16_DEFINED) || !defined(_TYPE_UINT16_DEFINED) ||	\
     !defined(_TYPE_SINT32_DEFINED) || !defined(_TYPE_UINT32_DEFINED) ||	\
-    !defined(_TYPE_SINT64_DEFINED) || !defined(_TYPE_UINT64_DEFINED) ||	\
-    !defined(_TYPE_FP32_DEFINED) || !defined(_TYPE_FP64_DEFINED))
+    !defined(_TYPE_SINT64_DEFINED) || !defined(_TYPE_UINT64_DEFINED))
 #error "Lacking mandatory typedefs"
 #endif
 

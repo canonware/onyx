@@ -115,10 +115,6 @@ static cw_uint32_t	out_p_int32_render(const char *a_format, cw_uint32_t
     a_len, const void *a_arg, cw_uint32_t a_max_len, cw_uint8_t *r_buf);
 static cw_uint32_t	out_p_int64_render(const char *a_format, cw_uint32_t
     a_len, const void *a_arg, cw_uint32_t a_max_len, cw_uint8_t *r_buf);
-static cw_uint32_t	out_p_fp_render(const char *a_format, cw_uint32_t
-    a_len, const void *a_arg, cw_uint32_t a_max_len, cw_uint8_t *r_buf);
-static cw_uint32_t	out_p_exp_render(const char *a_format, cw_uint32_t
-    a_len, const void *a_arg, cw_uint32_t a_max_len, cw_uint8_t *r_buf);
 static cw_uint32_t	out_p_char_render(const char *a_format, cw_uint32_t
     a_len, const void *a_arg, cw_uint32_t a_max_len, cw_uint8_t *r_buf);
 static cw_uint32_t	out_p_string_render(const char *a_format, cw_uint32_t
@@ -134,9 +130,7 @@ static cw_out_ent_t cw_g_out_builtins[] = {
 	{"p",	1,	sizeof(void *),		out_p_pointer_render},
 	{"c",	1,	sizeof(cw_uint8_t),	out_p_char_render},
 	{"q",	1,	sizeof(cw_uint64_t),	out_p_int64_render},
-	{"b",	1,	sizeof(cw_buf_t *),	out_p_buf_render},
-	{"f",	1,	sizeof(cw_fp64_t),	out_p_fp_render},
-	{"e",	1,	sizeof(cw_fp64_t),	out_p_exp_render}
+	{"b",	1,	sizeof(cw_buf_t *),	out_p_buf_render}
 };
 
 cw_out_t *
@@ -1418,186 +1412,6 @@ out_p_int64_render(const char *a_format, cw_uint32_t a_len, const void *a_arg,
 
 	retval = out_p_int_render(a_format, a_len, arg, a_max_len, r_buf, 64,
 	    10);
-
-	return retval;
-}
-
-static cw_uint32_t
-out_p_fp_render(const char *a_format, cw_uint32_t a_len, const void *a_arg,
-    cw_uint32_t a_max_len, cw_uint8_t *r_buf)
-{
-	cw_uint32_t	olen, rlen, owidth, width, offset, digits, i;
-	cw_sint32_t	val_len;
-	cw_bool_t	show_sign;
-	cw_uint8_t	sign;
-	cw_sint32_t	exp;
-	const cw_uint8_t *val;
-	struct ieee_double {
-		cw_uint32_t	manl : 32;
-		cw_uint32_t	manh : 20;
-		cw_uint32_t	exp  : 11;
-		cw_uint32_t	sign :  1;
-	}		*arg;
-	cw_uint32_t	slen = _CW_OUT_PRINT_BUF;
-	cw_uint8_t	*result, s_result[_CW_OUT_PRINT_BUF];
-
-	_cw_check_ptr(a_format);
-	_cw_assert(a_len > 0);
-	_cw_check_ptr(a_arg);
-	_cw_check_ptr(r_buf);
-
-	arg = (struct ieee_double *)a_arg;
-	exp = arg->exp - 1023;
-	result = s_result;
-
-	if ((val_len = spec_val_get(a_format, a_len, "a", 1, &val)) != -1) {
-		/* Decimal accuracy specified. */
-		/*
-		 * The next character after val is either `|' or `]', so we
-		 * don't have to worry about terminating the string that val
-		 * points to.
-		 */
-		digits = strtoul(val, NULL, 10);
-	} else
-		digits = 2;
-
-	/*
-	 * IEEE 754 double precision floating-point numbers are formatted as
-	 * such:
-	 *
-	 * X XXXXXXXXXXX XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-	 * 1 11 (exp)    52 (mantissa)
-	 * (sign)
-	 *
-	 * There is an implicit 1 before the point, so the mantissa is
-	 * normalized to always make this the case.
-	 *
-	 * The exponent is biased by 1023, such that the effective range is
-	 * -1022 <= exponent <= 1023.  1024 is used for special representations.
-	 * 1.0e1023 is infinity (inf), !1.0e1023 is not a number (nan).  -1023
-	 * is used for special representations.  Specifically, all 0 bits is 0.
-	 * This special case is necessary due to the implicit 1 before the
-	 * point.
-	 *
-	 */
-
-	/* Should we show the sign? */
-	if ((arg->sign) || (((val_len = spec_val_get(a_format, a_len, "+", 1,
-	    &val)) != -1) && (val[0]) == '+')) {
-		show_sign = TRUE;
-		sign = (arg->sign) ? '-' : '+';
-	} else
-		show_sign = FALSE;
-
-	/* Check for special representations. */
-	if (exp == -1023 && arg->manh == 0 && arg->manl == 0) {
-		/* Zero. */
-		/* Expand buffer if necessary. */
-		if (slen < 2 + (show_sign ? 1 : 0) + digits) {
-			result = (cw_uint8_t *)_cw_malloc(2 + (show_sign ? 1 :
-			    0) + digits);
-		}
-
-		i = 0;
-		/* Sign. */
-		if (show_sign) {
-			result[i] = '+';
-			i++;
-		}
-		/* Leading zero. */
-		result[i] = '0';
-		i++;
-		if (digits > 0) {
-			cw_uint32_t	j;
-
-			/* Decimal point. */
-			result[i] = '.';
-			i++;
-
-			for (j = 0; j < digits; j++)
-				result[i + j] = '0';
-
-			i += j;
-		}
-		rlen = i;
-	} else if (exp != 1024) {
-		cw_uint8_t	format[10];
-
-		/* Normal number. */
-
-		/* XXX Wimp out. */
-		out_put_sn(NULL, format, sizeof(format) - 1, "%[s].[i]f",
-		    show_sign ? "+" : "", digits);
-		format[7] = '\0';
-
-		xep_begin();
-		volatile cw_uint8_t	*v_result;
-		xep_try {
-			rlen = snprintf(result, slen, format, *arg);
-			if (rlen >= slen) {
-				slen *= 2;
-				v_result = result = (cw_uint8_t
-				    *)_cw_malloc(slen);
-				rlen = snprintf(result, slen, format, *arg);
-				while (rlen >= slen) {
-					slen += _CW_OUT_REALLOC_INC;
-					v_result = result = (cw_uint8_t
-					    *)_cw_realloc(result, slen);
-					rlen = snprintf(result, slen, format,
-					    *arg);
-				}
-			}
-		}
-		xep_catch(_CW_XEPV_OOM) {
-			result = (cw_uint8_t *)v_result;
-			if (result != s_result)
-				_cw_free(result);
-		}
-		xep_end();
-	} else if (arg->manh == 0 && arg->manl == 0) {
-		/* Infinity. */
-		rlen = 3;
-		memcpy(result, "inf", rlen);
-	} else {
-		/* Not a number. */
-		rlen = 3;
-		memcpy(result, "nan", rlen);
-	}
-
-	out_p_common_render(a_format, a_len, a_max_len, rlen, r_buf, &width,
-	    &owidth, &offset);
-
-	if (offset < owidth) {
-		if (offset + rlen <= owidth)
-			olen = rlen;
-		else
-			olen = owidth - offset;
-		memcpy(&r_buf[offset], result, olen);
-	}
-
-	/* Clean up, if we had to allocate space. */
-	if (result != s_result)
-		_cw_free(result);
-
-	return width;
-}
-
-static cw_uint32_t
-out_p_exp_render(const char *a_format, cw_uint32_t a_len, const void *a_arg,
-    cw_uint32_t a_max_len, cw_uint8_t *r_buf)
-{
-	cw_uint32_t	retval;
-	cw_fp64_t	arg;
-
-	_cw_check_ptr(a_format);
-	_cw_assert(a_len > 0);
-	_cw_check_ptr(a_arg);
-	_cw_check_ptr(r_buf);
-
-	arg = *(const cw_fp64_t *)a_arg;
-
-	/* XXX */
-	_cw_not_reached();
 
 	return retval;
 }

@@ -281,9 +281,6 @@ Padding character.
 .IR \*(lqb\*(rq :
 Numerical base.  Legal bases are (2 <= base <= 36).
 
-.IR \*(lqa\*(rq :
-Accuracy of fractional portion of a floating point number.  If 0 is specified, no decimal or fraction is printed.
-
 .IR \*(lqs\*(rq :
 Signed/unsigned.  Legal values:
 .RS
@@ -320,38 +317,32 @@ l.
 
 .TS H
 center box linesize(6) tab(@);
-cb s s s s s s s.
+cb s s s s s s.
 Formatting names/values
 _
 .T&
-lb | lb | lb | lb | lb | lb | lb | lb.
- Type@w@j@p@b@a@s@+
+lb | lb | lb | lb | lb | lb | lb.
+ Type@w@j@p@b@s@+
 _
 .T&
-l | l | l | l | l | l | l | l.
- i@Yes@Yes@Yes@Yes@No@Yes@Yes
- int32@Fit@Right@` '@10@@u@-
+l | l | l | l | l | l | l.
+ i@Yes@Yes@Yes@Yes@Yes@Yes
+ int32@Fit@r@` '@10@u@-
 _
- q@Yes@Yes@Yes@Yes@No@Yes@Yes
- int64@Fit@Right@` '@10@@u@-
+ q@Yes@Yes@Yes@Yes@Yes@Yes
+ int64@Fit@r@` '@10@u@-
 _
- c@Yes@Yes@Yes@No@No@No@No
- char@Fit@Right@` '@@@@
+ c@Yes@Yes@Yes@No@No@No
+ char@Fit@r@` '@@@
 _
- s@Yes@Yes@Yes@No@No@No@No
- string@Fit@Right@` '@@@@
+ s@Yes@Yes@Yes@No@No@No
+ string@Fit@r@` '@@@
 _
- p@Yes@Yes@Yes@Yes@No@Yes@Yes
- pointer@Fit@Right@` '@16@@u@-
+ p@Yes@Yes@Yes@Yes@Yes@Yes
+ pointer@Fit@r@` '@16@u@-
 _
- f@Yes@Yes@Yes@No@Yes@No@Yes
- fp (decimal)@Fit@Right@` '@@2@@-
-_
- e@Yes@Yes@Yes@No@Yes@No@Yes
- fp (exponential)@Fit@Right@` '@@2@@-
-_
- b@Yes@Yes@Yes@No@No@No@No
- buf@Fit@Right@` '@@@@
+ b@Yes@Yes@Yes@No@No@No
+ buf@Fit@r@` '@@@
 .TE
 
 .SH USAGE
