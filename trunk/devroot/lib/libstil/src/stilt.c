@@ -65,14 +65,12 @@ stilte_stiln(cw_stilte_t a_stilte)
 	} while (0)
 
 /*
- * Update the line and column counters to reflect that a '\n' was just seen.
- * The column number is set to -1 because the loop will increment it before the
- * next character is seen, which should be at column 0.
+ * Make a note that a '\n' was just seen.  The line and column counters will be
+ * updated before the next character is seen.
  */
 #define _CW_STILT_NEWLINE()						\
 	do {								\
-		a_stilts->line++;					\
-		a_stilts->column = -1;					\
+		newline = 1;						\
 	} while (0)
 
 /*
@@ -980,7 +978,7 @@ static cw_uint32_t
 stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
     const cw_uint8_t *a_str, cw_uint32_t a_len)
 {
-	cw_uint32_t	retval, i;
+	cw_uint32_t	retval, i, newline;
 	cw_uint8_t	c;
 	cw_stilo_t	*stilo;
 	cw_bool_t	token;
@@ -990,7 +988,16 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 		a_stilt->defer_count++;
 	}
 
-	for (i = 0; i < a_len; i++, a_stilts->column++) {
+	/*
+	 * All the grossness surrounding newline avoids doing any branches when
+	 * calculating the line and column number.  This may be overzealous
+	 * optimization, but the logic is relatively simple.  We do the update
+	 * of both line and column number here so that they are correct at all
+	 * times during the main part of the loop.
+	 */
+	for (i = newline = 0; i < a_len; i++, a_stilts->line += newline,
+	    a_stilts->column = ((a_stilts->column + 1) * !newline), newline =
+	    0) {
 		c = a_str[i];
 
 #ifdef _CW_STILT_SCANNER_DBG
