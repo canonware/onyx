@@ -77,7 +77,7 @@ nxo_compare(const cw_nxo_t *a_a, const cw_nxo_t *a_b)
 	case NXOT_NAME:
 	case NXOT_STRING:
 	{
-	    const uint8_t *str_a, *str_b;
+	    const char *str_a, *str_b;
 	    uint32_t len_a, len_b;
 #ifdef CW_THREADS
 	    bool lock_a, lock_b;

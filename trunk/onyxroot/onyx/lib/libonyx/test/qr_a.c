@@ -20,7 +20,7 @@ typedef struct ring_s ring_t;
 struct ring_s
 {
     qr(ring_t) link;
-    uint8_t id;
+    char id;
 };
 
 int

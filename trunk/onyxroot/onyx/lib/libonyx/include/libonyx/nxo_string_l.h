@@ -32,7 +32,7 @@ struct cw_nxoe_string_s
 	} i;
 	struct
 	{
-	    uint8_t *str;
+	    char *str;
 	    uint32_t len;
 	    uint32_t alloc_len;
 	} s;

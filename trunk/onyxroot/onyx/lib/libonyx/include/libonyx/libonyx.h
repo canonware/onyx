@@ -382,7 +382,7 @@ typedef struct cw_mema_s cw_mema_t;
     do									\
     {									\
 	cw_nxo_threadp_t threadp;					\
-	static const uint8_t	code[] = (a_code);			\
+	static const char code[] = (a_code);				\
 									\
 	nxo_threadp_new(&threadp);					\
 	nxo_thread_interpret((a_thread), &threadp, code,		\

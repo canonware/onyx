@@ -19,7 +19,7 @@ typedef struct qstack_s qstack_t;
 
 struct qstack_s {
     qs_elm(qstack_t) link;
-    uint8_t id;
+    char id;
 };
 
 int

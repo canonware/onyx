@@ -18,7 +18,7 @@
 #define NITERATIONS 1000
 
 cw_tsd_t tsd;
-uint8_t arr[NITERATIONS];
+char arr[NITERATIONS];
 
 void *
 thread_entry_func(void *a_arg)
@@ -29,7 +29,7 @@ thread_entry_func(void *a_arg)
     {
 	tsd_set(&tsd, (void *)&arr[i]);
 	thd_yield();
-	cw_assert((uint8_t *)tsd_get(&tsd) == &arr[i]);
+	cw_assert((char *)tsd_get(&tsd) == &arr[i]);
 	thd_yield();
     }
 

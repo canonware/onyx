@@ -23,7 +23,7 @@ The \classname{nxo\_file} class is a subclass of the \classname{nxo} class.
 \label{cw_nxo_file_read_t}
 \index{cw_nxo_file_read_t@\cfunc{cw\_nxo\_file\_read\_t}{}}
 \citem{\cfunc[int32\_t]{cw\_nxo\_file\_read\_t}{void *a\_arg, cw\_nxo\_t
-*a\_file, uint32\_t a\_len, uint8\_t *r\_str}}
+*a\_file, uint32\_t a\_len, char *r\_str}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -57,7 +57,7 @@ The \classname{nxo\_file} class is a subclass of the \classname{nxo} class.
 \label{cw_nxo_file_write_t}
 \index{cw_nxo_file_write_t@\cfunc{cw\_nxo\_file\_write\_t}{}}
 \citem{\cfunc[bool]{cw\_nxo\_file\_write\_t}{void *a\_arg, cw\_nxo\_t
-*a\_file, const uint8\_t *a\_str, uint32\_t a\_len}}
+*a\_file, const char *a\_str, uint32\_t a\_len}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -203,7 +203,7 @@ void *a\_arg}}
 \label{nxo_file_open}
 \index{nxo_file_open@\cfunc{nxo\_file\_open}{}}
 \citem{\cfunc[cw\_nxn\_t]{nxo\_file\_open}{cw\_nxo\_t *a\_nxo, const
-uint8\_t *a\_filename, uint32\_t a\_nlen, const uint8\_t *a\_flags,
+char *a\_filename, uint32\_t a\_nlen, const char *a\_flags,
 uint32\_t a\_flen}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -276,7 +276,7 @@ uint32\_t a\_flen}}
 \label{nxo_file_origin_get}
 \index{nxo_file_origin_get@\cfunc{nxo\_file\_origin\_get}{}}
 \citem{\cfunc[void]{nxo\_file\_origin\_get}{cw\_nxo\_t *a\_nxo, const
-uint8\_t **r\_origin, uint32\_t *r\_olen}}
+char **r\_origin, uint32\_t *r\_olen}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -301,7 +301,7 @@ uint8\_t **r\_origin, uint32\_t *r\_olen}}
 \label{nxo_file_origin_set}
 \index{nxo_file_origin_set@\cfunc{nxo\_file\_origin\_set}{}}
 \citem{\cfunc[bool]{nxo\_file\_origin\_set}{cw\_nxo\_t *a\_nxo,
-const uint8\_t *a\_origin, uint32\_t a\_olen}}
+const char *a\_origin, uint32\_t a\_olen}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -399,7 +399,7 @@ bool a\_nonblocking}}
 \label{nxo_file_read}
 \index{nxo_file_read@\cfunc{nxo\_file\_read}{}}
 \citem{\cfunc[int32\_t]{nxo\_file\_read}{cw\_nxo\_t *a\_nxo, uint32\_t
-a\_len, uint8\_t *r\_str}}
+a\_len, char *r\_str}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -473,7 +473,7 @@ a\_len, uint8\_t *r\_str}}
 \label{nxo_file_write}
 \index{nxo_file_write@\cfunc{nxo\_file\_write}{}}
 \citem{\cfunc[cw\_nxn\_t]{nxo\_file\_write}{cw\_nxo\_t *a\_nxo, const
-uint8\_t *a\_str, uint32\_t a\_len, uint32\_t *r\_count}}
+char *a\_str, uint32\_t a\_len, uint32\_t *r\_count}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]

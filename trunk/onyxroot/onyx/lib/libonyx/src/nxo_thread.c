@@ -59,15 +59,15 @@ nxo_p_thread_entry(void *a_arg);
 #endif
 static uint32_t
 nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
-		   bool a_token, const uint8_t *a_str,
+		   bool a_token, const char *a_str,
 		   uint32_t a_len);
 static void
 nxoe_p_thread_tok_str_expand(cw_nxoe_thread_t *a_thread);
 static void
 nxoe_p_thread_syntax_error(cw_nxoe_thread_t *a_thread,
 			   cw_nxo_threadp_t *a_threadp,
-			   uint32_t a_defer_base, uint8_t *a_prefix,
-			   uint8_t *a_suffix, int32_t a_c);
+			   uint32_t a_defer_base, char *a_prefix,
+			   char *a_suffix, int32_t a_c);
 static void
 nxoe_p_thread_reset(cw_nxoe_thread_t *a_thread);
 static bool
@@ -151,7 +151,7 @@ nxo_threadp_delete(cw_nxo_threadp_t *a_threadp, cw_nxo_t *a_thread)
 	case THREADTS_NAME_START:
 	{
 	    cw_nxoe_thread_t *thread;
-	    uint8_t suffix[2] = "?";
+	    char suffix[2] = "?";
 
 	    cw_check_ptr(a_thread);
 	    cw_dassert(a_thread->magic == CW_NXO_MAGIC);
@@ -229,7 +229,7 @@ nxo_threadp_delete(cw_nxo_threadp_t *a_threadp, cw_nxo_t *a_thread)
 
 void
 nxo_threadp_origin_get(const cw_nxo_threadp_t *a_threadp,
-		       const uint8_t **r_origin, uint32_t *r_olen)
+		       const char **r_origin, uint32_t *r_olen)
 {
     cw_check_ptr(a_threadp);
     cw_dassert(a_threadp->magic == CW_NXO_THREADP_MAGIC);
@@ -240,7 +240,7 @@ nxo_threadp_origin_get(const cw_nxo_threadp_t *a_threadp,
 
 void
 nxo_threadp_origin_set(cw_nxo_threadp_t *a_threadp,
-			 const uint8_t *a_origin, uint32_t a_olen)
+			 const char *a_origin, uint32_t a_olen)
 {
     cw_check_ptr(a_threadp);
     cw_dassert(a_threadp->magic == CW_NXO_THREADP_MAGIC);
@@ -782,7 +782,7 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 			    {
 				cw_nxo_threadp_t threadp;
 				int32_t nread;
-				uint8_t buffer[CW_LIBONYX_FILE_EVAL_READ_SIZE];
+				char buffer[CW_LIBONYX_FILE_EVAL_READ_SIZE];
 
 #ifdef CW_THREADS
 				if (alocking)
@@ -792,7 +792,7 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 #endif
 				nxo_threadp_new(&threadp);
 				{
-				    const uint8_t *origin;
+				    const char *origin;
 				    uint32_t olen;
 
 				    nxo_file_origin_get(el, &origin, &olen);
@@ -1024,11 +1024,11 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 		{
 		    cw_nxo_threadp_t threadp;
 		    int32_t nread;
-		    uint8_t buffer[CW_LIBONYX_FILE_EVAL_READ_SIZE];
+		    char buffer[CW_LIBONYX_FILE_EVAL_READ_SIZE];
 
 		    nxo_threadp_new(&threadp);
 		    {
-			const uint8_t *origin;
+			const char *origin;
 			uint32_t olen;
 
 			nxo_file_origin_get(nxo, &origin, &olen);
@@ -1350,7 +1350,7 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 
 void
 nxo_thread_interpret(cw_nxo_t *a_nxo, cw_nxo_threadp_t *a_threadp, const
-		     uint8_t *a_str, uint32_t a_len)
+		     char *a_str, uint32_t a_len)
 {
     cw_nxoe_thread_t *thread;
 
@@ -1368,7 +1368,7 @@ void
 nxo_thread_flush(cw_nxo_t *a_nxo, cw_nxo_threadp_t *a_threadp)
 {
     cw_nxoe_thread_t *thread;
-    static const uint8_t str[] = "\n";
+    static const char str[] = "\n";
 
     cw_check_ptr(a_nxo);
     cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
@@ -1387,7 +1387,7 @@ nxo_thread_nerror(cw_nxo_t *a_nxo, cw_nxn_t a_nxn)
 }
 
 void
-nxo_thread_serror(cw_nxo_t *a_nxo, const uint8_t *a_str, uint32_t a_len)
+nxo_thread_serror(cw_nxo_t *a_nxo, const char *a_str, uint32_t a_len)
 {
     cw_nxoe_thread_t *thread;
     cw_nxo_t *errorname;
@@ -1619,7 +1619,7 @@ nxo_thread_stderr_set(cw_nxo_t *a_nxo, cw_nxo_t *a_stderr)
 
 uint32_t
 nxo_l_thread_token(cw_nxo_t *a_nxo, cw_nxo_threadp_t *a_threadp, const
-		   uint8_t *a_str, uint32_t a_len)
+		   char *a_str, uint32_t a_len)
 {
     cw_nxoe_thread_t *thread;
 
@@ -1635,11 +1635,11 @@ nxo_l_thread_token(cw_nxo_t *a_nxo, cw_nxo_threadp_t *a_threadp, const
 
 static uint32_t
 nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
-		   bool a_token, const uint8_t *a_str,
+		   bool a_token, const char *a_str,
 		   uint32_t a_len)
 {
     uint32_t retval, i, newline, defer_base;
-    uint8_t c;
+    unsigned char c;
     cw_nxo_t *nxo;
     bool token;
 
@@ -2616,7 +2616,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 		    case 'c': case 'd': case 'e': case 'f': case 'A': case 'B':
 		    case 'C': case 'D': case 'E': case 'F':
 		    {
-			uint8_t val;
+			unsigned char val;
 
 			a_thread->state = THREADTS_STRING;
 			switch (a_thread->m.s.hex_val)
@@ -2674,7 +2674,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 		    }
 		    default:
 		    {
-			uint8_t suffix[] = "\\x?";
+			char suffix[] = "\\x?";
 
 			suffix[2] = a_thread->m.s.hex_val;
 			nxoe_p_thread_syntax_error(a_thread, a_threadp,
@@ -2706,7 +2706,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 #endif
 		    case '$': case '~': case '#':
 		    {
-			uint8_t suffix[2] = "?";
+			char suffix[2] = "?";
 
 			switch (a_thread->m.m.action)
 			{
@@ -2804,7 +2804,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			}
 			else
 			{
-			    uint8_t suffix[2] = "?";
+			    char suffix[2] = "?";
 
 			    switch (a_thread->m.m.action)
 			    {
@@ -2895,16 +2895,16 @@ nxoe_p_thread_tok_str_expand(cw_nxoe_thread_t *a_thread)
     if (a_thread->index == CW_NXO_THREAD_BUFFER_SIZE)
     {
 	/* First overflow, initial expansion needed. */
-	a_thread->tok_str = (uint8_t *) nxa_malloc(a_thread->index * 2);
+	a_thread->tok_str = (char *) nxa_malloc(a_thread->index * 2);
 	a_thread->buffer_len = a_thread->index * 2;
 	memcpy(a_thread->tok_str, a_thread->buffer, a_thread->index);
     }
     else if (a_thread->index == a_thread->buffer_len)
     {
-	uint8_t *t_str;
+	char *t_str;
 
 	/* Overflowed, and additional expansion needed. */
-	t_str = (uint8_t *) nxa_malloc(a_thread->index * 2);
+	t_str = (char *) nxa_malloc(a_thread->index * 2);
 	a_thread->buffer_len = a_thread->index * 2;
 	memcpy(t_str, a_thread->tok_str, a_thread->index);
 	nxa_free(a_thread->tok_str, a_thread->index);
@@ -2922,11 +2922,11 @@ nxoe_p_thread_tok_str_expand(cw_nxoe_thread_t *a_thread)
 static void
 nxoe_p_thread_syntax_error(cw_nxoe_thread_t *a_thread,
 			   cw_nxo_threadp_t *a_threadp,
-			   uint32_t a_defer_base, uint8_t *a_prefix,
-			   uint8_t *a_suffix, int32_t a_c)
+			   uint32_t a_defer_base, char *a_prefix,
+			   char *a_suffix, int32_t a_c)
 {
     cw_nxo_t *nxo;
-    const uint8_t *origin;
+    const char *origin;
     uint32_t defer_count, olen, line, column;
 
     nxo = nxo_stack_push(&a_thread->ostack);
@@ -2956,7 +2956,7 @@ nxoe_p_thread_syntax_error(cw_nxoe_thread_t *a_thread,
     /* Current character, if any. */
     if (a_c >= 0)
     {
-	uint8_t c = (uint8_t) a_c;
+	char c = (char) a_c;
 
 	nxo_string_set(nxo, strlen((char *) a_prefix) + a_thread->index +
 		       strlen((char *) a_suffix), &c, 1);
@@ -3041,7 +3041,7 @@ nxoe_p_thread_integer_accept(cw_nxoe_thread_t *a_thread)
 	cw_nxoi_t val;
 	uint32_t i;
 	uint64_t threshold, maxlast, sum, digit;
-	uint8_t c;
+	char c;
 
 	/* Determine threshold value at which overflow is a risk.  If the
 	 * threshold is exceeded, then overflow occurred.  If the threshold
@@ -3199,7 +3199,7 @@ nxoe_p_thread_procedure_accept(cw_nxoe_thread_t *a_thread,
     nxo_array_new(tnxo, false, nelements);
 #endif
     {
-	const uint8_t *origin;
+	const char *origin;
 	uint32_t olen;
 
 	/* Set source origin information. */

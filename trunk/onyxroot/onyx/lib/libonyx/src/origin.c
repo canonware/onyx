@@ -24,7 +24,7 @@
 typedef struct cw_origin_ostr_s cw_origin_ostr_t;
 struct cw_origin_ostr_s
 {
-    uint8_t *ostr;
+    char *ostr;
     uint32_t olen;
 
     uint32_t ref_count; /* Reference count, used to remove hash items. */
@@ -117,12 +117,12 @@ origin_l_shutdown(void)
 }
 
 CW_P_INLINE cw_origin_ostr_t *
-origin_p_ostr_insert(const uint8_t *a_ostr, uint32_t a_olen)
+origin_p_ostr_insert(const char *a_ostr, uint32_t a_olen)
 {
     cw_origin_ostr_t *retval;
     cw_origin_ostr_t tkey;
 
-    tkey.ostr = (uint8_t *) a_ostr;
+    tkey.ostr = (char *) a_ostr;
     tkey.olen = a_olen;
 
     if (dch_search(&s_origin_ostr_hash, (void *) &tkey, (void **) &retval)
@@ -173,7 +173,7 @@ origin_p_ostr_remove(cw_origin_ostr_t *a_ostr_hash_key)
 }
 
 void
-origin_l_insert(void *a_obj, const uint8_t *a_ostr, uint32_t a_olen,
+origin_l_insert(void *a_obj, const char *a_ostr, uint32_t a_olen,
 		uint32_t a_line_num)
 {
     cw_origin_obj_t *obj_hash_item;
@@ -236,7 +236,7 @@ origin_l_remove(void *a_obj)
 }
 
 bool
-origin_l_lookup(void *a_obj, const uint8_t **r_ostr,
+origin_l_lookup(void *a_obj, const char **r_ostr,
 		uint32_t *r_olen, uint32_t *r_line_num)
 {
     bool retval;
@@ -276,7 +276,7 @@ origin_p_ostr_hash(const void *a_key)
 {
     uint32_t retval;
     cw_origin_ostr_t *key = (cw_origin_ostr_t *) a_key;
-    uint8_t *str;
+    char *str;
     uint32_t i, len;
 
     str = key->ostr;

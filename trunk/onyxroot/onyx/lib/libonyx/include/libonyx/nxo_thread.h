@@ -49,7 +49,7 @@ struct cw_nxo_threadp_s
 
     /* Current origin/length, line number (counting starts at 1 by convention)
      * and column number (counting starts at 0). */
-    const uint8_t *origin;
+    const char *origin;
     uint32_t olen;
 
     uint32_t line;
@@ -160,9 +160,9 @@ struct cw_nxoe_thread_s
      * If a temporary buffer is allocated, it is discarded as soon as the token
      * is handled.  That is, tok_buffer is used for every token until (if)
      * tok_buffer overflows. */
-    uint8_t *tok_str;
+    char *tok_str;
     uint32_t buffer_len; /* Only valid if buffer overflowed. */
-    uint8_t buffer[CW_NXO_THREAD_BUFFER_SIZE];
+    char buffer[CW_NXO_THREAD_BUFFER_SIZE];
 
     union
     {
@@ -204,7 +204,7 @@ struct cw_nxoe_thread_s
 	struct
 	{
 	    uint32_t q_depth;
-	    uint8_t hex_val;
+	    char hex_val;
 	} s;
 
 	/* name. */
@@ -238,11 +238,11 @@ nxo_threadp_delete(cw_nxo_threadp_t *a_threadp, cw_nxo_t *a_thread);
 
 void
 nxo_threadp_origin_get(const cw_nxo_threadp_t *a_threadp,
-		       const uint8_t **r_origin, uint32_t *r_olen);
+		       const char **r_origin, uint32_t *r_olen);
 
 void
 nxo_threadp_origin_set(cw_nxo_threadp_t *a_threadp,
-		       const uint8_t *a_origin, uint32_t a_olen);
+		       const char *a_origin, uint32_t a_olen);
 
 void
 nxo_threadp_position_get(const cw_nxo_threadp_t *a_threadp, uint32_t *r_line,
@@ -287,7 +287,7 @@ nxo_thread_loop(cw_nxo_t *a_nxo);
 
 void
 nxo_thread_interpret(cw_nxo_t *a_nxo, cw_nxo_threadp_t *a_threadp, const
-		     uint8_t *a_str, uint32_t a_len);
+		     char *a_str, uint32_t a_len);
 
 void
 nxo_thread_flush(cw_nxo_t *a_nxo, cw_nxo_threadp_t *a_threadp);
@@ -296,7 +296,7 @@ void
 nxo_thread_nerror(cw_nxo_t *a_nxo, cw_nxn_t a_nxn);
 
 void
-nxo_thread_serror(cw_nxo_t *a_nxo, const uint8_t *a_str, uint32_t a_len);
+nxo_thread_serror(cw_nxo_t *a_nxo, const char *a_str, uint32_t a_len);
 
 bool
 nxo_thread_dstack_search(cw_nxo_t *a_nxo, cw_nxo_t *a_key, cw_nxo_t *r_value);

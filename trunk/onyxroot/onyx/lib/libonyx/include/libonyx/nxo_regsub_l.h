@@ -20,7 +20,7 @@ typedef struct
 {
     /* String pointer and length for a plain string.  If str is NULL, then len
      * instead specifies a capturing subpattern. */
-    uint8_t *str;
+    char *str;
     uint32_t len;
 } cw_nxoe_regsub_telm_t;
 
@@ -52,7 +52,7 @@ struct cw_nxoe_regsub_s
     int capturecount;
 
     /* Template string and length.  vec elements point into this string. */
-    uint8_t *template;
+    char *template;
     uint32_t tlen;
 
     /* Vector of template elements. */

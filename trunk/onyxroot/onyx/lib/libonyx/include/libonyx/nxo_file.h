@@ -11,10 +11,10 @@
  ******************************************************************************/
 
 typedef int32_t cw_nxo_file_read_t (void *a_arg, cw_nxo_t *a_file,
-				    uint32_t a_len, uint8_t *r_str);
+				    uint32_t a_len, char *r_str);
 
 typedef bool cw_nxo_file_write_t (void *a_arg, cw_nxo_t *a_file,
-				  const uint8_t *a_str,
+				  const char *a_str,
 				  uint32_t a_len);
 
 typedef cw_nxoe_t *cw_nxo_file_ref_iter_t (void *a_arg, bool a_reset);
@@ -37,19 +37,19 @@ nxo_file_synthetic(cw_nxo_t *a_nxo, cw_nxo_file_read_t *a_read,
 
 #ifdef CW_POSIX_FILE
 cw_nxn_t
-nxo_file_open(cw_nxo_t *a_nxo, const uint8_t *a_filename, uint32_t a_nlen,
-	      const uint8_t *a_flags, uint32_t a_flen, mode_t a_mode);
+nxo_file_open(cw_nxo_t *a_nxo, const char *a_filename, uint32_t a_nlen,
+	      const char *a_flags, uint32_t a_flen, mode_t a_mode);
 #endif
 
 cw_nxn_t
 nxo_file_close(cw_nxo_t *a_nxo);
 
 void
-nxo_file_origin_get(const cw_nxo_t *a_nxo, const uint8_t **r_origin,
+nxo_file_origin_get(const cw_nxo_t *a_nxo, const char **r_origin,
 		    uint32_t *r_olen);
 
 void
-nxo_file_origin_set(cw_nxo_t *a_nxo, const uint8_t *a_origin,
+nxo_file_origin_set(cw_nxo_t *a_nxo, const char *a_origin,
 		    uint32_t a_olen);
 
 #ifdef CW_POSIX_FILE
@@ -64,14 +64,14 @@ bool
 nxo_file_nonblocking_set(cw_nxo_t *a_nxo, bool a_nonblocking);
 
 int32_t
-nxo_file_read(cw_nxo_t *a_nxo, uint32_t a_len, uint8_t *r_str);
+nxo_file_read(cw_nxo_t *a_nxo, uint32_t a_len, char *r_str);
 
 cw_nxn_t
 nxo_file_readline(cw_nxo_t *a_nxo, bool a_locking, cw_nxo_t *r_string,
 		  bool *r_eof);
 
 cw_nxn_t
-nxo_file_write(cw_nxo_t *a_nxo, const uint8_t *a_str, uint32_t a_len,
+nxo_file_write(cw_nxo_t *a_nxo, const char *a_str, uint32_t a_len,
 	       uint32_t *r_count);
 
 #ifdef CW_POSIX_FILE

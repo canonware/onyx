@@ -65,7 +65,7 @@ nxm_new(cw_nxo_t *a_nxo, cw_nxo_t *a_path, cw_nxo_t *a_sym)
     cw_nxm_t *nxm;
     void *handle, *symbol;
     uint32_t pathlen, symlen;
-    uint8_t *path, *sym;
+    char *path, *sym;
 
     cw_check_ptr(a_path);
     cw_assert(nxo_type_get(a_path) == NXOT_STRING);

@@ -26,9 +26,9 @@
  * is lamentable, but is better than the alternative of maintaining the two
  * representations separately. */
 #ifdef CW_NXN_C_
-const uint8_t *cw_g_nx_names[] =
+const char *cw_g_nx_names[] =
 #else
-extern const uint8_t *cw_g_nx_names[];
+extern const char *cw_g_nx_names[];
 typedef enum
 #endif
 {
@@ -875,13 +875,13 @@ cw_nxn_t
 ;
 
 #ifndef CW_USE_INLINES
-const uint8_t *nxn_str(cw_nxn_t a_nxn);
+const char *nxn_str(cw_nxn_t a_nxn);
 uint32_t nxn_len(cw_nxn_t a_nxn);
 #endif
 
 #if (defined(CW_USE_INLINES) && !defined(CW_NXN_C_) \
      || (!defined(CW_USE_INLINES) && defined(CW_NXN_C_)))
-CW_INLINE const uint8_t *
+CW_INLINE const char *
 nxn_str(cw_nxn_t a_nxn)
 {
     cw_assert(a_nxn > NXN_ZERO && a_nxn <= NXN_LAST);
@@ -894,7 +894,7 @@ nxn_len(cw_nxn_t a_nxn)
 {
     cw_assert(a_nxn > NXN_ZERO && a_nxn <= NXN_LAST);
 
-    return strlen((const char *) cw_g_nx_names[a_nxn]);
+    return strlen(cw_g_nx_names[a_nxn]);
 }
 #endif /* (defined(CW_USE_INLINES) && !defined(CW_NXN_C_) \
 	*  || (!defined(CW_USE_INLINES) && defined(CW_NXN_C_))) */

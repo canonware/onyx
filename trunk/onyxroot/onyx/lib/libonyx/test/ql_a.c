@@ -20,7 +20,7 @@ typedef struct list_s list_t;
 struct list_s
 {
     ql_elm(list_t) link;
-    uint8_t id;
+    char id;
 };
 
 int

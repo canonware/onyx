@@ -18,7 +18,7 @@ struct cw_nxoe_name_s
 
     /* name is not required to be NULL-terminated, so we keep track of the
      * length. */
-    const uint8_t *str;
+    const char *str;
     uint32_t len;
 
     cw_chi_t chi;
@@ -96,7 +96,7 @@ nxoe_l_name_delete(cw_nxoe_t *a_nxoe, uint32_t a_iter)
 	/* Cast away the const here; it's one of two places that the string is
 	 * allowed to be modified, and this cast is better than dropping the
 	 * const altogether. */
-	nxa_free((uint8_t *) name->str, name->len);
+	nxa_free((char *) name->str, name->len);
     }
 
     nxa_free(name, sizeof(cw_nxoe_name_t));

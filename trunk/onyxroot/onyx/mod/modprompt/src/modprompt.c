@@ -47,14 +47,14 @@ struct cw_modprompt_synth_s {
     cw_cnd_t get_cnd; /* The reader (interpreter thread) waits on this. */
 #endif
 
-    uint8_t *buffer;
+    char *buffer;
     uint32_t buffer_size;
     uint32_t buffer_count;
 
     EditLine *el;
     History *hist;
     HistEvent hevent;
-    uint8_t prompt_str[CW_PROMPT_STRLEN];
+    char prompt_str[CW_PROMPT_STRLEN];
 };
 
 /* Globals. */
@@ -70,7 +70,7 @@ modprompt_synth_delete(void *a_data);
 
 static int32_t
 modprompt_read(void *a_data, cw_nxo_t *a_file, uint32_t a_len,
-	       uint8_t *r_str);
+	       char *r_str);
 
 static void
 modprompt_promptstring(struct cw_modprompt_synth_s *a_synth);
@@ -249,7 +249,7 @@ modprompt_synth_delete(void *a_data)
 #ifdef CW_THREADS
 static int32_t
 modprompt_read(void *a_data, cw_nxo_t *a_file, uint32_t a_len,
-	       uint8_t *r_str)
+	       char *r_str)
 {
     int32_t retval;
     struct cw_modprompt_synth_s *synth = (struct cw_modprompt_synth_s *) a_data;
@@ -296,7 +296,7 @@ modprompt_read(void *a_data, cw_nxo_t *a_file, uint32_t a_len,
 #else
 static int32_t
 modprompt_read(void *a_data, cw_nxo_t *a_file, uint32_t a_len,
-	       uint8_t *r_str)
+	       char *r_str)
 {
     int32_t retval;
     struct cw_modprompt_synth_s *synth = (struct cw_modprompt_synth_s *) a_data;
@@ -354,11 +354,11 @@ modprompt_read(void *a_data, cw_nxo_t *a_file, uint32_t a_len,
 	    /* Expand the buffer. */
 	    if (synth->buffer == NULL)
 	    {
-		synth->buffer = (uint8_t *) cw_malloc(count);
+		synth->buffer = (char *) cw_malloc(count);
 	    }
 	    else
 	    {
-		synth->buffer = (uint8_t *) cw_realloc(synth->buffer, count);
+		synth->buffer = (char *) cw_realloc(synth->buffer, count);
 	    }
 	    synth->buffer_size = count;
 	}
@@ -397,11 +397,11 @@ modprompt_promptstring(struct cw_modprompt_synth_s *a_synth)
     if ((nxo_thread_deferred(synth->thread) == false)
 	&& (nxo_thread_state(synth->thread) == THREADTS_START))
     {
-	uint8_t *pstr;
+	char *pstr;
 	uint32_t plen, maxlen;
 	cw_nxo_t *nxo;
 	cw_nxo_t *stack;
-	static const uint8_t code[] =
+	static const char code[] =
 	    "{$promptstring where {\n"
 	    "pop\n"
 	    /* Save the current contents of errordict into promptdict. */
@@ -640,11 +640,11 @@ modprompt_entry(void *a_arg)
 	    /* Expand the buffer. */
 	    if (synth->buffer == NULL)
 	    {
-		synth->buffer = (uint8_t *) cw_malloc(count);
+		synth->buffer = (char *) cw_malloc(count);
 	    }
 	    else
 	    {
-		synth->buffer = (uint8_t *) cw_realloc(synth->buffer, count);
+		synth->buffer = (char *) cw_realloc(synth->buffer, count);
 	    }
 	    synth->buffer_size = count;
 	}

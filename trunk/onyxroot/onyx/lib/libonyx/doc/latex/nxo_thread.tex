@@ -58,7 +58,7 @@ cw\_nxo\_t *a\_thread}}
 \label{nxo_threadp_origin_get}
 \index{nxo_threadp_origin_get@\cfunc{nxo\_threadp\_origin\_get}{}}
 \citem{\cfunc[void]{nxo\_threadp\_origin\_get}{const cw\_nxo\_threadp\_t
-*a\_threadp, const uint8\_t **r\_origin, uint32\_t *r\_olen}}
+*a\_threadp, const char **r\_origin, uint32\_t *r\_olen}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -83,7 +83,7 @@ cw\_nxo\_t *a\_thread}}
 \label{nxo_threadp_origin_set}
 \index{nxo_threadp_origin_set@\cfunc{nxo\_threadp\_origin\_set}{}}
 \citem{\cfunc[void]{nxo\_threadp\_origin\_set}{cw\_nxo\_threadp\_t
-*a\_threadp, const uint8\_t *a\_origin, uint32\_t a\_olen}}
+*a\_threadp, const char *a\_origin, uint32\_t a\_olen}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -360,7 +360,7 @@ cw\_nxo\_t *a\_thread}}
 \label{nxo_thread_interpret}
 \index{nxo_thread_interpret@\cfunc{nxo\_thread\_interpret}{}}
 \citem{\cfunc[void]{nxo\_thread\_interpret}{cw\_nxo\_t *a\_nxo,
-cw\_nxo\_threadp\_t *a\_threadp, const uint8\_t *a\_str, uint32\_t
+cw\_nxo\_threadp\_t *a\_threadp, const char *a\_str, uint32\_t
 a\_len}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -416,7 +416,7 @@ a\_len}}
 	\end{capilist}
 \label{nxo_thread_serror}
 \index{nxo_thread_serror@\cfunc{nxo\_thread\_serror}{}}
-\citem{\cfunc[void]{nxo\_thread\_serror}{cw\_nxo\_t *a\_nxo, const uint8\_t
+\citem{\cfunc[void]{nxo\_thread\_serror}{cw\_nxo\_t *a\_nxo, const char
 a\_str, uint32\_t a\_len}}
 	\begin{capilist}
 	\item[Input(s): ]

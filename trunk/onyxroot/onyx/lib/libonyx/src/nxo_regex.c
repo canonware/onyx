@@ -22,7 +22,7 @@
  * GC-related initialization, so that this function can be used for the case
  * where a regex is temporarily constructed for a single match. */
 static cw_nxn_t
-nxo_p_regex_init(cw_nxoe_regex_t *a_regex, const uint8_t *a_pattern,
+nxo_p_regex_init(cw_nxoe_regex_t *a_regex, const char *a_pattern,
 		 uint32_t a_len, bool a_cont, bool a_global,
 		 bool a_insensitive, bool a_multiline,
 		 bool a_singleline)
@@ -249,7 +249,7 @@ nxo_p_regex_split(cw_nxoe_regex_t *a_regex, cw_nxo_t *a_thread,
 {
     cw_nxo_regex_cache_t *cache;
     cw_nxo_t *tstack, *tnxo;
-    uint8_t *istr;
+    char *istr;
     int ilen, ioff;
     uint32_t i, acnt;
 
@@ -380,7 +380,7 @@ nxo_p_regex_split(cw_nxoe_regex_t *a_regex, cw_nxo_t *a_thread,
 }
 
 cw_nxn_t
-nxo_regex_new(cw_nxo_t *a_nxo, const uint8_t *a_pattern,
+nxo_regex_new(cw_nxo_t *a_nxo, const char *a_pattern,
 	      uint32_t a_len, bool a_cont, bool a_global,
 	      bool a_insensitive, bool a_multiline,
 	      bool a_singleline)
@@ -437,7 +437,7 @@ nxo_regex_match(cw_nxo_t *a_nxo, cw_nxo_t *a_thread, cw_nxo_t *a_input,
 /* Do a match without creating a regex object, in order to avoid putting
  * pressure on the GC. */
 cw_nxn_t
-nxo_regex_nonew_match(cw_nxo_t *a_thread, const uint8_t *a_pattern,
+nxo_regex_nonew_match(cw_nxo_t *a_thread, const char *a_pattern,
 		      uint32_t a_len, bool a_cont, bool a_global,
 		      bool a_insensitive, bool a_multiline,
 		      bool a_singleline, cw_nxo_t *a_input,
@@ -489,7 +489,7 @@ nxo_regex_split(cw_nxo_t *a_nxo, cw_nxo_t *a_thread, uint32_t a_limit,
 /* Do a split without creating a regex object, in order to avoid putting
  * pressure on the GC. */
 cw_nxn_t
-nxo_regex_nonew_split(cw_nxo_t *a_thread, const uint8_t *a_pattern,
+nxo_regex_nonew_split(cw_nxo_t *a_thread, const char *a_pattern,
 		      uint32_t a_len, bool a_insensitive,
 		      bool a_multiline, bool a_singleline,
 		      uint32_t a_limit, cw_nxo_t *a_input, cw_nxo_t *r_array)

@@ -30,7 +30,7 @@ interactive_nxcode(cw_nxo_t *a_thread);
 typedef struct
 {
     bool is_expr;
-    uint8_t *str; /* If is_expr is false: filename; expression otherwise. */
+    char *str; /* If is_expr is false: filename; expression otherwise. */
 } cw_nxinit_t;
 
 #if (!defined(CW_POSIX_FILE) || !defined(CW_USE_MODPROMPT))
@@ -39,7 +39,7 @@ struct nx_read_arg_s
     int fd;
     cw_nxo_t *thread;
     bool interactive;
-    uint8_t *buffer;
+    char *buffer;
     uint32_t buffer_size;
     uint32_t buffer_count;
 };
@@ -58,10 +58,10 @@ void
 usage(void);
 
 int
-interactive_run(cw_nxinit_t *a_init, uint32_t a_ninit, const uint8_t *a_start);
+interactive_run(cw_nxinit_t *a_init, uint32_t a_ninit, const char *a_start);
 
 int
-batch_run(int a_argc, char **a_argv, bool a_version, uint8_t *a_expression);
+batch_run(int a_argc, char **a_argv, bool a_version, char *a_expression);
 
 bool
 file_setup(cw_nxo_t *a_thread, const char *a_filename);
@@ -71,7 +71,7 @@ void
 stdin_init(cw_nxo_t *a_thread, cw_nx_t *a_nx, bool a_interactive);
 
 int32_t
-nx_read(void *a_arg, cw_nxo_t *a_file, uint32_t a_len, uint8_t *r_str);
+nx_read(void *a_arg, cw_nxo_t *a_file, uint32_t a_len, char *r_str);
 
 void
 nx_read_shutdown(void *a_arg);
@@ -85,14 +85,14 @@ void
 stderr_init(cw_nx_t *a_nx);
 
 bool
-nx_write(void *a_arg, cw_nxo_t *a_file, const uint8_t *a_str, uint32_t a_len);
+nx_write(void *a_arg, cw_nxo_t *a_file, const char *a_str, uint32_t a_len);
 #endif
 
 int
 main(int argc, char **argv, char **envp)
 {
     int retval, c;
-    static const uint8_t optstr[] =
+    static const char optstr[] =
 #ifdef _GNU_SOURCE
 	/* Without this, glibc will permute unknown options
 	 * to the end of the argument list. */
@@ -104,10 +104,10 @@ main(int argc, char **argv, char **envp)
 #endif
 	"s:";
     bool opt_version = false;
-    uint8_t *opt_expression = NULL;
+    char *opt_expression = NULL;
     uint32_t opt_ninit = 0;
     cw_nxinit_t *opt_init = NULL;
-    uint8_t *opt_start = NULL;
+    char *opt_start = NULL;
 
     /* Run through the arguments to figure out how much of argv to pass to
      * libonyx_init().  Don't bother with error checking, since that's done
@@ -334,7 +334,7 @@ thread_start(cw_nxo_t *a_thread, cw_op_t *a_op)
 }
 
 int
-interactive_run(cw_nxinit_t *a_init, uint32_t a_ninit, const uint8_t *a_start)
+interactive_run(cw_nxinit_t *a_init, uint32_t a_ninit, const char *a_start)
 {
     int retval;
     cw_nx_t nx;
@@ -375,8 +375,7 @@ interactive_run(cw_nxinit_t *a_init, uint32_t a_ninit, const uint8_t *a_start)
 	    nxo = nxo_stack_push(nxo_thread_ostack_get(&thread));
 	    nxo_string_new(nxo, false, strlen((char *) a_init[i].str));
 	    nxo_attr_set(nxo, NXOA_EXECUTABLE);
-	    nxo_string_set(nxo, 0, (uint8_t *) a_init[i].str,
-			   nxo_string_len_get(nxo));
+	    nxo_string_set(nxo, 0, a_init[i].str, nxo_string_len_get(nxo));
 #ifdef CW_POSIX_FILE
 	}
 	else
@@ -438,7 +437,7 @@ interactive_run(cw_nxinit_t *a_init, uint32_t a_ninit, const uint8_t *a_start)
 }
 
 int
-batch_run(int a_argc, char **a_argv, bool a_version, uint8_t *a_expression)
+batch_run(int a_argc, char **a_argv, bool a_version, char *a_expression)
 {
     int retval;
     cw_nx_t nx;
@@ -600,7 +599,7 @@ stdin_init(cw_nxo_t *a_thread, cw_nx_t *a_nx, bool a_interactive)
 }
 
 int32_t
-nx_read(void *a_arg, cw_nxo_t *a_file, uint32_t a_len, uint8_t *r_str)
+nx_read(void *a_arg, cw_nxo_t *a_file, uint32_t a_len, char *r_str)
 {
     int32_t retval;
     struct nx_read_arg_s *arg = (struct nx_read_arg_s *) a_arg;
@@ -661,7 +660,7 @@ nx_read(void *a_arg, cw_nxo_t *a_file, uint32_t a_len, uint8_t *r_str)
 		if (arg->buffer == NULL)
 		{
 		    /* Initialize the buffer. */
-		    arg->buffer = (uint8_t *) cw_malloc(CW_BUFFER_SIZE);
+		    arg->buffer = (char *) cw_malloc(CW_BUFFER_SIZE);
 		    arg->buffer_size = CW_BUFFER_SIZE;
 		    arg->buffer_count = 0;
 		}
@@ -687,9 +686,8 @@ nx_read(void *a_arg, cw_nxo_t *a_file, uint32_t a_len, uint8_t *r_str)
 		    if (arg->buffer_count == arg->buffer_size)
 		    {
 			/* Expand the buffer. */
-			arg->buffer
-			    = (uint8_t *) cw_realloc(arg->buffer,
-							arg->buffer_size * 2);
+			arg->buffer = (char *) cw_realloc(arg->buffer,
+							  arg->buffer_size * 2);
 			arg->buffer_size *= 2;
 		    }
 		}
@@ -764,7 +762,7 @@ stderr_init(cw_nx_t *a_nx)
 }
 
 bool
-nx_write(void *a_arg, cw_nxo_t *a_file, const uint8_t *a_str, uint32_t a_len)
+nx_write(void *a_arg, cw_nxo_t *a_file, const char *a_str, uint32_t a_len)
 {
     bool retval;
     struct nx_write_arg_s *arg = (struct nx_write_arg_s *) a_arg;

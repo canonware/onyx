@@ -80,7 +80,7 @@ systemdict_p_name_arg(cw_nxo_t *a_name,
 		      const struct cw_systemdict_name_arg *a_arg,
 		      uint32_t a_argcnt)
 {
-    const uint8_t *str;
+    const char *str;
     uint32_t len, i;
 
     cw_assert(nxo_type_get(a_name) == NXOT_NAME);
@@ -3048,15 +3048,15 @@ systemdict_cvn(cw_nxo_t *a_thread)
 
 static uint32_t
 systemdict_p_integer_render(cw_nxoi_t a_integer, uint32_t a_base,
-			    uint8_t *r_buf)
+			    char *r_buf)
 {
     uint32_t retval, i;
     uint64_t t = (uint64_t) a_integer;
     bool negative;
-    uint8_t *syms = "0123456789abcdefghijklmnopqrstuvwxyz";
+    char *syms = "0123456789abcdefghijklmnopqrstuvwxyz";
     /* Since we're printing a signed integer, the most we ever need is 1 sign
      * byte and 63 digit bytes. */
-    uint8_t *result, s_result[65] =
+    char *result, s_result[65] =
 	"0000000000000000000000000000000000000000000000000000000000000000";
 
     /* Leave space for a leading sign. */
@@ -3126,8 +3126,8 @@ systemdict_cvrs(cw_nxo_t *a_thread)
     cw_nxo_t *num, *radix;
     uint64_t val;
     uint32_t rlen, base;
-    uint8_t *str;
-    uint8_t result[66]; /* Sign, 64 bits, terminator. */
+    char *str;
+    char result[66]; /* Sign, 64 bits, terminator. */
 
     ostack = nxo_thread_ostack_get(a_thread);
     NXO_STACK_GET(radix, ostack, a_thread);
@@ -3177,7 +3177,7 @@ systemdict_cvs(cw_nxo_t *a_thread)
 	}
 	case NXOT_INTEGER:
 	{
-	    uint8_t result[21];
+	    char result[21];
 	    int32_t len;
 
 	    len = systemdict_p_integer_render(nxo_integer_get(nxo), 10,
@@ -3240,7 +3240,7 @@ systemdict_cvs(cw_nxo_t *a_thread)
 #ifdef CW_REAL
 	case NXOT_REAL:
 	{
-	    uint8_t result[15]; /* "-9.999999e+307\0" */
+	    char result[15]; /* "-9.999999e+307\0" */
 	    int32_t len;
 
 	    len = snprintf(result, sizeof(result), "%e", nxo_real_get(nxo));
@@ -3256,8 +3256,9 @@ systemdict_cvs(cw_nxo_t *a_thread)
 	{
 	    cw_nxo_t *tstack, *tnxo;
 	    uint32_t i, j, len, newlen;
-	    uint8_t *str, *newstr;
-	    uint8_t syms[] = "0123456789abcdef";
+	    unsigned char *str;
+	    char *newstr;
+	    char syms[] = "0123456789abcdef";
 
 	    /* The source is already a string, but here we convert non-printing
 	     * characters. */
@@ -4811,7 +4812,7 @@ systemdict_foreach(cw_nxo_t *a_thread)
 #ifdef CW_OOP
 	    uint32_t c_cdepth;
 #endif
-	    uint8_t el;
+	    unsigned char el;
 	    volatile cw_nxoi_t i;
 
 	    /* Move proc and array to tstack. */
@@ -5268,7 +5269,7 @@ systemdict_get(cw_nxo_t *a_thread)
 	case NXOT_STRING:
 	{
 	    cw_nxoi_t index;
-	    uint8_t el;
+	    unsigned char el;
 
 	    if (nxo_type_get(with) != NXOT_INTEGER)
 	    {
@@ -7992,7 +7993,7 @@ void
 systemdict_offset(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack, *input, *submatch;
-    uint8_t *instr, *inend, *smstr, *smend;
+    char *instr, *inend, *smstr, *smend;
 
     ostack = nxo_thread_ostack_get(a_thread);
     NXO_STACK_GET(submatch, ostack, a_thread);
@@ -8128,7 +8129,7 @@ void
 systemdict_origin(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack, *nxo;
-    const uint8_t *filename;
+    const char *filename;
     uint32_t fnlen, line;
 
     ostack = nxo_thread_ostack_get(a_thread);
@@ -8189,7 +8190,7 @@ void
 systemdict_path(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack, *tstack, *envdict, *nxo, *tkey, *tval;
-    uint8_t *prog, *path, *rem, *elm, *buf;
+    char *prog, *path, *rem, *elm, *buf;
     uint32_t proglen, pathlen, buflen, len;
 
     ostack = nxo_thread_ostack_get(a_thread);
@@ -8223,7 +8224,7 @@ systemdict_path(cw_nxo_t *a_thread)
 
     /* Create a '\0'-terminated copy of the path. */
     pathlen = nxo_string_len_get(tval) + 1;
-    path = (uint8_t *) cw_malloc(pathlen);
+    path = (char *) cw_malloc(pathlen);
     memcpy(path, nxo_string_get(tval), pathlen - 1);
     path[pathlen - 1] = '\0';
 
@@ -8233,7 +8234,7 @@ systemdict_path(cw_nxo_t *a_thread)
      *   "path/prog\0"
      */
     buflen =  pathlen + 1 + nxo_string_len_get(nxo);
-    buf = (uint8_t *) cw_malloc(buflen);
+    buf = (char *) cw_malloc(buflen);
 
     /* Iterate through the path and search for the program. */
     for (rem = path; (elm = strsep((char **) &rem, ":")) != NULL;)
@@ -8939,7 +8940,7 @@ systemdict_put(cw_nxo_t *a_thread)
 	case NXOT_STRING:
 	{
 	    cw_nxoi_t index;
-	    uint8_t val;
+	    unsigned char val;
 
 	    if ((nxo_type_get(with) != NXOT_INTEGER)
 		|| nxo_type_get(what) != NXOT_INTEGER)
@@ -9019,7 +9020,7 @@ systemdict_putinterval(cw_nxo_t *a_thread)
 	}
 	case NXOT_STRING:
 	{
-	    uint8_t *str;
+	    char *str;
 	    uint32_t len;
 
 	    str = nxo_string_get(what);
@@ -9099,7 +9100,6 @@ systemdict_read(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack;
     cw_nxo_t *file;
-    uint8_t val;
     int32_t nread;
 
     ostack = nxo_thread_ostack_get(a_thread);
@@ -9109,6 +9109,7 @@ systemdict_read(cw_nxo_t *a_thread)
     {
 	case NXOT_FILE:
 	{
+	    unsigned char val;
 	    cw_nxo_t *value, *code;
 
 	    /* Character read. */
@@ -10241,7 +10242,7 @@ void
 systemdict_send(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack, *sock, *nxo;
-    uint8_t *str;
+    char *str;
     uint32_t npop, len;
     int fd, flags;
     ssize_t count, nwritten;
@@ -10491,8 +10492,8 @@ systemdict_setenv(cw_nxo_t *a_thread)
     cw_nxo_t *ostack, *tstack, *envdict;
     cw_nxo_t *key, *val, *tnxo;
     uint32_t klen, vlen;
-    const uint8_t *str;
-    uint8_t *tstr;
+    const char *str;
+    char *tstr;
 
     ostack = nxo_thread_ostack_get(a_thread);
     tstack = nxo_thread_tstack_get(a_thread);
@@ -14225,7 +14226,7 @@ void
 systemdict_test(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack, *file, *test;
-    uint8_t c;
+    char c;
     bool result;
     int32_t fd = -1;
     int error;
@@ -14760,7 +14761,7 @@ systemdict_token(cw_nxo_t *a_thread)
 	    cw_nxo_threadp_t threadp;
 	    int32_t nread;
 	    uint32_t scount;
-	    uint8_t c;
+	    char c;
 
 	    scount = nxo_stack_count(ostack);
 	    tnxo = nxo_stack_push(tstack);
@@ -15798,9 +15799,9 @@ systemdict_write(cw_nxo_t *a_thread)
     {
 	case NXOT_INTEGER:
 	{
-	    uint8_t val;
+	    char val;
 
-	    val = (uint8_t) nxo_integer_get(value);
+	    val = (char) nxo_integer_get(value);
 	    error = nxo_file_write(file, &val, 1, &count);
 	    if (error)
 	    {

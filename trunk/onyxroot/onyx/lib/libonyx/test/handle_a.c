@@ -15,7 +15,7 @@
 #define NAME_anon_handle "anon_handle"
 #define NAME_mark_handle "mark_handle"
 
-const uint8_t *data = "handle data";
+const char *data = "handle data";
 
 void
 handle_eval(void *a_data, cw_nxo_t *a_thread)

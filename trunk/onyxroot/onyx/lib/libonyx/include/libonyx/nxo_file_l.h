@@ -28,7 +28,7 @@ struct cw_nxoe_file_s
     cw_mtx_t lock;
 #endif
 
-    uint8_t *origin;
+    char *origin;
     uint32_t olen;
 
     enum
@@ -61,7 +61,7 @@ struct cw_nxoe_file_s
 #endif
     } f;
     /* Buffering. */
-    uint8_t *buffer;
+    char *buffer;
     uint32_t buffer_size;
     enum
     {

@@ -154,12 +154,12 @@ nxo_file_synthetic(cw_nxo_t *a_nxo, cw_nxo_file_read_t *a_read,
  * NXN_limitcheck,
  * NXN_invalidfileaccess */
 cw_nxn_t
-nxo_file_open(cw_nxo_t *a_nxo, const uint8_t *a_filename, uint32_t a_nlen,
-	      const uint8_t *a_flags, uint32_t a_flen, mode_t a_mode)
+nxo_file_open(cw_nxo_t *a_nxo, const char *a_filename, uint32_t a_nlen,
+	      const char *a_flags, uint32_t a_flen, mode_t a_mode)
 {
     cw_nxn_t retval;
     cw_nxoe_file_t *file;
-    uint8_t filename[PATH_MAX], flags[3];
+    char filename[PATH_MAX], flags[3];
     int access;
 
     /* Copy the arguments to local buffers in order to assure '\0'
@@ -392,7 +392,7 @@ nxo_file_close(cw_nxo_t *a_nxo)
 }
 
 void
-nxo_file_origin_get(const cw_nxo_t *a_nxo, const uint8_t **r_origin,
+nxo_file_origin_get(const cw_nxo_t *a_nxo, const char **r_origin,
 		    uint32_t *r_olen)
 {
     cw_nxoe_file_t *file;
@@ -412,7 +412,7 @@ nxo_file_origin_get(const cw_nxo_t *a_nxo, const uint8_t **r_origin,
 }
 
 void
-nxo_file_origin_set(cw_nxo_t *a_nxo, const uint8_t *a_origin,
+nxo_file_origin_set(cw_nxo_t *a_nxo, const char *a_origin,
 		    uint32_t a_olen)
 {
     cw_nxoe_file_t *file;
@@ -438,7 +438,7 @@ nxo_file_origin_set(cw_nxo_t *a_nxo, const uint8_t *a_origin,
     /* Allocate a copy of the origin. */
     if (a_origin != NULL)
     {
-	file->origin = (uint8_t *) nxa_malloc(a_olen);
+	file->origin = (char *) nxa_malloc(a_olen);
 	memcpy(file->origin, a_origin, a_olen);
 	file->olen = a_olen;
     }
@@ -581,7 +581,7 @@ nxo_file_nonblocking_set(cw_nxo_t *a_nxo, bool a_nonblocking)
 
 /* -1: NXN_ioerror */
 int32_t
-nxo_file_read(cw_nxo_t *a_nxo, uint32_t a_len, uint8_t *r_str)
+nxo_file_read(cw_nxo_t *a_nxo, uint32_t a_len, char *r_str)
 {
     int32_t retval;
     cw_nxoe_file_t *file;
@@ -817,7 +817,7 @@ nxo_file_readline(cw_nxo_t *a_nxo, bool a_locking, cw_nxo_t *r_string,
 {
     cw_nxn_t retval;
     cw_nxoe_file_t *file;
-    uint8_t *line, s_line[CW_NXO_FILE_READLINE_BUFSIZE];
+    char *line, s_line[CW_NXO_FILE_READLINE_BUFSIZE];
     uint32_t i, maxlen;
     int32_t nread;
     enum {NORMAL, CR} state;
@@ -869,16 +869,16 @@ nxo_file_readline(cw_nxo_t *a_nxo, bool a_locking, cw_nxo_t *r_string,
 		if (line == s_line)
 		{
 		    /* First expansion. */
-		    line = (uint8_t *) nxa_malloc(maxlen << 1);
+		    line = (char *) nxa_malloc(maxlen << 1);
 		    memcpy(line, s_line, maxlen);
 		}
 		else
 		{
-		    uint8_t *oldline;
+		    char *oldline;
 
 		    /* We've already expanded at least once. */
 		    oldline = line;
-		    line = (uint8_t *) nxa_malloc(maxlen << 1);
+		    line = (char *) nxa_malloc(maxlen << 1);
 		    memcpy(line, oldline, maxlen);
 		    nxa_free(oldline, maxlen);
 		}
@@ -1018,16 +1018,16 @@ nxo_file_readline(cw_nxo_t *a_nxo, bool a_locking, cw_nxo_t *r_string,
 		if (line == s_line)
 		{
 		    /* First expansion. */
-		    line = (uint8_t *) nxa_malloc(maxlen << 1);
+		    line = (char *) nxa_malloc(maxlen << 1);
 		    memcpy(line, s_line, maxlen);
 		}
 		else
 		{
-		    uint8_t *oldline;
+		    char *oldline;
 
 		    /* We've already expanded at least once. */
 		    oldline = line;
-		    line = (uint8_t *) nxa_malloc(maxlen << 1);
+		    line = (char *) nxa_malloc(maxlen << 1);
 		    memcpy(line, oldline, maxlen);
 		    nxa_free(oldline, maxlen);
 		}
@@ -1135,7 +1135,7 @@ nxo_file_readline(cw_nxo_t *a_nxo, bool a_locking, cw_nxo_t *r_string,
 
 /* NXN_ioerror */
 cw_nxn_t
-nxo_file_write(cw_nxo_t *a_nxo, const uint8_t *a_str, uint32_t a_len,
+nxo_file_write(cw_nxo_t *a_nxo, const char *a_str, uint32_t a_len,
 	       uint32_t *r_count)
 {
     cw_nxn_t retval;
@@ -1563,7 +1563,7 @@ nxo_file_buffer_size_set(cw_nxo_t *a_nxo, uint32_t a_size)
 	{
 	    nxa_free(file->buffer, file->buffer_size);
 	}
-	file->buffer = (uint8_t *) nxa_malloc(a_size);
+	file->buffer = (char *) nxa_malloc(a_size);
 	file->buffer_size = a_size;
     }
     file->buffer_mode = BUFFER_EMPTY;

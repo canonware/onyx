@@ -30,9 +30,9 @@ void
 nxo_array_el_set(cw_nxo_t *a_nxo, cw_nxo_t *a_el, cw_nxoi_t a_offset);
 
 bool
-nxo_array_origin_get(cw_nxo_t *a_nxo, const uint8_t **r_origin,
+nxo_array_origin_get(cw_nxo_t *a_nxo, const char **r_origin,
 		     uint32_t *r_olen, uint32_t *r_line_num);
 
 void
-nxo_array_origin_set(cw_nxo_t *a_nxo, const uint8_t *a_origin,
+nxo_array_origin_set(cw_nxo_t *a_nxo, const char *a_origin,
 		     uint32_t a_olen, uint32_t a_line_num);

@@ -11,10 +11,10 @@
  ******************************************************************************/
 
 void
-nxo_name_new(cw_nxo_t *a_nxo, const uint8_t *a_str, uint32_t a_len,
+nxo_name_new(cw_nxo_t *a_nxo, const char *a_str, uint32_t a_len,
 	     bool a_is_static);
 
-const uint8_t *
+const char *
 nxo_name_str_get(const cw_nxo_t *a_nxo);
 
 uint32_t

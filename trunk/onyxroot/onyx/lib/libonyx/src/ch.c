@@ -300,11 +300,11 @@ uint32_t
 ch_string_hash(const void *a_key)
 {
     uint32_t retval, c;
-    uint8_t *str;
+    char *str;
 
     cw_check_ptr(a_key);
 
-    for (str = (uint8_t *) a_key, retval = 5381; (c = *str) != 0; str++)
+    for (str = (char *) a_key, retval = 5381; (c = *str) != 0; str++)
     {
 	retval = ((retval << 5) + retval) + c;
     }

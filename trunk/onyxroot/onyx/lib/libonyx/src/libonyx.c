@@ -76,7 +76,7 @@ libonyx_init(int a_argc, char **a_argv, char **a_envp)
 	int i;
 	int32_t len;
 	cw_nxo_t str_nxo; /* GC-unsafe, but GC is disabled. */
-	uint8_t *t_str;
+	char *t_str;
 
 	/* Create the argv array and populate it. */
 	nxo_array_new(&cw_g_argv, true, a_argc);

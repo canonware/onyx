@@ -12,7 +12,7 @@
 
 uint32_t
 nxo_l_thread_token(cw_nxo_t *a_nxo, cw_nxo_threadp_t *a_threadp,
-		   const uint8_t *a_str, uint32_t a_len);
+		   const char *a_str, uint32_t a_len);
 
 #ifndef CW_USE_INLINES
 cw_nxo_t *

@@ -58,7 +58,7 @@ nxo_string_new(cw_nxo_t *a_nxo, bool a_locking, uint32_t a_len)
     string->e.s.alloc_len = a_len;
     if (string->e.s.len > 0)
     {
-	string->e.s.str = (uint8_t *) nxa_calloc(1, string->e.s.alloc_len);
+	string->e.s.str = (char *) nxa_calloc(1, string->e.s.alloc_len);
     }
     else
     {
@@ -116,7 +116,7 @@ nxo_string_copy(cw_nxo_t *a_to, cw_nxo_t *a_from)
 {
     cw_nxoe_string_t *string_fr, *string_fr_i = NULL, *string_fr_l;
     cw_nxoe_string_t *string_to, *string_to_i = NULL, *string_to_l;
-    uint8_t *str_fr, *str_to;
+    char *str_fr, *str_to;
     uint32_t len_fr, len_to;
 
     /* Set string pointers. */
@@ -250,7 +250,7 @@ nxo_string_len_get(const cw_nxo_t *a_nxo)
 }
 
 void
-nxo_string_el_get(const cw_nxo_t *a_nxo, cw_nxoi_t a_offset, uint8_t *r_el)
+nxo_string_el_get(const cw_nxo_t *a_nxo, cw_nxoi_t a_offset, char *r_el)
 {
     cw_nxoe_string_t *string;
 
@@ -276,7 +276,7 @@ nxo_string_el_get(const cw_nxo_t *a_nxo, cw_nxoi_t a_offset, uint8_t *r_el)
 }
 
 void
-nxo_string_el_set(cw_nxo_t *a_nxo, uint8_t a_el, cw_nxoi_t a_offset)
+nxo_string_el_set(cw_nxo_t *a_nxo, char a_el, cw_nxoi_t a_offset)
 {
     cw_nxoe_string_t *string;
 
@@ -351,10 +351,10 @@ nxo_string_unlock(cw_nxo_t *a_nxo)
 }
 #endif
 
-uint8_t *
+char *
 nxo_string_get(const cw_nxo_t *a_nxo)
 {
-    uint8_t *retval;
+    char *retval;
     cw_nxoe_string_t *string;
 
     cw_check_ptr(a_nxo);
@@ -380,11 +380,11 @@ nxo_string_get(const cw_nxo_t *a_nxo)
 }
 
 void
-nxo_string_set(cw_nxo_t *a_nxo, uint32_t a_offset, const uint8_t *a_str,
+nxo_string_set(cw_nxo_t *a_nxo, uint32_t a_offset, const char *a_str,
 	       uint32_t a_len)
 {
     cw_nxoe_string_t *string;
-    uint8_t *str;
+    char *str;
 
     cw_check_ptr(a_nxo);
     cw_dassert(a_nxo->magic == CW_NXO_MAGIC);

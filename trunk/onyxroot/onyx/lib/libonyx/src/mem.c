@@ -455,7 +455,7 @@ mem_realloc_e(void *a_arg, void *a_ptr, size_t a_size, size_t a_old_size,
 	ql_tail_insert(&s_mem_addr_list, allocation, link);
 	if (a_size > old_size)
 	{
-	    memset(((uint8_t *) retval) + old_size, 0xa5,
+	    memset(((char *) retval) + old_size, 0xa5,
 		   a_size - old_size);
 	}
 	if (a_old_size != 0 && a_old_size != old_size)
