@@ -206,14 +206,12 @@ stil_op_systemdict_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 #define NENTRIES							\
 	((sizeof(systemdict_ops) / sizeof(struct cw_stil_op_dict_entry)))
 
-	stilo_new(a_dict, a_stilt, _CW_STILOT_DICTTYPE, NENTRIES);
+	stilo_dict_new(a_dict, a_stilt, NENTRIES);
 
 	for (i = 0; i < NENTRIES; i++) {
-		stilo_new(&name, a_stilt, _CW_STILOT_NAMETYPE,
-		    systemdict_ops[i].name,strlen(systemdict_ops[i].name),
-		    TRUE);
-		stilo_new(&operator, a_stilt, _CW_STILOT_OPERATORTYPE,
-		    systemdict_ops[i].op_f);
+		stilo_name_new(&name, a_stilt, systemdict_ops[i].name,
+		    strlen(systemdict_ops[i].name), TRUE);
+		stilo_operator_new(&operator, systemdict_ops[i].op_f);
 
 		stilo_dict_def(a_dict, a_stilt, &name, &operator);
 	}
@@ -649,7 +647,10 @@ op_lt(cw_stilt_t *a_stilt)
 void
 op_mark(cw_stilt_t *a_stilt)
 {
-	stils_push(&a_stilt->data_stils, a_stilt, _CW_STILOT_MARKTYPE);
+	cw_stilo_t	*stilo;
+
+	stilo = stils_push(&a_stilt->data_stils);
+	stilo_mark_new(stilo);
 }
 
 void
@@ -1001,14 +1002,20 @@ op_sym_gt_gt(cw_stilt_t *a_stilt)
 void
 op_sym_lb(cw_stilt_t *a_stilt)
 {
-	stils_push(&a_stilt->data_stils, a_stilt, _CW_STILOT_MARKTYPE);
+	cw_stilo_t	*stilo;
+
+	stilo = stils_push(&a_stilt->data_stils);
+	stilo_mark_new(stilo);
 }
 
 /* << */
 void
 op_sym_lt_lt(cw_stilt_t *a_stilt)
 {
-	stils_push(&a_stilt->data_stils, a_stilt, _CW_STILOT_MARKTYPE);
+	cw_stilo_t	*stilo;
+
+	stilo = stils_push(&a_stilt->data_stils);
+	stilo_mark_new(stilo);
 }
 
 /* ] */
@@ -1032,7 +1039,7 @@ op_sym_rb(cw_stilt_t *a_stilt)
 	 */
 	nelements = i;
 
-	stilo_new(&t_stilo, a_stilt, _CW_STILOT_ARRAYTYPE, nelements);
+	stilo_array_new(&t_stilo, a_stilt, nelements);
 	arr = stilo_array_get(&t_stilo);
 
 	/*
@@ -1047,7 +1054,7 @@ op_sym_rb(cw_stilt_t *a_stilt)
 	stils_pop(&a_stilt->data_stils, a_stilt, nelements + 1);
 
 	/* Push the array onto the stack. */
-	stilo = stils_push(&a_stilt->data_stils, a_stilt, _CW_STILOT_NOTYPE);
+	stilo = stils_push(&a_stilt->data_stils);
 	stilo_move(stilo, &t_stilo);
 
 	/* Clean up. */

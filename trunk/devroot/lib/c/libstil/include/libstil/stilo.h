@@ -117,11 +117,33 @@ struct cw_stiloe_dicto_s {
 /*
  * The ... arg is used for array, dict, name, operator, and string construction.
  */
-void		stilo_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilot_t
-    a_type, ...);
-void		stilo_new_v(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
-    cw_stilot_t a_type, va_list a_p);
+/*  void		stilo_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilot_t */
+/*      a_type, ...); */
+/*  void		stilo_new_v(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, */
+/*      cw_stilot_t a_type, va_list a_p); */
+void		stilo_no_new(cw_stilo_t *a_stilo);
+void		stilo_array_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
+    cw_uint32_t a_len);
+void		stilo_boolean_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
+void		stilo_condition_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
+void		stilo_dict_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
+    cw_uint32_t a_dict_size);
+void		stilo_file_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
+void		stilo_hook_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
+void		stilo_lock_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
+void		stilo_mark_new(cw_stilo_t *a_stilo);
+void		stilo_mstate_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
+void		stilo_name_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const
+    cw_uint8_t *a_name, cw_uint32_t a_len, cw_bool_t a_is_static);
+void		stilo_null_new(cw_stilo_t *a_stilo);
+void		stilo_number_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
+void		stilo_operator_new(cw_stilo_t *a_stilo, cw_op_t *a_op);
+void		stilo_string_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
+    cw_uint32_t a_len);
 
+
+
+void		stilo_clobber(cw_stilo_t *a_stilo);
 void		stilo_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
 
 cw_stilot_t	stilo_type_get(cw_stilo_t *a_stilo);

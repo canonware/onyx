@@ -59,7 +59,7 @@ stil_new(cw_stil_t *a_stil)
 	 */
 
 	/* Initialize systemdict, since stilt_new() will access it. */
-	stilo_new(&retval->systemdict, NULL, _CW_STILOT_NOTYPE);
+	stilo_no_new(&retval->systemdict);
 
 	if (stilt_new(&stilt, retval) == NULL)
 		goto OOM_4;
@@ -103,26 +103,4 @@ stil_delete(cw_stil_t *a_stil)
 	else
 		memset(a_stil, 0x5a, sizeof(cw_stil_t));
 #endif
-}
-
-cw_stil_bufc_t *
-stil_stil_bufc_get(cw_stil_t *a_stil)
-{
-	cw_stil_bufc_t *retval;
-
-	_cw_check_ptr(a_stil);
-	_cw_assert(a_stil->magic == _CW_STIL_MAGIC);
-
-	retval = _cw_stilag_stil_bufc_get(&a_stil->stilag);
-	if (retval == NULL)
-		goto RETURN;
-	bufc_new(&retval->bufc, stilag_mem_get(&a_stil->stilag),
-	    (cw_opaque_dealloc_t *)pool_put,
-	    stilag_stil_bufc_pool_get(&a_stil->stilag));
-	memset(retval->buffer, 0, sizeof(retval->buffer));
-	bufc_buffer_set(&retval->bufc, retval->buffer, _CW_STIL_BUFC_SIZE, TRUE,
-	    NULL, NULL);
-
-	RETURN:
-	return retval;
 }

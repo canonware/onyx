@@ -13,7 +13,6 @@ typedef struct cw_stilng_s cw_stilng_t;
 typedef struct cw_stilnt_s cw_stilnt_t;
 
 /* Defined here to resolve circular dependencies. */
-typedef struct cw_stil_bufc_s cw_stil_bufc_t;
 typedef struct cw_stila_s cw_stila_t;
 typedef struct cw_stilag_s cw_stilag_t;
 typedef struct cw_stilat_s cw_stilat_t;

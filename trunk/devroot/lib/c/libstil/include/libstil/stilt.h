@@ -9,6 +9,12 @@
  *
  ******************************************************************************/
 
+#ifdef _LIBSTIL_DBG
+#define	_CW_STILT_BUFFER_SIZE	  8
+#else
+#define	_CW_STILT_BUFFER_SIZE	256
+#endif
+
 struct cw_stilt_s {
 #if (defined(_LIBSTIL_DBG) || defined(_LIBSTIL_DEBUG))
 	cw_uint32_t	magic;
@@ -65,36 +71,43 @@ struct cw_stilt_s {
 	cw_uint32_t	tok_line;
 	cw_uint32_t	tok_column;
 
-	/*
-	 * If greater than _CW_STIL_BUFC_SIZE, tok_buffer is a buf.
-	 * Otherwise, it is a character array.
-	 */
+	/* Offset of first invalid character in tok_str. */
 	cw_uint32_t	index;
 
-	union {
-		cw_buf_t	buf;
-		cw_uint8_t	str[_CW_STIL_BUFC_SIZE];
-	}	tok_buffer;
+	/*
+	 * Pointer to the token buffer.  As long as index is less than
+	 * _CW_STILT_BUFFER_SIZE, tok_str actually points to buffer.
+	 * Otherwise, adequate space is allocated (using exponential doubling),
+	 * and the contents of tok_buffer are copied to the allocated buffer.
+	 *
+	 * If a temporary buffer is allocated, it is discarded as soon as the
+	 * token is handled.  That is, tok_buffer is used for every token until
+	 * (if) tok_buffer overflows.
+	 */
+	cw_uint8_t	*tok_str;
+	cw_uint32_t	buffer_len;	/* Only valid if buffer overflowed. */
+	cw_uint8_t	buffer[_CW_STILT_BUFFER_SIZE];
+
 	enum {
-		_CW_STILT_STATE_START,
-		_CW_STILT_STATE_LT_CONT,
-		_CW_STILT_STATE_GT_CONT,
-		_CW_STILT_STATE_SLASH_CONT,
-		_CW_STILT_STATE_COMMENT,
-		_CW_STILT_STATE_NUMBER,
-		_CW_STILT_STATE_ASCII_STRING,
-		_CW_STILT_STATE_ASCII_STRING_NEWLINE_CONT,
-		_CW_STILT_STATE_ASCII_STRING_PROT_CONT,
-		_CW_STILT_STATE_ASCII_STRING_CRLF_CONT,
-		_CW_STILT_STATE_ASCII_STRING_HEX_CONT,
-		_CW_STILT_STATE_ASCII_STRING_HEX_FINISH,
-		_CW_STILT_STATE_LIT_STRING,
-		_CW_STILT_STATE_LIT_STRING_NEWLINE_CONT,
-		_CW_STILT_STATE_LIT_STRING_PROT_CONT,
-		_CW_STILT_STATE_HEX_STRING,
-		_CW_STILT_STATE_BASE85_STRING,
-		_CW_STILT_STATE_BASE85_STRING_CONT,
-		_CW_STILT_STATE_NAME
+		STATE_START,
+		STATE_LT_CONT,
+		STATE_GT_CONT,
+		STATE_SLASH_CONT,
+		STATE_COMMENT,
+		STATE_NUMBER,
+		STATE_ASCII_STRING,
+		STATE_ASCII_STRING_NEWLINE_CONT,
+		STATE_ASCII_STRING_PROT_CONT,
+		STATE_ASCII_STRING_CRLF_CONT,
+		STATE_ASCII_STRING_HEX_CONT,
+		STATE_ASCII_STRING_HEX_FINISH,
+		STATE_LIT_STRING,
+		STATE_LIT_STRING_NEWLINE_CONT,
+		STATE_LIT_STRING_PROT_CONT,
+		STATE_HEX_STRING,
+		STATE_BASE85_STRING,
+		STATE_BASE85_STRING_CONT,
+		STATE_NAME
 	}	state;
 
 	union {
@@ -154,11 +167,6 @@ cw_bool_t	stilt_detach_buf(cw_stilt_t *a_stilt, cw_buf_t *a_buf);
 #define		_cw_stilt_free(a_stilt, a_ptr)				\
 	stilat_free(&(a_stilt)->stilat, (a_ptr), NULL, 0)
 #endif
-
-#define		_cw_stilt_stil_bufc_get(a_stilt)			\
-	_cw_stilat_stil_bufc_get(&(a_stilt)->stilat)
-#define		_cw_stilt_stil_bufc_put(a_stilt, a_stil_bufc)		\
-	_cw_stilat_stil_bufc_put(&(a_stilt)->stilat, (a_stil_bufc))
 
 #define		_cw_stilt_chi_get(a_stilt)				\
 	_cw_stilat_chi_get(&(a_stilt)->stilat)
