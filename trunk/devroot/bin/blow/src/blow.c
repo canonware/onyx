@@ -287,7 +287,7 @@ usage(const char * a_progname)
      "%s usage:\n"
      "    %s -h\n"
      "    %s -V\n"
-     "    %s [-n <nsocks>] [-b <bsize>] -c <nblocks> -r [<rhost>:]<rport>\n"
+     "    %s [-n <nsocks>] [-b <bsize>] [-c <nblocks>] -r [<rhost>:]<rport>\n"
      "\n"
      "    Option               | Description\n"
      "    ---------------------+------------------------------------------\n"
