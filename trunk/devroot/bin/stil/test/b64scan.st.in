@@ -1,6 +1,3 @@
-#!/usr/home/jasone/cw/devroot/bin/stil/src/stil
-!#
-
 % Test scanning of base64 strings.
 <~YQ==~> print (\n) print		% "a"
 <~YWI=~> print (\n) print		% "ab"

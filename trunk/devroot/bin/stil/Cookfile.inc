@@ -53,8 +53,9 @@ SRCS = [SRCS] [STIL_SRCS];
  * output.
  */
 {
-  local stests = ;
-  ptests = [fromto % [srcdir]/bin/stil/test/% [stests]];
+  local stests = b64scan.st.in copy_a.st.in exec.st.in hello.st.in
+                 integer.st.in;
+  stests = [fromto % [srcdir]/bin/stil/test/% [stests]];
 
   STESTS = [STESTS] [stests];
 }

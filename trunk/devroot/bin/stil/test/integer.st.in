@@ -1,15 +1,12 @@
-%#!@stil@
-%!#
-
 % Test basic integer operations.
-"s> 0 0 add ==\n" print
+(s> 0 0 add ==\n) print
 0 0 add ==
 
-"s> 3 0 add ==\n" print
+(s> 3 0 add ==\n) print
 3 0 add ==
 
-"s> 3 4 add ==\n" print
+(s> 3 4 add ==\n) print
 3 4 add ==
 
-"s> -5 5 add ==\n" print
+(s> -5 5 add ==\n) print
 -5 5 add ==
