@@ -205,7 +205,6 @@ void		stilo_condition_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
  */
 void		stilo_dict_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
     cw_uint32_t a_dict_size);
-/* XXX Destroys a_key and a_val. */
 void		stilo_dict_def(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
     cw_stilo_t *a_key, cw_stilo_t *a_val);
 void		stilo_dict_undef(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const
