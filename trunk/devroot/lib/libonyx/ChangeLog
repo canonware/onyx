@@ -1,5 +1,7 @@
 2001-07-20  Jason Evans  <jasone@canonware.com>
 
+	* src/nx_nxcode.nx: Implement outputsdict, outputs and output.
+
 	* src/systemdict.c (systemdict_cvrs): Treat integer as signed
 	rather than unsigned.
 

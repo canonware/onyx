@@ -99,45 +99,45 @@ SRCS = [SRCS] [ONYX_SRCS];
                  neg_a.nx.in neg_b.nx.in neg_c.nx.in not_a.nx.in not_b.nx.in
                  not_c.nx.in nsleep_a.nx.in nsleep_b.nx.in nsleep_c.nx.in
                  nsleep_d.nx.in or_a.nx.in or_b.nx.in or_c.nx.in or_d.nx.in
-                 or_e.nx.in or_f.nx.in pop_a.nx.in pop_b.nx.in put_a.nx.in
-                 put_b.nx.in put_c.nx.in put_d.nx.in put_e.nx.in put_f.nx.in
-                 put_g.nx.in put_h.nx.in putinterval_a.nx.in putinterval_b.nx.in
-                 putinterval_c.nx.in putinterval_d.nx.in putinterval_e.nx.in
-                 putinterval_f.nx.in putinterval_g.nx.in putinterval_h.nx.in
-                 putinterval_i.nx.in rand_a.nx.in repeat_a.nx.in repeat_b.nx.in
-                 repeat_c.nx.in repeat_d.nx.in roll_a.nx.in roll_b.nx.in
-                 roll_c.nx.in roll_d.nx.in roll_e.nx.in roll_f.nx.in
-                 roll_g.nx.in sclear_a.nx.in sclear_b.nx.in sclear_c.nx.in
-                 scleartomark_a.nx.in scleartomark_b.nx.in scleartomark_c.nx.in
-                 scleartomark_d.nx.in scount_a.nx.in scount_b.nx.in
-                 scount_c.nx.in scounttomark_a.nx.in scounttomark_b.nx.in
-                 scounttomark_c.nx.in sdup_a.nx.in sdup_b.nx.in sdup_c.nx.in
-                 sdup_d.nx.in search.nx.in sexch_a.nx.in sexch_b.nx.in
-                 sexch_c.nx.in sexch_d.nx.in shift_a.nx.in shift_b.nx.in
-                 shift_c.nx.in shift_d.nx.in sindex_a.nx.in sindex_b.nx.in
-                 sindex_c.nx.in sindex_d.nx.in sindex_e.nx.in sindex_f.nx.in
-                 sindex_g.nx.in spop_a.nx.in spop_b.nx.in spop_c.nx.in
-                 spop_d.nx.in sprint_a.nx.in spush_a.nx.in spush_b.nx.in
-                 spush_c.nx.in spush_d.nx.in srand_a.nx.in srand_b.nx.in
-                 srand_c.nx.in srand_d.nx.in sroll_a.nx.in sroll_b.nx.in
-                 sroll_c.nx.in sroll_d.nx.in sroll_e.nx.in sroll_f.nx.in
-                 sroll_g.nx.in sroll_h.nx.in sroll_i.nx.in stack_a.nx.in
-                 start_a.nx.in start_b.nx.in stopped_a.nx.in stopped_b.nx.in
-                 stopped_c.nx.in string_a.nx.in string_b.nx.in string_c.nx.in
-                 string_d.nx.in sub_a.nx.in sub_b.nx.in sub_c.nx.in sub_d.nx.in
-                 sym_lp_a.nx.in sym_gt_a.nx.in sym_gt_b.nx.in sym_gt_c.nx.in
-                 sym_lt_a.nx.in sym_rp_a.nx.in sym_rp_b.nx.in
-                 syntaxerror_a.nx.in syntaxerror_b.nx.in syntaxerror_c.nx.in
-                 syntaxerror_d.nx.in syntaxerror_e.nx.in syntaxerror_f.nx.in
-                 syntaxerror_g.nx.in syntaxerror_h.nx.in syntaxerror_i.nx.in
-                 syntaxerror_j.nx.in syntaxerror_k.nx.in throw_a.nx.in
-                 throw_b.nx.in throw_c.nx.in throw_d.nx.in token_a.nx.in
-                 token_b.nx.in token_c.nx.in truncate_a.nx.in truncate_b.nx.in
-                 truncate_c.nx.in truncate_d.nx.in truncate_e.nx.in type_a.nx.in
-                 type_b.nx.in undef_a.nx.in undef_b.nx.in undef_c.nx.in
-                 where_a.nx.in where_b.nx.in xcheck_a.nx.in xcheck_b.nx.in
-                 xor_a.nx.in xor_b.nx.in xor_c.nx.in xor_d.nx.in xor_e.nx.in
-                 xor_f.nx.in;
+                 or_e.nx.in or_f.nx.in output_a.nx.in pop_a.nx.in pop_b.nx.in
+                 put_a.nx.in put_b.nx.in put_c.nx.in put_d.nx.in put_e.nx.in
+                 put_f.nx.in put_g.nx.in put_h.nx.in putinterval_a.nx.in
+                 putinterval_b.nx.in putinterval_c.nx.in putinterval_d.nx.in
+                 putinterval_e.nx.in putinterval_f.nx.in putinterval_g.nx.in
+                 putinterval_h.nx.in putinterval_i.nx.in rand_a.nx.in
+                 repeat_a.nx.in repeat_b.nx.in repeat_c.nx.in repeat_d.nx.in
+                 roll_a.nx.in roll_b.nx.in roll_c.nx.in roll_d.nx.in
+                 roll_e.nx.in roll_f.nx.in roll_g.nx.in sclear_a.nx.in
+                 sclear_b.nx.in sclear_c.nx.in scleartomark_a.nx.in
+                 scleartomark_b.nx.in scleartomark_c.nx.in scleartomark_d.nx.in
+                 scount_a.nx.in scount_b.nx.in scount_c.nx.in
+                 scounttomark_a.nx.in scounttomark_b.nx.in scounttomark_c.nx.in
+                 sdup_a.nx.in sdup_b.nx.in sdup_c.nx.in sdup_d.nx.in
+                 search.nx.in sexch_a.nx.in sexch_b.nx.in sexch_c.nx.in
+                 sexch_d.nx.in shift_a.nx.in shift_b.nx.in shift_c.nx.in
+                 shift_d.nx.in sindex_a.nx.in sindex_b.nx.in sindex_c.nx.in
+                 sindex_d.nx.in sindex_e.nx.in sindex_f.nx.in sindex_g.nx.in
+                 spop_a.nx.in spop_b.nx.in spop_c.nx.in spop_d.nx.in
+                 sprint_a.nx.in spush_a.nx.in spush_b.nx.in spush_c.nx.in
+                 spush_d.nx.in srand_a.nx.in srand_b.nx.in srand_c.nx.in
+                 srand_d.nx.in sroll_a.nx.in sroll_b.nx.in sroll_c.nx.in
+                 sroll_d.nx.in sroll_e.nx.in sroll_f.nx.in sroll_g.nx.in
+                 sroll_h.nx.in sroll_i.nx.in stack_a.nx.in start_a.nx.in
+                 start_b.nx.in stopped_a.nx.in stopped_b.nx.in stopped_c.nx.in
+                 string_a.nx.in string_b.nx.in string_c.nx.in string_d.nx.in
+                 sub_a.nx.in sub_b.nx.in sub_c.nx.in sub_d.nx.in sym_lp_a.nx.in
+                 sym_gt_a.nx.in sym_gt_b.nx.in sym_gt_c.nx.in sym_lt_a.nx.in
+                 sym_rp_a.nx.in sym_rp_b.nx.in syntaxerror_a.nx.in
+                 syntaxerror_b.nx.in syntaxerror_c.nx.in syntaxerror_d.nx.in
+                 syntaxerror_e.nx.in syntaxerror_f.nx.in syntaxerror_g.nx.in
+                 syntaxerror_h.nx.in syntaxerror_i.nx.in syntaxerror_j.nx.in
+                 syntaxerror_k.nx.in throw_a.nx.in throw_b.nx.in throw_c.nx.in
+                 throw_d.nx.in token_a.nx.in token_b.nx.in token_c.nx.in
+                 truncate_a.nx.in truncate_b.nx.in truncate_c.nx.in
+                 truncate_d.nx.in truncate_e.nx.in type_a.nx.in type_b.nx.in
+                 undef_a.nx.in undef_b.nx.in undef_c.nx.in where_a.nx.in
+                 where_b.nx.in xcheck_a.nx.in xcheck_b.nx.in xor_a.nx.in
+                 xor_b.nx.in xor_c.nx.in xor_d.nx.in xor_e.nx.in xor_f.nx.in;
 
   otests = [fromto % [srcdir]/bin/onyx/test/% [otests]];
 

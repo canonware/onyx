@@ -76,15 +76,15 @@ systemdict begin
 			pop pop
 			`-array-'
 		} ifelse
-	}
+	} bind
 	/booleantype {
 		pop
 		cvs
-	}
+	} bind
 	/conditiontype {
 		pop pop
 		`-condition-'
-	}
+	} bind
 	/dicttype {
 		% %dict %depth
 		dup 0 gt {
@@ -132,15 +132,15 @@ systemdict begin
 			pop pop
 			`-dict-'
 		} ifelse
-	}
+	} bind
 	/filetype {
 		pop pop
 		`-file-'
-	}
+	} bind
 	/finotype {
 		pop pop
 		`-fino-'
-	}
+	} bind
 	/hooktype {
 		% %hook %depth
 		exch hooktag
@@ -156,30 +156,30 @@ systemdict begin
 			pop pop
 			`-hook-'
 		} ifelse
-	}
+	} bind
 	/integertype {
 		pop
 		cvs
-	}
+	} bind
 	/marktype {
 		pop pop
 		`-mark-'
-	}
+	} bind
 	/mutextype {
 		pop pop
 		`-mutex-'
-	}
+	} bind
 	/nametype {
 		pop
 		dup cvs
 		exch xcheck not {
 			`/' exch catenate
 		} if
-	}
+	} bind
 	/nulltype {
 		pop pop
 		`null'
-	}
+	} bind
 	/operatortype {
 		pop
 		cvs
@@ -187,11 +187,11 @@ systemdict begin
 			`--' dup 3 1 roll
 			catenate catenate
 		} if
-	}
+	} bind
 	/pmarktype {
 		pop pop
 		`-pmark-'
-	}
+	} bind
 	/stacktype {
 		% %stack %depth
 		dup 0 gt {
@@ -231,26 +231,254 @@ systemdict begin
 			pop pop
 			`-stack-'
 		} ifelse
-	}
+	} bind
 	/stringtype {
 		pop
 		cvs
-	}
+	} bind
 	/threadtype {
 		pop pop
 		`-thread-'
-	}
+	} bind
 > def
 
 % <object> <depth> sprints <string>
 /sprints {
-	1 index type /sprintsdict load exch get eval
-} def
+	1 index type sprintsdict exch get eval
+} bind def
 
 /sprint {
 	sprints print
 	`\n' print flush
-} def
+} bind def
+
+%
+% outputsdict implements formatted output to strings for every type.
+%
+/outputsdict <
+	/integertype {
+		% %int %flags
+
+		% Get the base.
+		dup /b known {
+			dup /b get
+		}{
+			10
+		} ifelse
+		% %int %flags %base
+
+		2 index exch cvrs
+		% %int %flags %str
+
+		% Prepend the sign if necessary.
+		1 index /s known {
+			1 index /s get /+ eq {
+				2 index 0 ge {
+					`+' exch catenate
+				} if
+			} if
+		} if
+		% %int %flags %str
+		3 2 roll pop
+		% %flags %str
+		exch
+		% %str %flags
+		outputsdict /stringtype get eval
+		% %str
+	} bind
+	% Temporarily define.
+	/_s {
+		% Check for /w flag.  /w takes precedence over /n.
+		dup /w known {
+			% Get padding character.
+			dup /p known {
+				dup /p get
+			}{
+				` '
+			} ifelse
+			% %str %flags %pad
+
+			1 index /w get
+			% %str %flags %pad %width
+			3 index length
+			% %str %flags %pad %width %len
+
+			dup 2 index le {
+				% Pad string.
+				% %str %flags %pad %width %len
+
+				1 index string
+				% %str %flags %pad %width %len %pstr
+
+				% Fill %pstr with %pad.
+				0 1 4 index 1 sub {
+					1 index exch 5 index putinterval
+				} for
+				% %str %flags %pad %width %len %pstr
+				4 3 roll pop
+				% %str %flags %width %len %pstr
+
+				% Get the justification.
+				3 index /j known {
+					3 index /j get
+				}{
+					/r
+				} ifelse
+				% %str %flags %width %len %pstr %just
+
+				dup /r eq {
+					pop
+					% Right justify.
+					% %str %flags %width %len %pstr
+					3 1 roll sub
+				}{
+				/l eq {
+					% Left justify.
+					% %str %flags %width %len %pstr
+					3 1 roll pop pop
+					0
+				}{
+					% Center.
+					% %str %flags %width %len %pstr
+					3 1 roll sub 2 div
+				} ifelse
+				} ifelse
+				% %str %flags %pstr %offset
+
+				1 index exch
+				% %str %flags %pstr %pstr %offset
+				5 4 roll
+				% %flags %pstr %pstr %offset %str
+				putinterval
+				% %flags %pstr
+				exch
+				% %pstr %flags
+			}{
+				% No padding necessary.
+				pop pop pop
+			} ifelse
+			% %str %flags
+		}{
+			% %str %flags
+			dup /n known {
+				% Truncate the string if it is too long.
+				1 index length
+				1 index /n get
+				% %str %flags %len %max
+				dup 2 index lt {
+					% Truncate.
+					exch pop
+					dup string
+					% %str %flags %max %nstr
+					dup
+					% %str %flags %max %nstr %nstr
+					5 4 roll
+					% %flags %max %nstr %nstr %str
+					4 3 roll
+					% %flags %nstr %nstr %str %max
+					0 exch getinterval
+					% %flags %nstr %nstr %substr
+					0 exch putinterval
+					% %flags %nstr
+					exch
+				}{
+					pop pop
+				} ifelse
+				% %nstr %flags
+			} if
+			% %str %flags
+		} ifelse
+		% %str %flags
+
+		pop
+		% %str
+	} bind def
+	/stringtype /_s load
+
+	% Most types can be handled identically.  The following code uses the
+	% same procedure body for all of those types.
+	%
+	% The following block of code looks scary because it avoids deferred
+	% execution in order to "bind" things correctly (we can't use immediate
+	% evaluation in this file).
+	[
+		% %object %flags
+
+		% Get recursion depth.
+		/dup cvx /r /known cvx [
+			/dup cvx /r /get cvx
+		] cvx [
+			1
+		] cvx /ifelse cvx
+		% %object %flags %rdepth
+
+		3 2 /roll cvx /exch cvx
+		% %flags %object %rdepth
+		/sprints cvx /exch cvx
+		% %str %flags
+		/_s load /eval cvx
+		% %str
+	] cvx bind
+	[
+		/arraytype
+		/booleantype
+		/conditiontype
+		/dicttype
+		/filetype
+		/finotype
+		/hooktype
+		/marktype
+		/mutextype
+		/nametype
+		/nulltype
+		/operatortype
+		/pmarktype
+		/stacktype
+		/threadtype
+	]{
+		% %proc %name
+		exch dup
+		% %name %proc %proc
+	} foreach
+	% Get rid of the extra copy of %proc.
+	pop
+
+	% Now that we're done using _s, undef it.
+	currentdict /_s undef
+> def
+
+%
+% Formatted output to a string.  Supported flags:
+%
+% /w : minimum width
+%    : %integer
+% /n : maximum width
+%    : %integer
+% /j : justification
+%    : /l, /c, /r (left, center, right)
+% /p : padding character
+%    : `?'
+% /b : base
+%    : 2..36
+% /s : sign
+%    : /+ /-
+% /r : recursion depth
+%    : 0..n
+%
+% %obj %flags outputs %string
+/outputs {
+	dup type /dicttype ne {
+		/typecheck throw
+	} if
+	1 index type
+	% %obj %flags %type
+	outputsdict exch get eval
+} bind def
+
+%obj %flags output -
+/output {
+	outputs print
+} bind def
 
 % - product <string>
 /product `Canonware Onyx' def
@@ -260,7 +488,7 @@ systemdict begin
 		1 sprint
 	} foreach
 	flush
-} def
+} bind def
 
 %
 % <string> <pattern> search <post> <pattern> <pre> true
@@ -346,7 +574,7 @@ systemdict begin
 		% Substring is too long.
 		pop false
 	} ifelse
-} def
+} bind def
 
 % [`<path>' `<args>'...] system <exit_code>
 /system {
@@ -359,7 +587,7 @@ systemdict begin
 	}{
 		exch pop waitpid
 	} ifelse
-} def
+} bind def
 
 % /errorname throw -
 /throw {
@@ -430,7 +658,7 @@ systemdict begin
 
 	% Stop.
 	/errordict load /stop get eval
-} def
+} bind def
 
 % - version <string>
 /version `<Version>' def
