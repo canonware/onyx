@@ -141,6 +141,7 @@ thd_l_init(void)
 #endif
     cw_g_thd.start_func = NULL;
     cw_g_thd.start_arg = NULL;
+    cw_g_thd.suspendible = TRUE;
 #ifdef CW_THD_GENERIC_SR
     error = sem_init(&cw_g_thd.sem, 0, 0);
     if (error)
@@ -202,6 +203,7 @@ thd_new(void *(*a_start_func)(void *), void *a_arg, cw_bool_t a_suspendible)
 {
     cw_thd_t *retval;
 #ifdef CW_PTHREADS
+    pthread_t pthread;
     int error;
 #endif
 
@@ -230,7 +232,7 @@ thd_new(void *(*a_start_func)(void *), void *a_arg, cw_bool_t a_suspendible)
 #endif
 
 #ifdef CW_PTHREADS
-    error = pthread_create(&retval->thread, &cw_g_thd_attr,
+    error = pthread_create(&pthread, &cw_g_thd_attr,
 			   thd_p_start_func, (void *) retval);
     if (error)
     {
@@ -238,6 +240,15 @@ thd_new(void *(*a_start_func)(void *), void *a_arg, cw_bool_t a_suspendible)
 		__FILE__, __LINE__, __FUNCTION__, strerror(error));
 	abort();
     }
+
+    /* Set retval->thread, even though it is also set in thd_p_start_func().
+     * This is necessary, since it's possible to call something like thd_join()
+     * before the new thread even gets as far as initializing itself.
+     *
+     * cw_g_thd_single_lock is used as a memory barrier for retval->thread. */
+    mtx_lock(&cw_g_thd_single_lock);
+    retval->thread = pthread;
+    mtx_unlock(&cw_g_thd_single_lock);
 #endif
 
     return retval;
@@ -247,6 +258,7 @@ void
 thd_delete(cw_thd_t *a_thd)
 {
 #ifdef CW_PTHREADS
+    pthread_t pthread;
     int error;
 #endif
 
@@ -255,7 +267,13 @@ thd_delete(cw_thd_t *a_thd)
     cw_assert(cw_g_thd_initialized);
 
 #ifdef CW_PTHREADS
-    error = pthread_detach(a_thd->thread);
+    /* Use cw_g_thd_single_lock as a memory barrier when reading
+     * a_thd->thread. */
+    mtx_lock(&cw_g_thd_single_lock);
+    pthread = a_thd->thread;
+    mtx_unlock(&cw_g_thd_single_lock);
+
+    error = pthread_detach(pthread);
     if (error)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in pthread_detach(): %s\n",
@@ -272,6 +290,7 @@ thd_join(cw_thd_t *a_thd)
 {
     void *retval;
 #ifdef CW_PTHREADS
+    pthread_t pthread;
     int error;
 #endif
 
@@ -280,7 +299,13 @@ thd_join(cw_thd_t *a_thd)
     cw_assert(cw_g_thd_initialized);
 
 #ifdef CW_PTHREADS
-    error = pthread_join(a_thd->thread, &retval);
+    /* Use cw_g_thd_single_lock as a memory barrier when reading
+     * a_thd->thread. */
+    mtx_lock(&cw_g_thd_single_lock);
+    pthread = a_thd->thread;
+    mtx_unlock(&cw_g_thd_single_lock);
+
+    error = pthread_join(pthread, &retval);
     if (error)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in pthread_join(): %s\n",
@@ -515,6 +540,9 @@ thd_p_start_func(void *a_arg)
     {
 	/* Insert this thread into the thread ring. */
 	mtx_lock(&cw_g_thd_single_lock);
+#ifdef CW_PTHREADS
+	thd->thread = pthread_self();
+#endif
 #ifdef CW_MTHREADS
 	thd->mach_thread = mach_thread_self();
 #endif
@@ -673,8 +701,6 @@ thd_p_sr_handle(int a_signal)
     sigset_t set;
     cw_thd_t *thd;
 
-    /* Lock the mutex purely to get a memory barrier that assures us a clean
-     * read of cw_g_sr_self. */
     while (cw_g_sr_self == NULL)
     {
 	/* Loop until the value of cw_g_sr_self becomes valid. */
