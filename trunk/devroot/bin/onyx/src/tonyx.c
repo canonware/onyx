@@ -7,13 +7,12 @@
  *
  * Version: <Version>
  *
- * Wrapper program that sets ONYX_MPATH and ONYX_RPATH approriately for running
+ * Wrapper program that sets ONYX_MPATH and ONYX_RPATH appropriately for running
  * onyx in the source tree.  This must be a binary executable rather than a
  * shell script due to how nested #! magic is (not) handled by the OS.
  *
  ******************************************************************************/
 
-#include <stdio.h> /* XXX */
 #include <stdlib.h>
 #include <unistd.h>
 
