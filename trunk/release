@@ -64,8 +64,8 @@ if (($#ARGV >= 0)
 }
 
 $run =
-    "snap @ARGS -p cwnet -r devroot -f Howto.cook.in -f aclocal.m4"
-    . " -f config.guess"
+    "snap @ARGS -p cwnet -r devroot -f Howto.cook.in -f COPYING -f INSTALL"
+    . " -f README -f aclocal.m4 -f config.guess"
     . " -f config.sub -f configure -f configure.in -f install-sh -f test"
     . " -f lib/c/libstash -f lib/c/libsock -f bin/suck -f bin/blow"
     . " -f bin/ncat -f bin/proxy";
