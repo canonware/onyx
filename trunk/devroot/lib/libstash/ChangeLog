@@ -1,3 +1,8 @@
+1999-03-14  Jason Evans  <jasone@canonware.com>
+
+	* src/list.c (list_get_next): Add.
+	(list_get_prev): Add.
+
 1999-03-10  Jason Evans  <jasone@canonware.com>
 
 	* src/buf.c (buf_p_catenate_buf): Call buf_p_copy_array() with the

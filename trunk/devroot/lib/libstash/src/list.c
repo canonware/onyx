@@ -371,6 +371,68 @@ list_tpeek(cw_list_t * a_list)
 }
 
 cw_list_item_t *
+list_get_next(cw_list_t * a_list, cw_list_item_t * a_in_list)
+{
+  cw_list_item_t * retval;
+  
+  _cw_check_ptr(a_list);
+#ifdef _CW_REENTRANT
+  if (a_list->is_thread_safe)
+  {
+    mtx_lock(&a_list->lock);
+  }
+#endif
+
+  if (a_in_list == NULL)
+  {
+    retval = a_list->head;
+  }
+  else
+  {
+    retval = list_item_p_get_next(a_in_list);
+  }
+
+#ifdef _CW_REENTRANT
+  if (a_list->is_thread_safe)
+  {
+    mtx_unlock(&a_list->lock);
+  }
+#endif
+  return retval;
+}
+
+cw_list_item_t *
+list_get_prev(cw_list_t * a_list, cw_list_item_t * a_in_list)
+{
+  cw_list_item_t * retval;
+  
+  _cw_check_ptr(a_list);
+#ifdef _CW_REENTRANT
+  if (a_list->is_thread_safe)
+  {
+    mtx_lock(&a_list->lock);
+  }
+#endif
+
+  if (a_in_list == NULL)
+  {
+    retval = a_list->tail;
+  }
+  else
+  {
+    retval = list_item_p_get_prev(a_in_list);
+  }
+
+#ifdef _CW_REENTRANT
+  if (a_list->is_thread_safe)
+  {
+    mtx_unlock(&a_list->lock);
+  }
+#endif
+  return retval;
+}
+
+cw_list_item_t *
 list_insert_before(cw_list_t * a_list,
 		   cw_list_item_t * a_in_list,
 		   void * a_data)

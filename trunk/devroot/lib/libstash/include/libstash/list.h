@@ -145,6 +145,50 @@ list_tpeek(cw_list_t * a_list);
 
 /****************************************************************************
  *
+ * <<< Input(s) >>>
+ *
+ * a_list : Pointer to a list.
+ *
+ * a_in_list : Pointer to an item container in a_list, or NULL.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Pointer to an item container, or NULL.
+ *
+ * <<< Description >>>
+ *
+ * Return a pointer to the next container after a_in_list in a_list (NULL if
+ * a_in_list is the last container).  If a_in_list is NULL, return a pointer to
+ * the first container in a_list.
+ *
+ ****************************************************************************/
+cw_list_item_t *
+list_get_next(cw_list_t * a_list, cw_list_item_t * a_in_list);
+
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_list : Pointer to a list.
+ *
+ * a_in_list : Pointer to an item container in a_list, or NULL.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Pointer to an item container, or NULL.
+ *
+ * <<< Description >>>
+ *
+ * Return a pointer to the container before a_in_list in a_list (NULL if
+ * a_in_list is the first container).  If a_in_list is NULL, return a pointer to
+ * the last container in a_list.
+ *
+ ****************************************************************************/
+cw_list_item_t *
+list_get_prev(cw_list_t * a_list, cw_list_item_t * a_in_list);
+
+/****************************************************************************
+ *
  * Inserts an item before the list node pointed to by a_in_list.
  *
  ****************************************************************************/

@@ -159,6 +159,38 @@ main()
     list_delete(list);
   }
 
+  /* list_get_next(), list_get_prev(). */
+  {
+    cw_list_t * list;
+    cw_list_item_t * items[3], * item;
+
+    list = list_new(NULL, TRUE);
+
+    items[0] = list_tpush(list, NULL);
+    items[1] = list_tpush(list, NULL);
+    items[2] = list_tpush(list, NULL);
+
+    item = list_get_next(list, NULL);
+    _cw_assert(item == items[0]);
+    item = list_get_next(list, item);
+    _cw_assert(item == items[1]);
+    item = list_get_next(list, item);
+    _cw_assert(item == items[2]);
+    item = list_get_next(list, item);
+    _cw_assert(item == NULL);
+    
+    item = list_get_prev(list, NULL);
+    _cw_assert(item == items[2]);
+    item = list_get_prev(list, item);
+    _cw_assert(item == items[1]);
+    item = list_get_prev(list, item);
+    _cw_assert(item == items[0]);
+    item = list_get_prev(list, item);
+    _cw_assert(item == NULL);
+    
+    list_delete(list);
+  }
+
   /* list_insert_before(),
    * list_count(). */
   {
