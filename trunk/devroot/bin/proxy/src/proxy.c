@@ -27,7 +27,7 @@
 struct handler_s
 {
   sigset_t hupset;
-  pthread_t sig_thread;
+  cw_thd_t sig_thd;
 };
 
 typedef struct
@@ -79,7 +79,6 @@ main(int argc, char ** argv)
   struct timeval timeout;
 
   struct handler_s handler_arg;
-  void * junk;
 
   int c;
   cw_bool_t cl_error = FALSE, opt_help = FALSE, opt_version = FALSE;
@@ -224,11 +223,10 @@ main(int argc, char ** argv)
   sigemptyset(&handler_arg.hupset);
   sigaddset(&handler_arg.hupset, SIGHUP);
   sigaddset(&handler_arg.hupset, SIGINT);
-  pthread_sigmask(SIG_BLOCK, &handler_arg.hupset, NULL);
-  pthread_create(&handler_arg.sig_thread,
-		 NULL,
-		 sig_handler,
-		 (void *) &handler_arg);
+  thd_sigmask(SIG_BLOCK, &handler_arg.hupset, NULL);
+  thd_new(&handler_arg.sig_thd,
+	  sig_handler,
+	  (void *) &handler_arg);
   
   if (NULL != opt_dirname)
   {
@@ -320,7 +318,7 @@ main(int argc, char ** argv)
     }
   }
 
-  pthread_join(handler_arg.sig_thread, &junk);
+  thd_join(&handler_arg.sig_thd);
 
   socks_delete(socks);
   
