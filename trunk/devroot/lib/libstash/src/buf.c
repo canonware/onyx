@@ -1097,38 +1097,38 @@ buf_get_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset)
     
     retval |= (((cw_uint64_t)
 		*(bufc_get_p(a_buf->array[array_element].bufel.bufc)
-		  + bufel_offset + 1)
-		<< 48) & ((cw_uint64_t) 0x00ff0000 << 32) & 0x00000000);
+		  + bufel_offset + 1))
+		<< 48) & (((cw_uint64_t) 0x00ff0000 << 32) | 0x00000000);
 
     retval |= (((cw_uint64_t)
 		*(bufc_get_p(a_buf->array[array_element].bufel.bufc)
-		  + bufel_offset + 2)
-		<< 40) & ((cw_uint64_t) 0x0000ff00 << 32) & 0x00000000);
+		  + bufel_offset + 2))
+		<< 40) & (((cw_uint64_t) 0x0000ff00 << 32) | 0x00000000);
 
     retval |= (((cw_uint64_t)
 		*(bufc_get_p(a_buf->array[array_element].bufel.bufc)
-		  + bufel_offset + 3)
-		<< 32) & ((cw_uint64_t) 0x000000ff << 32) & 0x00000000);
+		  + bufel_offset + 3))
+		<< 32) & (((cw_uint64_t) 0x000000ff << 32) | 0x00000000);
 
     retval |= (((cw_uint64_t)
 		*(bufc_get_p(a_buf->array[array_element].bufel.bufc)
-		  + bufel_offset + 4)
-		<< 24) & ((cw_uint64_t) 0x00000000 << 32) & 0xff000000);
+		  + bufel_offset + 4))
+		<< 24) & (((cw_uint64_t) 0x00000000 << 32) | 0xff000000);
 
     retval |= (((cw_uint64_t)
 		*(bufc_get_p(a_buf->array[array_element].bufel.bufc)
-		  + bufel_offset + 5)
-		<< 16) & ((cw_uint64_t) 0x00000000 << 32) & 0x00ff0000);
+		  + bufel_offset + 5))
+		<< 16) & (((cw_uint64_t) 0x00000000 << 32) | 0x00ff0000);
 
     retval |= (((cw_uint64_t)
 		*(bufc_get_p(a_buf->array[array_element].bufel.bufc)
-		  + bufel_offset + 6)
-		<< 8) & ((cw_uint64_t) 0x00000000 << 32) & 0x0000ff00);
+		  + bufel_offset + 6))
+		<< 8) & (((cw_uint64_t) 0x00000000 << 32) | 0x0000ff00);
 
     retval |= ((cw_uint64_t)
 	       *(bufc_get_p(a_buf->array[array_element].bufel.bufc)
-		 + bufel_offset + 7)
-	       & ((cw_uint64_t) 0x00000000 << 32) & 0x000000ff);
+		 + bufel_offset + 7))
+	       & (((cw_uint64_t) 0x00000000 << 32) | 0x000000ff);
   }
   else
   {
@@ -1141,44 +1141,44 @@ buf_get_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset)
     buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
     retval |= (((cw_uint64_t)
 		*(bufc_get_p(a_buf->array[array_element].bufel.bufc)
-		  + bufel_offset)
-		<< 48) & ((cw_uint64_t) 0x00ff0000 << 32) & 0x00000000);
+		  + bufel_offset))
+		<< 48) & (((cw_uint64_t) 0x00ff0000 << 32) | 0x00000000);
 
     buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
     retval |= (((cw_uint64_t)
 		*(bufc_get_p(a_buf->array[array_element].bufel.bufc)
-		  + bufel_offset)
-		<< 40) & ((cw_uint64_t) 0x0000ff00 << 32) & 0x00000000);
+		  + bufel_offset))
+		<< 40) & (((cw_uint64_t) 0x0000ff00 << 32) | 0x00000000);
 
     buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
     retval |= (((cw_uint64_t)
 		*(bufc_get_p(a_buf->array[array_element].bufel.bufc)
-		  + bufel_offset)
-		<< 32) & ((cw_uint64_t) 0x000000ff << 32) & 0x00000000);
+		  + bufel_offset))
+		<< 32) & (((cw_uint64_t) 0x000000ff << 32) | 0x00000000);
 
     buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
     retval |= (((cw_uint64_t)
 		*(bufc_get_p(a_buf->array[array_element].bufel.bufc)
-		  + bufel_offset)
-		<< 24) & ((cw_uint64_t) 0x00000000 << 32) & 0xff000000);
+		  + bufel_offset))
+		<< 24) & (((cw_uint64_t) 0x00000000 << 32) | 0xff000000);
 
     buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
     retval |= (((cw_uint64_t)
 		*(bufc_get_p(a_buf->array[array_element].bufel.bufc)
-		  + bufel_offset)
-		<< 16) & ((cw_uint64_t) 0x00000000 << 32) & 0x00ff0000);
+		  + bufel_offset))
+		<< 16) & (((cw_uint64_t) 0x00000000 << 32) | 0x00ff0000);
 
     buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
     retval |= (((cw_uint64_t)
 		*(bufc_get_p(a_buf->array[array_element].bufel.bufc)
-		  + bufel_offset)
-		<< 8) & ((cw_uint64_t) 0x00000000 << 32) & 0x0000ff00);
+		  + bufel_offset))
+		<< 8) & (((cw_uint64_t) 0x00000000 << 32) | 0x0000ff00);
 
     buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
     retval |= ((cw_uint64_t)
 	       *(bufc_get_p(a_buf->array[array_element].bufel.bufc)
-		 + bufel_offset)
-	       & ((cw_uint64_t) 0x00000000 << 32) & 0x000000ff);
+		 + bufel_offset))
+	       & (((cw_uint64_t) 0x00000000 << 32) | 0x000000ff);
   }
 
 #ifdef _CW_REENTRANT

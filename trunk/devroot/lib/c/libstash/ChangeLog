@@ -1,5 +1,8 @@
 1999-02-22  Jason Evans  <jasone@canonware.com>
 
+	* : Make libstash_init() and libstash_shutdown() optional.  Avoid
+	a memory leak if libstash_init() is called multiple times.
+
 	* : Structural changes to make libstash more friendly with other
 	libraries, such as glib.  Change g_* to cw_g_* to avoid namespace
 	collisions with glib.  Break libstash.h.in into libstash.h and

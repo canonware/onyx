@@ -25,9 +25,18 @@ void
 libstash_init(void)
 {
   /* Start up global modules. */
-  cw_g_mem = mem_new();
-  cw_g_dbg = dbg_new();
-  cw_g_log = log_new();
+  if (cw_g_mem == NULL)
+  {
+    cw_g_mem = mem_new();
+  }
+  if (cw_g_dbg == NULL)
+  {
+    cw_g_dbg = dbg_new();
+  }
+  if (cw_g_log == NULL)
+  {
+    cw_g_log = log_new();
+  }
 }
 
 void
@@ -35,6 +44,9 @@ libstash_shutdown(void)
 {
   /* Shut down global modules in reverse order. */
   log_delete(cw_g_log);
+  cw_g_log = NULL;
   dbg_delete(cw_g_dbg);
+  cw_g_dbg = NULL;
   mem_delete(cw_g_mem);
+  cw_g_mem = NULL;
 }

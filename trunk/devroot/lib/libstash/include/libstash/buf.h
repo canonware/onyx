@@ -369,7 +369,7 @@ buf_get_iovec(cw_buf_t * a_buf, int * a_iovec_count);
  * Catenate two bufs.  a_b is left unmodified if a_preserve is TRUE.
  *
  ****************************************************************************/
-#define buf_append_buf _CW_NS_LIBSTASH(buf_append_buf)
+#define buf_catenate_buf _CW_NS_LIBSTASH(buf_catenate_buf)
 void
 buf_catenate_buf(cw_buf_t * a_a, cw_buf_t * a_b, cw_bool_t a_preserve);
 

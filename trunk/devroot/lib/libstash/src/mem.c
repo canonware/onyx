@@ -44,7 +44,7 @@ mem_malloc(cw_mem_t * a_mem, size_t a_size)
 {
   void * retval;
   
-  _cw_check_ptr(a_mem);
+/*    _cw_check_ptr(a_mem); */
 
   retval = malloc(a_size);
   if (retval == NULL)
@@ -63,7 +63,7 @@ mem_calloc(cw_mem_t * a_mem, size_t a_number,
 {
   void * retval;
 
-  _cw_check_ptr(a_mem);
+/*    _cw_check_ptr(a_mem); */
 
   retval = calloc(a_number, a_size);
   if (retval == NULL)
@@ -81,7 +81,7 @@ mem_realloc(cw_mem_t * a_mem, void * a_ptr, size_t a_size)
 {
   void * retval;
 
-  _cw_check_ptr(a_mem);
+/*    _cw_check_ptr(a_mem); */
   _cw_check_ptr(a_ptr);
 
   retval = realloc(a_ptr, a_size);
@@ -98,7 +98,7 @@ mem_realloc(cw_mem_t * a_mem, void * a_ptr, size_t a_size)
 void
 mem_free(cw_mem_t * a_mem, void * a_ptr)
 {
-  _cw_check_ptr(a_mem);
+/*    _cw_check_ptr(a_mem); */
   _cw_check_ptr(a_ptr);
 
   free(a_ptr);
