@@ -19,214 +19,192 @@ end
 
 `modslate/modslate.nx' require
 
-threaddict begin
-systemdict begin
+# Move slatedict to the bottom of dstack.
 slatedict begin
-globaldict begin
-userdict begin
+dstack saup
 
 # - hs -
 /hs {
-	# ANSI home cursor sequence: `\e[H'
-	`\e[H' print
+    # ANSI home cursor sequence: `\e[H'
+    `\e[H' print
 } def
 
 # - cs -
 /cs {
-	# ANSI clear screen sequence: `\e[2J'
-	`\e[2J' print
-	hs
+    # ANSI clear screen sequence: `\e[2J'
+    `\e[2J' print
+    hs
 } def
 
 # #=buffer= buffer_name #name
 /buffer_name {
-	buffer_aux_get /name get
+    buffer_aux_get /name get
 } def
 
 # - status_line -
 /status_line {
-	# Reverse video.
-	`\e[7m' print
-	
-	# History.
-	scratch buffer_undoable {
-		` <' print
-	}{
-		` [' print
-	} ifelse
-	scratch buffer_history_active {
-		`+' print
-	}{
-		`-' print
-	} ifelse
-	scratch buffer_redoable {
-		`>' print
-	}{
-		`]' print
-	} ifelse
+    # Reverse video.
+    `\e[7m' print
 
-	# Line.
-	` L' print
-	bpoint marker_line cvs print
-	`/' print
-	scratch buffer_lines cvs print
+    # History.
+    scratch buffer_undoable {
+	` <' print
+    }{
+	` [' print
+    } ifelse
+    scratch buffer_history_active {
+	`+' print
+    }{
+	`-' print
+    } ifelse
+    scratch buffer_redoable {
+	`>' print
+    }{
+	`]' print
+    } ifelse
 
-	# Column.
-	` C' print
-	bpoint marker_position
-	bpoint marker_copy dup -1 marker_seekline pop marker_position
-	sub cvs print
-	`/' print
-	bpoint marker_copy dup 1 marker_seekline pop marker_position
-	bpoint marker_copy dup -1 marker_seekline pop marker_position
-	sub cvs print
+    # Line.
+    ` L' print
+    bpoint marker_line cvs print
+    `/' print
+    scratch buffer_lines cvs print
 
-	# Character.
-	` c' print
-	bpoint marker_position cvs print
-	`/' print
-	scratch marker 0 /SEEK_EOB marker_seek cvs print
+    # Column.
+    ` C' print
+    bpoint marker_position
+    bpoint marker_copy dup -1 marker_seekline pop marker_position
+    sub cvs print
+    `/' print
+    bpoint marker_copy dup 1 marker_seekline pop marker_position
+    bpoint marker_copy dup -1 marker_seekline pop marker_position
+    sub cvs print
 
-	# Mark.
-	` m' print
-	bmark marker_position cvs print
+    # Character.
+    ` c' print
+    bpoint marker_position cvs print
+    `/' print
+    scratch marker 0 /SEEK_EOB marker_seek cvs print
 
-	# Buffer name.
-	` ' print
-	scratch buffer_name print
+    # Mark.
+    ` m' print
+    bmark marker_position cvs print
 
-	`\r\n' print
-	# Reset attributes.
-	`\e[m' print
+    # Buffer name.
+    ` ' print
+    scratch buffer_name print
 
-#	`-------------------------------------------------------------------------------' print
-#	`\r\n' print
+    `\r\n' print
+    # Reset attributes.
+    `\e[m' print
 } def
 
 # #=buffer= b2s #string
 /b2s {
-	marker dup marker_copy
-	dup 0 /SEEK_EOB marker_seek pop
-	marker_range_get
+    marker dup marker_copy
+    dup 0 /SEEK_EOB marker_seek pop
+    marker_range_get
 } def
 
 # #string srender -
 /srender {
-	{
-		dup 16@a eq {
-			`\r' print
-		} if
-		stdout exch write
-	} foreach
+    {
+	dup 16@a eq {
+	    `\r' print
+	} if
+	stdout exch write
+    } foreach
 } def
 
 # - redisplay -
 /redisplay {
-	cs
-	status_line
+    cs
+    status_line
 
-	scratch b2s
-#	1 sprint
-	srender
+    scratch b2s
+    srender
 
-	hs
-	`\r\n' print
-	bob dup 0 /SEEK_REL marker_seek pop bpoint marker_range_get
-#	1 sprint
-	srender flush
+    hs
+    `\r\n' print
+    bob dup 0 /SEEK_REL marker_seek pop bpoint marker_range_get
+    srender flush
 } def
 
 # - getc #string
 /getc {
-#	pstack
-	stdin ` ' read
-	true eq {
-		quit
-	} if
-#	`-->' print
-#	dup 1 sprint
-#	`<--\n' print flush
+    stdin ` ' read
+    true eq {
+	quit
+    } if
 } def
 
 # #string self_insert_char -
 /insert_string {
-	bpoint exch marker_before_insert
+    bpoint exch marker_before_insert
 } def
 
 # Undefined characters are inserted literally.
 /keytable <
-	`\b' {
-		bmark dup 0 bpoint marker_seek pop
-		bpoint dup -1 marker_seek pop
-		marker_range_cut pop
-#		`Cut -->' exch cat `<--\n' cat stderr exch write
-	}
-	`\cd' {
-		bmark dup 0 bpoint marker_seek pop
-		bpoint dup 1 marker_seek pop
-		marker_range_cut pop
-	}
-	`\r' {
-		`\n' insert_string
-	}
-	# C-q
-	`\cq' {
-		`\r\n' print gcdict /stats get eval 2 sprint flush
-		quit
-	}
-	# C-u
-	`\cu' {
-		bpoint buffer_undo
-	}
-	# C-r
-	`\cr' {
-		bpoint buffer_redo
-	}
-	# C-b
-	`\cb' {
-		bpoint -1 marker_seek pop
-	}
-	# C-f
-	`\cf' {
-		bpoint 1 marker_seek pop
-	}
-	# C-space
-	`\x00' {
-		/bmark bpoint marker_copy def
-	}
-	# C-w
-	`\cw' {
-		scratch bpoint buffer_history_startgroup
-		bmark bpoint marker_range_cut pop
-		scratch buffer_history_endgroup
-	}
-	# C-a
-	`\ca' {
-		bpoint -1 marker_seekline
-	}
-	# C-e
-	`\ce' {
-		bpoint 1 marker_seekline
-	}
-	# C-y
-	`\cy' {
-		scratch dup buffer_history_active
-		not buffer_history_setactive
-	}
-	# C-c
-	`\cc' {
-		
-		quit
-	}
+    `\b' {
+	bmark dup 0 bpoint marker_seek pop
+	bpoint dup -1 marker_seek pop
+	marker_range_cut pop
+    }
+    `\cd' {
+	bmark dup 0 bpoint marker_seek pop
+	bpoint dup 1 marker_seek pop
+	marker_range_cut pop
+    }
+    `\r' {
+	`\n' insert_string
+    }
+    `\cq' {
+	`\r\n' print gcdict /stats get eval 2 sprint flush
+	quit
+    }
+    `\cu' {
+	bpoint buffer_undo
+    }
+    `\cr' {
+	bpoint buffer_redo
+    }
+    `\cb' {
+	bpoint -1 marker_seek pop
+    }
+    `\cf' {
+	bpoint 1 marker_seek pop
+    }
+    # C-space
+    `\x00' {
+	/bmark bpoint marker_copy def
+    }
+    `\cw' {
+	scratch bpoint buffer_history_startgroup
+	bmark bpoint marker_range_cut pop
+	scratch buffer_history_endgroup
+    }
+    `\ca' {
+	bpoint -1 marker_seekline
+    }
+    `\ce' {
+	bpoint 1 marker_seekline
+    }
+    `\cy' {
+	scratch dup buffer_history_active
+	not buffer_history_setactive
+    }
+    `\cc' {
+	quit
+    }
 > def
 
 # #string interpc -
 /interpc {
-	keytable 1 idup known {
-		keytable exch get eval
-	}{
-		insert_string
-	} ifelse
+    stderr 1 idup cvs write stderr `\n' write
+    keytable 1 idup known {
+	keytable exch get eval
+    }{
+	insert_string
+    } ifelse
 } def
 
 /scratch buffer def
@@ -235,17 +213,15 @@ userdict begin
 /bob scratch marker def
 
 scratch <
-	/name	`*scratch*'
+    /name	`*scratch*'
 > buffer_aux_set
 
 2 gcdict /setperiod get eval
 
-scratch true buffer_history_setactive
+# scratch true buffer_history_setactive
 
-stdin 0 setiobuf
-{
-	redisplay
-#	`\e[H\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\r\n' print gcdict /stats get eval 2 sprints print flush
-	getc
-	interpc
+stdin 0 setiobuf {
+    redisplay
+    getc
+    interpc
 } loop
