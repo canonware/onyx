@@ -11,7 +11,6 @@
 
 #include "../include/libstash/libstash.h"
 
-#ifdef _LIBSTASH_DBG
 #ifdef _cw_malloc
 #undef _cw_malloc
 #endif
@@ -32,6 +31,7 @@
 #endif
 #define _cw_free(a) free(a)
 
+#ifdef _LIBSTASH_DBG
 struct cw_mem_item_s {
 	cw_uint32_t	size;
         const char	*filename;
