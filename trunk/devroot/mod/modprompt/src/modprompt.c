@@ -400,7 +400,7 @@ modprompt_promptstring(struct cw_modprompt_synth_s *a_synth)
 	cw_nxo_t *nxo;
 	cw_nxo_t *stack;
 	static const cw_uint8_t code[] =
-	    "$promptstring where {\n"
+	    "{$promptstring where {\n"
 	    "pop\n"
 	    /* Save the current contents of errordict into promptdict. */
 	    "$promptdict errordict dict copy def\n"
@@ -413,7 +413,7 @@ modprompt_promptstring(struct cw_modprompt_synth_s *a_synth)
 	    "promptdict errordict copy pop\n"
 	    /* Remove the definition of promptdict. */
 	    "$promptdict where {$promptdict undef} if\n"
-	    "}{`'} ifelse";
+	    "}{`'} ifelse} start";
 
 	stack = nxo_thread_ostack_get(synth->thread);
 
