@@ -127,6 +127,8 @@ clean :
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [CTESTS]];
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [CTESTS]];
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_s [CTESTS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.out [CTESTS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.diff [CTESTS]];
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS]];
 
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_d [BTESTS]];
@@ -137,7 +139,13 @@ clean :
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [BTESTS]];
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [BTESTS]];
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_s [BTESTS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.out [BTESTS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.diff [BTESTS]];
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0% [BTESTS]];
+
+  rm -f [fromto [srcdir]/%0%.pl.in [objdir]/%0%.out [PTESTS]];
+  rm -f [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl.out [PTESTS]];
+  rm -f [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]];
 
   /* Delete .cook.fp files from the source tree and object tree. */
   [SHELL] -e;
@@ -155,16 +163,17 @@ done
 dataend
 }
 
-distclean :
+distclean : clean
 {
-  rm -f [objdir]/config.cache
-  rm -f [objdir]/config.log
-  rm -f [objdir]/config.status
-  rm -f [objdir]/Howto.list
-  rm -f [objdir]/test/verify
-  rm -f [objdir]/
-  rm -f [objdir]/
-  rm -f [objdir]/
+  rm -f [objdir]/Howto.cook;
+  rm -f [objdir]/Howto.list;
+  rm -f [objdir]/config.cache;
+  rm -f [objdir]/config.log;
+  rm -f [objdir]/config.status;
+  rm -f [objdir]/test/verify;
+  rm -f [objdir]/lib/c/libstash/include/libstash/libstash_defs.h;
+  rm -f [objdir]/lib/c/libsock/include/libsock/libsock_defs.h;
+  rm -f [objdir]/lib/c/libkasi/include/libkasi/libkasi_defs.h;
 }
 
 [objdir]/%0%.pl : [srcdir]/%0%.pl.in

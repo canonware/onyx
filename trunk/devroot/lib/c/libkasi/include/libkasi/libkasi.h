@@ -23,8 +23,7 @@ extern "C" {
 
 #  define _LIBKASI_VERSION "<Version>"
 
-/* Project headers to always be included. */
-
+#  include "libkasi_defs.h"
 #  include "libkasi_incs.h"
 
 #endif /* _LIBKASI_H_ */

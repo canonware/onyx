@@ -123,7 +123,7 @@ main()
     char * d = "two of these\0foo";
     char * v;
 
-    chi_pezz = pezz_new(NULL, _CW_CH_TABLE2SIZEOF(4), 10);
+    chi_pezz = pezz_new(NULL, sizeof(cw_chi_t), 10);
     _cw_check_ptr(chi_pezz);
 
     ch = ch_new(NULL, 4, chi_pezz, ch_hash_string, ch_key_comp_string);

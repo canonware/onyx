@@ -46,7 +46,7 @@ ch_new(cw_ch_t * a_ch, cw_uint32_t a_table_size, cw_pezz_t * a_chi_pezz,
 #ifdef _LIBSTASH_DBG
   if (NULL != retval->chi_pezz)
   {
-    _cw_assert(sizeof(cw_chi_t) == pezz_get_buffer_size(retval->chi_pezz));
+    _cw_assert(sizeof(cw_chi_t) <= pezz_get_buffer_size(retval->chi_pezz));
   }
 #endif
   retval->hash = a_hash;
