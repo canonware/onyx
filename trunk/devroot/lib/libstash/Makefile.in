@@ -9,8 +9,8 @@
 #
 # $Source$
 # $Author: jasone $
-# Current revision: $Revision: 231 $
-# Last modified: $Date: 1998-09-19 23:32:24 -0700 (Sat, 19 Sep 1998) $
+# Current revision: $Revision: 232 $
+# Last modified: $Date: 1998-09-23 16:09:37 -0700 (Wed, 23 Sep 1998) $
 #
 # Description: Master Makefile for libstash.
 #              
@@ -52,9 +52,9 @@ BTESTS := b19980828a.c
 INCS := $(addprefix include/,$(INCS))
 PRIV_INCS := $(addprefix include/,$(P_INCS))
 SRCS := $(addprefix src/,$(SRCS))
-CTESTS := $(addprefix test/,$(CTESTS:.c=))
-BTESTS := $(addprefix test/,$(BTESTS:.c=))
-PTESTS := $(addprefix test/,$(PTESTS:.pl.in=.pl))
+override CTESTS := $(addprefix test/,$(CTESTS:.c=))
+override BTESTS := $(addprefix test/,$(BTESTS:.c=))
+override PTESTS := $(addprefix test/,$(PTESTS:.pl.in=.pl))
 
 #
 # Library names.
@@ -155,7 +155,13 @@ obj/st_p/%.o_st_p : src/%.c
 obj/sh_p/%.o_sh_p : src/%.c
 	$(CC) $(INCPATH) $(CFLAGS) $(SH_CFLAGS) $(P_CFLAGS) $(DEFINES) $(SH_DEFINES) $(P_DEFINES) -c $< -o $@
 
-# Rule for dependency file creation
+.pl.in.pl :
+	$(PERL) -w $(PMERGE) $(PERL) $(PSTUB) $< $@
+
+#
+# Rules for dependency file creation
+#
+
 %.d : %.c
 	$(SHELL) -ec "$(CC) -M $(DEFINES) $(ST_DEFINES) $(D_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o $(subst /,\/,$(strip $(dir $@)))\1.d \2/g\" > $@"
 
@@ -176,9 +182,6 @@ obj/st_p/%.d_st_p : src/%.c
 
 obj/sh_p/%.d_sh_p : src/%.c
 	$(SHELL) -ec "$(CC) -M $(DEFINES) $(SH_DEFINES) $(P_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_sh_p $(subst /,\/,$(strip $(dir $@)))\1.d_sh_p \2/g\" > $@"
-
-.pl.in.pl :
-	$(PERL) -w $(PMERGE) $(PERL) $(PSTUB) $< $@
 
 #
 # Dependencies (not rules).
@@ -271,27 +274,21 @@ install_common :
 	'
 
 install_stat_dbg : stat_dbg install_common
-	@INSTALL@ -d @prefix@/lib
 	@INSTALL@ $(LIB_ST_D) @prefix@/lib
 
 install_shar_dbg : shar_dbg install_common
-	@INSTALL@ -d @prefix@/lib
 	@INSTALL@ $(LIB_SH_D) @prefix@/lib
 
 install_stat_opt : stat_opt install_common
-	@INSTALL@ -d @prefix@/lib
 	@INSTALL@ $(LIB_ST_O) @prefix@/lib
 
 install_shar_opt : shar_opt install_common
-	@INSTALL@ -d @prefix@/lib
 	@INSTALL@ $(LIB_SH_O) @prefix@/lib
 
 install_stat_prof : stat_prof install_common
-	@INSTALL@ -d @prefix@/lib
 	@INSTALL@ $(LIB_ST_P) @prefix@/lib
 
 install_shar_prof : shar_prof install_common
-	@INSTALL@ -d @prefix@/lib
 	@INSTALL@ $(LIB_SH_P) @prefix@/lib
 
 uninstall :
