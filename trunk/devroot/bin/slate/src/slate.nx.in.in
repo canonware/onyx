@@ -12,12 +12,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Add slate paths.
-`a' 1 sprint
 onyxdict begin
 /rpath_post rpath_post [@slate_rpath_post@] catenate def
 /mpath_post mpath_post [@slate_mpath_post@] catenate def
 end
-`b' 1 sprint
 
 `modslate/modslate.nx' require
 
