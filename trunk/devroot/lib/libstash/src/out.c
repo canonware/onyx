@@ -34,33 +34,18 @@
 #endif
 
 /*
- * Designator values.  These codes are used to designate the type of each
- * byte in a_format by building a corresponding string during parsing.
- */
-#define _CW_OUT_DES_NORMAL	'n'
-#define _CW_OUT_DES_SPECIFIER	's'
-#define _CW_OUT_DES_WHITEOUT 	'w'
-
-/* Maximum size of specifier to use a stack buffer for parsing. */
-#ifdef _LIBSTASH_DBG
-#define _CW_OUT_SPEC_BUF	   8
-#else
-#define _CW_OUT_SPEC_BUF	 128
-#endif
-
-/*
  * Maximum size of stack buffer to use for printing.  Must be at least 2
  * bytes.
  */
 #ifdef _LIBSTASH_DBG
 #define _CW_OUT_PRINT_BUF	   8
 #else
-#define _CW_OUT_PRINT_BUF 	1024
+#define _CW_OUT_PRINT_BUF 	 128
 #endif
 
 /*
  * Number of bytes to add to the size of a buffer when realloc()ing.  Must be
- * at least 2 bytes.
+ * at least 1 byte.
  */
 #ifdef _LIBSTASH_DBG
 #define _CW_OUT_REALLOC_INC	   8
@@ -69,29 +54,34 @@
 #endif
 
 /*
- * Number of format specifiers to cache when scanning the format string.
+ * Maximum number of el's to store in a stack buffer before allocating space on
+ * the heap.  Must be at least 1.
  */
 #ifdef _LIBSTASH_DBG
-#define _CW_OUT_ENT_CACHE	   1
+#define _CW_OUT_ELS_BUF		   1
 #else
-#define _CW_OUT_ENT_CACHE	   8
+#define _CW_OUT_ELS_BUF		  16
 #endif
 
 /*
- * The following two structures are used for caching the results from
+ * The following structures are used for caching the results from
  * out_p_format_scan() in order to avoid recalculating it later on.
  */
-typedef struct {
-	cw_sint32_t	spec_len;
-	cw_out_ent_t	*ent;
-}       cw_out_ent_el_t;
+typedef enum {
+	TEXT,
+	SPEC
+}	cw_out_el_type_t;
 
 typedef struct {
-	cw_uint32_t	format_len;
-	cw_bool_t	raw;
-	char		format_key_buf[_CW_OUT_SPEC_BUF];
-	char		*format_key;
-	cw_out_ent_el_t	ents[_CW_OUT_ENT_CACHE];
+	cw_out_el_type_t el_type;
+	cw_uint32_t	el_offset;
+	cw_uint32_t	el_len;
+}       cw_out_el_t;
+
+typedef struct {
+	cw_uint32_t	key_nels;
+	cw_out_el_t	key_els_buf[_CW_OUT_ELS_BUF];
+	cw_out_el_t	*key_els;
 }       cw_out_key_t;
 
 static cw_sint32_t 	out_p_put_fvle(cw_out_t *a_out, cw_sint32_t a_fd,
@@ -109,33 +99,36 @@ static cw_uint8_t	*out_p_buffer_expand(cw_out_t *a_out, cw_uint32_t
     a_expand_size);
 static cw_sint32_t	out_p_format_scan(cw_out_t *a_out, const char *a_format,
      cw_out_key_t *a_key, va_list a_p);
-static cw_out_ent_t	*out_p_get_ent(cw_out_t *a_out, const char *a_format,
+static cw_sint32_t	out_p_el_accept(cw_out_t *a_out, const char *a_format,
+    cw_out_key_t *a_key, cw_out_el_type_t a_type, cw_uint32_t a_offset,
+    cw_uint32_t a_len);
+static cw_out_ent_t	*out_p_ent_get(cw_out_t *a_out, const char *a_format,
     cw_uint32_t a_len);
 static void		out_p_common_render(const char *a_format, cw_uint32_t
     a_len, cw_uint32_t a_max_len, cw_uint32_t a_rlen, cw_uint8_t *r_buf,
     cw_uint32_t *r_width, cw_uint32_t *r_owidth, cw_uint32_t *r_offset);
-static cw_uint32_t	out_p_render_int(const char *a_format, cw_uint32_t
+static cw_uint32_t	out_p_int_render(const char *a_format, cw_uint32_t
     a_len, cw_uint64_t a_arg, cw_uint32_t a_max_len, cw_uint8_t *r_buf,
     cw_uint32_t a_nbits, cw_uint32_t a_default_base);
-static cw_uint32_t	out_p_render_int32(const char *a_format, cw_uint32_t
+static cw_uint32_t	out_p_int32_render(const char *a_format, cw_uint32_t
     a_len, const void *a_arg, cw_uint32_t a_max_len, cw_uint8_t *r_buf);
-static cw_uint32_t	out_p_render_int64(const char *a_format, cw_uint32_t
+static cw_uint32_t	out_p_int64_render(const char *a_format, cw_uint32_t
     a_len, const void *a_arg, cw_uint32_t a_max_len, cw_uint8_t *r_buf);
-static cw_uint32_t	out_p_render_char(const char *a_format, cw_uint32_t
+static cw_uint32_t	out_p_char_render(const char *a_format, cw_uint32_t
     a_len, const void *a_arg, cw_uint32_t a_max_len, cw_uint8_t *r_buf);
-static cw_uint32_t	out_p_render_string(const char *a_format, cw_uint32_t
+static cw_uint32_t	out_p_string_render(const char *a_format, cw_uint32_t
     a_len, const void *a_arg, cw_uint32_t a_max_len, cw_uint8_t *r_buf);
-static cw_uint32_t	out_p_render_pointer(const char *a_format, cw_uint32_t
+static cw_uint32_t	out_p_pointer_render(const char *a_format, cw_uint32_t
     a_len, const void *a_arg, cw_uint32_t a_max_len, cw_uint8_t *r_buf);
 static cw_uint32_t	out_p_buf_render(const char *a_format, cw_uint32_t
     a_len, const void *a_arg, cw_uint32_t a_max_len, cw_uint8_t *r_buf);
 
 static cw_out_ent_t cw_g_out_builtins[] = {
-	{"s",	1,	sizeof(cw_uint8_t *),	out_p_render_string},
-	{"i",	1,	sizeof(cw_uint32_t),	out_p_render_int32},
-	{"p",	1,	sizeof(void *),		out_p_render_pointer},
-	{"c",	1,	sizeof(cw_uint8_t),	out_p_render_char},
-	{"q",	1,	sizeof(cw_uint64_t),	out_p_render_int64},
+	{"s",	1,	sizeof(cw_uint8_t *),	out_p_string_render},
+	{"i",	1,	sizeof(cw_uint32_t),	out_p_int32_render},
+	{"p",	1,	sizeof(void *),		out_p_pointer_render},
+	{"c",	1,	sizeof(cw_uint8_t),	out_p_char_render},
+	{"q",	1,	sizeof(cw_uint64_t),	out_p_int64_render},
 	{"b",	1,	sizeof(cw_buf_t *),	out_p_buf_render},
 
 #ifdef _TYPE_FP32_DEFINED
@@ -871,9 +864,9 @@ static cw_sint32_t
 out_p_put_svn(cw_out_t *a_out, char **a_str, cw_uint32_t a_size, cw_uint32_t
     a_max_size, const char *a_format, va_list a_p)
 {
-	cw_sint32_t	retval, i, j, enti, rcount;
+	cw_sint32_t	retval, i, key_offset, rcount;
 	cw_out_key_t	key;
-	cw_uint32_t	osize, size;
+	cw_uint32_t	osize;
 	cw_uint32_t	acount = 0;	/* Number of realloc()s done so far. */
 	cw_uint8_t	*obuf;
 
@@ -910,47 +903,25 @@ out_p_put_svn(cw_out_t *a_out, char **a_str, cw_uint32_t a_size, cw_uint32_t
 		osize = _CW_OUT_PRINT_BUF;
 	}
 
-	if (key.raw) {
-		/*
-		 * The formatting string has no special characters or formatting
-		 * specifiers in it, so we can do a straight memcpy().  Make
-		 * sure that there is is either enough space to memcpy the
-		 * entire formatting string, or that there is at least
-		 * a_max_size bytes of space, whichever is smaller.
-		 */
-		if (a_max_size < key.format_len)
-			size = a_max_size;
-		else
-			size = key.format_len;
-		
-		if (osize < size + 1) {
+	for (i = key_offset = 0; key_offset < key.key_nels && i < a_max_size;
+	     key_offset++) {
+		if (key.key_els[key_offset].el_type == TEXT) {
+			/* Text el. */
+
 			/*
-			 * The output buffer isn't as big as it is allowed to
-			 * be.
+			 * Make sure there is enough room to memcpy() this el.
+			 * If not, reallocate and try to add additional padding.
 			 */
-			obuf = out_p_buffer_expand(a_out, &acount, obuf, 0,
-			    size + 1);
-			if (obuf == NULL) {
-				retval = -1;
-				goto RETURN;
-			}
-			osize = size;
-		}
-		memcpy(obuf, a_format, size);
-	} else {
-		for (i = j = enti = 0; (i < key.format_len) && (j <
-		    a_max_size);) {
-			/*
-			 * There needs to be at least one spare byte in obuf
-			 * before continuing.
-			 */
-			if (j >= osize) {
+			if (i + key.key_els[key_offset].el_len >= osize) {
 				cw_uint32_t	esize;
 
 				/* Overflow. */
-				if (osize + _CW_OUT_REALLOC_INC <= a_max_size)
-					esize = osize + _CW_OUT_REALLOC_INC;
-				else
+				if (osize + key.key_els[key_offset].el_len +
+				    _CW_OUT_REALLOC_INC <= a_max_size) {
+					esize = osize +
+					    key.key_els[key_offset].el_len +
+					    _CW_OUT_REALLOC_INC;
+				} else
 					esize = a_max_size;
 
 				obuf = out_p_buffer_expand(a_out, &acount, obuf,
@@ -962,134 +933,119 @@ out_p_put_svn(cw_out_t *a_out, char **a_str, cw_uint32_t a_size, cw_uint32_t
 				osize = esize;
 			}
 
-			switch (key.format_key[i]) {
-			case _CW_OUT_DES_NORMAL:
-				obuf[j] = a_format[i];
-				j++;
-				i++;
-				break;
-			case _CW_OUT_DES_SPECIFIER: {
-				cw_sint32_t	spec_len, type_len;
-				const char	*type;
-				cw_out_ent_t	*ent;
-				void		*arg;
+			/*
+			 * memcpy as much as this el as will fit in obuf.
+			 */
+			if (i + key.key_els[key_offset].el_len <= osize) {
+				/* The whole el will fit into obuf. */
+				memcpy(&obuf[i],
+				    &a_format[key.key_els[key_offset].el_offset],
+				    key.key_els[key_offset].el_len);
+				i += key.key_els[key_offset].el_len;
+			} else {
+				/* Only part of the el will fit into obuf. */
+				memcpy(&obuf[i],
+				    &a_format[key.key_els[key_offset].el_offset],
+				    osize - i);
+				i += osize - i;
+			}
+		} else {
+			cw_sint32_t	type_len;
+			const char	*type;
+			cw_out_ent_t	*ent;
+			void		*arg;
 
+			/* Specifier el. */
+
+			/* Find the type string. */
+			type_len =
+			    spec_get_type(&a_format[key.key_els[key_offset].el_offset],
+			    key.key_els[key_offset].el_len, &type);
+			_cw_assert(type_len >= 0);
+			/* Get the handler for this specifier. */
+			ent = out_p_ent_get(a_out, type, type_len);
+			if (ent == NULL) {
+				/* No handler. */
+				retval = -2;
+				goto RETURN;
+			}
+
+			switch (ent->size) {
+			case 1: case 2: case 4:
+				arg = (void *)&va_arg(a_p, cw_uint32_t);
+				break;
+			case 8:
+				arg = (void *)&va_arg(a_p, cw_uint64_t);
+				break;
+#ifdef _TYPE_FP96_DEFINED
+			case 12:
+				arg = (void *)&va_arg(a_p, cw_fp96_t);
+				break;
+#endif
+#ifdef _TYPE_FP128_DEFINED
+			case 16:
+				arg = (void *)&va_arg(a_p, cw_fp128_t);
+				break;
+#endif
+			default:
+				arg = NULL;	/*
+						 * Keep the optimizer
+						 * quiet.
+						 */
+				_cw_error("Programming error");
+			}
+
+			/*
+			 * Try to render this element.  If it fails due to
+			 * overflow, reallocate and try again.  Add a spare
+			 * _CW_OUT_REALLOC_INC bytes in order to hopefully avoid
+			 * another overflow.
+			 */
+			rcount =
+			    ent->render_func(&a_format[key.key_els[key_offset].el_offset],
+			    key.key_els[key_offset].el_len, arg, osize - i,
+			    &obuf[i]);
+			if (rcount > osize - i) {
 				/*
-				 * Get the cached specifier length we're not
-				 * past the end of the cache.
+				 * Calculate the new size to expand the buffer
+				 * to.
 				 */
-				if (enti < _CW_OUT_ENT_CACHE)
-					spec_len = key.ents[enti].spec_len;
-				else {
-					/*
-					 * Calculate the specifier length.
-					 * We're guaranteed that there is a
-					 * whiteout character following the
-					 * specifier.
-					 */
-					for (spec_len = 0; key.format_key[i
-					    + spec_len] ==
-					    _CW_OUT_DES_SPECIFIER;
-					    spec_len++);
+				if (i + rcount + _CW_OUT_REALLOC_INC <=
+				    a_max_size) {
+					osize = i + rcount +
+					    _CW_OUT_REALLOC_INC;
+				} else {
+					if (osize == a_max_size) {
+						/*
+						 * We're not allowed to expand
+						 * any farther.
+						 */
+						i = a_max_size;
+						goto DONE;
+					}
+					osize = a_max_size;
 				}
 
-				/* Find the type string. */
-				type_len = spec_get_type(&a_format[i],
-				    spec_len, &type);
-				_cw_assert(type_len >= 0);
-				/* Get the handler for this specifier. */
-				ent = out_p_get_ent(a_out, type,
-				    type_len);
-				if (ent == NULL) {
-					/* No handler. */
-					retval = -2;
+				obuf = out_p_buffer_expand(a_out, &acount, obuf,
+				    i, osize);
+				if (obuf == NULL) {
+					retval = -1;
 					goto RETURN;
 				}
 
-				switch (ent->size) {
-				case 1: case 2: case 4:
-					arg = (void *)&va_arg(a_p, cw_uint32_t);
-					break;
-				case 8:
-					arg = (void *)&va_arg(a_p, cw_uint64_t);
-					break;
-#ifdef _TYPE_FP96_DEFINED
-				case 12:
-					arg = (void *)&va_arg(a_p, cw_fp96_t);
-					break;
-#endif
-#ifdef _TYPE_FP128_DEFINED
-				case 16:
-					arg = (void *)&va_arg(a_p, cw_fp128_t);
-					break;
-#endif
-				default:
-					arg = NULL;	/*
-							 * Keep the optimizer
-							 * quiet.
-							 */
-					_cw_error("Programming error");
-				}
-
-				/*
-				 * Try to render this element.  If it fails due
-				 * to overflow, reallocate and try again.  Add a
-				 * spare _CW_OUT_REALLOC_INC bytes in order
-				 * to hopefully avoid another overflow.
-				 */
-				rcount = ent->render_func(&a_format[i],
-				    spec_len, arg, osize - j, &obuf[j]);
-				if (rcount > osize - j) {
-					/*
-					 * Calculate the new size to expand the
-					 * buffer to.
-					 */
-					if (j + rcount + _CW_OUT_REALLOC_INC <=
-					    a_max_size) {
-						osize = j + rcount +
-						    _CW_OUT_REALLOC_INC;
-					} else {
-						if (osize == a_max_size) {
-							/*
-							 * We're not allowed to
-							 * expand any farther.
-							 */
-							size = a_max_size;
-							goto DONE;
-						}
-						osize = a_max_size;
-					}
-
-					obuf = out_p_buffer_expand(a_out,
-					    &acount, obuf, j, osize);
-					if (obuf == NULL) {
-						retval = -1;
-						goto RETURN;
-					}
-
-					rcount = ent->render_func(&a_format[i],
-					    spec_len, arg, osize - j, &obuf[j]);
-					if (rcount > osize - j)
-						rcount = osize - j;
-				}
-
-				j += rcount;
-				i += spec_len;
-				enti++;
-				break;
+				rcount = ent->render_func(&a_format[key.key_els[key_offset].el_offset],
+				    key.key_els[key_offset].el_len, arg, osize -
+				    i, &obuf[i]);
+				if (rcount > osize - i)
+					rcount = osize - i;
 			}
-			case _CW_OUT_DES_WHITEOUT:
-				i++;
-				break;
-			default:
-				_cw_error("Programming error");
-			}
+
+			i += rcount;
 		}
-		size = j;
 	}
 
 	DONE:
-	retval = size;
+	retval = i;
 
 	if (acount > 0) {
 		/*
@@ -1098,9 +1054,9 @@ out_p_put_svn(cw_out_t *a_out, char **a_str, cw_uint32_t a_size, cw_uint32_t
 		 * make space for a '\0' terminator).  Make sure to leave space
 		 * for a '\0' terminator.
 		 */
-		if ((*a_str == NULL) && (osize != size + 1)) {
+		if ((*a_str == NULL) && (osize != retval + 1)) {
 			obuf = out_p_buffer_expand(a_out, &acount, obuf, osize,
-			    size + 1);
+			    retval + 1);
 			if (obuf == NULL) {
 				retval = -1;
 				goto RETURN;
@@ -1109,10 +1065,10 @@ out_p_put_svn(cw_out_t *a_out, char **a_str, cw_uint32_t a_size, cw_uint32_t
 		*a_str = obuf;
 	}
 	RETURN:
-	if (key.format_key_buf != key.format_key) {
+	if (key.key_els != key.key_els_buf) {
 		/* out_p_format_scan() allocated a new spec key. */
 		_cw_mem_free((a_out != NULL) ? a_out->mem : NULL,
-		    key.format_key);
+		    key.key_els);
 	}
 	return retval;
 }
@@ -1151,8 +1107,7 @@ out_p_format_scan(cw_out_t *a_out, const char *a_format, cw_out_key_t *a_key,
     va_list a_p)
 {
 	cw_sint32_t	retval = 0;
-	cw_uint32_t	i, next_ent = 0;
-	cw_uint32_t	spec_len = 0;	/* Shut up the optimizer warning. */
+	cw_uint32_t	i, el_offset;
 	enum {
 		NORMAL,
 		BRACKET,
@@ -1160,100 +1115,46 @@ out_p_format_scan(cw_out_t *a_out, const char *a_format, cw_out_key_t *a_key,
 		VALUE
 	}	state;
 
-	a_key->format_key = a_key->format_key_buf;
-	a_key->raw = TRUE;
+	a_key->key_nels = 0;
+	a_key->key_els = a_key->key_els_buf;
 
-	for (i = 0, state = NORMAL; a_format[i] != '\0'; i++) {
-		/*
-		 * Test for overflow here rather than outside the loop to avoid
-		 * having to do a strlen() call all the time.
-		 */
-		if (i == _CW_OUT_SPEC_BUF) {
-			cw_uint32_t	format_len;
-
-			_cw_assert(a_key->format_key_buf == a_key->format_key);
-			/*
-			 * We just ran out of space in the statically allocated
-			 * buffer.  Time to face cold hard reality, get the
-			 * specifier length, allocate a buffer, and copy the
-			 * static buffer's contents over.
-			 */
-			format_len = strlen(a_format);
-			a_key->format_key = (char *)_cw_mem_malloc((a_out !=
-			    NULL) ? a_out->mem : NULL, format_len);
-			if (a_key->format_key == NULL) {
-				retval = -1;
-				goto RETURN;
-			}
-#ifdef _LIBSTASH_DBG
-			memset(a_key->format_key, 0, format_len);
-#endif
-			memcpy(a_key->format_key, a_key->format_key_buf,
-			    _CW_OUT_SPEC_BUF);
-#ifdef _LIBSTASH_DBG
-			memset(a_key->format_key_buf, 0,
-			    _CW_OUT_SPEC_BUF);
-#endif
-		}
+	for (i = el_offset = 0, state = NORMAL; a_format[i] != '\0'; i++) {
 		switch (state) {
 		case NORMAL:
 			if (a_format[i] == '[') {
 				/*
-				 * We can unconditionally white this character
-				 * out.  If the next character is a `[', we can
-				 * leave that one intact.
+				 * This character signifies the end of a text
+				 * el (unless i == 0, in which case, we've just
+				 * begun).  If the next character is also a '[',
+				 * it will mark the beginning of a new text el.
 				 */
-				a_key->format_key[i] =
-				    _CW_OUT_DES_WHITEOUT;
+				if (i > 0 && (retval = out_p_el_accept(a_out,
+				    a_format, a_key, TEXT, el_offset, i
+				    - el_offset)) < 0)
+					goto RETURN;
+				el_offset = i + 1;
 				state = BRACKET;
-			} else
-				a_key->format_key[i] = _CW_OUT_DES_NORMAL;
-
+			}
 			break;
 		case BRACKET:
-			a_key->raw = FALSE;
-
-			if (a_format[i] == '[') {
-				a_key->format_key[i] = _CW_OUT_DES_NORMAL;
+			if (a_format[i] == '[')
 				state = NORMAL;
-			} else {
-				a_key->format_key[i] =
-				    _CW_OUT_DES_SPECIFIER;
-				spec_len = 1;
+			else
 				state = VALUE;
-			}
-
 			break;
 		case NAME:
-			a_key->format_key[i] = _CW_OUT_DES_SPECIFIER;
-			spec_len++;
-
 			if (a_format[i] == ':')
 					state = VALUE;
 			break;
 		case VALUE:
-			a_key->format_key[i] = _CW_OUT_DES_SPECIFIER;
-
-			if (a_format[i] == '|') {
-				spec_len++;
+			if (a_format[i] == '|')
 				state = NAME;
-			} else if (a_format[i] == ']') {
-				a_key->format_key[i] =
-				    _CW_OUT_DES_WHITEOUT;
+			else if (a_format[i] == ']') {
+				if ((retval = out_p_el_accept(a_out, a_format,
+				    a_key, SPEC, el_offset, i - el_offset)) < 0)
+					goto RETURN;
+				el_offset = i + 1;
 				state = NORMAL;
-
-				/*
-				 * Cache the specifier length if there's room in
-				 * the cache.
-				 */
-				if (next_ent < _CW_OUT_ENT_CACHE) {
-					
-					a_key->ents[next_ent].spec_len =
-					    spec_len;
-					next_ent++;
-				}
-			} else {
-				spec_len++;
 			}
 
 			break;
@@ -1265,14 +1166,82 @@ out_p_format_scan(cw_out_t *a_out, const char *a_format, cw_out_key_t *a_key,
 		retval = -2;
 		goto RETURN;
 	}
-	a_key->format_len = i;
+	/*
+	 * Accept the last el, if there is one.
+	 */
+	if (i > el_offset) {
+		retval = out_p_el_accept(a_out, a_format, a_key, TEXT,
+		    el_offset, i - el_offset);
+	}
 
 	RETURN:
 	return retval;
 }
 
+static cw_sint32_t
+out_p_el_accept(cw_out_t *a_out, const char *a_format, cw_out_key_t *a_key,
+    cw_out_el_type_t a_type, cw_uint32_t a_offset, cw_uint32_t a_len)
+{
+	cw_sint32_t	retval;
+
+	/* Check for overflow of the stack-allocated els buffer. */
+	if (a_key->key_nels == _CW_OUT_ELS_BUF) {
+		cw_uint32_t	i, el_offset, total_els = _CW_OUT_ELS_BUF + 2;
+
+		_cw_assert(a_key->key_els == a_key->key_els_buf);
+			
+		/*
+		 * Overflow.  Time to face cold hard reality, calculate a tight
+		 * upper bound (at most off by one) on the total number of el's,
+		 * allocate a buffer, and copy the static buffer's contents
+		 * over.  We know that we need to expand by at least 1 el, and
+		 * there may be one more el than there are '[' characters (hence
+		 * the initialization of total_els), plus anything after the end
+		 * of this el.
+		 */
+		for (i = el_offset = a_offset + a_len; a_format[i] != '\0';
+		     i++) {
+			if (a_format[i] == '[') {
+				if (a_format[i + 1] == '[') {
+					/*
+					 * "[[".  Only add one to
+					 * total_els.
+					 */
+					i++;
+				}
+				total_els++;
+				el_offset = i;
+			}
+		}
+		a_key->key_els = (cw_out_el_t *)_cw_mem_malloc((a_out != NULL)
+		    ? a_out->mem : NULL, total_els * sizeof(cw_out_el_t));
+		if (a_key->key_els == NULL) {
+			retval = -1;
+			goto RETURN;
+		}
+#ifdef _LIBSTASH_DBG
+		memset(a_key->key_els, 0, total_els * sizeof(cw_out_el_t));
+#endif
+		memcpy(a_key->key_els, a_key->key_els_buf, _CW_OUT_ELS_BUF *
+		    sizeof(cw_out_el_t));
+#ifdef _LIBSTASH_DBG
+		memset(a_key->key_els_buf, 0, _CW_OUT_ELS_BUF *
+		    sizeof(cw_out_el_t));
+#endif
+	}
+
+	a_key->key_els[a_key->key_nels].el_type = a_type;
+	a_key->key_els[a_key->key_nels].el_offset = a_offset;
+	a_key->key_els[a_key->key_nels].el_len = a_len;
+	a_key->key_nels++;
+
+	retval = 0;
+	RETURN:
+	return retval;
+}
+
 static cw_out_ent_t *
-out_p_get_ent(cw_out_t *a_out, const char *a_format, cw_uint32_t a_len)
+out_p_ent_get(cw_out_t *a_out, const char *a_format, cw_uint32_t a_len)
 {
 	cw_out_ent_t	*retval;
 	cw_uint32_t	i;
@@ -1388,7 +1357,7 @@ out_p_common_render(const char *a_format, cw_uint32_t a_len, cw_uint32_t
 }
 
 static cw_uint32_t
-out_p_render_int(const char *a_format, cw_uint32_t a_len, cw_uint64_t a_arg,
+out_p_int_render(const char *a_format, cw_uint32_t a_len, cw_uint64_t a_arg,
     cw_uint32_t a_max_len, cw_uint8_t *r_buf, cw_uint32_t a_nbits, cw_uint32_t
     a_default_base)
 {
@@ -1443,29 +1412,44 @@ out_p_render_int(const char *a_format, cw_uint32_t a_len, cw_uint64_t a_arg,
 	/*
 	 * Treat 64 bit numbers separately, since they're much slower on 32 bit
 	 * architectures.
+	 *
+	 * Treat base 16 numbers specially, since they can be rendered more
+	 * quickly with special case code, and they tend to be used a lot.
 	 */
-	if (a_nbits != 64) {
+	if (arg == 0)
+		result += a_nbits - 1;
+	else if (a_nbits != 64) {
 		cw_uint32_t	rval = (cw_uint32_t)arg;
 
-		for (i = a_nbits - 1; rval != 0; i--) {
-			result[i] = syms[rval % base];
-			rval /= base;
+		if (base == 16) {
+			for (i = a_nbits - 1; rval != 0; i--) {
+				result[i] = syms[rval & 0xf];
+				rval >>= 4;
+			}
+		} else {
+			for (i = a_nbits - 1; rval != 0; i--) {
+				result[i] = syms[rval % base];
+				rval /= base;
+			}
 		}
+		result += i + 1;
 	} else {
 		cw_uint64_t	rval = arg;
 
-		for (i = a_nbits - 1; rval != 0; i--) {
-			result[i] = syms[rval % base];
-			rval /= base;
+		if (base == 16) {
+			for (i = 63; rval != 0; i--) {
+				result[i] = syms[rval & 0xf];
+				rval >>= 4;
+			}
+		} else {
+			for (i = 63; rval != 0; i--) {
+				result[i] = syms[rval % base];
+				rval /= base;
+			}
 		}
+		result += i + 1;
 	}
 
-	/* Find the first non-zero digit.  Render the sign if necessary.  */
-	for (i = 0; i < a_nbits - 1; i++) {
-		if (result[i] != '0')
-			break;
-	}
-	result += i;
 	if (show_sign) {
 		result--;
 		result[0] = (is_negative) ? '-' : '+';
@@ -1487,7 +1471,7 @@ out_p_render_int(const char *a_format, cw_uint32_t a_len, cw_uint64_t a_arg,
 }
 
 static cw_uint32_t
-out_p_render_int32(const char *a_format, cw_uint32_t a_len, const void *a_arg,
+out_p_int32_render(const char *a_format, cw_uint32_t a_len, const void *a_arg,
     cw_uint32_t a_max_len, cw_uint8_t *r_buf)
 {
 	cw_uint32_t	retval;
@@ -1500,14 +1484,14 @@ out_p_render_int32(const char *a_format, cw_uint32_t a_len, const void *a_arg,
 
 	arg = (cw_uint64_t)*(const cw_uint32_t *)a_arg;
 
-	retval = out_p_render_int(a_format, a_len, arg, a_max_len, r_buf, 32,
+	retval = out_p_int_render(a_format, a_len, arg, a_max_len, r_buf, 32,
 	    10);
 
 	return retval;
 }
 
 static cw_uint32_t
-out_p_render_int64(const char *a_format, cw_uint32_t a_len, const void *a_arg,
+out_p_int64_render(const char *a_format, cw_uint32_t a_len, const void *a_arg,
     cw_uint32_t a_max_len, cw_uint8_t *r_buf)
 {
 	cw_uint32_t	retval;
@@ -1520,19 +1504,17 @@ out_p_render_int64(const char *a_format, cw_uint32_t a_len, const void *a_arg,
 
 	arg = *(const cw_uint64_t *)a_arg;
 
-	retval = out_p_render_int(a_format, a_len, arg, a_max_len, r_buf, 64,
+	retval = out_p_int_render(a_format, a_len, arg, a_max_len, r_buf, 64,
 	    10);
 
 	return retval;
 }
 
 static cw_uint32_t
-out_p_render_char(const char *a_format, cw_uint32_t a_len, const void *a_arg,
+out_p_char_render(const char *a_format, cw_uint32_t a_len, const void *a_arg,
     cw_uint32_t a_max_len, cw_uint8_t *r_buf)
 {
 	cw_uint32_t	rlen, owidth, width, offset;
-	cw_sint32_t	val_len;
-	const cw_uint8_t *val;
 	cw_uint8_t	c;
 
 	_cw_check_ptr(a_format);
@@ -1554,7 +1536,7 @@ out_p_render_char(const char *a_format, cw_uint32_t a_len, const void *a_arg,
 }
 
 static cw_uint32_t
-out_p_render_string(const char *a_format, cw_uint32_t a_len, const void *a_arg,
+out_p_string_render(const char *a_format, cw_uint32_t a_len, const void *a_arg,
     cw_uint32_t a_max_len, cw_uint8_t *r_buf)
 {
 	cw_sint32_t	val_len;
@@ -1599,7 +1581,7 @@ out_p_render_string(const char *a_format, cw_uint32_t a_len, const void *a_arg,
 }
 
 static cw_uint32_t
-out_p_render_pointer(const char *a_format, cw_uint32_t a_len, const void *a_arg,
+out_p_pointer_render(const char *a_format, cw_uint32_t a_len, const void *a_arg,
     cw_uint32_t a_max_len, cw_uint8_t *r_buf)
 {
 	cw_uint32_t	retval;
@@ -1614,7 +1596,7 @@ out_p_render_pointer(const char *a_format, cw_uint32_t a_len, const void *a_arg,
 		cw_uint64_t	arg;
 		arg = (cw_uint64_t)(cw_uint32_t)*(const void **)a_arg;
 
-		retval = out_p_render_int(a_format, a_len, arg, a_max_len,
+		retval = out_p_int_render(a_format, a_len, arg, a_max_len,
 		    r_buf, 32, 16);
 	}
 #elif (SIZEOF_INT_P == 8)
@@ -1622,7 +1604,7 @@ out_p_render_pointer(const char *a_format, cw_uint32_t a_len, const void *a_arg,
 		cw_uint64_t	arg;
 		arg = (cw_uint64_t)*(const void **)a_arg;
 
-		retval = out_p_render_int(a_format, a_len, arg, a_max_len,
+		retval = out_p_int_render(a_format, a_len, arg, a_max_len,
 		    r_buf, 64, 16);
 	}
 #else

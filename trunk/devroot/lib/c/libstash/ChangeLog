@@ -1,3 +1,21 @@
+2000-07-19  Jason Evans  <jasone@canonware.com>
+
+	* src/out.c: Restructure the internals of the out class so that
+	there is no longer a per-character key for the formatting string.
+	Instead, keep track of the offset and length of each formatting
+	specifier and raw substring.
+
+	Optimize integer printing by removing an unnecessary loop to find
+	the first non-'0' digit.  Use special case code for base 16.
+	
+	The out class is now approximately as efficient as *printf().  In
+	comparison to *printf(), the out class ranges from being slightly
+	faster to ~20% slower.  Profiling suggests that the main reasons
+	for the lower performance are 1) more functions in the critical
+	path, and 2) overhead due to the more generalized syntax of the
+	specifiers.  Substantial function inlining could improve
+	performance by perhaps 5-10%, but at the cost of code obfuscation.
+
 2000-07-18  Jason Evans  <jasone@canonware.com>
 
 	* src/out.c: Restructure the internals of the out class so that
