@@ -14,6 +14,8 @@
 
 \clearemptydoublepage
 \chapter{The libonyx library}
+\label{onyxlib}
+
 The \libname{libonyx} library implements an embeddable \htmlref{Onyx}{onyxlang}
 interpreter.  \libname{libonyx} is designed to allow multiple interpreter
 instances in the same program, though since \htmlref{Onyx}{onyxlang} is a

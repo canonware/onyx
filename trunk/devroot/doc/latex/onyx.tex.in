@@ -15,16 +15,20 @@
 % Definitions and front matter.
 \input{@abs_srcdir@/doc/latex/front}
 
+% Onyx Language Tutorial.
+\input{@abs_srcdir@/doc/latex/onyx_tut}
+
+% Onyx Language Examples.
+\input{@abs_srcdir@/doc/latex/onyx_ex}
+
 % Onyx Language Reference.
-\clearemptydoublepage
 \input{@abs_srcdir@/doc/latex/onyx_lang}
 
-% Programs.
+% The onyx program.
 @bin_onyx_manual@\input{@abs_objdir@/bin/onyx/doc/latex/manual}
 
-% Libraries.
+% The libonyx library.
 @lib_onyx_manual@\input{@abs_objdir@/lib/libonyx/doc/latex/manual}
 
 % Back matter.
-\clearemptydoublepage
 \input{@abs_srcdir@/doc/latex/back}

@@ -33,7 +33,7 @@ T_ONYX = [objdir]/doc/latex/onyx.tex;
 
 /* LaTeX source files. */
 {
-  local tex_srcs = front.tex back.tex onyx_lang.tex;
+  local tex_srcs = front.tex back.tex onyx_lang.tex onyx_tut.tex onyx_ex.tex;
   tex_srcs = [fromto % [srcdir]/doc/latex/% [tex_srcs]];
 
   TEX_SRCS = [TEX_SRCS] [tex_srcs];

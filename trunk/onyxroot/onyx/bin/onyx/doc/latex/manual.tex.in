@@ -14,6 +14,8 @@
 
 \clearemptydoublepage
 \chapter{The onyx program}
+\label{onyxprog}
+
 \binname{onyx} is a stand-alone Onyx interpreter, with an integrated command
 line editor.  The Onyx language is documented in a separate
 \htmlref{chapter}{onyxlang}, so this chapter documents only the differences from
