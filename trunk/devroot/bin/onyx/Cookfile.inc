@@ -48,6 +48,12 @@ SRCS = [SRCS] [ONYX_SRCS] [TONYX_SRCS];
 #if [enable_threads]
                  monitor_a.nx.in monitor_b.nx.in monitor_c.nx.in
 #endif
+#if [enable_real]
+
+                 div_a.nx.in div_b.nx.in div_c.nx.in div_d.nx.in div_e.nx.in
+                 exp_e.nx.in
+
+#endif
 #if [enable_posix]
                  nsleep_a.nx.in nsleep_b.nx.in nsleep_c.nx.in nsleep_d.nx.in
                  rand_a.nx.in setenv_a.nx.in setenv_b.nx.in setenv_c.nx.in
@@ -70,12 +76,12 @@ SRCS = [SRCS] [ONYX_SRCS] [TONYX_SRCS];
                  cvlit_b.nx.in cvn_a.nx.in cvn_b.nx.in cvn_c.nx.in cvrs_a.nx.in
                  cvrs_b.nx.in cvrs_c.nx.in cvrs_d.nx.in cvrs_e.nx.in
                  cvrs_f.nx.in cvs_a.nx.in cvs_b.nx.in cvx_a.nx.in cvx_b.nx.in
-                 def_a.nx.in def_b.nx.in dict_a.nx.in div_a.nx.in div_b.nx.in
-                 div_c.nx.in div_d.nx.in div_e.nx.in dstack_a.nx.in dup_a.nx.in
-                 dup_b.nx.in end_a.nx.in end_b.nx.in eq_a.nx.in eq_b.nx.in
-                 eval.nx.in eval_a.nx.in eval_b.nx.in exch_a.nx.in exch_b.nx.in
-                 exch_c.nx.in exit_a.nx.in exp_a.nx.in exp_b.nx.in exp_c.nx.in
-                 exp_d.nx.in exp_e.nx.in for_a.nx.in for_b.nx.in for_c.nx.in
+                 def_a.nx.in def_b.nx.in dict_a.nx.in idiv_a.nx.in idiv_b.nx.in
+                 idiv_c.nx.in idiv_d.nx.in idiv_e.nx.in dstack_a.nx.in
+                 dup_a.nx.in dup_b.nx.in end_a.nx.in end_b.nx.in eq_a.nx.in
+                 eq_b.nx.in eval.nx.in eval_a.nx.in eval_b.nx.in exch_a.nx.in
+                 exch_b.nx.in exch_c.nx.in exit_a.nx.in exp_a.nx.in exp_b.nx.in
+                 exp_c.nx.in exp_d.nx.in for_a.nx.in for_b.nx.in for_c.nx.in
                  for_d.nx.in for_e.nx.in foreach_a.nx.in foreach_b.nx.in
                  foreach_c.nx.in gc_roll.nx.in ge_a.nx.in ge_b.nx.in ge_c.nx.in
                  ge_d.nx.in ge_e.nx.in ge_f.nx.in ge_g.nx.in ge_h.nx.in

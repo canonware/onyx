@@ -1,14 +1,14 @@
 Test begin
-`0 1 div'
+`0 1 idiv'
 0
-`4 2 div'
+`4 2 idiv'
 2
-`5 2 div'
+`5 2 idiv'
 2
-`5 -3 div'
+`5 -3 idiv'
 -1
-`-5 3 div'
+`-5 3 idiv'
 -1
-`-5 -3 div'
+`-5 -3 idiv'
 1
 Test end

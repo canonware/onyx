@@ -3,6 +3,6 @@ Error /typecheck
 ostack: (1 -mark-)
 dstack: (-dict- -dict- -dict- -dict-)
 estack/istack trace (0..2):
-0:	--div--
+0:	--idiv--
 1:	-file-
 2:	--start--

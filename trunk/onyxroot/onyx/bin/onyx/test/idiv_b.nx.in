@@ -12,6 +12,6 @@
 
 `Test begin\n' print flush
 
-1 div
+1 idiv
 
 `Test end\n' print
