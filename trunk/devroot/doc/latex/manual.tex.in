@@ -21,7 +21,6 @@
 \input{@abs_objdir@/bin/ncat/doc/latex/manual}
 \input{@abs_objdir@/bin/proxy/doc/latex/manual}
 \input{@abs_objdir@/bin/stil/doc/latex/manual}
-%\input{@abs_objdir@/bin/stile/doc/latex/manual}
 
 % Libraries.
 \clearemptydoublepage
