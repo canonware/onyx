@@ -86,6 +86,10 @@ sock_new(cw_sock_t * a_sock, cw_uint32_t a_in_max_buf_size)
   retval->out_is_flushed = TRUE;
   cnd_new(&retval->out_cnd);
 
+#ifdef _LIBSOCK_DBG
+  retval->magic = _LIBSOCK_SOCK_MAGIC;
+#endif
+
   RETURN:
   return retval;
 }
@@ -94,6 +98,7 @@ void
 sock_delete(cw_sock_t * a_sock)
 {
   _cw_check_ptr(a_sock);
+  _cw_assert(_LIBSOCK_SOCK_MAGIC == a_sock->magic);
 
   if (TRUE == a_sock->is_connected)
   {
@@ -117,6 +122,12 @@ sock_delete(cw_sock_t * a_sock)
   {
     _cw_free(a_sock);
   }
+#ifdef _LIBSOCK_DBG
+  else
+  {
+    a_sock->magic = _LIBSOCK_SOCK_MAGIC;
+  }
+#endif
 }
 
 cw_bool_t
@@ -125,6 +136,7 @@ sock_is_connected(cw_sock_t * a_sock)
   cw_bool_t retval;
   
   _cw_check_ptr(a_sock);
+  _cw_assert(_LIBSOCK_SOCK_MAGIC == a_sock->magic);
 
   /* Yeah, it's strange naming that results in us not returning
    * a_sock->is_connected.  The problem is that a_sock->error is the first
@@ -141,6 +153,7 @@ cw_uint32_t
 sock_get_port(cw_sock_t * a_sock)
 {
   _cw_check_ptr(a_sock);
+  _cw_assert(_LIBSOCK_SOCK_MAGIC == a_sock->magic);
 
   return a_sock->port;
 }
@@ -155,6 +168,7 @@ sock_connect(cw_sock_t * a_sock, const char * a_server_host, int a_port,
   struct sockaddr_in server_addr;
   
   _cw_check_ptr(a_sock);
+  _cw_assert(_LIBSOCK_SOCK_MAGIC == a_sock->magic);
   _cw_check_ptr(a_server_host);
   mtx_lock(&a_sock->state_lock);
 
@@ -382,6 +396,7 @@ sock_wrap(cw_sock_t * a_sock, int a_sockfd, cw_bool_t a_init)
   cw_bool_t retval;
   
   _cw_check_ptr(a_sock);
+  _cw_assert(_LIBSOCK_SOCK_MAGIC == a_sock->magic);
   mtx_lock(&a_sock->state_lock);
   
   if (TRUE == a_sock->is_connected)
@@ -464,6 +479,7 @@ sock_disconnect(cw_sock_t * a_sock)
   cw_bool_t retval;
 
   _cw_check_ptr(a_sock);
+  _cw_assert(_LIBSOCK_SOCK_MAGIC == a_sock->magic);
 
   retval = sock_p_disconnect(a_sock);
   
@@ -476,6 +492,7 @@ sock_buffered_in(cw_sock_t * a_sock)
   cw_uint32_t retval;
 
   _cw_check_ptr(a_sock);
+  _cw_assert(_LIBSOCK_SOCK_MAGIC == a_sock->magic);
   
   mtx_lock(&a_sock->in_lock);
   retval = buf_get_size(&a_sock->in_buf);
@@ -491,6 +508,7 @@ sock_read(cw_sock_t * a_sock, cw_buf_t * a_spare, cw_sint32_t a_max_read,
   cw_sint32_t retval, size;
   
   _cw_check_ptr(a_sock);
+  _cw_assert(_LIBSOCK_SOCK_MAGIC == a_sock->magic);
   _cw_check_ptr(a_spare);
 
   mtx_lock(&a_sock->in_lock);
@@ -616,6 +634,7 @@ sock_write(cw_sock_t * a_sock, cw_buf_t * a_buf)
   cw_uint32_t out_buf_size;
   
   _cw_check_ptr(a_sock);
+  _cw_assert(_LIBSOCK_SOCK_MAGIC == a_sock->magic);
   _cw_check_ptr(a_buf);
 
   mtx_lock(&a_sock->out_lock);
@@ -718,6 +737,7 @@ sock_flush_out(cw_sock_t * a_sock)
   cw_bool_t retval;
   
   _cw_check_ptr(a_sock);
+  _cw_assert(_LIBSOCK_SOCK_MAGIC == a_sock->magic);
 
   mtx_lock(&a_sock->out_lock);
   if (a_sock->error)
@@ -751,6 +771,7 @@ int
 sock_get_fd(cw_sock_t * a_sock)
 {
   _cw_check_ptr(a_sock);
+  _cw_assert(_LIBSOCK_SOCK_MAGIC == a_sock->magic);
 
   return a_sock->sockfd;
 }
@@ -761,6 +782,7 @@ sock_l_get_in_space(cw_sock_t * a_sock)
   cw_uint32_t retval;
 
   _cw_check_ptr(a_sock);
+  _cw_assert(_LIBSOCK_SOCK_MAGIC == a_sock->magic);
 
   retval = a_sock->in_max_buf_size;
 
@@ -782,6 +804,7 @@ sock_l_get_in_size(cw_sock_t * a_sock)
   cw_uint32_t retval;
   
   _cw_check_ptr(a_sock);
+  _cw_assert(_LIBSOCK_SOCK_MAGIC == a_sock->magic);
 
   mtx_lock(&a_sock->in_lock);
   retval = buf_get_size(&a_sock->in_buf);
@@ -793,6 +816,9 @@ sock_l_get_in_size(cw_sock_t * a_sock)
 cw_uint32_t
 sock_l_get_in_max_buf_size(cw_sock_t * a_sock)
 {
+  _cw_check_ptr(a_sock);
+  _cw_assert(_LIBSOCK_SOCK_MAGIC == a_sock->magic);
+  
   return a_sock->in_max_buf_size;
 }
 
@@ -800,6 +826,7 @@ void
 sock_l_get_out_data(cw_sock_t * a_sock, cw_buf_t * r_buf)
 {
   _cw_check_ptr(a_sock);
+  _cw_assert(_LIBSOCK_SOCK_MAGIC == a_sock->magic);
   _cw_check_ptr(r_buf);
 
   mtx_lock(&a_sock->out_lock);
@@ -829,6 +856,7 @@ sock_l_put_back_out_data(cw_sock_t * a_sock, cw_buf_t * a_buf)
   cw_uint32_t retval;
   
   _cw_check_ptr(a_sock);
+  _cw_assert(_LIBSOCK_SOCK_MAGIC == a_sock->magic);
   _cw_check_ptr(a_buf);
 
   mtx_lock(&a_sock->out_lock);
@@ -886,6 +914,7 @@ sock_l_put_in_data(cw_sock_t * a_sock, cw_buf_t * a_buf)
   cw_uint32_t buffered_in;
   
   _cw_check_ptr(a_sock);
+  _cw_assert(_LIBSOCK_SOCK_MAGIC == a_sock->magic);
   _cw_check_ptr(a_buf);
 
   mtx_lock(&a_sock->in_lock);
@@ -928,6 +957,7 @@ void
 sock_l_message_callback(cw_sock_t * a_sock, cw_bool_t a_error)
 {
   _cw_check_ptr(a_sock);
+  _cw_assert(_LIBSOCK_SOCK_MAGIC == a_sock->magic);
 
   mtx_lock(&a_sock->lock);
   mtx_lock(&a_sock->in_lock);
@@ -948,6 +978,7 @@ void
 sock_l_error_callback(cw_sock_t * a_sock)
 {
   _cw_check_ptr(a_sock);
+  _cw_assert(_LIBSOCK_SOCK_MAGIC == a_sock->magic);
 
   mtx_lock(&a_sock->state_lock);
   mtx_lock(&a_sock->lock);

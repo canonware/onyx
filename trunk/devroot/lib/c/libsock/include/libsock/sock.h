@@ -20,6 +20,9 @@ typedef struct cw_sock_s cw_sock_t;
 
 struct cw_sock_s
 {
+#if (defined(_LIBSOCK_DBG) || defined(_LIBSOCK_DEBUG))
+  cw_uint32_t magic;
+#endif
   cw_bool_t is_malloced;
 
   cw_uint32_t os_inbuf_size;
