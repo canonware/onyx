@@ -1,7 +1,5 @@
 2002-03-16 : Jason Evans <jasone@canonware.com>
 
-	* xep : Use sigsetjmp()/siglongjmp() rather than setjmp()/longjmp().
-
 	* lib/libonyx/src/thd.c : Significantly rework the generic
           suspend/resume code to use two signals (SIGUSR1 and SIGUSR2) rather
           than just one.  This allows the removal of some questionable code that

@@ -29,7 +29,7 @@ typedef enum
 struct cw_xep_s
 {
     qr(cw_xep_t) link;
-    sigjmp_buf context;
+    jmp_buf context;
     cw_xepv_t value;
     cw_bool_t is_handled;
     cw_xeps_t state;
@@ -43,7 +43,7 @@ struct cw_xep_s
 
 #define xep_try								\
 	xep_p_link(&_xep);						\
-	switch (sigsetjmp(_xep.context))				\
+	switch (setjmp(_xep.context))					\
 	{								\
 	    case CW_XEPV_NONE:						\
 	    case CW_XEPV_CODE:
