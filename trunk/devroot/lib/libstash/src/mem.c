@@ -178,6 +178,8 @@ mem_malloc(cw_mem_t * a_mem, size_t a_size)
       }
       else
       {
+	cw_sint32_t error;
+	
 	memset(retval, 0xa5, a_size);
 	
 	allocation->size = a_size;
@@ -196,7 +198,8 @@ mem_malloc(cw_mem_t * a_mem, size_t a_size)
 	  out_put(cw_g_out, buf);
 	}
 
-	if (-1 == oh_item_insert(&a_mem->addr_hash, retval, allocation))
+	error = oh_item_insert(&a_mem->addr_hash, retval, allocation);
+	if (-1 == error)
 	{
 	  if (dbg_is_registered(cw_g_dbg, "mem_error"))
 	  {
@@ -212,6 +215,48 @@ mem_malloc(cw_mem_t * a_mem, size_t a_size)
 	    out_put(cw_g_out, buf);
 	  }
 	}
+        else if (1 == error)
+        {
+	  if (FALSE == oh_item_search(&a_mem->addr_hash,
+				      a_mem,
+				      (void **) &old_allocation))
+	  {
+	    if (dbg_is_registered(cw_g_dbg, "mem_error"))
+	    {
+	      char buf[1025];
+
+	      _cw_check_ptr(old_allocation);
+	
+	      bzero(buf, sizeof(buf));
+	      out_put_sn(cw_g_out, buf, 1024,
+			 "[s](): 0x[p] multiply-allocated "
+			 "(was at [s], line [i], size [i];"
+			 " now at [s], line [i], size [i])\n",
+			 __FUNCTION__, retval,
+			 old_allocation->filename,
+			 old_allocation->line_num,
+			 old_allocation->size,
+			 a_filename,
+			 a_line_num,
+			 a_size);
+	      out_put(cw_g_out, buf);
+	    }
+	  }
+	  /* XXX */
+	  if (dbg_is_registered(cw_g_dbg, "mem_error"))
+	  {
+	    char buf[1025];
+
+	    bzero(buf, sizeof(buf));
+
+	    out_put_sn(cw_g_out, buf, 1024,
+		       "[s](): MemoryProgramming error during "
+		       "allocation (0x[p] (size [i]) from [s], line [i]\n",
+		       __FUNCTION__,
+		       retval, a_size, a_filename, a_line_num);
+	    out_put(cw_g_out, buf);
+	  }
+        }
       }
     }
 #ifdef _CW_REENTRANT
