@@ -34,7 +34,8 @@ struct cw_out_s
   cw_mtx_t lock;
 #endif
 
-  cw_out_ent_t * extentions;
+  cw_uint32_t nextensions;
+  cw_out_ent_t * extensions;
 };
 
 struct cw_out_ent_s

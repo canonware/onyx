@@ -27,6 +27,9 @@ main()
   out_put(cw_g_out, "Boo[name:value|t:string]", "hoo");
   out_put(cw_g_out, "[[ A bracket [[ ]", "hi");
 
+  out_put(cw_g_out, "Boo[name:value|t:buf|s:blah]", "hoo");
+  out_put(cw_g_out, "Boo[name:value|t:unknown|s:blah]", "hoo");
+
   log_printf(cw_g_log, "Test end\n");
   libstash_shutdown();
   return 0;

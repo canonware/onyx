@@ -82,14 +82,6 @@ static char *
 out_p_render_pointer(const char * a_format, cw_uint32_t a_len,
 		     const void * a_arg, char * r_buf);
 
-static cw_uint32_t
-out_p_metric_undef(const char * a_format, cw_uint32_t a_len,
-		   const void * a_arg);
-
-static char *
-out_p_render_undef(const char * a_format, cw_uint32_t a_len,
-		   const void * a_arg, char * r_buf);
-
 static cw_out_ent_t cw_g_out_builtins[] = 
 {
   {"int8",     sizeof(cw_uint8_t),   out_p_metric_int8,    out_p_render_int8},
@@ -103,19 +95,19 @@ static cw_out_ent_t cw_g_out_builtins[] =
   
   {"int64",    sizeof(cw_uint64_t),  out_p_metric_int64,   out_p_render_int64},
   {"i64",      sizeof(cw_uint64_t),  out_p_metric_int64,   out_p_render_int64},
-  
-  {"float32",  4,                    out_p_metric_undef,   out_p_render_undef},
-  {"f32",      4,                    out_p_metric_undef,   out_p_render_undef},
 
-  {"float64",  8,                    out_p_metric_undef,   out_p_render_undef},
-  {"f64",      8,                    out_p_metric_undef,   out_p_render_undef},
+  {"float32",  4,                    NULL,                 NULL},
+  {"f32",      4,                    NULL,                 NULL},
 
-  {"float96",  12,                   out_p_metric_undef,   out_p_render_undef},
-  {"f96",      12,                   out_p_metric_undef,   out_p_render_undef},
+  {"float64",  8,                    NULL,                 NULL},
+  {"f64",      8,                    NULL,                 NULL},
 
-  {"float128", 16,                   out_p_metric_undef,   out_p_render_undef},
-  {"f128",     16,                   out_p_metric_undef,   out_p_render_undef},
-  
+  {"float96",  12,                   NULL,                 NULL},
+  {"f96",      12,                   NULL,                 NULL},
+
+  {"float128", 16,                   NULL,                 NULL},
+  {"f128",     16,                   NULL,                 NULL},
+
   {"string",   sizeof(cw_uint8_t *), out_p_metric_string,  out_p_render_string},
   {"s",        sizeof(cw_uint8_t *), out_p_metric_string,  out_p_render_string},
   

@@ -14,6 +14,7 @@
  *
  ****************************************************************************/
 
+#define _LIBSTASH_USE_BUF
 #include "libstash/libstash.h"
 
 /* Globals. */
@@ -25,12 +26,20 @@ cw_out_t * cw_g_out = NULL;
 cw_bool_t
 libstash_init(void)
 {
-  cw_bool_t retval;
+  cw_bool_t retval = FALSE;
   
   /* Start up global modules. */
   if (cw_g_out == NULL)
   {
     cw_g_out = out_new(NULL);
+    if (NULL != cw_g_out)
+    {
+      if (TRUE == out_register(cw_g_out, "buf", sizeof(cw_buf_t *),
+			       buf_metric, buf_render))
+      {
+	retval = TRUE;
+      }
+    }
   }
   if (cw_g_log == NULL)
   {
@@ -52,10 +61,7 @@ libstash_init(void)
   {
     retval = TRUE;
   }
-  else
-  {
-    retval = FALSE;
-  }
+  
   return retval;
 }
 

@@ -50,6 +50,9 @@ out_new(cw_out_t * a_out)
   mtx_new(&retval->lock);
 #endif
 
+  retval->nextensions = 0;
+  retval->extensions = NULL;
+
 #ifdef _LIBSTASH_DBG
   retval->magic = _LIBSTASH_OUT_MAGIC;
 #endif
@@ -61,9 +64,20 @@ out_new(cw_out_t * a_out)
 void
 out_delete(cw_out_t * a_out)
 {
+  cw_uint32_t i;
+  
   _cw_check_ptr(a_out);
   _cw_assert(_LIBSTASH_OUT_MAGIC == a_out->magic);
 
+  for (i = 0; i < a_out->nextensions; i++)
+  {
+    _cw_free(a_out->extensions[i].type);
+  }
+  if (NULL != a_out->extensions)
+  {
+    _cw_free(a_out->extensions);
+  }
+  
 #ifdef _CW_REENTRANT
   mtx_delete(&a_out->lock);
 #endif
@@ -96,7 +110,48 @@ out_register(cw_out_t * a_out,
 	     || (12 == a_size) || (16 == a_size));
   _cw_check_ptr(a_metric_func);
   _cw_check_ptr(a_render_func);
+
+  if (NULL == a_out->extensions)
+  {
+    a_out->extensions = (cw_out_ent_t *) _cw_malloc(sizeof(cw_out_ent_t));
+    if (NULL == a_out->extensions)
+    {
+      retval = TRUE;
+      goto RETURN;
+    }
+  }
+  else
+  {
+    cw_out_ent_t * t_ptr;
+
+    t_ptr = (cw_out_ent_t *) _cw_realloc(a_out->extensions,
+					 ((a_out->nextensions + 1)
+					  * sizeof(cw_out_ent_t)));
+    if (NULL == t_ptr)
+    {
+      retval = TRUE;
+      goto RETURN;
+    }
+    a_out->extensions = t_ptr;
+  }
   
+  a_out->extensions[a_out->nextensions].type
+    = (char *) _cw_malloc(strlen(a_type) + 1);
+  if (NULL == a_out->extensions[a_out->nextensions].type)
+  {
+    retval = TRUE;
+    goto RETURN;
+  }
+  strcpy(a_out->extensions[a_out->nextensions].type, a_type);
+  a_out->extensions[a_out->nextensions].size = a_size;
+  a_out->extensions[a_out->nextensions].metric_func = a_metric_func;
+  a_out->extensions[a_out->nextensions].render_func = a_render_func;
+
+  a_out->nextensions++;
+
+  retval = FALSE;
+  
+  RETURN:
   return retval;
 }
 
@@ -691,7 +746,7 @@ out_p_metric(cw_out_t * a_out, const char * a_format, char ** r_format,
   format = (char *) _cw_malloc(format_len + 1);
   if (NULL == format)
   {
-    _cw_marker("Error");
+/*      _cw_marker("Error"); */
     retval = -1;
     goto RETURN;
   }
@@ -819,36 +874,127 @@ out_p_metric(cw_out_t * a_out, const char * a_format, char ** r_format,
 	else if (']' == a_format[i])
 	{
 	  const char * val;
-	  cw_sint32_t val_len;
+	  cw_sint32_t val_len, j;
+	  cw_uint32_t val_size;
+	  cw_out_metric_t * metric_func;
 	  
 	  format[i] = _LIBSTASH_OUT_DES_WHITEOUT;
 	  state = START;
 
 	  /* Successful completion of parsing this specifier.  Call the
 	   * corresponding metric function. */
-	  log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-		      "spec_len == %lu, \"", spec_len);
-	  log_nprintf(cw_g_log, spec_len, "%s", &a_format[i - spec_len]);
-	  log_printf(cw_g_log, "\"\n");
+/*  	  log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
+/*  		      "spec_len == %lu, \"", spec_len); */
+/*  	  log_nprintf(cw_g_log, spec_len, "%s", &a_format[i - spec_len]); */
+/*  	  log_printf(cw_g_log, "\"\n"); */
 
 	  val_len = spec_get_val(&a_format[i - spec_len], spec_len,
 				 "t", &val);
 	  if (-1 == val_len)
 	  {
-	    _cw_marker("Error");
+/*  	    _cw_marker("Error"); */
 	    retval = -2;
 	    goto RETURN;
 	  }
-	  log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-		      "val_len == %d, \"", val_len);
-	  log_nprintf(cw_g_log, val_len, "%s", val);
-	  log_printf(cw_g_log, "\"\n");
+/*  	  log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
+/*  		      "val_len == %d, \"", val_len); */
+/*  	  log_nprintf(cw_g_log, val_len, "%s", val); */
+/*  	  log_printf(cw_g_log, "\"\n"); */
 
 	  /* Find a match for the type and call the corresponding metric
-	   * function. */
-	  
+	   * function.  Use the first match found by searching the extended
+	   * types, then the built in types.  If there is no match, return an
+	   * error, since we have no way of knowing the size of argument to
+	   * use. */
+	  if (NULL != a_out)
+	  {
+	    for (j = 0;
+		 j < a_out->nextensions;
+		 j++)
+	    {
+	      if (0 == strncmp(val, a_out->extensions[j].type, val_len)
+		  && (val_len == strlen(a_out->extensions[j].type)))
+	      {
+/*  		log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
+/*  			    "Type: \"%s\", j == %d\n", */
+/*  			    a_out->extensions[j].type, j); */
+		val_size = a_out->extensions[j].size;
+		metric_func = a_out->extensions[j].metric_func;
+		goto MATCHED;
+	      }
+	    }
+	  }
 
-	  /* XXX */
+	  for (j = 0;
+	       j < (sizeof(cw_g_out_builtins) / sizeof(struct cw_out_ent_s));
+	       j++)
+	  {
+	    if (0 == strncmp(val, cw_g_out_builtins[j].type, val_len)
+		&& (val_len == strlen(cw_g_out_builtins[j].type)))
+	    {
+/*  	      log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
+/*  			  "Type: \"%s\", j == %d\n", */
+/*  			  cw_g_out_builtins[j].type, j); */
+	      val_size = cw_g_out_builtins[j].size;
+	      metric_func = cw_g_out_builtins[j].metric_func;
+	      goto MATCHED;
+	    }
+	  }
+
+	  /* No handler. */
+	  retval = -2;
+	  goto RETURN;
+	  
+	  MATCHED:
+	  {
+	    void * arg;
+
+	    switch (val_size)
+	    {
+	      case 1:
+	      {
+		arg = (void *) &va_arg(a_p, cw_uint8_t);
+		break;
+	      }
+	      case 2:
+	      {
+		arg = (void *) &va_arg(a_p, cw_uint16_t);
+		break;
+	      }
+	      case 4:
+	      {
+		arg = (void *) &va_arg(a_p, cw_uint32_t);
+		break;
+	      }
+	      case 8:
+	      {
+		arg = (void *) &va_arg(a_p, cw_uint64_t);
+		break;
+	      }
+/*  	      case 12: */
+/*  	      { */
+/*  		arg = (void *) va_arg(a_p, s_12); */
+/*  		break; */
+/*  	      } */
+/*  	      case 16: */
+/*  	      { */
+/*  		arg = (void *) va_arg(a_p, s_16); */
+/*  		break; */
+/*  	      } */
+	      default:
+	      {
+/*  		_cw_marker("Error"); */
+/*  		log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
+/*  			    "val_size == %lu\n", val_size); */
+		retval = -2;
+		goto RETURN;
+	      }
+	    }
+
+/*  	    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
+/*  			"out_size += %lu\n", metric_func(val, val_len, arg)); */
+	    out_size += metric_func(val, val_len, arg);
+	  }
 	}
 	else
 	{
@@ -866,13 +1012,10 @@ out_p_metric(cw_out_t * a_out, const char * a_format, char ** r_format,
   }
   if (START != state)
   {
-    _cw_marker("Error");
+/*      _cw_marker("Error"); */
     retval = -2;
     goto RETURN;
   }
-
-
-  /* XXX */
 
   retval = out_size;
 
@@ -1028,6 +1171,8 @@ out_p_metric_string(const char * a_format, cw_uint32_t a_len,
 {
   cw_uint32_t retval;
 
+  retval = 0;
+
   return retval;
 }
 
@@ -1052,24 +1197,6 @@ out_p_metric_pointer(const char * a_format, cw_uint32_t a_len,
 static char *
 out_p_render_pointer(const char * a_format, cw_uint32_t a_len,
 		     const void * a_arg, char * r_buf)
-{
-  char * retval;
-
-  return retval;
-}
-
-static cw_uint32_t
-out_p_metric_undef(const char * a_format, cw_uint32_t a_len,
-		   const void * a_arg)
-{
-  cw_uint32_t retval;
-
-  return retval;
-}
-
-static char *
-out_p_render_undef(const char * a_format, cw_uint32_t a_len,
-		   const void * a_arg, char * r_buf)
 {
   char * retval;
 

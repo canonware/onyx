@@ -275,6 +275,29 @@ buf_dump(cw_buf_t * a_buf, const char * a_prefix)
 }
 
 cw_uint32_t
+buf_metric(const char * a_format, cw_uint32_t a_len, const void * a_arg)
+{
+  cw_uint32_t retval;
+
+  retval = 8;
+  
+  /* XXX */
+
+  return retval;
+}
+
+char *
+buf_render(const char * a_format, cw_uint32_t a_len, const void * a_arg,
+	   char * r_buf)
+{
+  char * retval;
+
+  /* XXX */
+  
+  return retval;
+}
+
+cw_uint32_t
 buf_get_size(cw_buf_t * a_buf)
 {
   cw_uint32_t retval;
