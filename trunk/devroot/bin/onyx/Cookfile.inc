@@ -196,7 +196,7 @@ onyx_install_self : [ONYX]
 }
 
 onyx_install : onyx_install_self
-               libonyx_install_s libedit_install_s libstash_install_s;
+               libonyx_install_s /* libedit_install_s */ libstash_install_s;
 
 onyx_uninstall :
 {
@@ -217,14 +217,14 @@ onyx_distclean :
  */
 
 [ONYX] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [ONYX_SRCS]]
-         [LIBONYX_S] [LIBEDIT_S] [LIBSTASH_S]
+         [LIBONYX_S] [LIBEDIT_A] [LIBSTASH_S]
          [MODS]
   set mkdir
 {
   [CC] [A_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [ONYX_SRCS]]
        -rpath [abs_objdir]/lib/c/libonyx/lib
-       -rpath [abs_objdir]/lib/c/libedit/lib
+/*       -rpath [abs_objdir]/lib/c/libedit/lib */
        -rpath [abs_objdir]/lib/c/libstash/lib
-       [LDFLAGS] -lonyx -ledit -lstash [EXTRALIBS];
+       [LDFLAGS] -lonyx -ledit -lstash -ltermcap [EXTRALIBS];
 }

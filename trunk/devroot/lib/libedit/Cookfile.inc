@@ -114,7 +114,7 @@ LIBEDIT_A = [objdir]/lib/c/libedit/lib/libedit.a;
 LIBEDIT_S = [objdir]/lib/c/libedit/lib/libedit.so.[LIBEDIT_REV];
 
 LDFLAGS = [LDFLAGS] -L[objdir]/lib/c/libedit/lib;
-LIBS = [LIBS] -ledit;
+/* LIBS = [LIBS] -ledit; */
 A_LIBS = [A_LIBS] [LIBEDIT_A];
 S_LIBS = [S_LIBS] [LIBEDIT_S];
 S_LINKS = [S_LINKS] [objdir]/lib/c/libedit/lib/libedit.so;
@@ -123,9 +123,9 @@ S_LINKS = [S_LINKS] [objdir]/lib/c/libedit/lib/libedit.so;
  * User cook'ables.
  */
 
-libedit : [LIBEDIT_A] [LIBEDIT_S];
+libedit : [LIBEDIT_A]  [LIBEDIT_S];
 
-libedit_install : libedit_install_a libedit_install_s;
+libedit_install : /* libedit_install_a libedit_install_s */;
 
 libedit_uninstall :
 {
@@ -166,28 +166,28 @@ libedit_install_common :
 data
 #![SHELL]
 
-#echo [INSTALL] -d [PREFIX]/include/libedit
-#[INSTALL] -d [PREFIX]/include/libedit
+echo [INSTALL] -d [PREFIX]/include/libedit
+[INSTALL] -d [PREFIX]/include/libedit
 
-#for i in [LIBEDIT_INCS]; do
-#	echo [INSTALL] -m 0644 $i [PREFIX]/include/libedit/
-#	[INSTALL] -m 0644 $i [PREFIX]/include/libedit/
-#done
+for i in [LIBEDIT_INCS]; do
+	echo [INSTALL] -m 0644 $i [PREFIX]/include/libedit/
+	[INSTALL] -m 0644 $i [PREFIX]/include/libedit/
+done
 
-echo [INSTALL] -d [PREFIX]/lib
-[INSTALL] -d [PREFIX]/lib
+#echo [INSTALL] -d [PREFIX]/lib
+#[INSTALL] -d [PREFIX]/lib
 dataend
 }
 
 libedit_install_a : [LIBEDIT_A] libedit_install_common
 {
-	[INSTALL] -m 0444 [LIBEDIT_A] [PREFIX]/lib;
+  [INSTALL] -m 0444 [LIBEDIT_A] [PREFIX]/lib;
 }
 
 libedit_install_s : [LIBEDIT_S] libedit_install_common
 {
-	[INSTALL] -m 0444 [LIBEDIT_S] [PREFIX]/lib;
-	[LN] -sf libedit.so.[LIBEDIT_REV] [PREFIX]/lib/libedit.so;
+  [INSTALL] -m 0444 [LIBEDIT_S] [PREFIX]/lib;
+  [LN] -sf libedit.so.[LIBEDIT_REV] [PREFIX]/lib/libedit.so;
 }
 
 /*
