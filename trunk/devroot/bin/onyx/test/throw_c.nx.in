@@ -12,6 +12,6 @@
 
 `Test begin\n' print
 
-/foo throw
+mark throw
 
 `Test end\n' print
