@@ -101,10 +101,14 @@ main()
   error = oh_item_insert(&hash, (void *) strings[0],
 			       (void *) &(strings[0]));
   
-  log_printf(g_log, "Table size: %d\n",
-	     oh_get_size(&hash));
-  log_printf(g_log, "Number of items: %d\n",
-	     oh_get_num_items(&hash));
+  {
+    char t_buf[21];
+    
+    log_printf(g_log, "Table size: %s\n",
+	       log_print_uint64(oh_get_size(&hash), 10, t_buf));
+    log_printf(g_log, "Number of items: %s\n",
+	       log_print_uint64(oh_get_num_items(&hash), 10, t_buf));
+  }
 
 /*   oh_dump(&hash, FALSE); */
   

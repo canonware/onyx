@@ -79,8 +79,6 @@ main()
 
   thd_join(&thread_a);
   thd_join(&thread_b);
-  thd_delete(&thread_a);
-  thd_delete(&thread_b);
   mtx_delete(&mutex_a);
 
   log_printf(g_log, "g_count: %u\n", g_count);

@@ -330,7 +330,13 @@ main()
     }
 
     _cw_assert(list_count(list1) == 0);
-    log_printf(g_log, "list2->count == %d\n", list_count(&list2));
+    {
+      char t_buf[21];
+      
+      log_printf(g_log, "list2->count == %s\n",
+		 log_print_uint64(list_count(&list2), 10, t_buf));
+    }
+    
     _cw_assert(list_count(&list2) == NUM_ITEMS);
 
     log_printf(g_log, "tpop()ping from list2 and tpush()ing to list1\n");

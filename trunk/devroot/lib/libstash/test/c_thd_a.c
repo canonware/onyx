@@ -36,12 +36,10 @@ main()
 
   thread_a = thd_new(NULL, thread_entry_func, (void *) "Thread A argument");
   _cw_assert(NULL == thd_join(thread_a));
-  thd_delete(thread_a);
 
   _cw_assert(&thread_b == thd_new(&thread_b, thread_entry_func,
 				  (void *) "Thread B argument"));
   _cw_assert(NULL == thd_join(&thread_b));
-  thd_delete(&thread_b);
 
   libstash_shutdown();
 

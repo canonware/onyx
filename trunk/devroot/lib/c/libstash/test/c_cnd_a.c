@@ -102,7 +102,6 @@ main()
   cnd_signal(&cond_a);
   mtx_unlock(&mutex);
   thd_join(&thread);
-  thd_delete(&thread);
 
   /* Test cnd_broadcast. */
   num_waiting = 0;
@@ -126,7 +125,6 @@ main()
   for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
   {
     thd_join(&threads[i]);
-    thd_delete(&threads[i]);
   }
 
   cnd_delete(&cond_a);

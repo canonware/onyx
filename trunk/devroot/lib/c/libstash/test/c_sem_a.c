@@ -65,7 +65,6 @@ main()
   for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
   {
     thd_join(&threads[i]);
-    thd_delete(&threads[i]);
   }
   
   for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
@@ -81,7 +80,6 @@ main()
   for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
   {
     thd_join(&threads[i]);
-    thd_delete(&threads[i]);
   }
   
   sem_delete(&sem_a);

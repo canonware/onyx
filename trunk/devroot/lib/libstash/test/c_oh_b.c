@@ -73,11 +73,10 @@ main()
 /*     log_printf(g_log, "Got to end of for loop, i == %u\n", i); */
   }
 
-  /* Join on threads, then delete them. */
+  /* Join on threads. */
   for (i = 0; i < NUM_THREADS; i++)
   {
     thd_join(&threads[i]);
-    thd_delete(&threads[i]);
   }
   
   {

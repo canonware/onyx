@@ -70,7 +70,6 @@ main()
   for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
   {
     thd_join(&threads[i]);
-    thd_delete(&threads[i]);
   }
 
   rwl_wlock(&lock_a);
@@ -85,7 +84,6 @@ main()
   for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
   {
     thd_join(&threads[i]);
-    thd_delete(&threads[i]);
   }
   
   rwl_delete(&lock_a);
