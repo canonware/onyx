@@ -33,8 +33,8 @@
 
 /* Include files that are _not_ installed. */
 {
-  local priv_incs = arena_p.h bhp_p.h buf_p.h dbg_p.h list_p.h mem_l.h
-                    mem_p.h oh_p.h out_p.h res_p.h treen_p.h;
+  local priv_incs = arena_p.h bhp_p.h buf_p.h dbg_p.h list_p.h mem_l.h mem_p.h
+                    oh_p.h out_p.h res_p.h treen_p.h;
   priv_incs = [fromto % [srcdir]/lib/c/libstash/include/libstash/% [priv_incs]];
 
   PRIV_INCS = [PRIV_INCS] [priv_incs];
