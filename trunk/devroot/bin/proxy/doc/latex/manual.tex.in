@@ -21,13 +21,13 @@ three formats.  Which format to use (if any) should be chosen according to the
 nature of the data being streamed.
 
 \section{Usage}
-proxy -h
+\binname{proxy} -h
 
-proxy -V
+\binname{proxy} -V
 
-proxy [-v {\pipe} -q] [-l {\pipe} -d {\lt}dirpath{\gt}] [-f {p{\pipe}h{\pipe}a}]
-[-i {\lt}ip{\gt}] [-p {\lt}port{\gt}] [-r [{\lt}rhost{\gt}:]{\lt}rport{\gt}
-{\pipe} -t]
+\binname{proxy} [-v {\pipe} -q] [-l {\pipe} -d {\lt}dirpath{\gt}] [-f
+{p{\pipe}h{\pipe}a}] [-i {\lt}ip{\gt}] [-p {\lt}port{\gt}] [-r
+[{\lt}rhost{\gt}:]{\lt}rport{\gt} {\pipe} -t]
 
 \subsection{Options}
 \begin{description}
@@ -52,5 +52,4 @@ functionality.  Use /dev/ipnat to determine what host:port to connect to.  See
 ipnat(4), ipnat(5), ipf(8), and ipfstat(8) for ipfilter details.
 \item[-V: ] Display the version number and exit.
 \item[-v: ] Be verbose.  This flag is incompatible with the -q flag.
-
 \end{description}
