@@ -14,18 +14,13 @@
 void
 modslate_frame_init(cw_nxo_t *a_thread);
 
-/* Handles. */
-void
-modslate_frame(void *a_data, cw_nxo_t *a_thread);
+/* Helper functions. */
+cw_nxn_t
+modslate_frame_p(cw_nxo_t *a_instance, cw_nxo_t *a_thread);
 
+/* Methods. */
 void
-modslate_frame_p(void *a_data, cw_nxo_t *a_thread);
-
-void
-modslate_frame_aux_get(void *a_data, cw_nxo_t *a_thread);
-
-void
-modslate_frame_aux_set(void *a_data, cw_nxo_t *a_thread);
+modslate_frame_frame(void *a_data, cw_nxo_t *a_thread);
 
 void
 modslate_frame_focus(void *a_data, cw_nxo_t *a_thread);

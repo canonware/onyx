@@ -14,20 +14,19 @@
 void
 modslate_buffer_init(cw_nxo_t *a_thread);
 
-/* Handles. */
+/* Helper functions. */
+cw_nxn_t
+modslate_buffer_p(cw_nxo_t *a_instance, cw_nxo_t *a_thread);
+cw_nxn_t
+modslate_marker_p(cw_nxo_t *a_instance, cw_nxo_t *a_thread);
+cw_nxn_t
+modslate_extent_p(cw_nxo_t *a_instance, cw_nxo_t *a_thread);
+
+/* Methods. */
 
 /* buffer. */
 void
 modslate_buffer_buffer(void *a_data, cw_nxo_t *a_thread);
-
-//void
-//modslate_buffer_p(void *a_data, cw_nxo_t *a_thread);
-
-//void
-//modslate_buffer_aux_get(void *a_data, cw_nxo_t *a_thread);
-
-//void
-//modslate_buffer_aux_set(void *a_data, cw_nxo_t *a_thread);
 
 void
 modslate_buffer_seq(void *a_data, cw_nxo_t *a_thread);
@@ -81,9 +80,6 @@ modslate_buffer_validate(void *a_data, cw_nxo_t *a_thread);
 /* marker. */
 void
 modslate_marker_marker(void *a_data, cw_nxo_t *a_thread);
-
-//void
-//modslate_marker_p(void *a_data, cw_nxo_t *a_thread);
 
 void
 modslate_marker_seq(void *a_data, cw_nxo_t *a_thread);
@@ -144,17 +140,8 @@ modslate_marker_validate(void *a_data, cw_nxo_t *a_thread);
 void
 modslate_extent_extent(void *a_data, cw_nxo_t *a_thread);
 
-//void
-//modslate_extent_p(void *a_data, cw_nxo_t *a_thread);
-
 void
 modslate_extent_copy(void *a_data, cw_nxo_t *a_thread);
-
-//void
-//modslate_extent_aux_get(void *a_data, cw_nxo_t *a_thread);
-
-//void
-//modslate_extent_aux_set(void *a_data, cw_nxo_t *a_thread);
 
 void
 modslate_extent_buffer(void *a_data, cw_nxo_t *a_thread);

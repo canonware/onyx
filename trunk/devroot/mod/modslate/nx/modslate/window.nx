@@ -1,0 +1,27 @@
+################################################################################
+#
+# <Copyright = jasone>
+# <License>
+#
+################################################################################
+#
+# Version: Slate <Version = slate>
+#
+################################################################################
+
+# Finish initializing the window class.
+
+window vclass setsuper
+window data <
+> copy pop
+window methods <
+    #frame #instance #class :new #instance
+    #frame #parent #instance #class :new #instance
+    $new {
+	:rnew
+	#frame #?parent #instance
+
+	:window
+	#instance
+    }
+> exch copy pop

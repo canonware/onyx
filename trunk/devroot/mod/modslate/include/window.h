@@ -14,15 +14,10 @@
 void
 modslate_window_init(cw_nxo_t *a_thread);
 
-/* Handles. */
-void
-modslate_window(void *a_data, cw_nxo_t *a_thread);
+/* Helper functions. */
+cw_nxn_t
+modslate_window_p(cw_nxo_t *a_instance, cw_nxo_t *a_thread);
 
+/* Methods. */
 void
-modslate_window_p(void *a_data, cw_nxo_t *a_thread);
-
-void
-modslate_window_aux_get(void *a_data, cw_nxo_t *a_thread);
-
-void
-modslate_window_aux_set(void *a_data, cw_nxo_t *a_thread);
+modslate_window_window(void *a_data, cw_nxo_t *a_thread);

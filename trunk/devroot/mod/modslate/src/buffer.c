@@ -15,7 +15,7 @@
 
 #include "../include/modslate.h"
 
-/* These are used to assure that constructors are actually passed the correct
+/* These are used to assure that methods are actually passed the correct
  * classes.  They are not reported to the GC, so can not safely be used for any
  * other purpose. */
 static cw_nxo_t s_buffer;
@@ -326,11 +326,19 @@ buffer_p_delete(void *a_data, cw_uint32_t a_iter)
     return retval;
 }
 
+cw_nxn_t
+modslate_buffer_p(cw_nxo_t *a_instance, cw_nxo_t *a_thread)
+{
+    struct cw_buffer *buffer;
+
+    return buffer_p_get(a_instance, a_thread, &buffer);
+}
+
 /* #bsize #instance :buffer #instance */
 void
 modslate_buffer_buffer(void *a_data, cw_nxo_t *a_thread)
 {
-    cw_nxo_t *estack, *ostack, *tstack, *nxo, *instance;
+    cw_nxo_t *estack, *ostack, *tstack, *bsize, *instance;
     cw_nxo_t *tag, *name, *handle;
     cw_uint32_t bufp_size;
     struct cw_buffer *buffer;
@@ -339,19 +347,19 @@ modslate_buffer_buffer(void *a_data, cw_nxo_t *a_thread)
     ostack = nxo_thread_ostack_get(a_thread);
     tstack = nxo_thread_tstack_get(a_thread);
     NXO_STACK_GET(instance, ostack, a_thread);
-    NXO_STACK_DOWN_GET(nxo, ostack, a_thread, instance);
-    if (nxo_type_get(nxo) != NXOT_INTEGER
+    NXO_STACK_DOWN_GET(bsize, ostack, a_thread, instance);
+    if (nxo_type_get(bsize) != NXOT_INTEGER
 	|| nxo_type_get(instance) != NXOT_INSTANCE)
     {
 	nxo_thread_nerror(a_thread, NXN_typecheck);
 	return;
     }
-    if (nxo_integer_get(nxo) < 0 || nxo_integer_get(nxo) > UINT_MAX)
+    if (nxo_integer_get(bsize) < 0 || nxo_integer_get(bsize) > UINT_MAX)
     {
 	nxo_thread_nerror(a_thread, NXN_rangecheck);
 	return;
     }
-    bufp_size = nxo_integer_get(nxo);
+    bufp_size = nxo_integer_get(bsize);
 
     buffer = (struct cw_buffer *) nxa_malloc(sizeof(struct cw_buffer));
 
@@ -385,7 +393,7 @@ modslate_buffer_buffer(void *a_data, cw_nxo_t *a_thread)
 
     /* Clean up. */
     nxo_stack_npop(tstack, 2);
-    nxo_stack_remove(ostack, nxo);
+    nxo_stack_remove(ostack, bsize);
 }
 
 /* #buffer :seq #seq */
@@ -969,6 +977,14 @@ marker_p_whence(cw_nxo_t *a_whence)
 
     RETURN:
     return retval;
+}
+
+cw_nxn_t
+modslate_marker_p(cw_nxo_t *a_instance, cw_nxo_t *a_thread)
+{
+    struct cw_marker *marker;
+
+    return marker_p_get(a_instance, a_thread, &marker);
 }
 
 /* #buffer #instance :marker #instance */
@@ -1854,6 +1870,14 @@ extent_p_delete(void *a_data, cw_uint32_t a_iter)
     nxa_free(extent, sizeof(struct cw_extent));
 
     return FALSE;
+}
+
+cw_nxn_t
+modslate_extent_p(cw_nxo_t *a_instance, cw_nxo_t *a_thread)
+{
+    struct cw_extent *extent;
+
+    return extent_p_get(a_instance, a_thread, &extent);
 }
 #endif /* XXX_NOT_YET. */
 

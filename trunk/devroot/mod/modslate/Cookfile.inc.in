@@ -31,7 +31,8 @@ MODSLATE_NX_GEN = [fromto %.nx.in @objroot@/mod/modslate/nx/modslate/%.nx
                           ];
 
 MODSLATE_NX = [addprefix @srcroot@/mod/modslate/nx/modslate/
-                         buffer.nx extent.nx marker.nx modslate.nx
+                         buffer.nx frame.nx extent.nx marker.nx modslate.nx
+                         window.nx
                          ];
 
 MODSLATE_CTESTS = [addprefix @srcroot@/mod/modslate/test/
