@@ -88,6 +88,27 @@ esac
 AC_SUBST(abi)
 AC_SUBST(RPATH)
 
+case "${host_cpu}" in
+  i386)
+	AC_DEFINE(CW_CPU_I386)
+	;;
+  i486)
+	AC_DEFINE(CW_CPU_I486)
+	;;
+  i586)
+	AC_DEFINE(CW_CPU_I586)
+	;;
+  i686)
+	AC_DEFINE(CW_CPU_I686)
+	;;
+  powerpc)
+	AC_DEFINE(CW_CPU_POWERPC)
+	;;
+  *)
+	AC_MSG_RESULT(Unsupported CPU "${host_cpu}"; very slow memory barriers)
+	;;
+esac
+
 dnl Use threads by default.
 AC_ARG_ENABLE(threads, [  --disable-threads       Disable threads],
 if test "x$enable_threads" = "xyes" ; then
@@ -516,7 +537,7 @@ if test "x$lib_onyx" = "x1" ; then
   AC_CHECK_SIZEOF(double, 8)
   AC_CHECK_SIZEOF(long double, 12)
 
-  AC_CHECK_HEADERS(arpa/inet.h)
+  AC_CHECK_HEADERS(sys/socket.h netinet/in.h arpa/inet.h machine/endian.h)
 
   if test "x$enable_posix" = "x1" ; then
     if test "x$prefix" = "xNONE" ; then

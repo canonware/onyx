@@ -217,8 +217,17 @@ typedef enum
 #include <strings.h>
 #include <sys/types.h>
 #include <sys/uio.h>
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h> /* For htonl() and ntohl() on Darwin. */
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h> /* For htonl() and ntohl() on Darwin. */
+#endif
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h> /* For htonl() and ntohl(). */
+#endif
+#ifdef HAVE_MACHINE_ENDIAN_H
+#include <machine/endian.h> /* For htonl() and ntohl() on Darwin. */
 #endif
 #ifdef CW_PTHREADS
 #include <pthread.h>
@@ -258,6 +267,7 @@ typedef void cw_opaque_dealloc_t (const void *, const void *, size_t,
 #include "tsd.h"
 #include "thd.h"
 #endif
+#include "mb.h"
 #include "ch.h"
 #include "dch.h"
 #include "mem.h"

@@ -14,6 +14,7 @@
 #define nxo_p_type_set(a_nxo, a_type)					\
     do									\
     {									\
+	mb_write();							\
 	(a_nxo)->flags = ((a_nxo)->flags & 0xffffffe0) | (a_type);	\
     } while (0)
 
