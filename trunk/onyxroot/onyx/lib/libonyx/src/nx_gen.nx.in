@@ -95,24 +95,25 @@ $_encdict <
     $ne			$W	# 13
     $nip		$X	# 4
     $not		$Y	# 4
-    $ostack		$Z	# 3
-    $over		$a	# ~26
-    $pop		$b	# ~69
-    $print		$c	# 3
-    $putinterval	$d	# 3
-    $scount		$e	# 3
-    $spop		$f	# 7
-    $stderr		$g	# 10
-    $stop		$h	# 3
-    $stopped		$i	# 3
-    $string		$j	# 2
-    $sub		$k	# 15
-    $systemdict		$l	# 3
-    $true		$m	# 4
-    $type		$n	# >= 17
-    $until		$o	# 10
-    $write		$p	# 10
-    $xcheck		$q	# 3
+    $npop		$Z	# 24
+    $ostack		$a	# 3
+    $over		$b	# ~26
+    $pop		$c	# ~69
+    $print		$d	# 3
+    $putinterval	$e	# 3
+    $scount		$f	# 3
+    $spop		$g	# 7
+    $stderr		$h	# 10
+    $stop		$i	# 3
+    $stopped		$j	# 3
+    $string		$k	# 2
+    $sub		$l	# 15
+    $systemdict		$m	# 3
+    $true		$n	# 4
+    $type		$o	# >= 17
+    $until		$p	# 10
+    $write		$q	# 10
+    $xcheck		$r	# 3
 > def
 
 #proc _encarr -
