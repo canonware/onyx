@@ -203,34 +203,36 @@
  * (abbreviated as f-order and r-order):
  *
  *   f-order :
- *
+ *                  1         2
+ *         12345678901234567890123456789
  *     A : |---------|
  *     B : |-------|
  *     C :   |---------|
  *     D :   |-------|
  *     E :   |-----|
  *     F :   |---|
- *     G :       |-------|
- *     H :       |-----|
- *     I :         |-----------|
- *     J :           |---|
- *     K :             |---|
- *     L :               |-------|
+ *     G :         |-------|
+ *     H :         |-----|
+ *     I :           |-----------|
+ *     J :             |---|
+ *     K :               |---|
+ *     L :                 |-------|
  *
  *   r-order :
- *
+ *                  1         2
+ *         12345678901234567890123456789
  *     F :   |---|
  *     E :   |-----|
  *     B : |-------|
  *     D :   |-------|
  *     A : |---------|
- *     H :       |-----|
  *     C :   |---------|
- *     J :           |---|
- *     G :       |-------|
- *     K :             |---|
- *     I :         |-----------|
- *     L :               |-------|
+ *     H :         |-----|
+ *     J :             |---|
+ *     G :         |-------|
+ *     K :               |---|
+ *     I :           |-----------|
+ *     L :                 |-------|
  *
  * Maintaining both orderings makes it possible to quickly determine the set of
  * extents that overlap any range of the buffer.  Most importantly though, the
@@ -247,7 +249,7 @@
  *
  * No special maintenance is necessary for the markers that denote the ends of
  * extents; they are normal markers that stay well ordered at all times.
- * However, extent ordering is actually kept track of separately, and there
+ * However, extent ordering is actually kept track of separately, and there are
  * situations during insertion into a buffer where extra work is necessary to
  * maintain extent ordering.  Specifically, when there are both MKRO_BEFORE and
  * MKRO_AFTER markers at the insertion position, one set or the other of the
@@ -1566,6 +1568,9 @@ buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc,
     ql_new(&retval->flist);
     rb_tree_new(&retval->rtree, rnode);
     ql_new(&retval->rlist);
+
+    /* Initialize extent stack. */
+    qs_new(&retval->sstack);
 
     /* Initialize history. */
     retval->hist = NULL;
@@ -3647,6 +3652,11 @@ mkr_dump(cw_mkr_t *a_mkr, const char *a_beg, const char *a_mid,
     fprintf(stderr, "%s|-> order: %s\n", mid,
 	    (a_mkr->order == MKRO_BEFORE) ? "MKRO_BEFORE" :
 	    (a_mkr->order == MKRO_EITHER) ? "MKRO_EITHER" : "MKRO_AFTER");
+    if (a_mkr->order != MKRO_EITHER)
+    {
+	fprintf(stderr, "%s|-> ext_end: %s\n", mid,
+		a_mkr->ext_end ? "TRUE" : "FALSE");
+    }
     fprintf(stderr, "%s|-> ppos: %u\n", mid, a_mkr->ppos);
     fprintf(stderr, "%s\\-> pline: %u\n", end, a_mkr->pline);
 }
@@ -3830,13 +3840,18 @@ ext_new(cw_ext_t *a_ext, cw_buf_t *a_buf)
 
     /* Initialize markers.  Extents start out as zero-length shut-shut. */
     mkr_p_new(&retval->beg, a_buf, MKRO_BEFORE);
+    retval->beg.ext_end = FALSE;
     mkr_p_new(&retval->end, a_buf, MKRO_AFTER);
+    retval->end.ext_end = TRUE;
 
     /* Initialize extent tree and list linkage. */
     rb_node_new(&a_buf->ftree, retval, fnode);
     ql_elm_new(retval, flink);
     rb_node_new(&a_buf->rtree, retval, rnode);
     ql_elm_new(retval, rlink);
+
+    /* Initialize extent stack linkage. */
+    qs_elm_new(retval, slink);
 
 #ifdef CW_DBG
     retval->magic = CW_EXT_MAGIC;
@@ -4133,13 +4148,34 @@ ext_detachable_set(cw_ext_t *a_ext, cw_bool_t a_detachable)
     a_ext->detachable = a_detachable;
 }
 
-/* Get the first and last ext's that overlap a_mkr.  retval is the length of the
- * run (going forward only).  r_beg and r_end are NULL if there are no extents
- * overlapping the run. */
-cw_uint64_t
-ext_run_get(const cw_mkr_t *a_mkr, cw_ext_t *r_beg, cw_ext_t *r_end)
+/* Create the stack of extents that overlap a_mkr, which can then be iterated on
+ * by ext_stack_down_get().  The stack is in f-order, starting at the top of the
+ * stack. */
+cw_uint32_t
+ext_stack_init(const cw_mkr_t *a_mkr)
 {
     cw_error("XXX Not implemented");
+}
+
+/* Get the extent in the stack that is below a_ext.  If a_ext is NULL, the top
+ * element is returned. */
+cw_ext_t *
+ext_stack_down_get(cw_ext_t *a_ext)
+{
+    cw_ext_t *retval;
+
+    if (a_ext != NULL)
+    {
+	cw_dassert(a_ext->magic == CW_EXT_MAGIC);
+
+	retval = qs_down(a_ext, slink);
+    }
+    else
+    {
+	retval = qs_top(&a_ext->beg.bufp->buf->sstack);
+    }
+
+    return retval;
 }
 
 /* Get the beginning and ending points of the fragment that a_mkr is contained
@@ -4147,19 +4183,13 @@ ext_run_get(const cw_mkr_t *a_mkr, cw_ext_t *r_beg, cw_ext_t *r_end)
 void
 ext_frag_get(const cw_mkr_t *a_mkr, cw_mkr_t *r_beg, cw_mkr_t *r_end)
 {
-    cw_error("XXX Not implemented");
-}
+    cw_check_ptr(a_mkr);
+    cw_dassert(a_mkr->magic == CW_MKR_MAGIC);
+    cw_check_ptr(r_beg);
+    cw_dassert(r_beg->magic == CW_MKR_MAGIC);
+    cw_check_ptr(r_end);
+    cw_dassert(r_end->magic == CW_MKR_MAGIC);
 
-/* Iterate in f-order. */
-cw_ext_t *
-ext_prev_get(const cw_ext_t *a_ext)
-{
-    cw_error("XXX Not implemented");
-}
-
-cw_ext_t *
-ext_next_get(const cw_ext_t *a_ext)
-{
     cw_error("XXX Not implemented");
 }
 

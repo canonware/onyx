@@ -73,7 +73,12 @@ struct cw_mkr_s
 
     /* Marker type.  Normal markers are MKRO_EITHER; other values are for
      * extents. */
-    cw_mkro_t order;
+    cw_mkro_t order:2;
+
+    /* If this marker is part of an extent, then this field denotes whether it
+     * is the beginning or ending marker.  This is needed so that a pointer to
+     * the marker can be used to get a pointer to the containing extent. */
+    cw_bool_t ext_end:1;
 
     /* Gap movement can change this. */
     cw_uint32_t ppos;
@@ -105,11 +110,14 @@ struct cw_ext_s
     cw_mkr_t beg;
     cw_mkr_t end;
 
-    /* Forward- and reverse-ordered ext tree and list linkage. */
+    /* Forward- and reverse-ordered extent tree and list linkage. */
     rb_node(cw_ext_t) fnode;
     ql_elm(cw_ext_t) flink;
     rb_node(cw_ext_t) rnode;
     ql_elm(cw_ext_t) rlink;
+
+    /* Extent stack linkage. */
+    qs_elm(cw_ext_t) slink;
 };
 
 struct cw_bufp_s
@@ -196,6 +204,9 @@ struct cw_buf_s
     ql_head(cw_ext_t) flist;
     rb_tree(cw_ext_t) rtree;
     ql_head(cw_ext_t) rlist;
+
+    /* Extent stack. */
+    qs_head(cw_ext_t) sstack;
 
     /* History (undo/redo), if non-NULL. */
     cw_hist_t *hist;
@@ -358,21 +369,20 @@ ext_detachable_get(const cw_ext_t *a_ext);
 void
 ext_detachable_set(cw_ext_t *a_ext, cw_bool_t a_detachable);
 
-/* Get the first and last ext's that overlap a_mkr.  retval is the length of the
- * run.  r_beg and r_end are NULL if there are no extents overlapping the
- * run. */
-cw_uint64_t
-ext_run_get(const cw_mkr_t *a_mkr, cw_ext_t *r_beg, cw_ext_t *r_end);
+/* Create the stack of extents that overlap a_mkr, which can then be iterated on
+ * by ext_stack_down_get().  The stack is in f-order, starting at the top of the
+ * stack. */
+cw_uint32_t
+ext_stack_init(const cw_mkr_t *a_mkr);
+
+/* Get the extent in the stack that is below a_ext.  If a_ext is NULL, the top
+ * element is returned. */
+/* XXX This should be inlined. */
+cw_ext_t *
+ext_stack_down_get(cw_ext_t *a_ext);
 
 void
 ext_frag_get(const cw_mkr_t *a_mkr, cw_mkr_t *r_beg, cw_mkr_t *r_end);
-
-/* Iterate in f-order. */
-cw_ext_t *
-ext_prev_get(const cw_ext_t *a_ext);
-
-cw_ext_t *
-ext_next_get(const cw_ext_t *a_ext);
 
 #ifdef CW_BUF_DUMP
 void
