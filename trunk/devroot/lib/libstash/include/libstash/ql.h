@@ -64,7 +64,6 @@ struct {								\
 	ql_first(head) = qr_next((elm), field);				\
 } while (0)
 
-
 #define ql_remove(head, elm, field) do {				\
 	if (ql_first(head) == (elm)) {					\
 		ql_first(head) = qr_next(ql_first(head), field);	\

@@ -32,24 +32,24 @@ struct {								\
 	(head)->qsh_top = NULL;						\
 } while (0)
 
-#define qs_push(head, elm, field) do {					\
-	(elm)->field.qse_down = (head)->qsh_top;			\
-	(head)->qsh_top = (elm);					\
-} while (0)
-
-#define qs_under_push(qselm, elm, field) do {				\
-	(elm)->field.qse_down = (qselm)->field.qse_down;		\
-	(qselm)->field.qse_down = (elm);				\
-} while (0)
-
-#define qs_pop(head, field) do {					\
-	(head)->qsh_top = (head)->qsh_top->field.qse_down;		\
-} while (0)
-
 #define qs_top(head)	((head)->qsh_top)
 
 #define qs_down(elm, field)	((elm)->field.qse_down)
 
+#define qs_push(head, elm, field) do {					\
+	qs_down((elm), field) = qs_top(head);				\
+	qs_top(head) = (elm);						\
+} while (0)
+
+#define qs_under_push(qselm, elm, field) do {				\
+	qs_down((elm), field) = qs_down((qselm), field);		\
+	qs_down((qselm), field) = (elm);				\
+} while (0)
+
+#define qs_pop(head, field) do {					\
+	qs_top(head) = qs_down(qs_top(head), field);			\
+} while (0)
+
 #define qs_foreach(var, head, field)					\
-	for ((var) = (head)->qsh_top; (var) != NULL;			\
-	    (var) = (var)->field.qse_down)
+	for ((var) = qs_top(head); (var) != NULL;			\
+	    (var) = qs_down((var), field))

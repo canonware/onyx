@@ -66,6 +66,22 @@ qr_after_insert()
   qr_prev(g): f
   qr_prev(h): g
 qr_remove()
+  qr_foreach(a):         a b c d e f g h
+  qr_reverse_foreach(a): h g f e d c b a
+  qr_foreach(b):         b c d e f g h
+  qr_reverse_foreach(b): h g f e d c b
+  qr_foreach(c):         c d e f g h
+  qr_reverse_foreach(c): h g f e d c
+  qr_foreach(d):         d e f g h
+  qr_reverse_foreach(d): h g f e d
+  qr_foreach(e):         e f g h
+  qr_reverse_foreach(e): h g f e
+  qr_foreach(f):         f g h
+  qr_reverse_foreach(f): h g f
+  qr_foreach(g):         g h
+  qr_reverse_foreach(g): h g
+  qr_foreach(h):         h
+  qr_reverse_foreach(h): h
   qr_foreach(a): a
   qr_foreach(b): b
   qr_foreach(c): c
@@ -132,6 +148,22 @@ qr_before_insert()
   qr_prev(g): h
   qr_prev(h): a
 qr_remove()
+  qr_foreach(a):         a h g f e d c b
+  qr_reverse_foreach(a): b c d e f g h a
+  qr_foreach(b):         b h g f e d c
+  qr_reverse_foreach(b): c d e f g h b
+  qr_foreach(c):         c h g f e d
+  qr_reverse_foreach(c): d e f g h c
+  qr_foreach(d):         d h g f e
+  qr_reverse_foreach(d): e f g h d
+  qr_foreach(e):         e h g f
+  qr_reverse_foreach(e): f g h e
+  qr_foreach(f):         f h g
+  qr_reverse_foreach(f): g h f
+  qr_foreach(g):         g h
+  qr_reverse_foreach(g): h g
+  qr_foreach(h):         h
+  qr_reverse_foreach(h): h
   qr_foreach(a): a
   qr_foreach(b): b
   qr_foreach(c): c
