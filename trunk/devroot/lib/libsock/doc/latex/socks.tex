@@ -16,24 +16,110 @@
 \label{socks}
 \index{\classname{socks}{}}
 
+The \classname{socks} class implements a socket listener (server).  The
+\classname{socks} class is used to accept connections to a port and create a
+\classname{sock} instance for each connection.
+
 \subsubsection{API}
 \begin{description}
-\label{socks_}
-\index{\cfunc{socks\_}{}}
-\item[{\cfunc[]{socks\_}{}}: ]
+\label{socks_new}
+\index{\cfunc{socks\_new}{}}
+\item[{\cfunc[cw\_socks\_t *]{socks\_new}{void}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[retval: ]
+			Pointer to a \classname{socks}.
 		\end{description}
 	\item[Exception(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
 		\end{description}
 	\item[Description: ]
+		Constructor.
+	\end{description}
+\label{socks_delete}
+\index{\cfunc{socks\_delete}{}}
+\item[{\cfunc[void]{socks\_delete}{cw\_socks\_t *a\_socks}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_socks: ]
+			Pointer to a \classname{socks}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Destructor.
+	\end{description}
+\label{socks_listen}
+\index{\cfunc{socks\_listen}{}}
+\item[{\cfunc[cw\_bool\_t]{socks\_listen}{cw\_socks\_t *a\_socks,
+cw\_uint32\_a\_mask, int *r\_port}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_socks: ]
+			Pointer to a \classname{socks}.
+		\item[a\_mask: ]
+			Mask of client addresses to listen to (INADDR\_ANY,
+			INADDR\_LOOPBACK, etc.).
+		\item[r\_port: ]
+			Pointer to a port number to listen on, or 0.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[FALSE: ]
+				Success.
+			\item[TRUE: ]
+				\cfunc{socket}{} error, \cfunc{bind}{} error, or
+				\cfunc{getsockname}{} error.
+			\end{description}
+		\item[*r\_port: ]
+			If \cvar{retval} is FALSE, port number that
+			\cvar{a\_socks} is listening on.  Otherwise, undefined.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Do setup and start accepting connections on \cvar{*r\_port}.  If
+		\cvar{*r\_port} is 0, let the operating system choose what port
+		number to use, and assign the number to \cvar{*r\_port} before
+		returning.
+	\end{description}
+\label{socks_accept}
+\index{\cfunc{socks\_accept}{}}
+\item[{\cfunc[cw\_sock\_t *]{socks\_accept}{cw\_socks\_t *a\_socks, struct
+timespec *a\_timeout, cw\_sock\_t *r\_sock}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_socks: ]
+			Pointer to a \classname{socks}.
+		\item[a\_timeout: ]
+			Pointer to a timeout value, specified as an absolute
+			time interval, or NULL.  A NULL value will cause this
+			function to block indefinitely.
+		\item[r\_sock: ]
+			Pointer to a \classname{sock} that is not connected.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[non-NULL: ]
+				\cvar{r\_sock}.
+			\item[NULL: ]
+				Not listening, cannot allocate a file
+				descriptor, \cfunc{accept}{} error, or
+				\cfunc{sock\_wrap}{} error.
+			\end{description}
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Accept a connection.  Don't return until someone connects, or
+		the timeout expires.
 	\end{description}
 \end{description}
