@@ -77,7 +77,7 @@ systemdict begin
 
 % - promptstring <string>
 /promptstring {
-	count cvs `> ' catenate
+	count cvs `onyx:' exch catenate `> ' catenate
 } bind def
 
 % - product <string>

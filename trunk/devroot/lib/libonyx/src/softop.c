@@ -23,7 +23,7 @@ nx_p_soft_init(cw_nx_t *a_nx)
 /monitor
 {1 index type /mutextype ne {errordict begin typecheck end} if 1 index lock eval unlock}
 /promptstring
-{count cvs `> ' catenate}
+{count cvs `onyx:' exch catenate `> ' catenate}
 /product
 {`Canonware onyx'}
 /pstack
