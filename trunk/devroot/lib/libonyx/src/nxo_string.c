@@ -95,8 +95,8 @@ nxo_string_substring_new(cw_nxo_t *a_nxo, cw_nxo_t *a_string, cw_nx_t *a_nx,
 	}
 }
 
-void
-nxoe_l_string_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa)
+cw_bool_t
+nxoe_l_string_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
 {
 	cw_nxoe_string_t	*string;
 
@@ -115,6 +115,8 @@ nxoe_l_string_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa)
 #endif
 
 	nxa_free(a_nxa, string, sizeof(cw_nxoe_string_t));
+
+	return FALSE;
 }
 
 cw_nxoe_t *

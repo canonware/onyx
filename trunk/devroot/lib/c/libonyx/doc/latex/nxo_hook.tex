@@ -70,7 +70,8 @@ cw\_bool\_t a\_reset}}
 	\end{capilist}
 \label{cw_nxo_hook_delete_t}
 \index{cw_nxo_hook_delete_t@\cfunc{cw\_nxo\_hook\_delete\_t}{}}
-\citem{\cfunc[void]{cw\_nxo\_hook\_delete\_t}{void *a\_data, cw\_nx\_t *a\_nx}}
+\citem{\cfunc[cw\_bool\_t]{cw\_nxo\_hook\_delete\_t}{void *a\_data, cw\_nx\_t
+*a\_nx, cw\_uint32\_t a\_iter}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -78,8 +79,20 @@ cw\_bool\_t a\_reset}}
 			Opaque data pointer.
 		\item[a\_nx: ]
 			Pointer to an \classname{nx}.
+		\item[a\_iter: ]
+			Garbage collector sweep iteration count (starts at 0).
+			This value can be used to impose ordering of dependent
+			object deletions.
 		\end{description}
-	\item[Output(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[FALSE: ] Success.
+			\item[TRUE: ] Defer deletion until a later garbage
+			collector sweep iteration.
+			\end{description}
+		\end{description}
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Destructor function typedef.

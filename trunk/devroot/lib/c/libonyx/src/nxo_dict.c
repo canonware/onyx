@@ -69,8 +69,8 @@ nxo_dict_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking, cw_uint32_t
 	nxa_l_gc_register(nxa, (cw_nxoe_t *)dict);
 }
 
-void
-nxoe_l_dict_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa)
+cw_bool_t
+nxoe_l_dict_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
 {
 	cw_nxoe_dict_t	*dict;
 	cw_nxoe_dicto_t	*dicto;
@@ -94,6 +94,8 @@ nxoe_l_dict_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa)
 	dch_delete(&dict->hash);
 
 	nxa_free(a_nxa, dict, sizeof(cw_nxoe_dict_t));
+
+	return FALSE;
 }
 
 cw_nxoe_t *

@@ -644,13 +644,30 @@ nxa_p_mark(cw_nxa_t *a_nxa, cw_uint32_t *r_nreachable)
 _CW_INLINE void
 nxa_p_sweep(cw_nxa_t *a_nxa, cw_nxoe_t *a_garbage)
 {
-	cw_nxoe_t	*nxoe;
+	cw_nxoe_t	*first, *nxoe;
+	cw_uint32_t	i;
+	cw_bool_t	again;
 
-	do {
-		nxoe = qr_next(a_garbage, link);
-		qr_remove(nxoe, link);
-		nxoe_l_delete(nxoe, a_nxa);
-	} while (nxoe != a_garbage);
+	/*
+	 * Iterate through the garbage objects and delete them.  If
+	 * nxoe_l_delete() returns TRUE, the object deletion is deferred until a
+	 * later pass.  Repeatedly iterate through undeleted objects until no
+	 * objects defer deletion.
+	 */
+	for (first = a_garbage, nxoe = NULL, again = TRUE, i = 0; again == TRUE;
+	    i++) {
+		again = FALSE;
+
+		do {
+			nxoe = qr_next(first, link);
+			qr_remove(nxoe, link);
+			if (nxoe_l_delete(nxoe, a_nxa, i)) {
+				again = TRUE;
+				qr_before_insert(first, nxoe, link);
+				first = nxoe;
+			}
+		} while (nxoe != first);
+	}
 }
 
 /*

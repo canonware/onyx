@@ -39,9 +39,10 @@ nxo_hook_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, void *a_data, cw_nxo_hook_eval_t
 	nxa_l_gc_register(nx_nxa_get(a_nx), (cw_nxoe_t *)hook);
 }
 
-void
-nxoe_l_hook_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa)
+cw_bool_t
+nxoe_l_hook_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
 {
+	cw_bool_t	retval;
 	cw_nxoe_hook_t	*hook;
 
 	hook = (cw_nxoe_hook_t *)a_nxoe;
@@ -51,9 +52,14 @@ nxoe_l_hook_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa)
 	_cw_assert(hook->nxoe.type == NXOT_HOOK);
 
 	if (hook->delete_f != NULL)
-		hook->delete_f(hook->data, nxa_nx_get(a_nxa));
+		retval = hook->delete_f(hook->data, nxa_nx_get(a_nxa), a_iter);
+	else
+		retval = FALSE;
 
-	nxa_free(a_nxa, hook, sizeof(cw_nxoe_hook_t));
+	if (retval == FALSE)
+		nxa_free(a_nxa, hook, sizeof(cw_nxoe_hook_t));
+
+	return retval;
 }
 
 cw_nxoe_t *

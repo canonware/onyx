@@ -359,7 +359,7 @@ buf_p_bufms_apos_adjust(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_sint64_t
 /*  		fprintf(stderr, " [%llu (ignore)]", bufm->apos); */
 	}
 
-	for (/*  bufm = ql_prev(&a_buf->bufms, a_bufm, link) */;
+	for (;
 	    bufm != NULL && bufm->apos >= a_beg_apos;
 	    bufm = ql_prev(&a_buf->bufms, bufm, link)) {
 /*  		fprintf(stderr, " [%llu --> %llu]", bufm->apos, bufm->apos + */

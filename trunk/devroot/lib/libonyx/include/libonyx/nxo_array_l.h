@@ -54,7 +54,8 @@ struct cw_nxoe_array_s {
 } while (0)
 #endif
 
-void	nxoe_l_array_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa);
+cw_bool_t nxoe_l_array_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t
+    a_iter);
 cw_nxoe_t *nxoe_l_array_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
 
 #ifndef _CW_USE_INLINES

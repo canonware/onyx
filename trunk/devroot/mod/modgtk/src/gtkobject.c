@@ -31,8 +31,8 @@ nx_gtk_object_destroyed (GtkObject *o, gpointer user_data)
   nxo_hook_data_set (&nxo, NULL);
 }
 
-static void
-nx_gtk_object_delete (void *a_data, cw_nx_t *a_nx)
+static cw_bool_t
+nx_gtk_object_delete (void *a_data, cw_nx_t *a_nx, cw_uint32_t a_iter)
 {
   if (a_data) {
     GtkObject *o = a_data;
@@ -43,6 +43,8 @@ nx_gtk_object_delete (void *a_data, cw_nx_t *a_nx)
 
     gtk_object_destroy (o);
   }
+
+  return FALSE;
 }
 
 static cw_nxoe_t *

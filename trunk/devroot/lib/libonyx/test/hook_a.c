@@ -32,10 +32,12 @@ hook_ref_iter(void *a_data, cw_bool_t a_reset)
 	return NULL;
 }
 
-void
-hook_delete(void *a_data, cw_nx_t *a_nx)
+cw_bool_t
+hook_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t a_iter)
 {
 	_cw_assert(a_data == data);
+
+	return FALSE;
 }
 
 void

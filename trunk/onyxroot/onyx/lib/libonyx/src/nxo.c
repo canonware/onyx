@@ -34,7 +34,8 @@
 /*
  * vtable setup for the various operations on nxo's that are polymorphic.
  */
-typedef void	cw_nxot_delete_t(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa);
+typedef cw_bool_t cw_nxot_delete_t(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa,
+    cw_uint32_t a_iter);
 typedef cw_nxoe_t *cw_nxot_ref_iter_t(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
 
 typedef struct cw_nxot_vtable_s cw_nxot_vtable_t;
@@ -357,13 +358,13 @@ nxoe_l_new(cw_nxoe_t *a_nxoe, cw_nxot_t a_type, cw_bool_t a_locking)
 #endif
 }
 
-void
-nxoe_l_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa)
+cw_bool_t
+nxoe_l_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
 {
 	_cw_check_ptr(a_nxoe);
 	_cw_dassert(a_nxoe->magic == _CW_NXOE_MAGIC);
 
-	nxot_vtable[a_nxoe->type].delete_f(a_nxoe, a_nxa);
+	return nxot_vtable[a_nxoe->type].delete_f(a_nxoe, a_nxa, a_iter);
 }
 
 cw_nxoe_t *

@@ -64,8 +64,8 @@ nxo_file_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking)
 	nxa_l_gc_register(nx_nxa_get(a_nx), (cw_nxoe_t *)file);
 }
 
-void
-nxoe_l_file_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa)
+cw_bool_t
+nxoe_l_file_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
 {
 	cw_nxoe_file_t	*file;
 
@@ -98,6 +98,8 @@ nxoe_l_file_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa)
 	}
 
 	nxa_free(a_nxa, file, sizeof(cw_nxoe_file_t));
+
+	return FALSE;
 }
 
 cw_nxoe_t *

@@ -99,8 +99,8 @@ nxo_name_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_uint8_t *a_str,
 #endif
 }
 
-void
-nxoe_l_name_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa)
+cw_bool_t
+nxoe_l_name_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
 {
 	cw_nxoe_name_t	*name;
 #ifdef _CW_THREADS
@@ -151,6 +151,8 @@ nxoe_l_name_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa)
 #ifdef _CW_THREADS
 	mtx_unlock(name_lock);
 #endif
+
+	return FALSE;
 }
 
 cw_nxoe_t *

@@ -257,8 +257,8 @@ nxo_thread_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx)
 		nx_l_thread_init(a_nx)(&thread->self);
 }
 
-void
-nxoe_l_thread_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa)
+cw_bool_t
+nxoe_l_thread_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
 {
 	cw_nxoe_thread_t	*thread;
 
@@ -278,6 +278,8 @@ nxoe_l_thread_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa)
 	}
 
 	nxa_free(a_nxa, thread, sizeof(cw_nxoe_thread_t));
+
+	return FALSE;
 }
 
 cw_nxoe_t *
