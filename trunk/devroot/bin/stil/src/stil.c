@@ -62,7 +62,11 @@ main(int argc, char **argv)
 		static const cw_uint8_t	code[] =
 		    "product print (, version ) print version print (.\n)"
 		    " print flush"
-		    "/stop {} def";
+		    "/stop {} def"
+		    "/promptstring {count cvs dup length 4 add string"
+		    " dup 0 (s:) putinterval dup dup length 2 sub (> )"
+		    " putinterval dup 3 2 roll 2 exch putinterval} bind def"
+		    ;
 		struct stil_arg_s	arg = {NULL, 0, 0};
 
 		stil_new(&stil, cl_read, NULL, NULL, (void *)&arg);
@@ -79,7 +83,7 @@ main(int argc, char **argv)
 		/* Create procedures to handle #! magic. */
 		stilt_interpret(&stilt, &stilts, magic, sizeof(magic) - 1);
 		stilt_flush(&stilt, &stilts);
-		
+
 		/*
 		 * Initialize the command editor.
 		 */
