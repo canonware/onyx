@@ -157,6 +157,17 @@
 #  endif
 #endif
 
+#if (defined(_INC_LEX_H_))
+#  ifndef _LEX_H_
+#    ifndef _BUF_H_
+#      include <buf.h>
+#      define _BUF_H_
+#    endif
+#    include <lex.h>
+#    define _LEX_H_
+#  endif
+#endif
+
 #if (defined(_INC_LIST_H_))
 #  ifndef _LIST_H_
 #    include <list.h>
