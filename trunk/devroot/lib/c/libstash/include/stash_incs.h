@@ -6,10 +6,7 @@
  *
  ****************************************************************************
  *
- * $Source$
- * $Author: jasone $
- * Current revision: $Revision: 230 $
- * Last modified: $Date: 1998-09-19 23:31:43 -0700 (Sat, 19 Sep 1998) $
+ * Version: <Version>
  *
  * <<< Description >>>
  *

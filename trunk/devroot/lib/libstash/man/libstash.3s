@@ -3,12 +3,9 @@
 <Copyright = "jasone">
 <License>
 
-$Source$
-$Author: jasone $
-$Revision: 186 $
-$Date: 1998-08-30 23:02:21 -0700 (Sun, 30 Aug 1998) $
+Version: <Version>
 ..
-.Id $Id: libstash.3s 186 1998-08-31 06:02:21Z jasone $
+.Id $Id: libstash.3s 235 1998-10-13 17:39:13Z jasone $
 .TH libstash 3s
 .SH NAME
 libstash - Library of algorithms and data structures designed for transaction
