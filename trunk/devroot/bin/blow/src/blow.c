@@ -192,7 +192,7 @@ main(int argc, char ** argv)
     }
     else
     {
-      out_put_l(cw_g_out, "New connection ([i32])\n", i);
+      out_put_l(cw_g_out, "New connection ([i])\n", i);
     }
   }
 
@@ -223,7 +223,7 @@ main(int argc, char ** argv)
 	if (TRUE == sock_flush_out(&sock_array[j]))
 	{
 	  out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
-		    "Error in sock_flush_out() for connection [i32]\n", j);
+		    "Error in sock_flush_out() for connection [i]\n", j);
 	  goto SHUTDOWN;
 	}
 	if (TRUE == buf_catenate_buf(&t_buf, &buf, TRUE))
@@ -233,7 +233,7 @@ main(int argc, char ** argv)
 	if (TRUE == sock_write(&sock_array[j], &t_buf))
 	{
 	  out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
-		    "Error in sock_write() for connection [i32]\n", j);
+		    "Error in sock_write() for connection [i]\n", j);
 	  goto SHUTDOWN;
 	}
       }
@@ -249,7 +249,7 @@ main(int argc, char ** argv)
 	if (TRUE == sock_write(&sock_array[j], &t_buf))
 	{
 	  out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
-		    "Error in sock_write() for connection [i32]\n", j);
+		    "Error in sock_write() for connection [i]\n", j);
 	  goto SHUTDOWN;
 	}
       }
@@ -263,7 +263,7 @@ main(int argc, char ** argv)
   {
     sock_flush_out(&sock_array[i]);
     sock_delete(&sock_array[i]);
-    out_put_l(cw_g_out, "Connection closed ([i32])\n", i);
+    out_put_l(cw_g_out, "Connection closed ([i])\n", i);
   }
   
   RETURN:
@@ -294,11 +294,11 @@ usage(const char * a_progname)
      "    -h                   | Print usage and exit.\n"
      "    -V                   | Print version information and exit.\n"
      "    -n <nsocks>          | Number of connections to open.\n"
-     "                         | (Defaults to [i32].)\n"
+     "                         | (Defaults to [i].)\n"
      "    -b <bsize>           | Send blocks of size <bsize>.\n"
-     "                         | (Defaults to [i32].)\n"
+     "                         | (Defaults to [i].)\n"
      "    -c <nblocks>         | Number of blocks to send over each socket.\n"
-     "                         | (Defaults to [i32].)\n"
+     "                         | (Defaults to [i].)\n"
      "    -r [[<rhost>:]<rport> | Forward to host <rhost> or \"localhost\",\n"
      "                         | port <rport>.\n",
      a_progname, a_progname, a_progname, a_progname,

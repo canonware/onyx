@@ -378,7 +378,7 @@ matrix_dump(cw_matrix_t * a_matrix, cw_bool_t a_compact)
       char t_str[20];
 
       /* Figure out the maximum length of the labels. */
-      y_digits = out_put_s(cw_g_out, t_str, "[i32]", a_matrix->y_size -1);
+      y_digits = out_put_s(cw_g_out, t_str, "[i]", a_matrix->y_size -1);
 	
       /* Figure out the maximum length of any field. */
       for (y = 0, greatest = 0; y < a_matrix->y_size; y++)
@@ -393,11 +393,11 @@ matrix_dump(cw_matrix_t * a_matrix, cw_bool_t a_compact)
       }
       if (greatest > (a_matrix->x_size - 1))
       {
-	x_digits = out_put_s(cw_g_out, t_str, "[i32]", greatest);
+	x_digits = out_put_s(cw_g_out, t_str, "[i]", greatest);
       }
       else
       {
-	x_digits = out_put_s(cw_g_out, t_str, "[i32]", a_matrix->x_size - 1);
+	x_digits = out_put_s(cw_g_out, t_str, "[i]", a_matrix->x_size - 1);
       }
 
       /* Top labels. */
@@ -408,13 +408,13 @@ matrix_dump(cw_matrix_t * a_matrix, cw_bool_t a_compact)
       out_put(cw_g_out, "|");
       for (i = 0; i < a_matrix->x_size; i++)
       {
-	out_put_s(cw_g_out, t_str, "[i32]", i);
+	out_put_s(cw_g_out, t_str, "[i]", i);
 	t_len = strlen(t_str);
 	for (k = 0; k < ((x_digits + 1) - t_len); k++)
 	{
 	  out_put(cw_g_out, " ");
 	}
-	out_put(cw_g_out, "[i32]", i);
+	out_put(cw_g_out, "[i]", i);
       }
       out_put(cw_g_out, "\n");
 
@@ -433,26 +433,26 @@ matrix_dump(cw_matrix_t * a_matrix, cw_bool_t a_compact)
       for (j = 0; j < a_matrix->y_size; j++)
       {
 	/* Side label. */
-	out_put_s(cw_g_out, t_str, "[i32]", j);
+	out_put_s(cw_g_out, t_str, "[i]", j);
 	t_len = strlen(t_str);
 	for (k = 0; k < ((y_digits) - t_len); k++)
 	{
 	  out_put(cw_g_out, " ");
 	}
-	out_put(cw_g_out, "[i32]|", j);
+	out_put(cw_g_out, "[i]|", j);
 
 	/* Matrix elements. */
 	for (i = 0; i < a_matrix->x_size; i++)
 	{
 	  for (k = 0;
-	       k < (x_digits + 1 - out_put_s(cw_g_out, t_str, "[i32]",
+	       k < (x_digits + 1 - out_put_s(cw_g_out, t_str, "[i]",
 					     matrix_get_element(a_matrix,
 								i, j)));
 	       k++)
 	  {
 	    out_put(cw_g_out, " ");
 	  }
-	  out_put(cw_g_out, "[i32|s:s]",
+	  out_put(cw_g_out, "[i|s:s]",
 		  matrix_get_element(a_matrix, i, j));
 	}
 	

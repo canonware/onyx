@@ -77,11 +77,11 @@ main()
     }
   }
 
-  out_put(cw_g_out, "[i32] bytes of data in buf_a (various sized bufc's)\n",
+  out_put(cw_g_out, "[i] bytes of data in buf_a (various sized bufc's)\n",
 	  buf_get_size(buf_a));
-  out_put(cw_g_out, "[i32] bytes of data in buf_b (4kB bufc's)\n",
+  out_put(cw_g_out, "[i] bytes of data in buf_b (4kB bufc's)\n",
 	  buf_get_size(buf_b));
-  out_put(cw_g_out, "[i32] bytes of data in buf_c (16B bufc's)\n",
+  out_put(cw_g_out, "[i] bytes of data in buf_c (16B bufc's)\n",
 	  buf_get_size(buf_c));
 
   /* buf_get_uint8() inc loop for each buf. */

@@ -43,5 +43,5 @@ PTESTS := p_res_a.pl.in
 # Backend test programs that are driven by the PTESTS.
 BTESTS := b_res_a.c
 
-# Man pages
-MANPAGES := libstash.3s
+# Man pages.
+MANPAGES := libstash.3s libstash_buf.3s libstash_oh.3s

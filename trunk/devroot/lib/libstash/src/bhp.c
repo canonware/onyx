@@ -171,7 +171,7 @@ bhp_dump(cw_bhp_t * a_bhp)
 #endif
 
   out_put(cw_g_out, "=== bhp_dump() start ==============================\n");
-  out_put(cw_g_out, "num_nodes: [i64]\n",
+  out_put(cw_g_out, "num_nodes: [q]\n",
 	  a_bhp->num_nodes);
   if (NULL != a_bhp->head)
   {
@@ -567,7 +567,7 @@ bhp_p_dump(cw_bhpi_t * a_bhpi, cw_uint32_t a_depth, cw_bhpi_t * a_last_printed)
       out_put(cw_g_out, " ");
     }
   }
-  out_put(cw_g_out, "[[deg:[i32] pri:0x[p|w:8|p:0] dat:0x[p|w:8|p:0]]",
+  out_put(cw_g_out, "[[deg:[i] pri:0x[p|w:8|p:0] dat:0x[p|w:8|p:0]]",
 	  a_bhpi->degree, a_bhpi->priority, a_bhpi->data);
   a_last_printed = a_bhpi;
   

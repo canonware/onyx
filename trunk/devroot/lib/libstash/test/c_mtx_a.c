@@ -82,7 +82,7 @@ main()
   thd_join(&thread_b);
   mtx_delete(&mutex_a);
 
-  out_put(cw_g_out, "g_count: [i32]\n", g_count);
+  out_put(cw_g_out, "g_count: [i]\n", g_count);
   
   out_put(cw_g_out, "Test end\n");
   libstash_shutdown();

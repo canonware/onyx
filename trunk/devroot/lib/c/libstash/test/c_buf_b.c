@@ -151,7 +151,7 @@ main(int argc, char ** argv)
   {
     seed = getpid();
   }
-/*    out_put(cw_g_out, "seed == [i32]\n", seed); */
+/*    out_put(cw_g_out, "seed == [i]\n", seed); */
   srandom(seed);
   
   foo_a.buf_a = buf_a;
@@ -174,18 +174,18 @@ main(int argc, char ** argv)
   if (_LIBSTASH_TEST_NUM_BUFELS * _LIBSTASH_TEST_SIZEOF_BUFFER
       != buf_get_size(buf_a))
   {
-    out_put(cw_g_out, "buf_get_size(buf_a) == [i32] (should be [i32])\n",
+    out_put(cw_g_out, "buf_get_size(buf_a) == [i] (should be [i])\n",
 	    buf_get_size(buf_a),
 	    _LIBSTASH_TEST_NUM_BUFELS * _LIBSTASH_TEST_SIZEOF_BUFFER);
     buf_dump(buf_a, "buf_a ");
-    out_put(cw_g_out, "seed == [i32]\n", seed);
+    out_put(cw_g_out, "seed == [i]\n", seed);
   }
   if (0 != buf_get_size(&buf_b))
   {
-    out_put(cw_g_out, "buf_get_size(&buf_b) == [i32] (should be 0)\n",
+    out_put(cw_g_out, "buf_get_size(&buf_b) == [i] (should be 0)\n",
 	    buf_get_size(&buf_b));
     buf_dump(&buf_b, "buf_b ");
-    out_put(cw_g_out, "seed == [i32]\n", seed);
+    out_put(cw_g_out, "seed == [i]\n", seed);
   }
   
   for (i = 0; i < buf_get_size(buf_a); i++)
@@ -194,10 +194,10 @@ main(int argc, char ** argv)
     
     if (c != i % _LIBSTASH_TEST_DATA_MODULUS)
     {
-      out_put(cw_g_out, "buf_a[[[i32]] == %u, should be %u\n",
+      out_put(cw_g_out, "buf_a[[[i]] == %u, should be %u\n",
 	      i, c, i % _LIBSTASH_TEST_DATA_MODULUS);
       buf_dump(buf_a, "buf_a ");
-      out_put(cw_g_out, "seed == [i32]\n", seed);
+      out_put(cw_g_out, "seed == [i]\n", seed);
       break;
     }
   }

@@ -228,7 +228,7 @@ main(int argc, char ** argv)
   {
     cw_sint32_t fd;
     
-    out_put_s(cw_g_out, logfile, "[s]/[s].pid_[i32].log",
+    out_put_s(cw_g_out, logfile, "[s]/[s].pid_[i].log",
 	      opt_dirname, basename(argv[0]), getpid());
     
     fd = (cw_sint32_t) open(logfile, O_RDWR | O_CREAT | O_TRUNC, 0644);
@@ -246,7 +246,7 @@ main(int argc, char ** argv)
   
   if (dbg_is_registered(cw_g_dbg, "prog_verbose"))
   {
-    out_put(cw_g_out, "pid: [i32]\n", getpid());
+    out_put(cw_g_out, "pid: [i]\n", getpid());
   }
 
   if (sockb_init(2048, 4096))
@@ -261,7 +261,7 @@ main(int argc, char ** argv)
   }
   if (dbg_is_registered(cw_g_dbg, "prog_verbose"))
   {
-    out_put_l(cw_g_out, "[s]: Listening on port [i32]\n", argv[0], opt_port);
+    out_put_l(cw_g_out, "[s]: Listening on port [i]\n", argv[0], opt_port);
   }
 
   for (conn_num = 0; should_quit == FALSE; conn_num++)
@@ -300,7 +300,7 @@ main(int argc, char ** argv)
 	  exit(1);
 	}
 
-	out_put_s(cw_g_out, logfile, "[s]/[s].pid_[i32].conn[i32]",
+	out_put_s(cw_g_out, logfile, "[s]/[s].pid_[i].conn[i]",
 		  opt_dirname, basename(argv[0]), getpid(), conn_num);
 
 	fd = (cw_sint32_t) open(logfile, O_RDWR | O_CREAT | O_TRUNC, 0644);
@@ -412,7 +412,7 @@ get_out_str(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str)
 	 "----------------------------------------"
 	 "----------------------------------------\n");
 
-  out_put_s(cw_g_out, line_a, "[s]:0x[i32|b:16] ([i32]) byte[s]\n",
+  out_put_s(cw_g_out, line_a, "[s]:0x[i|b:16] ([i]) byte[s]\n",
 	    (TRUE == is_send) ? "send" : "recv",
 	    buf_size,
 	    buf_size,
@@ -428,7 +428,7 @@ get_out_str(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str)
      * translations. */
     line_a[0] = '\0';
     line_b[0] = '\0';
-    out_put_s(cw_g_out, line_a, "[i32|b:16|w:8|p:0]", i);
+    out_put_s(cw_g_out, line_a, "[i|b:16|w:8|p:0]", i);
     strcat(line_b, "        ");
     
     /* Each iteration generates out text for 16 bytes of data. */
@@ -842,7 +842,7 @@ get_out_str(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str)
 	  break;
       }
 
-      out_put_s(cw_g_out, line_a + strlen(line_a), "  [i8|b:16|w:2|p:0]", c);
+      out_put_s(cw_g_out, line_a + strlen(line_a), "  [i|b:16|w:2|p:0]", c);
       out_put_s(cw_g_out, line_b + strlen(line_b), " [s|w:3]", c_trans);
     }
     /* Actually copy the strings to the final output string. */
@@ -897,7 +897,7 @@ handle_client_send(void * a_arg)
     goto OPTERROR;
   }
 
-  out_put(conn->out, "Connecting to \"[s]\" on port [i32]\n",
+  out_put(conn->out, "Connecting to \"[s]\" on port [i]\n",
 	  conn->rhost, conn->rport);
       
   /* Connect to the remote end. */
@@ -905,7 +905,7 @@ handle_client_send(void * a_arg)
   if (TRUE == sock_connect(&conn->remote_sock, conn->rhost, conn->rport, NULL))
   {
     out_put_e(conn->out, __FILE__, __LINE__, __FUNCTION__,
-	      "Error in sock_connect(&conn->remote_sock, \"[s]\", [i32])\n",
+	      "Error in sock_connect(&conn->remote_sock, \"[s]\", [i])\n",
 	      conn->rhost, conn->rport);
     goto RETURN;
   }

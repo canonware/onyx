@@ -193,7 +193,7 @@ socks_accept(cw_socks_t * a_socks, struct timeval * a_timeout,
       {
 	out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
 		  "Exceded maximum number of simultaneous connections "
-		  "([i32])\n",
+		  "([i])\n",
 		  FD_SETSIZE);
       }
       retval = NULL;

@@ -63,7 +63,7 @@ main()
   for (i = 0; i < _LIBSTASH_TEST_NUM_NODES; i++)
   {
     _cw_assert(FALSE == bhp_del_min(h, (void **) &a, (void **) &b));
-    out_put(cw_g_out, "i == [i32], size == [i64]: [i32|s:s], [i32|s:s]\n",
+    out_put(cw_g_out, "i == [i], size == [q]: [i|s:s], [i|s:s]\n",
 	    i, bhp_get_size(h), *a, *b);
   }
 

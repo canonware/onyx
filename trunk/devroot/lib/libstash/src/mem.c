@@ -59,7 +59,7 @@ mem_delete(cw_mem_t * a_mem)
 
       bzero(buf, sizeof(buf));
       out_put_sn(cw_g_out, buf, 1024,
-		 "[s](): [i64] unfreed allocation[s]\n",
+		 "[s](): [q] unfreed allocation[s]\n",
 		 __FUNCTION__, oh_get_num_items(&a_mem->addr_hash),
 		 oh_get_num_items(&a_mem->addr_hash) != 1 ? "s" : "");
       out_put(cw_g_out, buf);
@@ -77,8 +77,8 @@ mem_delete(cw_mem_t * a_mem)
 
 	bzero(buf, sizeof(buf));
 	out_put_sn(cw_g_out, buf, 1024,
-		   "[s](): 0x[p], size [i32] never freed "
-		   "(allocated at [s], line [i32])\n",
+		   "[s](): 0x[p], size [i] never freed "
+		   "(allocated at [s], line [i])\n",
 		   __FUNCTION__, addr, allocation->size,
 		   ((NULL == allocation->filename)
 		    ? "<?>" : allocation->filename),
@@ -120,7 +120,7 @@ mem_malloc(cw_mem_t * a_mem, size_t a_size)
 
       bzero(buf, sizeof(buf));
       out_put_sn(cw_g_out, buf, 1024,
-		 "[s](): malloc([i32]) returned NULL at [s], line [i32]\n",
+		 "[s](): malloc([i]) returned NULL at [s], line [i]\n",
 		 __FUNCTION__, a_size, a_filename, a_line_num);
       out_put(cw_g_out, buf);
     }
@@ -145,8 +145,8 @@ mem_malloc(cw_mem_t * a_mem, size_t a_size)
 	bzero(buf, sizeof(buf));
 	out_put_sn(cw_g_out, buf, 1024,
 		   "[s](): 0x[p] multiply-allocated "
-		   "(was at [s], line [i32], size [i32];"
-		   " now at [s], line [i32], size [i32])\n",
+		   "(was at [s], line [i], size [i];"
+		   " now at [s], line [i], size [i])\n",
 		   __FUNCTION__, retval,
 		   ((NULL == old_allocation->filename)
 		    ? "<?>" : old_allocation->filename),
@@ -169,7 +169,7 @@ mem_malloc(cw_mem_t * a_mem, size_t a_size)
 
 	bzero(buf, sizeof(buf));
 	out_put_sn(cw_g_out, buf, 1024,
-		   "[s](): malloc([i32]) returned NULL\n",
+		   "[s](): malloc([i]) returned NULL\n",
 		   __FUNCTION__, sizeof(struct cw_mem_item_s));
 	out_put(cw_g_out, buf);
       }
@@ -187,7 +187,7 @@ mem_malloc(cw_mem_t * a_mem, size_t a_size)
 
 	  bzero(buf, sizeof(buf));
 	  out_put_sn(cw_g_out, buf, 1024,
-		     "[s](): 0x[p] <-- malloc([i32]) at [s], line [i32]\n",
+		     "[s](): 0x[p] <-- malloc([i]) at [s], line [i]\n",
 		     __FUNCTION__, retval, a_size,
 		     (NULL == a_filename) ? "<?>" : a_filename, a_line_num);
 	  out_put(cw_g_out, buf);
@@ -203,7 +203,7 @@ mem_malloc(cw_mem_t * a_mem, size_t a_size)
 
 	    out_put_sn(cw_g_out, buf, 1024,
 		       "[s](): 0x[p] multiply-allocated "
-		       "(probably used free() directly) at [s], line [i32]\n",
+		       "(probably used free() directly) at [s], line [i]\n",
 		       __FUNCTION__, retval,
 		       (NULL == a_filename) ? "<?>" : a_filename, a_line_num);
 	    out_put(cw_g_out, buf);
@@ -244,8 +244,8 @@ mem_calloc(cw_mem_t * a_mem, size_t a_number, size_t a_size)
 
       bzero(buf, sizeof(buf));
       out_put_sn(cw_g_out, buf, 1024,
-		 "[s](): calloc([i32], [i32]) returned NULL "
-		 "at [s], line [i32]\n",
+		 "[s](): calloc([i], [i]) returned NULL "
+		 "at [s], line [i]\n",
 		 __FUNCTION__, a_number, a_size, a_filename, a_line_num);
       out_put(cw_g_out, buf);
     }
@@ -271,8 +271,8 @@ mem_calloc(cw_mem_t * a_mem, size_t a_number, size_t a_size)
 	bzero(buf, sizeof(buf));
 	out_put_sn(cw_g_out, buf, 1024,
 		   "[s](): 0x[p] multiply-allocated "
-		   "(was at [s], line [i32], size [i32];"
-		   " now at [s], line [i32], size [i32])\n",
+		   "(was at [s], line [i], size [i];"
+		   " now at [s], line [i], size [i])\n",
 		   __FUNCTION__, retval,
 		   ((NULL == old_allocation->filename)
 		    ? "<?>" : old_allocation->filename),
@@ -295,7 +295,7 @@ mem_calloc(cw_mem_t * a_mem, size_t a_number, size_t a_size)
 
 	bzero(buf, sizeof(buf));
 	out_put_sn(cw_g_out, buf, 1024,
-		   "[s](): malloc([i32]) returned NULL\n",
+		   "[s](): malloc([i]) returned NULL\n",
 		   __FUNCTION__, sizeof(struct cw_mem_item_s));
 	out_put(cw_g_out, buf);
       }
@@ -313,8 +313,8 @@ mem_calloc(cw_mem_t * a_mem, size_t a_number, size_t a_size)
 
 	  bzero(buf, sizeof(buf));
 	  out_put_sn(cw_g_out, buf, 1024,
-		     "[s](): 0x[p] <-- calloc([i32], [i32]) "
-		     "at [s], line [i32]\n",
+		     "[s](): 0x[p] <-- calloc([i], [i]) "
+		     "at [s], line [i]\n",
 		     __FUNCTION__, retval, a_number, a_size,
 		     (NULL == a_filename) ? "<?>" : a_filename, a_line_num);
 	  out_put(cw_g_out, buf);
@@ -330,7 +330,7 @@ mem_calloc(cw_mem_t * a_mem, size_t a_number, size_t a_size)
 
 	    out_put_sn(cw_g_out, buf, 1024,
 		       "[s](): 0x[p] multiply-allocated "
-		       "(probably used free() directly) at [s], line [i32]\n",
+		       "(probably used free() directly) at [s], line [i]\n",
 		       __FUNCTION__, retval,
 		       (NULL == a_filename) ? "<?>" : a_filename, a_line_num);
 	    out_put(cw_g_out, buf);
@@ -372,8 +372,8 @@ mem_realloc(cw_mem_t * a_mem, void * a_ptr, size_t a_size)
 
       bzero(buf, sizeof(buf));
       out_put_sn(cw_g_out, buf, 1024,
-		 "[s](): realloc(0x[p], [i32]) "
-		 "returned NULL at [s], line [i32]\n",
+		 "[s](): realloc(0x[p], [i]) "
+		 "returned NULL at [s], line [i]\n",
 		 __FUNCTION__, a_ptr, a_size,
 		 a_filename, a_line_num);
       out_put(cw_g_out, buf);
@@ -441,8 +441,8 @@ mem_realloc(cw_mem_t * a_mem, void * a_ptr, size_t a_size)
 	bzero(buf, sizeof(buf));
 	out_put_sn(cw_g_out, buf, 1024,
 		   "[s](): reallocing 0x[p]"
-		   " (was size [i32], allocated at [s], line [i32])"
-		   " to 0x[p], size [i32] at [s], line [i32]\n",
+		   " (was size [i], allocated at [s], line [i])"
+		   " to 0x[p], size [i] at [s], line [i]\n",
 		   __FUNCTION__, a_ptr,
 		   old_size,
 		   ((NULL == old_filename)
@@ -492,7 +492,7 @@ mem_free(cw_mem_t * a_mem, void * a_ptr)
 	bzero(buf, sizeof(buf));
 	out_put_sn(cw_g_out, buf, 1024,
 		   "[s](): 0x[p] not allocated, "
-		   "attempted to free at [s], line [i32]\n",
+		   "attempted to free at [s], line [i]\n",
 		   __FUNCTION__, a_ptr,
 		   (NULL == a_filename) ? "<?>" : a_filename,
 		   a_line_num);
@@ -507,8 +507,8 @@ mem_free(cw_mem_t * a_mem, void * a_ptr)
 
 	bzero(buf, sizeof(buf));
 	out_put_sn(cw_g_out, buf, 1024,
-		   "[s](): Freeing 0x[p], size [i32], at [s], line [i32] "
-		   "(allocated at [s], line [i32])\n",
+		   "[s](): Freeing 0x[p], size [i], at [s], line [i] "
+		   "(allocated at [s], line [i])\n",
 		   __FUNCTION__, a_ptr,
 		   allocation->size,
 		   (NULL == a_filename) ? "<?>" : a_filename,

@@ -162,7 +162,7 @@ pezz_delete(cw_pezz_t * a_pezz)
       if (i < (a_pezz->num_blocks * a_pezz->block_num_buffers))
       {
 	out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-		  "[i32] leaked buffer[s]\n",
+		  "[i] leaked buffer[s]\n",
 		  (a_pezz->num_blocks * a_pezz->block_num_buffers) - i,
 		  (((a_pezz->num_blocks
 		     * a_pezz->block_num_buffers) - i) != 1) ? "s" : "");
@@ -172,7 +172,7 @@ pezz_delete(cw_pezz_t * a_pezz)
     {
       /* All the memory buffers are leaked! */
       out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-		"[i32] leaked buffer[s] (all of them)\n",
+		"[i] leaked buffer[s] (all of them)\n",
 		(a_pezz->num_blocks * a_pezz->block_num_buffers),
 		((a_pezz->num_blocks * a_pezz->block_num_buffers) != 1)
 		? "s" : "");
@@ -371,11 +371,11 @@ pezz_dump(cw_pezz_t * a_pezz, const char * a_prefix)
 
   out_put(cw_g_out, "[s]start ==========================================\n",
 	  a_prefix);
-  out_put(cw_g_out, "[s]buffer_size : [i32]\n",
+  out_put(cw_g_out, "[s]buffer_size : [i]\n",
 	  a_prefix, a_pezz->buffer_size);
-  out_put(cw_g_out, "[s]block_num_buffers : [i32]\n",
+  out_put(cw_g_out, "[s]block_num_buffers : [i]\n",
 	  a_prefix, a_pezz->block_num_buffers);
-  out_put(cw_g_out, "[s]num_blocks : [i32]\n",
+  out_put(cw_g_out, "[s]num_blocks : [i]\n",
 	  a_prefix, a_pezz->num_blocks);
 
   out_put(cw_g_out, "[s]mem_blocks : 0x[p]\n",
@@ -386,7 +386,7 @@ pezz_dump(cw_pezz_t * a_pezz, const char * a_prefix)
   for (i = 0; i < a_pezz->num_blocks; i++);
   {
     out_put(cw_g_out,
-	    "[s]mem_blocks[[[i32]] : 0x[p], ring_blocks[[[i32]] : 0x[p]\n",
+	    "[s]mem_blocks[[[i]] : 0x[p], ring_blocks[[[i]] : 0x[p]\n",
 	    a_prefix, i, a_pezz->mem_blocks[i], i, a_pezz->ring_blocks[i]);
   }
   

@@ -40,7 +40,7 @@ main()
   for (i = 0; i < NUM_STRINGS; i++)
   {
     strings[i] = (char *) _cw_malloc(sizeof(char) * 50);
-    out_put_s(cw_g_out, strings[i], "([i32]) This is string [i32]", i, i);
+    out_put_s(cw_g_out, strings[i], "([i]) This is string [i]", i, i);
   }
 
 /*   h1_ptr = oh_get_h1(hash); */
@@ -49,12 +49,12 @@ main()
 /*   out_put(cw_g_out, "<<< Begin first insertion loop >>>\n"); */
   for (i = 0; i < NUM_STRINGS; i++)
   {
-/*     out_put(cw_g_out, "<<< Iteration [i32] >>>\n", i); */
+/*     out_put(cw_g_out, "<<< Iteration [i] >>>\n", i); */
     ins_error = oh_item_insert(&hash, (void *) strings[i],
 			       (void *) &(strings[i]));
     if (ins_error == 1)
     {
-      out_put(cw_g_out, "(1) Error at i == [i32]\n", i);
+      out_put(cw_g_out, "(1) Error at i == [i]\n", i);
       oh_dump(&hash, FALSE);
       exit(1);
     }
@@ -67,7 +67,7 @@ main()
 			   (void **) &junk, (void **) &junk);
     if (error == TRUE)
     {
-      out_put(cw_g_out, "(2) Error at i == [i32]\n", i);
+      out_put(cw_g_out, "(2) Error at i == [i]\n", i);
       oh_dump(&hash, FALSE);
       exit(1);
     }
@@ -80,7 +80,7 @@ main()
 			       (void *) &(strings[i]));
     if (ins_error == 1)
     {
-      out_put(cw_g_out, "(3) Error at i == [i32]\n", i);
+      out_put(cw_g_out, "(3) Error at i == [i]\n", i);
       oh_dump(&hash, FALSE);
       exit(1);
     }
@@ -93,7 +93,7 @@ main()
 			   (void **) &junk, (void **) &junk);
     if (error == TRUE)
     {
-      out_put(cw_g_out, "(4) Error at i == [i32]\n", i);
+      out_put(cw_g_out, "(4) Error at i == [i]\n", i);
       oh_dump(&hash, FALSE);
       exit(1);
     }
@@ -104,9 +104,9 @@ main()
 			     (void *) &(strings[0]));
   
   {
-    out_put(cw_g_out, "Table size: [i64]\n",
+    out_put(cw_g_out, "Table size: [q]\n",
 	    oh_get_size(&hash));
-    out_put(cw_g_out, "Number of items: [i64]\n",
+    out_put(cw_g_out, "Number of items: [q]\n",
 	    oh_get_num_items(&hash));
   }
 

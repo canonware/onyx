@@ -1,4 +1,14 @@
+1999-07-30  Jason Evans  <jasone@canonware.com>
+
+	* src/out.c: Rework internals significantly.  Performance is
+	approximately 4 times better.
+
+	* include/libstash/out.h: Remove several specifier types.
+
 1999-07-29  Jason Evans  <jasone@canonware.com>
+
+	* configure.in (_LIBSTASH_MAX_IOV): Add lseek() call to fix test.
+	The test previously worked on FreeBSD and Solaris, but not Linux.
 
 	* src/out.c : Promote 1 and 2 byte va_list arguments to 4 bytes to
 	avoid problems on (at least) Solaris.

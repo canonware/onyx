@@ -173,7 +173,7 @@ sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port,
     if (dbg_is_registered(cw_g_dbg, "sock_error"))
     {
       out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-		"Exceded maximum number of simultaneous connections ([i32])\n",
+		"Exceded maximum number of simultaneous connections ([i])\n",
 		FD_SETSIZE);
     }
     if (close(a_sock->sockfd))
@@ -786,7 +786,7 @@ sock_p_config_socket(cw_sock_t * a_sock)
     else \
     { \
       out_put_e(cw_g_out, NULL, 0, __FUNCTION__, \
-		  "[s]: [i32]\n", #a, val); \
+		  "[s]: [i]\n", #a, val); \
     }
 
     _CW_SOCK_GETSOCKOPT(SO_REUSEADDR);
@@ -892,7 +892,7 @@ sock_p_config_socket(cw_sock_t * a_sock)
   else if (dbg_is_registered(cw_g_dbg, "sock_sockopt"))
   {
     out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-	      "SO_LINGER: [s], [i32] second[s]\n",
+	      "SO_LINGER: [s], [i] second[s]\n",
 	      linger_struct.l_onoff ? "on" : "off",
 	      linger_struct.l_linger,
 	      linger_struct.l_linger != 1 ? "s" : "");

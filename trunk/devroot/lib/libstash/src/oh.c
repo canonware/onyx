@@ -819,19 +819,19 @@ oh_dump(cw_oh_t * a_oh, cw_bool_t a_all)
   out_put(cw_g_out,
 	  "============================================================\n");
   out_put(cw_g_out,
-	  "Size: [[[i64]]  Slots filled: [[[i32]]\n\n",
+	  "Size: [[[q]]  Slots filled: [[[i]]\n\n",
 	  a_oh->size,
 	  a_oh->items_count);
   out_put(cw_g_out, "      pow h1         h2    shrink grow \n");
   out_put(cw_g_out, "      --- ---------- ----- ------ -----\n");
   out_put(cw_g_out,
-	  "Base: [i32|w:2]             [i32|w:5] [i32|w:5]  [i32|w:5]\n",
+	  "Base: [i|w:2]             [i|w:5] [i|w:5]  [i|w:5]\n",
 	  a_oh->base_power,
 	  a_oh->base_h2,
 	  a_oh->base_shrink_point,
 	  a_oh->base_grow_point);
   out_put(cw_g_out,
-	  "Curr: [i32|w:2]  0x[p|w:10] [i64|w:5] [i64|w:5]  [i64|w:5]\n\n",
+	  "Curr: [i|w:2]  0x[p|w:10] [q|w:5] [q|w:5]  [q|w:5]\n\n",
 	  a_oh->curr_power,
 	  a_oh->curr_h1,
 	  a_oh->curr_h2,
@@ -839,11 +839,11 @@ oh_dump(cw_oh_t * a_oh, cw_bool_t a_all)
 	  a_oh->curr_grow_point);
 
   out_put(cw_g_out,
-	  "Counters: collisions[[[i64]] inserts[[[i64]] deletes[[[i64]]\n",
+	  "Counters: collisions[[[q]] inserts[[[q]] deletes[[[q]]\n",
 	  a_oh->num_collisions,
 	  a_oh->num_inserts,
 	  a_oh->num_deletes);
-  out_put(cw_g_out, "          grows[[[i64]] shrinks[[[i64]]\n\n",
+  out_put(cw_g_out, "          grows[[[q]] shrinks[[[q]]\n\n",
 	  a_oh->num_grows,
 	  a_oh->num_shrinks);
 
@@ -872,10 +872,10 @@ oh_dump(cw_oh_t * a_oh, cw_bool_t a_all)
   
     for (i = 0; i < a_oh->size; i++)
     {
-      out_put(cw_g_out, "[i32|w:4] ", i);
+      out_put(cw_g_out, "[i|w:4] ", i);
       if (a_oh->items[i] != NULL)
       {
-	out_put(cw_g_out, "0x[i32|w:8|p:0|b:16] 0x[p|w:10]\n",
+	out_put(cw_g_out, "0x[i|w:8|p:0|b:16] 0x[p|w:10]\n",
 		a_oh->items[i]->key,
 		a_oh->items[i]->data);
       }

@@ -161,7 +161,7 @@ buf_dump(cw_buf_t * a_buf, const char * a_prefix)
 	  a_prefix);
 #ifdef _LIBSTASH_DBG
   out_put(cw_g_out,
-	  "[s]|--> magic : 0x[i32|b:16]\n",
+	  "[s]|--> magic : 0x[i|b:16]\n",
 	  a_prefix, a_buf->magic);
 #endif
   out_put(cw_g_out,
@@ -173,19 +173,19 @@ buf_dump(cw_buf_t * a_buf, const char * a_prefix)
 	  a_prefix, (a_buf->is_threadsafe) ? "TRUE" : "FALSE");
 #endif
   out_put(cw_g_out,
-	  "[s]|--> size : [i32]\n",
+	  "[s]|--> size : [i]\n",
 	  a_prefix, a_buf->size);
   out_put(cw_g_out,
-	  "[s]|--> array_size : [i32]\n",
+	  "[s]|--> array_size : [i]\n",
 	  a_prefix, a_buf->array_size);
   out_put(cw_g_out,
-	  "[s]|--> array_num_valid : [i32]\n",
+	  "[s]|--> array_num_valid : [i]\n",
 	  a_prefix, a_buf->array_num_valid);
   out_put(cw_g_out,
-	  "[s]|--> array_start : [i32]\n",
+	  "[s]|--> array_start : [i]\n",
 	  a_prefix, a_buf->array_start);
   out_put(cw_g_out,
-	  "[s]|--> array_end : [i32]\n",
+	  "[s]|--> array_end : [i]\n",
 	  a_prefix, a_buf->array_end);
   out_put(cw_g_out,
 	  "[s]|--> is_cumulative_valid : [s]\n",
@@ -194,15 +194,15 @@ buf_dump(cw_buf_t * a_buf, const char * a_prefix)
 	  "[s]|--> is_cached_bufel_valid : [s]\n",
 	  a_prefix, (a_buf->is_cached_bufel_valid) ? "TRUE" : "FALSE");
   out_put(cw_g_out,
-	  "[s]|--> cached_bufel : [i32]\n",
+	  "[s]|--> cached_bufel : [i]\n",
 	  a_prefix, a_buf->cached_bufel);
   
   for (i = 0; i < a_buf->array_size; i++)
   {
     out_put(cw_g_out,
 	    "[s]|\\\n"
-	    "[s]| |--> cumulative_index[[[i32]] : [i32]\n"
-	    "[s]| |--> bufel_array[[[i32]] : \n"
+	    "[s]| |--> cumulative_index[[[i]] : [i]\n"
+	    "[s]| |--> bufel_array[[[i]] : \n"
 	    "[s]|  \\\n",
 	    a_prefix,
 	    a_prefix, i, a_buf->cumulative_index[i],
@@ -212,14 +212,14 @@ buf_dump(cw_buf_t * a_buf, const char * a_prefix)
     /* Dump bufel. */
 #ifdef _LIBSTASH_DBG
     out_put(cw_g_out,
-	    "[s]|   |--> magic : 0x[i32|b:16]\n",
+	    "[s]|   |--> magic : 0x[i|b:16]\n",
 	    a_prefix, a_buf->bufel_array[i].magic);
 #endif
     out_put(cw_g_out,
-	    "[s]|   |--> beg_offset : [i32]\n",
+	    "[s]|   |--> beg_offset : [i]\n",
 	    a_prefix, a_buf->bufel_array[i].beg_offset);
     out_put(cw_g_out,
-	    "[s]|   |--> end_offset : [i32]\n",
+	    "[s]|   |--> end_offset : [i]\n",
 	    a_prefix, a_buf->bufel_array[i].end_offset);
 #ifdef _LIBSTASH_DBG
     if ((NULL != a_buf->bufel_array[i].bufc)
@@ -231,7 +231,7 @@ buf_dump(cw_buf_t * a_buf, const char * a_prefix)
       char * sub_prefix;
       
       out_put(cw_g_out,
-	      "[s]|   |--> bufc : 0x[i32|b:16]\n"
+	      "[s]|   |--> bufc : 0x[i|b:16]\n"
 	      "[s]|    \\\n",
 	      a_prefix, a_buf->bufel_array[i].bufc, a_prefix);
       
@@ -250,7 +250,7 @@ buf_dump(cw_buf_t * a_buf, const char * a_prefix)
     else
     {
       out_put(cw_g_out,
-	      "[s]|   \\--> bufc : 0x[i32|b:16] (invalid)\n",
+	      "[s]|   \\--> bufc : 0x[i|b:16] (invalid)\n",
 	      a_prefix, a_buf->bufel_array[i].bufc);
     }
   }
@@ -2555,7 +2555,7 @@ bufc_p_dump(cw_bufc_t * a_bufc, const char * a_prefix)
 	  a_prefix);
 #ifdef _LIBSTASH_DBG
   out_put(cw_g_out,
-	  "[s]|--> magic : 0x[i32|b:16]\n",
+	  "[s]|--> magic : 0x[i|b:16]\n",
 	  a_prefix, a_bufc->magic);
 #endif
   out_put(cw_g_out,
@@ -2565,25 +2565,25 @@ bufc_p_dump(cw_bufc_t * a_bufc, const char * a_prefix)
 	  "[s]|--> free_arg : 0x[p]\n",
 	  a_prefix, a_bufc->dealloc_arg);
   out_put(cw_g_out,
-	  "[s]|--> ref_count : [i32]\n",
+	  "[s]|--> ref_count : [i]\n",
 	  a_prefix, a_bufc->ref_count);
   out_put(cw_g_out,
 	  "[s]|--> is_writeable : [s]\n",
 	  a_prefix, a_bufc->is_writeable ? "TRUE" : "FALSE");
   out_put(cw_g_out,
-	  "[s]|--> buf_size : [i32]\n",
+	  "[s]|--> buf_size : [i]\n",
 	  a_prefix, a_bufc->buf_size);
   out_put(cw_g_out,
-	  "[s]\\--> buf (0x[i32|w:8|p:0|b:16]) : ",
+	  "[s]\\--> buf (0x[i|w:8|p:0|b:16]) : ",
 	  a_prefix, a_bufc->buf);
   
   for (i = 0; i < a_bufc->buf_size; i++)
   {
     if (i % 16 == 0)
     {
-      out_put(cw_g_out, "\n[s]         [[[i32|w:4|b:16]] ", a_prefix, i);
+      out_put(cw_g_out, "\n[s]         [[[i|w:4|b:16]] ", a_prefix, i);
     }
-    out_put(cw_g_out, "[i32|w:2|p:0|b:16] ", a_bufc->buf[i]);
+    out_put(cw_g_out, "[i|w:2|p:0|b:16] ", a_bufc->buf[i]);
   }
   out_put(cw_g_out, "\n");
   

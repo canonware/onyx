@@ -72,7 +72,7 @@ main(int argc, char ** argv)
   cw_sock_t * sock, * sock_ptr;
   int port;
 
-  out_put(cw_g_out, "[s]: pid [i32]\n", argv[0], getpid());
+  out_put(cw_g_out, "[s]: pid [i]\n", argv[0], getpid());
 
   if (argc != 2)
   {
@@ -96,7 +96,7 @@ main(int argc, char ** argv)
   
   socks = socks_new();
   _cw_assert(FALSE == socks_listen(socks, &port));
-  out_put(cw_g_out, "[s]: Listening on port [i32]\n", argv[0], port);
+  out_put(cw_g_out, "[s]: Listening on port [i]\n", argv[0], port);
 
   for (sock_ptr = NULL; sock_ptr == NULL; sock_ptr = NULL)
   {

@@ -738,13 +738,13 @@ list_dump(cw_list_t * a_list)
   out_put(cw_g_out,
 	  "=== cw_list_t ==============================================\n");
 #ifdef _CW_REENTRANT
-  out_put(cw_g_out, "is_malloced: [[[i32]], is_thread_safe: [[[i32]]\n",
+  out_put(cw_g_out, "is_malloced: [[[i]], is_thread_safe: [[[i]]\n",
 	  a_list->is_malloced, a_list->is_thread_safe);
 #else
-  out_put(cw_g_out, "is_malloced: [[[i32]]\n", a_list->is_malloced);
+  out_put(cw_g_out, "is_malloced: [[[i]]\n", a_list->is_malloced);
 #endif
   {
-    out_put(cw_g_out, "count: [[[i64]]  spares: [[[i64]]\n",
+    out_put(cw_g_out, "count: [[[q]]  spares: [[[q]]\n",
 	    a_list->count, a_list->spares_count);
   }
   

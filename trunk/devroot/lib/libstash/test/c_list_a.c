@@ -443,7 +443,7 @@ main()
     for (i = 0; i < NUM_ITEMS; i++)
     {
       strings[i] = (char *) _cw_malloc(NUM_ITEMS);
-      out_put_s(cw_g_out, strings[i], "This is string [i32]", i);
+      out_put_s(cw_g_out, strings[i], "This is string [i]", i);
     }
 
     list1 = list_new(NULL, FALSE);
@@ -483,7 +483,7 @@ main()
     }
 
     _cw_assert(list_count(list1) == 0);
-    out_put(cw_g_out, "list2->count == [i64]\n", list_count(&list2));
+    out_put(cw_g_out, "list2->count == [q]\n", list_count(&list2));
     
     _cw_assert(list_count(&list2) == NUM_ITEMS);
 

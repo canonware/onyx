@@ -136,7 +136,7 @@ main(int argc, char ** argv)
   {
     exit(1);
   }
-  out_put(cw_g_out, "[s]: Listening on port [i32]\n",
+  out_put(cw_g_out, "[s]: Listening on port [i]\n",
 	  basename(argv[0]), opt_port);
 
   tout.tv_sec = 0;
@@ -248,7 +248,7 @@ usage(const char * a_progname)
      "    -h                   | Print usage and exit.\n"
      "    -V                   | Print version information and exit.\n"
      "    -b <bsize>           | Send blocks of size <bsize>.\n"
-     "                         | (Defaults to [i32].)\n"
+     "                         | (Defaults to [i].)\n"
      "    -p <port>            | Port to listen on.\n",
      a_progname, a_progname, a_progname, a_progname,
      _LIBSOCK_BLOW_DEFAULT_BSIZE

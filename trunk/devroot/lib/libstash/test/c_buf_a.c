@@ -122,14 +122,14 @@ main()
     for (i = 0; i < 256; i += 8)
     {
       out_put(cw_g_out,
-	      "[i32|w:3|p:0]->0x[i8|w:2|p:0|b:16]:"
-	      "[i32|w:3|p:0]->0x[i8|w:2|p:0|b:16]:"
-	      "[i32|w:3|p:0]->0x[i8|w:2|p:0|b:16]:"
-	      "[i32|w:3|p:0]->0x[i8|w:2|p:0|b:16]:"
-	      "[i32|w:3|p:0]->0x[i8|w:2|p:0|b:16]:"
-	      "[i32|w:3|p:0]->0x[i8|w:2|p:0|b:16]:"
-	      "[i32|w:3|p:0]->0x[i8|w:2|p:0|b:16]:"
-	      "[i32|w:3|p:0]->0x[i8|w:2|p:0|b:16]\n",
+	      "[i|w:3|p:0]->0x[i|w:2|p:0|b:16]:"
+	      "[i|w:3|p:0]->0x[i|w:2|p:0|b:16]:"
+	      "[i|w:3|p:0]->0x[i|w:2|p:0|b:16]:"
+	      "[i|w:3|p:0]->0x[i|w:2|p:0|b:16]:"
+	      "[i|w:3|p:0]->0x[i|w:2|p:0|b:16]:"
+	      "[i|w:3|p:0]->0x[i|w:2|p:0|b:16]:"
+	      "[i|w:3|p:0]->0x[i|w:2|p:0|b:16]:"
+	      "[i|w:3|p:0]->0x[i|w:2|p:0|b:16]\n",
 	      i, buf_get_uint8(buf_p, i),
 	      i + 1, buf_get_uint8(buf_p, i + 1),
 	      i + 2, buf_get_uint8(buf_p, i + 2),
@@ -146,7 +146,7 @@ main()
       t_uint32_a = buf_get_uint32(buf_p, i);
       t_uint32_b = buf_get_uint32(buf_p, i + 4);
       
-      out_put(cw_g_out, "[i32|w:3|p:0]->0x[i32|w:8|p:0|b:16]:[i32|w:3|p:0]->0x[i32|w:8|p:0|b:16]\n",
+      out_put(cw_g_out, "[i|w:3|p:0]->0x[i|w:8|p:0|b:16]:[i|w:3|p:0]->0x[i|w:8|p:0|b:16]\n",
 	      i, t_uint32_a,
 	      i + 4, t_uint32_b);
     }
@@ -156,7 +156,7 @@ main()
     {
       t_uint64 = buf_get_uint64(buf_p, i);
       
-      out_put(cw_g_out, "[i32|w:3|p:0]->0x[i64|b:16|w:16|p:0]\n",
+      out_put(cw_g_out, "[i|w:3|p:0]->0x[q|b:16|w:16|p:0]\n",
 	      i, t_uint64);
     }
     
@@ -166,14 +166,14 @@ main()
     {
       t_uint32_a = buf_get_uint32(buf_p, 256 + i);
       
-      out_put(cw_g_out, "[i32|w:3|p:0]->0x[i32|w:8|p:0|b:16]\n",
+      out_put(cw_g_out, "[i|w:3|p:0]->0x[i|w:8|p:0|b:16]\n",
 	      256 + i, t_uint32_a);
     }
     
     out_put(cw_g_out, "Unaligned buf_get_uint64():\n");
     for (i = 1; i < 8; i++)
     {
-      out_put(cw_g_out, "[i32|w:3|p:0]->0x[i64|b:16|w:16|p:0]\n",
+      out_put(cw_g_out, "[i|w:3|p:0]->0x[q|b:16|w:16|p:0]\n",
 	      256 + i,
 	      buf_get_uint64(buf_p, 256 + i));
     }
@@ -336,14 +336,14 @@ main()
     out_put(cw_g_out, "Hodge podge buf_get_uint32():\n");
     for (i = 0; i <= 20; i++)
     {
-      out_put(cw_g_out, "[i32|w:3|p:0]->0x[i32|w:8|p:0|b:16]\n",
+      out_put(cw_g_out, "[i|w:3|p:0]->0x[i|w:8|p:0|b:16]\n",
 	      i, buf_get_uint32(&buf, i));
     }
     
     out_put(cw_g_out, "Hodge podge buf_get_uint64():\n");
     for (i = 0; i <= 16; i++)
     {
-      out_put(cw_g_out, "[i32|w:3|p:0]->0x[i64|b:16|w:16|p:0]\n",
+      out_put(cw_g_out, "[i|w:3|p:0]->0x[q|b:16|w:16|p:0]\n",
 	      i,
 	      buf_get_uint64(&buf, i));
     }

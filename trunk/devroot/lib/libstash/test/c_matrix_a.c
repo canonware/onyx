@@ -53,7 +53,7 @@ main(int argc, char * argv[])
 
   num_nodes = 5;
   
-  out_put(cw_g_out, "num_nodes == [i32]\n", num_nodes);
+  out_put(cw_g_out, "num_nodes == [i]\n", num_nodes);
   if (num_nodes > 6)
   {
     out_put(cw_g_out,
@@ -62,10 +62,10 @@ main(int argc, char * argv[])
   }
   num_edges = num_nodes * ((num_nodes - 1) / 2)
     + (((num_nodes + 1) / 2) * ((num_nodes + 1) % 2));
-  out_put(cw_g_out, "num_edges == [i32]\n", num_edges);
+  out_put(cw_g_out, "num_edges == [i]\n", num_edges);
   num_graphs = 1 << (num_nodes * ((num_nodes - 1) / 2)
 		     + (((num_nodes + 1) / 2) * ((num_nodes + 1) % 2)));
-  out_put(cw_g_out, "num_graphs == [i32]\n", num_graphs);
+  out_put(cw_g_out, "num_graphs == [i]\n", num_graphs);
   
   /* Create adjacency matrix, given number of nodes. */
   matrix_new(&graph);
@@ -137,7 +137,7 @@ main(int argc, char * argv[])
     }
   }
   
-  out_put(cw_g_out, "Matrix size == [i32] x [i32]\n", num_graphs,
+  out_put(cw_g_out, "Matrix size == [i] x [i]\n", num_graphs,
 	  num_min_graphs);
 
   /* Create the big bad matrix. */
@@ -201,9 +201,9 @@ main(int argc, char * argv[])
     cw_uint32_t num_essentials;
     
     num_essentials = reduce(&cover);
-    out_put(cw_g_out, "[i32] essentials\n", num_essentials);
+    out_put(cw_g_out, "[i] essentials\n", num_essentials);
     matrix_rebuild(&cover);
-    out_put(cw_g_out, "Matrix size == [i32] x [i32]\n",
+    out_put(cw_g_out, "Matrix size == [i] x [i]\n",
 	    matrix_get_x_size(&cover), matrix_get_y_size(&cover));
 
     recurse(&cover, num_essentials, matrix_get_y_size(&cover));
@@ -477,7 +477,7 @@ reduce(cw_matrix_t * a_m)
 	}
 	if (num_on == 0)
 	{
-	  out_put(cw_g_out, "Empty column [i32] (iteration [i32])\n",
+	  out_put(cw_g_out, "Empty column [i] (iteration [i])\n",
 		  x, x);
 	  exit(1);
 	}
@@ -542,7 +542,7 @@ recurse(cw_matrix_t * a_m, cw_uint32_t a_curr_selected, cw_uint32_t a_best)
     {
       /* Found a new solution. */
       g_tries++;
-      out_put(cw_g_out, "Solution with [i32] rows (try [i64])\n",
+      out_put(cw_g_out, "Solution with [i] rows (try [q])\n",
 	      a_curr_selected + curr_essentials + 1,
 	      g_tries);
       a_best = a_curr_selected + curr_essentials;
@@ -554,7 +554,7 @@ recurse(cw_matrix_t * a_m, cw_uint32_t a_curr_selected, cw_uint32_t a_best)
       g_tries++;
       if (g_tries % 2600 == 0)
       {
-	out_put(cw_g_out, "Try [i64]\n", g_tries);
+	out_put(cw_g_out, "Try [q]\n", g_tries);
 	out_put(cw_g_out, "Test end\n");
  	exit(0);
       }
