@@ -316,7 +316,7 @@ main(int argc, char ** argv)
     out_put_l(cw_g_out, "[s]: Listening on port [i]\n", argv[0], opt_port);
   }
 
-  for (conn_num = 0; should_quit == FALSE; conn_num++)
+  for (conn_num = 0; should_quit == FALSE;)
   {
     conn = _cw_malloc(sizeof(connection_t));
     
@@ -344,6 +344,7 @@ main(int argc, char ** argv)
 
 	out_put_s(cw_g_out, logfile, "[s]/[s].pid_[i].conn[i]",
 		  opt_dirname, g_progname, getpid(), conn_num);
+	conn_num++;
 
 	fd = (cw_sint32_t) open(logfile, O_RDWR | O_CREAT | O_TRUNC, 0644);
 	if (-1 == fd)
