@@ -17,11 +17,12 @@
 
 cw_thd_t	*thd;
 cw_uint32_t	i;
+cw_bool_t	done = FALSE;
 
 void *
 thread_entry_func(void *a_arg)
 {
-	for (i = 1; i < 10000000;) {
+	for (i = 1; i != 0 && done == FALSE;) {
 		thd_crit_enter();
 		i++;
 		thd_crit_leave();
@@ -81,6 +82,7 @@ main()
 		_cw_assert(count != i);
 		thd_resume(thd);
 	}
+	done = TRUE;
 	thd_join(thd);
 
 	_cw_out_put("Test end\n");
