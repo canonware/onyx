@@ -715,22 +715,24 @@ handle_client_send(void * a_arg)
   /* Parse the proxy options from the socket stream.  The syntax is:
    * hostname:port[\r]\n */
   {
+    int port;
+#if (0)
     cw_uint32_t offset;
     cw_bufel_t * bufel;
-    int port;
     enum
     {
       SERVER,
       PORT,
       DONE
     } state;
-
+#endif
     hostname = (char *) _cw_malloc(1);
     hostname[0] = '\0';
 
     port_str = (char *) _cw_malloc(1);
     port_str[0] = '\0';
-    
+
+#if (0)
     for (bufel = NULL, state = SERVER;
 	 state != DONE;
 	 )
@@ -825,13 +827,17 @@ handle_client_send(void * a_arg)
 	}
       }
     }
+#endif
+    /* XXX */
+    hostname = "localhost";
+    port = 23;
     
     log_printf(conn->log, "Connecting to \"%s\" on port %d\n", hostname, port);
       
     /* Open a connection as specified by the proxy options. */
 
     /* Connect to the remote end, using hostname and port. */
-    sock_new(&conn->remote_sock, 512 * 512);
+    sock_new(&conn->remote_sock, 512);
     if (TRUE == sock_connect(&conn->remote_sock, hostname, port))
     {
       log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
@@ -864,8 +870,8 @@ handle_client_send(void * a_arg)
     }
     else
     {
-      str = get_log_str(&buf, TRUE, str);
-      log_printf(conn->log, "%s", str);
+/*        str = get_log_str(&buf, TRUE, str); */
+/*        log_printf(conn->log, "%s", str); */
       if (-1 == sock_write(&conn->remote_sock, &buf))
       {
 	mtx_lock(&conn->lock);
@@ -934,8 +940,8 @@ handle_client_recv(void * a_arg)
     }
     else
     {
-      str = get_log_str(&buf, FALSE, str);
-      log_printf(conn->log, "%s", str);
+/*        str = get_log_str(&buf, FALSE, str); */
+/*        log_printf(conn->log, "%s", str); */
       if (-1 == sock_write(&conn->client_sock, &buf))
       {
 	mtx_lock(&conn->lock);
@@ -959,7 +965,6 @@ int
 main(int argc, char ** argv)
 {
   cw_socks_t * socks;
-  cw_sock_t * sock_ptr;
   connection_t * conn;
   int port;
 
@@ -981,8 +986,11 @@ main(int argc, char ** argv)
 /*    } */
   log_printf(cw_g_log, "pid: %d\n", getpid());
 
-  sockb_init(512, 512);
+/*    sockb_init(512, 512); */
+  sockb_init(512, 10);
   
+  dbg_register(cw_g_dbg, "mem_error");
+  dbg_register(cw_g_dbg, "mem_verbose");
 /*    dbg_register(cw_g_dbg, "sockb_verbose"); */
   dbg_register(cw_g_dbg, "sockb_error");
 /*    dbg_register(cw_g_dbg, "socks_verbose"); */
@@ -997,11 +1005,11 @@ main(int argc, char ** argv)
   }
   log_lprintf(cw_g_log, "%s: Listening on port %d\n", argv[0], port);
 
-  for (sock_ptr = NULL; sock_ptr == NULL; sock_ptr = NULL)
+  for (;;)
   {
     conn = _cw_malloc(sizeof(connection_t));
     bzero(conn, sizeof(conn));
-    sock_new(&conn->client_sock, 512 * 512);
+    sock_new(&conn->client_sock, 512);
     
     if (NULL == socks_accept_block(socks, &conn->client_sock))
     {

@@ -597,8 +597,8 @@ sockb_p_entry_func(void * a_arg)
 	    buf_split(&tmp_buf, &buf_in, bytes_read);
 
 	    /* XXX Hack to make a bug go away? */
-/*  	    buf_release_head_data(&buf_in, */
-/*  				  buf_get_size(&buf_in)); */
+	    buf_release_head_data(&buf_in,
+				  buf_get_size(&buf_in));
 	    /* Append to the sock's in_buf. */
 	    sock_l_put_in_data(socks[i], &tmp_buf);
 	  }
