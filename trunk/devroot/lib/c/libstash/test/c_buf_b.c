@@ -18,9 +18,6 @@
 #include <libstash/libstash_r.h>
 
 #include <limits.h>
-#ifdef _CW_OS_SOLARIS
-/*  #  include <sched.h> */
-#endif
 
 /* (_LIBSTASH_TEST_NUM_BUFELS * _LIBSTASH_TEST_SIZEOF_BUFFER *
  *  * _LIBSTASH_TEST_NUM_CIRCULATIONS) must fit within a 32 bit unsigned
@@ -84,7 +81,7 @@ thread_entry_func(void * a_arg)
     else
     {
       /* Hope for a context switch. */
-      /*thd_yield();*/
+      thd_yield();
     }
   }
 
