@@ -84,6 +84,24 @@ typedef unsigned long long cw_uint64_t;
 #    error "Lacking mandatory typedefs"
 #  endif
 
+#  if (SIZEOF_FLOAT == 4)
+#    define _TYPE_FP32_DEFINED
+typedef float cw_fp32_t;
+#  endif
+  
+#  if (SIZEOF_DOUBLE == 8)
+#    define _TYPE_FP64_DEFINED
+typedef double cw_fp64_t;
+#  endif
+  
+#  if (SIZEOF_LONG_DOUBLE == 12)
+#    define _TYPE_FP96_DEFINED
+typedef long double cw_fp96_t;
+#  elif (SIZEOF_LONG_DOUBLE == 16)
+#    define _TYPE_FP128_DEFINED
+typedef long double cw_fp128_t;
+#  endif
+
 /* Grossness to make sure things still work, even if TRUE and/or FALSE are/is
  * defined. */
 #  ifdef FALSE

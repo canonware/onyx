@@ -77,6 +77,9 @@ AC_CHECK_SIZEOF(unsigned long, 4)
 AC_CHECK_SIZEOF(long long, 4)
 AC_CHECK_SIZEOF(unsigned long long, 4)
 AC_CHECK_SIZEOF(int *, 4) dnl defines SIZEOF_INT_P
+AC_CHECK_SIZEOF(float, 4)
+AC_CHECK_SIZEOF(double, 8)
+AC_CHECK_SIZEOF(long double, 12)
 
 dnl Find maximum iovec compatible with readv()/writev().
 AC_TRY_RUN([

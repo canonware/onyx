@@ -1,7 +1,9 @@
 1999-07-30  Jason Evans  <jasone@canonware.com>
 
+	* include/libstash/libstash.h: Add cw_fp{32,64,96,128}_t typedefs.
+
 	* src/out.c: Rework internals significantly.  Performance is
-	approximately 4 times better.
+	approximately 5 times better.
 
 	* include/libstash/out.h: Remove several specifier types.
 
