@@ -32,7 +32,7 @@
 #
 # This script does all the necessary work to create a snapshot release of a 
 # source tree that is under cvs control.  It also does string substitution 
-# for certain tags, such as <Copyright = "author">, <License>, and <Version>.
+# for certain tags, such as <Copyright = author>, <License>, and <Version>.
 #
 #############################################################################
 
