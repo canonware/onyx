@@ -317,7 +317,7 @@ onyx_bins_install : [ONYX] mods_install
         [fromto %0%.c %0%.o_a [ONYX_ONLY_SRCS]]
 #if @enable_libonyx@
 #if [count @RPATH@]
-        @RPATH@[LIBDIR]
+        @RPATH@@LIBDIR@
 #endif
 #endif
         [LDFLAGS] -lonyx @LIBS@;

@@ -241,7 +241,7 @@ libonyx_libs_install_s : [LIBONYX_S] libonyx_libs_install_common
   [TCC] -undefined suppress -flat_namespace -dynamiclib -bind_at_load
         -compatibility_version [LIBONYX_REV]
         -current_version [LIBONYX_REV]
-        -install_name [LIBDIR]/libonyx.[LIBONYX_REV].dylib
+        -install_name @LIBDIR@/libonyx.[LIBONYX_REV].dylib
         -o [LIBONYX_S]
         [fromto @srcroot@/%0%.c @objroot@/%0%.o_s [LIBONYX_COMMON_SRCS]]
         [fromto @objroot@/%0%.c @objroot@/%0%.o_s [LIBONYX_ONLY_SRCS]];
