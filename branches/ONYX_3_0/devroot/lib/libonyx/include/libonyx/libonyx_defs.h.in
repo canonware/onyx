@@ -48,11 +48,8 @@
 #define CW_INLINE
 #endif
 
-#undef CW_CPU_I386
-#undef CW_CPU_I486
-#undef CW_CPU_I586
-#undef CW_CPU_I686
-#undef CW_CPU_POWERPC
+#undef CW_CPU_IA32
+#undef CW_CPU_PPC
 
 #undef SIZEOF_SIGNED_CHAR
 #undef SIZEOF_UNSIGNED_CHAR
