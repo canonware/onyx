@@ -18,6 +18,8 @@
 #include <sys/resource.h>
 
 #include "../include/libstil/stilo_l.h"
+#include "../include/libstil/stilo_array_l.h"
+#include "../include/libstil/stilo_operator_l.h"
 
 /* Initial size of dictionaries created with the dict operator. */
 #define	_CW_SYSTEMDICT_DICT_SIZE	16

@@ -60,45 +60,42 @@ struct cw_stiloe_s {
 	cw_bool_t	indirect:1;
 };
 
-/* This is private, but stila needs to know its size. */
-struct cw_stiloe_dicto_s {
-	cw_stilo_t	key;
-	cw_stilo_t	val;
-};
+/*
+ * Don't actually free stiloe's if debugging GC.  Instead, just reset the
+ * stiloe magic.  This way, we should still core dump when we hit collected
+ * stiloe's, but can actually see the old contents of the stiloe we tried
+ * to use.
+ */
+#if (0)
+#define	_CW_FREE(a_stilo)
+#define	_CW_STILOE_FREE(a_stiloe) (a_stiloe)->stiloe.magic = 0
+#else
+#define	_CW_FREE(a_stilo) _cw_free(a_stilo)
+#define	_CW_STILOE_FREE(a_stiloe) _cw_free(a_stiloe)
+#endif
 
 /*
- * This is private, but is exposed here to make inlining stilo_array_el_get()
- * possible.  stilt_loop() calls stilo_array_el_get() a lot, so this is critical
- * to performance.
+ * stilo.
  */
-typedef struct cw_stiloe_array_s cw_stiloe_array_t;
-struct cw_stiloe_array_s {
-	cw_stiloe_t	stiloe;
-	/*
-	 * Access is locked if this object has the locking bit set.  Indirect
-	 * arrays aren't locked, but their parents are.
-	 */
-	cw_mtx_t	lock;
-	/*
-	 * Used for remembering the current state of reference iteration.
-	 */
-	cw_uint32_t	ref_iter;
-	union {
-		struct {
-			cw_stilo_t	stilo;
-			cw_uint32_t	beg_offset;
-			cw_uint32_t	len;
-		}	i;
-		struct {
-			cw_stilo_t	*arr;
-			cw_uint32_t	len;
-		}	a;
-	}	e;
-};
+/* Call before other initialization. */
+#ifdef _LIBSTIL_DBG
+#define	stilo_l_new(a_stilo, a_type) do {				\
+	memset((a_stilo), 0, sizeof(cw_stilo_t));			\
+	(a_stilo)->type = (a_type);					\
+	(a_stilo)->magic = _CW_STILO_MAGIC;				\
+} while (0)
+#else
+#define	stilo_l_new(a_stilo, a_type) do {				\
+	memset((a_stilo), 0, sizeof(cw_stilo_t));			\
+	(a_stilo)->type = (a_type);					\
+} while (0)
+#endif
 
 /*
  * stiloe.
  */
+void	stiloe_l_new(cw_stiloe_t *a_stiloe, cw_stilot_t a_type, cw_bool_t
+    a_locking);
 void	stiloe_l_delete(cw_stiloe_t *a_stiloe, cw_stil_t *a_stil);
 cw_stiloe_t *stiloe_l_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t a_reset);
 
@@ -108,78 +105,3 @@ cw_stiloe_t *stiloe_l_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t a_reset);
 #define	stiloe_l_registered_get(a_stiloe) (a_stiloe)->registered
 #define	stiloe_l_registered_set(a_stiloe, a_registered)			\
 	(a_stiloe)->registered = (a_registered)
-
-/*
- * array.
- */
-#define		stiloe_p_array_lock(a_stiloe) do {			\
-	if ((a_stiloe)->stiloe.locking && !(a_stiloe)->stiloe.indirect)	\
-		mtx_lock(&(a_stiloe)->lock);				\
-} while (0)
-#define		stiloe_p_array_unlock(a_stiloe) do {			\
-	if ((a_stiloe)->stiloe.locking && !(a_stiloe)->stiloe.indirect)	\
-		mtx_unlock(&(a_stiloe)->lock);				\
-} while (0)
-
-#ifndef _CW_USE_INLINES
-void	stilo_l_array_el_get(cw_stilo_t *a_stilo, cw_stiloi_t a_offset,
-    cw_stilo_t *r_el);
-#endif
-
-#if (defined(_CW_USE_INLINES) || defined(_STILO_C_))
-_CW_INLINE void
-stilo_l_array_el_get(cw_stilo_t *a_stilo, cw_stiloi_t a_offset, cw_stilo_t
-    *r_el)
-{
-	cw_stiloe_array_t	*array;
-
-	_cw_check_ptr(a_stilo);
-	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
-	_cw_assert(a_stilo->type == STILOT_ARRAY);
-	_cw_check_ptr(r_el);
-
-	array = (cw_stiloe_array_t *)a_stilo->o.stiloe;
-
-	_cw_check_ptr(array);
-	_cw_assert(array->stiloe.magic == _CW_STILOE_MAGIC);
-	_cw_assert(array->stiloe.type == STILOT_ARRAY);
-
-	stiloe_p_array_lock(array);
-	if (array->stiloe.indirect == FALSE) {
-		_cw_assert(a_offset < array->e.a.len && a_offset >= 0);
-		stilo_dup(r_el, &array->e.a.arr[a_offset]);
-	} else {
-		stilo_array_el_get(&array->e.i.stilo, a_offset +
-		    array->e.i.beg_offset, r_el);
-	}
-	stiloe_p_array_unlock(array);
-}
-#endif
-
-cw_stilo_t *stilo_l_array_get(cw_stilo_t *a_stilo);
-
-#define	stilo_l_array_bound_get(a_stilo) (a_stilo)->array_bound
-#define	stilo_l_array_bound_set(a_stilo, a_bound)			\
-	(a_stilo)->array_bound = (a_bound);
-
-/*
- * dict.
- */
-cw_stilo_t *stilo_l_dict_lookup(cw_stilo_t *a_stilo, const cw_stilo_t
-    *a_key);
-
-/*
- * name.
- */
-cw_uint32_t stilo_l_name_hash(const void *a_key);
-cw_bool_t stilo_l_name_key_comp(const void *a_k1, const void *a_k2);
-
-/*
- * operator.
- */
-#define	stilo_l_operator_fast_op_get(a_stilo) (a_stilo)->fast_op
-#define	stilo_l_operator_fast_op_set(a_stilo, a_op_code) do {		\
-	(a_stilo)->fast_op = TRUE;					\
-	(a_stilo)->op_code = (a_op_code);				\
-} while (0)
-#define	stilo_l_operator_fast_op_stiln(a_stilo) (a_stilo)->op_code

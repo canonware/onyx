@@ -13,6 +13,7 @@
 #include "../include/libstil/envdict_l.h"
 #include "../include/libstil/systemdict_l.h"
 #include "../include/libstil/stilo_l.h"
+#include "../include/libstil/stilo_name_l.h"
 
 #ifdef _LIBSTIL_DBG
 #define _CW_STIL_MAGIC 0xae9678fd

@@ -20,6 +20,8 @@
 #include "../include/libstil/threaddict_l.h"
 #include "../include/libstil/stil_l.h"
 #include "../include/libstil/stilo_l.h"
+#include "../include/libstil/stilo_array_l.h"
+#include "../include/libstil/stilo_operator_l.h"
 
 cw_stiln_t
 stilte_stiln(cw_stilte_t a_stilte)

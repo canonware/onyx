@@ -78,6 +78,7 @@
 #include "../include/libstil/gcdict_l.h"
 #include "../include/libstil/stil_l.h"
 #include "../include/libstil/stilo_l.h"
+#include "../include/libstil/stilo_dict_l.h"
 #include "../include/libstil/stils_l.h"
 #include "../include/libstil/stilt_l.h"
 
