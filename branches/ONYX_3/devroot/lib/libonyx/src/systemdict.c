@@ -1525,12 +1525,12 @@ systemdict_cvds(cw_nxo_t *a_thread)
     {
 #define CW_STARTLEN 16
 	result = (char *) cw_malloc(CW_STARTLEN);
-	len = snprintf(result, CW_STARTLEN - 1, "%.*f",
+	len = snprintf(result, CW_STARTLEN, "%.*f",
 		       (int) nxo_integer_get(precision), nxo_real_get(real));
-	if (len > CW_STARTLEN - 1)
+	if (len >= CW_STARTLEN)
 	{
 	    result = (char *) cw_realloc(result, len + 1);
-	    snprintf(result, len, "%.*f",
+	    snprintf(result, len + 1, "%.*f",
 		     (int) nxo_integer_get(precision), nxo_real_get(real));
 	}
 #undef CW_STARTLEN
@@ -1593,12 +1593,12 @@ systemdict_cves(cw_nxo_t *a_thread)
     {
 #define CW_STARTLEN 16
 	result = (char *) cw_malloc(CW_STARTLEN);
-	len = snprintf(result, CW_STARTLEN - 1, "%.*e",
+	len = snprintf(result, CW_STARTLEN, "%.*e",
 		       (int) nxo_integer_get(precision), nxo_real_get(real));
-	if (len > CW_STARTLEN - 1)
+	if (len >= CW_STARTLEN)
 	{
 	    result = (char *) cw_realloc(result, len + 1);
-	    snprintf(result, len, "%.*e",
+	    snprintf(result, len + 1, "%.*e",
 		     (int) nxo_integer_get(precision), nxo_real_get(real));
 	}
 #undef CW_STARTLEN
