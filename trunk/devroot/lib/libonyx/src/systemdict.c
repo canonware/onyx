@@ -5030,6 +5030,7 @@ systemdict_token(cw_nxo_t *a_thread)
 	case NXOT_STRING: {
 		cw_nxo_threadp_t	threadp;
 		cw_uint32_t		nscanned, scount;
+		cw_bool_t		success;
 
 		scount = nxo_stack_count(ostack);
 		tnxo = nxo_stack_push(tstack);
@@ -5050,20 +5051,34 @@ systemdict_token(cw_nxo_t *a_thread)
 		xep_end();
 		nxo_string_unlock(tnxo);
 
-		xep_begin();
-		xep_try {
-			nxo_thread_flush(a_thread, &threadp);
-		}
-		xep_acatch {
-			nxo_stack_pop(tstack);
-			nxo_threadp_delete(&threadp, a_thread);
-		}
-		xep_end();
-
 		if (nxo_thread_state(a_thread) == THREADTS_START &&
 		    nxo_thread_deferred(a_thread) == FALSE &&
 		    nxo_stack_count(ostack) == scount + 1) {
-			/* Success. */
+			success = TRUE;
+		} else {
+			xep_begin();
+			xep_try {
+				/*
+				 * Flush, but do it such that execution is
+				 * deferred.
+				 */
+				nxo_l_thread_token(a_thread, &threadp, "\n", 1);
+			}
+			xep_acatch {
+				nxo_stack_pop(tstack);
+				nxo_threadp_delete(&threadp, a_thread);
+			}
+			xep_end();
+
+			if (nxo_thread_state(a_thread) == THREADTS_START &&
+			    nxo_thread_deferred(a_thread) == FALSE &&
+			    nxo_stack_count(ostack) == scount + 1)
+				success = TRUE;
+			else
+				success = FALSE;
+		}
+
+		if (success) {
 			nxo_string_substring_new(nxo, tnxo,
 			    nxo_thread_nx_get(a_thread), nscanned,
 			    nxo_string_len_get(tnxo) - nscanned);
@@ -5122,7 +5137,8 @@ systemdict_token(cw_nxo_t *a_thread)
 		}
 		xep_begin();
 		xep_try {
-			nxo_thread_flush(a_thread, &threadp);
+			/* Flush, but do it such that execution is deferred. */
+			nxo_l_thread_token(a_thread, &threadp, "\n", 1);
 		}
 		xep_acatch {
 			nxo_stack_pop(tstack);

@@ -6884,23 +6884,69 @@ onyx:0>
 	\end{description}
 \label{systemdict:token}
 \index{token@\onyxop{}{token}{}}
-\item[{\onyxop{--}{token}{--}}: ]
+\item[{\onyxop{file/string}{token}{false}}: ]
+\item[{\onyxop{file/string}{token}{file/substring object true}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[file: ]
+			A file that is used as onyx source code to scan a token
+			from.
+		\item[string: ]
+			A string that is used as onyx source code to scan a
+			token from.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[file: ]
+			The same file object that was passed in.
+		\item[substring: ]
+			The remainder of \oparg{string} after scanning a token.
+		\item[object: ]
+			An object that was constructed by scanning a token.
+		\item[false/true: ]
+			If true, a token was successfully scanned, false
+			otherwise.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{syntaxerror}{syntaxerror}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Scan a token from a file or string, using onyx syntax rules.  If
+		a token is followed by whitespace, one character of whitespace
+		is consumed when the token is scanned.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> `1 2' token pstack clear
+true
+1
+`2'
+onyx:0> `foo' token pstack clear
+true
+foo
+`'
+onyx:0> `foo ' token pstack clear
+true
+foo
+`'
+onyx:0> `foo  ' token pstack clear
+true
+foo
+` '
+onyx:0> `foo/bar' token pstack clear
+true
+foo
+`/bar'
+onyx:0> `foo{}' token pstack clear
+true
+foo
+`{}'
+onyx:0> ` ' token pstack clear
+false
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:truncate}
