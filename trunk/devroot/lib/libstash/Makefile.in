@@ -9,8 +9,8 @@
 #
 # $Source$
 # $Author: jasone $
-# Current revision: $Revision: 136 $
-# Last modified: $Date: 1998-07-10 13:11:48 -0700 (Fri, 10 Jul 1998) $
+# Current revision: $Revision: 141 $
+# Last modified: $Date: 1998-07-10 15:34:34 -0700 (Fri, 10 Jul 1998) $
 #
 # Description: Master Makefile for libstash.
 #              
@@ -54,7 +54,6 @@ endef
 
 # Clear out all vpaths.
 vpath
-vpath %.la lib
 
 # Need this here since the includes have dependencies in them, but there's stuff
 # in the includes that we need to see before using $(TARGETS).
@@ -68,17 +67,9 @@ all: default
 .SUFFIXES: .la .c .h .lo .d .l .y .yy.c .tab.c .tab.h .pl.in .pl
 
 # This rule is used to build the tests.
-#%: %.c $(LIBS)
-#	$(CC) $< -o $@ $(CFLAGS) $(INCPATH) $(DEFINES) $(LIBPATH) $(LNKLIBS)
-
 %: %.c $(LIBS)
 	$(CC) -c $< -o $(@:=.o) $(CFLAGS) $(INCPATH) $(DEFINES)
 	$(LIBTOOL) $(CC) -o $(notdir $@) $(@:=.o) $(LIBPATH) $(LNKLIBS) $(EXTRALIBS)
-
-#	mv -f $(notdir $(@:=.lo)) $(notdir $(@:=.o)) $(dir $@)
-
-#%.o: %.c
-#	$(CC) -c $< -o $@ $(CFLAGS) $(INCPATH) $(DEFINES)
 
 %.lo: %.c
 	$(LIBTOOL) $(CC) $(CFLAGS) $(INCPATH) $(DEFINES) -c $<
@@ -158,9 +149,29 @@ check: $(CTESTS) $(PTESTS) $(BTESTS)
 	echo "---------------------------------------------" \
 	'
 
-install:
+install: $(LIBS)
+	$(SHELL) -c \
+	'@INSTALL@ -d @prefix@/lib; \
+	for i in $(LIBS); do \
+	@LIBTOOL@ @INSTALL@ $$i @prefix@/lib; \
+	done; \
+	@INSTALL@ -d @prefix@/include/libstash; \
+	for i in libstash.h $(LIB_LINCS); do \
+	@LIBTOOL@ @INSTALL@ $$i @prefix@/include/libstash/; \
+	done; \
+	'
+
+#	@LIBTOOL@ --finish --dry-run @prefix@/lib \
 
 uninstall:
+	$(SHELL) -c \
+	'for i in $(LIBS); do \
+	@LIBTOOL@ rm -f @prefix@/lib/$$i; \
+	done; \
+	for i in libstash.h $(notdir $(LIB_LINCS)); do \
+	@LIBTOOL@ rm -f @prefix@/include/libstash/$$i; \
+	done; \
+	'
 
 doc:
 

@@ -9,8 +9,8 @@
 #
 # $Source$
 # $Author: jasone $
-# Current revision: $Revision: 132 $
-# Last modified: $Date: 1998-07-07 13:53:32 -0700 (Tue, 07 Jul 1998) $
+# Current revision: $Revision: 141 $
+# Last modified: $Date: 1998-07-10 15:34:34 -0700 (Fri, 10 Jul 1998) $
 #
 # Description: Stub included by every Makefile.mk.
 #              
@@ -46,7 +46,7 @@ endif
 # Library includes (headers to be installed for use with libraries)
 #
 ifneq ($(strip $($(CURRDIR)_LINCS)),) # Library include files in this dir.
-$(LIB)_LINCS := $(addprefix $(CURRDIR)/,$($(CURRDIR)_LINCS))
+LIB_LINCS := $(LIB_LINCS) $(addprefix $(CURRDIR)/,$($(CURRDIR)_LINCS))
 
 ifeq ($(strip $($(CURRDIR)_INCS)),) # Still need to add dir to INCPATH.
 INCPATH := $(INCPATH) -I$(CURRDIR)
