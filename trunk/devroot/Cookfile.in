@@ -92,6 +92,16 @@ check_update : tests
            -s [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]];
 }
 
+install :
+{
+
+}
+
+uninstall :
+{
+
+}
+
 clean :
 {
   rm -f core *.core;
