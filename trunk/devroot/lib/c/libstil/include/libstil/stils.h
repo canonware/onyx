@@ -9,11 +9,11 @@
  *
  ******************************************************************************/
 
-/* Calculate stilsc size, given the number of stilo's. */
+/* Calculate stilsc size, given the number of stilso's. */
 #define _CW_STILSC_O2SIZEOF(n)						\
 	(sizeof(cw_stilsc_t) + (((n) - 1) * sizeof(cw_stilso_t)))
 
-/* Calculate number of stilo's per stilsc, given stilsc size. */
+/* Calculate number of stilso's per stilsc, given stilsc size. */
 #define _CW_STILSC_SIZEOF2O(s)						\
 	((((s) - sizeof(cw_stilsc_t)) / sizeof(cw_stilso_t)) + 1)
 
@@ -29,8 +29,6 @@ struct cw_stilsc_s {
 #if (defined(_LIBSTIL_DBG) || defined(_LIBSTIL_DEBUG))
 	cw_uint32_t		magic;
 #endif
-	cw_pool_t		*stilsc_pool; /* stilsc allocator. */
-
 	qs_elm(cw_stilsc_t)	link;	/* Linkage for the stack of stilsc's. */
 
 	/*

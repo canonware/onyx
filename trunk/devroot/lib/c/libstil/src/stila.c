@@ -31,11 +31,11 @@ stilag_new(cw_stilag_t *a_stilag)
 	mtx_new(&a_stilag->lock);
 	ql_new(&a_stilag->head);
 
-	mem_new(&a_stilag->mem, cw_g_mem);
-	pool_new(&a_stilag->chi_pool, &a_stilag->mem, sizeof(cw_chi_t));
-	pool_new(&a_stilag->stilsc_pool, &a_stilag->mem,
+	mem_new(&a_stilag->mem, NULL);
+	pool_new(&a_stilag->chi_pool, NULL, sizeof(cw_chi_t));
+	pool_new(&a_stilag->stilsc_pool, NULL,
 	    _CW_STILSC_O2SIZEOF(_CW_STIL_STILSC_COUNT));
-	pool_new(&a_stilag->dicto_pool, &a_stilag->mem,
+	pool_new(&a_stilag->dicto_pool, NULL,
 	    sizeof(cw_stiloe_dicto_t));
 	stila_p_new(&a_stilag->stila, &a_stilag->mem);
 }

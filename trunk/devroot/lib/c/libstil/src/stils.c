@@ -74,7 +74,7 @@ stils_delete(cw_stils_t *a_stils, cw_stilt_t *a_stilt)
 	while (qs_top(&a_stils->chunks) != NULL) {
 		stilsc = qs_top(&a_stils->chunks);
 		qs_pop(&a_stils->chunks, link);
-		pool_put(stilsc->stilsc_pool, stilsc);
+		pool_put(a_stils->stilsc_pool, stilsc);
 	}
 
 #ifdef _LIBSTILS_DBG
@@ -141,7 +141,7 @@ stils_collect(cw_stils_t *a_stils, void (*a_add_root_func)
 	while (qs_top(&old_chunks) != NULL) {
 		stilsc = qs_top(&old_chunks);
 		qs_pop(&old_chunks, link);
-		pool_put(stilsc->stilsc_pool, stilsc);
+		pool_put(a_stils->stilsc_pool, stilsc);
 	}
 }
 
@@ -396,17 +396,20 @@ stils_p_spares_create(cw_stils_t *a_stils)
 #ifdef _LIBSTIL_DBG
 	stilsc->magic = _CW_STILSC_MAGIC;
 #endif
-	stilsc->stilsc_pool = a_stils->stilsc_pool;
 	qs_elm_new(stilsc, link);
 
 	qr_new(&stilsc->objects[0], link);
 	for (i = 1, nstilso =
-		 _CW_STILSC_SIZEOF2O(pool_buffer_size_get(stilsc->stilsc_pool));
+		 _CW_STILSC_SIZEOF2O(pool_buffer_size_get(a_stils->stilsc_pool));
 	     i < nstilso; i++) {
 		qr_new(&stilsc->objects[i], link);
-		qr_after_insert(&stilsc->objects[i],
-		    &stilsc->objects[i - 1], link);
+		qr_after_insert(&stilsc->objects[i - 1],
+		    &stilsc->objects[i], link);
 	}
+/*  	_cw_out_put_e("nstilso: [i]\n", nstilso); */
+/*  	_cw_out_put_e("[i] --> [i] --> [i]\n", nstilso, */
+/*  	    _CW_STILSC_O2SIZEOF(nstilso), */
+/*  	    _CW_STILSC_SIZEOF2O(_CW_STILSC_O2SIZEOF(nstilso))); */
 
 	qs_push(&a_stils->chunks, stilsc, link);
 	qr_meld(ql_first(&a_stils->stack), &stilsc->objects[0], link);
