@@ -18,23 +18,21 @@
 #
 
 # Include files that _are_ installed.
-INCS := stash_incs.h bhp.h br.h brblk.h brbs.h buf.h dbg.h \
-	glob.h jt.h lex.h list.h locks.h log.h matrix.h mem.h oh.h res.h \
-	sock.h socks.h thread.h
+INCS := libstash_r.h stash_incs.h bhp.h buf.h dbg.h glob.h \
+	lex.h list.h locks.h log.h matrix.h mem.h oh.h res.h thread.h
 
 # Include files that are _not_ installed.
-PRIV_INCS := bhp_priv.h br_priv.h brbs_priv.h \
-	dbg_priv.h jt_priv.h lex_priv.h list_priv.h \
+PRIV_INCS := bhp_priv.h dbg_priv.h lex_priv.h list_priv.h \
 	locks_priv.h log_priv.h mem_priv.h oh_priv.h res_priv.h
 
 # Source files.
-SRCS := bhp.c br.c brblk.c brbs.c buf.c dbg.c \
-	glob.c jt.c lex.c list.c locks.c log.c matrix.c mem.c oh.c res.c \
-	sock.c socks.c thread.c zt.c
+SRCS := bhp.c buf.c dbg.c \
+	glob.c lex.c list.c locks.c log.c matrix.c mem.c oh.c res.c \
+	thread.c
 
 # Simple tests.  Output is diff'ed with the expected (.exp file) output.
 CTESTS := c19980411a.c c19980412a.c c19980419a.c c19980430a.c \
-	c19980627a.c c19980630a.c c19980907a.c c19980907b.c c19980907c.c \
+	c19980630a.c c19980907a.c c19980907b.c c19980907c.c \
 	c19980908a.c c19980908c.c c19980914a.c c19980917a.c c19981014a.c
 
 # Perl scripts that drive the BTESTS.
@@ -62,11 +60,13 @@ LIB := stash
 LIB_REV := 0.0
 
 LIB_ST_D := lib/lib$(strip $(LIB))_d.a
-LIB_SH_D := lib/lib$(strip $(LIB))_d.so.$(strip $(LIB_REV))
 LIB_ST_O := lib/lib$(strip $(LIB)).a
 LIB_SH_O := lib/lib$(strip $(LIB)).so.$(strip $(LIB_REV))
 LIB_ST_P := lib/lib$(strip $(LIB))_p.a
-LIB_SH_P := lib/lib$(strip $(LIB))_p.so.$(strip $(LIB_REV))
+LIB_ST_R_D := lib/lib$(strip $(LIB))_r_d.a
+LIB_ST_R_O := lib/lib$(strip $(LIB))_r.a
+LIB_SH_R_O := lib/lib$(strip $(LIB))_r.so.$(strip $(LIB_REV))
+LIB_ST_R_P := lib/lib$(strip $(LIB))_r_p.a
 
 #
 # Standard definitions.
@@ -98,6 +98,7 @@ SH_DEFINES :=
 D_DEFINES := -D_STASH_DBG
 O_DEFINES := 
 P_DEFINES := 
+R_DEFINES := -D_CW_REENTRANT
 TEST_DEFINES := -D_STASH_DEBUG
 
 #CFLAGS  := @CFLAGS@
@@ -107,6 +108,7 @@ SH_CFLAGS := -fPIC -DPIC
 D_CFLAGS := -g3
 O_CFLAGS := -O3
 P_CFLAGS := -O3 -pg
+R_CFLAGS :=
 
 # Clear out all vpaths, then set just one (default vpath) for the main build
 # directory.
@@ -122,8 +124,11 @@ all : default
 #
 
 .SUFFIXES :
-.SUFFIXES : .a .c .h .o .o_st_d .o_sh_d .o_st_o .o_sh_o .o_st_p .o_sh_p \
-	.d_st_d .d_sh_d .d_st_o .d_sh_o .d_st_p .d_sh_p .pl.in .pl
+.SUFFIXES : .a .c .h .o .pl.in .pl \
+	.o_st_d .o_st_o .o_sh_o .o_st_p \
+	.o_st_r_d .o_st_r_o .o_sh_r_o .o_st_r_p \
+	.d_st_d .d_st_o .d_sh_o .d_st_p \
+	.d_st_r_d .d_st_r_o .d_sh_r_o .d_st_r_p
 
 #
 # Build rules.
@@ -131,14 +136,11 @@ all : default
 
 # This rule is used to build the tests.
 % : %.c $(LIB_ST_D)
-	$(CC) $(CFLAGS) $(ST_CFLAGS) $(D_CFLAGS) $(INCPATH) $(DEFINES) $(TEST_DEFINES) -c $< -o $(@:=.o)
-	$(CC) -o $@ $(@:=.o) $(LIBPATH) -static -l$(strip $(LIB))_d -dynamic $(EXTRALIBS)
+	$(CC) $(CFLAGS) $(ST_CFLAGS) $(D_CFLAGS) $(R_CFLAGS) $(INCPATH) $(DEFINES) $(R_DEFINES) $(TEST_DEFINES) -c $< -o $(@:=.o)
+	$(CC) -o $@ $(@:=.o) $(LIBPATH) $(LIB_ST_R_D) -dynamic $(EXTRALIBS)
 
 obj/st_d/%.o_st_d : src/%.c
 	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(D_CFLAGS) $(DEFINES) $(ST_DEFINES) $(D_DEFINES) -c $< -o $@
-
-obj/sh_d/%.o_sh_d : src/%.c
-	$(CC) $(INCPATH) $(CFLAGS) $(SH_CFLAGS) $(D_CFLAGS) $(DEFINES) $(SH_DEFINES) $(D_DEFINES) -c $< -o $@
 
 obj/st_o/%.o_st_o : src/%.c
 	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(O_CFLAGS) $(DEFINES) $(ST_DEFINES) $(O_DEFINES) -c $< -o $@		
@@ -149,8 +151,17 @@ obj/sh_o/%.o_sh_o : src/%.c
 obj/st_p/%.o_st_p : src/%.c
 	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(P_CFLAGS) $(DEFINES) $(ST_DEFINES) $(P_DEFINES) -c $< -o $@
 
-obj/sh_p/%.o_sh_p : src/%.c
-	$(CC) $(INCPATH) $(CFLAGS) $(SH_CFLAGS) $(P_CFLAGS) $(DEFINES) $(SH_DEFINES) $(P_DEFINES) -c $< -o $@
+obj/st_r_d/%.o_st_r_d : src/%.c
+	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(D_CFLAGS) $(R_CFLAGS) $(DEFINES) $(ST_DEFINES) $(D_DEFINES) $(R_DEFINES) -c $< -o $@
+
+obj/st_r_o/%.o_st_r_o : src/%.c
+	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(O_CFLAGS) $(R_CFLAGS) $(DEFINES) $(ST_DEFINES) $(O_DEFINES) $(R_DEFINES) -c $< -o $@		
+
+obj/sh_r_o/%.o_sh_r_o : src/%.c
+	$(CC) $(INCPATH) $(CFLAGS) $(SH_CFLAGS) $(O_CFLAGS) $(R_CFLAGS) $(DEFINES) $(SH_DEFINES) $(O_DEFINES) $(R_DEFINES) -c $< -o $@
+
+obj/st_r_p/%.o_st_r_p : src/%.c
+	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(P_CFLAGS) $(R_CFLAGS) $(DEFINES) $(ST_DEFINES) $(P_DEFINES) $(R_DEFINES) -c $< -o $@
 
 .pl.in.pl :
 	$(PERL) -w $(PMERGE) $(PERL) $(PSTUB) $< $@
@@ -165,9 +176,6 @@ obj/sh_p/%.o_sh_p : src/%.c
 obj/st_d/%.d_st_d : src/%.c
 	$(SHELL) -ec "$(CC) -M $(DEFINES) $(ST_DEFINES) $(D_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_st_d $(subst /,\/,$(strip $(dir $@)))\1.d_st_d \2/g\" > $@"
 
-obj/sh_d/%.d_sh_d : src/%.c
-	$(SHELL) -ec "$(CC) -M $(DEFINES) $(SH_DEFINES) $(D_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_sh_d $(subst /,\/,$(strip $(dir $@)))\1.d_sh_d \2/g\" > $@"
-
 obj/st_o/%.d_st_o : src/%.c
 	$(SHELL) -ec "$(CC) -M $(DEFINES) $(ST_DEFINES) $(O_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_st_o $(subst /,\/,$(strip $(dir $@)))\1.d_st_o \2/g\" > $@"
 
@@ -177,28 +185,36 @@ obj/sh_o/%.d_sh_o : src/%.c
 obj/st_p/%.d_st_p : src/%.c
 	$(SHELL) -ec "$(CC) -M $(DEFINES) $(ST_DEFINES) $(P_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_st_p $(subst /,\/,$(strip $(dir $@)))\1.d_st_p \2/g\" > $@"
 
-obj/sh_p/%.d_sh_p : src/%.c
-	$(SHELL) -ec "$(CC) -M $(DEFINES) $(SH_DEFINES) $(P_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_sh_p $(subst /,\/,$(strip $(dir $@)))\1.d_sh_p \2/g\" > $@"
+obj/st_r_d/%.d_st_r_d : src/%.c
+	$(SHELL) -ec "$(CC) -M $(DEFINES) $(ST_DEFINES) $(D_DEFINES) $(R_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_st_r_d $(subst /,\/,$(strip $(dir $@)))\1.d_st_r_d \2/g\" > $@"
+
+obj/st_r_o/%.d_st_r_o : src/%.c
+	$(SHELL) -ec "$(CC) -M $(DEFINES) $(ST_DEFINES) $(O_DEFINES) $(R_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_st_r_o $(subst /,\/,$(strip $(dir $@)))\1.d_st_r_o \2/g\" > $@"
+
+obj/sh_r_o/%.d_sh_r_o : src/%.c
+	$(SHELL) -ec "$(CC) -M $(DEFINES) $(SH_DEFINES) $(O_DEFINES) $(R_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_sh_r_o $(subst /,\/,$(strip $(dir $@)))\1.d_sh_r_o \2/g\" > $@"
+
+obj/st_r_p/%.d_st_r_p : src/%.c
+	$(SHELL) -ec "$(CC) -M $(DEFINES) $(ST_DEFINES) $(P_DEFINES) $(R_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_st_r_p $(subst /,\/,$(strip $(dir $@)))\1.d_st_r_p \2/g\" > $@"
 
 #
 # Dependencies (not rules).
 #
 
 include $(SRCS:src/%.c=obj/st_d/%.d_st_d)
-include $(SRCS:src/%.c=obj/sh_d/%.d_sh_d)
 include $(SRCS:src/%.c=obj/st_o/%.d_st_o)
 include $(SRCS:src/%.c=obj/sh_o/%.d_sh_o)
 include $(SRCS:src/%.c=obj/st_p/%.d_st_p)
-include $(SRCS:src/%.c=obj/sh_p/%.d_sh_p)
+include $(SRCS:src/%.c=obj/st_r_d/%.d_st_r_d)
+include $(SRCS:src/%.c=obj/st_r_o/%.d_st_r_o)
+include $(SRCS:src/%.c=obj/sh_r_o/%.d_sh_r_o)
+include $(SRCS:src/%.c=obj/st_r_p/%.d_st_r_p)
 include $(CTESTS:=.d)
 include $(BTESTS:=.d)
 
 $(LIB_ST_D) : $(SRCS:src/%.c=obj/st_d/%.o_st_d)
 	$(AR) cru $@ $?
 	$(RANLIB) $@
-
-$(LIB_SH_D) : $(SRCS:src/%.c=obj/sh_d/%.o_sh_d)
-	$(CC) -shared -o $@ $^
 
 $(LIB_ST_O) : $(SRCS:src/%.c=obj/st_o/%.o_st_o)
 	$(AR) cru $@ $?
@@ -211,15 +227,30 @@ $(LIB_ST_P) : $(SRCS:src/%.c=obj/st_p/%.o_st_p)
 	$(AR) cru $@ $?
 	$(RANLIB) $@
 
-$(LIB_SH_P) : $(SRCS:src/%.c=obj/sh_p/%.o_sh_p)
+
+$(LIB_ST_R_D) : $(SRCS:src/%.c=obj/st_r_d/%.o_st_r_d)
+	$(AR) cru $@ $?
+	$(RANLIB) $@
+
+$(LIB_ST_R_O) : $(SRCS:src/%.c=obj/st_r_o/%.o_st_r_o)
+	$(AR) cru $@ $?
+	$(RANLIB) $@
+
+$(LIB_SH_R_O) : $(SRCS:src/%.c=obj/sh_r_o/%.o_sh_r_o)
 	$(CC) -shared -o $@ $^
 
+$(LIB_ST_R_P) : $(SRCS:src/%.c=obj/st_r_p/%.o_st_r_p)
+	$(AR) cru $@ $?
+	$(RANLIB) $@
+
 stat_dbg : $(LIB_ST_D)
-shar_dbg : $(LIB_SH_D)
 stat_opt : $(LIB_ST_O)
 shar_opt : $(LIB_SH_O)
 stat_prof : $(LIB_ST_P)
-shar_prof : $(LIB_SH_P)
+stat_dbg_r : $(LIB_ST_R_D)
+stat_opt_r : $(LIB_ST_R_O)
+shar_opt_r : $(LIB_SH_R_O)
+stat_prof_r : $(LIB_ST_R_P)
 
 FORCE :
 
@@ -227,7 +258,8 @@ FORCE :
 # user 'make'ables
 #
 
-default : stat_dbg shar_dbg stat_opt shar_opt stat_prof shar_prof
+default : stat_dbg stat_opt shar_opt stat_prof \
+	stat_dbg_r stat_opt_r shar_opt_r stat_prof_r
 
 check : $(CTESTS) $(PTESTS) $(BTESTS)
 	@$(SHELL) -c \
@@ -258,8 +290,9 @@ check : $(CTESTS) $(PTESTS) $(BTESTS)
 	echo "---------------------------------------------" \
 	'
 
-install : install_stat_dbg install_shar_dbg install_stat_opt \
-	install_shar_opt install_stat_prof install_shar_prof
+install : install_stat_dbg install_stat_opt install_shar_opt install_stat_prof \
+	install_stat_dbg_r install_stat_opt_r install_shar_opt_r \
+	install_stat_prof_r
 
 install_common : 
 	$(SHELL) -c \
@@ -273,9 +306,6 @@ install_common :
 install_stat_dbg : stat_dbg install_common
 	@INSTALL@ -m 0444 $(LIB_ST_D) @prefix@/lib
 
-install_shar_dbg : shar_dbg install_common
-	@INSTALL@ -m 0444 $(LIB_SH_D) @prefix@/lib
-
 install_stat_opt : stat_opt install_common
 	@INSTALL@ -m 0444 $(LIB_ST_O) @prefix@/lib
 
@@ -285,8 +315,17 @@ install_shar_opt : shar_opt install_common
 install_stat_prof : stat_prof install_common
 	@INSTALL@ -m 0444 $(LIB_ST_P) @prefix@/lib
 
-install_shar_prof : shar_prof install_common
-	@INSTALL@ -m 0444 $(LIB_SH_P) @prefix@/lib
+install_stat_dbg_r : stat_dbg_r install_common
+	@INSTALL@ -m 0444 $(LIB_ST_R_D) @prefix@/lib
+
+install_stat_opt_r : stat_opt_r install_common
+	@INSTALL@ -m 0444 $(LIB_ST_R_O) @prefix@/lib
+
+install_shar_opt_r : shar_opt_r install_common
+	@INSTALL@ -m 0444 $(LIB_SH_R_O) @prefix@/lib
+
+install_stat_prof_r : stat_prof_r install_common
+	@INSTALL@ -m 0444 $(LIB_ST_R_P) @prefix@/lib
 
 uninstall :
 	rm -f @prefix@/lib/lib$(strip $(LIB))*

@@ -25,7 +25,9 @@ typedef struct cw_res_s cw_res_t;
 struct cw_res_s
 {
   cw_bool_t is_malloced;
+#ifdef _CW_REENTRANT
   cw_rwl_t rw_lock;
+#endif
   cw_oh_t hash_o;
   FILE * fd;
   char * str;

@@ -17,7 +17,11 @@
  ****************************************************************************/
 
 #define _INC_BUF_H_
-#include <libstash.h>
+#ifdef _CW_REENTRANT
+#  include <libstash_r.h>
+#else
+#  include <libstash.h>
+#endif
 
 #include <netinet/in.h>
 #include <sys/param.h>
@@ -28,7 +32,11 @@
  *
  ****************************************************************************/
 cw_buf_t *
+#ifdef _CW_REENTRANT
 buf_new(cw_buf_t * a_buf_o, cw_bool_t a_is_threadsafe)
+#else
+buf_new(cw_buf_t * a_buf_o)
+#endif
 {
   cw_buf_t * retval;
 
@@ -47,12 +55,17 @@ buf_new(cw_buf_t * a_buf_o, cw_bool_t a_is_threadsafe)
     retval->is_malloced = FALSE;
   }
 
+#ifdef _CW_REENTRANT
   retval->is_threadsafe = a_is_threadsafe;
   if (retval->is_threadsafe == TRUE)
   {
     mtx_new(&retval->lock);
   }
   list_new(&retval->bufels, FALSE);
+#else
+  list_new(&retval->bufels);
+#endif
+
   retval->size = 0;
   
   if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
@@ -76,10 +89,12 @@ buf_delete(cw_buf_t * a_buf_o)
   }
   _cw_check_ptr(a_buf_o);
 
+#ifdef _CW_REENTRANT
   if (a_buf_o->is_threadsafe == TRUE)
   {
     mtx_delete(&a_buf_o->lock);
   }
+#endif
 
   while (list_count(&a_buf_o->bufels) > 0)
   {
@@ -128,10 +143,12 @@ buf_append_buf(cw_buf_t * a_buf_o, cw_buf_t * a_other)
   }
   _cw_check_ptr(a_buf_o);
   _cw_check_ptr(a_other);
+#ifdef _CW_REENTRANT
   if (a_buf_o->is_threadsafe == TRUE)
   {
     mtx_lock(&a_buf_o->lock);
   }
+#endif
 
   /* Assume that we don't need to lock a_other. */
   {
@@ -148,10 +165,12 @@ buf_append_buf(cw_buf_t * a_buf_o, cw_buf_t * a_other)
   a_buf_o->size += a_other->size;
   a_other->size = 0;
   
+#ifdef _CW_REENTRANT
   if (a_buf_o->is_threadsafe == TRUE)
   {
     mtx_unlock(&a_buf_o->lock);
   }
+#endif
   if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
   {
     _cw_marker("Exit buf_append_buf()");
@@ -173,10 +192,12 @@ buf_rm_head_bufel(cw_buf_t * a_buf_o)
     _cw_marker("Enter buf_rm_head_bufel()");
   }
   _cw_check_ptr(a_buf_o);
+#ifdef _CW_REENTRANT
   if (a_buf_o->is_threadsafe == TRUE)
   {
     mtx_lock(&a_buf_o->lock);
   }
+#endif
 
   if (a_buf_o->size > 0) /* Make sure there is valid data. */
   {
@@ -188,10 +209,12 @@ buf_rm_head_bufel(cw_buf_t * a_buf_o)
     retval = NULL;
   }
   
+#ifdef _CW_REENTRANT
   if (a_buf_o->is_threadsafe == TRUE)
   {
     mtx_unlock(&a_buf_o->lock);
   }
+#endif
   if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
   {
     _cw_marker("Exit buf_rm_head_bufel()");
@@ -213,18 +236,22 @@ buf_append_bufel(cw_buf_t * a_buf_o, cw_bufel_t * a_bufel_o)
   }
   _cw_check_ptr(a_buf_o);
   _cw_check_ptr(a_bufel_o);
+#ifdef _CW_REENTRANT
   if (a_buf_o->is_threadsafe == TRUE)
   {
     mtx_lock(&a_buf_o->lock);
   }
+#endif
 
   list_tpush(&a_buf_o->bufels, a_bufel_o);
   a_buf_o->size += (a_bufel_o->end_offset - a_bufel_o->beg_offset);
   
+#ifdef _CW_REENTRANT
   if (a_buf_o->is_threadsafe == TRUE)
   {
     mtx_unlock(&a_buf_o->lock);
   }
+#endif
   if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
   {
     _cw_marker("Exit buf_append_bufel()");

@@ -43,16 +43,23 @@
  *
  ****************************************************************************/
 
-#include <string.h>
-
 #define _OH_PERF_
 
 #define _INC_OH_H_
-#include <libstash.h>
+#ifdef _CW_REENTRANT
+#  include <libstash_r.h>
+#else
+#  include <libstash.h>
+#endif
+
 #include <oh_priv.h>
 
 cw_oh_t *
+#ifdef _CW_REENTRANT
 oh_new(cw_oh_t * a_oh_o, cw_bool_t a_is_thread_safe)
+#else
+oh_new(cw_oh_t * a_oh_o)
+#endif
 {
   cw_oh_t * retval;
 
@@ -71,6 +78,7 @@ oh_new(cw_oh_t * a_oh_o, cw_bool_t a_is_thread_safe)
     retval->is_malloced = FALSE;
   }
 
+#ifdef _CW_REENTRANT
   if (a_is_thread_safe)
   {
     retval->is_thread_safe = TRUE;
@@ -80,9 +88,14 @@ oh_new(cw_oh_t * a_oh_o, cw_bool_t a_is_thread_safe)
   {
     retval->is_thread_safe = FALSE;
   }
+#endif
 
   /* Create the list for items. */
+#ifdef _CW_REENTRANT
   list_new(&retval->items_list, FALSE);
+#else
+  list_new(&retval->items_list);
+#endif
 
   retval->size = 1 << _OH_BASE_POWER;
 
@@ -92,7 +105,11 @@ oh_new(cw_oh_t * a_oh_o, cw_bool_t a_is_thread_safe)
   bzero(retval->items, retval->size * sizeof(cw_oh_item_t *));
 
   /* Create the spare items list. */
+#ifdef _CW_REENTRANT
   list_new(&retval->spares_list, FALSE);
+#else
+  list_new(&retval->spares_list);
+#endif
   
   retval->curr_h1 = oh_p_h1;
   retval->key_compare = oh_p_key_compare;
@@ -135,10 +152,12 @@ oh_delete(cw_oh_t * a_oh_o)
   }
   _cw_check_ptr(a_oh_o);
 
+#ifdef _CW_REENTRANT
   if (a_oh_o->is_thread_safe)
   {
     rwl_delete(&a_oh_o->rw_lock);
   }
+#endif
 
   /* Delete the items in the table, as well as items_list. */
   {
@@ -202,17 +221,21 @@ oh_get_num_items(cw_oh_t * a_oh_o)
     _cw_marker("Enter oh_get_num_items()");
   }
   _cw_check_ptr(a_oh_o);
+#ifdef _CW_REENTRANT
   if (a_oh_o->is_thread_safe)
   {
     rwl_rlock(&a_oh_o->rw_lock);
   }
+#endif
   
   retval = list_count(&a_oh_o->items_list);
   
+#ifdef _CW_REENTRANT
   if (a_oh_o->is_thread_safe)
   {
     rwl_runlock(&a_oh_o->rw_lock);
   }
+#endif
   if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
   {
     _cw_marker("Exit oh_get_num_items()");
@@ -292,10 +315,12 @@ oh_set_h1(cw_oh_t * a_oh_o,
   }
   _cw_check_ptr(a_oh_o);
   _cw_check_ptr(a_new_h1);
+#ifdef _CW_REENTRANT
   if (a_oh_o->is_thread_safe)
   {
     rwl_wlock(&a_oh_o->rw_lock);
   }
+#endif
 
   retval = a_oh_o->curr_h1;
   
@@ -305,10 +330,12 @@ oh_set_h1(cw_oh_t * a_oh_o,
     oh_p_rehash(a_oh_o);
   }
 
+#ifdef _CW_REENTRANT
   if (a_oh_o->is_thread_safe)
   {
     rwl_wunlock(&a_oh_o->rw_lock);
   }
+#endif
   if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
   {
     _cw_marker("Exit oh_set_h1()");
@@ -328,10 +355,12 @@ oh_set_key_compare(cw_oh_t * a_oh_o,
   }
   _cw_check_ptr(a_oh_o);
   _cw_check_ptr(a_new_key_compare);
+#ifdef _CW_REENTRANT
   if (a_oh_o->is_thread_safe)
   {
     rwl_wlock(&a_oh_o->rw_lock);
   }
+#endif
 
   retval = a_oh_o->key_compare;
   
@@ -341,10 +370,12 @@ oh_set_key_compare(cw_oh_t * a_oh_o,
     oh_p_rehash(a_oh_o);
   }
   
+#ifdef _CW_REENTRANT
   if (a_oh_o->is_thread_safe)
   {
     rwl_wunlock(&a_oh_o->rw_lock);
   }
+#endif
   if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
   {
     _cw_marker("Exit oh_set_key_compare()");
@@ -363,11 +394,12 @@ oh_set_base_h2(cw_oh_t * a_oh_o,
     _cw_marker("Enter oh_set_base_h2()");
   }
   _cw_check_ptr(a_oh_o);
-
+#ifdef _CW_REENTRANT
   if (a_oh_o->is_thread_safe)
   {
     rwl_wlock(&a_oh_o->rw_lock);
   }
+#endif
   
   if (((a_h2 % 2) == 0)
       || (a_h2 > (1 << a_oh_o->base_power)))
@@ -386,10 +418,12 @@ oh_set_base_h2(cw_oh_t * a_oh_o,
     oh_p_rehash(a_oh_o);
   }
 
+#ifdef _CW_REENTRANT
   if (a_oh_o->is_thread_safe)
   {
     rwl_wunlock(&a_oh_o->rw_lock);
   }
+#endif
   if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
   {
     _cw_marker("Exit oh_set_base_h2()");
@@ -408,10 +442,12 @@ oh_set_base_shrink_point(cw_oh_t * a_oh_o,
     _cw_marker("Enter oh_set_base_shrink_point()");
   }
   _cw_check_ptr(a_oh_o);
+#ifdef _CW_REENTRANT
   if (a_oh_o->is_thread_safe)
   {
     rwl_wlock(&a_oh_o->rw_lock);
   }
+#endif
 
   if ((a_shrink_point >= a_oh_o->base_grow_point)
       || (a_shrink_point >= (1 << a_oh_o->base_power)))
@@ -429,10 +465,12 @@ oh_set_base_shrink_point(cw_oh_t * a_oh_o,
     oh_p_shrink(a_oh_o);
   }
 
+#ifdef _CW_REENTRANT
   if (a_oh_o->is_thread_safe)
   {
     rwl_wunlock(&a_oh_o->rw_lock);
   }
+#endif
   if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
   {
     _cw_marker("Exit oh_set_base_shrink_point()");
@@ -451,10 +489,12 @@ oh_set_base_grow_point(cw_oh_t * a_oh_o,
     _cw_marker("Enter oh_set_base_grow_point()");
   }
   _cw_check_ptr(a_oh_o);
+#ifdef _CW_REENTRANT
   if (a_oh_o->is_thread_safe)
   {
     rwl_wlock(&a_oh_o->rw_lock);
   }
+#endif
 
   if ((a_grow_point <= a_oh_o->base_shrink_point)
       || (a_grow_point >= (1 << a_oh_o->base_power)))
@@ -472,11 +512,12 @@ oh_set_base_grow_point(cw_oh_t * a_oh_o,
     oh_p_grow(a_oh_o);
   }
 
+#ifdef _CW_REENTRANT
   if (a_oh_o->is_thread_safe)
   {
     rwl_wunlock(&a_oh_o->rw_lock);
   }
-
+#endif
   if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
   {
     _cw_marker("Exit oh_set_base_grow_point()");
@@ -504,10 +545,12 @@ oh_item_insert(cw_oh_t * a_oh_o, void * a_key,
   }
   _cw_check_ptr(a_oh_o);
   _cw_check_ptr(a_key);
+#ifdef _CW_REENTRANT
   if (a_oh_o->is_thread_safe)
   {
     rwl_wlock(&a_oh_o->rw_lock);
   }
+#endif
 
   /* Quiesce. */
   oh_p_shrink(a_oh_o);
@@ -539,10 +582,12 @@ oh_item_insert(cw_oh_t * a_oh_o, void * a_key,
     retval = TRUE;
   }
   
+#ifdef _CW_REENTRANT
   if (a_oh_o->is_thread_safe)
   {
     rwl_wunlock(&a_oh_o->rw_lock);
   }
+#endif
   if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
   {
     _cw_marker("Exit oh_item_insert()");
@@ -572,10 +617,12 @@ oh_item_delete(cw_oh_t * a_oh_o,
   }
   _cw_check_ptr(a_oh_o);
   _cw_check_ptr(a_search_key);
+#ifdef _CW_REENTRANT
   if (a_oh_o->is_thread_safe)
   {
     rwl_wlock(&a_oh_o->rw_lock);
   }
+#endif
 
   /* Get the slot number for what we want to delete (if it exists). */
   if (oh_p_item_search(a_oh_o, a_search_key, &slot) == FALSE)
@@ -613,10 +660,12 @@ oh_item_delete(cw_oh_t * a_oh_o,
     retval = TRUE;
   }
 
+#ifdef _CW_REENTRANT
   if (a_oh_o->is_thread_safe)
   {
     rwl_wunlock(&a_oh_o->rw_lock);
   }
+#endif
   if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
   {
     _cw_marker("Exit oh_item_delete()");
@@ -645,10 +694,12 @@ oh_item_search(cw_oh_t * a_oh_o,
   }
   _cw_check_ptr(a_oh_o);
   _cw_check_ptr(a_key);
+#ifdef _CW_REENTRANT
   if (a_oh_o->is_thread_safe)
   {
     rwl_rlock(&a_oh_o->rw_lock);
   }
+#endif
 
   if (oh_p_item_search(a_oh_o, a_key, &slot) == FALSE)
   {
@@ -668,10 +719,12 @@ oh_item_search(cw_oh_t * a_oh_o,
     retval = TRUE;
   }
 
+#ifdef _CW_REENTRANT
   if (a_oh_o->is_thread_safe)
   {
     rwl_runlock(&a_oh_o->rw_lock);
   }
+#endif
   if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
   {
     _cw_marker("Exit oh_item_search()");
@@ -696,10 +749,12 @@ oh_item_delete_iterate(cw_oh_t * a_oh_o, void ** a_key, void ** a_data)
     _cw_marker("Enter oh_item_delete_iterate()");
   }
   _cw_check_ptr(a_oh_o);
+#ifdef _CW_REENTRANT
   if (a_oh_o->is_thread_safe)
   {
     rwl_wlock(&a_oh_o->rw_lock);
   }
+#endif
 
   if (list_count(&a_oh_o->items_list) > 0)
   {
@@ -724,10 +779,12 @@ oh_item_delete_iterate(cw_oh_t * a_oh_o, void ** a_key, void ** a_data)
     retval = TRUE;
   }
   
+#ifdef _CW_REENTRANT
   if (a_oh_o->is_thread_safe)
   {
     rwl_wunlock(&a_oh_o->rw_lock);
   }
+#endif
   if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
   {
     _cw_marker("Exit oh_item_delete_iterate()");
@@ -752,11 +809,12 @@ oh_dump(cw_oh_t * a_oh_o, cw_bool_t a_all)
     _cw_marker("Enter oh_dump()");
   }
   _cw_check_ptr(a_oh_o);
-  
+#ifdef _CW_REENTRANT
   if (a_oh_o->is_thread_safe)
   {
     rwl_rlock(&a_oh_o->rw_lock);
   }
+#endif
 
   log_printf(g_log_o,
 	     "============================================================\n");
@@ -810,10 +868,13 @@ oh_dump(cw_oh_t * a_oh_o, cw_bool_t a_all)
   }
   log_printf(g_log_o,
 	     "============================================================\n");
+
+#ifdef _CW_REENTRANT
   if (a_oh_o->is_thread_safe)
   {
     rwl_runlock(&a_oh_o->rw_lock);
   }
+#endif
   if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
   {
     _cw_marker("Exit oh_dump()");

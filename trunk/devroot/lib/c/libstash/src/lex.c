@@ -16,7 +16,11 @@
  ****************************************************************************/
 
 #define _INC_LEX_H_
-#include <libstash.h>
+#ifdef _CW_REENTRANT
+#  include <libstash_r.h>
+#else
+#  include <libstash.h>
+#endif
 
 #include <lex_priv.h>
 

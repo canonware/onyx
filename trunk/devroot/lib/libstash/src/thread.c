@@ -26,9 +26,8 @@
  *
  ****************************************************************************/
 
-#include <libstash.h>
+#include <libstash_r.h>
 
-#include <string.h>
 #include <errno.h>
 
 cw_thd_t *

@@ -16,7 +16,7 @@
 
 #define _INC_GLOB_H_
 #define _INC_LIST_H_
-#include <libstash.h>
+#include <libstash_r.h>
 
 #define NUM_ITEMS 50
 

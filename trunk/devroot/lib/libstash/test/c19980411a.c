@@ -16,7 +16,7 @@
 
 #define _INC_OH_H_
 #define _INC_GLOB_H_
-#include <libstash.h>
+#include <libstash_r.h>
 
 #define NUM_STRINGS 5000
 

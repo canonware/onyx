@@ -52,9 +52,7 @@
  *
  ****************************************************************************/
 
-#include <string.h>
-
-#include <libstash.h>
+#include <libstash_r.h>
 #include <locks_priv.h>
 
 cw_rwl_t *

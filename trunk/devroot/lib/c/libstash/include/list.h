@@ -24,8 +24,10 @@ typedef struct cw_list_s cw_list_t;
 struct cw_list_s
 {
   cw_bool_t is_malloced;
+#ifdef _CW_REENTRANT
   cw_bool_t is_thread_safe;
   cw_mtx_t lock;
+#endif
   cw_list_item_t * head;
   cw_list_item_t * tail;
   cw_uint64_t count;
@@ -61,7 +63,11 @@ void list_item_delete(cw_list_item_t * a_cont);
 void * list_item_get(cw_list_item_t * a_cont);
 void list_item_set(cw_list_item_t * a_cont, void * a_data);
 
+#ifdef _CW_REENTRANT
 cw_list_t * list_new(cw_list_t * a_list_o, cw_bool_t a_is_thread_safe);
+#else
+cw_list_t * list_new(cw_list_t * a_list_o);
+#endif
 void list_delete(cw_list_t * a_list_o);
 cw_uint64_t list_count(cw_list_t * a_list_o);
 cw_list_item_t * list_hpush(cw_list_t * a_list_o, void * a_data);

@@ -14,10 +14,13 @@
  *
  ****************************************************************************/
 
-#include <string.h>
-
 #define _INC_BHP_H_
-#include <libstash.h>
+#ifdef _CW_REENTRANT
+#  include <libstash_r.h>
+#else
+#  include <libstash.h>
+#endif
+
 #include <bhp_priv.h>
 
 /****************************************************************************
@@ -27,7 +30,11 @@
  *
  ****************************************************************************/
 cw_bhp_t *
+#ifdef _CW_REENTRANT
 bhp_new(cw_bhp_t * a_bhp_o, cw_bool_t a_is_thread_safe)
+#else
+bhp_new(cw_bhp_t * a_bhp_o)
+#endif
 {
   cw_bhp_t * retval;
 
@@ -47,6 +54,7 @@ bhp_new(cw_bhp_t * a_bhp_o, cw_bool_t a_is_thread_safe)
     retval->is_malloced = FALSE;
   }
 
+#ifdef _CW_REENTRANT
   if (a_is_thread_safe == TRUE)
   {
     retval->is_thread_safe = TRUE;
@@ -56,6 +64,7 @@ bhp_new(cw_bhp_t * a_bhp_o, cw_bool_t a_is_thread_safe)
   {
     retval->is_thread_safe = FALSE;
   }
+#endif
   
   retval->head = NULL;
   retval->num_nodes = 0;
@@ -83,10 +92,12 @@ bhp_delete(cw_bhp_t * a_bhp_o)
   }
   _cw_check_ptr(a_bhp_o);
 
+#ifdef _CW_REENTRANT
   if (a_bhp_o->is_thread_safe == TRUE)
   {
     rwl_delete(&a_bhp_o->rw_lock);
   }
+#endif
 
   if (a_bhp_o->is_malloced == TRUE)
   {
@@ -112,17 +123,21 @@ bhp_dump(cw_bhp_t * a_bhp_o)
     _cw_marker("Enter bhp_dump()");
   }
   _cw_check_ptr(a_bhp_o);
+#ifdef _CW_REENTRANT
   if (a_bhp_o->is_thread_safe == TRUE)
   {
     rwl_rlock(&a_bhp_o->rw_lock);
   }
+#endif
 
   _cw_error("Not implemented");
   
+#ifdef _CW_REENTRANT
   if (a_bhp_o->is_thread_safe == TRUE)
   {
     rwl_runlock(&a_bhp_o->rw_lock);
   }
+#endif
   if (_cw_pmatch(_STASH_DBG_R_BHP_FUNC))
   {
     _cw_marker("Exit bhp_dump()");
@@ -146,10 +161,12 @@ bhp_insert(cw_bhp_t * a_bhp_o, void * a_priority, void * a_data)
     _cw_marker("Enter bhp_insert()");
   }
   _cw_check_ptr(a_bhp_o);
+#ifdef _CW_REENTRANT
   if (a_bhp_o->is_thread_safe == TRUE)
   {
     rwl_wlock(&a_bhp_o->rw_lock);
   }
+#endif
   
   /* Create and initialize new_item. */
   new_item = (cw_bhpi_t *) _cw_malloc(sizeof(cw_bhpi_t));
@@ -158,7 +175,11 @@ bhp_insert(cw_bhp_t * a_bhp_o, void * a_priority, void * a_data)
   new_item->data = a_data;
 
   /* Create and initialize temp_heap. */
+#ifdef _CW_REENTRANT
   bhp_new(&temp_heap, FALSE);
+#else
+  bhp_new(&temp_heap);
+#endif
   temp_heap.head = new_item;
   temp_heap.num_nodes = 1;
 
@@ -169,10 +190,12 @@ bhp_insert(cw_bhp_t * a_bhp_o, void * a_priority, void * a_data)
   /* XXX This should be done by bhp_merge(). */
 /*   bhp_delete(&temp_heap); */
   
+#ifdef _CW_REENTRANT
   if (a_bhp_o->is_thread_safe == TRUE)
   {
     rwl_wunlock(&a_bhp_o->rw_lock);
   }
+#endif
   if (_cw_pmatch(_STASH_DBG_R_BHP_FUNC))
   {
     _cw_marker("Exit bhp_insert()");
@@ -197,10 +220,12 @@ bhp_find_min(cw_bhp_t * a_bhp_o, void ** a_priority, void ** a_data)
     _cw_marker("Enter bhp_find_min()");
   }
   _cw_check_ptr(a_bhp_o);
+#ifdef _CW_REENTRANT
   if (a_bhp_o->is_thread_safe == TRUE)
   {
     rwl_rlock(&a_bhp_o->rw_lock);
   }
+#endif
 
   if (a_bhp_o->head != NULL)
   {
@@ -232,10 +257,12 @@ bhp_find_min(cw_bhp_t * a_bhp_o, void ** a_priority, void ** a_data)
     retval = TRUE;
   }
   
+#ifdef _CW_REENTRANT
   if (a_bhp_o->is_thread_safe == TRUE)
   {
     rwl_runlock(&a_bhp_o->rw_lock);
   }
+#endif
   if (_cw_pmatch(_STASH_DBG_R_BHP_FUNC))
   {
     _cw_marker("Exit bhp_find_min()");
@@ -262,10 +289,12 @@ bhp_del_min(cw_bhp_t * a_bhp_o, void ** a_priority, void ** a_data)
     _cw_marker("Enter bhp_del_min()");
   }
   _cw_check_ptr(a_bhp_o);
+#ifdef _CW_REENTRANT
   if (a_bhp_o->is_thread_safe == TRUE)
   {
     rwl_wlock(&a_bhp_o->rw_lock);
   }
+#endif
 
   if (a_bhp_o->num_nodes == 0)
   {
@@ -312,6 +341,12 @@ bhp_del_min(cw_bhp_t * a_bhp_o, void ** a_priority, void ** a_data)
     {
       next_pos = curr_pos->sibling;
     }
+    else
+    {
+      next_pos = NULL; /* Make optimizing compilers shut up about using
+			  next_pos uninitialized. */
+    }
+    
     while (curr_pos != NULL)
     {
       curr_pos->parent = NULL;
@@ -326,7 +361,11 @@ bhp_del_min(cw_bhp_t * a_bhp_o, void ** a_priority, void ** a_data)
     }
 
     /* Create a temporary heap and initialize it. */
+#ifdef _CW_REENTRANT
     bhp_new(&temp_heap, FALSE);
+#else
+    bhp_new(&temp_heap);
+#endif
     temp_heap.head = prev_pos;
     bhp_union(a_bhp_o, &temp_heap);
     a_bhp_o->num_nodes--;
@@ -338,10 +377,12 @@ bhp_del_min(cw_bhp_t * a_bhp_o, void ** a_priority, void ** a_data)
     _cw_free(curr_min);
   }
   
+#ifdef _CW_REENTRANT
   if (a_bhp_o->is_thread_safe == TRUE)
   {
     rwl_wunlock(&a_bhp_o->rw_lock);
   }
+#endif
   if (_cw_pmatch(_STASH_DBG_R_BHP_FUNC))
   {
     _cw_marker("Exit bhp_del_min()");
@@ -392,6 +433,7 @@ bhp_union(cw_bhp_t * a_bhp_o, cw_bhp_t * a_other)
   }
   _cw_check_ptr(a_bhp_o);
   _cw_check_ptr(a_other);
+  /* XXX Should this be locked? */
 
   bhp_p_merge(a_bhp_o, a_other);
   if (a_bhp_o->head == NULL)
@@ -455,20 +497,24 @@ bhp_set_priority_compare(cw_bhp_t * a_bhp_o,
   }
   _cw_check_ptr(a_bhp_o);
   _cw_check_ptr(a_new_prio_comp);
+#ifdef _CW_REENTRANT
   if (a_bhp_o->is_thread_safe == TRUE)
   {
     rwl_wlock(&a_bhp_o->rw_lock);
   }
+#endif
 
   /* To change this while there are items in the heap will wreak havoc. */
   _cw_assert(a_bhp_o->num_nodes == 0);
   
   a_bhp_o->priority_compare = a_new_prio_comp;
   
+#ifdef _CW_REENTRANT
   if (a_bhp_o->is_thread_safe == TRUE)
   {
     rwl_wunlock(&a_bhp_o->rw_lock);
   }
+#endif
   if (_cw_pmatch(_STASH_DBG_R_BHP_FUNC))
   {
     _cw_marker("Exit bhp_set_priority_compare()");

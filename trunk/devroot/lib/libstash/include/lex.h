@@ -29,8 +29,8 @@ typedef struct cw_lexs_s cw_lexs_t;
 
 struct cw_lexer_s
 {
-  cw_uint32_t line_num; /* May not want this here. */
-  cw_uint32_t col_num; /* May not want this here. */
+  cw_uint32_t line_num;
+  cw_uint32_t col_num;
 };
 
 struct cw_lexertok_s

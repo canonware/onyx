@@ -15,10 +15,14 @@
  ****************************************************************************/
 
 #include <stdarg.h>
-#include <string.h>
 #include <time.h>
 
-#include <libstash.h>
+#ifdef _CW_REENTRANT
+#  include <libstash_r.h>
+#else
+#  include <libstash.h>
+#endif
+
 #include <log_priv.h>
 
 /****************************************************************************
@@ -34,7 +38,9 @@ log_new()
 
   retval = (cw_log_t *) _cw_malloc(sizeof(cw_log_t));
   
+#ifdef _CW_REENTRANT
   mtx_new(&retval->lock);
+#endif
   retval->is_logfile_open = FALSE;
   retval->logfile_name = NULL;
   retval->log_fp = NULL;
@@ -64,7 +70,9 @@ log_delete(cw_log_t * a_log_o)
     _cw_free(a_log_o->logfile_name);
   }
 
+#ifdef _CW_REENTRANT
   mtx_delete(&a_log_o->lock);
+#endif
   
   _cw_free(a_log_o);
 }
@@ -86,7 +94,9 @@ log_set_logfile(cw_log_t * a_log_o,
   
   _cw_check_ptr(a_log_o);
   _cw_check_ptr(a_logfile);
+#ifdef _CW_REENTRANT
   mtx_lock(&a_log_o->lock);
+#endif
   
   if ((a_log_o->log_fp != NULL) && (a_log_o->log_fp != stderr))
   {
@@ -123,7 +133,9 @@ log_set_logfile(cw_log_t * a_log_o,
     retval = TRUE;
   }
 
+#ifdef _CW_REENTRANT
   mtx_unlock(&a_log_o->lock);
+#endif
   return retval;
 }
 
@@ -146,8 +158,9 @@ log_printf(cw_log_t * a_log_o, char * a_format, ...)
   }
   else
   {
+#ifdef _CW_REENTRANT
     mtx_lock(&a_log_o->lock);
-
+#endif
     if (a_log_o->log_fp == NULL)
     {
       fp = stderr;
@@ -163,10 +176,12 @@ log_printf(cw_log_t * a_log_o, char * a_format, ...)
   va_end(ap);
   fflush(fp);
 
+#ifdef _CW_REENTRANT
   if (a_log_o != NULL)
   {
     mtx_unlock(&a_log_o->lock);
   }
+#endif
   return retval;
 }
 
@@ -195,7 +210,9 @@ log_eprintf(cw_log_t * a_log_o,
   }
   else
   {
+#ifdef _CW_REENTRANT
     mtx_lock(&a_log_o->lock);
+#endif
   
     if (a_log_o->log_fp == NULL)
     {
@@ -226,10 +243,12 @@ log_eprintf(cw_log_t * a_log_o,
   va_end(ap);
   fflush(fp);
 
+#ifdef _CW_REENTRANT
   if (a_log_o != NULL)
   {
     mtx_unlock(&a_log_o->lock);
   }
+#endif
   
   return retval;
 }
@@ -256,14 +275,24 @@ log_lprintf(cw_log_t * a_log_o, char * a_format, ...)
   }
   else
   {
+#ifdef _CW_REENTRANT
     mtx_lock(&a_log_o->lock);
+#endif
 
   /* Create time string. */
     curr_time = time(NULL);
     cts = localtime(&curr_time);
+#if (defined(_CW_OS_FREEBSD) || defined(_CW_OS_LINUX))
     sprintf(time_str, "[%4d/%02d/%02d %02d:%02d:%02d (%s)]: ",
 	    cts->tm_year + 1900, cts->tm_mon + 1, cts->tm_mday,
 	    cts->tm_hour, cts->tm_min, cts->tm_sec, cts->tm_zone);
+#elif (defined(_CW_OS_SOLARIS))
+    sprintf(time_str, "[%4d/%02d/%02d %02d:%02d:%02d (%s)]: ",
+	    cts->tm_year + 1900, cts->tm_mon + 1, cts->tm_mday,
+	    cts->tm_hour, cts->tm_min, cts->tm_sec, tzname[0]);
+#else
+#  error "Unsupported OS"
+#endif
   
     if (a_log_o->log_fp == NULL)
     {
@@ -281,10 +310,12 @@ log_lprintf(cw_log_t * a_log_o, char * a_format, ...)
   va_end(ap);
   fflush(fp);
 
+#ifdef _CW_REENTRANT
   if (a_log_o != NULL)
   {
     mtx_unlock(&a_log_o->lock);
   }
+#endif
   return retval;
 }
 
@@ -316,7 +347,9 @@ log_leprintf(cw_log_t * a_log_o,
   }
   else
   {
+#ifdef _CW_REENTRANT
     mtx_lock(&a_log_o->lock);
+#endif
 
     if (a_log_o->log_fp == NULL)
     {
@@ -331,9 +364,17 @@ log_leprintf(cw_log_t * a_log_o,
   /* Create time string. */
   curr_time = time(NULL);
   cts = localtime(&curr_time);
-  sprintf(time_str, "[%4d/%02d/%02d %02d:%02d:%02d (%s)]: ",
-	  cts->tm_year + 1900, cts->tm_mon + 1, cts->tm_mday,
-	  cts->tm_hour, cts->tm_min, cts->tm_sec, cts->tm_zone);
+#if (defined(_CW_OS_FREEBSD) || defined(_CW_OS_LINUX))
+    sprintf(time_str, "[%4d/%02d/%02d %02d:%02d:%02d (%s)]: ",
+	    cts->tm_year + 1900, cts->tm_mon + 1, cts->tm_mday,
+	    cts->tm_hour, cts->tm_min, cts->tm_sec, cts->tm_zone);
+#elif (defined(_CW_OS_SOLARIS))
+    sprintf(time_str, "[%4d/%02d/%02d %02d:%02d:%02d (%s)]: ",
+	    cts->tm_year + 1900, cts->tm_mon + 1, cts->tm_mday,
+	    cts->tm_hour, cts->tm_min, cts->tm_sec, tzname[0]);
+#else
+#  error "Unsupported OS"
+#endif
 
   if (a_filename != NULL)
   {
@@ -355,10 +396,12 @@ log_leprintf(cw_log_t * a_log_o,
   va_end(ap);
   fflush(fp);
 
+#ifdef _CW_REENTRANT
   if (a_log_o != NULL)
   {
     mtx_unlock(&a_log_o->lock);
   }
+#endif
   return retval;
 }
 

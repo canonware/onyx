@@ -23,8 +23,10 @@ typedef struct cw_bufel_s cw_bufel_t;
 struct cw_buf_s
 {
   cw_bool_t is_malloced;
+#ifdef _CW_REENTRANT
   cw_bool_t is_threadsafe;
   cw_mtx_t lock;
+#endif
   cw_uint32_t size;
   cw_list_t bufels;
 };
@@ -58,7 +60,11 @@ struct cw_bufel_s
 #define bufel_get_uint32 _CW_NS_ANY(bufel_get_uint32)
 #define bufel_set_uint32 _CW_NS_ANY(bufel_set_uint32)
 
+#ifdef _CW_REENTRANT
 cw_buf_t * buf_new(cw_buf_t * a_buf_o, cw_bool_t a_is_threadsafe);
+#else
+cw_buf_t * buf_new(cw_buf_t * a_buf_o);
+#endif
 void buf_delete(cw_buf_t * a_buf_o);
 
 cw_uint32_t buf_get_size(cw_buf_t * a_buf_o);

@@ -34,8 +34,10 @@ typedef struct
 struct cw_oh_s
 {
   cw_bool_t is_malloced;
+#ifdef _CW_REENTRANT
   cw_bool_t is_thread_safe;
   cw_rwl_t rw_lock;
+#endif
   cw_oh_item_t ** items;
   cw_list_t items_list;
   cw_list_t spares_list;
@@ -100,7 +102,11 @@ struct cw_oh_s
 typedef cw_uint64_t oh_h1_t(cw_oh_t *, void *);
 typedef cw_bool_t oh_key_comp_t(void *, void *);
 
+#ifdef _CW_REENTRANT
 cw_oh_t * oh_new(cw_oh_t * a_oh_o, cw_bool_t a_is_thread_safe);
+#else
+cw_oh_t * oh_new(cw_oh_t * a_oh_o);
+#endif
 void oh_delete(cw_oh_t * a_oh_o);
 cw_uint64_t oh_get_size(cw_oh_t * a_oh_o);
 cw_uint64_t oh_get_num_items(cw_oh_t * a_oh_o);

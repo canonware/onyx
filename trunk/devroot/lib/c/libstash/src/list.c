@@ -15,7 +15,12 @@
  ****************************************************************************/
 
 #define _INC_LIST_H_
-#include <libstash.h>
+#ifdef _CW_REENTRANT
+#  include <libstash_r.h>
+#else
+#  include <libstash.h>
+#endif
+
 #include <list_priv.h>
 
 /****************************************************************************
@@ -79,7 +84,11 @@ list_item_set(cw_list_item_t * a_list_item_o, void * a_data)
  *
  ****************************************************************************/
 cw_list_t *
+#ifdef _CW_REENTRANT
 list_new(cw_list_t * a_list_o, cw_bool_t a_is_thread_safe)
+#else
+list_new(cw_list_t * a_list_o)
+#endif
 {
   cw_list_t * retval;
 
@@ -99,6 +108,7 @@ list_new(cw_list_t * a_list_o, cw_bool_t a_is_thread_safe)
     retval->is_malloced = FALSE;
   }
 
+#ifdef _CW_REENTRANT
   if (a_is_thread_safe)
   {
     retval->is_thread_safe = TRUE;
@@ -108,6 +118,7 @@ list_new(cw_list_t * a_list_o, cw_bool_t a_is_thread_safe)
   {
     retval->is_thread_safe = FALSE;
   }
+#endif
   
   retval->head = NULL;
   retval->tail = NULL;
@@ -155,10 +166,12 @@ list_delete(cw_list_t * a_list_o)
     }
   }
 
+#ifdef _CW_REENTRANT
   if (a_list_o->is_thread_safe)
   {
     mtx_delete(&a_list_o->lock);
   }
+#endif
   if (a_list_o->is_malloced)
   {
     _cw_free(a_list_o);
@@ -209,10 +222,12 @@ list_hpush(cw_list_t * a_list_o, void * a_data)
     _cw_marker("Enter list_hpush()");
   }
   _cw_check_ptr(a_list_o);
+#ifdef _CW_REENTRANT
   if (a_list_o->is_thread_safe)
   {
     mtx_lock(&a_list_o->lock);
   }
+#endif
 
   /* Find a list item somewhere. */
   if (a_list_o->spares_count > 0)
@@ -248,10 +263,12 @@ list_hpush(cw_list_t * a_list_o, void * a_data)
   }
   a_list_o->count++;
 
+#ifdef _CW_REENTRANT
   if (a_list_o->is_thread_safe)
   {
     mtx_unlock(&a_list_o->lock);
   }
+#endif
   if (_cw_pmatch(_STASH_DBG_R_LIST_FUNC))
   {
     _cw_marker("Exit list_hpush()");
@@ -274,17 +291,21 @@ list_hpop(cw_list_t * a_list_o)
     _cw_marker("Enter list_hpop()");
   }
   _cw_check_ptr(a_list_o);
+#ifdef _CW_REENTRANT
   if (a_list_o->is_thread_safe)
   {
     mtx_lock(&a_list_o->lock);
   }
+#endif
 
   retval = list_p_hpop(a_list_o);
 
+#ifdef _CW_REENTRANT
   if (a_list_o->is_thread_safe)
   {
     mtx_unlock(&a_list_o->lock);
   }
+#endif
   if (_cw_pmatch(_STASH_DBG_R_LIST_FUNC))
   {
     _cw_marker("Exit list_hpop()");
@@ -307,10 +328,12 @@ list_hpeek(cw_list_t * a_list_o)
     _cw_marker("Enter list_hpeek()");
   }
   _cw_check_ptr(a_list_o);
+#ifdef _CW_REENTRANT
   if (a_list_o->is_thread_safe)
   {
     mtx_lock(&a_list_o->lock);
   }
+#endif
 
   if (a_list_o->head == NULL)
   {
@@ -322,10 +345,12 @@ list_hpeek(cw_list_t * a_list_o)
     retval = a_list_o->head->item;
   }
 
+#ifdef _CW_REENTRANT
   if (a_list_o->is_thread_safe)
   {
     mtx_unlock(&a_list_o->lock);
   }
+#endif
   if (_cw_pmatch(_STASH_DBG_R_LIST_FUNC))
   {
     _cw_marker("Exit list_hpeek()");
@@ -348,10 +373,12 @@ list_tpush(cw_list_t * a_list_o, void * a_data)
     _cw_marker("Enter list_tpush()");
   }
   _cw_check_ptr(a_list_o);
+#ifdef _CW_REENTRANT
   if (a_list_o->is_thread_safe)
   {
     mtx_lock(&a_list_o->lock);
   }
+#endif
 
   /* Find a list item somewhere. */
   if (a_list_o->spares_count > 0)
@@ -387,10 +414,12 @@ list_tpush(cw_list_t * a_list_o, void * a_data)
   }
   a_list_o->count++;
 
+#ifdef _CW_REENTRANT
   if (a_list_o->is_thread_safe)
   {
     mtx_unlock(&a_list_o->lock);
   }
+#endif
   if (_cw_pmatch(_STASH_DBG_R_LIST_FUNC))
   {
     _cw_marker("Exit list_tpush()");
@@ -413,17 +442,21 @@ list_tpop(cw_list_t * a_list_o)
     _cw_marker("Enter list_tpop()");
   }
   _cw_check_ptr(a_list_o);
+#ifdef _CW_REENTRANT
   if (a_list_o->is_thread_safe)
   {
     mtx_lock(&a_list_o->lock);
   }
+#endif
 
   retval = list_p_tpop(a_list_o);
 
+#ifdef _CW_REENTRANT
   if (a_list_o->is_thread_safe)
   {
     mtx_unlock(&a_list_o->lock);
   }
+#endif
   if (_cw_pmatch(_STASH_DBG_R_LIST_FUNC))
   {
     _cw_marker("Exit list_tpop()");
@@ -446,10 +479,12 @@ list_tpeek(cw_list_t * a_list_o)
     _cw_marker("Enter list_tpeek()");
   }
   _cw_check_ptr(a_list_o);
+#ifdef _CW_REENTRANT
   if (a_list_o->is_thread_safe)
   {
     mtx_lock(&a_list_o->lock);
   }
+#endif
 
   if (a_list_o->head == NULL)
   {
@@ -461,10 +496,12 @@ list_tpeek(cw_list_t * a_list_o)
     retval = a_list_o->tail->item;
   }
 
+#ifdef _CW_REENTRANT
   if (a_list_o->is_thread_safe)
   {
     mtx_unlock(&a_list_o->lock);
   }
+#endif
   if (_cw_pmatch(_STASH_DBG_R_LIST_FUNC))
   {
     _cw_marker("Exit list_tpeek()");
@@ -490,10 +527,12 @@ list_insert_after(cw_list_t * a_list_o,
   }
   _cw_check_ptr(a_list_o);
   _cw_check_ptr(a_in_list);
+#ifdef _CW_REENTRANT
   if (a_list_o->is_thread_safe)
   {
     mtx_lock(&a_list_o->lock);
   }
+#endif
 
   /* Find a list item somewhere. */
   if (a_list_o->spares_count > 0)
@@ -527,10 +566,12 @@ list_insert_after(cw_list_t * a_list_o,
   }
   a_list_o->count++;
 
+#ifdef _CW_REENTRANT
   if (a_list_o->is_thread_safe)
   {
     mtx_unlock(&a_list_o->lock);
   }
+#endif
   if (_cw_pmatch(_STASH_DBG_R_LIST_FUNC))
   {
     _cw_marker("Exit list_insert_after()");
@@ -555,10 +596,12 @@ list_remove(cw_list_t * a_list_o, cw_list_item_t * a_to_remove)
   }
   _cw_check_ptr(a_list_o);
   _cw_check_ptr(a_to_remove);
+#ifdef _CW_REENTRANT
   if (a_list_o->is_thread_safe)
   {
     mtx_lock(&a_list_o->lock);
   }
+#endif
 
   if (a_to_remove->prev == NULL)
   {
@@ -586,10 +629,12 @@ list_remove(cw_list_t * a_list_o, cw_list_item_t * a_to_remove)
     a_list_o->count--;
   }
 
+#ifdef _CW_REENTRANT
   if (a_list_o->is_thread_safe)
   {
     mtx_unlock(&a_list_o->lock);
   }
+#endif
   if (_cw_pmatch(_STASH_DBG_R_LIST_FUNC))
   {
     _cw_marker("Exit list_remove()");
@@ -612,10 +657,12 @@ list_purge_spares(cw_list_t * a_list_o)
     _cw_marker("Enter list_purge_spares()");
   }
   _cw_check_ptr(a_list_o);
+#ifdef _CW_REENTRANT
   if (a_list_o->is_thread_safe)
   {
     mtx_lock(&a_list_o->lock);
   }
+#endif
     
   for (; a_list_o->spares_count > 0; a_list_o->spares_count--)
   {
@@ -624,10 +671,12 @@ list_purge_spares(cw_list_t * a_list_o)
     _cw_free(item);
   }
 
+#ifdef _CW_REENTRANT
   if (a_list_o->is_thread_safe)
   {
     mtx_unlock(&a_list_o->lock);
   }
+#endif
   if (_cw_pmatch(_STASH_DBG_R_LIST_FUNC))
   {
     _cw_marker("Exit list_purge_spares()");
@@ -648,15 +697,21 @@ list_dump(cw_list_t * a_list_o)
     _cw_marker("Enter list_dump()");
   }
   _cw_check_ptr(a_list_o);
+#ifdef _CW_REENTRANT
   if (a_list_o->is_thread_safe)
   {
     mtx_lock(&a_list_o->lock);
   }
+#endif
 
   log_printf(g_log_o,
 	     "=== cw_list_t ==============================================\n");
+#ifdef _CW_REENTRANT
   log_printf(g_log_o, "is_malloced: [%d], is_thread_safe: [%d]\n",
 	     a_list_o->is_malloced, a_list_o->is_thread_safe);
+#else
+  log_printf(g_log_o, "is_malloced: [%d]\n", a_list_o->is_malloced);
+#endif
   log_printf(g_log_o, "count: [%d]  spares: [%d]\n",
 	     a_list_o->count, a_list_o->spares_count);
   log_printf(g_log_o, "head: [%010p]  tail: [%010p]  spares_head: [%010p]\n",
@@ -673,10 +728,12 @@ list_dump(cw_list_t * a_list_o)
   log_printf(g_log_o,
 	     "============================================================\n");
   
+#ifdef _CW_REENTRANT
   if (a_list_o->is_thread_safe)
   {
     mtx_unlock(&a_list_o->lock);
   }
+#endif
   if (_cw_pmatch(_STASH_DBG_R_LIST_FUNC))
   {
     _cw_marker("Exit list_dump()");

@@ -46,9 +46,12 @@
  *
  ****************************************************************************/
 
-#include <string.h>
+#ifdef _CW_REENTRANT
+#  include <libstash_r.h>
+#else
+#  include <libstash.h>
+#endif
 
-#include <libstash.h>
 #include <dbg_priv.h>
 
 /****************************************************************************
@@ -67,7 +70,9 @@ dbg_new()
   /* Zero out the entire structure. */
   bzero(retval, sizeof(cw_dbg_t));
 
+#ifdef _CW_REENTRANT
   rwl_new(&retval->rw_lock);
+#endif
   dbg_p_build_tbl(retval);
   dbg_p_recalc_fpmatch(retval);
 
@@ -85,8 +90,9 @@ dbg_delete(cw_dbg_t * a_dbg_o)
 {
   _cw_check_ptr(a_dbg_o);
 
+#ifdef _CW_REENTRANT
   rwl_delete(&a_dbg_o->rw_lock);
-
+#endif
   _cw_free(a_dbg_o);
 }
 
@@ -101,12 +107,16 @@ dbg_turn_on(cw_dbg_t * a_dbg_o, cw_uint32_t a_flag)
 {
   _cw_check_ptr(a_dbg_o);
   _cw_assert(a_flag <= _STASH_DBG_R_MAX);
+#ifdef _CW_REENTRANT
   rwl_wlock(&a_dbg_o->rw_lock);
+#endif
 
   a_dbg_o->curr_settings[a_flag] = TRUE;
   dbg_p_recalc_fpmatch(a_dbg_o);
 
+#ifdef _CW_REENTRANT
   rwl_wunlock(&a_dbg_o->rw_lock);
+#endif
 }
 
 /****************************************************************************
@@ -120,12 +130,16 @@ dbg_turn_off(cw_dbg_t * a_dbg_o, cw_uint32_t a_flag)
 {
   _cw_check_ptr(a_dbg_o);
   _cw_assert(a_flag <= _STASH_DBG_R_MAX);
+#ifdef _CW_REENTRANT
   rwl_wlock(&a_dbg_o->rw_lock);
+#endif
 
   a_dbg_o->curr_settings[a_flag] = FALSE;
   dbg_p_recalc_fpmatch(a_dbg_o);
 
+#ifdef _CW_REENTRANT
   rwl_wunlock(&a_dbg_o->rw_lock);
+#endif
 }
 
 /****************************************************************************
@@ -140,7 +154,9 @@ dbg_clear(cw_dbg_t * a_dbg_o)
   cw_uint32_t x;
   
   _cw_check_ptr(a_dbg_o);
+#ifdef _CW_REENTRANT
   rwl_wlock(&a_dbg_o->rw_lock);
+#endif
 
   for (x = 0; x <= _STASH_DBG_C_MAX; x++)
   {
@@ -148,7 +164,9 @@ dbg_clear(cw_dbg_t * a_dbg_o)
   }
   dbg_p_recalc_fpmatch(a_dbg_o);
   
+#ifdef _CW_REENTRANT
   rwl_wunlock(&a_dbg_o->rw_lock);
+#endif
 }
 
 /****************************************************************************

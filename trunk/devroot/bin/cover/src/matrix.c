@@ -17,7 +17,6 @@
 #define _INC_MATRIX_H_
 #include <libstash.h>
 
-#include <string.h>
 #include <limits.h>
 
 cw_matrix_t *

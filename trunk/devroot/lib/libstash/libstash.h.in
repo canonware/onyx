@@ -15,16 +15,18 @@
 #ifndef _LIBSTASH_H_
 #  define _LIBSTASH_H_
 
-#define _LIBSTASH_VERSION_ <Version>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-/* Must be defined for pthreads. */
-#define _REENTRANT
+#define _LIBSTASH_VERSION_ <Version>
 
 /*
  * Various macros possibly defined by configure.
  */
-#undef HAVE_PTHREAD_H
-#undef HAVE_UNISTD_H
+#undef _CW_OS_FREEBSD
+#undef _CW_OS_LINUX
+#undef _CW_OS_SOLARIS
 
 #undef SIZEOF_SIGNED_CHAR
 #undef SIZEOF_UNSIGNED_CHAR
@@ -41,15 +43,9 @@
 #undef SIZEOF_LONG_DOUBLE
 #undef SIZEOF_INT_P
 
-/* Tell everyone that we're on an ILP-32 architecture.  Once again, this is
- * hard-coded for FreeBSD/x86. */
-#define _ILP_32_
-
 /*
  * Global typedefs.
  */
-
-/* XXX These typedefs will likely only work for x86 architectures. */
 
 #if (SIZEOF_SIGNED_CHAR == 1)
 #  define _TYPE_SINT8_DEFINED
@@ -114,14 +110,16 @@ typedef double cw_float8_t;
 #if (SIZEOF_LONG_DOUBLE == 12)
 #  define _TYPE_FLOAT12_DEFINED
 typedef long double cw_float12_t;
+#elif (SIZEOF_LONG_DOUBLE == 16)
+#  define _TYPE_FLOAT16_DEFINED
+typedef long double cw_float16_t;
 #endif
 
 #if (!defined(_TYPE_SINT8_DEFINED) || !defined(_TYPE_UINT8_DEFINED) \
   || !defined(_TYPE_SINT16_DEFINED) || !defined(_TYPE_UINT16_DEFINED) \
   || !defined(_TYPE_SINT32_DEFINED) || !defined(_TYPE_UINT32_DEFINED) \
   || !defined(_TYPE_SINT64_DEFINED) || !defined(_TYPE_UINT64_DEFINED) \
-  || !defined(_TYPE_FLOAT4_DEFINED) || !defined(_TYPE_FLOAT8_DEFINED) \
-  || !defined(_TYPE_FLOAT12_DEFINED))
+  || !defined(_TYPE_FLOAT4_DEFINED) || !defined(_TYPE_FLOAT8_DEFINED))
 #  error "Lacking mandatory typedefs"
 #endif
 
@@ -169,5 +167,9 @@ extern cw_log_t * g_log_o;
 
 #  define _cw_fmatch(a) dbg_fmatch(g_dbg_o, a)
 #  define _cw_pmatch(a) dbg_pmatch(g_dbg_o, a)
+
+#ifdef __cplusplus
+};
+#endif
 
 #endif /* _LIBSTASH_H_ */

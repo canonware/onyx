@@ -15,7 +15,7 @@
  ****************************************************************************/
 
 #define _INC_GLOB_H_
-#include <libstash.h>
+#include <libstash_r.h>
 
 int
 main()

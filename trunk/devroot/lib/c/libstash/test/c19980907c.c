@@ -15,10 +15,9 @@
  ****************************************************************************/
 
 #define _INC_GLOB_H_
-#include <libstash.h>
+#include <libstash_r.h>
 
 #include <sys/time.h>
-#include <string.h>
 
 #define _STASH_TEST_NUM_THREADS 10
 

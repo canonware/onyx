@@ -2,11 +2,25 @@ dnl
 dnl <Copyright = "jasone">
 dnl <License>
 dnl
-dnl Version: <Verion>
+dnl Version: <Version>
 dnl
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(libstash.h.in)
 AC_CONFIG_HEADER(libstash.h)
+
+AC_CANONICAL_HOST
+
+case "${host}" in
+  i386-*-freebsd*)
+	AC_DEFINE(_CW_OS_FREEBSD, )
+        ;;
+  *-*-linux*)
+	AC_DEFINE(_CW_OS_LINUX, )
+        ;;
+  *-*-solaris2*)
+	AC_DEFINE(_CW_OS_SOLARIS, )
+        ;;
+esac
 
 dnl Check for programs.
 AC_PROG_CC
@@ -25,7 +39,7 @@ dnl  AC_CHECK_PROG(MAKE, gmake, , $PATH,
 dnl    AC_MSG_ERROR(Cannot find GNU make anywhere)))
 
 dnl Check for libraries.
-AC_CHECK_LIB(pthread, pthread_create, LIBS="$LIBS -pthread", \
+AC_CHECK_LIB(pthread, pthread_create, LIBS="$LIBS -lpthread", \
   AC_CHECK_LIB(c_r, pthread_create, \
     LIBS="$LIBS -pthread", AC_MSG_ERROR(Cannot find the pthreads library)))
 

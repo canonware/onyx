@@ -19,7 +19,9 @@
 
 struct cw_log_s
 {
+#ifdef _CW_REENTRANT
   cw_mtx_t lock;
+#endif
   cw_bool_t is_logfile_open;
   char * logfile_name;
   FILE * log_fp;

@@ -33,8 +33,10 @@ typedef struct cw_bhpi_s
 struct cw_bhp_s
 {
   cw_bool_t is_malloced;
+#ifdef _CW_REENTRANT
   cw_bool_t is_thread_safe;
   cw_rwl_t rw_lock;
+#endif
   cw_bhpi_t * head;
   cw_uint64_t num_nodes;
   cw_sint32_t (*priority_compare)(cw_bhpi_t *, cw_bhpi_t *);
@@ -53,7 +55,11 @@ struct cw_bhp_s
 /* Typedefs to allow easy function pointer passing. */
 typedef cw_sint32_t bhp_prio_comp_t(cw_bhpi_t *, cw_bhpi_t *);
 
+#ifdef _CW_REENTRANT
 cw_bhp_t * bhp_new(cw_bhp_t * a_bhp_o, cw_bool_t a_is_thread_safe);
+#else
+cw_bhp_t * bhp_new(cw_bhp_t * a_bhp_o);
+#endif
 void bhp_delete(cw_bhp_t * a_bhp_o);
 void bhp_dump(cw_bhp_t * a_bhp_o);
 void bhp_insert(cw_bhp_t * a_bhp_o, void * a_priority, void * a_data);

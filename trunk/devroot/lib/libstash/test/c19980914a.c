@@ -16,9 +16,8 @@
 
 #define _INC_GLOB_H_
 #define _INC_MATRIX_H_
-#include <libstash.h>
+#include <libstash_r.h>
 
-#include <string.h>
 #include <limits.h>
 
 typedef struct

@@ -74,7 +74,9 @@ typedef struct cw_dbg_s cw_dbg_t;
 
 struct cw_dbg_s
 {
+#ifdef _CW_REENTRANT
   cw_rwl_t rw_lock;
+#endif
   cw_bool_t curr_settings[_STASH_DBG_C_MAX + 1];
   cw_bool_t fmatch[_STASH_DBG_R_MAX + 1];
   cw_bool_t pmatch[_STASH_DBG_R_MAX + 1];

@@ -17,7 +17,7 @@
 #define _INC_OH_H_
 #define _INC_GLOB_H_
 #define _INC_THREAD_H_
-#include <libstash.h>
+#include <libstash_r.h>
 
 /* XXX This test leaks memory, but it doesn't affect the results. */
 
