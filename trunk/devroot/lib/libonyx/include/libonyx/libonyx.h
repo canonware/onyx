@@ -137,8 +137,10 @@ typedef enum
 #undef CW_TRUE_DEFINED
 #endif
 
-/* Minimum initial size of dictionaries. */
-#define CW_LIBONYX_DICT_SIZE 16
+/* Minimum initial size of dictionaries.  This number shouldn't be too large,
+ * since for dictionaries below this size, an array is used internally instead
+ * of a hash table, which means that operations require linear searches. */
+#define CW_LIBONYX_DICT_SIZE 8
 
 /* Maximum depth of estack. */
 #define CW_LIBONYX_ESTACK_MAX 256
@@ -163,12 +165,12 @@ typedef enum
 
 /* Initial size of globaldict.  This is a bit arbitrary, and some applications
  * could benefit from making it larger or smaller. */
-#define CW_LIBONYX_GLOBALDICT_HASH 64
+#define CW_LIBONYX_GLOBALDICT_HASH CW_LIBONYX_DICT_SIZE
 
 /* Initial size of onyxdict.  Onyx uses this dictionary as a separate namespace
  * for configuration parameters and variables that shouldn't normally be seen by
  * dstack name lookups. */
-#define CW_LIBONYX_ONYXDICT_HASH 16
+#define CW_LIBONYX_ONYXDICT_HASH CW_LIBONYX_DICT_SIZE
 
 /* Extra slots in systemdict left open at creation time.  The embedded Onyx
  * initialization code uses several slots, so if adding additional entries to
@@ -181,7 +183,7 @@ typedef enum
 
 /* Initial size of threadsdict.  Most applications don't use many threads, so
  * the initial size is set pretty low. */
-#define CW_LIBONYX_THREADSDICT_HASH 16
+#define CW_LIBONYX_THREADSDICT_HASH CW_LIBONYX_DICT_SIZE
 
 /* Initial size initial name cache hash table.  We know for sure that there will
  * be about 250 names referenced by systemdict, errordict, and currenterror to
@@ -193,10 +195,10 @@ typedef enum
 #define CW_LIBONYX_STACK_CACHE 16
 
 /* Initial size of threaddict. */
-#define CW_LIBONYX_THREADDICT_HASH 4
+#define CW_LIBONYX_THREADDICT_HASH CW_LIBONYX_DICT_SIZE
 
 /* Initial size of dictionaries created with the dict operator. */
-#define CW_SYSTEMDICT_DICT_SIZE 16
+#define CW_SYSTEMDICT_DICT_SIZE CW_LIBONYX_DICT_SIZE
 
 /* Exception numbers.  libonyx reserves 0 through 127. */
 #define CW_ONYXX_MIN 0
