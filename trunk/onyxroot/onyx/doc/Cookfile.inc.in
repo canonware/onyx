@@ -48,9 +48,15 @@ docs_relclean : [addsuffix _docs_relclean @docs@]
   set mkdir
 {
   /*
+   * Clean up the temp files to keep pdflatex from getting confused.
+   *
    * Change directory to the object tree, since latex can't be made to use a
    * different location for output files.
    */
+
+  rm -f [addprefix @objroot@/%0latex/%1/%.
+                   alg aux aux-prev idx idx-prev ilg ind lof log lot out toc];
+  rm -f @objroot@/%0latex/%1/texput.log;
 
   cd @objroot@/%0latex/%1/\; @PERL@ @abs_srcroot@/%0latex/ltx2e @PDFLATEX@
                                     %.tex;
