@@ -19,7 +19,7 @@ extern  "C" {
 #ifndef CW_LIBONYX_H_
 #define CW_LIBONYX_H_
 
-#define CW_LIBONYX_VERSION "Onyx <Version = onyx>"
+#define CW_LIBONYX_VERSION "<Version = onyx>"
 
 /* Must be defined for pthreads. */
 #ifndef _REENTRANT
