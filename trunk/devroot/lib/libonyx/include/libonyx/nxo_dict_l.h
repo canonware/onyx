@@ -82,6 +82,10 @@ nxoe_l_dict_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
 #endif
     if (dict->is_hash)
     {
+	/* Set the dch non-shrinkable to avoid rehashes, which could be fatal
+	 * if any of the objects this dict points to have already been swept. */
+	dch_shrinkable_set(&dict->data.hash, FALSE);
+
 	while (dch_remove_iterate(&dict->data.hash, NULL, (void **) &dicto,
 				  &chi)
 	       == FALSE)
