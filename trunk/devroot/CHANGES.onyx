@@ -1,3 +1,12 @@
+2002-03-31 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/nxo_file.c:nxo_file_open() : Add the a_mode argument,
+          so that file creation mode can be specified.
+
+	* lib/libonyx/src/systemdict.c:systemdict_test() : Use macros
+          (S_ISDIR(), S_ISREG(), etc.) for non-standardized portions of struct
+          stat's st_mode field.  This fixes various false positives on Linux.
+
 2002-03-30 : Jason Evans <jasone@canonware.com>
 
 	* lib/libonyx/src/systemdict.c:systemdict_dirforeach() : Use strlen()

@@ -4641,12 +4641,31 @@ systemdict_open(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack, *tstack;
     cw_nxo_t *name, *flags, *file;
+    cw_uint32_t npop;
+    mode_t mode;
     cw_nxn_t error;
 
     ostack = nxo_thread_ostack_get(a_thread);
     tstack = nxo_thread_tstack_get(a_thread);
-	
+
     NXO_STACK_GET(flags, ostack, a_thread);
+    if (nxo_type_get(flags) == NXOT_INTEGER)
+    {
+	/* Mode specified. */
+	npop = 2;
+	mode = (mode_t) nxo_integer_get(flags);
+	if ((mode & 7777) != mode)
+	{
+	    nxo_thread_nerror(a_thread, NXN_rangecheck);
+	    return;
+	}
+	NXO_STACK_DOWN_GET(flags, ostack, a_thread, flags);
+    }
+    else
+    {
+	npop = 1;
+	mode = 0777;
+    }
     NXO_STACK_DOWN_GET(name, ostack, a_thread, flags);
     if (nxo_type_get(name) != NXOT_STRING || nxo_type_get(flags) != NXOT_STRING)
     {
@@ -4660,7 +4679,7 @@ systemdict_open(cw_nxo_t *a_thread)
     nxo_string_lock(name);
     error = nxo_file_open(file, nxo_string_get(name),
 			  nxo_string_len_get(name), nxo_string_get(flags),
-			  nxo_string_len_get(flags));
+			  nxo_string_len_get(flags), mode);
     nxo_string_unlock(name);
     if (error)
     {
@@ -4670,7 +4689,7 @@ systemdict_open(cw_nxo_t *a_thread)
 
     nxo_file_buffer_size_set(file, CW_LIBONYX_FILE_BUFFER_SIZE);
 
-    nxo_stack_pop(ostack);
+    nxo_stack_npop(ostack, npop);
     nxo_dup(name, file);
     nxo_stack_pop(tstack);
 }
@@ -6805,7 +6824,7 @@ systemdict_test(cw_nxo_t *a_thread)
 	tfile = nxo_stack_push(tstack);
 	nxo_string_cstring(tfile, file, a_thread);
 
-	error = stat(nxo_string_get(tfile), &sb);
+	error = lstat(nxo_string_get(tfile), &sb);
 
 	nxo_stack_pop(tstack);
     }
@@ -6855,13 +6874,13 @@ systemdict_test(cw_nxo_t *a_thread)
 	    case 'c':
 	    {
 		/* Character special device? */
-		result = (sb.st_mode & S_IFCHR) ? TRUE : FALSE;
+		result = S_ISCHR(sb.st_mode) ? TRUE : FALSE;
 		break;
 	    }
 	    case 'd':
 	    {
 		/* Directory? */
-		result = (sb.st_mode & S_IFDIR) ? TRUE : FALSE;
+		result = S_ISDIR(sb.st_mode) ? TRUE : FALSE;
 		break;
 	    }
 	    case 'e':
@@ -6874,7 +6893,7 @@ systemdict_test(cw_nxo_t *a_thread)
 	    case 'f':
 	    {
 		/* Regular file? */
-		result = (sb.st_mode & S_IFREG) ? TRUE : FALSE;
+		result = S_ISREG(sb.st_mode) ? TRUE : FALSE;
 		break;
 	    }
 	    case 'g':
@@ -6892,7 +6911,7 @@ systemdict_test(cw_nxo_t *a_thread)
 	    case 'p':
 	    {
 		/* Named pipe? */
-		result = (sb.st_mode & S_IFIFO) ? TRUE : FALSE;
+		result = S_ISFIFO(sb.st_mode) ? TRUE : FALSE;
 		break;
 	    }
 	    case 'r':
@@ -6942,7 +6961,7 @@ systemdict_test(cw_nxo_t *a_thread)
 	    case 'L':
 	    {
 		/* Symbolic link? */
-		result = (sb.st_mode & S_IFLNK) ? TRUE : FALSE;
+		result = S_ISLNK(sb.st_mode) ? TRUE : FALSE;
 		break;
 	    }
 	    case 'O':
@@ -6960,7 +6979,7 @@ systemdict_test(cw_nxo_t *a_thread)
 	    case 'S':
 	    {
 		/* Socket? */
-		result = (sb.st_mode & S_IFSOCK) ? TRUE : FALSE;
+		result = S_ISSOCK(sb.st_mode) ? TRUE : FALSE;
 		break;
 	    }
 	    default:
