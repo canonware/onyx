@@ -40,5 +40,4 @@ waitpid dup 0 ne {
 
 0 $SIGCONT kill
 pid $SIGCONT kill
-# XXX Uncomment once getpgid is implemented.
-# getpgid neg $SIGCONT kill
+0 getpgid neg $SIGCONT kill
