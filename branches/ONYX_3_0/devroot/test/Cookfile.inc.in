@@ -62,7 +62,7 @@ tests_distclean :
 @objroot@/%0test/%.nx : @srcroot@/%0test/%.nx.in
   set mkdir
 {
-  echo \"#!@ONYX@\" > [target];
+  echo \"#!@TONYX@\" > [target];
   echo \"!#\" >> [target];
   cat @srcroot@/%0test/%.nx.in >> [target];
   chmod u+x [target];

@@ -217,6 +217,9 @@ typedef enum
 #include <strings.h>
 #include <sys/types.h>
 #include <sys/uio.h>
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h> /* For htonl() and ntohl(). */
+#endif
 #ifdef CW_PTHREADS
 #include <pthread.h>
 #include <semaphore.h>
