@@ -172,18 +172,19 @@ ONYX_OTESTS =
               output_a.nx.in over_a.nx.in over_b.nx.in pop_a.nx.in pop_b.nx.in
               pow_a.nx.in pow_b.nx.in pow_c.nx.in pow_d.nx.in put_a.nx.in
               put_b.nx.in put_c.nx.in put_d.nx.in put_e.nx.in put_f.nx.in
-              put_g.nx.in put_h.nx.in putinterval_a.nx.in putinterval_b.nx.in
-              putinterval_c.nx.in putinterval_d.nx.in putinterval_e.nx.in
-              putinterval_f.nx.in putinterval_g.nx.in putinterval_h.nx.in
-              putinterval_i.nx.in repeat_a.nx.in repeat_b.nx.in repeat_c.nx.in
-              repeat_d.nx.in roll_a.nx.in roll_b.nx.in roll_c.nx.in roll_d.nx.in
-              roll_e.nx.in roll_f.nx.in roll_g.nx.in rot_a.nx.in rot_b.nx.in
-              rot_c.nx.in rot_d.nx.in sadn_a.nx.in sadn_b.nx.in sadn_c.nx.in
-              sadn_d.nx.in saup_a.nx.in saup_b.nx.in saup_c.nx.in saup_d.nx.in
-              sclear_a.nx.in sbdup_a.nx.in sbdup_b.nx.in sbdup_c.nx.in
-              sbdup_d.nx.in sbpop_a.nx.in sbpop_b.nx.in sbpop_c.nx.in
-              sbpop_d.nx.in sbpush_a.nx.in sbpush_b.nx.in sbpush_c.nx.in
-              sbpush_d.nx.in sclear_b.nx.in sclear_c.nx.in scleartomark_a.nx.in
+              put_g.nx.in put_h.nx.in put_i.nx.in putinterval_a.nx.in
+              putinterval_b.nx.in putinterval_c.nx.in putinterval_d.nx.in
+              putinterval_e.nx.in putinterval_f.nx.in putinterval_g.nx.in
+              putinterval_h.nx.in putinterval_i.nx.in repeat_a.nx.in
+              repeat_b.nx.in repeat_c.nx.in repeat_d.nx.in roll_a.nx.in
+              roll_b.nx.in roll_c.nx.in roll_d.nx.in roll_e.nx.in roll_f.nx.in
+              roll_g.nx.in rot_a.nx.in rot_b.nx.in rot_c.nx.in rot_d.nx.in
+              sadn_a.nx.in sadn_b.nx.in sadn_c.nx.in sadn_d.nx.in saup_a.nx.in
+              saup_b.nx.in saup_c.nx.in saup_d.nx.in sclear_a.nx.in
+              sbdup_a.nx.in sbdup_b.nx.in sbdup_c.nx.in sbdup_d.nx.in
+              sbpop_a.nx.in sbpop_b.nx.in sbpop_c.nx.in sbpop_d.nx.in
+              sbpush_a.nx.in sbpush_b.nx.in sbpush_c.nx.in sbpush_d.nx.in
+              sclear_b.nx.in sclear_c.nx.in scleartomark_a.nx.in
               scleartomark_b.nx.in scleartomark_c.nx.in scleartomark_d.nx.in
               scount_a.nx.in scount_b.nx.in scount_c.nx.in scounttomark_a.nx.in
               scounttomark_b.nx.in scounttomark_c.nx.in sdn_a.nx.in sdn_b.nx.in

@@ -1,3 +1,10 @@
+2003-02-08 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/nxo_dict.c:nxoe_p_dict_def() : Initialize the dch
+	  before inserting the contents of the array into it.  This bug could
+	  cause memory corruption and/or crashes if a dict grew from 7-->8-->9
+	  (assuming CW_LIBONYX_DICT_SIZE == 9).
+
 2003-02-01 : Jason Evans <jasone@canonware.com>
 
 	* Onyx 4.3.0 released.
