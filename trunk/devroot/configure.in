@@ -10,7 +10,8 @@ AC_INIT(Cookfile.in)
 dnl 
 dnl Version requirements for external software we depend on.
 dnl 
-GTK_VERSION_REQUIRED=1.3.12
+GTK_VERSION_MIN=1.3.12
+PCRE_VERSION_MIN=3.7
 
 srcroot=$srcdir
 AC_SUBST(srcroot)
@@ -111,12 +112,39 @@ AC_CHECK_FUNCS(dlopen, AC_DEFINE(HAVE_DLOPEN), \
 if test "x$enable_modules" = "xyes" -a "x$enable_threads" = "x1" \
      -a "x$enable_real" = "x1" -a "x$enable_posix" = "x1" \
      -a "x$enable_posix_file" = "x1" ; then
+
   dnl modgtk.
-  PKG_CHECK_MODULES(GTK, gtk+-2.0 >= $GTK_VERSION_REQUIRED, \
+  PKG_CHECK_MODULES(GTK, gtk+-2.0 >= $GTK_VERSION_MIN, \
     CW_BUILD_MOD(modgtk, mod_gtk), \
-    AC_MSG_RESULT(gtk+ $GTK_VERSION_REQUIRED or newer not found))
+    AC_MSG_RESULT(gtk+ $GTK_VERSION_MIN or newer not found))
+
+  dnl modpcre.
+  AC_PATH_PROG(PCRE_CONFIG, pcre-config, , $PATH)
+  if test "x$PCRE_CONFIG" != "x" ; then
+    dnl Make sure the version of pcre found is sufficient.
+    AC_MSG_CHECKING(for pcre >= $PCRE_VERSION_MIN)
+    PCRE_MAJOR=`pcre-config --version | tr . " " | awk '{print $1}'`
+    PCRE_MINOR=`pcre-config --version | tr . " " | awk '{print $2}'`
+    PCRE_MAJOR_MIN=`echo $PCRE_VERSION_MIN | tr . " " | awk '{print $1}'`
+    PCRE_MINOR_MIN=`echo $PCRE_VERSION_MIN | tr . " " | awk '{print $2}'`
+    if test $PCRE_MAJOR -gt $PCRE_MAJOR_MIN \
+         -o $PCRE_MAJOR -eq $PCRE_MAJOR_MIN \
+         -a $PCRE_MINOR -ge $PCRE_MINOR_MIN ; then
+      AC_MSG_RESULT(yes ($PCRE_MAJOR.$PCRE_MINOR))
+      CW_BUILD_MOD(modpcre, mod_pcre)
+      if test "x$mod_pcre" = "x1" ; then
+        PCRE_CFLAGS=`pcre-config --cflags`
+        PCRE_LIBS=`pcre-config --libs`
+        AC_SUBST(PCRE_CFLAGS)
+        AC_SUBST(PCRE_LIBS)
+      fi
+    else
+      AC_MSG_RESULT(no ($PCRE_MAJOR.$PCRE_MINOR))
+    fi
+  fi
+
 else
-  AC_MSG_RESULT(Missing configuration options necessary for modgtk)
+  AC_MSG_RESULT(Missing configuration options necessary for modules)
 fi
 
 dnl Look for binaries.
@@ -365,6 +393,13 @@ dnl modgtk configuration.
 dnl 
 if test "x$mod_gtk" = "x1" ; then
   cfgoutputs="$cfgoutputs mod/modgtk/nx/modgtk/modgtk_defs.nx"
+fi
+
+dnl 
+dnl modpcre configuration.
+dnl 
+if test "x$mod_pcre" = "x1" ; then
+  cfgoutputs="$cfgoutputs mod/modpcre/nx/modpcre/modpcre_defs.nx"
 fi
 
 dnl 

@@ -1,0 +1,112 @@
+/******************************************************************************
+ *
+ * <Copyright = jasone>
+ * <License>
+ *
+ ******************************************************************************
+ *
+ * Version: Onyx <Version = onyx>
+ *
+ * Cookfile for modpcre.
+ *
+ ******************************************************************************/
+
+/* Include generated dependency files. */
+#include-cooked [glob @objroot@/mod/modpcre/src/"*.d_*"]
+
+/*
+ * File lists.
+ */
+
+/* Source files. */
+MODPCRE_SRCS = [addprefix @srcroot@/mod/modpcre/src/
+                          modpcre.c
+                          ];
+
+/* Generated source code (created by configure). */
+MODPCRE_NX_GEN = [fromto %.nx.in @objroot@/mod/modpcre/nx/modpcre/%.nx
+                         modpcre_defs.nx.in
+                         ];
+
+MODPCRE_NX = [addprefix @srcroot@/mod/modpcre/nx/modpcre/
+                        modpcre.nx
+                        ];
+
+/* Modules. */
+MODPCRE = @objroot@/mod/modpcre/nxm/modpcre.nxm;
+
+/*
+ * User cook'ables.
+ */
+
+modpcre : [MODPCRE];
+
+modpcre_mods_tests :
+{
+
+}
+
+modpcre_mods_check :
+{
+
+}
+
+modpcre_mods_check_update :
+{
+
+}
+
+modpcre_mods_install : [MODPCRE]
+{
+  @INSTALL@ -d [PREFIX]/share/onyx-@onyx_version@/nxm;
+  @INSTALL@ -m 0444 [MODPCRE] [PREFIX]/share/onyx-@onyx_version@/nxm;
+  @INSTALL@ -d [PREFIX]/share/onyx-@onyx_version@/nx/modpcre;
+
+  loop local f = [MODPCRE_NX] [MODPCRE_NX_GEN]
+  {
+    @INSTALL@ -m 0644 [f] [PREFIX]/share/onyx-@onyx_version@/nx/modpcre/;
+  }
+}
+
+modpcre_mods_uninstall :
+{
+  rm -f [PREFIX]/share/onyx-@onyx_version@/nxm/modpcre.nxm;
+  rm -rf [PREFIX]/share/onyx-@onyx_version@/nx/modpcre;
+}
+
+modpcre_mods_clean :
+{
+  rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.d_s [MODPCRE_SRCS]];
+  rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.o_s [MODPCRE_SRCS]];
+  rm -f [MODPCRE];
+}
+
+modpcre_mods_distclean :
+{
+}
+
+/*
+ * Various flags.
+ */
+MODPCRE_CPPFLAGS = @PCRE_CFLAGS@;
+MODPCRE_LDFLAGS = @PCRE_LIBS@;
+
+CPPFLAGS = [CPPFLAGS] -I@srcroot@/mod/modpcre/include
+                      -I@objroot@/mod/modpcre/include
+                      [MODPCRE_CPPFLAGS];
+
+/*
+ * Dependencies.
+ */
+
+[MODPCRE] : [fromto @srcroot@/%0%.c @objroot@/%0%.o_s [MODPCRE_SRCS]]
+  set mkdir
+{
+  [CC]
+#if [matches elf @abi@]
+       -shared
+#elif [matches macho @abi@]
+       -undefined suppress -flat_namespace -bundle -all_load
+#endif
+       -o [target] [need] [MODPCRE_LDFLAGS];
+}
