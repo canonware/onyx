@@ -25,9 +25,11 @@ struct cw_sock_s
   cw_mtx_t lock;
   cw_cnd_t callback_cnd;
 
+  cw_uint32_t os_outbuf_size;
+  cw_uint16_t port;
+
   cw_mtx_t state_lock;
   int sockfd;
-  cw_uint16_t port;
   cw_bool_t is_connected;
   cw_bool_t error;
 

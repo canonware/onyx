@@ -27,6 +27,13 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#ifdef _CW_OS_FREEBSD
+/* XXX */
+/*  #include <sys/uio.h> */
+/*  #define _LIBSOCK_SOCKB_MAX_IOV UIO_MAXIOV */
+#define _LIBSOCK_SOCKB_MAX_IOV 1024
+#endif
+
 #include "libsock/sockb_p.h"
 #include "libsock/sockb_l.h"
 #include "libsock/sock_l.h"
@@ -396,6 +403,19 @@ sockb_p_entry_func(void * a_arg)
   cw_sint32_t j;
   cw_buf_t tmp_buf, buf_in;
 
+  if (dbg_is_registered(cw_g_dbg, "sockb_verbose"))
+  {
+    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
+		"Local variable addresses: socks %p, fd_m_read_set %p, "
+		"fd_m_write_set %p, fd_m_exception_set %p, fd_read_set %p, "
+		"fd_write_set %p, fd_exception_set %p, sock %p, "
+		"sockfd %p, max_fd %p, num_ready %p, num_msgs %p, i %p, j %p, "
+		"tmp_buf %p, buf_in %p\n",
+		&socks, &fd_m_read_set, &fd_m_write_set, &fd_m_exception_set,
+		&fd_read_set, &fd_write_set, &fd_exception_set, &sock, &sockfd,
+		&max_fd, &num_ready, &num_msgs, &i, &j, &tmp_buf, &buf_in);
+  }
+  
   /* Initialize data structures. */
   FD_ZERO(&fd_m_read_set);
   FD_ZERO(&fd_m_write_set);
@@ -409,6 +429,11 @@ sockb_p_entry_func(void * a_arg)
   /* Increase max_fd if necessary. */
   if (g_sockb->pipe_out > max_fd)
   {
+    if (dbg_is_registered(cw_g_dbg, "sockb_maxfd"))
+    {
+      log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
+		  "max_fd: %d --> %d\n", max_fd, g_sockb->pipe_out);
+    }
     max_fd = g_sockb->pipe_out;
   }
 
@@ -434,6 +459,11 @@ sockb_p_entry_func(void * a_arg)
 	/* Increase max_fd if necessary. */
 	if (sockfd > max_fd)
 	{
+	  if (dbg_is_registered(cw_g_dbg, "sockb_maxfd"))
+	  {
+	    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
+			"max_fd: %d --> %d\n", max_fd, sockfd);
+	  }
 	  max_fd = sockfd;
 	}
 
@@ -470,6 +500,11 @@ sockb_p_entry_func(void * a_arg)
 	    break;
 	  }
 	}
+      }
+      if (dbg_is_registered(cw_g_dbg, "sockb_maxfd"))
+      {
+	log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
+		    "max_fd: %d\n", max_fd);
       }
 	
       /* Notify the sock that it's unregistered. */
@@ -597,7 +632,7 @@ sockb_p_entry_func(void * a_arg)
 	    /* Lower max_fd to the next highest fd, if necessary. */
 	    if (i == max_fd)
 	    {
-	      cw_uint32_t new_max;
+	      cw_sint32_t new_max;
 	      
 	      max_fd = -1; /* In case there aren't any more registered
 			    * sockets. */
@@ -608,6 +643,11 @@ sockb_p_entry_func(void * a_arg)
 		  max_fd = new_max;
 		  break;
 		}
+	      }
+	      if (dbg_is_registered(cw_g_dbg, "sockb_maxfd"))
+	      {
+		log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
+			    "max_fd: %d\n", max_fd);
 	      }
 	    }
 	  }
@@ -629,6 +669,12 @@ sockb_p_entry_func(void * a_arg)
 	     * to. */
 	    iovec = buf_get_iovec(&buf_in, max_read, &iovec_count);
 
+	    /* Make sure not to exceed the max iovec size. */
+	    if (iovec_count > _LIBSOCK_SOCKB_MAX_IOV)
+	    {
+	      iovec_count = _LIBSOCK_SOCKB_MAX_IOV;
+	    }
+	    
 	    bytes_read = readv(i, iovec, iovec_count);
 
 /*  	    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
@@ -674,6 +720,12 @@ sockb_p_entry_func(void * a_arg)
 				buf_get_size(&tmp_buf),
 				&iovec_count);
 
+	  /* Make sure not to exceed the max iovec size. */
+	  if (iovec_count > _LIBSOCK_SOCKB_MAX_IOV)
+	  {
+	    iovec_count = _LIBSOCK_SOCKB_MAX_IOV;
+	  }
+	  
 	  bytes_written = writev(i, iovec, iovec_count);
 
 	  if (bytes_written >= 0)

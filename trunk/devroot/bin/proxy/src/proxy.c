@@ -114,7 +114,9 @@ main(int argc, char ** argv)
 	dbg_register(cw_g_dbg, "prog_verbose");
 /*  	dbg_register(cw_g_dbg, "mem_verbose"); */
 	dbg_register(cw_g_dbg, "sockb_verbose");
+/*  	dbg_register(cw_g_dbg, "sockb_maxfd"); */
 	dbg_register(cw_g_dbg, "socks_verbose");
+	dbg_register(cw_g_dbg, "sock_sockopt");
 	/* Nothing uses this flag. */
 /*      dbg_register(cw_g_dbg, "sock_verbose"); */
 	break;
@@ -264,7 +266,8 @@ main(int argc, char ** argv)
   {
     conn = _cw_malloc(sizeof(connection_t));
     bzero(conn, sizeof(conn));
-    sock_new(&conn->client_sock, 16384);
+/*      sock_new(&conn->client_sock, 16384); */
+    sock_new(&conn->client_sock, 512);
     
     if (NULL == socks_accept_block(socks, &conn->client_sock)
 	|| should_quit)
@@ -988,7 +991,8 @@ handle_client_send(void * a_arg)
 	     conn->rhost, conn->rport);
       
   /* Connect to the remote end. */
-  sock_new(&conn->remote_sock, 16384);
+/*    sock_new(&conn->remote_sock, 16384); */
+  sock_new(&conn->remote_sock, 512);
   if (TRUE == sock_connect(&conn->remote_sock, conn->rhost, conn->rport))
   {
     log_eprintf(conn->log, __FILE__, __LINE__, __FUNCTION__,

@@ -482,34 +482,42 @@ sock_write(cw_sock_t * a_sock, cw_buf_t * a_buf)
   cw_bool_t retval;
   
   _cw_check_ptr(a_sock);
-  
-  if (a_sock->error)
-  {
-    retval = TRUE;
+  _cw_check_ptr(a_buf);
 
-    mtx_lock(&a_sock->state_lock);
-    if (TRUE == a_sock->is_connected)
+  if (0 < buf_get_size(a_buf))
+  {
+    if (a_sock->error)
     {
-      sock_p_disconnect(a_sock);
+      retval = TRUE;
+
+      mtx_lock(&a_sock->state_lock);
+      if (TRUE == a_sock->is_connected)
+      {
+	sock_p_disconnect(a_sock);
+      }
+      mtx_unlock(&a_sock->state_lock);
     }
-    mtx_unlock(&a_sock->state_lock);
+    else
+    {
+      retval = FALSE;
+    
+      mtx_lock(&a_sock->out_lock);
+
+      if (a_sock->out_is_flushed == TRUE)
+      {
+	/* Notify the sockb that we now have data. */
+	sockb_l_out_notify(&a_sock->sockfd);
+	a_sock->out_is_flushed = FALSE;
+      }
+    
+      buf_catenate_buf(&a_sock->out_buf, a_buf, FALSE);
+
+      mtx_unlock(&a_sock->out_lock);
+    }
   }
   else
   {
-    retval = FALSE;
-    
-    mtx_lock(&a_sock->out_lock);
-
-    if (buf_get_size(&a_sock->out_buf) == 0)
-    {
-      /* Notify the sockb that we now have data. */
-      sockb_l_out_notify(&a_sock->sockfd);
-      a_sock->out_is_flushed = FALSE;
-    }
-    
-    buf_catenate_buf(&a_sock->out_buf, a_buf, FALSE);
-
-    mtx_unlock(&a_sock->out_lock);
+    retval = TRUE;
   }
   
   return retval;
@@ -622,7 +630,16 @@ sock_l_get_out_data(cw_sock_t * a_sock, cw_buf_t * a_buf)
   _cw_check_ptr(a_buf);
 
   mtx_lock(&a_sock->out_lock);
-  buf_catenate_buf(a_buf, &a_sock->out_buf, FALSE);
+
+  if (buf_get_size(&a_sock->out_buf) > a_sock->os_outbuf_size)
+  {
+    buf_split(a_buf, &a_sock->out_buf, a_sock->os_outbuf_size);
+  }
+  else
+  {
+    buf_catenate_buf(a_buf, &a_sock->out_buf, FALSE);
+  }
+  
   if (buf_get_size(a_buf) == 0)
   {
     /* No data was available. */
@@ -787,6 +804,22 @@ sock_p_config_socket(cw_sock_t * a_sock)
 #endif
 
 #undef _CW_SOCK_GETSOCKOPT
+  }
+
+  /* Get the size of the OS's outgoing buffer, so that we can hand no more than
+   * that amount to sockb each time it asks for data. */
+  {
+    int len;
+    
+    len = sizeof(a_sock->os_outbuf_size);
+    if (getsockopt(a_sock->sockfd, SOL_SOCKET, SO_SNDBUF,
+		   (void *) &a_sock->os_outbuf_size, &len))
+    {
+      log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
+		  "Error for SO_SNDBUF in getsockopt(): %s\n", strerror(errno));
+      retval = TRUE;
+      goto RETURN;
+    }
   }
 
   /* Set the socket to non-blocking, so that we don't have to worry about
