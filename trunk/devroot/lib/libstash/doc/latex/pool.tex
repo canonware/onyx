@@ -16,24 +16,161 @@
 \label{pool}
 \index{\classname{pool}{}}
 
+The \classname{pool} class provides cached allocation for equal-size buffers.
+Each allocation is done via \cfunc{mem\_malloc}{}, and deallocated buffers are
+cached.  The cache can be discarded via \cfunc{pool\_drain}{}.
+
+In the debug version of \libname{libstash}, tracking information is kept so that
+memory leaks and other memory allocation errors can be detected and printed to
+\cvar{out\_err}.
+
 \subsubsection{API}
 \begin{description}
-\label{pool_}
-\index{\cfunc{pool\_}{}}
-\item[{\cfunc[]{pool\_}{}}: ]
+\label{pool_new}
+\index{\cfunc{pool\_new}{}}
+\item[{\cfunc[cw\_pool\_t *]{pool\_new}{cw\_pool\_t *a\_pool, cw\_mem\_t
+*a\_mem, cw\_uint32\_t a\_buffer\_size}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a\_pool: ]
+			Pointer to space for a \classname{pool}, or NULL.
+		\item[a\_mem: ]
+			Pointer to the allocator to use internally, or NULL.
+		\item[a\_buffer\_size: ]
+			Size of buffers to allocate and return from
+			\cfunc{pool\_get}{}.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[retval: ]
+			Pointer to a \classname{pool}.
 		\end{description}
 	\item[Exception(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
 		\end{description}
 	\item[Description: ]
+		Constructor.
+	\end{description}
+\label{pool_delete}
+\index{\cfunc{pool\_delete}{}}
+\item[{\cfunc[void]{pool\_delete}{cw\_pool\_t *a\_pool}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_pool: ]
+			Pointer to a \classname{pool}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Destructor.
+	\end{description}
+\label{pool_buffer_size_get}
+\index{\cfunc{pool\_buffer\_size\_get}{}}
+\item[{\cfunc[cw\_uint32\_t]{pool\_}{cw\_pool\_t *a\_pool}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_pool: ]
+			Pointer to a \classname{pool}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Size of buffers that \cvar{a\_pool} is using.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return the size of the buffers that \cvar{a\_pool} is using.
+	\end{description}
+\label{pool_drain}
+\index{\cfunc{pool\_drain}{}}
+\item[{\cfunc[void]{pool\_drain}{cw\_pool\_t *a\_pool}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_pool: ]
+			Pointer to a \classname{pool}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Discard internally cached buffers, if any.
+	\end{description}
+\label{pool_get_e}
+\index{\cfunc{pool\_get\_e}{}}
+\item[{\cfunc[void *]{pool\_get\_e}{cw\_pool\_t *a\_pool, const char
+*a\_filename, cw\_uint32\_t a\_line\_num}}: ]
+\label{pool_get}
+\index{\cppmacro{pool\_get}{}}
+\item[{\cppmacro[void *]{pool\_get}{cw\_pool\_t *a\_pool}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_pool: ]
+			Pointer to a \classname{pool}.
+		\item[a\_filename: ]
+			Should be \_\_FILE\_\_.
+		\item[a\_line\_num: ]
+			Should be \_\_LINE\_\_.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to a memory buffer.
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Allocate a memory buffer and return a pointer to it.
+	\end{description}
+\label{pool_put_e}
+\index{\cfunc{pool\_put_e}{}}
+\item[{\cfunc[void]{pool\_put\_e}{cw\_pool\_t *a\_pool, void *a\_buffer, const
+char *a\_filename, cw\_uint32\_t a\_line\_num}}: ]
+\label{pool_put}
+\index{\cppmacro{pool\_put}{}}
+\item[{\cppmacro[void]{pool\_put}{cw\_pool\_t *a\_pool, void *a\_buffer}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_pool: ]
+			Pointer to a \classname{pool}.
+		\item[a\_buffer: ]
+			Pointer to a memory buffer.
+		\item[a\_filename: ]
+			Should be \_\_FILE\_\_.
+		\item[a\_line\_num: ]
+			Should be \_\_LINE\_\_.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Put back (deallocate) \cvar{a\_buffer}.
+	\end{description}
+\label{pool_dump}
+\index{\cfunc{pool\_dump}{}}
+\item[{\cfunc[void]{pool\_dump}{cw\_pool\_t *a\_pool, const char *a\_prefix}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_pool: ]
+			Pointer to a \classname{pool}.
+		\item[a\_prefix: ]
+			Pointer to a string which is used as a prefix for all
+			lines of output.
+		\end{description}
+	\item[Output(s): ]
+		Output printed to \cvar{out\_err}.
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Dump the internal state of \cvar{a\_pool} to \cvar{out\_err}.
 	\end{description}
 \end{description}
