@@ -1,3 +1,8 @@
+2000-01-11  Jason Evans  <jasone@canonware.com>
+
+	* src/out.c: Add -3 error return for functions that output to a
+	file descriptor to denote a write() error.
+
 2000-01-02  Jason Evans  <jasone@canonware.com>
 
 	* : Redesign and rewrite the treen code.  The API is substantially

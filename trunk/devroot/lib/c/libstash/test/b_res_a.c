@@ -23,7 +23,8 @@ main()
   
   libstash_init();
   dbg_register(cw_g_dbg, "res_error");
-  
+/*    dbg_register(cw_g_dbg, "res_state"); */
+
   res_new(&res);
   _cw_assert(FALSE == res_merge_file(&res, "b_res_a.res"));
   _cw_assert(FALSE == res_dump(&res, "b_res_a.dump"));

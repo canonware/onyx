@@ -959,19 +959,22 @@ out_p_put_fvn(cw_out_t * a_out, cw_sint32_t a_fd, cw_uint32_t a_size,
     {
       i += nwritten;
     }
+    else
+    {
+      retval = -3;
+      goto RETURN;
+    }
   } while ((i < out_size) && (-1 == nwritten) && (EAGAIN == errno));
 
+  retval = i;
+  
+  RETURN:
 #ifdef _CW_REENTRANT
   if (NULL != a_out)
   {
     mtx_unlock(&a_out->lock);
   }
 #endif
-/*    fsync(a_fd); */
-
-  retval = i;
-  
-  RETURN:
   if ((TRUE == malloced_output) && (NULL != output))
   {
     _cw_free(output);
