@@ -26,6 +26,9 @@ nxo_compare(const cw_nxo_t *a_a, const cw_nxo_t *a_b)
     switch (nxo_type_get(a_a))
     {
 	case NXOT_ARRAY:
+#ifdef CW_OOP
+	case NXOT_CLASS:
+#endif
 #ifdef CW_THREADS
 	case NXOT_CONDITION:
 #endif
@@ -33,6 +36,9 @@ nxo_compare(const cw_nxo_t *a_a, const cw_nxo_t *a_b)
 	case NXOT_FILE:
 #ifdef CW_HANDLE
 	case NXOT_HANDLE:
+#endif
+#ifdef CW_OOP
+	case NXOT_INSTANCE:
 #endif
 #ifdef CW_THREADS
 	case NXOT_MUTEX:
@@ -304,6 +310,9 @@ nxo_nxoe_get(const cw_nxo_t *a_nxo)
     switch (nxo_type_get(a_nxo))
     {
 	case NXOT_ARRAY:
+#ifdef CW_OOP
+	case NXOT_CLASS:
+#endif
 #ifdef CW_THREADS
 	case NXOT_CONDITION:
 #endif
@@ -311,6 +320,9 @@ nxo_nxoe_get(const cw_nxo_t *a_nxo)
 	case NXOT_FILE:
 #ifdef CW_HANDLE
 	case NXOT_HANDLE:
+#endif
+#ifdef CW_OOP
+	case NXOT_INSTANCE:
 #endif
 #ifdef CW_THREADS
 	case NXOT_MUTEX:

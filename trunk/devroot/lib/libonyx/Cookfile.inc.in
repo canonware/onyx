@@ -29,6 +29,9 @@
                nxo_integer.h nxo_mark.h nxo_name.h nxo_no.h nxo_null.h
                nxo_operator.h nxo_pmark.h nxo_stack.h nxo_string.h nxo_thread.h
                ql.h qr.h qs.h systemdict.h xep.h
+#if @enable_oop@
+               nxo_class.h nxo_instance.h
+#endif
 #if @enable_handle@
                nxo_handle.h
 #endif
@@ -56,6 +59,9 @@ LIBONYX_COMMON_SRCS = [addprefix @srcroot@/lib/libonyx/src/
                                  nxo_mark.c nxo_name.c nxo_null.c nxo_operator.c
                                  nxo_pmark.c nxo_stack.c nxo_string.c
                                  nxo_thread.c systemdict.c xep.c
+#if @enable_oop@
+                                 nxo_class.c nxo_instance.c
+#endif
 #if @enable_handle@
                                  nxo_handle.c
 #endif
@@ -100,14 +106,15 @@ LIBONYX_CTESTS = [addprefix @srcroot@/lib/libonyx/test/ [LIBONYX_CTESTS]];
 ONYX_TEX_SRCS += [addprefix @srcroot@/lib/libonyx/doc/latex/
                             ch.tex cnd.tex dch.tex gcdict.tex mb.tex mem.tex
                             mq.tex mtx.tex nx.tex nxa.tex nxn.tex nxo.tex
-                            nxo_array.tex nxo_boolean.tex nxo_dict.tex
-                            nxo_file.tex nxo_fino.tex nxo_handle.tex
-                            nxo_integer.tex nxo_mark.tex nxo_mutex.tex
-                            nxo_name.tex nxo_no.tex nxo_null.tex
-                            nxo_operator.tex nxo_pmark.tex nxo_real.tex
-                            nxo_regex.tex nxo_regsub.tex nxo_stack.tex
-                            nxo_string.tex nxo_thread.tex ql.tex qr.tex qs.tex
-                            systemdict.tex thd.tex tsd.tex xep.tex]
+                            nxo_array.tex nxo_boolean.tex nxo_class.tex
+                            nxo_dict.tex nxo_file.tex nxo_fino.tex
+                            nxo_handle.tex nxo_instance.tex nxo_integer.tex
+                            nxo_mark.tex nxo_mutex.tex nxo_name.tex nxo_no.tex
+                            nxo_null.tex nxo_operator.tex nxo_pmark.tex
+                            nxo_real.tex nxo_regex.tex nxo_regsub.tex
+                            nxo_stack.tex nxo_string.tex nxo_thread.tex ql.tex
+                            qr.tex qs.tex systemdict.tex thd.tex tsd.tex
+                            xep.tex]
                  @objroot@/lib/libonyx/doc/latex/manual.tex;
 
 /* Libraries. */

@@ -674,11 +674,17 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 			    break;
 			}
 			case NXOT_BOOLEAN:
+#ifdef CW_OOP
+			case NXOT_CLASS:
+#endif
 #ifdef CW_THREADS
 			case NXOT_CONDITION:
 #endif
 			case NXOT_DICT:
 			case NXOT_FINO:
+#ifdef CW_OOP
+			case NXOT_INSTANCE:
+#endif
 			case NXOT_INTEGER:
 			case NXOT_MARK:
 #ifdef CW_THREADS
@@ -856,11 +862,17 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 		break;
 	    }
 	    case NXOT_BOOLEAN:
+#ifdef CW_OOP
+	    case NXOT_CLASS:
+#endif
 #ifdef CW_THREADS
 	    case NXOT_CONDITION:
 #endif
 	    case NXOT_DICT:
 	    case NXOT_FINO:
+#ifdef CW_OOP
+	    case NXOT_INSTANCE:
+#endif
 	    case NXOT_INTEGER:
 	    case NXOT_MARK:
 #ifdef CW_THREADS

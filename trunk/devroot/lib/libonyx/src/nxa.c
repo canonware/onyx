@@ -82,6 +82,9 @@
 #include "../include/libonyx/nxa_l.h"
 #include "../include/libonyx/nxo_l.h"
 #include "../include/libonyx/nxo_array_l.h"
+#ifdef CW_OOP
+#include "../include/libonyx/nxo_class_l.h"
+#endif
 #ifdef CW_THREADS
 #include "../include/libonyx/nxo_condition_l.h"
 #endif
@@ -89,6 +92,9 @@
 #include "../include/libonyx/nxo_file_l.h"
 #ifdef CW_HANDLE
 #include "../include/libonyx/nxo_handle_l.h"
+#endif
+#ifdef CW_OOP
+#include "../include/libonyx/nxo_instance_l.h"
 #endif
 #ifdef CW_THREADS
 #include "../include/libonyx/nxo_mutex_l.h"
@@ -243,6 +249,13 @@ nxa_p_sweep(void)
 		    notyet = nxoe_l_array_delete(nxoe, s_iter);
 		    break;
 		}
+#ifdef CW_OOP
+		case NXOT_CLASS:
+		{
+		    notyet = nxoe_l_class_delete(nxoe, s_iter);
+		    break;
+		}
+#endif
 #ifdef CW_THREADS
 		case NXOT_CONDITION:
 		{
@@ -264,6 +277,13 @@ nxa_p_sweep(void)
 		case NXOT_HANDLE:
 		{
 		    notyet = nxoe_l_handle_delete(nxoe, s_iter);
+		    break;
+		}
+#endif
+#ifdef CW_OOP
+		case NXOT_INSTANCE:
+		{
+		    notyet = nxoe_l_instance_delete(nxoe, s_iter);
 		    break;
 		}
 #endif
@@ -915,6 +935,13 @@ nxa_p_mark(void)
 		    nxoe = nxoe_l_array_ref_iter(gray, reset);
 		    break;
 		}
+#ifdef CW_OOP
+		case NXOT_CLASS:
+		{
+		    nxoe = nxoe_l_class_ref_iter(gray, reset);
+		    break;
+		}
+#endif
 #ifdef CW_THREADS
 		case NXOT_CONDITION:
 		{
@@ -936,6 +963,13 @@ nxa_p_mark(void)
 		case NXOT_HANDLE:
 		{
 		    nxoe = nxoe_l_handle_ref_iter(gray, reset);
+		    break;
+		}
+#endif
+#ifdef CW_OOP
+		case NXOT_INSTANCE:
+		{
+		    nxoe = nxoe_l_instance_ref_iter(gray, reset);
 		    break;
 		}
 #endif

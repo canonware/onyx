@@ -102,6 +102,14 @@ $sprintsdict <
 	cvs
     }
 ' cat
+@enable_oop@ 1 eq {
+    `
+    $classtype {
+	pop pop
+	`-class-'
+    }
+    ' cat
+} if
 @enable_threads@ 1 eq {
     `
     $conditiontype {
@@ -185,6 +193,14 @@ $sprintsdict <
 	    pop pop
 	    `-handle-'
 	} ifelse
+    }
+    ' cat
+} if
+@enable_oop@ 1 eq {
+    `
+    $instancetype {
+	pop pop
+	`-instance-'
     }
     ' cat
 } if
@@ -544,6 +560,11 @@ $outputsdict <
 	$arraytype
 	$booleantype
 ' cat
+@enable_oop@ 1 eq {
+    `
+	$classtype
+    ' cat
+} if
 @enable_threads@ 1 eq {
     `
 	$conditiontype
@@ -557,6 +578,11 @@ $outputsdict <
 @enable_threads@ 1 eq {
     `
 	$handletype
+    ' cat
+} if
+@enable_oop@ 1 eq {
+    `
+	$instancetype
     ' cat
 } if
 `

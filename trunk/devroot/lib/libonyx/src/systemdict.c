@@ -3152,6 +3152,9 @@ systemdict_cvs(cw_nxo_t *a_thread)
 	    break;
 	}
 	case NXOT_ARRAY:
+#ifdef CW_OOP
+	case NXOT_CLASS:
+#endif
 #ifdef CW_THREADS
 	case NXOT_CONDITION:
 #endif
@@ -3160,6 +3163,9 @@ systemdict_cvs(cw_nxo_t *a_thread)
 	case NXOT_FINO:
 #ifdef CW_HANDLE
 	case NXOT_HANDLE:
+#endif
+#ifdef CW_OOP
+	case NXOT_INSTANCE:
 #endif
 	case NXOT_MARK:
 #ifdef CW_THREADS
@@ -4929,10 +4935,16 @@ systemdict_lcheck(cw_nxo_t *a_thread)
     switch (nxo_type_get(nxo))
     {
 	case NXOT_BOOLEAN:
+#ifdef CW_OOP
+	case NXOT_CLASS:
+#endif
 	case NXOT_CONDITION:
 	case NXOT_FINO:
 #ifdef CW_HANDLE
 	case NXOT_HANDLE:
+#endif
+#ifdef CW_OOP
+	case NXOT_INSTANCE:
 #endif
 	case NXOT_INTEGER:
 	case NXOT_MARK:
@@ -12399,6 +12411,9 @@ systemdict_type(cw_nxo_t *a_thread)
 	0,
 	NXN_arraytype,
 	NXN_booleantype,
+#ifdef CW_OOP
+	NXN_classtype,
+#endif
 #ifdef CW_THREADS
 	NXN_conditiontype,
 #endif
@@ -12407,6 +12422,9 @@ systemdict_type(cw_nxo_t *a_thread)
 	NXN_finotype,
 #ifdef CW_HANDLE
 	NXN_handletype,
+#endif
+#ifdef CW_OOP
+	NXN_instancetype,
 #endif
 	NXN_integertype,
 	NXN_marktype,

@@ -23,6 +23,9 @@ typedef enum
     NXOT_NO,
     NXOT_ARRAY,
     NXOT_BOOLEAN,
+#ifdef CW_OOP
+    NXOT_CLASS,
+#endif
 #ifdef CW_THREADS
     NXOT_CONDITION,
 #endif
@@ -31,6 +34,9 @@ typedef enum
     NXOT_FINO,
 #ifdef CW_HANDLE
     NXOT_HANDLE,
+#endif
+#ifdef CW_OOP
+    NXOT_INSTANCE,
 #endif
     NXOT_INTEGER,
     NXOT_MARK,

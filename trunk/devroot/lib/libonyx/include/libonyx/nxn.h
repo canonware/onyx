@@ -104,6 +104,10 @@ typedef enum
     NXN_ENTRY(chown),
     NXN_ENTRY(chroot),
 #endif
+#ifdef CW_OOP
+    NXN_ENTRY(class),
+    NXN_ENTRY(classtype),
+#endif
     NXN_ENTRY(clear),
     NXN_ENTRY(cleartomark),
 #ifdef CW_POSIX
@@ -273,6 +277,10 @@ typedef enum
     NXN_ENTRY(inc),
 #ifdef CW_POSIX
     NXN_ENTRY(ino),
+#endif
+#ifdef CW_OOP
+    NXN_ENTRY(instance),
+    NXN_ENTRY(instancetype),
 #endif
     NXN_ENTRY(integertype),
     NXN_ENTRY(invalidaccess),

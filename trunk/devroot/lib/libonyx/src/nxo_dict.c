@@ -558,6 +558,9 @@ nxo_p_dict_hash(const void *a_key)
     switch (nxo_type_get(key))
     {
 	case NXOT_ARRAY:
+#ifdef CW_OOP
+	case NXOT_CLASS:
+#endif
 #ifdef CW_THREADS
 	case NXOT_CONDITION:
 #endif
@@ -565,6 +568,9 @@ nxo_p_dict_hash(const void *a_key)
 	case NXOT_FILE:
 #ifdef CW_HANDLE
 	case NXOT_HANDLE:
+#endif
+#ifdef CW_OOP
+	case NXOT_INSTANCE:
 #endif
 #ifdef CW_THREADS
 	case NXOT_MUTEX:

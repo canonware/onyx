@@ -25,6 +25,8 @@
 #undef CW_STHREADS
 #undef CW_PTH
 
+#undef CW_OOP
+
 #undef CW_HANDLE
 
 #undef CW_REAL

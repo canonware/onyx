@@ -392,6 +392,10 @@ typedef struct cw_mema_s cw_mema_t;
 #include "nxo_dict.h"
 #include "nxo_file.h"
 #include "nxo_fino.h"
+#ifdef CW_OOP
+#include "nxo_class.h"
+#include "nxo_instance.h"
+#endif
 #ifdef CW_HANDLE
 #include "nxo_handle.h"
 #endif
