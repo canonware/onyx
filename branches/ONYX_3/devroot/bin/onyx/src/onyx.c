@@ -170,7 +170,13 @@ batch_run(int argc, char **argv, char **envp)
     /* Parse command line arguments, but postpone taking any actions that
      * require the onyx interpreter to be up and running.  This is necessary
      * because we need to know how much of argv to pass to nx_new(). */
-    c = getopt(argc, argv, "hVe:");
+    c = getopt(argc, argv,
+#ifdef _GNU_SOURCE
+	       /* Without this, glibc will permute unknown options to the end of
+		* the argument list. */
+	       "+"
+#endif
+	       "hVe:");
     switch (c)
     {
 	case 'h':
