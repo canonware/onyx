@@ -36,6 +36,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(astore),
 	ENTRY(begin),
 	ENTRY(bind),
+	ENTRY(broadcast),
 	ENTRY(bytesavailable),
 	ENTRY(clear),
 	ENTRY(cleardictstack),
@@ -98,11 +99,11 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(mark),
 	ENTRY(mod),
 	ENTRY(mul),
+	ENTRY(mutex),
 	ENTRY(ne),
 	ENTRY(neg),
 	ENTRY(noaccess),
 	ENTRY(not),
-	ENTRY(notify),
 	ENTRY(or),
 	ENTRY(pop),
 	ENTRY(print),
@@ -126,6 +127,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(setfileposition),
 	ENTRY(setglobal),
 	ENTRY(shift),
+	ENTRY(signal),
 	ENTRY(srand),
 	ENTRY(stack),
 	ENTRY(start),
@@ -493,6 +495,24 @@ systemdict_bind(cw_stilt_t *a_stilt)
 }
 
 void
+systemdict_broadcast(cw_stilt_t *a_stilt)
+{
+	cw_stils_t	*ostack;
+	cw_stilo_t	*condition;
+	
+	ostack = stilt_ostack_get(a_stilt);
+	STILS_GET(condition, ostack, a_stilt);
+	if (stilo_type_get(condition) != STILOT_CONDITION) {
+		stilt_error(a_stilt, STILTE_TYPECHECK);
+		return;
+	}
+
+	stilo_condition_broadcast(condition);
+
+	stils_pop(ostack);
+}
+
+void
 systemdict_bytesavailable(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack;
@@ -585,7 +605,12 @@ systemdict_closefile(cw_stilt_t *a_stilt)
 void
 systemdict_condition(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*ostack;
+	cw_stilo_t	*condition;
+
+	ostack = stilt_ostack_get(a_stilt);
+	condition = stils_push(ostack);
+	stilo_condition_new(condition, a_stilt);
 }
 
 void
@@ -765,7 +790,19 @@ systemdict_counttomark(cw_stilt_t *a_stilt)
 void
 systemdict_currentcontext(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*ostack;
+	cw_stilo_t	*context;
+	/* XXX Perhaps a better solution is to have a tsd key for thread ID. */
+	union {
+		cw_sint64_t	i;
+		void		*p;
+	} u;
+
+	ostack = stilt_ostack_get(a_stilt);
+	context = stils_push(ostack);
+
+	u.p = thd_self();
+	stilo_integer_new(context, u.i);
 }
 
 void
@@ -977,7 +1014,7 @@ systemdict_cvs(cw_stilt_t *a_stilt)
 	case STILOT_DICT:
 	case STILOT_FILE:
 	case STILOT_HOOK:
-	case STILOT_LOCK:
+	case STILOT_MUTEX:
 	case STILOT_MARK:
 	case STILOT_NULL:
 	default:
@@ -1284,7 +1321,7 @@ systemdict_executeonly(cw_stilt_t *a_stilt)
 	case STILOT_DICT:
 	case STILOT_FILE:
 	case STILOT_HOOK:
-	case STILOT_LOCK:
+	case STILOT_MUTEX:
 	case STILOT_STRING: {
 		cw_stilte_t	error;
 
@@ -1687,7 +1724,7 @@ systemdict_gcheck(cw_stilt_t *a_stilt)
 	case STILOT_DICT:
 	case STILOT_FILE:
 	case STILOT_HOOK:
-	case STILOT_LOCK:
+	case STILOT_MUTEX:
 	case STILOT_STRING:
 		global = stilo_global_get(stilo);
 		break;
@@ -2115,7 +2152,19 @@ systemdict_load(cw_stilt_t *a_stilt)
 void
 systemdict_lock(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*ostack;
+	cw_stilo_t	*mutex;
+
+	ostack = stilt_ostack_get(a_stilt);
+	STILS_GET(mutex, ostack, a_stilt);
+	if (stilo_type_get(mutex) != STILOT_MUTEX) {
+		stilt_error(a_stilt, STILTE_TYPECHECK);
+		return;
+	}
+
+	stilo_mutex_lock(mutex);
+
+	stils_pop(ostack);
 }
 
 void
@@ -2255,6 +2304,17 @@ systemdict_mul(cw_stilt_t *a_stilt)
 }
 
 void
+systemdict_mutex(cw_stilt_t *a_stilt)
+{
+	cw_stils_t	*ostack;
+	cw_stilo_t	*mutex;
+
+	ostack = stilt_ostack_get(a_stilt);
+	mutex = stils_push(ostack);
+	stilo_mutex_new(mutex, a_stilt);
+}
+
+void
 systemdict_ne(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack;
@@ -2310,7 +2370,7 @@ systemdict_noaccess(cw_stilt_t *a_stilt)
 	case STILOT_DICT:
 	case STILOT_FILE:
 	case STILOT_HOOK:
-	case STILOT_LOCK:
+	case STILOT_MUTEX:
 	case STILOT_STRING: {
 		cw_stilte_t	error;
 
@@ -2343,12 +2403,6 @@ systemdict_not(cw_stilt_t *a_stilt)
 		stilo_integer_set(stilo, ~stilo_integer_get(stilo));
 	else
 		stilt_error(a_stilt, STILTE_TYPECHECK);
-}
-
-void
-systemdict_notify(cw_stilt_t *a_stilt)
-{
-	_cw_error("XXX Not implemented");
 }
 
 void
@@ -2603,7 +2657,7 @@ systemdict_rcheck(cw_stilt_t *a_stilt)
 	case STILOT_DICT:
 	case STILOT_FILE:
 	case STILOT_HOOK:
-	case STILOT_LOCK:
+	case STILOT_MUTEX:
 	case STILOT_STRING: {
 		cw_stilop_t	perms;
 		cw_bool_t	result;
@@ -2706,7 +2760,7 @@ systemdict_readonly(cw_stilt_t *a_stilt)
 	case STILOT_DICT:
 	case STILOT_FILE:
 	case STILOT_HOOK:
-	case STILOT_LOCK:
+	case STILOT_MUTEX:
 	case STILOT_STRING: {
 		cw_stilte_t	error;
 
@@ -3058,6 +3112,24 @@ systemdict_shift(cw_stilt_t *a_stilt)
 		stilo_integer_set(integer, stilo_integer_get(integer) >>
 		    stilo_integer_get(shift));
 	}
+
+	stils_pop(ostack);
+}
+
+void
+systemdict_signal(cw_stilt_t *a_stilt)
+{
+	cw_stils_t	*ostack;
+	cw_stilo_t	*condition;
+	
+	ostack = stilt_ostack_get(a_stilt);
+	STILS_GET(condition, ostack, a_stilt);
+	if (stilo_type_get(condition) != STILOT_CONDITION) {
+		stilt_error(a_stilt, STILTE_TYPECHECK);
+		return;
+	}
+
+	stilo_condition_signal(condition);
 
 	stils_pop(ostack);
 }
@@ -3472,7 +3544,32 @@ systemdict_sym_rb(cw_stilt_t *a_stilt)
 void
 systemdict_timedwait(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*ostack;
+	cw_stilo_t	*condition, *mutex, *nsecs;
+	struct timespec	timeout;
+
+	ostack = stilt_ostack_get(a_stilt);
+	STILS_GET(nsecs, ostack, a_stilt);
+	STILS_DOWN_GET(mutex, ostack, a_stilt, nsecs);
+	STILS_DOWN_GET(condition, ostack, a_stilt, mutex);
+	if (stilo_type_get(condition) != STILOT_CONDITION ||
+	    stilo_type_get(mutex) != STILOT_MUTEX || stilo_type_get(nsecs) !=
+	    STILOT_INTEGER) {
+		stilt_error(a_stilt, STILTE_TYPECHECK);
+		return;
+	}
+	if (stilo_integer_get(nsecs) < 0) {
+		stilt_error(a_stilt, STILTE_RANGECHECK);
+		return;
+	}
+
+	/* Convert integer to timespec. */
+	timeout.tv_nsec = stilo_integer_get(nsecs) % 1000000000;
+	timeout.tv_sec = stilo_integer_get(nsecs) / 1000000000;
+
+	stilo_condition_timedwait(condition, mutex, &timeout);
+
+	stils_npop(ostack, 3);
 }
 
 void
@@ -3610,7 +3707,20 @@ systemdict_token(cw_stilt_t *a_stilt)
 void
 systemdict_trylock(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*ostack;
+	cw_stilo_t	*mutex;
+	cw_bool_t	error;
+
+	ostack = stilt_ostack_get(a_stilt);
+	STILS_GET(mutex, ostack, a_stilt);
+	if (stilo_type_get(mutex) != STILOT_MUTEX) {
+		stilt_error(a_stilt, STILTE_TYPECHECK);
+		return;
+	}
+
+	error = stilo_mutex_trylock(mutex);
+
+	stilo_boolean_new(mutex, error);
 }
 
 void
@@ -3671,7 +3781,19 @@ systemdict_undef(cw_stilt_t *a_stilt)
 void
 systemdict_unlock(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*ostack;
+	cw_stilo_t	*mutex;
+
+	ostack = stilt_ostack_get(a_stilt);
+	STILS_GET(mutex, ostack, a_stilt);
+	if (stilo_type_get(mutex) != STILOT_MUTEX) {
+		stilt_error(a_stilt, STILTE_TYPECHECK);
+		return;
+	}
+
+	stilo_mutex_unlock(mutex);
+
+	stils_pop(ostack);
 }
 
 void
@@ -3683,7 +3805,21 @@ systemdict_version(cw_stilt_t *a_stilt)
 void
 systemdict_wait(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*ostack;
+	cw_stilo_t	*condition, *mutex;
+
+	ostack = stilt_ostack_get(a_stilt);
+	STILS_GET(mutex, ostack, a_stilt);
+	STILS_DOWN_GET(condition, ostack, a_stilt, mutex);
+	if (stilo_type_get(condition) != STILOT_CONDITION ||
+	    stilo_type_get(mutex) != STILOT_MUTEX) {
+		stilt_error(a_stilt, STILTE_TYPECHECK);
+		return;
+	}
+
+	stilo_condition_wait(condition, mutex);
+
+	stils_npop(ostack, 2);
 }
 
 void
@@ -3701,7 +3837,7 @@ systemdict_wcheck(cw_stilt_t *a_stilt)
 	case STILOT_DICT:
 	case STILOT_FILE:
 	case STILOT_HOOK:
-	case STILOT_LOCK:
+	case STILOT_MUTEX:
 	case STILOT_STRING: {
 		cw_stilop_t	perms;
 		cw_bool_t	result;
@@ -3863,5 +3999,5 @@ systemdict_xor(cw_stilt_t *a_stilt)
 void
 systemdict_yield(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	thd_yield();
 }

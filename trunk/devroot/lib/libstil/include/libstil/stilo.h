@@ -71,8 +71,8 @@ typedef enum {
 	STILOT_FILE,
 	STILOT_HOOK,
 	STILOT_INTEGER,
-	STILOT_LOCK,
 	STILOT_MARK,
+	STILOT_MUTEX,
 	STILOT_NAME,
 	STILOT_NULL,
 	STILOT_OPERATOR,
@@ -237,6 +237,11 @@ void		stilo_boolean_set(cw_stilo_t *a_stilo, cw_bool_t a_val);
  * condition.
  */
 void		stilo_condition_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
+void		stilo_condition_signal(cw_stilo_t *a_stilo);
+void		stilo_condition_broadcast(cw_stilo_t *a_stilo);
+void		stilo_condition_wait(cw_stilo_t *a_stilo, cw_stilo_t *a_mutex);
+cw_bool_t	stilo_condition_timedwait(cw_stilo_t *a_stilo, cw_stilo_t
+    *a_mutex, const struct timespec *a_timeout);
 
 /*
  * dict.
@@ -321,14 +326,17 @@ cw_stilte_t	stilo_hook_copy(cw_stilo_t *a_to, cw_stilo_t *a_from,
 } while (0)
 
 /*
- * lock.
- */
-void		stilo_lock_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
-
-/*
  * mark.
  */
 void		stilo_mark_new(cw_stilo_t *a_stilo);
+
+/*
+ * mutex.
+ */
+void		stilo_mutex_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
+void		stilo_mutex_lock(cw_stilo_t *a_stilo);
+cw_bool_t	stilo_mutex_trylock(cw_stilo_t *a_stilo);
+void		stilo_mutex_unlock(cw_stilo_t *a_stilo);
 
 /*
  * name.
