@@ -2,7 +2,7 @@
 #-*-mode:perl-*-
 #############################################################################
 #
-# Copyright (c) 1998
+# Copyright (C) 1998.
 # Jason Evans <jasone@canonware.com>.  All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -30,22 +30,55 @@
 #
 # $Source$
 # $Author: jasone $
-# $Revision: 50 $
-# $Date: 1998-04-26 23:06:32 -0700 (Sun, 26 Apr 1998) $
+# $Revision: 89 $
+# $Date: 1998-06-23 17:52:25 -0700 (Tue, 23 Jun 1998) $
 #
 # <<< Description >>>
 #
-#
-#
+# This script does all the necessary work to create a snapshot release of a 
+# source tree that is under cvs control.
 #
 #############################################################################
 
 use Cwd; # For pwd().
+use File::Find; # For find().
+use FileHandle; # For file manipulation.
+use Getopt::Long;
+
+# XXX The following variables should be set according to the needs of the
+# project.
+$src_dir = "sqrl";
+$dot = "sqlmaster";
+
+@COPYRIGHT = (
+'Copyright (C) 1996-1998 Jason Evans <jasone@canonware.com>.',
+'All rights reserved.',
+'',
+'Redistribution and use in source and binary forms, with or without',
+'modification, are permitted provided that the following conditions',
+'are met:',
+'1. Redistributions of source code must retain the above copyright',
+'   notice, this list of conditions and the following disclaimer as',
+'   the first lines of this file unmodified.',
+'2. Redistributions in binary form must reproduce the above copyright',
+'   notice, this list of conditions and the following disclaimer in the',
+'   documentation and/or other materials provided with the distribution.',
+'',
+"THIS SOFTWARE IS PROVIDED BY JASON EVANS ``AS IS'' AND ANY EXPRESS OR",
+'IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES',
+'OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.',
+'IN NO EVENT SHALL JASON EVANS BE LIABLE FOR ANY DIRECT, INDIRECT,',
+'INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT',
+'NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,',
+'DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY',
+'THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT',
+'(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF',
+'THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.',
+);
 
 #
 # Parse command-line arguments.
 #
-use Getopt::Long;
 Getopt::Long::config("bundling"); # Allow -hv rather than forcing -h -v.
 
 $opt_retval = 
@@ -53,9 +86,7 @@ $opt_retval =
 	      "n|noact" => \$opt_noact,
 	      "v|verbose" => \$opt_verbose,
 	      "t|tag=s" => \$opt_tag#,
-# 	    "" => \$opt_?,
-# 	    "" => \$opt_?,
-# 	    "" => \$opt_?,
+#	      "" => \$opt_?,
 	     );
 
 if (($#ARGV >= 0) 
@@ -86,30 +117,40 @@ unless ($opt_noact)
 
 if ($opt_verbose)
   {
-    print STDERR "cvs tag SNAP_$opt_tag sqrl\n";
+    print STDERR "cvs tag SNAP_$opt_tag $src_dir\n";
   }
 unless ($opt_noact)
   {
-    `cvs tag SNAP_$opt_tag sqrl`;
+    `cvs tag SNAP_$opt_tag $src_dir`;
   }
 
 if ($opt_verbose)
   {
     print STDERR 
-      "cvs export -r SNAP_$opt_tag -d sqrl_$opt_tag sqlmaster/sqrl\n";
+      "cvs export -r SNAP_$opt_tag -d $src_dir\_$opt_tag $dot/$src_dir\n";
   }
 unless ($opt_noact)
   {
-    `cvs export -r SNAP_$opt_tag -d sqrl_$opt_tag sqlmaster/sqrl`;
+    `cvs export -r SNAP_$opt_tag -d $src_dir\_$opt_tag $dot/$src_dir`;
+  }
+
+# Find all the files that need the copyright tag expanded.
+if ($opt_verbose)
+  {
+    print STDERR "Doing copyright tag substitution:\n"
+  }
+unless ($opt_noact)
+  {
+    finddepth(\&expand_copyright, "$src_dir\_$opt_tag");
   }
 
 if ($opt_verbose)
   {
-    print STDERR "tar cvzf sqrl_$opt_tag.tar.gz sqrl_$opt_tag\n";
+    print STDERR "tar cvzf $src_dir\_$opt_tag.tar.gz $src_dir\_$opt_tag\n";
   }
 unless ($opt_noact)
   {
-    `tar cvzf sqrl_$opt_tag.tar.gz sqrl_$opt_tag`;
+    `tar cvzf $src_dir\_$opt_tag.tar.gz $src_dir\_$opt_tag`;
   }
 
 sub print_usage
@@ -118,4 +159,79 @@ sub print_usage
 $0 usage:
   $0 [-hnv --help --noact --verbose] --tag=<tag> | -t <tag>
 EOF
+  }
+
+sub expand_copyright
+  {
+    my ($name) = $_;
+    my ($did_subst) = 0;
+    my ($ifh, $ofh);
+
+    if (-r $name
+	&& (-w $name)
+	&& (-f $name)
+	&& (-s $name)
+       )
+      {
+	# Okay, we want to do this file.
+	# The filename is in $name.
+	# The directory is in $File::Find::dir.
+	if ($opt_verbose)
+	  {
+	    print STDERR "  $File::Find::dir/$name...";
+	  }
+
+	$ifh = new FileHandle $name, "r";
+	unless (defined $ifh)
+	  {
+	    print STDERR "Error opening $name for reading\n";
+	    exit(1);
+	  }
+	$ofh = new FileHandle "$name.tmp", "w";
+	unless (defined $ofh)
+	  {
+	    print STDERR "Error opening $name.tmp for writing\n";
+	    exit(1);
+	  }
+
+	while (<$ifh>)
+	  {
+	    if (/^(.*)\<Copyright\>.*\n/)
+	      {
+		$did_subst = 1;
+		foreach (@COPYRIGHT)
+		  {
+		    print $ofh "$1$_\n";
+		  }
+	      }
+	    else
+	      {
+		print $ofh "$_";
+	      }
+	  }
+	
+	$ifh->close;
+	$ofh->close;
+
+	if ($did_subst)
+	  {
+	    `mv $name.tmp $name`;
+	  }
+	else
+	  {
+	    `rm $name.tmp`
+	  }
+
+	if ($opt_verbose)
+	  {
+	    if ($did_subst)
+	      {
+		 print STDERR "yes\n";
+	      }
+	    else
+	      {
+		 print STDERR "no\n";
+	      }
+	  }
+      }
   }
