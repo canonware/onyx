@@ -14243,8 +14243,8 @@ systemdict_until(cw_nxo_t *a_thread)
 #ifdef CW_OOP
     cw_nxo_t *cstack;
 #endif
-    cw_nxo_t *nxo, *exec, *cond;
-    cw_uint32_t edepth, tdepth;
+    cw_nxo_t *nxo, *exec, *ocond, *cond;
+    cw_uint32_t edepth, tdepth, npop;
 #ifdef CW_OOP
     cw_uint32_t cdepth;
 #endif
@@ -14259,17 +14259,34 @@ systemdict_until(cw_nxo_t *a_thread)
     cstack = nxo_thread_cstack_get(a_thread);
 #endif
 
-    NXO_STACK_GET(cond, ostack, a_thread);
+    NXO_STACK_GET(ocond, ostack, a_thread);
     NXO_STACK_NGET(exec, ostack, a_thread, 1);
 
-    /* Move exec and cond to tstack. */
+    /* Move exec and ocond to tstack. */
     nxo = nxo_stack_push(tstack);
     nxo_dup(nxo, exec);
     exec = nxo;
 
     nxo = nxo_stack_push(tstack);
-    nxo_dup(nxo, cond);
-    cond = nxo;
+    nxo_dup(nxo, ocond);
+    ocond = nxo;
+
+    /* Replace an empty executable array with an executable null, to improve
+     * performance. */
+    if (nxo_type_get(ocond) == NXOT_ARRAY
+	&& nxo_attr_get(ocond) == NXOA_EXECUTABLE
+	&& nxo_array_len_get(ocond) == 0)
+    {
+	cond = nxo_stack_push(tstack);
+	nxo_null_new(cond);
+	nxo_attr_set(cond, NXOA_EXECUTABLE);
+	npop = 3;
+    }
+    else
+    {
+	cond = ocond;
+	npop = 2;
+    }
 
     nxo_stack_npop(ostack, 2);
 
@@ -14318,7 +14335,7 @@ systemdict_until(cw_nxo_t *a_thread)
 		nxo = nxo_stack_push(ostack);
 		nxo_dup(nxo, exec);
 		nxo = nxo_stack_push(ostack);
-		nxo_dup(nxo, cond);
+		nxo_dup(nxo, ocond);
 
 		nxo_thread_nerror((a_thread), nerror);
 		break;
@@ -14360,8 +14377,8 @@ systemdict_until(cw_nxo_t *a_thread)
     }
     xep_end();
 
-    /* Remove exec and cond from tstack. */
-    nxo_stack_npop(tstack, 2);
+    /* Remove exec, ocond, and (maybe) cond from tstack. */
+    nxo_stack_npop(tstack, npop);
 }
 
 void
@@ -14480,8 +14497,8 @@ systemdict_while(cw_nxo_t *a_thread)
 #ifdef CW_OOP
     cw_nxo_t *cstack;
 #endif
-    cw_nxo_t *nxo, *exec, *cond;
-    cw_uint32_t edepth, tdepth;
+    cw_nxo_t *nxo, *exec, *ocond, *cond;
+    cw_uint32_t edepth, tdepth, npop;
 #ifdef CW_OOP
     cw_uint32_t cdepth;
 #endif
@@ -14497,12 +14514,29 @@ systemdict_while(cw_nxo_t *a_thread)
 #endif
 
     NXO_STACK_GET(exec, ostack, a_thread);
-    NXO_STACK_NGET(cond, ostack, a_thread, 1);
+    NXO_STACK_NGET(ocond, ostack, a_thread, 1);
 
-    /* Move exec and cond to tstack. */
+    /* Move exec and ocond to tstack. */
     nxo = nxo_stack_push(tstack);
-    nxo_dup(nxo, cond);
-    cond = nxo;
+    nxo_dup(nxo, ocond);
+    ocond = nxo;
+
+    /* Replace an empty executable array with an executable null, to improve
+     * performance. */
+    if (nxo_type_get(ocond) == NXOT_ARRAY
+	&& nxo_attr_get(ocond) == NXOA_EXECUTABLE
+	&& nxo_array_len_get(ocond) == 0)
+    {
+	cond = nxo_stack_push(tstack);
+	nxo_null_new(cond);
+	nxo_attr_set(cond, NXOA_EXECUTABLE);
+	npop = 3;
+    }
+    else
+    {
+	cond = ocond;
+	npop = 2;
+    }
 
     nxo = nxo_stack_push(tstack);
     nxo_dup(nxo, exec);
@@ -14548,7 +14582,7 @@ systemdict_while(cw_nxo_t *a_thread)
 	    {
 		/* Push the inputs back onto ostack before throwing an error. */
 		nxo = nxo_stack_push(ostack);
-		nxo_dup(nxo, cond);
+		nxo_dup(nxo, ocond);
 		nxo = nxo_stack_push(ostack);
 		nxo_dup(nxo, exec);
 
@@ -14597,8 +14631,8 @@ systemdict_while(cw_nxo_t *a_thread)
     }
     xep_end();
 
-    /* Remove exec and cond from tstack. */
-    nxo_stack_npop(tstack, 2);
+    /* Remove exec, ocond, and (maybe) cond from tstack. */
+    nxo_stack_npop(tstack, npop);
 }
 
 void

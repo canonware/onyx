@@ -1,3 +1,9 @@
+2003-10-02 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/systemdict.c:systemdict_{while,until}() : Replace an
+	  empty executable conditional array with an executable null to improve
+	  performance.
+
 2003-09-19 : Jason Evans <jasone@canonware.com>
 
 	* lib/libonyx/src/nx.nx.in : Only embed as a string when bootstrapping
