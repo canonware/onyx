@@ -108,8 +108,12 @@ if ($opt_tag =~ /^[^A-Za-z]/)
     &print_usage;
     exit(1);
   }
-
-
+if ($opt_subdir =~ /\//)
+  {
+    print STDERR "Error: subirectory must not contain any '/' characters\n";
+    &print_usage;
+    exit(1);
+  }
 if ($opt_verbose)
   {
     print STDERR "cvs tag $opt_tag $opt_subdir\n";
