@@ -40,6 +40,11 @@ struct cw_stiloe_s {
 
 	cw_stilot_t	type:4;
 	/*
+	 * Dictionary permissions.  Only dictionaries share permissions accross
+	 * all references.
+	 */
+	cw_stilop_t	perms:2;
+	/*
 	 * If TRUE, there is a watchpoint set on this object.  In general, this
 	 * field is not looked at unless the interpreter has been put into
 	 * debugging mode. Note that setting a watchpoint on an extended type
@@ -109,11 +114,6 @@ struct cw_stiloe_dict_s {
 			 * dicto is the next reference to check.
 			 */
 			cw_stiloe_dicto_t *dicto;
-			/*
-			 * Initial capacity.  This is only needed when copying
-			 * the dict.
-			 */
-			cw_uint32_t	capacity;
 			/*
 			 * Name/value pairs.  The keys are (cw_stilo_t *), and
 			 * the values are * (cw_stiloe_dicto_t *).  The stilo
@@ -382,7 +382,7 @@ struct  cw_stilot_vtable_s {
  * cw_stilot_t.  NULL pointers are used in entries that should never get called,
  * so that a segfault will occur if such a non-existent function is called.
  */
-static cw_stilot_vtable_t stilot_vtable[] = {
+static const cw_stilot_vtable_t stilot_vtable[] = {
 	/* STILOT_NO */
 	{NULL,
 	 NULL,
@@ -582,7 +582,7 @@ stilo_global_get(cw_stilo_t *a_stilo)
 	case STILOT_FILE:
 	case STILOT_HOOK:
 	case STILOT_LOCK:
-	case STILOT_NAME:
+	case STILOT_NAME:	/* XXX Simple type.  Remove this? */
 	case STILOT_STRING:
 		retval = a_stilo->o.stiloe->global;
 		break;
@@ -593,6 +593,94 @@ stilo_global_get(cw_stilo_t *a_stilo)
 	retval = a_stilo->o.stiloe->global;
 #endif
 
+	return retval;
+}
+
+cw_stilop_t
+stilo_perms_get(cw_stilo_t *a_stilo)
+{
+	cw_stilop_t	retval;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+#ifdef _LIBSTIL_DBG
+	switch (a_stilo->type) {
+	case STILOT_ARRAY:
+	case STILOT_CONDITION:
+	case STILOT_DICT:
+	case STILOT_FILE:
+	case STILOT_HOOK:
+	case STILOT_LOCK:
+	case STILOT_STRING:
+		break;
+	default:
+		_cw_error("Not a composite object");
+	}
+#endif
+
+	if (a_stilo->type != STILOT_DICT)
+		retval = a_stilo->perms;
+	else {
+		cw_stiloe_dict_t	*dict;
+
+		dict = (cw_stiloe_dict_t *)a_stilo->o.stiloe;
+
+		/* Chase down the base dict. */
+		if (dict->stiloe.indirect)
+			dict = (cw_stiloe_dict_t *)dict->e.i.stilo.o.stiloe;
+
+		retval = dict->stiloe.perms;
+	}
+
+	return retval;
+}
+
+cw_stilte_t
+stilo_perms_set(cw_stilo_t *a_stilo, cw_stilop_t a_perms)
+{
+	cw_stilte_t	retval;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+#ifdef _LIBSTIL_DBG
+	switch (a_stilo->type) {
+	case STILOT_ARRAY:
+	case STILOT_CONDITION:
+	case STILOT_DICT:
+	case STILOT_FILE:
+	case STILOT_HOOK:
+	case STILOT_LOCK:
+	case STILOT_STRING:
+		break;
+	default:
+		_cw_error("Not a composite object");
+	}
+#endif
+
+	if (a_stilo->type != STILOT_DICT) {
+		if (a_stilo->perms >= a_perms) {
+			retval = STILTE_INVALIDACCESS;
+			goto RETURN;
+		}
+		a_stilo->perms = a_perms;
+	} else {
+		cw_stiloe_dict_t	*dict;
+
+		dict = (cw_stiloe_dict_t *)a_stilo->o.stiloe;
+
+		/* Chase down the base dict. */
+		if (dict->stiloe.indirect)
+			dict = (cw_stiloe_dict_t *)dict->e.i.stilo.o.stiloe;
+
+		if (dict->stiloe.perms >= a_perms) {
+			retval = STILTE_INVALIDACCESS;
+			goto RETURN;
+		}
+		dict->stiloe.perms = a_perms;
+	}
+
+	retval = STILTE_NONE;
+	RETURN:
 	return retval;
 }
 
@@ -1207,7 +1295,6 @@ stilo_dict_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_uint32_t
 
 	dict->iterations = 0;
 	dict->e.d.dicto = NULL;
-	dict->e.d.capacity = a_dict_size;
 
 	/*
 	 * Don't create a dict smaller than 16, since rounding errors for
@@ -1318,7 +1405,8 @@ stilo_dict_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
 	}
 
 	/* Deep (but not recursive) copy. */
-	stilo_dict_new(a_to, a_stilt, from->e.d.capacity);
+	count = dch_count(&from->e.d.hash);
+	stilo_dict_new(a_to, a_stilt, count);
 	to = (cw_stiloe_dict_t *)a_to->o.stiloe;
 
 	stiloe_p_lock(&from->stiloe);

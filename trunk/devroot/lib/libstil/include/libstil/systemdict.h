@@ -134,7 +134,6 @@ void	systemdict_trylock(cw_stilt_t *a_stilt);
 void	systemdict_type(cw_stilt_t *a_stilt);
 void	systemdict_undef(cw_stilt_t *a_stilt);
 void	systemdict_unlock(cw_stilt_t *a_stilt);
-void	systemdict_usertime(cw_stilt_t *a_stilt);
 void	systemdict_version(cw_stilt_t *a_stilt);
 void	systemdict_wait(cw_stilt_t *a_stilt);
 void	systemdict_wcheck(cw_stilt_t *a_stilt);

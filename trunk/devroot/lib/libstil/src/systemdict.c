@@ -11,6 +11,7 @@
 
 #include "../include/libstil/libstil.h"
 
+#include <sys/time.h>	/* For realtime operator. */
 #include <errno.h>
 
 /* Initial size of dictionaries created with the dict operator. */
@@ -22,19 +23,6 @@ struct cw_systemdict_entry {
 };
 
 #define ENTRY(name)	{STILN_##name, systemdict_##name}
-
-/*
- * Array of fastops, used by systemdict_bind().  stilt_loop() must have
- * corresponding handlers.
- */
-static const struct cw_systemdict_entry systemdict_fastops[] = {
-	ENTRY(add),
-	ENTRY(dup),
-	ENTRY(exch),
-	ENTRY(index),
-	ENTRY(pop),
-	ENTRY(roll)
-};
 
 /*
  * Array of operators in systemdict.
@@ -165,7 +153,6 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(type),
 	ENTRY(undef),
 	ENTRY(unlock),
-	ENTRY(usertime),
 	ENTRY(version),
 	ENTRY(wait),
 	ENTRY(wcheck),
@@ -453,6 +440,15 @@ systemdict_p_bind(cw_stilo_t *a_proc, cw_stilt_t *a_stilt)
 	cw_stils_t	*tstack;
 	cw_stilo_t	*el, *val;
 	cw_uint32_t	i, count;
+	/* Array of fastops.  stilt_loop() must have corresponding handlers. */
+	static const struct cw_systemdict_entry fastops[] = {
+		ENTRY(add),
+		ENTRY(dup),
+		ENTRY(exch),
+		ENTRY(index),
+		ENTRY(pop),
+		ENTRY(roll)
+	};
 
 	tstack = stilt_tstack_get(a_stilt);
 
@@ -477,7 +473,7 @@ systemdict_p_bind(cw_stilo_t *a_proc, cw_stilt_t *a_stilt)
 					cw_uint32_t	j;
 
 #define	NFASTOPS							\
-	(sizeof(systemdict_fastops) / sizeof(struct cw_systemdict_entry))
+	(sizeof(fastops) / sizeof(struct cw_systemdict_entry))
 
 					/*
 					 * If val can be converted to a fastop,
@@ -485,12 +481,12 @@ systemdict_p_bind(cw_stilo_t *a_proc, cw_stilt_t *a_stilt)
 					 */
 					for (j = 0; j < NFASTOPS; j++) {
 						if (stilo_operator_f(val) ==
-						    systemdict_fastops[j].op_f) {
+						    fastops[j].op_f) {
 							stilo_dup(el, val);
 							/* XXX API abuse. */
 							el->fast_op = TRUE;
 							el->op_code =
-							    systemdict_fastops[j].stiln;
+							    fastops[j].stiln;
 							break;
 						}
 					}
@@ -865,13 +861,92 @@ systemdict_cvlit(cw_stilt_t *a_stilt)
 void
 systemdict_cvn(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*ostack, *tstack;
+	cw_stilo_t	*stilo, *tstilo;
+
+	ostack = stilt_ostack_get(a_stilt);
+	tstack = stilt_tstack_get(a_stilt);
+	STILS_GET(stilo, ostack, a_stilt);
+
+	if (stilo_type_get(stilo) != STILOT_STRING) {
+		stilt_error(a_stilt, STILTE_TYPECHECK);
+		return;
+	}
+
+	tstilo = stils_push(tstack);
+	stilo_dup(tstilo, stilo);
+
+	stilo_name_new(stilo, a_stilt, stilo_string_get(tstilo),
+	    stilo_string_len_get(tstilo), FALSE);
+	stilo_attrs_set(stilo, stilo_attrs_get(tstilo));
+
+	stils_pop(tstack);
 }
 
 void
 systemdict_cvrs(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*ostack, *tstack;
+	cw_stilo_t	*num, *radix, *string, *tstring;
+	cw_stilte_t	error;
+	cw_uint64_t	val;
+	cw_uint32_t	i, rlen, base;
+	cw_uint8_t	*str;
+	static const cw_uint8_t *syms = "0123456789abcdefghijklmnopqrstuvwxyz";
+	cw_uint8_t	*result, s_result[65] =
+	    "0000000000000000000000000000000000000000000000000000000000000000";
+
+	ostack = stilt_ostack_get(a_stilt);
+	tstack = stilt_tstack_get(a_stilt);
+	STILS_GET(string, ostack, a_stilt);
+	STILS_DOWN_GET(radix, ostack, a_stilt, string);
+	STILS_DOWN_GET(num, ostack, a_stilt, radix);
+	if ((stilo_type_get(num) != STILOT_INTEGER) || (stilo_type_get(radix) !=
+	    STILOT_INTEGER) || (stilo_type_get(string) != STILOT_STRING)) {
+		stilt_error(a_stilt, STILTE_TYPECHECK);
+		return;
+	}
+	base = stilo_integer_get(radix);
+	if (base < 2 || base > 36) {
+		stilt_error(a_stilt, STILTE_RANGECHECK);
+		return;
+	}
+	val = (cw_uint64_t)stilo_integer_get(num);
+
+	/*
+	 * Handle radix 16 specially, since it can be done quickly, and is
+	 * commonly used.
+	 */
+	result = s_result;
+	if (base == 16) {
+		for (i = 63; val != 0; i--) {
+			result[i] = syms[val & 0xf];
+			val >>= 4;
+		}
+	} else {
+		for (i = 63; val != 0; i--) {
+			result[i] = syms[val % base];
+			val /= base;
+		}
+	}
+	result += i + 1;
+	rlen = 64 - (result - s_result);
+
+	tstring = stils_push(tstack);
+	stilo_dup(tstring, string);
+	error = stilo_string_substring_new(string, tstring, a_stilt, 0, rlen);
+	if (error) {
+		stils_pop(tstack);
+		stilt_error(a_stilt, error);
+		return;
+	}
+	stils_pop(tstack);
+
+	str = stilo_string_get(string);
+	memcpy(str, result, rlen);
+
+	stils_roll(ostack, 3, 1);
+	stils_npop(ostack, 2);
 }
 
 void
@@ -1166,7 +1241,33 @@ systemdict_execstack(cw_stilt_t *a_stilt)
 void
 systemdict_executeonly(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*ostack;
+	cw_stilo_t	*stilo;
+
+	ostack = stilt_ostack_get(a_stilt);
+	STILS_GET(stilo, ostack, a_stilt);
+
+	switch (stilo_type_get(stilo)) {
+	case STILOT_ARRAY:
+	case STILOT_CONDITION:
+	case STILOT_DICT:
+	case STILOT_FILE:
+	case STILOT_HOOK:
+	case STILOT_LOCK:
+	case STILOT_STRING: {
+		cw_stilte_t	error;
+
+		error = stilo_perms_set(stilo, STILOP_EXECUTEONLY);
+		if (error) {
+			stilt_error(a_stilt, error);
+			return;
+		}
+		break;
+	}
+	default:
+		stilt_error(a_stilt, STILTE_TYPECHECK);
+		return;
+	}
 }
 
 void
@@ -2136,7 +2237,33 @@ systemdict_neg(cw_stilt_t *a_stilt)
 void
 systemdict_noaccess(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*ostack;
+	cw_stilo_t	*stilo;
+
+	ostack = stilt_ostack_get(a_stilt);
+	STILS_GET(stilo, ostack, a_stilt);
+
+	switch (stilo_type_get(stilo)) {
+	case STILOT_ARRAY:
+	case STILOT_CONDITION:
+	case STILOT_DICT:
+	case STILOT_FILE:
+	case STILOT_HOOK:
+	case STILOT_LOCK:
+	case STILOT_STRING: {
+		cw_stilte_t	error;
+
+		error = stilo_perms_set(stilo, STILOP_NONE);
+		if (error) {
+			stilt_error(a_stilt, error);
+			return;
+		}
+		break;
+	}
+	default:
+		stilt_error(a_stilt, STILTE_TYPECHECK);
+		return;
+	}
 }
 
 void
@@ -2403,7 +2530,36 @@ systemdict_rand(cw_stilt_t *a_stilt)
 void
 systemdict_rcheck(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*ostack;
+	cw_stilo_t	*stilo;
+
+	ostack = stilt_ostack_get(a_stilt);
+	STILS_GET(stilo, ostack, a_stilt);
+
+	switch (stilo_type_get(stilo)) {
+	case STILOT_ARRAY:
+	case STILOT_CONDITION:
+	case STILOT_DICT:
+	case STILOT_FILE:
+	case STILOT_HOOK:
+	case STILOT_LOCK:
+	case STILOT_STRING: {
+		cw_stilop_t	perms;
+		cw_bool_t	result;
+
+		perms = stilo_perms_get(stilo);
+		if (perms < STILOP_EXECUTEONLY)
+			result = TRUE;
+		else
+			result = FALSE;
+		stilo_boolean_new(stilo, result);
+
+		break;
+	}
+	default:
+		stilt_error(a_stilt, STILTE_TYPECHECK);
+		return;
+	}
 }
 
 void
@@ -2446,7 +2602,33 @@ systemdict_read(cw_stilt_t *a_stilt)
 void
 systemdict_readonly(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*ostack;
+	cw_stilo_t	*stilo;
+
+	ostack = stilt_ostack_get(a_stilt);
+	STILS_GET(stilo, ostack, a_stilt);
+
+	switch (stilo_type_get(stilo)) {
+	case STILOT_ARRAY:
+	case STILOT_CONDITION:
+	case STILOT_DICT:
+	case STILOT_FILE:
+	case STILOT_HOOK:
+	case STILOT_LOCK:
+	case STILOT_STRING: {
+		cw_stilte_t	error;
+
+		error = stilo_perms_set(stilo, STILOP_READONLY);
+		if (error) {
+			stilt_error(a_stilt, error);
+			return;
+		}
+		break;
+	}
+	default:
+		stilt_error(a_stilt, STILTE_TYPECHECK);
+		return;
+	}
 }
 
 void
@@ -2501,7 +2683,16 @@ systemdict_readstring(cw_stilt_t *a_stilt)
 void
 systemdict_realtime(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*ostack;
+	cw_stilo_t	*stilo;
+	struct timeval	tv;
+
+	ostack = stilt_ostack_get(a_stilt);
+	stilo = stils_push(ostack);
+
+	gettimeofday(&tv, NULL);
+	stilo_integer_new(stilo, ((cw_sint64_t)tv.tv_sec *
+	    (cw_sint64_t)1000000) + (cw_sint64_t)tv.tv_usec);
 }
 
 void
@@ -3142,7 +3333,36 @@ systemdict_trylock(cw_stilt_t *a_stilt)
 void
 systemdict_type(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*ostack;
+	cw_stilo_t	*stilo;
+	cw_stilot_t	type;
+	/* Must be kept in sync with cw_stilot_t. */
+	static const cw_stiln_t typenames[] = {
+		0,
+		STILN_arraytype,
+		STILN_booleantype,
+		STILN_conditiontype,
+		STILN_dicttype,
+		STILN_filetype,
+		STILN_hooktype,
+		STILN_integertype,
+		STILN_locktype,
+		STILN_marktype,
+		STILN_nametype,
+		STILN_nulltype,
+		STILN_operatortype,
+		STILN_stringtype
+	};
+
+	ostack = stilt_ostack_get(a_stilt);
+	STILS_GET(stilo, ostack, a_stilt);
+
+	type = stilo_type_get(stilo);
+	_cw_assert(type != STILOT_NO && type <= STILOT_STRING);
+
+	stilo_name_new(stilo, a_stilt, stiln_str(typenames[type]),
+		    stiln_len(typenames[type]), TRUE);
+	stilo_attrs_set(stilo, STILOA_EXECUTABLE);
 }
 
 void
@@ -3172,12 +3392,6 @@ systemdict_unlock(cw_stilt_t *a_stilt)
 }
 
 void
-systemdict_usertime(cw_stilt_t *a_stilt)
-{
-	_cw_error("XXX Not implemented");
-}
-
-void
 systemdict_version(cw_stilt_t *a_stilt)
 {
 	_cw_stil_code(a_stilt, "(" _LIBSTIL_VERSION ")");
@@ -3192,7 +3406,36 @@ systemdict_wait(cw_stilt_t *a_stilt)
 void
 systemdict_wcheck(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*ostack;
+	cw_stilo_t	*stilo;
+
+	ostack = stilt_ostack_get(a_stilt);
+	STILS_GET(stilo, ostack, a_stilt);
+
+	switch (stilo_type_get(stilo)) {
+	case STILOT_ARRAY:
+	case STILOT_CONDITION:
+	case STILOT_DICT:
+	case STILOT_FILE:
+	case STILOT_HOOK:
+	case STILOT_LOCK:
+	case STILOT_STRING: {
+		cw_stilop_t	perms;
+		cw_bool_t	result;
+
+		perms = stilo_perms_get(stilo);
+		if (perms < STILOP_READONLY)
+			result = TRUE;
+		else
+			result = FALSE;
+		stilo_boolean_new(stilo, result);
+
+		break;
+	}
+	default:
+		stilt_error(a_stilt, STILTE_TYPECHECK);
+		return;
+	}
 }
 
 void

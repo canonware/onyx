@@ -63,34 +63,34 @@ typedef cw_bool_t cw_stil_write_t (void *a_arg, cw_stilo_t *a_file, cw_stilt_t
 typedef void cw_op_t(cw_stilt_t *);
 
 typedef enum {
-	STILOT_NO		=  0,
-	STILOT_ARRAY		=  1,
-	STILOT_BOOLEAN		=  2,
-	STILOT_CONDITION	=  3,
-	STILOT_DICT		=  4,
-	STILOT_FILE		=  5,
-	STILOT_HOOK		=  6,
-	STILOT_INTEGER		=  7,
-	STILOT_LOCK		=  8,
-	STILOT_MARK		=  9,
-	STILOT_NAME		= 10,
-	STILOT_NULL		= 11,
-	STILOT_OPERATOR		= 12,
-	STILOT_STRING		= 13
+	STILOT_NO,
+	STILOT_ARRAY,
+	STILOT_BOOLEAN,
+	STILOT_CONDITION,
+	STILOT_DICT,
+	STILOT_FILE,
+	STILOT_HOOK,
+	STILOT_INTEGER,
+	STILOT_LOCK,
+	STILOT_MARK,
+	STILOT_NAME,
+	STILOT_NULL,
+	STILOT_OPERATOR,
+	STILOT_STRING
 }	cw_stilot_t;
 
 /* Attributes. */
 typedef enum {
-	STILOA_LITERAL		=  0,
-	STILOA_EXECUTABLE	=  1
+	STILOA_LITERAL,
+	STILOA_EXECUTABLE
 }	cw_stiloa_t;
 
 /* Permissions. */
 typedef enum {
-	STILOP_UNLIMITED	=  0,
-	STILOP_READONLY		=  1,
-	STILOP_EXECUTEONLY	=  2,
-	STILOP_NONE		=  3
+	STILOP_UNLIMITED,
+	STILOP_READONLY,
+	STILOP_EXECUTEONLY,
+	STILOP_NONE
 }	cw_stilop_t;
 
 /*
@@ -121,7 +121,9 @@ struct cw_stilo_s {
 	 */
 	cw_stiloa_t	attrs:1;
 	/*
-	 * Permissions.  A stiloe has read and execute permissions.
+	 * Permissions.  A composite object has read and execute permissions.
+	 * Permissions for dict objects are shared accross all references, so
+	 * are stored in the stiloe.
 	 */
 	cw_stilop_t	perms:2;
 	/*
@@ -181,8 +183,8 @@ cw_bool_t	stilo_local_get(cw_stilo_t *a_stilo);
 #define		stilo_attrs_get(a_stilo) (a_stilo)->attrs
 #define		stilo_attrs_set(a_stilo, a_attrs) (a_stilo)->attrs = (a_attrs)
 
-#define		stilo_perms_get(a_stilo) (a_stilo)->perms
-#define		stilo_perms_set(a_stilo, a_perms) (a_stilo)->perms = (a_perms)
+cw_stilop_t	stilo_perms_get(cw_stilo_t *a_stilo);
+cw_stilte_t	stilo_perms_set(cw_stilo_t *a_stilo, cw_stilop_t a_perms);
 
 cw_stilte_t	stilo_print(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilo_t
     *a_file, cw_bool_t a_syntactic, cw_bool_t a_newline);
