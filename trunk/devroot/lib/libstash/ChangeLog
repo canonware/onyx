@@ -5,6 +5,7 @@
 	built.  The dependency file is always up to date, except in the
 	case where the object file would be rebuilt anyway, and this
 	causes a rebuild of the dependency file, so everything is fine.
+	(EXTRALIBS): Add @LDFLAGS@ to EXTRALIBS.
 
 1998-11-29  Jason Evans  <jasone@canonware.com>
 

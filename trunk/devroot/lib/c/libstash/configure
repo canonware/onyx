@@ -1968,6 +1968,7 @@ EOF
  
 echo "$ac_t""================================================================" 1>&6
 echo "$ac_t""Extra libraries to link in: ${LIBS}" 1>&6
+echo "$ac_t""Extra ld flags: ${LDFLAGS}" 1>&6
 echo "$ac_t""Extra defines: ${DEFS}" 1>&6
 echo "$ac_t""Compiler flags: ${CFLAGS}" 1>&6
 echo "$ac_t""C preprocessor flags: ${CPPFLAGS}" 1>&6

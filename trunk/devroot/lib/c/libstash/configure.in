@@ -100,6 +100,7 @@ AC_CHECK_SIZEOF(int *, 4) dnl defines SIZEOF_INT_P
 
 AC_MSG_RESULT(================================================================)
 AC_MSG_RESULT(Extra libraries to link in: ${LIBS})
+AC_MSG_RESULT(Extra ld flags: ${LDFLAGS})
 AC_MSG_RESULT(Extra defines: ${DEFS})
 AC_MSG_RESULT(Compiler flags: ${CFLAGS})
 AC_MSG_RESULT(C preprocessor flags: ${CPPFLAGS})

@@ -100,7 +100,7 @@ PSTUB   := @top_srcdir@/bin/pstub
 #
 
 LIBPATH := -L@top_srcdir@/lib
-EXTRALIBS := @LIBS@
+EXTRALIBS := @LDFLAGS@ @LIBS@
 INCPATH := -I@top_srcdir@/include @CPPFLAGS@
 
 DEFINES := @DEFS@
