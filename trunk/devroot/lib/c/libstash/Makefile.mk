@@ -9,29 +9,27 @@
 #
 # $Source$
 # $Author: jasone $
-# Current revision: $Revision: 125 $
-# Last modified: $Date: 1998-07-02 16:55:52 -0700 (Thu, 02 Jul 1998) $
+# Current revision: $Revision: 131 $
+# Last modified: $Date: 1998-07-07 13:43:45 -0700 (Tue, 07 Jul 1998) $
 #
 # Description: Makefile stub for a subdirectory.
 #              
 ##############################################################################
 
 # Current directory path relative to the main build directory.
-CURRDIR := lib/common/test
+CURRDIR :=
 
-$(CURRDIR)_INCS :=# List of .h headers.
-$(CURRDIR)_SRCS :=# List of .c sources.
-$(CURRDIR)_LEXERS :=# List of .l sources.
-$(CURRDIR)_PARSERS :=# List of .y sources.
+$(CURRDIR)_INCS :=# List of .h headers that don't need installed.
+$(CURRDIR)_LINCS :=# List of .h headers that do need installed.
+$(CURRDIR)_LSRCS :=# List of .c library sources.
 
-$(CURRDIR)_CTESTS := c19980411a.c c19980412a.c c19980419a.c c19980430a.c \
-	c19980627a.c c19980630a.c
+$(CURRDIR)_CTESTS :=# List of c*.c stand-alone C tests.
 $(CURRDIR)_BTESTS :=# List of b*.c back end C code driven by the perl scripts.
-$(CURRDIR)_PTESTS := p19980701a.pl.in
+$(CURRDIR)_PTESTS :=# List of .pl.in test sources that drive the b*.c programs.
 
 # Mutually exclusive.
 $(CURRDIR)_EXECS :=# List of .c sources that define main().
-$(CURRDIR)_LIB :=# Name of .a library.
+$LIB :=# Name of library to integrate sources into.
 
 # Include Makefile magic that uses the above lists.
 include Makefile.common

@@ -1,0 +1,325 @@
+/* -*-mode:c-*-
+ ****************************************************************************
+ *
+ * <Copyright = "jasone">
+ # <License>
+ *
+ ****************************************************************************
+ *
+ * $Source$
+ * $Author: jasone $
+ * Current revision: $Revision: 131 $
+ * Last modified: $Date: 1998-07-07 13:43:45 -0700 (Tue, 07 Jul 1998) $
+ *
+ * Description: 
+ *              
+ *              
+ *              
+ *              
+ ****************************************************************************/
+
+/* 
+ * Don't wrap this whole file, because it needs to be re-entrant since we're
+ * not automatically including everything.
+ */
+
+#ifndef _CONFIG_H_
+/*
+ * Defined by configure if we have the corresponding header on this system.
+ */
+
+#undef HAVE_PTHREAD_H
+#undef HAVE_UNISTD_H
+
+/*
+ * Defined by configure if necessary for pthreads.
+ */
+#undef _REENTRANT
+#undef _THREAD_SAFE
+
+/*
+ * Various macros possibly defined by configure.
+ */
+#undef _CW_PEDANTIC
+#undef _CW_DEBUG
+ 
+#undef SIZEOF_SIGNED_CHAR
+#undef SIZEOF_UNSIGNED_CHAR
+#undef SIZEOF_SIGNED_SHORT
+#undef SIZEOF_UNSIGNED_SHORT
+#undef SIZEOF_INT
+#undef SIZEOF_UNSIGNED
+#undef SIZEOF_LONG
+#undef SIZEOF_UNSIGNED_LONG
+#undef SIZEOF_LONG_LONG
+#undef SIZEOF_UNSIGNED_LONG_LONG
+#undef SIZEOF_FLOAT
+#undef SIZEOF_DOUBLE
+#undef SIZEOF_LONG_DOUBLE
+#undef SIZEOF_INT_P
+
+#endif /* _CONFIG_H_ */
+
+/*
+ * System headers we may want to include.
+ */
+
+#if (defined(_INC_STDARG_H_))
+#  ifndef _STDARG_H_
+#    include <stdarg.h>
+#    define _STDARG_H_
+#  endif
+#endif
+
+#if (defined(_INC_STRING_H_))
+#  ifndef _STRING_H_
+#    include <string.h>
+#    define _STRING_H_
+#  endif
+#endif
+
+#if (defined(_INC_SIGNAL_H_))
+#  ifndef _SIGNAL_H_
+#    include <signal.h>
+#    define _SIGNAL_H_
+#  endif
+#endif
+
+#if (defined(_INC_SYS_STAT_H_))
+#  ifndef _SYS_STAT_H_
+#    include <sys/stat.h>
+#    define _SYS_STAT_H_
+#  endif
+#endif
+
+#if (defined(_INC_SYS_TYPES_H_))
+#  ifndef _SYS_TYPES_H_
+#    include <sys/types.h>
+#    define _SYS_TYPES_H_
+#  endif
+#endif
+
+#if (defined(_INC_SYS_ERRNO_H_))
+#  ifndef _SYS_ERRNO_H_
+#    include <sys/errno.h>
+#    define _SYS_ERRNO_H_
+#  endif
+#endif
+
+#if (defined(_INC_SYS_DISKLABEL_H_))
+#  ifndef _SYS_DISKLABEL_H_
+#    include <sys/disklabel.h>
+#    define _SYS_DISKLABEL_H_
+#  endif
+#endif
+
+#if (defined(_INC_SYS_UIO_H_))
+#  ifndef _SYS_UIO_H_
+#    include <sys/uio.h>
+#    define _SYS_UIO_H_
+#  endif
+#endif
+
+#if (defined(_INC_GETOPT_H_))
+#  ifndef _GETOPT_H_
+#    include <getopt.h>
+#    define _GETOPT_H_
+#  endif
+#endif
+
+#if (defined(_INC_TIME_H_))
+#  ifndef _TIME_H_
+#    include <time.h>
+#    define _TIME_H_
+#  endif
+#endif
+
+#if (defined(_INC_FCNTL_H_))
+#  ifndef _FCNTL_H_
+#    include <fcntl.h>
+#    define _FCNTL_H_
+#  endif
+#endif
+
+/* Skeleton */
+#if (0) 
+
+#if (defined(_INC_?_H_))
+#  ifndef _?_H_
+#    include <?.h>
+#    define _?_H_
+#  endif
+#endif
+
+#endif
+
+#ifndef _CONFIG_H_
+#  define _CONFIG_H_
+
+/*
+ * Namespace setup.
+ */
+
+#  define _CW_PREF _sqrl_
+
+#  define _cw_ns_glue(x,y,z) x##y##z
+#  define _cw_ns_xglue(x,y,z) _cw_ns_glue(x,y,z)
+
+/* Create one of these for each namespace. */
+#  define _CW_NS_CMN(x) _cw_ns_xglue(_CW_PREF,common_,x)
+
+/* Tell everyone that we're on an ILP-32 architecture.  Once again, this is
+ * hard-coded for FreeBSD/x86. */
+#define _ILP_32_
+
+/*
+ * Global typedefs.
+ */
+
+/* XXX These typedefs are hard-coded for FreeBSD/x86. */
+
+#if (SIZEOF_SIGNED_CHAR == 1)
+#  define _TYPE_SINT8_DEFINED
+typedef signed char cw_sint8_t;
+#endif
+
+#if (SIZEOF_SIGNED_CHAR == 1)
+#  define _TYPE_UINT8_DEFINED
+typedef unsigned char cw_uint8_t;
+#endif
+
+#if (SIZEOF_SIGNED_SHORT == 2)
+#  define _TYPE_SINT16_DEFINED
+typedef signed short cw_sint16_t;
+#endif
+
+#if (SIZEOF_UNSIGNED_SHORT == 2)
+#  define _TYPE_UINT16_DEFINED
+typedef unsigned short cw_uint16_t;
+#endif
+
+#if (SIZEOF_INT == 4)
+#  define _TYPE_SINT32_DEFINED
+typedef int cw_sint32_t;
+#endif
+
+#if (SIZEOF_UNSIGNED == 4)
+#  define _TYPE_UINT32_DEFINED
+typedef unsigned cw_uint32_t;
+#endif
+
+#if (SIZEOF_LONG == 8)
+#  define _TYPE_SINT64_DEFINED
+typedef long cw_sint64_t;
+#endif
+
+#if (SIZEOF_UNSIGNED_LONG == 8)
+#  define _TYPE_UINT64_DEFINED
+typedef unsigned long cw_uint64_t;
+#endif
+
+#if (SIZEOF_LONG_LONG == 8)
+#  define _TYPE_SINT64_DEFINED
+typedef long long cw_sint64_t;
+#endif
+
+#if (SIZEOF_UNSIGNED_LONG_LONG == 8)
+#  define _TYPE_UINT64_DEFINED
+typedef unsigned long long cw_uint64_t;
+#endif
+
+#if (SIZEOF_FLOAT == 4)
+#  define _TYPE_FLOAT4_DEFINED
+typedef float cw_float4_t;
+#endif
+
+#if (SIZEOF_DOUBLE == 8)
+#  define _TYPE_FLOAT8_DEFINED
+typedef double cw_float8_t;
+#endif
+
+#if (SIZEOF_LONG_DOUBLE == 12)
+#  define _TYPE_FLOAT12_DEFINED
+typedef long double cw_float12_t;
+#endif
+
+#if (!defined(_TYPE_SINT32_DEFINED) || !defined(_TYPE_UINT32_DEFINED) \
+  || !defined(_TYPE_SINT64_DEFINED) || !defined(_TYPE_UINT64_DEFINED))
+#  error "Lacking mandatory typedefs"
+#endif
+
+typedef enum
+{
+  FALSE,
+  TRUE
+} cw_bool_t;
+
+/* 
+ * System headers to always be included.
+ */
+
+#  ifndef _STDIO_H_
+#    include <stdio.h>
+#    define _STDIO_H_
+#  endif
+
+#  ifndef _STDLIB_H_
+#    include <stdlib.h>
+#    define _STDLIB_H_
+#  endif
+
+#  if (HAVE_UNISTD_H)
+#    ifndef _UNISTD_H_
+#      include <unistd.h>
+#      define _UNISTD_H_
+#    endif
+#  else
+#    error "unistd.h not found.  Cannot continue"
+#  endif
+
+/*
+ * Project headers to always be included.
+ */
+
+#  ifndef _COMMON_INCS_H_
+#    include <common_incs.h>
+#    define _COMMON_INCS_H_
+#  endif
+
+/*
+ * Project headers we may want to include.
+ */
+
+#  if (defined(_INC_CSQRL_INCS_H_) || defined(_INC_ALL))
+#    ifndef _CSQRL_INCS_H_
+#      include <csqrl_incs.h>
+#      define _CSQRL_INCS_H_
+#    endif
+#  endif
+
+#  if (defined(_INC_SQL_INCS_H_) || defined(_INC_ALL))
+#    ifndef _INC_SQL_INCS_H_
+#      include <sql_incs.h>
+#      define _SQL_INCS_H_
+#    endif
+#  endif
+
+/*
+ * Global variables.
+ */
+extern cw_mem_t * g_mem_o;
+extern cw_dbg_t * g_dbg_o;
+extern cw_log_t * g_log_o;
+
+/*
+ * Global macros we use everywhere.
+ */
+#  define _cw_malloc(a) mem_malloc(g_mem_o, a)
+#  define _cw_calloc(a, b) mem_calloc(g_mem_o, a, b)
+#  define _cw_realloc(a, b) mem_realloc(g_mem_o, a, b)
+#  define _cw_free(a) mem_free(g_mem_o, a)
+
+#  define _cw_fmatch(a) dbg_fmatch(g_dbg_o, a)
+#  define _cw_pmatch(a) dbg_pmatch(g_dbg_o, a)
+
+#endif /* _CONFIG_H_ */

@@ -1,0 +1,248 @@
+# -*-mode:makefile-*-
+# @configure_input@
+#############################################################################
+#
+# <Copyright = "jasone">
+# <License>
+#
+#############################################################################
+#
+# $Source$
+# $Author: jasone $
+# Current revision: $Revision: 131 $
+# Last modified: $Date: 1998-07-07 13:43:45 -0700 (Tue, 07 Jul 1998) $
+#
+# Description: Master Makefile for libhungry.
+#              
+##############################################################################
+
+#
+# Common definitions.
+#
+
+SHELL   := /bin/sh
+top_builddir :=@top_srcdir@#
+MAKE    := @MAKE@
+CC	:= @CC@
+AR	:= @AR@
+FLEX    := @FLEX@
+BISON   := @BISON@
+RANLIB	:= @RANLIB@
+LIBTOOL := @LIBTOOL@
+INSTALL	:= @INSTALL@
+CAT     := @CAT@
+PERL    := @PERL@
+BASENAME:= @BASENAME@
+DIFF    := @DIFF@
+PMERGE  := @top_srcdir@/bin/pmerge
+PSTUB   := @top_srcdir@/bin/pstub
+
+FLEXFLAGS := -CF
+BISONFLAGS := -d
+
+DEFINES := @DEFS@
+CFLAGS  := @CFLAGS@
+LIBPATH :=
+EXTRALIBS := @LIBS@
+LIBS    :=
+INCPATH := -I@top_srcdir@
+
+# Needed for dependency generation code.
+define NL
+
+endef
+
+# Clear out all vpaths.
+vpath
+vpath %.la lib
+
+# Need this here since the includes have dependencies in them, but there's stuff
+# in the includes that we need to see before using $(TARGETS).
+all: default
+
+#
+# Common rules
+#
+
+.SUFFIXES:
+.SUFFIXES: .la .c .h .lo .d .l .y .yy.c .tab.c .tab.h .pl.in .pl
+
+# This rule is used to build the tests.
+#%: %.c $(LIBS)
+#	$(CC) $< -o $@ $(CFLAGS) $(INCPATH) $(DEFINES) $(LIBPATH) $(LNKLIBS)
+
+%: %.c $(LIBS)
+	$(CC) -c $< -o $(@:=.o) $(CFLAGS) $(INCPATH) $(DEFINES)
+	$(LIBTOOL) $(CC) -o $(notdir $@) $(@:=.o) $(LIBPATH) $(LNKLIBS) $(EXTRALIBS)
+
+#	mv -f $(notdir $(@:=.lo)) $(notdir $(@:=.o)) $(dir $@)
+
+#%.o: %.c
+#	$(CC) -c $< -o $@ $(CFLAGS) $(INCPATH) $(DEFINES)
+
+%.lo: %.c
+	$(LIBTOOL) $(CC) $(CFLAGS) $(INCPATH) $(DEFINES) -c $<
+	mv -f $(notdir $@) $(notdir $(@:.lo=.o)) $(dir $@)
+
+# Rule for dependency file creation
+%.d: %.c
+	$(SHELL) -ec "$(CC) -M $(DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o $(subst /,\/,$(strip $(dir $@)))\1.d \2/g\" > $@"
+
+%.tab.c %.tab.h: %.y
+	$(BISON) $(BISONFLAGS) -o $(<:.y=.tab.c) $<
+	mv -f $(notdir $(@:.c=.h)) $(dir $@)
+
+.l.yy.c:
+	$(FLEX) $(FLEXFLAGS) -o$(<:.l=.yy.c) $<
+
+.pl.in.pl:
+	$(PERL) -w $(PMERGE) $(PERL) $(PSTUB) $< $@
+
+# Include per-directory Makefile.mk files.
+ALLDIRS := @DIRLIST@
+
+include $(foreach dir,$(ALLDIRS),@top_srcdir@/$(strip $(dir))/Makefile.mk)
+
+# Include dependency files.
+ifneq ($(strip $(SRCS)),)
+include $(SRCS:.c=.d)
+endif
+
+ifneq ($(strip $(LSRCS)),)
+include $(LSRCS:.c=.d)
+endif
+
+#include $(EXECS:=.d)
+ifneq ($(strip $(CTESTS)),)
+include $(CTESTS:=.d)
+endif
+
+ifneq ($(strip $(BTESTS)),)
+include $(BTESTS:=.d)
+endif
+#include $(foreach firstname,$(LEXERS),$(firstname:.yy.c=.d))
+#include $(foreach firstname,$(PARSERS),$(firstname:.tab.c=.d))
+
+#
+# user 'make'ables
+#
+
+default: $(LIBS)
+
+check: $(CTESTS) $(PTESTS) $(BTESTS)
+	@$(SHELL) -c \
+	'echo Running regression tests: ; \
+	echo "---------------------------------------------" ;\
+	for i in $(PTESTS); do \
+	echo -n "$$i..."; \
+	./$$i; \
+	done; \
+	for i in $(CTESTS); do \
+	echo -n "$$i..."; \
+	./`$(BASENAME) $$i` > ./$$i.out 2>&1; \
+	$(DIFF) $$i.out $$i.expect > $$i.diff ; \
+	if [ -s $$i.diff ] ; then \
+	echo "failed. ****************" ; \
+	else \
+	echo "passed." ; \
+	rm $$i.diff ; \
+	fi \
+	done ; \
+	echo "---------------------------------------------" ;\
+	echo ;\
+	echo The following regression tests failed: ; \
+	echo "---------------------------------------------" ;\
+	for i in `find . -print | grep "\.diff$$"`; do \
+	echo `echo $$i | sed "s/\.\/\(.*\)\.diff/\1/g`; \
+	done; \
+	echo "---------------------------------------------" \
+	'
+
+install:
+
+uninstall:
+
+doc:
+
+clean: FORCE
+	rm -f *~
+	rm -f *.bak *.BAK
+	rm -f core
+	rm -f *.core
+	rm -f $(notdir $(CTESTS))
+	rm -f $(CTESTS:=.o) $(CTESTS:=.lo)
+	rm -f $(CTESTS:=.d)
+	rm -f $(LSRCS:.c=.d)
+	rm -f $(LOBJS) $(LOBJS:.lo=.o)
+	rm -f $(PTESTS)
+	rm -f $(ALLDIRS:=/*~) bin/*~
+	rm -f $(ALLDIRS:=/*.bak)
+	rm -f $(ALLDIRS:=/*.BAK)
+	rm -f $(ALLDIRS:=/*.out)
+	rm -f $(ALLDIRS:=/core)
+	rm -f $(ALLDIRS:=/*.core)
+	rm -f $(ALLDIRS:=/*.diff)
+
+#	rm -f $(OBJS)
+#	rm -f $(OBJS:.o=.d)
+#	rm -f $(EXECS)
+#	rm -f $(BTESTS)
+#	rm -f $(BTESTS:=.o)
+#	rm -f $(BTESTS:=.d)
+
+distclean: clean
+	rm -f "#"*"#"
+	rm -f $(ALLDIRS:=/"#"*"#")
+	rm -f Makefile Makefile.common
+	rm -f config.cache config.log config.status libhungry.h
+	rm -f TAGS
+	rm -rf .libs
+	rm -f $(LIBS)
+	rm -f $(PMERGE)
+	rm -f $(PSTUB)
+
+#	rm -f $(TARGETS)
+#	rm -f $(ALLDIRS:=/Makefile.mk)
+
+etags: $(SRCS) $(INCS) $(LSRCS) $(LINCS)
+	@ETAGS@ $(SRCS) $(INCS)
+
+# Create .yy.c, .tab.c, .tab.h, etc. files needed for a release.
+release:
+
+targets:
+	@echo "User 'make'ables: all (default)"
+	@echo "                  check"
+	@echo "                  install"
+	@echo "                  uninstall"
+	@echo "                  doc"
+	@echo "                  clean"
+	@echo "                  distclean"
+	@echo "                  etags"
+	@echo "                  targets"
+	@echo "                  release"
+
+FORCE:
+
+# XXX This can be fixed.
+# The next 3 dependencies unfortunately make all lexers dependent on all
+# parsers, so we may rebuild more than necessary when a parser is changed.
+$(PARSERS:.y=.tab.h): $(PARSERS)
+$(PARSERS:.y=.tab.c): $(PARSERS)
+$(LEXERS): $(PARSERS:.y=.tab.h)
+
+$(EXECS): $(LIBS)
+	$(CC) -o $@ $($(subst /_,_,$(strip $(dir $@)_OBJS))) $(LIBPATH) $(LNKLIBS) $(EXTRALIBS)
+
+#junk: $(LIBS)
+#	@echo Junk up to date now.
+#	@echo LIBS == $(LIBS)
+#	@echo LIB == $(LIB)
+#	@echo GARBAGE == $(GARBAGE)
+
+# Make sure that the tests are rebuilt if the libraries change.  Also force
+# the libraries to be built if they haven't already been.
+$(CTESTS) : $(LIBS)
+$(BTESTS) : $(LIBS)
+
+# End of file.

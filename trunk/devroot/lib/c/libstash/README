@@ -1,0 +1,23 @@
+-*-mode:text-*-
+
+$Source$
+$Author: jasone $
+Current revision: $Revision: 131 $
+Last modified: $Date: 1998-07-07 13:43:45 -0700 (Tue, 07 Jul 1998) $
+
+-----------------------------------------------------------------------------
+<Copyright = "jasone">
+<License>
+
+-----------------------------------------------------------------------------
+IMPORTANT FILES:
+
+The following files may be of direct interest to the user:
+
+* COPYING - Copyright and redistribution information.
+* INSTALL - Installation information.
+* CHANGES - Archive of major changes between versions.
+* BUGS - List of known bugs at time of release.  Hopefully not much here.
+* TODO - Work yet to be done.
+
+-----------------------------------------------------------------------------

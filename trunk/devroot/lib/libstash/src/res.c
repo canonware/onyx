@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 125 $
- * Last modified: $Date: 1998-07-02 16:55:52 -0700 (Thu, 02 Jul 1998) $
+ * Current revision: $Revision: 131 $
+ * Last modified: $Date: 1998-07-07 13:43:45 -0700 (Tue, 07 Jul 1998) $
  *
  * <<< Description >>>
  *
@@ -58,7 +58,7 @@
 #define _INC_STDARG_H_
 #define _INC_RES_H_
 #define _INC_OH_H_
-#include <config.h>
+#include <libhungry.h>
 #include <res_priv.h>
 
 /* Size of buffer to use for name/value parsing.  In practice, this is
