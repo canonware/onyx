@@ -8,14 +8,14 @@ qr_new()
   qr_foreach(f): f
   qr_foreach(g): g
   qr_foreach(h): h
-  qr_foreach_reverse(a): a
-  qr_foreach_reverse(b): b
-  qr_foreach_reverse(c): c
-  qr_foreach_reverse(d): d
-  qr_foreach_reverse(e): e
-  qr_foreach_reverse(f): f
-  qr_foreach_reverse(g): g
-  qr_foreach_reverse(h): h
+  qr_reverse_foreach(a): a
+  qr_reverse_foreach(b): b
+  qr_reverse_foreach(c): c
+  qr_reverse_foreach(d): d
+  qr_reverse_foreach(e): e
+  qr_reverse_foreach(f): f
+  qr_reverse_foreach(g): g
+  qr_reverse_foreach(h): h
   qr_next(a): a
   qr_next(b): b
   qr_next(c): c
