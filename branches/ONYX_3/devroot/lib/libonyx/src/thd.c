@@ -236,6 +236,16 @@ thd_new(void *(*a_start_func)(void *), void *a_arg, cw_bool_t a_suspendible)
     mtx_unlock(&retval->mtx);
 
 #ifdef CW_PTHREADS
+    /* Thread creation and setting retval->pthread must be atomic with respect
+     * to thread suspension if the new thread is suspendible.  There are
+     * multiple ways of trying to write this code, and all of them end up
+     * requiring that an interlock be used (to avoid race conditions and/or
+     * deadlocks, depending on the approach).  Since an interlock
+     * (cw_g_thd_single_lock; using retval->mtx could result in deadlock) is
+     * mandatory anyway, the pthread field of thd's is universally protected by
+     * cw_g_thd_single_lock. */
+    mtx_lock(&cw_g_thd_single_lock);
+
     error = pthread_create(&pthread, &cw_g_thd_attr,
 			   thd_p_start_func, (void *) retval);
     if (error)
@@ -245,12 +255,12 @@ thd_new(void *(*a_start_func)(void *), void *a_arg, cw_bool_t a_suspendible)
 	abort();
     }
 
-    /* Set retval->pthread, even though it is also set in thd_p_start_func().
-     * This is necessary, since it's possible to call something like thd_join()
-     * before the new thread even gets as far as initializing itself. */
-    mtx_lock(&retval->mtx);
+    /* Set retval->pthread here rather than in thd_p_start_func(), since it's
+     * possible to call something like thd_join() before the new thread even
+     * gets as far as initializing itself. */
     retval->pthread = pthread;
-    mtx_unlock(&retval->mtx);
+
+    mtx_unlock(&cw_g_thd_single_lock);
 #endif
 
     return retval;
@@ -269,9 +279,9 @@ thd_delete(cw_thd_t *a_thd)
     cw_assert(cw_g_thd_initialized);
 
 #ifdef CW_PTHREADS
-    mtx_lock(&a_thd->mtx);
+    mtx_lock(&cw_g_thd_single_lock);
     pthread = a_thd->pthread;
-    mtx_unlock(&a_thd->mtx);
+    mtx_unlock(&cw_g_thd_single_lock);
 
     error = pthread_detach(pthread);
     if (error)
@@ -299,9 +309,9 @@ thd_join(cw_thd_t *a_thd)
     cw_assert(cw_g_thd_initialized);
 
 #ifdef CW_PTHREADS
-    mtx_lock(&a_thd->mtx);
+    mtx_lock(&cw_g_thd_single_lock);
     pthread = a_thd->pthread;
-    mtx_unlock(&a_thd->mtx);
+    mtx_unlock(&cw_g_thd_single_lock);
 
     error = pthread_join(pthread, &retval);
     if (error)
@@ -538,19 +548,12 @@ thd_p_start_func(void *a_arg)
     {
 	/* Insert this thread into the thread ring. */
 	mtx_lock(&cw_g_thd_single_lock);
-#ifdef CW_PTHREADS
-	mtx_lock(&thd->mtx);
-	thd->pthread = pthread_self();
-	mtx_unlock(&thd->mtx);
-#endif
 #ifdef CW_MTHREADS
-	mtx_lock(&thd->mtx);
 	thd->mthread = mach_thread_self();
-	mtx_unlock(&thd->mtx);
 #endif
 	qr_before_insert(&cw_g_thd, thd, link);
 	mtx_unlock(&cw_g_thd_single_lock);
-	
+
 	retval = thd->start_func(thd->start_arg);
 
 	/* Remove this thread from the thread ring. */
