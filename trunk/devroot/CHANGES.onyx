@@ -1,5 +1,8 @@
 2003-08-07 : Jason Evans <jasone@canonware.com>
 
+	* lib/libonyx/src/nx.nx.in : Remove the search procedure, since the
+          regular expression facilities offer superior functionality.
+
 	* configure.in : Remove the --disable-libonyx and --disable-onyx
           options.
 

@@ -734,92 +734,6 @@ $pstack {
     } foreach
     flush
 } def
-
-#
-#string #pattern search #post #pattern #pre true
-#string #pattern search #string false
-#
-$search {
-    # Make sure the arguments are strings.
-    # Pattern.
-    dup type $stringtype ne {
-	$typecheck throw
-    } if
-    # String.
-    over type $stringtype ne {
-	$typecheck throw
-    } if
-
-    # Make sure substring is not longer than string.
-    dup length 2 idup length le {
-	# Use a nested looping algorithm.  The outer loop advances the
-	# offset #s_i at which to start the search in the string #s,
-	# and the inner loop compares byte by byte with the pattern #p.
-	#
-	# Take care not to cause a rangecheck error.
-	0 1 3 idup length 3 idup length sub {
-	    #s #p #s_i
-
-	    # Create a substring #s_sub of #s that is the same
-	    # length as #p, starting at #s_i.
-	    dup 3 idup exch 3 idup length getinterval
-
-	    #s #p #s_i #s_sub
-	    dup length 1 sub 0 1
-	    dn
-	    {
-		#s #p #s_i #s_sub #offset
-		dup 2 idup exch get
-		exch 4 idup exch get
-		ne {
-		    # Not equal.  Exit the inner loop.
-		    false exit
-		} if
-	    } for
-
-	    # Check to see if the substring match failed.
-	    dup type $booleantype eq {
-		#s #p #s_i #s_sub false
-		# Failure.  Clean up.
-		pop pop pop
-	    }{
-		#s #p #s_i #s_sub
-		# Success.
-		2 ipop
-		#s #s_i #s_sub
-
-		# Contstruct pre string #s_pre.
-		up dup 2 idup exch 0 exch
-		#s_sub #s #s_i #s 0 #s_i
-		getinterval
-		#s_sub #s #s_i #s_pre
-		up
-		#s_sub #s_pre #s #s_i
-
-		# Contstruct post string #s_post.
-		3 idup length add dup
-		2 idup length exch sub
-		getinterval
-		#s_sub #s_pre #s_post
-		up
-
-		true
-		#s_post #s_sub #s_pre true
-		exit
-	    } ifelse
-	} for
-
-	# Check to see if we succeeded.  If not, set up the stack to
-	# return failure.
-	dup type $booleantype ne {
-	    # Failure.
-	    pop false
-	} if
-    }{
-	# Substring is too long.
-	pop false
-    } ifelse
-} def
 ' cat
 @enable_posix@ 1 eq {
     `
@@ -860,24 +774,7 @@ $require {
 	    onyxdict $rpath_pre get
 
 	    envdict $ONYX_RPATH 2 ndup known {
-		get
-
-		# Push mark that denotes start of array.
-		[ exch
-		{
-		    # [ ... #cpath
-		    `:' search {
-			#post `:' #dir
-			nip exch
-			# [ ... #dir #post
-		    }{
-			# Last path component.
-			#dir
-			exit
-		    } ifelse
-		} loop
-		# Create array.
-		]
+		get `:' split
 	    }{
 		2 npop
 	    } ifelse
@@ -927,24 +824,7 @@ $mrequire {
 	    onyxdict $mpath_pre get
 
 	    envdict $ONYX_MPATH 2 ndup known {
-		get
-
-		# Push mark that denotes start of array.
-		[ exch
-		{
-		    # [ ... #cpath
-		    `:' search {
-			#post `:' #dir
-			nip exch
-			# [ ... #dir #post
-		    }{
-			# Last path component.
-			#dir
-			exit
-		    } ifelse
-		} loop
-		# Create array.
-		]
+		get `:' split
 	    }{
 		2 npop
 	    } ifelse

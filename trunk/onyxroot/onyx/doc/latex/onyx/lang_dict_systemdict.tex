@@ -1099,17 +1099,6 @@ math operators} \\
 	{{\bf \htmlref{outputs}{systemdict:outputs}}}
 	{string}
 	{Create formatted string from object.}
-\hline
-\optableent
-	{string pattern}
-	{{\bf \htmlref{search}{systemdict:search}}}
-	{post pattern pre true}
-	{Successfully search for pattern.}
-\optableent
-	{string pattern}
-	{{\bf \htmlref{search}{systemdict:search}}}
-	{string false}
-	{Unsuccessfully earch for pattern.}
 \hline \hline
 \multicolumn{2}{|l|}{\label{subsec:systemdict:name}Name operators} \\
 \hline \hline
@@ -4535,7 +4524,7 @@ onyx:0> pwd {1 sprint} dirforeach
 `Cookfile.inc'
 `latex'
 `Cookfile.inc.in'
-onyx:0> pwd {`Cookfile.inc' search
+onyx:0> pwd {`Cookfile.inc' match
      {pop `Yes: ' print 1 sprint pop exit}
      {`Not: ' print 1 sprint} ifelse
 } dirforeach
@@ -9322,63 +9311,6 @@ onyx:1>
 
 onyx:0> (1) dup sdup 1 sprint
 (1 1)
-onyx:0>
-		\end{verbatim}
-	\end{description}
-\label{systemdict:search}
-\index{search@\onyxop{}{search}{}}
-\item[{\onyxop{string pattern}{search}{post pattern pre true}}: ]
-\item[{\onyxop{string pattern}{search}{string false}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[string: ]
-			A string object.
-		\item[pattern: ]
-			A string that represents a substring to search for in
-			\oparg{string}.
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[post: ]
-			The substring of \oparg{string} that follows the match.
-		\item[pattern: ]
-			The substring of \oparg{string} that matches the input
-			\oparg{pattern}.
-		\item[pre: ]
-			The substring of \oparg{string} that precedes the match.
-		\item[true: ]
-			Success.
-		\item[string: ]
-			The same object as the input \oparg{string}.
-		\item[false: ]
-			Failure.
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{stackunderflow}{stackunderflow}.]
-		\item[\htmlref{typecheck}{typecheck}.]
-		\end{description}
-	\item[Description: ]
-		Search for the first instance of \oparg{pattern} in
-		\oparg{string}, and if found, return substrings that partition
-		\oparg{string} into \oparg{pre}, \oparg{pattern}, and
-		\oparg{post}.
-	\item[Example(s): ]\begin{verbatim}
-
-onyx:0> `abcabc' `ab' search pstack clear
-true
-`'
-`ab'
-`cabc'
-onyx:0> `abcabc' `ca' search pstack clear
-true
-`ab'
-`ca'
-`bc'
-onyx:0> `abcabc' `cb' search pstack clear
-false
-`abcabc'
 onyx:0>
 		\end{verbatim}
 	\end{description}
