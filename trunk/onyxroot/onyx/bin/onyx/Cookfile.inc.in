@@ -44,6 +44,7 @@ ONYX_OTESTS =
               setgstderr_a.nx.in setgstderr_b.nx.in setgstderr_c.nx.in
               setgstdin_a.nx.in setgstdin_b.nx.in setgstdin_c.nx.in
               setgstdout_a.nx.in setgstdout_b.nx.in setgstdout_c.nx.in
+              sigwait_a.nx.in sigwait_b.nx.in
 
 #endif
 #if @enable_threads@
@@ -151,11 +152,10 @@ ONYX_OTESTS =
               sigmask_d.nx.in sigmask_e.nx.in sigmask_f.nx.in sigmask_g.nx.in
               sigmask_h.nx.in sigmask_i.nx.in sigmask_j.nx.in sigmask_k.nx.in
               sigpending_a.nx.in sigpending_b.nx.in sigpending_c.nx.in
-              sigsuspend_a.nx.in sigsuspend_b.nx.in sigwait_a.nx.in
-              sigwait_b.nx.in srand_a.nx.in srand_b.nx.in srand_c.nx.in
-              srand_d.nx.in system_a.nx.in system_b.nx.in system_c.nx.in
-              system_d.nx.in system_e.nx.in system_f.nx.in system_g.nx.in
-              truncate_a.nx.in truncate_b.nx.in truncate_c.nx.in
+              sigsuspend_a.nx.in sigsuspend_b.nx.in srand_a.nx.in srand_b.nx.in
+              srand_c.nx.in srand_d.nx.in system_a.nx.in system_b.nx.in
+              system_c.nx.in system_d.nx.in system_e.nx.in system_f.nx.in
+              system_g.nx.in truncate_a.nx.in truncate_b.nx.in truncate_c.nx.in
               truncate_d.nx.in truncate_e.nx.in uid_a.nx.in umask_a.nx.in
               umask_b.nx.in umask_c.nx.in unsetenv_a.nx.in unsetenv_b.nx.in
               waitpid_a.nx.in waitpid_b.nx.in waitpid_c.nx.in

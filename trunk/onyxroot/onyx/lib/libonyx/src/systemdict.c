@@ -521,6 +521,8 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #ifdef CW_POSIX
     ENTRY(sigpending),
     ENTRY(sigsuspend),
+#endif
+#if (defined(CW_THREADS) && defined(CW_POSIX))
     ENTRY(sigwait),
 #endif
 #ifdef CW_REAL
@@ -886,7 +888,23 @@ systemdict_p_sock_family(cw_nxo_t *a_thread, int a_fd, bool a_peer,
 	}
     }
 
-    *r_family = u.sa.sa_family;
+    /* Darwin has a bug in getsockname(2).  From the man page:
+     *
+     *   BUGS
+     *        Names bound to sockets in the UNIX domain are inaccessible;
+     *        getsockname returns a zero length name.
+     *
+     * The following check works around this bug, and shouldn't have any impact
+     * on other platforms.
+     */
+    if (len == 0)
+    {
+	*r_family = AF_LOCAL;
+    }
+    else
+    {
+	*r_family = u.sa.sa_family;
+    }
 
     retval = false;
     RETURN:
@@ -12131,7 +12149,7 @@ systemdict_sigsuspend(cw_nxo_t *a_thread)
 }
 #endif
 
-#ifdef CW_POSIX
+#if (defined(CW_THREADS) && defined(CW_POSIX))
 void
 systemdict_sigwait(cw_nxo_t *a_thread)
 {

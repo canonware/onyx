@@ -695,6 +695,8 @@ typedef enum
 #ifdef CW_POSIX
     NXN_ENTRY(sigpending),
     NXN_ENTRY(sigsuspend),
+#endif
+#if (defined(CW_THREADS) && defined(CW_POSIX))
     NXN_ENTRY(sigwait),
 #endif
 #ifdef CW_REAL

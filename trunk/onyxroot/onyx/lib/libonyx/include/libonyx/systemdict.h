@@ -977,7 +977,7 @@ void
 systemdict_sigsuspend(cw_nxo_t *a_thread);
 #endif
 
-#ifdef CW_POSIX
+#if (defined(CW_THREADS) && defined(CW_POSIX))
 void
 systemdict_sigwait(cw_nxo_t *a_thread);
 #endif
