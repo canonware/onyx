@@ -25,7 +25,10 @@ dnl If CFLAGS isn't defined and using gcc, set CFLAGS to something reasonable.
 dnl Otherwise, just prevent autoconf from molesting CFLAGS.
 CFLAGS=$CFLAGS
 AC_PROG_CC
-if test "x$CFLAGS" = "x" -a "x$GCC" = "xyes" ; then
+if test "x$CFLAGS" = "x" ; then
+  no_CFLAGS="yes"
+fi
+if test "x$no_CFLAGS" = "xyes" -a "x$GCC" = "xyes" ; then
 	CFLAGS="-Wall -Wno-uninitialized -pipe -g3"
 fi
 AC_PROG_CPP
@@ -58,11 +61,11 @@ dnl Do not compile with profiling by default.
 CW_DISABLE_PROFILE
 
 dnl Only optimize if not debugging.
-if test "x$enable_debug" = "x0" ; then
+if test "x$enable_debug" = "x0" -a "x$no_CFLAGS" = "xyes" ; then
   CFLAGS="$CFLAGS -O"
 fi
 
-if test "x$enable_profile" = "x1" ; then
+if test "x$enable_profile" = "x1" -a "x$no_CFLAGS" = "xyes" ; then
   CFLAGS="$CFLAGS -pg"
 fi
 
