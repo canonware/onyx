@@ -4,9 +4,6 @@
 ** Author: John Sadler (john_sadler@alum.mit.edu)
 ** Created: 16 Oct 1997
 ** Implementations of FICL external interface functions... 
-**
-** (simple) port to Linux, Skip Carter 26 March 1998
-**
 *******************************************************************/
 
 #include <stdlib.h>
@@ -14,10 +11,6 @@
 
 #include "libficl/libficl.h"
 #include <libstash/libstash.h>
-
-/*
-*******************  Linux  P O R T   B E G I N S   H E R E ******************** Skip Carter, March 1998
-*/
 
 #if PORTABLE_LONGMULDIV == 0
 DPUNS ficlLongMul(FICL_UNS x, FICL_UNS y)
@@ -51,36 +44,25 @@ UNSQR ficlLongDiv(DPUNS q, FICL_UNS y)
 
 void  ficlTextOut(FICL_VM *pVM, char *msg, int fNewline)
 {
-    IGNORE(pVM);
-
     if (fNewline)
         puts(msg);
     else
         fputs(msg, stdout);
-
-   return;
 }
 
 void *ficlMalloc (size_t size)
 {
   return _cw_malloc(size);
-/*      return malloc(size); */
 }
 
 void  ficlFree   (void *p)
 {
   _cw_free(p);
-/*      free(p); */
 }
 
 void *ficlRealloc(void *p, size_t size)
 {
   return _cw_realloc(p, size);
-  
-/*      if (p) */
-/*          free(p); */
-
-/*      return malloc(size); */
 }
 
 /*
@@ -98,7 +80,17 @@ void *ficlRealloc(void *p, size_t size)
 #if FICL_MULTITHREAD
 int ficlLockDictionary(short fLock)
 {
-	IGNORE(fLock);
-	return 0;
+  if (TRUE == fLock)
+    {
+      /* Lock. */
+      mtx_lock(XXX);
+    }
+  else
+    {
+      /* Unlock. */
+      mtx_unlock(XXX);
+    }
+  
+  return 0;
 }
 #endif /* FICL_MULTITHREAD */

@@ -496,7 +496,7 @@ FICL_WORD *dictLookup(FICL_DICT *pDict, STRINGINFO si)
 
     assert(pDict);
 
-    if (ficlLockDictionary(1));
+    if (ficlLockDictionary(TRUE));
 
     for (i = (int)pDict->nLists - 1; (i >= 0) && (!pFW); --i)
     {
@@ -504,7 +504,7 @@ FICL_WORD *dictLookup(FICL_DICT *pDict, STRINGINFO si)
         pFW = hashLookup(pHash, si, hashCode);
     }
 
-    if (ficlLockDictionary(0));
+    if (ficlLockDictionary(FALSE));
     return pFW;
 }
 
@@ -525,7 +525,7 @@ FICL_WORD *dictLookupLoc(FICL_DICT *pDict, STRINGINFO si)
     assert(pHash);
     assert(pDict);
 
-    if (ficlLockDictionary(1));
+    if (ficlLockDictionary(TRUE));
     /* 
     ** check the locals dict first... 
     */
@@ -541,7 +541,7 @@ FICL_WORD *dictLookupLoc(FICL_DICT *pDict, STRINGINFO si)
         pFW = hashLookup(pHash, si, hashCode);
     }
 
-    if (ficlLockDictionary(0));
+    if (ficlLockDictionary(FALSE));
     return pFW;
 }
 #endif
@@ -770,5 +770,3 @@ void hashReset(FICL_HASH *pHash)
     pHash->link = NULL;
     return;
 }
-
-

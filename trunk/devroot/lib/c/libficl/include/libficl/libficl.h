@@ -13,13 +13,13 @@
 ** basis only.
 ** 
 ** Any third party may reproduce, distribute, or modify the ficl
-** software code or any derivative  works thereof without any 
+** software code or any derivative works thereof without any
 ** compensation or license, provided that the author information
 ** and this disclaimer text are retained in the source code files.
 ** The ficl software code is provided on an "as is"  basis without
 ** warranty of any kind, including, without limitation, the implied
 ** warranties of merchantability and fitness for a particular purpose
-** and their equivalents under the laws of any jurisdiction.  
+** and their equivalents under the laws of any jurisdiction.
 ** 
 ** I am interested in hearing from anyone who uses ficl. If you have
 ** a problem, a success story, a defect, an enhancement request, or

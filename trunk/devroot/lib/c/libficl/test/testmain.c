@@ -1,7 +1,7 @@
-/*
-** stub main for testing FICL under Win32
-** 
-*/
+/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
+ ****************************************************************************
+ * Stub main for testing FICL.
+ ****************************************************************************/
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -26,16 +26,16 @@
 */
 static void ficlGetCWD(FICL_VM *pVM)
 {
-    char *cp;
+  char *cp;
 
 #ifdef WIN32   
-    cp = _getcwd(NULL, 80);
+  cp = _getcwd(NULL, 80);
 #else
-   cp = getcwd(NULL, 80);
+  cp = getcwd(NULL, 80);
 #endif
-    vmTextOut(pVM, cp, 1);
-    free(cp);
-    return;
+  vmTextOut(pVM, cp, 1);
+  free(cp);
+  return;
 }
 
 /*
@@ -47,26 +47,26 @@ static void ficlGetCWD(FICL_VM *pVM)
 */
 static void ficlChDir(FICL_VM *pVM)
 {
-    FICL_STRING *pFS = (FICL_STRING *)pVM->pad;
-    vmGetString(pVM, pFS, '\n');
-    if (pFS->count > 0)
-    {
+  FICL_STRING *pFS = (FICL_STRING *)pVM->pad;
+  vmGetString(pVM, pFS, '\n');
+  if (pFS->count > 0)
+  {
 #ifdef WIN32
-       int err = _chdir(pFS->text);
+    int err = _chdir(pFS->text);
 #else
-       int err = chdir(pFS->text);
+    int err = chdir(pFS->text);
 #endif
-       if (err)
-        {
-            vmTextOut(pVM, "Error: path not found", 1);
-            vmThrow(pVM, VM_QUIT);
-        }
-    }
-    else
+    if (err)
     {
-        vmTextOut(pVM, "Warning (chdir): nothing happened", 1);
+      vmTextOut(pVM, "Error: path not found", 1);
+      vmThrow(pVM, VM_QUIT);
     }
-    return;
+  }
+  else
+  {
+    vmTextOut(pVM, "Warning (chdir): nothing happened", 1);
+  }
+  return;
 }
 
 /*
@@ -79,24 +79,24 @@ static void ficlChDir(FICL_VM *pVM)
 */
 static void ficlSystem(FICL_VM *pVM)
 {
-    FICL_STRING *pFS = (FICL_STRING *)pVM->pad;
+  FICL_STRING *pFS = (FICL_STRING *)pVM->pad;
 
-    vmGetString(pVM, pFS, '\n');
-    if (pFS->count > 0)
+  vmGetString(pVM, pFS, '\n');
+  if (pFS->count > 0)
+  {
+    int err = system(pFS->text);
+    if (err)
     {
-        int err = system(pFS->text);
-        if (err)
-        {
-            sprintf(pVM->pad, "System call returned %d", err);
-            vmTextOut(pVM, pVM->pad, 1);
-            vmThrow(pVM, VM_QUIT);
-        }
+      sprintf(pVM->pad, "System call returned %d", err);
+      vmTextOut(pVM, pVM->pad, 1);
+      vmThrow(pVM, VM_QUIT);
     }
-    else
-    {
-        vmTextOut(pVM, "Warning (system): nothing happened", 1);
-    }
-    return;
+  }
+  else
+  {
+    vmTextOut(pVM, "Warning (system): nothing happened", 1);
+  }
+  return;
 }
 
 /*
@@ -109,87 +109,87 @@ static void ficlSystem(FICL_VM *pVM)
 #define nLINEBUF 256
 static void ficlLoad(FICL_VM *pVM)
 {
-    char    cp[nLINEBUF];
-    char    filename[nLINEBUF];
-    FICL_STRING *pFilename = (FICL_STRING *)filename;
-    int     nLine = 0;
-    FILE   *fp;
-    int     result;
-    CELL    id;
+  char    cp[nLINEBUF];
+  char    filename[nLINEBUF];
+  FICL_STRING *pFilename = (FICL_STRING *)filename;
+  int     nLine = 0;
+  FILE   *fp;
+  int     result;
+  CELL    id;
 #ifdef WIN32       
-    struct _stat buf;
+  struct _stat buf;
 #else
-    struct stat buf;
+  struct stat buf;
 #endif
 
 
-    vmGetString(pVM, pFilename, '\n');
+  vmGetString(pVM, pFilename, '\n');
 
-    if (pFilename->count <= 0)
-    {
-        vmTextOut(pVM, "Warning (load): nothing happened", 1);
-        return;
-    }
-
-    /*
-    ** get the file's size and make sure it exists 
-    */
-#ifdef WIN32       
-    result = _stat( pFilename->text, &buf );
-#else
-    result = stat( pFilename->text, &buf );
-#endif
-
-    if (result != 0)
-    {
-        vmTextOut(pVM, "Unable to stat file: ", 0);
-        vmTextOut(pVM, pFilename->text, 1);
-        vmThrow(pVM, VM_QUIT);
-    }
-
-    fp = fopen(pFilename->text, "r");
-    if (!fp)
-    {
-        vmTextOut(pVM, "Unable to open file ", 0);
-        vmTextOut(pVM, pFilename->text, 1);
-        vmThrow(pVM, VM_QUIT);
-    }
-
-    id = pVM->sourceID;
-    pVM->sourceID.p = (void *)fp;
-
-    /* feed each line to ficlExec */
-    while (fgets(cp, nLINEBUF, fp))
-    {
-        int len = strlen(cp) - 1;
-
-        nLine++;
-        if (len <= 0)
-            continue;
-
-        if (cp[len] == '\n')
-            cp[len] = '\0';
-
-        result = ficlExec(pVM, cp);
-        if (result != VM_OUTOFTEXT)
-        {
-            pVM->sourceID = id;
-            fclose(fp);
-            vmThrowErr(pVM, "Error loading file <%s> line %d", pFilename->text, nLine);
-            break; 
-        }
-    }
-    /*
-    ** Pass an empty line with SOURCE-ID == -1 to flush
-    ** any pending REFILLs (as required by FILE wordset)
-    */
-    pVM->sourceID.i = -1;
-    ficlExec(pVM, "");
-
-    pVM->sourceID = id;
-    fclose(fp);
-
+  if (pFilename->count <= 0)
+  {
+    vmTextOut(pVM, "Warning (load): nothing happened", 1);
     return;
+  }
+
+  /*
+  ** get the file's size and make sure it exists 
+  */
+#ifdef WIN32       
+  result = _stat( pFilename->text, &buf );
+#else
+  result = stat( pFilename->text, &buf );
+#endif
+
+  if (result != 0)
+  {
+    vmTextOut(pVM, "Unable to stat file: ", 0);
+    vmTextOut(pVM, pFilename->text, 1);
+    vmThrow(pVM, VM_QUIT);
+  }
+
+  fp = fopen(pFilename->text, "r");
+  if (!fp)
+  {
+    vmTextOut(pVM, "Unable to open file ", 0);
+    vmTextOut(pVM, pFilename->text, 1);
+    vmThrow(pVM, VM_QUIT);
+  }
+
+  id = pVM->sourceID;
+  pVM->sourceID.p = (void *)fp;
+
+  /* feed each line to ficlExec */
+  while (fgets(cp, nLINEBUF, fp))
+  {
+    int len = strlen(cp) - 1;
+
+    nLine++;
+    if (len <= 0)
+    continue;
+
+    if (cp[len] == '\n')
+    cp[len] = '\0';
+
+    result = ficlExec(pVM, cp);
+    if (result != VM_OUTOFTEXT)
+    {
+      pVM->sourceID = id;
+      fclose(fp);
+      vmThrowErr(pVM, "Error loading file <%s> line %d", pFilename->text, nLine);
+      break; 
+    }
+  }
+  /*
+  ** Pass an empty line with SOURCE-ID == -1 to flush
+  ** any pending REFILLs (as required by FILE wordset)
+  */
+  pVM->sourceID.i = -1;
+  ficlExec(pVM, "");
+
+  pVM->sourceID = id;
+  fclose(fp);
+
+  return;
 }
 
 /*
@@ -198,97 +198,97 @@ static void ficlLoad(FICL_VM *pVM)
 */
 static void spewHash(FICL_VM *pVM)
 {
-    FICL_HASH *pHash = ficlGetDict()->pForthWords;
-    FICL_WORD *pFW;
-    FILE *pOut;
-    unsigned i;
-    unsigned nHash = pHash->size;
+  FICL_HASH *pHash = ficlGetDict()->pForthWords;
+  FICL_WORD *pFW;
+  FILE *pOut;
+  unsigned i;
+  unsigned nHash = pHash->size;
 
-    if (!vmGetWordToPad(pVM))
-        vmThrow(pVM, VM_OUTOFTEXT);
+  if (!vmGetWordToPad(pVM))
+  vmThrow(pVM, VM_OUTOFTEXT);
 
-    pOut = fopen(pVM->pad, "w");
-    if (!pOut)
-    {
-        vmTextOut(pVM, "unable to open file", 1);
-        return;
-    }
-
-    for (i=0; i < nHash; i++)
-    {
-        int n = 0;
-
-        pFW = pHash->table[i];
-        while (pFW)
-        {
-            n++;
-            pFW = pFW->link;
-        }
-
-        fprintf(pOut, "%d\t%d", i, n);
-
-        pFW = pHash->table[i];
-        while (pFW)
-        {
-            fprintf(pOut, "\t%s", pFW->name);
-            pFW = pFW->link;
-        }
-
-        fprintf(pOut, "\n");
-    }
-
-    fclose(pOut);
+  pOut = fopen(pVM->pad, "w");
+  if (!pOut)
+  {
+    vmTextOut(pVM, "unable to open file", 1);
     return;
+  }
+
+  for (i=0; i < nHash; i++)
+  {
+    int n = 0;
+
+    pFW = pHash->table[i];
+    while (pFW)
+    {
+      n++;
+      pFW = pFW->link;
+    }
+
+    fprintf(pOut, "%d\t%d", i, n);
+
+    pFW = pHash->table[i];
+    while (pFW)
+    {
+      fprintf(pOut, "\t%s", pFW->name);
+      pFW = pFW->link;
+    }
+
+    fprintf(pOut, "\n");
+  }
+
+  fclose(pOut);
+  return;
 }
 
 static void ficlBreak(FICL_VM *pVM)
 {
-    pVM->state = pVM->state;
-    return;
+  pVM->state = pVM->state;
+  return;
 }
 
 static void ficlClock(FICL_VM *pVM)
 {
-    clock_t now = clock();
-    stackPushUNS(pVM->pStack, (UNS32)now);
-    return;
+  clock_t now = clock();
+  stackPushUNS(pVM->pStack, (UNS32)now);
+  return;
 }
 
 static void clocksPerSec(FICL_VM *pVM)
 {
-    stackPushUNS(pVM->pStack, CLOCKS_PER_SEC);
-    return;
+  stackPushUNS(pVM->pStack, CLOCKS_PER_SEC);
+  return;
 }
 
 
 static void execxt(FICL_VM *pVM)
 {
-    FICL_WORD *pFW;
+  FICL_WORD *pFW;
 #if FICL_ROBUST > 1
-    vmCheckStack(pVM, 1, 0);
+  vmCheckStack(pVM, 1, 0);
 #endif
 
-    pFW = stackPopPtr(pVM->pStack);
-    ficlExecXT(pVM, pFW);
+  pFW = stackPopPtr(pVM->pStack);
+  ficlExecXT(pVM, pFW);
 
-    return;
+  return;
 }
 
 
 void buildTestInterface(void)
 {
-    ficlBuild("break",    ficlBreak,    FW_DEFAULT);
-    ficlBuild("clock",    ficlClock,    FW_DEFAULT);
-    ficlBuild("cd",       ficlChDir,    FW_DEFAULT);
-    ficlBuild("execxt",   execxt,       FW_DEFAULT);
-    ficlBuild("load",     ficlLoad,     FW_DEFAULT);
-    ficlBuild("pwd",      ficlGetCWD,   FW_DEFAULT);
-    ficlBuild("system",   ficlSystem,   FW_DEFAULT);
-    ficlBuild("spewhash", spewHash,     FW_DEFAULT);
-    ficlBuild("clocks/sec", 
-                          clocksPerSec, FW_DEFAULT);
+  ficlBuild("break",    ficlBreak,    FW_DEFAULT);
+  ficlBuild("clock",    ficlClock,    FW_DEFAULT);
+  ficlBuild("cd",       ficlChDir,    FW_DEFAULT);
+  ficlBuild("execxt",   execxt,       FW_DEFAULT);
+  ficlBuild("load",     ficlLoad,     FW_DEFAULT);
+  ficlBuild("pwd",      ficlGetCWD,   FW_DEFAULT);
+  ficlBuild("system",   ficlSystem,   FW_DEFAULT);
+  ficlBuild("spewhash", spewHash,     FW_DEFAULT);
+  ficlBuild("clocks/sec", 
+	    clocksPerSec, FW_DEFAULT);
 
-    return;
+  return;
 }
 
 
@@ -296,41 +296,40 @@ void buildTestInterface(void)
 #define nINBUF 256
 int main(int argc, char **argv)
 {
-    char in[nINBUF];
-    FICL_VM *pVM;
+  char in[nINBUF];
+  FICL_VM *pVM;
 
-    libstash_init();
+  libstash_init();
 
-    ficlInitSystem(10000);
-    buildTestInterface();
-    pVM = ficlNewVM();
+  ficlInitSystem(10000);
+  buildTestInterface();
+  pVM = ficlNewVM();
 
-    ficlExec(pVM, ".ver .( " __DATE__ " ) cr quit");
+  ficlExec(pVM, ".ver .( " __DATE__ " ) cr quit");
 
-    /*
-    ** load file from cmd line...
-    */
-    if (argc  > 1)
+  /*
+  ** load file from cmd line...
+  */
+  if (argc  > 1)
+  {
+    sprintf(in, ".( loading %s ) cr load %s\n cr", argv[1], argv[1]);
+    ficlExec(pVM, in);
+  }
+
+  for (;;)
+  {
+    int ret;
+    fgets(in, nINBUF, stdin);
+    ret = ficlExec(pVM, in);
+    if (ret == VM_USEREXIT)
     {
-        sprintf(in, ".( loading %s ) cr load %s\n cr", argv[1], argv[1]);
-        ficlExec(pVM, in);
+      ficlTermSystem();
+      break;
     }
+  }
 
-    for (;;)
-    {
-        int ret;
-        fgets(in, nINBUF, stdin);
-        ret = ficlExec(pVM, in);
-        if (ret == VM_USEREXIT)
-        {
-            ficlTermSystem();
-            break;
-        }
-    }
+  libstash_shutdown();
 
-    libstash_shutdown();
-
-    return 0;
+  return 0;
 }
-
 #endif

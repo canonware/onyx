@@ -616,5 +616,3 @@ char *skipSpace(char *cp, char *end)
 
     return cp;
 }
-
-
