@@ -5,7 +5,7 @@
 
 Version: Slate <Version = slate>
 ..
-.TH slate 1 "slate, version Slate <Version = slate>"
+.TH slate 1 "slate, version <Version = slate>"
 .hy 1
 .SH NAME
 slate - text editor
@@ -15,7 +15,7 @@ slate - text editor
 .B slate \-V
 .SH DESCRIPTION
 .B slate
-is a programmer's text editor, which is extensible due to the embedded Onxy
+is a programmer's text editor, which is extensible due to the embedded Onyx
 interpreter.
 This manual page only documents the command line usage for
 .BR slate ;
