@@ -24,7 +24,7 @@
 
 /* Include files that are installed. */
 {
-  local incs = libonyx.h ch.h dch.h gcdict.h mem.h nx.h nxa.h nxn.h nxo.h
+  local incs = libonyx.h ch.h dch.h gcdict.h mb.h mem.h nx.h nxa.h nxn.h nxo.h
                nxo_array.h nxo_boolean.h nxo_dict.h nxo_file.h nxo_fino.h
                nxo_hook.h nxo_integer.h nxo_mark.h nxo_name.h nxo_no.h
                nxo_null.h nxo_operator.h nxo_pmark.h nxo_stack.h nxo_string.h
@@ -51,8 +51,8 @@ LIBONYX_COMMON_SRCS = [addprefix @srcroot@/lib/libonyx/src/
                                  nxo_operator.c nxo_pmark.c nxo_stack.c
                                  nxo_string.c nxo_thread.c systemdict.c xep.c
 #if @enable_threads@
-                                 cnd.c mq.c mtx.c nxo_condition.c nxo_mutex.c
-                                 thd.c tsd.c
+                                 cnd.c mb.c mq.c mtx.c nxo_condition.c
+                                 nxo_mutex.c thd.c tsd.c
 #endif
 #if @enable_real@
                                  nxo_real.c
@@ -86,19 +86,20 @@ LIBONYX_CTESTS = [addprefix @srcroot@/lib/libonyx/test/ [LIBONYX_CTESTS]];
 
 /* LaTeX source files. */
 ONYX_TEX_SRCS += [addprefix @srcroot@/lib/libonyx/doc/latex/
-                            ch.tex cnd.tex dch.tex gcdict.tex mem.tex mq.tex
-                            mtx.tex nx.tex nxa.tex nxn.tex nxo.tex nxo_array.tex
-                            nxo_boolean.tex nxo_dict.tex nxo_file.tex
-                            nxo_fino.tex nxo_hook.tex nxo_integer.tex
-                            nxo_mark.tex nxo_mutex.tex nxo_name.tex nxo_no.tex
-                            nxo_null.tex nxo_operator.tex nxo_pmark.tex
-                            nxo_real.tex nxo_stack.tex nxo_string.tex
-                            nxo_thread.tex ql.tex qr.tex qs.tex systemdict.tex
-                            thd.tex tsd.tex xep.tex]
+                            ch.tex cnd.tex dch.tex gcdict.tex mb.tex mem.tex
+                            mq.tex mtx.tex nx.tex nxa.tex nxn.tex nxo.tex
+                            nxo_array.tex nxo_boolean.tex nxo_dict.tex
+                            nxo_file.tex nxo_fino.tex nxo_hook.tex
+                            nxo_integer.tex nxo_mark.tex nxo_mutex.tex
+                            nxo_name.tex nxo_no.tex nxo_null.tex
+                            nxo_operator.tex nxo_pmark.tex nxo_real.tex
+                            nxo_stack.tex nxo_string.tex nxo_thread.tex ql.tex
+                            qr.tex qs.tex systemdict.tex thd.tex tsd.tex
+                            xep.tex]
                  @objroot@/lib/libonyx/doc/latex/manual.tex;
 
 /* Libraries. */
-LIBONYX_REV = 7;
+LIBONYX_REV = 6;
 
 LIBBONYX_A = @objroot@/lib/libonyx/lib/libbonyx.a;
 LIBONYX_A = @objroot@/lib/libonyx/lib/libonyx.a;
