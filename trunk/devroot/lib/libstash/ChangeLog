@@ -1,3 +1,9 @@
+2000-06-28  Jason Evans  <jasone@canonware.com>
+
+	* src/mq.c: Significantly rework both the API and internals of the
+	mq class.  This implementation should be faster, use less memory,
+	and is more flexible (doesn't require casting to (void *)).
+
 2000-06-13  Jason Evans  <jasone@canonware.com>
 
 	* src/thd.c: Add thd_crit_enter(), thd_crit_leave(),

@@ -17,12 +17,14 @@ struct cw_mq_s {
 #if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
 	cw_uint32_t	magic;
 #endif
-	cw_uint32_t	msg_vec_count;
 	cw_uint32_t	msg_count;
+	cw_uint32_t	msg_size;
+	cw_uint32_t	msgs_vec_count;
 	cw_uint32_t	msgs_beg;
 	cw_uint32_t	msgs_end;
-	cw_uint32_t	msg_size;
 	union {
+		cw_uint8_t	*one;
+		cw_uint16_t	*two;
 		cw_uint32_t	*four;
 		cw_uint64_t	*eight;
 		void		*x;	/* Don't care. */
@@ -46,3 +48,4 @@ cw_bool_t	mq_start_get(cw_mq_t *a_mq);
 cw_bool_t	mq_stop_get(cw_mq_t *a_mq);
 cw_bool_t	mq_start_put(cw_mq_t *a_mq);
 cw_bool_t	mq_stop_put(cw_mq_t *a_mq);
+void		mq_dump(cw_mq_t *a_mq, const char *a_prefix);

@@ -16,32 +16,32 @@ mq - Message queue.
 .I cw_mq_t *
 .br
 .B mq_new
-.RI ( "cw_mq_t *a_mq" )
+.RI ( "cw_mq_t *a_mq" ", " "cw_uint32_t a_msg_size" )
 
 .I void
 .br
 .B mq_delete
 .RI ( "cw_mq_t *a_mq" )
 
-.I void *
+.I cw_bool_t
 .br
 .B mq_tryget
-.RI ( "cw_mq_t *a_mq" )
+.RI ( "cw_mq_t *a_mq" ", " "..." )
 
-.I void *
+.I cw_bool_t
 .br
 .B mq_timedget
-.RI ( "cw_mq_t *a_mq" ", " "const struct timespec *a_timeout" )
+.RI ( "cw_mq_t *a_mq" ", " "const struct timespec *a_timeout" ", " "..." )
 
-.I void *
+.I cw_bool_t
 .br
 .B mq_get
-.RI ( "cw_mq_t *a_mq" )
+.RI ( "cw_mq_t *a_mq" ", " "..." )
 
 .I cw_sint32_t
 .br
 .B mq_put
-.RI ( "cw_mq_t *a_mq" ", " "const void *a_message" )
+.RI ( "cw_mq_t *a_mq" ", " "..." )
 
 .I cw_bool_t
 .br
@@ -75,13 +75,18 @@ or put.  This provides a simple out of band state transition capability.
 .I cw_mq_t *
 .br
 .B mq_new
-.RI ( "cw_mq_t *a_mq" )
+.RI ( "cw_mq_t *a_mq" ", " "cw_uint32_t a_msg_size" )
 .RS
 Input(s):
 .RS
 .IR a_mq :
 .RS
 Pointer to space for a mq, or NULL.
+.RE
+.IR a_msg_size :
+.RS
+Size (in bytes) of messages used for all subsequent calls to \fBmq_*get\fR() and
+\fBmq_put\fR().
 .RE
 .RE
 Output(s):
@@ -90,7 +95,7 @@ Output(s):
 .RS
 non-NULL: Pointer to a mq.
 .br
-NULL: Memory allocation error.  Can only occur if (NULL == a_mq).
+NULL: Memory allocation error.
 .RE
 .RE
 Description:
@@ -121,10 +126,10 @@ Destructor.
 .RE
 .RE
 
-.I void *
+.I cw_bool_t
 .br
 .B mq_tryget
-.RI ( "cw_mq_t *a_mq" )
+.RI ( "cw_mq_t *a_mq" ", " "..." )
 .RS
 Input(s):
 .RS
@@ -132,26 +137,34 @@ Input(s):
 .RS
 Pointer to a mq.
 .RE
+.IR ... :
+.RS
+Pointer to space to store a message.
+.RE
 .RE
 Output(s):
 .RS
 .IR retval :
 .RS
-non-NULL: Pointer to a message.
+FALSE: Success.
 .br
-NULL: No messages in the queue, or get is in the stop state.
+TRUE: No messages in the queue, or get is in the stop state.
+.RE
+.IR *... :
+.RS
+If (retval == FALSE), a message.  Otherwise, undefined.
 .RE
 .RE
 Description:
 .RS
-Try to get a message, but return NULL if none are available.
+Try to get a message, but return TRUE if none are available.
 .RE
 .RE
 
-.I void *
+.I cw_bool_t
 .br
 .B mq_timedget
-.RI ( "cw_mq_t *a_mq" ", " "const struct timespec *a_timeout" )
+.RI ( "cw_mq_t *a_mq" ", " "const struct timespec *a_timeout" ", " "..." )
 .RS
 Input(s):
 .RS
@@ -163,14 +176,22 @@ Pointer to a mq.
 .RS
 Timeout, specified as an absolute time interval.
 .RE
+.IR ... :
+.RS
+Pointer to space to store a message.
+.RE
 .RE
 Output(s):
 .RS
 .IR retval :
 .RS
-non-NULL: Pointer to a message.
+FALSE: Succes.
 .br
 NULL: No messages in the queue, or get is in the stop state.
+.RE
+.IR *... :
+.RS
+If (retval == FALSE), a message.  Otherwise, undefined.
 .RE
 .RE
 Description:
@@ -180,10 +201,10 @@ until timeout.
 .RE
 .RE
 
-.I void *
+.I cw_bool_t
 .br
 .B mq_get
-.RI ( "cw_mq_t *a_mq" )
+.RI ( "cw_mq_t *a_mq" ", " "..." )
 .RS
 Input(s):
 .RS
@@ -191,14 +212,22 @@ Input(s):
 .RS
 Pointer to a mq.
 .RE
+.IR ... :
+.RS
+Pointer to space to store a message.
+.RE
 .RE
 Output(s):
 .RS
 .IR retval :
 .RS
-non-NULL: Pointer to a message.
+FALSE: Success.
 .br
-NULL: No messages in the queue, or get is in the stop state.
+TRUE: No messages in the queue, or get is in the stop state.
+.RE
+.IR *... :
+.RS
+If (retval == FALSE), a message.  Otherwise, undefined.
 .RE
 .RE
 Description:
@@ -210,7 +239,7 @@ Get a message.  If none are available, block until a message is available.
 .I cw_sint32_t
 .br
 .B mq_put
-.RI ( "cw_mq_t *a_mq" ", " "const void *a_message" )
+.RI ( "cw_mq_t *a_mq" ", " "..." )
 .RS
 Input(s):
 .RS
@@ -218,9 +247,9 @@ Input(s):
 .RS
 Pointer to a mq.
 .RE
-.IR a_message :
+.IR ... :
 .RS
-Pointer to a message.
+A message.
 .RE
 .RE
 Output(s):
@@ -346,6 +375,32 @@ TRUE: Error (already in the stop state).
 Description:
 .RS
 Change the put operation to the stop state (mq_put() will return 1).
+.RE
+.RE
+
+.I void
+.br
+.B mq_dump
+.RI ( "cw_mq_t *a_mq" ", " "const char *a_prefix" )
+.RS
+Input(s):
+.RS
+.IR a_mq :
+.RS
+Pointer to a mq.
+.RE
+.IR a_prefix :
+.RS
+Pointer to a string to prefix to all lines of output.
+.RE
+.RE
+Output(s):
+.RS
+Output printed to cw_g_out.
+.RE
+Description:
+.RS
+Print the internal state of a_mq to cw_g_out.
 .RE
 .RE
 
