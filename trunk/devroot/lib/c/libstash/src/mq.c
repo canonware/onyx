@@ -381,7 +381,7 @@ mq_put(cw_mq_t *a_mq, ...)
 			default:
 				_cw_not_reached();
 			}
-			_cw_free(a_mq->msgs.x);
+			mem_free(a_mq->mem, a_mq->msgs.x);
 			a_mq->msgs.x = t_msgs.x;
 			a_mq->msgs_beg = 0;
 			a_mq->msgs_end = a_mq->msg_count;
