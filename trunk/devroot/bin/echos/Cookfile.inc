@@ -125,14 +125,6 @@ echos_distclean :
 }
 
 /*
- * Various flags.
- */
-
-CPPFLAGS = [CPPFLAGS] -I[srcdir]/bin/echos/include
-                      -I[objdir]/bin/echos/include;
-D_CPPFLAGS = [D_CPPFLAGS] -D_ECHOS_DBG;
-
-/*
  * Build rules.
  */
 

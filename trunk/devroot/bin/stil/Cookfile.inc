@@ -125,14 +125,6 @@ stil_distclean :
 }
 
 /*
- * Various flags.
- */
-
-CPPFLAGS = [CPPFLAGS] -I[srcdir]/bin/stil/include
-                      -I[objdir]/bin/stil/include;
-D_CPPFLAGS = [D_CPPFLAGS] -D_STIL_DBG;
-
-/*
  * Build rules.
  */
 

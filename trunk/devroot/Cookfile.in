@@ -263,52 +263,127 @@ dataend
   [CC] -o [target] [objdir]/%0test/%1.o_d [D_LIBS] [LDFLAGS] [EXTRALIBS];
 }
 
-/*
- * Build rules for standard C files --> object files.
- */
-[objdir]/%0%.o_d : [srcdir]/%0%.c
+[objdir]/%0test/%1.o_d : [srcdir]/%0test/%1.c
   set mkdir
 {
-  [CC] [D_CFLAGS] [CPPFLAGS] [D_CPPFLAGS] -c [srcdir]/%0%.c -o [target];
+  [CC] [D_CFLAGS] [CPPFLAGS] [D_CPPFLAGS] -c [srcdir]/%0test/%1.c -o [target];
 
   c_incl [CPPFLAGS] --no-cache -Absent_Local_Ignore -No_System
-         [srcdir]/%0%.c
-         "--prefix='"[target]" : "[srcdir]/%0%.c"'"
+         [srcdir]/%0test/%1.c
+         "--prefix='"[target]" : "[srcdir]/%0test/%1.c"'"
          "--suffix='set nodefault;'"
-         -o [fromto %0%.o_d %0%.d_d [target]];
+         -o [fromto %0test/%1.o_d %0test/%1.d_d [target]];
 }
 
-[objdir]/%0%.o_a : [srcdir]/%0%.c
+/*
+ * Build rules for library C files --> object files.
+ */
+[objdir]/lib/c/%0src/%1.o_d : [srcdir]/lib/c/%0src/%1.c
   set mkdir
 {
-  [CC] [A_CFLAGS] [CPPFLAGS] [A_CPPFLAGS] -c [srcdir]/%0%.c -o [target];
+  [CC] [D_CFLAGS] [CPPFLAGS] [D_CPPFLAGS] -c [srcdir]/lib/c/%0src/%1.c
+       -o [target];
 
-  c_incl [CPPFLAGS] --no-cache -Absent_Local_Ignore -No_System [srcdir]/%0%.c
-         "--prefix='"[target]" : "[srcdir]/%0%.c"'"
+  c_incl [CPPFLAGS] --no-cache -Absent_Local_Ignore -No_System
+         [srcdir]/lib/c/%0src/%1.c
+         "--prefix='"[target]" : "[srcdir]/lib/c/%0src/%1.c"'"
          "--suffix='set nodefault;'"
-         -o [fromto %0%.o_a %0%.d_a [target]];
+         -o [fromto lib/c/%0src/%1.o_d lib/c/%0src/%1.d_d [target]];
 }
 
-[objdir]/%0%.o_p : [srcdir]/%0%.c
+[objdir]/lib/c/%0src/%1.o_a : [srcdir]/lib/c/%0src/%1.c
   set mkdir
 {
-  [CC] [P_CFLAGS] [CPPFLAGS] [P_CPPFLAGS] -c [srcdir]/%0%.c -o [target];
+  [CC] [A_CFLAGS] [CPPFLAGS] [A_CPPFLAGS] -c [srcdir]/lib/c/%0src/%1.c
+       -o [target];
 
-  c_incl [CPPFLAGS] --no-cache -Absent_Local_Ignore -No_System [srcdir]/%0%.c
-         "--prefix='"[target]" : "[srcdir]/%0%.c"'"
+  c_incl [CPPFLAGS] --no-cache -Absent_Local_Ignore -No_System
+         [srcdir]/lib/c/%0src/%1.c
+         "--prefix='"[target]" : "[srcdir]/lib/c/%0src/%1.c"'"
          "--suffix='set nodefault;'"
-         -o [fromto %0%.o_p %0%.d_p [target]];
+         -o [fromto lib/c/%0src/%1.o_a lib/c/%0src/%1.d_a [target]];
 }
 
-[objdir]/%0%.o_s : [srcdir]/%0%.c
+[objdir]/lib/c/%0src/%1.o_p : [srcdir]/lib/c/%0src/%1.c
   set mkdir
 {
-  [CC] [S_CFLAGS] [CPPFLAGS] [S_CPPFLAGS] -c [srcdir]/%0%.c -o [target];
+  [CC] [P_CFLAGS] [CPPFLAGS] [P_CPPFLAGS] -c [srcdir]/lib/c/%0src/%1.c
+       -o [target];
 
-  c_incl [CPPFLAGS] --no-cache -Absent_Local_Ignore -No_System [srcdir]/%0%.c
-         "--prefix='"[target]" : "[srcdir]/%0%.c"'"
+  c_incl [CPPFLAGS] --no-cache -Absent_Local_Ignore -No_System
+         [srcdir]/lib/c/%0src/%1.c
+         "--prefix='"[target]" : "[srcdir]/lib/c/%0src/%1.c"'"
          "--suffix='set nodefault;'"
-         -o [fromto %0%.o_s %0%.d_s [target]];
+         -o [fromto lib/c/%0src/%1.o_p lib/c/%0src/%1.d_p [target]];
+}
+
+[objdir]/lib/c/%0src/%1.o_s : [srcdir]/lib/c/%0src/%1.c
+  set mkdir
+{
+  [CC] [S_CFLAGS] [CPPFLAGS] [S_CPPFLAGS] -c [srcdir]/lib/c/%0src/%1.c
+       -o [target];
+
+  c_incl [CPPFLAGS] --no-cache -Absent_Local_Ignore -No_System
+         [srcdir]/lib/c/%0src/%1.c
+         "--prefix='"[target]" : "[srcdir]/lib/c/%0src/%1.c"'"
+         "--suffix='set nodefault;'"
+         -o [fromto lib/c/%0src/%1.o_s lib/c/%0src/%1.d_s [target]];
+}
+
+/*
+ * Build rules for binary C files --> object files.
+ */
+[objdir]/bin/%0src/%1.o_d : [srcdir]/bin/%0src/%1.c
+  set mkdir
+{
+  [CC] [D_CFLAGS] [CPPFLAGS] -I[srcdir]/bin/%0include -I[objdir]/bin/%0include
+       [D_CPPFLAGS] -D_[upcase [subst "/" "" %0]]_DBG
+       -c [srcdir]/bin/%0src/%1.c -o [target];
+
+  c_incl [CPPFLAGS] -I[srcdir]/bin/%0include -I[objdir]/bin/%0include
+         --no-cache -Absent_Local_Ignore -No_System [srcdir]/bin/%0src/%1.c
+         "--prefix='"[target]" : "[srcdir]/bin/%0src/%1.c"'"
+         "--suffix='set nodefault;'"
+         -o [fromto bin/%0src/%1.o_d bin/%0src/%1.d_d [target]];
+}
+
+[objdir]/bin/%0src/%1.o_a : [srcdir]/bin/%0src/%1.c
+  set mkdir
+{
+  [CC] [A_CFLAGS] [CPPFLAGS] -I[srcdir]/bin/%0include -I[objdir]/bin/%0include
+       [A_CPPFLAGS] -c [srcdir]/bin/%0src/%1.c -o [target];
+
+  c_incl [CPPFLAGS] -I[srcdir]/bin/%0include -I[objdir]/bin/%0include
+         --no-cache -Absent_Local_Ignore -No_System [srcdir]/bin/%0src/%1.c
+         "--prefix='"[target]" : "[srcdir]/bin/%0src/%1.c"'"
+         "--suffix='set nodefault;'"
+         -o [fromto bin/%0src/%1.o_a bin/%0src/%1.d_a [target]];
+}
+
+[objdir]/bin/%0src/%1.o_p : [srcdir]/bin/%0src/%1.c
+  set mkdir
+{
+  [CC] [P_CFLAGS] [CPPFLAGS] -I[srcdir]/bin/%0include -I[objdir]/bin/%0include
+       [P_CPPFLAGS] -c [srcdir]/bin/%0src/%1.c -o [target];
+
+  c_incl [CPPFLAGS] -I[srcdir]/bin/%0include -I[objdir]/bin/%0include
+         --no-cache -Absent_Local_Ignore -No_System [srcdir]/bin/%0src/%1.c
+         "--prefix='"[target]" : "[srcdir]/bin/%0src/%1.c"'"
+         "--suffix='set nodefault;'"
+         -o [fromto bin/%0src/%1.o_p bin/%0src/%1.d_p [target]];
+}
+
+[objdir]/bin/%0src/%1.o_s : [srcdir]/bin/%0src/%1.c
+  set mkdir
+{
+  [CC] [S_CFLAGS] [CPPFLAGS] -I[srcdir]/bin/%0include -I[objdir]/bin/%0include
+       [S_CPPFLAGS] -c [srcdir]/bin/%0src/%1.c -o [target];
+
+  c_incl [CPPFLAGS] -I[srcdir]/bin/%0include -I[objdir]/bin/%0include
+         --no-cache -Absent_Local_Ignore -No_System [srcdir]/bin/%0src/%1.c
+         "--prefix='"[target]" : "[srcdir]/bin/%0src/%1.c"'"
+         "--suffix='set nodefault;'"
+         -o [fromto bin/%0src/%1.o_s bin/%0src/%1.d_s [target]];
 }
 
 /*

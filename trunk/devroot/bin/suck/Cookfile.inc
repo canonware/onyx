@@ -125,14 +125,6 @@ suck_distclean :
 }
 
 /*
- * Various flags.
- */
-
-CPPFLAGS = [CPPFLAGS] -I[srcdir]/bin/suck/include
-                      -I[objdir]/bin/suck/include;
-D_CPPFLAGS = [D_CPPFLAGS] -D_SUCK_DBG;
-
-/*
  * Build rules.
  */
 

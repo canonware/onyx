@@ -125,14 +125,6 @@ cover_distclean :
 }
 
 /*
- * Various flags.
- */
-
-CPPFLAGS = [CPPFLAGS] -I[srcdir]/bin/cover/include
-                      -I[objdir]/bin/cover/include;
-D_CPPFLAGS = [D_CPPFLAGS] -D_COVER_DBG;
-
-/*
  * Build rules.
  */
 

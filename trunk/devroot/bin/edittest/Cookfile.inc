@@ -125,14 +125,6 @@ edittest_distclean :
 }
 
 /*
- * Various flags.
- */
-
-CPPFLAGS = [CPPFLAGS] -I[srcdir]/bin/edittest/include
-                      -I[objdir]/bin/edittest/include;
-D_CPPFLAGS = [D_CPPFLAGS] -D_EDITTEST_DBG;
-
-/*
  * Build rules.
  */
 

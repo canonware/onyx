@@ -125,14 +125,6 @@ proxy_distclean :
 }
 
 /*
- * Various flags.
- */
-
-CPPFLAGS = [CPPFLAGS] -I[srcdir]/bin/proxy/include
-                      -I[objdir]/bin/proxy/include;
-D_CPPFLAGS = [D_CPPFLAGS] -D_PROXY_DBG;
-
-/*
  * Build rules.
  */
 

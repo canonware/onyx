@@ -125,14 +125,6 @@ ncat_distclean :
 }
 
 /*
- * Various flags.
- */
-
-CPPFLAGS = [CPPFLAGS] -I[srcdir]/bin/ncat/include
-                      -I[objdir]/bin/ncat/include;
-D_CPPFLAGS = [D_CPPFLAGS] -D_NCAT_DBG;
-
-/*
  * Build rules.
  */
 

@@ -53,10 +53,6 @@ main(int argc, char **argv)
 
 	libstash_init();
 
-	/* XXX Turn off leak warnings until GC works. */
-	dbg_unregister(cw_g_dbg, "mem_error");
-	dbg_unregister(cw_g_dbg, "pool_error");
-
 	/*
 	 * Do a bunch of extra setup work to hook in command editing
 	 * functionality if this is an interactive session.  Otherwise, just let
@@ -125,6 +121,11 @@ main(int argc, char **argv)
 	stilts_delete(&stilts, &stilt);
 	stilt_delete(&stilt);
 	stil_delete(&stil);
+
+	/* XXX Turn off leak warnings until GC works. */
+	dbg_unregister(cw_g_dbg, "mem_error");
+	dbg_unregister(cw_g_dbg, "pool_error");
+
 	libstash_shutdown();
 	return 0;
 }

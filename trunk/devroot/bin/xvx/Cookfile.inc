@@ -125,14 +125,6 @@ xvx_distclean :
 }
 
 /*
- * Various flags.
- */
-
-CPPFLAGS = [CPPFLAGS] -I[srcdir]/bin/xvx/include
-                      -I[objdir]/bin/xvx/include;
-D_CPPFLAGS = [D_CPPFLAGS] -D_XVX_DBG;
-
-/*
  * Build rules.
  */
 

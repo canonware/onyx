@@ -125,14 +125,6 @@ stile_distclean :
 }
 
 /*
- * Various flags.
- */
-
-CPPFLAGS = [CPPFLAGS] -I[srcdir]/bin/stile/include
-                      -I[objdir]/bin/stile/include;
-D_CPPFLAGS = [D_CPPFLAGS] -D_STILE_DBG;
-
-/*
  * Build rules.
  */
 

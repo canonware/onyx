@@ -125,14 +125,6 @@ blow_distclean :
 }
 
 /*
- * Various flags.
- */
-
-CPPFLAGS = [CPPFLAGS] -I[srcdir]/bin/blow/include
-                      -I[objdir]/bin/blow/include;
-D_CPPFLAGS = [D_CPPFLAGS] -D_BLOW_DBG;
-
-/*
  * Build rules.
  */
 
