@@ -1,3 +1,9 @@
+1999-02-12  Jason Evans  <jasone@canonware.com>
+
+	* src/buf.c: Major rewrite of buf and bufel.  Provide a more
+	abstract interface to make using it less painful than before.
+	Untested, and some functions unimplemented.
+
 1999-02-03  Jason Evans  <jasone@canonware.com>
 
 	* include/libstash/libstash.h.in (_cw_ntohq): Add.

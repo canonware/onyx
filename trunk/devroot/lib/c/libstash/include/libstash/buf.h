@@ -26,7 +26,7 @@ typedef struct
 #endif
   cw_uint32_t ref_count;
   cw_uint32_t buf_size;
-  cw_uint32_t * buf;
+  char * buf;
 } cw_bufc_t;
 
 struct cw_bufel_s
