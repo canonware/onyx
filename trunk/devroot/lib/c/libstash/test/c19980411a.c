@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 58 $
- * $Date: 1998-05-01 03:18:42 -0700 (Fri, 01 May 1998) $
+ * $Revision: 66 $
+ * $Date: 1998-05-02 02:06:52 -0700 (Sat, 02 May 1998) $
  *
  * <<< Description >>>
  *
@@ -42,7 +42,8 @@
 #define _INC_GLOB_H_
 #include <config.h>
 
-#define NUM_STRINGS 2000
+/* #define NUM_STRINGS 2000 */
+#define NUM_STRINGS 250
 
 int
 main()
@@ -54,8 +55,9 @@ main()
   cw_bool_t error;
 
   glob_new();
-  oh_new(&hash_o);
-/*   _cw_error("Got here."); */
+  oh_new(&hash_o, FALSE, TRUE);
+/*   dbg_turn_on(g_dbg_o, _CW_DBG_R_OH_FUNC); */
+/*   dbg_turn_on(g_dbg_o, _CW_DBG_R_OH_SLOT); */
   
   strings = (char **) _cw_malloc(sizeof(char *) * NUM_STRINGS);
 
@@ -122,6 +124,8 @@ main()
   log_printf(g_log_o, "Number of invalid slots: %d\n",
 	     oh_get_num_invalid(&hash_o));
 
+/*   oh_dump(&hash_o, TRUE); */
+  
   for (i = 0; i < NUM_STRINGS; i++)
   {
     _cw_free(strings[i]);

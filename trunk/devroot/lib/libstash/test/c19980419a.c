@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 41 $
- * $Date: 1998-04-26 20:06:13 -0700 (Sun, 26 Apr 1998) $
+ * $Revision: 66 $
+ * $Date: 1998-05-02 02:06:52 -0700 (Sat, 02 May 1998) $
  *
  * <<< Description >>>
  *
@@ -48,7 +48,7 @@ int
 main()
 {
   char * strings[NUM_ITEMS];
-  cw_list_t * list1, * list2;
+  cw_list_t * list1, list2;
   cw_list_item_t * item;
   int i;
   
@@ -60,10 +60,10 @@ main()
     sprintf(strings[i], "This is string %d", i);
   }
 
-  list1 = list_new();
-  list2 = list_new();
+  list1 = list_new(NULL, FALSE);
+  list_new(&list2, FALSE);
   _cw_assert(list_count(list1) == 0);
-  _cw_assert(list_count(list2) == 0);
+  _cw_assert(list_count(&list2) == 0);
 	     
   for (i = 0; i < NUM_ITEMS; i++)
   {
@@ -82,41 +82,41 @@ main()
     item = list_hpop(list1);
     _cw_check_ptr(item);
     log_printf(g_log_o, "%s\n", (char *) list_item_get(item));
-    list_hpush(list2, item);
+    list_hpush(&list2, item);
   }
 
   _cw_assert(list_count(list1) == 0);
-  _cw_assert(list_count(list2) == NUM_ITEMS);
+  _cw_assert(list_count(&list2) == NUM_ITEMS);
 
   log_printf(g_log_o, "tpop()ping from list2 and hpush()ing to list2\n");
   
   for (i = 0; i < NUM_ITEMS; i++)
   {
-    item = list_tpop(list2);
+    item = list_tpop(&list2);
     _cw_check_ptr(item);
     log_printf(g_log_o, "%s\n", (char *) list_item_get(item));
-    list_hpush(list2, item);
+    list_hpush(&list2, item);
   }
 
   _cw_assert(list_count(list1) == 0);
-  log_printf(g_log_o, "list2->count == %d\n", list_count(list2));
-  _cw_assert(list_count(list2) == NUM_ITEMS);
+  log_printf(g_log_o, "list2->count == %d\n", list_count(&list2));
+  _cw_assert(list_count(&list2) == NUM_ITEMS);
 
   log_printf(g_log_o, "tpop()ping from list2 and tpush()ing to list1\n");
   
   for (i = 0; i < NUM_ITEMS; i++)
   {
-    item = list_tpop(list2);
+    item = list_tpop(&list2);
     _cw_check_ptr(item);
     log_printf(g_log_o, "%s\n", (char *) list_item_get(item));
     list_tpush(list1, item);
   }
 
   _cw_assert(list_count(list1) == NUM_ITEMS);
-  _cw_assert(list_count(list2) == 0);
+  _cw_assert(list_count(&list2) == 0);
   
   list_delete(list1);
-  list_delete(list2);
+  list_delete(&list2);
     
   glob_delete();
   

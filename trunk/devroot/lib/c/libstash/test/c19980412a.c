@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 58 $
- * $Date: 1998-05-01 03:18:42 -0700 (Fri, 01 May 1998) $
+ * $Revision: 66 $
+ * $Date: 1998-05-02 02:06:52 -0700 (Sat, 02 May 1998) $
  *
  * <<< Description >>>
  *
@@ -70,7 +70,7 @@ main()
   int i;
 
   glob_new();
-  hash_o = oh_new(NULL);
+  hash_o = oh_new(NULL, TRUE, FALSE);
 
   for (i = 0; i < NUM_THREADS; i++)
   {
