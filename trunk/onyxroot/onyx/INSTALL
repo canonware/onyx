@@ -137,12 +137,6 @@ Optionally, pass any of the following (not a definitive list) arguments to
 	which is open source software, written by Philip Hazel, and copyright
 	by the University of Cambridge, England.
 
-	Onyx's garbage collector tracks memory allocation to trigger collection,
-	but before PCRE 4.0, there was no reasonable way to get all the needed
-	memory allocation information from PCRE.  PCRE 3.9 is adequate for
-	Onyx's purposes, but the Onyx interpreter will not have a 100% accurate
-	picture of memory usage if PCRE 3.9 is used.
-
 --disable-posix
 	As much as reasonably possible, avoid using any external library
 	functions (disjoint from --disable-threads option).  This option is

@@ -11,7 +11,7 @@ dnl
 dnl Version requirements for external software we depend on.
 dnl 
 PTH_VERSION_MIN=2.0
-PCRE_VERSION_MIN=3.9
+PCRE_VERSION_MIN=4.0
 LIBEDIT_VERSION_MIN=2.6
 
 srcroot=$srcdir

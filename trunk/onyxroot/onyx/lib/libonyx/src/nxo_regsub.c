@@ -93,10 +93,8 @@ nxo_p_regsub_init(cw_nxoe_regsub_t *a_regsub, cw_nxa_t *a_nxa,
 		       &capturecount) != 0)
 	|| (pcre_fullinfo(a_regsub->pcre, a_regsub->extra, PCRE_INFO_SIZE,
 			  &a_regsub->size) != 0)
-#ifdef PCRE_INFO_STUDYSIZE
 	|| (pcre_fullinfo(a_regsub->pcre, a_regsub->extra, PCRE_INFO_STUDYSIZE,
 			  &a_regsub->studysize) != 0)
-#endif
 	)
     {
 	free(a_regsub->pcre);
@@ -490,11 +488,7 @@ nxo_regsub_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_uint8_t *a_pattern,
 
     /* Tell the GC about the space being taken up by regsub->pcre and
      * regsub->extra. */
-    nxa_l_count_adjust(nxa, (cw_nxoi_t) regsub->size
-#ifdef PCRE_INFO_STUDYSIZE
-		       + regsub->studysize
-#endif
-		       );
+    nxa_l_count_adjust(nxa, (cw_nxoi_t) regsub->size + regsub->studysize);
 
     /* Create a reference to the regsub object. */
     nxo_no_new(a_nxo);
