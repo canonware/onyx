@@ -56,12 +56,12 @@ ch_delete(cw_ch_t *a_ch)
 	cw_chi_t	*chi;
 
 	_cw_check_ptr(a_ch);
-	_cw_assert(a_ch->magic == _CW_CH_MAGIC);
+	_cw_dassert(a_ch->magic == _CW_CH_MAGIC);
 
 	while (ql_first(&a_ch->chi_ql) != NULL) {
 		chi = ql_first(&a_ch->chi_ql);
 		_cw_check_ptr(chi);
-		_cw_assert(chi->magic == _CW_CHI_MAGIC);
+		_cw_dassert(chi->magic == _CW_CHI_MAGIC);
 		ql_head_remove(&a_ch->chi_ql, cw_chi_t, ch_link);
 		if (chi->is_malloced)
 			mem_free(a_ch->mem, chi);
@@ -83,7 +83,7 @@ cw_uint32_t
 ch_count(cw_ch_t *a_ch)
 {
 	_cw_check_ptr(a_ch);
-	_cw_assert(a_ch->magic == _CW_CH_MAGIC);
+	_cw_dassert(a_ch->magic == _CW_CH_MAGIC);
 
 	return a_ch->count;
 }
@@ -96,7 +96,7 @@ ch_insert(cw_ch_t *a_ch, const void *a_key, const void *a_data, cw_chi_t
 	cw_chi_t	*chi;
 
 	_cw_check_ptr(a_ch);
-	_cw_assert(a_ch->magic == _CW_CH_MAGIC);
+	_cw_dassert(a_ch->magic == _CW_CH_MAGIC);
 
 	/* Initialize chi. */
 	if (a_chi != NULL) {
@@ -141,14 +141,14 @@ ch_remove(cw_ch_t *a_ch, const void *a_search_key, void **r_key, void **r_data,
 	cw_chi_t	*chi;
 
 	_cw_check_ptr(a_ch);
-	_cw_assert(a_ch->magic == _CW_CH_MAGIC);
+	_cw_dassert(a_ch->magic == _CW_CH_MAGIC);
 
 	slot = a_ch->hash(a_search_key) % a_ch->table_size;
 
 	for (chi = ql_first(&a_ch->table[slot]); chi != NULL; chi =
 	    ql_next(&a_ch->table[slot], chi, slot_link)) {
 		_cw_check_ptr(chi);
-		_cw_assert(chi->magic == _CW_CHI_MAGIC);
+		_cw_dassert(chi->magic == _CW_CHI_MAGIC);
 
 		/* Is this the chi we want? */
 		if (a_ch->key_comp(a_search_key, chi->key)) {
@@ -193,14 +193,14 @@ ch_search(cw_ch_t *a_ch, const void *a_key, void **r_data)
 	cw_chi_t	*chi;
 
 	_cw_check_ptr(a_ch);
-	_cw_assert(a_ch->magic == _CW_CH_MAGIC);
+	_cw_dassert(a_ch->magic == _CW_CH_MAGIC);
 
 	slot = a_ch->hash(a_key) % a_ch->table_size;
 
 	for (chi = ql_first(&a_ch->table[slot]); chi != NULL; chi =
 	     ql_next(&a_ch->table[slot], chi, slot_link)) {
 		_cw_check_ptr(chi);
-		_cw_assert(chi->magic == _CW_CHI_MAGIC);
+		_cw_dassert(chi->magic == _CW_CHI_MAGIC);
 
 		/* Is this the chi we want? */
 		if (a_ch->key_comp(a_key, chi->key) == TRUE) {
@@ -223,7 +223,7 @@ ch_get_iterate(cw_ch_t *a_ch, void **r_key, void **r_data)
 	cw_chi_t	*chi;
 
 	_cw_check_ptr(a_ch);
-	_cw_assert(a_ch->magic == _CW_CH_MAGIC);
+	_cw_dassert(a_ch->magic == _CW_CH_MAGIC);
 
 	chi = ql_first(&a_ch->chi_ql);
 	if (chi == NULL) {
@@ -231,7 +231,7 @@ ch_get_iterate(cw_ch_t *a_ch, void **r_key, void **r_data)
 		goto RETURN;
 	}
 	_cw_check_ptr(chi);
-	_cw_assert(chi->magic == _CW_CHI_MAGIC);
+	_cw_dassert(chi->magic == _CW_CHI_MAGIC);
 	if (r_key != NULL)
 		*r_key = (void *)chi->key;
 	if (r_data != NULL)
@@ -252,7 +252,7 @@ ch_remove_iterate(cw_ch_t *a_ch, void **r_key, void **r_data, cw_chi_t **r_chi)
 	cw_chi_t	*chi;
 
 	_cw_check_ptr(a_ch);
-	_cw_assert(a_ch->magic == _CW_CH_MAGIC);
+	_cw_dassert(a_ch->magic == _CW_CH_MAGIC);
 
 	chi = ql_first(&a_ch->chi_ql);
 	if (chi == NULL) {
@@ -260,7 +260,7 @@ ch_remove_iterate(cw_ch_t *a_ch, void **r_key, void **r_data, cw_chi_t **r_chi)
 		goto RETURN;
 	}
 	_cw_check_ptr(chi);
-	_cw_assert(chi->magic == _CW_CHI_MAGIC);
+	_cw_dassert(chi->magic == _CW_CHI_MAGIC);
 
 	/* Detach from the ch-wide list. */
 	ql_remove(&a_ch->chi_ql, chi, ch_link);
@@ -298,7 +298,7 @@ ch_dump(cw_ch_t *a_ch, const char *a_prefix)
 	cw_chi_t	*chi;
 
 	_cw_check_ptr(a_ch);
-	_cw_assert(a_ch->magic == _CW_CH_MAGIC);
+	_cw_dassert(a_ch->magic == _CW_CH_MAGIC);
 	_cw_check_ptr(a_prefix);
 
 #ifdef _CW_DBG

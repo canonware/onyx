@@ -286,7 +286,7 @@ nxo_lcheck(cw_nxo_t *a_nxo)
 	cw_bool_t	retval;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 
 #ifdef _CW_DBG
 	switch (nxo_type_get(a_nxo)) {
@@ -329,7 +329,7 @@ void
 nxoe_l_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 {
 	_cw_check_ptr(a_nxoe);
-	_cw_assert(a_nxoe->magic == _CW_NXOE_MAGIC);
+	_cw_dassert(a_nxoe->magic == _CW_NXOE_MAGIC);
 
 	nxot_vtable[a_nxoe->type].delete_f(a_nxoe, a_nx);
 }
@@ -340,7 +340,7 @@ nxoe_l_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 	cw_nxoe_t	*retval;
 
 	_cw_check_ptr(a_nxoe);
-	_cw_assert(a_nxoe->magic == _CW_NXOE_MAGIC);
+	_cw_dassert(a_nxoe->magic == _CW_NXOE_MAGIC);
 
 	retval = nxot_vtable[a_nxoe->type].ref_iter_f(a_nxoe, a_reset);
 

@@ -69,7 +69,7 @@ nxoe_l_file_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 	file = (cw_nxoe_file_t *)a_nxoe;
 
 	_cw_check_ptr(file);
-	_cw_assert(file->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(file->nxoe.type == NXOT_FILE);
 
 	if (file->buffer != NULL) {
@@ -147,13 +147,13 @@ nxo_file_fd_wrap(cw_nxo_t *a_nxo, cw_uint32_t a_fd)
 	cw_nxoe_file_t	*file;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
 	_cw_check_ptr(file);
-	_cw_assert(file->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(file->nxoe.type == NXOT_FILE);
 	_cw_assert(file->fd == -1);
 
@@ -167,13 +167,13 @@ nxo_file_interactive(cw_nxo_t *a_nxo, cw_nxo_file_read_t *a_read,
 	cw_nxoe_file_t	*file;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
 	_cw_check_ptr(file);
-	_cw_assert(file->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(file->nxoe.type == NXOT_FILE);
 	_cw_assert(file->fd == -1);
 
@@ -220,13 +220,13 @@ nxo_file_open(cw_nxo_t *a_nxo, const cw_uint8_t *a_filename, cw_uint32_t a_nlen,
 	flags[a_flen] = '\0';
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
 	_cw_check_ptr(file);
-	_cw_assert(file->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(file->nxoe.type == NXOT_FILE);
 
 	nxoe_p_file_lock(file);
@@ -310,13 +310,13 @@ nxo_file_close(cw_nxo_t *a_nxo)
 	cw_nxoe_file_t		*file;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
 	_cw_check_ptr(file);
-	_cw_assert(file->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(file->nxoe.type == NXOT_FILE);
 
 	nxoe_p_file_lock(file);
@@ -356,13 +356,13 @@ nxo_file_fd_get(cw_nxo_t *a_nxo)
 	cw_nxoe_file_t	*file;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
 	_cw_check_ptr(file);
-	_cw_assert(file->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(file->nxoe.type == NXOT_FILE);
 
 	nxoe_p_file_lock(file);
@@ -386,13 +386,13 @@ nxo_file_read(cw_nxo_t *a_nxo, cw_uint32_t a_len, cw_uint8_t *r_str)
 	cw_nxoe_file_t	*file;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
 	_cw_check_ptr(file);
-	_cw_assert(file->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(file->nxoe.type == NXOT_FILE);
 
 	nxoe_p_file_lock(file);
@@ -567,13 +567,13 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking, cw_nxo_t
 	enum {NORMAL, CR}	state;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
 	_cw_check_ptr(file);
-	_cw_assert(file->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(file->nxoe.type == NXOT_FILE);
 
 	line = s_line;
@@ -806,13 +806,13 @@ nxo_file_write(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len)
 	cw_nxoe_file_t		*file;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
 	_cw_check_ptr(file);
-	_cw_assert(file->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(file->nxoe.type == NXOT_FILE);
 
 	nxoe_p_file_lock(file);
@@ -905,13 +905,13 @@ nxo_file_output(cw_nxo_t *a_nxo, const char *a_format, ...)
 	va_list			ap;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
 	_cw_check_ptr(file);
-	_cw_assert(file->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(file->nxoe.type == NXOT_FILE);
 
 	nxoe_p_file_lock(file);
@@ -1028,13 +1028,13 @@ nxo_file_output_n(cw_nxo_t *a_nxo, cw_uint32_t a_size, const char *a_format,
 	va_list			ap;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
 	_cw_check_ptr(file);
-	_cw_assert(file->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(file->nxoe.type == NXOT_FILE);
 
 	nxoe_p_file_lock(file);
@@ -1137,13 +1137,13 @@ nxo_file_truncate(cw_nxo_t *a_nxo, off_t a_length)
 	cw_nxoe_file_t		*file;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
 	_cw_check_ptr(file);
-	_cw_assert(file->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(file->nxoe.type == NXOT_FILE);
 
 	nxoe_p_file_lock(file);
@@ -1173,13 +1173,13 @@ nxo_file_position_get(cw_nxo_t *a_nxo)
 	cw_nxoe_file_t		*file;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
 	_cw_check_ptr(file);
-	_cw_assert(file->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(file->nxoe.type == NXOT_FILE);
 
 	nxoe_p_file_lock(file);
@@ -1214,13 +1214,13 @@ nxo_file_position_set(cw_nxo_t *a_nxo, cw_nxoi_t a_position)
 	cw_nxoe_file_t		*file;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
 	_cw_check_ptr(file);
-	_cw_assert(file->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(file->nxoe.type == NXOT_FILE);
 
 	nxoe_p_file_lock(file);
@@ -1251,13 +1251,13 @@ nxo_file_buffer_size_get(cw_nxo_t *a_nxo)
 	cw_nxoe_file_t		*file;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
 	_cw_check_ptr(file);
-	_cw_assert(file->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(file->nxoe.type == NXOT_FILE);
 
 	nxoe_p_file_lock(file);
@@ -1273,13 +1273,13 @@ nxo_file_buffer_size_set(cw_nxo_t *a_nxo, cw_uint32_t a_size)
 	cw_nxoe_file_t	*file;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
 	_cw_check_ptr(file);
-	_cw_assert(file->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(file->nxoe.type == NXOT_FILE);
 
 	nxoe_p_file_lock(file);
@@ -1307,13 +1307,13 @@ nxo_file_buffer_count(cw_nxo_t *a_nxo)
 	cw_nxoe_file_t		*file;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
 	_cw_check_ptr(file);
-	_cw_assert(file->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(file->nxoe.type == NXOT_FILE);
 
 	nxoe_p_file_lock(file);
@@ -1335,13 +1335,13 @@ nxo_file_buffer_flush(cw_nxo_t *a_nxo)
 	cw_nxoe_file_t		*file;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
 
 	file = (cw_nxoe_file_t *)a_nxo->o.nxoe;
 
 	_cw_check_ptr(file);
-	_cw_assert(file->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(file->nxoe.type == NXOT_FILE);
 
 	nxoe_p_file_lock(file);

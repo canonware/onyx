@@ -224,10 +224,10 @@ nxo_thread_nx_get(cw_nxo_t *a_nxo)
 	cw_nxoe_thread_t	*thread;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 
 	thread = (cw_nxoe_thread_t *)a_nxo->o.nxoe;
-	_cw_assert(thread->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(thread->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(thread->nxoe.type == NXOT_THREAD);
 
 	return thread->nx;
@@ -239,10 +239,10 @@ nxo_thread_ostack_get(cw_nxo_t *a_nxo)
 	cw_nxoe_thread_t	*thread;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 
 	thread = (cw_nxoe_thread_t *)a_nxo->o.nxoe;
-	_cw_assert(thread->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(thread->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(thread->nxoe.type == NXOT_THREAD);
 
 	return &thread->ostack;
@@ -254,10 +254,10 @@ nxo_thread_dstack_get(cw_nxo_t *a_nxo)
 	cw_nxoe_thread_t	*thread;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 
 	thread = (cw_nxoe_thread_t *)a_nxo->o.nxoe;
-	_cw_assert(thread->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(thread->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(thread->nxoe.type == NXOT_THREAD);
 
 	return &thread->dstack;
@@ -269,10 +269,10 @@ nxo_thread_estack_get(cw_nxo_t *a_nxo)
 	cw_nxoe_thread_t	*thread;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 
 	thread = (cw_nxoe_thread_t *)a_nxo->o.nxoe;
-	_cw_assert(thread->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(thread->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(thread->nxoe.type == NXOT_THREAD);
 
 	return &thread->estack;
@@ -284,10 +284,10 @@ nxo_thread_istack_get(cw_nxo_t *a_nxo)
 	cw_nxoe_thread_t	*thread;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 
 	thread = (cw_nxoe_thread_t *)a_nxo->o.nxoe;
-	_cw_assert(thread->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(thread->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(thread->nxoe.type == NXOT_THREAD);
 
 	return &thread->istack;
@@ -299,10 +299,10 @@ nxo_thread_tstack_get(cw_nxo_t *a_nxo)
 	cw_nxoe_thread_t	*thread;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 
 	thread = (cw_nxoe_thread_t *)a_nxo->o.nxoe;
-	_cw_assert(thread->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(thread->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(thread->nxoe.type == NXOT_THREAD);
 
 	return &thread->tstack;
@@ -314,10 +314,10 @@ nxo_thread_stdin_get(cw_nxo_t *a_nxo)
 	cw_nxoe_thread_t	*thread;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 
 	thread = (cw_nxoe_thread_t *)a_nxo->o.nxoe;
-	_cw_assert(thread->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(thread->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(thread->nxoe.type == NXOT_THREAD);
 
 	return &thread->stdin_nxo;
@@ -329,10 +329,10 @@ nxo_thread_stdout_get(cw_nxo_t *a_nxo)
 	cw_nxoe_thread_t	*thread;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 
 	thread = (cw_nxoe_thread_t *)a_nxo->o.nxoe;
-	_cw_assert(thread->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(thread->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(thread->nxoe.type == NXOT_THREAD);
 
 	return &thread->stdout_nxo;
@@ -344,10 +344,10 @@ nxo_thread_stderr_get(cw_nxo_t *a_nxo)
 	cw_nxoe_thread_t	*thread;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 
 	thread = (cw_nxoe_thread_t *)a_nxo->o.nxoe;
-	_cw_assert(thread->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(thread->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(thread->nxoe.type == NXOT_THREAD);
 
 	return &thread->stderr_nxo;

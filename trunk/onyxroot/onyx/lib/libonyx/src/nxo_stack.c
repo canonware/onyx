@@ -69,7 +69,7 @@ nxoe_l_stack_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 	stack = (cw_nxoe_stack_t *)a_nxoe;
 
 	_cw_check_ptr(stack);
-	_cw_assert(stack->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(stack->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(stack->nxoe.type == NXOT_STACK);
 
 	/*
@@ -230,10 +230,10 @@ nxo_stack_copy(cw_nxo_t *a_to, cw_nxo_t *a_from)
 	cw_uint32_t	i, count;
 
 	_cw_check_ptr(a_to);
-	_cw_assert(a_to->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_to->magic == _CW_NXO_MAGIC);
 	  
 	_cw_check_ptr(a_from);
-	_cw_assert(a_from->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_from->magic == _CW_NXO_MAGIC);
 
 	for (i = 0, count = nxo_stack_count(a_from), nxo_fr = NULL, nxo_to
 	    = NULL; i < count; i++) {

@@ -20,7 +20,7 @@ _CW_INLINE cw_op_t *
 nxo_operator_f(cw_nxo_t *a_nxo)
 {
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_nxo) == NXOT_OPERATOR);
 
 	return a_nxo->o.operator.f;

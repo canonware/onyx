@@ -1,5 +1,3 @@
-*.[do]_[dap]
-cover.dbg
+*.[do]_[a]
 cover
-cover.prof
 Cookfile.list

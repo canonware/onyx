@@ -49,8 +49,7 @@ SRCS = [SRCS] [ONYX_SRCS];
 }
 
 /*
- * Simple onyx tests.  Output is diff'ed with the expected (.exp file)
- * output.
+ * Onyx tests.
  */
 {
   local otests = abs_a.nx.in abs_b.nx.in abs_c.nx.in add_a.nx.in add_b.nx.in
@@ -138,7 +137,7 @@ SRCS = [SRCS] [ONYX_SRCS];
   CBTESTS = [CBTESTS] [cbtests];
 }
 
-/* onyx programs that are driven by tests. */
+/* Onyx programs that are driven by tests. */
 {
   local obtests = ;
   obtests = [fromto % [srcdir]/bin/onyx/test/% [obtests]];
@@ -165,40 +164,30 @@ SRCS = [SRCS] [ONYX_SRCS];
 
 /* Binaries. */
 ONYX = [objdir]/bin/onyx/bin/onyx;
-ONYX_D = [ONYX].dbg;
-ONYX_A = [ONYX];
-ONYX_P = [ONYX].prof;
-
-D_BINS = [D_BINS] [ONYX_D];
-A_BINS = [A_BINS] [ONYX_A];
-P_BINS = [P_BINS] [ONYX_P];
+BINS = [BINS] [ONYX];
 
 /*
  * User cook'ables.
  */
 
-onyx_all : onyx_d onyx_a onyx_p;
-onyx_d : [ONYX_D];
-onyx_a : [ONYX_A];
-onyx_p : [ONYX_P];
+onyx : [ONYX];
 
-onyx_install : onyx_install_d onyx_install_a onyx_install_p;
+onyx_install_self : [ONYX]
+{
+  [INSTALL] -d [PREFIX]/bin;
+  [CC] [A_CFLAGS] -o [PREFIX]/bin/onyx
+       [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [ONYX_SRCS]]
+       -rpath [PREFIX]/lib
+       [LDFLAGS] -lonyx -ledit -lstash -ltermcap [EXTRALIBS];
+  [CHMOD] 0755 [PREFIX]/bin/onyx;
+}
+
+onyx_install : onyx_install_self
+               libonyx_install_s libedit_install_s libstash_install_s;
 
 onyx_uninstall :
 {
-  [SHELL] -e;
-data
-#![SHELL]
-
-echo rm -f [PREFIX]/bin/onyx.dbg
-rm -f [PREFIX]/bin/onyx.dbg
-
-echo rm -f [PREFIX]/bin/onyx
-rm -f [PREFIX]/bin/onyx
-
-echo rm -f [PREFIX]/bin/onyx.prof
-rm -f [PREFIX]/bin/onyx.prof
-dataend
+  rm -f [PREFIX]/bin/onyx;
 }
 
 onyx_clean :
@@ -211,82 +200,17 @@ onyx_distclean :
 }
 
 /*
- * Build rules.
- */
-
-onyx_install_common :
-{
-  [SHELL] -e;
-data
-#![SHELL]
-
-echo [INSTALL] -d [PREFIX]/bin
-[INSTALL] -d [PREFIX]/bin
-dataend
-}
-
-onyx_install_d : [ONYX_D] onyx_install_common
-{
-	[INSTALL] -m 0755 [ONYX_D] [PREFIX]/bin;
-}
-
-onyx_install_a : [ONYX_A] onyx_install_common
-#if [ENABLE_SHARED]
-                 libonyx_install_s libedit_install_s libstash_install_s
-#endif
-{
-#if [ENABLE_SHARED]
-  [CC] [A_CFLAGS] -o [PREFIX]/bin/onyx
-       [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [ONYX_SRCS]]
-       -rpath [PREFIX]/lib
-       [LDFLAGS] -lonyx -ledit -lstash -ltermcap [EXTRALIBS];
-  [CHMOD] 0755 [PREFIX]/bin/onyx;
-#else
-	[INSTALL] -m 0755 [ONYX_A] [PREFIX]/bin;
-#endif
-}
-
-onyx_install_p : [ONYX_P] onyx_install_common
-{
-	[INSTALL] -m 0755 [ONYX_P] [PREFIX]/bin;
-}
-
-/*
  * Dependencies.
  */
 
-[ONYX_D] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [ONYX_SRCS]]
-           [LIBONYX_D] [LIBEDIT_D] [LIBSTASH_D]
-  set mkdir
-{
-  [CC] [D_CFLAGS] -o [target]
-       [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [ONYX_SRCS]]
-       [LDFLAGS] -lonyx_d -ledit_d -lstash_d -ltermcap [EXTRALIBS];
-}
-
-[ONYX_A] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [ONYX_SRCS]]
-#if [ENABLE_SHARED]
-           [LIBONYX_S] [LIBEDIT_S] [LIBSTASH_S]
-#else
-           [LIBONYX_A] [LIBEDIT_A] [LIBSTASH_A]
-#endif
+[ONYX] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [ONYX_SRCS]]
+         [LIBONYX_S] [LIBEDIT_S] [LIBSTASH_S]
   set mkdir
 {
   [CC] [A_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [ONYX_SRCS]]
-#if [ENABLE_SHARED]
        -rpath [abs_objdir]/lib/c/libonyx/lib
        -rpath [abs_objdir]/lib/c/libedit/lib
        -rpath [abs_objdir]/lib/c/libstash/lib
-#endif
-       [LDFLAGS] -lonyx -ledit -lstash -ltermcap [EXTRALIBS];
-}
-
-[ONYX_P] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [ONYX_SRCS]]
-           [LIBONYX_P] [LIBEDIT_P] [LIBSTASH_P]
-  set mkdir
-{
-  [CC] [P_CFLAGS] -o [target]
-       [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [ONYX_SRCS]]
-       [LDFLAGS] -lonyx_p -ledit_p -lstash_p -ltermcap [EXTRALIBS];
+       [LDFLAGS] -lonyx -ledit -lstash [EXTRALIBS];
 }

@@ -7,15 +7,18 @@
  *
  * Version: <Version>
  *
- * Jump Cookfile.
- *
  ******************************************************************************/
 
-% : {
-	dir = [dirname [shell pwd]];
-	[print Entering directory \`[dir]\'];
-	cd ..\; [self] [options] %;
-	[print Leaving directory \`[dir]\'];
+#include <libonyx/libonyx.h>
+
+void
+modncurses_init(void *a_arg, cw_nxo_t *a_thread)
+{
+	_cw_out_put_e("Got here\n");
 }
 
-all : ;
+void
+modncurses_init_2(void *a_arg, cw_nxo_t *a_thread)
+{
+	_cw_out_put_e("Got here\n");
+}

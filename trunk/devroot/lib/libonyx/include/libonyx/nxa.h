@@ -75,7 +75,7 @@ _CW_INLINE cw_nxo_t *
 nxa_gcdict_get(cw_nxa_t *a_nxa)
 {
 	_cw_check_ptr(a_nxa);
-	_cw_assert(a_nxa->magic == _CW_NXA_MAGIC);
+	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
 
 	return &a_nxa->gcdict;
 }

@@ -208,7 +208,7 @@ thd_delete(cw_thd_t *a_thd)
 	int		error;
 
 	_cw_check_ptr(a_thd);
-	_cw_assert(a_thd->magic == _CW_THD_MAGIC);
+	_cw_dassert(a_thd->magic == _CW_THD_MAGIC);
 	_cw_assert(cw_g_thd_initialized);
 
 	error = pthread_detach(a_thd->thread);
@@ -228,7 +228,7 @@ thd_join(cw_thd_t *a_thd)
 	int	error;
 
 	_cw_check_ptr(a_thd);
-	_cw_assert(a_thd->magic == _CW_THD_MAGIC);
+	_cw_dassert(a_thd->magic == _CW_THD_MAGIC);
 	_cw_assert(cw_g_thd_initialized);
 
 	error = pthread_join(a_thd->thread, &retval);
@@ -259,7 +259,7 @@ thd_self(void)
 	retval = (cw_thd_t *)tsd_get(&cw_g_thd_self_key);
 
 	_cw_check_ptr(retval);
-	_cw_assert(retval->magic == _CW_THD_MAGIC);
+	_cw_dassert(retval->magic == _CW_THD_MAGIC);
 	_cw_assert(cw_g_thd_initialized);
 
 	return retval;
@@ -297,7 +297,7 @@ thd_crit_enter(void)
 	
 	thd = thd_self();
 	_cw_check_ptr(thd);
-	_cw_assert(thd->magic == _CW_THD_MAGIC);
+	_cw_dassert(thd->magic == _CW_THD_MAGIC);
 	mtx_lock(&thd->crit_lock);
 }
 
@@ -310,7 +310,7 @@ thd_crit_leave(void)
 
 	thd = thd_self();
 	_cw_check_ptr(thd);
-	_cw_assert(thd->magic == _CW_THD_MAGIC);
+	_cw_dassert(thd->magic == _CW_THD_MAGIC);
 	mtx_unlock(&thd->crit_lock);
 }
 
@@ -323,7 +323,7 @@ thd_single_enter(void)
 
 	self = thd_self();
 	_cw_check_ptr(self);
-	_cw_assert(self->magic == _CW_THD_MAGIC);
+	_cw_dassert(self->magic == _CW_THD_MAGIC);
 
 	mtx_lock(&cw_g_thd_single_lock);
 	qr_foreach(thd, &cw_g_thd, link) {
@@ -355,7 +355,7 @@ void
 thd_suspend(cw_thd_t *a_thd)
 {
 	_cw_check_ptr(a_thd);
-	_cw_assert(a_thd->magic == _CW_THD_MAGIC);
+	_cw_dassert(a_thd->magic == _CW_THD_MAGIC);
 	_cw_assert(cw_g_thd_initialized);
 
 	mtx_lock(&a_thd->crit_lock);
@@ -375,7 +375,7 @@ thd_trysuspend(cw_thd_t *a_thd)
 	cw_bool_t	retval;
 
 	_cw_check_ptr(a_thd);
-	_cw_assert(a_thd->magic == _CW_THD_MAGIC);
+	_cw_dassert(a_thd->magic == _CW_THD_MAGIC);
 	_cw_assert(cw_g_thd_initialized);
 
 	if (mtx_trylock(&a_thd->crit_lock)) {
@@ -398,7 +398,7 @@ thd_resume(cw_thd_t *a_thd)
 	int	error;
 
 	_cw_check_ptr(a_thd);
-	_cw_assert(a_thd->magic == _CW_THD_MAGIC);
+	_cw_dassert(a_thd->magic == _CW_THD_MAGIC);
 	_cw_assert(cw_g_thd_initialized);
 
 #ifdef _CW_THD_GENERIC_SR

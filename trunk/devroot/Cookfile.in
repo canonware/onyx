@@ -44,22 +44,21 @@ LATEX2HTML = @LATEX2HTML@;
 MAKEINDEX = @MAKEINDEX@;
 
 /* Build parameters. */
-CPPFLAGS = ;
-D_CPPFLAGS = -D_REENTRANT -D_CW_DBG @CPPFLAGS@;
-A_CPPFLAGS = -D_REENTRANT @CPPFLAGS@;
-P_CPPFLAGS = -D_REENTRANT @CPPFLAGS@;
-S_CPPFLAGS = -D_REENTRANT @CPPFLAGS@;
+CPPFLAGS = @CPPFLAGS@;
+CPPDEFS = -D_REENTRANT;
 
-/* CFLAGS = -Wall -pipe -g3 @CFLAGS@; */
-CFLAGS = -pipe -g3 @CFLAGS@;
-D_CFLAGS = [CFLAGS];
-A_CFLAGS = [CFLAGS] -O;
-P_CFLAGS = [CFLAGS] -O -pg;
+CFLAGS = @CFLAGS@;
+A_CFLAGS = [CFLAGS];
 S_CFLAGS = [CFLAGS] -fPIC -DPIC;
 
-ENABLE_SHARED = @enable_shared@;
 LDFLAGS = @LDFLAGS@;
 EXTRALIBS = @LIBS@;
+
+libs = @libs@;
+mods = @mods@;
+bins = @bins@;
+
+BOOTSTRAP = ;
 
 /*
  * For cleanliness purposes, it would be nice to have this in libstash's
@@ -79,6 +78,10 @@ HAVE_LIBSTASH_BUF = @enable_libstash_buf@;
 #include-cooked [srcdir]/lib/c/Cookfile.inc
 #include-cooked [fromto % [srcdir]/lib/c/%/Cookfile.inc @libs@]
 
+/* Modules. */
+#include-cooked [srcdir]/mod/Cookfile.inc
+#include-cooked [fromto % [srcdir]/mod/%/Cookfile.inc @mods@]
+
 /* Programs. */
 #include-cooked [srcdir]/bin/Cookfile.inc
 #include-cooked [fromto % [srcdir]/bin/%/Cookfile.inc @bins@]
@@ -87,28 +90,23 @@ HAVE_LIBSTASH_BUF = @enable_libstash_buf@;
  * User targets.
  */
 
-standard : libs bins_a
+standard : libs mods bins
   set default
 ;
 
-all : libs bins tests doc_all;
+all : libs mods bins tests docs;
 
-libs_d : [D_LIBS];
 libs_a : [A_LIBS];
-libs_p : [P_LIBS];
 libs_s : [S_LIBS];
-libs : libs_d libs_a libs_p
-#if [ENABLE_SHARED]
-       libs_s
-#endif
-;
+libs : libs_a libs_s;
 
-bins_d : [D_BINS];
-bins_a : [A_BINS];
-bins_p : [P_BINS];
-bins : bins_d bins_a bins_p;
+mods : [MODS];
 
-tests : [ONYX_D]
+bins : [BINS];
+
+bootstrap : [BOOTSTRAP];
+
+tests : [ONYX] [MODS]
         [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS] [CBTESTS]]
         [fromto [srcdir]/%0%.nx.in [objdir]/%0%.nx [OTESTS] [OBTESTS]]
         [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]];
@@ -129,39 +127,38 @@ check_update : tests
            [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]];
 }
 
-release : doc_all;
+release : docs;
 
-/* We can't call the target "doc" because there is a directory by that name. */
-doc_all : doc_ps doc_pdf doc_html;
-doc_ps : [PS_MANUAL];
-doc_pdf : [PDF_MANUAL];
-doc_html : [HTML_MANUAL];
+docs : docs_ps docs_pdf docs_html;
+docs_ps : [PS_MANUAL];
+docs_pdf : [PDF_MANUAL];
+docs_html : [HTML_MANUAL];
 
-install_bins : [addsuffix _install_a @bins@];
+install_bins : [addsuffix _install @bins@];
+install_mods : [addsuffix _install @mods@];
 install_libs : [addsuffix _install @libs@];
-install : install_bins install_libs install_doc;
+install : install_bins install_mods install_libs install_docs;
 
 uninstall_bins : [addsuffix _uninstall @bins@];
+uninstall_mods : [addsuffix _uninstall @mods@];
 uninstall_libs : [addsuffix _uninstall @libs@];
-uninstall : uninstall_bins uninstall_libs uninstall_doc
+uninstall : uninstall_bins uninstall_mods uninstall_libs uninstall_docs
 {
   rm -rf [PREFIX]/share/canonware;
 }
 
-clean : [addsuffix _clean doc test @bins@ @libs@]
+clean : [addsuffix _clean docs test @bins@ @mods@ @libs@]
 {
   rm -f core *.core;
   rm -f TAGS;
 
-  rm -f [D_LIBS];
   rm -f [A_LIBS];
-  rm -f [P_LIBS];
   rm -f [S_LIBS];
   rm -f [S_LINKS];
 
-  rm -f [D_BINS];
-  rm -f [A_BINS];
-  rm -f [P_BINS];
+  rm -f [MODS];
+
+  rm -f [BINS];
 
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_d [SRCS]];
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_a [SRCS]];
@@ -171,6 +168,9 @@ clean : [addsuffix _clean doc test @bins@ @libs@]
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [SRCS]];
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [SRCS]];
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_s [SRCS]];
+
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_s [MSRCS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_s [MSRCS]];
 
   /*
    * Delete .cook.fp files from the source tree and object tree.
@@ -195,7 +195,7 @@ done
 dataend
 }
 
-distclean : clean [addsuffix _distclean doc test @bins@ @libs@]
+distclean : clean [addsuffix _distclean docs test @bins@ @mods@ @libs@]
 {
   rm -f [objdir]/Cookfile;
   rm -f [objdir]/config.cache;
@@ -205,11 +205,11 @@ distclean : clean [addsuffix _distclean doc test @bins@ @libs@]
   rm -f @cfghdrs@;
 }
 
-relclean : distclean [addsuffix _relclean doc]
+relclean : distclean [addsuffix _relclean docs]
 {
 }
 
-etags : [INCS] [PRIV_INCS] [SRCS]
+etags : [INCS] [PRIV_INCS] [MINCS] [SRCS] [MSRCS]
 {
-  @ETAGS@ [INCS] [PRIV_INCS] [SRCS];
+  @ETAGS@ [INCS] [PRIV_INCS] [MINCS] [SRCS] [MSRCS];
 }

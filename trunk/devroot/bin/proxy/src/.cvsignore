@@ -1,5 +1,3 @@
-*.[do]_[dap]
-proxy.dbg
+*.[do]_[a]
 proxy
-proxy.prof
 Cookfile.list

@@ -102,40 +102,29 @@ SRCS = [SRCS] [PROXY_SRCS];
 
 /* Binaries. */
 PROXY = [objdir]/bin/proxy/bin/proxy;
-PROXY_D = [PROXY].dbg;
-PROXY_A = [PROXY];
-PROXY_P = [PROXY].prof;
-
-D_BINS = [D_BINS] [PROXY_D];
-A_BINS = [A_BINS] [PROXY_A];
-P_BINS = [P_BINS] [PROXY_P];
+BINS = [BINS] [PROXY];
 
 /*
  * User cook'ables.
  */
 
-proxy_all : proxy_d proxy_a proxy_p;
-proxy_d : [PROXY_D];
-proxy_a : [PROXY_A];
-proxy_p : [PROXY_P];
+proxy : [PROXY];
 
-proxy_install : proxy_install_d proxy_install_a proxy_install_p;
+proxy_install_self : [PROXY]
+{
+  [INSTALL] -d [PREFIX]/bin;
+  [CC] [A_CFLAGS] -o [PREFIX]/bin/proxy
+       [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [PROXY_SRCS]]
+       -rpath [PREFIX]/lib
+       [LDFLAGS] -lsock -lstash [EXTRALIBS];
+  [CHMOD] 0755 [PREFIX]/bin/proxy;
+}
+
+proxy_install : proxy_install_self libsock_install_s libstash_install_s;
 
 proxy_uninstall :
 {
-  [SHELL] -e;
-data
-#![SHELL]
-
-echo rm -f [PREFIX]/bin/proxy.dbg
-rm -f [PREFIX]/bin/proxy.dbg
-
-echo rm -f [PREFIX]/bin/proxy
-rm -f [PREFIX]/bin/proxy
-
-echo rm -f [PREFIX]/bin/proxy.prof
-rm -f [PREFIX]/bin/proxy.prof
-dataend
+  rm -f [PREFIX]/bin/proxy;
 }
 
 proxy_clean :
@@ -148,81 +137,16 @@ proxy_distclean :
 }
 
 /*
- * Build rules.
- */
-
-proxy_install_common :
-{
-  [SHELL] -e;
-data
-#![SHELL]
-
-echo [INSTALL] -d [PREFIX]/bin
-[INSTALL] -d [PREFIX]/bin
-dataend
-}
-
-proxy_install_d : [PROXY_D] proxy_install_common
-{
-	[INSTALL] -m 0755 [PROXY_D] [PREFIX]/bin;
-}
-
-proxy_install_a : [PROXY_A] proxy_install_common
-#if [ENABLE_SHARED]
-                  libsock_install_s libstash_install_s
-#endif
-{
-#if [ENABLE_SHARED]
-  [CC] [D_CFLAGS] -o [PREFIX]/bin/proxy
-       [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [PROXY_SRCS]]
-       -rpath [PREFIX]/lib
-       [LDFLAGS] -lsock -lstash [EXTRALIBS];
-  [CHMOD] 0755 [PREFIX]/bin/proxy;
-#else
-	[INSTALL] -m 0755 [PROXY_A] [PREFIX]/bin;
-#endif
-}
-
-proxy_install_p : [PROXY_P] proxy_install_common
-{
-	[INSTALL] -m 0755 [PROXY_P] [PREFIX]/bin;
-}
-
-/*
  * Dependencies.
  */
 
-[PROXY_D] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [PROXY_SRCS]]
-           [LIBSOCK_D] [LIBSTASH_D]
-  set mkdir
-{
-  [CC] [D_CFLAGS] -o [target]
-       [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [PROXY_SRCS]]
-       [LDFLAGS] -lsock_d -lstash_d [EXTRALIBS];
-}
-
-[PROXY_A] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [PROXY_SRCS]]
-#if [ENABLE_SHARED]
-           [LIBSOCK_S] [LIBSTASH_S]
-#else
-           [LIBSOCK_A] [LIBSTASH_A]
-#endif
+[PROXY] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [PROXY_SRCS]]
+          [LIBSOCK_S] [LIBSTASH_S]
   set mkdir
 {
   [CC] [A_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [PROXY_SRCS]]
-#if [ENABLE_SHARED]
        -rpath [abs_objdir]/lib/c/libsock/lib
        -rpath [abs_objdir]/lib/c/libstash/lib
-#endif
        [LDFLAGS] -lsock -lstash [EXTRALIBS];
-}
-
-[PROXY_P] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [PROXY_SRCS]]
-           [LIBSOCK_P] [LIBSTASH_P]
-  set mkdir
-{
-  [CC] [P_CFLAGS] -o [target]
-       [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [PROXY_SRCS]]
-       [LDFLAGS] -lsock_p -lstash_p [EXTRALIBS];
 }

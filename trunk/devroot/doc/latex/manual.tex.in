@@ -28,7 +28,11 @@
 @lib_stash_manual@\input{@abs_objdir@/lib/c/libstash/doc/latex/manual}
 @lib_sock_manual@\input{@abs_objdir@/lib/c/libsock/doc/latex/manual}
 @lib_onyx_manual@\input{@abs_objdir@/lib/c/libonyx/doc/latex/manual}
-@lib_prism_manual@\input{@abs_objdir@/lib/c/libprism/doc/latex/manual}
+
+% Modules.
+\clearemptydoublepage
+\part{Modules}
+@mod_ncurses_manual@\input{@abs_objdir@/mod/modncurses/doc/latex/manual}
 
 % onyx Language Reference.
 \clearemptydoublepage

@@ -13,7 +13,6 @@
 
 /* Include generated dependency files. */
 #include-cooked [glob [objdir]/lib/c/libonyx/src/"*.d_*"]
-#include-cooked [glob [objdir]/lib/c/libonyx/bin/"*.d_*"]
 #include-cooked [glob [objdir]/lib/c/libonyx/test/"*.d_*"]
 
 /*
@@ -125,18 +124,14 @@ SRCS = [SRCS] [LIBONYX_SRCS];
 }
 
 /* Libraries. */
-LIBONYX_REV = 0.0;
+LIBONYX_REV = 1.0;
 
-LIBONYX_D = [objdir]/lib/c/libonyx/lib/libonyx_d.a;
 LIBONYX_A = [objdir]/lib/c/libonyx/lib/libonyx.a;
 LIBONYX_S = [objdir]/lib/c/libonyx/lib/libonyx.so.[LIBONYX_REV];
-LIBONYX_P = [objdir]/lib/c/libonyx/lib/libonyx_p.a;
 
 LDFLAGS = [LDFLAGS] -L[objdir]/lib/c/libonyx/lib;
 LIBS = [LIBS] -lonyx;
-D_LIBS = [D_LIBS] [LIBONYX_D];
 A_LIBS = [A_LIBS] [LIBONYX_A];
-P_LIBS = [P_LIBS] [LIBONYX_P];
 S_LIBS = [S_LIBS] [LIBONYX_S];
 S_LINKS = [S_LINKS] [objdir]/lib/c/libonyx/lib/libonyx.so;
 
@@ -144,27 +139,21 @@ S_LINKS = [S_LINKS] [objdir]/lib/c/libonyx/lib/libonyx.so;
  * User cook'ables.
  */
 
-onyx_bootstrap : [ONYX_D]
+BOOTSTRAP = [BOOTSTRAP] libonyx_bootstrap;
+
+libonyx_bootstrap : [ONYX]
 {
   cat [srcdir]/lib/c/libonyx/src/nx_nxcode.nx
-    | [ONYX_D] [srcdir]/lib/c/libonyx/src/nx_nxcode_gen.nx
+    | [ONYX] [srcdir]/lib/c/libonyx/src/nx_nxcode_gen.nx
     > [srcdir]/lib/c/libonyx/src/nx_nxcode.c;
   cat [srcdir]/lib/c/libonyx/src/nxo_thread_nxcode.nx
-    | [ONYX_D] [srcdir]/lib/c/libonyx/src/nxo_thread_nxcode_gen.nx
+    | [ONYX] [srcdir]/lib/c/libonyx/src/nxo_thread_nxcode_gen.nx
     > [srcdir]/lib/c/libonyx/src/nxo_thread_nxcode.c;
 }
 
-libonyx : [LIBONYX_D] [LIBONYX_A] [LIBONYX_P]
-#if [ENABLE_SHARED]
-          [LIBONYX_S]
-#endif
-;
+libonyx : [LIBONYX_A] [LIBONYX_S];
 
-libonyx_install : libonyx_install_d libonyx_install_a libonyx_install_p
-#if [ENABLE_SHARED]
-                   libonyx_install_s
-#endif
-;
+libonyx_install : libonyx_install_a libonyx_install_s;
 
 libonyx_uninstall :
 {
@@ -219,19 +208,9 @@ echo [INSTALL] -d [PREFIX]/lib
 dataend
 }
 
-libonyx_install_d : [LIBONYX_D] libonyx_install_common
-{
-	[INSTALL] -m 0444 [LIBONYX_D] [PREFIX]/lib;
-}
-
 libonyx_install_a : [LIBONYX_A] libonyx_install_common
 {
 	[INSTALL] -m 0444 [LIBONYX_A] [PREFIX]/lib;
-}
-
-libonyx_install_p : [LIBONYX_P] libonyx_install_common
-{
-	[INSTALL] -m 0444 [LIBONYX_P] [PREFIX]/lib;
 }
 
 libonyx_install_s : [LIBONYX_S] libonyx_install_common
@@ -244,21 +223,7 @@ libonyx_install_s : [LIBONYX_S] libonyx_install_common
  * Dependencies.
  */
 
-[LIBONYX_D] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [LIBONYX_SRCS]]
-  set mkdir
-{
-  [AR] cru [target] [younger];
-  [RANLIB] [target];
-}
-
 [LIBONYX_A] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [LIBONYX_SRCS]]
-  set mkdir
-{
-  [AR] cru [target] [younger];
-  [RANLIB] [target];
-}
-
-[LIBONYX_P] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [LIBONYX_SRCS]]
   set mkdir
 {
   [AR] cru [target] [younger];

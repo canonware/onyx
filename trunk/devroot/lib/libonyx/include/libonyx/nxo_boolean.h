@@ -29,7 +29,7 @@ _CW_INLINE cw_bool_t
 nxo_boolean_get(cw_nxo_t *a_nxo)
 {
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_nxo) == NXOT_BOOLEAN);
 
 	return a_nxo->o.boolean.val;
@@ -39,7 +39,7 @@ _CW_INLINE void
 nxo_boolean_set(cw_nxo_t *a_nxo, cw_bool_t a_val)
 {
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_nxo) == NXOT_BOOLEAN);
 
 	a_nxo->o.boolean.val = a_val;

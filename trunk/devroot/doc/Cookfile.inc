@@ -39,20 +39,20 @@ HTML_MANUAL = [objdir]/doc/html/manual.html;
   FIG_SRCS = [FIG_SRCS] [fig_srcs];
 }
 
-install_doc : doc_install_ps doc_install_pdf doc_install_html;
-doc_install_ps : /* [PS_MANUAL] */
+install_docs : docs_install_ps docs_install_pdf docs_install_html;
+docs_install_ps : /* [PS_MANUAL] */
 {
   [INSTALL] -d [PREFIX]/share/canonware/doc/ps;
   [INSTALL] -m 0444 [PS_MANUAL] [PREFIX]/share/canonware/doc/ps;
 }
 
-doc_install_pdf : /* [PDF_MANUAL] */
+docs_install_pdf : /* [PDF_MANUAL] */
 {
   [INSTALL] -d [PREFIX]/share/canonware/doc/pdf;
   [INSTALL] -m 0444 [PDF_MANUAL] [PREFIX]/share/canonware/doc/pdf;
 }
 
-doc_install_html : /* [HTML_MANUAL] */
+docs_install_html : /* [HTML_MANUAL] */
 {
   [SHELL] -e;
 data
@@ -79,7 +79,7 @@ rm -rf [PREFIX]/share/canonware/doc
 dataend
 }
 
-doc_clean :
+docs_clean :
 {
   rm -f [objdir]/doc/latex/manual.alg;
   rm -f [objdir]/doc/latex/manual.aux;
@@ -98,12 +98,12 @@ doc_clean :
   rm -f [objdir]/doc/latex/texput.log;
 }
 
-doc_distclean :
+docs_distclean :
 {
   rm -f [objdir]/doc/latex/manual.tex;
 }
 
-doc_relclean :
+docs_relclean :
 {
   rm -rf [objdir]/doc/html;
   rm -rf [objdir]/doc/pdf;

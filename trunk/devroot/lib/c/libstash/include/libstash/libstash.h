@@ -195,7 +195,7 @@ extern cw_out_t	*out_err;
 		abort();						\
 	} while (0)
 
-#ifdef _CW_DBG
+#ifdef _CW_ASSERT
 #define _cw_not_reached()						\
 	do {								\
 		out_put_e(NULL, __FILE__, __LINE__, __FUNCTION__,	\
@@ -228,6 +228,25 @@ extern cw_out_t	*out_err;
 #define _cw_not_reached()
 #define _cw_assert(a)
 #define _cw_check_ptr(a)
+#endif
+
+/*
+ * _cw_dasssert() is used internally in places that the assertion should only
+ * be made if _CW_DBG is defined, such as checking magic variables that only
+ * exist in that case.
+ */
+#if (defined(_CW_DBG) && defined(_CW_ASSERT))
+#define _cw_dassert(a)							\
+	do {								\
+		if (!(a)) {						\
+			out_put_e(NULL, __FILE__, __LINE__,		\
+			    __FUNCTION__, "Failed assertion: \"[s]\"\n", \
+			    #a);					\
+			abort();					\
+		}							\
+	} while (0)
+#else
+#define _cw_dassert(a)
 #endif
 
 #endif /* _LIBSTASH_H_ */

@@ -52,7 +52,7 @@ void
 socks_delete(cw_socks_t *a_socks)
 {
 	_cw_check_ptr(a_socks);
-	_cw_assert(a_socks->magic == _CW_SOCKS_MAGIC);
+	_cw_dassert(a_socks->magic == _CW_SOCKS_MAGIC);
 
 	if (a_socks->is_listening) {
 		int	error;
@@ -81,7 +81,7 @@ socks_listen(cw_socks_t *a_socks, cw_uint32_t a_mask, int *r_port)
 	struct sockaddr_in	server_addr;
 
 	_cw_check_ptr(a_socks);
-	_cw_assert(a_socks->magic == _CW_SOCKS_MAGIC);
+	_cw_dassert(a_socks->magic == _CW_SOCKS_MAGIC);
 	_cw_check_ptr(r_port);
 	_cw_assert(a_socks->is_listening == FALSE);
 
@@ -176,7 +176,7 @@ socks_accept(cw_socks_t *a_socks, struct timespec *a_timeout, cw_sock_t
 	int		timeout, nready;
 
         _cw_check_ptr(a_socks);
-	_cw_assert(a_socks->magic == _CW_SOCKS_MAGIC);
+	_cw_dassert(a_socks->magic == _CW_SOCKS_MAGIC);
         _cw_check_ptr(r_sock);
 
 	/* Are we even listening right now? */

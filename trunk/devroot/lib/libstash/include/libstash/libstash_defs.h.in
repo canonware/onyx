@@ -13,6 +13,12 @@
  *
  ******************************************************************************/
 
+#undef _CW_DBG
+
+#ifndef _CW_ASSERT
+#undef _CW_ASSERT
+#endif
+
 #undef _CW_OS_FREEBSD
 #undef _CW_OS_LINUX
 #undef _CW_OS_SOLARIS

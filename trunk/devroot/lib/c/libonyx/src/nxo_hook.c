@@ -46,7 +46,7 @@ nxoe_l_hook_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 	hook = (cw_nxoe_hook_t *)a_nxoe;
 
 	_cw_check_ptr(hook);
-	_cw_assert(hook->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(hook->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(hook->nxoe.type == NXOT_HOOK);
 
 	if (hook->delete_f != NULL)
@@ -109,7 +109,7 @@ nxo_l_hook_print(cw_nxo_t *a_thread)
 	hook = (cw_nxoe_hook_t *)hnxo->o.nxoe;
 
 	_cw_check_ptr(hook);
-	_cw_assert(hook->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(hook->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(hook->nxoe.type == NXOT_HOOK);
 
 
@@ -155,13 +155,13 @@ nxo_hook_tag_get(cw_nxo_t *a_nxo)
 	cw_nxoe_hook_t	*hook;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_nxo) == NXOT_HOOK);
 
 	hook = (cw_nxoe_hook_t *)a_nxo->o.nxoe;
 
 	_cw_check_ptr(hook);
-	_cw_assert(hook->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(hook->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(hook->nxoe.type == NXOT_HOOK);
 
 	retval = &hook->tag;
@@ -176,13 +176,13 @@ nxo_hook_data_get(cw_nxo_t *a_nxo)
 	cw_nxoe_hook_t	*hook;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_nxo) == NXOT_HOOK);
 
 	hook = (cw_nxoe_hook_t *)a_nxo->o.nxoe;
 
 	_cw_check_ptr(hook);
-	_cw_assert(hook->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(hook->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(hook->nxoe.type == NXOT_HOOK);
 
 	retval = hook->data;
@@ -196,13 +196,13 @@ nxo_hook_eval(cw_nxo_t *a_nxo, cw_nxo_t *a_thread)
 	cw_nxoe_hook_t		*hook;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_nxo) == NXOT_HOOK);
 
 	hook = (cw_nxoe_hook_t *)a_nxo->o.nxoe;
 
 	_cw_check_ptr(hook);
-	_cw_assert(hook->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(hook->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(hook->nxoe.type == NXOT_HOOK);
 
 	if (hook->eval_f != NULL)

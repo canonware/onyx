@@ -1,5 +1,3 @@
-*.[do]_[dap]
-ncat.dbg
+*.[do]_[a]
 ncat
-ncat.prof
 Cookfile.list

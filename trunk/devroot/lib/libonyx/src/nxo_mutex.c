@@ -40,7 +40,7 @@ nxoe_l_mutex_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 	mutex = (cw_nxoe_mutex_t *)a_nxoe;
 
 	_cw_check_ptr(mutex);
-	_cw_assert(mutex->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(mutex->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(mutex->nxoe.type == NXOT_MUTEX);
 
 	mtx_delete(&mutex->lock);
@@ -86,13 +86,13 @@ nxo_mutex_lock(cw_nxo_t *a_nxo)
 	cw_nxoe_mutex_t	*mutex;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_nxo) == NXOT_MUTEX);
 
 	mutex = (cw_nxoe_mutex_t *)a_nxo->o.nxoe;
 
 	_cw_check_ptr(mutex);
-	_cw_assert(mutex->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(mutex->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(mutex->nxoe.type == NXOT_MUTEX);
 
 	mtx_lock(&mutex->lock);
@@ -105,13 +105,13 @@ nxo_mutex_trylock(cw_nxo_t *a_nxo)
 	cw_nxoe_mutex_t	*mutex;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_nxo) == NXOT_MUTEX);
 
 	mutex = (cw_nxoe_mutex_t *)a_nxo->o.nxoe;
 
 	_cw_check_ptr(mutex);
-	_cw_assert(mutex->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(mutex->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(mutex->nxoe.type == NXOT_MUTEX);
 
 	retval = mtx_trylock(&mutex->lock);
@@ -125,13 +125,13 @@ nxo_mutex_unlock(cw_nxo_t *a_nxo)
 	cw_nxoe_mutex_t	*mutex;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_nxo) == NXOT_MUTEX);
 
 	mutex = (cw_nxoe_mutex_t *)a_nxo->o.nxoe;
 
 	_cw_check_ptr(mutex);
-	_cw_assert(mutex->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(mutex->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(mutex->nxoe.type == NXOT_MUTEX);
 
 	mtx_unlock(&mutex->lock);

@@ -41,7 +41,7 @@ nxoe_l_condition_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 	condition = (cw_nxoe_condition_t *)a_nxoe;
 
 	_cw_check_ptr(condition);
-	_cw_assert(condition->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(condition->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(condition->nxoe.type == NXOT_CONDITION);
 
 	cnd_delete(&condition->condition);
@@ -87,13 +87,13 @@ nxo_condition_signal(cw_nxo_t *a_nxo)
 	cw_nxoe_condition_t	*condition;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_nxo) == NXOT_CONDITION);
 
 	condition = (cw_nxoe_condition_t *)a_nxo->o.nxoe;
 
 	_cw_check_ptr(condition);
-	_cw_assert(condition->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(condition->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(condition->nxoe.type == NXOT_CONDITION);
 
 	cnd_signal(&condition->condition);
@@ -105,13 +105,13 @@ nxo_condition_broadcast(cw_nxo_t *a_nxo)
 	cw_nxoe_condition_t	*condition;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_nxo) == NXOT_CONDITION);
 
 	condition = (cw_nxoe_condition_t *)a_nxo->o.nxoe;
 
 	_cw_check_ptr(condition);
-	_cw_assert(condition->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(condition->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(condition->nxoe.type == NXOT_CONDITION);
 
 	cnd_broadcast(&condition->condition);
@@ -124,23 +124,23 @@ nxo_condition_wait(cw_nxo_t *a_nxo, cw_nxo_t *a_mutex)
 	cw_nxoe_mutex_t		*mutex;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_nxo) == NXOT_CONDITION);
 
 	condition = (cw_nxoe_condition_t *)a_nxo->o.nxoe;
 
 	_cw_check_ptr(condition);
-	_cw_assert(condition->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(condition->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(condition->nxoe.type == NXOT_CONDITION);
 
 	_cw_check_ptr(a_mutex);
-	_cw_assert(a_mutex->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_mutex->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_mutex) == NXOT_MUTEX);
 
 	mutex = (cw_nxoe_mutex_t *)a_mutex->o.nxoe;
 
 	_cw_check_ptr(mutex);
-	_cw_assert(mutex->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(mutex->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(mutex->nxoe.type == NXOT_MUTEX);
 
 	cnd_wait(&condition->condition, &mutex->lock);
@@ -155,23 +155,23 @@ nxo_condition_timedwait(cw_nxo_t *a_nxo, cw_nxo_t *a_mutex, const struct
 	cw_nxoe_mutex_t		*mutex;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_nxo) == NXOT_CONDITION);
 
 	condition = (cw_nxoe_condition_t *)a_nxo->o.nxoe;
 
 	_cw_check_ptr(condition);
-	_cw_assert(condition->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(condition->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(condition->nxoe.type == NXOT_CONDITION);
 
 	_cw_check_ptr(a_mutex);
-	_cw_assert(a_mutex->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_mutex->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_mutex) == NXOT_MUTEX);
 
 	mutex = (cw_nxoe_mutex_t *)a_mutex->o.nxoe;
 
 	_cw_check_ptr(mutex);
-	_cw_assert(mutex->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(mutex->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(mutex->nxoe.type == NXOT_MUTEX);
 
 	retval = cnd_timedwait(&condition->condition, &mutex->lock, a_timeout);

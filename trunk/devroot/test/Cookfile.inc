@@ -22,8 +22,8 @@ OBTESTS = ;
 
 test_clean :
 {
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_d [CTESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [CTESTS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_a [CTESTS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [CTESTS]];
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.out [CTESTS]];
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.diff [CTESTS]];
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS]];
@@ -36,8 +36,8 @@ test_clean :
   rm -f [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl.out [PTESTS]];
   rm -f [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]];
 
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_d [CBTESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [CBTESTS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_a [CBTESTS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [CBTESTS]];
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.out [CBTESTS]];
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.diff [CBTESTS]];
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0% [CBTESTS]];
@@ -57,22 +57,29 @@ test_distclean :
 /*
  * Build rules for tests.
  */
-[objdir]/%0test/%1 : [objdir]/%0test/%1.o_d [D_LIBS]
+[objdir]/%0test/%1 : [objdir]/%0test/%1.o_a [S_LIBS]
   set mkdir
 {
-  [CC] -o [target] [objdir]/%0test/%1.o_d [D_LIBS] [LDFLAGS] [EXTRALIBS];
+  [CC] [A_CFLAGS] -o [target]
+       [objdir]/%0test/%1.o_a
+       [split " "
+              [prepost [prepost "-rpath " "/lib/c/" [abs_objdir]]
+                       "/lib"
+                       [libs]]]
+       [LDFLAGS] [LIBS] [EXTRALIBS];
 }
 
-[objdir]/%0test/%1.o_d : [srcdir]/%0test/%1.c
+[objdir]/%0test/%1.o_a : [srcdir]/%0test/%1.c
   set mkdir
 {
-  [CC] [D_CFLAGS] [CPPFLAGS] [D_CPPFLAGS] -c [srcdir]/%0test/%1.c -o [target];
+  [CC] [A_CFLAGS] [CPPFLAGS] [CPPDEFS] -D_CW_ASSERT
+    -c [srcdir]/%0test/%1.c -o [target];
 
   c_incl [CPPFLAGS] --no-cache -Absent_Local_Ignore -No_System
          [srcdir]/%0test/%1.c
          "--prefix='"[target]" : "[srcdir]/%0test/%1.c"'"
          "--suffix='set nodefault;'"
-         -o [fromto %0test/%1.o_d %0test/%1.d_d [target]];
+         -o [fromto %0test/%1.o_a %0test/%1.d_a [target]];
 }
 
 /*
@@ -105,7 +112,7 @@ data
 
 echo \"[srcdir]/%0%.nx.in --> [target]\"
 
-echo \"#![abs_objdir]/[ONYX_D]\" > [target]
+echo \"#![abs_objdir]/[ONYX]\" > [target]
 echo \"!#\" >> [target]
 [CAT] [srcdir]/%0%.nx.in >> [target];
 chmod u+x [target];

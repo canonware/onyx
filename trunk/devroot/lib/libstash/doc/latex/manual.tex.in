@@ -139,19 +139,41 @@ defines the following exceptions:
 		If the expression evaluates to zero, print an error message to
 		file descriptor 2 and \cfunc{abort}{}.
 
-		Note: This macro is optimized out of the non-debug versions of
-		\libname{libstash}.
+		Note: This macro is only active if the \cppdef{\_CW\_ASSERT} cpp
+		macro is defined.
 	\end{capilist}
 \label{_cw_not_reached}
 \index{_cw_not_reached@\cppmacro{\_cw\_not\_reached}{}}
 \citem{\cppmacro[void]{\_cw\_not\_reached}{void}}
 	\begin{capilist}
 	\item[Input(s): ] None.
-	\item[Output(s): ] None.
+	\item[Output(s): ]
+		Error printed to file descriptor 2.
 	\item[Exception(s): ] None.
 	\item[Description: ]
-		Abort with an error message, if a debugging version of
-		\libname{libstash}.
+		Abort with an error message.
+
+		Note: This macro is only active if the \cppdef{\_CW\_ASSERT} cpp
+		macro is defined.
+	\end{capilist}
+\label{_cw_check_ptr}
+\index{_cw_check\_ptr@\cppmacro{\_cw\_check\_ptr}{}}
+\citem{\cppmacro[void]{\_cw\_check\_ptr}{a\_pointer}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_pointer: ]
+			A pointer.
+		\end{description}
+	\item[Output(s): ]
+			Possible error printed to file descriptor 2.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		If \cvar{a\_pointer} is NULL, print an error message to file
+		descriptor 2 and \cfunc{abort}{}.
+
+		Note: This macro is only active if the \cppdef{\_CW\_ASSERT} cpp
+		macro is defined.
 	\end{capilist}
 \label{_cw_error}
 \index{_cw_error@\cppmacro{\_cw\_error}{}}

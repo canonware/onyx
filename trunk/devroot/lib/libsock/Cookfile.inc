@@ -13,7 +13,6 @@
 
 /* Include generated dependency files. */
 #include-cooked [glob [objdir]/lib/c/libsock/src/"*.d_*"]
-#include-cooked [glob [objdir]/lib/c/libsock/bin/"*.d_*"]
 #include-cooked [glob [objdir]/lib/c/libsock/test/"*.d_*"]
 
 /*
@@ -104,18 +103,14 @@ SRCS = [SRCS] [LIBSOCK_SRCS];
 }
 
 /* Libraries. */
-LIBSOCK_REV = 0.0;
+LIBSOCK_REV = 1.0;
 
-LIBSOCK_D = [objdir]/lib/c/libsock/lib/libsock_d.a;
 LIBSOCK_A = [objdir]/lib/c/libsock/lib/libsock.a;
 LIBSOCK_S = [objdir]/lib/c/libsock/lib/libsock.so.[LIBSOCK_REV];
-LIBSOCK_P = [objdir]/lib/c/libsock/lib/libsock_p.a;
 
 LDFLAGS = [LDFLAGS] -L[objdir]/lib/c/libsock/lib;
 LIBS = [LIBS] -lsock;
-D_LIBS = [D_LIBS] [LIBSOCK_D];
 A_LIBS = [A_LIBS] [LIBSOCK_A];
-P_LIBS = [P_LIBS] [LIBSOCK_P];
 S_LIBS = [S_LIBS] [LIBSOCK_S];
 S_LINKS = [S_LINKS] [objdir]/lib/c/libsock/lib/libsock.so;
 
@@ -123,17 +118,9 @@ S_LINKS = [S_LINKS] [objdir]/lib/c/libsock/lib/libsock.so;
  * User cook'ables.
  */
 
-libsock : [LIBSOCK_D] [LIBSOCK_A] [LIBSOCK_P]
-#if [ENABLE_SHARED]
-          [LIBSOCK_S]
-#endif
-;
+libsock : [LIBSOCK_A] [LIBSOCK_S];
 
-libsock_install : libsock_install_d libsock_install_a libsock_install_p
-#if [ENABLE_SHARED]
-                   libsock_install_s
-#endif
-;
+libsock_install : libsock_install_a libsock_install_s;
 
 libsock_uninstall :
 {
@@ -188,19 +175,9 @@ echo [INSTALL] -d [PREFIX]/lib
 dataend
 }
 
-libsock_install_d : [LIBSOCK_D] libsock_install_common
-{
-	[INSTALL] -m 0444 [LIBSOCK_D] [PREFIX]/lib;
-}
-
 libsock_install_a : [LIBSOCK_A] libsock_install_common
 {
 	[INSTALL] -m 0444 [LIBSOCK_A] [PREFIX]/lib;
-}
-
-libsock_install_p : [LIBSOCK_P] libsock_install_common
-{
-	[INSTALL] -m 0444 [LIBSOCK_P] [PREFIX]/lib;
 }
 
 libsock_install_s : [LIBSOCK_S] libsock_install_common
@@ -213,21 +190,7 @@ libsock_install_s : [LIBSOCK_S] libsock_install_common
  * Dependencies.
  */
 
-[LIBSOCK_D] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [LIBSOCK_SRCS]]
-  set mkdir
-{
-  [AR] cru [target] [younger];
-  [RANLIB] [target];
-}
-
 [LIBSOCK_A] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [LIBSOCK_SRCS]]
-  set mkdir
-{
-  [AR] cru [target] [younger];
-  [RANLIB] [target];
-}
-
-[LIBSOCK_P] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [LIBSOCK_SRCS]]
   set mkdir
 {
   [AR] cru [target] [younger];

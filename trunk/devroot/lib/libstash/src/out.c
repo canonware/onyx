@@ -160,7 +160,7 @@ void
 out_delete(cw_out_t *a_out)
 {
 	_cw_check_ptr(a_out);
-	_cw_assert(a_out->magic == _CW_OUT_MAGIC);
+	_cw_dassert(a_out->magic == _CW_OUT_MAGIC);
 
 	if (a_out->extensions != NULL)
 		mem_free(a_out->mem, a_out->extensions);
@@ -179,7 +179,7 @@ out_register(cw_out_t *a_out, const char *a_type, cw_uint32_t a_size,
     cw_out_render_t *a_render_func)
 {
 	_cw_check_ptr(a_out);
-	_cw_assert(a_out->magic == _CW_OUT_MAGIC);
+	_cw_dassert(a_out->magic == _CW_OUT_MAGIC);
 	_cw_check_ptr(a_type);
 	_cw_assert(strlen(a_type) <= _CW_OUT_MAX_TYPE);
 	_cw_assert((a_size == 1) || (a_size == 2) || (a_size == 4) ||
@@ -213,9 +213,9 @@ out_merge(cw_out_t *a_a, cw_out_t *a_b)
 	cw_sint32_t	i;
 
 	_cw_check_ptr(a_a);
-	_cw_assert(a_a->magic == _CW_OUT_MAGIC);
+	_cw_dassert(a_a->magic == _CW_OUT_MAGIC);
 	_cw_check_ptr(a_b);
-	_cw_assert(a_b->magic == _CW_OUT_MAGIC);
+	_cw_dassert(a_b->magic == _CW_OUT_MAGIC);
 
 	if (a_b->nextensions > 0) {
 		if (a_a->extensions == NULL) {
@@ -261,7 +261,7 @@ void
 out_default_fd_set(cw_out_t *a_out, cw_sint32_t a_fd)
 {
 	_cw_check_ptr(a_out);
-	_cw_assert(a_out->magic == _CW_OUT_MAGIC);
+	_cw_dassert(a_out->magic == _CW_OUT_MAGIC);
 	_cw_assert(0 <= a_fd);
 
 	a_out->fd = a_fd;
@@ -299,7 +299,7 @@ out_put_e(cw_out_t *a_out, const char *a_file_name, cw_uint32_t a_line_num,
 	_cw_check_ptr(a_format);
 
 	if (a_out != NULL) {
-		_cw_assert(a_out->magic == _CW_OUT_MAGIC);
+		_cw_dassert(a_out->magic == _CW_OUT_MAGIC);
 		fd = a_out->fd;
 	} else
 		fd = 2;

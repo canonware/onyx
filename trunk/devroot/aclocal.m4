@@ -8,22 +8,39 @@ AC_DEFUN(CW_USE_PTHREADS,
       LIBS="$LIBS -pthread", AC_MSG_ERROR(Cannot find the pthreads library)))
 ])
 
-AC_DEFUN(CW_DISABLE_SHARED,
+dnl Do not compile with debugging by default.
+AC_DEFUN(CW_DISABLE_DEBUG,
 [
-dnl Comment out target dependencies on shared libraries if --disable-shared
-dnl is defined.
-AC_ARG_ENABLE(shared, [  --enable-shared         Build shared libraries],
-if test "x$enable_shared" = "xno" ; then
-  enable_shared="0"
+AC_ARG_ENABLE(debug, [  --enable-debug           Build debugging code],
+if test "x$enable_debug" = "xno" ; then
+  enable_debug="0"
 else
-  enable_shared="1"
+  enable_debug="1"
 fi
 ,
-enable_shared="0"
+enable_debug="0"
 )
-AC_SUBST(enable_shared)
+if test "x$enable_debug" = "x1" ; then
+  AC_DEFINE(_CW_DBG)
+  AC_DEFINE(_CW_ASSERT)
+fi
 ])
 
+dnl Do not compile with profiling by default.
+AC_DEFUN(CW_DISABLE_PROFILE,
+[
+AC_ARG_ENABLE(profile, [  --enable-profile       Build with profiling],
+if test "x$enable_profile" = "xno" ; then
+  enable_profile="0"
+else
+  enable_profile="1"
+fi
+,
+enable_profile="0"
+)
+])
+
+dnl Use inline functions by default.
 AC_DEFUN(CW_ENABLE_INLINES,
 [
 AC_ARG_ENABLE(inlines, [  --disable-inlines       Do not use inline functions],
@@ -40,6 +57,7 @@ if test "x$enable_inlines" = "x1" ; then
 fi
 ])
 
+dnl Compile libstash's buf class by default.
 AC_DEFUN(CW_ENABLE_LIBSTASH_BUF,
 [
 AC_MSG_CHECKING(whether to include libstash's buf class in build)
@@ -78,6 +96,33 @@ if test -d "$srcdir/lib/c/$1" ; then
   libs="$libs $1"
   mkdir -p $objdir/lib/c/$1/include/$1
   mkdir -p $objdir/lib/c/$1/doc/latex
+else
+  build_$1="no"
+  $2=0
+  $2_manual="%"
+fi
+AC_MSG_RESULT($build_$1)
+AC_SUBST($2)
+AC_SUBST($2_manual)
+])
+
+dnl CW_BUILD_MOD(mod, var)
+dnl mod : Name of module.
+dnl var : Name of variable to substitute in configure output.
+AC_DEFUN(CW_BUILD_MOD,
+[
+AC_MSG_CHECKING(whether to include $1 in build)
+if test -d "$srcdir/mod/$1" ; then
+  build_$1="yes"
+  $2=1
+  $2_manual=""
+  if test -f "$srcdir/mod/$1/doc/latex/manual.tex.in" ; then
+    cfgoutputs="$cfgoutputs mod/$1/doc/latex/manual.tex"
+  fi
+  cfghdrs="$cfghdrs $objdir/mod/$1/include/$1_defs.h"
+  mods="$mods $1"
+  mkdir -p $objdir/mod/$1/include/$1
+  mkdir -p $objdir/mod/$1/doc/latex
 else
   build_$1="no"
   $2=0

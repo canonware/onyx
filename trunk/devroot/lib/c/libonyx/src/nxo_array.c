@@ -54,7 +54,7 @@ nxo_array_subarray_new(cw_nxo_t *a_nxo, cw_nxo_t *a_array, cw_nx_t *a_nx,
 
 	orig = (cw_nxoe_array_t *)a_array->o.nxoe;
 	_cw_check_ptr(orig);
-	_cw_assert(orig->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(orig->nxoe.magic == _CW_NXOE_MAGIC);
 
 	if (orig->nxoe.indirect) {
 		nxo_array_subarray_new(a_nxo, &orig->e.i.nxo, a_nx, a_offset +
@@ -86,7 +86,7 @@ nxoe_l_array_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 	array = (cw_nxoe_array_t *)a_nxoe;
 
 	_cw_check_ptr(array);
-	_cw_assert(array->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(array->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(array->nxoe.type == NXOT_ARRAY);
 
 	if (array->nxoe.indirect == FALSE && array->e.a.len > 0)
@@ -283,10 +283,10 @@ nxo_array_len_get(cw_nxo_t *a_nxo)
 	cw_nxoe_array_t	*array;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 
 	array = (cw_nxoe_array_t *)a_nxo->o.nxoe;
-	_cw_assert(array->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(array->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(array->nxoe.type == NXOT_ARRAY);
 
 	if (array->nxoe.indirect == FALSE)
@@ -309,13 +309,13 @@ nxo_array_el_set(cw_nxo_t *a_nxo, cw_nxo_t *a_el, cw_nxoi_t a_offset)
 	cw_nxoe_array_t	*array;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_nxo) == NXOT_ARRAY);
 
 	array = (cw_nxoe_array_t *)a_nxo->o.nxoe;
 
 	_cw_check_ptr(array);
-	_cw_assert(array->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(array->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(array->nxoe.type == NXOT_ARRAY);
 
 	nxoe_p_array_lock(array);
@@ -343,13 +343,13 @@ nxo_l_array_get(cw_nxo_t *a_nxo)
 	cw_nxoe_array_t	*array;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_nxo) == NXOT_ARRAY);
 
 	array = (cw_nxoe_array_t *)a_nxo->o.nxoe;
 
 	_cw_check_ptr(array);
-	_cw_assert(array->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(array->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(array->nxoe.type == NXOT_ARRAY);
 
 	if (array->nxoe.indirect == FALSE)

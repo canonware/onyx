@@ -188,10 +188,10 @@ _CW_INLINE void
 nxo_dup(cw_nxo_t *a_to, cw_nxo_t *a_from)
 {
 	_cw_check_ptr(a_to);
-	_cw_assert(a_to->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_to->magic == _CW_NXO_MAGIC);
 
 	_cw_check_ptr(a_from);
-	_cw_assert(a_from->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_from->magic == _CW_NXO_MAGIC);
 
 	/*
 	 * The order of operations is important in order to avoid a GC race.
@@ -205,7 +205,7 @@ _CW_INLINE cw_nxot_t
 nxo_type_get(cw_nxo_t *a_nxo)
 {
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 
 	return ((cw_nxot_t)(a_nxo->flags & 0x1f));
 }
@@ -214,7 +214,7 @@ _CW_INLINE cw_nxoa_t
 nxo_attr_get(cw_nxo_t *a_nxo)
 {
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 
 	return ((cw_nxoa_t)(((a_nxo)->flags >> 6) & 1));
 }
@@ -223,7 +223,7 @@ _CW_INLINE void
 nxo_attr_set(cw_nxo_t *a_nxo, cw_nxoa_t a_attr)
 {
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 
 	a_nxo->flags = (a_nxo->flags & 0xffffffbf) | (a_attr << 6);
 }

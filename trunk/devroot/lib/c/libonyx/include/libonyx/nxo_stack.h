@@ -85,10 +85,10 @@ nxo_stack_count(cw_nxo_t *a_nxo)
 	cw_nxoe_stack_t	*stack;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 
 	stack = (cw_nxoe_stack_t *)a_nxo->o.nxoe;
-	_cw_assert(stack->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(stack->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(stack->nxoe.type == NXOT_STACK);
 
 	retval = stack->count;
@@ -104,10 +104,10 @@ nxo_stack_push(cw_nxo_t *a_nxo)
 	cw_nxoe_stacko_t	*stacko;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 
 	stack = (cw_nxoe_stack_t *)a_nxo->o.nxoe;
-	_cw_assert(stack->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(stack->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(stack->nxoe.type == NXOT_STACK);
 
 	nxoe_p_stack_lock(stack);
@@ -144,10 +144,10 @@ nxo_stack_under_push(cw_nxo_t *a_nxo, cw_nxo_t *a_object)
 	cw_nxoe_stacko_t	*stacko;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 
 	stack = (cw_nxoe_stack_t *)a_nxo->o.nxoe;
-	_cw_assert(stack->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(stack->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(stack->nxoe.type == NXOT_STACK);
 
 	nxoe_p_stack_lock(stack);
@@ -193,10 +193,10 @@ nxo_stack_pop(cw_nxo_t *a_nxo)
 	cw_nxoe_stack_t		*stack;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 
 	stack = (cw_nxoe_stack_t *)a_nxo->o.nxoe;
-	_cw_assert(stack->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(stack->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(stack->nxoe.type == NXOT_STACK);
 
 	nxoe_p_stack_lock(stack);
@@ -233,10 +233,10 @@ nxo_stack_npop(cw_nxo_t *a_nxo, cw_uint32_t a_count)
 	cw_nxoe_stack_t		*stack;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 
 	stack = (cw_nxoe_stack_t *)a_nxo->o.nxoe;
-	_cw_assert(stack->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(stack->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(stack->nxoe.type == NXOT_STACK);
 
 	nxoe_p_stack_lock(stack);
@@ -279,10 +279,10 @@ nxo_stack_get(cw_nxo_t *a_nxo)
 	cw_nxoe_stacko_t	*stacko;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 
 	stack = (cw_nxoe_stack_t *)a_nxo->o.nxoe;
-	_cw_assert(stack->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(stack->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(stack->nxoe.type == NXOT_STACK);
 
 	nxoe_p_stack_lock(stack);
@@ -308,10 +308,10 @@ nxo_stack_nget(cw_nxo_t *a_nxo, cw_uint32_t a_index)
 	cw_uint32_t		i;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 
 	stack = (cw_nxoe_stack_t *)a_nxo->o.nxoe;
-	_cw_assert(stack->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(stack->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(stack->nxoe.type == NXOT_STACK);
 
 	nxoe_p_stack_lock(stack);
@@ -337,10 +337,10 @@ nxo_stack_down_get(cw_nxo_t *a_nxo, cw_nxo_t *a_object)
 	cw_nxoe_stacko_t	*stacko;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 
 	stack = (cw_nxoe_stack_t *)a_nxo->o.nxoe;
-	_cw_assert(stack->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(stack->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(stack->nxoe.type == NXOT_STACK);
 
 	nxoe_p_stack_lock(stack);
@@ -379,10 +379,10 @@ nxo_stack_exch(cw_nxo_t *a_nxo)
 	cw_nxoe_stacko_t	*top, *noroll;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 
 	stack = (cw_nxoe_stack_t *)a_nxo->o.nxoe;
-	_cw_assert(stack->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(stack->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(stack->nxoe.type == NXOT_STACK);
 
 	/*
@@ -449,10 +449,10 @@ nxo_stack_roll(cw_nxo_t *a_nxo, cw_uint32_t a_count, cw_sint32_t a_amount)
 	cw_uint32_t		i;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 
 	stack = (cw_nxoe_stack_t *)a_nxo->o.nxoe;
-	_cw_assert(stack->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(stack->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(stack->nxoe.type == NXOT_STACK);
 
 	_cw_assert(a_count > 0);

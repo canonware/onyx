@@ -73,7 +73,7 @@ void
 dch_delete(cw_dch_t *a_dch)
 {
 	_cw_check_ptr(a_dch);
-	_cw_assert(a_dch->magic == _CW_DCH_MAGIC);
+	_cw_dassert(a_dch->magic == _CW_DCH_MAGIC);
 
 	ch_delete(a_dch->ch);
 
@@ -89,7 +89,7 @@ cw_uint32_t
 dch_count(cw_dch_t *a_dch)
 {
 	_cw_check_ptr(a_dch);
-	_cw_assert(a_dch->magic == _CW_DCH_MAGIC);
+	_cw_dassert(a_dch->magic == _CW_DCH_MAGIC);
 
 	return ch_count(a_dch->ch);
 }
@@ -99,7 +99,7 @@ dch_insert(cw_dch_t *a_dch, const void *a_key, const void *a_data, cw_chi_t
     *a_chi)
 {
 	_cw_check_ptr(a_dch);
-	_cw_assert(a_dch->magic == _CW_DCH_MAGIC);
+	_cw_dassert(a_dch->magic == _CW_DCH_MAGIC);
 
 	dch_p_grow(a_dch);
 	ch_insert(a_dch->ch, a_key, a_data, a_chi);
@@ -112,7 +112,7 @@ dch_remove(cw_dch_t *a_dch, const void *a_search_key, void **r_key, void
 	cw_bool_t	retval;
 
 	_cw_check_ptr(a_dch);
-	_cw_assert(a_dch->magic == _CW_DCH_MAGIC);
+	_cw_dassert(a_dch->magic == _CW_DCH_MAGIC);
 
 	dch_p_shrink(a_dch);
 	if (ch_remove(a_dch->ch, a_search_key, r_key, r_data, r_chi)) {
@@ -128,7 +128,7 @@ cw_bool_t
 dch_search(cw_dch_t *a_dch, const void *a_key, void **r_data)
 {
 	_cw_check_ptr(a_dch);
-	_cw_assert(a_dch->magic == _CW_DCH_MAGIC);
+	_cw_dassert(a_dch->magic == _CW_DCH_MAGIC);
 
 	return ch_search(a_dch->ch, a_key, r_data);
 }
@@ -137,7 +137,7 @@ cw_bool_t
 dch_get_iterate(cw_dch_t *a_dch, void **r_key, void **r_data)
 {
 	_cw_check_ptr(a_dch);
-	_cw_assert(a_dch->magic == _CW_DCH_MAGIC);
+	_cw_dassert(a_dch->magic == _CW_DCH_MAGIC);
 
 	return ch_get_iterate(a_dch->ch, r_key, r_data);
 }
@@ -149,7 +149,7 @@ dch_remove_iterate(cw_dch_t *a_dch, void **r_key, void **r_data, cw_chi_t
 	cw_bool_t	retval;
 
 	_cw_check_ptr(a_dch);
-	_cw_assert(a_dch->magic == _CW_DCH_MAGIC);
+	_cw_dassert(a_dch->magic == _CW_DCH_MAGIC);
 
 	dch_p_shrink(a_dch);
 	if (ch_remove_iterate(a_dch->ch, r_key, r_data, r_chi)) {
@@ -165,7 +165,7 @@ void
 dch_dump(cw_dch_t *a_dch, const char *a_prefix)
 {
 	_cw_check_ptr(a_dch);
-	_cw_assert(a_dch->magic == _CW_DCH_MAGIC);
+	_cw_dassert(a_dch->magic == _CW_DCH_MAGIC);
 	_cw_check_ptr(a_prefix);
 
 #ifdef _CW_DBG

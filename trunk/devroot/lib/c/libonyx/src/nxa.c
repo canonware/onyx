@@ -178,7 +178,7 @@ void
 nxa_delete(cw_nxa_t *a_nxa)
 {
 	_cw_check_ptr(a_nxa);
-	_cw_assert(a_nxa->magic == _CW_NXA_MAGIC);
+	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
 
 	mq_put(&a_nxa->gc_mq, NXAM_SHUTDOWN);
 	thd_join(a_nxa->gc_thd);
@@ -193,7 +193,7 @@ void
 nxa_collect(cw_nxa_t *a_nxa)
 {
 	_cw_check_ptr(a_nxa);
-	_cw_assert(a_nxa->magic == _CW_NXA_MAGIC);
+	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
 
 	mq_put(&a_nxa->gc_mq, NXAM_COLLECT);
 }
@@ -204,7 +204,7 @@ nxa_active_get(cw_nxa_t *a_nxa)
 	cw_bool_t	retval;
 
 	_cw_check_ptr(a_nxa);
-	_cw_assert(a_nxa->magic == _CW_NXA_MAGIC);
+	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
 
 	mtx_lock(&a_nxa->lock);
 	retval = a_nxa->gcdict_active;
@@ -217,7 +217,7 @@ void
 nxa_active_set(cw_nxa_t *a_nxa, cw_bool_t a_active)
 {
 	_cw_check_ptr(a_nxa);
-	_cw_assert(a_nxa->magic == _CW_NXA_MAGIC);
+	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
 
 	mtx_lock(&a_nxa->lock);
 	a_nxa->gcdict_active = a_active;
@@ -231,7 +231,7 @@ nxa_period_get(cw_nxa_t *a_nxa)
 	cw_nxoi_t	retval;
 
 	_cw_check_ptr(a_nxa);
-	_cw_assert(a_nxa->magic == _CW_NXA_MAGIC);
+	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
 
 	mtx_lock(&a_nxa->lock);
 	retval = a_nxa->gcdict_period;
@@ -244,7 +244,7 @@ void
 nxa_period_set(cw_nxa_t *a_nxa, cw_nxoi_t a_period)
 {
 	_cw_check_ptr(a_nxa);
-	_cw_assert(a_nxa->magic == _CW_NXA_MAGIC);
+	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
 	_cw_assert(a_period >= 0);
 
 	mtx_lock(&a_nxa->lock);
@@ -259,7 +259,7 @@ nxa_threshold_get(cw_nxa_t *a_nxa)
 	cw_nxoi_t	retval;
 
 	_cw_check_ptr(a_nxa);
-	_cw_assert(a_nxa->magic == _CW_NXA_MAGIC);
+	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
 
 	mtx_lock(&a_nxa->lock);
 	retval = a_nxa->gcdict_threshold;
@@ -272,7 +272,7 @@ void
 nxa_threshold_set(cw_nxa_t *a_nxa, cw_nxoi_t a_threshold)
 {
 	_cw_check_ptr(a_nxa);
-	_cw_assert(a_nxa->magic == _CW_NXA_MAGIC);
+	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
 	_cw_assert(a_threshold >= 0);
 
 	mtx_lock(&a_nxa->lock);
@@ -291,7 +291,7 @@ nxa_stats_get(cw_nxa_t *a_nxa, cw_nxoi_t *r_collections, cw_nxoi_t *r_new,
     cw_nxoi_t *r_smark, cw_nxoi_t *r_ssweep)
 {
 	_cw_check_ptr(a_nxa);
-	_cw_assert(a_nxa->magic == _CW_NXA_MAGIC);
+	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
 	
 	mtx_lock(&a_nxa->lock);
 
@@ -334,7 +334,7 @@ void
 nxa_l_gc_register(cw_nxa_t *a_nxa, cw_nxoe_t *a_nxoe)
 {
 	_cw_check_ptr(a_nxa);
-	_cw_assert(a_nxa->magic == _CW_NXA_MAGIC);
+	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
 
 	mtx_lock(&a_nxa->lock);
 	_cw_assert(nxoe_l_registered_get(a_nxoe) == FALSE);
@@ -376,7 +376,7 @@ nxa_l_white_get(cw_nxa_t *a_nxa)
 	cw_bool_t	retval;
 
 	_cw_check_ptr(a_nxa);
-	_cw_assert(a_nxa->magic == _CW_NXA_MAGIC);
+	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
 
 	mtx_lock(&a_nxa->lock);
 	retval = a_nxa->white;

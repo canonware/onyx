@@ -148,7 +148,7 @@ nxo_l_name_print(cw_nxo_t *a_thread)
 	name = (cw_nxoe_name_t *)nnxo->o.nxoe;
 
 	_cw_check_ptr(name);
-	_cw_assert(name->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(name->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(name->nxoe.type == NXOT_NAME);
 
 	if (nxo_attr_get(nnxo) == NXOA_LITERAL) {
@@ -210,13 +210,13 @@ nxo_name_str_get(cw_nxo_t *a_nxo)
 	cw_nxoe_name_t		*name;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_nxo) == NXOT_NAME);
 
 	name = (cw_nxoe_name_t *)a_nxo->o.nxoe;
 
 	_cw_check_ptr(name);
-	_cw_assert(name->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(name->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(name->nxoe.type == NXOT_NAME);
 
 	retval = name->str;
@@ -231,13 +231,13 @@ nxo_name_len_get(cw_nxo_t *a_nxo)
 	cw_nxoe_name_t	*name;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_nxo) == NXOT_NAME);
 
 	name = (cw_nxoe_name_t *)a_nxo->o.nxoe;
 
 	_cw_check_ptr(name);
-	_cw_assert(name->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(name->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(name->nxoe.type == NXOT_NAME);
 
 	retval = name->len;

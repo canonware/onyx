@@ -125,7 +125,7 @@ pezz_delete(cw_pezz_t *a_pezz)
 	cw_uint32_t	i;
 
 	_cw_check_ptr(a_pezz);
-	_cw_assert(a_pezz->magic == _CW_PEZZ_MAGIC);
+	_cw_dassert(a_pezz->magic == _CW_PEZZ_MAGIC);
 
 #ifdef _CW_PEZZ_ERROR
 	{
@@ -172,7 +172,7 @@ cw_uint32_t
 pezz_buffer_size_get(cw_pezz_t *a_pezz)
 {
 	_cw_check_ptr(a_pezz);
-	_cw_assert(a_pezz->magic == _CW_PEZZ_MAGIC);
+	_cw_dassert(a_pezz->magic == _CW_PEZZ_MAGIC);
 
 	return a_pezz->buffer_size;
 }
@@ -184,7 +184,7 @@ pezz_get_e(cw_pezz_t *a_pezz, const char *a_filename, cw_uint32_t a_line_num)
 	cw_pezzi_t	*pezzi;
 
 	_cw_check_ptr(a_pezz);
-	_cw_assert(a_pezz->magic == _CW_PEZZ_MAGIC);
+	_cw_dassert(a_pezz->magic == _CW_PEZZ_MAGIC);
 	mtx_lock(&a_pezz->lock);
 
 	if (qs_top(&a_pezz->spares) == NULL) {
@@ -288,7 +288,7 @@ pezz_put_e(cw_pezz_t *a_pezz, void *a_buffer, const char *a_filename,
     cw_uint32_t a_line_num)
 {
 	_cw_check_ptr(a_pezz);
-	_cw_assert(a_pezz->magic == _CW_PEZZ_MAGIC);
+	_cw_dassert(a_pezz->magic == _CW_PEZZ_MAGIC);
 	mtx_lock(&a_pezz->lock);
 
 #ifdef _CW_PEZZ_ERROR
@@ -346,7 +346,7 @@ pezz_dump(cw_pezz_t *a_pezz, const char *a_prefix)
 	cw_uint32_t	i;
 
 	_cw_check_ptr(a_pezz);
-	_cw_assert(a_pezz->magic == _CW_PEZZ_MAGIC);
+	_cw_dassert(a_pezz->magic == _CW_PEZZ_MAGIC);
 	mtx_lock(&a_pezz->lock);
 
 	out_put(out_err,

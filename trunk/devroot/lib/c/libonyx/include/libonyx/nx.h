@@ -84,7 +84,7 @@ _CW_INLINE cw_nxa_t *
 nx_nxa_get(cw_nx_t *a_nx)
 {
 	_cw_check_ptr(a_nx);
-	_cw_assert(a_nx->magic == _CW_NX_MAGIC);
+	_cw_dassert(a_nx->magic == _CW_NX_MAGIC);
 
 	return &a_nx->nxa;
 }
@@ -93,7 +93,7 @@ _CW_INLINE cw_nxo_t *
 nx_systemdict_get(cw_nx_t *a_nx)
 {
 	_cw_check_ptr(a_nx);
-	_cw_assert(a_nx->magic == _CW_NX_MAGIC);
+	_cw_dassert(a_nx->magic == _CW_NX_MAGIC);
 
 	return &a_nx->systemdict;
 }
@@ -102,7 +102,7 @@ _CW_INLINE cw_nxo_t *
 nx_globaldict_get(cw_nx_t *a_nx)
 {
 	_cw_check_ptr(a_nx);
-	_cw_assert(a_nx->magic == _CW_NX_MAGIC);
+	_cw_dassert(a_nx->magic == _CW_NX_MAGIC);
 
 	return &a_nx->globaldict;
 }
@@ -111,7 +111,7 @@ _CW_INLINE cw_nxo_t *
 nx_envdict_get(cw_nx_t *a_nx)
 {
 	_cw_check_ptr(a_nx);
-	_cw_assert(a_nx->magic == _CW_NX_MAGIC);
+	_cw_dassert(a_nx->magic == _CW_NX_MAGIC);
 
 	return &a_nx->envdict;
 }
@@ -120,7 +120,7 @@ _CW_INLINE cw_nxo_t *
 nx_sprintdict_get(cw_nx_t *a_nx)
 {
 	_cw_check_ptr(a_nx);
-	_cw_assert(a_nx->magic == _CW_NX_MAGIC);
+	_cw_dassert(a_nx->magic == _CW_NX_MAGIC);
 
 	return &a_nx->sprintdict;
 }
@@ -129,7 +129,7 @@ _CW_INLINE cw_nxo_t *
 nx_stdin_get(cw_nx_t *a_nx)
 {
 	_cw_check_ptr(a_nx);
-	_cw_assert(a_nx->magic == _CW_NX_MAGIC);
+	_cw_dassert(a_nx->magic == _CW_NX_MAGIC);
 
 	return &a_nx->stdin_nxo;
 }
@@ -138,7 +138,7 @@ _CW_INLINE cw_nxo_t *
 nx_stdout_get(cw_nx_t *a_nx)
 {
 	_cw_check_ptr(a_nx);
-	_cw_assert(a_nx->magic == _CW_NX_MAGIC);
+	_cw_dassert(a_nx->magic == _CW_NX_MAGIC);
 
 	return &a_nx->stdout_nxo;
 }
@@ -147,7 +147,7 @@ _CW_INLINE cw_nxo_t *
 nx_stderr_get(cw_nx_t *a_nx)
 {
 	_cw_check_ptr(a_nx);
-	_cw_assert(a_nx->magic == _CW_NX_MAGIC);
+	_cw_dassert(a_nx->magic == _CW_NX_MAGIC);
 
 	return &a_nx->stderr_nxo;
 }

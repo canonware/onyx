@@ -20,7 +20,7 @@
 #include <sys/resource.h>
 #include <sys/stat.h>
 #include <dirent.h>	/* For dirforeach operator. */
-#include <dlfcn.h>	/* for autoload operator. */
+#include <dlfcn.h>	/* for modload operator. */
 
 #include "../include/libonyx/nxo_l.h"
 #include "../include/libonyx/nxo_array_l.h"
@@ -72,7 +72,6 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(and),
 	ENTRY(array),
 	ENTRY(astore),
-	ENTRY(autoload),
 	ENTRY(begin),
 	ENTRY(bind),
 	ENTRY(broadcast),
@@ -137,6 +136,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(lt),
 	ENTRY(mkdir),
 	ENTRY(mod),
+	ENTRY(modload),
 	ENTRY(monitor),
 	ENTRY(mul),
 	ENTRY(mutex),
@@ -513,178 +513,6 @@ systemdict_astore(cw_nxo_t *a_thread)
 	nxo = nxo_stack_push(ostack);
 	nxo_dup(nxo, array);
 	nxo_stack_pop(tstack);
-}
-
-static cw_nxoe_t *
-systemdict_p_autoload_dlsym_ref_iter(void *a_data, cw_bool_t a_reset)
-{
-	return NULL;
-}
-
-static void
-systemdict_p_autoload_dlsym_delete(void *a_data, cw_nx_t *a_nx)
-{
-	dlclose(a_data);
-}
-
-void
-systemdict_autoload(cw_nxo_t *a_thread)
-{
-	cw_nxo_t		*ostack, *tstack, *envdict, *onxo, *path, *key;
-	cw_nx_t			*nx;
-	const cw_uint8_t	*name_str;
-	cw_uint32_t		name_len, dllib_len;
-	cw_uint8_t		*dllib = NULL;
-	cw_uint8_t		*sym_str;
-	void			*symbol, *handle = NULL;
-
-	ostack = nxo_thread_ostack_get(a_thread);
-	tstack = nxo_thread_tstack_get(a_thread);
-	nx = nxo_thread_nx_get(a_thread);
-	NXO_STACK_GET(onxo, ostack, a_thread);
-	if (nxo_type_get(onxo) != NXOT_NAME) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
-		return;
-	}
-	name_str = nxo_name_str_get(onxo);
-	name_len = nxo_name_len_get(onxo);
-
-	/*
-	 * Get ONYX_LOAD_PATH from envdict.  For each path element in
-	 * ONYX_LOAD_PATH, look for:
-	 *
-	 *   <path_el>/<name>.nxm
-	 */
-	envdict = nx_envdict_get(nx);
-	path = nxo_stack_push(tstack);
-	key = nxo_stack_push(tstack);
-	nxo_name_new(key, nx, nxn_str(NXN_ONYX_LOAD_PATH),
-	    nxn_len(NXN_ONYX_LOAD_PATH), TRUE);
-
-	if (nxo_dict_lookup(envdict, key, path) == FALSE && nxo_type_get(path)
-	    == NXOT_STRING && nxo_string_len_get(path) > 0) {
-		cw_uint8_t	*path_str;
-		cw_uint32_t	path_len;
-		cw_uint32_t	i, el_off;
-
-		/*
-		 * We have the path string.  For each path element in
-		 * ONYX_LOAD_PATH, look for:
-		 *
-		 *   <path_el>/<name>.nxm
-		 */
-
-		path_str = nxo_string_get(path);
-		path_len = nxo_string_len_get(path);
-		
-		/* Lock path. */
-		nxo_string_lock(path);
-
-		for (i = el_off = 0; i <= path_len; i++) {
-			/*
-			 * If looking at a ':' or we're past the end of the
-			 * string and the last character wasn't a ':':
-			 */
-			if (path_str[i] == ':' || (i == path_len && i !=
-			    el_off)) {
-				/*
-				 * Construct a path.
-				 */
-				dllib_len = i - el_off	/* <path_el> */
-				    + name_len		/* <name> */
-				    + 6;		/* / .nxn\0 */
-				if (dllib == NULL)
-					dllib = _cw_malloc(dllib_len);
-				else
-					dllib = _cw_realloc(dllib, dllib_len);
-				memcpy(dllib, &path_str[el_off], i - el_off);
-				dllib[i - el_off] = '/';
-				memcpy(&dllib[i - el_off + 1], name_str,
-				    name_len);
-				/* Include '\0'. */
-				memcpy(&dllib[i - el_off + 1 + name_len],
-				    ".nxm", 5);
-				el_off = i + 1;
-
-/*  				_cw_out_put_e("dlopen(\"[s]\")\n", dllib); */
-
-				/* Try to dlopen(). */
-				handle = dlopen(dllib, RTLD_LAZY);
-				if (handle)
-					break;
-			}
-		}
-
-		/* Unlock path. */
-		nxo_string_unlock(path);
-	}
-	nxo_stack_npop(tstack, 2);
-
-	/*
-	 * If the module still hasn't been found, search the built in fallback
-	 * path, which is defined by the cpp macro _CW_LIBONYX_LOAD_PATH.
-	 */
-	if (handle == NULL) {
-		dllib_len = sizeof(_CW_LIBONYX_LOAD_PATH)	/* <path>/ */
-		    + name_len					/* <name> */
-		    + 5;					/* .nxn\0 */
-
-		if (dllib == NULL)
-			dllib = _cw_malloc(dllib_len);
-		else
-			dllib = _cw_realloc(dllib, dllib_len);
-
-		memcpy(dllib, _CW_LIBONYX_LOAD_PATH,
-		    sizeof(_CW_LIBONYX_LOAD_PATH) - 1);
-		dllib[sizeof(_CW_LIBONYX_LOAD_PATH) - 1] = '/';
-		memcpy(&dllib[sizeof(_CW_LIBONYX_LOAD_PATH)], name_str,
-		    name_len);
-		/* Include '\0'. */
-		memcpy(&dllib[sizeof(_CW_LIBONYX_LOAD_PATH) + name_len], ".nxm",
-		    5);
-
-/*  		_cw_out_put_e("dlopen(\"[s]\")\n", dllib); */
-
-		/* Try to dlopen(). */
-		handle = dlopen(dllib, RTLD_LAZY);
-	}
-
-	_cw_check_ptr(dllib);
-	_cw_free(dllib);
-
-	if (handle == NULL) {
-		/* Couldn't find the module. */
-		nxo_thread_error(a_thread, NXO_THREADE_UNDEFINEDFILENAME);
-		return;
-	}
-
-	/* Look up <name>_init. */
-	sym_str = _cw_malloc(name_len + 6);
-	memcpy(sym_str, name_str, name_len);
-	memcpy(&sym_str[name_len], "_init", 6);
-	symbol = dlsym(handle, sym_str);
-
-	if (symbol == NULL) {
-		/*
-		 * Couldn't find the init function.  Someone screwed up badly.
-		 */
-		dlclose(handle);
-		nxo_thread_error(a_thread, NXO_THREADE_UNREGISTERED);
-		return;
-	}
-
-	/*
-	 * Create a hook that wraps dlsym() for the initialization function to
-	 * use.  (Re-use existing ostack element.)
-	 */
-	nxo_hook_new(onxo, nx, handle, NULL,
-	    systemdict_p_autoload_dlsym_ref_iter,
-	    systemdict_p_autoload_dlsym_delete);
-	nxo_name_new(nxo_hook_tag_get(onxo), nx, nxn_str(NXN_dlsym),
-	    nxn_len(NXN_dlsym), TRUE);
-
-	/* Call <name>_init(a_thread) */
-	((cw_op_t *)symbol)(a_thread);
 }
 
 void
@@ -3151,6 +2979,106 @@ systemdict_mod(cw_nxo_t *a_thread)
 
 	nxo_integer_set(a, nxo_integer_get(a) % nxo_integer_get(b));
 	nxo_stack_pop(ostack);
+}
+
+static cw_nxoe_t *
+systemdict_p_modload_dlsym_ref_iter(void *a_data, cw_bool_t a_reset)
+{
+	return NULL;
+}
+
+static void
+systemdict_p_modload_dlsym_delete(void *a_data, cw_nx_t *a_nx)
+{
+	dlclose(a_data);
+}
+
+void
+systemdict_modload(cw_nxo_t *a_thread)
+{
+	cw_nxo_t	*ostack, *estack, *tstack;
+	cw_nxo_t	*path, *sym, *nxo;
+	cw_uint8_t	*str;
+	void		*symbol, *handle = NULL;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	estack = nxo_thread_estack_get(a_thread);
+	tstack = nxo_thread_tstack_get(a_thread);
+	NXO_STACK_GET(sym, ostack, a_thread);
+	NXO_STACK_DOWN_GET(path, ostack, a_thread, sym);
+	if (nxo_type_get(path) != NXOT_STRING) {
+		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		return;
+	}
+
+	/*
+	 * Create a copy of the path with an extra byte to store a '\0'
+	 * terminator.
+	 */
+	nxo = nxo_stack_push(tstack);
+	nxo_string_new(nxo, nxo_thread_nx_get(a_thread),
+	    nxo_thread_currentlocking(a_thread), nxo_string_len_get(path) + 1);
+	nxo_string_lock(path);
+	nxo_string_set(nxo, 0, nxo_string_get(path),
+	    nxo_string_len_get(path));
+	nxo_string_el_set(nxo, '\0', nxo_string_len_get(nxo) - 1);
+	nxo_string_unlock(path);
+
+	str = nxo_string_get(nxo);
+
+	/* Try to dlopen(). */
+	_cw_out_put("dlopen(\"[s]\")\n", str);
+	handle = dlopen(str, RTLD_LAZY);
+	if (handle == NULL) {
+		_cw_out_put("dlopen() error: [s]\n", dlerror());
+		nxo_stack_pop(tstack);
+		nxo_thread_error(a_thread, NXO_THREADE_INVALIDFILEACCESS);
+		return;
+	}
+
+	/*
+	 * Create a copy of sym with an extra byte to store a '\0' terminator.
+	 */
+	nxo_string_new(nxo, nxo_thread_nx_get(a_thread),
+	    nxo_thread_currentlocking(a_thread), nxo_string_len_get(sym) + 1);
+	nxo_string_lock(sym);
+	nxo_string_set(nxo, 0, nxo_string_get(sym),
+	    nxo_string_len_get(sym));
+	nxo_string_el_set(nxo, '\0', nxo_string_len_get(nxo) - 1);
+	nxo_string_unlock(sym);
+
+	str = nxo_string_get(nxo);
+
+	/* Look up symbol. */
+	_cw_out_put("dlsym(\"[s]\")\n", str);
+	symbol = dlsym(handle, str);
+
+	/* Pop nxo. */
+	nxo_stack_pop(tstack);
+
+	if (symbol == NULL) {
+		/* Couldn't find the init function. */
+		dlclose(handle);
+		nxo_thread_error(a_thread, NXO_THREADE_UNDEFINED);
+		return;
+	}
+
+	/*
+	 * Create a hook whose data pointer is the library handle, and whose
+	 * evaluation function is the symbol we just looked up.
+	 */
+	nxo = nxo_stack_push(estack);
+	nxo_hook_new(nxo, nxo_thread_nx_get(a_thread), handle, symbol,
+	    systemdict_p_modload_dlsym_ref_iter,
+	    systemdict_p_modload_dlsym_delete);
+	nxo_dup(nxo_hook_tag_get(nxo), sym);
+	nxo_attr_set(nxo, NXOA_EXECUTABLE);
+
+	/* Pop the arguments before recursing. */
+	nxo_stack_npop(ostack, 2);
+
+	/* Recurse on the hook. */
+	nxo_thread_loop(a_thread);
 }
 
 void

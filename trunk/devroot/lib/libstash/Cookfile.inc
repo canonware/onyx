@@ -13,7 +13,6 @@
 
 /* Include generated dependency files. */
 #include-cooked [glob [objdir]/lib/c/libstash/src/"*.d_*"]
-#include-cooked [glob [objdir]/lib/c/libstash/bin/"*.d_*"]
 #include-cooked [glob [objdir]/lib/c/libstash/test/"*.d_*"]
 
 /*
@@ -124,18 +123,14 @@ SRCS = [SRCS] [LIBSTASH_SRCS];
 }
 
 /* Libraries. */
-LIBSTASH_REV = 0.0;
+LIBSTASH_REV = 1.0;
 
-LIBSTASH_D = [objdir]/lib/c/libstash/lib/libstash_d.a;
 LIBSTASH_A = [objdir]/lib/c/libstash/lib/libstash.a;
 LIBSTASH_S = [objdir]/lib/c/libstash/lib/libstash.so.[LIBSTASH_REV];
-LIBSTASH_P = [objdir]/lib/c/libstash/lib/libstash_p.a;
 
 LDFLAGS = [LDFLAGS] -L[objdir]/lib/c/libstash/lib;
 LIBS = [LIBS] -lstash;
-D_LIBS = [D_LIBS] [LIBSTASH_D];
 A_LIBS = [A_LIBS] [LIBSTASH_A];
-P_LIBS = [P_LIBS] [LIBSTASH_P];
 S_LIBS = [S_LIBS] [LIBSTASH_S];
 S_LINKS = [S_LINKS] [objdir]/lib/c/libstash/lib/libstash.so;
 
@@ -143,17 +138,9 @@ S_LINKS = [S_LINKS] [objdir]/lib/c/libstash/lib/libstash.so;
  * User cook'ables.
  */
 
-libstash : [LIBSTASH_D] [LIBSTASH_A] [LIBSTASH_P]
-#if [ENABLE_SHARED]
-           [LIBSTASH_S]
-#endif
-;
+libstash : [LIBSTASH_A] [LIBSTASH_S];
 
-libstash_install : libstash_install_d libstash_install_a libstash_install_p
-#if [ENABLE_SHARED]
-                   libstash_install_s
-#endif
-;
+libstash_install : libstash_install_a libstash_install_s;
 
 libstash_uninstall :
 {
@@ -208,19 +195,9 @@ echo [INSTALL] -d [PREFIX]/lib
 dataend
 }
 
-libstash_install_d : [LIBSTASH_D] libstash_install_common
-{
-	[INSTALL] -m 0444 [LIBSTASH_D] [PREFIX]/lib;
-}
-
 libstash_install_a : [LIBSTASH_A] libstash_install_common
 {
 	[INSTALL] -m 0444 [LIBSTASH_A] [PREFIX]/lib;
-}
-
-libstash_install_p : [LIBSTASH_P] libstash_install_common
-{
-	[INSTALL] -m 0444 [LIBSTASH_P] [PREFIX]/lib;
 }
 
 libstash_install_s : [LIBSTASH_S] libstash_install_common
@@ -233,21 +210,7 @@ libstash_install_s : [LIBSTASH_S] libstash_install_common
  * Dependencies.
  */
 
-[LIBSTASH_D] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [LIBSTASH_SRCS]]
-  set mkdir
-{
-  [AR] cru [target] [younger];
-  [RANLIB] [target];
-}
-
 [LIBSTASH_A] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [LIBSTASH_SRCS]]
-  set mkdir
-{
-  [AR] cru [target] [younger];
-  [RANLIB] [target];
-}
-
-[LIBSTASH_P] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [LIBSTASH_SRCS]]
   set mkdir
 {
   [AR] cru [target] [younger];

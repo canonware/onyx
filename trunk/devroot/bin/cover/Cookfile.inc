@@ -101,40 +101,29 @@ SRCS = [SRCS] [COVER_SRCS];
 
 /* Binaries. */
 COVER = [objdir]/bin/cover/bin/cover;
-COVER_D = [COVER].dbg;
-COVER_A = [COVER];
-COVER_P = [COVER].prof;
-
-D_BINS = [D_BINS] [COVER_D];
-A_BINS = [A_BINS] [COVER_A];
-P_BINS = [P_BINS] [COVER_P];
+BINS = [BINS] [COVER];
 
 /*
  * User cook'ables.
  */
 
-cover_all : cover_d cover_a cover_p;
-cover_d : [COVER_D];
-cover_a : [COVER_A];
-cover_p : [COVER_P];
+cover : [COVER];
 
-cover_install : cover_install_d cover_install_a cover_install_p;
+cover_install_self : [COVER]
+{
+  [INSTALL] -d [PREFIX]/bin;
+  [CC] [A_CFLAGS] -o [PREFIX]/bin/cover
+       [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [COVER_SRCS]]
+       -rpath [PREFIX]/lib
+       [LDFLAGS] -lstash [EXTRALIBS];
+  [CHMOD] 0755 [PREFIX]/bin/cover;
+}
+
+cover_install : cover_install_self libstash_install_s;
 
 cover_uninstall :
 {
-  [SHELL] -e;
-data
-#![SHELL]
-
-echo rm -f [PREFIX]/bin/cover.dbg
-rm -f [PREFIX]/bin/cover.dbg
-
-echo rm -f [PREFIX]/bin/cover
-rm -f [PREFIX]/bin/cover
-
-echo rm -f [PREFIX]/bin/cover.prof
-rm -f [PREFIX]/bin/cover.prof
-dataend
+  rm -f [PREFIX]/bin/cover;
 }
 
 cover_clean :
@@ -146,80 +135,15 @@ cover_distclean :
 }
 
 /*
- * Build rules.
- */
-
-cover_install_common :
-{
-  [SHELL] -e;
-data
-#![SHELL]
-
-echo [INSTALL] -d [PREFIX]/bin
-[INSTALL] -d [PREFIX]/bin
-dataend
-}
-
-cover_install_d : [COVER_D] cover_install_common
-{
-	[INSTALL] -m 0755 [COVER_D] [PREFIX]/bin;
-}
-
-cover_install_a : [COVER_A] cover_install_common
-#if [ENABLE_SHARED]
-                  libstash_install_s
-#endif
-{
-#if [ENABLE_SHARED]
-  [CC] [D_CFLAGS] -o [PREFIX]/bin/cover
-       [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [COVER_SRCS]]
-       -rpath [PREFIX]/lib
-       [LDFLAGS] -lstash [EXTRALIBS];
-  [CHMOD] 0755 [PREFIX]/bin/cover;
-#else
-	[INSTALL] -m 0755 [COVER_A] [PREFIX]/bin;
-#endif
-}
-
-cover_install_p : [COVER_P] cover_install_common
-{
-	[INSTALL] -m 0755 [COVER_P] [PREFIX]/bin;
-}
-
-/*
  * Dependencies.
  */
 
-[COVER_D] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [COVER_SRCS]]
-           [LIBSTASH_D]
-  set mkdir
-{
-  [CC] [D_CFLAGS] -o [target]
-       [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [COVER_SRCS]]
-       [LDFLAGS] -lstash_d [EXTRALIBS];
-}
-
-[COVER_A] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [COVER_SRCS]]
-#if [ENABLE_SHARED]
-           [LIBSTASH_S]
-#else
-           [LIBSTASH_A]
-#endif
+[COVER] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [COVER_SRCS]]
+          [LIBSTASH_S]
   set mkdir
 {
   [CC] [A_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [COVER_SRCS]]
-#if [ENABLE_SHARED]
        -rpath [abs_objdir]/lib/c/libstash/lib
-#endif
        [LDFLAGS] -lstash [EXTRALIBS];
-}
-
-[COVER_P] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [COVER_SRCS]]
-           [LIBSTASH_P]
-  set mkdir
-{
-  [CC] [P_CFLAGS] -o [target]
-       [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [COVER_SRCS]]
-       [LDFLAGS] -lstash_p [EXTRALIBS];
 }

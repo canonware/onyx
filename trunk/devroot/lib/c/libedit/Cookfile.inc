@@ -15,7 +15,6 @@
 
 /* Include generated dependency files. */
 #include-cooked [glob [objdir]/lib/c/libedit/src/"*.d_*"]
-#include-cooked [glob [objdir]/lib/c/libedit/bin/"*.d_*"]
 #include-cooked [glob [objdir]/lib/c/libedit/test/"*.d_*"]
 
 /*
@@ -109,18 +108,14 @@ SRCS = [SRCS] [LIBEDIT_SRCS];
 }
 
 /* Libraries. */
-LIBEDIT_REV = 0.0;
+LIBEDIT_REV = 1.0;
 
-LIBEDIT_D = [objdir]/lib/c/libedit/lib/libedit_d.a;
 LIBEDIT_A = [objdir]/lib/c/libedit/lib/libedit.a;
 LIBEDIT_S = [objdir]/lib/c/libedit/lib/libedit.so.[LIBEDIT_REV];
-LIBEDIT_P = [objdir]/lib/c/libedit/lib/libedit_p.a;
 
 LDFLAGS = [LDFLAGS] -L[objdir]/lib/c/libedit/lib;
 LIBS = [LIBS] -ledit;
-D_LIBS = [D_LIBS] [LIBEDIT_D];
 A_LIBS = [A_LIBS] [LIBEDIT_A];
-P_LIBS = [P_LIBS] [LIBEDIT_P];
 S_LIBS = [S_LIBS] [LIBEDIT_S];
 S_LINKS = [S_LINKS] [objdir]/lib/c/libedit/lib/libedit.so;
 
@@ -128,17 +123,9 @@ S_LINKS = [S_LINKS] [objdir]/lib/c/libedit/lib/libedit.so;
  * User cook'ables.
  */
 
-libedit : [LIBEDIT_D] [LIBEDIT_A] [LIBEDIT_P]
-#if [ENABLE_SHARED]
-          [LIBEDIT_S]
-#endif
-;
+libedit : [LIBEDIT_A] [LIBEDIT_S];
 
-libedit_install : /* libedit_install_d libedit_install_a libedit_install_p */
-#if [ENABLE_SHARED]
-                   libedit_install_s
-#endif
-;
+libedit_install : libedit_install_a libedit_install_s;
 
 libedit_uninstall :
 {
@@ -192,19 +179,9 @@ echo [INSTALL] -d [PREFIX]/lib
 dataend
 }
 
-libedit_install_d : [LIBEDIT_D] libedit_install_common
-{
-	[INSTALL] -m 0444 [LIBEDIT_D] [PREFIX]/lib;
-}
-
 libedit_install_a : [LIBEDIT_A] libedit_install_common
 {
 	[INSTALL] -m 0444 [LIBEDIT_A] [PREFIX]/lib;
-}
-
-libedit_install_p : [LIBEDIT_P] libedit_install_common
-{
-	[INSTALL] -m 0444 [LIBEDIT_P] [PREFIX]/lib;
 }
 
 libedit_install_s : [LIBEDIT_S] libedit_install_common
@@ -217,21 +194,7 @@ libedit_install_s : [LIBEDIT_S] libedit_install_common
  * Dependencies.
  */
 
-[LIBEDIT_D] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [LIBEDIT_SRCS]]
-  set mkdir
-{
-  [AR] cru [target] [younger];
-  [RANLIB] [target];
-}
-
 [LIBEDIT_A] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [LIBEDIT_SRCS]]
-  set mkdir
-{
-  [AR] cru [target] [younger];
-  [RANLIB] [target];
-}
-
-[LIBEDIT_P] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [LIBEDIT_SRCS]]
   set mkdir
 {
   [AR] cru [target] [younger];

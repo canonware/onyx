@@ -71,7 +71,7 @@ nxoe_l_dict_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 	dict = (cw_nxoe_dict_t *)a_nxoe;
 
 	_cw_check_ptr(dict);
-	_cw_assert(dict->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(dict->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(dict->nxoe.type == NXOT_DICT);
 
 	if (dict->nxoe.locking)
@@ -212,19 +212,19 @@ nxo_dict_copy(cw_nxo_t *a_to, cw_nxo_t *a_from, cw_nx_t *a_nx)
 	cw_bool_t	removed;
 
 	_cw_check_ptr(a_to);
-	_cw_assert(a_to->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_to->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_to) == NXOT_DICT);
 	to = (cw_nxoe_dict_t *)a_to->o.nxoe;
 	_cw_check_ptr(to);
-	_cw_assert(to->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(to->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(to->nxoe.type == NXOT_DICT);
 
 	_cw_check_ptr(a_from);
-	_cw_assert(a_from->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_from->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_from) == NXOT_DICT);
 	from = (cw_nxoe_dict_t *)a_from->o.nxoe;
 	_cw_check_ptr(from);
-	_cw_assert(from->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(from->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(from->nxoe.type == NXOT_DICT);
 
 	/* Deep (but not recursive) copy. */
@@ -269,13 +269,13 @@ nxo_dict_def(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_nxo_t *a_key, cw_nxo_t *a_val)
 	cw_nxoe_dicto_t	*dicto;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_nxo) == NXOT_DICT);
 
 	dict = (cw_nxoe_dict_t *)a_nxo->o.nxoe;
 
 	_cw_check_ptr(dict);
-	_cw_assert(dict->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(dict->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(dict->nxoe.type == NXOT_DICT);
 
 	nxoe_p_dict_lock(dict);
@@ -318,13 +318,13 @@ nxo_dict_undef(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_nxo_t *a_key)
 	cw_bool_t	error;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_nxo) == NXOT_DICT);
 
 	dict = (cw_nxoe_dict_t *)a_nxo->o.nxoe;
 
 	_cw_check_ptr(dict);
-	_cw_assert(dict->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(dict->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(dict->nxoe.type == NXOT_DICT);
 
 	nxoe_p_dict_lock(dict);
@@ -352,13 +352,13 @@ nxo_dict_lookup(cw_nxo_t *a_nxo, const cw_nxo_t *a_key, cw_nxo_t *r_nxo)
 	cw_nxoe_dicto_t	*dicto;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_nxo) == NXOT_DICT);
 
 	dict = (cw_nxoe_dict_t *)a_nxo->o.nxoe;
 
 	_cw_check_ptr(dict);
-	_cw_assert(dict->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(dict->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(dict->nxoe.type == NXOT_DICT);
 
 	nxoe_p_dict_lock(dict);
@@ -387,13 +387,13 @@ nxo_l_dict_lookup(cw_nxo_t *a_nxo, const cw_nxo_t *a_key)
 	cw_nxoe_dicto_t	*dicto;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_nxo) == NXOT_DICT);
 
 	dict = (cw_nxoe_dict_t *)a_nxo->o.nxoe;
 
 	_cw_check_ptr(dict);
-	_cw_assert(dict->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(dict->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(dict->nxoe.type == NXOT_DICT);
 
 	nxoe_p_dict_lock(dict);
@@ -413,13 +413,13 @@ nxo_dict_count(cw_nxo_t *a_nxo)
 	cw_nxoe_dict_t	*dict;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_nxo) == NXOT_DICT);
 
 	dict = (cw_nxoe_dict_t *)a_nxo->o.nxoe;
 
 	_cw_check_ptr(dict);
-	_cw_assert(dict->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(dict->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(dict->nxoe.type == NXOT_DICT);
 
 	nxoe_p_dict_lock(dict);
@@ -437,13 +437,13 @@ nxo_dict_iterate(cw_nxo_t *a_nxo, cw_nxo_t *r_nxo)
 	cw_nxo_t	*nxo;
 
 	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_nxo) == NXOT_DICT);
 
 	dict = (cw_nxoe_dict_t *)a_nxo->o.nxoe;
 
 	_cw_check_ptr(dict);
-	_cw_assert(dict->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_dassert(dict->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(dict->nxoe.type == NXOT_DICT);
 
 	nxoe_p_dict_lock(dict);
@@ -463,7 +463,7 @@ nxo_p_dict_hash(const void *a_key)
 	cw_nxo_t	*key = (cw_nxo_t *)a_key;
 
 	_cw_check_ptr(key);
-	_cw_assert(key->magic == _CW_NXO_MAGIC);
+	_cw_dassert(key->magic == _CW_NXO_MAGIC);
 
 	switch (nxo_type_get(key)) {
 	case NXOT_ARRAY:
@@ -519,9 +519,9 @@ nxo_p_dict_key_comp(const void *a_k1, const void *a_k2)
 	cw_nxo_t	*k2 = (cw_nxo_t *)a_k2;
 
 	_cw_check_ptr(k1);
-	_cw_assert(k1->magic == _CW_NXO_MAGIC);
+	_cw_dassert(k1->magic == _CW_NXO_MAGIC);
 	_cw_check_ptr(k2);
-	_cw_assert(k2->magic == _CW_NXO_MAGIC);
+	_cw_dassert(k2->magic == _CW_NXO_MAGIC);
 
 	if ((nxo_type_get(k1) == NXOT_NAME) && (nxo_type_get(k1) ==
 	    NXOT_NAME)) {

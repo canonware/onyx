@@ -1,9 +1,9 @@
-dnl
+dnl 
 dnl <Copyright = jasone>
 dnl <License>
-dnl
+dnl 
 dnl Version: <Version>
-dnl
+dnl 
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(Cookfile.in)
 
@@ -18,6 +18,7 @@ AC_SUBST(abs_objdir)
 cfgoutputs="Cookfile doc/latex/manual.tex test/verify"
 cfghdrs=
 bins=
+mods=
 libs=
 
 dnl Compile in libstash's buf by default.  This check must happen here so that
@@ -28,14 +29,16 @@ dnl ussing CW_BUILD_LIB so that library link order is correct.
 CW_ENABLE_LIBSTASH_BUF()
 
 dnl Look for libraries.  Order matters.  They should appear in an order that
-dnl works on the link line (-lonyx -lprism -ledit -lsock -lstash).
+dnl works on the link line (-lonyx -ledit -lsock -lstash).
 CW_BUILD_LIB(libonyx, lib_onyx)
-CW_BUILD_LIB(libprism, lib_prism)
 CW_BUILD_LIB(libedit, lib_edit)
 if test "x$enable_libstash_buf" = "x1" ; then
   CW_BUILD_LIB(libsock, lib_sock)
 fi
 CW_BUILD_LIB(libstash, lib_stash)
+
+dnl Look for modules.
+CW_BUILD_MOD(modncurses, mod_ncurses)
 
 dnl Look for binaries.
 CW_BUILD_BIN(cover, bin_cover)
@@ -50,6 +53,7 @@ fi
 AC_CONFIG_HEADER($cfghdrs)
 AC_SUBST(cfghdrs)
 AC_SUBST(bins)
+AC_SUBST(mods)
 AC_SUBST(libs)
 
 AC_CANONICAL_HOST
@@ -102,10 +106,13 @@ mkdir -p $objdir/test
 AC_SUBST(VERIFY)
 
 dnl Find libraries.
-CW_USE_PTHREADS()
 
-dnl Do not build shared libraries by default.
-CW_DISABLE_SHARED()
+if test "x$build_libedit" = "xyes" ; then
+  AC_CHECK_LIB(termcap, tgetent, LIBS="$LIBS -ltermcap", \
+    AC_MSG_ERROR(Cannot find the termcap library))
+fi
+
+CW_USE_PTHREADS()
 
 dnl Enable inline functions by default.
 CW_ENABLE_INLINES()
@@ -185,22 +192,46 @@ if test "x$build_libsock" = "xyes" ; then
   AC_CHECK_FUNCS(poll, , AC_MSG_ERROR(Cannot build without poll))
 fi
 
-if test "x$build_libonyx" = "xyes" ; then
+if test "x$build_onyx" = "xyes" ; then
   if test "x$prefix" = "xNONE" ; then
-    _CW_LIBONYX_LOAD_PATH="/usr/local/share/canonware/onyx/modules"
+    _CW_ONYX_RPATH="/usr/local/share/canonware/onyx/onyx"
+    _CW_ONYX_MPATH="/usr/local/share/canonware/onyx/mod"
   else
-    _CW_LIBONYX_LOAD_PATH="$prefix/share/canonware/onyx/modules"
+    _CW_ONYX_RPATH="$prefix/share/canonware/onyx/onyx"
+    _CW_ONYX_MPATH="$prefix/share/canonware/onyx/mod"
   fi
-  AC_DEFINE_UNQUOTED(_CW_LIBONYX_LOAD_PATH, "$_CW_LIBONYX_LOAD_PATH")
+  AC_DEFINE_UNQUOTED(_CW_ONYX_RPATH, "$_CW_ONYX_RPATH")
+  AC_DEFINE_UNQUOTED(_CW_ONYX_MPATH, "$_CW_ONYX_MPATH")
+fi
+
+if test "x$build_ncurses" = "xyes" ; then
+  AC_CHECK_HEADERS(ncurses.h, , AC_MSG_ERROR(Cannot build without ncurses.h))
 fi
 
 if test "x$build_proxy" = "xyes" ; then
   AC_CHECK_HEADERS(netinet/ip_nat.h, AC_DEFINE(_CW_IPFILTER))
 fi
 
-dnl
+dnl Set CFLAGS.
+
+dnl Do not compile with debugging by default.
+CW_DISABLE_DEBUG()
+
+dnl Do not compile with profiling by default.
+CW_DISABLE_PROFILE()
+
+dnl Only optimize if not debugging.
+if test "x$enable_debug" = "x0" ; then
+	CFLAGS="$CFLAGS -O"
+fi
+
+if test "x$enable_profile" = "x1" ; then
+	CFLAGS="$CFLAGS -pg"
+fi
+
+dnl 
 dnl Print out the results of configuration.
-dnl
+dnl 
 AC_MSG_RESULT(===============================================================================)
 AC_MSG_RESULT(CFLAGS       : ${CFLAGS})
 AC_MSG_RESULT(CPPFLAGS     : ${CPPFLAGS})
@@ -214,9 +245,11 @@ AC_MSG_RESULT(abs_srcdir   : ${abs_srcdir})
 AC_MSG_RESULT(prefix       : ${prefix})
 AC_MSG_RESULT()
 AC_MSG_RESULT(libs         :${libs})
+AC_MSG_RESULT(mods         :${mods})
 AC_MSG_RESULT(bins         :${bins})
 AC_MSG_RESULT()
-AC_MSG_RESULT(shared       : ${enable_shared})
+AC_MSG_RESULT(debug        : ${enable_debug})
+AC_MSG_RESULT(profile      : ${enable_profile})
 AC_MSG_RESULT(inlines      : ${enable_inlines})
 AC_MSG_RESULT(libstash buf : ${enable_libstash_buf})
 AC_MSG_RESULT(===============================================================================)

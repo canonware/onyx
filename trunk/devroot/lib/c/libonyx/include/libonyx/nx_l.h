@@ -25,7 +25,7 @@ nx_l_ref_iter(cw_nx_t *a_nx, cw_bool_t a_reset)
 	cw_nxoe_t	*retval;
 
 	_cw_check_ptr(a_nx);
-	_cw_assert(a_nx->magic == _CW_NX_MAGIC);
+	_cw_dassert(a_nx->magic == _CW_NX_MAGIC);
 
 	if (a_nx->shutdown) {
 		/*
@@ -81,7 +81,7 @@ _CW_INLINE void
 nx_l_thread_insert(cw_nx_t *a_nx, cw_nxo_t *a_thread)
 {
 	_cw_check_ptr(a_nx);
-	_cw_assert(a_nx->magic == _CW_NX_MAGIC);
+	_cw_dassert(a_nx->magic == _CW_NX_MAGIC);
 
 	_cw_check_ptr(a_thread);
 	_cw_assert(nxo_type_get(a_thread) == NXOT_THREAD);
@@ -93,7 +93,7 @@ _CW_INLINE void
 nx_l_thread_remove(cw_nx_t *a_nx, cw_nxo_t *a_thread)
 {
 	_cw_check_ptr(a_nx);
-	_cw_assert(a_nx->magic == _CW_NX_MAGIC);
+	_cw_dassert(a_nx->magic == _CW_NX_MAGIC);
 
 	_cw_check_ptr(a_thread);
 	_cw_assert(nxo_type_get(a_thread) == NXOT_THREAD);
@@ -105,7 +105,7 @@ _CW_INLINE cw_mtx_t *
 nx_l_name_lock_get(cw_nx_t *a_nx)
 {
 	_cw_check_ptr(a_nx);
-	_cw_assert(a_nx->magic == _CW_NX_MAGIC);
+	_cw_dassert(a_nx->magic == _CW_NX_MAGIC);
 
 	return &a_nx->name_lock;
 }
@@ -114,7 +114,7 @@ _CW_INLINE cw_dch_t *
 nx_l_name_hash_get(cw_nx_t *a_nx)
 {
 	_cw_check_ptr(a_nx);
-	_cw_assert(a_nx->magic == _CW_NX_MAGIC);
+	_cw_dassert(a_nx->magic == _CW_NX_MAGIC);
 
 	return &a_nx->name_hash;
 }
@@ -123,7 +123,7 @@ _CW_INLINE cw_op_t *
 nx_l_thread_init(cw_nx_t *a_nx)
 {
 	_cw_check_ptr(a_nx);
-	_cw_assert(a_nx->magic == _CW_NX_MAGIC);
+	_cw_dassert(a_nx->magic == _CW_NX_MAGIC);
 
 	return a_nx->thread_init;
 }
