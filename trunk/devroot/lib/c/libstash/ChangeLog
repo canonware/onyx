@@ -1,3 +1,9 @@
+2001-03-05  Jason Evans  <jasone@canonware.com>
+
+	* include/libstash/xep.h (xep_acatch): Correctly handle the
+	situation where there is an xep_acatch block, but no xep_finally
+	block.
+
 2001-03-04  Jason Evans  <jasone@canonware.com>
 
 	* src/thd.c (thd_sigmask): Implement as a C function and mask the

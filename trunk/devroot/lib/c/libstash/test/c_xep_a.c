@@ -130,7 +130,14 @@ main()
 		}
 		xep_end();
 	}
-	
+
+	xep_begin();
+	xep_try {
+	}
+	xep_acatch {
+		out_put_e(out_err, NULL, 0, __FUNCTION__, "xep_acatch\n");
+	}
+	xep_end();
 
 	out_put(out_err, "Test end\n");
 	libstash_shutdown();

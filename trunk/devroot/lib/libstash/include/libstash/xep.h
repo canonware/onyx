@@ -53,7 +53,9 @@ struct cw_xep_s {
 
 #define	xep_acatch							\
 			break;						\
-		default:
+		default:						\
+			if (_xep.state != _CW_XEPS_CATCH)		\
+				break;
 
 #define xep_finally xep_catch(_CW_XEPV_FINALLY)
 
