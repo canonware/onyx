@@ -73,7 +73,7 @@ stilte_stiln(cw_stilte_t a_stilte)
 #define _CW_STILT_NEWLINE()						\
 	do {								\
 		a_stilts->line++;					\
-		a_stilts->column = -1;				\
+		a_stilts->column = -1;					\
 	} while (0)
 
 struct cw_stilt_entry_s {
@@ -712,7 +712,7 @@ stilt_loop(cw_stilt_t *a_stilt)
 			break;
 		}
 		case STILOT_HOOK:
-		case STILOT_LOCK:
+		case STILOT_MUTEX:
 			_cw_not_reached();	/* XXX */
 		default:
 			_cw_not_reached();
