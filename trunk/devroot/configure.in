@@ -706,9 +706,37 @@ dnl Define preprocessor macros.
 
 dnl Check for header files.
 if test "x$enable_posix_file" = "x1" ; then
-  dnl Make sure that poll() and/or select() is available.
-  can_poll="0"
-  AC_CHECK_FUNCS([poll select], [can_poll="1"])
+  dnl Make sure that poll() and/or select() is available.  The strange structure
+  dnl of tests assures that HAVE_POLL isn't defined unless the necessary cpp
+  dnl definitions are also present.  (Mac OS X 10.3 has poll.h, but is missing
+  dnl the appropriate cpp definitions.)
+  AC_MSG_CHECKING([for poll])
+  AC_TRY_LINK([
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/poll.h>
+#ifndef POLLRDNORM
+#error Missing POLLRDNORM
+#endif
+#ifndef POLLWRNORM
+#error Missing POLLWRNORM
+#endif
+#ifndef POLLRDBAND
+#error Missing POLLRDBAND
+#endif
+#ifndef POLLWRBAND
+#error Missing POLLWRBAND
+#endif
+], [
+poll(NULL, 0, 0);
+], [can_poll="1"], [can_poll="0"])
+  if test "x$can_poll" = "x1" ; then
+    AC_MSG_RESULT(yes)
+    AC_DEFINE(HAVE_POLL)
+  else
+    AC_MSG_RESULT(no)
+    AC_CHECK_FUNCS([select], [can_poll="1"])
+  fi
   if test "x$can_poll" = "x0" ; then
     AC_MSG_ERROR([Cannot build without poll() or select()])
   fi
