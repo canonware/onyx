@@ -13,11 +13,13 @@
 
 #include "../include/libstash/libstash.h"
 
+/*  #define _LIBSTASH_MEM_DBG */
+
 /* Globals. */
 cw_dbg_t	*cw_g_dbg = NULL;
 cw_mem_t	*cw_g_mem = NULL;
 cw_out_t	*cw_g_out = NULL;
-#ifdef _LIBSTASH_DBG
+#ifdef _LIBSTASH_MEM_DBG
 cw_mem_t	*cw_g_mem_mem = NULL;
 #endif
 
@@ -32,6 +34,8 @@ libstash_init(void)
 	dbg_register(cw_g_dbg, "mem_error");
 	dbg_register(cw_g_dbg, "pezz_error");
 
+#endif
+#ifdef _LIBSTASH_MEM_DBG
 	cw_g_mem_mem = mem_new(NULL, NULL);
 	if (cw_g_mem_mem == NULL)
 		goto OOM_2;
@@ -54,7 +58,7 @@ libstash_init(void)
 	mem_delete(cw_g_mem);
 	cw_g_mem = NULL;
 	OOM_3:
-#ifdef _LIBSTASH_DBG
+#ifdef _LIBSTASH_MEM_DBG
 	mem_delete(cw_g_mem_mem);
 	cw_g_mem_mem = NULL;
 	OOM_2:
@@ -75,7 +79,7 @@ libstash_shutdown(void)
 	mem_delete(cw_g_mem);
 	cw_g_mem = NULL;
 
-#ifdef _LIBSTASH_DBG
+#ifdef _LIBSTASH_MEM_DBG
 	mem_delete(cw_g_mem_mem);
 	cw_g_mem_mem = NULL;
 #endif
