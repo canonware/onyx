@@ -235,6 +235,8 @@
 /* Prototypes. */
 /* XXX */
 
+/* bufv. */
+
 /* A simplified version of bufv_copy() that counts '\n' characters that are
  * copied, and returns that rather than the number of elements copied. */
 CW_INLINE cw_uint64_t
@@ -329,70 +331,61 @@ bufv_copy(cw_bufv_t *a_to, cw_uint32_t a_to_len, const cw_bufv_t *a_fr,
 }
 
 /* bufp. */
+CW_INLINE cw_uint64_t
+bufp_p_bpos(cw_bufp_t *a_bufp)
+{
+    cw_uint64_t retval;
+
+    cw_check_ptr(a_bufp);
+    cw_dassert(a_bufp->magic == CW_BUFP_MAGIC);
+
+    if (a_bufp->bob_relative)
+    {
+	retval = a_bufp->bpos;
+    }
+    else
+    {
+	retval = a_bufp->buf->len + 1 - a_bufp->bpos;
+    }
+
+    return retval;
+}
+
+CW_INLINE cw_uint64_t
+bufp_p_line(cw_bufp_t *a_bufp)
+{
+    cw_uint64_t retval;
+
+    cw_check_ptr(a_bufp);
+    cw_dassert(a_bufp->magic == CW_BUFP_MAGIC);
+
+    if (a_bufp->bob_relative)
+    {
+	retval = a_bufp->line;
+    }
+    else
+    {
+	retval = a_bufp->buf->nlines + 1 - a_bufp->line;
+    }
+
+    return retval;
+}
+
 static cw_sint32_t
 bufp_p_comp(cw_bufp_t *a_a, cw_bufp_t *a_b)
 {
-    cw_error("XXX Not implemented");
-    return 2;
-}
+    cw_sint32_t retval;
 
-static void
-bufp_p_insert(cw_bufp_t *a_bufp)
-{
-    cw_buf_t *buf = a_bufp->buf;
-    cw_bufp_t *next;
-
-    /* Insert into tree. */
-    rb_insert(&buf->ptree, a_bufp, bufp_p_comp, cw_bufp_t, pnode);
-
-    /* Insert into list. */
-    rb_next(&buf->ptree, a_bufp, cw_bufp_t, pnode, next);
-    if (next != NULL)
+    if (bufp_p_bpos(a_a) < bufp_p_bpos(a_b))
     {
-	ql_before_insert(&buf->plist, next, a_bufp, plink);
+	retval = -1;
     }
     else
     {
-	ql_head_insert(&buf->plist, a_bufp, plink);
+	retval = 1;
     }
 
-    /* Resize bufv. */
-    if (buf->bufv_cnt == 0)
-    {
-	buf->bufv = (cw_bufv_t *) cw_opaque_alloc(buf->alloc, buf->arg,
-						  2 * sizeof(cw_bufv_t));
-    }
-    else
-    {
-	buf->bufv = (cw_bufv_t *) cw_opaque_realloc(buf->realloc, buf->bufv,
-						    buf->arg, buf->bufv_cnt,
-						    (buf->bufv_cnt + 2)
-						    * sizeof(cw_bufv_t));
-    }
-    buf->bufv_cnt += 2;
-}
-
-static void
-bufp_p_remove(cw_bufp_t *a_bufp)
-{
-    cw_buf_t *buf = a_bufp->buf;
-
-    rb_remove(&buf->ptree, a_bufp, cw_bufp_t, pnode);
-    ql_remove(&buf->plist, a_bufp, plink);
-
-    /* Resize bufv. */
-    if (buf->bufv_cnt == 2)
-    {
-	cw_opaque_dealloc(buf->dealloc, buf->arg, buf->bufv, 2);
-    }
-    else
-    {
-	buf->bufv = (cw_bufv_t *) cw_opaque_realloc(buf->realloc, buf->bufv,
-						    buf->arg, buf->bufv_cnt,
-						    (buf->bufv_cnt - 2)
-						    * sizeof(cw_bufv_t));
-    }
-    buf->bufv_cnt -= 2;
+    return retval;
 }
 
 static cw_bufp_t *
@@ -443,52 +436,13 @@ bufp_p_delete(cw_bufp_t *a_bufp)
     }
 #endif
     cw_assert(ql_first(&a_bufp->mlist) == NULL);
+    cw_assert(qr_next(a_bufp, plink) == NULL);
 
     cw_opaque_dealloc(a_bufp->buf->dealloc, a_bufp->buf->arg, a_bufp->b,
 		      CW_BUFP_SIZE);
 
     cw_opaque_dealloc(a_bufp->buf->dealloc, a_bufp->buf->arg, a_bufp,
 		      sizeof(cw_bufp_t));
-}
-
-CW_INLINE cw_uint64_t
-bufp_p_bpos(cw_bufp_t *a_bufp)
-{
-    cw_uint64_t retval;
-
-    cw_check_ptr(a_bufp);
-    cw_dassert(a_bufp->magic == CW_BUFP_MAGIC);
-
-    if (a_bufp->bob_relative)
-    {
-	retval = a_bufp->bpos;
-    }
-    else
-    {
-	retval = a_bufp->buf->len + 1 - a_bufp->bpos;
-    }
-
-    return retval;
-}
-
-CW_INLINE cw_uint64_t
-bufp_p_line(cw_bufp_t *a_bufp)
-{
-    cw_uint64_t retval;
-
-    cw_check_ptr(a_bufp);
-    cw_dassert(a_bufp->magic == CW_BUFP_MAGIC);
-
-    if (a_bufp->bob_relative)
-    {
-	retval = a_bufp->line;
-    }
-    else
-    {
-	retval = a_bufp->buf->nlines + 1 - a_bufp->line;
-    }
-
-    return retval;
 }
 
 static cw_uint32_t
@@ -502,8 +456,8 @@ bufp_p_pos_b2p(cw_bufp_t *a_bufp, cw_uint64_t a_bpos)
     cw_assert(a_bpos <= a_bufp->buf->len + 1);
 
     /* Calculate the offset into bufp up front. */
-    cw_assert(a_bpos >= a_bufp->bpos);
-    rel_bpos = a_bpos - a_bufp->bpos;
+    cw_assert(a_bpos >= bufp_p_bpos(a_bufp));
+    rel_bpos = a_bpos - bufp_p_bpos(a_bufp);
 
     if (rel_bpos <= a_bufp->gap_off)
     {
@@ -529,11 +483,11 @@ bufp_p_pos_p2b(cw_bufp_t *a_bufp, cw_uint64_t a_ppos)
 
     if (a_ppos <= a_bufp->gap_off)
     {
-	bpos = a_ppos + a_bufp->bpos;
+	bpos = a_ppos + bufp_p_bpos(a_bufp);
     }
     else
     {
-	bpos = a_ppos - a_bufp->gap_len;
+	bpos = a_ppos - a_bufp->gap_len + bufp_p_bpos(a_bufp);
     }
 
     return bpos;
@@ -668,6 +622,60 @@ buf_p_bpos_after_lf(cw_buf_t *a_buf, cw_uint64_t a_line, cw_bufp_t **r_bufp)
     return bpos + 1;
 }
 
+static void
+buf_p_bufp_insert(cw_buf_t *a_buf, cw_bufp_t *a_bufp)
+{
+    cw_bufp_t *next;
+
+    /* Insert into tree. */
+    rb_insert(&a_buf->ptree, a_bufp, bufp_p_comp, cw_bufp_t, pnode);
+
+    /* Insert into list. */
+    rb_next(&a_buf->ptree, a_bufp, cw_bufp_t, pnode, next);
+    if (next != NULL)
+    {
+	ql_before_insert(&a_buf->plist, next, a_bufp, plink);
+    }
+    else
+    {
+	ql_head_insert(&a_buf->plist, a_bufp, plink);
+    }
+
+    /* Resize bufv. */
+    if (a_buf->bufv_cnt == 0)
+    {
+	a_buf->bufv = (cw_bufv_t *) cw_opaque_alloc(a_buf->alloc, a_buf->arg,
+						    2 * sizeof(cw_bufv_t));
+    }
+    else
+    {
+	a_buf->bufv = (cw_bufv_t *) cw_opaque_realloc(a_buf->realloc,
+						      a_buf->bufv,
+						      a_buf->arg,
+						      a_buf->bufv_cnt,
+						      (a_buf->bufv_cnt + 2)
+						      * sizeof(cw_bufv_t));
+    }
+    a_buf->bufv_cnt += 2;
+}
+
+static void
+buf_p_bufp_remove(cw_buf_t *a_buf, cw_bufp_t *a_bufp)
+{
+    rb_remove(&a_buf->ptree, a_bufp, cw_bufp_t, pnode);
+    ql_remove(&a_buf->plist, a_bufp, plink);
+
+    /* Resize bufv. */
+    cw_assert(a_buf->bufv_cnt != 2);
+    a_buf->bufv = (cw_bufv_t *) cw_opaque_realloc(a_buf->realloc,
+						  a_buf->bufv,
+						  a_buf->arg,
+						  a_buf->bufv_cnt,
+						  (a_buf->bufv_cnt - 2)
+						  * sizeof(cw_bufv_t));
+    a_buf->bufv_cnt -= 2;
+}
+
 cw_buf_t *
 buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc,
 	cw_opaque_realloc_t *a_realloc, cw_opaque_dealloc_t *a_dealloc,
@@ -700,7 +708,7 @@ buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc,
     retval->len = 0;
     retval->nlines = 1;
 
-    /* Initialize bufv_cnt, so that bufp_p_insert() will know what to do. */
+    /* Initialize bufv_cnt, so that buf_p_bufp_insert() will know what to do. */
     retval->bufv_cnt = 0;
 
     /* Initialize bufp tree and list. */
@@ -712,7 +720,7 @@ buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc,
     bufp->bob_relative = TRUE;
     bufp->bpos = 1;
     bufp->line = 1;
-    bufp_p_insert(bufp);
+    buf_p_bufp_insert(retval, bufp);
 
     /* Initialize current bufp. */
     retval->bufp_cur = bufp;
@@ -736,6 +744,8 @@ buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc,
 void
 buf_delete(cw_buf_t *a_buf)
 {
+    cw_bufp_t *bufp;
+
     cw_check_ptr(a_buf);
     cw_dassert(a_buf->magic == CW_BUF_MAGIC);
 #ifdef CW_DBG
@@ -755,10 +765,24 @@ buf_delete(cw_buf_t *a_buf)
 #endif
     cw_assert(ql_first(&a_buf->rlist) == NULL);
 
+    /* Delete history if it exists. */
     if (a_buf->hist != NULL)
     {
 	hist_delete(a_buf->hist);
     }
+
+    /* Iteratively delete bufp's. */
+    for (bufp = ql_last(&a_buf->plist, plink);
+	 bufp != NULL;
+	 bufp = ql_last(&a_buf->plist, plink))
+    {
+	ql_remove(&a_buf->plist, bufp, plink);
+	bufp_p_delete(bufp);
+    }
+
+    /* Delete the bufv array if it exists. */
+    cw_opaque_dealloc(a_buf->dealloc, a_buf->arg, a_buf->bufv,
+		      a_buf->bufv_cnt * sizeof(cw_bufv_t));
 
     if (a_buf->alloced)
     {
