@@ -121,6 +121,7 @@ nxoe_p_dict_def(cw_nxoe_dict_t *a_dict, cw_nxo_t *a_key, cw_nxo_t *a_val)
 	     * assignments is done such that the list can always be traversed
 	     * in forward order, which is what reference iteration does. */
 	    ql_tail_insert(&a_dict->data.h.list, dicth, link);
+	    mb_write();
 	}
     }
     else
@@ -380,6 +381,7 @@ nxo_dict_undef(cw_nxo_t *a_nxo, const cw_nxo_t *a_key)
 	     * is done such that the list can always be traversed in forward
 	     * order, which is what reference iteration does. */
 	    ql_remove(&dict->data.h.list, dicth, link);
+	    mb_write();
 	    nxa_free(dicth, sizeof(cw_nxoe_dicth_t));
 	}
     }
