@@ -806,7 +806,7 @@ dictionary, which is described in Section~\ref{sec:gcdict}.
 \section{Regular expressions}
 \label{sec:onyx_regular_expressions}
 
-There are two special Onyx object types that support regular expressions: regex
+There are two special Onyx object types that support regular expressions: regexp
 and regsub.  Objects of these types are created via the
 \htmlref{\onyxop{}{regexp}{}}{systemdict:regexp} and
 \htmlref{\onyxop{}{regsub}{}}{systemdict:regsub} operators, respectively.  The
@@ -1762,7 +1762,7 @@ onyx:0>
 			{\lb}ccount cmark csweep{\rb} {\lb}mcount mmark
 			msweep{\rb} {\lb}scount smark ssweep{\rb}{\rb}, where
 			the fields have the following meanings:
-			\begin{description}\item[]
+			\begin{description}%\item[]
 			\item[collections: ]
 				Total number of collections the garbage
 				collector has performed.
@@ -5544,33 +5544,18 @@ same systemdict, which is implicitly locked.
 \optableent
 	{input pattern template flags}
 	{{\bf \htmlref{subst}{systemdict:subst}}}
-	{output true}
-	{Successfully substitute template for pattern matches.}
+	{output count}
+	{Substitute template for pattern matches.}
 \optableent
 	{input pattern template}
 	{{\bf \htmlref{subst}{systemdict:subst}}}
-	{output true}
-	{Successfully substitute template for pattern matches.}
+	{output count}
+	{Substitute template for pattern matches.}
 \optableent
 	{input regsub}
 	{{\bf \htmlref{subst}{systemdict:subst}}}
-	{output true}
-	{Successfully substitute.}
-\optableent
-	{input pattern template flags}
-	{{\bf \htmlref{subst}{systemdict:subst}}}
-	{false}
-	{Unsuccessfully substitute template for pattern matches.}
-\optableent
-	{input pattern template}
-	{{\bf \htmlref{subst}{systemdict:subst}}}
-	{false}
-	{Unsuccessfully substitute template for pattern matches.}
-\optableent
-	{input regsub}
-	{{\bf \htmlref{subst}{systemdict:subst}}}
-	{false}
-	{Unsuccessfully substitute.}
+	{output count}
+	{Substitute.}
 \hline \hline
 \multicolumn{2}{|l|}{Miscellaneous operators} \\
 \hline \hline
@@ -8470,28 +8455,6 @@ onyx:0>
 
 		\end{verbatim}
 	\end{description}
-\label{systemdict:hostbyname}
-\index{hostbyname@\onyxop{}{hostbyname}{}}
-\item[{\onyxop{OPARGS}{hostbyname}{OPOUTS}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{stackunderflow}{stackunderflow}.]
-		\item[\htmlref{typecheck}{typecheck}.]
-		\end{description}
-	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
-	\end{description}
 \label{systemdict:ibdup}
 \index{ibdup@\onyxop{}{ibdup}{}}
 \item[{\onyxop{\dots obj \commas index}{ibdup}{\dots obj \commas dup}}: ]
@@ -9291,15 +9254,33 @@ onyx:1>
 	\end{description}
 \label{systemdict:match}
 \index{match@\onyxop{}{match}{}}
-\item[{\onyxop{OPARGS}{match}{OPOUTS}}: ]
+\item[{\onyxop{input pattern flags}{match}{matches}}: ]
+\item[{\onyxop{input pattern}{match}{matches}}: ]
+\item[{\onyxop{input regexp}{match}{matches}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[input: ]
+			An input string to find matches in.
+		\item[pattern: ]
+			A string that specifies a regular expression.  See
+			Section~\ref{sec:onyx_regular_expressions} for syntax.
+		\item[flags: ]
+			A dictionary of optional flags:
+			\begin{description}%\item[]
+			\item[\$m: ] Maximum number of matches (0 is treated as
+				infinity).  Defaults to 1.
+			\item[\$i: ] Case insensitive.  Defaults to false.
+			\item[\$o: ] Allow matches to overlap.  Defaults to
+				false.
+			\end{description}
+		\item[regexp: ]
+			A regexp object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[matches: ]
+			An array of substring matches.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
@@ -9307,6 +9288,8 @@ onyx:1>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Create an array of substrings from \oparg{input} that match a
+		regular expression.
 	\item[Example(s): ]\begin{verbatim}
 
 		\end{verbatim}
@@ -10058,15 +10041,21 @@ onyx:5>
 	\end{description}
 \label{systemdict:offsets}
 \index{offsets@\onyxop{}{offsets}{}}
-\item[{\onyxop{OPARGS}{offsets}{OPOUTS}}: ]
+\item[{\onyxop{input matches}{offsets}{offsets}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[input: ]
+			A string.
+		\item[matches: ]
+			An array of substrings in \oparg{input}.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[offsets: ]
+			An array of integer offsets from the beginning of
+			\oparg{input} corresponding to the substrings in
+			\oparg{matches}.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
@@ -10074,6 +10063,9 @@ onyx:5>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Create an array of integer offsets from the beginning of
+		\oparg{input} corresponding to the substrings in
+		\oparg{matches}.
 	\item[Example(s): ]\begin{verbatim}
 
 		\end{verbatim}
@@ -10110,7 +10102,7 @@ onyx:0>
 			A string that represents a filename.
 		\item[flags: ]
 			A string that represents a file mode:
-			\begin{description}\item[]
+			\begin{description}%\item[]
 			\item[`r': ]
 				Read only.
 			\item[`r+': ]
@@ -10367,7 +10359,7 @@ onyx:4>
 			A dictionary of information about the peer end of
 			\oparg{sock}.  Depending on the socket family, the
 			following entries may exist:
-			\begin{description}\item[]
+			\begin{description}%\item[]
 			\item[family: ] Socket family.
 			\item[address: ] IPv4 address.
 			\item[port: ] IPv4 port.
@@ -10487,14 +10479,14 @@ onyx:1>
 		\item[{\lt}\dots{\gt}: ]
 			A dictionary of \oparg{file}/\oparg{flags} key/value
 			pairs.
-			\begin{description}\item[]
+			\begin{description}%\item[]
 			\item[file: ]
 				A file object.
 			\item[flags: ]
 				A dictionary that contains keys corresponding to
 				file status attributes to poll.  The following
 				keys are heeded:
-				\begin{description}\item[]
+				\begin{description}%\item[]
 				\item[\$POLLIN: ]
 					Normal or priority data are available
 					for reading.
@@ -10527,7 +10519,7 @@ onyx:1>
 			\oparg{{\lt}\dots{\gt}} for which a non-zero number of
 			status attributes is set to true.  A zero-length array
 			indicates that the poll timed out.
-			\begin{description}\item[]
+			\begin{description}%\item[]
 			\item[file: ]
 				A reference to a file object passed in that has
 				one or more attributes set to true.
@@ -10542,7 +10534,7 @@ onyx:1>
 			depending on the status of \oparg{file}.  In addition,
 			the following keys may defined (if not already defined)
 			with a value of true in the case of errors:
-			\begin{description}\item[]
+			\begin{description}%\item[]
 			\item[\$POLLERR: ]
 				An error has occurred.
 			\item[\$POLLHUP: ]
@@ -10978,7 +10970,7 @@ onyx:0>
 		\item[flags: ]
 			An array of flag names.  The following flags are
 			supported:
-			\begin{description}\item[]
+			\begin{description}%\item[]
 			\item[\$MSG\_OOB]
 			\item[\$MSG\_PEEK]
 			\item[\$MSG\_WAITALL]
@@ -11012,15 +11004,28 @@ onyx:1>
 	\end{description}
 \label{systemdict:regexp}
 \index{regexp@\onyxop{}{regexp}{}}
-\item[{\onyxop{OPARGS}{regexp}{OPOUTS}}: ]
+\item[{\onyxop{string flags}{regexp}{regexp}}: ]
+\item[{\onyxop{string}{regexp}{regexp}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[string: ]
+			A string that specifies a regular expression.  See
+			Section~\ref{sec:onyx_regular_expressions} for syntax.
+		\item[flags: ]
+			A dictionary of optional flags:
+			\begin{description}%\item[]
+			\item[\$m: ] Maximum number of matches (0 is treated as
+				infinity).  Defaults to 1.
+			\item[\$i: ] Case insensitive.  Defaults to false.
+			\item[\$o: ] Allow matches to overlap.  Defaults to
+				false.
+			\end{description}
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[regexp: ]
+			A regexp object.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
@@ -11028,21 +11033,37 @@ onyx:1>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Create a regexp object, according to \oparg{string} and
+		\oparg{flags}.
 	\item[Example(s): ]\begin{verbatim}
 
 		\end{verbatim}
 	\end{description}
 \label{systemdict:regsub}
 \index{regsub@\onyxop{}{regsub}{}}
-\item[{\onyxop{OPARGS}{regsub}{OPOUTS}}: ]
+\item[{\onyxop{pattern template flags}{regsub}{regsub}}: ]
+\item[{\onyxop{pattern template}{regsub}{regsub}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[pattern: ]
+			A string that specifies a regular expression.  See
+			Section~\ref{sec:onyx_regular_expressions} for syntax.
+		\item[template: ]
+			A string that specifies a substitution template.  See
+			Section~\ref{sec:onyx_regular_expressions} for syntax.
+		\item[flags: ]
+			A dictionary of optional flags:
+			\begin{description}%\item[]
+			\item[\$m: ] Maximum number of matches (0 is treated as
+				infinity).  Defaults to 1.
+			\item[\$i: ] Case insensitive.  Defaults to false.
+			\end{description}
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[regsub: ]
+			A regsub object.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
@@ -11050,6 +11071,8 @@ onyx:1>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Create a regsub object, according to \oparg{pattern},
+		\oparg{template}, and \oparg{flags}.
 	\item[Example(s): ]\begin{verbatim}
 
 		\end{verbatim}
@@ -11729,7 +11752,7 @@ onyx:0>
 		\item[flags: ]
 			An array of flag names.  The following flags are
 			supported:
-			\begin{description}\item[]
+			\begin{description}%\item[]
 			\item[\$MSG\_OOB]
 			\item[\$MSG\_PEEK]
 			\item[\$MSG\_WAITALL]
@@ -12121,7 +12144,7 @@ onyx:1>
 		\item[optname: ]
 			Name of option to set the value of.  The following
 			option names are supported:
-			\begin{description}\item[]
+			\begin{description}%\item[]
 			\item[\$SO\_DEBUG]
 			\item[\$SO\_REUSEADDR]
 			\item[\$SO\_REUSEPORT]
@@ -12139,7 +12162,7 @@ onyx:1>
 			\item[\$SO\_LINGER: ]
 				\oparg{optval} is a dictionary, and the
 				following entries are defined:
-				\begin{description}
+				\begin{description}%\item[]
 				\item[\$on: ]
 					Boolean.
 				\item[\$time: ]
@@ -12829,7 +12852,7 @@ onyx:2>
 			A dictionary of information about \oparg{sock}.
 			Depending on the socket family, the following entries
 			may exist:
-			\begin{description}\item[]
+			\begin{description}%\item[]
 			\item[family: ] Socket family.
 			\item[address: ] IPv4 address.
 			\item[port: ] IPv4 port.
@@ -12876,7 +12899,7 @@ onyx:1>
 		\item[optname: ]
 			Name of option to get the value of.  The following
 			option names are supported:
-			\begin{description}\item[]
+			\begin{description}%\item[]
 			\item[\$SO\_DEBUG]
 			\item[\$SO\_REUSEADDR]
 			\item[\$SO\_REUSEPORT]
@@ -12894,7 +12917,7 @@ onyx:1>
 			\item[\$SO\_LINGER: ]
 				\oparg{optval} is a dictionary, and the
 				following entries are defined:
-				\begin{description}
+				\begin{description}%\item
 				\item[\$on: ]
 					Boolean.
 				\item[\$time: ]
@@ -13283,7 +13306,7 @@ onyx:0>
 		\begin{description}\item[]
 		\item[dict: ]
 			A dictionary that contains the following entries:
-			\begin{description}\item[]
+			\begin{description}%\item[]
 			\item[dev: ]
 				Inode's device.
 			\item[ino: ]
@@ -13553,15 +13576,37 @@ onyx:0>
 	\end{description}
 \label{systemdict:subst}
 \index{subst@\onyxop{}{subst}{}}
-\item[{\onyxop{OPARGS}{subst}{OPOUTS}}: ]
+\item[{\onyxop{input pattern template flags}{subst}{output count}}: ]
+\item[{\onyxop{input pattern template}{subst}{output count}}: ]
+\item[{\onyxop{input regsub}{subst}{output count}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[input: ]
+			An input string.
+		\item[pattern: ]
+			A string that specifies a regular expression.  See
+			Section~\ref{sec:onyx_regular_expressions} for syntax.
+		\item[template: ]
+			A string that specifies a substitution template.  See
+			Section~\ref{sec:onyx_regular_expressions} for syntax.
+		\item[flags: ]
+			A dictionary of optional flags:
+			\begin{description}%\item[]
+			\item[\$m: ] Maximum number of matches (0 is treated as
+				infinity).  Defaults to 1.
+			\item[\$i: ] Case insensitive.  Defaults to false.
+			\end{description}
+		\item[regsub: ]
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[output: ]
+			A string that is created by substituting substrings
+			within \oparg{input} that match a regular expression
+			with \oparg{template}.
+		\item[count: ]
+			Number of substitutions made.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
@@ -13569,6 +13614,9 @@ onyx:0>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Create a string by substituting \oparg{template} for each
+		substring within \oparg{input} that matches a regular
+		expression.
 	\item[Example(s): ]\begin{verbatim}
 
 		\end{verbatim}
@@ -13768,7 +13816,7 @@ onyx:1>
 		\item[flag: ]
 			A single-character string that represents the test to do
 			on \oparg{file} or \oparg{filename}:
-			\begin{description}\item[]
+			\begin{description}%\item[]
 			\item[`b': ]
 				Block special device?
 			\item[`c': ]
