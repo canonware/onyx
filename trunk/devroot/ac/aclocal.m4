@@ -4,6 +4,37 @@ dnl leaving only 'sinclude', which doesn't cause an error if the file to be
 dnl included can't be found.
 AC_DEFUN(CW_INIT,[])
 
+dnl CW_REQUIRES(dir, opt config_flags, opt targets)
+dnl dir : Relative path of package.
+dnl config_opts : Command line options to pass to configure.
+dnl targets : make targets.
+dnl Require a self-contained package.
+dnl 
+AC_DEFUN(CW_REQUIRES,
+[
+  if test -d $1 ; then
+    pwd=`pwd`
+
+    echo "cd $1"
+    cd $1
+
+    echo "./configure $2"
+    ./configure $2
+
+    for i in $3 ; do
+      echo "make $i"
+      make $i
+    done
+
+    dnl Add elements to CFLAGS, CPPFLAGS, LDFLAGS, LD_LIBRARY_PATH, and PATH.
+
+    echo "cd $pwd"
+    cd $pwd
+  else
+    AC_MSG_ERROR(Cannot find required package in $1)
+  fi
+])
+
 dnl Use pthreads.
 AC_DEFUN(CW_USE_PTHREADS,
 [
