@@ -1,4 +1,4 @@
-<[]> pstack
+() pstack
 sclear pstack clear
-<[1 2 3]> pstack
+(1 2 3) pstack
 sclear pstack clear

@@ -148,7 +148,7 @@ stilo_l_string_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_uint32_t
 	str = stilo_string_get(a_stilo);
 	len = stilo_string_len_get(a_stilo);
 
-	stilo_file_output(a_file, "(");
+	stilo_file_output(a_file, "`");
 	stilo_string_lock(a_stilo);
 	for (i = 0; i < len; i++) {
 		switch (str[i]) {
@@ -170,11 +170,11 @@ stilo_l_string_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_uint32_t
 		case '\\':
 			retval = stilo_file_output(a_file, "\\\\");
 			break;
-		case '(':
-			retval = stilo_file_output(a_file, "\\(");
+		case '`':
+			retval = stilo_file_output(a_file, "\\`");
 			break;
-		case ')':
-			retval = stilo_file_output(a_file, "\\)");
+		case '\'':
+			retval = stilo_file_output(a_file, "\\'");
 			break;
 		default:
 			if (isprint(str[i]))
@@ -192,7 +192,7 @@ stilo_l_string_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_uint32_t
 		}
 	}
 	stilo_string_unlock(a_stilo);
-	retval = stilo_file_output(a_file, ")");
+	retval = stilo_file_output(a_file, "'");
 	if (retval)
 		goto RETURN;
 

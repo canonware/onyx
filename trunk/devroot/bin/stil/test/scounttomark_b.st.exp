@@ -1,4 +1,4 @@
 Error /stackunderflow in --scounttomark--
-ostack: <[--scounttomark--]>
-estack: <[-file- --scounttomark--]>
-dstack: <[-dict- -dict- -dict- -dict-]>
+ostack: (--scounttomark--)
+estack: (-file- --scounttomark--)
+dstack: (-dict- -dict- -dict- -dict-)

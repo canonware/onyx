@@ -1,4 +1,4 @@
 Error /stackunderflow in --sdup--
-ostack: <[-stack- --sdup--]>
-estack: <[-file- --sdup--]>
-dstack: <[-dict- -dict- -dict- -dict-]>
+ostack: (-stack- --sdup--)
+estack: (-file- --sdup--)
+dstack: (-dict- -dict- -dict- -dict-)

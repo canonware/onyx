@@ -1,42 +1,42 @@
-<[1 2 3 4]> 1 0 sroll pstack clear
-<[1 2 3 4]>
-<[1 2 3 4]> 1 1 sroll pstack clear
-<[1 2 3 4]>
-<[1 2 3 4]> 1 2 sroll pstack clear
-<[1 2 3 4]>
-<[1 2 3 4]> 2 0 sroll pstack clear
-<[1 2 3 4]>
-<[1 2 3 4]> 2 1 sroll pstack clear
-<[1 2 4 3]>
-<[1 2 3 4]> 2 2 sroll pstack clear
-<[1 2 3 4]>
-<[1 2 3 4]> 3 1 sroll pstack clear
-<[1 4 2 3]>
-<[1 2 3 4]> 3 2 sroll pstack clear
-<[1 3 4 2]>
-<[1 2 3 4]> 3 -1 sroll pstack clear
-<[1 3 4 2]>
-<[1 2 3 4]> 3 -2 sroll pstack clear
-<[1 4 2 3]>
-<[1 2 3 4]> 3 3 sroll pstack clear
-<[1 2 3 4]>
-<[1 2 3 4]> 4 -4 sroll pstack clear
-<[1 2 3 4]>
-<[1 2 3 4]> 4 -3 sroll pstack clear
-<[4 1 2 3]>
-<[1 2 3 4]> 4 -2 sroll pstack clear
-<[3 4 1 2]>
-<[1 2 3 4]> 4 -1 sroll pstack clear
-<[2 3 4 1]>
-<[1 2 3 4]> 4 0 sroll pstack clear
-<[1 2 3 4]>
-<[1 2 3 4]> 4 1 sroll pstack clear
-<[4 1 2 3]>
-<[1 2 3 4]> 4 2 sroll pstack clear
-<[3 4 1 2]>
-<[1 2 3 4]> 4 3 sroll pstack clear
-<[2 3 4 1]>
-<[1 2 3 4]> 4 4 sroll pstack clear
-<[1 2 3 4]>
-<[1 2 3 4]> 4 5 sroll pstack clear
-<[4 1 2 3]>
+(1 2 3 4) 1 0 sroll pstack clear
+(1 2 3 4)
+(1 2 3 4) 1 1 sroll pstack clear
+(1 2 3 4)
+(1 2 3 4) 1 2 sroll pstack clear
+(1 2 3 4)
+(1 2 3 4) 2 0 sroll pstack clear
+(1 2 3 4)
+(1 2 3 4) 2 1 sroll pstack clear
+(1 2 4 3)
+(1 2 3 4) 2 2 sroll pstack clear
+(1 2 3 4)
+(1 2 3 4) 3 1 sroll pstack clear
+(1 4 2 3)
+(1 2 3 4) 3 2 sroll pstack clear
+(1 3 4 2)
+(1 2 3 4) 3 -1 sroll pstack clear
+(1 3 4 2)
+(1 2 3 4) 3 -2 sroll pstack clear
+(1 4 2 3)
+(1 2 3 4) 3 3 sroll pstack clear
+(1 2 3 4)
+(1 2 3 4) 4 -4 sroll pstack clear
+(1 2 3 4)
+(1 2 3 4) 4 -3 sroll pstack clear
+(4 1 2 3)
+(1 2 3 4) 4 -2 sroll pstack clear
+(3 4 1 2)
+(1 2 3 4) 4 -1 sroll pstack clear
+(2 3 4 1)
+(1 2 3 4) 4 0 sroll pstack clear
+(1 2 3 4)
+(1 2 3 4) 4 1 sroll pstack clear
+(4 1 2 3)
+(1 2 3 4) 4 2 sroll pstack clear
+(3 4 1 2)
+(1 2 3 4) 4 3 sroll pstack clear
+(2 3 4 1)
+(1 2 3 4) 4 4 sroll pstack clear
+(1 2 3 4)
+(1 2 3 4) 4 5 sroll pstack clear
+(4 1 2 3)

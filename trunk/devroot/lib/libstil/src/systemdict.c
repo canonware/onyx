@@ -157,11 +157,11 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(sub),
 	{STILN_sym_hash_bang, systemdict_mark},
 	{STILN_sym_bang_hash, systemdict_cleartomark},
-	ENTRY(sym_rb_gt),
-	ENTRY(sym_gt_gt),
+	{STILN_sym_lp, systemdict_fino},
+	ENTRY(sym_rp),
+	{STILN_sym_lt, systemdict_mark},
+	ENTRY(sym_gt),
 	{STILN_sym_lb, systemdict_mark},
-	{STILN_sym_lt_lb, systemdict_fino},
-	{STILN_sym_lt_lt, systemdict_mark},
 	ENTRY(sym_rb),
 	ENTRY(symlink),
 	ENTRY(tell),
@@ -1016,7 +1016,7 @@ systemdict_cvs(cw_stilo_t *a_thread)
 
 	switch (stilo_type_get(stilo)) {
 	case STILOT_BOOLEAN:
-		_cw_stil_code(a_thread, "{(true)} {(false)} ifelse");
+		_cw_stil_code(a_thread, "{`true'} {`false'} ifelse");
 		break;
 	case STILOT_INTEGER: {
 		cw_uint8_t	result[21];
@@ -1061,7 +1061,7 @@ systemdict_cvs(cw_stilo_t *a_thread)
 
 		stiln = stilo_l_operator_fast_op_stiln(stilo);
 		if (stiln > STILN_LAST)
-			_cw_stil_code(a_thread, "pop (--operator--)");
+			_cw_stil_code(a_thread, "pop `--operator--'");
 		else {
 			cw_stilo_t	*tstack;
 			cw_stilo_t	*tstilo;
@@ -1093,7 +1093,7 @@ systemdict_cvs(cw_stilo_t *a_thread)
 	case STILOT_MARK:
 	case STILOT_NULL:
 	default:
-		_cw_stil_code(a_thread, "pop (--nostringval--)");
+		_cw_stil_code(a_thread, "pop `--nostringval--'");
 		break;
 	}
 }
@@ -3616,9 +3616,9 @@ systemdict_sub(cw_stilo_t *a_thread)
 	stilo_stack_pop(ostack);
 }
 
-/* ]> */
+/* ) */
 void
-systemdict_sym_rb_gt(cw_stilo_t *a_thread)
+systemdict_sym_rp(cw_stilo_t *a_thread)
 {
 	cw_stilo_t	*ostack, *tstack;
 	cw_stilo_t	*nstack, *tstilo, *stilo;
@@ -3677,9 +3677,9 @@ systemdict_sym_rb_gt(cw_stilo_t *a_thread)
 	stilo_stack_pop(tstack);
 }
 
-/* >> */
+/* > */
 void
-systemdict_sym_gt_gt(cw_stilo_t *a_thread)
+systemdict_sym_gt(cw_stilo_t *a_thread)
 {
 	cw_stilo_t	*ostack, *tstack;
 	cw_stilo_t	*stilo, *dict, *key, *val;

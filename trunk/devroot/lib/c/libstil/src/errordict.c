@@ -255,19 +255,19 @@ errordict_handleerror(cw_stilo_t *a_thread)
 	_cw_stil_code(a_thread, "
 currenterror begin
 errorname /syntaxerror eq {
-	(At line ) print
+	`At line ' print
 	line cvs print
-	(, column ) print
+	`, column ' print
 	column cvs print
-	(: ) print
+	`: ' print
 } if
-(Error /) print errorname cvs print ( in ) print /command load 1 sprint
+`Error /' print errorname cvs print ` in ' print /command load 1 sprint
 recordstacks {
-	(ostack: ) print
+	`ostack: ' print
 	ostack 1 sprint
-	(estack: ) print
+	`estack: ' print
 	estack 1 sprint
-	(dstack: ) print
+	`dstack: ' print
 	dstack 1 sprint
 } if
 end

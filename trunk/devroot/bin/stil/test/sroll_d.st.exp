@@ -1,4 +1,4 @@
 Error /stackunderflow in --sroll--
-ostack: <[1 2 --sroll--]>
-estack: <[-file- --sroll--]>
-dstack: <[-dict- -dict- -dict- -dict-]>
+ostack: (1 2 --sroll--)
+estack: (-file- --sroll--)
+dstack: (-dict- -dict- -dict- -dict-)

@@ -25,11 +25,11 @@ stil_p_soft_init(cw_stil_t *a_stil)
 /:
 {counttomark dup 0 eq {pop errordict /unmatchedmark get eval} {-1 roll load {counttomark dup 1 le {pop exit} if -1 roll get} loop exch pop eval} ifelse}
 /promptstring
-{count cvs dup length 4 add string dup 0 (s:) putinterval dup dup length 2 sub (> ) putinterval dup 3 2 roll 2 exch putinterval}
+{count cvs dup length 4 add string dup 0 `s:' putinterval dup dup length 2 sub `> ' putinterval dup 3 2 roll 2 exch putinterval}
 /product
-{(Canonware stil)}
+{`Canonware stil'}
 /version
-{(<Version>)}
+{`<Version>'}
 systemdict begin 7 {bind def} repeat end"
 	);
 	stilo_thread_exit(&thread);

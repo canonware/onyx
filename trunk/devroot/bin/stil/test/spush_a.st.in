@@ -1,8 +1,8 @@
-<[]>
+()
 true spush
 [] spush
 condition spush
-<<>> spush
+<> spush
 fino spush
 1 spush
 mark spush
@@ -10,6 +10,6 @@ mutex spush
 /foo spush
 null spush
 //pstack spush
-<[]> spush
-(hi) spush
+() spush
+`hi' spush
 pstack

@@ -192,7 +192,7 @@ stilo_l_stack_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_uint32_t
 	if (a_depth > 0) {
 		cw_stiloe_stack_t	*stack;
 
-		retval = stilo_file_output(a_file, "<[[");
+		retval = stilo_file_output(a_file, "(");
 		if (retval)
 			goto RETURN;
 
@@ -216,7 +216,7 @@ stilo_l_stack_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_uint32_t
 		}
 		stiloe_p_stack_unlock(stack);
 
-		retval = stilo_file_output(a_file, "]>");
+		retval = stilo_file_output(a_file, ")");
 		if (retval)
 			goto RETURN;
 	} else {

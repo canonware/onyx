@@ -1,4 +1,4 @@
 Error /typecheck in --sroll--
-ostack: <[-stack- -mark- 1 --sroll--]>
-estack: <[-file- --sroll--]>
-dstack: <[-dict- -dict- -dict- -dict-]>
+ostack: (-stack- -mark- 1 --sroll--)
+estack: (-file- --sroll--)
+dstack: (-dict- -dict- -dict- -dict-)

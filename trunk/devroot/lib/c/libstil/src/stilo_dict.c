@@ -129,7 +129,7 @@ stilo_l_dict_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_uint32_t
 		cw_stilo_t	key, val;
 		cw_uint32_t	count, i;
 
-		retval = stilo_file_output(a_file, "<<");
+		retval = stilo_file_output(a_file, "<");
 		if (retval)
 			goto RETURN;
 
@@ -160,7 +160,7 @@ stilo_l_dict_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_uint32_t
 					goto RETURN;
 			}
 		}
-		retval = stilo_file_output(a_file, ">>");
+		retval = stilo_file_output(a_file, ">");
 	} else {
 		retval = stilo_file_output(a_file, "-dict-");
 		if (retval)

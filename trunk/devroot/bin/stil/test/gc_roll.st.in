@@ -2,7 +2,7 @@
 % Test the GC with lots of rolls going on.
 %
 
-(Test begin\n) print
+`Test begin\n' print
 
 % Push 10 strings onto the stack.
 0 10 {1 add dup cvs exch} repeat pop
@@ -18,8 +18,8 @@
 	
 		gcdict /collect get eval
 	} repeat
-	(.) print flush
+	`.' print flush
 } bind repeat
-(\n) print
+`\n' print
 
-(Test end\n) print
+`Test end\n' print

@@ -34,27 +34,16 @@ struct cw_stilo_thread_entry_s {
 typedef struct cw_stiloe_threadts_s cw_stiloe_threadts_t;
 typedef enum {
 	THREADTS_START,
-	THREADTS_LT_CONT,
-	THREADTS_GT_CONT,
-	THREADTS_RB_CONT,
 	THREADTS_SLASH_CONT,
 	THREADTS_COMMENT,
 	THREADTS_INTEGER,
 	THREADTS_INTEGER_RADIX,
-	THREADTS_ASCII_STRING,
-	THREADTS_ASCII_STRING_NEWLINE_CONT,
-	THREADTS_ASCII_STRING_PROT_CONT,
-	THREADTS_ASCII_STRING_CRLF_CONT,
-	THREADTS_ASCII_STRING_HEX_CONT,
-	THREADTS_ASCII_STRING_HEX_FINISH,
-	THREADTS_LIT_STRING,
-	THREADTS_LIT_STRING_NEWLINE_CONT,
-	THREADTS_LIT_STRING_PROT_CONT,
-	THREADTS_HEX_STRING,
-	THREADTS_BASE64_STRING,
-	THREADTS_BASE64_STRING_PAD,
-	THREADTS_BASE64_STRING_TILDE,
-	THREADTS_BASE64_STRING_FINISH,
+	THREADTS_STRING,
+	THREADTS_STRING_NEWLINE_CONT,
+	THREADTS_STRING_PROT_CONT,
+	THREADTS_STRING_CRLF_CONT,
+	THREADTS_STRING_HEX_CONT,
+	THREADTS_STRING_HEX_FINISH,
 	THREADTS_NAME
 } cw_stilo_threadts_t;
 
@@ -162,12 +151,9 @@ struct cw_stiloe_thread_s {
 			cw_uint32_t	b_off;	/* Depends on sign, radix. */
 		}       n;	/* number. */
 		struct {
-			cw_uint32_t	p_depth;
+			cw_uint32_t	q_depth;
 			cw_uint8_t	hex_val;
 		}	s;	/* string. */
-		struct {
-			cw_uint32_t	nodd;
-		}	b;	/* base 64 string. */
 		struct {
 			enum {
 				ACTION_EXECUTE,

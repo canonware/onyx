@@ -1,4 +1,0 @@
-At line 3, column 17: Error /syntaxerror in -file-
-ostack: <[(<0123456789abcdefg) -file-]>
-estack: <[-file-]>
-dstack: <[-dict- -dict- -dict- -dict-]>

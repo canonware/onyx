@@ -67,7 +67,7 @@ main(int argc, char **argv, char **envp)
 #endif
 	cw_stil_t	stil;
 	static const cw_uint8_t	version[] =
-	    "product print (, version ) print version print (.\n) print flush";
+	    "product print `, version ' print version print `.\n' print flush";
 
 	libstash_init();
 #ifdef _STIL_SIGHANDLER

@@ -79,25 +79,6 @@ stilo_threade_stiln(cw_stilo_threade_t a_threade)
 #define _CW_STILO_THREAD_NEWLINE()					\
 		newline = 1
 
-/*
- * Lookup table for base64 decoding.
- */
-static cw_sint32_t cw_g_b64_codes[] = {
-		    62, -1, -1, -1, 63,
-	52, 53, 54, 55, 56, 57, 58, 59,
-	60, 61, -1, -1, -1, -1, -1, -1,
-
-	-1,  0,  1,  2,  3,  4 , 5,  6,
-	 7,  8,  9, 10, 11, 12, 13, 14,
-	15, 16, 17, 18, 19, 20, 21, 22,
-	23, 24, 25, -1, -1, -1, -1, -1,
-	-1, 26, 27, 28, 29, 30, 31, 32,
-	33, 34, 35, 36, 37, 38, 39, 40,
-	41, 42, 43, 44, 45, 46, 47, 48,
-	49, 50, 51
-};
-#define	stilo_p_thread_b64b(a) cw_g_b64_codes[(a) - 43]
-	
 static cw_uint32_t	stiloe_p_thread_feed(cw_stiloe_thread_t *a_thread,
     cw_stilo_threadp_t *a_threadp, cw_uint32_t a_token, const cw_uint8_t *a_str,
     cw_uint32_t a_len);
@@ -1157,27 +1138,16 @@ stiloe_p_thread_feed(cw_stiloe_thread_t *a_thread, cw_stilo_threadp_t
 		out_put(out_err, "c: '[c]' ([i]), index: [i] ", c, c,
 		    a_thread->index);
 		_CW_THREADTS_PRINT(THREADTS_START);
-		_CW_THREADTS_PRINT(THREADTS_LT_CONT);
-		_CW_THREADTS_PRINT(THREADTS_GT_CONT);
-		_CW_THREADTS_PRINT(THREADTS_RB_CONT);
 		_CW_THREADTS_PRINT(THREADTS_SLASH_CONT);
 		_CW_THREADTS_PRINT(THREADTS_COMMENT);
 		_CW_THREADTS_PRINT(THREADTS_INTEGER);
 		_CW_THREADTS_PRINT(THREADTS_INTEGER_RADIX);
-		_CW_THREADTS_PRINT(THREADTS_ASCII_STRING);
-		_CW_THREADTS_PRINT(THREADTS_ASCII_STRING_NEWLINE_CONT);
-		_CW_THREADTS_PRINT(THREADTS_ASCII_STRING_PROT_CONT);
-		_CW_THREADTS_PRINT(THREADTS_ASCII_STRING_CRLF_CONT);
-		_CW_THREADTS_PRINT(THREADTS_ASCII_STRING_HEX_CONT);
-		_CW_THREADTS_PRINT(THREADTS_ASCII_STRING_HEX_FINISH);
-		_CW_THREADTS_PRINT(THREADTS_LIT_STRING);
-		_CW_THREADTS_PRINT(THREADTS_LIT_STRING_NEWLINE_CONT);
-		_CW_THREADTS_PRINT(THREADTS_LIT_STRING_PROT_CONT);
-		_CW_THREADTS_PRINT(THREADTS_HEX_STRING);
-		_CW_THREADTS_PRINT(THREADTS_BASE64_STRING);
-		_CW_THREADTS_PRINT(THREADTS_BASE64_STRING_PAD);
-		_CW_THREADTS_PRINT(THREADTS_BASE64_STRING_TILDE);
-		_CW_THREADTS_PRINT(THREADTS_BASE64_STRING_FINISH);
+		_CW_THREADTS_PRINT(THREADTS_STRING);
+		_CW_THREADTS_PRINT(THREADTS_STRING_NEWLINE_CONT);
+		_CW_THREADTS_PRINT(THREADTS_STRING_PROT_CONT);
+		_CW_THREADTS_PRINT(THREADTS_STRING_CRLF_CONT);
+		_CW_THREADTS_PRINT(THREADTS_STRING_HEX_CONT);
+		_CW_THREADTS_PRINT(THREADTS_STRING_HEX_FINISH);
 		_CW_THREADTS_PRINT(THREADTS_NAME);
 #undef _CW_THREADTS_PRINT
 #endif
@@ -1193,12 +1163,6 @@ stiloe_p_thread_feed(cw_stiloe_thread_t *a_thread, cw_stilo_threadp_t
 
 		switch (a_thread->state) {
 		case THREADTS_START:
-			/*
-			 * A literal string cannot be accepted until one
-			 * character past the ' at the end has been seen, at
-			 * which point the scanner jumps here.
-			 */
-			START_CONTINUE:
 			_cw_assert(a_thread->index == 0);
 
 			if (a_token) {
@@ -1221,34 +1185,22 @@ stiloe_p_thread_feed(cw_stiloe_thread_t *a_thread, cw_stilo_threadp_t
 			}
 
 			switch (c) {
-			case '(':
-				a_thread->state = THREADTS_ASCII_STRING;
-				a_thread->m.s.p_depth = 1;
+			case '`':
+				a_thread->state = THREADTS_STRING;
+				a_thread->m.s.q_depth = 1;
 				break;
-			case ')':
-				stiloe_p_thread_syntax_error(a_thread, a_threadp,
-				    "", "", c);
+			case '\'':
+				stiloe_p_thread_syntax_error(a_thread,
+				    a_threadp, "", "", c);
 				if (a_token)
 					goto RETURN;
 				break;
-			case '`':
-				a_thread->state = THREADTS_LIT_STRING;
-				break;
-			case '<':
-				a_thread->state = THREADTS_LT_CONT;
-				break;
-			case '>':
-				a_thread->state = THREADTS_GT_CONT;
-				break;
-			case '[':
-				/* An operator, not the same as '{'. */
+			case '<': case '>': case '(': case ')': case '[':
+			case ']':
 				_CW_STILO_THREAD_PUTC(c);
 				token = TRUE;
 				a_thread->m.m.action = ACTION_EXECUTE;
 				stiloe_p_thread_name_accept(a_thread);
-				break;
-			case ']':
-				a_thread->state = THREADTS_RB_CONT;
 				break;
 			case '{':
 				a_thread->defer_count++;
@@ -1307,94 +1259,6 @@ stiloe_p_thread_feed(cw_stiloe_thread_t *a_thread, cw_stilo_threadp_t
 				break;
 			}
 			break;
-		case THREADTS_LT_CONT:
-			_cw_assert(a_thread->index == 0);
-
-			switch (c) {
-			case '<':
-				_CW_STILO_THREAD_PUTC(c);
-				_CW_STILO_THREAD_PUTC(c);
-				token = TRUE;
-				a_thread->m.m.action = ACTION_EXECUTE;
-				stiloe_p_thread_name_accept(a_thread);
-				break;
-			case '[':
-				_CW_STILO_THREAD_PUTC('<');
-				_CW_STILO_THREAD_PUTC(c);
-				token = TRUE;
-				a_thread->m.m.action = ACTION_EXECUTE;
-				stiloe_p_thread_name_accept(a_thread);
-				break;
-			case '>':
-				a_thread->state = THREADTS_START;
-				token = TRUE;
-				stilo = stilo_stack_push(&a_thread->ostack);
-				stilo_string_new(stilo, a_thread->stil,
-				    a_thread->locking, 0);
-				break;
-			case '~':
-				a_thread->state = THREADTS_BASE64_STRING;
-				break;
-			case '0': case '1': case '2': case '3': case '4':
-			case '5': case '6': case '7': case '8': case '9':
-			case 'a': case 'b': case 'c': case 'd': case 'e':
-			case 'f':
-				a_thread->state = THREADTS_HEX_STRING;
-				_CW_STILO_THREAD_PUTC(c);
-				break;
-			case '\n':
-				_CW_STILO_THREAD_NEWLINE();
-				/* Fall through. */
-			case '\0': case '\t': case '\f': case '\r': case ' ':
-				/* Whitespace within a hex string. */
-				a_thread->state = THREADTS_HEX_STRING;
-				break;
-			default:
-				stiloe_p_thread_syntax_error(a_thread, a_threadp, "", "<",
-				    c);
-				if (a_token)
-					goto RETURN;
-			}
-			break;
-		case THREADTS_GT_CONT:
-			_cw_assert(a_thread->index == 0);
-
-			switch (c) {
-			case '>':
-				_CW_STILO_THREAD_PUTC(c);
-				_CW_STILO_THREAD_PUTC(c);
-				token = TRUE;
-				a_thread->m.m.action = ACTION_EXECUTE;
-				stiloe_p_thread_name_accept(a_thread);
-				break;
-			default:
-				stiloe_p_thread_syntax_error(a_thread, a_threadp, "", ">",
-				    c);
-				if (a_token)
-					goto RETURN;
-			}
-			break;
-		case THREADTS_RB_CONT:
-			_cw_assert(a_thread->index == 0);
-
-			switch (c) {
-			case '>':
-				_CW_STILO_THREAD_PUTC(']');
-				_CW_STILO_THREAD_PUTC(c);
-				token = TRUE;
-				a_thread->m.m.action = ACTION_EXECUTE;
-				stiloe_p_thread_name_accept(a_thread);
-				break;
-			default:
-				/* An operator, not the same as '}'. */
-				_CW_STILO_THREAD_PUTC(']');
-				token = TRUE;
-				a_thread->m.m.action = ACTION_EXECUTE;
-				stiloe_p_thread_name_accept(a_thread);
-
-				goto RESTART;
-			}
-			break;
 		case THREADTS_SLASH_CONT:
 			_cw_assert(a_thread->index == 0);
 
@@ -1406,8 +1270,8 @@ stiloe_p_thread_feed(cw_stiloe_thread_t *a_thread, cw_stilo_threadp_t
 			case '\n':
 				_CW_STILO_THREAD_NEWLINE();
 
-				stiloe_p_thread_syntax_error(a_thread, a_threadp, "", "/",
-				    c);
+				stiloe_p_thread_syntax_error(a_thread,
+				    a_threadp, "", "/", c);
 				if (a_token)
 					goto RETURN;
 				break;
@@ -1415,8 +1279,8 @@ stiloe_p_thread_feed(cw_stiloe_thread_t *a_thread, cw_stilo_threadp_t
 			case '(': case ')': case '`': case '\'': case '<':
 			case '>': case '[': case ']': case '{': case '}':
 			case '%':
-				stiloe_p_thread_syntax_error(a_thread, a_threadp, "", "/",
-				    c);
+				stiloe_p_thread_syntax_error(a_thread,
+				    a_threadp, "", "/", c);
 				if (a_token)
 					goto RETURN;
 				break;
@@ -1461,12 +1325,11 @@ stiloe_p_thread_feed(cw_stiloe_thread_t *a_thread, cw_stilo_threadp_t
 				a_thread->m.n.base = 0;
 
 				for (i = 0; i < a_thread->index; i++) {
-					digit =
-					    _CW_STILO_THREAD_GETC(a_thread->m.n.b_off
-					    + i) - '0';
+					digit = _CW_STILO_THREAD_GETC(
+					    a_thread->m.n.b_off + i) - '0';
 
-					if (a_thread->index - a_thread->m.n.b_off
-					    - i == 2)
+					if (a_thread->index -
+					    a_thread->m.n.b_off - i == 2)
 						digit *= 10;
 					a_thread->m.n.base += digit;
 
@@ -1491,8 +1354,10 @@ stiloe_p_thread_feed(cw_stiloe_thread_t *a_thread, cw_stilo_threadp_t
 					a_thread->state = THREADTS_NAME;
 					a_thread->m.m.action = ACTION_EXECUTE;
 				} else {
-					a_thread->m.n.b_off = a_thread->index + 1;
-					a_thread->state = THREADTS_INTEGER_RADIX;
+					a_thread->m.n.b_off = a_thread->index +
+					    1;
+					a_thread->state =
+					    THREADTS_INTEGER_RADIX;
 				}
 				_CW_STILO_THREAD_PUTC(c);
 				break;
@@ -1522,11 +1387,17 @@ stiloe_p_thread_feed(cw_stiloe_thread_t *a_thread, cw_stilo_threadp_t
 					 * conversion before mucking with the
 					 * stack in case there is an exception.
 					 */
-					a_thread->tok_str[a_thread->index] = '\0';
+					a_thread->tok_str[a_thread->index] =
+					    '\0';
 					errno = 0;
+
+#if (_CW_STILOI_SIZEOF == 8)
 					val = strtoll(a_thread->tok_str, NULL,
 					    10);
-
+#else
+					val = strtol(a_thread->tok_str, NULL,
+					    10);
+#endif
 					if ((errno == ERANGE) &&
 #if (_CW_STILOI_SIZEOF == 8)
 					    ((val == LLONG_MIN) || (val ==
@@ -1542,8 +1413,8 @@ stiloe_p_thread_feed(cw_stiloe_thread_t *a_thread, cw_stilo_threadp_t
 						    STILO_THREADE_RANGECHECK);
 					} else {
 						token = TRUE;
-						stilo =
-						    stilo_stack_push(&a_thread->ostack);
+						stilo = stilo_stack_push(
+						    &a_thread->ostack);
 						stilo_integer_new(stilo, val);
 						stiloe_p_thread_reset(a_thread);
 					}
@@ -1618,12 +1489,19 @@ stiloe_p_thread_feed(cw_stiloe_thread_t *a_thread, cw_stilo_threadp_t
 					 * conversion before mucking with the
 					 * stack in case there is an exception.
 					 */
-					a_thread->tok_str[a_thread->index] = '\0';
+					a_thread->tok_str[a_thread->index] =
+					    '\0';
 					errno = 0;
-					val =
-					    strtoll(&a_thread->tok_str[a_thread->m.n.b_off],
-					    NULL,
+
+#if (_CW_STILOI_SIZEOF == 8)
+					val = strtoll(&a_thread->tok_str[
+					    a_thread->m.n.b_off], NULL,
 					    a_thread->m.n.base);
+#else
+					val = strtol(&a_thread->tok_str[
+					    a_thread->m.n.b_off], NULL,
+					    a_thread->m.n.base);
+#endif
 					if ((errno == ERANGE) &&
 #if (_CW_STILOI_SIZEOF == 8)
 					    ((val == LLONG_MIN) || (val ==
@@ -1639,8 +1517,8 @@ stiloe_p_thread_feed(cw_stiloe_thread_t *a_thread, cw_stilo_threadp_t
 						    STILO_THREADE_RANGECHECK);
 					} else {
 						token = TRUE;
-						stilo =
-						    stilo_stack_push(&a_thread->ostack);
+						stilo = stilo_stack_push(
+						    &a_thread->ostack);
 						stilo_integer_new(stilo, val);
 						stiloe_p_thread_reset(a_thread);
 					}
@@ -1662,21 +1540,21 @@ stiloe_p_thread_feed(cw_stiloe_thread_t *a_thread, cw_stilo_threadp_t
 			}
 			break;
 		}
-		case THREADTS_ASCII_STRING:
+		case THREADTS_STRING:
 			/* The CRLF code jumps here if there was no LF. */
-			ASCII_STRING_CONTINUE:
+			STRING_CONTINUE:
 
 			switch (c) {
 			case '\\':
-				a_thread->state = THREADTS_ASCII_STRING_PROT_CONT;
+				a_thread->state = THREADTS_STRING_PROT_CONT;
 				break;
-			case '(':
-				a_thread->m.s.p_depth++;
+			case '`':
+				a_thread->m.s.q_depth++;
 				_CW_STILO_THREAD_PUTC(c);
 				break;
-			case ')':
-				a_thread->m.s.p_depth--;
-				if (a_thread->m.s.p_depth == 0) {
+			case '\'':
+				a_thread->m.s.q_depth--;
+				if (a_thread->m.s.q_depth == 0) {
 					token = TRUE;
 					stilo =
 					    stilo_stack_push(&a_thread->ostack);
@@ -1690,8 +1568,7 @@ stiloe_p_thread_feed(cw_stiloe_thread_t *a_thread, cw_stilo_threadp_t
 					_CW_STILO_THREAD_PUTC(c);
 				break;
 			case '\r':
-				a_thread->state =
-				    THREADTS_ASCII_STRING_NEWLINE_CONT;
+				a_thread->state = THREADTS_STRING_NEWLINE_CONT;
 				break;
 			case '\n':
 				_CW_STILO_THREAD_NEWLINE();
@@ -1701,10 +1578,10 @@ stiloe_p_thread_feed(cw_stiloe_thread_t *a_thread, cw_stilo_threadp_t
 				break;
 			}
 			break;
-		case THREADTS_ASCII_STRING_NEWLINE_CONT:
+		case THREADTS_STRING_NEWLINE_CONT:
 			/* All cases in the switch statement do this. */
 			_CW_STILO_THREAD_PUTC('\n');
-			a_thread->state = THREADTS_ASCII_STRING;
+			a_thread->state = THREADTS_STRING;
 			switch (c) {
 			case '\n':
 				_CW_STILO_THREAD_NEWLINE();
@@ -1715,84 +1592,83 @@ stiloe_p_thread_feed(cw_stiloe_thread_t *a_thread, cw_stilo_threadp_t
 				 * the '\r' to a '\n' and jump back up to the
 				 * string scanning state to scan c again.
 				 */
-				goto ASCII_STRING_CONTINUE;
+				goto STRING_CONTINUE;
 			}
 			break;
-		case THREADTS_ASCII_STRING_PROT_CONT:
+		case THREADTS_STRING_PROT_CONT:
 			switch (c) {
-			case '(': case ')': case '\\':
-				a_thread->state = THREADTS_ASCII_STRING;
+			case '`': case '\'': case '\\':
+				a_thread->state = THREADTS_STRING;
 				_CW_STILO_THREAD_PUTC(c);
 				break;
 			case 'n':
-				a_thread->state = THREADTS_ASCII_STRING;
+				a_thread->state = THREADTS_STRING;
 				_CW_STILO_THREAD_PUTC('\n');
 				break;
 			case 'r':
-				a_thread->state = THREADTS_ASCII_STRING;
+				a_thread->state = THREADTS_STRING;
 				_CW_STILO_THREAD_PUTC('\r');
 				break;
 			case 't':
-				a_thread->state = THREADTS_ASCII_STRING;
+				a_thread->state = THREADTS_STRING;
 				_CW_STILO_THREAD_PUTC('\t');
 				break;
 			case 'b':
-				a_thread->state = THREADTS_ASCII_STRING;
+				a_thread->state = THREADTS_STRING;
 				_CW_STILO_THREAD_PUTC('\b');
 				break;
 			case 'f':
-				a_thread->state = THREADTS_ASCII_STRING;
+				a_thread->state = THREADTS_STRING;
 				_CW_STILO_THREAD_PUTC('\f');
 				break;
 			case 'x':
-				a_thread->state = THREADTS_ASCII_STRING_HEX_CONT;
+				a_thread->state = THREADTS_STRING_HEX_CONT;
 				break;
 			case '\r':
-				a_thread->state = THREADTS_ASCII_STRING_CRLF_CONT;
+				a_thread->state = THREADTS_STRING_CRLF_CONT;
 				break;
 			case '\n':
 				_CW_STILO_THREAD_NEWLINE();
 
 				/* Ignore. */
-				a_thread->state = THREADTS_ASCII_STRING;
+				a_thread->state = THREADTS_STRING;
 				break;
 			default:
-				a_thread->state = THREADTS_ASCII_STRING;
+				a_thread->state = THREADTS_STRING;
 				_CW_STILO_THREAD_PUTC('\\');
 				_CW_STILO_THREAD_PUTC(c);
 				break;
 			}
 			break;
-		case THREADTS_ASCII_STRING_CRLF_CONT:
+		case THREADTS_STRING_CRLF_CONT:
 			switch (c) {
 			case '\n':
 				_CW_STILO_THREAD_NEWLINE();
 
 				/* Ignore. */
-				a_thread->state = THREADTS_ASCII_STRING;
+				a_thread->state = THREADTS_STRING;
 				break;
 			default:
-				goto ASCII_STRING_CONTINUE;
+				goto STRING_CONTINUE;
 			}
 			break;
-		case THREADTS_ASCII_STRING_HEX_CONT:
+		case THREADTS_STRING_HEX_CONT:
 			switch (c) {
 			case '0': case '1': case '2': case '3': case '4':
 			case '5': case '6': case '7': case '8': case '9':
 			case 'a': case 'b': case 'c': case 'd': case 'e':
 			case 'f':
-				a_thread->state =
-				    THREADTS_ASCII_STRING_HEX_FINISH;
+				a_thread->state = THREADTS_STRING_HEX_FINISH;
 				a_thread->m.s.hex_val = c;
 				break;
 			default:
-				stiloe_p_thread_syntax_error(a_thread, a_threadp, "(",
-				    "\\x", c);
+				stiloe_p_thread_syntax_error(a_thread,
+				    a_threadp, "(", "\\x", c);
 				if (a_token)
 					goto RETURN;
 			}
 			break;
-		case THREADTS_ASCII_STRING_HEX_FINISH:
+		case THREADTS_STRING_HEX_FINISH:
 			switch (c) {
 			case '0': case '1': case '2': case '3': case '4':
 			case '5': case '6': case '7': case '8': case '9':
@@ -1800,7 +1676,7 @@ stiloe_p_thread_feed(cw_stiloe_thread_t *a_thread, cw_stilo_threadp_t
 			case 'f':{
 				cw_uint8_t	val;
 
-				a_thread->state = THREADTS_ASCII_STRING;
+				a_thread->state = THREADTS_STRING;
 				switch (a_thread->m.s.hex_val) {
 				case '0': case '1': case '2': case '3':
 				case '4': case '5': case '6': case '7':
@@ -1837,352 +1713,11 @@ stiloe_p_thread_feed(cw_stiloe_thread_t *a_thread, cw_stilo_threadp_t
 				cw_uint8_t	suffix[] = "\\x?";
 
 				suffix[2] = a_thread->m.s.hex_val;
-				stiloe_p_thread_syntax_error(a_thread, a_threadp, "(",
-				    suffix, c);
+				stiloe_p_thread_syntax_error(a_thread,
+				    a_threadp, "(", suffix, c);
 				if (a_token)
 					goto RETURN;
 			}
-			}
-			break;
-		case THREADTS_LIT_STRING:
-			/* The CRLF code jumps here if there was no LF. */
-			LIT_STRING_CONTINUE:
-
-			switch (c) {
-			case '\'':
-				a_thread->state = THREADTS_LIT_STRING_PROT_CONT;
-				break;
-			case '\r':
-				a_thread->state =
-				    THREADTS_LIT_STRING_NEWLINE_CONT;
-				break;
-			case '\n':
-				_CW_STILO_THREAD_NEWLINE();
-				/* Fall through. */
-			default:
-				_CW_STILO_THREAD_PUTC(c);
-				break;
-			}
-			break;
-		case THREADTS_LIT_STRING_NEWLINE_CONT:
-			/* All cases in the switch statement do this. */
-			_CW_STILO_THREAD_PUTC('\n');
-			a_thread->state = THREADTS_LIT_STRING;
-			switch (c) {
-			case '\n':
-				_CW_STILO_THREAD_NEWLINE();
-				break;
-			default:
-				/*
-				 * '\r' was not followed by a '\n'.  Translate
-				 * the '\r' to a '\n' and jump back up to the
-				 * string scanning state to scan c again.
-				 */
-				goto LIT_STRING_CONTINUE;
-			}
-			break;
-		case THREADTS_LIT_STRING_PROT_CONT:
-			switch (c) {
-			case '\'':
-				a_thread->state = THREADTS_LIT_STRING;
-				_CW_STILO_THREAD_PUTC('\'');
-				break;
-			default:
-				/* Accept literal string. */
-				token = TRUE;
-				stilo = stilo_stack_push(&a_thread->ostack);
-				stilo_string_new(stilo, a_thread->stil,
-				    a_thread->locking, a_thread->index);
-				stilo_string_set(stilo, 0, a_thread->tok_str,
-				    a_thread->index);
-
-				stiloe_p_thread_reset(a_thread);
-
-				/*
-				 * We're currently looking at the first
-				 * character of the next token, so re-scan it.
-				 */
-				goto START_CONTINUE;
-			}
-			break;
-		case THREADTS_HEX_STRING:
-			switch (c) {
-			case '>': {
-				cw_uint8_t	*str;
-				cw_uint32_t	j;
-
-				token = TRUE;
-				stilo = stilo_stack_push(&a_thread->ostack);
-				stilo_string_new(stilo, a_thread->stil,
-				    a_thread->locking, (a_thread->index + 1) >>
-				    1);
-				/*
-				 * Set the character following the string in
-				 * case the final hex character is missing.
-				 */
-				a_thread->tok_str[a_thread->index] = '0';
-
-				str = stilo_string_get(stilo);
-				stilo_string_lock(stilo);
-				for (j = 0; j < (a_thread->index + 1) >> 1;
-				     j++) {
-					switch (a_thread->tok_str[2 * j]) {
-					case '0': case '1': case '2': case '3':
-					case '4': case '5': case '6': case '7':
-					case '8': case '9':
-						str[j] = (a_thread->tok_str[2 *
-						    j] - '0') << 4;
-						break;
-					case 'a': case 'b': case 'c': case 'd':
-					case 'e': case 'f':
-						str[j] = ((a_thread->tok_str[2 *
-						    j] - 'a') + 10) << 4;
-						break;
-					default:
-						_cw_not_reached();
-					}
-					
-					switch (a_thread->tok_str[2 * j + 1]) {
-					case '0': case '1': case '2': case '3':
-					case '4': case '5': case '6': case '7':
-					case '8': case '9':
-						str[j] |= (a_thread->tok_str[2 *
-						    j + 1] - '0');
-						break;
-					case 'a': case 'b': case 'c': case 'd':
-					case 'e': case 'f':
-						str[j] |= (a_thread->tok_str[2 *
-						    j + 1] - 'a' + 10);
-						break;
-					default:
-						_cw_not_reached();
-					}
-				}
-				stilo_string_unlock(stilo);
-				stiloe_p_thread_reset(a_thread);
-				break;
-			}
-			case '0': case '1': case '2': case '3': case '4':
-			case '5': case '6': case '7': case '8': case '9':
-			case 'a': case 'b': case 'c': case 'd': case 'e':
-			case 'f':
-				_CW_STILO_THREAD_PUTC(c);
-				break;
-			case '\n':
-				_CW_STILO_THREAD_NEWLINE();
-				/* Fall through. */
-			case '\0': case '\t': case '\f': case '\r': case ' ':
-				break;
-			default:
-				stiloe_p_thread_syntax_error(a_thread, a_threadp, "<", "",
-				    c);
-				if (a_token)
-					goto RETURN;
-			}
-			break;
-		case THREADTS_BASE64_STRING:
-			switch (c) {
-			case '~':
-				a_thread->m.b.nodd = 0;
-				a_thread->state = THREADTS_BASE64_STRING_FINISH;
-				break;
-			case '\n':
-				_CW_STILO_THREAD_NEWLINE();
-				/* Fall through. */
-			case '\0': case '\t': case '\f': case '\r':
-			case ' ':
-				/* Ignore. */
-				break;
-			case 'A': case 'B': case 'C': case 'D': case 'E':
-			case 'F': case 'G': case 'H': case 'I': case 'J':
-			case 'K': case 'L': case 'M': case 'N': case 'O':
-			case 'P': case 'Q': case 'R': case 'S': case 'T':
-			case 'U': case 'V': case 'W': case 'X': case 'Y':
-			case 'Z': case 'a': case 'b': case 'c': case 'd':
-			case 'e': case 'f': case 'g': case 'h': case 'i':
-			case 'j': case 'k': case 'l': case 'm': case 'n':
-			case 'o': case 'p': case 'q': case 'r': case 's':
-			case 't': case 'u': case 'v': case 'w': case 'x':
-			case 'y': case 'z': case '0': case '1': case '2':
-			case '3': case '4': case '5': case '6': case '7':
-			case '8': case '9': case '+': case '/':
-				_CW_STILO_THREAD_PUTC(c);
-				break;
-			case '=':
-				/*
-				 * Calculate how many padding characters to
-				 * expect.
-				 */
-				switch (a_thread->index % 4) {
-				case 0: case 1:
-					/*
-					 * We shouldn't have even seen this
-					 * padding character.
-					 */
-					stiloe_p_thread_syntax_error(a_thread, a_threadp,
-					    "<~", "", c);
-					if (a_token)
-						goto RETURN;
-					break;
-				case 2:
-					a_thread->m.b.nodd = 1;
-					a_thread->state =
-					    THREADTS_BASE64_STRING_PAD;
-					break;
-				case 3:
-					a_thread->m.b.nodd = 2;
-					a_thread->state =
-					    THREADTS_BASE64_STRING_TILDE;
-					break;
-				default:
-					_cw_not_reached();
-				}
-				break;
-			default:
-				stiloe_p_thread_syntax_error(a_thread, a_threadp, "<~",
-				    "", c);
-				if (a_token)
-					goto RETURN;
-			}
-			break;
-		case THREADTS_BASE64_STRING_PAD:
-			switch (c) {
-			case '=':
-				a_thread->state = THREADTS_BASE64_STRING_TILDE;
-				break;
-			case '\n':
-				_CW_STILO_THREAD_NEWLINE();
-				/* Fall through. */
-			case '\0': case '\t': case '\f': case '\r':
-			case ' ':
-				/* Ignore. */
-				break;
-			default:
-				stiloe_p_thread_syntax_error(a_thread, a_threadp, "<~",
-				    "=", c);
-				if (a_token)
-					goto RETURN;
-			}
-			break;
-		case THREADTS_BASE64_STRING_TILDE:
-			switch (c) {
-			case '~':
-				a_thread->state = THREADTS_BASE64_STRING_FINISH;
-				break;
-			case '\n':
-				_CW_STILO_THREAD_NEWLINE();
-				/* Fall through. */
-			case '\0': case '\t': case '\f': case '\r':
-			case ' ':
-				/* Ignore. */
-				break;
-			default:
-				switch (a_thread->index % 4) {
-				case 2:
-					stiloe_p_thread_syntax_error(a_thread, a_threadp,
-					    "<~", "==", c);
-					break;
-				case 3:
-					stiloe_p_thread_syntax_error(a_thread, a_threadp,
-					    "<~", "=", c);
-					break;
-				default:
-					_cw_not_reached();
-				}
-				if (a_token)
-					goto RETURN;
-			}
-			break;
-		case THREADTS_BASE64_STRING_FINISH:
-			switch (c) {
-			case '>': {
-				cw_uint8_t	*str;
-				cw_uint32_t	j, ngroups;
-				cw_uint32_t	bits;
-
-				token = TRUE;
-
-				ngroups = a_thread->index >> 2;
-				stilo = stilo_stack_push(&a_thread->ostack);
-				stilo_string_new(stilo, a_thread->stil,
-				    a_thread->locking, ngroups * 3 +
-				    a_thread->m.b.nodd);
-
-				str = stilo_string_get(stilo);
-				stilo_string_lock(stilo);
-				for (j = 0; j < ngroups; j++) {
-					/* Accumulate the bits. */
-					bits = stilo_p_thread_b64b(
-					    a_thread->tok_str[j * 4]) << 18;
-					bits |= stilo_p_thread_b64b(
-					    a_thread->tok_str[j * 4 + 1]) << 12;
-					bits |= stilo_p_thread_b64b(
-					    a_thread->tok_str[j * 4 + 2]) << 6;
-					bits |= stilo_p_thread_b64b(
-					    a_thread->tok_str[j * 4 + 3]);
-
-					/* Pull out the bytes. */
-					str[j * 3] = bits >> 16;
-					str[j * 3 + 1] = (bits >> 8) & 0xff;
-					str[j * 3 + 2] = bits & 0xff;
-				}
-				stilo_string_unlock(stilo);
-
-				switch (a_thread->m.b.nodd) {
-				case 0:
-					/* abcd. Do nothing. */
-					break;
-				case 1:
-					/* ab==. */
-					/* Accumulate the bits. */
-					bits = stilo_p_thread_b64b(
-					    a_thread->tok_str[j * 4]) << 18;
-					bits |= stilo_p_thread_b64b(
-					    a_thread->tok_str[j * 4 + 1]) << 12;
-
-					/* Pull out the bytes. */
-					str[j * 3] = bits >> 16;
-					break;
-				case 2:
-					/* abc=. */
-					/* Accumulate the bits. */
-					bits = stilo_p_thread_b64b(
-					    a_thread->tok_str[j * 4]) << 18;
-					bits |= stilo_p_thread_b64b(
-					    a_thread->tok_str[j * 4 + 1]) << 12;
-					bits |= stilo_p_thread_b64b(
-					    a_thread->tok_str[j * 4 + 2]) << 6;
-
-					/* Pull out the bytes. */
-					str[j * 3] = bits >> 16;
-					str[j * 3 + 1] = (bits >> 8) & 0xff;
-					break;
-				default:
-					_cw_not_reached();
-				}
-
-				stiloe_p_thread_reset(a_thread);
-				break;
-			}
-			default:
-				switch (a_thread->index % 4) {
-				case 0:
-					stiloe_p_thread_syntax_error(a_thread, a_threadp,
-					    "<~", "~", c);
-					break;
-				case 2:
-					stiloe_p_thread_syntax_error(a_thread, a_threadp,
-					    "<~", "==~", c);
-					break;
-				case 3:
-					stiloe_p_thread_syntax_error(a_thread, a_threadp,
-					    "<~", "=~", c);
-					break;
-				default:
-					_cw_not_reached();
-				}
-				if (a_token)
-					goto RETURN;
 			}
 			break;
 		case THREADTS_NAME: {
@@ -2193,9 +1728,9 @@ stiloe_p_thread_feed(cw_stiloe_thread_t *a_thread, cw_stilo_threadp_t
 				restart = TRUE;	/* Inverted below. */
 				_CW_STILO_THREAD_NEWLINE();
 				/* Fall through. */
-			case '(': case ')': case '`': case '\'': case '<':
-			case '>': case '[': case ']': case '{': case '}':
-			case '/': case '%':
+			case '(': case ')': case '`': case '\'': case '"':
+			case '<': case '>': case '[': case ']': case '{':
+			case '}': case '/': case '%':
 				/* New token. */
 				/*
 				 * Invert, in case we fell through from

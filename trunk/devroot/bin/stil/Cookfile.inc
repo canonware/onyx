@@ -53,7 +53,7 @@ SRCS = [SRCS] [STIL_SRCS];
  * output.
  */
 {
-  local stests = b64scan.st.in copy_a.st.in eval.st.in gc_roll.st.in hello.st.in
+  local stests = copy_a.st.in eval.st.in gc_roll.st.in hello.st.in
                  integer.st.in sclear_a.st.in sclear_b.st.in sclear_c.st.in
                  scleartomark_a.st.in scleartomark_b.st.in scleartomark_c.st.in
                  scleartomark_d.st.in scount_a.st.in scount_b.st.in
@@ -66,12 +66,9 @@ SRCS = [SRCS] [STIL_SRCS];
                  spush_c.st.in spush_d.st.in sroll_a.st.in sroll_b.st.in
                  sroll_c.st.in sroll_d.st.in sroll_e.st.in sroll_f.st.in
                  sroll_g.st.in sroll_h.st.in sroll_i.st.in syntaxerror_a.st.in
-                 syntaxerror_b.st.in syntaxerror_c.st.in syntaxerror_d.st.in
+                 syntaxerror_b.st.in 
                  syntaxerror_e.st.in syntaxerror_f.st.in syntaxerror_g.st.in
-                 syntaxerror_h.st.in syntaxerror_i.st.in syntaxerror_j.st.in
-                 syntaxerror_k.st.in syntaxerror_l.st.in syntaxerror_m.st.in
-                 syntaxerror_n.st.in syntaxerror_o.st.in syntaxerror_p.st.in
-                 syntaxerror_q.st.in syntaxerror_r.st.in syntaxerror_s.st.in
+                 syntaxerror_h.st.in syntaxerror_s.st.in
                  syntaxerror_t.st.in;
   stests = [fromto % [srcdir]/bin/stil/test/% [stests]];
 
