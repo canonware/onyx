@@ -35,6 +35,10 @@ false
 false
 `mutex condition'
 false
+`//pop //spop'
+false
+`//pop //roll'
+false
 `/foo /bar'
 false
 `/foo \`bar\''
@@ -44,6 +48,8 @@ false
 `false true'
 false
 `mutex dup'
+true
+`//pop //pop'
 true
 `/foo /foo'
 true

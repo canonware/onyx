@@ -2460,21 +2460,23 @@ a shift & {\bf \htmlref{shift}{systemdict:shift}} & integer & Bitwise shift. \\
 \hline \hline
 \multicolumn{4}{|l|}{Type, conversion, and attribute operators} \\
 \hline \hline
-& {\bf \htmlref{type}{systemdict:type}} & & \\
+object & {\bf \htmlref{type}{systemdict:type}} & name & Get object type. \\
 \hline
-& {\bf \htmlref{xcheck}{systemdict:xcheck}} & & \\
+object & {\bf \htmlref{xcheck}{systemdict:xcheck}} & boolean & Executable? \\
 \hline
-& {\bf \htmlref{lcheck}{systemdict:lcheck}} & & \\
+object & {\bf \htmlref{cvx}{systemdict:cvx}} & object & Set executable
+attribute. \\
 \hline
-& {\bf \htmlref{cvlit}{systemdict:cvlit}} & & \\
+object & {\bf \htmlref{cvlit}{systemdict:cvlit}} & object & Set literal
+attribute. \\
 \hline
-& {\bf \htmlref{cvn}{systemdict:cvn}} & & \\
+string & {\bf \htmlref{cvn}{systemdict:cvn}} & name & Convert string to name. \\
 \hline
-& {\bf \htmlref{cvrs}{systemdict:cvrs}} & & \\
+object & {\bf \htmlref{cvs}{systemdict:cvs}} & string & Convert object to
+string. \\
 \hline
-& {\bf \htmlref{cvs}{systemdict:cvs}} & & \\
-\hline
-& {\bf \htmlref{cvx}{systemdict:cvx}} & & \\
+integer radix & {\bf \htmlref{cvrs}{systemdict:cvrs}} & string & Convert integer
+to radix string. \\
 \hline \hline
 \multicolumn{4}{|l|}{Threading and synchronization operators} \\
 \hline \hline
@@ -2506,6 +2508,9 @@ under the protection of a mutex. \\
 & {\bf \htmlref{join}{systemdict:join}} & & \\
 \hline
 & {\bf \htmlref{detach}{systemdict:detach}} & & \\
+\hline
+object & {\bf \htmlref{lcheck}{systemdict:lcheck}} & boolean & Implicitly
+locked? \\
 \hline
 & {\bf \htmlref{currentlocking}{systemdict:currentlocking}} & & \\
 \hline
@@ -3429,53 +3434,70 @@ onyx:5>
 	\end{description}
 \label{systemdict:cvlit}
 \index{cvlit@\onyxop{}{cvlit}{}}
-\item[{\onyxop{--}{cvlit}{--}}: ]
+\item[{\onyxop{object}{cvlit}{object}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[object: ]
+			An object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[object: ]
+			The same object that was passed in, but with the literal
+			attribute set.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
 	\item[Description: ]
+		Set the literal attribute for \oparg{object}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> {1 2 3} cvlit 1 sprint
+[1 2 3]
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:cvn}
 \index{cvn@\onyxop{}{cvn}{}}
-\item[{\onyxop{--}{cvn}{--}}: ]
+\item[{\onyxop{string}{cvn}{name}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[string: ]
+			A string.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[name: ]
+			A literal name that corresponds to \oparg{string}.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Convert \oparg{string} to a literal name.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> `foo' cvn 1 sprint
+/foo
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:cvrs}
 \index{cvrs@\onyxop{}{cvrs}{}}
-\item[{\onyxop{--}{cvrs}{--}}: ]
+\item[{\onyxop{integer radix}{cvrs}{string}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[integer: ]
+			An integer.
+		\item[radix: ]
+			A numerical base, from 2 to 36, inclusive.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
@@ -3483,53 +3505,97 @@ onyx:5>
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Convert \oparg{integer} to a string representation in base
+		\oparg{radix}.  \oparg{integer} is treated as a 64 bit unsigned
+		integer, so the results for negative integers will not generally
+		be useful.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> 42 2 cvrs 1 sprint
+`101010'
+onyx:0> 42 16 cvrs 1 sprint
+`2a'
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:cvs}
 \index{cvs@\onyxop{}{cvs}{}}
-\item[{\onyxop{--}{cvs}{--}}: ]
+\item[{\onyxop{object}{cvs}{string}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[object: ]
+			An object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[string: ]
+			A string representation of \oparg{object}.  The string
+			depends on the type of \oparg{object}:
+			\begin{description}
+			\item[boolean: ] {\tt `true'} or  {\tt `false'}.
+			\item[name: ] The string representation of the name.
+			\item[integer: ] The integer in base 10.
+			\item[operator: ] The string representation of the
+			operator name or {\tt `-operator-'}.
+			\item[string: ] The same as \oparg{object}.
+			\item[Other types: ] {\tt `--nostringval--'}.
+			\end{description}
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
 	\item[Description: ]
+		Convert \oparg{object} to a string representation.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> true cvs 1 sprint
+`true'
+onyx:0> /foo cvs 1 sprint
+`foo'
+onyx:0> 42 cvs 1 sprint
+`42'
+onyx:0> //pop cvs 1 sprint
+`pop'
+onyx:0> `foo' cvs 1 sprint
+`foo'
+onyx:0> mutex cvs 1 sprint
+`--nostringval--'
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:cvx}
 \index{cvx@\onyxop{}{cvx}{}}
-\item[{\onyxop{--}{cvx}{--}}: ]
+\item[{\onyxop{object}{cvx}{object}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[object: ]
+			An object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[object: ]
+			The same object that was passed in, but with the
+			executable attribute set.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
 	\item[Description: ]
+		Set the executable attribute for \oparg{object}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> [1 2 3] cvx 1 sprint
+{1 2 3}
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:def}
@@ -4436,23 +4502,35 @@ onyx:5>
 	\end{description}
 \label{systemdict:lcheck}
 \index{lcheck@\onyxop{}{lcheck}{}}
-\item[{\onyxop{--}{lcheck}{--}}: ]
+\item[{\onyxop{object}{lcheck}{boolean}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[object: ]
+			An array, dict, file, or string.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[boolean: ]
+			True if \oparg{object} is implicitly locked, false
+			otherwise.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Check if \oparg{object} is implicitly locked.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> false setlocking
+onyx:0> [1 2 3] lcheck 1 sprint
+false
+onyx:0> true setlocking
+onyx:0> [1 2 3] lcheck 1 sprint
+true
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:le}
@@ -6437,23 +6515,49 @@ onyx:0>
 	\end{description}
 \label{systemdict:type}
 \index{type@\onyxop{}{type}{}}
-\item[{\onyxop{--}{type}{--}}: ]
+\item[{\onyxop{object}{type}{name}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[object: ]
+			An object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[name: ]
+			An executable name that corresponds to the type of
+			\oparg{object}:
+			\begin{description}
+			\item[array: ] arraytype.
+			\item[boolean: ] booleantype.
+			\item[condition: ] conditiontype.
+			\item[dict: ] dicttype.
+			\item[file: ] filetype.
+			\item[fino: ] finotype.
+			\item[hook: ] hooktype.
+			\item[integer: ] integertype.
+			\item[mark: ] marktype.
+			\item[mutex: ] mutextype.
+			\item[name: ] nametype.
+			\item[null: ] nulltype.
+			\item[operator: ] operatortype.
+			\item[pmark: ] pmarktype.
+			\item[stack: ] stacktype.
+			\item[string: ] stringtype.
+			\item[thread: ] threadtype.
+			\end{description}
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
 	\item[Description: ]
+		Get a name that represent the type of \oparg{object}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> true type 1 sprint
+booleantype
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:undef}
@@ -6626,23 +6730,32 @@ onyx:1>
 	\end{description}
 \label{systemdict:xcheck}
 \index{xcheck@\onyxop{}{xcheck}{}}
-\item[{\onyxop{--}{xcheck}{--}}: ]
+\item[{\onyxop{object}{xcheck}{boolean}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[object: ]
+			An object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[boolean: ]
+			True if \oparg{object} has the executable attribute,
+			false otherwise.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
 	\item[Description: ]
+		Check \oparg{object} for executable attribute.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> {1 2 3} xcheck 1 sprint
+true
+onyx:0> [1 2 3] xcheck 1 sprint
+false
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:xor}

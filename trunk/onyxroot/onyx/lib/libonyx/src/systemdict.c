@@ -125,6 +125,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(istack),
 	ENTRY(join),
 	ENTRY(known),
+	ENTRY(lcheck),
 	ENTRY(le),
 	ENTRY(length),
 	ENTRY(link),
@@ -1383,12 +1384,13 @@ systemdict_cvs(cw_nxo_t *a_thread)
 		cw_nxn_t	nxn;
 
 		nxn = nxo_l_operator_fast_op_nxn(nxo);
-		if (nxn > NXN_LAST)
-			_cw_onyx_code(a_thread, "pop `--operator--'");
+		if (nxn == NXN_ZERO)
+			_cw_onyx_code(a_thread, "pop `-operator-'");
 		else {
 			cw_nxo_t	*tstack;
 			cw_nxo_t	*tnxo;
 
+			_cw_assert(nxn <= NXN_LAST);
 			tstack = nxo_thread_tstack_get(a_thread);
 			tnxo = nxo_stack_push(tstack);
 			nxo_dup(tnxo, nxo);
@@ -1406,18 +1408,23 @@ systemdict_cvs(cw_nxo_t *a_thread)
 	}
 	case NXOT_STRING:
 		break;
-	case NXOT_NO:
 	case NXOT_ARRAY:
 	case NXOT_CONDITION:
 	case NXOT_DICT:
 	case NXOT_FILE:
+	case NXOT_FINO:
 	case NXOT_HOOK:
-	case NXOT_MUTEX:
 	case NXOT_MARK:
+	case NXOT_MUTEX:
 	case NXOT_NULL:
-	default:
+	case NXOT_PMARK:
+	case NXOT_STACK:
+	case NXOT_THREAD:
 		_cw_onyx_code(a_thread, "pop `--nostringval--'");
 		break;
+	case NXOT_NO:
+	default:
+		_cw_not_reached();
 	}
 }
 
@@ -2583,6 +2590,7 @@ systemdict_lcheck(cw_nxo_t *a_thread)
 	switch (nxo_type_get(nxo)) {
 	case NXOT_BOOLEAN:
 	case NXOT_CONDITION:
+	case NXOT_FINO:
 	case NXOT_HOOK:
 	case NXOT_INTEGER:
 	case NXOT_MARK:
@@ -2590,11 +2598,14 @@ systemdict_lcheck(cw_nxo_t *a_thread)
 	case NXOT_NAME:
 	case NXOT_NULL:
 	case NXOT_OPERATOR:
+	case NXOT_PMARK:
+	case NXOT_THREAD:
 		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
 		return;
 	case NXOT_ARRAY:
 	case NXOT_DICT:
 	case NXOT_FILE:
+	case NXOT_STACK:
 	case NXOT_STRING:
 		locking = nxo_lcheck(nxo);
 		break;

@@ -44,6 +44,8 @@
 	% Not equal.
 	`mutex mutex'
 	`mutex condition'
+	`//pop //spop'
+	`//pop //roll'
 	`/foo /bar'
 	`/foo `bar''
 	`true false'
@@ -51,6 +53,7 @@
 
 	% Equal.
 	`mutex dup'
+	`//pop //pop'
 	`/foo /foo'
 	`/foo `foo''
 	``foo' /foo'
