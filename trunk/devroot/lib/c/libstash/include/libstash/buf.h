@@ -262,28 +262,6 @@ buf_split(cw_buf_t * a_a, cw_buf_t * a_b, cw_uint32_t a_offset);
  *
  * a_buf : Pointer to a buf.
  *
- * a_bufel : Pointer to a bufel.
- *
- * <<< Output(s) >>>
- *
- * retval : FALSE == success, TRUE == error.
- *          TRUE : Memory allocation error.  a_buf is still valid.
- *
- * <<< Description >>>
- *
- * Prepend the data from a_bufel to a_buf.  a_bufel is not modified.
- *
- ****************************************************************************/
-cw_bool_t
-buf_prepend_bufel(cw_buf_t * a_buf, cw_bufel_t * a_bufel);
-
-
-/****************************************************************************
- *
- * <<< Input(s) >>>
- *
- * a_buf : Pointer to a buf.
- *
  * a_bufc : Pointer to a bufc.
  *
  * a_beg_offset : Offset of first valid byte in a_bufc's memory buffer.
@@ -331,27 +309,6 @@ buf_prepend_bufc(cw_buf_t * a_buf, cw_bufc_t * a_bufc,
 cw_bool_t
 buf_append_bufc(cw_buf_t * a_buf, cw_bufc_t * a_bufc,
 		cw_uint32_t a_beg_offset, cw_uint32_t a_end_offset);
-
-/****************************************************************************
- *
- * <<< Input(s) >>>
- *
- * a_buf : Pointer to a buf.
- *
- * a_bufel : Pointer to a bufel.
- *
- * <<< Output(s) >>>
- *
- * retval : FALSE == success, TRUE == error.
- *          TRUE : Memory allocation error.  a_buf is still valid.
- *
- * <<< Description >>>
- *
- * Append the data from a_bufel to a_buf.  a_bufel is not modified.
- *
- ****************************************************************************/
-cw_bool_t
-buf_append_bufel(cw_buf_t * a_buf, cw_bufel_t * a_bufel);
 
 /****************************************************************************
  *
