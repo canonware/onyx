@@ -46,7 +46,7 @@ prio_comp(void * a_a, void * a_b)
     retval = 0;
   }
 
-/*    log_eprintf(g_log_o, NULL, 0, "prio_comp", */
+/*    log_eprintf(g_log, NULL, 0, "prio_comp", */
 /*  	      "%d %c %d (%d)\n", */
 /*  	      a, !retval ? '=' : retval > 0 ? '>' : '<', b, retval); */
   
@@ -81,13 +81,13 @@ main()
   {
     bhp_insert(h, &(nums[i]), &(nums[i]));
     bhp_dump(h);
-    log_printf(g_log_o, "===========================\n");
+    log_printf(g_log, "===========================\n");
   }
 
   for (i = 0; i < _STASH_TEST_NUM_NODES; i++)
   {
     _cw_assert(FALSE == bhp_del_min(h, (void **) &a, (void **) &b));
-    log_printf(g_log_o, "i == %d, size == %d: %d, %d\n",
+    log_printf(g_log, "i == %d, size == %d: %d, %d\n",
 	       i, bhp_get_size(h), *a, *b);
   }
   

@@ -41,12 +41,12 @@ mem_new()
  *
  ****************************************************************************/
 void
-mem_delete(cw_mem_t * a_mem_o)
+mem_delete(cw_mem_t * a_mem)
 {
-  _cw_check_ptr(a_mem_o);
+  _cw_check_ptr(a_mem);
 
   /* Calling free() directly since we had to bootstrap the structure. */
-  free(a_mem_o);
+  free(a_mem);
 }
 
 /****************************************************************************
@@ -55,16 +55,16 @@ mem_delete(cw_mem_t * a_mem_o)
  *
  ****************************************************************************/
 void *
-mem_malloc(cw_mem_t * a_mem_o, size_t a_size)
+mem_malloc(cw_mem_t * a_mem, size_t a_size)
 {
   void * retval;
   
-  _cw_check_ptr(a_mem_o);
+  _cw_check_ptr(a_mem);
 
   retval = malloc(a_size);
   if (retval == NULL)
   {
-    log_eprintf(g_log_o, __FILE__, __LINE__, "mem_malloc",
+    log_eprintf(g_log, __FILE__, __LINE__, "mem_malloc",
 		"malloc(%d) returned NULL\n", a_size);
     abort();
   }
@@ -78,17 +78,17 @@ mem_malloc(cw_mem_t * a_mem_o, size_t a_size)
  *
  ****************************************************************************/
 void *
-mem_calloc(cw_mem_t * a_mem_o, size_t a_number,
-		  size_t a_size)
+mem_calloc(cw_mem_t * a_mem, size_t a_number,
+	   size_t a_size)
 {
   void * retval;
 
-  _cw_check_ptr(a_mem_o);
+  _cw_check_ptr(a_mem);
 
   retval = calloc(a_number, a_size);
   if (retval == NULL)
   {
-    log_eprintf(g_log_o, __FILE__, __LINE__, "mem_calloc",
+    log_eprintf(g_log, __FILE__, __LINE__, "mem_calloc",
 		"calloc(%d, %d) returned NULL\n", a_number, a_size);
     abort();
   }
@@ -102,17 +102,17 @@ mem_calloc(cw_mem_t * a_mem_o, size_t a_number,
  *
  ****************************************************************************/
 void *
-mem_realloc(cw_mem_t * a_mem_o, void * a_ptr, size_t a_size)
+mem_realloc(cw_mem_t * a_mem, void * a_ptr, size_t a_size)
 {
   void * retval;
 
-  _cw_check_ptr(a_mem_o);
+  _cw_check_ptr(a_mem);
   _cw_check_ptr(a_ptr);
 
   retval = realloc(a_ptr, a_size);
   if (retval == NULL)
   {
-    log_eprintf(g_log_o, __FILE__, __LINE__, "mem_realloc",
+    log_eprintf(g_log, __FILE__, __LINE__, "mem_realloc",
 		"realloc(%p, %d) returned NULL\n", a_ptr, a_size);
     abort();
   }
@@ -126,9 +126,9 @@ mem_realloc(cw_mem_t * a_mem_o, void * a_ptr, size_t a_size)
  *
  ****************************************************************************/
 void
-mem_free(cw_mem_t * a_mem_o, void * a_ptr)
+mem_free(cw_mem_t * a_mem, void * a_ptr)
 {
-  _cw_check_ptr(a_mem_o);
+  _cw_check_ptr(a_mem);
   _cw_check_ptr(a_ptr);
 
   free(a_ptr);

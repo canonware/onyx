@@ -386,11 +386,14 @@ bufel_set_size(cw_bufel_t * a_bufel, cw_uint32_t a_size)
   }
   else if (a_bufel->buf != NULL)
   {
-    /* Reallocate. */
-    t_buf = (cw_uint32_t *) _cw_realloc(a_bufel->buf, a_size);
+    if (a_bufel->buf_size != a_size)
+    {
+      /* Reallocate. */
+      t_buf = (cw_uint32_t *) _cw_realloc(a_bufel->buf, a_size);
 
-    a_bufel->buf = t_buf;
-    a_bufel->buf_size = a_size;
+      a_bufel->buf = t_buf;
+      a_bufel->buf_size = a_size;
+    }
     retval = FALSE;
   }
   else

@@ -37,7 +37,7 @@ thread_entry_func(void * a_arg)
   
   cnd_wait(foo_var->cond, foo_var->mutex);
 
-  log_eprintf(g_log_o, NULL, 0, "thread_entry_func",
+  log_eprintf(g_log, NULL, 0, "thread_entry_func",
 	      "After cnd_wait() call\n");
 
   mtx_unlock(foo_var->mutex);

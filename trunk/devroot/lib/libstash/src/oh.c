@@ -59,21 +59,21 @@
  ****************************************************************************/
 cw_oh_t *
 #ifdef _CW_REENTRANT
-oh_new(cw_oh_t * a_oh_o, cw_bool_t a_is_thread_safe)
+oh_new(cw_oh_t * a_oh, cw_bool_t a_is_thread_safe)
 #else
-oh_new(cw_oh_t * a_oh_o)
+     oh_new(cw_oh_t * a_oh)
 #endif
 {
   cw_oh_t * retval;
 
-  if (a_oh_o == NULL)
+  if (a_oh == NULL)
   {
     retval = (cw_oh_t *) _cw_malloc(sizeof(cw_oh_t));
     retval->is_malloced = TRUE;
   }
   else
   {
-    retval = a_oh_o;
+    retval = a_oh;
     retval->is_malloced = FALSE;
   }
 
@@ -142,14 +142,14 @@ oh_new(cw_oh_t * a_oh_o)
  *
  ****************************************************************************/
 void
-oh_delete(cw_oh_t * a_oh_o)
+oh_delete(cw_oh_t * a_oh)
 {
-  _cw_check_ptr(a_oh_o);
+  _cw_check_ptr(a_oh);
 
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_delete(&a_oh_o->rw_lock);
+    rwl_delete(&a_oh->rw_lock);
   }
 #endif
 
@@ -158,12 +158,12 @@ oh_delete(cw_oh_t * a_oh_o)
     cw_sint64_t i;
     cw_oh_item_t * item;
 
-    for (i = list_count(&a_oh_o->items_list); i > 0; i--)
+    for (i = list_count(&a_oh->items_list); i > 0; i--)
     {
-      item = (cw_oh_item_t *) list_hpop(&a_oh_o->items_list);
+      item = (cw_oh_item_t *) list_hpop(&a_oh->items_list);
       _cw_free(item);
     }
-    list_delete(&a_oh_o->items_list);
+    list_delete(&a_oh->items_list);
   }
   
   /* Delete the spares list. */
@@ -171,18 +171,18 @@ oh_delete(cw_oh_t * a_oh_o)
     cw_sint64_t i;
     cw_oh_item_t * item;
 
-    for (i = list_count(&a_oh_o->spares_list); i > 0; i--)
+    for (i = list_count(&a_oh->spares_list); i > 0; i--)
     {
-      item = (cw_oh_item_t *) list_hpop(&a_oh_o->spares_list);
+      item = (cw_oh_item_t *) list_hpop(&a_oh->spares_list);
       _cw_free(item);
     }
-    list_delete(&a_oh_o->spares_list);
+    list_delete(&a_oh->spares_list);
   }
   
-  _cw_free(a_oh_o->items);
-  if (a_oh_o->is_malloced == TRUE)
+  _cw_free(a_oh->items);
+  if (a_oh->is_malloced == TRUE)
   {
-    _cw_free(a_oh_o);
+    _cw_free(a_oh);
   }
 }
 
@@ -192,25 +192,25 @@ oh_delete(cw_oh_t * a_oh_o)
  *
  ****************************************************************************/
 cw_uint64_t
-oh_get_size(cw_oh_t * a_oh_o)
+oh_get_size(cw_oh_t * a_oh)
 {
   cw_uint64_t retval;
 
-  _cw_check_ptr(a_oh_o);
+  _cw_check_ptr(a_oh);
 
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_rlock(&a_oh_o->rw_lock);
+    rwl_rlock(&a_oh->rw_lock);
   }
 #endif
 
-  retval = a_oh_o->size;
+  retval = a_oh->size;
 
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_rlock(&a_oh_o->rw_lock);
+    rwl_rlock(&a_oh->rw_lock);
   }
 #endif
   return retval;
@@ -222,24 +222,24 @@ oh_get_size(cw_oh_t * a_oh_o)
  *
  ****************************************************************************/
 cw_uint64_t
-oh_get_num_items(cw_oh_t * a_oh_o)
+oh_get_num_items(cw_oh_t * a_oh)
 {
   cw_uint64_t retval;
   
-  _cw_check_ptr(a_oh_o);
+  _cw_check_ptr(a_oh);
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_rlock(&a_oh_o->rw_lock);
+    rwl_rlock(&a_oh->rw_lock);
   }
 #endif
   
-  retval = list_count(&a_oh_o->items_list);
+  retval = list_count(&a_oh->items_list);
   
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_runlock(&a_oh_o->rw_lock);
+    rwl_runlock(&a_oh->rw_lock);
   }
 #endif
   return retval;
@@ -252,24 +252,24 @@ oh_get_num_items(cw_oh_t * a_oh_o)
  *
  ****************************************************************************/
 cw_uint64_t
-oh_get_base_size(cw_oh_t * a_oh_o)
+oh_get_base_size(cw_oh_t * a_oh)
 {
   cw_uint64_t retval;
   
-  _cw_check_ptr(a_oh_o);
+  _cw_check_ptr(a_oh);
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_rlock(&a_oh_o->rw_lock);
+    rwl_rlock(&a_oh->rw_lock);
   }
 #endif
 
-  retval = (1 << a_oh_o->base_power);
+  retval = (1 << a_oh->base_power);
 
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_runlock(&a_oh_o->rw_lock);
+    rwl_runlock(&a_oh->rw_lock);
   }
 #endif
   return retval;
@@ -281,24 +281,24 @@ oh_get_base_size(cw_oh_t * a_oh_o)
  *
  ****************************************************************************/
 cw_uint32_t
-oh_get_base_h2(cw_oh_t * a_oh_o)
+oh_get_base_h2(cw_oh_t * a_oh)
 {
   cw_uint32_t retval;
   
-  _cw_check_ptr(a_oh_o);
+  _cw_check_ptr(a_oh);
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_rlock(&a_oh_o->rw_lock);
+    rwl_rlock(&a_oh->rw_lock);
   }
 #endif
 
-  retval = a_oh_o->base_h2;
+  retval = a_oh->base_h2;
 
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_runlock(&a_oh_o->rw_lock);
+    rwl_runlock(&a_oh->rw_lock);
   }
 #endif
   return retval;
@@ -311,24 +311,24 @@ oh_get_base_h2(cw_oh_t * a_oh_o)
  *
  ****************************************************************************/
 cw_uint32_t
-oh_get_base_shrink_point(cw_oh_t * a_oh_o)
+oh_get_base_shrink_point(cw_oh_t * a_oh)
 {
   cw_uint32_t retval;
   
-  _cw_check_ptr(a_oh_o);
+  _cw_check_ptr(a_oh);
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_rlock(&a_oh_o->rw_lock);
+    rwl_rlock(&a_oh->rw_lock);
   }
 #endif
 
-  retval = a_oh_o->base_shrink_point;
+  retval = a_oh->base_shrink_point;
 
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_runlock(&a_oh_o->rw_lock);
+    rwl_runlock(&a_oh->rw_lock);
   }
 #endif
   return retval;
@@ -341,24 +341,24 @@ oh_get_base_shrink_point(cw_oh_t * a_oh_o)
  *
  ****************************************************************************/
 cw_uint32_t
-oh_get_base_grow_point(cw_oh_t * a_oh_o)
+oh_get_base_grow_point(cw_oh_t * a_oh)
 {
   cw_uint32_t retval;
   
-  _cw_check_ptr(a_oh_o);
+  _cw_check_ptr(a_oh);
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_rlock(&a_oh_o->rw_lock);
+    rwl_rlock(&a_oh->rw_lock);
   }
 #endif
 
-  retval = a_oh_o->base_grow_point;
+  retval = a_oh->base_grow_point;
 
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_runlock(&a_oh_o->rw_lock);
+    rwl_runlock(&a_oh->rw_lock);
   }
 #endif
   return retval;
@@ -371,32 +371,32 @@ oh_get_base_grow_point(cw_oh_t * a_oh_o)
  *
  ****************************************************************************/
 oh_h1_t *
-oh_set_h1(cw_oh_t * a_oh_o,
+oh_set_h1(cw_oh_t * a_oh,
 	  oh_h1_t * a_new_h1)
 {
   oh_h1_t * retval;
   
-  _cw_check_ptr(a_oh_o);
+  _cw_check_ptr(a_oh);
   _cw_check_ptr(a_new_h1);
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_wlock(&a_oh_o->rw_lock);
+    rwl_wlock(&a_oh->rw_lock);
   }
 #endif
 
-  retval = a_oh_o->curr_h1;
+  retval = a_oh->curr_h1;
   
-  if (a_oh_o->curr_h1 != a_new_h1)
+  if (a_oh->curr_h1 != a_new_h1)
   {
-    a_oh_o->curr_h1 = a_new_h1;
-    oh_p_rehash(a_oh_o);
+    a_oh->curr_h1 = a_new_h1;
+    oh_p_rehash(a_oh);
   }
 
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_wunlock(&a_oh_o->rw_lock);
+    rwl_wunlock(&a_oh->rw_lock);
   }
 #endif
   return retval;
@@ -408,32 +408,32 @@ oh_set_h1(cw_oh_t * a_oh_o,
  *
  ****************************************************************************/
 oh_key_comp_t *
-oh_set_key_compare(cw_oh_t * a_oh_o,
+oh_set_key_compare(cw_oh_t * a_oh,
 		   oh_key_comp_t * a_new_key_compare)
 {
   oh_key_comp_t * retval;
   
-  _cw_check_ptr(a_oh_o);
+  _cw_check_ptr(a_oh);
   _cw_check_ptr(a_new_key_compare);
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_wlock(&a_oh_o->rw_lock);
+    rwl_wlock(&a_oh->rw_lock);
   }
 #endif
 
-  retval = a_oh_o->key_compare;
+  retval = a_oh->key_compare;
   
-  if (a_oh_o->key_compare != a_new_key_compare)
+  if (a_oh->key_compare != a_new_key_compare)
   {
-    a_oh_o->key_compare = a_new_key_compare;
-    oh_p_rehash(a_oh_o);
+    a_oh->key_compare = a_new_key_compare;
+    oh_p_rehash(a_oh);
   }
   
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_wunlock(&a_oh_o->rw_lock);
+    rwl_wunlock(&a_oh->rw_lock);
   }
 #endif
   return retval;
@@ -445,21 +445,21 @@ oh_set_key_compare(cw_oh_t * a_oh_o,
  *
  ****************************************************************************/
 cw_bool_t
-oh_set_base_h2(cw_oh_t * a_oh_o,
+oh_set_base_h2(cw_oh_t * a_oh,
 	       cw_uint32_t a_h2)
 {
   cw_bool_t retval;
   
-  _cw_check_ptr(a_oh_o);
+  _cw_check_ptr(a_oh);
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_wlock(&a_oh_o->rw_lock);
+    rwl_wlock(&a_oh->rw_lock);
   }
 #endif
   
   if (((a_h2 % 2) == 0)
-      || (a_h2 > (1 << a_oh_o->base_power)))
+      || (a_h2 > (1 << a_oh->base_power)))
   {
     retval = TRUE;
   }
@@ -467,18 +467,18 @@ oh_set_base_h2(cw_oh_t * a_oh_o,
   {
     retval = FALSE;
     
-    a_oh_o->base_h2 = a_h2;
-    a_oh_o->curr_h2 = (((a_oh_o->base_h2 + 1)
-			<< (a_oh_o->curr_power
-			    - a_oh_o->base_power))
+    a_oh->base_h2 = a_h2;
+    a_oh->curr_h2 = (((a_oh->base_h2 + 1)
+			<< (a_oh->curr_power
+			    - a_oh->base_power))
 		       - 1);
-    oh_p_rehash(a_oh_o);
+    oh_p_rehash(a_oh);
   }
 
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_wunlock(&a_oh_o->rw_lock);
+    rwl_wunlock(&a_oh->rw_lock);
   }
 #endif
   return retval;
@@ -490,21 +490,21 @@ oh_set_base_h2(cw_oh_t * a_oh_o,
  *
  ****************************************************************************/
 cw_bool_t
-oh_set_base_shrink_point(cw_oh_t * a_oh_o,
+oh_set_base_shrink_point(cw_oh_t * a_oh,
 			 cw_uint32_t a_shrink_point)
 {
   cw_bool_t retval;
   
-  _cw_check_ptr(a_oh_o);
+  _cw_check_ptr(a_oh);
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_wlock(&a_oh_o->rw_lock);
+    rwl_wlock(&a_oh->rw_lock);
   }
 #endif
 
-  if ((a_shrink_point >= a_oh_o->base_grow_point)
-      || (a_shrink_point >= (1 << a_oh_o->base_power)))
+  if ((a_shrink_point >= a_oh->base_grow_point)
+      || (a_shrink_point >= (1 << a_oh->base_power)))
   {
     retval = TRUE;
   }
@@ -512,17 +512,17 @@ oh_set_base_shrink_point(cw_oh_t * a_oh_o,
   {
     retval = FALSE;
     
-    a_oh_o->base_shrink_point = a_shrink_point;
-    a_oh_o->curr_shrink_point
-      = (a_oh_o->base_shrink_point
-	 << (a_oh_o->curr_power - a_oh_o->base_power));
-    oh_p_shrink(a_oh_o);
+    a_oh->base_shrink_point = a_shrink_point;
+    a_oh->curr_shrink_point
+      = (a_oh->base_shrink_point
+	 << (a_oh->curr_power - a_oh->base_power));
+    oh_p_shrink(a_oh);
   }
 
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_wunlock(&a_oh_o->rw_lock);
+    rwl_wunlock(&a_oh->rw_lock);
   }
 #endif
   return retval;
@@ -534,21 +534,21 @@ oh_set_base_shrink_point(cw_oh_t * a_oh_o,
  *
  ****************************************************************************/
 cw_bool_t
-oh_set_base_grow_point(cw_oh_t * a_oh_o,
+oh_set_base_grow_point(cw_oh_t * a_oh,
 		       cw_uint32_t a_grow_point)
 {
   cw_bool_t retval;
   
-  _cw_check_ptr(a_oh_o);
+  _cw_check_ptr(a_oh);
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_wlock(&a_oh_o->rw_lock);
+    rwl_wlock(&a_oh->rw_lock);
   }
 #endif
 
-  if ((a_grow_point <= a_oh_o->base_shrink_point)
-      || (a_grow_point >= (1 << a_oh_o->base_power)))
+  if ((a_grow_point <= a_oh->base_shrink_point)
+      || (a_grow_point >= (1 << a_oh->base_power)))
   {
     retval = TRUE;
   }
@@ -556,17 +556,17 @@ oh_set_base_grow_point(cw_oh_t * a_oh_o,
   {
     retval = FALSE;
     
-    a_oh_o->base_grow_point = a_grow_point;
-    a_oh_o->curr_grow_point
-      = (a_oh_o->base_grow_point
-	 << (a_oh_o->curr_power - a_oh_o->base_power));
-    oh_p_grow(a_oh_o);
+    a_oh->base_grow_point = a_grow_point;
+    a_oh->curr_grow_point
+      = (a_oh->base_grow_point
+	 << (a_oh->curr_power - a_oh->base_power));
+    oh_p_grow(a_oh);
   }
 
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_wunlock(&a_oh_o->rw_lock);
+    rwl_wunlock(&a_oh->rw_lock);
   }
 #endif
   return retval;
@@ -578,35 +578,35 @@ oh_set_base_grow_point(cw_oh_t * a_oh_o,
  *
  ****************************************************************************/
 cw_bool_t
-oh_item_insert(cw_oh_t * a_oh_o, void * a_key,
+oh_item_insert(cw_oh_t * a_oh, void * a_key,
 	       void * a_data)
 {
   cw_oh_item_t * item;
   cw_bool_t retval;
   cw_uint64_t junk;
 
-  _cw_check_ptr(a_oh_o);
+  _cw_check_ptr(a_oh);
   _cw_check_ptr(a_key);
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_wlock(&a_oh_o->rw_lock);
+    rwl_wlock(&a_oh->rw_lock);
   }
 #endif
 
   /* Quiesce. */
-  oh_p_shrink(a_oh_o);
-  oh_p_grow(a_oh_o);
+  oh_p_shrink(a_oh);
+  oh_p_grow(a_oh);
 
-  if (oh_p_item_search(a_oh_o, a_key, &junk) == TRUE)
+  if (oh_p_item_search(a_oh, a_key, &junk) == TRUE)
   {
     /* Item isn't a duplicate key.  Go ahead and insert it. */
     retval = FALSE;
     
     /* Grab an item off the spares list, if there are any. */
-    if (list_count(&a_oh_o->spares_list) > 0)
+    if (list_count(&a_oh->spares_list) > 0)
     {
-      item = (cw_oh_item_t *) list_hpop(&a_oh_o->spares_list);
+      item = (cw_oh_item_t *) list_hpop(&a_oh->spares_list);
     }
     else
     {
@@ -616,7 +616,7 @@ oh_item_insert(cw_oh_t * a_oh_o, void * a_key,
     item->key = a_key;
     item->data = a_data;
 
-    oh_p_item_insert(a_oh_o, item);
+    oh_p_item_insert(a_oh, item);
   }
   else
   {
@@ -625,9 +625,9 @@ oh_item_insert(cw_oh_t * a_oh_o, void * a_key,
   }
   
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_wunlock(&a_oh_o->rw_lock);
+    rwl_wunlock(&a_oh->rw_lock);
   }
 #endif
   return retval;
@@ -640,7 +640,7 @@ oh_item_insert(cw_oh_t * a_oh_o, void * a_key,
  *
  ****************************************************************************/
 cw_bool_t
-oh_item_delete(cw_oh_t * a_oh_o,
+oh_item_delete(cw_oh_t * a_oh,
 	       void * a_search_key,
 	       void ** a_key,
 	       void ** a_data)
@@ -648,36 +648,36 @@ oh_item_delete(cw_oh_t * a_oh_o,
   cw_uint64_t slot;
   cw_bool_t retval;
   
-  _cw_check_ptr(a_oh_o);
+  _cw_check_ptr(a_oh);
   _cw_check_ptr(a_search_key);
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_wlock(&a_oh_o->rw_lock);
+    rwl_wlock(&a_oh->rw_lock);
   }
 #endif
 
   /* Get the slot number for what we want to delete (if it exists). */
-  if (oh_p_item_search(a_oh_o, a_search_key, &slot) == FALSE)
+  if (oh_p_item_search(a_oh, a_search_key, &slot) == FALSE)
   {
     /* Found the item. */
     retval = FALSE;
     
-    a_oh_o->num_deletes++;
+    a_oh->num_deletes++;
 
     /* Set the return variables, decrement the item count, and delete the
        item. */
-    *a_key = a_oh_o->items[slot]->key;
-    *a_data = a_oh_o->items[slot]->data;
-    list_remove(&a_oh_o->items_list, a_oh_o->items[slot]->list_item);
+    *a_key = a_oh->items[slot]->key;
+    *a_data = a_oh->items[slot]->data;
+    list_remove(&a_oh->items_list, a_oh->items[slot]->list_item);
     /* XXX Potentially a good place for an assertion. */
 
     /* Put the item on the spares list. */
-    list_hpush(&a_oh_o->spares_list, (void *) a_oh_o->items[slot]);
+    list_hpush(&a_oh->spares_list, (void *) a_oh->items[slot]);
 
-    a_oh_o->items[slot] = NULL;
+    a_oh->items[slot] = NULL;
 
-    oh_p_slot_shuffle(a_oh_o, slot);
+    oh_p_slot_shuffle(a_oh, slot);
   }
   else
   {
@@ -686,9 +686,9 @@ oh_item_delete(cw_oh_t * a_oh_o,
   }
 
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_wunlock(&a_oh_o->rw_lock);
+    rwl_wunlock(&a_oh->rw_lock);
   }
 #endif
   return retval;
@@ -701,28 +701,28 @@ oh_item_delete(cw_oh_t * a_oh_o,
  *
  ****************************************************************************/
 cw_bool_t
-oh_item_search(cw_oh_t * a_oh_o,
+oh_item_search(cw_oh_t * a_oh,
 	       void * a_key,
 	       void ** a_data)
 {
   cw_uint64_t slot;
   cw_bool_t retval;
 
-  _cw_check_ptr(a_oh_o);
+  _cw_check_ptr(a_oh);
   _cw_check_ptr(a_key);
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_rlock(&a_oh_o->rw_lock);
+    rwl_rlock(&a_oh->rw_lock);
   }
 #endif
 
-  if (oh_p_item_search(a_oh_o, a_key, &slot) == FALSE)
+  if (oh_p_item_search(a_oh, a_key, &slot) == FALSE)
   {
     /* Item found. */
     retval = FALSE;
 
-    *a_data = a_oh_o->items[slot]->data;
+    *a_data = a_oh->items[slot]->data;
   }
   else
   {
@@ -731,9 +731,9 @@ oh_item_search(cw_oh_t * a_oh_o,
   }
 
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_runlock(&a_oh_o->rw_lock);
+    rwl_runlock(&a_oh->rw_lock);
   }
 #endif
   return retval;
@@ -746,31 +746,31 @@ oh_item_search(cw_oh_t * a_oh_o,
  *
  ****************************************************************************/
 cw_bool_t
-oh_item_get_iterate(cw_oh_t * a_oh_o, void ** a_key, void ** a_data)
+oh_item_get_iterate(cw_oh_t * a_oh, void ** a_key, void ** a_data)
 {
   cw_bool_t retval;
   
-  _cw_check_ptr(a_oh_o);
+  _cw_check_ptr(a_oh);
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_wlock(&a_oh_o->rw_lock);
+    rwl_wlock(&a_oh->rw_lock);
   }
 #endif
 
-  if (list_count(&a_oh_o->items_list) > 0)
+  if (list_count(&a_oh->items_list) > 0)
   {
     cw_oh_item_t * item;
 
     retval = FALSE;
 
-    item = (cw_oh_item_t *) list_hpop(&a_oh_o->items_list);
+    item = (cw_oh_item_t *) list_hpop(&a_oh->items_list);
 
     *a_key = item->key;
     *a_data = item->data;
 
     /* Put the item back on the tail of the list. */
-    list_tpush(&a_oh_o->items_list, item);
+    list_tpush(&a_oh->items_list, item);
   }
   else
   {
@@ -778,9 +778,9 @@ oh_item_get_iterate(cw_oh_t * a_oh_o, void ** a_key, void ** a_data)
   }
   
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_wunlock(&a_oh_o->rw_lock);
+    rwl_wunlock(&a_oh->rw_lock);
   }
 #endif
   return retval;
@@ -793,35 +793,35 @@ oh_item_get_iterate(cw_oh_t * a_oh_o, void ** a_key, void ** a_data)
  *
  ****************************************************************************/
 cw_bool_t
-oh_item_delete_iterate(cw_oh_t * a_oh_o, void ** a_key, void ** a_data)
+oh_item_delete_iterate(cw_oh_t * a_oh, void ** a_key, void ** a_data)
 {
   cw_bool_t retval;
   
-  _cw_check_ptr(a_oh_o);
+  _cw_check_ptr(a_oh);
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_wlock(&a_oh_o->rw_lock);
+    rwl_wlock(&a_oh->rw_lock);
   }
 #endif
 
-  if (list_count(&a_oh_o->items_list) > 0)
+  if (list_count(&a_oh->items_list) > 0)
   {
     cw_oh_item_t * item;
 
     retval = FALSE;
 
-    item = (cw_oh_item_t *) list_hpop(&a_oh_o->items_list);
+    item = (cw_oh_item_t *) list_hpop(&a_oh->items_list);
 
     *a_key = item->key;
     *a_data = item->data;
 
     /* Do slot shuffling. */
-    a_oh_o->items[item->slot_num] = NULL;
-    oh_p_slot_shuffle(a_oh_o, item->slot_num);
+    a_oh->items[item->slot_num] = NULL;
+    oh_p_slot_shuffle(a_oh, item->slot_num);
 
     /* Add item to spares list. */
-    list_hpush(&a_oh_o->spares_list, item);
+    list_hpush(&a_oh->spares_list, item);
   }
   else
   {
@@ -829,9 +829,9 @@ oh_item_delete_iterate(cw_oh_t * a_oh_o, void ** a_key, void ** a_data)
   }
   
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_wunlock(&a_oh_o->rw_lock);
+    rwl_wunlock(&a_oh->rw_lock);
   }
 #endif
   return retval;
@@ -843,74 +843,74 @@ oh_item_delete_iterate(cw_oh_t * a_oh_o, void ** a_key, void ** a_data)
  *
  ****************************************************************************/
 void
-oh_dump(cw_oh_t * a_oh_o, cw_bool_t a_all)
+oh_dump(cw_oh_t * a_oh, cw_bool_t a_all)
 {
   cw_uint64_t i;
   char buf_a[21], buf_b[21], buf_c[21];
 
-  _cw_check_ptr(a_oh_o);
+  _cw_check_ptr(a_oh);
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_rlock(&a_oh_o->rw_lock);
+    rwl_rlock(&a_oh->rw_lock);
   }
 #endif
 
-  log_printf(g_log_o,
+  log_printf(g_log,
 	     "============================================================\n");
-  log_printf(g_log_o,
+  log_printf(g_log,
 	     "Size: [%s]  Slots filled: [%d]\n\n",
-	     log_print_uint64(a_oh_o->size, 10, buf_a),
-	     list_count(&a_oh_o->items_list));
-  log_printf(g_log_o, "      pow h1         h2    shrink grow \n");
-  log_printf(g_log_o, "      --- ---------- ----- ------ -----\n");
-  log_printf(g_log_o, "Base: %2d             %5d %5d  %5d\n",
-	     a_oh_o->base_power,
-	     a_oh_o->base_h2,
-	     a_oh_o->base_shrink_point,
-	     a_oh_o->base_grow_point);
-  log_printf(g_log_o, "Curr: %2d  %10p %5s %5s  %5s\n\n",
-	     a_oh_o->curr_power,
-	     a_oh_o->curr_h1,
-	     log_print_uint64(a_oh_o->curr_h2, 10, buf_a),
-	     log_print_uint64(a_oh_o->curr_shrink_point, 10, buf_b),
-	     log_print_uint64(a_oh_o->curr_grow_point, 10, buf_c));
+	     log_print_uint64(a_oh->size, 10, buf_a),
+	     list_count(&a_oh->items_list));
+  log_printf(g_log, "      pow h1         h2    shrink grow \n");
+  log_printf(g_log, "      --- ---------- ----- ------ -----\n");
+  log_printf(g_log, "Base: %2d             %5d %5d  %5d\n",
+	     a_oh->base_power,
+	     a_oh->base_h2,
+	     a_oh->base_shrink_point,
+	     a_oh->base_grow_point);
+  log_printf(g_log, "Curr: %2d  %10p %5s %5s  %5s\n\n",
+	     a_oh->curr_power,
+	     a_oh->curr_h1,
+	     log_print_uint64(a_oh->curr_h2, 10, buf_a),
+	     log_print_uint64(a_oh->curr_shrink_point, 10, buf_b),
+	     log_print_uint64(a_oh->curr_grow_point, 10, buf_c));
 
-  log_printf(g_log_o, "Counters: collisions[%s] inserts[%s] deletes[%s]\n",
-	     log_print_uint64(a_oh_o->num_collisions, 10, buf_a),
-	     log_print_uint64(a_oh_o->num_inserts, 10, buf_b),
-	     log_print_uint64(a_oh_o->num_deletes, 10, buf_c));
-  log_printf(g_log_o, "          grows[%s] shrinks[%s]\n\n",
-	     log_print_uint64(a_oh_o->num_grows, 10, buf_a),
-	     log_print_uint64(a_oh_o->num_shrinks, 10, buf_b));
+  log_printf(g_log, "Counters: collisions[%s] inserts[%s] deletes[%s]\n",
+	     log_print_uint64(a_oh->num_collisions, 10, buf_a),
+	     log_print_uint64(a_oh->num_inserts, 10, buf_b),
+	     log_print_uint64(a_oh->num_deletes, 10, buf_c));
+  log_printf(g_log, "          grows[%s] shrinks[%s]\n\n",
+	     log_print_uint64(a_oh->num_grows, 10, buf_a),
+	     log_print_uint64(a_oh->num_shrinks, 10, buf_b));
 
   if (a_all)
   {
-    log_printf(g_log_o, "slot key        value\n");
-    log_printf(g_log_o, "---- ---------- ----------\n");
+    log_printf(g_log, "slot key        value\n");
+    log_printf(g_log, "---- ---------- ----------\n");
   
-    for (i = 0; i < a_oh_o->size; i++)
+    for (i = 0; i < a_oh->size; i++)
     {
-      log_printf(g_log_o, "%4d ", i);
-      if (a_oh_o->items[i] != NULL)
+      log_printf(g_log, "%4d ", i);
+      if (a_oh->items[i] != NULL)
       {
-	log_printf(g_log_o, "0x%08x %10p\n",
-		   a_oh_o->items[i]->key,
-		   a_oh_o->items[i]->data);
+	log_printf(g_log, "0x%08x %10p\n",
+		   a_oh->items[i]->key,
+		   a_oh->items[i]->data);
       }
       else
       {
-	log_printf(g_log_o, "\n");
+	log_printf(g_log, "\n");
       }
     }
   }
-  log_printf(g_log_o,
+  log_printf(g_log,
 	     "============================================================\n");
 
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_runlock(&a_oh_o->rw_lock);
+    rwl_runlock(&a_oh->rw_lock);
   }
 #endif
 }
@@ -922,7 +922,7 @@ oh_dump(cw_oh_t * a_oh_o, cw_bool_t a_all)
  *
  ****************************************************************************/
 cw_uint64_t
-oh_p_h1(cw_oh_t * a_oh_o, void * a_key)
+oh_p_h1(cw_oh_t * a_oh, void * a_key)
 {
   cw_uint64_t retval;
   char * str;
@@ -932,19 +932,19 @@ oh_p_h1(cw_oh_t * a_oh_o, void * a_key)
     retval = retval * 33 + *str;
   }
 
-  retval = retval % (1 << a_oh_o->curr_power);
+  retval = retval % (1 << a_oh->curr_power);
   
   return retval;
 }
 #if (0)
 cw_uint64_t
-oh_p_h1(cw_oh_t * a_oh_o, void * a_key)
+oh_p_h1(cw_oh_t * a_oh, void * a_key)
 {
   cw_uint64_t retval;
 
-  _cw_check_ptr(a_oh_o);
+  _cw_check_ptr(a_oh);
 
-  retval = (a_key >> 4) % (1 << a_oh_o->curr_power);
+  retval = (a_key >> 4) % (1 << a_oh->curr_power);
 
   return retval;
 }
@@ -968,41 +968,41 @@ oh_p_key_compare(void * a_k1, void * a_k2)
  *
  ****************************************************************************/
 void
-oh_p_grow(cw_oh_t * a_oh_o)
+oh_p_grow(cw_oh_t * a_oh)
 {
   /* Should we grow? */
-  if (list_count(&a_oh_o->items_list) >= a_oh_o->curr_grow_point)
+  if (list_count(&a_oh->items_list) >= a_oh->curr_grow_point)
   {
-    a_oh_o->num_grows++;
+    a_oh->num_grows++;
 
-    a_oh_o->size <<= 1;
+    a_oh->size <<= 1;
   
     /* Allocate new table */
-    a_oh_o->items
-      = (cw_oh_item_t **) _cw_realloc(a_oh_o->items,
-				      a_oh_o->size * sizeof(cw_oh_item_t *));
-    bzero(a_oh_o->items, (a_oh_o->size * sizeof(cw_oh_item_t *)));
+    a_oh->items
+      = (cw_oh_item_t **) _cw_realloc(a_oh->items,
+				      a_oh->size * sizeof(cw_oh_item_t *));
+    bzero(a_oh->items, (a_oh->size * sizeof(cw_oh_item_t *)));
 
     /* Re-calculate curr_* fields. */
-    a_oh_o->curr_power += 1;
-    a_oh_o->curr_h2 = (((a_oh_o->base_h2 + 1)
-			<< (a_oh_o->curr_power
-			    - a_oh_o->base_power))
+    a_oh->curr_power += 1;
+    a_oh->curr_h2 = (((a_oh->base_h2 + 1)
+			<< (a_oh->curr_power
+			    - a_oh->base_power))
 		       - 1);
-    a_oh_o->curr_shrink_point
-      = a_oh_o->curr_shrink_point << 1;
-    a_oh_o->curr_grow_point
-      = a_oh_o->curr_grow_point << 1;
+    a_oh->curr_shrink_point
+      = a_oh->curr_shrink_point << 1;
+    a_oh->curr_grow_point
+      = a_oh->curr_grow_point << 1;
 
-  /* Iterate through old table and insert items into new table. */
+    /* Iterate through old table and insert items into new table. */
     {
       cw_oh_item_t * item;
       cw_uint64_t i;
     
-      for (i = list_count(&a_oh_o->items_list); i > 0; i--)
+      for (i = list_count(&a_oh->items_list); i > 0; i--)
       {
-	item = (cw_oh_item_t *) list_hpop(&a_oh_o->items_list);
-	oh_p_item_insert(a_oh_o, item);
+	item = (cw_oh_item_t *) list_hpop(&a_oh->items_list);
+	oh_p_item_insert(a_oh, item);
       }
     }
   }
@@ -1015,74 +1015,74 @@ oh_p_grow(cw_oh_t * a_oh_o)
  *
  ****************************************************************************/
 void
-oh_p_shrink(cw_oh_t * a_oh_o)
+oh_p_shrink(cw_oh_t * a_oh)
 {
   cw_uint32_t j;
   cw_uint32_t num_halvings;
 
   /* Should we shrink? */
-  if ((list_count(&a_oh_o->items_list) < a_oh_o->curr_shrink_point)
-      && (a_oh_o->curr_power > a_oh_o->base_power))
+  if ((list_count(&a_oh->items_list) < a_oh->curr_shrink_point)
+      && (a_oh->curr_power > a_oh->base_power))
   {
 
-    for (j = a_oh_o->curr_power - a_oh_o->base_power;
-	 (((a_oh_o->curr_grow_point >> j) < list_count(&a_oh_o->items_list))
+    for (j = a_oh->curr_power - a_oh->base_power;
+	 (((a_oh->curr_grow_point >> j) < list_count(&a_oh->items_list))
 	  && (j > 0));
 	 j--);
     num_halvings = j;
 
     /* We're not shrinking below the base table size, are we? */
-    _cw_assert((a_oh_o->curr_power - num_halvings) >= a_oh_o->base_power);
+    _cw_assert((a_oh->curr_power - num_halvings) >= a_oh->base_power);
   
-    a_oh_o->num_shrinks++;
+    a_oh->num_shrinks++;
 
-    a_oh_o->size >>= num_halvings;
+    a_oh->size >>= num_halvings;
   
     /* Allocate new table */
-    a_oh_o->items
-      = (cw_oh_item_t **) _cw_realloc(a_oh_o->items,
-				      a_oh_o->size * sizeof(cw_oh_item_t *));
-    bzero(a_oh_o->items, (a_oh_o->size * sizeof(cw_oh_item_t *)));
+    a_oh->items
+      = (cw_oh_item_t **) _cw_realloc(a_oh->items,
+				      a_oh->size * sizeof(cw_oh_item_t *));
+    bzero(a_oh->items, (a_oh->size * sizeof(cw_oh_item_t *)));
   
     /* Re-calculate curr_* fields. */
-    a_oh_o->curr_power -= num_halvings;
-    a_oh_o->curr_h2 = (((a_oh_o->base_h2 + 1)
-			<< (a_oh_o->curr_power
-			    - a_oh_o->base_power))
+    a_oh->curr_power -= num_halvings;
+    a_oh->curr_h2 = (((a_oh->base_h2 + 1)
+			<< (a_oh->curr_power
+			    - a_oh->base_power))
 		       - 1);
-    a_oh_o->curr_shrink_point
-      = a_oh_o->curr_shrink_point >> num_halvings;
-    a_oh_o->curr_grow_point
-      = a_oh_o->curr_grow_point >> num_halvings;
+    a_oh->curr_shrink_point
+      = a_oh->curr_shrink_point >> num_halvings;
+    a_oh->curr_grow_point
+      = a_oh->curr_grow_point >> num_halvings;
 
     /* Iterate through old table and insert items into new table. */
     {
       cw_uint64_t i;
       cw_oh_item_t * item;
     
-      for (i = list_count(&a_oh_o->items_list); i > 0; i--)
+      for (i = list_count(&a_oh->items_list); i > 0; i--)
       {
-	item = list_hpop(&a_oh_o->items_list);
-	oh_p_item_insert(a_oh_o, item);
+	item = list_hpop(&a_oh->items_list);
+	oh_p_item_insert(a_oh, item);
       }
     }
 
     /* Purge the spares in the items_list. */
-    list_purge_spares(&a_oh_o->items_list);
+    list_purge_spares(&a_oh->items_list);
   
     /* Shrink the spares list down to a reasonable size. */
     {
       cw_sint64_t i;
       cw_oh_item_t * item;
 
-      for (i = list_count(&a_oh_o->spares_list);
-	   i > a_oh_o->curr_grow_point;
+      for (i = list_count(&a_oh->spares_list);
+	   i > a_oh->curr_grow_point;
 	   i--)
       {
-	item = (cw_oh_item_t *) list_hpop(&a_oh_o->spares_list);
+	item = (cw_oh_item_t *) list_hpop(&a_oh->spares_list);
 	_cw_free(item);
       }
-      list_purge_spares(&a_oh_o->spares_list);
+      list_purge_spares(&a_oh->spares_list);
     }
   }
 }
@@ -1093,39 +1093,39 @@ oh_p_shrink(cw_oh_t * a_oh_o)
  *
  ****************************************************************************/
 void
-oh_p_item_insert(cw_oh_t * a_oh_o,
+oh_p_item_insert(cw_oh_t * a_oh,
 		 cw_oh_item_t * a_item)
 {
   cw_uint64_t slot, i, j;
   cw_bool_t retval = TRUE;
   
   /* Primary hash to first possible location to insert. */
-  slot = a_oh_o->curr_h1(a_oh_o, a_item->key);
+  slot = a_oh->curr_h1(a_oh, a_item->key);
 
   for (i = 0, j = slot;
-       i < a_oh_o->size;
-       i++, j = (j + a_oh_o->curr_h2) % a_oh_o->size)
+       i < a_oh->size;
+       i++, j = (j + a_oh->curr_h2) % a_oh->size)
   {
-    if (a_oh_o->items[j] == NULL)
+    if (a_oh->items[j] == NULL)
     {
-      a_oh_o->num_inserts++;
+      a_oh->num_inserts++;
 
       /* This slot is unused, so insert. */
       a_item->slot_num = j;
       a_item->jumps = i; /* For deletion shuffling. */
-      a_oh_o->items[j] = a_item;
+      a_oh->items[j] = a_item;
 
       /* Wow, this looks knarly.  What we're doing here is adding the item
        * to the items_list, then setting the list_item pointer inside the
        * item, so that we can rip the item out of the list when
        * deleting. */
-      a_item->list_item = list_tpush(&a_oh_o->items_list, a_item);
+      a_item->list_item = list_tpush(&a_oh->items_list, a_item);
       retval = FALSE;
       break;
     }
     else
     {
-      a_oh_o->num_collisions++;
+      a_oh->num_collisions++;
     }
   }
 }
@@ -1137,7 +1137,7 @@ oh_p_item_insert(cw_oh_t * a_oh_o,
  *
  ****************************************************************************/
 cw_bool_t
-oh_p_item_search(cw_oh_t * a_oh_o,
+oh_p_item_search(cw_oh_t * a_oh,
 		 void * a_key,
 		 cw_uint64_t * a_slot)
 {
@@ -1145,21 +1145,21 @@ oh_p_item_search(cw_oh_t * a_oh_o,
   cw_bool_t retval;
   
   /* Primary hash to the first location to look. */
-  slot = a_oh_o->curr_h1(a_oh_o, a_key);
+  slot = a_oh->curr_h1(a_oh, a_key);
 
   /* Jump by the secondary hash value until we either find what we're
    * looking for, or hit an empty slot. */
   for (i = 0, j = slot;
        ;
-       i++, j = (j + a_oh_o->curr_h2) % a_oh_o->size)
+       i++, j = (j + a_oh->curr_h2) % a_oh->size)
   {
-    if (a_oh_o->items[j] == NULL)
+    if (a_oh->items[j] == NULL)
     {
       /* Hit an empty slot.  What we're looking for isn't here. */
       retval = TRUE;
       break;
     }
-    else if (a_oh_o->key_compare(a_oh_o->items[j]->key, a_key) == TRUE)
+    else if (a_oh->key_compare(a_oh->items[j]->key, a_key) == TRUE)
     {
       /* Found it. */
       *a_slot = j;
@@ -1177,19 +1177,19 @@ oh_p_item_search(cw_oh_t * a_oh_o,
  *
  ****************************************************************************/
 void
-oh_p_rehash(cw_oh_t * a_oh_o)
+oh_p_rehash(cw_oh_t * a_oh)
 {
   cw_uint64_t i;
   cw_oh_item_t * item;
 
   /* Clear the table. */
-  bzero(a_oh_o->items, a_oh_o->size * sizeof(cw_oh_item_t *));
+  bzero(a_oh->items, a_oh->size * sizeof(cw_oh_item_t *));
   
   /* Iterate through old table and rehash them. */
-  for (i = list_count(&a_oh_o->items_list); i > 0; i--)
+  for (i = list_count(&a_oh->items_list); i > 0; i--)
   {
-    item = (cw_oh_item_t *) list_hpop(&a_oh_o->items_list);
-    oh_p_item_insert(a_oh_o, item);
+    item = (cw_oh_item_t *) list_hpop(&a_oh->items_list);
+    oh_p_item_insert(a_oh, item);
   }
 }
 
@@ -1202,32 +1202,32 @@ oh_p_rehash(cw_oh_t * a_oh_o)
  *
  ****************************************************************************/
 void
-oh_p_slot_shuffle(cw_oh_t * a_oh_o, cw_uint64_t a_slot)
+oh_p_slot_shuffle(cw_oh_t * a_oh, cw_uint64_t a_slot)
 {
   cw_uint64_t i, curr_empty, curr_look, curr_distance;
   
   for(i = 0,
 	curr_distance = 1,
 	curr_empty = a_slot,
-	curr_look = ((curr_empty + a_oh_o->curr_h2) % a_oh_o->size);
-      ((a_oh_o->items[curr_look] != NULL) && (i < a_oh_o->size));
+	curr_look = ((curr_empty + a_oh->curr_h2) % a_oh->size);
+      ((a_oh->items[curr_look] != NULL) && (i < a_oh->size));
       i++,
 	curr_distance++,
-	curr_look = (curr_look + a_oh_o->curr_h2) % a_oh_o->size)
+	curr_look = (curr_look + a_oh->curr_h2) % a_oh->size)
   {
     /* See if this item had to jump at least the current distance to
      * the last empty slot in this secondary hash chain. */
-    if (a_oh_o->items[curr_look]->jumps >= curr_distance)
+    if (a_oh->items[curr_look]->jumps >= curr_distance)
     {
       /* This item should be shuffled back to the previous empty slot.
        * Do so, and reset curr_distance and curr_empty.  Also, update
        * the jumps field of the item we just shuffled, as well as its
        * record of the slot that it's now in. */
 	  
-      a_oh_o->items[curr_empty] = a_oh_o->items[curr_look];
-      a_oh_o->items[curr_empty]->jumps -= curr_distance;
-      a_oh_o->items[curr_empty]->slot_num = curr_empty;
-      a_oh_o->items[curr_look] = NULL;
+      a_oh->items[curr_empty] = a_oh->items[curr_look];
+      a_oh->items[curr_empty]->jumps -= curr_distance;
+      a_oh->items[curr_empty]->slot_num = curr_empty;
+      a_oh->items[curr_look] = NULL;
 
       curr_empty = curr_look;
       curr_distance = 0;
@@ -1241,24 +1241,24 @@ oh_p_slot_shuffle(cw_oh_t * a_oh_o, cw_uint64_t a_slot)
  *
  ****************************************************************************/
 cw_uint64_t
-oh_get_num_collisions(cw_oh_t * a_oh_o)
+oh_get_num_collisions(cw_oh_t * a_oh)
 {
   cw_uint64_t retval;
   
-  _cw_check_ptr(a_oh_o);
+  _cw_check_ptr(a_oh);
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_rlock(&a_oh_o->rw_lock);
+    rwl_rlock(&a_oh->rw_lock);
   }
 #endif
 
-  retval = a_oh_o->num_collisions;
+  retval = a_oh->num_collisions;
 
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_runlock(&a_oh_o->rw_lock);
+    rwl_runlock(&a_oh->rw_lock);
   }
 #endif
   return retval;
@@ -1270,24 +1270,24 @@ oh_get_num_collisions(cw_oh_t * a_oh_o)
  *
  ****************************************************************************/
 cw_uint64_t
-oh_get_num_inserts(cw_oh_t * a_oh_o)
+oh_get_num_inserts(cw_oh_t * a_oh)
 {
   cw_uint64_t retval;
   
-  _cw_check_ptr(a_oh_o);
+  _cw_check_ptr(a_oh);
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_rlock(&a_oh_o->rw_lock);
+    rwl_rlock(&a_oh->rw_lock);
   }
 #endif
 
-  retval = a_oh_o->num_inserts;
+  retval = a_oh->num_inserts;
 
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_runlock(&a_oh_o->rw_lock);
+    rwl_runlock(&a_oh->rw_lock);
   }
 #endif
   return retval;
@@ -1299,24 +1299,24 @@ oh_get_num_inserts(cw_oh_t * a_oh_o)
  *
  ****************************************************************************/
 cw_uint64_t
-oh_get_num_deletes(cw_oh_t * a_oh_o)
+oh_get_num_deletes(cw_oh_t * a_oh)
 {
   cw_uint64_t retval;
   
-  _cw_check_ptr(a_oh_o);
+  _cw_check_ptr(a_oh);
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_rlock(&a_oh_o->rw_lock);
+    rwl_rlock(&a_oh->rw_lock);
   }
 #endif
 
-  retval = a_oh_o->num_deletes;
+  retval = a_oh->num_deletes;
 
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_runlock(&a_oh_o->rw_lock);
+    rwl_runlock(&a_oh->rw_lock);
   }
 #endif
   return retval;
@@ -1328,24 +1328,24 @@ oh_get_num_deletes(cw_oh_t * a_oh_o)
  *
  ****************************************************************************/
 cw_uint64_t
-oh_get_num_grows(cw_oh_t * a_oh_o)
+oh_get_num_grows(cw_oh_t * a_oh)
 {
   cw_uint64_t retval;
   
-  _cw_check_ptr(a_oh_o);
+  _cw_check_ptr(a_oh);
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_rlock(&a_oh_o->rw_lock);
+    rwl_rlock(&a_oh->rw_lock);
   }
 #endif
 
-  retval = a_oh_o->num_grows;
+  retval = a_oh->num_grows;
 
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_runlock(&a_oh_o->rw_lock);
+    rwl_runlock(&a_oh->rw_lock);
   }
 #endif
   return retval;
@@ -1357,24 +1357,24 @@ oh_get_num_grows(cw_oh_t * a_oh_o)
  *
  ****************************************************************************/
 cw_uint64_t
-oh_get_num_shrinks(cw_oh_t * a_oh_o)
+oh_get_num_shrinks(cw_oh_t * a_oh)
 {
   cw_uint64_t retval;
   
-  _cw_check_ptr(a_oh_o);
+  _cw_check_ptr(a_oh);
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_rlock(&a_oh_o->rw_lock);
+    rwl_rlock(&a_oh->rw_lock);
   }
 #endif
 
-  retval = a_oh_o->num_shrinks;
+  retval = a_oh->num_shrinks;
 
 #ifdef _CW_REENTRANT
-  if (a_oh_o->is_thread_safe)
+  if (a_oh->is_thread_safe)
   {
-    rwl_runlock(&a_oh_o->rw_lock);
+    rwl_runlock(&a_oh->rw_lock);
   }
 #endif
   return retval;

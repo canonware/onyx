@@ -154,10 +154,10 @@ main()
       bufel_set_uint8(bufel_p, i, i);
     }
 
-    log_printf(g_log_o, "lower char dump:\n");
+    log_printf(g_log, "lower char dump:\n");
     for (i = 0; i < 256; i += 8)
     {
-      log_printf(g_log_o,
+      log_printf(g_log,
 		 "%03u->0x%02x:%03u->0x%02x:%03u->0x%02x:%03u->0x%02x:%03u->0x%02x:%03u->0x%02x:%03u->0x%02x:%03u->0x%02x\n",
 		 i, bufel_get_uint8(bufel_p, i),
 		 i + 1, bufel_get_uint8(bufel_p, i + 1),
@@ -181,10 +181,10 @@ main()
 			| ((cw_uint32_t) bufel_get_uint8(bufel_p, i + 3))));
     }
 
-    log_printf(g_log_o, "upper long dump:\n");
+    log_printf(g_log, "upper long dump:\n");
     for (i = 256; i < 512; i += 8)
     {
-      log_printf(g_log_o, "%03u->0x%08x:%03u->0x%08x\n",
+      log_printf(g_log, "%03u->0x%08x:%03u->0x%08x\n",
 		 i, bufel_get_uint32(bufel_p, i),
 		 i + 4, bufel_get_uint32(bufel_p, i + 4));
     }

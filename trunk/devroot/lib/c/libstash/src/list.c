@@ -44,11 +44,11 @@ list_item_new()
  *
  ****************************************************************************/
 void
-list_item_delete(cw_list_item_t * a_list_item_o)
+list_item_delete(cw_list_item_t * a_list_item)
 {
-  _cw_check_ptr(a_list_item_o);
+  _cw_check_ptr(a_list_item);
 
-  _cw_free(a_list_item_o);
+  _cw_free(a_list_item);
 }
 
 /****************************************************************************
@@ -57,11 +57,11 @@ list_item_delete(cw_list_item_t * a_list_item_o)
  *
  ****************************************************************************/
 void *
-list_item_get(cw_list_item_t * a_list_item_o)
+list_item_get(cw_list_item_t * a_list_item)
 {
-  _cw_check_ptr(a_list_item_o);
+  _cw_check_ptr(a_list_item);
 
-  return a_list_item_o->item;
+  return a_list_item->item;
 }
 
 /****************************************************************************
@@ -70,11 +70,11 @@ list_item_get(cw_list_item_t * a_list_item_o)
  *
  ****************************************************************************/
 void
-list_item_set(cw_list_item_t * a_list_item_o, void * a_data)
+list_item_set(cw_list_item_t * a_list_item, void * a_data)
 {
-  _cw_check_ptr(a_list_item_o);
+  _cw_check_ptr(a_list_item);
 
-  a_list_item_o->item = a_data;
+  a_list_item->item = a_data;
 }
 
 /****************************************************************************
@@ -84,21 +84,21 @@ list_item_set(cw_list_item_t * a_list_item_o, void * a_data)
  ****************************************************************************/
 cw_list_t *
 #ifdef _CW_REENTRANT
-list_new(cw_list_t * a_list_o, cw_bool_t a_is_thread_safe)
+list_new(cw_list_t * a_list, cw_bool_t a_is_thread_safe)
 #else
-list_new(cw_list_t * a_list_o)
+     list_new(cw_list_t * a_list)
 #endif
 {
   cw_list_t * retval;
 
-  if (a_list_o == NULL)
+  if (a_list == NULL)
   {
     retval = (cw_list_t *) _cw_malloc(sizeof(cw_list_t));
     retval->is_malloced = TRUE;
   }
   else
   {
-    retval = a_list_o;
+    retval = a_list;
     retval->is_malloced = FALSE;
   }
 
@@ -129,38 +129,38 @@ list_new(cw_list_t * a_list_o)
  *
  ****************************************************************************/
 void
-list_delete(cw_list_t * a_list_o)
+list_delete(cw_list_t * a_list)
 {
   cw_list_item_t * item;
   cw_uint64_t i;
-  _cw_check_ptr(a_list_o);
+  _cw_check_ptr(a_list);
 
   /* Delete whatever items are still in the list.  This does *not* free
    * memory pointed to by the item pointers. */
-  for(i = 0; i < a_list_o->count; i++)
+  for(i = 0; i < a_list->count; i++)
   {
-    item = a_list_o->head;
-    a_list_o->head = list_item_p_get_next(a_list_o->head);
+    item = a_list->head;
+    a_list->head = list_item_p_get_next(a_list->head);
     list_item_delete(item);
   }
   
   /* Delete the spares list. */
-  for (i = 0; i < a_list_o->spares_count; i++)
+  for (i = 0; i < a_list->spares_count; i++)
   {
-    item = a_list_o->spares_head;
-    a_list_o->spares_head = list_item_p_get_next(a_list_o->spares_head);
+    item = a_list->spares_head;
+    a_list->spares_head = list_item_p_get_next(a_list->spares_head);
     list_item_delete(item);
   }
 
 #ifdef _CW_REENTRANT
-  if (a_list_o->is_thread_safe)
+  if (a_list->is_thread_safe)
   {
-    mtx_delete(&a_list_o->lock);
+    mtx_delete(&a_list->lock);
   }
 #endif
-  if (a_list_o->is_malloced)
+  if (a_list->is_malloced)
   {
-    _cw_free(a_list_o);
+    _cw_free(a_list);
   }
 }
 
@@ -170,13 +170,13 @@ list_delete(cw_list_t * a_list_o)
  *
  ****************************************************************************/
 cw_uint64_t
-list_count(cw_list_t * a_list_o)
+list_count(cw_list_t * a_list)
 {
   cw_uint64_t retval;
 
-  _cw_check_ptr(a_list_o);
+  _cw_check_ptr(a_list);
 
-  retval = a_list_o->count;
+  retval = a_list->count;
   
   return retval;
 }
@@ -187,25 +187,25 @@ list_count(cw_list_t * a_list_o)
  *
  ****************************************************************************/
 cw_list_item_t *
-list_hpush(cw_list_t * a_list_o, void * a_data)
+list_hpush(cw_list_t * a_list, void * a_data)
 {
   cw_list_item_t * retval;
   
-  _cw_check_ptr(a_list_o);
+  _cw_check_ptr(a_list);
 #ifdef _CW_REENTRANT
-  if (a_list_o->is_thread_safe)
+  if (a_list->is_thread_safe)
   {
-    mtx_lock(&a_list_o->lock);
+    mtx_lock(&a_list->lock);
   }
 #endif
 
   /* Find a list item somewhere. */
-  if (a_list_o->spares_count > 0)
+  if (a_list->spares_count > 0)
   {
     /* A spare item is available, so use it. */
-    retval = a_list_o->spares_head;
-    a_list_o->spares_head = list_item_p_get_next(a_list_o->spares_head);
-    a_list_o->spares_count--;
+    retval = a_list->spares_head;
+    a_list->spares_head = list_item_p_get_next(a_list->spares_head);
+    a_list->spares_count--;
   }
   else
   {
@@ -215,28 +215,28 @@ list_hpush(cw_list_t * a_list_o, void * a_data)
   list_item_set(retval, a_data);
 
   /* Link things together. */
-  if (a_list_o->head != NULL)
+  if (a_list->head != NULL)
   {
     /* The list isn't empty. */
     list_item_p_set_prev(retval, NULL);
-    list_item_p_set_next(retval, a_list_o->head);
-    list_item_p_set_prev(a_list_o->head, retval);
-    a_list_o->head = retval;
+    list_item_p_set_next(retval, a_list->head);
+    list_item_p_set_prev(a_list->head, retval);
+    a_list->head = retval;
   }
   else
   {
     /* The list is empty. */
     list_item_p_set_prev(retval, NULL);
     list_item_p_set_next(retval, NULL);
-    a_list_o->head = retval;
-    a_list_o->tail = retval;
+    a_list->head = retval;
+    a_list->tail = retval;
   }
-  a_list_o->count++;
+  a_list->count++;
 
 #ifdef _CW_REENTRANT
-  if (a_list_o->is_thread_safe)
+  if (a_list->is_thread_safe)
   {
-    mtx_unlock(&a_list_o->lock);
+    mtx_unlock(&a_list->lock);
   }
 #endif
   return retval;
@@ -248,24 +248,24 @@ list_hpush(cw_list_t * a_list_o, void * a_data)
  *
  ****************************************************************************/
 void *
-list_hpop(cw_list_t * a_list_o)
+list_hpop(cw_list_t * a_list)
 {
   void * retval;
 
-  _cw_check_ptr(a_list_o);
+  _cw_check_ptr(a_list);
 #ifdef _CW_REENTRANT
-  if (a_list_o->is_thread_safe)
+  if (a_list->is_thread_safe)
   {
-    mtx_lock(&a_list_o->lock);
+    mtx_lock(&a_list->lock);
   }
 #endif
 
-  retval = list_p_hpop(a_list_o);
+  retval = list_p_hpop(a_list);
 
 #ifdef _CW_REENTRANT
-  if (a_list_o->is_thread_safe)
+  if (a_list->is_thread_safe)
   {
-    mtx_unlock(&a_list_o->lock);
+    mtx_unlock(&a_list->lock);
   }
 #endif
   return retval;
@@ -277,32 +277,32 @@ list_hpop(cw_list_t * a_list_o)
  *
  ****************************************************************************/
 void *
-list_hpeek(cw_list_t * a_list_o)
+list_hpeek(cw_list_t * a_list)
 {
   void * retval;
 
-  _cw_check_ptr(a_list_o);
+  _cw_check_ptr(a_list);
 #ifdef _CW_REENTRANT
-  if (a_list_o->is_thread_safe)
+  if (a_list->is_thread_safe)
   {
-    mtx_lock(&a_list_o->lock);
+    mtx_lock(&a_list->lock);
   }
 #endif
 
-  if (a_list_o->head == NULL)
+  if (a_list->head == NULL)
   {
     /* List is empty. */
     retval = NULL;
   }
   else
   {
-    retval = list_item_get(a_list_o->head);
+    retval = list_item_get(a_list->head);
   }
 
 #ifdef _CW_REENTRANT
-  if (a_list_o->is_thread_safe)
+  if (a_list->is_thread_safe)
   {
-    mtx_unlock(&a_list_o->lock);
+    mtx_unlock(&a_list->lock);
   }
 #endif
   return retval;
@@ -314,25 +314,25 @@ list_hpeek(cw_list_t * a_list_o)
  *
  ****************************************************************************/
 cw_list_item_t *
-list_tpush(cw_list_t * a_list_o, void * a_data)
+list_tpush(cw_list_t * a_list, void * a_data)
 {
   cw_list_item_t * retval;
 
-  _cw_check_ptr(a_list_o);
+  _cw_check_ptr(a_list);
 #ifdef _CW_REENTRANT
-  if (a_list_o->is_thread_safe)
+  if (a_list->is_thread_safe)
   {
-    mtx_lock(&a_list_o->lock);
+    mtx_lock(&a_list->lock);
   }
 #endif
 
   /* Find a list item somewhere. */
-  if (a_list_o->spares_count > 0)
+  if (a_list->spares_count > 0)
   {
     /* A spare item is available, so use it. */
-    retval = a_list_o->spares_head;
-    a_list_o->spares_head = list_item_p_get_next(a_list_o->spares_head);
-    a_list_o->spares_count--;
+    retval = a_list->spares_head;
+    a_list->spares_head = list_item_p_get_next(a_list->spares_head);
+    a_list->spares_count--;
   }
   else
   {
@@ -342,28 +342,28 @@ list_tpush(cw_list_t * a_list_o, void * a_data)
   list_item_set(retval, a_data);
   
   /* Link things together. */
-  if (a_list_o->tail != NULL)
+  if (a_list->tail != NULL)
   {
     /* The list isn't empty. */
     list_item_p_set_next(retval, NULL);
-    list_item_p_set_prev(retval, a_list_o->tail);
-    list_item_p_set_next(a_list_o->tail, retval);
-    a_list_o->tail = retval;
+    list_item_p_set_prev(retval, a_list->tail);
+    list_item_p_set_next(a_list->tail, retval);
+    a_list->tail = retval;
   }
   else
   {
     /* The list is empty. */
     list_item_p_set_prev(retval, NULL);
     list_item_p_set_next(retval, NULL);
-    a_list_o->head = retval;
-    a_list_o->tail = retval;
+    a_list->head = retval;
+    a_list->tail = retval;
   }
-  a_list_o->count++;
+  a_list->count++;
 
 #ifdef _CW_REENTRANT
-  if (a_list_o->is_thread_safe)
+  if (a_list->is_thread_safe)
   {
-    mtx_unlock(&a_list_o->lock);
+    mtx_unlock(&a_list->lock);
   }
 #endif
   return retval;
@@ -375,24 +375,24 @@ list_tpush(cw_list_t * a_list_o, void * a_data)
  *
  ****************************************************************************/
 void *
-list_tpop(cw_list_t * a_list_o)
+list_tpop(cw_list_t * a_list)
 {
   void * retval;
 
-  _cw_check_ptr(a_list_o);
+  _cw_check_ptr(a_list);
 #ifdef _CW_REENTRANT
-  if (a_list_o->is_thread_safe)
+  if (a_list->is_thread_safe)
   {
-    mtx_lock(&a_list_o->lock);
+    mtx_lock(&a_list->lock);
   }
 #endif
 
-  retval = list_p_tpop(a_list_o);
+  retval = list_p_tpop(a_list);
 
 #ifdef _CW_REENTRANT
-  if (a_list_o->is_thread_safe)
+  if (a_list->is_thread_safe)
   {
-    mtx_unlock(&a_list_o->lock);
+    mtx_unlock(&a_list->lock);
   }
 #endif
   return retval;
@@ -404,32 +404,32 @@ list_tpop(cw_list_t * a_list_o)
  *
  ****************************************************************************/
 void *
-list_tpeek(cw_list_t * a_list_o)
+list_tpeek(cw_list_t * a_list)
 {
   void * retval;
 
-  _cw_check_ptr(a_list_o);
+  _cw_check_ptr(a_list);
 #ifdef _CW_REENTRANT
-  if (a_list_o->is_thread_safe)
+  if (a_list->is_thread_safe)
   {
-    mtx_lock(&a_list_o->lock);
+    mtx_lock(&a_list->lock);
   }
 #endif
 
-  if (a_list_o->head == NULL)
+  if (a_list->head == NULL)
   {
     /* List is empty. */
     retval = NULL;
   }
   else
   {
-    retval = list_item_get(a_list_o->tail);
+    retval = list_item_get(a_list->tail);
   }
 
 #ifdef _CW_REENTRANT
-  if (a_list_o->is_thread_safe)
+  if (a_list->is_thread_safe)
   {
-    mtx_unlock(&a_list_o->lock);
+    mtx_unlock(&a_list->lock);
   }
 #endif
   return retval;
@@ -441,28 +441,28 @@ list_tpeek(cw_list_t * a_list_o)
  *
  ****************************************************************************/
 cw_list_item_t *
-list_insert_before(cw_list_t * a_list_o,
-		  cw_list_item_t * a_in_list,
-		  void * a_data)
+list_insert_before(cw_list_t * a_list,
+		   cw_list_item_t * a_in_list,
+		   void * a_data)
 {
   cw_list_item_t * retval;
   
-  _cw_check_ptr(a_list_o);
+  _cw_check_ptr(a_list);
   _cw_check_ptr(a_in_list);
 #ifdef _CW_REENTRANT
-  if (a_list_o->is_thread_safe)
+  if (a_list->is_thread_safe)
   {
-    mtx_lock(&a_list_o->lock);
+    mtx_lock(&a_list->lock);
   }
 #endif
 
   /* Find a list item somewhere. */
-  if (a_list_o->spares_count > 0)
+  if (a_list->spares_count > 0)
   {
     /* A spare item is available, so use it. */
-    retval = a_list_o->spares_head;
-    a_list_o->spares_head = list_item_p_get_next(a_list_o->spares_head);
-    a_list_o->spares_count--;
+    retval = a_list->spares_head;
+    a_list->spares_head = list_item_p_get_next(a_list->spares_head);
+    a_list->spares_count--;
   }
   else
   {
@@ -477,7 +477,7 @@ list_insert_before(cw_list_t * a_list_o,
     list_item_p_set_prev(a_in_list, retval);
     list_item_p_set_next(retval, a_in_list);
     list_item_p_set_prev(retval, NULL);
-    a_list_o->head = retval;
+    a_list->head = retval;
   }
   else
   {
@@ -487,12 +487,12 @@ list_insert_before(cw_list_t * a_list_o,
     list_item_p_set_prev(a_in_list, retval);
     list_item_p_set_next(list_item_p_get_prev(retval), retval);
   }
-  a_list_o->count++;
+  a_list->count++;
 
 #ifdef _CW_REENTRANT
-  if (a_list_o->is_thread_safe)
+  if (a_list->is_thread_safe)
   {
-    mtx_unlock(&a_list_o->lock);
+    mtx_unlock(&a_list->lock);
   }
 #endif
   return retval;
@@ -504,28 +504,28 @@ list_insert_before(cw_list_t * a_list_o,
  *
  ****************************************************************************/
 cw_list_item_t *
-list_insert_after(cw_list_t * a_list_o,
+list_insert_after(cw_list_t * a_list,
 		  cw_list_item_t * a_in_list,
 		  void * a_data)
 {
   cw_list_item_t * retval;
   
-  _cw_check_ptr(a_list_o);
+  _cw_check_ptr(a_list);
   _cw_check_ptr(a_in_list);
 #ifdef _CW_REENTRANT
-  if (a_list_o->is_thread_safe)
+  if (a_list->is_thread_safe)
   {
-    mtx_lock(&a_list_o->lock);
+    mtx_lock(&a_list->lock);
   }
 #endif
 
   /* Find a list item somewhere. */
-  if (a_list_o->spares_count > 0)
+  if (a_list->spares_count > 0)
   {
     /* A spare item is available, so use it. */
-    retval = a_list_o->spares_head;
-    a_list_o->spares_head = list_item_p_get_next(a_list_o->spares_head);
-    a_list_o->spares_count--;
+    retval = a_list->spares_head;
+    a_list->spares_head = list_item_p_get_next(a_list->spares_head);
+    a_list->spares_count--;
   }
   else
   {
@@ -540,7 +540,7 @@ list_insert_after(cw_list_t * a_list_o,
     list_item_p_set_next(a_in_list, retval);
     list_item_p_set_prev(retval, a_in_list);
     list_item_p_set_next(retval, NULL);
-    a_list_o->tail = retval;
+    a_list->tail = retval;
   }
   else
   {
@@ -550,12 +550,12 @@ list_insert_after(cw_list_t * a_list_o,
     list_item_p_set_next(a_in_list, retval);
     list_item_p_set_prev(list_item_p_get_next(retval), retval);
   }
-  a_list_o->count++;
+  a_list->count++;
 
 #ifdef _CW_REENTRANT
-  if (a_list_o->is_thread_safe)
+  if (a_list->is_thread_safe)
   {
-    mtx_unlock(&a_list_o->lock);
+    mtx_unlock(&a_list->lock);
   }
 #endif
   return retval;
@@ -568,28 +568,28 @@ list_insert_after(cw_list_t * a_list_o,
  *
  ****************************************************************************/
 void *
-list_remove(cw_list_t * a_list_o, cw_list_item_t * a_to_remove)
+list_remove(cw_list_t * a_list, cw_list_item_t * a_to_remove)
 {
   void * retval;
 
-  _cw_check_ptr(a_list_o);
+  _cw_check_ptr(a_list);
   _cw_check_ptr(a_to_remove);
 #ifdef _CW_REENTRANT
-  if (a_list_o->is_thread_safe)
+  if (a_list->is_thread_safe)
   {
-    mtx_lock(&a_list_o->lock);
+    mtx_lock(&a_list->lock);
   }
 #endif
 
   if (list_item_p_get_prev(a_to_remove) == NULL)
   {
     /* Removing from the beginning of the list. */
-    retval = list_p_hpop(a_list_o);
+    retval = list_p_hpop(a_list);
   }
   else if (list_item_p_get_next(a_to_remove) == NULL)
   {
     /* Removing from the end of the list. */
-    retval = list_p_tpop(a_list_o);
+    retval = list_p_tpop(a_list);
   }
   else
   {
@@ -602,17 +602,17 @@ list_remove(cw_list_t * a_list_o, cw_list_item_t * a_to_remove)
 			 list_item_p_get_prev(a_to_remove));
 
     /* Put item on the spares list. */
-    list_item_p_set_next(a_to_remove, a_list_o->spares_head);
-    a_list_o->spares_head = a_to_remove;
-    a_list_o->spares_count++;
+    list_item_p_set_next(a_to_remove, a_list->spares_head);
+    a_list->spares_head = a_to_remove;
+    a_list->spares_count++;
     
-    a_list_o->count--;
+    a_list->count--;
   }
 
 #ifdef _CW_REENTRANT
-  if (a_list_o->is_thread_safe)
+  if (a_list->is_thread_safe)
   {
-    mtx_unlock(&a_list_o->lock);
+    mtx_unlock(&a_list->lock);
   }
 #endif
   return retval;
@@ -624,29 +624,29 @@ list_remove(cw_list_t * a_list_o, cw_list_item_t * a_to_remove)
  *
  ****************************************************************************/
 void
-list_purge_spares(cw_list_t * a_list_o)
+list_purge_spares(cw_list_t * a_list)
 {
   cw_list_item_t * item;
 
-  _cw_check_ptr(a_list_o);
+  _cw_check_ptr(a_list);
 #ifdef _CW_REENTRANT
-  if (a_list_o->is_thread_safe)
+  if (a_list->is_thread_safe)
   {
-    mtx_lock(&a_list_o->lock);
+    mtx_lock(&a_list->lock);
   }
 #endif
     
-  for (; a_list_o->spares_count > 0; a_list_o->spares_count--)
+  for (; a_list->spares_count > 0; a_list->spares_count--)
   {
-    item = a_list_o->spares_head;
-    a_list_o->spares_head = list_item_p_get_next(a_list_o->spares_head);
+    item = a_list->spares_head;
+    a_list->spares_head = list_item_p_get_next(a_list->spares_head);
     list_item_delete(item);
   }
 
 #ifdef _CW_REENTRANT
-  if (a_list_o->is_thread_safe)
+  if (a_list->is_thread_safe)
   {
-    mtx_unlock(&a_list_o->lock);
+    mtx_unlock(&a_list->lock);
   }
 #endif
 }
@@ -658,50 +658,50 @@ list_purge_spares(cw_list_t * a_list_o)
  *
  ****************************************************************************/
 void
-list_dump(cw_list_t * a_list_o)
+list_dump(cw_list_t * a_list)
 {
-  _cw_check_ptr(a_list_o);
+  _cw_check_ptr(a_list);
 #ifdef _CW_REENTRANT
-  if (a_list_o->is_thread_safe)
+  if (a_list->is_thread_safe)
   {
-    mtx_lock(&a_list_o->lock);
+    mtx_lock(&a_list->lock);
   }
 #endif
 
-  log_printf(g_log_o,
+  log_printf(g_log,
 	     "=== cw_list_t ==============================================\n");
 #ifdef _CW_REENTRANT
-  log_printf(g_log_o, "is_malloced: [%d], is_thread_safe: [%d]\n",
-	     a_list_o->is_malloced, a_list_o->is_thread_safe);
+  log_printf(g_log, "is_malloced: [%d], is_thread_safe: [%d]\n",
+	     a_list->is_malloced, a_list->is_thread_safe);
 #else
-  log_printf(g_log_o, "is_malloced: [%d]\n", a_list_o->is_malloced);
+  log_printf(g_log, "is_malloced: [%d]\n", a_list->is_malloced);
 #endif
   {
     char buf_a[21], buf_b[21];
     
-    log_printf(g_log_o, "count: [%s]  spares: [%s]\n",
-	       log_print_uint64(a_list_o->count, 10, buf_a),
-	       log_print_uint64(a_list_o->spares_count, 10, buf_b));
+    log_printf(g_log, "count: [%s]  spares: [%s]\n",
+	       log_print_uint64(a_list->count, 10, buf_a),
+	       log_print_uint64(a_list->spares_count, 10, buf_b));
   }
   
-  log_printf(g_log_o, "head: [%010p]  tail: [%010p]  spares_head: [%010p]\n",
-	     a_list_o->head, a_list_o->tail, a_list_o->spares_head);
-  if (a_list_o->count > 0)
+  log_printf(g_log, "head: [%010p]  tail: [%010p]  spares_head: [%010p]\n",
+	     a_list->head, a_list->tail, a_list->spares_head);
+  if (a_list->count > 0)
   {
-    log_printf(g_log_o, "head->item: [%010p]  tail->item: [%010p]\n",
-	       list_item_get(a_list_o->head), list_item_get(a_list_o->tail));
+    log_printf(g_log, "head->item: [%010p]  tail->item: [%010p]\n",
+	       list_item_get(a_list->head), list_item_get(a_list->tail));
   }
   else
   {
-    log_printf(g_log_o, "head->item: [N/A]  tail->item: [N/A]\n");
+    log_printf(g_log, "head->item: [N/A]  tail->item: [N/A]\n");
   }
-  log_printf(g_log_o,
+  log_printf(g_log,
 	     "============================================================\n");
   
 #ifdef _CW_REENTRANT
-  if (a_list_o->is_thread_safe)
+  if (a_list->is_thread_safe)
   {
-    mtx_unlock(&a_list_o->lock);
+    mtx_unlock(&a_list->lock);
   }
 #endif
 }
@@ -712,49 +712,49 @@ list_dump(cw_list_t * a_list_o)
  *
  ****************************************************************************/
 void *
-list_p_hpop(cw_list_t * a_list_o)
+list_p_hpop(cw_list_t * a_list)
 {
   void * retval;
 
-  if (a_list_o->head == NULL)
+  if (a_list->head == NULL)
   {
     /* List is empty. */
     retval = NULL;
   }
-  else if (a_list_o->head == a_list_o->tail)
+  else if (a_list->head == a_list->tail)
   {
     /* Only one item in the list. */
-    retval = list_item_get(a_list_o->head);
+    retval = list_item_get(a_list->head);
 
     /* Put the item on the spares list. */
-    list_item_p_set_next(a_list_o->head, a_list_o->spares_head);
-    a_list_o->spares_head = a_list_o->head;
-    a_list_o->spares_count++;
+    list_item_p_set_next(a_list->head, a_list->spares_head);
+    a_list->spares_head = a_list->head;
+    a_list->spares_count++;
 
-    a_list_o->head = NULL;
-    a_list_o->tail = NULL;
+    a_list->head = NULL;
+    a_list->tail = NULL;
 
-    a_list_o->count--;
+    a_list->count--;
   }
   else
   {
     cw_list_item_t * temp_ptr;
     
     /* More than one item in the list. */
-    retval = list_item_get(a_list_o->head);
+    retval = list_item_get(a_list->head);
 
-    temp_ptr = a_list_o->spares_head;
-    a_list_o->spares_head = a_list_o->head;
+    temp_ptr = a_list->spares_head;
+    a_list->spares_head = a_list->head;
 
-    a_list_o->head = list_item_p_get_next(a_list_o->head);
-    list_item_p_set_prev(a_list_o->head, NULL);
+    a_list->head = list_item_p_get_next(a_list->head);
+    list_item_p_set_prev(a_list->head, NULL);
     /* Done with main list. */
     
-    list_item_p_set_next(a_list_o->spares_head, temp_ptr);
-    a_list_o->spares_count++;
+    list_item_p_set_next(a_list->spares_head, temp_ptr);
+    a_list->spares_count++;
     /* Done with spares list. */
 
-    a_list_o->count--;
+    a_list->count--;
   }
 
   return retval;
@@ -766,49 +766,49 @@ list_p_hpop(cw_list_t * a_list_o)
  *
  ****************************************************************************/
 void *
-list_p_tpop(cw_list_t * a_list_o)
+list_p_tpop(cw_list_t * a_list)
 {
   void * retval;
 
-  if (a_list_o->tail == NULL)
+  if (a_list->tail == NULL)
   {
     /* List is empty. */
     retval = NULL;
   }
-  else if (a_list_o->tail == a_list_o->head)
+  else if (a_list->tail == a_list->head)
   {
     /* Only one item in the list. */
-    retval = list_item_get(a_list_o->tail);
+    retval = list_item_get(a_list->tail);
 
     /* Put the item on the spares list. */
-    list_item_p_set_next(a_list_o->head, a_list_o->spares_head);
-    a_list_o->spares_head = a_list_o->tail;
-    a_list_o->spares_count++;
+    list_item_p_set_next(a_list->head, a_list->spares_head);
+    a_list->spares_head = a_list->tail;
+    a_list->spares_count++;
     
-    a_list_o->head = NULL;
-    a_list_o->tail = NULL;
+    a_list->head = NULL;
+    a_list->tail = NULL;
 
-    a_list_o->count--;
+    a_list->count--;
   }
   else
   {
     cw_list_item_t * temp_ptr;
 
     /* More than one item in the list. */
-    retval = list_item_get(a_list_o->tail);
+    retval = list_item_get(a_list->tail);
 
-    temp_ptr = a_list_o->spares_head;
-    a_list_o->spares_head = a_list_o->tail;
+    temp_ptr = a_list->spares_head;
+    a_list->spares_head = a_list->tail;
 
-    a_list_o->tail = list_item_p_get_prev(a_list_o->tail);
-    list_item_p_set_next(a_list_o->tail, NULL);
+    a_list->tail = list_item_p_get_prev(a_list->tail);
+    list_item_p_set_next(a_list->tail, NULL);
     /* Done with main list. */
 
-    list_item_p_set_next(a_list_o->spares_head, temp_ptr);
-    a_list_o->spares_count++;
+    list_item_p_set_next(a_list->spares_head, temp_ptr);
+    a_list->spares_count++;
     /* Done with spares list. */
       
-    a_list_o->count--;
+    a_list->count--;
   }
 
   return retval;

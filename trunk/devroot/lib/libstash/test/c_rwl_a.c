@@ -24,7 +24,7 @@ thread_entry_func(void * a_arg)
   cw_rwl_t * lock = (cw_rwl_t *) a_arg;
 
   rwl_wlock(lock);
-  log_eprintf(g_log_o, NULL, 0, "thread_entry_func",
+  log_eprintf(g_log, NULL, 0, "thread_entry_func",
 	      "Got wlock\n");
   rwl_wunlock(lock);
 
@@ -58,13 +58,13 @@ main()
   {
     thd_new(&threads[i], thread_entry_func, (void *) &lock_a);
   }
-  log_eprintf(g_log_o, NULL, 0, "main", "About to release rlock\n");
+  log_eprintf(g_log, NULL, 0, "main", "About to release rlock\n");
   rwl_runlock(&lock_a);
   usleep(1);
-  log_eprintf(g_log_o, NULL, 0, "main", "About to release rlock\n");
+  log_eprintf(g_log, NULL, 0, "main", "About to release rlock\n");
   rwl_runlock(&lock_a);
   usleep(1);
-  log_eprintf(g_log_o, NULL, 0, "main", "About to release rlock\n");
+  log_eprintf(g_log, NULL, 0, "main", "About to release rlock\n");
   rwl_runlock(&lock_a);
   
   for (i = 0; i < _STASH_TEST_NUM_THREADS; i++)
@@ -78,7 +78,7 @@ main()
   {
     thd_new(&threads[i], thread_entry_func, (void *) &lock_a);
   }
-  log_eprintf(g_log_o, NULL, 0, "main", "About to release wlock\n");
+  log_eprintf(g_log, NULL, 0, "main", "About to release wlock\n");
   usleep(1);
   rwl_wunlock(&lock_a);
 

@@ -25,7 +25,7 @@
 
 struct foo_s
 {
-  cw_oh_t * hash_o;
+  cw_oh_t * hash;
   cw_uint32_t thread_num;
 };
 
@@ -41,9 +41,9 @@ insert_items(void * a_arg)
     string = (char *) _cw_malloc(40);
     sprintf(string, "thread %u, string %u",
 	    foo_var->thread_num, i);
-    _cw_assert(FALSE == oh_item_insert(foo_var->hash_o,
+    _cw_assert(FALSE == oh_item_insert(foo_var->hash,
 				       (void *) string, (void *) string));
-/*     log_eprintf(g_log_o, NULL, 0, "insert_items", */
+/*     log_eprintf(g_log, NULL, 0, "insert_items", */
 /* 		"thread %u, end iteration %u\n", foo_var->thread_num, i); */
   }
   
@@ -53,24 +53,24 @@ insert_items(void * a_arg)
 int
 main()
 {
-  cw_oh_t * hash_o;
+  cw_oh_t * hash;
   cw_thd_t threads[NUM_THREADS];
   cw_uint32_t i;
   struct foo_s * foo_var;
   cw_rwl_t lock;
 
   libstash_init();
-  hash_o = oh_new(NULL, TRUE);
+  hash = oh_new(NULL, TRUE);
   rwl_new(&lock);
 
   for (i = 0; i < NUM_THREADS; i++)
   {
     foo_var = (struct foo_s *) _cw_malloc(sizeof(struct foo_s));
-    foo_var->hash_o = hash_o;
+    foo_var->hash = hash;
     foo_var->thread_num = i;
     
     thd_new(&threads[i], insert_items, (void *) foo_var);
-/*     log_printf(g_log_o, "Got to end of for loop, i == %u\n", i); */
+/*     log_printf(g_log, "Got to end of for loop, i == %u\n", i); */
   }
 
   /* Join on threads, then delete them. */
@@ -83,12 +83,12 @@ main()
   {
     char buf[21];
     
-    log_printf(g_log_o, "Number of items in hash table: %s\n",
-	       log_print_uint64(oh_get_num_items(hash_o), 10, buf));
+    log_printf(g_log, "Number of items in hash table: %s\n",
+	       log_print_uint64(oh_get_num_items(hash), 10, buf));
   }
 
   rwl_delete(&lock);
-  oh_delete(hash_o);
+  oh_delete(hash);
   libstash_shutdown();
   
   return 0;

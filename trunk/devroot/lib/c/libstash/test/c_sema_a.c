@@ -24,7 +24,7 @@ thread_entry_func(void * a_arg)
   cw_sem_t * sem = (cw_sem_t *) a_arg;
 
   sem_wait(sem);
-  log_printf(g_log_o, "Got semaphore.\n");
+  log_printf(g_log, "Got semaphore.\n");
   
   return NULL;
 }

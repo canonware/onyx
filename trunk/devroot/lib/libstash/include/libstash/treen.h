@@ -29,22 +29,36 @@ struct cw_treen_s
 };
 
 #define treen_new _CW_NS_STASH(treen_new)
-#define treen_delete _CW_NS_STASH(treen_delete)
-#define treen_get_num_children _CW_NS_STASH(treen_get_num_children)
-#define treen_link_child _CW_NS_STASH(tree_ins_child)
-#define treen_unlink_child _CW_NS_STASH(tree_del_child)
-#define treen_get_child_ptr _CW_NS_STASH(treen_get_child_ptr)
-#define treen_get_data_ptr _CW_NS_STASH(tree_get_data_ptr)
-#define treen_set_data_ptr _CW_NS_STASH(tree_set_data_ptr)
+cw_treen_t *
+treen_new(cw_bool_t a_is_thread_safe);
 
-cw_treen_t * treen_new(cw_bool_t a_is_thread_safe);
-void treen_delete(cw_treen_t * a_treen_o);
-cw_uint32_t treen_get_num_children(cw_treen_t * a_treen_o);
-cw_bool_t treen_link_child(cw_treen_t * a_treen_o, cw_treen_t * a_child,
-			   cw_uint32_t a_position);
-cw_bool_t treen_unlink_child(cw_treen_t * a_treen_o, cw_uint32_t a_position,
-			     cw_treen_t ** a_child);
-cw_bool_t treen_get_child_ptr(cw_treen_t * a_treen_o, cw_uint32_t a_position,
-			      cw_treen_t ** a_child);
-void * treen_get_data_ptr(cw_treen_t * a_treen_o);
-void * treen_set_data_ptr(cw_treen_t * a_treen_o, void * a_data);
+#define treen_delete _CW_NS_STASH(treen_delete)
+void
+treen_delete(cw_treen_t * a_treen);
+
+#define treen_get_num_children _CW_NS_STASH(treen_get_num_children)
+cw_uint32_t
+treen_get_num_children(cw_treen_t * a_treen);
+
+#define treen_link_child _CW_NS_STASH(tree_ins_child)
+cw_bool_t
+treen_link_child(cw_treen_t * a_treen, cw_treen_t * a_child,
+		 cw_uint32_t a_position);
+
+#define treen_unlink_child _CW_NS_STASH(tree_del_child)
+cw_bool_t
+treen_unlink_child(cw_treen_t * a_treen, cw_uint32_t a_position,
+		   cw_treen_t ** a_child);
+
+#define treen_get_child_ptr _CW_NS_STASH(treen_get_child_ptr)
+cw_bool_t
+treen_get_child_ptr(cw_treen_t * a_treen, cw_uint32_t a_position,
+		    cw_treen_t ** a_child);
+
+#define treen_get_data_ptr _CW_NS_STASH(tree_get_data_ptr)
+void *
+treen_get_data_ptr(cw_treen_t * a_treen);
+
+#define treen_set_data_ptr _CW_NS_STASH(tree_set_data_ptr)
+void *
+treen_set_data_ptr(cw_treen_t * a_treen, void * a_data);

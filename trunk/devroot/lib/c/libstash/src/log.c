@@ -55,26 +55,26 @@ log_new()
  *
  ****************************************************************************/
 void
-log_delete(cw_log_t * a_log_o)
+log_delete(cw_log_t * a_log)
 {
-  _cw_check_ptr(a_log_o);
+  _cw_check_ptr(a_log);
   
-  if ((a_log_o->log_fp != NULL) && (a_log_o->log_fp != stderr))
+  if ((a_log->log_fp != NULL) && (a_log->log_fp != stderr))
   {
-    fflush(a_log_o->log_fp);
-    fclose(a_log_o->log_fp);
+    fflush(a_log->log_fp);
+    fclose(a_log->log_fp);
   }
 
-  if (a_log_o->logfile_name != NULL)
+  if (a_log->logfile_name != NULL)
   {
-    _cw_free(a_log_o->logfile_name);
+    _cw_free(a_log->logfile_name);
   }
 
 #ifdef _CW_REENTRANT
-  mtx_delete(&a_log_o->lock);
+  mtx_delete(&a_log->lock);
 #endif
   
-  _cw_free(a_log_o);
+  _cw_free(a_log);
 }
 
 /****************************************************************************
@@ -85,23 +85,23 @@ log_delete(cw_log_t * a_log_o)
  *
  ****************************************************************************/
 cw_bool_t
-log_set_logfile(cw_log_t * a_log_o,
+log_set_logfile(cw_log_t * a_log,
 		char * a_logfile,
 		cw_bool_t a_overwrite)
 {
   cw_bool_t retval;
   FILE * temp_fp;
   
-  _cw_check_ptr(a_log_o);
+  _cw_check_ptr(a_log);
   _cw_check_ptr(a_logfile);
 #ifdef _CW_REENTRANT
-  mtx_lock(&a_log_o->lock);
+  mtx_lock(&a_log->lock);
 #endif
   
-  if ((a_log_o->log_fp != NULL) && (a_log_o->log_fp != stderr))
+  if ((a_log->log_fp != NULL) && (a_log->log_fp != stderr))
   {
-    fflush(a_log_o->log_fp);
-    fclose(a_log_o->log_fp);
+    fflush(a_log->log_fp);
+    fclose(a_log->log_fp);
   }
 
   if (a_overwrite == TRUE)
@@ -120,13 +120,13 @@ log_set_logfile(cw_log_t * a_log_o,
   if (temp_fp != NULL)
   {
     retval = FALSE;
-    a_log_o->log_fp = temp_fp;
-    if (a_log_o->logfile_name != NULL)
+    a_log->log_fp = temp_fp;
+    if (a_log->logfile_name != NULL)
     {
-      _cw_free(a_log_o->logfile_name);
+      _cw_free(a_log->logfile_name);
     }
-    a_log_o->logfile_name = (char *) _cw_malloc(strlen(a_logfile) + 1);
-    strcpy(a_log_o->logfile_name, a_logfile);
+    a_log->logfile_name = (char *) _cw_malloc(strlen(a_logfile) + 1);
+    strcpy(a_log->logfile_name, a_logfile);
   }
   else
   {
@@ -134,7 +134,7 @@ log_set_logfile(cw_log_t * a_log_o,
   }
 
 #ifdef _CW_REENTRANT
-  mtx_unlock(&a_log_o->lock);
+  mtx_unlock(&a_log->lock);
 #endif
   return retval;
 }
@@ -146,28 +146,28 @@ log_set_logfile(cw_log_t * a_log_o,
  *
  ****************************************************************************/
 int
-log_printf(cw_log_t * a_log_o, char * a_format, ...)
+log_printf(cw_log_t * a_log, char * a_format, ...)
 {
   va_list ap;
   int retval;
   FILE * fp;
 
-  if (a_log_o == NULL)
+  if (a_log == NULL)
   {
     fp = stderr;
   }
   else
   {
 #ifdef _CW_REENTRANT
-    mtx_lock(&a_log_o->lock);
+    mtx_lock(&a_log->lock);
 #endif
-    if (a_log_o->log_fp == NULL)
+    if (a_log->log_fp == NULL)
     {
       fp = stderr;
     }
     else
     {
-      fp = a_log_o->log_fp;
+      fp = a_log->log_fp;
     }
   }
   
@@ -177,9 +177,9 @@ log_printf(cw_log_t * a_log_o, char * a_format, ...)
   fflush(fp);
 
 #ifdef _CW_REENTRANT
-  if (a_log_o != NULL)
+  if (a_log != NULL)
   {
-    mtx_unlock(&a_log_o->lock);
+    mtx_unlock(&a_log->lock);
   }
 #endif
   return retval;
@@ -193,7 +193,7 @@ log_printf(cw_log_t * a_log_o, char * a_format, ...)
  *
  ****************************************************************************/
 int
-log_eprintf(cw_log_t * a_log_o,
+log_eprintf(cw_log_t * a_log,
 	    char * a_filename,
 	    int a_line_num,
 	    char * a_func_name,
@@ -204,23 +204,23 @@ log_eprintf(cw_log_t * a_log_o,
   int retval;
   FILE * fp;
 
-  if (a_log_o == NULL)
+  if (a_log == NULL)
   {
     fp = stderr;
   }
   else
   {
 #ifdef _CW_REENTRANT
-    mtx_lock(&a_log_o->lock);
+    mtx_lock(&a_log->lock);
 #endif
   
-    if (a_log_o->log_fp == NULL)
+    if (a_log->log_fp == NULL)
     {
       fp = stderr;
     }
     else
     {
-      fp = a_log_o->log_fp;
+      fp = a_log->log_fp;
     }
   }
   
@@ -244,12 +244,62 @@ log_eprintf(cw_log_t * a_log_o,
   fflush(fp);
 
 #ifdef _CW_REENTRANT
-  if (a_log_o != NULL)
+  if (a_log != NULL)
   {
-    mtx_unlock(&a_log_o->lock);
+    mtx_unlock(&a_log->lock);
   }
 #endif
   
+  return retval;
+}
+
+int
+log_nprintf(cw_log_t * a_log,
+	    cw_uint32_t a_size,
+	    char * a_format,
+	    ...)
+{
+  va_list ap;
+  int retval;
+  char * t_buf;
+  FILE * fp;
+
+  if (a_log == NULL)
+  {
+    fp = stderr;
+  }
+  else
+  {
+#ifdef _CW_REENTRANT
+    mtx_lock(&a_log->lock);
+#endif
+    if (a_log->log_fp == NULL)
+    {
+      fp = stderr;
+    }
+    else
+    {
+      fp = a_log->log_fp;
+    }
+  }
+
+  t_buf = (char *) _cw_malloc(a_size + 1);
+  
+  va_start(ap, a_format);
+  vsnprintf(t_buf, (size_t) a_size + 1, a_format, ap);
+  va_end(ap);
+
+  retval = fprintf(fp, "%s", t_buf);
+  fflush(fp);
+
+  _cw_free(t_buf);
+
+#ifdef _CW_REENTRANT
+  if (a_log != NULL)
+  {
+    mtx_unlock(&a_log->lock);
+  }
+#endif
   return retval;
 }
 
@@ -260,7 +310,7 @@ log_eprintf(cw_log_t * a_log_o,
  *
  ****************************************************************************/
 int
-log_lprintf(cw_log_t * a_log_o, char * a_format, ...)
+log_lprintf(cw_log_t * a_log, char * a_format, ...)
 {
   va_list ap;
   int retval;
@@ -269,14 +319,14 @@ log_lprintf(cw_log_t * a_log_o, char * a_format, ...)
   time_t curr_time;
   struct tm * cts;
 
-  if (a_log_o == NULL)
+  if (a_log == NULL)
   {
     fp = stderr;
   }
   else
   {
 #ifdef _CW_REENTRANT
-    mtx_lock(&a_log_o->lock);
+    mtx_lock(&a_log->lock);
 #endif
 
   /* Create time string. */
@@ -294,13 +344,13 @@ log_lprintf(cw_log_t * a_log_o, char * a_format, ...)
 #  error "Unsupported OS"
 #endif
   
-    if (a_log_o->log_fp == NULL)
+    if (a_log->log_fp == NULL)
     {
       fp = stderr;
     }
     else
     {
-      fp = a_log_o->log_fp;
+      fp = a_log->log_fp;
     }
   }
   
@@ -311,9 +361,9 @@ log_lprintf(cw_log_t * a_log_o, char * a_format, ...)
   fflush(fp);
 
 #ifdef _CW_REENTRANT
-  if (a_log_o != NULL)
+  if (a_log != NULL)
   {
-    mtx_unlock(&a_log_o->lock);
+    mtx_unlock(&a_log->lock);
   }
 #endif
   return retval;
@@ -327,7 +377,7 @@ log_lprintf(cw_log_t * a_log_o, char * a_format, ...)
  *
  ****************************************************************************/
 int
-log_leprintf(cw_log_t * a_log_o,
+log_leprintf(cw_log_t * a_log,
 	     char * a_filename,
 	     int a_line_num,
 	     char * a_func_name,
@@ -341,23 +391,23 @@ log_leprintf(cw_log_t * a_log_o,
   time_t curr_time;
   struct tm * cts;
 
-  if (a_log_o == NULL)
+  if (a_log == NULL)
   {
     fp = stderr;
   }
   else
   {
 #ifdef _CW_REENTRANT
-    mtx_lock(&a_log_o->lock);
+    mtx_lock(&a_log->lock);
 #endif
 
-    if (a_log_o->log_fp == NULL)
+    if (a_log->log_fp == NULL)
     {
       fp = stderr;
     }
     else
     {
-      fp = a_log_o->log_fp;
+      fp = a_log->log_fp;
     }
   }
   
@@ -397,9 +447,9 @@ log_leprintf(cw_log_t * a_log_o,
   fflush(fp);
 
 #ifdef _CW_REENTRANT
-  if (a_log_o != NULL)
+  if (a_log != NULL)
   {
-    mtx_unlock(&a_log_o->lock);
+    mtx_unlock(&a_log->lock);
   }
 #endif
   return retval;

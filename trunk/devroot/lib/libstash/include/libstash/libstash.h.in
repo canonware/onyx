@@ -162,25 +162,27 @@ typedef enum
  * libstash initialization and shutdown function prototypes.
  */
 #  define libstash_init _CW_NS_STASH(libstash_init)
+void
+libstash_init();
+  
 #  define libstash_shutdown _CW_NS_STASH(libstash_shutdown)
-
-void libstash_init();
-void libstash_shutdown();
+void
+libstash_shutdown();
   
 /*
  * Global variables.
  */
-extern cw_mem_t * g_mem_o;
-extern cw_dbg_t * g_dbg_o;
-extern cw_log_t * g_log_o;
+extern cw_mem_t * g_mem;
+extern cw_dbg_t * g_dbg;
+extern cw_log_t * g_log;
 
 /*
  * Global macros we use everywhere.
  */
-#  define _cw_malloc(a) mem_malloc(g_mem_o, a)
-#  define _cw_calloc(a, b) mem_calloc(g_mem_o, a, b)
-#  define _cw_realloc(a, b) mem_realloc(g_mem_o, a, b)
-#  define _cw_free(a) mem_free(g_mem_o, a)
+#  define _cw_malloc(a) mem_malloc(g_mem, a)
+#  define _cw_calloc(a, b) mem_calloc(g_mem, a, b)
+#  define _cw_realloc(a, b) mem_realloc(g_mem, a, b)
+#  define _cw_free(a) mem_free(g_mem, a)
 
 #endif /* _LIBSTASH_H_B_ */
 

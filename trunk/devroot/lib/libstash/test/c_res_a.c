@@ -20,7 +20,7 @@
 int
 main()
 {
-  cw_res_t res_o;
+  cw_res_t res;
   char s1[50] = "simple:value",
     s2[80] = "less_simple : this has spaces",
     s3[80] = "9adv_more_.nasty ::hello there!@$",
@@ -50,41 +50,41 @@ main()
 
   libstash_init();
 
-/*   dbg_register(g_dbg_o, "res_state"); */
+/*   dbg_register(g_dbg, "res_state"); */
   
-  res_new(&res_o);
+  res_new(&res);
 
-  log_printf(g_log_o, "Merging in a list...\n");
-  _cw_assert(FALSE == res_merge_list(&res_o, s1, s2, s3, s4, s5, s6, s7,
+  log_printf(g_log, "Merging in a list...\n");
+  _cw_assert(FALSE == res_merge_list(&res, s1, s2, s3, s4, s5, s6, s7,
 				     s8, NULL));
 
-  log_printf(g_log_o, "Searching for a resource...\n");
-  str = res_get_res_val(&res_o, "simple");
+  log_printf(g_log, "Searching for a resource...\n");
+  str = res_get_res_val(&res, "simple");
 
   _cw_check_ptr(str);
-  log_printf(g_log_o, "simple:%s\n", str);
+  log_printf(g_log, "simple:%s\n", str);
   _cw_assert(!strcmp(str, "value"));
 
-  log_printf(g_log_o, "Testing invalid resources handling...\n");
+  log_printf(g_log, "Testing invalid resources handling...\n");
 
-  _cw_assert(TRUE == res_merge_list(&res_o, es1, NULL));
-  _cw_assert(TRUE == res_merge_list(&res_o, es2, NULL));
-  _cw_assert(TRUE == res_merge_list(&res_o, es3, NULL));
-  _cw_assert(TRUE == res_merge_list(&res_o, es4, NULL));
-  _cw_assert(TRUE == res_merge_list(&res_o, es5, NULL));
-  _cw_assert(TRUE == res_merge_list(&res_o, es6, NULL));
-  _cw_assert(TRUE == res_merge_list(&res_o, es7, NULL));
-  _cw_assert(TRUE == res_merge_list(&res_o, es8, NULL));
-  _cw_assert(TRUE == res_merge_list(&res_o, es9, NULL));
-  _cw_assert(TRUE == res_merge_list(&res_o, es10, NULL));
-  _cw_assert(TRUE == res_merge_list(&res_o, es11, NULL));
-  _cw_assert(TRUE == res_merge_list(&res_o, es12, NULL));
-  _cw_assert(TRUE == res_merge_list(&res_o, es13, NULL));
-  _cw_assert(TRUE == res_merge_list(&res_o, es14, NULL));
-  _cw_assert(TRUE == res_merge_list(&res_o, es15, NULL));
-  _cw_assert(TRUE == res_merge_list(&res_o, es16, NULL));
+  _cw_assert(TRUE == res_merge_list(&res, es1, NULL));
+  _cw_assert(TRUE == res_merge_list(&res, es2, NULL));
+  _cw_assert(TRUE == res_merge_list(&res, es3, NULL));
+  _cw_assert(TRUE == res_merge_list(&res, es4, NULL));
+  _cw_assert(TRUE == res_merge_list(&res, es5, NULL));
+  _cw_assert(TRUE == res_merge_list(&res, es6, NULL));
+  _cw_assert(TRUE == res_merge_list(&res, es7, NULL));
+  _cw_assert(TRUE == res_merge_list(&res, es8, NULL));
+  _cw_assert(TRUE == res_merge_list(&res, es9, NULL));
+  _cw_assert(TRUE == res_merge_list(&res, es10, NULL));
+  _cw_assert(TRUE == res_merge_list(&res, es11, NULL));
+  _cw_assert(TRUE == res_merge_list(&res, es12, NULL));
+  _cw_assert(TRUE == res_merge_list(&res, es13, NULL));
+  _cw_assert(TRUE == res_merge_list(&res, es14, NULL));
+  _cw_assert(TRUE == res_merge_list(&res, es15, NULL));
+  _cw_assert(TRUE == res_merge_list(&res, es16, NULL));
   
-  res_delete(&res_o);
+  res_delete(&res);
   libstash_shutdown();
 
   return 0;

@@ -25,5 +25,5 @@ struct cw_log_s
 };
 
 #define log_p_uint64_base10_add _CW_NS_STASH(log_p_uint64_base10_add)
-
-void log_p_uint64_base10_add(char * a_result, char * a_a, char * a_b);
+void
+log_p_uint64_base10_add(char * a_result, char * a_a, char * a_b);

@@ -37,27 +37,42 @@ struct cw_bhp_s
 };
 
 #define bhp_new _CW_NS_STASH(bhp_new)
-#define bhp_delete _CW_NS_STASH(bhp_delete)
-#define bhp_dump _CW_NS_STASH(bhp_dump)
-#define bhp_insert _CW_NS_STASH(bhp_insert)
-#define bhp_find_min _CW_NS_STASH(bhp_find_min)
-#define bhp_del_min _CW_NS_STASH(bhp_del_min)
-#define bhp_get_size _CW_NS_STASH(bhp_get_size)
-#define bhp_union _CW_NS_STASH(bhp_union)
-#define bhp_set_priority_compare _CW_NS_STASH(bhp_set_priority_compare)
-
-
 #ifdef _CW_REENTRANT
-cw_bhp_t * bhp_new(cw_bhp_t * a_bhp, cw_bool_t a_is_thread_safe);
+cw_bhp_t *
+bhp_new(cw_bhp_t * a_bhp, cw_bool_t a_is_thread_safe);
 #else
-cw_bhp_t * bhp_new(cw_bhp_t * a_bhp);
+cw_bhp_t *
+bhp_new(cw_bhp_t * a_bhp);
 #endif
-void bhp_delete(cw_bhp_t * a_bhp);
-void bhp_dump(cw_bhp_t * a_bhp);
-void bhp_insert(cw_bhp_t * a_bhp, void * a_priority, void * a_data);
-cw_bool_t bhp_find_min(cw_bhp_t * a_bhp, void ** a_priority, void ** a_data);
-cw_bool_t bhp_del_min(cw_bhp_t * a_bhp, void ** a_priority, void ** a_data);
-cw_uint64_t bhp_get_size(cw_bhp_t * a_bhp);
-void bhp_union(cw_bhp_t * a_bhp, cw_bhp_t * a_other);
-void bhp_set_priority_compare(cw_bhp_t * a_bhp,
-			      bhp_prio_comp_t * a_new_prio_comp);
+
+#define bhp_delete _CW_NS_STASH(bhp_delete)
+void
+bhp_delete(cw_bhp_t * a_bhp);
+
+#define bhp_dump _CW_NS_STASH(bhp_dump)
+void
+bhp_dump(cw_bhp_t * a_bhp);
+
+#define bhp_insert _CW_NS_STASH(bhp_insert)
+void
+bhp_insert(cw_bhp_t * a_bhp, void * a_priority, void * a_data);
+
+#define bhp_find_min _CW_NS_STASH(bhp_find_min)
+cw_bool_t
+bhp_find_min(cw_bhp_t * a_bhp, void ** a_priority, void ** a_data);
+
+#define bhp_del_min _CW_NS_STASH(bhp_del_min)
+cw_bool_t
+bhp_del_min(cw_bhp_t * a_bhp, void ** a_priority, void ** a_data);
+
+#define bhp_get_size _CW_NS_STASH(bhp_get_size)
+cw_uint64_t
+bhp_get_size(cw_bhp_t * a_bhp);
+
+#define bhp_union _CW_NS_STASH(bhp_union)
+void
+bhp_union(cw_bhp_t * a_bhp, cw_bhp_t * a_other);
+
+#define bhp_set_priority_compare _CW_NS_STASH(bhp_set_priority_compare)
+void
+bhp_set_priority_compare(cw_bhp_t * a_bhp, bhp_prio_comp_t * a_new_prio_comp);

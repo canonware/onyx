@@ -44,7 +44,7 @@ main(int argc, char * argv[])
 #if (0)
   if (argc != 2)
   {
-    log_printf(g_log_o, "Usage: %s <num_nodes>\n", argv[0]);
+    log_printf(g_log, "Usage: %s <num_nodes>\n", argv[0]);
     exit(1);
   }
   num_nodes = strtol(argv[1], (char **) NULL, 10);
@@ -52,19 +52,19 @@ main(int argc, char * argv[])
 
   num_nodes = 5;
   
-  log_printf(g_log_o, "num_nodes == %lu\n", num_nodes);
+  log_printf(g_log, "num_nodes == %lu\n", num_nodes);
   if (num_nodes > 6)
   {
-    log_printf(g_log_o,
+    log_printf(g_log,
 	       "Due to variable limits, we can't do (num_nodes > 6)\n");
     exit(1);
   }
   num_edges = num_nodes * ((num_nodes - 1) / 2)
     + (((num_nodes + 1) / 2) * ((num_nodes + 1) % 2));
-  log_printf(g_log_o, "num_edges == %lu\n", num_edges);
+  log_printf(g_log, "num_edges == %lu\n", num_edges);
   num_graphs = 1 << (num_nodes * ((num_nodes - 1) / 2)
 		     + (((num_nodes + 1) / 2) * ((num_nodes + 1) % 2)));
-  log_printf(g_log_o, "num_graphs == %lu\n", num_graphs);
+  log_printf(g_log, "num_graphs == %lu\n", num_graphs);
   
   /* Create adjacency matrix, given number of nodes. */
   matrix_new(&graph);
@@ -129,14 +129,14 @@ main(int argc, char * argv[])
       }
       if (is_min_span_tree(&graph, num_nodes))
       {
-	/* 	log_printf(g_log_o, "Ding.\n"); */
+	/* 	log_printf(g_log, "Ding.\n"); */
 	graphs[num_min_graphs] = matrix_copy(&graph);
 	num_min_graphs++;
       }
     }
   }
   
-  log_printf(g_log_o, "Matrix size == %lu x %lu\n", num_graphs,
+  log_printf(g_log, "Matrix size == %lu x %lu\n", num_graphs,
 	     num_min_graphs);
 
   /* Create the big bad matrix. */
@@ -200,9 +200,9 @@ main(int argc, char * argv[])
     cw_uint32_t num_essentials;
     
     num_essentials = reduce(&cover);
-    log_printf(g_log_o, "%u essentials\n", num_essentials);
+    log_printf(g_log, "%u essentials\n", num_essentials);
     matrix_rebuild(&cover);
-    log_printf(g_log_o, "Matrix size == %lu x %lu\n",
+    log_printf(g_log, "Matrix size == %lu x %lu\n",
 	       matrix_get_x_size(&cover), matrix_get_y_size(&cover));
 
     recurse(&cover, num_essentials, matrix_get_y_size(&cover));
@@ -217,12 +217,12 @@ main(int argc, char * argv[])
 }
 
 cw_bool_t
-is_min_span_tree(cw_matrix_t * a_matrix_o, cw_uint32_t a_num_nodes)
+is_min_span_tree(cw_matrix_t * a_matrix, cw_uint32_t a_num_nodes)
 {
   cw_bool_t retval = TRUE;
   cw_uint32_t * class;
   
-  _cw_check_ptr(a_matrix_o);
+  _cw_check_ptr(a_matrix);
 
   class = (cw_uint32_t *) _cw_malloc(sizeof(cw_uint32_t) * a_num_nodes);
   bzero(class, (sizeof(cw_uint32_t) * a_num_nodes));
@@ -235,7 +235,7 @@ is_min_span_tree(cw_matrix_t * a_matrix_o, cw_uint32_t a_num_nodes)
     {
       for (i = 0, num_on_row = 0; i < a_num_nodes; i++)
       {
-	if (matrix_get_element(a_matrix_o, i, j) == TRUE)
+	if (matrix_get_element(a_matrix, i, j) == TRUE)
 	{
 	  num_on_row++;
 	  num_on_total++;
@@ -285,18 +285,18 @@ is_min_span_tree(cw_matrix_t * a_matrix_o, cw_uint32_t a_num_nodes)
       /* Relax all nodes. */
       for (j = 0; j < a_num_nodes; j++)
       {
-	if (matrix_get_element(a_matrix_o, i, j) != 0)
+	if (matrix_get_element(a_matrix, i, j) != 0)
 	{
-	  if (curr_leg + matrix_get_element(a_matrix_o, i, j) < weights[j])
+	  if (curr_leg + matrix_get_element(a_matrix, i, j) < weights[j])
 	  {
-	    weights[j] = curr_leg + matrix_get_element(a_matrix_o, i, j);
+	    weights[j] = curr_leg + matrix_get_element(a_matrix, i, j);
 	  }
 	}
 	if ((have_visited[j] == FALSE)
-	    && (matrix_get_element(a_matrix_o, i, j) != 0)
-	    && (matrix_get_element(a_matrix_o, i, j) < least))
+	    && (matrix_get_element(a_matrix, i, j) != 0)
+	    && (matrix_get_element(a_matrix, i, j) < least))
 	{
-	  least = matrix_get_element(a_matrix_o, i, j);
+	  least = matrix_get_element(a_matrix, i, j);
 	  new_i = j;
 	}
       }
@@ -314,7 +314,7 @@ is_min_span_tree(cw_matrix_t * a_matrix_o, cw_uint32_t a_num_nodes)
 	  for (k = 0; k < a_num_nodes; k++)
 	  {
 	    if ((have_visited[k] == FALSE)
-		&& (matrix_get_element(a_matrix_o,
+		&& (matrix_get_element(a_matrix,
 				       k, curr_path[curr_path_ele])
 		    != 0)
 		)
@@ -476,7 +476,7 @@ reduce(cw_matrix_t * a_m)
 	}
 	if (num_on == 0)
 	{
-	  log_printf(g_log_o, "Empty column %u (iteration %u)\n",
+	  log_printf(g_log, "Empty column %u (iteration %u)\n",
 		     x, x);
 	  exit(1);
 	}
@@ -543,7 +543,7 @@ recurse(cw_matrix_t * a_m, cw_uint32_t a_curr_selected, cw_uint32_t a_best)
       
       /* Found a new solution. */
       g_tries++;
-      log_printf(g_log_o, "Solution with %u rows (try %s)\n",
+      log_printf(g_log, "Solution with %u rows (try %s)\n",
 		 a_curr_selected + curr_essentials + 1,
 		 log_print_uint64(g_tries, 10, buf));
       a_best = a_curr_selected + curr_essentials;
@@ -556,7 +556,7 @@ recurse(cw_matrix_t * a_m, cw_uint32_t a_curr_selected, cw_uint32_t a_best)
       if (g_tries % 2600 == 0)
       {
 	char buf[65];
-	log_printf(g_log_o, "Try %s\n", log_print_uint64(g_tries, 10, buf));
+	log_printf(g_log, "Try %s\n", log_print_uint64(g_tries, 10, buf));
 	exit(0);
       }
     }

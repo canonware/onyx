@@ -20,15 +20,15 @@
 int
 main()
 {
-  cw_res_t res_o;
+  cw_res_t res;
   
   libstash_init();
-  dbg_register(g_dbg_o, "res_error");
+  dbg_register(g_dbg, "res_error");
   
-  res_new(&res_o);
-  _cw_assert(FALSE == res_merge_file(&res_o, "b19980828a.res"));
-  _cw_assert(FALSE == res_dump(&res_o, "b19980828a.dump"));
-  res_delete(&res_o);
+  res_new(&res);
+  _cw_assert(FALSE == res_merge_file(&res, "b19980828a.res"));
+  _cw_assert(FALSE == res_dump(&res, "b19980828a.dump"));
+  res_delete(&res);
       
   libstash_shutdown();
   return 0;

@@ -96,18 +96,18 @@
 #define _STASH_RES_STATE_FINISH 10
 
 cw_res_t *
-res_new(cw_res_t * a_res_o)
+res_new(cw_res_t * a_res)
 {
   cw_res_t * retval;
 
-  if (a_res_o == NULL)
+  if (a_res == NULL)
   {
     retval = (cw_res_t *) _cw_malloc(sizeof(cw_res_t));
     retval->is_malloced = TRUE;
   }
   else
   {
-    retval = a_res_o;
+    retval = a_res;
     retval->is_malloced = FALSE;
   }
 
@@ -118,28 +118,28 @@ res_new(cw_res_t * a_res_o)
   /* Non-thread-safe hash table, since we're already taking care of the
    * locking. */
 #ifdef _CW_REENTRANT
-  oh_new(&retval->hash_o, FALSE);
+  oh_new(&retval->hash, FALSE);
 #else
-  oh_new(&retval->hash_o);
+  oh_new(&retval->hash);
 #endif
 
   return retval;
 }
 
 void
-res_delete(cw_res_t * a_res_o)
+res_delete(cw_res_t * a_res)
 {
-  _cw_check_ptr(a_res_o);
+  _cw_check_ptr(a_res);
 
   /* Clean up internals. */
 #ifdef _CW_REENTRANT
-  rwl_delete(&a_res_o->rw_lock);
+  rwl_delete(&a_res->rw_lock);
 #endif
-  oh_delete(&a_res_o->hash_o);
+  oh_delete(&a_res->hash);
   
-  if (a_res_o->is_malloced)
+  if (a_res->is_malloced)
   {
-    _cw_free(a_res_o);
+    _cw_free(a_res);
   }
 }
 
@@ -150,16 +150,16 @@ res_delete(cw_res_t * a_res_o)
  *
  ****************************************************************************/
 void
-res_clear(cw_res_t * a_res_o)
+res_clear(cw_res_t * a_res)
 {
   char * key, * val;
   
-  _cw_check_ptr(a_res_o);
+  _cw_check_ptr(a_res);
 #ifdef _CW_REENTRANT
-  rwl_wlock(&a_res_o->rw_lock);
+  rwl_wlock(&a_res->rw_lock);
 #endif
 
-  while (FALSE == oh_item_delete_iterate(&a_res_o->hash_o, (void **) &key,
+  while (FALSE == oh_item_delete_iterate(&a_res->hash, (void **) &key,
 					 (void **) &val))
   {
     _cw_free(key);
@@ -167,7 +167,7 @@ res_clear(cw_res_t * a_res_o)
   }
   
 #ifdef _CW_REENTRANT
-  rwl_wunlock(&a_res_o->rw_lock);
+  rwl_wunlock(&a_res->rw_lock);
 #endif
 }
 
@@ -178,24 +178,24 @@ res_clear(cw_res_t * a_res_o)
  *
  ****************************************************************************/
 cw_bool_t
-res_is_equal(cw_res_t * a_res_o, cw_res_t * a_other)
+res_is_equal(cw_res_t * a_res, cw_res_t * a_other)
 {
   cw_bool_t retval;
 
-  _cw_check_ptr(a_res_o);
+  _cw_check_ptr(a_res);
   _cw_check_ptr(a_other);
 #ifdef _CW_REENTRANT
-  rwl_wlock(&a_res_o->rw_lock);
+  rwl_wlock(&a_res->rw_lock);
   rwl_rlock(&a_other->rw_lock);
 #endif
 
-  if (a_res_o == a_other)
+  if (a_res == a_other)
   {
     /* Two pointers to the same instance. */
     retval = TRUE;
   }
-  else if (oh_get_num_items(&a_res_o->hash_o)
-	   != oh_get_num_items(&a_other->hash_o))
+  else if (oh_get_num_items(&a_res->hash)
+	   != oh_get_num_items(&a_other->hash))
   {
     retval = FALSE;
   }
@@ -204,11 +204,11 @@ res_is_equal(cw_res_t * a_res_o, cw_res_t * a_other)
     cw_uint32_t i, num_resources;
     char * key, * val;
 
-    num_resources = oh_get_num_items(&a_res_o->hash_o);
+    num_resources = oh_get_num_items(&a_res->hash);
     
     for (i = 0, retval = FALSE; (i < num_resources) && (retval == FALSE); i++)
     {
-      oh_item_delete_iterate(&a_res_o->hash_o, (void **) &key,
+      oh_item_delete_iterate(&a_res->hash, (void **) &key,
 			     (void **) &val);
 
       if (NULL == res_get_res_val(a_other, key))
@@ -216,13 +216,13 @@ res_is_equal(cw_res_t * a_res_o, cw_res_t * a_other)
 	retval = TRUE;
       }
 
-      oh_item_insert(&a_res_o->hash_o, key, val);
+      oh_item_insert(&a_res->hash, key, val);
     }
   }
   
 #ifdef _CW_REENTRANT
   rwl_runlock(&a_other->rw_lock);
-  rwl_wunlock(&a_res_o->rw_lock);
+  rwl_wunlock(&a_res->rw_lock);
 #endif
   return retval;
 }
@@ -238,32 +238,32 @@ res_is_equal(cw_res_t * a_res_o, cw_res_t * a_other)
  *
  ****************************************************************************/
 cw_bool_t
-res_merge_file(cw_res_t * a_res_o, char * a_filename)
+res_merge_file(cw_res_t * a_res, char * a_filename)
 {
   cw_bool_t retval = FALSE, state_mach_error;
   int error;
   
-  _cw_check_ptr(a_res_o);
+  _cw_check_ptr(a_res);
 #ifdef _CW_REENTRANT
-  rwl_wlock(&a_res_o->rw_lock);
+  rwl_wlock(&a_res->rw_lock);
 #endif
 
-  a_res_o->fd = fopen(a_filename, "r");
-  if (a_res_o->fd == NULL)
+  a_res->fd = fopen(a_filename, "r");
+  if (a_res->fd == NULL)
   {
     retval = TRUE;
   }
   else
   {
     /* Run the state machine on the file. */
-    state_mach_error = res_p_parse_res(a_res_o, TRUE);
+    state_mach_error = res_p_parse_res(a_res, TRUE);
     if (state_mach_error == TRUE)
     {
       retval = TRUE;
     }
 
     /* Close the file. */
-    error = fclose(a_res_o->fd);
+    error = fclose(a_res->fd);
     if (error)
     {
       retval = TRUE;
@@ -271,7 +271,7 @@ res_merge_file(cw_res_t * a_res_o, char * a_filename)
   }
 
 #ifdef _CW_REENTRANT
-  rwl_wunlock(&a_res_o->rw_lock);
+  rwl_wunlock(&a_res->rw_lock);
 #endif
   return retval;
 }
@@ -291,23 +291,23 @@ res_merge_file(cw_res_t * a_res_o, char * a_filename)
  *
  ****************************************************************************/
 cw_bool_t
-res_merge_list(cw_res_t * a_res_o, ...)
+res_merge_list(cw_res_t * a_res, ...)
 {
   va_list ap;
   cw_bool_t retval = FALSE, state_mach_error;
   
-  _cw_check_ptr(a_res_o);
+  _cw_check_ptr(a_res);
 #ifdef _CW_REENTRANT
-  rwl_wlock(&a_res_o->rw_lock);
+  rwl_wlock(&a_res->rw_lock);
 #endif
 
   /* Run the strings through the insertion state machine. */
-  va_start(ap, a_res_o);
-  for (a_res_o->str = va_arg(ap, char *);
-       ((a_res_o->str != NULL) && (retval != TRUE));
-       a_res_o->str = va_arg(ap, char *))
+  va_start(ap, a_res);
+  for (a_res->str = va_arg(ap, char *);
+       ((a_res->str != NULL) && (retval != TRUE));
+       a_res->str = va_arg(ap, char *))
   {
-    state_mach_error = res_p_parse_res(a_res_o, FALSE);
+    state_mach_error = res_p_parse_res(a_res, FALSE);
     if (state_mach_error == TRUE)
     {
       retval = TRUE;
@@ -316,7 +316,7 @@ res_merge_list(cw_res_t * a_res_o, ...)
   va_end(ap);
   
 #ifdef _CW_REENTRANT
-  rwl_wunlock(&a_res_o->rw_lock);
+  rwl_wunlock(&a_res->rw_lock);
 #endif
   return retval;
 }
@@ -334,18 +334,18 @@ res_merge_list(cw_res_t * a_res_o, ...)
  *
  ****************************************************************************/
 char *
-res_get_res_val(cw_res_t * a_res_o, char * a_res_name)
+res_get_res_val(cw_res_t * a_res, char * a_res_name)
 {
   char * retval;
   cw_bool_t error;
   
-  _cw_check_ptr(a_res_o);
+  _cw_check_ptr(a_res);
   _cw_check_ptr(a_res_name);
 #ifdef _CW_REENTRANT
-  rwl_rlock(&a_res_o->rw_lock);
+  rwl_rlock(&a_res->rw_lock);
 #endif
 
-  error = oh_item_search(&a_res_o->hash_o, (void *) a_res_name,
+  error = oh_item_search(&a_res->hash, (void *) a_res_name,
 			 (void **) &retval);
   if (error == TRUE)
   {
@@ -353,7 +353,7 @@ res_get_res_val(cw_res_t * a_res_o, char * a_res_name)
   }
   
 #ifdef _CW_REENTRANT
-  rwl_runlock(&a_res_o->rw_lock);
+  rwl_runlock(&a_res->rw_lock);
 #endif
   return retval;
 }
@@ -367,21 +367,21 @@ res_get_res_val(cw_res_t * a_res_o, char * a_res_name)
  *
  ****************************************************************************/
 cw_bool_t
-res_extract_res(cw_res_t * a_res_o, char * a_res_key,
+res_extract_res(cw_res_t * a_res, char * a_res_key,
 		char ** a_res_name, char ** a_res_val)
 {
   cw_bool_t retval;
 
-  _cw_check_ptr(a_res_o);
+  _cw_check_ptr(a_res);
 #ifdef _CW_REENTRANT
-  rwl_wlock(&a_res_o->rw_lock);
+  rwl_wlock(&a_res->rw_lock);
 #endif
 
-  retval = oh_item_delete(&a_res_o->hash_o, a_res_key,
+  retval = oh_item_delete(&a_res->hash, a_res_key,
 			  (void **) a_res_name, (void **) a_res_val);
 
 #ifdef _CW_REENTRANT
-  rwl_wunlock(&a_res_o->rw_lock);
+  rwl_wunlock(&a_res->rw_lock);
 #endif
   return retval;
 }
@@ -390,26 +390,26 @@ res_extract_res(cw_res_t * a_res_o, char * a_res_key,
  * <<< Description >>>
  *
  * Dump the resource database.  If a_filename is non-NULL, attempt to open
- * the specified file and write to it.  Otherwise, use g_log_o.
+ * the specified file and write to it.  Otherwise, use g_log.
  *
  ****************************************************************************/
 cw_bool_t
-res_dump(cw_res_t * a_res_o, char * a_filename)
+res_dump(cw_res_t * a_res, char * a_filename)
 {
   cw_bool_t retval;
-  cw_log_t * t_log_o;
+  cw_log_t * t_log;
   
-  _cw_check_ptr(a_res_o);
+  _cw_check_ptr(a_res);
 #ifdef _CW_REENTRANT
-  rwl_wlock(&a_res_o->rw_lock);
+  rwl_wlock(&a_res->rw_lock);
 #endif
 
   if (a_filename != NULL)
   {
-    t_log_o = log_new(NULL);
-    if (log_set_logfile(t_log_o, a_filename, TRUE) == TRUE)
+    t_log = log_new(NULL);
+    if (log_set_logfile(t_log, a_filename, TRUE) == TRUE)
     {
-      log_leprintf(g_log_o, NULL, 0, "res_dump",
+      log_leprintf(g_log, NULL, 0, "res_dump",
 		   "Error opening file \"%s\"\n", a_filename);
       retval = TRUE;
       goto RETURN;
@@ -417,24 +417,24 @@ res_dump(cw_res_t * a_res_o, char * a_filename)
   }
   else
   {
-    t_log_o = g_log_o;
+    t_log = g_log;
   }
 
   retval = FALSE;
 
-  /* Now dump the resources to t_log_o. */
+  /* Now dump the resources to t_log. */
   {
     cw_uint64_t num_items, i;
     char * key, * val;
     cw_uint32_t j, curr_offset, val_len;
     
-    num_items = oh_get_num_items(&a_res_o->hash_o);
+    num_items = oh_get_num_items(&a_res->hash);
 
     for (i = 0; i < num_items; i++)
     {
-      oh_item_delete_iterate(&a_res_o->hash_o, (void *) &key, (void *) &val);
+      oh_item_delete_iterate(&a_res->hash, (void *) &key, (void *) &val);
 
-      log_printf(t_log_o, "%s:", key);
+      log_printf(t_log, "%s:", key);
       
       for (j = 0, curr_offset = 0, val_len = strlen(val);
 	   j < val_len + 1;
@@ -445,32 +445,32 @@ res_dump(cw_res_t * a_res_o, char * a_filename)
 	  val[j] = '\0';
 	  if ((j < val_len) && (val[j + 1] != '\0'))
 	  {
-	    log_printf(t_log_o, "%s\\n\\\n", (char *) (val + curr_offset));
+	    log_printf(t_log, "%s\\n\\\n", (char *) (val + curr_offset));
 	  }
 	  else
 	  {
-	    log_printf(t_log_o, "%s\\n", (char *) (val + curr_offset));
+	    log_printf(t_log, "%s\\n", (char *) (val + curr_offset));
 	  }
 	  val[j] = '\n';
 	  curr_offset = j + 1;
 	}
 	else if (val[j] == '\0')
 	{
-	  log_printf(t_log_o, "%s\n", (char *) (val + curr_offset));
+	  log_printf(t_log, "%s\n", (char *) (val + curr_offset));
 	}
       }
       
-      oh_item_insert(&a_res_o->hash_o, key, val);
+      oh_item_insert(&a_res->hash, key, val);
     }
   }
 
  RETURN:  
   if (a_filename != NULL)
   {
-    log_delete(t_log_o);
+    log_delete(t_log);
   }
 #ifdef _CW_REENTRANT
-  rwl_wunlock(&a_res_o->rw_lock);
+  rwl_wunlock(&a_res->rw_lock);
 #endif
   return retval;
 }
@@ -487,7 +487,7 @@ res_dump(cw_res_t * a_res_o, char * a_filename)
  *
  ****************************************************************************/
 cw_bool_t
-res_p_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
+res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 {
   cw_bool_t retval = FALSE;
   size_t i, name_pos = 0, val_pos = 0;
@@ -506,13 +506,13 @@ res_p_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
     /* Read the next character in. */
     if (a_is_file)
     {
-      c = (char) getc(a_res_o->fd);
+      c = (char) getc(a_res->fd);
       if (c == EOF)
       {
 	/* Make sure it's an EOF, not an error. */
-	if (ferror(a_res_o->fd))
+	if (ferror(a_res->fd))
 	{
-	  log_printf(g_log_o, "res_parse_res(): Error reading from file\n");
+	  log_printf(g_log, "res_parse_res(): Error reading from file\n");
 	  retval = TRUE;
 	  break;
 	}
@@ -525,12 +525,12 @@ res_p_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
     }
     else
     {
-      c = a_res_o->str[i];
+      c = a_res->str[i];
     }
     
-    if (dbg_is_registered(g_dbg_o, "res_state"))
+    if (dbg_is_registered(g_dbg, "res_state"))
     {
-      log_printf(g_log_o, "res_parse_res(): State == %d, Input == \'%c\'\n",
+      log_printf(g_log, "res_parse_res(): State == %d, Input == \'%c\'\n",
 		 state, c);
     }
     
@@ -592,7 +592,7 @@ res_p_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
 	  default:
 	  {
 	    /* Error. */
-	    log_eprintf(g_log_o, NULL, 0, "res_parse_res",
+	    log_eprintf(g_log, NULL, 0, "res_parse_res",
 			"Illegal character while in _STASH_RES_STATE_START, line %d, column %d\n",
 			line_num, col_num);
 	    retval = TRUE;
@@ -650,7 +650,7 @@ res_p_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
 	  case _STASH_RES_CHAR_OTHER:
 	  default:
 	  {
-	    log_eprintf(g_log_o, NULL, 0, "res_parse_res",
+	    log_eprintf(g_log, NULL, 0, "res_parse_res",
 			"Illegal character while in _STASH_RES_STATE_BEGIN_WHITESPACE, line %d, column %d\n",
 			line_num, col_num);
 	    retval = TRUE;
@@ -696,7 +696,7 @@ res_p_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
 	  default:
 	  {
 	    /* Error. */
-	    log_eprintf(g_log_o, NULL, 0, "res_parse_res",
+	    log_eprintf(g_log, NULL, 0, "res_parse_res",
 			"Illegal character while in _STASH_RES_STATE_BEGIN_COMMENT, line %d, column %d\n",
 			line_num, col_num);
 	    retval = TRUE;
@@ -746,7 +746,7 @@ res_p_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
 	  default:
 	  {
 	    /* Error. */
-	    log_eprintf(g_log_o, NULL, 0, "res_parse_res",
+	    log_eprintf(g_log, NULL, 0, "res_parse_res",
 			"Illegal character while in _STASH_RES_STATE_NAME, line %d, column %d\n",
 			line_num, col_num);
 	    retval = TRUE;
@@ -786,7 +786,7 @@ res_p_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
 	  default:
 	  {
 	    /* Error. */
-	    log_eprintf(g_log_o, NULL, 0, "res_parse_res",
+	    log_eprintf(g_log, NULL, 0, "res_parse_res",
 			"Illegal character while in _STASH_RES_STATE_POST_NAME_WHITESPACE, line %d, column %d\n",
 			line_num, col_num);
 	    retval = TRUE;
@@ -824,7 +824,7 @@ res_p_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
 	    /* Empty value.  NULL-terminate the string and jump to the
 	     * trailing comment state. */
 	    val[val_pos] = '\0';
-	    res_p_merge_res(a_res_o, name, val);
+	    res_p_merge_res(a_res, name, val);
 	    state = _STASH_RES_STATE_TRAILING_COMMENT;
 	    break;
 	  }
@@ -841,7 +841,7 @@ res_p_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
 	    line_num++;
 	    col_num = 1;
 	    val[val_pos] = '\0';
-	    res_p_merge_res(a_res_o, name, val);
+	    res_p_merge_res(a_res, name, val);
 	    state = _STASH_RES_STATE_START;
 	    break;
 	  }
@@ -849,7 +849,7 @@ res_p_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
 	  {
 	    /* Empty value, and end of input.  Insert the resource. */
 	    val[val_pos] = '\0';
-	    res_p_merge_res(a_res_o, name, val);
+	    res_p_merge_res(a_res, name, val);
 	    state = _STASH_RES_STATE_FINISH;
 	    break;
 	  }
@@ -857,7 +857,7 @@ res_p_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
 	  default:
 	  {
 	    /* Error. */
-	    log_eprintf(g_log_o, NULL, 0, "res_parse_res",
+	    log_eprintf(g_log, NULL, 0, "res_parse_res",
 			"Illegal character while in _STASH_RES_STATE_POST_COLON_WHITESPACE, line %d, column %d\n",
 			line_num, col_num);
 	    retval = TRUE;
@@ -892,7 +892,7 @@ res_p_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
 	     * NULL-terminate the string, insert the resource, and jump to
 	     * the trailing comment state. */
 	    val[val_pos] = '\0';
-	    res_p_merge_res(a_res_o, name, val);
+	    res_p_merge_res(a_res, name, val);
 	    state = _STASH_RES_STATE_TRAILING_COMMENT;
 	    break;
 	  }
@@ -910,7 +910,7 @@ res_p_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
 	    line_num++;
 	    col_num = 1;
 	    val[val_pos] = '\0';
-	    res_p_merge_res(a_res_o, name, val);
+	    res_p_merge_res(a_res, name, val);
 	    state = _STASH_RES_STATE_START;
 	    break;
 	  }
@@ -919,7 +919,7 @@ res_p_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
 	    /* Do the same thing as for a newline, except that we want the
 	     * state machine to exit. */
 	    val[val_pos] = '\0';
-	    res_p_merge_res(a_res_o, name, val);
+	    res_p_merge_res(a_res, name, val);
 	    state = _STASH_RES_STATE_FINISH;
 	    break;
 	  }
@@ -927,7 +927,7 @@ res_p_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
 	  default:
 	  {
 	    /* Error. */
-	    log_eprintf(g_log_o, NULL, 0, "res_parse_res",
+	    log_eprintf(g_log, NULL, 0, "res_parse_res",
 			"Illegal character while in _STASH_RES_STATE_VALUE, line %d, column %d\n",
 			line_num, col_num);
 	    retval = TRUE;
@@ -1004,7 +1004,7 @@ res_p_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
 	  default:
 	  {
 	    /* Error. */
-	    log_eprintf(g_log_o, NULL, 0, "res_parse_res",
+	    log_eprintf(g_log, NULL, 0, "res_parse_res",
 			"Illegal character while in _STASH_RES_STATE_VALUE_BACKSLASH, line %d, column %d\n",
 			line_num, col_num);
 	    retval = TRUE;
@@ -1045,7 +1045,7 @@ res_p_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
 	  default:
 	  {
 	    /* Error. */
-	    log_eprintf(g_log_o, NULL, 0, "res_parse_res",
+	    log_eprintf(g_log, NULL, 0, "res_parse_res",
 			"Illegal character while in _STASH_RES_STATE_BACKSLASH_WHITESPACE, line %d, column %d\n",
 			line_num, col_num);
 	    retval = TRUE;
@@ -1091,7 +1091,7 @@ res_p_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
 	  default:
 	  {
 	    /* Error. */
-	    log_eprintf(g_log_o, NULL, 0, "res_parse_res",
+	    log_eprintf(g_log, NULL, 0, "res_parse_res",
 			"Illegal character while in _STASH_RES_STATE_TRAILING_COMMENT, line %d, column %d\n",
 			line_num, col_num);
 	    retval = TRUE;
@@ -1102,7 +1102,7 @@ res_p_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
       }
       default:
       {
-	log_eprintf(g_log_o, NULL, 0, "res_parse_res",
+	log_eprintf(g_log, NULL, 0, "res_parse_res",
 		    "Jumped to non-existant state, line %d, column %d\n",
 		    line_num, col_num);
 	retval = TRUE;
@@ -1241,7 +1241,7 @@ res_p_char_type(char a_char)
  *
  ****************************************************************************/
 void
-res_p_merge_res(cw_res_t * a_res_o, char * a_name, char * a_val)
+res_p_merge_res(cw_res_t * a_res, char * a_name, char * a_val)
 {
   char * temp_name, * temp_val;
   cw_bool_t error;
@@ -1252,15 +1252,15 @@ res_p_merge_res(cw_res_t * a_res_o, char * a_name, char * a_val)
   temp_val = (char *) _cw_malloc(strlen(a_val) + 1);
   strcpy(temp_val, a_val);
 
-  if (dbg_is_registered(g_dbg_o, "res_state"))
+  if (dbg_is_registered(g_dbg, "res_state"))
   {
-    log_printf(g_log_o,
+    log_printf(g_log,
 	       "res_merge_res(): Merging name == :%s:, value == :%s:\n",
 	       a_name, a_val);
   }
 
   /* Insert the resource into the hash table. */
-  error = oh_item_insert(&a_res_o->hash_o, (void *) temp_name,
+  error = oh_item_insert(&a_res->hash, (void *) temp_name,
 			 (void *) temp_val);
   if (error == TRUE)
   {
@@ -1269,13 +1269,13 @@ res_p_merge_res(cw_res_t * a_res_o, char * a_name, char * a_val)
     /* The resource already exists.  That means we need to delete the
      * existing one, free the resources that are taken up by it, and redo
      * the insertion. */
-    oh_item_delete(&a_res_o->hash_o, (void *) temp_name,
+    oh_item_delete(&a_res->hash, (void *) temp_name,
 		   (void **) &old_name,
 		   (void **) &old_val);
     _cw_free(old_name);
     _cw_free(old_val);
 
-    oh_item_insert(&a_res_o->hash_o, (void *) temp_name,
+    oh_item_insert(&a_res->hash, (void *) temp_name,
 		   (void *) temp_val);
   }
 }

@@ -41,7 +41,7 @@ lex_new()
  *
  ****************************************************************************/
 void
-lex_delete(cw_lex_t * a_lex_o)
+lex_delete(cw_lex_t * a_lex)
 {
 }
 
@@ -173,7 +173,7 @@ lex_delete(cw_lex_t * a_lex_o)
  *
  ****************************************************************************/
 cw_bool_t
-lex_insert_regex(cw_lex_t * a_lex_o,
+lex_insert_regex(cw_lex_t * a_lex,
 		 char * a_regex,
 		 cw_uint32_t a_tok_val)
 {
@@ -190,7 +190,7 @@ lex_insert_regex(cw_lex_t * a_lex_o,
  *
  ****************************************************************************/
 char *
-lex_delete_regex(cw_lex_t * a_lex_o, char * a_regex)
+lex_delete_regex(cw_lex_t * a_lex, char * a_regex)
 {
   return NULL; /* XXX */
 }
@@ -201,7 +201,7 @@ lex_delete_regex(cw_lex_t * a_lex_o, char * a_regex)
  *
  ****************************************************************************/
 cw_bool_t
-lex_build_table(cw_lex_t * a_lex_o)
+lex_build_table(cw_lex_t * a_lex)
 {
   return TRUE; /* XXX */
 }
@@ -212,7 +212,7 @@ lex_build_table(cw_lex_t * a_lex_o)
  *
  ****************************************************************************/
 cw_lexer_t *
-lexer_new(cw_lexer_t * a_lexer_o)
+lexer_new(cw_lexer_t * a_lexer)
 {
   return NULL; /* XXX */
 }
@@ -223,7 +223,7 @@ lexer_new(cw_lexer_t * a_lexer_o)
  *
  ****************************************************************************/
 void
-lexer_delete(cw_lexer_t * a_lexer_o)
+lexer_delete(cw_lexer_t * a_lexer)
 {
 }
 
@@ -233,19 +233,19 @@ lexer_delete(cw_lexer_t * a_lexer_o)
  *
  ****************************************************************************/
 void
-lexer_set_lex(cw_lexer_t * a_lexer_o, cw_lex_t * a_lex_o)
+lexer_set_lex(cw_lexer_t * a_lexer, cw_lex_t * a_lex)
 {
 }
 
 /****************************************************************************
  *
  * Connect a buf to this lexer.  New data is read from the buf whenever
- * internally buffered data runs out.  Passing in a_buf_o == NULL disconnects
+ * internally buffered data runs out.  Passing in a_buf == NULL disconnects
  * the current buf.
  *
  ****************************************************************************/
 cw_bool_t
-lexer_connect_buf(cw_lexer_t * a_lexer_o, cw_buf_t * a_buf_o)
+lexer_connect_buf(cw_lexer_t * a_lexer, cw_buf_t * a_buf)
 {
   return TRUE; /* XXX */
 }
@@ -256,7 +256,7 @@ lexer_connect_buf(cw_lexer_t * a_lexer_o, cw_buf_t * a_buf_o)
  *
  ****************************************************************************/
 cw_lexertok_t *
-lexer_get_token(cw_lexer_t * a_lexer_o)
+lexer_get_token(cw_lexer_t * a_lexer)
 {
   return NULL; /* XXX */
 }
@@ -270,7 +270,7 @@ lexer_get_token(cw_lexer_t * a_lexer_o)
  *
  ****************************************************************************/
 cw_uint32_t
-lexer_get_line_num(cw_lexer_t * a_lexer_o,
+lexer_get_line_num(cw_lexer_t * a_lexer,
 		   cw_bool_t a_last_or_next_tok)
 {
   return 0; /* XXX */
@@ -283,7 +283,7 @@ lexer_get_line_num(cw_lexer_t * a_lexer_o,
  *
  ****************************************************************************/
 cw_bool_t
-lexer_set_line_num(cw_lexer_t * a_lexer_o,
+lexer_set_line_num(cw_lexer_t * a_lexer,
 		   cw_uint32_t a_line_num)
 {
   return TRUE; /* XXX */
@@ -298,7 +298,7 @@ lexer_set_line_num(cw_lexer_t * a_lexer_o,
  *
  ****************************************************************************/
 cw_uint32_t
-lexer_get_col_num(cw_lexer_t * a_lexer_o,
+lexer_get_col_num(cw_lexer_t * a_lexer,
 		  cw_bool_t a_last_or_next_tok)
 {
   return 0; /* XXX */
@@ -315,7 +315,7 @@ lexer_get_col_num(cw_lexer_t * a_lexer_o,
  *
  ****************************************************************************/
 cw_bool_t
-lexer_reject(cw_lexer_t * a_lexer_o)
+lexer_reject(cw_lexer_t * a_lexer)
 {
   return TRUE; /* XXX */
 }
@@ -329,7 +329,7 @@ lexer_reject(cw_lexer_t * a_lexer_o)
  *
  ****************************************************************************/
 cw_bool_t
-lexer_push_text(cw_lexer_t * a_lexer_o, cw_uint32_t a_strlen,
+lexer_push_text(cw_lexer_t * a_lexer, cw_uint32_t a_strlen,
 		char * a_text)
 {
   return TRUE; /* XXX */
@@ -341,7 +341,7 @@ lexer_push_text(cw_lexer_t * a_lexer_o, cw_uint32_t a_strlen,
  *
  ****************************************************************************/
 cw_bool_t
-lexer_less(cw_lexer_t * a_lexer_o, cw_uint32_t a_num_chars)
+lexer_less(cw_lexer_t * a_lexer, cw_uint32_t a_num_chars)
 {
   return TRUE; /* XXX */
 }
@@ -352,7 +352,7 @@ lexer_less(cw_lexer_t * a_lexer_o, cw_uint32_t a_num_chars)
  *
  ****************************************************************************/
 cw_bool_t
-lexer_more(cw_lexer_t * a_lexer_o)
+lexer_more(cw_lexer_t * a_lexer)
 {
   return TRUE; /* XXX */
 }
@@ -363,7 +363,7 @@ lexer_more(cw_lexer_t * a_lexer_o)
  *
  ****************************************************************************/
 cw_lexertok_t *
-lexertok_new(cw_lexertok_t * a_lexertok_o)
+lexertok_new(cw_lexertok_t * a_lexertok)
 {
   return NULL; /* XXX */
 }
@@ -374,7 +374,7 @@ lexertok_new(cw_lexertok_t * a_lexertok_o)
  *
  ****************************************************************************/
 void
-lexertok_delete(cw_lexertok_t * a_lexertok_o)
+lexertok_delete(cw_lexertok_t * a_lexertok)
 {
 }
 
@@ -384,7 +384,7 @@ lexertok_delete(cw_lexertok_t * a_lexertok_o)
  *
  ****************************************************************************/
 cw_uint32_t
-lexertok_get_tok_val(cw_lexertok_t * a_lexertok_o)
+lexertok_get_tok_val(cw_lexertok_t * a_lexertok)
 {
   return 0; /* XXX */
 }
@@ -398,7 +398,7 @@ lexertok_get_tok_val(cw_lexertok_t * a_lexertok_o)
  *
  ****************************************************************************/
 char *
-lexertok_get_str(cw_lexertok_t * a_lexertok_o)
+lexertok_get_str(cw_lexertok_t * a_lexertok)
 {
   return NULL; /* XXX */
 }

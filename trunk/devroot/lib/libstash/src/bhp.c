@@ -35,7 +35,7 @@ cw_bhp_t *
 #ifdef _CW_REENTRANT
 bhp_new(cw_bhp_t * a_bhp, cw_bool_t a_is_thread_safe)
 #else
-bhp_new(cw_bhp_t * a_bhp)
+     bhp_new(cw_bhp_t * a_bhp)
 #endif
 {
   cw_bhp_t * retval;
@@ -159,7 +159,7 @@ bhp_insert(cw_bhp_t * a_bhp, void * a_priority, void * a_data)
 
   /* Clean up temp_heap. */
   /* XXX This should be done by bhp_merge(). */
-/*   bhp_delete(&temp_heap); */
+  /*   bhp_delete(&temp_heap); */
   
 #ifdef _CW_REENTRANT
   if (a_bhp->is_thread_safe == TRUE)
@@ -203,7 +203,7 @@ bhp_find_min(cw_bhp_t * a_bhp, void ** a_priority, void ** a_data)
        *                              0 means a == b,
        *                              1 means a > b. */
       if (-1 == a_bhp->priority_compare(curr_pos->priority,
-					  curr_min->priority))
+					curr_min->priority))
       {
 	curr_min = curr_pos;
       }
@@ -266,7 +266,7 @@ bhp_del_min(cw_bhp_t * a_bhp, void ** a_priority, void ** a_data)
     while (curr_pos != NULL)
     {
       if (-1 == a_bhp->priority_compare(curr_pos->priority,
-					  curr_min->priority))
+					curr_min->priority))
       {
 	/* Found a new minimum. */
 	curr_min = curr_pos;
@@ -392,7 +392,7 @@ bhp_union(cw_bhp_t * a_bhp, cw_bhp_t * a_other)
       curr_node = next_node;
     }
     else if (1 != a_bhp->priority_compare(curr_node->priority,
-					    next_node->priority)) /* <= */
+					  next_node->priority)) /* <= */
     {
       curr_node->sibling = next_node->sibling;
       bhp_p_bin_link(curr_node, next_node);
@@ -459,7 +459,7 @@ bhp_set_priority_compare(cw_bhp_t * a_bhp,
 cw_bhpi_t *
 bhp_p_dump(cw_bhpi_t * a_bhpi, cw_uint32_t a_depth, cw_bhpi_t * a_last_printed)
 {
-/*    cw_bhpi_t * bhpi_p; */
+  /*    cw_bhpi_t * bhpi_p; */
   cw_uint32_t i;
   
   /* Sibling. */
@@ -474,22 +474,22 @@ bhp_p_dump(cw_bhpi_t * a_bhpi, cw_uint32_t a_depth, cw_bhpi_t * a_last_printed)
     /* Indent. */
     for (i = 0; i < (a_depth * 50); i++)
     {
-      log_printf(g_log_o, " ");
+      log_printf(g_log, " ");
     }
   }
-  log_printf(g_log_o, "[depth: %d, degree: %d, priority: %d, data: %d]",
+  log_printf(g_log, "[depth: %d, degree: %d, priority: %d, data: %d]",
 	     a_depth, a_bhpi->degree, *(cw_sint32_t *) a_bhpi->priority,
 	     *(cw_sint32_t *) a_bhpi->data);
   
   /* Child. */
   if (NULL != a_bhpi->child)
   {
-    log_printf(g_log_o, " ---> ");
+    log_printf(g_log, " ---> ");
     a_last_printed = bhp_p_dump(a_bhpi->child, a_depth + 1, a_bhpi);
   }
   else
   {
-    log_printf(g_log_o, "\n");
+    log_printf(g_log, "\n");
   }
 
   return a_last_printed;

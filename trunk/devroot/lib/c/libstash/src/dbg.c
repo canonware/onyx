@@ -51,12 +51,12 @@ dbg_new()
  *
  ****************************************************************************/
 void
-dbg_delete(cw_dbg_t * a_dbg_o)
+dbg_delete(cw_dbg_t * a_dbg)
 {
-  _cw_check_ptr(a_dbg_o);
+  _cw_check_ptr(a_dbg);
 
-  oh_delete(&a_dbg_o->flag_hash);
-  _cw_free(a_dbg_o);
+  oh_delete(&a_dbg->flag_hash);
+  _cw_free(a_dbg);
 }
 
 /****************************************************************************
@@ -66,14 +66,14 @@ dbg_delete(cw_dbg_t * a_dbg_o)
  *
  ****************************************************************************/
 void
-dbg_register(cw_dbg_t * a_dbg_o, char * a_flag)
+dbg_register(cw_dbg_t * a_dbg, char * a_flag)
 {
-  _cw_check_ptr(a_dbg_o);
+  _cw_check_ptr(a_dbg);
 
   /* Ignore the return value, since we don't care if the flag is already
    * registered.  Pass a NULL data pointer since we don't need any additional
    * info stored with the flag. */
-  oh_item_insert(&a_dbg_o->flag_hash, (void *) a_flag, NULL);
+  oh_item_insert(&a_dbg->flag_hash, (void *) a_flag, NULL);
 }
 
 /****************************************************************************
@@ -83,16 +83,16 @@ dbg_register(cw_dbg_t * a_dbg_o, char * a_flag)
  *
  ****************************************************************************/
 void
-dbg_unregister(cw_dbg_t * a_dbg_o, char * a_flag)
+dbg_unregister(cw_dbg_t * a_dbg, char * a_flag)
 {
   char ** junk1 = NULL, ** junk2 = NULL;
 
-  _cw_check_ptr(a_dbg_o);
+  _cw_check_ptr(a_dbg);
 
   /* Ignore the return value, since we don't care if the flag isn't registered.
    * Also, pass dummy variables junk1 and junk2, since we don't care about their
    * contents. */
-  oh_item_delete(&a_dbg_o->flag_hash, a_flag, (void **) junk1, (void **) junk2);
+  oh_item_delete(&a_dbg->flag_hash, a_flag, (void **) junk1, (void **) junk2);
 }
 
 /****************************************************************************
@@ -102,13 +102,13 @@ dbg_unregister(cw_dbg_t * a_dbg_o, char * a_flag)
  *
  ****************************************************************************/
 cw_bool_t
-dbg_is_registered(cw_dbg_t * a_dbg_o, char * a_flag)
+dbg_is_registered(cw_dbg_t * a_dbg, char * a_flag)
 {
   char * junk = NULL;
 
-  _cw_check_ptr(a_dbg_o);
+  _cw_check_ptr(a_dbg);
   _cw_check_ptr(a_flag);
 
   /* Pass dummy variable junk, since we don't care about the data pointer. */
-  return ! oh_item_search(&a_dbg_o->flag_hash, a_flag, (void **) &junk);
+  return ! oh_item_search(&a_dbg->flag_hash, a_flag, (void **) &junk);
 }
