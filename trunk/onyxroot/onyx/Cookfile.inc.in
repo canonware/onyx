@@ -187,7 +187,12 @@ dataend
 
 distclean : clean [addsuffix _distclean tests bins mods libs]
 {
-  rm -rf @objroot@/autom4te*.cache;
+  {
+    local cachedir = [glob @objroot@/autom4te"*".cache];
+
+    if [count [cachedir]] then
+      rm -rf [cachedir];
+  }
   rm -f @objroot@/config.log;
   rm -f @objroot@/config.status;
   rm -f @objroot@/config.stamp;
