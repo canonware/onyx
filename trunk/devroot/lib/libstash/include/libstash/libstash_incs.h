@@ -31,7 +31,7 @@
 
 /*
  * Include files.  These must be listed in reverse dependency order (for
- * example, list.h must come before oh.h.
+ * example, ring.h must come before oh.h.
  */
 
 #include "ring.h"
