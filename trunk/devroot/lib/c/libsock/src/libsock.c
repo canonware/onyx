@@ -150,9 +150,9 @@ sockb_init(cw_uint32_t a_bufel_size, cw_uint32_t a_max_spare_bufels)
     sem_new(&g_sockb->pipe_sem, 1);
 
     /* Create the spare bufel pool and initialize associated variables. */
-    bufpool_new(&g_sockb->bufel_pool, sizeof(cw_bufel_t), a_max_spare_bufels);
-    bufpool_new(&g_sockb->bufc_pool, sizeof(cw_bufc_t), a_max_spare_bufels);
-    bufpool_new(&g_sockb->buffer_pool, a_bufel_size, a_max_spare_bufels);
+    pezz_new(&g_sockb->bufel_pool, sizeof(cw_bufel_t), a_max_spare_bufels);
+    pezz_new(&g_sockb->bufc_pool, sizeof(cw_bufc_t), a_max_spare_bufels);
+    pezz_new(&g_sockb->buffer_pool, a_bufel_size, a_max_spare_bufels);
   
     /* Create the message queues. */
     list_new(&g_sockb->registrations, TRUE);
@@ -181,9 +181,9 @@ sockb_shutdown(void)
   sem_delete(&g_sockb->pipe_sem);
   
   /* Clean up the spare bufel's. */
-  bufpool_delete(&g_sockb->bufel_pool);
-  bufpool_delete(&g_sockb->bufc_pool);
-  bufpool_delete(&g_sockb->buffer_pool);
+  pezz_delete(&g_sockb->bufel_pool);
+  pezz_delete(&g_sockb->bufc_pool);
+  pezz_delete(&g_sockb->buffer_pool);
   
   list_delete(&g_sockb->registrations);
   list_delete(&g_sockb->unregistrations);
@@ -209,16 +209,16 @@ sockb_get_spare_bufel(void)
   
   _cw_check_ptr(g_sockb);
 
-  retval = bufel_new((cw_bufel_t *) bufpool_get_buffer(&g_sockb->bufel_pool),
-		     bufpool_put_buffer,
+  retval = bufel_new((cw_bufel_t *) pezz_get(&g_sockb->bufel_pool),
+		     pezz_put,
 		     (void *) &g_sockb->bufel_pool);
-  bufc = bufc_new((cw_bufc_t *) bufpool_get_buffer(&g_sockb->bufc_pool),
-		  bufpool_put_buffer,
+  bufc = bufc_new((cw_bufc_t *) pezz_get(&g_sockb->bufc_pool),
+		  pezz_put,
 		  (void *) &g_sockb->bufc_pool);
   bufc_set_buffer(bufc,
-		  bufpool_get_buffer(&g_sockb->buffer_pool),
-		  bufpool_get_buffer_size(&g_sockb->buffer_pool),
-		  bufpool_put_buffer,
+		  pezz_get(&g_sockb->buffer_pool),
+		  pezz_get_buffer_size(&g_sockb->buffer_pool),
+		  pezz_put,
 		  (void *) &g_sockb->buffer_pool);
   bufel_set_bufc(retval, bufc);
   bufel_set_beg_offset(retval, 0);
@@ -542,6 +542,8 @@ sockb_p_entry_func(void * a_arg)
 	  if (NULL != socks[i])
 	  {
 	    /* Is any space available? */
+/*  	    if (sock_l_get_in_max_buf_size(socks[i]) */
+/*  		<= sock_l_get_in_size(socks[i])) */
 	    if (0 >= (sock_l_get_in_max_buf_size(socks[i])
 			- sock_l_get_in_size(socks[i])))
 	    {
@@ -638,6 +640,8 @@ sockb_p_entry_func(void * a_arg)
 	   * be more room now... */
 	  max_read = (sock_l_get_in_max_buf_size(socks[i])
 		      - sock_l_get_in_size(socks[i]));
+/*  	  _cw_assert(sock_l_get_in_max_buf_size(socks[i]) */
+/*  		     >= sock_l_get_in_size(socks[i])); */
 
 	  _cw_assert(max_read > 0);
 

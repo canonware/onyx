@@ -290,6 +290,7 @@ clean : FORCE
 	rm -f test/*.[do]
 	rm -f test/*.diff
 	rm -f $(BTESTS)
+	rm -f $(BINS)
 
 #	rm -f $(CTESTS) $(PTESTS) $(BTESTS) $(BINS)
 

@@ -34,6 +34,9 @@
 #  ifndef _LIBSTASH_USE_BUF
 #    define _LIBSTASH_USE_BUF
 #  endif
+#  ifndef _LIBSTASH_USE_PEZZ
+#    define _LIBSTASH_USE_PEZZ
+#  endif
 #  ifndef _LIBSTASH_USE_LIST
 #    define _LIBSTASH_USE_LIST
 #  endif

@@ -1,3 +1,7 @@
+1999-04-11  Jason Evans  <jasone@canonware.com>
+
+	* src/sockb.c: Use pezz instead of bufpool.
+
 1999-04-09  Jason Evans  <jasone@canonware.com>
 
 	* configure.in: Add --disable-shared.
