@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 69 $
- * Last modified: $Date: 1998-05-02 02:08:51 -0700 (Sat, 02 May 1998) $
+ * Current revision: $Revision: 80 $
+ * Last modified: $Date: 1998-05-18 23:40:54 -0700 (Mon, 18 May 1998) $
  *
  * Description: The idea here is to keep cpp from having to process a header
  *              file more than once.
@@ -84,56 +84,66 @@
  * Other project headers we don't always want to include.
  */
 
-#if (defined(_INC_BHP_H_) || defined(_INC_ALL_))
+#if (defined(_INC_BHP_H_))
 #  ifndef _BHP_H_
 #    include <bhp.h>
 #    define _BHP_H_
 #  endif
 #endif
 
-#if (defined(_INC_BR_H_) || defined(_INC_ALL_))
+#if (defined(_INC_BR_H_))
 #  ifndef _BR_H_
+#    ifndef _BRBLK_H_
+#      include <brblk.h>
+#    endif
 #    include <br.h>
 #    define _BR_H_
 #  endif
 #endif
 
-#if (defined(_INC_BT_H_) || defined(_INC_ALL_))
+#if (defined(_INC_BRBLK_H_))
+#  ifndef _BRBLK_H_
+#    include <brblk.h>
+#    define _BRBLK_H_
+#  endif
+#endif
+
+#if (defined(_INC_BT_H_))
 #  ifndef _BT_H_
 #    include <bt.h>
 #    define _BT_H_
 #  endif
 #endif
 
-#if (defined(_INC_BUF_H_) || defined(_INC_ALL_))
+#if (defined(_INC_BUF_H_))
 #  ifndef _BUF_H_
 #    include <buf.h>
 #    define _BUF_H_
 #  endif
 #endif
 
-#if (defined(_INC_GLOB_H_) || defined(_INC_ALL_))
+#if (defined(_INC_GLOB_H_))
 #  ifndef _GLOB_H_
 #    include <glob.h>
 #    define _GLOB_H_
 #  endif
 #endif
 
-#if (defined(_INC_LIST_H_) || defined(_INC_ALL_))
+#if (defined(_INC_LIST_H_))
 #  ifndef _LIST_H_
 #    include <list.h>
 #    define _LIST_H_
 #  endif
 #endif
 
-#if (defined(_INC_OH_H_) || defined(_INC_ALL_))
+#if (defined(_INC_OH_H_))
 #  ifndef _OH_H_
 #    include <oh.h>
 #    define _OH5_H_
 #  endif
 #endif
 
-#if (defined(_INC_RES_H_) || defined(_INC_ALL_))
+#if (defined(_INC_RES_H_))
 #  ifndef _RES_H_
 #    ifndef _OH_H_
 #      include <oh.h>
@@ -144,7 +154,7 @@
 #  endif
 #endif
 
-#if (defined(_INC_SOCK_H_) || defined(_INC_ALL_))
+#if (defined(_INC_SOCK_H_))
 #  ifndef _SOCK_H_
 #    include <sock.h>
 #    define _SOCK_H_
@@ -154,7 +164,7 @@
 /* Skeleton */
 #if (0)
 
-#if (defined(_INC_?_H_) || defined(_INC_ALL_))
+#if (defined(_INC_?_H_))
 #  ifndef _?_H_
 #    include <?.h>
 #    define _?_H_
