@@ -44,7 +44,7 @@
 
 * Sun Solaris 9.
 
-* Apple OS X 10.2.
+* Apple OS X 10.3.
 
   + Amazingly, execve() does not work for a multi-threaded process.  This can be
     worked around by calling fork(), then execve(), and exiting the parent
