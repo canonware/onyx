@@ -88,9 +88,10 @@ AC_CHECK_FUNCS(dlopen, AC_DEFINE(HAVE_DLOPEN), \
     [enable_modules="no"
     AC_MSG_RESULT(Modules disabled since dlopen is missing)]))
 
-dnl if test "x$enable_modules" = "xyes" -a "x$enable_threads" = "x1" \
-dnl      -a "x$enable_posix" = "x1" ; then
-dnl fi
+if test "x$enable_modules" = "xyes" -a "x$enable_threads" = "x1" \
+     -a "x$enable_posix" = "x1" ; then
+    CW_BUILD_MOD(modpane, mod_pane)
+fi
 
 dnl Look for binaries.
 if test "x$enable_onyx" = "x1" ; then
@@ -238,7 +239,7 @@ if test "x$build_onyx" = "xyes" ; then
   trpath=ONYX_RPATH=:.
   for i in $mods ; do
     tmpath=$tmpath:$abs_objdir/mod/$i/nxmod
-    trpath=$trpath:$abs_objdir/mod/$i/src
+    trpath=$trpath:$abs_objdir/mod/$i/nxcode
   done
   AC_DEFINE_UNQUOTED(CW_TONYX_RPATH, "$trpath")
   AC_DEFINE_UNQUOTED(CW_TONYX_MPATH, "$tmpath")
@@ -261,7 +262,7 @@ if test "x$build_slate" = "xyes" ; then
   trpath=SLATE_RPATH=:.
   for i in $mods ; do
     tmpath=$tmpath:$abs_objdir/mod/$i/nxmod
-    trpath=$trpath:$abs_objdir/mod/$i/src
+    trpath=$trpath:$abs_objdir/mod/$i/nxcode
   done
   AC_DEFINE_UNQUOTED(CW_TSLATE_RPATH, "$trpath")
   AC_DEFINE_UNQUOTED(CW_TSLATE_MPATH, "$tmpath")

@@ -157,10 +157,7 @@ install : install_bins install_mods install_libs install_docs;
 uninstall_bins : [addsuffix _uninstall @bins@];
 uninstall_mods : [addsuffix _uninstall @mods@];
 uninstall_libs : [addsuffix _uninstall @libs@];
-uninstall : uninstall_bins uninstall_mods uninstall_libs uninstall_docs
-{
-  rm -rf [PREFIX]/share/canonware;
-}
+uninstall : uninstall_bins uninstall_mods uninstall_libs uninstall_docs;
 
 clean : [addsuffix _clean docs test @bins@ @mods@ @libs@]
 {
