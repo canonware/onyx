@@ -56,7 +56,7 @@ qs - Stack macros
 .RI ( "<qs_elm_type> *a_qselm" ", " "<qs_elm_type> *a_elm" ", "
 .IR "<field_name> a_field" )
 
-.I <qs_elm_type> *
+.I void
 .br
 .B qs_pop
 .RI ( "<qs_type> *a_head" ", " "<field_name> a_field" )
@@ -305,7 +305,7 @@ Push a_elm under a_qselm.
 .RE
 .RE
 
-.I <qs_elm_type> *
+.I void
 .br
 .B qs_pop
 .RI ( "<qs_type> *a_head" ", " "<field_name> a_field" )
@@ -323,12 +323,7 @@ Field within the \fBqs\fR elements to use.
 .RE
 Output(s):
 .RS
-.IR retval :
-.RS
-non-NULL: Pointer to a \fBqs\fR element.
-.br
-NULL: a_head is empty.
-.RE
+None.
 .RE
 Description:
 .RS
