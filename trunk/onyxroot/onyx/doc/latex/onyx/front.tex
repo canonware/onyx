@@ -125,12 +125,18 @@
 \newcommand{\oparg}[1]{{\em #1}}
 \newcommand{\commas}{,,,}
 
+% \optableent{inputs}{operator}{outputs}{description}
+\newcommand{\optableent}[4]{\parbox[t]{2.0in}{#1 \\
+\hspace*{0.25in} \parbox[t]{1.75in}{#2} \\
+\hspace*{0.50in} \parbox[t]{1.50in}{#3 \vspace*{2pt}}} & #4 \\
+}
+
 % For printed versions, we need to limit the width of tables, but for html
 % there is no need to.
-\newcommand{\optableformat}[1]{|r|l|l|p{#1in}|}
+\newcommand{\optableformat}[1]{|l|p{#1in}|}
 \newcommand{\rxtableformat}[1]{|r|p{#1in}|}
 
-% TeX doesn't have '\', '<', '>', '|', and '~' in its text fonts.
+% TeX doesn't have '\', '^', '<', '>', '|', and '~' in its text fonts.
 \newcommand{\bs}{$\backslash$}
 \newcommand{\carat}{\^{ }}
 \newcommand{\lt}{$<$}
@@ -143,7 +149,7 @@
 % The build system does substitution of the YYY..ZZZ strings after the html
 % is generated.
 \begin{htmlonly}
-\newcommand{\optableformat}[1]{|r|l|l|l|}
+\newcommand{\optableformat}[1]{|l|l|}
 \newcommand{\rxtableformat}[1]{|r|l|}
 \newcommand{\bs}{YYYbsZZZ}
 \newcommand{\carat}{^}

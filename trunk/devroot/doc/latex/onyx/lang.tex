@@ -808,7 +808,7 @@ dictionary, which is described in Section~\ref{sec:gcdict}.
 
 There are two special Onyx object types that support regular expressions: regex
 and regsub.  Objects of these types are created via the
-\htmlref{\onyxop{}{regex}{}}{systemdict:regex} and
+\htmlref{\onyxop{}{regexp}{}}{systemdict:regexp} and
 \htmlref{\onyxop{}{regsub}{}}{systemdict:regsub} operators, respectively.  The
 \htmlref{\onyxop{}{match}{}}{systemdict:match} operator applies a regular
 expression to an input string, and the
@@ -830,7 +830,7 @@ consistent syntax.  An introductory summary of the characters that can have
 special meaning within strings that specify regular expressions follows:
 
 \begin{longtable}{\rxtableformat{5.50}}
-\caption[Special characters]{Regular expression special characters} \\
+\caption{Regular expression special characters} \\
 \hline
 Character & Description \\
 \hline \hline
@@ -874,7 +874,7 @@ character class. \\
 The following sequences have special meaning within strings that specify regular
 expressions:
 \begin{longtable}{\rxtableformat{5.30}}
-\caption[Special sequences]{Regular expression special sequences} \\
+\caption{Regular expression special sequences} \\
 \hline
 Sequence & Description \\
 \hline \hline
@@ -1009,7 +1009,7 @@ The following sequences have special meaning within strings that specify
 substitution templates:
 
 \begin{longtable}{\rxtableformat{5.50}}
-\caption[Special characters]{Substitution template special characters} \\
+\caption{Substitution template special characters} \\
 \hline
 Sequence & Description \\
 \hline \hline
@@ -1045,40 +1045,76 @@ program-defined definition shadows the built in definition during name lookups.
 Each thread has its own currenterror dictionary, which is used by the error
 handling machinery to store error state.
 
-\begin{longtable}{\optableformat{3}}
-\caption[currenterror summary]{currenterror summary}
+\begin{longtable}{\optableformat{4.10}}
+\caption{currenterror summary}
 \\
 \hline
-Input(s) & Op/Proc/Var & Output(s) & Description \\
+\optableent
+	{Input(s)}
+	{Op/Proc/Var}
+	{Output(s)}
+	{Description}
 \hline \hline
 %begin{latexonly}
 \endfirsthead
 \caption[]{\emph{continued}} \\
 \hline
-Input(s) & Op/Proc/Var & Output(s) & Description \\
+\optableent
+	{Input(s)}
+	{Op/Proc/Var}
+	{Output(s)}
+	{Description}
 \hline \endhead
-\multicolumn{4}{r}{\emph{Continued on next page...}} \endfoot
+\multicolumn{2}{r}{\emph{Continued on next page...}} \endfoot
 \hline \endlastfoot
 %end{latexonly}
--- & {\bf \htmlref{newerror}{currenterror:newerror}} & boolean & Set to true
-during error handling. \\
+\optableent
+	{--}
+	{{\bf \htmlref{newerror}{currenterror:newerror}}}
+	{boolean}
+	{Set to true during error handling.}
 \hline
--- & {\bf \htmlref{errorname}{currenterror:errorname}} & name & Name of most
-recent error. \\
+\optableent
+	{--}
+	{{\bf \htmlref{errorname}{currenterror:errorname}}}
+	{name}
+	{Name of most recent error.}
 \hline
--- & {\bf \htmlref{line}{currenterror:line}} & number & Get line number of
-syntax error. \\
+\optableent
+	{--}
+	{{\bf \htmlref{line}{currenterror:line}}}
+	{number}
+	{Get line number of syntax error.}
 \hline
--- & {\bf \htmlref{column}{currenterror:column}} & number & Get column number of
-syntax error. \\
+\optableent
+	{--}
+	{{\bf \htmlref{column}{currenterror:column}}}
+	{number}
+	{Get column number of syntax error.}
 \hline
--- & {\bf \htmlref{ostack}{currenterror:ostack}} & stack & ostack snapshot. \\
+\optableent
+	{--}
+	{{\bf \htmlref{ostack}{currenterror:ostack}}}
+	{stack}
+	{ostack snapshot.}
 \hline
--- & {\bf \htmlref{dstack}{currenterror:dstack}} & stack & dstack snaphot. \\
+\optableent
+	{--}
+	{{\bf \htmlref{dstack}{currenterror:dstack}}}
+	{stack}
+	{dstack snaphot.}
 \hline
--- & {\bf \htmlref{estack}{currenterror:estack}} & stack & estack snapshot. \\
+\optableent
+	{--}
+	{{\bf \htmlref{estack}{currenterror:estack}}}
+	{stack}
+	{estack snapshot.}
 \hline
--- & {\bf \htmlref{istack}{currenterror:istack}} & stack & istack snapshot. \\
+\optableent
+	{--}
+	{{\bf \htmlref{istack}{currenterror:istack}}}
+	{stack}
+	{istack snapshot.}
 \end{longtable}
 
 \begin{description}
@@ -1357,25 +1393,39 @@ modified directly, the changes will not be visible to programs such as
 Each thread has its own errordict, which is used by default by the error
 handling machinery.
 
-\begin{longtable}{\optableformat{3}}
-\caption[errordict summary]{errordict summary} \\
+\begin{longtable}{\optableformat{4.10}}
+\caption{errordict summary} \\
 \hline
-Input(s) & Op/Proc/Var & Output(s) & Description \\
+\optableent
+	{Input(s)}
+	{Op/Proc/Var}
+	{Output(s)}
+	{Description}
 \hline \hline
 %begin{latexonly}
 \endfirsthead
 \caption[]{\emph{continued}} \\
 \hline
-Input(s) & Op/Proc/Var & Output(s) & Description \\
+\optableent
+	{Input(s)}
+	{Op/Proc/Var}
+	{Output(s)}
+	{Description}
 \hline \endhead
-\multicolumn{4}{r}{\emph{Continued on next page...}} \endfoot
+\multicolumn{2}{r}{\emph{Continued on next page...}} \endfoot
 \hline \endlastfoot
 %end{latexonly}
--- & {\bf \htmlref{handleerror}{errordict:handleerror}} & -- & Print a state
-dump. \\
+\optableent
+	{--}
+	{{\bf \htmlref{handleerror}{errordict:handleerror}}}
+	{--}
+	{Print a state dump.}
 \hline
--- & {\bf \htmlref{stop}{errordict:stop}} & -- & Last operation during error
-handling. \\
+\optableent
+	{--}
+	{{\bf \htmlref{stop}{errordict:stop}}}
+	{--}
+	{Last operation during error handling.}
 \end{longtable}
 
 \begin{description}
@@ -1471,48 +1521,80 @@ Custom stop
 The gcdict dictionary provides garbage collection control and status
 capabilities.
 
-\begin{longtable}{\optableformat{3.75}}
-\caption[gcdict summary]{gcdict summary by functional group}
+\begin{longtable}{\optableformat{4.10}}
+\caption{gcdict summary}
 \\
 \hline
-Input(s) & Op/Proc/Var & Output(s) & Description \\
+\optableent
+	{Input(s)}
+	{Op/Proc/Var}
+	{Output(s)}
+	{Description}
 \hline \hline
 %begin{latexonly}
 \endfirsthead
 \caption[]{\emph{continued}} \\
 \hline
-Input(s) & Op/Proc/Var & Output(s) & Description \\
+\optableent
+	{Input(s)}
+	{Op/Proc/Var}
+	{Output(s)}
+	{Description}
 \hline \endhead
-\multicolumn{4}{r}{\emph{Continued on next page...}} \endfoot
+\multicolumn{2}{r}{\emph{Continued on next page...}} \endfoot
 \hline \endlastfoot
 %end{latexonly}
-\multicolumn{4}{|l|}{Control operators} \\
+\multicolumn{2}{|l|}{Control operators} \\
 \hline \hline
--- & {\bf \htmlref{collect}{gcdict:collect}} & -- & Force a garbage
-collection. \\
+\optableent
+	{--}
+	{{\bf \htmlref{collect}{gcdict:collect}}}
+	{--}
+	{Force a garbage collection.}
 \hline
-boolean & {\bf \htmlref{setactive}{gcdict:setactive}} & -- & Set whether the
-garbage collector is active. \\
+\optableent
+	{boolean}
+	{{\bf \htmlref{setactive}{gcdict:setactive}}}
+	{--}
+	{Set whether the garbage collector is active.}
 \hline
-seconds & {\bf \htmlref{setperiod}{gcdict:setperiod}} & -- & Set the inactivity
-period before the garbage collector will run. \\
+\optableent
+	{seconds}
+	{{\bf \htmlref{setperiod}{gcdict:setperiod}}}
+	{--}
+	{Set the inactivity period before the garbage collector will run.}
 \hline
-count & {\bf \htmlref{setthreshold}{gcdict:setthreshold}} & -- & Set the number
-of bytes of memory allocation that will trigger a garbage collection. \\
+\optableent
+	{count}
+	{{\bf \htmlref{setthreshold}{gcdict:setthreshold}}}
+	{--}
+	{Set the number of bytes of memory allocation that will trigger a garbage collection.}
 \hline \hline
-\multicolumn{4}{|l|}{State and statistics operators} \\
+\multicolumn{2}{|l|}{State and statistics operators} \\
 \hline \hline
--- & {\bf \htmlref{active}{gcdict:active}} & boolean & Get whether the garbage
-collector is active. \\
+\optableent
+	{--}
+	{{\bf \htmlref{active}{gcdict:active}}}
+	{boolean}
+	{Get whether the garbage collector is active.}
 \hline
--- & {\bf \htmlref{period}{gcdict:period}} & seconds & Get the inactivity period
-befor the garbage collector will run. \\
+\optableent
+	{--}
+	{{\bf \htmlref{period}{gcdict:period}}}
+	{seconds}
+	{Get the inactivity period before the garbage collector will run.}
 \hline
--- & {\bf \htmlref{threshold}{gcdict:threshold}} & count & Get the number of
-bytes of memory allocation that will trigger a garbage collection. \\
+\optableent
+	{--}
+	{{\bf \htmlref{threshold}{gcdict:threshold}}}
+	{count}
+	{Get the number of bytes of memory allocation that will trigger a garbage collection.}
 \hline
--- & {\bf \htmlref{stats}{gcdict:stats}} & array & Get garbage collection
-statistics. \\
+\optableent
+	{--}
+	{{\bf \htmlref{stats}{gcdict:stats}}}
+	{array}
+	{Get garbage collection statistics.}
 \end{longtable}
 
 \begin{description}
@@ -1769,32 +1851,52 @@ Various portions of Onyx use the onyxdict dictionary for storage of
 miscellaneous objects that normally should not be part of the namespace visible
 to dstack searches.
 
-\begin{longtable}{\optableformat{3}}
-\caption[onyxdict summary]{onyxdict summary}
+\begin{longtable}{\optableformat{4.10}}
+\caption{onyxdict summary}
 \\
 \hline
-Input(s) & Op/Proc/Var & Output(s) & Description \\
+\optableent
+	{Input(s)}
+	{Op/Proc/Var}
+	{Output(s)}
+	{Description}
 \hline \hline
 %begin{latexonly}
 \endfirsthead
 \caption[]{\emph{continued}} \\
 \hline
-Input(s) & Op/Proc/Var & Output(s) & Description \\
+\optableent
+	{Input(s)}
+	{Op/Proc/Var}
+	{Output(s)}
+	{Description}
 \hline \endhead
-\multicolumn{4}{r}{\emph{Continued on next page...}} \endfoot
+\multicolumn{2}{r}{\emph{Continued on next page...}} \endfoot
 \hline \endlastfoot
 %end{latexonly}
--- & {\bf \htmlref{mpath\_post}{onyxdict:mpath_post}} & array & Get path
-searched by \htmlref{mrequire}{systemdict:mrequire}. \\
+\optableent
+	{--}
+	{{\bf \htmlref{mpath\_post}{onyxdict:mpath_post}}}
+	{array}
+	{Get path searched by \htmlref{mrequire}{systemdict:mrequire}.}
 \hline
--- & {\bf \htmlref{mpath\_pre}{onyxdict:mpath_pre}} & array & Get path searched
-by \htmlref{mrequire}{systemdict:mrequire}. \\
+\optableent
+	{--}
+	{{\bf \htmlref{mpath\_pre}{onyxdict:mpath_pre}}}
+	{array}
+	{Get path searched by \htmlref{mrequire}{systemdict:mrequire}.}
 \hline
--- & {\bf \htmlref{rpath\_post}{onyxdict:rpath_post}} & array & Get path
-searched by \htmlref{require}{systemdict:require}. \\
+\optableent
+	{--}
+	{{\bf \htmlref{rpath\_post}{onyxdict:rpath_post}}}
+	{array}
+	{Get path searched by \htmlref{require}{systemdict:require}.}
 \hline
--- & {\bf \htmlref{rpath\_pre}{onyxdict:rpath_pre}} & array & Get path searched
-by \htmlref{require}{systemdict:require}. \\
+\optableent
+	{--}
+	{{\bf \htmlref{rpath\_pre}{onyxdict:rpath_pre}}}
+	{array}
+	{Get path searched by \htmlref{require}{systemdict:require}.}
 \end{longtable}
 
 \begin{description}
@@ -1946,74 +2048,136 @@ The following additional flags are supported for reals:
 	Exponential notation, if true.  Default: false.
 \end{description}
 
-\begin{longtable}{\optableformat{3}}
-\caption[outputsdict summary]{outputsdict summary}
+\begin{longtable}{\optableformat{4.10}}
+\caption{outputsdict summary}
 \\
 \hline
-Input(s) & Op/Proc/Var & Output(s) & Description \\
+\optableent
+	{Input(s)}
+	{Op/Proc/Var}
+	{Output(s)}
+	{Description}
 \hline \hline
 %begin{latexonly}
 \endfirsthead
 \caption[]{\emph{continued}} \\
 \hline
-Input(s) & Op/Proc/Var & Output(s) & Description \\
+\optableent
+	{Input(s)}
+	{Op/Proc/Var}
+	{Output(s)}
+	{Description}
 \hline \endhead
-\multicolumn{4}{r}{\emph{Continued on next page...}} \endfoot
+\multicolumn{2}{r}{\emph{Continued on next page...}} \endfoot
 \hline \endlastfoot
 %end{latexonly}
-array flags & {\bf \htmlref{arraytype}{outputsdict:arraytype}} & string &
-Create formatted string from array. \\
+\optableent
+	{array flags}
+	{{\bf \htmlref{arraytype}{outputsdict:arraytype}}}
+	{string}
+	{Create formatted string from array.}
 \hline
-boolean flags & {\bf \htmlref{booleantype}{outputsdict:booleantype}} & string &
-Create formatted string from boolean. \\
+\optableent
+	{boolean flags}
+	{{\bf \htmlref{booleantype}{outputsdict:booleantype}}}
+	{string}
+	{Create formatted string from boolean.}
 \hline
-condition flags & {\bf \htmlref{conditiontype}{outputsdict:conditiontype}} &
-string & Create formatted string from condition. \\
+\optableent
+	{condition flags}
+	{{\bf \htmlref{conditiontype}{outputsdict:conditiontype}}}
+	{string}
+	{Create formatted string from condition.}
 \hline
-dict flags & {\bf \htmlref{dicttype}{outputsdict:dicttype}} & string &
-Create formatted string from dict. \\
+\optableent
+	{dict flags}
+	{{\bf \htmlref{dicttype}{outputsdict:dicttype}}}
+	{string}
+	{Create formatted string from dict.}
 \hline
-file flags & {\bf \htmlref{filetype}{outputsdict:filetype}} & string &
-Create formatted string from file. \\
+\optableent
+	{file flags}
+	{{\bf \htmlref{filetype}{outputsdict:filetype}}}
+	{string}
+	{Create formatted string from file.}
 \hline
-fino flags & {\bf \htmlref{finotype}{outputsdict:finotype}} & string &
-Create formatted string from fino. \\
+\optableent
+	{fino flags}
+	{{\bf \htmlref{finotype}{outputsdict:finotype}}}
+	{string}
+	{Create formatted string from fino.}
 \hline
-hook flags & {\bf \htmlref{hooktype}{outputsdict:hooktype}} & string &
-Create formatted string from hook. \\
+\optableent
+	{hook flags}
+	{{\bf \htmlref{hooktype}{outputsdict:hooktype}}}
+	{string}
+	{Create formatted string from hook.}
 \hline
-integer flags & {\bf \htmlref{integertype}{outputsdict:integertype}} & string &
-Create formatted string from integer. \\
+\optableent
+	{integer flags}
+	{{\bf \htmlref{integertype}{outputsdict:integertype}}}
+	{string}
+	{Create formatted string from integer.}
 \hline
-mark flags & {\bf \htmlref{marktype}{outputsdict:marktype}} & string &
-Create formatted string from mark. \\
+\optableent
+	{mark flags}
+	{{\bf \htmlref{marktype}{outputsdict:marktype}}}
+	{string}
+	{Create formatted string from mark.}
 \hline
-mutex flags & {\bf \htmlref{mutextype}{outputsdict:mutextype}} & string &
-Create formatted string from mutex. \\
+\optableent
+	{mutex flags}
+	{{\bf \htmlref{mutextype}{outputsdict:mutextype}}}
+	{string}
+	{Create formatted string from mutex.}
 \hline
-name flags & {\bf \htmlref{nametype}{outputsdict:nametype}} & string &
-Create formatted string from name. \\
+\optableent
+	{name flags}
+	{{\bf \htmlref{nametype}{outputsdict:nametype}}}
+	{string}
+	{Create formatted string from name.}
 \hline
-null flags & {\bf \htmlref{nulltype}{outputsdict:nulltype}} & string &
-Create formatted string from null. \\
+\optableent
+	{null flags}
+	{{\bf \htmlref{nulltype}{outputsdict:nulltype}}}
+	{string}
+	{Create formatted string from null.}
 \hline
-operator flags & {\bf \htmlref{operatortype}{outputsdict:operatortype}} & string
-& Create formatted string from operator. \\
+\optableent
+	{operator flags}
+	{{\bf \htmlref{operatortype}{outputsdict:operatortype}}}
+	{string}
+	{Create formatted string from operator.}
 \hline
-pmark flags & {\bf \htmlref{pmarktype}{outputsdict:pmarktype}} & string &
-Create formatted string from pmark. \\
+\optableent
+	{pmark flags}
+	{{\bf \htmlref{pmarktype}{outputsdict:pmarktype}}}
+	{string}
+	{Create formatted string from pmark.}
 \hline
-real flags & {\bf \htmlref{realtype}{outputsdict:realtype}} & string &
-Create formatted string from real. \\
+\optableent
+	{real flags}
+	{{\bf \htmlref{realtype}{outputsdict:realtype}}}
+	{string}
+	{Create formatted string from real.}
 \hline
-stack flags & {\bf \htmlref{stacktype}{outputsdict:stacktype}} & string &
-Create formatted string from stack. \\
+\optableent
+	{stack flags}
+	{{\bf \htmlref{stacktype}{outputsdict:stacktype}}}
+	{string}
+	{Create formatted string from stack.}
 \hline
-string flags & {\bf \htmlref{stringtype}{outputsdict:stringtype}} & string &
-Create formatted string from string. \\
+\optableent
+	{string flags}
+	{{\bf \htmlref{stringtype}{outputsdict:stringtype}}}
+	{string}
+	{Create formatted string from string.}
 \hline
-thread flags & {\bf \htmlref{threadtype}{outputsdict:threadtype}} & string &
-Create formatted string from thread. \\
+\optableent
+	{thread flags}
+	{{\bf \htmlref{threadtype}{outputsdict:threadtype}}}
+	{string}
+	{Create formatted string from thread.}
 \end{longtable}
 
 \begin{description}
@@ -2652,74 +2816,136 @@ $sprints {
 } def
 \end{verbatim}
 
-\begin{longtable}{\optableformat{3}}
-\caption[sprintsdict summary]{sprintsdict summary}
+\begin{longtable}{\optableformat{4.10}}
+\caption{sprintsdict summary}
 \\
 \hline
-Input(s) & Op/Proc/Var & Output(s) & Description \\
+\optableent
+	{Input(s)}
+	{Op/Proc/Var}
+	{Output(s)}
+	{Description}
 \hline \hline
 %begin{latexonly}
 \endfirsthead
 \caption[]{\emph{continued}} \\
 \hline
-Input(s) & Op/Proc/Var & Output(s) & Description \\
+\optableent
+	{Input(s)}
+	{Op/Proc/Var}
+	{Output(s)}
+	{Description}
 \hline \endhead
-\multicolumn{4}{r}{\emph{Continued on next page...}} \endfoot
+\multicolumn{2}{r}{\emph{Continued on next page...}} \endfoot
 \hline \endlastfoot
 %end{latexonly}
-array depth & {\bf \htmlref{arraytype}{sprintsdict:arraytype}} & string &
-Create syntactical string from array. \\
+\optableent
+	{array depth}
+	{{\bf \htmlref{arraytype}{sprintsdict:arraytype}}}
+	{string}
+	{Create syntactical string from array.}
 \hline
-boolean depth & {\bf \htmlref{booleantype}{sprintsdict:booleantype}} & string &
-Create syntactical string from boolean. \\
+\optableent
+	{boolean depth}
+	{{\bf \htmlref{booleantype}{sprintsdict:booleantype}}}
+	{string}
+	{Create syntactical string from boolean.}
 \hline
-condition depth & {\bf \htmlref{conditiontype}{sprintsdict:conditiontype}} &
-string & Create syntactical string from condition. \\
+\optableent
+	{condition depth}
+	{{\bf \htmlref{conditiontype}{sprintsdict:conditiontype}}}
+	{string}
+	{Create syntactical string from condition.}
 \hline
-dict depth & {\bf \htmlref{dicttype}{sprintsdict:dicttype}} & string &
-Create syntactical string from dict. \\
+\optableent
+	{dict depth}
+	{{\bf \htmlref{dicttype}{sprintsdict:dicttype}}}
+	{string}
+	{Create syntactical string from dict.}
 \hline
-file depth & {\bf \htmlref{filetype}{sprintsdict:filetype}} & string &
-Create syntactical string from file. \\
+\optableent
+	{file depth}
+	{{\bf \htmlref{filetype}{sprintsdict:filetype}}}
+	{string}
+	{Create syntactical string from file.}
 \hline
-fino depth & {\bf \htmlref{finotype}{sprintsdict:finotype}} & string &
-Create syntactical string from fino. \\
+\optableent
+	{fino depth}
+	{{\bf \htmlref{finotype}{sprintsdict:finotype}}}
+	{string}
+	{Create syntactical string from fino.}
 \hline
-hook depth & {\bf \htmlref{hooktype}{sprintsdict:hooktype}} & string &
-Create syntactical string from hook. \\
+\optableent
+	{hook depth}
+	{{\bf \htmlref{hooktype}{sprintsdict:hooktype}}}
+	{string}
+	{Create syntactical string from hook.}
 \hline
-integer depth & {\bf \htmlref{integertype}{sprintsdict:integertype}} & string &
-Create syntactical string from integer. \\
+\optableent
+	{integer depth}
+	{{\bf \htmlref{integertype}{sprintsdict:integertype}}}
+	{string}
+	{Create syntactical string from integer.}
 \hline
-mark depth & {\bf \htmlref{marktype}{sprintsdict:marktype}} & string &
-Create syntactical string from mark. \\
+\optableent
+	{mark depth}
+	{{\bf \htmlref{marktype}{sprintsdict:marktype}}}
+	{string}
+	{Create syntactical string from mark.}
 \hline
-mutex depth & {\bf \htmlref{mutextype}{sprintsdict:mutextype}} & string &
-Create syntactical string from mutex. \\
+\optableent
+	{mutex depth}
+	{{\bf \htmlref{mutextype}{sprintsdict:mutextype}}}
+	{string}
+	{Create syntactical string from mutex.}
 \hline
-name depth & {\bf \htmlref{nametype}{sprintsdict:nametype}} & string &
-Create syntactical string from name. \\
+\optableent
+	{name depth}
+	{{\bf \htmlref{nametype}{sprintsdict:nametype}}}
+	{string}
+	{Create syntactical string from name.}
 \hline
-null depth & {\bf \htmlref{nulltype}{sprintsdict:nulltype}} & string &
-Create syntactical string from null. \\
+\optableent
+	{null depth}
+	{{\bf \htmlref{nulltype}{sprintsdict:nulltype}}}
+	{string}
+	{Create syntactical string from null.}
 \hline
-operator depth & {\bf \htmlref{operatortype}{sprintsdict:operatortype}} & string
-& Create syntactical string from operator. \\
+\optableent
+	{operator depth}
+	{{\bf \htmlref{operatortype}{sprintsdict:operatortype}}}
+	{string}
+	{Create syntactical string from operator.}
 \hline
-pmark depth & {\bf \htmlref{pmarktype}{sprintsdict:pmarktype}} & string &
-Create syntactical string from pmark. \\
+\optableent
+	{pmark depth}
+	{{\bf \htmlref{pmarktype}{sprintsdict:pmarktype}}}
+	{string}
+	{Create syntactical string from pmark.}
 \hline
-real depth & {\bf \htmlref{realtype}{sprintsdict:realtype}} & string &
-Create syntactical string from real. \\
+\optableent
+	{real depth}
+	{{\bf \htmlref{realtype}{sprintsdict:realtype}}}
+	{string}
+	{Create syntactical string from real.}
 \hline
-stack depth & {\bf \htmlref{stacktype}{sprintsdict:stacktype}} & string &
-Create syntactical string from stack. \\
+\optableent
+	{stack depth}
+	{{\bf \htmlref{stacktype}{sprintsdict:stacktype}}}
+	{string}
+	{Create syntactical string from stack.}
 \hline
-string depth & {\bf \htmlref{stringtype}{sprintsdict:stringtype}} & string &
-Create syntactical string from string. \\
+\optableent
+	{string depth}
+	{{\bf \htmlref{stringtype}{sprintsdict:stringtype}}}
+	{string}
+	{Create syntactical string from string.}
 \hline
-thread depth & {\bf \htmlref{threadtype}{sprintsdict:threadtype}} & string &
-Create syntactical string from thread. \\
+\optableent
+	{thread depth}
+	{{\bf \htmlref{threadtype}{sprintsdict:threadtype}}}
+	{string}
+	{Create syntactical string from thread.}
 \end{longtable}
 
 \begin{description}
@@ -3376,926 +3602,2001 @@ programs should not normally need to modify systemdict, since globaldict
 provides a place for storing globally shared objects.  All threads share the
 same systemdict, which is implicitly locked.
 
-\begin{longtable}{\optableformat{1.80}}
-\caption[systemdict summary]{systemdict summary by functional group} \\
+\begin{longtable}{\optableformat{4.10}}
+\caption{systemdict summary} \\
 \hline
-Input(s) & Op/Proc/Var & Output(s) & Description \\
+\optableent
+	{Input(s)}
+	{Op/Proc/Var}
+	{Output(s)}
+	{Description}
 \hline \hline
 %begin{latexonly}
 \endfirsthead
 \caption[]{\emph{continued}} \\
 \hline
-Input(s) & Op/Proc/Var & Output(s) & Description \\
-\hline \endhead
-\multicolumn{4}{r}{\emph{Continued on next page...}} \endfoot
+\optableent
+	{Input(s)}
+	{Op/Proc/Var}
+	{Output(s)}
+	{Description}
+\hline \hline \endhead
+\multicolumn{2}{r}{\emph{Continued on next page...}} \endfoot
 \hline \endlastfoot
 %end{latexonly}
-\multicolumn{4}{|l|}{Operand stack operators} \\
+\multicolumn{2}{|l|}{Operand stack operators} \\
 \hline \hline
--- & {\bf \htmlref{mark}{systemdict:mark}} & mark & Create a mark. \\
+\optableent
+	{--}
+	{{\bf \htmlref{mark}{systemdict:mark}}}
+	{mark}
+	{Create a mark.}
 \hline
-\commas obj & {\bf \htmlref{aup}{systemdict:aup}} & obj \commas & Rotate stack
-up one position. \\
+\optableent
+	{\commas obj}
+	{{\bf \htmlref{aup}{systemdict:aup}}}
+	{obj \commas}
+	{Rotate stack up one position.}
 \hline
-obj \commas & {\bf \htmlref{adn}{systemdict:adn}} & \commas obj & Rotate stack
-down one position. \\
+\optableent
+	{obj \commas}
+	{{\bf \htmlref{adn}{systemdict:adn}}}
+	{\commas obj}
+	{Rotate stack down one position.}
 \hline
--- & {\bf \htmlref{count}{systemdict:count}} & count & Get the number of objects
-on ostack. \\
+\optableent
+	{--}
+	{{\bf \htmlref{count}{systemdict:count}}}
+	{count}
+	{Get the number of objects on ostack.}
 \hline
-mark \dots & {\bf \htmlref{counttomark}{systemdict:counttomark}} & mark
-\dots count & Get the depth of the topmost mark on ostack. \\
+\optableent
+	{mark \dots}
+	{{\bf \htmlref{counttomark}{systemdict:counttomark}}}
+	{mark \dots count}
+	{Get the depth of the topmost mark on ostack.}
 \hline
-obj & {\bf \htmlref{dup}{systemdict:dup}} & obj dup & Duplicate an object. \\
+\optableent
+	{obj}
+	{{\bf \htmlref{dup}{systemdict:dup}}}
+	{obj dup}
+	{Duplicate an object.}
 \hline
-obj \commas & {\bf \htmlref{bdup}{systemdict:bdup}} & obj \commas dup &
-Duplicate bottom object. \\
+\optableent
+	{obj \commas}
+	{{\bf \htmlref{bdup}{systemdict:bdup}}}
+	{obj \commas dup}
+	{Duplicate bottom object.}
 \hline
-objects count & {\bf \htmlref{ndup}{systemdict:ndup}} & objects objects &
-Duplicate objects. \\
+\optableent
+	{objects count}
+	{{\bf \htmlref{ndup}{systemdict:ndup}}}
+	{objects objects}
+	{Duplicate objects.}
 \hline
-obj \dots index & {\bf \htmlref{idup}{systemdict:idup}} & obj \dots
-dup & Duplicate object on ostack at index. \\
+\optableent
+	{obj \dots index}
+	{{\bf \htmlref{idup}{systemdict:idup}}}
+	{obj \dots dup}
+	{Duplicate object on ostack at index.}
 \hline
-\dots obj \commas index & {\bf \htmlref{ibdup}{systemdict:ibdup}} & \dots
-obj \commas dup & Duplicate object on ostack at index from bottom. \\
+\optableent
+	{\dots obj \commas index}
+	{{\bf \htmlref{ibdup}{systemdict:ibdup}}}
+	{\dots obj \commas dup}
+	{Duplicate object on ostack at index from bottom.}
 \hline
-a b & {\bf \htmlref{tuck}{systemdict:tuck}} & b a b & Tuck duplicate of top
-object under second object. \\
+\optableent
+	{a b}
+	{{\bf \htmlref{tuck}{systemdict:tuck}}}
+	{b a b}
+	{Tuck duplicate of top object under second object.}
 \hline
-a b & {\bf \htmlref{under}{systemdict:under}} & a a b & Duplicate second
-object. \\
+\optableent
+	{a b}
+	{{\bf \htmlref{under}{systemdict:under}}}
+	{a a b}
+	{Duplicate second object.}
 \hline
-a b & {\bf \htmlref{over}{systemdict:over}} & a b a & Duplicate second
-object. \\
+\optableent
+	{a b}
+	{{\bf \htmlref{over}{systemdict:over}}}
+	{a b a}
+	{Duplicate second object.}
 \hline
-a b & {\bf \htmlref{exch}{systemdict:exch}} & b a & Exchange top two objects. \\
+\optableent
+	{a b}
+	{{\bf \htmlref{exch}{systemdict:exch}}}
+	{b a}
+	{Exchange top two objects.}
 \hline
-a b c & {\bf \htmlref{up}{systemdict:up}} & c a b & Roll top three objects up
-one. \\
+\optableent
+	{a b c}
+	{{\bf \htmlref{up}{systemdict:up}}}
+	{c a b}
+	{Roll top three objects up one.}
 \hline
-a \dots b count & {\bf \htmlref{nup}{systemdict:nup}} & b a \dots & Roll count
-objects up one. \\
+\optableent
+	{a \dots b count}
+	{{\bf \htmlref{nup}{systemdict:nup}}}
+	{b a \dots}
+	{Roll count objects up one.}
 \hline
-a b c & {\bf \htmlref{dn}{systemdict:dn}} & b c a & Roll top three objects down
-one. \\
+\optableent
+	{a b c}
+	{{\bf \htmlref{dn}{systemdict:dn}}}
+	{b c a}
+	{Roll top three objects down one.}
 \hline
-a \dots b count & {\bf \htmlref{ndn}{systemdict:ndn}} & \dots b a & Roll count
-objects down one. \\
+\optableent
+	{a \dots b count}
+	{{\bf \htmlref{ndn}{systemdict:ndn}}}
+	{\dots b a}
+	{Roll count objects down one.}
 \hline
-\dots amount & {\bf \htmlref{rot}{systemdict:rot}} & \dots & Rotate stack up by
-\oparg{amount}. \\
+\optableent
+	{\dots amount}
+	{{\bf \htmlref{rot}{systemdict:rot}}}
+	{\dots}
+	{Rotate stack up by \oparg{amount}.}
 \hline
-region count amount & {\bf \htmlref{roll}{systemdict:roll}} & rolled & Roll
-\oparg{count} objects up by \oparg{amount}. \\
+\optableent
+	{region count amount}
+	{{\bf \htmlref{roll}{systemdict:roll}}}
+	{rolled}
+	{Roll \oparg{count} objects up by \oparg{amount}.}
 \hline
-obj & {\bf \htmlref{pop}{systemdict:pop}} & -- & Remove object. \\
+\optableent
+	{obj}
+	{{\bf \htmlref{pop}{systemdict:pop}}}
+	{--}
+	{Remove object.}
 \hline
-obj \commas & {\bf \htmlref{bpop}{systemdict:bpop}} & \commas & Remove bottom
-object. \\
+\optableent
+	{obj \commas}
+	{{\bf \htmlref{bpop}{systemdict:bpop}}}
+	{\commas}
+	{Remove bottom object.}
 \hline
-objects count & {\bf \htmlref{npop}{systemdict:npop}} & -- & Remove count
-objects. \\
+\optableent
+	{objects count}
+	{{\bf \htmlref{npop}{systemdict:npop}}}
+	{--}
+	{Remove count objects.}
 \hline
-objects \dots count & {\bf \htmlref{nbpop}{systemdict:nbpop}} & \dots & Remove
-count objects from bottom. \\
+\optableent
+	{objects \dots count}
+	{{\bf \htmlref{nbpop}{systemdict:nbpop}}}
+	{\dots}
+	{Remove count objects from bottom.}
 \hline
-obj \dots index & {\bf \htmlref{ipop}{systemdict:ipop}} & \dots & Remove
-object at index. \\
+\optableent
+	{obj \dots index}
+	{{\bf \htmlref{ipop}{systemdict:ipop}}}
+	{\dots}
+	{Remove object at index.}
 \hline
-\dots obj \commas index & {\bf \htmlref{ibpop}{systemdict:ibpop}} & \dots
-\commas & Remove object at index from bottom. \\
+\optableent
+	{\dots obj \commas index}
+	{{\bf \htmlref{ibpop}{systemdict:ibpop}}}
+	{\dots \commas}
+	{Remove object at index from bottom.}
 \hline
-a b & {\bf \htmlref{nip}{systemdict:nip}} & b & Remove second object. \\
+\optableent
+	{a b}
+	{{\bf \htmlref{nip}{systemdict:nip}}}
+	{b}
+	{Remove second object.}
 \hline
-objects & {\bf \htmlref{clear}{systemdict:clear}} & -- & Pop all objects off
-ostack. \\
+\optableent
+	{objects}
+	{{\bf \htmlref{clear}{systemdict:clear}}}
+	{--}
+	{Pop all objects off ostack.}
 \hline
-mark \dots & {\bf \htmlref{cleartomark}{systemdict:cleartomark}} & -- & Remove
-objects from ostack through topmost mark. \\
+\optableent
+	{mark \dots}
+	{{\bf \htmlref{cleartomark}{systemdict:cleartomark}}}
+	{--}
+	{Remove objects from ostack through topmost mark.}
 \hline
--- & {\bf \htmlref{ostack}{systemdict:ostack}} & stack & Get a current ostack
-snapshot. \\
+\optableent
+	{--}
+	{{\bf \htmlref{ostack}{systemdict:ostack}}}
+	{stack}
+	{Get a current ostack snapshot.}
 \hline
-thread & {\bf \htmlref{threadostack}{systemdict:threadostack}} & stack & Get a
-reference to thread's ostack. \\
+\optableent
+	{thread}
+	{{\bf \htmlref{threadostack}{systemdict:threadostack}}}
+	{stack}
+	{Get a reference to thread's ostack.}
 \hline \hline
-\multicolumn{4}{|l|}{Execution, control, and execution stack operators} \\
+\multicolumn{2}{|l|}{Execution, control, and execution stack operators} \\
 \hline \hline
-obj & {\bf \htmlref{eval}{systemdict:eval}} & -- & Evaluate object. \\
+\optableent
+	{obj}
+	{{\bf \htmlref{eval}{systemdict:eval}}}
+	{--}
+	{Evaluate object.}
 \hline
-boolean obj & {\bf \htmlref{if}{systemdict:if}} & -- & Conditionally evaluate
-object. \\
+\optableent
+	{boolean obj}
+	{{\bf \htmlref{if}{systemdict:if}}}
+	{--}
+	{Conditionally evaluate object.}
 \hline
-boolean a b & {\bf \htmlref{ifelse}{systemdict:ifelse}} & -- & Conditionally
-evaluate one of two objects. \\
+\optableent
+	{boolean a b}
+	{{\bf \htmlref{ifelse}{systemdict:ifelse}}}
+	{--}
+	{Conditionally evaluate one of two objects.}
 \hline
-init inc limit proc & {\bf \htmlref{for}{systemdict:for}} & -- & Iterate with a
-control variable. \\
+\optableent
+	{init inc limit proc}
+	{{\bf \htmlref{for}{systemdict:for}}}
+	{--}
+	{Iterate with a control variable.}
 \hline
-count proc & {\bf \htmlref{repeat}{systemdict:repeat}} & -- & Iterate a set
-number of times. \\
+\optableent
+	{count proc}
+	{{\bf \htmlref{repeat}{systemdict:repeat}}}
+	{--}
+	{Iterate a set number of times.}
 \hline
-cond proc & {\bf \htmlref{while}{systemdict:while}} & -- &  Loop while cond
-is true. \\
+\optableent
+	{cond proc}
+	{{\bf \htmlref{while}{systemdict:while}}}
+	{--}
+	{ Loop while cond is true.}
 \hline
-proc cond & {\bf \htmlref{until}{systemdict:until}} & -- &  Loop until cond
-is false. \\
+\optableent
+	{proc cond}
+	{{\bf \htmlref{until}{systemdict:until}}}
+	{--}
+	{ Loop until cond is false.}
 \hline
-proc & {\bf \htmlref{loop}{systemdict:loop}} & -- &  Loop indefinitely. \\
+\optableent
+	{proc}
+	{{\bf \htmlref{loop}{systemdict:loop}}}
+	{--}
+	{ Loop indefinitely.}
 \hline
-array proc & {\bf \htmlref{foreach}{systemdict:foreach}} & -- & Iterate on array
-elements. \\
-dict proc & {\bf \htmlref{foreach}{systemdict:foreach}} & -- & Iterate on
-dictionary key/value pairs. \\
-stack proc & {\bf \htmlref{foreach}{systemdict:foreach}} & -- & Iterate on stack
-elements. \\
-string proc & {\bf \htmlref{foreach}{systemdict:foreach}} & -- & Iterate on
-string elements. \\
+\optableent
+	{array proc}
+	{{\bf \htmlref{foreach}{systemdict:foreach}}}
+	{--}
+	{Iterate on array elements.}
+\optableent
+	{dict proc}
+	{{\bf \htmlref{foreach}{systemdict:foreach}}}
+	{--}
+	{Iterate on dictionary key/value pairs.}
+\optableent
+	{stack proc}
+	{{\bf \htmlref{foreach}{systemdict:foreach}}}
+	{--}
+	{Iterate on stack elements.}
+\optableent
+	{string proc}
+	{{\bf \htmlref{foreach}{systemdict:foreach}}}
+	{--}
+	{Iterate on string elements.}
 \hline
--- & {\bf \htmlref{exit}{systemdict:exit}} & -- & Terminate innermost looping
-context. \\
+\optableent
+	{--}
+	{{\bf \htmlref{exit}{systemdict:exit}}}
+	{--}
+	{Terminate innermost looping context.}
 \hline
-%begin{latexonly}
-file/string & {\bf \htmlref{token}{systemdict:token}} & false & Scan for a
-token. \\
-file/string & {\bf \htmlref{token}{systemdict:token}} & rem obj true & \\
+\optableent
+	{file/string}
+	{{\bf \htmlref{token}{systemdict:token}}}
+	{false}
+	{Unsuccessfully scan for a token.}
+\optableent
+	{file/string}
+	{{\bf \htmlref{token}{systemdict:token}}}
+	{rem obj true}
+	{Successfully scan for a token}
 \hline
-%end{latexonly}
-\begin{htmlonly}
-file/string & {\bf \htmlref{token}{systemdict:token}} & false & Scan for a
-token. \\
-file/string & {\bf \htmlref{token}{systemdict:token}} & file/substring obj
-true & Scan for a token. \\
-\end{htmlonly}
-obj & {\bf \htmlref{start}{systemdict:start}} & -- & Evaluate object. \\
+\optableent
+	{obj}
+	{{\bf \htmlref{start}{systemdict:start}}}
+	{--}
+	{Evaluate object.}
 \hline
--- & {\bf \htmlref{quit}{systemdict:quit}} & -- & Unwind to innermost start
-context. \\
+\optableent
+	{--}
+	{{\bf \htmlref{quit}{systemdict:quit}}}
+	{--}
+	{Unwind to innermost start context.}
 \hline
-obj & {\bf \htmlref{stopped}{systemdict:stopped}} & boolean & Evaluate
-object. \\
+\optableent
+	{obj}
+	{{\bf \htmlref{stopped}{systemdict:stopped}}}
+	{boolean}
+	{Evaluate object.}
 \hline
--- & {\bf \htmlref{stop}{systemdict:stop}} & -- & Unwind to innermost stopped or
-start context. \\
+\optableent
+	{--}
+	{{\bf \htmlref{stop}{systemdict:stop}}}
+	{--}
+	{Unwind to innermost stopped or start context.}
 \hline
-name & {\bf \htmlref{throw}{systemdict:throw}} & obj & Throw an error. \\
+\optableent
+	{name}
+	{{\bf \htmlref{throw}{systemdict:throw}}}
+	{obj}
+	{Throw an error.}
 \hline
--- & {\bf \htmlref{estack}{systemdict:estack}} & stack & Get a current estack
-snapshot. \\
+\optableent
+	{--}
+	{{\bf \htmlref{estack}{systemdict:estack}}}
+	{stack}
+	{Get a current estack snapshot.}
 \hline
-thread & {\bf \htmlref{threadestack}{systemdict:threadestack}} & stack & Get a
-reference to thread's estack. \\
+\optableent
+	{thread}
+	{{\bf \htmlref{threadestack}{systemdict:threadestack}}}
+	{stack}
+	{Get a reference to thread's estack.}
 \hline
--- & {\bf \htmlref{countestack}{systemdict:countestack}} & count & Get current
-estack depth. \\
+\optableent
+	{--}
+	{{\bf \htmlref{countestack}{systemdict:countestack}}}
+	{count}
+	{Get current estack depth.}
 \hline
--- & {\bf \htmlref{istack}{systemdict:istack}} & stack & Get a current istack
-snapshot. \\
+\optableent
+	{--}
+	{{\bf \htmlref{istack}{systemdict:istack}}}
+	{stack}
+	{Get a current istack snapshot.}
 \hline
-thread & {\bf \htmlref{threadistack}{systemdict:threadistack}} & stack & Get a
-reference to thread's istack. \\
+\optableent
+	{thread}
+	{{\bf \htmlref{threadistack}{systemdict:threadistack}}}
+	{stack}
+	{Get a reference to thread's istack.}
 \hline
-status & {\bf \htmlref{die}{systemdict:die}} & -- & Exit program. \\
+\optableent
+	{status}
+	{{\bf \htmlref{die}{systemdict:die}}}
+	{--}
+	{Exit program.}
 \hline
-path symbol & {\bf \htmlref{modload}{systemdict:modload}} & -- & Load a
-module. \\
+\optableent
+	{path symbol}
+	{{\bf \htmlref{modload}{systemdict:modload}}}
+	{--}
+	{Load a module.}
 \hline
-file symbol & {\bf \htmlref{mrequire}{systemdict:mrequire}} & -- & Search for
-and load a module. \\
+\optableent
+	{file symbol}
+	{{\bf \htmlref{mrequire}{systemdict:mrequire}}}
+	{--}
+	{Search for and load a module.}
 \hline
-file & {\bf \htmlref{require}{systemdict:require}} & -- & Search for and
-evaluate a source file. \\
+\optableent
+	{file}
+	{{\bf \htmlref{require}{systemdict:require}}}
+	{--}
+	{Search for and evaluate a source file.}
 \hline
-args & {\bf \htmlref{exec}{systemdict:exec}} & -- & Overlay a new program and
-execute it. \\
+\optableent
+	{args}
+	{{\bf \htmlref{exec}{systemdict:exec}}}
+	{--}
+	{Overlay a new program and execute it.}
 \hline
-args & {\bf \htmlref{forkexec}{systemdict:forkexec}} & pid & Fork and exec a new
-process. \\
+\optableent
+	{args}
+	{{\bf \htmlref{forkexec}{systemdict:forkexec}}}
+	{pid}
+	{Fork and exec a new process.}
 \hline
-pid & {\bf \htmlref{waitpid}{systemdict:waitpid}} & status & Wait for a program
-to terminate. \\
+\optableent
+	{pid}
+	{{\bf \htmlref{waitpid}{systemdict:waitpid}}}
+	{status}
+	{Wait for a program to terminate.}
 \hline
-args & {\bf \htmlref{system}{systemdict:system}} & status & Execute a
-program. \\
+\optableent
+	{args}
+	{{\bf \htmlref{system}{systemdict:system}}}
+	{status}
+	{Execute a program.}
 \hline
--- & {\bf \htmlref{pid}{systemdict:pid}} & pid & Get process ID. \\
+\optableent
+	{--}
+	{{\bf \htmlref{pid}{systemdict:pid}}}
+	{pid}
+	{Get process ID.}
 \hline
--- & {\bf \htmlref{ppid}{systemdict:ppid}} & pid & Get parent's process ID. \\
+\optableent
+	{--}
+	{{\bf \htmlref{ppid}{systemdict:ppid}}}
+	{pid}
+	{Get parent's process ID.}
 \hline
--- & {\bf \htmlref{uid}{systemdict:uid}} & uid & Get the process's user ID. \\
+\optableent
+	{--}
+	{{\bf \htmlref{uid}{systemdict:uid}}}
+	{uid}
+	{Get the process's user ID.}
 \hline
-uid & {\bf \htmlref{setuid}{systemdict:setuid}} & boolean & Set the process's
-user ID. \\
+\optableent
+	{uid}
+	{{\bf \htmlref{setuid}{systemdict:setuid}}}
+	{boolean}
+	{Set the process's user ID.}
 \hline
--- & {\bf \htmlref{euid}{systemdict:euid}} & uid & Get the process's effective
-user ID. \\
+\optableent
+	{--}
+	{{\bf \htmlref{euid}{systemdict:euid}}}
+	{uid}
+	{Get the process's effective user ID.}
 \hline
-uid & {\bf \htmlref{seteuid}{systemdict:seteuid}} & boolean & Set the process's
-effective user ID. \\
+\optableent
+	{uid}
+	{{\bf \htmlref{seteuid}{systemdict:seteuid}}}
+	{boolean}
+	{Set the process's effective user ID.}
 \hline
--- & {\bf \htmlref{gid}{systemdict:gid}} & gid & Get the process's group ID. \\
+\optableent
+	{--}
+	{{\bf \htmlref{gid}{systemdict:gid}}}
+	{gid}
+	{Get the process's group ID.}
 \hline
-gid & {\bf \htmlref{setgid}{systemdict:setgid}} & boolean & Set the process's
-group ID. \\
+\optableent
+	{gid}
+	{{\bf \htmlref{setgid}{systemdict:setgid}}}
+	{boolean}
+	{Set the process's group ID.}
 \hline
--- & {\bf \htmlref{egid}{systemdict:egid}} & gid & Get the process's effective
-group ID. \\
+\optableent
+	{--}
+	{{\bf \htmlref{egid}{systemdict:egid}}}
+	{gid}
+	{Get the process's effective group ID.}
 \hline
-gid & {\bf \htmlref{setegid}{systemdict:setegid}} & boolean & Set the process's
-effective group ID. \\
+\optableent
+	{gid}
+	{{\bf \htmlref{setegid}{systemdict:setegid}}}
+	{boolean}
+	{Set the process's effective group ID.}
 \hline
--- & {\bf \htmlref{realtime}{systemdict:realtime}} & nsecs & Get the number of
-nanoseconds since the epoch. \\
+\optableent
+	{--}
+	{{\bf \htmlref{realtime}{systemdict:realtime}}}
+	{nsecs}
+	{Get the number of nanoseconds since the epoch.}
 \hline
-nanoseconds & {\bf \htmlref{nsleep}{systemdict:nsleep}} & -- & Nanosleep. \\
+\optableent
+	{nanoseconds}
+	{{\bf \htmlref{nsleep}{systemdict:nsleep}}}
+	{--}
+	{Nanosleep.}
 \hline \hline
-\multicolumn{4}{|l|}{Stack operators} \\
+\multicolumn{2}{|l|}{Stack operators} \\
 \hline \hline
--- & {\bf \htmlref{(}{systemdict:sym_lp}} & fino & Begin a stack declaration. \\
+\optableent
+	{--}
+	{{\bf \htmlref{(}{systemdict:sym_lp}}}
+	{fino}
+	{Begin a stack declaration.}
 \hline
-fino objects & {\bf \htmlref{)}{systemdict:sym_rp}} & stack & Create a stack. \\
+\optableent
+	{fino objects}
+	{{\bf \htmlref{)}{systemdict:sym_rp}}}
+	{stack}
+	{Create a stack.}
 \hline
--- & {\bf \htmlref{stack}{systemdict:stack}} & stack & Create a stack. \\
+\optableent
+	{--}
+	{{\bf \htmlref{stack}{systemdict:stack}}}
+	{stack}
+	{Create a stack.}
 \hline
-stack obj & {\bf \htmlref{spush}{systemdict:spush}} & -- & Push object onto
-stack. \\
+\optableent
+	{stack obj}
+	{{\bf \htmlref{spush}{systemdict:spush}}}
+	{--}
+	{Push object onto stack.}
 \hline
-stack obj & {\bf \htmlref{sbpush}{systemdict:sbpush}} & -- & Push object
-onto bottom of stack. \\
+\optableent
+	{stack obj}
+	{{\bf \htmlref{sbpush}{systemdict:sbpush}}}
+	{--}
+	{Push object onto bottom of stack.}
 \hline
-stack & {\bf \htmlref{scount}{systemdict:scount}} & count & Get the number of
-objects on a stack. \\
+\optableent
+	{stack}
+	{{\bf \htmlref{scount}{systemdict:scount}}}
+	{count}
+	{Get the number of objects on a stack.}
 \hline
-stack & {\bf \htmlref{scounttomark}{systemdict:scounttomark}} & count & Get the
-depth of the topmost mark on stack. \\
+\optableent
+	{stack}
+	{{\bf \htmlref{scounttomark}{systemdict:scounttomark}}}
+	{count}
+	{Get the depth of the topmost mark on stack.}
 \hline
-stack & {\bf \htmlref{sdup}{systemdict:sdup}} & -- & Duplicate an object. \\
+\optableent
+	{stack}
+	{{\bf \htmlref{sdup}{systemdict:sdup}}}
+	{--}
+	{Duplicate an object.}
 \hline
-stack & {\bf \htmlref{sbdup}{systemdict:sbdup}} & -- & Duplicate bottom
-object. \\
+\optableent
+	{stack}
+	{{\bf \htmlref{sbdup}{systemdict:sbdup}}}
+	{--}
+	{Duplicate bottom object.}
 \hline
-stack count & {\bf \htmlref{sndup}{systemdict:sndup}} & -- & Duplicate objects
-on stack. \\
+\optableent
+	{stack count}
+	{{\bf \htmlref{sndup}{systemdict:sndup}}}
+	{--}
+	{Duplicate objects on stack.}
 \hline
-stack index & {\bf \htmlref{sidup}{systemdict:sidup}} & -- & Duplicate object
-on stack at index. \\
+\optableent
+	{stack index}
+	{{\bf \htmlref{sidup}{systemdict:sidup}}}
+	{--}
+	{Duplicate object on stack at index.}
 \hline
-stack index & {\bf \htmlref{sibdup}{systemdict:sibdup}} & -- & Duplicate object
-on stack at index from bottom. \\
+\optableent
+	{stack index}
+	{{\bf \htmlref{sibdup}{systemdict:sibdup}}}
+	{--}
+	{Duplicate object on stack at index from bottom.}
 \hline
-stack & {\bf \htmlref{stuck}{systemdict:stuck}} & -- & Tuck duplicate of top
-object on stack under next object on stack. \\
+\optableent
+	{stack}
+	{{\bf \htmlref{stuck}{systemdict:stuck}}}
+	{--}
+	{Tuck duplicate of top object on stack under next object on stack.}
 \hline
-stack & {\bf \htmlref{sunder}{systemdict:sunder}} & -- & Duplicate second object
-on stack. \\
+\optableent
+	{stack}
+	{{\bf \htmlref{sunder}{systemdict:sunder}}}
+	{--}
+	{Duplicate second object on stack.}
 \hline
-stack & {\bf \htmlref{sover}{systemdict:sover}} & -- & Duplicate second object
-on stack. \\
+\optableent
+	{stack}
+	{{\bf \htmlref{sover}{systemdict:sover}}}
+	{--}
+	{Duplicate second object on stack.}
 \hline
-stack & {\bf \htmlref{sexch}{systemdict:sexch}} & -- & Exchange top objects on
-stack. \\
+\optableent
+	{stack}
+	{{\bf \htmlref{sexch}{systemdict:sexch}}}
+	{--}
+	{Exchange top objects on stack.}
 \hline
-stack & {\bf \htmlref{sup}{systemdict:sup}} & -- & Roll top three objects on
-stack up one. \\
+\optableent
+	{stack}
+	{{\bf \htmlref{sup}{systemdict:sup}}}
+	{--}
+	{Roll top three objects on stack up one.}
 \hline
-stack count & {\bf \htmlref{snup}{systemdict:snup}} & -- & Roll count objects on
-stack up one. \\
+\optableent
+	{stack count}
+	{{\bf \htmlref{snup}{systemdict:snup}}}
+	{--}
+	{Roll count objects on stack up one.}
 \hline
-stack & {\bf \htmlref{saup}{systemdict:saup}} & -- & Roll objects on stack up
-one. \\
+\optableent
+	{stack}
+	{{\bf \htmlref{saup}{systemdict:saup}}}
+	{--}
+	{Roll objects on stack up one.}
 \hline
-stack & {\bf \htmlref{sdn}{systemdict:sdn}} & -- & Roll top three objects on
-stack down one. \\
+\optableent
+	{stack}
+	{{\bf \htmlref{sdn}{systemdict:sdn}}}
+	{--}
+	{Roll top three objects on stack down one.}
 \hline
-stack count & {\bf \htmlref{sndn}{systemdict:sndn}} & -- & Roll count objects on
-stack down one. \\
+\optableent
+	{stack count}
+	{{\bf \htmlref{sndn}{systemdict:sndn}}}
+	{--}
+	{Roll count objects on stack down one.}
 \hline
-stack & {\bf \htmlref{sadn}{systemdict:sadn}} & -- & Roll objects on stack down
-one. \\
+\optableent
+	{stack}
+	{{\bf \htmlref{sadn}{systemdict:sadn}}}
+	{--}
+	{Roll objects on stack down one.}
 \hline
-stack amount & {\bf \htmlref{srot}{systemdict:srot}} & -- & Rotate objects on
-stack up by \oparg{amount}. \\
+\optableent
+	{stack amount}
+	{{\bf \htmlref{srot}{systemdict:srot}}}
+	{--}
+	{Rotate objects on stack up by \oparg{amount}.}
 \hline
-stack count amount & {\bf \htmlref{sroll}{systemdict:sroll}} & -- & Roll objects
-on stack. \\
+\optableent
+	{stack count amount}
+	{{\bf \htmlref{sroll}{systemdict:sroll}}}
+	{--}
+	{Roll objects on stack.}
 \hline
-stack & {\bf \htmlref{spop}{systemdict:spop}} & obj & Pop object off
-stack. \\
+\optableent
+	{stack}
+	{{\bf \htmlref{spop}{systemdict:spop}}}
+	{obj}
+	{Pop object off stack.}
 \hline
-stack & {\bf \htmlref{sbpop}{systemdict:sbpop}} & obj & Pop object off bottom of
-stack. \\
+\optableent
+	{stack}
+	{{\bf \htmlref{sbpop}{systemdict:sbpop}}}
+	{obj}
+	{Pop object off bottom of stack.}
 \hline
-stack count & {\bf \htmlref{snpop}{systemdict:snpop}} & array & Pop count
-objects off stack. \\
+\optableent
+	{stack count}
+	{{\bf \htmlref{snpop}{systemdict:snpop}}}
+	{array}
+	{Pop count objects off stack.}
 \hline
-stack count & {\bf \htmlref{snbpop}{systemdict:snbpop}} & array & Pop count
-objects off bottom of stack. \\
+\optableent
+	{stack count}
+	{{\bf \htmlref{snbpop}{systemdict:snbpop}}}
+	{array}
+	{Pop count objects off bottom of stack.}
 \hline
-stack index & {\bf \htmlref{sipop}{systemdict:sipop}} & obj & Remove object
-on stack at index. \\
+\optableent
+	{stack index}
+	{{\bf \htmlref{sipop}{systemdict:sipop}}}
+	{obj}
+	{Remove object on stack at index.}
 \hline
-stack index & {\bf \htmlref{sibpop}{systemdict:sibpop}} & obj & Remove object
-on stack at index from bottom. \\
+\optableent
+	{stack index}
+	{{\bf \htmlref{sibpop}{systemdict:sibpop}}}
+	{obj}
+	{Remove object on stack at index from bottom.}
 \hline
-stack & {\bf \htmlref{snip}{systemdict:snip}} & obj & Remove second object on
-stack. \\
+\optableent
+	{stack}
+	{{\bf \htmlref{snip}{systemdict:snip}}}
+	{obj}
+	{Remove second object on stack.}
 \hline
-stack & {\bf \htmlref{sclear}{systemdict:sclear}} & -- & Remove all objects on
-stack. \\
+\optableent
+	{stack}
+	{{\bf \htmlref{sclear}{systemdict:sclear}}}
+	{--}
+	{Remove all objects on stack.}
 \hline
-stack & {\bf \htmlref{scleartomark}{systemdict:scleartomark}} & -- & Remove
-objects from stack down through topmost mark. \\
+\optableent
+	{stack}
+	{{\bf \htmlref{scleartomark}{systemdict:scleartomark}}}
+	{--}
+	{Remove objects from stack down through topmost mark.}
 \hline
-(a) (b) & {\bf \htmlref{cat}{systemdict:cat}} & (a b) & Catenate two stacks. \\
+\optableent
+	{(a) (b)}
+	{{\bf \htmlref{cat}{systemdict:cat}}}
+	{(a b)}
+	{Catenate two stacks.}
 \hline
-stacks count & {\bf \htmlref{ncat}{systemdict:ncat}} & stack & Catenate
-stacks. \\
+\optableent
+	{stacks count}
+	{{\bf \htmlref{ncat}{systemdict:ncat}}}
+	{stack}
+	{Catenate stacks.}
 \hline
-srcstack dststack & {\bf \htmlref{copy}{systemdict:copy}} & dststack & Copy
-stack contents. \\
+\optableent
+	{srcstack dststack}
+	{{\bf \htmlref{copy}{systemdict:copy}}}
+	{dststack}
+	{Copy stack contents.}
 \hline \hline
-\multicolumn{4}{|l|}{Number (integer, real) and math operators} \\
+\multicolumn{2}{|l|}{Number (integer, real) and math operators} \\
 \hline \hline
-a b & {\bf \htmlref{add}{systemdict:add}} & r & Add a and b. \\
+\optableent
+	{a b}
+	{{\bf \htmlref{add}{systemdict:add}}}
+	{r}
+	{Add a and b.}
 \hline
-a & {\bf \htmlref{inc}{systemdict:inc}} & r & Add 1 to a. \\
+\optableent
+	{a}
+	{{\bf \htmlref{inc}{systemdict:inc}}}
+	{r}
+	{Add 1 to a.}
 \hline
-a b & {\bf \htmlref{sub}{systemdict:sub}} & r & Subtract b from a. \\
+\optableent
+	{a b}
+	{{\bf \htmlref{sub}{systemdict:sub}}}
+	{r}
+	{Subtract b from a.}
 \hline
-a & {\bf \htmlref{dec}{systemdict:dec}} & r & Subtract 1 from a. \\
+\optableent
+	{a}
+	{{\bf \htmlref{dec}{systemdict:dec}}}
+	{r}
+	{Subtract 1 from a.}
 \hline
-a b & {\bf \htmlref{mul}{systemdict:mul}} & r & Multiply a and b. \\
+\optableent
+	{a b}
+	{{\bf \htmlref{mul}{systemdict:mul}}}
+	{r}
+	{Multiply a and b.}
 \hline
-a b & {\bf \htmlref{div}{systemdict:div}} & r & Divide a by b. \\
+\optableent
+	{a b}
+	{{\bf \htmlref{div}{systemdict:div}}}
+	{r}
+	{Divide a by b.}
 \hline
-a b & {\bf \htmlref{idiv}{systemdict:idiv}} & r & Divide a by b (integers). \\
+\optableent
+	{a b}
+	{{\bf \htmlref{idiv}{systemdict:idiv}}}
+	{r}
+	{Divide a by b (integers).}
 \hline
-a b & {\bf \htmlref{mod}{systemdict:mod}} & r & Mod a by b (integers). \\
+\optableent
+	{a b}
+	{{\bf \htmlref{mod}{systemdict:mod}}}
+	{r}
+	{Mod a by b (integers).}
 \hline
-a b & {\bf \htmlref{exp}{systemdict:exp}} & r & Raise a to the power of b. \\
+\optableent
+	{a b}
+	{{\bf \htmlref{exp}{systemdict:exp}}}
+	{r}
+	{Raise a to the power of b.}
 \hline
-a & {\bf \htmlref{sqrt}{systemdict:sqrt}} & r & Square root. \\
+\optableent
+	{a}
+	{{\bf \htmlref{sqrt}{systemdict:sqrt}}}
+	{r}
+	{Square root.}
 \hline
-a & {\bf \htmlref{ln}{systemdict:ln}} & r & Natural log. \\
+\optableent
+	{a}
+	{{\bf \htmlref{ln}{systemdict:ln}}}
+	{r}
+	{Natural log.}
 \hline
-a & {\bf \htmlref{log}{systemdict:log}} & r & Base 10 log. \\
+\optableent
+	{a}
+	{{\bf \htmlref{log}{systemdict:log}}}
+	{r}
+	{Base 10 log.}
 \hline
-a & {\bf \htmlref{abs}{systemdict:abs}} & r & Get the absolute value of a. \\
+\optableent
+	{a}
+	{{\bf \htmlref{abs}{systemdict:abs}}}
+	{r}
+	{Get the absolute value of a.}
 \hline
-a & {\bf \htmlref{neg}{systemdict:neg}} & r & Get the negative of a. \\
+\optableent
+	{a}
+	{{\bf \htmlref{neg}{systemdict:neg}}}
+	{r}
+	{Get the negative of a.}
 \hline
-a & {\bf \htmlref{ceiling}{systemdict:ceiling}} & r & Integer ceiling of a
-real. \\
+\optableent
+	{a}
+	{{\bf \htmlref{ceiling}{systemdict:ceiling}}}
+	{r}
+	{Integer ceiling of a real.}
 \hline
-a & {\bf \htmlref{floor}{systemdict:floor}} & r & Integer floor of a real. \\
+\optableent
+	{a}
+	{{\bf \htmlref{floor}{systemdict:floor}}}
+	{r}
+	{Integer floor of a real.}
 \hline
-a & {\bf \htmlref{round}{systemdict:round}} & r & Real rounded to integer. \\
+\optableent
+	{a}
+	{{\bf \htmlref{round}{systemdict:round}}}
+	{r}
+	{Real rounded to integer.}
 \hline
-a & {\bf \htmlref{trunc}{systemdict:trunc}} & r & Integer from real with
-truncated fractional. \\
+\optableent
+	{a}
+	{{\bf \htmlref{trunc}{systemdict:trunc}}}
+	{r}
+	{Integer from real with truncated fractional.}
 \hline
-a & {\bf \htmlref{sin}{systemdict:sin}} & r & Sine in radians. \\
+\optableent
+	{a}
+	{{\bf \htmlref{sin}{systemdict:sin}}}
+	{r}
+	{Sine in radians.}
 \hline
-a & {\bf \htmlref{cos}{systemdict:cos}} & r & Cosine in radians. \\
+\optableent
+	{a}
+	{{\bf \htmlref{cos}{systemdict:cos}}}
+	{r}
+	{Cosine in radians.}
 \hline
-y x & {\bf \htmlref{atan}{systemdict:atan}} & r & Arctangent in radians of
-$y/x$. \\
+\optableent
+	{y x}
+	{{\bf \htmlref{atan}{systemdict:atan}}}
+	{r}
+	{Arctangent in radians of $y/x$.}
 \hline
-seed & {\bf \htmlref{srand}{systemdict:srand}} & -- & Seed pseudo-random number
-generator. \\
+\optableent
+	{seed}
+	{{\bf \htmlref{srand}{systemdict:srand}}}
+	{--}
+	{Seed pseudo-random number generator.}
 \hline
--- & {\bf \htmlref{rand}{systemdict:rand}} & integer & Get a pseudo-random
-number. \\
+\optableent
+	{--}
+	{{\bf \htmlref{rand}{systemdict:rand}}}
+	{integer}
+	{Get a pseudo-random number.}
 \hline \hline
-\multicolumn{4}{|l|}{String operators} \\
+\multicolumn{2}{|l|}{String operators} \\
 \hline \hline
-length & {\bf \htmlref{string}{systemdict:string}} & string & Create a
-string. \\
+\optableent
+	{length}
+	{{\bf \htmlref{string}{systemdict:string}}}
+	{string}
+	{Create a string.}
 \hline
-string & {\bf \htmlref{length}{systemdict:length}} & count & Get string
-length. \\
+\optableent
+	{string}
+	{{\bf \htmlref{length}{systemdict:length}}}
+	{count}
+	{Get string length.}
 \hline
-string index & {\bf \htmlref{get}{systemdict:get}} & integer & Get string
-element. \\
+\optableent
+	{string index}
+	{{\bf \htmlref{get}{systemdict:get}}}
+	{integer}
+	{Get string element.}
 \hline
-string index integer & {\bf \htmlref{put}{systemdict:put}} & -- & Set string
-element. \\
+\optableent
+	{string index integer}
+	{{\bf \htmlref{put}{systemdict:put}}}
+	{--}
+	{Set string element.}
 \hline
-string index length & {\bf \htmlref{getinterval}{systemdict:getinterval}} &
-substring & Get a string interval. \\
+\optableent
+	{string index length}
+	{{\bf \htmlref{getinterval}{systemdict:getinterval}}}
+	{substring}
+	{Get a string interval.}
 \hline
-string index substring & {\bf \htmlref{putinterval}{systemdict:putinterval}} &
--- & Copy substring into string. \\
+\optableent
+	{string index substring}
+	{{\bf \htmlref{putinterval}{systemdict:putinterval}}}
+	{--}
+	{Copy substring into string.}
 \hline
-`a' `b' & {\bf \htmlref{cat}{systemdict:cat}} & `ab' & Catenate two strings. \\
+\optableent
+	{`a' `b'}
+	{{\bf \htmlref{cat}{systemdict:cat}}}
+	{`ab'}
+	{Catenate two strings.}
 \hline
-strings count & {\bf \htmlref{ncat}{systemdict:ncat}} & string & Catenate
-strings. \\
+\optableent
+	{strings count}
+	{{\bf \htmlref{ncat}{systemdict:ncat}}}
+	{string}
+	{Catenate strings.}
 \hline
-srcstring dststring & {\bf \htmlref{copy}{systemdict:copy}} & dstsubstring &
-Copy string. \\
+\optableent
+	{srcstring dststring}
+	{{\bf \htmlref{copy}{systemdict:copy}}}
+	{dstsubstring}
+	{Copy string.}
 \hline
-obj depth & {\bf \htmlref{sprints}{systemdict:sprints}} & string &
-Create syntactical string from object. \\
+\optableent
+	{obj depth}
+	{{\bf \htmlref{sprints}{systemdict:sprints}}}
+	{string}
+	{Create syntactical string from object.}
 \hline
-obj flags & {\bf \htmlref{outputs}{systemdict:outputs}} & string &
-Create formatted string from object. \\
+\optableent
+	{obj flags}
+	{{\bf \htmlref{outputs}{systemdict:outputs}}}
+	{string}
+	{Create formatted string from object.}
 \hline
-string pattern & {\bf \htmlref{search}{systemdict:search}} & post pattern pre
-true & Successfully search for pattern. \\
-string pattern & {\bf \htmlref{search}{systemdict:search}} & string false &
-Unsuccessfully earch for pattern. \\
+\optableent
+	{string pattern}
+	{{\bf \htmlref{search}{systemdict:search}}}
+	{post pattern pre true}
+	{Successfully search for pattern.}
+\optableent
+	{string pattern}
+	{{\bf \htmlref{search}{systemdict:search}}}
+	{string false}
+	{Unsuccessfully earch for pattern.}
 \hline \hline
-\multicolumn{4}{|l|}{Name operators} \\
+\multicolumn{2}{|l|}{Name operators} \\
 \hline \hline
-name & {\bf \htmlref{length}{systemdict:length}} & count & Get name length. \\
+\optableent
+	{name}
+	{{\bf \htmlref{length}{systemdict:length}}}
+	{count}
+	{Get name length.}
 \hline \hline
-\multicolumn{4}{|l|}{Array operators} \\
+\multicolumn{2}{|l|}{Array operators} \\
 \hline \hline
--- & {\bf \htmlref{argv}{systemdict:argv}} & args & Get program arguments. \\
+\optableent
+	{--}
+	{{\bf \htmlref{argv}{systemdict:argv}}}
+	{args}
+	{Get program arguments.}
 \hline
--- & {\bf \htmlref{[}{systemdict:sym_lb}} & mark & Begin an array
-declaration. \\
+\optableent
+	{--}
+	{{\bf \htmlref{[}{systemdict:sym_lb}}}
+	{mark}
+	{Begin an array declaration.}
 \hline
-mark objects & {\bf \htmlref{]}{systemdict:sym_rb}} & array & Construct an
-array. \\
+\optableent
+	{mark objects}
+	{{\bf \htmlref{]}{systemdict:sym_rb}}}
+	{array}
+	{Construct an array.}
 \hline
-length & {\bf \htmlref{array}{systemdict:array}} & array & Create an array. \\
+\optableent
+	{length}
+	{{\bf \htmlref{array}{systemdict:array}}}
+	{array}
+	{Create an array.}
 \hline
-array & {\bf \htmlref{length}{systemdict:length}} & count & Get array length. \\
+\optableent
+	{array}
+	{{\bf \htmlref{length}{systemdict:length}}}
+	{count}
+	{Get array length.}
 \hline
-array index & {\bf \htmlref{get}{systemdict:get}} & obj & Get array
-element. \\
+\optableent
+	{array index}
+	{{\bf \htmlref{get}{systemdict:get}}}
+	{obj}
+	{Get array element.}
 \hline
-array index obj & {\bf \htmlref{put}{systemdict:put}} & -- & Set array
-element. \\
+\optableent
+	{array index obj}
+	{{\bf \htmlref{put}{systemdict:put}}}
+	{--}
+	{Set array element.}
 \hline
-array index length & {\bf \htmlref{getinterval}{systemdict:getinterval}} &
-subarray & Get an array interval. \\
+\optableent
+	{array index length}
+	{{\bf \htmlref{getinterval}{systemdict:getinterval}}}
+	{subarray}
+	{Get an array interval.}
 \hline
-array index subarray & {\bf \htmlref{putinterval}{systemdict:putinterval}} & --
-& Copy subarray into array. \\
+\optableent
+	{array index subarray}
+	{{\bf \htmlref{putinterval}{systemdict:putinterval}}}
+	{--}
+	{Copy subarray into array.}
 \hline
-[a] [b] & {\bf \htmlref{cat}{systemdict:cat}} & [a b] & Catenate two arrays. \\
+\optableent
+	{[a] [b]}
+	{{\bf \htmlref{cat}{systemdict:cat}}}
+	{[a b]}
+	{Catenate two arrays.}
 \hline
-arrays count & {\bf \htmlref{ncat}{systemdict:ncat}} & array & Catenate
-arrays. \\
+\optableent
+	{arrays count}
+	{{\bf \htmlref{ncat}{systemdict:ncat}}}
+	{array}
+	{Catenate arrays.}
 \hline
-srcarray dstarray & {\bf \htmlref{copy}{systemdict:copy}} & dstsubarray & Copy
-array. \\
+\optableent
+	{srcarray dstarray}
+	{{\bf \htmlref{copy}{systemdict:copy}}}
+	{dstsubarray}
+	{Copy array.}
 \hline \hline
-\multicolumn{4}{|l|}{Dictionary and dictionary stack operators} \\
+\multicolumn{2}{|l|}{Dictionary and dictionary stack operators} \\
 \hline \hline
--- & {\bf \htmlref{gcdict}{systemdict:gcdict}} & dict & Get gcdict. \\
+\optableent
+	{--}
+	{{\bf \htmlref{gcdict}{systemdict:gcdict}}}
+	{dict}
+	{Get gcdict.}
 \hline
--- & {\bf \htmlref{userdict}{systemdict:userdict}} & dict & Get userdict. \\
+\optableent
+	{--}
+	{{\bf \htmlref{userdict}{systemdict:userdict}}}
+	{dict}
+	{Get userdict.}
 \hline
--- & {\bf \htmlref{globaldict}{systemdict:globaldict}} & dict & Get
-globaldict. \\
+\optableent
+	{--}
+	{{\bf \htmlref{globaldict}{systemdict:globaldict}}}
+	{dict}
+	{Get globaldict.}
 \hline
--- & {\bf \htmlref{systemdict}{systemdict:systemdict}} & dict & Get
-systemdict. \\
+\optableent
+	{--}
+	{{\bf \htmlref{systemdict}{systemdict:systemdict}}}
+	{dict}
+	{Get systemdict.}
 \hline
--- & {\bf \htmlref{onyxdict}{systemdict:onyxdict}} & dict & Get onyxdict. \\
+\optableent
+	{--}
+	{{\bf \htmlref{onyxdict}{systemdict:onyxdict}}}
+	{dict}
+	{Get onyxdict.}
 \hline
--- & {\bf \htmlref{sprintsdict}{systemdict:sprintsdict}} & dict & Get
-sprintsdict. \\
+\optableent
+	{--}
+	{{\bf \htmlref{sprintsdict}{systemdict:sprintsdict}}}
+	{dict}
+	{Get sprintsdict.}
 \hline
--- & {\bf \htmlref{outputsdict}{systemdict:outputsdict}} & dict & Get
-outputsdict. \\
+\optableent
+	{--}
+	{{\bf \htmlref{outputsdict}{systemdict:outputsdict}}}
+	{dict}
+	{Get outputsdict.}
 \hline
--- & {\bf \htmlref{envdict}{systemdict:envdict}} & dict & Get envdict. \\
+\optableent
+	{--}
+	{{\bf \htmlref{envdict}{systemdict:envdict}}}
+	{dict}
+	{Get envdict.}
 \hline
--- & {\bf \htmlref{threadsdict}{systemdict:threadsdict}} & dict & Get
-threadsdict. \\
+\optableent
+	{--}
+	{{\bf \htmlref{threadsdict}{systemdict:threadsdict}}}
+	{dict}
+	{Get threadsdict.}
 \hline
-key val & {\bf \htmlref{setenv}{systemdict:setenv}} & -- & Set environment
-variable. \\
+\optableent
+	{key val}
+	{{\bf \htmlref{setenv}{systemdict:setenv}}}
+	{--}
+	{Set environment variable.}
 \hline
-key & {\bf \htmlref{unsetenv}{systemdict:unsetenv}} & -- & Unset environment
-variable. \\
+\optableent
+	{key}
+	{{\bf \htmlref{unsetenv}{systemdict:unsetenv}}}
+	{--}
+	{Unset environment variable.}
 \hline
--- & {\bf \htmlref{{\lt}}{systemdict:sym_lt}} & mark & Begin a dictionary
-declaration. \\
+\optableent
+	{--}
+	{{\bf \htmlref{{\lt}}{systemdict:sym_lt}}}
+	{mark}
+	{Begin a dictionary declaration.}
 \hline
-mark kvpairs & {\bf \htmlref{{\gt}}{systemdict:sym_gt}} & dict & Construct a
-dictionary. \\
+\optableent
+	{mark kvpairs}
+	{{\bf \htmlref{{\gt}}{systemdict:sym_gt}}}
+	{dict}
+	{Construct a dictionary.}
 \hline
--- & {\bf \htmlref{dict}{systemdict:dict}} & dict & Create a dictionary. \\
+\optableent
+	{--}
+	{{\bf \htmlref{dict}{systemdict:dict}}}
+	{dict}
+	{Create a dictionary.}
 \hline
-dict & {\bf \htmlref{begin}{systemdict:begin}} & -- & Pust dict onto dstack. \\
+\optableent
+	{dict}
+	{{\bf \htmlref{begin}{systemdict:begin}}}
+	{--}
+	{Pust dict onto dstack.}
 \hline
--- & {\bf \htmlref{end}{systemdict:end}} & -- & Pop a dictionary off dstack. \\
+\optableent
+	{--}
+	{{\bf \htmlref{end}{systemdict:end}}}
+	{--}
+	{Pop a dictionary off dstack.}
 \hline
-key val & {\bf \htmlref{def}{systemdict:def}} & -- & Define key/value pair. \\
+\optableent
+	{key val}
+	{{\bf \htmlref{def}{systemdict:def}}}
+	{--}
+	{Define key/value pair.}
 \hline
-dict key & {\bf \htmlref{undef}{systemdict:undef}} & -- & Undefine key in
-dict. \\
+\optableent
+	{dict key}
+	{{\bf \htmlref{undef}{systemdict:undef}}}
+	{--}
+	{Undefine key in dict.}
 \hline
-key & {\bf \htmlref{load}{systemdict:load}} & val & Look up a key's value. \\
+\optableent
+	{key}
+	{{\bf \htmlref{load}{systemdict:load}}}
+	{val}
+	{Look up a key's value.}
 \hline
-dict key & {\bf \htmlref{known}{systemdict:known}} & boolean & Check for key in
-dict. \\
+\optableent
+	{dict key}
+	{{\bf \htmlref{known}{systemdict:known}}}
+	{boolean}
+	{Check for key in dict.}
 \hline
-%begin{latexonly}
-key & {\bf \htmlref{where}{systemdict:where}} & false & Get topmost dstack
-dictionary that \\
-key & {\bf \htmlref{where}{systemdict:where}} & dict true & defines key. \\
+\optableent
+	{key}
+	{{\bf \htmlref{where}{systemdict:where}}}
+	{false}
+	{Unsuccessfully get topmost dstack dictionary that defines key.}
 \hline
-%end{latexonly}
-\begin{htmlonly}
-key & {\bf \htmlref{where}{systemdict:where}} & false & Get topmost dstack
-dictionary that defines key. \\
-key & {\bf \htmlref{where}{systemdict:where}} & dict true & Get topmost dstack
-dictionary that defines key. \\
-\end{htmlonly}
-dict & {\bf \htmlref{length}{systemdict:length}} & count & Get number of
-dictionary key/value pairs. \\
+\optableent
+	{key}
+	{{\bf \htmlref{where}{systemdict:where}}}
+	{dict true}
+	{Successfully get topmost dstack dictionary that defines key.}
 \hline
-dict key & {\bf \htmlref{get}{systemdict:get}} & value & Get dict value
-associate with key. \\
+\optableent
+	{dict}
+	{{\bf \htmlref{length}{systemdict:length}}}
+	{count}
+	{Get number of dictionary key/value pairs.}
 \hline
-dict key value & {\bf \htmlref{put}{systemdict:put}} & -- & Set dict key/value
-pair. \\
+\optableent
+	{dict key}
+	{{\bf \htmlref{get}{systemdict:get}}}
+	{value}
+	{Get dict value associate with key.}
 \hline
-srcdict dstdict & {\bf \htmlref{copy}{systemdict:copy}} & dstdict & Copy
-dictionary contents. \\
+\optableent
+	{dict key value}
+	{{\bf \htmlref{put}{systemdict:put}}}
+	{--}
+	{Set dict key/value pair.}
 \hline
--- & {\bf \htmlref{currentdict}{systemdict:currentdict}} & dict & Get topmost
-dstack dictionary. \\
+\optableent
+	{srcdict dstdict}
+	{{\bf \htmlref{copy}{systemdict:copy}}}
+	{dstdict}
+	{Copy dictionary contents.}
 \hline
--- & {\bf \htmlref{dstack}{systemdict:dstack}} & stack & Get dstack snapshot. \\
+\optableent
+	{--}
+	{{\bf \htmlref{currentdict}{systemdict:currentdict}}}
+	{dict}
+	{Get topmost dstack dictionary.}
 \hline
-thread & {\bf \htmlref{threaddstack}{systemdict:threaddstack}} & stack & Get a
-reference to thread's dstack. \\
+\optableent
+	{--}
+	{{\bf \htmlref{dstack}{systemdict:dstack}}}
+	{stack}
+	{Get dstack snapshot.}
 \hline
--- & {\bf \htmlref{countdstack}{systemdict:countdstack}} & count & Get number of
-stacks on dstack. \\
+\optableent
+	{thread}
+	{{\bf \htmlref{threaddstack}{systemdict:threaddstack}}}
+	{stack}
+	{Get a reference to thread's dstack.}
+\hline
+\optableent
+	{--}
+	{{\bf \htmlref{countdstack}{systemdict:countdstack}}}
+	{count}
+	{Get number of stacks on dstack.}
 \hline \hline
-\multicolumn{4}{|l|}{File and filesystem operators} \\
+\multicolumn{2}{|l|}{File and filesystem operators} \\
 \hline \hline
-filename flags & {\bf \htmlref{open}{systemdict:open}} & file & Open a file. \\
+\optableent
+	{filename flags}
+	{{\bf \htmlref{open}{systemdict:open}}}
+	{file}
+	{Open a file.}
+\optableent
+	{filename flags mode}
+	{{\bf \htmlref{open}{systemdict:open}}}
+	{file}
+	{Open a file, creation mode specified.}
 \hline
-filename flags mode & {\bf \htmlref{open}{systemdict:open}} & file & Open a
-file, creation mode specified. \\
+\optableent
+	{--}
+	{{\bf \htmlref{pipe}{systemdict:pipe}}}
+	{rfile wfile}
+	{Create a pipe.}
 \hline
--- & {\bf \htmlref{pipe}{systemdict:pipe}} & rfile wfile & Create a pipe. \\
+\optableent
+	{file}
+	{{\bf \htmlref{close}{systemdict:close}}}
+	{--}
+	{Close file.}
 \hline
-file & {\bf \htmlref{close}{systemdict:close}} & -- & Close file. \\
+\optableent
+	{file}
+	{{\bf \htmlref{read}{systemdict:read}}}
+	{integer boolean}
+	{Read from file.}
+\optableent
+	{file string}
+	{{\bf \htmlref{read}{systemdict:read}}}
+	{substring boolean}
+	{Read from file.}
+\optableent
+	{file}
+	{{\bf \htmlref{readline}{systemdict:readline}}}
+	{string boolean}
+	{Read a line from file.}
 \hline
-%begin{latexonly}
-file & {\bf \htmlref{read}{systemdict:read}} & integer boolean & Read from
-file. \\
-file string & {\bf \htmlref{read}{systemdict:read}} & substring boolean & \\
+\optableent
+	{{\lt}file dict \dots{\gt} timeout}
+	{{\bf \htmlref{poll}{systemdict:poll}}}
+	{{\lb}file \dots{\rb}}
+	{Wait for file(s) to change status.}
 \hline
-%end{latexonly}
-\begin{htmlonly}
-file & {\bf \htmlref{read}{systemdict:read}} & integer boolean & Read from
-file. \\
-file string & {\bf \htmlref{read}{systemdict:read}} & substring boolean &
-Read from file. \\
-\end{htmlonly}
-file & {\bf \htmlref{readline}{systemdict:readline}} & string boolean &
-Read a line from file. \\
+\optableent
+	{file}
+	{{\bf \htmlref{bytesavailable}{systemdict:bytesavailable}}}
+	{count}
+	{Get number of buffered readable bytes.}
 \hline
-{\lt}file dict \dots{\gt} timeout & {\bf \htmlref{poll}{systemdict:poll}} &
-{\lb}file \dots{\rb} & Wait for file(s) to change status. \\
+\optableent
+	{file}
+	{{\bf \htmlref{iobuf}{systemdict:iobuf}}}
+	{count}
+	{Get size of I/O buffer.}
 \hline
-file & {\bf \htmlref{bytesavailable}{systemdict:bytesavailable}} & count &
-Get number of buffered readable bytes. \\
+\optableent
+	{file count}
+	{{\bf \htmlref{setiobuf}{systemdict:setiobuf}}}
+	{--}
+	{Set size of I/O buffer.}
 \hline
-file & {\bf \htmlref{iobuf}{systemdict:iobuf}} & count & Get size of I/O
-buffer. \\
+\optableent
+	{file}
+	{{\bf \htmlref{nonblocking}{systemdict:nonblocking}}}
+	{boolean}
+	{Get non-blocking mode.}
 \hline
-file count & {\bf \htmlref{setiobuf}{systemdict:setiobuf}} & -- & Set size of
-I/O buffer. \\
+\optableent
+	{file boolean}
+	{{\bf \htmlref{setnonblocking}{systemdict:setnonblocking}}}
+	{--}
+	{Set non-blocking mode.}
 \hline
-file & {\bf \htmlref{nonblocking}{systemdict:nonblocking}} & boolean & Get
-non-blocking mode. \\
+\optableent
+	{file integer/string}
+	{{\bf \htmlref{write}{systemdict:write}}}
+	{false}
+	{Write to file.}
+\optableent
+	{file integer/string}
+	{{\bf \htmlref{write}{systemdict:write}}}
+	{integer/substring true}
+	{Write to file.}
 \hline
-file boolean & {\bf \htmlref{setnonblocking}{systemdict:setnonblocking}} & -- &
-Set non-blocking mode. \\
+\optableent
+	{string}
+	{{\bf \htmlref{print}{systemdict:print}}}
+	{--}
+	{Print string to stdout.}
 \hline
-%begin{latexonly}
-file integer/string & {\bf \htmlref{write}{systemdict:write}} & false & Write to file. \\
-file integer/string & {\bf \htmlref{write}{systemdict:write}} &
-integer/substring true & \\
+\optableent
+	{obj depth}
+	{{\bf \htmlref{sprint}{systemdict:sprint}}}
+	{--}
+	{Syntactically print object to stdout.}
 \hline
-%end{latexonly}
-\begin{htmlonly}
-file integer/string & {\bf \htmlref{write}{systemdict:write}} & false & Write to
-file. \\
-file integer/string & {\bf \htmlref{write}{systemdict:write}} &
-integer/substring true & Write to file. \\
-\end{htmlonly}
-string & {\bf \htmlref{print}{systemdict:print}} & -- & Print string to
-stdout. \\
+\optableent
+	{obj flags}
+	{{\bf \htmlref{output}{systemdict:output}}}
+	{--}
+	{Formatted print to stdout.}
 \hline
-obj depth & {\bf \htmlref{sprint}{systemdict:sprint}} & -- & Syntactically print
-object to stdout. \\
+\optableent
+	{--}
+	{{\bf \htmlref{pstack}{systemdict:pstack}}}
+	{--}
+	{Syntactically print ostack elements.}
 \hline
-obj flags & {\bf \htmlref{output}{systemdict:output}} & -- & Formatted print
-to stdout. \\
+\optableent
+	{file}
+	{{\bf \htmlref{flushfile}{systemdict:flushfile}}}
+	{--}
+	{Flush file buffer.}
 \hline
--- & {\bf \htmlref{pstack}{systemdict:pstack}} & -- & Syntactically print
-ostack elements. \\
+\optableent
+	{--}
+	{{\bf \htmlref{flush}{systemdict:flush}}}
+	{--}
+	{Flush stdout buffer.}
 \hline
-file & {\bf \htmlref{flushfile}{systemdict:flushfile}} & -- & Flush file
-buffer. \\
+\optableent
+	{file length}
+	{{\bf \htmlref{truncate}{systemdict:truncate}}}
+	{--}
+	{Truncate file.}
 \hline
--- & {\bf \htmlref{flush}{systemdict:flush}} & -- & Flush stdout buffer. \\
+\optableent
+	{file offset}
+	{{\bf \htmlref{seek}{systemdict:seek}}}
+	{--}
+	{Move file position pointer.}
 \hline
-file length & {\bf \htmlref{truncate}{systemdict:truncate}} & -- & Truncate
-file. \\
+\optableent
+	{file}
+	{{\bf \htmlref{tell}{systemdict:tell}}}
+	{offset}
+	{Get file position pointer offset.}
 \hline
-file offset & {\bf \htmlref{seek}{systemdict:seek}} & -- & Move file position
-pointer. \\
+\optableent
+	{path}
+	{{\bf \htmlref{mkdir}{systemdict:mkdir}}}
+	{--}
+	{Create a directory.}
+\optableent
+	{path mode}
+	{{\bf \htmlref{mkdir}{systemdict:mkdir}}}
+	{--}
+	{Create a directory, mode specified.}
 \hline
-file & {\bf \htmlref{tell}{systemdict:tell}} & offset & Get file position
-pointer offset. \\
+\optableent
+	{path}
+	{{\bf \htmlref{mkfifo}{systemdict:mkfifo}}}
+	{--}
+	{Create a named pipe.}
+\optableent
+	{path mode}
+	{{\bf \htmlref{mkfifo}{systemdict:mkfifo}}}
+	{--}
+	{Create a named pipe, mode specified.}
 \hline
-path & {\bf \htmlref{mkdir}{systemdict:mkdir}} & -- & Create a directory. \\
+\optableent
+	{old new}
+	{{\bf \htmlref{rename}{systemdict:rename}}}
+	{--}
+	{Rename a file or directory.}
 \hline
-path mode & {\bf \htmlref{mkdir}{systemdict:mkdir}} & -- & Create a directory,
-mode specified. \\
+\optableent
+	{file/filename mode}
+	{{\bf \htmlref{chmod}{systemdict:chmod}}}
+	{--}
+	{Change file permissions.}
 \hline
-path & {\bf \htmlref{mkfifo}{systemdict:mkfifo}} & -- & Create a named pipe. \\
+\optableent
+	{file/filename uid gid}
+	{{\bf \htmlref{chown}{systemdict:chown}}}
+	{--}
+	{Change file owner and group.}
 \hline
-path mode & {\bf \htmlref{mkfifo}{systemdict:mkfifo}} & -- & Create a named
-pipe, mode specified. \\
+\optableent
+	{filename linkname}
+	{{\bf \htmlref{link}{systemdict:link}}}
+	{--}
+	{Create a hard link.}
 \hline
-old new & {\bf \htmlref{rename}{systemdict:rename}} & -- & Rename a file or
-directory. \\
+\optableent
+	{filename linkname}
+	{{\bf \htmlref{symlink}{systemdict:symlink}}}
+	{--}
+	{Create a symbolic link.}
 \hline
-file/filename mode & {\bf \htmlref{chmod}{systemdict:chmod}} & -- & Change file
-permissions. \\
+\optableent
+	{filename}
+	{{\bf \htmlref{unlink}{systemdict:unlink}}}
+	{--}
+	{Unlink a file.}
 \hline
-file/filename uid gid & {\bf \htmlref{chown}{systemdict:chown}} & -- & Change
-file owner and group. \\
+\optableent
+	{path}
+	{{\bf \htmlref{rmdir}{systemdict:rmdir}}}
+	{--}
+	{Remove an empty directory.}
 \hline
-filename linkname & {\bf \htmlref{link}{systemdict:link}} & -- & Create a hard
-link. \\
+\optableent
+	{file/filename flag}
+	{{\bf \htmlref{test}{systemdict:test}}}
+	{boolean}
+	{Test a file.}
 \hline
-filename linkname & {\bf \htmlref{symlink}{systemdict:symlink}} & -- & Create a
-symbolic link. \\
+\optableent
+	{file/filename}
+	{{\bf \htmlref{status}{systemdict:status}}}
+	{dict}
+	{Get file information.}
 \hline
-filename & {\bf \htmlref{unlink}{systemdict:unlink}} & -- & Unlink a file. \\
+\optableent
+	{linkname}
+	{{\bf \htmlref{readlink}{systemdict:readlink}}}
+	{string}
+	{Get symbolic link data.}
 \hline
-path & {\bf \htmlref{rmdir}{systemdict:rmdir}} & -- & Remove an empty
-directory. \\
+\optableent
+	{path proc}
+	{{\bf \htmlref{dirforeach}{systemdict:dirforeach}}}
+	{--}
+	{Iterate on directory entries.}
 \hline
-file/filename flag & {\bf \htmlref{test}{systemdict:test}} & boolean & Test a
-file. \\
+\optableent
+	{--}
+	{{\bf \htmlref{pwd}{systemdict:pwd}}}
+	{path}
+	{Get present working directory.}
 \hline
-file/filename & {\bf \htmlref{status}{systemdict:status}} & dict & Get file
-information. \\
+\optableent
+	{path}
+	{{\bf \htmlref{cd}{systemdict:cd}}}
+	{--}
+	{Change present working directory.}
 \hline
-linkname & {\bf \htmlref{readlink}{systemdict:readlink}} & string & Get symbolic
-link data. \\
-path proc & {\bf \htmlref{dirforeach}{systemdict:dirforeach}} & -- & Iterate on
-directory entries. \\
+\optableent
+	{path}
+	{{\bf \htmlref{chroot}{systemdict:chroot}}}
+	{--}
+	{Change root directory.}
 \hline
--- & {\bf \htmlref{pwd}{systemdict:pwd}} & path & Get present working
-directory. \\
+\optableent
+	{--}
+	{{\bf \htmlref{stdin}{systemdict:stdin}}}
+	{file}
+	{Get thread's stdin.}
 \hline
-path & {\bf \htmlref{cd}{systemdict:cd}} & -- & Change present working
-directory. \\
+\optableent
+	{--}
+	{{\bf \htmlref{stdout}{systemdict:stdout}}}
+	{file}
+	{Get thread's stdout.}
 \hline
-path & {\bf \htmlref{chroot}{systemdict:chroot}} & -- & Change root
-directory. \\
+\optableent
+	{--}
+	{{\bf \htmlref{stderr}{systemdict:stderr}}}
+	{file}
+	{Get thread's stderr.}
 \hline
--- & {\bf \htmlref{stdin}{systemdict:stdin}} & file & Get thread's stdin. \\
+\optableent
+	{--}
+	{{\bf \htmlref{gstdin}{systemdict:gstdin}}}
+	{file}
+	{Get global stdin.}
 \hline
--- & {\bf \htmlref{stdout}{systemdict:stdout}} & file & Get thread's stdout. \\
+\optableent
+	{--}
+	{{\bf \htmlref{gstdout}{systemdict:gstdout}}}
+	{file}
+	{Get global stdout.}
 \hline
--- & {\bf \htmlref{stderr}{systemdict:stderr}} & file & Get thread's stderr. \\
+\optableent
+	{--}
+	{{\bf \htmlref{gstderr}{systemdict:gstderr}}}
+	{file}
+	{Get global stderr.}
 \hline
--- & {\bf \htmlref{gstdin}{systemdict:gstdin}} & file & Get global stdin. \\
+\optableent
+	{file}
+	{{\bf \htmlref{setstdin}{systemdict:setstdin}}}
+	{--}
+	{Set thread's stdin.}
 \hline
--- & {\bf \htmlref{gstdout}{systemdict:gstdout}} & file & Get global stdout. \\
+\optableent
+	{file}
+	{{\bf \htmlref{setstdout}{systemdict:setstdout}}}
+	{--}
+	{Set thread's stdout.}
 \hline
--- & {\bf \htmlref{gstderr}{systemdict:gstderr}} & file & Get global stderr. \\
+\optableent
+	{file}
+	{{\bf \htmlref{setstderr}{systemdict:setstderr}}}
+	{--}
+	{Set thread's stderr.}
 \hline
-file & {\bf \htmlref{setstdin}{systemdict:setstdin}} & -- & Set thread's
-stdin. \\
+\optableent
+	{file}
+	{{\bf \htmlref{setgstdin}{systemdict:setgstdin}}}
+	{--}
+	{Set global stdin.}
 \hline
-file & {\bf \htmlref{setstdout}{systemdict:setstdout}} & -- & Set thread's
-stdout. \\
+\optableent
+	{file}
+	{{\bf \htmlref{setgstdout}{systemdict:setgstdout}}}
+	{--}
+	{Set global stdout.}
 \hline
-file & {\bf \htmlref{setstderr}{systemdict:setstderr}} & -- & Set thread's
-stderr. \\
-\hline
-file & {\bf \htmlref{setgstdin}{systemdict:setgstdin}} & -- & Set global
-stdin. \\
-\hline
-file & {\bf \htmlref{setgstdout}{systemdict:setgstdout}} & -- & Set global
-stdout. \\
-\hline
-file & {\bf \htmlref{setgstderr}{systemdict:setgstderr}} & -- & Set global
-stderr. \\
+\optableent
+	{file}
+	{{\bf \htmlref{setgstderr}{systemdict:setgstderr}}}
+	{--}
+	{Set global stderr.}
 \hline \hline
-\multicolumn{4}{|l|}{Socket and networking operators} \\
+\multicolumn{2}{|l|}{Socket and networking operators} \\
 \hline \hline
-family type proto & {\bf \htmlref{socket}{systemdict:socket}} & sock & Create a
-socket. \\
+\optableent
+	{family type proto}
+	{{\bf \htmlref{socket}{systemdict:socket}}}
+	{sock}
+	{Create a socket.}
+\optableent
+	{family type}
+	{{\bf \htmlref{socket}{systemdict:socket}}}
+	{sock}
+	{Create a socket.}
 \hline
-family type & {\bf \htmlref{socket}{systemdict:socket}} & sock & Create a
-socket. \\
+\optableent
+	{sock addr port}
+	{{\bf \htmlref{bindsocket}{systemdict:bindsocket}}}
+	{--}
+	{Bind socket to address/port.}
+\optableent
+	{sock addr}
+	{{\bf \htmlref{bindsocket}{systemdict:bindsocket}}}
+	{--}
+	{Bind socket to address.}
+\optableent
+	{sock path}
+	{{\bf \htmlref{bindsocket}{systemdict:bindsocket}}}
+	{--}
+	{Bind socket to port.}
 \hline
-sock addr port & {\bf \htmlref{bindsocket}{systemdict:bindsocket}} & -- & Bind
-socket to address/port. \\
+\optableent
+	{sock backlog}
+	{{\bf \htmlref{listen}{systemdict:listen}}}
+	{--}
+	{Listen for socket connections.}
+\optableent
+	{sock}
+	{{\bf \htmlref{listen}{systemdict:listen}}}
+	{--}
+	{Listen for socket connections.}
 \hline
-sock addr & {\bf \htmlref{bindsocket}{systemdict:bindsocket}} & -- & Bind
-socket to address. \\
+\optableent
+	{sock}
+	{{\bf \htmlref{accept}{systemdict:accept}}}
+	{sock}
+	{Accept a socket connection.}
 \hline
-sock path & {\bf \htmlref{bindsocket}{systemdict:bindsocket}} & -- & Bind socket
-to port. \\
+\optableent
+	{sock addr port}
+	{{\bf \htmlref{connect}{systemdict:connect}}}
+	{--}
+	{Connect a socket.}
+\optableent
+	{sock path}
+	{{\bf \htmlref{connect}{systemdict:connect}}}
+	{--}
+	{Connect a socket.}
 \hline
-sock backlog & {\bf \htmlref{listen}{systemdict:listen}} & -- & Listen for
-socket connections. \\
+\optableent
+	{service}
+	{{\bf \htmlref{serviceport}{systemdict:serviceport}}}
+	{port}
+	{Get port number for service name.}
 \hline
-sock & {\bf \htmlref{listen}{systemdict:listen}} & -- & Listen for socket
-connections. \\
+\optableent
+	{sock}
+	{{\bf \htmlref{sockname}{systemdict:sockname}}}
+	{dict}
+	{Get socket information.}
 \hline
-sock & {\bf \htmlref{accept}{systemdict:accept}} & sock & Accept a socket
-connection. \\
+\optableent
+	{sock level optname}
+	{{\bf \htmlref{sockopt}{systemdict:sockopt}}}
+	{optval}
+	{Get socket option.}
+\optableent
+	{sock optname}
+	{{\bf \htmlref{sockopt}{systemdict:sockopt}}}
+	{optval}
+	{Get socket option.}
 \hline
-sock addr port & {\bf \htmlref{connect}{systemdict:connect}} & -- & Connect a
-socket. \\
+\optableent
+	{sock level optname optval}
+	{{\bf \htmlref{setsockopt}{systemdict:setsockopt}}}
+	{--}
+	{Set socket option.}
+\optableent
+	{sock optname optval}
+	{{\bf \htmlref{setsockopt}{systemdict:setsockopt}}}
+	{--}
+	{Set socket option.}
 \hline
-sock path & {\bf \htmlref{connect}{systemdict:connect}} & -- & Connect a
-socket. \\
+\optableent
+	{sock}
+	{{\bf \htmlref{peername}{systemdict:peername}}}
+	{dict}
+	{Get peer socket information.}
 \hline
-service & {\bf \htmlref{serviceport}{systemdict:serviceport}} & port & Get port
-number for service name. \\
+\optableent
+	{sock mesg flags}
+	{{\bf \htmlref{send}{systemdict:send}}}
+	{nsend}
+	{Send a message.}
+\optableent
+	{sock mesg}
+	{{\bf \htmlref{send}{systemdict:send}}}
+	{count}
+	{Send a message.}
 \hline
-sock & {\bf \htmlref{sockname}{systemdict:sockname}} & dict & Get socket
-information. \\
+\optableent
+	{sock string flags}
+	{{\bf \htmlref{recv}{systemdict:recv}}}
+	{substring}
+	{Receive a message.}
+\optableent
+	{sock string}
+	{{\bf \htmlref{recv}{systemdict:recv}}}
+	{substring}
+	{Receive a message.}
 \hline
-sock level optname & {\bf \htmlref{sockopt}{systemdict:sockopt}} & optval & Get
-socket option. \\
-\hline
-sock optname & {\bf \htmlref{sockopt}{systemdict:sockopt}} & optval & Get
-socket option. \\
-\hline
-sock level optname optval & {\bf \htmlref{setsockopt}{systemdict:setsockopt}} &
--- & Set socket option. \\
-\hline
-sock optname optval & {\bf \htmlref{setsockopt}{systemdict:setsockopt}} & -- &
-Set socket option. \\
-\hline
-sock & {\bf \htmlref{peername}{systemdict:peername}} & dict & Get peer socket
-information. \\
-\hline
-sock mesg flags & {\bf \htmlref{send}{systemdict:send}} & nsend & Send a
-message. \\
-\hline
-sock mesg & {\bf \htmlref{send}{systemdict:send}} & count & Send a message. \\
-\hline
-sock string flags & {\bf \htmlref{recv}{systemdict:recv}} & substring & Receive
-a message. \\
-\hline
-sock string & {\bf \htmlref{recv}{systemdict:recv}} & substring & Receive a
-message. \\
-\hline
-family type proto & {\bf \htmlref{socketpair}{systemdict:socketpair}} & sock
-sock & Create a socket pair. \\
-\hline
-family type & {\bf \htmlref{socketpair}{systemdict:socketpair}} & sock sock &
-Create a socket pair. \\
+\optableent
+	{family type proto}
+	{{\bf \htmlref{socketpair}{systemdict:socketpair}}}
+	{sock sock}
+	{Create a socket pair.}
+\optableent
+	{family type}
+	{{\bf \htmlref{socketpair}{systemdict:socketpair}}}
+	{sock sock}
+	{Create a socket pair.}
 \hline \hline
-\multicolumn{4}{|l|}{Logical and bitwise operators} \\
+\multicolumn{2}{|l|}{Logical and bitwise operators} \\
 \hline \hline
-a b & {\bf \htmlref{lt}{systemdict:lt}} & boolean & a less than b?
-(integer/real, string) \\
+\optableent
+	{a b}
+	{{\bf \htmlref{lt}{systemdict:lt}}}
+	{boolean}
+	{a less than b? (integer/real, string)}
 \hline
-a b & {\bf \htmlref{le}{systemdict:le}} & boolean & a less than or equal to b?
-(integer/real, string) \\
+\optableent
+	{a b}
+	{{\bf \htmlref{le}{systemdict:le}}}
+	{boolean}
+	{a less than or equal to b? (integer/real, string)}
 \hline
-a b & {\bf \htmlref{eq}{systemdict:eq}} & boolean & a equal to b? (any type) \\
+\optableent
+	{a b}
+	{{\bf \htmlref{eq}{systemdict:eq}}}
+	{boolean}
+	{a equal to b? (any type)}
 \hline
-a b & {\bf \htmlref{ne}{systemdict:ne}} & boolean & a not equal to b? (any type)
-\\
+\optableent
+	{a b}
+	{{\bf \htmlref{ne}{systemdict:ne}}}
+	{boolean}
+	{a not equal to b? (any type)}
 \hline
-a b & {\bf \htmlref{ge}{systemdict:ge}} & boolean & a greater than or equal to
-b? (integer/real, string) \\
+\optableent
+	{a b}
+	{{\bf \htmlref{ge}{systemdict:ge}}}
+	{boolean}
+	{a greater than or equal to b? (integer/real, string)}
 \hline
-a b & {\bf \htmlref{gt}{systemdict:gt}} & boolean & a greater than b?
-(integer/real, string) \\
+\optableent
+	{a b}
+	{{\bf \htmlref{gt}{systemdict:gt}}}
+	{boolean}
+	{a greater than b? (integer/real, string)}
 \hline
-a b & {\bf \htmlref{and}{systemdict:and}} & r & Logical/bitwise and.
-(boolean/integer)  \\
+\optableent
+	{a b}
+	{{\bf \htmlref{and}{systemdict:and}}}
+	{r}
+	{Logical/bitwise and. (boolean/integer) }
 \hline
-a b & {\bf \htmlref{or}{systemdict:or}} & r & Logical/bitwise or.
-(boolean/integer) \\
+\optableent
+	{a b}
+	{{\bf \htmlref{or}{systemdict:or}}}
+	{r}
+	{Logical/bitwise or. (boolean/integer)}
 \hline
-a b & {\bf \htmlref{xor}{systemdict:xor}} & r & Logical/bitwise exclusive or.
-(boolean/integer) \\
+\optableent
+	{a b}
+	{{\bf \htmlref{xor}{systemdict:xor}}}
+	{r}
+	{Logical/bitwise exclusive or. (boolean/integer)}
 \hline
-a & {\bf \htmlref{not}{systemdict:not}} & r & Logical/bitwise not.
-(boolean/integer) \\
+\optableent
+	{a}
+	{{\bf \htmlref{not}{systemdict:not}}}
+	{r}
+	{Logical/bitwise not. (boolean/integer)}
 \hline
-a shift & {\bf \htmlref{shift}{systemdict:shift}} & integer & Bitwise shift. \\
+\optableent
+	{a shift}
+	{{\bf \htmlref{shift}{systemdict:shift}}}
+	{integer}
+	{Bitwise shift.}
 \hline
--- & {\bf \htmlref{false}{systemdict:false}} & false & Return true. \\
+\optableent
+	{--}
+	{{\bf \htmlref{false}{systemdict:false}}}
+	{false}
+	{Return true.}
 \hline
--- & {\bf \htmlref{true}{systemdict:true}} & true & Return false. \\
+\optableent
+	{--}
+	{{\bf \htmlref{true}{systemdict:true}}}
+	{true}
+	{Return false.}
 \hline \hline
-\multicolumn{4}{|l|}{Type, conversion, and attribute operators} \\
+\multicolumn{2}{|l|}{Type, conversion, and attribute operators} \\
 \hline \hline
-obj & {\bf \htmlref{type}{systemdict:type}} & name & Get object type. \\
+\optableent
+	{obj}
+	{{\bf \htmlref{type}{systemdict:type}}}
+	{name}
+	{Get object type.}
 \hline
-obj & {\bf \htmlref{echeck}{systemdict:echeck}} & boolean & Evaluatable? \\
+\optableent
+	{obj}
+	{{\bf \htmlref{echeck}{systemdict:echeck}}}
+	{boolean}
+	{Evaluatable?}
 \hline
-obj & {\bf \htmlref{xcheck}{systemdict:xcheck}} & boolean & Executable? \\
+\optableent
+	{obj}
+	{{\bf \htmlref{xcheck}{systemdict:xcheck}}}
+	{boolean}
+	{Executable?}
 \hline
-obj & {\bf \htmlref{cve}{systemdict:cve}} & obj & Set evaluatable attribute. \\
+\optableent
+	{obj}
+	{{\bf \htmlref{cve}{systemdict:cve}}}
+	{obj}
+	{Set evaluatable attribute.}
 \hline
-obj & {\bf \htmlref{cvx}{systemdict:cvx}} & obj & Set executable attribute. \\
+\optableent
+	{obj}
+	{{\bf \htmlref{cvx}{systemdict:cvx}}}
+	{obj}
+	{Set executable attribute.}
 \hline
-obj & {\bf \htmlref{cvlit}{systemdict:cvlit}} & obj & Set literal attribute. \\
+\optableent
+	{obj}
+	{{\bf \htmlref{cvlit}{systemdict:cvlit}}}
+	{obj}
+	{Set literal attribute.}
 \hline
-string & {\bf \htmlref{cvn}{systemdict:cvn}} & name & Convert string to name. \\
+\optableent
+	{string}
+	{{\bf \htmlref{cvn}{systemdict:cvn}}}
+	{name}
+	{Convert string to name.}
 \hline
-obj & {\bf \htmlref{cvs}{systemdict:cvs}} & string & Convert object to
-string. \\
+\optableent
+	{obj}
+	{{\bf \htmlref{cvs}{systemdict:cvs}}}
+	{string}
+	{Convert object to string.}
 \hline
-integer radix & {\bf \htmlref{cvrs}{systemdict:cvrs}} & string & Convert integer
-to radix string. \\
+\optableent
+	{integer radix}
+	{{\bf \htmlref{cvrs}{systemdict:cvrs}}}
+	{string}
+	{Convert integer to radix string.}
 \hline
-real precision & {\bf \htmlref{cvds}{systemdict:cvds}} & string & Convert real
-to decimal string. \\
+\optableent
+	{real precision}
+	{{\bf \htmlref{cvds}{systemdict:cvds}}}
+	{string}
+	{Convert real to decimal string.}
 \hline
-real precision & {\bf \htmlref{cves}{systemdict:cves}} & string & Convert real
-to exponential string. \\
+\optableent
+	{real precision}
+	{{\bf \htmlref{cves}{systemdict:cves}}}
+	{string}
+	{Convert real to exponential string.}
 \hline
-hook & {\bf \htmlref{hooktag}{systemdict:hooktag}} & tag & Get hook tag. \\
+\optableent
+	{hook}
+	{{\bf \htmlref{hooktag}{systemdict:hooktag}}}
+	{tag}
+	{Get hook tag.}
 \hline \hline
-\multicolumn{4}{|l|}{Threading and synchronization operators} \\
+\multicolumn{2}{|l|}{Threading and synchronization operators} \\
 \hline \hline
-stack entry & {\bf \htmlref{thread}{systemdict:thread}} & thread & Create and
-run a thread. \\
+\optableent
+	{stack entry}
+	{{\bf \htmlref{thread}{systemdict:thread}}}
+	{thread}
+	{Create and run a thread.}
 \hline
--- & {\bf \htmlref{self}{systemdict:self}} & thread & Get a thread object for
-the running thread. \\
+\optableent
+	{--}
+	{{\bf \htmlref{self}{systemdict:self}}}
+	{thread}
+	{Get a thread object for the running thread.}
 \hline
-thread & {\bf \htmlref{join}{systemdict:join}} & -- & Wait for thread to
-exit. \\
+\optableent
+	{thread}
+	{{\bf \htmlref{join}{systemdict:join}}}
+	{--}
+	{Wait for thread to exit.}
 \hline
-thread & {\bf \htmlref{detach}{systemdict:detach}} & -- & Detach thread. \\
+\optableent
+	{thread}
+	{{\bf \htmlref{detach}{systemdict:detach}}}
+	{--}
+	{Detach thread.}
 \hline
--- & {\bf \htmlref{yield}{systemdict:yield}} & -- & Voluntarily yield the
-processor. \\
+\optableent
+	{--}
+	{{\bf \htmlref{yield}{systemdict:yield}}}
+	{--}
+	{Voluntarily yield the processor.}
 \hline
--- & {\bf \htmlref{mutex}{systemdict:mutex}} & mutex & Create a mutex. \\
+\optableent
+	{--}
+	{{\bf \htmlref{mutex}{systemdict:mutex}}}
+	{mutex}
+	{Create a mutex.}
 \hline
-mutex proc & {\bf \htmlref{monitor}{systemdict:mutex}} & -- & Evaluate an object
-under the protection of a mutex. \\
+\optableent
+	{mutex proc}
+	{{\bf \htmlref{monitor}{systemdict:mutex}}}
+	{--}
+	{Evaluate an object under the protection of a mutex.}
 \hline
-mutex & {\bf \htmlref{lock}{systemdict:lock}} & -- & Acquire mutex. \\
+\optableent
+	{mutex}
+	{{\bf \htmlref{lock}{systemdict:lock}}}
+	{--}
+	{Acquire mutex.}
 \hline
-mutex & {\bf \htmlref{trylock}{systemdict:trylock}} & boolean & Try to acquire
-mutex. \\
+\optableent
+	{mutex}
+	{{\bf \htmlref{trylock}{systemdict:trylock}}}
+	{boolean}
+	{Try to acquire mutex.}
 \hline
-mutex & {\bf \htmlref{unlock}{systemdict:unlock}} & -- & Release mutex. \\
+\optableent
+	{mutex}
+	{{\bf \htmlref{unlock}{systemdict:unlock}}}
+	{--}
+	{Release mutex.}
 \hline
--- & {\bf \htmlref{condition}{systemdict:condition}} & condition & Create a
-condition variable. \\
+\optableent
+	{--}
+	{{\bf \htmlref{condition}{systemdict:condition}}}
+	{condition}
+	{Create a condition variable.}
 \hline
-condition mutex & {\bf \htmlref{wait}{systemdict:wait}} & -- & Wait on
-condition. \\
+\optableent
+	{condition mutex}
+	{{\bf \htmlref{wait}{systemdict:wait}}}
+	{--}
+	{Wait on condition.}
 \hline
-condition mutex timeout & {\bf \htmlref{timedwait}{systemdict:timedwait}} &
-boolean & Wait on condition with timeout. \\
+\optableent
+	{condition mutex timeout}
+	{{\bf \htmlref{timedwait}{systemdict:timedwait}}}
+	{boolean}
+	{Wait on condition with timeout.}
 \hline
-condition & {\bf \htmlref{signal}{systemdict:signal}} & -- & Signal a condition
-waiter. \\
+\optableent
+	{condition}
+	{{\bf \htmlref{signal}{systemdict:signal}}}
+	{--}
+	{Signal a condition waiter.}
 \hline
-condition & {\bf \htmlref{broadcast}{systemdict:broadcast}} & -- & Signal all
-condition waiters. \\
+\optableent
+	{condition}
+	{{\bf \htmlref{broadcast}{systemdict:broadcast}}}
+	{--}
+	{Signal all condition waiters.}
 \hline
--- & {\bf \htmlref{currentlocking}{systemdict:currentlocking}} & boolean & Get
-implicit locking mode. \\
+\optableent
+	{--}
+	{{\bf \htmlref{currentlocking}{systemdict:currentlocking}}}
+	{boolean}
+	{Get implicit locking mode.}
 \hline
-boolean & {\bf \htmlref{setlocking}{systemdict:setlocking}} & -- & Set implicit
-locking mode. \\
+\optableent
+	{boolean}
+	{{\bf \htmlref{setlocking}{systemdict:setlocking}}}
+	{--}
+	{Set implicit locking mode.}
 \hline
-obj & {\bf \htmlref{lcheck}{systemdict:lcheck}} & boolean & Implicitly
-locked? \\
+\optableent
+	{obj}
+	{{\bf \htmlref{lcheck}{systemdict:lcheck}}}
+	{boolean}
+	{Implicitly locked?}
 \hline \hline
-\multicolumn{4}{|l|}{Miscellaneous operators} \\
+\multicolumn{2}{|l|}{Regular expression operators} \\
 \hline \hline
--- & {\bf \htmlref{product}{systemdict:product}} & string & Get the product
-string. \\
+\optableent
+	{string flags}
+	{{\bf \htmlref{regexp}{systemdict:regexp}}}
+	{regexp}
+	{Create a regexp object.}
+\optableent
+	{string}
+	{{\bf \htmlref{regexp}{systemdict:regexp}}}
+	{regexp}
+	{Create a regexp object.}
 \hline
--- & {\bf \htmlref{version}{systemdict:version}} & string & Get the version
-string. \\
+\optableent
+	{input pattern flags}
+	{{\bf \htmlref{match}{systemdict:match}}}
+	{matches}
+	{Find pattern matches in input string.}
+\optableent
+	{input pattern}
+	{{\bf \htmlref{match}{systemdict:match}}}
+	{matches}
+	{Find pattern matches in input string.}
+\optableent
+	{input regexp}
+	{{\bf \htmlref{match}{systemdict:match}}}
+	{matches}
+	{Find regexp matches in input string.}
 \hline
-proc & {\bf \htmlref{bind}{systemdict:bind}} & proc & Bind names to
-operators. \\
+\optableent
+	{input matches}
+	{{\bf \htmlref{offsets}{systemdict:offsets}}}
+	{offsets}
+	{Get match offsets from beginning of input.}
 \hline
--- & {\bf \htmlref{null}{systemdict:null}} & null & Create a null object. \\
+\optableent
+	{pattern template flags}
+	{{\bf \htmlref{regsub}{systemdict:regsub}}}
+	{regsub}
+	{Create a regsub object.}
+\optableent
+	{pattern template}
+	{{\bf \htmlref{regsub}{systemdict:regsub}}}
+	{regsub}
+	{Create a regsub object.}
+\hline
+\optableent
+	{input pattern template flags}
+	{{\bf \htmlref{subst}{systemdict:subst}}}
+	{output true}
+	{Successfully substitute template for pattern matches.}
+\optableent
+	{input pattern template}
+	{{\bf \htmlref{subst}{systemdict:subst}}}
+	{output true}
+	{Successfully substitute template for pattern matches.}
+\optableent
+	{input regsub}
+	{{\bf \htmlref{subst}{systemdict:subst}}}
+	{output true}
+	{Successfully substitute.}
+\optableent
+	{input pattern template flags}
+	{{\bf \htmlref{subst}{systemdict:subst}}}
+	{false}
+	{Unsuccessfully substitute template for pattern matches.}
+\optableent
+	{input pattern template}
+	{{\bf \htmlref{subst}{systemdict:subst}}}
+	{false}
+	{Unsuccessfully substitute template for pattern matches.}
+\optableent
+	{input regsub}
+	{{\bf \htmlref{subst}{systemdict:subst}}}
+	{false}
+	{Unsuccessfully substitute.}
+\hline \hline
+\multicolumn{2}{|l|}{Miscellaneous operators} \\
+\hline \hline
+\optableent
+	{--}
+	{{\bf \htmlref{product}{systemdict:product}}}
+	{string}
+	{Get the product string.}
+\hline
+\optableent
+	{--}
+	{{\bf \htmlref{version}{systemdict:version}}}
+	{string}
+	{Get the version string.}
+\hline
+\optableent
+	{proc}
+	{{\bf \htmlref{bind}{systemdict:bind}}}
+	{proc}
+	{Bind names to operators.}
+\hline
+\optableent
+	{--}
+	{{\bf \htmlref{null}{systemdict:null}}}
+	{null}
+	{Create a null object.}
 \end{longtable}
 
 %% \label{systemdict:OPNAME}
@@ -7988,6 +9289,28 @@ onyx:0> mark pstack
 onyx:1>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:match}
+\index{match@\onyxop{}{match}{}}
+\item[{\onyxop{OPARGS}{match}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
 \label{systemdict:mkdir}
 \index{mkdir@\onyxop{}{mkdir}{}}
 \item[{\onyxop{path}{mkdir}{--}}: ]
@@ -8731,6 +10054,28 @@ onyx:0> `a' `b' `c' `d' `e' 4 nup pstack
 `e'
 `a'
 onyx:5>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:offsets}
+\index{offsets@\onyxop{}{offsets}{}}
+\item[{\onyxop{OPARGS}{offsets}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
 		\end{verbatim}
 	\end{description}
 \label{systemdict:onyxdict}
@@ -9663,6 +11008,50 @@ onyx:1> dup 10 string recv
 onyx:2> 1 sprint
 `hello'
 onyx:1>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:regexp}
+\index{regexp@\onyxop{}{regexp}{}}
+\item[{\onyxop{OPARGS}{regexp}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{systemdict:regsub}
+\index{regsub@\onyxop{}{regsub}{}}
+\item[{\onyxop{OPARGS}{regsub}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
 		\end{verbatim}
 	\end{description}
 \label{systemdict:rename}
@@ -12162,6 +13551,28 @@ onyx:0> -3.0 4.1 sub 1 sprint
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:subst}
+\index{subst@\onyxop{}{subst}{}}
+\item[{\onyxop{OPARGS}{subst}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
 \label{systemdict:sunder}
 \index{sunder@\onyxop{}{sunder}{}}
 \item[{\onyxop{stack}{sunder}{--}}: ]
@@ -13560,30 +14971,52 @@ Each thread has its own threaddict, which is not shared with any other threads.
 threaddict is meant to be used for thread-specific definitions that would
 otherwise go in systemdict.
 
-\begin{longtable}{\optableformat{3}}
-\caption[threaddict summary]{threaddict summary}
+\begin{longtable}{\optableformat{4.10}}
+\caption{threaddict summary}
 \\
 \hline
-Input(s) & Op/Proc/Var & Output(s) & Description \\
+\optableent
+	{Input(s)}
+	{Op/Proc/Var}
+	{Output(s)}
+	{Description}
 \hline \hline
 %begin{latexonly}
 \endfirsthead
 \caption[]{\emph{continued}} \\
 \hline
-Input(s) & Op/Proc/Var & Output(s) & Description \\
+\optableent
+	{Input(s)}
+	{Op/Proc/Var}
+	{Output(s)}
+	{Description}
 \hline \endhead
-\multicolumn{4}{r}{\emph{Continued on next page...}} \endfoot
+\multicolumn{2}{r}{\emph{Continued on next page...}} \endfoot
 \hline \endlastfoot
 %end{latexonly}
--- & {\bf \htmlref{threaddict}{threaddict:threaddict}} & dict & Get
-threaddict. \\
+\optableent
+	{--}
+	{{\bf \htmlref{threaddict}{threaddict:threaddict}}}
+	{dict}
+	{Get threaddict.}
 \hline
--- & {\bf \htmlref{userdict}{threaddict:userdict}} & dict & Get userdict. \\
+\optableent
+	{--}
+	{{\bf \htmlref{userdict}{threaddict:userdict}}}
+	{dict}
+	{Get userdict.}
 \hline
--- & {\bf \htmlref{currenterror}{threaddict:currenterror}} & dict & Get
-currenterror. \\
+\optableent
+	{--}
+	{{\bf \htmlref{currenterror}{threaddict:currenterror}}}
+	{dict}
+	{Get currenterror.}
 \hline
--- & {\bf \htmlref{errordict}{threaddict:errordict}} & dict & Get errordict. \\
+\optableent
+	{--}
+	{{\bf \htmlref{errordict}{threaddict:errordict}}}
+	{dict}
+	{Get errordict.}
 \end{longtable}
 
 \begin{description}
