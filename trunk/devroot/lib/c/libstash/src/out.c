@@ -1277,7 +1277,8 @@ out_p_add(cw_uint32_t a_base, cw_uint32_t a_ndigits,
 
 static cw_uint32_t
 out_p_metric_int(const char * a_format, cw_uint32_t a_len,
-		 cw_uint64_t a_arg, cw_uint32_t a_nbits)
+		 cw_uint64_t a_arg,
+		 cw_uint32_t a_nbits, cw_uint32_t a_default_base)
 {
   cw_uint32_t retval, width, base, i;
   cw_sint32_t val_len;
@@ -1356,8 +1357,7 @@ out_p_metric_int(const char * a_format, cw_uint32_t a_len,
   }
   else
   {
-    /* Default to base 10. */
-    base = 10;
+    base = a_default_base;
   }
   
   for (i = 0; i < a_nbits; i++)
@@ -1403,7 +1403,8 @@ out_p_metric_int(const char * a_format, cw_uint32_t a_len,
 
 static char *
 out_p_render_int(const char * a_format, cw_uint32_t a_len,
-		 cw_uint64_t a_arg, char * r_buf, cw_uint32_t a_nbits)
+		 cw_uint64_t a_arg, char * r_buf,
+		 cw_uint32_t a_nbits, cw_uint32_t a_default_base)
 {
   char * retval;
   cw_uint32_t base, width, out_len, i;
@@ -1444,8 +1445,7 @@ out_p_render_int(const char * a_format, cw_uint32_t a_len,
   }
   else
   {
-    /* Default to base 10. */
-    base = 10;
+    base = a_default_base;
   }
   
   /* Determine sign. */
@@ -1501,7 +1501,7 @@ out_p_render_int(const char * a_format, cw_uint32_t a_len,
     }
   }
 
-  width = out_p_metric_int(a_format, a_len, a_arg, a_nbits);
+  width = out_p_metric_int(a_format, a_len, a_arg, a_nbits, a_default_base);
   out_len = (a_nbits - i) + (show_sign ? 1 : 0);
 
   if (width > out_len)
@@ -1591,7 +1591,7 @@ out_p_metric_int8(const char * a_format, cw_uint32_t a_len,
   cw_uint32_t retval;
   cw_uint64_t arg = (cw_uint64_t) *(const cw_uint8_t *) a_arg;
   
-  retval = out_p_metric_int(a_format, a_len, arg, 8);
+  retval = out_p_metric_int(a_format, a_len, arg, 8, 10);
 
   return retval;
 }
@@ -1603,7 +1603,7 @@ out_p_render_int8(const char * a_format, cw_uint32_t a_len,
   char * retval;
   cw_uint64_t arg = (cw_uint64_t) *(const cw_uint8_t *) a_arg;
 
-  retval = out_p_render_int(a_format, a_len, arg, r_buf, 8);
+  retval = out_p_render_int(a_format, a_len, arg, r_buf, 8, 10);
 
   return retval;
 }
@@ -1615,7 +1615,7 @@ out_p_metric_int16(const char * a_format, cw_uint32_t a_len,
   cw_uint32_t retval;
   cw_uint64_t arg = (cw_uint64_t) *(const cw_uint16_t *) a_arg;
   
-  retval = out_p_metric_int(a_format, a_len, arg, 16);
+  retval = out_p_metric_int(a_format, a_len, arg, 16, 10);
 
   return retval;
 }
@@ -1627,7 +1627,7 @@ out_p_render_int16(const char * a_format, cw_uint32_t a_len,
   char * retval;
   cw_uint64_t arg = (cw_uint64_t) *(const cw_uint16_t *) a_arg;
 
-  retval = out_p_render_int(a_format, a_len, arg, r_buf, 16);
+  retval = out_p_render_int(a_format, a_len, arg, r_buf, 16, 10);
 
   return retval;
 }
@@ -1639,7 +1639,7 @@ out_p_metric_int32(const char * a_format, cw_uint32_t a_len,
   cw_uint32_t retval;
   cw_uint64_t arg = (cw_uint64_t) *(const cw_uint32_t *) a_arg;
   
-  retval = out_p_metric_int(a_format, a_len, arg, 32);
+  retval = out_p_metric_int(a_format, a_len, arg, 32, 10);
 
   return retval;
 }
@@ -1651,7 +1651,7 @@ out_p_render_int32(const char * a_format, cw_uint32_t a_len,
   char * retval;
   cw_uint64_t arg = (cw_uint64_t) *(const cw_uint32_t *) a_arg;
 
-  retval = out_p_render_int(a_format, a_len, arg, r_buf, 32);
+  retval = out_p_render_int(a_format, a_len, arg, r_buf, 32, 10);
 
   return retval;
 }
@@ -1663,7 +1663,7 @@ out_p_metric_int64(const char * a_format, cw_uint32_t a_len,
   cw_uint32_t retval;
   cw_uint64_t arg = *(const cw_uint64_t *) a_arg;
   
-  retval = out_p_metric_int(a_format, a_len, arg, 64);
+  retval = out_p_metric_int(a_format, a_len, arg, 64, 10);
 
   return retval;
 }
@@ -1675,8 +1675,105 @@ out_p_render_int64(const char * a_format, cw_uint32_t a_len,
   char * retval;
   cw_uint64_t arg = *(const cw_uint64_t *) a_arg;
 
-  retval = out_p_render_int(a_format, a_len, arg, r_buf, 64);
+  retval = out_p_render_int(a_format, a_len, arg, r_buf, 64, 10);
 
+  return retval;
+}
+
+static cw_uint32_t
+out_p_metric_char(const char * a_format, cw_uint32_t a_len,
+		  const void * a_arg)
+{
+  cw_uint32_t retval, width;
+  cw_sint32_t val_len;
+  const char * val;
+
+  /* Options: w: p: j: */
+  if (-1 != (val_len = spec_get_val(a_format, a_len, "w", &val)))
+  {
+    /* Width specified. */
+    /* The next character after val is either `|' or `]', so we don't have to
+     * worry about terminating the string that val points to. */
+    width = strtoul(val, NULL, 10);
+    if (width > 1)
+    {
+      retval = width;
+      goto RETURN;
+    }
+  }
+
+  retval = 1;
+
+  RETURN:
+  return retval;
+}
+
+static char *
+out_p_render_char(const char * a_format, cw_uint32_t a_len,
+		  const void * a_arg, char * r_buf)
+{
+  char * retval;
+  cw_uint32_t width;
+  cw_sint32_t val_len;
+  const char * val;
+  cw_uint8_t pad, c = *(const cw_uint8_t *) a_arg;
+
+  /* Options: w: p: j: */
+  width = out_p_metric_char(a_format, a_len, a_arg);
+
+  if (1 < width)
+  {
+    /* Padding character. */
+    if (-1 != (val_len = spec_get_val(a_format, a_len, "p", &val)))
+    {
+      pad = val[0];
+    }
+    else
+    {
+      pad = ' ';
+    }
+
+    memset(r_buf, pad, width);
+
+    /* Justification. */
+    if (-1 != (val_len = spec_get_val(a_format, a_len, "j", &val)))
+    {
+      switch (val[0])
+      {
+	case 'r':
+	{
+	  r_buf[width - 1] = c;
+	  break;
+	}
+	case 'l':
+	{
+	  r_buf[0] = c;
+	  break;
+	}
+	case 'c':
+	{
+	  r_buf[width / 2] = c;
+	  break;
+	}
+	default:
+	{
+	  _cw_error("Unknown justification");
+	}
+      }
+    }
+    else
+    {
+      /* Default to right justification. */
+      r_buf[width - 1] = c;
+    }
+  }
+  else
+  {
+    r_buf[0] = c;
+  }
+
+  retval = r_buf;
+  
   return retval;
 }
 
@@ -1700,7 +1797,7 @@ out_p_metric_string(const char * a_format, cw_uint32_t a_len,
     /* The next character after val is either `|' or `]', so we don't have to
      * worry about terminating the string that val points to. */
     width = strtoul(val, NULL, 10);
-    if (width < len)
+    if (width > len)
     {
       retval = width;
       goto RETURN;
@@ -1721,7 +1818,10 @@ static char *
 out_p_render_string(const char * a_format, cw_uint32_t a_len,
 		    const void * a_arg, char * r_buf)
 {
-  char * retval;
+  char * retval, pad;
+  cw_sint32_t val_len;
+  const char * val;
+  cw_uint32_t len, width;
   const char * str = *(const char **) a_arg;
 
   _cw_check_ptr(a_format);
@@ -1729,9 +1829,61 @@ out_p_render_string(const char * a_format, cw_uint32_t a_len,
   _cw_check_ptr(a_arg);
   _cw_check_ptr(r_buf);
 
+  len = strlen(str);
+  
   /* XXX Add p: w: j: */
+  width = out_p_metric_string(a_format, a_len, a_arg);
 
-  memcpy(r_buf, str, out_p_metric_string(a_format, a_len, a_arg));
+  if (len < width)
+  {
+    /* Padding character. */
+    if (-1 != (val_len = spec_get_val(a_format, a_len, "p", &val)))
+    {
+      pad = val[0];
+    }
+    else
+    {
+      pad = ' ';
+    }
+
+    memset(r_buf, pad, width);
+
+    /* Justification. */
+    if (-1 != (val_len = spec_get_val(a_format, a_len, "j", &val)))
+    {
+      switch (val[0])
+      {
+	case 'r':
+	{
+	  memcpy(&r_buf[width - len], str, len);
+	  break;
+	}
+	case 'l':
+	{
+	  memcpy(r_buf, str, len);
+	  break;
+	}
+	case 'c':
+	{
+	  memcpy(&r_buf[(width - len) / 2], str, len);
+	  break;
+	}
+	default:
+	{
+	  _cw_error("Unknown justification");
+	}
+      }
+    }
+    else
+    {
+      /* Default to right justification. */
+      memcpy(&r_buf[width - len], str, len);
+    }
+  }
+  else
+  {
+    memcpy(r_buf, str, len);
+  }
 
   return retval;
 }
@@ -1741,6 +1893,10 @@ out_p_metric_pointer(const char * a_format, cw_uint32_t a_len,
 		     const void * a_arg)
 {
   cw_uint32_t retval;
+  /* XXX Assumes 32 bit pointer. */
+  cw_uint64_t arg = (cw_uint64_t) (cw_uint32_t) *(const void **) a_arg;
+  
+  retval = out_p_metric_int(a_format, a_len, arg, 32, 16);
 
   return retval;
 }
@@ -1750,6 +1906,10 @@ out_p_render_pointer(const char * a_format, cw_uint32_t a_len,
 		     const void * a_arg, char * r_buf)
 {
   char * retval;
+  /* XXX Assumes 32 bit pointer. */
+  cw_uint64_t arg = (cw_uint64_t) (cw_uint32_t) *(const void **) a_arg;
+
+  retval = out_p_render_int(a_format, a_len, arg, r_buf, 32, 16);
 
   return retval;
 }

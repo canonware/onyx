@@ -88,18 +88,29 @@ main()
   out_put(cw_g_out, ":[t:i16|s:u|b:2|p:0|w:16]: [[t:i16|s:u|b:2|p:0|w:16]\n", -43);
   out_put(cw_g_out, ":[t:i16|s:s|b:2]:\n", -43);
 
-  {
-    cw_uint32_t i;
-    char buf[65];
+/*    { */
+/*      cw_uint32_t i; */
+/*      char buf[65]; */
     
-    for (i = 0; i < 1000; i++)
-    {
-/*        out_put_s(cw_g_out, buf, "[t:i64|p:0|w:16|b:16]", 0xf2135123); */
-      out_put_s(cw_g_out, buf, "[t:i32|b:16]", (cw_uint32_t) 0xf2135123);
-      out_put(cw_g_out, ".");
-    }
-    out_put(cw_g_out, "\n[t:s]\n", buf);
-  }
+/*      for (i = 0; i < 1000; i++) */
+/*      { */
+/*        out_put_s(cw_g_out, buf, "[t:i32|b:16]", (cw_uint32_t) 0xf2135123); */
+/*        out_put(cw_g_out, "."); */
+/*      } */
+/*      out_put(cw_g_out, "\n[t:s]\n", buf); */
+/*    } */
+
+  out_put(cw_g_out, ":[t:c]:\n", 'A');
+  out_put(cw_g_out, ":[t:c|w:3]:\n", 'A');
+  out_put(cw_g_out, ":[t:c|w:3|j:l]:\n", 'A');
+  out_put(cw_g_out, ":[t:c|w:3|j:c]:\n", 'A');
+  out_put(cw_g_out, ":[t:c|w:3|j:r]:\n", 'A');
+  out_put(cw_g_out, ":[t:c|w:3|j:l|p:_]:\n", 'A');
+  out_put(cw_g_out, ":[t:c|w:3|j:c|p:+]:\n", 'A');
+  out_put(cw_g_out, ":[t:c|w:3|j:r|p:-]:\n", 'A');
+
+  out_put(cw_g_out, "0x:[t:p]:\n", 0x12345678);
+  out_put(cw_g_out, "0x:[t:p|w:12|p:_|j:c]:\n", 0x12345678);
   
   log_printf(cw_g_log, "Test end\n");
   libstash_shutdown();
