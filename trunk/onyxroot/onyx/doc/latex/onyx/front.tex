@@ -125,9 +125,10 @@
 \newcommand{\oparg}[1]{{\em #1}}
 \newcommand{\commas}{,,,}
 
-% For printed versions, we need to limit the width of the operator summary
-% tables, but for html there is no need do.
+% For printed versions, we need to limit the width of tables, but for html
+% there is no need to.
 \newcommand{\optableformat}[1]{|r|l|l|p{#1in}|}
+\newcommand{\rxtableformat}[1]{|r|p{#1in}|}
 
 % TeX doesn't have '\', '<', '>', '|', and '~' in its text fonts.
 \newcommand{\bs}{$\backslash$}
@@ -143,6 +144,7 @@
 % is generated.
 \begin{htmlonly}
 \newcommand{\optableformat}[1]{|r|l|l|l|}
+\newcommand{\rxtableformat}[1]{|r|l|}
 \newcommand{\bs}{YYYbsZZZ}
 \newcommand{\carat}{^}
 \newcommand{\lt}{<}
