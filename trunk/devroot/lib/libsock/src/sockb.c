@@ -26,14 +26,6 @@
 
 #include <sys/types.h>
 #include <poll.h>
-#ifdef _LIBSTASH_SOCKB_CONFESS
-#  ifdef _CW_OS_LINUX
-/* This pulls in definitions for POLLRDNORM, POLLRDBAND, POLLWRNORM, POLLWRBAND
- * and POLLMSG.  We don't really care about these except for completeness when
- * spewing debug info. */
-#    include <asm/poll.h>
-#  endif
-#endif
 #include <sys/time.h>
 #include <sys/uio.h>
 #include <fcntl.h>
