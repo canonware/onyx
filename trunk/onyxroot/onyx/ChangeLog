@@ -1,3 +1,7 @@
+2003-02-15 : Jason Evans <jasone@canonware.com>
+
+	* Onyx 4.3.1 released.
+
 2003-02-09 : Jason Evans <jasone@canonware.com>
 
 	* lib/libonyx/src/systemdict.c:systemdict_foreach() : Make a snapshot
