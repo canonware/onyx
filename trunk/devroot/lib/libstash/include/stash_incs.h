@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 165 $
- * Last modified: $Date: 1998-08-11 17:09:33 -0700 (Tue, 11 Aug 1998) $
+ * Current revision: $Revision: 181 $
+ * Last modified: $Date: 1998-08-29 21:02:22 -0700 (Sat, 29 Aug 1998) $
  *
  * <<< Description >>>
  *
@@ -121,6 +121,19 @@
 #  endif
 #endif
 
+#if (defined(_INC_BRF_H_))
+#  ifndef _BRF_H_
+#    ifndef _BRBLK_H_
+#      include <brblk.h>
+#    endif
+#    ifndef _BRBS_H_
+#      include <brbs.h>
+#    endif
+#    include <brf.h>
+#    define _BRF_H_
+#  endif
+#endif
+
 #if (defined(_INC_BUF_H_))
 #  ifndef _BUF_H_
 #    ifndef _LIST_H_
@@ -162,7 +175,7 @@
 #if (defined(_INC_OH_H_))
 #  ifndef _OH_H_
 #    include <oh.h>
-#    define _OH5_H_
+#    define _OH_H_
 #  endif
 #endif
 
