@@ -100,24 +100,6 @@ struct cw_stilo_s {
 #endif
 
 	/*
-	 * This should be before the bit fields so that in stilo_dup(), where
-	 * memcpy() is used, the stiloe pointer will be valid before the type is
-	 * set.  That way, the GC won't go chasing bad pointers.
-	 */
-	union {
-		struct {
-			cw_bool_t	val;
-		}	boolean;
-		struct {
-			cw_stiloi_t	i;
-		}	integer;
-		struct {
-			cw_op_t		*f;
-		}	operator;
-		cw_stiloe_t	*stiloe;
-	}	o;
-
-	/*
 	 * Type.
 	 */
 	cw_stilot_t	type:5;
@@ -142,6 +124,19 @@ struct cw_stilo_s {
 	 * procedures.
 	 */
 	cw_bool_t	array_bound:1;
+
+	union {
+		struct {
+			cw_bool_t	val;
+		}	boolean;
+		struct {
+			cw_stiloi_t	i;
+		}	integer;
+		struct {
+			cw_op_t		*f;
+		}	operator;
+		cw_stiloe_t	*stiloe;
+	}	o;
 };
 
 /*
@@ -194,19 +189,46 @@ struct cw_stiloe_s {
 cw_sint32_t	stilo_compare(cw_stilo_t *a_a, cw_stilo_t *a_b);
 
 /*
- * This code is only GC-safe as long as o.stiloe is memcpy()ed at or before the
- * time that the type is set.  This is probably okay with any compiler/OS
- * combination available, but the memcpy() interface does not explicitly
- * guarantee that bytes are copied in ascending order.
+ * The code for stilo_dup() is fragile in that it relies on the internal layout
+ * of cw_stilo_t.  In order to fix this fragility, we would need to convert the
+ * bit fields to a manually managed 32 bit variable with bits that represent
+ * various flags.
  *
- * To make this code safe even if the memcpy() does strange things, the memcpy()
- * call needs to be surrounded by thd_crit_{enter,leave}().
+ * The order of operations is important in order to avoid a GC race.
  */
+#ifdef _LIBSTIL_DBG
 #define		stilo_dup(a_to, a_from) do {				\
-	/* Copy. */							\
-	memcpy((a_to), (a_from), sizeof(cw_stilo_t));			\
+	struct {							\
+		cw_uint32_t	magic;					\
+		cw_uint32_t	flags;					\
+		cw_stiloi_t	data;					\
+	} *x_to, *x_from;						\
+	_cw_assert(sizeof(*x_to) == sizeof(cw_stilo_t));		\
+									\
+	x_to = (void *)(a_to);						\
+	x_from = (void *)(a_from);					\
+	_cw_assert((a_from)->magic == x_from->magic);			\
+	_cw_assert((a_from)->o.integer.i == x_from->data);		\
+	x_to->flags = 0;						\
+	x_to->data = x_from->data;					\
+	x_to->flags = x_from->flags;					\
+	x_to->magic = x_from->magic;					\
 } while (0)
-	
+#else
+#define		stilo_dup(a_to, a_from) do {				\
+	struct {							\
+		cw_uint32_t	flags;					\
+		cw_stiloi_t	data;					\
+	} *x_to, *x_from;						\
+									\
+	x_to = (void *)(a_to);						\
+	x_from = (void *)(a_from);					\
+	x_to->flags = 0;						\
+	x_to->data = x_from->data;					\
+	x_to->flags = x_from->flags;					\
+} while (0)
+#endif
+
 #define		stilo_type_get(a_stilo)	(a_stilo)->type
 cw_stiloe_t	*stilo_stiloe_get(cw_stilo_t *a_stilo);
 cw_bool_t	stilo_lcheck(cw_stilo_t *a_stilo);
