@@ -9,8 +9,6 @@
 #
 # Version: <Version>
 #
-# <<< Description >>>
-#
 # Test harness.
 #
 #############################################################################
@@ -31,13 +29,15 @@ $opt_verbose = 0;
 $opt_quiet = 0;
 $opt_srcdir = ".";
 $opt_ustats = 0;
+$opt_zero = 0;
 
-$opt_retval = 
+$opt_retval =
 &GetOptions("h|help" => \$opt_help,
 	    "v|verbose" => \$opt_verbose,
 	    "q|quiet" => \$opt_quiet,
             "s|srcdir=s" => \$opt_srcdir,
-	    "u|ustats" => \$opt_ustats
+	    "u|ustats" => \$opt_ustats,
+	    "z|zero" => \$opt_zero
 	    );
 
 $mode = "d";
@@ -289,7 +289,7 @@ foreach $test (@DTESTS)
 $tt_str = sprintf ("%d / %d passed (%5.2f%%%%)",
 		   ($#STESTS + $#DTESTS + 2) - ($#FAILED_TESTS + 1),
 		   $#STESTS + $#DTESTS + 2,
-		   (($#STESTS + $#DTESTS + 2) - ($#FAILED_TESTS + 1)) 
+		   (($#STESTS + $#DTESTS + 2) - ($#FAILED_TESTS + 1))
 		   / ($#STESTS + $#DTESTS + 2) * 100);
 
 $t_str = sprintf ("Totals                                   %7.2f  %7.2f %7.2f"
@@ -348,12 +348,15 @@ sub run_test
     $tutime -= $cutime;
     $tstime -= $cstime;
 
-    if ($?)
+    if ($opt_zero)
     {
-	$okay = 0;
-	if ($opt_verbose)
+	if ($?)
 	{
-	    print STDERR "Unable to run \"./$test > ./$test.out 2>&1\"\n";
+	    $okay = 0;
+	    if ($opt_verbose)
+	    {
+		print STDERR "\"./$test > ./$test.out 2>&1\" returned $?\n";
+	    }
 	}
     }
 
@@ -448,6 +451,7 @@ $0 usage:
     -q --quiet    | Quiet (incompatible with verbose).
     -s --srcdir   | Path to source tree (default is ".").
     -u --ustats   | Update historical statistics (stored in "<test>.perf".
+    -z --zero     | Consider non-zero exit code to be an error.
     --------------+-------------------------------------------------------------
 
     Flag          | Description
