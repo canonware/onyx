@@ -101,7 +101,7 @@ CPPFLAGS = -I@srcroot@/mod/modprompt/include
 #if [matches elf @abi@]
         -shared
 #elif [matches macho @abi@]
-        -undefined suppress -flat_namespace -bundle -all_load -bind_at_load
+        -undefined dynamic_lookup -bundle -all_load -prebind
 #endif
         -o [target] [need]
         [MODPROMPT_LDFLAGS];
