@@ -18,17 +18,9 @@ struct cw_stil_s {
 	cw_mtx_t	lock;
 
 	/*
-	 * List of all stilt's.
-	 */
-	ql_head(cw_stilt_t) stilt_head;
-
-	/*
 	 * Used for remembering the current state of reference iteration.
 	 */
 	ql_head(cw_stilt_t) ref_iter;
-
-	/* Memory allocator. */
-	cw_stila_t	stila;
 
         /*
          * Global hash of names (key: {name, len}, value: (stiloe_name *)).
@@ -43,6 +35,14 @@ struct cw_stil_s {
          */
 	cw_mtx_t	name_lock;
 	cw_dch_t	name_hash;
+
+	/*
+	 * List of all stilt's.
+	 */
+	ql_head(cw_stilt_t) stilt_head;
+
+	/* Memory allocator. */
+	cw_stila_t	stila;
 
 	/*
 	 * Dictionaries.

@@ -10,6 +10,8 @@
  ******************************************************************************/
 
 #include "../include/libstil/libstil.h"
+#include "../include/libstil/envdict_l.h"
+#include "../include/libstil/systemdict_l.h"
 #include "../include/libstil/stilo_l.h"
 
 #ifdef _LIBSTIL_DBG
@@ -51,7 +53,6 @@ stil_new(cw_stil_t *a_stil, int a_argc, char **a_argv, char **a_envp,
     cw_stilo_file_write_t *a_stderr, void *a_arg)
 {
 	cw_stil_t		*retval;
-	cw_stilt_t		stilt;
 	volatile cw_uint32_t	try_stage = 0;
 
 	xep_begin();
@@ -66,33 +67,22 @@ stil_new(cw_stil_t *a_stil, int a_argc, char **a_argv, char **a_envp,
 			memset(retval, 0, sizeof(cw_stil_t));
 			retval->is_malloced = TRUE;
 		}
+		v_retval = retval;
 		try_stage = 1;
 
-		v_retval = retval;
-		stila_new(&retval->stila, retval);
-		try_stage = 2;
-
+		/* Initialize the global stilt list. */
 		ql_new(&retval->stilt_head);
+
+		/* Initialize the global name cache. */
 		mtx_new(&retval->name_lock);
 		dch_new(&retval->name_hash, NULL, _CW_STIL_NAME_BASE_TABLE,
 		    _CW_STIL_NAME_BASE_GROW, _CW_STIL_NAME_BASE_SHRINK,
 		    stilo_l_name_hash, stilo_l_name_key_comp);
+		try_stage = 2;
+
+		/* Initialize the GC (and gcdict by association). */
+		stila_new(&retval->stila, retval);
 		try_stage = 3;
-
-		/*
-		 * Create a temporary thread in order to be able to initialize
-		 * systemdict, stdin, stdout, and stderr, and destroy the thread
-		 * as soon as we're done.
-		 */
-
-		/* XXX OOM in dictionary initialization isn't handled. */
-
-		/* Initialize systemdict, since stilt_new() will access it. */
-		stilo_no_new(&retval->systemdict);
-		stilt_new(&stilt, retval);
-		try_stage = 4;
-
-		stilt_setglobal(&stilt, TRUE);
 
 		/* Initialize stdin. */
 		stilo_file_new(&retval->stdin_stilo, retval);
@@ -104,6 +94,7 @@ stil_new(cw_stil_t *a_stil, int a_argc, char **a_argv, char **a_envp,
 		}
 		stilo_file_buffer_size_set(&retval->stdin_stilo,
 		    _CW_STIL_STDIN_BUFFER_SIZE);
+		try_stage = 4;
 
 		/* Initialize stdout. */
 		stilo_file_new(&retval->stdout_stilo, retval);
@@ -115,6 +106,7 @@ stil_new(cw_stil_t *a_stil, int a_argc, char **a_argv, char **a_envp,
 		}
 		stilo_file_buffer_size_set(&retval->stdout_stilo,
 		    _CW_STIL_STDOUT_BUFFER_SIZE);
+		try_stage = 5;
 
 		/* Initialize stderr. */
 		stilo_file_new(&retval->stderr_stilo, retval);
@@ -124,33 +116,35 @@ stil_new(cw_stil_t *a_stil, int a_argc, char **a_argv, char **a_envp,
 			stilo_file_interactive(&retval->stderr_stilo, NULL,
 			    a_stderr, a_arg);
 		}
+		try_stage = 6;
 
 		/* Initialize globaldict. */
 		stilo_dict_new(&retval->globaldict, retval,
 		    _CW_STIL_GLOBALDICT_SIZE);
+		try_stage = 7;
 
 		/* Initialize envdict. */
-		envdict_populate(&retval->envdict, &stilt, a_envp);
+		envdict_l_populate(&retval->envdict, retval, a_envp);
+		try_stage = 8;
 
-		/* Finish systemdict initialization. */
-		systemdict_populate(&retval->systemdict, &stilt, a_argc,
+		/* Initialize systemdict. */
+		systemdict_l_populate(&retval->systemdict, retval, a_argc,
 		    a_argv);
-
-		stilt_delete(&stilt);
-
-		/* Activate the GC. */
-		stila_collect_set(&retval->stila, TRUE);
+		try_stage = 9;
 	}
 	xep_catch (_CW_XEPV_OOM) {
 		retval = (cw_stil_t *)v_retval;
 		switch (try_stage) {
+		case 8:
+		case 7:
+		case 6:
+		case 5:
 		case 4:
-			stilt_delete(&stilt);
 		case 3:
+			stila_delete(&retval->stila);
+		case 2:
 			dch_delete(&retval->name_hash);
 			mtx_delete(&retval->name_lock);
-		case 2:
-			stila_delete(&retval->stila);
 		case 1:
 			if (retval->is_malloced)
 				_cw_free(retval);
@@ -215,4 +209,24 @@ stil_l_ref_iter(cw_stil_t *a_stil, cw_bool_t a_reset)
 	}
 
 	return retval;
+}
+
+void
+stil_l_stilt_insert(cw_stil_t *a_stil, cw_stilt_t *a_stilt)
+{
+	cw_bool_t	first_stilt;
+
+	if (ql_first(&a_stil->stilt_head) == NULL) {
+		/*
+		 * This is the first thread.  Activate the GC once the thread
+		 * has been inserted.
+		 */
+		first_stilt = TRUE;
+	} else
+		first_stilt = FALSE;
+
+	ql_tail_insert(&a_stil->stilt_head, a_stilt, link);
+
+	if (first_stilt)
+		stila_active_set(&a_stil->stila, TRUE);
 }

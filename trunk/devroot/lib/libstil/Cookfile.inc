@@ -22,9 +22,8 @@
 
 /* Include files that _are_ installed. */
 {
-  local incs = libstil.h libstil_incs.h stil.h stila.h stiln.h stilo.h stils.h
-               stilt.h systemdict.h envdict.h errordict.h currenterror.h
-               threaddict.h;
+  local incs = libstil.h libstil_incs.h errordict.h gcdict.h stil.h stila.h
+               stiln.h stilo.h stils.h stilt.h systemdict.h;
   incs = [fromto % [srcdir]/lib/c/libstil/include/libstil/% [incs]];
   incs = [incs] [objdir]/lib/c/libstil/include/libstil/libstil_defs.h;
 
@@ -34,15 +33,17 @@
 
 /* Include files that are _not_ installed. */
 {
-  local priv_incs = stil_l.h stila_l.h stilo_l.h stils_l.h stilt_l.h;
+  local priv_incs = currenterror_l.h envdict_l.h errordict_l.h gcdict_l.h
+                    systemdict_l.h threaddict_l.h stil_l.h stila_l.h stilo_l.h
+                    stils_l.h stilt_l.h;
   priv_incs = [fromto % [srcdir]/lib/c/libstil/include/libstil/% [priv_incs]];
 
   PRIV_INCS = [PRIV_INCS] [priv_incs];
 }
 
 /* Source files. */
-LIBSTIL_SRCS = stil.c stila.c stiln.c stilo.c stils.c stilt.c systemdict.c
-               envdict.c errordict.c currenterror.c threaddict.c;
+LIBSTIL_SRCS = currenterror.c envdict.c errordict.c gcdict.c stil.c stila.c
+               stiln.c stilo.c stils.c stilt.c systemdict.c threaddict.c;
 LIBSTIL_SRCS = [fromto % [srcdir]/lib/c/libstil/src/% [LIBSTIL_SRCS]];
 SRCS = [SRCS] [LIBSTIL_SRCS];
 

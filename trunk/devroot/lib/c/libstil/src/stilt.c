@@ -10,6 +10,9 @@
  ******************************************************************************/
 
 #include "../include/libstil/libstil.h"
+#include "../include/libstil/currenterror_l.h"
+#include "../include/libstil/errordict_l.h"
+#include "../include/libstil/threaddict_l.h"
 #include "../include/libstil/stil_l.h"
 #include "../include/libstil/stilo_l.h"
 
@@ -33,7 +36,6 @@ stilte_stiln(cw_stilte_t a_stilte)
 		STILN_ioerror,
 		STILN_limitcheck,
 		STILN_rangecheck,
-		STILN_stackoverflow,
 		STILN_stackunderflow,
 		STILN_syntaxerror,
 		STILN_timeout,
@@ -239,38 +241,33 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 		retval->tok_str = retval->buffer;
 		try_stage = 1;
 
-		dch_new(&retval->name_hash, NULL, _CW_STILT_NAME_BASE_TABLE,
-		    _CW_STILT_NAME_BASE_GROW, _CW_STILT_NAME_BASE_SHRINK,
-		    stilo_l_name_hash, stilo_l_name_key_comp);
-		try_stage = 2;
-
 		stils_new(&retval->estack,
 		    stila_stilsc_pool_get(stil_stila_get(a_stil)));
-		try_stage = 3;
+		try_stage = 2;
 
 		stils_new(&retval->ostack,
 		    stila_stilsc_pool_get(stil_stila_get(a_stil)));
-		try_stage = 4;
+		try_stage = 3;
 
 		stils_new(&retval->dstack,
 		    stila_stilsc_pool_get(stil_stila_get(a_stil)));
-		try_stage = 5;
+		try_stage = 4;
 
 		stils_new(&retval->tstack,
 		    stila_stilsc_pool_get(stil_stila_get(a_stil)));
-		try_stage = 6;
+		try_stage = 5;
 
 		/*
 		 * Create currenterror, errordict, and userdict.  threaddict
 		 * initialization needs these to already be initialized.
 		 */
-		currenterror_populate(&retval->currenterror, retval);
-		errordict_populate(&retval->errordict, retval);
+		currenterror_l_populate(&retval->currenterror, retval);
+		errordict_l_populate(&retval->errordict, retval);
 		stilo_dict_new(&retval->userdict, stilt_stil_get(retval),
 		    _CW_STILT_USERDICT_SIZE);
 
 		/* Create threaddict. */
-		threaddict_populate(&retval->threaddict, retval);
+		threaddict_l_populate(&retval->threaddict, retval);
 
 		/*
 		 * Push threaddict, systemdict, globaldict, and userdict onto
@@ -291,16 +288,14 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 	xep_catch(_CW_XEPV_OOM) {
 		retval = (cw_stilt_t *)v_retval;
 		switch (try_stage) {
-		case 6:
-			stils_delete(&retval->tstack);
 		case 5:
-			stils_delete(&retval->dstack);
+			stils_delete(&retval->tstack);
 		case 4:
-			stils_delete(&retval->ostack);
+			stils_delete(&retval->dstack);
 		case 3:
-			stils_delete(&retval->estack);
+			stils_delete(&retval->ostack);
 		case 2:
-			dch_delete(&retval->name_hash);
+			stils_delete(&retval->estack);
 		case 1:
 			if (retval->is_malloced)
 				_cw_free(retval);
@@ -338,7 +333,6 @@ stilt_delete(cw_stilt_t *a_stilt)
 	stils_delete(&a_stilt->dstack);
 	stils_delete(&a_stilt->ostack);
 	stils_delete(&a_stilt->estack);
-	dch_delete(&a_stilt->name_hash);
 	stil_l_stilt_remove(a_stilt->stil, a_stilt);
 	if (a_stilt->is_malloced)
 		_cw_free(a_stilt);

@@ -414,7 +414,7 @@ static const cw_stilot_vtable_t stilot_vtable[] = {
  * stilo.
  */
 cw_sint32_t
-stilo_compare(cw_stilo_t *a_a, cw_stilo_t *a_b, cw_stilt_t *a_stilt)
+stilo_compare(cw_stilo_t *a_a, cw_stilo_t *a_b)
 {
 	cw_sint32_t	retval;
 
@@ -866,11 +866,8 @@ stiloe_p_array_delete(cw_stiloe_t *a_stiloe, cw_stil_t *a_stil)
 	_cw_assert(array->stiloe.magic == _CW_STILOE_MAGIC);
 	_cw_assert(array->stiloe.type == STILOT_ARRAY);
 
-/*  	_cw_out_put_e("Got here\n"); */
-	if (array->stiloe.indirect == FALSE && array->e.a.len > 0) {
-/*  		_cw_out_put_e("free 0x[p|w:8|p:0]\n", array->e.a.arr); */
+	if (array->stiloe.indirect == FALSE && array->e.a.len > 0)
 		_CW_FREE(array->e.a.arr);
-	}
 
 	_CW_STILOE_FREE(array);
 }
@@ -905,7 +902,7 @@ stiloe_p_array_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t a_reset)
 }
 
 cw_stilte_t
-stilo_array_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
+stilo_array_copy(cw_stilo_t *a_to, cw_stilo_t *a_from)
 {
 	cw_stilte_t		retval;
 	cw_stiloe_array_t	*array_fr, *array_fr_i = NULL;
@@ -1598,7 +1595,7 @@ stilo_p_dict_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
 }
 
 void
-stilo_dict_def(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilo_t *a_key,
+stilo_dict_def(cw_stilo_t *a_stilo, cw_stil_t *a_stil, cw_stilo_t *a_key,
     cw_stilo_t *a_val)
 {
 	cw_stiloe_dict_t	*dict;
@@ -1631,8 +1628,8 @@ stilo_dict_def(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilo_t *a_key,
 		cw_chi_t	*chi;
 
 		/* Allocate and initialize. */
-		dicto = stilt_dicto_get(a_stilt);
-		chi = stilt_chi_get(a_stilt);
+		dicto = stila_dicto_get(stil_stila_get(a_stil));
+		chi = stila_chi_get(stil_stila_get(a_stil));
 		stilo_no_new(&dicto->key);
 		stilo_dup(&dicto->key, a_key);
 		stilo_no_new(&dicto->val);
@@ -1648,7 +1645,7 @@ stilo_dict_def(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilo_t *a_key,
 }
 
 void
-stilo_dict_undef(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const cw_stilo_t
+stilo_dict_undef(cw_stilo_t *a_stilo, cw_stil_t *a_stil, const cw_stilo_t
     *a_key)
 {
 	cw_stiloe_dict_t	*dict;
@@ -1674,8 +1671,8 @@ stilo_dict_undef(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const cw_stilo_t
 	stiloe_p_dict_unlock(dict);
 	    
 	if (error) {
-		stilt_dicto_put(a_stilt, dicto);
-		stilt_chi_put(a_stilt, chi);
+		stila_dicto_put(stil_stila_get(a_stil), dicto);
+		stila_chi_put(stil_stila_get(a_stil), chi);
 	}
 }
 
@@ -1704,6 +1701,39 @@ stilo_dict_lookup(cw_stilo_t *a_stilo, const cw_stilo_t *a_key, cw_stilo_t
 		retval = FALSE;
 	} else
 		retval = TRUE;
+	stiloe_p_dict_unlock(dict);
+
+	return retval;
+}
+
+/*
+ * This function is generally unsafe to use, since the return value can
+ * disappear due to GC before the pointer is turned into a legitimate reference.
+ * However, the GC itself needs to cache pointers to the actual values inside
+ * the dict for performance reasons, so it uses this function.
+ */
+cw_stilo_t *
+stilo_l_dict_lookup(cw_stilo_t *a_stilo, const cw_stilo_t *a_key)
+{
+	cw_stilo_t		*retval;
+	cw_stiloe_dict_t	*dict;
+	cw_stiloe_dicto_t	*dicto;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_stilo->type == STILOT_DICT);
+
+	dict = (cw_stiloe_dict_t *)a_stilo->o.stiloe;
+
+	_cw_check_ptr(dict);
+	_cw_assert(dict->stiloe.magic == _CW_STILOE_MAGIC);
+	_cw_assert(dict->stiloe.type == STILOT_DICT);
+
+	stiloe_p_dict_lock(dict);
+	if (dch_search(&dict->hash, (void *)a_key, (void **)&dicto) == FALSE) {
+		retval = &dicto->val;
+	} else
+		retval = NULL;
 	stiloe_p_dict_unlock(dict);
 
 	return retval;
@@ -3451,7 +3481,6 @@ stiloe_p_name_delete(cw_stiloe_t *a_stiloe, cw_stil_t *a_stil)
 	 * use.
 	 */
 	if (name->stiloe.color != stila_l_white_get(stil_stila_get(a_stil))) {
-/*  		_cw_out_put_e("Got here, 0x[p|w:8|p:8]\n", a_stiloe); */
 		/*
 		 * Remove from hash table.
 		 */
@@ -3469,7 +3498,6 @@ stiloe_p_name_delete(cw_stiloe_t *a_stiloe, cw_stil_t *a_stil)
 
 		_CW_STILOE_FREE(name);
 	} else {
-		_cw_out_put_e("Got here, 0x[p|w:8|p:8]\n", a_stiloe);
 		/* Re-register. */
 		a_stiloe->registered = FALSE;
 		stila_gc_register(stil_stila_get(a_stil), a_stiloe);
@@ -3768,7 +3796,7 @@ stiloe_p_string_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t a_reset)
 }
 
 cw_stilte_t
-stilo_string_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
+stilo_string_copy(cw_stilo_t *a_to, cw_stilo_t *a_from)
 {
 	cw_stilte_t		retval;
 	cw_stiloe_string_t	*string;

@@ -103,13 +103,6 @@ struct cw_stilt_s {
 	 */
 	cw_bool_t	global:1;
 
-        /*
-         * Thread-specific name cache hash (key: {name, len}, value:
-         * (stiloe_name *)).  This hash table keeps track of name "values" that
-         * are in existence within a particular local VM.
-         */
-	cw_dch_t	name_hash;
-
 	/*
 	 * Stacks.
 	 */

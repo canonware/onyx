@@ -9,6 +9,4 @@
  *
  ******************************************************************************/
 
-cw_bool_t stila_l_white_get(cw_stila_t *a_stila);
-
-#define	stila_l_stil_get(a_stila) (a_stila)->stil
+void	gcdict_l_populate(cw_stilo_t *a_dict, cw_stila_t *a_stila);

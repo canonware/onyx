@@ -24,6 +24,20 @@ extern  "C" {
 /*  #define	_LIBSTIL_CONFESS */
 
 /*
+ * Default minimum period of registration inactivity before a periodic
+ * collection is done (if any registrations have occured since the last
+ * collection).  On average, the actual inactivity period will be 1.5 times
+ * this, but can range from 1 to 2 times this.
+ */
+#define	_LIBSTIL_GCDICT_PERIOD		20
+
+/*
+ * Default number of sequence set additions since last collection that will
+ * cause an immediate collection.
+ */
+#define	_LIBSTIL_GCDICT_THRESHOLD	50000
+
+/*
  * Exception numbers.  libstil reserves -128 to -255.
  */
 #define	_CW_STILX_MAX			-128

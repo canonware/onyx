@@ -9,5 +9,4 @@
  *
  ******************************************************************************/
 
-void	envdict_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt, char
-    **a_envp);
+void	threaddict_l_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt);

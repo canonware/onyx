@@ -96,6 +96,12 @@ cw_stiloe_t *stiloe_l_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t a_reset);
 	(a_stiloe)->registered = (a_registered)
 
 /*
+ * dict.
+ */
+cw_stilo_t	*stilo_l_dict_lookup(cw_stilo_t *a_stilo, const cw_stilo_t
+    *a_key);
+
+/*
  * name.
  */
 cw_uint32_t	stilo_l_name_hash(const void *a_key);

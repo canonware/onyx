@@ -153,8 +153,7 @@ struct cw_stilo_s {
 	cw_bool_t	watchpoint:1;
 };
 
-cw_sint32_t	stilo_compare(cw_stilo_t *a_a, cw_stilo_t *a_b, cw_stilt_t
-    *a_stilt);
+cw_sint32_t	stilo_compare(cw_stilo_t *a_a, cw_stilo_t *a_b);
 
 /*
  * XXX This code is only GC-safe as long as o.stiloe is memcpy()ed at or before
@@ -214,8 +213,7 @@ void		stilo_array_new(cw_stilo_t *a_stilo, cw_stil_t *a_stil,
     cw_uint32_t a_len);
 cw_stilte_t	stilo_array_subarray_new(cw_stilo_t *a_stilo, cw_stilo_t
     *a_array, cw_stil_t *a_stil, cw_uint32_t a_offset, cw_uint32_t a_len);
-cw_stilte_t	stilo_array_copy(cw_stilo_t *a_to, cw_stilo_t *a_from,
-    cw_stilt_t *a_stilt);
+cw_stilte_t	stilo_array_copy(cw_stilo_t *a_to, cw_stilo_t *a_from);
 cw_uint32_t	stilo_array_len_get(cw_stilo_t *a_stilo);
 cw_stilo_t	*stilo_array_el_get(cw_stilo_t *a_stilo, cw_sint64_t a_offset);
 cw_stilte_t	stilo_array_el_set(cw_stilo_t *a_stilo, cw_stilo_t *a_el,
@@ -248,9 +246,9 @@ void		stilo_dict_new(cw_stilo_t *a_stilo, cw_stil_t *a_stil,
     cw_uint32_t a_dict_size);
 cw_stilte_t	stilo_dict_copy(cw_stilo_t *a_to, cw_stilo_t *a_from,
     cw_stil_t *a_stil);
-void		stilo_dict_def(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
+void		stilo_dict_def(cw_stilo_t *a_stilo, cw_stil_t *a_stil,
     cw_stilo_t *a_key, cw_stilo_t *a_val);
-void		stilo_dict_undef(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const
+void		stilo_dict_undef(cw_stilo_t *a_stilo, cw_stil_t *a_stil, const
     cw_stilo_t *a_key);
 cw_bool_t	stilo_dict_lookup(cw_stilo_t *a_stilo, const cw_stilo_t *a_key,
     cw_stilo_t *r_stilo);
@@ -386,8 +384,7 @@ void		stilo_string_new(cw_stilo_t *a_stilo, cw_stil_t *a_stil,
     cw_uint32_t a_len);
 cw_stilte_t	stilo_string_substring_new(cw_stilo_t *a_stilo, cw_stilo_t
     *a_string, cw_stil_t *a_stil, cw_uint32_t a_offset, cw_uint32_t a_len);
-cw_stilte_t	stilo_string_copy(cw_stilo_t *a_to, cw_stilo_t *a_from,
-    cw_stilt_t *a_stilt);
+cw_stilte_t	stilo_string_copy(cw_stilo_t *a_to, cw_stilo_t *a_from);
 cw_uint32_t	stilo_string_len_get(cw_stilo_t *a_stilo);
 cw_uint8_t	*stilo_string_el_get(cw_stilo_t *a_stilo, cw_sint64_t a_offset);
 cw_stilte_t	stilo_string_el_set(cw_stilo_t *a_stilo, cw_uint8_t a_el,

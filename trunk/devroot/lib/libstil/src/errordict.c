@@ -25,7 +25,6 @@ static const cw_stiln_t errordict_ops[] = {
 	STILN_ioerror,
 	STILN_limitcheck,
 	STILN_rangecheck,
-	STILN_stackoverflow,
 	STILN_stackunderflow,
 	STILN_syntaxerror,
 	STILN_timeout,
@@ -39,10 +38,10 @@ static const cw_stiln_t errordict_ops[] = {
 };
 
 void
-errordict_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
+errordict_l_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 {
 	cw_uint32_t	i;
-	cw_stilo_t	name, operator;
+	cw_stilo_t	name, value;
 
 #define	NEXTRA	1
 #define NENTRIES							\
@@ -54,11 +53,12 @@ errordict_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 		stilo_name_new(&name, stilt_stil_get(a_stilt),
 		    stiln_str(errordict_ops[i]),
 		    stiln_len(errordict_ops[i]), TRUE);
-		stilo_operator_new(&operator, errordict_generic,
+		stilo_operator_new(&value, errordict_generic,
 		    errordict_ops[i]);
-		stilo_attrs_set(&operator, STILOA_EXECUTABLE);
+		stilo_attrs_set(&value, STILOA_EXECUTABLE);
 
-		stilo_dict_def(a_dict, a_stilt, &name, &operator);
+		stilo_dict_def(a_dict, stilt_stil_get(a_stilt), &name,
+		    &value);
 	}
 
 	/*
@@ -67,9 +67,9 @@ errordict_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 	 */
 	stilo_name_new(&name, stilt_stil_get(a_stilt),
 	    stiln_str(STILN_handleerror), stiln_len(STILN_handleerror), TRUE);
-	stilo_operator_new(&operator, errordict_handleerror, STILN_handleerror);
-	stilo_attrs_set(&operator, STILOA_EXECUTABLE);
-	stilo_dict_def(a_dict, a_stilt, &name, &operator);
+	stilo_operator_new(&value, errordict_handleerror, STILN_handleerror);
+	stilo_attrs_set(&value, STILOA_EXECUTABLE);
+	stilo_dict_def(a_dict, stilt_stil_get(a_stilt), &name, &value);
 
 #ifdef _LIBSTIL_DBG
 	if (stilo_dict_count(a_dict) != NENTRIES + NEXTRA) {
@@ -96,8 +96,8 @@ errordict_generic(cw_stilt_t *a_stilt)
 	currenterror = stils_push(tstack);
 	tname = stils_push(tstack);
 	stilo_name_new(tname, stilt_stil_get(a_stilt),
-	    stiln_str(STILN_sym_currenterror),
-	    stiln_len(STILN_sym_currenterror), TRUE);
+	    stiln_str(STILN_currenterror),
+	    stiln_len(STILN_currenterror), TRUE);
 	if (stilt_dict_stack_search(a_stilt, tname, currenterror)) {
 		stils_npop(tstack, 2);
 		xep_throw(_CW_STILX_CURRENTERROR);
@@ -109,7 +109,7 @@ errordict_generic(cw_stilt_t *a_stilt)
 	stilo_boolean_new(tstilo, TRUE);
 	stilo_name_new(tname, stilt_stil_get(a_stilt),
 	    stiln_str(STILN_newerror), stiln_len(STILN_newerror), TRUE);
-	stilo_dict_def(currenterror, a_stilt, tname, tstilo);
+	stilo_dict_def(currenterror, stilt_stil_get(a_stilt), tname, tstilo);
 
 	/* Set errorname. */
 	stilo_name_new(tname, stilt_stil_get(a_stilt),
@@ -117,7 +117,7 @@ errordict_generic(cw_stilt_t *a_stilt)
 	stiln = stilte_stiln(stilt_error_get(a_stilt));
 	stilo_name_new(tstilo, stilt_stil_get(a_stilt), stiln_str(stiln),
 	    stiln_len(stiln), TRUE);
-	stilo_dict_def(currenterror, a_stilt, tname, tstilo);
+	stilo_dict_def(currenterror, stilt_stil_get(a_stilt), tname, tstilo);
 	
 	switch (stilt_error_get(a_stilt)) {
 	case STILTE_INTERRUPT:
@@ -152,8 +152,8 @@ errordict_generic(cw_stilt_t *a_stilt)
 		/* Set command to second element of estack. */
 		stilo_name_new(tname, stilt_stil_get(a_stilt),
 		    stiln_str(STILN_command), stiln_len(STILN_command), TRUE);
-		stilo_dict_def(currenterror, a_stilt, tname, stils_nget(estack,
-		    1));
+		stilo_dict_def(currenterror, stilt_stil_get(a_stilt), tname,
+		    stils_nget(estack, 1));
 
 		/*
 		 * If recordstacks is TRUE, snapshot the stacks (unless
@@ -187,7 +187,8 @@ errordict_generic(cw_stilt_t *a_stilt)
 				stilo = stils_down_get(ostack, stilo);
 				stilo_dup(stilo_array_el_get(arr, i), stilo);
 			}
-			stilo_dict_def(currenterror, a_stilt, tname, arr);
+			stilo_dict_def(currenterror, stilt_stil_get(a_stilt),
+			    tname, arr);
 
 			/*
 			 * estack.  Don't include the top element, which is
@@ -203,7 +204,8 @@ errordict_generic(cw_stilt_t *a_stilt)
 				stilo = stils_down_get(estack, stilo);
 				stilo_dup(stilo_array_el_get(arr, i), stilo);
 			}
-			stilo_dict_def(currenterror, a_stilt, tname, arr);
+			stilo_dict_def(currenterror, stilt_stil_get(a_stilt),
+			    tname, arr);
 
 			/* dstack. */
 			stilo_name_new(tname, stilt_stil_get(a_stilt),
@@ -215,7 +217,8 @@ errordict_generic(cw_stilt_t *a_stilt)
 				stilo = stils_down_get(dstack, stilo);
 				stilo_dup(stilo_array_el_get(arr, i), stilo);
 			}
-			stilo_dict_def(currenterror, a_stilt, tname, arr);
+			stilo_dict_def(currenterror, stilt_stil_get(a_stilt),
+			    tname, arr);
 
 			stils_pop(tstack);
 		}

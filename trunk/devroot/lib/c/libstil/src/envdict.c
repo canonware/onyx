@@ -14,7 +14,7 @@
 #define	_CW_STIL_ENVDICT_SIZE	128
 
 void
-envdict_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt, char **a_envp)
+envdict_l_populate(cw_stilo_t *a_dict, cw_stil_t *a_stil, char **a_envp)
 {
 	int		i;
 	char		*key_str, *val_str;
@@ -22,7 +22,7 @@ envdict_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt, char **a_envp)
 	cw_uint32_t	key_len, val_len;
 	cw_stilo_t	key_stilo, val_stilo;
 
-	stilo_dict_new(a_dict, stilt_stil_get(a_stilt), _CW_STIL_ENVDICT_SIZE);
+	stilo_dict_new(a_dict, a_stil, _CW_STIL_ENVDICT_SIZE);
 
 	if (a_envp != NULL) {
 		/*
@@ -37,17 +37,16 @@ envdict_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt, char **a_envp)
 			val_len = strlen(val_str);
 
 			/* Create key. */
-			stilo_name_new(&key_stilo, stilt_stil_get(a_stilt),
-			    key_str, key_len, FALSE);
+			stilo_name_new(&key_stilo, a_stil, key_str, key_len,
+			    FALSE);
 
 			/* Create value. */
-			stilo_string_new(&val_stilo, stilt_stil_get(a_stilt),
-			    val_len);
+			stilo_string_new(&val_stilo, a_stil, val_len);
 			t_str = stilo_string_get(&val_stilo);
 			memcpy(t_str, val_str, val_len);
 
 			/* Insert into dictionary. */
-			stilo_dict_def(a_dict, a_stilt, &key_stilo, &val_stilo);
+			stilo_dict_def(a_dict, a_stil, &key_stilo, &val_stilo);
 		}
 	}
 }

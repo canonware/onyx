@@ -9,9 +9,6 @@
  *
  ******************************************************************************/
 
-void	systemdict_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt, int a_argc,
-    char **a_argv);
-
 void	systemdict_abs(cw_stilt_t *a_stilt);
 void	systemdict_add(cw_stilt_t *a_stilt);
 void	systemdict_aload(cw_stilt_t *a_stilt);
@@ -115,7 +112,6 @@ void	systemdict_roll(cw_stilt_t *a_stilt);
 void	systemdict_run(cw_stilt_t *a_stilt);
 void	systemdict_seek(cw_stilt_t *a_stilt);
 void	systemdict_self(cw_stilt_t *a_stilt);
-void	systemdict_setcollect(cw_stilt_t *a_stilt);
 void	systemdict_setglobal(cw_stilt_t *a_stilt);
 void	systemdict_shift(cw_stilt_t *a_stilt);
 void	systemdict_signal(cw_stilt_t *a_stilt);

@@ -9,6 +9,8 @@
  *
  ******************************************************************************/
 
-cw_bool_t stila_l_white_get(cw_stila_t *a_stila);
-
-#define	stila_l_stil_get(a_stila) (a_stila)->stil
+void	gcdict_collect(cw_stilt_t *a_stilt);
+void	gcdict_dump(cw_stilt_t *a_stilt);
+void	gcdict_setactive(cw_stilt_t *a_stilt);
+void	gcdict_setperiod(cw_stilt_t *a_stilt);
+void	gcdict_setthreshold(cw_stilt_t *a_stilt);

@@ -33,7 +33,5 @@
 #include "stils.h"
 #include "stilt.h"
 #include "systemdict.h"
-#include "envdict.h"
 #include "errordict.h"
-#include "currenterror.h"
-#include "threaddict.h"
+#include "gcdict.h"
