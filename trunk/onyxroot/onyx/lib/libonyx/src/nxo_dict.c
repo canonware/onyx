@@ -110,8 +110,8 @@ nxoe_p_dict_def(cw_nxoe_dict_t *a_dict, cw_nxo_t *a_key, cw_nxo_t *a_val)
 	    dicth = (cw_nxoe_dicth_t *) nxa_malloc(sizeof(cw_nxoe_dicth_t));
 	    ql_elm_new(dicth, link);
 	    nxo_no_new(&dicth->key);
-	    nxo_dup(&dicth->key, a_key);
 	    nxo_no_new(&dicth->val);
+	    nxo_dup(&dicth->key, a_key);
 	    nxo_dup(&dicth->val, a_val);
 
 	    /* This insertion is GC-safe because the order of pointer
@@ -164,8 +164,11 @@ nxoe_p_dict_def(cw_nxoe_dict_t *a_dict, cw_nxo_t *a_key, cw_nxo_t *a_val)
 	{
 	    if (dicta != NULL)
 	    {
-		nxo_dup(&dicta->key, a_key);
+		/* Take care to set val to a known state before setting
+		 * key, since the GC may look at val after key is set, but
+		 * before we get a chance to set the final val. */
 		nxo_no_new(&dicta->val);
+		nxo_dup(&dicta->key, a_key);
 		nxo_dup(&dicta->val, a_val);
 	    }
 	    else
@@ -201,8 +204,8 @@ nxoe_p_dict_def(cw_nxoe_dict_t *a_dict, cw_nxo_t *a_key, cw_nxo_t *a_val)
 			    nxa_malloc(sizeof(cw_nxoe_dicth_t));
 			ql_elm_new(dicth, link);
 			nxo_no_new(&dicth->key);
-			nxo_dup(&dicth->key, &tarray[i].key);
 			nxo_no_new(&dicth->val);
+			nxo_dup(&dicth->key, &tarray[i].key);
 			nxo_dup(&dicth->val, &tarray[i].val);
 
 			/* Insert. */
@@ -221,8 +224,8 @@ nxoe_p_dict_def(cw_nxoe_dict_t *a_dict, cw_nxo_t *a_key, cw_nxo_t *a_val)
 		dicth = (cw_nxoe_dicth_t *) nxa_malloc(sizeof(cw_nxoe_dicth_t));
 		ql_elm_new(dicth, link);
 		nxo_no_new(&dicth->key);
-		nxo_dup(&dicth->key, a_key);
 		nxo_no_new(&dicth->val);
+		nxo_dup(&dicth->key, a_key);
 		nxo_dup(&dicth->val, a_val);
 
 		/* Insert. */
