@@ -16,8 +16,135 @@
 \label{out}
 \index{\classname{out}{}}
 
+The \classname{out} class provides functionality similar to the printf
+family of functions, with the additional capability of dynamically adding
+handlers for non-builtin types.
+
+The syntax of formatting specifiers is significantly different than what
+printf uses, since arbitrary flags must be supported.  Formatting
+specifiers are delimited by `[' and `]'.  Following are some examples of
+formatting strings, followed by explanations.
+
+\begin{description}
+\item[{\tt "[["}: ]
+	Print a `[' character.  Due to the way C strings and `{\bs}' protection
+ 	work, it is necessary to use a different escape character (`[').
+\item[{\tt "[s]"}: ]
+	Print a string.
+\item[{\tt "[s|w:10]"}: ]
+	Print a string, padded to be at least 10 bytes long.
+\item[{\tt "[i|b:16|p:0|w:8]"}: ]
+	Print a 32 bit integer in base 16.  Pad the output to 8 bytes, using `0'
+	for the padding character.
+\end{description}
+
+As can be seen above, flags are specified as name/value pairs.  Each name
+and value is separated by `:', and name/value pairs are separated from each
+other (and the type specifier) by `{\pipe}'.  Names and values can be of
+arbitrary length (nonzero for names), and can contain any characters except
+`]', `{\pipe}', `:', and ` '.  The parser may let these characters slip
+through in some cases, but such behavior should not be relied on.  Some or
+all of the following flags are supported for the builtin types:
+
+\begin{description}
+\item[{\tt "w"}: ]
+	Minimum number of bytes of output.
+\item[{\tt "j"}: ]
+	Justification.  Legal values:
+	\begin{description}
+	\item[{\tt "r"}: ]
+		Right.
+	\item[{\tt "l"}: ]
+		Left.
+	\item[{\tt "c"}: ]
+		Center.
+	\end{description}
+\item[{\tt "p"}: ]
+	 Padding character.
+\item[{\tt "b"}: ]
+	Numerical base.  Legal bases are (2 <= base <= 36).
+\item[{\tt "s"}: ]
+	Signed/unsigned.  Legal values:
+	\begin{description}
+	\item[{\tt "u"}: ]
+		 Unsigned.
+	\item[{\tt "s"}: ]
+		Signed.
+	\end{description}
+\item[{\tt "+"}: ]
+	Show sign.  Legal values:
+	\begin{description}
+	\item[{\tt "-"}: ]
+		Only print sign if output is negative.
+	\item[{\tt "+"}: ]
+		Always print sign.
+	\end{description}
+\end{description}
+
+The following is a matrix of flag defaults for the builtin output types.  A
+blank cell indicates an unsupported type/flag combination:
+\begin{table}[htb]
+\begin{center}
+\begin{tabular}{|l|l||l|l|l|l|l|l|}
+\hline
+\multicolumn{2}{|c||}{Type} & \multicolumn{6}{c|}{Flag} \\
+\hline
+C type		& Symbol & w	& j	& p	& b	& s	& +	\\
+\hline \hline
+cw\_*int32\_t	& i	& Fit	& r	& ` '	& 10	& u	& --	\\
+\hline
+cw\_*int64\_t	& q	& Fit	& r	& ` '	& 10	& u	& --	\\
+\hline
+cw\_*int8\_t	& c	& Fit	& r	& ` '	&	&	&	\\
+\hline
+cw\_*int8\_t *	& s	& Fit	& r	& ` '	&	&	&	\\
+\hline
+void *		& p	& Fit	& r	& ` '	& 16	& u	& --	\\
+\hline
+cw\_buf\_t *	& b	& Fit	& r	& ` '	&	&	&	\\
+\hline
+\end{tabular}
+\end{center}
+\caption{Flag defaults for builtin output types}
+\end{table}
+
 \subsubsection{API}
 \begin{description}
+\label{cw_out_render_t}
+\index{\cfunc{cw\_out\_render\_t}{}}
+\item[{\cfunc[typedef cw\_uint32\_t]{out\_}{const char *a\_format, cw\_uint32\_t
+a\_format\_len, const void *a\_arg, cw\_uint32\_t a\_max\_len, cw\_uint8\_t
+*r\_str}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_format: ]
+			Pointer to a format specifier.
+		\item[a\_format\_len: ]
+			Length in bytes of \cvar{a\_format}.
+		\item[a\_arg: ]
+			Pointer to object to be output.
+		\item[a\_max\_len: ]
+			Maximum number of bytes to output.
+		\item[r\_str: ]
+			Pointer to space to render to.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Number of bytes of output spoce that the rendering
+			function needs.
+		\item[*r\_str: ]
+			Rendered version of \cvar{a\_arg}.
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Print \cvar{a\_arg} to \cvar{*r\_str}, given the specification
+		pointed to by \cvar{a\_format}.
+	\end{description}
 \label{out_}
 \index{\cfunc{out\_}{}}
 \item[{\cfunc[]{out\_}{}}: ]

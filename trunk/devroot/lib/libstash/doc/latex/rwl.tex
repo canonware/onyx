@@ -16,24 +16,95 @@
 \label{rwl}
 \index{\classname{rwl}{}}
 
+The \classname{rwl} class implements read/write locks.  Multiple simultaneous
+readers are allowed, but only one writer (with no readers) is allowed.  This
+implementation toggles back and forth between read locks and write locks to
+assure deterministic locking.
+
 \subsubsection{API}
 \begin{description}
-\label{rwl_}
-\index{\cfunc{rwl\_}{}}
-\item[{\cfunc[]{rwl\_}{}}: ]
+\label{rwl_new}
+\index{\cfunc{rwl\_new}{}}
+\item[{\cfunc[void]{rwl\_new}{cw\_rwl\_t *a\_rwl}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a\_rwl: ]
+			Pointer to space for a \classname{rwl}.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Exception(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
-		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
 	\item[Description: ]
+		Constructor.
+	\end{description}
+\label{rwl_delete}
+\index{\cfunc{rwl\_delete}{}}
+\item[{\cfunc[void]{rwl\_delete}{cw\_rwl\_t *a\_rwl}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_rwl: ]
+			Pointer to a \classname{rwl}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Destructor.
+	\end{description}
+\label{rwl_rlock}
+\index{\cfunc{rwl\_rlock}{}}
+\item[{\cfunc[void]{rwl\_rlock}{cw\_rwl\_t *a\_rwl}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_rwl: ]
+			Pointer to a \classname{rwl}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Acquire a read lock.
+	\end{description}
+\label{rwl_runlock}
+\index{\cfunc{rwl\_runlock}{}}
+\item[{\cfunc[void]{rwl\_runlock}{cw\_rwl\_t *a\_rwl}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_rwl: ]
+			Pointer to a \classname{rwl}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Release a read lock.
+	\end{description}
+\label{rwl_wlock}
+\index{\cfunc{rwl\_wlock}{}}
+\item[{\cfunc[void]{rwl\_wlock}{cw\_rwl\_t *a\_rwl}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_rwl: ]
+			Pointer to a \classname{rwl}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Acquire a write lock.
+	\end{description}
+\label{rwl_wunlock}
+\index{\cfunc{rwl\_wunlock}{}}
+\item[{\cfunc[void]{rwl\_wunlock}{cw\_rwl\_t *a\_rwl}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_rwl: ]
+			Pointer to a \classname{rwl}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Release a write lock.
 	\end{description}
 \end{description}

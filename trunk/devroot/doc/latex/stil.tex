@@ -245,19 +245,19 @@ decimal numbers and lower case letters.  Examples include:
 \item[{\lt}paren\_string{\gt} : ] ()-delimited string.  Parens may
 be embedded in the string without escaping them, as long as the parens are
 matched.  The following sequences have special meaning when escaped by a
-``$\backslash$'' character:
+``{\bs}'' character:
 	\begin{description}
 	\item[( ] ``('' character.
 	\item[) ] ``)'' character.
-	\item[$\backslash$ ] ``$\backslash$'' character.
+	\item[{\bs} ] ``{\bs}'' character.
 	\item[n ] New line.
 	\item[r ] Carriage return.
 	\item[t ] Tab.
 	\item[b ] Backspace.
 	\item[f ] Form feed.
 	\item[xDD ] DD is hex encoding for a byte.
-	\item[$\backslash$n (newline) ] Ignore.
-	\item[$\backslash$r$\backslash$n (carriage return, newline) ] Ignore.
+	\item[{\bs}n (newline) ] Ignore.
+	\item[{\bs}r{\bs}n (carriage return, newline) ] Ignore.
 	\end{description}
 Examples include:
 \begin{verbatim}
@@ -1005,8 +1005,6 @@ s:4>
 		\end{verbatim}
 	\end{description}
 \end{description}
-
-\label{systemdict:pop}
 
 \subsection{threaddict}
 

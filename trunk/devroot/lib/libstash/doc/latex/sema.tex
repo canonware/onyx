@@ -16,24 +16,151 @@
 \label{sema}
 \index{\classname{sema}{}}
 
+The \classname{sema} class implements semaphores.  This implementation is a bit
+different than normal, in that it is possible to decrement the count to less
+than zero.  This allows dynamic modification of resource pools locked by
+semaphores.
+
 \subsubsection{API}
 \begin{description}
-\label{sema_}
-\index{\cfunc{sema\_}{}}
-\item[{\cfunc[]{sema\_}{}}: ]
+\label{sema_new}
+\index{\cfunc{sema\_new}{}}
+\item[{\cfunc[cw\_sema\_t *]{sema\_new}{cw\_sema\_t *a\_sema, cw\_sint32\_t
+a\_count}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a\_sema: ]
+			Pointer to space for a \classname{sema}.
+		\item[a\_count: ]
+			Initial value of semaphore.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Constructor.
+	\end{description}
+\label{sema_delete}
+\index{\cfunc{sema\_delete}{}}
+\item[{\cfunc[void]{sema\_delete}{cw\_sema\_t *a\_sema}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_sema: ]
+			Pointer to a \classname{sema}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Destructor.
+	\end{description}
+\label{sema_post}
+\index{\cfunc{sema\_post}{}}
+\item[{\cfunc[void]{sema\_post}{cw\_sema\_t *a\_sema}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_sema: ]
+			Pointer to a \classname{sema}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Post (increment) \cvar{a\_sema}.
+	\end{description}
+\label{sema_wait}
+\index{\cfunc{sema\_wait}{}}
+\item[{\cfunc[void]{sema\_wait}{cw\_sema\_t *a\_sema}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_sema: ]
+			Pointer to a \classname{sema}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Wait on (block until able to decrement) \cvar{a\_sema}.
+	\end{description}
+\label{sema_timedwait}
+\index{\cfunc{sema\_timedwait}{}}
+\item[{\cfunc[cw\_bool\_t]{sema\_timedwait}{cw\_sema\_t *a\_sema, struct
+timespec *a\_timeout}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_sema: ]
+			Pointer to a \classname{sema}.
+		\item[a\_timeout: ]
+			Timeout, specified as an absolute time interval.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[FALSE: ] Success.
+			\item[TRUE: ] Failure.
+			\end{description}
 		\end{description}
-	\item[Exception(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
-		\end{description}
+	\item[Exception(s): ] None.
 	\item[Description: ]
+		Try to wait on (decrement) \cvar{a\_sema}, but fail after
+		\cvar{a\_timeout} has expired if unable to.
+	\end{description}
+\label{sema_trywait}
+\index{\cfunc{sema\_trywait}{}}
+\item[{\cfunc[cw\_bool\_t]{sema\_trywait}{cw\_sema\_t *a\_sema}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_sema: ]
+			Pointer to a \classname{sema}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[FALSE: ] Success.
+			\item[TRUE: ] Failure.
+			\end{description}
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Try to wait on (decrement) \cvar{a\_sema}, but fail immediately
+		instead of blocking if unable to.
+	\end{description}
+\label{sema_getvalue}
+\index{\cfunc{sema\_getvalue}{}}
+\item[{\cfunc[cw\_sint32\_t]{sema\_getvalue}{cw\_sema\_t *a\_sema}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_sema: ]
+			Pointer to a \classname{sema}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Value of semaphore.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Get value of \cvar{a\_sema}.
+	\end{description}
+\label{sema_adjust}
+\index{\cfunc{sema\_adjust}{}}
+\item[{\cfunc[void]{sema\_adjust}{cw\_sema\_t *a\_sema}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_sema: ]
+			Pointer to a \classname{sema}.
+		\item[a\_adjust: ]
+			Amount to adjust the value of \cvar{a\_sema} by.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Adjust \cvar{a\_sema} by \cvar{a\_adjust}.
 	\end{description}
 \end{description}

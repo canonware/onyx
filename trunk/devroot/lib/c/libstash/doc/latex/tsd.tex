@@ -16,24 +16,74 @@
 \label{tsd}
 \index{\classname{tsd}{}}
 
+The \classname{tsd} class implements thread-specific data.  A \classname{tsd}
+instance can be created, then any number of threads can use that same instance
+to store and retrieve a thread-specific pointer to data.
+
 \subsubsection{API}
 \begin{description}
-\label{tsd_}
-\index{\cfunc{tsd\_}{}}
-\item[{\cfunc[]{tsd\_}{}}: ]
+\label{tsd_new}
+\index{\cfunc{tsd\_new}{}}
+\item[{\cfunc[void]{tsd\_new}{cw\_tsd\_t *a\_tsd, void (*a\_func)(void *)}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a\_tsd: ]
+			Pointer to space for a \classname{tsd}.
+		\item[a\_func: ]
+			Pointer to a cleanup function, or NULL.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Constructor.
+	\end{description}
+\label{tsd_delete}
+\index{\cfunc{tsd\_delete}{}}
+\item[{\cfunc[void]{tsd\_delete}{cw\_tsd\_t *a\_tsd}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_tsd: ]
+			Pointer to a \classname{tsd}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Destructor.
+	\end{description}
+\label{tsd_get}
+\index{\cfunc{tsd\_get}{}}
+\item[{\cfunc[void *]{tsd\_get}{cw\_tsd\_t *a\_tsd}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_tsd: ]
+			Pointer to a \classname{tsd}.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[retval: ]
+			Pointer to thread-specific data.
 		\end{description}
-	\item[Exception(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
-		\end{description}
+	\item[Exception(s): ] None.
 	\item[Description: ]
+		Get thread-specific data pointer.
+	\end{description}
+\label{tsd_set}
+\index{\cfunc{tsd\_set}{}}
+\item[{\cfunc[]{tsd\_set}{cw\_tsd\_t *a\_tsd, void *a\_val}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_tsd: ]
+			Pointer to a \classname{tsd}.
+		\item[a\_val: ]
+			Pointer to thread-specific data.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Set thread-specific data pointer.
 	\end{description}
 \end{description}
