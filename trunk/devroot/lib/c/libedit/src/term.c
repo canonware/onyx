@@ -255,6 +255,8 @@ term_end(el)
     el->el_term.t_buf = NULL;
     el_free((ptr_t) el->el_term.t_cap);
     el->el_term.t_cap = NULL;
+    el_free((ptr_t) el->el_term.t_fkey);
+    el->el_term.t_fkey = NULL;
     el->el_term.t_loc = 0;
     el_free((ptr_t) el->el_term.t_str);
     el->el_term.t_str = NULL;
@@ -992,24 +994,6 @@ term_clear_arrow(el, name)
 	    return 0;
 	}
     return -1;
-}
-
-
-/* term_print_arrow():
- *	Print the arrow key bindings
- */
-protected void
-term_print_arrow(el, name)
-    EditLine *el;
-    char *name;
-{
-    int i;
-    fkey_t *arrow = el->el_term.t_fkey;
-
-    for (i = 0; i < A_K_NKEYS; i++)
-	if (*name == '\0' || strcmp(name, arrow[i].name) == 0)
-	    if (arrow[i].type != XK_NOD)
-		key_kprint(el, arrow[i].name, &arrow[i].fun, arrow[i].type);
 }
 
 

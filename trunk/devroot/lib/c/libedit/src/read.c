@@ -348,18 +348,6 @@ el_gets(el, nread)
 	}
 
 	/* now do the real command */
-#ifdef DEBUG_READ
-	{
-	    el_bindings_t *b;
-	    for (b = el->el_map.help; b->name; b++)
-		if (b->func == cmdnum)
-		    break;
-	    if (b->name)
-		_cw_out_put_f(el->el_errfile, "Executing [s]\n", b->name);
-	    else
-		_cw_out_put_f(el->el_errfile, "Error command = [i]\n", cmdnum);
-	}
-#endif /* DEBUG_READ */
 	retval = (*el->el_map.func[cmdnum])(el, ch);
 
 	/* save the last command here */

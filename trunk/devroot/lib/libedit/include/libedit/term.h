@@ -85,7 +85,6 @@ protected void term_change_size		__P((EditLine *, int, int));
 protected int  term_get_size		__P((EditLine *, int *, int *));
 protected int  term_init		__P((EditLine *));
 protected void term_bind_arrow		__P((EditLine *));
-protected void term_print_arrow		__P((EditLine *, char *));
 protected int  term_clear_arrow		__P((EditLine *, char *));
 protected int  term_set_arrow		__P((EditLine *, char *,
 					     key_value_t *, int));

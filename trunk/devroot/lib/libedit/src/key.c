@@ -107,7 +107,7 @@ key_end(el)
 {
     el_free((ptr_t) el->el_key.buf);
     el->el_key.buf = NULL;
-    /* XXX: provide a function to clear the keys */
+    key_reset(el);
     el->el_key.map = NULL;
 }
 
@@ -367,10 +367,10 @@ node__try(ptr, str, val, ntype)
 	}
     }
     else {
-	/* still more chars to go */
-	if (ptr->next == NULL)
-	    ptr->next = node__get(*str);	/* setup new node */
-	(void) node__try(ptr->next, str, val, ntype);
+	    /* still more chars to go */
+	    if (ptr->next == NULL)
+		    ptr->next = node__get(*str);	/* setup new node */
+	    (void) node__try(ptr->next, str, val, ntype);
     }
     return 0;
 }

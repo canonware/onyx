@@ -260,7 +260,7 @@ private el_action_t  el_map_emacs[] = {
     /* 213 */	EM_UPPER_CASE,		/* M-U */
     /* 214 */	ED_UNASSIGNED,		/* M-V */
     /* 215 */	EM_COPY_REGION,		/* M-W */
-    /* 216 */	ED_COMMAND,		/* M-X */
+    /* 216 */	ED_UNASSIGNED,		/* M-X */
     /* 217 */	ED_UNASSIGNED,		/* M-Y */
     /* 218 */	ED_UNASSIGNED,		/* M-Z */
     /* 219 */	ED_SEQUENCE_LEAD_IN,	/* M-[ */
@@ -292,7 +292,7 @@ private el_action_t  el_map_emacs[] = {
     /* 244 */	EM_UPPER_CASE,		/* M-u */
     /* 245 */	ED_UNASSIGNED,		/* M-v */
     /* 246 */	EM_COPY_REGION,		/* M-w */
-    /* 247 */	ED_COMMAND,		/* M-x */
+    /* 247 */	ED_UNASSIGNED,		/* M-x */
     /* 248 */	ED_UNASSIGNED,		/* M-y */
     /* 249 */	ED_UNASSIGNED,		/* M-z */
     /* 250 */	ED_UNASSIGNED,		/* M-{ */
@@ -662,7 +662,7 @@ private el_action_t  el_map_vi_command[] = {
     /*  55 */	ED_ARGUMENT_DIGIT,	/* 7 */
     /*  56 */	ED_ARGUMENT_DIGIT,	/* 8 */
     /*  57 */	ED_ARGUMENT_DIGIT,	/* 9 */
-    /*  58 */	ED_COMMAND,		/* : */
+    /*  58 */	ED_UNASSIGNED,		/* : */
     /*  59 */	VI_REPEAT_NEXT_CHAR,	/* ; */
     /*  60 */	ED_UNASSIGNED,		/* < */
     /*  61 */	ED_UNASSIGNED,		/* = */
