@@ -3365,7 +3365,7 @@ object on stack under next object on stack. \\
 stack & {\bf \htmlref{sunder}{systemdict:sunder}} & -- & Duplicate second object
 on stack. \\
 \hline
-stack & {\bf \htmlref{sover}{systemdict:sunder}} & -- & Duplicate second object
+stack & {\bf \htmlref{sover}{systemdict:sover}} & -- & Duplicate second object
 on stack. \\
 \hline
 stack & {\bf \htmlref{sexch}{systemdict:sexch}} & -- & Exchange top objects on
@@ -3893,6 +3893,29 @@ operators. \\
 -- & {\bf \htmlref{null}{systemdict:null}} & null & Create a null object. \\
 \end{longtable}
 
+%% \label{systemdict:OPNAME}
+%% \index{OPNAME@\onyxop{}{OPNAME}{}}
+%% \item[{\onyxop{OPARGS}{OPNAME}{OPOUTS}}: ]
+%% 	\begin{description}\item[]
+%% 	\item[Input(s): ]
+%% 		\begin{description}\item[]
+%% 		\item[: ]
+%% 		\end{description}
+%% 	\item[Output(s): ]
+%% 		\begin{description}\item[]
+%% 		\item[: ]
+%% 		\end{description}
+%% 	\item[Errors(s): ]
+%% 		\begin{description}\item[]
+%% 		\item[\htmlref{stackunderflow}{stackunderflow}.]
+%% 		\item[\htmlref{typecheck}{typecheck}.]
+%% 		\end{description}
+%% 	\item[Description: ]
+%% 	\item[Example(s): ]\begin{verbatim}
+
+%% 		\end{verbatim}
+%% 	\end{description}
+
 \begin{description}
 \label{systemdict:sym_bang_hash}
 \index{"!#@\onyxop{}{"!\#}{}}
@@ -4314,6 +4337,28 @@ onyx:0> -1.0 0 atan 1 sprint
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:bdup}
+\index{bdup@\onyxop{}{bdup}{}}
+\item[{\onyxop{OPARGS}{bdup}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
 \label{systemdict:begin}
 \index{begin@\onyxop{}{begin}{}}
 \item[{\onyxop{dict}{begin}{--}}: ]
@@ -4397,6 +4442,50 @@ onyx:1> bind
 onyx:1> dup 2 sprint
 {--pop-- _{sprints --print-- `\n' --print-- --flush--}_ {--pop-- -array-}}
 onyx:1>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:bpop}
+\index{bpop@\onyxop{}{bpop}{}}
+\item[{\onyxop{OPARGS}{bpop}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{systemdict:bpush}
+\index{bpush@\onyxop{}{bpush}{}}
+\item[{\onyxop{OPARGS}{bpush}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
 		\end{verbatim}
 	\end{description}
 \label{systemdict:broadcast}
@@ -5476,6 +5565,28 @@ estack/istack trace (0..2):
 onyx:3>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:dn}
+\index{dn@\onyxop{}{dn}{}}
+\item[{\onyxop{OPARGS}{dn}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
 \label{systemdict:dstack}
 \index{dstack@\onyxop{}{dstack}{}}
 \item[{\onyxop{--}{dstack}{stack}}: ]
@@ -6459,6 +6570,50 @@ onyx:0>
 
 		\end{verbatim}
 	\end{description}
+\label{systemdict:ibdup}
+\index{ibdup@\onyxop{}{ibdup}{}}
+\item[{\onyxop{OPARGS}{ibdup}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{systemdict:ibpop}
+\index{ibpop@\onyxop{}{ibpop}{}}
+\item[{\onyxop{OPARGS}{ibpop}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
 \label{systemdict:idiv}
 \index{idiv@\onyxop{}{idiv}{}}
 \item[{\onyxop{a b}{idiv}{r}}: ]
@@ -6629,6 +6784,28 @@ onyx:0> stdout iobuf 1 sprint
 onyx:0> stderr iobuf 1 sprint
 0
 onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:ipop}
+\index{ipop@\onyxop{}{ipop}{}}
+\item[{\onyxop{OPARGS}{ipop}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
 		\end{verbatim}
 	\end{description}
 \label{systemdict:istack}
@@ -7334,6 +7511,50 @@ onyx:0> mutex 1 sprint
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:nbpop}
+\index{nbpop@\onyxop{}{nbpop}{}}
+\item[{\onyxop{OPARGS}{nbpop}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{systemdict:ndn}
+\index{ndn@\onyxop{}{ndn}{}}
+\item[{\onyxop{OPARGS}{ndn}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
 \label{systemdict:ndup}
 \index{ndup@\onyxop{}{ndup}{}}
 \item[{\onyxop{objects count}{ndup}{objects objects}}: ]
@@ -7470,6 +7691,28 @@ onyx:0> -3.14 neg 1 sprint
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:nip}
+\index{nip@\onyxop{}{nip}{}}
+\item[{\onyxop{OPARGS}{nip}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
 \label{systemdict:not}
 \index{not@\onyxop{}{not}{}}
 \item[{\onyxop{a}{not}{r}}: ]
@@ -7575,6 +7818,28 @@ onyx:0>
 onyx:0> null pstack
 null
 onyx:1>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:nup}
+\index{nup@\onyxop{}{nup}{}}
+\item[{\onyxop{OPARGS}{nup}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
 		\end{verbatim}
 	\end{description}
 \label{systemdict:onyxdict}
@@ -7814,6 +8079,28 @@ onyx:0>
 onyx:0> outputsdict 0 sprint
 -dict-
 onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:over}
+\index{over@\onyxop{}{over}{}}
+\item[{\onyxop{OPARGS}{over}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
 		\end{verbatim}
 	\end{description}
 \label{systemdict:pid}
@@ -8540,6 +8827,72 @@ onyx:0> 1.51 round 1 sprint
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:sbdup}
+\index{sbdup@\onyxop{}{sbdup}{}}
+\item[{\onyxop{OPARGS}{sbdup}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{systemdict:sbpop}
+\index{sbpop@\onyxop{}{sbpop}{}}
+\item[{\onyxop{OPARGS}{sbpop}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{systemdict:sbpush}
+\index{sbpush@\onyxop{}{sbpush}{}}
+\item[{\onyxop{OPARGS}{sbpush}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
 \label{systemdict:sclear}
 \index{sclear@\onyxop{}{sclear}{}}
 \item[{\onyxop{stack}{sclear}{--}}: ]
@@ -8645,6 +8998,28 @@ onyx:0>
 onyx:0> (3 mark 1 0) scounttomark 1 sprint
 2
 onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:sdn}
+\index{sdn@\onyxop{}{sdn}{}}
+\item[{\onyxop{OPARGS}{sdn}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sdup}
@@ -9257,6 +9632,50 @@ onyx:0> 4 -1 shift 1 sprint
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:sibdup}
+\index{sibdup@\onyxop{}{sibdup}{}}
+\item[{\onyxop{OPARGS}{sibdup}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{systemdict:sibpop}
+\index{sibpop@\onyxop{}{sibpop}{}}
+\item[{\onyxop{OPARGS}{sibpop}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
 \label{systemdict:sidup}
 \index{sidup@\onyxop{}{sidup}{}}
 \item[{\onyxop{stack index}{sidup}{--}}: ]
@@ -9345,6 +9764,182 @@ onyx:0> 1.570796 sin 1 sprint
 onyx:0> 0.7853982 sin 1 sprint
 7.071068e-01
 onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:sipop}
+\index{sipop@\onyxop{}{sipop}{}}
+\item[{\onyxop{OPARGS}{sipop}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{systemdict:snbpop}
+\index{snbpop@\onyxop{}{snbpop}{}}
+\item[{\onyxop{OPARGS}{snbpop}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{systemdict:sndn}
+\index{sndn@\onyxop{}{sndn}{}}
+\item[{\onyxop{OPARGS}{sndn}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{systemdict:sndup}
+\index{sndup@\onyxop{}{sndup}{}}
+\item[{\onyxop{OPARGS}{sndup}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{systemdict:snip}
+\index{snip@\onyxop{}{snip}{}}
+\item[{\onyxop{OPARGS}{snip}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{systemdict:snpop}
+\index{snpop@\onyxop{}{snpop}{}}
+\item[{\onyxop{OPARGS}{snpop}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{systemdict:snup}
+\index{snup@\onyxop{}{snup}{}}
+\item[{\onyxop{OPARGS}{snup}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{systemdict:sover}
+\index{sover@\onyxop{}{sover}{}}
+\item[{\onyxop{OPARGS}{sover}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
 		\end{verbatim}
 	\end{description}
 \label{systemdict:spop}
@@ -9854,6 +10449,28 @@ onyx:0> 0 string 1 sprint
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:stuck}
+\index{stuck@\onyxop{}{stuck}{}}
+\item[{\onyxop{OPARGS}{stuck}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
 \label{systemdict:sub}
 \index{sub@\onyxop{}{sub}{}}
 \item[{\onyxop{a b}{sub}{r}}: ]
@@ -9890,6 +10507,50 @@ onyx:0> 5 1.0 sub 1 sprint
 onyx:0> -3.0 4.1 sub 1 sprint
 -7.100000e+00
 onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:sunder}
+\index{sunder@\onyxop{}{sunder}{}}
+\item[{\onyxop{OPARGS}{sunder}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{systemdict:sup}
+\index{sup@\onyxop{}{sup}{}}
+\item[{\onyxop{OPARGS}{sup}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
 		\end{verbatim}
 	\end{description}
 \label{systemdict:symlink}
@@ -10405,6 +11066,28 @@ true
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:tuck}
+\index{tuck@\onyxop{}{tuck}{}}
+\item[{\onyxop{OPARGS}{tuck}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
 \label{systemdict:type}
 \index{type@\onyxop{}{type}{}}
 \item[{\onyxop{object}{type}{name}}: ]
@@ -10499,6 +11182,28 @@ onyx:0> currentdict /foo undef
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:under}
+\index{under@\onyxop{}{under}{}}
+\item[{\onyxop{OPARGS}{under}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
 \label{systemdict:unlink}
 \index{unlink@\onyxop{}{unlink}{}}
 \item[{\onyxop{filename}{unlink}{--}}: ]
@@ -10591,6 +11296,28 @@ onyx:0> /foo unsetenv
 onyx:0> envdict /foo known 1 sprint
 false
 onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:up}
+\index{up@\onyxop{}{up}{}}
+\item[{\onyxop{OPARGS}{up}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
 		\end{verbatim}
 	\end{description}
 \label{systemdict:version}
