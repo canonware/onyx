@@ -45,8 +45,14 @@ main(int argc, char **argv)
 		out_put(&out,
 		    "See http://www.canonware.com/stil/ for information.\n");
 	}
-	stil_new(&stil);
-	stilt_new(&stilt, &stil);
+	if (stil_new(&stil) == NULL) {
+		_cw_out_put("Error in stil_new()\n");
+		exit(1);
+	}
+	if (stilt_new(&stilt, &stil) == NULL) {
+		_cw_out_put("Error in stilt_new()\n");
+		exit(1);
+	}
 
 #if (0)
 	_cw_out_put("sizeof(cw_stilo_t): [i]\n", sizeof(cw_stilo_t));
