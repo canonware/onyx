@@ -625,13 +625,43 @@ stilo_p_hash(const void *a_key)
 	_cw_check_ptr(key);
 	_cw_assert(key->magic == _CW_STILO_MAGIC);
 
-	if (key->type == STILOT_NAME) {
-		cw_stiloe_name_t	*name;
+	switch (key->type) {
+	case STILOT_ARRAY:
+	case STILOT_CONDITION:
+	case STILOT_DICT:
+	case STILOT_FILE:
+	case STILOT_HOOK:
+	case STILOT_MUTEX:
+	case STILOT_NAME:
+		retval = ch_direct_hash((void *)key->o.stiloe);
+		break;
+	case STILOT_OPERATOR:
+		retval = ch_direct_hash((void *)key->o.operator.f);
+		break;
+	case STILOT_STRING: {
+		cw_uint8_t	*str;
+		cw_uint32_t	i, len;
 
-		name = (cw_stiloe_name_t *)key->o.stiloe;
-		retval = ch_direct_hash((void *)name);
-	} else {
-		_cw_error("XXX Not implemented");
+		str = stilo_string_get(key);
+		len = stilo_string_len_get(key);
+		stilo_string_lock(key);
+		for (i = retval = 0; i < len; i++)
+			retval = retval * 33 + str[i];
+		stilo_string_unlock(key);
+		break;
+	}
+	case STILOT_BOOLEAN:
+		retval = (cw_uint32_t)key->o.boolean.val;
+		break;
+	case STILOT_INTEGER:
+		retval = (cw_uint32_t)key->o.integer.i;
+		break;
+	case STILOT_MARK:
+	case STILOT_NULL:
+		retval = UINT_MAX;
+		break;
+	default:
+		_cw_not_reached();
 	}
 
 	return retval;
@@ -650,17 +680,17 @@ stilo_p_key_comp(const void *a_k1, const void *a_k2)
 	_cw_check_ptr(k2);
 	_cw_assert(k2->magic == _CW_STILO_MAGIC);
 
-	if ((k1->type == STILOT_NAME) && (k1->type ==
-	    STILOT_NAME)) {
+	if ((k1->type == STILOT_NAME) && (k1->type == STILOT_NAME)) {
 		cw_stiloe_name_t	*n1, *n2;
-		
+
 		n1 = (cw_stiloe_name_t *)k1->o.stiloe;
 		n2 = (cw_stiloe_name_t *)k2->o.stiloe;
 
 		retval = (n1 == n2) ? TRUE : FALSE;
-	} else {
-		_cw_error("XXX Not implemented");
-	}
+	} else if (k1->type != k2->type)
+		retval = FALSE;
+	else
+		retval = stilo_compare(k1, k2) ? FALSE : TRUE;
 
 	return retval;
 }
