@@ -10,6 +10,12 @@
  *
  ******************************************************************************/
 
+/* Define CW_BUF_DUMP to enable buf_dump(). */
+#ifdef CW_DBG
+#define CW_BUF_DUMP
+#endif
+/* #define CW_BUFP_DUMP */
+
 typedef struct cw_hist_s cw_hist_t;
 typedef struct cw_ext_s cw_ext_t;
 typedef struct cw_mkr_s cw_mkr_t;
@@ -113,7 +119,11 @@ struct cw_bufp_s
     cw_uint32_t gap_off;
 
     /* Text buffer, with gap. */
+#ifdef XXX_NOT_YET
 #define CW_BUFP_SIZE 65536
+#else
+#define CW_BUFP_SIZE 16
+#endif
     cw_uint8_t *b;
 
     /* Tree and list of mkr's that point into the bufp.  Both of these are
@@ -217,6 +227,11 @@ buf_hist_group_beg(cw_buf_t *a_buf, cw_mkr_t *a_mkr);
 
 cw_bool_t
 buf_hist_group_end(cw_buf_t *a_buf);
+
+#ifdef CW_BUF_DUMP
+void
+buf_dump(cw_buf_t *a_buf, const char *a_prefix);
+#endif
 
 /* mkr. */
 void
