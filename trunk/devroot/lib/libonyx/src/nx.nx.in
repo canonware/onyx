@@ -102,7 +102,7 @@ $sprintsdict <
 	cvs
     }
 ' cat
-@enable_oop@ 1 eq {
+@enable_oop@ 1 eq opt_bootstrap not and {
     `
     $classtype {
 	pop pop
@@ -196,7 +196,7 @@ $sprintsdict <
     }
     ' cat
 } if
-@enable_oop@ 1 eq {
+@enable_oop@ 1 eq opt_bootstrap not and {
     `
     $instancetype {
 	pop pop
@@ -222,7 +222,9 @@ $sprintsdict <
     }
     ' cat
 } if
-`
+# Note code duplication.
+@enable_oop@ 1 eq opt_bootstrap not and {
+    `
     $nametype {
 	#name #depth
 	pop
@@ -245,6 +247,28 @@ $sprintsdict <
 	} ifelse
 	} ifelse
     }
+    ' cat
+}{
+    `
+    $nametype {
+	#name #depth
+	pop
+	dup cvs exch
+	#str #name
+	dup lcheck {
+	    # Literal.
+	    pop
+	    `$' exch cat
+	}{
+	echeck {
+	    # Evaluable.
+	    `!' exch cat
+	} if
+	} ifelse
+    }
+    ' cat
+} ifelse
+`
     $nulltype {
 	pop pop
 	`null'
@@ -262,7 +286,6 @@ $sprintsdict <
 	`-pmark-'
     }
 ' cat
-
 @enable_real@ 1 eq {
     `
     $realtype {
@@ -566,7 +589,7 @@ $outputsdict <
 	$arraytype
 	$booleantype
 ' cat
-@enable_oop@ 1 eq {
+@enable_oop@ 1 eq opt_bootstrap not and {
     `
 	$classtype
     ' cat
@@ -586,7 +609,7 @@ $outputsdict <
 	$handletype
     ' cat
 } if
-@enable_oop@ 1 eq {
+@enable_oop@ 1 eq opt_bootstrap not and {
     `
 	$instancetype
     ' cat
@@ -946,7 +969,7 @@ $mrequire {
 } def
     ' cat
 } if
-@enable_oop@ 1 eq {
+@enable_oop@ 1 eq opt_bootstrap not and {
     `
 # Define vclass, which is provided as the top level base class.
 $vclass class dup up def
@@ -954,15 +977,49 @@ dup $vclass setclassname
 dup <
 > setdata
 <
+    #class #instance :init #instance
+    $init {
+	# Do nothing.
+	nip
+    }
+
     #class :new #instance
-    #class #instance :new #instance
     $new {
+	# Create instance.
+	instance 2 ndup exch setisa
+
+	# XXX Hard-code to avoid lookup?
+	:init
+    }
+
+    # Typically called at the beginning of :new or :init in subclasses.
+    # Recursively invokes :init, and sets isa.
+    #
+    #class #instance :rinit #instance
+    $rinit {
+	exch super
+	#instance #super
 	dup type $classtype eq {
-	    # Create instance.
-	    instance dup dn setisa
+	    tuck methods
+	    #super #instance #methods
+	    dup type $dicttype eq {
+		dup $init known {
+		    # Call super:init.
+		    $init get eval
+		}{
+		    # :init not defined.
+		    pop
+		    $undefined throw
+		} ifelse
+	    }{
+		# No methods.
+		pop
+		$undefined throw
+	    } ifelse
 	}{
-	    # Do nothing.
-	    nip
+	    # No superclass.
+	    pop
+	    $undefined throw
 	} ifelse
     }
 
@@ -970,63 +1027,35 @@ dup <
     # invokes :new, and sets isa.
     #
     #class :rnew #instance
-    #class #instance :rnew #instance
     $rnew {
-	dup type $classtype eq {
-	    #class
+	#class
 
-	    dup super
-	    dup type $classtype eq {
-		dup methods
-		dup type $dicttype eq {
-		    dup $new known {
-			# Call super:new.
-			$new get eval
-		    }{
-			# :new not defined.
-			pop
-			instance
-		    } ifelse
+	dup super
+	dup type $classtype eq {
+	    dup methods
+	    dup type $dicttype eq {
+		dup $new known {
+		    # Call super:new.
+		    $new get eval
 		}{
-		    # No methods.
+		    # :new not defined.
 		    pop
 		    instance
 		} ifelse
 	    }{
-		# No superclass.
+		# No methods.
 		pop
 		instance
 	    } ifelse
-	    #class #instance
-
-	    dup dn setisa
-	    #instance
 	}{
-	    #class #instance
-
-	    exch super
-	    #instance #super
-	    dup type $classtype eq {
-		tuck methods
-		#super #instance #methods
-		dup type $dicttype eq {
-		    dup $new known {
-			# Call super:new.
-			$new get eval
-		    }{
-			# :new not defined.
-			pop nip
-		    } ifelse
-		}{
-		    # No methods.
-		    pop nip
-		} ifelse
-	    }{
-		# No superclass.
-		pop nip
-	    } ifelse
-	    #instance
+	    # No superclass.
+	    pop
+	    instance
 	} ifelse
+	#class #instance
+
+	dup dn setisa
+	#instance
     }
 
     #class :classname #name/null
@@ -1082,8 +1111,6 @@ dup <
     $kind {
 	exch kind
     }
-    
-    
 > setmethods
     ' cat
 } if

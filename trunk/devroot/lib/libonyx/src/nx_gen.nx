@@ -7,12 +7,56 @@
 #
 # Version: Onyx <Version = onyx>
 #
+# Usage: nx_gen.nx [<options>]
+#
+#   Option: -B : Not bootstrapping.
+#           -b : Bootstrapping.
+#           -C : Do not compact.
+#           -c : Compact.
+#
 # Read onyx code from stdin and output a compacted version to stdout.  The
 # output code defines the C function nx_p_nxcode().
 #
 # This program is run by the 'bootstrap' build system target.
 #
 ################################################################################
+
+# Parse the command line.
+$opt_bootstrap false def
+$opt_compact true def
+
+$opt_dict <
+    `-B' {
+	$opt_bootstrap false def
+    }
+    `-b' {
+	$opt_bootstrap true def
+    }
+    `-C' {
+	$opt_compact false def
+    }
+    `-c' {
+	$opt_compact true def
+    }
+> def
+
+argv length 1 gt {
+    argv 1 over length dec getinterval {
+	opt_dict over known {
+	    opt_dict exch get eval
+	}{
+	    # Unknown option.
+	    `nx_gen.nx: Unknown option '
+	    exch 1 sprints cat
+	    `\n' cat
+
+	    stderr exch write pop
+	    1 die
+	} ifelse
+    } foreach
+}{
+    $opt_bootstrap false def
+} ifelse
 
 # Create an encoding dictionary for various operators.  The values must not
 # correspond to an existing name in dstack.  The byte overhead is the length of
@@ -25,8 +69,7 @@
 #        3 | 4           | xxx xxx xxx --> $X~xxx x x x
 #        4 | 3           | xxxx xxxx xxxx --> $X~xxxx x x x
 #        5 | 3           | xxxxx xxxxx xxxxx --> $X~xxxxx x x x
-#        6 | 2           | xxxxxx xxxxxx --> $X~xxxxxx x x
-#       >7 | 2
+#      >=6 | 2           | xxxxxx xxxxxx --> $X~xxxxxx x x
 #
 $_encdict <
     $begin		$A	# 4
@@ -76,24 +119,28 @@ $_encdict <
 
 #proc _encarr -
 $_encarr {
-    0 1 2 idup length 1 sub {
+    0 1 2 idup length dec {
 	#proc #i
-	1 idup 1 idup get
+	2 ndup get
 	#proc #i #el
 	dup type $nametype eq {
 	    dup xcheck {
-		# Executable Name.  Try to replace.
-		_encdict 1 idup known {
-		    _encdict exch get cvx
-		    #proc #i #e
-		    2 idup up
-		    #proc #proc #i #e
-		    put
+		opt_compact {
+		    # Executable Name.  Try to replace.
+		    _encdict 1 idup known {
+			_encdict exch get cvx
+			#proc #i #e
+			2 idup up
+			#proc #proc #i #e
+			put
+		    }{
+			2 npop
+		    } ifelse
 		}{
-		    pop pop
+		    2 npop
 		} ifelse
 	    }{
-		pop pop
+		2 npop
 	    } ifelse
 	}{
 	    dup type $arraytype eq {
@@ -102,7 +149,7 @@ $_encarr {
 		pop
 	    }{
 		# Other.  Do nothing.
-		pop pop
+		2 npop
 	    } ifelse
 	} ifelse
 	#proc
@@ -134,13 +181,15 @@ nx_p_nxcode(cw_nx_t *a_nx)
     nxo_thread_new(&thread, a_nx);
     cw_onyx_code(&thread, "' print
 
-# Output the translation dictionary.
-`<' print
-_encdict {
-    1 sprints print
-    `~' print cvx 1 sprints print
-} foreach
-`>begin' print
+opt_compact {
+    # Output the translation dictionary.
+    `<' print
+    _encdict {
+	1 sprints print
+	`~' print cvx 1 sprints print
+    } foreach
+    `>begin' print
+} if
 
 # Read in the code.
 stdin cvx eval

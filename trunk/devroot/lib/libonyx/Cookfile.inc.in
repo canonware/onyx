@@ -153,7 +153,7 @@ libonyx_libs_bootstrap : [BONYX]
   loop local f = [fromto @srcroot@/lib/libonyx/src/%.nx.in % [LIBONYX_NSRCS]]
   {
     cat @objroot@/lib/libonyx/src/[f].nx
-      | [BONYX] @srcroot@/lib/libonyx/src/[f]_gen.nx
+      | [BONYX] @srcroot@/lib/libonyx/src/[f]_gen.nx -b -C
       > @srcroot@/lib/libonyx/src/[f]_bootstrap.c;
   }
 }
