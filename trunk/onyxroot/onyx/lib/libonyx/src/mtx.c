@@ -25,7 +25,7 @@ mtx_new(cw_mtx_t *a_mtx)
     cw_check_ptr(a_mtx);
 
 #ifdef CW_PTH
-    if (pth_mutex_init(&a_mtx->mutex) == FALSE)
+    if (pth_mutex_init(&a_mtx->mutex) == false)
     {
 	fprintf(stderr, "%s:%d:%s(): Error in pth_mutex_init: %s\n",
 		__FILE__, __LINE__, __func__, strerror(errno));
@@ -73,7 +73,7 @@ mtx_lock(cw_mtx_t *a_mtx)
     cw_check_ptr(a_mtx);
 
 #ifdef CW_PTH
-    if (pth_mutex_acquire(&a_mtx->mutex, FALSE, NULL) == FALSE)
+    if (pth_mutex_acquire(&a_mtx->mutex, false, NULL) == false)
     {
 	fprintf(stderr, "%s:%d:%s(): Error in pth_mutex_acquire(): %s\n",
 		__FILE__, __LINE__, __func__, strerror(errno));
@@ -91,10 +91,10 @@ mtx_lock(cw_mtx_t *a_mtx)
 #endif
 }
 
-cw_bool_t
+bool
 mtx_trylock(cw_mtx_t *a_mtx)
 {
-    cw_bool_t retval;
+    bool retval;
 #ifdef CW_PTHREADS
     int error;
 #endif
@@ -102,13 +102,13 @@ mtx_trylock(cw_mtx_t *a_mtx)
     cw_check_ptr(a_mtx);
 
 #ifdef CW_PTH
-    if (pth_mutex_acquire(&a_mtx->mutex, TRUE, NULL))
+    if (pth_mutex_acquire(&a_mtx->mutex, true, NULL))
     {
-	retval = FALSE;
+	retval = false;
     }
     else if (errno == EBUSY)
     {
-	retval = TRUE;
+	retval = true;
     }
     else
     {
@@ -121,11 +121,11 @@ mtx_trylock(cw_mtx_t *a_mtx)
     error = pthread_mutex_trylock(&a_mtx->mutex);
     if (error == 0)
     {
-	retval = FALSE;
+	retval = false;
     }
     else if (error == EBUSY)
     {
-	retval = TRUE;
+	retval = true;
     }
     else
     {
@@ -148,7 +148,7 @@ mtx_unlock(cw_mtx_t *a_mtx)
     cw_check_ptr(a_mtx);
 
 #ifdef CW_PTH
-    if (pth_mutex_release(&a_mtx->mutex) == FALSE)
+    if (pth_mutex_release(&a_mtx->mutex) == false)
     {
 	fprintf(stderr, "%s:%d:%s(): Error in pth_mutex_release(): %s\n",
 		__FILE__, __LINE__, __func__, strerror(errno));

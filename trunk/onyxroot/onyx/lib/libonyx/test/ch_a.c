@@ -89,22 +89,22 @@ main()
 	ch_insert(ch, d, d, NULL);
 	cw_assert(ch_count(ch) == 4);
 
-	cw_assert(ch_remove(ch, a, (void **) &k, (void **) &v, NULL) == FALSE);
+	cw_assert(ch_remove(ch, a, (void **) &k, (void **) &v, NULL) == false);
 	cw_assert(k == a);
 	cw_assert(v == a);
 	cw_assert(ch_count(ch) == 3);
 
 	cw_assert(ch_remove(ch, a, NULL, NULL, NULL));
 
-	cw_assert(ch_remove(ch, b, NULL, NULL, NULL) == FALSE);
+	cw_assert(ch_remove(ch, b, NULL, NULL, NULL) == false);
 	cw_assert(ch_count(ch) == 2);
 
-	cw_assert(ch_remove(ch, c, (void **) &k, (void **) &v, NULL) == FALSE);
+	cw_assert(ch_remove(ch, c, (void **) &k, (void **) &v, NULL) == false);
 	cw_assert(k == d);
 	cw_assert(v == d);
 	cw_assert(ch_count(ch) == 1);
 
-	cw_assert(ch_remove(ch, c, NULL, NULL, NULL) == FALSE);
+	cw_assert(ch_remove(ch, c, NULL, NULL, NULL) == false);
 	cw_assert(ch_count(ch) == 0);
 
 	cw_assert(ch_remove(ch, d, NULL, NULL, NULL));
@@ -135,16 +135,16 @@ main()
 
 	cw_assert(ch_search(ch, "foo", (void **) &v));
 
-	cw_assert(ch_search(ch, a, (void **) &v) == FALSE);
+	cw_assert(ch_search(ch, a, (void **) &v) == false);
 	cw_assert(v == a);
 
-	cw_assert(ch_search(ch, b, (void **) &v) == FALSE);
+	cw_assert(ch_search(ch, b, (void **) &v) == false);
 	cw_assert(v == b);
 
-	cw_assert(ch_search(ch, c, (void **) &v) == FALSE);
+	cw_assert(ch_search(ch, c, (void **) &v) == false);
 	cw_assert(v == d);
 
-	cw_assert(ch_search(ch, d, (void **) &v) == FALSE);
+	cw_assert(ch_search(ch, d, (void **) &v) == false);
 	cw_assert(v == d);
 
 	ch_chi_remove(ch, &chi_b);

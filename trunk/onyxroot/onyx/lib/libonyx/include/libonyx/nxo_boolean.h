@@ -12,18 +12,18 @@
 
 #ifndef CW_USE_INLINES
 void
-nxo_boolean_new(cw_nxo_t *a_nxo, cw_bool_t a_val);
+nxo_boolean_new(cw_nxo_t *a_nxo, bool a_val);
 
-cw_bool_t
+bool
 nxo_boolean_get(const cw_nxo_t *a_nxo);
 
 void
-nxo_boolean_set(cw_nxo_t *a_nxo, cw_bool_t a_val);
+nxo_boolean_set(cw_nxo_t *a_nxo, bool a_val);
 #endif
 
 #if (defined(CW_USE_INLINES) || defined(CW_NXO_BOOLEAN_C_))
 CW_INLINE void
-nxo_boolean_new(cw_nxo_t *a_nxo, cw_bool_t a_val)
+nxo_boolean_new(cw_nxo_t *a_nxo, bool a_val)
 {
     cw_check_ptr(a_nxo);
 
@@ -31,7 +31,7 @@ nxo_boolean_new(cw_nxo_t *a_nxo, cw_bool_t a_val)
     a_nxo->o.boolean.val = a_val;
 }
 
-CW_INLINE cw_bool_t
+CW_INLINE bool
 nxo_boolean_get(const cw_nxo_t *a_nxo)
 {
     cw_check_ptr(a_nxo);
@@ -42,7 +42,7 @@ nxo_boolean_get(const cw_nxo_t *a_nxo)
 }
 
 CW_INLINE void
-nxo_boolean_set(cw_nxo_t *a_nxo, cw_bool_t a_val)
+nxo_boolean_set(cw_nxo_t *a_nxo, bool a_val)
 {
     cw_check_ptr(a_nxo);
     cw_dassert(a_nxo->magic == CW_NXO_MAGIC);

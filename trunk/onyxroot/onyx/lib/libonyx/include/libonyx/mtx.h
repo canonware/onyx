@@ -32,7 +32,7 @@ mtx_delete(cw_mtx_t *a_mtx);
 void
 mtx_lock(cw_mtx_t *a_mtx);
 
-cw_bool_t
+bool
 mtx_trylock(cw_mtx_t *a_mtx);
 
 void

@@ -26,8 +26,8 @@ of strings for situations where other C functions expect terminated strings.
 \begin{capi}
 \label{nxo_string_new}
 \index{nxo_string_new@\cfunc{nxo\_string\_new}{}}
-\citem{\cfunc[void]{nxo\_string\_new}{cw\_nxo\_t *a\_nxo, cw\_bool\_t
-a\_locking, cw\_uint32\_t a\_len}}
+\citem{\cfunc[void]{nxo\_string\_new}{cw\_nxo\_t *a\_nxo, bool
+a\_locking, uint32\_t a\_len}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -49,7 +49,7 @@ a\_locking, cw\_uint32\_t a\_len}}
 \label{nxo_string_substring_new}
 \index{nxo_string_substring_new@\cfunc{nxo\_string\_substring\_new}{}}
 \citem{\cfunc[void]{nxo\_string\_substring\_new}{cw\_nxo\_t *a\_nxo, cw\_nxo\_t
-*a\_string, cw\_uint32\_t a\_offset, cw\_uint32\_t a\_len}}
+*a\_string, uint32\_t a\_offset, uint32\_t a\_len}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -114,7 +114,7 @@ a\_locking, cw\_uint32\_t a\_len}}
 	\end{capilist}
 \label{nxo_string_len_get}
 \index{nxo_string_len_get@\cfunc{nxo\_string\_len\_get}{}}
-\citem{\cfunc[cw\_uint32\_t]{nxo\_string\_len\_get}{const cw\_nxo\_t *a\_nxo}}
+\citem{\cfunc[uint32\_t]{nxo\_string\_len\_get}{const cw\_nxo\_t *a\_nxo}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -133,7 +133,7 @@ a\_locking, cw\_uint32\_t a\_len}}
 \label{nxo_string_el_get}
 \index{nxo_string_el_get@\cfunc{nxo\_string\_el\_get}{}}
 \citem{\cfunc[void]{nxo\_string\_el\_get}{const cw\_nxo\_t *a\_nxo, cw\_nxoi\_t
-a\_offset, cw\_uint8\_t *r\_el}}
+a\_offset, uint8\_t *r\_el}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -157,7 +157,7 @@ a\_offset, cw\_uint8\_t *r\_el}}
 	\end{capilist}
 \label{nxo_string_el_set}
 \index{nxo_string_el_set@\cfunc{nxo\_string\_el\_set}{}}
-\citem{\cfunc[void]{nxo\_string\_el\_set}{cw\_nxo\_t *a\_nxo, cw\_uint8\_t
+\citem{\cfunc[void]{nxo\_string\_el\_set}{cw\_nxo\_t *a\_nxo, uint8\_t
 a\_el, cw\_nxoi\_t a\_offset}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -206,7 +206,7 @@ a\_el, cw\_nxoi\_t a\_offset}}
 	\end{capilist}
 \label{nxo_string_get}
 \index{nxo_string_get@\cfunc{nxo\_string\_get}{}}
-\citem{\cfunc[cw\_uint8\_t *]{nxo\_string\_get}{const cw\_nxo\_t *a\_nxo}}
+\citem{\cfunc[uint8\_t *]{nxo\_string\_get}{const cw\_nxo\_t *a\_nxo}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -224,8 +224,8 @@ a\_el, cw\_nxoi\_t a\_offset}}
 	\end{capilist}
 \label{nxo_string_set}
 \index{nxo_string_set@\cfunc{nxo\_string\_set}{}}
-\citem{\cfunc[void]{nxo\_string\_set}{cw\_nxo\_t *a\_nxo, cw\_uint32\_t
-a\_offset, const cw\_uint8\_t *a\_str, cw\_uint32\_t a\_len}}
+\citem{\cfunc[void]{nxo\_string\_set}{cw\_nxo\_t *a\_nxo, uint32\_t
+a\_offset, const uint8\_t *a\_str, uint32\_t a\_len}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]

@@ -23,11 +23,11 @@
  * GC-related initialization, so that this function can be used for the case
  * where a regsub is temporarily constructed for a single subst. */
 static cw_nxn_t
-nxo_p_regsub_init(cw_nxoe_regsub_t *a_regsub, const cw_uint8_t *a_pattern,
-		  cw_uint32_t a_plen, cw_bool_t a_global,
-		  cw_bool_t a_insensitive, cw_bool_t a_multiline,
-		  cw_bool_t a_singleline, const cw_uint8_t *a_template,
-		  cw_uint32_t a_tlen)
+nxo_p_regsub_init(cw_nxoe_regsub_t *a_regsub, const uint8_t *a_pattern,
+		  uint32_t a_plen, bool a_global,
+		  bool a_insensitive, bool a_multiline,
+		  bool a_singleline, const uint8_t *a_template,
+		  uint32_t a_tlen)
 {
     cw_nxn_t retval;
     char *pattern;
@@ -38,9 +38,9 @@ nxo_p_regsub_init(cw_nxoe_regsub_t *a_regsub, const cw_uint8_t *a_pattern,
 	TSTATE_START,
 	TSTATE_BS_CONT
     } tstate;
-    cw_uint32_t i, beg, end, voff;
+    uint32_t i, beg, end, voff;
 
-    nxoe_l_new(&a_regsub->nxoe, NXOT_REGSUB, FALSE);
+    nxoe_l_new(&a_regsub->nxoe, NXOT_REGSUB, false);
 
     /* Create a '\0'-terminated copy of a_pattern. */
     pattern = (char *) nxa_malloc(a_plen + 1);
@@ -113,7 +113,7 @@ nxo_p_regsub_init(cw_nxoe_regsub_t *a_regsub, const cw_uint8_t *a_pattern,
     /* Make a copy of a_template. */
     if (a_tlen > 0)
     {
-	a_regsub->template = (cw_uint8_t *) nxa_malloc(a_tlen);
+	a_regsub->template = (uint8_t *) nxa_malloc(a_tlen);
 	memcpy(a_regsub->template, a_template, a_tlen);
     }
     else
@@ -248,7 +248,7 @@ nxo_p_regsub_init(cw_nxoe_regsub_t *a_regsub, const cw_uint8_t *a_pattern,
 			/* Subpattern substitution. */
 			a_regsub->vec[voff].str = NULL;
 			a_regsub->vec[voff].len
-			    = (cw_uint32_t) (a_regsub->template[i] - '0');
+			    = (uint32_t) (a_regsub->template[i] - '0');
 			voff++;
 			beg = end = i + 1;
 			tstate = TSTATE_START;
@@ -294,11 +294,11 @@ nxo_p_regsub_init(cw_nxoe_regsub_t *a_regsub, const cw_uint8_t *a_pattern,
 }
 
 CW_P_INLINE void
-nxo_p_regsub_append(cw_uint8_t **r_ostr, cw_uint32_t *r_omax,
-		    cw_uint32_t *r_olen, const cw_uint8_t *a_istr,
-		    cw_uint32_t a_ilen)
+nxo_p_regsub_append(uint8_t **r_ostr, uint32_t *r_omax,
+		    uint32_t *r_olen, const uint8_t *a_istr,
+		    uint32_t a_ilen)
 {
-    cw_uint32_t omax;
+    uint32_t omax;
 
     /* Expand *r_ostr, if necessary. */
     for (omax = *r_omax; *r_olen + a_ilen > omax; omax *= 2)
@@ -316,14 +316,14 @@ nxo_p_regsub_append(cw_uint8_t **r_ostr, cw_uint32_t *r_omax,
     *r_olen += a_ilen;
 }
 
-static cw_uint32_t
+static uint32_t
 nxo_p_regsub_subst(cw_nxoe_regsub_t *a_regsub, cw_nxo_t *a_thread,
 		   cw_nxo_t *a_input, cw_nxo_t *r_output)
 {
-    cw_bool_t retval = 0;
+    uint32_t retval = 0;
     cw_nxo_regex_cache_t *cache;
-    cw_uint32_t scnt, ilen, ioff, olen, omax, v;
-    cw_uint8_t *istr, *ostr;
+    uint32_t scnt, ilen, ioff, olen, omax, v;
+    uint8_t *istr, *ostr;
 
     cache = nxo_l_thread_regex_cache_get(a_thread);
 
@@ -359,7 +359,7 @@ nxo_p_regsub_subst(cw_nxoe_regsub_t *a_regsub, cw_nxo_t *a_thread,
     /* Iteratively look for matches. */
     for (scnt = ioff = 0;
 	 ioff < ilen && (a_regsub->global || scnt < 1);
-	 scnt++, ioff = (cw_uint32_t) cache->ovp[1])
+	 scnt++, ioff = (uint32_t) cache->ovp[1])
     {
 	/* Look for a match. */
 	nxo_string_lock(a_input);
@@ -393,11 +393,11 @@ nxo_p_regsub_subst(cw_nxoe_regsub_t *a_regsub, cw_nxo_t *a_thread,
 
 	/* Copy any data between the end of the previous substitution and the
 	 * beginning of the current substitution. */
-	if (ioff < (cw_uint32_t) cache->ovp[0])
+	if (ioff < (uint32_t) cache->ovp[0])
 	{
 	    nxo_p_regsub_append(&ostr, &omax, &olen,
 				&istr[ioff],
-				(cw_uint32_t) cache->ovp[0] - ioff);
+				(uint32_t) cache->ovp[0] - ioff);
 	}
 
 	/* Substitute. */
@@ -458,10 +458,10 @@ nxo_p_regsub_subst(cw_nxoe_regsub_t *a_regsub, cw_nxo_t *a_thread,
 }
 
 cw_nxn_t
-nxo_regsub_new(cw_nxo_t *a_nxo, const cw_uint8_t *a_pattern, cw_uint32_t a_plen,
-	       cw_bool_t a_global, cw_bool_t a_insensitive,
-	       cw_bool_t a_multiline, cw_bool_t a_singleline,
-	       const cw_uint8_t *a_template, cw_uint32_t a_tlen)
+nxo_regsub_new(cw_nxo_t *a_nxo, const uint8_t *a_pattern, uint32_t a_plen,
+	       bool a_global, bool a_insensitive,
+	       bool a_multiline, bool a_singleline,
+	       const uint8_t *a_template, uint32_t a_tlen)
 {
     cw_nxn_t retval;
     cw_nxoe_regsub_t *regsub;
@@ -496,7 +496,7 @@ nxo_regsub_new(cw_nxo_t *a_nxo, const cw_uint8_t *a_pattern, cw_uint32_t a_plen,
 
 void
 nxo_regsub_subst(cw_nxo_t *a_nxo, cw_nxo_t *a_thread, cw_nxo_t *a_input,
-		 cw_nxo_t *r_output, cw_uint32_t *r_count)
+		 cw_nxo_t *r_output, uint32_t *r_count)
 {
     cw_nxoe_regsub_t *regsub;
 
@@ -516,12 +516,12 @@ nxo_regsub_subst(cw_nxo_t *a_nxo, cw_nxo_t *a_thread, cw_nxo_t *a_input,
 /* Do a subst without creating a regsub object, in order to avoid putting
  * pressure on the GC. */
 cw_nxn_t
-nxo_regsub_nonew_subst(cw_nxo_t *a_thread, const cw_uint8_t *a_pattern,
-		       cw_uint32_t a_plen, cw_bool_t a_global,
-		       cw_bool_t a_insensitive, cw_bool_t a_multiline,
-		       cw_bool_t a_singleline, const cw_uint8_t *a_template,
-		       cw_uint32_t a_tlen, cw_nxo_t *a_input,
-		       cw_nxo_t *r_output, cw_uint32_t *r_count)
+nxo_regsub_nonew_subst(cw_nxo_t *a_thread, const uint8_t *a_pattern,
+		       uint32_t a_plen, bool a_global,
+		       bool a_insensitive, bool a_multiline,
+		       bool a_singleline, const uint8_t *a_template,
+		       uint32_t a_tlen, cw_nxo_t *a_input,
+		       cw_nxo_t *r_output, uint32_t *r_count)
 {
     cw_nxn_t retval;
     cw_nxoe_regsub_t regsub;

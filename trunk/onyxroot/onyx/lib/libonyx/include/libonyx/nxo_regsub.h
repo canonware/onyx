@@ -11,19 +11,19 @@
  ******************************************************************************/
 
 cw_nxn_t
-nxo_regsub_new(cw_nxo_t *a_nxo, const cw_uint8_t *a_pattern, cw_uint32_t a_plen,
-	       cw_bool_t a_global, cw_bool_t a_insensitive,
-	       cw_bool_t a_multiline, cw_bool_t a_singleline,
-	       const cw_uint8_t *a_template, cw_uint32_t a_tlen);
+nxo_regsub_new(cw_nxo_t *a_nxo, const uint8_t *a_pattern, uint32_t a_plen,
+	       bool a_global, bool a_insensitive,
+	       bool a_multiline, bool a_singleline,
+	       const uint8_t *a_template, uint32_t a_tlen);
 
 void
 nxo_regsub_subst(cw_nxo_t *a_nxo, cw_nxo_t *a_thread, cw_nxo_t *a_input,
-		 cw_nxo_t *r_output, cw_uint32_t *r_count);
+		 cw_nxo_t *r_output, uint32_t *r_count);
 
 cw_nxn_t
-nxo_regsub_nonew_subst(cw_nxo_t *a_thread, const cw_uint8_t *a_pattern,
-		       cw_uint32_t a_plen, cw_bool_t a_global,
-		       cw_bool_t a_insensitive, cw_bool_t a_multiline,
-		       cw_bool_t a_singleline, const cw_uint8_t *a_template,
-		       cw_uint32_t a_tlen, cw_nxo_t *a_input,
-		       cw_nxo_t *r_output, cw_uint32_t *r_count);
+nxo_regsub_nonew_subst(cw_nxo_t *a_thread, const uint8_t *a_pattern,
+		       uint32_t a_plen, bool a_global,
+		       bool a_insensitive, bool a_multiline,
+		       bool a_singleline, const uint8_t *a_template,
+		       uint32_t a_tlen, cw_nxo_t *a_input,
+		       cw_nxo_t *r_output, uint32_t *r_count);

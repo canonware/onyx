@@ -10,9 +10,9 @@
  *
  ******************************************************************************/
 
-typedef cw_nxoe_t *cw_nxo_class_ref_iter_t (void *a_opaque, cw_bool_t a_reset);
+typedef cw_nxoe_t *cw_nxo_class_ref_iter_t (void *a_opaque, bool a_reset);
 
-typedef cw_bool_t cw_nxo_class_delete_t (void *a_opaque, cw_uint32_t a_iter);
+typedef bool cw_nxo_class_delete_t (void *a_opaque, uint32_t a_iter);
 
 void
 nxo_class_new(cw_nxo_t *a_nxo, void *a_opaque,

@@ -18,8 +18,8 @@ struct cw_nxoe_name_s
 
     /* name is not required to be NULL-terminated, so we keep track of the
      * length. */
-    const cw_uint8_t *str;
-    cw_uint32_t len;
+    const uint8_t *str;
+    uint32_t len;
 
     cw_chi_t chi;
     ql_elm(cw_nxoe_name_t) link;
@@ -33,10 +33,10 @@ extern cw_dch_t cw_g_name_hash;
 typedef ql_head(cw_nxoe_name_t) cw_name_list_t;
 extern cw_name_list_t cw_g_name_list;
 
-cw_uint32_t
+uint32_t
 nxo_l_name_hash(const void *a_key);
 
-cw_bool_t
+bool
 nxo_l_name_key_comp(const void *a_k1, const void *a_k2);
 
 #ifndef CW_USE_INLINES
@@ -46,13 +46,13 @@ nxo_l_name_lock_get(void);
 #endif
 
 void
-nxo_l_name_list_prune(cw_bool_t a_white);
+nxo_l_name_list_prune(bool a_white);
 
-cw_bool_t
-nxoe_l_name_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter);
+bool
+nxoe_l_name_delete(cw_nxoe_t *a_nxoe, uint32_t a_iter);
 
 cw_nxoe_t *
-nxoe_l_name_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
+nxoe_l_name_ref_iter(cw_nxoe_t *a_nxoe, bool a_reset);
 #endif
 
 #if (defined(CW_USE_INLINES) || defined(CW_NXO_NAME_C_))
@@ -67,7 +67,7 @@ nxo_l_name_lock_get(void)
 #endif
 
 CW_INLINE void
-nxo_l_name_list_prune(cw_bool_t a_white)
+nxo_l_name_list_prune(bool a_white)
 {
     cw_nxoe_name_t *name;
 
@@ -80,8 +80,8 @@ nxo_l_name_list_prune(cw_bool_t a_white)
     }
 }
 
-CW_INLINE cw_bool_t
-nxoe_l_name_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
+CW_INLINE bool
+nxoe_l_name_delete(cw_nxoe_t *a_nxoe, uint32_t a_iter)
 {
     cw_nxoe_name_t *name;
 
@@ -91,21 +91,21 @@ nxoe_l_name_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
     cw_dassert(name->nxoe.magic == CW_NXOE_MAGIC);
     cw_assert(name->nxoe.type == NXOT_NAME);
 
-    if (name->nxoe.name_static == FALSE)
+    if (name->nxoe.name_static == false)
     {
 	/* Cast away the const here; it's one of two places that the string is
 	 * allowed to be modified, and this cast is better than dropping the
 	 * const altogether. */
-	nxa_free((cw_uint8_t *) name->str, name->len);
+	nxa_free((uint8_t *) name->str, name->len);
     }
 
     nxa_free(name, sizeof(cw_nxoe_name_t));
 
-    return FALSE;
+    return false;
 }
 
 CW_INLINE cw_nxoe_t *
-nxoe_l_name_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
+nxoe_l_name_ref_iter(cw_nxoe_t *a_nxoe, bool a_reset)
 {
     cw_nxoe_name_t *name;
 

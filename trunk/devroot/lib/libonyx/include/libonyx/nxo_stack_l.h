@@ -11,19 +11,19 @@
  ******************************************************************************/
 
 #ifndef CW_USE_INLINES
-cw_bool_t
-nxoe_l_stack_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter);
+bool
+nxoe_l_stack_delete(cw_nxoe_t *a_nxoe, uint32_t a_iter);
 
 cw_nxoe_t *
-nxoe_l_stack_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
+nxoe_l_stack_ref_iter(cw_nxoe_t *a_nxoe, bool a_reset);
 #endif
 
 #if (defined(CW_USE_INLINES) || defined(CW_NXO_STACK_C_))
-CW_INLINE cw_bool_t
-nxoe_l_stack_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
+CW_INLINE bool
+nxoe_l_stack_delete(cw_nxoe_t *a_nxoe, uint32_t a_iter)
 {
     cw_nxoe_stack_t *stack;
-    cw_uint32_t i, count;
+    uint32_t i, count;
 
     stack = (cw_nxoe_stack_t *) a_nxoe;
 
@@ -56,19 +56,19 @@ nxoe_l_stack_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
     /* Deallocate the container structure. */
     nxa_free(stack, sizeof(cw_nxoe_stack_t));
 
-    return FALSE;
+    return false;
 }
 
 CW_INLINE cw_nxoe_t *
-nxoe_l_stack_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
+nxoe_l_stack_ref_iter(cw_nxoe_t *a_nxoe, bool a_reset)
 {
     cw_nxoe_t *retval;
     cw_nxoe_stack_t *stack;
-    cw_uint32_t count;
+    uint32_t count;
     /* Used for remembering the current state of reference iteration.  This
      * function is only called by the garbage collector, so using a static
      * variable works fine. */
-    static cw_uint32_t iter;
+    static uint32_t iter;
 
     stack = (cw_nxoe_stack_t *) a_nxoe;
 

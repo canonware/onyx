@@ -22,7 +22,7 @@
 CW_P_INLINE void
 dch_p_insert(cw_ch_t *a_ch, cw_chi_t *a_chi)
 {
-    cw_uint32_t slot;
+    uint32_t slot;
 
     /* Initialize a_chi. */
     slot = a_ch->hash(a_chi->key) % a_ch->table_size;
@@ -53,7 +53,7 @@ dch_p_grow(cw_dch_t *a_dch)
     {
 	cw_ch_t *t_ch;
 	cw_chi_t *chi;
-	cw_uint32_t i;
+	uint32_t i;
 
 	/* Too small.  Create a new ch twice as large and populate it. */
 	t_ch = ch_new(NULL, a_dch->mema,
@@ -93,15 +93,15 @@ dch_p_shrink(cw_dch_t *a_dch, const void *a_search_key)
 {
     cw_ch_t *t_ch;
     cw_chi_t *chi;
-    cw_uint32_t count, i;
+    uint32_t count, i;
 
     count = ch_count(a_dch->ch);
 
     if ((count - 1 < a_dch->base_shrink * a_dch->grow_factor)
 	&& (a_dch->grow_factor > 1)
-	&& ch_search(a_dch->ch, a_search_key, NULL) == FALSE)
+	&& ch_search(a_dch->ch, a_search_key, NULL) == false)
     {
-	cw_uint32_t new_factor;
+	uint32_t new_factor;
 
 	/* Too big.  Create a new ch with the smallest grow factor that does not
 	 * cause the ch to be overflowed. */
@@ -144,8 +144,8 @@ dch_p_shrink(cw_dch_t *a_dch, const void *a_search_key)
 }
 
 cw_dch_t *
-dch_new(cw_dch_t *a_dch, cw_mema_t *a_mema, cw_uint32_t a_base_table,
-	cw_uint32_t a_base_grow, cw_uint32_t a_base_shrink,
+dch_new(cw_dch_t *a_dch, cw_mema_t *a_mema, uint32_t a_base_table,
+	uint32_t a_base_grow, uint32_t a_base_shrink,
 	cw_ch_hash_t *a_hash, cw_ch_key_comp_t *a_key_comp)
 {
     cw_dch_t *retval;
@@ -164,21 +164,21 @@ dch_new(cw_dch_t *a_dch, cw_mema_t *a_mema, cw_uint32_t a_base_table,
     {
 	retval = a_dch;
 	memset(retval, 0, sizeof(cw_dch_t));
-	retval->is_malloced = FALSE;
+	retval->is_malloced = false;
     }
     else
     {
 	retval = (cw_dch_t *) cw_opaque_calloc(mema_calloc_get(a_mema),
 					       mema_arg_get(a_mema), 1,
 					       sizeof(cw_dch_t));
-	retval->is_malloced = TRUE;
+	retval->is_malloced = true;
     }
 
     retval->mema = a_mema;
     retval->base_table = a_base_table;
     retval->base_grow = a_base_grow;
     retval->base_shrink = a_base_shrink;
-    retval->shrinkable = TRUE;
+    retval->shrinkable = true;
     retval->grow_factor = 1;
     retval->hash = a_hash;
     retval->key_comp = a_key_comp;
@@ -240,7 +240,7 @@ dch_delete(cw_dch_t *a_dch)
 #endif
 }
 
-cw_uint32_t
+uint32_t
 dch_count(cw_dch_t *a_dch)
 {
     cw_check_ptr(a_dch);
@@ -249,7 +249,7 @@ dch_count(cw_dch_t *a_dch)
     return ch_count(a_dch->ch);
 }
 
-cw_bool_t
+bool
 dch_shrinkable_get(cw_dch_t *a_dch)
 {
     cw_check_ptr(a_dch);
@@ -259,7 +259,7 @@ dch_shrinkable_get(cw_dch_t *a_dch)
 }
 
 void
-dch_shrinkable_set(cw_dch_t *a_dch, cw_bool_t a_shrinkable)
+dch_shrinkable_set(cw_dch_t *a_dch, bool a_shrinkable)
 {
     cw_check_ptr(a_dch);
     cw_dassert(a_dch->magic == CW_DCH_MAGIC);
@@ -278,11 +278,11 @@ dch_insert(cw_dch_t *a_dch, const void *a_key, const void *a_data,
     ch_insert(a_dch->ch, a_key, a_data, a_chi);
 }
 
-cw_bool_t
+bool
 dch_remove(cw_dch_t *a_dch, const void *a_search_key, void **r_key,
 	   void **r_data, cw_chi_t **r_chi)
 {
-    cw_bool_t retval;
+    bool retval;
 
     cw_check_ptr(a_dch);
     cw_dassert(a_dch->magic == CW_DCH_MAGIC);
@@ -293,10 +293,10 @@ dch_remove(cw_dch_t *a_dch, const void *a_search_key, void **r_key,
     }
     if (ch_remove(a_dch->ch, a_search_key, r_key, r_data, r_chi))
     {
-	retval = TRUE;
+	retval = true;
 	goto RETURN;
     }
-    retval = FALSE;
+    retval = false;
     RETURN:
     return retval;
 }
@@ -314,7 +314,7 @@ dch_chi_remove(cw_dch_t *a_dch, cw_chi_t *a_chi)
     ch_chi_remove(a_dch->ch, a_chi);
 }
 
-cw_bool_t
+bool
 dch_search(cw_dch_t *a_dch, const void *a_key, void **r_data)
 {
     cw_check_ptr(a_dch);

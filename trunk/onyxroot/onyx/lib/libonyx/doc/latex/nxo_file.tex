@@ -22,8 +22,8 @@ The \classname{nxo\_file} class is a subclass of the \classname{nxo} class.
 \begin{capi}
 \label{cw_nxo_file_read_t}
 \index{cw_nxo_file_read_t@\cfunc{cw\_nxo\_file\_read\_t}{}}
-\citem{\cfunc[cw\_sint32\_t]{cw\_nxo\_file\_read\_t}{void *a\_arg, cw\_nxo\_t
-*a\_file, cw\_uint32\_t a\_len, cw\_uint8\_t *r\_str}}
+\citem{\cfunc[int32\_t]{cw\_nxo\_file\_read\_t}{void *a\_arg, cw\_nxo\_t
+*a\_file, uint32\_t a\_len, uint8\_t *r\_str}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -56,8 +56,8 @@ The \classname{nxo\_file} class is a subclass of the \classname{nxo} class.
 	\end{capilist}
 \label{cw_nxo_file_write_t}
 \index{cw_nxo_file_write_t@\cfunc{cw\_nxo\_file\_write\_t}{}}
-\citem{\cfunc[cw\_bool\_t]{cw\_nxo\_file\_write\_t}{void *a\_arg, cw\_nxo\_t
-*a\_file, const cw\_uint8\_t *a\_str, cw\_uint32\_t a\_len}}
+\citem{\cfunc[bool]{cw\_nxo\_file\_write\_t}{void *a\_arg, cw\_nxo\_t
+*a\_file, const uint8\_t *a\_str, uint32\_t a\_len}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -74,9 +74,9 @@ The \classname{nxo\_file} class is a subclass of the \classname{nxo} class.
 		\begin{description}\item[]
 		\item[retval: ]
 			\begin{description}\item[]
-			\item[FALSE: ]
+			\item[false: ]
 				Success.
-			\item[TRUE: ]
+			\item[true: ]
 				Write error.
 			\end{description}
 		\end{description}
@@ -88,7 +88,7 @@ The \classname{nxo\_file} class is a subclass of the \classname{nxo} class.
 \label{cw_nxo_file_ref_iter_t}
 \index{cw_nxo_file_ref_iter_t@\cfunc{cw\_nxo\_file\_ref\_iter\_t}{}}
 \citem{\cfunc[cw\_nxoe\_t *]{cw\_nxo\_file\_ref\_iter\_t}{void *a\_arg,
-cw\_bool\_t a\_reset}}
+bool a\_reset}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -96,9 +96,9 @@ cw\_bool\_t a\_reset}}
 			Opaque data pointer.
 		\item[a\_reset: ]
 			\begin{description}\item[]
-			\item[FALSE: ]
+			\item[false: ]
 				At least one iteration has already occurred.
-			\item[TRUE: ]
+			\item[true: ]
 				First iteration.
 			\end{description}
 		\end{description}
@@ -132,7 +132,7 @@ cw\_bool\_t a\_reset}}
 	\end{capilist}
 \label{nxo_file_new}
 \index{nxo_file_new@\cfunc{nxo\_file\_new}{}}
-\citem{\cfunc[void]{nxo\_file\_new}{cw\_nxo\_t *a\_nxo, cw\_bool\_t a\_locking}}
+\citem{\cfunc[void]{nxo\_file\_new}{cw\_nxo\_t *a\_nxo, bool a\_locking}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -151,8 +151,8 @@ cw\_bool\_t a\_reset}}
 	\end{capilist}
 \label{nxo_file_fd_wrap}
 \index{nxo_file_fd_wrap@\cfunc{nxo\_file\_fd\_wrap}{}}
-\citem{\cfunc[void]{nxo\_file\_fd\_wrap}{cw\_nxo\_t *a\_nxo, cw\_uint32\_t
-a\_fd, cw\_bool\_t a\_close}}
+\citem{\cfunc[void]{nxo\_file\_fd\_wrap}{cw\_nxo\_t *a\_nxo, uint32\_t
+a\_fd, bool a\_close}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -160,10 +160,10 @@ a\_fd, cw\_bool\_t a\_close}}
 			Pointer to a file \classname{nxo}.
 		\item[a\_fd: ]
 			File descriptor number.
-		\item[a\_close: ] If TRUE, close \cvar{a\_fd} when \cvar{a\_nxo}
+		\item[a\_close: ] If true, close \cvar{a\_fd} when \cvar{a\_nxo}
 			is finalized by the garbage collector, otherwise, do
 			not automatically close \cvar{a\_fd}.  This should
-			typically be set to TRUE.
+			typically be set to true.
 		\end{description}
 	\item[Output(s): ] None.
 	\item[Exception(s): ] None.
@@ -203,8 +203,8 @@ void *a\_arg}}
 \label{nxo_file_open}
 \index{nxo_file_open@\cfunc{nxo\_file\_open}{}}
 \citem{\cfunc[cw\_nxn\_t]{nxo\_file\_open}{cw\_nxo\_t *a\_nxo, const
-cw\_uint8\_t *a\_filename, cw\_uint32\_t a\_nlen, const cw\_uint8\_t *a\_flags,
-cw\_uint32\_t a\_flen}}
+uint8\_t *a\_filename, uint32\_t a\_nlen, const uint8\_t *a\_flags,
+uint32\_t a\_flen}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -276,7 +276,7 @@ cw\_uint32\_t a\_flen}}
 \label{nxo_file_origin_get}
 \index{nxo_file_origin_get@\cfunc{nxo\_file\_origin\_get}{}}
 \citem{\cfunc[void]{nxo\_file\_origin\_get}{cw\_nxo\_t *a\_nxo, const
-cw\_uint8\_t **r\_origin, cw\_uint32\_t *r\_olen}}
+uint8\_t **r\_origin, uint32\_t *r\_olen}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -300,8 +300,8 @@ cw\_uint8\_t **r\_origin, cw\_uint32\_t *r\_olen}}
 	\end{capilist}
 \label{nxo_file_origin_set}
 \index{nxo_file_origin_set@\cfunc{nxo\_file\_origin\_set}{}}
-\citem{\cfunc[cw\_bool\_t]{nxo\_file\_origin\_set}{cw\_nxo\_t *a\_nxo,
-const cw\_uint8\_t *a\_origin, cw\_uint32\_t a\_olen}}
+\citem{\cfunc[bool]{nxo\_file\_origin\_set}{cw\_nxo\_t *a\_nxo,
+const uint8\_t *a\_origin, uint32\_t a\_olen}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -324,7 +324,7 @@ const cw\_uint8\_t *a\_origin, cw\_uint32\_t a\_olen}}
 	\end{capilist}
 \label{nxo_file_fd_get}
 \index{nxo_file_fd_get@\cfunc{nxo\_file\_fd\_get}{}}
-\citem{\cfunc[cw\_sint32\_t]{nxo\_file\_fd\_get}{const cw\_nxo\_t *a\_nxo}}
+\citem{\cfunc[int32\_t]{nxo\_file\_fd\_get}{const cw\_nxo\_t *a\_nxo}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -347,7 +347,7 @@ const cw\_uint8\_t *a\_origin, cw\_uint32\_t a\_olen}}
 	\end{capilist}
 \label{nxo_file_nonblocking_get}
 \index{nxo_file_nonblocking_get@\cfunc{nxo\_file\_nonblocking\_get}{}}
-\citem{\cfunc[cw\_bool\_t]{nxo\_file\_nonblocking\_get}{const cw\_nxo\_t
+\citem{\cfunc[bool]{nxo\_file\_nonblocking\_get}{const cw\_nxo\_t
 *a\_nxo}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -359,9 +359,9 @@ const cw\_uint8\_t *a\_origin, cw\_uint32\_t a\_olen}}
 		\begin{description}\item[]
 		\item[retval: ]
 			\begin{description}\item[]
-			\item[FALSE: ]
+			\item[false: ]
 				Blocking file.
-			\item[TRUE: ]
+			\item[true: ]
 				Non-blocking file.
 			\end{description}
 		\end{description}
@@ -371,8 +371,8 @@ const cw\_uint8\_t *a\_origin, cw\_uint32\_t a\_olen}}
 	\end{capilist}
 \label{nxo_file_nonblocking_set}
 \index{nxo_file_nonblocking_set@\cfunc{nxo\_file\_nonblocking\_set}{}}
-\citem{\cfunc[cw\_bool\_t]{nxo\_file\_nonblocking\_set}{cw\_nxo\_t *a\_nxo,
-cw\_bool\_t a\_nonblocking}}
+\citem{\cfunc[bool]{nxo\_file\_nonblocking\_set}{cw\_nxo\_t *a\_nxo,
+bool a\_nonblocking}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -385,9 +385,9 @@ cw\_bool\_t a\_nonblocking}}
 		\begin{description}\item[]
 		\item[retval: ]
 			\begin{description}\item[]
-			\item[FALSE: ]
+			\item[false: ]
 				Success.
-			\item[TRUE: ]
+			\item[true: ]
 				I/O error or non-POSIX file.
 			\end{description}
 		\end{description}
@@ -398,8 +398,8 @@ cw\_bool\_t a\_nonblocking}}
 	\end{capilist}
 \label{nxo_file_read}
 \index{nxo_file_read@\cfunc{nxo\_file\_read}{}}
-\citem{\cfunc[cw\_sint32\_t]{nxo\_file\_read}{cw\_nxo\_t *a\_nxo, cw\_uint32\_t
-a\_len, cw\_uint8\_t *r\_str}}
+\citem{\cfunc[int32\_t]{nxo\_file\_read}{cw\_nxo\_t *a\_nxo, uint32\_t
+a\_len, uint8\_t *r\_str}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -430,7 +430,7 @@ a\_len, cw\_uint8\_t *r\_str}}
 \label{nxo_file_readline}
 \index{nxo_file_readline@\cfunc{nxo\_file\_readline}{}}
 \citem{\cfunc[cw\_nxn\_t]{nxo\_file\_readline}{cw\_nxo\_t *a\_nxo, cw\_nx\_t
-*a\_nx, cw\_bool\_t a\_locking, cw\_nxo\_t *r\_string, cw\_bool\_t *r\_eof}}
+*a\_nx, bool a\_locking, cw\_nxo\_t *r\_string, bool *r\_eof}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -443,7 +443,7 @@ a\_len, cw\_uint8\_t *r\_str}}
 		\item[r\_string: ]
 			Pointer to an \classname{nxo}.
 		\item[r\_eof: ]
-			Pointer to a \ctype{cw\_bool\_t}.
+			Pointer to a \ctype{bool}.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
@@ -457,9 +457,9 @@ a\_len, cw\_uint8\_t *r\_str}}
 			otherwise unmodified.
 		\item[*r\_eof: ]
 			\begin{description}\item[]
-			\item[FALSE: ]
+			\item[false: ]
 				End of file not reached.
-			\item[TRUE: ]
+			\item[true: ]
 				End of file reached.
 			\end{description}
 		\end{description}
@@ -473,7 +473,7 @@ a\_len, cw\_uint8\_t *r\_str}}
 \label{nxo_file_write}
 \index{nxo_file_write@\cfunc{nxo\_file\_write}{}}
 \citem{\cfunc[cw\_nxn\_t]{nxo\_file\_write}{cw\_nxo\_t *a\_nxo, const
-cw\_uint8\_t *a\_str, cw\_uint32\_t a\_len, cw\_uint32\_t *r\_count}}
+uint8\_t *a\_str, uint32\_t a\_len, uint32\_t *r\_count}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -578,7 +578,7 @@ cw\_nxoi\_t a\_position}}
 	\end{capilist}
 \label{nxo_file_buffer_size_get}
 \index{nxo_file_buffer_size_get@\cfunc{nxo\_file\_buffer\_size\_get}{}}
-\citem{\cfunc[cw\_uint32\_t]{nxo\_file\_buffer\_size\_get}{const cw\_nxo\_t
+\citem{\cfunc[uint32\_t]{nxo\_file\_buffer\_size\_get}{const cw\_nxo\_t
 *a\_nxo}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -598,7 +598,7 @@ cw\_nxoi\_t a\_position}}
 \label{nxo_file_buffer_size_set}
 \index{nxo_file_buffer_size_set@\cfunc{nxo\_file\_buffer\_size\_set}{}}
 \citem{\cfunc[void]{nxo\_file\_buffer\_size\_set}{cw\_nxo\_t *a\_nxo,
-cw\_uint32\_t a\_size}}
+uint32\_t a\_size}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]

@@ -36,8 +36,8 @@ struct cw_nxoe_regex_s
 
     /* Flags used when matching that determine where in the input string to
      * start searching. */
-    cw_bool_t cont:1;
-    cw_bool_t global:1;
+    bool cont:1;
+    bool global:1;
 };
 
 #ifndef CW_USE_INLINES
@@ -45,16 +45,16 @@ void
 nxo_l_regex_cache_new(cw_nxo_regex_cache_t *a_cache);
 
 cw_nxoe_t *
-nxo_l_regex_cache_ref_iter(cw_nxo_regex_cache_t *a_cache, cw_bool_t a_reset);
+nxo_l_regex_cache_ref_iter(cw_nxo_regex_cache_t *a_cache, bool a_reset);
 
 void
 nxo_l_regex_cache_delete(cw_nxo_regex_cache_t *a_cache);
 
-cw_bool_t
-nxoe_l_regex_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter);
+bool
+nxoe_l_regex_delete(cw_nxoe_t *a_nxoe, uint32_t a_iter);
 
 cw_nxoe_t *
-nxoe_l_regex_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
+nxoe_l_regex_ref_iter(cw_nxoe_t *a_nxoe, bool a_reset);
 #endif
 
 #if (defined(CW_USE_INLINES) || defined(CW_NXO_REGEX_C_))
@@ -67,14 +67,14 @@ nxo_l_regex_cache_new(cw_nxo_regex_cache_t *a_cache)
 }
 
 CW_INLINE cw_nxoe_t *
-nxo_l_regex_cache_ref_iter(cw_nxo_regex_cache_t *a_cache, cw_bool_t a_reset)
+nxo_l_regex_cache_ref_iter(cw_nxo_regex_cache_t *a_cache, bool a_reset)
 {
     cw_nxoe_t *retval;
     /* Used for remembering the current state of reference iteration.  This
      * function is only called by the garbage collector, so as long as two
      * interpreters aren't collecting simultaneously, using a static variable
      * works fine. */
-    static cw_uint32_t ref_iter;
+    static uint32_t ref_iter;
 
     if (a_reset)
     {
@@ -111,8 +111,8 @@ nxo_l_regex_cache_delete(cw_nxo_regex_cache_t *a_cache)
     }
 }
 
-CW_INLINE cw_bool_t
-nxoe_l_regex_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
+CW_INLINE bool
+nxoe_l_regex_delete(cw_nxoe_t *a_nxoe, uint32_t a_iter)
 {
     cw_nxoe_regex_t *regex;
 
@@ -133,11 +133,11 @@ nxoe_l_regex_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
 
     nxa_free(regex, sizeof(cw_nxoe_regex_t));
 
-    return FALSE;
+    return false;
 }
 
 CW_INLINE cw_nxoe_t *
-nxoe_l_regex_ref_iter(cw_nxoe_t *a_nxo, cw_bool_t a_reset)
+nxoe_l_regex_ref_iter(cw_nxoe_t *a_nxo, bool a_reset)
 {
     return NULL;
 }

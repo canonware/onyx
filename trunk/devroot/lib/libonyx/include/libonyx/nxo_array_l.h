@@ -29,27 +29,27 @@ struct cw_nxoe_array_s
 	struct
 	{
 	    cw_nxoe_array_t *array;
-	    cw_uint32_t beg_offset;
-	    cw_uint32_t len;
+	    uint32_t beg_offset;
+	    uint32_t len;
 	} i;
 	struct
 	{
 	    cw_nxo_t *arr;
-	    cw_uint32_t len;
-	    cw_uint32_t alloc_len;
+	    uint32_t len;
+	    uint32_t alloc_len;
 	} a;
     } e;
 };
 
 #ifndef CW_USE_INLINES
-cw_bool_t
-nxoe_l_array_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter);
+bool
+nxoe_l_array_delete(cw_nxoe_t *a_nxoe, uint32_t a_iter);
 
 cw_nxoe_t *
-nxoe_l_array_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
+nxoe_l_array_ref_iter(cw_nxoe_t *a_nxoe, bool a_reset);
 
 #ifdef CW_THREADS
-cw_bool_t
+bool
 nxo_l_array_locking(const cw_nxo_t *a_nxo);
 #endif
 
@@ -66,7 +66,7 @@ nxo_l_array_unlock(const cw_nxo_t *a_nxo);
 cw_nxo_t *
 nxo_l_array_el_get(const cw_nxo_t *a_nxo, cw_nxoi_t a_offset);
 
-cw_bool_t
+bool
 nxo_l_array_bound_get(const cw_nxo_t *a_nxo);
 
 void
@@ -74,8 +74,8 @@ nxo_l_array_bound_set(cw_nxo_t *a_nxo);
 #endif
 
 #if (defined(CW_USE_INLINES) || defined(CW_NXO_ARRAY_C_))
-CW_INLINE cw_bool_t
-nxoe_l_array_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
+CW_INLINE bool
+nxoe_l_array_delete(cw_nxoe_t *a_nxoe, uint32_t a_iter)
 {
     cw_nxoe_array_t *array;
 
@@ -85,7 +85,7 @@ nxoe_l_array_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
     cw_dassert(array->nxoe.magic == CW_NXOE_MAGIC);
     cw_assert(array->nxoe.type == NXOT_ARRAY);
 
-    if (array->nxoe.indirect == FALSE && array->e.a.alloc_len > 0)
+    if (array->nxoe.indirect == false && array->e.a.alloc_len > 0)
     {
 	nxa_free(array->e.a.arr, array->e.a.alloc_len * sizeof(cw_nxo_t));
     }
@@ -96,7 +96,7 @@ nxoe_l_array_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
     }
 
 #ifdef CW_THREADS
-    if (array->nxoe.locking && array->nxoe.indirect == FALSE)
+    if (array->nxoe.locking && array->nxoe.indirect == false)
     {
 	mtx_delete(&array->lock);
     }
@@ -104,18 +104,18 @@ nxoe_l_array_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
 
     nxa_free(array, sizeof(cw_nxoe_array_t));
 
-    return FALSE;
+    return false;
 }
 
 CW_INLINE cw_nxoe_t *
-nxoe_l_array_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
+nxoe_l_array_ref_iter(cw_nxoe_t *a_nxoe, bool a_reset)
 {
     cw_nxoe_t *retval;
     cw_nxoe_array_t *array;
     /* Used for remembering the current state of reference iteration.  This
      * function is only called by the garbage collector, so using a static
      * variable works fine. */
-    static cw_uint32_t ref_iter;
+    static uint32_t ref_iter;
 
     array = (cw_nxoe_array_t *) a_nxoe;
 
@@ -150,10 +150,10 @@ nxoe_l_array_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 }
 
 #ifdef CW_THREADS
-CW_INLINE cw_bool_t
+CW_INLINE bool
 nxo_l_array_locking(const cw_nxo_t *a_nxo)
 {
-    cw_bool_t retval;
+    bool retval;
     cw_nxoe_array_t *array;
 
     cw_check_ptr(a_nxo);
@@ -166,13 +166,13 @@ nxo_l_array_locking(const cw_nxo_t *a_nxo)
     cw_dassert(array->nxoe.magic == CW_NXOE_MAGIC);
     cw_assert(array->nxoe.type == NXOT_ARRAY);
 
-    if (array->nxoe.indirect == FALSE && array->nxoe.locking)
+    if (array->nxoe.indirect == false && array->nxoe.locking)
     {
-	retval = TRUE;
+	retval = true;
     }
     else
     {
-	retval = FALSE;
+	retval = false;
     }
 
     return retval;
@@ -195,7 +195,7 @@ nxo_l_array_lock(const cw_nxo_t *a_nxo)
     cw_dassert(array->nxoe.magic == CW_NXOE_MAGIC);
     cw_assert(array->nxoe.type == NXOT_ARRAY);
 
-    cw_assert(array->nxoe.indirect == FALSE && array->nxoe.locking);
+    cw_assert(array->nxoe.indirect == false && array->nxoe.locking);
 
     mtx_lock(&array->lock);
 }
@@ -217,7 +217,7 @@ nxo_l_array_unlock(const cw_nxo_t *a_nxo)
     cw_dassert(array->nxoe.magic == CW_NXOE_MAGIC);
     cw_assert(array->nxoe.type == NXOT_ARRAY);
 
-    cw_assert(array->nxoe.indirect == FALSE && array->nxoe.locking);
+    cw_assert(array->nxoe.indirect == false && array->nxoe.locking);
 
     mtx_unlock(&array->lock);
 }
@@ -243,14 +243,14 @@ nxo_l_array_el_get(const cw_nxo_t *a_nxo, cw_nxoi_t a_offset)
 	a_offset += array->e.i.beg_offset;
 	array = array->e.i.array;
     }
-    cw_assert(array->nxoe.indirect == FALSE);
+    cw_assert(array->nxoe.indirect == false);
 
     cw_assert(a_offset >= 0 && a_offset < array->e.a.len);
 
     return &array->e.a.arr[a_offset];
 }
 
-CW_INLINE cw_bool_t
+CW_INLINE bool
 nxo_l_array_bound_get(const cw_nxo_t *a_nxo)
 {
     cw_check_ptr(a_nxo);

@@ -85,7 +85,7 @@ The \classname{nxo\_condition} class is a subclass of the \classname{nxo} class.
 	\end{capilist}
 \label{nxo_condition_timedwait}
 \index{nxo_condition_timedwait@\cfunc{nxo\_condition\_timedwait}{}}
-\citem{\cfunc[cw\_bool\_t]{nxo\_condition\_timedwait}{cw\_nxo\_t *a\_nxo,
+\citem{\cfunc[bool]{nxo\_condition\_timedwait}{cw\_nxo\_t *a\_nxo,
 cw\_nxo\_t *a\_mutex, const struct timespec *a\_timeout}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -101,8 +101,8 @@ cw\_nxo\_t *a\_mutex, const struct timespec *a\_timeout}}
 		\begin{description}\item[]
 		\item[retval: ]
 			\begin{description}\item[]
-			\item[FALSE: ] Success.
-			\item[TRUE: ] Timeout.
+			\item[false: ] Success.
+			\item[true: ] Timeout.
 			\end{description}
 		\end{description}
 	\item[Exception(s): ] None.

@@ -19,13 +19,13 @@ typedef struct qstack_s qstack_t;
 
 struct qstack_s {
     qs_elm(qstack_t) link;
-    cw_uint8_t id;
+    uint8_t id;
 };
 
 int
 main()
 {
-    cw_uint32_t i;
+    uint32_t i;
     qstack_t entries[NENTRIES], *t;
     qs_head(qstack_t) head;
 

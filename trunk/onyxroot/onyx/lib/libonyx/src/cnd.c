@@ -25,7 +25,7 @@ cnd_new(cw_cnd_t *a_cnd)
     cw_check_ptr(a_cnd);
 
 #ifdef CW_PTH
-    if (pth_cond_init(&a_cnd->condition) == FALSE)
+    if (pth_cond_init(&a_cnd->condition) == false)
     {
 	fprintf(stderr, "%s:%d:%s(): Error in pth_cond_init(): %s\n",
 		__FILE__, __LINE__, __func__, strerror(errno));
@@ -73,7 +73,7 @@ cnd_signal(cw_cnd_t *a_cnd)
     cw_check_ptr(a_cnd);
 
 #ifdef CW_PTH
-    if (pth_cond_notify(&a_cnd->condition, FALSE) == FALSE)
+    if (pth_cond_notify(&a_cnd->condition, false) == false)
     {
 	fprintf(stderr, "%s:%d:%s(): Error in pth_cond_notify(): %s\n",
 		__FILE__, __LINE__, __func__, strerror(errno));
@@ -100,7 +100,7 @@ cnd_broadcast(cw_cnd_t *a_cnd)
     cw_check_ptr(a_cnd);
 
 #ifdef CW_PTH
-    if (pth_cond_notify(&a_cnd->condition, TRUE) == FALSE)
+    if (pth_cond_notify(&a_cnd->condition, true) == false)
     {
 	fprintf(stderr, "%s:%d:%s(): Error in pth_cond_notify(): %s\n",
 		__FILE__, __LINE__, __func__, strerror(errno));
@@ -118,11 +118,11 @@ cnd_broadcast(cw_cnd_t *a_cnd)
 #endif
 }
 
-cw_bool_t
+bool
 cnd_timedwait(cw_cnd_t *a_cnd, cw_mtx_t *a_mtx,
 	      const struct timespec *a_timeout)
 {
-    cw_bool_t retval;
+    bool retval;
 #ifdef CW_PTH
     pth_event_t event;
 #endif
@@ -151,31 +151,31 @@ cnd_timedwait(cw_cnd_t *a_cnd, cw_mtx_t *a_mtx,
     event = pth_event(PTH_EVENT_TIME,
 		      pth_time(timeout.tv_sec, timeout.tv_nsec / 1000));
 
-    if (pth_cond_await(&a_cnd->condition, &a_mtx->mutex, event) == FALSE)
+    if (pth_cond_await(&a_cnd->condition, &a_mtx->mutex, event) == false)
     {
 	fprintf(stderr, "%s:%d:%s(): Error in pth_cond_await(): %s\n",
 		__FILE__, __LINE__, __func__, strerror(errno));
 	abort();
     }
 
-    if (pth_event_occurred(event) == FALSE)
+    if (pth_event_occurred(event) == false)
     {
-	retval = FALSE;
+	retval = false;
     }
     else
     {
-	retval = TRUE;
+	retval = true;
     }
 #endif
 #ifdef CW_PTHREADS
     error = pthread_cond_timedwait(&a_cnd->condition, &a_mtx->mutex, &timeout);
     if (error == 0)
     {
-	retval = FALSE;
+	retval = false;
     }
     else if (error == ETIMEDOUT)
     {
-	retval = TRUE;
+	retval = true;
     }
     else
     {
@@ -199,7 +199,7 @@ cnd_wait(cw_cnd_t *a_cnd, cw_mtx_t *a_mtx)
     cw_check_ptr(a_mtx);
 
 #ifdef CW_PTH
-    if (pth_cond_await(&a_cnd->condition, &a_mtx->mutex, NULL) == FALSE)
+    if (pth_cond_await(&a_cnd->condition, &a_mtx->mutex, NULL) == false)
     {
 	fprintf(stderr, "%s:%d:%s(): Error in pth_cond_wait: %s\n",
 		__FILE__, __LINE__, __func__, strerror(errno));

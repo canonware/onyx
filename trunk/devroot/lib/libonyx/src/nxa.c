@@ -116,7 +116,7 @@ nxo_name_l_shutdown(void);
 
 /* Prototypes. */
 static void
-nxa_p_collect(cw_bool_t a_shutdown);
+nxa_p_collect(bool a_shutdown);
 #ifdef CW_PTHREADS
 static void *
 nxa_p_gc_entry(void *a_arg);
@@ -124,7 +124,7 @@ nxa_p_gc_entry(void *a_arg);
 
 /* Global variables. */
 #ifdef CW_DBG
-cw_bool_t cw_g_nxa_initialized = FALSE;
+bool cw_g_nxa_initialized = false;
 #endif
 
 cw_mema_t *cw_g_nxaa = NULL;
@@ -141,7 +141,7 @@ static cw_mtx_t s_lock;
 #endif
 
 /* Actual state of gcdict. */
-static cw_bool_t s_gcdict_active;
+static bool s_gcdict_active;
 #ifdef CW_PTHREADS
 static cw_nxoi_t s_gcdict_period;
 #endif
@@ -158,10 +158,10 @@ static cw_nxoi_t s_gcdict_sum[2];
 static cw_mtx_t s_seq_mtx;
 #endif
 static ql_head(cw_nxoe_t) s_seq_set;
-static cw_bool_t s_white; /* Current value for white (alternates). */
+static bool s_white; /* Current value for white (alternates). */
 
 /* Garbage. */
-static cw_uint32_t s_iter;
+static uint32_t s_iter;
 static cw_nxoi_t s_target_count;
 static cw_nxoe_t *s_garbage;
 static cw_nxoe_t *s_deferred_garbage;
@@ -170,8 +170,8 @@ static cw_nxoe_t *s_deferred_garbage;
 #ifdef CW_PTHREADS
 static cw_mq_t s_gc_mq;
 #endif
-static cw_bool_t s_gc_pending;
-static cw_bool_t s_gc_allocated;
+static bool s_gc_pending;
+static bool s_gc_allocated;
 
 /* GC thread. */
 #ifdef CW_PTHREADS
@@ -184,14 +184,14 @@ CW_P_INLINE void
 nxa_p_sweep(void)
 {
     cw_nxoe_t *nxoe, *next;
-    cw_bool_t notyet;
+    bool notyet;
     /* Sweep more than one object at a time, primarily in order to reduce the
      * number of times that s_lock is locked/unlocked. */
 #define NSWEEP 8
-    cw_uint32_t i;
+    uint32_t i;
 
     /* Iterate through the garbage objects and delete them.  If notyet is set to
-     * TRUE, the object deletion is deferred until a later pass.  Repeatedly
+     * true, the object deletion is deferred until a later pass.  Repeatedly
      * iterate through undeleted objects until no objects defer deletion, or
      * s_gcdict_count has dropped below s_target_count. */
     while (1)
@@ -372,10 +372,10 @@ nxa_l_init(void)
     sigset_t sig_mask, old_mask;
 #endif
 
-    cw_assert(cw_g_nxa_initialized == FALSE);
+    cw_assert(cw_g_nxa_initialized == false);
 
 #ifdef CW_DBG
-    cw_g_nxa_initialized = TRUE;
+    cw_g_nxa_initialized = true;
 #endif
     /* Set up the mema to be used for allocation. */
     cw_g_nxaa = mema_new(&s_nxaa, (cw_opaque_alloc_t *) nxa_malloc_e,
@@ -394,7 +394,7 @@ nxa_l_init(void)
 #endif
 
     ql_new(&s_seq_set);
-    s_white = FALSE;
+    s_white = false;
 
     s_garbage = NULL;
     s_deferred_garbage = NULL;
@@ -402,11 +402,11 @@ nxa_l_init(void)
 #ifdef CW_PTHREADS
     mq_new(&s_gc_mq, cw_g_mema, sizeof(cw_nxam_t));
 #endif
-    s_gc_pending = FALSE;
-    s_gc_allocated = FALSE;
+    s_gc_pending = false;
+    s_gc_allocated = false;
 
     /* Initialize gcdict state. */
-    s_gcdict_active = FALSE;
+    s_gcdict_active = false;
 #ifdef CW_PTHREADS
     s_gcdict_period = CW_LIBONYX_GCDICT_PERIOD;
 #endif
@@ -432,7 +432,7 @@ nxa_l_init(void)
      * to the GC thread. */
     sigfillset(&sig_mask);
     thd_sigmask(SIG_BLOCK, &sig_mask, &old_mask);
-    s_gc_thd = thd_new(nxa_p_gc_entry, NULL, FALSE);
+    s_gc_thd = thd_new(nxa_p_gc_entry, NULL, false);
     thd_sigmask(SIG_SETMASK, &old_mask, NULL);
 #endif
 }
@@ -451,14 +451,14 @@ nxa_l_shutdown(void)
 #endif
 #ifdef CW_PTH
     mtx_lock(&s_lock);
-    nxa_p_collect(TRUE);
+    nxa_p_collect(true);
     s_target_count = 0;
     nxa_p_sweep();
     mtx_unlock(&s_lock);
 #endif
     mtx_delete(&s_seq_mtx);
 #else
-    nxa_p_collect(TRUE);
+    nxa_p_collect(true);
     s_target_count = 0;
     nxa_p_sweep();
 #endif
@@ -469,7 +469,7 @@ nxa_l_shutdown(void)
     mtx_delete(&s_lock);
 #endif
 #ifdef CW_DBG
-    cw_g_nxa_initialized = FALSE;
+    cw_g_nxa_initialized = false;
 #endif
 
     mema_delete(cw_g_nxaa);
@@ -506,7 +506,7 @@ nxa_l_nx_remove(cw_nx_t *a_nx)
 
 void *
 nxa_malloc_e(void *a_arg, size_t a_size, const char *a_filename,
-	     cw_uint32_t a_line_num)
+	     uint32_t a_line_num)
 {
     cw_assert(cw_g_nxa_initialized);
 
@@ -517,7 +517,7 @@ nxa_malloc_e(void *a_arg, size_t a_size, const char *a_filename,
 
 void *
 nxa_calloc_e(void *a_arg, size_t a_number, size_t a_size,
-	     const char *a_filename, cw_uint32_t a_line_num)
+	     const char *a_filename, uint32_t a_line_num)
 {
     cw_assert(cw_g_nxa_initialized);
 
@@ -528,7 +528,7 @@ nxa_calloc_e(void *a_arg, size_t a_number, size_t a_size,
 
 void *
 nxa_realloc_e(void *a_arg, void *a_ptr, size_t a_size, size_t a_old_size,
-	      const char *a_filename, cw_uint32_t a_line_num)
+	      const char *a_filename, uint32_t a_line_num)
 {
     cw_assert(cw_g_nxa_initialized);
 
@@ -540,7 +540,7 @@ nxa_realloc_e(void *a_arg, void *a_ptr, size_t a_size, size_t a_old_size,
 
 void
 nxa_free_e(void *a_arg, void *a_ptr, size_t a_size, const char *a_filename,
-	   cw_uint32_t a_line_num)
+	   uint32_t a_line_num)
 {
     cw_assert(cw_g_nxa_initialized);
 
@@ -557,15 +557,15 @@ nxa_collect(void)
 #ifdef CW_THREADS
     mtx_lock(&s_lock);
 #endif
-    if (s_gc_pending == FALSE)
+    if (s_gc_pending == false)
     {
-	s_gc_pending = TRUE;
+	s_gc_pending = true;
 #ifdef CW_PTHREADS
 	mq_put(&s_gc_mq, NXAM_COLLECT);
 #else
 	if (s_gcdict_active)
 	{
-	    nxa_p_collect(FALSE);
+	    nxa_p_collect(false);
 	}
 #endif
     }
@@ -574,10 +574,10 @@ nxa_collect(void)
 #endif
 }
 
-cw_bool_t
+bool
 nxa_active_get(void)
 {
-    cw_bool_t retval;
+    bool retval;
 
     cw_assert(cw_g_nxa_initialized);
 
@@ -593,7 +593,7 @@ nxa_active_get(void)
 }
 
 void
-nxa_active_set(cw_bool_t a_active)
+nxa_active_set(bool a_active)
 {
     cw_assert(cw_g_nxa_initialized);
 
@@ -604,15 +604,15 @@ nxa_active_set(cw_bool_t a_active)
     if (a_active && s_gcdict_threshold > 0 && s_gcdict_threshold
 	<= s_gcdict_count - s_gcdict_current[0])
     {
-	if (s_gc_pending == FALSE)
+	if (s_gc_pending == false)
 	{
-	    s_gc_pending = TRUE;
+	    s_gc_pending = true;
 #ifdef CW_PTHREADS
 	    mq_put(&s_gc_mq, NXAM_COLLECT);
 #else
 	    if (s_gcdict_active)
 	    {
-		nxa_p_collect(FALSE);
+		nxa_p_collect(false);
 	    }
 #endif
 	}
@@ -620,7 +620,7 @@ nxa_active_set(cw_bool_t a_active)
 #ifdef CW_PTHREADS
     else
     {
-	if (s_gc_pending == FALSE)
+	if (s_gc_pending == false)
 	{
 	    mq_put(&s_gc_mq, NXAM_RECONFIGURE);
 	}
@@ -691,15 +691,15 @@ nxa_threshold_set(cw_nxoi_t a_threshold)
 	&& a_threshold <= s_gcdict_count - s_gcdict_current[0]
 	&& s_gcdict_active)
     {
-	if (s_gc_pending == FALSE)
+	if (s_gc_pending == false)
 	{
-	    s_gc_pending = TRUE;
+	    s_gc_pending = true;
 #ifdef CW_PTHREADS
 	    mq_put(&s_gc_mq, NXAM_COLLECT);
 #else
 	    if (s_gcdict_active)
 	    {
-		nxa_p_collect(FALSE);
+		nxa_p_collect(false);
 	    }
 #endif
 	}
@@ -776,14 +776,14 @@ nxa_l_gc_register(cw_nxoe_t *a_nxoe)
 #ifdef CW_THREADS
     mtx_lock(&s_seq_mtx);
 #endif
-    cw_assert(nxoe_l_registered_get(a_nxoe) == FALSE);
+    cw_assert(nxoe_l_registered_get(a_nxoe) == false);
     cw_assert(qr_next(a_nxoe, link) == a_nxoe);
     cw_assert(qr_prev(a_nxoe, link) == a_nxoe);
 
     /* Set the color to white, set the registered bit, and insert into the
      * object ring. */
     nxoe_l_color_set(a_nxoe, s_white);
-    nxoe_l_registered_set(a_nxoe, TRUE);
+    nxoe_l_registered_set(a_nxoe, true);
     ql_tail_insert(&s_seq_set, a_nxoe, link);
 
 #ifdef CW_THREADS
@@ -823,7 +823,7 @@ nxa_l_count_adjust(cw_nxoi_t a_adjust)
 	}
 
 	/* Note that allocation has been done. */
-	s_gc_allocated = TRUE;
+	s_gc_allocated = true;
 
 	/* Adjust the total allocation sum. */
 	s_gcdict_sum[0] += a_adjust;
@@ -833,15 +833,15 @@ nxa_l_count_adjust(cw_nxoi_t a_adjust)
 	    >= s_gcdict_threshold && s_gcdict_active
 	    && s_gcdict_threshold != 0)
 	{
-	    if (s_gc_pending == FALSE)
+	    if (s_gc_pending == false)
 	    {
-		s_gc_pending = TRUE;
+		s_gc_pending = true;
 #ifdef CW_PTHREADS
 		mq_put(&s_gc_mq, NXAM_COLLECT);
 #else
 		if (s_gcdict_active)
 		{
-		    nxa_p_collect(FALSE);
+		    nxa_p_collect(false);
 		}
 #endif
 	    }
@@ -853,7 +853,7 @@ nxa_l_count_adjust(cw_nxoi_t a_adjust)
 }
 
 CW_P_INLINE void
-nxa_p_root_add(cw_nxoe_t *a_nxoe, cw_nxoe_t **r_gray, cw_bool_t *r_roots)
+nxa_p_root_add(cw_nxoe_t *a_nxoe, cw_nxoe_t **r_gray, bool *r_roots)
 {
     /* If this object is registered and isn't already in the root set, paint it
      * gray and insert it into the root set.  It is very rare for an object to
@@ -876,7 +876,7 @@ nxa_p_root_add(cw_nxoe_t *a_nxoe, cw_nxoe_t **r_gray, cw_bool_t *r_roots)
 	else
 	{
 	    ql_first(&s_seq_set) = a_nxoe;
-	    *r_roots = TRUE;
+	    *r_roots = true;
 	}
 	/* Set gray to a_nxoe, since we inserted at the head of the
 	 * list. */
@@ -884,31 +884,31 @@ nxa_p_root_add(cw_nxoe_t *a_nxoe, cw_nxoe_t **r_gray, cw_bool_t *r_roots)
     }
 }
 
-/* Find roots, if any.  Return TRUE if there are roots, FALSE otherwise.  Upon
+/* Find roots, if any.  Return true if there are roots, false otherwise.  Upon
  * return, s_seq_set points to the first object in the root set. */
-CW_P_INLINE cw_bool_t
-nxa_p_roots(cw_bool_t a_shutdown)
+CW_P_INLINE bool
+nxa_p_roots(bool a_shutdown)
 {
-    cw_bool_t retval = FALSE;
+    bool retval = false;
     cw_nx_t *nx;
     cw_nxoe_t *nxoe, *gray;
 
     /* Iterate through the root set and mark it gray.
      *
      * Each set of *_ref_iter() calls on a particular object must start with a
-     * call with (a_reset == TRUE), and repeated calls until NULL is
+     * call with (a_reset == true), and repeated calls until NULL is
      * returned. */
     ql_foreach(nx, &s_nx_ql, link)
     {
-	for (nxoe = nx_l_ref_iter(nx, TRUE);
+	for (nxoe = nx_l_ref_iter(nx, true);
 	     nxoe != NULL;
-	     nxoe = nx_l_ref_iter(nx, FALSE))
+	     nxoe = nx_l_ref_iter(nx, false))
 	{
 	    nxa_p_root_add(nxoe, &gray, &retval);
 	}
     }
 
-    if (a_shutdown == FALSE)
+    if (a_shutdown == false)
     {
 	/* Add argv to the root set. */
 	nxa_p_root_add(nxo_nxoe_get(libonyx_argv_get()), &gray, &retval);
@@ -929,7 +929,7 @@ CW_P_INLINE cw_nxoe_t *
 nxa_p_mark(void)
 {
     cw_nxoe_t *retval, *gray, *nxoe;
-    cw_bool_t reset;
+    bool reset;
 
     /* Iterate through the gray objects and process them until only black and
      * white objects are left. */
@@ -938,8 +938,8 @@ nxa_p_mark(void)
     {
 	cw_assert(nxoe_l_color_get(gray) != s_white);
 
-	reset = TRUE;
-	for (reset = TRUE;; reset = FALSE)
+	reset = true;
+	for (reset = true;; reset = false)
 	{
 	    switch (nxoe_l_type_get(gray))
 	    {
@@ -1074,7 +1074,7 @@ nxa_p_mark(void)
 /* Collect garbage using a Baker's Treadmill.  s_lock is held upon entry
  * into this function. */
 static void
-nxa_p_collect(cw_bool_t a_shutdown)
+nxa_p_collect(bool a_shutdown)
 {
     struct timeval t_tv;
     cw_nxoi_t start_us, mark_us;
@@ -1090,10 +1090,10 @@ nxa_p_collect(cw_bool_t a_shutdown)
     }
 
     /* Reset the pending flag. */
-    s_gc_pending = FALSE;
+    s_gc_pending = false;
 
     /* Reset the allocated flag. */
-    s_gc_allocated = FALSE;
+    s_gc_allocated = false;
 
     /* Release the lock before entering the single section to avoid lock order
      * reversal due to mutators calling nxa_malloc() within critical sections.
@@ -1209,7 +1209,7 @@ nxa_p_gc_entry(void *a_arg)
 {
     struct timespec period;
     cw_nxam_t message;
-    cw_bool_t allocated, sweep, shutdown;
+    bool allocated, sweep, shutdown;
 
     /* Any of the following conditions will cause a collection:
      *
@@ -1221,7 +1221,7 @@ nxa_p_gc_entry(void *a_arg)
      * 3) Collection was explicitly requested.
      */
     period.tv_nsec = 0;
-    for (allocated = shutdown = FALSE; shutdown == FALSE;)
+    for (allocated = shutdown = false; shutdown == false;)
     {
 	mtx_lock(&s_lock);
 	period.tv_sec = s_gcdict_period;
@@ -1250,23 +1250,23 @@ nxa_p_gc_entry(void *a_arg)
 		    {
 			/* Record the fact that there has been allocation
 			 * activity. */
-			allocated = TRUE;
+			allocated = true;
 		    }
 
-		    if (s_gc_allocated == FALSE)
+		    if (s_gc_allocated == false)
 		    {
 			if (allocated)
 			{
 			    /* No additional registrations have happened since
 			     * the last mq_timedget() timeout and some
 			     * allocation has occurred; collect. */
-			    nxa_p_collect(FALSE);
-			    sweep = FALSE;
-			    allocated = FALSE;
+			    nxa_p_collect(false);
+			    sweep = false;
+			    allocated = false;
 			}
 			else
 			{
-			    sweep = TRUE;
+			    sweep = true;
 			}
 		    }
 		    else
@@ -1274,8 +1274,8 @@ nxa_p_gc_entry(void *a_arg)
 			/* Reset the allocated flag so that at the next timeout,
 			 * we can tell if there has been any allocation
 			 * activity. */
-			s_gc_allocated = FALSE;
-			sweep = FALSE;
+			s_gc_allocated = false;
+			sweep = false;
 		    }
 
 		    /* If no collection was done, and no new data were
@@ -1294,8 +1294,8 @@ nxa_p_gc_entry(void *a_arg)
 	    case NXAM_COLLECT:
 	    {
 		mtx_lock(&s_lock);
-		nxa_p_collect(FALSE);
-		allocated = FALSE;
+		nxa_p_collect(false);
+		allocated = false;
 		mtx_unlock(&s_lock);
 		break;
 	    }
@@ -1306,9 +1306,9 @@ nxa_p_gc_entry(void *a_arg)
 	    }
 	    case NXAM_SHUTDOWN:
 	    {
-		shutdown = TRUE;
+		shutdown = true;
 		mtx_lock(&s_lock);
-		nxa_p_collect(TRUE);
+		nxa_p_collect(true);
 		s_target_count = 0;
 		nxa_p_sweep();
 		mtx_unlock(&s_lock);

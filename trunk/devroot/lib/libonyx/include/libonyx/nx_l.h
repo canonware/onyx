@@ -12,7 +12,7 @@
 
 #ifndef CW_USE_INLINES
 cw_nxoe_t *
-nx_l_ref_iter(cw_nx_t *a_nx, cw_bool_t a_reset);
+nx_l_ref_iter(cw_nx_t *a_nx, bool a_reset);
 
 void
 nx_l_thread_insert(cw_nx_t *a_nx, cw_nxo_t *a_thread);
@@ -29,13 +29,13 @@ nx_l_thread_start(cw_nx_t *a_nx);
 
 #if (defined(CW_USE_INLINES) || defined(CW_NX_C_))
 CW_INLINE cw_nxoe_t *
-nx_l_ref_iter(cw_nx_t *a_nx, cw_bool_t a_reset)
+nx_l_ref_iter(cw_nx_t *a_nx, bool a_reset)
 {
     cw_nxoe_t *retval;
     /* Used for remembering the current state of reference iteration.  This
      * function is only called by the garbage collector, so using a static
      * variable works fine. */
-    static cw_uint32_t ref_iter;
+    static uint32_t ref_iter;
 
     cw_check_ptr(a_nx);
     cw_dassert(a_nx->magic == CW_NX_MAGIC);

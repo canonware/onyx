@@ -19,16 +19,16 @@ struct cw_nxoe_mutex_s
 };
 
 #ifndef CW_USE_INLINES
-cw_bool_t
-nxoe_l_mutex_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter);
+bool
+nxoe_l_mutex_delete(cw_nxoe_t *a_nxoe, uint32_t a_iter);
 
 cw_nxoe_t *
-nxoe_l_mutex_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
+nxoe_l_mutex_ref_iter(cw_nxoe_t *a_nxoe, bool a_reset);
 #endif
 
 #if (defined(CW_USE_INLINES) || defined(CW_NXO_MUTEX_C_))
-CW_INLINE cw_bool_t
-nxoe_l_mutex_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
+CW_INLINE bool
+nxoe_l_mutex_delete(cw_nxoe_t *a_nxoe, uint32_t a_iter)
 {
     cw_nxoe_mutex_t *mutex;
 
@@ -42,11 +42,11 @@ nxoe_l_mutex_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
 
     nxa_free(mutex, sizeof(cw_nxoe_mutex_t));
 
-    return FALSE;
+    return false;
 }
 
 CW_INLINE cw_nxoe_t *
-nxoe_l_mutex_ref_iter(cw_nxoe_t *a_nxo, cw_bool_t a_reset)
+nxoe_l_mutex_ref_iter(cw_nxoe_t *a_nxo, bool a_reset)
 {
     return NULL;
 }

@@ -66,7 +66,7 @@ already owning it has undefined results.
 	\end{capilist}
 \label{mtx_trylock}
 \index{mtx_trylock@\cfunc{mtx\_trylock}{}}
-\citem{\cfunc[cw\_bool\_t]{mtx\_trylock}{cw\_mtx\_t *a\_mtx}}
+\citem{\cfunc[bool]{mtx\_trylock}{cw\_mtx\_t *a\_mtx}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -77,8 +77,8 @@ already owning it has undefined results.
 		\begin{description}\item[]
 		\item[retval: ]
 			\begin{description}\item[]
-			\item[FALSE: ] Success.
-			\item[TRUE: ] Failure.
+			\item[false: ] Success.
+			\item[true: ] Failure.
 			\end{description}
 		\end{description}
 	\item[Exception(s): ] None.

@@ -27,7 +27,7 @@ cw_nx_t *
 nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, cw_thread_start_t *a_thread_start)
 {
     cw_nx_t *retval;
-    volatile cw_uint32_t try_stage = 0;
+    volatile uint32_t try_stage = 0;
 
     xep_begin();
     volatile cw_nx_t *v_retval;
@@ -37,12 +37,12 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, cw_thread_start_t *a_thread_start)
 	{
 	    retval = a_nx;
 	    memset(retval, 0, sizeof(cw_nx_t));
-	    retval->is_malloced = FALSE;
+	    retval->is_malloced = false;
 	}
 	else
 	{
 	    retval = (cw_nx_t *) cw_calloc(1, sizeof(cw_nx_t));
-	    retval->is_malloced = TRUE;
+	    retval->is_malloced = true;
 	}
 	v_retval = retval;
 	try_stage = 1;
@@ -72,7 +72,7 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, cw_thread_start_t *a_thread_start)
 	try_stage = 2;
 
 	/* Initialize globaldict. */
-	nxo_dict_new(&retval->globaldict, TRUE, CW_LIBONYX_GLOBALDICT_HASH);
+	nxo_dict_new(&retval->globaldict, true, CW_LIBONYX_GLOBALDICT_HASH);
 
 	/* Use stdin_nxo and stdout_nxo as temporaries for the dictionary
 	 * population functions.  This is the only place where such temporaries
@@ -81,7 +81,7 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, cw_thread_start_t *a_thread_start)
 	 * would be wasteful. */
 
 	/* Initialize threadsdict. */
-	nxo_dict_new(&retval->threadsdict, TRUE, CW_LIBONYX_THREADSDICT_HASH);
+	nxo_dict_new(&retval->threadsdict, true, CW_LIBONYX_THREADSDICT_HASH);
 
 	/* Initialize systemdict.  This must happen after the other dict
 	 * initializations, since references to them are inserted into
@@ -90,9 +90,9 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, cw_thread_start_t *a_thread_start)
 			      &retval->stdout_nxo, retval);
 
 	/* Initialize stdin. */
-	nxo_file_new(&retval->stdin_nxo, TRUE);
+	nxo_file_new(&retval->stdin_nxo, true);
 #ifdef CW_POSIX_FILE
-	nxo_file_fd_wrap(&retval->stdin_nxo, 0, FALSE);
+	nxo_file_fd_wrap(&retval->stdin_nxo, 0, false);
 #endif
 	nxo_file_origin_set(&retval->stdin_nxo,
 			    "*stdin*", sizeof("*stdin*") - 1);
@@ -101,9 +101,9 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, cw_thread_start_t *a_thread_start)
 				 CW_LIBONYX_FILE_BUFFER_SIZE);
 
 	/* Initialize stdout. */
-	nxo_file_new(&retval->stdout_nxo, TRUE);
+	nxo_file_new(&retval->stdout_nxo, true);
 #ifdef CW_POSIX_FILE
-	nxo_file_fd_wrap(&retval->stdout_nxo, 1, FALSE);
+	nxo_file_fd_wrap(&retval->stdout_nxo, 1, false);
 #endif
 	nxo_file_origin_set(&retval->stdout_nxo,
 			    "*stdout*", sizeof("*stdout*") - 1);
@@ -111,9 +111,9 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, cw_thread_start_t *a_thread_start)
 				 CW_LIBONYX_FILE_BUFFER_SIZE);
 
 	/* Initialize stderr. */
-	nxo_file_new(&retval->stderr_nxo, TRUE);
+	nxo_file_new(&retval->stderr_nxo, true);
 #ifdef CW_POSIX_FILE
-	nxo_file_fd_wrap(&retval->stderr_nxo, 2, FALSE);
+	nxo_file_fd_wrap(&retval->stderr_nxo, 2, false);
 #endif
 	nxo_file_origin_set(&retval->stderr_nxo,
 			    "*stderr*", sizeof("*stderr*") - 1);
@@ -189,7 +189,7 @@ nx_maxestack_set(cw_nx_t *a_nx, cw_nxoi_t a_maxestack)
 }
 
 void
-nx_tailopt_set(cw_nx_t *a_nx, cw_bool_t a_tailopt)
+nx_tailopt_set(cw_nx_t *a_nx, bool a_tailopt)
 {
     cw_check_ptr(a_nx);
     cw_dassert(a_nx->magic == CW_NX_MAGIC);

@@ -73,24 +73,6 @@ Use the following compiler command line to compile applications with
 cc `onyx_config --cppflags` <file> `onyx_config --ldflags --libs`
 \end{verbatim}
 
-\section{Types}
-\libname{libonyx} is careful to use the following data types rather than the
-built-in types (other than when using system library functions and string
-pointers (char *)) to allow easy porting and explicit knowledge of variable
-sizes:
-\begin{description}
-\item[cw\_bool\_t: ] Boolean, either FALSE or TRUE.
-\item[cw\_sint8\_t: ] Signed 8 bit variable.
-\item[cw\_uint8\_t: ] Unsigned 8 bit variable.
-\item[cw\_sint16\_t: ] Signed 16 bit variable.
-\item[cw\_uint16\_t: ] Unsigned 16 bit variable.
-\item[cw\_sint32\_t: ] Signed 32 bit variable.
-\item[cw\_uint32\_t: ] Unsigned 32 bit variable.
-\item[cw\_sint64\_t: ] Signed 64 bit variable.
-\item[cw\_uint64\_t: ] Unsigned 64 bit variable.
-\item[cw\_fp64\_t: ] 64 bit IEEE floating point variable.
-\end{description}
-
 \section{Global variables}
 \libname{libonyx} defines the following global variables, which can be used by
 the application:
@@ -133,7 +115,7 @@ Since there can be arbitrary threads executing in the interpreter concurrently,
 there are two ways to implement safe garbage collection: concurrent or atomic.
 \libname{libonyx} uses atomic garbage collection, which means that during the
 mark phase, the thread doing garbage collection suspends all other threads that
-are created via \cfunc{\htmlref{thd\_new}{thd_new}}{..., TRUE}.  In order for
+are created via \cfunc{\htmlref{thd\_new}{thd_new}}{..., true}.  In order for
 this to work, the garbage collector must not do any locking while the other
 threads are suspended, or else there is a high probability of eventual deadlock.
 \libname{libonyx} itself meets these criteria, as must any C extensions to the
@@ -323,7 +305,7 @@ behavior and likely crashes.
 \label{cw_opaque_alloc_t}
 \index{cw_opaque_alloc_t@\cfunc{cw\_opaque\_alloc\_t}{}}
 \citem{\cfunc[void *]{cw\_opaque\_alloc\_t}{void *a\_arg, size\_t a\_size,
-const char *a\_filename, cw\_uint32\_t a\_line\_num}}
+const char *a\_filename, uint32\_t a\_line\_num}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -351,7 +333,7 @@ const char *a\_filename, cw\_uint32\_t a\_line\_num}}
 \label{cw_opaque_calloc_t}
 \index{cw_opaque_calloc_t@\cfunc{cw\_opaque\_calloc\_t}{}}
 \citem{\cfunc[void *]{cw\_opaque\_calloc\_t}{void *a\_arg, size\_t a\_number,
-size\_t a\_size, const char *a\_filename, cw\_uint32\_t
+size\_t a\_size, const char *a\_filename, uint32\_t
 a\_line\_num}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -383,7 +365,7 @@ a\_line\_num}}
 \label{cw_opaque_realloc_t}
 \index{cw_opaque_realloc_t@\cfunc{cw\_opaque\_realloc\_t}{}}
 \citem{\cfunc[void *]{cw\_opaque\_realloc\_t}{void *a\_arg, void *a\_ptr,
-size\_t a\_size, size\_t a\_old\_size, const char *a\_filename, cw\_uint32\_t
+size\_t a\_size, size\_t a\_old\_size, const char *a\_filename, uint32\_t
 a\_line\_num}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -417,7 +399,7 @@ a\_line\_num}}
 \label{cw_opaque_dealloc_t}
 \index{cw_opaque_dealloc_t@\cfunc{cw\_opaque\_dealloc\_t}{}}
 \citem{\cfunc[void]{cw\_opaque\_dealloc\_t}{void *a\_mem, void *a\_ptr, size\_t
-a\_size, const char *a\_filename, cw\_uint32\_t a\_line\_num}}
+a\_size, const char *a\_filename, uint32\_t a\_line\_num}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -652,7 +634,7 @@ void *a\_mem, void *a\_ptr, size\_t a\_size}}
 	\end{capilist}
 \label{cw_ntohq}
 \index{cw_ntohq@\cppmacro{cw\_ntohq}{}}
-\citem{\cppmacro[cw\_uint64\_t]{cw\_ntohq}{cw\_uint64\_t a\_val}}
+\citem{\cppmacro[uint64\_t]{cw\_ntohq}{uint64\_t a\_val}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -671,7 +653,7 @@ void *a\_mem, void *a\_ptr, size\_t a\_size}}
 	\end{capilist}
 \label{cw_htonq}
 \index{cw_htonq@\cppmacro{cw\_htonq}{}}
-\citem{\cppmacro[cw\_uint64\_t]{cw\_htonq}{cw\_uint64\_t a\_val}}
+\citem{\cppmacro[uint64\_t]{cw\_htonq}{uint64\_t a\_val}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -690,7 +672,7 @@ void *a\_mem, void *a\_ptr, size\_t a\_size}}
 	\end{capilist}
 \label{cw_offsetof}
 \index{cw_offsetof@\cppmacro{cw\_offsetof}{}}
-\citem{\cppmacro[cw\_uint32\_t]{cw\_offsetof}{{\lt}type{\gt} a\_type,
+\citem{\cppmacro[uint32\_t]{cw\_offsetof}{{\lt}type{\gt} a\_type,
 {\lt}field\_name{\gt} a\_field}}
 	\begin{capilist}
 	\item[Input(s): ]

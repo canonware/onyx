@@ -29,32 +29,32 @@
 struct cw_modprompt_synth_s {
 #ifdef CW_DBG
 #define CW_MODPROMPT_SYNTH_MAGIC 0x32ad81a5
-    cw_uint32_t magic;
+    uint32_t magic;
 #endif
     cw_nxo_t modload_handle;
     cw_nxo_t *thread;
     cw_nxo_threadp_t threadp;
-    cw_bool_t continuation;
+    bool continuation;
 #ifdef CW_THREADS
     cw_thd_t *read_thd;
-    volatile cw_bool_t quit;
-    volatile cw_bool_t resize;
+    volatile bool quit;
+    volatile bool resize;
 
     cw_mtx_t mtx;
-    cw_bool_t have_data; /* The writer wrote data. */
+    bool have_data; /* The writer wrote data. */
     cw_cnd_t put_cnd; /* The writer (libedit thread) waits on this. */
-    cw_bool_t want_data; /* The reader wants data. */
+    bool want_data; /* The reader wants data. */
     cw_cnd_t get_cnd; /* The reader (interpreter thread) waits on this. */
 #endif
 
-    cw_uint8_t *buffer;
-    cw_uint32_t buffer_size;
-    cw_uint32_t buffer_count;
+    uint8_t *buffer;
+    uint32_t buffer_size;
+    uint32_t buffer_count;
 
     EditLine *el;
     History *hist;
     HistEvent hevent;
-    cw_uint8_t prompt_str[CW_PROMPT_STRLEN];
+    uint8_t prompt_str[CW_PROMPT_STRLEN];
 };
 
 /* Globals. */
@@ -63,14 +63,14 @@ static struct cw_modprompt_synth_s *synth;
 
 /* Function prototypes. */
 static cw_nxoe_t *
-modprompt_synth_ref_iter(void *a_data, cw_bool_t a_reset);
+modprompt_synth_ref_iter(void *a_data, bool a_reset);
 
 static void
 modprompt_synth_delete(void *a_data);
 
-static cw_sint32_t
-modprompt_read(void *a_data, cw_nxo_t *a_file, cw_uint32_t a_len,
-	       cw_uint8_t *r_str);
+static int32_t
+modprompt_read(void *a_data, cw_nxo_t *a_file, uint32_t a_len,
+	       uint8_t *r_str);
 
 static void
 modprompt_promptstring(struct cw_modprompt_synth_s *a_synth);
@@ -106,7 +106,7 @@ modprompt_init(void *a_arg, cw_nxo_t *a_thread)
      * application is crazy enough use the initial thread's stdin in another
      * thread, crashes are likely. */
     file = nxo_thread_stdin_get(a_thread);
-    nxo_file_new(file, TRUE);
+    nxo_file_new(file, true);
     nxo_file_synthetic(file, modprompt_read, NULL, modprompt_synth_ref_iter,
 		       modprompt_synth_delete, synth);
     nxo_file_origin_set(file, "*stdin*", sizeof("*stdin*") - 1);
@@ -168,7 +168,7 @@ modprompt_init(void *a_arg, cw_nxo_t *a_thread)
 #endif
     sigaddset(&set, SIGWINCH);
     thd_sigmask(SIG_BLOCK, &set, &oset);
-    synth->read_thd = thd_new(modprompt_entry, synth, TRUE);
+    synth->read_thd = thd_new(modprompt_entry, synth, true);
 #else
     /* Install signal handlers. */
     modprompt_handlers_install();
@@ -192,7 +192,7 @@ modprompt_init(void *a_arg, cw_nxo_t *a_thread)
 }
 
 static cw_nxoe_t *
-modprompt_synth_ref_iter(void *a_data, cw_bool_t a_reset)
+modprompt_synth_ref_iter(void *a_data, bool a_reset)
 {
     cw_nxoe_t *retval;
     struct cw_modprompt_synth_s *synth = (struct cw_modprompt_synth_s *) a_data;
@@ -223,7 +223,7 @@ modprompt_synth_delete(void *a_data)
 #ifdef CW_THREADS
     /* Tell the read thread to start shutting down. */
     mtx_lock(&synth->mtx);
-    synth->quit = TRUE;
+    synth->quit = true;
     cnd_signal(&synth->put_cnd);
     mtx_unlock(&synth->mtx);
     /* Wait for the read thread to exit. */
@@ -247,11 +247,11 @@ modprompt_synth_delete(void *a_data)
 }
 
 #ifdef CW_THREADS
-static cw_sint32_t
-modprompt_read(void *a_data, cw_nxo_t *a_file, cw_uint32_t a_len,
-	       cw_uint8_t *r_str)
+static int32_t
+modprompt_read(void *a_data, cw_nxo_t *a_file, uint32_t a_len,
+	       uint8_t *r_str)
 {
-    cw_sint32_t retval;
+    int32_t retval;
     struct cw_modprompt_synth_s *synth = (struct cw_modprompt_synth_s *) a_data;
 
     cw_check_ptr(synth);
@@ -263,10 +263,10 @@ modprompt_read(void *a_data, cw_nxo_t *a_file, cw_uint32_t a_len,
     if (synth->buffer_count == 0)
     {
 	/* Tell the main thread to read more data, then wait for it. */
-	synth->want_data = TRUE;
+	synth->want_data = true;
 	cnd_signal(&synth->put_cnd);
-	synth->have_data = FALSE;
-	while (synth->have_data == FALSE)
+	synth->have_data = false;
+	while (synth->have_data == false)
 	{
 	    cnd_wait(&synth->get_cnd, &synth->mtx);
 	}
@@ -294,11 +294,11 @@ modprompt_read(void *a_data, cw_nxo_t *a_file, cw_uint32_t a_len,
     return retval;
 }
 #else
-static cw_sint32_t
-modprompt_read(void *a_data, cw_nxo_t *a_file, cw_uint32_t a_len,
-	       cw_uint8_t *r_str)
+static int32_t
+modprompt_read(void *a_data, cw_nxo_t *a_file, uint32_t a_len,
+	       uint8_t *r_str)
 {
-    cw_sint32_t retval;
+    int32_t retval;
     struct cw_modprompt_synth_s *synth = (struct cw_modprompt_synth_s *) a_data;
     const char *str;
     int count = 0;
@@ -321,7 +321,7 @@ modprompt_read(void *a_data, cw_nxo_t *a_file, cw_uint32_t a_len,
 	cw_assert(count > 0);
 
 	/* Update the command line history. */
-	if ((nxo_thread_deferred(synth->thread) == FALSE)
+	if ((nxo_thread_deferred(synth->thread) == false)
 	    && (nxo_thread_state(synth->thread) == THREADTS_START))
 	{
 	    /* Completion of a history element.  Insert it, taking care to avoid
@@ -330,7 +330,7 @@ modprompt_read(void *a_data, cw_nxo_t *a_file, cw_uint32_t a_len,
 	    if (synth->continuation)
 	    {
 		history(synth->hist, &synth->hevent, H_ENTER, str);
-		synth->continuation = FALSE;
+		synth->continuation = false;
 	    }
 	    else
 	    {
@@ -345,7 +345,7 @@ modprompt_read(void *a_data, cw_nxo_t *a_file, cw_uint32_t a_len,
 	{
 	    /* Continuation.  Append it to the current history element. */
 	    history(synth->hist, &synth->hevent, H_ADD, str);
-	    synth->continuation = TRUE;
+	    synth->continuation = true;
 	}
 
 	/* Copy the data to the synth buffer. */
@@ -354,11 +354,11 @@ modprompt_read(void *a_data, cw_nxo_t *a_file, cw_uint32_t a_len,
 	    /* Expand the buffer. */
 	    if (synth->buffer == NULL)
 	    {
-		synth->buffer = (cw_uint8_t *) cw_malloc(count);
+		synth->buffer = (uint8_t *) cw_malloc(count);
 	    }
 	    else
 	    {
-		synth->buffer = (cw_uint8_t *) cw_realloc(synth->buffer, count);
+		synth->buffer = (uint8_t *) cw_realloc(synth->buffer, count);
 	    }
 	    synth->buffer_size = count;
 	}
@@ -394,14 +394,14 @@ modprompt_promptstring(struct cw_modprompt_synth_s *a_synth)
     /* Call promptstring if the conditions are right.  Take lots of care not to
      * let an error in promptstring cause recursion into the error handling
      * machinery. */
-    if ((nxo_thread_deferred(synth->thread) == FALSE)
+    if ((nxo_thread_deferred(synth->thread) == false)
 	&& (nxo_thread_state(synth->thread) == THREADTS_START))
     {
-	cw_uint8_t *pstr;
-	cw_uint32_t plen, maxlen;
+	uint8_t *pstr;
+	uint32_t plen, maxlen;
 	cw_nxo_t *nxo;
 	cw_nxo_t *stack;
-	static const cw_uint8_t code[] =
+	static const uint8_t code[] =
 	    "{$promptstring where {\n"
 	    "pop\n"
 	    /* Save the current contents of errordict into promptdict. */
@@ -584,11 +584,11 @@ modprompt_entry(void *a_arg)
     for (;;)
     {
 	/* Wait for the interpreter thread to request data. */
-	while (synth->want_data == FALSE && synth->quit == FALSE)
+	while (synth->want_data == false && synth->quit == false)
 	{
 	    cnd_wait(&synth->put_cnd, &synth->mtx);
 	}
-	synth->want_data = FALSE;
+	synth->want_data = false;
 	if (synth->quit)
 	{
 	    break;
@@ -607,7 +607,7 @@ modprompt_entry(void *a_arg)
 	cw_assert(count > 0);
 
 	/* Update the command line history. */
-	if ((nxo_thread_deferred(synth->thread) == FALSE)
+	if ((nxo_thread_deferred(synth->thread) == false)
 	    && (nxo_thread_state(synth->thread) == THREADTS_START))
 	{
 	    /* Completion of a history element.  Insert it, taking care to avoid
@@ -616,7 +616,7 @@ modprompt_entry(void *a_arg)
 	    if (synth->continuation)
 	    {
 		history(synth->hist, &synth->hevent, H_ENTER, str);
-		synth->continuation = FALSE;
+		synth->continuation = false;
 	    }
 	    else
 	    {
@@ -631,7 +631,7 @@ modprompt_entry(void *a_arg)
 	{
 	    /* Continuation.  Append it to the current history element. */
 	    history(synth->hist, &synth->hevent, H_ADD, str);
-	    synth->continuation = TRUE;
+	    synth->continuation = true;
 	}
 
 	/* Copy the data to the synth buffer. */
@@ -640,11 +640,11 @@ modprompt_entry(void *a_arg)
 	    /* Expand the buffer. */
 	    if (synth->buffer == NULL)
 	    {
-		synth->buffer = (cw_uint8_t *) cw_malloc(count);
+		synth->buffer = (uint8_t *) cw_malloc(count);
 	    }
 	    else
 	    {
-		synth->buffer = (cw_uint8_t *) cw_realloc(synth->buffer, count);
+		synth->buffer = (uint8_t *) cw_realloc(synth->buffer, count);
 	    }
 	    synth->buffer_size = count;
 	}
@@ -652,7 +652,7 @@ modprompt_entry(void *a_arg)
 	synth->buffer_count = count;
 
 	/* Tell the interpreter thread that there are data available. */
-	synth->have_data = TRUE;
+	synth->have_data = true;
 	cnd_signal(&synth->get_cnd);
     }
     mtx_unlock(&synth->mtx);

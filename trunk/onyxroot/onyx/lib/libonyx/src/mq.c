@@ -29,7 +29,7 @@
 #endif
 
 void
-mq_new(cw_mq_t *a_mq, cw_mema_t *a_mema, cw_uint32_t a_msg_size)
+mq_new(cw_mq_t *a_mq, cw_mema_t *a_mema, uint32_t a_msg_size)
 {
     cw_check_ptr(a_mq);
 
@@ -67,7 +67,7 @@ mq_new(cw_mq_t *a_mq, cw_mema_t *a_mema, cw_uint32_t a_msg_size)
     a_mq->msgs_beg = 0;
     a_mq->msgs_end = 0;
 
-    a_mq->msgs.x = (cw_uint32_t *) cw_opaque_alloc(mema_alloc_get(a_mema),
+    a_mq->msgs.x = (uint32_t *) cw_opaque_alloc(mema_alloc_get(a_mema),
 						   mema_arg_get(a_mema),
 						   a_mq->msgs_vec_count
 						   * a_mq->msg_size);
@@ -75,8 +75,8 @@ mq_new(cw_mq_t *a_mq, cw_mema_t *a_mema, cw_uint32_t a_msg_size)
     mtx_new(&a_mq->lock);
     cnd_new(&a_mq->cond);
 
-    a_mq->get_stop = FALSE;
-    a_mq->put_stop = FALSE;
+    a_mq->get_stop = false;
+    a_mq->put_stop = false;
 
 #ifdef CW_DBG
     a_mq->magic = CW_MQ_MAGIC;
@@ -102,16 +102,16 @@ mq_delete(cw_mq_t *a_mq)
 #endif
 }
 
-cw_bool_t
+bool
 mq_tryget(cw_mq_t *a_mq, ...)
 {
-    cw_bool_t retval;
+    bool retval;
     union
     {
-	cw_uint8_t *one;
-	cw_uint16_t *two;
-	cw_uint32_t *four;
-	cw_uint64_t *eight;
+	uint8_t *one;
+	uint16_t *two;
+	uint32_t *four;
+	uint64_t *eight;
 	void *x; /* Don't care. */
     } r_msg;
     va_list ap;
@@ -127,7 +127,7 @@ mq_tryget(cw_mq_t *a_mq, ...)
 
     if (a_mq->get_stop)
     {
-	retval = TRUE;
+	retval = true;
 	goto RETURN;
     }
     if (a_mq->msg_count > 0)
@@ -164,26 +164,26 @@ mq_tryget(cw_mq_t *a_mq, ...)
     }
     else
     {
-	retval = TRUE;
+	retval = true;
 	goto RETURN;
     }
 
-    retval = FALSE;
+    retval = false;
     RETURN:
     mtx_unlock(&a_mq->lock);
     return retval;
 }
 
-cw_bool_t
+bool
 mq_timedget(cw_mq_t *a_mq, const struct timespec *a_timeout, ...)
 {
-    cw_bool_t retval, timed_out;
+    bool retval, timed_out;
     union
     {
-	cw_uint8_t *one;
-	cw_uint16_t *two;
-	cw_uint32_t *four;
-	cw_uint64_t *eight;
+	uint8_t *one;
+	uint16_t *two;
+	uint32_t *four;
+	uint64_t *eight;
 	void *x; /* Don't care. */
     } r_msg;
     va_list ap;
@@ -200,18 +200,18 @@ mq_timedget(cw_mq_t *a_mq, const struct timespec *a_timeout, ...)
 
     if (a_mq->get_stop)
     {
-	retval = TRUE;
+	retval = true;
 	goto RETURN;
     }
     /* A spurious wakeup will cause the timeout interval to start over.  This
      * isn't a big deal as long as spurious wakeups don't occur continuously,
      * since the timeout period is merely a lower bound on how long to wait. */
-    for (timed_out = FALSE; a_mq->msg_count == 0 && timed_out == FALSE;)
+    for (timed_out = false; a_mq->msg_count == 0 && timed_out == false;)
     {
 	timed_out = cnd_timedwait(&a_mq->cond, &a_mq->lock, a_timeout);
 	if (a_mq->get_stop)
 	{
-	    retval = TRUE;
+	    retval = true;
 	    goto RETURN;
 	}
     }
@@ -249,26 +249,26 @@ mq_timedget(cw_mq_t *a_mq, const struct timespec *a_timeout, ...)
     }
     else
     {
-	retval = TRUE;
+	retval = true;
 	goto RETURN;
     }
 
-    retval = FALSE;
+    retval = false;
     RETURN:
     mtx_unlock(&a_mq->lock);
     return retval;
 }
 
-cw_bool_t
+bool
 mq_get(cw_mq_t *a_mq, ...)
 {
-    cw_bool_t retval;
+    bool retval;
     union
     {
-	cw_uint8_t *one;
-	cw_uint16_t *two;
-	cw_uint32_t *four;
-	cw_uint64_t *eight;
+	uint8_t *one;
+	uint16_t *two;
+	uint32_t *four;
+	uint64_t *eight;
 	void *x; /* Don't care. */
     } r_msg;
     va_list ap;
@@ -284,7 +284,7 @@ mq_get(cw_mq_t *a_mq, ...)
 
     if (a_mq->get_stop)
     {
-	retval = TRUE;
+	retval = true;
 	goto RETURN;
     }
     while (a_mq->msg_count == 0)
@@ -292,7 +292,7 @@ mq_get(cw_mq_t *a_mq, ...)
 	cnd_wait(&a_mq->cond, &a_mq->lock);
 	if (a_mq->get_stop)
 	{
-	    retval = TRUE;
+	    retval = true;
 	    goto RETURN;
 	}
     }
@@ -327,20 +327,20 @@ mq_get(cw_mq_t *a_mq, ...)
     a_mq->msg_count--;
     a_mq->msgs_beg = (a_mq->msgs_beg + 1) % a_mq->msgs_vec_count;
 
-    retval = FALSE;
+    retval = false;
     RETURN:
     mtx_unlock(&a_mq->lock);
     return retval;
 }
 
-cw_bool_t
+bool
 mq_put(cw_mq_t *a_mq, ...)
 {
-    cw_bool_t retval;
+    bool retval;
     union
     {
-	cw_uint32_t four;
-	cw_uint64_t eight;
+	uint32_t four;
+	uint64_t eight;
     } a_msg;
     va_list ap;
 
@@ -354,12 +354,12 @@ mq_put(cw_mq_t *a_mq, ...)
 	case 2: /* Compiler-promoted to 32 bits. */
 	case 4:
 	{
-	    a_msg.four = va_arg(ap, cw_uint32_t);
+	    a_msg.four = va_arg(ap, uint32_t);
 	    break;
 	}
 	case 8:
 	{
-	    a_msg.eight = va_arg(ap, cw_uint64_t);
+	    a_msg.eight = va_arg(ap, uint64_t);
 	    break;
 	}
 	default:
@@ -377,7 +377,7 @@ mq_put(cw_mq_t *a_mq, ...)
     }
     if (a_mq->put_stop)
     {
-	retval = TRUE;
+	retval = true;
 	goto RETURN;
     }
     else
@@ -386,13 +386,13 @@ mq_put(cw_mq_t *a_mq, ...)
 	{
 	    union
 	    {
-		cw_uint8_t *one;
-		cw_uint16_t *two;
-		cw_uint32_t *four;
-		cw_uint64_t *eight;
+		uint8_t *one;
+		uint16_t *two;
+		uint32_t *four;
+		uint64_t *eight;
 		void *x; /* Don't care. */
 	    } t_msgs;
-	    cw_uint32_t i, offset;
+	    uint32_t i, offset;
 
 	    /* Array overflow.  Double the array and copy the messages. */
 	    t_msgs.x = (void *) cw_opaque_alloc(mema_alloc_get(a_mq->mema),
@@ -490,38 +490,38 @@ mq_put(cw_mq_t *a_mq, ...)
 	a_mq->msgs_end = (a_mq->msgs_end + 1) % a_mq->msgs_vec_count;
     }
 
-    retval = FALSE;
+    retval = false;
     RETURN:
     mtx_unlock(&a_mq->lock);
     return retval;
 }
 
-cw_bool_t
+bool
 mq_get_start(cw_mq_t *a_mq)
 {
-    cw_bool_t retval;
+    bool retval;
 
     cw_check_ptr(a_mq);
     cw_dassert(a_mq->magic == CW_MQ_MAGIC);
     mtx_lock(&a_mq->lock);
 
-    if (a_mq->get_stop == FALSE)
+    if (a_mq->get_stop == false)
     {
-	retval = TRUE;
+	retval = true;
 	goto RETURN;
     }
-    a_mq->get_stop = FALSE;
+    a_mq->get_stop = false;
 
-    retval = FALSE;
+    retval = false;
     RETURN:
     mtx_unlock(&a_mq->lock);
     return retval;
 }
 
-cw_bool_t
+bool
 mq_get_stop(cw_mq_t *a_mq)
 {
-    cw_bool_t retval;
+    bool retval;
 
     cw_check_ptr(a_mq);
     cw_dassert(a_mq->magic == CW_MQ_MAGIC);
@@ -529,44 +529,44 @@ mq_get_stop(cw_mq_t *a_mq)
 
     if (a_mq->get_stop)
     {
-	retval = TRUE;
+	retval = true;
 	goto RETURN;
     }
     cnd_broadcast(&a_mq->cond);
-    a_mq->get_stop = TRUE;
+    a_mq->get_stop = true;
 
-    retval = FALSE;
+    retval = false;
     RETURN:
     mtx_unlock(&a_mq->lock);
     return retval;
 }
 
-cw_bool_t
+bool
 mq_put_start(cw_mq_t *a_mq)
 {
-    cw_bool_t retval;
+    bool retval;
 
     cw_check_ptr(a_mq);
     cw_dassert(a_mq->magic == CW_MQ_MAGIC);
     mtx_lock(&a_mq->lock);
 
-    if (a_mq->put_stop == FALSE)
+    if (a_mq->put_stop == false)
     {
-	retval = TRUE;
+	retval = true;
 	goto RETURN;
     }
-    a_mq->put_stop = FALSE;
+    a_mq->put_stop = false;
 
-    retval = FALSE;
+    retval = false;
     RETURN:
     mtx_unlock(&a_mq->lock);
     return retval;
 }
 
-cw_bool_t
+bool
 mq_put_stop(cw_mq_t *a_mq)
 {
-    cw_bool_t retval;
+    bool retval;
 
     cw_check_ptr(a_mq);
     cw_dassert(a_mq->magic == CW_MQ_MAGIC);
@@ -574,12 +574,12 @@ mq_put_stop(cw_mq_t *a_mq)
 
     if (a_mq->put_stop)
     {
-	retval = TRUE;
+	retval = true;
 	goto RETURN;
     }
-    a_mq->put_stop = TRUE;
+    a_mq->put_stop = true;
 
-    retval = FALSE;
+    retval = false;
     RETURN:
     mtx_unlock(&a_mq->lock);
     return retval;

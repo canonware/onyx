@@ -1,3 +1,20 @@
+2003-12-13 : Jason Evans <jasone@canonware.com>
+
+	* Remove the following types, and replace them with C99 equivalents:
+	  + cw_uint8_t	--> uint8_t
+	  + cw_uint8_t	--> uint8_t
+	  + cw_sint8_t	--> int8_t
+	  + cw_uint16_t	--> uint16_t
+	  + cw_sint16_t	--> int16_t
+	  + cw_uint32_t	--> uint32_t
+	  + cw_sint32_t	--> int32_t
+	  + cw_uint64_t	--> uint64_t
+	  + cw_sint64_t	--> int64_t
+	  + cw_fp64_t	--> double
+	  + cw_bool_t	--> bool (requires stdbool.h)
+
+	  Use false and true, rather than FALSE and TRUE.
+
 2003-12-12 : Jason Evans <jasone@canonware.com>
 
 	* lib/libonyx/src/asprintf.c : Remove, since all the operating systems

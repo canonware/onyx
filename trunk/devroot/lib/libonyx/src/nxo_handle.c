@@ -26,7 +26,7 @@ nxo_handle_new(cw_nxo_t *a_nxo, void *a_opaque, cw_nxo_handle_eval_t *a_eval_f,
 
     handle = (cw_nxoe_handle_t *) nxa_malloc(sizeof(cw_nxoe_handle_t));
 
-    nxoe_l_new(&handle->nxoe, NXOT_HANDLE, FALSE);
+    nxoe_l_new(&handle->nxoe, NXOT_HANDLE, false);
     nxo_null_new(&handle->tag);
     handle->opaque = a_opaque;
     handle->eval_f = a_eval_f;

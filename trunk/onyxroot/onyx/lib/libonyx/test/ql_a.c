@@ -20,13 +20,13 @@ typedef struct list_s list_t;
 struct list_s
 {
     ql_elm(list_t) link;
-    cw_uint8_t id;
+    uint8_t id;
 };
 
 int
 main()
 {
-    cw_uint32_t i;
+    uint32_t i;
     list_t entries[NENTRIES], *t;
     ql_head(list_t) head;
 

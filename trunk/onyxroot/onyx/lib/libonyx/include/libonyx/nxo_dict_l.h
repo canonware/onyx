@@ -41,13 +41,13 @@ struct cw_nxoe_dict_s
     cw_mtx_t lock;
 #endif
 
-    /* If TRUE, the data are in the hash.  Otherwise, they are stored in the
+    /* If true, the data are in the hash.  Otherwise, they are stored in the
      * array. */
-    cw_bool_t is_hash:1;
+    bool is_hash:1;
 
     /* Iteration state variable for iterating over the data array.  The value is
      * always less than CW_LIBONYX_DICT_SIZE. */
-    cw_uint32_t array_iter:31;
+    uint32_t array_iter:31;
 
     union
     {
@@ -74,16 +74,16 @@ struct cw_nxoe_dict_s
 };
 
 #ifndef CW_USE_INLINES
-cw_bool_t
-nxoe_l_dict_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter);
+bool
+nxoe_l_dict_delete(cw_nxoe_t *a_nxoe, uint32_t a_iter);
 
 cw_nxoe_t *
-nxoe_l_dict_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
+nxoe_l_dict_ref_iter(cw_nxoe_t *a_nxoe, bool a_reset);
 #endif
 
 #if (defined(CW_USE_INLINES) || defined(CW_NXO_DICT_C_))
-CW_INLINE cw_bool_t
-nxoe_l_dict_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
+CW_INLINE bool
+nxoe_l_dict_delete(cw_nxoe_t *a_nxoe, uint32_t a_iter)
 {
     cw_nxoe_dict_t *dict;
 
@@ -105,7 +105,7 @@ nxoe_l_dict_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
 
 	/* Set the dch non-shrinkable to avoid rehashes, which could be fatal
 	 * if any of the objects this dict points to have already been swept. */
-	dch_shrinkable_set(&dict->data.h.hash, FALSE);
+	dch_shrinkable_set(&dict->data.h.hash, false);
 
 	for (dicth = ql_first(&dict->data.h.list);
 	     dicth != NULL;
@@ -119,18 +119,18 @@ nxoe_l_dict_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
     }
     nxa_free(dict, sizeof(cw_nxoe_dict_t));
 
-    return FALSE;
+    return false;
 }
 
 CW_INLINE cw_nxoe_t *
-nxoe_l_dict_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
+nxoe_l_dict_ref_iter(cw_nxoe_t *a_nxoe, bool a_reset)
 {
     cw_nxoe_t *retval;
     cw_nxoe_dict_t *dict;
     /* Used for remembering the current state of reference iteration.  This
      * function is only called by the garbage collector, so using a static
      * variable works fine. */
-    static cw_uint32_t ref_iter;
+    static uint32_t ref_iter;
     /* If non-NULL, the previous reference iteration returned the key of this
      * dict[ah], so the value of this dict[ah] is the next reference to
      * check. */

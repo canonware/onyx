@@ -23,7 +23,7 @@ typedef enum
 
 /* Global variables. */
 #ifdef CW_DBG
-extern cw_bool_t cw_g_nxa_initialized;
+extern bool cw_g_nxa_initialized;
 #endif
 
 void

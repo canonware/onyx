@@ -35,7 +35,7 @@ cnd_signal(cw_cnd_t *a_cnd);
 void
 cnd_broadcast(cw_cnd_t *a_cnd);
 
-cw_bool_t
+bool
 cnd_timedwait(cw_cnd_t *a_cnd, cw_mtx_t *a_mtx,
 	      const struct timespec *a_timeout);
 

@@ -25,7 +25,7 @@ nxo_mutex_new(cw_nxo_t *a_nxo)
 
     mutex = (cw_nxoe_mutex_t *) nxa_malloc(sizeof(cw_nxoe_mutex_t));
 
-    nxoe_l_new(&mutex->nxoe, NXOT_MUTEX, FALSE);
+    nxoe_l_new(&mutex->nxoe, NXOT_MUTEX, false);
     mtx_new(&mutex->lock);
 
     nxo_no_new(a_nxo);
@@ -53,10 +53,10 @@ nxo_mutex_lock(cw_nxo_t *a_nxo)
     mtx_lock(&mutex->lock);
 }
 
-cw_bool_t
+bool
 nxo_mutex_trylock(cw_nxo_t *a_nxo)
 {
-    cw_bool_t retval;
+    bool retval;
     cw_nxoe_mutex_t *mutex;
 
     cw_check_ptr(a_nxo);

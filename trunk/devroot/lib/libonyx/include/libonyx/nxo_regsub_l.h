@@ -20,8 +20,8 @@ typedef struct
 {
     /* String pointer and length for a plain string.  If str is NULL, then len
      * instead specifies a capturing subpattern. */
-    cw_uint8_t *str;
-    cw_uint32_t len;
+    uint8_t *str;
+    uint32_t len;
 } cw_nxoe_regsub_telm_t;
 
 struct cw_nxoe_regsub_s
@@ -46,31 +46,31 @@ struct cw_nxoe_regsub_s
 
     /* Flag used when determining whether to substitute just one, or all
      * matches. */
-    cw_bool_t global;
+    bool global;
 
     /* Number of capturing subpatterns. */
     int capturecount;
 
     /* Template string and length.  vec elements point into this string. */
-    cw_uint8_t *template;
-    cw_uint32_t tlen;
+    uint8_t *template;
+    uint32_t tlen;
 
     /* Vector of template elements. */
     cw_nxoe_regsub_telm_t *vec;
-    cw_uint32_t vlen;
+    uint32_t vlen;
 };
 
 #ifndef CW_USE_INLINES
-cw_bool_t
-nxoe_l_regsub_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter);
+bool
+nxoe_l_regsub_delete(cw_nxoe_t *a_nxoe, uint32_t a_iter);
 
 cw_nxoe_t *
-nxoe_l_regsub_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
+nxoe_l_regsub_ref_iter(cw_nxoe_t *a_nxoe, bool a_reset);
 #endif
 
 #if (defined(CW_USE_INLINES) || defined(CW_NXO_REGSUB_C_))
-CW_INLINE cw_bool_t
-nxoe_l_regsub_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
+CW_INLINE bool
+nxoe_l_regsub_delete(cw_nxoe_t *a_nxoe, uint32_t a_iter)
 {
     cw_nxoe_regsub_t *regsub;
 
@@ -101,11 +101,11 @@ nxoe_l_regsub_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
 
     nxa_free(regsub, sizeof(cw_nxoe_regsub_t));
 
-    return FALSE;
+    return false;
 }
 
 CW_INLINE cw_nxoe_t *
-nxoe_l_regsub_ref_iter(cw_nxoe_t *a_nxo, cw_bool_t a_reset)
+nxoe_l_regsub_ref_iter(cw_nxoe_t *a_nxo, bool a_reset)
 {
     return NULL;
 }

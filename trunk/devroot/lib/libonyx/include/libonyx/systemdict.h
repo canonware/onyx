@@ -12,7 +12,7 @@
 
 typedef struct
 {
-    cw_uint32_t iter;
+    uint32_t iter;
     void (*pre_unload_hook)(void);
     void *dlhandle;
 } cw_nxmod_t;

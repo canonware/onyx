@@ -20,7 +20,7 @@ thread_entry_func(void *a_arg)
 {
     cw_nx_t nx;
     cw_nxo_t thread;
-    cw_uint32_t i;
+    uint32_t i;
 
     cw_assert(nx_new(&nx, NULL, NULL) == &nx);
     nxo_thread_new(&thread, &nx);
@@ -40,14 +40,14 @@ int
 main(int argc, char **argv, char **envp)
 {
     cw_thd_t *thds[NINTERPS];
-    cw_uint32_t i;
+    uint32_t i;
 
     fprintf(stderr, "Test begin\n");
     libonyx_init(argc, argv, envp);
 
     for (i = 0; i < NINTERPS; i++)
     {
-	thds[i] = thd_new(thread_entry_func, NULL, TRUE);
+	thds[i] = thd_new(thread_entry_func, NULL, true);
     }
 
     for (i = 0; i < NINTERPS; i++)

@@ -10,9 +10,9 @@
  *
  ******************************************************************************/
 
-cw_uint32_t
+uint32_t
 nxo_l_thread_token(cw_nxo_t *a_nxo, cw_nxo_threadp_t *a_threadp,
-		   const cw_uint8_t *a_str, cw_uint32_t a_len);
+		   const uint8_t *a_str, uint32_t a_len);
 
 #ifndef CW_USE_INLINES
 cw_nxo_t *
@@ -23,11 +23,11 @@ cw_nxo_regex_cache_t *
 nxo_l_thread_regex_cache_get(cw_nxo_t *a_nxo);
 #endif
 
-cw_bool_t
-nxoe_l_thread_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter);
+bool
+nxoe_l_thread_delete(cw_nxoe_t *a_nxoe, uint32_t a_iter);
 
 cw_nxoe_t *
-nxoe_l_thread_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
+nxoe_l_thread_ref_iter(cw_nxoe_t *a_nxoe, bool a_reset);
 #endif
 
 #if (defined(CW_USE_INLINES) || defined(CW_NXO_THREAD_C_))
@@ -63,8 +63,8 @@ nxo_l_thread_regex_cache_get(cw_nxo_t *a_nxo)
 }
 #endif
 
-CW_INLINE cw_bool_t
-nxoe_l_thread_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
+CW_INLINE bool
+nxoe_l_thread_delete(cw_nxoe_t *a_nxoe, uint32_t a_iter)
 {
     cw_nxoe_thread_t *thread;
 
@@ -87,18 +87,18 @@ nxoe_l_thread_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
 
     nxa_free(thread, sizeof(cw_nxoe_thread_t));
 
-    return FALSE;
+    return false;
 }
 
 CW_INLINE cw_nxoe_t *
-nxoe_l_thread_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
+nxoe_l_thread_ref_iter(cw_nxoe_t *a_nxoe, bool a_reset)
 {
     cw_nxoe_t *retval;
     cw_nxoe_thread_t *thread;
     /* Used for remembering the current state of reference iteration.  This
      * function is only called by the garbage collector, so using a static
      * variable works fine. */
-    static cw_uint32_t ref_iter;
+    static uint32_t ref_iter;
 
     thread = (cw_nxoe_thread_t *) a_nxoe;
 
@@ -169,7 +169,7 @@ nxoe_l_thread_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 #ifdef CW_REGEX
 	    case (9 + CW_REF_ITER_CSTACK):
 	    {
-		retval = nxo_l_regex_cache_ref_iter(&thread->regex_cache, TRUE);
+		retval = nxo_l_regex_cache_ref_iter(&thread->regex_cache, true);
 		if (retval == NULL)
 		{
 		    /* Avoid looping and hitting the default case. */
@@ -183,7 +183,7 @@ nxoe_l_thread_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 	    {
 #ifdef CW_REGEX
 		retval = nxo_l_regex_cache_ref_iter(&thread->regex_cache,
-						    FALSE);
+						    false);
 #else
 		retval = NULL;
 #endif

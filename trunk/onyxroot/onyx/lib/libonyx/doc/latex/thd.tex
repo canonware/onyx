@@ -43,7 +43,7 @@ interrupted: \cfunc{read}{}, \cfunc{write}{}, \cfunc{sendto}{},
 \label{thd_new}
 \index{thd_new@\cfunc{thd\_new}{}}
 \citem{\cfunc[cw\_thd\_t *]{thd\_new}{void *(*a\_start\_func)(void *), void
-*a\_arg, cw\_bool\_t a\_suspendible}}
+*a\_arg, bool a\_suspendible}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -51,8 +51,8 @@ interrupted: \cfunc{read}{}, \cfunc{write}{}, \cfunc{sendto}{},
 		\item[a\_arg: ] Argument passed to \cfunc{a\_start\_func}{}.
 		\item[a\_suspendible: ]
 		\begin{description}\item[]
-			\item[FALSE: ] Not suspendible.
-			\item[TRUE: ] Suspendible.
+			\item[false: ] Not suspendible.
+			\item[true: ] Suspendible.
 		\end{description}
 		\end{description}
 	\item[Output(s): ]
@@ -221,7 +221,7 @@ interrupted: \cfunc{read}{}, \cfunc{write}{}, \cfunc{sendto}{},
 	\end{capilist}
 \label{thd_trysuspend}
 \index{thd_trysuspend@\cfunc{thd\_trysuspend}{}}
-\citem{\cfunc[cw\_bool\_t]{thd\_trysuspend}{cw\_thd\_t *a\_thd}}
+\citem{\cfunc[bool]{thd\_trysuspend}{cw\_thd\_t *a\_thd}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -232,9 +232,9 @@ interrupted: \cfunc{read}{}, \cfunc{write}{}, \cfunc{sendto}{},
 		\begin{description}\item[]
 		\item[retval: ]
 			\begin{description}\item[]
-			\item[FALSE: ]
+			\item[false: ]
 				Success.
-			\item[TRUE: ]
+			\item[true: ]
 				Failure.
 			\end{description}
 		\end{description}

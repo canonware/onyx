@@ -57,23 +57,23 @@ nxo_p_thread_start(cw_nxo_t *a_nxo);
 static void *
 nxo_p_thread_entry(void *a_arg);
 #endif
-static cw_uint32_t
+static uint32_t
 nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
-		   cw_bool_t a_token, const cw_uint8_t *a_str,
-		   cw_uint32_t a_len);
+		   bool a_token, const uint8_t *a_str,
+		   uint32_t a_len);
 static void
 nxoe_p_thread_tok_str_expand(cw_nxoe_thread_t *a_thread);
 static void
 nxoe_p_thread_syntax_error(cw_nxoe_thread_t *a_thread,
 			   cw_nxo_threadp_t *a_threadp,
-			   cw_uint32_t a_defer_base, cw_uint8_t *a_prefix,
-			   cw_uint8_t *a_suffix, cw_sint32_t a_c);
+			   uint32_t a_defer_base, uint8_t *a_prefix,
+			   uint8_t *a_suffix, int32_t a_c);
 static void
 nxoe_p_thread_reset(cw_nxoe_thread_t *a_thread);
-static cw_bool_t
+static bool
 nxoe_p_thread_integer_accept(cw_nxoe_thread_t *a_thread);
 #ifdef CW_REAL
-static cw_bool_t
+static bool
 nxoe_p_thread_real_accept(cw_nxoe_thread_t *a_thread);
 #endif
 static void
@@ -151,7 +151,7 @@ nxo_threadp_delete(cw_nxo_threadp_t *a_threadp, cw_nxo_t *a_thread)
 	case THREADTS_NAME_START:
 	{
 	    cw_nxoe_thread_t *thread;
-	    cw_uint8_t suffix[2] = "?";
+	    uint8_t suffix[2] = "?";
 
 	    cw_check_ptr(a_thread);
 	    cw_dassert(a_thread->magic == CW_NXO_MAGIC);
@@ -229,7 +229,7 @@ nxo_threadp_delete(cw_nxo_threadp_t *a_threadp, cw_nxo_t *a_thread)
 
 void
 nxo_threadp_origin_get(const cw_nxo_threadp_t *a_threadp,
-		       const cw_uint8_t **r_origin, cw_uint32_t *r_olen)
+		       const uint8_t **r_origin, uint32_t *r_olen)
 {
     cw_check_ptr(a_threadp);
     cw_dassert(a_threadp->magic == CW_NXO_THREADP_MAGIC);
@@ -240,7 +240,7 @@ nxo_threadp_origin_get(const cw_nxo_threadp_t *a_threadp,
 
 void
 nxo_threadp_origin_set(cw_nxo_threadp_t *a_threadp,
-			 const cw_uint8_t *a_origin, cw_uint32_t a_olen)
+			 const uint8_t *a_origin, uint32_t a_olen)
 {
     cw_check_ptr(a_threadp);
     cw_dassert(a_threadp->magic == CW_NXO_THREADP_MAGIC);
@@ -250,8 +250,8 @@ nxo_threadp_origin_set(cw_nxo_threadp_t *a_threadp,
 }
 
 void
-nxo_threadp_position_get(const cw_nxo_threadp_t *a_threadp, cw_uint32_t *r_line,
-			 cw_uint32_t *r_column)
+nxo_threadp_position_get(const cw_nxo_threadp_t *a_threadp, uint32_t *r_line,
+			 uint32_t *r_column)
 {
     cw_check_ptr(a_threadp);
     cw_dassert(a_threadp->magic == CW_NXO_THREADP_MAGIC);
@@ -261,8 +261,8 @@ nxo_threadp_position_get(const cw_nxo_threadp_t *a_threadp, cw_uint32_t *r_line,
 }
 
 void
-nxo_threadp_position_set(cw_nxo_threadp_t *a_threadp, cw_uint32_t a_line,
-			 cw_uint32_t a_column)
+nxo_threadp_position_set(cw_nxo_threadp_t *a_threadp, uint32_t a_line,
+			 uint32_t a_column)
 {
     cw_check_ptr(a_threadp);
     cw_dassert(a_threadp->magic == CW_NXO_THREADP_MAGIC);
@@ -280,7 +280,7 @@ nxo_thread_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx)
 
     thread = (cw_nxoe_thread_t *) nxa_calloc(1, sizeof(cw_nxoe_thread_t));
 
-    nxoe_l_new(&thread->nxoe, NXOT_THREAD, FALSE);
+    nxoe_l_new(&thread->nxoe, NXOT_THREAD, false);
 
     /* Set things to a state that won't cause the GC (or any thread-related
      * operators) to puke. */
@@ -328,14 +328,14 @@ nxo_thread_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx)
     nxa_l_gc_register((cw_nxoe_t *) thread);
 
     /* Finish setting up the internals. */
-    nxo_stack_new(&thread->estack, FALSE, CW_LIBONYX_ESTACK_MINCOUNT);
-    nxo_stack_new(&thread->istack, FALSE, CW_LIBONYX_ISTACK_MINCOUNT);
-    nxo_stack_new(&thread->ostack, FALSE, CW_LIBONYX_OSTACK_MINCOUNT);
-    nxo_stack_new(&thread->dstack, FALSE, CW_LIBONYX_DSTACK_MINCOUNT);
+    nxo_stack_new(&thread->estack, false, CW_LIBONYX_ESTACK_MINCOUNT);
+    nxo_stack_new(&thread->istack, false, CW_LIBONYX_ISTACK_MINCOUNT);
+    nxo_stack_new(&thread->ostack, false, CW_LIBONYX_OSTACK_MINCOUNT);
+    nxo_stack_new(&thread->dstack, false, CW_LIBONYX_DSTACK_MINCOUNT);
 #ifdef CW_OOP
-    nxo_stack_new(&thread->cstack, FALSE, CW_LIBONYX_CSTACK_MINCOUNT);
+    nxo_stack_new(&thread->cstack, false, CW_LIBONYX_CSTACK_MINCOUNT);
 #endif
-    nxo_stack_new(&thread->tstack, FALSE, CW_LIBONYX_TSTACK_MINCOUNT);
+    nxo_stack_new(&thread->tstack, false, CW_LIBONYX_TSTACK_MINCOUNT);
 
     nxo_dup(&thread->stdin_nxo, nx_stdin_get(a_nx));
     nxo_dup(&thread->stdout_nxo, nx_stdout_get(a_nx));
@@ -344,7 +344,7 @@ nxo_thread_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx)
     /* Push threaddict, systemdict, and globaldict, onto the dictionary stack.
      * The embedded onyx initialization code creates userdict. */
     nxo = nxo_stack_push(&thread->dstack);
-    nxo_dict_new(nxo, FALSE, CW_LIBONYX_THREADDICT_HASH);
+    nxo_dict_new(nxo, false, CW_LIBONYX_THREADDICT_HASH);
 
     nxo = nxo_stack_push(&thread->dstack);
     nxo_dup(nxo, nx_systemdict_get(a_nx));
@@ -439,8 +439,8 @@ nxo_p_thread_entry(void *a_arg)
 
     /* Wait to be joined or detated, if not already so. */
     mtx_lock(&thread->lock);
-    thread->done = TRUE;
-    while (thread->detached == FALSE && thread->joined == FALSE)
+    thread->done = true;
+    while (thread->detached == false && thread->joined == false)
     {
 	cnd_wait(&thread->done_cnd, &thread->lock);
     }
@@ -460,7 +460,7 @@ nxo_p_thread_entry(void *a_arg)
 	/* Wake the joiner back up. */
 	cnd_signal(&thread->join_cnd);
 	/* We're done.  The joiner will clean up. */
-	thread->gone = TRUE;
+	thread->gone = true;
 	mtx_unlock(&thread->lock);
     }
     else
@@ -486,12 +486,12 @@ nxo_thread_thread(cw_nxo_t *a_nxo)
     mtx_new(&thread->lock);
     cnd_new(&thread->done_cnd);
     cnd_new(&thread->join_cnd);
-    thread->done = FALSE;
-    thread->gone = FALSE;
-    thread->detached = FALSE;
-    thread->joined = FALSE;
+    thread->done = false;
+    thread->gone = false;
+    thread->detached = false;
+    thread->joined = false;
 
-    thread->thd = thd_new(nxo_p_thread_entry, (void *) thread, TRUE);
+    thread->thd = thd_new(nxo_p_thread_entry, (void *) thread, true);
 }
 
 void
@@ -507,7 +507,7 @@ nxo_thread_detach(cw_nxo_t *a_nxo)
     cw_assert(thread->nxoe.type == NXOT_THREAD);
 
     mtx_lock(&thread->lock);
-    thread->detached = TRUE;
+    thread->detached = true;
     if (thread->done)
     {
 	/* The thread is already done, so wake it back up. */
@@ -529,14 +529,14 @@ nxo_thread_join(cw_nxo_t *a_nxo)
     cw_assert(thread->nxoe.type == NXOT_THREAD);
 
     mtx_lock(&thread->lock);
-    thread->joined = TRUE;
+    thread->joined = true;
     if (thread->done)
     {
 	/* The thread is already done, so wake it back up. */
 	cnd_signal(&thread->done_cnd);
     }
     /* Wait for the thread to totally go away. */
-    while (thread->gone == FALSE)
+    while (thread->gone == false)
     {
 	cnd_wait(&thread->join_cnd, &thread->lock);
     }
@@ -567,10 +567,10 @@ nxo_thread_state(const cw_nxo_t *a_nxo)
     return thread->state;
 }
 
-cw_bool_t
+bool
 nxo_thread_deferred(cw_nxo_t *a_nxo)
 {
-    cw_bool_t retval;
+    bool retval;
     cw_nxoe_thread_t *thread;
 
     cw_check_ptr(a_nxo);
@@ -582,11 +582,11 @@ nxo_thread_deferred(cw_nxo_t *a_nxo)
 
     if (thread->defer_count != 0)
     {
-	retval = TRUE;
+	retval = true;
     }
     else
     {
-	retval = FALSE;
+	retval = false;
     }
 
     return retval;
@@ -614,7 +614,7 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
     cw_nxoe_thread_t *thread;
     cw_nxo_t *nxo, *tnxo, *inxo;
 #ifdef CW_DBG
-    cw_uint32_t tdepth;
+    uint32_t tdepth;
 #endif
 
     cw_check_ptr(a_nxo);
@@ -662,9 +662,9 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 	    {
 		case NXOT_ARRAY:
 		{
-		    cw_uint32_t i, len, tailopt;
+		    uint32_t i, len, tailopt;
 #ifdef CW_THREADS
-		    cw_bool_t alocking;
+		    bool alocking;
 #endif
 		    cw_nxo_t *el;
 		    cw_nxoa_t attr;
@@ -781,8 +781,8 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 			    case NXOT_FILE:
 			    {
 				cw_nxo_threadp_t threadp;
-				cw_sint32_t nread;
-				cw_uint8_t buffer[CW_LIBONYX_FILE_EVAL_READ_SIZE];
+				int32_t nread;
+				uint8_t buffer[CW_LIBONYX_FILE_EVAL_READ_SIZE];
 
 #ifdef CW_THREADS
 				if (alocking)
@@ -792,8 +792,8 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 #endif
 				nxo_threadp_new(&threadp);
 				{
-				    const cw_uint8_t *origin;
-				    cw_uint32_t olen;
+				    const uint8_t *origin;
+				    uint32_t olen;
 
 				    nxo_file_origin_get(el, &origin, &olen);
 				    nxo_threadp_origin_set(&threadp, origin,
@@ -1023,13 +1023,13 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 		case NXOT_FILE:
 		{
 		    cw_nxo_threadp_t threadp;
-		    cw_sint32_t nread;
-		    cw_uint8_t buffer[CW_LIBONYX_FILE_EVAL_READ_SIZE];
+		    int32_t nread;
+		    uint8_t buffer[CW_LIBONYX_FILE_EVAL_READ_SIZE];
 
 		    nxo_threadp_new(&threadp);
 		    {
-			const cw_uint8_t *origin;
-			cw_uint32_t olen;
+			const uint8_t *origin;
+			uint32_t olen;
 
 			nxo_file_origin_get(nxo, &origin, &olen);
 			nxo_threadp_origin_set(&threadp, origin, olen);
@@ -1063,7 +1063,7 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 #endif
 		case NXOT_NAME:
 		{
-		    cw_uint32_t tailopt;
+		    uint32_t tailopt;
 		    cw_nxo_t *name, *value;
 		    cw_nxn_t error;
 
@@ -1169,7 +1169,7 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 	case NXOA_CALLABLE:
 	{
 	    cw_nxo_t *value, *instance, *class_, *cnxo;
-	    cw_uint32_t cdepth;
+	    uint32_t cdepth;
 	    cw_nxn_t error;
 
 	    /* Create space for value. */
@@ -1350,7 +1350,7 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 
 void
 nxo_thread_interpret(cw_nxo_t *a_nxo, cw_nxo_threadp_t *a_threadp, const
-		     cw_uint8_t *a_str, cw_uint32_t a_len)
+		     uint8_t *a_str, uint32_t a_len)
 {
     cw_nxoe_thread_t *thread;
 
@@ -1361,14 +1361,14 @@ nxo_thread_interpret(cw_nxo_t *a_nxo, cw_nxo_threadp_t *a_threadp, const
     cw_dassert(thread->nxoe.magic == CW_NXOE_MAGIC);
     cw_assert(thread->nxoe.type == NXOT_THREAD);
 
-    nxoe_p_thread_feed(thread, a_threadp, FALSE, a_str, a_len);
+    nxoe_p_thread_feed(thread, a_threadp, false, a_str, a_len);
 }
 
 void
 nxo_thread_flush(cw_nxo_t *a_nxo, cw_nxo_threadp_t *a_threadp)
 {
     cw_nxoe_thread_t *thread;
-    static const cw_uint8_t str[] = "\n";
+    static const uint8_t str[] = "\n";
 
     cw_check_ptr(a_nxo);
     cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
@@ -1377,7 +1377,7 @@ nxo_thread_flush(cw_nxo_t *a_nxo, cw_nxo_threadp_t *a_threadp)
     cw_dassert(thread->nxoe.magic == CW_NXOE_MAGIC);
     cw_assert(thread->nxoe.type == NXOT_THREAD);
 
-    nxoe_p_thread_feed(thread, a_threadp, FALSE, str, sizeof(str) - 1);
+    nxoe_p_thread_feed(thread, a_threadp, false, str, sizeof(str) - 1);
 }
 
 void
@@ -1387,11 +1387,11 @@ nxo_thread_nerror(cw_nxo_t *a_nxo, cw_nxn_t a_nxn)
 }
 
 void
-nxo_thread_serror(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len)
+nxo_thread_serror(cw_nxo_t *a_nxo, const uint8_t *a_str, uint32_t a_len)
 {
     cw_nxoe_thread_t *thread;
     cw_nxo_t *errorname;
-    cw_uint32_t defer_count;
+    uint32_t defer_count;
 
     cw_check_ptr(a_nxo);
     cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
@@ -1402,7 +1402,7 @@ nxo_thread_serror(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len)
 
     /* Convert a_str to a name object on ostack. */
     errorname = nxo_stack_push(&thread->ostack);
-    nxo_name_new(errorname, a_str, a_len, FALSE);
+    nxo_name_new(errorname, a_str, a_len, false);
 
     /* Shut off deferral temporarily.  It is possible for this C stack frame to
      * never be returned to, due to an exception (stop, quit, exit), in which
@@ -1418,13 +1418,13 @@ nxo_thread_serror(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len)
     thread->defer_count = defer_count;
 }
 
-cw_bool_t
+bool
 nxo_thread_dstack_search(cw_nxo_t *a_nxo, cw_nxo_t *a_key, cw_nxo_t *r_value)
 {
-    cw_bool_t retval;
+    bool retval;
     cw_nxoe_thread_t *thread;
     cw_nxo_t *dict;
-    cw_uint32_t i, depth;
+    uint32_t i, depth;
 
     cw_check_ptr(a_nxo);
     cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
@@ -1440,25 +1440,25 @@ nxo_thread_dstack_search(cw_nxo_t *a_nxo, cw_nxo_t *a_key, cw_nxo_t *r_value)
 	 i++)
     {
 	dict = nxo_stack_nget(&thread->dstack, i);
-	if (nxo_dict_lookup(dict, a_key, r_value) == FALSE)
+	if (nxo_dict_lookup(dict, a_key, r_value) == false)
 	{
 	    /* Found. */
-	    retval = FALSE;
+	    retval = false;
 	    goto RETURN;
 	}
     }
 
-    retval = TRUE;
+    retval = true;
     RETURN:
     return retval;
 }
 
 #ifdef CW_OOP
-cw_bool_t
+bool
 nxo_thread_class_hier_search(cw_nxo_t *a_nxo, cw_nxo_t *a_class,
 			     cw_nxo_t *a_key, cw_nxo_t *r_value)
 {
-    cw_bool_t retval;
+    bool retval;
     cw_nxoe_thread_t *thread;
     cw_nxo_t *class_, *methods;
 
@@ -1479,22 +1479,22 @@ nxo_thread_class_hier_search(cw_nxo_t *a_nxo, cw_nxo_t *a_class,
     {
 	methods = nxo_class_methods_get(class_);
 	if (nxo_type_get(methods) == NXOT_DICT
-	    && nxo_dict_lookup(methods, a_key, r_value) == FALSE)
+	    && nxo_dict_lookup(methods, a_key, r_value) == false)
 	{
 	    /* Found. */
-	    retval = FALSE;
+	    retval = false;
 	    goto RETURN;
 	}
     }
 
-    retval = TRUE;
+    retval = true;
     RETURN:
     return retval;
 }
 #endif
 
 #ifdef CW_THREADS
-cw_bool_t
+bool
 nxo_thread_currentlocking(const cw_nxo_t *a_nxo)
 {
     cw_nxoe_thread_t *thread;
@@ -1510,7 +1510,7 @@ nxo_thread_currentlocking(const cw_nxo_t *a_nxo)
 }
 
 void
-nxo_thread_setlocking(cw_nxo_t *a_nxo, cw_bool_t a_locking)
+nxo_thread_setlocking(cw_nxo_t *a_nxo, bool a_locking)
 {
     cw_nxoe_thread_t *thread;
 
@@ -1542,7 +1542,7 @@ nxo_thread_maxestack_set(cw_nxo_t *a_nxo, cw_nxoi_t a_maxestack)
 }
 
 void
-nxo_thread_tailopt_set(cw_nxo_t *a_nxo, cw_bool_t a_tailopt)
+nxo_thread_tailopt_set(cw_nxo_t *a_nxo, bool a_tailopt)
 {
     cw_nxoe_thread_t *thread;
 
@@ -1617,9 +1617,9 @@ nxo_thread_stderr_set(cw_nxo_t *a_nxo, cw_nxo_t *a_stderr)
     nxo_dup(&thread->stderr_nxo, a_stderr);
 }
 
-cw_uint32_t
+uint32_t
 nxo_l_thread_token(cw_nxo_t *a_nxo, cw_nxo_threadp_t *a_threadp, const
-		   cw_uint8_t *a_str, cw_uint32_t a_len)
+		   uint8_t *a_str, uint32_t a_len)
 {
     cw_nxoe_thread_t *thread;
 
@@ -1630,18 +1630,18 @@ nxo_l_thread_token(cw_nxo_t *a_nxo, cw_nxo_threadp_t *a_threadp, const
     cw_dassert(thread->nxoe.magic == CW_NXOE_MAGIC);
     cw_assert(thread->nxoe.type == NXOT_THREAD);
 
-    return nxoe_p_thread_feed(thread, a_threadp, TRUE, a_str, a_len);
+    return nxoe_p_thread_feed(thread, a_threadp, true, a_str, a_len);
 }
 
-static cw_uint32_t
+static uint32_t
 nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
-		   cw_bool_t a_token, const cw_uint8_t *a_str,
-		   cw_uint32_t a_len)
+		   bool a_token, const uint8_t *a_str,
+		   uint32_t a_len)
 {
-    cw_uint32_t retval, i, newline, defer_base;
-    cw_uint8_t c;
+    uint32_t retval, i, newline, defer_base;
+    uint8_t c;
     cw_nxo_t *nxo;
-    cw_bool_t token;
+    bool token;
 
     if (a_token)
     {
@@ -1651,7 +1651,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 	a_thread->defer_count++;
 	/* The value of token is only used when a_token is true, so only bother
 	 * to initialize it in this case. */
-	token = FALSE;
+	token = false;
     }
     else
     {
@@ -1685,8 +1685,8 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 
 		if (a_token)
 		{
-		    /* token is TRUE if a token has been accepted.  We look for
-		     * the situation where token is TRUE and
+		    /* token is true if a token has been accepted.  We look for
+		     * the situation where token is true and
 		     * a_thread->defer_count is only 1 (artificially raised).
 		     * If these conditions are met, then we've managed to scan
 		     * an entire token, as defined by the token operator. */
@@ -1719,14 +1719,14 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 		    case '<': case '>': case '(': case ')': case '[': case ']':
 		    {
 			CW_NXO_THREAD_PUTC(c);
-			token = TRUE;
+			token = true;
 			a_thread->m.m.action = ACTION_EXECUTE;
 			nxoe_p_thread_name_accept(a_thread);
 			break;
 		    }
 		    case '{':
 		    {
-			cw_uint32_t line, column;
+			uint32_t line, column;
 
 			a_thread->defer_count++;
 			nxo = nxo_stack_push(&a_thread->ostack);
@@ -1739,7 +1739,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 		    {
 			if (a_thread->defer_count > defer_base)
 			{
-			    token = TRUE;
+			    token = true;
 			    a_thread->defer_count--;
 			    nxoe_p_thread_procedure_accept(a_thread, a_threadp);
 			}
@@ -1811,12 +1811,12 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 		    case '+':
 		    {
 			a_thread->state = THREADTS_INTEGER;
-			a_thread->m.n.mant_neg = FALSE;
+			a_thread->m.n.mant_neg = false;
 			a_thread->m.n.radix_base = 10;
-			a_thread->m.n.whole = FALSE;
+			a_thread->m.n.whole = false;
 #ifdef CW_REAL
-			a_thread->m.n.frac = FALSE;
-			a_thread->m.n.exp = FALSE;
+			a_thread->m.n.frac = false;
+			a_thread->m.n.exp = false;
 #endif
 			CW_NXO_THREAD_PUTC(c);
 			break;
@@ -1824,12 +1824,12 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 		    case '-':
 		    {
 			a_thread->state = THREADTS_INTEGER;
-			a_thread->m.n.mant_neg = TRUE;
+			a_thread->m.n.mant_neg = true;
 			a_thread->m.n.radix_base = 10;
-			a_thread->m.n.whole = FALSE;
+			a_thread->m.n.whole = false;
 #ifdef CW_REAL
-			a_thread->m.n.frac = FALSE;
-			a_thread->m.n.exp = FALSE;
+			a_thread->m.n.frac = false;
+			a_thread->m.n.exp = false;
 #endif
 			CW_NXO_THREAD_PUTC(c);
 			break;
@@ -1838,11 +1838,11 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 		    case '.':
 		    {
 			a_thread->state = THREADTS_REAL_FRAC;
-			a_thread->m.n.mant_neg = FALSE;
+			a_thread->m.n.mant_neg = false;
 			a_thread->m.n.radix_base = 10;
-			a_thread->m.n.whole = FALSE;
-			a_thread->m.n.frac = FALSE;
-			a_thread->m.n.exp = FALSE;
+			a_thread->m.n.whole = false;
+			a_thread->m.n.frac = false;
+			a_thread->m.n.exp = false;
 			break;
 		    }
 #endif
@@ -1850,13 +1850,13 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 		    case '6': case '7': case '8': case '9':
 		    {
 			a_thread->state = THREADTS_INTEGER;
-			a_thread->m.n.mant_neg = FALSE;
+			a_thread->m.n.mant_neg = false;
 			a_thread->m.n.radix_base = 10;
-			a_thread->m.n.whole = TRUE;
+			a_thread->m.n.whole = true;
 			a_thread->m.n.whole_off = 0;
 #ifdef CW_REAL
-			a_thread->m.n.frac = FALSE;
-			a_thread->m.n.exp = FALSE;
+			a_thread->m.n.frac = false;
+			a_thread->m.n.exp = false;
 #endif
 			CW_NXO_THREAD_PUTC(c);
 			break;
@@ -1900,16 +1900,16 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 	    }
 	    case THREADTS_INTEGER:
 	    {
-		cw_bool_t restart = FALSE;
+		bool restart = false;
 
 		switch (c)
 		{
 		    case '0': case '1': case '2': case '3': case '4': case '5':
 		    case '6': case '7': case '8': case '9':
 		    {
-			if (a_thread->m.n.whole == FALSE)
+			if (a_thread->m.n.whole == false)
 			{
-			    a_thread->m.n.whole = TRUE;
+			    a_thread->m.n.whole = true;
 			    a_thread->m.n.whole_off = a_thread->index;
 			}
 			CW_NXO_THREAD_PUTC(c);
@@ -1917,7 +1917,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 		    }
 		    case '@':
 		    {
-			cw_uint32_t digit, ndigits;
+			uint32_t digit, ndigits;
 
 			/* Convert the string to a base (interpreted as base
 			 * 10). */
@@ -1976,7 +1976,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			}
 			else
 			{
-			    a_thread->m.n.whole = FALSE;
+			    a_thread->m.n.whole = false;
 			    a_thread->state = THREADTS_INTEGER_RADIX;
 			}
 			CW_NXO_THREAD_PUTC(c);
@@ -1997,8 +1997,8 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 		    case 'e': case 'E':
 		    {
 			a_thread->state = THREADTS_REAL_EXP;
-			a_thread->m.n.exp_sign = FALSE;
-			a_thread->m.n.exp_neg = FALSE;
+			a_thread->m.n.exp_sign = false;
+			a_thread->m.n.exp_neg = false;
 			if (a_thread->m.n.whole)
 			{
 			    a_thread->m.n.whole_len = a_thread->index
@@ -2010,7 +2010,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 #endif
 		    case '\n':
 		    {
-			restart = TRUE; /* Inverted below. */
+			restart = true; /* Inverted below. */
 			CW_NXO_THREAD_NEWLINE();
 			/* Fall through. */
 		    }
@@ -2039,7 +2039,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			    a_thread->m.m.action = ACTION_EXECUTE;
 			    nxoe_p_thread_name_accept(a_thread);
 			}
-			token = TRUE;
+			token = true;
 			if (restart)
 			{
 			    goto RESTART;
@@ -2059,7 +2059,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 	    }
 	    case THREADTS_INTEGER_RADIX:
 	    {
-		cw_bool_t restart = FALSE;
+		bool restart = false;
 
 		switch (c)
 		{
@@ -2069,13 +2069,13 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 		    case 's': case 't': case 'u': case 'v': case 'w': case 'x':
 		    case 'y': case 'z':
 		    {
-			if (a_thread->m.n.whole == FALSE)
+			if (a_thread->m.n.whole == false)
 			{
-			    a_thread->m.n.whole = TRUE;
+			    a_thread->m.n.whole = true;
 			    a_thread->m.n.whole_off = a_thread->index;
 			}
 			if (a_thread->m.n.radix_base
-			    <= (10 + ((cw_uint32_t) (c - 'a'))))
+			    <= (10 + ((uint32_t) (c - 'a'))))
 			{
 			    /* Too big for this base. */
 			    a_thread->state = THREADTS_NAME;
@@ -2090,13 +2090,13 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 		    case 'S': case 'T': case 'U': case 'V': case 'W': case 'X':
 		    case 'Y': case 'Z':
 		    {
-			if (a_thread->m.n.whole == FALSE)
+			if (a_thread->m.n.whole == false)
 			{
-			    a_thread->m.n.whole = TRUE;
+			    a_thread->m.n.whole = true;
 			    a_thread->m.n.whole_off = a_thread->index;
 			}
 			if (a_thread->m.n.radix_base
-			    <= (10 + ((cw_uint32_t) (c - 'A'))))
+			    <= (10 + ((uint32_t) (c - 'A'))))
 			{
 			    /* Too big for this base. */
 			    a_thread->state = THREADTS_NAME;
@@ -2108,13 +2108,13 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 		    case '0': case '1': case '2': case '3': case '4': case '5':
 		    case '6': case '7': case '8': case '9':
 		    {
-			if (a_thread->m.n.whole == FALSE)
+			if (a_thread->m.n.whole == false)
 			{
-			    a_thread->m.n.whole = TRUE;
+			    a_thread->m.n.whole = true;
 			    a_thread->m.n.whole_off = a_thread->index;
 			}
 			if (a_thread->m.n.radix_base
-			    <= ((cw_uint32_t) (c - '0')))
+			    <= ((uint32_t) (c - '0')))
 			{
 			    /* Too big for this base. */
 			    a_thread->state = THREADTS_NAME;
@@ -2125,7 +2125,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 		    }
 		    case '\n':
 		    {
-			restart = TRUE; /* Inverted below. */
+			restart = true; /* Inverted below. */
 			CW_NXO_THREAD_NEWLINE();
 			/* Fall through. */
 		    }
@@ -2148,14 +2148,14 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			    a_thread->m.n.whole_len = a_thread->index
 				- a_thread->m.n.whole_off;
 			}
-			if (a_thread->m.n.whole == FALSE
+			if (a_thread->m.n.whole == false
 			    || nxoe_p_thread_integer_accept(a_thread))
 			{
 			    /* Conversion error.  Accept as a name. */
 			    a_thread->m.m.action = ACTION_EXECUTE;
 			    nxoe_p_thread_name_accept(a_thread);
 			}
-			token = TRUE;
+			token = true;
 			if (restart)
 			{
 			    goto RESTART;
@@ -2176,16 +2176,16 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 #ifdef CW_REAL
 	    case THREADTS_REAL_FRAC:
 	    {
-		cw_bool_t restart = FALSE;
+		bool restart = false;
 
 		switch (c)
 		{
 		    case '0': case '1': case '2': case '3': case '4': case '5':
 		    case '6': case '7': case '8': case '9':
 		    {
-			if (a_thread->m.n.frac == FALSE)
+			if (a_thread->m.n.frac == false)
 			{
-			    a_thread->m.n.frac = TRUE;
+			    a_thread->m.n.frac = true;
 			    a_thread->m.n.frac_off = a_thread->index;
 			}
 			CW_NXO_THREAD_PUTC(c);
@@ -2194,8 +2194,8 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 		    case 'e': case 'E':
 		    {
 			a_thread->state = THREADTS_REAL_EXP;
-			a_thread->m.n.exp_sign = FALSE;
-			a_thread->m.n.exp_neg = FALSE;
+			a_thread->m.n.exp_sign = false;
+			a_thread->m.n.exp_neg = false;
 			if (a_thread->m.n.frac)
 			{
 			    a_thread->m.n.frac_len = a_thread->index
@@ -2206,7 +2206,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 		    }
 		    case '\n':
 		    {
-			restart = TRUE; /* Inverted below. */
+			restart = true; /* Inverted below. */
 			CW_NXO_THREAD_NEWLINE();
 			/* Fall through. */
 		    }
@@ -2235,7 +2235,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			    a_thread->m.m.action = ACTION_EXECUTE;
 			    nxoe_p_thread_name_accept(a_thread);
 			}
-			token = TRUE;
+			token = true;
 			if (restart)
 			{
 			    goto RESTART;
@@ -2255,16 +2255,16 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 	    }
 	    case THREADTS_REAL_EXP:
 	    {
-		cw_bool_t restart = FALSE;
+		bool restart = false;
 
 		switch (c)
 		{
 		    case '0': case '1': case '2': case '3': case '4': case '5':
 		    case '6': case '7': case '8': case '9':
 		    {
-			if (a_thread->m.n.exp == FALSE)
+			if (a_thread->m.n.exp == false)
 			{
-			    a_thread->m.n.exp = TRUE;
+			    a_thread->m.n.exp = true;
 			    a_thread->m.n.exp_off = a_thread->index;
 			}
 			CW_NXO_THREAD_PUTC(c);
@@ -2272,10 +2272,10 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 		    }
 		    case '+':
 		    {
-			if (a_thread->m.n.exp_sign == FALSE
-			    && a_thread->m.n.exp == FALSE)
+			if (a_thread->m.n.exp_sign == false
+			    && a_thread->m.n.exp == false)
 			{
-			    a_thread->m.n.exp_sign = TRUE;
+			    a_thread->m.n.exp_sign = true;
 			}
 			else
 			{
@@ -2288,11 +2288,11 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 		    }
 		    case '-':
 		    {
-			if (a_thread->m.n.exp_sign == FALSE
-			    && a_thread->m.n.exp == FALSE)
+			if (a_thread->m.n.exp_sign == false
+			    && a_thread->m.n.exp == false)
 			{
-			    a_thread->m.n.exp_sign = TRUE;
-			    a_thread->m.n.exp_neg = TRUE;
+			    a_thread->m.n.exp_sign = true;
+			    a_thread->m.n.exp_neg = true;
 			}
 			else
 			{
@@ -2305,7 +2305,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 		    }
 		    case '\n':
 		    {
-			restart = TRUE; /* Inverted below. */
+			restart = true; /* Inverted below. */
 			CW_NXO_THREAD_NEWLINE();
 			/* Fall through. */
 		    }
@@ -2328,14 +2328,14 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			    a_thread->m.n.exp_len = a_thread->index
 				- a_thread->m.n.exp_off;
 			}
-			if (a_thread->m.n.exp == FALSE
+			if (a_thread->m.n.exp == false
 			    || nxoe_p_thread_real_accept(a_thread))
 			{
 			    /* Conversion error.  Accept as a name. */
 			    a_thread->m.m.action = ACTION_EXECUTE;
 			    nxoe_p_thread_name_accept(a_thread);
 			}
-			token = TRUE;
+			token = true;
 			if (restart)
 			{
 			    goto RESTART;
@@ -2377,13 +2377,13 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			a_thread->m.s.q_depth--;
 			if (a_thread->m.s.q_depth == 0)
 			{
-			    token = TRUE;
+			    token = true;
 			    nxo = nxo_stack_push(&a_thread->ostack);
 #ifdef CW_THREADS
 			    nxo_string_new(nxo, a_thread->locking,
 					   a_thread->index);
 #else
-			    nxo_string_new(nxo, FALSE, a_thread->index);
+			    nxo_string_new(nxo, false, a_thread->index);
 #endif
 			    nxo_string_set(nxo, 0, a_thread->tok_str,
 					   a_thread->index);
@@ -2616,7 +2616,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 		    case 'c': case 'd': case 'e': case 'f': case 'A': case 'B':
 		    case 'C': case 'D': case 'E': case 'F':
 		    {
-			cw_uint8_t val;
+			uint8_t val;
 
 			a_thread->state = THREADTS_STRING;
 			switch (a_thread->m.s.hex_val)
@@ -2674,7 +2674,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 		    }
 		    default:
 		    {
-			cw_uint8_t suffix[] = "\\x?";
+			uint8_t suffix[] = "\\x?";
 
 			suffix[2] = a_thread->m.s.hex_val;
 			nxoe_p_thread_syntax_error(a_thread, a_threadp,
@@ -2706,7 +2706,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 #endif
 		    case '$': case '~': case '#':
 		    {
-			cw_uint8_t suffix[2] = "?";
+			uint8_t suffix[2] = "?";
 
 			switch (a_thread->m.m.action)
 			{
@@ -2772,13 +2772,13 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 	    }
 	    case THREADTS_NAME:
 	    {
-		cw_bool_t restart = FALSE;
+		bool restart = false;
 
 		switch (c)
 		{
 		    case '\n':
 		    {
-			restart = TRUE;	/* Inverted below. */
+			restart = true;	/* Inverted below. */
 			CW_NXO_THREAD_NEWLINE();
 			/* Fall through. */
 		    }
@@ -2799,12 +2799,12 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			/* End of name. */
 			if (a_thread->index > 0)
 			{
-			    token = TRUE;
+			    token = true;
 			    nxoe_p_thread_name_accept(a_thread);
 			}
 			else
 			{
-			    cw_uint8_t suffix[2] = "?";
+			    uint8_t suffix[2] = "?";
 
 			    switch (a_thread->m.m.action)
 			    {
@@ -2895,16 +2895,16 @@ nxoe_p_thread_tok_str_expand(cw_nxoe_thread_t *a_thread)
     if (a_thread->index == CW_NXO_THREAD_BUFFER_SIZE)
     {
 	/* First overflow, initial expansion needed. */
-	a_thread->tok_str = (cw_uint8_t *) nxa_malloc(a_thread->index * 2);
+	a_thread->tok_str = (uint8_t *) nxa_malloc(a_thread->index * 2);
 	a_thread->buffer_len = a_thread->index * 2;
 	memcpy(a_thread->tok_str, a_thread->buffer, a_thread->index);
     }
     else if (a_thread->index == a_thread->buffer_len)
     {
-	cw_uint8_t *t_str;
+	uint8_t *t_str;
 
 	/* Overflowed, and additional expansion needed. */
-	t_str = (cw_uint8_t *) nxa_malloc(a_thread->index * 2);
+	t_str = (uint8_t *) nxa_malloc(a_thread->index * 2);
 	a_thread->buffer_len = a_thread->index * 2;
 	memcpy(t_str, a_thread->tok_str, a_thread->index);
 	nxa_free(a_thread->tok_str, a_thread->index);
@@ -2922,12 +2922,12 @@ nxoe_p_thread_tok_str_expand(cw_nxoe_thread_t *a_thread)
 static void
 nxoe_p_thread_syntax_error(cw_nxoe_thread_t *a_thread,
 			   cw_nxo_threadp_t *a_threadp,
-			   cw_uint32_t a_defer_base, cw_uint8_t *a_prefix,
-			   cw_uint8_t *a_suffix, cw_sint32_t a_c)
+			   uint32_t a_defer_base, uint8_t *a_prefix,
+			   uint8_t *a_suffix, int32_t a_c)
 {
     cw_nxo_t *nxo;
-    const cw_uint8_t *origin;
-    cw_uint32_t defer_count, olen, line, column;
+    const uint8_t *origin;
+    uint32_t defer_count, olen, line, column;
 
     nxo = nxo_stack_push(&a_thread->ostack);
 
@@ -2936,7 +2936,7 @@ nxoe_p_thread_syntax_error(cw_nxoe_thread_t *a_thread,
 		   strlen((char *) a_prefix) + a_thread->index
 		   + strlen((char *) a_suffix) + ((a_c >= 0) ? 1 : 0));
 #else
-    nxo_string_new(nxo, FALSE,
+    nxo_string_new(nxo, false,
 		   strlen((char *) a_prefix) + a_thread->index
 		   + strlen((char *) a_suffix) + ((a_c >= 0) ? 1 : 0));
 #endif
@@ -2956,7 +2956,7 @@ nxoe_p_thread_syntax_error(cw_nxoe_thread_t *a_thread,
     /* Current character, if any. */
     if (a_c >= 0)
     {
-	cw_uint8_t c = (cw_uint8_t) a_c;
+	uint8_t c = (uint8_t) a_c;
 
 	nxo_string_set(nxo, strlen((char *) a_prefix) + a_thread->index +
 		       strlen((char *) a_suffix), &c, 1);
@@ -2976,7 +2976,7 @@ nxoe_p_thread_syntax_error(cw_nxoe_thread_t *a_thread,
 #ifdef CW_THREADS
 	nxo_string_new(nxo, a_thread->locking, olen);
 #else
-	nxo_string_new(nxo, FALSE, olen);
+	nxo_string_new(nxo, false, olen);
 #endif
 	nxo_string_set(nxo, 0, origin, olen);
     }
@@ -3030,18 +3030,18 @@ nxoe_p_thread_reset(cw_nxoe_thread_t *a_thread)
     a_thread->index = 0;
 }
 
-static cw_bool_t
+static bool
 nxoe_p_thread_integer_accept(cw_nxoe_thread_t *a_thread)
 {
-    cw_bool_t retval;
+    bool retval;
 
     if (a_thread->m.n.whole)
     {
 	cw_nxo_t *nxo;
 	cw_nxoi_t val;
-	cw_uint32_t i;
-	cw_uint64_t threshold, maxlast, sum, digit;
-	cw_uint8_t c;
+	uint32_t i;
+	uint64_t threshold, maxlast, sum, digit;
+	uint8_t c;
 
 	/* Determine threshold value at which overflow is a risk.  If the
 	 * threshold is exceeded, then overflow occurred.  If the threshold
@@ -3071,7 +3071,7 @@ nxoe_p_thread_integer_accept(cw_nxoe_thread_t *a_thread)
 		case 's': case 't': case 'u': case 'v': case 'w': case 'x':
 		case 'y': case 'z':
 		{
-		    digit = 10 + ((cw_uint64_t) (c - 'a'));
+		    digit = 10 + ((uint64_t) (c - 'a'));
 		    break;
 		}
 		case 'A': case 'B': case 'C': case 'D': case 'E': case 'F':
@@ -3080,13 +3080,13 @@ nxoe_p_thread_integer_accept(cw_nxoe_thread_t *a_thread)
 		case 'S': case 'T': case 'U': case 'V': case 'W': case 'X':
 		case 'Y': case 'Z':
 		{
-		    digit = 10 + ((cw_uint64_t) (c - 'A'));
+		    digit = 10 + ((uint64_t) (c - 'A'));
 		    break;
 		}
 		case '0': case '1': case '2': case '3': case '4': case '5':
 		case '6': case '7': case '8': case '9':
 		{
-		    digit = (cw_uint64_t) (c - '0');
+		    digit = (uint64_t) (c - '0');
 		    /* Fall through. */
 		}
 		default:
@@ -3098,7 +3098,7 @@ nxoe_p_thread_integer_accept(cw_nxoe_thread_t *a_thread)
 	    if ((sum > threshold) || (sum == threshold && digit > maxlast))
 	    {
 		/* Overflow. */
-		retval = TRUE;
+		retval = true;
 		goto RETURN;
 	    }
 
@@ -3123,20 +3123,20 @@ nxoe_p_thread_integer_accept(cw_nxoe_thread_t *a_thread)
     else
     {
 	/* No number specified. */
-	retval = TRUE;
+	retval = true;
 	goto RETURN;
     }
 
-    retval = FALSE;
+    retval = false;
     RETURN:
     return retval;
 }
 
 #ifdef CW_REAL
-static cw_bool_t
+static bool
 nxoe_p_thread_real_accept(cw_nxoe_thread_t *a_thread)
 {
-    cw_bool_t retval;
+    bool retval;
     cw_nxo_t *nxo;
     cw_nxor_t val;
 
@@ -3152,7 +3152,7 @@ nxoe_p_thread_real_accept(cw_nxoe_thread_t *a_thread)
     val = strtod(a_thread->tok_str, NULL);
     if (errno == ERANGE && (val == HUGE_VAL || val == -HUGE_VAL))
     {
-	retval = TRUE;
+	retval = true;
 	goto RETURN;
     }
 
@@ -3161,7 +3161,7 @@ nxoe_p_thread_real_accept(cw_nxoe_thread_t *a_thread)
     nxo_real_new(nxo, val);
     nxoe_p_thread_reset(a_thread);
 
-    retval = FALSE;
+    retval = false;
     RETURN:
     return retval;
 }
@@ -3172,7 +3172,7 @@ nxoe_p_thread_procedure_accept(cw_nxoe_thread_t *a_thread,
 			       cw_nxo_threadp_t *a_threadp)
 {
     cw_nxo_t *tnxo, *nxo;
-    cw_uint32_t nelements, i, depth;
+    uint32_t nelements, i, depth;
 
     /* Find the pmark. */
     for (i = 0, depth = nxo_stack_count(&a_thread->ostack), nxo = NULL;
@@ -3196,11 +3196,11 @@ nxoe_p_thread_procedure_accept(cw_nxoe_thread_t *a_thread,
 #ifdef CW_THREADS
     nxo_array_new(tnxo, a_thread->locking, nelements);
 #else
-    nxo_array_new(tnxo, FALSE, nelements);
+    nxo_array_new(tnxo, false, nelements);
 #endif
     {
-	const cw_uint8_t *origin;
-	cw_uint32_t olen;
+	const uint8_t *origin;
+	uint32_t olen;
 
 	/* Set source origin information. */
 	nxo_threadp_origin_get(a_threadp, &origin, &olen);
@@ -3247,7 +3247,7 @@ nxoe_p_thread_name_accept(cw_nxoe_thread_t *a_thread)
 		/* Prepare for interpreter recursion by pushing a name object
 		 * onto estack, then run the execution loop. */
 		nxo = nxo_stack_push(&a_thread->estack);
-		nxo_name_new(nxo, a_thread->tok_str, a_thread->index, FALSE);
+		nxo_name_new(nxo, a_thread->tok_str, a_thread->index, false);
 		nxo_attr_set(nxo, a_thread->m.m.action);
 
 		nxoe_p_thread_reset(a_thread);
@@ -3257,7 +3257,7 @@ nxoe_p_thread_name_accept(cw_nxoe_thread_t *a_thread)
 	    {
 		/* Push the name object onto the operand stack. */
 		nxo = nxo_stack_push(&a_thread->ostack);
-		nxo_name_new(nxo, a_thread->tok_str, a_thread->index, FALSE);
+		nxo_name_new(nxo, a_thread->tok_str, a_thread->index, false);
 		nxo_attr_set(nxo, a_thread->m.m.action);
 		nxoe_p_thread_reset(a_thread);
 	    }
@@ -3267,7 +3267,7 @@ nxoe_p_thread_name_accept(cw_nxoe_thread_t *a_thread)
 	{
 	    /* Push the name object onto the operand stack. */
 	    nxo = nxo_stack_push(&a_thread->ostack);
-	    nxo_name_new(nxo, a_thread->tok_str, a_thread->index, FALSE);
+	    nxo_name_new(nxo, a_thread->tok_str, a_thread->index, false);
 	    nxoe_p_thread_reset(a_thread);
 	    break;
 	}
@@ -3278,7 +3278,7 @@ nxoe_p_thread_name_accept(cw_nxoe_thread_t *a_thread)
 	    /* Find the value associated with the name in the dictionary stack
 	     * and push the value onto the operand stack. */
 	    key = nxo_stack_push(&a_thread->tstack);
-	    nxo_name_new(key, a_thread->tok_str, a_thread->index, FALSE);
+	    nxo_name_new(key, a_thread->tok_str, a_thread->index, false);
 	    nxoe_p_thread_reset(a_thread);
 
 	    nxo = nxo_stack_push(&a_thread->ostack);

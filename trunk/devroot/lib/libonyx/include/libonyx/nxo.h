@@ -74,14 +74,14 @@ typedef enum
 #endif
 } cw_nxoa_t;
 
-typedef cw_sint64_t cw_nxoi_t;
-typedef cw_fp64_t cw_nxor_t;
+typedef int64_t cw_nxoi_t;
+typedef double cw_nxor_t;
 
 /* Main object structure. */
 struct cw_nxo_s
 {
 #ifdef CW_DBG
-    cw_uint32_t magic;
+    uint32_t magic;
 #define CW_NXO_MAGIC 0x398754ba
 #endif
 
@@ -98,7 +98,7 @@ struct cw_nxo_s
      *
      * A : Attribute (cw_nxoa_t).
      *
-     * B : Array bound.  TRUE if the bind operator has processed this array.
+     * B : Array bound.  True if the bind operator has processed this array.
      *     This is used to avoid infinite recursion in the bind operator
      *     when binding recursive procedures.
      *
@@ -106,13 +106,13 @@ struct cw_nxo_s
      *
      * ........ .....CCC CCCCCCCA AABTTTTT
      * */
-    cw_uint32_t flags;
+    uint32_t flags;
 
     union
     {
 	struct
 	{
-	    cw_bool_t val;
+	    bool val;
 	} boolean;
 	struct
 	{
@@ -124,7 +124,7 @@ struct cw_nxo_s
 	} real;
 	struct
 	{
-	    cw_uint32_t line;
+	    uint32_t line;
 	} pmark;
 	struct
 	{
@@ -140,7 +140,7 @@ struct cw_nxo_s
 struct cw_nxoe_s
 {
 #ifdef CW_DBG
-    cw_uint32_t magic;
+    uint32_t magic;
 #define CW_NXOE_MAGIC 0x0fa6e798
 #endif
 
@@ -153,40 +153,40 @@ struct cw_nxoe_s
      * nxo. */
     cw_nxot_t type:5;
 
-    /* If TRUE, the origin of this object has been recorded. */
-    cw_bool_t origin:1;
+    /* If true, the origin of this object has been recorded. */
+    bool origin:1;
 
-    /* If TRUE, the string in the key is statically allocated, and should not be
+    /* If true, the string in the key is statically allocated, and should not be
      * deallocated during destruction. */
-    cw_bool_t name_static:1;
+    bool name_static:1;
 
     /* The GC toggles this value at each collection in order to maintain
      * state. */
-    cw_bool_t color:1;
+    bool color:1;
 
-    /* TRUE if this object has been registered with the GC.  It is possible for
+    /* True if this object has been registered with the GC.  It is possible for
      * an object to be reachable by the GC (on a stack, for instance), but not
      * be registered yet. */
-    cw_bool_t registered:1;
+    bool registered:1;
 
 #ifdef CW_THREADS
     /* If true, accesses to this object are locked.  This applies to arrays,
      * dictionaries, files, and strings. */
-    cw_bool_t locking:1;
+    bool locking:1;
 #endif
 
-    /* If TRUE, this nxoe is a reference to another nxoe. */
-    cw_bool_t indirect:1;
+    /* If true, this nxoe is a reference to another nxoe. */
+    bool indirect:1;
 };
 
-cw_sint32_t
+int32_t
 nxo_compare(const cw_nxo_t *a_a, const cw_nxo_t *a_b);
 
 cw_nxoe_t *
 nxo_nxoe_get(const cw_nxo_t *a_nxo);
 
 #ifdef CW_THREADS
-cw_bool_t
+bool
 nxo_ilocked(cw_nxo_t *a_nxo);
 #endif
 

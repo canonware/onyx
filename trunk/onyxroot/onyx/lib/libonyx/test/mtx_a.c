@@ -16,12 +16,12 @@
 
 #define CW_TEST_COUNT 50
 
-cw_uint32_t g_count = 0;
+uint32_t g_count = 0;
 
 void *
 thread_entry_func(void *a_arg)
 {
-    cw_uint32_t i, temp;
+    uint32_t i, temp;
     cw_mtx_t *mutex = (cw_mtx_t *) a_arg;
 
     for (i = 0; i < CW_TEST_COUNT; i++)
@@ -52,7 +52,7 @@ main()
     /* Locked. */
     mtx_unlock(&mutex_a);
     /* Unlocked. */
-    cw_assert(mtx_trylock(&mutex_a) == FALSE);
+    cw_assert(mtx_trylock(&mutex_a) == false);
     /* Locked. */
 #ifndef CW_PTH
     /* pth only has recursive mutexes, so don't check for failure of recursive
@@ -61,7 +61,7 @@ main()
 #endif
     mtx_unlock(&mutex_a);
     /* Unlocked. */
-    cw_assert(mtx_trylock(&mutex_a) == FALSE);
+    cw_assert(mtx_trylock(&mutex_a) == false);
     /* Locked. */
     mtx_unlock(&mutex_a);
     /* Unlocked. */
@@ -81,8 +81,8 @@ main()
      * sections. */
     mtx_new(&mutex_a);
 
-    thread_a = thd_new(thread_entry_func, (void *) &mutex_a, TRUE);
-    thread_b = thd_new(thread_entry_func, (void *) &mutex_a, TRUE);
+    thread_a = thd_new(thread_entry_func, (void *) &mutex_a, true);
+    thread_b = thd_new(thread_entry_func, (void *) &mutex_a, true);
 
     thd_join(thread_a);
     thd_join(thread_b);

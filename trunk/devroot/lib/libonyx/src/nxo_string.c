@@ -41,7 +41,7 @@
 #endif
 
 void
-nxo_string_new(cw_nxo_t *a_nxo, cw_bool_t a_locking, cw_uint32_t a_len)
+nxo_string_new(cw_nxo_t *a_nxo, bool a_locking, uint32_t a_len)
 {
     cw_nxoe_string_t *string;
 
@@ -58,7 +58,7 @@ nxo_string_new(cw_nxo_t *a_nxo, cw_bool_t a_locking, cw_uint32_t a_len)
     string->e.s.alloc_len = a_len;
     if (string->e.s.len > 0)
     {
-	string->e.s.str = (cw_uint8_t *) nxa_calloc(1, string->e.s.alloc_len);
+	string->e.s.str = (uint8_t *) nxa_calloc(1, string->e.s.alloc_len);
     }
     else
     {
@@ -74,7 +74,7 @@ nxo_string_new(cw_nxo_t *a_nxo, cw_bool_t a_locking, cw_uint32_t a_len)
 
 void
 nxo_string_substring_new(cw_nxo_t *a_nxo, cw_nxo_t *a_string,
-			 cw_uint32_t a_offset, cw_uint32_t a_len)
+			 uint32_t a_offset, uint32_t a_len)
 {
     cw_nxoe_string_t *string, *orig;
 
@@ -86,8 +86,8 @@ nxo_string_substring_new(cw_nxo_t *a_nxo, cw_nxo_t *a_string,
 
     string = (cw_nxoe_string_t *) nxa_malloc(sizeof(cw_nxoe_string_t));
 
-    nxoe_l_new(&string->nxoe, NXOT_STRING, FALSE);
-    string->nxoe.indirect = TRUE;
+    nxoe_l_new(&string->nxoe, NXOT_STRING, false);
+    string->nxoe.indirect = true;
 
     if (orig->nxoe.indirect)
     {
@@ -116,8 +116,8 @@ nxo_string_copy(cw_nxo_t *a_to, cw_nxo_t *a_from)
 {
     cw_nxoe_string_t *string_fr, *string_fr_i = NULL, *string_fr_l;
     cw_nxoe_string_t *string_to, *string_to_i = NULL, *string_to_l;
-    cw_uint8_t *str_fr, *str_to;
-    cw_uint32_t len_fr, len_to;
+    uint8_t *str_fr, *str_to;
+    uint32_t len_fr, len_to;
 
     /* Set string pointers. */
     string_fr = (cw_nxoe_string_t *) a_from->o.nxoe;
@@ -196,7 +196,7 @@ nxo_string_copy(cw_nxo_t *a_to, cw_nxo_t *a_from)
 void
 nxo_string_cstring(cw_nxo_t *a_to, cw_nxo_t *a_from, cw_nxo_t *a_thread)
 {
-    cw_uint32_t from_len;
+    uint32_t from_len;
 
     cw_assert(nxo_type_get(a_from) == NXOT_STRING
 	      || nxo_type_get(a_from) == NXOT_NAME);
@@ -206,7 +206,7 @@ nxo_string_cstring(cw_nxo_t *a_to, cw_nxo_t *a_from, cw_nxo_t *a_thread)
     if (nxo_type_get(a_from) == NXOT_STRING)
     {
 	from_len = nxo_string_len_get(a_from);
-	nxo_string_new(a_to, FALSE, from_len + 1);
+	nxo_string_new(a_to, false, from_len + 1);
 	nxo_string_lock(a_from);
 	nxo_string_set(a_to, 0, nxo_string_get(a_from), from_len);
 	nxo_string_el_set(a_to, '\0', from_len);
@@ -215,16 +215,16 @@ nxo_string_cstring(cw_nxo_t *a_to, cw_nxo_t *a_from, cw_nxo_t *a_thread)
     else
     {
 	from_len = nxo_name_len_get(a_from);
-	nxo_string_new(a_to, FALSE, from_len + 1);
+	nxo_string_new(a_to, false, from_len + 1);
 	nxo_string_set(a_to, 0, nxo_name_str_get(a_from), from_len);
 	nxo_string_el_set(a_to, '\0', from_len);
     }
 }
 
-cw_uint32_t
+uint32_t
 nxo_string_len_get(const cw_nxo_t *a_nxo)
 {
-    cw_uint32_t retval;
+    uint32_t retval;
     cw_nxoe_string_t *string;
 
     cw_check_ptr(a_nxo);
@@ -250,7 +250,7 @@ nxo_string_len_get(const cw_nxo_t *a_nxo)
 }
 
 void
-nxo_string_el_get(const cw_nxo_t *a_nxo, cw_nxoi_t a_offset, cw_uint8_t *r_el)
+nxo_string_el_get(const cw_nxo_t *a_nxo, cw_nxoi_t a_offset, uint8_t *r_el)
 {
     cw_nxoe_string_t *string;
 
@@ -269,14 +269,14 @@ nxo_string_el_get(const cw_nxo_t *a_nxo, cw_nxoi_t a_offset, cw_uint8_t *r_el)
 	a_offset += string->e.i.beg_offset;
 	string = string->e.i.string;
     }
-    cw_assert(string->nxoe.indirect == FALSE);
+    cw_assert(string->nxoe.indirect == false);
 
     cw_assert(a_offset >= 0 && a_offset < string->e.s.len);
     *r_el = string->e.s.str[a_offset];
 }
 
 void
-nxo_string_el_set(cw_nxo_t *a_nxo, cw_uint8_t a_el, cw_nxoi_t a_offset)
+nxo_string_el_set(cw_nxo_t *a_nxo, uint8_t a_el, cw_nxoi_t a_offset)
 {
     cw_nxoe_string_t *string;
 
@@ -295,7 +295,7 @@ nxo_string_el_set(cw_nxo_t *a_nxo, cw_uint8_t a_el, cw_nxoi_t a_offset)
 	a_offset += string->e.i.beg_offset;
 	string = string->e.i.string;
     }
-    cw_assert(string->nxoe.indirect == FALSE);
+    cw_assert(string->nxoe.indirect == false);
 
     cw_assert(a_offset >= 0 && a_offset < string->e.s.len);
     string->e.s.str[a_offset] = a_el;
@@ -321,7 +321,7 @@ nxo_string_lock(cw_nxo_t *a_nxo)
     {
 	string = string->e.i.string;
     }
-    cw_assert(string->nxoe.indirect == FALSE);
+    cw_assert(string->nxoe.indirect == false);
 
     nxoe_p_string_lock(string);
 }
@@ -345,16 +345,16 @@ nxo_string_unlock(cw_nxo_t *a_nxo)
     {
 	string = string->e.i.string;
     }
-    cw_assert(string->nxoe.indirect == FALSE);
+    cw_assert(string->nxoe.indirect == false);
 
     nxoe_p_string_unlock(string);
 }
 #endif
 
-cw_uint8_t *
+uint8_t *
 nxo_string_get(const cw_nxo_t *a_nxo)
 {
-    cw_uint8_t *retval;
+    uint8_t *retval;
     cw_nxoe_string_t *string;
 
     cw_check_ptr(a_nxo);
@@ -380,11 +380,11 @@ nxo_string_get(const cw_nxo_t *a_nxo)
 }
 
 void
-nxo_string_set(cw_nxo_t *a_nxo, cw_uint32_t a_offset, const cw_uint8_t *a_str,
-	       cw_uint32_t a_len)
+nxo_string_set(cw_nxo_t *a_nxo, uint32_t a_offset, const uint8_t *a_str,
+	       uint32_t a_len)
 {
     cw_nxoe_string_t *string;
-    cw_uint8_t *str;
+    uint8_t *str;
 
     cw_check_ptr(a_nxo);
     cw_dassert(a_nxo->magic == CW_NXO_MAGIC);

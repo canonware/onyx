@@ -18,10 +18,10 @@
 #include "../include/libonyx/nxo_l.h"
 
 /* nxo. */
-cw_sint32_t
+int32_t
 nxo_compare(const cw_nxo_t *a_a, const cw_nxo_t *a_b)
 {
-    cw_sint32_t retval;
+    int32_t retval;
 
     switch (nxo_type_get(a_a))
     {
@@ -77,10 +77,10 @@ nxo_compare(const cw_nxo_t *a_a, const cw_nxo_t *a_b)
 	case NXOT_NAME:
 	case NXOT_STRING:
 	{
-	    const cw_uint8_t *str_a, *str_b;
-	    cw_uint32_t len_a, len_b;
+	    const uint8_t *str_a, *str_b;
+	    uint32_t len_a, len_b;
 #ifdef CW_THREADS
-	    cw_bool_t lock_a, lock_b;
+	    bool lock_a, lock_b;
 #endif
 
 	    if (nxo_type_get(a_a) == NXOT_NAME)
@@ -88,7 +88,7 @@ nxo_compare(const cw_nxo_t *a_a, const cw_nxo_t *a_b)
 		str_a = nxo_name_str_get(a_a);
 		len_a = nxo_name_len_get(a_a);
 #ifdef CW_THREADS
-		lock_a = FALSE;
+		lock_a = false;
 #endif
 	    }
 	    else
@@ -96,7 +96,7 @@ nxo_compare(const cw_nxo_t *a_a, const cw_nxo_t *a_b)
 		str_a = nxo_string_get(a_a);
 		len_a = nxo_string_len_get(a_a);
 #ifdef CW_THREADS
-		lock_a = TRUE;
+		lock_a = true;
 #endif
 	    }
 
@@ -105,7 +105,7 @@ nxo_compare(const cw_nxo_t *a_a, const cw_nxo_t *a_b)
 		str_b = nxo_name_str_get(a_b);
 		len_b = nxo_name_len_get(a_b);
 #ifdef CW_THREADS
-		lock_b = FALSE;
+		lock_b = false;
 #endif
 	    }
 	    else if (nxo_type_get(a_b) == NXOT_STRING)
@@ -113,7 +113,7 @@ nxo_compare(const cw_nxo_t *a_a, const cw_nxo_t *a_b)
 		str_b = nxo_string_get(a_b);
 		len_b = nxo_string_len_get(a_b);
 #ifdef CW_THREADS
-		lock_b = TRUE;
+		lock_b = true;
 #endif
 	    }
 	    else
@@ -348,10 +348,10 @@ nxo_nxoe_get(const cw_nxo_t *a_nxo)
 }
 
 #ifdef CW_THREADS
-cw_bool_t
+bool
 nxo_ilocked(cw_nxo_t *a_nxo)
 {
-    cw_bool_t retval;
+    bool retval;
 
     cw_check_ptr(a_nxo);
     cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
@@ -384,7 +384,7 @@ nxo_ilocked(cw_nxo_t *a_nxo)
 /* nxoe. */
 /* Can be called at any time during nxoe_* initialization. */
 void
-nxoe_l_new(cw_nxoe_t *a_nxoe, cw_nxot_t a_type, cw_bool_t a_locking)
+nxoe_l_new(cw_nxoe_t *a_nxoe, cw_nxot_t a_type, bool a_locking)
 {
     /* Initialize the common section. */
     memset(a_nxoe, 0, sizeof(cw_nxoe_t));

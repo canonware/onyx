@@ -23,101 +23,10 @@ extern "C" {
 
 #include "libonyx_defs.h"
 
-/* Global typedefs. */
-
-#if (SIZEOF_SIGNED_CHAR == 1)
-#define CW_TYPE_SINT8_DEFINED
-typedef signed char cw_sint8_t;
-#endif
-
-#if (SIZEOF_SIGNED_CHAR == 1)
-#define CW_TYPE_UINT8_DEFINED
-typedef unsigned char cw_uint8_t;
-#endif
-
-#if (SIZEOF_SIGNED_SHORT == 2)
-#define CW_TYPE_SINT16_DEFINED
-typedef signed short cw_sint16_t;
-#endif
-
-#if (SIZEOF_UNSIGNED_SHORT == 2)
-#define CW_TYPE_UINT16_DEFINED
-typedef unsigned short cw_uint16_t;
-#endif
-
-#if (SIZEOF_INT == 4)
-#define CW_TYPE_SINT32_DEFINED
-typedef int cw_sint32_t;
-#endif
-
-#if (SIZEOF_UNSIGNED == 4)
-#define CW_TYPE_UINT32_DEFINED
-typedef unsigned cw_uint32_t;
-#endif
-
-#if (SIZEOF_LONG == 8)
-#define CW_TYPE_SINT64_DEFINED
-typedef long cw_sint64_t;
-#endif
-
-#if (SIZEOF_UNSIGNED_LONG == 8)
-#define CW_TYPE_UINT64_DEFINED
-typedef unsigned long cw_uint64_t;
-#endif
-
-#ifndef CW_TYPE_SINT64_DEFINED
-#if (SIZEOF_LONG_LONG == 8)
-#define CW_TYPE_SINT64_DEFINED
-typedef long long cw_sint64_t;
-#endif
-#endif
-
-#ifndef CW_TYPE_UINT64_DEFINED
-#if (SIZEOF_UNSIGNED_LONG_LONG == 8)
-#define CW_TYPE_UINT64_DEFINED
-typedef unsigned long long cw_uint64_t;
-#endif
-#endif
-
-#if (SIZEOF_FLOAT == 4)
-#define CW_TYPE_FP32_DEFINED
-typedef float cw_fp32_t;
-#endif
-
-#if (SIZEOF_DOUBLE == 8)
-#define CW_TYPE_FP64_DEFINED
-typedef double cw_fp64_t;
-#endif
-
-#ifndef CW_TYPE_FP64_DEFINED
-#if (SIZEOF_LONG_DOUBLE == 8)
-#define CW_TYPE_FP64_DEFINED
-typedef long double cw_fp64_t;
-#endif
-#endif
-
-#if (!defined(CW_TYPE_SINT8_DEFINED) || !defined(CW_TYPE_UINT8_DEFINED) \
-     || !defined(CW_TYPE_SINT16_DEFINED) || !defined(CW_TYPE_UINT16_DEFINED) \
-     || !defined(CW_TYPE_SINT32_DEFINED) || !defined(CW_TYPE_UINT32_DEFINED) \
-     || !defined(CW_TYPE_SINT64_DEFINED) || !defined(CW_TYPE_UINT64_DEFINED) \
-     || !defined(CW_TYPE_FP32_DEFINED) || !defined(CW_TYPE_FP64_DEFINED))
-#error "Lacking mandatory typedefs"
-#endif
-
-/* Definitions for booleans. */
-#ifndef FALSE
-#define FALSE (0)
-#endif
-#ifndef TRUE
-#define TRUE (1)
-#endif
-
-typedef unsigned int cw_bool_t;
-
-/* If FALSE, do not optimize tail calls by default.  If TRUE, optimize tail
+/* If false, do not optimize tail calls by default.  If true, optimize tail
  * calls by default.  The gtailopt, gsettailopt, tailopt, and settailopt
  * operators can be used to control this at runtime. */
-#define CW_LIBONYX_TAILOPT TRUE
+#define CW_LIBONYX_TAILOPT true
 
 /* Initial default maximum depth of estack.  The gmaxestack, gsetmaxestack,
  * maxestack, and setmaxestack operators can be used to control this at
@@ -221,6 +130,7 @@ typedef unsigned int cw_bool_t;
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <stdbool.h>
 #include <unistd.h>
 #include <limits.h>
 #include <string.h>
@@ -269,22 +179,22 @@ typedef unsigned int cw_bool_t;
 /* Generic typedef used for memory allocation hooks.  This typedef is compatible
  * with functions such as mem_malloc_e(). */
 typedef void *cw_opaque_alloc_t (const void *, size_t, const char *,
-				 cw_uint32_t);
+				 uint32_t);
 
 /* Generic typedef used for zeroed memory allocation hooks.  This typedef is
  * compatible with functions such as mem_calloc_e(). */
 typedef void *cw_opaque_calloc_t (const void *, size_t, size_t, const char *,
-				  cw_uint32_t);
+				  uint32_t);
 
 /* Generic typedef used for memory reallocation hooks.  This typedef is
  * compatible with functions such as mem_realloc_e(). */
 typedef void *cw_opaque_realloc_t (const void *, void *, size_t, size_t,
-				   const char *, cw_uint32_t);
+				   const char *, uint32_t);
 
 /* Generic typedef used for memory deallocation hooks.  This typedef is
  * compatible with functions such as mem_free_e(). */
 typedef void cw_opaque_dealloc_t (const void *, const void *, size_t,
-				  const char *, cw_uint32_t);
+				  const char *, uint32_t);
 
 /* Pseudo-opaque type that is used to pass allocator parameters to functions
  * like ch_new() and dch_new().  See mem.h for methods that act on this type. */
@@ -341,12 +251,12 @@ typedef struct cw_mema_s cw_mema_t;
 #define cw_htonq(a) (a)
 #else
 #define cw_ntohq(a)							\
-    (cw_uint64_t) (((cw_uint64_t) (ntohl((cw_uint32_t) ((a) >> 32))))	\
-		   | (((cw_uint64_t) (ntohl((cw_uint32_t)		\
+    (uint64_t) (((uint64_t) (ntohl((uint32_t) ((a) >> 32))))	\
+		   | (((uint64_t) (ntohl((uint32_t)		\
 		   ((a) & 0x00000000ffffffff)))) << 32))
 #define cw_htonq(a)							\
-    (cw_uint64_t) (((cw_uint64_t) (htonl((cw_uint32_t) ((a) >> 32))))	\
-		   | (((cw_uint64_t) (htonl((cw_uint32_t)		\
+    (uint64_t) (((uint64_t) (htonl((uint32_t) ((a) >> 32))))	\
+		   | (((uint64_t) (htonl((uint32_t)		\
 		   ((a) & 0x00000000ffffffff)))) << 32))
 #endif
 
@@ -418,7 +328,7 @@ typedef struct cw_mema_s cw_mema_t;
 /* Convenience macro for determining the offset of a field within a
  * structure. */
 #define cw_offsetof(a_type, a_field)					\
-    ((cw_uint32_t) &(((a_type *)NULL)->a_field))
+    ((uint32_t) &(((a_type *)NULL)->a_field))
 
 #include "nxn.h"
 #include "nxo.h"
@@ -468,7 +378,7 @@ typedef struct cw_mema_s cw_mema_t;
     do									\
     {									\
 	cw_nxo_threadp_t threadp;					\
-	static const cw_uint8_t	code[] = (a_code);			\
+	static const uint8_t	code[] = (a_code);			\
 									\
 	nxo_threadp_new(&threadp);					\
 	nxo_thread_interpret((a_thread), &threadp, code,		\

@@ -24,18 +24,18 @@ struct cw_nxoe_handle_s
 };
 
 #ifndef CW_USE_INLINES
-cw_bool_t
-nxoe_l_handle_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter);
+bool
+nxoe_l_handle_delete(cw_nxoe_t *a_nxoe, uint32_t a_iter);
 
 cw_nxoe_t *
-nxoe_l_handle_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
+nxoe_l_handle_ref_iter(cw_nxoe_t *a_nxoe, bool a_reset);
 #endif
 
 #if (defined(CW_USE_INLINES) || defined(CW_NXO_HANDLE_C_))
-CW_INLINE cw_bool_t
-nxoe_l_handle_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
+CW_INLINE bool
+nxoe_l_handle_delete(cw_nxoe_t *a_nxoe, uint32_t a_iter)
 {
-    cw_bool_t retval;
+    bool retval;
     cw_nxoe_handle_t *handle;
 
     handle = (cw_nxoe_handle_t *) a_nxoe;
@@ -50,10 +50,10 @@ nxoe_l_handle_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
     }
     else
     {
-	retval = FALSE;
+	retval = false;
     }
 
-    if (retval == FALSE)
+    if (retval == false)
     {
 	nxa_free(handle, sizeof(cw_nxoe_handle_t));
     }
@@ -62,14 +62,14 @@ nxoe_l_handle_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
 }
 
 CW_INLINE cw_nxoe_t *
-nxoe_l_handle_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
+nxoe_l_handle_ref_iter(cw_nxoe_t *a_nxoe, bool a_reset)
 {
     cw_nxoe_t *retval;
     cw_nxoe_handle_t *handle;
     /* Used for remembering the current state of reference iteration.  This
      * function is only called by the garbage collector, so using a static
      * variable works fine. */
-    static cw_uint32_t ref_stage;
+    static uint32_t ref_stage;
 
     handle = (cw_nxoe_handle_t *) a_nxoe;
 
@@ -94,7 +94,7 @@ nxoe_l_handle_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 	    ref_stage++;
 	    if (handle->ref_iter_f != NULL)
 	    {
-		retval = handle->ref_iter_f(handle->opaque, TRUE);
+		retval = handle->ref_iter_f(handle->opaque, true);
 	    }
 	    else
 	    {
@@ -104,7 +104,7 @@ nxoe_l_handle_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 	}
 	case 2:
 	{
-	    retval = handle->ref_iter_f(handle->opaque, FALSE);
+	    retval = handle->ref_iter_f(handle->opaque, false);
 	    break;
 	}
 	default:

@@ -21,7 +21,7 @@
 
 struct cw_mema_s
 {
-    cw_bool_t is_malloced;
+    bool is_malloced;
 
     cw_opaque_alloc_t *alloc;
     cw_opaque_calloc_t *calloc;
@@ -95,20 +95,19 @@ mema_arg_get(cw_mema_t *a_mema)
 /* mem. */
 void *
 mem_malloc_e(void *a_arg, size_t a_size, const char *a_filename,
-	     cw_uint32_t a_line_num);
+	     uint32_t a_line_num);
 
 void *
 mem_calloc_e(void *a_arg, size_t a_number, size_t a_size, const
-	     char *a_filename, cw_uint32_t a_line_num);
+	     char *a_filename, uint32_t a_line_num);
 
 void *
 mem_realloc_e(void *a_arg, void *a_ptr, size_t a_size,
-	      size_t a_old_size, const char *a_filename,
-	      cw_uint32_t a_line_num);
+	      size_t a_old_size, const char *a_filename, uint32_t a_line_num);
 
 void
 mem_free_e(void *a_arg, void *a_ptr, size_t a_size,
-	   const char *a_filename, cw_uint32_t a_line_num);
+	   const char *a_filename, uint32_t a_line_num);
 
 /* These macros are declared differently, depending on whether this is a debug
  * library, because consistently using arguments of NULL and 0 reduces the size

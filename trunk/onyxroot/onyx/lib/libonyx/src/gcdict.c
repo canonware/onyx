@@ -40,17 +40,17 @@ static const struct cw_gcdict_entry gcdict_ops[] = {
 void
 gcdict_l_populate(cw_nxo_t *a_dict, cw_nxo_t *a_tname, cw_nxo_t *a_tvalue)
 {
-    cw_uint32_t i;
+    uint32_t i;
 
 #define	NEXTRA	0
 #define NENTRIES (sizeof(gcdict_ops) / sizeof(struct cw_gcdict_entry))
 
-    nxo_dict_new(a_dict, TRUE, NENTRIES + NEXTRA);
+    nxo_dict_new(a_dict, true, NENTRIES + NEXTRA);
 
     for (i = 0; i < NENTRIES; i++)
     {
 	nxo_name_new(a_tname, nxn_str(gcdict_ops[i].nxn),
-		     nxn_len(gcdict_ops[i].nxn), TRUE);
+		     nxn_len(gcdict_ops[i].nxn), true);
 	nxo_operator_new(a_tvalue, gcdict_ops[i].op_f, gcdict_ops[i].nxn);
 	nxo_attr_set(a_tvalue, NXOA_EXECUTABLE);
 
@@ -173,7 +173,7 @@ gcdict_setthreshold(cw_nxo_t *a_thread)
 void
 gcdict_stats(cw_nxo_t *a_thread)
 {
-    cw_bool_t currentlocking;
+    bool currentlocking;
     cw_nxo_t *ostack, *tstack;
     cw_nxo_t *stats, *nxo, *tnxo;
     cw_nxoi_t collections, count;

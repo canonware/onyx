@@ -56,7 +56,7 @@ func_c(void)
 int
 main()
 {
-    volatile cw_uint32_t i;
+    volatile uint32_t i;
 
     libonyx_init(0, NULL, NULL);
     fprintf(stderr, "Test begin\n");

@@ -20,7 +20,7 @@
 
 /* nxoe. */
 void
-nxoe_l_new(cw_nxoe_t *a_nxoe, cw_nxot_t a_type, cw_bool_t a_locking);
+nxoe_l_new(cw_nxoe_t *a_nxoe, cw_nxot_t a_type, bool a_locking);
 
 #define nxoe_l_color_get(a_nxoe) (a_nxoe)->color
 #define nxoe_l_color_set(a_nxoe, a_color) (a_nxoe)->color = (a_color)

@@ -74,16 +74,16 @@ libonyx_init(int a_argc, char **a_argv, char **a_envp)
     /* Initialize argv. */
     {
 	int i;
-	cw_sint32_t len;
+	int32_t len;
 	cw_nxo_t str_nxo; /* GC-unsafe, but GC is disabled. */
-	cw_uint8_t *t_str;
+	uint8_t *t_str;
 
 	/* Create the argv array and populate it. */
-	nxo_array_new(&cw_g_argv, TRUE, a_argc);
+	nxo_array_new(&cw_g_argv, true, a_argc);
 	for (i = 0; i < a_argc; i++)
 	{
 	    len = strlen(a_argv[i]);
-	    nxo_string_new(&str_nxo, TRUE, len);
+	    nxo_string_new(&str_nxo, true, len);
 	    t_str = nxo_string_get(&str_nxo);
 	    memcpy(t_str, a_argv[i], len);
 
@@ -108,7 +108,7 @@ libonyx_init(int a_argc, char **a_argv, char **a_envp)
     }
 
     /* Turn the GC on, now that argv, envdict, and gcdict are initialized. */
-    nxa_active_set(TRUE);
+    nxa_active_set(true);
 }
 
 void

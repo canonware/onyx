@@ -18,10 +18,10 @@ envdict_l_populate(cw_nxo_t *a_dict, cw_nxo_t *a_tkey, cw_nxo_t *a_tval,
 {
     int i;
     char *val_str;
-    cw_uint8_t *t_str;
-    cw_uint32_t key_len, val_len;
+    uint8_t *t_str;
+    uint32_t key_len, val_len;
 
-    nxo_dict_new(a_dict, TRUE, CW_LIBONYX_ENVDICT_SIZE);
+    nxo_dict_new(a_dict, true, CW_LIBONYX_ENVDICT_SIZE);
 
     if (a_envp != NULL)
     {
@@ -37,11 +37,11 @@ envdict_l_populate(cw_nxo_t *a_dict, cw_nxo_t *a_tkey, cw_nxo_t *a_tval,
 	    val_str++;
 
 	    /* Create key. */
-	    nxo_name_new(a_tkey, a_envp[i], key_len, FALSE);
+	    nxo_name_new(a_tkey, a_envp[i], key_len, false);
 
 	    /* Create value. */
 	    val_len = strlen(val_str);
-	    nxo_string_new(a_tval, TRUE, val_len);
+	    nxo_string_new(a_tval, true, val_len);
 	    t_str = nxo_string_get(a_tval);
 #ifdef CW_THREADS
 	    nxo_string_lock(a_tval);

@@ -17,13 +17,13 @@
 #include <time.h>
 
 cw_thd_t *thd;
-cw_uint32_t i;
-cw_bool_t done = FALSE;
+uint32_t i;
+bool done = false;
 
 void *
 thread_entry_func(void *a_arg)
 {
-    for (i = 1; i != 0 && done == FALSE;)
+    for (i = 1; i != 0 && done == false;)
     {
 	thd_crit_enter();
 	i++;
@@ -43,7 +43,7 @@ thread_entry_func(void *a_arg)
 int
 main()
 {
-    cw_uint32_t j, count;
+    uint32_t j, count;
     struct timespec tout = {0, 1000000};
 
     libonyx_init(0, NULL, NULL);
@@ -52,7 +52,7 @@ main()
     thd_crit_enter();
     thd_crit_leave();
 
-    thd = thd_new(thread_entry_func, NULL, TRUE);
+    thd = thd_new(thread_entry_func, NULL, true);
     nanosleep(&tout, NULL);
 
     fprintf(stderr, "thd_suspend()\n");
@@ -90,7 +90,7 @@ main()
 	cw_assert(count <= i);
 	thd_resume(thd);
     }
-    done = TRUE;
+    done = true;
     thd_join(thd);
 
     fprintf(stderr, "Test end\n");

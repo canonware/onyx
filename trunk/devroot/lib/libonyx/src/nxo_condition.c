@@ -25,7 +25,7 @@ nxo_condition_new(cw_nxo_t *a_nxo)
 
     condition = (cw_nxoe_condition_t *) nxa_malloc(sizeof(cw_nxoe_condition_t));
 
-    nxoe_l_new(&condition->nxoe, NXOT_CONDITION, FALSE);
+    nxoe_l_new(&condition->nxoe, NXOT_CONDITION, false);
     cnd_new(&condition->condition);
 
     nxo_no_new(a_nxo);
@@ -100,11 +100,11 @@ nxo_condition_wait(cw_nxo_t *a_nxo, cw_nxo_t *a_mutex)
     cnd_wait(&condition->condition, &mutex->lock);
 }
 
-cw_bool_t
+bool
 nxo_condition_timedwait(cw_nxo_t *a_nxo, cw_nxo_t *a_mutex,
 			const struct timespec *a_timeout)
 {
-    cw_bool_t retval;
+    bool retval;
     cw_nxoe_condition_t *condition;
     cw_nxoe_mutex_t *mutex;
 

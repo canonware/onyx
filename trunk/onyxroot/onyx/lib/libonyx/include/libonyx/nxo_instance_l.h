@@ -28,18 +28,18 @@ struct cw_nxoe_instance_s
 };
 
 #ifndef CW_USE_INLINES
-cw_bool_t
-nxoe_l_instance_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter);
+bool
+nxoe_l_instance_delete(cw_nxoe_t *a_nxoe, uint32_t a_iter);
 
 cw_nxoe_t *
-nxoe_l_instance_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
+nxoe_l_instance_ref_iter(cw_nxoe_t *a_nxoe, bool a_reset);
 #endif
 
 #if (defined(CW_USE_INLINES) || defined(CW_NXO_INSTANCE_C_))
-CW_INLINE cw_bool_t
-nxoe_l_instance_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
+CW_INLINE bool
+nxoe_l_instance_delete(cw_nxoe_t *a_nxoe, uint32_t a_iter)
 {
-    cw_bool_t retval;
+    bool retval;
     cw_nxoe_instance_t *instance;
 
     instance = (cw_nxoe_instance_t *) a_nxoe;
@@ -54,10 +54,10 @@ nxoe_l_instance_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
     }
     else
     {
-	retval = FALSE;
+	retval = false;
     }
 
-    if (retval == FALSE)
+    if (retval == false)
     {
 	nxa_free(instance, sizeof(cw_nxoe_instance_t));
     }
@@ -66,14 +66,14 @@ nxoe_l_instance_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
 }
 
 CW_INLINE cw_nxoe_t *
-nxoe_l_instance_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
+nxoe_l_instance_ref_iter(cw_nxoe_t *a_nxoe, bool a_reset)
 {
     cw_nxoe_t *retval;
     cw_nxoe_instance_t *instance;
     /* Used for remembering the current state of reference iteration.  This
      * function is only called by the garbage collector, so using a static
      * variable works fine. */
-    static cw_uint32_t ref_stage;
+    static uint32_t ref_stage;
 
     instance = (cw_nxoe_instance_t *) a_nxoe;
 
@@ -108,7 +108,7 @@ nxoe_l_instance_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 	    ref_stage++;
 	    if (instance->ref_iter_f != NULL)
 	    {
-		retval = instance->ref_iter_f(instance->opaque, TRUE);
+		retval = instance->ref_iter_f(instance->opaque, true);
 	    }
 	    else
 	    {
@@ -118,7 +118,7 @@ nxoe_l_instance_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 	}
 	case 3:
 	{
-	    retval = instance->ref_iter_f(instance->opaque, FALSE);
+	    retval = instance->ref_iter_f(instance->opaque, false);
 	    break;
 	}
 	default:

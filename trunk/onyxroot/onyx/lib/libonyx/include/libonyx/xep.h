@@ -13,7 +13,7 @@
 /* Pseudo-opaque type. */
 typedef struct cw_xep_s cw_xep_t;
 
-typedef cw_uint32_t cw_xepv_t;
+typedef uint32_t cw_xepv_t;
 
 #define CW_XEPV_NONE 0
 #define CW_XEPV_CODE 1
@@ -28,11 +28,11 @@ struct cw_xep_s
 {
     volatile qr(cw_xep_t) link;
     volatile cw_xepv_t value;
-    volatile cw_bool_t is_handled;
-    volatile cw_bool_t is_linked;
+    volatile bool is_handled;
+    volatile bool is_linked;
     volatile cw_xeps_t state;
     volatile const char *filename;
-    volatile cw_uint32_t line_num;
+    volatile uint32_t line_num;
     jmp_buf context;
 };
 
@@ -75,7 +75,7 @@ struct cw_xep_s
 
 void
 xep_throw_e(cw_xepv_t a_value, volatile const char *a_filename,
-	    cw_uint32_t a_line_num);
+	    uint32_t a_line_num);
 
 #define xep_throw(a_value) xep_throw_e((a_value), __FILE__, __LINE__)
 

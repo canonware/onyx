@@ -22,17 +22,17 @@
  * GC-related initialization, so that this function can be used for the case
  * where a regex is temporarily constructed for a single match. */
 static cw_nxn_t
-nxo_p_regex_init(cw_nxoe_regex_t *a_regex, const cw_uint8_t *a_pattern,
-		 cw_uint32_t a_len, cw_bool_t a_cont, cw_bool_t a_global,
-		 cw_bool_t a_insensitive, cw_bool_t a_multiline,
-		 cw_bool_t a_singleline)
+nxo_p_regex_init(cw_nxoe_regex_t *a_regex, const uint8_t *a_pattern,
+		 uint32_t a_len, bool a_cont, bool a_global,
+		 bool a_insensitive, bool a_multiline,
+		 bool a_singleline)
 {
     cw_nxn_t retval;
     char *pattern;
     const char *errptr;
     int options, erroffset, capturecount;
 
-    nxoe_l_new(&a_regex->nxoe, NXOT_REGEX, FALSE);
+    nxoe_l_new(&a_regex->nxoe, NXOT_REGEX, false);
 
     /* Create a '\0'-terminated copy of a_pattern. */
     pattern = (char *) nxa_malloc(a_len + 1);
@@ -108,12 +108,12 @@ nxo_p_regex_init(cw_nxoe_regex_t *a_regex, const cw_uint8_t *a_pattern,
     return retval;
 }
 
-/* Returns TRUE if match is successful. */
-static cw_bool_t
+/* Returns true if match is successful. */
+static bool
 nxo_p_regex_match(cw_nxoe_regex_t *a_regex, cw_nxo_t *a_thread,
 		  cw_nxo_t *a_input)
 {
-    cw_bool_t retval;
+    bool retval;
     cw_nxo_regex_cache_t *cache;
     int ioff;
 
@@ -122,7 +122,7 @@ nxo_p_regex_match(cw_nxoe_regex_t *a_regex, cw_nxo_t *a_thread,
     if (nxo_string_len_get(a_input) == 0)
     {
 	cache->mcnt = -1;
-	retval = FALSE;
+	retval = false;
 	goto RETURN;
     }
 
@@ -149,10 +149,10 @@ nxo_p_regex_match(cw_nxoe_regex_t *a_regex, cw_nxo_t *a_thread,
 	    && nxo_compare(&cache->input, a_input) == 0)
 	{
 	    ioff = cache->cont;
-	    if ((cw_uint32_t) ioff >= nxo_string_len_get(a_input))
+	    if ((uint32_t) ioff >= nxo_string_len_get(a_input))
 	    {
 		cache->mcnt = -1;
-		retval = FALSE;
+		retval = false;
 		goto NOMATCH;
 	    }
 	}
@@ -181,7 +181,7 @@ nxo_p_regex_match(cw_nxoe_regex_t *a_regex, cw_nxo_t *a_thread,
 	    case PCRE_ERROR_NOMATCH:
 	    {
 		/* No match found.  Not an error. */
-		retval = FALSE;
+		retval = false;
 		break;
 	    }
 	    case PCRE_ERROR_NOMEMORY:
@@ -200,7 +200,7 @@ nxo_p_regex_match(cw_nxoe_regex_t *a_regex, cw_nxo_t *a_thread,
     }
     else
     {
-	retval = TRUE;
+	retval = true;
     }
 
     NOMATCH:
@@ -245,13 +245,13 @@ nxo_p_regex_match(cw_nxoe_regex_t *a_regex, cw_nxo_t *a_thread,
 
 static void
 nxo_p_regex_split(cw_nxoe_regex_t *a_regex, cw_nxo_t *a_thread,
-		  cw_uint32_t a_limit, cw_nxo_t *a_input, cw_nxo_t *r_array)
+		  uint32_t a_limit, cw_nxo_t *a_input, cw_nxo_t *r_array)
 {
     cw_nxo_regex_cache_t *cache;
     cw_nxo_t *tstack, *tnxo;
-    cw_uint8_t *istr;
+    uint8_t *istr;
     int ilen, ioff;
-    cw_uint32_t i, acnt;
+    uint32_t i, acnt;
 
     cache = nxo_l_thread_regex_cache_get(a_thread);
     tstack = nxo_thread_tstack_get(a_thread);
@@ -359,7 +359,7 @@ nxo_p_regex_split(cw_nxoe_regex_t *a_regex, cw_nxo_t *a_thread,
 	tnxo = nxo_stack_push(tstack);
 	nxo_string_substring_new(tnxo, a_input, ioff,
 				 nxo_string_len_get(a_input)
-				 - (cw_uint32_t) ioff);
+				 - (uint32_t) ioff);
 	acnt++;
     }
 
@@ -380,10 +380,10 @@ nxo_p_regex_split(cw_nxoe_regex_t *a_regex, cw_nxo_t *a_thread,
 }
 
 cw_nxn_t
-nxo_regex_new(cw_nxo_t *a_nxo, const cw_uint8_t *a_pattern,
-	      cw_uint32_t a_len, cw_bool_t a_cont, cw_bool_t a_global,
-	      cw_bool_t a_insensitive, cw_bool_t a_multiline,
-	      cw_bool_t a_singleline)
+nxo_regex_new(cw_nxo_t *a_nxo, const uint8_t *a_pattern,
+	      uint32_t a_len, bool a_cont, bool a_global,
+	      bool a_insensitive, bool a_multiline,
+	      bool a_singleline)
 {
     cw_nxn_t retval;
     cw_nxoe_regex_t *regex;
@@ -417,7 +417,7 @@ nxo_regex_new(cw_nxo_t *a_nxo, const cw_uint8_t *a_pattern,
 
 void
 nxo_regex_match(cw_nxo_t *a_nxo, cw_nxo_t *a_thread, cw_nxo_t *a_input,
-		cw_bool_t *r_match)
+		bool *r_match)
 {
     cw_nxoe_regex_t *regex;
 
@@ -437,11 +437,11 @@ nxo_regex_match(cw_nxo_t *a_nxo, cw_nxo_t *a_thread, cw_nxo_t *a_input,
 /* Do a match without creating a regex object, in order to avoid putting
  * pressure on the GC. */
 cw_nxn_t
-nxo_regex_nonew_match(cw_nxo_t *a_thread, const cw_uint8_t *a_pattern,
-		      cw_uint32_t a_len, cw_bool_t a_cont, cw_bool_t a_global,
-		      cw_bool_t a_insensitive, cw_bool_t a_multiline,
-		      cw_bool_t a_singleline, cw_nxo_t *a_input,
-		      cw_bool_t *r_match)
+nxo_regex_nonew_match(cw_nxo_t *a_thread, const uint8_t *a_pattern,
+		      uint32_t a_len, bool a_cont, bool a_global,
+		      bool a_insensitive, bool a_multiline,
+		      bool a_singleline, cw_nxo_t *a_input,
+		      bool *r_match)
 {
     cw_nxn_t retval;
     cw_nxoe_regex_t regex;
@@ -468,7 +468,7 @@ nxo_regex_nonew_match(cw_nxo_t *a_thread, const cw_uint8_t *a_pattern,
 }
 
 void
-nxo_regex_split(cw_nxo_t *a_nxo, cw_nxo_t *a_thread, cw_uint32_t a_limit,
+nxo_regex_split(cw_nxo_t *a_nxo, cw_nxo_t *a_thread, uint32_t a_limit,
 		cw_nxo_t *a_input, cw_nxo_t *r_array)
 {
     cw_nxoe_regex_t *regex;
@@ -489,15 +489,15 @@ nxo_regex_split(cw_nxo_t *a_nxo, cw_nxo_t *a_thread, cw_uint32_t a_limit,
 /* Do a split without creating a regex object, in order to avoid putting
  * pressure on the GC. */
 cw_nxn_t
-nxo_regex_nonew_split(cw_nxo_t *a_thread, const cw_uint8_t *a_pattern,
-		      cw_uint32_t a_len, cw_bool_t a_insensitive,
-		      cw_bool_t a_multiline, cw_bool_t a_singleline,
-		      cw_uint32_t a_limit, cw_nxo_t *a_input, cw_nxo_t *r_array)
+nxo_regex_nonew_split(cw_nxo_t *a_thread, const uint8_t *a_pattern,
+		      uint32_t a_len, bool a_insensitive,
+		      bool a_multiline, bool a_singleline,
+		      uint32_t a_limit, cw_nxo_t *a_input, cw_nxo_t *r_array)
 {
     cw_nxn_t retval;
     cw_nxoe_regex_t regex;
 
-    retval = nxo_p_regex_init(&regex, a_pattern, a_len, FALSE, FALSE,
+    retval = nxo_p_regex_init(&regex, a_pattern, a_len, false, false,
 			      a_insensitive, a_multiline, a_singleline);
     if (retval)
     {
@@ -519,7 +519,7 @@ nxo_regex_nonew_split(cw_nxo_t *a_thread, const cw_uint8_t *a_pattern,
 }
 
 void
-nxo_regex_submatch(cw_nxo_t *a_thread, cw_uint32_t a_capture, cw_nxo_t *r_match)
+nxo_regex_submatch(cw_nxo_t *a_thread, uint32_t a_capture, cw_nxo_t *r_match)
 {
     cw_nxo_regex_cache_t *cache;
 

@@ -28,8 +28,8 @@ struct cw_nxoe_file_s
     cw_mtx_t lock;
 #endif
 
-    cw_uint8_t *origin;
-    cw_uint32_t olen;
+    uint8_t *origin;
+    uint32_t olen;
 
     enum
     {
@@ -39,7 +39,7 @@ struct cw_nxoe_file_s
 #endif
 	FILE_SYNTHETIC
     } mode:2;
-    cw_bool_t nonblocking:1;
+    bool nonblocking:1;
 
     union
     {
@@ -55,21 +55,21 @@ struct cw_nxoe_file_s
 #ifdef CW_POSIX_FILE
 	struct
 	{
-	    cw_sint32_t fd;
-	    cw_bool_t close;
+	    int32_t fd;
+	    bool close;
 	} p;
 #endif
     } f;
     /* Buffering. */
-    cw_uint8_t *buffer;
-    cw_uint32_t buffer_size;
+    uint8_t *buffer;
+    uint32_t buffer_size;
     enum
     {
 	BUFFER_EMPTY,
 	BUFFER_READ,
 	BUFFER_WRITE
     } buffer_mode;
-    cw_uint32_t buffer_offset;
+    uint32_t buffer_offset;
 };
 
 /* Private, but needed for the inlining of nxoe_l_file_delete(). */
@@ -77,16 +77,16 @@ cw_nxn_t
 nxo_p_file_buffer_flush(cw_nxoe_file_t *a_file);
 
 #ifndef CW_USE_INLINES
-cw_bool_t
-nxoe_l_file_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter);
+bool
+nxoe_l_file_delete(cw_nxoe_t *a_nxoe, uint32_t a_iter);
 
 cw_nxoe_t *
-nxoe_l_file_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
+nxoe_l_file_ref_iter(cw_nxoe_t *a_nxoe, bool a_reset);
 #endif
 
 #if (defined(CW_USE_INLINES) || defined(CW_NXO_FILE_C_))
-CW_INLINE cw_bool_t
-nxoe_l_file_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
+CW_INLINE bool
+nxoe_l_file_delete(cw_nxoe_t *a_nxoe, uint32_t a_iter)
 {
     cw_nxoe_file_t *file;
 
@@ -139,11 +139,11 @@ nxoe_l_file_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
 
     nxa_free(file, sizeof(cw_nxoe_file_t));
 
-    return FALSE;
+    return false;
 }
 
 CW_INLINE cw_nxoe_t *
-nxoe_l_file_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
+nxoe_l_file_ref_iter(cw_nxoe_t *a_nxoe, bool a_reset)
 {
     cw_nxoe_t *retval;
     cw_nxoe_file_t *file;

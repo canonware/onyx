@@ -13,7 +13,7 @@
 #include "../include/libonyx/libonyx.h"
 
 #ifdef CW_DBG
-static cw_bool_t s_xep_initialized = FALSE;
+static bool s_xep_initialized = false;
 #endif
 #ifdef CW_THREADS
 static cw_tsd_t s_xep_key;
@@ -24,7 +24,7 @@ static cw_xep_t *s_xep_first;
 void
 xep_l_init(void)
 {
-    cw_assert(s_xep_initialized == FALSE);
+    cw_assert(s_xep_initialized == false);
 
 #ifdef CW_THREADS
     tsd_new(&s_xep_key, NULL);
@@ -32,7 +32,7 @@ xep_l_init(void)
     s_xep_first = NULL;
 #endif
 #ifdef CW_DBG
-    s_xep_initialized = TRUE;
+    s_xep_initialized = true;
 #endif
 }
 
@@ -45,13 +45,13 @@ xep_l_shutdown(void)
     tsd_delete(&s_xep_key);
 #endif
 #ifdef CW_DBG
-    s_xep_initialized = FALSE;
+    s_xep_initialized = false;
 #endif
 }
 
 void
 xep_throw_e(cw_xepv_t a_value, volatile const char *a_filename,
-	    cw_uint32_t a_line_num)
+	    uint32_t a_line_num)
 {
     cw_xep_t *xep_first, *xep;
 
@@ -79,7 +79,7 @@ xep_throw_e(cw_xepv_t a_value, volatile const char *a_filename,
 
     do
     {
-	xep->is_handled = FALSE;
+	xep->is_handled = false;
 	xep->filename = a_filename;
 	xep->line_num = a_line_num;
 
@@ -137,7 +137,7 @@ xep_p_retry(cw_xep_t *a_xep)
 #endif
     a_xep->value = CW_XEPV_NONE;
     a_xep->state = CW_XEPS_TRY;
-    a_xep->is_handled = TRUE;
+    a_xep->is_handled = true;
     longjmp(a_xep->context, (int)CW_XEPV_CODE);
     cw_not_reached();
 }
@@ -165,7 +165,7 @@ xep_p_handled(cw_xep_t *a_xep)
     }
 #endif
 
-    a_xep->is_handled = TRUE;
+    a_xep->is_handled = true;
     xep_p_unlink(a_xep);
 }
 
@@ -202,8 +202,8 @@ xep_p_link(cw_xep_t *a_xep)
 
     a_xep->value = CW_XEPV_NONE;
     a_xep->state = CW_XEPS_TRY;
-    a_xep->is_handled = TRUE;
-    a_xep->is_linked = TRUE;
+    a_xep->is_handled = true;
+    a_xep->is_linked = true;
 }
 
 void
@@ -236,9 +236,9 @@ xep_p_unlink(cw_xep_t *a_xep)
 	    s_xep_first = NULL;
 #endif
 	}
-	a_xep->is_linked = FALSE;
+	a_xep->is_linked = false;
 
-	if (a_xep->is_handled == FALSE)
+	if (a_xep->is_handled == false)
 	{
 	    if (a_xep != xep_first)
 	    {

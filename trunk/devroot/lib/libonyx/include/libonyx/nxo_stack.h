@@ -26,27 +26,27 @@ struct cw_nxoe_stack_s
     /* Spare nxo's.  The spares array is filled starting at 0, and nspare is the
      * current number of spares stored in the array. */
     cw_nxo_t *spare[CW_LIBONYX_STACK_CACHE];
-    cw_uint32_t nspare;
+    uint32_t nspare;
 
     /* Half the minimum allowable object pointer array length (two times as
      * large as the a_mincount argument passed to nxo_stack_new()).  'a' is
      * logically divided in half, so the usable length is half the true
      * length. */
-    cw_uint32_t ahmin;
+    uint32_t ahmin;
 
     /* Half the number of slots in 'a'.  'a' is logically divided in half, so
      * the usable length is half the true length. */
-    cw_uint32_t ahlen;
+    uint32_t ahlen;
 
     /* Base offset of range to use for the stack; either 0 or ahlen. */
-    cw_uint32_t abase;
+    uint32_t abase;
 
     /* a[abase + abeg] is the top stack element. */
-    cw_uint32_t abeg;
+    uint32_t abeg;
 
     /* a[abase + aend] is the first element in 'a' past the bottom of the
      * stack. */
-    cw_uint32_t aend;
+    uint32_t aend;
 
     /* Object pointer array. */
     cw_nxo_t **a;
@@ -68,15 +68,15 @@ struct cw_nxoe_stack_s
 
     /* Base offset of range to use for temporary storage; either 0 or
      * ahlen. */
-    cw_uint32_t rbase;
+    uint32_t rbase;
 
     /* r[rbase + rbeg] is the first element in 'r' being protected against
      * GC. */
-    cw_uint32_t rbeg;
+    uint32_t rbeg;
 
     /* r[rbase + rend] is the first element in 'r' past the range begin
      * protected against GC. */
-    cw_uint32_t rend;
+    uint32_t rend;
 
     /* Object pointer array, usually (but not during some very small windows)
      * the same as 'a'. */
@@ -84,13 +84,13 @@ struct cw_nxoe_stack_s
 };
 
 void
-nxo_stack_new(cw_nxo_t *a_nxo, cw_bool_t a_locking, cw_uint32_t a_mincount);
+nxo_stack_new(cw_nxo_t *a_nxo, bool a_locking, uint32_t a_mincount);
 
 void
 nxo_stack_copy(cw_nxo_t *a_to, cw_nxo_t *a_from);
 
 #ifndef CW_USE_INLINES
-cw_uint32_t
+uint32_t
 nxo_stack_count(cw_nxo_t *a_nxo);
 
 cw_nxo_t *
@@ -99,17 +99,17 @@ nxo_stack_push(cw_nxo_t *a_nxo);
 cw_nxo_t *
 nxo_stack_bpush(cw_nxo_t *a_nxo);
 
-cw_bool_t
+bool
 nxo_stack_pop(cw_nxo_t *a_nxo);
 
-cw_bool_t
+bool
 nxo_stack_bpop(cw_nxo_t *a_nxo);
 
-cw_bool_t
-nxo_stack_npop(cw_nxo_t *a_nxo, cw_uint32_t a_count);
+bool
+nxo_stack_npop(cw_nxo_t *a_nxo, uint32_t a_count);
 
-cw_bool_t
-nxo_stack_nbpop(cw_nxo_t *a_nxo, cw_uint32_t a_count);
+bool
+nxo_stack_nbpop(cw_nxo_t *a_nxo, uint32_t a_count);
 
 cw_nxo_t *
 nxo_stack_get(const cw_nxo_t *a_nxo);
@@ -118,26 +118,26 @@ cw_nxo_t *
 nxo_stack_bget(const cw_nxo_t *a_nxo);
 
 cw_nxo_t *
-nxo_stack_nget(const cw_nxo_t *a_nxo, cw_uint32_t a_index);
+nxo_stack_nget(const cw_nxo_t *a_nxo, uint32_t a_index);
 
 cw_nxo_t *
-nxo_stack_nbget(const cw_nxo_t *a_nxo, cw_uint32_t a_index);
+nxo_stack_nbget(const cw_nxo_t *a_nxo, uint32_t a_index);
 
-cw_bool_t
+bool
 nxo_stack_exch(cw_nxo_t *a_nxo);
 
 void
-nxo_stack_rot(cw_nxo_t *a_nxo, cw_sint32_t a_amount);
+nxo_stack_rot(cw_nxo_t *a_nxo, int32_t a_amount);
 
-cw_bool_t
-nxo_stack_roll(cw_nxo_t *a_nxo, cw_uint32_t a_count, cw_sint32_t a_amount);
+bool
+nxo_stack_roll(cw_nxo_t *a_nxo, uint32_t a_count, int32_t a_amount);
 #endif
 
 /* Private, but the inline functions need these prototypes. */
 void
 nxoe_p_stack_shrink(cw_nxoe_stack_t *a_stack);
 
-cw_uint32_t
+uint32_t
 nxoe_p_stack_count_locking(cw_nxoe_stack_t *a_stack);
 
 cw_nxo_t *
@@ -157,29 +157,29 @@ nxoe_p_stack_bpush_locking(cw_nxoe_stack_t *a_stack);
 #endif
 
 #ifdef CW_THREADS
-cw_bool_t
+bool
 nxoe_p_stack_pop_locking(cw_nxoe_stack_t *a_stack);
 #endif
 
 #ifdef CW_THREADS
-cw_bool_t
+bool
 nxoe_p_stack_bpop_locking(cw_nxoe_stack_t *a_stack);
 #endif
 
 void
-nxoe_p_stack_npop_hard(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count);
+nxoe_p_stack_npop_hard(cw_nxoe_stack_t *a_stack, uint32_t a_count);
 
 #ifdef CW_THREADS
-cw_bool_t
-nxoe_p_stack_npop_locking(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count);
+bool
+nxoe_p_stack_npop_locking(cw_nxoe_stack_t *a_stack, uint32_t a_count);
 #endif
 
 void
-nxoe_p_stack_nbpop_hard(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count);
+nxoe_p_stack_nbpop_hard(cw_nxoe_stack_t *a_stack, uint32_t a_count);
 
 #ifdef CW_THREADS
-cw_bool_t
-nxoe_p_stack_nbpop_locking(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count);
+bool
+nxoe_p_stack_nbpop_locking(cw_nxoe_stack_t *a_stack, uint32_t a_count);
 #endif
 
 #ifdef CW_THREADS
@@ -194,35 +194,35 @@ nxoe_p_stack_bget_locking(cw_nxoe_stack_t *a_stack);
 
 #ifdef CW_THREADS
 cw_nxo_t *
-nxoe_p_stack_nget_locking(cw_nxoe_stack_t *a_stack, cw_uint32_t a_index);
+nxoe_p_stack_nget_locking(cw_nxoe_stack_t *a_stack, uint32_t a_index);
 #endif
 
 #ifdef CW_THREADS
 cw_nxo_t *
-nxoe_p_stack_nbget_locking(cw_nxoe_stack_t *a_stack, cw_uint32_t a_index);
+nxoe_p_stack_nbget_locking(cw_nxoe_stack_t *a_stack, uint32_t a_index);
 #endif
 
 #ifdef CW_THREADS
-cw_bool_t
+bool
 nxoe_p_stack_exch_locking(cw_nxoe_stack_t *a_stack);
 #endif
 
 #ifdef CW_THREADS
 void
-nxoe_p_stack_rot_locking(cw_nxoe_stack_t *a_stack, cw_sint32_t a_amount);
+nxoe_p_stack_rot_locking(cw_nxoe_stack_t *a_stack, int32_t a_amount);
 #endif
 
 #ifdef CW_THREADS
-cw_bool_t
-nxoe_p_stack_roll_locking(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count,
-			  cw_sint32_t a_amount);
+bool
+nxoe_p_stack_roll_locking(cw_nxoe_stack_t *a_stack, uint32_t a_count,
+			  int32_t a_amount);
 #endif
 
 #if (defined(CW_USE_INLINES) || defined(CW_NXO_STACK_C_))
-CW_INLINE cw_uint32_t
+CW_INLINE uint32_t
 nxo_stack_count(cw_nxo_t *a_nxo)
 {
-    cw_uint32_t retval;
+    uint32_t retval;
     cw_nxoe_stack_t *stack;
 
     cw_check_ptr(a_nxo);
@@ -357,14 +357,14 @@ nxo_stack_bpush(cw_nxo_t *a_nxo)
     return retval;
 }
 
-CW_INLINE cw_bool_t
+CW_INLINE bool
 nxoe_p_stack_pop(cw_nxoe_stack_t *a_stack)
 {
-    cw_bool_t retval;
+    bool retval;
 
     if (a_stack->aend == a_stack->abeg)
     {
-	retval = TRUE;
+	retval = true;
 	goto RETURN;
     }
 
@@ -392,15 +392,15 @@ nxoe_p_stack_pop(cw_nxoe_stack_t *a_stack)
 	nxoe_p_stack_shrink(a_stack);
     }
 
-    retval = FALSE;
+    retval = false;
     RETURN:
     return retval;
 }
 
-CW_INLINE cw_bool_t
+CW_INLINE bool
 nxo_stack_pop(cw_nxo_t *a_nxo)
 {
-    cw_bool_t retval;
+    bool retval;
     cw_nxoe_stack_t *stack;
 
     cw_check_ptr(a_nxo);
@@ -424,14 +424,14 @@ nxo_stack_pop(cw_nxo_t *a_nxo)
     return retval;
 }
 
-CW_INLINE cw_bool_t
+CW_INLINE bool
 nxoe_p_stack_bpop(cw_nxoe_stack_t *a_stack)
 {
-    cw_bool_t retval;
+    bool retval;
 
     if (a_stack->aend == a_stack->abeg)
     {
-	retval = TRUE;
+	retval = true;
 	goto RETURN;
     }
 
@@ -458,15 +458,15 @@ nxoe_p_stack_bpop(cw_nxoe_stack_t *a_stack)
 	nxoe_p_stack_shrink(a_stack);
     }
 
-    retval = FALSE;
+    retval = false;
     RETURN:
     return retval;
 }
 
-CW_INLINE cw_bool_t
+CW_INLINE bool
 nxo_stack_bpop(cw_nxo_t *a_nxo)
 {
-    cw_bool_t retval;
+    bool retval;
     cw_nxoe_stack_t *stack;
 
     cw_check_ptr(a_nxo);
@@ -490,15 +490,15 @@ nxo_stack_bpop(cw_nxo_t *a_nxo)
     return retval;
 }
 
-CW_INLINE cw_bool_t
-nxoe_p_stack_npop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
+CW_INLINE bool
+nxoe_p_stack_npop(cw_nxoe_stack_t *a_stack, uint32_t a_count)
 {
-    cw_bool_t retval;
-    cw_uint32_t i;
+    bool retval;
+    uint32_t i;
 
     if (a_count > a_stack->aend - a_stack->abeg)
     {
-	retval = TRUE;
+	retval = true;
 	goto RETURN;
     }
 
@@ -529,15 +529,15 @@ nxoe_p_stack_npop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
 	nxoe_p_stack_shrink(a_stack);
     }
 
-    retval = FALSE;
+    retval = false;
     RETURN:
     return retval;
 }
 
-CW_INLINE cw_bool_t
-nxo_stack_npop(cw_nxo_t *a_nxo, cw_uint32_t a_count)
+CW_INLINE bool
+nxo_stack_npop(cw_nxo_t *a_nxo, uint32_t a_count)
 {
-    cw_bool_t retval;
+    bool retval;
     cw_nxoe_stack_t *stack;
 
     cw_check_ptr(a_nxo);
@@ -561,15 +561,15 @@ nxo_stack_npop(cw_nxo_t *a_nxo, cw_uint32_t a_count)
     return retval;
 }
 
-CW_INLINE cw_bool_t
-nxoe_p_stack_nbpop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
+CW_INLINE bool
+nxoe_p_stack_nbpop(cw_nxoe_stack_t *a_stack, uint32_t a_count)
 {
-    cw_bool_t retval;
-    cw_uint32_t i;
+    bool retval;
+    uint32_t i;
 
     if (a_count > a_stack->aend - a_stack->abeg)
     {
-	retval = TRUE;
+	retval = true;
 	goto RETURN;
     }
 
@@ -601,15 +601,15 @@ nxoe_p_stack_nbpop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
 	nxoe_p_stack_shrink(a_stack);
     }
 
-    retval = FALSE;
+    retval = false;
     RETURN:
     return retval;
 }
 
-CW_INLINE cw_bool_t
-nxo_stack_nbpop(cw_nxo_t *a_nxo, cw_uint32_t a_count)
+CW_INLINE bool
+nxo_stack_nbpop(cw_nxo_t *a_nxo, uint32_t a_count)
 {
-    cw_bool_t retval;
+    bool retval;
     cw_nxoe_stack_t *stack;
 
     cw_check_ptr(a_nxo);
@@ -724,7 +724,7 @@ nxo_stack_bget(const cw_nxo_t *a_nxo)
 }
 
 CW_INLINE cw_nxo_t *
-nxoe_p_stack_nget(cw_nxoe_stack_t *a_stack, cw_uint32_t a_index)
+nxoe_p_stack_nget(cw_nxoe_stack_t *a_stack, uint32_t a_index)
 {
     cw_nxo_t *retval;
 
@@ -742,7 +742,7 @@ nxoe_p_stack_nget(cw_nxoe_stack_t *a_stack, cw_uint32_t a_index)
 }
 
 CW_INLINE cw_nxo_t *
-nxo_stack_nget(const cw_nxo_t *a_nxo, cw_uint32_t a_index)
+nxo_stack_nget(const cw_nxo_t *a_nxo, uint32_t a_index)
 {
     cw_nxo_t *retval;
     cw_nxoe_stack_t *stack;
@@ -769,7 +769,7 @@ nxo_stack_nget(const cw_nxo_t *a_nxo, cw_uint32_t a_index)
 }
 
 CW_INLINE cw_nxo_t *
-nxoe_p_stack_nbget(cw_nxoe_stack_t *a_stack, cw_uint32_t a_index)
+nxoe_p_stack_nbget(cw_nxoe_stack_t *a_stack, uint32_t a_index)
 {
     cw_nxo_t *retval;
 
@@ -787,7 +787,7 @@ nxoe_p_stack_nbget(cw_nxoe_stack_t *a_stack, cw_uint32_t a_index)
 }
 
 CW_INLINE cw_nxo_t *
-nxo_stack_nbget(const cw_nxo_t *a_nxo, cw_uint32_t a_index)
+nxo_stack_nbget(const cw_nxo_t *a_nxo, uint32_t a_index)
 {
     cw_nxo_t *retval;
     cw_nxoe_stack_t *stack;
@@ -813,14 +813,14 @@ nxo_stack_nbget(const cw_nxo_t *a_nxo, cw_uint32_t a_index)
     return retval;
 }
 
-CW_INLINE cw_bool_t
+CW_INLINE bool
 nxoe_p_stack_exch(cw_nxoe_stack_t *a_stack)
 {
-    cw_bool_t retval;
+    bool retval;
 
     if (a_stack->aend - a_stack->abeg < 2)
     {
-	retval = TRUE;
+	retval = true;
 	goto ERROR;
     }
 
@@ -849,15 +849,15 @@ nxoe_p_stack_exch(cw_nxoe_stack_t *a_stack)
     a_stack->rstate = RSTATE_NONE;
 #endif
 
-    retval = FALSE;
+    retval = false;
     ERROR:
     return retval;
 }
 
-CW_INLINE cw_bool_t
+CW_INLINE bool
 nxo_stack_exch(cw_nxo_t *a_nxo)
 {
-    cw_bool_t retval;
+    bool retval;
     cw_nxoe_stack_t *stack;
 
     cw_check_ptr(a_nxo);
@@ -882,9 +882,9 @@ nxo_stack_exch(cw_nxo_t *a_nxo)
 }
 
 CW_INLINE void
-nxoe_p_stack_rot(cw_nxoe_stack_t *a_stack, cw_sint32_t a_amount)
+nxoe_p_stack_rot(cw_nxoe_stack_t *a_stack, int32_t a_amount)
 {
-    cw_uint32_t trbase, count;
+    uint32_t trbase, count;
 
     cw_assert(a_stack->aend > a_stack->abeg);
 
@@ -1027,7 +1027,7 @@ nxoe_p_stack_rot(cw_nxoe_stack_t *a_stack, cw_sint32_t a_amount)
 }
 
 CW_INLINE void
-nxo_stack_rot(cw_nxo_t *a_nxo, cw_sint32_t a_amount)
+nxo_stack_rot(cw_nxo_t *a_nxo, int32_t a_amount)
 {
     cw_nxoe_stack_t *stack;
 
@@ -1050,15 +1050,15 @@ nxo_stack_rot(cw_nxo_t *a_nxo, cw_sint32_t a_amount)
     }
 }
 
-CW_INLINE cw_bool_t
-nxoe_p_stack_roll(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count,
-		  cw_sint32_t a_amount)
+CW_INLINE bool
+nxoe_p_stack_roll(cw_nxoe_stack_t *a_stack, uint32_t a_count,
+		  int32_t a_amount)
 {
-    cw_bool_t retval;
+    bool retval;
 
     if (a_count > a_stack->aend - a_stack->abeg)
     {
-	retval = TRUE;
+	retval = true;
 	goto RETURN;
     }
 
@@ -1089,15 +1089,15 @@ nxoe_p_stack_roll(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count,
     a_stack->rstate = RSTATE_NONE;
 #endif
 
-    retval = FALSE;
+    retval = false;
     RETURN:
     return retval;
 }
 
-CW_INLINE cw_bool_t
-nxo_stack_roll(cw_nxo_t *a_nxo, cw_uint32_t a_count, cw_sint32_t a_amount)
+CW_INLINE bool
+nxo_stack_roll(cw_nxo_t *a_nxo, uint32_t a_count, int32_t a_amount)
 {
-    cw_bool_t retval;
+    bool retval;
     cw_nxoe_stack_t *stack;
 
     cw_check_ptr(a_nxo);
@@ -1131,7 +1131,7 @@ nxo_stack_roll(cw_nxo_t *a_nxo, cw_uint32_t a_count, cw_sint32_t a_amount)
     if (a_amount == 0)
     {
 	/* Noop. */
-	retval = FALSE;
+	retval = false;
 	goto RETURN;
     }
 

@@ -42,7 +42,7 @@
 #include "../include/libonyx/nxo_stack_l.h"
 
 void
-nxo_stack_new(cw_nxo_t *a_nxo, cw_bool_t a_locking, cw_uint32_t a_mincount)
+nxo_stack_new(cw_nxo_t *a_nxo, bool a_locking, uint32_t a_mincount)
 {
     cw_nxoe_stack_t *stack;
 
@@ -96,10 +96,10 @@ nxo_stack_new(cw_nxo_t *a_nxo, cw_bool_t a_locking, cw_uint32_t a_mincount)
 }
 
 CW_P_INLINE void
-nxoe_p_stack_grow(cw_nxoe_stack_t *a_stack, cw_uint32_t a_beg_pad,
-		  cw_uint32_t a_end_pad)
+nxoe_p_stack_grow(cw_nxoe_stack_t *a_stack, uint32_t a_beg_pad,
+		  uint32_t a_end_pad)
 {
-    cw_uint32_t rhlen, count, pcount;
+    uint32_t rhlen, count, pcount;
 
     /* Protect the current array. */
     rhlen = a_stack->ahlen;
@@ -148,10 +148,10 @@ nxoe_p_stack_grow(cw_nxoe_stack_t *a_stack, cw_uint32_t a_beg_pad,
 /* Copy the entire array, centering the valid elements as though there were
  * a_beg_pad leading elements and a_end_pad trailing elements. */
 CW_P_INLINE void
-nxoe_p_stack_center(cw_nxoe_stack_t *a_stack, cw_uint32_t a_beg_pad,
-		    cw_uint32_t a_end_pad)
+nxoe_p_stack_center(cw_nxoe_stack_t *a_stack, uint32_t a_beg_pad,
+		    uint32_t a_end_pad)
 {
-    cw_uint32_t trbase, count, pcount;
+    uint32_t trbase, count, pcount;
 
     /* Protect the region that is being moved. */
     trbase = a_stack->rbase;
@@ -188,7 +188,7 @@ nxo_stack_copy(cw_nxo_t *a_to, cw_nxo_t *a_from)
 {
     cw_nxoe_stack_t *to, *fr;
     cw_nxo_t *nxo;
-    cw_uint32_t to_count, fr_count, i;
+    uint32_t to_count, fr_count, i;
 
     cw_check_ptr(a_to);
     cw_dassert(a_to->magic == CW_NXO_MAGIC);
@@ -245,7 +245,7 @@ nxo_stack_copy(cw_nxo_t *a_to, cw_nxo_t *a_from)
 void
 nxoe_p_stack_shrink(cw_nxoe_stack_t *a_stack)
 {
-    cw_uint32_t rhlen, count;
+    uint32_t rhlen, count;
 
     /* Protect the current array. */
     rhlen = a_stack->ahlen;
@@ -294,10 +294,10 @@ nxoe_p_stack_shrink(cw_nxoe_stack_t *a_stack)
  * branch-free as possible. */
 
 #ifdef CW_THREADS
-cw_uint32_t
+uint32_t
 nxoe_p_stack_count_locking(cw_nxoe_stack_t *a_stack)
 {
-    cw_uint32_t retval;
+    uint32_t retval;
     cw_nxoe_stack_t *stack;
 
     mtx_lock(&a_stack->lock);
@@ -399,10 +399,10 @@ nxoe_p_stack_bpush_locking(cw_nxoe_stack_t *a_stack)
 #endif
 
 #ifdef CW_THREADS
-cw_bool_t
+bool
 nxoe_p_stack_pop_locking(cw_nxoe_stack_t *a_stack)
 {
-    cw_bool_t retval;
+    bool retval;
 
     mtx_lock(&a_stack->lock);
     retval = nxoe_p_stack_pop(a_stack);
@@ -413,10 +413,10 @@ nxoe_p_stack_pop_locking(cw_nxoe_stack_t *a_stack)
 #endif
 
 #ifdef CW_THREADS
-cw_bool_t
+bool
 nxoe_p_stack_bpop_locking(cw_nxoe_stack_t *a_stack)
 {
-    cw_bool_t retval;
+    bool retval;
 
     mtx_lock(&a_stack->lock);
     retval = nxoe_p_stack_bpop(a_stack);
@@ -427,9 +427,9 @@ nxoe_p_stack_bpop_locking(cw_nxoe_stack_t *a_stack)
 #endif
 
 void
-nxoe_p_stack_npop_hard(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
+nxoe_p_stack_npop_hard(cw_nxoe_stack_t *a_stack, uint32_t a_count)
 {
-    cw_uint32_t i;
+    uint32_t i;
 
     /* Save spares. */
     for (i = 0; a_stack->nspare < CW_LIBONYX_STACK_CACHE && i < a_count; i++)
@@ -451,10 +451,10 @@ nxoe_p_stack_npop_hard(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
 }
 
 #ifdef CW_THREADS
-cw_bool_t
-nxoe_p_stack_npop_locking(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
+bool
+nxoe_p_stack_npop_locking(cw_nxoe_stack_t *a_stack, uint32_t a_count)
 {
-    cw_bool_t retval;
+    bool retval;
 
     mtx_lock(&a_stack->lock);
     retval = nxoe_p_stack_npop(a_stack, a_count);
@@ -465,9 +465,9 @@ nxoe_p_stack_npop_locking(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
 #endif
 
 void
-nxoe_p_stack_nbpop_hard(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
+nxoe_p_stack_nbpop_hard(cw_nxoe_stack_t *a_stack, uint32_t a_count)
 {
-    cw_uint32_t i;
+    uint32_t i;
 
     /* Save spares. */
     for (i = 0; a_stack->nspare < CW_LIBONYX_STACK_CACHE && i < a_count; i++)
@@ -489,10 +489,10 @@ nxoe_p_stack_nbpop_hard(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
 }
 
 #ifdef CW_THREADS
-cw_bool_t
-nxoe_p_stack_nbpop_locking(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
+bool
+nxoe_p_stack_nbpop_locking(cw_nxoe_stack_t *a_stack, uint32_t a_count)
 {
-    cw_bool_t retval;
+    bool retval;
 
     mtx_lock(&a_stack->lock);
     retval = nxoe_p_stack_nbpop(a_stack, a_count);
@@ -532,7 +532,7 @@ nxoe_p_stack_bget_locking(cw_nxoe_stack_t *a_stack)
 
 #ifdef CW_THREADS
 cw_nxo_t *
-nxoe_p_stack_nget_locking(cw_nxoe_stack_t *a_stack, cw_uint32_t a_index)
+nxoe_p_stack_nget_locking(cw_nxoe_stack_t *a_stack, uint32_t a_index)
 {
     cw_nxo_t *retval;
     
@@ -546,7 +546,7 @@ nxoe_p_stack_nget_locking(cw_nxoe_stack_t *a_stack, cw_uint32_t a_index)
 
 #ifdef CW_THREADS
 cw_nxo_t *
-nxoe_p_stack_nbget_locking(cw_nxoe_stack_t *a_stack, cw_uint32_t a_index)
+nxoe_p_stack_nbget_locking(cw_nxoe_stack_t *a_stack, uint32_t a_index)
 {
     cw_nxo_t *retval;
     
@@ -559,10 +559,10 @@ nxoe_p_stack_nbget_locking(cw_nxoe_stack_t *a_stack, cw_uint32_t a_index)
 #endif
 
 #ifdef CW_THREADS
-cw_bool_t
+bool
 nxoe_p_stack_exch_locking(cw_nxoe_stack_t *a_stack)
 {
-    cw_bool_t retval;
+    bool retval;
     
     mtx_lock(&a_stack->lock);
     retval = nxoe_p_stack_exch(a_stack);
@@ -574,7 +574,7 @@ nxoe_p_stack_exch_locking(cw_nxoe_stack_t *a_stack)
 
 #ifdef CW_THREADS
 void
-nxoe_p_stack_rot_locking(cw_nxoe_stack_t *a_stack, cw_sint32_t a_amount)
+nxoe_p_stack_rot_locking(cw_nxoe_stack_t *a_stack, int32_t a_amount)
 {
     mtx_lock(&a_stack->lock);
     nxoe_p_stack_rot(a_stack, a_amount);
@@ -583,11 +583,11 @@ nxoe_p_stack_rot_locking(cw_nxoe_stack_t *a_stack, cw_sint32_t a_amount)
 #endif
 
 #ifdef CW_THREADS
-cw_bool_t
-nxoe_p_stack_roll_locking(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count,
-			  cw_sint32_t a_amount)
+bool
+nxoe_p_stack_roll_locking(cw_nxoe_stack_t *a_stack, uint32_t a_count,
+			  int32_t a_amount)
 {
-    cw_bool_t retval;
+    bool retval;
 
     mtx_lock(&a_stack->lock);
     retval = nxoe_p_stack_roll(a_stack, a_count, a_amount);

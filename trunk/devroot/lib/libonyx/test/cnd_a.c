@@ -18,7 +18,7 @@
 
 struct cw_foo_s
 {
-    cw_uint32_t *num_waiting;
+    uint32_t *num_waiting;
     cw_cnd_t *cond;
     cw_mtx_t *mutex;
 };
@@ -48,8 +48,8 @@ main()
     cw_thd_t *threads[CW_TEST_NUM_THREADS], *thread;
     struct cw_foo_s foo_var;
     struct timespec timeout;
-    cw_uint32_t i;
-    cw_uint32_t num_waiting;
+    uint32_t i;
+    uint32_t num_waiting;
 
     libonyx_init(0, NULL, NULL);
     fprintf(stderr, "Test begin\n");
@@ -76,7 +76,7 @@ main()
     foo_var.mutex = &mutex;
 
     /* Test cnd_signal. */
-    thread = thd_new(thread_entry_func, (void *) &foo_var, TRUE);
+    thread = thd_new(thread_entry_func, (void *) &foo_var, true);
 
     /* Bad programming practice, but it works for this test. */
     mtx_lock(&mutex);
@@ -95,7 +95,7 @@ main()
     num_waiting = 0;
     for (i = 0; i < CW_TEST_NUM_THREADS; i++)
     {
-	threads[i] = thd_new(thread_entry_func, (void *) &foo_var, TRUE);
+	threads[i] = thd_new(thread_entry_func, (void *) &foo_var, true);
     }
 
     /* Bad programming practice, but it works for this test. */

@@ -19,10 +19,10 @@
 #include "../include/libonyx/nxa_l.h"
 
 void
-nxo_array_new(cw_nxo_t *a_nxo, cw_bool_t a_locking, cw_uint32_t a_len)
+nxo_array_new(cw_nxo_t *a_nxo, bool a_locking, uint32_t a_len)
 {
     cw_nxoe_array_t *array;
-    cw_uint32_t i;
+    uint32_t i;
 
     array = (cw_nxoe_array_t *) nxa_malloc(sizeof(cw_nxoe_array_t));
 
@@ -53,8 +53,8 @@ nxo_array_new(cw_nxo_t *a_nxo, cw_bool_t a_locking, cw_uint32_t a_len)
 }
 
 void
-nxo_array_subarray_new(cw_nxo_t *a_nxo, cw_nxo_t *a_array, cw_uint32_t a_offset,
-		       cw_uint32_t a_len)
+nxo_array_subarray_new(cw_nxo_t *a_nxo, cw_nxo_t *a_array, uint32_t a_offset,
+		       uint32_t a_len)
 {
     cw_nxoe_array_t *array, *orig;
 
@@ -66,8 +66,8 @@ nxo_array_subarray_new(cw_nxo_t *a_nxo, cw_nxo_t *a_array, cw_uint32_t a_offset,
 
     array = (cw_nxoe_array_t *) nxa_malloc(sizeof(cw_nxoe_array_t));
 
-    nxoe_l_new(&array->nxoe, NXOT_ARRAY, FALSE);
-    array->nxoe.indirect = TRUE;
+    nxoe_l_new(&array->nxoe, NXOT_ARRAY, false);
+    array->nxoe.indirect = true;
 
     if (orig->nxoe.indirect)
     {
@@ -97,9 +97,9 @@ nxo_array_copy(cw_nxo_t *a_to, cw_nxo_t *a_from)
     cw_nxoe_array_t *array_fr, *array_fr_i = NULL, *array_fr_l;
     cw_nxoe_array_t *array_to, *array_to_i = NULL, *array_to_l;
     cw_nxo_t *arr_fr, *arr_to;
-    cw_uint32_t i, len_fr, len_to;
+    uint32_t i, len_fr, len_to;
 #ifdef CW_THREADS
-    cw_bool_t locking_fr, locking_to;
+    bool locking_fr, locking_to;
 #endif
 
     /* Set array pointers. */
@@ -151,24 +151,24 @@ nxo_array_copy(cw_nxo_t *a_to, cw_nxo_t *a_from)
     /* Iteratively copy elements.  Only copy one level deep (not recursively),
      * by using dup. */
 #ifdef CW_THREADS
-    if (array_fr_l->nxoe.locking && array_fr_l->nxoe.indirect == FALSE)
+    if (array_fr_l->nxoe.locking && array_fr_l->nxoe.indirect == false)
     {
-	locking_fr = TRUE;
+	locking_fr = true;
 	mtx_lock(&array_fr_l->lock);
     }
     else
     {
-	locking_fr = FALSE;
+	locking_fr = false;
     }
 
-    if (array_to_l->nxoe.locking && array_to_l->nxoe.indirect == FALSE)
+    if (array_to_l->nxoe.locking && array_to_l->nxoe.indirect == false)
     {
-	locking_to = TRUE;
+	locking_to = true;
 	mtx_lock(&array_to_l->lock);
     }
     else
     {
-	locking_to = FALSE;
+	locking_to = false;
     }
 #endif
     for (i = 0; i < len_fr; i++)
@@ -202,10 +202,10 @@ nxo_array_copy(cw_nxo_t *a_to, cw_nxo_t *a_from)
 #endif
 }
 
-cw_uint32_t
+uint32_t
 nxo_array_len_get(const cw_nxo_t *a_nxo)
 {
-    cw_uint32_t retval;
+    uint32_t retval;
     cw_nxoe_array_t *array;
 
     cw_check_ptr(a_nxo);
@@ -215,7 +215,7 @@ nxo_array_len_get(const cw_nxo_t *a_nxo)
     cw_dassert(array->nxoe.magic == CW_NXOE_MAGIC);
     cw_assert(array->nxoe.type == NXOT_ARRAY);
 
-    if (array->nxoe.indirect == FALSE)
+    if (array->nxoe.indirect == false)
     {
 	retval = array->e.a.len;
     }
@@ -232,7 +232,7 @@ nxo_array_el_get(const cw_nxo_t *a_nxo, cw_nxoi_t a_offset, cw_nxo_t *r_el)
 {
     cw_nxoe_array_t *array;
 #ifdef CW_THREADS
-    cw_bool_t locking;
+    bool locking;
 #endif
 
     cw_check_ptr(a_nxo);
@@ -251,7 +251,7 @@ nxo_array_el_get(const cw_nxo_t *a_nxo, cw_nxoi_t a_offset, cw_nxo_t *r_el)
 	a_offset += array->e.i.beg_offset;
 	array = array->e.i.array;
 #ifdef CW_THREADS
-	locking = FALSE;
+	locking = false;
 #endif
     }
 #ifdef CW_THREADS
@@ -259,11 +259,11 @@ nxo_array_el_get(const cw_nxo_t *a_nxo, cw_nxoi_t a_offset, cw_nxo_t *r_el)
     {
 	if (array->nxoe.locking)
 	{
-	    locking = TRUE;
+	    locking = true;
 	}
 	else
 	{
-	    locking = FALSE;
+	    locking = false;
 	}
     }
 
@@ -272,7 +272,7 @@ nxo_array_el_get(const cw_nxo_t *a_nxo, cw_nxoi_t a_offset, cw_nxo_t *r_el)
 	mtx_lock(&array->lock);
     }
 #endif
-    cw_assert(array->nxoe.indirect == FALSE);
+    cw_assert(array->nxoe.indirect == false);
 
     cw_assert(a_offset >= 0 && a_offset < array->e.a.len);
     nxo_dup(r_el, &array->e.a.arr[a_offset]);
@@ -289,7 +289,7 @@ nxo_array_el_set(cw_nxo_t *a_nxo, cw_nxo_t *a_el, cw_nxoi_t a_offset)
 {
     cw_nxoe_array_t *array;
 #ifdef CW_THREADS
-    cw_bool_t locking;
+    bool locking;
 #endif
 
     cw_check_ptr(a_nxo);
@@ -307,7 +307,7 @@ nxo_array_el_set(cw_nxo_t *a_nxo, cw_nxo_t *a_el, cw_nxoi_t a_offset)
 	a_offset += array->e.i.beg_offset;
 	array = array->e.i.array;
 #ifdef CW_THREADS
-	locking = FALSE;
+	locking = false;
 #endif
     }
 #ifdef CW_THREADS
@@ -315,11 +315,11 @@ nxo_array_el_set(cw_nxo_t *a_nxo, cw_nxo_t *a_el, cw_nxoi_t a_offset)
     {
 	if (array->nxoe.locking)
 	{
-	    locking = TRUE;
+	    locking = true;
 	}
 	else
 	{
-	    locking = FALSE;
+	    locking = false;
 	}
     }
 
@@ -328,7 +328,7 @@ nxo_array_el_set(cw_nxo_t *a_nxo, cw_nxo_t *a_el, cw_nxoi_t a_offset)
 	mtx_lock(&array->lock);
     }
 #endif
-    cw_assert(array->nxoe.indirect == FALSE);
+    cw_assert(array->nxoe.indirect == false);
 
     cw_assert(a_offset >= 0 && a_offset < array->e.a.len);
     nxo_no_new(&array->e.a.arr[a_offset]);
@@ -341,11 +341,11 @@ nxo_array_el_set(cw_nxo_t *a_nxo, cw_nxo_t *a_el, cw_nxoi_t a_offset)
 #endif
 }
 
-cw_bool_t
-nxo_array_origin_get(cw_nxo_t *a_nxo, const cw_uint8_t **r_origin,
-		     cw_uint32_t *r_olen, cw_uint32_t *r_line_num)
+bool
+nxo_array_origin_get(cw_nxo_t *a_nxo, const uint8_t **r_origin,
+		     uint32_t *r_olen, uint32_t *r_line_num)
 {
-    cw_bool_t retval;
+    bool retval;
     cw_nxoe_array_t *array;
 
     cw_check_ptr(a_nxo);
@@ -364,15 +364,15 @@ nxo_array_origin_get(cw_nxo_t *a_nxo, const cw_uint8_t **r_origin,
     }
     else
     {
-	retval = TRUE;
+	retval = true;
     }
 
     return retval;
 }
 
 void
-nxo_array_origin_set(cw_nxo_t *a_nxo, const cw_uint8_t *a_origin,
-		     cw_uint32_t a_olen, cw_uint32_t a_line_num)
+nxo_array_origin_set(cw_nxo_t *a_nxo, const uint8_t *a_origin,
+		     uint32_t a_olen, uint32_t a_line_num)
 {
     cw_nxoe_array_t *array;
 
@@ -386,8 +386,8 @@ nxo_array_origin_set(cw_nxo_t *a_nxo, const cw_uint8_t *a_origin,
     cw_dassert(array->nxoe.magic == CW_NXOE_MAGIC);
     cw_assert(array->nxoe.type == NXOT_ARRAY);
 
-    cw_assert(array->nxoe.origin == FALSE);
+    cw_assert(array->nxoe.origin == false);
 
     origin_l_insert(array, a_origin, a_olen, a_line_num);
-    array->nxoe.origin = TRUE;
+    array->nxoe.origin = true;
 }

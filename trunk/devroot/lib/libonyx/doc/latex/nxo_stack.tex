@@ -22,8 +22,8 @@ The \classname{nxo\_stack} class is a subclass of the \classname{nxo} class.
 \begin{capi}
 \label{nxo_stack_new}
 \index{nxo_stack_new@\cfunc{nxo\_stack\_new}{}}
-\citem{\cfunc[void]{nxo\_stack\_new}{cw\_nxo\_t *a\_nxo, cw\_bool\_t
-a\_locking, cw\_uint32\_t a\_mincount}}
+\citem{\cfunc[void]{nxo\_stack\_new}{cw\_nxo\_t *a\_nxo, bool
+a\_locking, uint32\_t a\_mincount}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -63,7 +63,7 @@ a\_locking, cw\_uint32\_t a\_mincount}}
 	\end{capilist}
 \label{nxo_stack_count}
 \index{nxo_stack_count@\cfunc{nxo\_stack\_count}{}}
-\citem{\cfunc[cw\_uint32\_t]{nxo\_stack\_count}{cw\_nxo\_t *a\_nxo}}
+\citem{\cfunc[uint32\_t]{nxo\_stack\_count}{cw\_nxo\_t *a\_nxo}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -127,7 +127,7 @@ a\_locking, cw\_uint32\_t a\_mincount}}
 	\end{capilist}
 \label{nxo_stack_pop}
 \index{nxo_stack_pop@\cfunc{nxo\_stack\_pop}{}}
-\citem{\cfunc[cw\_bool\_t]{nxo\_stack\_pop}{cw\_nxo\_t *a\_nxo}}
+\citem{\cfunc[bool]{nxo\_stack\_pop}{cw\_nxo\_t *a\_nxo}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -138,9 +138,9 @@ a\_locking, cw\_uint32\_t a\_mincount}}
 		\begin{description}\item[]
 		\item[retval: ]
 			\begin{description}\item[]
-			\item[FALSE: ]
+			\item[false: ]
 				Success.
-			\item[TRUE: ]
+			\item[true: ]
 				Stack underflow.
 			\end{description}
 		\end{description}
@@ -150,7 +150,7 @@ a\_locking, cw\_uint32\_t a\_mincount}}
 	\end{capilist}
 \label{nxo_stack_bpop}
 \index{nxo_stack_bpop@\cfunc{nxo\_stack\_bpop}{}}
-\citem{\cfunc[cw\_bool\_t]{nxo\_stack\_bpop}{cw\_nxo\_t *a\_nxo}}
+\citem{\cfunc[bool]{nxo\_stack\_bpop}{cw\_nxo\_t *a\_nxo}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -161,9 +161,9 @@ a\_locking, cw\_uint32\_t a\_mincount}}
 		\begin{description}\item[]
 		\item[retval: ]
 			\begin{description}\item[]
-			\item[FALSE: ]
+			\item[false: ]
 				Success.
-			\item[TRUE: ]
+			\item[true: ]
 				Stack underflow.
 			\end{description}
 		\end{description}
@@ -173,7 +173,7 @@ a\_locking, cw\_uint32\_t a\_mincount}}
 	\end{capilist}
 \label{nxo_stack_npop}
 \index{nxo_stack_npop@\cfunc{nxo\_stack\_npop}{}}
-\citem{\cfunc[cw\_bool\_t]{nxo\_stack\_npop}{cw\_nxo\_t *a\_nxo, cw\_uint32\_t
+\citem{\cfunc[bool]{nxo\_stack\_npop}{cw\_nxo\_t *a\_nxo, uint32\_t
 a\_count}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -187,9 +187,9 @@ a\_count}}
 		\begin{description}\item[]
 		\item[retval: ]
 			\begin{description}\item[]
-			\item[FALSE: ]
+			\item[false: ]
 				Success.
-			\item[TRUE: ]
+			\item[true: ]
 				Stack underflow.
 			\end{description}
 		\end{description}
@@ -199,7 +199,7 @@ a\_count}}
 	\end{capilist}
 \label{nxo_stack_nbpop}
 \index{nxo_stack_nbpop@\cfunc{nxo\_stack\_nbpop}{}}
-\citem{\cfunc[cw\_bool\_t]{nxo\_stack\_nbpop}{cw\_nxo\_t *a\_nxo, cw\_uint32\_t
+\citem{\cfunc[bool]{nxo\_stack\_nbpop}{cw\_nxo\_t *a\_nxo, uint32\_t
 a\_count}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -214,9 +214,9 @@ a\_count}}
 		\begin{description}\item[]
 		\item[retval: ]
 			\begin{description}\item[]
-			\item[FALSE: ]
+			\item[false: ]
 				Success.
-			\item[TRUE: ]
+			\item[true: ]
 				Stack underflow.
 			\end{description}
 		\end{description}
@@ -275,7 +275,7 @@ a\_count}}
 \label{nxo_stack_nget}
 \index{nxo_stack_nget@\cfunc{nxo\_stack\_nget}{}}
 \citem{\cfunc[cw\_nxo\_t *]{nxo\_stack\_nget}{const cw\_nxo\_t *a\_nxo,
-cw\_uint32\_t a\_index}}
+uint32\_t a\_index}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -303,7 +303,7 @@ cw\_uint32\_t a\_index}}
 \label{nxo_stack_nbget}
 \index{nxo_stack_nbget@\cfunc{nxo\_stack\_nbget}{}}
 \citem{\cfunc[cw\_nxo\_t *]{nxo\_stack\_nbget}{const cw\_nxo\_t *a\_nxo,
-cw\_uint32\_t a\_index}}
+uint32\_t a\_index}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -331,7 +331,7 @@ cw\_uint32\_t a\_index}}
 	\end{capilist}
 \label{nxo_stack_exch}
 \index{nxo_stack_exch@\cfunc{nxo\_stack\_exch}{}}
-\citem{\cfunc[cw\_bool\_t]{nxo\_stack\_exch}{cw\_nxo\_t *a\_nxo}}
+\citem{\cfunc[bool]{nxo\_stack\_exch}{cw\_nxo\_t *a\_nxo}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -342,9 +342,9 @@ cw\_uint32\_t a\_index}}
 		\begin{description}\item[]
 		\item[retval: ]
 			\begin{description}\item[]
-			\item[FALSE: ]
+			\item[false: ]
 				Success.
-			\item[TRUE: ]
+			\item[true: ]
 				Stack underflow.
 			\end{description}
 		\end{description}
@@ -354,7 +354,7 @@ cw\_uint32\_t a\_index}}
 	\end{capilist}
 \label{nxo_stack_rot}
 \index{nxo_stack_rot@\cfunc{nxo\_stack\_rot}{}}
-\citem{\cfunc[void]{nxo\_stack\_rot}{cw\_nxo\_t *a\_nxo, cw\_sint32\_t
+\citem{\cfunc[void]{nxo\_stack\_rot}{cw\_nxo\_t *a\_nxo, int32\_t
 a\_amount}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -372,8 +372,8 @@ a\_amount}}
 	\end{capilist}
 \label{nxo_stack_roll}
 \index{nxo_stack_roll@\cfunc{nxo\_stack\_roll}{}}
-\citem{\cfunc[cw\_bool\_t]{nxo\_stack\_roll}{cw\_nxo\_t *a\_nxo, cw\_uint32\_t
-a\_count, cw\_sint32\_t a\_amount}}
+\citem{\cfunc[bool]{nxo\_stack\_roll}{cw\_nxo\_t *a\_nxo, uint32\_t
+a\_count, int32\_t a\_amount}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -388,9 +388,9 @@ a\_count, cw\_sint32\_t a\_amount}}
 		\begin{description}\item[]
 		\item[retval: ]
 			\begin{description}\item[]
-			\item[FALSE: ]
+			\item[false: ]
 				Success.
-			\item[TRUE: ]
+			\item[true: ]
 				Stack underflow.
 			\end{description}
 		\end{description}

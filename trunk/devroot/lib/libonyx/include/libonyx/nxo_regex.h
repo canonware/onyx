@@ -40,32 +40,32 @@ typedef struct
 } cw_nxo_regex_cache_t;
 
 cw_nxn_t
-nxo_regex_new(cw_nxo_t *a_nxo, const cw_uint8_t *a_pattern, cw_uint32_t a_len,
-	      cw_bool_t a_cont, cw_bool_t a_global, cw_bool_t a_insensitive,
-	      cw_bool_t a_multiline, cw_bool_t a_singleline);
+nxo_regex_new(cw_nxo_t *a_nxo, const uint8_t *a_pattern, uint32_t a_len,
+	      bool a_cont, bool a_global, bool a_insensitive,
+	      bool a_multiline, bool a_singleline);
 
 void
 nxo_regex_match(cw_nxo_t *a_nxo, cw_nxo_t *a_thread, cw_nxo_t *a_input,
-		cw_bool_t *r_match);
+		bool *r_match);
 
 cw_nxn_t
-nxo_regex_nonew_match(cw_nxo_t *a_thread, const cw_uint8_t *a_pattern,
-		      cw_uint32_t a_len, cw_bool_t a_cont, cw_bool_t a_global,
-		      cw_bool_t a_insensitive, cw_bool_t a_multiline,
-		      cw_bool_t a_singleline, cw_nxo_t *a_input,
-		      cw_bool_t *r_match);
+nxo_regex_nonew_match(cw_nxo_t *a_thread, const uint8_t *a_pattern,
+		      uint32_t a_len, bool a_cont, bool a_global,
+		      bool a_insensitive, bool a_multiline,
+		      bool a_singleline, cw_nxo_t *a_input,
+		      bool *r_match);
 
 void
-nxo_regex_split(cw_nxo_t *a_nxo, cw_nxo_t *a_thread, cw_uint32_t a_limit,
+nxo_regex_split(cw_nxo_t *a_nxo, cw_nxo_t *a_thread, uint32_t a_limit,
 		cw_nxo_t *a_input, cw_nxo_t *r_array);
 
 cw_nxn_t
-nxo_regex_nonew_split(cw_nxo_t *a_thread, const cw_uint8_t *a_pattern,
-		      cw_uint32_t a_len, cw_bool_t a_insensitive,
-		      cw_bool_t a_multiline, cw_bool_t a_singleline,
-		      cw_uint32_t a_limit, cw_nxo_t *a_input,
+nxo_regex_nonew_split(cw_nxo_t *a_thread, const uint8_t *a_pattern,
+		      uint32_t a_len, bool a_insensitive,
+		      bool a_multiline, bool a_singleline,
+		      uint32_t a_limit, cw_nxo_t *a_input,
 		      cw_nxo_t *r_array);
 
 void
-nxo_regex_submatch(cw_nxo_t *a_thread, cw_uint32_t a_capture,
+nxo_regex_submatch(cw_nxo_t *a_thread, uint32_t a_capture,
 		   cw_nxo_t *r_match);

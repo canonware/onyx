@@ -15,7 +15,7 @@
 #define NAME_anon_handle "anon_handle"
 #define NAME_mark_handle "mark_handle"
 
-const cw_uint8_t *data = "handle data";
+const uint8_t *data = "handle data";
 
 void
 handle_eval(void *a_data, cw_nxo_t *a_thread)
@@ -26,19 +26,19 @@ handle_eval(void *a_data, cw_nxo_t *a_thread)
 }
 
 cw_nxoe_t *
-handle_ref_iter(void *a_data, cw_bool_t a_reset)
+handle_ref_iter(void *a_data, bool a_reset)
 {
     cw_assert(a_data == data);
 
     return NULL;
 }
 
-cw_bool_t
-handle_delete(void *a_data, cw_uint32_t a_iter)
+bool
+handle_delete(void *a_data, uint32_t a_iter)
 {
     cw_assert(a_data == data);
 
-    return FALSE;
+    return false;
 }
 
 void
@@ -83,14 +83,14 @@ main(int argc, char **argv, char **envp)
 
     name = nxo_stack_push(ostack);
     operator = nxo_stack_push(ostack);
-    nxo_name_new(name, NAME_anon_handle, strlen(NAME_anon_handle), FALSE);
+    nxo_name_new(name, NAME_anon_handle, strlen(NAME_anon_handle), false);
     nxo_operator_new(operator, anon_handle, NXN_ZERO);
     nxo_attr_set(operator, NXOA_EXECUTABLE);
     cw_onyx_code(&thread, "def");
 
     name = nxo_stack_push(ostack);
     operator = nxo_stack_push(ostack);
-    nxo_name_new(name, NAME_mark_handle, strlen(NAME_mark_handle), FALSE);
+    nxo_name_new(name, NAME_mark_handle, strlen(NAME_mark_handle), false);
     nxo_operator_new(operator, mark_handle, NXN_ZERO);
     nxo_attr_set(operator, NXOA_EXECUTABLE);
     cw_onyx_code(&thread, "def");

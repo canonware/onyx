@@ -26,7 +26,7 @@ nxo_instance_new(cw_nxo_t *a_nxo, void *a_opaque,
 
     instance = (cw_nxoe_instance_t *) nxa_malloc(sizeof(cw_nxoe_instance_t));
 
-    nxoe_l_new(&instance->nxoe, NXOT_INSTANCE, FALSE);
+    nxoe_l_new(&instance->nxoe, NXOT_INSTANCE, false);
     nxo_null_new(&instance->isa);
     nxo_null_new(&instance->data);
     instance->opaque = a_opaque;

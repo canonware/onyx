@@ -23,9 +23,9 @@ The \classname{nxo\_regsub} class is a subclass of the \classname{nxo} class.
 \label{nxo_regsub_new}
 \index{nxo_regsub_new@\cfunc{nxo\_regsub\_new}{}}
 \citem{\cfunc[cw\_nxn\_t]{nxo\_regsub\_new}{cw\_nxo\_t *a\_nxo, const
-cw\_uint8\_t  *a\_pattern, cw\_uint32\_t a\_plen, cw\_bool\_t a\_global,
-cw\_bool\_t a\_insensitive, cw\_bool\_t a\_multiline, cw\_bool\_t a\_singleline,
-const cw\_uint8\_t *a\_template, cw\_uint32\_t a\_tlen}}
+uint8\_t  *a\_pattern, uint32\_t a\_plen, bool a\_global,
+bool a\_insensitive, bool a\_multiline, bool a\_singleline,
+const uint8\_t *a\_template, uint32\_t a\_tlen}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -36,11 +36,11 @@ const cw\_uint8\_t *a\_template, cw\_uint32\_t a\_tlen}}
 		\item[a\_plen: ]
 			Length of \cvar{a\_pattern}.
 		\item[a\_global: ]
-			Substitute as many times as possible if TRUE.
+			Substitute as many times as possible if true.
 		\item[a\_insensitive: ]
-			Match with case insensitivity if TRUE.
+			Match with case insensitivity if true.
 		\item[a\_multiline: ]
-			Treat input as a multi-line string if TRUE.
+			Treat input as a multi-line string if true.
 		\item[a\_singleline: ]
 			Treat input as a single line, so that the dot
 			metacharacter matches any character, including a
@@ -69,7 +69,7 @@ const cw\_uint8\_t *a\_template, cw\_uint32\_t a\_tlen}}
 \label{nxo_regsub_subst}
 \index{nxo_regsub_subst@\cfunc{nxo\_regsub\_subst}{}}
 \citem{\cfunc[void]{nxo\_regsub\_subst}{cw\_nxo\_t *a\_nxo, cw\_nxo\_t
-*a\_thread, cw\_nxo\_t *a\_input, cw\_nxo\_t *r\_output, cw\_uint32\_t
+*a\_thread, cw\_nxo\_t *a\_input, cw\_nxo\_t *r\_output, uint32\_t
 *r\_count}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -84,7 +84,7 @@ const cw\_uint8\_t *a\_template, cw\_uint32\_t a\_tlen}}
 			Pointer to an \classname{nxo} to dup a string reference
 			to.
 		\item[r\_count: ]
-			Pointer to a \ctype{cw\_uint32\_t}.
+			Pointer to a \ctype{uint32\_t}.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
@@ -111,10 +111,10 @@ const cw\_uint8\_t *a\_template, cw\_uint32\_t a\_tlen}}
 \label{nxo_regsub_nonew_subst}
 \index{nxo_regsub_nonew_subst@\cfunc{nxo\_regsub\_nonew\_subst}{}}
 \citem{\cfunc[cw\_nxn\_t]{nxo\_regsub\_nonew\_subst}{cw\_nxo\_t *a\_thread,
-const cw\_uint8\_t *a\_pattern, cw\_uint32\_t a\_plen, cw\_bool\_t a\_global,
-cw\_bool\_t a\_insensitive, cw\_bool\_t a\_multiline, cw\_bool\_t a\_singleline,
-const cw\_uint8\_t *a\_template, cw\_uint32\_t a\_tlen, cw\_nxo\_t *a\_input,
-cw\_nxo\_t *r\_output, cw\_uint32\_t *r\_count}}
+const uint8\_t *a\_pattern, uint32\_t a\_plen, bool a\_global,
+bool a\_insensitive, bool a\_multiline, bool a\_singleline,
+const uint8\_t *a\_template, uint32\_t a\_tlen, cw\_nxo\_t *a\_input,
+cw\_nxo\_t *r\_output, uint32\_t *r\_count}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -125,11 +125,11 @@ cw\_nxo\_t *r\_output, cw\_uint32\_t *r\_count}}
 		\item[a\_plen: ]
 			Length of \cvar{a\_pattern}.
 		\item[a\_global: ]
-			Substitute as many times as possible if TRUE.
+			Substitute as many times as possible if true.
 		\item[a\_insensitive: ]
-			Match with case insensitivity if TRUE.
+			Match with case insensitivity if true.
 		\item[a\_multiline: ]
-			Treat input as a multi-line string if TRUE.
+			Treat input as a multi-line string if true.
 		\item[a\_singleline: ]
 			Treat input as a single line, so that the dot
 			metacharacter matches any character, including a
@@ -145,7 +145,7 @@ cw\_nxo\_t *r\_output, cw\_uint32\_t *r\_count}}
 			Pointer to an \classname{nxo} to dup a string reference
 			to.
 		\item[r\_count: ]
-			Pointer to a \ctype{cw\_uint32\_t}.
+			Pointer to a \ctype{uint32\_t}.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]

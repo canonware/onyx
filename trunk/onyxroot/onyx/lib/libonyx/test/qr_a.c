@@ -20,13 +20,13 @@ typedef struct ring_s ring_t;
 struct ring_s
 {
     qr(ring_t) link;
-    cw_uint8_t id;
+    uint8_t id;
 };
 
 int
 main()
 {
-    cw_uint32_t i;
+    uint32_t i;
     ring_t entries[NENTRIES], *t;
 
     libonyx_init(0, NULL, NULL);

@@ -39,7 +39,7 @@ such situations.
 \begin{capi}
 \label{CW_CH_TABLE2SIZEOF}
 \index{CW_CH_TABLE2SIZEOF@\cppmacro{CW\_CH\_TABLE2SIZEOF}{}}
-\citem{\cppmacro[cw\_uint32\_t]{CW\_CH\_TABLE2SIZEOF}{cw\_uint32\_t
+\citem{\cppmacro[uint32\_t]{CW\_CH\_TABLE2SIZEOF}{uint32\_t
 a\_table\_size}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -60,7 +60,7 @@ a\_table\_size}}
 	\end{capilist}
 \label{ch_new}
 \index{ch_new@\cfunc{ch\_new}{}}
-\citem{\cfunc[]{ch\_new}{cw\_ch\_t *a\_ch, cw\_mema\_t *a\_mema, cw\_uint32\_t
+\citem{\cfunc[]{ch\_new}{cw\_ch\_t *a\_ch, cw\_mema\_t *a\_mema, uint32\_t
 a\_table\_size, cw\_ch\_hash\_t *a\_hash, cw\_ch\_key\_comp\_t *a\_key\_comp}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -107,7 +107,7 @@ a\_table\_size, cw\_ch\_hash\_t *a\_hash, cw\_ch\_key\_comp\_t *a\_key\_comp}}
 	\end{capilist}
 \label{ch_count}
 \index{ch_count@\cfunc{ch\_count}{}}
-\citem{\cfunc[cw\_uint32\_t]{ch\_count}{cw\_ch\_t *a\_ch}}
+\citem{\cfunc[uint32\_t]{ch\_count}{cw\_ch\_t *a\_ch}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -151,7 +151,7 @@ a\_table\_size, cw\_ch\_hash\_t *a\_hash, cw\_ch\_key\_comp\_t *a\_key\_comp}}
 	\end{capilist}
 \label{ch_remove}
 \index{ch_remove@\cfunc{ch\_remove}{}}
-\citem{\cfunc[cw\_bool\_t]{ch\_remove}{cw\_ch\_t *a\_ch, const void
+\citem{\cfunc[bool]{ch\_remove}{cw\_ch\_t *a\_ch, const void
 *a\_search\_key, void **r\_key, void **r\_data, cw\_chi\_t **r\_chi}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -171,19 +171,19 @@ a\_table\_size, cw\_ch\_hash\_t *a\_hash, cw\_ch\_key\_comp\_t *a\_key\_comp}}
 		\begin{description}\item[]
 		\item[retval: ]
 			\begin{description}\item[]
-			\item[FALSE: ]
+			\item[false: ]
 				Success.
-			\item[TRUE: ]
+			\item[true: ]
 				Item with key \cvar{a\_search\_key} not	found.
 			\end{description}
 		\item[*r\_key: ]
-			If (\cvar{r\_key} != NULL) and (retval == FALSE),
+			If (\cvar{r\_key} != NULL) and (retval == false),
 			pointer to a key.  Otherwise, undefined.
 		\item[*r\_data: ]
-			If (\cvar{r\_data} != NULL) and (retval == FALSE),
+			If (\cvar{r\_data} != NULL) and (retval == false),
 			pointer to data.  Otherwise, undefined.
 		\item[*r\_chi: ]
-			If (\cvar{r\_chi} != NULL) and (retval == FALSE),
+			If (\cvar{r\_chi} != NULL) and (retval == false),
 			pointer to space for a \classname{chi}, or NULL.
 			Otherwise, undefined.
 		\end{description}
@@ -213,7 +213,7 @@ a\_table\_size, cw\_ch\_hash\_t *a\_hash, cw\_ch\_key\_comp\_t *a\_key\_comp}}
 	\end{capilist}
 \label{ch_search}
 \index{ch_search@\cfunc{ch\_search}{}}
-\citem{\cfunc[cw\_bool\_t]{ch\_search}{cw\_ch\_t *a\_ch, const void *a\_key,
+\citem{\cfunc[bool]{ch\_search}{cw\_ch\_t *a\_ch, const void *a\_key,
 void **r\_data}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -229,14 +229,14 @@ void **r\_data}}
 		\begin{description}\item[]
 		\item[retval: ]
 			\begin{description}\item[]
-			\item[FALSE: ]
+			\item[false: ]
 				Success.
-			\item[TRUE: ]
+			\item[true: ]
 				Item with key \cvar{a\_key} not found in
 				\cvar{a\_ch}.
 			\end{description}
 		\item[*r\_data: ]
-			If (\cvar{r\_data} != NULL) and (retval == FALSE),
+			If (\cvar{r\_data} != NULL) and (retval == false),
 			pointer to data.
 		\end{description}
 	\item[Exception(s): ] None.
@@ -247,7 +247,7 @@ void **r\_data}}
 	\end{capilist}
 \label{ch_string_hash}
 \index{ch_string_hash@\cfunc{ch\_string\_hash}{}}
-\citem{\cfunc[cw\_uint32\_t]{ch\_string\_hash}{const void *a\_key}}
+\citem{\cfunc[uint32\_t]{ch\_string\_hash}{const void *a\_key}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -265,7 +265,7 @@ void **r\_data}}
 	\end{capilist}
 \label{ch_direct_hash}
 \index{ch_direct_hash@\cfunc{ch\_direct\_hash}{}}
-\citem{\cfunc[cw\_uint32\_t]{ch\_direct\_hash}{const void *a\_key}}
+\citem{\cfunc[uint32\_t]{ch\_direct\_hash}{const void *a\_key}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -283,7 +283,7 @@ void **r\_data}}
 	\end{capilist}
 \label{ch_string_key_comp}
 \index{ch_string_key_comp@\cfunc{ch\_string\_key\_comp}{}}
-\citem{\cfunc[cw\_bool\_t]{ch\_string\_key\_comp}{const void *a\_k1, const void
+\citem{\cfunc[bool]{ch\_string\_key\_comp}{const void *a\_k1, const void
 *a\_k2}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -297,9 +297,9 @@ void **r\_data}}
 		\begin{description}\item[]
 		\item[retval: ]
 			\begin{description}\item[]
-			\item[FALSE: ]
+			\item[false: ]
 				Not equal.
-			\item[TRUE: ]
+			\item[true: ]
 				Equal.
 			\end{description}
 		\end{description}
@@ -309,7 +309,7 @@ void **r\_data}}
 	\end{capilist}
 \label{ch_direct_key_comp}
 \index{ch_direct_key_comp@\cfunc{ch\_direct\_key\_comp}{}}
-\citem{\cfunc[cw\_bool\_t]{ch\_direct\_key\_comp}{const void *a\_k1, const void
+\citem{\cfunc[bool]{ch\_direct\_key\_comp}{const void *a\_k1, const void
 *a\_k2}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -323,9 +323,9 @@ void **r\_data}}
 		\begin{description}\item[]
 		\item[retval: ]
 			\begin{description}\item[]
-			\item[FALSE: ]
+			\item[false: ]
 				Not equal.
-			\item[TRUE: ]
+			\item[true: ]
 				Equal.
 			\end{description}
 		\end{description}

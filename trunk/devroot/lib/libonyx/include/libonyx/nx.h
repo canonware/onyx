@@ -13,11 +13,11 @@
 struct cw_nx_s
 {
 #ifdef CW_DBG
-    cw_uint32_t magic;
+    uint32_t magic;
 #define CW_NX_MAGIC 0xae9678fd
 #endif
 
-    cw_bool_t is_malloced;
+    bool is_malloced;
 
     /* Linkage for nxa's list of nx's. */
     ql_elm(cw_nx_t) link;
@@ -26,7 +26,7 @@ struct cw_nx_s
     cw_nxoi_t maxestack;
 
     /* Initial setting for tail call optimization. */
-    cw_bool_t tailopt;
+    bool tailopt;
 
     /* Dictionaries. */
     cw_nxo_t threadsdict;
@@ -57,7 +57,7 @@ void
 nx_maxestack_set(cw_nx_t *a_nx, cw_nxoi_t a_maxestack);
 
 void
-nx_tailopt_set(cw_nx_t *a_nx, cw_bool_t a_tailopt);
+nx_tailopt_set(cw_nx_t *a_nx, bool a_tailopt);
 
 void
 nx_stdin_set(cw_nx_t *a_nx, cw_nxo_t *a_stdin);
@@ -72,7 +72,7 @@ nx_stderr_set(cw_nx_t *a_nx, cw_nxo_t *a_stderr);
 cw_nxoi_t
 nx_maxestack_get(cw_nx_t *a_nx);
 
-cw_bool_t
+bool
 nx_tailopt_get(cw_nx_t *a_nx);
 
 cw_nxo_t *
@@ -104,7 +104,7 @@ nx_maxestack_get(cw_nx_t *a_nx)
     return a_nx->maxestack;
 }
 
-CW_INLINE cw_bool_t
+CW_INLINE bool
 nx_tailopt_get(cw_nx_t *a_nx)
 {
     cw_check_ptr(a_nx);

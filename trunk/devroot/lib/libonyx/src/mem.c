@@ -41,7 +41,7 @@ struct cw_mem_item_s
     void *addr;
     size_t size;
     char *filename;
-    cw_uint32_t line_num;
+    uint32_t line_num;
     cw_chi_t chi; /* For internal dch linkage. */
     ql_elm(cw_mem_item_t) link; /* For iteration. */
 };
@@ -54,7 +54,7 @@ cw_mema_t *cw_g_mema = NULL;
 static cw_mema_t s_mema;
 
 #ifdef CW_DBG
-static cw_bool_t s_mem_initialized = FALSE;
+static bool s_mem_initialized = false;
 #endif
 
 #ifdef CW_MEM_ERROR
@@ -85,7 +85,7 @@ mema_new(cw_mema_t *a_mema, cw_opaque_alloc_t *a_alloc,
     if (a_mema != NULL)
     {
 	retval = a_mema;
-	retval->is_malloced = FALSE;
+	retval->is_malloced = false;
     }
     else
     {
@@ -93,7 +93,7 @@ mema_new(cw_mema_t *a_mema, cw_opaque_alloc_t *a_alloc,
 	cw_check_ptr(a_dealloc);
 	retval = (cw_mema_t *) cw_opaque_alloc(a_alloc, a_arg,
 					       sizeof(cw_mema_t));
-	retval->is_malloced = TRUE;
+	retval->is_malloced = true;
     }
 
     retval->alloc = a_alloc;
@@ -124,14 +124,14 @@ mema_delete(cw_mema_t *a_mema)
 #ifdef CW_MEM_ERROR
 static void *
 mem_p_malloc_e(void *a_arg, size_t a_size, const char *a_filename,
-	       cw_uint32_t a_line_num)
+	       uint32_t a_line_num)
 {
     return cw_malloc(a_size);
 }
 
 static void *
 mem_p_calloc_e(void *a_arg, size_t a_number, size_t a_size, const
-	       char *a_filename, cw_uint32_t a_line_num)
+	       char *a_filename, uint32_t a_line_num)
 {
     return cw_calloc(a_number, a_size);
 }
@@ -139,14 +139,14 @@ mem_p_calloc_e(void *a_arg, size_t a_number, size_t a_size, const
 static void *
 mem_p_realloc_e(void *a_arg, void *a_ptr, size_t a_size,
 		size_t a_old_size, const char *a_filename,
-		cw_uint32_t a_line_num)
+		uint32_t a_line_num)
 {
     return cw_realloc(a_ptr, a_size);
 }
 
 static void
 mem_p_free_e(void *a_arg, void *a_ptr, size_t a_size,
-	     const char *a_filename, cw_uint32_t a_line_num)
+	     const char *a_filename, uint32_t a_line_num)
 {
     cw_free(a_ptr);
 }
@@ -155,7 +155,7 @@ mem_p_free_e(void *a_arg, void *a_ptr, size_t a_size,
 void
 mem_l_init(void)
 {
-    cw_assert(s_mem_initialized == FALSE);
+    cw_assert(s_mem_initialized == false);
 
     cw_g_mema = mema_new(&s_mema,
 			 (cw_opaque_alloc_t *) mem_malloc_e,
@@ -181,7 +181,7 @@ mem_l_init(void)
 #endif
 
 #ifdef CW_DBG
-    s_mem_initialized = TRUE;
+    s_mem_initialized = true;
 #endif
 }
 
@@ -191,7 +191,7 @@ mem_l_shutdown(void)
     cw_assert(s_mem_initialized);
 
 #ifdef CW_DBG
-    s_mem_initialized = FALSE;
+    s_mem_initialized = false;
 #endif
 
     mema_delete(cw_g_mema);
@@ -234,7 +234,7 @@ mem_l_shutdown(void)
 
 void *
 mem_malloc_e(void *a_arg, size_t a_size, const char *a_filename,
-	     cw_uint32_t a_line_num)
+	     uint32_t a_line_num)
 {
     void *retval;
 #ifdef CW_MEM_ERROR
@@ -270,7 +270,7 @@ mem_malloc_e(void *a_arg, size_t a_size, const char *a_filename,
     }
 
     if (dch_search(s_mem_addr_hash, retval, (void **) &old_allocation)
-	== FALSE)
+	== false)
     {
 	fprintf(stderr, "%s(): %p multiply-allocated "
 		"(was at %s:%u, size %zu; now at %s:%u, size %zu)\n",
@@ -312,7 +312,7 @@ mem_malloc_e(void *a_arg, size_t a_size, const char *a_filename,
 
 void *
 mem_calloc_e(void *a_arg, size_t a_number, size_t a_size,
-	     const char *a_filename, cw_uint32_t a_line_num)
+	     const char *a_filename, uint32_t a_line_num)
 {
     void *retval;
 #ifdef CW_MEM_ERROR
@@ -349,7 +349,7 @@ mem_calloc_e(void *a_arg, size_t a_number, size_t a_size,
     }
 
     if (dch_search(s_mem_addr_hash, retval, (void **) &old_allocation)
-	== FALSE)
+	== false)
     {
 	fprintf(stderr, "%s(): %p multiply-allocated "
 		"(was at %s:%u, size %zu; now at %s:%u, size %zu\n",
@@ -392,7 +392,7 @@ mem_calloc_e(void *a_arg, size_t a_number, size_t a_size,
 
 void *
 mem_realloc_e(void *a_arg, void *a_ptr, size_t a_size, size_t a_old_size,
-	      const char *a_filename, cw_uint32_t a_line_num)
+	      const char *a_filename, uint32_t a_line_num)
 {
     void *retval;
 #ifdef CW_MEM_ERROR
@@ -438,7 +438,7 @@ mem_realloc_e(void *a_arg, void *a_ptr, size_t a_size, size_t a_old_size,
     {
 	char *old_filename;
 	size_t old_size;
-	cw_uint32_t old_line_num;
+	uint32_t old_line_num;
 
 	ql_remove(&s_mem_addr_list, allocation, link);
 
@@ -455,7 +455,7 @@ mem_realloc_e(void *a_arg, void *a_ptr, size_t a_size, size_t a_old_size,
 	ql_tail_insert(&s_mem_addr_list, allocation, link);
 	if (a_size > old_size)
 	{
-	    memset(((cw_uint8_t *) retval) + old_size, 0xa5,
+	    memset(((uint8_t *) retval) + old_size, 0xa5,
 		   a_size - old_size);
 	}
 	if (a_old_size != 0 && a_old_size != old_size)
@@ -485,7 +485,7 @@ mem_realloc_e(void *a_arg, void *a_ptr, size_t a_size, size_t a_old_size,
 
 void
 mem_free_e(void *a_arg, void *a_ptr, size_t a_size, const char *a_filename,
-	   cw_uint32_t a_line_num)
+	   uint32_t a_line_num)
 {
 #ifdef CW_MEM_ERROR
     cw_mem_item_t *allocation;

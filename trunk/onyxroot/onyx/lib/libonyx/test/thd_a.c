@@ -42,13 +42,13 @@ main()
 
     thread_b = NULL;
     mtx_lock(&mtx);
-    thread_a = thd_new(thread_entry_func, (void *)"Thread A argument", TRUE);
+    thread_a = thd_new(thread_entry_func, (void *)"Thread A argument", true);
     mtx_unlock(&mtx);
     cw_assert(thd_join(thread_a) == NULL);
     thread_a = NULL;
 
     mtx_lock(&mtx);
-    thread_b = thd_new(thread_entry_func, (void *)"Thread B argument", TRUE);
+    thread_b = thd_new(thread_entry_func, (void *)"Thread B argument", true);
     mtx_unlock(&mtx);
     cw_assert(thd_join(thread_b) == NULL);
 

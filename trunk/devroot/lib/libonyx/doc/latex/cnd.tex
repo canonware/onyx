@@ -81,7 +81,7 @@ condition to occur.
 	\end{capilist}
 \label{cnd_timedwait}
 \index{cnd_timedwait@\cfunc{cnd\_timedwait}{}}
-\citem{\cfunc[cw\_bool\_t]{cnd\_timedwait}{cw\_cnd\_t *a\_cnd, cw\_mtx\_t
+\citem{\cfunc[bool]{cnd\_timedwait}{cw\_cnd\_t *a\_cnd, cw\_mtx\_t
 *a\_mtx, const struct timespec *a\_timeout}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -97,8 +97,8 @@ condition to occur.
 		\begin{description}\item[]
 		\item[retval: ]
 			\begin{description}\item[]
-			\item[FALSE: ] Success.
-			\item[TRUE: ] Timeout.
+			\item[false: ] Success.
+			\item[true: ] Timeout.
 			\end{description}
 		\end{description}
 	\item[Exception(s): ] None.

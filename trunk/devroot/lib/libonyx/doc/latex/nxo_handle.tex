@@ -40,7 +40,7 @@ cw\_nxo\_t *a\_thread}}
 \label{cw_nxo_handle_ref_iter_t}
 \index{cw_nxo_handle_ref_iter_t@\cfunc{cw\_nxo\_handle\_ref\_iter\_t}{}}
 \citem{\cfunc[cw\_nxoe\_t *]{cw\_nxo\_handle\_ref\_iter\_t}{void *a\_opaque,
-cw\_bool\_t a\_reset}}
+bool a\_reset}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -48,9 +48,9 @@ cw\_bool\_t a\_reset}}
 			Opaque data pointer.
 		\item[a\_reset: ]
 			\begin{description}\item[]
-			\item[FALSE: ]
+			\item[false: ]
 				At least one iteration has already occurred.
-			\item[TRUE: ]
+			\item[true: ]
 				First iteration.
 			\end{description}
 		\end{description}
@@ -70,8 +70,8 @@ cw\_bool\_t a\_reset}}
 	\end{capilist}
 \label{cw_nxo_handle_delete_t}
 \index{cw_nxo_handle_delete_t@\cfunc{cw\_nxo\_handle\_delete\_t}{}}
-\citem{\cfunc[cw\_bool\_t]{cw\_nxo\_handle\_delete\_t}{void *a\_opaque,
-cw\_uint32\_t a\_iter}}
+\citem{\cfunc[bool]{cw\_nxo\_handle\_delete\_t}{void *a\_opaque,
+uint32\_t a\_iter}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -86,8 +86,8 @@ cw\_uint32\_t a\_iter}}
 		\begin{description}\item[]
 		\item[retval: ]
 			\begin{description}\item[]
-			\item[FALSE: ] Success.
-			\item[TRUE: ] Defer deletion until a later garbage
+			\item[false: ] Success.
+			\item[true: ] Defer deletion until a later garbage
 			collector sweep iteration.
 			\end{description}
 		\end{description}

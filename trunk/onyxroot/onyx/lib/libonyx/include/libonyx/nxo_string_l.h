@@ -27,29 +27,29 @@ struct cw_nxoe_string_s
 	struct
 	{
 	    cw_nxoe_string_t *string;
-	    cw_uint32_t beg_offset;
-	    cw_uint32_t len;
+	    uint32_t beg_offset;
+	    uint32_t len;
 	} i;
 	struct
 	{
-	    cw_uint8_t *str;
-	    cw_uint32_t len;
-	    cw_uint32_t alloc_len;
+	    uint8_t *str;
+	    uint32_t len;
+	    uint32_t alloc_len;
 	} s;
     } e;
 };
 
 #ifndef CW_USE_INLINES
-cw_bool_t
-nxoe_l_string_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter);
+bool
+nxoe_l_string_delete(cw_nxoe_t *a_nxoe, uint32_t a_iter);
 
 cw_nxoe_t *
-nxoe_l_string_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
+nxoe_l_string_ref_iter(cw_nxoe_t *a_nxoe, bool a_reset);
 #endif
 
 #if (defined(CW_USE_INLINES) || defined(CW_NXO_STRING_C_))
-CW_INLINE cw_bool_t
-nxoe_l_string_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
+CW_INLINE bool
+nxoe_l_string_delete(cw_nxoe_t *a_nxoe, uint32_t a_iter)
 {
     cw_nxoe_string_t *string;
 
@@ -59,13 +59,13 @@ nxoe_l_string_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
     cw_dassert(string->nxoe.magic == CW_NXOE_MAGIC);
     cw_assert(string->nxoe.type == NXOT_STRING);
 
-    if (string->nxoe.indirect == FALSE && string->e.s.alloc_len > 0)
+    if (string->nxoe.indirect == false && string->e.s.alloc_len > 0)
     {
 	nxa_free(string->e.s.str, string->e.s.alloc_len);
     }
 
 #ifdef CW_THREADS
-    if (string->nxoe.locking && string->nxoe.indirect == FALSE)
+    if (string->nxoe.locking && string->nxoe.indirect == false)
     {
 	mtx_delete(&string->lock);
     }
@@ -73,18 +73,18 @@ nxoe_l_string_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
 
     nxa_free(string, sizeof(cw_nxoe_string_t));
 
-    return FALSE;
+    return false;
 }
 
 CW_INLINE cw_nxoe_t *
-nxoe_l_string_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
+nxoe_l_string_ref_iter(cw_nxoe_t *a_nxoe, bool a_reset)
 {
     cw_nxoe_t *retval;
     cw_nxoe_string_t *string;
     /* Used for remembering the current state of reference iteration.  This
      * function is only called by the garbage collector, so using a static
      * variable works fine. */
-    static cw_uint32_t ref_iter;
+    static uint32_t ref_iter;
 
     string = (cw_nxoe_string_t *) a_nxoe;
 
@@ -93,7 +93,7 @@ nxoe_l_string_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 	ref_iter = 0;
     }
 
-    if (a_nxoe->indirect == FALSE)
+    if (a_nxoe->indirect == false)
     {
 	retval = NULL;
     }

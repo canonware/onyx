@@ -25,7 +25,7 @@ tsd_new(cw_tsd_t *a_tsd, void (*a_func)(void *))
     cw_check_ptr(a_tsd);
 
 #ifdef CW_PTH
-    if (pth_key_create(&a_tsd->key, a_func) == FALSE)
+    if (pth_key_create(&a_tsd->key, a_func) == false)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in pth_key_create(): %s\n",
 		__FILE__, __LINE__, __func__, strerror(errno));
@@ -53,7 +53,7 @@ tsd_delete(cw_tsd_t *a_tsd)
     cw_check_ptr(a_tsd);
 
 #ifdef CW_PTH
-    if (pth_key_delete(a_tsd->key) == FALSE)
+    if (pth_key_delete(a_tsd->key) == false)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in pth_key_delete(): %s\n",
 		__FILE__, __LINE__, __func__, strerror(errno));
@@ -98,7 +98,7 @@ tsd_set(cw_tsd_t *a_tsd, void *a_val)
     cw_check_ptr(a_tsd);
 
 #ifdef CW_PTH
-    if (pth_key_setdata(a_tsd->key, a_val) == FALSE)
+    if (pth_key_setdata(a_tsd->key, a_val) == false)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in pth_key_setdata(): %s\n",
 		__FILE__, __LINE__, __func__, strerror(errno));

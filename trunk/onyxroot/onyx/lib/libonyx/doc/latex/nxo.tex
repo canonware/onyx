@@ -61,7 +61,7 @@ The following functions are applicable to all types of \classname{nxo} objects.
 \begin{capi}
 \label{nxo_compare}
 \index{nxo_compare@\cfunc{nxo\_compare}{}}
-\citem{\cfunc[cw\_sint32\_t]{nxo\_compare}{const cw\_nxo\_t *a\_a, const
+\citem{\cfunc[int32\_t]{nxo\_compare}{const cw\_nxo\_t *a\_a, const
 cw\_nxo\_t *a\_b}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -215,7 +215,7 @@ cw\_nxo\_t *a\_b}}
 	\end{capilist}
 \label{nxo_ilocked}
 \index{nxo_ilocked@\cfunc{nxo\_ilocked}{}}
-\citem{\cfunc[cw\_bool\_t]{nxo\_ilocked}{}}
+\citem{\cfunc[bool]{nxo\_ilocked}{}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -227,9 +227,9 @@ cw\_nxo\_t *a\_b}}
 		\begin{description}\item[]
 		\item[retval: ]
 			\begin{description}\item[]
-			\item[FALSE: ]
+			\item[false: ]
 				\cvar{a\_nxo} is not implicitly locked.
-			\item[TRUE: ]
+			\item[true: ]
 				\cvar{a\_nxo} is implicitly locked.
 			\end{description}
 		\end{description}

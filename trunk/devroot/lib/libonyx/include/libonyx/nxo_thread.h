@@ -44,16 +44,16 @@ typedef enum
 struct cw_nxo_threadp_s
 {
 #ifdef CW_DBG
-    cw_uint32_t magic;
+    uint32_t magic;
 #endif
 
     /* Current origin/length, line number (counting starts at 1 by convention)
      * and column number (counting starts at 0). */
-    const cw_uint8_t *origin;
-    cw_uint32_t olen;
+    const uint8_t *origin;
+    uint32_t olen;
 
-    cw_uint32_t line;
-    cw_sint32_t column;
+    uint32_t line;
+    int32_t column;
 };
 
 struct cw_nxoe_thread_s
@@ -74,23 +74,23 @@ struct cw_nxoe_thread_s
     cw_mtx_t lock;
     cw_cnd_t done_cnd;
     cw_cnd_t join_cnd;
-    cw_bool_t done:1;
-    cw_bool_t gone:1;
-    cw_bool_t detached:1;
-    cw_bool_t joined:1;
+    bool done:1;
+    bool gone:1;
+    bool detached:1;
+    bool joined:1;
 #endif
 
 #ifdef CW_THREADS
-    /* TRUE  : New array, dict, file, and string objects are implicitly locked.
-     * FALSE : No implicit locking for new objects. */
-    cw_bool_t locking:1;
+    /* true  : New array, dict, file, and string objects are implicitly locked.
+     * false : No implicit locking for new objects. */
+    bool locking:1;
 #endif
 
     /* Current maximum estack depth. */
     cw_nxoi_t maxestack;
 
     /* If 1, optimize tail calls; if 0, do not optimize tail calls. */
-    cw_uint32_t tailopt;
+    uint32_t tailopt;
 
     /* Stacks. */
 
@@ -147,10 +147,10 @@ struct cw_nxoe_thread_s
      * incremented, and this value is decremented every time the scanner
      * encounters a '}' token.  Execution of objects is deferred if this value
      * is non-zero. */
-    cw_uint32_t defer_count;
+    uint32_t defer_count;
 
     /* Offset of first invalid character in tok_str. */
-    cw_uint32_t index;
+    uint32_t index;
 
     /* Pointer to the token buffer.  As long as index is less than
      * CW_NXO_THREAD_BUFFER_SIZE, tok_str actually points to buffer.  Otherwise,
@@ -160,9 +160,9 @@ struct cw_nxoe_thread_s
      * If a temporary buffer is allocated, it is discarded as soon as the token
      * is handled.  That is, tok_buffer is used for every token until (if)
      * tok_buffer overflows. */
-    cw_uint8_t *tok_str;
-    cw_uint32_t buffer_len; /* Only valid if buffer overflowed. */
-    cw_uint8_t buffer[CW_NXO_THREAD_BUFFER_SIZE];
+    uint8_t *tok_str;
+    uint32_t buffer_len; /* Only valid if buffer overflowed. */
+    uint8_t buffer[CW_NXO_THREAD_BUFFER_SIZE];
 
     union
     {
@@ -171,40 +171,40 @@ struct cw_nxoe_thread_s
 	struct
 	{
 	    /* Mantissa. */
-	    cw_bool_t mant_neg:1; /* FALSE: Positive. TRUE: Negative. */
+	    bool mant_neg:1; /* false: Positive. true: Negative. */
 
 	    /* Radix number base for mantissa (integers only). */
-	    cw_uint32_t radix_base:7; /* Radix (2-36).  Error detection requires
+	    uint32_t radix_base:7; /* Radix (2-36).  Error detection requires
 				       * space to store up to 99. */
 
 	    /* Whole part of mantissa (or radix integer). */
-	    cw_bool_t whole:1; /* FALSE: No whole portion of mantissa.
-				* TRUE: Whole portion of mantissa. */
-	    cw_uint32_t whole_off; /* Offset to first digit of whole. */
-	    cw_uint32_t whole_len; /* Length of whole. */
+	    bool whole:1; /* false: No whole portion of mantissa.
+				* true: Whole portion of mantissa. */
+	    uint32_t whole_off; /* Offset to first digit of whole. */
+	    uint32_t whole_len; /* Length of whole. */
 
 #ifdef CW_REAL
 	    /* Fractional part of mantissa. */
-	    cw_bool_t frac:1; /* FALSE: No fractional portion of mantissa.
-			       * TRUE: Fractional portion of mantissa. */
-	    cw_uint32_t frac_off; /* Offset to first digit of fractional. */
-	    cw_uint32_t frac_len; /* Length of fractional. */
+	    bool frac:1; /* false: No fractional portion of mantissa.
+			       * true: Fractional portion of mantissa. */
+	    uint32_t frac_off; /* Offset to first digit of fractional. */
+	    uint32_t frac_len; /* Length of fractional. */
 
 	    /* Exponent. */
-	    cw_bool_t exp:1; /* FALSE: No exponent specified.
-			      * TRUE: Exponential notation. */
-	    cw_bool_t exp_sign:1; /* FALSE: No sign.  TRUE: Sign. */
-	    cw_bool_t exp_neg:1; /* FALSE: Positive.  TRUE: Negative. */
-	    cw_uint32_t exp_off; /* Offset to first digit of exponent. */
-	    cw_uint32_t exp_len; /* Length of exponent. */
+	    bool exp:1; /* false: No exponent specified.
+			      * true: Exponential notation. */
+	    bool exp_sign:1; /* false: No sign.  true: Sign. */
+	    bool exp_neg:1; /* false: Positive.  true: Negative. */
+	    uint32_t exp_off; /* Offset to first digit of exponent. */
+	    uint32_t exp_len; /* Length of exponent. */
 #endif
 	} n;
 
 	/* string. */
 	struct
 	{
-	    cw_uint32_t q_depth;
-	    cw_uint8_t hex_val;
+	    uint32_t q_depth;
+	    uint8_t hex_val;
 	} s;
 
 	/* name. */
@@ -238,19 +238,19 @@ nxo_threadp_delete(cw_nxo_threadp_t *a_threadp, cw_nxo_t *a_thread);
 
 void
 nxo_threadp_origin_get(const cw_nxo_threadp_t *a_threadp,
-		       const cw_uint8_t **r_origin, cw_uint32_t *r_olen);
+		       const uint8_t **r_origin, uint32_t *r_olen);
 
 void
 nxo_threadp_origin_set(cw_nxo_threadp_t *a_threadp,
-		       const cw_uint8_t *a_origin, cw_uint32_t a_olen);
+		       const uint8_t *a_origin, uint32_t a_olen);
 
 void
-nxo_threadp_position_get(const cw_nxo_threadp_t *a_threadp, cw_uint32_t *r_line,
-			 cw_uint32_t *r_column);
+nxo_threadp_position_get(const cw_nxo_threadp_t *a_threadp, uint32_t *r_line,
+			 uint32_t *r_column);
 
 void
-nxo_threadp_position_set(cw_nxo_threadp_t *a_threadp, cw_uint32_t a_line,
-			 cw_uint32_t a_column);
+nxo_threadp_position_set(cw_nxo_threadp_t *a_threadp, uint32_t a_line,
+			 uint32_t a_column);
 
 /* nxo_thread. */
 void
@@ -276,7 +276,7 @@ nxo_thread_join(cw_nxo_t *a_nxo);
 cw_nxo_threadts_t
 nxo_thread_state(const cw_nxo_t *a_nxo);
 
-cw_bool_t
+bool
 nxo_thread_deferred(cw_nxo_t *a_nxo);
 
 void
@@ -287,7 +287,7 @@ nxo_thread_loop(cw_nxo_t *a_nxo);
 
 void
 nxo_thread_interpret(cw_nxo_t *a_nxo, cw_nxo_threadp_t *a_threadp, const
-		     cw_uint8_t *a_str, cw_uint32_t a_len);
+		     uint8_t *a_str, uint32_t a_len);
 
 void
 nxo_thread_flush(cw_nxo_t *a_nxo, cw_nxo_threadp_t *a_threadp);
@@ -296,32 +296,32 @@ void
 nxo_thread_nerror(cw_nxo_t *a_nxo, cw_nxn_t a_nxn);
 
 void
-nxo_thread_serror(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len);
+nxo_thread_serror(cw_nxo_t *a_nxo, const uint8_t *a_str, uint32_t a_len);
 
-cw_bool_t
+bool
 nxo_thread_dstack_search(cw_nxo_t *a_nxo, cw_nxo_t *a_key, cw_nxo_t *r_value);
 
 #ifdef CW_OOP
-cw_bool_t
+bool
 nxo_thread_class_hier_search(cw_nxo_t *a_nxo, cw_nxo_t *a_class,
 			     cw_nxo_t *a_key, cw_nxo_t *r_value);
 #endif
 
 #ifdef CW_THREADS
-cw_bool_t
+bool
 nxo_thread_currentlocking(const cw_nxo_t *a_nxo);
 
 void
-nxo_thread_setlocking(cw_nxo_t *a_nxo, cw_bool_t a_locking);
+nxo_thread_setlocking(cw_nxo_t *a_nxo, bool a_locking);
 #else
-#define nxo_thread_currentlocking(a_nxo) FALSE
+#define nxo_thread_currentlocking(a_nxo) false
 #endif
 
 void
 nxo_thread_maxestack_set(cw_nxo_t *a_nxo, cw_nxoi_t a_maxestack);
 
 void
-nxo_thread_tailopt_set(cw_nxo_t *a_nxo, cw_bool_t a_tailopt);
+nxo_thread_tailopt_set(cw_nxo_t *a_nxo, bool a_tailopt);
 
 void
 nxo_thread_stdin_set(cw_nxo_t *a_nxo, cw_nxo_t *a_stdin);
@@ -339,7 +339,7 @@ nxo_thread_nx_get(cw_nxo_t *a_nxo);
 cw_nxoi_t
 nxo_thread_maxestack_get(cw_nxo_t *a_nxo);
 
-cw_bool_t
+bool
 nxo_thread_tailopt_get(cw_nxo_t *a_nxo);
 
 cw_nxo_t *
@@ -403,10 +403,10 @@ nxo_thread_maxestack_get(cw_nxo_t *a_nxo)
     return thread->maxestack;
 }
 
-CW_INLINE cw_bool_t
+CW_INLINE bool
 nxo_thread_tailopt_get(cw_nxo_t *a_nxo)
 {
-    cw_bool_t retval;
+    bool retval;
     cw_nxoe_thread_t *thread;
 
     cw_check_ptr(a_nxo);
@@ -418,11 +418,11 @@ nxo_thread_tailopt_get(cw_nxo_t *a_nxo)
 
     if (thread->tailopt)
     {
-	retval = TRUE;
+	retval = true;
     }
     else
     {
-	retval = FALSE;
+	retval = false;
     }
 
     return retval;

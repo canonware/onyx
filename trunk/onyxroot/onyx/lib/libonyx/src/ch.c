@@ -18,7 +18,7 @@
 #endif
 
 cw_ch_t *
-ch_new(cw_ch_t *a_ch, cw_mema_t *a_mema, cw_uint32_t a_table_size,
+ch_new(cw_ch_t *a_ch, cw_mema_t *a_mema, uint32_t a_table_size,
        cw_ch_hash_t *a_hash, cw_ch_key_comp_t *a_key_comp)
 {
     cw_ch_t *retval;
@@ -35,14 +35,14 @@ ch_new(cw_ch_t *a_ch, cw_mema_t *a_mema, cw_uint32_t a_table_size,
     {
 	retval = a_ch;
 	memset(retval, 0, CW_CH_TABLE2SIZEOF(a_table_size));
-	retval->is_malloced = FALSE;
+	retval->is_malloced = false;
     }
     else
     {
 	retval = (cw_ch_t *) cw_opaque_calloc(mema_calloc_get(a_mema),
 					      mema_arg_get(a_mema), 1,
 					      CW_CH_TABLE2SIZEOF(a_table_size));
-	retval->is_malloced = TRUE;
+	retval->is_malloced = true;
     }
 
     retval->mema = a_mema;
@@ -61,7 +61,7 @@ void
 ch_delete(cw_ch_t *a_ch)
 {
     cw_chi_t *chi;
-    cw_uint32_t i;
+    uint32_t i;
 
     cw_check_ptr(a_ch);
     cw_dassert(a_ch->magic == CW_CH_MAGIC);
@@ -109,7 +109,7 @@ ch_delete(cw_ch_t *a_ch)
 #endif
 }
 
-cw_uint32_t
+uint32_t
 ch_count(cw_ch_t *a_ch)
 {
     cw_check_ptr(a_ch);
@@ -122,7 +122,7 @@ void
 ch_insert(cw_ch_t *a_ch, const void *a_key, const void *a_data,
 	  cw_chi_t *a_chi)
 {
-    cw_uint32_t slot;
+    uint32_t slot;
     cw_chi_t *chi;
 
     cw_check_ptr(a_ch);
@@ -132,14 +132,14 @@ ch_insert(cw_ch_t *a_ch, const void *a_key, const void *a_data,
     if (a_chi != NULL)
     {
 	chi = a_chi;
-	chi->is_malloced = FALSE;
+	chi->is_malloced = false;
     }
     else
     {
 	chi = (cw_chi_t *) cw_opaque_alloc(mema_alloc_get(a_ch->mema),
 					   mema_arg_get(a_ch->mema),
 					   sizeof(cw_chi_t));
-	chi->is_malloced = TRUE;
+	chi->is_malloced = true;
     }
     chi->key = a_key;
     chi->data = a_data;
@@ -165,12 +165,12 @@ ch_insert(cw_ch_t *a_ch, const void *a_key, const void *a_data,
 #endif
 }
 
-cw_bool_t
+bool
 ch_remove(cw_ch_t *a_ch, const void *a_search_key, void **r_key, void **r_data,
 	  cw_chi_t **r_chi)
 {
-    cw_bool_t retval;
-    cw_uint32_t slot;
+    bool retval;
+    uint32_t slot;
     cw_chi_t *chi;
 
     cw_check_ptr(a_ch);
@@ -217,12 +217,12 @@ ch_remove(cw_ch_t *a_ch, const void *a_search_key, void **r_key, void **r_data,
 #ifdef CW_CH_COUNT
 	    a_ch->num_removes++;
 #endif
-	    retval = FALSE;
+	    retval = false;
 	    goto RETURN;
 	}
     }
 
-    retval = TRUE;
+    retval = true;
     RETURN:
     return retval;
 }
@@ -257,11 +257,11 @@ ch_chi_remove(cw_ch_t *a_ch, cw_chi_t *a_chi)
 #endif
 }
 
-cw_bool_t
+bool
 ch_search(cw_ch_t *a_ch, const void *a_key, void **r_data)
 {
-    cw_bool_t retval;
-    cw_uint32_t slot;
+    bool retval;
+    uint32_t slot;
     cw_chi_t *chi;
 
     cw_check_ptr(a_ch);
@@ -283,12 +283,12 @@ ch_search(cw_ch_t *a_ch, const void *a_key, void **r_data)
 	    {
 		*r_data = (void *) chi->data;
 	    }
-	    retval = FALSE;
+	    retval = false;
 	    goto RETURN;
 	}
     }
 
-    retval = TRUE;
+    retval = true;
     RETURN:
 #ifdef CW_CH_COUNT
     a_ch->num_searches++;
@@ -296,15 +296,15 @@ ch_search(cw_ch_t *a_ch, const void *a_key, void **r_data)
     return retval;
 }
 
-cw_uint32_t
+uint32_t
 ch_string_hash(const void *a_key)
 {
-    cw_uint32_t retval, c;
-    cw_uint8_t *str;
+    uint32_t retval, c;
+    uint8_t *str;
 
     cw_check_ptr(a_key);
 
-    for (str = (cw_uint8_t *) a_key, retval = 5381; (c = *str) != 0; str++)
+    for (str = (uint8_t *) a_key, retval = 5381; (c = *str) != 0; str++)
     {
 	retval = ((retval << 5) + retval) + c;
     }
@@ -312,13 +312,13 @@ ch_string_hash(const void *a_key)
     return retval;
 }
 
-cw_uint32_t
+uint32_t
 ch_direct_hash(const void *a_key)
 {
 #if (SIZEOF_INT_P == 4)
-    cw_uint32_t t = (cw_uint32_t) a_key;
+    uint32_t t = (uint32_t) a_key;
 #elif (SIZEOF_INT_P == 8)
-    cw_uint64_t t = (cw_uint64_t) a_key;
+    uint64_t t = (uint64_t) a_key;
 #else
 #error Unsupported pointer size
 #endif
@@ -337,17 +337,17 @@ ch_direct_hash(const void *a_key)
     return t;
 }
 
-cw_bool_t
+bool
 ch_string_key_comp(const void *a_k1, const void *a_k2)
 {
     cw_check_ptr(a_k1);
     cw_check_ptr(a_k2);
 
-    return strcmp((char *) a_k1, (char *) a_k2) ? FALSE : TRUE;
+    return strcmp((char *) a_k1, (char *) a_k2) ? false : true;
 }
 
-cw_bool_t
+bool
 ch_direct_key_comp(const void *a_k1, const void *a_k2)
 {
-    return (a_k1 == a_k2) ? TRUE : FALSE;
+    return (a_k1 == a_k2) ? true : false;
 }

@@ -29,8 +29,8 @@ interactive_nxcode(cw_nxo_t *a_thread);
 
 typedef struct
 {
-    cw_bool_t is_expr;
-    cw_uint8_t *str; /* If is_expr is FALSE: filename; expression otherwise. */
+    bool is_expr;
+    uint8_t *str; /* If is_expr is false: filename; expression otherwise. */
 } cw_nxinit_t;
 
 #if (!defined(CW_POSIX_FILE) || !defined(CW_USE_MODPROMPT))
@@ -38,10 +38,10 @@ struct nx_read_arg_s
 {
     int fd;
     cw_nxo_t *thread;
-    cw_bool_t interactive;
-    cw_uint8_t *buffer;
-    cw_uint32_t buffer_size;
-    cw_uint32_t buffer_count;
+    bool interactive;
+    uint8_t *buffer;
+    uint32_t buffer_size;
+    uint32_t buffer_count;
 };
 
 struct nx_write_arg_s
@@ -58,22 +58,20 @@ void
 usage(void);
 
 int
-interactive_run(cw_nxinit_t *a_init, cw_uint32_t a_ninit,
-		const cw_uint8_t *a_start);
+interactive_run(cw_nxinit_t *a_init, uint32_t a_ninit, const uint8_t *a_start);
 
 int
-batch_run(int a_argc, char **a_argv, cw_bool_t a_version,
-	  cw_uint8_t *a_expression);
+batch_run(int a_argc, char **a_argv, bool a_version, uint8_t *a_expression);
 
-cw_bool_t
+bool
 file_setup(cw_nxo_t *a_thread, const char *a_filename);
 
 #if (!defined(CW_POSIX_FILE) || !defined(CW_USE_MODPROMPT))
 void
-stdin_init(cw_nxo_t *a_thread, cw_nx_t *a_nx, cw_bool_t a_interactive);
+stdin_init(cw_nxo_t *a_thread, cw_nx_t *a_nx, bool a_interactive);
 
-cw_sint32_t
-nx_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str);
+int32_t
+nx_read(void *a_arg, cw_nxo_t *a_file, uint32_t a_len, uint8_t *r_str);
 
 void
 nx_read_shutdown(void *a_arg);
@@ -86,16 +84,15 @@ stdout_init(cw_nx_t *a_nx);
 void
 stderr_init(cw_nx_t *a_nx);
 
-cw_bool_t
-nx_write(void *a_arg, cw_nxo_t *a_file, const cw_uint8_t *a_str,
-	 cw_uint32_t a_len);
+bool
+nx_write(void *a_arg, cw_nxo_t *a_file, const uint8_t *a_str, uint32_t a_len);
 #endif
 
 int
 main(int argc, char **argv, char **envp)
 {
     int retval, c;
-    static const cw_uint8_t optstr[] =
+    static const uint8_t optstr[] =
 #ifdef _GNU_SOURCE
 	/* Without this, glibc will permute unknown options
 	 * to the end of the argument list. */
@@ -106,11 +103,11 @@ main(int argc, char **argv, char **envp)
 	"f:"
 #endif
 	"s:";
-    cw_bool_t opt_version = FALSE;
-    cw_uint8_t *opt_expression = NULL;
-    cw_uint32_t opt_ninit = 0;
+    bool opt_version = false;
+    uint8_t *opt_expression = NULL;
+    uint32_t opt_ninit = 0;
     cw_nxinit_t *opt_init = NULL;
-    cw_uint8_t *opt_start = NULL;
+    uint8_t *opt_start = NULL;
 
     /* Run through the arguments to figure out how much of argv to pass to
      * libonyx_init().  Don't bother with error checking, since that's done
@@ -151,7 +148,7 @@ main(int argc, char **argv, char **envp)
 		}
 		case 'V':
 		{
-		    opt_version = TRUE;
+		    opt_version = true;
 		    break;
 		}
 		case 'e':
@@ -183,7 +180,7 @@ main(int argc, char **argv, char **envp)
 							 sizeof(cw_nxinit_t)
 							 * opt_ninit);
 		    }
-		    opt_init[opt_ninit - 1].is_expr = TRUE;
+		    opt_init[opt_ninit - 1].is_expr = true;
 		    opt_init[opt_ninit - 1].str = optarg;
 		    break;
 		}
@@ -203,7 +200,7 @@ main(int argc, char **argv, char **envp)
 							 sizeof(cw_nxinit_t)
 							 * opt_ninit);
 		    }
-		    opt_init[opt_ninit - 1].is_expr = FALSE;
+		    opt_init[opt_ninit - 1].is_expr = false;
 		    opt_init[opt_ninit - 1].str = optarg;
 		    break;
 		}
@@ -247,7 +244,7 @@ main(int argc, char **argv, char **envp)
 	/* Run differently, depending on whether this is an interactive session,
 	 * and what flags were specified. */
 	if (isatty(0) && optind == argc
-	    && opt_version == FALSE && opt_expression == NULL)
+	    && opt_version == false && opt_expression == NULL)
 	{
 	    retval = interactive_run(opt_init, opt_ninit, opt_start);
 	}
@@ -337,14 +334,13 @@ thread_start(cw_nxo_t *a_thread, cw_op_t *a_op)
 }
 
 int
-interactive_run(cw_nxinit_t *a_init, cw_uint32_t a_ninit,
-		const cw_uint8_t *a_start)
+interactive_run(cw_nxinit_t *a_init, uint32_t a_ninit, const uint8_t *a_start)
 {
     int retval;
     cw_nx_t nx;
     cw_nxo_t thread;
     cw_nxo_t *nxo;
-    cw_uint32_t i;
+    uint32_t i;
     char *init;
 
     /* Initialize the interpreter. */
@@ -353,7 +349,7 @@ interactive_run(cw_nxinit_t *a_init, cw_uint32_t a_ninit,
     /* Make sure that stdin is always synthetic, so that the prompt will be
      * printed. */
 #ifndef CW_USE_MODPROMPT
-    stdin_init(&thread, &nx, TRUE);
+    stdin_init(&thread, &nx, true);
 #endif
 #ifndef CW_POSIX_FILE
     stdout_init(&nx);
@@ -377,9 +373,9 @@ interactive_run(cw_nxinit_t *a_init, cw_uint32_t a_ninit,
 #endif
 	    /* Set up string for evaluation. */
 	    nxo = nxo_stack_push(nxo_thread_ostack_get(&thread));
-	    nxo_string_new(nxo, FALSE, strlen((char *) a_init[i].str));
+	    nxo_string_new(nxo, false, strlen((char *) a_init[i].str));
 	    nxo_attr_set(nxo, NXOA_EXECUTABLE);
-	    nxo_string_set(nxo, 0, (cw_uint8_t *) a_init[i].str,
+	    nxo_string_set(nxo, 0, (uint8_t *) a_init[i].str,
 			   nxo_string_len_get(nxo));
 #ifdef CW_POSIX_FILE
 	}
@@ -427,7 +423,7 @@ interactive_run(cw_nxinit_t *a_init, cw_uint32_t a_ninit,
 	 * made the initial thread exit, thus causing access to a thread that is
 	 * no longer valid. */
 	nxo = nxo_stack_push(nxo_thread_ostack_get(&thread));
-	nxo_string_new(nxo, FALSE, strlen((char *) a_start));
+	nxo_string_new(nxo, false, strlen((char *) a_start));
 	nxo_attr_set(nxo, NXOA_EXECUTABLE);
 	nxo_string_set(nxo, 0, a_start, nxo_string_len_get(nxo));
     }
@@ -442,8 +438,7 @@ interactive_run(cw_nxinit_t *a_init, cw_uint32_t a_ninit,
 }
 
 int
-batch_run(int a_argc, char **a_argv, cw_bool_t a_version,
-	  cw_uint8_t *a_expression)
+batch_run(int a_argc, char **a_argv, bool a_version, uint8_t *a_expression)
 {
     int retval;
     cw_nx_t nx;
@@ -452,7 +447,7 @@ batch_run(int a_argc, char **a_argv, cw_bool_t a_version,
 
     nx_new(&nx, NULL, thread_start);
 #ifndef CW_POSIX_FILE
-    stdin_init(&thread, &nx, FALSE);
+    stdin_init(&thread, &nx, false);
     stdout_init(&nx);
     stderr_init(&nx);
 #endif
@@ -477,7 +472,7 @@ batch_run(int a_argc, char **a_argv, cw_bool_t a_version,
     {
 	/* Push the string onto the execution stack. */
 	nxo = nxo_stack_push(nxo_thread_ostack_get(&thread));
-	nxo_string_new(nxo, FALSE, strlen((char *) a_expression));
+	nxo_string_new(nxo, false, strlen((char *) a_expression));
 	nxo_attr_set(nxo, NXOA_EXECUTABLE);
 	nxo_string_set(nxo, 0, a_expression, nxo_string_len_get(nxo));
     }
@@ -512,10 +507,10 @@ batch_run(int a_argc, char **a_argv, cw_bool_t a_version,
 /* Open a source file, wrap it in an executable onyx file object, and push it
  * onto the operand stack. */
 #ifdef CW_POSIX_FILE
-cw_bool_t
+bool
 file_setup(cw_nxo_t *a_thread, const char *a_filename)
 {
-    cw_bool_t retval;
+    bool retval;
     int src_fd;
     cw_nxo_t *file;
 
@@ -525,25 +520,25 @@ file_setup(cw_nxo_t *a_thread, const char *a_filename)
 	fprintf(stderr,
 		"onyx: Error in open(\"%s\", O_RDONLY): %s\n", a_filename,
 		strerror(errno));
-	retval = TRUE;
+	retval = true;
 	goto RETURN;
     }
     file = nxo_stack_push(nxo_thread_ostack_get(a_thread));
-    nxo_file_new(file, FALSE);
+    nxo_file_new(file, false);
     nxo_attr_set(file, NXOA_EXECUTABLE);
 
-    nxo_file_fd_wrap(file, src_fd, TRUE);
+    nxo_file_fd_wrap(file, src_fd, true);
     nxo_file_origin_set(file, a_filename, strlen(a_filename));
 
-    retval = FALSE;
+    retval = false;
     RETURN:
     return retval;
 }
 #else
-cw_bool_t
+bool
 file_setup(cw_nxo_t *a_thread, const char *a_filename)
 {
-    cw_bool_t retval;
+    bool retval;
     int src_fd;
     cw_nxo_t *file;
     struct nx_read_arg_s *src_arg;
@@ -554,11 +549,11 @@ file_setup(cw_nxo_t *a_thread, const char *a_filename)
 	fprintf(stderr,
 		"onyx: Error in open(\"%s\", O_RDONLY): %s\n", a_filename,
 		strerror(errno));
-	retval = TRUE;
+	retval = true;
 	goto RETURN;
     }
     file = nxo_stack_push(nxo_thread_ostack_get(a_thread));
-    nxo_file_new(file, FALSE);
+    nxo_file_new(file, false);
     nxo_attr_set(file, NXOA_EXECUTABLE);
 
     /* Initialize the src argument structure. */
@@ -573,7 +568,7 @@ file_setup(cw_nxo_t *a_thread, const char *a_filename)
 		       (void *) src_arg);
     nxo_file_origin_set(file, a_filename, strlen(a_filename));
 
-    retval = FALSE;
+    retval = false;
     RETURN:
     return retval;
 }
@@ -581,7 +576,7 @@ file_setup(cw_nxo_t *a_thread, const char *a_filename)
 
 #if (!defined(CW_POSIX_FILE) || !defined(CW_USE_MODPROMPT))
 void
-stdin_init(cw_nxo_t *a_thread, cw_nx_t *a_nx, cw_bool_t a_interactive)
+stdin_init(cw_nxo_t *a_thread, cw_nx_t *a_nx, bool a_interactive)
 {
     cw_nxo_t *nxo;
     static struct nx_read_arg_s *stdin_arg;
@@ -598,16 +593,16 @@ stdin_init(cw_nxo_t *a_thread, cw_nx_t *a_nx, cw_bool_t a_interactive)
     stdin_arg->buffer_count = 0;
 
     nxo = nx_stdin_get(a_nx);
-    nxo_file_new(nxo, TRUE);
+    nxo_file_new(nxo, true);
     nxo_file_synthetic(nxo, nx_read, NULL, NULL, nx_read_shutdown,
 		       (void *) stdin_arg);
     nxo_file_origin_set(nxo, "*stdin*", sizeof("*stdin*") - 1);
 }
 
-cw_sint32_t
-nx_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str)
+int32_t
+nx_read(void *a_arg, cw_nxo_t *a_file, uint32_t a_len, uint8_t *r_str)
 {
-    cw_sint32_t retval;
+    int32_t retval;
     struct nx_read_arg_s *arg = (struct nx_read_arg_s *) a_arg;
 
     cw_assert(a_len > 0);
@@ -624,7 +619,7 @@ nx_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str)
 	 * isn't worthwhile, considering that it's a degenerate case of a
 	 * non-standard configuration. */
 	if ((arg->interactive)
-	    && (nxo_thread_deferred(arg->thread) == FALSE)
+	    && (nxo_thread_deferred(arg->thread) == false)
 	    && (nxo_thread_state(arg->thread) == THREADTS_START))
 	{
 	    cw_onyx_code(arg->thread,
@@ -659,14 +654,14 @@ nx_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str)
 	{
 	    if (retval == a_len)
 	    {
-		cw_sint32_t count;
+		int32_t count;
 
 		/* There may be more data available.  Store any available data
 		 * in a buffer. */
 		if (arg->buffer == NULL)
 		{
 		    /* Initialize the buffer. */
-		    arg->buffer = (cw_uint8_t *) cw_malloc(CW_BUFFER_SIZE);
+		    arg->buffer = (uint8_t *) cw_malloc(CW_BUFFER_SIZE);
 		    arg->buffer_size = CW_BUFFER_SIZE;
 		    arg->buffer_count = 0;
 		}
@@ -693,7 +688,7 @@ nx_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str)
 		    {
 			/* Expand the buffer. */
 			arg->buffer
-			    = (cw_uint8_t *) cw_realloc(arg->buffer,
+			    = (uint8_t *) cw_realloc(arg->buffer,
 							arg->buffer_size * 2);
 			arg->buffer_size *= 2;
 		    }
@@ -748,7 +743,7 @@ stdout_init(cw_nx_t *a_nx)
     stdout_arg.fd = 1;
 
     nxo = nx_stdout_get(a_nx);
-    nxo_file_new(nxo, TRUE);
+    nxo_file_new(nxo, true);
     nxo_file_synthetic(nxo, NULL, nx_write, NULL, NULL, (void *) &stdout_arg);
     nxo_file_origin_set(nxo, "*stdout*", sizeof("*stdout*") - 1);
 }
@@ -763,16 +758,15 @@ stderr_init(cw_nx_t *a_nx)
     stderr_arg.fd = 2;
 
     nxo = nx_stderr_get(a_nx);
-    nxo_file_new(nxo, TRUE);
+    nxo_file_new(nxo, true);
     nxo_file_synthetic(nxo, NULL, nx_write, NULL, NULL, (void *) &stderr_arg);
     nxo_file_origin_set(nxo, "*stderr*", sizeof("*stderr*") - 1);
 }
 
-cw_bool_t
-nx_write(void *a_arg, cw_nxo_t *a_file, const cw_uint8_t *a_str,
-	 cw_uint32_t a_len)
+bool
+nx_write(void *a_arg, cw_nxo_t *a_file, const uint8_t *a_str, uint32_t a_len)
 {
-    cw_bool_t retval;
+    bool retval;
     struct nx_write_arg_s *arg = (struct nx_write_arg_s *) a_arg;
     ssize_t nwritten, cwritten;
 
@@ -785,7 +779,7 @@ nx_write(void *a_arg, cw_nxo_t *a_file, const cw_uint8_t *a_str,
 	{
 	    if (errno != EINTR)
 	    {
-		retval = TRUE;
+		retval = true;
 		goto RETURN;
 	    }
 	}
@@ -795,7 +789,7 @@ nx_write(void *a_arg, cw_nxo_t *a_file, const cw_uint8_t *a_str,
 	}
     }
 
-    retval = FALSE;
+    retval = false;
     RETURN:
     return retval;
 }

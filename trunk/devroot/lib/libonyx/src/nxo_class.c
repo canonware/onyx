@@ -26,7 +26,7 @@ nxo_class_new(cw_nxo_t *a_nxo, void *a_opaque,
 
     class_ = (cw_nxoe_class_t *) nxa_malloc(sizeof(cw_nxoe_class_t));
 
-    nxoe_l_new(&class_->nxoe, NXOT_CLASS, FALSE);
+    nxoe_l_new(&class_->nxoe, NXOT_CLASS, false);
     nxo_null_new(&class_->name);
     nxo_null_new(&class_->super);
     nxo_null_new(&class_->methods);

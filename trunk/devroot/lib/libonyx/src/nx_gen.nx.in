@@ -234,7 +234,7 @@ nx_p_nxcode(cw_nx_t *a_nx)
     nxo_thread_new(&thread, a_nx);
     ostack = nxo_thread_ostack_get(&thread);
     nxo = nxo_stack_push(ostack);
-    nxo_file_new(nxo, FALSE);
+    nxo_file_new(nxo, false);
     if ((error = nxo_file_open(nxo, CW_INIT_FILE, sizeof(CW_INIT_FILE) - 1,
 			      "r", sizeof("r") - 1, 0644)))
     {

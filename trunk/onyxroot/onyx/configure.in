@@ -775,20 +775,10 @@ dnl
 dnl libonyx configuration.
 dnl 
 if test "x$lib_onyx" = "x1" ; then
-  AC_CHECK_SIZEOF([signed char], [1])
-  AC_CHECK_SIZEOF([unsigned char], [1])
-  AC_CHECK_SIZEOF([signed short], [2])
-  AC_CHECK_SIZEOF([unsigned short], [2])
-  AC_CHECK_SIZEOF([int], [4]) dnl defines SIZEOF_INT
-  AC_CHECK_SIZEOF([unsigned], [4])
-  AC_CHECK_SIZEOF([long], [4])
-  AC_CHECK_SIZEOF([unsigned long], [4])
-  AC_CHECK_SIZEOF([long long], [4])
-  AC_CHECK_SIZEOF([unsigned long long], [4])
   AC_CHECK_SIZEOF([int *], [4]) dnl defines SIZEOF_INT_P
-  AC_CHECK_SIZEOF([float], [4])
-  AC_CHECK_SIZEOF([double], [8])
-  AC_CHECK_SIZEOF([long double], [12])
+
+  AC_CHECK_HEADERS([stdbool.h], , 
+                   [AC_MSG_ERROR([Cannot build without stdbool.h])])
 
   AC_CHECK_HEADERS([sys/socket.h netinet/in.h arpa/inet.h machine/endian.h])
 

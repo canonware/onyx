@@ -15,19 +15,19 @@ extern cw_mema_t *cw_g_nxaa;
 
 void *
 nxa_malloc_e(void *a_arg, size_t a_size, const char *a_filename,
-	     cw_uint32_t a_line_num);
+	     uint32_t a_line_num);
 
 void *
 nxa_calloc_e(void *a_arg, size_t a_number, size_t a_size,
-	     const char *a_filename, cw_uint32_t a_line_num);
+	     const char *a_filename, uint32_t a_line_num);
 
 void *
 nxa_realloc_e(void *a_arg, void *a_ptr, size_t a_size, size_t a_old_size,
-	      const char *a_filename, cw_uint32_t a_line_num);
+	      const char *a_filename, uint32_t a_line_num);
 
 void
 nxa_free_e(void *a_arg, void *a_ptr, size_t a_size, const char *a_filename,
-	   cw_uint32_t a_line_num);
+	   uint32_t a_line_num);
 
 #ifdef CW_DBG
 #define nxa_malloc(a_size)						\
@@ -52,11 +52,11 @@ nxa_free_e(void *a_arg, void *a_ptr, size_t a_size, const char *a_filename,
 void
 nxa_collect(void);
 
-cw_bool_t
+bool
 nxa_active_get(void);
 
 void
-nxa_active_set(cw_bool_t a_active);
+nxa_active_set(bool a_active);
 
 #ifdef CW_PTHREADS
 cw_nxoi_t

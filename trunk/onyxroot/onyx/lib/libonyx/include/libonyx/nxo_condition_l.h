@@ -19,16 +19,16 @@ struct cw_nxoe_condition_s
 };
 
 #ifndef CW_USE_INLINES
-cw_bool_t
-nxoe_l_condition_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter);
+bool
+nxoe_l_condition_delete(cw_nxoe_t *a_nxoe, uint32_t a_iter);
 
 cw_nxoe_t *
-nxoe_l_condition_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
+nxoe_l_condition_ref_iter(cw_nxoe_t *a_nxoe, bool a_reset);
 #endif
 
 #if (defined(CW_USE_INLINES) || defined(CW_NXO_CONDITION_C_))
-CW_INLINE cw_bool_t
-nxoe_l_condition_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
+CW_INLINE bool
+nxoe_l_condition_delete(cw_nxoe_t *a_nxoe, uint32_t a_iter)
 {
     cw_nxoe_condition_t *condition;
 
@@ -42,11 +42,11 @@ nxoe_l_condition_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
 
     nxa_free(condition, sizeof(cw_nxoe_condition_t));
 
-    return FALSE;
+    return false;
 }
 
 CW_INLINE cw_nxoe_t *
-nxoe_l_condition_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
+nxoe_l_condition_ref_iter(cw_nxoe_t *a_nxoe, bool a_reset)
 {
     return NULL;
 }
