@@ -57,8 +57,29 @@ mb_write(void)
     /* The compiler cannot optimize this away. */
     static volatile void *p = NULL;
 }
+#elif (defined(CW_CPU_POWERPC))
+CW_INLINE void
+mb_write(void)
+{
+    asm volatile ("eieio"
+		  : /* Outputs. */
+		  : /* Inputs. */
+		  : "memory" /* Clobbers. */
+		  );
+}
 #else
-#error "Unsupported processor"
+/* This is much slower than a simple memory barrier, but the semantics of
+ * mutex unlock make this work. */
+CW_INLINE void
+mb_write(void)
+{
+    cw_mtx_t mtx;
+
+    mtx_new(&mtx);
+    mtx_lock(&mtx);
+    mtx_unlock(&mtx);
+    mtx_delete(&mtx);
+}
 #endif
 #endif
 

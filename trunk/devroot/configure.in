@@ -102,25 +102,23 @@ case "${host_cpu}" in
   i686)
 	AC_DEFINE(CW_CPU_I686)
 	;;
+  powerpc)
+	AC_DEFINE(CW_CPU_POWERPC)
+	;;
   *)
-	unsupported_cpu="1"
-	AC_MSG_RESULT(Unsupported CPU "${host_cpu}"; threading disabled)
+	AC_MSG_RESULT(Unsupported CPU "${host_cpu}"; very slow memory barriers)
 	;;
 esac
 
 dnl Use threads by default.
 AC_ARG_ENABLE(threads, [  --disable-threads       Disable threads],
-if test "x$enable_threads" = "xyes" -a "x$unsupported_cpu" != "x1" ; then
+if test "x$enable_threads" = "xyes" ; then
   enable_threads="1"
 else
   enable_threads="0"
 fi
 ,
-if test "x$unsupported_cpu" != "x1" ; then
-  enable_threads="1"
-else
-  enable_threads="0"
-fi
+enable_threads="1"
 )
 if test "x$enable_threads" = "x1" ; then
   dnl Look for Mach threads.
@@ -655,7 +653,7 @@ if test "x$lib_onyx" = "x1" ; then
   AC_CHECK_SIZEOF(double, 8)
   AC_CHECK_SIZEOF(long double, 12)
 
-  AC_CHECK_HEADERS(arpa/inet.h)
+  AC_CHECK_HEADERS(sys/socket.h netinet/in.h arpa/inet.h machine/endian.h)
 
   if test "x$enable_posix" = "x1" ; then
     if test "x$prefix" = "xNONE" ; then
