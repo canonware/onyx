@@ -1,3 +1,14 @@
+2003-06-26 : Jason Evans <jasone@canonware.com>
+
+	* Add the continue operator.
+
+	* Add the invalidcontinue error.
+
+	* Add the CW_ONYXX_CONTINUE exception.
+
+	* lib/libonyx/src/systemdict.c:systemdict_{until,while}() : Do not
+	  return from within an xep block.
+
 2003-06-20 : Jason Evans <jasone@canonware.com>
 
 	* Add the kill operator.
