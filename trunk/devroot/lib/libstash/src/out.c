@@ -535,10 +535,26 @@ spec_get_val(const char * a_spec, cw_uint32_t a_spec_len,
       }
       case VALUE:
       {
-	if (('|' == a_spec[i])
-	    || (i == a_spec_len - 1))
+	if ('|' == a_spec[i])
 	{
 	  /* End of the value. */
+	  if (TRUE == match)
+	  {
+	    retval = val_len;
+	    goto RETURN;
+	  }
+	  else
+	  {
+	    curr_name_len = 0;
+	    match = TRUE;
+	    state = NAME;
+	  }
+	}
+	else if (i == a_spec_len - 1)
+	{
+	  /* End of the value, and end of specifier.  Add one to val_len. */
+	  val_len++;
+	  
 	  if (TRUE == match)
 	  {
 	    retval = val_len;
@@ -810,7 +826,6 @@ out_p_metric(cw_out_t * a_out, const char * a_format, char ** r_format,
 
 	  /* Successful completion of parsing this specifier.  Call the
 	   * corresponding metric function. */
-	  /* XXX Accept. */
 	  log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
 		      "spec_len == %lu, \"", spec_len);
 	  log_nprintf(cw_g_log, spec_len, "%s", &a_format[i - spec_len]);
@@ -818,14 +833,16 @@ out_p_metric(cw_out_t * a_out, const char * a_format, char ** r_format,
 
 	  val_len = spec_get_val(&a_format[i - spec_len], spec_len,
 				 "t", &val);
-	  log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-		      "val_len == %d\n", val_len);
 	  if (-1 == val_len)
 	  {
 	    _cw_marker("Error");
 	    retval = -2;
 	    goto RETURN;
 	  }
+	  log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
+		      "val_len == %d, \"", val_len);
+	  log_nprintf(cw_g_log, val_len, "%s", val);
+	  log_printf(cw_g_log, "\"\n");
 
 	  /* Find a match for the type and call the corresponding metric
 	   * function. */
