@@ -10,7 +10,8 @@
  *
  ******************************************************************************/
 
-typedef struct cw_nxoe_dicto_s cw_nxoe_dicto_t;
+typedef struct cw_nxoe_dicta_s cw_nxoe_dicta_t;
+typedef struct cw_nxoe_dicth_s cw_nxoe_dicth_t;
 typedef struct cw_nxoe_dict_s cw_nxoe_dict_t;
 
 void

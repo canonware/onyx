@@ -102,6 +102,12 @@
 #include "../include/libonyx/nxo_string_l.h"
 #include "../include/libonyx/nxo_thread_l.h"
 
+/* Prototypes for library-private functions that are only used in this file. */
+void
+nxo_name_l_init(void);
+void
+nxo_name_l_shutdown(void);
+
 /* Prototypes. */
 static void
 nxa_p_collect(cw_bool_t a_shutdown);
@@ -114,14 +120,6 @@ nxa_p_gc_entry(void *a_arg);
 #ifdef CW_DBG
 cw_bool_t cw_g_nxa_initialized = FALSE;
 #endif
-#ifdef CW_THREADS
-cw_mtx_t cw_g_nxa_name_lock;
-#endif
-/* Hash of names (key: {name, len}, value: (nxoe_name *)).  This hash table
- * keeps track of *all* name "values" in the virtual machine.  When a name
- * object is created, it actually adds a reference to a nxoe_name in this hash
- * and uses a pointer to that nxoe_name as a unique key. */
-cw_dch_t cw_g_nxa_name_hash;
 
 cw_mema_t *cw_g_nxaa = NULL;
 
@@ -353,118 +351,67 @@ nxa_l_init(void)
 #ifdef CW_PTHREADS
     sigset_t sig_mask, old_mask;
 #endif
-    volatile cw_uint32_t try_stage = 0;
 
     cw_assert(cw_g_nxa_initialized == FALSE);
 
-    xep_begin();
-    xep_try
-    {
 #ifdef CW_DBG
-	cw_g_nxa_initialized = TRUE;
+    cw_g_nxa_initialized = TRUE;
 #endif
-	/* Set up the mema to be used for allocation. */
-	cw_g_nxaa = mema_new(&s_nxaa, (cw_opaque_alloc_t *) nxa_malloc_e,
-			     (cw_opaque_calloc_t *) nxa_calloc_e,
-			     (cw_opaque_realloc_t *) nxa_realloc_e,
-			     (cw_opaque_dealloc_t *) nxa_free_e, NULL);
+    /* Set up the mema to be used for allocation. */
+    cw_g_nxaa = mema_new(&s_nxaa, (cw_opaque_alloc_t *) nxa_malloc_e,
+			 (cw_opaque_calloc_t *) nxa_calloc_e,
+			 (cw_opaque_realloc_t *) nxa_realloc_e,
+			 (cw_opaque_dealloc_t *) nxa_free_e, NULL);
 
-	ql_new(&s_nx_ql);
-
-#ifdef CW_THREADS
-	mtx_new(&s_lock);
-#endif
+    ql_new(&s_nx_ql);
 
 #ifdef CW_THREADS
-	mtx_new(&s_seq_mtx);
+    mtx_new(&s_lock);
 #endif
 
-	ql_new(&s_seq_set);
-	s_white = FALSE;
-
-	s_garbage = NULL;
-	s_deferred_garbage = NULL;
-
-#ifdef CW_PTHREADS
-	mq_new(&s_gc_mq, cw_g_mema, sizeof(cw_nxam_t));
-#endif
-	s_gc_pending = FALSE;
-	s_gc_allocated = FALSE;
-	try_stage = 1;
-
-	/* Initialize gcdict state. */
-	s_gcdict_active = FALSE;
-#ifdef CW_PTHREADS
-	s_gcdict_period = CW_LIBONYX_GCDICT_PERIOD;
-#endif
-	s_gcdict_threshold = CW_LIBONYX_GCDICT_THRESHOLD;
-	s_gcdict_collections = 0;
-	s_gcdict_count = 0;
-	s_gcdict_current[0] = 0;
-	s_gcdict_current[1] = 0;
-	s_gcdict_maximum[0] = 0;
-	s_gcdict_maximum[1] = 0;
-	s_gcdict_sum[0] = 0;
-	s_gcdict_sum[1] = 0;
-
-#ifdef CW_PTHREADS
-	/* Block all signals during thread creation, so that the GC thread does
-	 * not receive any signals.  Doing this here rather than in the GC
-	 * thread itself avoids a race condition where signals can be delivered
-	 * to the GC thread. */
-	sigfillset(&sig_mask);
-	thd_sigmask(SIG_BLOCK, &sig_mask, &old_mask);
-	s_gc_thd = thd_new(nxa_p_gc_entry, NULL, FALSE);
-	thd_sigmask(SIG_SETMASK, &old_mask, NULL);
-#endif
-
-	/* Initialize the global name cache. */
 #ifdef CW_THREADS
-	mtx_new(&cw_g_nxa_name_lock);
+    mtx_new(&s_seq_mtx);
 #endif
-	try_stage = 2;
-	dch_new(&cw_g_nxa_name_hash, cw_g_nxaa,
-		CW_LIBONYX_NAME_HASH, CW_LIBONYX_NAME_HASH / 4 * 3,
-		CW_LIBONYX_NAME_HASH / 4, nxo_l_name_hash,
-		nxo_l_name_key_comp);
 
-    }
-    xep_catch(CW_ONYXX_OOM)
-    {
-	switch (try_stage)
-	{
-	    case 2:
-	    {
-#ifdef CW_THREADS
-		mtx_delete(&cw_g_nxa_name_lock);
-#endif
-#ifdef CW_PTHREADS
-		mq_put(&s_gc_mq, NXAM_SHUTDOWN);
+    ql_new(&s_seq_set);
+    s_white = FALSE;
 
-		thd_join(s_gc_thd);
-#endif
-	    }
-	    case 1:
-	    {
+    s_garbage = NULL;
+    s_deferred_garbage = NULL;
+
 #ifdef CW_PTHREADS
-		mq_delete(&s_gc_mq);
+    mq_new(&s_gc_mq, cw_g_mema, sizeof(cw_nxam_t));
 #endif
-#ifdef CW_THREADS
-		mtx_delete(&s_seq_mtx);
-		mtx_delete(&s_lock);
+    s_gc_pending = FALSE;
+    s_gc_allocated = FALSE;
+
+    /* Initialize gcdict state. */
+    s_gcdict_active = FALSE;
+#ifdef CW_PTHREADS
+    s_gcdict_period = CW_LIBONYX_GCDICT_PERIOD;
 #endif
-#ifdef CW_DBG
-		cw_g_nxa_initialized = FALSE;
+    s_gcdict_threshold = CW_LIBONYX_GCDICT_THRESHOLD;
+    s_gcdict_collections = 0;
+    s_gcdict_count = 0;
+    s_gcdict_current[0] = 0;
+    s_gcdict_current[1] = 0;
+    s_gcdict_maximum[0] = 0;
+    s_gcdict_maximum[1] = 0;
+    s_gcdict_sum[0] = 0;
+    s_gcdict_sum[1] = 0;
+
+#ifdef CW_PTHREADS
+    /* Block all signals during thread creation, so that the GC thread does
+     * not receive any signals.  Doing this here rather than in the GC
+     * thread itself avoids a race condition where signals can be delivered
+     * to the GC thread. */
+    sigfillset(&sig_mask);
+    thd_sigmask(SIG_BLOCK, &sig_mask, &old_mask);
+    s_gc_thd = thd_new(nxa_p_gc_entry, NULL, FALSE);
+    thd_sigmask(SIG_SETMASK, &old_mask, NULL);
 #endif
-		break;
-	    }
-	    default:
-	    {
-		cw_not_reached();
-	    }
-	}
-    }
-    xep_end();
+
+    nxo_name_l_init();
 }
 
 void
@@ -492,9 +439,10 @@ nxa_l_shutdown(void)
     s_target_count = 0;
     nxa_p_sweep();
 #endif
-    dch_delete(&cw_g_nxa_name_hash);
+    /* nxo_name_l_shutdown() has to be called precisely here, because it uses
+     * cw_g_nxaa for memory allocation. */
+    nxo_name_l_shutdown();
 #ifdef CW_THREADS
-    mtx_delete(&cw_g_nxa_name_lock);
     mtx_delete(&s_lock);
 #endif
 #ifdef CW_DBG
@@ -821,29 +769,6 @@ nxa_l_gc_register(cw_nxoe_t *a_nxoe)
 }
 
 void
-nxa_l_gc_reregister(cw_nxoe_t *a_nxoe)
-{
-    cw_assert(cw_g_nxa_initialized);
-
-#ifdef CW_THREADS
-    mtx_lock(&s_seq_mtx);
-#endif
-    cw_assert(nxoe_l_registered_get(a_nxoe));
-
-    /* This is only called in nxo_name_new() in the case that a name object is
-     * already registered.  By setting the color to white, the collector thread
-     * will notice that this object has been re-registered in
-     * nxoe_l_name_delete(), and will finish the normal registration process.
-     * If the object is not being swept, its color is already white, and this
-     * function has no effect. */
-    nxoe_l_color_set(a_nxoe, s_white);
-
-#ifdef CW_THREADS
-    mtx_unlock(&s_seq_mtx);
-#endif
-}
-
-void
 nxa_l_count_adjust(cw_nxoi_t a_adjust)
 {
     cw_assert(cw_g_nxa_initialized);
@@ -902,25 +827,6 @@ nxa_l_count_adjust(cw_nxoi_t a_adjust)
 #ifdef CW_THREADS
     mtx_unlock(&s_lock);
 #endif
-}
-
-/* This function is only called in nxoe_l_name_delete(). */
-cw_bool_t
-nxa_l_white_get(void)
-{
-    cw_bool_t retval;
-
-    cw_assert(cw_g_nxa_initialized);
-
-#ifdef CW_THREADS
-    mtx_lock(&s_seq_mtx);
-#endif
-    retval = s_white;
-#ifdef CW_THREADS
-    mtx_unlock(&s_seq_mtx);
-#endif
-
-    return retval;
 }
 
 CW_P_INLINE void
@@ -1125,6 +1031,9 @@ nxa_p_collect(cw_bool_t a_shutdown)
 {
     struct timeval t_tv;
     cw_nxoi_t start_us, mark_us;
+#ifdef CW_THREADS
+    cw_mtx_t *name_lock;
+#endif
 
     /* Sweep any garbage that remains from the previous collection. */
     if (s_garbage != NULL || s_deferred_garbage != NULL)
@@ -1152,6 +1061,13 @@ nxa_p_collect(cw_bool_t a_shutdown)
     start_us = t_tv.tv_sec;
     start_us *= 1000000;
     start_us += t_tv.tv_usec;
+
+    /* Acquire name_lock before s_seq_mtx to avoid lock order reversal.
+     * nxo_name_new() acquires the locks in this same order. */
+#ifdef CW_THREADS
+    name_lock = nxo_l_name_lock_get();
+    mtx_lock(name_lock);
+#endif
 
     /* Prevent new registrations until after the mark phase is completed. */
 #ifdef CW_THREADS
@@ -1189,8 +1105,15 @@ nxa_p_collect(cw_bool_t a_shutdown)
     thd_single_leave();
 #endif
 
+    /* Remove all garbage names before releasing cw_g_nxa_name_lock. */
+    nxo_l_name_list_prune(s_white);
+
     /* Flip the value of white. */
     s_white = !s_white;
+
+#ifdef CW_THREADS
+    mtx_unlock(name_lock);
+#endif
 
     /* New registrations are safe again. */
 #ifdef CW_THREADS

@@ -10,9 +10,24 @@
  *
  ******************************************************************************/
 
-/* This is private, but nxa needs to know its size. */
-struct cw_nxoe_dicto_s
+/* This is private, but nxa needs to know its size.
+ *
+ * This structure is used as an element of a fixed size array for small
+ * dicts. */
+struct cw_nxoe_dicta_s
 {
+    cw_nxo_t key;
+    cw_nxo_t val;
+};
+
+/* This is private, but nxa needs to know its size.
+ *
+ * This structure is used as an element for dch-based dicts. */
+struct cw_nxoe_dicth_s
+{
+    cw_chi_t chi;
+    ql_elm(cw_nxoe_dicth_t) link;
+
     cw_nxo_t key;
     cw_nxo_t val;
 };
@@ -36,16 +51,25 @@ struct cw_nxoe_dict_s
 
     union
     {
-	/* Array of dicto's.  Searching is linear.  Invalid entries have a key
-	 * of type NXOT_NO.  If the array is full and another insertion occurs,
-	 * the array contents are converted to a hash, and are never converted
-	 * back to an array, even if the array would be large enough. */
-	cw_nxoe_dicto_t array[CW_LIBONYX_DICT_SIZE];
+	struct
+	{
+	    /* Array of dicta's.  Searching is linear.  Invalid entries have a
+	     * key of type NXOT_NO.  If the array is full and another insertion
+	     * occurs, the array contents are converted to a hash, and are never
+	     * converted back to an array, even if the array would be large
+	     * enough. */
+	    cw_nxoe_dicta_t array[CW_LIBONYX_DICT_SIZE];
+	} a;
+	struct
+	{
+	    /* Name/value pairs.  The keys are (cw_nxo_t *), and the values are
+	     * (cw_nxoe_dicth_t *).  The nxo that the key points to resides in
+	     * the nxoe_dicth (value) structure. */
+	    cw_dch_t hash;
 
-	/* Name/value pairs.  The keys are (cw_nxo_t *), and the values are
-	 * (cw_nxoe_dicto_t *).  The nxo that the key points to resides in the
-	 * nxoe_dicto (value) structure. */
-	cw_dch_t hash;
+	    /* List of all dict items. */
+	    ql_head(cw_nxoe_dicth_t) list;
+	} h;
     } data;
 };
 
@@ -65,8 +89,6 @@ CW_INLINE cw_bool_t
 nxoe_l_dict_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
 {
     cw_nxoe_dict_t *dict;
-    cw_nxoe_dicto_t *dicto;
-    cw_chi_t *chi;
 
     dict = (cw_nxoe_dict_t *) a_nxoe;
 
@@ -82,18 +104,21 @@ nxoe_l_dict_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
 #endif
     if (dict->is_hash)
     {
+	cw_nxoe_dicth_t *dicth;
+
 	/* Set the dch non-shrinkable to avoid rehashes, which could be fatal
 	 * if any of the objects this dict points to have already been swept. */
-	dch_shrinkable_set(&dict->data.hash, FALSE);
+	dch_shrinkable_set(&dict->data.h.hash, FALSE);
 
-	while (dch_remove_iterate(&dict->data.hash, NULL, (void **) &dicto,
-				  &chi)
-	       == FALSE)
+	for (dicth = ql_first(&dict->data.h.list);
+	     dicth != NULL;
+	     dicth = ql_first(&dict->data.h.list))
 	{
-	    nxa_free(dicto, sizeof(cw_nxoe_dicto_t));
-	    nxa_free(chi, sizeof(cw_chi_t));
+	    dch_chi_remove(&dict->data.h.hash, &dicth->chi);
+	    ql_remove(&dict->data.h.list, dicth, link);
+	    nxa_free(dicth, sizeof(cw_nxoe_dicth_t));
 	}
-	dch_delete(&dict->data.hash);
+	dch_delete(&dict->data.h.hash);
     }
     nxa_free(dict, sizeof(cw_nxoe_dict_t));
 
@@ -110,35 +135,40 @@ nxoe_l_dict_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
      * variable works fine. */
     static cw_uint32_t ref_iter;
     /* If non-NULL, the previous reference iteration returned the key of this
-     * dicto, so the value of this dicto is the next reference to check. */
-    static cw_nxoe_dicto_t *dicto;
+     * dict[ah], so the value of this dict[ah] is the next reference to
+     * check. */
+    static cw_nxoe_dicta_t *dicta;
+    static cw_nxoe_dicth_t *dicth;
 
     dict = (cw_nxoe_dict_t *) a_nxoe;
 
     if (a_reset)
     {
 	ref_iter = 0;
-	dicto = NULL;
+	dicta = NULL;
+	dicth = NULL;
     }
 
     retval = NULL;
     if (dict->is_hash)
     {
 	while (retval == NULL
-	       && ref_iter < dch_count(&dict->data.hash))
+	       && ref_iter < dch_count(&dict->data.h.hash))
 	{
-	    if (dicto == NULL)
+	    if (dicth == NULL)
 	    {
 		/* Key. */
-		dch_get_iterate(&dict->data.hash, NULL, (void **) &dicto);
-		retval = nxo_nxoe_get(&dicto->key);
+		dicth = ql_first(&dict->data.h.list);
+		cw_check_ptr(dicth);
+		ql_first(&dict->data.h.list) = qr_next(dicth, link);
+		retval = nxo_nxoe_get(&dicth->key);
 	    }
 	    else
 	    {
 		/* Value. */
-		retval = nxo_nxoe_get(&dicto->val);
+		retval = nxo_nxoe_get(&dicth->val);
 		ref_iter++;
-		dicto = NULL;
+		dicth = NULL;
 	    }
 	}
     }
@@ -146,14 +176,14 @@ nxoe_l_dict_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
     {
 	while (retval == NULL && ref_iter < CW_LIBONYX_DICT_SIZE)
 	{
-	    if (dicto == NULL)
+	    if (dicta == NULL)
 	    {
-		if (nxo_type_get(&dict->data.array[ref_iter].key)
+		if (nxo_type_get(&dict->data.a.array[ref_iter].key)
 		    != NXOT_NO)
 		{
 		    /* Key. */
-		    dicto = &dict->data.array[ref_iter];
-		    retval = nxo_nxoe_get(&dicto->key);
+		    dicta = &dict->data.a.array[ref_iter];
+		    retval = nxo_nxoe_get(&dicta->key);
 		}
 		else
 		{
@@ -164,9 +194,9 @@ nxoe_l_dict_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 	    else
 	    {
 		/* Value. */
-		retval = nxo_nxoe_get(&dicto->val);
+		retval = nxo_nxoe_get(&dicta->val);
 		ref_iter++;
-		dicto = NULL;
+		dicta = NULL;
 	    }
 	}
     }

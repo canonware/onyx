@@ -18,33 +18,57 @@
 #include "../include/libonyx/nxo_l.h"
 #include "../include/libonyx/nxo_name_l.h"
 
+/* Global variables. */
+#ifdef CW_THREADS
+cw_mtx_t cw_g_name_lock;
+#endif
+/* Hash of names (key: {name, len}, value: (nxoe_name *)).  This hash table
+ * keeps track of *all* name "values" in the virtual machine.  When a name
+ * object is created, it actually adds a reference to a nxoe_name in this hash
+ * and uses a pointer to that nxoe_name as a unique key. */
+cw_dch_t cw_g_name_hash;
+/* List of names, corresponding to the entries in cw_g_name_hash. */
+cw_name_list_t cw_g_name_list;
+
+void
+nxo_name_l_init(void)
+{
+    /* Initialize the global name cache. */
+    dch_new(&cw_g_name_hash, cw_g_nxaa,
+	    CW_LIBONYX_NAME_HASH, CW_LIBONYX_NAME_HASH / 4 * 3,
+	    CW_LIBONYX_NAME_HASH / 4, nxo_l_name_hash,
+	    nxo_l_name_key_comp);
+#ifdef CW_THREADS
+    mtx_new(&cw_g_name_lock);
+#endif
+    ql_new(&cw_g_name_list);
+}
+
+void
+nxo_name_l_shutdown(void)
+{
+    dch_delete(&cw_g_name_hash);
+#ifdef CW_THREADS
+    mtx_delete(&cw_g_name_lock);
+#endif
+}
+
 void
 nxo_name_new(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len,
 	     cw_bool_t a_is_static)
 {
     cw_nxoe_name_t *name, key;
-#ifdef CW_THREADS
-    cw_mtx_t *name_lock;
-#endif
-    cw_dch_t *name_hash;
-    cw_bool_t do_register;
 
     /* Fake up a key so that we can search the hash tables. */
     key.str = a_str;
     key.len = a_len;
 
-#ifdef CW_THREADS
-    name_lock = nxa_l_name_lock_get();
-#endif
-    name_hash = nxa_l_name_hash_get();
-
     /* Look in the global hash for the name.  If the name doesn't exist, create
      * it. */
 #ifdef CW_THREADS
-    mtx_lock(name_lock);
-    thd_crit_enter();
+    mtx_lock(&cw_g_name_lock);
 #endif
-    if (dch_search(name_hash, (void *) &key, (void **) &name))
+    if (dch_search(&cw_g_name_hash, (void *) &key, (void **) &name))
     {
 	/* Not found in the name hash.  Create, initialize, and insert a new
 	 * entry. */
@@ -66,36 +90,26 @@ nxo_name_new(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len,
 	{
 	    name->str = a_str;
 	}
+	ql_elm_new(name, link);
 
-	dch_insert(name_hash, (void *) name, (void **) name,
-		   (cw_chi_t *) nxa_malloc(sizeof(cw_chi_t)));
+	dch_insert(&cw_g_name_hash, (void *) name, (void **) name,
+		   &name->chi);
+	ql_head_insert(&cw_g_name_list, name, link);
 
-	do_register = TRUE;
-    }
-    else
-    {
-	do_register = FALSE;
-    }
-    nxo_no_new(a_nxo);
-    a_nxo->o.nxoe = (cw_nxoe_t *) name;
-    nxo_p_type_set(a_nxo, NXOT_NAME);
-#ifdef CW_THREADS
-    thd_crit_leave();
-#endif
-
-    /* Registration must be done outside the critical region to avoid
-     * deadlock. */
-    if (do_register)
-    {
+	nxo_no_new(a_nxo);
+	a_nxo->o.nxoe = (cw_nxoe_t *) name;
+	nxo_p_type_set(a_nxo, NXOT_NAME);
 	nxa_l_gc_register((cw_nxoe_t *) name);
     }
     else
     {
-	nxa_l_gc_reregister((cw_nxoe_t *) name);
+	nxo_no_new(a_nxo);
+	a_nxo->o.nxoe = (cw_nxoe_t *) name;
+	nxo_p_type_set(a_nxo, NXOT_NAME);
     }
 
 #ifdef CW_THREADS
-    mtx_unlock(name_lock);
+    mtx_unlock(&cw_g_name_lock);
 #endif
 }
 
