@@ -45,20 +45,20 @@ do_dbg(void)
 int
 main()
 {
-	out_put(cw_g_out, "Test begin\n");
+	_cw_out_put("Test begin\n");
 	do_mem();
 	do_dbg();
 
-	out_put(cw_g_out, "libstash_init()\n");
+	_cw_out_put("libstash_init()\n");
 	libstash_init();
 	do_mem();
 	do_dbg();
 
-	out_put(cw_g_out, "libstash_shutdown()\n");
+	_cw_out_put("libstash_shutdown()\n");
 	libstash_shutdown();
 	do_mem();
 	do_dbg();
 
-	out_put(cw_g_out, "Test end\n");
+	_cw_out_put("Test end\n");
 	return 0;
 }

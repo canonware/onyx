@@ -308,8 +308,7 @@ RETURN:
 			allocation = _cw_malloc(sizeof(cw_pezz_item_t));
 			if (allocation == NULL) {
 				if (dbg_is_registered(cw_g_dbg, "pezz_error")) {
-					out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-					    "Memory allocation error; "
+					_cw_out_put_e("Memory allocation error; "
 					    "unable to record pezz allocation "
 					    "0x[p] at [s], line [i]\n",
 					    sizeof(cw_pezz_item_t),
@@ -333,9 +332,7 @@ RETURN:
 				    retval, allocation)) {
 					if (dbg_is_registered(cw_g_dbg,
 					    "pezz_error")) {
-						out_put_e(cw_g_out, __FILE__,
-						    __LINE__, __FUNCTION__,
-						    "Memory allocation error; "
+						_cw_out_put_e("Memory allocation error; "
 						    "unable to record pezz allocation "
 						    "0x[p] at [s], line [i]\n",
 						    sizeof(cw_pezz_item_t),
@@ -453,24 +450,23 @@ pezz_dump(cw_pezz_t *a_pezz, const char *a_prefix)
 	_cw_assert(a_pezz->magic == _CW_PEZZ_MAGIC);
 	mtx_lock(&a_pezz->lock);
 
-	out_put(cw_g_out,
-	    "[s]start ==========================================\n", a_prefix);
-	out_put(cw_g_out, "[s]buffer_size : [i]\n",
+	_cw_out_put("[s]start ==========================================\n",
+	    a_prefix);
+	_cw_out_put("[s]buffer_size : [i]\n",
 	    a_prefix, a_pezz->buffer_size);
-	out_put(cw_g_out, "[s]block_num_buffers : [i]\n",
+	_cw_out_put("[s]block_num_buffers : [i]\n",
 	    a_prefix, a_pezz->block_num_buffers);
-	out_put(cw_g_out, "[s]num_blocks : [i]\n",
+	_cw_out_put("[s]num_blocks : [i]\n",
 	    a_prefix, a_pezz->num_blocks);
 
-	out_put(cw_g_out, "[s]mem_blocks : 0x[p]\n",
+	_cw_out_put("[s]mem_blocks : 0x[p]\n",
 	    a_prefix, a_pezz->mem_blocks);
-	out_put(cw_g_out, "[s]ring_blocks : 0x[p]\n",
+	_cw_out_put("[s]ring_blocks : 0x[p]\n",
 	    a_prefix, a_pezz->ring_blocks);
 
 	for (i = 0; i < a_pezz->num_blocks; i++);
 	{
-		out_put(cw_g_out,
-		    "[s]mem_blocks[[[i]] : 0x[p], ring_blocks[[[i]] : 0x[p]\n",
+		_cw_out_put("[s]mem_blocks[[[i]] : 0x[p], ring_blocks[[[i]] : 0x[p]\n",
 		    a_prefix, i, a_pezz->mem_blocks[i], i,
 		    a_pezz->ring_blocks[i]);
 	}
@@ -478,12 +474,11 @@ pezz_dump(cw_pezz_t *a_pezz, const char *a_prefix)
 	if (NULL != a_pezz->spare_buffers) {
 		char   *prefix = (char *)_cw_malloc(strlen(a_prefix) + 17);
 
-		out_put(cw_g_out, "[s]spare_buffers : \n",
+		_cw_out_put("[s]spare_buffers : \n",
 		    a_prefix);
 
 		if (NULL != prefix) {
-			out_put_s(cw_g_out, prefix,
-			    "[s]              : ", a_prefix);
+			_cw_out_put_s(prefix, "[s]              : ", a_prefix);
 			ring_dump(a_pezz->spare_buffers, prefix);
 			_cw_free(prefix);
 		} else {
@@ -491,11 +486,11 @@ pezz_dump(cw_pezz_t *a_pezz, const char *a_prefix)
 			ring_dump(a_pezz->spare_buffers, prefix);
 		}
 	} else {
-		out_put(cw_g_out, "[s]spare_buffers : (null)\n", a_prefix);
+		_cw_out_put("[s]spare_buffers : (null)\n", a_prefix);
 	}
 
-	out_put(cw_g_out,
-	    "[s]end ============================================\n", a_prefix);
+	_cw_out_put("[s]end ============================================\n",
+	    a_prefix);
 
 	mtx_unlock(&a_pezz->lock);
 }

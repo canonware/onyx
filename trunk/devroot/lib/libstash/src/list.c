@@ -565,26 +565,26 @@ list_dump(cw_list_t *a_list)
 	_cw_assert(a_list->magic_b == _CW_LIST_MAGIC);
 	if (a_list->is_thread_safe)
 		mtx_lock(&a_list->lock);
-	out_put(cw_g_out,
+	_cw_out_put(
 	    "=== cw_list_t ==============================================\n");
-	out_put(cw_g_out, "is_malloced: [[[i]], is_thread_safe: [[[i]]\n",
+	_cw_out_put("is_malloced: [[[i]], is_thread_safe: [[[i]]\n",
 	    a_list->is_malloced, a_list->is_thread_safe);
 	{
-		out_put(cw_g_out, "count: [[[q]]  spares: [[[q]]\n",
+		_cw_out_put("count: [[[q]]  spares: [[[q]]\n",
 		    a_list->count, a_list->spares_count);
 	}
 
-	out_put(cw_g_out,
+	_cw_out_put(
 	    "head: [[0x[p|w:8|p:0]]  tail: [[0x[p|w:8|p:0]]  "
 	    "spares_head: [[0x[p|w:8|p:0]]\n",
 	    a_list->head, a_list->tail, a_list->spares_head);
 	if (a_list->count > 0) {
-		out_put(cw_g_out,
+		_cw_out_put(
 		    "head->item: [[0x[p|w:8|p:0]]  tail->item: [[0x[p|w:8|p:0]]\n",
 		    list_item_get(a_list->head), list_item_get(a_list->tail));
 	} else
-		out_put(cw_g_out, "head->item: [[N/A]  tail->item: [[N/A]\n");
-	out_put(cw_g_out,
+		_cw_out_put("head->item: [[N/A]  tail->item: [[N/A]\n");
+	_cw_out_put(
 	    "============================================================\n");
 
 	if (a_list->is_thread_safe)

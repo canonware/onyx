@@ -72,14 +72,14 @@ main(int argc, char **argv)
 			opt_port = strtol(optarg, NULL, 10);
 			break;
 		default:
-			out_put(cw_g_out, "Unrecognized option '[c]'\n", c);
+			_cw_out_put("Unrecognized option '[c]'\n", c);
 			cl_error = TRUE;
 			break;
 		}
 	}
 
 	if ((TRUE == cl_error) || (optind < argc)) {
-		out_put(cw_g_out, "Unrecognized option(s)\n");
+		_cw_out_put("Unrecognized option(s)\n");
 		usage(basename(argv[0]));
 		retval = 1;
 		goto CLERROR;
@@ -93,7 +93,7 @@ main(int argc, char **argv)
 		goto CLERROR;
 	}
 	if (0 == opt_bsize) {
-		out_put(cw_g_out, "Invalid block size\n");
+		_cw_out_put("Invalid block size\n");
 		retval = 1;
 		goto CLERROR;
 	}
@@ -104,7 +104,7 @@ main(int argc, char **argv)
 		_cw_error("Memory allocation error");
 	if (TRUE == socks_listen(socks, INADDR_ANY, &opt_port))
 		exit(1);
-	out_put(cw_g_out, "[s]: Listening on port [i]\n",
+	_cw_out_put("[s]: Listening on port [i]\n",
 	    basename(argv[0]), opt_port);
 
 	tout.tv_sec = 0;
@@ -142,8 +142,7 @@ main(int argc, char **argv)
 					sock_delete(sock_vec[sockfd]);
 					sock_vec[sockfd] = NULL;
 
-					out_put_l(cw_g_out,
-					    "Connection closed\n");
+					_cw_out_put_l("Connection closed\n");
 				}
 			}
 		}
@@ -167,7 +166,7 @@ accept_entry_func(void *a_arg)
 		_cw_error("Memory allocation error");
 	while (1) {
 		if (sock == socks_accept(socks, NULL, sock)) {
-			out_put_l(cw_g_out, "New connection\n");
+			_cw_out_put_l("New connection\n");
 
 			sock_vec[sock_get_fd(sock)] = sock;
 
@@ -190,8 +189,7 @@ accept_entry_func(void *a_arg)
 void
 usage(const char *a_progname)
 {
-	out_put
-	(cw_g_out,
+	_cw_out_put(
 	    "[s] usage:\n"
 	    "    [s] -h\n"
 	    "    [s] -V\n"
@@ -212,7 +210,7 @@ usage(const char *a_progname)
 void
 version(const char *a_progname)
 {
-	out_put(cw_g_out, "[s], version [s]\n", a_progname, _LIBSOCK_VERSION);
+	_cw_out_put("[s], version [s]\n", a_progname, _LIBSOCK_VERSION);
 }
 
 /* Doesn't strip trailing '/' characters. */

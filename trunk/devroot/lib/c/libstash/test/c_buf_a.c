@@ -30,7 +30,7 @@ int
 main()
 {
 	libstash_init();
-	out_put(cw_g_out, "Test begin\n");
+	_cw_out_put("Test begin\n");
 
 /*    dbg_register(cw_g_dbg, "mem_verbose"); */
 
@@ -119,9 +119,9 @@ main()
 		buf_append_bufc(buf_p, &bufc, 0, 512);
 		bufc_delete(&bufc);
 
-		out_put(cw_g_out, "lower char dump:\n");
+		_cw_out_put("lower char dump:\n");
 		for (i = 0; i < 256; i += 8) {
-			out_put(cw_g_out,
+			_cw_out_put(
 			    "[i|w:3|p:0]->0x[i|w:2|p:0|b:16]:"
 			    "[i|w:3|p:0]->0x[i|w:2|p:0|b:16]:"
 			    "[i|w:3|p:0]->0x[i|w:2|p:0|b:16]:"
@@ -140,45 +140,45 @@ main()
 			    i + 7, buf_get_uint8(buf_p, i + 7));
 		}
 
-		out_put(cw_g_out, "upper long dump:\n");
+		_cw_out_put("upper long dump:\n");
 		for (i = 256; i < 512; i += 8) {
 			t_uint32_a = buf_get_uint32(buf_p, i);
 			t_uint32_a = ntohl(t_uint32_a);
 			t_uint32_b = buf_get_uint32(buf_p, i + 4);
 			t_uint32_b = ntohl(t_uint32_b);
 
-			out_put(cw_g_out,
+			_cw_out_put(
 			    "[i|w:3|p:0]->0x[i|w:8|p:0|b:16]:"
 			    "[i|w:3|p:0]->0x[i|w:8|p:0|b:16]\n",
 			    i, t_uint32_a,
 			    i + 4, t_uint32_b);
 		}
 
-		out_put(cw_g_out, "upper quad dump:\n");
+		_cw_out_put("upper quad dump:\n");
 		for (i = 256; i < 512; i += 8) {
 			t_uint64 = buf_get_uint64(buf_p, i);
 			t_uint64 = _cw_ntohq(t_uint64);
 
-			out_put(cw_g_out, "[i|w:3|p:0]->0x[q|b:16|w:16|p:0]\n",
+			_cw_out_put("[i|w:3|p:0]->0x[q|b:16|w:16|p:0]\n",
 			    i, t_uint64);
 		}
 
 		/* Unaligned gets. */
-		out_put(cw_g_out, "Unaligned buf_get_uint32():\n");
+		_cw_out_put("Unaligned buf_get_uint32():\n");
 		for (i = 1; i < 4; i++) {
 			t_uint32_a = buf_get_uint32(buf_p, 256 + i);
 			t_uint32_a = ntohl(t_uint32_a);
 
-			out_put(cw_g_out, "[i|w:3|p:0]->0x[i|w:8|p:0|b:16]\n",
+			_cw_out_put("[i|w:3|p:0]->0x[i|w:8|p:0|b:16]\n",
 			    256 + i, t_uint32_a);
 		}
 
-		out_put(cw_g_out, "Unaligned buf_get_uint64():\n");
+		_cw_out_put("Unaligned buf_get_uint64():\n");
 		for (i = 1; i < 8; i++) {
 			t_uint64 = buf_get_uint64(buf_p, 256 + i);
 			t_uint64 = _cw_ntohq(t_uint64);
 
-			out_put(cw_g_out, "[i|w:3|p:0]->0x[q|b:16|w:16|p:0]\n",
+			_cw_out_put("[i|w:3|p:0]->0x[q|b:16|w:16|p:0]\n",
 			    256 + i,
 			    t_uint64);
 		}
@@ -344,21 +344,21 @@ main()
 
 		_cw_assert(24 == buf_get_size(&buf));
 
-		out_put(cw_g_out, "Hodge podge buf_get_uint32():\n");
+		_cw_out_put("Hodge podge buf_get_uint32():\n");
 		for (i = 0; i <= 20; i++) {
 			t_uint32 = buf_get_uint32(&buf, i);
 			t_uint32 = ntohl(t_uint32);
 
-			out_put(cw_g_out, "[i|w:3|p:0]->0x[i|w:8|p:0|b:16]\n",
+			_cw_out_put("[i|w:3|p:0]->0x[i|w:8|p:0|b:16]\n",
 			    i, t_uint32);
 		}
 
-		out_put(cw_g_out, "Hodge podge buf_get_uint64():\n");
+		_cw_out_put("Hodge podge buf_get_uint64():\n");
 		for (i = 0; i <= 16; i++) {
 			t_uint64 = buf_get_uint64(&buf, i);
 			t_uint64 = _cw_ntohq(t_uint64);
 
-			out_put(cw_g_out, "[i|w:3|p:0]->0x[q|b:16|w:16|p:0]\n",
+			_cw_out_put("[i|w:3|p:0]->0x[q|b:16|w:16|p:0]\n",
 			    i, t_uint64);
 		}
 
@@ -626,7 +626,7 @@ main()
 
 			_cw_assert(FALSE == buf_set_uint32(&buf, i, t_uint32));
 
-/*        out_put(cw_g_out, "t_uint32: 0x[i|b:16], " */
+/*        _cw_out_put("t_uint32: 0x[i|b:16], " */
 /*  	      "buf_get_uint32(&buf, [i]): 0x[i|b:16]\n", */
 /*  	      t_uint32, i, buf_get_uint32(&buf, i)); */
 			_cw_assert(t_uint32 == buf_get_uint32(&buf, i));
@@ -1198,42 +1198,42 @@ main()
 		bufc_delete(&bufc);
 
 		/* Print. */
-		_cw_assert(0 < out_put(cw_g_out, "Here is the buf :[b]:\n",
+		_cw_assert(0 < _cw_out_put("Here is the buf :[b]:\n",
 		    buf_p));
 		buf_split(&buf, buf_p, 23);
 		buf_catenate_buf(buf_p, &buf, TRUE);
-		_cw_assert(0 < out_put(cw_g_out, ":[b]:\n", &buf));
-		_cw_assert(0 < out_put(cw_g_out, ":[b|w:40]:\n", &buf));
-		_cw_assert(0 < out_put(cw_g_out, ":[b|w:40|p:_]:\n", &buf));
-		_cw_assert(0 < out_put(cw_g_out, ":[b|w:40|p:+|j:l]:\n", &buf));
-		_cw_assert(0 < out_put(cw_g_out, ":[b|w:40|p:-|j:c]:\n", &buf));
-		_cw_assert(0 < out_put(cw_g_out, ":[b|w:40|p:_|j:r]:\n", &buf));
+		_cw_assert(0 < _cw_out_put(":[b]:\n", &buf));
+		_cw_assert(0 < _cw_out_put(":[b|w:40]:\n", &buf));
+		_cw_assert(0 < _cw_out_put(":[b|w:40|p:_]:\n", &buf));
+		_cw_assert(0 < _cw_out_put(":[b|w:40|p:+|j:l]:\n", &buf));
+		_cw_assert(0 < _cw_out_put(":[b|w:40|p:-|j:c]:\n", &buf));
+		_cw_assert(0 < _cw_out_put(":[b|w:40|p:_|j:r]:\n", &buf));
 
 		buf_split(&buf, buf_p, 3);
-		_cw_assert(0 < out_put(cw_g_out, ":[b]:\n", &buf));
+		_cw_assert(0 < _cw_out_put(":[b]:\n", &buf));
 		buf_catenate_buf(buf_p, &buf, TRUE);
 		buf_catenate_buf(buf_p, &buf, FALSE);
 		buf_split(&buf, buf_p, 4);
-		_cw_assert(0 < out_put(cw_g_out, ":[b]:\n", &buf));
+		_cw_assert(0 < _cw_out_put(":[b]:\n", &buf));
 		buf_catenate_buf(buf_p, &buf, TRUE);
 		buf_catenate_buf(buf_p, &buf, FALSE);
 		buf_split(&buf, buf_p, 5);
-		_cw_assert(0 < out_put(cw_g_out, ":[b]:\n", &buf));
+		_cw_assert(0 < _cw_out_put(":[b]:\n", &buf));
 		buf_catenate_buf(buf_p, &buf, TRUE);
 		buf_catenate_buf(buf_p, &buf, FALSE);
 		buf_split(&buf, buf_p, 6);
-		_cw_assert(0 < out_put(cw_g_out, ":[b]:\n", &buf));
+		_cw_assert(0 < _cw_out_put(":[b]:\n", &buf));
 		buf_catenate_buf(buf_p, &buf, TRUE);
 		buf_catenate_buf(buf_p, &buf, FALSE);
 		buf_release_head_data(buf_p, buf_get_size(buf_p) - 40);
 
-		_cw_assert(0 < out_put(cw_g_out, "buf_p :[b]:\n", buf_p));
+		_cw_assert(0 < _cw_out_put("buf_p :[b]:\n", buf_p));
 
 		buf_delete(buf_p);
 		buf_delete(&buf);
 	}
 
-	out_put(cw_g_out, "Test end\n");
+	_cw_out_put("Test end\n");
 	libstash_shutdown();
 	return 0;
 }

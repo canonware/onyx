@@ -53,7 +53,7 @@ main()
 	cw_bool_t num_waiting;
 
 	libstash_init();
-	out_put(cw_g_out, "Test begin\n");
+	_cw_out_put("Test begin\n");
 
 	mtx_new(&mutex);
 
@@ -119,7 +119,7 @@ main()
 	cnd_delete(&cond_a);
 	mtx_delete(&mutex);
 
-	out_put(cw_g_out, "Test end\n");
+	_cw_out_put("Test end\n");
 	libstash_shutdown();
 	return 0;
 }

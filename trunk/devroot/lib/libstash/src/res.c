@@ -369,7 +369,7 @@ res_p_parse_res(cw_res_t *a_res, cw_bool_t a_is_file)
 			if (c == EOF) {
 				/* Make sure it's an EOF, not an error. */
 				if (ferror(a_res->fd)) {
-					out_put(cw_g_out, "res_parse_res(): Error reading from file\n");
+					_cw_out_put("res_parse_res(): Error reading from file\n");
 					retval = TRUE;
 					break;
 				} else {
@@ -384,8 +384,7 @@ res_p_parse_res(cw_res_t *a_res, cw_bool_t a_is_file)
 			c = a_res->str[i];
 
 		if (dbg_is_registered(cw_g_dbg, "res_state")) {
-			out_put(cw_g_out,
-			    "res_parse_res(): State == [i], Input == \'[c]\'\n",
+			_cw_out_put("res_parse_res(): State == [i], Input == \'[c]\'\n",
 			    state, c);
 		}
 		switch (state) {
@@ -1121,8 +1120,7 @@ res_p_merge_res(cw_res_t *a_res, const char *a_name, const char *a_val)
 	strcpy(temp_val, a_val);
 
 	if (dbg_is_registered(cw_g_dbg, "res_state")) {
-		out_put(cw_g_out,
-		    "res_merge_res(): Merging name == :[s]:, value == :[s]:\n",
+		_cw_out_put("res_merge_res(): Merging name == :[s]:, value == :[s]:\n",
 		    a_name, a_val);
 	}
 	/* Insert the resource into the hash table. */

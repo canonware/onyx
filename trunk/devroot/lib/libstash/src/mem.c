@@ -58,11 +58,11 @@ mem_delete(cw_mem_t *a_mem)
 			char    buf[1025];
 
 			bzero(buf, sizeof(buf));
-			out_put_sn(cw_g_out, buf, 1024,
+			_cw_out_put_sn(buf, 1024,
 			    "[s](): [q] unfreed allocation[s]\n",
 			    __FUNCTION__, num_addrs,
 			    num_addrs != 1 ? "s" : "");
-			out_put(cw_g_out, buf);
+			_cw_out_put(buf);
 		}
 		for (i = 0; i < num_addrs; i++) {
 			oh_item_delete_iterate(&a_mem->addr_hash,
@@ -71,13 +71,13 @@ mem_delete(cw_mem_t *a_mem)
 				char    buf[1025];
 
 				bzero(buf, sizeof(buf));
-				out_put_sn(cw_g_out, buf, 1024,
+				_cw_out_put_sn(buf, 1024,
 				    "[s](): 0x[p], size [i] never freed "
 				    "(allocated at [s], line [i])\n",
 				    __FUNCTION__, addr, allocation->size,
 				    allocation->filename,
 				    allocation->line_num);
-				out_put(cw_g_out, buf);
+				_cw_out_put(buf);
 			}
 			_cw_free(allocation);
 		}
@@ -148,10 +148,10 @@ mem_malloc(cw_mem_t *a_mem, size_t a_size)
 			char    buf[1025];
 
 			bzero(buf, sizeof(buf));
-			out_put_sn(cw_g_out, buf, 1024,
+			_cw_out_put_sn(buf, 1024,
 			    "[s](): malloc([i]) returned NULL at [s], line [i]\n",
 			    __FUNCTION__, a_size, a_filename, a_line_num);
-			out_put(cw_g_out, buf);
+			_cw_out_put(buf);
 		}
 	} else if (NULL != a_mem) {
 		struct cw_mem_item_s *old_allocation;
@@ -164,7 +164,7 @@ mem_malloc(cw_mem_t *a_mem, size_t a_size)
 				_cw_check_ptr(old_allocation);
 
 				bzero(buf, sizeof(buf));
-				out_put_sn(cw_g_out, buf, 1024,
+				_cw_out_put_sn(buf, 1024,
 				    "[s](): 0x[p] multiply-allocated "
 				    "(was at [s], line [i], size [i];"
 				    " now at [s], line [i], size [i])\n",
@@ -175,7 +175,7 @@ mem_malloc(cw_mem_t *a_mem, size_t a_size)
 				    a_filename,
 				    a_line_num,
 				    a_size);
-				out_put(cw_g_out, buf);
+				_cw_out_put(buf);
 			}
 		} else {
 			struct cw_mem_item_s *allocation;
@@ -185,10 +185,10 @@ mem_malloc(cw_mem_t *a_mem, size_t a_size)
 				char    buf[1025];
 
 				bzero(buf, sizeof(buf));
-				out_put_sn(cw_g_out, buf, 1024,
+				_cw_out_put_sn(buf, 1024,
 				    "[s](): malloc([i]) returned NULL\n",
 				    __FUNCTION__, sizeof(struct cw_mem_item_s));
-				out_put(cw_g_out, buf);
+				_cw_out_put(buf);
 			} else {
 				memset(retval, 0xa5, a_size);
 
@@ -201,11 +201,11 @@ mem_malloc(cw_mem_t *a_mem, size_t a_size)
 					char    buf[1025];
 
 					bzero(buf, sizeof(buf));
-					out_put_sn(cw_g_out, buf, 1024,
+					_cw_out_put_sn(buf, 1024,
 					    "[s](): 0x[p] <-- malloc([i]) at [s], line [i]\n",
 					    __FUNCTION__, retval, a_size,
 					    a_filename, a_line_num);
-					out_put(cw_g_out, buf);
+					_cw_out_put(buf);
 				}
 				if (-1 == oh_item_insert(&a_mem->addr_hash,
 				    retval, allocation)) {
@@ -215,12 +215,12 @@ mem_malloc(cw_mem_t *a_mem, size_t a_size)
 
 						bzero(buf, sizeof(buf));
 
-						out_put_sn(cw_g_out, buf, 1024,
+						_cw_out_put_sn(buf, 1024,
 						    "[s](): Memory allocation error; "
 						    "unable to record allocation 0x[p] at [s], line [i]\n",
 						    __FUNCTION__, retval,
 						    a_filename, a_line_num);
-						out_put(cw_g_out, buf);
+						_cw_out_put(buf);
 					}
 				}
 			}
@@ -277,12 +277,12 @@ mem_calloc(cw_mem_t *a_mem, size_t a_number, size_t a_size)
 			char    buf[1025];
 
 			bzero(buf, sizeof(buf));
-			out_put_sn(cw_g_out, buf, 1024,
+			_cw_out_put_sn(buf, 1024,
 			    "[s](): calloc([i], [i]) returned NULL "
 			    "at [s], line [i]\n",
 			    __FUNCTION__, a_number, a_size, a_filename,
 			    a_line_num);
-			out_put(cw_g_out, buf);
+			_cw_out_put(buf);
 		}
 	} else if (NULL != a_mem) {
 		struct cw_mem_item_s *old_allocation;
@@ -295,7 +295,7 @@ mem_calloc(cw_mem_t *a_mem, size_t a_number, size_t a_size)
 				_cw_check_ptr(old_allocation);
 
 				bzero(buf, sizeof(buf));
-				out_put_sn(cw_g_out, buf, 1024,
+				_cw_out_put_sn(buf, 1024,
 				    "[s](): 0x[p] multiply-allocated "
 				    "(was at [s], line [i], size [i];"
 				    " now at [s], line [i], size [i])\n",
@@ -306,7 +306,7 @@ mem_calloc(cw_mem_t *a_mem, size_t a_number, size_t a_size)
 				    a_filename,
 				    a_line_num,
 				    a_size);
-				out_put(cw_g_out, buf);
+				_cw_out_put(buf);
 			}
 		} else {
 			struct cw_mem_item_s *allocation;
@@ -316,10 +316,10 @@ mem_calloc(cw_mem_t *a_mem, size_t a_number, size_t a_size)
 				char    buf[1025];
 
 				bzero(buf, sizeof(buf));
-				out_put_sn(cw_g_out, buf, 1024,
+				_cw_out_put_sn(buf, 1024,
 				    "[s](): malloc([i]) returned NULL\n",
 				    __FUNCTION__, sizeof(struct cw_mem_item_s));
-				out_put(cw_g_out, buf);
+				_cw_out_put(buf);
 			} else {
 				/*
 				 * Leave the memory alone, since calloc() is
@@ -334,12 +334,12 @@ mem_calloc(cw_mem_t *a_mem, size_t a_number, size_t a_size)
 					char    buf[1025];
 
 					bzero(buf, sizeof(buf));
-					out_put_sn(cw_g_out, buf, 1024,
+					_cw_out_put_sn(buf, 1024,
 					    "[s](): 0x[p] <-- calloc([i], [i]) "
 					    "at [s], line [i]\n",
 					    __FUNCTION__, retval, a_number, a_size,
 					    a_filename, a_line_num);
-					out_put(cw_g_out, buf);
+					_cw_out_put(buf);
 				}
 				if (-1 == oh_item_insert(&a_mem->addr_hash, retval, allocation)) {
 					if (dbg_is_registered(cw_g_dbg, "mem_error")) {
@@ -347,12 +347,12 @@ mem_calloc(cw_mem_t *a_mem, size_t a_number, size_t a_size)
 
 						bzero(buf, sizeof(buf));
 
-						out_put_sn(cw_g_out, buf, 1024,
+						_cw_out_put_sn(buf, 1024,
 						    "[s](): Memory allocation error; "
 						    "unable to record allocation 0x[p] at [s], line [i]\n",
 						    __FUNCTION__, retval,
 						    a_filename, a_line_num);
-						out_put(cw_g_out, buf);
+						_cw_out_put(buf);
 					}
 				}
 			}
@@ -410,12 +410,12 @@ mem_realloc(cw_mem_t *a_mem, void *a_ptr, size_t a_size)
 			char    buf[1025];
 
 			bzero(buf, sizeof(buf));
-			out_put_sn(cw_g_out, buf, 1024,
+			_cw_out_put_sn(buf, 1024,
 			    "[s](): realloc(0x[p], [i]) "
 			    "returned NULL at [s], line [i]\n",
 			    __FUNCTION__, a_ptr, a_size,
 			    a_filename, a_line_num);
-			out_put(cw_g_out, buf);
+			_cw_out_put(buf);
 		}
 	} else if (NULL != a_mem) {
 		struct cw_mem_item_s *allocation;
@@ -426,10 +426,10 @@ mem_realloc(cw_mem_t *a_mem, void *a_ptr, size_t a_size)
 				char    buf[1025];
 
 				bzero(buf, sizeof(buf));
-				out_put_sn(cw_g_out, buf, 1024,
+				_cw_out_put_sn(buf, 1024,
 				    "[s](): 0x[p] not allocated\n",
 				    __FUNCTION__, a_ptr);
-				out_put(cw_g_out, buf);
+				_cw_out_put(buf);
 			}
 		} else {
 			const char *old_filename;
@@ -449,12 +449,12 @@ mem_realloc(cw_mem_t *a_mem, void *a_ptr, size_t a_size)
 
 					bzero(buf, sizeof(buf));
 
-					out_put_sn(cw_g_out, buf, 1024,
+					_cw_out_put_sn(buf, 1024,
 					    "[s](): Memory allocation error; "
 					    "unable to record allocation 0x[p] at [s], line [i]\n",
 					    __FUNCTION__, retval,
 					    a_filename, a_line_num);
-					out_put(cw_g_out, buf);
+					_cw_out_put(buf);
 				}
 			}
 			if (old_size < a_size) {
@@ -465,7 +465,7 @@ mem_realloc(cw_mem_t *a_mem, void *a_ptr, size_t a_size)
 				char    buf[1025];
 
 				bzero(buf, sizeof(buf));
-				out_put_sn(cw_g_out, buf, 1024,
+				_cw_out_put_sn(buf, 1024,
 				    "[s](): reallocing 0x[p]"
 				    " (was size [i], allocated at [s], line [i])"
 				    " to 0x[p], size [i] at [s], line [i]\n",
@@ -477,7 +477,7 @@ mem_realloc(cw_mem_t *a_mem, void *a_ptr, size_t a_size)
 				    a_size,
 				    a_filename,
 				    a_line_num);
-				out_put(cw_g_out, buf);
+				_cw_out_put(buf);
 			}
 		}
 		mtx_unlock(&a_mem->lock);
@@ -510,20 +510,20 @@ mem_free(cw_mem_t *a_mem, void *a_ptr)
 				char    buf[1025];
 
 				bzero(buf, sizeof(buf));
-				out_put_sn(cw_g_out, buf, 1024,
+				_cw_out_put_sn(buf, 1024,
 				    "[s](): 0x[p] not allocated, "
 				    "attempted to free at [s], line [i]\n",
 				    __FUNCTION__, a_ptr,
 				    a_filename,
 				    a_line_num);
-				out_put(cw_g_out, buf);
+				_cw_out_put(buf);
 			}
 		} else {
 			if (dbg_is_registered(cw_g_dbg, "mem_verbose")) {
 				char    buf[1025];
 
 				bzero(buf, sizeof(buf));
-				out_put_sn(cw_g_out, buf, 1024,
+				_cw_out_put_sn(buf, 1024,
 				    "[s](): Freeing 0x[p], size [i], at [s], line [i] "
 				    "(allocated at [s], line [i])\n",
 				    __FUNCTION__, a_ptr,
@@ -532,7 +532,7 @@ mem_free(cw_mem_t *a_mem, void *a_ptr)
 				    a_line_num,
 				    allocation->filename,
 				    allocation->line_num);
-				out_put(cw_g_out, buf);
+				_cw_out_put(buf);
 			}
 			memset(a_ptr, 0x5a, allocation->size);
 			_cw_free(allocation);

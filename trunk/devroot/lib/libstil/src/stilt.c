@@ -251,10 +251,10 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 #define _CW_STILS_PSTATE(a)						\
 	do {								\
 		if (a_stilt->state == (a))				\
-			out_put(cw_g_out, "[s]\n", #a);			\
+			_cw_out_put("[s]\n", #a);			\
 	} while (0)
 
-		out_put(cw_g_out, "c: '[c]' ([i]), index: [i] ", c, c,
+		_cw_out_put("c: '[c]' ([i]), index: [i] ", c, c,
 		    a_stilt->index);
 		_CW_STILS_PSTATE(_CW_STILT_STATE_START);
 		_CW_STILS_PSTATE(_CW_STILT_STATE_LT_CONT);
@@ -991,12 +991,12 @@ stilt_p_print_token(cw_stilt_t *a_stilt, cw_uint32_t a_length,
     const char *a_note)
 {
 #ifdef _LIBSTIL_DBG
-	out_put(cw_g_out, "-->");
+	_cw_out_put("-->");
 	if (a_stilt->index <= _CW_STIL_BUFC_SIZE)
-		out_put_n(cw_g_out, a_length, "[s]", a_stilt->tok_buffer.str);
+		_cw_out_put_n(a_length, "[s]", a_stilt->tok_buffer.str);
 	else
-		out_put_n(cw_g_out, a_length, "[b]", &a_stilt->tok_buffer.buf);
-	out_put(cw_g_out, "<-- [s]\n", a_note);
+		_cw_out_put_n(a_length, "[b]", &a_stilt->tok_buffer.buf);
+	_cw_out_put("<-- [s]\n", a_note);
 #endif
 }
 
@@ -1006,12 +1006,12 @@ stilt_p_print_syntax_error(cw_stilt_t *a_stilt, cw_uint8_t a_c)
 	_cw_out_put("Syntax error for '[c]' (0x[i|b:16]), following -->",
 	    a_c, a_c);
 	if (a_stilt->index <= _CW_STIL_BUFC_SIZE)
-		out_put_n(cw_g_out, a_stilt->index, "[s]",
+		_cw_out_put_n(a_stilt->index, "[s]",
 		    a_stilt->tok_buffer.str);
 	else
-		out_put_n(cw_g_out, a_stilt->index, "[b]",
+		_cw_out_put_n(a_stilt->index, "[b]",
 		    &a_stilt->tok_buffer.buf);
-	out_put(cw_g_out, "<--\n");
+	_cw_out_put("<--\n");
 	a_stilt->state = _CW_STILT_STATE_START;
 	stilt_p_reset_tok_buffer(a_stilt);
 }

@@ -29,7 +29,7 @@ main()
 	cw_sint32_t ins_error;
 
 	libstash_init();
-	out_put(cw_g_out, "Test begin\n");
+	_cw_out_put("Test begin\n");
 
 	oh_new(&hash);
 /*   dbg_register(cw_g_dbg, "oh_slot"); */
@@ -38,66 +38,66 @@ main()
 
 	for (i = 0; i < NUM_STRINGS; i++) {
 		strings[i] = (char *)_cw_malloc(sizeof(char) * 50);
-		out_put_s(cw_g_out, strings[i], "([i]) This is string [i]", i,
+		_cw_out_put_s(strings[i], "([i]) This is string [i]", i,
 		    i);
 	}
 
 /*   h1_ptr = oh_get_h1(hash); */
 /*   oh_set_h1(hash, new_h1); */
 
-/*   out_put(cw_g_out, "<<< Begin first insertion loop >>>\n"); */
+/*   _cw_out_put("<<< Begin first insertion loop >>>\n"); */
 	for (i = 0; i < NUM_STRINGS; i++) {
-/*     out_put(cw_g_out, "<<< Iteration [i] >>>\n", i); */
+/*     _cw_out_put("<<< Iteration [i] >>>\n", i); */
 		ins_error = oh_item_insert(&hash, (void *)strings[i],
 		    (void *)&(strings[i]));
 		if (ins_error == 1) {
-			out_put(cw_g_out, "(1) Error at i == [i]\n", i);
+			_cw_out_put("(1) Error at i == [i]\n", i);
 			oh_dump(&hash, FALSE);
 			exit(1);
 		}
 	}
 
-/*   out_put(cw_g_out, "<<< Begin first deletion loop >>>\n"); */
+/*   _cw_out_put("<<< Begin first deletion loop >>>\n"); */
 	for (i = 0; i < (NUM_STRINGS / 2); i++) {
 		error = oh_item_delete(&hash, (void *)strings[i],
 		    (void **)&junk, (void **)&junk);
 		if (error == TRUE) {
-			out_put(cw_g_out, "(2) Error at i == [i]\n", i);
+			_cw_out_put("(2) Error at i == [i]\n", i);
 			oh_dump(&hash, FALSE);
 			exit(1);
 		}
 	}
 
-/*   out_put(cw_g_out, "<<< Begin second insertion loop >>>\n"); */
+/*   _cw_out_put("<<< Begin second insertion loop >>>\n"); */
 	for (i = 0; i < NUM_STRINGS / 2; i++) {
 		ins_error = oh_item_insert(&hash, (void *)strings[i],
 		    (void *)&(strings[i]));
 		if (ins_error == 1) {
-			out_put(cw_g_out, "(3) Error at i == [i]\n", i);
+			_cw_out_put("(3) Error at i == [i]\n", i);
 			oh_dump(&hash, FALSE);
 			exit(1);
 		}
 	}
 
-/*   out_put(cw_g_out, "<<< Begin second deletion loop >>>\n"); */
+/*   _cw_out_put("<<< Begin second deletion loop >>>\n"); */
 	for (i = 0; i < NUM_STRINGS; i++) {
 		error = oh_item_delete(&hash, (void *)strings[i],
 		    (void **)&junk, (void **)&junk);
 		if (error == TRUE) {
-			out_put(cw_g_out, "(4) Error at i == [i]\n", i);
+			_cw_out_put("(4) Error at i == [i]\n", i);
 			oh_dump(&hash, FALSE);
 			exit(1);
 		}
 	}
 
-/*   out_put(cw_g_out, "<<< Final insertion >>>\n"); */
+/*   _cw_out_put("<<< Final insertion >>>\n"); */
 	ins_error = oh_item_insert(&hash, (void *)strings[0],
 	    (void *)&(strings[0]));
 
 	{
-		out_put(cw_g_out, "Table size: [q]\n",
+		_cw_out_put("Table size: [q]\n",
 		    oh_get_size(&hash));
-		out_put(cw_g_out, "Number of items: [q]\n",
+		_cw_out_put("Number of items: [q]\n",
 		    oh_get_num_items(&hash));
 	}
 
@@ -109,7 +109,7 @@ main()
 	_cw_free(strings);
 
 	oh_delete(&hash);
-	out_put(cw_g_out, "Test end\n");
+	_cw_out_put("Test end\n");
 	libstash_shutdown();
 
 	return 0;

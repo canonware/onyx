@@ -94,8 +94,8 @@ sockb_init(cw_uint32_t a_max_fds, cw_uint32_t a_bufc_size, cw_uint32_t
 		 */
 
 		if (-1 == pipe(filedes)) {
-			out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-			    "Fatal error in pipe(): [s]\n", strerror(errno));
+			_cw_out_put_e("Fatal error in pipe(): [s]\n",
+			    strerror(errno));
 			abort();
 		}
 		g_sockb->pipe_out = filedes[0];
@@ -104,28 +104,24 @@ sockb_init(cw_uint32_t a_max_fds, cw_uint32_t a_bufc_size, cw_uint32_t
 		/* Set g_sockb->pipe_in to non-blocking. */
 		val = fcntl(g_sockb->pipe_in, F_GETFL, 0);
 		if (val == -1) {
-			out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-			    "Fatal error for F_GETFL in fcntl(): [s]\n",
+			_cw_out_put_e("Fatal error for F_GETFL in fcntl(): [s]\n",
 			    strerror(errno));
 			abort();
 		}
 		if (fcntl(g_sockb->pipe_in, F_SETFL, val | O_NONBLOCK)) {
-			out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-			    "Fatal error for F_SETFL in fcntl(): [s]\n",
+			_cw_out_put_e("Fatal error for F_SETFL in fcntl(): [s]\n",
 			    strerror(errno));
 			abort();
 		}
 
 		val = fcntl(g_sockb->pipe_out, F_GETFL, 0);
 		if (val == -1) {
-			out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-			    "Fatal error for F_GETFL in fcntl(): [s]\n",
+			_cw_out_put_e("Fatal error for F_GETFL in fcntl(): [s]\n",
 			    strerror(errno));
 			abort();
 		}
 		if (fcntl(g_sockb->pipe_in, F_SETFL, val | O_NONBLOCK)) {
-			out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-			    "Fatal error for F_SETFL in fcntl(): [s]\n",
+			_cw_out_put_e("Fatal error for F_SETFL in fcntl(): [s]\n",
 			    strerror(errno));
 			abort();
 		}
@@ -308,8 +304,7 @@ sockb_l_wakeup(void)
 	if (FALSE == sem_trywait(&g_sockb->pipe_sem)) {
 		if (-1 == write(g_sockb->pipe_in, "X", 1)) {
 			if (dbg_is_registered(cw_g_dbg, "sockb_error")) {
-				out_put_e(cw_g_out, __FILE__, __LINE__,
-				    __FUNCTION__, "Error in write(): [s]\n",
+				_cw_out_put_e("Error in write(): [s]\n",
 				    strerror(errno));
 			}
 		}
@@ -480,19 +475,13 @@ sockb_l_get_host_ip(const char *a_host_str, cw_uint32_t *r_host_ip)
 		if (host_entry == NULL) {
 			if (dbg_is_registered(cw_g_dbg, "sockb_error")) {
 #ifdef _CW_OS_SOLARIS
-				out_put_e(cw_g_out, __FILE__, __LINE__,
-				    __FUNCTION__,
-				    "Error in gethostbyname(): [i]\n",
+				_cw_out_put_e("Error in gethostbyname(): [i]\n",
 				    h_errno);
 #else
-				out_put_e(cw_g_out, __FILE__, __LINE__,
-				    __FUNCTION__,
-				    "Error in gethostbyname(): [s]\n",
+				_cw_out_put_e("Error in gethostbyname(): [s]\n",
 				    hstrerror(h_errno));
 #endif
-				out_put_e(cw_g_out, __FILE__, __LINE__,
-				    __FUNCTION__,
-				    "Host \"[s]\" isn't an IP address or a hostname\n",
+				_cw_out_put_e("Host \"[s]\" isn't an IP address or a hostname\n",
 				    a_host_str);
 			}
 			retval = TRUE;
@@ -544,10 +533,8 @@ sockb_p_notify(cw_mq_t *a_mq, int a_sockfd)
 		 * We can't afford to lose the message, since it could end
 		 * up causing deadlock.
 		 */
-		if (dbg_is_registered(cw_g_dbg, "sockb_error")) {
-			out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-			    "Memory allocation error; yielding\n");
-		}
+		if (dbg_is_registered(cw_g_dbg, "sockb_error"))
+			_cw_out_put_e("Memory allocation error; yielding\n");
 		thd_yield();
 	}
 
@@ -561,7 +548,7 @@ sockb_p_notify(cw_mq_t *a_mq, int a_sockfd)
 	}
 	retval = FALSE;
 #ifdef _LIBSOCK_CONFESS
-	out_put(cw_g_out, "n");
+	_cw_out_put("n");
 #endif
 
 RETURN:
@@ -682,8 +669,7 @@ sockb_p_entry_func(void *a_arg)
 					nfds--;
 					if (regs[sockfd].pollfd_pos != nfds) {
 #ifdef _LIBSOCK_CONFESS
-						out_put(cw_g_out,
-						    "h([i]-->[i])", nfds,
+						_cw_out_put("h([i]-->[i])", nfds,
 						    regs[sockfd].pollfd_pos);
 #endif
 
@@ -842,14 +828,14 @@ sockb_p_entry_func(void *a_arg)
 			for (i = 1; i < nfds; i++) {
 				sockfd = fds[i].fd;
 
-				out_put(cw_g_out, " [i]R", sockfd);
+				_cw_out_put(" [i]R", sockfd);
 
 				if (fds[i].events & POLLIN)
-					out_put(cw_g_out, "r");
+					_cw_out_put("r");
 				if (fds[i].events & POLLOUT)
-					out_put(cw_g_out, "w");
+					_cw_out_put("w");
 			}
-			out_put(cw_g_out, " ([i][s])\n", fds[0].fd,
+			_cw_out_put(" ([i][s])\n", fds[0].fd,
 			    (fds[0].events & POLLIN) ? "r" : "");
 		}
 
@@ -860,7 +846,7 @@ sockb_p_entry_func(void *a_arg)
 		num_ready = poll(fds, nfds, -1);
 
 #ifdef _LIBSOCK_CONFESS
-		out_put(cw_g_out, "-->([i|s:s])\n", num_ready);
+		_cw_out_put("-->([i|s:s])\n", num_ready);
 #endif
 
 		if (-1 == num_ready) {
@@ -869,9 +855,7 @@ sockb_p_entry_func(void *a_arg)
 				 * This is an error that should never
 				 * happen.
 				 */
-				out_put_e(cw_g_out, __FILE__, __LINE__,
-				    __FUNCTION__,
-				    "Fatal error in poll(): [s]\n",
+				_cw_out_put_e("Fatal error in poll(): [s]\n",
 				    strerror(errno));
 				abort();
 			}
@@ -889,7 +873,7 @@ sockb_p_entry_func(void *a_arg)
 				ssize_t bytes_read;
 
 #ifdef _LIBSOCK_CONFESS
-				out_put(cw_g_out, " ([i|s:s]r)",
+				_cw_out_put(" ([i|s:s]r)",
 				    g_sockb->pipe_out);
 #endif
 
@@ -914,9 +898,7 @@ sockb_p_entry_func(void *a_arg)
 				if (bytes_read == -1) {
 					if (dbg_is_registered(cw_g_dbg,
 					    "sockb_error")) {
-						out_put_e(cw_g_out, __FILE__,
-						    __LINE__, __FUNCTION__,
-						    "Error in read(): [s]\n",
+						_cw_out_put_e("Error in read(): [s]\n",
 						    strerror(errno));
 					}
 				} else if (bytes_read > 0) {
@@ -946,8 +928,7 @@ sockb_p_entry_func(void *a_arg)
 				sockfd = fds[i].fd;
 
 #ifdef _LIBSOCK_CONFESS
-				out_put(cw_g_out,
-				    " [i][s][s][s][s][s][s][s][s][s][s]",
+				_cw_out_put(" [i][s][s][s][s][s][s][s][s][s][s]",
 				    sockfd,
 #ifdef POLLIN
 				    fds[i].revents & POLLIN ? "<IN>" :
@@ -1006,7 +987,7 @@ sockb_p_entry_func(void *a_arg)
 					j++;
 
 #ifdef _LIBSOCK_CONFESS
-					out_put(cw_g_out, "r");
+					_cw_out_put("r");
 #endif
 					/* Ready for reading. */
 
@@ -1027,11 +1008,8 @@ sockb_p_entry_func(void *a_arg)
 						while (NULL == (bufc =
 						    sockb_get_spare_bufc())) {
 							if (dbg_is_registered(cw_g_dbg,
-							    "sockb_error")) {
-								out_put_e(cw_g_out, __FILE__,
-								    __LINE__, __FUNCTION__,
-								    "Memory allocation error; yielding\n");
-							}
+							    "sockb_error"))
+								_cw_out_put_e("Memory allocation error; yielding\n");
 							thd_yield();
 						}
 
@@ -1039,13 +1017,8 @@ sockb_p_entry_func(void *a_arg)
 						    buf_append_bufc(&buf_in,
 						        bufc, 0,
 							pezz_get_buffer_size(&g_sockb->buffer_pool))) {
-							if (dbg_is_registered(cw_g_dbg, "sockb_error")) {
-								out_put_e(cw_g_out,
-								    __FILE__,
-								    __LINE__,
-								    __FUNCTION__,
-								    "Memory allocation error; yielding\n");
-							}
+							if (dbg_is_registered(cw_g_dbg, "sockb_error"))
+								_cw_out_put_e("Memory allocation error; yielding\n");
 							thd_yield();
 						}
 						bufc_delete(bufc);
@@ -1069,7 +1042,7 @@ sockb_p_entry_func(void *a_arg)
 					bytes_read = readv(sockfd, iov,
 					    iov_cnt);
 #ifdef _LIBSOCK_CONFESS
-					out_put(cw_g_out, "([i|s:s])",
+					_cw_out_put("([i|s:s])",
 					    bytes_read);
 #endif
 
@@ -1083,13 +1056,8 @@ sockb_p_entry_func(void *a_arg)
 						    buf_split(&tmp_buf,
 						    &buf_in, bytes_read)) {
 							if (dbg_is_registered(cw_g_dbg,
-							    "sockb_error")) {
-								out_put_e(cw_g_out,
-								    __FILE__,
-								    __LINE__,
-								    __FUNCTION__,
-								    "Memory allocation error; yielding\n");
-							}
+							    "sockb_error"))
+								_cw_out_put_e("Memory allocation error; yielding\n");
 							thd_yield();
 						}
 
@@ -1111,7 +1079,7 @@ sockb_p_entry_func(void *a_arg)
 							 * again space.
 							 */
 #ifdef _LIBSOCK_CONFESS
-							out_put(cw_g_out, "u");
+							_cw_out_put("u");
 #endif
 							fds[i].events ^=
 							    (fds[i].events &
@@ -1140,10 +1108,7 @@ sockb_p_entry_func(void *a_arg)
 						/* readv() error. */
 						if (dbg_is_registered(cw_g_dbg,
 						    "sockb_verbose")) {
-							out_put_e(cw_g_out,
-							    __FILE__, __LINE__,
-							    __FUNCTION__,
-							    "EOF in readv().  Closing sockfd [i]\n",
+							_cw_out_put_e("EOF in readv().  Closing sockfd [i]\n",
 							    sockfd);
 						}
 						/*
@@ -1154,8 +1119,7 @@ sockb_p_entry_func(void *a_arg)
 						if (regs[sockfd].pollfd_pos !=
 						    nfds) {
 #ifdef _LIBSOCK_CONFESS
-							out_put(cw_g_out,
-							    "h([i]-->[i])",
+							_cw_out_put("h([i]-->[i])",
 							    nfds, i);
 #endif
 
@@ -1181,17 +1145,14 @@ sockb_p_entry_func(void *a_arg)
 							}
 						}
 #ifdef _LIBSOCK_CONFESS
-						out_put(cw_g_out, "\n");
+						_cw_out_put("\n");
 #endif
 						continue;
 					} else {	/* if (bytes_read == -1) */
 						/* readv() error. */
 						if (dbg_is_registered(cw_g_dbg,
 						    "sockb_error")) {
-							out_put_e(cw_g_out,
-							    __FILE__, __LINE__,
-							    __FUNCTION__,
-							    "Error in readv(): [s]\n",
+							_cw_out_put_e("Error in readv(): [s]\n",
 							    strerror(errno));
 						}
 					}
@@ -1205,7 +1166,7 @@ sockb_p_entry_func(void *a_arg)
 					j++;
 
 #ifdef _LIBSOCK_CONFESS
-					out_put(cw_g_out, "r(");
+					_cw_out_put("r(");
 #endif
 
 					/*
@@ -1235,13 +1196,8 @@ sockb_p_entry_func(void *a_arg)
 							while (NULL == (bufc =
 							    sockb_get_spare_bufc())) {
 								if (dbg_is_registered(cw_g_dbg,
-								    "sockb_error")) {
-									out_put_e(cw_g_out,
-									    __FILE__,
-									    __LINE__,
-									    __FUNCTION__,
-									    "Memory allocation error; yielding\n");
-								}
+								    "sockb_error"))
+									_cw_out_put_e("Memory allocation error; yielding\n");
 								thd_yield();
 							}
 
@@ -1250,13 +1206,8 @@ sockb_p_entry_func(void *a_arg)
 							    bufc, 0,
 							    buffer_size)) {
 								if (dbg_is_registered(cw_g_dbg,
-								    "sockb_error")) {
-									out_put_e(cw_g_out,
-									    __FILE__,
-									    __LINE__,
-									    __FUNCTION__,
-									    "Memory allocation error; yielding\n");
-								}
+								    "sockb_error"))
+									_cw_out_put_e("Memory allocation error; yielding\n");
 								thd_yield();
 							}
 							/*
@@ -1273,7 +1224,7 @@ sockb_p_entry_func(void *a_arg)
 						    iov_cnt);
 
 #ifdef _LIBSOCK_CONFESS
-						out_put(cw_g_out, "[i|s:s][s]",
+						_cw_out_put("[i|s:s][s]",
 						    bytes_read, (0 <
 						    bytes_read) ? ", " : ")");
 #endif
@@ -1284,13 +1235,8 @@ sockb_p_entry_func(void *a_arg)
 						    buf_split(&tmp_buf,
 						    &buf_in, bytes_read)) {
 							if (dbg_is_registered(cw_g_dbg,
-							    "sockb_error")) {
-								out_put_e(cw_g_out,
-								    __FILE__,
-								    __LINE__,
-								    __FUNCTION__,
-								    "Memory allocation error; yielding\n");
-							}
+							    "sockb_error"))
+								_cw_out_put_e("Memory allocation error; yielding\n");
 							thd_yield();
 						}
 						sock_l_put_in_data(regs[sockfd].sock,
@@ -1298,14 +1244,12 @@ sockb_p_entry_func(void *a_arg)
 					} while (0 < bytes_read);
 
 #ifdef _LIBSOCK_CONFESS
-					out_put(cw_g_out, "c");
+					_cw_out_put("c");
 #endif
 
 					if (dbg_is_registered(cw_g_dbg,
 					    "sockb_verbose")) {
-						out_put_e(cw_g_out, __FILE__,
-						    __LINE__, __FUNCTION__,
-						    "POLLHUP.  Closing sockfd [i]\n",
+						_cw_out_put_e("POLLHUP.  Closing sockfd [i]\n",
 						    sockfd);
 					}
 					/*
@@ -1315,8 +1259,8 @@ sockb_p_entry_func(void *a_arg)
 					nfds--;
 					if (regs[sockfd].pollfd_pos != nfds) {
 #ifdef _LIBSOCK_CONFESS
-						out_put(cw_g_out,
-						    "h([i]-->[i])", nfds, i);
+						_cw_out_put("h([i]-->[i])",
+						    nfds, i);
 #endif
 
 						regs[fds[nfds].fd].pollfd_pos
@@ -1338,7 +1282,7 @@ sockb_p_entry_func(void *a_arg)
 						}
 					}
 #ifdef _LIBSOCK_CONFESS
-					out_put(cw_g_out, "\n");
+					_cw_out_put("\n");
 #endif
 					continue;
 				}
@@ -1350,7 +1294,7 @@ sockb_p_entry_func(void *a_arg)
 					j++;
 
 #ifdef _LIBSOCK_CONFESS
-					out_put(cw_g_out, "w");
+					_cw_out_put("w");
 #endif
 					/* Ready for writing. */
 
@@ -1377,7 +1321,7 @@ sockb_p_entry_func(void *a_arg)
 					bytes_written = writev(sockfd, iov,
 					    iov_cnt);
 #ifdef _LIBSOCK_CONFESS
-					out_put(cw_g_out, "([i|s:s]/[i])",
+					_cw_out_put("([i|s:s]/[i])",
 					    bytes_written,
 					    buf_get_size(&tmp_buf));
 #endif
@@ -1398,7 +1342,7 @@ sockb_p_entry_func(void *a_arg)
 							 * descriptor set.
 							 */
 #ifdef _LIBSOCK_CONFESS
-							out_put(cw_g_out, "u");
+							_cw_out_put("u");
 #endif
 							fds[i].events ^=
 							    (fds[i].events &
@@ -1406,7 +1350,7 @@ sockb_p_entry_func(void *a_arg)
 						}
 #ifdef _LIBSOCK_CONFESS
 						else
-							out_put(cw_g_out, "i");
+							_cw_out_put("i");
 #endif
 					} else {	/* if (bytes_written ==
 							 * -1) */
@@ -1415,15 +1359,10 @@ sockb_p_entry_func(void *a_arg)
 
 						if (dbg_is_registered(cw_g_dbg,
 						    "sockb_verbose")) {
-							out_put_e(cw_g_out,
-							    __FILE__, __LINE__,
-							    __FUNCTION__,
-							    "Error in writev(): [s]\n",
+							_cw_out_put_e("Error in writev(): [s]\n",
 							    strerror(errno));
-							out_put_e(cw_g_out,
-							    __FILE__, __LINE__,
-							    __FUNCTION__,
-							    "Closing sockfd [i]\n", sockfd);
+							_cw_out_put_e("Closing sockfd [i]\n",
+							    sockfd);
 						}
 						/*
 						 * Fill this hole, decrement
@@ -1433,8 +1372,7 @@ sockb_p_entry_func(void *a_arg)
 						if (regs[sockfd].pollfd_pos !=
 						    nfds) {
 #ifdef _LIBSOCK_CONFESS
-							out_put(cw_g_out,
-							    "h([i]-->[i])",
+							_cw_out_put("h([i]-->[i])",
 							    nfds, i);
 #endif
 							regs[fds[nfds].fd].pollfd_pos
@@ -1463,7 +1401,7 @@ sockb_p_entry_func(void *a_arg)
 				}
 			}
 #ifdef _LIBSOCK_CONFESS
-			out_put(cw_g_out, "\n");
+			_cw_out_put("\n");
 #endif
 		}
 	}

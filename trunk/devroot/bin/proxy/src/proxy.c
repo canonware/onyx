@@ -165,7 +165,7 @@ main(int argc, char **argv)
 	}
 
 	if ((TRUE == cl_error) || (optind < argc)) {
-		out_put(cw_g_out, "Unrecognized option(s)\n");
+		_cw_out_put("Unrecognized option(s)\n");
 		usage();
 		retval = 1;
 		goto CLERROR;
@@ -180,26 +180,25 @@ main(int argc, char **argv)
 	}
 	/* Check validity of command line options. */
 	if ((TRUE == opt_verbose) && (TRUE == opt_quiet)) {
-		out_put(cw_g_out, "\"-v\" and \"-q\" are incompatible\n");
+		_cw_out_put("\"-v\" and \"-q\" are incompatible\n");
 		usage();
 		retval = 1;
 		goto CLERROR;
 	}
 	if ((TRUE == opt_log) && (NULL != opt_dirname)) {
-		out_put(cw_g_out, "\"-l\" and \"-d\" are incompatible\n");
+		_cw_out_put("\"-l\" and \"-d\" are incompatible\n");
 		usage();
 		retval = 1;
 		goto CLERROR;
 	}
 	if ((NULL != opt_dirname) && (512 < strlen(opt_dirname))) {
-		out_put(cw_g_out,
-		    "Argument to \"-d\" flag is too long (512 bytes max)\n");
+		_cw_out_put("Argument to \"-d\" flag is too long (512 bytes max)\n");
 		usage();
 		retval = 1;
 		goto CLERROR;
 	}
 	if (NULL == opt_rhost) {
-		out_put(cw_g_out, "\"-r\" flag must be specified\n");
+		_cw_out_put("\"-r\" flag must be specified\n");
 		usage();
 		retval = 1;
 		goto CLERROR;
@@ -217,30 +216,28 @@ main(int argc, char **argv)
 	if (NULL != opt_dirname) {
 		cw_sint32_t fd;
 
-		out_put_s(cw_g_out, logfile, "[s]/[s].pid_[i].log", opt_dirname,
+		_cw_out_put_s(logfile, "[s]/[s].pid_[i].log", opt_dirname,
 		    g_progname, getpid());
 
 		fd = (cw_sint32_t)open(logfile, O_RDWR | O_CREAT | O_TRUNC,
 		    0644);
 		if (-1 == fd) {
 			if (dbg_is_registered(cw_g_dbg, "prog_error")) {
-				out_put_e(cw_g_out, __FILE__, __LINE__,
-				    __FUNCTION__,
-				    "Error opening \"[s]\": [s]\n", logfile,
-				    strerror(errno));
+				_cw_out_put_e("Error opening \"[s]\": [s]\n",
+				    logfile, strerror(errno));
 			}
 		}
 		out_set_default_fd(cw_g_out, fd);
 	}
 	if (dbg_is_registered(cw_g_dbg, "prog_verbose"))
-		out_put(cw_g_out, "pid: [i]\n", getpid());
+		_cw_out_put("pid: [i]\n", getpid());
 	if (sockb_init(1024, 2048, 4096))
 		_cw_error("Initialization failure");
 	socks = socks_new();
 	if (TRUE == socks_listen(socks, INADDR_ANY, &opt_port))
 		exit(1);
 	if (dbg_is_registered(cw_g_dbg, "prog_verbose")) {
-		out_put_l(cw_g_out, "[s]: Listening on port [i]\n", argv[0],
+		_cw_out_put_l("[s]: Listening on port [i]\n", argv[0],
 		    opt_port);
 	}
 	for (conn_num = 0; should_quit == FALSE;) {
@@ -264,9 +261,10 @@ main(int argc, char **argv)
 
 				conn->out = out_new(NULL);
 
-				out_put_s(cw_g_out, logfile,
+				_cw_out_put_s(logfile,
 				    "[s]/[s].pid_[i].conn[i]",
-				    opt_dirname, g_progname, getpid(), conn_num);
+				    opt_dirname, g_progname, getpid(),
+				    conn_num);
 				conn_num++;
 
 				fd = (cw_sint32_t)open(logfile, O_RDWR | O_CREAT
@@ -274,9 +272,7 @@ main(int argc, char **argv)
 				if (-1 == fd) {
 					if (dbg_is_registered(cw_g_dbg,
 					    "prog_error")) {
-						out_put_e(cw_g_out, __FILE__,
-						    __LINE__, __FUNCTION__,
-						    "Error opening \"[s]\": [s]\n",
+						_cw_out_put_e("Error opening \"[s]\": [s]\n",
 						    logfile, strerror(errno));
 					}
 					out_delete(conn->out);
@@ -363,7 +359,7 @@ get_out_str_pretty(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 	memcpy(p, t_str, len);
 	p += len;
 
-	len = out_put_s(cw_g_out, line_a, "[s]:0x[i|b:16] ([i]) byte[s]\n",
+	len = _cw_out_put_s(line_a, "[s]:0x[i|b:16] ([i]) byte[s]\n",
 	    (TRUE == is_send) ? "send" : "recv",
 	    buf_size,
 	    buf_size,
@@ -382,7 +378,7 @@ get_out_str_pretty(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 		 */
 		line_a[0] = '\0';
 		p_a = line_a;
-		p_a += out_put_s(cw_g_out, line_a, "[i|b:16|w:8|p:0]", i);
+		p_a += _cw_out_put_s(line_a, "[i|b:16|w:8|p:0]", i);
 
 		line_b[0] = '\0';
 		p_b = line_b;
@@ -803,8 +799,8 @@ get_out_str_pretty(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 				break;
 			}
 
-			p_a += out_put_s(cw_g_out, p_a, "  [i|b:16|w:2|p:0]", c);
-			p_b += out_put_s(cw_g_out, p_b, " [s|w:3]", c_trans);
+			p_a += _cw_out_put_s(p_a, "  [i|b:16|w:2|p:0]", c);
+			p_b += _cw_out_put_s(p_b, " [s|w:3]", c_trans);
 		}
 		/* Actually copy the strings to the final output string. */
 		len = p_a - line_a;
@@ -929,7 +925,7 @@ get_out_str_ascii(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 	p += strlen(t_str);
 
 	/* Header. */
-	p += out_put_s(cw_g_out, p, "[s]:0x[i|b:16] ([i]) byte[s]\n",
+	p += _cw_out_put_s(p, "[s]:0x[i|b:16] ([i]) byte[s]\n",
 	    (TRUE == is_send) ? "send" : "recv",
 	    buf_size,
 	    buf_size,
@@ -941,7 +937,7 @@ get_out_str_ascii(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 		p++;
 	}
 
-	p += out_put_s(cw_g_out, p, "\n");
+	p += _cw_out_put_s(p, "\n");
 
 	/* Last dashed line. */
 	t_str = "----------------------------------------"
@@ -955,7 +951,7 @@ cw_bool_t
 oom_handler(const void *a_data, cw_uint32_t a_size)
 {
 	if (dbg_is_registered(cw_g_dbg, "ncat_error")) {
-		out_put(cw_g_out, "[s]: Memory allocation error for size [i]\n",
+		_cw_out_put("[s]: Memory allocation error for size [i]\n",
 		    g_progname, a_size);
 	}
 	exit(1);
@@ -1126,8 +1122,7 @@ handle_client_recv(void *a_arg)
 void
 usage(void)
 {
-	out_put
-	(cw_g_out,
+	_cw_out_put(
 	    "[s] usage:\n"
 	    "    [s] -h\n"
 	    "    [s] -V\n"
@@ -1155,7 +1150,7 @@ usage(void)
 void
 version(void)
 {
-	out_put(cw_g_out, "[s], version [s]\n", g_progname, _LIBSOCK_VERSION);
+	_cw_out_put("[s], version [s]\n", g_progname, _LIBSOCK_VERSION);
 }
 
 /* Doesn't strip trailing '/' characters. */

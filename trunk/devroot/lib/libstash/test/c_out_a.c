@@ -19,12 +19,12 @@ int
 main()
 {
 	libstash_init();
-	out_put(cw_g_out, "Test begin\n");
+	_cw_out_put("Test begin\n");
 
 /*    dbg_register(cw_g_dbg, "mem_verbose"); */
 
 	/* out_new(), out_delete(). */
-	out_put(cw_g_out, "out_new(), out_delete()\n");
+	_cw_out_put("out_new(), out_delete()\n");
 	{
 		cw_out_t out, *out_p;
 
@@ -37,7 +37,7 @@ main()
 	}
 
 	/* out_register(), out_merge(). */
-	out_put(cw_g_out, "out_register(), out_merge()\n");
+	_cw_out_put("out_register(), out_merge()\n");
 	{
 		cw_out_t *out_p;
 
@@ -53,7 +53,7 @@ main()
 	}
 
 	/* out_get_default_fd(), out_set_default_fd(). */
-	out_put(cw_g_out, "out_get_default_fd(), out_set_default_fd()\n");
+	_cw_out_put("out_get_default_fd(), out_set_default_fd()\n");
 	{
 		cw_out_t *out_p;
 
@@ -69,7 +69,7 @@ main()
 	}
 
 	/* out_put(). */
-	out_put(cw_g_out, "out_put()\n");
+	_cw_out_put("out_put()\n");
 	{
 		cw_out_t *out_p;
 
@@ -84,7 +84,7 @@ main()
 	}
 
 	/* out_put_e(). */
-	out_put(cw_g_out, "out_put_e()\n");
+	_cw_out_put("out_put_e()\n");
 	{
 		cw_out_t *out_p;
 
@@ -105,7 +105,7 @@ main()
 	}
 
 	/* out_put_l(). */
-	out_put(cw_g_out, "out_put_l()\n");
+	_cw_out_put("out_put_l()\n");
 	{
 		cw_out_t *out_p;
 
@@ -119,7 +119,7 @@ main()
 	}
 
 	/* out_put_le(). */
-	out_put(cw_g_out, "out_put_le()\n");
+	_cw_out_put("out_put_le()\n");
 	{
 		cw_out_t *out_p;
 
@@ -134,7 +134,7 @@ main()
 	}
 
 	/* out_put_n(). */
-	out_put(cw_g_out, "out_put_n()\n");
+	_cw_out_put("out_put_n()\n");
 	{
 		cw_out_t *out_p;
 		char    buf[81] =
@@ -152,7 +152,7 @@ main()
 	}
 
 	/* out_put_f(). */
-	out_put(cw_g_out, "out_put_f()\n");
+	_cw_out_put("out_put_f()\n");
 	{
 		cw_out_t *out_p;
 
@@ -167,7 +167,7 @@ main()
 	}
 
 	/* out_put_fe(). */
-	out_put(cw_g_out, "out_put_fe()\n");
+	_cw_out_put("out_put_fe()\n");
 	{
 		cw_out_t *out_p;
 
@@ -191,7 +191,7 @@ main()
 	}
 
 	/* out_put_fl(). */
-	out_put(cw_g_out, "out_put_fl()\n");
+	_cw_out_put("out_put_fl()\n");
 	{
 		cw_out_t *out_p;
 
@@ -205,7 +205,7 @@ main()
 	}
 
 	/* out_put_fle(). */
-	out_put(cw_g_out, "out_put_fle()\n");
+	_cw_out_put("out_put_fle()\n");
 	{
 		cw_out_t *out_p;
 
@@ -220,7 +220,7 @@ main()
 	}
 
 	/* out_put_fn(). */
-	out_put(cw_g_out, "out_put_fn()\n");
+	_cw_out_put("out_put_fn()\n");
 	{
 		cw_out_t *out_p;
 		char    buf[81] =
@@ -238,7 +238,7 @@ main()
 	}
 
 	/* out_put_s(). */
-	out_put(cw_g_out, "out_put_s()\n");
+	_cw_out_put("out_put_s()\n");
 	{
 		cw_out_t *out_p;
 		char    buf[80];
@@ -256,7 +256,7 @@ main()
 	}
 
 	/* out_put_sa(). */
-	out_put(cw_g_out, "out_put_sa()\n");
+	_cw_out_put("out_put_sa()\n");
 	{
 		cw_out_t *out_p;
 		char   *buf;
@@ -273,7 +273,7 @@ main()
 	}
 
 	/* out_put_sn(). */
-	out_put(cw_g_out, "out_put_sn()\n");
+	_cw_out_put("out_put_sn()\n");
 	{
 		cw_out_t *out_p;
 		char   *str, buf[81], ibuf[81] =
@@ -682,13 +682,13 @@ main()
 
 /*      for (i = 0; i < 10000; i++) */
 /*      { */
-/*        out_put_s(cw_g_out, buf, "[i|b:16]", (cw_uint32_t) 0xf2135123); */
-/*        out_put(cw_g_out, "."); */
+/*        _cw_out_put_s(buf, "[i|b:16]", (cw_uint32_t) 0xf2135123); */
+/*        _cw_out_put("."); */
 /*      } */
-/*      out_put(cw_g_out, "\n[s]\n", buf); */
+/*      _cw_out_put("\n[s]\n", buf); */
 /*    } */
 
-	out_put(cw_g_out, "Test end\n");
+	_cw_out_put("Test end\n");
 	libstash_shutdown();
 	return 0;
 }

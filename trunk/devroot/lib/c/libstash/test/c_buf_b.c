@@ -46,7 +46,7 @@ thread_entry_func(void *a_arg)
 	    i < (_LIBSTASH_TEST_NUM_BUFELS * _LIBSTASH_TEST_SIZEOF_BUFFER
 		* _LIBSTASH_TEST_NUM_CIRCULATIONS);
 	     /* Increment in the body. */ ) {
-/*      out_put(cw_g_out, "[s]", foo_struct->thread_name); */
+/*      _cw_out_put("[s]", foo_struct->thread_name); */
 
 		size = buf_get_size(foo_struct->buf_a);
 
@@ -103,7 +103,7 @@ main(int argc, char **argv)
 	cw_uint32_t seed;
 
 	libstash_init();
-	out_put(cw_g_out, "Test begin\n");
+	_cw_out_put("Test begin\n");
 
 /*    dbg_register(cw_g_dbg, "mem_verbose"); */
 
@@ -135,7 +135,7 @@ main(int argc, char **argv)
 	} else {
 		seed = getpid();
 	}
-/*    out_put(cw_g_out, "seed == [i]\n", seed); */
+/*    _cw_out_put("seed == [i]\n", seed); */
 	srandom(seed);
 
 	foo_a.buf_a = buf_a;
@@ -157,27 +157,27 @@ main(int argc, char **argv)
 	/* Make sure the data hasn't been corrupted. */
 	if (_LIBSTASH_TEST_NUM_BUFELS * _LIBSTASH_TEST_SIZEOF_BUFFER
 	    != buf_get_size(buf_a)) {
-		out_put(cw_g_out,
+		_cw_out_put(
 		    "buf_get_size(buf_a) == [i] (should be [i])\n",
 		    buf_get_size(buf_a),
 		    _LIBSTASH_TEST_NUM_BUFELS * _LIBSTASH_TEST_SIZEOF_BUFFER);
 		buf_dump(buf_a, "buf_a ");
-		out_put(cw_g_out, "seed == [i]\n", seed);
+		_cw_out_put("seed == [i]\n", seed);
 	}
 	if (0 != buf_get_size(&buf_b)) {
-		out_put(cw_g_out, "buf_get_size(&buf_b) == [i] (should be 0)\n",
+		_cw_out_put("buf_get_size(&buf_b) == [i] (should be 0)\n",
 		    buf_get_size(&buf_b));
 		buf_dump(&buf_b, "buf_b ");
-		out_put(cw_g_out, "seed == [i]\n", seed);
+		_cw_out_put("seed == [i]\n", seed);
 	}
 	for (i = 0; i < buf_get_size(buf_a); i++) {
 		c = (cw_uint32_t)buf_get_uint8(buf_a, i);
 
 		if (c != i % _LIBSTASH_TEST_DATA_MODULUS) {
-			out_put(cw_g_out, "buf_a[[[i]] == %u, should be %u\n",
+			_cw_out_put("buf_a[[[i]] == %u, should be %u\n",
 			    i, c, i % _LIBSTASH_TEST_DATA_MODULUS);
 			buf_dump(buf_a, "buf_a ");
-			out_put(cw_g_out, "seed == [i]\n", seed);
+			_cw_out_put("seed == [i]\n", seed);
 			break;
 		}
 	}
@@ -186,7 +186,7 @@ main(int argc, char **argv)
 	buf_delete(&buf_b);
 	mtx_delete(&rand_lock);
 
-	out_put(cw_g_out, "Test end\n");
+	_cw_out_put("Test end\n");
 	libstash_shutdown();
 	return 0;
 }

@@ -85,6 +85,8 @@ cw_sint32_t out_put_le(cw_out_t *a_out, const char *a_file_name, cw_uint32_t
 cw_sint32_t out_put_n(cw_out_t *a_out, cw_uint32_t a_size, const char
     *a_format,...);
 
+#define _cw_out_put_f(a_fd, a_format, a_args...)			\
+	out_put_f(cw_g_out, a_fd, a_format, ## a_args)
 cw_sint32_t out_put_f(cw_out_t *a_out, cw_sint32_t a_fd, const char
     *a_format,...);
 
@@ -99,16 +101,22 @@ cw_sint32_t out_put_fle(cw_out_t *a_out, cw_sint32_t a_fd, const char
     *a_file_name, cw_uint32_t a_line_num, const char *a_func_name, const char
     *a_format,...);
 
+#define _cw_out_put_fn(a_fd, a_size, a_format, a_args...)		\
+	out_put_fn(cw_g_out, a_fd, a_size, a_format, ## a_args)
 cw_sint32_t out_put_fn(cw_out_t *a_out, cw_sint32_t a_fd, cw_uint32_t a_size,
     const char *a_format,...);
 
 cw_sint32_t out_put_fv(cw_out_t *a_out, cw_sint32_t a_fd, const char *a_format,
     va_list a_p);
 
+#define _cw_out_put_s(a_str, a_format, a_args...)			\
+	out_put_s(cw_g_out, a_str, a_format, ## a_args)
 cw_sint32_t out_put_s(cw_out_t *a_out, char *a_str, const char *a_format,...);
 
 cw_sint32_t out_put_sa(cw_out_t *a_out, char **r_str, const char *a_format,...);
 
+#define _cw_out_put_sn(a_str, a_size, a_format, a_args...)		\
+	out_put_sn(cw_g_out, a_str, a_size, a_format, ## a_args)
 cw_sint32_t out_put_sn(cw_out_t *a_out, char *a_str, cw_uint32_t a_size, const
     char *a_format,...);
 

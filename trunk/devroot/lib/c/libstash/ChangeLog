@@ -1,3 +1,7 @@
+2000-05-02  Jason Evans  <jasone@canonware.com>
+
+	* include/libstash/out.h: Add _cw_out_put_[fs]{n}().
+
 2000-04-30  Jason Evans  <jasone@canonware.com>
 
 	* include/libstash/queue.h: Add FreeBSD's /usr/include/sys/queue.h,

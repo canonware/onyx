@@ -32,7 +32,7 @@ insert_items(void *a_arg)
 
 	for (i = 0; i < NUM_STRINGS; i++) {
 		string = (char *)_cw_malloc(40);
-		out_put_s(cw_g_out, string, "thread [i], string [i]",
+		_cw_out_put_s(string, "thread [i], string [i]",
 		    foo_var->thread_num, i);
 		_cw_assert(0 == oh_item_insert(foo_var->hash,
 			(void *)string, (void *)string));
@@ -55,7 +55,7 @@ main()
 	cw_rwl_t lock;
 
 	libstash_init();
-	out_put(cw_g_out, "Test begin\n");
+	_cw_out_put("Test begin\n");
 	hash = oh_new_r(NULL);
 	rwl_new(&lock);
 
@@ -66,7 +66,7 @@ main()
 		foo_var->thread_num = i;
 
 		thd_new(&threads[i], insert_items, (void *)foo_var);
-/*     out_put(cw_g_out, "Got to end of for loop, i == [i]\n", i); */
+/*     _cw_out_put("Got to end of for loop, i == [i]\n", i); */
 	}
 
 	/* Join on threads. */
@@ -74,7 +74,7 @@ main()
 		thd_join(&threads[i]);
 	}
 
-	out_put(cw_g_out, "Number of items in hash table: [q]\n",
+	_cw_out_put("Number of items in hash table: [q]\n",
 	    oh_get_num_items(hash));
 
 	/* Delete all the strings. */
@@ -93,7 +93,7 @@ main()
 
 	rwl_delete(&lock);
 	oh_delete(hash);
-	out_put(cw_g_out, "Test end\n");
+	_cw_out_put("Test end\n");
 	libstash_shutdown();
 
 	return 0;

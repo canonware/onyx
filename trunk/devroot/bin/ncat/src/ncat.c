@@ -174,14 +174,14 @@ main(int argc, char **argv)
 	}
 
 	if ((TRUE == cl_error) || (optind < argc)) {
-		out_put(cw_g_out, "[s]: Unrecognized option(s)\n", g_progname);
+		_cw_out_put("[s]: Unrecognized option(s)\n", g_progname);
 		usage();
 		retval = 1;
 		goto RETURN;
 	}
 	/* Check validity of command line options. */
 	if ((TRUE == opt_verbose) && (TRUE == opt_quiet)) {
-		out_put(cw_g_out, "[s]: \"-v\" and \"-q\" are incompatible\n",
+		_cw_out_put("[s]: \"-v\" and \"-q\" are incompatible\n",
 		    g_progname);
 		usage();
 		retval = 1;
@@ -189,21 +189,21 @@ main(int argc, char **argv)
 	}
 	if (FALSE == opt_client) {
 		if (FALSE == opt_server) {
-			out_put(cw_g_out, "[s]: -p or -r must be specified\n",
+			_cw_out_put("[s]: -p or -r must be specified\n",
 			    g_progname);
 			usage();
 			retval = 1;
 			goto RETURN;
 		}
 	} else if (TRUE == opt_server) {
-		out_put(cw_g_out, "[s]: -p and -r are incompatible\n",
+		_cw_out_put("[s]: -p and -r are incompatible\n",
 		    g_progname);
 		usage();
 		retval = 1;
 		goto RETURN;
 	}
 	if ((NULL == opt_log) && (NONE != opt_format)) {
-		out_put(cw_g_out, "[s]: -f requires -l to be specified\n",
+		_cw_out_put("[s]: -f requires -l to be specified\n",
 		    g_progname);
 		usage();
 		retval = 1;
@@ -219,8 +219,7 @@ main(int argc, char **argv)
 
 		if (-1 == fd) {
 			if (dbg_is_registered(cw_g_dbg, "ncat_verbose")) {
-				out_put(cw_g_out,
-				    "[s]: Unable to open log file \"[s]\"\n",
+				_cw_out_put("[s]: Unable to open log file \"[s]\"\n",
 				    opt_log);
 			}
 			retval = 1;
@@ -229,7 +228,7 @@ main(int argc, char **argv)
 		out_set_default_fd(log_out, fd);
 	}
 	if (dbg_is_registered(cw_g_dbg, "ncat_verbose"))
-		out_put(cw_g_out, "[s]: pid: [i]\n", g_progname, getpid());
+		_cw_out_put("[s]: pid: [i]\n", g_progname, getpid());
 	sockb_init(16, 4096, 4);
 
 	if (TRUE == opt_client) {
@@ -243,12 +242,10 @@ main(int argc, char **argv)
 	if (NULL == sock) {
 		if (dbg_is_registered(cw_g_dbg, "ncat_error")) {
 			if (TRUE == opt_client) {
-				out_put(cw_g_out,
-				    "[s]: Connection failure or timeout\n",
+				_cw_out_put("[s]: Connection failure or timeout\n",
 				    g_progname);
 			} else {
-				out_put(cw_g_out,
-				    "[s]: Error listening on port [i] or timeout\n",
+				_cw_out_put("[s]: Error listening on port [i] or timeout\n",
 				    g_progname, opt_port);
 			}
 		}
@@ -421,7 +418,7 @@ client_setup(const char *a_rhost, int a_rport, struct timespec * a_timeout)
         error = sock_connect(retval, a_rhost, a_rport, a_timeout);
 	if (-1 == error) {
 		if (dbg_is_registered(cw_g_dbg, "ncat_error")) {
-			out_put(cw_g_out, "[s]: Error connecting to [s]:[i]\n",
+			_cw_out_put("[s]: Error connecting to [s]:[i]\n",
 			    g_progname, a_rhost, a_rport);
 		}
 		sock_delete(retval);
@@ -429,14 +426,14 @@ client_setup(const char *a_rhost, int a_rport, struct timespec * a_timeout)
 		retval = NULL;
 	} else if (1 == error) {
 		if (dbg_is_registered(cw_g_dbg, "ncat_error")) {
-			out_put(cw_g_out, "[s]: Timeout connecting to [s]:[i]\n",
+			_cw_out_put("[s]: Timeout connecting to [s]:[i]\n",
 			    g_progname, a_rhost, a_rport);
 		}
 		sock_delete(retval);
 		retval = NULL;
 	}
 	if (dbg_is_registered(cw_g_dbg, "ncat_verbose")) {
-		out_put(cw_g_out, "[s]: Connected to [s]:[i]\n",
+		_cw_out_put("[s]: Connected to [s]:[i]\n",
 		    g_progname, a_rhost, a_rport);
 	}
 	return retval;
@@ -463,7 +460,7 @@ server_setup(int a_port, struct timespec * a_timeout)
 		 * info, running in server mode is rather useless.
 		 */
 		if (dbg_is_registered(cw_g_dbg, "ncat_error")) {
-			out_put(cw_g_out, "[s]: Listening on port [i]\n",
+			_cw_out_put("[s]: Listening on port [i]\n",
 			    g_progname, port);
 		}
 	}
@@ -475,7 +472,7 @@ server_setup(int a_port, struct timespec * a_timeout)
 		goto RETURN;
 	}
 	if (dbg_is_registered(cw_g_dbg, "ncat_verbose"))
-		out_put(cw_g_out, "[s]: Connection established\n", g_progname);
+		_cw_out_put("[s]: Connection established\n", g_progname);
 RETURN:
 	socks_delete(socks);
 	return retval;
@@ -522,7 +519,7 @@ get_out_str_pretty(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 	memcpy(p, t_str, len);
 	p += len;
 
-	len = out_put_s(cw_g_out, line_a, "[s]:0x[i|b:16] ([i]) byte[s]\n",
+	len = _cw_out_put_s(line_a, "[s]:0x[i|b:16] ([i]) byte[s]\n",
 	    (TRUE == is_send) ? "send" : "recv", buf_size, buf_size, (buf_size
 	    != 1) ? "s" : "");
 	memcpy(p, line_a, len);
@@ -539,7 +536,7 @@ get_out_str_pretty(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 		 */
 		line_a[0] = '\0';
 		p_a = line_a;
-		p_a += out_put_s(cw_g_out, line_a, "[i|b:16|w:8|p:0]", i);
+		p_a += _cw_out_put_s(line_a, "[i|b:16|w:8|p:0]", i);
 
 		line_b[0] = '\0';
 		p_b = line_b;
@@ -960,8 +957,8 @@ get_out_str_pretty(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 				break;
 			}
 
-			p_a += out_put_s(cw_g_out, p_a, "  [i|b:16|w:2|p:0]", c);
-			p_b += out_put_s(cw_g_out, p_b, " [s|w:3]", c_trans);
+			p_a += _cw_out_put_s(p_a, "  [i|b:16|w:2|p:0]", c);
+			p_b += _cw_out_put_s(p_b, " [s|w:3]", c_trans);
 		}
 		/* Actually copy the strings to the final output string. */
 		len = p_a - line_a;
@@ -1086,7 +1083,7 @@ get_out_str_ascii(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 	p += strlen(t_str);
 
 	/* Header. */
-	p += out_put_s(cw_g_out, p, "[s]:0x[i|b:16] ([i]) byte[s]\n", (TRUE ==
+	p += _cw_out_put_s(p, "[s]:0x[i|b:16] ([i]) byte[s]\n", (TRUE ==
 	    is_send) ? "send" : "recv", buf_size, buf_size, (buf_size != 1) ?
 	    "s" : "");
 
@@ -1096,7 +1093,7 @@ get_out_str_ascii(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 		p++;
 	}
 
-	p += out_put_s(cw_g_out, p, "\n");
+	p += _cw_out_put_s(p, "\n");
 
 	/* Last dashed line. */
 	t_str = "----------------------------------------"
@@ -1110,7 +1107,7 @@ cw_bool_t
 oom_handler(const void *a_data, cw_uint32_t a_size)
 {
 	if (dbg_is_registered(cw_g_dbg, "ncat_error")) {
-		out_put(cw_g_out, "[s]: Memory allocation error for size [i]\n",
+		_cw_out_put("[s]: Memory allocation error for size [i]\n",
 		    g_progname, a_size);
 	}
 	exit(1);
@@ -1121,8 +1118,7 @@ oom_handler(const void *a_data, cw_uint32_t a_size)
 void
 usage(void)
 {
-	out_put
-	(cw_g_out,
+	_cw_out_put(
 	    "[s]: Usage:\n"
 	    "    [s] -h\n"
 	    "    [s] -V\n"
@@ -1150,7 +1146,7 @@ usage(void)
 void
 version(void)
 {
-	out_put(cw_g_out, "[s]: Version [s]\n", g_progname, _LIBSOCK_VERSION);
+	_cw_out_put("[s]: Version [s]\n", g_progname, _LIBSOCK_VERSION);
 }
 
 /* Doesn't strip trailing '/' characters. */

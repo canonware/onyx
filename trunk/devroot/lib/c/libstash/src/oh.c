@@ -510,21 +510,21 @@ oh_dump(cw_oh_t *a_oh, cw_bool_t a_all)
 	_cw_check_ptr(a_oh);
 	if (a_oh->is_thread_safe)
 		rwl_rlock(&a_oh->rw_lock);
-	out_put(cw_g_out,
+	_cw_out_put(
 	    "============================================================\n");
-	out_put(cw_g_out,
+	_cw_out_put(
 	    "Size: [[[q]]  Slots filled: [[[i]]\n\n",
 	    a_oh->size,
 	    a_oh->items_count);
-	out_put(cw_g_out, "      pow h1         h2    shrink grow \n");
-	out_put(cw_g_out, "      --- ---------- ----- ------ -----\n");
-	out_put(cw_g_out,
+	_cw_out_put("      pow h1         h2    shrink grow \n");
+	_cw_out_put("      --- ---------- ----- ------ -----\n");
+	_cw_out_put(
 	    "Base: [i|w:2]             [i|w:5] [i|w:5]  [i|w:5]\n",
 	    a_oh->base_power,
 	    a_oh->base_h2,
 	    a_oh->base_shrink_point,
 	    a_oh->base_grow_point);
-	out_put(cw_g_out,
+	_cw_out_put(
 	    "Curr: [i|w:2]  0x[p|w:8|p:0] [q|w:5] [q|w:5]  [q|w:5]\n\n",
 	    a_oh->curr_power,
 	    a_oh->curr_h1,
@@ -532,12 +532,12 @@ oh_dump(cw_oh_t *a_oh, cw_bool_t a_all)
 	    a_oh->curr_shrink_point,
 	    a_oh->curr_grow_point);
 
-	out_put(cw_g_out,
+	_cw_out_put(
 	    "Counters: collisions[[[q]] inserts[[[q]] deletes[[[q]]\n",
 	    a_oh->num_collisions,
 	    a_oh->num_inserts,
 	    a_oh->num_deletes);
-	out_put(cw_g_out, "          grows[[[q]] shrinks[[[q]]\n\n",
+	_cw_out_put("          grows[[[q]] shrinks[[[q]]\n\n",
 	    a_oh->num_grows,
 	    a_oh->num_shrinks);
 
@@ -545,27 +545,27 @@ oh_dump(cw_oh_t *a_oh, cw_bool_t a_all)
 		if (NULL != a_oh->items_ring)
 			ring_dump(a_oh->items_ring, "items_ring ");
 		else
-			out_put(cw_g_out, "NULL items_ring\n");
+			_cw_out_put("NULL items_ring\n");
 
 		if (NULL != a_oh->spares_ring)
 			ring_dump(a_oh->spares_ring, "spares_ring ");
 		else
-			out_put(cw_g_out, "NULL spares_ring\n");
+			_cw_out_put("NULL spares_ring\n");
 
-		out_put(cw_g_out, "slot key        value\n");
-		out_put(cw_g_out, "---- ---------- ----------\n");
+		_cw_out_put("slot key        value\n");
+		_cw_out_put("---- ---------- ----------\n");
 
 		for (i = 0; i < a_oh->size; i++) {
-			out_put(cw_g_out, "[i|w:4] ", i);
+			_cw_out_put("[i|w:4] ", i);
 			if (a_oh->items[i] != NULL) {
-				out_put(cw_g_out, "0x[i|w:8|p:0|b:16] 0x[p|w:8|p:0]\n",
+				_cw_out_put("0x[i|w:8|p:0|b:16] 0x[p|w:8|p:0]\n",
 				    a_oh->items[i]->key,
 				    a_oh->items[i]->data);
 			} else
-				out_put(cw_g_out, "\n");
+				_cw_out_put("\n");
 		}
 	}
-	out_put(cw_g_out,
+	_cw_out_put(
 	    "============================================================\n");
 
 	if (a_oh->is_thread_safe)

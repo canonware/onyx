@@ -20,7 +20,7 @@ int
 main()
 {
 	libstash_init();
-	out_put(cw_g_out, "Test begin\n");
+	_cw_out_put("Test begin\n");
 
 /*    dbg_register(cw_g_dbg, "mem_verbose"); */
 
@@ -160,7 +160,7 @@ main()
 		arena_delete(&arena);
 	}
 
-	out_put(cw_g_out, "Test end\n");
+	_cw_out_put("Test end\n");
 	libstash_shutdown();
 	return 0;
 }

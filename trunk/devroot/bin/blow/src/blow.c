@@ -93,7 +93,7 @@ main(int argc, char **argv)
 	}
 
 	if ((TRUE == cl_error) || (optind < argc)) {
-		out_put(cw_g_out, "Unrecognized option(s)\n");
+		_cw_out_put("Unrecognized option(s)\n");
 		usage(basename(argv[0]));
 		retval = 1;
 		goto CLERROR;
@@ -107,22 +107,22 @@ main(int argc, char **argv)
 		goto CLERROR;
 	}
 	if (NULL == opt_rhost) {
-		out_put(cw_g_out, "Remote host:port not specified\n");
+		_cw_out_put("Remote host:port not specified\n");
 		retval = 1;
 		goto CLERROR;
 	}
 	if (0 == opt_bsize) {
-		out_put(cw_g_out, "Invalid block size\n");
+		_cw_out_put("Invalid block size\n");
 		retval = 1;
 		goto CLERROR;
 	}
 	if (0 == opt_nsocks) {
-		out_put(cw_g_out, "Invalid number of connections\n");
+		_cw_out_put("Invalid number of connections\n");
 		retval = 1;
 		goto CLERROR;
 	}
 	if (0 == opt_nblocks) {
-		out_put(cw_g_out, "Invalid number of blocks\n");
+		_cw_out_put("Invalid number of blocks\n");
 		retval = 1;
 		goto CLERROR;
 	}
@@ -138,14 +138,13 @@ main(int argc, char **argv)
 		timeout.tv_nsec = 0;
 		if (0 != sock_connect(&sock_array[i], opt_rhost, opt_rport,
 		    &timeout)) {
-			out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-			    "Error in sock_connect()\n");
+			_cw_out_put_e("Error in sock_connect()\n");
 			retval = 1;
 			for (j = 0; j < i; j++)
 				sock_delete(&sock_array[j]);
 			goto RETURN;
 		} else
-			out_put_l(cw_g_out, "New connection ([i])\n", i);
+			_cw_out_put_l("New connection ([i])\n", i);
 	}
 
 	buf_new(&buf);
@@ -206,7 +205,7 @@ SHUTDOWN:
 	for (i = 0; i < opt_nsocks; i++) {
 		sock_flush_out(&sock_array[i]);
 		sock_delete(&sock_array[i]);
-		out_put_l(cw_g_out, "Connection closed ([i])\n", i);
+		_cw_out_put_l("Connection closed ([i])\n", i);
 	}
 
 RETURN:
@@ -221,8 +220,7 @@ CLERROR:
 void
 usage(const char *a_progname)
 {
-	out_put
-	(cw_g_out,
+	_cw_out_put(
 	    "[s] usage:\n"
 	    "    [s] -h\n"
 	    "    [s] -V\n"
@@ -250,7 +248,7 @@ usage(const char *a_progname)
 void
 version(const char *a_progname)
 {
-	out_put(cw_g_out, "[s], version [s]\n", a_progname, _LIBSOCK_VERSION);
+	_cw_out_put("[s], version [s]\n", a_progname, _LIBSOCK_VERSION);
 }
 
 /* Doesn't strip trailing '/' characters. */

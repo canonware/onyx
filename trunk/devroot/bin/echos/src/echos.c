@@ -25,7 +25,7 @@ handle_client(void *a_arg)
 	int     iovec_count;
 	cw_uint32_t i;
 
-	out_put(cw_g_out, "New connection\n");
+	_cw_out_put("New connection\n");
 
 	buf_new(&buf);
 
@@ -36,13 +36,12 @@ handle_client(void *a_arg)
 		iovec = buf_get_iovec(&buf, 0xffffffff, buf_get_size(&buf),
 		    &iovec_count);
 
-		out_put(cw_g_out, "Got :");
+		_cw_out_put("Got :");
 		for (i = 0; i < iovec_count; i++) {
-			out_put_n(cw_g_out, iovec[i].iov_len,
-			    "[s]",
+			_cw_out_put_n(iovec[i].iov_len, "[s]",
 			    iovec[i].iov_base);
 		}
-		out_put(cw_g_out, ":\n");
+		_cw_out_put(":\n");
 
 		if (TRUE == sock_write(sock, &buf))
 			break;
@@ -52,7 +51,7 @@ handle_client(void *a_arg)
 	buf_delete(&buf);
 	sock_delete(sock);
 
-	out_put(cw_g_out, "Connection closed\n");
+	_cw_out_put("Connection closed\n");
 
 	return NULL;
 }
@@ -65,7 +64,7 @@ main(int argc, char **argv)
 	int     port;
 	cw_thd_t *thd;
 
-	out_put(cw_g_out, "[s]: pid [i]\n", argv[0], getpid());
+	_cw_out_put("[s]: pid [i]\n", argv[0], getpid());
 
 	if (argc != 2)
 		port = 0;
@@ -85,11 +84,11 @@ main(int argc, char **argv)
 
 	socks = socks_new();
 	if (TRUE == socks_listen(socks, INADDR_ANY, &port)) {
-		out_put(cw_g_out, "[s]: Error listening on port [i]\n", argv[0],
+		_cw_out_put("[s]: Error listening on port [i]\n", argv[0],
 		    port);
 		goto RETURN;
 	}
-	out_put(cw_g_out, "[s]: Listening on port [i]\n", argv[0], port);
+	_cw_out_put("[s]: Listening on port [i]\n", argv[0], port);
 
 	for (sock_ptr = NULL; sock_ptr == NULL; sock_ptr = NULL) {
 		sock = sock_new(NULL, 1024);

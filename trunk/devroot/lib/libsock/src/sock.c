@@ -587,8 +587,7 @@ sock_write(cw_sock_t *a_sock, cw_buf_t *a_buf)
 			bytes_written = writev(a_sock->sockfd, iovec,
 			    iovec_count);
 #ifdef _LIBSOCK_CONFESS
-			out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-			    "[i]w?([i|s:s]/[i])\n", a_sock->sockfd,
+			_cw_out_put_e("[i]w?([i|s:s]/[i])\n", a_sock->sockfd,
 			    bytes_written, buf_get_size(&a_sock->out_buf));
 #endif
 
@@ -778,19 +777,14 @@ sock_l_put_back_out_data(cw_sock_t *a_sock, cw_buf_t *a_buf)
 		/* There are still data in out_buf, so preserve the order. */
 		while (TRUE == buf_catenate_buf(a_buf, &a_sock->out_buf,
 		    FALSE)) {
-			if (dbg_is_registered(cw_g_dbg, "sock_error")) {
-				out_put_e(cw_g_out, __FILE__, __LINE__,
-				    __FUNCTION__,
-				    "Memory allocation error; yielding\n");
-			}
+			if (dbg_is_registered(cw_g_dbg, "sock_error"))
+				_cw_out_put_e("Memory allocation error; yielding\n");
 			thd_yield();
 		}
 	}
 	while (TRUE == buf_catenate_buf(&a_sock->out_buf, a_buf, FALSE)) {
-		if (dbg_is_registered(cw_g_dbg, "sock_error")) {
-			out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-			    "Memory allocation error; yielding\n");
-		}
+		if (dbg_is_registered(cw_g_dbg, "sock_error"))
+			_cw_out_put_e("Memory allocation error; yielding\n");
 		thd_yield();
 	}
 	_cw_assert(0 == buf_get_size(a_buf));
@@ -819,10 +813,8 @@ sock_l_put_in_data(cw_sock_t *a_sock, cw_buf_t *a_buf)
 	mtx_lock(&a_sock->in_lock);
 
 	while (TRUE == buf_catenate_buf(&a_sock->in_buf, a_buf, FALSE)) {
-		if (dbg_is_registered(cw_g_dbg, "sock_error")) {
-			out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-			    "Memory allocation error; yielding\n");
-		}
+		if (dbg_is_registered(cw_g_dbg, "sock_error"))
+			_cw_out_put_e("Memory allocation error; yielding\n");
 		thd_yield();
 	}
 
