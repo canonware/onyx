@@ -19,7 +19,7 @@
 
 # Include files that _are_ installed.
 INCS := libstash_r.h stash_incs.h bhp.h buf.h dbg.h glob.h \
-	lex.h list.h locks.h log.h matrix.h mem.h oh.h res.h thread.h tree.h
+	lex.h list.h locks.h log.h matrix.h mem.h oh.h res.h thread.h treen.h
 
 # Include files that are _not_ installed.
 PRIV_INCS := bhp_priv.h lex_priv.h list_priv.h \
@@ -28,7 +28,7 @@ PRIV_INCS := bhp_priv.h lex_priv.h list_priv.h \
 # Source files.
 SRCS := bhp.c buf.c dbg.c \
 	glob.c lex.c list.c locks.c log.c matrix.c mem.c oh.c res.c \
-	thread.c tree.c
+	thread.c treen.c
 
 # Simple tests.  Output is diff'ed with the expected (.exp file) output.
 CTESTS := c19980411a.c c19980412a.c c19980419a.c c19980430a.c \

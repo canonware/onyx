@@ -13,140 +13,14 @@
  * Implementation of arbitrary trees.  Each treen (tree node) can have an
  * arbitrary number of children.
  *
- * Don't do silly things like creating a cycle in the graph, or bad things
- * (infinite recursion) could happen.
- *
  ****************************************************************************/
 
-#define _INC_TREE_H_
+#define _INC_TREEN_H_
 #ifdef _CW_REENTRANT
 #  include "libstash_r.h"
 #else
 #  include "libstash.h"
 #endif
-
-/****************************************************************************
- *
- * tree constructor.
- *
- ****************************************************************************/
-cw_tree_t *
-#ifdef _CW_REENTRANT
-tree_new(cw_tree_t * a_tree_o, cw_bool_t a_is_thread_safe)
-#else
-tree_new(cw_tree_t * a_tree_o)
-#endif
-{
-  cw_tree_t * retval;
-  
-  if (a_tree_o == NULL)
-  {
-    retval = (cw_tree_t *) _cw_malloc(sizeof(cw_tree_t));
-    retval->is_malloced = TRUE;
-  }
-  else
-  {
-    retval = a_tree_o;
-    retval->is_malloced = FALSE;
-  }
-  
-#ifdef _CW_REENTRANT
-  if (a_is_thread_safe == TRUE)
-  {
-    mtx_new(&retval->lock);
-    retval->is_thread_safe = TRUE;
-  }
-  else
-  {
-    retval->is_thread_safe = FALSE;
-  }
-#endif
-
-  retval->root = NULL;
-  
-  return retval;
-}
-
-/****************************************************************************
- *
- * tree destructor.  Deletes the tree nodes as well, but leaves the data
- * pointers alone.
- *
- ****************************************************************************/
-void
-tree_delete(cw_tree_t * a_tree_o)
-{
-  _cw_check_ptr(a_tree_o);
-
-  treen_delete(a_tree_o->root);
-
-#ifdef _CW_REENTRANT
-  if (a_tree_o->is_thread_safe == TRUE)
-  {
-    mtx_delete(&a_tree_o->lock);
-  }
-#endif
-
-  if (a_tree_o->is_malloced == TRUE)
-  {
-    _cw_free(a_tree_o);
-  }
-}
-
-/****************************************************************************
- *
- * Returns a pointer to the root treen.
- *
- ****************************************************************************/
-cw_treen_t *
-tree_get_root_ptr(cw_tree_t * a_tree_o)
-{
-  cw_treen_t * retval;
-  
-  _cw_check_ptr(a_tree_o);
-#ifdef _CW_REENTRANT
-  if (a_tree_o->is_thread_safe)
-  {
-    mtx_lock(&a_tree_o->lock);
-  }
-#endif
-
-  retval = a_tree_o->root;
-  
-#ifdef _CW_REENTRANT
-  if (a_tree_o->is_thread_safe)
-  {
-    mtx_unlock(&a_tree_o->lock);
-  }
-#endif
-  return retval;
-}
-
-/****************************************************************************
- *
- * Sets the pointer to the root treen.
- *
- ****************************************************************************/
-void
-tree_set_root_ptr(cw_tree_t * a_tree_o, cw_treen_t * a_treen_o)
-{
-  _cw_check_ptr(a_tree_o);
-#ifdef _CW_REENTRANT
-  if (a_tree_o->is_thread_safe)
-  {
-    mtx_lock(&a_tree_o->lock);
-  }
-#endif
-
-  a_tree_o->root = a_treen_o;
-
-#ifdef _CW_REENTRANT
-  if (a_tree_o->is_thread_safe)
-  {
-    mtx_unlock(&a_tree_o->lock);
-  }
-#endif
-}
 
 /****************************************************************************
  *
@@ -178,7 +52,7 @@ treen_new(cw_bool_t a_is_thread_safe)
 
 /****************************************************************************
  *
- * treen destructor.
+ * treen destructor.  Also deletes all subtrees.
  *
  ****************************************************************************/
 void
@@ -210,116 +84,6 @@ treen_delete(cw_treen_t * a_treen_o)
 
     _cw_free(a_treen_o);
   }
-}
-
-/****************************************************************************
- *
- * Returns a pointer to the parent of a_treen_o.
- *
- ****************************************************************************/
-cw_treen_t *
-treen_get_parent_ptr(cw_treen_t * a_treen_o)
-{
-  cw_treen_t * retval;
-  
-  _cw_check_ptr(a_treen_o);
-#ifdef _CW_REENTRANT
-  if (a_treen_o->is_thread_safe)
-  {
-    mtx_lock(&a_treen_o->lock);
-  }
-#endif
-
-  retval = a_treen_o->parent;
-  
-#ifdef _CW_REENTRANT
-  if (a_treen_o->is_thread_safe)
-  {
-    mtx_unlock(&a_treen_o->lock);
-  }
-#endif
-  return retval;
-}
-
-/****************************************************************************
- *
- * Sets the pointer to the parent of a_treen_o.
- *
- ****************************************************************************/
-void
-treen_set_parent_ptr(cw_treen_t * a_treen_o, cw_treen_t * a_parent)
-{
-  _cw_check_ptr(a_treen_o);
-#ifdef _CW_REENTRANT
-  if (a_treen_o->is_thread_safe)
-  {
-    mtx_lock(&a_treen_o->lock);
-  }
-#endif
-
-  a_treen_o->parent = a_parent;
-
-#ifdef _CW_REENTRANT
-  if (a_treen_o->is_thread_safe)
-  {
-    mtx_unlock(&a_treen_o->lock);
-  }
-#endif
-}
-
-/****************************************************************************
- *
- * Returns a pointer to the data for a_treen_o.
- *
- ****************************************************************************/
-void *
-treen_get_data_ptr(cw_treen_t * a_treen_o)
-{
-  void * retval;
-  
-  _cw_check_ptr(a_treen_o);
-#ifdef _CW_REENTRANT
-  if (a_treen_o->is_thread_safe)
-  {
-    mtx_lock(&a_treen_o->lock);
-  }
-#endif
-
-  retval = a_treen_o->data;
-  
-#ifdef _CW_REENTRANT
-  if (a_treen_o->is_thread_safe)
-  {
-    mtx_unlock(&a_treen_o->lock);
-  }
-#endif
-  return retval;
-}
-
-/****************************************************************************
- *
- * Sets the pointer for data for a_treen_o.
- *
- ****************************************************************************/
-void
-treen_set_data_ptr(cw_treen_t * a_treen_o, void * a_data)
-{
-  _cw_check_ptr(a_treen_o);
-#ifdef _CW_REENTRANT
-  if (a_treen_o->is_thread_safe)
-  {
-    mtx_lock(&a_treen_o->lock);
-  }
-#endif
-
-  a_treen_o->data = a_data;
-  
-#ifdef _CW_REENTRANT
-  if (a_treen_o->is_thread_safe)
-  {
-    mtx_unlock(&a_treen_o->lock);
-  }
-#endif
 }
 
 /****************************************************************************
@@ -359,12 +123,13 @@ treen_get_num_children(cw_treen_t * a_treen_o)
  *
  ****************************************************************************/
 cw_bool_t
-treen_ins_child(cw_treen_t * a_treen_o, cw_treen_t * a_child,
-		cw_uint32_t a_position)
+treen_link_child(cw_treen_t * a_treen_o, cw_treen_t * a_child,
+		 cw_uint32_t a_position)
 {
   cw_bool_t retval;
 
   _cw_check_ptr(a_treen_o);
+  _cw_check_ptr(a_child);
 #ifdef _CW_REENTRANT
   if (a_treen_o->is_thread_safe)
   {
@@ -386,10 +151,18 @@ treen_ins_child(cw_treen_t * a_treen_o, cw_treen_t * a_child,
     a_treen_o->num_children++;
 
     /* Extend the array. */
-    a_treen_o->children = _cw_realloc(a_treen_o->children,
-				      a_treen_o->num_children
-				      * sizeof(cw_treen_t *));
-
+    if (a_treen_o->children == NULL)
+    {
+      a_treen_o->children = _cw_malloc(a_treen_o->num_children
+				       * sizeof(cw_treen_t *));
+    }
+    else
+    {
+      a_treen_o->children = _cw_realloc(a_treen_o->children,
+					a_treen_o->num_children
+					* sizeof(cw_treen_t *));
+    }
+    
     /* Shuffle things forward to make room. */
     for (i = (a_treen_o->num_children - 1); i > a_position; i--)
     {
@@ -417,8 +190,8 @@ treen_ins_child(cw_treen_t * a_treen_o, cw_treen_t * a_child,
  *
  ****************************************************************************/
 cw_bool_t
-treen_del_child(cw_treen_t * a_treen_o, cw_uint32_t a_position,
-		cw_treen_t ** a_child)
+treen_unlink_child(cw_treen_t * a_treen_o, cw_uint32_t a_position,
+		   cw_treen_t ** a_child)
 {
   cw_bool_t retval;
 
@@ -430,13 +203,14 @@ treen_del_child(cw_treen_t * a_treen_o, cw_uint32_t a_position,
   else
   {
     cw_uint32_t i;
-    
+
 #ifdef _CW_REENTRANT
     if (a_treen_o->is_thread_safe)
     {
       mtx_lock(&a_treen_o->lock);
     }
 #endif
+
     retval = FALSE;
     
     *a_child = a_treen_o->children[a_position];
@@ -450,9 +224,17 @@ treen_del_child(cw_treen_t * a_treen_o, cw_uint32_t a_position,
     a_treen_o->num_children--;
 
     /* Truncate the array. */
-    a_treen_o->children = _cw_realloc(a_treen_o->children,
-				      a_treen_o->num_children
-				      * sizeof(cw_treen_t *));
+    if (a_treen_o->num_children == 0)
+    {
+      _cw_free(a_treen_o->children);
+      a_treen_o->children = NULL;
+    }
+    else
+    {
+      a_treen_o->children = _cw_realloc(a_treen_o->children,
+					a_treen_o->num_children
+					* sizeof(cw_treen_t *));
+    }
 
 #ifdef _CW_REENTRANT
     if (a_treen_o->is_thread_safe)
@@ -508,16 +290,14 @@ treen_get_child_ptr(cw_treen_t * a_treen_o, cw_uint32_t a_position,
 
 /****************************************************************************
  *
- * Sets the child pointer at a_position to a_child.  If a_position is past the
- * last child pointer, returns TRUE.
+ * Returns a pointer to the data for a_treen_o.
  *
  ****************************************************************************/
-cw_bool_t
-treen_set_child_ptr(cw_treen_t * a_treen_o, cw_uint32_t a_position,
-		    cw_treen_t * a_child)
+void *
+treen_get_data_ptr(cw_treen_t * a_treen_o)
 {
-  cw_bool_t retval;
-
+  void * retval;
+  
   _cw_check_ptr(a_treen_o);
 #ifdef _CW_REENTRANT
   if (a_treen_o->is_thread_safe)
@@ -526,16 +306,37 @@ treen_set_child_ptr(cw_treen_t * a_treen_o, cw_uint32_t a_position,
   }
 #endif
 
-  if (a_position < a_treen_o->num_children)
+  retval = a_treen_o->data;
+  
+#ifdef _CW_REENTRANT
+  if (a_treen_o->is_thread_safe)
   {
-    retval = FALSE;
-    a_treen_o->children[a_position] = a_child;
+    mtx_unlock(&a_treen_o->lock);
   }
-  else
+#endif
+  return retval;
+}
+
+/****************************************************************************
+ *
+ * Sets the pointer for data for a_treen_o.
+ *
+ ****************************************************************************/
+void *
+treen_set_data_ptr(cw_treen_t * a_treen_o, void * a_data)
+{
+  void * retval;
+  
+  _cw_check_ptr(a_treen_o);
+#ifdef _CW_REENTRANT
+  if (a_treen_o->is_thread_safe)
   {
-    /* Past end of child pointer array. */
-    retval = TRUE;
+    mtx_lock(&a_treen_o->lock);
   }
+#endif
+
+  retval = a_treen_o->data;
+  a_treen_o->data = a_data;
   
 #ifdef _CW_REENTRANT
   if (a_treen_o->is_thread_safe)

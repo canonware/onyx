@@ -215,9 +215,9 @@
 #    endif
 #  endif
 
-#  ifdef _INC_TREE_H_
-#    ifndef _TREE_H_
-#      include "tree.h"
-#      define _TREE_H_
+#  ifdef _INC_TREEN_H_
+#    ifndef _TREEN_H_
+#      include "treen.h"
+#      define _TREEN_H_
 #    endif
 #  endif
