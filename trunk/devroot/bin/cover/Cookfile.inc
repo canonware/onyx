@@ -87,7 +87,10 @@ P_BINS = [P_BINS] [COVER_P];
  * User cook'ables.
  */
 
-cover_all : [COVER_D] [COVER_A] [COVER_P];
+cover_all : cover_d cover_a cover_p;
+cover_d : [COVER_D];
+cover_a : [COVER_A];
+cover_p : [COVER_P];
 
 cover_install : cover_install_d cover_install_a cover_install_p;
 

@@ -87,7 +87,10 @@ P_BINS = [P_BINS] [ECHOS_P];
  * User cook'ables.
  */
 
-echos_all : [ECHOS_D] [ECHOS_A] [ECHOS_P];
+echos_all : echos_d echos_a echos_p;
+echos_d : [ECHOS_D];
+echos_a : [ECHOS_A];
+echos_p : [ECHOS_P];
 
 echos_install : echos_install_d echos_install_a echos_install_p;
 

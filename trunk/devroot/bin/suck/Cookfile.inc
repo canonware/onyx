@@ -87,7 +87,10 @@ P_BINS = [P_BINS] [SUCK_P];
  * User cook'ables.
  */
 
-suck : [SUCK_D] [SUCK_A] [SUCK_P];
+suck_all : suck_d suck_a suck_p;
+suck_d : [SUCK_D];
+suck_a : [SUCK_A];
+suck_p : [SUCK_P];
 
 suck_install : suck_install_d suck_install_a suck_install_p;
 
