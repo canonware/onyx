@@ -27,6 +27,66 @@
 
 systemdict begin
 
+% :: and : implement a simple mechanism for qualified namespaces.  For example,
+% one can type:
+%
+%   ::/systemdict/gcdict/dump :
+%
+/:: {
+	mark
+} bind def
+
+/: {
+	% Prime the loop.
+	counttomark
+	dup 0 eq {
+		pop
+		errordict begin unmatchedmark end
+	}{
+		-1 roll load
+		{
+			counttomark
+
+			% If there are no more names to look up, break out of
+			% the loop.
+			dup 1 le {
+				pop
+				exit
+			} if
+
+			% Collapse the two top level names.
+			-1 roll get
+		} loop
+
+		exch pop
+		eval
+	} ifelse
+} bind def
+
+% <lock> <proc> monitor -
+/monitor {
+	% Validate arguments.
+	1 index type /mutextype ne {
+		errordict begin typecheck end
+	} if
+
+	1 index lock
+	eval
+	unlock
+} bind def
+
+% - promptstring <string>
+/promptstring {
+	count cvs dup length 4 add string
+	dup 0 `s:' putinterval dup dup length 2 sub `> '
+	putinterval dup 3 2 roll 2 exch putinterval
+} bind def
+
+% - product <string>
+/product {
+	`Canonware stil'
+} bind def
+
 /pstack {
 	ostack {
 		1 sprint
@@ -42,11 +102,11 @@ systemdict begin
 	% Make sure the arguments are strings.
 	% Pattern.
 	dup type /stringtype ne {
-		errordict /typecheck get eval
+		errordict begin typecheck end
 	} if
 	% String.
 	1 index type /stringtype ne {
-		errordict /typecheck get eval
+		errordict begin typecheck end
 	} if
 
 	% Make sure substring isn't longer than string.
@@ -131,54 +191,6 @@ systemdict begin
 	}{
 		exch pop waitpid
 	} ifelse
-} bind def
-
-% :: and : implement a simple mechanism for qualified namespaces.  For example,
-% one can type:
-%
-%   ::/systemdict/gcdict/dump :
-%
-/:: {
-	mark
-} bind def
-
-/: {
-	% Prime the loop.
-	counttomark
-	dup 0 eq {
-		pop
-		errordict /unmatchedmark get eval
-	}{
-		-1 roll load
-		{
-			counttomark
-
-			% If there are no more names to look up, break out of
-			% the loop.
-			dup 1 le {
-				pop
-				exit
-			} if
-
-			% Collapse the two top level names.
-			-1 roll get
-		} loop
-
-		exch pop
-		eval
-	} ifelse
-} bind def
-
-% - promptstring <string>
-/promptstring {
-	count cvs dup length 4 add string
-	dup 0 `s:' putinterval dup dup length 2 sub `> '
-	putinterval dup 3 2 roll 2 exch putinterval
-} bind def
-
-% - product <string>
-/product {
-	`Canonware stil'
 } bind def
 
 % - version <string>

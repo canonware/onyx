@@ -867,6 +867,9 @@ a stack. \\
 \hline
 & {\bf \htmlref{mutex}{systemdict:mutex}} & & \\
 \hline
+mutex proc & {\bf \htmlref{monitor}{systemdict:mutex}} & -- & Evaluate an object
+under the protection of a mutex. \\
+\hline
 & {\bf \htmlref{lock}{systemdict:lock}} & & \\
 \hline
 & {\bf \htmlref{join}{systemdict:join}} & & \\
@@ -978,6 +981,32 @@ s:3> pstack
 s:3> )
 s:1> 1 sprint
 (1 2)
+s:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:monitor}
+\index{\stilop{}{monitor}{}}
+\item[{\stilop{mutex proc}{monitor}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[mutex: ]
+			A mutex.
+		\item[proc: ]
+			Any object.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Execute \oparg{proc} while holding \oparg{mutex}.
+	\item[Example(s): ]\begin{verbatim}
+
+s:0> mutex {`hello\n' print} monitor flush
+hello
 s:0>
 		\end{verbatim}
 	\end{description}

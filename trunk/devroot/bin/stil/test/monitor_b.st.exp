@@ -1,0 +1,4 @@
+Error /typecheck in {errordict --begin-- typecheck --end--}
+ostack: (-mark- -array-)
+estack: (--start-- -file- -array- -array-)
+dstack: (-dict- -dict- -dict- -dict- -dict-)
