@@ -66,48 +66,59 @@ bins="onyx"
 #
 # Test everything with every allowable combination of configure options.
 #
-for h in 0 1 2 3 4 5 6 7 8 9 10 11 ; do
-	# --enable-debug
-	case $h in
-	*)
-		conf="$conf"
+for e in 0 1 2 ; do
+	# --enable-debug, --enable-profile
+	case $e in
+	0)
+		conf_e=""
 		;;
-	4|5|6|7)
-		conf="$conf --enable-debug"
+	1)
+		conf_e="--enable-debug"
 		;;
-	esac
-
-	# --enable-profile
-	case $h in
-	*)
-		conf="$conf"
-		;;
-	8|9|10|11)
-		conf="$conf --enable-profile"
+	2)
+		conf_e="--enable-profile"
 		;;
 	esac
-
-	# --disable-threads
-	case $h in
-	*)
-		conf="$conf"
+for f in 0 1 2 ; do
+	# --disable-libedit, --disable-threads
+	case $f in
+	0)
+		conf_f=""
 		;;
-	0|1|4|5|8|9)
-		conf="$conf --disable-threads"
+	1)
+		conf_f="--disable-libedit"
+		;;
+	2)
+		conf_f="--disable-threads"
 		;;
 	esac
-
+for g in 0 1 2 ; do
+	# --disable-posix, --disable-posix-file
+	case $g in
+	0)
+		conf_g=""
+		;;
+	1)
+		conf_g="--disable-posix"
+		;;
+	2)
+		conf_g="--disable-posix-file"
+		;;
+	esac
+for h in 0 1 ; do
 	# --disable-inlines
 	case $h in
-	*)
-		conf="$conf"
+	0)
+		conf_h=""
 		;;
-	1|3|5|7|9|11)
-		conf="$conf --disable-inlines"
+	1)
+		conf_h="--disable-inlines"
 		;;
 	esac
 
-	echo "===> ../$SRCDIR/configure $conf --prefix=$PREFIX"
+	conf="$conf_e $conf_f $conf_g $conf_h"
+
+  	echo "===> ../$SRCDIR/configure $conf --prefix=$PREFIX"
 	../$SRCDIR/configure $conf --prefix=$PREFIX
 	if [ "x$?" != "x0" ] ; then
 		echo "===> Error in configure"
@@ -214,6 +225,9 @@ for h in 0 1 2 3 4 5 6 7 8 9 10 11 ; do
 		echo "===> uninstall didn't clean up well enough"
 		exit 2
 	fi
+done
+done
+done
 done
 
 #
