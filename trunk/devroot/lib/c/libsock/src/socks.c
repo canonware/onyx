@@ -225,7 +225,7 @@ socks_accept(cw_socks_t * a_socks, struct timeval * a_timeout,
     sockfd = accept(a_socks->sockfd,
 		    (struct sockaddr *) &client_addr,
 		    &sockaddr_struct_size);
-    if (sockfd < 0)
+    if (0 > sockfd)
     {
       if (dbg_is_registered(cw_g_dbg, "socks_error"))
       {
