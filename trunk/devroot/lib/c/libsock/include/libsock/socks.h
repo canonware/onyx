@@ -89,8 +89,9 @@ socks_listen(cw_socks_t * a_socks, int * r_port);
  *
  * a_socks : Pointer to a socks.
  *
- * a_timeout : Pointer to a timeout value, or NULL.  A NULL value will cause
- *             this function to block indefinitely.
+ * a_timeout : Pointer to a timeout value, specified as an absolute time
+ *             interval, or NULL.  A NULL value will cause this function to
+ *             block indefinitely.
  *
  * r_sock : Pointer to a sock that is not connected.
  *
@@ -109,5 +110,5 @@ socks_listen(cw_socks_t * a_socks, int * r_port);
  *
  ****************************************************************************/
 cw_sock_t *
-socks_accept(cw_socks_t * a_socks, struct timeval * a_timeout,
+socks_accept(cw_socks_t * a_socks, struct timespec * a_timeout,
 	     cw_sock_t * r_sock);

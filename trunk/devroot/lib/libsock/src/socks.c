@@ -176,7 +176,7 @@ socks_listen(cw_socks_t * a_socks, int * r_port)
 }
 
 cw_sock_t *
-socks_accept(cw_socks_t * a_socks, struct timeval * a_timeout,
+socks_accept(cw_socks_t * a_socks, struct timespec * a_timeout,
 	     cw_sock_t * r_sock)
 {
   cw_sock_t * retval;
@@ -205,7 +205,7 @@ socks_accept(cw_socks_t * a_socks, struct timeval * a_timeout,
   }
   else
   {
-    timeout = (a_timeout->tv_sec * 1000) + (a_timeout->tv_usec / 1000000);
+    timeout = (a_timeout->tv_sec * 1000) + (a_timeout->tv_nsec / 1000000);
 
     if (0 > timeout)
     {

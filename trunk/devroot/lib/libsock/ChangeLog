@@ -1,3 +1,12 @@
+1999-09-23  Jason Evans  <jasone@canonware.com>
+
+	* src/sock.c (sock_connect): 
+	(sock_read): 
+	* src/socks.c (socks_accept): 
+	Convert a_timeout parameter to (struct timespec).  Standardize the
+	interpretation of timeouts as an absolute time interval, rather
+	than absolute time since the epoch.
+
 1999-09-17  Jason Evans  <jasone@canonware.com>
 
 	* src/sock.c (sock_new): Treat (0 == a_in_max_buf_size) as a

@@ -84,7 +84,7 @@ main(int argc, char ** argv)
   connection_t * conn;
   char logfile[2048];
   cw_uint32_t conn_num;
-  struct timeval timeout;
+  struct timespec timeout;
 
   struct handler_s handler_arg;
 
@@ -322,10 +322,10 @@ main(int argc, char ** argv)
     conn = _cw_malloc(sizeof(connection_t));
     
     bzero(conn, sizeof(connection_t));
-    sock_new(&conn->client_sock, 4096);
+    sock_new(&conn->client_sock, 16384);
 
     timeout.tv_sec = 5;
-    timeout.tv_usec = 0;
+    timeout.tv_nsec = 0;
     
     if (NULL == socks_accept(socks, &timeout, &conn->client_sock)
 	|| should_quit)
@@ -1093,7 +1093,7 @@ handle_client_send(void * a_arg)
 	  conn->rhost, conn->rport);
       
   /* Connect to the remote end. */
-  sock_new(&conn->remote_sock, 4096);
+  sock_new(&conn->remote_sock, 16384);
   if (0 != sock_connect(&conn->remote_sock, conn->rhost, conn->rport, NULL))
   {
     out_put_e(conn->out, __FILE__, __LINE__, __FUNCTION__,

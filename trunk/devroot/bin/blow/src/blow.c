@@ -36,7 +36,7 @@ main(int argc, char ** argv)
   int retval = 0;
   cw_uint32_t i, j;
   cw_sock_t * sock_array = NULL;
-  struct timeval timeout;
+  struct timespec timeout;
   cw_buf_t buf, t_buf;
   cw_bufc_t bufc;
   void * buffer;
@@ -178,7 +178,7 @@ main(int argc, char ** argv)
   {
     sock_new(&sock_array[i], opt_bsize);
     timeout.tv_sec = 10;
-    timeout.tv_usec = 0;
+    timeout.tv_nsec = 0;
     if (0 != sock_connect(&sock_array[i], opt_rhost, opt_rport, &timeout))
     {
       out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,

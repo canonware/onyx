@@ -148,7 +148,7 @@ sock_get_port(cw_sock_t * a_sock)
 
 cw_sint32_t
 sock_connect(cw_sock_t * a_sock, const char * a_server_host, int a_port,
-	     struct timeval * a_timeout)
+	     struct timespec * a_timeout)
 {
   cw_sint32_t retval;
   int error = 0;
@@ -232,7 +232,7 @@ sock_connect(cw_sock_t * a_sock, const char * a_server_host, int a_port,
       }
       else
       {
-	timeout = (a_timeout->tv_sec * 1000) + (a_timeout->tv_usec / 1000000);
+	timeout = (a_timeout->tv_sec * 1000) + (a_timeout->tv_nsec / 1000000);
 
 	if (0 > timeout)
 	{
@@ -528,6 +528,8 @@ sock_read(cw_sock_t * a_sock, cw_buf_t * a_spare, cw_sint32_t a_max_read,
       }
       else if ((0 != a_timeout->tv_sec) || (0 != a_timeout->tv_nsec))
       {
+	/* a_timeout is non-zero, so wait.  We could call cnd_timedwait()
+	 * unconditionally, but there's no real need to. */
 	cnd_timedwait(&a_sock->in_cnd, &a_sock->in_lock, a_timeout);
       }
       a_sock->in_need_signal_count--;

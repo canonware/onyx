@@ -33,9 +33,9 @@ typedef enum
 
 /* Function prototypes. */
 cw_sock_t *
-client_setup(const char * a_rhost, int a_rport, struct timeval * a_timeout);
+client_setup(const char * a_rhost, int a_rport, struct timespec * a_timeout);
 cw_sock_t *
-server_setup(int a_port, struct timeval * a_timeout);
+server_setup(int a_port, struct timespec * a_timeout);
 char *
 get_out_str_pretty(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str);
 char *
@@ -64,7 +64,7 @@ main(int argc, char ** argv)
   cw_sock_t * sock_stdin = NULL;
   cw_sock_t * sock_stdout = NULL;
   cw_mq_t * mq = NULL;
-  struct timeval * tout = NULL;
+  struct timespec * tout = NULL;
 
   int c;
   cw_bool_t opt_client = FALSE, opt_server = FALSE;
@@ -210,9 +210,9 @@ main(int argc, char ** argv)
       {
 	opt_timeout = strtoul(optarg, NULL, 10);
 	
-	tout = _cw_malloc(sizeof(struct timeval));
+	tout = _cw_malloc(sizeof(struct timespec));
 	tout->tv_sec = opt_timeout;
-	tout->tv_usec = 0;
+	tout->tv_nsec = 0;
 	break;
       }
       default:
@@ -323,10 +323,7 @@ main(int argc, char ** argv)
   }
   else
   {
-    struct timeval now;
-    struct timezone tz;
-    struct timespec timeout;
-    struct timespec zero;
+    struct timespec timeout, zero;
     int fd;
     cw_bool_t done_reading = FALSE;
     char * str = NULL;
@@ -350,10 +347,8 @@ main(int argc, char ** argv)
     {
       if (NULL != tout)
       {
-	bzero(&tz, sizeof(struct timezone));
-	gettimeofday(&now, &tz);
-	timeout.tv_sec = now.tv_sec + opt_timeout;
-	timeout.tv_nsec = now.tv_usec * 1000;
+	timeout.tv_sec = opt_timeout;
+	timeout.tv_nsec = 0;
       
 	fd = (int) mq_timedget(mq, &timeout);
 	if (0 == fd)
@@ -516,7 +511,7 @@ main(int argc, char ** argv)
 }
 
 cw_sock_t *
-client_setup(const char * a_rhost, int a_rport, struct timeval * a_timeout)
+client_setup(const char * a_rhost, int a_rport, struct timespec * a_timeout)
 {
   cw_sock_t * retval;
   cw_sint32_t error;
@@ -555,7 +550,7 @@ client_setup(const char * a_rhost, int a_rport, struct timeval * a_timeout)
 }
 
 cw_sock_t *
-server_setup(int a_port, struct timeval * a_timeout)
+server_setup(int a_port, struct timespec * a_timeout)
 {
   cw_sock_t * retval;
   cw_socks_t * socks;

@@ -137,7 +137,8 @@ sock_get_port(cw_sock_t * a_sock);
  *
  * a_port : Remote port number to connect to.
  *
- * a_timeout : Connect timeout, or NULL for no timeout.
+ * a_timeout : Connect timeout, specified as an absolute time interval, or NULL
+ *             for no timeout.
  *
  * <<< Output(s) >>>
  *
@@ -160,7 +161,7 @@ sock_get_port(cw_sock_t * a_sock);
  ****************************************************************************/
 cw_sint32_t
 sock_connect(cw_sock_t * a_sock, const char * a_server_host, int a_port,
-	     struct timeval * a_timeout);
+	     struct timespec * a_timeout);
 
 /****************************************************************************
  *
