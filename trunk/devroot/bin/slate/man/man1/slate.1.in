@@ -35,5 +35,7 @@ Display the version number and exit.
 @prefix@/share/slate/doc/ps/slate.ps
 .br
 @prefix@/share/slate/doc/pdf/slate.pdf
+.SH SEE ALSO
+onyx(1)
 .SH HISTORY
 Written by Jason Evans <jasone@canonware.com>.
