@@ -180,18 +180,25 @@ extern cw_log_t * cw_g_log;
 #  define _cw_dealloc(a) mem_dealloc((void *) cw_g_mem, a)
 #endif
 
+#ifdef WORDS_BIGENDIAN
+#  define _cw_ntohq(a) (a)
+#  define _cw_htonq(a) (a)
+#else
 #  define _cw_ntohq(a) (cw_uint64_t) \
-                       ((((cw_uint64_t) \
-                          (ntohl((cw_uint32_t) ((a) >> 32)))) << 32) \
+                       (((cw_uint64_t) \
+                          (ntohl((cw_uint32_t) ((a) >> 32)))) \
 			| \
-                       (cw_uint64_t) \
-                          ntohl((cw_uint32_t) ((a) & 0x00000000ffffffff)))
+                       (((cw_uint64_t) \
+                          (ntohl((cw_uint32_t) ((a) & 0x00000000ffffffff)))) \
+                           << 32))
 #  define _cw_htonq(a) (cw_uint64_t) \
-                       ((((cw_uint64_t) \
-                          (htonl((cw_uint32_t) ((a) >> 32)))) << 32) \
+                       (((cw_uint64_t) \
+                          (htonl((cw_uint32_t) ((a) >> 32)))) \
 			| \
-                       (cw_uint64_t) \
-                          htonl((cw_uint32_t) ((a) & 0x00000000ffffffff)))
+                       (((cw_uint64_t) \
+                          (htonl((cw_uint32_t) ((a) & 0x00000000ffffffff)))) \
+                                << 32))
+#endif
 
 #endif /* _LIBSTASH_H_B_ */
 

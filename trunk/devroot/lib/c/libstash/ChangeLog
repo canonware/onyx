@@ -1,3 +1,8 @@
+1999-04-05  Jason Evans  <jasone@canonware.com>
+
+	* include/libstash/libstash.h (_cw_ntohq, _cw_htonq): Swap words
+	as well as bytes, if little endian.
+
 1999-03-29  Jason Evans  <jasone@canonware.com>
 
 	* src/list.c (list_catenate_list): Add.
