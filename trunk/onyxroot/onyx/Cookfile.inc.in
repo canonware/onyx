@@ -151,7 +151,11 @@ distclean : clean [addsuffix _distclean tests bins mods libs]
   rm -f @cfgoutputs@;
 }
 
-relclean : distclean [addsuffix _relclean docs];
+relclean : distclean [addsuffix _relclean docs]
+{
+  rm -f @objroot@/aclocal.m4;
+  rm -f @objroot@/configure;
+}
 
 /*
  * Rule for generation of C code from Onyx code.  This rule assumes a stylized
