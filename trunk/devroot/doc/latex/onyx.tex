@@ -628,7 +628,8 @@ deadlocks due to implicit file locking.
 \item[stack: ] All stack operations are protected.  There are no potential
 deadlocks due to implicit stack locking.  However, there are races in stack
 copying, such that the results of copying a stack that is concurrently being
-modified are unpredictable.
+modified are unpredictable.  In addition, removing an object that is being
+concurrently accessed from a stack is unsafe.
 \item[string: ] String copying is protected.  Character access is protected by
 many operators, but string copying is the only potential cause of deadlock for
 string access.

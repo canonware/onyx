@@ -1,3 +1,8 @@
+2001-07-30  Jason Evans  <jasone@canonware.com>
+
+	* doc/latex/onyx.tex: Document unsafeness of removing objects from
+	a concurrently accessed stack.
+
 2001-07-24  Jason Evans  <jasone@canonware.com>
 
 	* doc/latex/onyx.tex (section{Interpreter recursion}): Document
