@@ -1340,10 +1340,36 @@ mkr_p_slide_before_insert(cw_mkr_t *a_mkr, cw_bufp_t *a_prevp,
 			  const cw_bufv_t *a_bufv, cw_uint32_t a_bufvcnt,
 			  cw_uint32_t a_count)
 {
-/*      cw_bufp_t *bufp; */
+    cw_bufp_t *bufp;
 
-/*      bufp = a_mkr->bufp; */
-/*      buf = bufp->buf; */
+    bufp = a_mkr->bufp;
+    buf = bufp->buf;
+
+    /* The data won't fit in this bufp, but enough data can be slid to the next
+     * bufp to make room.  The data inserted may be split across the two bufp's
+     * as well.
+     *
+     **************************************************************************
+     *           I
+     * [X   ][YYYY]
+     *           ^
+     *
+     * [XYYY][YI  ]
+     *
+     **************************************************************************
+     *         IIIII
+     * [X   ][YY  ]
+     *         ^
+     *
+     * [XYII][IIIY]
+     *
+     **************************************************************************
+     *         II
+     * [X   ][YYY ]
+     *         ^
+     * [XYII][   Y]
+     *
+     **************************************************************************/
 
 }
 
@@ -1356,6 +1382,44 @@ mkr_p_slide_after_insert(cw_mkr_t *a_mkr, cw_bufp_t *a_nextp,
 
 /*      bufp = a_mkr->bufp; */
 /*      buf = bufp->buf; */
+
+}
+
+static void
+mkr_p_slide_both_insert(cw_mkr_t *a_mkr, cw_bufp_t *a_prevp, cw_bufp_t *nextp,
+			const cw_bufv_t *a_bufv, cw_uint32_t a_bufvcnt,
+			cw_uint32_t cnt)
+{
+    /* The data won't fit in this bufp, but enough data can be slid to the next
+     * and previous bufp's to make room.  The data inserted may be split across
+     * the three  bufp's as well.  Since this function is not called unless
+     * sliding only one direction or the other wouldn't have worked, we are
+     * guaranteed that there are enough data that the center bufp won't be left
+     * empty.
+     *
+     **************************************************************************
+     *          II
+     * [XXX ][YYYY][ ZZZ]
+     *          ^
+     *
+     * [XXXY][YYII][YZZZ]
+     *
+     **************************************************************************
+     *          IIIIII
+     * [XXX ][  YY][   Z]
+     *          ^
+     *
+     * [X   ][IIII][II  ][   Z]
+     *
+     * [XYII][IIII][Y  Z]
+     *
+     **************************************************************************
+     *         II
+     * [X   ][YYY ]
+     *         ^
+     * [XYII][   Y]
+     *
+     **************************************************************************/
 
 }
 
@@ -1678,7 +1742,9 @@ mkr_l_insert(cw_mkr_t *a_mkr, cw_bool_t a_record, cw_bool_t a_after,
 	 * the slides would make enough room, splitting is guaranteed not to
 	 * violate the requirement that any two consecutive bufps must both be
 	 * at least 25% full.  Thus, there is never a need to do bufp coalescing
-	 * after insertion. */
+	 * after insertion.  In addition, by not trying to slide both directions
+	 * unless necessary, there is never the risk of leaving the center bufp
+	 * empty after sliding and insertion. */
 	if (prevp != NULL && cnt <= (CW_BUFP_SIZE - bufp->len)
 	    + (CW_BUFP_SIZE - prevp->len))
 	{
