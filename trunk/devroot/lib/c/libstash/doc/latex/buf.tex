@@ -316,7 +316,7 @@ cw\_uint32\_t a\_amount}}
 			\item[FALSE: ]
 				 Success.
 			\item[TRUE: ]
-				 Error.  (\cvar{a\_amount} >
+				 Error.  (\cvar{a\_amount} {\gt}
 				\cfunc{buf\_size\_get}{a\_buf}).
 			\end{description}
 		\end{description}
@@ -344,7 +344,7 @@ cw\_uint32\_t a\_amount}}
 			\item[FALSE: ]
 				 Success.
 			\item[TRUE: ]
-				 Error.  (\cvar{a\_amount} >
+				 Error.  (\cvar{a\_amount} {\gt}
 				\cfunc{buf\_size\_get}{a\_buf}).
 			\end{description}
 		\end{description}
@@ -363,7 +363,7 @@ a\_offset}}
 			Pointer to a \classname{buf}.
 		\item[a\_offset: ]
 			Offset in bytes of uint8 to return.  (\cvar{a\_offset}
-			<= \cfunc{buf\_size\_get}{a\_buf} - 1).
+			{\lt}= \cfunc{buf\_size\_get}{a\_buf} - 1).
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
@@ -386,7 +386,7 @@ a\_offset}}
 			Pointer to a \classname{buf}.
 		\item[a\_offset: ]
 			Offset in bytes of uint32 to return.  (\cvar{a\_offset}
-			<= \cfunc{buf\_size\_get}{a\_buf} - 4).
+			{\lt}= \cfunc{buf\_size\_get}{a\_buf} - 4).
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
@@ -409,7 +409,7 @@ a\_offset}}
 			Pointer to a \classname{buf}.
 		\item[a\_offset: ]
 			Offset in bytes of uint64 to return.  (\cvar{a\_offset}
-			<= \cfunc{buf\_size\_get}{a\_buf} - 8).
+			{\lt}= \cfunc{buf\_size\_get}{a\_buf} - 8).
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
@@ -431,8 +431,8 @@ a\_offset, cw\_uint\_t32 a\_val}}
 		\item[a\_buf: ]
 			Pointer to a \classname{buf}.
 		\item[a\_offset: ]
-			Offset in bytes of uint64 to set.  (\cvar{a\_offset} <=
-			\cfunc{buf\_size\_get}{a\_buf}).
+			Offset in bytes of uint64 to set.  (\cvar{a\_offset}
+			{\lt}= \cfunc{buf\_size\_get}{a\_buf}).
 		\item[a\_val: ]
 			Value to set data at \cvar{a\_offset} to.
 		\end{description}
@@ -454,8 +454,8 @@ a\_offset, cw\_uint\_t32 a\_val}}
 		\item[a\_buf: ]
 			Pointer to a \classname{buf}.
 		\item[a\_offset: ]
-			Offset in bytes of uint64 to set.  (\cvar{a\_offset} <=
-			\cfunc{buf\_size\_get}{a\_buf}).
+			Offset in bytes of uint64 to set.  (\cvar{a\_offset}
+			{\lt}= \cfunc{buf\_size\_get}{a\_buf}).
 		\item[a\_val: ]
 			Value to set data at \cvar{a\_offset} to.
 		\end{description}
@@ -477,8 +477,8 @@ a\_offset, cw\_uint\_t32 a\_val}}
 		\item[a\_buf: ]
 			Pointer to a \classname{buf}.
 		\item[a\_offset: ]
-			Offset in bytes of uint64 to set.  (\cvar{a\_offset} <=
-			\cfunc{buf\_size\_get}{a\_buf}).
+			Offset in bytes of uint64 to set.  (\cvar{a\_offset}
+			{\lt}= \cfunc{buf\_size\_get}{a\_buf}).
 		\item[a\_val: ]
 			Value to set data at \cvar{a\_offset} to.
 		\end{description}
@@ -501,7 +501,7 @@ a\_is\_writeable}}
 		\item[a\_buf: ]
 			Pointer to a \classname{buf}.
 		\item[a\_offset: ]
-			Offset in bytes of data to set. (\cvar{a\_offset} <=
+			Offset in bytes of data to set. (\cvar{a\_offset} {\lt}=
 			\cfunc{buf\_size\_get}{a\_buf}).
 		\item[a\_length: ]
 			Number of bytes to copy from \cvar{a\_val}.

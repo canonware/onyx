@@ -43,13 +43,11 @@ All \libname{libstash} class API definitions are made available via the
 in order for things to work properly.
 
 \section{Compilation}
-Use one of the following compiler command lines to compile applications with
+Use the following compiler command line to compile applications with
 \libname{libstash}.
-\begin{description}
-\item[Normal: ] cc \filename{file} -lstash -lpthread
-\item[Debug: ] cc -g -D\_CW\_DBG \filename{file} -lstash\_d -lpthread
-\item[Profile: ] cc -pg \filename{file} -lstash\_p -lpthread
-\end{description}
+\begin{verbatim}
+cc <file> -lstash -lpthread
+\end{verbatim}
 
 \section{Types}
 \libname{libstash} is careful to use the following data types rather than the
@@ -109,8 +107,7 @@ defines the following exceptions:
 		\end{description}
 	\item[Description: ]
 		Initialize various global variables.  In particular, initialize
-		\cvar{cw\_g\_mem}, \cvar{out\_std}, and \cvar{out\_err} (default
-		output to file descriptor 1).
+		\cvar{cw\_g\_mem}, \cvar{out\_std}, and \cvar{out\_err}.
 	\end{capilist}
 \label{libstash_shutdown}
 \index{libstash_shutdown@\cfunc{libstash\_shutdown}{}}

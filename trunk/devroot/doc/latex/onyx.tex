@@ -22,7 +22,7 @@ find most aspects of Onyx familiar, but there are significant differences that
 will prevent a knowledgeable PostScript programmer from programming in Onyx
 without first skimming this chapter.  This chapter does not assume specific
 knowledge of other programming languages, so stands as a definitive reference
-manual for Onyx.
+for Onyx.
 
 Onyx is different from most languages in that it is not compiled, but rather
 consumed.  For example, there are mechanisms for creating the equivalent of
@@ -36,11 +36,11 @@ be expected of a byte code interpreter.
 
 Onyx is implemented as a C library that can be embedded in other programs.
 Mechanisms are provided for extending the set of operators available.  This
-manual only documents the base language; see application documentation for any
-language extensions.
+manual only documents the base language; see application-specific documentation
+for any language extensions.
 
 Following is a list of basic language features that are discussed in more detail
-later in this manual:
+later in this chapter:
 
 \begin{itemize}
 \item{Stack-based.  There are no named variables as in procedural languages.
@@ -97,14 +97,13 @@ described in detail later.
 
 All objects have a literal or executable attribute associated with them.
 Composite objects each have their own attribute, even for composite objects that
-share the same backing memory.  An object is either literal or executable.  When
-an executable file, hook, name, operator, or string is interpreted (encountered
-directly by the interpreter), it is pushed onto the execution stack and
-executed; otherwise the object is pushed onto the operand stack.  When an
-executable array, file, hook, name, operator, or string is evaluated, it is
-pushed onto the execution stack and executed; otherwise the object is pushed
-onto the operand stack.  Note that executable arrays are the only objects that
-behave differently when interpreted versus evaluated.
+share the same backing memory.  When an executable file, hook, name, operator,
+or string is interpreted (encountered directly by the interpreter), it is pushed
+onto the execution stack and executed; otherwise the object is pushed onto the
+operand stack.  When an executable array, file, hook, name, operator, or string
+is evaluated, it is pushed onto the execution stack and executed; otherwise the
+object is pushed onto the operand stack.  Note that executable arrays are the
+only objects that behave differently when interpreted versus evaluated.
 
 In practice, attributes are only useful for types that can be executed.
 Attributes are not considered in equality test operations.
@@ -149,7 +148,8 @@ When an executable file is executed, it is used as a source of Onyx code.  Data
 are sequentially read from the file and interpreted until the end of the file is
 reached.
 
-\item[fino: ] A fino is used as a stack marker when constructing stacks.
+\item[fino: ] A fino (first in, never out) is used as a stack marker when
+constructing stacks.
 
 \item[hook: ] The hook type is not used by the core Onyx language.  It can be
 used by applications that extend the interpreter as a container object.  Hooks
@@ -178,8 +178,10 @@ for equality.  Names are typically used as keys in dictionaries.
 When an executable name is executed, the topmost value in the dictionary stack
 associated with the name is evaluated.
 
-\item[null: ] A null has no significance other than its existence.  When
-an executable null is executed, it does nothing.
+\item[null: ] A null has no significance other than its existence.  When an
+executable null is executed, it does nothing.  Executable nulls can be useful as
+place holders that can later be replaced with useful code, or for replacing
+obsolete code so that the code is no longer executed.
 
 \item[operator: ] An operator is an operation that is built in to the
 interpreter.  Operators can be executed.
@@ -210,7 +212,8 @@ After the code executes, the string left on the operand stack looks like:
 `bcd'
 \end{verbatim}
 
-When a string is executed, its contents are used as a source of Onyx code.
+When an executable string is executed, its contents are used as a source of Onyx
+code.
 
 \item[thread: ] A thread object serves as a handle for operations such as
 detaching and joining.
@@ -225,7 +228,7 @@ switch statements with a couple of auxiliary variables), which should give the
 reader an idea of the simplicity of the language syntax.
 
 CRNL (carriage return, newline) pairs are in all important cases converted to
-newline during scanning.
+newlines during scanning.
 
 The characters \%, /, {\lb}, {\rb}, \{, \}, (, ), `, ', {\lt}, and {\gt} are
 special.  In most cases, any of the special characters and whitespace (space,
@@ -278,7 +281,7 @@ foo     % executable
 \item[{\lt}string{\gt} ::= ] `'-delimited string.  Ticks may
 be embedded in the string without escaping them, as long as the unescaped ticks
 are balanced.  The following sequences have special meaning when escaped by a
-``{\bs}'' character:
+{\bs} character:
 	\begin{description}
 	\item[` ] ` character.
 	\item[' ] ' character.
@@ -293,8 +296,7 @@ are balanced.  The following sequences have special meaning when escaped by a
 	\item[{\bs}r{\bs}n (carriage return, newline) ] Ignore.
 	\end{description}
 
-``{\bs}'' has no special meaning unless followed by a character in the above
-list.
+{\bs} has no special meaning unless followed by a character in the above list.
 
 Examples include:
 \begin{verbatim}
@@ -368,52 +370,54 @@ their construction.  Examples of stack contstruction include:
 \section{Stacks}
 
 Stacks in Onyx are the core data structure that programs act on.  Stacks store
-objects in a last in, first out (LIFO) fashion.  Onyx includes a number of
+objects in a last in, first out (LIFO) order.  Onyx includes a number of
 operators that manipulate stacks.
 
 Each Onyx thread has four program-visible stacks associated with it:
 \begin{description}
-\item[Operand stack: ] Most direct object manipulations are done using the
-	operand stack.  Operators use the operand stack for inputs and outputs,
-	and code generally uses the operand stack for a place to store objects
-	as they are being manipulated.
-\item[Dictionary stack: ] The dictionary stack is used for looking up names.
-	Each thread starts with with four dictionaries on its dictionary stack,
-	which are, from top to bottom:
+\item[Operand stack (ostack): ] Most direct object manipulations are done using
+	the operand stack.  Operators use the operand stack for inputs and
+	outputs, and code generally uses the operand stack for a place to store
+	objects as they are being manipulated.
+\item[Dictionary stack (dstack): ] The dictionary stack is used for looking up
+	names.  Each thread starts with with four dictionaries on its dictionary
+	stack, which are, from top to bottom:
 	\begin{itemize}
-	\item{userdict}
-	\item{globaldict}
-	\item{systemdict}
-	\item{threaddict}
+		\item{userdict}
+		\item{globaldict}
+		\item{systemdict}
+		\item{threaddict}
 	\end{itemize}
 	The dictionary stack is manipulated via the
 	\htmlref{\onyxop{}{begin}{}}{systemdict:begin} and
 	\htmlref{\onyxop{}{end}{}}{systemdict:end} operators.  The initial
 	dictionaries on the dictionary stack cannot be removed.
-\item[Execution stack: ] The interpreter uses the execution stack to store
-	objects that are being executed.  The application generally does not
-	need to explicitly manipulate the execution stack, but its contents are
-	accessible, mainly for debugging purposes.
-\item[Index stack: ] The interpreter uses the index stack to store execution
-	offsets for arrays that are being executed.  There is a one to one
-	correspondence of the elements of the execution stack to the elements
-	of the index stack, even though the elements of the index stack that
-	don't correspond to arrays have no meaning.  The index stack does not
-	affect execution, and exists purely to allow useful execution stack
+\item[Execution stack (estack): ] The interpreter uses the execution stack to
+	store objects that are being executed.  The application generally does
+	not need to explicitly manipulate the execution stack, but its contents
+	are accessible, mainly for debugging purposes.
+\item[Index stack (istack): ] The interpreter uses the index stack to store
+	execution offsets for arrays that are being executed.  There is a one to
+	one correspondence of the elements of the execution stack to the
+	elements of the index stack, even though the elements of the index stack
+	that do not correspond to arrays have no meaning.  The index stack does
+	not affect execution, and exists purely to allow useful execution stack
 	traces when errors occur.
 \end{description}
 
 The application can also create additional stacks and manipulate them in much
 the same way as the operand stack can be manipulated.
 
-\section{Interpretation, execution and evaluation}
+\section{Interpreter recursion}
 
-During Onyx interpreter initialization, an object file object corresponding to
-stdin is usually pushed onto the execution stack.  However, depending on how the
-interpreter is invoked, the initial object on the execution stack may be any
-object.  The interpreter loop can be recursively invoked.  For example, if the
-following code is executed, the eval operator recursively invokes the
-interpreter loop to interpret the string.
+During typical Onyx interpreter initialization, the
+\htmlref{\onyxop{}{start}{}}{systemdict:start} operator is executed, which in
+turn executes a file object corresponding to stdin.  However, depending on how
+the interpreter is invoked, the initial execution stack state may differ.
+
+The interpreter can be recursively invoked.  For example, if the following code
+is executed, the \htmlref{\onyxop{}{eval}{}}{systemdict:eval} operator
+recursively invokes the interpreter to interpret the string.
 \begin{verbatim}
 `2 2 add' cvx eval
 \end{verbatim}
@@ -485,8 +489,8 @@ A B copy
 B A copy
 \end{verbatim}
 
-Following is a description of the implicit locking semantics for each type of
-composite object:
+The following are descriptions of the implicit locking semantics for each type
+of composite object:
 \begin{description}
 \item[array: ] Array copying is protected.  Array element modifications are
 protected, but element reads are not protected.
@@ -534,16 +538,17 @@ applications, anything under about 100 milliseconds is undetectable by the user,
 so under normal circumstances the user will not notice that garbage collection
 is happening.
 
-There are three parameters that can be used to customize garbage collection:
+There are three parameters that can be used to control garbage collection:
 \begin{enumerate}
 \item{The garbage collector can be turned off for situations where many objects
 are being created over a short period of time.}
 \item{The garbage collector is sent a message to run whenever a certain number
 of composite objects have been created since the last collection.  This
-threshold can be changed to suit the application.}
+threshold can be changed or disabled.}
 \item{If no composite objects have been created for an extended period of time
 (seconds), the garbage collector will run if any composite objects have been
-allocated since the last collection.  This idle timeout period can be changed.}
+allocated since the last collection.  This idle timeout period can be changed or
+disabled.}
 \end{enumerate}
 
 There is one situation in which it is possible for garbage to never be
@@ -553,19 +558,19 @@ program enters a code path that clobbers object references, such that the
 objects could be collected, but no new objects are allocated.  In such a
 situation, neither the allocation inactivity timer (period), nor the object
 allocation threshold will trigger a collection, and garbage will remain
-uncollected.  In practice this situation is unlikely, and isn't a significant
+uncollected.  In practice this situation is unlikely, and is not a significant
 problem since the program size is not growing.
 
-Garbage collection is controlled via \htmlref{gcdict}{systemdict:gcdict}, which
-is described in Section~\ref{sec:gcdict}.
+Garbage collection is controlled via the \htmlref{gcdict}{systemdict:gcdict}
+dictionary, which is described in Section~\ref{sec:gcdict}.
 
 \section{Dictionary reference}
 
 All operators built in to Onyx have corresponding names that are composed
 entirely of lower case letters.  In order to avoid any possibility of namespace
-collisions names defined by current and future versions of Onyx, use at least
-one character that is not a lower case letter in names (for example, capital
-letters, numbers, underscore, etc.).
+collisions with names defined by current and future versions of Onyx, use at
+least one character that is not a lower case letter in names (for example,
+capital letters, numbers, underscore, etc.).
 
 \subsection{currenterror}
 \label{sec:currenterror}
@@ -619,7 +624,7 @@ syntax error. \\
 		\begin{description}\item[]
 		\item[integer: ]
 			Column number, valid only if the error was a
-			syntaxerror.
+			syntaxerror.  Column numbering starts at 0.
 		\end{description}
 	\item[Errors(s): ] None.
 	\item[Description: ]
@@ -701,7 +706,7 @@ onyx:1>
 	\end{description}
 \label{currenterror:estack}
 \index{estack@\onyxop{}{estack}{}}
-\item[{\onyxop{--}{estack}{--}}: ]
+\item[{\onyxop{--}{estack}{stack}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ] None.
 	\item[Output(s): ]
@@ -730,7 +735,7 @@ onyx:1>
 	\end{description}
 \label{currenterror:istack}
 \index{istack@\onyxop{}{istack}{}}
-\item[{\onyxop{--}{istack}{--}}: ]
+\item[{\onyxop{--}{istack}{stack}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ] None.
 	\item[Output(s): ]
@@ -816,6 +821,7 @@ onyx:2>
 		\begin{description}\item[]
 		\item[integer: ]
 			Line number, valid only if the error was a syntaxerror.
+			Line numbering starts at 1.
 		\end{description}
 	\item[Errors(s): ] None.
 	\item[Description: ]
@@ -838,7 +844,7 @@ onyx:5>
 	\end{description}
 \label{currenterror:ostack}
 \index{ostack@\onyxop{}{ostack}{}}
-\item[{\onyxop{--}{ostack}{--}}: ]
+\item[{\onyxop{--}{ostack}{stack}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ] None.
 	\item[Output(s): ]
@@ -1374,9 +1380,9 @@ onyx:0>
 		Set whether the garbage collector is active.  This setting takes
 		effect asynchronously, so it is possible for the garbage
 		collector to run even after it has been deactivated.  This
-		setting overrides the allocation inactivity period an allocation
-		threshold settings, so that if this setting is set to false, the
-		other settings have no effect.
+		setting overrides the allocation inactivity period and
+		allocation threshold settings, so that if this setting is set to
+		false, the other settings have no effect.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> gcdict begin false setactive end
@@ -1421,7 +1427,7 @@ onyx:0>
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[count: ]
-			Number of objects allocations since the last garbage
+			Number of object allocations since the last garbage
 			collection that will trigger a garbage collection.  0 is
 			treated specially to mean infinity.
 		\end{description}
@@ -1549,8 +1555,9 @@ depth.  Each operator removes the two arguments from ostack upon completion.  If
 there is a syntactically valid representation for an object and the recursion
 depth is greater than 0, the corresponding operator prints the object
 syntactically.  Otherwise, a non-syntictical representation of the object is
-printed.  If the recursion depth is greater than 0, the operators will
-recursively print any contained objects.  All printing is done to
+printed, except for booleans, integers, names, nulls, and strings, which are
+always printed syntactically.  If the recursion depth is greater than 0, the
+operators will recursively print any contained objects.  All printing is done to
 \htmlref{\onyxop{}{stdout}{}}{systemdict:stdout}.
 
 The operators do not print whitespace before or after the object
