@@ -17,7 +17,7 @@ clopt <
 clopt <
     # Constructor.
     #
-    #class:
+    #class#
     #- new #instance
     $new {
 	;rnew
@@ -38,7 +38,7 @@ clopt <
 
     # Get the packing mode for single character options.
     #
-    #instance:
+    #instance#
     #- packing_get #packing?
     $packing_get {
 	,packing
@@ -46,7 +46,7 @@ clopt <
 
     # Set the packing mode for single character options.
     #
-    #instance:
+    #instance#
     #packing? packing_set -
     $packing_set {
 	$packing exch ;def
@@ -54,7 +54,7 @@ clopt <
 
     # Print an error.
     #
-    #instance:;
+    #instance#
     #errstr error_print -
     $error_print {
 	,progname
@@ -67,7 +67,7 @@ clopt <
 
     # Handle an error, and unwind to :parse.
     #
-    #instance;
+    #instance#
     #errstr p_error
     $p_error {
 	;error_print
@@ -78,7 +78,7 @@ clopt <
 
     # Parse #argv, and clean up from errors.
     #
-    #instance:
+    #instance#
     #argv parse #remainder false
     #argv parse true
     $parse {
@@ -93,7 +93,7 @@ clopt <
 
     # Parse #argv.
     #
-    #instance;
+    #instance#
     #argv p_parse #remainder
     $p_parse {
 	# Store a reference to #argv.
@@ -159,7 +159,7 @@ clopt <
 
     # Dispatch a long format option.
     #
-    #instance;
+    #instance#
     #opt #arg p_longopt_dispatch -
     $p_longopt_dispatch {
 	this isa
@@ -229,7 +229,7 @@ clopt <
 
     # Dispatch a short format option.
     #
-    #instance;
+    #instance#
     #argv #i #elm p_shortopt_dispatch #i
     $p_shortopt_dispatch {
 	,packing {
@@ -241,6 +241,7 @@ clopt <
 
     # Dispatch a short format option in packed mode.
     #
+    #instance#
     #argv #i #elm :p_packed_shortopt_dispatch #i
     $p_packed_shortopt_dispatch {
 	`XXX Not implemented' 1 sprint
@@ -250,7 +251,7 @@ clopt <
 
     # Dispatch a short format option in unpacked mode.
     #
-    #instance;
+    #instance#
     #argv #i #elm p_unpacked_shortopt_dispatch #i
     $p_unpacked_shortopt_dispatch {
 	this isa
@@ -327,7 +328,7 @@ clopt <
 
     # Return the program name, which is the basename of argv[0].
     #
-    #instance:
+    #instance#
     #- progname_get #progname
     $progname_get {
 	,progname
@@ -335,7 +336,7 @@ clopt <
 
     # Return argv.  This is provided to aid option handlers.
     #
-    #instance:
+    #instance#
     #- argv_get #argv
     $argv_get {
 	,argv
@@ -343,7 +344,7 @@ clopt <
 
     # Return the current argv index.  This is provided to aid option handlers.
     #
-    #instance:
+    #instance#
     #- index_get #index
     $index_get {
 	,index
@@ -352,7 +353,7 @@ clopt <
     # Return the current option argument.  This is provided to aid option
     # handlers.
     #
-    #instance:
+    #instance#
     #- arg_get #arg
     $arg_get {
 	,arg
