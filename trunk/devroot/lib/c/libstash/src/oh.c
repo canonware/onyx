@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 173 $
- * $Date: 1998-08-26 12:34:42 -0700 (Wed, 26 Aug 1998) $
+ * $Revision: 200 $
+ * $Date: 1998-09-07 09:49:54 -0700 (Mon, 07 Sep 1998) $
  *
  * <<< Description >>>
  *
@@ -768,7 +768,6 @@ oh_dump(cw_oh_t * a_oh_o, cw_bool_t a_all)
 	     list_count(&a_oh_o->items_list));
   log_printf(g_log_o, "      pow h1         h2    shrink grow \n");
   log_printf(g_log_o, "      --- ---------- ----- ------ -----\n");
-#ifdef _CW_PEDANTIC
   log_printf(g_log_o, "Base: %2d             %5d %5d  %5d\n",
 	     a_oh_o->base_power,
 	     a_oh_o->base_h2,
@@ -780,19 +779,6 @@ oh_dump(cw_oh_t * a_oh_o, cw_bool_t a_all)
 	     log_print_uint64(a_oh_o->curr_h2, 10, buf_a),
 	     log_print_uint64(a_oh_o->curr_shrink_point, 10, buf_b),
 	     log_print_uint64(a_oh_o->curr_grow_point, 10, buf_c));
-#else
-  log_printf(g_log_o, "Base: %2d             %5d %5d  %5d\n",
-	     a_oh_o->base_power,
-	     a_oh_o->base_h2,
-	     a_oh_o->base_shrink_point,
-	     a_oh_o->base_grow_point);
-  log_printf(g_log_o, "Curr: %2d  %010p %5s %5s  %5s\n\n",
-	     a_oh_o->curr_power,
-	     a_oh_o->curr_h1,
-	     log_print_uint64(a_oh_o->curr_h2, 10, buf_a),
-	     log_print_uint64(a_oh_o->curr_shrink_point, 10, buf_b),
-	     log_print_uint64(a_oh_o->curr_grow_point, 10, buf_c));
-#endif
 
 #ifdef _OH_PERF_
   log_printf(g_log_o, "Counters: collisions[%s] inserts[%s] deletes[%s]\n",
@@ -814,15 +800,9 @@ oh_dump(cw_oh_t * a_oh_o, cw_bool_t a_all)
       log_printf(g_log_o, "%4d ", i);
       if (a_oh_o->items[i] != NULL)
       {
-#ifdef _CW_PEDANTIC
 	log_printf(g_log_o, "0x%08x %10p\n",
 		   a_oh_o->items[i]->key,
 		   a_oh_o->items[i]->data);
-#else
-	log_printf(g_log_o, "0x%08x %010p\n",
-		   a_oh_o->items[i]->key,
-		   a_oh_o->items[i]->data);
-#endif
       }
       else
       {
@@ -1248,7 +1228,7 @@ oh_p_slot_shuffle(cw_oh_t * a_oh_o, cw_uint64_t a_slot)
        * record of the slot that it's now in. */
       if (_cw_fmatch(_STASH_DBG_R_OH_SLOT))
       {
-	log_eprintf(g_log_o, NULL, NULL, "oh_p_slot_shuffle",
+	log_eprintf(g_log_o, NULL, 0, "oh_p_slot_shuffle",
 		    "Shuffling slot %d to %d (%d jumps)\n",
 		    curr_look, curr_empty, curr_distance);
       }
