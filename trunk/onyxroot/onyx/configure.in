@@ -871,7 +871,7 @@ if test "x$lib_onyx" = "x1" ; then
 #include <sys/time.h>
 #include <time.h>
 ], [
-    tzname[[0]] = 'a';
+    tzname[[0]] = "GMT";
 ], AC_MSG_RESULT([yes])
    AC_DEFINE([CW_LIBONYX_USE_TZNAME]),
    AC_MSG_RESULT([no])

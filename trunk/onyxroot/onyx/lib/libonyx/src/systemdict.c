@@ -6653,7 +6653,7 @@ systemdict_localtime(cw_nxo_t *a_thread)
 #ifdef CW_LIBONYX_USE_TM_ZONE
 #define CW_LIBONYX_ZONE tm.tm_zone
 #elif defined(CW_LIBONYX_USE_TZNAME)
-#define CW_LIBONYX_ZONE tzname
+#define CW_LIBONYX_ZONE tzname[1]
 #endif
     nxo_name_new(name, nxn_str(NXN_zone), nxn_len(NXN_zone), true);
     nxo_string_new(value, currentlocking, strlen(CW_LIBONYX_ZONE));
@@ -6668,7 +6668,7 @@ systemdict_localtime(cw_nxo_t *a_thread)
 #define CW_LIBONYX_GMTOFF altzone
 #endif
     nxo_name_new(name, nxn_str(NXN_gmtoff), nxn_len(NXN_gmtoff), true);
-    nxo_integer_new(value, tm.tm_gmtoff);
+    nxo_integer_new(value, CW_LIBONYX_GMTOFF);
     nxo_dict_def(nxo, name, value);
 #undef CW_LIBONYX_GMTOFF
 
