@@ -119,7 +119,7 @@ thd_l_init(void)
     if (error == -1)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in sigaction(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(error));
+		__FILE__, __LINE__, __func__, strerror(error));
 	abort();
     }
 
@@ -130,7 +130,7 @@ thd_l_init(void)
     if (error == -1)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in sigaction(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(error));
+		__FILE__, __LINE__, __func__, strerror(error));
 	abort();
     }
 
@@ -139,7 +139,7 @@ thd_l_init(void)
     if (error)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in sem_init(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(error));
+		__FILE__, __LINE__, __func__, strerror(error));
 	abort();
     }
 #endif
@@ -149,7 +149,7 @@ thd_l_init(void)
     if (pth_init() == FALSE)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in pth_init(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(errno));
+		__FILE__, __LINE__, __func__, strerror(errno));
 	abort();
     }
 
@@ -159,7 +159,7 @@ thd_l_init(void)
     if (pth_attr_get(cw_g_thd_attr, PTH_ATTR_STACK_SIZE, &stacksize) == FALSE)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in pth_attr_get(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(errno));
+		__FILE__, __LINE__, __func__, strerror(errno));
 	abort();
     }
     if (stacksize < CW_THD_MINSTACK)
@@ -168,7 +168,7 @@ thd_l_init(void)
 	    == FALSE)
 	{
 	    fprintf(stderr, "%s:%u:%s(): Error in pth_attr_set(): %s\n",
-		    __FILE__, __LINE__, __FUNCTION__, strerror(errno));
+		    __FILE__, __LINE__, __func__, strerror(errno));
 	    abort();
 	}
     }
@@ -233,14 +233,14 @@ thd_l_shutdown(void)
     if (pth_attr_destroy(cw_g_thd_attr) == FALSE)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in pth_attr_destroy(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(errno));
+		__FILE__, __LINE__, __func__, strerror(errno));
 	abort();
     }
 
     if (pth_kill() == FALSE)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in pth_kill(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(errno));
+		__FILE__, __LINE__, __func__, strerror(errno));
 	abort();
     }
 #endif
@@ -251,7 +251,7 @@ thd_l_shutdown(void)
     if (error)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in sem_destroy(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(error));
+		__FILE__, __LINE__, __func__, strerror(error));
 	abort();
     }
 #endif
@@ -307,7 +307,7 @@ thd_new(void *(*a_start_func)(void *), void *a_arg, cw_bool_t a_suspendible)
     if (pth == NULL)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in pth_spawn(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(errno));
+		__FILE__, __LINE__, __func__, strerror(errno));
 	abort();
     }
 
@@ -322,7 +322,7 @@ thd_new(void *(*a_start_func)(void *), void *a_arg, cw_bool_t a_suspendible)
     if (error)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in pthread_create(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(error));
+		__FILE__, __LINE__, __func__, strerror(error));
 	abort();
     }
 
@@ -362,19 +362,19 @@ thd_delete(cw_thd_t *a_thd)
     if (attr == NULL)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in pth_attr_of(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(errno));
+		__FILE__, __LINE__, __func__, strerror(errno));
 	abort();
     }
     if (pth_attr_set(attr, PTH_ATTR_JOINABLE, FALSE) == FALSE)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in pth_attr_set(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(errno));
+		__FILE__, __LINE__, __func__, strerror(errno));
 	abort();
     }	
     if (pth_attr_destroy(attr) == FALSE)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in pth_attr_destroy(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(errno));
+		__FILE__, __LINE__, __func__, strerror(errno));
 	abort();
     }
 #endif
@@ -387,7 +387,7 @@ thd_delete(cw_thd_t *a_thd)
     if (error)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in pthread_detach(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(error));
+		__FILE__, __LINE__, __func__, strerror(error));
 	abort();
     }
 #endif
@@ -419,7 +419,7 @@ thd_join(cw_thd_t *a_thd)
     if (pth_join(pth, &retval) == FALSE)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in pth_join(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(errno));
+		__FILE__, __LINE__, __func__, strerror(errno));
 	abort();
     }
 #endif
@@ -432,7 +432,7 @@ thd_join(cw_thd_t *a_thd)
     if (error)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in pthread_join(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(error));
+		__FILE__, __LINE__, __func__, strerror(error));
 	abort();
     }
 #endif
@@ -682,7 +682,7 @@ thd_p_suspend(cw_thd_t *a_thd)
     if (pth_suspend(a_thd->pth) == FALSE)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in pth_suspend(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(errno));
+		__FILE__, __LINE__, __func__, strerror(errno));
 	abort();
     }
 #endif
@@ -691,13 +691,13 @@ thd_p_suspend(cw_thd_t *a_thd)
     if (error != 0)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in pthread_kill(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(error));
+		__FILE__, __LINE__, __func__, strerror(error));
 	abort();
     }
     if (sem_wait(&cw_g_thd_sem) != 0)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in sem_wait(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(errno));
+		__FILE__, __LINE__, __func__, strerror(errno));
 	abort();
     }
 #endif
@@ -706,7 +706,7 @@ thd_p_suspend(cw_thd_t *a_thd)
     if (error)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in pthread_suspend_np(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(error));
+		__FILE__, __LINE__, __func__, strerror(error));
 	abort();
     }
 #endif
@@ -715,7 +715,7 @@ thd_p_suspend(cw_thd_t *a_thd)
     if (error)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in thr_suspend(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(error));
+		__FILE__, __LINE__, __func__, strerror(error));
 	abort();
     }
 #endif
@@ -724,7 +724,7 @@ thd_p_suspend(cw_thd_t *a_thd)
     if (mach_error != KERN_SUCCESS)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in thread_suspend(): %d\n",
-		__FILE__, __LINE__, __FUNCTION__, mach_error);
+		__FILE__, __LINE__, __func__, mach_error);
 	abort();
     }
 #endif
@@ -737,7 +737,7 @@ thd_p_resume(cw_thd_t *a_thd)
     if (pth_resume(a_thd->pth) == FALSE)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in pth_resume(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(errno));
+		__FILE__, __LINE__, __func__, strerror(errno));
 	abort();
     }
 #endif
@@ -748,7 +748,7 @@ thd_p_resume(cw_thd_t *a_thd)
     if (error != 0)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in pthread_kill(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(error));
+		__FILE__, __LINE__, __func__, strerror(error));
 	abort();
     }
 #endif
@@ -759,7 +759,7 @@ thd_p_resume(cw_thd_t *a_thd)
     if (error)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in pthread_resume_np(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(error));
+		__FILE__, __LINE__, __func__, strerror(error));
 	abort();
     }
 #endif
@@ -770,7 +770,7 @@ thd_p_resume(cw_thd_t *a_thd)
     if (error)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in thr_continue(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(error));
+		__FILE__, __LINE__, __func__, strerror(error));
 	abort();
     }
 #endif
@@ -781,7 +781,7 @@ thd_p_resume(cw_thd_t *a_thd)
     if (mach_error != KERN_SUCCESS)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in thread_resume(): %d\n",
-		__FILE__, __LINE__, __FUNCTION__, mach_error);
+		__FILE__, __LINE__, __func__, mach_error);
 	abort();
     }
 #endif

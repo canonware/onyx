@@ -100,7 +100,7 @@ dch_delete(cw_dch_t *a_dch)
 	    "%s(%p): num_collisions: %llu, num_inserts: %llu,"
 	    " num_removes: %llu, num_searches: %llu, num_grows: %llu,"
 	    " num_shrinks: %llu\n",
-	    __FUNCTION__, a_dch, a_dch->ch->num_collisions,
+	    __func__, a_dch, a_dch->ch->num_collisions,
 	    a_dch->ch->num_inserts, a_dch->ch->num_removes,
 	    a_dch->ch->num_searches, a_dch->num_grows, a_dch->num_shrinks);
 #endif

@@ -30,12 +30,12 @@ func_b(void)
     xep_begin();
     xep_try
     {
-	fprintf(stderr, "%s(): CW_XEPV_CODE\n", __FUNCTION__);
+	fprintf(stderr, "%s(): CW_XEPV_CODE\n", __func__);
 	func_a();
     }
     xep_catch(CW_XEPV_BAR)
     {
-	fprintf(stderr, "%s(): CW_XEPV_BAR\n", __FUNCTION__);
+	fprintf(stderr, "%s(): CW_XEPV_BAR\n", __func__);
 	xep_handled();
     }
     xep_end();
@@ -47,7 +47,7 @@ func_c(void)
     xep_begin();
     xep_try
     {
-	fprintf(stderr, "%s(): CW_XEPV_CODE\n", __FUNCTION__);
+	fprintf(stderr, "%s(): CW_XEPV_CODE\n", __func__);
 	func_a();
     }
     xep_end();
@@ -63,11 +63,11 @@ main()
 
     for (i = 0; i < 11; i++)
     {
-	fprintf(stderr, "%s(): i == %u\n", __FUNCTION__, i);
+	fprintf(stderr, "%s(): i == %u\n", __func__, i);
 	xep_begin();
 	xep_try
 	{
-	    fprintf(stderr, "%s(): CW_XEPV_CODE\n", __FUNCTION__);
+	    fprintf(stderr, "%s(): CW_XEPV_CODE\n", __func__);
 	    if (i == 2)
 	    {
 		xep_throw(CW_XEPV_FOO);
@@ -100,13 +100,13 @@ main()
 	xep_catch(CW_XEPV_FOO)
 	{
 	    cw_assert(xep_value() == CW_XEPV_FOO);
-	    fprintf(stderr, "%s(): CW_XEPV_FOO\n", __FUNCTION__);
+	    fprintf(stderr, "%s(): CW_XEPV_FOO\n", __func__);
 	    xep_handled();
 	}
 	xep_catch(CW_XEPV_BAR)
 	{
 	    cw_assert(xep_value() == CW_XEPV_BAR);
-	    fprintf(stderr, "%s(): CW_XEPV_BAR\n", __FUNCTION__);
+	    fprintf(stderr, "%s(): CW_XEPV_BAR\n", __func__);
 	    xep_handled();
 	}
 	xep_catch(CW_XEPV_BIZ)
@@ -116,13 +116,13 @@ main()
 		      || xep_value() == CW_XEPV_BAZ);
 	    if (xep_value() == CW_XEPV_BIZ)
 	    {
-		fprintf(stderr, "%s(): CW_XEPV_BIZ\n", __FUNCTION__);
+		fprintf(stderr, "%s(): CW_XEPV_BIZ\n", __func__);
 		i++;
 		xep_retry();
 	    }
 	    else
 	    {
-		fprintf(stderr, "%s(): CW_XEPV_BAZ\n", __FUNCTION__);
+		fprintf(stderr, "%s(): CW_XEPV_BAZ\n", __func__);
 		xep_handled();
 	    }
 	}
@@ -130,7 +130,7 @@ main()
 	{
 	    if (xep_value() == CW_XEPV_BAM)
 	    {
-		fprintf(stderr, "%s(): CW_XEPV_BAM\n", __FUNCTION__);
+		fprintf(stderr, "%s(): CW_XEPV_BAM\n", __func__);
 		xep_handled();
 	    }
 	}
@@ -143,7 +143,7 @@ main()
     }
     xep_acatch
     {
-	fprintf(stderr, "%s(): xep_acatch\n", __FUNCTION__);
+	fprintf(stderr, "%s(): xep_acatch\n", __func__);
     }
     xep_end();
 

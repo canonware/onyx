@@ -69,7 +69,7 @@ ch_delete(cw_ch_t *a_ch)
     fprintf(stderr,
 	    "%s(%p): num_collisions: %llu, num_inserts: %llu,"
 	    " num_removes: %llu, num_searches: %llu\n",
-	    __FUNCTION__, a_ch, a_ch->num_collisions, a_ch->num_inserts,
+	    __func__, a_ch, a_ch->num_collisions, a_ch->num_inserts,
 	    a_ch->num_removes, a_ch->num_searches);
 #endif
 

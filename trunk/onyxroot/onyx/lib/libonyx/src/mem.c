@@ -172,7 +172,7 @@ mem_delete(cw_mem_t *a_mem)
 	if (num_addrs > 0)
 	{
 	    fprintf(stderr, "%s(%p): %u unfreed allocation%s\n",
-		    __FUNCTION__, a_mem, num_addrs, num_addrs != 1 ? "s" : "");
+		    __func__, a_mem, num_addrs, num_addrs != 1 ? "s" : "");
 	}
 	for (i = 0; i < num_addrs; i++)
 	{
@@ -180,7 +180,7 @@ mem_delete(cw_mem_t *a_mem)
 			       NULL);
 	    fprintf(stderr,
 		    "%s(%p): %p, size %zu never freed (allocated at %s:%u)\n",
-		    __FUNCTION__, a_mem, addr,
+		    __func__, a_mem, addr,
 		    allocation->size, allocation->filename,
 		    allocation->line_num);
 	    mem_free(a_mem->mem, allocation->filename);
@@ -222,7 +222,7 @@ mem_malloc_e(cw_mem_t *a_mem, size_t a_size, const char *a_filename,
     {
 #ifdef CW_MEM_ERROR
 	fprintf(stderr, "%s(%p): %p <-- malloc(%zu) at %s:%u\n",
-		__FUNCTION__, a_mem, retval, a_size, a_filename, a_line_num);
+		__func__, a_mem, retval, a_size, a_filename, a_line_num);
 #endif
 	xep_throw(CW_ONYXX_OOM);
     }
@@ -242,7 +242,7 @@ mem_malloc_e(cw_mem_t *a_mem, size_t a_size, const char *a_filename,
 	{
 	    fprintf(stderr, "%s(%p): %p multiply-allocated "
 		    "(was at %s:%u, size %zu; now at %s:%u, size %zu)\n",
-		    __FUNCTION__, a_mem, retval,
+		    __func__, a_mem, retval,
 		    old_allocation->filename, old_allocation->line_num,
 		    old_allocation->size, a_filename, a_line_num,
 		    a_size);
@@ -263,7 +263,7 @@ mem_malloc_e(cw_mem_t *a_mem, size_t a_size, const char *a_filename,
 
 #ifdef CW_MEM_VERBOSE
 	    fprintf(stderr, "%s(%p): %p <-- malloc(%zu) at %s:%u\n",
-		    __FUNCTION__, a_mem, retval, a_size, a_filename,
+		    __func__, a_mem, retval, a_size, a_filename,
 		    a_line_num);
 #endif
 	    dch_insert(a_mem->addr_hash, retval, allocation, &allocation->chi);
@@ -299,7 +299,7 @@ mem_calloc_e(cw_mem_t *a_mem, size_t a_number, size_t a_size,
     {
 #ifdef CW_MEM_ERROR
 	fprintf(stderr, "%s(%p): %p <-- calloc(%zu, %zu) at %s:%u\n",
-		__FUNCTION__, a_mem, retval, a_number, a_size,
+		__func__, a_mem, retval, a_number, a_size,
 		a_filename, a_line_num);
 #endif
 	xep_throw(CW_ONYXX_OOM);
@@ -320,7 +320,7 @@ mem_calloc_e(cw_mem_t *a_mem, size_t a_number, size_t a_size,
 	{
 	    fprintf(stderr, "%s(%p): %p multiply-allocated "
 		    "(was at %s:%u, size %zu; now at %s:%u, size %zu\n",
-		    __FUNCTION__, a_mem, retval,
+		    __func__, a_mem, retval,
 		    old_allocation->filename, old_allocation->line_num,
 		    old_allocation->size, a_filename, a_line_num,
 		    a_size);
@@ -341,7 +341,7 @@ mem_calloc_e(cw_mem_t *a_mem, size_t a_number, size_t a_size,
 
 #ifdef CW_MEM_VERBOSE
 	    fprintf(stderr, "%s(%p): %p <-- calloc(%zu, %zu) at %s:%u\n",
-		    __FUNCTION__, a_mem, retval, a_number, a_size,
+		    __func__, a_mem, retval, a_number, a_size,
 		    a_filename, a_line_num);
 #endif
 	    dch_insert(a_mem->addr_hash, retval, allocation,
@@ -382,7 +382,7 @@ mem_realloc_e(cw_mem_t *a_mem, void *a_ptr, size_t a_size, size_t a_old_size,
     {
 #ifdef CW_MEM_ERROR
 	fprintf(stderr, "%s(%p): %p <-- realloc(%p, %zu) at %s:%u\n",
-		__FUNCTION__, a_mem, retval, a_ptr, a_size,
+		__func__, a_mem, retval, a_ptr, a_size,
 		a_filename, a_line_num);
 #endif
 	xep_throw(CW_ONYXX_OOM);
@@ -401,7 +401,7 @@ mem_realloc_e(cw_mem_t *a_mem, void *a_ptr, size_t a_size, size_t a_old_size,
 	if (dch_remove(a_mem->addr_hash, a_ptr, NULL, (void **) &allocation,
 		       NULL))
 	{
-	    fprintf(stderr, "%s(%p): %p not allocated\n", __FUNCTION__, a_mem,
+	    fprintf(stderr, "%s(%p): %p not allocated\n", __func__, a_mem,
 		    a_ptr);
 	}
 	else
@@ -429,14 +429,14 @@ mem_realloc_e(cw_mem_t *a_mem, void *a_ptr, size_t a_size, size_t a_old_size,
 	    {
 		fprintf(stderr, "%s(%p): Wrong size %zu for %p "
 			"at %s:%u (size %zu, allocated at %s:%u)\n",
-			__FUNCTION__, a_mem, a_old_size, a_ptr,
+			__func__, a_mem, a_old_size, a_ptr,
 			a_filename, a_line_num, old_size,
 			old_filename, old_line_num);
 	    }
 #ifdef CW_MEM_VERBOSE
 	    fprintf(stderr, "%s(%p): %p <-- realloc(%p, %zu) at "
 		    "%s:%u (was size %zu, allocated at %s:%u)\n",
-		    __FUNCTION__, a_mem, retval, a_ptr, a_size,
+		    __func__, a_mem, retval, a_ptr, a_size,
 		    a_filename, a_line_num, old_size, old_filename,
 		    old_line_num);
 #endif
@@ -476,7 +476,7 @@ mem_free_e(cw_mem_t *a_mem, void *a_ptr, size_t a_size, const char *a_filename,
 		       NULL))
 	{
 	    fprintf(stderr, "%s(%p): %p not allocated, attempted "
-		    "to free at %s:%u\n", __FUNCTION__, a_mem, a_ptr,
+		    "to free at %s:%u\n", __func__, a_mem, a_ptr,
 		    a_filename, a_line_num);
 	}
 	else
@@ -485,13 +485,13 @@ mem_free_e(cw_mem_t *a_mem, void *a_ptr, size_t a_size, const char *a_filename,
 	    {
 		fprintf(stderr, "%s(%p): Wrong size %zu for %p "
 			"at %s:%u (size %zu, allocated at %s:%u)\n",
-			__FUNCTION__, a_mem, a_size, a_ptr,
+			__func__, a_mem, a_size, a_ptr,
 			a_filename, a_line_num, allocation->size,
 			allocation->filename, allocation->line_num);
 	    }
 #ifdef CW_MEM_VERBOSE
 	    fprintf(stderr, "%s(%p): free(%p) at %s:%u "
-		    "(size %zu, allocated at %s:%u)\n", __FUNCTION__,
+		    "(size %zu, allocated at %s:%u)\n", __func__,
 		    a_mem, a_ptr, a_filename, a_line_num,
 		    allocation->size, allocation->filename,
 		    allocation->line_num);

@@ -1446,7 +1446,7 @@ buf_p_bufp_cur_set(cw_buf_t *a_buf, cw_bufp_t *a_bufp)
 	cw_uint64_t bpos, line;
 
 	cw_assert(bufp_p_bpos(a_bufp) != bufp_p_bpos(a_buf->bufp_cur));
-//	fprintf(stderr, "%s:%d:%s(): %p(%llu) > %p(%llu) ?\n", __FILE__, __LINE__, __FUNCTION__, a_bufp, bufp_p_bpos(a_bufp), a_buf->bufp_cur, bufp_p_bpos(a_buf->bufp_cur));
+//	fprintf(stderr, "%s:%d:%s(): %p(%llu) > %p(%llu) ?\n", __FILE__, __LINE__, __func__, a_bufp, bufp_p_bpos(a_bufp), a_buf->bufp_cur, bufp_p_bpos(a_buf->bufp_cur));
 	if (bufp_p_bpos(a_bufp) > bufp_p_bpos(a_buf->bufp_cur))
 	{
 	    /* Move forward. */
@@ -1777,7 +1777,7 @@ buf_p_bufp_splice(cw_buf_t *a_buf, cw_bufp_t *a_start, cw_bufp_t *a_end)
     cw_assert(ql_next(&a_buf->plist, a_start, plink) == a_end);
     cw_assert(a_start == ql_prev(&a_buf->plist, a_end, plink));
 
-//    fprintf(stderr, "%s:%d:%s() %p..%p\n", __FILE__, __LINE__, __FUNCTION__, a_start, a_end);
+//    fprintf(stderr, "%s:%d:%s() %p..%p\n", __FILE__, __LINE__, __func__, a_start, a_end);
     /* Move a_start's gap to the end, and a_end's gap to the beginning. */
     bufp_p_gap_move(a_start, a_start->len);
     bufp_p_gap_move(a_end, 0);

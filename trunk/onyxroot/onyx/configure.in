@@ -390,6 +390,9 @@ if test "x$enable_modules" = "x1" ; then
       [enable_modules="0"
       AC_MSG_RESULT(Modules disabled since dlopen is missing)]))
 fi
+if test "x$enable_posix" = "x0" ; then
+  enable_modules="0"
+fi
 AC_SUBST(enable_modules)
 if test "x$enable_modules" = "x1" ; then
   AC_DEFINE(CW_MODULES)

@@ -73,7 +73,7 @@ xep_throw_e(cw_xepv_t a_value, volatile const char *a_filename,
     {
 	/* No exception handlers at all. */
 	fprintf(stderr, "%s(): Unhandled exception %u thrown at %s:%u\n",
-		__FUNCTION__, a_value, a_filename, a_line_num);
+		__func__, a_value, a_filename, a_line_num);
 	abort();
     }
 
@@ -109,7 +109,7 @@ xep_throw_e(cw_xepv_t a_value, volatile const char *a_filename,
 
     /* No more exception handlers. */
     fprintf(stderr, "%s(): Unhandled exception %u thrown at %s:%u\n",
-	    __FUNCTION__, a_value, xep->filename, xep->line_num);
+	    __func__, a_value, xep->filename, xep->line_num);
     abort();
 }
 
@@ -250,7 +250,7 @@ xep_p_unlink(cw_xep_t *a_xep)
 	    {
 		/* No more exception handlers. */
 		fprintf(stderr, "%s(): Unhandled exception "
-			"%u thrown at %s:%u\n", __FUNCTION__,
+			"%u thrown at %s:%u\n", __func__,
 			a_xep->value, a_xep->filename,
 			a_xep->line_num);
 		abort();

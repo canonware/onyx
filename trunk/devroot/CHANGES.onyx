@@ -1,5 +1,7 @@
 2003-03-15 : Jason Evans <jasone@canonware.com>
 
+	* Use __func__ rather than __FUNCTION__, in order to comply with C99.
+
 	* lib/libonyx/src/nxo_thread.c:nxo_thread_loop() : Make some
 	  performance improvements by reducing nxo dup's, array
 	  locking/unlocking, and the number of branches.

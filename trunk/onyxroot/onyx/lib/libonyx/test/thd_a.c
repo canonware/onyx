@@ -22,10 +22,10 @@ thread_entry_func(void *a_arg)
 {
     char *arg_str = (char *) a_arg;
 
-    fprintf(stderr, "%s(): Argument string: \"%s\"\n", __FUNCTION__, arg_str);
+    fprintf(stderr, "%s(): Argument string: \"%s\"\n", __func__, arg_str);
 
     mtx_lock(&mtx);
-    fprintf(stderr, "%s(): thd_self() returns %s\n", __FUNCTION__,
+    fprintf(stderr, "%s(): thd_self() returns %s\n", __func__,
 	    (thd_self() == thread_a) ? "thread_a" : (thd_self() == thread_b)
 	    ? "thread_b" : "<error>");
     mtx_unlock(&mtx);

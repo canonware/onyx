@@ -28,7 +28,7 @@ mtx_new(cw_mtx_t *a_mtx)
     if (pth_mutex_init(&a_mtx->mutex) == FALSE)
     {
 	fprintf(stderr, "%s:%d:%s(): Error in pth_mutex_init: %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(errno));
+		__FILE__, __LINE__, __func__, strerror(errno));
 	abort();
     }
 #endif
@@ -37,7 +37,7 @@ mtx_new(cw_mtx_t *a_mtx)
     if (error)
     {
 	fprintf(stderr, "%s:%d:%s(): Error in pthread_mutex_init: %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(error));
+		__FILE__, __LINE__, __func__, strerror(error));
 	abort();
     }
 #endif
@@ -57,7 +57,7 @@ mtx_delete(cw_mtx_t *a_mtx)
     if (error)
     {
 	fprintf(stderr, "%s:%d:%s(): Error in pthread_mutex_destroy(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(error));
+		__FILE__, __LINE__, __func__, strerror(error));
 	abort();
     }
 #endif
@@ -76,7 +76,7 @@ mtx_lock(cw_mtx_t *a_mtx)
     if (pth_mutex_acquire(&a_mtx->mutex, FALSE, NULL) == FALSE)
     {
 	fprintf(stderr, "%s:%d:%s(): Error in pth_mutex_acquire(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(errno));
+		__FILE__, __LINE__, __func__, strerror(errno));
 	abort();
     }
 #endif
@@ -85,7 +85,7 @@ mtx_lock(cw_mtx_t *a_mtx)
     if (error)
     {
 	fprintf(stderr, "%s:%d:%s(): Error in pthread_mutex_lock(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(error));
+		__FILE__, __LINE__, __func__, strerror(error));
 	abort();
     }
 #endif
@@ -113,7 +113,7 @@ mtx_trylock(cw_mtx_t *a_mtx)
     else
     {
 	fprintf(stderr, "%s:%d:%s(): Error in pth_mutex_acquire(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(errno));
+		__FILE__, __LINE__, __func__, strerror(errno));
 	abort();
     }
 #endif
@@ -130,7 +130,7 @@ mtx_trylock(cw_mtx_t *a_mtx)
     else
     {
 	fprintf(stderr, "%s:%d:%s(): Error in pthread_mutex_trylock(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(error));
+		__FILE__, __LINE__, __func__, strerror(error));
 	abort();
     }
 #endif
@@ -151,7 +151,7 @@ mtx_unlock(cw_mtx_t *a_mtx)
     if (pth_mutex_release(&a_mtx->mutex) == FALSE)
     {
 	fprintf(stderr, "%s:%d:%s(): Error in pth_mutex_release(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(errno));
+		__FILE__, __LINE__, __func__, strerror(errno));
 	abort();
     }
 #endif
@@ -160,7 +160,7 @@ mtx_unlock(cw_mtx_t *a_mtx)
     if (error)
     {
 	fprintf(stderr, "%s:%d:%s(): Error in pthread_mutex_unlock(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(error));
+		__FILE__, __LINE__, __func__, strerror(error));
 	abort();
     }
 #endif

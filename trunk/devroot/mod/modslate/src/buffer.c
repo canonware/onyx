@@ -1624,7 +1624,7 @@ modslate_marker_range_get(void *a_data, cw_nxo_t *a_thread)
 
     /* Get a pointer to the buffer range and calculate its length. */
     bufv = mkr_range_get(&marker_a->mkr, &marker_b->mkr, &bufvcnt);
-//    fprintf(stderr, "%s:%d:%s(): %llu..%llu, bufvcnt: %u\n", __FILE__, __LINE__, __FUNCTION__, mkr_pos(&marker_a->mkr), mkr_pos(&marker_b->mkr), bufvcnt);
+//    fprintf(stderr, "%s:%d:%s(): %llu..%llu, bufvcnt: %u\n", __FILE__, __LINE__, __func__, mkr_pos(&marker_a->mkr), mkr_pos(&marker_b->mkr), bufvcnt);
     pos_a = mkr_pos(&marker_a->mkr);
     pos_b = mkr_pos(&marker_b->mkr);
     str_len = (pos_a < pos_b) ? pos_b - pos_a : pos_a - pos_b;

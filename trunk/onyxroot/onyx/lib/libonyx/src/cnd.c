@@ -28,7 +28,7 @@ cnd_new(cw_cnd_t *a_cnd)
     if (pth_cond_init(&a_cnd->condition) == FALSE)
     {
 	fprintf(stderr, "%s:%d:%s(): Error in pth_cond_init(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(errno));
+		__FILE__, __LINE__, __func__, strerror(errno));
 	abort();
     }
 #endif
@@ -37,7 +37,7 @@ cnd_new(cw_cnd_t *a_cnd)
     if (error)
     {
 	fprintf(stderr, "%s:%d:%s(): Error in pthread_cond_init(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(error));
+		__FILE__, __LINE__, __func__, strerror(error));
 	abort();
     }
 #endif
@@ -57,7 +57,7 @@ cnd_delete(cw_cnd_t *a_cnd)
     if (error)
     {
 	fprintf(stderr, "%s:%d:%s(): Error in pthread_cond_destroy(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(error));
+		__FILE__, __LINE__, __func__, strerror(error));
 	abort();
     }
 #endif
@@ -76,7 +76,7 @@ cnd_signal(cw_cnd_t *a_cnd)
     if (pth_cond_notify(&a_cnd->condition, FALSE) == FALSE)
     {
 	fprintf(stderr, "%s:%d:%s(): Error in pth_cond_notify(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(errno));
+		__FILE__, __LINE__, __func__, strerror(errno));
 	abort();
     }
 #endif
@@ -84,7 +84,7 @@ cnd_signal(cw_cnd_t *a_cnd)
     error = pthread_cond_signal(&a_cnd->condition);
     if (error) {
 	fprintf(stderr, "%s:%d:%s(): Error in pthread_cond_signal(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(error));
+		__FILE__, __LINE__, __func__, strerror(error));
 	abort();
     }
 #endif
@@ -103,7 +103,7 @@ cnd_broadcast(cw_cnd_t *a_cnd)
     if (pth_cond_notify(&a_cnd->condition, TRUE) == FALSE)
     {
 	fprintf(stderr, "%s:%d:%s(): Error in pth_cond_notify(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(errno));
+		__FILE__, __LINE__, __func__, strerror(errno));
 	abort();
     }
 #endif
@@ -112,7 +112,7 @@ cnd_broadcast(cw_cnd_t *a_cnd)
     if (error)
     {
 	fprintf(stderr, "%s:%d:%s(): Error in pthread_cond_broadcast(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(error));
+		__FILE__, __LINE__, __func__, strerror(error));
 	abort();
     }
 #endif
@@ -154,7 +154,7 @@ cnd_timedwait(cw_cnd_t *a_cnd, cw_mtx_t *a_mtx,
     if (pth_cond_await(&a_cnd->condition, &a_mtx->mutex, event) == FALSE)
     {
 	fprintf(stderr, "%s:%d:%s(): Error in pth_cond_await(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(errno));
+		__FILE__, __LINE__, __func__, strerror(errno));
 	abort();
     }
 
@@ -180,7 +180,7 @@ cnd_timedwait(cw_cnd_t *a_cnd, cw_mtx_t *a_mtx,
     else
     {
 	fprintf(stderr, "%s:%d:%s(): Error in pthread_cond_timedwait(): %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(error));
+		__FILE__, __LINE__, __func__, strerror(error));
 	abort();
     }
 #endif
@@ -202,7 +202,7 @@ cnd_wait(cw_cnd_t *a_cnd, cw_mtx_t *a_mtx)
     if (pth_cond_await(&a_cnd->condition, &a_mtx->mutex, NULL) == FALSE)
     {
 	fprintf(stderr, "%s:%d:%s(): Error in pth_cond_wait: %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(errno));
+		__FILE__, __LINE__, __func__, strerror(errno));
 	abort();
     }
 #endif
@@ -211,7 +211,7 @@ cnd_wait(cw_cnd_t *a_cnd, cw_mtx_t *a_mtx)
     if (error)
     {
 	fprintf(stderr, "%s:%d:%s(): Error in pthread_cond_wait: %s\n",
-		__FILE__, __LINE__, __FUNCTION__, strerror(error));
+		__FILE__, __LINE__, __func__, strerror(error));
 	abort();
     }
 #endif

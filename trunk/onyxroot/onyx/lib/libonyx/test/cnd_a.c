@@ -33,7 +33,7 @@ thread_entry_func(void *a_arg)
 
     cnd_wait(foo_var->cond, foo_var->mutex);
 
-    fprintf(stderr, "%s(): After cnd_wait() call\n", __FUNCTION__);
+    fprintf(stderr, "%s(): After cnd_wait() call\n", __func__);
 
     mtx_unlock(foo_var->mutex);
 

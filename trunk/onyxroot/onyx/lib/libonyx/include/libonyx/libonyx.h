@@ -332,7 +332,7 @@ extern cw_mtx_t cw_g_getservbyname_mtx;
     do									\
     {									\
 	fprintf(stderr, "%s:%u:%s(): Error: %s\n", __FILE__,		\
-		__LINE__, __FUNCTION__, a);				\
+		__LINE__, __func__, a);				\
 		abort();						\
     } while (0)
 
@@ -341,7 +341,7 @@ extern cw_mtx_t cw_g_getservbyname_mtx;
     do									\
     {									\
 	fprintf(stderr, "%s:%u:%s(): Unreachable code reached\n",	\
-		__FILE__, __LINE__, __FUNCTION__);			\
+		__FILE__, __LINE__, __func__);			\
 		abort();						\
     } while (0)
 
@@ -351,7 +351,7 @@ extern cw_mtx_t cw_g_getservbyname_mtx;
 	if (!(a))							\
 	{								\
 	    fprintf(stderr, "%s:%u:%s(): Failed assertion: \"%s\"\n",	\
-		    __FILE__, __LINE__, __FUNCTION__, #a);		\
+		    __FILE__, __LINE__, __func__, #a);		\
 	    abort();							\
 	}								\
     } while (0)
@@ -364,7 +364,7 @@ extern cw_mtx_t cw_g_getservbyname_mtx;
 	    || ((x) == (void *) 0x5a5a5a5a))				\
 	{								\
 	    fprintf(stderr, "%s:%u:%s(): Invalid pointer: %s (%p)\n",	\
-		    __FILE__, __LINE__, __FUNCTION__, #x, (x));		\
+		    __FILE__, __LINE__, __func__, #x, (x));		\
 	    abort();							\
 	}								\
     } while (0)
@@ -384,7 +384,7 @@ extern cw_mtx_t cw_g_getservbyname_mtx;
 	if (!(a))							\
 	{								\
 	    fprintf(stderr, "%s:%u:%s(): Failed assertion: \"%s\"\n",	\
-		    __FILE__, __LINE__, __FUNCTION__, #a);		\
+		    __FILE__, __LINE__, __func__, #a);		\
 	    abort();							\
 	}								\
     } while (0)
