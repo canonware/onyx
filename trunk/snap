@@ -239,6 +239,15 @@ if ($opt_verbose)
 unless ($opt_noact)
 {
     `cd $opt_pkgname && cook distclean`;
+
+    # Sanity check to make sure documentation got built.
+    unless (-e "$opt_pkgname/doc/ps/manual.ps"
+	    && -e "$opt_pkgname/doc/pdf/manual.pdf"
+	    && -e "$opt_pkgname/doc/html/manual.html")
+    {
+	print STDERR "'cook release' seems to have failed\n";
+	exit 1;
+    }
 }
 
 if ($opt_verbose)
