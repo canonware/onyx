@@ -16,24 +16,210 @@
 \label{qs}
 \index{\classname{qs}{}}
 
+The \classname{qs} macros implement operations on a stack.  The type of the
+stack elements and which field of the elements to use are determined by
+arguments that are passed into the macros.  The macros are optimized for speed
+and code size, which means that there is minimal error checking built in.  As a
+result, care must be taken to assure that these macros are used as intended, or
+strange things can happen.
+
 \subsubsection{API}
 \begin{description}
-\label{qs_}
-\index{\cfunc{qs\_}{}}
-\item[{\cfunc[]{qs\_}{}}: ]
+\label{qs_head}
+\index{\cppmacro{qs\_head}{}}
+\item[{\cppmacro[]{qs\_head}{{\lt}qs\_type{\gt} a\_type}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a\_type: ]
+			Data type for the \classname{qs}.
+		\end{description}
+	\item[Output(s): ]
+		A data structure that can be used as a \classname{qs} head.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Generate code for a \classname{qs} head data structure.
+	\end{description}
+\label{qs_head_initializer}
+\index{\cppmacro{qs\_head\_initializer}{}}
+\item[{\cppmacro[]{qs\_head\_initializer}{{\lt}qs\_type{\gt} *a\_head}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_head: ]
+			Pointer to a \classname{qs} head.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Statically initialize a \classname{qs} head.
+	\end{description}
+\label{qs_elm}
+\index{\cppmacro{qs\_elm}{}}
+\item[{\cppmacro[]{qs\_elm}{{\lt}qs\_elm\_type{\gt} a\_type}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_type: ]
+			Data type for the \classname{qs} elements.
+		\end{description}
+	\item[Output(s): ]
+		A data structure that can be used as a qs element.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Generate code for a \classname{qs} element data structure.
+	\end{description}
+\label{qs_new}
+\index{\cppmacro{qs\_new}{}}
+\item[{\cppmacro[void]{qs\_new}{{\lt}qs\_type{\gt} *a\_head}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_head: ]
+			Pointer to a \classname{qs} head.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Constructor.
+	\end{description}
+\label{qs_elm_new}
+\index{\cppmacro{qs\_elm\_new}{}}
+\item[{\cppmacro[void]{qs\_elm\_new}{{\lt}qs\_elm\_type{\gt} *a\_elm,
+{\lt}field\_name{\gt} a\_field}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_head: ]
+			Pointer to a \classname{qs} element.
+		\item[a\_field: ]
+			Field within the \classname{qs} elements to use.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Constructor.
+	\end{description}
+\label{qs_top}
+\index{\cppmacro{qs\_top}{}}
+\item[{\cppmacro[{\lt}qs\_type{\gt} *]{qs\_top}{{\lt}qs\_type{\gt} *a\_head}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_head: ]
+			Pointer to a \classname{qs} head.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[retval: ]
+			Pointer to the top element in the \classname{qs}.
 		\end{description}
-	\item[Exception(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
-		\end{description}
+	\item[Exception(s): ] None.
 	\item[Description: ]
+		Return a pointer to the top element in the \classname{qs}.
+	\end{description}
+\label{qs_down}
+\index{\cppmacro{qs\_down}{}}
+\item[{\cppmacro[{\lt}qs\_type{\gt} *]{qs\_down}{{\lt}qs\_elm\_type{\gt}
+*a\_elm, {\lt}field\_name{\gt} a\_field}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_elm: ]
+			Pointer to a \classname{qs} element.
+		\item[a\_field: ]
+			Field within the \classname{qs} elements to use.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[non-NULL: ]
+				Pointer to the next element in the
+				\classname{qs}.
+			\item[NULL: ]
+				\cvar{a\_elm} is the bottom element in the
+				\classname{qs}.
+			\end{description}
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return a pointer to the next element in the \classname{qs} below
+		\cvar{a\_elm}.
+	\end{description}
+\label{qs_push}
+\index{\cppmacro{qs\_push}{}}
+\item[{\cppmacro[void]{qs\_push}{{\lt}qs\_type{\gt} *a\_head,
+{\lt}qs\_elm\_type{\gt} *a\_elm, {\lt}field\_name{\gt} a\_field}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_head: ]
+			Pointer to a \classname{qs} head.
+		\item[a\_elm: ]
+			Pointer to an element.
+		\item[a\_field: ]
+			Field within the \classname{qs} elements to use.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Push \cvar{a\_elm} onto the \classname{qs}.
+	\end{description}
+\label{qs_under_push}
+\index{\cppmacro{qs\_under\_push}{}}
+\item[{\cppmacro[void]{qs\_under\_push}{{\lt}qs\_elm\_type{\gt} *a\_qselm,
+{\lt}qs\_elm\_type{\gt} *a\_elm, {\lt}field\_name{\gt} a\_field}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_qselm: ]
+			Pointer to a \classname{qs} element.
+		\item[a\_elm: ]
+			Pointer to an element.
+		\item[a\_field: ]
+			Field within the \classname{qs} elements to use.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Push \cvar{a\_elm} under \cvar{a\_qselm}.
+	\end{description}
+\label{qs_pop}
+\index{\cppmacro{qs\_pop}{}}
+\item[{\cppmacro[void]{qs\_pop}{{\lt}qs\_type{\gt} *a\_head,
+{\lt}field\_name{\gt} a\_field}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_head: ]
+			Pointer to a \classname{qs} head.
+		\item[a\_field: ]
+			Field within the \classname{qs} elements to use.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Pop an element off of \cvar{a\_head}.
+	\end{description}
+\label{qs_foreach}
+\index{\cppmacro{qs\_foreach}{}}
+\item[{\cppmacro[]{qs\_foreach}{{\lt}qs\_elm\_type{\gt} *a\_var,
+{\lt}qs\_type{\gt} *a\_head, {\lt}field\_name{\gt} a\_field}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_var: ]
+			The name of a temporary variable to use for iteration.
+		\item[a\_head: ]
+			Pointer to a \classname{qs} head.
+		\item[a\_field: ]
+			Field within the \classname{qs} elements to use.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Iterate down the \classname{qs}, storing a pointer to each
+		element in \cvar{a\_var} along the way.
 	\end{description}
 \end{description}
