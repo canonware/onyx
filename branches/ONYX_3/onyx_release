@@ -2,7 +2,7 @@
 #-*-mode:perl-*-
 #############################################################################
 #
-# Copyright (C) 1998-2000 Jason Evans <jasone@canonware.com>.
+# Copyright (C) 1998-2002 Jason Evans <jasone@canonware.com>.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -10,7 +10,7 @@
 # are met:
 # 1. Redistributions of source code must retain the above copyright
 #    notice(s), this list of conditions and the following disclaimer as
-#    the first lines of this file unmodified other than the possible 
+#    the first lines of this file unmodified other than the possible
 #    addition of one or more copyright notices.
 # 2. Redistributions in binary form must reproduce the above copyright
 #    notice(s), this list of conditions and the following disclaimer in the
@@ -53,6 +53,7 @@ $opt_retval =
 		"n|noact" => \$opt_noact,
 		"v|verbose" => \$opt_verbose,
 		"b|branchpoint=s" => \$opt_branchpoint,
+		"B|branchtag=s" => \$opt_branchtag,
 		"t|tag=s" => \$opt_tag,
 		"V|version=s%" => \%OPT_VERSION
 		);
@@ -67,7 +68,7 @@ if (($#ARGV >= 0)
 }
 
 $run =
-    "./snap @ARGS -T ONYX_ -p onyx -r devroot -f ChangeLog"
+    "./snap @ARGS -T ONYX_ -p onyx -r devroot -f CHANGES.onyx"
     . " -f Cookfile.in -f Cookfile.inc.in"
     . " -f COPYING -f INSTALL -f PLATFORMS -f README"
     . " -f autogen.sh -f acinclude.m4"
@@ -79,7 +80,7 @@ $run =
     . " -f doc/latex/onyx"
     . " -f bin/.cvsignore -f bin/Cookfile.inc.in -f bin/Cookfile -f bin/onyx"
     . " -f mod/.cvsignore -f mod/Cookfile.inc.in -f mod/Cookfile"
-    . " -f mod/modgtk -f mod/modpcre -f mod/modprompt"
+    . " -f mod/modprompt"
     ;
 if (defined($opt_verbose))
 {
@@ -100,7 +101,9 @@ sub print_usage
     print <<EOF;
 $0 usage:
 $0 [-chnv --cvsnotag --help --noact --verbose]
-       [--branchpoint <revision> | -b <revision>] [--tag=<tag> | -t <tag>]
+       [--branchpoint=<revision> | -b <revision>]
+       [--branchtag=<tag> | -B <tag>]
+       [--tag=<tag> | -t <tag>]
        {--version <key>=<version> | -V <key>=<version>}*
 EOF
 }

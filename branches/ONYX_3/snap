@@ -2,7 +2,7 @@
 #-*-mode:perl-*-
 #############################################################################
 #
-# Copyright (C) 1998-2001 Jason Evans <jasone@canonware.com>.
+# Copyright (C) 1998-2002 Jason Evans <jasone@canonware.com>.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -10,7 +10,7 @@
 # are met:
 # 1. Redistributions of source code must retain the above copyright
 #    notice(s), this list of conditions and the following disclaimer as
-#    the first lines of this file unmodified other than the possible 
+#    the first lines of this file unmodified other than the possible
 #    addition of one or more copyright notices.
 # 2. Redistributions in binary form must reproduce the above copyright
 #    notice(s), this list of conditions and the following disclaimer in the
@@ -114,6 +114,7 @@ $opt_retval =
 		"p|pkgname=s" => \$opt_pkgname,
 		"r|root=s" => \$opt_root,
 		"b|branchpoint=s" => \$opt_branchpoint,
+		"B|branchtag=s" => \$opt_branchtag,
 		"T|tagprefix=s" => \$opt_tagprefix,
 		"t|tag=s" => \$opt_tag,
 		"f|filetree=s@" => \@OPT_FILETREES
@@ -192,6 +193,7 @@ else
 if ($opt_verbose)
 {
     print STDERR "branch point   : $opt_branchpoint\n";
+    print STDERR "branch tag     : $opt_branchtag\n";
     print STDERR "tag            : $opt_tag\n";
     print STDERR "cvs tag        : $tag_cvs\n";
     print STDERR "Tree root      : $opt_root\n";
@@ -211,7 +213,7 @@ foreach $dir (@OPT_FILETREES)
     @TREES = (@TREES, "$opt_root/$dir");
 }
 
-# Remove the temporary directory if it is already there.
+# Remove the tag directory if it is already there.
 if ($opt_verbose)
 {
     print STDERR "rm -rf $tagdir\n";
@@ -232,25 +234,48 @@ unless ($opt_noact)
 }
 
 # Create the branch point and branch tags.
-if (defined($opt_tag) && !defined($opt_cvsnotag))
+if (defined($opt_branchtag) && !defined($opt_cvsnotag))
 {
     if ($opt_verbose)
     {
-	print STDERR "cd $tagdir && cvs tag -b $tag_cvs\_BP @TREES\n";
+	print STDERR "cd $tagdir && cvs tag -b $opt_branchtag\_BP @TREES\n";
     }
     unless ($opt_noact)
     {
-	`cd $tagdir && cvs tag -b $tag_cvs\_BP @TREES`;
+	`cd $tagdir && cvs tag -b $opt_branchtag\_BP @TREES`;
     }
 
     if ($opt_verbose)
     {
-	print STDERR "cd $tagdir && cvs tag -b $tag_cvs @TREES\n";
+	print STDERR "cd $tagdir && cvs tag -b $opt_branchtag @TREES\n";
+    }
+    unless ($opt_noact)
+    {
+	`cd $tagdir && cvs tag -b $opt_branchtag @TREES`;
+    }
+}
+
+# Create the release tag.
+if (defined($opt_tag) && !defined($opt_cvsnotag))
+{
+    if ($opt_verbose)
+    {
+	print STDERR "cd $tagdir && cvs tag $tag_cvs @TREES\n";
     }
     unless ($opt_noact)
     {
 	`cd $tagdir && cvs tag -b $tag_cvs @TREES`;
     }
+}
+
+# Remove the tag directory.
+if ($opt_verbose)
+{
+    print STDERR "rm -r $tagdir\n";
+}
+unless ($opt_noact)
+{
+    `rm -r $tagdir`;
 }
 
 # Remove the export directory if it is already there.
@@ -390,7 +415,8 @@ sub print_usage
     print STDERR <<EOF;
 $0 usage:
 $0 [-chnv --cvsnotag --help --noact --verbose]
-       [--branchpoint <revision> | -b <revision>]
+       [--branchpoint=<revision> | -b <revision>]
+       [--branchtag=<tag> | -B <tag>]
        [--tag=<tag> | -t <tag>]
        [--tagprefix=<prefix> | -T <prefix>]
        {--version <key>=<version> | -V <key>=<version>}*

@@ -160,21 +160,6 @@ Optionally, pass any of the following (not a definitive list) arguments to
 	used.  This option is only useful when modifications have been made to
 	the documentation source.
 
---with-libpcre-prefix=<prefix>
-	If specified, modprompt will be built using the copy of pcre in
-	<prefix>.  Specifically, <prefix>/pcre-config will be used to determine
-	the appropriate compiler and linker flags.
-
-	In addition, if building on a system that requires that the library
-	search path be encoded in modpcre, the link line will also include
-	something like:
-
-		-Wl,-rpath,<prefix>/lib
-
-	This option should only be necessary when there are multiple versions of
-	libpcre installed on the system, and the desired version does not come
-	first in the default library search path.
-
 --with-libedit-prefix=<prefix>
 	If specified, modprompt will be built using the copy of libedit in
 	<prefix>.  Specifically, the following will be used when compiling and

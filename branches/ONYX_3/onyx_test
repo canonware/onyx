@@ -12,6 +12,8 @@ PREFIX=`pwd`/onyx_prefix
 
 CONFIGURE_FLAGS="--with-libedit-prefix=/space/local"
 
+export CC=gcc30
+
 #
 # Set up.
 #
