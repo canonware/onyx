@@ -183,7 +183,7 @@ edittest_install_p : [EDITTEST_P] edittest_install_common
  */
 
 [EDITTEST_D] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [EDITTEST_SRCS]]
-           [LIBSTASH_D]
+           [LIBEDIT_D] [LIBSTASH_D]
   set mkdir
 {
   [CC] [D_CFLAGS] -o [target]
