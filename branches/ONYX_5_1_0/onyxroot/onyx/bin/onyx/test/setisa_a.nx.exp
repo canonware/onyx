@@ -1,0 +1,6 @@
+Test begin
+-class=$vclass-
+-class=$fooclass-
+-class=$barclass-
+null
+Test end
