@@ -572,6 +572,10 @@ systemdict_bind(cw_nxo_t *a_thread)
 	ostack = nxo_thread_ostack_get(a_thread);
 
 	NXO_STACK_GET(array, ostack, a_thread);
+	if (nxo_type_get(array) != NXOT_ARRAY) {
+		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		return;
+	}
 
 	systemdict_p_bind(array, a_thread);
 }
@@ -2791,14 +2795,14 @@ systemdict_loop(cw_nxo_t *a_thread)
 
 	NXO_STACK_GET(exec, ostack, a_thread);
 
+	/* Record stack depths so that we can clean up later. */
+	edepth = nxo_stack_count(estack);
+	tdepth = nxo_stack_count(tstack);
+
 	/* Move the object to be executed to tstack. */
 	tnxo = nxo_stack_push(tstack);
 	nxo_dup(tnxo, exec);
 	nxo_stack_pop(ostack);
-
-	/* Record stack depths so that we can clean up later. */
-	edepth = nxo_stack_count(estack);
-	tdepth = nxo_stack_count(tstack);
 
 	/*
 	 * Catch an exit exception, if thrown, but do not continue executing the
@@ -4412,13 +4416,14 @@ systemdict_stopped(cw_nxo_t *a_thread)
 	tstack = nxo_thread_tstack_get(a_thread);
 	
 	NXO_STACK_GET(exec, ostack, a_thread);
-	nxo = nxo_stack_push(estack);
-	nxo_dup(nxo, exec);
-	nxo_stack_pop(ostack);
 
 	/* Record stack depths so that we can clean up if necessary. */
 	edepth = nxo_stack_count(estack);
 	tdepth = nxo_stack_count(tstack);
+
+	nxo = nxo_stack_push(estack);
+	nxo_dup(nxo, exec);
+	nxo_stack_pop(ostack);
 
 	/* Catch a stop exception, if thrown. */
 	xep_begin();
