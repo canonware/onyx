@@ -1,7 +1,7 @@
 1999-07-29  Jason Evans  <jasone@canonware.com>
 
-	* src/out.c (out_put_svn, out_p_metric): Promote 1 and 2 byte
-	va_list arguments to 4 bytes to avoid problems on (at least) Solaris.
+	* src/out.c : Promote 1 and 2 byte va_list arguments to 4 bytes to
+	avoid problems on (at least) Solaris.
 
 	* configure.in (_LIBSTASH_MAX_IOV): Add test to detect the maximum
 	iovec size compatible with readv()/writev().
