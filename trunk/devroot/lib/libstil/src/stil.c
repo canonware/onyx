@@ -171,6 +171,7 @@ stil_delete(cw_stil_t *a_stil)
 	stilt_new(&stilt, a_stil);
 
 	/* Flush stdout. */
+	/* XXX Check return? */
 	stilo_file_buffer_flush(&a_stil->stdout_stilo, &stilt);
 
 	stilt_setglobal(&stilt, TRUE);

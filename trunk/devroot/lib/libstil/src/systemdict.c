@@ -547,6 +547,7 @@ systemdict_closefile(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack;
 	cw_stilo_t	*stilo;
+	cw_stilte_t	error;
 
 	ostack = stilt_ostack_get(a_stilt);
 
@@ -556,7 +557,11 @@ systemdict_closefile(cw_stilt_t *a_stilt)
 		return;
 	}
 
-	stilo_file_close(stilo, a_stilt);
+	error = stilo_file_close(stilo, a_stilt);
+	if (error) {
+		stilt_error(a_stilt, STILTE_IOERROR);
+		return;
+	}
 
 	stils_pop(ostack);
 }
@@ -1200,6 +1205,7 @@ systemdict_file(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack, *tstack;
 	cw_stilo_t	*name, *flags, *file;
+	cw_stilte_t	error;
 
 	ostack = stilt_ostack_get(a_stilt);
 	tstack = stilt_tstack_get(a_stilt);
@@ -1214,9 +1220,13 @@ systemdict_file(cw_stilt_t *a_stilt)
 
 	file = stils_push(tstack);
 	stilo_file_new(file, a_stilt);
-	stilo_file_open(file, a_stilt, stilo_string_get(name),
+	error = stilo_file_open(file, stilo_string_get(name),
 	    stilo_string_len_get(name), stilo_string_get(flags),
 	    stilo_string_len_get(flags));
+	if (error) {
+		stilt_error(a_stilt, error);
+		return;
+	}
 
 	/* XXX Magic number. */
 	stilo_file_buffer_size_set(file, 512);
@@ -1249,6 +1259,10 @@ systemdict_fileposition(cw_stilt_t *a_stilt)
 	}
 
 	position = stilo_file_position_get(file, a_stilt);
+	if (position == -1) {
+		stilt_error(a_stilt, STILTE_IOERROR);
+		return;
+	}
 	stilo_integer_new(file, position);
 }
 
@@ -1261,7 +1275,11 @@ systemdict_filter(cw_stilt_t *a_stilt)
 void
 systemdict_flush(cw_stilt_t *a_stilt)
 {
-	stilo_file_buffer_flush(stilt_stdout_get(a_stilt), a_stilt);
+	cw_stilte_t	error;
+
+	error = stilo_file_buffer_flush(stilt_stdout_get(a_stilt), a_stilt);
+	if (error)
+		stilt_error(a_stilt, error);
 }
 
 void
@@ -1269,6 +1287,7 @@ systemdict_flushfile(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack;
 	cw_stilo_t	*file;
+	cw_stilte_t	error;
 
 	ostack = stilt_ostack_get(a_stilt);
 
@@ -1279,7 +1298,11 @@ systemdict_flushfile(cw_stilt_t *a_stilt)
 		return;
 	}
 
-	stilo_file_buffer_flush(file, a_stilt);
+	error = stilo_file_buffer_flush(file, a_stilt);
+	if (error) {
+		stilt_error(a_stilt, error);
+		return;
+	}
 	
 	stils_pop(ostack);
 }
@@ -2200,6 +2223,7 @@ systemdict_print(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack;
 	cw_stilo_t	*stilo, *stdout_stilo;
+	cw_stilte_t	error;
 
 	ostack = stilt_ostack_get(a_stilt);
 	stdout_stilo = stilt_stdout_get(a_stilt);
@@ -2210,8 +2234,13 @@ systemdict_print(cw_stilt_t *a_stilt)
 		return;
 	}
 
-	stilo_file_write(stdout_stilo, a_stilt, stilo_string_get(stilo),
+	error = stilo_file_write(stdout_stilo, a_stilt, stilo_string_get(stilo),
 	    stilo_string_len_get(stilo));
+	if (error) {
+		stilt_error(a_stilt, error);
+		return;
+	}
+
 	stils_pop(ostack);
 }
 
@@ -2416,6 +2445,10 @@ systemdict_read(cw_stilt_t *a_stilt)
 	code = stils_push(ostack);
 
 	nread = stilo_file_read(file, a_stilt, 1, &val);
+	if (nread == -1) {
+		stilt_error(a_stilt, STILTE_IOERROR);
+		return;
+	}
 
 	if (nread == 0) {
 		stilo_integer_new(value, 0);
@@ -2455,6 +2488,10 @@ systemdict_readstring(cw_stilt_t *a_stilt)
 
 	nread = stilo_file_read(file, a_stilt, stilo_string_len_get(string),
 	    stilo_string_get(string));
+	if (nread == -1) {
+		stilt_error(a_stilt, STILTE_IOERROR);
+		return;
+	}
 
 	if (nread == 0) {
 		/* EOF. */
@@ -2634,6 +2671,7 @@ systemdict_setfileposition(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack;
 	cw_stilo_t	*file, *position;
+	cw_stilte_t	error;
 
 	ostack = stilt_ostack_get(a_stilt);
 
@@ -2646,7 +2684,12 @@ systemdict_setfileposition(cw_stilt_t *a_stilt)
 		return;
 	}
 
-	stilo_file_position_set(file, a_stilt, stilo_integer_get(position));
+	error = stilo_file_position_set(file, a_stilt,
+	    stilo_integer_get(position));
+	if (error) {
+		stilt_error(a_stilt, error);
+		return;
+	}
 
 	stils_npop(ostack, 2);
 }
@@ -2940,13 +2983,23 @@ systemdict_sym_eq(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack;
 	cw_stilo_t	*stilo, *stdout_stilo;
+	cw_stilte_t	error;
 
 	ostack = stilt_ostack_get(a_stilt);
 	stdout_stilo = stilt_stdout_get(a_stilt);
 
 	STILS_GET(stilo, ostack, a_stilt);
-	stilo_print(stilo, a_stilt, stdout_stilo, FALSE, TRUE);
-	stilo_file_buffer_flush(stdout_stilo, a_stilt);
+	error = stilo_print(stilo, a_stilt, stdout_stilo, FALSE, TRUE);
+	if (error) {
+		stilt_error(a_stilt, error);
+		return;
+	}
+	error = stilo_file_buffer_flush(stdout_stilo, a_stilt);
+	if (error) {
+		stilt_error(a_stilt, error);
+		return;
+	}
+
 	stils_pop(ostack);
 }
 
@@ -2956,13 +3009,23 @@ systemdict_sym_eq_eq(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack;
 	cw_stilo_t	*stilo, *stdout_stilo;
+	cw_stilte_t	error;
 
 	ostack = stilt_ostack_get(a_stilt);
 	stdout_stilo = stilt_stdout_get(a_stilt);
 
 	STILS_GET(stilo, ostack, a_stilt);
-	stilo_print(stilo, a_stilt, stdout_stilo, TRUE, TRUE);
-	stilo_file_buffer_flush(stdout_stilo, a_stilt);
+	error = stilo_print(stilo, a_stilt, stdout_stilo, TRUE, TRUE);
+	if (error) {
+		stilt_error(a_stilt, error);
+		return;
+	}
+	error = stilo_file_buffer_flush(stdout_stilo, a_stilt);
+	if (error) {
+		stilt_error(a_stilt, error);
+		return;
+	}
+
 	stils_pop(ostack);
 }
 
@@ -3190,6 +3253,7 @@ systemdict_write(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack;
 	cw_stilo_t	*file, *value;
+	cw_stilte_t	error;
 	cw_uint8_t	val;
 
 	ostack = stilt_ostack_get(a_stilt);
@@ -3204,7 +3268,11 @@ systemdict_write(cw_stilt_t *a_stilt)
 	}
 
 	val = (cw_uint8_t)stilo_integer_get(value);
-	stilo_file_write(file, a_stilt, &val, 1);
+	error = stilo_file_write(file, a_stilt, &val, 1);
+	if (error) {
+		stilt_error(a_stilt, error);
+		return;
+	}
 
 	stils_npop(ostack, 2);
 }
@@ -3214,6 +3282,7 @@ systemdict_writestring(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack;
 	cw_stilo_t	*file, *string;
+	cw_stilte_t	error;
 
 	ostack = stilt_ostack_get(a_stilt);
 	STILS_GET(string, ostack, a_stilt);
@@ -3225,8 +3294,12 @@ systemdict_writestring(cw_stilt_t *a_stilt)
 		return;
 	}
 
-	stilo_file_write(file, a_stilt, stilo_string_get(string),
+	error = stilo_file_write(file, a_stilt, stilo_string_get(string),
 	    stilo_string_len_get(string));
+	if (error) {
+		stilt_error(a_stilt, error);
+		return;
+	}
 
 	stils_npop(ostack, 2);
 }
