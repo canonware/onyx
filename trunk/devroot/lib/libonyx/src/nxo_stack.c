@@ -7,24 +7,18 @@
  *
  * Version: <Version>
  *
- * Stack object space is allocated in chunks (implemented by the stackc class)
- * in order to improve locality and reduce memory fragmentation.  Freed objects
- * within a chunk are kept in the same ring as the actual stack and re-used in
- * LIFO order.  This has the potential to cause adjacent stack objects to be
- * scattered throughout the stackc's, but typical stack operations have the same
- * effect anyway, so little care is taken to keep stack object re-allocation
- * contiguous, or even local.
+ * Stack object space is allocated on a per-element basis, and a certain number
+ * of elements are cached to avoid allocation deallocation overhead in the
+ * common case.  Doing chunked allocation of stack elements would be slightly
+ * more memory efficient (and probably more cache friendly) in the common case,
+ * but would require extra code complexity in the critical paths of pushing and
+ * popping.
  *
  * By keeping the re-allocation algorithm simple, we are able to make common
  * stack operations very fast.
  *
- * Using a ring makes it relatively simple to make all the stack operations
- * GC-safe.  One disadvantage of using rings, however, is that nxo_stack_exch()
- * and nxo_stack_roll() re-order stack elements, and over time, the elements
- * become jumbled enough that it is possible that additional cache misses
- * result.  However, since only a relatively small number of spare elements is
- * kept, the cache effects of jumbling should be negligible under normal
- * conditions.
+ * Using a ring makes it relatively efficient (if not simple for the reference
+ * iterator) to make all the stack operations GC-safe.
  *
  ******************************************************************************/
 
@@ -47,9 +41,8 @@ nxo_stack_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking)
 	if (a_locking)
 		mtx_new(&stack->lock);
 
-	stack->nx = a_nx;
+	stack->nxa = nx_nxa_get(a_nx);
 	ql_new(&stack->stack);
-	ql_new(&stack->chunks);
 
 	stack->count = 0;
 	stack->nspare = 0;
@@ -63,14 +56,15 @@ nxo_stack_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking)
 	a_nxo->o.nxoe = (cw_nxoe_t *)stack;
 	nxo_p_type_set(a_nxo, NXOT_STACK);
 
-	nxa_l_gc_register(nx_nxa_get(a_nx), (cw_nxoe_t *)stack);
+	nxa_l_gc_register(stack->nxa, (cw_nxoe_t *)stack);
 }
 
 void
 nxoe_l_stack_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 {
 	cw_nxoe_stack_t		*stack;
-	cw_nxoe_stackc_t	*stackc;
+	cw_nxoe_stacko_t	*stacko, *tstacko;
+	cw_uint32_t		i;
 
 	stack = (cw_nxoe_stack_t *)a_nxoe;
 
@@ -79,22 +73,14 @@ nxoe_l_stack_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 	_cw_assert(stack->nxoe.type == NXOT_STACK);
 
 	/*
-	 * Pop objects off the stack.  Then delete all the stackc's.
+	 * Deallocate stacko's.
 	 */
-	if (stack->count > 0) {
-		cw_nxo_t	nxo;
-
-		/* Fake up a nxo. */
-		nxo_p_new(&nxo, NXOT_STACK);
-		nxo.o.nxoe = (cw_nxoe_t *)stack;
-		
-		nxo_stack_npop(&nxo, stack->count);
-	}
-
-	while (ql_first(&stack->chunks) != NULL) {
-		stackc = ql_first(&stack->chunks);
-		ql_remove(&stack->chunks, stackc, link);
-		nxa_l_stackc_put(nx_nxa_get(stack->nx), stackc);
+	stacko = qr_next(&stack->under, link);
+	qr_remove(&stack->under, link);
+	for (i = 0; i < stack->count + stack->nspare; i++) {
+		tstacko = qr_next(stacko, link);
+		qr_remove(tstacko, link);
+		nxa_l_stacko_put(stack->nxa, tstacko);
 	}
 
 	if (stack->nxoe.locking)
@@ -257,73 +243,94 @@ nxo_stack_copy(cw_nxo_t *a_to, cw_nxo_t *a_from)
 	}
 }
 
-cw_uint32_t
-nxo_stack_count(cw_nxo_t *a_nxo)
+cw_nxoe_stacko_t *
+nxoe_p_stack_push(cw_nxoe_stack_t *a_stack)
 {
-	cw_uint32_t		retval;
-	cw_nxoe_stack_t	*stack;
+	cw_nxoe_stacko_t	*retval;
 
-	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-
-	stack = (cw_nxoe_stack_t *)a_nxo->o.nxoe;
-	_cw_assert(stack->nxoe.magic == _CW_NXOE_MAGIC);
-	_cw_assert(stack->nxoe.type == NXOT_STACK);
-
-	retval = stack->count;
+	/* No spares.  Allocate and insert one. */
+	retval = nxa_l_stacko_get(a_stack->nxa);
+	qr_new(retval, link);
+	qr_after_insert(&a_stack->under, retval, link);
 
 	return retval;
 }
 
+/*
+ * This function handles a special case for nxo_stack_pop(), but is done as a
+ * separate function to keep nxo_stack_pop() small.
+ */
 void
-nxoe_p_stack_spares_create(cw_nxoe_stack_t *a_stack)
+nxoe_p_stack_pop(cw_nxoe_stack_t *a_stack)
 {
-	cw_nxoe_stackc_t	*stackc;
-	cw_uint32_t		i;
+	cw_nxoe_stacko_t	*stacko;
 
-	/*
-	 * create a new stackc, add it to the stackc ql, and add its stacko's to
-	 * the stack.
-	 */
-	stackc = nxa_l_stackc_get(nx_nxa_get(a_stack->nx));
+	_cw_assert(a_stack->nspare == _CW_LIBONYX_STACK_CACHE);
 
-	ql_elm_new(stackc, link);
-
-	stackc->nused = 0;
-
-	qr_new(&stackc->objects[0], link);
-	stackc->objects[0].stackc = stackc;
-	for (i = 1; i < _CW_LIBONYX_STACKC_COUNT; i++) {
-		qr_new(&stackc->objects[i], link);
-		qr_after_insert(&stackc->objects[i - 1], &stackc->objects[i],
-		    link);
-		stackc->objects[i].stackc = stackc;
-	}
-
-	ql_tail_insert(&a_stack->chunks, stackc, link);
-	qr_meld(ql_first(&a_stack->stack), &stackc->objects[0], link);
-
-	a_stack->nspare += _CW_LIBONYX_STACKC_COUNT;
+	/* Throw the popped element away. */
+	stacko = ql_first(&a_stack->stack);
+	ql_first(&a_stack->stack) = qr_next(ql_first(&a_stack->stack), link);
+	qr_remove(stacko, link);
+	nxa_l_stacko_put(a_stack->nxa, stacko);
 }
 
+/*
+ * This function handles a special case for nxo_stack_npop(), but is done as a
+ * separate function to keep nxo_stack_npop() small.
+ */
 void
-nxoe_p_stack_spares_destroy(cw_nxoe_stack_t *a_stack, cw_nxoe_stackc_t
-    *a_stackc)
+nxoe_p_stack_npop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
 {
-	cw_uint32_t	i;
+	cw_uint32_t		i;
+	cw_nxoe_stacko_t	*top, *stacko, *tstacko;
 
 	/*
-	 * Iterate through the objects and remove them from the stack-wide
-	 * object ring.
+	 * We need to discard some spares, so get a pointer to the
+	 * beginning of the region to be removed from the ring.
 	 */
-	for (i = 0; i < _CW_LIBONYX_STACKC_COUNT; i++)
-		qr_remove(&a_stackc->objects[i], link);
+	for (i = 0, stacko = ql_first(&a_stack->stack); i <
+		 _CW_LIBONYX_STACK_CACHE - a_stack->nspare; i++)
+		stacko = qr_next(stacko, link);
+	for (top = stacko; i < a_count; i++)
+		top = qr_next(top, link);
 
-	/* Remove the stackc from the stack's list of stackc's. */
-	ql_remove(&a_stack->chunks, a_stackc, link);
+	/*
+	 * We now have:
+	 *
+	 * ql_first(&a_stack->stack) --> /----------\ \
+	 *                               |          | |
+	 *                               |          | |
+	 *                               |          | |
+	 *                               |          | |
+	 *                               |          | |
+	 *                               \----------/  \ a_count
+	 *                    stacko --> /----------\  / \
+	 *                               |          | |  |
+	 *                               |          | |   \ nspare
+	 *                               |          | |   / + a_count
+	 *                               |          | |  |  - max cache
+	 *                               |          | |  /
+	 *                               \----------/ /
+	 *                       top --> /----------\
+	 *                               |          |
+	 *                               |          |
+	 *                               |          |
+	 *                               |          |
+	 *                               |          |
+	 *                               \----------/
+	 *
+	 * Remove the region from stacko (inclusive) down to top
+	 * (exclusive), then deallocate those stacko's.
+	 */
+	ql_first(&a_stack->stack) = top;
+	qr_split(stacko, top, link);
 
-	/* Deallocate. */
-	nxa_l_stackc_put(nx_nxa_get(a_stack->nx), a_stackc);
+	for (i = 0; i < a_stack->nspare + a_count -
+		 _CW_LIBONYX_STACK_CACHE; i++) {
+		tstacko = qr_next(stacko, link);
+		qr_remove(tstacko, link);
+		nxa_l_stacko_put(a_stack->nxa, tstacko);
+	}
 
-	a_stack->nspare -= _CW_LIBONYX_STACKC_COUNT;
+	a_stack->nspare = _CW_LIBONYX_STACK_CACHE;
 }

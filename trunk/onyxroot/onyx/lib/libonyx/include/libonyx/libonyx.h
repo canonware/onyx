@@ -76,9 +76,10 @@ extern  "C" {
 #define _CW_LIBONYX_NAME_HASH		 1024
 
 /*
- * Number of objects to allocate in a chunk for internal stack use.
+ * Maximum number of stack elements to cache in a stack before reclaiming unused
+ * elements.
  */
-#define	_CW_LIBONYX_STACKC_COUNT	   32
+#define	_CW_LIBONYX_STACK_CACHE		   16
 
 /*
  * Initial size of threaddict.

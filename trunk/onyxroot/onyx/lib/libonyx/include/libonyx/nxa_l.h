@@ -18,8 +18,8 @@ cw_chi_t *nxa_l_chi_get(cw_nxa_t *a_nxa);
 void	nxa_l_chi_put(cw_nxa_t *a_nxa, cw_chi_t *a_chi);
 cw_nxoe_dicto_t *nxa_l_dicto_get(cw_nxa_t *a_nxa);
 void	nxa_l_dicto_put(cw_nxa_t *a_nxa, cw_nxoe_dicto_t *a_dicto);
-cw_nxoe_stackc_t *nxa_l_stackc_get(cw_nxa_t *a_nxa);
-void	nxa_l_stackc_put(cw_nxa_t *a_nxa, cw_nxoe_stackc_t *a_stackc);
+cw_nxoe_stacko_t *nxa_l_stacko_get(cw_nxa_t *a_nxa);
+void	nxa_l_stacko_put(cw_nxa_t *a_nxa, cw_nxoe_stacko_t *a_stacko);
 #endif
 
 #if (defined(_CW_USE_INLINES) || defined(_NXA_C_))
@@ -70,22 +70,22 @@ nxa_l_dicto_put(cw_nxa_t *a_nxa, cw_nxoe_dicto_t *a_dicto)
 	pool_put(&a_nxa->dicto_pool, a_dicto);
 }
 
-_CW_INLINE cw_nxoe_stackc_t *
-nxa_l_stackc_get(cw_nxa_t *a_nxa)
+_CW_INLINE cw_nxoe_stacko_t *
+nxa_l_stacko_get(cw_nxa_t *a_nxa)
 {
 	_cw_check_ptr(a_nxa);
 	_cw_assert(a_nxa->magic == _CW_NXA_MAGIC);
 
-	return (cw_nxoe_stackc_t *)pool_get(&a_nxa->stackc_pool);
+	return (cw_nxoe_stacko_t *)pool_get(&a_nxa->stacko_pool);
 }
 
 _CW_INLINE void
-nxa_l_stackc_put(cw_nxa_t *a_nxa, cw_nxoe_stackc_t *a_stackc)
+nxa_l_stacko_put(cw_nxa_t *a_nxa, cw_nxoe_stacko_t *a_stacko)
 {
 	_cw_check_ptr(a_nxa);
 	_cw_assert(a_nxa->magic == _CW_NXA_MAGIC);
-	_cw_check_ptr(a_stackc);
+	_cw_check_ptr(a_stacko);
 
-	pool_put(&a_nxa->stackc_pool, a_stackc);
+	pool_put(&a_nxa->stacko_pool, a_stacko);
 }
 #endif	/* (defined(_CW_USE_INLINES) || defined(_NXA_C_)) */

@@ -15,32 +15,20 @@
  */
 typedef struct cw_nxoe_stack_s cw_nxoe_stack_t;
 typedef struct cw_nxoe_stacko_s cw_nxoe_stacko_t;
-typedef struct cw_nxoe_stackc_s cw_nxoe_stackc_t;
 
 struct cw_nxoe_stacko_s {
 	cw_nxo_t		nxo;	/* Payload.  Must be first field. */
 	ql_elm(cw_nxoe_stacko_t) link;	/* Stack/spares linkage. */
-	cw_nxoe_stackc_t	*stackc; /* Container stackc. */
-};
-
-struct cw_nxoe_stackc_s {
-	ql_elm(cw_nxoe_stackc_t) link;	/* Linkage for stack of stackc's. */
-
-	cw_uint32_t		nused;	/* Number of objects in use. */
-
-	cw_nxoe_stacko_t	objects[_CW_LIBONYX_STACKC_COUNT];
 };
 
 struct cw_nxoe_stack_s {
 	cw_nxoe_t		nxoe;
 	cw_mtx_t		lock;	/* Access locked if locking bit set. */
-	cw_nx_t			*nx;
+	cw_nxa_t		*nxa;
 	ql_head(cw_nxoe_stacko_t) stack; /* Stack. */
 	cw_uint32_t		count;	/* Number of stack elements. */
 	cw_uint32_t		nspare;	/* Number of spare elements. */
 	cw_nxoe_stacko_t	under;	/* Not used, just under stack bottom. */
-
-	ql_head(cw_nxoe_stackc_t) chunks; /* List of stackc's. */
 
 	/*
 	 * Used for remembering the current state of reference iteration.
@@ -52,9 +40,9 @@ struct cw_nxoe_stack_s {
 
 void	nxo_stack_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking);
 void	nxo_stack_copy(cw_nxo_t *a_to, cw_nxo_t *a_from);
-cw_uint32_t nxo_stack_count(cw_nxo_t *a_nxo);
 
 #ifndef _CW_USE_INLINES
+cw_uint32_t nxo_stack_count(cw_nxo_t *a_nxo);
 cw_nxo_t *nxo_stack_push(cw_nxo_t *a_nxo);
 cw_nxo_t *nxo_stack_under_push(cw_nxo_t *a_nxo, cw_nxo_t *a_object);
 cw_bool_t nxo_stack_pop(cw_nxo_t *a_nxo);
@@ -68,9 +56,10 @@ cw_bool_t nxo_stack_roll(cw_nxo_t *a_nxo, cw_uint32_t a_count, cw_sint32_t
 #endif
 
 /* Private, but the inline functions need these prototypes. */
-void	nxoe_p_stack_spares_create(cw_nxoe_stack_t *a_stack);
-void	nxoe_p_stack_spares_destroy(cw_nxoe_stack_t *a_stack, cw_nxoe_stackc_t
-    *a_stackc);
+cw_nxoe_stacko_t *nxoe_p_stack_push(cw_nxoe_stack_t *a_stack);
+void	nxoe_p_stack_pop(cw_nxoe_stack_t *a_stack);
+void	nxoe_p_stack_npop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count);
+
 
 #if (defined(_CW_USE_INLINES) || defined(_NXO_STACK_C_))
 /* Private, but defined here for the inline functions. */
@@ -89,6 +78,24 @@ nxoe_p_stack_unlock(cw_nxoe_stack_t *a_nxoe)
 		mtx_unlock(&a_nxoe->lock);
 }
 
+_CW_INLINE cw_uint32_t
+nxo_stack_count(cw_nxo_t *a_nxo)
+{
+	cw_uint32_t		retval;
+	cw_nxoe_stack_t	*stack;
+
+	_cw_check_ptr(a_nxo);
+	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+
+	stack = (cw_nxoe_stack_t *)a_nxo->o.nxoe;
+	_cw_assert(stack->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_assert(stack->nxoe.type == NXOT_STACK);
+
+	retval = stack->count;
+
+	return retval;
+}
+
 _CW_INLINE cw_nxo_t *
 nxo_stack_push(cw_nxo_t *a_nxo)
 {
@@ -103,17 +110,27 @@ nxo_stack_push(cw_nxo_t *a_nxo)
 	_cw_assert(stack->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(stack->nxoe.type == NXOT_STACK);
 
-	/* Get an unused stacko.  If there are no spares, create some first. */
 	nxoe_p_stack_lock(stack);
-	if (qr_prev(ql_first(&stack->stack), link) == &stack->under)
-		nxoe_p_stack_spares_create(stack);
-	stacko = qr_prev(ql_first(&stack->stack), link);
+
+	/* Get an unused stacko. */
+	if (qr_prev(ql_first(&stack->stack), link) != &stack->under) {
+		/* Use spare. */
+		stacko = qr_prev(ql_first(&stack->stack), link);
+		stack->nspare--;
+	} else {
+		/*
+		 * A spare needs to be created.  Do this in a separate function
+		 * to keep this one small, since this code path is rarely
+		 * executed.
+		 */
+		stacko = nxoe_p_stack_push(stack);
+	}
+
 	nxo_no_new(&stacko->nxo);
 	ql_first(&stack->stack) = stacko;
-	stacko->stackc->nused++;
 	stack->count++;
-	stack->nspare--;
 	retval = &stacko->nxo;
+
 	nxoe_p_stack_unlock(stack);
 
 	return retval;
@@ -133,25 +150,37 @@ nxo_stack_under_push(cw_nxo_t *a_nxo, cw_nxo_t *a_object)
 	_cw_assert(stack->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(stack->nxoe.type == NXOT_STACK);
 
-	/* Get an unused stacko.  If there are no spares, create some first. */
 	nxoe_p_stack_lock(stack);
-	if (qr_prev(ql_first(&stack->stack), link) == &stack->under)
-		nxoe_p_stack_spares_create(stack);
-	if (a_object != NULL) {
+
+	/* Get an unused stacko.  If there are no spare, create one first. */
+	if (qr_prev(ql_first(&stack->stack), link) != &stack->under) {
+		/* Use spare. */
 		stacko = qr_prev(ql_first(&stack->stack), link);
+		stack->nspare--;
+	} else {
+		/*
+		 * A spare needs to be created.  Do this in a separate function
+		 * to keep this one small, since this code path is rarely
+		 * executed.
+		 */
+		stacko = nxoe_p_stack_push(stack);
+	}
+
+	/* Push under. */
+	if (a_object != NULL) {
+		/* Push under a_object. */
 		nxo_no_new(&stacko->nxo);
 		qr_remove(stacko, link);
 		qr_after_insert((cw_nxoe_stacko_t *)a_object, stacko, link);
 	} else {
 		/* Same as nxo_stack_push(). */
-		stacko = qr_prev(ql_first(&stack->stack), link);
 		nxo_no_new(&stacko->nxo);
 		ql_first(&stack->stack) = stacko;
 	}
-	stacko->stackc->nused++;
+
 	stack->count++;
-	stack->nspare--;
 	retval = &stacko->nxo;
+
 	nxoe_p_stack_unlock(stack);
 
 	return retval;
@@ -162,7 +191,6 @@ nxo_stack_pop(cw_nxo_t *a_nxo)
 {
 	cw_bool_t		retval;
 	cw_nxoe_stack_t		*stack;
-	cw_nxoe_stacko_t	*stacko;
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
@@ -177,14 +205,20 @@ nxo_stack_pop(cw_nxo_t *a_nxo)
 		goto RETURN;
 	}
 
-	stacko = ql_first(&stack->stack);
-	ql_first(&stack->stack) = qr_next(ql_first(&stack->stack), link);
-	stacko->stackc->nused--;
+	if (stack->nspare < _CW_LIBONYX_STACK_CACHE) {
+		ql_first(&stack->stack) = qr_next(ql_first(&stack->stack),
+		    link);
+		stack->nspare++;
+	} else {
+		/*
+		 * A spare needs to be discarded.  Do this in a separate
+		 * function to keep this one small, since this code path is
+		 * rarely executed.
+		 */
+		nxoe_p_stack_pop(stack);
+	}
+
 	stack->count--;
-	stack->nspare++;
-	if (stacko->stackc->nused == 0 && stack->nspare > 2 *
-	    _CW_LIBONYX_STACKC_COUNT)
-		nxoe_p_stack_spares_destroy(stack, stacko->stackc);
 
 	retval = FALSE;
 	RETURN:
@@ -197,8 +231,6 @@ nxo_stack_npop(cw_nxo_t *a_nxo, cw_uint32_t a_count)
 {
 	cw_bool_t		retval;
 	cw_nxoe_stack_t		*stack;
-	cw_nxoe_stacko_t	*top, *stacko;
-	cw_uint32_t		i;
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
@@ -212,20 +244,25 @@ nxo_stack_npop(cw_nxo_t *a_nxo, cw_uint32_t a_count)
 		retval = TRUE;
 		goto RETURN;
 	}
-
 	/* Get a pointer to what will be the new stack top. */
-	for (i = 0, top = ql_first(&stack->stack); i < a_count; i++) {
-		stacko = top;
-		top = qr_next(top, link);
+	if (stack->nspare + a_count <= _CW_LIBONYX_STACK_CACHE) {
+		cw_nxoe_stacko_t	*top;
+		cw_uint32_t		i;
 
-		stacko->stackc->nused--;
-		stack->nspare++;
-		if (stacko->stackc->nused == 0 && stack->nspare > 2 *
-		    _CW_LIBONYX_STACKC_COUNT)
-			nxoe_p_stack_spares_destroy(stack, stacko->stackc);
+		for (i = 0, top = ql_first(&stack->stack); i < a_count; i++)
+			top = qr_next(top, link);
+
+		ql_first(&stack->stack) = top;
+		stack->nspare += a_count;
+	} else {
+		/*
+		 * Spares need to be discarded.  Do this in a separate function
+		 * to keep this one small, since this code path is rarely
+		 * executed.
+		 */
+		nxoe_p_stack_npop(stack, a_count);
 	}
 
-	ql_first(&stack->stack) = top;
 	stack->count -= a_count;
 
 	retval = FALSE;

@@ -113,7 +113,7 @@ nxa_new(cw_nxa_t *a_nxa, cw_nx_t *a_nx)
 		pool_new(&a_nxa->dicto_pool, NULL, sizeof(cw_nxoe_dicto_t));
 		try_stage = 3;
 
-		pool_new(&a_nxa->stackc_pool, NULL, sizeof(cw_nxoe_stackc_t));
+		pool_new(&a_nxa->stacko_pool, NULL, sizeof(cw_nxoe_stacko_t));
 		try_stage = 4;
 
 		ql_new(&a_nxa->seq_set);
@@ -159,7 +159,7 @@ nxa_new(cw_nxa_t *a_nxa, cw_nx_t *a_nx)
 		case 5:
 			mq_delete(&a_nxa->gc_mq);
 		case 4:
-			pool_delete(&a_nxa->stackc_pool);
+			pool_delete(&a_nxa->stacko_pool);
 		case 3:
 			pool_delete(&a_nxa->dicto_pool);
 		case 2:
@@ -184,7 +184,7 @@ nxa_delete(cw_nxa_t *a_nxa)
 	thd_join(a_nxa->gc_thd);
 	mq_delete(&a_nxa->gc_mq);
 
-	pool_delete(&a_nxa->stackc_pool);
+	pool_delete(&a_nxa->stacko_pool);
 	pool_delete(&a_nxa->dicto_pool);
 	pool_delete(&a_nxa->chi_pool);
 }
@@ -698,7 +698,7 @@ nxa_p_collect(cw_nxa_t *a_nxa)
 	/* Drain the pools. */
 	pool_drain(&a_nxa->chi_pool);
 	pool_drain(&a_nxa->dicto_pool);
-	pool_drain(&a_nxa->stackc_pool);
+/*  	pool_drain(&a_nxa->stacko_pool); */
 
 	/* Record the sweep finish time and calculate sweep_us. */
 	gettimeofday(&t_tv, NULL);

@@ -22,7 +22,7 @@ struct cw_nxa_s {
 	/* Various pools. */
 	cw_pool_t	chi_pool;
 	cw_pool_t	dicto_pool;
-	cw_pool_t	stackc_pool;
+	cw_pool_t	stacko_pool;
 
 	/*
 	 * Dictionary that contains stats and flags, available from within the
