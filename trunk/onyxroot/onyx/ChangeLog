@@ -1,5 +1,9 @@
 2002-04-27 : Jason Evans <jasone@canonware.com>
 
+	* Modify the mkdir operator such that specifying the mode is optional.
+
+2002-04-27 : Jason Evans <jasone@canonware.com>
+
 	* Add operators:
 	  + chroot
 	  + mkfifo

@@ -3109,80 +3109,6 @@ systemdict_fcntl(cw_nxo_t *a_thread)
 }
 #endif
 
-#ifdef CW_POSIX
-void
-systemdict_mkfifo(cw_nxo_t *a_thread)
-{
-    cw_nxo_t *ostack, *tstack;
-    cw_nxo_t *nxo, *tnxo;
-    cw_uint32_t npop;
-    mode_t mode;
-    int error;
-
-    ostack = nxo_thread_ostack_get(a_thread);
-    tstack = nxo_thread_tstack_get(a_thread);
-
-    NXO_STACK_GET(nxo, ostack, a_thread);
-    if (nxo_type_get(nxo) == NXOT_INTEGER)
-    {
-	/* Mode specified. */
-	npop = 2;
-	mode = (mode_t) nxo_integer_get(nxo);
-	if ((mode & 0777) != mode)
-	{
-	    nxo_thread_nerror(a_thread, NXN_rangecheck);
-	    return;
-	}
-	NXO_STACK_DOWN_GET(nxo, ostack, a_thread, nxo);
-    }
-    else
-    {
-	npop = 1;
-	mode = 0777;
-    }
-    if (nxo_type_get(nxo) != NXOT_STRING)
-    {
-	nxo_thread_nerror(a_thread, NXN_typecheck);
-	return;
-    }
-
-    tnxo = nxo_stack_push(tstack);
-    nxo_string_cstring(tnxo, nxo, a_thread);
-
-    error = mkfifo(nxo_string_get(tnxo), mode);
-    nxo_stack_pop(tstack);
-
-    if (error == -1)
-    {
-	switch (errno)
-	{
-	    case ENOSPC:
-	    case EROFS:
-	    {
-		nxo_thread_nerror(a_thread, NXN_ioerror);
-		return;
-	    }
-	    case EACCES:
-	    case EEXIST:
-	    case ENOTDIR:
-	    case ENOENT:
-	    case ENAMETOOLONG:
-	    {
-		nxo_thread_nerror(a_thread, NXN_invalidfileaccess);
-		return;
-	    }
-	    default:
-	    {
-		nxo_thread_nerror(a_thread, NXN_unregistered);
-		return;
-	    }
-	}
-    }
-
-    nxo_stack_npop(ostack, npop);
-}
-#endif
-
 #ifdef CW_REAL
 void
 systemdict_floor(cw_nxo_t *a_thread)
@@ -4683,31 +4609,43 @@ systemdict_lt(cw_nxo_t *a_thread)
 void
 systemdict_mkdir(cw_nxo_t *a_thread)
 {
-    cw_nxo_t *ostack, *tstack, *path, *mode, *tpath;
+    cw_nxo_t *ostack, *tstack;
+    cw_nxo_t *nxo, *tnxo;
+    cw_uint32_t npop;
+    mode_t mode;
     int error;
 
     ostack = nxo_thread_ostack_get(a_thread);
     tstack = nxo_thread_tstack_get(a_thread);
-    NXO_STACK_GET(mode, ostack, a_thread);
-    NXO_STACK_DOWN_GET(path, ostack, a_thread, mode);
-    if ((nxo_type_get(mode) != NXOT_INTEGER)
-	|| nxo_type_get(path) != NXOT_STRING)
+
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    if (nxo_type_get(nxo) == NXOT_INTEGER)
+    {
+	/* Mode specified. */
+	npop = 2;
+	mode = (mode_t) nxo_integer_get(nxo);
+	if ((mode & 0777) != mode)
+	{
+	    nxo_thread_nerror(a_thread, NXN_rangecheck);
+	    return;
+	}
+	NXO_STACK_DOWN_GET(nxo, ostack, a_thread, nxo);
+    }
+    else
+    {
+	npop = 1;
+	mode = 0777;
+    }
+    if (nxo_type_get(nxo) != NXOT_STRING)
     {
 	nxo_thread_nerror(a_thread, NXN_typecheck);
 	return;
     }
-    if (nxo_integer_get(mode) < 0 || nxo_integer_get(mode) > 0xfff)
-    {
-	nxo_thread_nerror(a_thread, NXN_rangecheck);
-	return;
-    }
 
-    /* Create a copy of path with an extra byte to store a '\0' terminator. */
-    tpath = nxo_stack_push(tstack);
-    nxo_string_cstring(tpath, path, a_thread);
+    tnxo = nxo_stack_push(tstack);
+    nxo_string_cstring(tnxo, nxo, a_thread);
 
-    error = mkdir(nxo_string_get(tpath), nxo_integer_get(mode));
-
+    error = mkdir(nxo_string_get(tnxo), mode);
     nxo_stack_pop(tstack);
 
     if (error == -1)
@@ -4741,7 +4679,81 @@ systemdict_mkdir(cw_nxo_t *a_thread)
 	return;
     }
 
-    nxo_stack_npop(ostack, 2);
+    nxo_stack_npop(ostack, npop);
+}
+#endif
+
+#ifdef CW_POSIX
+void
+systemdict_mkfifo(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *tstack;
+    cw_nxo_t *nxo, *tnxo;
+    cw_uint32_t npop;
+    mode_t mode;
+    int error;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    tstack = nxo_thread_tstack_get(a_thread);
+
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    if (nxo_type_get(nxo) == NXOT_INTEGER)
+    {
+	/* Mode specified. */
+	npop = 2;
+	mode = (mode_t) nxo_integer_get(nxo);
+	if ((mode & 0777) != mode)
+	{
+	    nxo_thread_nerror(a_thread, NXN_rangecheck);
+	    return;
+	}
+	NXO_STACK_DOWN_GET(nxo, ostack, a_thread, nxo);
+    }
+    else
+    {
+	npop = 1;
+	mode = 0777;
+    }
+    if (nxo_type_get(nxo) != NXOT_STRING)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+
+    tnxo = nxo_stack_push(tstack);
+    nxo_string_cstring(tnxo, nxo, a_thread);
+
+    error = mkfifo(nxo_string_get(tnxo), mode);
+    nxo_stack_pop(tstack);
+
+    if (error == -1)
+    {
+	switch (errno)
+	{
+	    case ENOSPC:
+	    case EROFS:
+	    {
+		nxo_thread_nerror(a_thread, NXN_ioerror);
+		return;
+	    }
+	    case EACCES:
+	    case EEXIST:
+	    case ENOTDIR:
+	    case ENOENT:
+	    case ENAMETOOLONG:
+	    {
+		nxo_thread_nerror(a_thread, NXN_invalidfileaccess);
+		return;
+	    }
+	    default:
+	    {
+		nxo_thread_nerror(a_thread, NXN_unregistered);
+		return;
+	    }
+	}
+    }
+
+    nxo_stack_npop(ostack, npop);
 }
 #endif
 
