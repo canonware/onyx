@@ -1,7 +1,7 @@
 2003-06-19 : Jason Evans <jasone@canonware.com>
 
-	* lib/libonyx/src/systemdict.c:systemdict_{fork,}exec() : Throw an error
-	  if the execve() call fails, rather than calling _exit().
+	* lib/libonyx/src/systemdict.c:systemdict_exec() : Throw an error if the
+	  execve() call fails, rather than calling _exit().
 
 2003-06-07 : Jason Evans <jasone@canonware.com>
 
