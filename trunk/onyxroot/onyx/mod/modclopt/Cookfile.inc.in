@@ -33,7 +33,17 @@ MODCLOPT_OTESTS = [addprefix @srcroot@/mod/modclopt/test/
                              ];
 
 /* LaTeX source files. */
-ONYX_TEX_SRCS += @objroot@/mod/modclopt/doc/latex/manual.tex;
+ONYX_TEX_SRCS += [addprefix @srcroot@/mod/modclopt/doc/latex/
+                            arg_enum_get.nx arg_enum_get.nx.out arg_get.nx
+                            arg_get.nx.out arg_int_get.nx arg_int_get.nx.out
+                            arg_uint_get.nx arg_uint_get.nx.out argv_get.nx
+                            argv_get.nx.out error_escape.nx error_escape.nx.out
+                            error_print.nx error_print.nx.out flag_get.nx
+                            flag_get.nx.out index_get.nx index_get.nx.out
+                            parse.nx parse.nx.out progname_get.nx
+                            progname_get.nx.out]
+                 @objroot@/mod/modclopt/doc/latex/manual.tex;
+
 
 /*
  * User cook'ables.
