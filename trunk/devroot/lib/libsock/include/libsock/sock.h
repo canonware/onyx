@@ -205,34 +205,8 @@ sock_disconnect(cw_sock_t * a_sock);
  *
  * a_max_read : Maximum number of bytes to read into a_spare, or 0 for no limit.
  *
- * <<< Output(s) >>>
- *
- * retval : -1 : Socket error.
- *        : 0 : No data read.
- *        : > 0 : Data read.
- *
- * <<< Description >>>
- *
- * Read data from the socket if any is there.  Do not block, regardless of
- * whether data is available.
- *
- ****************************************************************************/
-cw_sint32_t
-sock_read_noblock(cw_sock_t * a_sock, cw_buf_t * a_spare,
-		  cw_sint32_t a_max_read);
-
-/****************************************************************************
- *
- * <<< Input(s) >>>
- *
- * a_sock : Pointer to a cw_sock_t instance.
- *
- * a_spare : Pointer to a spare cw_buf_t, to which data may be appended.
- *
- * a_max_read : Maximum number of bytes to read into a_spare, or 0 for no limit.
- *
  * a_timeout : Maximum time to wait for data before returning, or NULL to wait
- *             indefinitely.
+ *             indefinitely.  To avoid blocking, pass a zero timeout value.
  *
  * <<< Output(s) >>>
  *
@@ -248,8 +222,8 @@ sock_read_noblock(cw_sock_t * a_sock, cw_buf_t * a_spare,
  *
  ****************************************************************************/
 cw_sint32_t
-sock_read_block(cw_sock_t * a_sock, cw_buf_t * a_spare,	cw_sint32_t a_max_read,
-		struct timespec * a_timeout);
+sock_read(cw_sock_t * a_sock, cw_buf_t * a_spare, cw_sint32_t a_max_read,
+	  struct timespec * a_timeout);
 
 /****************************************************************************
  *

@@ -35,6 +35,8 @@
 /* Global. */
 cw_sockb_t * g_sockb = NULL;
 
+/*  #define _LIBSTASH_SOCKB_CONFESS */
+
 cw_bool_t
 sockb_init(cw_uint32_t a_bufel_size, cw_uint32_t a_max_spare_bufels)
 {
@@ -402,6 +404,7 @@ static void *
 sockb_p_entry_func(void * a_arg)
 {
   cw_sock_t * socks[FD_SETSIZE];
+  fd_set registered_set;
   fd_set fd_m_read_set, fd_read_set;
   fd_set fd_m_write_set, fd_write_set;
   fd_set fd_m_exception_set, fd_exception_set;
@@ -412,17 +415,12 @@ sockb_p_entry_func(void * a_arg)
   cw_buf_t tmp_buf, buf_in;
 
   /* Initialize data structures. */
+  FD_ZERO(&registered_set);
   FD_ZERO(&fd_m_read_set);
   FD_ZERO(&fd_m_write_set);
   FD_ZERO(&fd_m_exception_set);
-  if (NULL == buf_new(&tmp_buf, FALSE))
-  {
-    _cw_error("buf allocation failure during sockb startup");
-  }
-  if (NULL == buf_new(&buf_in, FALSE))
-  {
-    _cw_error("buf allocation failure during sockb startup");
-  }
+  buf_new(&tmp_buf, FALSE);
+  buf_new(&buf_in, FALSE);
 
   /* Add g_sockb->pipe_out to the read set, so that this thread will return from
    * select() when data is written to g_sockb->pipe_in. */
@@ -444,12 +442,18 @@ sockb_p_entry_func(void * a_arg)
       sock = (cw_sock_t *) list_hpop(&g_sockb->registrations);
       
       sockfd = sock_l_get_fd(sock);
-      if (!FD_ISSET(sockfd, &fd_m_read_set))
+      if (!FD_ISSET(sockfd, &registered_set))
       {
 	/* The sock isn't registered.  Register it. */
+#ifdef _LIBSTASH_SOCKB_CONFESS
+	log_eprintf(cw_g_log, __FILE__, __LINE__, NULL,
+		    "Register %d\n", sockfd);
+#endif
 
+	FD_SET(sockfd, &registered_set);
 	FD_SET(sockfd, &fd_m_read_set);
-	/* XXX Uncomment this if adding out of band data support. */
+/*  	FD_SET(sockfd, &fd_m_write_set); */
+	/* Uncomment this if adding out of band data support. */
 	/* FD_SET(sockfd, &fd_m_exception_set); */
 
 	/* Increase max_fd if necessary. */
@@ -464,6 +468,13 @@ sockb_p_entry_func(void * a_arg)
 	/* Notify the sock that it's registered. */
 	sock_l_message_callback(sock);
       }
+#ifdef _LIBSTASH_SOCKB_CONFESS
+      else
+      {
+	log_eprintf(cw_g_log, __FILE__, __LINE__, NULL,
+		    "Refuse to register %d\n", sockfd);
+      }
+#endif
     }
 
     /* Unregistration messages. */
@@ -472,27 +483,40 @@ sockb_p_entry_func(void * a_arg)
     {
       sockfd = *(int *) list_hpop(&g_sockb->unregistrations);
 
-      _cw_assert(FD_ISSET(sockfd, &fd_m_read_set));
-
-      FD_CLR(sockfd, &fd_m_read_set);
-      FD_CLR(sockfd, &fd_m_write_set); /* May not be set. */
-      /* XXX Uncomment this if adding out of band data support. */
-      /* FD_CLR(sockfd, &fd_m_exception_set); */
-
-      /* Lower max_fd to the next highest fd, if necessary. */
-      if (sockfd == max_fd)
+      if (FD_ISSET(sockfd, &registered_set))
       {
-	max_fd = -1; /* In case there aren't any more registered sockets. */
-	for (j = sockfd - 1; j >= 0; j--)
+#ifdef _LIBSTASH_SOCKB_CONFESS
+	log_eprintf(cw_g_log, __FILE__, __LINE__, NULL,
+		    "Unregister %d\n", sockfd);
+#endif
+	
+	FD_CLR(sockfd, &registered_set);
+	FD_CLR(sockfd, &fd_m_read_set);
+	FD_CLR(sockfd, &fd_m_write_set); /* May not be set. */
+	/* Uncomment this if adding out of band data support. */
+	/* FD_CLR(sockfd, &fd_m_exception_set); */
+
+	/* Lower max_fd to the next highest fd, if necessary. */
+	if (sockfd == max_fd)
 	{
-	  if (FD_ISSET(j, &fd_m_read_set))
+	  max_fd = g_sockb->pipe_out;
+	  for (j = sockfd - 1; j > g_sockb->pipe_out; j--)
 	  {
-	    max_fd = j;
-	    break;
+	    if (FD_ISSET(j, &registered_set))
+	    {
+	      max_fd = j;
+	      break;
+	    }
 	  }
 	}
       }
-	
+#ifdef _LIBSTASH_SOCKB_CONFESS
+      else
+      {
+	log_eprintf(cw_g_log, __FILE__, __LINE__, NULL,
+		    "Refuse to unregister %d\n", sockfd);
+      }
+#endif      
       /* Notify the sock that it's unregistered. */
       sock_l_message_callback(socks[sockfd]);
       socks[sockfd] = NULL;
@@ -504,10 +528,22 @@ sockb_p_entry_func(void * a_arg)
     {
       sockfd = *(int *) list_hpop(&g_sockb->out_notifications);
 
-      if (FD_ISSET(sockfd, &fd_m_read_set))
+      if (FD_ISSET(sockfd, &registered_set))
       {
+#ifdef _LIBSTASH_SOCKB_CONFESS
+	log_eprintf(cw_g_log, __FILE__, __LINE__, NULL,
+		    "Set %dw\n", sockfd);
+#endif
+	
 	FD_SET(sockfd, &fd_m_write_set);
       }
+#ifdef _LIBSTASH_SOCKB_CONFESS
+      else
+      {
+	log_eprintf(cw_g_log, __FILE__, __LINE__, NULL,
+		    "Refuse to set %dw\n", sockfd);
+      }
+#endif
     }
 
     /* Copy the master sets of descriptors we care about to the sets that are
@@ -525,28 +561,52 @@ sockb_p_entry_func(void * a_arg)
     {
       cw_uint32_t i;
 
+#ifdef _LIBSTASH_SOCKB_CONFESS
+      log_eprintf(cw_g_log, __FILE__, __LINE__, NULL,
+		  "select fd's:");
+#endif
       for (i = 0; i <= max_fd; i++)
       {
-	if (FD_ISSET(i, &fd_read_set))
+	if (FD_ISSET(i, &registered_set))
 	{
-	  /* Check to see if socks[i] is non-null so that we don't get confused
-	   * by the pipe. */
-	  if (NULL != socks[i])
+#ifdef _LIBSTASH_SOCKB_CONFESS
+	  log_printf(cw_g_log, " %dR", i);
+#endif
+	  
+	  /* Is any space available? */
+	  if (sock_l_get_in_max_buf_size(socks[i])
+	      <= sock_l_get_in_size(socks[i]))
 	  {
-	    /* Is any space available? */
-	    if (0 >= (sock_l_get_in_max_buf_size(socks[i])
-			- sock_l_get_in_size(socks[i])))
-	    {
-	      FD_CLR(i, &fd_read_set);
-	    }
+	    /* Nope, no space. */
+	    FD_CLR(i, &fd_read_set);
 	  }
+#ifdef _LIBSTASH_SOCKB_CONFESS
+	  else
+	  {
+	    log_printf(cw_g_log, "r");
+	  }
+	  if (FD_ISSET(i, &fd_write_set))
+	  {
+	    log_printf(cw_g_log, "w");
+	  }
+#endif
 	}
       }
+#ifdef _LIBSTASH_SOCKB_CONFESS
+      log_printf(cw_g_log, " (%dr)\n", g_sockb->pipe_out);
+#endif
     }
-    
+
+#ifdef _LIBSTASH_SOCKB_CONFESS
+    log_eprintf(cw_g_log, __FILE__, __LINE__, NULL,
+		"select(%lu)", max_fd + 1);
+#endif
     num_ready = select(max_fd + 1,
 		       &fd_read_set, &fd_write_set, &fd_exception_set,
 		       NULL);
+#ifdef _LIBSTASH_SOCKB_CONFESS
+    log_printf(cw_g_log, "-->(%lu)\n", num_ready);
+#endif
     
     if (num_ready == -1)
     {
@@ -572,7 +632,7 @@ sockb_p_entry_func(void * a_arg)
 #endif
     else
     {
-      cw_sint32_t i, j;
+      cw_sint32_t i, j, k;
       
       /* Ready descriptors. */
       if (FD_ISSET(g_sockb->pipe_out, &fd_read_set))
@@ -616,8 +676,18 @@ sockb_p_entry_func(void * a_arg)
 	_cw_assert(bytes_read <= 1);
       }
 
-      for (i = j = 0; (j < num_ready) && (i < (max_fd + 1)); i++)
+#ifdef _LIBSTASH_SOCKB_CONFESS
+      log_eprintf(cw_g_log, __FILE__, __LINE__, NULL,
+		  "Check fd:");
+#endif
+      /* XXX Perhaps looping downward would save a bit of work. */
+/*        for (i = j = 0; (j < num_ready) && (i < (max_fd + 1)); i++) */
+      for (i = max_fd, j = 0; (j < num_ready) && (i >= 0); i--)
       {
+#ifdef _LIBSTASH_SOCKB_CONFESS
+	log_printf(cw_g_log, " %d", i);
+#endif
+	
 	if (FD_ISSET(i, &fd_read_set))
 	{
 	  const struct iovec * iovec;
@@ -628,6 +698,9 @@ sockb_p_entry_func(void * a_arg)
 	  
 	  j++;
 
+#ifdef _LIBSTASH_SOCKB_CONFESS
+	  log_printf(cw_g_log, "r");
+#endif
 	  /* Ready for reading. */
 
 	  /* Figure out how much data we're willing to shove into this sock's
@@ -703,20 +776,66 @@ sockb_p_entry_func(void * a_arg)
 
 	  bytes_read = readv(i, iovec, iovec_count);
 
-	  if (bytes_read >= 0)
+	  if (bytes_read > 0)
 	  {
 	    _cw_assert(buf_get_size(&tmp_buf) == 0);
-	    
+
 	    if (TRUE == buf_split(&tmp_buf, &buf_in, bytes_read))
 	    {
 	      /* XXX */
+	      _cw_error("Unhandled error condition");
 	    }
 
 	    /* Append to the sock's in_buf. */
 	    sock_l_put_in_data(socks[i], &tmp_buf);
 	    _cw_assert(buf_get_size(&tmp_buf) == 0);
 	  }
-	  else if (bytes_read == -1)
+	  else if (0 == bytes_read)
+	  {
+	    /* readv() error. */
+	    if (dbg_is_registered(cw_g_dbg, "sockb_verbose"))
+	    {
+	      log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
+			  "EOF in readv().  Closing sockfd %d\n", i);
+	    }
+	    FD_CLR(i, &registered_set);
+	    FD_CLR(i, &fd_m_read_set);
+	    FD_CLR(i, &fd_m_write_set);
+/*  	    FD_CLR(i, &fd_m_exception_set); */
+	    
+	    /* Lower max_fd to the next highest fd, if necessary. */
+	    if (i == max_fd)
+	    {
+#ifdef _LIBSTASH_SOCKB_CONFESS
+	      log_eprintf(cw_g_log, __FILE__, __LINE__, NULL,
+			  "max_fd: %d", max_fd);
+#endif
+	      max_fd = g_sockb->pipe_out;
+	      for (k = i - 1; k > g_sockb->pipe_out; k--)
+	      {
+		if (FD_ISSET(k, &registered_set))
+		{
+		  max_fd = k;
+		  break;
+		}
+	      }
+#ifdef _LIBSTASH_SOCKB_CONFESS
+	      log_printf(cw_g_log, "-->%d\n", max_fd);
+#endif
+	    }
+
+	    sock_l_error_callback(socks[i]);
+	    socks[i] = NULL;
+
+	    /* Make sure not to try to handle outgoing data on this socket,
+	     * since we just set the sock pointer to NULL. */
+	    if (FD_ISSET(i, &fd_write_set))
+	    {
+	      j++;
+	      FD_CLR(i, &fd_write_set);
+	    }
+	  }
+	  else /*  if (bytes_read == -1) */
 	  {
 	    /* readv() error. */
 	    if (dbg_is_registered(cw_g_dbg, "sockb_error"))
@@ -734,6 +853,9 @@ sockb_p_entry_func(void * a_arg)
 	  
 	  j++;
 
+#ifdef _LIBSTASH_SOCKB_CONFESS
+	  log_printf(cw_g_log, "w");
+#endif	  
 	  /* Ready for writing. */
 
 	  /* Get the socket's buf. */
@@ -772,7 +894,34 @@ sockb_p_entry_func(void * a_arg)
 	      log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
 			  "Closing sockfd %d\n", i);
 	    }
+	    
+	    FD_CLR(i, &registered_set);
+	    FD_CLR(i, &fd_m_read_set);
+/*  	    FD_CLR(i, &fd_m_exception_set); */
+
+	    /* Lower max_fd to the next highest fd, if necessary. */
+	    if (i == max_fd)
+	    {
+#ifdef _LIBSTASH_SOCKB_CONFESS
+	      log_eprintf(cw_g_log, __FILE__, __LINE__, NULL,
+			  "max_fd: %d", max_fd);
+#endif
+	      max_fd = g_sockb->pipe_out;
+	      for (k = i - 1; k > g_sockb->pipe_out; k--)
+	      {
+		if (FD_ISSET(k, &registered_set))
+		{
+		  max_fd = k;
+		  break;
+		}
+	      }
+#ifdef _LIBSTASH_SOCKB_CONFESS
+	      log_printf(cw_g_log, "-->%d\n", max_fd);
+#endif
+	    }
+
 	    sock_l_error_callback(socks[i]);
+	    socks[i] = NULL;
 	  }
 	  _cw_assert(buf_get_size(&tmp_buf) == 0);
 	}
@@ -781,11 +930,14 @@ sockb_p_entry_func(void * a_arg)
 	{
 	  j++;
 	  _cw_error("Out of band data handling unimplemented");
-	  /* XXX If we ever need to use out of band data, this must be
+	  /* If we ever need to use out of band data, this must be
 	   * implemented. */
 	}
 #endif
       }
+#ifdef _LIBSTASH_SOCKB_CONFESS
+      log_printf(cw_g_log, "\n");
+#endif
     }
   }
 

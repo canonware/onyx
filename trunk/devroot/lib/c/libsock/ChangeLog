@@ -1,4 +1,16 @@
+1999-06-19  Jason Evans  <jasone@canonware.com>
+
+	* src/sockb.c (sockb_p_entry_func): Significant reworking of the
+	event loop logic.  The main advantage of the changes is that when
+	a socket error is detected, the socket can be disconnected
+	immediately, rather than asking the sock code running in another
+	thread to do so.  The potential for deadlocks is much less now,
+	and the locking overhead is somewhat less.
+
 1999-06-18  Jason Evans  <jasone@canonware.com>
+
+	* src/sock.c (sock_read): Add.  Remove sock_read_[no]block(),
+	since sock_read() provides the same functionality.
 
 	* include/libsock/socks.h (socks_accept): Remove
 	socks_accept_[no]block() and replace them with socks_accept()
