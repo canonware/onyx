@@ -423,64 +423,6 @@ history_set_fun(h, nh)
 }
 
 
-/* history_load():
- *	History load function
- */
-private int
-history_load(h, fname)
-    History *h;
-    const char *fname;
-{
-    FILE *fp;
-    char *line;
-    size_t sz;
-    int i = -1;
-
-    if ((fp = fopen(fname, "r")) == NULL)
-	return i;
-
-    if ((line = fgetln(fp, &sz)) == NULL)
-	goto done;
-
-    if (strncmp(line, hist_cookie, sz) != 0)
-	goto done;
-	
-    for (i = 0; (line = fgetln(fp, &sz)) != NULL; i++) {
-	char c = line[sz];
-	line[sz] = '\0';
-	HENTER(h, line);
-	line[sz] = c;
-    }
-
-done:
-    (void) fclose(fp);
-    return i;
-}
-
-
-/* history_save():
- *	History save function
- */
-private int
-history_save(h, fname)
-    History *h;
-    const char *fname;
-{
-    FILE *fp;
-    const HistEvent *ev;
-    int i = 0;
-
-    if ((fp = fopen(fname, "w")) == NULL)
-	return -1;
-
-    (void) fputs(hist_cookie, fp);
-    for (ev = HLAST(h); ev != NULL; ev = HPREV(h), i++)
-	(void) fprintf(fp, "%s", ev->str);
-    (void) fclose(fp);
-    return i;
-}
-
-
 /* history_prev_event():
  *	Find the previous event, with number given
  */
@@ -610,16 +552,6 @@ history(va_alist)
 	HCLEAR(h);
 	break;
 	
-    case H_LOAD:
-	sev.num = history_load(h, va_arg(va, const char *));
-	ev = &sev;
-	break;
-	
-    case H_SAVE:
-	sev.num = history_save(h, va_arg(va, const char *));
-	ev = &sev;
-	break;
-
     case H_PREV_EVENT:
 	ev = history_prev_event(h, va_arg(va, int));
 	break;

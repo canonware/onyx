@@ -110,11 +110,6 @@ int 		 el_set		__P((EditLine *, int, ...));
 #define EL_HIST		10	/* , hist_fun_t, const char *);	*/
 
 /*
- * Source named file or $PWD/.editrc or $HOME/.editrc
- */
-int		el_source	__P((EditLine *, const char *));
-
-/*
  * Must be called when the terminal changes size; If EL_SIGNAL
  * is set this is done automatically otherwise it is the responsibility
  * of the application
@@ -165,6 +160,4 @@ const HistEvent *	history		__P((History *, int, ...));
 #define H_PREV_STR	11	/* , const char*);	*/
 #define H_NEXT_EVENT	12	/* , const int);	*/
 #define H_PREV_EVENT	13	/* , const int);	*/
-#define H_LOAD		14	/* , const char *);	*/
-#define H_SAVE		15	/* , const char *);	*/
 #define H_CLEAR		16	/* , void);		*/
