@@ -6,6 +6,7 @@
 	case where the object file would be rebuilt anyway, and this
 	causes a rebuild of the dependency file, so everything is fine.
 	(EXTRALIBS): Add @LDFLAGS@ to EXTRALIBS.
+	(%): Suffix for CTESTS dependency file should be ".d".
 
 1998-11-29  Jason Evans  <jasone@canonware.com>
 
