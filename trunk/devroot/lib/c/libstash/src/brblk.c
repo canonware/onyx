@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 194 $
- * $Date: 1998-09-05 13:33:40 -0700 (Sat, 05 Sep 1998) $
+ * $Revision: 219 $
+ * $Date: 1998-09-11 00:24:44 -0700 (Fri, 11 Sep 1998) $
  *
  * <<< Description >>>
  *
@@ -123,7 +123,7 @@ brblk_tlock(cw_brblk_t * a_brblk_o)
   }
   _cw_check_ptr(a_brblk_o);
 
-  jtl_tlock(&a_brblk_o->jt_lock);
+  jtl_tlock(&a_brblk_o->jt_lock, jtl_get_tq_el(&a_brblk_o->jt_lock));
   
   if (_cw_pmatch(_STASH_DBG_R_BRBLK_FUNC))
   {
