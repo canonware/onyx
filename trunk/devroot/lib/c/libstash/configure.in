@@ -23,15 +23,25 @@ AC_SUBST(without_threads)
 
 AC_CANONICAL_HOST
 
+dnl Remove Makefile if it exists
+echo rm -f Makefile
+rm -f Makefile
+
 case "${host}" in
   i386-*-freebsd*)
 	AC_DEFINE(_CW_OS_FREEBSD, )
+	echo "ln -s Makefile.bsd Makefile"
+	ln -s Makefile.bsd Makefile
         ;;
   *-*-linux*)
 	AC_DEFINE(_CW_OS_LINUX, )
+	echo "ln -s Makefile.gnu Makefile"
+	ln -s Makefile.gnu Makefile
         ;;
   *-*-solaris2*)
 	AC_DEFINE(_CW_OS_SOLARIS, )
+	echo "ln -s Makefile.gnu Makefile"
+	ln -s Makefile.gnu Makefile
         ;;
 esac
 
@@ -107,6 +117,7 @@ AC_MSG_RESULT(C preprocessor flags: ${CPPFLAGS})
 AC_MSG_RESULT(================================================================)
 
 dnl Process the following files.
-AC_OUTPUT(Makefile \
+AC_OUTPUT(Makefile.bsd \
+Makefile.gnu \
 bin/pmerge \
 bin/pstub, echo timestamp > stamp)

@@ -1,3 +1,7 @@
+1999-02-15  Jason Evans  <jasone@canonware.com>
+
+	* Makefile.bsd.in : Add Makefile for BSD make.
+
 1999-02-12  Jason Evans  <jasone@canonware.com>
 
 	* src/buf.c: Major rewrite of buf and bufel.  Provide a more
