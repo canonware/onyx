@@ -24,24 +24,64 @@ extern  "C" {
 /*  #define	_LIBSTIL_CONFESS */
 
 /*
+ * Minimum initial size of dictionaries.
+ */
+#define	_LIBSTIL_DICT_SIZE		  16
+
+/*
+ * Maximum depth of estack.
+ */
+#define	_LIBSTIL_ESTACK_MAX		 256
+
+/*
+ * Default file buffer size.
+ */
+#define	_LIBSTIL_FILE_BUFFER_SIZE	 512
+
+/*
+ * Size of stack-allocated buffer to use when executing file objects.  This
+ * generally doesn't need to be huge, because there is usually additional
+ * buffering going on upstream.
+ */
+#define	_LIBSTIL_FILE_EVAL_READ_SIZE	128
+
+/*
  * Default minimum period of registration inactivity before a periodic
  * collection is done (if any registrations have occured since the last
  * collection).  On average, the actual inactivity period will be 1.5 times
  * this, but can range from 1 to 2 times this.
  */
-#define	_LIBSTIL_GCDICT_PERIOD		20
+#define	_LIBSTIL_GCDICT_PERIOD		  20
 
 /*
  * Default number of sequence set additions since last collection that will
  * cause an immediate collection.
  */
-#define	_LIBSTIL_GCDICT_THRESHOLD	50000
+#define	_LIBSTIL_GCDICT_THRESHOLD      50000
+
+/*
+ * Initial size of globaldict.  This is a bit arbitrary, and some applications
+ * could benefit from making it larger or smaller.
+ */
+#define	_LIBSTIL_GLOBALDICT_HASH	  64
+
+/*
+ * Initial size initial name cache hash table.  We know for sure that there will
+ * be about 175 names referenced by systemdict, threaddict, errordict, and
+ * currenterror to begin with.
+ */
+#define _LIBSTIL_NAME_HASH		1024
 
 /*
  * Number of objects to allocate in a chunk for internal stils use.
  */
 #define	_LIBSTIL_STILSC_COUNT		  32
-	
+
+/*
+ * Initial size of userdict.
+ */
+#define	_LIBSTASH_USERDICT_HASH	 64
+
 /*
  * Exception numbers.  libstil reserves -128 to -255.
  */

@@ -2378,8 +2378,7 @@ systemdict_open(cw_stilt_t *a_stilt)
 		return;
 	}
 
-	/* XXX Magic number. */
-	stilo_file_buffer_size_set(file, 512);
+	stilo_file_buffer_size_set(file, _LIBSTIL_FILE_BUFFER_SIZE);
 
 	stils_pop(ostack);
 	stilo_dup(name, file);
@@ -3149,10 +3148,17 @@ systemdict_srand(cw_stilt_t *a_stilt)
 void
 systemdict_start(cw_stilt_t *a_stilt)
 {
-	cw_stils_t	*estack;
+	cw_stils_t	*ostack, *estack;
+	cw_stilo_t	*ostilo, *estilo;
 	cw_uint32_t	depth;
 
+	ostack = stilt_ostack_get(a_stilt);
 	estack = stilt_estack_get(a_stilt);
+
+	STILS_GET(ostilo, ostack, a_stilt);
+	estilo = stils_push(estack);
+	stilo_dup(estilo, ostilo);
+	stils_pop(ostack);
 
 	depth = stils_count(estack);
 

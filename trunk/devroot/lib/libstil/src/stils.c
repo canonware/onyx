@@ -18,6 +18,13 @@
  * By keeping the re-allocation algorithm simple, we are able to make common
  * stack operations very fast.
  *
+ * Using a ring makes it relatively simple to make all the stack operations
+ * GC-safe.  One disadvantage of using rings, however, is that the stils_roll()
+ * re-orders stack elements, and over time, the elements become jumbled enough
+ * that it is possible that additional cache misses result.  Every algorithm I
+ * have thought of that keeps from jumbling the elements requires a very
+ * expensive stils_roll() implementation.
+ *
  ******************************************************************************/
 
 #include "../include/libstil/libstil.h"
@@ -36,7 +43,6 @@ stils_new(cw_stils_t *a_stils)
 	ql_first(&a_stils->stack) = &a_stils->under;
 	/* Fill spares. */
 	stils_p_spares_create(a_stils);
-/*  	ql_first(&a_stils->stack) = qr_prev(ql_first(&a_stils->stack), link); */
 
 #ifdef _LIBSTIL_DBG
 	a_stils->magic = _CW_STILS_MAGIC;

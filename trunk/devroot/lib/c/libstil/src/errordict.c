@@ -14,7 +14,6 @@
 #include <errno.h>
 
 static const cw_stiln_t errordict_ops[] = {
-	STILN_dstackoverflow,
 	STILN_dstackunderflow,
 	STILN_estackoverflow,
 	STILN_interrupt,
@@ -33,15 +32,15 @@ static const cw_stiln_t errordict_ops[] = {
 	STILN_undefinedfilename,
 	STILN_undefinedresult,
 	STILN_unmatchedmark,
-	STILN_unregistered,
-	STILN_vmerror
+	STILN_unregistered
 };
 
 void
 errordict_l_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 {
+	cw_stils_t	*tstack;
+	cw_stilo_t	*name, *value;
 	cw_uint32_t	i;
-	cw_stilo_t	name, value;
 
 #define	NEXTRA	1
 #define NENTRIES							\
@@ -50,27 +49,33 @@ errordict_l_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 	stilo_dict_new(a_dict, stilt_stil_get(a_stilt),
 	    stilt_currentlocking(a_stilt), NENTRIES);
 
+	tstack = stilt_tstack_get(a_stilt);
+	name = stils_push(tstack);
+	value = stils_push(tstack);
+
 	for (i = 0; i < NENTRIES; i++) {
-		stilo_name_new(&name, stilt_stil_get(a_stilt),
+		stilo_name_new(name, stilt_stil_get(a_stilt),
 		    stiln_str(errordict_ops[i]),
 		    stiln_len(errordict_ops[i]), TRUE);
-		stilo_operator_new(&value, errordict_generic,
+		stilo_operator_new(value, errordict_generic,
 		    errordict_ops[i]);
-		stilo_attrs_set(&value, STILOA_EXECUTABLE);
+		stilo_attrs_set(value, STILOA_EXECUTABLE);
 
-		stilo_dict_def(a_dict, stilt_stil_get(a_stilt), &name,
-		    &value);
+		stilo_dict_def(a_dict, stilt_stil_get(a_stilt), name,
+		    value);
 	}
 
 	/*
 	 * Initialize entries that aren't aliases for the generic error
 	 * processor.
 	 */
-	stilo_name_new(&name, stilt_stil_get(a_stilt),
+	stilo_name_new(name, stilt_stil_get(a_stilt),
 	    stiln_str(STILN_handleerror), stiln_len(STILN_handleerror), TRUE);
-	stilo_operator_new(&value, errordict_handleerror, STILN_handleerror);
-	stilo_attrs_set(&value, STILOA_EXECUTABLE);
-	stilo_dict_def(a_dict, stilt_stil_get(a_stilt), &name, &value);
+	stilo_operator_new(value, errordict_handleerror, STILN_handleerror);
+	stilo_attrs_set(value, STILOA_EXECUTABLE);
+	stilo_dict_def(a_dict, stilt_stil_get(a_stilt), name, value);
+
+	stils_npop(tstack, 2);
 
 #ifdef _LIBSTIL_DBG
 	if (stilo_dict_count(a_dict) != NENTRIES + NEXTRA) {
@@ -125,7 +130,6 @@ errordict_generic(cw_stilt_t *a_stilt)
 	case STILTE_TIMEOUT:
 		/* Don't do anything. */
 		break;
-	case STILTE_DSTACKOVERFLOW:
 	case STILTE_DSTACKUNDERFLOW:
 	case STILTE_ESTACKOVERFLOW:
 	case STILTE_INVALIDACCESS:
@@ -142,8 +146,7 @@ errordict_generic(cw_stilt_t *a_stilt)
 	case STILTE_UNDEFINEDFILENAME:
 	case STILTE_UNDEFINEDRESULT:
 	case STILTE_UNMATCHEDMARK:
-	case STILTE_UNREGISTERED:
-	case STILTE_VMERROR: {
+	case STILTE_UNREGISTERED: {
 		cw_stils_t	*ostack, *estack, *dstack;
 
 		ostack = stilt_ostack_get(a_stilt);
@@ -157,8 +160,7 @@ errordict_generic(cw_stilt_t *a_stilt)
 		    stils_nget(estack, 1));
 
 		/*
-		 * If recordstacks is TRUE, snapshot the stacks (unless
-		 * vmerror).
+		 * If recordstacks is TRUE, snapshot the stacks.
 		 */
 		stilo_name_new(tname, stilt_stil_get(a_stilt),
 		    stiln_str(STILN_recordstacks),
@@ -171,8 +173,7 @@ errordict_generic(cw_stilt_t *a_stilt)
 			stils_npop(tstack, 3);
 			xep_throw(_CW_STILX_CURRENTERROR);
 		}
-		if (stilo_boolean_get(tstilo) && stilt_error_get(a_stilt) !=
-		    STILTE_VMERROR) {
+		if (stilo_boolean_get(tstilo) && stilt_error_get(a_stilt)) {
 			cw_stilo_t	*arr, *stilo;
 			cw_sint32_t	i, count;
 

@@ -84,13 +84,13 @@
 
 /*
  * Doing any locking during GC is dangerous and can result in deadlock.  Even
- * using malloc() can cause a deadlock.  Therefore, some of the diagnostic
- * messages are dangerous in that they print, so if deadlocks occur while
- * they're on, don't be surprised.
+ * using malloc() can cause a deadlock.  Therefore, the diagnostic messages are
+ * dangerous in that they print, so if deadlocks occur while they're on, don't
+ * be surprised.
  */
 #ifdef _LIBSTIL_CONFESS
 /* Print tree traversal information for root set acquisition if defined. */
-/*  #define	_LIBSTIL_STILA_REF_ITER */
+#define	_LIBSTIL_STILA_REF_ITER
 #endif
 
 typedef enum {
@@ -175,6 +175,8 @@ stila_new(cw_stila_t *a_stila, cw_stil_t *a_stil)
 		    stiln_len(STILN_new), TRUE);
 		a_stila->gcdict_new = stilo_l_dict_lookup(&a_stila->gcdict,
 		    &key);
+		stilo_integer_set(a_stila->gcdict_new,
+		    stilo_integer_get(&t_new));
 
 		/* current. */
 		stilo_name_new(&key, a_stil, stiln_str(STILN_current),

@@ -57,6 +57,11 @@ struct cw_stil_s {
 	cw_stilo_t	stdin_stilo;
 	cw_stilo_t	stdout_stilo;
 	cw_stilo_t	stderr_stilo;
+
+	/*
+	 * Initial thread.
+	 */
+	cw_stilt_t	stilt;
 };
 
 /* stil. */
@@ -65,6 +70,7 @@ cw_stil_t *stil_new(cw_stil_t *a_stil, int a_argc, char **a_argv, char **a_envp,
     cw_stilo_file_write_t *a_stderr, void *a_arg);
 void	stil_delete(cw_stil_t *a_stil);
 
+#define	stil_stilt_get(a_stil) (&(a_stil)->stilt)
 #define	stil_stila_get(a_stil) (&(a_stil)->stila)
 
 #define	stil_systemdict_get(a_stil) (&(a_stil)->systemdict)

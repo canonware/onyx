@@ -42,7 +42,7 @@ struct stil_arg_s {
  * Globals.  These are global due to the libedit API not providing a way to pass
  * them to the prompt function.
  */
-cw_stilt_t	stilt;
+cw_stilt_t	*stilt;
 cw_stilts_t	stilts;
 EditLine	*el;
 History		*hist;
@@ -97,9 +97,17 @@ main(int argc, char **argv, char **envp)
 	 * interpreter.
 	 */
 	if (isatty(0) && argc == 1) {
+		/*
+		 * Quit on estackoverflow in order to avoid an infinite loop,
+		 * since we redefine the stop operator so that we won't exit
+		 * on other errors.
+		 */
 		static const cw_uint8_t	code[] =
-		    "/stop {} def"
-		    "/promptstring {count cvs dup length 4 add string"
+		    " errordict begin"
+		    " /estackoverflow {/stop {quit} def //estackoverflow} def"
+		    " end"
+		    " /stop {} def"
+		    " /promptstring {count cvs dup length 4 add string"
 		    " dup 0 (s:) putinterval dup dup length 2 sub (> )"
 		    " putinterval dup 3 2 roll 2 exch putinterval} bind def"
 		    ;
@@ -107,16 +115,16 @@ main(int argc, char **argv, char **envp)
 
 		stil_new(&stil, argc, argv, envp, cl_read, NULL, NULL, (void
 		    *)&arg);
-		stilt_new(&stilt, &stil);
+		stilt = stil_stilt_get(&stil);
 		stilts_new(&stilts);
 
 		/*
 		 * Print product and version info.  Redefine stop so that the
 		 * interpreter won't exit on error.
 		 */
-		stilt_interpret(&stilt, &stilts, version, sizeof(version) - 1);
-		stilt_interpret(&stilt, &stilts, code, sizeof(code) - 1);
-		stilt_flush(&stilt, &stilts);
+		stilt_interpret(stilt, &stilts, version, sizeof(version) - 1);
+		stilt_interpret(stilt, &stilts, code, sizeof(code) - 1);
+		stilt_flush(stilt, &stilts);
 
 		/*
 		 * Initialize the command editor.
@@ -131,7 +139,7 @@ main(int argc, char **argv, char **envp)
 /*  		el_set(el, EL_SIGNAL, 1); */
 
 		/* Run the interpreter such that it will not exit on errors. */
-		stilt_start(&stilt);
+		stilt_start(stilt);
 
 		/* Clean up the command editor. */
 		el_end(el);
@@ -202,7 +210,7 @@ main(int argc, char **argv, char **envp)
 		 */
 		stil_new(&stil, argc - optind, &argv[optind], envp, NULL, NULL,
 		    NULL, NULL);
-		stilt_new(&stilt, &stil);
+		stilt_new(stilt, &stil);
 		stilts_new(&stilts);
 
 		/*
@@ -213,9 +221,9 @@ main(int argc, char **argv, char **envp)
 			/*
 			 * Print the version and exit.
 			 */
-			stilt_interpret(&stilt, &stilts, version,
+			stilt_interpret(stilt, &stilts, version,
 			    sizeof(version) - 1);
-			stilt_flush(&stilt, &stilts);
+			stilt_flush(stilt, &stilts);
 			retval = 0;
 			goto RETURN;
 		} else if (opt_expression != NULL) {
@@ -225,7 +233,7 @@ main(int argc, char **argv, char **envp)
 			/*
 			 * Push the string onto the execution stack.
 			 */
-			string = stils_push(stilt_estack_get(&stilt));
+			string = stils_push(stilt_ostack_get(stilt));
 			stilo_string_new(string, &stil, FALSE,
 			    strlen(opt_expression));
 			stilo_attrs_set(string, STILOA_EXECUTABLE);
@@ -249,7 +257,7 @@ main(int argc, char **argv, char **envp)
 				retval = 1;
 				goto RETURN;
 			}
-			file = stils_push(stilt_estack_get(&stilt));
+			file = stils_push(stilt_ostack_get(stilt));
 			stilo_file_new(file, &stil, FALSE);
 			stilo_attrs_set(file, STILOA_EXECUTABLE);
 			stilo_file_fd_wrap(file, src_fd);
@@ -262,24 +270,23 @@ main(int argc, char **argv, char **envp)
 			 * In other words, there were no arguments specified,
 			 * and this isn't a tty.
 			 */
-			file = stils_push(stilt_estack_get(&stilt));
+			file = stils_push(stilt_ostack_get(stilt));
 			stilo_dup(file, stil_stdin_get(&stil));
 			stilo_attrs_set(file, STILOA_EXECUTABLE);
 		} else
 			_cw_not_reached();
 
 		/* Create procedures to handle #! magic. */
-		stilt_interpret(&stilt, &stilts, magic, sizeof(magic) - 1);
-		stilt_flush(&stilt, &stilts);
+		stilt_interpret(stilt, &stilts, magic, sizeof(magic) - 1);
+		stilt_flush(stilt, &stilts);
 
 		/* Run the interpreter non-interactively. */
-		systemdict_start(&stilt);
+		systemdict_start(stilt);
 	}
 
 	retval = 0;
 	RETURN:
-	stilts_delete(&stilts, &stilt);
-	stilt_delete(&stilt);
+	stilts_delete(&stilts, stilt);
 	stil_delete(&stil);
 #ifdef _STIL_SIGHANDLER
 	/*
@@ -296,25 +303,25 @@ main(int argc, char **argv, char **envp)
 char *
 prompt(EditLine *a_el)
 {
-	if ((stilt_deferred(&stilt) == FALSE) && (stilt_state(&stilt) ==
+	if ((stilt_deferred(stilt) == FALSE) && (stilt_state(stilt) ==
 	    STILTTS_START)) {
 		static const cw_uint8_t	code[] = "promptstring";
 		cw_uint8_t		*pstr;
 		cw_uint32_t		plen, maxlen;
 		cw_stilo_t		*stilo;
-		cw_stils_t		*stack = stilt_ostack_get(&stilt);
+		cw_stils_t		*stack = stilt_ostack_get(stilt);
 
 		/* Push the prompt onto the data stack. */
-		stilt_interpret(&stilt, &stilts, code, sizeof(code) - 1);
-		stilt_flush(&stilt, &stilts);
+		stilt_interpret(stilt, &stilts, code, sizeof(code) - 1);
+		stilt_flush(stilt, &stilts);
 
 		/* Get the actual prompt string. */
 		stilo = stils_get(stack);
 		if (stilo == NULL) {
-			stilt_error(&stilt, STILTE_STACKUNDERFLOW);
+			stilt_error(stilt, STILTE_STACKUNDERFLOW);
 			maxlen = 0;
 		} else if (stilo_type_get(stilo) != STILOT_STRING) {
-			stilt_error(&stilt, STILTE_TYPECHECK);
+			stilt_error(stilt, STILTE_TYPECHECK);
 			maxlen = 0;
 		} else {
 			pstr = stilo_string_get(stilo);
@@ -366,8 +373,8 @@ cl_read(void *a_arg, cw_stilo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str)
 		/*
 		 * Update the command line history.
 		 */
-		if ((stilt_deferred(&stilt) == FALSE) &&
-		    (stilt_state(&stilt) == STILTTS_START)) {
+		if ((stilt_deferred(stilt) == FALSE) &&
+		    (stilt_state(stilt) == STILTTS_START)) {
 			const HistEvent	*hevent;
 
 			/*

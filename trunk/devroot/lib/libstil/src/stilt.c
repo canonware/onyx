@@ -25,7 +25,6 @@ stilte_stiln(cw_stilte_t a_stilte)
 {
 	static const cw_stiln_t stilte_stiln[] = {
 		0,
-		STILN_dstackoverflow,
 		STILN_dstackunderflow,
 		STILN_estackoverflow,
 		STILN_interrupt,
@@ -44,8 +43,7 @@ stilte_stiln(cw_stilte_t a_stilte)
 		STILN_undefinedfilename,
 		STILN_undefinedresult,
 		STILN_unmatchedmark,
-		STILN_unregistered,
-		STILN_vmerror
+		STILN_unregistered
 	};
 
 	_cw_assert(a_stilte > 0 && a_stilte <= STILTE_LAST);
@@ -53,9 +51,6 @@ stilte_stiln(cw_stilte_t a_stilte)
 }
 
 /*  #define	_CW_STILT_SCANNER_DBG */
-
-/* Initial size of userdict. */
-#define	_CW_STILT_USERDICT_SIZE	 64
 
 #define _CW_STILT_GETC(a_i)						\
 	a_stilt->tok_str[(a_i)]
@@ -121,30 +116,6 @@ static void		stilt_p_name_accept(cw_stilt_t *a_stilt, cw_stilts_t
 #define _CW_STILT_MAGIC 0x978fdbe0
 #define _CW_STILTS_MAGIC 0xdfe76a68
 #endif
-
-/*
- * Size and fullness control of initial thread-specific name cache hash table.
- * This starts out empty, but should be expected to grow rather quickly to start
- * with.
- */
-#define _CW_STILT_NAME_BASE_TABLE	512
-#define _CW_STILT_NAME_BASE_GROW	400
-#define _CW_STILT_NAME_BASE_SHRINK	128
-
-/*
- * Size and fullness control of initial root set for local VM.  Local VM is
- * empty to begin with.
- */
-#define _CW_STILT_ROOTS_BASE_TABLE	 32
-#define _CW_STILT_ROOTS_BASE_GROW	 24
-#define _CW_STILT_ROOTS_BASE_SHRINK	  8
-
-/*
- * Size of buffer to use when executing file objects.  This generally doesn't
- * need to be huge, because there is usually additional buffering going on
- * upstream.
- */
-#define	_CW_STILT_FILE_READ_SIZE	128
 
 /*
  * stilts.
@@ -253,17 +224,38 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 		stils_new(&retval->tstack);
 		try_stage = 5;
 
+#ifdef _LIBSTIL_DBG
+		retval->magic = _CW_STILT_MAGIC;
+#endif
+		/*
+		 * Register with the stil before creating objects that
+		 * the GC will know about, so that the GC won't yank the rug out
+		 * if it runs before the stilt is completely initialized.
+		 */
+		stil_l_stilt_insert(a_stil, retval);
+
 		/*
 		 * Create currenterror, errordict, and userdict.  threaddict
-		 * initialization needs these to already be initialized.
+		 * initialization needs these to already be initialized.  Take
+		 * care to keep references to the dictionaries on tstack, so
+		 * that the GC can find them.
 		 */
-		currenterror_l_populate(&retval->currenterror, retval);
-		errordict_l_populate(&retval->errordict, retval);
-		stilo_dict_new(&retval->userdict, a_stil, FALSE,
-		    _CW_STILT_USERDICT_SIZE);
+		stilo = stils_push(&retval->tstack);
+		currenterror_l_populate(stilo, retval);
+		stilo_dup(&retval->currenterror, stilo);
+
+		stilo = stils_push(&retval->tstack);
+		errordict_l_populate(stilo, retval);
+		stilo_dup(&retval->errordict, stilo);
+
+		stilo = stils_push(&retval->tstack);
+		stilo_dict_new(stilo, a_stil, FALSE, _LIBSTASH_USERDICT_HASH);
+		stilo_dup(&retval->userdict, stilo);
 
 		/* Create threaddict. */
-		threaddict_l_populate(&retval->threaddict, retval);
+		stilo = stils_push(&retval->tstack);
+		threaddict_l_populate(stilo, retval);
+		stilo_dup(&retval->threaddict, stilo);
 
 		/*
 		 * Push threaddict, systemdict, globaldict, and userdict onto
@@ -280,6 +272,8 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 
 		stilo = stils_push(&retval->dstack);
 		stilo_dup(stilo, &retval->userdict);
+
+		stils_npop(&retval->tstack, 4);
 	}
 	xep_catch(_CW_XEPV_OOM) {
 		retval = (cw_stilt_t *)v_retval;
@@ -301,11 +295,6 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 		}
 	}
 	xep_end();
-
-	stil_l_stilt_insert(a_stil, retval);
-#ifdef _LIBSTIL_DBG
-	retval->magic = _CW_STILT_MAGIC;
-#endif
 
 	return retval;
 }
@@ -346,7 +335,7 @@ stilt_start(cw_stilt_t *a_stilt)
 	_cw_check_ptr(a_stilt);
 	_cw_assert(a_stilt->magic == _CW_STILT_MAGIC);
 
-	file = stils_push(&a_stilt->estack);
+	file = stils_push(&a_stilt->ostack);
 	stilo_dup(file, stilt_stdin_get(a_stilt));
 	stilo_attrs_set(file, STILOA_EXECUTABLE);
 
@@ -468,10 +457,13 @@ void
 stilt_loop(cw_stilt_t *a_stilt)
 {
 	cw_stilo_t	*stilo, *tstilo;
-	cw_uint32_t	sdepth;
+	cw_uint32_t	sdepth, cdepth;
 
-	for (sdepth = stils_count(&a_stilt->estack);
-	     stils_count(&a_stilt->estack) >= sdepth;) {
+	for (sdepth = cdepth = stils_count(&a_stilt->estack);
+	     cdepth >= sdepth; cdepth = stils_count(&a_stilt->estack)) {
+		if (cdepth == _LIBSTIL_ESTACK_MAX)
+			stilt_error(a_stilt, STILTE_ESTACKOVERFLOW);
+
 		stilo = stils_get(&a_stilt->estack);
 		if (stilo_attrs_get(stilo) == STILOA_LITERAL) {
 			/* Always push literal objects onto the data stack. */
@@ -787,7 +779,7 @@ stilt_loop(cw_stilt_t *a_stilt)
 		case STILOT_FILE: {
 			cw_stilts_t	stilts;
 			cw_sint32_t	nread;
-			cw_uint8_t	buffer[_CW_STILT_FILE_READ_SIZE];
+			cw_uint8_t	buffer[_LIBSTIL_FILE_EVAL_READ_SIZE];
 
 			stilts_new(&stilts);
 			/*
@@ -795,9 +787,9 @@ stilt_loop(cw_stilt_t *a_stilt)
 			 * (0 byte read).
 			 */
 			for (nread = stilo_file_read(stilo,
-			    _CW_STILT_FILE_READ_SIZE, buffer); nread > 0;
+			    _LIBSTIL_FILE_EVAL_READ_SIZE, buffer); nread > 0;
 			    nread = stilo_file_read(stilo,
-			    _CW_STILT_FILE_READ_SIZE, buffer)) {
+			    _LIBSTIL_FILE_EVAL_READ_SIZE, buffer)) {
 				stilt_interpret(a_stilt, &stilts, buffer,
 				    nread);
 			}

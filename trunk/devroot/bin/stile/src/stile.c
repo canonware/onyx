@@ -18,18 +18,15 @@ int
 main(int argc, char **argv, char **envp)
 {
 	cw_stil_t	stil;
-	cw_stilt_t	stilt;
 	cw_stilts_t	stilts;
 
 	libstash_init();
 	stil_new(&stil, argc, argv, envp, NULL, NULL, NULL, NULL);
-	stilt_new(&stilt, &stil);
 	stilts_new(&stilts);
 
-	stilt_start(&stilt);
+	stilt_start(stil_stilt_get(&stil));
 
-	stilts_delete(&stilts, &stilt);
-	stilt_delete(&stilt);
+	stilts_delete(&stilts, stil_stilt_get(&stil));
 	stil_delete(&stil);
 	libstash_shutdown();
 	return 0;

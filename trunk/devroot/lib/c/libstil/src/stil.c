@@ -18,27 +18,6 @@
 #define _CW_STIL_MAGIC 0xae9678fd
 #endif
 
-/*
- * Size and fullness control of initial name cache hash table.  We know for sure
- * that there will be about 175 names referenced by systemdict, threaddict,
- * errordict, and currenterror to begin with.
- */
-#define _CW_STIL_NAME_BASE_TABLE	512
-#define _CW_STIL_NAME_BASE_GROW		400
-#define _CW_STIL_NAME_BASE_SHRINK	128
-
-/*
- * Initial size of globaldict.  This is a bit arbitrary, and some applications
- * could benefit from making it larger or smaller.
- */
-#define	_CW_STIL_GLOBALDICT_SIZE	 64
-
-/*
- * Size of buffers for stdin and stdout.  stderr isn't buffered.
- */
-#define	_CW_STIL_STDIN_BUFFER_SIZE	512
-#define	_CW_STIL_STDOUT_BUFFER_SIZE	512
-
 cw_stil_t *
 stil_new(cw_stil_t *a_stil, int a_argc, char **a_argv, char **a_envp,
     cw_stilo_file_read_t *a_stdin, cw_stilo_file_write_t *a_stdout,
@@ -67,8 +46,8 @@ stil_new(cw_stil_t *a_stil, int a_argc, char **a_argv, char **a_envp,
 
 		/* Initialize the global name cache. */
 		mtx_new(&retval->name_lock);
-		dch_new(&retval->name_hash, NULL, _CW_STIL_NAME_BASE_TABLE,
-		    _CW_STIL_NAME_BASE_GROW, _CW_STIL_NAME_BASE_SHRINK,
+		dch_new(&retval->name_hash, NULL, _LIBSTIL_NAME_HASH,
+		    _LIBSTIL_NAME_HASH / 4 * 3, _LIBSTIL_NAME_HASH / 4,
 		    stilo_l_name_hash, stilo_l_name_key_comp);
 		try_stage = 2;
 
@@ -85,7 +64,7 @@ stil_new(cw_stil_t *a_stil, int a_argc, char **a_argv, char **a_envp,
 			    NULL, a_arg);
 		}
 		stilo_file_buffer_size_set(&retval->stdin_stilo,
-		    _CW_STIL_STDIN_BUFFER_SIZE);
+		    _LIBSTIL_FILE_BUFFER_SIZE);
 		try_stage = 4;
 
 		/* Initialize stdout. */
@@ -97,7 +76,7 @@ stil_new(cw_stil_t *a_stil, int a_argc, char **a_argv, char **a_envp,
 			    a_stdout, a_arg);
 		}
 		stilo_file_buffer_size_set(&retval->stdout_stilo,
-		    _CW_STIL_STDOUT_BUFFER_SIZE);
+		    _LIBSTIL_FILE_BUFFER_SIZE);
 		try_stage = 5;
 
 		/* Initialize stderr. */
@@ -112,7 +91,7 @@ stil_new(cw_stil_t *a_stil, int a_argc, char **a_argv, char **a_envp,
 
 		/* Initialize globaldict. */
 		stilo_dict_new(&retval->globaldict, retval, TRUE,
-		    _CW_STIL_GLOBALDICT_SIZE);
+		    _LIBSTIL_GLOBALDICT_HASH);
 		try_stage = 7;
 
 		/* Initialize envdict. */
@@ -123,10 +102,19 @@ stil_new(cw_stil_t *a_stil, int a_argc, char **a_argv, char **a_envp,
 		systemdict_l_populate(&retval->systemdict, retval, a_argc,
 		    a_argv);
 		try_stage = 9;
+
+		stilt_new(&retval->stilt, retval);
+		try_stage = 10;
+
+		/*
+		 * Now that we have an initial thread, activate the GC.
+		 */
+		stila_active_set(&retval->stila, TRUE);
 	}
 	xep_catch (_CW_XEPV_OOM) {
 		retval = (cw_stil_t *)v_retval;
 		switch (try_stage) {
+		case 9:
 		case 8:
 		case 7:
 		case 6:
@@ -159,13 +147,22 @@ stil_new(cw_stil_t *a_stil, int a_argc, char **a_argv, char **a_envp,
 void
 stil_delete(cw_stil_t *a_stil)
 {
+	cw_stilte_t	error;
+
 	_cw_check_ptr(a_stil);
 	_cw_assert(a_stil->magic == _CW_STIL_MAGIC);
 	
 	/* Flush stdout. */
-	/* XXX Check return? */
-	stilo_file_buffer_flush(&a_stil->stdout_stilo);
+	error = stilo_file_buffer_flush(&a_stil->stdout_stilo);
+	if (error) {
+		/*
+		 * There are no other threads at this point, so report the error
+		 * to the initial thread for lack of a better place.
+		 */
+		stilt_error(&a_stil->stilt, error);
+	}
 
+	stilt_delete(&a_stil->stilt);
 	stila_delete(&a_stil->stila);
 	dch_delete(&a_stil->name_hash);
 	mtx_delete(&a_stil->name_lock);
@@ -201,24 +198,4 @@ stil_l_ref_iter(cw_stil_t *a_stil, cw_bool_t a_reset)
 	}
 
 	return retval;
-}
-
-void
-stil_l_stilt_insert(cw_stil_t *a_stil, cw_stilt_t *a_stilt)
-{
-	cw_bool_t	first_stilt;
-
-	if (ql_first(&a_stil->stilt_head) == NULL) {
-		/*
-		 * This is the first thread.  Activate the GC once the thread
-		 * has been inserted.
-		 */
-		first_stilt = TRUE;
-	} else
-		first_stilt = FALSE;
-
-	ql_tail_insert(&a_stil->stilt_head, a_stilt, link);
-
-	if (first_stilt)
-		stila_active_set(&a_stil->stila, TRUE);
 }

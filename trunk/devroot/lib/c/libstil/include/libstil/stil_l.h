@@ -10,8 +10,9 @@
  ******************************************************************************/
 
 cw_stilt_t *stil_l_ref_iter(cw_stil_t *a_stil, cw_bool_t a_reset);
-void	stil_l_stilt_insert(cw_stil_t *a_stil, cw_stilt_t *a_stilt);
 
+#define	stil_l_stilt_insert(a_stil, a_stilt)				\
+	ql_tail_insert(&(a_stil)->stilt_head, (a_stilt), link)
 #define	stil_l_stilt_remove(a_stil, a_stilt)				\
 	ql_remove(&(a_stil)->stilt_head, (a_stilt), link)
 

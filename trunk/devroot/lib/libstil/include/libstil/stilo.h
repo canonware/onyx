@@ -27,7 +27,6 @@ typedef struct cw_stiloe_dict_s cw_stiloe_dict_t;
 /* Interpreter errors. */
 typedef enum {
 	STILTE_NONE,			/* No error. */
-	STILTE_DSTACKOVERFLOW,		/* dstack too deep. */
 	STILTE_DSTACKUNDERFLOW,		/* No poppable dictionary on dstack. */
 	STILTE_ESTACKOVERFLOW,		/* estack too deep. */
 	STILTE_INTERRUPT,		/* Interrupt. */
@@ -46,9 +45,8 @@ typedef enum {
 	STILTE_UNDEFINEDFILENAME,	/* Bad filename. */
 	STILTE_UNDEFINEDRESULT,
 	STILTE_UNMATCHEDMARK,		/* No mark on ostack. */
-	STILTE_UNREGISTERED,		/* Other non-enumerated error. */
-	STILTE_VMERROR			/* Out of memory. */
-#define	STILTE_LAST	STILTE_VMERROR
+	STILTE_UNREGISTERED		/* Other non-enumerated error. */
+#define	STILTE_LAST	STILTE_UNREGISTERED
 } cw_stilte_t;
 
 /* Defined here to resolve circular dependencies. */

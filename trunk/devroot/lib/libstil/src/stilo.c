@@ -360,7 +360,7 @@ static const cw_stilot_vtable_t stilot_vtable[] = {
 	/* STILOT_NO */
 	{NULL,
 	 NULL,
-	 stilo_p_no_print},	/* XXX Debugging only. */
+	 stilo_p_no_print},	/* Debugging only. */
 
 	/* STILOT_ARRAY */
 	{stiloe_p_array_delete,
@@ -630,7 +630,7 @@ stilo_p_hash(const void *a_key)
 		name = (cw_stiloe_name_t *)key->o.stiloe;
 		retval = ch_direct_hash((void *)name);
 	} else {
-		_cw_error("XXX Unimplemented");
+		_cw_error("XXX Not implemented");
 	}
 
 	return retval;
@@ -658,7 +658,7 @@ stilo_p_key_comp(const void *a_k1, const void *a_k2)
 
 		retval = (n1 == n2) ? TRUE : FALSE;
 	} else {
-		_cw_error("XXX Unimplemented");
+		_cw_error("XXX Not implemented");
 	}
 
 	return retval;
@@ -780,24 +780,31 @@ stilo_array_subarray_new(cw_stilo_t *a_stilo, cw_stilo_t *a_array, cw_stil_t
 	_cw_check_ptr(orig);
 	_cw_assert(orig->stiloe.magic == _CW_STILOE_MAGIC);
 
-	_cw_assert(a_offset + a_len <= orig->e.a.len);
+	if (orig->stiloe.indirect) {
+		stilo_array_subarray_new(a_stilo, &orig->e.i.stilo, a_stil,
+		    a_offset + orig->e.i.beg_offset, a_len);
+	} else {
+		_cw_assert(a_offset + a_len <= orig->e.a.len);
 
-	array = (cw_stiloe_array_t *)_cw_malloc(sizeof(cw_stiloe_array_t));
+		array = (cw_stiloe_array_t
+		    *)_cw_malloc(sizeof(cw_stiloe_array_t));
 
-	stiloe_p_new(&array->stiloe, STILOT_ARRAY, FALSE);
-	array->stiloe.indirect = TRUE;
-	memcpy(&array->e.i.stilo, a_array, sizeof(cw_stilo_t));
-	array->e.i.beg_offset = a_offset;
-	array->e.i.len = a_len;
+		stiloe_p_new(&array->stiloe, STILOT_ARRAY, FALSE);
+		array->stiloe.indirect = TRUE;
+		memcpy(&array->e.i.stilo, a_array, sizeof(cw_stilo_t));
+		array->e.i.beg_offset = a_offset;
+		array->e.i.len = a_len;
 
-	memset(a_stilo, 0, sizeof(cw_stilo_t));
-	a_stilo->o.stiloe = (cw_stiloe_t *)array;
+		memset(a_stilo, 0, sizeof(cw_stilo_t));
+		a_stilo->o.stiloe = (cw_stiloe_t *)array;
 #ifdef _LIBSTIL_DBG
-	a_stilo->magic = _CW_STILO_MAGIC;
+		a_stilo->magic = _CW_STILO_MAGIC;
 #endif
-	a_stilo->type = STILOT_ARRAY;
+		a_stilo->type = STILOT_ARRAY;
 
-	stila_l_gc_register(stil_stila_get(a_stil), (cw_stiloe_t *)array);
+		stila_l_gc_register(stil_stila_get(a_stil), (cw_stiloe_t
+		    *)array);
+	}
 }
 
 static void
@@ -1302,22 +1309,18 @@ stilo_dict_new(cw_stilo_t *a_stilo, cw_stil_t *a_stil, cw_bool_t a_locking,
 	dict->dicto = NULL;
 
 	/*
-	 * Don't create a dict smaller than 16, since rounding errors for
-	 * calculating the grow/shrink points can cause severe performance
-	 * problems if the dict grows significantly.
+	 * Don't create a dict smaller than _LIBSTIL_DICT_SIZE, since rounding
+	 * errors for calculating the grow/shrink points can cause severe
+	 * performance problems if the dict grows significantly.
 	 *
 	 * Don't let the table get more than 80% full, or less than 25% full,
 	 * when shrinking.
-	 *
-	 * XXX Magic numbers.
 	 */
-	if (a_dict_size > 16) {
-		dch_new(&dict->hash, NULL, a_dict_size * 1.25, a_dict_size,
-		    a_dict_size / 4, stilo_p_hash, stilo_p_key_comp);
-	} else {
-		dch_new(&dict->hash, NULL, 20, 16, 4, stilo_p_hash,
-		    stilo_p_key_comp);
-	}
+	if (a_dict_size < _LIBSTIL_DICT_SIZE)
+		a_dict_size = _LIBSTIL_DICT_SIZE;
+
+	dch_new(&dict->hash, NULL, a_dict_size * 1.25, a_dict_size, a_dict_size
+	    / 4, stilo_p_hash, stilo_p_key_comp);
 
 	memset(a_stilo, 0, sizeof(cw_stilo_t));
 	a_stilo->o.stiloe = (cw_stiloe_t *)dict;
@@ -1760,14 +1763,12 @@ stiloe_p_file_delete(cw_stiloe_t *a_stiloe, cw_stil_t *a_stil)
 			ioerror = TRUE;
 	}
 
-#if (0)
 	/*
-	 * XXX GC-induced deletion can get a write error, but there's no thread
-	 * to report it to.
+	 * GC-induced deletion can get a write error, but there's no thread
+	 * to report it to.  Use the initial thread for lack of a better place.
 	 */
 	if (ioerror)
-		stilt_error(XXX, STILTE_IOERROR);
-#endif
+		stilt_error(stil_stilt_get(a_stil), STILTE_IOERROR);
 
 	_CW_STILOE_FREE(file);
 }
@@ -2109,6 +2110,8 @@ stilo_file_read(cw_stilo_t *a_stilo, cw_uint32_t a_len, cw_uint8_t *r_str)
 		}
 	}
 	RETURN:
+	if (retval != -1)
+		file->position += retval;
 	stiloe_p_file_unlock(file);
 	return retval;
 }
@@ -2212,6 +2215,7 @@ stilo_file_readline(cw_stilo_t *a_stilo, cw_stil_t *a_stil, cw_bool_t a_locking,
 					stilo_string_lock(r_string);
 					stilo_string_set(r_string, 0, line, i);
 					stilo_string_unlock(r_string);
+					file->position += i;
 
 					retval = STILTE_NONE;
 					*r_eof = TRUE;
@@ -2240,6 +2244,7 @@ stilo_file_readline(cw_stilo_t *a_stilo, cw_stil_t *a_stil, cw_bool_t a_locking,
 				stilo_string_lock(r_string);
 				stilo_string_set(r_string, 0, line, i);
 				stilo_string_unlock(r_string);
+				file->position += i;
 
 				/*
 				 * Shift the remaining buffered data to the
@@ -2311,6 +2316,7 @@ stilo_file_readline(cw_stilo_t *a_stilo, cw_stil_t *a_stil, cw_bool_t a_locking,
 				stilo_string_lock(r_string);
 				stilo_string_set(r_string, 0, line, i);
 				stilo_string_unlock(r_string);
+				file->position += i;
 
 				retval = STILTE_NONE;
 				*r_eof = TRUE;
@@ -2331,6 +2337,7 @@ stilo_file_readline(cw_stilo_t *a_stilo, cw_stil_t *a_stil, cw_bool_t a_locking,
 				stilo_string_lock(r_string);
 				stilo_string_set(r_string, 0, line, i);
 				stilo_string_unlock(r_string);
+				file->position += i;
 
 				retval = STILTE_NONE;
 				*r_eof = FALSE;
@@ -2702,7 +2709,7 @@ stilo_file_truncate(cw_stilo_t *a_stilo, cw_uint32_t a_length)
 		goto RETURN;
 	}
 
-	/* XXX Reset buffer. */
+	stilo_p_file_buffer_flush(a_stilo);
 
 	if (ftruncate(file->fd, a_length)) {
 		retval = STILTE_IOERROR;
@@ -3628,24 +3635,31 @@ stilo_string_substring_new(cw_stilo_t *a_stilo, cw_stilo_t *a_string, cw_stil_t
 	_cw_check_ptr(orig);
 	_cw_assert(orig->stiloe.magic == _CW_STILOE_MAGIC);
 
-	_cw_assert(a_offset + a_len <= orig->e.s.len);
+	if (orig->stiloe.indirect) {
+		stilo_string_substring_new(a_stilo, &orig->e.i.stilo, a_stil,
+		    a_offset + orig->e.i.beg_offset, a_len);
+	} else {
+		_cw_assert(a_offset + a_len <= orig->e.s.len);
 
-	string = (cw_stiloe_string_t *)_cw_malloc(sizeof(cw_stiloe_string_t));
+		string = (cw_stiloe_string_t
+		    *)_cw_malloc(sizeof(cw_stiloe_string_t));
 
-	stiloe_p_new(&string->stiloe, STILOT_STRING, FALSE);
-	string->stiloe.indirect = TRUE;
-	memcpy(&string->e.i.stilo, a_string, sizeof(cw_stilo_t));
-	string->e.i.beg_offset = a_offset;
-	string->e.i.len = a_len;
+		stiloe_p_new(&string->stiloe, STILOT_STRING, FALSE);
+		string->stiloe.indirect = TRUE;
+		memcpy(&string->e.i.stilo, a_string, sizeof(cw_stilo_t));
+		string->e.i.beg_offset = a_offset;
+		string->e.i.len = a_len;
 
-	memset(a_stilo, 0, sizeof(cw_stilo_t));
-	a_stilo->o.stiloe = (cw_stiloe_t *)string;
+		memset(a_stilo, 0, sizeof(cw_stilo_t));
+		a_stilo->o.stiloe = (cw_stiloe_t *)string;
 #ifdef _LIBSTIL_DBG
-	a_stilo->magic = _CW_STILO_MAGIC;
+		a_stilo->magic = _CW_STILO_MAGIC;
 #endif
-	a_stilo->type = STILOT_STRING;
+		a_stilo->type = STILOT_STRING;
 
-	stila_l_gc_register(stil_stila_get(a_stil), (cw_stiloe_t *)string);
+		stila_l_gc_register(stil_stila_get(a_stil), (cw_stiloe_t
+		    *)string);
+	}
 }
 
 static void
