@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 116 $
- * $Date: 1998-06-30 17:45:16 -0700 (Tue, 30 Jun 1998) $
+ * $Revision: 118 $
+ * $Date: 1998-07-01 00:06:33 -0700 (Wed, 01 Jul 1998) $
  *
  * <<< Description >>>
  *
@@ -217,22 +217,20 @@ brbs_open(cw_brbs_t * a_brbs_o)
 	  /* Raw device. */
 	  a_brbs_o->is_raw = TRUE;
 	
-	  brbs_p_get_sector_size(a_brbs_o);
+	  retval = brbs_p_get_raw_info(a_brbs_o);
 	}
 	else
 	{
 	  /* Normal file. */
 	  a_brbs_o->is_raw = FALSE;
+    
+	  /* Figure out how big the file or device is. */
+	  a_brbs_o->size = lseek(a_brbs_o->fd, 0, SEEK_END);
+	  if (a_brbs_o->size == -1)
+	  {
+	    retval = TRUE;
+	  }
 	}
-      }
-
-      /* Figure out how big the file or device is. */
-      /* XXX This isn't working for raw devices.  Maybe we need to read the 
-       * size from the disk label. */
-      a_brbs_o->size = lseek(a_brbs_o->fd, 0, SEEK_END);
-      if (a_brbs_o->size == -1)
-      {
-	retval = TRUE;
       }
     }
   }
@@ -659,54 +657,60 @@ brbs_block_write(cw_brbs_t * a_brbs_o, cw_uint64_t a_offset,
  * <<< Description >>>
  *
  * Determines the sector size of a device and sets a_brbs_o->sect_size
- * accordingly.
+ * accordingly.  Also finds out the size in bytes of the device and sets
+ * a_brbs_o->size accordingly.
  *
  ****************************************************************************/
-void
-brbs_p_get_sector_size(cw_brbs_t * a_brbs_o)
+cw_bool_t
+brbs_p_get_raw_info(cw_brbs_t * a_brbs_o)
 {
+  cw_bool_t retval;
   struct disklabel dlp;
-
+  
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
   {
-    _cw_marker("Enter brbs_p_get_sector_size()");
+    _cw_marker("Enter brbs_p_get_raw_info()");
   }
-
-  a_brbs_o->sect_size = 0;
   
   if (ioctl(a_brbs_o->fd, DIOCGDINFO, &dlp) < 0)
   {
-#define _CW_BUF_POWER 13
-    cw_uint8_t buf[1 << _CW_BUF_POWER];
-    int i;
+    retval = TRUE;
     
     if (dbg_fmatch(g_dbg_o, _CW_DBG_R_BRBS_ERROR))
     {
-      log_leprintf(g_log_o, __FILE__, __LINE__, "brbs_p_get_sector_size",
+      log_leprintf(g_log_o, __FILE__, __LINE__, "brbs_p_get_raw_info",
 		   "ioctl() error: %s\n", strerror(errno));
-    }
-
-    /* Try to find the sector size the gross way. */
-    for (i = 1; (i <= _CW_BUF_POWER); i++)
-#undef _CW_BUF_POWER
-    {
-      if (read(a_brbs_o->fd, &buf, 1 << (i - 1)) >= 0)
-      {
-	a_brbs_o->sect_size = 1 << (i - 1);
-	break;
-      }
     }
   }
   else
   {
-    a_brbs_o->sect_size = dlp.d_secsize;
-  }
+    cw_uint32_t i, slice = '\0';
+
+    retval = FALSE;
+
+    /* Figure out which slice we're in. */
+    for (i = strlen(a_brbs_o->filename) - 1;
+	 i > 0;
+	 i--)
+    {
+      if ((a_brbs_o->filename[i] >= 'a') && (a_brbs_o->filename[i] <= 'h'))
+      {
+	slice = a_brbs_o->filename[i] - 'a';
+	break;
+      }
+    }
+    _cw_assert(slice != '\0');
   
+    a_brbs_o->sect_size = dlp.d_secsize;
+    a_brbs_o->size = dlp.d_partitions[slice].p_size * dlp.d_secsize;
+  }
+
   _cw_assert(a_brbs_o->sect_size > 0);
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
   {
-    _cw_marker("Exit brbs_p_get_sector_size()");
+    _cw_marker("Exit brbs_p_get_raw_info()");
   }
+  return retval;
 }
 
 /****************************************************************************
