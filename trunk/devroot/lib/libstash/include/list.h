@@ -10,7 +10,7 @@
  *
  * <<< Description >>>
  *
- *
+ * Public interface for the list and list_item classes.
  *
  ****************************************************************************/
 

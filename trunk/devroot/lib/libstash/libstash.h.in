@@ -28,6 +28,8 @@ extern "C" {
 #  undef _CW_OS_LINUX
 #  undef _CW_OS_SOLARIS
 
+#  undef WORDS_BIGENDIAN
+
 #  undef SIZEOF_SIGNED_CHAR
 #  undef SIZEOF_UNSIGNED_CHAR
 #  undef SIZEOF_SIGNED_SHORT

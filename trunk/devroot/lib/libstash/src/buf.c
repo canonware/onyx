@@ -110,8 +110,10 @@ buf_get_size(cw_buf_t * a_buf_o)
  *
  ****************************************************************************/
 void
-buf_append_buf(cw_buf_t * a_buf_o, cw_buf_t * a_other)
+buf_prepend_buf(cw_buf_t * a_buf_o, cw_buf_t * a_other)
 {
+  cw_uint64_t i, count;
+  
   _cw_check_ptr(a_buf_o);
   _cw_check_ptr(a_other);
 #ifdef _CW_REENTRANT
@@ -119,24 +121,73 @@ buf_append_buf(cw_buf_t * a_buf_o, cw_buf_t * a_other)
   {
     mtx_lock(&a_buf_o->lock);
   }
+  if (a_other->is_threadsafe == TRUE)
+  {
+    mtx_lock(&a_other->lock);
+  }
 #endif
 
-  /* Assume that we don't need to lock a_other. */
+  for (i = 0, count = list_count(&a_other->bufels);
+       i < count;
+       i++)
   {
-    cw_uint64_t i, count;
-
-    for (i = 0, count = list_count(&a_other->bufels);
-	 i < count;
-	 i++)
-    {
-      list_tpush(&a_buf_o->bufels, list_hpop(&a_other->bufels));
-    }
+    list_hpush(&a_buf_o->bufels, list_tpop(&a_other->bufels));
   }
 
   a_buf_o->size += a_other->size;
   a_other->size = 0;
   
 #ifdef _CW_REENTRANT
+  if (a_other->is_threadsafe == TRUE)
+  {
+    mtx_unlock(&a_other->lock);
+  }
+  if (a_buf_o->is_threadsafe == TRUE)
+  {
+    mtx_unlock(&a_buf_o->lock);
+  }
+#endif
+}
+
+/****************************************************************************
+ *
+ * Concatenates two bufs.  After this function call, a_other is empty, but
+ * it still exists.
+ *
+ ****************************************************************************/
+void
+buf_append_buf(cw_buf_t * a_buf_o, cw_buf_t * a_other)
+{
+  cw_uint64_t i, count;
+  
+  _cw_check_ptr(a_buf_o);
+  _cw_check_ptr(a_other);
+#ifdef _CW_REENTRANT
+  if (a_buf_o->is_threadsafe == TRUE)
+  {
+    mtx_lock(&a_buf_o->lock);
+  }
+  if (a_other->is_threadsafe == TRUE)
+  {
+    mtx_lock(&a_other->lock);
+  }
+#endif
+
+  for (i = 0, count = list_count(&a_other->bufels);
+       i < count;
+       i++)
+  {
+    list_tpush(&a_buf_o->bufels, list_hpop(&a_other->bufels));
+  }
+
+  a_buf_o->size += a_other->size;
+  a_other->size = 0;
+  
+#ifdef _CW_REENTRANT
+  if (a_other->is_threadsafe == TRUE)
+  {
+    mtx_unlock(&a_other->lock);
+  }
   if (a_buf_o->is_threadsafe == TRUE)
   {
     mtx_unlock(&a_buf_o->lock);
@@ -362,6 +413,19 @@ bufel_set_end_offset(cw_bufel_t * a_bufel_o, cw_uint32_t a_offset)
   _cw_assert(a_offset <= a_bufel_o->buf_size);
 
   a_bufel_o->end_offset = a_offset;
+}
+
+/****************************************************************************
+ *
+ * Returns a pointer to the internal buffer.
+ *
+ ****************************************************************************/
+void *
+bufel_get_data_ptr(cw_bufel_t * a_bufel_o)
+{
+  _cw_check_ptr(a_bufel_o);
+
+  return (void *) a_bufel_o->buf;
 }
 
 /****************************************************************************
