@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 151 $
- * $Date: 1998-07-29 16:53:57 -0700 (Wed, 29 Jul 1998) $
+ * $Revision: 163 $
+ * $Date: 1998-08-07 13:13:12 -0700 (Fri, 07 Aug 1998) $
  *
  * <<< Description >>>
  *
@@ -34,6 +34,7 @@ struct cw_buf_s
 
 struct cw_bufel_s
 {
+  cw_bool_t is_malloced;
   cw_uint32_t buf_size;
   cw_uint32_t beg_offset;
   cw_uint32_t end_offset;
@@ -69,7 +70,7 @@ cw_uint32_t buf_get_size(cw_buf_t * a_buf_o);
 cw_buf_t * buf_get_buf(cw_buf_t * a_buf_o, cw_buf_t * a_spare);
 cw_bool_t buf_put_buf(cw_buf_t * a_a, cw_buf_t * a_b);
 
-cw_bufel_t * buf_get_bufel(cw_buf_t * a_buf_o, cw_bufel_t * a_spare);
+cw_bufel_t * buf_get_bufel(cw_buf_t * a_buf_o);
 cw_bool_t buf_put_bufel(cw_buf_t * a_buf_o, cw_bufel_t * a_bufel_o);
 
 cw_bufel_t * bufel_new(cw_bufel_t * a_bufel_o);
@@ -79,15 +80,15 @@ cw_uint32_t bufel_get_size(cw_bufel_t * a_bufel_o);
 cw_bool_t bufel_set_size(cw_bufel_t * a_bufel_o, cw_uint32_t a_size);
 
 cw_uint32_t bufel_get_beg_offset(cw_bufel_t * a_bufel_o);
-cw_bool_t bufel_set_beg_offset(cw_bufel_t * a_bufel_o, cw_uint32_t a_offset);
+void bufel_set_beg_offset(cw_bufel_t * a_bufel_o, cw_uint32_t a_offset);
 cw_uint32_t bufel_get_end_offset(cw_bufel_t * a_bufel_o);
-cw_bool_t bufel_set_end_offset(cw_bufel_t * a_bufel_o, cw_uint32_t a_offset);
+void bufel_set_end_offset(cw_bufel_t * a_bufel_o, cw_uint32_t a_offset);
 
 cw_uint8_t bufel_get_uint8(cw_bufel_t * a_bufel_o, cw_uint32_t a_offset);
-cw_bool_t bufel_set_uint8(cw_bufel_t * a_bufel_o, cw_uint32_t a_offset,
-			  cw_uint8_t a_val);
+void bufel_set_uint8(cw_bufel_t * a_bufel_o, cw_uint32_t a_offset,
+		     cw_uint8_t a_val);
 cw_uint32_t bufel_get_uint32(cw_bufel_t * a_bufel_o, cw_uint32_t a_offset);
-cw_bool_t bufel_set_uint32(cw_bufel_t * a_bufel_o, cw_uint32_t a_offset,
-			   cw_uint32_t a_val);
+void bufel_set_uint32(cw_bufel_t * a_bufel_o, cw_uint32_t a_offset,
+		      cw_uint32_t a_val);
 
 #endif /* _BUF_H_ */

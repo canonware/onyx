@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 151 $
- * $Date: 1998-07-29 16:53:57 -0700 (Wed, 29 Jul 1998) $
+ * $Revision: 163 $
+ * $Date: 1998-08-07 13:13:12 -0700 (Fri, 07 Aug 1998) $
  *
  * <<< Description >>>
  *
@@ -21,6 +21,8 @@
 
 #define _INC_BUF_H_
 #include <libstash.h>
+
+#include <sys/param.h>
 
 /****************************************************************************
  * <<< Description >>>
@@ -117,10 +119,14 @@ buf_get_buf(cw_buf_t * a_buf_o, cw_buf_t * a_spare)
 
   if (a_spare != NULL)
   {
+    cw_uint64_t i, count;
+
     retval = a_spare;
 
     /* Delete the contents of retval's list. */
-    while (list_count(&retval->bufels) > 0)
+    for (i = 0, count = list_count(&retval->bufels);
+	 i < count;
+	 i++)
     {
       bufel_delete(list_hpop(&retval->bufels));
     }
@@ -131,9 +137,15 @@ buf_get_buf(cw_buf_t * a_buf_o, cw_buf_t * a_spare)
   }
   
   /* Move bufels from a_buf_o to retval. */
-  while (list_count(&a_buf_o->bufels) > 0)
   {
-    list_tpush(&retval->bufels, list_hpop(&a_buf_o->bufels));
+    cw_uint64_t i, count;
+
+    for (i = 0, count = list_count(&a_buf_o->bufels);
+	 i < count;
+	 i++)
+    {
+      list_tpush(&retval->bufels, list_hpop(&a_buf_o->bufels));
+    }
   }
 
   /* Copy over size and zero it for a_buf_o. */
@@ -165,6 +177,21 @@ buf_put_buf(cw_buf_t * a_buf_o, cw_buf_t * a_other)
   {
     mtx_lock(&a_buf_o->lock);
   }
+
+  /* Assume that we don't need to lock a_other. */
+  {
+    cw_uint64_t i, count;
+
+    for (i = 0, count = list_count(&a_other->bufels);
+	 i < count;
+	 i++)
+    {
+      list_tpush(&a_buf_o->bufels, list_hpop(&a_other->bufels));
+    }
+  }
+
+  a_buf_o->size += a_other->size;
+  a_other->size = 0;
   
   if (a_buf_o->is_threadsafe == TRUE)
   {
@@ -180,7 +207,7 @@ buf_put_buf(cw_buf_t * a_buf_o, cw_buf_t * a_other)
  *
  ****************************************************************************/
 cw_bufel_t *
-buf_get_bufel(cw_buf_t * a_buf_o, cw_bufel_t * a_spare)
+buf_get_bufel(cw_buf_t * a_buf_o)
 {
   cw_bufel_t * retval;
 
@@ -188,6 +215,16 @@ buf_get_bufel(cw_buf_t * a_buf_o, cw_bufel_t * a_spare)
   if (a_buf_o->is_threadsafe == TRUE)
   {
     mtx_lock(&a_buf_o->lock);
+  }
+
+  if (a_buf_o->size > 0) /* Make sure there is valid data. */
+  {
+    retval = (cw_bufel_t *) list_hpop(&a_buf_o->bufels);
+    a_buf_o->size -= (retval->end_offset - retval->beg_offset);
+  }
+  else
+  {
+    retval = NULL;
   }
   
   if (a_buf_o->is_threadsafe == TRUE)
@@ -209,10 +246,13 @@ buf_put_bufel(cw_buf_t * a_buf_o, cw_bufel_t * a_bufel_o)
   cw_bool_t retval;
 
   _cw_check_ptr(a_buf_o);
+  _cw_check_ptr(a_bufel_o);
   if (a_buf_o->is_threadsafe == TRUE)
   {
     mtx_lock(&a_buf_o->lock);
   }
+
+  list_tpush(&a_buf_o->bufels, a_bufel_o);
   
   if (a_buf_o->is_threadsafe == TRUE)
   {
@@ -232,6 +272,22 @@ bufel_new(cw_bufel_t * a_bufel_o)
 {
   cw_bufel_t * retval;
 
+  if (a_bufel_o == NULL)
+  {
+    retval = (cw_bufel_t *) _cw_malloc(sizeof(a_bufel_o));
+    retval->is_malloced = TRUE;
+  }
+  else
+  {
+    retval = a_bufel_o;
+    retval->is_malloced = FALSE;
+  }
+
+  retval->buf_size = 0;
+  retval->beg_offset = 0;
+  retval->end_offset = 0;
+  retval->buf = NULL;
+  
   return retval;
 }
 
@@ -244,6 +300,16 @@ bufel_new(cw_bufel_t * a_bufel_o)
 void
 bufel_delete(cw_bufel_t * a_bufel_o)
 {
+  _cw_check_ptr(a_bufel_o);
+
+  if (a_bufel_o->buf != NULL)
+  {
+    _cw_free(a_bufel_o->buf);
+  }
+  if (a_bufel_o->is_malloced == TRUE)
+  {
+    _cw_free(a_bufel_o);
+  }
 }
 
 /****************************************************************************
@@ -256,9 +322,9 @@ bufel_delete(cw_bufel_t * a_bufel_o)
 cw_uint32_t
 bufel_get_size(cw_bufel_t * a_bufel_o)
 {
-  cw_uint32_t retval;
-
-  return retval;
+  _cw_check_ptr(a_bufel_o);
+  
+  return a_bufel_o->buf_size;
 }
 
 /****************************************************************************
@@ -271,7 +337,48 @@ cw_bool_t
 bufel_set_size(cw_bufel_t * a_bufel_o, cw_uint32_t a_size)
 {
   cw_bool_t retval;
+  cw_uint32_t * t_buf;
 
+  _cw_check_ptr(a_bufel_o);
+  _cw_assert((a_size & 0x3) == 0);
+
+  if (a_size <= a_bufel_o->end_offset)
+  {
+    /* We would chop off valid data if we did this. */
+    retval = TRUE;
+  }
+  else if (a_bufel_o->buf != NULL)
+  {
+    /* Reallocate. */
+    t_buf = (cw_uint32_t *) _cw_realloc(a_bufel_o->buf, a_size);
+
+    if (t_buf == NULL)
+    {
+      retval = TRUE;
+    }
+    else
+    {
+      a_bufel_o->buf = t_buf;
+      a_bufel_o->buf_size = a_size;
+      retval = FALSE;
+    }
+  }
+  else
+  {
+    /* Allocate for the first time. */
+    a_bufel_o->buf = (cw_uint32_t *) _cw_malloc(a_size);
+
+    if (a_bufel_o->buf == NULL)
+    {
+      retval = TRUE;
+    }
+    else
+    {
+      a_bufel_o->buf_size = a_size;
+      retval = FALSE;
+    }
+  }
+  
   return retval;
 }
 
@@ -284,9 +391,9 @@ bufel_set_size(cw_bufel_t * a_bufel_o, cw_uint32_t a_size)
 cw_uint32_t
 bufel_get_beg_offset(cw_bufel_t * a_bufel_o)
 {
-  cw_uint32_t retval;
+  _cw_check_ptr(a_bufel_o);
 
-  return retval;
+  return a_bufel_o->beg_offset;
 }
 
 /****************************************************************************
@@ -295,12 +402,13 @@ bufel_get_beg_offset(cw_bufel_t * a_bufel_o)
  * Sets the begin pointer offset.
  *
  ****************************************************************************/
-cw_bool_t
+void
 bufel_set_beg_offset(cw_bufel_t * a_bufel_o, cw_uint32_t a_offset)
 {
-  cw_bool_t retval;
+  _cw_check_ptr(a_bufel_o);
+  _cw_assert(a_offset <= a_bufel_o->end_offset);
 
-  return retval;
+  a_bufel_o->beg_offset = a_offset;
 }
 
 /****************************************************************************
@@ -312,9 +420,9 @@ bufel_set_beg_offset(cw_bufel_t * a_bufel_o, cw_uint32_t a_offset)
 cw_uint32_t
 bufel_get_end_offset(cw_bufel_t * a_bufel_o)
 {
-  cw_uint32_t retval;
+  _cw_check_ptr(a_bufel_o);
 
-  return retval;
+  return a_bufel_o->end_offset;
 }
 
 /****************************************************************************
@@ -323,12 +431,14 @@ bufel_get_end_offset(cw_bufel_t * a_bufel_o)
  * Sets the end pointer offset.
  *
  ****************************************************************************/
-cw_bool_t
+void
 bufel_set_end_offset(cw_bufel_t * a_bufel_o, cw_uint32_t a_offset)
 {
-  cw_bool_t retval;
+  _cw_check_ptr(a_bufel_o);
+  _cw_assert(a_offset >= a_bufel_o->beg_offset);
+  _cw_assert(a_offset < a_bufel_o->buf_size);
 
-  return retval;
+  a_bufel_o->end_offset = a_offset;
 }
 
 /****************************************************************************
@@ -341,7 +451,20 @@ cw_uint8_t
 bufel_get_uint8(cw_bufel_t * a_bufel_o, cw_uint32_t a_offset)
 {
   cw_uint8_t retval;
+  cw_uint32_t t;
 
+  _cw_check_ptr(a_bufel_o);
+  _cw_assert(a_offset < a_bufel_o->buf_size);
+  /* XXX This should be a compile-time check. */
+  _cw_assert(sizeof(u_long) == sizeof(cw_uint32_t));
+
+  /* XXX Does this make endianness assumptions? */
+  t = a_bufel_o->buf[a_offset >> 2];
+  t = htonl(t);
+  t >>= (8 * (a_offset & 0x3));
+  t &= 0xff;
+  retval = t;
+  
   return retval;
 }
 
@@ -351,13 +474,29 @@ bufel_get_uint8(cw_bufel_t * a_bufel_o, cw_uint32_t a_offset)
  * Sets the uint8 at a_offset to a_val.
  *
  ****************************************************************************/
-cw_bool_t
+void
 bufel_set_uint8(cw_bufel_t * a_bufel_o, cw_uint32_t a_offset,
 		cw_uint8_t a_val)
 {
-  cw_bool_t retval;
+  cw_uint32_t t_a, t_b, mask;
 
-  return retval;
+  _cw_check_ptr(a_bufel_o);
+  _cw_assert(a_offset < a_bufel_o->buf_size);
+
+  t_a = a_bufel_o->buf[a_offset >> 2];
+  t_a = htonl(t_a);
+
+  mask = 0xff << (8 * (a_offset & 0x3));
+  mask ^= 0xffffffff;
+
+  t_a &= mask;
+
+  t_b = a_val;
+  t_b <<= (8 * (a_offset & 0x3));
+
+  t_a |= t_b;
+  t_a = ntohl(t_a);
+  a_bufel_o->buf[a_offset >> 2] = t_a;
 }
 
 /****************************************************************************
@@ -371,6 +510,13 @@ bufel_get_uint32(cw_bufel_t * a_bufel_o, cw_uint32_t a_offset)
 {
   cw_uint32_t retval;
 
+  _cw_check_ptr(a_bufel_o);
+  _cw_assert((a_offset & 0x3) == 0);
+  _cw_assert (a_offset < a_bufel_o->buf_size);
+
+  retval = a_bufel_o->buf[a_offset];
+  retval = htonl(retval);
+  
   return retval;
 }
 
@@ -380,11 +526,13 @@ bufel_get_uint32(cw_bufel_t * a_bufel_o, cw_uint32_t a_offset)
  * Sets the uint32 at a_offset to a_val.
  *
  ****************************************************************************/
-cw_bool_t
+void
 bufel_set_uint32(cw_bufel_t * a_bufel_o, cw_uint32_t a_offset,
 		 cw_uint32_t a_val)
 {
-  cw_bool_t retval;
+  _cw_check_ptr(a_bufel_o);
+  _cw_assert((a_offset & 0x3) == 0);
+  _cw_assert (a_offset < a_bufel_o->buf_size);
 
-  return retval;
+  a_bufel_o->buf[a_offset] = ntohl(a_val);
 }
