@@ -26,24 +26,6 @@
 
 /****************************************************************************
  *
- * Default primary hash function.  This is a string hash, so if the keys
- * being used for an oh instance aren't strings, don't use this.
- *
- ****************************************************************************/
-static cw_uint64_t
-oh_p_h1(cw_oh_t * a_oh, const void * a_key);
-
-/****************************************************************************
- *
- * Compares two keys (strings) for equality.  A return value of TRUE means the
- * arguments are equal.
- *
- ****************************************************************************/
-static cw_bool_t
-oh_p_key_compare(const void * a_k1, const void * a_k2);
-
-/****************************************************************************
- *
  * If the table is too full, double in size and insert into the new table.
  *
  ****************************************************************************/

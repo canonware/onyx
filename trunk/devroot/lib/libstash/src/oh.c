@@ -75,8 +75,8 @@ oh_new(cw_oh_t * a_oh, cw_bool_t a_is_thread_safe)
   list_new(&retval->spares_list);
 #endif
   
-  retval->curr_h1 = oh_p_h1;
-  retval->key_compare = oh_p_key_compare;
+  retval->curr_h1 = oh_h1_string;
+  retval->key_compare = oh_key_compare_string;
 
   retval->curr_power
     = retval->base_power
@@ -901,8 +901,8 @@ oh_get_num_shrinks(cw_oh_t * a_oh)
   return retval;
 }
 
-static cw_uint64_t
-oh_p_h1(cw_oh_t * a_oh, const void * a_key)
+cw_uint64_t
+oh_h1_string(cw_oh_t * a_oh, const void * a_key)
 {
   cw_uint64_t retval;
   char * str;
@@ -914,28 +914,34 @@ oh_p_h1(cw_oh_t * a_oh, const void * a_key)
     retval = retval * 33 + *str;
   }
 
-  retval = retval % (1 << a_oh->curr_power);
+/*    retval = retval % (1 << a_oh->curr_power); */
   
   return retval;
 }
-#if (0)
-static cw_uint64_t
-oh_p_h1(cw_oh_t * a_oh, const void * a_key)
+
+cw_uint64_t
+oh_h1_direct(cw_oh_t * a_oh, const void * a_key)
 {
   cw_uint64_t retval;
 
   _cw_check_ptr(a_oh);
 
-  retval = (a_key >> 4) % (1 << a_oh->curr_power);
+/*    retval = (a_key >> 4) % (1 << a_oh->curr_power); */
+  retval = (cw_uint64_t) (cw_uint32_t) a_key;
 
   return retval;
 }
-#endif
 
-static cw_bool_t
-oh_p_key_compare(const void * a_k1, const void * a_k2)
+cw_bool_t
+oh_key_compare_string(const void * a_k1, const void * a_k2)
 {
   return strcmp((char *) a_k1, (char *) a_k2) ? FALSE : TRUE;
+}
+
+cw_bool_t
+oh_key_compare_direct(const void * a_k1, const void * a_k2)
+{
+  return (a_k1 == a_k2) ? TRUE : FALSE;
 }
 
 static void

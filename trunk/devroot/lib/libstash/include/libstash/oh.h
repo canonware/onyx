@@ -298,3 +298,38 @@ oh_get_num_grows(cw_oh_t * a_oh);
  ****************************************************************************/
 cw_uint64_t
 oh_get_num_shrinks(cw_oh_t * a_oh);
+
+/****************************************************************************
+ *
+ * Default primary hash function.  This is a string hash, so if the keys
+ * being used for an oh instance aren't strings, don't use this.
+ *
+ ****************************************************************************/
+cw_uint64_t
+oh_h1_string(cw_oh_t * a_oh, const void * a_key);
+
+/****************************************************************************
+ *
+ * Alternate primary hash function.  This is a direct pointer hash.
+ *
+ ****************************************************************************/
+cw_uint64_t
+oh_h1_direct(cw_oh_t * a_oh, const void * a_key);
+
+/****************************************************************************
+ *
+ * Compares two keys (strings) for equality.  A return value of TRUE means the
+ * arguments are equal.
+ *
+ ****************************************************************************/
+cw_bool_t
+oh_key_compare_string(const void * a_k1, const void * a_k2);
+
+/****************************************************************************
+ *
+ * Compares two keys pointers for equality.  A return value of TRUE means the
+ * arguments are equal.
+ *
+ ****************************************************************************/
+cw_bool_t
+oh_key_compare_direct(const void * a_k1, const void * a_k2);
