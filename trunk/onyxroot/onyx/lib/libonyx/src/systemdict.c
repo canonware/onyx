@@ -264,7 +264,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #endif
     ENTRY(loop),
     ENTRY(lt),
-#ifdef CW_RX
+#ifdef CW_REGEX
     ENTRY(match),
 #endif
 #ifdef CW_POSIX
@@ -296,7 +296,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(nsleep),
 #endif
     ENTRY(nup),
-#ifdef CW_RX
+#ifdef CW_REGEX
     ENTRY(offsets),
 #endif
 #ifdef CW_POSIX
@@ -334,8 +334,8 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #ifdef CW_SOCKET
     ENTRY(recv),
 #endif
-#ifdef CW_RX
-    ENTRY(regexp),
+#ifdef CW_REGEX
+    ENTRY(regex),
     ENTRY(regsub),
 #endif
 #ifdef CW_POSIX
@@ -442,7 +442,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(string),
     ENTRY(stuck),
     ENTRY(sub),
-#ifdef CW_RX
+#ifdef CW_REGEX
     ENTRY(subst),
 #endif
     ENTRY(sunder),
@@ -2867,6 +2867,10 @@ systemdict_cvs(cw_nxo_t *a_thread)
 #endif
 	case NXOT_NULL:
 	case NXOT_PMARK:
+#ifdef CW_REGEX
+	case NXOT_REGEX:
+	case NXOT_REGSUB:
+#endif
 	case NXOT_STACK:
 	case NXOT_THREAD:
 	{
@@ -4718,6 +4722,13 @@ systemdict_lcheck(cw_nxo_t *a_thread)
 	case NXOT_NULL:
 	case NXOT_OPERATOR:
 	case NXOT_PMARK:
+#ifdef CW_REAL
+	case NXOT_REAL:
+#endif
+#ifdef CW_REGEX
+	case NXOT_REGEX:
+	case NXOT_REGSUB:
+#endif
 	case NXOT_THREAD:
 	{
 	    nxo_thread_nerror(a_thread, NXN_typecheck);
@@ -5211,7 +5222,7 @@ systemdict_lt(cw_nxo_t *a_thread)
     nxo_stack_pop(ostack);
 }
 
-#ifdef CW_RX
+#ifdef CW_REGEX
 void
 systemdict_match(cw_nxo_t *a_thread)
 {
@@ -6155,7 +6166,7 @@ systemdict_nup(cw_nxo_t *a_thread)
     }
 }
 
-#ifdef CW_RX
+#ifdef CW_REGEX
 void
 systemdict_offsets(cw_nxo_t *a_thread)
 {
@@ -7437,15 +7448,15 @@ systemdict_rename(cw_nxo_t *a_thread)
 }
 #endif
 
-#ifdef CW_RX
+#ifdef CW_REGEX
 void
-systemdict_regexp(cw_nxo_t *a_thread)
+systemdict_regex(cw_nxo_t *a_thread)
 {
     cw_error("XXX Not implemented");
 }
 #endif
 
-#ifdef CW_RX
+#ifdef CW_REGEX
 void
 systemdict_regsub(cw_nxo_t *a_thread)
 {
@@ -10146,7 +10157,7 @@ systemdict_sub(cw_nxo_t *a_thread)
     nxo_stack_pop(ostack);
 }
 
-#ifdef CW_RX
+#ifdef CW_REGEX
 void
 systemdict_subst(cw_nxo_t *a_thread)
 {
@@ -11183,8 +11194,8 @@ systemdict_type(cw_nxo_t *a_thread)
 #ifdef CW_REAL
 	NXN_realtype,
 #endif
-#ifdef CW_RX
-	NXN_regexptype,
+#ifdef CW_REGEX
+	NXN_regextype,
 	NXN_regsubtype,
 #endif
 	NXN_stacktype,
