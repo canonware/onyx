@@ -64,6 +64,8 @@ EXTRALIBS = @LIBS@;
 
 all : libs;
 
+everything : libs bins tests;
+
 libs_d : [D_LIBS];
 libs_a : [A_LIBS];
 libs_p : [P_LIBS];

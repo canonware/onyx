@@ -80,8 +80,8 @@ cw_sint32_t out_put_l(cw_out_t *a_out, const char *a_format,...);
 cw_sint32_t out_put_le(cw_out_t *a_out, const char *a_file_name, cw_uint32_t
     a_line_num, const char *a_func_name, const char *a_format,...);
 
-#define _cw_out_put_n(a_format, a_size, a_args...)			\
-	out_put(cw_g_out, a_size, a_format , ## a_args)
+#define _cw_out_put_n(a_size, a_format, a_args...)			\
+	out_put_n(cw_g_out, a_size, a_format , ## a_args)
 cw_sint32_t out_put_n(cw_out_t *a_out, cw_uint32_t a_size, const char
     *a_format,...);
 
