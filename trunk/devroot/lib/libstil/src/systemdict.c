@@ -820,7 +820,7 @@ systemdict_currentcontext(cw_stilt_t *a_stilt)
 	cw_stilo_t	*context;
 	union {
 		cw_sint64_t	i;
-		void		*p;
+		cw_stilt_t	*stilt;
 	} u;
 	_cw_assert(sizeof(cw_sint64_t) >= sizeof(void *));
 
@@ -828,7 +828,7 @@ systemdict_currentcontext(cw_stilt_t *a_stilt)
 	context = stils_push(ostack);
 
 	u.i = 0;
-	u.p = a_stilt;
+	u.stilt = a_stilt;
 	stilo_integer_new(context, u.i);
 }
 
@@ -1124,7 +1124,24 @@ systemdict_deletefile(cw_stilt_t *a_stilt)
 void
 systemdict_detach(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*ostack;
+	cw_stilo_t	*thread;
+	union {
+		cw_sint64_t	i;
+		cw_stilt_t	*stilt;
+	} u;
+
+	ostack = stilt_ostack_get(a_stilt);
+	STILS_GET(thread, ostack, a_stilt);
+	if (stilo_type_get(thread) != STILOT_INTEGER) {
+		stilt_error(a_stilt, STILTE_TYPECHECK);
+		return;
+	}
+
+	u.i = stilo_integer_get(thread);
+	stilt_detach(u.stilt);
+
+	stils_pop(ostack);
 }
 
 void
@@ -2064,7 +2081,24 @@ systemdict_index(cw_stilt_t *a_stilt)
 void
 systemdict_join(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*ostack;
+	cw_stilo_t	*thread;
+	union {
+		cw_sint64_t	i;
+		cw_stilt_t	*stilt;
+	} u;
+
+	ostack = stilt_ostack_get(a_stilt);
+	STILS_GET(thread, ostack, a_stilt);
+	if (stilo_type_get(thread) != STILOT_INTEGER) {
+		stilt_error(a_stilt, STILTE_TYPECHECK);
+		return;
+	}
+
+	u.i = stilo_integer_get(thread);
+	stilt_join(u.stilt);
+
+	stils_pop(ostack);
 }
 
 void
@@ -3572,7 +3606,55 @@ systemdict_test(cw_stilt_t *a_stilt)
 void
 systemdict_thread(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*ostack, *tstack;
+	cw_stilo_t	*mark, *stilo, *new;
+	union {
+		cw_sint64_t	i;
+		cw_stilt_t	*stilt;
+	} u;
+
+	ostack = stilt_ostack_get(a_stilt);
+	tstack = stilt_tstack_get(a_stilt);
+
+	/*
+	 * Find the first mark on ostack, which demarks the objects to be moved
+	 * to the new stilt's stacks.
+	 */
+	STILS_GET(mark, ostack, a_stilt);
+	stilo = mark;
+	while (stilo_type_get(mark) != STILOT_MARK)
+		STILS_DOWN_GET(mark, ostack, a_stilt, mark);
+
+	/*
+	 * Create the new stilt.
+	 */
+	u.i = 0;
+	u.stilt = stilt_new(NULL, stilt_stil_get(a_stilt));
+
+	/*
+	 * Move objects over to the new stilt.
+	 */
+	if (stilo != mark) {
+		new = stils_push(stilt_estack_get(u.stilt));
+		stilo_dup(new, stilo);
+		stils_pop(ostack);
+	}
+	for (stilo = stils_get(ostack); stilo != mark; stilo =
+	     stils_get(ostack)) {
+		new = stils_push(stilt_ostack_get(u.stilt));
+		stilo_dup(new, stilo);
+		stils_pop(ostack);
+	}
+
+	/*
+	 * Put the context on ostack.
+	 */
+	stilo_integer_new(mark, u.i);
+
+	/*
+	 * Start the thread.
+	 */
+	stilt_thread(u.stilt);
 }
 
 void

@@ -83,7 +83,7 @@ stila_new(cw_stila_t *a_stila, cw_stil_t *a_stil)
 		 */
 		sigemptyset(&sig_mask);
 		thd_sigmask(SIG_BLOCK, &sig_mask, &old_mask);
-		thd_new(&a_stila->gc_thd, stila_p_gc_entry, (void *)a_stila);
+		a_stila->gc_thd = thd_new(stila_p_gc_entry, (void *)a_stila);
 		thd_sigmask(SIG_UNBLOCK, &old_mask, NULL);
 		try_stage = 6;
 
@@ -118,7 +118,7 @@ stila_delete(cw_stila_t *a_stila)
 	_cw_assert(a_stila->magic == _CW_STILA_MAGIC);
 
 	mq_put(&a_stila->gc_mq, STILAM_SHUTDOWN);
-	thd_join(&a_stila->gc_thd);
+	thd_join(a_stila->gc_thd);
 	mq_delete(&a_stila->gc_mq);
 
 	pool_delete(&a_stila->dicto_pool);

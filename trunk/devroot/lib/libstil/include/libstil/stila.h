@@ -31,7 +31,7 @@ struct cw_stila_s {
 
 	cw_mq_t		gc_mq;
 	cw_stil_t	*stil;
-	cw_thd_t	gc_thd;
+	cw_thd_t	*gc_thd;
 };
 
 void	stila_new(cw_stila_t *a_stila, cw_stil_t *a_stil);

@@ -231,7 +231,7 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 		} else {
 			v_retval = retval = (cw_stilt_t
 			    *)_cw_malloc(sizeof(cw_stilt_t));
-			memset(a_stilt, 0, sizeof(cw_stilt_t));
+			memset(retval, 0, sizeof(cw_stilt_t));
 			retval->is_malloced = TRUE;
 		}
 		retval->stil = a_stil;
@@ -311,7 +311,7 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 	}
 	xep_end();
 
-	stil_l_stilt_insert(a_stilt->stil, a_stilt);
+	stil_l_stilt_insert(a_stil, retval);
 #ifdef _LIBSTIL_DBG
 	retval->magic = _CW_STILT_MAGIC;
 #endif
@@ -346,6 +346,100 @@ stilt_delete(cw_stilt_t *a_stilt)
 	else
 		memset(a_stilt, 0x5a, sizeof(cw_stilt_t));
 #endif
+}
+
+void *
+stilt_p_thread_entry(void *a_arg)
+{
+	cw_stilt_thread_entry_t	*arg = (cw_stilt_thread_entry_t *)a_arg;
+
+	/* Run. */
+	stilt_loop(arg->stilt);
+
+	/* Wait to be joined or detated, if not already so. */
+	mtx_lock(&arg->lock);
+	arg->done = TRUE;
+	while (arg->detached == FALSE && arg->joined == FALSE) {
+		cnd_wait(&arg->done_cnd, &arg->lock);
+	}
+	if (arg->detached) {
+		mtx_unlock(&arg->lock);
+
+		/* Clean up. */
+		cnd_delete(&arg->join_cnd);
+		cnd_delete(&arg->done_cnd);
+		mtx_delete(&arg->lock);
+		stilt_delete(arg->stilt);
+		thd_delete(arg->thd);
+		/* XXX Need to free this once thd_delete() is safe. */
+/*  		_cw_free(arg); */
+	} else if (arg->joined) {
+		/* Wake the joiner back up. */
+		cnd_signal(&arg->join_cnd);
+		/* We're done.  The joiner will clean up. */
+		arg->gone = TRUE;
+		mtx_unlock(&arg->lock);
+	} else
+		_cw_not_reached();
+
+	return NULL;
+}
+
+void
+stilt_thread(cw_stilt_t *a_stilt)
+{
+	a_stilt->entry = (cw_stilt_thread_entry_t
+	    *)_cw_malloc(sizeof(cw_stilt_thread_entry_t));
+
+	a_stilt->entry->stilt = a_stilt;
+	mtx_new(&a_stilt->entry->lock);
+	cnd_new(&a_stilt->entry->done_cnd);
+	cnd_new(&a_stilt->entry->join_cnd);
+	a_stilt->entry->done = FALSE;
+	a_stilt->entry->gone = FALSE;
+	a_stilt->entry->detached = FALSE;
+	a_stilt->entry->joined = FALSE;
+
+	a_stilt->entry->thd = thd_new(stilt_p_thread_entry, (void
+	    *)a_stilt->entry);
+}
+
+void
+stilt_detach(cw_stilt_t *a_stilt)
+{
+	mtx_lock(&a_stilt->entry->lock);
+	a_stilt->entry->detached = TRUE;
+	if (a_stilt->entry->done) {
+		/* The thread is already done, so wake it back up. */
+		cnd_signal(&a_stilt->entry->done_cnd);
+	}
+	mtx_unlock(&a_stilt->entry->lock);
+}
+
+void
+stilt_join(cw_stilt_t *a_stilt)
+{
+	cw_stilt_thread_entry_t	*entry;
+
+	mtx_lock(&a_stilt->entry->lock);
+	a_stilt->entry->joined = TRUE;
+	if (a_stilt->entry->done) {
+		/* The thread is already done, so wake it back up. */
+		cnd_signal(&a_stilt->entry->done_cnd);
+	}
+	/* Wait for the thread to totally go away. */
+	while (a_stilt->entry->gone == FALSE)
+		cnd_wait(&a_stilt->entry->join_cnd, &a_stilt->entry->lock);
+	mtx_unlock(&a_stilt->entry->lock);
+
+	/* Clean up. */
+	cnd_delete(&a_stilt->entry->join_cnd);
+	cnd_delete(&a_stilt->entry->done_cnd);
+	mtx_delete(&a_stilt->entry->lock);
+	thd_join(a_stilt->entry->thd);
+	entry = a_stilt->entry;
+	stilt_delete(a_stilt->entry->stilt);
+	_cw_free(entry);
 }
 
 void

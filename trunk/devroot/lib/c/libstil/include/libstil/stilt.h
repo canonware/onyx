@@ -15,6 +15,20 @@
 #define	_CW_STILT_BUFFER_SIZE	256
 #endif
 
+typedef struct cw_stilt_thread_entry_s cw_stilt_thread_entry_t;
+
+struct cw_stilt_thread_entry_s {
+	cw_stilt_t	*stilt;
+	cw_thd_t	*thd;
+	cw_mtx_t	lock;
+	cw_cnd_t	done_cnd;
+	cw_cnd_t	join_cnd;
+	cw_bool_t	done:1;
+	cw_bool_t	gone:1;
+	cw_bool_t	detached:1;
+	cw_bool_t	joined:1;
+};
+
 typedef struct cw_stilts_s cw_stilts_t;
 typedef enum {
 	STILTTS_START,
@@ -61,7 +75,7 @@ struct cw_stilt_s {
 	cw_uint32_t	magic;
 #endif
 
-	cw_bool_t	is_malloced;
+	cw_bool_t	is_malloced:1;
 
 	/*
 	 * stil this stilt is part of.
@@ -74,6 +88,11 @@ struct cw_stilt_s {
 	ql_elm(cw_stilt_t) link;
 
 	/*
+	 * Used by stilt_thread(), stilt_detach(), and stilt_join().
+	 */
+	cw_stilt_thread_entry_t *entry;
+
+	/*
 	 * Used for remembering the current state of reference iteration.
 	 */
 	cw_uint32_t	ref_iter;
@@ -82,7 +101,7 @@ struct cw_stilt_s {
 	 * TRUE  : Global allocation mode.
 	 * FALSE : Local allocation mode.
 	 */
-	cw_bool_t	global;
+	cw_bool_t	global:1;
 
         /*
          * Thread-specific name cache hash (key: {name, len}, value:
@@ -195,6 +214,10 @@ cw_stilt_t *stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil);
 void	stilt_delete(cw_stilt_t *a_stilt);
 #define	stilt_start(a_stilt) systemdict_start(a_stilt)
 #define	stilt_executive(a_stilt) systemdict_executive(a_stilt)
+
+void	stilt_thread(cw_stilt_t *a_stilt);
+void	stilt_detach(cw_stilt_t *a_stilt);
+void	stilt_join(cw_stilt_t *a_stilt);
 
 #define	stilt_state(a_stilt) (a_stilt)->state
 #define	stilt_deferred(a_stilt) ((a_stilt)->defer_count ? TRUE : FALSE)
