@@ -271,10 +271,43 @@ const char *a\_filename, cw\_uint32\_t a\_line\_num}}
 	\item[Description: ]
 		Allocate \cvar{a\_size} of space and return a pointer to it.
 	\end{capilist}
+\label{cw_opaque_calloc_t}
+\index{cw_opaque_calloc_t@\cfunc{cw\_opaque\_calloc\_t}{}}
+\citem{\cfunc[void *]{cw\_opaque\_calloc\_t}{void *a\_arg, size\_t a\_number,
+size\_t a\_size, const char *a\_filename, cw\_uint32\_t
+a\_line\_num}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_arg: ]
+			Opaque pointer.
+		\item[a\_number: ]
+			Number of elements to allocate.
+		\item[a\_size: ]
+			Size of each element to allocate.
+		\item[a\_filename: ]
+			Should be \_\_FILE\_\_.
+		\item[a\_line\_num: ]
+			Should be \_\_LINE\_\_.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to a zeroed memory range.
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{CW\_ONYXX\_OOM}{CW_ONYXX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Allocate a zeroed array of \cvar{a\_number} objects, each
+		\cvar{a\_size} bytes long, and return a pointer to the array.
+	\end{capilist}
 \label{cw_opaque_realloc_t}
 \index{cw_opaque_realloc_t@\cfunc{cw\_opaque\_realloc\_t}{}}
 \citem{\cfunc[void *]{cw\_opaque\_realloc\_t}{void *a\_arg, void *a\_ptr,
-size\_t a\_size, const char *a\_filename, cw\_uint32\_t a\_line\_num}}
+size\_t a\_size, size\_t a\_old\_size, const char *a\_filename, cw\_uint32\_t
+a\_line\_num}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -284,6 +317,9 @@ size\_t a\_size, const char *a\_filename, cw\_uint32\_t a\_line\_num}}
 			Pointer to memory range to be reallocated.
 		\item[a\_size: ]
 			Size of memory range to allocate.
+		\item[a\_old\_size: ]
+			Size of memory range previously pointed to by
+			\cvar{a\_ptr}.
 		\item[a\_filename: ]
 			Should be \_\_FILE\_\_.
 		\item[a\_line\_num: ]
@@ -350,10 +386,39 @@ a\_size, const char *a\_filename, cw\_uint32\_t a\_line\_num}}
 	\item[Description: ]
 		Allocate \cvar{a\_size} of space and return a pointer to it.
 	\end{capilist}
+\label{cw_opaque_calloc}
+\index{cw_opaque_calloc@\cfunc{cw\_opaque\_calloc}{}}
+\citem{\cppmacro[void *]{cw\_opaque\_calloc}{cw\_opaque\_calloc\_t *a\_func,
+void *a\_arg, size\_t a\_number, size\_t a\_size}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_func: ]
+			Opaque allocator function pointer.
+		\item[a\_arg: ]
+			Opaque pointer.
+		\item[a\_number: ]
+			Number of elements to allocate.
+		\item[a\_size: ]
+			Size of each element to allocate.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to a zeroed memory range.
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{CW\_ONYXX\_OOM}{CW_ONYXX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Allocate a zeroed array of \cvar{a\_number} objects, each
+		\cvar{a\_size} bytes long, and return a pointer to the array.
+	\end{capilist}
 \label{cw_opaque_realloc}
 \index{cw_opaque_realloc@\cfunc{cw\_opaque\_realloc}{}}
 \citem{\cppmacro[void *]{cw\_opaque\_realloc}{cw\_opaque\_realloc\_t *a\_func,
-void *a\_arg, void *a\_ptr, size\_t a\_size}}
+void *a\_arg, void *a\_ptr, size\_t a\_size, size\_t a\_old\_size}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -365,6 +430,9 @@ void *a\_arg, void *a\_ptr, size\_t a\_size}}
 			Pointer to memory range to be reallocated.
 		\item[a\_size: ]
 			Size of memory range to allocate.
+		\item[a\_old\_size: ]
+			Size of memory range previously pointed to by
+			\cvar{a\_ptr}.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
@@ -435,6 +503,25 @@ void *a\_mem, void *a\_ptr, size\_t a\_size}}
 
 		Note: This macro is only active if the \cppdef{CW\_ASSERT} cpp
 		macro is defined.
+	\end{capilist}
+\label{cw_dassert}
+\index{cw_dassert@\cppmacro{cw\_dassert}{}}
+\citem{\cppmacro[void]{cw\_dassert}{expression}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[expression: ]
+			C expression that evaluates to zero or non-zero.
+		\end{description}
+	\item[Output(s): ]
+			Possible error printed to \cvar{stderr}.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		If the expression evaluates to zero, print an error message to
+		\cvar{stderr} and \cfunc{abort}{}.
+
+		Note: This macro is only active if the \cppdef{CW\_ASSERT} and
+		\cppdef{CW\_DBG} cpp macros are defined.
 	\end{capilist}
 \label{cw_not_reached}
 \index{cw_not_reached@\cppmacro{cw\_not\_reached}{}}

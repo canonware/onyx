@@ -1,3 +1,12 @@
+2003-03-22 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/include/libonyx/libonyx.h:cw_opaque_{c,re}alloc() : Fix
+	  the reversal of a_arg and a_num.  This is a minor issue, since
+	  internally, libonyx was consistent in reversing the order of the
+	  arguments.  The change causes a header incompatibility, but no library
+	  incompatibility, so the library version number does not need to be
+	  bumped.
+
 2003-03-21 : Jason Evans <jasone@canonware.com>
 
 	* Onyx 4.4.1 released.
