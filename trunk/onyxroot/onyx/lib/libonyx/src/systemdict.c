@@ -88,7 +88,6 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(countestack),
 	ENTRY(counttomark),
 	ENTRY(currentdict),
-	ENTRY(currentfile),
 	ENTRY(currentlocking),
 	ENTRY(cvlit),
 	ENTRY(cvn),
@@ -1146,31 +1145,6 @@ systemdict_currentdict(cw_nxo_t *a_thread)
 
 	nxo = nxo_stack_push(ostack);
 	nxo_dup(nxo, nxo_stack_get(dstack));
-}
-
-void
-systemdict_currentfile(cw_nxo_t *a_thread)
-{
-	cw_nxo_t	*ostack, *estack;
-	cw_nxo_t	*file, *nxo;
-	cw_uint32_t	i, depth;
-
-	estack = nxo_thread_estack_get(a_thread);
-	ostack = nxo_thread_ostack_get(a_thread);
-
-	file = nxo_stack_push(ostack);
-	for (i = 0, depth = nxo_stack_count(estack), nxo = NULL; i < depth;
-	    i++) {
-		nxo = nxo_stack_down_get(estack, nxo);
-		if (nxo_type_get(nxo) == NXOT_FILE) {
-			nxo_dup(file, nxo);
-			break;
-		}
-	}
-	if (i == depth) {
-		nxo_file_new(file, nxo_thread_nx_get(a_thread),
-		    nxo_thread_currentlocking(a_thread));
-	}
 }
 
 void
@@ -3284,7 +3258,8 @@ systemdict_putinterval(cw_nxo_t *a_thread)
 	NXO_STACK_DOWN_GET(with, ostack, a_thread, what);
 	NXO_STACK_DOWN_GET(into, ostack, a_thread, with);
 
-	if (nxo_type_get(with) != NXOT_INTEGER) {
+	if (nxo_type_get(with) != NXOT_INTEGER || nxo_type_get(what) !=
+	    nxo_type_get(into)) {
 		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
 		return;
 	}

@@ -32,7 +32,6 @@ void	systemdict_countdstack(cw_nxo_t *a_thread);
 void	systemdict_countestack(cw_nxo_t *a_thread);
 void	systemdict_counttomark(cw_nxo_t *a_thread);
 void	systemdict_currentdict(cw_nxo_t *a_thread);
-void	systemdict_currentfile(cw_nxo_t *a_thread);
 void	systemdict_currentlocking(cw_nxo_t *a_thread);
 void	systemdict_cvlit(cw_nxo_t *a_thread);
 void	systemdict_cvn(cw_nxo_t *a_thread);

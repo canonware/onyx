@@ -55,7 +55,6 @@ typedef enum {
 	NXN_counttomark,
 	NXN_ctime,
 	NXN_currentdict,
-	NXN_currentfile,
 	NXN_currentlocking,
 	NXN_cvlit,
 	NXN_cvn,

@@ -5667,19 +5667,38 @@ onyx:0>
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[array: ]
+			An array object.
+		\item[string: ]
+			A string object.
+		\item[index: ]
+			Offset into \oparg{array} or \oparg{string} to put
+			\oparg{subarray} or \oparg{substring}, respectively.
+		\item[subarray: ]
+			An array object to put into \oparg{array} at offset
+			\oparg{index}.  When inserted \oparg{subarray} must not
+			extend past the end of \oparg{array}.
+		\item[substring: ]
+			A string object to put into \oparg{string} at offset
+			\oparg{index}.  When inserted \oparg{substring} must not
+			extend past the end of \oparg{string}.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Replace a portion of \oparg{array} or \oparg{string}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> 4 array dup 1 [`a' `b'] putinterval 1 sprint
+[null `a' `b' null]
+onyx:0> 4 string dup 1 `ab' putinterval 1 sprint
+`\x00ab\x00'
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:pwd}

@@ -97,7 +97,10 @@ SRCS = [SRCS] [ONYX_SRCS];
                  nsleep_b.nx.in nsleep_c.nx.in nsleep_d.nx.in or_a.nx.in
                  or_b.nx.in or_c.nx.in or_d.nx.in or_e.nx.in or_f.nx.in
                  pop_a.nx.in pop_b.nx.in put_a.nx.in put_b.nx.in put_c.nx.in
-                 put_d.nx.in put_e.nx.in put_f.nx.in put_g.nx.in rand_a.nx.in
+                 put_d.nx.in put_e.nx.in put_f.nx.in put_g.nx.in
+                 putinterval_a.nx.in putinterval_b.nx.in putinterval_c.nx.in
+                 putinterval_d.nx.in putinterval_e.nx.in putinterval_f.nx.in
+                 putinterval_g.nx.in putinterval_h.nx.in rand_a.nx.in
                  repeat_a.nx.in repeat_b.nx.in repeat_c.nx.in repeat_d.nx.in
                  roll_a.nx.in roll_b.nx.in roll_c.nx.in roll_d.nx.in
                  roll_e.nx.in roll_f.nx.in roll_g.nx.in sclear_a.nx.in
