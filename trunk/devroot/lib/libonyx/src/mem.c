@@ -256,9 +256,9 @@ mem_malloc_e(void *a_arg, size_t a_size, const char *a_filename,
 #ifdef CW_MEM_ERROR
 	fprintf(stderr, "%s(): %p <-- malloc(%zu) at %s:%u\n",
 		__func__, retval, a_size, a_filename, a_line_num);
-#endif
 #ifdef CW_THREADS
 	mtx_unlock(&s_mem_lock);
+#endif
 #endif
 	xep_throw(CW_ONYXX_OOM);
     }
@@ -335,9 +335,9 @@ mem_calloc_e(void *a_arg, size_t a_number, size_t a_size,
 	fprintf(stderr, "%s(): %p <-- calloc(%zu, %zu) at %s:%u\n",
 		__func__, retval, a_number, a_size,
 		a_filename, a_line_num);
-#endif
 #ifdef CW_THREADS
 	mtx_unlock(&s_mem_lock);
+#endif
 #endif
 	xep_throw(CW_ONYXX_OOM);
     }
@@ -416,9 +416,9 @@ mem_realloc_e(void *a_arg, void *a_ptr, size_t a_size, size_t a_old_size,
 	fprintf(stderr, "%s(): %p <-- realloc(%p, %zu) at %s:%u\n",
 		__func__, retval, a_ptr, a_size,
 		a_filename, a_line_num);
-#endif
 #ifdef CW_THREADS
 	mtx_unlock(&s_mem_lock);
+#endif
 #endif
 	xep_throw(CW_ONYXX_OOM);
     }
