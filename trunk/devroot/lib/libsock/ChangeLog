@@ -1,3 +1,12 @@
+1999-08-06  Jason Evans  <jasone@canonware.com>
+
+	* src/sockb.c (sockb_p_entry_func): Use poll() instead of
+	select().  This avoids the 1024 FD_SETSIZE limitation on Solaris,
+	and generally improves scalability, though it makes libsock
+	somewhat less portable.  FreeBSD prior to 20 June 1999 cannot deal
+	with this.
+	(sockb_init): Add a_max_fds argument.
+
 1999-08-01  Jason Evans  <jasone@canonware.com>
 
 	* src/sock.c (sock_is_connected): Reverse the return value.

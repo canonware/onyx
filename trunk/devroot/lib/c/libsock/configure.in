@@ -26,6 +26,8 @@ AC_PATH_PROG(DIFF, diff, , $PATH)
 AC_PATH_PROG(CAT, cat, , $PATH)
 AC_PATH_PROG(ETAGS, etags, , $PATH)
 
+AC_CHECK_FUNCS(poll, , AC_MSG_ERROR(Cannot build without poll))
+
 SQRL_DISABLE_SHARED()
 
 AC_ARG_WITH(libstash-prefix, [  --with-libstash-prefix  Path to libstash])
@@ -83,6 +85,7 @@ esac
 dnl Check for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS(unistd.h, , AC_MSG_ERROR(Cannot build without unistd.h))
+AC_CHECK_HEADERS(poll.h, , AC_MSG_ERROR(Cannot build without unistd.h))
 
 dnl Check for typedefs, structures, and compiler characteristics.
 dnl AC_C_BIGENDIAN

@@ -95,6 +95,26 @@ sockb_l_out_notify(cw_uint32_t a_sockfd);
  *
  * <<< Input(s) >>>
  *
+ * a_sockfd : A file descriptor number.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : FALSE == success, TRUE == error.
+ *          TRUE : Memory allocation error.
+ *
+ * <<< Description >>>
+ *
+ * Tell the sockb thread that the sock corresponding to a_sockfd has space
+ * available for incoming data.
+ *
+ ****************************************************************************/
+cw_bool_t
+sockb_l_in_space(cw_uint32_t a_sockfd);
+
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
  * a_host_str : Pointer to a string that represents an IP address or hostname.
  *
  * r_host_ip : Pointer to space for an IP address.

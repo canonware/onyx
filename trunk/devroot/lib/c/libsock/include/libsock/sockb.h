@@ -40,6 +40,8 @@ extern cw_sockb_t * g_sockb;
  *
  * <<< Input(s) >>>
  *
+ * a_max_fds : Maximum possible file descriptor plus one.
+ *
  * a_bufc_size : Size of bufc to use for memory buffering.
  *
  * a_max_spare_bufcs : Maximum number of bufc's to cache in one pezz block.

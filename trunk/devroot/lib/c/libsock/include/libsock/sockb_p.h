@@ -23,7 +23,7 @@ struct cw_sockb_msg_s
 #ifdef _LIBSOCK_DBG
   cw_uint32_t magic;
 #endif
-  enum {REGISTER, UNREGISTER, OUT_NOTIFY, IN_NOTIFY} type;
+  enum {REGISTER, UNREGISTER, OUT_NOTIFY, IN_SPACE, IN_NOTIFY} type;
   union
   {
     cw_sock_t * sock;

@@ -471,6 +471,15 @@ sock_read(cw_sock_t * a_sock, cw_buf_t * a_spare, cw_sint32_t a_max_read,
     size = buf_get_size(&a_sock->in_buf);
     if (0 < size)
     {
+      _cw_assert(a_sock->in_max_buf_size >= size);
+      if (a_sock->in_max_buf_size == size)
+      {
+	/* The incoming buffer was maxed, but now there is space. */
+	while (TRUE == sockb_l_in_space(a_sock->sockfd))
+	{
+	}
+      }
+      
       if ((a_max_read == 0) || (size < a_max_read))
       {
 	buf_catenate_buf(a_spare, &a_sock->in_buf, FALSE);
@@ -526,13 +535,6 @@ sock_write(cw_sock_t * a_sock, cw_buf_t * a_buf)
     {
       mtx_lock(&a_sock->out_lock);
       
-/*        out_put_e(cw_g_out, NULL, 0, __FUNCTION__, */
-/*  		"sockfd [i]: write [i] bytes onto [i] existing, notify: [s]\n", */
-/*  		a_sock->sockfd, */
-/*  		buf_get_size(a_buf), */
-/*  		buf_get_size(&a_sock->out_buf), */
-/*  		a_sock->out_is_flushed ? "yes" : "no"); */
-
       if (a_sock->out_is_flushed == TRUE)
       {
 	/* Notify the sockb that we now have data. */
@@ -656,24 +658,12 @@ sock_l_get_out_data(cw_sock_t * a_sock, cw_buf_t * r_buf)
 
   mtx_lock(&a_sock->out_lock);
 
-/*    out_put_e(cw_g_out, NULL, 0, __FUNCTION__, */
-/*  	    "os_outbuf_size: [i], out_buf size: [i]\n", */
-/*  	    a_sock->os_outbuf_size, buf_get_size(&a_sock->out_buf)); */
-  
   if (buf_get_size(&a_sock->out_buf) > a_sock->os_outbuf_size)
   {
-/*      out_put_e(cw_g_out, NULL, 0, __FUNCTION__, */
-/*  	      "split [i]/[i] bytes onto [i] (should be 0) existing\n", */
-/*  	      a_sock->os_outbuf_size, buf_get_size(&a_sock->out_buf), */
-/*  	      buf_get_size(r_buf)); */
     buf_split(r_buf, &a_sock->out_buf, a_sock->os_outbuf_size);
   }
   else
   {
-/*      out_put_e(cw_g_out, NULL, 0, __FUNCTION__, */
-/*  	      "catenate [i] bytes onto [i] (should be 0) existing\n", */
-/*  	      buf_get_size(&a_sock->out_buf), */
-/*  	      buf_get_size(r_buf)); */
     buf_catenate_buf(r_buf, &a_sock->out_buf, FALSE);
   }
 
@@ -726,9 +716,11 @@ sock_l_put_back_out_data(cw_sock_t * a_sock, cw_buf_t * a_buf)
   return retval;
 }
 
-void
+cw_uint32_t
 sock_l_put_in_data(cw_sock_t * a_sock, cw_buf_t * a_buf)
 {
+  cw_uint32_t retval;
+  
   _cw_check_ptr(a_sock);
   _cw_check_ptr(a_buf);
 
@@ -741,8 +733,13 @@ sock_l_put_in_data(cw_sock_t * a_sock, cw_buf_t * a_buf)
     /* Someone wants to know that there are data available. */
     cnd_signal(&a_sock->in_cnd);
   }
+
+  _cw_assert(a_sock->in_max_buf_size >= buf_get_size(&a_sock->in_buf));
+  retval = a_sock->in_max_buf_size - buf_get_size(&a_sock->in_buf);
   
   mtx_unlock(&a_sock->in_lock);
+
+  return retval;
 }
 
 void

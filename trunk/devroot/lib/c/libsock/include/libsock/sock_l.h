@@ -123,14 +123,14 @@ sock_l_put_back_out_data(cw_sock_t * a_sock, cw_buf_t * a_buf);
  *
  * <<< Output(s) >>>
  *
- * None.
+ * retval : Remaining available buffer space.
  *
  * <<< Description >>>
  *
  * Append data to the incoming data buffer.
  *
  ****************************************************************************/
-void
+cw_uint32_t
 sock_l_put_in_data(cw_sock_t * a_sock, cw_buf_t * a_buf);
 
 /****************************************************************************
