@@ -21,6 +21,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <errno.h>
+#include <limits.h>
 
 #include "libsock/sock_p.h"
 #include "libsock/sock_l.h"
