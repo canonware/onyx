@@ -35,9 +35,12 @@ SRCS := libstash.c bhp.c buf.c dbg.c lex.c list.c log.c matrix.c mem.c oh.c \
 SRCS_R := locks.c thread.c
 
 # Simple tests.  Output is diff'ed with the expected (.exp file) output.
-CTESTS := c_buf_a.c c_cnd_a.c c_jtl_a.c c_list_a.c c_log_a.c c_matrix_a.c \
+CTESTS := c_buf_a.c c_jtl_a.c c_list_a.c c_log_a.c c_matrix_a.c \
 	c_mtx_a.c c_oh_a.c c_oh_b.c c_oh_c.c c_res_a.c c_rwl_a.c c_sem_a.c \
 	c_thd_a.c c_treen_a.c
+
+# Deadlocks on FreeBSD due to a libc_r bug in pthread_cond_timed_wait().
+# c_cnd_a.c 
 
 # Hopelessly broken.
 # c_bhp_a.c 
@@ -153,37 +156,37 @@ $(bin) : $(LIB_ST_R_D) $(bin:S/$/&.c/)
 .endfor
 
 .for srcfile in $(SRCS)
-$(srcfile:T:R:S/^/$(.OBJDIR)\/st_d\/&/:S/$/&.o_st_d/) : $(srcfile)
+$(srcfile:T:R:S/^/$(.OBJDIR)\/&/:S/$/&.o_st_d/) : $(srcfile)
 	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(D_CFLAGS) $(DEFINES) $(ST_DEFINES) $(D_DEFINES) -c $(srcfile) -o $@
 	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(D_DEFINES) $(INCPATH) $(srcfile) | sed \"s/\($(srcfile:T:R)\)\.o\([ :]*\)/$(.CURDIR:S/\//\\\//g)\/obj\/st_d\/\1.o_st_d \2/g\" > $(@:R:S/$/&.d_st_d/)"
 
-$(srcfile:T:R:S/^/$(.OBJDIR)\/st_o\/&/:S/$/&.o_st_o/) : $(srcfile)
+$(srcfile:T:R:S/^/$(.OBJDIR)\/&/:S/$/&.o_st_o/) : $(srcfile)
 	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(O_CFLAGS) $(DEFINES) $(ST_DEFINES) $(O_DEFINES) -c $(srcfile) -o $@
 	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(O_DEFINES) $(INCPATH) $(srcfile) | sed \"s/\($(srcfile:T:R)\)\.o\([ :]*\)/$(.CURDIR:S/\//\\\//g)\/obj\/st_o\/\1.o_st_o \2/g\" > $(@:R:S/$/&.d_st_o/)"
 
-$(srcfile:T:R:S/^/$(.OBJDIR)\/sh_o\/&/:S/$/&.o_sh_o/) : $(srcfile)
+$(srcfile:T:R:S/^/$(.OBJDIR)\/&/:S/$/&.o_sh_o/) : $(srcfile)
 	$(CC) $(INCPATH) $(CFLAGS) $(SH_CFLAGS) $(O_CFLAGS) $(DEFINES) $(SH_DEFINES) $(O_DEFINES) -c $(srcfile) -o $@
 	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(SH_DEFINES) $(O_DEFINES) $(INCPATH) $(srcfile) | sed \"s/\($(srcfile:T:R)\)\.o\([ :]*\)/$(.CURDIR:S/\//\\\//g)\/obj\/sh_o\/\1.o_sh_o \2/g\" > $(@:R:S/$/&.d_sh_o/)"
 
-$(srcfile:T:R:S/^/$(.OBJDIR)\/st_p\/&/:S/$/&.o_st_p/) : $(srcfile)
+$(srcfile:T:R:S/^/$(.OBJDIR)\/&/:S/$/&.o_st_p/) : $(srcfile)
 	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(P_CFLAGS) $(DEFINES) $(ST_DEFINES) $(P_DEFINES) -c $(srcfile) -o $@
 	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(P_DEFINES) $(INCPATH) $(srcfile) | sed \"s/\($(srcfile:T:R)\)\.o\([ :]*\)/$(.CURDIR:S/\//\\\//g)\/obj\/st_p\/\1.o_st_p \2/g\" > $(@:R:S/$/&.d_st_p/)"
 .endfor
 
 .for srcfile in $(SRCS) $(SRCS_R)
-$(srcfile:T:R:S/^/$(.OBJDIR)\/st_r_d\/&/:S/$/&.o_st_r_d/) : $(srcfile)
+$(srcfile:T:R:S/^/$(.OBJDIR)\/&/:S/$/&.o_st_r_d/) : $(srcfile)
 	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(D_CFLAGS) $(R_CFLAGS) $(DEFINES) $(ST_DEFINES) $(D_DEFINES) $(R_DEFINES) -c $(srcfile) -o $@
 	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(D_DEFINES) $(R_DEFINES) $(INCPATH) $(srcfile) | sed \"s/\($(srcfile:T:R)\)\.o\([ :]*\)/$(.CURDIR:S/\//\\\//g)\/obj\/st_r_d\/\1.o_st_r_d \2/g\" > $(@:R:S/$/&.d_st_r_d/)"
 
-$(srcfile:T:R:S/^/$(.OBJDIR)\/st_r_o\/&/:S/$/&.o_st_r_o/) : $(srcfile)
+$(srcfile:T:R:S/^/$(.OBJDIR)\/&/:S/$/&.o_st_r_o/) : $(srcfile)
 	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(O_CFLAGS) $(R_CFLAGS) $(DEFINES) $(ST_DEFINES) $(O_DEFINES) $(R_DEFINES) -c $(srcfile) -o $@
 	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(O_DEFINES) $(R_DEFINES) $(INCPATH) $(srcfile) | sed \"s/\($(srcfile:T:R)\)\.o\([ :]*\)/$(.CURDIR:S/\//\\\//g)\/obj\/st_r_o\/\1.o_st_r_o \2/g\" > $(@:R:S/$/&.d_st_r_o/)"
 
-$(srcfile:T:R:S/^/$(.OBJDIR)\/sh_r_o\/&/:S/$/&.o_sh_r_o/) : $(srcfile)
+$(srcfile:T:R:S/^/$(.OBJDIR)\/&/:S/$/&.o_sh_r_o/) : $(srcfile)
 	$(CC) $(INCPATH) $(CFLAGS) $(SH_CFLAGS) $(O_CFLAGS) $(R_CFLAGS) $(DEFINES) $(SH_DEFINES) $(O_DEFINES) $(R_DEFINES) -c $(srcfile) -o $@
 	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(SH_DEFINES) $(O_DEFINES) $(R_DEFINES) $(INCPATH) $(srcfile) | sed \"s/\($(srcfile:T:R)\)\.o\([ :]*\)/$(.CURDIR:S/\//\\\//g)\/obj\/sh_r_o\/\1.o_sh_r_o \2/g\" > $(@:R:S/$/&.d_sh_r_o/)"
 
-$(srcfile:T:R:S/^/$(.OBJDIR)\/st_r_p\/&/:S/$/&.o_st_r_p/) : $(srcfile)
+$(srcfile:T:R:S/^/$(.OBJDIR)\/&/:S/$/&.o_st_r_p/) : $(srcfile)
 	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(P_CFLAGS) $(R_CFLAGS) $(DEFINES) $(ST_DEFINES) $(P_DEFINES) $(R_DEFINES) -c $(srcfile) -o $@
 	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(P_DEFINES) $(R_DEFINES) $(INCPATH) $(srcfile) | sed \"s/\($(srcfile:T:R)\)\.o\([ :]*\)/$(.CURDIR:S/\//\\\//g)\/obj\/st_r_p\/\1.o_st_r_p \2/g\" > $(@:R:S/$/&.d_st_r_p/)"
 .endfor
@@ -195,10 +198,10 @@ $(srcfile:T:R:S/^/$(.OBJDIR)\/st_r_p\/&/:S/$/&.o_st_r_p/) : $(srcfile)
 # Dependencies (not rules).
 #
 
-.for depfile in $(SRCS:T:R:S/^/$(.CURDIR)\/obj\/st_d\/&/:S/$/&.d_st_d/) \
-	$(SRCS:T:R:S/^/$(.CURDIR)\/obj\/st_o\/&/:S/$/&.d_st_o/) \
-	$(SRCS:T:R:S/^/$(.CURDIR)\/obj\/sh_o\/&/:S/$/&.d_sh_o/) \
-	$(SRCS:T:R:S/^/$(.CURDIR)\/obj\/st_p\/&/:S/$/&.d_st_p/)
+.for depfile in $(SRCS:T:R:S/^/$(.CURDIR)\/obj\/&/:S/$/&.d_st_d/) \
+	$(SRCS:T:R:S/^/$(.CURDIR)\/obj\/&/:S/$/&.d_st_o/) \
+	$(SRCS:T:R:S/^/$(.CURDIR)\/obj\/&/:S/$/&.d_sh_o/) \
+	$(SRCS:T:R:S/^/$(.CURDIR)\/obj\/&/:S/$/&.d_st_p/)
 .if exists($(depfile))
 .include "$(depfile)"
 .endif
@@ -206,14 +209,14 @@ $(srcfile:T:R:S/^/$(.OBJDIR)\/st_r_p\/&/:S/$/&.o_st_r_p/) : $(srcfile)
 
 #@without_threads@WITH_THREADS=yes
 #.ifdef WITHTHREADS
-@without_threads@.for depfile in $(SRCS:T:R:S/^/$(.CURDIR)\/obj\/st_r_d\/&/:S/$/&.d_st_r_d/) \
-@without_threads@	$(SRCS_R:T:R:S/^/$(.CURDIR)\/obj\/st_r_d\/&/:S/$/&.d_st_r_d/) \
-@without_threads@	$(SRCS:T:R:S/^/$(.CURDIR)\/obj\/st_r_o\/&/:S/$/&.d_st_r_o/) \
-@without_threads@	$(SRCS_R:T:R:S/^/$(.CURDIR)\/obj\/st_r_o\/&/:S/$/&.d_st_r_o/) \
-@without_threads@	$(SRCS:T:R:S/^/$(.CURDIR)\/obj\/sh_r_o\/&/:S/$/&.d_sh_r_o/) \
-@without_threads@	$(SRCS_R:T:R:S/^/$(.CURDIR)\/obj\/sh_r_o\/&/:S/$/&.d_sh_r_o/) \
-@without_threads@	$(SRCS:T:R:S/^/$(.CURDIR)\/obj\/st_r_p\/&/:S/$/&.d_st_r_p/) \
-@without_threads@	$(SRCS_R:T:R:S/^/$(.CURDIR)\/obj\/st_r_p\/&/:S/$/&.d_st_p_d/)
+@without_threads@.for depfile in $(SRCS:T:R:S/^/$(.CURDIR)\/obj\/&/:S/$/&.d_st_r_d/) \
+@without_threads@	$(SRCS_R:T:R:S/^/$(.CURDIR)\/obj\/&/:S/$/&.d_st_r_d/) \
+@without_threads@	$(SRCS:T:R:S/^/$(.CURDIR)\/obj\/&/:S/$/&.d_st_r_o/) \
+@without_threads@	$(SRCS_R:T:R:S/^/$(.CURDIR)\/obj\/&/:S/$/&.d_st_r_o/) \
+@without_threads@	$(SRCS:T:R:S/^/$(.CURDIR)\/obj\/&/:S/$/&.d_sh_r_o/) \
+@without_threads@	$(SRCS_R:T:R:S/^/$(.CURDIR)\/obj\/&/:S/$/&.d_sh_r_o/) \
+@without_threads@	$(SRCS:T:R:S/^/$(.CURDIR)\/obj\/&/:S/$/&.d_st_r_p/) \
+@without_threads@	$(SRCS_R:T:R:S/^/$(.CURDIR)\/obj\/&/:S/$/&.d_st_p_d/)
 @without_threads@.if exists($(depfile))
 @without_threads@.include "$(depfile)"
 @without_threads@.endif
@@ -226,37 +229,37 @@ $(srcfile:T:R:S/^/$(.OBJDIR)\/st_r_p\/&/:S/$/&.o_st_r_p/) : $(srcfile)
 .endif
 .endfor
 
-$(LIB_ST_D) : $(SRCS:T:R:S/^/$(.OBJDIR)\/st_d\/&/:S/$/&.o_st_d/)
+$(LIB_ST_D) : $(SRCS:T:R:S/^/$(.OBJDIR)\/&/:S/$/&.o_st_d/)
 	$(AR) cru $@ $?
 	$(RANLIB) $@
 
-$(LIB_ST_O) : $(SRCS:T:R:S/^/$(.OBJDIR)\/st_o\/&/:S/$/&.o_st_o/)
+$(LIB_ST_O) : $(SRCS:T:R:S/^/$(.OBJDIR)\/&/:S/$/&.o_st_o/)
 	$(AR) cru $@ $?
 	$(RANLIB) $@
 
-$(LIB_SH_O) : $(SRCS:T:R:S/^/$(.OBJDIR)\/sh_o\/&/:S/$/&.o_sh_o/)
+$(LIB_SH_O) : $(SRCS:T:R:S/^/$(.OBJDIR)\/&/:S/$/&.o_sh_o/)
 	$(CC) -shared -o $@ $>
 
-$(LIB_ST_P) : $(SRCS:T:R:S/^/$(.OBJDIR)\/st_p\/&/:S/$/&.o_st_p/)
+$(LIB_ST_P) : $(SRCS:T:R:S/^/$(.OBJDIR)\/&/:S/$/&.o_st_p/)
 	$(AR) cru $@ $?
 	$(RANLIB) $@
 
-$(LIB_ST_R_D) : $(SRCS:T:R:S/^/$(.OBJDIR)\/st_r_d\/&/:S/$/&.o_st_r_d/) \
-	$(SRCS_R:T:R:S/^/$(.OBJDIR)\/st_r_d\/&/:S/$/&.o_st_r_d/)
+$(LIB_ST_R_D) : $(SRCS:T:R:S/^/$(.OBJDIR)\/&/:S/$/&.o_st_r_d/) \
+	$(SRCS_R:T:R:S/^/$(.OBJDIR)\/&/:S/$/&.o_st_r_d/)
 	$(AR) cru $@ $?
 	$(RANLIB) $@
 
-$(LIB_ST_R_O) : $(SRCS:T:R:S/^/$(.OBJDIR)\/st_r_o\/&/:S/$/&.o_st_r_o/) \
-	$(SRCS_R:T:R:S/^/$(.OBJDIR)\/st_r_o\/&/:S/$/&.o_st_r_o/)
+$(LIB_ST_R_O) : $(SRCS:T:R:S/^/$(.OBJDIR)\/&/:S/$/&.o_st_r_o/) \
+	$(SRCS_R:T:R:S/^/$(.OBJDIR)\/&/:S/$/&.o_st_r_o/)
 	$(AR) cru $@ $?
 	$(RANLIB) $@
 
-$(LIB_SH_R_O) : $(SRCS:T:R:S/^/$(.OBJDIR)\/sh_r_o\/&/:S/$/&.o_sh_r_o/) \
-	$(SRCS_R:T:R:S/^/$(.OBJDIR)\/sh_r_o\/&/:S/$/&.o_sh_r_o/)
+$(LIB_SH_R_O) : $(SRCS:T:R:S/^/$(.OBJDIR)\/&/:S/$/&.o_sh_r_o/) \
+	$(SRCS_R:T:R:S/^/$(.OBJDIR)\/&/:S/$/&.o_sh_r_o/)
 	$(CC) -shared -o $@ $>
 
-$(LIB_ST_R_P) : $(SRCS:T:R:S/^/$(.OBJDIR)\/st_r_p\/&/:S/$/&.o_st_r_p/) \
-	$(SRCS:T:R:S/^/$(.OBJDIR)\/st_r_p\/&/:S/$/&.o_st_r_p/)
+$(LIB_ST_R_P) : $(SRCS:T:R:S/^/$(.OBJDIR)\/&/:S/$/&.o_st_r_p/) \
+	$(SRCS:T:R:S/^/$(.OBJDIR)\/&/:S/$/&.o_st_r_p/)
 	$(AR) cru $@ $?
 	$(RANLIB) $@
 
@@ -307,31 +310,32 @@ tests : $(CTESTS) $(PTESTS) $(BTESTS) makefile
 
 check : tests
 	@$(SHELL) -c \
-	'cd $(.CURDIR) \
-	printf "Running regression tests:\\n" ; \
-	printf "---------------------------------------------\\n" ;\
+	'cd $(.CURDIR) ;\
+	echo Hi ;\
+	printf "Running regression tests:\\n" ;\
+	printf "%s\\n" "---------------------------------------------" ;\
 	for i in $(PTESTS); do \
-	printf "$$i..."; \
-	$$i; \
-	done; \
+	printf "%s" "$$i..." ;\
+	$$i ;\
+	done ;\
 	for i in $(CTESTS); do \
-	printf "$$i..."; \
-	$$i > $$i.out 2>&1; \
-	$(DIFF) $$i.out $$i.exp > $$i.diff ; \
+	printf "%s" "$$i..."; \
+	$$i > $$i.out 2>&1 ;\
+	$(DIFF) $$i.out $$i.exp > $$i.diff ;\
 	if [ -s $$i.diff ] ; then \
-	printf "failed. ****************\\n" ; \
+	printf "%s\\n" "failed. ****************" ;\
 	else \
-	printf "passed.\\n" ; \
-	rm $$i.diff ; \
+	printf "%s\\n" "passed." ;\
+	rm $$i.diff ;\
 	fi \
-	done ; \
-	printf "---------------------------------------------\\n\\n" ;\
-	printf "The following regression tests failed:\\n" ; \
-	printf "---------------------------------------------\\n" ;\
+	done ;\
+	printf "%s\\n\\n" "---------------------------------------------" ;\
+	printf "%s\\n" "The following regression tests failed:" ;\
+	printf "%s\\n" "---------------------------------------------" ;\
 	for i in `find ./test -print | grep "\.diff$$"`; do \
-	echo `echo $$i | sed "s/\.\/\(.*\)\.diff/\1/g"`; \
-	done; \
-	printf "---------------------------------------------\\n" \
+	echo `echo $$i | sed "s/\.\/\(.*\)\.diff/\1/g"` ;\
+	done ;\
+	printf "%s\\n" "---------------------------------------------" ;\
 	cd - \
 	'
 
@@ -398,7 +402,7 @@ clean : makefile FORCE
 	rm -f $(.CURDIR)/test/*.o $(.CURDIR)/test/*.out
 	rm -f $(.CURDIR)/test/*.diff $(.CURDIR)/test/*.pl
 	rm -f $(CTESTS) $(PTESTS) $(BTESTS)
-	rm -f $(.CURDIR)/obj/*/*.[do]*
+	rm -f $(.CURDIR)/obj/*.[do]*
 	rm -f $(.CURDIR)/lib/lib*
 	rm -f $(.CURDIR)/test/*.d
 	rm -f $(.CURDIR)/test/*.diff
