@@ -60,8 +60,8 @@ struct cw_buf_s {
 	cw_uint32_t	magic_a;
 #endif
 	cw_mem_t	*mem;
-	cw_bool_t	is_malloced;
-	cw_bool_t	is_threadsafe;
+	cw_bool_t	is_malloced:1;
+	cw_bool_t	is_threadsafe:1;
 	cw_mtx_t	lock;
 	cw_uint32_t	size;
 
@@ -69,8 +69,8 @@ struct cw_buf_s {
 	cw_uint32_t	array_num_valid;
 	cw_uint32_t	array_start;
 	cw_uint32_t	array_end;
-	cw_bool_t	is_cumulative_valid;
-	cw_bool_t	is_cached_bufel_valid;
+	cw_bool_t	is_cumulative_valid:1;
+	cw_bool_t	is_cached_bufel_valid:1;
 	cw_uint32_t	cached_bufel;
 	cw_bufel_t	*bufel_array;
 	cw_uint32_t	*cumulative_index;
