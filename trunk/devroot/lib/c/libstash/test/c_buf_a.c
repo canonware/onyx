@@ -146,7 +146,9 @@ main()
       t_uint32_a = buf_get_uint32(buf_p, i);
       t_uint32_b = buf_get_uint32(buf_p, i + 4);
       
-      out_put(cw_g_out, "[i|w:3|p:0]->0x[i|w:8|p:0|b:16]:[i|w:3|p:0]->0x[i|w:8|p:0|b:16]\n",
+      out_put(cw_g_out,
+	      "[i|w:3|p:0]->0x[i|w:8|p:0|b:16]:"
+	      "[i|w:3|p:0]->0x[i|w:8|p:0|b:16]\n",
 	      i, t_uint32_a,
 	      i + 4, t_uint32_b);
     }
@@ -1152,6 +1154,73 @@ main()
     buf_delete(&buf_a);
     buf_delete(&buf_b);
     buf_delete(&buf_c);
+  }
+
+  /* out_put("[b]"). */
+  {
+    cw_bufc_t bufc;
+    cw_buf_t * buf_p, buf;
+    char * buffer;
+
+    buf_p = buf_new(NULL, TRUE);
+    _cw_check_ptr(buf_p);
+    buf_new(&buf, TRUE);
+    buffer = (char *) _cw_malloc(512);
+    bufc_new(&bufc, NULL, NULL);
+    bufc_set_buffer(&bufc,
+		    buffer,
+		    512,
+		    FALSE,
+		    mem_dealloc,
+		    (void *) cw_g_mem);
+    /* Fill buffer. */
+    memcpy(buffer,
+	   "This is a whack of text in a buffer, which is inside a buf.  Now"
+	   " here is some more text.  Since this is a 512 byte buf, we might"
+	   " as well fill it with some readable text, as opposed to random g"
+	   "arbage.  Then again, writing prose just to fill a space is rathe"
+	   "r reminiscent of the good ol' school days.  Perhaps some margin "
+	   "indentation or slightly wider line spacing is in order.  Oh wait"
+	   ", this is ascii text.  Oh well.  Who says technology can solve a"
+	   "ny problem?  Well, I'm about to run out of space.  Live long an",
+	   512);
+    
+    buf_append_bufc(buf_p, &bufc, 0, 512);
+    bufc_delete(&bufc);
+
+    /* Print. */
+    _cw_assert(0 < out_put(cw_g_out, "Here is the buf :[b]:\n", buf_p));
+    buf_split(&buf, buf_p, 23);
+    buf_catenate_buf(buf_p, &buf, TRUE);
+    _cw_assert(0 < out_put(cw_g_out, ":[b]:\n", &buf));
+    _cw_assert(0 < out_put(cw_g_out, ":[b|w:40]:\n", &buf));
+    _cw_assert(0 < out_put(cw_g_out, ":[b|w:40|p:_]:\n", &buf));
+    _cw_assert(0 < out_put(cw_g_out, ":[b|w:40|p:+|j:l]:\n", &buf));
+    _cw_assert(0 < out_put(cw_g_out, ":[b|w:40|p:-|j:c]:\n", &buf));
+    _cw_assert(0 < out_put(cw_g_out, ":[b|w:40|p:_|j:r]:\n", &buf));
+    
+    buf_split(&buf, buf_p, 3);
+    _cw_assert(0 < out_put(cw_g_out, ":[b]:\n", &buf));
+    buf_catenate_buf(buf_p, &buf, TRUE);
+    buf_catenate_buf(buf_p, &buf, FALSE);
+    buf_split(&buf, buf_p, 4);
+    _cw_assert(0 < out_put(cw_g_out, ":[b]:\n", &buf));
+    buf_catenate_buf(buf_p, &buf, TRUE);
+    buf_catenate_buf(buf_p, &buf, FALSE);
+    buf_split(&buf, buf_p, 5);
+    _cw_assert(0 < out_put(cw_g_out, ":[b]:\n", &buf));
+    buf_catenate_buf(buf_p, &buf, TRUE);
+    buf_catenate_buf(buf_p, &buf, FALSE);
+    buf_split(&buf, buf_p, 6);
+    _cw_assert(0 < out_put(cw_g_out, ":[b]:\n", &buf));
+    buf_catenate_buf(buf_p, &buf, TRUE);
+    buf_catenate_buf(buf_p, &buf, FALSE);
+    buf_release_head_data(buf_p, buf_get_size(buf_p) - 40);
+    
+    _cw_assert(0 < out_put(cw_g_out, "buf_p :[b]:\n", buf_p));
+    
+    buf_delete(buf_p);
+    buf_delete(&buf);
   }
 
   out_put(cw_g_out, "Test end\n");

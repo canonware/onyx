@@ -32,14 +32,6 @@ libstash_init(void)
   if (cw_g_out == NULL)
   {
     cw_g_out = out_new(NULL);
-    if (NULL != cw_g_out)
-    {
-      if (TRUE == out_register(cw_g_out, "buf", sizeof(cw_buf_t *),
-			       buf_out_metric, buf_out_render))
-      {
-	retval = TRUE;
-      }
-    }
   }
   if (cw_g_log == NULL)
   {

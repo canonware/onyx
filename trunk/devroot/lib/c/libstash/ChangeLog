@@ -1,3 +1,7 @@
+1999-07-31  Jason Evans  <jasone@canonware.com>
+
+	* include/libstash/out.h: Add buf printing capability.
+
 1999-07-30  Jason Evans  <jasone@canonware.com>
 
 	* include/libstash/libstash.h: Add cw_fp{32,64,96,128}_t typedefs.

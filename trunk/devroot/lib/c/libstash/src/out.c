@@ -10,6 +10,10 @@
  *
  ****************************************************************************/
 
+/* Various include files needed in order to see the prototypes for their
+ * printing functions. */
+#define _LIBSTASH_USE_BUF
+
 #ifdef _CW_REENTRANT
 #  include "libstash/libstash_r.h"
 #else

@@ -153,6 +153,8 @@ static cw_out_ent_t cw_g_out_builtins[] =
   {"c",    1, sizeof(cw_uint8_t),   out_p_metric_char,    out_p_render_char},
   {"q",    1, sizeof(cw_uint64_t),  out_p_metric_int64,   out_p_render_int64},
 
+  {"b",    1, sizeof(cw_buf_t *),   buf_out_metric,       buf_out_render},
+
 #ifdef _TYPE_FP32_DEFINED
   {"f32",  3, sizeof(cw_fp32_t),    NULL,                 NULL},
 #endif
