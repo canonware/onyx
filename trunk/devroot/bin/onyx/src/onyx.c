@@ -48,6 +48,15 @@ struct nx_read_arg_s
 };
 
 #ifndef CW_POSIX_FILE
+struct src_read_arg_s
+{
+    int fd;
+    cw_nxo_t *thread;
+    cw_uint8_t *buffer;
+    cw_uint32_t buffer_size;
+    cw_uint32_t buffer_count;
+};
+
 struct nx_write_arg_s
 {
     int fd;
@@ -100,6 +109,15 @@ nx_entry(void *a_arg);
 #endif
 
 #ifndef CW_POSIX_FILE
+cw_sint32_t
+src_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str);
+
+struct src_read_arg_s *
+src_init(cw_nx_t *a_nx, cw_nxo_t *a_thread, int a_fd);
+
+void
+src_shutdown(void *a_arg, cw_nx_t *a_nx);
+
 void
 stdout_init(cw_nx_t *a_nx);
 
@@ -140,9 +158,7 @@ usage(void)
 	   "    onyx -h\n"
 	   "    onyx -V\n"
 	   "    onyx -e <expr>\n"
-#ifdef CW_POSIX_FILE
 	   "    onyx <file> [<args>]\n"
-#endif
 	   "\n"
 	   "    Option    | Description\n"
 	   "    ----------+------------------------------------\n"
@@ -666,8 +682,8 @@ batch_run(int argc, char **argv, char **envp)
 	str = nxo_string_get(string);
 	memcpy(str, opt_expression, nxo_string_len_get(string));
     }
-#ifdef CW_POSIX_FILE
     else if (optind < argc)
+#ifdef CW_POSIX_FILE
     {
 	int src_fd;
 
@@ -688,6 +704,31 @@ batch_run(int argc, char **argv, char **envp)
 	nxo_attr_set(file, NXOA_EXECUTABLE);
 
 	nxo_file_fd_wrap(file, src_fd);
+    }
+#else
+    {
+	int src_fd;
+	struct src_read_arg_s *src_arg;
+
+	/* Remaining command line arguments should be the name of a source file,
+	 * followed by optional arguments.  Open the source file, wrap it in an
+	 * onyx file object, and push it onto the execution stack. */
+	src_fd = open(argv[optind], O_RDONLY);
+	if (src_fd == -1)
+	{
+	    fprintf(stderr,
+		    "onyx: Error in open(\"%s\", O_RDONLY): %s\n", argv[optind],
+		    strerror(errno));
+	    retval = 1;
+	    goto RETURN;
+	}
+	file = nxo_stack_push(nxo_thread_ostack_get(&thread));
+	nxo_file_new(file, &nx, FALSE);
+	nxo_attr_set(file, NXOA_EXECUTABLE);
+
+	src_arg = src_init(&nx, &thread, src_fd);
+	nxo_file_synthetic(file, src_read, NULL, NULL, src_shutdown,
+			   (void *) src_arg);
     }
 #endif
     else
@@ -913,6 +954,121 @@ nx_entry(void *a_arg)
 #endif
 
 #ifndef CW_POSIX_FILE
+cw_sint32_t
+src_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str)
+{
+    cw_sint32_t retval;
+    struct src_read_arg_s *arg = (struct src_read_arg_s *) a_arg;
+
+    cw_assert(a_len > 0);
+
+    if (arg->buffer_count == 0)
+    {
+	/* Read data until there are no more. */
+	while ((retval = read(arg->fd, r_str, a_len)) == -1 && errno == EINTR)
+	{
+	    /* Interrupted system call, probably due to garbage collection. */
+	}
+	if (retval == -1)
+	{
+	    /* EOF. */
+	    retval = 0;
+	}
+	else
+	{
+	    if (retval == a_len)
+	    {
+		cw_sint32_t count;
+
+		/* There may be more data available.  Store any available data
+		 * in a buffer. */
+		if (arg->buffer == NULL)
+		{
+		    /* Initialize the buffer. */
+		    arg->buffer = (cw_uint8_t *) cw_malloc(CW_BUFFER_SIZE);
+		    arg->buffer_size = CW_BUFFER_SIZE;
+		    arg->buffer_count = 0;
+		}
+
+		for (;;)
+		{
+		    while ((count
+			    = read(arg->fd, &arg->buffer[arg->buffer_count],
+				   arg->buffer_size - arg->buffer_count))
+			   == -1
+			   && errno == EINTR)
+		    {
+			/* Interrupted system call, probably due to garbage
+			 * collection. */
+		    }
+		    if (count <= 0)
+		    {
+			/* EOF or no more data buffered by stdin. */
+			break;
+		    }
+
+		    arg->buffer_count += count;
+		    if (arg->buffer_count == arg->buffer_size)
+		    {
+			/* Expand the buffer. */
+			arg->buffer
+			    = (cw_uint8_t *) cw_realloc(arg->buffer,
+							arg->buffer_size * 2);
+			arg->buffer_size *= 2;
+		    }
+		}
+	    }
+	}
+    }
+    else
+    {
+	/* Return as much of the buffered data as possible. */
+	if (arg->buffer_count > a_len)
+	{
+	    /* There are more data than we can return. */
+	    retval = a_len;
+	    memcpy(r_str, arg->buffer, a_len);
+	    arg->buffer_count -= a_len;
+	    memmove(arg->buffer, &arg->buffer[a_len], arg->buffer_count);
+	}
+	else
+	{
+	    /* Return all the data. */
+	    retval = arg->buffer_count;
+	    memcpy(r_str, arg->buffer, arg->buffer_count);
+	    arg->buffer_count = 0;
+	}
+    }
+
+    return retval;
+}
+
+struct src_read_arg_s *
+src_init(cw_nx_t *a_nx, cw_nxo_t *a_thread, int a_fd)
+{
+    static struct src_read_arg_s src_arg;
+
+    /* Initialize the src argument structure. */
+    src_arg.fd = a_fd;
+    src_arg.thread = a_thread;
+    src_arg.buffer = NULL;
+    src_arg.buffer_size = 0;
+    src_arg.buffer_count = 0;
+
+    return &src_arg;
+}
+
+void
+src_shutdown(void *a_arg, cw_nx_t *a_nx)
+{
+    struct src_read_arg_s *arg = (struct src_read_arg_s *) a_arg;
+
+    if (arg->buffer != NULL)
+    {
+	cw_free(arg->buffer);
+    }
+}
+
 void
 stdout_init(cw_nx_t *a_nx)
 {

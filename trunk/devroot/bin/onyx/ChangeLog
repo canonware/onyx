@@ -1,3 +1,9 @@
+2002-01-30  Jason Evans  <jasone@canonware.com>
+
+	* src/onyx.c: Add command line support for #! magic when
+	--disable-posix-file is specified.  This is necessary in order for
+	onyx to bootstrap itself when configured as such.
+
 2002-01-28  Jason Evans  <jasone@canonware.com>
 
 	* : Move require and mrequire from onyx to libonyx.
