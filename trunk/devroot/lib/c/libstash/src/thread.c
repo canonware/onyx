@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 86 $
- * $Date: 1998-06-23 17:40:29 -0700 (Tue, 23 Jun 1998) $
+ * $Revision: 109 $
+ * $Date: 1998-06-30 00:07:40 -0700 (Tue, 30 Jun 1998) $
  *
  * <<< Description >>>
  * 
@@ -250,7 +250,7 @@ cnd_signal(cw_cnd_t * a_cnd_o)
 
   _cw_check_ptr(a_cnd_o);
 
-  pthread_cond_signal(&a_cnd_o->condition);
+  error = pthread_cond_signal(&a_cnd_o->condition);
   if (error)
   {
     log_printf(g_log_o, __FILE__, __LINE__, "cnd_signal",
@@ -266,7 +266,7 @@ cnd_broadcast(cw_cnd_t * a_cnd_o)
 
   _cw_check_ptr(a_cnd_o);
 
-  pthread_cond_broadcast(&a_cnd_o->condition);
+  error = pthread_cond_broadcast(&a_cnd_o->condition);
   if (error)
   {
     log_printf(g_log_o, __FILE__, __LINE__, "cnd_broadcast",
@@ -284,8 +284,8 @@ cnd_timedwait(cw_cnd_t * a_cnd_o, cw_mtx_t * a_mtx_o,
   _cw_check_ptr(a_cnd_o);
   _cw_check_ptr(a_mtx_o);
 
-  pthread_cond_timedwait(&a_cnd_o->condition, &a_mtx_o->mutex,
-			 a_time);
+  error = pthread_cond_timedwait(&a_cnd_o->condition, &a_mtx_o->mutex,
+				 a_time);
   if (error)
   {
     log_printf(g_log_o, __FILE__, __LINE__, "cnd_timedwait",
@@ -305,7 +305,7 @@ cnd_wait(cw_cnd_t * a_cnd_o, cw_mtx_t * a_mtx_o)
   _cw_check_ptr(a_cnd_o);
   _cw_check_ptr(a_mtx_o);
 
-  pthread_cond_wait(&a_cnd_o->condition, &a_mtx_o->mutex);
+  error = pthread_cond_wait(&a_cnd_o->condition, &a_mtx_o->mutex);
   if (error)
   {
     log_printf(g_log_o, __FILE__, __LINE__, "cnd_wait",
