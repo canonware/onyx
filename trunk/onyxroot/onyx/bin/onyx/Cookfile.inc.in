@@ -46,7 +46,10 @@ ONYX_OTESTS =
               name_unsweep.nx.in
 #endif
 #if @enable_threads@
-              gc_roll.nx.in monitor_a.nx.in monitor_b.nx.in monitor_c.nx.in
+
+              gc_roll.nx.in gstderr_a.nx.in gstdin_a.nx.in gstdout_a.nx.in
+              monitor_a.nx.in monitor_b.nx.in monitor_c.nx.in
+
 #endif
 #if @enable_real@
 
@@ -143,20 +146,21 @@ ONYX_OTESTS =
               spush_b.nx.in spush_c.nx.in spush_d.nx.in sroll_a.nx.in
               sroll_b.nx.in sroll_c.nx.in sroll_d.nx.in sroll_e.nx.in
               sroll_f.nx.in sroll_g.nx.in sroll_h.nx.in sroll_i.nx.in
-              stack_a.nx.in start_a.nx.in start_b.nx.in stopped_a.nx.in
-              stopped_b.nx.in stopped_c.nx.in string_a.nx.in string_b.nx.in
-              string_c.nx.in string_d.nx.in sub_a.nx.in sub_b.nx.in sub_c.nx.in
-              sub_d.nx.in sym_lp_a.nx.in sym_gt_a.nx.in sym_gt_b.nx.in
-              sym_gt_c.nx.in sym_lt_a.nx.in sym_rp_a.nx.in sym_rp_b.nx.in
-              syntaxerror_a.nx.in syntaxerror_b.nx.in syntaxerror_c.nx.in
-              syntaxerror_d.nx.in syntaxerror_e.nx.in syntaxerror_f.nx.in
-              syntaxerror_g.nx.in syntaxerror_h.nx.in syntaxerror_i.nx.in
-              syntaxerror_j.nx.in syntaxerror_k.nx.in throw_a.nx.in
-              throw_b.nx.in throw_c.nx.in token_a.nx.in token_b.nx.in
-              token_c.nx.in type_a.nx.in type_b.nx.in undef_a.nx.in
-              undef_b.nx.in undef_c.nx.in where_a.nx.in where_b.nx.in
-              xcheck_a.nx.in xcheck_b.nx.in xor_a.nx.in xor_b.nx.in xor_c.nx.in
-              xor_d.nx.in xor_e.nx.in xor_f.nx.in
+              stack_a.nx.in start_a.nx.in start_b.nx.in stderr_a.nx.in
+              stdin_a.nx.in stdout_a.nx.in stopped_a.nx.in stopped_b.nx.in
+              stopped_c.nx.in string_a.nx.in string_b.nx.in string_c.nx.in
+              string_d.nx.in sub_a.nx.in sub_b.nx.in sub_c.nx.in sub_d.nx.in
+              sym_lp_a.nx.in sym_gt_a.nx.in sym_gt_b.nx.in sym_gt_c.nx.in
+              sym_lt_a.nx.in sym_rp_a.nx.in sym_rp_b.nx.in syntaxerror_a.nx.in
+              syntaxerror_b.nx.in syntaxerror_c.nx.in syntaxerror_d.nx.in
+              syntaxerror_e.nx.in syntaxerror_f.nx.in syntaxerror_g.nx.in
+              syntaxerror_h.nx.in syntaxerror_i.nx.in syntaxerror_j.nx.in
+              syntaxerror_k.nx.in throw_a.nx.in throw_b.nx.in throw_c.nx.in
+              token_a.nx.in token_b.nx.in token_c.nx.in type_a.nx.in
+              type_b.nx.in undef_a.nx.in undef_b.nx.in undef_c.nx.in
+              where_a.nx.in where_b.nx.in xcheck_a.nx.in xcheck_b.nx.in
+              xor_a.nx.in xor_b.nx.in xor_c.nx.in xor_d.nx.in xor_e.nx.in
+              xor_f.nx.in
 
               ;
 
