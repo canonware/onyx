@@ -100,26 +100,29 @@ D_CPPFLAGS = [D_CPPFLAGS] -D_SUCK_DBG;
  * Dependencies.
  */
 
-[SUCK_D] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [SUCK_SRCS]] [D_LIBS]
+[SUCK_D] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [SUCK_SRCS]]
+           [LIBSOCK_D] [LIBSTASH_D]
   set mkdir
 {
   [CC] [D_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [SUCK_SRCS]]
-       [D_LIBS] [LDFLAGS] [D_LIBS] [EXTRALIBS];
+       [LDFLAGS] -lsock_d -lstash_d [EXTRALIBS];
 }
 
-[SUCK_A] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [SUCK_SRCS]] [A_LIBS]
+[SUCK_A] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [SUCK_SRCS]]
+           [LIBSOCK_A] [LIBSTASH_A]
   set mkdir
 {
   [CC] [D_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [SUCK_SRCS]]
-       [D_LIBS] [LDFLAGS] [A_LIBS] [EXTRALIBS];
+       [LDFLAGS] -lsock -lstash [EXTRALIBS];
 }
 
-[SUCK_P] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [SUCK_SRCS]] [P_LIBS]
+[SUCK_P] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [SUCK_SRCS]]
+           [LIBSOCK_P] [LIBSTASH_P]
   set mkdir
 {
   [CC] [D_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [SUCK_SRCS]]
-       [D_LIBS] [LDFLAGS] [P_LIBS] [EXTRALIBS];
+       [LDFLAGS] -lsock_p -lstash_p [EXTRALIBS];
 }

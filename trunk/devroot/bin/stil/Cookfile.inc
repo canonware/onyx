@@ -100,26 +100,29 @@ D_CPPFLAGS = [D_CPPFLAGS] -D_STIL_DBG;
  * Dependencies.
  */
 
-[STIL_D] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [STIL_SRCS]] [D_LIBS]
+[STIL_D] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [STIL_SRCS]]
+           [LIBSTIL_D] [LIBSTASH_D]
   set mkdir
 {
   [CC] [D_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [STIL_SRCS]]
-       [D_LIBS] [LDFLAGS] [D_LIBS] [EXTRALIBS];
+       [LDFLAGS] -lstil_d -lstash_d [EXTRALIBS];
 }
 
-[STIL_A] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [STIL_SRCS]] [A_LIBS]
+[STIL_A] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [STIL_SRCS]]
+           [LIBSTIL_D] [LIBSTASH_A]
   set mkdir
 {
   [CC] [D_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [STIL_SRCS]]
-       [D_LIBS] [LDFLAGS] [A_LIBS] [EXTRALIBS];
+       [LDFLAGS] -lstil -lstash [EXTRALIBS];
 }
 
-[STIL_P] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [STIL_SRCS]] [P_LIBS]
+[STIL_P] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [STIL_SRCS]]
+           [LIBSTIL_P] [LIBSTASH_P]
   set mkdir
 {
   [CC] [D_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [STIL_SRCS]]
-       [D_LIBS] [LDFLAGS] [P_LIBS] [EXTRALIBS];
+       [LDFLAGS] -lstil_p -lstash_p [EXTRALIBS];
 }

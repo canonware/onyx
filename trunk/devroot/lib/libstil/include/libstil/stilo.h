@@ -54,36 +54,35 @@ struct cw_stilo_s {
 
 	cw_stilot_t type:4;
 	/*
-	 * If non-zero, this is an extended number or mstate.  Both number
-	 * and mstate objects can switch between simple and extended
+	 * If non-zero, this is an extended number or mstate.  Both number and
+	 * mstate objects can switch between simple and extended
 	 * representations.
 	 */
 	cw_bool_t extended:1;
 	/*
 	 * Name objects use this bit to indicate if a name is an indirect
 	 * reference.  Each stilt maintains a cache of stiln pointers, each
-	 * holding a single reference to the names hash in stil.  If this is
-	 * an indirect reference, the unreferencing operation should
-	 * actually be done with the stilt's stiln cache.  Note that this is
-	 * the (very) common case.  Only global dictionaries have direct
-	 * references.  Use the stiln pointer to get the actual
-	 * name "value" for the unreferencing operation.  This is safe,
-	 * because this stilt is guaranteed to be holding a reference to the
-	 * stiln.
+	 * holding a single reference to the names hash in stil.  If this is an
+	 * indirect reference, the unreferencing operation should actually be
+	 * done with the stilt's stiln cache.  Note that this is the (very)
+	 * common case.  Only global dictionaries have direct references.  Use
+	 * the stiln pointer to get the actual name "value" for the
+	 * unreferencing operation.  This is safe, because this stilt is
+	 * guaranteed to be holding a reference to the stiln.
 	 */
 	cw_bool_t indirect_name:1;
 	/*
-	 * If TRUE, there is a breakpoint set on this object.  In general,
-	 * this field is not looked at unless the interpreter has been put
-	 * into debugging mode.
+	 * If TRUE, there is a breakpoint set on this object.  In general, this
+	 * field is not looked at unless the interpreter has been put into
+	 * debugging mode.
 	 */
 	cw_bool_t breakpoint:1;
 	/*
-	 * If TRUE, there is a watchpoint set on this object.  In general,
-	 * this field is not looked at unless the interpreter has been put
-	 * into debugging mode. Note that setting a watchpoint on a
-	 * reference to an extended type only detects changes that are made
-	 * via that particular reference to the extension.
+	 * If TRUE, there is a watchpoint set on this object.  In general, this
+	 * field is not looked at unless the interpreter has been put into
+	 * debugging mode. Note that setting a watchpoint on a reference to an
+	 * extended type only detects changes that are made via that particular
+	 * reference to the extension.
 	 */
 	cw_bool_t watchpoint:1;
 	/*
@@ -95,10 +94,10 @@ struct cw_stilo_s {
 	/* Reference to a local or global object? */
 	cw_bool_t global:1;
 	/*
-	 * This bit is used to protect modifications to a stiloe pointer.
-	 * Since a thread can be suspended at any time, it is critical to
-	 * mark the pointer invalid while modifying it so that the collector
-	 * knows not to try using a possibly corrupt pointer.
+	 * This bit is used to protect modifications to a stiloe pointer.  Since
+	 * a thread can be suspended at any time, it is critical to mark the
+	 * pointer invalid while modifying it so that the collector knows not to
+	 * try using a possibly corrupt pointer.
 	 */
 	cw_bool_t valid:1;
 
@@ -141,7 +140,9 @@ struct cw_stilo_s {
 		}       mstate;
 		struct {
 			union {
-				const void *key; /* Key used for global names. */
+				const void *key; /*
+						  * Key used for global names.
+						  */
 				cw_stilt_t *stilt;
 			}	s;
 			cw_stiln_t *stiln;
@@ -151,9 +152,9 @@ struct cw_stilo_s {
 		}       null;
 		struct {
 			/*
-			 * If not (flags.extended), this number is
-			 * representable as a 32 bit signed integer.
-			 * Otherwise the ext contains the value.
+			 * If not (flags.extended), this number is representable
+			 * as a 32 bit signed integer.  Otherwise the ext
+			 * contains the value.
 			 */
 			union {
 				cw_stiloe_number_t *stiloe;

@@ -100,26 +100,29 @@ D_CPPFLAGS = [D_CPPFLAGS] -D_NCAT_DBG;
  * Dependencies.
  */
 
-[NCAT_D] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [NCAT_SRCS]] [D_LIBS]
+[NCAT_D] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [NCAT_SRCS]]
+           [LIBSOCK_D] [LIBSTASH_D]
   set mkdir
 {
   [CC] [D_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [NCAT_SRCS]]
-       [D_LIBS] [LDFLAGS] [D_LIBS] [EXTRALIBS];
+       [LDFLAGS] -lsock_d -lstash_d [EXTRALIBS];
 }
 
-[NCAT_A] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [NCAT_SRCS]] [A_LIBS]
+[NCAT_A] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [NCAT_SRCS]]
+           [LIBSOCK_A] [LIBSTASH_A]
   set mkdir
 {
   [CC] [D_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [NCAT_SRCS]]
-       [D_LIBS] [LDFLAGS] [A_LIBS] [EXTRALIBS];
+       [LDFLAGS] -lsock -lstash [EXTRALIBS];
 }
 
-[NCAT_P] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [NCAT_SRCS]] [P_LIBS]
+[NCAT_P] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [NCAT_SRCS]]
+           [LIBSOCK_P] [LIBSTASH_P]
   set mkdir
 {
   [CC] [D_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [NCAT_SRCS]]
-       [D_LIBS] [LDFLAGS] [P_LIBS] [EXTRALIBS];
+       [LDFLAGS] -lsock_p -lstash_p [EXTRALIBS];
 }

@@ -20,10 +20,12 @@ objdir = @objdir@;
 
 SHELL = /bin/sh;
 PREFIX = @prefix@;
+ENABLE_SHARED = @enable_shared@;
 CC = @CC@;
 AR = @AR@;
 RANLIB = @RANLIB@;
 INSTALL = @INSTALL@;
+BASENAME = @BASENAME@;
 PERL = @PERL@;
 CAT = @CAT@;
 DIFF = @DIFF@;
@@ -74,7 +76,7 @@ libs_a : [A_LIBS];
 libs_p : [P_LIBS];
 libs_s : [S_LIBS];
 libs : libs_d libs_a libs_p
-#if @enable_shared@
+#if [ENABLE_SHARED]
        libs_s
 #endif
 ;
@@ -101,15 +103,81 @@ check_update : tests
            -s [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]];
 }
 
-install :
-{
+install : install_bins install_libs;
 
-}
+install_bins :
+#if @bin_blow@
+          blow_install
+#endif
+#if @bin_echos@
+          echos_install
+#endif
+#if @bin_ncat@
+          ncat_install
+#endif
+#if @bin_proxy@
+          proxy_install
+#endif
+#if @bin_stil@
+          stil_install
+#endif
+#if @bin_stile@
+          stile_install
+#endif
+#if @bin_suck@
+          suck_install
+#endif
+;
 
-uninstall :
-{
+install_libs :
+#if @lib_stil@
+          libstil_install
+#endif
+#if @lib_sock@
+          libsock_install
+#endif
+#if @lib_stash@
+          libstash_install
+#endif
+;
 
-}
+uninstall : uninstall_bins uninstall_libs;
+
+uninstall_bins :
+#if @bin_blow@
+          blow_uninstall
+#endif
+#if @bin_echos@
+          echos_uninstall
+#endif
+#if @bin_ncat@
+          ncat_uninstall
+#endif
+#if @bin_proxy@
+          proxy_uninstall
+#endif
+#if @bin_stil@
+          stil_uninstall
+#endif
+#if @bin_stile@
+          stile_uninstall
+#endif
+#if @bin_suck@
+          suck_uninstall
+#endif
+;
+
+uninstall_libs :
+#if @lib_stil@
+          libstil_uninstall
+#endif
+#if @lib_sock@
+          libsock_uninstall
+#endif
+#if @lib_stash@
+          libstash_uninstall
+#endif
+;
 
 clean :
 {
@@ -168,12 +236,12 @@ data
 #![SHELL]
 
 for i in `find [srcdir] -type f -name .cook.fp` ; do
-  echo rm $i;
-  rm $i;
+	echo rm $i;
+	rm $i;
 done
 for i in `find [objdir] -type f -name .cook.fp` ; do
-  echo rm $i;
-  rm $i;
+	echo rm $i;
+	rm $i;
 done
 dataend
 }
@@ -266,16 +334,23 @@ dataend
          -o [fromto %0%.o_s %0%.d_s [target]];
 }
 
-#if @lib_stash@
-#  include [srcdir]/lib/c/libstash/Howto.cook
+/*
+ * Libraries.  Order matters.  They should appear in an order that works on the
+ * link line (-lstil -lsock -lstash).
+ */
+#if @lib_stil@
+#  include [srcdir]/lib/c/libstil/Howto.cook
 #endif
 #if @lib_sock@
 #  include [srcdir]/lib/c/libsock/Howto.cook
 #endif
-#if @lib_stil@
-#  include [srcdir]/lib/c/libstil/Howto.cook
+#if @lib_stash@
+#  include [srcdir]/lib/c/libstash/Howto.cook
 #endif
 
+/*
+ * Programs.
+ */
 #if @bin_blow@
 #  include [srcdir]/bin/blow/Howto.cook
 #endif

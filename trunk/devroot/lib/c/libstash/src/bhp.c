@@ -32,16 +32,16 @@ cw_bhpi_t *
 bhpi_new(cw_bhpi_t *a_bhpi, const void *a_priority, const void *a_data,
     cw_opaque_dealloc_t *a_dealloc_func, void *a_dealloc_arg)
 {
-	cw_bhpi_t *retval;
+	cw_bhpi_t	*retval;
 
-	if (NULL != a_bhpi) {
+	if (a_bhpi != NULL) {
 		retval = a_bhpi;
 		bzero(retval, sizeof(cw_bhpi_t));
 		retval->dealloc_func = a_dealloc_func;
 		retval->dealloc_arg = a_dealloc_arg;
 	} else {
 		retval = (cw_bhpi_t *)_cw_malloc(sizeof(cw_bhpi_t));
-		if (NULL == retval)
+		if (retval == NULL)
 			goto RETURN;
 		bzero(retval, sizeof(cw_bhpi_t));
 		retval->dealloc_func = (cw_opaque_dealloc_t *)mem_free;
@@ -57,7 +57,7 @@ bhpi_new(cw_bhpi_t *a_bhpi, const void *a_priority, const void *a_data,
 	retval->magic_b = _LIBSTASH_BHPI_MAGIC;
 #endif
 
-RETURN:
+	RETURN:
 	return retval;
 }
 
@@ -442,7 +442,7 @@ bhp_p_new(cw_bhp_t *a_bhp, bhp_prio_comp_t *a_prio_comp,
 	retval->magic_b = _LIBSTASH_BHP_MAGIC;
 #endif
 
-RETURN:
+	RETURN:
 	return retval;
 }
 

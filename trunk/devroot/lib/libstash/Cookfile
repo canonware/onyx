@@ -28,12 +28,13 @@
   incs = [fromto % [srcdir]/lib/c/libstash/include/libstash/% [incs]];
   incs = [incs] [objdir]/lib/c/libstash/include/libstash/libstash_defs.h;
 
+  LIBSTASH_INCS = [incs];
   INCS = [INCS] [incs];
 }
 
 /* Include files that are _not_ installed. */
 {
-  local priv_incs = mem_l.h treen_p.h;
+  local priv_incs = mem_l.h;
   priv_incs = [fromto % [srcdir]/lib/c/libstash/include/libstash/% [priv_incs]];
 
   PRIV_INCS = [PRIV_INCS] [priv_incs];
@@ -82,6 +83,7 @@ SRCS = [SRCS] [LIBSTASH_SRCS];
                      libstash_thd.3s libstash_tsd.3s libstash_treen.3s;
   manpages_3 = [fromto % [srcdir]/lib/c/libstash/man/man3/% [manpages_3]];
 
+  LIBSTASH_MANPAGES_3 = [manpages_3];
   MANPAGES_3 = [MANPAGES_3] [manpages_3];
 }
 
@@ -106,6 +108,31 @@ S_LIBS = [S_LIBS] [LIBSTASH_S];
 
 libstash : [LIBSTASH_D] [LIBSTASH_A] [LIBSTASH_P] [LIBSTASH_S];
 
+libstash_install : libstash_install_d libstash_install_a libstash_install_p
+#if [ENABLE_SHARED]
+                   libstash_install_s
+#endif
+;
+
+libstash_uninstall :
+{
+  [SHELL] -e;
+data
+#![SHELL]
+
+echo rm -f [PREFIX]/lib/libstash*
+rm -f [PREFIX]/lib/libstash*
+
+echo rm -rf [PREFIX]/include/libstash
+rm -rf [PREFIX]/include/libstash
+
+for i in [LIBSTASH_MANPAGES_3]; do
+	echo rm -f [PREFIX]/man/man3/`[BASENAME] $i`
+	rm -f [PREFIX]/man/man3/`[BASENAME] $i`
+done
+dataend
+}
+
 /*
  * Various flags.
  */
@@ -113,6 +140,57 @@ libstash : [LIBSTASH_D] [LIBSTASH_A] [LIBSTASH_P] [LIBSTASH_S];
 CPPFLAGS = [CPPFLAGS] -I[srcdir]/lib/c/libstash/include
                       -I[objdir]/lib/c/libstash/include/libstash;
 D_CPPFLAGS = [D_CPPFLAGS] -D_LIBSTASH_DBG;
+
+/*
+ * Build rules.
+ */
+
+libstash_install_common : libstash
+{
+  [SHELL] -e;
+data
+#![SHELL]
+
+echo [INSTALL] -d [PREFIX]/include/libstash
+[INSTALL] -d [PREFIX]/include/libstash
+
+for i in [LIBSTASH_INCS]; do
+	echo [INSTALL] -m 0644 $i [PREFIX]/include/libstash/
+	[INSTALL] -m 0644 $i [PREFIX]/include/libstash/
+done
+
+echo [INSTALL] -d [PREFIX]/man/man3
+[INSTALL] -d [PREFIX]/man/man3
+
+for i in [LIBSTASH_MANPAGES_3]; do
+	echo [INSTALL] -m 0644 $i [PREFIX]/man/man3/
+	[INSTALL] -m 0644 $i [PREFIX]/man/man3/
+done
+
+echo [INSTALL] -d [PREFIX]/lib
+[INSTALL] -d [PREFIX]/lib
+dataend
+}
+
+libstash_install_d : [LIBSTASH_D] libstash_install_common
+{
+	[INSTALL] -m 0444 [LIBSTASH_D] [PREFIX]/lib;
+}
+
+libstash_install_a : [LIBSTASH_A] libstash_install_common
+{
+	[INSTALL] -m 0444 [LIBSTASH_A] [PREFIX]/lib;
+}
+
+libstash_install_p : [LIBSTASH_P] libstash_install_common
+{
+	[INSTALL] -m 0444 [LIBSTASH_P] [PREFIX]/lib;
+}
+
+libstash_install_s : [LIBSTASH_D] libstash_install_common
+{
+	[INSTALL] -m 0444 [LIBSTASH_S] [PREFIX]/lib;
+}
 
 /*
  * Dependencies.

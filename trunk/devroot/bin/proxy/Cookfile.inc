@@ -100,26 +100,29 @@ D_CPPFLAGS = [D_CPPFLAGS] -D_PROXY_DBG;
  * Dependencies.
  */
 
-[PROXY_D] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [PROXY_SRCS]] [D_LIBS]
+[PROXY_D] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [PROXY_SRCS]]
+            [LIBSOCK_D] [LIBSTASH_D]
   set mkdir
 {
   [CC] [D_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [PROXY_SRCS]]
-       [D_LIBS] [LDFLAGS] [D_LIBS] [EXTRALIBS];
+       [LDFLAGS] -lsock_d -lstash_d [EXTRALIBS];
 }
 
-[PROXY_A] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [PROXY_SRCS]] [A_LIBS]
+[PROXY_A] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [PROXY_SRCS]]
+            [LIBSOCK_A] [LIBSTASH_A]
   set mkdir
 {
   [CC] [D_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [PROXY_SRCS]]
-       [D_LIBS] [LDFLAGS] [A_LIBS] [EXTRALIBS];
+       [LDFLAGS] -lsock -lstash [EXTRALIBS];
 }
 
-[PROXY_P] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [PROXY_SRCS]] [P_LIBS]
+[PROXY_P] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [PROXY_SRCS]]
+            [LIBSOCK_P] [LIBSTASH_P]
   set mkdir
 {
   [CC] [D_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [PROXY_SRCS]]
-       [D_LIBS] [LDFLAGS] [P_LIBS] [EXTRALIBS];
+       [LDFLAGS] -lsock_p -lstash_p [EXTRALIBS];
 }

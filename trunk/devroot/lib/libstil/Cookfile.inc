@@ -89,7 +89,7 @@ LIBSTIL_S = [objdir]/lib/c/libstil/lib/libstil.so.[LIBSTIL_REV];
 LIBSTIL_P = [objdir]/lib/c/libstil/lib/libstil_p.a;
 
 LDFLAGS = [LDFLAGS] -L[objdir]/lib/c/libstil/lib;
-LIBS = [LIBS] -lsock;
+LIBS = [LIBS] -lstil;
 D_LIBS = [D_LIBS] [LIBSTIL_D];
 A_LIBS = [A_LIBS] [LIBSTIL_A];
 P_LIBS = [P_LIBS] [LIBSTIL_P];
