@@ -1,5 +1,8 @@
 1999-02-03  Jason Evans  <jasone@canonware.com>
 
+	* include/libstash/libstash.h.in (_cw_ntohq): Add.
+	(_cw_htonq): Add.
+
 	* src/buf.c (buf_rm_tail_bufel): Add.
 
 1999-02-02  Jason Evans  <jasone@canonware.com>
