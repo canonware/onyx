@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 71 $
- * $Date: 1998-05-02 02:10:52 -0700 (Sat, 02 May 1998) $
+ * $Revision: 73 $
+ * $Date: 1998-05-02 13:58:09 -0700 (Sat, 02 May 1998) $
  *
  * <<< Description >>>
  *
@@ -42,12 +42,6 @@
  * to read/write locks.  That is, multiple readers can be in the code
  * simultaneously, but only one locker (with no readers) can be in the code
  * at any given time.
- *
- * XXX Perhaps we should convert items to be within the items array, rather
- * than storing pointers to them.  With the current implementation, this
- * would introduce a copying overhead, but since this will eventually be
- * converted to shuffle slots to alleviate invalid slots, the copying
- * overhead will be there anyway.
  *
  ****************************************************************************/
 
@@ -1220,7 +1214,7 @@ oh_shrink_priv(cw_oh_t * a_oh_o)
 {
   cw_oh_item_t ** old_items;
   cw_uint64_t old_size, i;
-  cw_bool_t retval;
+  cw_bool_t retval = FALSE;
   cw_uint32_t num_halvings;
 
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
@@ -1243,20 +1237,17 @@ oh_shrink_priv(cw_oh_t * a_oh_o)
   }
   else
   {
-    retval = FALSE;
     goto RETURN;
   }
+
+  /* We're not shrinking below the base table size, are we? */
+  _cw_assert((a_oh_o->curr_power - num_halvings) >= a_oh_o->base_power);
   
 #ifdef _OH_PERF_
   a_oh_o->num_shrinks++;
 #endif
 
-  if (num_halvings - a_oh_o->curr_power
-      < a_oh_o->base_power)
-  {
-    num_halvings = a_oh_o->curr_power - a_oh_o->base_power;
-  }
-
+  
   old_items = a_oh_o->items;
   old_size = a_oh_o->size;
   a_oh_o->size >>= num_halvings;
@@ -1306,7 +1297,6 @@ oh_shrink_priv(cw_oh_t * a_oh_o)
   }
   _cw_free(old_items);
   
-  retval = FALSE;
  RETURN:
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
   {
