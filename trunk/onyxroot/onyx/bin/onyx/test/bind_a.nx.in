@@ -12,7 +12,19 @@
 
 `Test begin\n' print
 
-{product pop realtime true globaldict {product pop realtime true globaldict}}
+{
+	product pop realtime true globaldict
+	{product pop realtime true globaldict}
+}
+dup 2 sprint
+bind 2 sprint
+
+{
+	product pop realtime true globaldict
+	{product pop realtime true globaldict}
+}
+dup dup 5 get cvlit 5 exch put
+cvlit
 dup 2 sprint
 bind 2 sprint
 

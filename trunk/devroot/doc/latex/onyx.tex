@@ -2886,12 +2886,14 @@ onyx:0>
 	\end{description}
 \label{systemdict:bind}
 \index{bind@\onyxop{}{bind}{}}
-\item[{\onyxop{--}{bind}{--}}: ]
+\item[{\onyxop{proc}{bind}{proc}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[proc: ]
-			A procedure (executable array).
+			A procedure (array).  \oparg{proc} will be bound even if
+			it is literal, but contained literal arrays will not be
+			recursively bound.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
@@ -2904,12 +2906,22 @@ onyx:0>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Recursively bind unbound procedures.  Objects within a procedure
-		are replaced with their values 
-Binding entails replacing
-		executable names
+		Recursively bind unbound procedures.  Executable names within a
+		procedure are replaced with their values if defined in dstack,
+		in any of the following cases:
+		\begin{itemize}
+		\item{The value is an executable operator.}
+		\item{The value is a literal object.}
+		\end{itemize}
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> {pop product globaldict {pop product globaldict}}
+onyx:1> dup 2 sprint
+{pop product globaldict {pop product globaldict}}
+onyx:1> bind
+onyx:1> dup 2 sprint
+{--pop-- `Canonware onyx' <> {--pop-- `Canonware onyx' -dict-}}
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:broadcast}
