@@ -41,7 +41,7 @@
  * Short insert/yank/remove/delete (SINS, SYNK, SREM, SDEL):
  *   TA...AT
  *
- * Insert/yank/remove/delete (INS, YNK, REM, DEL):
+ * Long insert/yank/remove/delete (LINS, LYNK, LREM, LDEL):
  *   TAAAAAAAA...AAAAAAAAT
  *
  * Three markers are used when traversing the history.  hbeg and hend bracket
@@ -60,12 +60,12 @@
  * E      : Group end.
  * P(n,m) : Buffer position change.
  * i(s)   : Insert short string s before point.
- * I(s)   : Insert long string s before point.
  * y(s)   : Insert (yank) short string s after point.
- * Y(s)   : Insert (yank) long string s after point.
  * r(s)   : Remove short string s before point.
- * R(s)   : Remove long string s before point.
  * d(s)   : Remove (delete) short string s after point.
+ * I(s)   : Insert long string s before point.
+ * Y(s)   : Insert (yank) long string s after point.
+ * R(s)   : Remove long string s before point.
  * D(s)   : Remove (delete) long string s after point.
  *
  ******************************************************************************/
@@ -78,8 +78,6 @@
 #ifdef CW_BUF_DUMP
 #include <ctype.h>
 #endif
-
-#define HISTH_SAUX_MAX 255
 
 /* Prototypes. */
 /* histh. */
@@ -570,6 +568,22 @@ histh_p_record_prev(cw_histh_t *a_head, cw_histh_t *a_foot, cw_buf_t *a_buf,
 
 		break;
 	    }
+	    case HISTH_TAG_SINS:
+	    case HISTH_TAG_SYNK:
+	    case HISTH_TAG_SREM:
+	    case HISTH_TAG_SDEL:
+	    {
+		/* Skip data. */
+		mkr_dup(a_tmp, a_cur);
+		mkr_seek(a_tmp, -(cw_sint64_t)histh_p_saux_get(a_foot),
+			 BUFW_REL);
+
+		/* Get header. */
+		histh_p_header_before_get(a_head, a_tmp, a_beg,
+					  histh_p_tag_get(a_foot));
+
+		break;
+	    }
 	    case HISTH_TAG_LINS:
 	    case HISTH_TAG_LYNK:
 	    case HISTH_TAG_LREM:
@@ -637,6 +651,21 @@ histh_p_record_next(cw_histh_t *a_head, cw_histh_t *a_foot, cw_buf_t *a_buf,
 	    {
 		/* Get footer. */
 		histh_p_footer_after_get(a_foot, a_cur, a_end,
+					 histh_p_tag_get(a_head));
+
+		break;
+	    }
+	    case HISTH_TAG_SINS:
+	    case HISTH_TAG_SYNK:
+	    case HISTH_TAG_SREM:
+	    case HISTH_TAG_SDEL:
+	    {
+		/* Skip data. */
+		mkr_dup(a_tmp, a_cur);
+		mkr_seek(a_tmp, histh_p_saux_get(a_head), BUFW_REL);
+
+		/* Get footer. */
+		histh_p_footer_after_get(a_foot, a_tmp, a_end,
 					 histh_p_tag_get(a_head));
 
 		break;
@@ -712,8 +741,8 @@ histh_p_dump(cw_histh_t *a_histh, const char *a_beg, const char *a_mid,
 	    fprintf(stderr, "%s|-> tag: %s (%u)\n", mid,
 		    tags[a_histh->tag], a_histh->tag);
 	    fprintf(stderr, "%s|\n", mid);
-	    fprintf(stderr, "%s\\-> aux: %llu\n", mid,
-		    histh_p_aux_get(a_histh));
+	    fprintf(stderr, "%s\\-> saux: %u\n", mid,
+		    histh_p_saux_get(a_histh));
 	    break;
 	}
 	case HISTH_TAG_POS:
@@ -1116,7 +1145,7 @@ hist_p_ins_ynk_rem_del(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos,
 	else
 	{
 	    histh_p_footer_tag_set(&a_hist->hfoot, tag_equiv);
-	    histh_p_saux_set(&a_hist->hhead, cnt);
+	    histh_p_saux_set(&a_hist->hfoot, cnt);
 	}
 
 	/* Insert footer. */
@@ -1317,6 +1346,10 @@ hist_undo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 		hist_p_record_prev(a_hist);
 		break;
 	    }
+	    case HISTH_TAG_SINS:
+	    case HISTH_TAG_SYNK:
+	    case HISTH_TAG_SREM:
+	    case HISTH_TAG_SDEL:
 	    case HISTH_TAG_LINS:
 	    case HISTH_TAG_LYNK:
 	    case HISTH_TAG_LREM:
@@ -1330,6 +1363,7 @@ hist_undo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 		mkr_seek(a_mkr, a_hist->hbpos - 1, BUFW_BOB);
 		switch (histh_p_tag_get(&a_hist->hhead))
 		{
+		    case HISTH_TAG_SINS:
 		    case HISTH_TAG_LINS:
 		    {
 			/* Remove character. */
@@ -1341,6 +1375,7 @@ hist_undo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 			a_hist->hbpos--;
 			break;
 		    }
+		    case HISTH_TAG_SYNK:
 		    case HISTH_TAG_LYNK:
 		    {
 			/* Remove character. */
@@ -1349,6 +1384,7 @@ hist_undo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 			mkr_l_remove(a_mkr, &tmkr, FALSE);
 			break;
 		    }
+		    case HISTH_TAG_SREM:
 		    case HISTH_TAG_LREM:
 		    {
 			/* Get character. */
@@ -1365,6 +1401,7 @@ hist_undo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 			a_hist->hbpos++;
 			break;
 		    }
+		    case HISTH_TAG_SDEL:
 		    case HISTH_TAG_LDEL:
 		    {
 			/* Get character. */
@@ -1497,6 +1534,10 @@ hist_redo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 		hist_p_record_next(a_hist);
 		break;
 	    }
+	    case HISTH_TAG_SINS:
+	    case HISTH_TAG_SYNK:
+	    case HISTH_TAG_SREM:
+	    case HISTH_TAG_SDEL:
 	    case HISTH_TAG_LINS:
 	    case HISTH_TAG_LYNK:
 	    case HISTH_TAG_LREM:
@@ -1510,6 +1551,7 @@ hist_redo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 		mkr_seek(a_mkr, a_hist->hbpos - 1, BUFW_BOB);
 		switch(histh_p_tag_get(&a_hist->hhead))
 		{
+		    case HISTH_TAG_SINS:
 		    case HISTH_TAG_LINS:
 		    {
 			/* Get character. */
@@ -1526,6 +1568,7 @@ hist_redo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 			a_hist->hbpos++;
 			break;
 		    }
+		    case HISTH_TAG_SYNK:
 		    case HISTH_TAG_LYNK:
 		    {
 			/* Get character. */
@@ -1539,6 +1582,7 @@ hist_redo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 			mkr_l_insert(a_mkr, FALSE, TRUE, &bufv, 1, FALSE);
 			break;
 		    }
+		    case HISTH_TAG_SREM:
 		    case HISTH_TAG_LREM:
 		    {
 			/* Remove character. */
@@ -1550,6 +1594,7 @@ hist_redo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 			a_hist->hbpos--;
 			break;
 		    }
+		    case HISTH_TAG_SDEL:
 		    case HISTH_TAG_LDEL:
 		    {
 			/* Remove character. */
@@ -1847,8 +1892,8 @@ hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
 	else
 	{
 	    /* Get current record header/footer. */
-	    histh_p_header_after_get(&thead, &tbeg, &ttmp);
 	    histh_p_footer_before_get(&tfoot, &tend, &ttmp);
+	    histh_p_header_after_get(&thead, &tbeg, &ttmp);
 	}
 
 	/* Iterate through records. */
@@ -1886,15 +1931,6 @@ hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
 			    histh_p_saux_get(&thead));
 		    break;
 		}
-		case HISTH_TAG_LINS:
-		{
-		    fprintf(stderr, "%s|         (", mid);
-		    bufv = mkr_range_get(&ttmp, &tcur, &bufvcnt);
-		    hist_p_bufv_print(bufv, bufvcnt);
-		    fprintf(stderr, ")%lluI\n",
-			    histh_p_aux_get(&thead));
-		    break;
-		}
 		case HISTH_TAG_SYNK:
 		{
 		    fprintf(stderr, "%s|         (", mid);
@@ -1902,15 +1938,6 @@ hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
 		    hist_p_bufv_print(bufv, bufvcnt);
 		    fprintf(stderr, ")%uy\n",
 			    histh_p_saux_get(&thead));
-		    break;
-		}
-		case HISTH_TAG_LYNK:
-		{
-		    fprintf(stderr, "%s|         (", mid);
-		    bufv = mkr_range_get(&ttmp, &tcur, &bufvcnt);
-		    hist_p_bufv_print(bufv, bufvcnt);
-		    fprintf(stderr, ")%lluY\n",
-			    histh_p_aux_get(&thead));
 		    break;
 		}
 		case HISTH_TAG_SREM:
@@ -1922,15 +1949,6 @@ hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
 			    histh_p_saux_get(&thead));
 		    break;
 		}
-		case HISTH_TAG_LREM:
-		{
-		    fprintf(stderr, "%s|         (", mid);
-		    bufv = mkr_range_get(&ttmp, &tcur, &bufvcnt);
-		    hist_p_bufv_print(bufv, bufvcnt);
-		    fprintf(stderr, ")%lluR\n",
-			    histh_p_aux_get(&thead));
-		    break;
-		}
 		case HISTH_TAG_SDEL:
 		{
 		    fprintf(stderr, "%s|         (", mid);
@@ -1938,6 +1956,33 @@ hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
 		    hist_p_bufv_print(bufv, bufvcnt);
 		    fprintf(stderr, ")%ud\n",
 			    histh_p_saux_get(&thead));
+		    break;
+		}
+		case HISTH_TAG_LINS:
+		{
+		    fprintf(stderr, "%s|         (", mid);
+		    bufv = mkr_range_get(&ttmp, &tcur, &bufvcnt);
+		    hist_p_bufv_print(bufv, bufvcnt);
+		    fprintf(stderr, ")%lluI\n",
+			    histh_p_aux_get(&thead));
+		    break;
+		}
+		case HISTH_TAG_LYNK:
+		{
+		    fprintf(stderr, "%s|         (", mid);
+		    bufv = mkr_range_get(&ttmp, &tcur, &bufvcnt);
+		    hist_p_bufv_print(bufv, bufvcnt);
+		    fprintf(stderr, ")%lluY\n",
+			    histh_p_aux_get(&thead));
+		    break;
+		}
+		case HISTH_TAG_LREM:
+		{
+		    fprintf(stderr, "%s|         (", mid);
+		    bufv = mkr_range_get(&ttmp, &tcur, &bufvcnt);
+		    hist_p_bufv_print(bufv, bufvcnt);
+		    fprintf(stderr, ")%lluR\n",
+			    histh_p_aux_get(&thead));
 		    break;
 		}
 		case HISTH_TAG_LDEL:
@@ -2018,28 +2063,10 @@ hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
 		    fprintf(stderr, ")\n");
 		    break;
 		}
-		case HISTH_TAG_LINS:
-		{
-		    fprintf(stderr, "%s|         I%llu(", mid,
-			    histh_p_aux_get(&thead));
-		    bufv = mkr_range_get(&tcur, &ttmp, &bufvcnt);
-		    hist_p_bufv_print(bufv, bufvcnt);
-		    fprintf(stderr, ")\n");
-		    break;
-		}
 		case HISTH_TAG_SYNK:
 		{
 		    fprintf(stderr, "%s|         y%u(\n", mid,
 			    histh_p_saux_get(&thead));
-		    bufv = mkr_range_get(&tcur, &ttmp, &bufvcnt);
-		    hist_p_bufv_print(bufv, bufvcnt);
-		    fprintf(stderr, ")\n");
-		    break;
-		}
-		case HISTH_TAG_LYNK:
-		{
-		    fprintf(stderr, "%s|         Y%llu(\n", mid,
-			    histh_p_aux_get(&thead));
 		    bufv = mkr_range_get(&tcur, &ttmp, &bufvcnt);
 		    hist_p_bufv_print(bufv, bufvcnt);
 		    fprintf(stderr, ")\n");
@@ -2054,19 +2081,37 @@ hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
 		    fprintf(stderr, ")\n");
 		    break;
 		}
-		case HISTH_TAG_LREM:
+		case HISTH_TAG_SDEL:
 		{
-		    fprintf(stderr, "%s|         R%llu(", mid,
+		    fprintf(stderr, "%s|         d%u(", mid,
+			    histh_p_saux_get(&thead));
+		    bufv = mkr_range_get(&tcur, &ttmp, &bufvcnt);
+		    hist_p_bufv_print(bufv, bufvcnt);
+		    fprintf(stderr, ")\n");
+		    break;
+		}
+		case HISTH_TAG_LINS:
+		{
+		    fprintf(stderr, "%s|         I%llu(", mid,
 			    histh_p_aux_get(&thead));
 		    bufv = mkr_range_get(&tcur, &ttmp, &bufvcnt);
 		    hist_p_bufv_print(bufv, bufvcnt);
 		    fprintf(stderr, ")\n");
 		    break;
 		}
-		case HISTH_TAG_SDEL:
+		case HISTH_TAG_LYNK:
 		{
-		    fprintf(stderr, "%s|         d%u(", mid,
-			    histh_p_saux_get(&thead));
+		    fprintf(stderr, "%s|         Y%llu(\n", mid,
+			    histh_p_aux_get(&thead));
+		    bufv = mkr_range_get(&tcur, &ttmp, &bufvcnt);
+		    hist_p_bufv_print(bufv, bufvcnt);
+		    fprintf(stderr, ")\n");
+		    break;
+		}
+		case HISTH_TAG_LREM:
+		{
+		    fprintf(stderr, "%s|         R%llu(", mid,
+			    histh_p_aux_get(&thead));
 		    bufv = mkr_range_get(&tcur, &ttmp, &bufvcnt);
 		    hist_p_bufv_print(bufv, bufvcnt);
 		    fprintf(stderr, ")\n");
@@ -2125,10 +2170,10 @@ hist_validate(cw_hist_t *a_hist, cw_buf_t *a_buf)
     buf_validate(&a_hist->h);
 
     /* Validate that hbeg, hcur, hend, and htmp are in h. */
-    cw_assert(a_hist->hbeg.bufp->buf == &a_hist->h);
-    cw_assert(a_hist->hcur.bufp->buf == &a_hist->h);
-    cw_assert(a_hist->hend.bufp->buf == &a_hist->h);
-    cw_assert(a_hist->htmp.bufp->buf == &a_hist->h);
+    cw_assert(mkr_buf(&a_hist->hbeg) == &a_hist->h);
+    cw_assert(mkr_buf(&a_hist->hcur) == &a_hist->h);
+    cw_assert(mkr_buf(&a_hist->hend) == &a_hist->h);
+    cw_assert(mkr_buf(&a_hist->htmp) == &a_hist->h);
 
     /* Validate that hpbos is a legal bpos in the data buf. */
     cw_assert(a_hist->hbpos >= 1
@@ -2150,8 +2195,8 @@ hist_validate(cw_hist_t *a_hist, cw_buf_t *a_buf)
 	else
 	{
 	    /* Get current record header/footer. */
-	    histh_p_header_after_get(&thead, &tbeg, &ttmp);
 	    histh_p_footer_before_get(&tfoot, &tend, &ttmp);
+	    histh_p_header_after_get(&thead, &tbeg, &ttmp);
 	}
 
 	/* Iterate through records. */

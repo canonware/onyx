@@ -48,6 +48,7 @@ struct cw_histh_s
     {
 	cw_uint8_t str[8];
 	cw_uint8_t saux;
+#define HISTH_SAUX_MAX 255
 	cw_uint64_t aux; /* Always network byte order. */
     } u;
 
