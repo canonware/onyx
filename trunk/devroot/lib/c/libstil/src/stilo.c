@@ -20,7 +20,7 @@ stilo_new(cw_stilo_t *a_stilo)
 {
 	_cw_check_ptr(a_stilo);
 
-	bzero(a_stilo, sizeof(cw_stilo_t));
+	memset(a_stilo, 0, sizeof(cw_stilo_t));
 #ifdef _LIBSTIL_DBG
 	a_stilo->magic = _CW_STILO_MAGIC;
 #endif
@@ -32,14 +32,11 @@ stilo_delete(cw_stilo_t *a_stilo)
 	_cw_check_ptr(a_stilo);
 	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
 
-	/* XXX Perhaps stiloe_delete() should have the switch statement. */
-	
 	/*
 	 * Delete extended types if they only have one reference.  Otherwise,
 	 * the GC is responsible for determining when an object can be deleted.
 	 */
 	if (a_stilo->ref_count == 0) {
-		
 		switch (a_stilo->type) {
 		case _CW_STILOT_NOTYPE:
 		case _CW_STILOT_BOOLEANTYPE:
@@ -232,8 +229,12 @@ stilo_copy(cw_stilo_t *a_to, cw_stilo_t *a_from)
 	cw_stilot_t	type;
 
 	_cw_check_ptr(a_to);
+	_cw_assert(a_to->magic == _CW_STILO_MAGIC);
 	_cw_check_ptr(a_from);
 	_cw_assert(a_from->magic == _CW_STILO_MAGIC);
+
+	/* Clean up before stomping on the destination stilo. */
+	stilo_delete(a_to);
 
 	/* Mark the stilo as invalid. */
 	type = a_from->type;
@@ -275,6 +276,7 @@ stilo_copy(cw_stilo_t *a_to, cw_stilo_t *a_from)
 	case _CW_STILOT_NAMETYPE:
 	case _CW_STILOT_NULLTYPE:
 	case _CW_STILOT_OPERATORTYPE:
+		break;
 	default:
 		_cw_error("Programming error");
 	}
@@ -292,13 +294,109 @@ void
 stilo_move(cw_stilo_t *a_to, cw_stilo_t *a_from)
 {
 	_cw_check_ptr(a_to);
+	_cw_assert(a_to->magic == _CW_STILO_MAGIC);
 	_cw_check_ptr(a_from);
 	_cw_assert(a_from->magic == _CW_STILO_MAGIC);
 
+	/* Clean up before stomping on the destination stilo. */
+	stilo_delete(a_to);
+	
 	memcpy(a_to, a_from, sizeof(cw_stilo_t));
 
-#ifdef _LIBSTIL_DBG
-	a_from->type = _CW_STILOT_NOTYPE;
-	memset(a_from, 0x5a, sizeof(cw_stilo_t));
-#endif
+	/* Reset the source stilo. */
+	stilo_new(a_from);
+}
+
+void
+stilo_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t a_syntactic,
+    cw_bool_t a_newline)
+{
+	cw_uint8_t	newline;
+
+	if (a_newline)
+		newline = '\n';
+	else
+		newline = '\0';
+
+	switch (stilo_type_get(a_stilo)) {
+	case _CW_STILOT_ARRAYTYPE: {
+		cw_stiloe_t	*stiloe;
+		cw_stilo_t	*arr;
+		cw_uint32_t	nelms, i;
+
+		stiloe = stilo_extended_get(a_stilo);
+		arr = stiloe_array_get(stiloe);
+		nelms = stiloe_array_len_get(stiloe);
+
+		if (a_syntactic) {
+			_cw_out_put_f(a_fd, "[[");
+			for (i = 0; i < nelms; i++) {
+				stilo_print(&arr[i], a_fd, a_syntactic, FALSE);
+				if (i < nelms - 1)
+					_cw_out_put_f(a_fd, " ");
+			}
+			_cw_out_put_f(a_fd, "][c]", newline);
+		} else
+			_cw_out_put_f(a_fd, "--nostringval--[c]", newline);
+		break;
+	}
+	case _CW_STILOT_BOOLEANTYPE:
+	case _CW_STILOT_CONDITIONTYPE:
+	case _CW_STILOT_DICTTYPE:
+	case _CW_STILOT_FILETYPE:
+	case _CW_STILOT_HOOKTYPE:
+	case _CW_STILOT_LOCKTYPE:
+		/* XXX */
+		_cw_error("Programming error");
+	case _CW_STILOT_MARKTYPE:
+		if (a_syntactic)
+			_cw_out_put_f(a_fd, "-mark-[c]", newline);
+		else
+			_cw_out_put_f(a_fd, "--nostringval--[c]", newline);
+		break;
+	case _CW_STILOT_MSTATETYPE:
+		if (a_syntactic)
+			_cw_out_put_f(a_fd, "-mstate-[c]", newline);
+		else
+			_cw_out_put_f(a_fd, "--nostringval--[c]", newline);
+		break;
+	case _CW_STILOT_NAMETYPE:
+		/* XXX */
+		_cw_error("Programming error");
+	case _CW_STILOT_NULLTYPE:
+		if (a_syntactic)
+			_cw_out_put_f(a_fd, "-null-[c]", newline);
+		else
+			_cw_out_put_f(a_fd, "--nostringval--[c]", newline);
+		break;
+	case _CW_STILOT_NUMBERTYPE:
+	case _CW_STILOT_OPERATORTYPE:
+		/* XXX */
+		_cw_error("Programming error");
+	case _CW_STILOT_STRINGTYPE: {
+		cw_stiloe_t	*stiloe;
+		cw_uint8_t	*str;
+		cw_sint32_t	len;
+
+		stiloe = stilo_extended_get(a_stilo);
+		str = stiloe_string_get(stiloe);
+		len = stiloe_string_len_get(stiloe);
+
+		if (a_syntactic)
+			_cw_out_put_f(a_fd, "(");
+		if (len > 0)
+			_cw_out_put_fn(a_fd, len, "[s]", str);
+		if (a_syntactic)
+			_cw_out_put_f(a_fd, ")");
+		_cw_out_put_f(a_fd, "[c]", newline);
+
+		break;
+	}
+	case _CW_STILOT_NOTYPE:
+		/* XXX This should really be a fatal error. */
+		_cw_out_put_f(a_fd, "-notype-[c]", newline);
+		break;
+	default:
+		_cw_error("Programming error");
+	}
 }

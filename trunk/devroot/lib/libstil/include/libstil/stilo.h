@@ -151,3 +151,5 @@ void		stilo_extended_set(cw_stilo_t *a_stilo, cw_stiloe_t *a_stiloe);
 void		stilo_copy(cw_stilo_t *a_to, cw_stilo_t *a_from);
 void		stilo_move(cw_stilo_t *a_to, cw_stilo_t *a_from);
 
+void		stilo_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t
+    a_syntactic, cw_bool_t a_newline);

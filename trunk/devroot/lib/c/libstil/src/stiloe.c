@@ -11,6 +11,9 @@
 
 #include "../include/libstil/libstil.h"
 
+void	stiloe_l_array_init(cw_stiloe_t *a_stiloe);
+void	stiloe_l_array_delete(cw_stiloe_t *a_stiloe);
+
 void	stiloe_l_string_init(cw_stiloe_t *a_stiloe);
 void	stiloe_l_string_delete(cw_stiloe_t *a_stiloe);
 
@@ -21,6 +24,10 @@ stiloe_new(cw_stilt_t *a_stilt, cw_stilot_t a_type)
 
 	switch (a_type) {
 	case _CW_STILOT_ARRAYTYPE:
+		retval = (cw_stiloe_t *)_cw_stilt_malloc(a_stilt,
+		    sizeof(cw_stiloe_array_t));
+		stiloe_l_array_init(retval);
+		break;
 	case _CW_STILOT_CONDITIONTYPE:
 	case _CW_STILOT_DICTTYPE:
 	case _CW_STILOT_HOOKTYPE:

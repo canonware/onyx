@@ -16,7 +16,7 @@ stiloe_l_string_init(cw_stiloe_t *a_stiloe)
 {
 	cw_stiloe_string_t	*stiloe = (cw_stiloe_string_t *)a_stiloe;
 
-	stiloe->prev_ref = NULL;
+	stiloe->iterations = 0;
 	stiloe->e.s.str = NULL;
 	stiloe->e.s.len = -1;
 }
@@ -28,30 +28,33 @@ stiloe_l_string_delete(cw_stiloe_t *a_stiloe)
 
 	_cw_check_ptr(a_stiloe);
 	_cw_assert(a_stiloe->magic == _CW_STILOE_MAGIC);
+	_cw_assert(a_stiloe->composite == FALSE);
 
-	/* If this isn't a composite object, delete the string. */
-	if (a_stiloe->composite == FALSE && stiloe->e.s.len != -1)
+	if (stiloe->e.s.len != -1)
 		_cw_stilt_free(a_stiloe->stilt, stiloe->e.s.str);
 }
 
 cw_stiloe_t *
 stiloe_string_ref_iterate(cw_stiloe_t *a_stiloe, cw_bool_t a_reset)
 {
-	cw_stiloe_t	*retval;
+	cw_stiloe_t		*retval;
 	cw_stiloe_string_t	*stiloe = (cw_stiloe_string_t *)a_stiloe;
 
 	_cw_check_ptr(a_stiloe);
 	_cw_assert(a_stiloe->magic == _CW_STILOE_MAGIC);
 
 	if (a_reset)
-		stiloe->prev_ref = NULL;
+		stiloe->iterations = 0;
 
 	if (a_stiloe->composite == FALSE)
 		retval = NULL;
-	else if (stiloe->prev_ref == NULL)
-		retval = stiloe->prev_ref = stiloe->e.stiloec.stiloe;
-	else
-		retval = stiloe->prev_ref = NULL;
+	else if (stiloe->iterations == 0) {
+		retval = stiloe->e.stiloec.stiloe;
+		stiloe->iterations++;
+	} else {
+		retval = NULL;
+		stiloe->iterations = 0;
+	}
 
 	return retval;
 }
@@ -74,8 +77,7 @@ stiloe_string_len_get(cw_stiloe_t *a_stiloe)
 }
 
 void
-stiloe_string_len_set(cw_stiloe_t *a_stiloe, cw_stilt_t *a_stilt, cw_uint32_t
-    a_len)
+stiloe_string_len_set(cw_stiloe_t *a_stiloe, cw_uint32_t a_len)
 {
 	cw_stiloe_string_t	*stiloe = (cw_stiloe_string_t *)a_stiloe;
 
@@ -85,16 +87,16 @@ stiloe_string_len_set(cw_stiloe_t *a_stiloe, cw_stilt_t *a_stilt, cw_uint32_t
 	_cw_assert(stiloe->e.s.len == -1);
 
 	if (a_len > 0) {
-		stiloe->e.s.str = (cw_uint8_t *)_cw_stilt_malloc(a_stilt,
-		    a_len);
+		stiloe->e.s.str = (cw_uint8_t
+		    *)_cw_stilt_malloc(a_stiloe->stilt, a_len);
 	}
 	stiloe->e.s.len = a_len;
 }
 
-cw_uint8_t
+cw_uint8_t *
 stiloe_string_el_get(cw_stiloe_t *a_stiloe, cw_uint32_t a_offset)
 {
-	cw_uint8_t		retval;
+	cw_uint8_t		*retval;
 	cw_stiloe_string_t	*stiloe = (cw_stiloe_string_t *)a_stiloe;
 
 	_cw_check_ptr(a_stiloe);
@@ -102,10 +104,10 @@ stiloe_string_el_get(cw_stiloe_t *a_stiloe, cw_uint32_t a_offset)
 
 	if (a_stiloe->composite == FALSE) {
 		_cw_assert(stiloe->e.s.len > a_offset);
-		retval = stiloe->e.s.str[a_offset];
+		retval = &stiloe->e.s.str[a_offset];
 	} else {
-		retval = stiloe_string_el_get(stiloe->e.stiloec.stiloe,
-		    a_offset) + stiloe->e.stiloec.beg_offset;
+		retval = &stiloe_string_el_get(stiloe->e.stiloec.stiloe,
+		    a_offset)[stiloe->e.stiloec.beg_offset];
 	}
 
 	return retval;
@@ -124,8 +126,8 @@ stiloe_string_get(cw_stiloe_t *a_stiloe)
 		_cw_assert(stiloe->e.s.len != -1);
 		retval = stiloe->e.s.str;
 	} else {
-		retval = stiloe_string_get(stiloe->e.stiloec.stiloe) +
-		    stiloe->e.stiloec.beg_offset;
+		retval = &stiloe_string_get(stiloe->e.stiloec.stiloe)
+		    [stiloe->e.stiloec.beg_offset];
 	}
 
 	return retval;
@@ -147,8 +149,8 @@ stiloe_string_set(cw_stiloe_t *a_stiloe, cw_uint32_t a_offset, const cw_uint8_t
 		str = stiloe->e.s.str;
 	} else {
 		_cw_assert(stiloe->e.stiloec.len >= a_len);
-		str = stiloe_string_get(stiloe->e.stiloec.stiloe) +
-		    stiloe->e.stiloec.beg_offset;
+		str = &stiloe_string_get(stiloe->e.stiloec.stiloe)
+		    [stiloe->e.stiloec.beg_offset];
 	}
 
 	/* Set the string. */

@@ -312,6 +312,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 	cw_sint32_t	retval;
 	cw_uint32_t	i;
 	cw_uint8_t	c;
+	cw_stilo_t	*stilo;
+	cw_stiloe_t	*stiloe;
 
 	for (i = 0; i < a_len; i++, a_stilt->column++) {
 		c = a_str[i];
@@ -377,10 +379,67 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 				break;
 			case '[':
 				stilt_p_print_token(a_stilt, 0, "[");
+				stilo = stils_push(&a_stilt->data_stils);
+				stilo_type_set(stilo, _CW_STILOT_MARKTYPE);
 				break;
-			case ']':
+			case ']': {
+				cw_stilo_t	t_stilo, *arr;
+				cw_uint32_t	nelements, j;
+
 				stilt_p_print_token(a_stilt, 0, "]");
+				/* Find the mark. */
+				for (j = 0, stilo =
+				    stils_get(&a_stilt->data_stils, 0);
+				    stilo != NULL && stilo_type_get(stilo) !=
+				    _CW_STILOT_MARKTYPE; j++, stilo =
+				    stils_get_down(&a_stilt->data_stils,
+				    stilo));
+
+				if (stilo == NULL) {
+					/*
+					 * XXX No mark found.  Generate
+					 * error.
+					 */
+					_cw_error("XXX No mark");
+				}
+				/*
+				 * j is the index of the mark, and stilo points
+				 * to the mark.  Set nelements accordingly.
+				 * When we pop the stilo's off the stack, we'll
+				 * have to pop (nelements + 1) stilo's.
+				 */
+				nelements = j;
+
+				stilo_new(&t_stilo);
+				stilo_type_set(&t_stilo, _CW_STILOT_ARRAYTYPE);
+				stiloe = stiloe_new(a_stilt,
+				    _CW_STILOT_STRINGTYPE);
+				stiloe_array_len_set(stiloe, nelements);
+				stilo_extended_set(&t_stilo, stiloe);
+				arr = stiloe_array_get(stiloe);
+
+				/*
+				 * Traverse up the stack, moving stilo's to the
+				 * array.
+				 */
+				for (j = 0, stilo =
+				    stils_get_up(&a_stilt->data_stils, stilo); j
+				    < nelements; j++, stilo =
+				    stils_get_up(&a_stilt->data_stils,
+				    stilo))
+					stilo_move(&arr[j], stilo);
+
+				/* Pop the stilo's off the stack now. */
+				stils_pop(&a_stilt->data_stils, nelements + 1);
+
+				/* Push the array onto the stack. */
+				stilo = stils_push(&a_stilt->data_stils);
+				stilo_move(stilo, &t_stilo);
+
+				/* Clean up. */
+				stilo_delete(&t_stilo);
 				break;
+			}
 			case '{':
 				stilt_p_print_token(a_stilt, 0, "{");
 				break;
@@ -721,14 +780,12 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 			case ')':
 				a_stilt->meta.string.paren_depth--;
 				if (a_stilt->meta.string.paren_depth == 0) {
-					cw_stilo_t	*stilo;
-					cw_stiloe_t	*stiloe;
-
 					/*
 					 * Matched opening paren; not part of
 					 * the string.
 					 */
 					a_stilt->state = _CW_STILT_STATE_START;
+
 					stilt_p_print_token(a_stilt,
 					    a_stilt->index, "string");
 					stilo =
@@ -737,7 +794,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 					    _CW_STILOT_STRINGTYPE);
 					stiloe = stiloe_new(a_stilt,
 					    _CW_STILOT_STRINGTYPE);
-					stiloe_string_len_set(stiloe, a_stilt,
+					stiloe_string_len_set(stiloe,
 					    a_stilt->index);
 					if (a_stilt->index <=
 					    _CW_STIL_BUFC_SIZE) {
@@ -1104,8 +1161,9 @@ stilt_p_print_token(cw_stilt_t *a_stilt, cw_uint32_t a_length, const char
 		_cw_out_put_n(a_length, "[s]", a_stilt->tok_buffer.str);
 	else
 		_cw_out_put_n(a_length, "[b]", &a_stilt->tok_buffer.buf);
-	_cw_out_put("<-- [s] (line [i], column [i])\n", a_note,
-	    a_stilt->tok_line, a_stilt->tok_column);
+	_cw_out_put("<-- [s] ([i]:[i] [[--> [i]:[i])\n", a_note,
+	    a_stilt->tok_line, a_stilt->tok_column, a_stilt->line,
+	    a_stilt->column);
 #endif
 }
 
