@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 60 $
- * Last modified: $Date: 1998-05-01 14:50:34 -0700 (Fri, 01 May 1998) $
+ * Current revision: $Revision: 70 $
+ * Last modified: $Date: 1998-05-02 02:09:36 -0700 (Sat, 02 May 1998) $
  *
  * <<< Description >>>
  *
@@ -136,7 +136,9 @@ res_new(cw_res_t * a_res_o)
 
   /* Initialize internals. */
   rwl_new(&retval->rw_lock);
-  oh_new(&retval->hash_o);
+  /* Non-thread-safe hash table, since we're already taking care of the
+   * locking. */
+  oh_new(&retval->hash_o, FALSE, FALSE);
 
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_RES_FUNC))
   {
