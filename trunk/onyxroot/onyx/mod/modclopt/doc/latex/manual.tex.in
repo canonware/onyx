@@ -46,15 +46,17 @@ handler method names determines whether the options take arguments:
 	Handle a short-style argument ({\tt -s}) that has no arguments.
 \item[{\tt '-S:'}: ]
 	Handle a short-style argument ({\tt -S}) that must have an argument.
-\item[{\tt `--long'}: ]
-	Handle a long-style option ({\tt --long}) that has no arguments.
-\item[{\tt `--Long?'}: ]
-	Handle a long-style option ({\tt --Long}) that has an optional argument.
-\item[{\tt `--LONG='}: ]
-	Handle a long-style option ({\tt --LONG}) that must have an argument.
+\item[{\tt `{\ddash}long'}: ]
+	Handle a long-style option ({\tt {\ddash}long}) that has no arguments.
+\item[{\tt `{\ddash}Long?'}: ]
+	Handle a long-style option ({\tt {\ddash}Long}) that has an optional
+	argument.
+\item[{\tt `{\ddash}LONG='}: ]
+	Handle a long-style option ({\tt {\ddash}LONG}) that must have an
+	argument.
 \end{description}
 
-The {\tt --} command line argument terminates argument parsing, and any
+The {\tt {\ddash}} command line argument terminates argument parsing, and any
 remaining arguments are returned by the \method{parse} method.
 
 \classname{clopt} subclasses \htmlref{\classname{vclass}}{sec:vclass}.

@@ -88,6 +88,7 @@ data
       | sed -e s/YYYlbZZZ/\[/g \\
       | sed -e s/YYYrbZZZ/\]/g \\
       | sed -e s/YYYhrZZZ/\\<hr\\>/g \\
+      | sed -e s/YYYddashZZZ/--/g \\
       | sed -e \\
         "s/^\\\\\\(\\\\\\<\\\\/TABLE\\\\\\>\\\\\\)\\\\\\<\\\\\\>/\\\\1/g" \\
       > $i
