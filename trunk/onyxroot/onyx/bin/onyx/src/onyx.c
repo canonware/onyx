@@ -545,6 +545,8 @@ nx_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str)
     if (arg->buffer_count == 0)
     {
 	/* Print the prompt if interactive and not in deferred execution mode.
+	 * Take lots of care not to let an error in promptstring cause recursion
+	 * into the error handling machinery.
 	 *
 	 * This code assumes that only the initial thread reads from stdin.  Bad
 	 * things (likely crashes) will happen if that assumption is broken.
@@ -555,18 +557,22 @@ nx_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str)
 	    && (nxo_thread_deferred(arg->thread) == FALSE)
 	    && (nxo_thread_state(arg->thread) == THREADTS_START))
 	{
-	/* Call preprompt if the conditions are right.  Take lots of care not
-	 * to let an error in preprompt or promptstring cause recursion into the
-	 * error handling machinery. */
-	if ((nxo_thread_deferred(synth->thread) == FALSE)
-	    && (nxo_thread_state(synth->thread) == THREADTS_START))
-	{
-	    cw_onyx_code(arg->thread, "\
-$preprompt where {\n\
-pop <$errordict <$handleerror {} $stop $stop load>> begin\n\
-{preprompt promptstring print flush} stopped {`'} if\n\
-end}\n\
-if");
+	    cw_onyx_code(arg->thread,
+			 "$promptstring where {\n"
+			 "pop\n"
+			 /* Save the current contents of errordict into
+			  * promptdict. */
+			 "$promptdict errordict dict copy def\n"
+			 /* Temporarily reconfigure errordict. */
+			 "errordict $handleerror {} put\n"
+			 "errordict $stop $stop load put\n"
+			 /* Actually print the prompt. */
+			 "{promptstring print flush} stopped pop\n"
+			 /* Restore errordict's configuration. */
+			 "promptdict errordict copy pop\n"
+			 /* Remove the definition of promptdict. */
+			 "$promptdict where {$promptdict undef} if\n"
+			 "} if");
 	}
 
 	/* Read data until there are no more. */

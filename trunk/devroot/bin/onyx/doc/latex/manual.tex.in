@@ -93,13 +93,11 @@ called as a more intuitive name for resuming.}
 \label{onyx_interactive:promptstring}
 \index{promptstring@\onyxop{}{promptstring}{}}
 \item{The name ``promptstring'' is defined in systemdict; it takes no arguments
-and returns a string.  The return string is used as the interactive prompt.}
-\label{onyx_interactive:preprompt}
-\index{preprompt@\onyxop{}{preprompt}{}}
-\item{If the name ``preprompt'' is defined in any of the dictionaries on dstack,
-it will be called just before the prompt is displayed.  This is provided
-separately from ``promptstring'', which is potentially called multiple times if
-the prompt needs to be refreshed.}
+and returns a string.  The return string is used as the interactive prompt.  For
+the duration of the call to promptstring, a temporary definition called
+``promptdict'' is stored in the top dictionary on dstack, as a side effect of
+the machinery that makes the interpreter somewhat resilient to errors during the
+call to promptstring.}
 \end{itemize}
 
 If \binname{onyx} is being run non-interactively:

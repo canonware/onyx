@@ -1,7 +1,5 @@
 2003-03-03 : Jason Evans <jasone@canonware.com>
 
-	* Add support for calling preprompt in interactive onyx sessions.
-
 	* Make calls to promptstring resilient to errors.
 
 	* lib/libonyx/src/systemdict.c:systemdict_{copy,get}() : Use

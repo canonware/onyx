@@ -65,6 +65,9 @@ static cw_sint32_t
 modprompt_read(void *a_data, cw_nxo_t *a_file, cw_uint32_t a_len,
 	       cw_uint8_t *r_str);
 
+static void
+modprompt_promptstring(struct cw_modprompt_synth_s *a_synth);
+
 static char *
 modprompt_prompt(EditLine *a_el);
 
@@ -304,22 +307,8 @@ modprompt_read(void *a_data, cw_nxo_t *a_file, cw_uint32_t a_len,
 
     if (synth->buffer_count == 0)
     {
-	/* Call preprompt if the conditions are right.  Take lots of care not
-	 * to let an error in preprompt cause recursion into the error handling
-	 * machinery. */
-	if ((nxo_thread_deferred(synth->thread) == FALSE)
-	    && (nxo_thread_state(synth->thread) == THREADTS_START))
-	{
-	    cw_onyx_code(synth->thread,
-			 "$preprompt where {\n"
-			     "pop\n"
-			     "<$errordict <$handleerror {} $stop $stop load>>\n"
-			     "begin\n"
-			     "{preprompt} stopped pop\n"
-			     "end\n"
-			 "}\n"
-			 "if");
-	}
+	/* Update the promptstring if necessary. */
+	modprompt_promptstring(synth);
 
 	/* Read more data. */
 	while ((str = el_gets(synth->el, &count)) == NULL)
@@ -397,31 +386,34 @@ modprompt_read(void *a_data, cw_nxo_t *a_file, cw_uint32_t a_len,
 }
 #endif
 
-static char *
-modprompt_prompt(EditLine *a_el)
+static void
+modprompt_promptstring(struct cw_modprompt_synth_s *a_synth)
 {
-    struct cw_modprompt_synth_s *synth;
-
-    el_get(a_el, EL_CLIENTDATA, (void **)&synth);
-
-    cw_check_ptr(synth);
-    cw_dassert(synth->magic == CW_MODPROMPT_SYNTH_MAGIC);
-
+    /* Call promptstring if the conditions are right.  Take lots of care not to
+     * let an error in promptstring cause recursion into the error handling
+     * machinery. */
     if ((nxo_thread_deferred(synth->thread) == FALSE)
 	&& (nxo_thread_state(synth->thread) == THREADTS_START))
     {
-	static const cw_uint8_t code[] =
-	    "$promptstring where {\n"
-	        "pop <$errordict <$handleerror {} $stop $stop load>> begin\n"
-	        "{promptstring} stopped {`'} if\n"
-	        "end\n"
-	    "}{\n"
-	        "`'\n"
-	    "} ifelse\n";
 	cw_uint8_t *pstr;
 	cw_uint32_t plen, maxlen;
 	cw_nxo_t *nxo;
 	cw_nxo_t *stack;
+	static const cw_uint8_t code[] =
+	    "$promptstring where {\n"
+	    "pop\n"
+	    /* Save the current contents of errordict into promptdict. */
+	    "$promptdict errordict dict copy def\n"
+	    /* Temporarily reconfigure errordict. */
+	    "errordict $handleerror {} put\n"
+	    "errordict $stop $stop load put\n"
+	    /* Actually call promptstring. */
+	    "{promptstring} stopped {`'} if\n"
+	    /* Restore errordict's configuration. */
+	    "promptdict errordict copy pop\n"
+	    /* Remove the definition of promptdict. */
+	    "$promptdict where {$promptdict undef} if\n"
+	    "}{`'} ifelse";
 
 	stack = nxo_thread_ostack_get(synth->thread);
 
@@ -448,8 +440,8 @@ modprompt_prompt(EditLine *a_el)
 	    plen = nxo_string_len_get(nxo);
 
 	    /* Copy the prompt string to a global buffer. */
-	    maxlen
-		= (plen > CW_PROMPT_STRLEN - 1) ? CW_PROMPT_STRLEN - 1 : plen;
+	    maxlen = (plen > CW_PROMPT_STRLEN - 1)
+		? CW_PROMPT_STRLEN - 1 : plen;
 	    strncpy(synth->prompt_str, pstr, maxlen);
 	}
 
@@ -458,7 +450,20 @@ modprompt_prompt(EditLine *a_el)
 	/* Pop the prompt string off the data stack. */
 	nxo_stack_pop(stack);
     }
-    else
+}
+
+static char *
+modprompt_prompt(EditLine *a_el)
+{
+    struct cw_modprompt_synth_s *synth;
+
+    el_get(a_el, EL_CLIENTDATA, (void **)&synth);
+
+    cw_check_ptr(synth);
+    cw_dassert(synth->magic == CW_MODPROMPT_SYNTH_MAGIC);
+
+    if ((nxo_thread_deferred(synth->thread))
+	|| (nxo_thread_state(synth->thread) != THREADTS_START))
     {
 	/* One or both of:
 	 *
@@ -579,29 +584,15 @@ modprompt_entry(void *a_arg)
 	    break;
 	}
 
-	/* Call preprompt if the conditions are right.  Take lots of care not
-	 * to let an error in preprompt cause recursion into the error handling
-	 * machinery. */
-	if ((nxo_thread_deferred(synth->thread) == FALSE)
-	    && (nxo_thread_state(synth->thread) == THREADTS_START))
-	{
-	    cw_onyx_code(synth->thread,
-			 "$preprompt where {\n"
-			     "pop\n"
-			     "<$errordict <$handleerror {} $stop $stop load>>\n"
-			     "begin\n"
-			     "{preprompt} stopped pop\n"
-			     "end\n"
-			 "}\n"
-			 "if");
-	}
+	/* Update the promptstring if necessary. */
+	modprompt_promptstring(synth);
 
 	/* Read data. */
 	cw_assert(synth->buffer_count == 0);
 	while ((str = el_gets(synth->el, &count)) == NULL)
 	{
-	    /* An interrupted system call (EINTR) caused an error in
-	     * el_gets().  Check to see if we should quit. */
+	    /* An interrupted system call (EINTR) caused an error in el_gets().
+	     * Check to see if we should quit. */
 	}
 	cw_assert(count > 0);
 
