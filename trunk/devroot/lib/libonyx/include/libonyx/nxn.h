@@ -190,6 +190,7 @@ typedef enum
 #endif
     NXN_ENTRY(eq),
     NXN_ENTRY(errorname),
+    NXN_ENTRY(escape),
     NXN_ENTRY(estack),
     NXN_ENTRY(estackoverflow),
 #ifdef CW_POSIX
@@ -750,6 +751,7 @@ typedef enum
     NXN_ENTRY(timedwait),
 #endif
     NXN_ENTRY(token),
+    NXN_ENTRY(trapped),
     NXN_ENTRY(true),
 #ifdef CW_REAL
     NXN_ENTRY(trunc),

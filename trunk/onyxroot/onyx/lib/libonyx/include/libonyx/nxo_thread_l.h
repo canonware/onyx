@@ -15,6 +15,9 @@ nxo_l_thread_token(cw_nxo_t *a_nxo, cw_nxo_threadp_t *a_threadp,
 		   const cw_uint8_t *a_str, cw_uint32_t a_len);
 
 #ifndef CW_USE_INLINES
+cw_nxo_t *
+nxo_l_thread_trapped_arg_get(cw_nxo_t *a_nxo);
+
 #ifdef CW_REGEX
 cw_nxo_regex_cache_t *
 nxo_l_thread_regex_cache_get(cw_nxo_t *a_nxo);
@@ -28,6 +31,21 @@ nxoe_l_thread_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
 #endif
 
 #if (defined(CW_USE_INLINES) || defined(CW_NXO_THREAD_C_))
+CW_INLINE cw_nxo_t *
+nxo_l_thread_trapped_arg_get(cw_nxo_t *a_nxo)
+{
+    cw_nxoe_thread_t *thread;
+
+    cw_check_ptr(a_nxo);
+    cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+
+    thread = (cw_nxoe_thread_t *) a_nxo->o.nxoe;
+    cw_dassert(thread->nxoe.magic == CW_NXOE_MAGIC);
+    cw_assert(thread->nxoe.type == NXOT_THREAD);
+
+    return &thread->trapped_arg;
+}
+
 #ifdef CW_REGEX
 CW_INLINE cw_nxo_regex_cache_t *
 nxo_l_thread_regex_cache_get(cw_nxo_t *a_nxo)
@@ -133,8 +151,13 @@ nxoe_l_thread_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 		retval = nxo_nxoe_get(&thread->stderr_nxo);
 		break;
 	    }
-#ifdef CW_REGEX
 	    case 8:
+	    {
+		retval = nxo_nxoe_get(&thread->trapped_arg);
+		break;
+	    }
+#ifdef CW_REGEX
+	    case 9:
 	    {
 		retval = nxo_l_regex_cache_ref_iter(&thread->regex_cache, TRUE);
 		if (retval == NULL)

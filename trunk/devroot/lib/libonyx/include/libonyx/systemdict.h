@@ -295,6 +295,9 @@ void
 systemdict_eq(cw_nxo_t *a_thread);
 
 void
+systemdict_escape(cw_nxo_t *a_thread);
+
+void
 systemdict_estack(cw_nxo_t *a_thread);
 
 #ifdef CW_POSIX
@@ -1103,6 +1106,9 @@ systemdict_timedwait(cw_nxo_t *a_thread);
 
 void
 systemdict_token(cw_nxo_t *a_thread);
+
+void
+systemdict_trapped(cw_nxo_t *a_thread);
 
 #ifdef CW_REAL
 void

@@ -229,6 +229,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #endif
     ENTRY(end),
     ENTRY(eq),
+    ENTRY(escape),
     ENTRY(estack),
 #ifdef CW_POSIX
     ENTRY(euid),
@@ -568,6 +569,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(timedwait),
 #endif
     ENTRY(token),
+    ENTRY(trapped),
 #ifdef CW_REAL
     ENTRY(trunc),
 #endif
@@ -3779,6 +3781,17 @@ systemdict_eq(cw_nxo_t *a_thread)
     nxo_boolean_new(nxo_a, eq);
 
     nxo_stack_pop(ostack);
+}
+
+void
+systemdict_escape(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *nxo;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    nxo_dup(nxo_l_thread_trapped_arg_get(a_thread), nxo);
+    xep_throw(CW_ONYXX_ESCAPE);
 }
 
 void
@@ -11686,6 +11699,7 @@ systemdict_start(cw_nxo_t *a_thread)
 	nxo_thread_loop(a_thread);
     }
     xep_catch(CW_ONYXX_CONTINUE)
+    xep_mcatch(CW_ONYXX_ESCAPE)
     xep_mcatch(CW_ONYXX_EXIT)
     xep_mcatch(CW_ONYXX_QUIT)
     xep_mcatch(CW_ONYXX_STOP)
@@ -13260,6 +13274,117 @@ systemdict_token(cw_nxo_t *a_thread)
 	    return;
 	}
     }
+}
+
+void
+systemdict_trapped(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *dstack, *estack, *tstack;
+    cw_nxo_t *exec, *nxo;
+    cw_nxo_t *t_ostack, *t_dstack;
+    cw_bool_t result = FALSE;
+    cw_uint32_t edepth, tdepth;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    dstack = nxo_thread_dstack_get(a_thread);
+    estack = nxo_thread_estack_get(a_thread);
+    tstack = nxo_thread_tstack_get(a_thread);
+
+    NXO_STACK_GET(exec, ostack, a_thread);
+
+    /* Record stack depths so that we can clean up if necessary. */
+    edepth = nxo_stack_count(estack);
+    tdepth = nxo_stack_count(tstack);
+
+    /* Prepare for execution of exec. */
+    nxo = nxo_stack_push(estack);
+    nxo_dup(nxo, exec);
+    nxo_stack_pop(ostack);
+
+    /* Snapshot ostack. */
+    t_ostack = nxo_stack_push(tstack);
+    nxo_stack_new(t_ostack, FALSE, nxo_stack_count(ostack));
+    nxo_stack_copy(t_ostack, ostack);
+
+    /* Snapshot dstack. */
+    t_dstack = nxo_stack_push(tstack);
+    nxo_stack_new(t_dstack, FALSE, nxo_stack_count(dstack));
+    nxo_stack_copy(t_dstack, dstack);
+
+    /* Catch an escape exception, if thrown. */
+    xep_begin();
+    xep_try
+    {
+	nxo_thread_loop(a_thread);
+    }
+    xep_catch(CW_ONYXX_ESCAPE)
+    {
+	result = TRUE;
+
+	xep_handled();
+    }
+    xep_catch(CW_ONYXX_CONTINUE)
+    {
+	/* This is a serious program error, and we've already unwound the C
+	 * stack, so there's no going back.  After throwing an error, do the
+	 * equivalent of what the quit operator does, so that we'll unwind to
+	 * the innermost start context. */
+	xep_handled();
+
+	nxo_thread_nerror(a_thread, NXN_invalidcontinue);
+
+	xep_throw(CW_ONYXX_QUIT);
+    }
+    xep_catch(CW_ONYXX_EXIT)
+    {
+	/* This is a serious program error, and we've already unwound the C
+	 * stack, so there's no going back.  After throwing an error, do the
+	 * equivalent of what the quit operator does, so that we'll unwind to
+	 * the innermost start context. */
+	xep_handled();
+
+	nxo_thread_nerror(a_thread, NXN_invalidexit);
+
+	xep_throw(CW_ONYXX_QUIT);
+    }
+    xep_end();
+
+    /* Restore ostack and dstack, if an escape was trapped. */
+    if (result)
+    {
+	cw_nxo_t *istack, *trapped_arg;
+
+	/* Restore ostack. */
+	nxo_stack_npop(ostack, nxo_stack_count(ostack));
+	nxo_stack_copy(ostack, t_ostack);
+
+	/* Push the escape argument onto ostack. */
+	nxo = nxo_stack_push(ostack);
+	trapped_arg = nxo_l_thread_trapped_arg_get(a_thread);
+	nxo_dup(nxo, trapped_arg);
+	cw_assert(nxo_type_get(nxo) != NXOT_NO);
+
+	/* Reset trapped_arg. */
+	nxo_no_new(trapped_arg);
+
+	/* Restore dstack. */
+	nxo_stack_npop(dstack, nxo_stack_count(dstack));
+	nxo_stack_copy(dstack, t_dstack);
+
+	/* Clean up other stacks. */
+	nxo_stack_npop(estack, nxo_stack_count(estack) - edepth);
+	istack = nxo_thread_istack_get(a_thread);
+	nxo_stack_npop(istack, nxo_stack_count(istack) - edepth);
+	nxo_stack_npop(tstack, nxo_stack_count(tstack) - tdepth);
+    }
+    else
+    {
+	nxo_stack_npop(tstack, 2);
+    }
+
+    /* Push result onto ostack. */
+    nxo = nxo_stack_push(ostack);
+    nxo_boolean_new(nxo, result);
 }
 
 #ifdef CW_REAL

@@ -111,6 +111,9 @@ struct cw_nxoe_thread_s
     cw_nxo_t stdout_nxo;
     cw_nxo_t stderr_nxo;
 
+    /* Argument passed by the escape operator to the trapped operator. */
+    cw_nxo_t trapped_arg;
+
 #ifdef CW_REGEX
     /* Cached regular expression state used by the match operator.  This needs
      * to be stored here since the cache is per-thread, and there is no other

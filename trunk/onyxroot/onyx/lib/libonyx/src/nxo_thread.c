@@ -268,6 +268,7 @@ nxo_thread_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx)
     nxo_no_new(&thread->stdin_nxo);
     nxo_no_new(&thread->stdout_nxo);
     nxo_no_new(&thread->stderr_nxo);
+    nxo_no_new(&thread->trapped_arg);
 #ifdef CW_REGEX
     nxo_l_regex_cache_new(&thread->regex_cache);
 #endif

@@ -203,12 +203,14 @@ typedef unsigned int cw_bool_t;
 #define CW_ONYXX_OOM 2
 /* Internal use, for the continue operator. */
 #define CW_ONYXX_CONTINUE 3
+/* Internal use, for the escape operator. */
+#define CW_ONYXX_ESCAPE 4
 /* Internal use, for the exit operator. */
-#define CW_ONYXX_EXIT 4
+#define CW_ONYXX_EXIT 5
 /* Internal use, for the stop operator, caught by the stopped operator. */
-#define CW_ONYXX_STOP 5
+#define CW_ONYXX_STOP 6
 /* Internal use, for the quit operator, caught by the start operator. */
-#define CW_ONYXX_QUIT 6
+#define CW_ONYXX_QUIT 7
 
 #include <stdio.h>
 #include <stdlib.h>
