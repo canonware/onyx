@@ -15,6 +15,11 @@
 #include-cooked [glob [objdir]/mod/modnxgtk/src/"*.d_*"]
 
 /*
+ * XXX Make this a configure test.
+ */
+GTKCONFIG = gtk12-config;
+
+/*
  * File lists.
  */
 
@@ -90,22 +95,22 @@ MODS = [MODS] [MODNXGTK];
 
 modnxgtk : [MODNXGTK];
 
-modnxgtk : [MODNXGTK]
+modnxgtk_install : [MODNXGTK]
 {
   [INSTALL] -d [PREFIX]/share/canonware/onyx/nxmod;
   [INSTALL] -m 0444 [MODNXGTK] [PREFIX]/share/canonware/onyx/nxmod;
 }
 
-modnxgtk :
+modnxgtk_uninstall :
 {
   rm -f [PREFIX]/share/canonware/onyx/nxmod/modnxgtk.nxm;
 }
 
-modnxgtk :
+modnxgtk_clean :
 {
 }
 
-modnxgtk :
+modnxgtk_distclean :
 {
   rm -f [objdir]/mod/modnxgtk/doc/latex/manual.tex;
 }
@@ -116,7 +121,7 @@ modnxgtk :
 
 CPPFLAGS = [CPPFLAGS] -I[srcdir]/mod/modnxgtk/include
                       -I[objdir]/mod/modnxgtk/include
-		      `gtk-config --cflags`;
+		      `[GTKCONFIG] --cflags`;
 
 /*
  * Dependencies.
@@ -125,5 +130,5 @@ CPPFLAGS = [CPPFLAGS] -I[srcdir]/mod/modnxgtk/include
 [MODNXGTK] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_s [MODNXGTK_MSRCS]]
   set mkdir
 {
-  [CC] -shared -o [target] [need] `gtk-config --libs`;
+  [CC] -shared -o [target] [need] `[GTKCONFIG] --libs`;
 }
