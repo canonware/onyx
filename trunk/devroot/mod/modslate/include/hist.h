@@ -31,6 +31,7 @@ struct cw_histh_s
 #define HISTH_TAG_YNK		5
 #define HISTH_TAG_REM		6
 #define HISTH_TAG_DEL		7
+#define HISTH_TAG_SYNC		8
     cw_uint8_t tag;
 
     /* Auxiliary field (bpos or data byte count). */
