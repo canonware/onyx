@@ -39,28 +39,22 @@ stilag_new(cw_stilag_t *a_stilag)
 	    NULL)
 		goto OOM_3;
 
-	if (pool_new(&a_stilag->stiln_pool, &a_stilag->mem, sizeof(cw_stiln_t))
-	    == NULL)
-		goto OOM_4;
-
 	if (pool_new(&a_stilag->stilsc_pool, &a_stilag->mem,
 	    sizeof(cw_stilsc_t)) == NULL)
-		goto OOM_5;
+		goto OOM_4;
 
 	if (pool_new(&a_stilag->dicto_pool, &a_stilag->mem,
 	    sizeof(cw_stiloe_dicto_t)) == NULL)
-		goto OOM_6;
+		goto OOM_5;
 
 	if (stila_p_new(&a_stilag->stila, &a_stilag->mem))
-		goto OOM_7;
+		goto OOM_6;
 
 	return FALSE;
-	OOM_7:
-	pool_delete(&a_stilag->dicto_pool);
 	OOM_6:
-	pool_delete(&a_stilag->stilsc_pool);
+	pool_delete(&a_stilag->dicto_pool);
 	OOM_5:
-	pool_delete(&a_stilag->stiln_pool);
+	pool_delete(&a_stilag->stilsc_pool);
 	OOM_4:
 	pool_delete(&a_stilag->chi_pool);
 	OOM_3:
@@ -77,7 +71,6 @@ stilag_delete(cw_stilag_t *a_stilag)
 	stila_p_delete(&a_stilag->stila);
 	pool_delete(&a_stilag->dicto_pool);
 	pool_delete(&a_stilag->stilsc_pool);
-	pool_delete(&a_stilag->stiln_pool);
 	pool_delete(&a_stilag->chi_pool);
 	pool_delete(&a_stilag->stil_bufc_pool);
 	mem_delete(&a_stilag->mem);
@@ -247,26 +240,6 @@ stilat_chi_get(cw_stilat_t *a_stilat, const char *a_filename, cw_uint32_t
 
 		retval = (cw_chi_t
 		    *)pool_get(&a_stilat->stilag->chi_pool, a_filename,
-		    a_line_num);
-	}
-
-	return retval;
-}
-
-cw_stiln_t *
-stilat_stiln_get(cw_stilat_t *a_stilat, const char *a_filename, cw_uint32_t
-    a_line_num)
-{
-	cw_stiln_t	*retval;
-
-	retval = (cw_stiln_t *)pool_get(&a_stilat->stilag->stiln_pool,
-	    a_filename, a_line_num);
-
-	while (retval == NULL) {
-		/* XXX Throw memory error. */
-
-		retval = (cw_stiln_t
-		    *)pool_get(&a_stilat->stilag->stiln_pool, a_filename,
 		    a_line_num);
 	}
 

@@ -43,7 +43,6 @@ struct cw_stilag_s {
 	/* Various pools. */
 	cw_pool_t	stil_bufc_pool;
 	cw_pool_t	chi_pool;
-	cw_pool_t	stiln_pool;
 	cw_pool_t	stilsc_pool;
 	cw_pool_t	dicto_pool;
 
@@ -95,8 +94,6 @@ cw_bool_t	stilag_gc_register(cw_stilag_t *a_stilag, cw_stilt_t *a_stilt,
 	&(a_stilag)->stil_bufc_pool
 #define		stilag_chi_pool_get(a_stilag)				\
 	&(a_stilag)->chi_pool
-#define		stilag_stiln_pool_get(a_stilag)				\
-	&(a_stilag)->stiln_pool
 #define		stilag_stilsc_pool_get(a_stilag)			\
 	&(a_stilag)->stilsc_pool
 #define		stilag_dicto_pool_get(a_stilag)				\
@@ -128,11 +125,6 @@ cw_bool_t	stilag_gc_register(cw_stilag_t *a_stilag, cw_stilt_t *a_stilt,
 #define		_cw_stilag_chi_put(a_stilag, a_chi)			\
 	_cw_pool_put(&(a_stilag)->chi_pool, (a_chi))
 
-#define		_cw_stilag_stiln_get(a_stilag)				\
-	(cw_stiln_t *)_cw_pool_get(&(a_stilag)->stiln_pool)
-#define		_cw_stilag_stiln_put(a_stilag, a_stiln)			\
-	_cw_pool_put(&(a_stilag)->stiln_pool, (a_stiln))
-
 #define		_cw_stilag_stilsc_get(a_stilag)				\
 	(cw_stilsc_t *)_cw_pool_get(&(a_stilag)->stilsc_pool)
 #define		_cw_stilag_stilsc_put(a_stilag, a_stilsc)		\
@@ -151,8 +143,6 @@ void		stilat_delete(cw_stilat_t *a_stilat);
 cw_stil_bufc_t	*stilat_stil_bufc_get(cw_stilat_t *a_stilat, const char
     *a_filename, cw_uint32_t a_line_num);
 cw_chi_t	*stilat_chi_get(cw_stilat_t *a_stilat, const char
-    *a_filename, cw_uint32_t a_line_num);
-cw_stiln_t	*stilat_stiln_get(cw_stilat_t *a_stilat, const char
     *a_filename, cw_uint32_t a_line_num);
 cw_stilsc_t	*stilat_stilsc_get(cw_stilat_t *a_stilat, const char
     *a_filename, cw_uint32_t a_line_num);
@@ -176,8 +166,6 @@ void		stilat_free(cw_stilat_t *a_stilat, void *a_ptr, const char
 	stilag_stil_bufc_pool_get((a_stilat)->stilag)
 #define		stilat_chi_pool_get(a_stilat)				\
 	stilag_chi_pool_get((a_stilat)->stilag)
-#define		stilat_stiln_pool_get(a_stilat)				\
-	stilag_stiln_pool_get((a_stilat)->stilag)
 #define		stilat_stilsc_pool_get(a_stilat)			\
 	stilag_stilsc_pool_get((a_stilat)->stilag)
 #define		stilat_dicto_pool_get(a_stilat)				\
@@ -188,8 +176,6 @@ void		stilat_free(cw_stilat_t *a_stilat, void *a_ptr, const char
 	stilat_stil_bufc_get((a_stilat), __FILE__, __LINE__)
 #define		_cw_stilat_chi_get(a_stilat)				\
 	stilat_chi_get((a_stilat), __FILE__, __LINE__)
-#define		_cw_stilat_stiln_get(a_stilat)				\
-	stilat_stiln_get((a_stilat), __FILE__, __LINE__)
 #define		_cw_stilat_stilsc_get(a_stilat)				\
 	stilat_stilsc_get((a_stilat), __FILE__, __LINE__)
 #define		_cw_stilat_dicto_get(a_stilat)				\
@@ -205,8 +191,6 @@ void		stilat_free(cw_stilat_t *a_stilat, void *a_ptr, const char
 	stilat_stil_bufc_get((a_stilat), NULL, 0)
 #define		_cw_stilat_chi_get(a_stilat)				\
 	stilat_chi_get((a_stilat), NULL, 0)
-#define		_cw_stilat_stiln_get(a_stilat)				\
-	stilat_stiln_get((a_stilat), NULL, 0)
 #define		_cw_stilat_stilsc_get(a_stilat)				\
 	stilat_stilsc_get((a_stilat), NULL, 0)
 #define		_cw_stilat_dicto_get(a_stilat)				\
@@ -223,8 +207,6 @@ void		stilat_free(cw_stilat_t *a_stilat, void *a_ptr, const char
 	_cw_pool_put(&(a_stilat)->stilag->stil_bufc_pool, (a_stil_bufc))
 #define		_cw_stilat_chi_put(a_stilat, a_chi)			\
 	_cw_pool_put(&(a_stilat)->stilag->chi_pool, (a_chi))
-#define		_cw_stilat_stiln_put(a_stilat, a_stiln)			\
-	_cw_pool_put(&(a_stilat)->stilag->stiln_pool, (a_stiln))
 #define		_cw_stilat_stilsc_put(a_stilat, a_stilsc)		\
 	_cw_pool_put(&(a_stilat)->stilag->stilsc_pool, (a_stilsc))
 #define		_cw_stilat_dicto_put(a_stilat, a_dicto)			\

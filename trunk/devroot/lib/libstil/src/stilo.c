@@ -19,31 +19,52 @@
 #define _CW_STILOE_MAGIC	0x0fa6e798
 #endif
 
-/* stiln. */
-cw_bool_t	stiln_l_gdict_insert(cw_stiln_t *a_stiln, const cw_stiloe_dict_t
-    *a_dict);
-cw_bool_t	stiln_l_gdict_search(cw_stiln_t *a_stiln, const cw_stiloe_dict_t
-    *a_dict);
-cw_bool_t	stiln_l_gdict_remove(cw_stiln_t *a_stiln, const cw_stiloe_dict_t
-    *a_dict);
-
-/* stilng. */
-cw_bool_t	stilng_l_name_ref(cw_stilng_t *a_stilng, const cw_uint8_t
-    *a_name, cw_uint32_t a_len, cw_stilo_t *r_stilo);
-cw_bool_t	stilng_l_gdict_search(cw_stilng_t *a_stilng, const cw_uint8_t
-    *a_name, cw_uint32_t a_len);
-
-/* stilnt. */
-cw_bool_t	stilnt_l_name_ref(cw_stilnt_t *a_stilnt, const cw_uint8_t
-    *a_name, cw_uint32_t a_len, cw_stilo_t *r_stilo);
-
 typedef struct cw_stiloe_array_s cw_stiloe_array_t;
 typedef struct cw_stiloe_condition_s cw_stiloe_condition_t;
 typedef struct cw_stiloe_hook_s cw_stiloe_hook_t;
 typedef struct cw_stiloe_lock_s cw_stiloe_lock_t;
 typedef struct cw_stiloe_mstate_s cw_stiloe_mstate_t;
+typedef struct cw_stiloe_name_s cw_stiloe_name_t;
 typedef struct cw_stiloe_number_s cw_stiloe_number_t;
 typedef struct cw_stiloe_string_s cw_stiloe_string_t;
+
+/*
+ * All extended type objects contain a stiloe.  This provides a poor man's
+ * inheritance.  Since stil's type system is static, this idiom is adequate.
+ */
+struct cw_stiloe_s {
+#ifdef _LIBSTIL_DBG
+	cw_uint32_t	magic;
+#endif
+
+	cw_stilot_t	type:4;
+	/*
+	 * If TRUE, there is a watchpoint set on this object.  In general, this
+	 * field is not looked at unless the interpreter has been put into
+	 * debugging mode. Note that setting a watchpoint on an extended type
+	 * causes modification via *any* reference to be watched.
+	 */
+	cw_bool_t	watchpoint:1;
+	/* If TRUE, this object is black (or gray).  Otherwise it is white. */
+	cw_bool_t	black:1;
+	/* Allocated locally or globally? */
+	cw_bool_t	global:1;
+	/*
+	 * If TRUE, this object cannot be modified, which means it need not be
+	 * locked, even if global.
+	 */
+	cw_bool_t	immutable:1;
+	/*
+	 * If TRUE, this stiloe is a reference to another stiloe.
+	 */
+	cw_bool_t	indirect:1;
+
+	/*
+	 * Modifications must be locked if this is a globally allocated
+	 * object.
+	 */
+	cw_mtx_t	lock;
+};
 
 struct cw_stiloe_array_s {
 	cw_stiloe_t	stiloe;
@@ -123,6 +144,55 @@ struct cw_stiloe_mstate_s {
 	cw_uint32_t	base;
 };
 
+/*
+ * Size and fullness control for keyed reference hashes.  For each keyed
+ * reference, there is a global dictionary with a key that corresponds to the
+ * name, so in most cases, these hashes are quite small.
+ */
+#define _CW_STILO_NAME_KREF_TABLE	  8
+#define _CW_STILO_NAME_KREF_GROW	  6
+#define _CW_STILO_NAME_KREF_SHRINK	  2
+
+struct cw_stiloe_name_s {
+	cw_stiloe_t	stiloe;
+	/*
+	 * Always the value of the root name stiloe, regardless of whether this
+	 * is a reference (local) or the root (global).  This allows fast access
+	 * to what is effectively the key for name comparisions.
+	 */
+	cw_stiloe_t	*val;
+	union {
+		/* Thread-specific (local) name.  Indirect object. */
+		struct {
+			cw_stilo_t	stilo;
+		}	i;
+		/* Root (global) name.  Direct object. */
+		struct {
+			/*
+			 * If non-NULL, a hash of keyed references to this
+			 * object.  Keyed references are used by global
+			 * dictionary entries.  This allows a thread to
+			 * determine whether an entry exists in a particular
+			 * global dictionary without having to lock the entire
+			 * dictionary.
+			 */
+			cw_dch_t	*keyed_refs;
+			/*
+			 * If TRUE, the string in the key is statically
+			 * allocated, and should not be deallocated during
+			 * destruction.
+			 */
+			cw_bool_t	is_static_name;
+			/*
+			 * name is *not* required to be NULL-terminated, so we
+			 * keep track of the length.
+			 */
+			const cw_uint8_t *name;
+			cw_uint32_t	len;
+		}	n;
+	}	e;
+};
+
 struct cw_stiloe_number_s {
 	cw_stiloe_t	stiloe;
 	/* Offset in val that the "decimal point" precedes. */
@@ -172,12 +242,12 @@ static void	stilo_p_clobber(cw_stilo_t *a_stilo);
 static void	stiloe_p_new(cw_stiloe_t *a_stiloe, cw_stilot_t a_type);
 static void	stiloe_p_delete(cw_stiloe_t *a_stiloe, cw_stilt_t *a_stilt);
 
-#define stiloe_p_lock(a_stiloe) do {					\
+#define		stiloe_p_lock(a_stiloe) do {				\
 	if ((a_stiloe)->global)						\
 		mtx_lock(&(a_stiloe)->lock);				\
 } while (0)
 
-#define stiloe_p_unlock(a_stiloe) do {					\
+#define		stiloe_p_unlock(a_stiloe) do {				\
 	if ((a_stiloe)->global)						\
 		mtx_unlock(&(a_stiloe)->lock);				\
 } while (0)
@@ -281,11 +351,22 @@ static void	stilo_p_mstate_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd,
 static void	stilo_p_name_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
     va_list a_p);
 static void	stilo_p_name_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
+static cw_stiloe_t *stiloe_p_name_ref_iterate(cw_stiloe_t *a_stiloe, cw_bool_t
+    a_reset);
 static void	stilo_p_name_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type);
 static void	stilo_p_name_copy(cw_stilo_t *a_to, cw_stilo_t *a_from,
     cw_stilt_t *a_stilt);
 static void	stilo_p_name_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd,
     cw_bool_t a_syntactic, cw_bool_t a_newline);
+
+static cw_stiloe_name_t *stilo_p_name_gref(cw_stilt_t *a_stilt, const char
+    *a_str, cw_uint32_t a_len, cw_bool_t a_is_static);
+static cw_bool_t stilo_p_name_kref_insert(cw_stilo_t *a_stilo, cw_stilt_t
+    *a_stilt, const cw_stiloe_dict_t *a_dict);
+static cw_bool_t stilo_p_name_kref_search(cw_stilo_t *a_stilo, const
+    cw_stiloe_dict_t *a_dict);
+static cw_bool_t stilo_p_name_kref_remove(cw_stilo_t *a_stilo, cw_stilt_t
+    *a_stilt, const cw_stiloe_dict_t *a_dict);
 
 /* null. */
 static void	stilo_p_null_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type);
@@ -436,7 +517,7 @@ static cw_stilot_vtable_t stilot_vtable[] = {
 	/* _CW_STILOT_NAMETYPE */
 	{stilo_p_name_new,
 	 stilo_p_name_delete,
-	 NULL,
+	 stiloe_p_name_ref_iterate,
 	 stilo_p_name_cast,
 	 stilo_p_name_copy,
 	 stilo_p_name_print},
@@ -1506,7 +1587,45 @@ stilo_p_mstate_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t
 
 /*
  * name.
- *
+ */
+/* Hash {name string, length}. */
+cw_uint32_t
+stilo_name_hash(const void *a_key)
+{
+	cw_uint32_t		retval, i;
+	cw_stiloe_name_t	*key = (cw_stiloe_name_t *)a_key;
+	const char		*str;
+
+	_cw_check_ptr(a_key);
+
+	for (i = 0, str = key->e.n.name, retval = 0; i < key->e.n.len;
+	    i++, str++)
+		retval = retval * 33 + *str;
+
+	return retval;
+}
+
+/* Compare keys {name string, length}. */
+cw_bool_t
+stilo_name_key_comp(const void *a_k1, const void *a_k2)
+{
+	cw_stiloe_name_t	*k1 = (cw_stiloe_name_t *)a_k1;
+	cw_stiloe_name_t	*k2 = (cw_stiloe_name_t *)a_k2;
+	size_t			len;
+
+	_cw_check_ptr(a_k1);
+	_cw_check_ptr(a_k2);
+
+	if (k1->e.n.len > k2->e.n.len)
+		len = k1->e.n.len;
+	else
+		len = k2->e.n.len;
+
+	return strncmp((char *)k1->e.n.name, (char *)k2->e.n.name, len) ? FALSE
+	    : TRUE;
+}
+
+/*
  * a_stilt's allocation mode (local/global) is used to determine how the object
  * is allocated.
  *
@@ -1520,14 +1639,55 @@ stilo_p_name_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, va_list a_p)
 	const cw_uint8_t	*name_str;
 	cw_uint32_t		len;
 	cw_bool_t		is_static;
-	cw_stiloe_name_t	*name;
+	cw_stiloe_name_t	*name, key;
 
 	/* Get varargs. */
 	name_str = (cw_uint8_t *)va_arg(a_p, cw_uint8_t *);
 	len = (cw_uint32_t)va_arg(a_p, cw_uint32_t);
 	is_static = (cw_bool_t)va_arg(a_p, cw_bool_t);
 
-	name = stiln_l_ref(a_stilt, name_str, len, is_static);
+	/* Fake up a key so that we can search the hash tables. */
+	key.e.n.name = name_str;
+	key.e.n.len = len;
+
+	if (stilt_currentglobal(a_stilt) == FALSE) {
+		cw_stilnt_t		*stilnt;
+		cw_stiloe_name_t	*gname;
+
+		/*
+		 * Look in the per-thread name cache for a cached reference to
+		 * the name.  If there is no cached reference, check the global
+		 * hash for the name.  Create the name in the global hash if
+		 * necessary, then create a cached reference if necessary.
+		 */
+		stilnt = stilt_stilnt_get(a_stilt);
+		if (dch_search(&stilnt->hash, (void *)&key, (void **)&name)) {
+			/* Not found in the per-thread name cache. */
+			gname = stilo_p_name_gref(a_stilt, name_str, len,
+			    is_static);
+
+			name = (cw_stiloe_name_t *)_cw_stilt_malloc(a_stilt,
+			    sizeof(cw_stiloe_name_t));
+
+			name->val = (cw_stiloe_t *)gname;
+
+			/* XXX stilo-internal initialization. */
+			memset(&name->e.i.stilo, 0, sizeof(cw_stilo_t));
+			name->e.i.stilo.type = _CW_STILOT_NAMETYPE;
+			name->e.i.stilo.o.stiloe = (cw_stiloe_t *)gname;
+
+			/* XXX */
+			stiloe_p_new(&name->stiloe, _CW_STILOT_NAMETYPE);
+			name->stiloe.indirect = TRUE;
+
+			/*
+			 * Insert a cached entry for this thread.
+			 */
+			dch_insert(&stilnt->hash, (void *)gname, (void
+			    **)name, _cw_stilt_chi_get(a_stilt));
+		}
+	} else
+		name = stilo_p_name_gref(a_stilt, name_str, len, is_static);
 
 	thd_crit_enter();
 	a_stilo->o.stiloe = &name->stiloe;
@@ -1538,6 +1698,35 @@ static void
 stilo_p_name_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 {
 	/* Do nothing. */
+}
+
+static cw_stiloe_t *
+stiloe_p_name_ref_iterate(cw_stiloe_t *a_stiloe, cw_bool_t a_reset)
+{
+#if (0)
+#ifdef _LIBSTIL_DBG
+	cw_stiloe_name_t	*name;
+	
+	name = (cw_stiloe_name_t *)a_stilo->o.stiloe->val;
+	if (name->e.n.keyed_refs != NULL) {
+		cw_uint32_t	i;
+		void		*key;
+
+		_cw_out_put_e("Name \"");
+		_cw_out_put_n(name->e.n.len, "[s]", name->e.n.name);
+		_cw_out_put("\" still exists with [i] keyed reference[s]:",
+		    dch_count(name->e.n.keyed_refs),
+		    (dch_count(name->e.n.keyed_refs) == 1) ? "" : "s");
+		for (i = 0; i < dch_count(name->e.n.keyed_refs); i++) {
+			dch_get_iterate(name->e.n.keyed_refs, &key, NULL);
+			_cw_out_put(" 0x[p]", key);
+		}
+		_cw_out_put("\n");
+		abort();
+	}
+#endif
+#endif
+	return NULL;	/* XXX */
 }
 
 static void
@@ -1554,24 +1743,169 @@ static void
 stilo_p_name_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t
     a_syntactic, cw_bool_t a_newline)
 {
-	cw_stiloe_name_t	*stiloe;
-	const cw_uint8_t	*name;
-	cw_uint32_t		len;
+	cw_stiloe_name_t	*name;
 
-	/* Chase down the stiln. */
-	stiloe = (cw_stiloe_name_t *)&a_stilo->o.stiloe;
-	stiloe = (cw_stiloe_name_t *)stiloe->val;
+	/* Chase down the name. */
+	name = (cw_stiloe_name_t *)&a_stilo->o.stiloe;
+	name = (cw_stiloe_name_t *)name->val;
 	
-	name = stiln_l_val_get(&stiloe->e.n.key);
-	len = stiln_l_len_get(&stiloe->e.n.key);
-
 	if (a_syntactic)
 		_cw_out_put_f(a_fd, "/");
 
-	_cw_out_put_fn(a_fd, len, "[s]", name);
+	_cw_out_put_fn(a_fd, name->e.n.len, "[s]", name->e.n.name);
 
 	if (a_newline)
 		_cw_out_put_f(a_fd, "\n");
+}
+
+static cw_stiloe_name_t *
+stilo_p_name_gref(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len,
+    cw_bool_t a_is_static)
+{
+	cw_stiloe_name_t	*retval, key;
+	cw_stilng_t		*stilng;
+
+	/* Fake up a key so that we can search the hash tables. */
+	key.e.n.name = a_str;
+	key.e.n.len = a_len;
+
+	stilng = stil_stilng_get(stilt_stil_get(a_stilt));
+
+	/*
+	 * Look in the global hash for the name.  If the name doesn't exist,
+	 * create it.
+	 */
+	mtx_lock(&stilng->lock);
+	if (dch_search(&stilng->hash, (void *)&key, (void **)&retval)) {
+		cw_stilag_t	*stilag;
+
+		/*
+		 * Not found in the global hash.  Create, initialize, and insert
+		 * a new entry.
+		 */
+		stilag = stil_stilag_get(stilt_stil_get(a_stilt));
+		retval = (cw_stiloe_name_t *)_cw_stilag_malloc(stilag,
+		    sizeof(cw_stiloe_name_t));
+		memset(retval, 0, sizeof(cw_stiloe_name_t));
+
+		retval->val = (cw_stiloe_t *)retval;
+
+		retval->e.n.is_static_name = a_is_static;
+		retval->e.n.len = a_len;
+	
+		if (a_is_static == FALSE) {
+			/* This should be allocated from global space. */
+			retval->e.n.name =
+			    _cw_stilag_malloc(stil_stilag_get(stilt_stil_get(a_stilt)),
+			    a_len);
+			/*
+			 * Cast away the const here; it's the only place that
+			 * the string is allowed to be modified, and this cast
+			 * is better than dropping the const altogether.
+			 */
+			memcpy((cw_uint8_t *)retval->e.n.name, a_str, a_len);
+		} else
+			retval->e.n.name = a_str;
+
+		stiloe_p_new(&retval->stiloe, _CW_STILOT_NAMETYPE);
+
+		dch_insert(&stilng->hash, (void *)retval, (void
+		    **)retval, _cw_stilt_chi_get(a_stilt));
+	}
+	mtx_unlock(&stilng->lock);
+
+	return retval;
+}
+
+/* Insert a keyed reference. */
+static cw_bool_t
+stilo_p_name_kref_insert(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const
+    cw_stiloe_dict_t *a_dict)
+{
+	cw_bool_t		retval;
+	cw_stiloe_name_t	*name;
+
+	/* Chase down the name. */
+	name = (cw_stiloe_name_t *)&a_stilo->o.stiloe;
+	name = (cw_stiloe_name_t *)name->val;
+
+	stiloe_p_lock(&name->stiloe);
+	if (name->e.n.keyed_refs == NULL) {
+		/* No keyed references.  Create the hash. */
+		name->e.n.keyed_refs = dch_new(NULL,
+		    stilag_mem_get(stil_stilag_get(stilt_stil_get(a_stilt))),
+		    _CW_STILO_NAME_KREF_TABLE, _CW_STILO_NAME_KREF_GROW,
+		    _CW_STILO_NAME_KREF_SHRINK, ch_direct_hash,
+		    ch_direct_key_comp);
+		/* XXX Check dch_new() return. */
+	}
+
+	if (dch_insert(name->e.n.keyed_refs, (void *)a_dict, NULL,
+	    _cw_stilt_chi_get(a_stilt))) {
+		retval = TRUE;
+		goto RETURN;
+	}
+
+	retval = FALSE;
+	RETURN:
+	stiloe_p_unlock(&name->stiloe);
+	return retval;
+}
+
+/* Search for a keyed reference matching a_dict. */
+static cw_bool_t
+stilo_p_name_kref_search(cw_stilo_t *a_stilo, const cw_stiloe_dict_t *a_dict)
+{
+	cw_bool_t		retval;
+	cw_stiloe_name_t	*name;
+
+	/* Chase down the name. */
+	name = (cw_stiloe_name_t *)&a_stilo->o.stiloe;
+	name = (cw_stiloe_name_t *)name->val;
+
+	stiloe_p_lock(&name->stiloe);
+	if ((name->e.n.keyed_refs == NULL) || dch_search(name->e.n.keyed_refs,
+	    (void *)a_dict, NULL)) {
+		/* Not found. */
+		retval = TRUE;
+	} else {
+		/* Found. */
+		retval = TRUE;
+	}
+	stiloe_p_unlock(&name->stiloe);
+
+	return retval;
+}
+
+/* Remove a keyed reference. */
+static cw_bool_t
+stilo_p_name_kref_remove(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const
+    cw_stiloe_dict_t *a_dict)
+{
+	cw_bool_t		retval;
+	cw_chi_t		*chi;
+	cw_stiloe_name_t	*name;
+
+	/* Chase down the name. */
+	name = (cw_stiloe_name_t *)&a_stilo->o.stiloe;
+	name = (cw_stiloe_name_t *)name->val;
+
+	stiloe_p_lock(&name->stiloe);
+	_cw_check_ptr(name->e.n.keyed_refs);
+
+	if ((retval = dch_remove(name->e.n.keyed_refs, (void *)a_dict, NULL,
+	    NULL, &chi)) == FALSE)
+		/* XXX Need stilag, not a_stilt. */
+		_cw_stilt_chi_put(a_stilt, chi);
+
+	/* If there are no more keyed references, delete the hash. */
+	if (dch_count(name->e.n.keyed_refs) == 0) {
+		dch_delete(name->e.n.keyed_refs);
+		name->e.n.keyed_refs = NULL;
+	}
+	stiloe_p_unlock(&name->stiloe);
+
+	return retval;
 }
 
 /*

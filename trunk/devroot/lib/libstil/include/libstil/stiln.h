@@ -23,6 +23,12 @@ typedef struct cw_stilsc_s cw_stilsc_t;
 typedef struct cw_stiloe_dict_s cw_stiloe_dict_t;
 
 /*
+ * Names are kept in a global hash table of stiloe_name's, and there is only one
+ * stiloe_name per unique character string.  This allows the address of each
+ * stiloe_name in the global hash table to be used as a unique key, so
+ * regardless of the string length of a name, once it has been converted to a
+ * stiloe_name pointer, name comparisons are a constant time operation.
+ *
  * The following diagram shows the various name-related object relationships
  * that are possible.  Locally allocated name objects use a thread-specific
  * cache.  Globally allocated name objects refer directly to the global table.
@@ -44,9 +50,9 @@ typedef struct cw_stiloe_dict_s cw_stiloe_dict_t;
  * | /-------------\ |                     | /-------------\ |
  * | | stiloe_name | |                     | | stiloe_name | |
  * | |             | |                     | |             | |
- * | | /-------\   | |                     | | /-------\   | |
- * | | | stiln |   | |            /------------| stilo |   | |
- * | | \-------/   | |           /         | | \-------/   | |
+ * | | /------\    | |                     | | /-------\   | |
+ * | | | name |    | |            /------------| stilo |   | |
+ * | | \------/    | |           /         | | \-------/   | |
  * | |             | |          /          | |             | |
  * | \-------------/ |          |          | \-------------/ |
  * |                 |          |          |                 |
@@ -57,9 +63,9 @@ typedef struct cw_stiloe_dict_s cw_stiloe_dict_t;
  * | /-------------\ |          |          | /-------------\ |
  * | | stiloe_name | |          |          | | stiloe_name | |
  * | |             | |          /          | |             | |
- * | | /-------\   | |         /           | | /-------\   | |
- * | | | stiln |   |<---------/   /------------| stilo |   | |
- * | | \-------/   | |           /         | | \-------/   | |
+ * | | /------\    | |         /           | | /-------\   | |
+ * | | | name |    |<---------/   /------------| stilo |   | |
+ * | | \------/    | |           /         | | \-------/   | |
  * | |             | |          /          | |             | |
  * | \-------------/ |          |          | \-------------/ |
  * |                 |          |          |                 |
@@ -70,9 +76,9 @@ typedef struct cw_stiloe_dict_s cw_stiloe_dict_t;
  * | /-------------\ |          |          \-------/
  * | | stiloe_name | |          |             |
  * | |             | |          |             |
- * | | /-------\   | |          |             |
- * | | | stiln |   |<-----------+--\          v
- * | | \-------/   | |          |   \      /-----------------\
+ * | | /------\    | |          |             |
+ * | | | name |    |<-----------+--\          v
+ * | | \------/    | |          |   \      /-----------------\
  * | |             | |          |    \     | stilnt          |
  * | \-------------/ |          |    |     |                 |
  * |                 |          |    |     | /-------------\ |
@@ -83,9 +89,9 @@ typedef struct cw_stiloe_dict_s cw_stiloe_dict_t;
  * | /-------------\ |          /          | | \-------/   | |
  * | | stiloe_name | |         /           | |             | |
  * | |             |<---------/            | \-------------/ |
- * | | /-------\   | |                     |                 |
- * | | | stiln |   | |                     | ............... |
- * | | \-------/   |<---------\            | ............... |
+ * | | /------\    | |                     |                 |
+ * | | | name |    | |                     | ............... |
+ * | | \------/    |<---------\            | ............... |
  * | |             | |         \           | ............... |
  * | \-------------/ |          \          |                 |
  * |       ^         |          |          | /-------------\ |
@@ -108,40 +114,9 @@ typedef struct cw_stiloe_dict_s cw_stiloe_dict_t;
  */
 
 /*
- * Name.  stiln's are kept in a global hash table, and there is only one stiln
- * per unique character string.  This allows the address of each stiloe_name
- * container object in the global hash table to be used as a unique key, so
- * regardless of the string length of a name, once it has been converted to a
- * stiloe_name pointer, name comparisons are a constant time operation.
- */
-struct cw_stiln_s {
-	/* Must be held during access to keyed_refs. */
-	cw_mtx_t	lock;
-	/*
-	 * If non-NULL, a hash of keyed references to this object.  Keyed
-	 * references are used by global dictionary entries.  This allows a
-	 * thread to determine whether an entry exists in a particular global
-	 * dictionary without having to lock the entire dictionary.
-	 */
-	cw_dch_t	*keyed_refs;
-	/*
-	 * If TRUE, the string in the key is statically allocated, and should
-	 * not be deallocated during stiln destruction.
-	 */
-	cw_bool_t	is_static_name;
-	/*
-	 * name is *not* required to be NULL-terminated, so we keep track of the
-	 * length.
-	 */
-	const cw_uint8_t *name;
-	cw_uint32_t	len;
-};
-
-/*
  * Global name cache.
  */
 struct cw_stilng_s {
-	/* Protects hash. */
 	cw_mtx_t	lock;
 	/*
 	 * Hash of names (key: {name, len}, value: (stiloe_name *)).  This hash

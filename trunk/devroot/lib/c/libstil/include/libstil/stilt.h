@@ -170,11 +170,6 @@ cw_bool_t	stilt_detach_buf(cw_stilt_t *a_stilt, cw_buf_t *a_buf);
 #define		_cw_stilt_chi_put(a_stilt, a_chi)			\
 	_cw_stilat_chi_put(&(a_stilt)->stilat, (a_chi))
 
-#define		_cw_stilt_stiln_get(a_stilt)				\
-	_cw_stilat_stiln_get(&(a_stilt)->stilat)
-#define		_cw_stilt_stiln_put(a_stilt, a_stiln)			\
-	_cw_stilat_stiln_put(&(a_stilt)->stilat, (a_stiln))
-
 #define		_cw_stilt_stilsc_get(a_stilt)				\
 	_cw_stilat_stilsc_get(&(a_stilt)->stilat)
 #define		_cw_stilt_stilsc_put(a_stilt, a_stilsc)			\

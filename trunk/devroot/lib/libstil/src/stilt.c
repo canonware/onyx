@@ -14,6 +14,10 @@
 #include <ctype.h>
 #include <limits.h>
 
+cw_bool_t	stilnt_l_new(cw_stilnt_t *a_stilnt, cw_mem_t *a_mem,
+    cw_stilng_t *a_stilng);
+void		stilnt_l_delete(cw_stilnt_t *a_stilnt);
+
 /*
  * If defined, inline oft-used functions for improved performance (and slightly
  * increased code size).
@@ -125,7 +129,7 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 	if (stilat_new(&retval->stilat, a_stilt, stil_stilag_get(a_stil)))
 		goto OOM_2;
 
-	if (stilnt_new(&retval->stilnt, stilat_mem_get(&retval->stilat),
+	if (stilnt_l_new(&retval->stilnt, stilat_mem_get(&retval->stilat),
 	    stil_stilng_get(a_stil)))
 		goto OOM_3;
 
@@ -155,7 +159,7 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 	OOM_5:
 	stils_delete(&retval->exec_stils, retval);
 	OOM_4:
-	stilnt_delete(&retval->stilnt);
+	stilnt_l_delete(&retval->stilnt);
 	OOM_3:
 	stilat_delete(&retval->stilat);
 	OOM_2:
@@ -174,7 +178,7 @@ stilt_delete(cw_stilt_t *a_stilt)
 	stils_delete(&a_stilt->dict_stils, a_stilt);
 	stils_delete(&a_stilt->data_stils, a_stilt);
 	stils_delete(&a_stilt->exec_stils, a_stilt);
-	stilnt_delete(&a_stilt->stilnt);
+	stilnt_l_delete(&a_stilt->stilnt);
 	stilat_delete(&a_stilt->stilat);
 	if (a_stilt->is_malloced)
 		_cw_free(a_stilt);
