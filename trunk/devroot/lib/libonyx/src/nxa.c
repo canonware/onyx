@@ -765,11 +765,9 @@ nxa_p_collect(cw_nxa_t *a_nxa)
     thd_single_enter();
 #endif
 
-    /*
-     * Mark the root set gray.  If there are any objects in the root set,
-     * mark all objects reachable from the root set.  Otherwise, everything
-     * is garbage.
-     */
+    /* Mark the root set gray.  If there are any objects in the root set, mark
+     * all objects reachable from the root set.  Otherwise, everything is
+     * garbage. */
     if (nxa_p_roots(a_nxa, &nroot))
     {
 	garbage = nxa_p_mark(a_nxa, &nreachable);
