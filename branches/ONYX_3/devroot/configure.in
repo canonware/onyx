@@ -511,7 +511,7 @@ if test "x$lib_onyx" = "x1" ; then
       mpath_post="\`/usr/local/share/onyx-$onyx_version/nxm'"
     else
       rpath_post="\`$prefix/share/onyx-$onyx_version/nx'"
-      mpaath_post="\`$prefix/share/onyx-$onyx_version/nxm'"
+      mpath_post="\`$prefix/share/onyx-$onyx_version/nxm'"
     fi
     AC_SUBST(rpath_post)
     AC_SUBST(mpath_post)
