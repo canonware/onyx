@@ -725,7 +725,7 @@ if test "x$bin_onyx" = "x1" ; then
   fi
   AC_SUBST([onyx_version])
 
-  ONYX="$abs_objroot/bin/onyx/bin/onyx"
+  ONYX="$BINDIR/onyx-$onyx_version"
   AC_SUBST([ONYX])
 
   TONYX="$abs_objroot/bin/onyx/bin/tonyx"
