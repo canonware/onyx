@@ -178,7 +178,8 @@ prompt(EditLine *a_el)
 		 * s> } def
 		 * prompt>
 		 *
-		 * Oh well.
+		 * Oh well.  Due to the dynamic nature of the prompt, there is
+		 * no reasonable way to make this edge case work correctly.
 		 */
 		retval = prompt_str;
 	}
