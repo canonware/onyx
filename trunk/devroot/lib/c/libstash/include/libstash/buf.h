@@ -63,7 +63,6 @@ typedef struct
   void * buffer_dealloc_arg;
   cw_uint32_t ref_count;
   cw_uint32_t buf_size;
-/*    char * buf; */
   const cw_uint8_t * buf;
 } cw_bufc_t;
 
@@ -79,13 +78,8 @@ struct cw_bufel_s
   cw_uint32_t beg_offset;
   cw_uint32_t end_offset;
   cw_bufc_t * bufc;
+  const cw_uint8_t * bufc_buf;
 };
-
-typedef struct
-{
-  cw_bufel_t bufel;
-  cw_uint32_t cumulative_size;
-} cw_bufel_array_el_t;
 
 struct cw_buf_s
 {
@@ -104,7 +98,10 @@ struct cw_buf_s
   cw_uint32_t array_start;
   cw_uint32_t array_end;
   cw_bool_t is_cumulative_valid;
-  cw_bufel_array_el_t * array;
+  cw_bool_t is_cached_bufel_valid;
+  cw_uint32_t cached_bufel;
+  cw_bufel_t * bufel_array;
+  cw_uint32_t * cumulative_index;
   struct iovec * iov;
 };
 
@@ -322,6 +319,24 @@ buf_dump(cw_buf_t * a_buf, const char * a_prefix);
  ****************************************************************************/
 cw_uint32_t
 buf_get_size(cw_buf_t * a_buf);
+
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_buf : Pointer to a buf.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : Number of bufel's in a_buf (same as iovec count in buf_get_iovec()).
+ *
+ * <<< Description >>>
+ *
+ * Return the number of bufel's in a_buf.
+ *
+ ****************************************************************************/
+cw_uint32_t
+buf_get_num_bufels(cw_buf_t * a_buf);
 
 /****************************************************************************
  *
@@ -732,7 +747,7 @@ bufel_get_valid_data_size(cw_bufel_t * a_bufel);
  * Return a pointer to the internal buffer.
  *
  ****************************************************************************/
-const void *
+const cw_uint8_t *
 bufel_get_data_ptr(cw_bufel_t * a_bufel);
 
 /****************************************************************************

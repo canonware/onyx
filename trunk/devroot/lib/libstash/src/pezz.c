@@ -309,4 +309,3 @@ pezz_dump(cw_pezz_t * a_pezz, const char * a_prefix)
   mtx_unlock(&a_pezz->lock);
 #endif
 }
-
