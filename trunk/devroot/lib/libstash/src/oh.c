@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 125 $
- * $Date: 1998-07-02 16:55:52 -0700 (Thu, 02 Jul 1998) $
+ * $Revision: 127 $
+ * $Date: 1998-07-02 18:31:00 -0700 (Thu, 02 Jul 1998) $
  *
  * <<< Description >>>
  *
@@ -34,6 +34,11 @@
  * when growing, shrinking, and rehashing (done only when hashing functions
  * are changed).  This also makes it possible to use realloc() instead of
  * malloc(), since the table can be bzero()ed, then rebuilt from the list.
+ *
+ * A useful side effect of the internal list is that calling
+ * oh_item_delete_iterate() is guaranteed to remove the oldest item in the 
+ * hash table, which means that the hash code has an integrated FIFO
+ * queue.
  *
  * A list of spare item containers is kept around to avoid excessive calls
  * to malloc during insertion/deletion.  All internal lists and buffers are
@@ -605,6 +610,7 @@ void
 oh_dump(cw_oh_t * a_oh_o, cw_bool_t a_all)
 {
   cw_uint64_t i;
+  char buf_a[21], buf_b[21], buf_c[21];
 
   _cw_check_ptr(a_oh_o);
   
@@ -616,8 +622,8 @@ oh_dump(cw_oh_t * a_oh_o, cw_bool_t a_all)
   log_printf(g_log_o,
 	     "============================================================\n");
   log_printf(g_log_o,
-	     "Size: [%d]  Slots filled: [%d]\n\n",
-	     a_oh_o->size,
+	     "Size: [%s]  Slots filled: [%d]\n\n",
+	     log_print_uint64(a_oh_o->size, 10, buf_a),
 	     list_count(&a_oh_o->items_list));
   log_printf(g_log_o, "      pow h1         h2    shrink grow \n");
   log_printf(g_log_o, "      --- ---------- ----- ------ -----\n");
@@ -627,34 +633,34 @@ oh_dump(cw_oh_t * a_oh_o, cw_bool_t a_all)
 	     a_oh_o->base_h2,
 	     a_oh_o->base_shrink_point,
 	     a_oh_o->base_grow_point);
-  log_printf(g_log_o, "Curr: %2d  %10p %5d %5d  %5d\n\n",
+  log_printf(g_log_o, "Curr: %2d  %10p %5s %5s  %5s\n\n",
 	     a_oh_o->curr_power,
 	     a_oh_o->curr_h1,
-	     a_oh_o->curr_h2,
-	     a_oh_o->curr_shrink_point,
-	     a_oh_o->curr_grow_point);
+	     log_print_uint64(a_oh_o->curr_h2, 10, buf_a),
+	     log_print_uint64(a_oh_o->curr_shrink_point, 10, buf_b),
+	     log_print_uint64(a_oh_o->curr_grow_point, 10, buf_c));
 #else
   log_printf(g_log_o, "Base: %2d             %5d %5d  %5d\n",
 	     a_oh_o->base_power,
 	     a_oh_o->base_h2,
 	     a_oh_o->base_shrink_point,
 	     a_oh_o->base_grow_point);
-  log_printf(g_log_o, "Curr: %2d  %010p %5d %5d  %5d\n\n",
+  log_printf(g_log_o, "Curr: %2d  %010p %5s %5s  %5s\n\n",
 	     a_oh_o->curr_power,
 	     a_oh_o->curr_h1,
-	     a_oh_o->curr_h2,
-	     a_oh_o->curr_shrink_point,
-	     a_oh_o->curr_grow_arg);
+	     log_print_uint64(a_oh_o->curr_h2, 10, buf_a),
+	     log_print_uint64(a_oh_o->curr_shrink_point, 10, buf_b),
+	     log_print_uint64(a_oh_o->curr_grow_point, 10, buf_c));
 #endif
 
 #ifdef _OH_PERF_
-  log_printf(g_log_o, "Counters: collisions[%d] inserts[%d] deletes[%d]\n",
-	     a_oh_o->num_collisions,
-	     a_oh_o->num_inserts,
-	     a_oh_o->num_deletes);
-  log_printf(g_log_o, "          grows[%d] shrinks[%d]\n\n",
-	     a_oh_o->num_grows,
-	     a_oh_o->num_shrinks);
+  log_printf(g_log_o, "Counters: collisions[%s] inserts[%s] deletes[%s]\n",
+	     log_print_uint64(a_oh_o->num_collisions, 10, buf_a),
+	     log_print_uint64(a_oh_o->num_inserts, 10, buf_b),
+	     log_print_uint64(a_oh_o->num_deletes, 10, buf_c));
+  log_printf(g_log_o, "          grows[%s] shrinks[%s]\n\n",
+	     log_print_uint64(a_oh_o->num_grows, 10, buf_a),
+	     log_print_uint64(a_oh_o->num_shrinks, 10, buf_b));
 #endif
 
   if (a_all)

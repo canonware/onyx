@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 125 $
- * $Date: 1998-07-02 16:55:52 -0700 (Thu, 02 Jul 1998) $
+ * $Revision: 127 $
+ * $Date: 1998-07-02 18:31:00 -0700 (Thu, 02 Jul 1998) $
  *
  * <<< Description >>>
  *
@@ -36,7 +36,7 @@
 #define _OH_BASE_SHRINK_POINT 64;
 
 /* Maximum number of items allowable before growing. */
-#define _OH_BASE_GROW_POINT 230;
+#define _OH_BASE_GROW_POINT 192;
 
 void oh_p_grow(cw_oh_t * a_oh_o);
 void oh_p_shrink(cw_oh_t * a_oh_o);

@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 125 $
- * $Date: 1998-07-02 16:55:52 -0700 (Thu, 02 Jul 1998) $
+ * $Revision: 127 $
+ * $Date: 1998-07-02 18:31:00 -0700 (Thu, 02 Jul 1998) $
  *
  * <<< Description >>>
  *
@@ -61,6 +61,7 @@ main()
     if (error == TRUE)
     {
       log_printf(g_log_o, "(1) Error at i == %d\n", i);
+      oh_dump(&hash_o, FALSE);
       exit(1);
     }
   }
@@ -73,6 +74,7 @@ main()
     if (error == TRUE)
     {
       log_printf(g_log_o, "(2) Error at i == %d\n", i);
+      oh_dump(&hash_o, FALSE);
       exit(1);
     }
   }
@@ -85,6 +87,7 @@ main()
     if (error == TRUE)
     {
       log_printf(g_log_o, "(3) Error at i == %d\n", i);
+      oh_dump(&hash_o, FALSE);
       exit(1);
     }
   }
@@ -97,7 +100,7 @@ main()
     if (error == TRUE)
     {
       log_printf(g_log_o, "(4) Error at i == %d\n", i);
-      oh_dump(&hash_o, TRUE);
+      oh_dump(&hash_o, FALSE);
       exit(1);
     }
   }
