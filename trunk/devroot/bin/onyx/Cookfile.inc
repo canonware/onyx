@@ -64,6 +64,7 @@ SRCS = [SRCS] [ONYX_SRCS];
  */
 {
   local otests =
+#if [enable_posix_file]
 #if [enable_threads]
                  monitor_a.nx.in monitor_b.nx.in monitor_c.nx.in
 #endif
@@ -75,7 +76,6 @@ SRCS = [SRCS] [ONYX_SRCS];
                  truncate_b.nx.in truncate_c.nx.in truncate_d.nx.in
                  truncate_e.nx.in
 #endif
-#if [enable_posix_file]
 
                  abs_a.nx.in abs_b.nx.in abs_c.nx.in add_a.nx.in add_b.nx.in
                  add_c.nx.in add_d.nx.in and_a.nx.in and_b.nx.in and_c.nx.in
