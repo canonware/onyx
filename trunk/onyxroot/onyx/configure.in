@@ -121,7 +121,7 @@ if test "x$build_libstash" = "xyes" ; then
   AC_CHECK_SIZEOF(long double, 12)
 
   dnl Find maximum iovec compatible with readv()/writev().
-  AC_MSG_CHECKING(aximum iov for readv()/writev())
+  AC_MSG_CHECKING(maximum iov for readv()/writev())
   AC_TRY_RUN([
 #include <stdio.h>
 #include <fcntl.h>

@@ -2575,8 +2575,8 @@ EOF
 
 
 
-    echo $ac_n "checking aximum iov for readv()/writev()""... $ac_c" 1>&6
-echo "configure:2580: checking aximum iov for readv()/writev()" >&5
+    echo $ac_n "checking maximum iov for readv()/writev()""... $ac_c" 1>&6
+echo "configure:2580: checking maximum iov for readv()/writev()" >&5
   if test "$cross_compiling" = yes; then
     { echo "configure: error: can not run test program while cross compiling" 1>&2; exit 1; }
 else
