@@ -10,6 +10,8 @@ OBJDIR="onyx_obj"
 
 PREFIX=`pwd`/onyx_prefix
 
+CONFIGURE_FLAGS="--with-libedit-prefix=/space/local"
+
 #
 # Set up.
 #
@@ -40,7 +42,7 @@ for d in 0 1 ; do
 	;;
     esac
 
-    conf="$conf_d"
+    conf="$conf_d $CONFIGURE_FLAGS"
 
     echo "===> ../$SRCDIR/configure $conf --prefix=$PREFIX"
     ../$SRCDIR/configure $conf --prefix=$PREFIX
@@ -151,7 +153,7 @@ for h in 0 1 ; do
         ;;
     esac
 
-    conf="$conf_c $conf_d $conf_e $conf_f $conf_g $conf_h"
+    conf="$conf_c $conf_d $conf_e $conf_f $conf_g $conf_h $CONFIGURE_FLAGS"
 
     echo "===> ../$SRCDIR/configure $conf --prefix=$PREFIX"
     ../$SRCDIR/configure $conf --prefix=$PREFIX
@@ -246,7 +248,7 @@ for h in 0 1 ; do
 
     # General targets.
     # Parallelizable.
-    for i in bins libs tests check ; do
+    for i in bins libs check ; do
         echo "===> $COOK $COOKPAR $i"
         $COOK $COOKPAR $i
         if [ "x$?" != "x0" ] ; then
