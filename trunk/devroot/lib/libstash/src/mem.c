@@ -340,6 +340,8 @@ mem_calloc(cw_mem_t * a_mem, size_t a_number, size_t a_size)
       }
       else
       {
+	cw_sint32_t error;
+	
 	memset(retval, 0xa5, a_number * a_size);
 	
 	allocation->size = a_number * a_size;
@@ -358,8 +360,9 @@ mem_calloc(cw_mem_t * a_mem, size_t a_number, size_t a_size)
 		     a_filename, a_line_num);
 	  out_put(cw_g_out, buf);
 	}
-      
-	if (0 != oh_item_insert(&a_mem->addr_hash, retval, allocation))
+
+	error = oh_item_insert(&a_mem->addr_hash, retval, allocation);
+	if (-1 == error)
 	{
 	  if (dbg_is_registered(cw_g_dbg, "mem_error"))
 	  {
@@ -368,11 +371,40 @@ mem_calloc(cw_mem_t * a_mem, size_t a_number, size_t a_size)
 	    bzero(buf, sizeof(buf));
 
 	    out_put_sn(cw_g_out, buf, 1024,
-		       "[s](): 0x[p] multiply-allocated "
-		       "(probably used free() directly) at [s], line [i]\n",
+		       "[s](): Memory allocation error; "
+		       "unable to record allocation 0x[p] at [s], line [i]\n",
 		       __FUNCTION__, retval,
 		       a_filename, a_line_num);
 	    out_put(cw_g_out, buf);
+	  }
+	}
+	else if (1 == error)
+	{
+	  if (FALSE == oh_item_search(&a_mem->addr_hash,
+				      a_mem,
+				      (void **) &old_allocation))
+	  {
+	    if (dbg_is_registered(cw_g_dbg, "mem_error"))
+	    {
+	      char buf[1025];
+
+	      _cw_check_ptr(old_allocation);
+	
+	      bzero(buf, sizeof(buf));
+	      out_put_sn(cw_g_out, buf, 1024,
+			 "[s](): 0x[p] multiply-allocated "
+			 "(was at [s], line [i], size [i];"
+			 " now at [s], line [i], size [i])."
+			 "  Suspect a race condition\n",
+			 __FUNCTION__, retval,
+			 old_allocation->filename,
+			 old_allocation->line_num,
+			 old_allocation->size,
+			 a_filename,
+			 a_line_num,
+			 a_size);
+	      out_put(cw_g_out, buf);
+	    }
 	  }
 	}
       }
@@ -449,17 +481,17 @@ mem_realloc(cw_mem_t * a_mem, void * a_ptr, size_t a_size)
     {
       const char * old_filename;
       cw_uint32_t old_size, old_line_num;
+      cw_sint32_t error;
 
-      /* Do this before inserting into the hash table, since only the hash table
-       * is thread-safe. */
       old_filename = allocation->filename;
       old_size = allocation->size;
       old_line_num = allocation->line_num;
       allocation->filename = a_filename;
       allocation->size = a_size;
       allocation->line_num = a_line_num;
-      
-      if (1 == oh_item_insert(&a_mem->addr_hash, retval, allocation))
+
+      error = oh_item_insert(&a_mem->addr_hash, retval, allocation);
+      if (1 == error)
       {
 	if (dbg_is_registered(cw_g_dbg, "mem_error"))
 	{
@@ -469,6 +501,28 @@ mem_realloc(cw_mem_t * a_mem, void * a_ptr, size_t a_size)
 	  out_put_sn(cw_g_out, buf, 1024,
 		     "[s](): 0x[p] multiply-allocated\n",
 		     __FUNCTION__, retval);
+	  out_put(cw_g_out, buf);
+	}
+      }
+      else if (-1 == error)
+      {
+	if (dbg_is_registered(cw_g_dbg, "mem_error"))
+	{
+	  char buf[1025];
+
+	  bzero(buf, sizeof(buf));
+	  out_put_sn(cw_g_out, buf, 1024,
+		     "[s](): 0x[p] multiply-allocated "
+		     "(was at [s], line [i], size [i];"
+		     " now at [s], line [i], size [i])."
+		     "  Suspect a race condition\n",
+		     __FUNCTION__, retval,
+		     old_filename,
+		     old_line_num,
+		     old_size,
+		     a_filename,
+		     a_line_num,
+		     a_size);
 	  out_put(cw_g_out, buf);
 	}
       }
