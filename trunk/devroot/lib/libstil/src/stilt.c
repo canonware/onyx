@@ -14,6 +14,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
+#include <math.h>	/* For HUGE_VAL, though this is probably an OS bug. */
 
 #define _CW_STILT_GETC(a_i)						\
 	a_stilt->tok_str[(a_i)]
@@ -58,6 +59,8 @@ static void		stilt_p_syntax_error_print(cw_stilt_t *a_stilt,
     cw_uint8_t a_c);
 static cw_sint32_t	stilt_p_exec(cw_stilt_t *a_stilt);
 static void		*stilt_p_entry(void *a_arg);
+static void		stilt_p_special_accept(cw_stilt_t *a_stilt, const
+    cw_uint8_t *a_token, cw_uint32_t a_len);
 static void		stilt_p_procedure_accept(cw_stilt_t *a_stilt);
 static void		stilt_p_name_accept(cw_stilt_t *a_stilt, cw_stilts_t
     *a_stilts);
@@ -411,12 +414,14 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				a_stilt->state = STATE_GT_CONT;
 				break;
 			case '[':
-				stilt_p_token_print(a_stilt, a_stilts, 0, "[");
 				/* An operator, not the same as '{'. */
+				stilt_p_token_print(a_stilt, a_stilts, 0, "[");
+				stilt_p_special_accept(a_stilt, "[", 1);
 				break;
 			case ']':
-				stilt_p_token_print(a_stilt, a_stilts, 0, "]");
 				/* An operator, not the same as '}'. */
+				stilt_p_token_print(a_stilt, a_stilts, 0, "]");
+				stilt_p_special_accept(a_stilt, "]", 1);
 				break;
 			case '{':
 				stilt_p_token_print(a_stilt, a_stilts, 0, "{");
@@ -490,11 +495,14 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 			case '<':
 				a_stilt->state = STATE_START;
 				stilt_p_token_print(a_stilt, a_stilts, 0, "<<");
+				stilt_p_special_accept(a_stilt, "<<", 2);
 				break;
 			case '>':
 				a_stilt->state = STATE_START;
 				stilt_p_token_print(a_stilt, a_stilts,
 				    a_stilt->index, "empty hex string");
+				stilo = stils_push(&a_stilt->data_stils);
+				stilo_string_new(stilo, a_stilt, 0);
 				break;
 			case '~':
 				a_stilt->state = STATE_BASE85_STRING;
@@ -525,6 +533,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 			case '>':
 				a_stilt->state = STATE_START;
 				stilt_p_token_print(a_stilt, a_stilts, 0, ">>");
+				stilt_p_special_accept(a_stilt, ">>", 2);
 				break;
 			default:
 				stilt_p_syntax_error_print(a_stilt, c);
@@ -823,9 +832,28 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				/* Fall through. */
 			case '\0': case '\t': case '\f': case '\r': case ' ':
 				if (a_stilt->index - a_stilt->m.n.b_off > 1) {
+					cw_fp64_t	val;
+
 					/* Real. */
 					stilt_p_token_print(a_stilt, a_stilts,
 					    a_stilt->index, "real");
+
+					/*
+					 * Convert string to real.  Do the
+					 * conversion before mucking with the
+					 * stack in case there is an exception.
+					 */
+					a_stilt->tok_str[a_stilt->index] = '\0';
+					errno = 0;
+					val = strtod(a_stilt->tok_str, NULL);
+					if ((errno == ERANGE) && ((val ==
+					    HUGE_VAL) || (val == -HUGE_VAL)))
+						xep_throw(_CW_XEPV_RANGECHECK);
+
+					stilo =
+					    stils_push(&a_stilt->data_stils);
+					stilo_real_new(stilo, a_stilt, val);
+
 					stilt_p_reset(a_stilt);
 				} else {
 					/*
@@ -880,9 +908,28 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 			case '\0': case '\t': case '\f': case '\r': case ' ':
 				if (a_stilt->index - a_stilt->m.n.t.e.e_off >
 				    1) {
+					cw_fp64_t	val;
+
 					/* Real. */
 					stilt_p_token_print(a_stilt, a_stilts,
 					    a_stilt->index, "real (exp)");
+
+					/*
+					 * Convert string to real.  Do the
+					 * conversion before mucking with the
+					 * stack in case there is an exception.
+					 */
+					a_stilt->tok_str[a_stilt->index] = '\0';
+					errno = 0;
+					val = strtod(a_stilt->tok_str, NULL);
+					if ((errno == ERANGE) && ((val ==
+					    HUGE_VAL) || (val == -HUGE_VAL)))
+						xep_throw(_CW_XEPV_RANGECHECK);
+
+					stilo =
+					    stils_push(&a_stilt->data_stils);
+					stilo_real_new(stilo, a_stilt, val);
+
 					stilt_p_reset(a_stilt);
 				} else {
 					/* No exponent specified, so a name. */
@@ -1135,11 +1182,59 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 			break;
 		case STATE_HEX_STRING:
 			switch (c) {
-			case '>':
+			case '>': {
+				cw_uint8_t	*str;
+				cw_uint32_t	j;
+
 				stilt_p_token_print(a_stilt, a_stilts,
 				    a_stilt->index, "hex string");
+				stilo = stils_push(&a_stilt->data_stils);
+				stilo_string_new(stilo, a_stilt,
+				    (a_stilt->index + 1) >> 1);
+				/*
+				 * Set the character following the string in
+				 * case the final hex character is missing.
+				 */
+				a_stilt->tok_str[a_stilt->index] = '0';
+
+				str = stilo_string_get(stilo);
+				for (j = 0; j < (a_stilt->index + 1) >> 1;
+				     j++) {
+					switch (a_stilt->tok_str[2 * j]) {
+					case '0': case '1': case '2': case '3':
+					case '4': case '5': case '6': case '7':
+					case '8': case '9':
+						str[j] = (a_stilt->tok_str[2 *
+						    j] - '0') << 4;
+						break;
+					case 'a': case 'b': case 'c': case 'd':
+					case 'e': case 'f':
+						str[j] = ((a_stilt->tok_str[2 *
+						    j] - 'a') + 10) << 4;
+						break;
+					default:
+						_cw_not_reached();
+					}
+					
+					switch (a_stilt->tok_str[2 * j + 1]) {
+					case '0': case '1': case '2': case '3':
+					case '4': case '5': case '6': case '7':
+					case '8': case '9':
+						str[j] |= (a_stilt->tok_str[2 *
+						    j + 1] - '0');
+						break;
+					case 'a': case 'b': case 'c': case 'd':
+					case 'e': case 'f':
+						str[j] |= (a_stilt->tok_str[2 *
+						    j + 1] - 'a' + 10);
+						break;
+					default:
+						_cw_not_reached();
+					}
+				}
 				stilt_p_reset(a_stilt);
 				break;
+			}
 			case '0': case '1': case '2': case '3': case '4':
 			case '5': case '6': case '7': case '8': case '9':
 			case 'a': case 'b': case 'c': case 'd': case 'e':
@@ -1345,6 +1440,24 @@ stilt_p_entry(void *a_arg)
 }
 
 static void
+stilt_p_special_accept(cw_stilt_t *a_stilt, const cw_uint8_t *a_token,
+    cw_uint32_t a_len)
+{
+	cw_stilo_t	*stilo, key;
+
+	stilo_name_new(&key, a_stilt, a_token, a_len, TRUE);
+
+	stilo = stils_push(&a_stilt->exec_stils);
+	if (stilt_dict_stack_search(a_stilt, &key, stilo)) {
+		stils_pop(&a_stilt->exec_stils, a_stilt, 1);
+		xep_throw(_CW_XEPV_UNDEFINED);
+	}
+
+	stilo_delete(&key, a_stilt);
+	stilt_p_exec(a_stilt);
+}
+
+static void
 stilt_p_procedure_accept(cw_stilt_t *a_stilt)
 {
 	cw_stilo_t	t_stilo, *stilo, *arr;
@@ -1408,6 +1521,7 @@ stilt_p_name_accept(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts)
 			stilo = stils_push(&a_stilt->exec_stils);
 			if (stilt_dict_stack_search(a_stilt, &key, stilo))
 				xep_throw(_CW_XEPV_UNDEFINED);
+			stilo_delete(&key, a_stilt);
 			stilo_attrs_set(stilo, STILOA_EXECUTABLE);
 
 			stilt_p_reset(a_stilt);

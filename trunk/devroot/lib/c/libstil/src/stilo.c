@@ -2324,6 +2324,8 @@ void
 stilo_real_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_fp64_t a_val)
 {
 	stilo_p_new(a_stilo, STILOT_REAL);
+
+	a_stilo->o.real.r = a_val;
 }
 
 static void
@@ -2338,7 +2340,7 @@ stilo_p_real_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t
 {
 	cw_uint8_t	newline = (a_newline) ? '\n' : '\0';
 	
-	_cw_out_put_f(a_fd, "[f64][c]", a_stilo->o.real.r, newline);
+	_cw_out_put_f(a_fd, "[f][c]", a_stilo->o.real.r, newline);
 }
 
 void
@@ -2481,8 +2483,8 @@ stilo_p_string_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t
 				if (isprint(str[i]))
 					_cw_out_put_f(a_fd, "[c]", str[i]);
 				else {
-					_cw_out_put_f(a_fd, "\\x[i|b:16]",
-					    str[i]);
+					_cw_out_put_f(a_fd,
+					    "\\x[i|b:16|w:2|p:0]", str[i]);
 				}
 				break;
 			}
