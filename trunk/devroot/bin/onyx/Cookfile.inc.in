@@ -219,11 +219,14 @@ onyx_bins_install : [ONYX]
 #endif
        [LDFLAGS] -lonyx @LIBS@;
   chmod 0755 [PREFIX]/bin/onyx-@onyx_version@;
+  rm -f [PREFIX]/bin/onyx;
   ln -s onyx-@onyx_version@ [PREFIX]/bin/onyx;
 
   @INSTALL@ -d [PREFIX]/man/man1;
   @INSTALL@ -m 0444 @objroot@/bin/onyx/man/man1/onyx.1 [PREFIX]/man/man1;
 
+  @INSTALL@ -d [PREFIX]/share;
+  rm -f [PREFIX]/share/onyx;
   ln -s onyx-@onyx_version@ [PREFIX]/share/onyx;
 }
 
