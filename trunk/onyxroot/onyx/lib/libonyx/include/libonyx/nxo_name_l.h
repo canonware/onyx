@@ -16,7 +16,7 @@ struct cw_nxoe_name_s
 {
     cw_nxoe_t nxoe;
 
-    /* name is not required to be NULL-terminated, so we keep track of the
+    /* str is not required to be NULL-terminated, so we keep track of the
      * length. */
     const char *str;
     uint32_t len;
