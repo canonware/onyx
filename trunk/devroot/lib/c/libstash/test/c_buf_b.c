@@ -54,10 +54,16 @@ thread_entry_func(void * a_arg)
 
     size = buf_get_size(foo_struct->buf_a);
 
-    if (size <= ((_LIBSTASH_TEST_NUM_BUFELS * _LIBSTASH_TEST_SIZEOF_BUFFER
-		 * _LIBSTASH_TEST_NUM_CIRCULATIONS) - i))
+    if (i <= (_LIBSTASH_TEST_NUM_BUFELS * _LIBSTASH_TEST_SIZEOF_BUFFER
+	      * (_LIBSTASH_TEST_NUM_CIRCULATIONS - 1)))
     {
       buf_catenate_buf(buf, foo_struct->buf_a, FALSE);
+    }
+    else if ((size + i) < (_LIBSTASH_TEST_NUM_BUFELS *
+		      _LIBSTASH_TEST_SIZEOF_BUFFER 
+		      * _LIBSTASH_TEST_NUM_CIRCULATIONS))
+    {
+      buf_split(buf, foo_struct->buf_a, size);
     }
     else
     {
@@ -117,7 +123,7 @@ main(int argc, char ** argv)
 
   for (i = n = 0; i < _LIBSTASH_TEST_NUM_BUFELS; i++)
   {
-    /* Create a bufel, fill it with data, and append it to buf_a. */
+    /* Create a bufc, fill it with data, and append it to buf_a. */
     bufc = bufc_new(NULL, NULL, NULL);
     buffer = _cw_malloc(_LIBSTASH_TEST_SIZEOF_BUFFER);
     for (j = 0; j < _LIBSTASH_TEST_SIZEOF_BUFFER; j++, n++)
