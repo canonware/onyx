@@ -240,27 +240,47 @@ sockb_get_spare_bufc(void)
   
   _cw_check_ptr(g_sockb);
 
+  /* Do not use pezz for the debug version of libsock in order to make memory
+   * leaks more apparent. */
+#ifdef _LIBSOCK_DBG
+  retval = bufc_new(NULL, NULL, NULL);
+#else
   retval = bufc_new((cw_bufc_t *) pezz_get(&g_sockb->bufc_pool),
 		  pezz_put,
 		  (void *) &g_sockb->bufc_pool);
+#endif
   if (NULL == retval)
   {
     retval = NULL;
     goto RETURN;
   }
+#ifdef _LIBSOCK_DBG
+  buffer = (void *) _cw_malloc(pezz_get_buffer_size(&g_sockb->buffer_pool));
+#else
   buffer = pezz_get(&g_sockb->buffer_pool);
+#endif
   if (NULL == buffer)
   {
     bufc_delete(retval);
     retval = NULL;
     goto RETURN;
   }
+  
+#ifdef _LIBSOCK_DBG
+  bufc_set_buffer(retval,
+		  buffer,
+		  pezz_get_buffer_size(&g_sockb->buffer_pool),
+		  TRUE,
+		  mem_dealloc,
+		  (void *) cw_g_mem);
+#else
   bufc_set_buffer(retval,
 		  buffer,
 		  pezz_get_buffer_size(&g_sockb->buffer_pool),
 		  TRUE,
 		  pezz_put,
 		  (void *) &g_sockb->buffer_pool);
+#endif
 
   RETURN:
   return retval;
@@ -759,11 +779,11 @@ sockb_p_entry_func(void * a_arg)
 	{
 	  _cw_error("Programming error");
 	}
-#ifdef _LIBSOCK_DBG
-	message->magic = 0;
-#endif
-	pezz_put(&g_sockb->messages_pezz, (void *) message);
       }
+#ifdef _LIBSOCK_DBG
+      message->magic = 0;
+#endif
+      pezz_put(&g_sockb->messages_pezz, (void *) message);
     }
 
     /* Copy the master sets of descriptors we care about to the sets that are
