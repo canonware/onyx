@@ -206,6 +206,15 @@ Optionally, pass any of the following (not a definitive list) arguments to
 	used.  This option is only useful when modifications have been made to
 	the documentation source.
 
+--with-host-cc=<cc>
+	If specified, use <cc> as the host compiler.  This needs to be specified
+	if cross compiling, since bootstrapping the onyx interpreter must be
+	done on the host.
+
+--with-target-cc=<cc>
+	If specified, use <cc> as the target compiler, which generates the final
+	binaries.
+
 --with-pcre-prefix=<prefix>
 	If specified, libonyx will be built using the copy of pcre in <prefix>.
 	Specifically, <prefix>/bin/pcre-config will be used to determine the
