@@ -667,6 +667,8 @@ systemdict_copy(cw_stilt_t *a_stilt)
 			stilt_error(a_stilt, error);
 			return;
 		}
+		stils_roll(ostack, 2, 1);
+		stils_pop(ostack);
 		break;
 	}
 	case STILOT_DICT: {
@@ -701,6 +703,8 @@ systemdict_copy(cw_stilt_t *a_stilt)
 			stilt_error(a_stilt, error);
 			return;
 		}
+		stils_roll(ostack, 2, 1);
+		stils_pop(ostack);
 		break;
 	}
 	default:
