@@ -31,7 +31,6 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(abs),
 	ENTRY(add),
 	ENTRY(aload),
-	ENTRY(anchorsearch),
 	ENTRY(and),
 	ENTRY(array),
 	ENTRY(astore),
@@ -73,9 +72,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(exit),
 	ENTRY(exp),
 	ENTRY(file),
-	ENTRY(filenameforall),
 	ENTRY(fileposition),
-	ENTRY(filter),
 	ENTRY(flush),
 	ENTRY(flushfile),
 	ENTRY(for),
@@ -126,7 +123,6 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(repeat),
 	ENTRY(roll),
 	ENTRY(run),
-	ENTRY(search),
 	ENTRY(setfileposition),
 	ENTRY(setglobal),
 	ENTRY(shift),
@@ -289,36 +285,6 @@ systemdict_aload(cw_stilt_t *a_stilt)
 		stilo = stils_under_push(ostack, array);
 		stilo_dup(stilo, stilo_array_el_get(array, i));
 	}
-}
-
-void
-systemdict_anchorsearch(cw_stilt_t *a_stilt)
-{
-	_cw_stil_code(a_stilt, "
-%/anchorsearch
-%{
-  exch dup 3 1 roll % Make a copy of the original string.
-  search % -string- -seek- search -post- -match- -pre- true
-         % -string- -seek- search -string- false
-  {
-    % Search string found.  Check if it was at the beginning.
-    3 2 roll length 0 eq
-    {
-      % Success.
-      3 2 roll pop % Get rid of original string.
-      true
-    }{
-      % Nope.  Clean up
-      pop pop
-      false
-    } ifelse
-  }{
-    % Search string not found at all.
-    pop pop pop
-    false
-  } ifelse
-%} bind def
-");
 }
 
 void
@@ -1410,12 +1376,6 @@ systemdict_file(cw_stilt_t *a_stilt)
 }
 
 void
-systemdict_filenameforall(cw_stilt_t *a_stilt)
-{
-	_cw_error("XXX Not implemented");
-}
-
-void
 systemdict_fileposition(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack;
@@ -1437,12 +1397,6 @@ systemdict_fileposition(cw_stilt_t *a_stilt)
 		return;
 	}
 	stilo_integer_new(file, position);
-}
-
-void
-systemdict_filter(cw_stilt_t *a_stilt)
-{
-	_cw_error("XXX Not implemented");
 }
 
 void
@@ -3034,12 +2988,6 @@ systemdict_run(cw_stilt_t *a_stilt)
 	xep_end();
 
 	stils_pop(tstack);
-}
-
-void
-systemdict_search(cw_stilt_t *a_stilt)
-{
-	_cw_error("XXX Not implemented");
 }
 
 void
