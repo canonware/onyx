@@ -24,11 +24,10 @@ extern "C" {
 /* This guarantees that the socket code can handle something over 1000
  * simultaneous clients, rather than the default of under 256 as on some
  * systems. */
-#  ifdef _CW_OS_FREEBSD
-#    ifdef FD_SETSIZE
-#      undef FD_SETSIZE
+#  ifndef FD_SETSIZE
+#    ifdef _CW_OS_FREEBSD
+#      define FD_SETSIZE 1024
 #    endif
-#    define FD_SETSIZE 1024
 #  endif
 
 /* Need to include libstash_r.h here for the namespace mangling foo.  It gets
