@@ -10,6 +10,6 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-`Test begin\n' print
+`Test begin\n' print flush
 1 2 pop pop
 `Test end\n' print

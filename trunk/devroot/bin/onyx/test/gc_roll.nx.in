@@ -14,7 +14,7 @@
 % Test the GC with lots of rolls going on.
 %
 
-`Test begin\n' print
+`Test begin\n' print flush
 
 % Push 10 strings onto the stack.
 0 10 {1 add dup cvs exch} repeat pop

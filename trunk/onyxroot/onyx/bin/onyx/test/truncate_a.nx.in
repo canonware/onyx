@@ -10,7 +10,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-`Test begin\n' print
+`Test begin\n' print flush
 
 % Open file for writing.
 argv 2 get

@@ -10,7 +10,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-`Test begin\n' print
+`Test begin\n' print flush
 
 [1 [2 3] 4] </w 16 /p `_' /j /l /r 0> output `\n' print
 [1 [2 3] 4] </w 16 /p `_' /j /l /r 1> output `\n' print

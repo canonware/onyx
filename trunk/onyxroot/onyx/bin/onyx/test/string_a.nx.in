@@ -10,7 +10,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-`Test begin\n' print
+`Test begin\n' print flush
 
 0 string 1 sprint
 1 string 1 sprint

@@ -10,7 +10,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-`Test begin\n' print
+`Test begin\n' print flush
 
 `1 2 3 4 1 0 roll pstack clear\n' dup print cvx eval
 `1 2 3 4 1 1 roll pstack clear\n' dup print cvx eval

@@ -12,7 +12,7 @@
 
 % Check that we're really sleeping long enough.
 
-`Test begin\n' print
+`Test begin\n' print flush
 
 /sleepinterval 100000000 def
 

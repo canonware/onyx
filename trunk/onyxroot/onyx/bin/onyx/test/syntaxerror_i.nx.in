@@ -1,4 +1,4 @@
-`Test begin\n' print
+`Test begin\n' print flush
 % Syntax error within a procedure.
 {'}
 `Test end\n' print

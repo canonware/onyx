@@ -12,7 +12,7 @@
 
 % Test the eval operator.
 
-`Test begin\n' print
+`Test begin\n' print flush
 
 ``hi' 1 sprint' cvx eval
 ``bye' 1 sprint' cvx eval
