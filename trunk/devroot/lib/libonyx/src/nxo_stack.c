@@ -7,19 +7,29 @@
  ******************************************************************************
  *
  * Version: Onyx <Version = onyx>
- *XXX
- * Stack object space is allocated on a per-element basis, and a certain number
- * of elements are cached to avoid allocation/deallocation overhead in the
- * common case.  Doing chunked allocation of stack elements would be slightly
- * more memory efficient (and probably more cache friendly) in the common case,
- * but would require extra code complexity in the critical paths of pushing and
+ *
+ * A stack is stored as an array of nxo pointers, with slop room at both the
+ * beginning and end of the array.  The slop room makes typical push/pop
+ * operations very fast on average.  Additionally, the slop room is kept large
+ * enough that repeated stack rotations are also reasonably fast, even in
+ * pathological cases.
+ *
+ * Since stacks are central to Onyx, a great deal of care is taken to avoid
+ * locking wherever possible.  This is hard, since the garbage collector can
+ * preempt mutator threads at any time.  Therefore, the stack code makes heavy
+ * use of memory barriers, along with a mirror array of nxo pointers, to make
+ * sure that no matter where the stack code is preempted, the garbage collector
+ * can reliably iterate over stack contents.
+ *
+ * Stack objects are allocated on a per-element basis, and a certain number of
+ * elements are cached to avoid allocation/deallocation overhead in the common
+ * case.  Doing chunked allocation of stack elements would be slightly more
+ * memory efficient (and probably more cache friendly) in the common case, but
+ * would require extra code complexity in the critical paths of pushing and
  * popping.
  *
  * By keeping the re-allocation algorithm simple, we are able to make common
  * stack operations very fast.
- *
- * Using a ring makes it relatively efficient (if not simple for the reference
- * iterator) to make all the stack operations GC-safe.
  *
  ******************************************************************************/
 
