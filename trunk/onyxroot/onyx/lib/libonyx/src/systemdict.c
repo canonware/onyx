@@ -7725,7 +7725,82 @@ systemdict_regex(cw_nxo_t *a_thread)
 void
 systemdict_regsub(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *pattern, *template, *nxo;
+    cw_nxn_t error;
+    cw_uint32_t npop;
+    cw_bool_t global, insensitive, multiline, singleline;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+
+    NXO_STACK_GET(template, ostack, a_thread);
+    switch (nxo_type_get(template))
+    {
+	case NXOT_DICT:
+	{
+	    cw_nxo_t *flags;
+
+	    flags = template;
+	    npop = 3;
+	    NXO_STACK_DOWN_GET(template, ostack, a_thread, template);
+	    if (nxo_type_get(template) != NXOT_STRING)
+	    {
+		nxo_thread_nerror(a_thread, NXN_typecheck);
+		return;
+	    }
+
+	    error = systemdict_p_regex_flags_get(flags, a_thread, NULL,
+						 &global, &insensitive,
+						 &multiline, &singleline);
+	    if (error)
+	    {
+		nxo_thread_nerror(a_thread, error);
+		return;
+	    }
+	    break;
+	}
+	case NXOT_STRING:
+	{
+	    npop = 2;
+
+	    global = FALSE;
+	    insensitive = FALSE;
+	    multiline = FALSE;
+	    singleline = FALSE;
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+    NXO_STACK_DOWN_GET(pattern, ostack, a_thread, template);
+    if (nxo_type_get(pattern) != NXOT_STRING)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+
+    /* Create the regex object. */
+    nxo = nxo_stack_under_push(ostack, pattern);
+    nxo_string_lock(pattern);
+    nxo_string_lock(template);
+    error = nxo_regsub_new(nxo, nxo_thread_nx_get(a_thread),
+			   nxo_string_get(pattern),
+			   nxo_string_len_get(pattern), global,
+			   insensitive, multiline, singleline,
+			   nxo_string_get(template),
+			   nxo_string_len_get(template));
+    nxo_string_unlock(template);
+    nxo_string_unlock(pattern);
+    if (error)
+    {
+	nxo_stack_remove(ostack, nxo);
+	nxo_thread_nerror(a_thread, error);
+	return;
+    }
+
+    nxo_stack_npop(ostack, npop);
 }
 #endif
 
@@ -10573,7 +10648,124 @@ systemdict_submatch(cw_nxo_t *a_thread)
 void
 systemdict_subst(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *nxo, *flags, *template, *pattern, *input, *output;
+    cw_uint32_t npop;
+    cw_nxn_t error;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+
+    flags = NULL;
+    npop = 1;
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    switch (nxo_type_get(nxo))
+    {
+	case NXOT_DICT:
+	{
+	    flags = nxo;
+
+	    /* Get template. */
+	    npop++;
+	    NXO_STACK_DOWN_GET(nxo, ostack, a_thread, nxo);
+	    if (nxo_type_get(nxo) != NXOT_STRING)
+	    {
+		nxo_thread_nerror(a_thread, NXN_typecheck);
+		return;
+	    }
+
+	    /* Fall through. */
+	}
+	case NXOT_STRING:
+	{
+	    cw_bool_t global, insensitive, multiline, singleline;
+
+	    /* Get regex flags. */
+	    if (flags != NULL)
+	    {
+		error = systemdict_p_regex_flags_get(flags, a_thread, NULL,
+						     &global, &insensitive,
+						     &multiline, &singleline);
+		if (error)
+		{
+		    nxo_thread_nerror(a_thread, error);
+		    return;
+		}
+	    }
+	    else
+	    {
+		global = FALSE;
+		insensitive = FALSE;
+		multiline = FALSE;
+		singleline = FALSE;
+	    }
+
+	    template = nxo;
+
+	    /* Get pattern. */
+	    npop++;
+	    NXO_STACK_DOWN_GET(pattern, ostack, a_thread, nxo);
+	    if (nxo_type_get(nxo) != NXOT_STRING)
+	    {
+		nxo_thread_nerror(a_thread, NXN_typecheck);
+		return;
+	    }
+
+	    /* Get input string. */
+	    npop++;
+	    NXO_STACK_DOWN_GET(input, ostack, a_thread, pattern);
+	    if (nxo_type_get(input) != NXOT_STRING)
+	    {
+		nxo_thread_nerror(a_thread, NXN_typecheck);
+		return;
+	    }
+
+	    output = nxo_stack_under_push(ostack, input);
+	    nxo_string_lock(pattern);
+	    nxo_string_lock(template);
+	    error = nxo_regsub_nonew_subst(a_thread, nxo_string_get(pattern),
+					   nxo_string_len_get(pattern), global,
+					   insensitive, multiline, singleline,
+					   nxo_string_get(template),
+					   nxo_string_len_get(template), input,
+					   output);
+	    nxo_string_unlock(template);
+	    nxo_string_unlock(pattern);
+	    if (error)
+	    {
+		nxo_stack_remove(ostack, output);
+		nxo_thread_nerror(a_thread, error);
+		return;
+	    }
+
+	    break;
+	}
+	case NXOT_REGSUB:
+	{
+	    cw_nxo_t *regsub;
+
+	    regsub = nxo;
+
+	    /* Get input string. */
+	    npop++;
+	    NXO_STACK_DOWN_GET(input, ostack, a_thread, nxo);
+	    if (nxo_type_get(input) != NXOT_STRING)
+	    {
+		nxo_thread_nerror(a_thread, NXN_typecheck);
+		return;
+	    }
+
+	    output = nxo_stack_under_push(ostack, input);
+	    nxo_regsub_subst(regsub, a_thread, input, output);
+
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+
+    nxo_stack_npop(ostack, npop);
 }
 #endif
 

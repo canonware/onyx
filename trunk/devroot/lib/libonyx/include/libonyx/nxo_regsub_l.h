@@ -46,8 +46,9 @@ struct cw_nxoe_regsub_s
     size_t extrasize;
 #endif
 
-    /* Maximum number of matches.  0 means unlimited. */
-    cw_uint32_t limit;
+    /* Flag used when determining whether to substitute just one, or all
+     * matches. */
+    cw_bool_t global;
 
     /* Number of capturing subpatterns. */
     int capturecount;
