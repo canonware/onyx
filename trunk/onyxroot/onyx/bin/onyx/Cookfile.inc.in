@@ -74,6 +74,13 @@ ONYX_OTESTS =
               sub_e.nx.in trunc_a.nx.in trunc_b.nx.in trunc_c.nx.in
 
 #endif
+#if @enable_regex@
+
+              regex_a.nx.in regex_b.nx.in regex_c.nx.in regex_d.nx.in
+              regex_e.nx.in regex_f.nx.in regex_g.nx.in regex_h.nx.in
+              regex_i.nx.in regex_j.nx.in
+
+#endif
 #if @enable_posix@
 
               argv_a.nx.in argv_b.nx.in chroot_a.nx.in chroot_b.nx.in

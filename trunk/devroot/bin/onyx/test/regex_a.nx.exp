@@ -1,0 +1,10 @@
+Test begin
+{`.'}
+-regex-
+{`.' < >}
+-regex-
+{`.' < $i true $l 0 $m true $s true >}
+-regex-
+{`([a-z]+)'}
+-regex-
+Test end
