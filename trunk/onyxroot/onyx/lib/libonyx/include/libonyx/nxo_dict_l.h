@@ -43,11 +43,11 @@ struct cw_nxoe_dict_s
 
     /* If true, the data are in the hash.  Otherwise, they are stored in the
      * array. */
-    bool is_hash:1;
+    bool is_hash:2/*1*/;
 
     /* Iteration state variable for iterating over the data array.  The value is
      * always less than CW_LIBONYX_DICT_SIZE. */
-    uint32_t array_iter:31;
+    uint32_t array_iter:30/*31*/;
 
     union
     {

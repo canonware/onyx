@@ -74,16 +74,16 @@ struct cw_nxoe_thread_s
     cw_mtx_t lock;
     cw_cnd_t done_cnd;
     cw_cnd_t join_cnd;
-    bool done:1;
-    bool gone:1;
-    bool detached:1;
-    bool joined:1;
+    bool done:2/*1*/;
+    bool gone:2/*1*/;
+    bool detached:2/*1*/;
+    bool joined:2/*1*/;
 #endif
 
 #ifdef CW_THREADS
     /* true  : New array, dict, file, and string objects are implicitly locked.
      * false : No implicit locking for new objects. */
-    bool locking:1;
+    bool locking:2/*1*/;
 #endif
 
     /* Current maximum estack depth. */
@@ -171,30 +171,30 @@ struct cw_nxoe_thread_s
 	struct
 	{
 	    /* Mantissa. */
-	    bool mant_neg:1; /* false: Positive. true: Negative. */
+	    bool mant_neg:2/*1*/; /* false: Positive. true: Negative. */
 
 	    /* Radix number base for mantissa (integers only). */
 	    uint32_t radix_base:7; /* Radix (2-36).  Error detection requires
 				       * space to store up to 99. */
 
 	    /* Whole part of mantissa (or radix integer). */
-	    bool whole:1; /* false: No whole portion of mantissa.
+	    bool whole:2/*1*/; /* false: No whole portion of mantissa.
 				* true: Whole portion of mantissa. */
 	    uint32_t whole_off; /* Offset to first digit of whole. */
 	    uint32_t whole_len; /* Length of whole. */
 
 #ifdef CW_REAL
 	    /* Fractional part of mantissa. */
-	    bool frac:1; /* false: No fractional portion of mantissa.
+	    bool frac:2/*1*/; /* false: No fractional portion of mantissa.
 			       * true: Fractional portion of mantissa. */
 	    uint32_t frac_off; /* Offset to first digit of fractional. */
 	    uint32_t frac_len; /* Length of fractional. */
 
 	    /* Exponent. */
-	    bool exp:1; /* false: No exponent specified.
+	    bool exp:2/*1*/; /* false: No exponent specified.
 			      * true: Exponential notation. */
-	    bool exp_sign:1; /* false: No sign.  true: Sign. */
-	    bool exp_neg:1; /* false: Positive.  true: Negative. */
+	    bool exp_sign:2/*1*/; /* false: No sign.  true: Sign. */
+	    bool exp_neg:2/*1*/; /* false: Positive.  true: Negative. */
 	    uint32_t exp_off; /* Offset to first digit of exponent. */
 	    uint32_t exp_len; /* Length of exponent. */
 #endif

@@ -37,7 +37,7 @@ struct cw_dch_s
     /* Opaque allocation/deallocation pointers. */
     cw_mema_t *mema;
 
-    bool is_malloced:1;
+    bool is_malloced:2/*1*/;
 
     /* Intial table size and high/low water marks.  These values are used in
      * proportion if the table grows. */
@@ -45,7 +45,7 @@ struct cw_dch_s
     uint32_t base_grow;
     uint32_t base_shrink;
 
-    bool shrinkable:1;
+    bool shrinkable:2/*1*/;
 
     /* (grow_factor * base_table) is the current table size. */
     uint32_t grow_factor;

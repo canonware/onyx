@@ -154,29 +154,29 @@ struct cw_nxoe_s
     cw_nxot_t type:5;
 
     /* If true, the origin of this object has been recorded. */
-    bool origin:1;
+    bool origin:2/*1*/;
 
     /* If true, the string in the key is statically allocated, and should not be
      * deallocated during destruction. */
-    bool name_static:1;
+    bool name_static:2/*1*/;
 
     /* The GC toggles this value at each collection in order to maintain
      * state. */
-    bool color:1;
+    bool color:2/*1*/;
 
     /* True if this object has been registered with the GC.  It is possible for
      * an object to be reachable by the GC (on a stack, for instance), but not
      * be registered yet. */
-    bool registered:1;
+    bool registered:2/*1*/;
 
 #ifdef CW_THREADS
     /* If true, accesses to this object are locked.  This applies to arrays,
      * dictionaries, files, and strings. */
-    bool locking:1;
+    bool locking:2/*1*/;
 #endif
 
     /* If true, this nxoe is a reference to another nxoe. */
-    bool indirect:1;
+    bool indirect:2/*1*/;
 };
 
 int32_t
