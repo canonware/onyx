@@ -432,7 +432,7 @@ buf_split(cw_buf_t * a_a, cw_buf_t * a_b, cw_uint32_t a_offset);
  * <<< Output(s) >>>
  *
  * retval : FALSE == success, TRUE == error.
- *          TRUE : Memory allocation error.
+ *          TRUE : Memory allocation error.  a_buf is still valid.
  *
  * <<< Description >>>
  *
@@ -453,7 +453,7 @@ buf_prepend_bufel(cw_buf_t * a_buf, cw_bufel_t * a_bufel);
  * <<< Output(s) >>>
  *
  * retval : FALSE == success, TRUE == error.
- *          TRUE : Memory allocation error.
+ *          TRUE : Memory allocation error.  a_buf is still valid.
  *
  * <<< Description >>>
  *

@@ -50,10 +50,6 @@ pezz_new(cw_pezz_t * a_pezz, cw_uint32_t a_buffer_size,
     retval->is_malloced = FALSE;
   }
 
-#ifdef _LIBSTASH_DBG
-  retval->magic = _CW_PEZZ_MAGIC;
-#endif
-
 #ifdef _CW_REENTRANT
   mtx_new(&retval->lock);
 #endif
@@ -66,7 +62,10 @@ pezz_new(cw_pezz_t * a_pezz, cw_uint32_t a_buffer_size,
     = (cw_ring_t *) _cw_calloc(retval->num_buffers, sizeof(cw_ring_t));
   if (NULL == retval->rings)
   {
-    _cw_free(retval);
+    if (retval->is_malloced)
+    {
+      _cw_free(retval);
+    }
     retval = NULL;
     goto RETURN;
   }
@@ -76,7 +75,10 @@ pezz_new(cw_pezz_t * a_pezz, cw_uint32_t a_buffer_size,
   if (NULL == retval->mem_base)
   {
     _cw_free(retval->rings);
-    _cw_free(retval);
+    if (retval->is_malloced)
+    {
+      _cw_free(retval);
+    }
     retval = NULL;
     goto RETURN;
   }
@@ -103,6 +105,10 @@ pezz_new(cw_pezz_t * a_pezz, cw_uint32_t a_buffer_size,
       ring_meld(retval->spare_buffers, ring);
     }
   }
+
+#ifdef _LIBSTASH_DBG
+  retval->magic = _CW_PEZZ_MAGIC;
+#endif
 
   RETURN:
   return retval;

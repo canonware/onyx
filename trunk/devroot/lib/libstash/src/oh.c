@@ -66,7 +66,10 @@ oh_new(cw_oh_t * a_oh, cw_bool_t a_is_thread_safe)
 					       * sizeof(cw_oh_item_t *));
   if (NULL == retval->items)
   {
-    _cw_free(retval);
+    if (retval->is_malloced)
+    {
+      _cw_free(retval);
+    }
     retval = NULL;
     goto RETURN;
   }

@@ -282,7 +282,10 @@ buf_new(cw_buf_t * a_buf)
   t_ptr = _cw_calloc(_LIBSTASH_BUF_ARRAY_MIN_SIZE, sizeof(cw_bufel_t));
   if (NULL == t_ptr)
   {
-    _cw_free(retval);
+    if (retval->is_malloced)
+    {
+      _cw_free(retval);
+    }
     retval = NULL;
     goto RETURN;
   }
@@ -295,7 +298,10 @@ buf_new(cw_buf_t * a_buf)
   if (NULL == t_ptr)
   {
     _cw_free(retval->bufel_array);
-    _cw_free(retval);
+    if (retval->is_malloced)
+    {
+      _cw_free(retval);
+    }
     retval = NULL;
     goto RETURN;
   }
@@ -309,7 +315,10 @@ buf_new(cw_buf_t * a_buf)
   {
     _cw_free(retval->cumulative_index);
     _cw_free(retval->bufel_array);
-    _cw_free(retval);
+    if (retval->is_malloced)
+    {
+      _cw_free(retval);
+    }
     retval = NULL;
     goto RETURN;
   }
