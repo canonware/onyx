@@ -45,7 +45,7 @@ SRCS = [SRCS] [LIBSOCK_SRCS];
 
 /* Simple tests.  Output is diff'ed with the expected (.exp file) output. */
 {
-  local ctests = ;
+  local ctests = c_sock_a.c;
   ctests = [fromto % [srcdir]/lib/c/libsock/test/% [ctests]];
 
   CTESTS = [CTESTS] [ctests];
