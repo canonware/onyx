@@ -1,6 +1,10 @@
 2002-04-27 : Jason Evans <jasone@canonware.com>
 
 	* Add operators:
+	  + chroot
+	  + mkfifo
+	  + pipe
+	  + readlink
 	  + umask
 
 	* lib/libonyx/src/systemdict.c : Optimize operators to take advantage of

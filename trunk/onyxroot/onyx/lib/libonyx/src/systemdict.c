@@ -156,7 +156,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(exp),
 #ifdef CW_POSIX
     ENTRY(fcntl),
-    ENTRY(fifo),
+    ENTRY(mkfifo),
 #endif
 #ifdef CW_REAL
     ENTRY(floor),
@@ -1394,7 +1394,46 @@ systemdict_chown(cw_nxo_t *a_thread)
 void
 systemdict_chroot(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *tstack, *path, *tpath;
+    int error;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    tstack = nxo_thread_tstack_get(a_thread);
+    NXO_STACK_GET(path, ostack, a_thread);
+    if (nxo_type_get(path) != NXOT_STRING)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+
+    /* Create a copy of the path with an extra byte to store a '\0'
+     * terminator. */
+    tpath = nxo_stack_push(tstack);
+    nxo_string_cstring(tpath, path, a_thread);
+
+    error = chroot(nxo_string_get(tpath));
+    if (error == -1)
+    {
+	nxo_string_unlock(tpath);
+	switch (errno)
+	{
+	    case EIO:
+	    {
+		nxo_thread_nerror(a_thread, NXN_ioerror);
+		break;
+	    }
+	    default:
+	    {
+		nxo_thread_nerror(a_thread, NXN_invalidaccess);
+	    }
+	}
+	goto ERROR;
+    }
+
+    nxo_stack_pop(ostack);
+
+    ERROR:
+    nxo_stack_pop(tstack);
 }
 #endif
 
@@ -3072,9 +3111,75 @@ systemdict_fcntl(cw_nxo_t *a_thread)
 
 #ifdef CW_POSIX
 void
-systemdict_fifo(cw_nxo_t *a_thread)
+systemdict_mkfifo(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *tstack;
+    cw_nxo_t *nxo, *tnxo;
+    cw_uint32_t npop;
+    mode_t mode;
+    int error;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    tstack = nxo_thread_tstack_get(a_thread);
+
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    if (nxo_type_get(nxo) == NXOT_INTEGER)
+    {
+	/* Mode specified. */
+	npop = 2;
+	mode = (mode_t) nxo_integer_get(nxo);
+	if ((mode & 0777) != mode)
+	{
+	    nxo_thread_nerror(a_thread, NXN_rangecheck);
+	    return;
+	}
+	NXO_STACK_DOWN_GET(nxo, ostack, a_thread, nxo);
+    }
+    else
+    {
+	npop = 1;
+	mode = 0777;
+    }
+    if (nxo_type_get(nxo) != NXOT_STRING)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+
+    tnxo = nxo_stack_push(tstack);
+    nxo_string_cstring(tnxo, nxo, a_thread);
+
+    error = mkfifo(nxo_string_get(tnxo), mode);
+    nxo_stack_pop(tstack);
+
+    if (error == -1)
+    {
+	switch (errno)
+	{
+	    case ENOSPC:
+	    case EROFS:
+	    {
+		nxo_thread_nerror(a_thread, NXN_ioerror);
+		return;
+	    }
+	    case EACCES:
+	    case EEXIST:
+	    case ENOTDIR:
+	    case ENOENT:
+	    case ENAMETOOLONG:
+	    {
+		nxo_thread_nerror(a_thread, NXN_invalidfileaccess);
+		return;
+	    }
+	    default:
+	    {
+		nxo_thread_nerror(a_thread, NXN_unregistered);
+		return;
+	    }
+	}
+    }
+
+    nxo_stack_npop(ostack, npop);
 }
 #endif
 
@@ -5258,7 +5363,7 @@ systemdict_open(cw_nxo_t *a_thread)
 	/* Mode specified. */
 	npop = 2;
 	mode = (mode_t) nxo_integer_get(flags);
-	if ((mode & 7777) != mode)
+	if ((mode & 0777) != mode)
 	{
 	    nxo_thread_nerror(a_thread, NXN_rangecheck);
 	    return;
@@ -5388,7 +5493,42 @@ systemdict_pid(cw_nxo_t *a_thread)
 void
 systemdict_pipe(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *nxo;
+    int filedes[2], error;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+
+    error = pipe(filedes);
+    if (error == -1)
+    {
+	switch (errno)
+	{
+	    case EMFILE:
+	    case ENFILE:
+	    {
+		nxo_thread_nerror(a_thread, NXN_ioerror);
+		return;
+	    }
+	    case EFAULT:
+	    default:
+	    {
+		nxo_thread_nerror(a_thread, NXN_unregistered);
+		return;
+	    }
+	}
+    }
+
+    /* Read fd. */
+    nxo = nxo_stack_push(ostack);
+    nxo_file_new(nxo, nxo_thread_nx_get(a_thread),
+		 nxo_thread_currentlocking(a_thread));
+    nxo_file_fd_wrap(nxo, filedes[0]);
+    
+    /* Write fd. */
+    nxo = nxo_stack_push(ostack);
+    nxo_file_new(nxo, nxo_thread_nx_get(a_thread),
+		 nxo_thread_currentlocking(a_thread));
+    nxo_file_fd_wrap(nxo, filedes[1]);
 }
 #endif
 
@@ -5978,7 +6118,109 @@ systemdict_readline(cw_nxo_t *a_thread)
 void
 systemdict_readlink(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *tstack, *nxo, *tnxo, *link;
+    struct stat sb;
+    int error;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    tstack = nxo_thread_tstack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    if (nxo_type_get(nxo) != NXOT_STRING)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+
+    /* Create a copy of the string with an extra byte to store a '\0'
+     * terminator. */
+    tnxo = nxo_stack_push(tstack);
+    nxo_string_cstring(tnxo, nxo, a_thread);
+
+    error = lstat(nxo_string_get(tnxo), &sb);
+    if (error == -1)
+    {
+	nxo_stack_pop(tstack);
+
+	switch (errno)
+	{
+	    case EACCES:
+	    {
+		nxo_thread_nerror(a_thread, NXN_invalidaccess);
+		return;
+	    }
+	    case ENOENT:
+	    case ENOTDIR:
+	    {
+		nxo_thread_nerror(a_thread, NXN_undefinedfilename);
+		return;
+	    }
+	    case EIO:
+	    {
+		nxo_thread_nerror(a_thread, NXN_ioerror);
+		return;
+	    }
+	    case ELOOP:
+	    case ENAMETOOLONG:
+	    {
+		nxo_thread_nerror(a_thread, NXN_invalidfileaccess);
+		return;
+	    }
+	    case EOVERFLOW:
+	    default:
+	    {
+		nxo_thread_nerror(a_thread, NXN_unregistered);
+		return;
+	    }
+	}
+    }
+
+    link = nxo_stack_push(ostack);
+    nxo_string_new(link, nxo_thread_nx_get(a_thread),
+		   nxo_thread_currentlocking(a_thread), sb.st_size);
+
+    error = readlink(nxo_string_get(tnxo), nxo_string_get(link), sb.st_size);
+    if (error == -1)
+    {
+	nxo_stack_pop(ostack);
+	nxo_stack_pop(tstack);
+
+	switch (errno)
+	{
+	    case EACCES:
+	    {
+		nxo_thread_nerror(a_thread, NXN_invalidaccess);
+		return;
+	    }
+	    case ENOENT:
+	    case ENOTDIR:
+	    case EINVAL:
+	    {
+		nxo_thread_nerror(a_thread, NXN_undefinedfilename);
+		return;
+	    }
+	    case EIO:
+	    {
+		nxo_thread_nerror(a_thread, NXN_ioerror);
+		return;
+	    }
+	    case ELOOP:
+	    case ENAMETOOLONG:
+	    {
+		nxo_thread_nerror(a_thread, NXN_invalidfileaccess);
+		return;
+	    }
+	    case EFAULT:
+	    case ENOMEM:
+	    default:
+	    {
+		nxo_thread_nerror(a_thread, NXN_unregistered);
+		return;
+	    }
+	}
+    }
+
+    nxo_stack_remove(ostack, nxo);
+    nxo_stack_pop(tstack);
 }
 #endif
 
@@ -8460,6 +8702,7 @@ systemdict_test(cw_nxo_t *a_thread)
 	    }
 	    case EBADF:
 	    case EFAULT:
+	    default:
 	    {
 		nxo_thread_nerror(a_thread, NXN_unregistered);
 		return;
@@ -9365,7 +9608,7 @@ systemdict_until(cw_nxo_t *a_thread)
 
 		nxo_stack_npop(tstack, 2);
 
-		nxo_thread_nerror((a_thread), NXN_stackunderflow);
+		nxo_thread_nerror((a_thread), nerror);
 		return;
 	    }
 
@@ -9568,7 +9811,7 @@ systemdict_while(cw_nxo_t *a_thread)
 
 		nxo_stack_npop(tstack, 2);
 
-		nxo_thread_nerror((a_thread), NXN_stackunderflow);
+		nxo_thread_nerror((a_thread), nerror);
 		return;
 	    }
 
