@@ -1,0 +1,7 @@
+2001-07-10  Chris Toshok  <toshok@toshok.org>
+
+	* include/gtkdict.h: remove the NxGtkSignalClosure typedef.
+
+	* src/gtksignal.c (nx_gtk_signal_destroy): new function, free up
+	the NxGtkSignalClosure.  Also, most the structure typedef here.
+

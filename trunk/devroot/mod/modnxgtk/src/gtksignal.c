@@ -13,6 +13,11 @@
 	nxo_threadp_delete(&threadp, (a_thread));			\
 } while (0)
 
+typedef struct {
+  cw_nxo_t *a_thread;
+  char *wrapped_code;
+} NxGtkSignalClosure;
+
 void
 nx_gtk_signal_marshal (GtkObject *object,
 		       gpointer	  data,
@@ -24,6 +29,15 @@ nx_gtk_signal_marshal (GtkObject *object,
   NxGtkSignalClosure *closure = data;
 
   nxgtk_code (closure->a_thread, closure->wrapped_code);
+}
+
+void
+nx_gtk_signal_destroy (gpointer data)
+{
+  NxGtkSignalClosure *closure = data;
+
+  g_free (closure->wrapped_code);
+  g_free (closure);
 }
 
 void

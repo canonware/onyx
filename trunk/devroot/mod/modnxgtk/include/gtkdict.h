@@ -4,17 +4,14 @@
 
 #include "gtk/gtk.h"
 
-typedef struct {
-  cw_nxo_t *a_thread;
-  char *wrapped_code;
-} NxGtkSignalClosure;
-
 void nx_gtk_signal_marshal (GtkObject *object,
 			    gpointer	  data,
 			    guint	  nparams,
 			    GtkArg	 *args,
 			    GtkType	 *arg_types,
 			    GtkType	  return_type);
+
+void nx_gtk_signal_destroy (gpointer data);
 
 void nx_gtk_button_new (cw_nxo_t *a_thread);
 void nx_gtk_button_new_with_label (cw_nxo_t *a_thread);
