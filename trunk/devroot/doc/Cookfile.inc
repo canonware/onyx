@@ -19,8 +19,6 @@ TEX_SRCS = ;
 FIG_SRCS = ;
 
 T_MANUAL = [objdir]/doc/latex/manual.tex;
-D_MANUAL = [objdir]/doc/latex/manual.dvi;
-P_MANUAL = [objdir]/doc/latex/manual.pdf;
 PS_MANUAL = [objdir]/doc/ps/manual.ps;
 PDF_MANUAL = [objdir]/doc/pdf/manual.pdf;
 HTML_MANUAL = [objdir]/doc/html/manual.html;
@@ -112,17 +110,10 @@ doc_relclean :
   rm -rf [objdir]/doc/ps;
 }
 
-[D_MANUAL] : [T_MANUAL] [TEX_SRCS]
-             [fromto [srcdir]/%0%.fig [objdir]/%0%.ps [FIG_SRCS]];
+[PS_MANUAL] [PDF_MANUAL] : [T_MANUAL] [TEX_SRCS]
+                           [fromto [srcdir]/%0%.fig [objdir]/%0%.ps [FIG_SRCS]];
 
-[P_MANUAL] : [T_MANUAL] [TEX_SRCS]
-             [fromto [srcdir]/%0%.fig [objdir]/%0%.ps [FIG_SRCS]];
-
-[PS_MANUAL] : [D_MANUAL];
-
-[PDF_MANUAL] : [P_MANUAL];
-
-[HTML_MANUAL] : [D_MANUAL];
+[HTML_MANUAL] : [PS_MANUAL];
 
 [objdir]/%0%.ps : [objdir]/%0%.fig
   set mkdir
@@ -130,7 +121,7 @@ doc_relclean :
   [FIG2DEV] -L ps [objdir]/%0%.fig [objdir]/%0%.ps;
 }
 
-[objdir]/%0%.dvi : [objdir]/%0%.tex
+[objdir]/%0ps/%.ps [objdir]/%0latex/%.dvi : [objdir]/%0latex/%.tex
   set mkdir
 {
   /*
@@ -141,25 +132,27 @@ doc_relclean :
    * the last run was building a pdf.
    */
 
-  rm -f [objdir]/doc/latex/manual.alg;
-  rm -f [objdir]/doc/latex/manual.aux;
-  rm -f [objdir]/doc/latex/manual.aux-prev;
-  rm -f [objdir]/doc/latex/manual.idx;
-  rm -f [objdir]/doc/latex/manual.idx-prev;
-  rm -f [objdir]/doc/latex/manual.ilg;
-  rm -f [objdir]/doc/latex/manual.ind;
-  rm -f [objdir]/doc/latex/manual.lof;
-  rm -f [objdir]/doc/latex/manual.log;
-  rm -f [objdir]/doc/latex/manual.out;
-  rm -f [objdir]/doc/latex/manual.toc;
-  rm -f [objdir]/doc/latex/texput.log;
+  rm -f [objdir]/%0latex/manual.alg;
+  rm -f [objdir]/%0latex/manual.aux;
+  rm -f [objdir]/%0latex/manual.aux-prev;
+  rm -f [objdir]/%0latex/manual.idx;
+  rm -f [objdir]/%0latex/manual.idx-prev;
+  rm -f [objdir]/%0latex/manual.ilg;
+  rm -f [objdir]/%0latex/manual.ind;
+  rm -f [objdir]/%0latex/manual.lof;
+  rm -f [objdir]/%0latex/manual.log;
+  rm -f [objdir]/%0latex/manual.out;
+  rm -f [objdir]/%0latex/manual.toc;
+  rm -f [objdir]/%0latex/texput.log;
 
-  cd [objdir]/%0\; ./ltx2e [LATEX] [objdir]/%.tex;
-  cd [objdir]/%0\; [MAKEINDEX] -c -l [objdir]/%.idx;
-  cd [objdir]/%0\; ./ltx2e [LATEX] [objdir]/%.tex;
+  cd [objdir]/%0latex/\; ./ltx2e [LATEX] [objdir]/%.tex;
+  cd [objdir]/%0latex/\; [MAKEINDEX] -c -l [objdir]/%.idx;
+  cd [objdir]/%0latex/\; ./ltx2e [LATEX] [objdir]/%.tex;
+
+  [DVIPS] [objdir]/%0latex/%.dvi -o [objdir]/%0ps/%.ps;
 }
 
-[objdir]/%0%.pdf : [objdir]/%0%.tex
+[objdir]/%0pdf/%.pdf [objdir]/%0latex/%.pdf : [objdir]/%0latex/%.tex
   set mkdir
 {
   /*
@@ -170,33 +163,23 @@ doc_relclean :
    * the last run was building a dvi.
    */
 
-  rm -f [objdir]/doc/latex/manual.alg;
-  rm -f [objdir]/doc/latex/manual.aux;
-  rm -f [objdir]/doc/latex/manual.aux-prev;
-  rm -f [objdir]/doc/latex/manual.idx;
-  rm -f [objdir]/doc/latex/manual.idx-prev;
-  rm -f [objdir]/doc/latex/manual.ilg;
-  rm -f [objdir]/doc/latex/manual.ind;
-  rm -f [objdir]/doc/latex/manual.lof;
-  rm -f [objdir]/doc/latex/manual.log;
-  rm -f [objdir]/doc/latex/manual.out;
-  rm -f [objdir]/doc/latex/manual.toc;
-  rm -f [objdir]/doc/latex/texput.log;
+  rm -f [objdir]/%0latex/manual.alg;
+  rm -f [objdir]/%0latex/manual.aux;
+  rm -f [objdir]/%0latex/manual.aux-prev;
+  rm -f [objdir]/%0latex/manual.idx;
+  rm -f [objdir]/%0latex/manual.idx-prev;
+  rm -f [objdir]/%0latex/manual.ilg;
+  rm -f [objdir]/%0latex/manual.ind;
+  rm -f [objdir]/%0latex/manual.lof;
+  rm -f [objdir]/%0latex/manual.log;
+  rm -f [objdir]/%0latex/manual.out;
+  rm -f [objdir]/%0latex/manual.toc;
+  rm -f [objdir]/%0latex/texput.log;
 
-  cd [objdir]/%0\; ./ltx2e [PDFLATEX] [objdir]/%.tex;
-  cd [objdir]/%0\; [MAKEINDEX] -c -l [objdir]/%.idx;
-  cd [objdir]/%0\; ./ltx2e [PDFLATEX] [objdir]/%.tex;
-}
+  cd [objdir]/%0latex/\; ./ltx2e [PDFLATEX] [objdir]/%.tex;
+  cd [objdir]/%0latex/\; [MAKEINDEX] -c -l [objdir]/%.idx;
+  cd [objdir]/%0latex/\; ./ltx2e [PDFLATEX] [objdir]/%.tex;
 
-[objdir]/%0ps/%.ps : [objdir]/%0latex/%.dvi
-  set mkdir
-{
-  [DVIPS] [objdir]/%0latex/%.dvi -o [objdir]/%0ps/%.ps;
-}
-
-[objdir]/%0pdf/%.pdf : [objdir]/%0latex/%.pdf
-  set mkdir
-{
   cp [objdir]/%0latex/%.pdf [objdir]/%0pdf/%.pdf;
 }
 

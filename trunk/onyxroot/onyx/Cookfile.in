@@ -123,6 +123,7 @@ check_update : tests
 
 release : doc_all;
 
+/* We can't call the target "doc" because there is a directory by that name. */
 doc_all : doc_ps doc_pdf doc_html;
 doc_ps : [PS_MANUAL];
 doc_pdf : [PDF_MANUAL];
