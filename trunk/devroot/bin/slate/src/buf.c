@@ -487,33 +487,39 @@ buf_p_shrink(cw_buf_t *a_buf)
 static void
 buf_p_hist_b(cw_buf_t *a_buf)
 {
+	_cw_assert(a_buf->h != NULL);
 }
 
 static void
 buf_p_hist_e(cw_buf_t *a_buf)
 {
+	_cw_assert(a_buf->h != NULL);
 }
 
 static void
 buf_p_hist_i(cw_buf_t *a_buf, cw_uint64_t a_apos, cw_uint8_t *a_str, cw_uint32_t
     a_len)
 {
+	_cw_assert(a_buf->h != NULL);
 }
 
 static void
 buf_p_hist_y(cw_buf_t *a_buf, cw_uint64_t a_apos, cw_uint8_t *a_str, cw_uint32_t
     a_len)
 {
+	_cw_assert(a_buf->h != NULL);
 }
 
 static void
 buf_p_hist_r(cw_buf_t *a_buf, cw_uint64_t a_apos, cw_uint32_t a_len)
 {
+	_cw_assert(a_buf->h != NULL);
 }
 
 static void
 buf_p_hist_k(cw_buf_t *a_buf, cw_uint64_t a_apos, cw_uint32_t a_len)
 {
+	_cw_assert(a_buf->h != NULL);
 }
 
 cw_buf_t *
@@ -751,9 +757,17 @@ buf_hist_active_set(cw_buf_t *a_buf, cw_bool_t a_active)
 	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
 
 	if (a_active == TRUE && a_buf->h == NULL) {
-		_cw_error("XXX Not implemented");
+		a_buf->h = buf_new(NULL, alloc, realloc, dealloc, arg);
+		a_buf->hcur = bufm_new(NULL, a_buf->h, NULL);
+		a_buf->hend = bufm_new(NULL, a_buf->h, NULL);
+		a_buf->hstate = BUFH_NONE;
+		a_buf->ucount = 0;
+		a_buf->rcount = 0;
 	} else if (a_active == FALSE && a_buf->h != NULL) {
-		_cw_error("XXX Not implemented");
+		bufm_delete(a_buf->hcur);
+		bufm_delete(a_buf->hend);
+		buf_delete(a_buf->h);
+		a_buf->h = NULL;
 	}
 }
 
@@ -831,7 +845,8 @@ buf_hist_group_beg(cw_buf_t *a_buf)
 	_cw_check_ptr(a_buf);
 	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
 
-	_cw_error("XXX Not implemented");
+	if (a_buf->h != NULL)
+		buf_p_hist_b(a_buf);
 }
 
 void
@@ -840,7 +855,8 @@ buf_hist_group_end(cw_buf_t *a_buf)
 	_cw_check_ptr(a_buf);
 	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
 
-	_cw_error("XXX Not implemented");
+	if (a_buf->h != NULL)
+		buf_p_hist_e(a_buf);
 }
 
 void
@@ -849,7 +865,13 @@ buf_hist_flush(cw_buf_t *a_buf)
 	_cw_check_ptr(a_buf);
 	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
 
-	_cw_error("XXX Not implemented");
+	if (a_buf->h != NULL) {
+		bufm_seek(a_buf->hcur, 0, BUFW_BEG);
+		bufm_remove(a_buf->hcur, a_buf->hend);
+		a_buf->hstate = BUFH_NONE;
+		a_buf->ucount = 0;
+		a_buf->rcount = 0;
+	}
 }
 
 /* bufm. */

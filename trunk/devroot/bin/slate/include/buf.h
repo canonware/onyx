@@ -22,6 +22,7 @@ typedef enum {
 
 /* Buffer history record types. */
 typedef enum {
+	BUFH_NONE,
 	BUFH_B,
 	BUFH_E,
 	BUFH_P,
