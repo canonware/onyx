@@ -59,7 +59,7 @@ SRCS = [SRCS] [LIBSTIL_SRCS];
  */
 {
   local stests = ;
-  ptests = [fromto % [srcdir]/lib/c/libstil/test/% [stests]];
+  stests = [fromto % [srcdir]/lib/c/libstil/test/% [stests]];
 
   STESTS = [STESTS] [stests];
 }

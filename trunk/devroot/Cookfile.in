@@ -17,6 +17,7 @@
 
 srcdir = @top_srcdir@;
 objdir = @objdir@;
+abs_objdir = @abs_objdir@;
 
 SHELL = /bin/sh;
 PREFIX = @prefix@;
@@ -166,12 +167,10 @@ clean : [addsuffix _clean @bins@ @libs@]
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.perf [CTESTS]];
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS]];
 
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_d [STESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [STESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.out [STESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.diff [STESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.perf [STESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0% [STESTS]];
+  rm -f [fromto [srcdir]/%0%.st.in [objdir]/%0%.out [STESTS]];
+  rm -f [fromto [srcdir]/%0%.st.in [objdir]/%0%.diff [STESTS]];
+  rm -f [fromto [srcdir]/%0%.st.in [objdir]/%0%.perf [STESTS]];
+  rm -f [fromto [srcdir]/%0%.st.in [objdir]/%0% [STESTS]];
 
   rm -f [fromto [srcdir]/%0%.pl.in [objdir]/%0%.out [PTESTS]];
   rm -f [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl.out [PTESTS]];
@@ -184,11 +183,9 @@ clean : [addsuffix _clean @bins@ @libs@]
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.diff [CBTESTS]];
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0% [CBTESTS]];
 
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_d [SBTESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [SBTESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.out [SBTESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.diff [SBTESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0% [SBTESTS]];
+  rm -f [fromto [srcdir]/%0%.st.in [objdir]/%0%.out [SBTESTS]];
+  rm -f [fromto [srcdir]/%0%.st.in [objdir]/%0%.diff [SBTESTS]];
+  rm -f [fromto [srcdir]/%0%.st.in [objdir]/%0% [SBTESTS]];
 
   /*
    * Delete .cook.fp files from the source tree and object tree.
@@ -268,7 +265,7 @@ data
 
 echo \"[srcdir]/%0%.st.in --> [target]\"
 
-echo \"#![STIL_D]\" > [target]
+echo \"#![abs_objdir]/[STIL_D]\" > [target]
 echo \"!#\" >> [target]
 [CAT] [srcdir]/%0%.st.in >> [target];
 chmod u+x [target];

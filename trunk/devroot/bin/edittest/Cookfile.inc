@@ -54,7 +54,7 @@ SRCS = [SRCS] [EDITTEST_SRCS];
  */
 {
   local stests = ;
-  ptests = [fromto % [srcdir]/bin/edittest/test/% [stests]];
+  stests = [fromto % [srcdir]/bin/edittest/test/% [stests]];
 
   STESTS = [STESTS] [stests];
 }

@@ -9,6 +9,8 @@ AC_INIT(Cookfile.in)
 
 objdir=.
 AC_SUBST(objdir)
+abs_objdir=`pwd`
+AC_SUBST(abs_objdir)
 
 cfghdrs=
 bins=

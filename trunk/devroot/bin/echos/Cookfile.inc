@@ -54,7 +54,7 @@ SRCS = [SRCS] [ECHOS_SRCS];
  */
 {
   local stests = ;
-  ptests = [fromto % [srcdir]/bin/echos/test/% [stests]];
+  stests = [fromto % [srcdir]/bin/echos/test/% [stests]];
 
   STESTS = [STESTS] [stests];
 }

@@ -54,7 +54,7 @@ SRCS = [SRCS] [XVX_SRCS];
  */
 {
   local stests = ;
-  ptests = [fromto % [srcdir]/bin/xvx/test/% [stests]];
+  stests = [fromto % [srcdir]/bin/xvx/test/% [stests]];
 
   STESTS = [STESTS] [stests];
 }

@@ -54,7 +54,7 @@ SRCS = [SRCS] [NCAT_SRCS];
  */
 {
   local stests = ;
-  ptests = [fromto % [srcdir]/bin/ncat/test/% [stests]];
+  stests = [fromto % [srcdir]/bin/ncat/test/% [stests]];
 
   STESTS = [STESTS] [stests];
 }

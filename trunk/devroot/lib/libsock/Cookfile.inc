@@ -57,7 +57,7 @@ SRCS = [SRCS] [LIBSOCK_SRCS];
  */
 {
   local stests = ;
-  ptests = [fromto % [srcdir]/lib/c/libsock/test/% [stests]];
+  stests = [fromto % [srcdir]/lib/c/libsock/test/% [stests]];
 
   STESTS = [STESTS] [stests];
 }

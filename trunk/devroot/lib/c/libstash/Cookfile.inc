@@ -66,7 +66,7 @@ SRCS = [SRCS] [LIBSTASH_SRCS];
  */
 {
   local stests = ;
-  ptests = [fromto % [srcdir]/lib/c/libstash/test/% [stests]];
+  stests = [fromto % [srcdir]/lib/c/libstash/test/% [stests]];
 
   STESTS = [STESTS] [stests];
 }

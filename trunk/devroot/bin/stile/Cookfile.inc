@@ -54,7 +54,7 @@ SRCS = [SRCS] [STILE_SRCS];
  */
 {
   local stests = ;
-  ptests = [fromto % [srcdir]/bin/stile/test/% [stests]];
+  stests = [fromto % [srcdir]/bin/stile/test/% [stests]];
 
   STESTS = [STESTS] [stests];
 }

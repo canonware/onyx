@@ -54,7 +54,7 @@ SRCS = [SRCS] [BLOW_SRCS];
  */
 {
   local stests = ;
-  ptests = [fromto % [srcdir]/bin/blow/test/% [stests]];
+  stests = [fromto % [srcdir]/bin/blow/test/% [stests]];
 
   STESTS = [STESTS] [stests];
 }

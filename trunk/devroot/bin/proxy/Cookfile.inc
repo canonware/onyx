@@ -54,7 +54,7 @@ SRCS = [SRCS] [PROXY_SRCS];
  */
 {
   local stests = ;
-  ptests = [fromto % [srcdir]/bin/proxy/test/% [stests]];
+  stests = [fromto % [srcdir]/bin/proxy/test/% [stests]];
 
   STESTS = [STESTS] [stests];
 }

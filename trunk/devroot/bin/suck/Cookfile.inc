@@ -54,7 +54,7 @@ SRCS = [SRCS] [SUCK_SRCS];
  */
 {
   local stests = ;
-  ptests = [fromto % [srcdir]/bin/suck/test/% [stests]];
+  stests = [fromto % [srcdir]/bin/suck/test/% [stests]];
 
   STESTS = [STESTS] [stests];
 }

@@ -54,7 +54,7 @@ SRCS = [SRCS] [COVER_SRCS];
  */
 {
   local stests = ;
-  ptests = [fromto % [srcdir]/bin/cover/test/% [stests]];
+  stests = [fromto % [srcdir]/bin/cover/test/% [stests]];
 
   STESTS = [STESTS] [stests];
 }
