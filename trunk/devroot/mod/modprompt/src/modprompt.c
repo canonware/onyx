@@ -46,6 +46,7 @@ struct cw_modprompt_synth_s {
 
     EditLine *el;
     History *hist;
+    HistEvent hevent;
     cw_uint8_t prompt_str[CW_PROMPT_STRLEN];
 };
 
@@ -124,9 +125,9 @@ modprompt_init(void *a_arg, cw_nxo_t *a_thread)
 
     /* Initialize the command editor. */
     synth->hist = history_init();
-    history(synth->hist, H_EVENT, 512);
+    history(synth->hist, &synth->hevent, H_SETSIZE, 512);
 
-    synth->el = el_init("onyx", stdin, stdout);
+    synth->el = el_init("onyx", stdin, stdout, stderr);
     el_set(synth->el, EL_HIST, history, synth->hist);
     el_set(synth->el, EL_PROMPT, modprompt_prompt);
 
@@ -307,30 +308,27 @@ modprompt_read(void *a_data, cw_nxo_t *a_file, cw_uint32_t a_len,
 	if ((nxo_thread_deferred(synth->thread) == FALSE)
 	    && (nxo_thread_state(synth->thread) == THREADTS_START))
 	{
-	    const HistEvent *hevent;
-
 	    /* Completion of a history element.  Insert it, taking care to avoid
 	     * simple (non-continued) duplicates and empty lines (simple
 	     * carriage returns). */
 	    if (synth->continuation)
 	    {
-		history(synth->hist, H_ENTER, str);
+		history(synth->hist, &synth->hevent, H_ENTER, str);
 		synth->continuation = FALSE;
 	    }
 	    else
 	    {
-		hevent = history(synth->hist, H_FIRST);
-		if ((hevent == NULL
-		     || strcmp(str, hevent->str)) && strlen(str) > 1)
+		if ((history(synth->hist, &synth->hevent, H_FIRST) == -1
+		     || strcmp(str, synth->hevent.str)) && strlen(str) > 1)
 		{
-		    history(synth->hist, H_ENTER, str);
+		    history(synth->hist, &synth->hevent, H_ENTER, str);
 		}
 	    }
 	}
 	else
 	{
 	    /* Continuation.  Append it to the current history element. */
-	    history(synth->hist, H_ADD, str);
+	    history(synth->hist, &synth->hevent, H_ADD, str);
 	    synth->continuation = TRUE;
 	}
 
@@ -484,30 +482,27 @@ modprompt_entry(void *a_arg)
 	if ((nxo_thread_deferred(synth->thread) == FALSE)
 	    && (nxo_thread_state(synth->thread) == THREADTS_START))
 	{
-	    const HistEvent *hevent;
-
 	    /* Completion of a history element.  Insert it, taking care to avoid
 	     * simple (non-continued) duplicates and empty lines (simple
 	     * carriage returns). */
 	    if (synth->continuation)
 	    {
-		history(synth->hist, H_ENTER, str);
+		history(synth->hist, &synth->hevent, H_ENTER, str);
 		synth->continuation = FALSE;
 	    }
 	    else
 	    {
-		hevent = history(synth->hist, H_FIRST);
-		if ((hevent == NULL
-		     || strcmp(str, hevent->str)) && strlen(str) > 1)
+		if ((history(synth->hist, &synth->hevent, H_FIRST) == -1
+		     || strcmp(str, synth->hevent.str)) && strlen(str) > 1)
 		{
-		    history(synth->hist, H_ENTER, str);
+		    history(synth->hist, &synth->hevent, H_ENTER, str);
 		}
 	    }
 	}
 	else
 	{
 	    /* Continuation.  Append it to the current history element. */
-	    history(synth->hist, H_ADD, str);
+	    history(synth->hist, &synth->hevent, H_ADD, str);
 	    synth->continuation = TRUE;
 	}
 
