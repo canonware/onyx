@@ -19,7 +19,7 @@
 int
 main()
 {
-/*    char buf[37]; */
+  char buf[37];
   
   libstash_init();
   log_printf(cw_g_log, "Test begin\n");
@@ -29,25 +29,24 @@ main()
 
 /*    out_put(cw_g_out, "Hello world [t:s|name:value|w:0] blah", "hi"); */
 /*    out_put(cw_g_out, "Oog[name:value|t:string|w:0] blah", "hi"); */
-/*    out_put(cw_g_out, "Boo[name:value|t:string]", "hoo"); */
-/*    out_put(cw_g_out, "[[ A bracket [[ ]", "hi"); */
+  out_put(cw_g_out, "Boo[name:value|t:string]", "hoo");
+  out_put(cw_g_out, "[[ A bracket [[ ][t:s]\n", "hi");
 /*    out_put(cw_g_out, "Boo[name:value|t:buf|s:blah]", "hoo"); */
 /*    out_put(cw_g_out, "Boo[name:value|t:unknown|s:blah]", "hoo"); */
-/*    out_put(cw_g_out, "[t:s]"); */
   
 /*    out_put(cw_g_out, "[t:i32] [t:s]]][[[w:3|t:i64]\n", 64, ":Hi:", 32); */
   
-/*    bzero(buf, 37); */
-/*    _cw_assert(18 == out_put_sn(cw_g_out, */
-/*  			      buf, */
-/*  			      18, */
-/*  			      "[t:i32] [t:s]]][[[w:3|t:i64]", */
-/*  			      64, */
-/*  			      "Hi" */
-/*  			      )); */
+  bzero(buf, 37);
+  _cw_assert(18 == out_put_sn(cw_g_out,
+			      buf,
+			      18,
+			      "[t:i32] [t:s]]][[[w:3|t:i64]",
+			      64,
+			      "Hi"
+			      ));
 
-/*    out_put(cw_g_out, "[t:i32]\n", 123); */
-/*    out_put(cw_g_out, "[t:i32|b:16]\n", 123); */
+  out_put(cw_g_out, "[t:i32]\n", 123);
+  out_put(cw_g_out, "[t:i32|b:16]\n", 123);
   
   out_put(cw_g_out, ":123456789: --> :[t:i32]:\n", 123456789);
   out_put(cw_g_out, ":123456789: --> :[t:i32|b:13]:_13\n", 123456789);
@@ -88,17 +87,17 @@ main()
   out_put(cw_g_out, ":[t:i16|s:u|b:2|p:0|w:16]: [[t:i16|s:u|b:2|p:0|w:16]\n", -43);
   out_put(cw_g_out, ":[t:i16|s:s|b:2]:\n", -43);
 
-/*    { */
-/*      cw_uint32_t i; */
-/*      char buf[65]; */
+  {
+    cw_uint32_t i;
+    char buf[65];
     
-/*      for (i = 0; i < 1000; i++) */
-/*      { */
-/*        out_put_s(cw_g_out, buf, "[t:i32|b:16]", (cw_uint32_t) 0xf2135123); */
-/*        out_put(cw_g_out, "."); */
-/*      } */
-/*      out_put(cw_g_out, "\n[t:s]\n", buf); */
-/*    } */
+    for (i = 0; i < 1; i++)
+    {
+      out_put_s(cw_g_out, buf, "[t:i32|b:16]", (cw_uint32_t) 0xf2135123);
+      out_put(cw_g_out, ".");
+    }
+    out_put(cw_g_out, "\n[t:s]\n", buf);
+  }
 
   out_put(cw_g_out, ":[t:c]:\n", 'A');
   out_put(cw_g_out, ":[t:c|w:3]:\n", 'A');
