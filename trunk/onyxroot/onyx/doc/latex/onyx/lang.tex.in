@@ -684,6 +684,11 @@ Onyx:
 \label{invalidaccess}
 \index{invalidaccess}
 \item[invalidaccess: ] Permission error.
+\label{invalidcontinue}
+\index{invalidcontinue}
+\item[invalidcontinue: ] The \onyxop{}{continue}{} operator was called outside
+of any loop.  This error is generated as a result of catching a continue, so the
+execution state for where the error really happened is gone.
 \label{invalidexit}
 \index{invalidexit}
 \item[invalidexit: ] The \onyxop{}{exit}{} operator was called outside of any

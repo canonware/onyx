@@ -12,16 +12,6 @@
 
 `Test begin\n' print flush
 
-{quit} start
-estack 1 sprint
-
-{stop} start
-estack 1 sprint
-
-{continue} start
-estack 1 sprint
-
-{exit} start
-estack 1 sprint
+{continue} stopped
 
 `Test end\n' print

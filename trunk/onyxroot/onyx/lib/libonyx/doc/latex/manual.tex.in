@@ -144,6 +144,9 @@ interpreter that are executed by the garbage collector during the mark phase
 \label{CW_ONYXX_OOM}
 \item[\cppdef{CW\_ONYXX\_OOM}: ]
 	Memory allocation error.
+\label{CW_ONYXX_CONTINUE}
+\item[\cppdef{CW\_ONYXX\_CONTINUE}: ]
+	Internal use, for the continue operator.
 \label{CW_ONYXX_EXIT}
 \item[\cppdef{CW\_ONYXX\_EXIT}: ]
 	Internal use, for the exit operator.

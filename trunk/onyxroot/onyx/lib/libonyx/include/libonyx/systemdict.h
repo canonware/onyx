@@ -171,6 +171,9 @@ systemdict_connect(cw_nxo_t *a_thread);
 #endif
 
 void
+systemdict_continue(cw_nxo_t *a_thread);
+
+void
 systemdict_copy(cw_nxo_t *a_thread);
 
 #ifdef CW_REAL

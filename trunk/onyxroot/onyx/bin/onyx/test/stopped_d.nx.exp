@@ -1,0 +1,9 @@
+Test begin
+Error $invalidcontinue
+ostack: ()
+dstack: (-dict- -dict- -dict- -dict-)
+estack/istack trace (0..3):
+0:	--continue--
+1:	--stopped--
+2:	-file-
+3:	--start--

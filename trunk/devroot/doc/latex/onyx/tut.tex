@@ -238,12 +238,29 @@ the brain necessary for stack manipulation.  Some people might argue that stack
 manipulation is the job of the compiler.  In any case, stack manipulation is an
 acquired skill that requires practice.
 
+\subsection{Efficiency issues}
+
+Stacks are implemented such that accessing an object is a constant-time
+operation, regardless of its depth in a stack.  However, only the top and
+bottom of a stack may be modified in constant time.
+
+Typically, the cost of stack manipulations is proportional to the number of
+objects being touched.  So, rolling the top ten objects is five times as costly
+as exchanging the top two objects.  Likewise, rotating the stack by ten
+positions is typically five times as expensive as rotating the stack by two
+positions.  Costs for rolling and rotation are approximately proportional to
+each other, though pathological cases for rotation incur a slightly higher
+overhead (a constant factor more expensive, when amortized).
+
+Stacks have more memory and performance overhead than arrays, so unless growing
+or shrinking is imporant, arrays are a better choice for indexed access.
+Dictionaries are always a better choice for keyed access.
+
 \subsection{Using stacks as queues}
 
-Stacks are implemented such that access to the top or bottom is very efficient,
-and efficiency decreases linearly, the farther into the stack an operation has
-to iterate.  Since pushing and popping is efficient for both ends of stacks,
-this means that stacks are suitable for use as queues.
+Since pushing and popping is efficient for both ends of stacks, this means that
+stacks are suitable for use as queues.  Either orientation for input/output is
+fine.
 
 \subsection{Using the operand stack as two stacks}
 
@@ -251,25 +268,9 @@ The ability to efficiently manipulate both ends of the operand stack means that
 the operand stack can effectively be thought of as two stacks.  This can be very
 useful in situations where more than a handful of objects are being manipulated,
 and an additional location to temporarily stash objects would be useful.  If a
-program is repeatedly doing large stack rotations, using the bottom of the stack
-can often help to simplify the code and reduce stack manipulation overhead.
-
-\subsection{Efficiency issues}
-
-Since stacks are stored internally as doubly linked lists, the cost of indexed
-access to an object on a stack is proportional to its offset from the top or
-bottom of the stack, depending on the operator being used.  Therefore, stacks
-are not ideal in situations where arbitrary access to an object is a common
-operation.  An array is a better choice for indexed access, and a dictionary is
-a better choice for keyed access.
-
-Indexed access doesn't just apply to operators like
-\htmlref{\onyxop{}{idup}{}}{systemdict:idup}; operators like
-\htmlref{\onyxop{}{nup}{}}{systemdict:nup} and
-\htmlref{\onyxop{}{roll}{}}{systemdict:roll} are also affected.  However,
-operators such as \htmlref{\onyxop{}{rot}{}}{systemdict:rot} are not as heavily
-impacted, since they only need to index into the stack by the number of
-positions to rotate.
+program is repeatedly doing large stack rolls or rotations, using the bottom of
+the stack can often help to simplify the code and reduce stack manipulation
+overhead.
 
 \section{Dictionaries}
 

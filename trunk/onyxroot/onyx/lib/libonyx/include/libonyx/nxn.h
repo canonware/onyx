@@ -125,6 +125,7 @@ typedef enum
 #ifdef CW_SOCKET
     NXN_ENTRY(connect),
 #endif
+    NXN_ENTRY(continue),
     NXN_ENTRY(copy),
 #ifdef CW_REAL
     NXN_ENTRY(cos),
@@ -304,6 +305,7 @@ typedef enum
 #endif
     NXN_ENTRY(integertype),
     NXN_ENTRY(invalidaccess),
+    NXN_ENTRY(invalidcontinue),
     NXN_ENTRY(invalidexit),
     NXN_ENTRY(invalidfileaccess),
     NXN_ENTRY(iobuf),

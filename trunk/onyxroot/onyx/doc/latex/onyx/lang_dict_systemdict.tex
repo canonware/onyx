@@ -340,6 +340,12 @@ execution stack operators} \\
 \hline
 \optableent
 	{--}
+	{{\bf \htmlref{continue}{systemdict:continue}}}
+	{--}
+	{Skip to next iteration of innermost looping context.}
+\hline
+\optableent
+	{--}
 	{{\bf \htmlref{exit}{systemdict:exit}}}
 	{--}
 	{Terminate innermost looping context.}
@@ -3730,6 +3736,35 @@ onyx:1> dup `localhost' 7777 connect
 onyx:1>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:continue}
+\index{continue@\onyxop{}{continue}{}}
+\item[{\onyxop{--}{continue}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
+	\item[Errors(s): ] None.
+	\item[Description: ]
+		Terminate the current iteration of the innermost enclosing
+		context, and start at the beginning of the next iteration.
+		This operator can be called within the looping context of
+		\htmlref{\onyxop{}{for}{}}{systemdict:for},
+		\htmlref{\onyxop{}{repeat}{}}{systemdict:repeat},
+		\htmlref{\onyxop{}{while}{}}{systemdict:while},
+		\htmlref{\onyxop{}{until}{}}{systemdict:until},
+		\htmlref{\onyxop{}{loop}{}}{systemdict:loop},
+		\htmlref{\onyxop{}{foreach}{}}{systemdict:foreach}, and
+		\htmlref{\onyxop{}{dirforeach}{}}{systemdict:dirforeach}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> 1 1 5 {1 sprint continue bang} for
+1
+2
+3
+4
+5
+onyx:0>
+		\end{verbatim}
+	\end{description}
 \label{systemdict:copy}
 \index{copy@\onyxop{}{copy}{}}
 \item[{\onyxop{srcarray dstarray}{copy}{dstsubarray}}: ]
@@ -4488,8 +4523,9 @@ onyx:0> 1 die
 		For each entry in the directory represented by \oparg{path}
 		except for ``.'' and ``..'', push a string that represents the
 		entry onto ostack and execute \oparg{proc}.  This operator
-		supports the \htmlref{\onyxop{}{exit}{}}{systemdict:exit}
-		operator.
+		supports the
+		\htmlref{\onyxop{}{continue}{}}{systemdict:continue} and
+		\htmlref{\onyxop{}{exit}{}}{systemdict:exit} operators.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> pwd {1 sprint} dirforeach
@@ -5120,8 +5156,9 @@ onyx:0>
 		Iteratively evaluate \oparg{proc}, pushing a control variable
 		onto ostack at the beginning of each iteration, until the
 		control variable has exceeded \oparg{limit}.  This operator
-		supports the \htmlref{\onyxop{}{exit}{}}{systemdict:exit}
-		operator.
+		supports the
+		\htmlref{\onyxop{}{continue}{}}{systemdict:continue}
+		and\htmlref{\onyxop{}{exit}{}}{systemdict:exit} operators.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> 0 1 3 {1 sprint} for
@@ -5175,7 +5212,8 @@ onyx:0>
 		For each entry in the first input argument (\oparg{array},
 		\oparg{dict}, \oparg{stack}, or \oparg{string}), push the entry
 		onto ostack and execute \oparg{proc}.  This operator supports
-		the \htmlref{\onyxop{}{exit}{}}{systemdict:exit} operator.
+		the \htmlref{\onyxop{}{continue}{}}{systemdict:continue} and
+		\htmlref{\onyxop{}{exit}{}}{systemdict:exit} operators.
 
 		The object being iterated over can be modified during iteration,
 		with the expectation of no ill consequences, and in most cases
@@ -6654,8 +6692,9 @@ onyx:0>
 		\end{description}
 	\item[Description: ]
 		Repeatedly evaluate \oparg{proc} indefinitely.  This operator
-		supports the \htmlref{\onyxop{}{exit}{}}{systemdict:exit}
-		operator.
+		supports the
+		\htmlref{\onyxop{}{continue}{}}{systemdict:continue} and
+		\htmlref{\onyxop{}{exit}{}}{systemdict:exit} operators.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> 0 {1 add dup 1 sprint dup 3 eq {pop exit} if} loop
@@ -8787,8 +8826,9 @@ onyx:0>
 		\end{description}
 	\item[Description: ]
 		Evaluate \oparg{proc} \oparg{count} times.  This operator
-		supports the \htmlref{\onyxop{}{exit}{}}{systemdict:exit}
-		operator.
+		supports the
+		\htmlref{\onyxop{}{continue}{}}{systemdict:continue} and
+		\htmlref{\onyxop{}{exit}{}}{systemdict:exit} operators.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> 3 {`hi' 1 sprint} repeat
@@ -11451,6 +11491,7 @@ onyx:0>
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
+		\item[\htmlref{invalidcontinue}{invalidcontinue}.]
 		\item[\htmlref{invalidexit}{invalidexit}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
@@ -11458,10 +11499,12 @@ onyx:0>
 		Evaluate \oparg{obj}.  This operator provides a context that
 		terminates execution stack unwinding due to the
 		\htmlref{\onyxop{}{stop}{}}{systemdict:stop}.  It will also
-		terminate execution stack unwinding due to the 
-		\htmlref{\onyxop{}{exit}{}}{systemdict:exit} operator, but will
-		throw an \htmlref{invalidexit}{invalidexit} error, then do the
-		equivalent of calling
+		terminate execution stack unwinding due to the
+		\htmlref{\onyxop{}{continue}{}}{systemdict:continue} and
+		\htmlref{\onyxop{}{exit}{}}{systemdict:exit} operators, but will
+		throw an \htmlref{invalidcontinue}{invalidcontinue} or
+		\htmlref{invalidexit}{invalidexit} error, respectively, then do
+		the equivalent of calling
 		\htmlref{\onyxop{}{quit}{}}{systemdict:quit}.
 	\item[Example(s): ]\begin{verbatim}
 
@@ -12834,7 +12877,8 @@ onyx:0>
 		Repeatedly evaluate \oparg{proc} and \oparg{cond}, terminating
 		the first time that \oparg{cond} places false on ostack.  This
 		operator supports the
-		\htmlref{\onyxop{}{exit}{}}{systemdict:exit} operator.
+		\htmlref{\onyxop{}{continue}{}}{systemdict:continue} and
+		\htmlref{\onyxop{}{exit}{}}{systemdict:exit} operators.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> 0 {inc dup 1 sprint}{dup 3 lt} until pop
@@ -13074,7 +13118,8 @@ onyx:0>
 		Repeatedly evaluate \oparg{cond} and \oparg{proc}, terminating
 		the first time that \oparg{cond} places false on ostack.  This
 		operator supports the
-		\htmlref{\onyxop{}{exit}{}}{systemdict:exit} operator.
+		\htmlref{\onyxop{}{continue}{}}{systemdict:continue} and
+		\htmlref{\onyxop{}{exit}{}}{systemdict:exit} operators.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> 0 {dup 3 lt}{inc dup 1 sprint} while pop
