@@ -641,7 +641,7 @@ main()
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[p]_2", 0xffffffff) >=
+		_cw_assert(out_put_sn(out_p, str, 70, "[p]_16", 0xffffffff) >=
 		    0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
