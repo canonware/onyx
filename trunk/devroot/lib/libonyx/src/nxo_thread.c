@@ -576,6 +576,13 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 	    case NXOT_MUTEX:
 #endif
 	    case NXOT_PMARK:
+#ifdef CW_REAL
+	    case NXOT_REAL:
+#endif
+#ifdef CW_REGEX
+	    case NXOT_REGEX:
+	    case NXOT_REGSUB:
+#endif
 	    case NXOT_STACK:
 	    case NXOT_THREAD:
 	    {
