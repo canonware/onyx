@@ -488,24 +488,24 @@ bufv_p_rcopy(cw_bufv_t *a_to, cw_uint32_t a_to_len, const cw_bufv_t *a_fr,
     cw_check_ptr(a_fr);
 
     retval = 0;
-    to_el = a_to_len - 1;
-    to_off = a_to[to_el].len - 1;
+    fr_el = a_fr_len - 1;
+    fr_off = a_fr[fr_el].len - 1;
     /* Iterate over bufv elements. */
-    for (fr_el = 0; fr_el < a_fr_len; fr_el++)
+    for (to_el = 0; to_el < a_to_len; to_el++)
     {
 	/* Iterate over bufv element contents. */
-	for (fr_off = 0; fr_off < a_fr[fr_el].len; fr_off++)
+	for (to_off = 0; to_off < a_to[to_el].len; to_off++)
 	{
-	    /* If there is no more room in the current destination bufv element,
+	    /* If there is no more room in the current source bufv element,
 	     * move on to the previous one. */
-	    while (to_off == 0xffffffff)
+	    while (fr_off == 0xffffffff)
 	    {
-		to_el--;
-		if (to_el == 0xffffffff)
+		fr_el--;
+		if (fr_el == 0xffffffff)
 		{
 		    goto RETURN;
 		}
-		to_off = a_to[to_el].len - 1;
+		fr_off = a_fr[fr_el].len - 1;
 	    }
 
 	    a_to[to_el].data[to_off] = a_fr[fr_el].data[fr_off];
@@ -516,8 +516,8 @@ bufv_p_rcopy(cw_bufv_t *a_to, cw_uint32_t a_to_len, const cw_bufv_t *a_fr,
 		retval++;
 	    }
 
-	    /* Decrement the position to copy to. */
-	    to_off--;
+	    /* Decrement the position to copy from. */
+	    fr_off--;
 	}
     }
 
@@ -585,24 +585,24 @@ bufv_rcopy(cw_bufv_t *a_to, cw_uint32_t a_to_len, const cw_bufv_t *a_fr,
     cw_check_ptr(a_fr);
 
     retval = 0;
-    to_el = a_to_len - 1;
-    to_off = a_to[to_el].len - 1;
+    fr_el = a_fr_len - 1;
+    fr_off = a_fr[fr_el].len - 1;
     /* Iterate over bufv elements. */
-    for (fr_el = 0; fr_el < a_fr_len; fr_el++)
+    for (to_el = 0; to_el < a_to_len; to_el++)
     {
 	/* Iterate over bufv element contents. */
-	for (fr_off = 0; fr_off < a_fr[fr_el].len; fr_off++)
+	for (to_off = 0; to_off < a_to[to_el].len; to_off++)
 	{
-	    /* If there is no more room in the current destination bufv element,
+	    /* If there is no more room in the current source bufv element,
 	     * move on to the previous one. */
-	    while (to_off == 0xffffffff)
+	    while (fr_off == 0xffffffff)
 	    {
-		to_el--;
-		if (to_el == 0xffffffff)
+		fr_el--;
+		if (fr_el == 0xffffffff)
 		{
 		    goto RETURN;
 		}
-		to_off = a_to[to_el].len - 1;
+		fr_off = a_fr[fr_el].len - 1;
 	    }
 
 	    a_to[to_el].data[to_off] = a_fr[fr_el].data[fr_off];
@@ -614,8 +614,8 @@ bufv_rcopy(cw_bufv_t *a_to, cw_uint32_t a_to_len, const cw_bufv_t *a_fr,
 		goto RETURN;
 	    }
 
-	    /* Decrement the position to copy to. */
-	    to_off--;
+	    /* Decrement the position to copy from. */
+	    fr_off--;
 	}
     }
 
@@ -1670,7 +1670,7 @@ buf_p_bufv_rinsert(cw_buf_t *a_buf, cw_bufp_t *a_bufp, cw_bufp_t *a_pastp,
 	if (cnt != 0)
 	{
 	    nlines += (cw_uint64_t) bufp_p_simple_insert(bufp, &a_bufv[v],
-							 i - v, cnt, TRUE);
+							 v - i, cnt, TRUE);
 	    v = i;
 	}
 
@@ -2585,7 +2585,7 @@ mkr_p_before_slide_insert(cw_mkr_t *a_mkr, cw_bool_t a_after,
 
     bufv.data = &bufp->b[0];
     bufv.len = nmove;
-    nmovelines = bufp_p_simple_insert(a_prevp, &bufv, 1, nmove, a_reverse);
+    nmovelines = bufp_p_simple_insert(a_prevp, &bufv, 1, nmove, FALSE);
 
     /* Move markers that belong with the data copied to a_prevp. */
     for (mkr = ql_first(&bufp->mlist);
@@ -2690,7 +2690,7 @@ mkr_p_after_slide_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, cw_bufp_t *a_nextp,
 
     bufv.data = &bufp->b[CW_BUFP_SIZE - nmove];
     bufv.len = nmove;
-    nmovelines = bufp_p_simple_insert(a_nextp, &bufv, 1, nmove, a_reverse);
+    nmovelines = bufp_p_simple_insert(a_nextp, &bufv, 1, nmove, FALSE);
 
     /* Move markers that belong with the data copied to a_nextp. */
     for (mkr = ql_last(&bufp->mlist, mlink);
@@ -4062,18 +4062,22 @@ mkr_range_get(const cw_mkr_t *a_start, const cw_mkr_t *a_end,
 		retval[bufvcnt].len = bufp->gap_off - start->ppos;
 		bufvcnt++;
 
-		retval[bufvcnt].data = &bufp->b[bufp->gap_off
-					  + (CW_BUFP_SIZE - bufp->len)];
-		retval[bufvcnt].len = end->ppos - (bufp->gap_off
-					     + (CW_BUFP_SIZE - bufp->len));
-		bufvcnt++;
+		if (end->ppos > bufp->gap_off + (CW_BUFP_SIZE - bufp->len))
+		{
+		    /* Data after gap. */
+		    retval[bufvcnt].data
+			= &bufp->b[bufp->gap_off + (CW_BUFP_SIZE - bufp->len)];
+		    retval[bufvcnt].len
+			= end->ppos - (bufp->gap_off
+				       + (CW_BUFP_SIZE - bufp->len));
+		    bufvcnt++;
+		}
 	    }
 	    else
 	    {
 		/* One range. */
 		retval[0].data = &bufp->b[start->ppos];
 		retval[0].len = end->ppos - start->ppos;
-
 		bufvcnt++;
 	    }
 	    break;
@@ -4089,15 +4093,16 @@ mkr_range_get(const cw_mkr_t *a_start, const cw_mkr_t *a_end,
 
 	    /* First bufp. */
 	    bufp = start->bufp;
-	    retval[bufvcnt].data = &bufp->b[start->ppos];
 	    if (start->ppos < bufp->gap_off)
 	    {
 		/* Before gap. */
+		retval[bufvcnt].data = &bufp->b[start->ppos];
 		retval[bufvcnt].len = bufp->gap_off - start->ppos;
 		bufvcnt++;
 
-		if (bufp->gap_off + (CW_BUFP_SIZE - bufp->len) < CW_BUFP_SIZE)
+		if (bufp->gap_off < bufp->len)
 		{
+		    /* Data after gap. */
 		    retval[bufvcnt].data
 			= &bufp->b[bufp->gap_off + (CW_BUFP_SIZE - bufp->len)];
 		    retval[bufvcnt].len = bufp->len - bufp->gap_off;
@@ -4107,8 +4112,12 @@ mkr_range_get(const cw_mkr_t *a_start, const cw_mkr_t *a_end,
 	    else
 	    {
 		/* After gap. */
-		retval[bufvcnt].len = CW_BUFP_SIZE - start->ppos;
-		bufvcnt++;
+		if (start->ppos < CW_BUFP_SIZE)
+		{
+		    retval[bufvcnt].data = &bufp->b[start->ppos];
+		    retval[bufvcnt].len = CW_BUFP_SIZE - start->ppos;
+		    bufvcnt++;
+		}
 	    }
 
 	    /* Intermediate bufp's. */
@@ -4118,30 +4127,19 @@ mkr_range_get(const cw_mkr_t *a_start, const cw_mkr_t *a_end,
 	    {
 		cw_check_ptr(bufp);
 
-		if (bufp->gap_off == 0)
+		if (bufp->gap_off > 0)
 		{
-		    /* Gap at beginning. */
-		    retval[bufvcnt].data = &bufp->b[CW_BUFP_SIZE - bufp->len];
-		    retval[bufvcnt].len = bufp->len;
-		    bufvcnt++;
-		}
-		else if (bufp->gap_off == bufp->len)
-		{
-		    /* Gap at end. */
-		    retval[bufvcnt].data = &bufp->b[0];
-		    retval[bufvcnt].len = bufp->len;
-		    bufvcnt++;
-		}
-		else
-		{
-		    /* Gap splits bufp into two regions. */
+		    /* Data before gap. */
 		    retval[bufvcnt].data = &bufp->b[0];
 		    retval[bufvcnt].len = bufp->gap_off;
 		    bufvcnt++;
+		}
 
-		    retval[bufvcnt].data = &bufp->b[bufp->gap_off
-						    + (CW_BUFP_SIZE
-						       - bufp->len)];
+		if (bufp->gap_off < bufp->len)
+		{
+		    /* Data after gap. */
+		    retval[bufvcnt].data
+			= &bufp->b[bufp->gap_off + (CW_BUFP_SIZE - bufp->len)];
 		    retval[bufvcnt].len = bufp->len - bufp->gap_off;
 		    bufvcnt++;
 		}
@@ -4151,22 +4149,28 @@ mkr_range_get(const cw_mkr_t *a_start, const cw_mkr_t *a_end,
 	    if (end->ppos < end->bufp->gap_off)
 	    {
 		/* Before gap. */
-		retval[bufvcnt].data = &bufp->b[0];
-		retval[bufvcnt].len = end->ppos;
-		bufvcnt++;
+		if (end->ppos > 0)
+		{
+		    retval[bufvcnt].data = &bufp->b[0];
+		    retval[bufvcnt].len = end->ppos;
+		    bufvcnt++;
+		}
 	    }
 	    else
 	    {
 		/* After gap. */
 		if (bufp->gap_off > 0)
 		{
+		    /* Data before gap. */
 		    retval[bufvcnt].data = &bufp->b[0];
 		    retval[bufvcnt].len = bufp->gap_off;
 		    bufvcnt++;
 		}
 
-		if (bufp->gap_off + (CW_BUFP_SIZE - bufp->len) < CW_BUFP_SIZE)
+		if (bufp->gap_off < bufp->len
+		    && end->ppos > bufp->gap_off + (CW_BUFP_SIZE - bufp->len))
 		{
+		    /* Data after gap. */
 		    retval[bufvcnt].data
 			= &bufp->b[bufp->gap_off + (CW_BUFP_SIZE - bufp->len)];
 		    retval[bufvcnt].len
@@ -4184,6 +4188,16 @@ mkr_range_get(const cw_mkr_t *a_start, const cw_mkr_t *a_end,
 	}
     }
 
+#ifdef CW_DBG
+    {
+	cw_uint32_t i;
+
+	for (i = 0; i < bufvcnt; i++)
+	{
+	    cw_assert(retval[i].len != 0);
+	}
+    }
+#endif
     *r_bufvcnt = bufvcnt;
     return retval;
 }
