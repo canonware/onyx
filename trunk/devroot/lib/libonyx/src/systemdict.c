@@ -4090,7 +4090,7 @@ systemdict_sprint(cw_nxo_t *a_thread)
 
 	/*
 	 * depth and nxo aren't used, but accessing them causes a more
-	 * intelligible error than the embedded nx code would.
+	 * intelligible error than the embedded onyx code would.
 	 */
 	NXO_STACK_GET(depth, ostack, a_thread);
 	NXO_STACK_DOWN_GET(nxo, ostack, a_thread, depth);
