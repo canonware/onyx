@@ -1,3 +1,7 @@
+1999-08-01  Jason Evans  <jasone@canonware.com>
+
+	* src/sock.c (sock_is_connected): Reverse the return value.
+
 1999-07-28  Jason Evans  <jasone@canonware.com>
 
 	* src/socks.c (socks_listen): Set SO_REUSEADDR option on socket.

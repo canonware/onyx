@@ -125,7 +125,7 @@ sock_is_connected(cw_sock_t * a_sock)
    * a_sock->is_connected.  The problem is that a_sock->error is the first
    * indication that we're disconnected, whereas a_sock->is_connected means that
    * we realize that fact internally. */
-  return a_sock->error;
+  return !a_sock->error;
 }
 
 cw_uint32_t
