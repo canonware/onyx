@@ -1,0 +1,73 @@
+.ig \" -*-mode:nroff-*-
+
+<Copyright = jasone>
+<License>
+
+Version: <Version>
+..
+.TH libsock_<template> 3s "libsock, version <Version>"
+.Nm libsock
+.hy 1
+.SH NAME
+libsock - Multi-threaded TCP/IP networking library.
+.SH SYNOPSIS
+cc
+.I file
+-lsock -lstash_r -lpthread
+.br
+cc -g -D_LIBSTASH_DEBUG -D_LIBSOCK_DEBUG
+.I file
+-lsock_d -lstash_r_d -lpthread
+.br
+cc -pg
+.I file
+-lsock_p -lstash_r_p -lpthread
+
+.SH DESCRIPTION
+The \fBlibsock\fR library implements a streamlined interface for multi-threaded
+TCP/IP socket programming.  The main purpose of the library is to abstract the
+complexities of threaded network server programming without compromising
+performance.
+
+Internally, \fBlibsock\fR works by running a separate thread that asynchronously
+manages I/O.  A simple message passing mechanism is used to communicate control
+events to the I/O thread.  Data is managed and buffered with \fBlibstash\fR's
+\fBbuf\fR code.  As such, all library interfaces for injecting and extracting
+data require the use of \Bbuf\fR's.
+
+A simple mechanism for multiplexing connection handling onto a set of threads is
+provided as part of the sockb interface.  This mechanism can be thought of as a
+way of hooking into the I/O thread's poll loop.
+
+.SH USAGE
+Detailed usage of the various available classes is discussed in detail in other
+man pages.  Regardless of what classes are used, at least the following minimal
+shell of C code should be used.
+
+.RS
+#include <libsock/libsock.h>
+
+int
+.br
+main()
+.br
+{
+  libstash_init();
+  sockb_init(1024, /* Max fd number, plus one. */
+             4096, /* bufc size. */
+             16);  /* Maximum bufc's to cache. */
+
+  /* Do stuff. */
+
+  sockb_shutdown();
+  libstash_shutdown();
+  return 0;
+.br
+}
+.RE
+
+.SH SEE ALSO
+libsock_sockb(3s), libsock_sock(3s), libsock_socks(3s), libstash(3s).
+
+.SH HISTORY
+Written by Jason Evans <jasone@canonware.com>.

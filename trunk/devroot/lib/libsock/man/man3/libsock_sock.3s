@@ -1,0 +1,60 @@
+.ig \" -*-mode:nroff-*-
+
+<Copyright = jasone>
+<License>
+
+Version: <Version>
+..
+.TH libsock_<template> 3s "libsock, version <Version>"
+.Nm libsock
+.hy 1
+.SH NAME
+<template> - <XXX Description>
+.SH SYNOPSIS
+\fB#include <libsock/libsock.h>\fR
+
+.I <return type>
+.br
+.B <template>_<func>
+.RI ( "cw_<template>_t * a_<template>" ", " <args> )
+
+.SS Debugging (dbg) symbols
+.TP \" XXX
+\*(lq<XXX symbol>\*(rq
+<XXX Symbol description>
+
+.SH DESCRIPTION
+<XXX Description>
+
+.SH USAGE
+
+.br
+Input(s):
+.RS
+.IR a_<template> :
+.RS
+Pointer to a<n> <template>.
+.RE
+.IR <input> :
+.RS
+<input description>
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+<retval description>
+.RE
+.RE
+Description:
+.RS
+<description>
+.RE
+.RE
+
+.SH SEE ALSO
+libsock(3s).
+
+.SH HISTORY
+Written by Jason Evans <jasone@canonware.com>.
