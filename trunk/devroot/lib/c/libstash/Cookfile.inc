@@ -22,8 +22,8 @@
 
 /* Include files that _are_ installed. */
 {
-  local incs = libstash.h libstash_incs.h arena.h bhp.h buf.h ch.h cnd.h dch.h
-               dbg.h list.h mem.h mq.h mtx.h oh.h out.h pezz.h res.h ring.h
+  local incs = libstash.h libstash_incs.h bhp.h buf.h ch.h cnd.h dch.h dbg.h
+               mem.h mq.h mtx.h oh.h out.h pezz.h res.h ring.h
                rwl.h sem.h thd.h treen.h tsd.h;
   incs = [fromto % [srcdir]/lib/c/libstash/include/libstash/% [incs]];
   incs = [incs] [objdir]/lib/c/libstash/include/libstash/libstash_defs.h;
@@ -33,17 +33,16 @@
 
 /* Include files that are _not_ installed. */
 {
-  local priv_incs = arena_p.h bhp_p.h buf_p.h dbg_p.h list_p.h mem_l.h mem_p.h
-                    oh_p.h out_p.h res_p.h treen_p.h;
+  local priv_incs = bhp_p.h buf_p.h dbg_p.h mem_l.h mem_p.h oh_p.h out_p.h
+                    res_p.h treen_p.h;
   priv_incs = [fromto % [srcdir]/lib/c/libstash/include/libstash/% [priv_incs]];
 
   PRIV_INCS = [PRIV_INCS] [priv_incs];
 }
 
 /* Source files. */
-LIBSTASH_SRCS = libstash.c arena.c bhp.c buf.c ch.c cnd.c dch.c dbg.c list.c
-                mem.c mq.c mtx.c oh.c out.c pezz.c res.c ring.c rwl.c sem.c
-                thd.c treen.c tsd.c;
+LIBSTASH_SRCS = libstash.c bhp.c buf.c ch.c cnd.c dch.c dbg.c mem.c mq.c mtx.c
+                oh.c out.c pezz.c res.c ring.c rwl.c sem.c thd.c treen.c tsd.c;
 LIBSTASH_SRCS = [fromto % [srcdir]/lib/c/libstash/src/% [LIBSTASH_SRCS]];
 SRCS = [SRCS] [LIBSTASH_SRCS];
 
@@ -57,11 +56,10 @@ SRCS = [SRCS] [LIBSTASH_SRCS];
 
 /* Simple tests.  Output is diff'ed with the expected (.exp file) output. */
 {
-  local ctests = c_arena_a.c c_bhp_a.c c_bhp_b.c c_buf_a.c c_buf_b.c c_buf_c.c 
-                 c_buf_d.c c_buf_e.c c_ch_a.c c_cnd_a.c c_dch_a.c c_libstash_a.c
-                 c_list_a.c c_mq_a.c c_mtx_a.c c_oh_a.c c_oh_b.c c_oh_c.c
-                 c_out_a.c c_pezz_a.c c_res_a.c c_ring_a.c c_rwl_a.c c_sem_a.c
-                 c_thd_a.c c_treen_a.c;
+  local ctests = c_bhp_a.c c_bhp_b.c c_buf_a.c c_buf_b.c c_buf_c.c c_buf_d.c
+                 c_buf_e.c c_ch_a.c c_cnd_a.c c_dch_a.c c_libstash_a.c c_mq_a.c
+                 c_mtx_a.c c_oh_a.c c_oh_b.c c_oh_c.c c_out_a.c c_pezz_a.c
+                 c_res_a.c c_ring_a.c c_rwl_a.c c_sem_a.c c_thd_a.c c_treen_a.c;
   ctests = [fromto % [srcdir]/lib/c/libstash/test/% [ctests]];
 
   CTESTS = [CTESTS] [ctests];
@@ -85,9 +83,8 @@ SRCS = [SRCS] [LIBSTASH_SRCS];
 
 /* Man pages. */
 {
-  local manpages_3 = libstash.3s libstash_arena.3s libstash_bhp.3s
-                     libstash_buf.3s libstash_ch.3s libstash_cnd.3s
-                     libstash_dch.3s libstash_dbg.3s libstash_list.3s
+  local manpages_3 = libstash.3s libstash_bhp.3s libstash_buf.3s libstash_ch.3s
+                     libstash_cnd.3s libstash_dch.3s libstash_dbg.3s
                      libstash_mem.3s libstash_mq.3s libstash_mtx.3s
                      libstash_oh.3s libstash_out.3s libstash_pezz.3s
                      libstash_res.3s libstash_ring.3s libstash_rwl.3s

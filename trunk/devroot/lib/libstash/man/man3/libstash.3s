@@ -515,7 +515,6 @@ lb | lb | lb.
 _
 .T&
 l | l | l.
- arena@libstash_arena(3s)@Arena (memory allocation).
  bhp@libstash_bhp(3s)@Binomial heap.
  bhpi@libstash_bhp(3s)@Binomial heap node.
  buf@libstash_buf(3s)@Extensible buffer.
@@ -523,7 +522,6 @@ l | l | l.
  ch@libstash_ch(3s)@Chained hashing.
  cnd@libstash_cnd(3s)@Condition.
  dbg@libstash_dbg(3s)@Runtime debugging symbol lookup.
- list@libstash_list(3s)@Doubly linked list.
  mem@libstash_mem(3s)@Memory allocation (malloc(3) wrapper).
  mq@libstash_mq(3s)@Message queue.
  mtx@libstash_mtx(3s)@Mutex.

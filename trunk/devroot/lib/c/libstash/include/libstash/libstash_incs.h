@@ -30,7 +30,7 @@
  * example, ring.h must come before oh.h.
  */
 
-#include "queue.h"
+#include "q.h"
 #include "ring.h"
 #include "thd.h"
 #include "mtx.h"
@@ -42,12 +42,10 @@
 #include "dbg.h"
 #include "out.h"
 #include "mem.h"
-#include "list.h"
 #include "buf.h"
 #include "pezz.h"
 #include "ch.h"
 #include "dch.h"
-#include "arena.h"
 #include "bhp.h"
 #include "res.h"
 #include "treen.h"

@@ -39,7 +39,7 @@ stils_new(cw_stils_t *a_stils, cw_pezz_t *a_stilsc_pezz)
 	retval->spares = NULL;
 	retval->nspares = 0;
 	retval->stilsc_pezz = a_stilsc_pezz;
-	_cw_slist_init(&retval->chunks);
+	qsl_init(&retval->chunks);
 
 #ifdef _LIBSTIL_DBG
 	retval->magic = _CW_STILS_MAGIC;
@@ -63,9 +63,9 @@ stils_delete(cw_stils_t *a_stils)
 	if (a_stils->count > 0)
 		stils_pop(a_stils, a_stils->count);
 
-	while (!_cw_slist_empty(&a_stils->chunks)) {
-		stilsc = _cw_slist_first(&a_stils->chunks);
-		_cw_slist_remove_head(&a_stils->chunks, link);
+	while (!qsl_empty(&a_stils->chunks)) {
+		stilsc = qsl_first(&a_stils->chunks);
+		qsl_remove_head(&a_stils->chunks, link);
 		stilsc_p_delete(stilsc);
 	}
 
@@ -82,7 +82,7 @@ stils_collect(cw_stils_t *a_stils, void (*a_add_root_func) (void *add_root_arg,
 	cw_stilso_t	*old_stilso;
 	cw_stilo_t	*new_stilo;
 	cw_uint32_t	old_count, i;
-	_cw_slist_head(, cw_stilsc_t) old_chunks;
+	qsl_head(, cw_stilsc_t) old_chunks;
 
 	_cw_check_ptr(a_stils);
 	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
@@ -98,14 +98,13 @@ stils_collect(cw_stils_t *a_stils, void (*a_add_root_func) (void *add_root_arg,
 	a_stils->spares = NULL;
 	a_stils->nspares = 0;
 	memcpy(&old_chunks, &a_stils->chunks, sizeof(old_chunks));
-	_cw_slist_init(&a_stils->chunks);
+	qsl_init(&a_stils->chunks);
 
 	/*
 	 * Iterate through the entire stack, moving stilso's to the new stack.
 	 * Along the way, report any extended objects to the GC.
 	 */
-	for (i = 0; i < old_count; old_stilso = _cw_ring_next(old_stilso, link), 
-	    i++) {
+	for (i = 0; i < old_count; old_stilso = qr_next(old_stilso, link), i++) {
 		new_stilo = stils_push(a_stils);
 		stilo_move(new_stilo, &old_stilso->stilo);
 
@@ -129,9 +128,9 @@ stils_collect(cw_stils_t *a_stils, void (*a_add_root_func) (void *add_root_arg,
 	 * Now delete the old stilsc's.  We've moved everything important to new
 	 * storage, so nothing more than deletion is necessary.
 	 */
-	while (!_cw_slist_empty(&old_chunks)) {
-		stilsc = _cw_slist_first(&old_chunks);
-		_cw_slist_remove_head(&old_chunks, link);
+	while (!qsl_empty(&old_chunks)) {
+		stilsc = qsl_first(&old_chunks);
+		qsl_remove_head(&old_chunks, link);
 		stilsc_p_delete(stilsc);
 	}
 }
@@ -146,7 +145,7 @@ stils_push(cw_stils_t *a_stils)
 
 	/* Get an unused stilso and link it into the stack. */
 	stilso = stils_p_alloc_stilso(a_stils);
-	_cw_ring_meld(stilso, a_stils->stack, link);
+	qr_meld(stilso, a_stils->stack, link);
 	a_stils->stack = stilso;
 	a_stils->count++;
 
@@ -175,7 +174,7 @@ stils_pop(cw_stils_t *a_stils, cw_uint32_t a_count)
 	 */
 	for (i = 0, stilso = a_stils->stack; i < a_count; i++) {
 		stilo_delete(&stilso->stilo);
-		stilso = _cw_ring_next(stilso, link);
+		stilso = qr_next(stilso, link);
 	}
 
 	if (a_count != a_stils->count) {
@@ -183,11 +182,11 @@ stils_pop(cw_stils_t *a_stils, cw_uint32_t a_count)
 		 * Split the ring.  stilso points to the top of the stack, and
 		 * a_stils->stack points to the popped elements.
 		 */
-		_cw_ring_split(stilso, a_stils->stack, link);
+		qr_split(stilso, a_stils->stack, link);
 	}
 
 	if (a_stils->nspares > 0)
-		_cw_ring_meld(a_stils->stack, a_stils->spares, link);
+		qr_meld(a_stils->stack, a_stils->spares, link);
 	a_stils->spares = a_stils->stack;
 	a_stils->nspares += a_count;
 
@@ -244,7 +243,7 @@ stils_roll(cw_stils_t *a_stils, cw_uint32_t a_count, cw_sint32_t a_amount)
 	 * to find the end of the roll region.
 	 */
 	for (i = 0, stilso = a_stils->stack; i < a_amount; i++)
-		stilso = _cw_ring_next(stilso, link);
+		stilso = qr_next(stilso, link);
 	top = stilso;
 
 	/*
@@ -253,11 +252,11 @@ stils_roll(cw_stils_t *a_stils, cw_uint32_t a_count, cw_sint32_t a_amount)
 	 */
 	if (a_count < a_stils->count) {
 		for (i = 0; i < a_count - a_amount; i++)
-			stilso = _cw_ring_next(stilso, link);
+			stilso = qr_next(stilso, link);
 
-		_cw_ring_split(stilso, a_stils->stack, link);
+		qr_split(stilso, a_stils->stack, link);
 
-		_cw_ring_meld(top, stilso, link);
+		qr_meld(top, stilso, link);
 	}
 
 	a_stils->stack = top;
@@ -286,7 +285,7 @@ stils_dup(cw_stils_t *a_stils, cw_uint32_t a_count, cw_uint32_t a_index)
 
 	/* Push an unused stilso. */
 	dup = stils_p_alloc_stilso(a_stils);
-	_cw_ring_meld(dup, a_stils->stack, link);
+	qr_meld(dup, a_stils->stack, link);
 	a_stils->stack = dup;
 	a_stils->count++;
 
@@ -322,7 +321,7 @@ stils_get(cw_stils_t *a_stils, cw_uint32_t a_index)
 	}
 
 	for (i = 0, stilso = a_stils->stack; i < a_index; i++)
-		stilso = _cw_ring_next(stilso, link);
+		stilso = qr_next(stilso, link);
 
 RETURN:
 	return &stilso->stilo;
@@ -343,7 +342,7 @@ stils_get_down(cw_stils_t *a_stils, cw_stilo_t *a_stilo)
 	}
 
 	stilso = (cw_stilso_t *)a_stilo;
-	stilso = _cw_ring_next(stilso, link);
+	stilso = qr_next(stilso, link);
 	if (stilso == a_stils->stack) {
 		/* Tried to get next element down while at the stack bottom. */
 		retval = NULL;
@@ -375,7 +374,7 @@ stils_get_up(cw_stils_t *a_stils, cw_stilo_t *a_stilo)
 		retval = NULL;
 		goto RETURN;
 	}
-	stilso = _cw_ring_prev(stilso, link);
+	stilso = qr_prev(stilso, link);
 
 	retval = &stilso->stilo;
 RETURN:
@@ -392,7 +391,7 @@ stils_get_index(cw_stils_t *a_stils, cw_stilo_t *a_stilo)
 	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
 
 	for (i = 0, stilso = a_stils->stack; (stilso != (cw_stilso_t *)a_stilo)
-	    && (i < a_stils->count); stilso = _cw_ring_next(stilso, link), i++);
+	    && (i < a_stils->count); stilso = qr_next(stilso, link), i++);
 	_cw_assert(i < a_stils->count);
 
 	return i;
@@ -412,14 +411,14 @@ stils_p_alloc_stilso(cw_stils_t *a_stils)
 
 		stilsc = stilsc_p_new(a_stils->stilsc_pezz);
 
-		_cw_slist_insert_head(&a_stils->chunks, stilsc, link);
+		qsl_insert_head(&a_stils->chunks, stilsc, link);
 		a_stils->spares = stilsc_p_get_stilso(stilsc, 0);
 		a_stils->nspares = stilsc_p_get_nstilso(stilsc);
 	 }
 
 	retval = a_stils->spares;
-	a_stils->spares = _cw_ring_next(retval, link);
-	_cw_ring_remove(retval, link);
+	a_stils->spares = qr_next(retval, link);
+	qr_remove(retval, link);
 	a_stils->nspares--;
 
 	return retval;
@@ -447,8 +446,7 @@ stilsc_p_new(cw_pezz_t *a_stilsc_pezz)
 	stilso_p_new(&retval->objects[0]);
 	for (i = 1, nstilso = stilsc_p_get_nstilso(retval); i < nstilso; i++) {
 		stilso_p_new(&retval->objects[i]);
-		_cw_ring_meld(&retval->objects[i], &retval->objects[i - 1],
-		    link);
+		qr_meld(&retval->objects[i], &retval->objects[i - 1], link);
 	}
 
 	return retval;
@@ -486,5 +484,5 @@ static void
 stilso_p_new(cw_stilso_t *a_stilso)
 {
 	stilo_new(&a_stilso->stilo);
-	_cw_ring_init(a_stilso, link);
+	qr_init(a_stilso, link);
 }
