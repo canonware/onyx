@@ -73,6 +73,7 @@ mods = @mods@;
 bins = @bins@;
 
 enable_threads = @enable_threads@;
+enable_real = @enable_real@;
 enable_posix = @enable_posix@;
 enable_posix_file = @enable_posix_file@;
 enable_libedit = @enable_libedit@;

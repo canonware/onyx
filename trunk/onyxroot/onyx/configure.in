@@ -36,6 +36,9 @@ AC_PROG_CPP
 dnl Use threads by default.
 CW_ENABLE_THREADS
 
+dnl Enable ral support by default.
+CW_ENABLE_REAL
+
 dnl Support POSIX file operations by default.
 CW_ENABLE_POSIX_FILE
 
@@ -188,6 +191,9 @@ if test "x$build_libonyx" = "xyes" ; then
   AC_CHECK_SIZEOF(long long, 4)
   AC_CHECK_SIZEOF(unsigned long long, 4)
   AC_CHECK_SIZEOF(int *, 4) dnl defines SIZEOF_INT_P
+  AC_CHECK_SIZEOF(float)
+  AC_CHECK_SIZEOF(double)
+  AC_CHECK_SIZEOF(long double)
 
 if test "x$enable_posix" = "x1" ; then
 dnl Try to figure out which field of struct dirent contains the entry string
@@ -293,6 +299,7 @@ AC_MSG_RESULT(mods         :${mods})
 AC_MSG_RESULT(bins         :${bins})
 AC_MSG_RESULT()
 AC_MSG_RESULT(threads      : ${enable_threads})
+AC_MSG_RESULT(real         : ${enable_real})
 AC_MSG_RESULT(posix        : ${enable_posix})
 AC_MSG_RESULT(posix-file   : ${enable_posix_file})
 AC_MSG_RESULT(inlines      : ${enable_inlines})

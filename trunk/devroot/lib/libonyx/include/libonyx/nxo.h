@@ -39,6 +39,9 @@ typedef enum
     NXOT_NULL,
     NXOT_OPERATOR,
     NXOT_PMARK,
+#ifdef CW_REAL
+    NXOT_REAL,
+#endif
     NXOT_STACK,
     NXOT_STRING,
     NXOT_THREAD
@@ -54,6 +57,7 @@ typedef enum
 } cw_nxoa_t;
 
 typedef cw_sint64_t cw_nxoi_t;
+typedef cw_fp64_t cw_nxor_t;
 
 /* Main object structure. */
 struct cw_nxo_s
@@ -102,6 +106,10 @@ struct cw_nxo_s
 	} integer;
 	struct
 	{
+	    cw_nxor_t r;
+	} real;
+	struct
+	{
 	    cw_op_t *f;
 	} operator;
 	cw_nxoe_t *nxoe;
@@ -109,7 +117,7 @@ struct cw_nxo_s
 };
 
 /* All extended type objects contain a nxoe.  This provides a poor man's
- * inheritance.  Since onyx's type system is non-extenible, this idiom is
+ * inheritance.  Since onyx's type system is non-extensible, this idiom is
  * adequate. */
 struct cw_nxoe_s
 {

@@ -84,10 +84,28 @@ typedef unsigned long long cw_uint64_t;
 #endif
 #endif
 
+#if (SIZEOF_FLOAT == 4)
+#define CW_TYPE_FP32_DEFINED
+typedef float cw_fp32_t;
+#endif
+    
+#if (SIZEOF_DOUBLE == 8)
+#define CW_TYPE_FP64_DEFINED
+typedef double cw_fp64_t;
+#endif
+
+#ifndef CW_TYPE_FP64_DEFINED
+#if (SIZEOF_LONG_DOUBLE == 8)
+#define CW_TYPE_FP64_DEFINED
+typedef long double cw_fp64_t;
+#endif
+#endif
+    
 #if (!defined(CW_TYPE_SINT8_DEFINED) || !defined(CW_TYPE_UINT8_DEFINED) \
      || !defined(CW_TYPE_SINT16_DEFINED) || !defined(CW_TYPE_UINT16_DEFINED) \
      || !defined(CW_TYPE_SINT32_DEFINED) || !defined(CW_TYPE_UINT32_DEFINED) \
-     || !defined(CW_TYPE_SINT64_DEFINED) || !defined(CW_TYPE_UINT64_DEFINED))
+     || !defined(CW_TYPE_SINT64_DEFINED) || !defined(CW_TYPE_UINT64_DEFINED) \
+     || !defined(CW_TYPE_FP32_DEFINED) || !defined(CW_TYPE_FP64_DEFINED))
 #error "Lacking mandatory typedefs"
 #endif
 
@@ -362,6 +380,9 @@ extern cw_mem_t *cw_g_mem;
 #include "nxo_null.h"
 #include "nxo_operator.h"
 #include "nxo_pmark.h"
+#ifdef CW_REAL
+#include "nxo_real.h"
+#endif
 #include "nxo_stack.h"
 #include "nxo_string.h"
 #include "nxo_thread.h"

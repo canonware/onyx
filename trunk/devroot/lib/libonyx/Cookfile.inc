@@ -29,6 +29,9 @@
 #if [enable_threads]
                cnd.h mq.h mtx.h nxo_condition.h nxo_mutex.h thd.h tsd.h
 #endif
+#if [enable_real]
+               nxo_real.h
+#endif
                ;
   incs = [fromto % [srcdir]/lib/libonyx/include/libonyx/% [incs]];
   incs = [incs] [objdir]/lib/libonyx/include/libonyx/libonyx_defs.h;
@@ -65,6 +68,9 @@ LIBONYX_SRCS = libonyx.c ch.c dch.c gcdict.c mem.c nx.c nxa.c nxn.c nxo.c
                systemdict.c xep.c
 #if [enable_threads]
                cnd.c mq.c mtx.c nxo_condition.c nxo_mutex.c thd.c tsd.c
+#endif
+#if [enable_real]
+               nxo_real.c
 #endif
 #if [enable_posix]
                envdict.c

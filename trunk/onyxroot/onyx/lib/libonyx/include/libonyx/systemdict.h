@@ -28,6 +28,11 @@ systemdict_and(cw_nxo_t *a_thread);
 void
 systemdict_array(cw_nxo_t *a_thread);
 
+#ifdef CW_REAL
+void
+systemdict_atan(cw_nxo_t *a_thread);
+#endif
+
 void
 systemdict_begin(cw_nxo_t *a_thread);
 
@@ -48,6 +53,11 @@ systemdict_catenate(cw_nxo_t *a_thread);
 #ifdef CW_POSIX
 void
 systemdict_cd(cw_nxo_t *a_thread);
+
+#ifdef CW_REAL
+void
+systemdict_ceiling(cw_nxo_t *a_thread);
+#endif
 
 void
 systemdict_chmod(cw_nxo_t *a_thread);
@@ -78,6 +88,11 @@ systemdict_condition(cw_nxo_t *a_thread);
 void
 systemdict_copy(cw_nxo_t *a_thread);
 
+#ifdef CW_REAL
+void
+systemdict_cos(cw_nxo_t *a_thread);
+#endif
+
 void
 systemdict_count(cw_nxo_t *a_thread);
 
@@ -100,6 +115,11 @@ systemdict_currentlocking(cw_nxo_t *a_thread);
 
 void
 systemdict_cve(cw_nxo_t *a_thread);
+
+#ifdef CW_REAL
+void
+systemdict_cves(cw_nxo_t *a_thread);
+#endif
 
 void
 systemdict_cvlit(cw_nxo_t *a_thread);
@@ -183,6 +203,11 @@ systemdict_exit(cw_nxo_t *a_thread);
 void
 systemdict_exp(cw_nxo_t *a_thread);
 
+#ifdef CW_REAL
+void
+systemdict_floor(cw_nxo_t *a_thread);
+#endif
+
 void
 systemdict_flush(cw_nxo_t *a_thread);
 
@@ -219,6 +244,14 @@ systemdict_gt(cw_nxo_t *a_thread);
 
 void
 systemdict_hooktag(cw_nxo_t *a_thread);
+
+#ifdef CW_REAL
+void
+systemdict_idiv(cw_nxo_t *a_thread);
+
+void
+systemdict_iexp(cw_nxo_t *a_thread);
+#endif
 
 void
 systemdict_if(cw_nxo_t *a_thread);
@@ -265,6 +298,14 @@ systemdict_load(cw_nxo_t *a_thread);
 #ifdef CW_THREADS
 void
 systemdict_lock(cw_nxo_t *a_thread);
+#endif
+
+#ifdef CW_REAL
+void
+systemdict_log(cw_nxo_t *a_thread);
+
+void
+systemdict_ln(cw_nxo_t *a_thread);
 #endif
 
 void
@@ -386,6 +427,11 @@ systemdict_rmdir(cw_nxo_t *a_thread);
 void
 systemdict_roll(cw_nxo_t *a_thread);
 
+#ifdef CW_REAL
+void
+systemdict_round(cw_nxo_t *a_thread);
+#endif
+
 void
 systemdict_sclear(cw_nxo_t *a_thread);
 
@@ -449,6 +495,11 @@ void
 systemdict_signal(cw_nxo_t *a_thread);
 #endif
 
+#ifdef CW_REAL
+void
+systemdict_sin(cw_nxo_t *a_thread);
+#endif
+
 void
 systemdict_sindex(cw_nxo_t *a_thread);
 
@@ -457,6 +508,11 @@ systemdict_spop(cw_nxo_t *a_thread);
 
 void
 systemdict_spush(cw_nxo_t *a_thread);
+
+#ifdef CW_REAL
+void
+systemdict_sqrt(cw_nxo_t *a_thread);
+#endif
 
 #ifdef CW_POSIX
 void
@@ -533,6 +589,11 @@ systemdict_timedwait(cw_nxo_t *a_thread);
 
 void
 systemdict_token(cw_nxo_t *a_thread);
+
+#ifdef CW_REAL
+void
+systemdict_trunc(cw_nxo_t *a_thread);
+#endif
 
 #ifdef CW_POSIX
 void

@@ -97,6 +97,11 @@ static const cw_nxot_vtable_t nxot_vtable[] = {
     /* NXOT_PMARK */
     {NULL, NULL},
 
+#ifdef CW_REAL
+    /* NXOT_REAL */
+    {NULL, NULL},
+#endif
+
     /* NXOT_STACK */
     {nxoe_l_stack_delete, nxoe_l_stack_ref_iter},
 
@@ -255,7 +260,7 @@ nxo_compare(cw_nxo_t *a_a, cw_nxo_t *a_b)
 	}
 	case NXOT_BOOLEAN:
 	{
-	    if (nxo_type_get(a_a) != nxo_type_get(a_b))
+	    if (nxo_type_get(a_b) != NXOT_BOOLEAN)
 	    {
 		retval = 2;
 		break;
@@ -273,26 +278,97 @@ nxo_compare(cw_nxo_t *a_a, cw_nxo_t *a_b)
 	}
 	case NXOT_INTEGER:
 	{
-	    if (nxo_type_get(a_a) != nxo_type_get(a_b))
+	    switch (nxo_type_get(a_b))
 	    {
-		retval = 2;
-		break;
-	    }
-
-	    if (a_a->o.integer.i < a_b->o.integer.i)
-	    {
-		retval = -1;
-	    }
-	    else if (a_a->o.integer.i == a_b->o.integer.i)
-	    {
-		retval = 0;
-	    }
-	    else
-	    {
-		retval = 1;
+		case NXOT_INTEGER:
+		{
+		    if (a_a->o.integer.i < a_b->o.integer.i)
+		    {
+			retval = -1;
+		    }
+		    else if (a_a->o.integer.i == a_b->o.integer.i)
+		    {
+			retval = 0;
+		    }
+		    else
+		    {
+			retval = 1;
+		    }
+		    break;
+		}
+#ifdef CW_REAL
+		case NXOT_REAL:
+		{
+		    if (((cw_nxor_t) a_a->o.integer.i) < a_b->o.real.r)
+		    {
+			retval = -1;
+		    }
+		    else if (((cw_nxor_t) a_a->o.integer.i) == a_b->o.real.r)
+		    {
+			retval = 0;
+		    }
+		    else
+		    {
+			retval = 1;
+		    }
+		    
+		    break;
+		}
+#endif
+		default:
+		{
+		    retval = 2;
+		    break;
+		}
 	    }
 	    break;
 	}
+#ifdef CW_REAL
+	case NXOT_REAL:
+	{
+	    switch (nxo_type_get(a_b))
+	    {
+		case NXOT_INTEGER:
+		{
+		    if (a_a->o.real.r < ((cw_nxor_t) a_b->o.integer.i))
+		    {
+			retval = -1;
+		    }
+		    else if (a_a->o.real.r == ((cw_nxor_t) a_b->o.integer.i))
+		    {
+			retval = 0;
+		    }
+		    else
+		    {
+			retval = 1;
+		    }
+		    break;
+		}
+		case NXOT_REAL:
+		{
+		    if (a_a->o.real.r < a_b->o.real.r)
+		    {
+			retval = -1;
+		    }
+		    else if (a_a->o.real.r == a_b->o.real.r)
+		    {
+			retval = 0;
+		    }
+		    else
+		    {
+			retval = 1;
+		    }
+		    break;
+		}
+		default:
+		{
+		    retval = 2;
+		    break;
+		}
+	    }
+	    break;
+	}
+#endif
 	case NXOT_FINO:
 	case NXOT_MARK:
 	case NXOT_NULL:

@@ -70,6 +70,9 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(abs),
     ENTRY(and),
     ENTRY(array),
+#ifdef CW_REAL
+    ENTRY(atan),
+#endif
     ENTRY(begin),
     ENTRY(bind),
 #ifdef CW_THREADS
@@ -79,6 +82,11 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(catenate),
 #ifdef CW_POSIX
     ENTRY(cd),
+#endif
+#ifdef CW_REAL
+    ENTRY(ceiling),
+#endif
+#ifdef CW_POSIX
     ENTRY(chmod),
     ENTRY(chown),
 #endif
@@ -92,6 +100,9 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(condition),
 #endif
     ENTRY(copy),
+#ifdef CW_REAL
+    ENTRY(cos),
+#endif
     ENTRY(count),
     ENTRY(countdstack),
     ENTRY(countestack),
@@ -101,6 +112,9 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(currentlocking),
 #endif
     ENTRY(cve),
+#ifdef CW_REAL
+    ENTRY(cves),
+#endif
     ENTRY(cvlit),
     ENTRY(cvn),
     ENTRY(cvrs),
@@ -133,6 +147,9 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #endif
     ENTRY(exit),
     ENTRY(exp),
+#ifdef CW_REAL
+    ENTRY(floor),
+#endif
     ENTRY(flush),
     ENTRY(flushfile),
     ENTRY(for),
@@ -148,6 +165,10 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #endif
     ENTRY(gt),
     ENTRY(hooktag),
+#ifdef CW_REAL
+    ENTRY(idiv),
+    ENTRY(iexp),
+#endif
     ENTRY(if),
     ENTRY(ifelse),
     ENTRY(iobuf),
@@ -167,6 +188,10 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(load),
 #ifdef CW_THREADS
     ENTRY(lock),
+#endif
+#ifdef CW_REAL
+    ENTRY(log),
+    ENTRY(ln),
 #endif
     ENTRY(loop),
     ENTRY(lt),
@@ -217,6 +242,9 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #ifdef CW_POSIX
     ENTRY(rmdir),
 #endif
+#ifdef CW_REAL
+    ENTRY(round),
+#endif
     ENTRY(sclear),
     ENTRY(scleartomark),
     ENTRY(scount),
@@ -246,9 +274,15 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #ifdef CW_THREADS
     ENTRY(signal),
 #endif
+#ifdef CW_REAL
+    ENTRY(sin),
+#endif
     ENTRY(sindex),
     ENTRY(spop),
     ENTRY(spush),
+#ifdef CW_REAL
+    ENTRY(sqrt),
+#endif
 #ifdef CW_POSIX
     ENTRY(srand),
 #endif
@@ -282,6 +316,9 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(timedwait),
 #endif
     ENTRY(token),
+#ifdef CW_REAL
+    ENTRY(trunc),
+#endif
 #ifdef CW_POSIX
     ENTRY(truncate),
 #endif
@@ -553,6 +590,14 @@ systemdict_array(cw_nxo_t *a_thread)
     nxo_array_new(nxo, nxo_thread_nx_get(a_thread),
 		  nxo_thread_currentlocking(a_thread), len);
 }
+
+#ifdef CW_REAL
+void
+systemdict_atan(cw_nxo_t *a_thread)
+{
+    cw_error("XXX Not implemented");
+}
+#endif
 
 void
 systemdict_begin(cw_nxo_t *a_thread)
@@ -858,7 +903,17 @@ systemdict_cd(cw_nxo_t *a_thread)
     ERROR:
     nxo_stack_pop(tstack);
 }
+#endif
 
+#ifdef CW_REAL
+void
+systemdict_ceiling(cw_nxo_t *a_thread)
+{
+    cw_error("XXX Not implemented");
+}
+#endif
+
+#ifdef CW_POSIX
 void
 systemdict_chmod(cw_nxo_t *a_thread)
 {
@@ -1227,6 +1282,14 @@ systemdict_copy(cw_nxo_t *a_thread)
     }
 }
 
+#ifdef CW_REAL
+void
+systemdict_cos(cw_nxo_t *a_thread)
+{
+    cw_error("XXX Not implemented");
+}
+#endif
+
 void
 systemdict_count(cw_nxo_t *a_thread)
 {
@@ -1328,6 +1391,14 @@ systemdict_cve(cw_nxo_t *a_thread)
     NXO_STACK_GET(nxo, ostack, a_thread);
     nxo_attr_set(nxo, NXOA_EVALUATABLE);
 }
+
+#ifdef CW_REAL
+void
+systemdict_cves(cw_nxo_t *a_thread)
+{
+    cw_error("XXX Not implemented");
+}
+#endif
 
 void
 systemdict_cvlit(cw_nxo_t *a_thread)
@@ -2295,6 +2366,14 @@ systemdict_exp(cw_nxo_t *a_thread)
     nxo_stack_pop(ostack);
 }
 
+#ifdef CW_REAL
+void
+systemdict_floor(cw_nxo_t *a_thread)
+{
+    cw_error("XXX Not implemented");
+}
+#endif
+
 void
 systemdict_flush(cw_nxo_t *a_thread)
 {
@@ -2900,6 +2979,20 @@ systemdict_hooktag(cw_nxo_t *a_thread)
     nxo_stack_pop(tstack);
 }
 
+#ifdef CW_REAL
+void
+systemdict_idiv(cw_nxo_t *a_thread)
+{
+    cw_error("XXX Not implemented");
+}
+
+void
+systemdict_iexp(cw_nxo_t *a_thread)
+{
+    cw_error("XXX Not implemented");
+}
+#endif
+
 void
 systemdict_if(cw_nxo_t *a_thread)
 {
@@ -3289,6 +3382,20 @@ systemdict_lock(cw_nxo_t *a_thread)
     nxo_mutex_lock(mutex);
 
     nxo_stack_pop(ostack);
+}
+#endif
+
+#ifdef CW_REAL
+void
+systemdict_log(cw_nxo_t *a_thread)
+{
+    cw_error("XXX Not implemented");
+}
+
+void
+systemdict_ln(cw_nxo_t *a_thread)
+{
+    cw_error("XXX Not implemented");
 }
 #endif
 
@@ -4554,6 +4661,14 @@ systemdict_roll(cw_nxo_t *a_thread)
 }
 #endif
 
+#ifdef CW_REAL
+void
+systemdict_round(cw_nxo_t *a_thread)
+{
+    cw_error("XXX Not implemented");
+}
+#endif
+
 void
 systemdict_sclear(cw_nxo_t *a_thread)
 {
@@ -5009,6 +5124,14 @@ systemdict_signal(cw_nxo_t *a_thread)
 }
 #endif
 
+#ifdef CW_REAL
+void
+systemdict_sin(cw_nxo_t *a_thread)
+{
+    cw_error("XXX Not implemented");
+}
+#endif
+
 void
 systemdict_sindex(cw_nxo_t *a_thread)
 {
@@ -5076,6 +5199,14 @@ systemdict_spush(cw_nxo_t *a_thread)
     nxo_dup(nnxo, nxo);
     nxo_stack_npop(ostack, 2);
 }
+
+#ifdef CW_REAL
+void
+systemdict_sqrt(cw_nxo_t *a_thread)
+{
+    cw_error("XXX Not implemented");
+}
+#endif
 
 #ifdef CW_POSIX
 void
@@ -6278,6 +6409,14 @@ systemdict_token(cw_nxo_t *a_thread)
     }
 }
 
+#ifdef CW_REAL
+void
+systemdict_trunc(cw_nxo_t *a_thread)
+{
+    cw_error("XXX Not implemented");
+}
+#endif
+
 #ifdef CW_POSIX
 void
 systemdict_truncate(cw_nxo_t *a_thread)
@@ -6362,6 +6501,9 @@ systemdict_type(cw_nxo_t *a_thread)
 	NXN_nulltype,
 	NXN_operatortype,
 	NXN_pmarktype,
+#ifdef CW_REAL
+	NXN_realtype,
+#endif
 	NXN_stacktype,
 	NXN_stringtype,
 #ifdef CW_THREADS

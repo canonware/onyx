@@ -32,6 +32,9 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "argv",
     "array",
     "arraytype",
+#ifdef CW_REAL
+    "atan",
+#endif
 #ifdef CW_POSIX
     "atime",
 #endif
@@ -49,6 +52,11 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "catenate",
 #ifdef CW_POSIX
     "cd",
+#endif
+#ifdef CW_REAL
+    "ceiling",
+#endif
+#ifdef CW_POSIX
     "chmod",
     "chown",
 #endif
@@ -64,6 +72,9 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "conditiontype",
 #endif
     "copy",
+#ifdef CW_REAL
+    "cos",
+#endif
     "count",
     "countdstack",
     "countestack",
@@ -76,6 +87,9 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "currentlocking",
 #endif
     "cve",
+#ifdef CW_REAL
+    "cves",
+#endif
     "cvlit",
     "cvn",
     "cvrs",
@@ -123,6 +137,9 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "false",
     "filetype",
     "finotype",
+#ifdef CW_REAL
+    "floor",
+#endif
     "flush",
     "flushfile",
     "for",
@@ -141,6 +158,10 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "gt",
     "hooktag",
     "hooktype",
+#ifdef CW_REAL
+    "idiv",
+    "iexp",
+#endif
     "if",
     "ifelse",
     "index",
@@ -170,6 +191,10 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "load",
 #ifdef CW_THREADS
     "lock",
+#endif
+#ifdef CW_REAL
+    "log",
+    "ln",
 #endif
     "loop",
     "lt",
@@ -247,6 +272,11 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "readline",
 #ifdef CW_POSIX
     "realtime",
+#endif
+#ifdef CW_REAL
+    "realtype",
+#endif
+#ifdef CW_POSIX
     "rename",
 #endif
     "repeat",
@@ -254,6 +284,9 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "rmdir",
 #endif
     "roll",
+#ifdef CW_REAL
+    "round",
+#endif
     "sclear",
     "scleartomark",
     "scount",
@@ -286,12 +319,18 @@ const cw_uint8_t *cw_g_nx_names[] = {
 #ifdef CW_THREADS
     "signal",
 #endif
+#ifdef CW_REAL
+    "sin",
+#endif
     "sindex",
 #ifdef CW_POSIX
     "size",
 #endif
     "spop",
     "spush",
+#ifdef CW_REAL
+    "sqrt",
+#endif
 #ifdef CW_POSIX
     "srand",
 #endif
@@ -333,6 +372,9 @@ const cw_uint8_t *cw_g_nx_names[] = {
 #endif
     "token",
     "true",
+#ifdef CW_REAL
+    "trunc",
+#endif
 #ifdef CW_POSIX
     "truncate",
 #endif

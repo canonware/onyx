@@ -31,6 +31,9 @@ typedef enum
     NXN_argv,
     NXN_array,
     NXN_arraytype,
+#ifdef CW_REAL
+    NXN_atan,
+#endif
 #ifdef CW_POSIX
     NXN_atime,
 #endif
@@ -48,6 +51,11 @@ typedef enum
     NXN_catenate,
 #ifdef CW_POSIX
     NXN_cd,
+#endif
+#ifdef CW_REAL
+    NXN_ceiling,
+#endif
+#ifdef CW_POSIX
     NXN_chmod,
     NXN_chown,
 #endif
@@ -63,6 +71,9 @@ typedef enum
     NXN_conditiontype,
 #endif
     NXN_copy,
+#ifdef CW_REAL
+    NXN_cos,
+#endif
     NXN_count,
     NXN_countdstack,
     NXN_countestack,
@@ -75,6 +86,9 @@ typedef enum
     NXN_currentlocking,
 #endif
     NXN_cve,
+#ifdef CW_REAL
+    NXN_cves,
+#endif
     NXN_cvlit,
     NXN_cvn,
     NXN_cvrs,
@@ -122,6 +136,9 @@ typedef enum
     NXN_false,
     NXN_filetype,
     NXN_finotype,
+#ifdef CW_REAL
+    NXN_floor,
+#endif
     NXN_flush,
     NXN_flushfile,
     NXN_for,
@@ -140,6 +157,10 @@ typedef enum
     NXN_gt,
     NXN_hooktag,
     NXN_hooktype,
+#ifdef CW_REAL
+    NXN_idiv,
+    NXN_iexp,
+#endif
     NXN_if,
     NXN_ifelse,
     NXN_index,
@@ -169,6 +190,10 @@ typedef enum
     NXN_load,
 #ifdef CW_THREADS
     NXN_lock,
+#endif
+#ifdef CW_REAL
+    NXN_log,
+    NXN_ln,
 #endif
     NXN_loop,
     NXN_lt,
@@ -246,6 +271,11 @@ typedef enum
     NXN_readline,
 #ifdef CW_POSIX
     NXN_realtime,
+#endif
+#ifdef CW_REAL
+    NXN_realtype,
+#endif
+#ifdef CW_POSIX
     NXN_rename,
 #endif
     NXN_repeat,
@@ -253,6 +283,9 @@ typedef enum
     NXN_rmdir,
 #endif
     NXN_roll,
+#ifdef CW_REAL
+    NXN_round,
+#endif
     NXN_sclear,
     NXN_scleartomark,
     NXN_scount,
@@ -285,12 +318,18 @@ typedef enum
 #ifdef CW_THREADS
     NXN_signal,
 #endif
+#ifdef CW_REAL
+    NXN_sin,
+#endif
     NXN_sindex,
 #ifdef CW_POSIX
     NXN_size,
 #endif
     NXN_spop,
     NXN_spush,
+#ifdef CW_REAL
+    NXN_sqrt,
+#endif
 #ifdef CW_POSIX
     NXN_srand,
 #endif
@@ -332,6 +371,9 @@ typedef enum
 #endif
     NXN_token,
     NXN_true,
+#ifdef CW_REAL
+    NXN_trunc,
+#endif
 #ifdef CW_POSIX
     NXN_truncate,
 #endif

@@ -79,6 +79,26 @@ fi
 AC_SUBST(enable_threads)
 ])
 
+dnl Support the real type in Onyx by default.
+AC_DEFUN(CW_ENABLE_REAL,
+[
+AC_ARG_ENABLE(real, [  --disable-real          Disable real number support],
+
+if test "x$enable_real" = "xyes" ; then
+  enable_real="1"
+else
+  enable_real="0"
+fi
+,
+enable_real="1"
+)
+AC_SUBST(enable_real)
+if test "x$enable_real" = "x1" ; then
+  AC_DEFINE(CW_REAL)
+  LIBS="$LIBS -lm"
+fi
+])
+
 dnl Support POSIX file operations by default.
 AC_DEFUN(CW_ENABLE_POSIX_FILE,
 [

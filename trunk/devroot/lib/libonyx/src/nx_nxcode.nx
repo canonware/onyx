@@ -202,6 +202,10 @@ systemdict begin
 		pop pop
 		`-pmark-'
 	}
+	/realtype {
+	    pop
+	    cvs
+	}
 	/stacktype {
 		% %stack %depth
 		dup 0 gt {
@@ -295,6 +299,41 @@ systemdict begin
 		% %str %flags
 		outputsdict /stringtype get eval
 		% %str
+	}
+	/realtype {
+	    % %real %flags
+
+	    % Determine whether to use decimal or exponential notation.
+	    dup /e known {
+		dup /e get
+	    }{
+		false
+	    } ifelse
+	    % %real %flags %exp?
+
+	    {
+		% Use exponential notation.
+		1 index cves
+	    }{
+		% Use decimal notation.
+		1 index cvs
+	    } ifelse
+	    % %real %flags %str
+
+	    % Prepend the sign if necessary.
+	    1 index /s known {
+		1 index /s get /+ eq {
+		    2 index 0 ge {
+			`+' exch catenate
+		    } if
+		} if
+	    } if
+	    % %real %flags %str
+	    3 2 roll pop exch
+	    % %str %flags
+
+	    outputsdict /stringtype get eval
+	    % %str
 	}
 	% Temporarily define.
 	/_s {
@@ -461,6 +500,7 @@ systemdict begin
 % Formatted output to a string.  Supported flags:
 %
 % All types:
+%
 % /n : maximum width
 %    : %integer
 % /w : minimum width
@@ -478,6 +518,11 @@ systemdict begin
 %    : 2..36
 % /s : sign
 %    : /+ /-
+%
+% Reals only:
+%
+% /e : exponential notation
+%    : %boolean (default false)
 %
 % %obj %flags outputs %string
 /outputs {
