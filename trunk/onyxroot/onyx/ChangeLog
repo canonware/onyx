@@ -1,3 +1,10 @@
+2004-10-27 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/systemdict.c:systemdict_{bindsocket,connect}() :
+	  Move a mtx_unlock() call inside the conditional block that calls
+	  mtx_lock(), in order to keep from trying to unlock a mutex that
+	  isn't locked.
+
 2004-03-16 : Jason Evans <jasone@canonware.com>
 
 	* lib/libonyx/src/nxo_dict.c:nxoe_p_dict_def() : Fix the ordering
