@@ -30,6 +30,7 @@ struct cw_stila_s {
 	ql_head(cw_stiloe_t) seq_set;
 	/* Number of sequence set additions since the last collection. */
 	cw_uint32_t	seq_new;
+	cw_bool_t	white;	/* Current value for white (alternates). */
 
 	cw_mq_t		gc_mq;
 	cw_stil_t	*stil;

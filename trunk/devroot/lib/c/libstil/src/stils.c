@@ -32,8 +32,9 @@ stils_new(cw_stils_t *a_stils, cw_pool_t *a_stilsc_pool)
 	_cw_check_ptr(a_stils);
 	_cw_check_ptr(a_stilsc_pool);
 
-	ql_new(&a_stils->stack);
 	a_stils->stilsc_pool = a_stilsc_pool;
+
+	ql_new(&a_stils->stack);
 	qs_new(&a_stils->chunks);
 
 	a_stils->count = 0;
@@ -79,45 +80,19 @@ cw_stiloe_t *
 stils_l_ref_iter(cw_stils_t *a_stils, cw_bool_t a_reset)
 {
 	cw_stiloe_t	*retval;
-	cw_stilo_t	*new_stilo;
 
 	_cw_check_ptr(a_stils);
 	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
 
 	if (a_reset) {
-		/*
-		 * Move the old stack, spares, and stilsc's out of the way so
-		 * that we can start fresh.
-		 */
-		a_stils->old_stilso = ql_first(&a_stils->stack);
-		a_stils->old_count = a_stils->count;
-		a_stils->count = 0;
-
-		qr_remove(&a_stils->under, link);
-		ql_first(&a_stils->stack) = &a_stils->under;
-		/* Fill spares. */
-		stils_p_spares_create(a_stils);
-		ql_first(&a_stils->stack) = qr_prev(ql_first(&a_stils->stack),
-		    link);
-	
-		memcpy(&a_stils->old_chunks, &a_stils->chunks,
-		    sizeof(a_stils->old_chunks));
-		qs_new(&a_stils->chunks);
-
+		a_stils->ref_stilso = ql_first(&a_stils->stack);
 		a_stils->ref_iter = 0;
 	}
 
-	/*
-	 * Iterate through the entire stack, moving stilso's to the new stack.
-	 * Along the way, report any extended objects to the GC.
-	 */
 	for (retval = NULL; retval == NULL && a_stils->ref_iter <
-	    a_stils->old_count; a_stils->old_stilso =
-	    qr_next(a_stils->old_stilso, link), a_stils->ref_iter++) {
-		new_stilo = stils_push(a_stils);
-		stilo_dup(new_stilo, &a_stils->old_stilso->stilo);
-
-		switch (stilo_type_get(new_stilo)) {
+	    a_stils->count; a_stils->ref_stilso = qr_next(a_stils->ref_stilso,
+	    link), a_stils->ref_iter++) {
+		switch (stilo_type_get(&a_stils->ref_stilso->stilo)) {
 		case STILOT_ARRAY:
 		case STILOT_CONDITION:
 		case STILOT_DICT:
@@ -126,23 +101,10 @@ stils_l_ref_iter(cw_stils_t *a_stils, cw_bool_t a_reset)
 		case STILOT_MUTEX:
 		case STILOT_NAME:
 		case STILOT_STRING:
-			retval = stilo_stiloe_get(new_stilo);
+			retval = stilo_stiloe_get(&a_stils->ref_stilso->stilo);
 			break;
 		default:
 			break;
-		}
-	}
-
-	if (retval == NULL) {
-		cw_stilsc_t	*stilsc;
-		/*
-		 * Delete the old stilsc's.  We've moved everything important to
-		 * new storage, so nothing more than deletion is necessary.
-		 */
-		while (qs_top(&a_stils->old_chunks) != NULL) {
-			stilsc = qs_top(&a_stils->old_chunks);
-			qs_pop(&a_stils->old_chunks, link);
-			pool_put(a_stils->stilsc_pool, stilsc);
 		}
 	}
 

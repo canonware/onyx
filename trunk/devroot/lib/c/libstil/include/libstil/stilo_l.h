@@ -57,8 +57,11 @@ struct cw_stiloe_s {
 	 * causes modification via *any* reference to be watched.
 	 */
 	cw_bool_t	watchpoint:1;
-	/* If TRUE, this object is black (or gray).  Otherwise it is white. */
-	cw_bool_t	black:1;
+	/*
+	 * The GC toggles this value at each collection in order to maintain
+	 * state.
+	 */
+	cw_bool_t	color:1;
 	/* Allocated locally or globally? */
 	cw_bool_t	global:1;
 	/*
@@ -73,6 +76,9 @@ struct cw_stiloe_dicto_s {
 	cw_stilo_t	val;
 };
 
-void		stiloe_l_delete(cw_stiloe_t *a_stiloe, cw_stilt_t *a_stilt);
-cw_stiloe_t	*stiloe_l_ref_iterate(cw_stiloe_t *a_stiloe, cw_bool_t a_reset);
-#define		stiloe_l_next(a_stiloe) (qr_next((a_stiloe), link))
+void	stiloe_l_delete(cw_stiloe_t *a_stiloe, cw_stilt_t *a_stilt);
+cw_stiloe_t *stiloe_l_ref_iterate(cw_stiloe_t *a_stiloe, cw_bool_t a_reset);
+#define	stiloe_l_next(a_stiloe) (qr_next((a_stiloe), link))
+
+#define	stiloe_l_color_get(a_stiloe) (a_stiloe)->color
+#define	stiloe_l_color_set(a_stiloe, a_color) (a_stiloe)->color = (a_color)

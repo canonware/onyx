@@ -21,7 +21,7 @@
 /*
  * Interval (in seconds) at which collection occurs, if not triggered sooner.
  */
-#define	_CW_STILA_INTERVAL	 5
+#define	_CW_STILA_INTERVAL	 2
 
 /*
  * Number of sequence set additions since last collection that will cause an
@@ -62,6 +62,7 @@ stila_new(cw_stila_t *a_stila, cw_stil_t *a_stil)
 
 		ql_new(&a_stila->seq_set);
 		a_stila->seq_new = 0;
+		a_stila->white = FALSE;
 		mq_new(&a_stila->gc_mq, &a_stila->mem, sizeof(cw_stilam_t));
 		try_stage = 6;
 
@@ -109,8 +110,9 @@ void
 stila_gc_register(cw_stila_t *a_stila, cw_stiloe_t *a_stiloe)
 {
 	mtx_lock(&a_stila->lock);
-	out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-	    "0x[p|w:8|p:0] : [i]\n", a_stiloe, a_stiloe->type);
+/*  	out_put_e(cw_g_out, NULL, 0, __FUNCTION__, */
+/*  	    "0x[p|w:8|p:0] : [i]\n", a_stiloe, a_stiloe->type); */
+	stiloe_l_color_set(a_stiloe, a_stila->white);
 	ql_tail_insert(&a_stila->seq_set, a_stiloe, link);
 	a_stila->seq_new++;
 	if (a_stila->seq_new >= _CW_STILA_THRESHHOLD)
@@ -166,15 +168,77 @@ stila_p_gc_entry(void *a_arg)
 	return NULL;
 }
 
+/*
+ * Collect garbage using a Baker's Treadmill.
+ */
 static void
 stila_p_collect(cw_stila_t *a_stila)
 {
+	cw_stilt_t	*stilt;
+	cw_stils_t	*stils;
+	cw_stiloe_t	*stiloe;
+
 	mtx_lock(&a_stila->lock);
 	thd_single_enter();
 
-	out_put_e(cw_g_out, NULL, 0, __FUNCTION__, "Collect\n");
+	/*
+	 * Iterate through the root set and mark it gray.  This requires a 3
+	 * level loop, due to the relationship:
+	 *
+	 * stil --> stilt --> stils --> stiloe
+	 *
+	 * Each set of *_ref_iter() calls on a particular object must start with
+	 * a call with (a_reset == TRUE), and repeated calls until NULL is
+	 * returned.
+	 */
+	_cw_out_put("\n");
+	out_put_e(cw_g_out, NULL, 0, __FUNCTION__, "v");
+	for (stilt = stil_l_ref_iter(a_stila->stil, TRUE); stilt != NULL; stilt
+	    = stil_l_ref_iter(a_stila->stil, FALSE)) {
+		_cw_out_put("t");
+		for (stils = stilt_l_ref_iter(stilt, TRUE); stils != NULL; stils
+		    = stilt_l_ref_iter(stilt, FALSE)) {
+			_cw_out_put("s");
+			for (stiloe = stils_l_ref_iter(stils, TRUE); stiloe !=
+			    NULL; stiloe = stils_l_ref_iter(stils, FALSE)) {
+				if (stiloe_l_color_get(stiloe) ==
+				    a_stila->white) {
+					_cw_out_put("+");
+					/*
+					 * Make object gray by setting its color
+					 * bit and moving it in the sequence set
+					 * ring.
+					 */
+					stiloe_l_color_set(stiloe,
+					    !a_stila->white);
+					/* XXX Move. */
+				}
+			}
+		}
+	}
+	_cw_out_put("\n");
+
+	/*
+	 * Iterate through the gray objects and process them until only black
+	 * and white objects are left.
+	 */
+
+	/*
+	 * Split the white objects into a separate ring before resuming other
+	 * threads.
+	 */
+
+	/* Flip the value of white. */
+	a_stila->white = !a_stila->white;
+
+	/* Reset the counter of new sequence set members since collection. */
 	a_stila->seq_new = 0;
 
 	thd_single_leave();
 	mtx_unlock(&a_stila->lock);
+
+	/*
+	 * Now that we can safely call code that potentially does locking, clean
+	 * up the unreferenced objects.
+	 */
 }

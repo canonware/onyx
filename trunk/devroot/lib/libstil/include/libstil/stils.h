@@ -47,22 +47,19 @@ struct cw_stils_s {
 #ifdef _LIBSTIL_DBG
 	cw_uint32_t		magic;
 #endif
+	cw_pool_t		*stilsc_pool; /* Allocator for stilsc's. */
+
 	ql_head(cw_stilso_t)	stack;	/* Stack. */
 	cw_uint32_t		count;	/* Number of stack elements. */
 	cw_stilso_t		under;	/* Not used, just under stack bottom. */
 
+	qs_head(cw_stilsc_t)	chunks;	/* List of stilsc's. */
+
 	/*
 	 * Used for remembering the current state of reference iteration.
 	 */
-	cw_stilso_t		*old_stilso;
-	cw_uint32_t		old_count;
+	cw_stilso_t		*ref_stilso;
 	cw_uint32_t		ref_iter;
-	qs_head(cw_stilsc_t)	old_chunks;
-	
-
-	cw_pool_t		*stilsc_pool; /* Allocator for stilsc's. */
-
-	qs_head(cw_stilsc_t)	chunks;	/* List of stilsc's. */
 };
 
 void		stils_new(cw_stils_t *a_stils, cw_pool_t *a_stilsc_pool);
