@@ -4426,19 +4426,43 @@ onyx:0>
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[array: ]
+			An array object.
+		\item[dict: ]
+			A dict object.
+		\item[stack: ]
+			A stack object.
+		\item[string: ]
+			A string object.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		For each entry in the first input argument (\oparg{array},
+		\oparg{dict}, \oparg{stack}, or \oparg{string}), push the entry
+		onto ostack and execute \oparg{proc}.  This operator supports
+		the \htmlref{\onyxop{}{exit}{}}{systemdict:exit} operator.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> [1 2] {1 sprint} foreach
+1
+2
+onyx:0> </foo `foo' /bar `bar'> {pstack clear} foreach
+`bar'
+/bar
+`foo'
+/foo
+onyx:0> (1 2) {pstack clear} foreach
+2
+1
+onyx:0> `ab' {pstack clear} foreach
+97
+98
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:fork}

@@ -73,12 +73,13 @@ SRCS = [SRCS] [ONYX_SRCS];
                  eq_a.nx.in eq_b.nx.in eval.nx.in eval_a.nx.in eval_b.nx.in
                  exch_a.nx.in exch_b.nx.in exch_c.nx.in exit_a.nx.in exp_a.nx.in
                  exp_b.nx.in exp_c.nx.in exp_d.nx.in exp_e.nx.in for_a.nx.in
-                 for_b.nx.in for_c.nx.in for_d.nx.in for_e.nx.in gc_roll.nx.in
-                 ge_a.nx.in ge_b.nx.in ge_c.nx.in ge_d.nx.in ge_e.nx.in
-                 ge_f.nx.in ge_g.nx.in ge_h.nx.in gt_a.nx.in gt_b.nx.in
-                 gt_c.nx.in gt_d.nx.in gt_e.nx.in gt_f.nx.in gt_g.nx.in
-                 gt_h.nx.in hello.nx.in if_a.nx.in if_b.nx.in if_c.nx.in
-                 ifelse_a.nx.in ifelse_b.nx.in ifelse_c.nx.in immediate_a.nx.in
+                 for_b.nx.in for_c.nx.in for_d.nx.in for_e.nx.in foreach_a.nx.in
+                 foreach_b.nx.in foreach_c.nx.in gc_roll.nx.in ge_a.nx.in
+                 ge_b.nx.in ge_c.nx.in ge_d.nx.in ge_e.nx.in ge_f.nx.in
+                 ge_g.nx.in ge_h.nx.in gt_a.nx.in gt_b.nx.in gt_c.nx.in
+                 gt_d.nx.in gt_e.nx.in gt_f.nx.in gt_g.nx.in gt_h.nx.in
+                 hello.nx.in if_a.nx.in if_b.nx.in if_c.nx.in ifelse_a.nx.in
+                 ifelse_b.nx.in ifelse_c.nx.in immediate_a.nx.in
                  immediate_b.nx.in index_a.nx.in index_b.nx.in index_c.nx.in
                  index_d.nx.in index_e.nx.in index_f.nx.in integer.nx.in
                  integer_a.nx.in integer_b.nx.in integer_c.nx.in integer_d.nx.in

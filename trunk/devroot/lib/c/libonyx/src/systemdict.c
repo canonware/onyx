@@ -2165,7 +2165,7 @@ systemdict_foreach(cw_nxo_t *a_thread)
 			 * Iterate through the string, push each element onto
 			 * ostack, and execute proc.
 			 */
-			for (i = 0, count = nxo_array_len_get(what); i < count;
+			for (i = 0, count = nxo_string_len_get(what); i < count;
 			    i++) {
 				nxo_string_el_get(what, i, &el);
 				nxo = nxo_stack_push(ostack);
