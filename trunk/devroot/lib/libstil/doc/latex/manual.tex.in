@@ -18,7 +18,7 @@ The \libname{libstil} library implements an embeddable \htmlref{stil}{stillang}
 interpreter.  \libname{libstil} is designed to allow multiple interpreter
 instances in the same program, though since \htmlref{stil}{stillang} is a
 multi-threaded language, in most cases it makes more sense to use a single
-interpreter with multiple threads.
+interpreter instance with multiple threads.
 
 \htmlref{stil}{stillang} is described elsewhere in this manual, so this chapter
 documents the C API with as little information about the
@@ -30,6 +30,60 @@ documents the C API with as little information about the
 \item[Debug: ] cc -g -D\_LIBSTIL\_DBG -D\_LIBSTASH\_DBG \filename{file}
 -lstil\_d -lstash\_d -lpthread
 \item[Profile: ] cc -pg \filename{file} -lstil\_p -lstash\_p -lpthread
+\end{description}
+
+\section{Threads}
+\libname{libstil} encapsulates each interpreter instance in a \classname{stil}
+object.  A \classname{stil} object supports running multiple concurrent threads.
+Each thread context is encapsulated by a \classname{stilt} object.  There is
+always at least one \classname{stilt} object associated with a \classname{stil}
+object, since one \classname{stilt} object is embedded in the \classname{stil}
+object.  The reasons for this have to do with garbage collection; if there were
+no references to the built in dictionaries, they would be in danger of being
+collected.  It is possible to use the initial \classname{stilt} object the same
+as any other, except that it must not be destroyed, since the \classname{stil}
+object explicitly manages it during interpreter initialization and shutdown.
+
+In general, each process thread should execute in its own \classname{stilt}
+object context, though the only explicit restriction places on \classname{stilt}
+object operations is that only one thread can be executing in a
+\classname{stilt} object context at a time.  In other words, the
+\classname{stilt} class does not synchronize access to its internals, since
+there is normally no reason for multiple threads to execute in the same
+\classname{stilt} object context.
+
+\section{Garbage Collection}
+Garbage collection is done asynchronously by a separate thread that does nothing
+but garbage collection.  Since there can be arbitrary threads executing in the
+interpreter concurrently, there are two ways to implement safe garbage
+collection: concurrent or atomic.  \libname{libstil} uses atomic garbage
+collection, which means that the garbage collector thread suspends all other
+threads (with the exception of signal handler threads) during its mark phase.
+In order for this to work, the garbage collector must not do any locking while
+the other threads are suspended, or else there is a high probability of
+eventual deadlock.  \libname{libstil} itself meets this criteria.
+
+
+
+\section{Exceptions}
+\libname{libstil} reserves \htmlref{xep}{xep} exception numbers 128 to 255 and
+defines the following exceptions:
+\begin{description}
+\label{_CW_STILX_ERRORDICT}
+\item[\cppdef{\_CW\_STILX\_ERRORDICT}: ]
+	errordict not found, or handler not found in errordict.
+\label{_CW_STILX_CURRENTERROR}
+\item[\cppdef{\_CW\_STILX\_CURRENTERROR}: ]
+	Error accessing currenterror.
+\label{_CW_STILX_EXIT}
+\item[\cppdef{\_CW\_STILX\_EXIT}: ]
+	Internal use, for the exit operator.
+\label{_CW_STILX_STOP}
+\item[\cppdef{\_CW\_STILX\_STOP}: ]
+	Internal use, for the stop operator.
+\label{_CW_STILX_QUIT}
+\item[\cppdef{\_CW\_STILX\_QUIT}: ]
+	Internal use, for the quit operator, caught by the start operator.
 \end{description}
 
 \section{Integration issues}
@@ -52,27 +106,6 @@ collection requires stripping significant functionality out of
 would be interested in hearing from you; the work involved in implementing
 synchronous garbage collection seems not worth the effort, considering the low
 likelihood of anyone ever needing to use \libname{libstil} in this mode.
-
-\section{Exceptions}
-\libname{libstil} reserves \htmlref{xep}{xep} exception numbers 128 to 255 and
-defines the following exceptions:
-\begin{description}
-\label{_CW_STILX_ERRORDICT}
-\item[\cppdef{\_CW\_STILX\_ERRORDICT}: ]
-	errordict not found, or handler not found in errordict.
-\label{_CW_STILX_CURRENTERROR}
-\item[\cppdef{\_CW\_STILX\_CURRENTERROR}: ]
-	Error accessing currenterror.
-\label{_CW_STILX_EXIT}
-\item[\cppdef{\_CW\_STILX\_EXIT}: ]
-	Internal use, for the exit operator.
-\label{_CW_STILX_STOP}
-\item[\cppdef{\_CW\_STILX\_STOP}: ]
-	Internal use, for the stop operator.
-\label{_CW_STILX_QUIT}
-\item[\cppdef{\_CW\_STILX\_QUIT}: ]
-	Internal use, for the quit operator, caught by the start operator.
-\end{description}
 
 \section{API}
 \begin{description}
