@@ -39,10 +39,8 @@ Optionally, pass any of the following (not a definitive list) arguments to
 	libstash library.  The default is to look for pthreads, and fail if they
 	cannot be found.
 
-	Note that if this option is specified, then a different set of 'make'
-	targets should be used (all --> all_s, install --> install_s).  The
-	check target only works correctly if the multi-threaded versions of
-	libstash are built.
+	Note that the check target only works correctly if the multi-threaded 
+	versions of libstash are built.
 
 Optionally, define environment variables, including (not exclusively):
 

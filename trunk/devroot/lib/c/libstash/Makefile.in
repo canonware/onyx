@@ -127,7 +127,7 @@ vpath % .
 
 # Need this here since the includes have dependencies in them, but there's
 # stuff in the includes that we need to see before using $(TARGETS).
-all : all_s all_r
+all : all_s @without_threads@all_r
 
 #
 # Common rules
@@ -315,7 +315,7 @@ check : $(CTESTS) $(PTESTS) $(BTESTS)
 	echo "---------------------------------------------" \
 	'
 
-install : install_s install_r
+install : install_s @without_threads@install_r
 
 install_s : install_stat_dbg install_stat_opt install_shar_opt install_stat_prof
 
