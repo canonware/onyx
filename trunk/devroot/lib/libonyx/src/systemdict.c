@@ -320,9 +320,11 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #endif
 #ifdef CW_POSIX
     ENTRY(setsockopt),
+#endif
     ENTRY(setstderr),
     ENTRY(setstdin),
     ENTRY(setstdout),
+#ifdef CW_POSIX
     ENTRY(setuid),
     ENTRY(setumask),
 #endif
