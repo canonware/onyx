@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 223 $
- * $Date: 1998-09-15 17:27:27 -0700 (Tue, 15 Sep 1998) $
+ * $Revision: 227 $
+ * $Date: 1998-09-19 18:11:22 -0700 (Sat, 19 Sep 1998) $
  *
  * <<< Description >>>
  *
@@ -239,7 +239,8 @@ jtl_slock(cw_jtl_t * a_jtl_o)
 
   mtx_lock(&a_jtl_o->lock);
   while ((a_jtl_o->tlock_holders > 0)
-	 || (a_jtl_o->tlock_waiters > 0))
+	 || (list_count(&a_jtl_o->tlock_wait) > 0)
+	 )
   {
     a_jtl_o->slock_waiters++;
     cnd_wait(&a_jtl_o->slock_wait, &a_jtl_o->lock);
@@ -272,35 +273,34 @@ jtl_get_tq_el(cw_jtl_t * a_jtl_o)
 void
 jtl_tlock(cw_jtl_t * a_jtl_o, cw_jtl_tq_el_t * a_tq_el)
 {
-  cw_jtl_tq_el_t * tq_el;
-  
   _cw_check_ptr(a_jtl_o);
   _cw_check_ptr(a_tq_el);
 
   mtx_lock(&a_jtl_o->lock);
 
   if ((a_jtl_o->tlock_holders == 0)
-      && (a_jtl_o->tlock_waiters == 0))
+      && (list_count(&a_jtl_o->tlock_wait) == 0)
+      )
   {
     /* No other threads are waiting for a tlock.  Help ourselves. */
-    cnd_delete(&a_tq_el->tlock_wait);
-    _cw_free(a_tq_el);
-    a_jtl_o->tlock_holders++;
+  }
+  else if ((a_jtl_o->tlock_holders == 0)
+	   && (a_tq_el == list_hpeek(&a_jtl_o->tlock_wait)))
+  {
+    /* This thread is first in line. */
+    list_hpop(&a_jtl_o->tlock_wait);
   }
   else
   {
     a_tq_el->is_blocked = TRUE;
-    while(a_jtl_o->tlock_holders > 0)
-    {
-      a_jtl_o->tlock_waiters++;
-      cnd_wait(&a_tq_el->tlock_wait, &a_jtl_o->lock);
-      a_jtl_o->tlock_waiters--;
-    }
-    a_jtl_o->tlock_holders++;
-    tq_el = (cw_jtl_tq_el_t *) list_hpop(&a_jtl_o->tlock_wait);
-    cnd_delete(&tq_el->tlock_wait);
-    _cw_free(tq_el);
+    a_jtl_o->tlock_waiters++;
+    cnd_wait(&a_tq_el->tlock_wait, &a_jtl_o->lock);
+    a_jtl_o->tlock_waiters--;
+    list_hpop(&a_jtl_o->tlock_wait);
   }
+  a_jtl_o->tlock_holders++;
+  cnd_delete(&a_tq_el->tlock_wait);
+  _cw_free(a_tq_el);
 
   mtx_unlock(&a_jtl_o->lock);
 }
@@ -411,18 +411,16 @@ jtl_sunlock(cw_jtl_t * a_jtl_o)
   a_jtl_o->slock_holders--;
 
   if ((a_jtl_o->slock_holders == 0)
-      && (a_jtl_o->tlock_waiters > 0))
+      && (list_count(&a_jtl_o->tlock_wait) > 0)
+      && (((cw_jtl_tq_el_t *)
+	   list_hpeek(&a_jtl_o->tlock_wait))->is_blocked == TRUE))
   {
-    cw_jtl_tq_el_t * tq_el;
-
-    _cw_assert(list_count(&a_jtl_o->tlock_wait) > 0);
-    tq_el = (cw_jtl_tq_el_t *) list_hpeek(&a_jtl_o->tlock_wait);
-    _cw_check_ptr(tq_el);
-
-    if (tq_el->is_blocked == TRUE)
-    {
-      cnd_signal(&tq_el->tlock_wait);
-    }
+    cnd_signal(&((cw_jtl_tq_el_t *)
+		 list_hpeek(&a_jtl_o->tlock_wait))->tlock_wait);
+  }
+  else if (a_jtl_o->slock_waiters > 0)
+  {
+    cnd_broadcast(&a_jtl_o->slock_wait);
   }
   
   mtx_unlock(&a_jtl_o->lock);
@@ -449,6 +447,11 @@ jtl_tunlock(cw_jtl_t * a_jtl_o)
     {
       cnd_signal(&tq_el->tlock_wait);
     }
+  }
+  else if ((a_jtl_o->slock_waiters > 0)
+	   && (list_count(&a_jtl_o->tlock_wait) == 0))
+  {
+    cnd_broadcast(&a_jtl_o->slock_wait);
   }
 
   mtx_unlock(&a_jtl_o->lock);
