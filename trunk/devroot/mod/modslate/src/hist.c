@@ -1342,8 +1342,16 @@ hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
 void
 hist_validate(cw_hist_t *a_hist, cw_buf_t *a_buf)
 {
+    cw_mkr_t tmkr, ttmkr;
+    HIST_HDR(hdr);
+
     cw_check_ptr(a_hist);
     cw_dassert(a_hist->magic == CW_HIST_MAGIC);
+
+    HIST_HDR_INIT(hdr);
+
+    mkr_new(&tmkr, &a_hist->h);
+    mkr_new(&ttmkr, &a_hist->h);
 
     /* Validate h. */
     buf_validate(&a_hist->h);
@@ -1358,9 +1366,114 @@ hist_validate(cw_hist_t *a_hist, cw_buf_t *a_buf)
     cw_assert(a_hist->hbpos <= buf_len(a_buf) + 1);
 
     /* Iterate through the undo history and validate record consistency. */
+    mkr_dup(&tmkr, &a_hist->hcur);
+    while (mkr_pos(&tmkr) > 1)
+    {
+	hist_p_undo_header_get(&tmkr, &ttmkr, &hdr);
+	
+	switch (hdr.tag)
+	{
+	    case HST_TAG_GRP_BEG:
+	    {
+		mkr_seek(&tmkr, -HST_HDR_LEN, BUFW_REL);
+		break;
+	    }
+	    case HST_TAG_GRP_END:
+	    {
+		mkr_seek(&tmkr, -HST_HDR_LEN, BUFW_REL);
+		break;
+	    }
+	    case HST_TAG_POS:
+	    {
+		mkr_seek(&tmkr, -HST_HDR_LEN, BUFW_REL);
+		break;
+	    }
+	    case HST_TAG_INS:
+	    {
+		mkr_seek(&tmkr, -HST_HDR_LEN, BUFW_REL);
+		mkr_seek(&tmkr, -(cw_sint64_t) hdr.aux, BUFW_REL);
+		break;
+	    }
+	    case HST_TAG_YNK:
+	    {
+		mkr_seek(&tmkr, -HST_HDR_LEN, BUFW_REL);
+		mkr_seek(&tmkr, -(cw_sint64_t) hdr.aux, BUFW_REL);
+		break;
+	    }
+	    case HST_TAG_REM:
+	    {
+		mkr_seek(&tmkr, -HST_HDR_LEN, BUFW_REL);
+		mkr_seek(&tmkr, -(cw_sint64_t) hdr.aux, BUFW_REL);
+		break;
+	    }
+	    case HST_TAG_DEL:
+	    {
+		mkr_seek(&tmkr, -HST_HDR_LEN, BUFW_REL);
+		mkr_seek(&tmkr, -(cw_sint64_t) hdr.aux, BUFW_REL);
+		break;
+	    }
+	    default:
+	    {
+		cw_not_reached();
+	    }
+	}
+    }
 
     /* Iterate through the redo history and validate record consistency. */
+    mkr_dup(&tmkr, &a_hist->hcur);
+    while (mkr_pos(&tmkr) < buf_len(&a_hist->h) + 1)
+    {
+	hist_p_redo_header_get(&tmkr, &ttmkr, &hdr);
+	
+	switch (hdr.tag)
+	{
+	    case HST_TAG_GRP_BEG:
+	    {
+		mkr_seek(&tmkr, HST_HDR_LEN, BUFW_REL);
+		break;
+	    }
+	    case HST_TAG_GRP_END:
+	    {
+		mkr_seek(&tmkr, HST_HDR_LEN, BUFW_REL);
+		break;
+	    }
+	    case HST_TAG_POS:
+	    {
+		mkr_seek(&tmkr, HST_HDR_LEN, BUFW_REL);
+		break;
+	    }
+	    case HST_TAG_INS:
+	    {
+		mkr_seek(&tmkr, HST_HDR_LEN, BUFW_REL);
+		mkr_seek(&tmkr, hdr.aux, BUFW_REL);
+		break;
+	    }
+	    case HST_TAG_YNK:
+	    {
+		mkr_seek(&tmkr, HST_HDR_LEN, BUFW_REL);
+		mkr_seek(&tmkr, hdr.aux, BUFW_REL);
+		break;
+	    }
+	    case HST_TAG_REM:
+	    {
+		mkr_seek(&tmkr, HST_HDR_LEN, BUFW_REL);
+		mkr_seek(&tmkr, hdr.aux, BUFW_REL);
+		break;
+	    }
+	    case HST_TAG_DEL:
+	    {
+		mkr_seek(&tmkr, HST_HDR_LEN, BUFW_REL);
+		mkr_seek(&tmkr, hdr.aux, BUFW_REL);
+		break;
+	    }
+	    default:
+	    {
+		cw_not_reached();
+	    }
+	}
+    }
 
-    /* XXX */
+    mkr_delete(&ttmkr);
+    mkr_delete(&tmkr);
 }
 #endif
