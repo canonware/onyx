@@ -73,6 +73,9 @@ bufc_p_get_size(cw_bufc_t * a_bufc);
 static cw_uint8_t *
 bufc_p_get_p(cw_bufc_t * a_bufc);
 
+static cw_bool_t
+bufc_p_get_is_writeable(cw_bufc_t * a_bufc);
+
 static cw_uint32_t
 bufc_p_get_ref_count(cw_bufc_t * a_bufc);
 

@@ -236,7 +236,7 @@ cw_buf_t *
 #ifdef _CW_REENTRANT
 buf_new(cw_buf_t * a_buf, cw_bool_t a_is_threadsafe)
 #else
-  buf_new(cw_buf_t * a_buf)
+buf_new(cw_buf_t * a_buf)
 #endif
 {
   cw_buf_t * retval;
@@ -1468,17 +1468,36 @@ buf_set_uint32(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint32_t a_val)
   }
 
   buf_p_get_data_position(a_buf, a_offset, &array_element, &bufel_offset);
+  a_buf->bufel_array[array_element].bufc_buf[bufel_offset] = a_val & 0xff;
+  
   if (bufel_offset + 3
       < 
       a_buf->bufel_array[array_element].end_offset)
   {
     /* The whole thing is in one bufel. */
-    /* XXX */
+    a_buf->bufel_array[array_element].bufc_buf[bufel_offset + 1]
+      = (a_val >> 8) & 0xff;
+    
+    a_buf->bufel_array[array_element].bufc_buf[bufel_offset + 2]
+      = (a_val >> 16) & 0xff;
+    
+    a_buf->bufel_array[array_element].bufc_buf[bufel_offset + 3]
+      = (a_val >> 24) & 0xff;
   }
   else
   {
     /* Split across two or more bufels. */
-    /* XXX */
+    buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
+    a_buf->bufel_array[array_element].bufc_buf[bufel_offset + 1]
+      = (a_val >> 8) & 0xff;
+    
+    buf_p_get_data_position(a_buf, a_offset + 2, &array_element, &bufel_offset);
+    a_buf->bufel_array[array_element].bufc_buf[bufel_offset + 2]
+      = (a_val >> 16) & 0xff;
+    
+    buf_p_get_data_position(a_buf, a_offset + 3, &array_element, &bufel_offset);
+    a_buf->bufel_array[array_element].bufc_buf[bufel_offset + 3]
+      = (a_val >> 24) & 0xff;
   }
 
   retval = FALSE;
@@ -1517,17 +1536,64 @@ buf_set_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint64_t a_val)
   }
 
   buf_p_get_data_position(a_buf, a_offset, &array_element, &bufel_offset);
+  a_buf->bufel_array[array_element].bufc_buf[bufel_offset]
+    = a_val & 0xff;
   if (bufel_offset + 3
       < 
       a_buf->bufel_array[array_element].end_offset)
   {
     /* The whole thing is in one bufel. */
-    /* XXX */
+    a_buf->bufel_array[array_element].bufc_buf[bufel_offset + 1]
+      = (a_val >> 8) & 0xff;
+
+    a_buf->bufel_array[array_element].bufc_buf[bufel_offset + 2]
+      = (a_val >> 16) & 0xff;
+
+    a_buf->bufel_array[array_element].bufc_buf[bufel_offset + 3]
+      = (a_val >> 24) & 0xff;
+
+    a_buf->bufel_array[array_element].bufc_buf[bufel_offset + 4]
+      = (a_val >> 32) & 0xff;
+
+    a_buf->bufel_array[array_element].bufc_buf[bufel_offset + 5]
+      = (a_val >> 40) & 0xff;
+
+    a_buf->bufel_array[array_element].bufc_buf[bufel_offset + 6]
+      = (a_val >> 48) & 0xff;
+
+    a_buf->bufel_array[array_element].bufc_buf[bufel_offset + 7]
+      = (a_val >> 54) & 0xff;
   }
   else
   {
     /* Split across two or more bufels. */
-    /* XXX */
+    buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
+    a_buf->bufel_array[array_element].bufc_buf[bufel_offset + 1]
+      = (a_val >> 8) & 0xff;
+
+    buf_p_get_data_position(a_buf, a_offset + 2, &array_element, &bufel_offset);
+    a_buf->bufel_array[array_element].bufc_buf[bufel_offset + 2]
+      = (a_val >> 16) & 0xff;
+
+    buf_p_get_data_position(a_buf, a_offset + 3, &array_element, &bufel_offset);
+    a_buf->bufel_array[array_element].bufc_buf[bufel_offset + 3]
+      = (a_val >> 24) & 0xff;
+
+    buf_p_get_data_position(a_buf, a_offset + 4, &array_element, &bufel_offset);
+    a_buf->bufel_array[array_element].bufc_buf[bufel_offset + 4]
+      = (a_val >> 32) & 0xff;
+
+    buf_p_get_data_position(a_buf, a_offset + 5, &array_element, &bufel_offset);
+    a_buf->bufel_array[array_element].bufc_buf[bufel_offset + 5]
+      = (a_val >> 40) & 0xff;
+
+    buf_p_get_data_position(a_buf, a_offset + 6, &array_element, &bufel_offset);
+    a_buf->bufel_array[array_element].bufc_buf[bufel_offset + 6]
+      = (a_val >> 48) & 0xff;
+
+    buf_p_get_data_position(a_buf, a_offset + 7, &array_element, &bufel_offset);
+    a_buf->bufel_array[array_element].bufc_buf[bufel_offset + 7]
+      = (a_val >> 54) & 0xff;
   }
 
   retval = FALSE;
@@ -1558,14 +1624,73 @@ buf_set_range(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint32_t a_length,
     mtx_lock(&a_buf->lock);
   }
 #endif
-  
-  if (buf_p_make_range_writeable(a_buf, a_offset, a_length))
-  {
-    retval = TRUE;
-    goto RETURN;
-  }
 
-  /* XXX */
+  /* If a_val is writeable and it's being appended to the buf, tack it on to the
+   * end of the buf, rather than copying. */
+  if (a_is_writeable && (a_offset == a_buf->size))
+  {
+    cw_bufc_t * bufc;
+
+    bufc = bufc_new(NULL, NULL, NULL);
+    if (NULL == bufc)
+    {
+      retval = TRUE;
+      goto RETURN;
+    }
+
+    bufc_set_buffer(bufc, (void *) a_val, a_length, TRUE, NULL, NULL);
+
+    if (buf_p_fit_array(a_buf, a_buf->array_num_valid + 1))
+    {
+      bufc_delete(bufc);
+      retval = TRUE;
+      goto RETURN;
+    }
+    bufel_new(&a_buf->bufel_array[a_buf->array_end], NULL, NULL);
+    bufel_set_bufc(&a_buf->bufel_array[a_buf->array_end], bufc);
+
+    a_buf->size += a_length;
+    a_buf->array_num_valid++;
+    /* Do this in case the cumulative index is valid. */
+    a_buf->cumulative_index[a_buf->array_end] = a_buf->size;
+    a_buf->array_end = ((a_buf->array_end + 1) & (a_buf->array_size - 1));
+  }
+  else
+  {
+    cw_uint32_t bytes_copied, array_element, bufel_offset;
+    
+    if (buf_p_make_range_writeable(a_buf, a_offset, a_length))
+    {
+      retval = TRUE;
+      goto RETURN;
+    }
+    /* March through the bufel_array and memcpy in a_val. */
+    bytes_copied = 0;
+    while (bytes_copied < a_length)
+    {
+      buf_p_get_data_position(a_buf, a_offset + bytes_copied, &array_element,
+			      &bufel_offset);
+      if (((bufel_get_end_offset(&a_buf->bufel_array[array_element])
+	    - bufel_offset) + bytes_copied) > a_length)
+      {
+	/* There's more than enough room to finish up with the current bufel. */
+	memcpy(a_buf->bufel_array[array_element].bufc_buf + bufel_offset,
+	       a_val + bytes_copied,
+	       a_length - bytes_copied);
+	bytes_copied = a_length;
+      }
+      else
+      {
+	/* Completely re-write the current bufel. */
+	memcpy(a_buf->bufel_array[array_element].bufc_buf + bufel_offset,
+	       a_val + bytes_copied,
+	       (bufel_get_end_offset(&a_buf->bufel_array[array_element])
+		- bufel_offset));
+	bytes_copied += (bufel_get_end_offset(
+	  &a_buf->bufel_array[array_element]) - bufel_offset);
+      }
+    }
+  }
 
   retval = FALSE;
 
@@ -2257,8 +2382,47 @@ buf_p_make_range_writeable(cw_buf_t * a_buf, cw_uint32_t a_offset,
   cw_uint32_t first_array_element, last_array_element, bufel_offset;
   cw_uint32_t i, num_iterations;
 
-  /* XXX Need to handle situation where the range extends beyond the end of the
-   * buf. */
+  /* Add extra buffer space to the end of the buf if the writeable range we're
+   * creating extends past the current end of the buf. */
+  if (a_offset + a_length >= a_buf->size)
+  {
+    cw_bufc_t * bufc;
+    void * buffer;
+    
+    bufc = bufc_new(NULL, mem_dealloc, cw_g_mem);
+    if (NULL == bufc)
+    {
+      retval = TRUE;
+      goto RETURN;
+    }
+    
+    buffer = _cw_malloc((a_offset + a_length + 1) - a_buf->size);
+    if (NULL == buffer)
+    {
+      bufc_delete(bufc);
+      retval = TRUE;
+      goto RETURN;
+    }
+
+    bufc_set_buffer(bufc, buffer, (a_offset + a_length + 1) - a_buf->size,
+		    TRUE, mem_dealloc, cw_g_mem);
+
+    if (buf_p_fit_array(a_buf, a_buf->array_num_valid + 1))
+    {
+      bufc_delete(bufc);
+      retval = TRUE;
+      goto RETURN;
+    }
+
+    bufel_new(&a_buf->bufel_array[a_buf->array_end], NULL, NULL);
+    bufel_set_bufc(&a_buf->bufel_array[a_buf->array_end], bufc);
+
+    a_buf->size = a_offset + a_length + 1;
+    a_buf->array_num_valid++;
+    /* Do this in case the cumulative index is valid. */
+    a_buf->cumulative_index[a_buf->array_end] = a_buf->size;
+    a_buf->array_end = ((a_buf->array_end + 1) & (a_buf->array_size - 1));
+  }
   
   /* March through the bufel's we need our own copy of and call
    * bufel_p_make_writeable().
@@ -2570,7 +2734,48 @@ bufel_p_merge_bufel(cw_bufel_t * a_a, cw_bufel_t * a_b)
 static cw_bool_t
 bufel_p_make_writeable(cw_bufel_t * a_bufel)
 {
-  return TRUE; /* XXX */
+  cw_bool_t retval;
+  
+  _cw_check_ptr(a_bufel);
+  _cw_assert(a_bufel->magic == _CW_BUFEL_MAGIC);
+  
+  if (!bufc_p_get_is_writeable(a_bufel->bufc))
+  {
+    cw_uint8_t * buffer;
+    cw_bufc_t * bufc;
+
+    buffer = (cw_uint8_t *) _cw_malloc(a_bufel->end_offset
+				       - a_bufel->beg_offset);
+    if (NULL == buffer)
+    {
+      retval = TRUE;
+      goto RETURN;
+    }
+
+    bufc = bufc_new(NULL, NULL, NULL);
+    if (NULL == bufc)
+    {
+      _cw_free(buffer);
+      retval = TRUE;
+      goto RETURN;
+    }
+
+    bufc_set_buffer(bufc, buffer, a_bufel->end_offset - a_bufel->beg_offset,
+		    TRUE, mem_dealloc, cw_g_mem);
+
+    memcpy(a_bufel->bufc_buf + a_bufel->beg_offset,
+	   buffer,
+	   a_bufel->end_offset - a_bufel->beg_offset);
+    
+    bufc_p_ref_decrement(a_bufel->bufc);
+    a_bufel->bufc = bufc;
+    a_bufel->bufc_buf = buffer;
+  }
+
+  retval = FALSE;
+  
+  RETURN:
+  return retval;
 }
 
 cw_bufc_t *
@@ -2726,6 +2931,15 @@ bufc_p_get_p(cw_bufc_t * a_bufc)
   _cw_assert(a_bufc->magic == _CW_BUFC_MAGIC);
 
   return a_bufc->buf;
+}
+
+static cw_bool_t
+bufc_p_get_is_writeable(cw_bufc_t * a_bufc)
+{
+  _cw_check_ptr(a_bufc);
+  _cw_assert(a_bufc->magic == _CW_BUFC_MAGIC);
+
+  return a_bufc->is_writeable;
 }
 
 static cw_uint32_t
