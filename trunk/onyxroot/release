@@ -66,10 +66,11 @@ if (($#ARGV >= 0)
 }
 
 $run =
-    "./snap @ARGS -T ONYX_ -p onyx -r devroot -f ChangeLog -f Cookfile.in"
+    "./snap @ARGS -T ONYX_ -p onyx -r devroot -f ChangeLog"
+    . " -f Cookfile.in -f Cookfile.inc.in"
     . " -f COPYING -f INSTALL -f PLATFORMS -f README"
-    . " -f acinclude.m4 -f aclocal.m4"
-    . " -f config.guess -f config.sub -f configure -f configure.in"
+    . " -f autogen.sh -f acinclude.m4"
+    . " -f config.guess -f config.sub -f config.stamp.in -f configure.in"
     . " -f install-sh"
     . " -f test -f examples -f mod -f lib"
     . " -f doc/.cvsignore -f doc/Cookfile.inc.in -f doc/Cookfile"

@@ -221,15 +221,25 @@ unless ($opt_noact)
     finddepth(\&expand_tags, "$tmpdir/devroot");
 }
 
-# cook release.
+# autogen.
 if ($opt_verbose)
 {
-    print STDERR "cd $tmpdir/devroot && ./configure --with-docs\n";
+    print STDERR "cd $tmpdir/devroot && ./autogen.sh --with-docs\n";
 }
 unless ($opt_noact)
 {
-    `cd $tmpdir/devroot && ./configure --with-docs`;
+    `cd $tmpdir/devroot && ./autogen.sh --with-docs`;
 }
+if ($opt_verbose)
+{
+    print STDERR "rm $tmpdir/devroot/autogen.sh\n";
+}
+unless ($opt_noact)
+{
+    `cd $tmpdir/devroot/autogen.sh`;
+}
+
+# cook release.
 if ($opt_verbose)
 {
     print STDERR "cd $tmpdir/devroot && cook release\n";
