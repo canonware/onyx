@@ -13,39 +13,8 @@
 #              
 ##############################################################################
 
-#
 # File lists.
-#
-
-# Include files that _are_ installed.
-INCS := libstash.h libstash_defs.h libstash_incs.h bhp.h buf.h dbg.h lex.h \
-	list.h log.h matrix.h mem.h mq.h oh.h out.h pezz.h res.h ring.h treen.h
-
-INCS_R := libstash_r.h locks.h thread.h
-
-# Include files that are _not_ installed.
-PRIV_INCS := bhp_p.h buf_p.h lex_p.h list_p.h log_p.h mem_l.h mem_p.h oh_p.h \
-	out_p.h res_p.h
-
-PRIV_INCS_R := locks_p.h
-
-# Source files.
-SRCS := libstash.c bhp.c buf.c dbg.c lex.c list.c log.c matrix.c mem.c mq.c \
-	oh.c out.c pezz.c res.c ring.c treen.c
-
-SRCS_R := locks.c thread.c
-
-# Simple tests.  Output is diff'ed with the expected (.exp file) output.
-CTESTS := c_bhp_a.c c_bhp_b.c c_buf_a.c c_buf_b.c c_buf_c.c c_cnd_a.c \
-	c_jtl_a.c c_list_a.c c_log_a.c c_matrix_a.c c_mq_a.c \
-	c_mtx_a.c c_oh_a.c c_oh_b.c c_oh_c.c c_out_a.c c_pezz_a.c c_res_a.c \
-	c_ring_a.c c_rwl_a.c c_sem_a.c c_thd_a.c c_treen_a.c
-
-# Perl scripts that drive the BTESTS.
-PTESTS := p_res_a.pl.in
-
-# Backend test programs that are driven by the PTESTS.
-BTESTS := b_res_a.c
+include Makefile.files
 
 # Munge the filename lists so that they are prefixed by the directory they're
 # in, relative to @top_srcdir@.  Also, convert the test names to their final
@@ -59,6 +28,7 @@ SRCS_R := $(addprefix src/,$(SRCS_R))
 override CTESTS := $(addprefix test/,$(CTESTS:.c=))
 override BTESTS := $(addprefix test/,$(BTESTS:.c=))
 override PTESTS := $(addprefix test/,$(PTESTS:.pl.in=.pl))
+MANPAGES := $(addprefix man/man3/,$(MANPAGES))
 
 #
 # Library names.
@@ -282,11 +252,14 @@ install_r : install_stat_dbg_r install_stat_opt_r install_stat_prof_r \
 install_common : all
 	$(SHELL) -c \
 	'@INSTALL@ -d @prefix@/include/libstash; \
-	@INSTALL@ -d @prefix@/include/libstash; \
 	for i in $(INCS); do \
 	@INSTALL@ -m 0644 $$i @prefix@/include/libstash/; \
-	@INSTALL@ -d @prefix@/lib; \
 	done; \
+	@INSTALL@ -d @prefix@/man/man3; \
+	for i in $(MANPAGES); do \
+	@INSTALL@ -m 0644 $$i @prefix@/man/man3/; \
+	done; \
+	@INSTALL@ -d @prefix@/lib; \
 	'
 
 install_common_r : install_common
@@ -323,6 +296,11 @@ install_stat_prof_r : stat_prof_r install_common install_common_r
 uninstall :
 	rm -f @prefix@/lib/lib$(strip $(LIB))*
 	rm -rf @prefix@/include/libstash
+	$(SHELL) -c \
+	'for i in $(MANPAGES); do \
+	rm -f @prefix@/$$i; \
+	done; \
+	'
 
 doc :
 

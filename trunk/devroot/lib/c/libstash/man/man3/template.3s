@@ -1,0 +1,133 @@
+.ig \" -*-mode:nroff-*-
+
+<Copyright = jasone>
+<License>
+
+Version: <Version>
+..
+.TH libstash_<template> 3s "libstash, version <Version>"
+.Nm libstash_<template>
+.hy 1
+.SH NAME
+<template> - <XXX Description>
+.SH SYNOPSIS
+.SS Single-threaded
+#define _LIBSTASH_USE_<template>
+.br
+\fB#include <libstash/libstash.h>\fR
+
+.SS Multi-threaded
+#define _LIBSTASH_USE_<template>
+.br
+\fB#include <libstash/libstash_r.h>\fR
+
+.SS Functions
+.I cw_<template>_t *
+.br
+.B <template>_new
+.RI ( <XXX_Args> )
+
+.I void
+.br
+.B <template>_delete
+.RI ( void )
+
+.I <return type>
+.br
+.B <func>
+.RI ( <args> )
+
+.SS Debugging (dbg) symbols
+.TP \" XXX 
+\*(lq<XXX symbol>\*(rq
+<XXX Symbol description>
+
+.SH DESCRIPTION
+<XXX Description>
+
+\"  .SH OPTIONS
+
+.SH USAGE
+.I cw_<template>_t *
+.br
+.B <template>_new
+.RI ( <args> )
+.RS
+Input(s):
+.RS
+.IR <input> :
+.RS
+<input description>
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+<retval description>
+.RE
+.RE
+Description:
+.RS
+Constructor.
+.RE
+.RE
+
+.I void
+.br
+.B <template>_delete
+.RI ( "cw_<template>_t * a_<template>" )
+.RS
+Input(s):
+.RS
+.IR <input> :
+.RS
+Pointer to a <template>.
+.RE
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Destructor.
+.RE
+.RE
+
+.I <return type>
+.br
+.B <func>
+.RI ( <args> )
+.RS
+Input(s):
+.RS
+.IR <input> :
+.RS
+<input description>
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+<retval description>
+.RE
+.RE
+Description:
+.RS
+<description>
+.RE
+.RE
+
+\"  .SH RETURN VALUES
+\"  .SH EXIT STATUS
+\"  .SH FILES
+.SH SEE ALSO
+libstash(3s).
+
+\"  .SH DIAGNOSTICS
+\"  .SH BUGS
+.SH HISTORY
+Written by Jason Evans <jasone@canonware.com>.
+
