@@ -122,7 +122,7 @@ struct cw_bufp_s
 #ifdef XXX_NOT_YET
 #define CW_BUFP_SIZE 65536
 #else
-#define CW_BUFP_SIZE 16
+#define CW_BUFP_SIZE 8
 #endif
     cw_uint8_t *b;
 
