@@ -56,6 +56,9 @@ typedef enum
 #endif
     NXN_ENTRY(active),
     NXN_ENTRY(add),
+#ifdef CW_POSIX
+    NXN_ENTRY(address),
+#endif
     NXN_ENTRY(adn),
     NXN_ENTRY(and),
     NXN_ENTRY(argcheck),
@@ -178,6 +181,9 @@ typedef enum
     NXN_ENTRY(exit),
     NXN_ENTRY(exp),
     NXN_ENTRY(false),
+#ifdef CW_POSIX
+    NXN_ENTRY(family),
+#endif
     NXN_ENTRY(filetype),
     NXN_ENTRY(finotype),
 #ifdef CW_REAL
@@ -207,7 +213,6 @@ typedef enum
     NXN_ENTRY(hooktag),
     NXN_ENTRY(hooktype),
 #ifdef CW_POSIX
-    NXN_ENTRY(hostbyname),
     NXN_ENTRY(IPPROTO_IP),
     NXN_ENTRY(IPPROTO_HOPOPTS),
     NXN_ENTRY(IPPROTO_ICMP),
@@ -327,6 +332,9 @@ typedef enum
     NXN_ENTRY(null),
     NXN_ENTRY(nulltype),
     NXN_ENTRY(nup),
+#ifdef CW_POSIX
+    NXN_ENTRY(on),
+#endif
     NXN_ENTRY(onyxdict),
 #ifdef CW_POSIX
     NXN_ENTRY(open),
@@ -362,6 +370,7 @@ typedef enum
 #endif
     NXN_ENTRY(pop),
 #ifdef CW_POSIX
+    NXN_ENTRY(port),
     NXN_ENTRY(ppid),
 #endif
     NXN_ENTRY(print),
@@ -401,6 +410,24 @@ typedef enum
     NXN_ENTRY(round),
 #endif
 #ifdef CW_POSIX
+    NXN_ENTRY(SO_BROADCAST),
+    NXN_ENTRY(SO_DEBUG),
+    NXN_ENTRY(SO_DONTROUTE),
+    NXN_ENTRY(SO_ERROR),
+    NXN_ENTRY(SO_KEEPALIVE),
+    NXN_ENTRY(SO_LINGER),
+    NXN_ENTRY(SO_OOBINLINE),
+    NXN_ENTRY(SO_RCVBUF),
+    NXN_ENTRY(SO_RCVLOWAT),
+    NXN_ENTRY(SO_RCVTIMEO),
+    NXN_ENTRY(SO_REUSEADDR),
+#ifdef SO_REUSEPORT
+    NXN_ENTRY(SO_REUSEPORT),
+#endif
+    NXN_ENTRY(SO_SNDBUF),
+    NXN_ENTRY(SO_SNDLOWAT),
+    NXN_ENTRY(SO_SNDTIMEO),
+    NXN_ENTRY(SO_TYPE),
     NXN_ENTRY(SOCK_DGRAM),
     NXN_ENTRY(SOCK_RAW),
 #ifdef SOCK_RDM
@@ -411,6 +438,7 @@ typedef enum
 #endif
     NXN_ENTRY(SOCK_STREAM),
 #endif
+    NXN_ENTRY(SOL_SOCKET),
     NXN_ENTRY(sadn),
     NXN_ENTRY(saup),
     NXN_ENTRY(sbdup),
@@ -428,6 +456,7 @@ typedef enum
     NXN_ENTRY(self),
 #ifdef CW_POSIX
     NXN_ENTRY(send),
+    NXN_ENTRY(serviceport),
 #endif
     NXN_ENTRY(setactive),
 #ifdef CW_POSIX
@@ -537,6 +566,9 @@ typedef enum
     NXN_ENTRY(threadtype),
     NXN_ENTRY(threshold),
     NXN_ENTRY(throw),
+#ifdef CW_POSIX
+    NXN_ENTRY(time),
+#endif
 #ifdef CW_THREADS
     NXN_ENTRY(timedwait),
 #endif

@@ -306,11 +306,6 @@ systemdict_gt(cw_nxo_t *a_thread);
 void
 systemdict_hooktag(cw_nxo_t *a_thread);
 
-#ifdef CW_POSIX
-void
-systemdict_hostbyname(cw_nxo_t *a_thread);
-#endif
-
 void
 systemdict_ibdup(cw_nxo_t *a_thread);
 
@@ -614,6 +609,11 @@ systemdict_self(cw_nxo_t *a_thread);
 #ifdef CW_POSIX
 void
 systemdict_send(cw_nxo_t *a_thread);
+#endif
+
+#ifdef CW_POSIX
+void
+systemdict_serviceport(cw_nxo_t *a_thread);
 #endif
 
 #ifdef CW_POSIX

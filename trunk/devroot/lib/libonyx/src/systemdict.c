@@ -25,7 +25,7 @@
 #include <sys/stat.h>
 #include <dirent.h> /* For dirforeach operator. */
 #ifdef CW_POSIX
-#include <netdb.h> /* For socket and socketpair operators. */
+#include <netdb.h> /* For socket, socketpair, connect, serviceport operators. */
 #include <sys/socket.h> /* For socket and socketpair operators. */
 #ifndef CW_HAVE_SOCKLEN_T
 /* socklen_t is missing on Mac OS X <= 10.2. */
@@ -55,6 +55,40 @@ typedef int socklen_t;
 #include "../include/libonyx/nxo_array_l.h"
 #include "../include/libonyx/nxo_operator_l.h"
 #include "../include/libonyx/nxo_thread_l.h"
+
+#ifdef CW_POSIX
+struct cw_systemdict_name_arg
+{
+    cw_nxn_t nxn;
+    int arg;
+};
+
+/* Compare a_name to the names in a_arg.  If successful, return the index of the
+ * matching element.  Otherwise, return a_argcnt. */
+static cw_uint32_t
+systemdict_p_name_arg(cw_nxo_t *a_name,
+		      const struct cw_systemdict_name_arg *a_arg,
+		      cw_uint32_t a_argcnt)
+{
+    const cw_uint8_t *str;
+    cw_uint32_t len, i;
+
+    cw_assert(nxo_type_get(a_name) == NXOT_NAME);
+
+    str = nxo_name_str_get(a_name);
+    len = nxo_name_len_get(a_name);
+    for (i = 0; i < a_argcnt; i++)
+    {
+	if (nxn_len(a_arg[i].nxn) == len
+	    && memcmp(nxn_str(a_arg[i].nxn), str, len) == 0)
+	{
+	    break;
+	}
+    }
+
+    return i;
+}
+#endif
 
 struct cw_systemdict_entry
 {
@@ -195,9 +229,6 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #endif
     ENTRY(gt),
     ENTRY(hooktag),
-#ifdef CW_POSIX
-    ENTRY(hostbyname),
-#endif
     ENTRY(ibdup),
     ENTRY(ibpop),
     ENTRY(idiv),
@@ -319,6 +350,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(self),
 #ifdef CW_POSIX
     ENTRY(send),
+    ENTRY(serviceport),
     ENTRY(setegid),
     ENTRY(setenv),
     ENTRY(seteuid),
@@ -1530,17 +1562,87 @@ systemdict_condition(cw_nxo_t *a_thread)
 #endif
 
 #ifdef CW_POSIX
+static cw_bool_t
+systemdict_p_sock_family(cw_nxo_t *a_thread, int a_fd, cw_bool_t a_peer,
+			 sa_family_t *r_family)
+{
+    cw_bool_t retval;
+    int error;
+/* Stevens hard codes 128 in his unp.h header.  This seems sketchy to me, but
+ * should work fine for the limited types of sockets Onyx supports. */
+#define CW_MAXSOCKADDR 128
+    union
+    {
+	struct sockaddr sa;
+	char pad[CW_MAXSOCKADDR];
+    } u;
+    socklen_t len;
+
+    len = CW_MAXSOCKADDR;
+#undef CW_MAXSOCKADDR
+    if (a_peer)
+    {
+	error = getpeername(a_fd, &u.sa, &len);
+    }
+    else
+    {
+	error = getsockname(a_fd, &u.sa, &len);
+    }
+    if (error == -1)
+    {
+	switch (errno)
+	{
+	    case EBADF:
+	    {
+		nxo_thread_nerror(a_thread, NXN_ioerror);
+		retval = TRUE;
+		goto RETURN;
+	    }
+	    case ECONNRESET:
+	    case ENOTCONN:
+	    {
+		nxo_thread_nerror(a_thread, NXN_neterror);
+		retval = TRUE;
+		goto RETURN;
+	    }
+	    case ENOTSOCK:
+	    {
+		nxo_thread_nerror(a_thread, NXN_argcheck);
+		retval = TRUE;
+		goto RETURN;
+	    }
+	    case ENOBUFS:
+	    {
+		xep_throw(CW_ONYXX_OOM);
+		/* Not reached. */
+	    }
+	    default:
+	    {
+		nxo_thread_nerror(a_thread, NXN_unregistered);
+		retval = TRUE;
+		goto RETURN;
+	    }
+	}
+    }
+
+    *r_family = u.sa.sa_family;
+
+    retval = FALSE;
+    RETURN:
+    return retval;
+}
+
 void
 systemdict_connect(cw_nxo_t *a_thread)
 {
-    cw_nxo_t *ostack, *sock, *addr;
+    cw_nxo_t *ostack, *tstack, *sock, *addr, *taddr;
     cw_uint32_t npop;
-    struct sockaddr sockname;
-    socklen_t socknamelen;
+    sa_family_t family;
     struct sockaddr_in sockaddr;
     int sockport, error;
 
     ostack = nxo_thread_ostack_get(a_thread);
+    tstack = nxo_thread_tstack_get(a_thread);
     NXO_STACK_GET(addr, ostack, a_thread);
     if (nxo_type_get(addr) == NXOT_INTEGER)
     {
@@ -1559,39 +1661,35 @@ systemdict_connect(cw_nxo_t *a_thread)
 	return;
     }
 
-    socknamelen = sizeof(sockname);
-    if (getsockname(nxo_file_fd_get(sock), &sockname, &socknamelen) == -1)
+    /* Get the socket family. */
+    if (systemdict_p_sock_family(a_thread, nxo_file_fd_get(sock), FALSE,
+				 &family))
     {
-	switch (errno)
-	{
-	    case EBADF:
-		nxo_thread_nerror(a_thread, NXN_ioerror);
-		return;
-	    case ENOTSOCK:
-		nxo_thread_nerror(a_thread, NXN_argcheck);
-		return;
-	    case ENOBUFS:
-		xep_throw(CW_ONYXX_OOM);
-		/* Not reached. */
-	    default:
-		nxo_thread_nerror(a_thread, NXN_unregistered);
-		return;
-	}
+	return;
     }
 
-    switch (sockname.sa_family)
+    /* Create a '\0'-terminated copy of addr. */
+    taddr = nxo_stack_push(tstack);
+    nxo_string_cstring(taddr, addr, a_thread);
+
+    /* Begin initialization of sockaddr. */
+    memset(&sockaddr, 0, sizeof(struct sockaddr_in));
+    sockaddr.sin_family = family;
+    sockaddr.sin_port = htons(sockport);
+
+    switch (family)
     {
 	case AF_INET:
 #ifdef AF_INET6
 	case AF_INET6:
 #endif
-	    memset(&sockaddr, 0, sizeof(struct sockaddr_in));
-	    error = inet_pton(sockname.sa_family, nxo_string_get(addr),
+	{
+	    error = inet_pton(family, nxo_string_get(taddr),
 			      &sockaddr.sin_addr);
 	    if (error < 0)
 	    {
 		nxo_thread_nerror(a_thread, NXN_argcheck);
-		return;
+		goto ERROR;
 	    }
 	    else if (error == 0)
 	    {
@@ -1602,14 +1700,14 @@ systemdict_connect(cw_nxo_t *a_thread)
 #ifdef CW_THREADS
 		mtx_lock(&cw_g_gethostbyname_mtx);
 #endif
-		ent = gethostbyname(nxo_string_get(addr));
+		ent = gethostbyname(nxo_string_get(taddr));
 		if (ent == NULL)
 		{
 #ifdef CW_THREADS
 		    mtx_unlock(&cw_g_gethostbyname_mtx);
 #endif
 		    nxo_thread_nerror(a_thread, NXN_argcheck);
-		    return;
+		    goto ERROR;
 		}
 
 		iaddr = (struct in_addr *) ent->h_addr_list[0];
@@ -1617,22 +1715,27 @@ systemdict_connect(cw_nxo_t *a_thread)
 		sockaddr.sin_addr = *iaddr;
 	    }
 
-	    sockaddr.sin_port = htons(sockport);
-
 #ifdef CW_THREADS
 	    mtx_unlock(&cw_g_gethostbyname_mtx);
 #endif
 	    break;
+	}
 	case AF_LOCAL:
 	case AF_ROUTE:
+	{
 	    cw_error("XXX Not implemented");
+	}
 #ifdef AF_KEY
 	case AF_KEY:
+	{
 	    cw_error("XXX Not implemented");
 	    break;
+	}
 #endif
 	default:
+	{
 	    cw_not_reached();
+	}
     }
 
     error = connect(nxo_file_fd_get(sock), (struct sockaddr *) &sockaddr,
@@ -1646,18 +1749,18 @@ systemdict_connect(cw_nxo_t *a_thread)
 	    case ENETUNREACH:
 	    {
 		nxo_thread_nerror(a_thread, NXN_neterror);
-		break;
+		goto ERROR;
 	    }
 	    case EINPROGRESS:
 	    case EALREADY:
 	    {
 		nxo_thread_nerror(a_thread, NXN_ioerror);
-		break;
+		goto ERROR;
 	    }
 	    case EAFNOSUPPORT:
 	    {
 		nxo_thread_nerror(a_thread, NXN_argcheck);
-		break;
+		goto ERROR;
 	    }
 	    case EACCES:
 	    case EISCONN:
@@ -1665,7 +1768,7 @@ systemdict_connect(cw_nxo_t *a_thread)
 	    case EPERM:
 	    {
 		nxo_thread_nerror(a_thread, NXN_invalidfileaccess);
-		break;
+		goto ERROR;
 	    }
 	    case EADDRINUSE:
 	    case EAGAIN:
@@ -1674,12 +1777,14 @@ systemdict_connect(cw_nxo_t *a_thread)
 	    default:
 	    {
 		nxo_thread_nerror(a_thread, NXN_unregistered);
-		return;
+		goto ERROR;
 	    }
 	}
     }
 
     nxo_stack_npop(ostack, npop);
+    ERROR:
+    nxo_stack_pop(tstack);
 }
 #endif
 
@@ -3986,14 +4091,6 @@ systemdict_hooktag(cw_nxo_t *a_thread)
     nxo_stack_pop(tstack);
 }
 
-#ifdef CW_POSIX
-void
-systemdict_hostbyname(cw_nxo_t *a_thread)
-{
-    cw_error("XXX Not implemented");
-}
-#endif
-
 void
 systemdict_ibdup(cw_nxo_t *a_thread)
 {
@@ -5807,10 +5904,138 @@ systemdict_over(cw_nxo_t *a_thread)
 }
 
 #ifdef CW_POSIX
+static void
+systemdict_p_peername(cw_nxo_t *a_thread, cw_bool_t a_peer)
+{
+    cw_nxo_t *ostack, *nxo;
+    sa_family_t family;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    if (nxo_type_get(nxo) != NXOT_FILE)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+
+    /* Get the socket family. */
+    if (systemdict_p_sock_family(a_thread, nxo_file_fd_get(nxo), a_peer,
+				 &family))
+    {
+	return;
+    }
+
+    switch (family)
+    {
+	case AF_INET:
+	{
+	    cw_nxo_t *tstack;
+	    cw_nxo_t *tkey, *tval;
+	    cw_nx_t *nx;
+	    struct sockaddr_in sa;
+	    int len, error;
+
+	    len = sizeof(sa);
+	    if (a_peer)
+	    {
+		error = getpeername(nxo_file_fd_get(nxo),
+				    (struct sockaddr *) &sa, &len);
+	    }
+	    else
+	    {
+		error = getsockname(nxo_file_fd_get(nxo),
+				    (struct sockaddr *) &sa, &len);
+	    }
+	    if (error == -1)
+	    {
+		switch (errno)
+		{
+		    case EBADF:
+		    {
+			nxo_thread_nerror(a_thread, NXN_ioerror);
+			return;
+		    }
+		    case ENOTSOCK:
+		    {
+			nxo_thread_nerror(a_thread, NXN_argcheck);
+			return;
+		    }
+		    case ENOBUFS:
+		    {
+			xep_throw(CW_ONYXX_OOM);
+			/* Not reached. */
+		    }
+		    default:
+		    {
+			nxo_thread_nerror(a_thread, NXN_unregistered);
+			return;
+		    }
+		}
+	    }
+
+	    tstack = nxo_thread_tstack_get(a_thread);
+	    nx = nxo_thread_nx_get(a_thread);
+	    tkey = nxo_stack_push(tstack);
+	    tval = nxo_stack_push(tstack);
+
+	    nxo_dict_new(nxo, nx, nxo_thread_currentlocking(a_thread), 3);
+
+	    /* family. */
+	    nxo_name_new(tkey, nx, nxn_str(NXN_family), nxn_len(NXN_family),
+			 TRUE);
+	    nxo_name_new(tval, nx, nxn_str(NXN_AF_INET), nxn_len(NXN_AF_INET),
+			 TRUE);
+	    nxo_dict_def(nxo, nx, tkey, tval);
+
+	    /* address. */
+	    nxo_name_new(tkey, nx, nxn_str(NXN_address), nxn_len(NXN_address),
+			 TRUE);
+	    nxo_integer_new(tval, ntohl(sa.sin_addr.s_addr));
+	    nxo_dict_def(nxo, nx, tkey, tval);
+
+	    /* port. */
+	    nxo_name_new(tkey, nx, nxn_str(NXN_port), nxn_len(NXN_port),
+			 TRUE);
+	    nxo_integer_new(tval, ntohs(sa.sin_port));
+	    nxo_dict_def(nxo, nx, tkey, tval);
+
+	    nxo_stack_npop(tstack, 2);
+	    break;
+	}
+#ifdef AF_INET6
+	case AF_INET6:
+	{
+	    /* XXX */
+	    break;
+	}
+#endif
+	case AF_LOCAL:
+	{
+	    /* XXX */
+	    break;
+	}
+	case AF_ROUTE:
+	{
+	    /* XXX */
+	    break;
+	}
+	case AF_KEY:
+	{
+	    /* XXX */
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_unregistered);
+	    return;
+	}
+    }
+}
+
 void
 systemdict_peername(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    systemdict_p_peername(a_thread, TRUE);
 }
 #endif
 
@@ -6024,9 +6249,13 @@ systemdict_poll(cw_nxo_t *a_thread)
 	switch (errno)
 	{
 	    case ENOMEM:
+	    {
 		xep_throw(CW_ONYXX_OOM);
+	    }
 	    default:
+	    {
 		cw_not_reached();
+	    }
 	}
     }
 
@@ -6438,8 +6667,10 @@ systemdict_read(cw_nxo_t *a_thread)
 	    break;
 	}
 	default:
+	{
 	    nxo_thread_nerror(a_thread, NXN_typecheck);
 	    return;
+	}
     }
 }
 
@@ -6600,7 +6831,7 @@ systemdict_realtime(cw_nxo_t *a_thread)
 
     gettimeofday(&tv, NULL);
     nxo_integer_new(nxo, (((cw_nxoi_t) tv.tv_sec * (cw_nxoi_t) 1000000000)
-			  + (cw_nxoi_t) tv.tv_usec * (cw_nxoi_t) 1000));
+			  + ((cw_nxoi_t) tv.tv_usec * (cw_nxoi_t) 1000)));
 }
 #endif
 
@@ -7202,6 +7433,49 @@ systemdict_send(cw_nxo_t *a_thread)
 
 #ifdef CW_POSIX
 void
+systemdict_serviceport(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *tstack, *nxo, *tnxo;
+    struct servent *ent;
+    cw_nxoi_t port;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    tstack = nxo_thread_tstack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    if (nxo_type_get(nxo) != NXOT_STRING)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+
+    tnxo = nxo_stack_push(tstack);
+    nxo_string_cstring(tnxo, nxo, a_thread);
+
+#ifdef CW_THREADS
+    mtx_lock(&cw_g_getservbyname_mtx);
+#endif
+    setservent(0);
+    ent = getservbyname(nxo_string_get(tnxo), NULL);
+    if (ent == NULL)
+    {
+	port = 0;
+    }
+    else
+    {
+	port = ntohs(ent->s_port);
+    }
+    endservent();
+#ifdef CW_THREADS
+    mtx_unlock(&cw_g_getservbyname_mtx);
+#endif
+    
+    nxo_stack_pop(tstack);
+    nxo_integer_new(nxo, port);
+}
+#endif
+
+#ifdef CW_POSIX
+void
 systemdict_setegid(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack, *nxo;
@@ -7471,10 +7745,363 @@ systemdict_setnonblocking(cw_nxo_t *a_thread)
 }
 
 #ifdef CW_POSIX
+static const struct cw_systemdict_name_arg sock_opt[] =
+{
+    {NXN_SO_DEBUG, SO_DEBUG},
+    {NXN_SO_REUSEADDR, SO_REUSEADDR},
+#ifdef SO_REUSEPORT
+    {NXN_SO_REUSEPORT, SO_REUSEPORT},
+#endif
+    {NXN_SO_KEEPALIVE, SO_KEEPALIVE},
+    {NXN_SO_DONTROUTE, SO_DONTROUTE},
+    {NXN_SO_LINGER, SO_LINGER},
+    {NXN_SO_BROADCAST, SO_BROADCAST},
+    {NXN_SO_OOBINLINE, SO_OOBINLINE},
+    {NXN_SO_SNDBUF, SO_SNDBUF},
+    {NXN_SO_RCVBUF, SO_RCVBUF},
+    {NXN_SO_SNDLOWAT, SO_SNDLOWAT},
+    {NXN_SO_RCVLOWAT, SO_RCVLOWAT},
+    {NXN_SO_SNDTIMEO, SO_SNDTIMEO},
+    {NXN_SO_RCVTIMEO, SO_RCVTIMEO},
+    {NXN_SO_TYPE, SO_TYPE},
+    {NXN_SO_ERROR, SO_ERROR}
+};
+
+static const struct cw_systemdict_name_arg sock_opt_level[] =
+{
+    {NXN_SOL_SOCKET, SOL_SOCKET}
+};
+
+static void
+systemdict_p_sockopt(cw_nxo_t *a_thread, cw_bool_t a_set)
+{
+    cw_nxo_t *ostack, *nxo, *nxoval;
+    cw_uint32_t argcnt, argind, npop;
+    int opt, level;
+    union
+    {
+	int i;
+	struct linger l;
+	struct timeval t;
+    } optval;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+
+    if (a_set)
+    {
+	/* Get option value. */
+	NXO_STACK_GET(nxoval, ostack, a_thread);
+	NXO_STACK_DOWN_GET(nxo, ostack, a_thread, nxoval);
+	npop = 1;
+    }
+    else
+    {
+	NXO_STACK_GET(nxo, ostack, a_thread);
+	npop = 0;
+    }
+
+    /* Get option name. */
+    if (nxo_type_get(nxo) != NXOT_NAME)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    argcnt = sizeof(sock_opt) / sizeof(struct cw_systemdict_name_arg);
+    argind = systemdict_p_name_arg(nxo, sock_opt, argcnt);
+    if (argind == argcnt)
+    {
+	nxo_thread_nerror(a_thread, NXN_argcheck);
+	return;
+    }
+    opt = sock_opt[argind].arg;
+
+    /* Get level. */
+    NXO_STACK_DOWN_GET(nxo, ostack, a_thread, nxo);
+    if (nxo_type_get(nxo) == NXOT_NAME)
+    {
+	/* If level is $SOL_SOCKET, simply use SOL_SOCKET.  Otherwise, use the
+	 * name as a protocol to look up the associated protocol number. */
+	argcnt = sizeof(sock_opt_level) / sizeof(struct cw_systemdict_name_arg);
+	argind = systemdict_p_name_arg(nxo, sock_opt_level, argcnt);
+	if (argind != argcnt)
+	{
+	    level = SOL_SOCKET;
+	}
+	else
+	{
+	    cw_nxo_t *tstack, *tnxo;
+	    struct protoent *ent;
+
+	    tstack = nxo_thread_tstack_get(a_thread);
+	    tnxo = nxo_stack_push(tstack);
+	    nxo_string_cstring(tnxo, nxo, a_thread);
+
+#ifdef CW_THREADS
+	    mtx_lock(&cw_g_getprotobyname_mtx);
+#endif
+	    setprotoent(0);
+	    ent = getprotobyname(nxo_string_get(tnxo));
+
+	    nxo_stack_pop(tstack);
+
+	    if (ent == NULL)
+	    {
+		/* Not a socket protocol. */
+		endprotoent();
+#ifdef CW_THREADS
+		mtx_unlock(&cw_g_getprotobyname_mtx);
+#endif
+		nxo_thread_nerror(a_thread, NXN_argcheck);
+		return;
+	    }
+
+	    level = ent->p_proto;
+	}
+
+	NXO_STACK_DOWN_GET(nxo, ostack, a_thread, nxo);
+	if (nxo_type_get(nxo) != NXOT_FILE)
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+	npop += 2;
+    }
+    else if (nxo_type_get(nxo) == NXOT_FILE)
+    {
+	level = SOL_SOCKET;
+	npop++;
+    }
+    else
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    /* nxo is the socket. */
+
+    if (a_set)
+    {
+	switch (opt)
+	{
+	    case SO_DEBUG:
+	    case SO_REUSEADDR:
+#ifdef SO_REUSEPORT
+	    case SO_REUSEPORT:
+#endif
+	    case SO_KEEPALIVE:
+	    case SO_DONTROUTE:
+	    case SO_BROADCAST:
+	    case SO_OOBINLINE:
+	    case SO_SNDBUF:
+	    case SO_RCVBUF:
+	    case SO_SNDLOWAT:
+	    case SO_RCVLOWAT:
+	    case SO_TYPE:
+	    case SO_ERROR:
+	    {
+		if (nxo_type_get(nxoval) != NXOT_INTEGER)
+		{
+		    nxo_thread_nerror(a_thread, NXN_typecheck);
+		    return;
+		}
+
+		optval.i = nxo_integer_get(nxoval);
+
+		break;
+	    }
+	    case SO_LINGER:
+	    {
+		cw_nxo_t *tstack, *tkey, *tval;
+		cw_nx_t *nx;
+
+		if (nxo_type_get(nxoval) != NXOT_DICT)
+		{
+		    nxo_thread_nerror(a_thread, NXN_typecheck);
+		    return;
+		}
+
+		tstack = nxo_thread_tstack_get(a_thread);
+		nx = nxo_thread_nx_get(a_thread);
+		tkey = nxo_stack_push(tstack);
+		tval = nxo_stack_push(tstack);
+
+		
+		/* on. */
+		nxo_name_new(tkey, nx, nxn_str(NXN_on), nxn_len(NXN_on),
+			     TRUE);
+		if (nxo_dict_lookup(nxoval, tkey, tval))
+		{
+		    nxo_stack_npop(tstack, 2);
+		    nxo_thread_nerror(a_thread, NXN_argcheck);
+		    return;
+		}
+		if (nxo_type_get(tval) != NXOT_BOOLEAN)
+		{
+		    nxo_stack_npop(tstack, 2);
+		    nxo_thread_nerror(a_thread, NXN_typecheck);
+		    return;
+		}		    
+		optval.l.l_onoff = nxo_boolean_get(tval);
+
+		/* time. */
+		nxo_name_new(tkey, nx, nxn_str(NXN_time), nxn_len(NXN_time),
+			     TRUE);
+		if (nxo_dict_lookup(nxoval, tkey, tval))
+		{
+		    nxo_stack_npop(tstack, 2);
+		    nxo_thread_nerror(a_thread, NXN_argcheck);
+		    return;
+		}
+		if (nxo_type_get(tval) != NXOT_INTEGER)
+		{
+		    nxo_stack_npop(tstack, 2);
+		    nxo_thread_nerror(a_thread, NXN_typecheck);
+		    return;
+		}		    
+		optval.l.l_linger = nxo_integer_get(tval);
+
+		nxo_stack_npop(tstack, 2);
+		break;
+	    }
+	    case SO_SNDTIMEO:
+	    case SO_RCVTIMEO:
+	    {
+		if (nxo_type_get(nxoval) != NXOT_INTEGER)
+		{
+		    nxo_thread_nerror(a_thread, NXN_typecheck);
+		    return;
+		}
+
+		optval.t.tv_sec = nxo_integer_get(nxoval) / 1000000000LL;
+		optval.t.tv_usec = (nxo_integer_get(nxoval) % 1000000000LL)
+		    / 1000;
+		break;
+	    }
+	    default:
+	    {
+		cw_not_reached();
+	    }
+	}
+
+	if (setsockopt(nxo_file_fd_get(nxo), level, opt, &optval,
+		       sizeof(optval)) == -1)
+	{
+	    switch (errno)
+	    {
+		case ENOTSOCK:
+		case ENOPROTOOPT:
+		{
+		    nxo_thread_nerror(a_thread, NXN_argcheck);
+		    break;
+		}
+		case EBADF:
+		case EFAULT:
+		default:
+		{
+		    nxo_thread_nerror(a_thread, NXN_unregistered);
+		}
+	    }
+	    return;
+	}
+    }
+    else
+    {
+	socklen_t optlen;
+
+	optlen = sizeof(optval);
+	if (getsockopt(nxo_file_fd_get(nxo), level, opt, &optval, &optlen)
+	    == -1)
+	{
+	    switch (errno)
+	    {
+		case ENOTSOCK:
+		case ENOPROTOOPT:
+		{
+		    nxo_thread_nerror(a_thread, NXN_argcheck);
+		    break;
+		}
+		case EBADF:
+		case EFAULT:
+		default:
+		{
+		    nxo_thread_nerror(a_thread, NXN_unregistered);
+		}
+	    }
+	    return;
+	}
+
+	switch (opt)
+	{
+	    case SO_DEBUG:
+	    case SO_REUSEADDR:
+#ifdef SO_REUSEPORT
+	    case SO_REUSEPORT:
+#endif
+	    case SO_KEEPALIVE:
+	    case SO_DONTROUTE:
+	    case SO_BROADCAST:
+	    case SO_OOBINLINE:
+	    case SO_SNDBUF:
+	    case SO_RCVBUF:
+	    case SO_SNDLOWAT:
+	    case SO_RCVLOWAT:
+	    case SO_TYPE:
+	    case SO_ERROR:
+	    {
+		nxo_integer_new(nxo, optval.i);
+		break;
+	    }
+	    case SO_LINGER:
+	    {
+		cw_nxo_t *tstack, *tkey, *tval;
+		cw_nx_t *nx;
+
+		tstack = nxo_thread_tstack_get(a_thread);
+		nx = nxo_thread_nx_get(a_thread);
+		tkey = nxo_stack_push(tstack);
+		tval = nxo_stack_push(tstack);
+
+		nxo_dict_new(nxo, nxo_thread_nx_get(a_thread),
+			     nxo_thread_currentlocking(a_thread), 2);
+
+		/* on. */
+		nxo_name_new(tkey, nx, nxn_str(NXN_on), nxn_len(NXN_on),
+			     TRUE);
+		nxo_boolean_new(tval, optval.l.l_onoff ? TRUE : FALSE);
+		nxo_dict_def(nxo, nx, tkey, tval);
+
+		/* time. */
+		nxo_name_new(tkey, nx, nxn_str(NXN_time), nxn_len(NXN_time),
+			     TRUE);
+		nxo_integer_new(tval, optval.l.l_linger);
+		nxo_dict_def(nxo, nx, tkey, tval);
+
+		nxo_stack_npop(tstack, 2);
+		break;
+	    }
+	    case SO_SNDTIMEO:
+	    case SO_RCVTIMEO:
+	    {
+		nxo_integer_new(nxo,
+				(((cw_nxoi_t) optval.t.tv_sec
+				  * (cw_nxoi_t) 1000000000)
+				 + ((cw_nxoi_t) optval.t.tv_usec
+				    * (cw_nxoi_t) 1000)));
+		break;
+	    }
+	    default:
+	    {
+		cw_not_reached();
+	    }
+	}
+    }
+
+    nxo_stack_npop(ostack, npop);
+}
+
 void
 systemdict_setsockopt(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    systemdict_p_sockopt(a_thread, TRUE);
 }
 #endif
 
@@ -8006,13 +8633,7 @@ systemdict_snup(cw_nxo_t *a_thread)
 }
 
 #ifdef CW_POSIX
-struct cw_systemdict_socket_arg
-{
-    cw_nxn_t nxn;
-    int arg;
-};
-
-static const struct cw_systemdict_socket_arg socket_family[] =
+static const struct cw_systemdict_name_arg socket_family[] =
 {
     {NXN_AF_INET, AF_INET},
     {NXN_AF_LOCAL, AF_LOCAL},
@@ -8027,7 +8648,7 @@ static const struct cw_systemdict_socket_arg socket_family[] =
 #endif
 };
 
-static const struct cw_systemdict_socket_arg socket_type[] =
+static const struct cw_systemdict_name_arg socket_type[] =
 {
     {NXN_SOCK_STREAM, SOCK_STREAM},
     {NXN_SOCK_DGRAM, SOCK_DGRAM},
@@ -8041,32 +8662,6 @@ static const struct cw_systemdict_socket_arg socket_type[] =
     {NXN_SOCK_SEQPACKET, SOCK_SEQPACKET}
 #endif
 };
-
-/* Compare a_name to the names in a_arg.  If successful, return the index of the
- * matching element.  Otherwise, return a_argcnt. */
-static cw_uint32_t
-systemdict_p_socket_arg(cw_nxo_t *a_name,
-			const struct cw_systemdict_socket_arg *a_arg,
-			cw_uint32_t a_argcnt)
-{
-    const cw_uint8_t *str;
-    cw_uint32_t len, i;
-
-    cw_assert(nxo_type_get(a_name) == NXOT_NAME);
-
-    str = nxo_name_str_get(a_name);
-    len = nxo_name_len_get(a_name);
-    for (i = 0; i < a_argcnt; i++)
-    {
-	if (nxn_len(a_arg[i].nxn) == len
-	    && memcmp(nxn_str(a_arg[i].nxn), str, len) == 0)
-	{
-	    break;
-	}
-    }
-
-    return i;
-}
 
 static void
 systemdict_p_socket(cw_nxo_t *a_thread, cw_bool_t a_pair)
@@ -8083,8 +8678,8 @@ systemdict_p_socket(cw_nxo_t *a_thread, cw_bool_t a_pair)
 	return;
     }
     /* See if nxo is a socket type. */
-    argcnt = sizeof(socket_type) / sizeof(struct cw_systemdict_socket_arg);
-    argind = systemdict_p_socket_arg(nxo, socket_type, argcnt);
+    argcnt = sizeof(socket_type) / sizeof(struct cw_systemdict_name_arg);
+    argind = systemdict_p_name_arg(nxo, socket_type, argcnt);
     if (argind != argcnt)
     {
 	/* Socket type. */
@@ -8106,6 +8701,7 @@ systemdict_p_socket(cw_nxo_t *a_thread, cw_bool_t a_pair)
 #ifdef CW_THREADS
 	mtx_lock(&cw_g_getprotobyname_mtx);
 #endif
+	setprotoent(0);
 	ent = getprotobyname(nxo_string_get(tnxo));
 
 	nxo_stack_pop(tstack);
@@ -8113,16 +8709,16 @@ systemdict_p_socket(cw_nxo_t *a_thread, cw_bool_t a_pair)
 	if (ent == NULL)
 	{
 	    /* Not a socket protocol. */
+	    endprotoent();
 #ifdef CW_THREADS
 	    mtx_unlock(&cw_g_getprotobyname_mtx);
 #endif
-	    endprotoent();
 	    nxo_thread_nerror(a_thread, NXN_argcheck);
 	    return;
 	}
 
-	endprotoent();
 	protocol = ent->p_proto;
+	endprotoent();
 #ifdef CW_THREADS
 	mtx_unlock(&cw_g_getprotobyname_mtx);
 #endif
@@ -8135,8 +8731,8 @@ systemdict_p_socket(cw_nxo_t *a_thread, cw_bool_t a_pair)
 	    return;
 	}
 	argcnt = sizeof(socket_type)
-	    / sizeof(struct cw_systemdict_socket_arg);
-	argind = systemdict_p_socket_arg(nxo, socket_type, argcnt);
+	    / sizeof(struct cw_systemdict_name_arg);
+	argind = systemdict_p_name_arg(nxo, socket_type, argcnt);
 	if (argind != argcnt)
 	{
 	    /* Socket type. */
@@ -8159,8 +8755,8 @@ systemdict_p_socket(cw_nxo_t *a_thread, cw_bool_t a_pair)
 	nxo_thread_nerror(a_thread, NXN_typecheck);
 	return;
     }
-    argcnt = sizeof(socket_family) / sizeof(struct cw_systemdict_socket_arg);
-    argind = systemdict_p_socket_arg(nxo, socket_family, argcnt);
+    argcnt = sizeof(socket_family) / sizeof(struct cw_systemdict_name_arg);
+    argind = systemdict_p_name_arg(nxo, socket_family, argcnt);
     if (argind != argcnt)
     {
 	/* Socket family. */
@@ -8182,7 +8778,6 @@ systemdict_p_socket(cw_nxo_t *a_thread, cw_bool_t a_pair)
 	{
 	    goto ERROR;
 	}
-
 	/* Wrap sockfd. */
 	nxo = nxo_stack_under_push(ostack, nxo);
 	nxo_file_new(nxo, nxo_thread_nx_get(a_thread),
@@ -8220,21 +8815,28 @@ systemdict_p_socket(cw_nxo_t *a_thread, cw_bool_t a_pair)
 	case EOPNOTSUPP:
 	case EPROTONOSUPPORT:
 	case ESOCKTNOSUPPORT:
+	{
 	    nxo_thread_nerror(a_thread, NXN_argcheck);
 	    return;
+	}
 	case EACCES:
+	{
 	    nxo_thread_nerror(a_thread, NXN_invalidaccess);
 	    return;
+	}
 	case ENFILE:
 	case EMFILE:
 	case ENOBUFS:
 	case ENOMEM:
+	{
 	    xep_throw(CW_ONYXX_OOM);
-	    /* Not reached. */
+	}
 	case EINVAL:
 	default:
+	{
 	    nxo_thread_nerror(a_thread, NXN_unregistered);
 	    return;
+	}
     }
 }
 #endif
@@ -8257,17 +8859,15 @@ systemdict_socketpair(cw_nxo_t *a_thread)
 
 #ifdef CW_POSIX
 void
-systemdict_sockname(cw_nxo_t *a_thread)
-{
-    cw_error("XXX Not implemented");
-}
-#endif
-
-#ifdef CW_POSIX
-void
 systemdict_sockopt(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    systemdict_p_sockopt(a_thread, FALSE);
+}
+
+void
+systemdict_sockname(cw_nxo_t *a_thread)
+{
+    systemdict_p_peername(a_thread, FALSE);
 }
 #endif
 
