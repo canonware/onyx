@@ -147,7 +147,6 @@ const cw_uint8_t *cw_g_nx_names[] = {
 #ifdef CW_POSIX
     "ino",
 #endif
-    "integertype",
     "invalidaccess",
     "invalidexit",
     "invalidfileaccess",
@@ -211,6 +210,7 @@ const cw_uint8_t *cw_g_nx_names[] = {
 #endif
     "null",
     "nulltype",
+    "numbertype",
 #ifdef CW_POSIX
     "open",
 #endif

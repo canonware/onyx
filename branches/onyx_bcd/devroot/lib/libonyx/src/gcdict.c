@@ -96,7 +96,7 @@ gcdict_period(cw_nxo_t *a_thread)
     ostack = nxo_thread_ostack_get(a_thread);
     nxa = nx_nxa_get(nxo_thread_nx_get(a_thread));
     period = nxo_stack_push(ostack);
-    nxo_integer_new(period, nxa_period_get(nxa));
+    nxo_dup(period, nxa_period_get(nxa));
 }
 #endif
 
@@ -129,19 +129,19 @@ gcdict_setperiod(cw_nxo_t *a_thread)
 
     ostack = nxo_thread_ostack_get(a_thread);
     NXO_STACK_GET(period, ostack, a_thread);
-    if (nxo_type_get(period) != NXOT_INTEGER)
+    if (nxo_type_get(period) != NXOT_NUMBER)
     {
 	nxo_thread_nerror(a_thread, NXN_typecheck);
 	return;
     }
-    if (nxo_integer_get(period) < 0 || nxo_integer_get(period) > UINT_MAX)
+    /* Make sure period is a non-negative integer. */
+    if (nxo_number_negative(period) || nxo_number_integer(period) == FALSE)
     {
 	nxo_thread_nerror(a_thread, NXN_limitcheck);
 	return;
     }
 
-    nxa_period_set(nx_nxa_get(nxo_thread_nx_get(a_thread)),
-		   nxo_integer_get(period));
+    nxa_period_set(nx_nxa_get(nxo_thread_nx_get(a_thread)), period);
 
     nxo_stack_pop(ostack);
 }
@@ -155,19 +155,20 @@ gcdict_setthreshold(cw_nxo_t *a_thread)
 
     ostack = nxo_thread_ostack_get(a_thread);
     NXO_STACK_GET(threshold, ostack, a_thread);
-    if (nxo_type_get(threshold) != NXOT_INTEGER)
+    if (nxo_type_get(threshold) != NXOT_NUMBER)
     {
 	nxo_thread_nerror(a_thread, NXN_typecheck);
 	return;
     }
-    if (nxo_integer_get(threshold) < 0 || nxo_integer_get(threshold) > UINT_MAX)
+    /* Make sure period is a non-negative integer. */
+    if (nxo_number_negative(threshold)
+	|| nxo_number_integer(threshold) == FALSE)
     {
 	nxo_thread_nerror(a_thread, NXN_limitcheck);
 	return;
     }
 
-    nxa_threshold_set(nx_nxa_get(nxo_thread_nx_get(a_thread)),
-		      nxo_integer_get(threshold));
+    nxa_threshold_set(nx_nxa_get(nxo_thread_nx_get(a_thread)), threshold);
 
     nxo_stack_pop(ostack);
 }
@@ -189,11 +190,11 @@ gcdict_stats(cw_nxo_t *a_thread)
     cw_nxa_t *nxa;
     cw_bool_t currentlocking;
     cw_nxo_t *ostack, *tstack;
-    cw_nxo_t *stats, *nxo, *tnxo;
-    cw_nxoi_t collections, count;
-    cw_nxoi_t ccount, cmark, csweep;
-    cw_nxoi_t mcount, mmark, msweep;
-    cw_nxoi_t scount, smark, ssweep;
+    cw_nxo_t *stats, *nxo;
+    cw_nxo_t *collections, *count;
+    cw_nxo_t *ccount, *cmark, *csweep;
+    cw_nxo_t *mcount, *mmark, *msweep;
+    cw_nxo_t *scount, *smark, *ssweep;
 
     nx = nxo_thread_nx_get(a_thread);
     nxa = nx_nxa_get(nx);
@@ -202,7 +203,6 @@ gcdict_stats(cw_nxo_t *a_thread)
     tstack = nxo_thread_tstack_get(a_thread);
 
     nxo = nxo_stack_push(tstack);
-    tnxo = nxo_stack_push(tstack);
 
     /* Get stats. */
     nxa_stats_get(nxa, &collections, &count,
@@ -215,44 +215,33 @@ gcdict_stats(cw_nxo_t *a_thread)
     nxo_array_new(stats, nx, currentlocking, 5);
 
     /* collections. */
-    nxo_integer_new(nxo, collections);
-    nxo_array_el_set(stats, nxo, 0);
+    nxo_array_el_set(stats, collections, 0);
 
     /* count. */
-    nxo_integer_new(nxo, count);
-    nxo_array_el_set(stats, nxo, 1);
+    nxo_array_el_set(stats, count, 1);
 
     /* current. */
     nxo_array_new(nxo, nx, currentlocking, 3);
-    nxo_integer_new(tnxo, ccount);
-    nxo_array_el_set(nxo, tnxo, 0);
-    nxo_integer_new(tnxo, cmark);
-    nxo_array_el_set(nxo, tnxo, 1);
-    nxo_integer_new(tnxo, csweep);
-    nxo_array_el_set(nxo, tnxo, 2);
+    nxo_array_el_set(nxo, ccount, 0);
+    nxo_array_el_set(nxo, cmark, 1);
+    nxo_array_el_set(nxo, csweep, 2);
     nxo_array_el_set(stats, nxo, 2);
 
     /* maximum. */
     nxo_array_new(nxo, nx, currentlocking, 3);
-    nxo_integer_new(tnxo, mcount);
-    nxo_array_el_set(nxo, tnxo, 0);
-    nxo_integer_new(tnxo, mmark);
-    nxo_array_el_set(nxo, tnxo, 1);
-    nxo_integer_new(tnxo, msweep);
-    nxo_array_el_set(nxo, tnxo, 2);
+    nxo_array_el_set(nxo, mcount, 0);
+    nxo_array_el_set(nxo, mmark, 1);
+    nxo_array_el_set(nxo, msweep, 2);
     nxo_array_el_set(stats, nxo, 3);
 
     /* current. */
     nxo_array_new(nxo, nx, currentlocking, 3);
-    nxo_integer_new(tnxo, scount);
-    nxo_array_el_set(nxo, tnxo, 0);
-    nxo_integer_new(tnxo, smark);
-    nxo_array_el_set(nxo, tnxo, 1);
-    nxo_integer_new(tnxo, ssweep);
-    nxo_array_el_set(nxo, tnxo, 2);
+    nxo_array_el_set(nxo, scount, 0);
+    nxo_array_el_set(nxo, smark, 1);
+    nxo_array_el_set(nxo, ssweep, 2);
     nxo_array_el_set(stats, nxo, 4);
 
-    nxo_stack_npop(tstack, 2);
+    nxo_stack_pop(tstack);
 }
 
 void
@@ -265,5 +254,5 @@ gcdict_threshold(cw_nxo_t *a_thread)
     ostack = nxo_thread_ostack_get(a_thread);
     nxa = nx_nxa_get(nxo_thread_nx_get(a_thread));
     threshold = nxo_stack_push(ostack);
-    nxo_integer_new(threshold, nxa_threshold_get(nxa));
+    nxo_dup(threshold, nxa_threshold_get(nxa));
 }

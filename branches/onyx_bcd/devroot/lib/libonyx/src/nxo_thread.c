@@ -63,7 +63,7 @@ nxoe_p_thread_syntax_error(cw_nxoe_thread_t *a_thread,
 static void
 nxoe_p_thread_reset(cw_nxoe_thread_t *a_thread);
 static cw_bool_t
-nxoe_p_thread_integer_accept(cw_nxoe_thread_t *a_thread);
+nxoe_p_thread_number_accept(cw_nxoe_thread_t *a_thread, cw_bool_t a_radix);
 static void
 nxoe_p_thread_procedure_accept(cw_nxoe_thread_t *a_thread);
 static void
@@ -1223,29 +1223,47 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 		    }
 		    case '+':
 		    {
-			a_thread->state = THREADTS_INTEGER;
-			a_thread->m.n.sign = 1;
-			a_thread->m.n.base = 10;
-			a_thread->m.n.b_off = 1;
+			a_thread->state = THREADTS_NUMBER_WHOLE;
+			a_thread->m.n.mant_neg = FALSE;
+			a_thread->m.n.radix = FALSE;
+			a_thread->m.n.whole = FALSE;
+			a_thread->m.n.frac = FALSE;
+			a_thread->m.n.exp = FALSE;
 			CW_NXO_THREAD_PUTC(c);
 			break;
 		    }
 		    case '-':
 		    {
-			a_thread->state = THREADTS_INTEGER;
-			a_thread->m.n.sign = -1;
-			a_thread->m.n.base = 10;
-			a_thread->m.n.b_off = 1;
+			a_thread->state = THREADTS_NUMBER_WHOLE;
+			a_thread->m.n.mant_neg = TRUE;
+			a_thread->m.n.radix = FALSE;
+			a_thread->m.n.whole = FALSE;
+			a_thread->m.n.frac = FALSE;
+			a_thread->m.n.exp = FALSE;
+			CW_NXO_THREAD_PUTC(c);
+			break;
+		    }
+		    case '.':
+		    {
+			a_thread->state = THREADTS_NUMBER_FRAC;
+			a_thread->m.n.mant_neg = FALSE;
+			a_thread->m.n.radix = FALSE;
+			a_thread->m.n.whole = FALSE;
+			a_thread->m.n.frac = FALSE;
+			a_thread->m.n.exp = FALSE;
 			CW_NXO_THREAD_PUTC(c);
 			break;
 		    }
 		    case '0': case '1': case '2': case '3': case '4': case '5':
 		    case '6': case '7': case '8': case '9':
 		    {
-			a_thread->state = THREADTS_INTEGER;
-			a_thread->m.n.sign = 0;
-			a_thread->m.n.base = 10;
-			a_thread->m.n.b_off = 0;
+			a_thread->state = THREADTS_WHOLE;
+			a_thread->m.n.mant_neg = FALSE;
+			a_thread->m.n.radix = FALSE;
+			a_thread->m.n.whole = TRUE;
+			a_thread->m.n.whole_off = 0;
+			a_thread->m.n.frac = FALSE;
+			a_thread->m.n.exp = FALSE;
 			CW_NXO_THREAD_PUTC(c);
 			break;
 		    }
@@ -1332,7 +1350,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 		}
 		break;
 	    }
-	    case THREADTS_INTEGER:
+	    case THREADTS_NUMBER_WHOLE:
 	    {
 		cw_bool_t restart = FALSE;
 
@@ -1341,6 +1359,35 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 		    case '0': case '1': case '2': case '3': case '4': case '5':
 		    case '6': case '7': case '8': case '9':
 		    {
+			if (a_thread->m.n.whole == FALSE)
+			{
+			    a_thread->m.n.whole = TRUE;
+			    a_thread->m.n.whole_off = a_thread->index;
+			}
+			CW_NXO_THREAD_PUTC(c);
+			break;
+		    }
+		    case '.':
+		    {
+			a_thread->state = THREADTS_NUMBER_FRAC;
+			if (a_thread->m.n.whole)
+			{
+			    a_thread->m.n.whole_len = a_thread->index
+				- a_thread->m.n.whole_off;
+			}
+			CW_NXO_THREAD_PUTC(c);
+			break;
+		    }
+		    case 'e': case 'E':
+		    {
+			a_thread->state = THREADTS_NUMBER_EXP;
+			a_thread->m.n.exp_sign = FALSE;
+			a_thread->m.n.exp_neg = FALSE;
+			if (a_thread->m.n.whole)
+			{
+			    a_thread->m.n.whole_len = a_thread->index
+				- a_thread->whole_off;
+			}
 			CW_NXO_THREAD_PUTC(c);
 			break;
 		    }
@@ -1350,42 +1397,53 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 
 			/* Convert the string to a base (interpreted as base
 			 * 10). */
-			ndigits = a_thread->index - a_thread->m.n.b_off;
+			if (a_thread->m.n.whole)
+			{
+			    a_thread->m.n.whole_len = a_thread->index
+				- a_thread->whole_off;
+			    ndigits = a_thread->m.n.whole_len;
+			}
+			else
+			{
+			    ndigits = 0;
+			}
 			switch (ndigits)
 			{
 			    case 2:
 			    {
-				digit = CW_NXO_THREAD_GETC(a_thread->m.n.b_off)
+				digit =
+				    CW_NXO_THREAD_GETC(a_thread->m.n.whole_off)
 				    - '0';
 				if (digit == 0)
 				{
 				    /* Leading '0' in radix not allowed. */
 				    break;
 				}
-				a_thread->m.n.base = digit * 10;
+				a_thread->m.n.radix_base = digit * 10;
 
-				digit = CW_NXO_THREAD_GETC(a_thread->m.n.b_off
-							   + 1) - '0';
-				a_thread->m.n.base += digit;
+				digit
+				    = CW_NXO_THREAD_GETC(a_thread->m.n.whole_off
+							 + 1) - '0';
+				a_thread->m.n.radix_base += digit;
 				break;
-				/* Fall through. */
 			    }
 			    case 1:
 			    {
 				digit = CW_NXO_THREAD_GETC(a_thread->m.n.b_off)
 				    - '0';
-				a_thread->m.n.base = digit;
+				a_thread->m.n.radix_base = digit;
 				break;
 			    }
 			    default:
 			    {
 				/* Too many, or not enough digits. */
-				a_thread->m.n.base = 0;
+				a_thread->m.n.radix_base = 0;
 				break;
 			    }
 			}
 
-			if (a_thread->m.n.base < 2 || a_thread->m.n.base > 36)
+			if (a_thread->m.n.radix_base < 2
+			    || a_thread->m.n.radix_base > 36)
 			{
 			    /* Base too small or too large. */
 			    a_thread->state = THREADTS_NAME;
@@ -1393,7 +1451,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			}
 			else
 			{
-			    a_thread->m.n.b_off = a_thread->index + 1;
+			    a_thread->m.n.whole = FALSE;
 			    a_thread->state = THREADTS_INTEGER_RADIX;
 			}
 			CW_NXO_THREAD_PUTC(c);
@@ -1415,7 +1473,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 		    }
 		    case '\0': case '\t': case '\f': case '\r': case ' ':
 		    {
-			if (nxoe_p_thread_integer_accept(a_thread))
+			if (nxoe_p_thread_number_accept(a_thread, FALSE))
 			{
 			    /* Conversion error.  Accept as a name. */
 			    a_thread->m.m.action = ACTION_EXECUTE;
@@ -1451,7 +1509,12 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 		    case 's': case 't': case 'u': case 'v': case 'w': case 'x':
 		    case 'y': case 'z':
 		    {
-			if (a_thread->m.n.base
+			if (a_thread->m.n.whole == FALSE)
+			{
+			    a_thread->m.n.whole = TRUE;
+			    a_thread->m.n.whole_off = a_thread->index;
+			}
+			if (a_thread->m.n.radix_base
 			    <= (10 + ((cw_uint32_t) (c - 'a'))))
 			{
 			    /* Too big for this base. */
@@ -1467,7 +1530,12 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 		    case 'S': case 'T': case 'U': case 'V': case 'W': case 'X':
 		    case 'Y': case 'Z':
 		    {
-			if (a_thread->m.n.base
+			if (a_thread->m.n.whole == FALSE)
+			{
+			    a_thread->m.n.whole = TRUE;
+			    a_thread->m.n.whole_off = a_thread->index;
+			}
+			if (a_thread->m.n.radix_base
 			    <= (10 + ((cw_uint32_t) (c - 'A'))))
 			{
 			    /* Too big for this base. */
@@ -1480,7 +1548,13 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 		    case '0': case '1': case '2': case '3': case '4': case '5':
 		    case '6': case '7': case '8': case '9':
 		    {
-			if (a_thread->m.n.base <= ((cw_uint32_t) (c - '0')))
+			if (a_thread->m.n.whole == FALSE)
+			{
+			    a_thread->m.n.whole = TRUE;
+			    a_thread->m.n.whole_off = a_thread->index;
+			}
+			if (a_thread->m.n.radix_base
+			    <= ((cw_uint32_t) (c - '0')))
 			{
 			    /* Too big for this base. */
 			    a_thread->state = THREADTS_NAME;
@@ -1505,7 +1579,183 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 		    }
 		    case '\0': case '\t': case '\f': case '\r': case ' ':
 		    {
-			if (nxoe_p_thread_integer_accept(a_thread))
+			if (a_thread->m.n.whole)
+			{
+			    a_thread->m.n.whole_len = a_thread->index
+				- a_thread->m.n.whole_off;
+			}
+			if (a_thread->m.n.whole == FALSE
+			    || nxoe_p_thread_number_accept(a_thread, TRUE))
+			{
+			    /* Conversion error.  Accept as a name. */
+			    a_thread->m.m.action = ACTION_EXECUTE;
+			    nxoe_p_thread_name_accept(a_thread);
+			}
+			token = TRUE;
+			if (restart)
+			{
+			    goto RESTART;
+			}
+			break;
+		    }
+		    default:
+		    {
+			/* Not a number character. */
+			a_thread->m.m.action = ACTION_EXECUTE;
+			a_thread->state = THREADTS_NAME;
+			CW_NXO_THREAD_PUTC(c);
+			break;
+		    }
+		}
+		break;
+	    }
+	    case THREADTS_NUMBER_FRAC:
+	    {
+		cw_bool_t restart = FALSE;
+
+		switch (c)
+		{
+		    case '0': case '1': case '2': case '3': case '4': case '5':
+		    case '6': case '7': case '8': case '9':
+		    {
+			if (a_thread->m.n.frac == FALSE)
+			{
+			    a_thread->m.n.frac = TRUE;
+			    a_thread->m.n.frac_off = a_thread->index;
+			}
+			CW_NXO_THREAD_PUTC(c);
+			break;
+		    }
+		    case 'e': case 'E':
+		    {
+			a_thread->state = THREADTS_NUMBER_EXP;
+			a_thread->m.n.exp_sign = FALSE;
+			a_thread->m.n.exp_neg = FALSE;
+			if (a_thread->m.n.frac)
+			{
+			    a_thread->m.n.frac_len = a_thread->index
+				- a_thread->frac_off;
+			}
+			break;
+		    }
+		    case '\n':
+		    {
+			restart = TRUE; /* Inverted below. */
+			CW_NXO_THREAD_NEWLINE();
+			/* Fall through. */
+		    }
+		    case '(': case ')': case '`': case '\'': case '<': case '>':
+		    case '[': case ']': case '{': case '}': case '/': case '%':
+		    {
+			/* New token. */
+			/* Invert, in case we fell through from above. */
+			restart = !restart;
+			/* Fall through. */
+		    }
+		    case '\0': case '\t': case '\f': case '\r': case ' ':
+		    {
+			if (a_thread->m.n.frac)
+			{
+			    a_thread->m.n.frac_len = a_thread->index
+				- a_thread->frac_off;
+			}
+			if (nxoe_p_thread_number_accept(a_thread, FALSE))
+			{
+			    /* Conversion error.  Accept as a name. */
+			    a_thread->m.m.action = ACTION_EXECUTE;
+			    nxoe_p_thread_name_accept(a_thread);
+			}
+			token = TRUE;
+			if (restart)
+			{
+			    goto RESTART;
+			}
+			break;
+		    }
+		    default:
+		    {
+			/* Not a number character. */
+			a_thread->m.m.action = ACTION_EXECUTE;
+			a_thread->state = THREADTS_NAME;
+			CW_NXO_THREAD_PUTC(c);
+			break;
+		    }
+		}
+		break;
+	    }
+	    case THREADTS_NUMBER_EXP:
+	    {
+		cw_bool_t restart = FALSE;
+
+		switch (c)
+		{
+		    case '0': case '1': case '2': case '3': case '4': case '5':
+		    case '6': case '7': case '8': case '9':
+		    {
+			if (a_thread->m.n.exp == FALSE)
+			{
+			    a_thread->m.n.exp = TRUE;
+			    a_thread->m.n.exp_off = a_thread->index;
+			}
+			CW_NXO_THREAD_PUTC(c);
+			break;
+		    }
+		    case '+':
+		    {
+			if (a_thread->m.n.exp_sign == FALSE
+			    && a_thread->m.n.exp == FALSE)
+			{
+			    a_thread->m.n.exp_sign = TRUE;
+			}
+			else
+			{
+			    /* Sign specified more than once. */
+			    a_thread->m.m.action = ACTION_EXECUTE;
+			    a_thread->state = THREADTS_NAME;
+			}
+			CW_NXO_THREAD_PUTC(c);
+			break;
+		    }
+		    case '-':
+		    {
+			if (a_thread->m.n.exp_sign == FALSE
+			    && a_thread->m.n.exp == FALSE)
+			{
+			    a_thread->m.n.exp_sign = TRUE;
+			    a_thread->m.n.exp_neg = TRUE;
+			}
+			else
+			{
+			    /* Sign specified more than once. */
+			    a_thread->m.m.action = ACTION_EXECUTE;
+			    a_thread->state = THREADTS_NAME;
+			}
+			CW_NXO_THREAD_PUTC(c);
+			break;
+		    }
+		    case '\n':
+		    {
+			restart = TRUE; /* Inverted below. */
+			CW_NXO_THREAD_NEWLINE();
+			/* Fall through. */
+		    }
+		    case '(': case ')': case '`': case '\'': case '<': case '>':
+		    case '[': case ']': case '{': case '}': case '/': case '%':
+		    {
+			/* New token. */
+			/* Invert, in case we fell through from above. */
+			restart = !restart;
+			/* Fall through. */
+		    }
+		    case '\0': case '\t': case '\f': case '\r': case ' ':
+		    {
+			if (a_thread->m.n.exp)
+			{
+			    a_thread->m.n.exp_len = a_thread->index
+				- a_thread->m.n.exp_off;
+			}
+			if (a_thread->m.n.exp == FALSE
+			    || nxoe_p_thread_number_accept(a_thread, FALSE))
 			{
 			    /* Conversion error.  Accept as a name. */
 			    a_thread->m.m.action = ACTION_EXECUTE;
@@ -2022,6 +2272,14 @@ nxoe_p_thread_reset(cw_nxoe_thread_t *a_thread)
 }
 
 static cw_bool_t
+nxoe_p_thread_number_accept(cw_nxoe_thread_t *a_thread, cw_bool_t a_radix)
+{
+    /* XXX Check for missing components, or conflicting components. */
+    cw_error("XXX Not implemented");
+}
+
+#if (0) /* XXX */
+static cw_bool_t
 nxoe_p_thread_integer_accept(cw_nxoe_thread_t *a_thread)
 {
     cw_bool_t retval;
@@ -2124,6 +2382,7 @@ nxoe_p_thread_integer_accept(cw_nxoe_thread_t *a_thread)
     RETURN:
     return retval;
 }
+#endif
 
 static void
 nxoe_p_thread_procedure_accept(cw_nxoe_thread_t *a_thread)

@@ -146,7 +146,6 @@ typedef enum
 #ifdef CW_POSIX
     NXN_ino,
 #endif
-    NXN_integertype,
     NXN_invalidaccess,
     NXN_invalidexit,
     NXN_invalidfileaccess,
@@ -210,6 +209,7 @@ typedef enum
 #endif
     NXN_null,
     NXN_nulltype,
+    NXN_numbertype,
 #ifdef CW_POSIX
     NXN_open,
 #endif

@@ -151,8 +151,8 @@ typedef enum
  * the initial size is set pretty low. */
 #define CW_LIBONYX_THREADSDICT_HASH 16
 
-/* Initial size initial name cache hash table.  We know for sure that there will
- * be about 250 names referenced by systemdict, errordict, and currenterror to
+/* Initial size of name cache hash table.  We know for sure that there will be
+ * about 250 names referenced by systemdict, errordict, and currenterror to
  * begin with. */
 #define CW_LIBONYX_NAME_HASH 1024
 
@@ -353,13 +353,13 @@ extern cw_mem_t *cw_g_mem;
 #include "nxo_file.h"
 #include "nxo_fino.h"
 #include "nxo_hook.h"
-#include "nxo_integer.h"
 #include "nxo_mark.h"
 #ifdef CW_THREADS
 #include "nxo_mutex.h"
 #endif
 #include "nxo_name.h"
 #include "nxo_null.h"
+#include "nxo_number.h"
 #include "nxo_operator.h"
 #include "nxo_pmark.h"
 #include "nxo_stack.h"

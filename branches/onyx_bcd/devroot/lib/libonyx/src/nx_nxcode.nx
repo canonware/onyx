@@ -167,10 +167,6 @@ systemdict begin
 			`-hook-'
 		} ifelse
 	}
-	/integertype {
-		pop
-		cvs
-	}
 	/marktype {
 		pop pop
 		`-mark-'
@@ -189,6 +185,10 @@ systemdict begin
 	/nulltype {
 		pop pop
 		`null'
+	}
+	/numbertype {
+		pop
+		cvs
 	}
 	/operatortype {
 		pop
@@ -266,36 +266,61 @@ systemdict begin
 % outputsdict implements formatted output to strings for every type.
 %
 /outputsdict <
-	/integertype {
-		% %int %flags
+    /numbertype {
+	% %num %flags
 
-		% Get the base.
-		dup /b known {
-			dup /b get
-		}{
-			10
-		} ifelse
-		% %int %flags %base
+	% Determine whether to deal with the number as an integer or as
+	% a real.
+	1 index dup 0 round eq {
+	    % Integer.
 
-		2 index exch cvrs
-		% %int %flags %str
+	    % Get the base.
+	    dup /b known {
+		dup /b get
+	    }{
+		10
+	    } ifelse
+	    % %int %flags %base
 
-		% Prepend the sign if necessary.
-		1 index /s known {
-			1 index /s get /+ eq {
-				2 index 0 ge {
-					`+' exch catenate
-				} if
-			} if
+	    2 index exch cvrs
+	    % %int %flags %str
+	}{
+	    % Real.
+
+	    % Determine whether to use decimal or exponential notation.
+	    dup /d known {
+		dup /d get
+	    }{
+		false
+	    } ifelse
+	    % %real %flags %dec?
+
+	    {
+		% Use decimal notation.
+		1 index cvds
+	    }{
+		% Use exponential notation.
+		1 index cvs
+	    } ifelse
+	    % %real %flags %str
+	} ifelse
+	% %num %flags %str
+
+	% Prepend the sign if necessary.
+	1 index /s known {
+	    1 index /s get /+ eq {
+		2 index 0 ge {
+		    `+' exch catenate
 		} if
-		% %int %flags %str
-		3 2 roll pop
-		% %flags %str
-		exch
-		% %str %flags
-		outputsdict /stringtype get eval
-		% %str
-	}
+	    } if
+	} if
+	% %num %flags %str
+	3 2 roll pop exch
+	% %str %flags
+
+	outputsdict /stringtype get eval
+	% %str
+    }
 	% Temporarily define.
 	/_s {
 		% Check for /w flag.  /w takes precedence over /n.
@@ -462,7 +487,7 @@ systemdict begin
 %
 % All types:
 % /n : maximum width
-%    : %integer
+%    : %integer XXX Make sure reals are handled correctly.
 % /w : minimum width
 %    : %integer
 % /j : justification
@@ -472,12 +497,17 @@ systemdict begin
 % /r : recursion depth
 %    : 0..n
 %
-% Integers only:
-%
-% /b : base
-%    : 2..36
+% Numbers only:
 % /s : sign
 %    : /+ /-
+%
+% Integer numbers only:
+% /b : base
+%    : 2..36
+%
+% Real numbers only:
+% /d : decimal notation if true, exponential notation if false or not defined.
+%      %boolean
 %
 % %obj %flags outputs %string
 /outputs {

@@ -74,9 +74,6 @@ static const cw_nxot_vtable_t nxot_vtable[] = {
     /* NXOT_HOOK */
     {nxoe_l_hook_delete, nxoe_l_hook_ref_iter},
 
-    /* NXOT_INTEGER */
-    {NULL, NULL},
-
     /* NXOT_MARK */
     {NULL, NULL},
 
@@ -90,6 +87,9 @@ static const cw_nxot_vtable_t nxot_vtable[] = {
 
     /* NXOT_NULL */
     {NULL, NULL},
+
+    /* NXOT_NUMBER */
+    {nxoe_l_number_delete, nxoe_l_number_ref_iter},
 
     /* NXOT_OPERATOR */
     {NULL, NULL},
@@ -271,28 +271,6 @@ nxo_compare(cw_nxo_t *a_a, cw_nxo_t *a_b)
 	    }
 	    break;
 	}
-	case NXOT_INTEGER:
-	{
-	    if (nxo_type_get(a_a) != nxo_type_get(a_b))
-	    {
-		retval = 2;
-		break;
-	    }
-
-	    if (a_a->o.integer.i < a_b->o.integer.i)
-	    {
-		retval = -1;
-	    }
-	    else if (a_a->o.integer.i == a_b->o.integer.i)
-	    {
-		retval = 0;
-	    }
-	    else
-	    {
-		retval = 1;
-	    }
-	    break;
-	}
 	case NXOT_FINO:
 	case NXOT_MARK:
 	case NXOT_NULL:
@@ -306,6 +284,17 @@ nxo_compare(cw_nxo_t *a_a, cw_nxo_t *a_b)
 	    {
 		retval = 2;
 	    }
+	    break;
+	}
+	case NXOT_NUMBER:
+	{
+	    if (nxo_type_get(a_a) != nxo_type_get(a_b))
+	    {
+		retval = 2;
+		break;
+	    }
+
+	    retval = nxo_number_compare(a_a, a_b);
 	    break;
 	}
 	default:
@@ -343,6 +332,18 @@ nxo_nxoe_get(cw_nxo_t *a_nxo)
 	case NXOT_THREAD:
 	{
 	    retval = a_nxo->o.nxoe;
+	    break;
+	}
+	case NXOT_NUMBER:
+	{
+	    if (nxo_l_number_small_get(a_nxo))
+	    {
+		retval = NULL;
+	    }
+	    else
+	    {
+		retval = a_nxo->o.nxoe;
+	    }
 	    break;
 	}
 	default:

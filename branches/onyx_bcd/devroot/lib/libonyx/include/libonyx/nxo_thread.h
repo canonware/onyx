@@ -25,8 +25,10 @@ typedef enum
     THREADTS_START,
     THREADTS_SLASH_CONT,
     THREADTS_COMMENT,
-    THREADTS_INTEGER,
-    THREADTS_INTEGER_RADIX,
+    THREADTS_NUMBER_WHOLE,
+    THREADTS_NUMBER_RADIX,
+    THREADTS_NUMBER_FRAC,
+    THREADTS_NUMBER_EXP,
     THREADTS_STRING,
     THREADTS_STRING_NEWLINE_CONT,
     THREADTS_STRING_PROT_CONT,
@@ -137,13 +139,32 @@ struct cw_nxoe_thread_s
 	/* number. */
 	struct
 	{
-	    /* -1, 0 (not specified), 1. */
-	    cw_sint32_t sign;
-	    
-	    cw_uint32_t base;
+	    /* Mantissa. */
+	    cw_bool_t mant_neg:1; /* FALSE: Positive. TRUE: Negative. */
 
-	    /* Depends on sign, radix. */
-	    cw_uint32_t b_off;
+	    /* Radix number base for mantissa (integers only). */
+	    cw_uint32_t radix_base:7; /* Radix (2-36).  Error detection requires
+				       * space to store up to 99. */
+
+	    /* Whole part of mantissa (or radix integer). */
+	    cw_bool_t whole:1; /* FALSE: No whole portion of mantissa.
+				* TRUE: Whole portion of mantissa. */
+	    cw_uint32_t whole_off; /* Offset to first digit of whole. */
+	    cw_uint32_t whole_len; /* Length of whole. */
+
+	    /* Fractional part of mantissa. */
+	    cw_bool_t frac:1; /* FALSE: No fractional portion of mantissa.
+			       * TRUE: Fractional portion of mantissa. */
+	    cw_uint32_t frac_off; /* Offset to first digit of fractional. */
+	    cw_uint32_t frac_len; /* Length of fractional. */
+
+	    /* Exponent. */
+	    cw_bool_t exp:1; /* FALSE: No exponent specified.
+			      * TRUE: Exponential notation. */
+	    cw_bool_t exp_sign:1; /* FALSE: No sign.  TRUE: Sign. */
+	    cw_bool_t exp_neg:1; /* FALSE: Positive.  TRUE: Negative. */
+	    cw_uint32_t exp_off; /* Offset to first digit of exponent. */
+	    cw_uint32_t exp_len; /* Length of exponent. */
 	} n;
 
 	/* string. */

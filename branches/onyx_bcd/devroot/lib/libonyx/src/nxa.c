@@ -492,9 +492,9 @@ nxa_threshold_set(cw_nxa_t *a_nxa, cw_nxoi_t a_threshold)
 
 void
 nxa_stats_get(cw_nxa_t *a_nxa, cw_nxoi_t *r_collections, cw_nxoi_t *r_count,
-	      cw_nxoi_t *r_ccount, cw_nxoi_t *r_cmark, cw_nxoi_t *r_csweep,
-	      cw_nxoi_t *r_mcount, cw_nxoi_t *r_mmark, cw_nxoi_t *r_msweep,
-	      cw_nxoi_t *r_scount, cw_nxoi_t *r_smark, cw_nxoi_t *r_ssweep)
+	      cw_nxo_t **r_ccount, cw_nxo_t **r_cmark, cw_nxo_t **r_csweep,
+	      cw_nxo_t **r_mcount, cw_nxo_t **r_mmark, cw_nxo_t **r_msweep,
+	      cw_nxo_t **r_scount, cw_nxo_t **r_smark, cw_nxo_t **r_ssweep)
 {
     cw_check_ptr(a_nxa);
     cw_dassert(a_nxa->magic == CW_NXA_MAGIC);
@@ -506,55 +506,55 @@ nxa_stats_get(cw_nxa_t *a_nxa, cw_nxoi_t *r_collections, cw_nxoi_t *r_count,
     /* collections. */
     if (r_collections != NULL)
     {
-	*r_collections = a_nxa->gcdict_collections;
+	*r_collections = &a_nxa->gcdict_collections;
     }
 
     /* count. */
     if (r_count != NULL)
     {
-	*r_count = a_nxa->gcdict_count;
+	*r_count = &a_nxa->gcdict_count;
     }
 
     /* current. */
     if (r_ccount != NULL)
     {
-	*r_ccount = a_nxa->gcdict_current[0];
+	*r_ccount = &a_nxa->gcdict_current[0];
     }
     if (r_cmark != NULL)
     {
-	*r_cmark = a_nxa->gcdict_current[1];
+	*r_cmark = &a_nxa->gcdict_current[1];
     }
     if (r_csweep != NULL)
     {
-	*r_csweep = a_nxa->gcdict_current[2];
+	*r_csweep = &a_nxa->gcdict_current[2];
     }
 
     /* maximum. */
     if (r_mcount != NULL)
     {
-	*r_mcount = a_nxa->gcdict_maximum[0];
+	*r_mcount = &a_nxa->gcdict_maximum[0];
     }
     if (r_mmark != NULL)
     {
-	*r_mmark = a_nxa->gcdict_maximum[1];
+	*r_mmark = &a_nxa->gcdict_maximum[1];
     }
     if (r_msweep != NULL)
     {
-	*r_msweep = a_nxa->gcdict_maximum[2];
+	*r_msweep = &a_nxa->gcdict_maximum[2];
     }
 
     /* sum. */
     if (r_scount != NULL)
     {
-	*r_scount = a_nxa->gcdict_sum[0];
+	*r_scount = &a_nxa->gcdict_sum[0];
     }
     if (r_smark != NULL)
     {
-	*r_smark = a_nxa->gcdict_sum[1];
+	*r_smark = &a_nxa->gcdict_sum[1];
     }
     if (r_ssweep != NULL)
     {
-	*r_ssweep = a_nxa->gcdict_sum[2];
+	*r_ssweep = &a_nxa->gcdict_sum[2];
     }
 
 #ifdef CW_THREADS
@@ -635,6 +635,9 @@ nxa_p_roots(cw_nxa_t *a_nxa, cw_uint32_t *r_nroot)
 	    gray = nxoe;
 	}
     }
+
+    /* XXX Iterate through stats numbers. */
+    /* XXX Move gcdict reporting from nx to here. */
 
     *r_nroot = nroot;
     return retval;

@@ -30,12 +30,12 @@ typedef enum
     NXOT_FILE,
     NXOT_FINO,
     NXOT_HOOK,
-    NXOT_INTEGER,
     NXOT_MARK,
 #ifdef CW_THREADS
     NXOT_MUTEX,
 #endif
     NXOT_NAME,
+    NXOT_NUMBER,
     NXOT_NULL,
     NXOT_OPERATOR,
     NXOT_PMARK,
@@ -75,6 +75,9 @@ struct cw_nxo_s
      *     can be used to print the operator name or inline fast_op's in the
      *     interpreter loop.
      *
+     * I : If TRUE, o.number.small is a small integer.  This avoids the overhead
+     *     of extended data for the common case of small integer numbers.
+     *
      * B : Array bound.  TRUE if the bind operator has processed this array.
      *     This is used to avoid infinite recursion in the bind operator
      *     when binding recursive procedures.
@@ -86,7 +89,7 @@ struct cw_nxo_s
      *
      * T : Type.
      *
-     * ........ .....CCC CCCCCCCB AAPTTTTT
+     * ........ ....CCCC CCCCCCIB AAPTTTTT
      * */
     cw_uint32_t flags;
 
@@ -98,8 +101,8 @@ struct cw_nxo_s
 	} boolean;
 	struct
 	{
-	    cw_nxoi_t i;
-	} integer;
+	    cw_sint32_t small;
+	} number;
 	struct
 	{
 	    cw_op_t *f;
@@ -109,7 +112,7 @@ struct cw_nxo_s
 };
 
 /* All extended type objects contain a nxoe.  This provides a poor man's
- * inheritance.  Since onyx's type system is non-extenible, this idiom is
+ * inheritance.  Since Onyx's type system is non-extenible, this idiom is
  * adequate. */
 struct cw_nxoe_s
 {
@@ -231,9 +234,9 @@ nxo_p_new(cw_nxo_t *a_nxo, cw_nxot_t a_type)
     a_nxo->magic = CW_NXO_MAGIC;
 #endif
 
-    /* o.integer.i is assumed to be at least as big as all the other fields in
-     * the union. */
-    a_nxo->o.integer.i = 0;
+    /* o.nxoe is assumed to be at least as big as all the other fields in the
+     * union. */
+    a_nxo->o.nxoe = NULL;
     a_nxo->flags = a_type;
 }
 #endif /* (defined(CW_USE_INLINES) || defined(CW_NXO_C_)) */

@@ -32,4 +32,4 @@ nxoe_l_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
 
 #define nxoe_l_registered_get(a_nxoe) (a_nxoe)->registered
 #define nxoe_l_registered_set(a_nxoe, a_registered)			\
-	(a_nxoe)->registered = (a_registered)
+    (a_nxoe)->registered = (a_registered)

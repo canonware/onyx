@@ -29,14 +29,14 @@ struct cw_nxa_s
     /* Actual state of gcdict. */
     cw_bool_t gcdict_active;
 #ifdef CW_THREADS
-    cw_nxoi_t gcdict_period;
+    cw_nxo_t gcdict_period;
 #endif
-    cw_nxoi_t gcdict_threshold;
-    cw_nxoi_t gcdict_collections;
-    cw_nxoi_t gcdict_count;
-    cw_nxoi_t gcdict_current[3];
-    cw_nxoi_t gcdict_maximum[3];
-    cw_nxoi_t gcdict_sum[3];
+    cw_nxo_t gcdict_threshold;
+    cw_nxo_t gcdict_collections;
+    cw_nxo_t gcdict_count;
+    cw_nxo_t gcdict_current[3];
+    cw_nxo_t gcdict_maximum[3];
+    cw_nxo_t gcdict_sum[3];
 
     /* Sequence set. */
 #ifdef CW_THREADS
@@ -104,10 +104,10 @@ void
 nxa_threshold_set(cw_nxa_t *a_nxa, cw_nxoi_t a_threshold);
 
 void
-nxa_stats_get(cw_nxa_t *a_nxa, cw_nxoi_t *r_collections, cw_nxoi_t *r_count,
-	      cw_nxoi_t *r_ccount, cw_nxoi_t *r_cmark, cw_nxoi_t *r_csweep,
-	      cw_nxoi_t *r_mcount, cw_nxoi_t *r_mmark, cw_nxoi_t *r_msweep,
-	      cw_nxoi_t *r_scount, cw_nxoi_t *r_smark, cw_nxoi_t *r_ssweep);
+nxa_stats_get(cw_nxa_t *a_nxa, cw_nxo_t **r_collections, cw_nxo_t **r_count,
+	      cw_nxo_t **r_ccount, cw_nxo_t **r_cmark, cw_nxo_t **r_csweep,
+	      cw_nxo_t **r_mcount, cw_nxo_t **r_mmark, cw_nxo_t **r_msweep,
+	      cw_nxo_t **r_scount, cw_nxo_t **r_smark, cw_nxo_t **r_ssweep);
 
 #ifndef CW_USE_INLINES
 cw_nx_t *
