@@ -229,16 +229,17 @@ extern cw_out_t * cw_g_out;
 
 /* Macro to do the drudgery of assuring that a pointer is non-NULL. */
 #define _cw_check_ptr(x) \
+  do \
   { \
     if (((x) == NULL) \
         || ((x) == (void *) 0xa5a5a5a5) \
         || ((x) == (void *) 0x5a5a5a5a)) \
-      { \
-	out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__, \
-		    "[s] is a NULL pointer\n", #x); \
-        abort(); \
-      } \
-  }
+    { \
+      out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__, \
+	        "[s] (0x[p]) is an invalid pointer\n", #x, (x)); \
+      abort(); \
+    } \
+  } while (0);
 #else
 #  define _cw_assert(a)
 #  define _cw_marker(a)
