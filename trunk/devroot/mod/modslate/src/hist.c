@@ -1159,7 +1159,8 @@ hist_new(cw_opaque_alloc_t *a_alloc, cw_opaque_realloc_t *a_realloc,
     cw_hist_t *retval;
 
     retval = (cw_hist_t *) cw_opaque_alloc(a_alloc, a_arg, sizeof(cw_hist_t));
-    buf_new(&retval->h, a_alloc, a_realloc, a_dealloc, a_arg);
+    buf_new(&retval->h, CW_HIST_BUFP_SIZE, a_alloc, a_realloc, a_dealloc,
+	    a_arg);
     histh_p_new(&retval->hhead);
     histh_p_new(&retval->hfoot);
     mkr_new(&retval->hbeg, &retval->h);

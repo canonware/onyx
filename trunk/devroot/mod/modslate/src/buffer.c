@@ -273,11 +273,24 @@ modslate_buffer(void *a_data, cw_nxo_t *a_thread)
 {
     cw_nxo_t *estack, *ostack, *nxo, *tag;
     cw_nx_t *nx;
+    cw_uint32_t bufp_size;
     struct cw_buffer *buffer;
 
     estack = nxo_thread_estack_get(a_thread);
     ostack = nxo_thread_ostack_get(a_thread);
     nx = nxo_thread_nx_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    if (nxo_type_get(nxo) != NXOT_INTEGER)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    if (nxo_integer_get(nxo) < 0 || nxo_integer_get(nxo) > UINT_MAX)
+    {
+	nxo_thread_nerror(a_thread, NXN_rangecheck);
+	return;
+    }
+    bufp_size = nxo_integer_get(nxo);
 
     buffer = (struct cw_buffer *) nxa_malloc(nx_nxa_get(nx),
 					     sizeof(struct cw_buffer));
@@ -288,7 +301,7 @@ modslate_buffer(void *a_data, cw_nxo_t *a_thread)
     nxo_dup(&buffer->hook, nxo_stack_get(estack));
 
     /* Initialize the buf. */
-    buf_new(&buffer->buf, (cw_opaque_alloc_t *) nxa_malloc_e,
+    buf_new(&buffer->buf, bufp_size, (cw_opaque_alloc_t *) nxa_malloc_e,
 	    (cw_opaque_realloc_t *) nxa_realloc_e,
 	    (cw_opaque_dealloc_t *) nxa_free_e, (void *) nx_nxa_get(nx));
 
@@ -296,7 +309,6 @@ modslate_buffer(void *a_data, cw_nxo_t *a_thread)
     mtx_new(&buffer->mtx);
 
     /* Create a reference to the buffer. */
-    nxo = nxo_stack_push(ostack);
     nxo_hook_new(nxo, nx, buffer, buffer_p_eval, buffer_p_ref_iter,
 		 buffer_p_delete);
 

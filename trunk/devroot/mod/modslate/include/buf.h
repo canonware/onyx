@@ -154,11 +154,6 @@ struct cw_bufp_s
     cw_uint32_t gap_off;
 
     /* Text buffer, with gap. */
-#ifdef XXX_NOT_YET
-#define CW_BUFP_SIZE 65536
-#else
-#define CW_BUFP_SIZE 16
-#endif
     cw_uint8_t *b;
 
     /* Tree and list of mkr's that point into the bufp.  Both of these are
@@ -178,6 +173,9 @@ struct cw_buf_s
     cw_uint32_t magic;
 #define CW_BUF_MAGIC 0x348279bd
 #endif
+
+    /* Size of buffer pages. */
+    cw_uint32_t bufp_size;
 
     /* Allocator state. */
     cw_bool_t alloced;
@@ -230,7 +228,7 @@ bufv_rcopy(cw_bufv_t *a_to, cw_uint32_t a_to_len, const cw_bufv_t *a_fr,
 
 /* buf. */
 cw_buf_t *
-buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc,
+buf_new(cw_buf_t *a_buf, cw_uint32_t a_bufp_size, cw_opaque_alloc_t *a_alloc,
 	cw_opaque_realloc_t *a_realloc, cw_opaque_dealloc_t *a_dealloc,
 	void *a_arg);
 

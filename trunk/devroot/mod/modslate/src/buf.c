@@ -81,19 +81,19 @@
  * of view to store the buffer gap offset and length, but since moving buf's
  * bufp_cur must be efficient, we instead store the buffer gap offset and total
  * number of valid characters.  The buffer gap length can be derived from this,
- * since the page size is fixed at CW_BUFP_SIZE.
+ * since the page size is fixed at buf->bufp_size.
  *
  *         /------- len ------\
  *        /                    \
  * |- gap_off -|           |-------|
  *
- * |--------- CW_BUFP_SIZE --------|
+ * |-------- buf->bufp_size -------|
  * /---+---+---+---+---+---+---+---\
  * | A | B | C |:::|:::|:::| D | E |
  * \---+---+---+---+---+---+---+---/
  *   ^           ^           ^
  *   |           |           |
- *   0           gap_off     gap_off + (CW_BUFP_SIZE - len)
+ *   0           gap_off     gap_off + (buf->bufp_size - len)
  *
  ******************************************************************************
  *
@@ -719,7 +719,7 @@ bufp_p_mkrs_pline_adjust(cw_bufp_t *a_bufp, cw_sint32_t a_adjust,
     cw_mkr_t *mkr;
 
     cw_check_ptr(a_bufp);
-    cw_assert(a_beg_ppos <= CW_BUFP_SIZE + 1);
+    cw_assert(a_beg_ppos <= a_bufp->buf->bufp_size + 1);
 
     for (mkr = ql_last(&a_bufp->mlist, mlink);
 	 mkr != NULL && mkr->ppos >= a_beg_ppos;
@@ -732,13 +732,15 @@ bufp_p_mkrs_pline_adjust(cw_bufp_t *a_bufp, cw_sint32_t a_adjust,
 static void
 bufp_p_gap_move(cw_bufp_t *a_bufp, cw_uint32_t a_ppos)
 {
-    cw_assert(a_ppos < CW_BUFP_SIZE
-	      || (a_ppos == CW_BUFP_SIZE && a_bufp->len == CW_BUFP_SIZE));
+    cw_uint32_t bufp_size = a_bufp->buf->bufp_size;
+
+    cw_assert(a_ppos < bufp_size
+	      || (a_ppos == bufp_size && a_bufp->len == bufp_size));
 
     /* Move the gap if it isn't already where it needs to be. */
     if (a_bufp->gap_off != a_ppos)
     {
-	if (a_bufp->len < CW_BUFP_SIZE)
+	if (a_bufp->len < bufp_size)
 	{
 	    if (a_bufp->gap_off < a_ppos)
 	    {
@@ -756,16 +758,15 @@ bufp_p_gap_move(cw_bufp_t *a_bufp, cw_uint32_t a_ppos)
 		 *                   v
 		 * oooooooMMMMMMMMMMM________oo */
 		memmove(&a_bufp->b[a_bufp->gap_off],
-			&a_bufp->b[a_bufp->gap_off
-				   + (CW_BUFP_SIZE - a_bufp->len)],
+			&a_bufp->b[a_bufp->gap_off + (bufp_size - a_bufp->len)],
 			(a_ppos - a_bufp->gap_off));
 
 		/* Adjust the ppos of all mkr's with ppos in the moved
 		 * region. */
-		bufp_p_mkrs_ppos_adjust(a_bufp, -(CW_BUFP_SIZE - a_bufp->len),
-					a_bufp->gap_off + (CW_BUFP_SIZE
+		bufp_p_mkrs_ppos_adjust(a_bufp, -(bufp_size - a_bufp->len),
+					a_bufp->gap_off + (bufp_size
 							   - a_bufp->len),
-					a_ppos + (CW_BUFP_SIZE - a_bufp->len));
+					a_ppos + (bufp_size - a_bufp->len));
 	    }
 	    else
 	    {
@@ -782,13 +783,13 @@ bufp_p_gap_move(cw_bufp_t *a_bufp, cw_uint32_t a_ppos)
 		 *     |
 		 *     v
 		 * oooo___________MMMMMMMMMoooo */
-		memmove(&a_bufp->b[(CW_BUFP_SIZE - a_bufp->len) + a_ppos],
+		memmove(&a_bufp->b[(bufp_size - a_bufp->len) + a_ppos],
 			&a_bufp->b[a_ppos],
 			(a_bufp->gap_off - a_ppos));
 
 		/* Adjust the ppos of all mkr's with ppos in the moved
 		 * region. */
-		bufp_p_mkrs_ppos_adjust(a_bufp, CW_BUFP_SIZE - a_bufp->len,
+		bufp_p_mkrs_ppos_adjust(a_bufp, bufp_size - a_bufp->len,
 					a_ppos, a_bufp->gap_off);
 	    }
 	}
@@ -819,7 +820,7 @@ bufp_p_new(cw_buf_t *a_buf)
 
     /* Allocate buffer. */
     retval->b = (cw_uint8_t *) cw_opaque_alloc(a_buf->alloc, a_buf->arg,
-					       CW_BUFP_SIZE);
+					       a_buf->bufp_size);
 
     /* Initialize marker tree and list. */
     rb_tree_new(&retval->mtree, mnode);
@@ -849,7 +850,7 @@ bufp_p_simple_insert(cw_bufp_t *a_bufp, const cw_bufv_t *a_bufv,
 
     /* Insert. */
     bufv.data = &a_bufp->b[a_bufp->gap_off];
-    bufv.len = CW_BUFP_SIZE - a_bufp->len;
+    bufv.len = a_bufp->buf->bufp_size - a_bufp->len;
     if (a_reverse == FALSE)
     {
 	nlines = bufv_p_copy(&bufv, 1, a_bufv, a_bufvcnt);
@@ -871,7 +872,7 @@ bufp_p_simple_insert(cw_bufp_t *a_bufp, const cw_bufv_t *a_bufv,
 	/* Adjust the line numbers of all mkr's after the gap. */
 	bufp_p_mkrs_pline_adjust(a_bufp, nlines,
 				 a_bufp->gap_off
-				 + (CW_BUFP_SIZE - a_bufp->len));
+				 + (a_bufp->buf->bufp_size - a_bufp->len));
     }
 
     return nlines;
@@ -893,7 +894,7 @@ bufp_p_delete(cw_bufp_t *a_bufp)
     cw_assert(qr_next(a_bufp, plink) == a_bufp);
 
     cw_opaque_dealloc(a_bufp->buf->dealloc, a_bufp->buf->arg, a_bufp->b,
-		      CW_BUFP_SIZE);
+		      a_bufp->buf->bufp_size);
 
     cw_opaque_dealloc(a_bufp->buf->dealloc, a_bufp->buf->arg, a_bufp,
 		      sizeof(cw_bufp_t));
@@ -916,9 +917,10 @@ bufp_p_pos_p2r(cw_bufp_t *a_bufp, cw_uint32_t a_ppos)
      * *) Just past the end of the last bufp in the buf.
      */
     cw_assert(a_ppos < a_bufp->gap_off
-	      || (a_ppos >= a_bufp->gap_off + (CW_BUFP_SIZE - a_bufp->len)
-		  && a_ppos < CW_BUFP_SIZE)
-	      || (a_ppos == CW_BUFP_SIZE
+	      || (a_ppos >= a_bufp->gap_off
+		  + (a_bufp->buf->bufp_size - a_bufp->len)
+		  && a_ppos < a_bufp->buf->bufp_size)
+	      || (a_ppos == a_bufp->buf->bufp_size
 		  && a_bufp == ql_last(&a_bufp->buf->plist, plink)));
 
     if (a_ppos < a_bufp->gap_off)
@@ -927,7 +929,7 @@ bufp_p_pos_p2r(cw_bufp_t *a_bufp, cw_uint32_t a_ppos)
     }
     else
     {
-	rpos = a_ppos - (CW_BUFP_SIZE - a_bufp->len);
+	rpos = a_ppos - (a_bufp->buf->bufp_size - a_bufp->len);
     }
 
     return rpos;
@@ -947,7 +949,7 @@ bufp_p_pos_b2p(cw_bufp_t *a_bufp, cw_uint64_t a_bpos)
     /* Calculate the offset into bufp up front. */
     cw_assert(a_bpos >= bufp_p_bpos(a_bufp));
     rel_bpos = a_bpos - bufp_p_bpos(a_bufp);
-    cw_assert(rel_bpos <= CW_BUFP_SIZE);
+    cw_assert(rel_bpos <= a_bufp->buf->bufp_size);
 
     if (rel_bpos < a_bufp->gap_off)
     {
@@ -955,13 +957,14 @@ bufp_p_pos_b2p(cw_bufp_t *a_bufp, cw_uint64_t a_bpos)
     }
     else
     {
-	ppos = rel_bpos + (CW_BUFP_SIZE - a_bufp->len);
+	ppos = rel_bpos + (a_bufp->buf->bufp_size - a_bufp->len);
     }
 
     cw_assert(ppos < a_bufp->gap_off
-	      || (ppos >= a_bufp->gap_off + (CW_BUFP_SIZE - a_bufp->len)
-		  && ppos < CW_BUFP_SIZE)
-	      || (ppos == CW_BUFP_SIZE
+	      || (ppos >= a_bufp->gap_off
+		  + (a_bufp->buf->bufp_size - a_bufp->len)
+		  && ppos < a_bufp->buf->bufp_size)
+	      || (ppos == a_bufp->buf->bufp_size
 		  && a_bufp == ql_last(&a_bufp->buf->plist, plink)));
     return ppos;
 }
@@ -976,13 +979,16 @@ bufp_p_pos_p2b(cw_bufp_t *a_bufp, cw_uint32_t a_ppos)
 static cw_uint32_t
 bufp_p_ppos2pline(cw_bufp_t *a_bufp, cw_uint32_t a_ppos)
 {
-    cw_uint32_t pline, i;
+    cw_uint32_t pline, i, bufp_size;
 
     cw_check_ptr(a_bufp);
     cw_dassert(a_bufp->magic == CW_BUFP_MAGIC);
+
+    bufp_size = a_bufp->buf->bufp_size;
+
     cw_assert(a_ppos <= a_bufp->gap_off
-	      || a_ppos >= a_bufp->gap_off + (CW_BUFP_SIZE - a_bufp->len)
-	      || (a_ppos == CW_BUFP_SIZE
+	      || a_ppos >= a_bufp->gap_off + (bufp_size - a_bufp->len)
+	      || (a_ppos == bufp_size
 		  && a_bufp == ql_last(&a_bufp->buf->plist, plink)));
 
     if (a_ppos < a_bufp->gap_off)
@@ -1001,8 +1007,8 @@ bufp_p_ppos2pline(cw_bufp_t *a_bufp, cw_uint32_t a_ppos)
 	else
 	{
 	    /* Start from the end. */
-	    for (i = CW_BUFP_SIZE - 1, pline = a_bufp->nlines;
-		 i >= a_bufp->gap_off + (CW_BUFP_SIZE - a_bufp->len);
+	    for (i = bufp_size - 1, pline = a_bufp->nlines;
+		 i >= a_bufp->gap_off + (bufp_size - a_bufp->len);
 		 i--)
 	    {
 		if (a_bufp->b[i] == '\n')
@@ -1023,7 +1029,7 @@ bufp_p_ppos2pline(cw_bufp_t *a_bufp, cw_uint32_t a_ppos)
     }
     else
     {
-	if ((CW_BUFP_SIZE - a_ppos) * 2 > a_bufp->len)
+	if ((bufp_size - a_ppos) * 2 > a_bufp->len)
 	{
 	    /* Start from the beginning. */
 	    for (i = pline = 0; i < a_bufp->gap_off; i++)
@@ -1033,7 +1039,7 @@ bufp_p_ppos2pline(cw_bufp_t *a_bufp, cw_uint32_t a_ppos)
 		    pline++;
 		}
 	    }
-	    for (i = a_bufp->gap_off + (CW_BUFP_SIZE - a_bufp->len);
+	    for (i = a_bufp->gap_off + (bufp_size - a_bufp->len);
 		 i < a_ppos;
 		 i++)
 	    {
@@ -1046,7 +1052,7 @@ bufp_p_ppos2pline(cw_bufp_t *a_bufp, cw_uint32_t a_ppos)
 	else
 	{
 	    /* Start from the end. */
-	    for (i = CW_BUFP_SIZE - 1, pline = a_bufp->nlines;
+	    for (i = bufp_size - 1, pline = a_bufp->nlines;
 		 i >= a_ppos;
 		 i--)
 	    {
@@ -1126,13 +1132,14 @@ bufp_p_dump(cw_bufp_t *a_bufp, const char *a_beg, const char *a_mid,
 	}
 	fprintf(stderr, "\"\n");
     }
-    if (a_bufp->gap_off + (CW_BUFP_SIZE - a_bufp->len) < CW_BUFP_SIZE)
+    if (a_bufp->gap_off + (a_bufp->buf->bufp_size - a_bufp->len)
+	< a_bufp->buf->bufp_size)
     {
 	fprintf(stderr, "%s|   b[%u..%u]: \"", mid,
-		a_bufp->gap_off + (CW_BUFP_SIZE - a_bufp->len),
-		CW_BUFP_SIZE - 1);
-	for (i = a_bufp->gap_off + (CW_BUFP_SIZE - a_bufp->len);
-	     i < CW_BUFP_SIZE;
+		a_bufp->gap_off + (a_bufp->buf->bufp_size - a_bufp->len),
+		a_bufp->buf->bufp_size - 1);
+	for (i = a_bufp->gap_off + (a_bufp->buf->bufp_size - a_bufp->len);
+	     i < a_bufp->buf->bufp_size;
 	     i++)
 	{
 	    if (isprint(a_bufp->b[i]))
@@ -1182,16 +1189,18 @@ bufp_p_dump(cw_bufp_t *a_bufp, const char *a_beg, const char *a_mid,
 static void
 bufp_p_validate(cw_bufp_t *a_bufp)
 {
-    cw_uint32_t i, nlines;
+    cw_uint32_t i, nlines, bufp_size;
     cw_mkr_t *mkr, *tmkr;
 
     cw_check_ptr(a_bufp);
     cw_dassert(a_bufp->magic == CW_BUFP_MAGIC);
 
+    bufp_size = a_bufp->buf->bufp_size;
+
     /* Validate consistency of len and gap_off. */
     cw_assert(a_bufp->gap_off <= a_bufp->len);
-    cw_assert(a_bufp->len <= CW_BUFP_SIZE);
-    cw_assert(a_bufp->gap_off <= CW_BUFP_SIZE);
+    cw_assert(a_bufp->len <= bufp_size);
+    cw_assert(a_bufp->gap_off <= bufp_size);
 
     /* Validate nlines. */
     for (i = nlines = 0; i < a_bufp->gap_off; i++)
@@ -1201,8 +1210,8 @@ bufp_p_validate(cw_bufp_t *a_bufp)
 	    nlines++;
 	}
     }
-    for (i = a_bufp->gap_off + (CW_BUFP_SIZE - a_bufp->len);
-	 i < CW_BUFP_SIZE;
+    for (i = a_bufp->gap_off + (bufp_size - a_bufp->len);
+	 i < bufp_size;
 	 i++)
     {
 	if (a_bufp->b[i] == '\n')
@@ -1332,7 +1341,7 @@ buf_p_bpos_lf_comp(cw_bufp_t *a_key, cw_bufp_t *a_bufp)
 static cw_uint64_t
 buf_p_bpos_before_lf(cw_buf_t *a_buf, cw_uint64_t a_lf, cw_bufp_t **r_bufp)
 {
-    cw_uint32_t ppos, nlines;
+    cw_uint32_t ppos, nlines, bufp_size;
     cw_uint64_t retval, bufp_line;
     cw_bufp_t *bufp, key;
 
@@ -1373,9 +1382,10 @@ buf_p_bpos_before_lf(cw_buf_t *a_buf, cw_uint64_t a_lf, cw_bufp_t **r_bufp)
     }
 
     /* After the gap. */
-    for (ppos += (CW_BUFP_SIZE - bufp->len);; ppos++)
+    bufp_size = bufp->buf->bufp_size;
+    for (ppos += (bufp_size - bufp->len);; ppos++)
     {
-	cw_assert(ppos < CW_BUFP_SIZE);
+	cw_assert(ppos < bufp_size);
 
 	if (bufp->b[ppos] == '\n')
 	{
@@ -1384,7 +1394,7 @@ buf_p_bpos_before_lf(cw_buf_t *a_buf, cw_uint64_t a_lf, cw_bufp_t **r_bufp)
 	    {
 		retval = bufp_p_bpos(bufp)
 		    + (cw_uint64_t) ppos
-		    - (cw_uint64_t) (CW_BUFP_SIZE - bufp->len);
+		    - (cw_uint64_t) (bufp_size - bufp->len);
 		goto DONE;
 	    }
 	}
@@ -1544,9 +1554,9 @@ buf_p_bufv_insert(cw_buf_t *a_buf, cw_bufp_t *a_bufp, cw_bufp_t *a_pastp,
 	if (vremain.len != 0)
 	{
 	    vsplit.data = vremain.data;
-	    if (CW_BUFP_SIZE - bufp->len < vremain.len)
+	    if (a_buf->bufp_size - bufp->len < vremain.len)
 	    {
-		vsplit.len = CW_BUFP_SIZE - bufp->len;
+		vsplit.len = a_buf->bufp_size - bufp->len;
 	    }
 	    else
 	    {
@@ -1558,7 +1568,7 @@ buf_p_bufv_insert(cw_buf_t *a_buf, cw_bufp_t *a_bufp, cw_bufp_t *a_pastp,
 	    nlines += (cw_uint64_t) bufp_p_simple_insert(bufp, &vsplit, 1,
 							 vsplit.len, FALSE);
 
-	    if (CW_BUFP_SIZE - bufp->len == 0 || vremain.len != 0)
+	    if (a_buf->bufp_size - bufp->len == 0 || vremain.len != 0)
 	    {
 		/* No more space in this bufp, or no more remaining data in
 		 * bufv[v]. */
@@ -1571,7 +1581,7 @@ buf_p_bufv_insert(cw_buf_t *a_buf, cw_bufp_t *a_bufp, cw_bufp_t *a_pastp,
 	cnt = 0;
 	for (i = v; i < a_bufvcnt; i++)
 	{
-	    if (cnt + a_bufv[i].len > CW_BUFP_SIZE - bufp->len)
+	    if (cnt + a_bufv[i].len > a_buf->bufp_size - bufp->len)
 	    {
 		break;
 	    }
@@ -1585,10 +1595,10 @@ buf_p_bufv_insert(cw_buf_t *a_buf, cw_bufp_t *a_bufp, cw_bufp_t *a_pastp,
 	}
 
 	/* Split a_bufv[v] if bufp isn't full and there are more data. */
-	if (CW_BUFP_SIZE - bufp->len != 0 && v < a_bufvcnt)
+	if (a_buf->bufp_size - bufp->len != 0 && v < a_bufvcnt)
 	{
 	    vsplit.data = a_bufv[v].data;
-	    vsplit.len = CW_BUFP_SIZE - bufp->len;
+	    vsplit.len = a_buf->bufp_size - bufp->len;
 	    vremain.data = &vsplit.data[vsplit.len];
 	    vremain.len = a_bufv[v].len - vsplit.len;
 	    v++;
@@ -1642,9 +1652,9 @@ buf_p_bufv_rinsert(cw_buf_t *a_buf, cw_bufp_t *a_bufp, cw_bufp_t *a_pastp,
 	/* Insert remainder, if any. */
 	if (vremain.len != 0)
 	{
-	    if (CW_BUFP_SIZE - bufp->len < vremain.len)
+	    if (a_buf->bufp_size - bufp->len < vremain.len)
 	    {
-		vsplit.len = CW_BUFP_SIZE - bufp->len;
+		vsplit.len = a_buf->bufp_size - bufp->len;
 	    }
 	    else
 	    {
@@ -1656,7 +1666,7 @@ buf_p_bufv_rinsert(cw_buf_t *a_buf, cw_bufp_t *a_bufp, cw_bufp_t *a_pastp,
 	    nlines += (cw_uint64_t) bufp_p_simple_insert(bufp, &vsplit, 1,
 							 vsplit.len, TRUE);
 
-	    if (CW_BUFP_SIZE - bufp->len == 0 || vremain.len != 0)
+	    if (a_buf->bufp_size - bufp->len == 0 || vremain.len != 0)
 	    {
 		/* No more space in this bufp, or no more remaining data in
 		 * bufv[v]. */
@@ -1669,7 +1679,7 @@ buf_p_bufv_rinsert(cw_buf_t *a_buf, cw_bufp_t *a_bufp, cw_bufp_t *a_pastp,
 	cnt = 0;
 	for (i = v; i != 0xffffffff; i--)
 	{
-	    if (cnt + a_bufv[i].len > CW_BUFP_SIZE - bufp->len)
+	    if (cnt + a_bufv[i].len > a_buf->bufp_size - bufp->len)
 	    {
 		break;
 	    }
@@ -1683,9 +1693,9 @@ buf_p_bufv_rinsert(cw_buf_t *a_buf, cw_bufp_t *a_bufp, cw_bufp_t *a_pastp,
 	}
 
 	/* Split a_bufv[v] if bufp isn't full and there are more data. */
-	if (CW_BUFP_SIZE - bufp->len != 0 && v != 0xffffffff)
+	if (a_buf->bufp_size - bufp->len != 0 && v != 0xffffffff)
 	{
-	    vsplit.len = CW_BUFP_SIZE - bufp->len;
+	    vsplit.len = a_buf->bufp_size - bufp->len;
 	    vremain.len = a_bufv[v].len - vsplit.len;
 	    vremain.data = a_bufv[v].data;
 	    vsplit.data = &vremain.data[vremain.len];
@@ -1771,8 +1781,8 @@ buf_p_bufp_splice(cw_buf_t *a_buf, cw_bufp_t *a_start, cw_bufp_t *a_end)
     bufp_p_gap_move(a_end, 0);
 
     /* Copy a_end's data to a_start. */
-    memcpy(&a_start->b[CW_BUFP_SIZE - a_end->len],
-	   &a_end->b[CW_BUFP_SIZE - a_end->len],
+    memcpy(&a_start->b[a_buf->bufp_size - a_end->len],
+	   &a_end->b[a_buf->bufp_size - a_end->len],
 	   a_end->len);
 
     /* Remove a_end. */
@@ -1805,7 +1815,7 @@ buf_p_bufp_splice(cw_buf_t *a_buf, cw_bufp_t *a_start, cw_bufp_t *a_end)
 }
 
 cw_buf_t *
-buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc,
+buf_new(cw_buf_t *a_buf, cw_uint32_t a_bufp_size, cw_opaque_alloc_t *a_alloc,
 	cw_opaque_realloc_t *a_realloc, cw_opaque_dealloc_t *a_dealloc,
 	void *a_arg)
 {
@@ -1826,6 +1836,11 @@ buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc,
 	retval = (cw_buf_t *) cw_opaque_alloc(a_alloc, a_arg, sizeof(cw_buf_t));
 	retval->alloced = TRUE;
     }
+
+    /* Set page size.  This is settable per buffer, so that for extremely large
+     * buffers, it is possible to use a large page size that might be less than
+     * ideal under normal circumstances. */
+    retval->bufp_size = a_bufp_size;
 
     /* Initialize internal allocator pointers. */
     retval->alloc = a_alloc;
@@ -2480,15 +2495,16 @@ mkr_p_simple_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
 		    cw_uint32_t a_bufvcnt, cw_uint32_t a_count,
 		    cw_bool_t a_reverse)
 {
-    cw_uint32_t nlines;
+    cw_uint32_t nlines, bufp_size;
     cw_buf_t *buf;
     cw_bufp_t *bufp;
     cw_mkr_t *mkr;
 
-    cw_assert(a_count <= CW_BUFP_SIZE - a_mkr->bufp->len);
-
     bufp = a_mkr->bufp;
     buf = bufp->buf;
+    bufp_size = buf->bufp_size;
+
+    cw_assert(a_count <= bufp_size - a_mkr->bufp->len);
     cw_assert(buf->bufp_cur == bufp);
 
     /* Move the gap. */
@@ -2518,7 +2534,7 @@ mkr_p_simple_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
 	     mkr = ql_prev(&bufp->mlist, mkr, mlink))
 	{
 	    cw_assert(mkr->order == MKRO_BEFORE);
-	    mkr->ppos -= (CW_BUFP_SIZE - bufp->len) + a_count;
+	    mkr->ppos -= (bufp_size - bufp->len) + a_count;
 	    mkr->pline -= nlines;
 	}
     }
@@ -2535,7 +2551,7 @@ mkr_p_simple_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
 	     mkr != NULL && mkr->ppos == ppos && mkr->order == MKRO_EITHER;
 	     mkr = ql_next(&bufp->mlist, mkr, mlink))
 	{
-	    mkr->ppos -= (CW_BUFP_SIZE - bufp->len) + a_count;
+	    mkr->ppos -= (bufp_size - bufp->len) + a_count;
 	    mkr->pline -= nlines;
 	}
 
@@ -2544,7 +2560,7 @@ mkr_p_simple_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
 	     mkr != NULL && mkr->ppos == ppos;
 	     mkr = ql_prev(&bufp->mlist, mkr, mlink))
 	{
-	    mkr->ppos -= (CW_BUFP_SIZE - bufp->len) + a_count;
+	    mkr->ppos -= (bufp_size - bufp->len) + a_count;
 	    mkr->pline -= nlines;
 	}	
     }
@@ -2579,7 +2595,7 @@ mkr_p_before_slide_insert(cw_mkr_t *a_mkr, cw_bool_t a_after,
     bufp_p_gap_move(a_prevp, a_prevp->len);
 
     /* Copy all data that will fit to a_prevp. */
-    if (CW_BUFP_SIZE - a_prevp->len >= bufp->gap_off)
+    if (buf->bufp_size - a_prevp->len >= bufp->gap_off)
     {
 	/* All data can be moved to a_prevp. */
 	nmove = bufp->gap_off;
@@ -2587,7 +2603,7 @@ mkr_p_before_slide_insert(cw_mkr_t *a_mkr, cw_bool_t a_after,
     else
     {
 	/* Only some of the data can be moved to a_prevp. */
-	nmove = CW_BUFP_SIZE - a_prevp->len;
+	nmove = buf->bufp_size - a_prevp->len;
     }
     nslide = bufp->gap_off - nmove;
 
@@ -2663,7 +2679,7 @@ mkr_p_after_slide_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, cw_bufp_t *a_nextp,
 			 const cw_bufv_t *a_bufv, cw_uint32_t a_bufvcnt,
 			 cw_uint32_t a_count, cw_bool_t a_reverse)
 {
-    cw_uint32_t nlines;
+    cw_uint32_t nlines, bufp_size;
     cw_buf_t *buf;
     cw_bufp_t *bufp;
     cw_mkr_t *mkr, *mmkr;
@@ -2672,6 +2688,7 @@ mkr_p_after_slide_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, cw_bufp_t *a_nextp,
 
     bufp = a_mkr->bufp;
     buf = bufp->buf;
+    bufp_size = buf->bufp_size;
     cw_assert(buf->bufp_cur == bufp);
     
     /* The data won't fit in this bufp, but enough data can be slid to the next
@@ -2684,7 +2701,7 @@ mkr_p_after_slide_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, cw_bufp_t *a_nextp,
     bufp_p_gap_move(a_nextp, 0);
 
     /* Copy all data that will fit to a_nextp. */
-    if (CW_BUFP_SIZE - a_nextp->len >= bufp->len - bufp->gap_off)
+    if (bufp_size - a_nextp->len >= bufp->len - bufp->gap_off)
     {
 	/* All data can be moved to a_nextp. */
 	nmove = bufp->len - bufp->gap_off;
@@ -2692,17 +2709,17 @@ mkr_p_after_slide_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, cw_bufp_t *a_nextp,
     else
     {
 	/* Only some of the data can be moved to a_nextp. */
-	nmove = CW_BUFP_SIZE - a_nextp->len;
+	nmove = bufp_size - a_nextp->len;
     }
     nslide = bufp->len - bufp->gap_off - nmove;
 
-    bufv.data = &bufp->b[CW_BUFP_SIZE - nmove];
+    bufv.data = &bufp->b[bufp_size - nmove];
     bufv.len = nmove;
     nmovelines = bufp_p_simple_insert(a_nextp, &bufv, 1, nmove, FALSE);
 
     /* Move markers that belong with the data copied to a_nextp. */
     for (mkr = ql_last(&bufp->mlist, mlink);
-	 mkr != NULL && mkr->ppos >= CW_BUFP_SIZE - nmove;
+	 mkr != NULL && mkr->ppos >= bufp_size - nmove;
 	 mkr = mmkr)
     {
 	/* Get previous before removing mkr. */
@@ -2710,7 +2727,7 @@ mkr_p_after_slide_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, cw_bufp_t *a_nextp,
 
 	mkr_p_remove(mkr);
 	mkr->bufp = a_nextp;
-	mkr->ppos -= CW_BUFP_SIZE - nmove;
+	mkr->ppos -= bufp_size - nmove;
 	mkr->pline -= bufp->nlines - nmovelines;
 	rb_node_new(&a_nextp->mtree, mkr, mnode);
 	mkr_p_insert(mkr);
@@ -2721,8 +2738,8 @@ mkr_p_after_slide_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, cw_bufp_t *a_nextp,
 	/* Not all slid data fit in a_nextp. */
 
 	/* Slide the remainder to the end of bufp. */
-	memmove(&bufp->b[CW_BUFP_SIZE - nslide],
-		&bufp->b[bufp->gap_off + (CW_BUFP_SIZE - bufp->len)],
+	memmove(&bufp->b[bufp_size - nslide],
+		&bufp->b[bufp->gap_off + (bufp_size - bufp->len)],
 		nslide);
 
 	/* Adjust bufp's internal state. */
@@ -2732,7 +2749,7 @@ mkr_p_after_slide_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, cw_bufp_t *a_nextp,
 	/* Adjust the internal state of markers associated with the slid
 	 * data. */
 	bufp_p_mkrs_ppos_adjust(bufp, nmove, bufp->gap_off,
-				CW_BUFP_SIZE - nmove);
+				bufp_size - nmove);
     }
     else
     {
@@ -2769,13 +2786,14 @@ mkr_p_split_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
 		   cw_bool_t a_reverse)
 {
     cw_uint64_t nlines;
-    cw_uint32_t i, nextra;
+    cw_uint32_t i, nextra, bufp_size;
     cw_buf_t *buf;
     cw_bufp_t *bufp, *nextp, *pastp;
     cw_mkr_t *mkr, *mmkr;
 
     bufp = a_mkr->bufp;
     buf = bufp->buf;
+    bufp_size = buf->bufp_size;
     cw_assert(buf->bufp_cur == bufp);
 
     /* Keep track of the bufp past the range of bufp's being operated on.  This
@@ -2800,8 +2818,8 @@ mkr_p_split_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
     /* Insert the data after bufp's gap to the same offset in nextp. */
     nextp->len = bufp->len - bufp->gap_off;
     nextp->nlines = bufp->nlines - a_mkr->pline;
-    memcpy(&nextp->b[bufp->gap_off + (CW_BUFP_SIZE - bufp->len)],
-	   &bufp->b[bufp->gap_off + (CW_BUFP_SIZE - bufp->len)],
+    memcpy(&nextp->b[bufp->gap_off + (bufp_size - bufp->len)],
+	   &bufp->b[bufp->gap_off + (bufp_size - bufp->len)],
 	   nextp->len);
 
     /* Subtract nextp's nlines from bufp's nlines. */
@@ -2833,20 +2851,20 @@ mkr_p_split_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
 
     /* Check if splitting bufp provided enough space.  If not, calculate how
      * many more bufp's are needed, then insert them. */
-    if (a_count > (cw_uint64_t) ((CW_BUFP_SIZE - bufp->len)
-				 + (CW_BUFP_SIZE - nextp->len)))
+    if (a_count > (cw_uint64_t) ((bufp_size - bufp->len)
+				 + (bufp_size - nextp->len)))
     {
 	cw_bufp_t *newp;
 
 	/* Splitting bufp didn't provide enough space.  Calculate how many more
 	 * bufp's are needed. */
-	nextra = (a_count - (cw_uint64_t) ((CW_BUFP_SIZE - bufp->len)
-					   + (CW_BUFP_SIZE - nextp->len)))
-	    / (cw_uint64_t) CW_BUFP_SIZE;
+	nextra = (a_count - (cw_uint64_t) ((bufp_size - bufp->len)
+					   + (bufp_size - nextp->len)))
+	    / (cw_uint64_t) bufp_size;
 
-	if ((a_count - (cw_uint64_t) ((CW_BUFP_SIZE - bufp->len)
-				      + (CW_BUFP_SIZE - nextp->len)))
-	    % (cw_uint64_t) CW_BUFP_SIZE != 0)
+	if ((a_count - (cw_uint64_t) ((bufp_size - bufp->len)
+				      + (bufp_size - nextp->len)))
+	    % (cw_uint64_t) bufp_size != 0)
 	{
 	    nextra++;
 	}
@@ -2902,7 +2920,7 @@ mkr_l_insert(cw_mkr_t *a_mkr, cw_bool_t a_record, cw_bool_t a_after,
 	     cw_bool_t a_reverse)
 {
     cw_uint64_t cnt, nlines;
-    cw_uint32_t i;
+    cw_uint32_t i, bufp_size;
     cw_buf_t *buf;
     cw_bufp_t *bufp;
     cw_mkr_t *mkr, *mmkr;
@@ -2914,6 +2932,7 @@ mkr_l_insert(cw_mkr_t *a_mkr, cw_bool_t a_record, cw_bool_t a_after,
 
     bufp = a_mkr->bufp;
     buf = bufp->buf;
+    bufp_size = buf->bufp_size;
 
     /* Move bufp_cur. */
     buf_p_bufp_cur_set(buf, bufp);
@@ -3009,7 +3028,7 @@ mkr_l_insert(cw_mkr_t *a_mkr, cw_bool_t a_record, cw_bool_t a_after,
 
     /* Depending on how much data are to be inserted, there are three
      * different algorithms: simple, slide, and split. */
-    if (cnt <= CW_BUFP_SIZE - bufp->len)
+    if (cnt <= bufp_size - bufp->len)
     {
 	nlines = (cw_uint64_t) mkr_p_simple_insert(a_mkr, a_after, a_bufv,
 						   a_bufvcnt,
@@ -3028,8 +3047,8 @@ mkr_l_insert(cw_mkr_t *a_mkr, cw_bool_t a_record, cw_bool_t a_after,
 	 * requirement that any two consecutive bufps must be on average more
 	 * than 25% full.  Thus, there is never a need to do bufp coalescing
 	 * after insertion. */
-	if (prevp != NULL && cnt <= (CW_BUFP_SIZE - bufp->len)
-	    + (CW_BUFP_SIZE - prevp->len))
+	if (prevp != NULL && cnt <= (bufp_size - bufp->len)
+	    + (bufp_size - prevp->len))
 	{
 	    nlines = (cw_uint64_t) mkr_p_before_slide_insert(a_mkr, a_after,
 							     prevp, a_bufv,
@@ -3037,8 +3056,8 @@ mkr_l_insert(cw_mkr_t *a_mkr, cw_bool_t a_record, cw_bool_t a_after,
 							     (cw_uint32_t) cnt,
 							     a_reverse);
 	}
-	else if (nextp != NULL && cnt <= (CW_BUFP_SIZE - bufp->len)
-		 + (CW_BUFP_SIZE - nextp->len))
+	else if (nextp != NULL && cnt <= (bufp_size - bufp->len)
+		 + (bufp_size - nextp->len))
 	{
 	    nlines = (cw_uint64_t) mkr_p_after_slide_insert(a_mkr, a_after,
 							    nextp, a_bufv,
@@ -3159,7 +3178,7 @@ mkr_l_remove(cw_mkr_t *a_start, cw_mkr_t *a_end, cw_bool_t a_record)
     cw_bufp_t *bufp, *nextp, *pastp;
     cw_mkr_t *start, *end, *mkr, *prev;
     cw_ext_t *ext;
-    cw_uint32_t nrem = 0;
+    cw_uint32_t nrem = 0, bufp_size;
     cw_uint64_t start_bpos, end_bpos, rcount;
 
     cw_check_ptr(a_start);
@@ -3202,6 +3221,7 @@ mkr_l_remove(cw_mkr_t *a_start, cw_mkr_t *a_end, cw_bool_t a_record)
 
     bufp = start->bufp;
     buf = bufp->buf;
+    bufp_size = buf->bufp_size;
 
     /* Move bufp_cur. */
     buf_p_bufp_cur_set(buf, bufp);
@@ -3239,7 +3259,7 @@ mkr_l_remove(cw_mkr_t *a_start, cw_mkr_t *a_end, cw_bool_t a_record)
 	bufp_p_gap_move(bufp, bufp_p_pos_p2r(bufp, start->ppos));
 	bufp->len -= (cw_uint32_t) rcount;
 	buf->len -= rcount;
-	gap_end = bufp->gap_off + (CW_BUFP_SIZE - bufp->len);
+	gap_end = bufp->gap_off + (bufp_size - bufp->len);
 
 	/* Adjust pline for mkr's after the gap. */
 	nlines = end->pline - start->pline;
@@ -3392,7 +3412,7 @@ mkr_l_remove(cw_mkr_t *a_start, cw_mkr_t *a_end, cw_bool_t a_record)
 	 nextp != pastp;
 	 bufp = nextp, nextp = ql_next(&buf->plist, bufp, plink))
     {
-	while (bufp->len + nextp->len <= CW_BUFP_SIZE / 2
+	while (bufp->len + nextp->len <= bufp_size / 2
 	       || bufp->len == 0
 	       || nextp->len == 0)
 	{
@@ -3692,7 +3712,7 @@ cw_uint64_t
 mkr_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence)
 {
     cw_uint64_t bpos;
-    cw_uint32_t ppos, pline;
+    cw_uint32_t ppos, pline, bufp_size;
     cw_buf_t *buf;
     cw_bufp_t *bufp;
 
@@ -3700,6 +3720,7 @@ mkr_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence)
     cw_dassert(a_mkr->magic == CW_MKR_MAGIC);
 
     buf = a_mkr->bufp->buf;
+    bufp_size = buf->bufp_size;
 
     /* Determine the bpos to seek to.  Take care not to go out of bounds. */
     switch (a_whence)
@@ -3794,7 +3815,7 @@ mkr_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence)
 	/* If the distance between the old position and the new position isn't
 	 * larger than the distance from the new position to either end of the
 	 * bufp, calculate pline relative to the previous position. */
-	if (a_offset <= rpos && a_offset <= CW_BUFP_SIZE - rpos)
+	if (a_offset <= rpos && a_offset <= bufp_size - rpos)
 	{
 	    cw_uint32_t lppos, hppos, i, nlines;
 
@@ -3813,7 +3834,7 @@ mkr_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence)
 	    /* Count newlines in range. */
 	    nlines = 0;
 	    if (hppos < bufp->gap_off
-		|| lppos >= bufp->gap_off + (CW_BUFP_SIZE - bufp->len))
+		|| lppos >= bufp->gap_off + (bufp_size - bufp->len))
 	    {
 		/* All data before or after the gap. */
 		for (i = lppos; i < hppos; i++)
@@ -3835,7 +3856,7 @@ mkr_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence)
 		    }
 		}
 
-		for (i = bufp->gap_off + (CW_BUFP_SIZE - bufp->len);
+		for (i = bufp->gap_off + (bufp_size - bufp->len);
 		     i < hppos;
 		     i++)
 		{
@@ -3924,7 +3945,7 @@ mkr_before_get(const cw_mkr_t *a_mkr)
 	    if (bufp->len > bufp->gap_off)
 	    {
 		/* Last character in raw buffer. */
-		retval = &bufp->b[CW_BUFP_SIZE - 1];
+		retval = &bufp->b[buf->bufp_size - 1];
 	    }
 	    else
 	    {
@@ -3944,7 +3965,7 @@ mkr_before_get(const cw_mkr_t *a_mkr)
 	else
 	{
 	    /* After gap. */
-	    retval = &bufp->b[rpos + (CW_BUFP_SIZE - bufp->len)];
+	    retval = &bufp->b[rpos + (buf->bufp_size - bufp->len)];
 	}
     }
 
@@ -3959,7 +3980,7 @@ mkr_after_get(const cw_mkr_t *a_mkr)
     cw_check_ptr(a_mkr);
     cw_dassert(a_mkr->magic == CW_MKR_MAGIC);
 
-    if (a_mkr->ppos == CW_BUFP_SIZE)
+    if (a_mkr->ppos == a_mkr->bufp->buf->bufp_size)
     {
 	retval = NULL;
 	goto RETURN;
@@ -4063,21 +4084,24 @@ mkr_range_get(const cw_mkr_t *a_start, const cw_mkr_t *a_end,
 	    retval = bufp->buf->bufv;
 
 	    if (start->ppos < bufp->gap_off
-		&& end->ppos >= bufp->gap_off + (CW_BUFP_SIZE - bufp->len))
+		&& end->ppos >= bufp->gap_off
+		+ (bufp->buf->bufp_size - bufp->len))
 	    {
 		/* Two ranges. */
 		retval[bufvcnt].data = &bufp->b[start->ppos];
 		retval[bufvcnt].len = bufp->gap_off - start->ppos;
 		bufvcnt++;
 
-		if (end->ppos > bufp->gap_off + (CW_BUFP_SIZE - bufp->len))
+		if (end->ppos > bufp->gap_off
+		    + (bufp->buf->bufp_size - bufp->len))
 		{
 		    /* Data after gap. */
 		    retval[bufvcnt].data
-			= &bufp->b[bufp->gap_off + (CW_BUFP_SIZE - bufp->len)];
+			= &bufp->b[bufp->gap_off
+				  + (bufp->buf->bufp_size - bufp->len)];
 		    retval[bufvcnt].len
 			= end->ppos - (bufp->gap_off
-				       + (CW_BUFP_SIZE - bufp->len));
+				       + (bufp->buf->bufp_size - bufp->len));
 		    bufvcnt++;
 		}
 	    }
@@ -4112,7 +4136,8 @@ mkr_range_get(const cw_mkr_t *a_start, const cw_mkr_t *a_end,
 		{
 		    /* Data after gap. */
 		    retval[bufvcnt].data
-			= &bufp->b[bufp->gap_off + (CW_BUFP_SIZE - bufp->len)];
+			= &bufp->b[bufp->gap_off
+				  + (bufp->buf->bufp_size - bufp->len)];
 		    retval[bufvcnt].len = bufp->len - bufp->gap_off;
 		    bufvcnt++;
 		}
@@ -4120,10 +4145,10 @@ mkr_range_get(const cw_mkr_t *a_start, const cw_mkr_t *a_end,
 	    else
 	    {
 		/* After gap. */
-		if (start->ppos < CW_BUFP_SIZE)
+		if (start->ppos < bufp->buf->bufp_size)
 		{
 		    retval[bufvcnt].data = &bufp->b[start->ppos];
-		    retval[bufvcnt].len = CW_BUFP_SIZE - start->ppos;
+		    retval[bufvcnt].len = bufp->buf->bufp_size - start->ppos;
 		    bufvcnt++;
 		}
 	    }
@@ -4147,7 +4172,8 @@ mkr_range_get(const cw_mkr_t *a_start, const cw_mkr_t *a_end,
 		{
 		    /* Data after gap. */
 		    retval[bufvcnt].data
-			= &bufp->b[bufp->gap_off + (CW_BUFP_SIZE - bufp->len)];
+			= &bufp->b[bufp->gap_off
+				  + (bufp->buf->bufp_size - bufp->len)];
 		    retval[bufvcnt].len = bufp->len - bufp->gap_off;
 		    bufvcnt++;
 		}
@@ -4176,14 +4202,16 @@ mkr_range_get(const cw_mkr_t *a_start, const cw_mkr_t *a_end,
 		}
 
 		if (bufp->gap_off < bufp->len
-		    && end->ppos > bufp->gap_off + (CW_BUFP_SIZE - bufp->len))
+		    && end->ppos > bufp->gap_off
+		    + (bufp->buf->bufp_size - bufp->len))
 		{
 		    /* Data after gap. */
 		    retval[bufvcnt].data
-			= &bufp->b[bufp->gap_off + (CW_BUFP_SIZE - bufp->len)];
+			= &bufp->b[bufp->gap_off
+				  + (bufp->buf->bufp_size - bufp->len)];
 		    retval[bufvcnt].len
 			= end->ppos
-			- (bufp->gap_off + (CW_BUFP_SIZE - bufp->len));
+			- (bufp->gap_off + (bufp->buf->bufp_size - bufp->len));
 		    bufvcnt++;
 		}
 	    }
@@ -4290,8 +4318,8 @@ mkr_validate(cw_mkr_t *a_mkr)
     /* Validate that ppos isn't in the gap. */
     cw_assert(a_mkr->ppos <= a_mkr->bufp->gap_off
 	      || (a_mkr->ppos >= a_mkr->bufp->gap_off
-		  + (CW_BUFP_SIZE - a_mkr->bufp->len))
-	      || (a_mkr->ppos == CW_BUFP_SIZE
+		  + (a_mkr->bufp->buf->bufp_size - a_mkr->bufp->len))
+	      || (a_mkr->ppos == a_mkr->bufp->buf->bufp_size
 		  && a_mkr->bufp == ql_last(&a_mkr->bufp->buf->plist, plink)));
 
     /* Validate pline. */

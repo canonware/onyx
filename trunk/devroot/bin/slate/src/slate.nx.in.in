@@ -248,7 +248,7 @@ $interpc {
     } ifelse
 } def
 
-$scratch buffer def
+$scratch 16 buffer def
 $bpoint scratch marker def
 $tpoint scratch marker def
 $bmark scratch marker def

@@ -15,6 +15,11 @@
 #define CW_HIST_DUMP
 #endif
 
+/* Buffer page size for the history buffer.  History operations have high
+ * locality of reference, so this number could be set quite high without issues,
+ * except that setting the size too high wastes memory. */
+#define CW_HIST_BUFP_SIZE 4096
+
 /* History record header. */
 struct cw_histh_s
 {
