@@ -718,17 +718,8 @@ $system {
 	$typecheck throw
     } if
 
-    fork
-    dup 0 eq {
-	# Child.
-	systemdict begin
-	$throw {1 die} def
-	end
-	pop exec
-    }{
-	# Parent.
-	nip waitpid
-    } ifelse
+    forkexec
+    waitpid
 } def
 
 # Define require and mrequire configuration parameters in onyxdict.  By default,

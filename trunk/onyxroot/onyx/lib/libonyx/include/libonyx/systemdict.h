@@ -268,7 +268,7 @@ systemdict_foreach(cw_nxo_t *a_thread);
 
 #ifdef CW_POSIX
 void
-systemdict_fork(cw_nxo_t *a_thread);
+systemdict_forkexec(cw_nxo_t *a_thread);
 #endif
 
 void

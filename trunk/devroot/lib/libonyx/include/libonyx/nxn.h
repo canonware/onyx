@@ -188,7 +188,7 @@ typedef enum
     NXN_ENTRY(for),
     NXN_ENTRY(foreach),
 #ifdef CW_POSIX
-    NXN_ENTRY(fork),
+    NXN_ENTRY(forkexec),
 #endif
     NXN_ENTRY(gcdict),
     NXN_ENTRY(ge),

@@ -173,7 +173,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(for),
     ENTRY(foreach),
 #ifdef CW_POSIX
-    ENTRY(fork),
+    ENTRY(forkexec),
 #endif
     ENTRY(ge),
     ENTRY(get),
@@ -2922,16 +2922,16 @@ systemdict_exch(cw_nxo_t *a_thread)
 }
 
 #ifdef CW_POSIX
-void
-systemdict_exec(cw_nxo_t *a_thread)
+static cw_bool_t
+systemdict_p_exec_prepare(cw_nxo_t *a_thread, char **r_path, char ***r_argv,
+			  char ***r_envp)
 {
-    cw_nxo_t *ostack, *tstack;
-    cw_nxo_t *array, *el;
-    cw_uint32_t i, slen, argc;
-    char *path, **argv, **envp;
+    cw_nxo_t *ostack, *tstack, *array, *el, *key, *val;
+    cw_uint32_t i, slen, argc, dcount, key_len, val_len;
+    char *path, **argv, **envp, *entry;
     cw_nxn_t error;
 
-    /* This operator does a bunch of memory allocation, which must be done with
+    /* This function does a bunch of memory allocation, which must be done with
      * great care, since an exception will cause us to leak all of the allocated
      * memory.  For example, a user can cause an exception in
      * nxo_thread_nerror(), so we must do all cleanup before throwing the
@@ -2941,7 +2941,12 @@ systemdict_exec(cw_nxo_t *a_thread)
     tstack = nxo_thread_tstack_get(a_thread);
     el = nxo_stack_push(tstack);
 
-    NXO_STACK_GET(array, ostack, a_thread);
+    array = nxo_stack_get(ostack);
+    if (array == NULL)
+    {
+	error = NXN_stackunderflow;
+	goto VALIDATION_ERROR;
+    }
     if (nxo_type_get(array) != NXOT_ARRAY)
     {
 	error = NXN_typecheck;
@@ -2978,7 +2983,7 @@ systemdict_exec(cw_nxo_t *a_thread)
     path[slen] = '\0';
 
     /* Construct argv. */
-    argv = (char **) cw_malloc(sizeof(char *) * (argc + 1));
+    argv = (char **) cw_calloc(argc + 1, sizeof(char *));
     for (i = 0; i < argc; i++)
     {
 	nxo_array_el_get(array, i, el);
@@ -2997,55 +3002,48 @@ systemdict_exec(cw_nxo_t *a_thread)
     argv[i] = NULL;
 
     /* Construct envp. */
+    key = el;
+    val = nxo_stack_push(tstack);
+
+    dcount = nxo_dict_count(nx_envdict_get(nxo_thread_nx_get(a_thread)));
+    envp = (char **) cw_calloc(dcount + 1, sizeof(char *));
+    for (i = 0; i < dcount; i++)
     {
-	cw_uint32_t dcount, key_len, val_len;
-	cw_nxo_t *key, *val;
-	char *entry;
-
-	key = nxo_stack_push(tstack);
-	val = nxo_stack_push(tstack);
-
-	dcount = nxo_dict_count(nx_envdict_get(nxo_thread_nx_get(a_thread)));
-	envp = (char **) cw_malloc(sizeof(char *) * (dcount + 1));
-	for (i = 0; i < dcount; i++)
+	/* Get key and val. */
+	nxo_dict_iterate(nx_envdict_get(nxo_thread_nx_get(a_thread)), key);
+	nxo_dict_lookup(nx_envdict_get(nxo_thread_nx_get(a_thread)), key,
+			val);
+	if (nxo_type_get(key) != NXOT_NAME || nxo_type_get(val) != NXOT_STRING)
 	{
-	    /* Get key and val. */
-	    nxo_dict_iterate(nx_envdict_get(nxo_thread_nx_get(a_thread)), key);
-	    nxo_dict_lookup(nx_envdict_get(nxo_thread_nx_get(a_thread)), key,
-			    val);
-	    if (nxo_type_get(key) != NXOT_NAME
-		|| nxo_type_get(val) != NXOT_STRING)
-	    {
-		nxo_stack_npop(tstack, 2);
-		error = NXN_typecheck;
-		goto ENVP_ERROR;
-	    }
-
-	    /* Create string that looks like "<key>=<val>\0". */
-	    key_len = nxo_name_len_get(key);
-	    val_len = nxo_string_len_get(val);
-	    entry = (char *) cw_malloc(key_len + val_len + 2);
-
-	    memcpy(entry, nxo_name_str_get(key), key_len);
-	    entry[key_len] = '=';
-	    nxo_string_lock(val);
-	    memcpy(&entry[key_len + 1], nxo_string_get(val), val_len);
-	    nxo_string_unlock(val);
-	    entry[key_len + 1 + val_len] = '\0';
-
-	    envp[i] = entry;
+	    error = NXN_typecheck;
+	    goto ENVP_ERROR;
 	}
-	envp[i] = NULL;
 
-	nxo_stack_npop(tstack, 2);
+	/* Create string that looks like "<key>=<val>\0". */
+	key_len = nxo_name_len_get(key);
+	val_len = nxo_string_len_get(val);
+	entry = (char *) cw_malloc(key_len + val_len + 2);
+
+	memcpy(entry, nxo_name_str_get(key), key_len);
+	entry[key_len] = '=';
+	nxo_string_lock(val);
+	memcpy(&entry[key_len + 1], nxo_string_get(val), val_len);
+	nxo_string_unlock(val);
+	entry[key_len + 1 + val_len] = '\0';
+
+	envp[i] = entry;
     }
+    envp[i] = NULL;
 
-    execve(path, argv, envp);
-    /* If we get here, then the execve() call failed.  Get an error back to the
-     * parent. */
-    exit(1);
+    nxo_stack_npop(tstack, 2);
+
+    *r_path = path;
+    *r_argv = argv;
+    *r_envp = envp;
+    return FALSE;
 
     ENVP_ERROR:
+    nxo_stack_npop(tstack, 2);
     for (i = 0; envp[i] != NULL; i++)
     {
 	cw_free(envp[i]);
@@ -3062,6 +3060,21 @@ systemdict_exec(cw_nxo_t *a_thread)
     VALIDATION_ERROR:
     nxo_stack_pop(tstack);
     nxo_thread_nerror(a_thread, error);
+
+    return TRUE;
+}
+void
+systemdict_exec(cw_nxo_t *a_thread)
+{
+    char *path, **argv, **envp;
+
+    if (systemdict_p_exec_prepare(a_thread, &path, &argv, &envp) == FALSE)
+    {
+	execve(path, argv, envp);
+	/* If we get here, then the execve() call failed.  Get an error back to
+	 * the parent. */
+	exit(1);
+    }
 }
 #endif
 
@@ -3550,23 +3563,54 @@ systemdict_foreach(cw_nxo_t *a_thread)
 
 #ifdef CW_POSIX
 void
-systemdict_fork(cw_nxo_t *a_thread)
+systemdict_forkexec(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack;
     cw_nxo_t *nxo;
+    char *path, **argv, **envp;
     pid_t pid;
+    cw_uint32_t i;
 
-    pid = fork();
-    if (pid == -1)
+    if (systemdict_p_exec_prepare(a_thread, &path, &argv, &envp) == FALSE)
     {
-	/* Error, related to some form of resource exhaustion. */
-	nxo_thread_nerror(a_thread, NXN_limitcheck);
-	return;
-    }
+	pid = fork();
+	if (pid == -1)
+	{
+	    /* Error, related to some form of resource exhaustion. */
+	    nxo_thread_nerror(a_thread, NXN_limitcheck);
+	    return;
+	}
+	else if (pid == 0)
+	{
+	    /* Child. */
+	    execve(path, argv, envp);
+	    /* If we get here, then the execve() call failed.  Get an error back
+	     * to the parent. */
+	    exit(1);
+	}
+	else
+	{
+	    /* Parent. */
+	    ostack = nxo_thread_ostack_get(a_thread);
+	    nxo = nxo_stack_get(ostack);
+	    nxo_integer_new(nxo, pid);
 
-    ostack = nxo_thread_ostack_get(a_thread);
-    nxo = nxo_stack_push(ostack);
-    nxo_integer_new(nxo, pid);
+	    /* Clean up memory allocation. */
+	    for (i = 0; envp[i] != NULL; i++)
+	    {
+		cw_free(envp[i]);
+	    }
+	    cw_free(envp);
+
+	    for (i = 0; argv[i] != NULL; i++)
+	    {
+		cw_free(argv[i]);
+	    }
+	    cw_free(argv);
+
+	    cw_free(path);
+	}
+    }
 }
 #endif
 

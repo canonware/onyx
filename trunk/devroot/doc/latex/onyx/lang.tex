@@ -3313,10 +3313,11 @@ and load a module. \\
 file & {\bf \htmlref{require}{systemdict:require}} & -- & Search for and
 evaluate a source file. \\
 \hline
--- & {\bf \htmlref{fork}{systemdict:fork}} & pid & Fork a new process. \\
-\hline
 args & {\bf \htmlref{exec}{systemdict:exec}} & -- & Overlay a new program and
 execute it. \\
+\hline
+args & {\bf \htmlref{forkexec}{systemdict:forkexec}} & pid & Fork and exec a new
+process. \\
 \hline
 pid & {\bf \htmlref{waitpid}{systemdict:waitpid}} & status & Wait for a program
 to terminate. \\
@@ -6434,11 +6435,16 @@ onyx:0> `ab' {pstack clear} foreach
 onyx:0>
 		\end{verbatim}
 	\end{description}
-\label{systemdict:fork}
-\index{fork@\onyxop{}{fork}{}}
-\item[{\onyxop{--}{fork}{pid}}: ]
+\label{systemdict:forkexec}
+\index{forkexec@\onyxop{}{forkexec}{}}
+\item[{\onyxop{args}{forkexec}{pid}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ] None.
+	\item[Input(s): ]
+		\item[args: ]
+			An array of strings.  The first string in \oparg{args}
+			is the path of the program to invoke, and any additional
+			array elements are passed as command line arguments to
+			the invoked program.
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[pid: ]
@@ -6448,23 +6454,19 @@ onyx:0>
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{limitcheck}{limitcheck}.]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Fork a new process.  Care must be taken when using the fork
-		operator due to the fact that onyx consumes programs on the
-		fly.  The child process cannot reliably scan onyx code from the
-		same source as the parent, so the child process should be forked
-		into an environment where it is executing an object that has
-		already been constructed by the interpreter, which in turn
-		avoids unwinding the onyx execution stack.
+		Fork and exec a new process.  The current contents of envdict
+		are used to construct the new program's environment.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> {fork dup 0 eq
-        {pop `Child\n' print flush}
-        {`Parent\n' print flush waitpid}
-        ifelse} eval
-Parent
-Child
+onyx:0> [`/bin/date'] forkexec dup 1 sprint waitpid 1 sprint
+6516
+Sat Jul 13 20:47:54 PDT 2002
+0
 onyx:0>
 		\end{verbatim}
 	\end{description}
@@ -12629,12 +12631,10 @@ onyx:0>
 		Wait for the process with process ID \oparg{pid} to exit.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> {fork dup 0 eq
-        {pop `Child\n' print flush}
-        {`Parent\n' print flush waitpid}
-        ifelse} eval
-Parent
-Child
+onyx:0> [`/bin/date'] forkexec dup 1 sprint waitpid 1 sprint
+6516
+Sat Jul 13 20:47:54 PDT 2002
+0
 onyx:0>
 		\end{verbatim}
 	\end{description}

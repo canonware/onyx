@@ -1,5 +1,9 @@
 2002-07-13 : Jason Evans <jasone@canonware.com>
 
+	* Remove the fork operator and replace it with the forkexec operator.
+	  Doing anything between fork() and exec() in a multi-threaded
+	  application risks hanging.
+
 	* bin/onyx/src/batch.nx.in : Redefine stop in errordict, not in
 	  currenterror.  This bug has existed since before Onyx 1.0.0.
 
