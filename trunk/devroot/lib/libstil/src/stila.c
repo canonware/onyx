@@ -168,6 +168,10 @@ stila_p_gc_entry(void *a_arg)
 	return NULL;
 }
 
+#define	stila_p_gray(a_stila, a_stiloe) do {				\
+	stiloe_l_color_set((a_stiloe), !(a_stila)->white);
+	
+
 /*
  * Collect garbage using a Baker's Treadmill.
  */
@@ -176,10 +180,15 @@ stila_p_collect(cw_stila_t *a_stila)
 {
 	cw_stilt_t	*stilt;
 	cw_stils_t	*stils;
-	cw_stiloe_t	*stiloe;
+	cw_stiloe_t	*stiloe, *black, *gray, *white;
 
 	mtx_lock(&a_stila->lock);
 	thd_single_enter();
+
+	/*
+	 * Set up the object regions.
+	 */
+	black = gray = white = ql_first(&a_stila->seq_set);
 
 	/*
 	 * Iterate through the root set and mark it gray.  This requires a 3
@@ -204,13 +213,8 @@ stila_p_collect(cw_stila_t *a_stila)
 				if (stiloe_l_color_get(stiloe) ==
 				    a_stila->white) {
 					_cw_out_put("+");
-					/*
-					 * Make object gray by setting its color
-					 * bit and moving it in the sequence set
-					 * ring.
-					 */
-					stiloe_l_color_set(stiloe,
-					    !a_stila->white);
+					/* Make object gray. */
+					stila_p_gray(stila, stiloe);
 					/* XXX Move. */
 				}
 			}
@@ -222,6 +226,12 @@ stila_p_collect(cw_stila_t *a_stila)
 	 * Iterate through the gray objects and process them until only black
 	 * and white objects are left.
 	 */
+
+	/*
+	 * Move black forward one, since it is actually pointing to a white
+	 * object.
+	 */
+	black = qr_next(black, link);
 
 	/*
 	 * Split the white objects into a separate ring before resuming other
