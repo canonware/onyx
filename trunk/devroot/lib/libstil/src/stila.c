@@ -347,7 +347,7 @@ stila_dump(cw_stila_t *a_stila, cw_stilt_t *a_stilt)
 	 */
 	mtx_lock(&a_stila->lock);
 	stilo_file_output(file, "active: [s|w:10]\n",
-	    stilo_boolean_get(a_stila->gcdict_active) ? "TRUE" : "FALSE");
+	    stilo_boolean_get(a_stila->gcdict_active) ? "true" : "false");
 	stilo_file_output(file, "period: [q|w:10]\n",
 	    stilo_integer_get(a_stila->gcdict_period));
 	stilo_file_output(file, "threshold: [q|w:7]\n",
@@ -934,14 +934,14 @@ stila_p_gc_entry(void *a_arg)
 				 * timeout, collect.
 				 */
 				if (prev_seq_new == seq_new) {
-					stila_p_collect(stila, TRUE);
+					stila_p_collect(stila, FALSE);
 					prev_seq_new = 0;
 				} else
 					prev_seq_new = seq_new;
 			}
 			break;
 		case STILAM_COLLECT:
-			stila_p_collect(stila, TRUE);
+			stila_p_collect(stila, FALSE);
 			prev_seq_new = 0;
 			break;
 		case STILAM_RECONFIGURE:
