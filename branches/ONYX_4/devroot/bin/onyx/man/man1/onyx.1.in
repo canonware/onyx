@@ -5,7 +5,7 @@
 
 Version: Onyx <Version = onyx>
 ..
-.TH onyx 1 "onyx, version Onyx <Version = onyx>"
+.TH onyx 1 "onyx, version <Version = onyx>"
 .hy 1
 .SH NAME
 onyx - stand-alone Onyx language interpreter
@@ -18,6 +18,14 @@ onyx - stand-alone Onyx language interpreter
 .I <expr>
 .br
 .B onyx
+.RB [ \-i
+.IR <expr> ]*
+.RB [ \-f
+.IR <file> ]*
+.RB [ \-s
+.IR <expr> ]
+.br
+.B onyx
 .I <file>
 .RI [ <args> ]
 .SH DESCRIPTION
@@ -28,7 +36,8 @@ line editor.
 This manual page only documents the command line usage for
 .BR onyx ;
 much more extensive documentation is available in HTML, PostScript, and PDF
-formats.  See the FILES section below.
+formats.
+See the FILES section below.
 .SS Command line flags:
 .IP \-e
 .I <expr>
@@ -38,8 +47,30 @@ Execute
 as Onyx code.
 .RE
 .PP
+.IP \-f
+.I <file>
+.RS
+Evaluate contents of initalization
+.IR <file> .
+.RE
+.PP
 .IP \-h
 Display usage information and exit.
+.PP
+.IP \-i
+.I <expr>
+.RS
+Evaluate initalization
+.IR <expr> .
+.RE
+.PP
+.IP \-s
+.I <expr>
+.RS
+Call the start operator with
+.IR <expr>
+as the argument, rather than stdin.
+.RE
 .PP
 .IP \-V
 Display the version number and exit.
