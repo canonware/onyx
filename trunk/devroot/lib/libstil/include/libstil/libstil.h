@@ -15,19 +15,20 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-extern "C" {
+extern  "C" {
 #endif
 
 #ifndef _LIBSTIL_H_
-#  define _LIBSTIL_H_
+#define _LIBSTIL_H_
 
-#  define _LIBSTIL_VERSION "<Version>"
+#define _LIBSTIL_VERSION "<Version>"
 
-#  include "libstil_defs.h"
-#  include "libstil_incs.h"
+#include "libstil_defs.h"
+#include "libstil_incs.h"
 
-#endif /* _LIBSTIL_H_ */
+#endif				/* _LIBSTIL_H_ */
 
 #ifdef __cplusplus
 };
+
 #endif

@@ -13,18 +13,17 @@
 #include "../include/libstil/libstil.h"
 
 cw_stiloe_condition_t *
-stiloe_condition_new(cw_stiloe_condition_t * a_stiloe_condition)
+stiloe_condition_new(cw_stiloe_condition_t *a_stiloe_condition)
 {
-  return NULL; /* XXX */
+	return NULL;		/* XXX */
 }
 
 void
-stiloe_condition_ref(cw_stiloe_condition_t * a_stiloe_condition)
+stiloe_condition_ref(cw_stiloe_condition_t *a_stiloe_condition)
 {
 }
 
 void
-stiloe_condition_unref(cw_stiloe_condition_t * a_stiloe_condition)
+stiloe_condition_unref(cw_stiloe_condition_t *a_stiloe_condition)
 {
 }
-
