@@ -71,8 +71,8 @@ main(int argc, char **argv, char **envp)
 	libstash_init();
 #ifdef _LIBSTIL_CONFESS
 	/*
-	 * Don't print memory leakage information, since objects are not freed
-	 * in order to make post-mortem debugging simpler.
+	 * Don't print memory leakage information, since objects are not
+	 * necessarily freed in order to make post-mortem debugging simpler.
 	 */
 	dbg_unregister(cw_g_dbg, "mem_error");
 	dbg_unregister(cw_g_dbg, "pool_error");
