@@ -900,6 +900,8 @@ stiloe_p_array_delete(cw_stiloe_t *a_stiloe, cw_stilt_t *a_stilt)
 
 	if (array->e.a.len > 0)
 		stilt_free(a_stilt, array->e.a.arr);
+
+	stilt_free(a_stilt, array);
 }
 
 static cw_stiloe_t *
@@ -1306,6 +1308,8 @@ stiloe_p_condition_delete(cw_stiloe_t *a_stiloe, cw_stilt_t *a_stilt)
 	_cw_assert(condition->stiloe.type == STILOT_CONDITION);
 
 	cnd_delete(&condition->condition);
+
+	stilt_free(a_stilt, condition);
 }
 
 static cw_stiloe_t *
@@ -1493,6 +1497,8 @@ stiloe_p_dict_delete(cw_stiloe_t *a_stiloe, cw_stilt_t *a_stilt)
 		/* XXX Remove keyed references. */
 		stilt_chi_put(a_stilt, chi);
 	}
+
+	stilt_free(a_stilt, dict);
 }
 
 static cw_stiloe_t *
@@ -1832,6 +1838,8 @@ stiloe_p_file_delete(cw_stiloe_t *a_stiloe, cw_stilt_t *a_stilt)
 
 	if (ioerror)
 		stilt_error(a_stilt, STILTE_IOERROR);
+
+	stilt_free(a_stilt, file);
 }
 
 static cw_stiloe_t *
@@ -3133,6 +3141,8 @@ stiloe_p_hook_delete(cw_stiloe_t *a_stiloe, cw_stilt_t *a_stilt)
 
 	if (hook->delete_f != NULL)
 		hook->delete_f(hook->data, a_stilt);
+
+	stilt_free(a_stilt, hook);
 }
 
 static cw_stiloe_t *
@@ -3292,6 +3302,8 @@ stiloe_p_mutex_delete(cw_stiloe_t *a_stiloe, cw_stilt_t *a_stilt)
 	_cw_assert(mutex->stiloe.type == STILOT_MUTEX);
 
 	mtx_delete(&mutex->lock);
+
+	stilt_free(a_stilt, mutex);
 }
 
 static cw_stiloe_t *
@@ -4032,6 +4044,8 @@ stiloe_p_string_delete(cw_stiloe_t *a_stiloe, cw_stilt_t *a_stilt)
 
 	if (string->e.s.len > 0)
 		stilt_free(a_stilt, string->e.s.str);
+
+	stilt_free(a_stilt, string);
 }
 
 static cw_stiloe_t *

@@ -301,7 +301,7 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 		stilo = stils_push(&retval->dstack);
 		stilo_dup(stilo, &retval->userdict);
 	}
-	xep_catch (_CW_XEPV_OOM) {
+	xep_catch(_CW_XEPV_OOM) {
 		retval = (cw_stilt_t *)v_retval;
 		switch (try_stage) {
 		case 6:

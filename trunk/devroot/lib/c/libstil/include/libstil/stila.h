@@ -21,16 +21,17 @@ struct cw_stila_s {
 	/* Allocator. */
 	cw_mem_t	mem;
 
-	/*
-	 * Keys are pointers to stiloe's.  Values are unused (NULL).
-	 */
-	ql_head(cw_stiloe_t) seq_set;
-
 	/* Various pools. */
 	cw_pool_t	chi_pool;
 	cw_pool_t	stilsc_pool;
 	cw_pool_t	dicto_pool;
 
+	/* Sequence set. */
+	ql_head(cw_stiloe_t) seq_set;
+	/* Number of sequence set additions since the last collection. */
+	cw_uint32_t	seq_new;
+
+	cw_mq_t		gc_mq;
 	cw_stil_t	*stil;
 	cw_thd_t	gc_thd;
 };
@@ -39,7 +40,7 @@ void	stila_new(cw_stila_t *a_stila, cw_stil_t *a_stil);
 void	stila_delete(cw_stila_t *a_stila);
 
 void	stila_gc_register(cw_stila_t *a_stila, cw_stiloe_t *a_stiloe);
-void	stila_gc_force(cw_stila_t *a_stila);
+#define	stila_gc_force(a_stila) mq_put(&(a_stila)->gc_mq, STILAM_FORCE)
 #define	stila_gc_suspend(a_stila) thd_suspend(&(a_stila)->gc_thd)
 #define	stila_gc_resume(a_stila) thd_resume(&(a_stila)->gc_thd)
 
