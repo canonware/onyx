@@ -22,8 +22,8 @@ nxa_calloc_e(void *a_arg, size_t a_number, size_t a_size,
 	     const char *a_filename, cw_uint32_t a_line_num);
 
 void *
-nxa_realloc_e(void *a_arg, void *a_ptr, size_t a_size, size_t
-	      a_old_size, const char *a_filename, cw_uint32_t a_line_num);
+nxa_realloc_e(void *a_arg, void *a_ptr, size_t a_size, size_t a_old_size,
+	      const char *a_filename, cw_uint32_t a_line_num);
 
 void
 nxa_free_e(void *a_arg, void *a_ptr, size_t a_size, const char *a_filename,
