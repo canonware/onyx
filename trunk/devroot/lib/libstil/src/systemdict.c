@@ -775,16 +775,17 @@ systemdict_currentcontext(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack;
 	cw_stilo_t	*context;
-	/* XXX Perhaps a better solution is to have a tsd key for thread ID. */
 	union {
 		cw_sint64_t	i;
 		void		*p;
 	} u;
+	_cw_assert(sizeof(cw_sint64_t) >= sizeof(void *));
 
 	ostack = stilt_ostack_get(a_stilt);
 	context = stils_push(ostack);
 
-	u.p = thd_self();
+	u.i = 0;
+	u.p = a_stilt;
 	stilo_integer_new(context, u.i);
 }
 
