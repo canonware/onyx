@@ -32,7 +32,7 @@
  * "[s|w:10]"
  *  Print a string, padded to be at least 10 bytes long.
  *
- * "[i32|b:16|p:0|w:8]"
+ * "[i|b:16|p:0|w:8]"
  * Print a 32 bit integer in base 16.  Pad the output to 8 bytes, using `0' for
  * the padding character.
  *
@@ -72,29 +72,23 @@
  * | Default    |
  * +------------+
  *
- * Type     | w   | j     | p   | b   | s        | +             |
- * ---------+-----+-------+-----+-----+----------+---------------+
- * int8     | Yes | Yes   | Yes | Yes | Yes      | Yes           |
- * i8       | Fit | Right | ` ' | 10  | Unsigned | Negative only |
- * ---------+-----+-------+-----+-----+----------+---------------+
- * int16    | Yes | Yes   | Yes | Yes | Yes      | Yes           |
- * i16      | Fit | Right | ` ' | 10  | Unsigned | Negative only |
- * ---------+-----+-------+-----+-----+----------+---------------+
- * int32    | Yes | Yes   | Yes | Yes | Yes      | Yes           |
- * i32      | Fit | Right | ` ' | 10  | Unsigned | Negative only |
- * ---------+-----+-------+-----+-----+----------+---------------+
- * int64    | Yes | Yes   | Yes | Yes | Yes      | Yes           |
- * i64      | Fit | Right | ` ' | 10  | Unsigned | Negative only |
- * ---------+-----+-------+-----+-----+----------+---------------+
- * char     | Yes | Yes   | Yes | No  | No       | No            |
- * c        | Fit | Right | ` ' |     |          |               |
- * ---------+-----+-------+-----+-----+----------+---------------+
- * string   | Yes | Yes   | Yes | No  | No       | No            |
- * s        | Fit | Right | ` ' |     |          |               |
- * ---------+-----+-------+-----+-----+----------+---------------+
- * pointer  | Yes | Yes   | Yes | Yes | Yes      | Yes           |
- * p        | Fit | Right | ` ' | 16  | Unsigned | Negative only |
- * ---------+-----+-------+-----+-----+----------+---------------+
+ * Type | w   | j     | p   | b   | s        | +             |
+ * -----+-----+-------+-----+-----+----------+---------------+
+ * i    | Yes | Yes   | Yes | Yes | Yes      | Yes           |
+ *      | Fit | Right | ` ' | 10  | Unsigned | Negative only |
+ * -----+-----+-------+-----+-----+----------+---------------+
+ * q    | Yes | Yes   | Yes | Yes | Yes      | Yes           |
+ *      | Fit | Right | ` ' | 10  | Unsigned | Negative only |
+ * -----+-----+-------+-----+-----+----------+---------------+
+ * c    | Yes | Yes   | Yes | No  | No       | No            |
+ *      | Fit | Right | ` ' |     |          |               |
+ * -----+-----+-------+-----+-----+----------+---------------+
+ * s    | Yes | Yes   | Yes | No  | No       | No            |
+ *      | Fit | Right | ` ' |     |          |               |
+ * -----+-----+-------+-----+-----+----------+---------------+
+ * p    | Yes | Yes   | Yes | Yes | Yes      | Yes           |
+ *      | Fit | Right | ` ' | 16  | Unsigned | Negative only |
+ * -----+-----+-------+-----+-----+----------+---------------+
  *
  ****************************************************************************/
 
@@ -181,6 +175,7 @@ struct cw_out_s
 struct cw_out_ent_s
 {
   char * type;
+  cw_uint32_t len;
   cw_uint32_t size;
   cw_out_metric_t * metric_func;
   cw_out_render_t * render_func;
@@ -893,6 +888,8 @@ spec_get_type(const char * a_spec, cw_uint32_t a_spec_len, const char ** r_val);
  *
  * a_name : Pointer to a NULL-terminated name.
  *
+ * a_name_len : Length of a_name.
+ *
  * r_val : Pointer to a string pointer.
  *
  * <<< Output(s) >>>
@@ -910,4 +907,5 @@ spec_get_type(const char * a_spec, cw_uint32_t a_spec_len, const char ** r_val);
  ****************************************************************************/
 cw_sint32_t
 spec_get_val(const char * a_spec, cw_uint32_t a_spec_len,
-	     const char * a_name, const char ** r_val);
+	     const char * a_name,  cw_uint32_t a_name_len,
+	     const char ** r_val);

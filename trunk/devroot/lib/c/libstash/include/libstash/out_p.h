@@ -24,6 +24,42 @@
 #define _LIBSTASH_OUT_DES_SPECIFIER 's'
 #define _LIBSTASH_OUT_DES_WHITEOUT  'w'
 
+/* Maximum size of specifier to use a stack buffer for parsing. */
+#ifdef _LIBSTASH_DBG
+#  define _LIBSTASH_OUT_SPEC_BUF 8
+#else
+#  define _LIBSTASH_OUT_SPEC_BUF 128
+#endif
+
+/* Maximum size of stack buffer to use for printing. */
+#ifdef _LIBSTASH_DBG
+#  define _LIBSTASH_OUT_PRINT_BUF 8
+#else
+#  define _LIBSTASH_OUT_PRINT_BUF 1024
+#endif
+
+#ifdef _LIBSTASH_DBG
+#  define _LIBSTASH_OUT_ENT_CACHE 1
+#else
+#  define _LIBSTASH_OUT_ENT_CACHE 8
+#endif
+
+typedef struct
+{
+  cw_sint32_t spec_len;
+  cw_out_ent_t * ent;
+} cw_out_ent_el_t;
+
+typedef struct
+{
+  cw_uint32_t metric;
+  cw_uint32_t format_len;
+  cw_bool_t raw;
+  char format_key_buf[_LIBSTASH_OUT_SPEC_BUF];
+  char * format_key;
+  cw_out_ent_el_t ents[_LIBSTASH_OUT_ENT_CACHE];
+} cw_out_key_t;
+
 static cw_sint32_t
 out_p_put_fvle(cw_out_t * a_out, cw_sint32_t a_fd,
 	       cw_bool_t a_time_stamp,
@@ -35,10 +71,22 @@ out_p_put_fvle(cw_out_t * a_out, cw_sint32_t a_fd,
 
 static cw_sint32_t
 out_p_put_fvn(cw_out_t * a_out, cw_sint32_t a_fd, cw_uint32_t a_size,
+	      cw_out_key_t * a_key,
+	      const char * a_format, va_list a_p);
+
+cw_sint32_t
+out_p_put_sva(cw_out_t * a_out, char ** r_str,
+	      cw_out_key_t * a_key,
+	      const char * a_format, va_list a_p);
+
+cw_sint32_t
+out_p_put_svn(cw_out_t * a_out, char * a_str, cw_uint32_t a_size,
+	      cw_out_key_t * a_key,
 	      const char * a_format, va_list a_p);
 
 static cw_sint32_t
-out_p_metric(cw_out_t * a_out, const char * a_format, char ** r_format,
+out_p_metric(cw_out_t * a_out, const char * a_format,
+	     cw_out_key_t * a_key,
 	     va_list a_p);
 
 static cw_out_ent_t *
@@ -53,22 +101,6 @@ static char *
 out_p_render_int(const char * a_format, cw_uint32_t a_len,
 		 cw_uint64_t a_arg, char * r_buf,
 		 cw_uint32_t a_nbits, cw_uint32_t a_default_base);
-
-static cw_sint32_t
-out_p_metric_int8(const char * a_format, cw_uint32_t a_len,
-		  const void * a_arg);
-
-static char *
-out_p_render_int8(const char * a_format, cw_uint32_t a_len,
-		  const void * a_arg, char * r_buf);
-
-static cw_sint32_t
-out_p_metric_int16(const char * a_format, cw_uint32_t a_len,
-		   const void * a_arg);
-
-static char *
-out_p_render_int16(const char * a_format, cw_uint32_t a_len,
-		   const void * a_arg, char * r_buf);
 
 static cw_sint32_t
 out_p_metric_int32(const char * a_format, cw_uint32_t a_len,
@@ -112,39 +144,14 @@ out_p_render_pointer(const char * a_format, cw_uint32_t a_len,
 
 static cw_out_ent_t cw_g_out_builtins[] = 
 {
-  {"int8",     sizeof(cw_uint8_t),   out_p_metric_int8,    out_p_render_int8},
-  {"i8",       sizeof(cw_uint8_t),   out_p_metric_int8,    out_p_render_int8},
+  {"s",    1, sizeof(cw_uint8_t *), out_p_metric_string,  out_p_render_string},
+  {"i",    1, sizeof(cw_uint32_t),  out_p_metric_int32,   out_p_render_int32},
+  {"p",    1, sizeof(void *),       out_p_metric_pointer, out_p_render_pointer},
+  {"c",    1, sizeof(cw_uint8_t),   out_p_metric_char,    out_p_render_char},
+  {"q",    1, sizeof(cw_uint64_t),  out_p_metric_int64,   out_p_render_int64},
   
-  {"int16",    sizeof(cw_uint16_t),  out_p_metric_int16,   out_p_render_int16},
-  {"i16",      sizeof(cw_uint16_t),  out_p_metric_int16,   out_p_render_int16},
-  
-  {"int32",    sizeof(cw_uint32_t),  out_p_metric_int32,   out_p_render_int32},
-  {"i32",      sizeof(cw_uint32_t),  out_p_metric_int32,   out_p_render_int32},
-  
-  {"int64",    sizeof(cw_uint64_t),  out_p_metric_int64,   out_p_render_int64},
-  {"i64",      sizeof(cw_uint64_t),  out_p_metric_int64,   out_p_render_int64},
-
-  {"float32",  4,                    NULL,                 NULL},
-  {"f32",      4,                    NULL,                 NULL},
-
-  {"float64",  8,                    NULL,                 NULL},
-  {"f64",      8,                    NULL,                 NULL},
-
-  {"float96",  12,                   NULL,                 NULL},
-  {"f96",      12,                   NULL,                 NULL},
-
-  {"float128", 16,                   NULL,                 NULL},
-  {"f128",     16,                   NULL,                 NULL},
-
-  {"char",     sizeof(cw_uint8_t),   out_p_metric_char,    out_p_render_char},
-  {"c",        sizeof(cw_uint8_t),   out_p_metric_char,    out_p_render_char},
-  
-  {"string",   sizeof(cw_uint8_t *), out_p_metric_string,  out_p_render_string},
-  {"s",        sizeof(cw_uint8_t *), out_p_metric_string,  out_p_render_string},
-  
-  {"pointer",  sizeof(void *),       out_p_metric_pointer, out_p_render_pointer},
-  {"p",        sizeof(void *),       out_p_metric_pointer, out_p_render_pointer}
+  {"f32",  3, 4,                    NULL,                 NULL},
+  {"f64",  3, 8,                    NULL,                 NULL},
+  {"f96",  3, 12,                   NULL,                 NULL},
+  {"f128", 4, 16,                   NULL,                 NULL}
 };
-
-static cw_sint32_t
-spec_p_has_specifier(const char * a_format);
