@@ -19,9 +19,6 @@
 
 #include "libstash/buf_p.h"
 
-/*  #include <netinet/in.h> */
-/*  #include <sys/param.h> */
-
 #ifdef _CW_OS_FREEBSD
 #  include <sys/types.h>
 #  include <sys/uio.h>
@@ -45,7 +42,6 @@ buf_new(cw_buf_t * a_buf)
 #endif
 {
   cw_buf_t * retval;
-/*    void * t_ptr; */
 
   if (a_buf == NULL)
   {

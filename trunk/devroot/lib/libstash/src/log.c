@@ -337,17 +337,9 @@ log_lprintf(cw_log_t * a_log, const char * a_format, ...)
   /* Create time string. */
   curr_time = time(NULL);
   cts = localtime(&curr_time);
-#if (defined(_CW_OS_FREEBSD))
-  sprintf(time_str, "[%4d/%02d/%02d %02d:%02d:%02d (%s)]: ",
-	  cts->tm_year + 1900, cts->tm_mon + 1, cts->tm_mday,
-	  cts->tm_hour, cts->tm_min, cts->tm_sec, cts->tm_zone);
-#elif (defined(_CW_OS_SOLARIS) || defined(_CW_OS_LINUX))
   sprintf(time_str, "[%4d/%02d/%02d %02d:%02d:%02d (%s)]: ",
 	  cts->tm_year + 1900, cts->tm_mon + 1, cts->tm_mday,
 	  cts->tm_hour, cts->tm_min, cts->tm_sec, tzname[0]);
-#else
-#  error "Unsupported OS"
-#endif
 
   retval += fprintf(fp, "%s", time_str);
   va_start(ap, a_format);
@@ -402,17 +394,9 @@ log_leprintf(cw_log_t * a_log,
   /* Create time string. */
   curr_time = time(NULL);
   cts = localtime(&curr_time);
-#if (defined(_CW_OS_FREEBSD))
-  sprintf(time_str, "[%4d/%02d/%02d %02d:%02d:%02d (%s)]: ",
-	  cts->tm_year + 1900, cts->tm_mon + 1, cts->tm_mday,
-	  cts->tm_hour, cts->tm_min, cts->tm_sec, cts->tm_zone);
-#elif (defined(_CW_OS_SOLARIS) || defined(_CW_OS_LINUX))
   sprintf(time_str, "[%4d/%02d/%02d %02d:%02d:%02d (%s)]: ",
 	  cts->tm_year + 1900, cts->tm_mon + 1, cts->tm_mday,
 	  cts->tm_hour, cts->tm_min, cts->tm_sec, tzname[0]);
-#else
-#  error "Unsupported OS"
-#endif
   
   retval += fprintf(fp, "%s", time_str);
     
