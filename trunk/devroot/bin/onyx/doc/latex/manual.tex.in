@@ -28,7 +28,7 @@ the main Onyx language documentation.
 
 \binname{onyx} -e {\lt}expr{\gt}
 
-\binname{onyx} [-i {\lt}expr{\gt}]* [-s {\lt}file{\gt}]*
+\binname{onyx} [-i {\lt}expr{\gt}]* [-f {\lt}file{\gt}]* [-s {\lt}expr{\gt}]
 
 \binname{onyx} {\lt}file{\gt} [{\lt}args{\gt}]
 
@@ -39,6 +39,8 @@ the main Onyx language documentation.
 \item[-e {\lt}expr{\gt}: ] Evaluate {\lt}expr{\gt} as Onyx code.
 \item[-i {\lt}expr{\gt}: ] Evaluate initialization {\lt}expr{\gt}.
 \item[-f {\lt}file{\gt}: ] Evaluate initialization {\lt}file{\gt}.
+\item[-s {\lt}expr{\gt}: ] Call \htmlref{\onyxop{}{start}{}}{systemdict:start}
+with {\lt}expr{\gt}, rather than with the stdin file.
 \end{description}
 
 \section{Environment variables}

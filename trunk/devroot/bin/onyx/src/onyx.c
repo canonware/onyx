@@ -67,7 +67,7 @@ usage(void);
 
 int
 interactive_run(int argc, char **argv, char **envp, cw_nxinit_t *a_init,
-		cw_uint32_t a_ninit);
+		cw_uint32_t a_ninit, const cw_uint8_t *a_start);
 
 int
 batch_run(int argc, char **argv, char **envp, cw_bool_t a_version,
@@ -107,7 +107,7 @@ main(int argc, char **argv, char **envp)
     cw_uint8_t *opt_expression = NULL;
     cw_uint32_t opt_ninit = 0;
     cw_nxinit_t *opt_init = NULL;
-//    cw_uint8_t **opt_init = NULL;
+    cw_uint8_t *opt_start = NULL;
 
     libonyx_init();
 
@@ -120,7 +120,7 @@ main(int argc, char **argv, char **envp)
 			* the end of the argument list. */
 		       "+"
 #endif
-		       "hVe:i:s:")) != -1)
+		       "hVe:i:f:s:")) != -1)
     {
 	switch (c)
 	{
@@ -148,7 +148,6 @@ main(int argc, char **argv, char **envp)
 		opt_expression = optarg;
 		break;
 	    }
-#ifdef CW_POSIX_FILE
 	    case 'i':
 	    {
 		opt_ninit++;
@@ -166,8 +165,8 @@ main(int argc, char **argv, char **envp)
 		opt_init[opt_ninit - 1].str = optarg;
 		break;
 	    }
-#endif
-	    case 's':
+#ifdef CW_POSIX_FILE
+	    case 'f':
 	    {
 		opt_ninit++;
 		if (opt_ninit == 1)
@@ -184,6 +183,19 @@ main(int argc, char **argv, char **envp)
 		opt_init[opt_ninit - 1].str = optarg;
 		break;
 	    }
+#endif
+	    case 's':
+	    {
+		if (opt_start != NULL)
+		{
+		    fprintf(stderr, "onyx: -s specified more than once\n");
+		    usage();
+		    retval = 1;
+		    goto CLERROR;
+		}
+		opt_start = optarg;
+		break;
+	    }
 	    default:
 	    {
 		fprintf(stderr,  "onyx: Unrecognized option\n");
@@ -196,9 +208,10 @@ main(int argc, char **argv, char **envp)
 
     /* Do additional command line argument error checking. */
     if ((optind < argc && (opt_expression != NULL || opt_version
-			   || opt_ninit != 0))
+			   || opt_ninit != 0 || opt_start != NULL))
 	|| (opt_version && opt_expression != NULL)
-	|| (opt_ninit != 0 && (opt_version || opt_expression != NULL))
+	|| ((opt_ninit != 0 || opt_start)
+	    && (opt_version || opt_expression != NULL))
 	)
     {
 	fprintf(stderr, "onyx: Incorrect number of arguments\n");
@@ -212,7 +225,8 @@ main(int argc, char **argv, char **envp)
     if (isatty(0) && optind == argc
 	&& opt_version == FALSE && opt_expression == NULL)
     {
-	retval = interactive_run(argc, argv, envp, opt_init, opt_ninit);
+	retval = interactive_run(argc, argv, envp, opt_init, opt_ninit,
+				 opt_start);
     }
     else
     {
@@ -235,7 +249,7 @@ usage(void)
 	   "    onyx -h\n"
 	   "    onyx -V\n"
 	   "    onyx [-e <expr>]\n"
-	   "    onyx [-i <expr>]* [-s <file>]*\n"
+	   "    onyx [-i <expr>]* [-f <file>]* [-s <expr>]\n"
 	   "    onyx <file> [<args>]\n"
 	   "\n"
 	   "    Option    | Description\n"
@@ -243,16 +257,17 @@ usage(void)
 	   "    -h        | Print usage and exit.\n"
 	   "    -V        | Print version information and exit.\n"
 	   "    -e <expr> | Evaluate <expr>.\n"
-	   "    -i <expr> | Evaluate initialization <expr>.\n"
 #ifdef CW_POSIX_FILE
-	   "    -s <file> | Evaluate contents of initialization <file>.\n"
+	   "    -f <file> | Evaluate contents of initialization <file>.\n"
 #endif
+	   "    -i <expr> | Evaluate initialization <expr>.\n"
+	   "    -s <expr> | Call start with <expr>.\n"
 	   );
 }
 
 int
 interactive_run(int argc, char **argv, char **envp, cw_nxinit_t *a_init,
-		cw_uint32_t a_ninit)
+		cw_uint32_t a_ninit, const cw_uint8_t *a_start)
 {
     int retval;
     cw_nx_t nx;
@@ -320,12 +335,28 @@ interactive_run(int argc, char **argv, char **envp, cw_nxinit_t *a_init,
     }
 #endif
 
-    /* Push an executable stdin on ostack.  This must be done after loading
-     * modprompt, as well as after any initialization scripts that are specified
-     * on the command line. */
-    nxo = nxo_stack_push(nxo_thread_ostack_get(&thread));
-    nxo_dup(nxo, nxo_thread_stdin_get(&thread));
-    nxo_attr_set(nxo, NXOA_EXECUTABLE);
+    if (a_start == NULL)
+    {
+	/* Push an executable stdin on ostack.  This must be done after loading
+	 * modprompt, as well as after any initialization scripts that are
+	 * specified on the command line. */
+	nxo = nxo_stack_push(nxo_thread_ostack_get(&thread));
+	nxo_dup(nxo, nxo_thread_stdin_get(&thread));
+	nxo_attr_set(nxo, NXOA_EXECUTABLE);
+    }
+    else
+    {
+	/* Push the string onto the execution stack, in preparatiion for calling
+	 * start.  It is not possible to safely call nxo_thread_interpret()
+	 * here, since it requires a following nxo_threadp_delete() to assure
+	 * the last token is accepted, yet earlier code in the string could have
+	 * made the initial thread exit, thus causing access to a thread that is
+	 * no longer valid. */
+	nxo = nxo_stack_push(nxo_thread_ostack_get(&thread));
+	nxo_string_new(nxo, &nx, FALSE, strlen((char *) a_start));
+	nxo_attr_set(nxo, NXOA_EXECUTABLE);
+	nxo_string_set(nxo, 0, a_start, nxo_string_len_get(nxo));
+    }
 
     /* Run the interpreter such that it will not exit on errors. */
     nxo_thread_start(&thread);
@@ -343,7 +374,7 @@ batch_run(int argc, char **argv, char **envp, cw_bool_t a_version,
 	  cw_uint8_t *a_expression)
 {
     int retval;
-    cw_nxo_t *file;
+    cw_nxo_t *nxo;
     cw_nx_t nx;
 
     /* Since this is a non-interactive invocation, don't include all elements of
@@ -377,13 +408,11 @@ batch_run(int argc, char **argv, char **envp, cw_bool_t a_version,
     }
     else if (a_expression != NULL)
     {
-	cw_nxo_t *string;
-
 	/* Push the string onto the execution stack. */
-	string = nxo_stack_push(nxo_thread_ostack_get(&thread));
-	nxo_string_new(string, &nx, FALSE, strlen((char *) a_expression));
-	nxo_attr_set(string, NXOA_EXECUTABLE);
-	nxo_string_set(string, 0, a_expression, nxo_string_len_get(string));
+	nxo = nxo_stack_push(nxo_thread_ostack_get(&thread));
+	nxo_string_new(nxo, &nx, FALSE, strlen((char *) a_expression));
+	nxo_attr_set(nxo, NXOA_EXECUTABLE);
+	nxo_string_set(nxo, 0, a_expression, nxo_string_len_get(nxo));
     }
     else if (optind < argc)
     {
@@ -397,9 +426,9 @@ batch_run(int argc, char **argv, char **envp, cw_bool_t a_version,
     {
 	/* No source file specified, and there there was no -e expression
 	 * specified either, so treat stdin as the source. */
-	file = nxo_stack_push(nxo_thread_ostack_get(&thread));
-	nxo_dup(file, nx_stdin_get(&nx));
-	nxo_attr_set(file, NXOA_EXECUTABLE);
+	nxo = nxo_stack_push(nxo_thread_ostack_get(&thread));
+	nxo_dup(nxo, nx_stdin_get(&nx));
+	nxo_attr_set(nxo, NXOA_EXECUTABLE);
     }
 
     /* Run the interpreter non-interactively. */
