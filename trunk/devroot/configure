@@ -16,9 +16,9 @@ ac_help="$ac_help
 ac_help="$ac_help
   --disable-inlines       Do not use inline functions"
 ac_help="$ac_help
-  --enable-debug           Build debugging code"
+  --enable-debug          Build debugging code"
 ac_help="$ac_help
-  --enable-profile       Build with profiling"
+  --enable-profile        Build with profiling"
 
 # Initialize some variables set by options.
 # The variables have the same names as the options, with

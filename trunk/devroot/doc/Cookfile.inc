@@ -68,7 +68,7 @@ done
 dataend
 }
 
-uninstall_doc :
+uninstall_docs :
 {
   [SHELL] -e;
 data

@@ -11,7 +11,7 @@ AC_DEFUN(CW_USE_PTHREADS,
 dnl Do not compile with debugging by default.
 AC_DEFUN(CW_DISABLE_DEBUG,
 [
-AC_ARG_ENABLE(debug, [  --enable-debug           Build debugging code],
+AC_ARG_ENABLE(debug, [  --enable-debug          Build debugging code],
 if test "x$enable_debug" = "xno" ; then
   enable_debug="0"
 else
@@ -29,7 +29,7 @@ fi
 dnl Do not compile with profiling by default.
 AC_DEFUN(CW_DISABLE_PROFILE,
 [
-AC_ARG_ENABLE(profile, [  --enable-profile       Build with profiling],
+AC_ARG_ENABLE(profile, [  --enable-profile        Build with profiling],
 if test "x$enable_profile" = "xno" ; then
   enable_profile="0"
 else

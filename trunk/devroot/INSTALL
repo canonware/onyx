@@ -12,12 +12,12 @@ see:
 
 	http://www.canb.auug.org.au/~millerp/cook/cook.html
 
-Optional: Running the regression tests requires perl 5.002 or greater.
+Optional: Running the regression tests requires perl.
 
-Optional: Rebuilding the documentation requires LaTeX (teTeX distribution) and
-latex2html.  However, the source distribution should come with the documentation
-already built, so you should not need to do so unless making documentation
-modifications.
+Optional: Rebuilding the documentation requires LaTeX (teTeX distribution),
+latex2html, and perl.  However, the source distribution should come with the
+documentation already built, so you should not need to do so unless making
+documentation modifications.
 
 Building this distribution in many cases is as simple as typing the following
 while in the root directory of the source tree:
@@ -32,27 +32,29 @@ To install, do the above, then type:
 Additional build targets of finer granularity include:
 
 	bins
-	bins_[daps]
 	libs
-	libs_[daps]
+	libs_[as]
 	<libname>
+	mods
+	<modname>
 	tests
 
 Additional install targets of finer granularity include:
 
-	install_{bins,libs,doc}
+	install_{bins,libs,mods,docs}
 	<binname>_install
-	<binname>_install_[dap]
 	<libname>_install
-	<libname>_install_[daps]
-	doc_install_{ps,pdf,html}
+	<libname>_install_[as]
+	<modname>_install
+	docs_install_{ps,pdf,html}
 
 Uninstall targets include:
 
 	uninstall
-	uninstall_{bins,libs,doc}
+	uninstall_{bins,libs,mods,docs}
 	<binname>_uninstall
 	<libname>_uninstall
+	<modname>_uninstall
 
 Cleanup targets include:
 
@@ -63,7 +65,8 @@ Cleanup targets include:
 Targets that depend on optional supporting software include:
 
 	all
-	doc_{all,ps,pdf,html}
+	docs
+	docs_{ps,pdf,html}
 	release
 	check
 	check_update
@@ -85,13 +88,6 @@ Optionally, pass any of the following (not a definitive list) arguments to
 	will cause files to be installed into /usr/local/bin, /usr/local/man,
 	/usr/local/include, and /usr/local/lib.
 
---enable-shared
-	Build and install shared libraries.  If this option is specified,
-	binaries will also be linked with the resulting shared libraries.  Note
-	that the library version numbers are not currently being incremented to
-	reflect incompatible changes, so you will need to handle this manually
-	if upgrading from an older version of the libraries.
-
 --disable-inlines
 	Do not use inline functions.  This reduces the size of binaries at the
 	expense of performance.
@@ -101,6 +97,15 @@ Optionally, pass any of the following (not a definitive list) arguments to
 	the buf class, so if this feature is disabled, libsock as well as the
 	programs that depend on libsock (ncat and proxy) will be left out of
 	the build, even if present in the source tree.
+
+--enable-debug
+	Build debugging code and turn assertions on (controlled by the
+	_CW_ASSERT cpp macro).  The resulting libraries and modules will not be
+	binary compatible with ones that were compiled without this option, so
+	specifying this option and installing the results is not recommended.
+
+--enable-profile
+	Instrument binaries, libraries, and modules for profiling.
 
 Optionally, define environment variables, including (not exclusively):
 
