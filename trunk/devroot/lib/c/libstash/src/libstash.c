@@ -19,29 +19,52 @@
 cw_dbg_t	*cw_g_dbg = NULL;
 cw_mem_t	*cw_g_mem = NULL;
 cw_out_t	*cw_g_out = NULL;
+#ifdef _LIBSTASH_DBG
+cw_mem_t	*cw_g_mem_mem = NULL;
+#endif
 
 cw_bool_t
 libstash_init(void)
 {
-	cw_bool_t	retval = FALSE;
-
 	/* Start up global modules. */
-	if (cw_g_dbg == NULL) {
-		cw_g_dbg = dbg_new(cw_g_mem);
+	cw_g_dbg = dbg_new(cw_g_mem);
+	if (cw_g_dbg == NULL)
+		goto OOM_1;
 #ifdef _LIBSTASH_DBG
-		if (cw_g_dbg != NULL)
-			dbg_register(cw_g_dbg, "mem_error");
-		if (cw_g_dbg != NULL)
-			dbg_register(cw_g_dbg, "pezz_error");
-#endif
-	}
+	dbg_register(cw_g_dbg, "mem_error");
+	dbg_register(cw_g_dbg, "pezz_error");
+
+	cw_g_mem_mem = mem_new(NULL, NULL);
+	if (cw_g_mem_mem == NULL)
+		goto OOM_2;
+
+	cw_g_mem = mem_new(NULL, cw_g_mem_mem);
 	if (cw_g_mem == NULL)
-		cw_g_mem = mem_new(NULL, NULL);
+		goto OOM_3;
+#else
+	cw_g_mem = mem_new(NULL, NULL);
+	if (cw_g_mem == NULL)
+		goto OOM_3;
+#endif
+
+	cw_g_out = out_new(NULL, cw_g_mem);
 	if (cw_g_out == NULL)
-		cw_g_out = out_new(NULL, cw_g_mem);
-	if ((cw_g_dbg == NULL) || (cw_g_mem == NULL) || (cw_g_out == NULL))
-		retval = TRUE;
-	return retval;
+		goto OOM_4;
+
+	return FALSE;
+	OOM_4:
+	mem_delete(cw_g_mem);
+	cw_g_mem = NULL;
+	OOM_3:
+#ifdef _LIBSTASH_DBG
+	mem_delete(cw_g_mem_mem);
+	cw_g_mem_mem = NULL;
+	OOM_2:
+#endif
+	dbg_delete(cw_g_dbg);
+	cw_g_dbg = NULL;
+	OOM_1:
+	return TRUE;
 }
 
 void
@@ -53,6 +76,11 @@ libstash_shutdown(void)
 
 	mem_delete(cw_g_mem);
 	cw_g_mem = NULL;
+
+#ifdef _LIBSTASH_DBG
+	mem_delete(cw_g_mem_mem);
+	cw_g_mem_mem = NULL;
+#endif
 
 	dbg_delete(cw_g_dbg);
 	cw_g_dbg = NULL;

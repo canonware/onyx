@@ -1,5 +1,11 @@
 2000-07-21  Jason Evans  <jasone@canonware.com>
 
+	* src/libstash.c: For the debug version of libstash, create an
+	allocator for cw_g_mem, in order to hopefully detect bugs within
+	the mem class.
+
+	libstash_init(): Clean up.
+
 	* src/out.c (out_p_el_accept): Correctly calculate the number of
 	elements in a specifier when the stack-allocated element cache
 	overflows.
