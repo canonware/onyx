@@ -553,6 +553,7 @@ The application can also create additional stacks and manipulate them in much
 the same way as the operand stack can be manipulated.
 
 \section{Standard I/O}
+\label{sec:onyx_standard_io}
 
 Onyx provides operators to access the standard I/O file objects:
 \htmlref{\onyxop{}{stdin}{}}{systemdict:stdin},
@@ -667,7 +668,7 @@ native threading facilities.  Along with threads comes the need for methods of
 synchronization between threads.
 
 \subsection{Implicit synchronization}
-\label{sec:implicit_synchronization}
+\label{sec:onyx_implicit_synchronization}
 
 Implicit synchronization is a mandatory language feature, since objects such as
 \htmlref{globaldict}{systemdict:globaldict} are implicitly accessed by the
@@ -3638,6 +3639,24 @@ directory. \\
 -- & {\bf \htmlref{gstdout}{systemdict:gstdout}} & file & Get global stdout. \\
 \hline
 -- & {\bf \htmlref{gstderr}{systemdict:gstderr}} & file & Get global stderr. \\
+\hline
+file & {\bf \htmlref{setstdin}{systemdict:setstdin}} & -- & Set thread's
+stdin. \\
+\hline
+file & {\bf \htmlref{setstdout}{systemdict:setstdout}} & -- & Set thread's
+stdout. \\
+\hline
+file & {\bf \htmlref{setstderr}{systemdict:setstderr}} & -- & Set thread's
+stderr. \\
+\hline
+file & {\bf \htmlref{setgstdin}{systemdict:setgstdin}} & -- & Set global
+stdin. \\
+\hline
+file & {\bf \htmlref{setgstdout}{systemdict:setgstdout}} & -- & Set global
+stdout. \\
+\hline
+file & {\bf \htmlref{setgstderr}{systemdict:setgstderr}} & -- & Set global
+stderr. \\
 \hline \hline
 \multicolumn{4}{|l|}{Logical and bitwise operators} \\
 \hline \hline
@@ -4874,7 +4893,7 @@ onyx:0>
 	\item[Errors(s): ] None.
 	\item[Description: ]
 		Get the current implicit locking mode.  See
-		Section~\ref{sec:implicit_synchronization} for implicit
+		Section~\ref{sec:onyx_implicit_synchronization} for implicit
 		synchronization details.
 	\item[Example(s): ]\begin{verbatim}
 
@@ -6213,7 +6232,8 @@ onyx:0>
 		\end{description}
 	\item[Errors(s): ] None.
 	\item[Description: ]
-		Get the global stderr that is inherited by new threads.
+		Get the global stderr that is inherited by new threads.  See
+		Section~\ref{sec:onyx_standard_io} for standard I/O details.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> gstderr pstack
@@ -6233,7 +6253,8 @@ onyx:1>
 		\end{description}
 	\item[Errors(s): ] None.
 	\item[Description: ]
-		Get the global stdin that is inherited by new threads.
+		Get the global stdin that is inherited by new threads.  See
+		Section~\ref{sec:onyx_standard_io} for standard I/O details.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> gstdin pstack
@@ -6253,7 +6274,8 @@ onyx:1>
 		\end{description}
 	\item[Errors(s): ] None.
 	\item[Description: ]
-		Get the global stdout that is inherited by new threads.
+		Get the global stdout that is inherited by new threads.  See
+		Section~\ref{sec:onyx_standard_io} for standard I/O details.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> gstdout pstack
@@ -8780,6 +8802,104 @@ true
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:setgstderr}
+\index{setgstderr@\onyxop{}{setgstderr}{}}
+\item[{\onyxop{file}{setgstderr}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[file: ]
+			A file to set the global stderr to.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Set the global stderr to \oparg{file}.  See
+		Section~\ref{sec:onyx_standard_io} for standard I/O details.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> `/tmp/stderr' `w' open dup 0 setiobuf setgstderr
+onyx:0> () {stderr `Some text\n' write} thread join
+onyx:0> `/tmp/stderr' `r' open readline pop 1 sprint
+`Some text'
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:setgstdin}
+\index{setgstdin@\onyxop{}{setgstdin}{}}
+\item[{\onyxop{file}{setgstdin}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[file: ]
+			A file to set the global stdin to.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Set the global stdin to \oparg{file}.  See
+		Section~\ref{sec:onyx_standard_io} for standard I/O details.
+	\item[Example(s): ]
+		Under normal interactive operation, stdin is pushed onto estack
+		during interpreter initialization and evaluated until EOF is
+		reached.  Therefore, changing stdin has no effect on the file
+		descriptor already on estack.  The following example recursively
+		evaluates stdin after redefining it.
+\begin{verbatim}
+
+lawine:~> cat /tmp/stdin
+1 2 3 pstack
+lawine:~> onyx 
+Canonware Onyx, version 3.1.0.
+onyx:0> `/tmp/stdin' `r' open cvx setgstdin
+onyx:0> () {stdin eval} thread join
+3
+2
+1
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:setgstdout}
+\index{setgstdout@\onyxop{}{setgstdout}{}}
+\item[{\onyxop{file}{setgstdout}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[file: ]
+			A file to set the global stdout to.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Set the global stdout to \oparg{file}.  See
+		Section~\ref{sec:onyx_standard_io} for standard I/O details.
+	\item[Example(s): ]
+		In the following example, the prompt continues to be printed,
+		even though stdout has been redefined, because the prompt module
+		was initialized to print to file descriptor 1.  This
+		demonstrates the only known exception in the stock Onyx
+		interpreter where redefining stdout will not redirect output.
+\begin{verbatim}
+
+onyx:0> `/tmp/stdout' `w' open dup 0 setiobuf setgstdout
+onyx:0> () {`Some text\n' print} thread join
+onyx:0> `/tmp/stdout' `r' open readline pop 1 sprint
+`Some text'
+onyx:0>
+		\end{verbatim}
+	\end{description}
 \label{systemdict:setiobuf}
 \index{setiobuf@\onyxop{}{setiobuf}{}}
 \item[{\onyxop{file count}{setiobuf}{--}}: ]
@@ -8827,7 +8947,7 @@ onyx:0>
 		\end{description}
 	\item[Description: ]
 		Set the current implicit locking mode.  See
-		Section~\ref{sec:implicit_synchronization} for implicit
+		Section~\ref{sec:onyx_implicit_synchronization} for implicit
 		synchronization details.
 	\item[Example(s): ]\begin{verbatim}
 
@@ -8836,6 +8956,105 @@ false
 onyx:0> true setlocking
 onyx:0> currentlocking 1 sprint
 true
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:setstderr}
+\index{setstderr@\onyxop{}{setstderr}{}}
+\item[{\onyxop{file}{setstderr}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[file: ]
+			A file to set the calling thread's stderr to.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Set the thread's stderr to \oparg{file}.  See
+		Section~\ref{sec:onyx_standard_io} for standard I/O details.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> `/tmp/stderr' `w' open dup 0 setiobuf setstderr
+onyx:0> stderr `Some text\n' write
+onyx:0> `/tmp/stderr' `r' open readline pop 1 sprint
+`Some text'
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:setstdin}
+\index{setstdin@\onyxop{}{setstdin}{}}
+\item[{\onyxop{file}{setstdin}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[file: ]
+			A file to set the calling thread's stdin to.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Set the thread's stdin to \oparg{file}.  See
+		Section~\ref{sec:onyx_standard_io} for standard I/O details.
+	\item[Example(s): ]
+		Under normal interactive operation, stdin is pushed onto estack
+		during interpreter initialization and evaluated until EOF is
+		reached.  Therefore, changing stdin has no effect on the file
+		descriptor already on estack.  The following example recursively
+		evaluates stdin after redefining it.
+\begin{verbatim}
+
+lawine:~> cat /tmp/stdin
+1 2 3 pstack
+lawine:~> onyx 
+Canonware Onyx, version 3.1.0.
+onyx:0> `/tmp/stdin' `r' open cvx setstdin
+onyx:0> stdin eval
+3
+2
+1
+onyx:3>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:setstdout}
+\index{setstdout@\onyxop{}{setstdout}{}}
+\item[{\onyxop{file}{setstdout}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[file: ]
+			A file to set the calling thread's stdout to.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Set the thread's stdout to \oparg{file}.  See
+		Section~\ref{sec:onyx_standard_io} for standard I/O details.
+	\item[Example(s): ]
+		In the following example, the prompt continues to be printed,
+		even though stdout has been redefined, because the prompt module
+		was initialized to print to file descriptor 1.  This
+		demonstrates the only known exception in the stock Onyx
+		interpreter where redefining stdout will not redirect output.
+\begin{verbatim}
+
+onyx:0> `/tmp/stdout' `w' open dup 0 setiobuf setstdout
+onyx:0> `Some text\n' print
+onyx:0> gstdout setstdout
+onyx:0> `/tmp/stdout' `r' open readline pop 1 sprint
+`Some text'
 onyx:0>
 		\end{verbatim}
 	\end{description}
@@ -9384,7 +9603,8 @@ onyx:0>
 		\end{description}
 	\item[Errors(s): ] None.
 	\item[Description: ]
-		Get the thread's stderr.
+		Get the thread's stderr.  See Section~\ref{sec:onyx_standard_io}
+		for standard I/O details.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> stderr pstack
@@ -9405,7 +9625,8 @@ onyx:1>
 		\end{description}
 	\item[Errors(s): ] None.
 	\item[Description: ]
-		Get the thread's stdin.
+		Get the thread's stdin.  See Section~\ref{sec:onyx_standard_io}
+		for standard I/O details.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> stdin pstack
@@ -9426,7 +9647,8 @@ onyx:1>
 		\end{description}
 	\item[Errors(s): ] None.
 	\item[Description: ]
-		Get the thread's stdout.
+		Get the thread's stdout.  See Section~\ref{sec:onyx_standard_io}
+		for standard I/O details.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> stdout pstack
