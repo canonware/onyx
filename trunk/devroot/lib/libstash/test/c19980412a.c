@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 66 $
- * $Date: 1998-05-02 02:06:52 -0700 (Sat, 02 May 1998) $
+ * $Revision: 78 $
+ * $Date: 1998-05-15 01:43:21 -0700 (Fri, 15 May 1998) $
  *
  * <<< Description >>>
  *
@@ -57,7 +57,7 @@ insert_items(void * arg)
   {
     string = (char *) _cw_malloc(20);
     sprintf(string, "String %d", i);
-    oh_item_insert(hash_o, (void *) string, &string);
+    oh_item_insert(hash_o, (void *) string, (void *) string);
   }
   return NULL;
 }
