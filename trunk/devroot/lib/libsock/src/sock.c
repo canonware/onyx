@@ -525,6 +525,13 @@ sock_write(cw_sock_t * a_sock, cw_buf_t * a_buf)
     else
     {
       mtx_lock(&a_sock->out_lock);
+      
+/*        out_put_e(cw_g_out, NULL, 0, __FUNCTION__, */
+/*  		"sockfd [i]: write [i] bytes onto [i] existing, notify: [s]\n", */
+/*  		a_sock->sockfd, */
+/*  		buf_get_size(a_buf), */
+/*  		buf_get_size(&a_sock->out_buf), */
+/*  		a_sock->out_is_flushed ? "yes" : "no"); */
 
       if (a_sock->out_is_flushed == TRUE)
       {
@@ -649,15 +656,30 @@ sock_l_get_out_data(cw_sock_t * a_sock, cw_buf_t * r_buf)
 
   mtx_lock(&a_sock->out_lock);
 
+/*    out_put_e(cw_g_out, NULL, 0, __FUNCTION__, */
+/*  	    "os_outbuf_size: [i], out_buf size: [i]\n", */
+/*  	    a_sock->os_outbuf_size, buf_get_size(&a_sock->out_buf)); */
+  
   if (buf_get_size(&a_sock->out_buf) > a_sock->os_outbuf_size)
   {
+/*      out_put_e(cw_g_out, NULL, 0, __FUNCTION__, */
+/*  	      "split [i]/[i] bytes onto [i] (should be 0) existing\n", */
+/*  	      a_sock->os_outbuf_size, buf_get_size(&a_sock->out_buf), */
+/*  	      buf_get_size(r_buf)); */
     buf_split(r_buf, &a_sock->out_buf, a_sock->os_outbuf_size);
   }
   else
   {
+/*      out_put_e(cw_g_out, NULL, 0, __FUNCTION__, */
+/*  	      "catenate [i] bytes onto [i] (should be 0) existing\n", */
+/*  	      buf_get_size(&a_sock->out_buf), */
+/*  	      buf_get_size(r_buf)); */
     buf_catenate_buf(r_buf, &a_sock->out_buf, FALSE);
   }
-  
+
+  /* XXX This probably doesn't need to be here, since sock_l_put_back_out_data()
+   * is always called afterwards, at least in non-error situations. */
+#if (0)
   if (buf_get_size(r_buf) == 0)
   {
     /* No data was available. */
@@ -669,6 +691,7 @@ sock_l_get_out_data(cw_sock_t * a_sock, cw_buf_t * r_buf)
       cnd_broadcast(&a_sock->out_cnd);
     }
   }
+#endif
   mtx_unlock(&a_sock->out_lock);
 }
 

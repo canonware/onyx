@@ -42,7 +42,7 @@
 /* Global. */
 cw_sockb_t * g_sockb = NULL;
 
-#define _LIBSTASH_SOCKB_CONFESS
+/*  #define _LIBSTASH_SOCKB_CONFESS */
 
 cw_bool_t
 sockb_init(cw_uint32_t a_max_fds, cw_uint32_t a_bufc_size,
@@ -775,7 +775,7 @@ sockb_p_entry_func(void * a_arg)
 	    = message->data.in_notify.mq;
 #ifdef _LIBSTASH_SOCKB_CONFESS
 	  out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
-		    "notify_vec[[[i]] = 0x[p]\n",
+		    "regs[[[i]].notify_mq = 0x[p]\n",
 		    message->data.in_notify.sockfd,
 		    regs[message->data.in_notify.sockfd].notify_mq);
 #endif
@@ -799,8 +799,7 @@ sockb_p_entry_func(void * a_arg)
       cw_uint32_t i, in_size;
 
 #ifdef _LIBSTASH_SOCKB_CONFESS
-      out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
-		"poll fd's:");
+      out_put_e(cw_g_out, __FILE__, __LINE__, NULL, "poll fd's:");
 #endif
       for (i = 1; i < nfds; i++)
       {
@@ -814,11 +813,19 @@ sockb_p_entry_func(void * a_arg)
 	/* XXX We should probably get messages from sock's, instead of actively
 	 * checking for available space in every sock. */
 	in_size = sock_l_get_in_size(regs[sockfd].sock);
-	  
+
+	fds[i].events |= POLLIN;
 	if (0 == (sock_l_get_in_max_buf_size(regs[sockfd].sock) - in_size))
 	{
 	  /* Nope, no space. */
+/*  	  out_put_e(cw_g_out, __FILE__, __LINE__, NULL, */
+/*  		    "fds[[[i]].events == [i|b:2|w:16|p:0]_2\n", */
+/*  		    i, fds[i].events); */
+	  
 	  fds[i].events ^= (fds[i].events & POLLIN);
+/*  	  out_put_e(cw_g_out, __FILE__, __LINE__, NULL, */
+/*  		    "fds[[[i]].events == [i|b:2|w:16|p:0]_2\n", */
+/*  		    i, fds[i].events); */
 
 	  if (NULL != regs[sockfd].notify_mq)
 	  {
@@ -837,7 +844,7 @@ sockb_p_entry_func(void * a_arg)
 	  }
 	}
 #ifdef _LIBSTASH_SOCKB_CONFESS
-	else
+	if (fds[i].events & POLLIN)
 	{
 	  out_put(cw_g_out, "r");
 	}
@@ -848,7 +855,9 @@ sockb_p_entry_func(void * a_arg)
 #endif
       }
 #ifdef _LIBSTASH_SOCKB_CONFESS
-      out_put(cw_g_out, " ([i]r)\n", g_sockb->pipe_out);
+      out_put(cw_g_out, " ([i][s])\n",
+	      fds[0].fd,
+	      (fds[0].events & POLLIN) ? "r" : "");
 #endif
     }
 
@@ -1119,7 +1128,7 @@ sockb_p_entry_func(void * a_arg)
 	  if (bytes_written >= 0)
 	  {
 	    buf_release_head_data(&tmp_buf, bytes_written);
-a	    
+	    
 	    if (0 == sock_l_put_back_out_data(regs[sockfd].sock, &tmp_buf))
 	    {
 	      /* The socket has no more outgoing data, so turn the write bit

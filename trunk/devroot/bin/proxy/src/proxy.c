@@ -87,6 +87,7 @@ main(int argc, char ** argv)
   dbg_register(cw_g_dbg, "sockb_error");
   dbg_register(cw_g_dbg, "socks_error");
   dbg_register(cw_g_dbg, "sock_error");
+/*    dbg_register(cw_g_dbg, "sock_sockopt"); */
 /*    dbg_register(cw_g_dbg, "mem_verbose"); */
 /*    dbg_register(cw_g_dbg, "pezz_verbose"); */
 
