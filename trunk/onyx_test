@@ -116,18 +116,14 @@ for d in 0 1 ; do
         conf_d="--disable-real"
         ;;
     esac
-#for e in 0 1 2 ; do
 for e in 0 1 ; do
-    # --enable-debug, --enable-profile
+    # --enable-debug
     case $e in
     0)
         conf_e=""
         ;;
     1)
         conf_e="--enable-debug"
-        ;;
-    2)
-        conf_e="--enable-profile"
         ;;
     esac
 for f in 0 1 ; do

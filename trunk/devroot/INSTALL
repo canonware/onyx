@@ -157,9 +157,6 @@ Optionally, pass any of the following (not a definitive list) arguments to
 	specifying this option and installing the results for general use is not
 	recommended.
 
---enable-profile
-	Instrument binaries, libraries, and modules for profiling.
-
 --with-docs
 	Enable build system rules to build the documentation.  Unless this
 	option is specified, the build system assumes that pre-built

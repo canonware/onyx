@@ -1,5 +1,7 @@
 2002-04-21 : Jason Evans <jasone@canonware.com>
 
+	* configure.in : Remove --enable-profile.
+
 	* lib/libonyx/include/libonyx/mb.h : Convert mb_write() to a nop, but in
           such a way that the compiler cannot re-order instructions around
           mb_write().  This improves interpreter performance by a factor of
