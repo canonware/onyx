@@ -17,6 +17,7 @@
 
 typedef enum {
 	/* Interpreter errors. */
+	STILTE_NONE = 0,		/* No error. */
 	STILTE_DICTSTACKOVERFLOW,	/* dstack too deep. */
 	STILTE_DICTSTACKUNDERFLOW,	/* No poppable dictionary on dstack. */
 	STILTE_EXECSTACKOVERFLOW,	/* estack too deep. */
@@ -114,8 +115,10 @@ struct cw_stilt_s {
 	/*
 	 * Local dictionaries.
 	 */
-	cw_stilo_t	userdict;
 	cw_stilo_t	errordict;
+	cw_stilo_t	derror;
+	cw_stilo_t	threaddict;
+	cw_stilo_t	userdict;
 
 	/*
 	 * Number of objects to pop off ostack if there is an error.
@@ -233,6 +236,7 @@ cw_bool_t	stilt_dict_stack_search(cw_stilt_t *a_stilt, cw_stilo_t *a_key,
 	(stil_globaldict_get((a_stilt)->stil))
 #define		stilt_userdict_get(a_stilt) (&((a_stilt)->userdict))
 #define		stilt_errordict_get(a_stilt) (&((a_stilt)->errordict))
+#define		stilt_derror_get(a_stilt) (&((a_stilt)->derror))
 
 /*
  * If TRUE, allocation for the stilt is global.  Otherwise, allocation is

@@ -240,6 +240,22 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 		    stilat_stilsc_pool_get(&a_stilt->stilat));
 		try_stage = 7;
 
+		/* Create errordict.  threaddict needs this. */
+		errordict_populate(&retval->errordict, retval);
+
+		/* Create derrordict.  threaddict needs this. */
+		/* XXX */
+/*  		derror_populate(&retval->derrordict, retval); */
+
+		/* Create userdict. threaddict needs this. */
+		stilo_dict_new(&retval->userdict, retval,
+		    _CW_STILT_USERDICT_SIZE);
+
+		/* Create and push threaddict onto the dictionary stack. */
+		threaddict_populate(&retval->threaddict, retval);
+		stilo = stils_push(&retval->dstack, retval);
+		stilo_dup(stilo, &retval->threaddict);
+
 		/* Push systemdict onto the dictionary stack. */
 		stilo = stils_push(&retval->dstack, retval);
 		stilo_dup(stilo, stil_systemdict_get(a_stil));
@@ -248,14 +264,9 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 		stilo = stils_push(&retval->dstack, retval);
 		stilo_dup(stilo, stil_globaldict_get(a_stil));
 
-		/* Create and push userdict onto the dictionary stack. */
-		stilo_dict_new(&retval->userdict, retval,
-		    _CW_STILT_USERDICT_SIZE);
+		/* Push userdict onto the dictionary stack. */
 		stilo = stils_push(&retval->dstack, retval);
 		stilo_dup(stilo, &retval->userdict);
-
-		/* Create errordict. */
-		errordict_populate(&retval->errordict, retval);
 	}
 	xep_catch (_CW_XEPV_OOM) {
 		retval = (cw_stilt_t *)v_retval;
@@ -299,7 +310,7 @@ stilt_delete(cw_stilt_t *a_stilt)
 		/*
 		 * This shouldn't happen, since it indicates that there is an
 		 * unaccepted token.  However, it's really the caller's fault,
-		 * so just clean up and return an error.
+		 * so just clean up.
 		 */
 		stilt_free(a_stilt, a_stilt->tok_str);
 	}
@@ -757,25 +768,25 @@ stilt_dict_stack_search(cw_stilt_t *a_stilt, cw_stilo_t *a_key, cw_stilo_t
 	 * Iteratively search the dictionaries on the dictionary stack for
 	 * a_key.
 	 */
-	/* XXX We're guaranteed that dstack is >= 3 deep. */
+	/* XXX We're guaranteed that dstack is >= 4 deep. */
 	i = 0;
 	depth = stils_count(&a_stilt->dstack);
-	if (depth > 0) {
-		dict = stils_get(&a_stilt->dstack, a_stilt);
-		if (stilo_dict_lookup(dict, a_stilt, a_key, r_value) == FALSE) {
+	_cw_assert(depth >= 4);
+
+	dict = stils_get(&a_stilt->dstack, a_stilt);
+	if (stilo_dict_lookup(dict, a_stilt, a_key, r_value) == FALSE) {
+		/* Found. */
+		retval = FALSE;
+		goto RETURN;
+	}
+
+	for (i = 1; i < depth; i++) {
+		dict = stils_down_get(&a_stilt->dstack, a_stilt, dict);
+		if (stilo_dict_lookup(dict, a_stilt, a_key, r_value) ==
+		    FALSE) {
 			/* Found. */
 			retval = FALSE;
 			goto RETURN;
-		}
-
-		for (i = 1; i < depth; i++) {
-			dict = stils_down_get(&a_stilt->dstack, a_stilt, dict);
-			if (stilo_dict_lookup(dict, a_stilt, a_key, r_value) ==
-			    FALSE) {
-				/* Found. */
-				retval = FALSE;
-				goto RETURN;
-			}
 		}
 	}
 

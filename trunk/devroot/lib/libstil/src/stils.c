@@ -173,14 +173,20 @@ stils_under_push(cw_stils_t *a_stils, cw_stilt_t *a_stilt, cw_stilo_t *a_stilo)
 
 	_cw_check_ptr(a_stils);
 	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
-	_cw_check_ptr(a_stilo);
 
 	/* Get an unused stilso.  If there are no spares, create some first. */
 	if (qr_prev(ql_first(&a_stils->stack), link) == &a_stils->under)
 		stils_p_spares_create(a_stils);
-	stilso = qr_prev(ql_first(&a_stils->stack), link);
-	qr_remove(stilso, link);
-	qr_after_insert((cw_stilso_t *)stilso, stilso, link);
+	if (a_stilo != NULL) {
+		stilso = qr_prev(ql_first(&a_stils->stack), link);
+		qr_remove(stilso, link);
+		qr_after_insert((cw_stilso_t *)a_stilo, stilso, link);
+	} else {
+		/* Same as stils_push(). */
+		ql_first(&a_stils->stack) = qr_prev(ql_first(&a_stils->stack),
+		    link);
+		stilso = ql_first(&a_stils->stack);
+	}
 	a_stils->count++;
 
 	stilo_no_new(&stilso->stilo);
@@ -353,13 +359,20 @@ stils_down_get(cw_stils_t *a_stils, cw_stilt_t *a_stilt, cw_stilo_t *a_stilo)
 	_cw_check_ptr(a_stils);
 	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
 
-	if (a_stils->count <= 1)
-		stilt_error(a_stilt, STILTE_STACKUNDERFLOW);
+	if (a_stilo != NULL) {
+		if (a_stils->count <= 1)
+			stilt_error(a_stilt, STILTE_STACKUNDERFLOW);
+		stilso = (cw_stilso_t *)a_stilo;
+		stilso = qr_next(stilso, link);
+		if (stilso == &a_stils->under)
+			stilt_error(a_stilt, STILTE_STACKUNDERFLOW);
+	} else {
+		/* Same as stils_get(). */
+		if (a_stils->count == 0)
+			stilt_error(a_stilt, STILTE_STACKUNDERFLOW);
 
-	stilso = (cw_stilso_t *)a_stilo;
-	stilso = qr_next(stilso, link);
-	if (stilso == &a_stils->under)
-		stilt_error(a_stilt, STILTE_STACKUNDERFLOW);
+		stilso = ql_first(&a_stils->stack);
+	}
 
 	return &stilso->stilo;
 }

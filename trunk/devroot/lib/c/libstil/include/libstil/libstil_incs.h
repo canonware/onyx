@@ -33,3 +33,4 @@
 #include "stilt.h"
 #include "systemdict.h"
 #include "errordict.h"
+#include "threaddict.h"

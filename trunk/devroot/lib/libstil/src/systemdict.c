@@ -78,7 +78,6 @@ static struct cw_systemdict_entry systemdict_ops[] = {
 	_SYSTEMDICT_ENTRY(dup),
 	_SYSTEMDICT_ENTRY(end),
 	_SYSTEMDICT_ENTRY(eq),
-	_SYSTEMDICT_ENTRY(errordict),
 	_SYSTEMDICT_ENTRY(exch),
 	_SYSTEMDICT_ENTRY(exec),
 	_SYSTEMDICT_ENTRY(execstack),
@@ -106,13 +105,11 @@ static struct cw_systemdict_entry systemdict_ops[] = {
 	_SYSTEMDICT_ENTRY(if),
 	_SYSTEMDICT_ENTRY(ifelse),
 	_SYSTEMDICT_ENTRY(index),
-	_SYSTEMDICT_ENTRY(internaldict),
 	_SYSTEMDICT_ENTRY(join),
 	_SYSTEMDICT_ENTRY(known),
 	_SYSTEMDICT_ENTRY(le),
 	_SYSTEMDICT_ENTRY(length),
 	_SYSTEMDICT_ENTRY(load),
-	_SYSTEMDICT_ENTRY(localinstancedict),
 	_SYSTEMDICT_ENTRY(lock),
 	_SYSTEMDICT_ENTRY(loop),
 	_SYSTEMDICT_ENTRY(lt),
@@ -149,7 +146,6 @@ static struct cw_systemdict_entry systemdict_ops[] = {
 	_SYSTEMDICT_ENTRY(roll),
 	_SYSTEMDICT_ENTRY(run),
 	_SYSTEMDICT_ENTRY(search),
-	_SYSTEMDICT_ENTRY(serverdict),
 	_SYSTEMDICT_ENTRY(setfileposition),
 	_SYSTEMDICT_ENTRY(setglobal),
 	_SYSTEMDICT_ENTRY(shift),
@@ -165,7 +161,6 @@ static struct cw_systemdict_entry systemdict_ops[] = {
 	_SYSTEMDICT_ENTRY(store),
 	_SYSTEMDICT_ENTRY(string),
 	_SYSTEMDICT_ENTRY(sub),
-	{"$error",	systemdict_sym_derror},
 	{"=",	systemdict_sym_eq},
 	{"==",	systemdict_sym_eq_eq},
 	{">>",	systemdict_sym_gt_gt},
@@ -181,8 +176,6 @@ static struct cw_systemdict_entry systemdict_ops[] = {
 	_SYSTEMDICT_ENTRY(undef),
 	_SYSTEMDICT_ENTRY(undefineresource),
 	_SYSTEMDICT_ENTRY(unlock),
-	_SYSTEMDICT_ENTRY(userdict),
-	_SYSTEMDICT_ENTRY(userparams),
 	_SYSTEMDICT_ENTRY(usertime),
 	_SYSTEMDICT_ENTRY(version),
 	_SYSTEMDICT_ENTRY(wait),
@@ -442,20 +435,11 @@ systemdict_cleartomark(cw_stilt_t *a_stilt)
 
 	ostack = stilt_ostack_get(a_stilt);
 
-	i = 0;
-	depth = stils_count(ostack);
-	if (depth > 0) {
-		stilo = stils_get(ostack, a_stilt);
+	for (i = 0, depth = stils_count(ostack), stilo = NULL; i < depth; i++) {
+		stilo = stils_down_get(ostack, a_stilt, stilo);
 		if (stilo_type_get(stilo) == STILOT_MARK)
-			goto OUT;
-
-		for (i = 1; i < depth; i++) {
-			stilo = stils_down_get(ostack, a_stilt, stilo);
-			if (stilo_type_get(stilo) == STILOT_MARK)
-				break;
-		}
+			break;
 	}
-	OUT:
 	if (i == depth)
 		stilt_error(a_stilt, STILTE_UNMATCHEDMARK);
 
@@ -497,6 +481,7 @@ systemdict_copy(cw_stilt_t *a_stilt)
 	switch (stilo_type_get(stilo)) {
 	case STILOT_INTEGER: {
 		cw_stilo_t	*dup;
+		cw_uint32_t	i;
 		cw_sint64_t	count;
 
 		/* Dup a range of the stack. */
@@ -507,29 +492,15 @@ systemdict_copy(cw_stilt_t *a_stilt)
 			stilt_error(a_stilt, STILTE_STACKUNDERFLOW);
 		stils_pop(ostack, a_stilt);
 
-		if (count > 0) {
-			cw_uint32_t	i;
-
-			/*
-			 * Iterate down the stack, creating dup's along the way.
-			 * Since we're going down, it's necessary to use
-			 * stils_under_push() to preserve order.
-			 */
-
-			stilo = stils_get(ostack, a_stilt);
-			i = 0;
-			dup = stils_push(ostack, a_stilt);
+		/*
+		 * Iterate down the stack, creating dup's along the way.  Since
+		 * we're going down, it's necessary to use stils_under_push() to
+		 * preserve order.
+		 */
+		for (i = 0, stilo = NULL, dup = NULL; i < count; i++) {
+			stilo = stils_down_get(ostack, a_stilt, stilo);
+			dup = stils_under_push(ostack, a_stilt, dup);
 			stilo_dup(dup, stilo);
-			if (count > 1) {
-				
-				for (i = 1; i < count; i++) {
-					stilo = stils_down_get(ostack, a_stilt,
-					    stilo);
-					dup = stils_under_push(ostack, a_stilt,
-					    dup);
-					stilo_dup(dup, stilo);
-				}
-			}
 		}
 		break;
 	}
@@ -596,20 +567,11 @@ systemdict_counttomark(cw_stilt_t *a_stilt)
 
 	ostack = stilt_ostack_get(a_stilt);
 
-	i = 0;
-	depth = stils_count(ostack);
-	if (depth > 0) {
-		stilo = stils_get(ostack, a_stilt);
+	for (i = 0, depth = stils_count(ostack), stilo = NULL; i < depth; i++) {
+		stilo = stils_down_get(ostack, a_stilt, stilo);
 		if (stilo_type_get(stilo) == STILOT_MARK)
-			goto OUT;
-		
-		for (i = 1; i < depth; i++) {
-			stilo = stils_down_get(ostack, a_stilt, stilo);
-			if (stilo_type_get(stilo) == STILOT_MARK)
-				break;
-		}
+			break;
 	}
-	OUT:
 	if (i == depth)
 		stilt_error(a_stilt, STILTE_UNMATCHEDMARK);
 
@@ -647,24 +609,13 @@ systemdict_currentfile(cw_stilt_t *a_stilt)
 	ostack = stilt_ostack_get(a_stilt);
 
 	file = stils_push(ostack, a_stilt);
-	i = 0;
-	depth = stils_count(estack);
-	if (depth > 0) {
-		stilo = stils_get(estack, a_stilt);
+	for (i = 0, depth = stils_count(estack), stilo = NULL; i < depth; i++) {
+		stilo = stils_down_get(estack, a_stilt, stilo);
 		if (stilo_type_get(stilo) == STILOT_FILE) {
 			stilo_dup(file, stilo);
-			goto OUT;
-		}
-
-		for (i = 1; i < depth; i++) {
-			stilo = stils_down_get(estack, a_stilt, stilo);
-			if (stilo_type_get(stilo) == STILOT_FILE) {
-				stilo_dup(file, stilo);
-				break;
-			}
+			break;
 		}
 	}
-	OUT:
 	if (i == depth)
 		stilo_file_new(file, a_stilt);
 }
@@ -831,12 +782,8 @@ systemdict_dictstack(cw_stilt_t *a_stilt)
 	stilo_array_subarray_new(subarray, array, a_stilt, 0, count);
 	stils_pop(tstack, a_stilt);
 
-	/* Copy dictstack to subarray. */
-	i = count - 1;
-	stilo = stils_get(dstack, a_stilt);
-	stilo_dup(stilo_array_el_get(subarray, a_stilt, i), stilo);
-	
-	for (i--; i >= 0; i--) {
+	/* Copy dstack to subarray. */
+	for (i = count - 1, stilo = NULL; i >= 0; i--) {
 		stilo = stils_down_get(dstack, a_stilt, stilo);
 		stilo_dup(stilo_array_el_get(subarray, a_stilt, i), stilo);
 	}
@@ -881,7 +828,8 @@ systemdict_end(cw_stilt_t *a_stilt)
 
 	dstack = stilt_dstack_get(a_stilt);
 
-	if (stils_count(dstack) < 4)
+	/* threaddict, systemdict, globaldict, and userdict cannot be popped. */
+	if (stils_count(dstack) <= 4)
 		stilt_error(a_stilt, STILTE_DICTSTACKUNDERFLOW);
 
 	stils_pop(dstack, a_stilt);
@@ -891,18 +839,6 @@ void
 systemdict_eq(cw_stilt_t *a_stilt)
 {
 	_cw_error("XXX Not implemented");
-}
-
-void
-systemdict_errordict(cw_stilt_t *a_stilt)
-{
-	cw_stils_t	*ostack;
-	cw_stilo_t	*stilo;
-
-	ostack = stilt_ostack_get(a_stilt);
-
-	stilo = stils_push(ostack, a_stilt);
-	stilo_dup(stilo, stilt_errordict_get(a_stilt));
 }
 
 void
@@ -958,12 +894,8 @@ systemdict_execstack(cw_stilt_t *a_stilt)
 	stilo_array_subarray_new(subarray, array, a_stilt, 0, count);
 	stils_pop(tstack, a_stilt);
 
-	/* Copy dictstack to subarray. */
-	i = count - 1;
-	stilo = stils_get(estack, a_stilt);
-	stilo_dup(stilo_array_el_get(subarray, a_stilt, i), stilo);
-	
-	for (i--; i >= 0; i--) {
+	/* Copy estack to subarray. */
+	for (i = count - 1, stilo = NULL; i >= 0; i--) {
 		stilo = stils_down_get(estack, a_stilt, stilo);
 		stilo_dup(stilo_array_el_get(subarray, a_stilt, i), stilo);
 	}
@@ -1560,12 +1492,6 @@ systemdict_index(cw_stilt_t *a_stilt)
 }
 
 void
-systemdict_internaldict(cw_stilt_t *a_stilt)
-{
-	_cw_error("XXX Not implemented");
-}
-
-void
 systemdict_join(cw_stilt_t *a_stilt)
 {
 	_cw_error("XXX Not implemented");
@@ -1615,12 +1541,6 @@ systemdict_length(cw_stilt_t *a_stilt)
 
 void
 systemdict_load(cw_stilt_t *a_stilt)
-{
-	_cw_error("XXX Not implemented");
-}
-
-void
-systemdict_localinstancedict(cw_stilt_t *a_stilt)
 {
 	_cw_error("XXX Not implemented");
 }
@@ -2208,12 +2128,6 @@ systemdict_search(cw_stilt_t *a_stilt)
 }
 
 void
-systemdict_serverdict(cw_stilt_t *a_stilt)
-{
-	_cw_error("XXX Not implemented");
-}
-
-void
 systemdict_setfileposition(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack;
@@ -2308,20 +2222,12 @@ systemdict_start(cw_stilt_t *a_stilt)
 		/*
 		 * Pop objects off the exec stack, up to and including file.
 		 */
-		i = 0;
-		depth = stils_count(estack);
-		if (depth > 0) {
-			stilo = stils_get(estack, a_stilt);
+		for (i = 0, depth = stils_count(estack), stilo = NULL; i <
+		     depth; i++) {
+			stilo = stils_down_get(estack, a_stilt, stilo);
 			if (stilo == file)
-				goto OUT;
-
-			for (i = 1; i < depth; i++) {
-				stilo = stils_down_get(estack, a_stilt, stilo);
-				if (stilo == file)
-					break;
-			}
+				break;
 		}
-		OUT:
 		_cw_assert(i < depth);
 		stils_npop(estack, a_stilt, i + 1);
 
@@ -2466,13 +2372,6 @@ systemdict_sub(cw_stilt_t *a_stilt)
 	stils_pop(ostack, a_stilt);
 }
 
-/* $error */
-void
-systemdict_sym_derror(cw_stilt_t *a_stilt)
-{
-	_cw_error("XXX Not implemented");
-}
-
 /* = */
 void
 systemdict_sym_eq(cw_stilt_t *a_stilt)
@@ -2518,24 +2417,15 @@ systemdict_sym_rb(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack;
 	cw_stilo_t	t_stilo, *stilo, *arr;	/* XXX GC-unsafe.*/
-	cw_uint32_t	nelements, i, depth;
+	cw_sint32_t	nelements, i, depth;
 
 	ostack = stilt_ostack_get(a_stilt);
 	/* Find the mark. */
-	i = 0;
-	depth = stils_count(ostack);
-	if (depth > 0) {
-		stilo = stils_get(ostack, a_stilt);
+	for (i = 0, depth = stils_count(ostack), stilo = NULL; i < depth; i++) {
+		stilo = stils_down_get(ostack, a_stilt, stilo);
 		if (stilo_type_get(stilo) == STILOT_MARK)
-			goto OUT;
-
-		for (i = 1; i < depth; i++) {
-			stilo = stils_down_get(ostack, a_stilt, stilo);
-			if (stilo_type_get(stilo) == STILOT_MARK)
-				break;
-		}
+			break;
 	}
-	OUT:
 	if (i == depth)
 		stilt_error(a_stilt, STILTE_UNMATCHEDMARK);
 
@@ -2552,17 +2442,11 @@ systemdict_sym_rb(cw_stilt_t *a_stilt)
 	/*
 	 * Traverse down the stack, moving stilo's to the array.
 	 */
-	i = nelements;
-	if (i > 0) {
-		stilo = stils_get(ostack, a_stilt);
-		stilo_move(&arr[i - 1], stilo);
-
-		for (i--; i > 0; i--) {
-			stilo = stils_down_get(ostack, a_stilt, stilo);
-			stilo_move(&arr[i - 1], stilo);
-		}
+	for (i = nelements - 1, stilo = NULL; i >= 0; i--) {
+		stilo = stils_down_get(ostack, a_stilt, stilo);
+		stilo_move(&arr[i], stilo);
 	}
-	
+
 	/* Pop the stilo's off the stack now. */
 	stils_npop(ostack, a_stilt, nelements + 1);
 
@@ -2632,24 +2516,6 @@ systemdict_undefineresource(cw_stilt_t *a_stilt)
 
 void
 systemdict_unlock(cw_stilt_t *a_stilt)
-{
-	_cw_error("XXX Not implemented");
-}
-
-void
-systemdict_userdict(cw_stilt_t *a_stilt)
-{
-	cw_stils_t	*ostack;
-	cw_stilo_t	*stilo;
-
-	ostack = stilt_ostack_get(a_stilt);
-
-	stilo = stils_push(ostack, a_stilt);
-	stilo_dup(stilo, stilt_userdict_get(a_stilt));
-}
-
-void
-systemdict_userparams(cw_stilt_t *a_stilt)
 {
 	_cw_error("XXX Not implemented");
 }
