@@ -13,7 +13,6 @@
 
 #include "../include/libonyx/libonyx.h"
 #include "../include/libonyx/envdict_l.h"
-#include "../include/libonyx/sprintdict_l.h"
 #include "../include/libonyx/systemdict_l.h"
 #include "../include/libonyx/nx_l.h"
 #include "../include/libonyx/nxo_l.h"
@@ -83,23 +82,19 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, int a_argc, char **a_argv, char
 		    _CW_LIBONYX_GLOBALDICT_HASH);
 		try_stage = 7;
 
-		/* Initialize sprintdict. */
-		sprintdict_l_populate(&retval->sprintdict, retval);
-		try_stage = 8;
-
 		/* Initialize envdict. */
 		envdict_l_populate(&retval->envdict, retval, a_envp);
-		try_stage = 9;
+		try_stage = 8;
 
 		/* Initialize systemdict. */
 		systemdict_l_populate(&retval->systemdict, retval, a_argc,
 		    a_argv);
-		try_stage = 10;
+		try_stage = 9;
 
 		/* Initialize threadsdict. */
 		nxo_dict_new(&retval->threadsdict, retval, TRUE,
 		    _CW_LIBONYX_THREADSDICT_HASH);
-		try_stage = 11;
+		try_stage = 10;
 
 		/* Now that we have an initial thread, activate the GC. */
 		nxa_active_set(&retval->nxa, TRUE);
@@ -118,7 +113,6 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, int a_argc, char **a_argv, char
 	xep_catch (_CW_STASHX_OOM) {
 		retval = (cw_nx_t *)v_retval;
 		switch (try_stage) {
-		case 11:
 		case 10:
 		case 9:
 		case 8:

@@ -12,7 +12,7 @@ Test begin
 `//pop'
 `pop'
 `\`foo\''
-`foo'
+`\`foo\''
 `[]'
 `--nostringval--'
 `condition'

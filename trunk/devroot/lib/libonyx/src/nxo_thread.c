@@ -354,32 +354,6 @@ nxoe_l_thread_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 }
 
 void
-nxo_l_thread_print(cw_nxo_t *a_thread)
-{
-	cw_nxo_t		*ostack, *depth, *thread, *stdout_nxo;
-	cw_nxo_threade_t	error;
-
-	ostack = nxo_thread_ostack_get(a_thread);
-	NXO_STACK_GET(depth, ostack, a_thread);
-	NXO_STACK_DOWN_GET(thread, ostack, a_thread, depth);
-	if (nxo_type_get(depth) != NXOT_INTEGER || nxo_type_get(thread)
-	    != NXOT_THREAD) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
-		return;
-	}
-	stdout_nxo = nxo_thread_stdout_get(a_thread);
-
-	error = nxo_file_output(stdout_nxo, "-thread-");
-
-	if (error) {
-		nxo_thread_error(a_thread, error);
-		return;
-	}
-
-	nxo_stack_npop(ostack, 2);
-}
-
-void
 nxo_thread_start(cw_nxo_t *a_nxo)
 {
 	cw_nxoe_thread_t	*thread;

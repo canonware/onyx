@@ -1,3 +1,16 @@
+2001-07-19  Jason Evans  <jasone@canonware.com>
+
+	* src/systemdict.c (systemdict_hooktag): Add.
+
+	* include/libonyx/nx.h: Remove sprintdict, which is replaced by
+	sprintsdict.
+
+	* src/nx_nxcode.nx: Implement sprintsdict and sprints.  Re-define
+	sprint in terms of sprints.
+
+	* src/systemdict.c (systemdict_cvs): Convert a string to a
+	syntactically valid equivalent.  Strings were previously left alone.
+
 2001-07-13  Jason Evans  <jasone@canonware.com>
 
 	* src/nxo_thread.c (nxoe_p_thread_feed): Support signed radix

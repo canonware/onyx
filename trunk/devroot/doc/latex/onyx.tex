@@ -1542,40 +1542,33 @@ All threads share the same globaldict, which is meant as a repository for
 globally shared objects.  globaldict is empty when the Onyx interpreter is
 initialized, and is implicitly locked.
 
-\subsection{sprintdict}
-\label{sec:sprintdict}
+\subsection{sprintsdict}
+\label{sec:sprintsdict}
 
-The sprintdict dictionary is primarily used to support
-\htmlref{\onyxop{}{sprint}{}}{systemdict:sprint}, but its contents may be of use
-to an application that wishes to extend or modify syntactical printing.
+The sprintsdict dictionary is primarily used to support
+\htmlref{\onyxop{}{sprints}{}}{systemdict:sprints}, but its contents may be of
+use to an application that wishes to extend or modify syntactical printing.
 
-There is an entry in sprintdict for each Onyx type.  Each operator takes two
-arguments: an object to print and an integer that represents printing recursion
-depth.  Each operator removes the two arguments from ostack upon completion.  If
-there is a syntactically valid representation for an object and the recursion
-depth is greater than 0, the corresponding operator prints the object
-syntactically.  Otherwise, a non-syntictical representation of the object is
-printed, except for booleans, integers, names, nulls, and strings, which are
-always printed syntactically.  If the recursion depth is greater than 0, the
-operators will recursively print any contained objects.  All printing is done to
-\htmlref{\onyxop{}{stdout}{}}{systemdict:stdout}.
+There is an entry in sprintsdict for each Onyx type.  If there is a
+syntactically valid representation for an object and the recursion depth is
+greater than 0, the corresponding operator creates a string that syntactically
+represents the object.  Otherwise, a string with a non-syntictical
+representation of the object is created, except for booleans, integers, names,
+nulls, and strings, for which the results are always syntactical.  If the
+recursion depth is greater than 0, the operators will recursively convert any
+contained objects.
 
-The operators do not print whitespace before or after the object
-representations, so if multiple objects are being sequentially printed
-syntactically, care should be taken to insert whitespace delimiters.
-
-The implementation of \htmlref{\onyxop{}{sprint}{}}{systemdict:sprint} is useful
-in illustrating a useful method of doing type-dependent operations:
+The implementation of \htmlref{\onyxop{}{sprints}{}}{systemdict:sprints} is
+useful in illustrating a useful method of doing type-dependent operations:
 
 \begin{verbatim}
-/sprint {
-        1 index type /sprintdict load exch get eval
-        `\n' print flush
-} bind def
+/sprints {
+        1 index type /sprintsdict load exch get eval
+} def
 \end{verbatim}
 
 \begin{longtable}{\optableformat{3}}
-\caption[sprintdict summary]{sprintdict summary}
+\caption[sprintsdict summary]{sprintsdict summary}
 \\
 \hline
 Input(s) & Op/Proc/Var & Output(s) & Description \\
@@ -1589,267 +1582,288 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 \multicolumn{4}{r}{\emph{Continued on next page...}} \endfoot
 \hline \endlastfoot
 %end{latexonly}
-array depth & {\bf \htmlref{arraytype}{sprintdict:arraytype}} & -- &
-Syntactically print array. \\
+array depth & {\bf \htmlref{arraytype}{sprintsdict:arraytype}} & string &
+Create syntactical string from array. \\
 \hline
-boolean depth & {\bf \htmlref{booleantype}{sprintdict:booleantype}} & -- &
-Syntactically print boolean. \\
+boolean depth & {\bf \htmlref{booleantype}{sprintsdict:booleantype}} & string &
+Create syntactical string from boolean. \\
 \hline
-condition depth & {\bf \htmlref{conditiontype}{sprintdict:conditiontype}} & -- &
-Syntactically print condition. \\
+condition depth & {\bf \htmlref{conditiontype}{sprintsdict:conditiontype}} &
+string & Create syntactical string from condition. \\
 \hline
-dict depth & {\bf \htmlref{dicttype}{sprintdict:dicttype}} & -- & Syntactically
-print dict. \\
+dict depth & {\bf \htmlref{dicttype}{sprintsdict:dicttype}} & string &
+Create syntactical string from dict. \\
 \hline
-file depth & {\bf \htmlref{filetype}{sprintdict:filetype}} & -- & Syntactically
-print file. \\
+file depth & {\bf \htmlref{filetype}{sprintsdict:filetype}} & string &
+Create syntactical string from file. \\
 \hline
-fino depth & {\bf \htmlref{finotype}{sprintdict:finotype}} & -- & Syntactically
-print fino. \\
+fino depth & {\bf \htmlref{finotype}{sprintsdict:finotype}} & string &
+Create syntactical string from fino. \\
 \hline
-hook depth & {\bf \htmlref{hooktype}{sprintdict:hooktype}} & -- & Syntactically
-print hook. \\
+hook depth & {\bf \htmlref{hooktype}{sprintsdict:hooktype}} & string &
+Create syntactical string from hook. \\
 \hline
-integer depth & {\bf \htmlref{integertype}{sprintdict:integertype}} & -- &
-Syntactically print integer. \\
+integer depth & {\bf \htmlref{integertype}{sprintsdict:integertype}} & string &
+Create syntactical string from integer. \\
 \hline
-mark depth & {\bf \htmlref{marktype}{sprintdict:marktype}} & -- & Syntactically
-print mark. \\
+mark depth & {\bf \htmlref{marktype}{sprintsdict:marktype}} & string &
+Create syntactical string from mark. \\
 \hline
-mutex depth & {\bf \htmlref{mutextype}{sprintdict:mutextype}} & -- &
-Syntactically print mutex. \\
+mutex depth & {\bf \htmlref{mutextype}{sprintsdict:mutextype}} & string &
+Create syntactical string from mutex. \\
 \hline
-name depth & {\bf \htmlref{nametype}{sprintdict:nametype}} & -- & Syntactically
-print name. \\
+name depth & {\bf \htmlref{nametype}{sprintsdict:nametype}} & string &
+Create syntactical string from name. \\
 \hline
-null depth & {\bf \htmlref{nulltype}{sprintdict:nulltype}} & -- & Syntactically
-print null. \\
+null depth & {\bf \htmlref{nulltype}{sprintsdict:nulltype}} & string &
+Create syntactical string from null. \\
 \hline
-operator depth & {\bf \htmlref{operatortype}{sprintdict:operatortype}} & -- &
-Syntactically print operator. \\
+operator depth & {\bf \htmlref{operatortype}{sprintsdict:operatortype}} & string
+& Create syntactical string from operator. \\
 \hline
-pmark depth & {\bf \htmlref{pmarktype}{sprintdict:pmarktype}} & -- &
-Syntactically print pmark. \\
+pmark depth & {\bf \htmlref{pmarktype}{sprintsdict:pmarktype}} & string &
+Create syntactical string from pmark. \\
 \hline
-stack depth & {\bf \htmlref{stacktype}{sprintdict:stacktype}} & -- &
-Syntactically print stack. \\
+stack depth & {\bf \htmlref{stacktype}{sprintsdict:stacktype}} & string &
+Create syntactical string from stack. \\
 \hline
-string depth & {\bf \htmlref{stringtype}{sprintdict:stringtype}} & -- &
-Syntactically print string. \\
+string depth & {\bf \htmlref{stringtype}{sprintsdict:stringtype}} & string &
+Create syntactical string from string. \\
 \hline
-thread depth & {\bf \htmlref{threadtype}{sprintdict:threadtype}} & -- &
-Syntactically print thread. \\
+thread depth & {\bf \htmlref{threadtype}{sprintsdict:threadtype}} & string &
+Create syntactical string from thread. \\
 \end{longtable}
 
 \begin{description}
-\label{sprintdict:arraytype}
+\label{sprintsdict:arraytype}
 \index{arraytype@\onyxop{}{arraytype}{}}
-\item[{\onyxop{array depth}{arraytype}{--}}: ]
+\item[{\onyxop{array depth}{arraytype}{string}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[array: ]
-			An array to be syntactically printed.
+			An array object.
 		\item[depth: ]
-			Printing recursion depth.
+			Recursion depth.
 		\end{description}
 	\item[Output(s): ]
-		Syntactic representation of \oparg{array} printed to stdout.
+		\begin{description}\item[]
+		\item[string: ]
+			Syntactical string representation of \oparg{array}.
+		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Syntactically print \oparg{array} to stdout.
+		Create a syntactical string representation of \oparg{array}.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> sprintdict begin
+onyx:0> sprintsdict begin
 onyx:0> [1 [2 3] 4]
-onyx:1> dup 0 arraytype `\n' print flush
+onyx:1> dup 0 arraytype print `\n' print flush
 -array-
-onyx:1> dup 1 arraytype `\n' print flush
+onyx:1> dup 1 arraytype print `\n' print flush
 [1 -array- 4]
-onyx:1> dup 2 arraytype `\n' print flush
+onyx:1> dup 2 arraytype print `\n' print flush
 [1 [2 3] 4]
 onyx:1>
 		\end{verbatim}
 	\end{description}
-\label{sprintdict:booleantype}
+\label{sprintsdict:booleantype}
 \index{booleantype@\onyxop{}{booleantype}{}}
-\item[{\onyxop{boolean depth}{booleantype}{--}}: ]
+\item[{\onyxop{boolean depth}{booleantype}{string}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[boolean: ]
-			A boolean to be syntactically printed.
+			A boolean object.
 		\item[depth: ]
-			Printing recursion depth.
+			Recursion depth.
 		\end{description}
 	\item[Output(s): ]
-		Syntactic representation of \oparg{boolean} printed to stdout.
+		\begin{description}\item[]
+		\item[string: ]
+			Syntactical string representation of \oparg{boolean}.
+		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Syntactically print \oparg{boolean} to stdout.
+		Create a syntactical string representation of \oparg{boolean}.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> sprintdict begin
+onyx:0> sprintsdict begin
 onyx:0> true
-onyx:1> dup 0 booleantype `\n' print flush
+onyx:1> dup 0 booleantype print `\n' print flush
 true
 onyx:1>
 		\end{verbatim}
 	\end{description}
-\label{sprintdict:conditiontype}
+\label{sprintsdict:conditiontype}
 \index{conditiontype@\onyxop{}{conditiontype}{}}
-\item[{\onyxop{condition depth}{conditiontype}{--}}: ]
+\item[{\onyxop{condition depth}{conditiontype}{string}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[condition: ]
-			A condition to be syntactically printed.
+			A condition object.
 		\item[depth: ]
-			Printing recursion depth.
+			Recursion depth.
 		\end{description}
 	\item[Output(s): ]
-		Syntactic representation of \oparg{condition} printed to stdout.
+		\begin{description}\item[]
+		\item[string: ]
+			Syntactical string representation of \oparg{condition}.
+		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Syntactically print \oparg{condition} to stdout.
+		Create a syntactical string representation of \oparg{condition}.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> sprintdict begin
+onyx:0> sprintsdict begin
 onyx:0> condition
-onyx:1> dup 0 conditiontype `\n' print flush
+onyx:1> dup 0 conditiontype print `\n' print flush
 -condition-
-onyx:1> dup 1 conditiontype `\n' print flush
+onyx:1> dup 1 conditiontype print `\n' print flush
 -condition-
 onyx:1>
 		\end{verbatim}
 	\end{description}
-\label{sprintdict:dicttype}
+\label{sprintsdict:dicttype}
 \index{dicttype@\onyxop{}{dicttype}{}}
-\item[{\onyxop{dict depth}{dicttype}{--}}: ]
+\item[{\onyxop{dict depth}{dicttype}{string}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[dict: ]
-			A dict to be syntactically printed.
+			A dict object.
 		\item[depth: ]
-			Printing recursion depth.
+			Recursion depth.
 		\end{description}
 	\item[Output(s): ]
-		Syntactic representation of \oparg{dict} printed to stdout.
+		\begin{description}\item[]
+		\item[string: ]
+			Syntactical string representation of \oparg{dict}.
+		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Syntactically print \oparg{dict} to stdout.
+		Create a syntactical string representation of \oparg{dict}.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> sprintdict begin
+onyx:0> sprintsdict begin
 onyx:0> </a `a' /subdict </b `b'>>
-onyx:1> dup 0 dicttype `\n' print flush
+onyx:1> dup 0 dicttype print `\n' print flush
 -dict-
-onyx:1> dup 1 dicttype `\n' print flush
+onyx:1> dup 1 dicttype print `\n' print flush
 </subdict -dict- /a `a'>
-onyx:1> dup 2 dicttype `\n' print flush
+onyx:1> dup 2 dicttype print `\n' print flush
 </subdict </b `b'> /a `a'>
 onyx:1>
 		\end{verbatim}
 	\end{description}
-\label{sprintdict:filetype}
+\label{sprintsdict:filetype}
 \index{filetype@\onyxop{}{filetype}{}}
-\item[{\onyxop{file depth}{filetype}{--}}: ]
+\item[{\onyxop{file depth}{filetype}{string}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[file: ]
-			A file to be syntactically printed.
+			A file object.
 		\item[depth: ]
-			Printing recursion depth.
+			Recursion depth.
 		\end{description}
 	\item[Output(s): ]
-		Syntactic representation of \oparg{file} printed to stdout.
+		\begin{description}\item[]
+		\item[string: ]
+			Syntactical string representation of \oparg{file}.
+		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Syntactically print \oparg{file} to stdout.
+		Create a syntactical string representation of \oparg{file}.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> sprintdict begin
+onyx:0> sprintsdict begin
 onyx:0> stdout
-onyx:1> dup 0 filetype `\n' print flush
+onyx:1> dup 0 filetype print `\n' print flush
 -file-
-onyx:1> dup 1 filetype `\n' print flush
+onyx:1> dup 1 filetype print `\n' print flush
 -file-
 onyx:1>
 		\end{verbatim}
 	\end{description}
-\label{sprintdict:finotype}
+\label{sprintsdict:finotype}
 \index{finotype@\onyxop{}{finotype}{}}
-\item[{\onyxop{fino depth}{finotype}{--}}: ]
+\item[{\onyxop{fino depth}{finotype}{string}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[fino: ]
-			A fino to be syntactically printed.
+			A fino object.
 		\item[depth: ]
-			Printing recursion depth.
+			Recursion depth.
 		\end{description}
 	\item[Output(s): ]
-		Syntactic representation of \oparg{fino} printed to stdout.
+		\begin{description}\item[]
+		\item[string: ]
+			Syntactical string representation of \oparg{fino}.
+		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Syntactically print \oparg{fino} to stdout.
+		Create a syntactical string representation of \oparg{fino}.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> sprintdict begin
+onyx:0> sprintsdict begin
 onyx:0> (
-onyx:1> dup 0 finotype `\n' print flush
+onyx:1> dup 0 finotype print `\n' print flush
 -fino-
-onyx:1> dup 1 finotype `\n' print flush
+onyx:1> dup 1 finotype print `\n' print flush
 -fino-
 onyx:1>
 		\end{verbatim}
 	\end{description}
-\label{sprintdict:hooktype}
+\label{sprintsdict:hooktype}
 \index{hooktype@\onyxop{}{hooktype}{}}
-\item[{\onyxop{hook depth}{hooktype}{--}}: ]
+\item[{\onyxop{hook depth}{hooktype}{string}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[hook: ]
-			A hook to be syntactically printed.
+			A hook object.
 		\item[depth: ]
-			Printing recursion depth.
+			Recursion depth.
 		\end{description}
 	\item[Output(s): ]
-		Syntactic representation of \oparg{hook} printed to stdout.
+		\begin{description}\item[]
+		\item[string: ]
+			Syntactical string representation of \oparg{hook}.
+		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Syntactically print \oparg{hook} to stdout.
+		Create a syntactical string representation of \oparg{hook}.
 	\item[Example(s): ]
 		The following example is a bit contrived, since there is no way
 		to create a hook object with a stock onyx interpreter.
@@ -1859,196 +1873,213 @@ onyx:1>
 		hook.
 		\begin{verbatim}
 
-onyx:0> sprintdict begin
+onyx:0> sprintsdict begin
 onyx:0> taggedhook
-onyx:1> dup 0 hooktype `\n' print flush
+onyx:1> dup 0 hooktype print `\n' print flush
 =tagged=
-onyx:1> 1 hooktype `\n' print flush
+onyx:1> 1 hooktype print `\n' print flush
 =tagged=
 onyx:0> untaggedhook
-onyx:1> dup 0 hooktype `\n' print flush
+onyx:1> dup 0 hooktype print `\n' print flush
 -hook-
-onyx:1> 1 hooktype `\n' print flush
+onyx:1> 1 hooktype print `\n' print flush
 -hook-
 onyx:0>
 		\end{verbatim}
 	\end{description}
-\label{sprintdict:integertype}
+\label{sprintsdict:integertype}
 \index{integertype@\onyxop{}{integertype}{}}
-\item[{\onyxop{integer depth}{integertype}{--}}: ]
+\item[{\onyxop{integer depth}{integertype}{string}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[integer: ]
-			An integer to be syntactically printed.
+			An integer object.
 		\item[depth: ]
-			Printing recursion depth.
+			Recursion depth.
 		\end{description}
 	\item[Output(s): ]
-		Syntactic representation of \oparg{integer} printed to stdout.
+		\begin{description}\item[]
+		\item[string: ]
+			Syntactical string representation of \oparg{integer}.
+		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Syntactically print \oparg{integer} to stdout.
+		Create a syntactical string representation of \oparg{integer}.
 	\item[Example(s): ]\begin{verbatim}
 
-
-onyx:0> sprintdict begin
+onyx:0> sprintsdict begin
 onyx:0> 42
-onyx:1> dup 0 integertype `\n' print flush
+onyx:1> dup 0 integertype print `\n' print flush
 42
-onyx:1> dup 1 integertype `\n' print flush
+onyx:1> dup 1 integertype print `\n' print flush
 42
 onyx:1>
 		\end{verbatim}
 	\end{description}
-\label{sprintdict:marktype}
+\label{sprintsdict:marktype}
 \index{marktype@\onyxop{}{marktype}{}}
-\item[{\onyxop{mark depth}{marktype}{--}}: ]
+\item[{\onyxop{mark depth}{marktype}{string}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[mark: ]
-			A mark to be syntactically printed.
+			A mark object.
 		\item[depth: ]
-			Printing recursion depth.
+			Recursion depth.
 		\end{description}
 	\item[Output(s): ]
-		Syntactic representation of \oparg{mark} printed to stdout.
+		\begin{description}\item[]
+		\item[string: ]
+			Syntactical string representation of \oparg{mark}.
+		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Syntactically print \oparg{mark} to stdout.
+		Create a syntactical string representation of \oparg{mark}.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> sprintdict begin
+onyx:0> sprintsdict begin
 onyx:0> mark
-onyx:1> dup 0 marktype `\n' print flush
+onyx:1> dup 0 marktype print `\n' print flush
 -mark-
-onyx:1> dup 1 marktype `\n' print flush
+onyx:1> dup 1 marktype print `\n' print flush
 -mark-
 onyx:1>
 		\end{verbatim}
 	\end{description}
-\label{sprintdict:mutextype}
+\label{sprintsdict:mutextype}
 \index{mutextype@\onyxop{}{mutextype}{}}
-\item[{\onyxop{mutex depth}{mutextype}{--}}: ]
+\item[{\onyxop{mutex depth}{mutextype}{string}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[mutex: ]
-			A mutex to be syntactically printed.
+			A mutex object.
 		\item[depth: ]
-			Printing recursion depth.
+			Recursion depth.
 		\end{description}
 	\item[Output(s): ]
-		Syntactic representation of \oparg{mutex} printed to stdout.
+		\begin{description}\item[]
+		\item[string: ]
+			Syntactical string representation of \oparg{mutex}.
+		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Syntactically print \oparg{mutex} to stdout.
+		Create a syntactical string representation of \oparg{mutex}.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> sprintdict begin
+onyx:0> sprintsdict begin
 onyx:0> mutex
-onyx:1> dup 0 mutextype `\n' print flush
+onyx:1> dup 0 mutextype print `\n' print flush
 -mutex-
-onyx:1> dup 1 mutextype `\n' print flush
+onyx:1> dup 1 mutextype print `\n' print flush
 -mutex-
 onyx:1>
 		\end{verbatim}
 	\end{description}
-\label{sprintdict:nametype}
+\label{sprintsdict:nametype}
 \index{nametype@\onyxop{}{nametype}{}}
-\item[{\onyxop{name depth}{nametype}{--}}: ]
+\item[{\onyxop{name depth}{nametype}{string}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[name: ]
-			A name to be syntactically printed.
+			A name object.
 		\item[depth: ]
-			Printing recursion depth.
+			Recursion depth.
 		\end{description}
 	\item[Output(s): ]
-		Syntactic representation of \oparg{name} printed to stdout.
+		\begin{description}\item[]
+		\item[string: ]
+			Syntactical string representation of \oparg{name}.
+		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Syntactically print \oparg{name} to stdout.
+		Create a syntactical string representation of \oparg{name}.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> sprintdict begin
+onyx:0> sprintsdict begin
 onyx:0> /foo
-onyx:1> dup 0 nametype `\n' print flush
+onyx:1> dup 0 nametype print `\n' print flush
 /foo
-onyx:1> dup 1 nametype `\n' print flush
+onyx:1> dup 1 nametype print `\n' print flush
 /foo
 onyx:1>
 		\end{verbatim}
 	\end{description}
-\label{sprintdict:nulltype}
+\label{sprintsdict:nulltype}
 \index{nulltype@\onyxop{}{nulltype}{}}
-\item[{\onyxop{null depth}{nulltype}{--}}: ]
+\item[{\onyxop{null depth}{nulltype}{string}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[null: ]
-			A null to be syntactically printed.
+			A null object.
 		\item[depth: ]
-			Printing recursion depth.
+			Recursion depth.
 		\end{description}
 	\item[Output(s): ]
-		Syntactic representation of \oparg{null} printed to stdout.
+		\begin{description}\item[]
+		\item[string: ]
+			Syntactical string representation of \oparg{null}.
+		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Syntactically print \oparg{null} to stdout.
+		Create a syntactical string representation of \oparg{null}.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> sprintdict begin
+onyx:0> sprintsdict begin
 onyx:0> null
-onyx:1> dup 0 nulltype `\n' print flush
+onyx:1> dup 0 nulltype print `\n' print flush
 -null-
-onyx:1> dup 1 nulltype `\n' print flush
+onyx:1> dup 1 nulltype print `\n' print flush
 -null-
 onyx:1>
 		\end{verbatim}
 	\end{description}
-\label{sprintdict:operatortype}
+\label{sprintsdict:operatortype}
 \index{operatortype@\onyxop{}{operatortype}{}}
-\item[{\onyxop{operator depth}{operatortype}{--}}: ]
+\item[{\onyxop{operator depth}{operatortype}{string}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[operator: ]
-			An operator to be syntactically printed.
+			An operator object.
 		\item[depth: ]
-			Printing recursion depth.
+			Recursion depth.
 		\end{description}
 	\item[Output(s): ]
-		Syntactic representation of \oparg{operator} printed to stdout.
+		\begin{description}\item[]
+		\item[string: ]
+			Syntactical string representation of \oparg{operator}.
+		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Syntactically print \oparg{operator} to stdout.
+		Create a syntactical string representation of \oparg{operator}.
 	\item[Example(s): ]
 		The following example shows an operator printed out with two
 		leading and trailing dashes.  If the interpreter cannot
@@ -2057,38 +2088,41 @@ onyx:1>
 		{\tt -operator-}.
 		\begin{verbatim}
 
-onyx:0> sprintdict begin
+onyx:0> sprintsdict begin
 onyx:0> //realtime
-onyx:1> dup 0 operatortype `\n' print flush
+onyx:1> dup 0 operatortype print `\n' print flush
 --realtime--
-onyx:1> 1 operatortype `\n' print flush
+onyx:1> 1 operatortype print `\n' print flush
 --realtime--
 onyx:0>
 		\end{verbatim}
 	\end{description}
-\label{sprintdict:pmarktype}
+\label{sprintsdict:pmarktype}
 \index{pmarktype@\onyxop{}{pmarktype}{}}
-\item[{\onyxop{pmark depth}{pmarktype}{--}}: ]
+\item[{\onyxop{pmark depth}{pmarktype}{string}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[pmark: ]
-			A pmark to be syntactically printed.
+			A pmark object.
 		\item[depth: ]
-			Printing recursion depth.
+			Recursion depth.
 		\end{description}
 	\item[Output(s): ]
-		Syntactic representation of \oparg{pmark} printed to stdout.
+		\begin{description}\item[]
+		\item[string: ]
+			Syntactical string representation of \oparg{pmark}.
+		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Syntactically print \oparg{pmark} to stdout.
+		Create a syntactical string representation of \oparg{pmark}.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> sprintdict begin
+onyx:0> sprintsdict begin
 onyx:0> { //x
 Error /undefined
 ostack: (-pmark- /x)
@@ -2097,111 +2131,118 @@ estack/istack trace (0..1):
 0:      -file-
 1:      --start--
 onyx:3> pop pop resume
-onyx:1> dup 0 pmarktype `\n' print flush
+onyx:1> dup 0 pmarktype print `\n' print flush
 -pmark-
-onyx:1> dup 1 pmarktype `\n' print flush
+onyx:1> dup 1 pmarktype print `\n' print flush
 -pmark-
 onyx:1>
 		\end{verbatim}
 	\end{description}
-\label{sprintdict:stacktype}
+\label{sprintsdict:stacktype}
 \index{stacktype@\onyxop{}{stacktype}{}}
-\item[{\onyxop{stack depth}{stacktype}{--}}: ]
+\item[{\onyxop{stack depth}{stacktype}{string}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[stack: ]
-			A stack to be syntactically printed.
+			A stack object.
 		\item[depth: ]
-			Printing recursion depth.
+			Recursion depth.
 		\end{description}
 	\item[Output(s): ]
-		Syntactic representation of \oparg{stack} printed to stdout.
+		\begin{description}\item[]
+		\item[string: ]
+			Syntactical string representation of \oparg{stack}.
+		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Syntactically print \oparg{stack} to stdout.
+		Create a syntactical string representation of \oparg{stack}.
 	\item[Example(s): ]\begin{verbatim}
 
-
-onyx:0> sprintdict begin
+onyx:0> sprintsdict begin
 onyx:0> (1 (2 3) 4)
-onyx:1> dup 0 stacktype `\n' print flush
+onyx:1> dup 0 stacktype print `\n' print flush
 -stack-
-onyx:1> dup 1 stacktype `\n' print flush
+onyx:1> dup 1 stacktype print `\n' print flush
 (1 -stack- 4)
-onyx:1> dup 2 stacktype `\n' print flush
+onyx:1> dup 2 stacktype print `\n' print flush
 (1 (2 3) 4)
 onyx:1>
 		\end{verbatim}
 	\end{description}
-\label{sprintdict:stringtype}
+\label{sprintsdict:stringtype}
 \index{stringtype@\onyxop{}{stringtype}{}}
-\item[{\onyxop{string depth}{stringtype}{--}}: ]
+\item[{\onyxop{string depth}{stringtype}{string}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[string: ]
-			A string to be syntactically printed.
+			A string object.
 		\item[depth: ]
-			Printing recursion depth.
+			Recursion depth.
 		\end{description}
 	\item[Output(s): ]
-		Syntactic representation of \oparg{string} printed to stdout.
+		\begin{description}\item[]
+		\item[string: ]
+			Syntactical string representation of \oparg{string}.
+		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Syntactically print \oparg{string} to stdout.
+		Create a syntactical string representation of \oparg{string}.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> sprintdict begin
+onyx:0> sprintsdict begin
 onyx:0> `abcd'
-onyx:1> dup 0 stringtype `\n' print flush
+onyx:1> dup 0 stringtype print `\n' print flush
 `abcd'
-onyx:1> dup 1 stringtype `\n' print flush
+onyx:1> dup 1 stringtype print `\n' print flush
 `abcd'
 onyx:1>
 		\end{verbatim}
 	\end{description}
-\label{sprintdict:threadtype}
+\label{sprintsdict:threadtype}
 \index{threadtype@\onyxop{}{threadtype}{}}
-\item[{\onyxop{thread depth}{threadtype}{--}}: ]
+\item[{\onyxop{thread depth}{threadtype}{string}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[thread: ]
-			A thread to be syntactically printed.
+			A thread object.
 		\item[depth: ]
-			Printing recursion depth.
+			Recursion depth.
 		\end{description}
 	\item[Output(s): ]
-		Syntactic representation of \oparg{thread} printed to stdout.
+		\begin{description}\item[]
+		\item[string: ]
+			Syntactical string representation of \oparg{thread}.
+		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Syntactically print \oparg{thread} to stdout.
+		Create a syntactical string representation of \oparg{thread}.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> sprintdict begin
+onyx:0> sprintsdict begin
 onyx:0> thread
-onyx:1> dup 0 threadtype `\n' print flush
+onyx:1> dup 0 threadtype print `\n' print flush
 -thread-
-onyx:1> dup 1 threadtype `\n' print flush
+onyx:1> dup 1 threadtype print `\n' print flush
 -thread-
 onyx:1>
 		\end{verbatim}
 	\end{description}
 \end{description}
-
 
 \subsection{systemdict}
 \label{sec:systemdict}
@@ -2481,8 +2522,8 @@ array. \\
 -- & {\bf \htmlref{globaldict}{systemdict:globaldict}} & dict & Get
 globaldict. \\
 \hline
--- & {\bf \htmlref{sprintdict}{systemdict:sprintdict}} & dict & Get
-sprintdict. \\
+-- & {\bf \htmlref{sprintsdict}{systemdict:sprintsdict}} & dict & Get
+sprintsdict. \\
 \hline
 -- & {\bf \htmlref{{\lt}}{systemdict:sym_lt}} & mark & Begin a dictionary
 declaration. \\
@@ -2572,6 +2613,9 @@ stdout. \\
 \hline
 object depth & {\bf \htmlref{sprint}{systemdict:sprint}} & -- &
 Syntactically print object to stdout. \\
+\hline
+object depth & {\bf \htmlref{sprints}{systemdict:sprints}} & string &
+Create syntactical string from object. \\
 \hline
 -- & {\bf \htmlref{pstack}{systemdict:pstack}} & -- & Syntactically print
 ostack elements. \\
@@ -2687,6 +2731,8 @@ string & {\bf \htmlref{cvn}{systemdict:cvn}} & name & Convert string to name. \\
 \hline
 object & {\bf \htmlref{cvs}{systemdict:cvs}} & string & Convert object to
 string. \\
+\hline
+hook & {\bf \htmlref{hooktag}{systemdict:hooktag}} & tag & Get hook tag. \\
 \hline
 integer radix & {\bf \htmlref{cvrs}{systemdict:cvrs}} & string & Convert integer
 to radix string. \\
@@ -3867,7 +3913,9 @@ onyx:0>
 			\item[integer: ] The integer in base 10.
 			\item[operator: ] The string representation of the
 			operator name or {\tt `-operator-'}.
-			\item[string: ] The same as \oparg{object}.
+			\item[string: ] A printable representation of
+			\oparg{object}.  The result can be evaluated to produce
+			the original string.
 			\item[Other types: ] {\tt `--nostringval--'}.
 			\end{description}
 		\end{description}
@@ -3887,8 +3935,8 @@ onyx:0> 42 cvs 1 sprint
 `42'
 onyx:0> //pop cvs 1 sprint
 `pop'
-onyx:0> `foo' cvs 1 sprint
-`foo'
+onyx:0> `foo\nbar\\biz\`baz' cvs 1 sprint
+`\`foo\\nbar\\\\biz\\\`baz\''
 onyx:0> mutex cvs 1 sprint
 `--nostringval--'
 onyx:0>
@@ -4863,6 +4911,31 @@ false
 onyx:0> `b' `a' gt 1 sprint
 true
 onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:hooktag}
+\index{hooktag@\onyxop{}{hooktag}{}}
+\item[{\onyxop{hook}{hooktag}{tag}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[hook: ]
+			A hook object.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[tag: ]
+			The tag associated with \oparg{hook}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Get the tag associated with \oparg{hook}.
+	\item[Example(s): ]\begin{verbatim}
+
 		\end{verbatim}
 	\end{description}
 \label{systemdict:if}
@@ -6715,9 +6788,44 @@ onyx:1> dup 2 sprint
 onyx:1>
 		\end{verbatim}
 	\end{description}
-\label{systemdict:sprintdict}
-\index{sprintdict@\onyxop{}{sprintdict}{}}
-\item[{\onyxop{--}{sprintdict}{dict}}: ]
+\label{systemdict:sprints}
+\index{sprints@\onyxop{}{sprints}{}}
+\item[{\onyxop{object depth}{sprints}{string}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[object: ]
+			An object to print syntactically.
+		\item[depth: ]
+			Maximum recursion depth.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[string: ]
+			A syntactical string representation of \oparg{object}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Create a syntactical string representation of \oparg{object}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> [1 [2 3] 4]
+onyx:1> dup 0 sprints print `\n' print flush
+-array-
+onyx:1> dup 1 sprints print `\n' print flush
+[1 -array- 4]
+onyx:1> dup 2 sprints print `\n' print flush
+[1 [2 3] 4]
+onyx:1>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:sprintsdict}
+\index{sprintsdict@\onyxop{}{sprintsdict}{}}
+\item[{\onyxop{--}{sprintsdict}{dict}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ] None.
 	\item[Output(s): ]
@@ -6727,11 +6835,11 @@ onyx:1>
 		\end{description}
 	\item[Errors(s): ] None.
 	\item[Description: ]
-		Get sprintdict.  See Section~\ref{sec:sprintdict} for details on
-		sprintdict.
+		Get sprintsdict.  See Section~\ref{sec:sprintsdict} for details
+		on sprintsdict.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> sprintdict 0 sprint
+onyx:0> sprintsdict 0 sprint
 -dict-
 onyx:0>
 		\end{verbatim}

@@ -56,15 +56,12 @@ nx_l_ref_iter(cw_nx_t *a_nx, cw_bool_t a_reset)
 			retval = nxo_nxoe_get(&a_nx->envdict);
 			break;
 		case 5:
-			retval = nxo_nxoe_get(&a_nx->sprintdict);
-			break;
-		case 6:
 			retval = nxo_nxoe_get(&a_nx->stdin_nxo);
 			break;
-		case 7:
+		case 6:
 			retval = nxo_nxoe_get(&a_nx->stdout_nxo);
 			break;
-		case 8:
+		case 7:
 			retval = nxo_nxoe_get(&a_nx->stderr_nxo);
 			break;
 		default:

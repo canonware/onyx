@@ -14,6 +14,7 @@
 #include "../include/libonyx/libonyx.h"
 
 #include <sys/time.h>	/* For realtime operator. */
+#include <ctype.h>
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -117,6 +118,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(get),
 	ENTRY(getinterval),
 	ENTRY(gt),
+	ENTRY(hooktag),
 	ENTRY(if),
 	ENTRY(ifelse),
 	ENTRY(istack),
@@ -220,7 +222,7 @@ systemdict_l_populate(cw_nxo_t *a_dict, cw_nx_t *a_nx, int a_argc, char
 #define	NSPARE	 8
 
 /* Number of names that are defined below, but not as operators. */
-#define	NEXTRA	13
+#define	NEXTRA	12
 #define NFASTOPS							\
 	(sizeof(systemdict_fastops) / sizeof(struct cw_systemdict_entry))
 #define NOPS								\
@@ -279,12 +281,6 @@ systemdict_l_populate(cw_nxo_t *a_dict, cw_nx_t *a_nx, int a_argc, char
 	nxo_name_new(&name, a_nx, nxn_str(NXN_envdict), nxn_len(NXN_envdict),
 	    TRUE);
 	nxo_dup(&value, nx_envdict_get(a_nx));
-	nxo_dict_def(a_dict, a_nx, &name, &value);
-
-	/* sprintdict. */
-	nxo_name_new(&name, a_nx, nxn_str(NXN_sprintdict),
-	    nxn_len(NXN_sprintdict), TRUE);
-	nxo_dup(&value, nx_sprintdict_get(a_nx));
 	nxo_dict_def(a_dict, a_nx, &name, &value);
 
 	/* argv. */
@@ -1326,8 +1322,114 @@ systemdict_cvs(cw_nxo_t *a_thread)
 		}
 		break;
 	}
-	case NXOT_STRING:
+	case NXOT_STRING: {
+		cw_nxo_t	*tstack, *tnxo;
+		cw_uint32_t	i, j, len, newlen;
+		cw_uint8_t	*str, *newstr;
+
+		/*
+		 * The source is already a string, but here we convert
+		 * non-printing characters.
+		 */
+
+		tstack = nxo_thread_tstack_get(a_thread);
+		tnxo = nxo_stack_push(tstack);
+		nxo_dup(tnxo, nxo);
+
+		str = nxo_string_get(tnxo);
+		len = nxo_string_len_get(tnxo);
+
+		/*
+		 * The source string must not change between the first and
+		 * second passes.  The destination string need not be locked,
+		 * since no other threads have a possible way of accessing it
+		 * yet.
+		 */
+		nxo_string_lock(tnxo);
+
+		/* Calculate the length of the new string. */
+		for (i = 0, newlen = 2; i < len; i++) {
+			switch (str[i]) {
+			case '\n': case '\r': case '\t': case '\b': case '\f':
+			case '\\': case '`': case '\'':
+				newlen += 2;
+				break;
+			default:
+				if (isprint(str[i]))
+					newlen++;
+				else
+					newlen += 4;
+				break;
+			}
+		}
+
+		/* Create new string. */
+		nxo_string_new(nxo, nxo_thread_nx_get(a_thread),
+		    nxo_thread_currentlocking(a_thread), newlen);
+		newstr = nxo_string_get(nxo);
+
+		/* Convert old string to new string. */
+		newstr[0] = '`';
+		newstr[newlen - 1] = '\'';
+		for (i = 0, j = 1; i < len; i++) {
+			switch (str[i]) {
+			case '\n':
+				newstr[j] = '\\';
+				newstr[j + 1] = 'n';
+				j += 2;
+				break;
+			case '\r':
+				newstr[j] = '\\';
+				newstr[j + 1] = 'r';
+				j += 2;
+				break;
+			case '\t':
+				newstr[j] = '\\';
+				newstr[j + 1] = 't';
+				j += 2;
+				break;
+			case '\b':
+				newstr[j] = '\\';
+				newstr[j + 1] = 'b';
+				j += 2;
+				break;
+			case '\f':
+				newstr[j] = '\\';
+				newstr[j + 1] = 'f';
+				j += 2;
+				break;
+			case '\\':
+				newstr[j] = '\\';
+				newstr[j + 1] = '\\';
+				j += 2;
+				break;
+			case '`':
+				newstr[j] = '\\';
+				newstr[j + 1] = '`';
+				j += 2;
+				break;
+			case '\'':
+				newstr[j] = '\\';
+				newstr[j + 1] = '\'';
+				j += 2;
+				break;
+			default:
+				if (isprint(str[i])) {
+					newstr[j] = str[i];
+					j++;
+				} else {
+					_cw_out_put_sn(&newstr[j], 4,
+					    "\\x[i|b:16|w:2|p:0]", str[i]);
+					j += 4;
+				}
+				break;
+			}
+		}
+
+		nxo_string_unlock(tnxo);
+		nxo_stack_pop(tstack);
 		break;
+	}
 	case NXOT_ARRAY:
 	case NXOT_CONDITION:
 	case NXOT_DICT:
@@ -2376,6 +2478,28 @@ systemdict_gt(cw_nxo_t *a_thread)
 	nxo_boolean_new(nxo_a, gt);
 
 	nxo_stack_pop(ostack);
+}
+
+void
+systemdict_hooktag(cw_nxo_t *a_thread)
+{
+	cw_nxo_t	*ostack, *tstack, *nxo, *tnxo, *tag;
+	
+	ostack = nxo_thread_ostack_get(a_thread);
+	tstack = nxo_thread_tstack_get(a_thread);
+	NXO_STACK_GET(nxo, ostack, a_thread);
+	if (nxo_type_get(nxo) != NXOT_HOOK) {
+		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		return;
+	}
+
+	tnxo = nxo_stack_push(tstack);
+	nxo_dup(tnxo, nxo);
+
+	tag = nxo_hook_tag_get(tnxo);
+	nxo_dup(nxo, tag);
+
+	nxo_stack_pop(tstack);
 }
 
 void

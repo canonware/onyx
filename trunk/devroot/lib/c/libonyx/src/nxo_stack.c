@@ -165,65 +165,6 @@ nxoe_l_stack_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 }
 
 void
-nxo_l_stack_print(cw_nxo_t *a_thread)
-{
-	cw_nxo_t		*ostack, *depth, *stack, *stdout_nxo;
-	cw_nxo_threade_t	error;
-
-	ostack = nxo_thread_ostack_get(a_thread);
-	NXO_STACK_GET(depth, ostack, a_thread);
-	NXO_STACK_DOWN_GET(stack, ostack, a_thread, depth);
-	if (nxo_type_get(depth) != NXOT_INTEGER || nxo_type_get(stack)
-	    != NXOT_STACK) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
-		return;
-	}
-	stdout_nxo = nxo_thread_stdout_get(a_thread);
-
-	if (nxo_integer_get(depth) > 0) {
-		cw_uint32_t		i;
-		cw_nxo_t		*nxo;
-
-		error = nxo_file_output(stdout_nxo, "(");
-		if (error) {
-			nxo_thread_error(a_thread, error);
-			return;
-		}
-
-		for (i = nxo_stack_count(stack); i > 0; i--) {
-			nxo = nxo_stack_push(ostack);
-			nxo_dup(nxo, nxo_stack_nget(stack, i - 1));
-			nxo = nxo_stack_push(ostack);
-			nxo_integer_new(nxo, nxo_integer_get(depth) - 1);
-			_cw_onyx_code(a_thread,
-			    "1 index type sprintdict exch get eval");
-
-			if (i > 1) {
-				error = nxo_file_output(stdout_nxo, " ");
-				if (error) {
-					nxo_thread_error(a_thread, error);
-					return;
-				}
-			}
-		}
-
-		error = nxo_file_output(stdout_nxo, ")");
-		if (error) {
-			nxo_thread_error(a_thread, error);
-			return;
-		}
-	} else {
-		error = nxo_file_output(stdout_nxo, "-stack-");
-		if (error) {
-			nxo_thread_error(a_thread, error);
-			return;
-		}
-	}
-
-	nxo_stack_npop(ostack, 2);
-}
-
-void
 nxo_stack_copy(cw_nxo_t *a_to, cw_nxo_t *a_from)
 {
 	cw_nxo_t	*nxo_to, *nxo_fr;

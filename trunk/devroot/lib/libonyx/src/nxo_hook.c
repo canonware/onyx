@@ -89,65 +89,6 @@ nxoe_l_hook_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 	return retval;
 }
 
-void
-nxo_l_hook_print(cw_nxo_t *a_thread)
-{
-	cw_nxo_t		*ostack, *depth, *nxo, *hnxo, *stdout_nxo;
-	cw_nxoe_hook_t		*hook;
-	cw_nxo_threade_t	error;
-
-	ostack = nxo_thread_ostack_get(a_thread);
-	NXO_STACK_GET(depth, ostack, a_thread);
-	NXO_STACK_DOWN_GET(hnxo, ostack, a_thread, depth);
-	if (nxo_type_get(depth) != NXOT_INTEGER || nxo_type_get(hnxo) !=
-	    NXOT_HOOK) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
-		return;
-	}
-	stdout_nxo = nxo_thread_stdout_get(a_thread);
-
-	hook = (cw_nxoe_hook_t *)hnxo->o.nxoe;
-
-	_cw_check_ptr(hook);
-	_cw_dassert(hook->nxoe.magic == _CW_NXOE_MAGIC);
-	_cw_assert(hook->nxoe.type == NXOT_HOOK);
-
-
-	if (nxo_type_get(&hook->tag) != NXOT_NULL) {
-		error = nxo_file_output(stdout_nxo, "=");
-		if (error) {
-			nxo_thread_error(a_thread, error);
-			return;
-		}
-
-		nxo = nxo_stack_push(ostack);
-		nxo_dup(nxo, &hook->tag);
-		nxo = nxo_stack_push(ostack);
-		nxo_integer_new(nxo, nxo_integer_get(depth) - 1);
-		_cw_onyx_code(a_thread,
-		    "1 index type sprintdict exch get eval");
-
-		error = nxo_file_output(stdout_nxo, "=");
-		if (error) {
-			nxo_thread_error(a_thread, error);
-			return;
-		}
-	} else {
-		error = nxo_file_output(stdout_nxo, "-hook-");
-		if (error) {
-			nxo_thread_error(a_thread, error);
-			return;
-		}
-	}
-
-	if (error) {
-		nxo_thread_error(a_thread, error);
-		return;
-	}
-
-	nxo_stack_npop(ostack, 2);
-}
-
 cw_nxo_t *
 nxo_hook_tag_get(cw_nxo_t *a_nxo)
 {

@@ -56,32 +56,6 @@ nxoe_l_condition_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 }
 
 void
-nxo_l_condition_print(cw_nxo_t *a_thread)
-{
-	cw_nxo_t		*ostack, *depth, *condition, *stdout_nxo;
-	cw_nxo_threade_t	error;
-
-	ostack = nxo_thread_ostack_get(a_thread);
-	NXO_STACK_GET(depth, ostack, a_thread);
-	NXO_STACK_DOWN_GET(condition, ostack, a_thread, depth);
-	if (nxo_type_get(depth) != NXOT_INTEGER || nxo_type_get(condition) !=
-	    NXOT_CONDITION) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
-		return;
-	}
-	stdout_nxo = nx_stdout_get(nxo_thread_nx_get(a_thread));
-
-	error = nxo_file_output(stdout_nxo, "-condition-");
-
-	if (error) {
-		nxo_thread_error(a_thread, error);
-		return;
-	}
-
-	nxo_stack_npop(ostack, 2);
-}
-
-void
 nxo_condition_signal(cw_nxo_t *a_nxo)
 {
 	cw_nxoe_condition_t	*condition;

@@ -46,7 +46,7 @@ stdin cvx eval
 
 % Output the procedure, using a recursion depth large enough to meet or exceed
 % the depth of nested braces in the code.
-1000 1 index type /sprintdict load exch get eval
+1000 1 index type /sprintsdict load exch get eval print
 
 % Output the footer.
 ` bind eval");

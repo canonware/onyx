@@ -25,12 +25,230 @@
 
 systemdict begin
 
-% sprint is used by some of the procedures defined later in this file, so must
-% be defined early.
 %
-% <object> <depth> sprint -
+% sprintsdict implements syntactic printing to strings for every type.
+%
+/sprintsdict <
+	/arraytype {
+		% %array %depth
+		dup 0 gt {
+			1 index xcheck {
+				`{'
+			}{
+				`['
+			} ifelse
+
+			% %array %depth %accum
+			2 index length 1 gt {
+				% %array %depth %accum
+				0 1 4 index length 2 sub {
+					% %array %depth %accum %i
+					3 index exch get
+					2 index 1 sub
+					% %array %depth %accum %el %rdepth
+					1 index type sprintsdict exch get eval
+					catenate
+					% %array %depth %accum %el %rdepth
+				` ' catenate
+				} for
+			} if
+			% %array %depth %accum
+
+			2 index length 0 gt {
+				2 index dup length 1 sub get
+				2 index 1 sub
+				% %array %depth %accum %el %rdepth
+				1 index type sprintsdict exch get eval
+				catenate
+			} if
+			% %array %depth %accum
+
+			exch pop
+			% %array %accum
+			exch xcheck {
+				`}'
+			}{
+				`]'
+			} ifelse
+			catenate
+			% %accum
+		}{
+			pop pop
+			`-array-'
+		} ifelse
+	}
+	/booleantype {
+		pop
+		cvs
+	}
+	/conditiontype {
+		pop pop
+		`-condition-'
+	}
+	/dicttype {
+		% %dict %depth
+		dup 0 gt {
+			% Update recursion depth.
+			1 sub
+
+			0
+			`<'
+
+			% %dict %rdepth %i %accum
+			3 index {
+				% %dict %rdepth %i %accum %key %value
+				exch 4 index
+				% %dict %rdepth %i %accum %value %key %rdepth
+				1 index type sprintsdict exch get eval
+				` ' catenate
+				% %dict %rdepth %accum %i %value %keystr
+				exch 4 index
+				% %dict %rdepth %i %accum %keystr %value %rdepth
+				1 index type sprintsdict exch get eval
+				% %dict %rdepth %i %accum %keystr %valstr
+				catenate catenate
+				% %dict %rdepth %i %accum
+
+				% Update counter.
+				exch 1 add dup 4 index length lt {
+					% %dict %rdepth %accum %i
+					exch
+					` ' catenate
+					% %dict %rdepth %i %accum
+				}{
+					% Last element.
+					exch
+					% %dict %rdepth %accum
+				} ifelse
+			} foreach
+			% %dict %rdepth %i %accum
+
+			4 1 roll pop pop pop
+			% %accum
+			`>'
+			catenate
+			% %accum
+		}{
+			pop pop
+			`-dict-'
+		} ifelse
+	}
+	/filetype {
+		pop pop
+		`-file-'
+	}
+	/finotype {
+		pop pop
+		`-fino-'
+	}
+	/hooktype {
+		% %hook %depth
+		exch hooktag
+		% %depth %tag
+		dup type /nulltype ne {
+			exch 1 sub
+			% %tag %rdepth
+			1 index type sprintsdict exch get eval
+			% %tagstr
+			`=' exch catenate
+			`=' catenate
+		}{
+			pop pop
+			`-hook-'
+		} ifelse
+	}
+	/integertype {
+		pop
+		cvs
+	}
+	/marktype {
+		pop pop
+		`-mark-'
+	}
+	/mutextype {
+		pop pop
+		`-mutex-'
+	}
+	/nametype {
+		pop
+		dup cvs
+		exch xcheck not {
+			`/' exch catenate
+		} if
+	}
+	/nulltype {
+		pop pop
+		`null'
+	}
+	/operatortype {
+		pop
+		cvs
+		dup `-operator-' ne {
+			`--' dup 3 1 roll
+			catenate catenate
+		} if
+	}
+	/pmarktype {
+		pop pop
+		`-pmark-'
+	}
+	/stacktype {
+		% %stack %depth
+		dup 0 gt {
+			`('
+
+			% %stack %depth %accum
+			2 index scount exch pop 1 gt {
+				% %stack %depth %accum
+				2 index scount exch pop 1 sub -1 1 {
+					% %stack %depth %accum %i
+					3 index exch sindex spop exch pop
+					2 index 1 sub
+					% %stack %depth %accum %el %rdepth
+					1 index type sprintsdict exch get eval
+					catenate
+					% %stack %depth %accum %el %rdepth
+				` ' catenate
+				} for
+			} if
+			% %stack %depth %accum
+
+			2 index scount exch pop 0 gt {
+				2 index sdup spop exch pop
+				2 index 1 sub
+				% %stack %depth %accum %el %rdepth
+				1 index type sprintsdict exch get eval
+				catenate
+			} if
+			% %stack %depth %accum
+
+			3 1 roll pop pop
+			% %accum
+			`)'
+			catenate
+			% %accum
+		}{
+			pop pop
+			`-stack-'
+		} ifelse
+	}
+	/stringtype {
+		pop
+		cvs
+	}
+	/threadtype {
+		pop pop
+		`-thread-'
+	}
+> def
+
+% <object> <depth> sprints <string>
+/sprints {
+	1 index type /sprintsdict load exch get eval
+} def
+
 /sprint {
-	1 index type /sprintdict load exch get eval
+	sprints print
 	`\n' print flush
 } def
 

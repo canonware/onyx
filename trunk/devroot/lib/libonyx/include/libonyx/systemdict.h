@@ -63,6 +63,7 @@ void	systemdict_ge(cw_nxo_t *a_thread);
 void	systemdict_get(cw_nxo_t *a_thread);
 void	systemdict_getinterval(cw_nxo_t *a_thread);
 void	systemdict_gt(cw_nxo_t *a_thread);
+void	systemdict_hooktag(cw_nxo_t *a_thread);
 void	systemdict_if(cw_nxo_t *a_thread);
 void	systemdict_ifelse(cw_nxo_t *a_thread);
 void	systemdict_index(cw_nxo_t *a_thread);

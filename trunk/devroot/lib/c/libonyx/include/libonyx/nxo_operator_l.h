@@ -25,7 +25,6 @@
 } while (0)
 
 /* Library-private. */
-void	nxo_l_operator_print(cw_nxo_t *a_thread);
 #define	nxo_l_operator_fast_op_get(a_nxo) nxo_p_fastop_get(a_nxo)
 #define	nxo_l_operator_fast_op_set(a_nxo, a_op_code) do {		\
 	nxo_p_fastop_set((a_nxo), TRUE);				\
