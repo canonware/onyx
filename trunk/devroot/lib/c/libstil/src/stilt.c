@@ -236,11 +236,6 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 		    stilat_stilsc_pool_get(&a_stilt->stilat));
 		try_stage = 6;
 
-		/* Create and push threaddict onto the dictionary stack. */
-		threaddict_populate(&retval->threaddict, retval);
-		stilo = stils_push(&retval->dict_stils);
-		stilo_dup(stilo, &retval->threaddict);
-
 		/* Push systemdict onto the dictionary stack. */
 		stilo = stils_push(&retval->dict_stils);
 		stilo_dup(stilo, stil_systemdict_get(a_stil));

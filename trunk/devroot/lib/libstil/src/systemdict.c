@@ -76,6 +76,7 @@ static struct cw_systemdict_entry systemdict_ops[] = {
 	_SYSTEMDICT_ENTRY(echo),
 	_SYSTEMDICT_ENTRY(end),
 	_SYSTEMDICT_ENTRY(eq),
+	_SYSTEMDICT_ENTRY(errordict),
 	_SYSTEMDICT_ENTRY(exch),
 	_SYSTEMDICT_ENTRY(exec),
 	_SYSTEMDICT_ENTRY(execstack),
@@ -102,11 +103,13 @@ static struct cw_systemdict_entry systemdict_ops[] = {
 	_SYSTEMDICT_ENTRY(if),
 	_SYSTEMDICT_ENTRY(ifelse),
 	_SYSTEMDICT_ENTRY(index),
+	_SYSTEMDICT_ENTRY(internaldict),
 	_SYSTEMDICT_ENTRY(join),
 	_SYSTEMDICT_ENTRY(known),
 	_SYSTEMDICT_ENTRY(le),
 	_SYSTEMDICT_ENTRY(length),
 	_SYSTEMDICT_ENTRY(load),
+	_SYSTEMDICT_ENTRY(localinstancedict),
 	_SYSTEMDICT_ENTRY(lock),
 	_SYSTEMDICT_ENTRY(loop),
 	_SYSTEMDICT_ENTRY(lt),
@@ -144,6 +147,7 @@ static struct cw_systemdict_entry systemdict_ops[] = {
 	_SYSTEMDICT_ENTRY(roll),
 	_SYSTEMDICT_ENTRY(run),
 	_SYSTEMDICT_ENTRY(search),
+	_SYSTEMDICT_ENTRY(serverdict),
 	_SYSTEMDICT_ENTRY(setfileposition),
 	_SYSTEMDICT_ENTRY(setglobal),
 	_SYSTEMDICT_ENTRY(shift),
@@ -151,6 +155,7 @@ static struct cw_systemdict_entry systemdict_ops[] = {
 	_SYSTEMDICT_ENTRY(stack),
 	_SYSTEMDICT_ENTRY(start),
 	_SYSTEMDICT_ENTRY(status),
+	_SYSTEMDICT_ENTRY(statusdict),
 	_SYSTEMDICT_ENTRY(stdin),
 	_SYSTEMDICT_ENTRY(stderr),
 	_SYSTEMDICT_ENTRY(stdout),
@@ -159,6 +164,7 @@ static struct cw_systemdict_entry systemdict_ops[] = {
 	_SYSTEMDICT_ENTRY(store),
 	_SYSTEMDICT_ENTRY(string),
 	_SYSTEMDICT_ENTRY(sub),
+	{"$error",	systemdict_sym_derror},
 	{"=",	systemdict_sym_eq},
 	{"==",	systemdict_sym_eq_eq},
 	{">>",	systemdict_sym_gt_gt},
@@ -173,6 +179,8 @@ static struct cw_systemdict_entry systemdict_ops[] = {
 	_SYSTEMDICT_ENTRY(undef),
 	_SYSTEMDICT_ENTRY(undefineresource),
 	_SYSTEMDICT_ENTRY(unlock),
+	_SYSTEMDICT_ENTRY(userdict),
+	_SYSTEMDICT_ENTRY(userparams),
 	_SYSTEMDICT_ENTRY(usertime),
 	_SYSTEMDICT_ENTRY(version),
 	_SYSTEMDICT_ENTRY(wait),
@@ -740,6 +748,12 @@ systemdict_eq(cw_stilt_t *a_stilt)
 }
 
 void
+systemdict_errordict(cw_stilt_t *a_stilt)
+{
+	_cw_error("XXX Not implemented");
+}
+
+void
 systemdict_exch(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*stack;
@@ -1186,6 +1200,12 @@ systemdict_index(cw_stilt_t *a_stilt)
 }
 
 void
+systemdict_internaldict(cw_stilt_t *a_stilt)
+{
+	_cw_error("XXX Not implemented");
+}
+
+void
 systemdict_join(cw_stilt_t *a_stilt)
 {
 	_cw_error("XXX Not implemented");
@@ -1211,6 +1231,12 @@ systemdict_length(cw_stilt_t *a_stilt)
 
 void
 systemdict_load(cw_stilt_t *a_stilt)
+{
+	_cw_error("XXX Not implemented");
+}
+
+void
+systemdict_localinstancedict(cw_stilt_t *a_stilt)
 {
 	_cw_error("XXX Not implemented");
 }
@@ -1722,6 +1748,12 @@ systemdict_search(cw_stilt_t *a_stilt)
 }
 
 void
+systemdict_serverdict(cw_stilt_t *a_stilt)
+{
+	_cw_error("XXX Not implemented");
+}
+
+void
 systemdict_setfileposition(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*stack;
@@ -1846,6 +1878,12 @@ systemdict_status(cw_stilt_t *a_stilt)
 }
 
 void
+systemdict_statusdict(cw_stilt_t *a_stilt)
+{
+	_cw_error("XXX Not implemented");
+}
+
+void
 systemdict_stdin(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*stack;
@@ -1959,6 +1997,13 @@ systemdict_sub(cw_stilt_t *a_stilt)
 	stilo_integer_new(&t_stilo, stilo_integer_get(a));
 	stilo_integer_sub(&t_stilo, b, a);
 	stils_pop(stack);
+}
+
+/* $error */
+void
+systemdict_sym_derror(cw_stilt_t *a_stilt)
+{
+	_cw_error("XXX Not implemented");
 }
 
 /* = */
@@ -2108,6 +2153,18 @@ systemdict_undefineresource(cw_stilt_t *a_stilt)
 
 void
 systemdict_unlock(cw_stilt_t *a_stilt)
+{
+	_cw_error("XXX Not implemented");
+}
+
+void
+systemdict_userdict(cw_stilt_t *a_stilt)
+{
+	_cw_error("XXX Not implemented");
+}
+
+void
+systemdict_userparams(cw_stilt_t *a_stilt)
 {
 	_cw_error("XXX Not implemented");
 }

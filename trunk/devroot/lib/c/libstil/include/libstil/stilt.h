@@ -84,9 +84,8 @@ struct cw_stilt_s {
 	cw_stils_t	dict_stils;
 
 	/*
-	 * Local dictionaries.
+	 * Local dictionary.
 	 */
-	cw_stilo_t	threaddict;
 	cw_stilo_t	localdict;
 
 	/*
