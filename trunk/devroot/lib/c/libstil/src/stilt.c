@@ -220,8 +220,8 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 
 		dch_new(&retval->name_hash, stilat_mem_get(&retval->stilat),
 		    _CW_STILT_NAME_BASE_TABLE, _CW_STILT_NAME_BASE_GROW,
-		    _CW_STILT_NAME_BASE_SHRINK, ch_direct_hash,
-		    ch_direct_key_comp);
+		    _CW_STILT_NAME_BASE_SHRINK, stilo_name_hash,
+		    stilo_name_key_comp);
 		try_stage = 3;
 
 		stils_new(&retval->estack,
