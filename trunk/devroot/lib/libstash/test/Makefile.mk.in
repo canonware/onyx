@@ -8,8 +8,8 @@
 #
 # $Source$
 # $Author: jasone $
-# Current revision: $Revision: 111 $
-# Last modified: $Date: 1998-06-30 15:55:50 -0700 (Tue, 30 Jun 1998) $
+# Current revision: $Revision: 119 $
+# Last modified: $Date: 1998-07-01 17:20:10 -0700 (Wed, 01 Jul 1998) $
 #
 # Description: Makefile stub for a subdirectory.
 #              
@@ -26,7 +26,7 @@ $(CURRDIR)_PARSERS :=# List of .y sources.
 $(CURRDIR)_CTESTS := c19980411a.c c19980412a.c c19980419a.c c19980430a.c \
 	c19980627a.c c19980630a.c
 $(CURRDIR)_BTESTS :=# List of b*.c back end C code driven by the perl scripts.
-$(CURRDIR)_PTESTS :=# List of .pl.in test sources that drive the b*.c programs.
+$(CURRDIR)_PTESTS := p19980701a.pl.in
 
 # Mutually exclusive.
 $(CURRDIR)_EXECS :=# List of .c sources that define main().
