@@ -329,19 +329,54 @@ bufel_new(cw_bufel_t * a_bufel)
     bzero(retval, sizeof(cw_bufel_t));
     retval->is_malloced = FALSE;
   }
-
+  
   return retval;
 }
 
 void
 bufel_delete(cw_bufel_t * a_bufel)
 {
+#ifdef _CW_REENTRANT
+  cw_bool_t should_delete_bufc;
+#endif
+  
   _cw_check_ptr(a_bufel);
 
   if (a_bufel->bufc != NULL)
   {
+#ifdef _CW_REENTRANT
+    mtx_lock(a_bufel->bufc->lock);
+#endif
+    a_bufel->bufc->ref_count--;
+
+    if (0 == a_bufel->bufc->ref_count)
+    {
+#ifdef _CW_REENTRANT
+      /* Make a note that we should delete the bufc once we've released the
+       * mutex. */
+      should_delete_bufc = TRUE;
+#else
+      _cw_free(a_bufel->bufc);
+#endif
+    }
+#ifdef _CW_REENTRANT
+    else
+    {
+      should_delete_bufc = FALSE;
+    }
+#endif
+
+#ifdef _CW_REENTRANT
+    mtx_unlock(a_bufel->bufc->lock);
+
+    if (TRUE == should_delete_bufc)
+    {
+      mtx_delete(a_bufel->bufc->lock);
+      _cw_free(a_bufel->bufc);
+    }
+#endif
     
-    _cw_free(a_bufel->buf);
+    _cw_free(a_bufel->bufc);
   }
   if (a_bufel->is_malloced == TRUE)
   {
@@ -352,8 +387,20 @@ bufel_delete(cw_bufel_t * a_bufel)
 cw_uint32_t
 bufel_get_size(cw_bufel_t * a_bufel)
 {
+  cw_uint32_t retval;
+  
   _cw_check_ptr(a_bufel);
-  return a_bufel->buf_size;
+
+  if (NULL == a_bufel->bufc)
+  {
+    retval = 0;
+  }
+  else
+  {
+    retval = a_bufel->bufc->buf_size;
+  }
+  
+  return retval;
 }
 
 cw_bool_t
@@ -372,12 +419,14 @@ bufel_set_size(cw_bufel_t * a_bufel, cw_uint32_t a_size)
   }
   else if (a_size == 0)
   {
-    /* Release the memory for the buffer, if any is used. */
-    if (a_bufel->buf != NULL)
+    if (a_bufel->bufc != NULL)
     {
-      _cw_free(a_bufel->buf);
+      /* Decrement the reference count for the bufc and free it if necessary. */
+      
+      a_bufel->bufc = NULL;
     }
-    a_bufel->buf = NULL;
+    
+    /* Release the memory for the buffer, if any is used. */
     a_bufel->buf_size = 0;
     a_bufel->beg_offset = 0;
     a_bufel->end_offset = 0;
