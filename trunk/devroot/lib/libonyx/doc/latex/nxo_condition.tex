@@ -20,24 +20,95 @@ The \classname{nxo\_condition} class is a subclass of the \classname{nxo} class.
 
 \subsubsection{API}
 \begin{capi}
-\label{nxo_condition_}
-\index{\cfunc{nxo\_condition\_}{}}
-\citem{\cfunc[]{nxo\_condition\_}{}}
+\label{nxo_condition_new}
+\index{\cfunc{nxo\_condition\_new}{}}
+\citem{\cfunc[void]{nxo\_condition\_new}{cw\_nxo\_t *a\_nxo, cw\_nx\_t *a\_nx}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_nxo: ]
-			Pointer to a<n> condition \classname{nxo}.
-		\item[: ]
+			Pointer to a condition \classname{nxo}.
+		\item[a\_nx: ]
+			Pointer to an \classname{nx}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Constructor.
+	\end{capilist}
+\label{nxo_condition_signal}
+\index{\cfunc{nxo\_condition\_signal}{}}
+\citem{\cfunc[void]{nxo\_condition\_signal}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a condition \classname{nxo}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Signal one thread waiting on \cvar{a\_nxo}, if there are any
+		waiters.
+	\end{capilist}
+\label{nxo_condition_broadcast}
+\index{\cfunc{nxo\_condition\_broadcast}{}}
+\citem{\cfunc[void]{nxo\_condition\_broadcast}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a condition \classname{nxo}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Signal all threads waiting on \cvar{a\_nxo}.
+	\end{capilist}
+\label{nxo_condition_wait}
+\index{\cfunc{nxo\_condition\_wait}{}}
+\citem{\cfunc[void]{nxo\_condition\_wait}{cw\_nxo\_t *a\_nxo, cw\_nxo\_t
+*a\_mutex}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a condition \classname{nxo}.
+		\item[a\_mutex: ]
+			Pointer to a mutex \classname{nxo}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Wait for \cvar{a\_nxo}.
+	\end{capilist}
+\label{nxo_condition_timedwait}
+\index{\cfunc{nxo\_condition\_timedwait}{}}
+\citem{\cfunc[cw\_bool\_t]{nxo\_condition\_timedwait}{cw\_nxo\_t *a\_nxo,
+cw\_nxo\_t *a\_mutex, const struct timespec *a\_timeout}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a condition \classname{nxo}.
+		\item[a\_mutex: ]
+			Pointer to a mutex \classname{nxo}.
+		\item[a\_timeout: ]
+			Timeout, specified as an absolute time interval.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[FALSE: ] Success.
+			\item[TRUE: ] Timeout.
+			\end{description}
 		\end{description}
-	\item[Exception(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
-		\end{description}
+	\item[Exception(s): ] None.
 	\item[Description: ]
+		Wait for \cvar{a\_nxo} for at least \cvar{a\_timeout}.
 	\end{capilist}
 \end{capi}
