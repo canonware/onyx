@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 86 $
- * $Date: 1998-06-23 17:40:29 -0700 (Tue, 23 Jun 1998) $
+ * $Revision: 91 $
+ * $Date: 1998-06-24 23:46:00 -0700 (Wed, 24 Jun 1998) $
  *
  * <<< Description >>>
  *
@@ -25,7 +25,7 @@ typedef struct cw_brblk_s cw_brblk_t;
 struct cw_brblk_s
 {
   cw_rwl_t rw_lock;
-  cw_btl_t bt_lock;
+  cw_jtl_t jt_lock;
   cw_bool_t is_valid;
   cw_bool_t is_dirty;
   cw_uint64_t logical_addr;
@@ -64,7 +64,9 @@ void brblk_delete(cw_brblk_t * a_brblk_o);
 void brblk_slock(cw_brblk_t * a_brblk_o);
 void brblk_tlock(cw_brblk_t * a_brblk_o);
 
-void brblk_s2dlock(cw_brblk_t * a_brblk_o);
+/* XXX It's possible for dlocking to fail, if the node is absolutely
+ * deletion unsafe (only one data item. */
+cw_bool_t brblk_s2dlock(cw_brblk_t * a_brblk_o);
 void brblk_s2rlock(cw_brblk_t * a_brblk_o);
 void brblk_s2wlock(cw_brblk_t * a_brblk_o);
 void brblk_s2xlock(cw_brblk_t * a_brblk_o);

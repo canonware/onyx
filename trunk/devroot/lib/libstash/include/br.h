@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 86 $
- * $Date: 1998-06-23 17:40:29 -0700 (Tue, 23 Jun 1998) $
+ * $Revision: 91 $
+ * $Date: 1998-06-24 23:46:00 -0700 (Wed, 24 Jun 1998) $
  *
  * <<< Description >>>
  *
@@ -41,8 +41,8 @@ struct cw_br_s
 #define br_rm_file _CW_NS_CMN(br_rm_file)
 #define br_block_create _CW_NS_CMN(br_block_create)
 #define br_block_destroy _CW_NS_CMN(br_block_destroy)
-#define br_block_slock _CW_NS_CMN(br_slock)
-#define br_block_tlock _CW_NS_CMN(br_tlock)
+#define br_block_slock _CW_NS_CMN(br_block_slock)
+#define br_block_tlock _CW_NS_CMN(br_block_tlock)
 
 /* Function prototypes. */
 cw_br_t * br_new(cw_br_t * a_br_o, cw_bool_t a_is_thread_safe);
@@ -61,11 +61,18 @@ cw_bool_t br_add_file(cw_br_t * a_br_o, char * a_filename,
 		      cw_uint64_t a_base_addr, cw_uint64_t a_max_size);
 cw_bool_t br_rm_file(cw_br_t * a_br_o, char * a_filename);
 
+/* XXX Should br_block_create() imply some sort of lock is held?  Since the 
+ * block didn't exist in a valid state until this function returned, no one 
+ * else is in the block, but it is conceivable for someone else to ask (and 
+ * get) a lock on the block, even though they don't have an explicit way of 
+ * knowing that it exists.  Hmm... */
 cw_bool_t br_block_create(cw_br_t * a_br_o, cw_brblk_t ** a_brblk_o);
 cw_bool_t br_block_destroy(cw_br_t * a_br_o, cw_brblk_t * a_brblk_o);
 
-cw_brblk_t * br_block_slock(cw_br_t * a_br_o,
-			     cw_uint64_t a_logical_addr);
-cw_brblk_t * br_block_tlock(cw_br_t * a_br_o,
-			     cw_uint64_t a_logical_addr);
+cw_bool_t br_block_slock(cw_br_t * a_br_o,
+			 cw_uint64_t a_logical_addr,
+			 cw_brblk_t ** a_brblk_o);
+cw_bool_t br_block_tlock(cw_br_t * a_br_o,
+			 cw_uint64_t a_logical_addr,
+			 cw_brblk_t ** a_brblk_o);
 #endif /* _BR_H_ */

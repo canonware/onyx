@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 86 $
- * $Date: 1998-06-23 17:40:29 -0700 (Tue, 23 Jun 1998) $
+ * $Revision: 91 $
+ * $Date: 1998-06-24 23:46:00 -0700 (Wed, 24 Jun 1998) $
  *
  * <<< Description >>>
  *
@@ -373,9 +373,10 @@ br_block_destroy(cw_br_t * a_br_o, cw_brblk_t * a_brblk_o)
  * s-locks a block, as well as pulling it into cache.
  *
  ****************************************************************************/
-cw_brblk_t *
+cw_bool_t
 br_block_slock(cw_br_t * a_br_o,
-	       cw_uint64_t a_logical_addr)
+	       cw_uint64_t a_logical_addr,
+	       cw_brblk_t ** a_brblk_o)
 {
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
   {
@@ -406,9 +407,10 @@ br_block_slock(cw_br_t * a_br_o,
  * t-locks a block, as well as pulling it into cache.
  *
  ****************************************************************************/
-cw_brblk_t *
+cw_bool_t
 br_block_tlock(cw_br_t * a_br_o,
-	       cw_uint64_t a_logical_addr)
+	       cw_uint64_t a_logical_addr,
+	       cw_brblk_t ** a_brblk_o)
 {
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
   {

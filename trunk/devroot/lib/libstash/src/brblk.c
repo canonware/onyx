@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 86 $
- * $Date: 1998-06-23 17:40:29 -0700 (Tue, 23 Jun 1998) $
+ * $Revision: 91 $
+ * $Date: 1998-06-24 23:46:00 -0700 (Wed, 24 Jun 1998) $
  *
  * <<< Description >>>
  *
@@ -154,21 +154,29 @@ brblk_tlock(cw_brblk_t * a_brblk_o)
  *
  *
  ****************************************************************************/
-void
+cw_bool_t
 brblk_s2dlock(cw_brblk_t * a_brblk_o)
 {
+  cw_bool_t retval;
+  
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Enter brblk_s2dlock()");
   }
   _cw_check_ptr(a_brblk_o);
   rwl_wlock(&a_brblk_o->rw_lock);
+
+  /* Make sure that the node is potentially deletion safe in the case that
+   * we have to wait for a dlock. */
+
+  /* If we have to wait, make sure that the node is still deletion safe. */
   
   rwl_wunlock(&a_brblk_o->rw_lock);
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
   {
     _cw_marker("Exit brblk_s2dlock()");
   }
+  return retval;
 }
 
 /****************************************************************************
