@@ -64,8 +64,8 @@ docs_relclean : [addsuffix _docs_relclean @docs@]
 
   cd @objroot@/%0latex/%1/\; @PERL@ @abs_srcroot@/%0latex/ltx2e @LATEX@ %.tex;
   cd @objroot@/%0latex/%1/\; @MAKEINDEX@ -c -l
-                                        -s @abs_srcroot@/%0latex/%1/%.mst
-                                        %.idx;
+                                         -s @abs_srcroot@/%0latex/%1/%.mst
+                                         %.idx;
   cd @objroot@/%0latex/%1/\; @PERL@ @abs_srcroot@/%0latex/ltx2e @LATEX@ %.tex;
   @DVIPS@ @objroot@/%0latex/%1/%.dvi -o @objroot@/%0ps/%1/%.ps;
 }
