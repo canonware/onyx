@@ -150,7 +150,6 @@ const cw_uint8_t *cw_g_stil_names[] = {
 	"print",
 	"product",
 	"promptstring",
-	"pstack",
 	"put",
 	"putinterval",
 	"quit",

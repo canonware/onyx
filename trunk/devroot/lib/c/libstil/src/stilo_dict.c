@@ -122,55 +122,87 @@ stiloe_l_dict_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t a_reset)
 void
 stilo_l_dict_print(cw_stilo_t *a_thread)
 {
-#if (0)
-	cw_stilo_threade_t	retval;
+	cw_stilo_t		*ostack, *depth, *dict, *stdout_stilo;
+	cw_stilo_threade_t	error;
 
-	if (a_depth > 0) {
-		cw_stilo_t	key, val;
+	ostack = stilo_thread_ostack_get(a_thread);
+	STILO_STACK_GET(depth, ostack, a_thread);
+	STILO_STACK_DOWN_GET(dict, ostack, a_thread, depth);
+	if (stilo_type_get(depth) != STILOT_INTEGER || stilo_type_get(dict)
+	    != STILOT_DICT) {
+		stilo_thread_error(a_thread, STILO_THREADE_TYPECHECK);
+		return;
+	}
+	stdout_stilo = stil_stdout_get(stilo_thread_stil_get(a_thread));
+
+	if (stilo_integer_get(depth) > 0) {
+		cw_stilo_t	*tstack, *key, *val, *stilo;
 		cw_uint32_t	count, i;
 
-		retval = stilo_file_output(a_file, "<");
-		if (retval)
-			goto RETURN;
+		tstack = stilo_thread_tstack_get(a_thread);
+		key = stilo_stack_push(tstack);
+		val = stilo_stack_push(tstack);
 
-		for (i = 0, count = stilo_dict_count(a_stilo); i < count; i++) {
+		error = stilo_file_output(stdout_stilo, "<");
+		if (error) {
+			stilo_stack_npop(tstack, 2);
+			stilo_thread_error(a_thread, error);
+			return;
+		}
+
+		for (i = 0, count = stilo_dict_count(dict); i < count; i++) {
 			/* Get key and val. */
-			stilo_dict_iterate(a_stilo, &key);
-			if (stilo_dict_lookup(a_stilo, &key, &val)) {
-				/* Race condition.  Pretend it didn't happen. */
-				retval = STILO_THREADE_NONE;
-				goto RETURN;
-			}
+			stilo_dict_iterate(dict, key);
+			stilo_dict_lookup(dict, key, val);
 
 			/* Print key. */
-			retval = stilo_print(&key, a_file, a_depth - 1, FALSE);
-			if (retval)
-				goto RETURN;
-			retval = stilo_file_output(a_file, " ");
-			if (retval)
-				goto RETURN;
+			stilo = stilo_stack_push(ostack);
+			stilo_dup(stilo, key);
+			stilo = stilo_stack_push(ostack);
+			stilo_integer_new(stilo, stilo_integer_get(depth) - 1);
+			_cw_stil_code(a_thread,
+			    "1 index type sprintdict exch get eval");
+			
+			error = stilo_file_output(stdout_stilo, " ");
+			if (error) {
+				stilo_thread_error(a_thread, error);
+				return;
+			}
 
 			/* Print val. */
-			retval = stilo_print(&val, a_file, a_depth - 1, FALSE);
-			if (retval)
-				goto RETURN;
+			stilo = stilo_stack_push(ostack);
+			stilo_dup(stilo, val);
+			stilo = stilo_stack_push(ostack);
+			stilo_integer_new(stilo, stilo_integer_get(depth) - 1);
+			_cw_stil_code(a_thread,
+			    "1 index type sprintdict exch get eval");
+
 			if (i < count - 1) {
-				retval = stilo_file_output(a_file, " ");
-				if (retval)
-					goto RETURN;
+				error = stilo_file_output(stdout_stilo, " ");
+				if (error) {
+					stilo_stack_npop(tstack, 2);
+					stilo_thread_error(a_thread, error);
+					return;
+				}
 			}
 		}
-		retval = stilo_file_output(a_file, ">");
+		error = stilo_file_output(stdout_stilo, ">");
+		if (error) {
+			stilo_stack_npop(tstack, 2);
+			stilo_thread_error(a_thread, error);
+			return;
+		}
+
+		stilo_stack_npop(tstack, 2);
 	} else {
-		retval = stilo_file_output(a_file, "-dict-");
-		if (retval)
-			goto RETURN;
+		error = stilo_file_output(stdout_stilo, "-dict-");
+		if (error) {
+			stilo_thread_error(a_thread, error);
+			return;
+		}
 	}
 
-	retval = STILO_THREADE_NONE;
-	RETURN:
-	return retval;
-#endif
+	stilo_stack_npop(ostack, 2);
 }
 
 void

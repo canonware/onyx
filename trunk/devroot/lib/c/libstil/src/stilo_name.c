@@ -137,35 +137,42 @@ stiloe_l_name_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t a_reset)
 void
 stilo_l_name_print(cw_stilo_t *a_thread)
 {
-#if (0)
-	cw_stilo_threade_t	retval;
+	cw_stilo_t		*ostack, *depth, *nstilo, *stdout_stilo;
+	cw_stilo_threade_t	error;
 	cw_stiloe_name_t	*name;
 
-	_cw_check_ptr(a_stilo);
-	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
-	_cw_assert(a_stilo->type == STILOT_NAME);
+	ostack = stilo_thread_ostack_get(a_thread);
+	STILO_STACK_GET(depth, ostack, a_thread);
+	STILO_STACK_DOWN_GET(nstilo, ostack, a_thread, depth);
+	if (stilo_type_get(depth) != STILOT_INTEGER || stilo_type_get(nstilo)
+	    != STILOT_NAME) {
+		stilo_thread_error(a_thread, STILO_THREADE_TYPECHECK);
+		return;
+	}
+	stdout_stilo = stil_stdout_get(stilo_thread_stil_get(a_thread));
 
-	name = (cw_stiloe_name_t *)a_stilo->o.stiloe;
+	name = (cw_stiloe_name_t *)nstilo->o.stiloe;
 
 	_cw_check_ptr(name);
 	_cw_assert(name->stiloe.magic == _CW_STILOE_MAGIC);
 	_cw_assert(name->stiloe.type == STILOT_NAME);
-	
-	if (a_stilo->attrs == STILOA_LITERAL) {
-		retval = stilo_file_output(a_file, "/");
-		if (retval)
-			goto RETURN;
+
+	if (nstilo->attrs == STILOA_LITERAL) {
+		error = stilo_file_output(stdout_stilo, "/");
+		if (error) {
+			stilo_thread_error(a_thread, error);
+			return;
+		}
 	}
 
-	retval = stilo_file_output_n(a_file, name->len, "[s]",
+	error = stilo_file_output_n(stdout_stilo, name->len, "[s]",
 	    name->str);
-	if (retval)
-		goto RETURN;
+	if (error) {
+		stilo_thread_error(a_thread, error);
+		return;
+	}
 
-	retval = STILO_THREADE_NONE;
-	RETURN:
-	return retval;
-#endif
+	stilo_stack_npop(ostack, 2);
 }
 
 /* Hash {name string, length}. */

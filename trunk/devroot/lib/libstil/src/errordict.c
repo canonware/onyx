@@ -157,8 +157,7 @@ errordict_p_generic(cw_stilo_t *a_thread, cw_stilo_threade_t a_threade,
 			xep_throw(_CW_STILX_CURRENTERROR);
 		}
 		if (stilo_boolean_get(tstilo) && a_threade) {
-			cw_stilo_t	*stack, *stilo, *nstilo;
-			cw_sint32_t	i, count;
+			cw_stilo_t	*stack;
 
 			stack = stilo_stack_push(tstack);
 
@@ -166,20 +165,9 @@ errordict_p_generic(cw_stilo_t *a_thread, cw_stilo_threade_t a_threade,
 			stilo_name_new(tname, stilo_thread_stil_get(a_thread),
 			    stiln_str(STILN_ostack), stiln_len(STILN_ostack),
 			    TRUE);
-			count = stilo_stack_count(ostack);
-			for (i = 0, stilo = NULL; i < count; i++) {
-				stilo = stilo_stack_down_get(ostack, stilo);
-				nstilo = stilo_stack_push(tstack);
-				stilo_dup(nstilo, stilo);
-			}
 			stilo_stack_new(stack, stilo_thread_stil_get(a_thread),
 			    FALSE);
-			for (i = 0; i < count; i++) {
-				stilo = stilo_stack_get(tstack);
-				nstilo = stilo_stack_push(stack);
-				stilo_dup(nstilo, stilo);
-				stilo_stack_pop(tstack);
-			}
+			stilo_stack_copy(stack, ostack);
 			stilo_dict_def(currenterror,
 			    stilo_thread_stil_get(a_thread), tname, stack);
 
@@ -190,21 +178,10 @@ errordict_p_generic(cw_stilo_t *a_thread, cw_stilo_threade_t a_threade,
 			stilo_name_new(tname, stilo_thread_stil_get(a_thread),
 			    stiln_str(STILN_estack), stiln_len(STILN_estack),
 			    TRUE);
-			count = stilo_stack_count(estack) - 1;
-			for (i = 0, stilo = stilo_stack_get(estack); i < count;
-			    i++) {
-				stilo = stilo_stack_down_get(estack, stilo);
-				nstilo = stilo_stack_push(tstack);
-				stilo_dup(nstilo, stilo);
-			}
 			stilo_stack_new(stack, stilo_thread_stil_get(a_thread),
 			    FALSE);
-			for (i = 0; i < count; i++) {
-				stilo = stilo_stack_get(tstack);
-				nstilo = stilo_stack_push(stack);
-				stilo_dup(nstilo, stilo);
-				stilo_stack_pop(tstack);
-			}
+			stilo_stack_copy(stack, estack);
+			stilo_stack_pop(stack);
 			stilo_dict_def(currenterror,
 			    stilo_thread_stil_get(a_thread), tname, stack);
 
@@ -212,20 +189,9 @@ errordict_p_generic(cw_stilo_t *a_thread, cw_stilo_threade_t a_threade,
 			stilo_name_new(tname, stilo_thread_stil_get(a_thread),
 			    stiln_str(STILN_dstack), stiln_len(STILN_dstack),
 			    TRUE);
-			count = stilo_stack_count(dstack);
-			for (i = 0, stilo = NULL; i < count; i++) {
-				stilo = stilo_stack_down_get(dstack, stilo);
-				nstilo = stilo_stack_push(tstack);
-				stilo_dup(nstilo, stilo);
-			}
 			stilo_stack_new(stack, stilo_thread_stil_get(a_thread),
 			    FALSE);
-			for (i = 0; i < count; i++) {
-				stilo = stilo_stack_get(tstack);
-				nstilo = stilo_stack_push(stack);
-				stilo_dup(nstilo, stilo);
-				stilo_stack_pop(tstack);
-			}
+			stilo_stack_copy(stack, dstack);
 			stilo_dict_def(currenterror,
 			    stilo_thread_stil_get(a_thread), tname, stack);
 

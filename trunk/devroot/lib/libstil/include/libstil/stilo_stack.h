@@ -52,6 +52,7 @@ struct cw_stiloe_stack_s {
 
 void		stilo_stack_new(cw_stilo_t *a_stilo, cw_stil_t *a_stil,
     cw_bool_t a_locking);
+void		stilo_stack_copy(cw_stilo_t *a_to, cw_stilo_t *a_from);
 cw_uint32_t	stilo_stack_count(cw_stilo_t *a_stilo);
 cw_uint32_t	stilo_stack_index_get(cw_stilo_t *a_stilo, cw_stilo_t
     *a_object);

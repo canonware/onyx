@@ -138,13 +138,13 @@ stiloe_l_array_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t a_reset)
 void
 stilo_l_array_print(cw_stilo_t *a_thread)
 {
-	cw_stilo_t		*ostack, *depth, *astilo, *stdout_stilo;
+	cw_stilo_t		*ostack, *depth, *array, *stdout_stilo;
 	cw_stilo_threade_t	error;
 
 	ostack = stilo_thread_ostack_get(a_thread);
 	STILO_STACK_GET(depth, ostack, a_thread);
-	STILO_STACK_DOWN_GET(astilo, ostack, a_thread, depth);
-	if (stilo_type_get(depth) != STILOT_INTEGER || stilo_type_get(astilo)
+	STILO_STACK_DOWN_GET(array, ostack, a_thread, depth);
+	if (stilo_type_get(depth) != STILOT_INTEGER || stilo_type_get(array)
 	    != STILOT_ARRAY) {
 		stilo_thread_error(a_thread, STILO_THREADE_TYPECHECK);
 		return;
@@ -152,11 +152,10 @@ stilo_l_array_print(cw_stilo_t *a_thread)
 	stdout_stilo = stil_stdout_get(stilo_thread_stil_get(a_thread));
 
 	if (stilo_integer_get(depth) > 0) {
-		cw_stiloe_array_t	*array;
 		cw_stilo_t		*stilo;
 		cw_uint32_t		nelms, i;
 
-		if (astilo->attrs == STILOA_EXECUTABLE) {
+		if (array->attrs == STILOA_EXECUTABLE) {
 			error = stilo_file_output(stdout_stilo, "{");
 			if (error) {
 				stilo_thread_error(a_thread, error);
@@ -170,12 +169,10 @@ stilo_l_array_print(cw_stilo_t *a_thread)
 			}
 		}
 
-		array = (cw_stiloe_array_t *)astilo->o.stiloe;
-		stiloe_p_array_lock(array);
-		nelms = stilo_array_len_get(astilo);
+		nelms = stilo_array_len_get(array);
 		for (i = 0; i < nelms; i++) {
 			stilo = stilo_stack_push(ostack);
-			stilo_array_el_get(astilo, i, stilo);
+			stilo_array_el_get(array, i, stilo);
 			stilo = stilo_stack_push(ostack);
 			stilo_integer_new(stilo, stilo_integer_get(depth) - 1);
 			_cw_stil_code(a_thread,
@@ -184,15 +181,13 @@ stilo_l_array_print(cw_stilo_t *a_thread)
 			if (i < nelms - 1) {
 				error = stilo_file_output(stdout_stilo, " ");
 				if (error) {
-					stiloe_p_array_unlock(array);
 					stilo_thread_error(a_thread, error);
 					return;
 				}
 			}
 		}
-		stiloe_p_array_unlock(array);
 
-		if (astilo->attrs == STILOA_EXECUTABLE) {
+		if (array->attrs == STILOA_EXECUTABLE) {
 			error = stilo_file_output(stdout_stilo, "}");
 			if (error) {
 				stilo_thread_error(a_thread, error);
@@ -273,10 +268,8 @@ stilo_array_copy(cw_stilo_t *a_to, cw_stilo_t *a_from)
 	 */
 	stiloe_p_array_lock(array_fr_l);
 	stiloe_p_array_lock(array_to_l);
-	for (i = 0; i < len_fr; i++) {
-		stilo_no_new(&arr_to[i]);
+	for (i = 0; i < len_fr; i++)
 		stilo_dup(&arr_to[i], &arr_fr[i]);
-	}
 	stiloe_p_array_unlock(array_fr_l);
 
 	/*

@@ -153,7 +153,6 @@ typedef enum {
 	STILN_print,
 	STILN_product,
 	STILN_promptstring,
-	STILN_pstack,
 	STILN_put,
 	STILN_putinterval,
 	STILN_quit,

@@ -27,6 +27,13 @@
 
 systemdict begin
 
+/pstack {
+	ostack {
+		1 sprint
+	} foreach
+	flush
+} bind def
+
 %
 % <string> <pattern> search <post> <pattern> <pre> true
 %                    search <string> false

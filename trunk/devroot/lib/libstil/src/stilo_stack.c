@@ -184,51 +184,80 @@ stiloe_l_stack_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t a_reset)
 void
 stilo_l_stack_print(cw_stilo_t *a_thread)
 {
-#if (0)
-	cw_stilo_threade_t	retval;
-	cw_stilo_t		*stilo;
-	cw_uint32_t		i;
+	cw_stilo_t		*ostack, *depth, *stack, *stdout_stilo;
+	cw_stilo_threade_t	error;
 
-	if (a_depth > 0) {
-		cw_stiloe_stack_t	*stack;
+	ostack = stilo_thread_ostack_get(a_thread);
+	STILO_STACK_GET(depth, ostack, a_thread);
+	STILO_STACK_DOWN_GET(stack, ostack, a_thread, depth);
+	if (stilo_type_get(depth) != STILOT_INTEGER || stilo_type_get(stack)
+	    != STILOT_STACK) {
+		stilo_thread_error(a_thread, STILO_THREADE_TYPECHECK);
+		return;
+	}
+	stdout_stilo = stil_stdout_get(stilo_thread_stil_get(a_thread));
 
-		retval = stilo_file_output(a_file, "(");
-		if (retval)
-			goto RETURN;
+	if (stilo_integer_get(depth) > 0) {
+		cw_uint32_t		i;
+		cw_stilo_t		*stilo;
 
-		stack = (cw_stiloe_stack_t *)a_stilo->o.stiloe;
-		stiloe_p_stack_lock(stack);
-		for (i = stilo_stack_count(a_stilo); i > 0; i--) {
-			stilo = stilo_stack_nget(a_stilo, i - 1);
-			retval = stilo_print(stilo, a_file, a_depth - 1, FALSE);
-			if (retval) {
-				stiloe_p_stack_unlock(stack);
-				goto RETURN;
-			}
+		error = stilo_file_output(stdout_stilo, "(");
+		if (error) {
+			stilo_thread_error(a_thread, error);
+			return;
+		}
+
+		for (i = stilo_stack_count(stack); i > 0; i--) {
+			stilo = stilo_stack_push(ostack);
+			stilo_dup(stilo, stilo_stack_nget(stack, i - 1));
+			stilo = stilo_stack_push(ostack);
+			stilo_integer_new(stilo, stilo_integer_get(depth) - 1);
+			_cw_stil_code(a_thread,
+			    "1 index type sprintdict exch get eval");
 
 			if (i > 1) {
-				retval = stilo_file_output(a_file, " ");
-				if (retval) {
-					stiloe_p_stack_unlock(stack);
-					goto RETURN;
+				error = stilo_file_output(stdout_stilo, " ");
+				if (error) {
+					stilo_thread_error(a_thread, error);
+					return;
 				}
 			}
 		}
-		stiloe_p_stack_unlock(stack);
 
-		retval = stilo_file_output(a_file, ")");
-		if (retval)
-			goto RETURN;
+		error = stilo_file_output(stdout_stilo, ")");
+		if (error) {
+			stilo_thread_error(a_thread, error);
+			return;
+		}
 	} else {
-		retval = stilo_file_output(a_file, "-stack-");
-		if (retval)
-			goto RETURN;
+		error = stilo_file_output(stdout_stilo, "-stack-");
+		if (error) {
+			stilo_thread_error(a_thread, error);
+			return;
+		}
 	}
 
-	retval = STILO_THREADE_NONE;
-	RETURN:
-	return retval;
-#endif
+	stilo_stack_npop(ostack, 2);
+}
+
+void
+stilo_stack_copy(cw_stilo_t *a_to, cw_stilo_t *a_from)
+{
+	cw_stilo_t	*stilo_to, *stilo_fr;
+	cw_uint32_t	i, count;
+
+	_cw_check_ptr(a_to);
+	_cw_assert(a_to->magic == _CW_STILO_MAGIC);
+	  
+	_cw_check_ptr(a_from);
+	_cw_assert(a_from->magic == _CW_STILO_MAGIC);
+
+	for (i = 0, count = stilo_stack_count(a_from), stilo_fr = NULL, stilo_to
+	    = NULL; i < count; i++) {
+		stilo_fr = stilo_stack_down_get(a_from, stilo_fr);
+		stilo_to = stilo_stack_under_push(a_to, stilo_to);
+		stilo_dup(stilo_to, stilo_fr);
+	}
 }
 
 cw_uint32_t

@@ -116,9 +116,9 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(nsleep),
 	ENTRY(open),
 	ENTRY(or),
+	ENTRY(ostack),
 	ENTRY(pop),
 	ENTRY(print),
-	ENTRY(pstack),
 	ENTRY(put),
 	ENTRY(putinterval),
 	ENTRY(quit),
@@ -726,7 +726,8 @@ systemdict_copy(cw_stilo_t *a_thread)
 			return;
 		}
 		if (count > stilo_stack_count(ostack) - 1) {
-			stilo_thread_error(a_thread, STILO_THREADE_STACKUNDERFLOW);
+			stilo_thread_error(a_thread,
+			    STILO_THREADE_STACKUNDERFLOW);
 			return;
 		}
 		stilo_stack_pop(ostack);
@@ -773,6 +774,21 @@ systemdict_copy(cw_stilo_t *a_thread)
 
 		stilo_dict_copy(stilo, orig, stilo_thread_stil_get(a_thread),
 		    stilo_thread_currentlocking(a_thread));
+		break;
+	}
+	case STILOT_STACK: {
+		cw_stilo_t	*orig;
+
+		STILO_STACK_DOWN_GET(orig, ostack, a_thread, stilo);
+		if (stilo_type_get(orig) != STILOT_STACK) {
+			stilo_thread_error(a_thread, STILO_THREADE_TYPECHECK);
+			return;
+		}
+
+		stilo_stack_copy(stilo, orig);
+
+		stilo_stack_roll(ostack, 2, 1);
+		stilo_stack_pop(ostack);
 		break;
 	}
 	case STILOT_STRING: {
@@ -1673,7 +1689,7 @@ systemdict_foreach(cw_stilo_t *a_thread)
 		case STILOT_DICT: {
 			cw_stilo_t	*key, *val;
 
-			/* Move proc and array to tstack. */
+			/* Move proc and dict to tstack. */
 			stilo = stilo_stack_push(tstack);
 			stilo_dup(stilo, proc);
 			proc = stilo;
@@ -1703,6 +1719,37 @@ systemdict_foreach(cw_stilo_t *a_thread)
 			}
 			break;
 		}
+		case STILOT_STACK: {
+			cw_stilo_t	*el;
+
+			/* Move proc and stack to tstack. */
+			stilo = stilo_stack_push(tstack);
+			stilo_dup(stilo, proc);
+			proc = stilo;
+
+			stilo = stilo_stack_push(tstack);
+			stilo_dup(stilo, what);
+			what = stilo;
+
+			stilo_stack_npop(ostack, 2);
+
+			/*
+			 * Iterate through the stack, push each element onto
+			 * ostack, and execute proc.
+			 */
+			for (i = 0, count = stilo_stack_count(what), el = NULL;
+			    i < count; i++) {
+				el = stilo_stack_down_get(what, el);
+
+				stilo = stilo_stack_push(ostack);
+				stilo_dup(stilo, el);
+
+				stilo = stilo_stack_push(estack);
+				stilo_dup(stilo, proc);
+				stilo_thread_loop(a_thread);
+			}
+			break;
+		}
 		case STILOT_STRING: {
 			cw_uint8_t	el;
 
@@ -1722,7 +1769,7 @@ systemdict_foreach(cw_stilo_t *a_thread)
 			 * ostack, and execute proc.
 			 */
 			for (i = 0, count = stilo_array_len_get(what); i <
-				 count; i++) {
+			    count; i++) {
 				stilo_string_el_get(what, i, &el);
 				stilo = stilo_stack_push(ostack);
 				stilo_integer_new(stilo, (cw_stiloi_t)el);
@@ -1733,7 +1780,6 @@ systemdict_foreach(cw_stilo_t *a_thread)
 			}
 			break;
 		}
-
 		default:
 			stilo_thread_error(a_thread, STILO_THREADE_TYPECHECK);
 			return;
@@ -2552,6 +2598,24 @@ systemdict_or(cw_stilo_t *a_thread)
 }
 
 void
+systemdict_ostack(cw_stilo_t *a_thread)
+{
+	cw_stilo_t		*ostack, *stack;
+
+	ostack = stilo_thread_ostack_get(a_thread);
+	stack = stilo_stack_push(ostack);
+	stilo_stack_new(stack, stilo_thread_stil_get(a_thread),
+	    stilo_thread_currentlocking(a_thread));
+	stilo_stack_copy(stack, ostack);
+
+	/*
+	 * Pop the top element off the stack, since it's a reference to the
+	 * stack itself.
+	 */
+	stilo_stack_pop(stack);
+}
+
+void
 systemdict_pop(cw_stilo_t *a_thread)
 {
 	systemdict_inline_pop(a_thread);
@@ -2583,13 +2647,6 @@ systemdict_print(cw_stilo_t *a_thread)
 	}
 
 	stilo_stack_pop(ostack);
-}
-
-void
-systemdict_pstack(cw_stilo_t *a_thread)
-{
-	/* XXX Convert to softop. */
-	_cw_stil_code(a_thread, "ostack {1 sprint} foreach flush");
 }
 
 void
@@ -3352,8 +3409,6 @@ systemdict_sprint(cw_stilo_t *a_thread)
 		stilo_thread_error(a_thread, error);
 		return;
 	}
-
-	stilo_stack_npop(ostack, 2);
 }
 
 void
@@ -3819,10 +3874,8 @@ systemdict_test(cw_stilo_t *a_thread)
 void
 systemdict_thread(cw_stilo_t *a_thread)
 {
-	cw_stilo_t	*ostack, *tstack;
-	cw_stilo_t	*stack, *testack, *tostack, *ttstack;
+	cw_stilo_t	*ostack, *tstack, *stack;
 	cw_stilo_t	*entry, *thread, *stilo;
-	cw_uint32_t	i, count;
 
 	ostack = stilo_thread_ostack_get(a_thread);
 	tstack = stilo_thread_tstack_get(a_thread);
@@ -3839,27 +3892,11 @@ systemdict_thread(cw_stilo_t *a_thread)
 	stilo_thread_new(thread, stilo_thread_stil_get(a_thread));
 
 	/* Set up the new thread's estack. */
-	testack = stilo_thread_estack_get(thread);
-	stilo = stilo_stack_push(testack);
+	stilo = stilo_stack_push(stilo_thread_estack_get(thread));
 	stilo_dup(stilo, entry);
 
-	/*
-	 * Set up the new thread's ostack.
-	 */
-	tostack = stilo_thread_ostack_get(thread);
-	ttstack = stilo_thread_tstack_get(thread);
-	/* Move stack objects to new thread's tstack. */
-	for (i = 0, count = stilo_stack_count(stack); i < count; i++) {
-		stilo = stilo_stack_push(ttstack);
-		stilo_dup(stilo, stilo_stack_get(stack));
-		stilo_stack_pop(stack);
-	}
-	/* Move objects from new thread's tstack to ostack. */
-	for (i = 0; i < count; i++) {
-		stilo = stilo_stack_push(tostack);
-		stilo_dup(stilo, stilo_stack_get(ttstack));
-		stilo_stack_pop(ttstack);
-	}
+	/* Set up the new thread's ostack. */
+	stilo_stack_copy(stilo_thread_ostack_get(thread), stack);
 
 	/* Clean up. */
 	stilo_stack_npop(ostack, 2);

@@ -139,67 +139,74 @@ stiloe_l_string_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t a_reset)
 void
 stilo_l_string_print(cw_stilo_t *a_thread)
 {
-#if (0)
-	cw_stilo_threade_t	retval;
+	cw_stilo_t		*ostack, *depth, *string, *stdout_stilo;
+	cw_stilo_threade_t	error;
 	cw_uint8_t		*str;
 	cw_sint32_t		len;
 	cw_uint32_t		i;
 
-	str = stilo_string_get(a_stilo);
-	len = stilo_string_len_get(a_stilo);
+	ostack = stilo_thread_ostack_get(a_thread);
+	STILO_STACK_GET(depth, ostack, a_thread);
+	STILO_STACK_DOWN_GET(string, ostack, a_thread, depth);
+	if (stilo_type_get(depth) != STILOT_INTEGER || stilo_type_get(string)
+	    != STILOT_STRING) {
+		stilo_thread_error(a_thread, STILO_THREADE_TYPECHECK);
+		return;
+	}
+	stdout_stilo = stil_stdout_get(stilo_thread_stil_get(a_thread));
 
-	stilo_file_output(a_file, "`");
-	stilo_string_lock(a_stilo);
+	str = stilo_string_get(string);
+	len = stilo_string_len_get(string);
+
+	stilo_file_output(stdout_stilo, "`");
 	for (i = 0; i < len; i++) {
 		switch (str[i]) {
 		case '\n':
-			retval = stilo_file_output(a_file, "\\n");
+			error = stilo_file_output(stdout_stilo, "\\n");
 			break;
 		case '\r':
-			retval = stilo_file_output(a_file, "\\r");
+			error = stilo_file_output(stdout_stilo, "\\r");
 			break;
 		case '\t':
-			retval = stilo_file_output(a_file, "\\t");
+			error = stilo_file_output(stdout_stilo, "\\t");
 			break;
 		case '\b':
-			retval = stilo_file_output(a_file, "\\b");
+			error = stilo_file_output(stdout_stilo, "\\b");
 			break;
 		case '\f':
-			retval = stilo_file_output(a_file, "\\f");
+			error = stilo_file_output(stdout_stilo, "\\f");
 			break;
 		case '\\':
-			retval = stilo_file_output(a_file, "\\\\");
+			error = stilo_file_output(stdout_stilo, "\\\\");
 			break;
 		case '`':
-			retval = stilo_file_output(a_file, "\\`");
+			error = stilo_file_output(stdout_stilo, "\\`");
 			break;
 		case '\'':
-			retval = stilo_file_output(a_file, "\\'");
+			error = stilo_file_output(stdout_stilo, "\\'");
 			break;
 		default:
 			if (isprint(str[i]))
-				retval = stilo_file_output(a_file, "[c]",
+				error = stilo_file_output(stdout_stilo, "[c]",
 				    str[i]);
 			else {
-				retval = stilo_file_output(a_file,
+				error = stilo_file_output(stdout_stilo,
 				    "\\x[i|b:16|w:2|p:0]", str[i]);
 			}
 			break;
 		}
-		if (retval) {
-			stilo_string_unlock(a_stilo);
-			goto RETURN;
+		if (error) {
+			stilo_thread_error(a_thread, error);
+			return;
 		}
 	}
-	stilo_string_unlock(a_stilo);
-	retval = stilo_file_output(a_file, "'");
-	if (retval)
-		goto RETURN;
+	error = stilo_file_output(stdout_stilo, "'");
+	if (error) {
+		stilo_thread_error(a_thread, error);
+		return;
+	}
 
-	retval = STILO_THREADE_NONE;
-	RETURN:
-	return retval;
-#endif
+	stilo_stack_npop(ostack, 2);
 }
 
 void
