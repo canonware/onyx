@@ -35,7 +35,7 @@ typedef struct
   cw_thd_t send_thd;
   cw_thd_t recv_thd;
   cw_mtx_t lock;
-  volatile cw_bool_t should_quit;
+  cw_bool_t should_quit;
   cw_log_t * log;
   cw_sock_t client_sock;
   cw_sock_t remote_sock;
@@ -46,7 +46,7 @@ typedef struct
   cw_bool_t is_verbose;
 } connection_t;
 
-volatile cw_bool_t should_quit = FALSE;
+cw_bool_t should_quit = FALSE;
 
 /* Function prototypes. */
 void *
@@ -87,7 +87,7 @@ main(int argc, char ** argv)
   char * opt_rhost = NULL, * opt_dirname = NULL;
 
   libstash_init();
-  dbg_register(cw_g_dbg, "mem_verbose");
+  dbg_register(cw_g_dbg, "mem_error");
   dbg_register(cw_g_dbg, "prog_error");
   dbg_register(cw_g_dbg, "sockb_error");
   dbg_register(cw_g_dbg, "socks_error");
@@ -112,6 +112,7 @@ main(int argc, char ** argv)
       {
 	opt_verbose = TRUE;
 	dbg_register(cw_g_dbg, "prog_verbose");
+	dbg_register(cw_g_dbg, "mem_verbose");
 	dbg_register(cw_g_dbg, "sockb_verbose");
 	dbg_register(cw_g_dbg, "socks_verbose");
 	/* Nothing uses this flag. */
@@ -122,6 +123,7 @@ main(int argc, char ** argv)
       {
 	opt_quiet = TRUE;
 	dbg_unregister(cw_g_dbg, "prog_error");
+	dbg_unregister(cw_g_dbg, "mem_error");
 	dbg_unregister(cw_g_dbg, "sockb_error");
 	dbg_unregister(cw_g_dbg, "socks_error");
 	dbg_unregister(cw_g_dbg, "sock_error");
@@ -347,8 +349,11 @@ sig_handler(void * a_arg)
   {
     _cw_error("sigwait() error");
   }
-  log_eprintf(cw_g_log, NULL, 0, __FUNCTION__, "Caught signal\n");
-
+  if (dbg_is_registered(cw_g_dbg, "prog_verbose"))
+  {
+    log_eprintf(cw_g_log, NULL, 0, __FUNCTION__, "Caught signal\n");
+  }
+  
   should_quit = TRUE;
 
   return NULL;
@@ -892,7 +897,7 @@ handle_client_send(void * a_arg)
 /*    cw_bool_t parse_error = TRUE; */
 
   log_printf(conn->log, "New connection\n");
-
+  
   buf_new(&buf, FALSE);
 
   /* Finish initializing conn. */
