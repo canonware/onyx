@@ -112,8 +112,8 @@ ch_insert(cw_ch_t *a_ch, const void *a_key, const void *a_data, cw_chi_t
 	}
 	chi->key = a_key;
 	chi->data = a_data;
-	qr_init(chi, ch_link);
-	qr_init(chi, slot_link);
+	qr_new(chi, ch_link);
+	qr_new(chi, slot_link);
 	slot = a_ch->hash(a_key) % a_ch->table_size;
 	chi->slot = slot;
 
