@@ -34,7 +34,17 @@ struct cw_systemdict_entry {
 	cw_op_t		*op_f;
 };
 
+/*
+ * If inlines are being used, we don't actually need pointers to the operator
+ * functions, since they'll never be used (other than that they would make
+ * operator comparison easier.  Therefore, use NULL pointers to allow the
+ * operator functions to be stripped.
+*/
+#ifdef _CW_USE_INLINES
+#define ENTRY(name)	{NXN_##name, NULL}
+#else
 #define ENTRY(name)	{NXN_##name, systemdict_##name}
+#endif
 
 /*
  * Array of fast operators in systemdict.  This operators must have
@@ -48,6 +58,9 @@ static const struct cw_systemdict_entry systemdict_fastops[] = {
 	ENTRY(pop),
 	ENTRY(roll)
 };
+
+#undef ENTRY
+#define ENTRY(name)	{NXN_##name, systemdict_##name}
 
 /*
  * Array of operators in systemdict.
