@@ -91,6 +91,9 @@ interactive_run(int argc, char **argv, char **envp)
 	 *
 	 * Quit on estackoverflow in order to avoid an infinite loop.
 	 *
+	 * Define promptstring in systemdict:
+	 *   - promptstring <string>
+	 *
 	 * Print the product and version info.
 	 *
 	 * Push an executable stdin on ostack to prepare for the start operator.
@@ -101,6 +104,11 @@ currenterror begin
 	/stop {
 		stdin cvx stopped pop
 	} def
+end
+systemdict begin
+/promptstring {
+	count cvs `onyx:' exch catenate `> ' catenate
+} bind def
 end
 errordict begin
 	/estackoverflow {

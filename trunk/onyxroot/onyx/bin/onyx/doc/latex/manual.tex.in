@@ -50,11 +50,13 @@ stdin file in a stopped context in order to keep the interpreter from exiting on
 error.  It is possible (though generally unlikely) for buffering of stdin to
 cause strange things to occur; any additional program execution after an error
 is a result of this.}
-\item{The name resume is defined in the initial thread's userdict as an alias
-to the stop operator.  Thus, when an error occurs, when the user is ready to
-continue running after addressing any issues the error caused, resume can be
+\item{The name ``resume'' is defined in the initial thread's userdict as an
+alias to the stop operator.  Thus, when an error occurs, when the user is ready
+to continue running after addressing any issues the error caused, resume can be
 called as a more intuitive name for resuming.}
 \item{The estackoverflow operator in errordict is redefined to call the quit
 operator in order to avoid infinite recursion in the error handling machinery.
 The need for this is a result of not exiting on error.}
+\item{The name ``promptstring'' is defined in systemdict; it takes no arguments
+and returns a string.  The return string is used as the interactive prompt.}
 \end{itemize}

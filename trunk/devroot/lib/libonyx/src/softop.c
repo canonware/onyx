@@ -22,8 +22,6 @@ nx_p_soft_init(cw_nx_t *a_nx)
 {counttomark dup 0 eq {pop errordict begin unmatchedmark end} {-1 roll load {counttomark dup 1 le {pop exit} if -1 roll get} loop exch pop eval} ifelse}
 /monitor
 {1 index type /mutextype ne {errordict begin typecheck end} if 1 index lock eval unlock}
-/promptstring
-{count cvs `onyx:' exch catenate `> ' catenate}
 /product
 {`Canonware onyx'}
 /pstack
@@ -34,7 +32,7 @@ nx_p_soft_init(cw_nx_t *a_nx)
 {fork dup 0 eq {errordict begin /handleerror {quit} def end pop exec} {exch pop waitpid} ifelse}
 /version
 {`<Version>'}
-systemdict begin 9 {bind def} repeat end"
+systemdict begin 8 {bind def} repeat end"
 	);
 	nxo_thread_exit(&thread);
 }

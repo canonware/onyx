@@ -1203,8 +1203,16 @@ nxo_file_position_get(cw_nxo_t *a_nxo)
 
 	if (file->fd == -2)
 		retval = file->position;
-	else
+	else {
+		/*
+		 * Flush the file in case there are buffered data that have yet
+		 * to be written.
+		 */
+		retval = nxo_p_file_buffer_flush(a_nxo);
+		if (retval)
+			goto RETURN;
 		retval = lseek(file->fd, 0, SEEK_CUR);
+	}
 
 	RETURN:
 	nxoe_p_file_unlock(file);
