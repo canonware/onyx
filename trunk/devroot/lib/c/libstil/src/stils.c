@@ -154,10 +154,9 @@ stils_push(cw_stils_t *a_stils)
 	return &stilso->stilo;
 }
 
-cw_bool_t
+void
 stils_pop(cw_stils_t *a_stils, cw_stilt_t *a_stilt, cw_uint32_t a_count)
 {
-	cw_bool_t	retval;
 	cw_stilso_t	*stilso;
 	cw_uint32_t	i;
 
@@ -165,10 +164,8 @@ stils_pop(cw_stils_t *a_stils, cw_stilt_t *a_stilt, cw_uint32_t a_count)
 	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
 	_cw_assert(a_count > 0);
 	
-	if (a_count > a_stils->count) {
-		retval = TRUE;
-		goto RETURN;
-	}
+	if (a_count > a_stils->count)
+		xep_throw(_CW_XEPV_STACKUNDERFLOW);
 
 	/*
 	 * Get a pointer to what will be the new stack top, and delete the
@@ -194,26 +191,21 @@ stils_pop(cw_stils_t *a_stils, cw_stilt_t *a_stilt, cw_uint32_t a_count)
 
 	a_stils->stack = stilso;
 	a_stils->count -= a_count;
-
-	retval = FALSE;
-	RETURN:
-	return retval;
 }
 
-cw_bool_t
+void
 stils_roll(cw_stils_t *a_stils, cw_uint32_t a_count, cw_sint32_t a_amount)
 {
-	cw_bool_t	retval;
 	cw_stilso_t	*stilso, *top;
 	cw_uint32_t	i;
 
 	_cw_check_ptr(a_stils);
 	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
 
-	if ((a_count < 1) || (a_count > a_stils->count)) {
-		retval = TRUE;
-		goto RETURN;
-	}
+	if (a_count < 1)
+		xep_throw(_CW_XEPV_RANGECHECK);
+	if (a_count > a_stils->count)
+		xep_throw(_CW_XEPV_STACKUNDERFLOW);
 
 	/*
 	 * Calculate the current index of the element that will end up on top of
@@ -235,8 +227,7 @@ stils_roll(cw_stils_t *a_stils, cw_uint32_t a_count, cw_sint32_t a_amount)
 	 * amount is an even multiple of the roll region.
 	 */
 	if (a_amount == 0) {
-		/* Noop.  Return success. */
-		retval = FALSE;
+		/* Noop. */
 		goto RETURN;
 	}
 
@@ -262,9 +253,7 @@ stils_roll(cw_stils_t *a_stils, cw_uint32_t a_count, cw_sint32_t a_amount)
 
 	a_stils->stack = top;
 
-	retval = FALSE;
 	RETURN:
-	return retval;
 }
 
 cw_uint32_t
@@ -285,15 +274,12 @@ stils_get(cw_stils_t *a_stils, cw_uint32_t a_index)
 	_cw_check_ptr(a_stils);
 	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
 
-	if (a_index >= a_stils->count) {
-		stilso = NULL;
-		goto RETURN;
-	}
+	if (a_index >= a_stils->count)
+		xep_throw(_CW_XEPV_STACKUNDERFLOW);
 
 	for (i = 0, stilso = a_stils->stack; i < a_index; i++)
 		stilso = qr_next(stilso, link);
 
-	RETURN:
 	return &stilso->stilo;
 }
 
