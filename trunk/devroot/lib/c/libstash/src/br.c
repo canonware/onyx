@@ -7,13 +7,83 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 91 $
- * $Date: 1998-06-24 23:46:00 -0700 (Wed, 24 Jun 1998) $
+ * $Revision: 93 $
+ * $Date: 1998-06-26 01:34:33 -0700 (Fri, 26 Jun 1998) $
  *
  * <<< Description >>>
  *
- * Block repository implementation.
+ * Block repository (br) implementation.  The br consists of four distinct
+ * sections, which are spread across multiple files.  Logically, the br
+ * looks like:
  *
+ * /----------------------------------\
+ * |                                  |
+ * | config space (cs)                |
+ * |                                  |
+ * |----------------------------------| 0x0000000000000000
+ * |                                  |
+ * | v_addr lookup table (vlt)        |
+ * |                                  |
+ * |                                  |
+ * |----------------------------------| (2^64 / (8 * page_size + 1)) 
+ * |                                  | div page_size
+ * | data blocks (pdb)                |
+ * |                                  |
+ * |                                  |
+ * |                                  |
+ * |                                  |
+ * |                                  |
+ * |                                  |
+ * |                                  |
+ * |----------------------------------|
+ * |                                  |
+ * | v_addr lookup table cache (vltc) |
+ * |                                  |
+ * \----------------------------------/ 0xffffffffffffffff
+ *
+ * However, the config space is actually a separate file, and the remainder
+ * of the br is composed of one or more plain files and raw devices.  These
+ * sections are mapped into a unified address space.  That is, files and
+ * devices are mapped into an address space that the br sits on top of.  It
+ * is possible to have unmapped holes in the br_addr space, but mappings
+ * never overlap.
+ *
+ * In order to prevent having to shuffle sections around to allow expansion
+ * and contraction, the sections are set at fixed br_addr's during creation
+ * of the repository.  The vltc starts at the top of the address space
+ * (0xffffffffffffffff) and grows downward.  Since we know in advance the
+ * following:
+ *
+ *       (vlt + pdb + vltc) <= 2^64 bytes
+ *                     vltc >= 0 bytes
+ *              sizeof(vlt) == (sizeof(pdb) / page_size) / 8
+ *
+ * we can calculate the base address of pdb:
+ *
+ *       base_addr(pdb) == sizeof(vlt) == (2^64 / (8 * page_size + 1))
+ *                                        div page_size
+ *
+ * and
+ *
+ *       sizeof(pdb) == ((2^64 * 8 * page_size) / (8 * page_size + 1))
+ *                      div page_size
+ *
+ * So, assuming a page size of 8kB:
+ *
+ *   base_addr(pdb) == 281470681800704 == FFFF0000E000
+ *   sizeof(pdb) == 18446462603027742720 == 0xffff0000ffff0000
+ *
+ ****************************************************************************
+ *
+ * This hard coding of section offsets if all fine and good, except that
+ * there are some pretty definite holes in the address space.  Since we
+ * want the option of using a single backing store (bs) (file or raw
+ * device) for all three sections, there needs to be a way of mapping
+ * chunks of a bs to separate address ranges.
+ *
+ * So, that is what br does.  Each backing store is mapped to one or more
+ * br_addr ranges.
+ * 
  ****************************************************************************/
 
 #define _INC_BR_H_
@@ -28,7 +98,7 @@
  *
  ****************************************************************************/
 cw_br_t *
-br_new(cw_br_t * a_br_o, cw_bool_t a_is_thread_safe)
+br_new(cw_br_t * a_br_o)
 {
   cw_br_t * retval;
   
@@ -48,15 +118,11 @@ br_new(cw_br_t * a_br_o, cw_bool_t a_is_thread_safe)
     retval->is_malloced = FALSE;
   }
 
-  if (a_is_thread_safe)
-  {
-    retval->is_thread_safe = TRUE;
-    rwl_new(&retval->rw_lock);
-  }
-  else
-  {
-    retval->is_thread_safe = FALSE;
-  }
+  rwl_new(&retval->rw_lock);
+
+  /* Initialize member variables. */
+  retval-> is_open = FALSE;
+  
   
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
   {
@@ -80,11 +146,17 @@ br_delete(cw_br_t * a_br_o)
   }
   _cw_check_ptr(a_br_o);
 
-  if (a_br_o->is_thread_safe)
+  if (a_br_o->is_open)
   {
-    rwl_delete(&a_br_o->rw_lock);
+    if (br_close(a_br_o))
+    {
+      log_leprintf(g_log_o, __FILE__, __LINE__, "br_delete",
+		   "Error in br_close()\n");
+    }
   }
 
+  rwl_delete(&a_br_o->rw_lock);
+  
   if (a_br_o->is_malloced)
   {
     _cw_free(a_br_o);
@@ -113,17 +185,11 @@ br_is_open(cw_br_t * a_br_o)
     _cw_marker("Enter br_is_open()");
   }
   _cw_check_ptr(a_br_o);
-  if (a_br_o->is_thread_safe)
-  {
-    rwl_rlock(&a_br_o->rw_lock);
-  }
+  rwl_rlock(&a_br_o->rw_lock);
 
   retval = a_br_o->is_open;
   
-  if (a_br_o->is_thread_safe)
-  {
-    rwl_runlock(&a_br_o->rw_lock);
-  }
+  rwl_runlock(&a_br_o->rw_lock);
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
   {
     _cw_marker("Exit br_is_open()");
@@ -134,7 +200,7 @@ br_is_open(cw_br_t * a_br_o)
 /****************************************************************************
  * <<< Description >>>
  *
- * Opens the backing store for a br instance.  The main file in the
+ * Opens the backing store for a br instance.  The config file for the
  * repository must be a plain file.
  *
  ****************************************************************************/
@@ -146,10 +212,7 @@ br_open(cw_br_t * a_br_o, char * a_filename)
     _cw_marker("Enter br_open()");
   }
   _cw_check_ptr(a_br_o);
-  if (a_br_o->is_thread_safe)
-  {
-    rwl_wlock(&a_br_o->rw_lock);
-  }
+  rwl_wlock(&a_br_o->rw_lock);
 
   /* Open a_filename. */
   /* Get size of config space. */
@@ -157,10 +220,7 @@ br_open(cw_br_t * a_br_o, char * a_filename)
   /* Create and initialize internal data structures. */
   
   
-  if (a_br_o->is_thread_safe)
-  {
-    rwl_wunlock(&a_br_o->rw_lock);
-  }
+  rwl_wunlock(&a_br_o->rw_lock);
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
   {
     _cw_marker("Exit br_open()");
@@ -183,17 +243,11 @@ br_close(cw_br_t * a_br_o)
     _cw_marker("Enter br_close()");
   }
   _cw_check_ptr(a_br_o);
-  if (a_br_o->is_thread_safe)
-  {
-    rwl_wlock(&a_br_o->rw_lock);
-  }
+  rwl_wlock(&a_br_o->rw_lock);
   
 
   
-  if (a_br_o->is_thread_safe)
-  {
-    rwl_wunlock(&a_br_o->rw_lock);
-  }
+  rwl_wunlock(&a_br_o->rw_lock);
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
   {
     _cw_marker("Exit br_close()");
@@ -215,17 +269,11 @@ br_get_block_size(cw_br_t * a_br_o)
     _cw_marker("Enter br_get_block_size()");
   }
   _cw_check_ptr(a_br_o);
-  if (a_br_o->is_thread_safe)
-  {
-    rwl_rlock(&a_br_o->rw_lock);
-  }
+  rwl_rlock(&a_br_o->rw_lock);
   
 
   
-  if (a_br_o->is_thread_safe)
-  {
-    rwl_runlock(&a_br_o->rw_lock);
-  }
+  rwl_runlock(&a_br_o->rw_lock);
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
   {
     _cw_marker("Exit br_get_block_size()");
@@ -250,17 +298,11 @@ br_add_file(cw_br_t * a_br_o, char * a_filename,
     _cw_marker("Enter br_add_file()");
   }
   _cw_check_ptr(a_br_o);
-  if (a_br_o->is_thread_safe)
-  {
-    rwl_wlock(&a_br_o->rw_lock);
-  }
+  rwl_wlock(&a_br_o->rw_lock);
   
 
   
-  if (a_br_o->is_thread_safe)
-  {
-    rwl_wunlock(&a_br_o->rw_lock);
-  }
+  rwl_wunlock(&a_br_o->rw_lock);
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
   {
     _cw_marker("Exit br_add_file()");
@@ -284,17 +326,11 @@ br_rm_file(cw_br_t * a_br_o, char * a_filename)
     _cw_marker("Enter br_rm_file()");
   }
   _cw_check_ptr(a_br_o);
-  if (a_br_o->is_thread_safe)
-  {
-    rwl_wlock(&a_br_o->rw_lock);
-  }
+  rwl_wlock(&a_br_o->rw_lock);
   
 
   
-  if (a_br_o->is_thread_safe)
-  {
-    rwl_wunlock(&a_br_o->rw_lock);
-  }
+  rwl_wunlock(&a_br_o->rw_lock);
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
   {
     _cw_marker("Exit br_rm_file()");
@@ -316,17 +352,11 @@ br_block_create(cw_br_t * a_br_o, cw_brblk_t ** a_brblk_o)
     _cw_marker("Enter br_block_destroy()");
   }
   _cw_check_ptr(a_br_o);
-  if (a_br_o->is_thread_safe)
-  {
-    rwl_rlock(&a_br_o->rw_lock);
-  }
+  rwl_rlock(&a_br_o->rw_lock);
   
 
   
-  if (a_br_o->is_thread_safe)
-  {
-    rwl_runlock(&a_br_o->rw_lock);
-  }
+  rwl_runlock(&a_br_o->rw_lock);
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
   {
     _cw_marker("Exit br_block_destroy()");
@@ -349,17 +379,11 @@ br_block_destroy(cw_br_t * a_br_o, cw_brblk_t * a_brblk_o)
     _cw_marker("Enter br_block_destroy()");
   }
   _cw_check_ptr(a_br_o);
-  if (a_br_o->is_thread_safe)
-  {
-    rwl_rlock(&a_br_o->rw_lock);
-  }
+  rwl_rlock(&a_br_o->rw_lock);
   
 
   
-  if (a_br_o->is_thread_safe)
-  {
-    rwl_runlock(&a_br_o->rw_lock);
-  }
+  rwl_runlock(&a_br_o->rw_lock);
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
   {
     _cw_marker("Exit br_block_destroy()");
@@ -383,17 +407,11 @@ br_block_slock(cw_br_t * a_br_o,
     _cw_marker("Enter br_block_slock()");
   }
   _cw_check_ptr(a_br_o);
-  if (a_br_o->is_thread_safe)
-  {
-    rwl_rlock(&a_br_o->rw_lock);
-  }
+  rwl_rlock(&a_br_o->rw_lock);
   
 
   
-  if (a_br_o->is_thread_safe)
-  {
-    rwl_runlock(&a_br_o->rw_lock);
-  }
+  rwl_runlock(&a_br_o->rw_lock);
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
   {
     _cw_marker("Exit br_block_slock()");
@@ -417,17 +435,11 @@ br_block_tlock(cw_br_t * a_br_o,
     _cw_marker("Enter br_block_tlock()");
   }
   _cw_check_ptr(a_br_o);
-  if (a_br_o->is_thread_safe)
-  {
-    rwl_rlock(&a_br_o->rw_lock);
-  }
+  rwl_rlock(&a_br_o->rw_lock);
   
 
   
-  if (a_br_o->is_thread_safe)
-  {
-    rwl_runlock(&a_br_o->rw_lock);
-  }
+  rwl_runlock(&a_br_o->rw_lock);
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
   {
     _cw_marker("Exit br_block_tlock()");

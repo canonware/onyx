@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 91 $
- * $Date: 1998-06-24 23:46:00 -0700 (Wed, 24 Jun 1998) $
+ * $Revision: 93 $
+ * $Date: 1998-06-26 01:34:33 -0700 (Fri, 26 Jun 1998) $
  *
  * <<< Description >>>
  *
@@ -25,9 +25,10 @@ typedef struct cw_br_s cw_br_t;
 struct cw_br_s
 {
   cw_bool_t is_malloced;
-  cw_bool_t is_thread_safe;
   cw_rwl_t rw_lock;
   cw_bool_t is_open;
+
+  
 };
 
 /* Namespace definitions for br. */
@@ -45,8 +46,10 @@ struct cw_br_s
 #define br_block_tlock _CW_NS_CMN(br_block_tlock)
 
 /* Function prototypes. */
-cw_br_t * br_new(cw_br_t * a_br_o, cw_bool_t a_is_thread_safe);
+cw_br_t * br_new(cw_br_t * a_br_o);
 void br_delete(cw_br_t * a_br_o);
+
+void br_dump(cw_br_t * a_br_o);
 
 cw_bool_t br_is_open(cw_br_t * a_br_o);
 
@@ -55,11 +58,11 @@ cw_bool_t br_close(cw_br_t * a_br_o);
 
 cw_uint64_t br_get_block_size(cw_br_t * a_br_o);
 
-cw_bool_t br_add_file(cw_br_t * a_br_o, char * a_filename,
-		      cw_bool_t a_is_raw, cw_bool_t a_can_overlap,
-		      cw_bool_t a_is_dynamic,
-		      cw_uint64_t a_base_addr, cw_uint64_t a_max_size);
-cw_bool_t br_rm_file(cw_br_t * a_br_o, char * a_filename);
+cw_bool_t br_add_brbs(cw_br_t * a_br_o, cw_brbs_t * a_brbs_t,
+		      cw_uint64_t a_vltc_size);
+cw_bool_t br_get_brbs_p(cw_br_t * a_br_o, char * a_filename,
+			cw_brbs_t ** a_brbs_o);
+cw_bool_t br_rm_brbs(cw_br_t * a_br_o, char * a_filename);
 
 /* XXX Should br_block_create() imply some sort of lock is held?  Since the 
  * block didn't exist in a valid state until this function returned, no one 
