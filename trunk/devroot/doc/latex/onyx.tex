@@ -4569,19 +4569,46 @@ onyx:0>
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[array: ]
+			An array object.
+		\item[dict: ]
+			A dict object.
+		\item[string: ]
+			A string object.
+		\item[index: ] Offset of \oparg{array} element or \oparg{string}
+		element.
+		\item[key: ]
+			A key in \oparg{dict}.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[object: ]
+			The object in \oparg{array} at offset \oparg{index}.
+		\item[value: ]
+			The value in \oparg{dict} corresponding to \oparg{key}.
+		\item[integer: ]
+			The ascii value of the character in \oparg{string} at
+			offset \oparg{index}.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{undefined}{undefined}.]
 		\end{description}
 	\item[Description: ]
+		Get an element of \oparg{array}, a value in \oparg{dict}, or an
+		element of \oparg{string}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> [`a' `b' `c'] 1 get 1 sprint
+`b'
+onyx:0> </foo `foo' /bar `bar'> /bar get 1 sprint
+`bar'
+onyx:0> `abc' 1 get 1 sprint
+98
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:getinterval}

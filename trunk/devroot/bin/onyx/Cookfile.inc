@@ -76,7 +76,9 @@ SRCS = [SRCS] [ONYX_SRCS];
                  for_b.nx.in for_c.nx.in for_d.nx.in for_e.nx.in foreach_a.nx.in
                  foreach_b.nx.in foreach_c.nx.in gc_roll.nx.in ge_a.nx.in
                  ge_b.nx.in ge_c.nx.in ge_d.nx.in ge_e.nx.in ge_f.nx.in
-                 ge_g.nx.in ge_h.nx.in gt_a.nx.in gt_b.nx.in gt_c.nx.in
+                 ge_g.nx.in ge_h.nx.in get_a.nx.in get_b.nx.in get_c.nx.in
+                 get_d.nx.in get_e.nx.in get_f.nx.in get_g.nx.in gt_a.nx.in
+                 gt_b.nx.in gt_c.nx.in
                  gt_d.nx.in gt_e.nx.in gt_f.nx.in gt_g.nx.in gt_h.nx.in
                  hello.nx.in if_a.nx.in if_b.nx.in if_c.nx.in ifelse_a.nx.in
                  ifelse_b.nx.in ifelse_c.nx.in immediate_a.nx.in
