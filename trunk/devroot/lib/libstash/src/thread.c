@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 213 $
- * $Date: 1998-09-08 20:22:29 -0700 (Tue, 08 Sep 1998) $
+ * $Revision: 234 $
+ * $Date: 1998-10-13 09:57:27 -0700 (Tue, 13 Oct 1998) $
  *
  * <<< Description >>>
  * 
@@ -32,6 +32,7 @@
 #include <libstash.h>
 
 #include <string.h>
+#include <errno.h>
 
 cw_thd_t *
 thd_new(cw_thd_t * a_thd_o,
