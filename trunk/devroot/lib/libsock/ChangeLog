@@ -1,3 +1,7 @@
+1999-09-06  Jason Evans  <jasone@canonware.com>
+
+	* bin/proxy.c : Add the -f flag and support hex and ascii logging.
+
 1999-08-25  Jason Evans  <jasone@canonware.com>
 
 	* : Completely get rid of select() usage.

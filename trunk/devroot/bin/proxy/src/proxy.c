@@ -30,6 +30,11 @@ struct handler_s
   cw_thd_t sig_thd;
 };
 
+typedef enum
+{
+  PRETTY, HEX, ASCII
+} format_t;
+
 typedef struct
 {
   cw_thd_t send_thd;
@@ -44,6 +49,7 @@ typedef struct
   int rport;
 
   cw_bool_t is_verbose;
+  format_t format;
 } connection_t;
 
 cw_bool_t should_quit = FALSE;
@@ -52,7 +58,11 @@ cw_bool_t should_quit = FALSE;
 void *
 sig_handler(void * a_arg);
 char *
-get_out_str(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str);
+get_out_str_pretty(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str);
+char *
+get_out_str_hex(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str);
+char *
+get_out_str_ascii(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str);
 void *
 handle_client_send(void * a_arg);
 void *
@@ -79,6 +89,7 @@ main(int argc, char ** argv)
   int c;
   cw_bool_t cl_error = FALSE, opt_help = FALSE, opt_version = FALSE;
   cw_bool_t opt_verbose = FALSE, opt_quiet = FALSE, opt_log = FALSE;
+  format_t opt_format = PRETTY;
   int opt_port = 0, opt_rport = 0;
   char * opt_rhost = NULL, * opt_dirname = NULL;
 
@@ -92,7 +103,7 @@ main(int argc, char ** argv)
 /*    dbg_register(cw_g_dbg, "pezz_verbose"); */
 
   /* Parse command line. */
-  while (-1 != (c = getopt(argc, argv, "hVvqp:r:ld:")))
+  while (-1 != (c = getopt(argc, argv, "hVvqp:r:lf:d:")))
   {
     switch (c)
     {
@@ -151,6 +162,34 @@ main(int argc, char ** argv)
 	  opt_rport = strtoul(colon + 1, NULL, 10);
 	}
 	
+	break;
+      }
+      case 'f':
+      {
+	switch (*optarg)
+	{
+	  case 'p':
+	  {
+	    opt_format = PRETTY;
+	    break;
+	  }
+	  case 'h':
+	  {
+	    opt_format = HEX;
+	    break;
+	  }
+	  case 'a':
+	  {
+	    opt_format = ASCII;
+	    break;
+	  }
+	  default:
+	  {
+	    cl_error = TRUE;
+	    break;
+	  }
+	}
+	    
 	break;
       }
       case 'l':
@@ -327,6 +366,7 @@ main(int argc, char ** argv)
       {
 	conn->is_verbose = TRUE;
       }
+      conn->format = opt_format;
       	    
       thd_new(&conn->send_thd, handle_client_send, (void *) conn);
     }
@@ -365,7 +405,7 @@ sig_handler(void * a_arg)
 }
 
 char *
-get_out_str(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str)
+get_out_str_pretty(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str)
 {
   char * retval;
   char c_trans[4], line_a[81], line_b[81],
@@ -373,8 +413,6 @@ get_out_str(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str)
     = "         |                 |                 |                 |\n";
   cw_uint32_t str_len, buf_size, i, j;
   cw_uint8_t c;
-
-/*    buf_new(&t_buf, NULL); */
 
   buf_size = buf_get_size(a_buf);
 
@@ -873,6 +911,151 @@ get_out_str(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str)
   return retval;
 }
 
+char *
+get_out_str_hex(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str)
+{
+  char * retval, * t_str, * p;
+  cw_uint32_t str_len, buf_size, i;
+
+  buf_size = buf_get_size(a_buf);
+  
+  /* Calculate the total size of the output. */
+  str_len = (81 /* First dashed line. */
+	     + 35 /* Header. */
+	     + (buf_size * 3) /* Hex dump. */
+	     + 1 /* Newline. */
+	     + 81 /* Last dashed line. */
+	     );
+
+  if (NULL == a_str)
+  {
+    /* Allocate for the first time. */
+    retval = _cw_malloc(str_len);
+    if (NULL == retval)
+    {
+      out_put(cw_g_out, "malloc() error\n");
+      exit(1);
+    }
+  }
+  else
+  {
+    /* Re-use a_str. */
+    retval = _cw_realloc(a_str, str_len);
+    if (NULL == retval)
+    {
+      out_put(cw_g_out, "malloc() error\n");
+      exit(1);
+    }
+  }
+  /* Clear the string. */
+  retval[0] = '\0';
+  p = retval;
+
+  /* First dashed line. */
+  t_str =
+    "----------------------------------------"
+    "----------------------------------------\n";
+  strcpy(p, t_str);
+  p += strlen(t_str);
+  
+  /* Header. */
+  p += out_put_s(cw_g_out, p, "[s]:0x[i|b:16] ([i]) byte[s]\n",
+		 (TRUE == is_send) ? "send" : "recv",
+		 buf_size,
+		 buf_size,
+		 (buf_size != 1) ? "s" : "");
+
+  /* Hex dump. */
+  for (i = 0; i < buf_size; i++)
+  {
+    p += out_put_s(cw_g_out, p, "[i|b:16|w:2|p:0] ", buf_get_uint8(a_buf, i));
+  }
+
+  p += out_put_s(cw_g_out, p, "\n");
+  
+  /* Last dashed line. */
+  t_str =
+    "----------------------------------------"
+    "----------------------------------------\n";
+  strcpy(p, t_str);
+/*    p += strlen(t_str); */
+  
+  return retval;
+}
+
+char *
+get_out_str_ascii(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str)
+{
+  char * retval, * t_str, * p;
+  cw_uint32_t str_len, buf_size, i;
+
+  buf_size = buf_get_size(a_buf);
+  
+  /* Calculate the total size of the output. */
+  str_len = (81 /* First dashed line. */
+	     + 35 /* Header. */
+	     + buf_size /* Data. */
+	     + 1 /* Newline. */
+	     + 81 /* Last dashed line. */
+	     );
+
+  if (NULL == a_str)
+  {
+    /* Allocate for the first time. */
+    retval = _cw_malloc(str_len);
+    if (NULL == retval)
+    {
+      out_put(cw_g_out, "malloc() error\n");
+      exit(1);
+    }
+  }
+  else
+  {
+    /* Re-use a_str. */
+    retval = _cw_realloc(a_str, str_len);
+    if (NULL == retval)
+    {
+      out_put(cw_g_out, "malloc() error\n");
+      exit(1);
+    }
+  }
+  /* Clear the string. */
+  retval[0] = '\0';
+  p = retval;
+
+  /* First dashed line. */
+  t_str =
+    "----------------------------------------"
+    "----------------------------------------\n";
+  strcpy(p, t_str);
+  p += strlen(t_str);
+  
+  /* Header. */
+  p += out_put_s(cw_g_out, p, "[s]:0x[i|b:16] ([i]) byte[s]\n",
+		 (TRUE == is_send) ? "send" : "recv",
+		 buf_size,
+		 buf_size,
+		 (buf_size != 1) ? "s" : "");
+
+  /* Data. */
+  for (i = 0; i < buf_size; i++)
+  {
+    *p = buf_get_uint8(a_buf, i);
+    p++;
+  }
+
+  p += out_put_s(cw_g_out, p, "\n");
+  
+  /* Last dashed line. */
+  t_str =
+    "----------------------------------------"
+    "----------------------------------------\n";
+  strcpy(p, t_str);
+/*    p += strlen(t_str); */
+  
+  return retval;
+}
+
 void *
 handle_client_send(void * a_arg)
 {
@@ -938,7 +1121,30 @@ handle_client_send(void * a_arg)
     {
       if (conn->is_verbose)
       {
-	str = get_out_str(&buf, TRUE, str);
+	switch (conn->format)
+	{
+	  case PRETTY:
+	  {
+	    str = get_out_str_pretty(&buf, TRUE, str);
+	    break;
+	  }
+	  case HEX:
+	  {
+	    str = get_out_str_hex(&buf, TRUE, str);
+	    break;
+	  }
+	  case ASCII:
+	  {
+	    str = get_out_str_ascii(&buf, TRUE, str);
+	    break;
+	  }
+	  default:
+	  {
+	    _cw_error("Programming error");
+	    break;
+	  }
+	}
+	
 	out_put(conn->out, "[s]", str);
       }
       
@@ -1016,7 +1222,30 @@ handle_client_recv(void * a_arg)
     {
       if (conn->is_verbose)
       {
-	str = get_out_str(&buf, FALSE, str);
+	switch (conn->format)
+	{
+	  case PRETTY:
+	  {
+	    str = get_out_str_pretty(&buf, TRUE, str);
+	    break;
+	  }
+	  case HEX:
+	  {
+	    str = get_out_str_hex(&buf, TRUE, str);
+	    break;
+	  }
+	  case ASCII:
+	  {
+	    str = get_out_str_ascii(&buf, TRUE, str);
+	    break;
+	  }
+	  default:
+	  {
+	    _cw_error("Programming error");
+	    break;
+	  }
+	}
+	
 	out_put(conn->out, "[s]", str);
       }
       
@@ -1048,7 +1277,7 @@ usage(const char * a_progname)
      "[s] usage:\n"
      "    [s] -h\n"
      "    [s] -V\n"
-     "    [s] [[-v | -q] [[-l | -d <dirpath>] -p <port> -r [[<rhost>:]<rport>\n"
+     "    [s] [[-v | -q] [[-f {p|h|a}] [[-l | -d <dirpath>] -p <port> -r [[<rhost>:]<rport>\n"
      "\n"
      "    Option               | Description\n"
      "    ---------------------+------------------------------------------\n"
@@ -1056,6 +1285,10 @@ usage(const char * a_progname)
      "    -V                   | Print version information and exit.\n"
      "    -v                   | Verbose.\n"
      "    -q                   | Quiet.\n"
+     "    -f <format>          | Data logging format.\n"
+     "                         |   p : Pretty (default).\n"
+     "                         |   h : Hex.\n"
+     "                         |   a : Ascii.\n"
      "    -l                   | Write logs to stderr.\n"
      "    -d <dirpath>         | Write logs to \"<dirpath>/proxy.*\".\n"
      "    -p <port>            | Listen on port <port>.\n"
