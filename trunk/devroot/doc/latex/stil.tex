@@ -398,16 +398,180 @@ collisions in future versions of stil, use at least one character that is not a
 lower case letter in names (for example, capital letters, numbers, underscore,
 etc.).
 
+\subsection{currenterror}
+
 \begin{longtable}{|r|l|l|p{4in}|}
-\caption[Operator summary]{Operator summary by functional group} \\
+\caption[currenterror summary]{currenterror summary by functional group}
+\\
 \hline
-Input(s) & Operator & Output(s) & Description \\
+Input(s) & Op/Proc/Var & Output(s) & Description \\
 \hline \hline
 %begin{latexonly}
 \endfirsthead
 \caption[]{\emph{continued}} \\
 \hline
-Input(s) & Operator & Output(s) & Description \\
+Input(s) & Op/Proc/Var & Output(s) & Description \\
+\hline \hline \endhead
+\hline
+\multicolumn{4}{r}{\emph{Continued on next page...}} \endfoot
+\hline \endlastfoot
+%end{latexonly}
+\multicolumn{4}{|l|}{Control operators} \\
+\hline \hline
+& stop & & \\
+\hline
+& recordstacks & & \\
+\hline \hline
+\multicolumn{4}{|l|}{State operators} \\
+\hline \hline
+& newerror & & \\
+\hline
+& errorname & & \\
+\hline
+& command & & \\
+\hline
+& ostack & & \\
+\hline
+& estack & & \\
+\hline
+& dstack & & \\
+\end{longtable}
+
+\subsection{envdict}
+\subsection{errordict}
+
+\begin{longtable}{|r|l|l|p{4in}|}
+\caption{errordict summary} \\
+\hline
+Input(s) & Op/Proc/Var & Output(s) & Description \\
+\hline \hline
+%begin{latexonly}
+\endfirsthead
+\caption[]{\emph{continued}} \\
+\hline
+Input(s) & Op/Proc/Var & Output(s) & Description \\
+\hline \hline \endhead
+\hline
+\multicolumn{4}{r}{\emph{Continued on next page...}} \endfoot
+\hline \endlastfoot
+%end{latexonly}
+& dstackunderflow & & \\
+\hline
+& estackunderflow & & \\
+\hline
+& handleerror & & \\
+\hline
+& interrupt & & \\
+\hline
+& invalidaccess & & \\
+\hline
+& invalidcontext & & \\
+\hline
+& invalidexit & & \\
+\hline
+& invalidfileaccess & & \\
+\hline
+& ioerror & & \\
+\hline
+& limitcheck & & \\
+\hline
+& rangecheck & & \\
+\hline
+& stackunderflow & & \\
+\hline
+& syntaxerror & & \\
+\hline
+& timeout & & \\
+\hline
+& typecheck & & \\
+\hline
+& undefined & & \\
+\hline
+& undefinedfilename & & \\
+\hline
+& undefinedresult & & \\
+\hline
+& unmatchedmark & & \\
+\hline
+& unregistered & & \\
+\hline
+\end{longtable}
+
+\subsection{gcdict}
+
+\begin{longtable}{|r|l|l|p{4in}|}
+\caption[gcdict summary]{gcdict summary by functional group}
+\\
+\hline
+Input(s) & Op/Proc/Var & Output(s) & Description \\
+\hline \hline
+%begin{latexonly}
+\endfirsthead
+\caption[]{\emph{continued}} \\
+\hline
+Input(s) & Op/Proc/Var & Output(s) & Description \\
+\hline \hline \endhead
+\hline
+\multicolumn{4}{r}{\emph{Continued on next page...}} \endfoot
+\hline \endlastfoot
+%end{latexonly}
+\multicolumn{4}{|l|}{Control operators} \\
+\hline \hline
+& collect & & \\
+\hline
+& setactive & & \\
+\hline
+& setperiod & & \\
+\hline
+& setthreshold & & \\
+\hline
+& dump & & \\
+\hline \hline
+\multicolumn{4}{|l|}{State operators} \\
+\hline \hline
+& active & & \\
+\hline
+& period & & \\
+\hline
+& threshold & & \\
+\hline \hline
+\multicolumn{4}{|l|}{Statistics operators} \\
+\hline \hline
+& collections & & \\
+\hline
+& new & & \\
+\hline
+& current & & \\
+\hline
+& maximum & & \\
+\hline
+& sum & & \\
+\end{longtable}
+
+\subsection{globaldict}
+
+All threads share the same globaldict, which is meant as a repository for
+globally shared objects.  globaldict is empty when the stil interpreter is
+initialized.
+
+\subsection{systemdict}
+
+All threads share the same systemdict, which contains most of the operators that
+are of general use.  Although there are no mechanisms that prevent modification
+of systemdict, programs should not normally need to modify systemdict, since
+globaldict provides a place for storing globally shared objects.
+
+\begin{longtable}{|r|l|l|p{4in}|}
+\caption[systemdict summary]{systemdict summary by functional
+group} \\
+\hline
+Input(s) & Op/Proc/Var & Output(s) & Description \\
+\hline \hline
+%begin{latexonly}
+\endfirsthead
+\caption[]{\emph{continued}} \\
+\hline
+Input(s) & Op/Proc/Var & Output(s) & Description \\
 \hline \hline \endhead
 \hline
 \multicolumn{4}{r}{\emph{Continued on next page...}} \endfoot
@@ -539,15 +703,7 @@ any & pop & - & Pop an object off the operand stack. \\
 \hline \hline
 & gcdict & & \\
 \hline
-& errordict & & \\
-\hline
-& currenterror & & \\
-\hline
-& userdict & & \\
-\hline
 & globaldict & & \\
-\hline
-& threaddict & & \\
 \hline
 & where & & \\
 \hline
@@ -718,13 +874,37 @@ any & pop & - & Pop an object off the operand stack. \\
 & bind & & \\
 \end{longtable}
 
-\subsection{currenterror}
-\subsection{envdict}
-\subsection{errordict}
-\subsection{gcdict}
-\subsection{globaldict}
-\subsection{systemdict}
 \subsection{threaddict}
+
+\begin{longtable}{|r|l|l|p{4in}|}
+\caption[threaddict summary]{threaddict summary by functional group} \\
+\hline
+Input(s) & Op/Proc/Var & Output(s) & Description \\
+\hline \hline
+%begin{latexonly}
+\endfirsthead
+\caption[]{\emph{continued}} \\
+\hline
+Input(s) & Op/Proc/Var & Output(s) & Description \\
+\hline \hline \endhead
+\hline
+\multicolumn{4}{|l|}{Dictionary and dictionary stack operators} \\
+\hline \hline
+& errordict & & \\
+\hline
+& currenterror & & \\
+\hline
+& userdict & & \\
+\hline
+& threaddict & & \\
+\hline
+\end{longtable}
+
 \subsection{userdict}
+
+Each thread has its own userdict, which is not shared with any other threads.
+userdict is meant to be used for general storage of definitions that do not need
+to be shared among threads.  userdict starts out empty when a thread is
+created.
 
 \section{Tutorial}
