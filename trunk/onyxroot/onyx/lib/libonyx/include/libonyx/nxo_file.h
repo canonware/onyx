@@ -46,11 +46,11 @@ nxo_file_close(cw_nxo_t *a_nxo);
 
 #ifdef CW_POSIX_FILE
 cw_sint32_t
-nxo_file_fd_get(cw_nxo_t *a_nxo);
+nxo_file_fd_get(const cw_nxo_t *a_nxo);
 #endif
 
 cw_bool_t
-nxo_file_nonblocking_get(cw_nxo_t *a_nxo);
+nxo_file_nonblocking_get(const cw_nxo_t *a_nxo);
 
 cw_bool_t
 nxo_file_nonblocking_set(cw_nxo_t *a_nxo, cw_bool_t a_nonblocking);
@@ -80,13 +80,13 @@ nxo_file_position_set(cw_nxo_t *a_nxo, cw_nxoi_t a_position);
 #endif
 
 cw_uint32_t
-nxo_file_buffer_size_get(cw_nxo_t *a_nxo);
+nxo_file_buffer_size_get(const cw_nxo_t *a_nxo);
 
 void
 nxo_file_buffer_size_set(cw_nxo_t *a_nxo, cw_uint32_t a_size);
 
 cw_nxoi_t
-nxo_file_buffer_count(cw_nxo_t *a_nxo);
+nxo_file_buffer_count(const cw_nxo_t *a_nxo);
 
 cw_nxn_t
 nxo_file_buffer_flush(cw_nxo_t *a_nxo);

@@ -213,7 +213,7 @@ nxo_l_name_key_comp(const void *a_k1, const void *a_k2)
 }
 
 const cw_uint8_t *
-nxo_name_str_get(cw_nxo_t *a_nxo)
+nxo_name_str_get(const cw_nxo_t *a_nxo)
 {
     const cw_uint8_t *retval;
     cw_nxoe_name_t *name;
@@ -234,7 +234,7 @@ nxo_name_str_get(cw_nxo_t *a_nxo)
 }
 
 cw_uint32_t
-nxo_name_len_get(cw_nxo_t *a_nxo)
+nxo_name_len_get(const cw_nxo_t *a_nxo)
 {
     cw_uint32_t retval;
     cw_nxoe_name_t *name;

@@ -15,12 +15,12 @@ nxo_operator_new(cw_nxo_t *a_nxo, cw_op_t *a_op, cw_nxn_t a_nxn);
 
 #ifndef CW_USE_INLINES
 cw_op_t *
-nxo_operator_f(cw_nxo_t *a_nxo);
+nxo_operator_f(const cw_nxo_t *a_nxo);
 #endif
 
 #if (defined(CW_USE_INLINES) || defined(CW_NXO_OPERATOR_C_))
 CW_INLINE cw_op_t *
-nxo_operator_f(cw_nxo_t *a_nxo)
+nxo_operator_f(const cw_nxo_t *a_nxo)
 {
     cw_check_ptr(a_nxo);
     cw_dassert(a_nxo->magic == CW_NXO_MAGIC);

@@ -25,10 +25,10 @@ void
 nxo_string_cstring(cw_nxo_t *a_to, cw_nxo_t *a_from, cw_nxo_t *a_thread);
 
 cw_uint32_t
-nxo_string_len_get(cw_nxo_t *a_nxo);
+nxo_string_len_get(const cw_nxo_t *a_nxo);
 
 void
-nxo_string_el_get(cw_nxo_t *a_nxo, cw_nxoi_t a_offset, cw_uint8_t *r_el);
+nxo_string_el_get(const cw_nxo_t *a_nxo, cw_nxoi_t a_offset, cw_uint8_t *r_el);
 
 void
 nxo_string_el_set(cw_nxo_t *a_nxo, cw_uint8_t a_el, cw_nxoi_t a_offset);
@@ -45,7 +45,7 @@ nxo_string_unlock(cw_nxo_t *a_nxo);
 #endif
 
 cw_uint8_t *
-nxo_string_get(cw_nxo_t *a_nxo);
+nxo_string_get(const cw_nxo_t *a_nxo);
 
 void
 nxo_string_set(cw_nxo_t *a_nxo, cw_uint32_t a_offset, const cw_uint8_t *a_str,

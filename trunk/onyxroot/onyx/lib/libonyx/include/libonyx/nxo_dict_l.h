@@ -63,4 +63,4 @@ cw_nxoe_t *
 nxoe_l_dict_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
 
 cw_nxo_t *
-nxo_l_dict_lookup(cw_nxo_t *a_nxo, const cw_nxo_t *a_key);
+nxo_l_dict_lookup(const cw_nxo_t *a_nxo, const cw_nxo_t *a_key);

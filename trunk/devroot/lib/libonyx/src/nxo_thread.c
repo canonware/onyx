@@ -176,7 +176,7 @@ nxo_threadp_delete(cw_nxo_threadp_t *a_threadp, cw_nxo_t *a_thread)
 }
 
 void
-nxo_threadp_position_get(cw_nxo_threadp_t *a_threadp, cw_uint32_t *r_line,
+nxo_threadp_position_get(const cw_nxo_threadp_t *a_threadp, cw_uint32_t *r_line,
 			 cw_uint32_t *r_column)
 {
     cw_check_ptr(a_threadp);
@@ -522,7 +522,7 @@ nxo_thread_join(cw_nxo_t *a_nxo)
 #endif
 
 cw_nxo_threadts_t
-nxo_thread_state(cw_nxo_t *a_nxo)
+nxo_thread_state(const cw_nxo_t *a_nxo)
 {
     cw_nxoe_thread_t *thread;
 
@@ -946,7 +946,7 @@ nxo_thread_dstack_search(cw_nxo_t *a_nxo, cw_nxo_t *a_key, cw_nxo_t *r_value)
 
 #ifdef CW_THREADS
 cw_bool_t
-nxo_thread_currentlocking(cw_nxo_t *a_nxo)
+nxo_thread_currentlocking(const cw_nxo_t *a_nxo)
 {
     cw_nxoe_thread_t *thread;
 

@@ -155,10 +155,10 @@ struct cw_nxoe_s
 };
 
 cw_sint32_t
-nxo_compare(cw_nxo_t *a_a, cw_nxo_t *a_b);
+nxo_compare(const cw_nxo_t *a_a, const cw_nxo_t *a_b);
 
 cw_nxoe_t *
-nxo_nxoe_get(cw_nxo_t *a_nxo);
+nxo_nxoe_get(const cw_nxo_t *a_nxo);
 
 #ifdef CW_THREADS
 cw_bool_t
@@ -170,10 +170,10 @@ void
 nxo_dup(cw_nxo_t *a_to, cw_nxo_t *a_from);
 
 cw_nxot_t
-nxo_type_get(cw_nxo_t *a_nxo);
+nxo_type_get(const cw_nxo_t *a_nxo);
 
 cw_nxoa_t
-nxo_attr_get(cw_nxo_t *a_nxo);
+nxo_attr_get(const cw_nxo_t *a_nxo);
 
 void
 nxo_attr_set(cw_nxo_t *a_nxo, cw_nxoa_t a_attr);
@@ -201,7 +201,7 @@ nxo_dup(cw_nxo_t *a_to, cw_nxo_t *a_from)
 }
 
 CW_INLINE cw_nxot_t
-nxo_type_get(cw_nxo_t *a_nxo)
+nxo_type_get(const cw_nxo_t *a_nxo)
 {
     cw_check_ptr(a_nxo);
     cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
@@ -210,7 +210,7 @@ nxo_type_get(cw_nxo_t *a_nxo)
 }
 
 CW_INLINE cw_nxoa_t
-nxo_attr_get(cw_nxo_t *a_nxo)
+nxo_attr_get(const cw_nxo_t *a_nxo)
 {
     cw_check_ptr(a_nxo);
     cw_dassert(a_nxo->magic == CW_NXO_MAGIC);

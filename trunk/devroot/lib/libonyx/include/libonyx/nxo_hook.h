@@ -23,10 +23,10 @@ nxo_hook_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, void *a_data,
 	     cw_nxo_hook_delete_t *a_delete_f);
 
 cw_nxo_t *
-nxo_hook_tag_get(cw_nxo_t *a_nxo);
+nxo_hook_tag_get(const cw_nxo_t *a_nxo);
 
 void *
-nxo_hook_data_get(cw_nxo_t *a_nxo);
+nxo_hook_data_get(const cw_nxo_t *a_nxo);
 
 void
 nxo_hook_data_set(cw_nxo_t *a_nxo, void *a_data);

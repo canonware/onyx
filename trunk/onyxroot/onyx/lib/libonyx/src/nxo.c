@@ -113,7 +113,7 @@ static const cw_nxot_vtable_t nxot_vtable[] = {
 
 /* nxo. */
 cw_sint32_t
-nxo_compare(cw_nxo_t *a_a, cw_nxo_t *a_b)
+nxo_compare(const cw_nxo_t *a_a, const cw_nxo_t *a_b)
 {
     cw_sint32_t retval;
 
@@ -382,7 +382,7 @@ nxo_compare(cw_nxo_t *a_a, cw_nxo_t *a_b)
 }
 
 cw_nxoe_t *
-nxo_nxoe_get(cw_nxo_t *a_nxo)
+nxo_nxoe_get(const cw_nxo_t *a_nxo)
 {
     cw_nxoe_t *retval;
 

@@ -16,7 +16,7 @@ void
 nxo_real_new(cw_nxo_t *a_nxo, cw_nxor_t a_val);
 
 cw_nxor_t
-nxo_real_get(cw_nxo_t *a_nxo);
+nxo_real_get(const cw_nxo_t *a_nxo);
 
 void
 nxo_real_set(cw_nxo_t *a_nxo, cw_nxor_t a_val);
@@ -33,7 +33,7 @@ nxo_real_new(cw_nxo_t *a_nxo, cw_nxor_t a_val)
 }
 
 CW_INLINE cw_nxor_t
-nxo_real_get(cw_nxo_t *a_nxo)
+nxo_real_get(const cw_nxo_t *a_nxo)
 {
     cw_check_ptr(a_nxo);
     cw_dassert(a_nxo->magic == CW_NXO_MAGIC);

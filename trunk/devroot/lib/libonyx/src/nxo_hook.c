@@ -121,7 +121,7 @@ nxoe_l_hook_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 }
 
 cw_nxo_t *
-nxo_hook_tag_get(cw_nxo_t *a_nxo)
+nxo_hook_tag_get(const cw_nxo_t *a_nxo)
 {
     cw_nxo_t *retval;
     cw_nxoe_hook_t *hook;
@@ -142,7 +142,7 @@ nxo_hook_tag_get(cw_nxo_t *a_nxo)
 }
 
 void *
-nxo_hook_data_get(cw_nxo_t *a_nxo)
+nxo_hook_data_get(const cw_nxo_t *a_nxo)
 {
     void *retval;
     cw_nxoe_hook_t *hook;

@@ -518,7 +518,7 @@ nxo_dict_undef(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_nxo_t *a_key)
 }
 
 cw_bool_t
-nxo_dict_lookup(cw_nxo_t *a_nxo, const cw_nxo_t *a_key, cw_nxo_t *r_nxo)
+nxo_dict_lookup(const cw_nxo_t *a_nxo, const cw_nxo_t *a_key, cw_nxo_t *r_nxo)
 {
     cw_bool_t retval;
     cw_nxoe_dict_t *dict;
@@ -562,7 +562,7 @@ nxo_dict_lookup(cw_nxo_t *a_nxo, const cw_nxo_t *a_key, cw_nxo_t *r_nxo)
  * However, the GC itself needs to cache pointers to the actual values inside
  * the dict for performance reasons, so it uses this function. */
 cw_nxo_t *
-nxo_l_dict_lookup(cw_nxo_t *a_nxo, const cw_nxo_t *a_key)
+nxo_l_dict_lookup(const cw_nxo_t *a_nxo, const cw_nxo_t *a_key)
 {
     cw_nxo_t *retval;
     cw_nxoe_dict_t *dict;
@@ -589,7 +589,7 @@ nxo_l_dict_lookup(cw_nxo_t *a_nxo, const cw_nxo_t *a_key)
 }
 
 cw_uint32_t
-nxo_dict_count(cw_nxo_t *a_nxo)
+nxo_dict_count(const cw_nxo_t *a_nxo)
 {
     cw_uint32_t retval;
     cw_nxoe_dict_t *dict;

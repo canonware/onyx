@@ -27,10 +27,10 @@ void
 nxo_dict_undef(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_nxo_t *a_key);
 
 cw_bool_t
-nxo_dict_lookup(cw_nxo_t *a_nxo, const cw_nxo_t *a_key, cw_nxo_t *r_nxo);
+nxo_dict_lookup(const cw_nxo_t *a_nxo, const cw_nxo_t *a_key, cw_nxo_t *r_nxo);
 
 cw_uint32_t
-nxo_dict_count(cw_nxo_t *a_nxo);
+nxo_dict_count(const cw_nxo_t *a_nxo);
 
 cw_bool_t
 nxo_dict_iterate(cw_nxo_t *a_nxo, cw_nxo_t *r_nxo);

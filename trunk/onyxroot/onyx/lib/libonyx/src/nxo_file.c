@@ -466,7 +466,7 @@ nxo_file_close(cw_nxo_t *a_nxo)
 
 #ifdef CW_POSIX_FILE
 cw_sint32_t
-nxo_file_fd_get(cw_nxo_t *a_nxo)
+nxo_file_fd_get(const cw_nxo_t *a_nxo)
 {
     cw_sint32_t retval;
     cw_nxoe_file_t *file;
@@ -509,7 +509,7 @@ nxo_file_fd_get(cw_nxo_t *a_nxo)
 #endif
 
 cw_bool_t
-nxo_file_nonblocking_get(cw_nxo_t *a_nxo)
+nxo_file_nonblocking_get(const cw_nxo_t *a_nxo)
 {
     cw_bool_t retval;
     cw_nxoe_file_t *file;
@@ -1226,6 +1226,10 @@ nxo_file_write(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len,
 		    iov[1].iov_base = (char *) a_str;
 		    iov[1].iov_len = a_len;
 
+		    /* XXX This probably isn't good enough.  In addition, this
+		     * code should check whether this is a nonblocking file, and
+		     * if not, keep writing until the full amount is at least
+		     * buffered. */
 		    while ((count = writev(file->f.p.fd, iov, 2)) == -1)
 		    {
 			if (errno != EINTR)
@@ -1492,7 +1496,7 @@ nxo_file_position_set(cw_nxo_t *a_nxo, cw_nxoi_t a_position)
 #endif
 
 cw_uint32_t
-nxo_file_buffer_size_get(cw_nxo_t *a_nxo)
+nxo_file_buffer_size_get(const cw_nxo_t *a_nxo)
 {
     cw_uint32_t retval;
     cw_nxoe_file_t *file;
@@ -1564,7 +1568,7 @@ nxo_file_buffer_size_set(cw_nxo_t *a_nxo, cw_uint32_t a_size)
 }
 
 cw_nxoi_t
-nxo_file_buffer_count(cw_nxo_t *a_nxo)
+nxo_file_buffer_count(const cw_nxo_t *a_nxo)
 {
     cw_nxoi_t retval;
     cw_nxoe_file_t *file;

@@ -59,7 +59,8 @@ The following functions are applicable to all types of \classname{nxo} objects.
 \begin{capi}
 \label{nxo_compare}
 \index{nxo_compare@\cfunc{nxo\_compare}{}}
-\citem{\cfunc[cw\_sint32\_t]{nxo\_compare}{cw\_nxo\_t *a\_a, cw\_nxo\_t *a\_b}}
+\citem{\cfunc[cw\_sint32\_t]{nxo\_compare}{const cw\_nxo\_t *a\_a, const
+cw\_nxo\_t *a\_b}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -110,7 +111,7 @@ The following functions are applicable to all types of \classname{nxo} objects.
 	\end{capilist}
 \label{nxo_type_get}
 \index{nxo_type_get@\cfunc{nxo\_type\_get}{}}
-\citem{\cfunc[cw\_nxot\_t]{nxo\_type\_get}{cw\_nxo\_t *a\_nxo}}
+\citem{\cfunc[cw\_nxot\_t]{nxo\_type\_get}{const cw\_nxo\_t *a\_nxo}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -185,7 +186,7 @@ The following functions are applicable to all types of \classname{nxo} objects.
 	\end{capilist}
 \label{nxo_nxoe_get}
 \index{nxo_nxoe_get@\cfunc{nxo\_nxoe\_get}{}}
-\citem{\cfunc[cw\_nxoe\_t *]{nxo\_nxoe\_get}{cw\_nxo\_t *a\_nxo}}
+\citem{\cfunc[cw\_nxoe\_t *]{nxo\_nxoe\_get}{const cw\_nxo\_t *a\_nxo}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -231,7 +232,7 @@ The following functions are applicable to all types of \classname{nxo} objects.
 	\end{capilist}
 \label{nxo_attr_get}
 \index{nxo_attr_get@\cfunc{nxo\_attr\_get}{}}
-\citem{\cfunc[cw\_nxoa\_t]{nxo\_attr\_get}{cw\_nxo\_t *a\_nxo}}
+\citem{\cfunc[cw\_nxoa\_t]{nxo\_attr\_get}{const cw\_nxo\_t *a\_nxo}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]

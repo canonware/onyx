@@ -15,7 +15,7 @@ void
 nxo_integer_new(cw_nxo_t *a_nxo, cw_nxoi_t a_val);
 
 cw_nxoi_t
-nxo_integer_get(cw_nxo_t *a_nxo);
+nxo_integer_get(const cw_nxo_t *a_nxo);
 
 void
 nxo_integer_set(cw_nxo_t *a_nxo, cw_nxoi_t a_val);
@@ -32,7 +32,7 @@ nxo_integer_new(cw_nxo_t *a_nxo, cw_nxoi_t a_val)
 }
 
 CW_INLINE cw_nxoi_t
-nxo_integer_get(cw_nxo_t *a_nxo)
+nxo_integer_get(const cw_nxo_t *a_nxo)
 {
     cw_check_ptr(a_nxo);
     cw_dassert(a_nxo->magic == CW_NXO_MAGIC);

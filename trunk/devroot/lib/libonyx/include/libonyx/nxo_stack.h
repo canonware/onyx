@@ -92,22 +92,22 @@ void
 nxo_stack_remove(cw_nxo_t *a_nxo, cw_nxo_t *a_object);
 
 cw_nxo_t *
-nxo_stack_get(cw_nxo_t *a_nxo);
+nxo_stack_get(const cw_nxo_t *a_nxo);
 
 cw_nxo_t *
-nxo_stack_bget(cw_nxo_t *a_nxo);
+nxo_stack_bget(const cw_nxo_t *a_nxo);
 
 cw_nxo_t *
-nxo_stack_nget(cw_nxo_t *a_nxo, cw_uint32_t a_index);
+nxo_stack_nget(const cw_nxo_t *a_nxo, cw_uint32_t a_index);
 
 cw_nxo_t *
-nxo_stack_nbget(cw_nxo_t *a_nxo, cw_uint32_t a_index);
+nxo_stack_nbget(const cw_nxo_t *a_nxo, cw_uint32_t a_index);
 
 cw_nxo_t *
-nxo_stack_down_get(cw_nxo_t *a_nxo, cw_nxo_t *a_object);
+nxo_stack_down_get(const cw_nxo_t *a_nxo, cw_nxo_t *a_object);
 
 cw_nxo_t *
-nxo_stack_up_get(cw_nxo_t *a_nxo, cw_nxo_t *a_object);
+nxo_stack_up_get(const cw_nxo_t *a_nxo, cw_nxo_t *a_object);
 
 cw_bool_t
 nxo_stack_exch(cw_nxo_t *a_nxo);
@@ -591,7 +591,7 @@ nxo_stack_remove(cw_nxo_t *a_nxo, cw_nxo_t *a_object)
 }
 
 CW_INLINE cw_nxo_t *
-nxo_stack_get(cw_nxo_t *a_nxo)
+nxo_stack_get(const cw_nxo_t *a_nxo)
 {
     cw_nxo_t *retval;
     cw_nxoe_stack_t *stack;
@@ -625,7 +625,7 @@ nxo_stack_get(cw_nxo_t *a_nxo)
 }
 
 CW_INLINE cw_nxo_t *
-nxo_stack_bget(cw_nxo_t *a_nxo)
+nxo_stack_bget(const cw_nxo_t *a_nxo)
 {
     cw_nxo_t *retval;
     cw_nxoe_stack_t *stack;
@@ -659,7 +659,7 @@ nxo_stack_bget(cw_nxo_t *a_nxo)
 }
 
 CW_INLINE cw_nxo_t *
-nxo_stack_nget(cw_nxo_t *a_nxo, cw_uint32_t a_index)
+nxo_stack_nget(const cw_nxo_t *a_nxo, cw_uint32_t a_index)
 {
     cw_nxo_t *retval;
     cw_nxoe_stack_t *stack;
@@ -697,7 +697,7 @@ nxo_stack_nget(cw_nxo_t *a_nxo, cw_uint32_t a_index)
 }
 
 CW_INLINE cw_nxo_t *
-nxo_stack_nbget(cw_nxo_t *a_nxo, cw_uint32_t a_index)
+nxo_stack_nbget(const cw_nxo_t *a_nxo, cw_uint32_t a_index)
 {
     cw_nxo_t *retval;
     cw_nxoe_stack_t *stack;
@@ -735,7 +735,7 @@ nxo_stack_nbget(cw_nxo_t *a_nxo, cw_uint32_t a_index)
 }
 
 CW_INLINE cw_nxo_t *
-nxo_stack_down_get(cw_nxo_t *a_nxo, cw_nxo_t *a_object)
+nxo_stack_down_get(const cw_nxo_t *a_nxo, cw_nxo_t *a_object)
 {
     cw_nxo_t *retval;
     cw_nxoe_stack_t *stack;
@@ -788,7 +788,7 @@ nxo_stack_down_get(cw_nxo_t *a_nxo, cw_nxo_t *a_object)
 }
 
 CW_INLINE cw_nxo_t *
-nxo_stack_up_get(cw_nxo_t *a_nxo, cw_nxo_t *a_object)
+nxo_stack_up_get(const cw_nxo_t *a_nxo, cw_nxo_t *a_object)
 {
     cw_nxo_t *retval;
     cw_nxoe_stack_t *stack;
