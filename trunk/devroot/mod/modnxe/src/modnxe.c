@@ -19,6 +19,10 @@ struct cw_nxe_entry {
 };
 
 static const struct cw_nxe_entry nxe_ops[] = {
+	ENTRY(buf),
+	ENTRY(buf_len),
+	ENTRY(buf_nlines),
+	ENTRY(marker),
 	ENTRY(buffer)
 };
 
@@ -51,6 +55,7 @@ nxe_ops_init(cw_nxo_t *a_thread)
 	nxo_stack_npop(tstack, 2);
 }
 
+#if (0)
 void
 foo(cw_nx_t *a_nx, cw_nxo_t *a_thread)
 {
@@ -142,13 +147,16 @@ foo(cw_nx_t *a_nx, cw_nxo_t *a_thread)
 	bufm_delete(bufm);
 	buf_delete(buf);
 }
+#endif
 
 void
 nxe_init (void *a_arg, cw_nxo_t *a_thread)
 {
-	fprintf(stderr, "%s:%u:%s(): Got here\n", __FILE__, __LINE__,
-	    __FUNCTION__);
+/*  	fprintf(stderr, "%s:%u:%s(): Got here\n", __FILE__, __LINE__, */
+/*  	    __FUNCTION__); */
 	nxe_ops_init(a_thread);
-	
+
+#if (0)
 	foo(nxo_thread_nx_get(a_thread), a_thread);	/* XXX */
+#endif
 }

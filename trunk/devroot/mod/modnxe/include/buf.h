@@ -199,3 +199,9 @@ void	bufm_after_insert(cw_bufm_t *a_bufm, const cw_char_t *a_str,
     cw_uint64_t a_count);
 
 void	bufm_remove(cw_bufm_t *a_start, cw_bufm_t *a_end);
+
+/* Operators. */
+void	nxe_buf(cw_nxo_t *a_thread);
+void	nxe_buf_len(cw_nxo_t *a_thread);
+void	nxe_buf_nlines(cw_nxo_t *a_thread);
+void	nxe_marker(cw_nxo_t *a_thread);

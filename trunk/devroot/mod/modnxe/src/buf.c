@@ -1571,3 +1571,258 @@ bufm_remove(cw_bufm_t *a_start, cw_bufm_t *a_end)
 		bufm->line -= nlines;
 	}
 }
+
+/*
+ * Operators.
+ */
+
+static void
+buf_p_eval(void *a_data, cw_nxo_t *a_thread)
+{
+	/* XXX Feed the buffer to the Onyx interpreter. */
+}
+
+static cw_nxoe_t *
+buf_p_ref_iter(void *a_data, cw_bool_t a_reset)
+{
+	return NULL;
+}
+
+static void
+buf_p_delete(void *a_data, cw_nx_t *a_nx)
+{
+	cw_buf_t	*buf = (cw_buf_t *)a_data;
+
+	buf_delete(buf);
+}
+
+void
+nxe_buf(cw_nxo_t *a_thread)
+{
+	cw_nxo_t	*ostack, *nxo, *tag;
+	cw_nx_t		*nx;
+	cw_buf_t	*buf;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	nx = nxo_thread_nx_get(a_thread);
+
+	/* Allocate and initialize the buf structure. */
+	buf = buf_new(NULL, (cw_opaque_alloc_t *)nxa_malloc_e,
+	    (cw_opaque_realloc_t *)nxa_realloc_e, (cw_opaque_dealloc_t
+	    *)nxa_free_e, (void *)nx_nxa_get(nx), NULL);
+
+	/* Create a reference to the buf. */
+	nxo = nxo_stack_push(ostack);
+	nxo_hook_new(nxo, nx, buf, buf_p_eval, buf_p_ref_iter, buf_p_delete);
+
+	/* Set the hook tag. */
+	tag = nxo_hook_tag_get(nxo);
+	nxo_name_new(tag, nx, "buf", sizeof("buf") - 1, FALSE);
+	nxo_attr_set(tag, NXOA_EXECUTABLE);
+}
+
+/*
+ * Verify that a_nxo is a =buf=.
+ */
+static cw_nxo_threade_t
+buf_p_type(cw_nxo_t *a_nxo)
+{
+	cw_nxo_threade_t	retval;
+	cw_nxo_t		*tag;
+	const cw_uint8_t	*name_buf;
+#ifdef _CW_DBG
+	cw_buf_t		*buf;
+#endif
+
+	if (nxo_type_get(a_nxo) != NXOT_HOOK) {
+		retval = NXO_THREADE_TYPECHECK;
+		goto RETURN;
+	}
+
+	tag = nxo_hook_tag_get(a_nxo);
+	if (nxo_type_get(tag) != NXOT_NAME) {
+		retval = NXO_THREADE_TYPECHECK;
+		goto RETURN;
+	}
+
+	name_buf = nxo_name_str_get(tag);
+
+	if ((nxo_name_len_get(tag) != strlen("buf")) || strcmp("buf",
+	    name_buf)) {
+		retval = NXO_THREADE_TYPECHECK;
+		goto RETURN;
+	}
+
+#ifdef _CW_DBG
+	buf = (cw_buf_t *)nxo_hook_data_get(a_nxo);
+	_cw_check_ptr(buf);
+	_cw_dassert(buf->magic == _CW_BUF_MAGIC);
+#endif
+
+	retval = NXO_THREADE_NONE;
+	RETURN:
+	return retval;
+}
+
+void
+nxe_buf_len(cw_nxo_t *a_thread)
+{
+	cw_nxo_t		*ostack, *hook;
+	cw_nxo_threade_t	error;
+	cw_buf_t		*buf;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	NXO_STACK_GET(hook, ostack, a_thread);
+	error = buf_p_type(hook);
+	if (error) {
+		nxo_thread_error(a_thread, error);
+		return;
+	}
+
+	buf = (cw_buf_t *)nxo_hook_data_get(hook);
+
+	nxo_integer_new(hook, buf_len(buf));
+}
+
+void
+nxe_buf_nlines(cw_nxo_t *a_thread)
+{
+	cw_nxo_t		*ostack, *hook;
+	cw_nxo_threade_t	error;
+	cw_buf_t		*buf;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	NXO_STACK_GET(hook, ostack, a_thread);
+	error = buf_p_type(hook);
+	if (error) {
+		nxo_thread_error(a_thread, error);
+		return;
+	}
+
+	buf = (cw_buf_t *)nxo_hook_data_get(hook);
+
+	nxo_integer_new(hook, buf_nlines(buf));
+}
+
+/*
+ * This structure is necessary since =marker=s need to report a reference to
+ * their associated =buf=s.
+ */
+struct cw_marker_s {
+	cw_nxo_t	buf;
+	cw_bufm_t	bufm;
+};
+
+static void
+bufm_p_eval(void *a_data, cw_nxo_t *a_thread)
+{
+}
+
+static cw_nxoe_t *
+bufm_p_ref_iter(void *a_data, cw_bool_t a_reset)
+{
+	cw_nxoe_t		*retval;
+	struct cw_marker_s	*marker= (struct cw_marker_s *)a_data;
+	
+	if (a_reset)
+		retval = nxo_nxoe_get(&marker->buf);
+	else
+		retval = NULL;
+		
+	return retval;
+}
+
+static void
+bufm_p_delete(void *a_data, cw_nx_t *a_nx)
+{
+	struct cw_marker_s	*marker= (struct cw_marker_s *)a_data;
+
+	bufm_delete(&marker->bufm);
+	nxa_free(nx_nxa_get(a_nx), marker, sizeof(struct cw_marker_s));
+}
+
+void
+nxe_marker(cw_nxo_t *a_thread)
+{
+	cw_nxo_t		*ostack, *tstack, *nxo, *tnxo, *tag;
+	cw_nx_t			*nx;
+	cw_nxo_threade_t	error;
+	cw_buf_t		*buf;
+	struct cw_marker_s	*marker_data;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	tstack = nxo_thread_tstack_get(a_thread);
+	nx = nxo_thread_nx_get(a_thread);
+	NXO_STACK_GET(nxo, ostack, a_thread);
+	error = buf_p_type(nxo);
+	if (error) {
+		nxo_thread_error(a_thread, error);
+		return;
+	}
+	buf = (cw_buf_t *)nxo_hook_data_get(nxo);
+
+	marker_data = (struct cw_marker_s *)nxa_malloc(nx_nxa_get(nx),
+	    sizeof(struct cw_marker_s));
+	
+	nxo_no_new(&marker_data->buf);
+	nxo_dup(&marker_data->buf, nxo);
+	bufm_new(&marker_data->bufm, buf, NULL);
+
+	/*
+	 * Create a reference to the marker; keep a reference to the buf on
+	 * tstack to avoid a GC race.
+	 */
+	tnxo = nxo_stack_push(tstack);
+	nxo_dup(tnxo, nxo);
+	nxo_hook_new(nxo, nx, marker_data, bufm_p_eval, bufm_p_ref_iter,
+	    bufm_p_delete);
+	nxo_stack_pop(tstack);
+
+	/* Set the hook tag. */
+	tag = nxo_hook_tag_get(nxo);
+	nxo_name_new(tag, nx, "marker", sizeof("marker") - 1, FALSE);
+	nxo_attr_set(tag, NXOA_EXECUTABLE);
+}
+
+/*
+ * Verify that a_nxo is a =marker=.
+ */
+static cw_nxo_threade_t
+marker_p_type(cw_nxo_t *a_nxo)
+{
+	cw_nxo_threade_t	retval;
+	cw_nxo_t		*tag;
+	const cw_uint8_t	*name_marker;
+#ifdef _CW_DBG
+	cw_bufm_t		*bufm;
+#endif
+
+	if (nxo_type_get(a_nxo) != NXOT_HOOK) {
+		retval = NXO_THREADE_TYPECHECK;
+		goto RETURN;
+	}
+
+	tag = nxo_hook_tag_get(a_nxo);
+	if (nxo_type_get(tag) != NXOT_NAME) {
+		retval = NXO_THREADE_TYPECHECK;
+		goto RETURN;
+	}
+
+	name_marker = nxo_name_str_get(tag);
+
+	if ((nxo_name_len_get(tag) != strlen("marker")) || strcmp("marker",
+	    name_marker)) {
+		retval = NXO_THREADE_TYPECHECK;
+		goto RETURN;
+	}
+
+#ifdef _CW_DBG
+	bufm = (cw_bufm_t *)nxo_hook_data_get(a_nxo);
+	_cw_check_ptr(bufm);
+	_cw_dassert(bufm->magic == _CW_BUFM_MAGIC);
+#endif
+
+	retval = NXO_THREADE_NONE;
+	RETURN:
+	return retval;
+}
