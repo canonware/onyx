@@ -287,7 +287,7 @@ modslate_window_aux_get(void *a_data, cw_nxo_t *a_thread)
 	nxo_thread_nerror(a_thread, error);
 	return;
     }
-    window = (struct cw_window *) nxo_handle_data_get(nxo);
+    window = (struct cw_window *) nxo_handle_opaque_get(nxo);
 
     /* Avoid a GC race by using tnxo to store a reachable ref to the window. */
     tnxo = nxo_stack_push(tstack);
@@ -312,7 +312,7 @@ modslate_window_aux_set(void *a_data, cw_nxo_t *a_thread)
 	nxo_thread_nerror(a_thread, error);
 	return;
     }
-    window = (struct cw_window *) nxo_handle_data_get(nxo);
+    window = (struct cw_window *) nxo_handle_opaque_get(nxo);
 
     nxo_dup(&window->aux, aux);
     nxo_stack_npop(ostack, 2);

@@ -147,7 +147,7 @@ modpane_init(void *a_arg, cw_nxo_t *a_thread)
     nxo_dup(&modpane_module_handle, nxo_stack_get(estack));
 
     /* Set the GC iteration for module destruction. */
-    nxmod = (cw_nxmod_t *) nxo_handle_data_get(&modpane_module_handle);
+    nxmod = (cw_nxmod_t *) nxo_handle_opaque_get(&modpane_module_handle);
     nxmod->iter = MODPANE_GC_ITER_MODULE;
 
     /* Initialize handles. */

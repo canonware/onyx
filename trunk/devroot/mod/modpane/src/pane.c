@@ -214,7 +214,7 @@ modpane_pane_aux_get(void *a_data, cw_nxo_t *a_thread)
 	nxo_thread_nerror(a_thread, error);
 	return;
     }
-    pane = (struct cw_pane *) nxo_handle_data_get(nxo);
+    pane = (struct cw_pane *) nxo_handle_opaque_get(nxo);
 
     /* Avoid a GC race by using tnxo to store a reachable ref to the pane. */
     tnxo = nxo_stack_push(tstack);
@@ -239,7 +239,7 @@ modpane_pane_aux_set(void *a_data, cw_nxo_t *a_thread)
 	nxo_thread_nerror(a_thread, error);
 	return;
     }
-    pane = (struct cw_pane *) nxo_handle_data_get(nxo);
+    pane = (struct cw_pane *) nxo_handle_opaque_get(nxo);
 
     nxo_dup(&pane->aux, aux);
     nxo_stack_npop(ostack, 2);
@@ -261,7 +261,7 @@ modpane_pane_size(void *a_data, cw_nxo_t *a_thread)
 	nxo_thread_nerror(a_thread, error);
 	return;
     }
-    pane = (struct cw_pane *) nxo_handle_data_get(nxo);
+    pane = (struct cw_pane *) nxo_handle_opaque_get(nxo);
 
     pane_p_lock(pane);
     pn_size(&pane->pn, &x, &y);

@@ -149,7 +149,7 @@ modslate_init(void *a_arg, cw_nxo_t *a_thread)
     nxo_dup(&modslate_module_handle, nxo_stack_get(estack));
 
     /* Set the GC iteration for module destruction. */
-    nxmod = (cw_nxmod_t *) nxo_handle_data_get(&modslate_module_handle);
+    nxmod = (cw_nxmod_t *) nxo_handle_opaque_get(&modslate_module_handle);
     nxmod->iter = MODSLATE_GC_ITER_MODULE;
 
     /* Initialize handles. */

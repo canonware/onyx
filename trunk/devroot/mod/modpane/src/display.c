@@ -229,7 +229,7 @@ modpane_display_aux_get(void *a_data, cw_nxo_t *a_thread)
 	nxo_thread_nerror(a_thread, error);
 	return;
     }
-    display = (struct cw_display *) nxo_handle_data_get(nxo);
+    display = (struct cw_display *) nxo_handle_opaque_get(nxo);
 
     /* Avoid a GC race by using tnxo to store a reachable ref to the display. */
     tnxo = nxo_stack_push(tstack);
@@ -254,7 +254,7 @@ modpane_display_aux_set(void *a_data, cw_nxo_t *a_thread)
 	nxo_thread_nerror(a_thread, error);
 	return;
     }
-    display = (struct cw_display *) nxo_handle_data_get(nxo);
+    display = (struct cw_display *) nxo_handle_opaque_get(nxo);
 
     nxo_dup(&display->aux, aux);
     nxo_stack_npop(ostack, 2);
@@ -276,7 +276,7 @@ modpane_display_size(void *a_data, cw_nxo_t *a_thread)
 	nxo_thread_nerror(a_thread, error);
 	return;
     }
-    display = (struct cw_display *) nxo_handle_data_get(nxo);
+    display = (struct cw_display *) nxo_handle_opaque_get(nxo);
 
     display_p_lock(display);
     ds_size(&display->ds, &x, &y);
@@ -308,7 +308,7 @@ modpane_display_start(void *a_data, cw_nxo_t *a_thread)
 	nxo_thread_nerror(a_thread, error);
 	return;
     }
-    display = (struct cw_display *) nxo_handle_data_get(nxo);
+    display = (struct cw_display *) nxo_handle_opaque_get(nxo);
 
     display_p_lock(display);
     /* XXX Check error return. */
@@ -331,7 +331,7 @@ modpane_display_stop(void *a_data, cw_nxo_t *a_thread)
 	nxo_thread_nerror(a_thread, error);
 	return;
     }
-    display = (struct cw_display *) nxo_handle_data_get(nxo);
+    display = (struct cw_display *) nxo_handle_opaque_get(nxo);
 
     display_p_lock(display);
     /* XXX Check error return. */

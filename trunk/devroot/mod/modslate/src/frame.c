@@ -184,7 +184,7 @@ modslate_frame_aux_get(void *a_data, cw_nxo_t *a_thread)
 	nxo_thread_nerror(a_thread, error);
 	return;
     }
-    frame = (struct cw_frame *) nxo_handle_data_get(nxo);
+    frame = (struct cw_frame *) nxo_handle_opaque_get(nxo);
 
     /* Avoid a GC race by using tnxo to store a reachable ref to the frame. */
     tnxo = nxo_stack_push(tstack);
@@ -209,7 +209,7 @@ modslate_frame_aux_set(void *a_data, cw_nxo_t *a_thread)
 	nxo_thread_nerror(a_thread, error);
 	return;
     }
-    frame = (struct cw_frame *) nxo_handle_data_get(nxo);
+    frame = (struct cw_frame *) nxo_handle_opaque_get(nxo);
 
     nxo_dup(&frame->aux, aux);
     nxo_stack_npop(ostack, 2);
@@ -230,7 +230,7 @@ modslate_frame_focus(void *a_data, cw_nxo_t *a_thread)
 	nxo_thread_nerror(a_thread, error);
 	return;
     }
-    frame = (struct cw_frame *)nxo_handle_data_get(nxo);
+    frame = (struct cw_frame *)nxo_handle_opaque_get(nxo);
 
 //    show_panel(frame->panel);
 
