@@ -84,9 +84,6 @@ if [not [defined LDFLAGS]] then
 /* Documentation. */
 #include-cooked @objroot@/doc/Cookfile.inc
 
-/* Examples. */
-#include-cooked @objroot@/examples/Cookfile.inc
-
 /* Tests. */
 #include-cooked @objroot@/test/Cookfile.inc
 
