@@ -54,16 +54,16 @@ its data must be treated as read-only.  That is, the \classname{bufc} must be
 treated as opaque as soon as any \classname{buf} has a reference to it.
 
 \subsubsection{API}
-\begin{description}
+\begin{capi}
 \label{buf_new}
 \label{buf_new_r}
 \index{\cfunc{buf\_new}{}}
 \index{\cfunc{buf\_new\_r}{}}
-\item[{\cfunc[cw\_buf\_t *]{buf\_new}{cw\_buf\_t *a\_buf, cw\_mem\_t
-*a\_mem}}: ]
-\item[{\cfunc[cw\_buf\_t *]{buf\_new\_r}{cw\_buf\_t *a\_buf, cw\_mem\_t
-*a\_mem}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_buf\_t *]{buf\_new}{cw\_buf\_t *a\_buf, cw\_mem\_t
+*a\_mem}}
+\citem{\cfunc[cw\_buf\_t *]{buf\_new\_r}{cw\_buf\_t *a\_buf, cw\_mem\_t
+*a\_mem}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_buf: ]
@@ -82,11 +82,11 @@ treated as opaque as soon as any \classname{buf} has a reference to it.
 		\end{description}
 	\item[Description: ]
 		Non-thread-safe and thread-safe constructors.
-	\end{description}
+	\end{capilist}
 \label{buf_delete}
 \index{\cfunc{buf\_delete}{}}
-\item[{\cfunc[void]{buf\_delete}{cw\_buf\_t *a\_buf}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{buf\_delete}{cw\_buf\_t *a\_buf}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_buf: ]
@@ -96,11 +96,11 @@ treated as opaque as soon as any \classname{buf} has a reference to it.
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Destructor.
-	\end{description}
+	\end{capilist}
 \label{buf_dump}
 \index{\cfunc{buf\_dump}{}}
-\item[{\cfunc[void]{buf\_dump}{cw\_buf\_t *a\_buf}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{buf\_dump}{cw\_buf\_t *a\_buf}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_buf: ]
@@ -114,11 +114,11 @@ treated as opaque as soon as any \classname{buf} has a reference to it.
 		\end{description}
 	\item[Description: ]
 		Print the internal state of \cvar{a\_buf} to \cvar{out\_err}.
-	\end{description}
+	\end{capilist}
 \label{buf_size_get}
 \index{\cfunc{buf\_size\_get}{}}
-\item[{\cfunc[cw\_uint32\_t]{buf\_size\_get}{cw\_buf\_t *a\_buf}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_uint32\_t]{buf\_size\_get}{cw\_buf\_t *a\_buf}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_buf: ]
@@ -132,11 +132,11 @@ treated as opaque as soon as any \classname{buf} has a reference to it.
 	\item[Exception(s): ] None.
 		Return the amout of valid data in bytes.
 	\item[Description: ]
-	\end{description}
+	\end{capilist}
 \label{buf_num_bufels_get}
 \index{\cfunc{buf\_num\_bufels\_get}{}}
-\item[{\cfunc[cw\_uint32\_t]{buf\_num\_bufels\_get}{cw\_buf\_t *a\_buf}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_uint32\_t]{buf\_num\_bufels\_get}{cw\_buf\_t *a\_buf}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_buf: ]
@@ -152,13 +152,13 @@ treated as opaque as soon as any \classname{buf} has a reference to it.
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Return the number of \classname{bufel}'s in \cvar{a\_buf}.
-	\end{description}
+	\end{capilist}
 \label{buf_iovec_get}
 \index{\cfunc{buf\_iovec\_get}{}}
-\item[{\cfunc[const struct iovec *]{buf\_iovec\_get}{cw\_buf\_t *a\_buf,
+\citem{\cfunc[const struct iovec *]{buf\_iovec\_get}{cw\_buf\_t *a\_buf,
 cw\_uint32\_t a\_max\_data, cw\_bool\_t a\_is\_sys\_iovec, int
-*r\_iovec\_count}}: ]
-	\begin{description}\item[]
+*r\_iovec\_count}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_buf: ]
@@ -186,12 +186,12 @@ cw\_uint32\_t a\_max\_data, cw\_bool\_t a\_is\_sys\_iovec, int
 		Build an iovec array that represents the valid data in
 		\cvar{a\_buf}'s internal buffers (up to \cvar{a\_max\_data}
 		bytes) and return a pointer to it.
-	\end{description}
+	\end{capilist}
 \label{buf_catenate}
 \index{\cfunc{buf\_catenate}{}}
-\item[{\cfunc[void]{buf\_catenate}{cw\_buf\_t *a\_a, cw\_buf\_t *a\_b,
-cw\_bool\_t a\_preserve}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{buf\_catenate}{cw\_buf\_t *a\_a, cw\_buf\_t *a\_b,
+cw\_bool\_t a\_preserve}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_a: ]
@@ -211,12 +211,12 @@ cw\_bool\_t a\_preserve}}: ]
 	\item[Description: ]
 		Catenate two \classname{buf}'s.  \cvar{a\_b} is left unmodifed
 		if \cvar{a\_preserve} is TRUE; otherwise \cvar{a\_b} is emptied.
-	\end{description}
+	\end{capilist}
 \label{buf_split}
 \index{\cfunc{buf\_split}{}}
-\item[{\cfunc[void]{buf\_split}{cw\_buf\_t *a\_a, cw\_buf\_t *a\_b,
-cw\_bool\_t a\_offset}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{buf\_split}{cw\_buf\_t *a\_a, cw\_buf\_t *a\_b,
+cw\_bool\_t a\_offset}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_a: ]
@@ -235,12 +235,12 @@ cw\_bool\_t a\_offset}}: ]
 		Split \cvar{a\_b} at offset \cvar{a\_offset}.  Append the data
 		before \cvar{a\_offset} to \cvar{a\_a}, and leave the remainder
 		in \cvar{a\_b}.
-	\end{description}
+	\end{capilist}
 \label{buf_bufc_prepend}
 \index{\cfunc{buf\_bufc\_prepend}{}}
-\item[{\cfunc[void]{buf\_bufc\_prepend}{cw\_buf\_t *a\_buf, cw\_bufc\_t
-*a\_bufc, cw\_uint32\_t a\_beg\_offset, cw\_uint32\_t a\_end\_offset}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{buf\_bufc\_prepend}{cw\_buf\_t *a\_buf, cw\_bufc\_t
+*a\_bufc, cw\_uint32\_t a\_beg\_offset, cw\_uint32\_t a\_end\_offset}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_buf: ]
@@ -262,12 +262,12 @@ cw\_bool\_t a\_offset}}: ]
 	\item[Description: ]
 		Prepend \cvar{a\_bufc}, bytes \cvar{a\_beg\_offset} through
 		(\cvar{a\_end\_offset} - 1) to \cvar{a\_buf}.
-	\end{description}
+	\end{capilist}
 \label{buf_bufc_append}
 \index{\cfunc{buf\_bufc\_append}{}}
-\item[{\cfunc[void]{buf\_bufc\_append}{cw\_buf\_t *a\_buf, cw\_bufc\_t
-*a\_bufc, cw\_uint32\_t a\_beg\_offset, cw\_uint32\_t a\_end\_offset}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{buf\_bufc\_append}{cw\_buf\_t *a\_buf, cw\_bufc\_t
+*a\_bufc, cw\_uint32\_t a\_beg\_offset, cw\_uint32\_t a\_end\_offset}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_buf: ]
@@ -289,12 +289,12 @@ cw\_bool\_t a\_offset}}: ]
 	\item[Description: ]
 		Append \cvar{a\_bufc}, bytes \cvar{a\_beg\_offset} through
 		(\cvar{a\_end\_offset} - 1) to \cvar{a\_buf}.
-	\end{description}
+	\end{capilist}
 \label{buf_head_data_release}
 \index{\cfunc{buf\_head\_data\_release}{}}
-\item[{\cfunc[cw\_bool\_t]{buf\_head\_data\_release}{cw\_buf\_t *a\_buf,
-cw\_uint32\_t a\_amount}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_bool\_t]{buf\_head\_data\_release}{cw\_buf\_t *a\_buf,
+cw\_uint32\_t a\_amount}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_buf: ]
@@ -317,12 +317,12 @@ cw\_uint32\_t a\_amount}}: ]
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Release \cvar{a\_amount} bytes from the head of \cvar{a\_buf}.
-	\end{description}
+	\end{capilist}
 \label{buf_tail_data_release}
 \index{\cfunc{buf\_tail\_data\_release}{}}
-\item[{\cfunc[cw\_bool\_t]{buf\_tail\_data\_release}{cw\_buf\_t *a\_buf,
-cw\_uint32\_t a\_amount}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_bool\_t]{buf\_tail\_data\_release}{cw\_buf\_t *a\_buf,
+cw\_uint32\_t a\_amount}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_buf: ]
@@ -345,12 +345,12 @@ cw\_uint32\_t a\_amount}}: ]
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Release \cvar{a\_amount} bytes from the tail of \cvar{a\_buf}.
-	\end{description}
+	\end{capilist}
 \label{buf_uint8_get}
 \index{\cfunc{buf\_uint8\_get}{}}
-\item[{\cfunc[cw\_uint8\_t]{buf\_uint8\_get}{cw\_buf\_t *a\_buf, cw\_uint32\_t
-a\_offset}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_uint8\_t]{buf\_uint8\_get}{cw\_buf\_t *a\_buf, cw\_uint32\_t
+a\_offset}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_buf: ]
@@ -368,12 +368,12 @@ a\_offset}}: ]
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Return the uint8 at offset \cvar{a\_offset}.
-	\end{description}
+	\end{capilist}
 \label{buf_uint32_get}
 \index{\cfunc{buf\_uint32\_get}{}}
-\item[{\cfunc[cw\_uint32\_t]{buf\_uint32\_get}{cw\_buf\_t *a\_buf, cw\_uint32\_t
-a\_offset}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_uint32\_t]{buf\_uint32\_get}{cw\_buf\_t *a\_buf, cw\_uint32\_t
+a\_offset}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_buf: ]
@@ -391,12 +391,12 @@ a\_offset}}: ]
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Return the uint32 at offset \cvar{a\_offset}.
-	\end{description}
+	\end{capilist}
 \label{buf_uint64_get}
 \index{\cfunc{buf\_uint64\_get}{}}
-\item[{\cfunc[cw\_uint64\_t]{buf\_uint64\_get}{cw\_buf\_t *a\_buf, cw\_uint32\_t
-a\_offset}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_uint64\_t]{buf\_uint64\_get}{cw\_buf\_t *a\_buf, cw\_uint32\_t
+a\_offset}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_buf: ]
@@ -414,12 +414,12 @@ a\_offset}}: ]
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Return the uint64 at offset \cvar{a\_offset}.
-	\end{description}
+	\end{capilist}
 \label{buf_uint8_set}
 \index{\cfunc{buf\_uint8\_set}{}}
-\item[{\cfunc[void]{buf\_uint8\_set}{cw\_buf\_t *a\_buf, cw\_uint32\_t
-a\_offset, cw\_uint\_t32 a\_val}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{buf\_uint8\_set}{cw\_buf\_t *a\_buf, cw\_uint32\_t
+a\_offset, cw\_uint\_t32 a\_val}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_buf: ]
@@ -437,12 +437,12 @@ a\_offset, cw\_uint\_t32 a\_val}}: ]
 		\end{description}
 	\item[Description: ]
 		Set the uint8 at \cvar{a\_offset} to \cvar{a\_val}.
-	\end{description}
+	\end{capilist}
 \label{buf_uint32_set}
 \index{\cfunc{buf\_uint32\_set}{}}
-\item[{\cfunc[void]{buf\_uint32\_set}{cw\_buf\_t *a\_buf, cw\_uint32\_t
-a\_offset, cw\_uint\_t32 a\_val}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{buf\_uint32\_set}{cw\_buf\_t *a\_buf, cw\_uint32\_t
+a\_offset, cw\_uint\_t32 a\_val}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_buf: ]
@@ -460,12 +460,12 @@ a\_offset, cw\_uint\_t32 a\_val}}: ]
 		\end{description}
 	\item[Description: ]
 		Set the uint32 at \cvar{a\_offset} to \cvar{a\_val}.
-	\end{description}
+	\end{capilist}
 \label{buf_uint64_set}
 \index{\cfunc{buf\_uint64\_set}{}}
-\item[{\cfunc[void]{buf\_uint64\_set}{cw\_buf\_t *a\_buf, cw\_uint32\_t
-a\_offset, cw\_uint\_t32 a\_val}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{buf\_uint64\_set}{cw\_buf\_t *a\_buf, cw\_uint32\_t
+a\_offset, cw\_uint\_t32 a\_val}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_buf: ]
@@ -483,13 +483,13 @@ a\_offset, cw\_uint\_t32 a\_val}}: ]
 		\end{description}
 	\item[Description: ]
 		Set the uint64 at \cvar{a\_offset} to \cvar{a\_val}.
-	\end{description}
+	\end{capilist}
 \label{buf_range_set}
 \index{\cfunc{buf\_range\_set}{}}
-\item[{\cfunc[void]{buf\_range\_set}{cw\_buf\_t *a\_buf, cw\_uint32\_t
+\citem{\cfunc[void]{buf\_range\_set}{cw\_buf\_t *a\_buf, cw\_uint32\_t
 a\_offset, cw\_uint32\_t a\_length, cw\_uint8\_t *a\_val, cw\_bool\_t
-a\_is\_writeable}}: ]
-	\begin{description}\item[]
+a\_is\_writeable}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_buf: ]
@@ -517,12 +517,12 @@ a\_is\_writeable}}: ]
 	\item[Description: ]
 		Insert \cvar{a\_offset} bytes from \cvar{a\_val} into
 		\cvar{a\_buf} at offset \cvar{a\_offset}.
-	\end{description}
+	\end{capilist}
 \label{bufc_new}
 \index{\cfunc{bufc\_new}{}}
-\item[{\cfunc[cw\_bufc\_t *]{bufc\_new}{cw\_bufc\_t *a\_bufc, cw\_mem\_t
-*a\_mem, cw\_opaque\_dealloc\_t *a\_dealloc\_func, void *a\_dealloc\_arg}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_bufc\_t *]{bufc\_new}{cw\_bufc\_t *a\_bufc, cw\_mem\_t
+*a\_mem, cw\_opaque\_dealloc\_t *a\_dealloc\_func, void *a\_dealloc\_arg}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_bufc: ]
@@ -548,11 +548,11 @@ a\_is\_writeable}}: ]
 		\end{description}
 	\item[Description: ]
 		Constructor.
-	\end{description}
+	\end{capilist}
 \label{bufc_delete}
 \index{\cfunc{bufc\_delete}{}}
-\item[{\cfunc[void]{bufc\_delete}{cw\_bufc\_t *a\_bufc}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{bufc\_delete}{cw\_bufc\_t *a\_bufc}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_bufc: ]
@@ -562,13 +562,13 @@ a\_is\_writeable}}: ]
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Destructor.
-	\end{description}
+	\end{capilist}
 \label{bufc_buffer_set}
 \index{\cfunc{bufc\_buffer\_set}{}}
-\item[{\cfunc[void]{bufc\_buffer\_set}{cw\_bufc\_t *a\_bufc, void *a\_buffer,
+\citem{\cfunc[void]{bufc\_buffer\_set}{cw\_bufc\_t *a\_bufc, void *a\_buffer,
 cw\_uint32\_t a\_size, cw\_bool\_t a\_is\_writeable, cw\_opaque\_dealloc\_t
-*a\_dealloc\_func, void *a\_dealloc\_arg}}: ]
-	\begin{description}\item[]
+*a\_dealloc\_func, void *a\_dealloc\_arg}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_bufc: ]
@@ -603,11 +603,11 @@ cw\_uint32\_t a\_size, cw\_bool\_t a\_is\_writeable, cw\_opaque\_dealloc\_t
 		on the \classname{bufc}'s state).  In other words, don't call
 		this function after the \classname{bufc} has been inserted into
 		one or more \classname{buf}'s.
-	\end{description}
+	\end{capilist}
 \label{bufc_size_get}
 \index{\cfunc{bufc\_size\_get}{}}
-\item[{\cfunc[cw\_uint32\_t]{bufc\_size\_get}{cw\_bufc\_t *a\_bufc}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_uint32\_t]{bufc\_size\_get}{cw\_bufc\_t *a\_bufc}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_bufc: ]
@@ -621,5 +621,5 @@ cw\_uint32\_t a\_size, cw\_bool\_t a\_is\_writeable, cw\_opaque\_dealloc\_t
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Return the number of bytes in \cvar{a\_bufc}'s internal buffer.
-	\end{description}
-\end{description}
+	\end{capilist}
+\end{capi}

@@ -21,11 +21,11 @@ thread can hold a lock at a time, and attempting to attain the lock while
 already owning it has undefined results.
 
 \subsubsection{API}
-\begin{description}
+\begin{capi}
 \label{mtx_new}
 \index{\cfunc{mtx\_new}{}}
-\item[{\cfunc[void]{mtx\_new}{cw\_mtx\_t *a\_mtx}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{mtx\_new}{cw\_mtx\_t *a\_mtx}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_mtx: ]
@@ -35,11 +35,11 @@ already owning it has undefined results.
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Constructor.
-	\end{description}
+	\end{capilist}
 \label{mtx_delete}
 \index{\cfunc{mtx\_delete}{}}
-\item[{\cfunc[void]{mtx\_delete}{cw\_mtx\_t *a\_mtx}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{mtx\_delete}{cw\_mtx\_t *a\_mtx}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_mtx: ]
@@ -49,11 +49,11 @@ already owning it has undefined results.
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Destructor.
-	\end{description}
+	\end{capilist}
 \label{mtx_lock}
 \index{\cfunc{mtx\_lock}{}}
-\item[{\cfunc[void]{mtx\_lock}{cw\_mtx\_t *a\_mtx}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{mtx\_lock}{cw\_mtx\_t *a\_mtx}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_mtx: ]
@@ -63,11 +63,11 @@ already owning it has undefined results.
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Lock \cvar{a\_mtx}.
-	\end{description}
+	\end{capilist}
 \label{mtx_trylock}
 \index{\cfunc{mtx\_trylock}{}}
-\item[{\cfunc[cw\_bool\_t]{mtx\_trylock}{cw\_mtx\_t *a\_mtx}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_bool\_t]{mtx\_trylock}{cw\_mtx\_t *a\_mtx}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_mtx: ]
@@ -85,11 +85,11 @@ already owning it has undefined results.
 	\item[Description: ]
 		Try to lock \cvar{a\_mtx}, but return immediately instead of
 		blocking if \cvar{a\_mtx} is already locked.
-	\end{description}
+	\end{capilist}
 \label{mtx_unlock}
 \index{\cfunc{mtx\_unlock}{}}
-\item[{\cfunc[void]{mtx\_unlock}{cw\_mtx\_t *a\_mtx}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{mtx\_unlock}{cw\_mtx\_t *a\_mtx}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_mtx: ]
@@ -99,5 +99,5 @@ already owning it has undefined results.
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Unlock \cvar{a\_mtx}.
-	\end{description}
-\end{description}
+	\end{capilist}
+\end{capi}

@@ -21,11 +21,11 @@ conjunction with the \htmlref{\classname{mtx}}{mtx} class to wait for a
 condition to occur.
 
 \subsubsection{API}
-\begin{description}
+\begin{capi}
 \label{cnd_new}
 \index{\cfunc{cnd\_new}{}}
-\item[{\cfunc[void]{cnd\_new}{cw\_cnd\_t *a\_cnd}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{cnd\_new}{cw\_cnd\_t *a\_cnd}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_cnd: ]
@@ -35,11 +35,11 @@ condition to occur.
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Constructor.
-	\end{description}
+	\end{capilist}
 \label{cnd_delete}
 \index{\cfunc{cnd\_delete}{}}
-\item[{\cfunc[void]{cnd\_}{cw\_cnd\_t *a\_cnd}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{cnd\_}{cw\_cnd\_t *a\_cnd}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_cnd: ]
@@ -49,11 +49,11 @@ condition to occur.
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Destructor.
-	\end{description}
+	\end{capilist}
 \label{cnd_signal}
 \index{\cfunc{cnd\_signal}{}}
-\item[{\cfunc[void]{cnd\_signal}{cw\_cnd\_t *a\_cnd}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{cnd\_signal}{cw\_cnd\_t *a\_cnd}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_cnd: ]
@@ -64,11 +64,11 @@ condition to occur.
 	\item[Description: ]
 		Signal one thread waiting on \cvar{a\_cnd}, if there are any
 		waiters.
-	\end{description}
+	\end{capilist}
 \label{cnd_broadcast}
 \index{\cfunc{cnd\_broadcast}{}}
-\item[{\cfunc[void]{cnd\_broadcast}{cw\_cnd\_t *a\_cnd}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{cnd\_broadcast}{cw\_cnd\_t *a\_cnd}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_cnd: ]
@@ -78,12 +78,12 @@ condition to occur.
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Signal all threads waiting on \cvar{a\_cnd}.
-	\end{description}
+	\end{capilist}
 \label{cnd_timedwait}
 \index{\cfunc{cnd\_timedwait}{}}
-\item[{\cfunc[cw\_bool\_t]{cnd\_}{cw\_cnd\_t *a\_cnd, cw\_mtx\_t *a\_mtx, const
-struct timespec *a\_timeout}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_bool\_t]{cnd\_}{cw\_cnd\_t *a\_cnd, cw\_mtx\_t *a\_mtx, const
+struct timespec *a\_timeout}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_cnd: ]
@@ -104,11 +104,11 @@ struct timespec *a\_timeout}}: ]
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Wait for \cvar{a\_cnd} for at least \cvar{a\_time}.
-	\end{description}
+	\end{capilist}
 \label{cnd_wait}
 \index{\cfunc{cnd\_wait}{}}
-\item[{\cfunc[void]{cnd\_wait}{cw\_cnd\_t *a\_cnd, cw\_mtx\_t *a\_mtx}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{cnd\_wait}{cw\_cnd\_t *a\_cnd, cw\_mtx\_t *a\_mtx}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_cnd: ]
@@ -120,5 +120,5 @@ struct timespec *a\_timeout}}: ]
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Wait for \cvar{a\_cnd}.
-	\end{description}
-\end{description}
+	\end{capilist}
+\end{capi}

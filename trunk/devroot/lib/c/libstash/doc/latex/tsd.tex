@@ -21,11 +21,11 @@ instance can be created, then any number of threads can use that same instance
 to store and retrieve a thread-specific pointer to data.
 
 \subsubsection{API}
-\begin{description}
+\begin{capi}
 \label{tsd_new}
 \index{\cfunc{tsd\_new}{}}
-\item[{\cfunc[void]{tsd\_new}{cw\_tsd\_t *a\_tsd, void (*a\_func)(void *)}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{tsd\_new}{cw\_tsd\_t *a\_tsd, void (*a\_func)(void *)}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_tsd: ]
@@ -37,11 +37,11 @@ to store and retrieve a thread-specific pointer to data.
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Constructor.
-	\end{description}
+	\end{capilist}
 \label{tsd_delete}
 \index{\cfunc{tsd\_delete}{}}
-\item[{\cfunc[void]{tsd\_delete}{cw\_tsd\_t *a\_tsd}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{tsd\_delete}{cw\_tsd\_t *a\_tsd}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_tsd: ]
@@ -51,11 +51,11 @@ to store and retrieve a thread-specific pointer to data.
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Destructor.
-	\end{description}
+	\end{capilist}
 \label{tsd_get}
 \index{\cfunc{tsd\_get}{}}
-\item[{\cfunc[void *]{tsd\_get}{cw\_tsd\_t *a\_tsd}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void *]{tsd\_get}{cw\_tsd\_t *a\_tsd}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_tsd: ]
@@ -69,11 +69,11 @@ to store and retrieve a thread-specific pointer to data.
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Get thread-specific data pointer.
-	\end{description}
+	\end{capilist}
 \label{tsd_set}
 \index{\cfunc{tsd\_set}{}}
-\item[{\cfunc[]{tsd\_set}{cw\_tsd\_t *a\_tsd, void *a\_val}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[]{tsd\_set}{cw\_tsd\_t *a\_tsd, void *a\_val}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_tsd: ]
@@ -85,5 +85,5 @@ to store and retrieve a thread-specific pointer to data.
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Set thread-specific data pointer.
-	\end{description}
-\end{description}
+	\end{capilist}
+\end{capi}

@@ -381,7 +381,7 @@ etc.).
 
 \subsection{currenterror}
 
-\begin{longtable}{|r|l|l|p{4in}|}
+\begin{longtable}{|r|l|l|p{3in}|}
 \caption[currenterror summary]{currenterror summary by functional group}
 \\
 \hline
@@ -421,7 +421,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 \subsection{envdict}
 \subsection{errordict}
 
-\begin{longtable}{|r|l|l|p{4in}|}
+\begin{longtable}{|r|l|l|p{3in}|}
 \caption{errordict summary} \\
 \hline
 Input(s) & Op/Proc/Var & Output(s) & Description \\
@@ -475,12 +475,11 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 & {\bf \htmlref{unmatchedmark}{errordict:unmatchedmark}} & & \\
 \hline
 & {\bf \htmlref{unregistered}{errordict:unregistered}} & & \\
-\hline
 \end{longtable}
 
 \subsection{gcdict}
 
-\begin{longtable}{|r|l|l|p{4in}|}
+\begin{longtable}{|r|l|l|p{3in}|}
 \caption[gcdict summary]{gcdict summary by functional group}
 \\
 \hline
@@ -542,7 +541,7 @@ are of general use.  Although there are no mechanisms that prevent modification
 of systemdict, programs should not normally need to modify systemdict, since
 globaldict provides a place for storing globally shared objects.
 
-\begin{longtable}{|r|l|l|p{3in}|}
+\begin{longtable}{|r|l|l|p{2.5in}|}
 \caption[systemdict summary]{systemdict summary by functional group} \\
 \hline
 Input(s) & Op/Proc/Var & Output(s) & Description \\
@@ -1458,8 +1457,9 @@ s:1> pstack
 
 \subsection{threaddict}
 
-\begin{longtable}{|r|l|l|p{4in}|}
-\caption[threaddict summary]{threaddict summary by functional group} \\
+
+\begin{longtable}{|r|l|l|p{3in}|}
+\caption{threaddict summary} \\
 \hline
 Input(s) & Op/Proc/Var & Output(s) & Description \\
 \hline \hline
@@ -1470,8 +1470,9 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 Input(s) & Op/Proc/Var & Output(s) & Description \\
 \hline \hline \endhead
 \hline
-\multicolumn{4}{|l|}{Dictionary and dictionary stack operators} \\
-\hline \hline
+\multicolumn{4}{r}{\emph{Continued on next page...}} \endfoot
+\hline \endlastfoot
+%end{latexonly}
 & {\bf \htmlref{errordict}{threaddict:errordict}} & & \\
 \hline
 & {\bf \htmlref{currenterror}{threaddict:currenterror}} & & \\
@@ -1479,7 +1480,6 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 & {\bf \htmlref{userdict}{threaddict:userdict}} & & \\
 \hline
 & {\bf \htmlref{threaddict}{threaddict:threaddict}} & & \\
-\hline
 \end{longtable}
 
 \subsection{userdict}
@@ -1489,4 +1489,4 @@ userdict is meant to be used for general storage of definitions that do not need
 to be shared among threads.  userdict starts out empty when a thread is
 created.
 
-\section{Tutorial}
+%\section{Tutorial}

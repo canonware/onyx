@@ -20,12 +20,12 @@ The \classname{sock} class encapsulates a TCP/IP socket and provides an
 abstracted API that allows completely asynchronous socket I/O.
 
 \subsubsection{API}
-\begin{description}
+\begin{capi}
 \label{sock_new}
 \index{\cfunc{sock\_new}{}}
-\item[{\cfunc[cw\_sock\_t *]{sock\_new}{cw\_sock\_t *a\_sock, cw\_uint32\_t
-a\_in\_max\_buf\_size}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_sock\_t *]{sock\_new}{cw\_sock\_t *a\_sock, cw\_uint32\_t
+a\_in\_max\_buf\_size}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_sock: ]
@@ -46,11 +46,11 @@ a\_in\_max\_buf\_size}}: ]
 		\end{description}
 	\item[Description: ]
 		Constructor.
-	\end{description}
+	\end{capilist}
 \label{sock_delete}
 \index{\cfunc{sock\_delete}{}}
-\item[{\cfunc[void]{sock\_delete}{cw\_sock\_t *a\_sock}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{sock\_delete}{cw\_sock\_t *a\_sock}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_sock: ]
@@ -60,11 +60,11 @@ a\_in\_max\_buf\_size}}: ]
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Destructor.
-	\end{description}
+	\end{capilist}
 \label{sock_is_connected}
 \index{\cfunc{sock\_is\_connected}{}}
-\item[{\cfunc[cw\_bool\_t]{sock\_is\_connected}{cw\_sock\_t *a\_sock}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_bool\_t]{sock\_is\_connected}{cw\_sock\_t *a\_sock}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_sock: ]
@@ -83,11 +83,11 @@ a\_in\_max\_buf\_size}}: ]
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Return TRUE if \cvar{a\_sock} is connected.
-	\end{description}
+	\end{capilist}
 \label{sock_port_get}
 \index{\cfunc{sock\_port\_get}{}}
-\item[{\cfunc[cw\_uint32\_t]{sock\_port\_get}{cw\_sock\_t *a\_sock}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_uint32\_t]{sock\_port\_get}{cw\_sock\_t *a\_sock}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_sock: ]
@@ -101,12 +101,12 @@ a\_in\_max\_buf\_size}}: ]
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Return the local port number for \cvar{a\_sock}.
-	\end{description}
+	\end{capilist}
 \label{sock_connect}
 \index{\cfunc{sock\_connect}{}}
-\item[{\cfunc[cw\_sint32\_t]{sock\_connect}{cw\_sock\_t *a\_sock, const char
-*a\_server\_host, int a\_port, struct timespec *a\_timeout}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_sint32\_t]{sock\_connect}{cw\_sock\_t *a\_sock, const char
+*a\_server\_host, int a\_port, struct timespec *a\_timeout}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_sock: ]
@@ -138,12 +138,12 @@ a\_in\_max\_buf\_size}}: ]
 		Connect to a remote socket.  If the connection attempt times
 		out, \cfunc{sock\_connect}{} can be called again in order to
 		attempt completing a non-blocking connect.
-	\end{description}
+	\end{capilist}
 \label{sock_wrap}
 \index{\cfunc{sock\_wrap}{}}
-\item[{\cfunc[cw\_bool\_t]{sock\_wrap}{cw\_sock\_t *a\_sock, int a\_sockfd,
-cw\_bool\_t a\_init}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_bool\_t]{sock\_wrap}{cw\_sock\_t *a\_sock, int a\_sockfd,
+cw\_bool\_t a\_init}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_sock: ]
@@ -167,11 +167,11 @@ cw\_bool\_t a\_init}}: ]
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Wrap an open socket descriptor inside \cvar{a\_sock}.
-	\end{description}
+	\end{capilist}
 \label{sock_disconnect}
 \index{\cfunc{sock\_disconnect}{}}
-\item[{\cfunc[cw\_bool\_t]{sock\_disconnect}{cw\_sock\_t *a\_sock}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_bool\_t]{sock\_disconnect}{cw\_sock\_t *a\_sock}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_sock: ]
@@ -191,11 +191,11 @@ cw\_bool\_t a\_init}}: ]
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Disconnect \cvar{a\_sock}.
-	\end{description}
+	\end{capilist}
 \label{sock_buffered_in}
 \index{\cfunc{sock\_buffered\_in}{}}
-\item[{\cfunc[cw\_uint32\_t]{sock\_buffered\_in}{cw\_sock\_t *a\_sock}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_uint32\_t]{sock\_buffered\_in}{cw\_sock\_t *a\_sock}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_sock: ]
@@ -209,12 +209,12 @@ cw\_bool\_t a\_init}}: ]
 	\item[Exception(s): ] none.
 	\item[Description: ]
 		Return the number of bytes of buffered incoming data.
-	\end{description}
+	\end{capilist}
 \label{sock_read}
 \index{\cfunc{sock\_read}{}}
-\item[{\cfunc[cw\_sint32\_t]{sock\_read}{cw\_sock\_t *a\_sock, cw\_buf\_t
-*a\_spare, cw\_sint32\_t a\_max\_read, struct timespec *a\_timeout}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_sint32\_t]{sock\_read}{cw\_sock\_t *a\_sock, cw\_buf\_t
+*a\_spare, cw\_sint32\_t a\_max\_read, struct timespec *a\_timeout}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_sock: ]
@@ -251,12 +251,12 @@ cw\_bool\_t a\_init}}: ]
 		Read data from the socket, and do not return until there are
 		data (not necessarily \cvar{a\_max\_read}), or the timeout
 		expires.
-	\end{description}
+	\end{capilist}
 \label{sock_write}
 \index{\cfunc{sock\_write}{}}
-\item[{\cfunc[cw\_bool\_t]{sock\_write}{cw\_sock\_t *a\_sock, cw\_buf\_t
-*a\_buf}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_bool\_t]{sock\_write}{cw\_sock\_t *a\_sock, cw\_buf\_t
+*a\_buf}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_sock: ]
@@ -278,11 +278,11 @@ cw\_bool\_t a\_init}}: ]
 		\end{description}
 	\item[Description: ]
 		Queue the data in \cvar{a\_buf} for asynchronous writing.
-	\end{description}
+	\end{capilist}
 \label{sock_out_flush}
 \index{\cfunc{sock\_out\_flush}{}}
-\item[{\cfunc[cw\_bool\_t]{sock\_out\_flush}{cw\_sock\_t *a\_sock}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_bool\_t]{sock\_out\_flush}{cw\_sock\_t *a\_sock}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_sock: ]
@@ -300,11 +300,11 @@ cw\_bool\_t a\_init}}: ]
 	\item[Description: ]
 		Flush the outgoing data queue (actually, just wait until it has
 		all been sent), and do not return until done.
-	\end{description}
+	\end{capilist}
 \label{sock_fd_get}
 \index{\cfunc{sock\_fd\_get}{}}
-\item[{\cfunc[int]{sock\_fd\_get}{cw\_sock\_t *a\_sock}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[int]{sock\_fd\_get}{cw\_sock\_t *a\_sock}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_sock: ]
@@ -324,5 +324,5 @@ cw\_bool\_t a\_init}}: ]
 	\item[Description: ]
 		Return the number of the file descriptor associated with
 		\cvar{a\_sock}.
-	\end{description}
-\end{description}
+	\end{capilist}
+\end{capi}

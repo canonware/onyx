@@ -114,11 +114,11 @@ full result.  See the \htmlref{\classname{thd}}{thd} class documentation for
 more details.
 
 \section{API}
-\begin{description}
+\begin{capi}
 \label{_cw_stil_code}
 \index{\cppmacro{\_cw\_stil\_code}{}}
-\item[{\cppmacro[void]{\_cw\_stil\_code}{cw\_stilt\_t *a\_stilt, a\_code}}: ]
-	\begin{description}\item[]
+\citem{\cppmacro[void]{\_cw\_stil\_code}{cw\_stilt\_t *a\_stilt, a\_code}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_stilt: ]
@@ -131,8 +131,8 @@ more details.
 	\item[Description: ]
 		Convenience macro for static embedded \htmlref{stil}{stillang}
 		code.
-	\end{description}
-\end{description}
+	\end{capilist}
+\end{capi}
 
 \section{Classes}
 \input{@abs_srcdir@/lib/c/libstil/doc/latex/stil}

@@ -24,11 +24,11 @@ result, care must be taken to assure that these macros are used as intended, or
 strange things can happen.
 
 \subsubsection{API}
-\begin{description}
+\begin{capi}
 \label{qs_head}
 \index{\cppmacro{qs\_head}{}}
-\item[{\cppmacro[]{qs\_head}{{\lt}qs\_type{\gt} a\_type}}: ]
-	\begin{description}\item[]
+\citem{\cppmacro[]{qs\_head}{{\lt}qs\_type{\gt} a\_type}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_type: ]
@@ -39,11 +39,11 @@ strange things can happen.
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Generate code for a \classname{qs} head data structure.
-	\end{description}
+	\end{capilist}
 \label{qs_head_initializer}
 \index{\cppmacro{qs\_head\_initializer}{}}
-\item[{\cppmacro[]{qs\_head\_initializer}{{\lt}qs\_type{\gt} *a\_head}}: ]
-	\begin{description}\item[]
+\citem{\cppmacro[]{qs\_head\_initializer}{{\lt}qs\_type{\gt} *a\_head}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_head: ]
@@ -53,11 +53,11 @@ strange things can happen.
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Statically initialize a \classname{qs} head.
-	\end{description}
+	\end{capilist}
 \label{qs_elm}
 \index{\cppmacro{qs\_elm}{}}
-\item[{\cppmacro[]{qs\_elm}{{\lt}qs\_elm\_type{\gt} a\_type}}: ]
-	\begin{description}\item[]
+\citem{\cppmacro[]{qs\_elm}{{\lt}qs\_elm\_type{\gt} a\_type}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_type: ]
@@ -68,11 +68,11 @@ strange things can happen.
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Generate code for a \classname{qs} element data structure.
-	\end{description}
+	\end{capilist}
 \label{qs_new}
 \index{\cppmacro{qs\_new}{}}
-\item[{\cppmacro[void]{qs\_new}{{\lt}qs\_type{\gt} *a\_head}}: ]
-	\begin{description}\item[]
+\citem{\cppmacro[void]{qs\_new}{{\lt}qs\_type{\gt} *a\_head}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_head: ]
@@ -82,12 +82,12 @@ strange things can happen.
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Constructor.
-	\end{description}
+	\end{capilist}
 \label{qs_elm_new}
 \index{\cppmacro{qs\_elm\_new}{}}
-\item[{\cppmacro[void]{qs\_elm\_new}{{\lt}qs\_elm\_type{\gt} *a\_elm,
-{\lt}field\_name{\gt} a\_field}}: ]
-	\begin{description}\item[]
+\citem{\cppmacro[void]{qs\_elm\_new}{{\lt}qs\_elm\_type{\gt} *a\_elm,
+{\lt}field\_name{\gt} a\_field}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_head: ]
@@ -99,11 +99,11 @@ strange things can happen.
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Constructor.
-	\end{description}
+	\end{capilist}
 \label{qs_top}
 \index{\cppmacro{qs\_top}{}}
-\item[{\cppmacro[{\lt}qs\_type{\gt} *]{qs\_top}{{\lt}qs\_type{\gt} *a\_head}}: ]
-	\begin{description}\item[]
+\citem{\cppmacro[{\lt}qs\_type{\gt} *]{qs\_top}{{\lt}qs\_type{\gt} *a\_head}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_head: ]
@@ -117,12 +117,12 @@ strange things can happen.
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Return a pointer to the top element in the \classname{qs}.
-	\end{description}
+	\end{capilist}
 \label{qs_down}
 \index{\cppmacro{qs\_down}{}}
-\item[{\cppmacro[{\lt}qs\_type{\gt} *]{qs\_down}{{\lt}qs\_elm\_type{\gt}
-*a\_elm, {\lt}field\_name{\gt} a\_field}}: ]
-	\begin{description}\item[]
+\citem{\cppmacro[{\lt}qs\_type{\gt} *]{qs\_down}{{\lt}qs\_elm\_type{\gt}
+*a\_elm, {\lt}field\_name{\gt} a\_field}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_elm: ]
@@ -146,12 +146,12 @@ strange things can happen.
 	\item[Description: ]
 		Return a pointer to the next element in the \classname{qs} below
 		\cvar{a\_elm}.
-	\end{description}
+	\end{capilist}
 \label{qs_push}
 \index{\cppmacro{qs\_push}{}}
-\item[{\cppmacro[void]{qs\_push}{{\lt}qs\_type{\gt} *a\_head,
-{\lt}qs\_elm\_type{\gt} *a\_elm, {\lt}field\_name{\gt} a\_field}}: ]
-	\begin{description}\item[]
+\citem{\cppmacro[void]{qs\_push}{{\lt}qs\_type{\gt} *a\_head,
+{\lt}qs\_elm\_type{\gt} *a\_elm, {\lt}field\_name{\gt} a\_field}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_head: ]
@@ -165,12 +165,12 @@ strange things can happen.
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Push \cvar{a\_elm} onto the \classname{qs}.
-	\end{description}
+	\end{capilist}
 \label{qs_under_push}
 \index{\cppmacro{qs\_under\_push}{}}
-\item[{\cppmacro[void]{qs\_under\_push}{{\lt}qs\_elm\_type{\gt} *a\_qselm,
-{\lt}qs\_elm\_type{\gt} *a\_elm, {\lt}field\_name{\gt} a\_field}}: ]
-	\begin{description}\item[]
+\citem{\cppmacro[void]{qs\_under\_push}{{\lt}qs\_elm\_type{\gt} *a\_qselm,
+{\lt}qs\_elm\_type{\gt} *a\_elm, {\lt}field\_name{\gt} a\_field}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_qselm: ]
@@ -184,12 +184,12 @@ strange things can happen.
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Push \cvar{a\_elm} under \cvar{a\_qselm}.
-	\end{description}
+	\end{capilist}
 \label{qs_pop}
 \index{\cppmacro{qs\_pop}{}}
-\item[{\cppmacro[void]{qs\_pop}{{\lt}qs\_type{\gt} *a\_head,
-{\lt}field\_name{\gt} a\_field}}: ]
-	\begin{description}\item[]
+\citem{\cppmacro[void]{qs\_pop}{{\lt}qs\_type{\gt} *a\_head,
+{\lt}field\_name{\gt} a\_field}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_head: ]
@@ -201,12 +201,12 @@ strange things can happen.
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Pop an element off of \cvar{a\_head}.
-	\end{description}
+	\end{capilist}
 \label{qs_foreach}
 \index{\cppmacro{qs\_foreach}{}}
-\item[{\cppmacro[]{qs\_foreach}{{\lt}qs\_elm\_type{\gt} *a\_var,
-{\lt}qs\_type{\gt} *a\_head, {\lt}field\_name{\gt} a\_field}}: ]
-	\begin{description}\item[]
+\citem{\cppmacro[]{qs\_foreach}{{\lt}qs\_elm\_type{\gt} *a\_var,
+{\lt}qs\_type{\gt} *a\_head, {\lt}field\_name{\gt} a\_field}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_var: ]
@@ -221,5 +221,5 @@ strange things can happen.
 	\item[Description: ]
 		Iterate down the \classname{qs}, storing a pointer to each
 		element in \cvar{a\_var} along the way.
-	\end{description}
-\end{description}
+	\end{capilist}
+\end{capi}

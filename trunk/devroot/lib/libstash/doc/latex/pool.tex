@@ -25,12 +25,12 @@ memory leaks and other memory allocation errors can be detected and printed to
 \cvar{out\_err}.
 
 \subsubsection{API}
-\begin{description}
+\begin{capi}
 \label{pool_new}
 \index{\cfunc{pool\_new}{}}
-\item[{\cfunc[cw\_pool\_t *]{pool\_new}{cw\_pool\_t *a\_pool, cw\_mem\_t
-*a\_mem, cw\_uint32\_t a\_buffer\_size}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_pool\_t *]{pool\_new}{cw\_pool\_t *a\_pool, cw\_mem\_t
+*a\_mem, cw\_uint32\_t a\_buffer\_size}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_pool: ]
@@ -52,11 +52,11 @@ memory leaks and other memory allocation errors can be detected and printed to
 		\end{description}
 	\item[Description: ]
 		Constructor.
-	\end{description}
+	\end{capilist}
 \label{pool_delete}
 \index{\cfunc{pool\_delete}{}}
-\item[{\cfunc[void]{pool\_delete}{cw\_pool\_t *a\_pool}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{pool\_delete}{cw\_pool\_t *a\_pool}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_pool: ]
@@ -66,11 +66,11 @@ memory leaks and other memory allocation errors can be detected and printed to
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Destructor.
-	\end{description}
+	\end{capilist}
 \label{pool_buffer_size_get}
 \index{\cfunc{pool\_buffer\_size\_get}{}}
-\item[{\cfunc[cw\_uint32\_t]{pool\_}{cw\_pool\_t *a\_pool}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_uint32\_t]{pool\_}{cw\_pool\_t *a\_pool}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_pool: ]
@@ -84,11 +84,11 @@ memory leaks and other memory allocation errors can be detected and printed to
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Return the size of the buffers that \cvar{a\_pool} is using.
-	\end{description}
+	\end{capilist}
 \label{pool_drain}
 \index{\cfunc{pool\_drain}{}}
-\item[{\cfunc[void]{pool\_drain}{cw\_pool\_t *a\_pool}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{pool\_drain}{cw\_pool\_t *a\_pool}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_pool: ]
@@ -98,15 +98,15 @@ memory leaks and other memory allocation errors can be detected and printed to
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Discard internally cached buffers, if any.
-	\end{description}
+	\end{capilist}
 \label{pool_get_e}
 \index{\cfunc{pool\_get\_e}{}}
-\item[{\cfunc[void *]{pool\_get\_e}{cw\_pool\_t *a\_pool, const char
-*a\_filename, cw\_uint32\_t a\_line\_num}}: ]
+\citem{\cfunc[void *]{pool\_get\_e}{cw\_pool\_t *a\_pool, const char
+*a\_filename, cw\_uint32\_t a\_line\_num}}
 \label{pool_get}
 \index{\cppmacro{pool\_get}{}}
-\item[{\cppmacro[void *]{pool\_get}{cw\_pool\_t *a\_pool}}: ]
-	\begin{description}\item[]
+\citem{\cppmacro[void *]{pool\_get}{cw\_pool\_t *a\_pool}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_pool: ]
@@ -127,15 +127,15 @@ memory leaks and other memory allocation errors can be detected and printed to
 		\end{description}
 	\item[Description: ]
 		Allocate a memory buffer and return a pointer to it.
-	\end{description}
+	\end{capilist}
 \label{pool_put_e}
 \index{\cfunc{pool\_put_e}{}}
-\item[{\cfunc[void]{pool\_put\_e}{cw\_pool\_t *a\_pool, void *a\_buffer, const
-char *a\_filename, cw\_uint32\_t a\_line\_num}}: ]
+\citem{\cfunc[void]{pool\_put\_e}{cw\_pool\_t *a\_pool, void *a\_buffer, const
+char *a\_filename, cw\_uint32\_t a\_line\_num}}
 \label{pool_put}
 \index{\cppmacro{pool\_put}{}}
-\item[{\cppmacro[void]{pool\_put}{cw\_pool\_t *a\_pool, void *a\_buffer}}: ]
-	\begin{description}\item[]
+\citem{\cppmacro[void]{pool\_put}{cw\_pool\_t *a\_pool, void *a\_buffer}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_pool: ]
@@ -151,11 +151,11 @@ char *a\_filename, cw\_uint32\_t a\_line\_num}}: ]
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Put back (deallocate) \cvar{a\_buffer}.
-	\end{description}
+	\end{capilist}
 \label{pool_dump}
 \index{\cfunc{pool\_dump}{}}
-\item[{\cfunc[void]{pool\_dump}{cw\_pool\_t *a\_pool, const char *a\_prefix}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{pool\_dump}{cw\_pool\_t *a\_pool, const char *a\_prefix}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_pool: ]
@@ -172,5 +172,5 @@ char *a\_filename, cw\_uint32\_t a\_line\_num}}: ]
 		\end{description}
 	\item[Description: ]
 		Dump the internal state of \cvar{a\_pool} to \cvar{out\_err}.
-	\end{description}
-\end{description}
+	\end{capilist}
+\end{capi}

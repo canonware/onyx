@@ -39,12 +39,12 @@ items can vary wildly; the \htmlref{\classname{dch}}{dch} class is designed for
 such situations.
 
 \subsubsection{API}
-\begin{description}
+\begin{capi}
 \label{_CW_CH_TABLE2SIZEOF}
 \index{\cppmacro{\_CW\_CH\_TABLE2SIZEOF}{}}
-\item[{\cppmacro[cw\_uint32\_t]{\_CW\_CH\_TABLE2SIZEOF}{cw\_uint32\_t
-a\_table\_size}}: ]
-	\begin{description}\item[]
+\citem{\cppmacro[cw\_uint32\_t]{\_CW\_CH\_TABLE2SIZEOF}{cw\_uint32\_t
+a\_table\_size}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_table\_size: ]
@@ -60,13 +60,13 @@ a\_table\_size}}: ]
 	\item[Description: ]
 		Calculate the size of a \classname{ch} object with
 		\cvar{a\_table\_size} slots.
-	\end{description}
+	\end{capilist}
 \label{ch_new}
 \index{\cfunc{ch\_new}{}}
-\item[{\cfunc[]{ch\_new}{cw\_ch\_t *a\_ch, cw\_mem\_t *a\_mem, cw\_uint32\_t
+\citem{\cfunc[]{ch\_new}{cw\_ch\_t *a\_ch, cw\_mem\_t *a\_mem, cw\_uint32\_t
 a\_table\_size, cw\_ch\_hash\_t *a\_hash, cw\_ch\_key\_comp\_t 
-*a\_key\_comp}}: ]
-	\begin{description}\item[]
+*a\_key\_comp}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_ch: ]
@@ -94,11 +94,11 @@ a\_table\_size, cw\_ch\_hash\_t *a\_hash, cw\_ch\_key\_comp\_t
 		\end{description}
 	\item[Description: ]
 		Constructor.
-	\end{description}
+	\end{capilist}
 \label{ch_delete}
 \index{\cfunc{ch\_delete}{}}
-\item[{\cfunc[void]{ch\_delete}{cw\_ch\_t *a\_ch}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{ch\_delete}{cw\_ch\_t *a\_ch}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_ch: ]
@@ -108,11 +108,11 @@ a\_table\_size, cw\_ch\_hash\_t *a\_hash, cw\_ch\_key\_comp\_t
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Destructor.
-	\end{description}
+	\end{capilist}
 \label{ch_count}
 \index{\cfunc{ch\_count}{}}
-\item[{\cfunc[cw\_uint32\_t]{ch\_count}{cw\_ch\_t *a\_ch}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_uint32\_t]{ch\_count}{cw\_ch\_t *a\_ch}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_ch: ]
@@ -126,12 +126,12 @@ a\_table\_size, cw\_ch\_hash\_t *a\_hash, cw\_ch\_key\_comp\_t
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Return the number of items in \cvar{a\_ch}.
-	\end{description}
+	\end{capilist}
 \label{ch_insert}
 \index{\cfunc{ch\_insert}{}}
-\item[{\cfunc[void]{ch\_insert}{cw\_ch\_t *a\_ch, const void *a\_key, const void
-*a\_data, cw\_chi\_t *a\_chi}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{ch\_insert}{cw\_ch\_t *a\_ch, const void *a\_key, const void
+*a\_data, cw\_chi\_t *a\_chi}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_ch: ]
@@ -152,12 +152,12 @@ a\_table\_size, cw\_ch\_hash\_t *a\_hash, cw\_ch\_key\_comp\_t
 		Insert \cvar{a\_data} into \cvar{a\_ch}, using key
 		\cvar{a\_key}.  Use \cvar{a\_chi} for the internal
 		\classname{chi} container if non-NULL.
-	\end{description}
+	\end{capilist}
 \label{ch_remove}
 \index{\cfunc{ch\_remove}{}}
-\item[{\cfunc[cw\_bool\_t]{ch\_remove}{cw\_ch\_t *a\_ch, const void
-*a\_search\_key, void **r\_key, void **r\_data, cw\_chi\_t **r\_chi}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_bool\_t]{ch\_remove}{cw\_ch\_t *a\_ch, const void
+*a\_search\_key, void **r\_key, void **r\_data, cw\_chi\_t **r\_chi}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_ch: ]
@@ -196,12 +196,12 @@ a\_table\_size, cw\_ch\_hash\_t *a\_hash, cw\_ch\_key\_comp\_t
 		inserted with key \cvar{a\_search\_key}.  If successful, set
 		\cvar{*r\_key} and \cvar{*r\_data} to point to the key, data,
 		and externally allocated \classname{chi}, respectively.
-	\end{description}
+	\end{capilist}
 \label{ch_search}
 \index{\cfunc{ch\_search}{}}
-\item[{\cfunc[cw\_bool\_t]{ch\_search}{cw\_ch\_t *a\_ch, const void *a\_key,
-void **r\_data}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_bool\_t]{ch\_search}{cw\_ch\_t *a\_ch, const void *a\_key,
+void **r\_data}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_ch: ]
@@ -230,12 +230,12 @@ void **r\_data}}: ]
 		Search for the most recently inserted item with key
 		\cvar{a\_key}.  If found, \cvar{*r\_data} to point to the
 		associated data.
-	\end{description}
+	\end{capilist}
 \label{ch_get_iterate}
 \index{\cfunc{ch\_get\_iterate}{}}
-\item[{\cfunc[cw\_bool\_t]{ch\_get\_iterate}{cw\_ch\_t *a\_ch,  void **r\_key,
-void **r\_data}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_bool\_t]{ch\_get\_iterate}{cw\_ch\_t *a\_ch,  void **r\_key,
+void **r\_data}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_ch: ]
@@ -266,12 +266,12 @@ void **r\_data}}: ]
 		Set \cvar{*r\_key} and \cvar{*r\_data} to point to the oldest
 		item in \cvar{a\_ch}.  Promote the item so that it is the newest
 		item in \cvar{a\_ch}.
-	\end{description}
+	\end{capilist}
 \label{ch_remove_iterate}
 \index{\cfunc{ch\_remove\_iterate}{}}
-\item[{\cfunc[cw\_bool\_t]{ch\_remove\_iterate}{cw\_ch\_t *a\_ch,  void
-**r\_key, void **r\_data, cw\_chi\_t **r\_chi}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_bool\_t]{ch\_remove\_iterate}{cw\_ch\_t *a\_ch,  void
+**r\_key, void **r\_data, cw\_chi\_t **r\_chi}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_ch: ]
@@ -309,11 +309,11 @@ void **r\_data}}: ]
 		item in \cvar{a\_ch}, set \cvar{*r\_chi} to point to the item's
 		container, if externally allocated, and remove the item from
 		\cvar{a\_ch}.
-	\end{description}
+	\end{capilist}
 \label{ch_dump}
 \index{\cfunc{ch\_dump}{}}
-\item[{\cfunc[void]{ch\_dump}{cw\_ch\_t *a\_ch, const char *a\_prefix}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{ch\_dump}{cw\_ch\_t *a\_ch, const char *a\_prefix}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_ch: ]
@@ -329,11 +329,11 @@ void **r\_data}}: ]
 		\end{description}
 	\item[Description: ]
 		Print the internal state of \cvar{a\_ch}.
-	\end{description}
+	\end{capilist}
 \label{ch_string_hash}
 \index{\cfunc{ch\_string\_hash}{}}
-\item[{\cfunc[cw\_uint32\_t]{ch\_string\_hash}{const void *a\_key}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_uint32\_t]{ch\_string\_hash}{const void *a\_key}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_key: ]
@@ -347,11 +347,11 @@ void **r\_data}}: ]
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		NULL-terminated string hashing function.
-	\end{description}
+	\end{capilist}
 \label{ch_direct_hash}
 \index{\cfunc{ch\_direct\_hash}{}}
-\item[{\cfunc[cw\_uint32\_t]{ch\_direct\_hash}{const void *a\_key}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_uint32\_t]{ch\_direct\_hash}{const void *a\_key}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_key: ]
@@ -365,12 +365,12 @@ void **r\_data}}: ]
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Direct (pointer) hashing function.
-	\end{description}
+	\end{capilist}
 \label{ch_string_key_comp}
 \index{\cfunc{ch\_string\_key\_comp}{}}
-\item[{\cfunc[cw\_bool\_t]{ch\_string\_key\_comp}{const void *a\_k1, const void
-*a\_k2}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_bool\_t]{ch\_string\_key\_comp}{const void *a\_k1, const void
+*a\_k2}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_k1: ]
@@ -391,12 +391,12 @@ void **r\_data}}: ]
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Test two keys (NULL-terminated strings) for equality.
-	\end{description}
+	\end{capilist}
 \label{ch_direct_key_comp}
 \index{\cfunc{ch\_direct\_key\_comp}{}}
-\item[{\cfunc[cw\_bool\_t]{ch\_direct\_key\_comp}{const void *a\_k1, const void
-*a\_k2}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_bool\_t]{ch\_direct\_key\_comp}{const void *a\_k1, const void
+*a\_k2}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_k1: ]
@@ -417,5 +417,5 @@ void **r\_data}}: ]
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Test two keys (pointers) for equality.
-	\end{description}
-\end{description}
+	\end{capilist}
+\end{capi}

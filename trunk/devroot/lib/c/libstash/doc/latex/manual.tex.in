@@ -96,11 +96,11 @@ defines the following exceptions:
 \end{description}
 
 \section{API}
-\begin{description}
+\begin{capi}
 \label{libstash_init}
 \index{\cfunc{libstash\_init}{}}
-\item[{\cfunc[void]{libstash\_init}{void}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{libstash\_init}{void}}
+	\begin{capilist}
 	\item[Input(s): ] None.
 	\item[Output(s): ] None.
 	\item[Exception(s): ]
@@ -111,22 +111,22 @@ defines the following exceptions:
 		Initialize various global variables.  In particular, initialize
 		\cvar{cw\_g\_mem}, \cvar{out\_std}, and \cvar{out\_err} (default
 		output to file descriptor 1).
-	\end{description}
+	\end{capilist}
 \label{libstash_shutdown}
 \index{\cfunc{libstash\_shutdown}{}}
-\item[{\cfunc[void]{libstash\_shutdown}{void}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{libstash\_shutdown}{void}}
+	\begin{capilist}
 	\item[Input(s): ] None.
 	\item[Output(s): ] None.
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Clean up the global variables that are initialized by
 		\cfunc{libstash\_init}{}.
-	\end{description}
+	\end{capilist}
 \label{_cw_assert}
 \index{\cppmacro{\_cw\_assert}{}}
-\item[{\cppmacro[void]{\_cw\_assert}{expression}}: ]
-	\begin{description}\item[]
+\citem{\cppmacro[void]{\_cw\_assert}{expression}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[expression: ]
@@ -141,22 +141,22 @@ defines the following exceptions:
 
 		Note: This macro is optimized out of the non-debug versions of
 		\libname{libstash}.
-	\end{description}
+	\end{capilist}
 \label{_cw_not_reached}
 \index{\cppmacro{\_cw\_not\_reached}{}}
-\item[{\cppmacro[void]{\_cw\_not\_reached}{void}}: ]
-	\begin{description}\item[]
+\citem{\cppmacro[void]{\_cw\_not\_reached}{void}}
+	\begin{capilist}
 	\item[Input(s): ] None.
 	\item[Output(s): ] None.
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Abort with an error message, if a debugging version of
 		\libname{libstash}.
-	\end{description}
+	\end{capilist}
 \label{_cw_error}
 \index{\cfunc{\_cw\_error}{}}
-\item[{\cfunc[void]{\_cw\_error}{const char *a\_str}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{\_cw\_error}{const char *a\_str}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_str: ]
@@ -169,11 +169,11 @@ defines the following exceptions:
 	\item[Description: ]
 		Print the contents of \cvar{a\_str}, followed by a carriage
 		return, to file descriptor 2.
-	\end{description}
+	\end{capilist}
 \label{_cw_ntohq}
 \index{\cppmacro{\_cw\_ntohq}{}}
-\item[{\cppmacro[cw\_uint64\_t]{\_cw\_ntohq}{cw\_uint64\_t a\_val}}: ]
-	\begin{description}\item[]
+\citem{\cppmacro[cw\_uint64\_t]{\_cw\_ntohq}{cw\_uint64\_t a\_val}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_val: ]
@@ -188,11 +188,11 @@ defines the following exceptions:
 	\item[Description: ]
 		Convert \cvar{a\_val} from network byte order to host byte order
 		and return the result.
-	\end{description}
+	\end{capilist}
 \label{_cw_htonq}
 \index{\cppmacro{\_cw\_htonq}{}}
-\item[{\cppmacro[cw\_uint64\_t]{\_cw\_htonq}{cw\_uint64\_t a\_val}}: ]
-	\begin{description}\item[]
+\citem{\cppmacro[cw\_uint64\_t]{\_cw\_htonq}{cw\_uint64\_t a\_val}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_val: ]
@@ -207,26 +207,8 @@ defines the following exceptions:
 	\item[Description: ]
 		Convert \cvar{a\_val} from host byte order to network byte order
 		and return the result.
-	\end{description}
-% \label{xxx_}
-% \index{\cfunc{xxx\_}{}}
-% \item[{\cfunc[]{xxx\_}{}}: ]
-% 	\begin{description}\item[]
-% 	\item[Input(s): ]
-% 		\begin{description}\item[]
-% 		\item[: ]
-% 		\end{description}
-% 	\item[Output(s): ]
-% 		\begin{description}\item[]
-% 		\item[: ]
-% 		\end{description}
-% 	\item[Exception(s): ]
-% 		\begin{description}\item[]
-% 		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
-% 		\end{description}
-% 	\item[Description: ]
-% 	\end{description}
-\end{description}
+	\end{capilist}
+\end{capi}
 
 \section{Classes}
 \input{@abs_srcdir@/lib/c/libstash/doc/latex/bhp}

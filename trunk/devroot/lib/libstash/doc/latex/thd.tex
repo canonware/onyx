@@ -33,12 +33,12 @@ interrupted: \cfunc{read}{}, \cfunc{write}{}, \cfunc{sendto}{},
 \cfunc{wait}{}.  See the system documentation for additional information.
 
 \subsubsection{API}
-\begin{description}
+\begin{capi}
 \label{thd_new}
 \index{\cfunc{thd\_new}{}}
-\item[{\cfunc[cw\_thd\_t]{thd\_new}{void *(*a\_start\_func)(void *), void
-*a\_arg, cw\_bool\_t a\_suspendible}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_thd\_t]{thd\_new}{void *(*a\_start\_func)(void *), void
+*a\_arg, cw\_bool\_t a\_suspendible}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_start\_func: ] Pointer to a start function.
@@ -59,11 +59,11 @@ interrupted: \cfunc{read}{}, \cfunc{write}{}, \cfunc{sendto}{},
 		\end{description}
 	\item[Description: ]
 		Constructor (creates a new thread).
-	\end{description}
+	\end{capilist}
 \label{thd_delete}
 \index{\cfunc{thd\_delete}{}}
-\item[{\cfunc[void]{thd\_delete}{cw\_thd\_t *a\_thd}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{thd\_delete}{cw\_thd\_t *a\_thd}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_thd: ] Pointer to a \classname{thd}.
@@ -72,11 +72,11 @@ interrupted: \cfunc{read}{}, \cfunc{write}{}, \cfunc{sendto}{},
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Destructor.
-	\end{description}
+	\end{capilist}
 \label{thd_join}
 \index{\cfunc{thd\_join}{}}
-\item[{\cfunc[void *]{thd\_join}{cw\_thd\_t *a\_thd}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void *]{thd\_join}{cw\_thd\_t *a\_thd}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_thd: ] Pointer to a \classname{thd}.
@@ -89,11 +89,11 @@ interrupted: \cfunc{read}{}, \cfunc{write}{}, \cfunc{sendto}{},
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Join (wait for) the thread associated with \cvar{a\_thd}.
-	\end{description}
+	\end{capilist}
 \label{thd_self}
 \index{\cfunc{thd\_self}{}}
-\item[{\cfunc[cw\_thd\_t *]{thd\_self}{void}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_thd\_t *]{thd\_self}{void}}
+	\begin{capilist}
 	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
@@ -105,22 +105,22 @@ interrupted: \cfunc{read}{}, \cfunc{write}{}, \cfunc{sendto}{},
 	\item[Description: ]
 		Return a pointer to the \classname{thd} structure that
 		corresponds to the calling thread.
-	\end{description}
+	\end{capilist}
 \label{thd_yield}
 \index{\cfunc{thd\_yield}{}}
-\item[{\cfunc[void]{thd\_}{void}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{thd\_}{void}}
+	\begin{capilist}
 	\item[Input(s): ] None.
 	\item[Output(s): ] None.
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Give up the rest of the calling thread's time slice.
-	\end{description}
+	\end{capilist}
 \label{thd_sigmask}
 \index{\cfunc{thd\_sigmask}{}}
-\item[{\cfunc[int]{thd\_sigmask}{int a\_how, const sigset\_t *a\_set, sigset\_t
-*r\_oset}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[int]{thd\_sigmask}{int a\_how, const sigset\_t *a\_set, sigset\_t
+*r\_oset}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_how: ]
@@ -152,11 +152,11 @@ interrupted: \cfunc{read}{}, \cfunc{write}{}, \cfunc{sendto}{},
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Set the calling thread's signal mask.
-	\end{description}
+	\end{capilist}
 \label{thd_crit_enter}
 \index{\cfunc{thd\_crit\_enter}{}}
-\item[{\cfunc[void]{thd\_crit\_enter}{void}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{thd\_crit\_enter}{void}}
+	\begin{capilist}
 	\item[Input(s): ] None.
 	\item[Output(s): ] None.
 	\item[Exception(s): ] None.
@@ -164,33 +164,33 @@ interrupted: \cfunc{read}{}, \cfunc{write}{}, \cfunc{sendto}{},
 		Enter a critical region where the calling thread may not be
 		suspended by \cfunc{thd\_suspend}{}, \cfunc{thd\_trysuspend}{},
 		or \cfunc{thd\_single\_enter}{}.
-	\end{description}
+	\end{capilist}
 \label{thd_crit_leave}
 \index{\cfunc{thd\_crit\_leave}{}}
-\item[{\cfunc[void]{thd\_crit\_leave}{void}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{thd\_crit\_leave}{void}}
+	\begin{capilist}
 	\item[Input(s): ] None.
 	\item[Output(s): ] None.
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Leave a critical section; the calling thread may once again be
 		suspended.
-	\end{description}
+	\end{capilist}
 \label{thd_single_enter}
 \index{\cfunc{thd\_single\_enter}{}}
-\item[{\cfunc[void]{thd\_single\_enter}{void}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{thd\_single\_enter}{void}}
+	\begin{capilist}
 	\item[Input(s): ] None.
 	\item[Output(s): ] None.
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Enter a critical region where all other suspendible threads must
 		be suspended.
-	\end{description}
+	\end{capilist}
 \label{thd_single_leave}
 \index{\cfunc{thd\_single\_leave}{}}
-\item[{\cfunc[void]{thd\_single\_leave}{void}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{thd\_single\_leave}{void}}
+	\begin{capilist}
 	\item[Input(s): ] None.
 	\item[Output(s): ] None.
 	\item[Exception(s): ] None.
@@ -198,11 +198,11 @@ interrupted: \cfunc{read}{}, \cfunc{write}{}, \cfunc{sendto}{},
 		Leave a critical section where all other threads must be
 		suspended.  All threads that were suspended in
 		\cfunc{thd\_single\_enter}{} are resumed.
-	\end{description}
+	\end{capilist}
 \label{thd_suspend}
 \index{\cfunc{thd\_suspend}{}}
-\item[{\cfunc[void]{thd\_suspend}{cw\_thd\_t *a\_thd}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{thd\_suspend}{cw\_thd\_t *a\_thd}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_thd: ]
@@ -212,11 +212,11 @@ interrupted: \cfunc{read}{}, \cfunc{write}{}, \cfunc{sendto}{},
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Suspend \cvar{a\_thd}.
-	\end{description}
+	\end{capilist}
 \label{thd_trysuspend}
 \index{\cfunc{thd\_trysuspend}{}}
-\item[{\cfunc[cw\_bool\_t]{thd\_trysuspend}{cw\_thd\_t *a\_thd}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_bool\_t]{thd\_trysuspend}{cw\_thd\_t *a\_thd}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_thd: ]
@@ -236,11 +236,11 @@ interrupted: \cfunc{read}{}, \cfunc{write}{}, \cfunc{sendto}{},
 	\item[Description: ]
 		Try to suspend \cvar{a\_thd}, but fail if it is in a critical
 		section.
-	\end{description}
+	\end{capilist}
 \label{thd_resume}
 \index{\cfunc{thd\_resume}{}}
-\item[{\cfunc[void]{thd\_}{cw\_thd\_t *a\_thd}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{thd\_}{cw\_thd\_t *a\_thd}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_thd: ]
@@ -250,5 +250,5 @@ interrupted: \cfunc{read}{}, \cfunc{write}{}, \cfunc{sendto}{},
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Resume (make runnable) \classname{a\_thd}.
-	\end{description}
-\end{description}
+	\end{capilist}
+\end{capi}

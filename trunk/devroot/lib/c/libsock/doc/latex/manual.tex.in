@@ -76,12 +76,12 @@ Use one of the following compiler command lines to compile applications with
 \end{description}
 
 \section{API}
-\begin{description}
+\begin{capi}
 \label{libsock_init}
 \index{\cfunc{libsock\_init}{}}
-\item[{\cfunc[void]{libsock\_init}{cw\_uint32\_t a\_max\_fds, cw\_uint32\_t
-a\_bufc\_size, cw\_uint32\_t a\_max\_spare\_bufcs}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{libsock\_init}{cw\_uint32\_t a\_max\_fds, cw\_uint32\_t
+a\_bufc\_size, cw\_uint32\_t a\_max\_spare\_bufcs}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_max\_fds: ]
@@ -104,21 +104,21 @@ a\_bufc\_size, cw\_uint32\_t a\_max\_spare\_bufcs}}: ]
 		\end{description}
 	\item[Description: ]
 		Global initializer for \libname{libsock} and its I/O thread.
-	\end{description}
+	\end{capilist}
 \label{libsock_shutdown}
 \index{\cfunc{libsock\_shutdown}{}}
-\item[{\cfunc[void]{libsock\_shutdown}{void}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{libsock\_shutdown}{void}}
+	\begin{capilist}
 	\item[Input(s): ] None.
 	\item[Output(s): ] None.
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Global shutdown for \libname{libsock}.
-	\end{description}
+	\end{capilist}
 \label{libsock_spare_bufc_get}
 \index{\cfunc{libsock\_spare\_bufc\_get}{}}
-\item[{\cfunc[cw\_bufc\_t *]{libsock\_spare\_bufc\_get}{void}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_bufc\_t *]{libsock\_spare\_bufc\_get}{void}}
+	\begin{capilist}
 	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
@@ -134,12 +134,12 @@ a\_bufc\_size, cw\_uint32\_t a\_max\_spare\_bufcs}}: ]
 		\classname{bufc} is of the size specified by the
 		\cvar{a\_bufc\_size} parameter passed to
 		\cfunc{libsock\_init}{}.
-	\end{description}
+	\end{capilist}
 \label{libsock_in_notify}
 \index{\cfunc{libsock\_in\_notify}{}}
-\item[{\cfunc[void]{libsock\_in\_notify}{cw\_mq\_t *a\_mq, cw\_sock\_t *a\_sock,
-void *a\_val}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{libsock\_in\_notify}{cw\_mq\_t *a\_mq, cw\_sock\_t *a\_sock,
+void *a\_val}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_mq: ]
@@ -163,8 +163,8 @@ void *a\_val}}: ]
 		receiving notifications, pass a NULL pointer for the
 		\cvar{a\_mq} parameter. Note that only one \classname{mq} at a
 		time can be notified of events on a particular \classname{sock}.
-	\end{description}
-\end{description}
+	\end{capilist}
+\end{capi}
 
 \section{Classes}
 \input{@abs_srcdir@/lib/c/libsock/doc/latex/sock}

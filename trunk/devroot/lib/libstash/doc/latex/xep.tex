@@ -63,42 +63,42 @@ that exception.  Instead, \cfunc{xep\_handled}{} must be manually called to
 avoid propagating the exception up the handler chain.
 
 \subsubsection{API}
-\begin{description}
+\begin{capi}
 \label{xep_begin}
 \index{\cppmacro{xep\_begin}{}}
-\item[{\cppmacro[void]{xep\_begin}{void}}: ]
-	\begin{description}\item[]
+\citem{\cppmacro[void]{xep\_begin}{void}}
+	\begin{capilist}
 	\item[Input(s): ] None.
 	\item[Output(s): ] None.
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Begin an exception handling code block.
-	\end{description}
+	\end{capilist}
 \label{xep_end}
 \index{\cppmacro{xep\_end}{}}
-\item[{\cppmacro[void]{xep\_end}{void}}: ]
-	\begin{description}\item[]
+\citem{\cppmacro[void]{xep\_end}{void}}
+	\begin{capilist}
 	\item[Input(s): ] None.
 	\item[Output(s): ] None.
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		End an exception handling block.
-	\end{description}
+	\end{capilist}
 \label{xep_try}
 \index{\cppdef{xep\_try}}
-\item[{\cppdef{xep\_try} \dots}: ]
-	\begin{description}\item[]
+\citem{\cppdef{xep\_try} \dots}
+	\begin{capilist}
 	\item[Input(s): ] None.
 	\item[Output(s): ] None.
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Begin a block of code that is to be executed, with the
 		possibility that an exception might be thrown.
-	\end{description}
+	\end{capilist}
 \label{xep_catch}
 \index{\cppmacro{xep\_catch}{}}
-\item[{\cppmacro{xep\_catch}{cw\_xepv\_t a\_xepv} \dots}: ]
-	\begin{description}\item[]
+\citem{\cppmacro{xep\_catch}{cw\_xepv\_t a\_xepv} \dots}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_xepv: ]
@@ -110,11 +110,11 @@ avoid propagating the exception up the handler chain.
 		Begin a block of code that catches an exception.  The exception
 		is not considered handled unless \cfunc{xep\_handled}{} is
 		called.
-	\end{description}
+	\end{capilist}
 \label{xep_mcatch}
 \index{\cppmacro{xep\_mcatch}{}}
-\item[{\cppmacro{xep\_mcatch}{cw\_xepv\_t a\_xepv} \dots}: ]
-	\begin{description}\item[]
+\citem{\cppmacro{xep\_mcatch}{cw\_xepv\_t a\_xepv} \dots}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_xepv: ]
@@ -128,11 +128,11 @@ avoid propagating the exception up the handler chain.
 		is used for the case where more than one exception type is to be
 		handled by the same code block.  The exception is not considered
 		handled unless \cfunc{xep\_handled}{} is called.
-	\end{description}
+	\end{capilist}
 \label{xep_acatch}
 \index{\cppdef{xep\_acatch}}
-\item[{\cppdef{xep\_acatch} \dots}: ]
-	\begin{description}\item[]
+\citem{\cppdef{xep\_acatch} \dots}
+	\begin{capilist}
 	\item[Input(s): ] None.
 	\item[Output(s): ] None.
 	\item[Exception(s): ] None.
@@ -142,11 +142,11 @@ avoid propagating the exception up the handler chain.
 		blocks.  There may only be one \cppdef{xep\_acatch} block within
 		a try/catch block.  The exception is not considered handled
 		unless \cfunc{xep\_handled}{} is called.
-	\end{description}
+	\end{capilist}
 \label{xep_finally}
 \index{\cppdef{xep\_finally}}
-\item[{\cppdef{xep\_finally} \dots}: ]
-	\begin{description}\item[]
+\citem{\cppdef{xep\_finally} \dots}
+	\begin{capilist}
 	\item[Input(s): ] None.
 	\item[Output(s): ] None.
 	\item[Exception(s): ] None.
@@ -154,11 +154,11 @@ avoid propagating the exception up the handler chain.
 		Begin a block of code that is executed if no exceptions are
 		thrown in the exception handling code block or if an exception
 		handler is executed.
-	\end{description}
+	\end{capilist}
 \label{xep_value}
 \index{\cfunc{xep\_value}{}}
-\item[{\cfunc[cw\_xepv\_t]{xep\_value}{void}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_xepv\_t]{xep\_value}{void}}
+	\begin{capilist}
 	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
@@ -168,15 +168,15 @@ avoid propagating the exception up the handler chain.
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Return the value of the current exception being handled.
-	\end{description}
+	\end{capilist}
 \label{xep_throw_e}
 \label{xep_throw}
 \index{\cfunc{xep\_throw\_e}{}}
 \index{\cfunc{xep\_throw}{}}
-\item[{\cfunc[void]{xep\_throw\_e}{cw\_xepv\_t a\_xepv, const char *a\_filename,
-cw\_uint32\_t a\_line\_num}}: ]
-\item[{\cfunc[void]{xep\_throw}{cw\_xepv\_t a\_xepv}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{xep\_throw\_e}{cw\_xepv\_t a\_xepv, const char *a\_filename,
+cw\_uint32\_t a\_line\_num}}
+\citem{\cfunc[void]{xep\_throw}{cw\_xepv\_t a\_xepv}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_xepv: ]
@@ -193,26 +193,26 @@ cw\_uint32\_t a\_line\_num}}: ]
 		\end{description}
 	\item[Description: ]
 		Throw an exception.
-	\end{description}
+	\end{capilist}
 \label{xep_retry}
 \index{\cfunc{xep\_retry}{}}
-\item[{\cfunc[void]{xep\_retry}{void}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{xep\_retry}{void}}
+	\begin{capilist}
 	\item[Input(s): ] None.
 	\item[Output(s): ] None.
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Implicitly handle the current exception and retry the
 		\cppdef{xep\_try} code block.
-	\end{description}
+	\end{capilist}
 \label{xep_handled}
 \index{\cfunc{xep\_handled}{}}
-\item[{\cfunc[void]{xep\_handled}{void}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{xep\_handled}{void}}
+	\begin{capilist}
 	\item[Input(s): ] None.
 	\item[Output(s): ] None.
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Mark the current exception as handled.
-	\end{description}
-\end{description}
+	\end{capilist}
+\end{capi}

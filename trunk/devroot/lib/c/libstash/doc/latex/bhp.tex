@@ -23,13 +23,13 @@ priority comparison function must be specified during creation of a
 \ctype{cw\_uint32\_t}, \ctype{cw\_sint32\_t}, and \ctype{cw\_uint64\_t}.
 
 \subsubsection{API}
-\begin{description}
+\begin{capi}
 \label{bhpi_new}
 \index{\cfunc{bhpi\_new}{}}
-\item[{\cfunc[cw\_bhpi\_t]{bhpi\_new}{cw\_bhpi\_t *a\_bhpi, cw\_mem\_t *a\_mem,
+\citem{\cfunc[cw\_bhpi\_t]{bhpi\_new}{cw\_bhpi\_t *a\_bhpi, cw\_mem\_t *a\_mem,
 const void *a\_priority, const void *a\_data, void (*a\_dealloc\_func)(void
-*dealloc\_arg, void *bhpi), void *a\_dealloc\_arg}}: ]
-	\begin{description}\item[]
+*dealloc\_arg, void *bhpi), void *a\_dealloc\_arg}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_bhpi: ]
@@ -59,11 +59,11 @@ const void *a\_priority, const void *a\_data, void (*a\_dealloc\_func)(void
 		\end{description}
 	\item[Description: ]
 		Constructor.
-	\end{description}
+	\end{capilist}
 \label{bhpi_delete}
 \index{\cfunc{bhpi\_delete}{}}
-\item[{\cfunc[void]{bhpi\_delete}{cw\_bhpi\_t *a\_bhpi}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{bhpi\_delete}{cw\_bhpi\_t *a\_bhpi}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_bhpi: ]
@@ -78,16 +78,16 @@ const void *a\_priority, const void *a\_data, void (*a\_dealloc\_func)(void
 
 		Note: No attempt is made to free data pointed to by the priority
 		or data pointers.
-	\end{description}
+	\end{capilist}
 \label{bhp_new}
 \label{bhp_new_r}
 \index{\cfunc{bhp\_new}{}}
 \index{\cfunc{bhp\_new\_r}{}}
-\item[{\cfunc[cw\_bhp\_t *]{bhp\_new}{cw\_bhp\_t *a\_bhp, cw\_mem\_t *a\_mem,
-bhp\_prio\_comp\_t *a\_prio\_comp}}: ]
-\item[{\cfunc[cw\_bhp\_t *]{bhp\_new\_r}{cw\_bhp\_t *a\_bhp, cw\_mem\_t *a\_mem,
-bhp\_prio\_comp\_t *a\_prio\_comp}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_bhp\_t *]{bhp\_new}{cw\_bhp\_t *a\_bhp, cw\_mem\_t *a\_mem,
+bhp\_prio\_comp\_t *a\_prio\_comp}}
+\citem{\cfunc[cw\_bhp\_t *]{bhp\_new\_r}{cw\_bhp\_t *a\_bhp, cw\_mem\_t
+*a\_mem, bhp\_prio\_comp\_t *a\_prio\_comp}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_bhp: ]
@@ -108,11 +108,11 @@ bhp\_prio\_comp\_t *a\_prio\_comp}}: ]
 		\end{description}
 	\item[Description: ]
 		Non-thread-safe and thread-safe constructors.
-	\end{description}
+	\end{capilist}
 \label{bhp_delete}
 \index{\cfunc{bhp\_delete}{}}
-\item[{\cfunc[void]{bhp\_delete}{cw\_bhp\_t *a\_bhp}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{bhp\_delete}{cw\_bhp\_t *a\_bhp}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_bhp: ]
@@ -122,11 +122,11 @@ bhp\_prio\_comp\_t *a\_prio\_comp}}: ]
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Destructor.
-	\end{description}
+	\end{capilist}
 \label{bhp_dump}
 \index{\cfunc{bhp\_dump}{}}
-\item[{\cfunc[void]{bhp\_dump}{cw\_bhp\_t *a\_bhp}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{bhp\_dump}{cw\_bhp\_t *a\_bhp}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_bhp: ]
@@ -140,11 +140,11 @@ bhp\_prio\_comp\_t *a\_prio\_comp}}: ]
 		\end{description}
 	\item[Description: ]
 		Print the internal tree to \cvar{out\_err}.
-	\end{description}
+	\end{capilist}
 \label{bhp_insert}
 \index{\cfunc{bhp\_insert}{}}
-\item[{\cfunc[void]{bhp\_insert}{cw\_bhp\_t *a\_bhp, cw\_bhpi\_t *a\_bhpi}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{bhp\_insert}{cw\_bhp\_t *a\_bhp, cw\_bhpi\_t *a\_bhpi}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_bhp: ]
@@ -156,12 +156,12 @@ bhp\_prio\_comp\_t *a\_prio\_comp}}: ]
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Insert an item into \cvar{a\_bhp}.
-	\end{description}
+	\end{capilist}
 \label{bhp_min_find}
 \index{\cfunc{bhp\_min\_find}{}}
-\item[{\cfunc[cw\_bool\_t]{bhp\_min\_find}{cw\_bhp\_t *a\_bhp, void
-**r\_priority, void **r\_data}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_bool\_t]{bhp\_min\_find}{cw\_bhp\_t *a\_bhp, void
+**r\_priority, void **r\_data}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_bhp: ]
@@ -187,12 +187,12 @@ bhp\_prio\_comp\_t *a\_prio\_comp}}: ]
 	\item[Description: ]
 		Set \cvar{*r\_priority} and \cvar{*r\_data} to point to a
 		minimum node in \cvar{a\_bhp}.
-	\end{description}
+	\end{capilist}
 \label{bhp_min_del}
 \index{\cfunc{bhp\_min\_del}{}}
-\item[{\cfunc[cw\_bool\_t]{bhp\_min\_del}{cw\_bhp\_t *a\_bhp, void
-**r\_priority, void **r\_data}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_bool\_t]{bhp\_min\_del}{cw\_bhp\_t *a\_bhp, void
+**r\_priority, void **r\_data}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_bhp: ]
@@ -219,11 +219,11 @@ bhp\_prio\_comp\_t *a\_prio\_comp}}: ]
 		Set \cvar{*r\_priority} and \cvar{*r\_data} to point to a
 		minimum node in \cvar{a\_bhp} and remove the item from
 		\cvar{a\_bhp}.
-	\end{description}
+	\end{capilist}
 \label{bhp_size_get}
 \index{\cfunc{bhp\_size\_get}{}}
-\item[{\cfunc[cw\_uint64\_t]{bhp\_size\_get}{cw\_bhp\_t *a\_bhp}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_uint64\_t]{bhp\_size\_get}{cw\_bhp\_t *a\_bhp}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_bhp: ]
@@ -237,11 +237,11 @@ bhp\_prio\_comp\_t *a\_prio\_comp}}: ]
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Return the number of items in \cvar{a\_bhp}.
-	\end{description}
+	\end{capilist}
 \label{bhp_union}
 \index{\cfunc{bhp\_union}{}}
-\item[{\cfunc[void]{bhp\_union}{cw\_bhp\_t *a\_a, cw\_bhp\_t *a\_b}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{bhp\_union}{cw\_bhp\_t *a\_a, cw\_bhp\_t *a\_b}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_a: ]
@@ -254,12 +254,12 @@ bhp\_prio\_comp\_t *a\_prio\_comp}}: ]
 	\item[Description: ]
 		Merge \cvar{a\_b} into \cvar{a\_a}.  \cvar{a\_b} is invalid
 		after this call, and does not need to be deleted.
-	\end{description}
+	\end{capilist}
 \label{bhp_priority_compare_uint32}
 \index{\cfunc{bhp\_priority\_compare\_uint32}{}}
-\item[{\cfunc[cw\_sint32\_t]{bhp\_priority\_compare\_uint32}{const void *a\_a,
-const void *a\_b}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_sint32\_t]{bhp\_priority\_compare\_uint32}{const void *a\_a,
+const void *a\_b}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_a: ]
@@ -271,21 +271,21 @@ const void *a\_b}}: ]
 		\begin{description}\item[]
 		\item[retval: ]
 			\begin{description}\item[]
-			\item[-1: ] \cvar{*a\_a} < \cvar{*a\_b}.
+			\item[-1: ] \cvar{*a\_a} {\lt} \cvar{*a\_b}.
 			\item[0: ] \cvar{*a\_a} == \cvar{*a\_b}.
-			\item[1: ] \cvar{*a\_a} > \cvar{*a\_b}.
+			\item[1: ] \cvar{*a\_a} {\gt} \cvar{*a\_b}.
 			\end{description}
 		\end{description}
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Compare \cvar{*a\_a} and \cvar{*a\_b} as unsigned 32 bit
 		integers.
-	\end{description}
+	\end{capilist}
 \label{bhp_priority_compare_sint32}
 \index{\cfunc{bhp\_priority\_compare\_sint32}{}}
-\item[{\cfunc[cw\_sint32\_t]{bhp\_priority\_compare\_sint32}{const void *a\_a,
-const void *a\_b}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_sint32\_t]{bhp\_priority\_compare\_sint32}{const void *a\_a,
+const void *a\_b}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_a: ]
@@ -297,21 +297,21 @@ const void *a\_b}}: ]
 		\begin{description}\item[]
 		\item[retval: ]
 			\begin{description}\item[]
-			\item[-1: ] \cvar{*a\_a} < \cvar{*a\_b}.
+			\item[-1: ] \cvar{*a\_a} {\lt} \cvar{*a\_b}.
 			\item[0: ] \cvar{*a\_a} == \cvar{*a\_b}.
-			\item[1: ] \cvar{*a\_a} > \cvar{*a\_b}.
+			\item[1: ] \cvar{*a\_a} {\gt} \cvar{*a\_b}.
 			\end{description}
 		\end{description}
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Compare \cvar{*a\_a} and \cvar{*a\_b} as signed 32 bit
 		integers.
-	\end{description}
+	\end{capilist}
 \label{bhp_priority_compare_uint64}
 \index{\cfunc{bhp\_priority\_compare\_uint64}{}}
-\item[{\cfunc[cw\_sint32\_t]{bhp\_priority\_compare\_uint64}{const void *a\_a,
-const void *a\_b}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_sint32\_t]{bhp\_priority\_compare\_uint64}{const void *a\_a,
+const void *a\_b}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_a: ]
@@ -323,14 +323,14 @@ const void *a\_b}}: ]
 		\begin{description}\item[]
 		\item[retval: ]
 			\begin{description}\item[]
-			\item[-1: ] \cvar{*a\_a} < \cvar{*a\_b}.
+			\item[-1: ] \cvar{*a\_a} {\lt} \cvar{*a\_b}.
 			\item[0: ] \cvar{*a\_a} == \cvar{*a\_b}.
-			\item[1: ] \cvar{*a\_a} > \cvar{*a\_b}.
+			\item[1: ] \cvar{*a\_a} {\gt} \cvar{*a\_b}.
 			\end{description}
 		\end{description}
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Compare \cvar{*a\_a} and \cvar{*a\_b} as unsigned 64 bit
 		integers.
-	\end{description}
-\end{description}
+	\end{capilist}
+\end{capi}

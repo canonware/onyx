@@ -21,11 +21,11 @@ The \classname{socks} class implements a socket listener (server).  The
 \classname{sock} instance for each connection.
 
 \subsubsection{API}
-\begin{description}
+\begin{capi}
 \label{socks_new}
 \index{\cfunc{socks\_new}{}}
-\item[{\cfunc[cw\_socks\_t *]{socks\_new}{void}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_socks\_t *]{socks\_new}{void}}
+	\begin{capilist}
 	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
@@ -38,11 +38,11 @@ The \classname{socks} class implements a socket listener (server).  The
 		\end{description}
 	\item[Description: ]
 		Constructor.
-	\end{description}
+	\end{capilist}
 \label{socks_delete}
 \index{\cfunc{socks\_delete}{}}
-\item[{\cfunc[void]{socks\_delete}{cw\_socks\_t *a\_socks}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{socks\_delete}{cw\_socks\_t *a\_socks}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_socks: ]
@@ -52,12 +52,12 @@ The \classname{socks} class implements a socket listener (server).  The
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Destructor.
-	\end{description}
+	\end{capilist}
 \label{socks_listen}
 \index{\cfunc{socks\_listen}{}}
-\item[{\cfunc[cw\_bool\_t]{socks\_listen}{cw\_socks\_t *a\_socks,
-cw\_uint32\_a\_mask, int *r\_port}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_bool\_t]{socks\_listen}{cw\_socks\_t *a\_socks,
+cw\_uint32\_a\_mask, int *r\_port}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_socks: ]
@@ -88,12 +88,12 @@ cw\_uint32\_a\_mask, int *r\_port}}: ]
 		\cvar{*r\_port} is 0, let the operating system choose what port
 		number to use, and assign the number to \cvar{*r\_port} before
 		returning.
-	\end{description}
+	\end{capilist}
 \label{socks_accept}
 \index{\cfunc{socks\_accept}{}}
-\item[{\cfunc[cw\_sock\_t *]{socks\_accept}{cw\_socks\_t *a\_socks, struct
-timespec *a\_timeout, cw\_sock\_t *r\_sock}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_sock\_t *]{socks\_accept}{cw\_socks\_t *a\_socks, struct
+timespec *a\_timeout, cw\_sock\_t *r\_sock}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_socks: ]
@@ -121,5 +121,5 @@ timespec *a\_timeout, cw\_sock\_t *r\_sock}}: ]
 	\item[Description: ]
 		Accept a connection.  Don't return until someone connects, or
 		the timeout expires.
-	\end{description}
-\end{description}
+	\end{capilist}
+\end{capi}

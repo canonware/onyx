@@ -25,12 +25,12 @@ memory leaks and other memory allocation errors can be detected and printed to
 \cvar{out\_err}.
 
 \subsubsection{API}
-\begin{description}
+\begin{capi}
 \label{pezz_new}
 \index{\cfunc{pezz\_new}{}}
-\item[{\cfunc[cw\_pezz\_t *]{pezz\_new}{cw\_pezz\_t *a\_pezz, cw\_mem\_t
-*a\_mem, cw\_uint32\_t a\_buffer\_size, cw\_uint32\_t a\_num\_buffers}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_pezz\_t *]{pezz\_new}{cw\_pezz\_t *a\_pezz, cw\_mem\_t
+*a\_mem, cw\_uint32\_t a\_buffer\_size, cw\_uint32\_t a\_num\_buffers}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_pezz: ]
@@ -55,11 +55,11 @@ memory leaks and other memory allocation errors can be detected and printed to
 		\end{description}
 	\item[Description: ]
 		Constructor.
-	\end{description}
+	\end{capilist}
 \label{pezz_delete}
 \index{\cfunc{pezz\_delete}{}}
-\item[{\cfunc[void]{pezz\_delete}{cw\_pezz\_t *a\_pezz}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{pezz\_delete}{cw\_pezz\_t *a\_pezz}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_pezz: ]
@@ -69,11 +69,11 @@ memory leaks and other memory allocation errors can be detected and printed to
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Destructor.
-	\end{description}
+	\end{capilist}
 \label{pezz_buffer_size_get}
 \index{\cfunc{pezz\_buffer\_size\_get}{}}
-\item[{\cfunc[cw\_uint32\_t]{pezz\_}{cw\_pezz\_t *a\_pezz}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_uint32\_t]{pezz\_}{cw\_pezz\_t *a\_pezz}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_pezz: ]
@@ -87,15 +87,15 @@ memory leaks and other memory allocation errors can be detected and printed to
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Return the size of the buffers that \cvar{a\_pezz} is using.
-	\end{description}
+	\end{capilist}
 \label{pezz_get_e}
 \index{\cfunc{pezz\_get\_e}{}}
-\item[{\cfunc[void *]{pezz\_get\_e}{cw\_pezz\_t *a\_pezz, const char
-*a\_filename, cw\_uint32\_t a\_line\_num}}: ]
+\citem{\cfunc[void *]{pezz\_get\_e}{cw\_pezz\_t *a\_pezz, const char
+*a\_filename, cw\_uint32\_t a\_line\_num}}
 \label{pezz_get}
 \index{\cppmacro{pezz\_get}{}}
-\item[{\cppmacro[void *]{pezz\_get}{cw\_pezz\_t *a\_pezz}}: ]
-	\begin{description}\item[]
+\citem{\cppmacro[void *]{pezz\_get}{cw\_pezz\_t *a\_pezz}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_pezz: ]
@@ -116,15 +116,15 @@ memory leaks and other memory allocation errors can be detected and printed to
 		\end{description}
 	\item[Description: ]
 		Allocate a memory buffer and return a pointer to it.
-	\end{description}
+	\end{capilist}
 \label{pezz_put_e}
 \index{\cfunc{pezz\_put_e}{}}
-\item[{\cfunc[void]{pezz\_put\_e}{cw\_pezz\_t *a\_pezz, void *a\_buffer, const
-char *a\_filename, cw\_uint32\_t a\_line\_num}}: ]
+\citem{\cfunc[void]{pezz\_put\_e}{cw\_pezz\_t *a\_pezz, void *a\_buffer, const
+char *a\_filename, cw\_uint32\_t a\_line\_num}}
 \label{pezz_put}
 \index{\cppmacro{pezz\_put}{}}
-\item[{\cppmacro[void]{pezz\_put}{cw\_pezz\_t *a\_pezz, void *a\_buffer}}: ]
-	\begin{description}\item[]
+\citem{\cppmacro[void]{pezz\_put}{cw\_pezz\_t *a\_pezz, void *a\_buffer}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_pezz: ]
@@ -140,11 +140,11 @@ char *a\_filename, cw\_uint32\_t a\_line\_num}}: ]
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Put back (deallocate) \cvar{a\_buffer}.
-	\end{description}
+	\end{capilist}
 \label{pezz_dump}
 \index{\cfunc{pezz\_dump}{}}
-\item[{\cfunc[void]{pezz\_dump}{cw\_pezz\_t *a\_pezz, const char *a\_prefix}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{pezz\_dump}{cw\_pezz\_t *a\_pezz, const char *a\_prefix}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_pezz: ]
@@ -161,5 +161,5 @@ char *a\_filename, cw\_uint32\_t a\_line\_num}}: ]
 		\end{description}
 	\item[Description: ]
 		Dump the internal state of \cvar{a\_pezz} to \cvar{out\_err}.
-	\end{description}
-\end{description}
+	\end{capilist}
+\end{capi}

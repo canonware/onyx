@@ -40,12 +40,12 @@ Instead, there are several preprocessor macros that can be used:
 \cppmacro{\_cw\_realloc}{}, and \cppmacro{\_cw\_free}{}.
 
 \subsubsection{API}
-\begin{description}
+\begin{capi}
 \label{mem_new}
 \index{\cfunc{mem\_new}{}}
-\item[{\cfunc[cw\_mem\_t *]{mem\_new}{cw\_mem\_t *a\_mem, cw\_mem\_t
-*a\_internal}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[cw\_mem\_t *]{mem\_new}{cw\_mem\_t *a\_mem, cw\_mem\_t
+*a\_internal}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_mem: ]
@@ -65,11 +65,11 @@ Instead, there are several preprocessor macros that can be used:
 		\end{description}
 	\item[Description: ]
 		Constructor.
-	\end{description}
+	\end{capilist}
 \label{mem_delete}
 \index{\cfunc{mem\_delete}{}}
-\item[{\cfunc[void]{mem\_delete}{cw\_mem\_t *a\_mem}}: ]
-	\begin{description}\item[]
+\citem{\cfunc[void]{mem\_delete}{cw\_mem\_t *a\_mem}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_mem: ]
@@ -79,18 +79,18 @@ Instead, there are several preprocessor macros that can be used:
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Destructor.
-	\end{description}
+	\end{capilist}
 \label{mem_malloc_e}
 \index{\cfunc{mem\_malloc\_e}{}}
-\item[{\cfunc[void *]{mem\_malloc\_e}{cw\_mem\_t *a\_mem, size\_t a\_size, const
-char *a\_filename, cw\_uint32\_t a\_line\_num}}: ]
+\citem{\cfunc[void *]{mem\_malloc\_e}{cw\_mem\_t *a\_mem, size\_t a\_size, const
+char *a\_filename, cw\_uint32\_t a\_line\_num}}
 \label{mem_malloc}
 \index{\cfunc{mem\_malloc}{}}
-\item[{\cfunc[void *]{mem\_malloc}{cw\_mem\_t *a\_mem, , size\_t a\_size}}: ]
+\citem{\cfunc[void *]{mem\_malloc}{cw\_mem\_t *a\_mem, , size\_t a\_size}}
 \label{_cw_malloc}
 \index{\cppmacro{\_cw\_malloc}{}}
-\item[{\cppmacro[void *]{\_cw\_malloc}{size\_t a\_size}}: ]
-	\begin{description}\item[]
+\citem{\cppmacro[void *]{\_cw\_malloc}{size\_t a\_size}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_mem: ]
@@ -113,20 +113,20 @@ char *a\_filename, cw\_uint32\_t a\_line\_num}}: ]
 		\end{description}
 	\item[Description: ]
 		\cfunc{malloc}{} wrapper.
-	\end{description}
+	\end{capilist}
 \label{mem_calloc_e}
 \index{\cfunc{mem\_calloc\_e}{}}
-\item[{\cfunc[void *]{mem\_calloc\_e}{cw\_mem\_t *a\_mem, size\_t a\_number,
-size\_t a\_size, const char *a\_filename, cw\_uint32\_t a\_line\_num}}: ]
+\citem{\cfunc[void *]{mem\_calloc\_e}{cw\_mem\_t *a\_mem, size\_t a\_number,
+size\_t a\_size, const char *a\_filename, cw\_uint32\_t a\_line\_num}}
 \label{mem_calloc}
 \index{\cfunc{mem\_calloc}{}}
-\item[{\cfunc[void *]{mem\_calloc}{cw\_mem\_t *a\_mem, size\_t a\_number,
-size\_t a\_size}}: ]
+\citem{\cfunc[void *]{mem\_calloc}{cw\_mem\_t *a\_mem, size\_t a\_number,
+size\_t a\_size}}
 \label{_cw_calloc}
 \index{\cppmacro{\_cw\_calloc}{}}
-\item[{\cppmacro[void *]{\_cw\_calloc}{size\_t a\_number,
-size\_t a\_size}}: ]
-	\begin{description}\item[]
+\citem{\cppmacro[void *]{\_cw\_calloc}{size\_t a\_number,
+size\_t a\_size}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_mem: ]
@@ -151,19 +151,19 @@ size\_t a\_size}}: ]
 		\end{description}
 	\item[Description: ]
 		\cfunc{calloc}{} wrapper.
-	\end{description}
+	\end{capilist}
 \label{mem_realloc_e}
 \index{\cfunc{mem\_realloc\_e}{}}
-\item[{\cfunc[void *]{mem\_realloc\_e}{cw\_mem\_t *a\_mem, void *a\_ptr, size\_t
-a\_size, const char *a\_filename, cw\_uint32\_t a\_line\_num}}: ]
+\citem{\cfunc[void *]{mem\_realloc\_e}{cw\_mem\_t *a\_mem, void *a\_ptr, size\_t
+a\_size, const char *a\_filename, cw\_uint32\_t a\_line\_num}}
 \label{mem_realloc}
 \index{\cfunc{mem\_realloc}{}}
-\item[{\cfunc[void *]{mem\_realloc}{cw\_mem\_t *a\_mem, void *a\_ptr, size\_t
-a\_size}}: ]
+\citem{\cfunc[void *]{mem\_realloc}{cw\_mem\_t *a\_mem, void *a\_ptr, size\_t
+a\_size}}
 \label{_cw_realloc}
 \index{\cppmacro{\_cw\_realloc}{}}
-\item[{\cppmacro[void *]{\_cw\_realloc}{void *a\_ptr, size\_t a\_size}}: ]
-	\begin{description}\item[]
+\citem{\cppmacro[void *]{\_cw\_realloc}{void *a\_ptr, size\_t a\_size}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_mem: ]
@@ -188,18 +188,18 @@ a\_size}}: ]
 		\end{description}
 	\item[Description: ]
 		\cfunc{realloc}{} wrapper.
-	\end{description}
+	\end{capilist}
 \label{mem_free_e}
 \index{\cfunc{mem\_free\_e}{}}
-\item[{\cfunc[void]{mem\_free\_e}{cw\_mem\_t *a\_mem, void *a\_ptr, const char
-*a\_filename, cw\_uint32\_t a\_line\_num}}: ]
+\citem{\cfunc[void]{mem\_free\_e}{cw\_mem\_t *a\_mem, void *a\_ptr, const char
+*a\_filename, cw\_uint32\_t a\_line\_num}}
 \label{mem_free}
 \index{\cfunc{mem\_free}{}}
-\item[{\cfunc[void]{mem\_free}{cw\_mem\_t *a\_mem, void *a\_ptr}}: ]
+\citem{\cfunc[void]{mem\_free}{cw\_mem\_t *a\_mem, void *a\_ptr}}
 \label{_cw_free}
 \index{\cppmacro{\_cw\_free}{}}
-\item[{\cppmacro[void]{\_cw\_free}{void *a\_ptr}}: ]
-	\begin{description}\item[]
+\citem{\cppmacro[void]{\_cw\_free}{void *a\_ptr}}
+	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_mem: ]
@@ -215,5 +215,5 @@ a\_size}}: ]
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		\cfunc{free}{} wrapper.
-	\end{description}
-\end{description}
+	\end{capilist}
+\end{capi}
