@@ -103,7 +103,7 @@ cw_uint64_t buf_undo(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_uint64_t a_count);
 cw_uint64_t buf_redo(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_uint64_t a_count);
 void	buf_hist_flush(cw_buf_t *a_buf);
 void	buf_hist_group_beg(cw_buf_t *a_buf, cw_bufm_t *a_bufm);
-void	buf_hist_group_end(cw_buf_t *a_buf);
+cw_bool_t buf_hist_group_end(cw_buf_t *a_buf);
 
 /* bufm. */
 cw_bufm_t *bufm_new(cw_bufm_t *a_bufm, cw_buf_t *a_buf);
@@ -124,6 +124,7 @@ cw_uint8_t *bufm_after_get(cw_bufm_t *a_bufm);
 cw_bufv_t *bufm_range_get(cw_bufm_t *a_start, cw_bufm_t *a_end, cw_uint32_t
     *r_iovcnt);
 
+/* XXX Use bufv's. */
 void	bufm_before_insert(cw_bufm_t *a_bufm, const cw_uint8_t *a_str,
     cw_uint64_t a_len);
 void	bufm_after_insert(cw_bufm_t *a_bufm, const cw_uint8_t *a_str,

@@ -551,6 +551,7 @@ buf_elmsize_set(cw_buf_t *a_buf, cw_uint32_t a_elmsize)
 	b = (cw_uint8_t *)_cw_opaque_alloc(a_buf->alloc, a_buf->arg, size *
 	    a_elmsize);
 
+	/* XXX Use bufv_copy(). */
 	/*
 	 * Iteratively move data from the old buffer to the new one.  Preserve
 	 * as many bytes per element as possible, which is the lesser of the two
@@ -730,14 +731,20 @@ buf_hist_group_beg(cw_buf_t *a_buf, cw_bufm_t *a_bufm)
 		hist_group_beg(a_buf->hist, a_buf, a_bufm);
 }
 
-void
+cw_bool_t
 buf_hist_group_end(cw_buf_t *a_buf)
 {
+	cw_bool_t	retval;
+
 	_cw_check_ptr(a_buf);
 	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
 
 	if (a_buf->hist != NULL)
-		hist_group_end(a_buf->hist, a_buf);
+		retval = hist_group_end(a_buf->hist, a_buf);
+	else
+		retval = TRUE;
+
+	return retval;
 }
 
 /* bufm. */
