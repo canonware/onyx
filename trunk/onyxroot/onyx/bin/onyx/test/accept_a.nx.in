@@ -20,6 +20,8 @@ s `localhost' bindsocket
 s sockname $port get
 $port exch cvs def
 
+s listen
+
 # Launch a process that will connect to port.
 [
     argv 2 get `/b_accept_a.nx' cat
@@ -28,7 +30,6 @@ $port exch cvs def
 ] forkexec
 $child exch def
 
-s listen
 s accept
 $c exch def
 
