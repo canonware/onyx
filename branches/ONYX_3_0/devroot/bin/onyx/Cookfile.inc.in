@@ -67,10 +67,11 @@ ONYX_OTESTS =
 #endif
 #if @enable_posix@
 
-              nsleep_a.nx.in nsleep_b.nx.in nsleep_c.nx.in nsleep_d.nx.in
-              rand_a.nx.in setenv_a.nx.in setenv_b.nx.in setenv_c.nx.in
-              srand_a.nx.in srand_b.nx.in srand_c.nx.in srand_d.nx.in
-              unsetenv_a.nx.in unsetenv_b.nx.in truncate_a.nx.in
+              argv_a.nx.in argv_b.nx.in dirforeach_a.nx.in dirforeach_b.nx.in
+              dirforeach_c.nx.in nsleep_a.nx.in nsleep_b.nx.in nsleep_c.nx.in
+              nsleep_d.nx.in rand_a.nx.in setenv_a.nx.in setenv_b.nx.in
+              setenv_c.nx.in srand_a.nx.in srand_b.nx.in srand_c.nx.in
+              srand_d.nx.in unsetenv_a.nx.in unsetenv_b.nx.in truncate_a.nx.in
               truncate_b.nx.in truncate_c.nx.in truncate_d.nx.in
               truncate_e.nx.in
 
@@ -159,6 +160,15 @@ ONYX_OTESTS =
 
 ONYX_OTESTS = [addprefix @srcroot@/bin/onyx/test/ [ONYX_OTESTS]];
 
+/*
+ * Back end scripts driven by Onyx tests.
+ */
+ONYX_BTESTS = [addprefix @srcroot@/bin/onyx/test/
+#if @enable_posix@
+                         b_argv_b.nx.in
+#endif
+                         ];
+
 /* LaTeX source files. */
 ONYX_TEX_SRCS += @objroot@/bin/onyx/doc/latex/manual.tex;
 
@@ -187,7 +197,8 @@ onyx_bins_bootstrap : [BONYX]
   }
 }
 
-onyx_bins_tests : [fromto @srcroot@/%0%.nx.in @objroot@/%0%.nx [ONYX_OTESTS]];
+onyx_bins_tests : [fromto @srcroot@/%0%.nx.in @objroot@/%0%.nx
+                          [ONYX_OTESTS] [ONYX_BTESTS]];
 
 onyx_bins_check : onyx_bins_tests [TONYX]
 {
@@ -257,6 +268,10 @@ onyx_bins_clean :
   rm -f [fromto @srcroot@/%0%.nx.in @objroot@/%0%.nx.out [ONYX_OTESTS]];
   rm -f [fromto @srcroot@/%0%.nx.in @objroot@/%0%.nx.diff [ONYX_OTESTS]];
   rm -f [fromto @srcroot@/%0%.nx.in @objroot@/%0%.nx [ONYX_OTESTS]];
+#endif
+
+#if [count [ONYX_BTESTS]]
+  rm -f [fromto @srcroot@/%0%.nx.in @objroot@/%0%.nx [ONYX_BTESTS]];
 #endif
 
   rm -f [ONYX] [BONYX] [TONYX];

@@ -1,3 +1,16 @@
+2002-03-30 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/systemdict.c:systemdict_dirforeach() : Use strlen()
+          rather than the reclen field of struct dirent if there is no namlen
+          field.  (Reported by John Liles.)
+
+	* bin/onyx/src/onyx.c:batch_run() : Specify '+' as the first character
+          of the options string to getopt() on systems that use GNU libc, since
+          they will otherwise permute the arguments and leave unknown ones at
+          the end.  This fixes #! magic handling in the case when options are
+          passed to the script that are also used by the onyx binary (for
+          example, -e).
+
 2002-03-22 : Jason Evans <jasone@canonware.com>
 
 	* lib/libonyx/src/systemdict.c:systemdict_rand() : Fix the way random()
