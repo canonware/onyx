@@ -30,7 +30,7 @@ systemdict begin
 %
 % <object> <depth> sprint -
 /sprint {
-	1 index type sprintdict exch get eval
+	1 index type /sprintdict load exch get eval
 	`\n' print flush
 } def
 
