@@ -27,9 +27,9 @@ typedef struct cw_stiloe_dict_s cw_stiloe_dict_t;
 /* Interpreter errors. */
 typedef enum {
 	STILTE_NONE,			/* No error. */
-	STILTE_DICTSTACKOVERFLOW,	/* dstack too deep. */
-	STILTE_DICTSTACKUNDERFLOW,	/* No poppable dictionary on dstack. */
-	STILTE_EXECSTACKOVERFLOW,	/* estack too deep. */
+	STILTE_DSTACKOVERFLOW,		/* dstack too deep. */
+	STILTE_DSTACKUNDERFLOW,		/* No poppable dictionary on dstack. */
+	STILTE_ESTACKOVERFLOW,		/* estack too deep. */
 	STILTE_INTERRUPT,		/* Interrupt. */
 	STILTE_INVALIDACCESS,		/* Permission error. */
 	STILTE_INVALIDCONTEXT,		/* Bad thread context. */

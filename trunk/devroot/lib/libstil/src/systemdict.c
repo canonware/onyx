@@ -41,16 +41,15 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(chmod),
 	ENTRY(chown),
 	ENTRY(clear),
-	ENTRY(cleardictstack),
+	ENTRY(cleardstack),
 	ENTRY(cleartomark),
 	ENTRY(closefile),
 	ENTRY(condition),
 	ENTRY(copy),
 	ENTRY(count),
-	ENTRY(countdictstack),
-	ENTRY(countexecstack),
+	ENTRY(countdstack),
+	ENTRY(countestack),
 	ENTRY(counttomark),
-	ENTRY(currentcontext),
 	ENTRY(currentdict),
 	ENTRY(currentfile),
 	ENTRY(currentglobal),
@@ -60,27 +59,24 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(cvs),
 	ENTRY(cvx),
 	ENTRY(def),
-	ENTRY(deletefile),
 	ENTRY(detach),
 	ENTRY(dict),
-	ENTRY(dictstack),
-	ENTRY(dirnameforall),
+	ENTRY(dirforeach),
 	ENTRY(div),
+	ENTRY(dstack),
 	ENTRY(dup),
 	ENTRY(end),
 	ENTRY(eq),
+	ENTRY(estack),
 	ENTRY(exch),
 	ENTRY(exec),
-	ENTRY(execstack),
 	ENTRY(executeonly),
 	ENTRY(exit),
 	ENTRY(exp),
-	ENTRY(file),
-	ENTRY(fileposition),
 	ENTRY(flush),
 	ENTRY(flushfile),
 	ENTRY(for),
-	ENTRY(forall),
+	ENTRY(foreach),
 	ENTRY(gcheck),
 	ENTRY(ge),
 	ENTRY(get),
@@ -108,8 +104,11 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(neg),
 	ENTRY(noaccess),
 	ENTRY(not),
+	ENTRY(nsleep),
+	ENTRY(open),
 	ENTRY(or),
 	ENTRY(pop),
+	ENTRY(ppop),
 	ENTRY(print),
 	ENTRY(product),
 	ENTRY(promptstring),
@@ -128,27 +127,27 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(repeat),
 	ENTRY(roll),
 	ENTRY(run),
+	ENTRY(seek),
+	ENTRY(self),
 	ENTRY(setcollect),
-	ENTRY(setfileposition),
 	ENTRY(setglobal),
 	ENTRY(shift),
 	ENTRY(signal),
+	ENTRY(spop),
 	ENTRY(srand),
-	ENTRY(stack),
 	ENTRY(start),
-	ENTRY(status),
+	ENTRY(stat),
 	ENTRY(stop),
 	ENTRY(stopped),
 	ENTRY(store),
 	ENTRY(string),
 	ENTRY(sub),
-	ENTRY(sym_eq),
-	ENTRY(sym_eq_eq),
 	ENTRY(sym_gt_gt),
 	{STILN_sym_lb, systemdict_mark},
 	{STILN_sym_lt_lt, systemdict_mark},
 	ENTRY(sym_rb),
 	ENTRY(symlink),
+	ENTRY(tell),
 	ENTRY(test),
 	ENTRY(thread),
 	ENTRY(timedwait),
@@ -157,6 +156,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(trylock),
 	ENTRY(type),
 	ENTRY(undef),
+	ENTRY(unlink),
 	ENTRY(unlock),
 	ENTRY(version),
 	ENTRY(wait),
@@ -584,7 +584,7 @@ systemdict_clear(cw_stilt_t *a_stilt)
 }
 
 void
-systemdict_cleardictstack(cw_stilt_t *a_stilt)
+systemdict_cleardstack(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*dstack;
 	cw_uint32_t	count;
@@ -765,7 +765,7 @@ systemdict_count(cw_stilt_t *a_stilt)
 }
 
 void
-systemdict_countdictstack(cw_stilt_t *a_stilt)
+systemdict_countdstack(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack, *dstack;
 	cw_stilo_t	*stilo;
@@ -778,7 +778,7 @@ systemdict_countdictstack(cw_stilt_t *a_stilt)
 }
 
 void
-systemdict_countexecstack(cw_stilt_t *a_stilt)
+systemdict_countestack(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack, *estack;
 	cw_stilo_t	*stilo;
@@ -811,25 +811,6 @@ systemdict_counttomark(cw_stilt_t *a_stilt)
 
 	stilo = stils_push(ostack);
 	stilo_integer_new(stilo, i);
-}
-
-void
-systemdict_currentcontext(cw_stilt_t *a_stilt)
-{
-	cw_stils_t	*ostack;
-	cw_stilo_t	*context;
-	union {
-		cw_sint64_t	i;
-		cw_stilt_t	*stilt;
-	} u;
-	_cw_assert(sizeof(cw_sint64_t) >= sizeof(void *));
-
-	ostack = stilt_ostack_get(a_stilt);
-	context = stils_push(ostack);
-
-	u.i = 0;
-	u.stilt = a_stilt;
-	stilo_integer_new(context, u.i);
 }
 
 void
@@ -1082,46 +1063,6 @@ systemdict_def(cw_stilt_t *a_stilt)
 }
 
 void
-systemdict_deletefile(cw_stilt_t *a_stilt)
-{
-	cw_stils_t	*ostack;
-	cw_stilo_t	*string;
-	cw_uint8_t	str[PATH_MAX];
-	cw_uint32_t	nbytes;
-
-	ostack = stilt_ostack_get(a_stilt);
-	STILS_GET(string, ostack, a_stilt);
-
-	if (stilo_type_get(string) != STILOT_STRING) {
-		stilt_error(a_stilt, STILTE_TYPECHECK);
-		return;
-	}
-
-	if (stilo_string_len_get(string) < sizeof(str))
-		nbytes = stilo_string_len_get(string);
-	else
-		nbytes = sizeof(str) - 1;
-	memcpy(str, stilo_string_get(string), nbytes);
-	str[nbytes] = '\0';
-
-	stils_pop(ostack);
-
-	if (unlink(str) == -1) {
-		switch (errno) {
-		case EACCES:
-		case EPERM:
-			stilt_error(a_stilt, STILTE_INVALIDFILEACCESS);
-		case EIO:
-		case EBUSY:
-			stilt_error(a_stilt, STILTE_IOERROR);
-		default:
-			stilt_error(a_stilt, STILTE_UNDEFINEDFILENAME);
-		}
-		return;
-	}
-}
-
-void
 systemdict_detach(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack;
@@ -1157,51 +1098,7 @@ systemdict_dict(cw_stilt_t *a_stilt)
 }
 
 void
-systemdict_dictstack(cw_stilt_t *a_stilt)
-{
-	cw_stils_t	*ostack, *dstack, *tstack;
-	cw_stilo_t	*array, *subarray, *stilo;
-	cw_stilte_t	error;
-	cw_sint32_t	i, count;
-
-	ostack = stilt_ostack_get(a_stilt);
-	dstack = stilt_dstack_get(a_stilt);
-	tstack = stilt_tstack_get(a_stilt);
-
-	STILS_GET(array, ostack, a_stilt);
-	if (stilo_type_get(array) != STILOT_ARRAY) {
-		stilt_error(a_stilt, STILTE_TYPECHECK);
-		return;
-	}
-	count = stils_count(dstack);
-	if (count > stilo_array_len_get(array)) {
-		stilt_error(a_stilt, STILTE_RANGECHECK);
-		return;
-	}
-
-	/* Move array to tstack, create subarray, and pop array. */
-	stilo = stils_push(tstack);
-	stilo_dup(stilo, array);
-	subarray = array;
-	array = stilo;
-	error = stilo_array_subarray_new(subarray, array,
-	    stilt_stil_get(a_stilt), 0, count);
-	if (error) {
-		stils_pop(tstack);
-		stilt_error(a_stilt, error);
-		return;
-	}
-	stils_pop(tstack);
-
-	/* Copy dstack to subarray. */
-	for (i = count - 1, stilo = NULL; i >= 0; i--) {
-		stilo = stils_down_get(dstack, stilo);
-		stilo_dup(stilo_array_el_get(subarray, i), stilo);
-	}
-}
-
-void
-systemdict_dirnameforall(cw_stilt_t *a_stilt)
+systemdict_dirforeach(cw_stilt_t *a_stilt)
 {
 	_cw_error("XXX Not implemented");
 }
@@ -1231,6 +1128,28 @@ systemdict_div(cw_stilt_t *a_stilt)
 }
 
 void
+systemdict_dstack(cw_stilt_t *a_stilt)
+{
+	cw_stils_t	*ostack, *dstack;
+	cw_stilo_t	*array, *stilo;
+	cw_sint32_t	i, count;
+
+	ostack = stilt_ostack_get(a_stilt);
+	dstack = stilt_dstack_get(a_stilt);
+
+	/* Create array. */
+	count = stils_count(dstack);
+	array = stils_push(ostack);
+	stilo_array_new(array, stilt_stil_get(a_stilt), count);
+
+	/* Copy dstack to array. */
+	for (i = count - 1, stilo = NULL; i >= 0; i--) {
+		stilo = stils_down_get(dstack, stilo);
+		stilo_dup(stilo_array_el_get(array, i), stilo);
+	}
+}
+
+void
 systemdict_dup(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack;
@@ -1252,7 +1171,7 @@ systemdict_end(cw_stilt_t *a_stilt)
 
 	/* threaddict, systemdict, globaldict, and userdict cannot be popped. */
 	if (stils_count(dstack) <= 4) {
-		stilt_error(a_stilt, STILTE_DICTSTACKUNDERFLOW);
+		stilt_error(a_stilt, STILTE_DSTACKUNDERFLOW);
 		return;
 	}
 
@@ -1281,6 +1200,28 @@ systemdict_eq(cw_stilt_t *a_stilt)
 	stilo_boolean_new(stilo_a, eq);
 
 	stils_pop(ostack);
+}
+
+void
+systemdict_estack(cw_stilt_t *a_stilt)
+{
+	cw_stils_t	*ostack, *estack;
+	cw_stilo_t	*array, *stilo;
+	cw_sint32_t	i, count;
+
+	ostack = stilt_ostack_get(a_stilt);
+	estack = stilt_estack_get(a_stilt);
+
+	/* Create array. */
+	count = stils_count(estack);
+	array = stils_push(ostack);
+	stilo_array_new(array, stilt_stil_get(a_stilt), count);
+
+	/* Copy estack to array. */
+	for (i = count - 1, stilo = NULL; i >= 0; i--) {
+		stilo = stils_down_get(estack, stilo);
+		stilo_dup(stilo_array_el_get(array, i), stilo);
+	}
 }
 
 void
@@ -1313,51 +1254,6 @@ systemdict_exec(cw_stilt_t *a_stilt)
 	stils_pop(ostack);
 
 	stilt_loop(a_stilt);
-}
-
-void
-systemdict_execstack(cw_stilt_t *a_stilt)
-{
-	cw_stils_t	*ostack, *estack, *tstack;
-	cw_stilo_t	*array, *subarray, *stilo;
-	cw_stilte_t	error;
-	cw_sint32_t	i, count;
-
-	ostack = stilt_ostack_get(a_stilt);
-	estack = stilt_estack_get(a_stilt);
-	tstack = stilt_tstack_get(a_stilt);
-
-	STILS_GET(array, ostack, a_stilt);
-	if (stilo_type_get(array) != STILOT_ARRAY) {
-		stilt_error(a_stilt, STILTE_TYPECHECK);
-		return;
-	}
-	count = stils_count(estack);
-	if (count > stilo_array_len_get(array)) {
-		stilt_error(a_stilt, STILTE_RANGECHECK);
-		return;
-	}
-
-	/* Move array to tstack, create subarray, and pop array. */
-	stilo = stils_push(tstack);
-	stilo_dup(stilo, array);
-	subarray = array;
-	array = stilo;
-	
-	error = stilo_array_subarray_new(subarray, array,
-	    stilt_stil_get(a_stilt), 0, count);
-	if (error) {
-		stils_pop(tstack);
-		stilt_error(a_stilt, error);
-		return;
-	}
-	stils_pop(tstack);
-
-	/* Copy estack to subarray. */
-	for (i = count - 1, stilo = NULL; i >= 0; i--) {
-		stilo = stils_down_get(estack, stilo);
-		stilo_dup(stilo_array_el_get(subarray, i), stilo);
-	}
 }
 
 void
@@ -1428,66 +1324,6 @@ systemdict_exp(cw_stilt_t *a_stilt)
 
 	stilo_integer_set(a, r);
 	stils_pop(ostack);
-}
-
-void
-systemdict_file(cw_stilt_t *a_stilt)
-{
-	cw_stils_t	*ostack, *tstack;
-	cw_stilo_t	*name, *flags, *file;
-	cw_stilte_t	error;
-
-	ostack = stilt_ostack_get(a_stilt);
-	tstack = stilt_tstack_get(a_stilt);
-	
-	STILS_GET(flags, ostack, a_stilt);
-	STILS_DOWN_GET(name, ostack, a_stilt, flags);
-	if (stilo_type_get(name) != STILOT_STRING || stilo_type_get(flags) !=
-	    STILOT_STRING) {
-		stilt_error(a_stilt, STILTE_TYPECHECK);
-		return;
-	}
-
-	file = stils_push(tstack);
-	stilo_file_new(file, stilt_stil_get(a_stilt));
-	error = stilo_file_open(file, stilo_string_get(name),
-	    stilo_string_len_get(name), stilo_string_get(flags),
-	    stilo_string_len_get(flags));
-	if (error) {
-		stilt_error(a_stilt, error);
-		return;
-	}
-
-	/* XXX Magic number. */
-	stilo_file_buffer_size_set(file, 512);
-
-	stils_pop(ostack);
-	stilo_dup(name, file);
-	stils_pop(tstack);
-}
-
-void
-systemdict_fileposition(cw_stilt_t *a_stilt)
-{
-	cw_stils_t	*ostack;
-	cw_stilo_t	*file;
-	cw_sint64_t	position;
-
-	ostack = stilt_ostack_get(a_stilt);
-
-	STILS_GET(file, ostack, a_stilt);
-	
-	if (stilo_type_get(file) != STILOT_FILE) {
-		stilt_error(a_stilt, STILTE_TYPECHECK);
-		return;
-	}
-
-	position = stilo_file_position_get(file);
-	if (position == -1) {
-		stilt_error(a_stilt, STILTE_IOERROR);
-		return;
-	}
-	stilo_integer_new(file, position);
 }
 
 void
@@ -1624,7 +1460,7 @@ systemdict_for(cw_stilt_t *a_stilt)
 }
 
 void
-systemdict_forall(cw_stilt_t *a_stilt)
+systemdict_foreach(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack, *estack, *tstack;
 	cw_stilo_t	*stilo, *what, *proc;
@@ -2477,6 +2313,69 @@ systemdict_not(cw_stilt_t *a_stilt)
 }
 
 void
+systemdict_nsleep(cw_stilt_t *a_stilt)
+{
+	cw_stils_t	*ostack;
+	cw_stilo_t	*stilo;
+	struct timespec sleeptime;
+
+	ostack = stilt_ostack_get(a_stilt);
+
+	STILS_GET(stilo, ostack, a_stilt);
+
+	if (stilo_type_get(stilo) != STILOT_INTEGER) {
+		stilt_error(a_stilt, STILTE_TYPECHECK);
+		return;
+	}
+	if (stilo_integer_get(stilo) <= 0) {
+		stilt_error(a_stilt, STILTE_RANGECHECK);
+		return;
+	}
+
+	sleeptime.tv_sec = stilo_integer_get(stilo) / 1000000000;
+	sleeptime.tv_nsec = stilo_integer_get(stilo) % 1000000000;
+
+	nanosleep(&sleeptime, NULL);
+	stils_pop(ostack);
+}
+
+void
+systemdict_open(cw_stilt_t *a_stilt)
+{
+	cw_stils_t	*ostack, *tstack;
+	cw_stilo_t	*name, *flags, *file;
+	cw_stilte_t	error;
+
+	ostack = stilt_ostack_get(a_stilt);
+	tstack = stilt_tstack_get(a_stilt);
+	
+	STILS_GET(flags, ostack, a_stilt);
+	STILS_DOWN_GET(name, ostack, a_stilt, flags);
+	if (stilo_type_get(name) != STILOT_STRING || stilo_type_get(flags) !=
+	    STILOT_STRING) {
+		stilt_error(a_stilt, STILTE_TYPECHECK);
+		return;
+	}
+
+	file = stils_push(tstack);
+	stilo_file_new(file, stilt_stil_get(a_stilt));
+	error = stilo_file_open(file, stilo_string_get(name),
+	    stilo_string_len_get(name), stilo_string_get(flags),
+	    stilo_string_len_get(flags));
+	if (error) {
+		stilt_error(a_stilt, error);
+		return;
+	}
+
+	/* XXX Magic number. */
+	stilo_file_buffer_size_set(file, 512);
+
+	stils_pop(ostack);
+	stilo_dup(name, file);
+	stils_pop(tstack);
+}
+
+void
 systemdict_or(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack;
@@ -2516,6 +2415,31 @@ systemdict_pop(cw_stilt_t *a_stilt)
 	ostack = stilt_ostack_get(a_stilt);
 
 	STILS_POP(ostack, a_stilt);
+}
+
+void
+systemdict_ppop(cw_stilt_t *a_stilt)
+{
+	cw_stils_t	*ostack;
+	cw_stilo_t	*stilo, *stdout_stilo;
+	cw_stilte_t	error;
+
+	ostack = stilt_ostack_get(a_stilt);
+	stdout_stilo = stilt_stdout_get(a_stilt);
+
+	STILS_GET(stilo, ostack, a_stilt);
+	error = stilo_print(stilo, stdout_stilo, FALSE, TRUE);
+	if (error) {
+		stilt_error(a_stilt, error);
+		return;
+	}
+	error = stilo_file_buffer_flush(stdout_stilo);
+	if (error) {
+		stilt_error(a_stilt, error);
+		return;
+	}
+
+	stils_pop(ostack);
 }
 
 void
@@ -2562,7 +2486,7 @@ systemdict_pstack(cw_stilt_t *a_stilt)
 	cw_stilts_t	stilts;
 	cw_stils_t	*ostack;
 	cw_uint32_t	i, count;
-	cw_uint8_t	code[] = "==";
+	cw_uint8_t	code[] = "spop";
 
 	stilts_new(&stilts);
 	ostack = stilt_ostack_get(a_stilt);
@@ -3047,6 +2971,26 @@ systemdict_roll(cw_stilt_t *a_stilt)
 }
 
 void
+systemdict_self(cw_stilt_t *a_stilt)
+{
+	cw_stils_t	*ostack;
+	cw_stilo_t	*context;
+	union {
+		cw_sint64_t	i;
+		cw_stilt_t	*stilt;
+	} u;
+	_cw_assert(sizeof(cw_sint64_t) >= sizeof(void *));
+
+	ostack = stilt_ostack_get(a_stilt);
+	context = stils_push(ostack);
+
+	u.i = 0;
+	u.stilt = a_stilt;
+	stilo_integer_new(context, u.i);
+	stilo_perms_set(context, STILOP_READONLY);
+}
+
+void
 systemdict_run(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack, *estack, *tstack;
@@ -3111,28 +3055,7 @@ systemdict_run(cw_stilt_t *a_stilt)
 }
 
 void
-systemdict_setcollect(cw_stilt_t *a_stilt)
-{
-	cw_stils_t	*ostack;
-	cw_stilo_t	*collect;
-
-	ostack = stilt_ostack_get(a_stilt);
-
-	STILS_GET(collect, ostack, a_stilt);
-	
-	if (stilo_type_get(collect) != STILOT_BOOLEAN) {
-		stilt_error(a_stilt, STILTE_TYPECHECK);
-		return;
-	}
-
-	stila_collect_set(stil_stila_get(stilt_stil_get(a_stilt)),
-	    stilo_boolean_get(collect));
-
-	stils_pop(ostack);
-}
-
-void
-systemdict_setfileposition(cw_stilt_t *a_stilt)
+systemdict_seek(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack;
 	cw_stilo_t	*file, *position;
@@ -3156,6 +3079,27 @@ systemdict_setfileposition(cw_stilt_t *a_stilt)
 	}
 
 	stils_npop(ostack, 2);
+}
+
+void
+systemdict_setcollect(cw_stilt_t *a_stilt)
+{
+	cw_stils_t	*ostack;
+	cw_stilo_t	*collect;
+
+	ostack = stilt_ostack_get(a_stilt);
+
+	STILS_GET(collect, ostack, a_stilt);
+	
+	if (stilo_type_get(collect) != STILOT_BOOLEAN) {
+		stilt_error(a_stilt, STILTE_TYPECHECK);
+		return;
+	}
+
+	stila_collect_set(stil_stila_get(stilt_stil_get(a_stilt)),
+	    stilo_boolean_get(collect));
+
+	stils_pop(ostack);
 }
 
 void
@@ -3221,6 +3165,31 @@ systemdict_signal(cw_stilt_t *a_stilt)
 }
 
 void
+systemdict_spop(cw_stilt_t *a_stilt)
+{
+	cw_stils_t	*ostack;
+	cw_stilo_t	*stilo, *stdout_stilo;
+	cw_stilte_t	error;
+
+	ostack = stilt_ostack_get(a_stilt);
+	stdout_stilo = stilt_stdout_get(a_stilt);
+
+	STILS_GET(stilo, ostack, a_stilt);
+	error = stilo_print(stilo, stdout_stilo, TRUE, TRUE);
+	if (error) {
+		stilt_error(a_stilt, error);
+		return;
+	}
+	error = stilo_file_buffer_flush(stdout_stilo);
+	if (error) {
+		stilt_error(a_stilt, error);
+		return;
+	}
+
+	stils_pop(ostack);
+}
+
+void
 systemdict_srand(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack;
@@ -3231,27 +3200,6 @@ systemdict_srand(cw_stilt_t *a_stilt)
 	STILS_GET(seed, ostack, a_stilt);
 	srandom(stilo_integer_get(seed));
 	stils_pop(ostack);
-}
-
-void
-systemdict_stack(cw_stilt_t *a_stilt)
-{
-	cw_stilts_t	stilts;
-	cw_stils_t	*ostack;
-	cw_uint32_t	i, count;
-	cw_uint8_t	code[] = "=";
-
-	stilts_new(&stilts);
-	ostack = stilt_ostack_get(a_stilt);
-	count = stils_count(ostack);
-
-	for (i = 0; i < count; i++) {
-		systemdict_dup(a_stilt);
-		stilt_interpret(a_stilt, &stilts, code, sizeof(code) - 1);
-		stilt_flush(a_stilt, &stilts);
-		stils_roll(ostack, count, 1);
-	}
-	stilts_delete(&stilts, a_stilt);
 }
 
 void
@@ -3285,7 +3233,7 @@ systemdict_start(cw_stilt_t *a_stilt)
 }
 
 void
-systemdict_status(cw_stilt_t *a_stilt)
+systemdict_stat(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack;
 	cw_stilo_t	*stilo;
@@ -3423,58 +3371,6 @@ systemdict_sub(cw_stilt_t *a_stilt)
 	stils_pop(ostack);
 }
 
-/* = */
-void
-systemdict_sym_eq(cw_stilt_t *a_stilt)
-{
-	cw_stils_t	*ostack;
-	cw_stilo_t	*stilo, *stdout_stilo;
-	cw_stilte_t	error;
-
-	ostack = stilt_ostack_get(a_stilt);
-	stdout_stilo = stilt_stdout_get(a_stilt);
-
-	STILS_GET(stilo, ostack, a_stilt);
-	error = stilo_print(stilo, stdout_stilo, FALSE, TRUE);
-	if (error) {
-		stilt_error(a_stilt, error);
-		return;
-	}
-	error = stilo_file_buffer_flush(stdout_stilo);
-	if (error) {
-		stilt_error(a_stilt, error);
-		return;
-	}
-
-	stils_pop(ostack);
-}
-
-/* == */
-void
-systemdict_sym_eq_eq(cw_stilt_t *a_stilt)
-{
-	cw_stils_t	*ostack;
-	cw_stilo_t	*stilo, *stdout_stilo;
-	cw_stilte_t	error;
-
-	ostack = stilt_ostack_get(a_stilt);
-	stdout_stilo = stilt_stdout_get(a_stilt);
-
-	STILS_GET(stilo, ostack, a_stilt);
-	error = stilo_print(stilo, stdout_stilo, TRUE, TRUE);
-	if (error) {
-		stilt_error(a_stilt, error);
-		return;
-	}
-	error = stilo_file_buffer_flush(stdout_stilo);
-	if (error) {
-		stilt_error(a_stilt, error);
-		return;
-	}
-
-	stils_pop(ostack);
-}
-
 /* >> */
 void
 systemdict_sym_gt_gt(cw_stilt_t *a_stilt)
@@ -3587,6 +3483,30 @@ systemdict_symlink(cw_stilt_t *a_stilt)
 }
 
 void
+systemdict_tell(cw_stilt_t *a_stilt)
+{
+	cw_stils_t	*ostack;
+	cw_stilo_t	*file;
+	cw_sint64_t	position;
+
+	ostack = stilt_ostack_get(a_stilt);
+
+	STILS_GET(file, ostack, a_stilt);
+	
+	if (stilo_type_get(file) != STILOT_FILE) {
+		stilt_error(a_stilt, STILTE_TYPECHECK);
+		return;
+	}
+
+	position = stilo_file_position_get(file);
+	if (position == -1) {
+		stilt_error(a_stilt, STILTE_IOERROR);
+		return;
+	}
+	stilo_integer_new(file, position);
+}
+
+void
 systemdict_test(cw_stilt_t *a_stilt)
 {
 	_cw_error("XXX Not implemented");
@@ -3639,6 +3559,7 @@ systemdict_thread(cw_stilt_t *a_stilt)
 	 * Put the context on ostack.
 	 */
 	stilo_integer_new(mark, u.i);
+	stilo_perms_set(mark, STILOP_READONLY);
 
 	/*
 	 * Start the thread.
@@ -3888,6 +3809,46 @@ systemdict_undef(cw_stilt_t *a_stilt)
 	stilo_dict_undef(dict, a_stilt, key);
 
 	stils_npop(ostack, 2);
+}
+
+void
+systemdict_unlink(cw_stilt_t *a_stilt)
+{
+	cw_stils_t	*ostack;
+	cw_stilo_t	*string;
+	cw_uint8_t	str[PATH_MAX];
+	cw_uint32_t	nbytes;
+
+	ostack = stilt_ostack_get(a_stilt);
+	STILS_GET(string, ostack, a_stilt);
+
+	if (stilo_type_get(string) != STILOT_STRING) {
+		stilt_error(a_stilt, STILTE_TYPECHECK);
+		return;
+	}
+
+	if (stilo_string_len_get(string) < sizeof(str))
+		nbytes = stilo_string_len_get(string);
+	else
+		nbytes = sizeof(str) - 1;
+	memcpy(str, stilo_string_get(string), nbytes);
+	str[nbytes] = '\0';
+
+	stils_pop(ostack);
+
+	if (unlink(str) == -1) {
+		switch (errno) {
+		case EACCES:
+		case EPERM:
+			stilt_error(a_stilt, STILTE_INVALIDFILEACCESS);
+		case EIO:
+		case EBUSY:
+			stilt_error(a_stilt, STILTE_IOERROR);
+		default:
+			stilt_error(a_stilt, STILTE_UNDEFINEDFILENAME);
+		}
+		return;
+	}
 }
 
 void

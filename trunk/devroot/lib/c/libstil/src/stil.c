@@ -19,7 +19,7 @@
 /*
  * Size and fullness control of initial name cache hash table.  We know for sure
  * that there will be about 175 names referenced by systemdict, threaddict,
- * errordict, and $error to begin with.
+ * errordict, and currenterror to begin with.
  */
 #define _CW_STIL_NAME_BASE_TABLE	512
 #define _CW_STIL_NAME_BASE_GROW		400

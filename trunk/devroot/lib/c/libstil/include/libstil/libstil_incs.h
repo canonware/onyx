@@ -34,5 +34,5 @@
 #include "stilt.h"
 #include "systemdict.h"
 #include "errordict.h"
-#include "derror.h"
+#include "currenterror.h"
 #include "threaddict.h"

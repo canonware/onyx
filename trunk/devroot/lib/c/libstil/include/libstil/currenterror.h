@@ -9,4 +9,4 @@
  *
  ******************************************************************************/
 
-void	derror_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt);
+void	currenterror_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt);

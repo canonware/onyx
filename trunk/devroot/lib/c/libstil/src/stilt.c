@@ -22,9 +22,9 @@ stilte_stiln(cw_stilte_t a_stilte)
 {
 	static const cw_stiln_t stilte_stiln[] = {
 		0,
-		STILN_dictstackoverflow,
-		STILN_dictstackunderflow,
-		STILN_execstackoverflow,
+		STILN_dstackoverflow,
+		STILN_dstackunderflow,
+		STILN_estackoverflow,
 		STILN_interrupt,
 		STILN_invalidaccess,
 		STILN_invalidcontext,
@@ -261,10 +261,10 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 		try_stage = 6;
 
 		/*
-		 * Create derror, errordict, and userdict.  threaddict
+		 * Create currenterror, errordict, and userdict.  threaddict
 		 * initialization needs these to already be initialized.
 		 */
-		derror_populate(&retval->derror, retval);
+		currenterror_populate(&retval->currenterror, retval);
 		errordict_populate(&retval->errordict, retval);
 		stilo_dict_new(&retval->userdict, stilt_stil_get(retval),
 		    _CW_STILT_USERDICT_SIZE);

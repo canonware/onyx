@@ -23,14 +23,16 @@ extern  "C" {
 /* Causes verbose GC-related output. */
 /*  #define	_LIBSTIL_CONFESS */
 
-/* Exception numbers.  libstil reserves -128 to -255. */
+/*
+ * Exception numbers.  libstil reserves -128 to -255.
+ */
 #define	_CW_STILX_MAX			-128
 #define	_CW_STILX_MIN			-255
 
 /* errordict not found, or handler not found in errordict. */
 #define	_CW_STILX_ERRORDICT		-128
-/* Error accessing $error. */
-#define	_CW_STILX_DERROR		-129
+/* Error accessing currenterror. */
+#define	_CW_STILX_CURRENTERROR		-129
 
 /* Internal use, for the exit operator. */
 #define	_CW_STILX_EXIT			-129

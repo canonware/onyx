@@ -121,7 +121,7 @@ struct cw_stilt_s {
 	/*
 	 * Local dictionaries.
 	 */
-	cw_stilo_t	derror;
+	cw_stilo_t	currenterror;
 	cw_stilo_t	errordict;
 	cw_stilo_t	userdict;
 	cw_stilo_t	threaddict;
@@ -252,7 +252,7 @@ cw_bool_t stilt_dict_stack_search(cw_stilt_t *a_stilt, cw_stilo_t *a_key,
 	(stil_globaldict_get((a_stilt)->stil))
 #define	stilt_userdict_get(a_stilt) (&((a_stilt)->userdict))
 #define	stilt_errordict_get(a_stilt) (&((a_stilt)->errordict))
-#define	stilt_derror_get(a_stilt) (&((a_stilt)->derror))
+#define	stilt_currenterror_get(a_stilt) (&((a_stilt)->currenterror))
 
 #define	stilt_error_get(a_stilt) (a_stilt)->error
 #define	stilt_error_set(a_stilt, a_stilte) (a_stilt)->error = (a_stilte)

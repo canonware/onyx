@@ -200,7 +200,7 @@ main(int argc, char **argv, char **envp)
 
 		/*
 		 * If there is anything left on the command line, it should be
-		 * the name of a source file, followed by optional arguments.
+		 * the name of a source file, follolwed by optional arguments.
 		 */
 		if (optind < argc) {
 			int	src_fd;

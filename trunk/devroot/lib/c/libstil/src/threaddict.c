@@ -16,7 +16,7 @@ threaddict_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 {
 	cw_stilo_t	name, val;	/* XXX GC-unsafe. */
 
-#define NENTRIES	3	/* Number of entries in threaddict. */
+#define NENTRIES	4	/* Number of entries in threaddict. */
 	stilo_dict_new(a_dict, stilt_stil_get(a_stilt), NENTRIES);
 
 	/*
@@ -28,8 +28,9 @@ threaddict_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 	stilo_dict_def(a_dict, a_stilt, &name, &val);
 
 	stilo_name_new(&name, stilt_stil_get(a_stilt),
-	    stiln_str(STILN_sym_derror), stiln_len(STILN_sym_derror), TRUE);
-	stilo_dup(&val, stilt_derror_get(a_stilt));
+	    stiln_str(STILN_sym_currenterror),
+	    stiln_len(STILN_sym_currenterror), TRUE);
+	stilo_dup(&val, stilt_currenterror_get(a_stilt));
 	stilo_dict_def(a_dict, a_stilt, &name, &val);
 
 	stilo_name_new(&name, stilt_stil_get(a_stilt),
