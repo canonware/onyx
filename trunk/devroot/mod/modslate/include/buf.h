@@ -96,16 +96,12 @@ struct cw_bufp_s
     /* Parent buf. */
     cw_buf_t *buf;
 
-    /* Offset into the buf's bufps array. */
-    cw_uint32_t index;
-
     /* Cached position of the begin of the bufp, relative to the begin/end
-     * of the entire buf.  The validity of these values is determined by the
-     * bob_cached/eob_cached fields of the buf. */
+     * of the entire buf.  If bob_relative is TRUE, bpos and line are relative
+     * to BOB; otherwise they're relative to EOB. */
+    cw_bool_t bob_relative;
     cw_uint64_t bpos;
     cw_uint64_t line;
-    cw_uint64_t ebpos;
-    cw_uint64_t eline;
 
     /* Length. */
     cw_uint32_t len;
@@ -128,6 +124,10 @@ struct cw_bufp_s
      * iteration is done via the list. */
     rb_tree(cw_mkr_t) mtree;
     ql_head(cw_mkr_t) mlist;
+
+    /* bufp tree and list linkage. */
+    rb_node(cw_bufp_t) pnode;
+    ql_elm(cw_bufp_t) plink;
 };
 
 struct cw_buf_s
@@ -150,31 +150,18 @@ struct cw_buf_s
     /* Number of lines (>= 1). */
     cw_uint64_t nlines;
 
-#ifdef NOT_YET
+    /* An array of bufv's with twice as many elements as there are bufp's.  This
+     * is large enough to create a vector for the entire buf, even if all bufp's
+     * are split by their gaps. */
+    cw_uint32_t bufv_cnt;
+    cw_bufv_t *bufv;
+
     /* bufp tree and list. */
     rb_tree(cw_bufp_t) ptree;
     ql_head(cw_bufp_t) plist;
-#else
-    /* Array of pointers to bufp's.  There are nbufps elements. */
-    cw_bufp_t **bufps;
-    cw_uint32_t nbufps;
-#endif
 
-#ifdef NOT_YET
-    /* Pointers to the ends of the bufp ranges with valid caches. */
-    cw_bufp_t *bob_cached;
-    cw_bufp_t *eob_cached;
-#else
-    /* Index of first and last bufp with valid caches.  The first bufp always
-     * has a valid cache, which allows bob_cached to be unsigned.  If no bufp's
-     * at the end have a valid cache, then eob_cached is set to nbufps. */
-    cw_uint32_t bob_cached;
-    cw_uint32_t eob_cached;
-#endif
-
-    /* An array of (2 * nbufps) bufv's.  This is large enough to create a vector
-     * for the entire buf, even if all bufp's are split by their gaps. */
-    cw_bufv_t *bufv;
+    /* Pointer to the last bufp that stores its position relative to BOB. */
+    cw_bufp_t *bufp_cur;
 
     /* Extent trees and lists.  ftree and flist are ordered in forward order.
      * rtree and rlist are ordered in reverse order. */
