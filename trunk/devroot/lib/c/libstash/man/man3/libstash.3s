@@ -93,10 +93,8 @@ main()
 }
 .RE
 
-Although nothing will fatally break if \fBlibstash_init\fR() is not called, a
-number of things will work better.  This is especially true of the debugging
-versions of the library, since a number of debugging aids are not active unless
-the library is initialized.
+
+\fBlibstash_init\fR() must be called in order for things to work properly.
 
 .I cw_bool_t
 .br
