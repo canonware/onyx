@@ -467,6 +467,12 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 				a_stilt->state = _CW_STILT_STATE_START;
 				stilt_p_print_token(a_stilt, 0, "<<");
 				break;
+			case '>':
+				a_stilt->state = _CW_STILT_STATE_START;
+				stilt_p_print_token(a_stilt, a_stilt->index,
+				    "empty hex string");
+				stilt_p_reset_tok_buffer(a_stilt);
+				break;
 			case '~':
 				a_stilt->state = _CW_STILT_STATE_BASE85_STRING;
 				break;
