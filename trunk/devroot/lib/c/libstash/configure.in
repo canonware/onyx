@@ -8,6 +8,19 @@ dnl Process this file with autoconf to produce a configure script.
 AC_INIT(include/libstash/libstash.h.in)
 AC_CONFIG_HEADER(include/libstash/libstash.h)
 
+dnl Comment out threaded dependency includes in Makefile.in if 
+dnl --without-pthreads is defined.
+AC_ARG_WITH(pthreads, [Build threaded libraries with pthreads], 
+if test $withval = "yes" ;
+ then  
+  without_threads=""
+ else
+  without_threads="[#]"
+ fi
+, without_threads="")
+
+AC_SUBST(without_threads)
+
 AC_CANONICAL_HOST
 
 case "${host}" in
@@ -23,6 +36,9 @@ case "${host}" in
 esac
 
 dnl Check for programs.
+dnl Trick AC_PROG_CC into not defining CFLAGS, even if it wasn't specified on
+dnl the command line.
+CFLAGS=$CFLAGS
 AC_PROG_CC
 AC_PROG_CPP
 AC_PROG_INSTALL
@@ -36,16 +52,22 @@ AC_PATH_PROG(CAT, cat, , $PATH)
 AC_PATH_PROG(ETAGS, etags, , $PATH)
 
 dnl Check for libraries.
+if test "$without_threads" != "[#]" ;
+ then
 AC_CHECK_LIB(pthread, pthread_create, LIBS="$LIBS -lpthread", \
   AC_CHECK_LIB(c_r, pthread_create, \
     LIBS="$LIBS -pthread", AC_MSG_ERROR(Cannot find the pthreads library)))
+fi
 
 dnl Define preprocessor macros.
 
 dnl Check for header files.
-AC_HEADER_STDC
+dnl AC_HEADER_STDC
 AC_CHECK_HEADERS(unistd.h, , AC_MSG_ERROR(Cannot build without unistd.h))
+if test "$without_threads" != "[#]" ;
+ then
 AC_CHECK_HEADERS(pthread.h, , AC_MSG_ERROR(Cannot build without pthread.h))
+fi
 
 dnl Check for typedefs, structures, and compiler characteristics.
 AC_C_BIGENDIAN
@@ -65,8 +87,12 @@ AC_CHECK_SIZEOF(double, 8)
 AC_CHECK_SIZEOF(long double, 12)
 AC_CHECK_SIZEOF(int *, 4) dnl defines SIZEOF_INT_P
 
-dnl AC_MSG_RESULT(Extra libraries to link in: $LIBS)
-dnl AC_MSG_RESULT(Extra defines: ${DEFS})
+AC_MSG_RESULT(================================================================)
+AC_MSG_RESULT(Extra libraries to link in: ${LIBS})
+AC_MSG_RESULT(Extra defines: ${DEFS})
+AC_MSG_RESULT(Compiler flags: ${CFLAGS})
+AC_MSG_RESULT(C preprocessor flags: ${CPPFLAGS})
+AC_MSG_RESULT(================================================================)
 
 dnl Process the following files.
 AC_OUTPUT(Makefile \

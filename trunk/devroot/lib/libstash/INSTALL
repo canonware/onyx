@@ -19,7 +19,8 @@ To install, do the above, then type:
 
    make install
 
-Optionally, pass any of the following arguments to 'configure':
+Optionally, pass any of the following (not a definitive list) arguments to 
+'configure':
 
 --prefix=<install-root-dir>
 
@@ -29,3 +30,41 @@ Optionally, pass any of the following arguments to 'configure':
 
 	will install SQRL into /usr/local/lib, /usr/local/include/libstash,
 	/usr/local/man, and /usr/local/share/libstash.
+
+--with-pthreads=no
+--without-pthreads
+
+	Tell 'configure' to not look for pthreads and to generate a Makefile
+	that can be used to compile only the non-threaded versions of the
+	libstash library.  The default is to look for pthreads, and fail if they
+	cannot be found.
+
+	Note that if this option is specified, then a different set of 'make'
+	targets should be used (all --> all_s, install --> install_s).  The
+	check target only works correctly if the multi-threaded versions of
+	libstash are built.
+
+Optionally, define environment variables, including (not exclusively):
+
+CFLAGS="?"
+
+	Pass these flags to the compiler.  You probably shouldn't define this
+	unless you know what you are doing.
+
+CPPFLAGS="?"
+
+	Pass these flags to the C preprocessor.  Note that CFLAGS is not passed
+	to 'cpp' when 'configure' is looking for include files, so you must use 
+	CPPFLAGS instead if you need to help 'configure' find header files.
+
+LD_LIBRARY_PATH="?"
+
+	'ld' uses this colon-separated list to find libraries.
+
+LDFLAGS="?"
+
+	Flags passed to gcc, which should normally be passed on to ld.
+
+PATH="?"
+
+	'configure' uses this to find programs.

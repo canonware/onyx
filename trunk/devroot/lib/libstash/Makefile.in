@@ -18,17 +18,22 @@
 #
 
 # Include files that _are_ installed.
-INCS := libstash.h libstash_r.h stash_incs.h bhp.h buf.h dbg.h \
-	lex.h list.h locks.h log.h matrix.h mem.h oh.h res.h thread.h treen.h
+INCS := libstash.h stash_incs.h bhp.h buf.h dbg.h lex.h list.h log.h matrix.h \
+	mem.h oh.h res.h treen.h
+
+INS_R := libstash_r.h locks.h thread.h
 
 # Include files that are _not_ installed.
-PRIV_INCS := bhp_priv.h lex_priv.h list_priv.h \
-	locks_priv.h log_priv.h mem_priv.h oh_priv.h res_priv.h
+PRIV_INCS := bhp_priv.h lex_priv.h list_priv.h log_priv.h mem_priv.h oh_priv.h \
+	res_priv.h
+
+PRIV_INCS_R := locks_priv.h
 
 # Source files.
-SRCS := libstash.c bhp.c buf.c dbg.c \
-	lex.c list.c locks.c log.c matrix.c mem.c oh.c res.c \
-	thread.c treen.c
+SRCS := libstash.c bhp.c buf.c dbg.c lex.c list.c log.c matrix.c mem.c oh.c \
+	res.c treen.c
+
+SRCS_R := locks.c thread.c
 
 # Simple tests.  Output is diff'ed with the expected (.exp file) output.
 CTESTS := c19980411a.c c19980412a.c c19980419a.c c19980430a.c \
@@ -48,8 +53,11 @@ BTESTS := b19980828a.c
 # in, relative to @top_srcdir@.  Also, convert the test names to their final
 # names.
 INCS := $(addprefix include/libstash/,$(INCS))
-PRIV_INCS := $(addprefix include/libstash/,$(P_INCS))
+INCS_R := $(addprefix include/libstash/,$(INCS_R))
+PRIV_INCS := $(addprefix include/libstash/,$(PRIV_INCS))
+PRIV_INCS_R := $(addprefix include/libstash/,$(PRIV_INCS_R))
 SRCS := $(addprefix src/,$(SRCS))
+SRCS_R := $(addprefix src/,$(SRCS_R))
 override CTESTS := $(addprefix test/,$(CTESTS:.c=))
 override BTESTS := $(addprefix test/,$(BTESTS:.c=))
 override PTESTS := $(addprefix test/,$(PTESTS:.pl.in=.pl))
@@ -93,7 +101,7 @@ PSTUB   := @top_srcdir@/bin/pstub
 
 LIBPATH := -L@top_srcdir@/lib
 EXTRALIBS := @LIBS@
-INCPATH := -I@top_srcdir@/include
+INCPATH := -I@top_srcdir@/include @CPPFLAGS@
 
 DEFINES := @DEFS@
 ST_DEFINES := 
@@ -104,8 +112,7 @@ P_DEFINES :=
 R_DEFINES := -D_CW_REENTRANT
 TEST_DEFINES := -D_STASH_DEBUG
 
-# @CFLAGS@
-CFLAGS := -Wall -pipe
+CFLAGS := -Wall -pipe @CFLAGS@
 ST_CFLAGS := 
 SH_CFLAGS := -fPIC -DPIC
 D_CFLAGS := -g3
@@ -120,7 +127,7 @@ vpath % .
 
 # Need this here since the includes have dependencies in them, but there's
 # stuff in the includes that we need to see before using $(TARGETS).
-all : default
+all : all_s all_r
 
 #
 # Common rules
@@ -208,10 +215,14 @@ include $(SRCS:src/%.c=obj/st_d/%.d_st_d)
 include $(SRCS:src/%.c=obj/st_o/%.d_st_o)
 include $(SRCS:src/%.c=obj/sh_o/%.d_sh_o)
 include $(SRCS:src/%.c=obj/st_p/%.d_st_p)
-include $(SRCS:src/%.c=obj/st_r_d/%.d_st_r_d)
-include $(SRCS:src/%.c=obj/st_r_o/%.d_st_r_o)
-include $(SRCS:src/%.c=obj/sh_r_o/%.d_sh_r_o)
-include $(SRCS:src/%.c=obj/st_r_p/%.d_st_r_p)
+@without_threads@include $(SRCS:src/%.c=obj/st_r_d/%.d_st_r_d) \
+@without_threads@	$(SRCS_R:src/%.c=obj/st_r_d/%.d_st_r_d)
+@without_threads@include $(SRCS:src/%.c=obj/st_r_o/%.d_st_r_o) \
+@without_threads@	$(SRCS_R:src/%.c=obj/st_r_o/%.d_st_r_o)
+@without_threads@include $(SRCS:src/%.c=obj/sh_r_o/%.d_sh_r_o) \
+@without_threads@	$(SRCS_R:src/%.c=obj/sh_r_o/%.d_sh_r_o)
+@without_threads@include $(SRCS:src/%.c=obj/st_r_p/%.d_st_r_p) \
+@without_threads@	$(SRCS_R:src/%.c=obj/st_r_p/%.d_st_r_p)
 ifneq ($(strip $(CTESTS)),)
 include $(CTESTS:=.d)
 endif
@@ -234,19 +245,22 @@ $(LIB_ST_P) : $(SRCS:src/%.c=obj/st_p/%.o_st_p)
 	$(AR) cru $@ $?
 	$(RANLIB) $@
 
-
-$(LIB_ST_R_D) : $(SRCS:src/%.c=obj/st_r_d/%.o_st_r_d)
+$(LIB_ST_R_D) : $(SRCS:src/%.c=obj/st_r_d/%.o_st_r_d) \
+	$(SRCS_R:src/%.c=obj/st_r_d/%.o_st_r_d)
 	$(AR) cru $@ $?
 	$(RANLIB) $@
 
-$(LIB_ST_R_O) : $(SRCS:src/%.c=obj/st_r_o/%.o_st_r_o)
+$(LIB_ST_R_O) : $(SRCS:src/%.c=obj/st_r_o/%.o_st_r_o) \
+	$(SRCS_R:src/%.c=obj/st_r_o/%.o_st_r_o)
 	$(AR) cru $@ $?
 	$(RANLIB) $@
 
-$(LIB_SH_R_O) : $(SRCS:src/%.c=obj/sh_r_o/%.o_sh_r_o)
+$(LIB_SH_R_O) : $(SRCS:src/%.c=obj/sh_r_o/%.o_sh_r_o) \
+	$(SRCS_R:src/%.c=obj/sh_r_o/%.o_sh_r_o)
 	$(CC) -shared -o $@ $^
 
-$(LIB_ST_R_P) : $(SRCS:src/%.c=obj/st_r_p/%.o_st_r_p)
+$(LIB_ST_R_P) : $(SRCS:src/%.c=obj/st_r_p/%.o_st_r_p) \
+	$(SRCS_R:src/%.c=obj/st_r_p/%.o_st_r_p)
 	$(AR) cru $@ $?
 	$(RANLIB) $@
 
@@ -265,8 +279,9 @@ FORCE :
 # user 'make'ables
 #
 
-default : stat_dbg stat_opt shar_opt stat_prof \
-	stat_dbg_r stat_opt_r shar_opt_r stat_prof_r
+all_s : stat_dbg stat_opt shar_opt stat_prof
+
+all_r : stat_dbg_r stat_opt_r shar_opt_r stat_prof_r
 
 # Empty target, but make still creates all the dependency files.
 depend:
@@ -300,8 +315,11 @@ check : $(CTESTS) $(PTESTS) $(BTESTS)
 	echo "---------------------------------------------" \
 	'
 
-install : install_stat_dbg install_stat_opt install_shar_opt install_stat_prof \
-	install_stat_dbg_r install_stat_opt_r install_shar_opt_r \
+install : install_s install_r
+
+install_s : install_stat_dbg install_stat_opt install_shar_opt install_stat_prof
+
+install_r : install_stat_dbg_r install_stat_opt_r install_shar_opt_r \
 	install_stat_prof_r
 
 install_common : 
@@ -309,6 +327,14 @@ install_common :
 	'@INSTALL@ -d @prefix@/lib; \
 	@INSTALL@ -d @prefix@/include/libstash; \
 	for i in $(INCS); do \
+	@INSTALL@ -m 0644 $$i @prefix@/include/libstash/; \
+	done; \
+	'
+
+install_common_r : 
+	$(SHELL) -c \
+	'@INSTALL@ -d @prefix@/include/libstash; \
+	for i in $(INCS_R); do \
 	@INSTALL@ -m 0644 $$i @prefix@/include/libstash/; \
 	done; \
 	'
@@ -325,16 +351,16 @@ install_shar_opt : shar_opt install_common
 install_stat_prof : stat_prof install_common
 	@INSTALL@ -m 0444 $(LIB_ST_P) @prefix@/lib
 
-install_stat_dbg_r : stat_dbg_r install_common
+install_stat_dbg_r : stat_dbg_r install_common install_common_r
 	@INSTALL@ -m 0444 $(LIB_ST_R_D) @prefix@/lib
 
-install_stat_opt_r : stat_opt_r install_common
+install_stat_opt_r : stat_opt_r install_common install_common_r
 	@INSTALL@ -m 0444 $(LIB_ST_R_O) @prefix@/lib
 
-install_shar_opt_r : shar_opt_r install_common
+install_shar_opt_r : shar_opt_r install_common install_common_r
 	@INSTALL@ -m 0444 $(LIB_SH_R_O) @prefix@/lib
 
-install_stat_prof_r : stat_prof_r install_common
+install_stat_prof_r : stat_prof_r install_common install_common_r
 	@INSTALL@ -m 0444 $(LIB_ST_R_P) @prefix@/lib
 
 uninstall :
@@ -362,5 +388,5 @@ distclean : clean
 	rm -f $(PMERGE)
 	rm -f $(PSTUB)
 
-etags : $(INCS) $(PRIV_INCS) $(SRCS)
-	@ETAGS@ $(INCS) $(PRIV_INCS) $(SRCS)
+etags : $(INCS) $(INCS_R) $(PRIV_INCS) $(PRIV_INCS_R) $(SRCS) $(SRCS_R)
+	@ETAGS@ $(INCS) $(INCS_R) $(PRIV_INCS) $(PRIV_INCS_R) $(SRCS) $(SRCS_R)
