@@ -100,137 +100,162 @@ main(int argc, char **argv, char **envp)
 
     libonyx_init();
 
-    /* Parse command line arguments, but postpone taking any actions that
-     * require the onyx interpreter to be up and running.  This is necessary
-     * because we need to know how much of argv to pass to nx_new(). */
-    while ((c = getopt(argc, argv,
-#ifdef _GNU_SOURCE
-		       /* Without this, glibc will permute unknown options to
-			* the end of the argument list. */
-		       "+"
-#endif
-		       "hVe:i:"
-#ifdef CW_POSIX_FILE
-		       "f:"
-#endif
-		       "s:")) != -1)
+    xep_begin();
+    xep_try
     {
-	switch (c)
-	{
-	    case 'h':
-	    {
-		usage();
-		retval = 0;
-		goto CLERROR;
-	    }
-	    case 'V':
-	    {
-		opt_version = TRUE;
-		break;
-	    }
-	    case 'e':
-	    {
-		if (argc != 3)
-		{
-		    fprintf(stderr, "onyx: Incorrect number of arguments\n");
-		    usage();
-		    retval = 1;
-		    goto CLERROR;
-		}
-
-		opt_expression = optarg;
-		break;
-	    }
-	    case 'i':
-	    {
-		opt_ninit++;
-		if (opt_ninit == 1)
-		{
-		    opt_init = (cw_nxinit_t *)cw_malloc(sizeof(cw_nxinit_t));
-		}
-		else
-		{
-		    opt_init = (cw_nxinit_t *)cw_realloc(opt_init,
-							 sizeof(cw_nxinit_t)
-							 * opt_ninit);
-		}
-		opt_init[opt_ninit - 1].is_expr = TRUE;
-		opt_init[opt_ninit - 1].str = optarg;
-		break;
-	    }
-#ifdef CW_POSIX_FILE
-	    case 'f':
-	    {
-		opt_ninit++;
-		if (opt_ninit == 1)
-		{
-		    opt_init = (cw_nxinit_t *)cw_malloc(sizeof(cw_nxinit_t));
-		}
-		else
-		{
-		    opt_init = (cw_nxinit_t *)cw_realloc(opt_init,
-							 sizeof(cw_nxinit_t)
-							 * opt_ninit);
-		}
-		opt_init[opt_ninit - 1].is_expr = FALSE;
-		opt_init[opt_ninit - 1].str = optarg;
-		break;
-	    }
+	/* Parse command line arguments, but postpone taking any actions that
+	 * require the onyx interpreter to be up and running.  This is necessary
+	 * because we need to know how much of argv to pass to nx_new(). */
+	while ((c = getopt(argc, argv,
+#ifdef _GNU_SOURCE
+			   /* Without this, glibc will permute unknown options
+			    * to the end of the argument list. */
+			   "+"
 #endif
-	    case 's':
+			   "hVe:i:"
+#ifdef CW_POSIX_FILE
+			   "f:"
+#endif
+			   "s:")) != -1)
+	{
+	    switch (c)
 	    {
-		if (opt_start != NULL)
+		case 'h':
 		{
-		    fprintf(stderr, "onyx: -s specified more than once\n");
+		    usage();
+		    retval = 0;
+		    goto CLERROR;
+		}
+		case 'V':
+		{
+		    opt_version = TRUE;
+		    break;
+		}
+		case 'e':
+		{
+		    if (argc != 3)
+		    {
+			fprintf(stderr,
+				"onyx: Incorrect number of arguments\n");
+			usage();
+			retval = 1;
+			goto CLERROR;
+		    }
+
+		    opt_expression = optarg;
+		    break;
+		}
+		case 'i':
+		{
+		    opt_ninit++;
+		    if (opt_ninit == 1)
+		    {
+			opt_init
+			    = (cw_nxinit_t *)cw_malloc(sizeof(cw_nxinit_t));
+		    }
+		    else
+		    {
+			opt_init = (cw_nxinit_t *)cw_realloc(opt_init,
+							     sizeof(cw_nxinit_t)
+							     * opt_ninit);
+		    }
+		    opt_init[opt_ninit - 1].is_expr = TRUE;
+		    opt_init[opt_ninit - 1].str = optarg;
+		    break;
+		}
+#ifdef CW_POSIX_FILE
+		case 'f':
+		{
+		    opt_ninit++;
+		    if (opt_ninit == 1)
+		    {
+			opt_init
+			    = (cw_nxinit_t *)cw_malloc(sizeof(cw_nxinit_t));
+		    }
+		    else
+		    {
+			opt_init = (cw_nxinit_t *)cw_realloc(opt_init,
+							     sizeof(cw_nxinit_t)
+							     * opt_ninit);
+		    }
+		    opt_init[opt_ninit - 1].is_expr = FALSE;
+		    opt_init[opt_ninit - 1].str = optarg;
+		    break;
+		}
+#endif
+		case 's':
+		{
+		    if (opt_start != NULL)
+		    {
+			fprintf(stderr, "onyx: -s specified more than once\n");
+			usage();
+			retval = 1;
+			goto CLERROR;
+		    }
+		    opt_start = optarg;
+		    break;
+		}
+		default:
+		{
+		    fprintf(stderr,  "onyx: Unrecognized option\n");
 		    usage();
 		    retval = 1;
 		    goto CLERROR;
 		}
-		opt_start = optarg;
-		break;
-	    }
-	    default:
-	    {
-		fprintf(stderr,  "onyx: Unrecognized option\n");
-		usage();
-		retval = 1;
-		goto CLERROR;
 	    }
 	}
-    }
 
-    /* Do additional command line argument error checking. */
-    if ((optind < argc && (opt_expression != NULL || opt_version
-			   || opt_ninit != 0 || opt_start != NULL))
-	|| (opt_version && opt_expression != NULL)
-	|| ((opt_ninit != 0 || opt_start)
-	    && (opt_version || opt_expression != NULL))
-	)
-    {
-	fprintf(stderr, "onyx: Incorrect number of arguments\n");
-	usage();
-	retval = 1;
-	goto CLERROR;
-    }
+	/* Do additional command line argument error checking. */
+	if ((optind < argc && (opt_expression != NULL || opt_version
+			       || opt_ninit != 0 || opt_start != NULL))
+	    || (opt_version && opt_expression != NULL)
+	    || ((opt_ninit != 0 || opt_start)
+		&& (opt_version || opt_expression != NULL))
+	    )
+	{
+	    fprintf(stderr, "onyx: Incorrect number of arguments\n");
+	    usage();
+	    retval = 1;
+	    goto CLERROR;
+	}
 
-    /* Run differently, depending on whether this is an interactive session, and
-     * what flags were specified. */
-    if (isatty(0) && optind == argc
-	&& opt_version == FALSE && opt_expression == NULL)
-    {
-	retval = interactive_run(argc, argv, envp, opt_init, opt_ninit,
-				 opt_start);
-    }
-    else
-    {
-	retval = batch_run(argc, argv, envp, opt_version, opt_expression);
-    }
+	/* Run differently, depending on whether this is an interactive session,
+	 * and what flags were specified. */
+	if (isatty(0) && optind == argc
+	    && opt_version == FALSE && opt_expression == NULL)
+	{
+	    retval = interactive_run(argc, argv, envp, opt_init, opt_ninit,
+				     opt_start);
+	}
+	else
+	{
+	    retval = batch_run(argc, argv, envp, opt_version, opt_expression);
+	}
 
-    CLERROR:
-    if (opt_init != NULL)
-    {
-	cw_free(opt_init);
+	CLERROR:
+	if (opt_init != NULL)
+	{
+	    cw_free(opt_init);
+	}
     }
+    xep_catch (CW_ONYXX_OOM)
+    {
+	/* Out of memory exception. */
+	fprintf(stderr,
+		"onyx: Unhandled exception CW_ONYXX_OOM thrown at %s:%u\n",
+		xep_filename(), xep_line_num());
+	_exit(1);
+    }
+    xep_acatch
+    {
+	/* Other exception.  This indicates a bug somewhere, since exceptions
+	 * should not propagate to the top level. */
+	fprintf(stderr, "onyx: Unhandled exception %u thrown at %s:%u\n",
+		xep_value(), xep_filename(), xep_line_num());
+	_exit(1);
+    }
+    xep_end();
+
     libonyx_shutdown();
     return retval;
 }
