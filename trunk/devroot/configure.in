@@ -96,6 +96,11 @@ AC_SUBST(TCC)
 dnl Platform-specific settings.  abi and RPATH can probably be determined
 dnl programmatically, but doing so is error-prone, which makes it generally
 dnl not worth the trouble.
+dnl 
+dnl Define cpp macros in CFLAGS, rather than doing AC_DEFINE(macro), since the
+dnl definitions need to be seen before and headers are included, which is a pain
+dnl to make happen otherwise.   Ideally, this would be defined in CPPFLAGS, but
+dnl that causes c_incl to fail.
 AC_CANONICAL_HOST
 case "${host}" in
   *-*-darwin*)
@@ -109,11 +114,7 @@ case "${host}" in
 	;;
   *-*-linux*)
 	abi="elf"
-	dnl Define _GNU_SOURCE in CFLAGS, rather than doing
-	dnl AC_DEFINE(_GNU_SOURCE), since the definition needs to be seen before
-	dnl and headers are included, which is a pain to make happen otherwise.
-	dnl Ideally, this would be defined in CPPFLAGS, but that causes c_incl
-	dnl to fail.
+	dnl Linux needs this for things like asprintf() and poll() flags.
 	CFLAGS="$CFLAGS -D_GNU_SOURCE"
 	RPATH="-Wl,-rpath,"
 	;;
@@ -132,7 +133,8 @@ case "${host}" in
   *-*-solaris2*)
 	abi="elf"
 	RPATH="-Wl,-R,"
-	AC_DEFINE(_POSIX_PTHREAD_SEMANTICS)
+	dnl Solaris needs this for sigwait().
+	CFLAGS="$CFLAGS -D_POSIX_PTHREAD_SEMANTICS"
 	LIBS="$LIBS -lposix4"
 	;;
   *)
@@ -931,8 +933,8 @@ if test "x$bin_slate" = "x1" ; then
   AC_SUBST(slate_rpath_post)
   AC_SUBST(slate_mpath_post)
 
-  tmpath=SLATE_MPATH=
-  trpath=SLATE_RPATH=
+  tmpath=ONYX_MPATH=
+  trpath=ONYX_RPATH=
   for i in $mods ; do
     tmpath=$tmpath:$abs_objroot/mod/$i/nxm
     trpath=$trpath:$abs_objroot/mod/$i/nx
@@ -968,8 +970,8 @@ fi
 AC_MSG_RESULT()
 AC_MSG_RESULT(HCC           : ${HCC})
 AC_MSG_RESULT(TCC           : ${TCC})
-AC_MSG_RESULT(CFLAGS        : ${CFLAGS})
 AC_MSG_RESULT(CPPFLAGS      : ${CPPFLAGS})
+AC_MSG_RESULT(CFLAGS        : ${CFLAGS})
 AC_MSG_RESULT(LDFLAGS       : ${LDFLAGS})
 AC_MSG_RESULT(LIBS          : ${LIBS})
 AC_MSG_RESULT()
