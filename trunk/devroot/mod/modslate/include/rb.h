@@ -70,6 +70,8 @@ struct									\
 	rb_node_new(a_tree, &(a_tree)->rbt_nil, a_field);		\
     } while (0)
 
+#define rb_tree_nil(a_tree, a_field) (&(a_tree)->rbt_nil)
+
 /* Operations. */
 #define rb_root(a_tree) (a_tree)->rbt_root
 
@@ -135,11 +137,11 @@ struct									\
 	}								\
     } while (0)
 
-#define rb_search(a_root, a_key, a_comp, a_field, r_node)		\
+#define rb_search(a_tree, a_key, a_comp, a_field, r_node)		\
     do									\
     {									\
 	cw_sint32_t t;							\
-	(r_node) = (a_root);						\
+	(r_node) = (a_tree)->rbt_root;					\
 	while ((r_node) != &(a_tree)->rbt_nil				\
 	       && (t = (a_comp)((a_key), (r_node))) != 0)		\
 	{								\
@@ -149,7 +151,7 @@ struct									\
 	    }								\
 	    else							\
 	    {								\
-		(r_node) = (r_node)->a_field.rbn_left;			\
+		(r_node) = (r_node)->a_field.rbn_right;			\
 	    }								\
 	}								\
     } while (0)
@@ -242,6 +244,7 @@ struct									\
 	/* Fix up. */							\
 	x->a_field.rbn_red = TRUE;					\
 	while (x != (a_tree)->rbt_root					\
+	       && x != &(a_tree)->rbt_nil				\
 	       && x->a_field.rbn_par->a_field.rbn_red)			\
 	{								\
 	    y = x->a_field.rbn_par;					\
@@ -296,6 +299,7 @@ struct									\
 		}							\
 	    }								\
 	}								\
+	(a_tree)->rbt_root->a_field.rbn_red = FALSE;			\
     } while (0)
 
 #define rb_remove(a_tree, a_node, a_type, a_field)			\
