@@ -1721,25 +1721,34 @@ systemdict_exch(cw_nxo_t *a_thread)
 void
 systemdict_exec(cw_nxo_t *a_thread)
 {
-	cw_nxo_t	*ostack, *tstack;
-	cw_nxo_t	*array, *el;
-	cw_uint32_t	i, slen, argc;
-	char		*path, **argv, **envp;
+	cw_nxo_t		*ostack, *tstack;
+	cw_nxo_t		*array, *el;
+	cw_uint32_t		i, slen, argc;
+	char			*path, **argv, **envp;
+	cw_nxo_threade_t	error;
+
+	/*
+	 * This operator does a bunch of memory allocation, which must be done
+	 * with great care, since an exception will cause us to leak all of the
+	 * allocated memory.  For example, a user can cause an exception in
+	 * nxo_thread_error(), so we must do all cleanup before throwing the
+	 * error.
+	 */
 
 	ostack = nxo_thread_ostack_get(a_thread);
 	tstack = nxo_thread_tstack_get(a_thread);
 	el = nxo_stack_push(tstack);
-	
+
 	NXO_STACK_GET(array, ostack, a_thread);
 	if (nxo_type_get(array) != NXOT_ARRAY) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		error = NXO_THREADE_TYPECHECK;
 		goto VALIDATION_ERROR;
 	}
 	argc = nxo_array_len_get(array);
 	for (i = 0; i < argc; i++) {
 		nxo_array_el_get(array, i, el);
 		if (nxo_type_get(el) != NXOT_STRING) {
-			nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+			error = NXO_THREADE_TYPECHECK;
 			goto VALIDATION_ERROR;
 		}
 	}
@@ -1749,7 +1758,7 @@ systemdict_exec(cw_nxo_t *a_thread)
 	 */
 	nxo_array_el_get(array, 0, el);
 	if (nxo_type_get(el) != NXOT_STRING) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		error = NXO_THREADE_TYPECHECK;
 		goto PATH_ERROR;
 	}
 	slen = nxo_string_len_get(el);
@@ -1766,7 +1775,7 @@ systemdict_exec(cw_nxo_t *a_thread)
 	for (i = 0; i < argc; i++) {
 		nxo_array_el_get(array, i, el);
 		if (nxo_type_get(el) != NXOT_STRING) {
-			nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+			error = NXO_THREADE_TYPECHECK;
 			goto ARGV_ERROR;
 		}
 		slen = nxo_string_len_get(el);
@@ -1800,9 +1809,8 @@ systemdict_exec(cw_nxo_t *a_thread)
 			    nxo_thread_nx_get(a_thread)), key, val);
 			if (nxo_type_get(key) != NXOT_NAME || nxo_type_get(val)
 			    != NXOT_STRING) {
-				nxo_thread_error(a_thread,
-				    NXO_THREADE_TYPECHECK);
 				nxo_stack_npop(tstack, 2);
+				error = NXO_THREADE_TYPECHECK;
 				goto ENVP_ERROR;
 			}
 
@@ -1845,6 +1853,7 @@ systemdict_exec(cw_nxo_t *a_thread)
 	PATH_ERROR:
 	VALIDATION_ERROR:
 	nxo_stack_pop(tstack);
+	nxo_thread_error(a_thread, error);
 }
 
 void
