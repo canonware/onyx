@@ -11,4 +11,4 @@
 
 #include "onyx_defs.h"
 
-#include <libonyx/libonyx.h>
+#include "../../../lib/libonyx/include/libonyx/libonyx.h"
