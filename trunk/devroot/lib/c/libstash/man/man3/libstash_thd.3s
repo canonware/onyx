@@ -55,6 +55,16 @@ thd - Thread.
 .PP
 .I void
 .br
+.B thd_single_enter
+.RI ( "void" )
+.PP
+.I void
+.br
+.B thd_single_leave
+.RI ( "void" )
+.PP
+.I void
+.br
 .B thd_suspend
 .RI ( "cw_thd_t *a_thd" )
 .PP
@@ -286,6 +296,45 @@ None.
 Description:
 .RS
 Leave a critical section; the calling thread may once again be suspended.
+.RE
+.RE
+.PP
+.I void
+.br
+.B thd_single_enter
+.RI ( "void" )
+.RS
+Input(s):
+.RS
+None.
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Enter a critical region where all other threads must be suspended.
+.RE
+.RE
+.PP
+.I void
+.br
+.B thd_single_leave
+.RI ( "void" )
+.RS
+Input(s):
+.RS
+None.
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Leave a critical section where all other threads must be suspended.
+All threads that were suspended in \fBthd_single_enter\fR() are resumed.
 .RE
 .RE
 .PP

@@ -29,6 +29,9 @@ static cw_bool_t cw_g_thd_initialized = FALSE;
 /* Special thd structure for initial thread, needed for critical sections. */
 static cw_thd_t	cw_g_thd;
 
+/* Protects the ring of thd's in thd_single_{enter,leave}(). */
+static cw_mtx_t	cw_g_thd_single_lock;
+
 /* For thd_self(). */
 cw_tsd_t	cw_g_thd_self_key;
 
@@ -84,6 +87,7 @@ thd_l_init(void)
 #endif
 	_cw_assert(cw_g_thd_initialized == FALSE);
 
+	mtx_new(&cw_g_thd_single_lock);
 	tsd_new(&cw_g_thd_self_key, NULL);
 	
 	/* Initialize the main thread's thd structure. */
@@ -100,6 +104,8 @@ thd_l_init(void)
 #endif
 	cw_g_thd.suspended = FALSE;
 	mtx_new(&cw_g_thd.crit_lock);
+	cw_g_thd.singled = FALSE;
+	qr_new(&cw_g_thd, link);
 #ifdef _LIBSTASH_DBG
 	cw_g_thd.magic = _CW_THD_MAGIC;
 #endif
@@ -128,6 +134,8 @@ thd_l_shutdown(void)
 		abort();
 	}
 #endif
+	tsd_delete(&cw_g_thd_self_key);
+	mtx_delete(&cw_g_thd_single_lock);
 #ifdef _LIBSTASH_DBG
 	memset(&cw_g_thd, 0x5a, sizeof(cw_thd_t));
 	cw_g_thd_initialized = FALSE;
@@ -154,6 +162,7 @@ thd_new(cw_thd_t *a_thd, void *(*a_start_func)(void *), void *a_arg)
 #endif
 	a_thd->suspended = FALSE;
 	mtx_new(&a_thd->crit_lock);
+	a_thd->singled = FALSE;
 #ifdef _LIBSTASH_DBG
 	a_thd->magic = _CW_THD_MAGIC;
 #endif
@@ -176,6 +185,13 @@ thd_delete(cw_thd_t *a_thd)
 	_cw_assert(a_thd->magic == _CW_THD_MAGIC);
 	_cw_assert(cw_g_thd_initialized);
 
+	error = pthread_detach(a_thd->thread);
+	if (error) {
+		out_put_e(NULL, NULL, 0, __FUNCTION__,
+		    "Error in pthread_detach(): [s]\n", strerror(error));
+		abort();
+	}
+
 	mtx_delete(&a_thd->crit_lock);
 #ifdef _CW_THD_GENERIC_SR
 	error = sem_destroy(&a_thd->sem);
@@ -185,12 +201,6 @@ thd_delete(cw_thd_t *a_thd)
 		abort();
 	}
 #endif
-	error = pthread_detach(a_thd->thread);
-	if (error) {
-		out_put_e(NULL, NULL, 0, __FUNCTION__,
-		    "Error in pthread_detach(): [s]\n", strerror(error));
-		abort();
-	}
 #ifdef _LIBSTASH_DBG
 	memset(a_thd, 0x5a, sizeof(cw_thd_t));
 #endif
@@ -206,13 +216,22 @@ thd_join(cw_thd_t *a_thd)
 	_cw_assert(a_thd->magic == _CW_THD_MAGIC);
 	_cw_assert(cw_g_thd_initialized);
 
-	mtx_delete(&a_thd->crit_lock);
 	error = pthread_join(a_thd->thread, &retval);
 	if (error) {
 		out_put_e(NULL, NULL, 0, __FUNCTION__,
 		    "Error in pthread_join(): [s]\n", strerror(error));
 		abort();
 	}
+
+	mtx_delete(&a_thd->crit_lock);
+#ifdef _CW_THD_GENERIC_SR
+	error = sem_destroy(&a_thd->sem);
+	if (error) {
+		out_put_e(NULL, NULL, 0, __FUNCTION__,
+		    "Error in sem_destroy(): [s]\n", strerror(error));
+		abort();
+	}
+#endif
 #ifdef _LIBSTASH_DBG
 	memset(a_thd, 0x5a, sizeof(cw_thd_t));
 #endif
@@ -259,6 +278,47 @@ thd_crit_leave(void)
 	mtx_unlock(&thd->crit_lock);
 }
 
+void
+thd_single_enter(void)
+{
+	cw_thd_t	*self, *thd;
+
+	_cw_assert(cw_g_thd_initialized);
+
+	self = thd_self();
+	_cw_check_ptr(self);
+	_cw_assert(self->magic == _CW_THD_MAGIC);
+
+	mtx_lock(&cw_g_thd_single_lock);
+	qr_foreach(thd, &cw_g_thd, link) {
+		if (thd != self) {
+			thd_suspend(thd);
+			thd->singled = TRUE;
+		}
+	}
+	mtx_unlock(&cw_g_thd_single_lock);
+}
+
+void
+thd_single_leave(void)
+{
+	cw_thd_t	*self, *thd;
+
+	_cw_assert(cw_g_thd_initialized);
+
+	self = thd_self();
+	_cw_check_ptr(self);
+	_cw_assert(self->magic == _CW_THD_MAGIC);
+
+	mtx_lock(&cw_g_thd_single_lock);
+	qr_foreach(thd, &cw_g_thd, link) {
+		if (thd->singled) {
+			thd_resume(thd);
+			thd->singled = FALSE;
+		}
+	}
+	mtx_unlock(&cw_g_thd_single_lock);
+}
 
 void
 thd_suspend(cw_thd_t *a_thd)
@@ -325,13 +385,26 @@ thd_resume(cw_thd_t *a_thd)
 static void *
 thd_p_start_func(void *a_arg)
 {
+	void		*retval;
 	cw_thd_t	*thd = (cw_thd_t *)a_arg;
 
 	_cw_assert(cw_g_thd_initialized);
 
 	tsd_set(&cw_g_thd_self_key, (void *)thd);
+
+	/* Insert this thread into the thread ring. */
+	mtx_lock(&cw_g_thd_single_lock);
+	qr_before_insert(&cw_g_thd, thd, link);
+	mtx_unlock(&cw_g_thd_single_lock);
 	
-	return thd->start_func(thd->start_arg);
+	retval = thd->start_func(thd->start_arg);
+
+	/* Remove this thread from the thread ring. */
+	mtx_lock(&cw_g_thd_single_lock);
+	qr_remove(thd, link);
+	mtx_unlock(&cw_g_thd_single_lock);
+
+	return retval;
 }
 
 static void

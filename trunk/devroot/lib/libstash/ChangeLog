@@ -1,5 +1,8 @@
 2001-02-03  Jason Evans  <jasone@canonware.com>
 
+	* src/thd.c (thd_single_enter): Add.
+	(thd_single_leave): Add.
+
 	* : Fold _LIBSTASH_DEBUG into _LIBSTASH_DBG.
 
 	* src/thd.c (thd_p_suspend): Call pthread_suspend_np() rather than
