@@ -61,7 +61,7 @@ cw_nxo_threadp_t threadp;
 #ifdef CW_USE_LIBEDIT
 EditLine	*el;
 History		*hist;
-cw_uint8_t	prompt_str[_PROMPT_STRLEN];
+cw_uint8_t	prompt_str[CW_PROMPT_STRLEN];
 #endif
 
 /*
