@@ -23,14 +23,13 @@
 buffer
 dup marker
 % %=buffer= %=marker=
-dup `foo' marker_before_insert
+dup `a' marker_before_insert
+dup `b' marker_after_insert
+dup `c' marker_before_insert
+dup `d' marker_after_insert
 1 index b2s 1 sprint
-dup `bar' marker_after_insert
-1 index b2s 1 sprint
-dup `wiz' marker_before_insert
-1 index b2s 1 sprint
-dup `pah' marker_after_insert
-1 index b2s 1 sprint
+dup marker_position 1 sprint
+clear
 
 `Test end\n' print
 pstack

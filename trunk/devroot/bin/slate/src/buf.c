@@ -313,8 +313,8 @@ buf_p_lines_count(cw_buf_t *a_buf, cw_uint64_t a_apos_beg, cw_uint64_t
 }
 
 static void
-buf_p_bufms_apos_adjust(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_bool_t a_exclude,
-    cw_sint64_t a_adjust, cw_uint64_t a_beg_apos, cw_uint64_t a_end_apos)
+buf_p_bufms_apos_adjust(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_sint64_t
+    a_adjust, cw_uint64_t a_beg_apos, cw_uint64_t a_end_apos)
 {
 	cw_bufm_t	*bufm;
 
@@ -322,38 +322,55 @@ buf_p_bufms_apos_adjust(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_bool_t a_exclude,
 	_cw_check_ptr(a_bufm);
 	_cw_assert(a_beg_apos < a_end_apos);
 
+/*  	fprintf(stderr, "%s:%u:%s(): a_bufm->apos: %llu, " */
+/*  	    "a_adjust: %lld, " */
+/*  	    "a_beg_apos: %llu, a_end_apos: %llu\n", __FILE__, __LINE__, */
+/*  	    __FUNCTION__, a_bufm->apos, a_adjust, */
+/*  	    a_beg_apos, a_end_apos); */
+
 	/*
-	 * Adjust apos field of affected bufm's. a_bufm is either in the
-	 * affected range or adjacent to the empty region.  Starting at a_bufm,
-	 * go both directions until out of the affected region or until past the
-	 * beginning/end of the list.
+	 * Adjust apos field of affected bufm's. a_bufm is either in or adjacent
+	 * to the affected range.  Starting at a_bufm, go both directions until
+	 * out of the affected range or until past the beginning/end of the
+	 * list.  Extra care must be taken to ignore bufm's at the starting apos
+	 * if a_bufm is merely adjacent to the affected region.
 	 */
 
-	if (a_exclude == FALSE && a_bufm->apos >= a_beg_apos && a_bufm->apos <
-	    a_end_apos) {
-		a_bufm->apos += a_adjust;
-	}
-
-	/* Forward. */
-	for (bufm = ql_next(&a_buf->bufms, a_bufm, link);
-	     bufm != NULL && bufm->apos >= a_beg_apos && bufm->apos <
-	     a_end_apos;
-	     bufm = ql_next(&a_buf->bufms, bufm, link))
+	/* Forward (including a_bufm). */
+/*  	fprintf(stderr, "%s:%u:%s(): Forward from %llu:", __FILE__, */
+/*  	    __LINE__, __FUNCTION__, a_bufm->apos); */
+	for (bufm = a_bufm;
+	    bufm != NULL && bufm->apos >= a_beg_apos && bufm->apos <
+	    a_end_apos;
+	    bufm = ql_next(&a_buf->bufms, bufm, link)) {
+/*  		fprintf(stderr, " [%llu --> %llu]", bufm->apos, bufm->apos + */
+/*  		    a_adjust); */
 		bufm->apos += a_adjust;
-/*  	fprintf(stderr, "%s:%u:%s(): Got here\n", __FILE__, __LINE__, */
-/*  	    __FUNCTION__); */
+	}
+/*  	fprintf(stderr, "\n"); */
 
 	/* Backward. */
+/*  	fprintf(stderr, "%s:%u:%s(): Backward:", __FILE__, __LINE__, */
+/*  	    __FUNCTION__); */
 	for (bufm = ql_prev(&a_buf->bufms, a_bufm, link);
-	     bufm != NULL && bufm->apos >= a_beg_apos && bufm->apos <
-	     a_end_apos;
-	     bufm = ql_prev(&a_buf->bufms, bufm, link))
+	    bufm != NULL && bufm->apos == a_end_apos;
+	    bufm = ql_prev(&a_buf->bufms, bufm, link)) {
+		/* Ignore. */
+/*  		fprintf(stderr, " [%llu (ignore)]", bufm->apos); */
+	}
+
+	for (/*  bufm = ql_prev(&a_buf->bufms, a_bufm, link) */;
+	    bufm != NULL && bufm->apos >= a_beg_apos;
+	    bufm = ql_prev(&a_buf->bufms, bufm, link)) {
+/*  		fprintf(stderr, " [%llu --> %llu]", bufm->apos, bufm->apos + */
+/*  		    a_adjust); */
 		bufm->apos += a_adjust;
+	}
+/*  	fprintf(stderr, "\n"); */
 }
 
 static void
-buf_p_gap_move(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_bool_t a_exclude,
-    cw_uint64_t a_bpos)
+buf_p_gap_move(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_uint64_t a_bpos)
 {
 	cw_uint64_t	apos;
 
@@ -389,9 +406,9 @@ buf_p_gap_move(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_bool_t a_exclude,
 			 * Adjust the apos of all bufm's with apos in the moved
 			 * region.
 			 */
-			buf_p_bufms_apos_adjust(a_buf, a_bufm, a_exclude,
-			    -a_buf->gap_len, a_buf->gap_off + a_buf->gap_len,
-			    apos + a_buf->gap_len);
+			buf_p_bufms_apos_adjust(a_buf, a_bufm, -a_buf->gap_len,
+			    a_buf->gap_off + a_buf->gap_len, apos +
+			    a_buf->gap_len);
 		} else {
 			/*
 			 * Move the gap backward.
@@ -417,8 +434,8 @@ buf_p_gap_move(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_bool_t a_exclude,
 			 * Adjust the apos of all bufm's with apos in the moved
 			 * region.
 			 */
-			buf_p_bufms_apos_adjust(a_buf, a_bufm, a_exclude,
-			    a_buf->gap_len, apos, a_buf->gap_off);
+			buf_p_bufms_apos_adjust(a_buf, a_bufm, a_buf->gap_len,
+			    apos, a_buf->gap_off);
 		}
 		a_buf->gap_off = apos;
 	}
@@ -439,8 +456,7 @@ buf_p_grow(cw_buf_t *a_buf, cw_uint64_t a_minlen)
 	}
 
 	/* Move the gap to the end before reallocating. */
-	buf_p_gap_move(a_buf, ql_last(&a_buf->bufms, link), FALSE, a_buf->len +
-	    1);
+	buf_p_gap_move(a_buf, ql_last(&a_buf->bufms, link), a_buf->len + 1);
 
 	a_buf->b = (cw_uint8_t *)_cw_opaque_realloc(a_buf->realloc, a_buf->arg,
 	    a_buf->b, new_size * a_buf->elmsize, old_size * a_buf->elmsize);
@@ -472,8 +488,8 @@ buf_p_shrink(cw_buf_t *a_buf)
 	 */
 	if (old_size > new_size) {
 		/* Move the gap to the end. */
-		buf_p_gap_move(a_buf, ql_last(&a_buf->bufms, link), FALSE,
-		    a_buf->len + 1);
+		buf_p_gap_move(a_buf, ql_last(&a_buf->bufms, link), a_buf->len +
+		    1);
 
 		/* Shrink the gap. */
 		a_buf->b = (cw_uint8_t *)_cw_opaque_realloc(a_buf->realloc,
@@ -1011,8 +1027,7 @@ buf_elmsize_set(cw_buf_t *a_buf, cw_uint32_t a_elmsize)
 	size = a_buf->len + a_buf->gap_len;
 
 	/* Move the gap to the end to make things easier. */
-	buf_p_gap_move(a_buf, ql_last(&a_buf->bufms, link), FALSE, a_buf->len +
-	    1);
+	buf_p_gap_move(a_buf, ql_last(&a_buf->bufms, link), a_buf->len + 1);
 
 	/* Allocate the new buffer. */
 	b = (cw_uint8_t *)_cw_opaque_alloc(a_buf->alloc, a_buf->arg, size *
@@ -1273,11 +1288,12 @@ buf_hist_flush(cw_buf_t *a_buf)
 
 /* bufm. */
 static void
-bufm_p_insert(cw_bufm_t *a_bufm, cw_bool_t a_exclude, const cw_uint8_t *a_str,
+bufm_p_insert(cw_bufm_t *a_bufm, cw_bool_t a_after, const cw_uint8_t *a_str,
     cw_uint64_t a_len)
 {
 	cw_uint64_t	i, nlines;
 	cw_buf_t	*buf;
+	cw_bufm_t	*first, *bufm;
 
 	buf = a_bufm->buf;
 
@@ -1286,8 +1302,7 @@ bufm_p_insert(cw_bufm_t *a_bufm, cw_bool_t a_exclude, const cw_uint8_t *a_str,
 		buf_p_grow(buf, buf->len + a_len);
 
 	/* Move the gap. */
-	buf_p_gap_move(buf, a_bufm, a_exclude, buf_p_pos_a2b(buf,
-	    a_bufm->apos));
+	buf_p_gap_move(buf, a_bufm, buf_p_pos_a2b(buf, a_bufm->apos));
 
 	/* Insert. */
 	for (i = nlines = 0; i < a_len; i++) {
@@ -1295,6 +1310,29 @@ bufm_p_insert(cw_bufm_t *a_bufm, cw_bool_t a_exclude, const cw_uint8_t *a_str,
 		if (a_str[i] == '\n')
 			nlines++;
 	}
+
+	/*
+	 * If there are multiple bufm's at the same position as a_bufm, make
+	 * sure that a_bufm is the first bufm in the bufm list, in order to
+	 * simplify later list iteration operations and allow moving a_bufm.
+	 */
+	for (first = NULL, bufm = ql_prev(&buf->bufms, a_bufm, link);
+	    bufm != NULL && bufm->apos == a_bufm->apos;
+	    bufm = ql_prev(&buf->bufms, bufm, link))
+		first = bufm;
+
+	if (first != NULL) {
+		ql_remove(&buf->bufms, a_bufm, link);
+		ql_before_insert(&buf->bufms, first, a_bufm, link);
+	}
+	
+	/*
+	 * If inserting after a_bufm, move a_bufm before the data just inserted.
+	 * This relies on the bufm list re-ordering above, since moving a_bufm
+	 * would otherwise require re-insertion into the bufm list.
+	 */
+	if (a_after)
+		a_bufm->apos = buf->gap_off;
 
 	/* Shrink the gap. */
 	buf->gap_off += a_len;
@@ -1305,10 +1343,8 @@ bufm_p_insert(cw_bufm_t *a_bufm, cw_bool_t a_exclude, const cw_uint8_t *a_str,
 	buf->nlines += nlines;
 
 	if (nlines > 0) {
-		cw_bufm_t	*bufm;
-
 		/* Adjust line. */
-		if (a_exclude == FALSE)
+		if (a_after == FALSE)
 			a_bufm->line += nlines;
 
 		/* Adjust line for all following bufm's. */
@@ -1340,7 +1376,7 @@ bufm_new(cw_bufm_t *a_bufm, cw_buf_t *a_buf, cw_msgq_t *a_msgq)
 
 	ql_elm_new(retval, link);
 	retval->buf = a_buf;
-	retval->apos = 0;
+	retval->apos = buf_p_pos_b2a(a_buf, 1);
 	retval->line = 1;
 	retval->msgq = a_msgq;
 
@@ -2028,7 +2064,7 @@ bufm_range_get(cw_bufm_t *a_start, cw_bufm_t *a_end)
 		 */
 	} else {
 		/* Move the gap to just past the end bufm. */
-		buf_p_gap_move(buf, end, FALSE, buf_p_pos_a2b(buf, end->apos));
+		buf_p_gap_move(buf, end, buf_p_pos_a2b(buf, end->apos));
 	}
 
 	retval = &buf->b[start->apos * buf->elmsize];
@@ -2105,7 +2141,7 @@ bufm_remove(cw_bufm_t *a_start, cw_bufm_t *a_end)
 	rcount = end_bpos - start_bpos;
 
 	/* Move the gap. */
-	buf_p_gap_move(buf, start, FALSE, start_bpos);
+	buf_p_gap_move(buf, start, start_bpos);
 
 	/*
 	 * Record undo information, now that the gap has been moved and the

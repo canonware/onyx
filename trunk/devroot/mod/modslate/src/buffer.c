@@ -965,7 +965,7 @@ slate_marker_after_insert(cw_nxo_t *a_thread)
 
 	buf = bufm_buf(&marker->bufm);
 	buf_lock(buf);
-	bufm_before_insert(&marker->bufm, str, str_len);
+	bufm_after_insert(&marker->bufm, str, str_len);
 	buf_unlock(buf);
 
 	nxo_stack_npop(ostack, 2);
