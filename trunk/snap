@@ -11,9 +11,9 @@
 # 1. Redistributions of source code must retain the above copyright
 #    notice(s), this list of conditions and the following disclaimer as
 #    the first lines of this file unmodified other than the possible 
-#    addition of on or more copyright notices.
+#    addition of one or more copyright notices.
 # 2. Redistributions in binary form must reproduce the above copyright
-#    notice(2), this list of conditions and the following disclaimer in the
+#    notice(s), this list of conditions and the following disclaimer in the
 #    documentation and/or other materials provided with the distribution.
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ``AS IS'' AND ANY
@@ -31,8 +31,8 @@
 #
 # $Source$
 # $Author: jasone $
-# $Revision: 126 $
-# $Date: 1998-07-02 18:29:51 -0700 (Thu, 02 Jul 1998) $
+# $Revision: 130 $
+# $Date: 1998-07-05 13:35:26 -0700 (Sun, 05 Jul 1998) $
 #
 # <<< Description >>>
 #
