@@ -34,6 +34,242 @@ and \cfunc{wait}{}.  See the system documentation for additional information.
 
 \subsubsection{API}
 \begin{description}
+\label{thd_new}
+\index{\cfunc{thd\_new}{}}
+\item[{\cfunc[cw\_thd\_t]{thd\_new}{void *(*a\_start\_func)(void *), void
+*a\_arg, cw\_bool\_t a\_suspendible}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_start\_func: ] Pointer to a start function.
+		\item[a\_arg: ] Argument passed to \cfunc{a\_start\_func}{}.
+		\item[a\_suspendible: ]
+		\begin{description}\item[]
+			\item[FALSE: ] Not suspendible.
+			\item[TRUE: ] Suspendible.
+		\end{description}
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ] Pointer to a \classname{thd}.
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Constructor (creates a new thread).
+	\end{description}
+\label{thd_delete}
+\index{\cfunc{thd\_delete}{}}
+\item[{\cfunc[void]{thd\_delete}{cw\_thd\_t *a\_thd}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_thd: ] Pointer to a \classname{thd}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Destructor.
+	\end{description}
+\label{thd_join}
+\index{\cfunc{thd\_join}{}}
+\item[{\cfunc[void *]{thd\_join}{cw\_thd\_t *a\_thd}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_thd: ] Pointer to a \classname{thd}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Return value from thread entry function.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Join (wait for) the thread associated with \cvar{a\_thd}.
+	\end{description}
+\label{thd_}
+\index{\cfunc{thd\_}{}}
+\item[{\cfunc[]{thd\_}{}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\end{description}
+	\item[Description: ]
+	\end{description}
+\label{thd_}
+\index{\cfunc{thd\_}{}}
+\item[{\cfunc[]{thd\_}{}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\end{description}
+	\item[Description: ]
+	\end{description}
+\label{thd_}
+\index{\cfunc{thd\_}{}}
+\item[{\cfunc[]{thd\_}{}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\end{description}
+	\item[Description: ]
+	\end{description}
+\label{thd_}
+\index{\cfunc{thd\_}{}}
+\item[{\cfunc[]{thd\_}{}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\end{description}
+	\item[Description: ]
+	\end{description}
+\label{thd_}
+\index{\cfunc{thd\_}{}}
+\item[{\cfunc[]{thd\_}{}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\end{description}
+	\item[Description: ]
+	\end{description}
+\label{thd_}
+\index{\cfunc{thd\_}{}}
+\item[{\cfunc[]{thd\_}{}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\end{description}
+	\item[Description: ]
+	\end{description}
+\label{thd_}
+\index{\cfunc{thd\_}{}}
+\item[{\cfunc[]{thd\_}{}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\end{description}
+	\item[Description: ]
+	\end{description}
+\label{thd_}
+\index{\cfunc{thd\_}{}}
+\item[{\cfunc[]{thd\_}{}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\end{description}
+	\item[Description: ]
+	\end{description}
+\label{thd_}
+\index{\cfunc{thd\_}{}}
+\item[{\cfunc[]{thd\_}{}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\end{description}
+	\item[Description: ]
+	\end{description}
+\label{thd_}
+\index{\cfunc{thd\_}{}}
+\item[{\cfunc[]{thd\_}{}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\end{description}
+	\item[Description: ]
+	\end{description}
 \label{thd_}
 \index{\cfunc{thd\_}{}}
 \item[{\cfunc[]{thd\_}{}}: ]
