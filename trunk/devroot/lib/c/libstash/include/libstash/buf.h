@@ -79,7 +79,7 @@ struct cw_bufel_s
   cw_uint32_t beg_offset;
   cw_uint32_t end_offset;
   cw_bufc_t * bufc;
-  const cw_uint8_t * bufc_buf;
+  cw_uint8_t * bufc_buf;
 };
 
 struct cw_buf_s

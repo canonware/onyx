@@ -55,11 +55,14 @@ buf_p_copy_array(cw_buf_t * a_a, cw_buf_t * a_b,
 #endif
 
 static cw_bool_t
-buf_p_uniquify_range(cw_buf_t * a_buf, cw_uint32_t a_offset,
-		     cw_uint32_t a_length);
+buf_p_make_range_writeable(cw_buf_t * a_buf, cw_uint32_t a_offset,
+			   cw_uint32_t a_length);
   
 static cw_bool_t
 bufel_p_merge_bufel(cw_bufel_t * a_a, cw_bufel_t * a_b);
+
+static cw_bool_t
+bufel_p_make_writeable(cw_bufel_t * a_bufel);
 
 static void
 bufc_p_dump(cw_bufc_t * a_bufc, const char * a_prefix);
@@ -67,7 +70,7 @@ bufc_p_dump(cw_bufc_t * a_bufc, const char * a_prefix);
 static cw_uint32_t
 bufc_p_get_size(cw_bufc_t * a_bufc);
 
-static const cw_uint8_t *
+static cw_uint8_t *
 bufc_p_get_p(cw_bufc_t * a_bufc);
 
 static cw_uint32_t

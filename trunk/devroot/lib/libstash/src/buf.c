@@ -1408,26 +1408,175 @@ buf_get_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset)
 cw_bool_t
 buf_set_uint8(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint8_t a_val)
 {
-  return TRUE; /* XXX */
+  cw_bool_t retval;
+  cw_uint32_t array_element, bufel_offset;
+
+  _cw_check_ptr(a_buf);
+  _cw_assert(a_buf->magic == _CW_BUF_MAGIC);
+  _cw_assert(a_offset <= a_buf->size);
+
+#ifdef _CW_REENTRANT
+  if (a_buf->is_threadsafe)
+  {
+    mtx_lock(&a_buf->lock);
+  }
+#endif
+  
+  if (buf_p_make_range_writeable(a_buf, a_offset, sizeof(cw_uint8_t)))
+  {
+    retval = TRUE;
+    goto RETURN;
+  }
+
+  buf_p_get_data_position(a_buf, a_offset, &array_element, &bufel_offset);
+
+  a_buf->bufel_array[array_element].bufc_buf[bufel_offset] = a_val;
+
+  retval = FALSE;
+
+  RETURN:
+#ifdef _CW_REENTRANT
+  if (a_buf->is_threadsafe)
+  {
+    mtx_unlock(&a_buf->lock);
+  }
+#endif
+  return retval;
 }
 
 cw_bool_t
 buf_set_uint32(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint32_t a_val)
 {
-  return TRUE; /* XXX */
+  cw_bool_t retval;
+  cw_uint32_t array_element, bufel_offset;
+  
+  _cw_check_ptr(a_buf);
+  _cw_assert(a_buf->magic == _CW_BUF_MAGIC);
+  _cw_assert(a_offset <= a_buf->size);
+
+#ifdef _CW_REENTRANT
+  if (a_buf->is_threadsafe)
+  {
+    mtx_lock(&a_buf->lock);
+  }
+#endif
+  
+  if (buf_p_make_range_writeable(a_buf, a_offset, sizeof(cw_uint32_t)))
+  {
+    retval = TRUE;
+    goto RETURN;
+  }
+
+  buf_p_get_data_position(a_buf, a_offset, &array_element, &bufel_offset);
+  if (bufel_offset + 3
+      < 
+      a_buf->bufel_array[array_element].end_offset)
+  {
+    /* The whole thing is in one bufel. */
+    /* XXX */
+  }
+  else
+  {
+    /* Split across two or more bufels. */
+    /* XXX */
+  }
+
+  retval = FALSE;
+
+  RETURN:
+#ifdef _CW_REENTRANT
+  if (a_buf->is_threadsafe)
+  {
+    mtx_unlock(&a_buf->lock);
+  }
+#endif
+  return retval;
 }
 
 cw_bool_t
 buf_set_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint64_t a_val)
 {
-  return TRUE; /* XXX */
+  cw_bool_t retval;
+  cw_uint32_t array_element, bufel_offset;
+  
+  _cw_check_ptr(a_buf);
+  _cw_assert(a_buf->magic == _CW_BUF_MAGIC);
+  _cw_assert(a_offset <= a_buf->size);
+
+#ifdef _CW_REENTRANT
+  if (a_buf->is_threadsafe)
+  {
+    mtx_lock(&a_buf->lock);
+  }
+#endif
+  
+  if (buf_p_make_range_writeable(a_buf, a_offset, sizeof(cw_uint64_t)))
+  {
+    retval = TRUE;
+    goto RETURN;
+  }
+
+  buf_p_get_data_position(a_buf, a_offset, &array_element, &bufel_offset);
+  if (bufel_offset + 3
+      < 
+      a_buf->bufel_array[array_element].end_offset)
+  {
+    /* The whole thing is in one bufel. */
+    /* XXX */
+  }
+  else
+  {
+    /* Split across two or more bufels. */
+    /* XXX */
+  }
+
+  retval = FALSE;
+
+  RETURN:
+#ifdef _CW_REENTRANT
+  if (a_buf->is_threadsafe)
+  {
+    mtx_unlock(&a_buf->lock);
+  }
+#endif
+  return retval;
 }
 
 cw_bool_t
 buf_set_range(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint32_t a_length,
 	      cw_uint8_t * a_val, cw_bool_t a_is_writeable)
 {
-  return TRUE; /* XXX */
+  cw_bool_t retval;
+  
+  _cw_check_ptr(a_buf);
+  _cw_assert(a_buf->magic == _CW_BUF_MAGIC);
+  _cw_assert(a_offset <= a_buf->size);
+
+#ifdef _CW_REENTRANT
+  if (a_buf->is_threadsafe)
+  {
+    mtx_lock(&a_buf->lock);
+  }
+#endif
+  
+  if (buf_p_make_range_writeable(a_buf, a_offset, a_length))
+  {
+    retval = TRUE;
+    goto RETURN;
+  }
+
+  /* XXX */
+
+  retval = FALSE;
+
+  RETURN:
+#ifdef _CW_REENTRANT
+  if (a_buf->is_threadsafe)
+  {
+    mtx_unlock(&a_buf->lock);
+  }
+#endif
+  return retval;
 }
 
 static void
@@ -2101,10 +2250,46 @@ buf_p_copy_array(cw_buf_t * a_a, cw_buf_t * a_b,
 }
 
 static cw_bool_t
-buf_p_uniquify_range(cw_buf_t * a_buf, cw_uint32_t a_offset,
-		     cw_uint32_t a_length)
+buf_p_make_range_writeable(cw_buf_t * a_buf, cw_uint32_t a_offset,
+			   cw_uint32_t a_length)
 {
-  return TRUE; /* XXX */
+  cw_bool_t retval;
+  cw_uint32_t first_array_element, last_array_element, bufel_offset;
+  cw_uint32_t i, num_iterations;
+
+  /* XXX Need to handle situation where the range extends beyond the end of the
+   * buf. */
+  
+  /* March through the bufel's we need our own copy of and call
+   * bufel_p_make_writeable().
+   *
+   * Note that this algorithm has the potential to fragment memory, but the
+   * functions that use this facility are not normally meant to be used in
+   * situations where a bufc is unwriteable (reference count greater than one or
+   * marked unwriteable). */
+  buf_p_get_data_position(a_buf, a_offset,
+			  &first_array_element, &bufel_offset);
+  buf_p_get_data_position(a_buf, a_offset + a_length,
+			  &last_array_element, &bufel_offset);
+
+  num_iterations = (((last_array_element + a_buf->array_size)
+		     - first_array_element)
+		    & (a_buf->array_size - 1));
+  for (i = 0; i < num_iterations; i++)
+  {
+    if (bufel_p_make_writeable(
+      &a_buf->bufel_array[((first_array_element + i)
+			   & (a_buf->array_size - 1))]))
+    {
+      retval = TRUE;
+      goto RETURN;
+    }
+  }
+
+  retval = FALSE;
+
+  RETURN:
+  return retval;
 }
 
 cw_bufel_t *
@@ -2382,6 +2567,12 @@ bufel_p_merge_bufel(cw_bufel_t * a_a, cw_bufel_t * a_b)
   return retval;
 }
 
+static cw_bool_t
+bufel_p_make_writeable(cw_bufel_t * a_bufel)
+{
+  return TRUE; /* XXX */
+}
+
 cw_bufc_t *
 bufc_new(cw_bufc_t * a_bufc,
 	 void (*a_dealloc_func)(void * dealloc_arg, void * bufel),
@@ -2528,7 +2719,7 @@ bufc_p_get_size(cw_bufc_t * a_bufc)
   return a_bufc->buf_size;
 }
 
-static const cw_uint8_t *
+static cw_uint8_t *
 bufc_p_get_p(cw_bufc_t * a_bufc)
 {
   _cw_check_ptr(a_bufc);
