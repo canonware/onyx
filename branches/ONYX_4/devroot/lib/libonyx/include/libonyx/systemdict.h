@@ -979,6 +979,9 @@ systemdict_undef(cw_nxo_t *a_thread);
 void
 systemdict_under(cw_nxo_t *a_thread);
 
+void
+systemdict_unless(cw_nxo_t *a_thread);
+
 #ifdef CW_POSIX
 void
 systemdict_unlink(cw_nxo_t *a_thread);
