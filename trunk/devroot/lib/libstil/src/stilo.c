@@ -1371,7 +1371,7 @@ stiloe_p_dict_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t a_reset)
 	while (retval == NULL && dict->ref_iter < dch_count(&dict->hash)) {
 		if (dict->dicto == NULL) {
 			/* Key. */
-			dch_get_iterate(&dict->hash, NULL,(void
+			dch_get_iterate(&dict->hash, NULL, (void
 			    **)&dict->dicto);
 			retval = stilo_stiloe_get(&dict->dicto->key);
 		} else {
@@ -1446,6 +1446,7 @@ stilo_dict_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stil_t *a_stil,
 	_cw_check_ptr(a_to);
 	_cw_assert(a_to->magic == _CW_STILO_MAGIC);
 	_cw_assert(a_to->type == STILOT_DICT);
+	_cw_assert(stilo_dict_count(a_to) == 0);
 
 	from = (cw_stiloe_dict_t *)a_from->o.stiloe;
 
@@ -1550,8 +1551,8 @@ stilo_dict_undef(cw_stilo_t *a_stilo, cw_stil_t *a_stil, const cw_stilo_t
 	    &chi);
 	thd_crit_leave();
 	stiloe_p_dict_unlock(dict);
-	    
-	if (error) {
+
+	if (error == FALSE) {
 		stila_dicto_put(stil_stila_get(a_stil), dicto);
 		stila_chi_put(stil_stila_get(a_stil), chi);
 	}
