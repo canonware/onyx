@@ -393,6 +393,7 @@ stilt_loop(cw_stilt_t *a_stilt)
 		case STILOT_DICT:
 		case STILOT_INTEGER:
 		case STILOT_MARK:
+		case STILOT_MUTEX:
 			/*
 			 * Always push the object onto the data stack, even
 			 * though it isn't literal.
@@ -711,9 +712,16 @@ stilt_loop(cw_stilt_t *a_stilt)
 			stils_pop(&a_stilt->estack);
 			break;
 		}
-		case STILOT_HOOK:
-		case STILOT_MUTEX:
-			_cw_not_reached();	/* XXX */
+		case STILOT_HOOK: {
+			cw_stilte_t	error;
+			
+			error = stilo_hook_exec(stilo, a_stilt);
+			if (error)
+				stilt_error(a_stilt, error);
+
+			stils_pop(&a_stilt->estack);
+			break;
+		}
 		default:
 			_cw_not_reached();
 		}
