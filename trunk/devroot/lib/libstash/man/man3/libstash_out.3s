@@ -279,34 +279,24 @@ _
 .T&
 lb | lb | lb | lb | lb | lb | lb.
  Type@w@j@p@b@s@+
--
+_
 .T&
 l | l | l | l | l | l | l.
  i@Yes@Yes@Yes@Yes@Yes@Yes
   @Fit@Right@` '@10@Unsigned@Negative only
 _
-.T&
-l | l | l | l | l | l | l.
  q@Yes@Yes@Yes@Yes@Yes@Yes
   @Fit@Right@` '@10@Unsigned@Negative only
 _
-.T&
-l | l | l | l | l | l | l.
  c@Yes@Yes@Yes@No@No@No
   @Fit@Right@` '@@@
 _
-.T&
-l | l | l | l | l | l | l.
  s@Yes@Yes@Yes@No@No@No
   @Fit@Right@` '@@@
 _
-.T&
-l | l | l | l | l | l | l.
  p@Yes@Yes@Yes@Yes@Yes@Yes
   @Fit@Right@` '@16@Unsigned@Negative only
 _
-.T&
-l | l | l | l | l | l | l.
  b@Yes@Yes@Yes@No@No@No
   @Fit@Right@` '@@@
 .TE
@@ -756,9 +746,8 @@ Output printed to a_out's default file descriptor (2 if (NULL == a_out)).
 .RE
 Description:
 .RS
-Print formatted output, with "[yy/mm/dd hh:mm:ss (zz)]: "
-and optional "At <file>, line <line>: <function>(): " prepended to the
-output.
+Print formatted output, with \*(lq[yy/mm/dd hh:mm:ss (zz)]: \*(rq and optional
+\*(lqAt <file>, line <line>: <function>(): \*(rq prepended to the output.
 .RE
 .RE
 
@@ -817,9 +806,9 @@ Input(s):
 .RS
 Pointer to an out.
 .RE
-.IR <input> :
+.IR a_fd :
 .RS
-<input description>
+File descriptor_number.
 .RE
 .IR a_format :
 .RS
@@ -840,10 +829,11 @@ Output(s):
 .br
 -2: Parse error.
 .RE
+Output printed to a_fd.
 .RE
 Description:
 .RS
-<description>
+Print formatted output.
 .RE
 .RE
 
@@ -860,9 +850,9 @@ Input(s):
 .RS
 Pointer to an out.
 .RE
-.IR <input> :
+.IR a_fd :
 .RS
-<input description>
+File descriptor_number.
 .RE
 .IR a_file_name :
 .RS
@@ -895,10 +885,15 @@ Output(s):
 .br
 -2: Parse error.
 .RE
+Output printed to a_fd.
 .RE
 Description:
 .RS
-<description>
+Print formatted output, with optional
+.br
+\*(lqAt <file>, line <line>: <function>(): \*(rq
+.br
+prepended to the output.
 .RE
 .RE
 
@@ -914,9 +909,9 @@ Input(s):
 .RS
 Pointer to an out.
 .RE
-.IR <input> :
+.IR a_fd :
 .RS
-<input description>
+File descriptor_number.
 .RE
 .IR a_format :
 .RS
@@ -937,10 +932,12 @@ Output(s):
 .br
 -2: Parse error.
 .RE
+Output printed to a_fd.
 .RE
 Description:
 .RS
-<description>
+Print formatted output, with \*(lq[yy/mm/dd hh:mm:ss (zz)]: \*(rq prepended to
+the output.
 .RE
 .RE
 
@@ -957,9 +954,9 @@ Input(s):
 .RS
 Pointer to an out.
 .RE
-.IR <input> :
+.IR a_fd :
 .RS
-<input description>
+File descriptor_number.
 .RE
 .IR a_file_name :
 .RS
@@ -992,10 +989,12 @@ Output(s):
 .br
 -2: Parse error.
 .RE
+Output printed to a_fd.
 .RE
 Description:
 .RS
-<description>
+Print formatted output, with \*(lq[yy/mm/dd hh:mm:ss (zz)]: \*(rq and optional
+\*(lqAt <file>, line <line>: <function>(): \*(rq prepended to the output.
 .RE
 .RE
 
@@ -1011,9 +1010,13 @@ Input(s):
 .RS
 Pointer to an out.
 .RE
-.IR <input> :
+.IR a_fd :
 .RS
-<input description>
+File descriptor_number.
+.RE
+.IR a_size :
+.RS
+Maximum number of characters to output.
 .RE
 .IR a_format :
 .RS
@@ -1034,10 +1037,11 @@ Output(s):
 .br
 -2: Parse error.
 .RE
+Output printed to a_fd.
 .RE
 Description:
 .RS
-<description>
+Print at most a_size bytes of formatted output.
 .RE
 .RE
 
@@ -1053,9 +1057,17 @@ Input(s):
 .RS
 Pointer to an out.
 .RE
-.IR <input> :
+.IR a_fd :
 .RS
-<input description>
+File descriptor_number.
+.RE
+.IR a_format :
+.RS
+Pointer to a formatting specifier string.
+.RE
+.IR a_p :
+.RS
+Variable argument list.
 .RE
 .RE
 Output(s):
@@ -1068,10 +1080,11 @@ Output(s):
 .br
 -2: Parse error.
 .RE
+Output printed to a_fd.
 .RE
 Description:
 .RS
-<description>
+Print formatted output.
 .RE
 .RE
 
@@ -1087,9 +1100,9 @@ Input(s):
 .RS
 Pointer to an out.
 .RE
-.IR <input> :
+.IR a_str :
 .RS
-<input description>
+Pointer to output string.
 .RE
 .IR a_format :
 .RS
@@ -1110,10 +1123,14 @@ Output(s):
 .br
 -2: Parse error.
 .RE
+.IR a_str :
+.RS
+Formatted output.
+.RE
 .RE
 Description:
 .RS
-<description>
+Print formatted output.
 .RE
 .RE
 
@@ -1129,9 +1146,9 @@ Input(s):
 .RS
 Pointer to an out.
 .RE
-.IR <input> :
+.IR r_str :
 .RS
-<input description>
+Pointer to a string pointer.
 .RE
 .IR a_format :
 .RS
@@ -1152,10 +1169,14 @@ Output(s):
 .br
 -2: Parse error.
 .RE
+.IR *r_str :
+.RS
+Formatted output, or undefined if error.
+.RE
 .RE
 Description:
 .RS
-<description>
+Allocate space, then print formatted output to it.
 .RE
 .RE
 
@@ -1171,9 +1192,18 @@ Input(s):
 .RS
 Pointer to an out.
 .RE
-.IR <input> :
+.IR a_str :
 .RS
-<input description>
+Pointer to output string.
+.RE
+.IR a_size :
+.RS
+Maximum number of characters to output.  If a_size is less than or equal to the
+number of bytes that could be output, were there no limit, then no `\\0' string
+termination byte is written.  Therefore, if the caller is depending on such
+string termination, care should be taken to specify a_size as one less than the
+total string length, and to make sure that if the string is completely filled
+with output, that the last byte is set to `\\0'.
 .RE
 .IR a_format :
 .RS
@@ -1194,10 +1224,15 @@ Output(s):
 .br
 -2: Parse error.
 .RE
+.IR a_str :
+.RS
+Formatted output.
+.RE
 .RE
 Description:
 .RS
-<description>
+Print at most a_size bytes of formatted output.
+
 .RE
 .RE
 
@@ -1213,9 +1248,17 @@ Input(s):
 .RS
 Pointer to an out.
 .RE
-.IR <input> :
+.IR a_str :
 .RS
-<input description>
+Pointer to output string.
+.RE
+.IR a_format :
+.RS
+Pointer to a formatting specifier string.
+.RE
+.IR a_p :
+.RS
+Variable argument list.
 .RE
 .RE
 Output(s):
@@ -1228,10 +1271,14 @@ Output(s):
 .br
 -2: Parse error.
 .RE
+.IR a_str :
+.RS
+Formatted output.
+.RE
 .RE
 Description:
 .RS
-<description>
+Print formatted output.
 .RE
 .RE
 
@@ -1247,9 +1294,17 @@ Input(s):
 .RS
 Pointer to an out.
 .RE
-.IR <input> :
+.IR r_str :
 .RS
-<input description>
+Pointer to a string pointer.
+.RE
+.IR a_format :
+.RS
+Pointer to a formatting specifier string.
+.RE
+.IR a_p :
+.RS
+Variable argument list.
 .RE
 .RE
 Output(s):
@@ -1262,10 +1317,14 @@ Output(s):
 .br
 -2: Parse error.
 .RE
+.IR *r_str :
+.RS
+Formatted output, or undefined if error.
+.RE
 .RE
 Description:
 .RS
-<description>
+Allocate space, then print formatted output to it.
 .RE
 .RE
 
@@ -1281,9 +1340,26 @@ Input(s):
 .RS
 Pointer to an out.
 .RE
-.IR <input> :
+.IR a_str :
 .RS
-<input description>
+Pointer to output string.
+.RE
+.IR a_size :
+.RS
+Maximum number of characters to output.  If a_size is less than or equal to the
+number of bytes that could be output, were there no limit, then no `\\0' string
+termination byte is written.  Therefore, if the caller is depending on such
+string termination, care should be taken to specify a_size as one less than the
+total string length, and to make sure that if the string is completely filled
+with output, that the last byte is set to `\\0'.
+.RE
+.IR a_format :
+.RS
+Pointer to a formatting specifier string.
+.RE
+.IR a_p :
+.RS
+Variable argument list.
 .RE
 .RE
 Output(s):
@@ -1296,10 +1372,14 @@ Output(s):
 .br
 -2: Parse error.
 .RE
+.IR a_str :
+.RS
+Formatted output.
+.RE
 .RE
 Description:
 .RS
-<description>
+Print at most a_size bytes of formatted output.
 .RE
 .RE
 
@@ -1315,21 +1395,29 @@ Input(s):
 .RS
 Pointer to a specifier string.
 .RE
-.IR <input> :
+.IR a_spec_len :
 .RS
-<input description>
+Length of a_spec.
+.RE
+.IR r_val :
+.RS
+Pointer to a string pointer.
 .RE
 .RE
 Output(s):
 .RS
 .IR retval :
 .RS
-<retval description>
+Length of type value string.
+.RE
+.IR *r_val :
+.RS
+Pointer to type value string.
 .RE
 .RE
 Description:
 .RS
-<description>
+Return the length of the type value string, and set *r_val to point to it.
 .RE
 .RE
 
@@ -1346,21 +1434,40 @@ Input(s):
 .RS
 Pointer to a specifier string.
 .RE
-.IR <input> :
+.IR a_spec_len :
 .RS
-<input description>
+Length of a_spec.
+.RE
+.IR a_name :
+.RS
+Pointer to a NULL-terminated name.
+.RE
+.IR a_name_len :
+.RS
+Length of a_name.
+.RE
+.IR r_val :
+.RS
+Pointer to a string pointer.
 .RE
 .RE
 Output(s):
 .RS
 .IR retval :
 .RS
-<retval description>
+>= 0: Length of value string.
+.br
+-1: No such name.
+.RE
+.IR *r_val :
+.RS
+Pointer to value string.
 .RE
 .RE
 Description:
 .RS
-<description>
+Return the length of the value string that corresponds to a_spec, and set *r_val
+to point to it.
 .RE
 .RE
 

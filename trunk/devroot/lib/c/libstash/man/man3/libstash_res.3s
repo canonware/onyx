@@ -1,0 +1,503 @@
+.ig \" -*-mode:nroff-*-
+
+<Copyright = jasone>
+<License>
+
+Version: <Version>
+..
+.TH libstash_res 3s "libstash, version <Version>"
+.Nm libstash_res
+.hy 1
+.SH NAME
+res - Simple resource class.
+.SH SYNOPSIS
+.SS Single-threaded
+#define _LIBSTASH_USE_RES
+.br
+\fB#include <libstash/libstash.h>\fR
+
+.SS Multi-threaded
+#define _LIBSTASH_USE_RES
+.br
+\fB#include <libstash/libstash_r.h>\fR
+
+.SS General
+.I cw_res_t *
+.br
+.B res_new
+.RI ( "cw_res_t * a_res" )
+
+.I void
+.br
+.B res_delete
+.RI ( "cw_res_t * a_res" )
+
+.I void
+.br
+.B res_clear
+.RI ( "cw_res_t * a_res" )
+
+.I cw_bool_t
+.br
+.B res_is_equal
+.RI ( "cw_res_t * a_a" ", " "cw_res_t * a_b" )
+
+.I cw_bool_t
+.br
+.B res_merge_file
+.RI ( "cw_res_t * a_res" ", " "const char * a_filename" )
+
+.I cw_bool_t
+.br
+.B res_merge_list
+.RI ( "cw_res_t * a_res" ", " "..." )
+
+.I const char *
+.br
+.B res_get_res_val
+.RI ( "cw_res_t * a_res" ", " "const char * a_res_name" )
+
+.I cw_bool_t
+.br
+.B res_extract_res
+.RI ( "cw_res_t * a_res" ", " "const char * a_res_key" ", " 
+.IR "char ** r_res_name" ", " "char ** r_res_val" )
+
+.I cw_bool_t
+.br
+.B res_dump
+.RI ( "cw_res_t * a_res" ", " "const char * a_filename" )
+
+.SS Debugging (dbg) symbols
+.TP
+\*(lqres_state\*(rq
+Print internal parsing state machine information.
+
+.SH DESCRIPTION
+\fBres\fR implements resources, also known as name/value pairs.  Following is a
+BNF specification of a resource:
+
+<resource> ::=
+.RS
+<^> <whitespaces> <name> <whitespaces> <linebreaks> <colon> <whitespaces>
+<linebreaks> <value> <comment>
+
+| <^> <whitespaces> <comment>
+.RE
+
+<name> ::=
+.RS
+{ <caps> | <lower> | <numbers> | <under> | <period> }+
+.RE
+
+<value> ::=
+.RS
+{ <caps> | <lower> | <numbers> | <under> | <period>
+
+| <backslash> <hash> | <whitespace> | <colon>
+
+| <backslash> <backslash> | <backslash> <n>
+
+| <legal_in_name> | <linebreak> }+
+
+| <e>
+.RE
+
+<comment> ::=
+.RS
+<hash> { <caps> | <lower> | <numbers> | <under> | <period>
+
+| <hash> | <whitespace> | <colon>
+
+| <backslash> | <legal_in_name> }+
+
+| <hash> <e>
+.RE
+
+<linebreak> ::= 
+.RS
+<backslash> <whitespaces> <newline>
+.RE
+
+<linebreaks> ::=
+.RS
+<linebreak> <linebreaks>
+
+| <e>
+.RE
+
+<^> ::=
+.RS
+Bound to beginning of line.
+.RE
+
+<e> ::=
+.RS
+Epsilon.
+.RE
+
+<n> ::=
+.RS
+[n]
+.RE
+
+<caps> ::=
+.RS
+[A-Z]
+.RE
+
+<lower> ::=
+.RS
+[a-z]
+.RE
+
+<numbers> ::=
+.RS
+[0-9]
+.RE
+
+<under> ::=
+.RS
+[_]
+.RE
+
+<period> ::=
+.RS
+[.]
+.RE
+
+<hash> ::=
+.RS
+[#]
+.RE
+
+<whitespace> ::=
+.RS
+[ \\t] 
+
+| <whitespace> [ \\t]
+.RE
+
+<whitespaces> ::=
+.RS
+<whitespace> <whitespaces>
+
+| <e>
+.RE
+
+<colon> ::=
+.RS
+[:]
+.RE
+
+<backslash> ::=
+.RS
+[\\]
+.RE
+
+<legal_in_name> ::=
+.RS
+[!\\*(rq$%&'()*+,-/;<=>?@[]^`{|}~]
+.RE
+
+<newline> ::=
+.RS
+[\\n]
+.RE
+
+<null> ::=
+.RS
+[\\0]
+.RE
+
+`\\' is a special character within <name>.  `\\' protects [#\\\\\\n] and
+[ ]+[\\n], but a `\\' followed by anything else is an error.
+
+.SH USAGE
+.I cw_res_t *
+.br
+.B res_new
+.RI ( "cw_res_t * a_res" )
+.br
+Input(s):
+.RS
+.IR a_res :
+.RS
+Pointer to space for a res, or NULL.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+non-NULL: Pointer to a res.
+.br
+NULL: Memory allocation error.
+.RE
+.RE
+Description:
+.RS
+Constructor.
+.RE
+.RE
+
+.I void
+.br
+.B res_delete
+.RI ( "cw_res_t * a_res" )
+.br
+Input(s):
+.RS
+.IR a_res :
+.RS
+Pointer to a res.
+.RE
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Destructor.
+.RE
+.RE
+
+.I void
+.br
+.B res_clear
+.RI ( "cw_res_t * a_res" )
+.br
+Input(s):
+.RS
+.IR a_res :
+.RS
+Pointer to a res.
+.RE
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Clear all resources.
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B res_is_equal
+.RI ( "cw_res_t * a_a" ", " "cw_res_t * a_b" )
+.br
+Input(s):
+.RS
+.IR a_a :
+.RS
+Pointer to a res.
+.RE
+.IR a_b :
+.RS
+Pointer to a res.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+FALSE: Not equal.
+.br
+TRUE: Equal.
+.RE
+.RE
+Description:
+.RS
+If a_res and a_other are equivalent, return TRUE, otherwise FALSE.
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B res_merge_file
+.RI ( "cw_res_t * a_res" ", " "const char * a_filename" )
+.br
+Input(s):
+.RS
+.IR a_res :
+.RS
+Pointer to a res.
+.RE
+.IR a_filename :
+.RS
+Pointer to a string that represents a resource filename.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+FALSE: Success.
+.br
+TRUE: Error.
+.RE
+.RE
+Description:
+.RS
+Merge the resources contained in a_filename into the resource database.
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B res_merge_list
+.RI ( "cw_res_t * a_res" ", " "..." )
+.br
+Input(s):
+.RS
+.IR a_res :
+.RS
+Pointer to a res.
+.RE
+.IR ... :
+.RS
+NULL-terminated list of resource name/value pair strings.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+FALSE: Success.
+.br
+TRUE: Error.
+.RE
+.RE
+Description:
+.RS
+Merge the resources (...) into the resource database (a_res).
+.RE
+.RE
+
+.I const char *
+.br
+.B res_get_res_val
+.RI ( "cw_res_t * a_res" ", " "const char * a_res_name" )
+.br
+Input(s):
+.RS
+.IR a_res :
+.RS
+Pointer to a res.
+.RE
+.IR a_res_name :
+.RS
+Pointer to a string that represents a resource name.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+non-NULL: Pointer to a string that represents a resource value.
+.br
+NULL: Resource does not exist.
+.RE
+.RE
+Description:
+.RS
+Return the value associoted with a_res_name if it exists.
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B res_extract_res
+.RI ( "cw_res_t * a_res" ", " "const char * a_res_key" ", " 
+.IR "char ** r_res_name" ", " "char ** r_res_val" )
+.br
+Input(s):
+.RS
+.IR a_res :
+.RS
+Pointer to a res.
+.RE
+.IR a_res_key :
+.RS
+Pointer to a string that represents a resource key.
+.RE
+.IR r_res_name :
+.RS
+Pointer to a pointer to a string that represents a resource key that is set by
+this function.
+.RE
+.IR r_res_val :
+.RS
+Pointer to a pointer to a string that represents a resource value that is set by
+this function.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+FALSE: Success.
+.br
+TRUE: Key not found.
+.RE
+.IR *r_res_name :
+.RS
+Pointer to a string that represents a resource key, or undefined if (TRUE ==
+retval).
+.RE
+.IR *r_res_val :
+.RS
+Pointer to a string that represents a resource value, or undefined if (TRUE ==
+retval).
+.RE
+.RE
+Description:
+.RS
+Find a resource name/value pair, remove it from the resource database, and set
+*r_res_name and *r_res_val to point it.  If the resource isn't found, return
+TRUE.
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B res_dump
+.RI ( "cw_res_t * a_res" ", " "const char * a_filename" )
+.br
+Input(s):
+.RS
+.IR a_res :
+.RS
+Pointer to a res.
+.RE
+.IR a_filename :
+.RS
+Pointer to a string that represents a file to dump to, or NULL.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+FALSE: Success.
+.br
+TRUE: Error opening output file.
+.RE
+Output printed to a file or to cw_g_out.
+.RE
+Description:
+.RS
+Dump the resource database.  If a_filename is non-NULL, attempt to open the
+specified file and write to it.  Otherwise, use cw_g_out.
+.RE
+.RE
+
+.SH SEE ALSO
+libstash(3s).
+
+.SH HISTORY
+Written by Jason Evans <jasone@canonware.com>.

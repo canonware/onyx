@@ -138,24 +138,24 @@ res_clear(cw_res_t * a_res)
 }
 
 cw_bool_t
-res_is_equal(cw_res_t * a_res, cw_res_t * a_other)
+res_is_equal(cw_res_t * a_a, cw_res_t * a_b)
 {
   cw_bool_t retval;
 
-  _cw_check_ptr(a_res);
-  _cw_check_ptr(a_other);
+  _cw_check_ptr(a_a);
+  _cw_check_ptr(a_b);
 #ifdef _CW_REENTRANT
-  rwl_wlock(&a_res->rw_lock);
-  rwl_rlock(&a_other->rw_lock);
+  rwl_wlock(&a_a->rw_lock);
+  rwl_rlock(&a_b->rw_lock);
 #endif
 
-  if (a_res == a_other)
+  if (a_a == a_b)
   {
     /* Two pointers to the same instance. */
     retval = TRUE;
   }
-  else if (oh_get_num_items(&a_res->hash)
-	   != oh_get_num_items(&a_other->hash))
+  else if (oh_get_num_items(&a_a->hash)
+	   != oh_get_num_items(&a_b->hash))
   {
     retval = FALSE;
   }
@@ -164,19 +164,19 @@ res_is_equal(cw_res_t * a_res, cw_res_t * a_other)
     cw_uint32_t i, num_resources;
     char * key, * val;
 
-    num_resources = oh_get_num_items(&a_res->hash);
+    num_resources = oh_get_num_items(&a_a->hash);
     
     for (i = 0, retval = FALSE; (i < num_resources) && (retval == FALSE); i++)
     {
-      oh_item_delete_iterate(&a_res->hash, (void **) &key,
+      oh_item_delete_iterate(&a_a->hash, (void **) &key,
 			     (void **) &val);
 
-      if (NULL == res_get_res_val(a_other, key))
+      if (NULL == res_get_res_val(a_b, key))
       {
 	retval = TRUE;
       }
 
-      if (0 != oh_item_insert(&a_res->hash, key, val))
+      if (0 != oh_item_insert(&a_a->hash, key, val))
       {
 	retval = TRUE;
 	goto RETURN;
@@ -186,8 +186,8 @@ res_is_equal(cw_res_t * a_res, cw_res_t * a_other)
 
   RETURN:
 #ifdef _CW_REENTRANT
-  rwl_runlock(&a_other->rw_lock);
-  rwl_wunlock(&a_res->rw_lock);
+  rwl_runlock(&a_b->rw_lock);
+  rwl_wunlock(&a_a->rw_lock);
 #endif
   return retval;
 }
@@ -288,7 +288,7 @@ res_get_res_val(cw_res_t * a_res, const char * a_res_name)
 }
 
 cw_bool_t
-res_extract_res(cw_res_t * a_res, char * a_res_key,
+res_extract_res(cw_res_t * a_res, const char * a_res_key,
 		char ** r_res_name, char ** r_res_val)
 {
   cw_bool_t retval;
@@ -308,7 +308,7 @@ res_extract_res(cw_res_t * a_res, char * a_res_key,
 }
 
 cw_bool_t
-res_dump(cw_res_t * a_res, char * a_filename)
+res_dump(cw_res_t * a_res, const char * a_filename)
 {
   cw_bool_t retval;
   int fd = -1;
