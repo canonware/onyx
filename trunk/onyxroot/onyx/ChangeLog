@@ -3,6 +3,11 @@
 	* Change language syntax:
 	  + Radix integers are <base>@<value> instead of <base>@<value>.
 	  + Comments start with #, not %.
+	  + Add special characters in strings:
+	    - `\0'  : Nul character (nul), equivalent to `\x00'.
+	    - `\cC' : Control C, where C is [A-Za-z].
+	    - `\a'  : Alarm (bel).
+	    - `\e'  : Escape (ec).
 
 	* Remove operators:
 	  + #!

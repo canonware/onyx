@@ -2068,10 +2068,28 @@ systemdict_cvs(cw_nxo_t *a_thread)
 	    {
 		switch (str[i])
 		{
-		    case '\n': case '\r': case '\t': case '\b': case '\f':
-		    case '\\': case '`': case '\'':
+		    case '\0': case '\x1b': /* \e */
+		    case '\a': case '\b': case '\f': case '\n': case '\r':
+		    case '\t': case '\\': case '`': case '\'':
 		    {
 			newlen += 2;
+			break;
+		    }
+		    case '\x01': case '\x02': case '\x03': case '\x04':
+		    case '\x05': case '\x06':
+		    /* case '\x07': \a */
+		    /* case '\x08': \b */
+		    /* case '\x09': \t */
+		    /* case '\x0a': \n */
+		    case '\x0b':
+		    /* case '\x0c': \f */
+		    /* case '\x0d': \r */
+		    case '\x0e': case '\x0f': case '\x10': case '\x11':
+		    case '\x12': case '\x13': case '\x14': case '\x15':
+		    case '\x16': case '\x17': case '\x18': case '\x19':
+		    case '\x1a':
+		    {
+			newlen += 3;
 			break;
 		    }
 		    default:
@@ -2101,6 +2119,41 @@ systemdict_cvs(cw_nxo_t *a_thread)
 	    {
 		switch (str[i])
 		{
+		    case '\0':
+		    {
+			newstr[j] = '\\';
+			newstr[j + 1] = '0';
+			j += 2;
+			break;
+		    }
+		    case '\x1b':
+		    {
+			newstr[j] = '\\';
+			newstr[j + 1] = 'e';
+			j += 2;
+			break;
+		    }
+		    case '\a':
+		    {
+			newstr[j] = '\\';
+			newstr[j + 1] = 'a';
+			j += 2;
+			break;
+		    }
+		    case '\b':
+		    {
+			newstr[j] = '\\';
+			newstr[j + 1] = 'b';
+			j += 2;
+			break;
+		    }
+		    case '\f':
+		    {
+			newstr[j] = '\\';
+			newstr[j + 1] = 'f';
+			j += 2;
+			break;
+		    }
 		    case '\n':
 		    {
 			newstr[j] = '\\';
@@ -2119,20 +2172,6 @@ systemdict_cvs(cw_nxo_t *a_thread)
 		    {
 			newstr[j] = '\\';
 			newstr[j + 1] = 't';
-			j += 2;
-			break;
-		    }
-		    case '\b':
-		    {
-			newstr[j] = '\\';
-			newstr[j + 1] = 'b';
-			j += 2;
-			break;
-		    }
-		    case '\f':
-		    {
-			newstr[j] = '\\';
-			newstr[j + 1] = 'f';
 			j += 2;
 			break;
 		    }
@@ -2155,6 +2194,26 @@ systemdict_cvs(cw_nxo_t *a_thread)
 			newstr[j] = '\\';
 			newstr[j + 1] = '\'';
 			j += 2;
+			break;
+		    }
+		    case '\x01': case '\x02': case '\x03': case '\x04':
+		    case '\x05': case '\x06':
+		    /* case '\x07': \a */
+		    /* case '\x08': \b */
+		    /* case '\x09': \t */
+		    /* case '\x0a': \n */
+		    case '\x0b':
+		    /* case '\x0c': \f */
+		    /* case '\x0d': \r */
+		    case '\x0e': case '\x0f': case '\x10': case '\x11':
+		    case '\x12': case '\x13': case '\x14': case '\x15':
+		    case '\x16': case '\x17': case '\x18': case '\x19':
+		    case '\x1a':
+		    {
+			newstr[j] = '\\';
+			newstr[j + 1] = 'c';
+			newstr[j + 2] = str[i] - 1 + 'a';
+			j += 3;
 			break;
 		    }
 		    default:

@@ -141,6 +141,7 @@ nxo_threadp_delete(cw_nxo_threadp_t *a_threadp, cw_nxo_t *a_thread)
 	case THREADTS_STRING_NEWLINE_CONT:
 	case THREADTS_STRING_PROT_CONT:
 	case THREADTS_STRING_CRLF_CONT:
+	case THREADTS_STRING_CTRL_CONT:
 	case THREADTS_STRING_HEX_CONT:
 	case THREADTS_STRING_HEX_FINISH:
 	{
@@ -1953,6 +1954,12 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			CW_NXO_THREAD_PUTC(c);
 			break;
 		    }
+		    case '0':
+		    {
+			a_thread->state = THREADTS_STRING;
+			CW_NXO_THREAD_PUTC('\0');
+			break;
+		    }
 		    case 'n':
 		    {
 			a_thread->state = THREADTS_STRING;
@@ -1971,16 +1978,33 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			CW_NXO_THREAD_PUTC('\t');
 			break;
 		    }
+		    case 'a':
+		    {
+			a_thread->state = THREADTS_STRING;
+			CW_NXO_THREAD_PUTC('\a');
+			break;
+		    }
 		    case 'b':
 		    {
 			a_thread->state = THREADTS_STRING;
 			CW_NXO_THREAD_PUTC('\b');
 			break;
 		    }
+		    case 'e':
+		    {
+			a_thread->state = THREADTS_STRING;
+			CW_NXO_THREAD_PUTC('\x1b');
+			break;
+		    }
 		    case 'f':
 		    {
 			a_thread->state = THREADTS_STRING;
 			CW_NXO_THREAD_PUTC('\f');
+			break;
+		    }
+		    case 'c':
+		    {
+			a_thread->state = THREADTS_STRING_CTRL_CONT;
 			break;
 		    }
 		    case 'x':
@@ -2026,6 +2050,43 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 		    default:
 		    {
 			goto STRING_CONTINUE;
+		    }
+		}
+		break;
+	    }
+	    case THREADTS_STRING_CTRL_CONT:
+	    {
+		switch (c)
+		{
+		    case 'a': case 'b': case 'c': case 'd': case 'e': case 'f':
+		    case 'g': case 'h': case 'i': case 'j': case 'k': case 'l':
+		    case 'm': case 'n': case 'o': case 'p': case 'q': case 'r':
+		    case 's': case 't': case 'u': case 'v': case 'w': case 'x':
+		    case 'y': case 'z':
+		    {
+			a_thread->state = THREADTS_STRING;
+			CW_NXO_THREAD_PUTC(c - 'a' + 1);
+			break;
+		    }
+		    case 'A': case 'B': case 'C': case 'D': case 'E': case 'F':
+		    case 'G': case 'H': case 'I': case 'J': case 'K': case 'L':
+		    case 'M': case 'N': case 'O': case 'P': case 'Q': case 'R':
+		    case 'S': case 'T': case 'U': case 'V': case 'W': case 'X':
+		    case 'Y': case 'Z':
+		    {
+			a_thread->state = THREADTS_STRING;
+			CW_NXO_THREAD_PUTC(c - 'A' + 1);
+			break;
+		    }
+		    
+		    default:
+		    {
+			nxoe_p_thread_syntax_error(a_thread, a_threadp,
+						   defer_base, "`", "\\c", c);
+			if (a_token)
+			{
+			    goto RETURN;
+			}
 		    }
 		}
 		break;

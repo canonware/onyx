@@ -4,5 +4,5 @@ Before:
 Shorten:
 `Hello\nHello\n'
 Lengthen:
-`Hello\nHello\n\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+`Hello\nHello\n\0\0\0\0\0\0\0\0\0\0\0\0'
 Test end
