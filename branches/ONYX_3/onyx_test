@@ -10,7 +10,7 @@ OBJDIR="onyx_obj"
 
 PREFIX=`pwd`/onyx_prefix
 
-CONFIGURE_FLAGS="--with-libedit-prefix=/space/local"
+CONFIGURE_FLAGS="--with-libedit-prefix=/usr/local"
 
 export CC=gcc30
 
@@ -260,7 +260,7 @@ for h in 0 1 ; do
         fi
     done
     # Non-parallelizable.
-    for i in install uninstall distclean ; do
+    for i in install install uninstall distclean ; do
         echo "===> $COOK $i"
         $COOK $i
         if [ "x$?" != "x0" ] ; then
