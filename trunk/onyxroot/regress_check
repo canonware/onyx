@@ -1,4 +1,4 @@
-#!/usr/bin/env oonyx
+#!/usr/bin/env onyx
 #
 # regress_check <prefix> <srcdir> [<conf>...]
 
