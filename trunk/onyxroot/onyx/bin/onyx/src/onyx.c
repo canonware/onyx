@@ -23,14 +23,11 @@
 
 #define	_PROMPT_STRLEN	  80
 
-/*  #define	_ONYX_SIGHANDLER */
-#ifdef _ONYX_SIGHANDLER
 struct handler_s {
 	cw_bool_t	quit;
 	sigset_t	hupset;
 	cw_thd_t	*sig_thd;
 };
-#endif
 
 struct nx_arg_s {
 	cw_uint8_t	*buffer;
@@ -51,9 +48,7 @@ cw_uint8_t	prompt_str[_PROMPT_STRLEN];
 char		*prompt(EditLine *a_el);
 cw_sint32_t	cl_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len,
     cw_uint8_t *r_str);
-#ifdef _ONYX_SIGHANDLER
 void		*sig_handler(void *a_arg);
-#endif
 void		usage(const char *a_progname);
 const char	*basename(const char *a_str);
 
@@ -61,17 +56,16 @@ int
 main(int argc, char **argv, char **envp)
 {
 	int			retval;
-#ifdef _ONYX_SIGHANDLER
 	struct handler_s	handler_arg;
-#endif
 	cw_nx_t			nx;
 	static const cw_uint8_t	version[] =
 	    "product print `, version ' print version print `.\n' print flush";
 
 	libstash_init();
-#ifdef _ONYX_SIGHANDLER
 	/*
 	 * Set the per-thread signal masks such that only one thread will catch
+	 * signals.  The signal handler thread should not be suspendible, since
+	 * it will cause sigwait() to return prematurely.
 	 * SIGHUP and SIGINT.
 	 */
 	handler_arg.quit = FALSE;
@@ -86,7 +80,6 @@ main(int argc, char **argv, char **envp)
 
 	thd_sigmask(SIG_BLOCK, &handler_arg.hupset, NULL);
 	handler_arg.sig_thd = thd_new(sig_handler, (void *)&handler_arg, FALSE);
-#endif
 
 	/*
 	 * Do a bunch of extra setup work to hook in command editing
@@ -152,9 +145,6 @@ stdin cvx
 			editor = "emacs";
 		}
 		el_set(el, EL_EDITOR, editor);
-#ifdef _ONYX_SIGHANDLER
-		el_set(el, EL_SIGNAL, 1);
-#endif
 
 		nx_new(&nx, argc, argv, envp, cl_read, NULL, NULL, (void *)&arg,
 		    NULL);
@@ -314,14 +304,12 @@ stdin cvx
 	nxo_threadp_delete(&threadp, &thread);
 	nx_delete(&nx);
 	CLERROR:
-#ifdef _ONYX_SIGHANDLER
 	/*
 	 * Tell the signal handler thread to quit, then join on it.
 	 */
 	handler_arg.quit = TRUE;
 	raise(SIGHUP);
 	thd_join(handler_arg.sig_thd);
-#endif
 	libstash_shutdown();
 	return retval;
 }
@@ -483,7 +471,6 @@ cl_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str)
 	return retval;
 }
 
-#ifdef _ONYX_SIGHANDLER
 void *
 sig_handler(void *a_arg)
 {
@@ -491,7 +478,10 @@ sig_handler(void *a_arg)
 	int			sig;
 
 	for (;;) {
-		sigwait(&arg->hupset, &sig);
+		if (sigwait(&arg->hupset, &sig))
+			_cw_not_reached();
+
+		_cw_out_put_e("Caught signal [i]\n", sig);
 
 		switch (sig) {
 		case SIGHUP:
@@ -517,14 +507,14 @@ sig_handler(void *a_arg)
 		case SIGTERM:
 			exit(0);
 		default:
-			_cw_not_reached();
+			_cw_out_put_e("Unexpected signal [i]\n", sig);
+/*  			abort(); */
 		}
 	}
 
 	RETURN:
 	return NULL;
 }
-#endif
 
 void
 usage(const char *a_progname)
