@@ -1,3 +1,39 @@
+2003-01-30 : Jason Evans <jasone@canonware.com>
+
+	* configure.in : Add --with-host-cc and --with-target-cc to make
+	  cross compiling possible.
+
+	  Cookfile.inc.in : Use HCC and TCC rather than CC to invoke the
+	  compiler.
+
+2003-01-29 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/include/libonyx/libonyx.h:cw_bool_t : Fix cw_bool_t to
+	  always work both with C and C++ code.  The change on 2002-12-15 was
+	  not adequate.
+
+	* Modify the mod operator to handle any combination of integers and
+	  reals.  Submitted by Zeljko Vrba.
+
+	* Modify the cvds operator to handle negative precision.
+
+	* Add operators (submitted by Zeljko Vrba):
+	  + exp
+	  + sinh
+	  + asin
+	  + asinh
+	  + cosh
+	  + acos
+	  + acosh
+	  + tan
+	  + tanh
+	  + atan
+	  + atanh
+
+	* Rename the exp operator to pow.
+
+	* Rename the atan operator to atan2.
+
 2002-12-15 : Jason Evans <jasone@canonware.com>
 
 	* Onyx 4.2.1 released.

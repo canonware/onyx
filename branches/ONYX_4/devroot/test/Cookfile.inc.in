@@ -32,13 +32,13 @@ tests_distclean :
 @objroot@/%0test/%1 : @objroot@/%0test/%1.o_a libs_s
   set mkdir
 {
-  [CC] [A_CFLAGS] -o [target]
-       @objroot@/%0test/%1.o_a
+  [TCC] [A_CFLAGS] -o [target]
+        @objroot@/%0test/%1.o_a
 #if [count @RPATH@]
-       [split " "
-              [prepost [prepost @RPATH@ "/lib/" @abs_objroot@]
-                       "/lib"
-                       @libs@]]
+        [split " "
+               [prepost [prepost @RPATH@ "/lib/" @abs_objroot@]
+                        "/lib"
+                        @libs@]]
 #endif
        [LDFLAGS] [subst lib -l [filter_out libedit @libs@]] @LIBS@;
 }
@@ -46,8 +46,8 @@ tests_distclean :
 @objroot@/%0test/%1.o_a : @srcroot@/%0test/%1.c
   set mkdir
 {
-  [CC] [A_CFLAGS] [CPPFLAGS] [CPPDEFS] -DCW_ASSERT
-    -c @srcroot@/%0test/%1.c -o [target];
+  [TCC] [A_CFLAGS] [CPPFLAGS] [CPPDEFS] -DCW_ASSERT
+        -c @srcroot@/%0test/%1.c -o [target];
 
   c_incl [CPPFLAGS] --no-cache -Absent_Local_Ignore -No_System
          @srcroot@/%0test/%1.c

@@ -24,6 +24,14 @@ void
 systemdict_accept(cw_nxo_t *a_thread);
 #endif
 
+#ifdef CW_REAL
+void
+systemdict_acos(cw_nxo_t *a_thread);
+
+void
+systemdict_acosh(cw_nxo_t *a_thread);
+#endif
+
 void
 systemdict_add(cw_nxo_t *a_thread);
 
@@ -38,7 +46,19 @@ systemdict_array(cw_nxo_t *a_thread);
 
 #ifdef CW_REAL
 void
+systemdict_asin(cw_nxo_t *a_thread);
+
+void
+systemdict_asinh(cw_nxo_t *a_thread);
+
+void
 systemdict_atan(cw_nxo_t *a_thread);
+
+void
+systemdict_atan2(cw_nxo_t *a_thread);
+
+void
+systemdict_atanh(cw_nxo_t *a_thread);
 #endif
 
 void
@@ -124,6 +144,9 @@ systemdict_copy(cw_nxo_t *a_thread);
 #ifdef CW_REAL
 void
 systemdict_cos(cw_nxo_t *a_thread);
+
+void
+systemdict_cosh(cw_nxo_t *a_thread);
 #endif
 
 void
@@ -505,6 +528,11 @@ systemdict_poll(cw_nxo_t *a_thread);
 void
 systemdict_pop(cw_nxo_t *a_thread);
 
+#ifdef CW_REAL
+void
+systemdict_pow(cw_nxo_t *a_thread);
+#endif
+
 #ifdef CW_POSIX
 void
 systemdict_ppid(cw_nxo_t *a_thread);
@@ -724,6 +752,9 @@ systemdict_signal(cw_nxo_t *a_thread);
 #ifdef CW_REAL
 void
 systemdict_sin(cw_nxo_t *a_thread);
+
+void
+systemdict_sinh(cw_nxo_t *a_thread);
 #endif
 
 void
@@ -862,6 +893,15 @@ systemdict_sym_rb(cw_nxo_t *a_thread);
 #ifdef CW_POSIX
 void
 systemdict_symlink(cw_nxo_t *a_thread);
+#endif
+
+#ifdef CW_REAL
+
+void
+systemdict_tan(cw_nxo_t *a_thread);
+
+void
+systemdict_tanh(cw_nxo_t *a_thread);
 #endif
 
 void

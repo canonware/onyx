@@ -21,7 +21,7 @@
 ]{
     dup 1 sprint
     cvx eval
-    -1 1 8 {
+    -8 1 8 {
 	1 idup exch
 	cvds
 	1 sprint

@@ -2,6 +2,7 @@
  ******************************************************************************
  *
  * <Copyright = jasone>
+ * <Copyright = mordor>
  * <License>
  *
  ******************************************************************************
@@ -106,15 +107,23 @@ struct cw_systemdict_entry
 /* Array of operators in systemdict. */
 static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(abs),
-    ENTRY(add),
 #ifdef CW_SOCKET
     ENTRY(accept),
 #endif
+#ifdef CW_REAL
+    ENTRY(acos),
+    ENTRY(acosh),
+#endif
+    ENTRY(add),
     ENTRY(adn),
     ENTRY(and),
     ENTRY(array),
 #ifdef CW_REAL
+    ENTRY(asin),
+    ENTRY(asinh),
     ENTRY(atan),
+    ENTRY(atan2),
+    ENTRY(atanh),
 #endif
     ENTRY(aup),
     ENTRY(bdup),
@@ -154,6 +163,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(copy),
 #ifdef CW_REAL
     ENTRY(cos),
+    ENTRY(cosh),
 #endif
     ENTRY(count),
     ENTRY(countdstack),
@@ -318,6 +328,9 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(poll),
 #endif
     ENTRY(pop),
+#ifdef CW_REAL
+    ENTRY(pow),
+#endif
 #ifdef CW_POSIX
     ENTRY(ppid),
 #endif
@@ -408,6 +421,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #endif
 #ifdef CW_REAL
     ENTRY(sin),
+    ENTRY(sinh),
 #endif
     ENTRY(sipop),
     ENTRY(snbpop),
@@ -461,6 +475,10 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(sym_rb),
 #ifdef CW_POSIX
     ENTRY(symlink),
+#endif
+#ifdef CW_REAL
+    ENTRY(tan),
+    ENTRY(tanh),
 #endif
     ENTRY(tell),
 #ifdef CW_POSIX
@@ -848,6 +866,84 @@ systemdict_accept(cw_nxo_t *a_thread)
 }
 #endif
 
+#ifdef CW_REAL
+void
+systemdict_acos(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack;
+    cw_nxo_t *nxo;
+    cw_nxor_t real;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    switch (nxo_type_get(nxo))
+    {
+	case NXOT_INTEGER:
+	{
+	    real = (cw_nxor_t) nxo_integer_get(nxo);
+	    break;
+	}
+	case NXOT_REAL:
+	{
+	    real = nxo_real_get(nxo);
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+
+    if (fabs(real) > 1.0)
+    {
+	nxo_thread_nerror(a_thread, NXN_rangecheck);
+	return;
+    }
+
+    nxo_real_new(nxo, acos(real));
+}
+#endif
+
+#ifdef CW_REAL
+void
+systemdict_acosh(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack;
+    cw_nxo_t *nxo;
+    cw_nxor_t real;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    switch (nxo_type_get(nxo))
+    {
+	case NXOT_INTEGER:
+	{
+	    real = (cw_nxor_t) nxo_integer_get(nxo);
+	    break;
+	}
+	case NXOT_REAL:
+	{
+	    real = nxo_real_get(nxo);
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+
+    if (real < 1.0)
+    {
+	nxo_thread_nerror(a_thread, NXN_rangecheck);
+	return;
+    }
+
+    nxo_real_new(nxo, acosh(real));
+}
+#endif
+
 void
 systemdict_add(cw_nxo_t *a_thread)
 {
@@ -1017,7 +1113,112 @@ systemdict_array(cw_nxo_t *a_thread)
 
 #ifdef CW_REAL
 void
+systemdict_asin(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack;
+    cw_nxo_t *nxo;
+    cw_nxor_t real;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    switch (nxo_type_get(nxo))
+    {
+	case NXOT_INTEGER:
+	{
+	    real = (cw_nxor_t) nxo_integer_get(nxo);
+	    break;
+	}
+	case NXOT_REAL:
+	{
+	    real = nxo_real_get(nxo);
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+
+    if (fabs(real) > 1.0)
+    {
+	nxo_thread_nerror(a_thread, NXN_rangecheck);
+	return;
+    }
+
+    nxo_real_new(nxo, asin(real));
+}
+#endif
+
+#ifdef CW_REAL
+void
+systemdict_asinh(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack;
+    cw_nxo_t *nxo;
+    cw_nxor_t real;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    switch (nxo_type_get(nxo))
+    {
+	case NXOT_INTEGER:
+	{
+	    real = (cw_nxor_t) nxo_integer_get(nxo);
+	    break;
+	}
+	case NXOT_REAL:
+	{
+	    real = nxo_real_get(nxo);
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+
+    nxo_real_new(nxo, asinh(real));
+}
+#endif
+
+#ifdef CW_REAL
+void
 systemdict_atan(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack;
+    cw_nxo_t *nxo;
+    cw_nxor_t real;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    switch (nxo_type_get(nxo))
+    {
+	case NXOT_INTEGER:
+	{
+	    real = (cw_nxor_t) nxo_integer_get(nxo);
+	    break;
+	}
+	case NXOT_REAL:
+	{
+	    real = nxo_real_get(nxo);
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+
+    nxo_real_new(nxo, atan(real));
+}
+#endif
+
+#ifdef CW_REAL
+void
+systemdict_atan2(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack;
     cw_nxo_t *nxo_x, *nxo_y;
@@ -1065,6 +1266,45 @@ systemdict_atan(cw_nxo_t *a_thread)
     nxo_real_new(nxo_y, atan2(y, x));
 
     nxo_stack_pop(ostack);
+}
+#endif
+
+#ifdef CW_REAL
+void
+systemdict_atanh(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack;
+    cw_nxo_t *nxo;
+    cw_nxor_t real;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    switch (nxo_type_get(nxo))
+    {
+	case NXOT_INTEGER:
+	{
+	    real = (cw_nxor_t) nxo_integer_get(nxo);
+	    break;
+	}
+	case NXOT_REAL:
+	{
+	    real = nxo_real_get(nxo);
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+
+    if (fabs(real) > 1.0)
+    {
+	nxo_thread_nerror(a_thread, NXN_rangecheck);
+	return;
+    }
+
+    nxo_real_new(nxo, atanh(real));
 }
 #endif
 
@@ -2240,6 +2480,38 @@ systemdict_cos(cw_nxo_t *a_thread)
 }
 #endif
 
+#ifdef CW_REAL
+void
+systemdict_cosh(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack;
+    cw_nxo_t *nxo;
+    cw_nxor_t real;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    switch (nxo_type_get(nxo))
+    {
+	case NXOT_INTEGER:
+	{
+	    real = (cw_nxor_t) nxo_integer_get(nxo);
+	    break;
+	}
+	case NXOT_REAL:
+	{
+	    real = nxo_real_get(nxo);
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+    nxo_real_new(nxo, cosh(real));
+}
+#endif
+
 void
 systemdict_count(cw_nxo_t *a_thread)
 {
@@ -2350,8 +2622,16 @@ systemdict_cvds(cw_nxo_t *a_thread)
 	return;
     }
 
-    len = asprintf(&result, "%.*f", (int) nxo_integer_get(precision),
-		   nxo_real_get(real));
+    if ((int) nxo_integer_get(precision) < 0)
+    {
+	len = asprintf(&result, "%.*g", -(int)nxo_integer_get(precision),
+		       nxo_real_get(real));
+    }
+    else
+    {
+	len = asprintf(&result, "%.*f", (int) nxo_integer_get(precision),
+		       nxo_real_get(real));
+    }
     if (len == -1)
     {
 	xep_throw(CW_ONYXX_OOM);
@@ -3543,87 +3823,28 @@ systemdict_exit(cw_nxo_t *a_thread)
     xep_throw(CW_ONYXX_EXIT);
 }
 
+#ifdef CW_REAL
 void
 systemdict_exp(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack;
-    cw_nxo_t *base, *exp;
-    cw_nxoi_t integer_base, integer_exp;
-#ifdef CW_REAL
-    cw_bool_t do_real;
-    cw_nxor_t real_base, real_exp;
-#endif
+    cw_nxo_t *nxo;
+    cw_nxor_t real;
 
     ostack = nxo_thread_ostack_get(a_thread);
-	
-    NXO_STACK_GET(exp, ostack, a_thread);
-    NXO_STACK_DOWN_GET(base, ostack, a_thread, exp);
-    switch (nxo_type_get(base))
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    switch (nxo_type_get(nxo))
     {
 	case NXOT_INTEGER:
 	{
-#ifdef CW_REAL
-	    do_real = FALSE;
-#endif
-	    integer_base = nxo_integer_get(base);
+	    real = (cw_nxor_t) nxo_integer_get(nxo);
 	    break;
 	}
-#ifdef CW_REAL
 	case NXOT_REAL:
 	{
-	    do_real = TRUE;
-	    real_base = nxo_real_get(base);
+	    real = nxo_real_get(nxo);
 	    break;
 	}
-#endif
-	default:
-	{
-	    nxo_thread_nerror(a_thread, NXN_typecheck);
-	    return;
-	}
-    }
-    switch (nxo_type_get(exp))
-    {
-	case NXOT_INTEGER:
-	{
-#ifdef CW_REAL
-	    if (do_real)
-	    {
-		real_exp = (cw_nxor_t) nxo_integer_get(exp);
-	    }
-	    else
-#endif
-	    {
-		integer_exp = nxo_integer_get(exp);
-		if (integer_exp < 0)
-		{
-#ifdef CW_REAL
-		    do_real = TRUE;
-		    real_base = (cw_nxor_t) integer_base;
-		    real_exp = (cw_nxor_t) integer_exp;
-#else
-		    /* The rangecheck error for exp is not documented in the
-		     * reference manual, since a non-standard configuration is
-		     * required for this code to be compiled in. */
-		    nxo_thread_nerror(a_thread, NXN_rangecheck);
-		    return;
-#endif
-		}
-	    }
-	    break;
-	}
-#ifdef CW_REAL
-	case NXOT_REAL:
-	{
-	    real_exp = nxo_real_get(exp);
-	    if (do_real == FALSE)
-	    {
-		do_real = TRUE;
-		real_base = (cw_nxor_t) integer_base;
-	    }
-	    break;
-	}
-#endif
 	default:
 	{
 	    nxo_thread_nerror(a_thread, NXN_typecheck);
@@ -3631,37 +3852,9 @@ systemdict_exp(cw_nxo_t *a_thread)
 	}
     }
 
-#ifdef CW_REAL
-    if (do_real)
-    {
-	/* base may be an integer, so use nxo_real_new() rather than
-	 * nxo_real_set(). */
-	nxo_real_new(base, pow(real_base, real_exp));
-    }
-    else
-#endif
-    {
-	cw_uint32_t i;
-	cw_nxoi_t r;
-
-	if (integer_exp != 0)
-	{
-	    for (i = 1, r = integer_base; i < integer_exp; i++)
-	    {
-		r *= integer_base;
-	    }
-	}
-	else
-	{
-	    /* base^0 --> 1. */
-	    r = 1;
-	}
-
-	nxo_integer_set(base, r);
-    }
-
-    nxo_stack_pop(ostack);
+    nxo_real_new(nxo, exp(real));
 }
+#endif
 
 #ifdef CW_REAL
 void
@@ -5558,19 +5751,79 @@ systemdict_mod(cw_nxo_t *a_thread)
 	
     NXO_STACK_GET(b, ostack, a_thread);
     NXO_STACK_DOWN_GET(a, ostack, a_thread, b);
-    if (nxo_type_get(a) != NXOT_INTEGER
-	|| nxo_type_get(b) != NXOT_INTEGER)
+    switch (nxo_type_get(a))
     {
-	nxo_thread_nerror(a_thread, NXN_typecheck);
-	return;
-    }
-    if (nxo_integer_get(b) == 0)
-    {
-	nxo_thread_nerror(a_thread, NXN_undefinedresult);
-	return;
+	case NXOT_INTEGER:
+	{
+	    switch (nxo_type_get(b))
+	    {
+		case NXOT_INTEGER:
+		{
+		    if (nxo_integer_get(b) == 0)
+		    {
+			nxo_thread_nerror(a_thread, NXN_undefinedresult);
+			return;
+		    }
+		    nxo_integer_set(a, nxo_integer_get(a) % nxo_integer_get(b));
+		    break;
+		}
+		case NXOT_REAL:
+		{
+		    if (nxo_real_get(b) == 0.0)
+		    {
+			nxo_thread_nerror(a_thread, NXN_undefinedresult);
+			return;
+		    }
+		    nxo_real_new(a, fmod(nxo_integer_get(a), nxo_real_get(b)));
+		    break;
+		}
+		default:
+		{
+		    nxo_thread_nerror(a_thread, NXN_typecheck);
+		    return;
+		}
+	    }
+	    break;
+	}
+	case NXOT_REAL:
+	{
+	    switch (nxo_type_get(b))
+	    {
+		case NXOT_INTEGER:
+		{
+		    if (nxo_integer_get(b) == 0)
+		    {
+			nxo_thread_nerror(a_thread, NXN_undefinedresult);
+			return;
+		    }
+		    nxo_real_new(a, fmod(nxo_real_get(a), nxo_integer_get(b)));
+		    break;
+		}
+		case NXOT_REAL:
+		{
+		    if (nxo_real_get(b) == 0.0)
+		    {
+			nxo_thread_nerror(a_thread, NXN_undefinedresult);
+			return;
+		    }
+		    nxo_real_set(a, fmod(nxo_real_get(a), nxo_real_get(b)));
+		    break;
+		}
+		default:
+		{
+		    nxo_thread_nerror(a_thread, NXN_typecheck);
+		    return;
+		}
+	    }
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
     }
 
-    nxo_integer_set(a, nxo_integer_get(a) % nxo_integer_get(b));
     nxo_stack_pop(ostack);
 }
 
@@ -6957,6 +7210,126 @@ systemdict_pop(cw_nxo_t *a_thread)
     NXO_STACK_POP(ostack, a_thread);
 }
 
+void
+systemdict_pow(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack;
+    cw_nxo_t *base, *exp;
+    cw_nxoi_t integer_base, integer_exp;
+#ifdef CW_REAL
+    cw_bool_t do_real;
+    cw_nxor_t real_base, real_exp;
+#endif
+
+    ostack = nxo_thread_ostack_get(a_thread);
+	
+    NXO_STACK_GET(exp, ostack, a_thread);
+    NXO_STACK_DOWN_GET(base, ostack, a_thread, exp);
+    switch (nxo_type_get(base))
+    {
+	case NXOT_INTEGER:
+	{
+#ifdef CW_REAL
+	    do_real = FALSE;
+#endif
+	    integer_base = nxo_integer_get(base);
+	    break;
+	}
+#ifdef CW_REAL
+	case NXOT_REAL:
+	{
+	    do_real = TRUE;
+	    real_base = nxo_real_get(base);
+	    break;
+	}
+#endif
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+    switch (nxo_type_get(exp))
+    {
+	case NXOT_INTEGER:
+	{
+#ifdef CW_REAL
+	    if (do_real)
+	    {
+		real_exp = (cw_nxor_t) nxo_integer_get(exp);
+	    }
+	    else
+#endif
+	    {
+		integer_exp = nxo_integer_get(exp);
+		if (integer_exp < 0)
+		{
+#ifdef CW_REAL
+		    do_real = TRUE;
+		    real_base = (cw_nxor_t) integer_base;
+		    real_exp = (cw_nxor_t) integer_exp;
+#else
+		    /* The rangecheck error for exp is not documented in the
+		     * reference manual, since a non-standard configuration is
+		     * required for this code to be compiled in. */
+		    nxo_thread_nerror(a_thread, NXN_rangecheck);
+		    return;
+#endif
+		}
+	    }
+	    break;
+	}
+#ifdef CW_REAL
+	case NXOT_REAL:
+	{
+	    real_exp = nxo_real_get(exp);
+	    if (do_real == FALSE)
+	    {
+		do_real = TRUE;
+		real_base = (cw_nxor_t) integer_base;
+	    }
+	    break;
+	}
+#endif
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+
+#ifdef CW_REAL
+    if (do_real)
+    {
+	/* base may be an integer, so use nxo_real_new() rather than
+	 * nxo_real_set(). */
+	nxo_real_new(base, pow(real_base, real_exp));
+    }
+    else
+#endif
+    {
+	cw_uint32_t i;
+	cw_nxoi_t r;
+
+	if (integer_exp != 0)
+	{
+	    for (i = 1, r = integer_base; i < integer_exp; i++)
+	    {
+		r *= integer_base;
+	    }
+	}
+	else
+	{
+	    /* base^0 --> 1. */
+	    r = 1;
+	}
+
+	nxo_integer_set(base, r);
+    }
+
+    nxo_stack_pop(ostack);
+}
+
 #ifdef CW_POSIX
 void
 systemdict_ppid(cw_nxo_t *a_thread)
@@ -7644,6 +8017,163 @@ systemdict_rename(cw_nxo_t *a_thread)
 
     nxo_stack_npop(tstack, 2);
     nxo_stack_npop(ostack, 2);
+}
+#endif
+
+#ifdef CW_REGEX
+void
+systemdict_regex(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *pattern, *nxo;
+    cw_nxn_t error;
+    cw_uint32_t npop;
+    cw_bool_t cont, global, insensitive, multiline, singleline;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+
+    NXO_STACK_GET(pattern, ostack, a_thread);
+    switch (nxo_type_get(pattern))
+    {
+	case NXOT_DICT:
+	{
+	    cw_nxo_t *flags;
+
+	    flags = pattern;
+	    npop = 2;
+	    NXO_STACK_DOWN_GET(pattern, ostack, a_thread, pattern);
+	    if (nxo_type_get(pattern) != NXOT_STRING)
+	    {
+		nxo_thread_nerror(a_thread, NXN_typecheck);
+		return;
+	    }
+
+	    error = systemdict_p_regex_flags_get(flags, a_thread, &cont,
+						 &global, &insensitive,
+						 &multiline, &singleline);
+	    if (error)
+	    {
+		nxo_thread_nerror(a_thread, error);
+		return;
+	    }
+	    break;
+	}
+	case NXOT_STRING:
+	{
+	    npop = 1;
+
+	    cont = FALSE;
+	    global = FALSE;
+	    insensitive = FALSE;
+	    multiline = FALSE;
+	    singleline = FALSE;
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+
+    /* Create the regex object. */
+    nxo = nxo_stack_under_push(ostack, pattern);
+    nxo_string_lock(pattern);
+    error = nxo_regex_new(nxo, nxo_thread_nx_get(a_thread),
+			  nxo_string_get(pattern),
+			  nxo_string_len_get(pattern), cont, global,
+			  insensitive, multiline, singleline);
+    nxo_string_unlock(pattern);
+    if (error)
+    {
+	nxo_stack_remove(ostack, nxo);
+	nxo_thread_nerror(a_thread, error);
+	return;
+    }
+
+    nxo_stack_npop(ostack, npop);
+}
+#endif
+
+#ifdef CW_REGEX
+void
+systemdict_regsub(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *pattern, *template, *nxo;
+    cw_nxn_t error;
+    cw_uint32_t npop;
+    cw_bool_t global, insensitive, multiline, singleline;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+
+    NXO_STACK_GET(template, ostack, a_thread);
+    switch (nxo_type_get(template))
+    {
+	case NXOT_DICT:
+	{
+	    cw_nxo_t *flags;
+
+	    flags = template;
+	    npop = 3;
+	    NXO_STACK_DOWN_GET(template, ostack, a_thread, template);
+	    if (nxo_type_get(template) != NXOT_STRING)
+	    {
+		nxo_thread_nerror(a_thread, NXN_typecheck);
+		return;
+	    }
+
+	    error = systemdict_p_regex_flags_get(flags, a_thread, NULL,
+						 &global, &insensitive,
+						 &multiline, &singleline);
+	    if (error)
+	    {
+		nxo_thread_nerror(a_thread, error);
+		return;
+	    }
+	    break;
+	}
+	case NXOT_STRING:
+	{
+	    npop = 2;
+
+	    global = FALSE;
+	    insensitive = FALSE;
+	    multiline = FALSE;
+	    singleline = FALSE;
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+    NXO_STACK_DOWN_GET(pattern, ostack, a_thread, template);
+    if (nxo_type_get(pattern) != NXOT_STRING)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+
+    /* Create the regex object. */
+    nxo = nxo_stack_under_push(ostack, pattern);
+    nxo_string_lock(pattern);
+    nxo_string_lock(template);
+    error = nxo_regsub_new(nxo, nxo_thread_nx_get(a_thread),
+			   nxo_string_get(pattern),
+			   nxo_string_len_get(pattern), global,
+			   insensitive, multiline, singleline,
+			   nxo_string_get(template),
+			   nxo_string_len_get(template));
+    nxo_string_unlock(template);
+    nxo_string_unlock(pattern);
+    if (error)
+    {
+	nxo_stack_remove(ostack, nxo);
+	nxo_thread_nerror(a_thread, error);
+	return;
+    }
+
+    nxo_stack_npop(ostack, npop);
 }
 #endif
 
@@ -9389,6 +9919,38 @@ systemdict_sin(cw_nxo_t *a_thread)
 }
 #endif
 
+#ifdef CW_REAL
+void
+systemdict_sinh(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack;
+    cw_nxo_t *nxo;
+    cw_nxor_t real;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    switch (nxo_type_get(nxo))
+    {
+	case NXOT_INTEGER:
+	{
+	    real = (cw_nxor_t) nxo_integer_get(nxo);
+	    break;
+	}
+	case NXOT_REAL:
+	{
+	    real = nxo_real_get(nxo);
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+    nxo_real_new(nxo, sinh(real));
+}
+#endif
+
 void
 systemdict_sipop(cw_nxo_t *a_thread)
 {
@@ -11065,6 +11627,77 @@ systemdict_symlink(cw_nxo_t *a_thread)
 }
 #endif
 
+#ifdef CW_REAL
+void
+systemdict_tan(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack;
+    cw_nxo_t *nxo;
+    cw_nxor_t real;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    switch (nxo_type_get(nxo))
+    {
+	case NXOT_INTEGER:
+	{
+	    real = (cw_nxor_t) nxo_integer_get(nxo);
+	    break;
+	}
+	case NXOT_REAL:
+	{
+	    real = nxo_real_get(nxo);
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+
+    if (fabs(fmod(real, M_PI/2) - M_PI/2) < 1.0E-6)
+    {
+	nxo_thread_nerror(a_thread, NXN_rangecheck);
+	return;
+    }
+
+    nxo_real_new(nxo, tan(real));
+}
+#endif
+
+#ifdef CW_REAL
+void
+systemdict_tanh(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack;
+    cw_nxo_t *nxo;
+    cw_nxor_t real;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    switch (nxo_type_get(nxo))
+    {
+	case NXOT_INTEGER:
+	{
+	    real = (cw_nxor_t) nxo_integer_get(nxo);
+	    break;
+	}
+	case NXOT_REAL:
+	{
+	    real = nxo_real_get(nxo);
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+    nxo_real_new(nxo, tanh(real));
+}
+#endif
+
 void
 systemdict_tell(cw_nxo_t *a_thread)
 {
@@ -11097,7 +11730,8 @@ systemdict_test(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack, *file, *test;
     cw_uint8_t c;
-    cw_bool_t result, fd = -1;
+    cw_bool_t result;
+    cw_sint32_t fd = -1;
     int error;
     struct stat sb;
 
