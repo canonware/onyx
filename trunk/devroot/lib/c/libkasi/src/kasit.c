@@ -56,6 +56,13 @@
   } while (0)
 #endif
 
+struct cw_kasit_entry_s
+{
+  cw_thd_t thd;
+  cw_kasit_t * kasit;
+  cw_buf_t buf;
+};
+
 static cw_sint32_t
 kasit_p_feed(cw_kasit_t * a_kasit, const char * a_str, cw_uint32_t a_len);
 static void
@@ -71,15 +78,27 @@ kasit_p_print_token(cw_kasit_t * a_kasit, cw_uint32_t a_length,
 		    const char * a_note);
 static void
 kasit_p_print_syntax_error(cw_kasit_t * a_kasit, cw_uint8_t a_c);
-#if (0)
 static void *
-kasit_p_entry(cw_kasit_t * a_kasit, void * a_arg);
+kasit_p_entry(void * a_arg);
+
+#ifdef _LIBKASI_DBG
+#  define _CW_KASIT_MAGIC 0x978fdbe0
 #endif
+
+/* Size and fullness control of initial name cache hash table.  This starts out
+ * empty, but should be expected to grow rather quickly to start with. */
+#define _CW_KASIT_KASIN_BASE_TABLE  256
+#define _CW_KASIT_KASIN_BASE_GROW   200
+#define _CW_KASIT_KASIN_BASE_SHRINK  64
+
+/* Size and fullness control of initial root set for local VM.  Local VM is
+ * empty to begin with. */
+#define _CW_KASIT_ROOTS_BASE_TABLE  32
+#define _CW_KASIT_ROOTS_BASE_GROW   24
+#define _CW_KASIT_ROOTS_BASE_SHRINK  8
 
 cw_kasit_t *
 kasit_new(cw_kasit_t * a_kasit,
-	  void (*a_dealloc_func)(void * dealloc_arg, void * kasit),
-	  void * a_dealloc_arg,
 	  cw_kasi_t * a_kasi)
 {
   cw_kasit_t * retval;
@@ -88,32 +107,65 @@ kasit_new(cw_kasit_t * a_kasit,
   {
     retval = a_kasit;
     bzero(a_kasit, sizeof(cw_kasit_t));
-    
-    retval->dealloc_func = a_dealloc_func;
-    retval->dealloc_arg = a_dealloc_arg;
+    retval->is_malloced = FALSE;
   }
   else
   {
     retval = (cw_kasit_t *) _cw_malloc(sizeof(cw_kasit_t));
     if (NULL == retval)
     {
-      goto RETURN;
+      goto OOM_1;
     }
+    retval->is_malloced = TRUE;
+  }
+  
+  if (NULL == dch_new(&retval->kasin_dch, _CW_KASIT_KASIN_BASE_TABLE,
+		      _CW_KASIT_KASIN_BASE_GROW, _CW_KASIT_KASIN_BASE_SHRINK,
+		      kasit_get_chi_pezz(a_kasi),
+		      ch_hash_direct, ch_key_comp_direct))
+  {
+    goto OOM_2;
+  }
 
-    retval->dealloc_func = mem_dealloc;
-    retval->dealloc_arg = cw_g_mem;
+  if (NULL == dch_new(&retval->roots_dch, _CW_KASIT_ROOTS_BASE_TABLE,
+		      _CW_KASIT_ROOTS_BASE_GROW, _CW_KASIT_ROOTS_BASE_SHRINK,
+		      kasit_get_chi_pezz(a_kasi),
+		      ch_hash_direct, ch_key_comp_direct))
+  {
+    goto OOM_3;
   }
 
   retval->kasi = a_kasi;
   retval->state = _CW_KASIT_STATE_START;
+#ifdef _LIBKASI_DBG
+  retval->magic = _CW_KASIT_MAGIC;
+#endif
   
-  RETURN:
   return retval;
+
+  OOM_3:
+  dch_delete(&retval->kasin_dch);
+  OOM_2:
+  if (TRUE == retval->is_malloced)
+  {
+    _cw_free(retval);
+  }
+  OOM_1:
+  return NULL;
 }
 
 void
 kasit_delete(cw_kasit_t * a_kasit)
 {
+  _cw_check_ptr(a_kasit);
+  _cw_assert(_CW_KASIT_MAGIC == a_kasit->magic);
+  
+  dch_delete(&a_kasit->roots_dch);
+  dch_delete(&a_kasit->kasin_dch);
+  if (TRUE == a_kasit->is_malloced)
+  {
+    _cw_free(a_kasit);
+  }
 }
 
 cw_bool_t
@@ -121,6 +173,9 @@ kasit_interp_str(cw_kasit_t * a_kasit, const char * a_str, cw_uint32_t a_len)
 {
   cw_bool_t retval;
   
+  _cw_check_ptr(a_kasit);
+  _cw_assert(_CW_KASIT_MAGIC == a_kasit->magic);
+
   retval = kasit_p_feed(a_kasit, a_str, a_len);
   
   return retval;
@@ -129,18 +184,87 @@ kasit_interp_str(cw_kasit_t * a_kasit, const char * a_str, cw_uint32_t a_len)
 cw_bool_t
 kasit_interp_buf(cw_kasit_t * a_kasit, cw_buf_t * a_buf)
 {
-	
-  return FALSE; /* XXX */
+  cw_bool_t retval;
+  int iov_cnt, i;
+  const struct iovec * iov;
+
+  _cw_check_ptr(a_kasit);
+  _cw_assert(_CW_KASIT_MAGIC == a_kasit->magic);
+  _cw_check_ptr(a_buf);
+
+  iov = buf_get_iovec(a_buf, UINT_MAX, FALSE, &iov_cnt);
+
+  for (i = 0; i < iov_cnt; i++)
+  {
+    if (TRUE == kasit_p_feed(a_kasit, iov[i].iov_base,
+			     (cw_uint32_t) iov[i].iov_len))
+    {
+      retval = TRUE;
+      goto RETURN;
+    }
+  }
+
+  retval = FALSE;
+
+  RETURN:
+  return retval;
 }
 
-void
+cw_bool_t
 kasit_detach_str(cw_kasit_t * a_kasit, const char * a_str, cw_uint32_t a_len)
 {
+  cw_bool_t retval;
+  cw_buf_t buf;
+  
+  _cw_check_ptr(a_kasit);
+  _cw_assert(_CW_KASIT_MAGIC == a_kasit->magic);
+  _cw_check_ptr(a_str);
+
+  buf_new(&buf);
+  if (TRUE == buf_set_range(&buf, 0, a_len, (cw_uint8_t *) a_str, FALSE))
+  {
+    retval = TRUE;
+    goto RETURN;
+  }
+
+  retval = kasit_detach_buf(a_kasit, &buf);
+
+  RETURN:
+  buf_delete(&buf);
+  return retval;
 }
 
-void
+cw_bool_t
 kasit_detach_buf(cw_kasit_t * a_kasit, cw_buf_t * a_buf)
 {
+  struct cw_kasit_entry_s * entry_arg;
+
+  _cw_check_ptr(a_kasit);
+  _cw_assert(_CW_KASIT_MAGIC == a_kasit->magic);
+  _cw_check_ptr(a_buf);
+
+  entry_arg
+    = (struct cw_kasit_entry_s *) _cw_malloc(sizeof(struct cw_kasit_entry_s));
+  if (NULL == entry_arg)
+  {
+    goto OOM_1;
+  }
+
+  buf_new(&entry_arg->buf);
+  if (TRUE == buf_catenate_buf(&entry_arg->buf, a_buf, TRUE))
+  {
+    goto OOM_2;
+  }
+  
+  kasit_p_entry((void *) entry_arg);
+
+  return FALSE;
+
+  OOM_2:
+  buf_delete(&entry_arg->buf);
+  _cw_free(entry_arg);
+  OOM_1:
+  return TRUE;
 }
 
 static cw_sint32_t
@@ -1096,10 +1220,20 @@ kasit_p_print_syntax_error(cw_kasit_t * a_kasit, cw_uint8_t a_c)
   kasit_p_reset_tok_buffer(a_kasit);
 }
 
-#if (0)
 static void *
-kasit_p_entry(cw_kasit_t * a_kasit, void * a_arg)
+kasit_p_entry(void * a_arg)
 {
+  struct cw_kasit_entry_s * arg = (struct cw_kasit_entry_s *) a_arg;
+
+  if (TRUE == kasit_interp_buf(arg->kasit, &arg->buf))
+  {
+    /* XXX OOM error needs delivered in interpreter. */
+  }
+
+  buf_delete(&arg->buf);
+  kasit_delete(arg->kasit);
+  /* XXX Deal with detach/join inside interpreter. */
+  thd_delete(&arg->thd);
+  _cw_free(arg);
   return NULL;
 }
-#endif

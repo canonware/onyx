@@ -48,7 +48,7 @@ main(int argc, char ** argv)
   }
 	    
   kasi_new(&kasi);
-  kasit_new(&kasit, NULL, NULL, &kasi);
+  kasit_new(&kasit, &kasi);
 
 #if (0)
   _cw_out_put("sizeof(cw_kasio_t): [i]\n", sizeof(cw_kasio_t));

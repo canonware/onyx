@@ -25,4 +25,8 @@ cw_kasioe_condition_t *
 kasioe_condition_new(cw_kasioe_condition_t * a_kasioe_condition);
 
 void
-kasioe_condition_delete(cw_kasioe_condition_t * a_kasioe_condition);
+kasioe_condition_ref(cw_kasioe_condition_t * a_kasioe_condition);
+
+void
+kasioe_condition_unref(cw_kasioe_condition_t * a_kasioe_condition);
+

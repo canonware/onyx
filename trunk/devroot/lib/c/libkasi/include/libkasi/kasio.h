@@ -113,7 +113,7 @@ struct cw_kasio_s
     } mark;
     struct
     {
-      /* If (flags.extended), the mstate is:
+      /* If not (flags.extended), the mstate is:
        *
        * accuracy : 32
        * point    : 0
@@ -132,8 +132,8 @@ struct cw_kasio_s
     } null;
     struct
     {
-      /* If (flags.extended), this number is representable as a 32 bit signed
-       * integer.  Otherwise the ext contains the value. */
+      /* If not (flags.extended), this number is representable as a 32 bit
+       * signed integer.  Otherwise the ext contains the value. */
       union
       {
 	cw_kasioe_number_t * kasioe;
@@ -161,7 +161,7 @@ kasio_new(cw_kasio_t * a_kasio);
 void
 kasio_delete(cw_kasio_t * a_kasio);
 
-cw_kasio_t
+cw_kasiot_t
 kasio_type(cw_kasio_t * a_kasio);
 
 void

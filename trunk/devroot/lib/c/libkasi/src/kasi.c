@@ -27,6 +27,12 @@
 #define _CW_KASI_KASIN_BASE_GROW   400
 #define _CW_KASI_KASIN_BASE_SHRINK 128
 
+/* Size and fullness control of initial root set for global VM.  Global VM is
+ * empty to begin with. */
+#define _CW_KASI_ROOTS_BASE_TABLE  32
+#define _CW_KASI_ROOTS_BASE_GROW   24
+#define _CW_KASI_ROOTS_BASE_SHRINK  8
+
 cw_kasin_t *
 kasi_p_kasin_new(cw_kasi_t * a_kasi);
 void
@@ -86,6 +92,13 @@ kasi_new(cw_kasi_t * a_kasi)
     goto OOM_5;
   }
 
+  if (NULL == dch_new(&retval->roots_dch, _CW_KASI_ROOTS_BASE_TABLE,
+		      _CW_KASI_ROOTS_BASE_GROW, _CW_KASI_ROOTS_BASE_SHRINK,
+		      &retval->chi_pezz, ch_hash_direct, ch_key_comp_direct))
+  {
+    goto OOM_6;
+  }
+
   mtx_new(&retval->lock);
 
 #ifdef _LIBKASI_DBG
@@ -94,6 +107,8 @@ kasi_new(cw_kasi_t * a_kasi)
 
   return retval;
 
+  OOM_6:
+  dch_delete(&retval->kasin_dch);
   OOM_5:
   pezz_delete(&retval->kasin_pezz);
   OOM_4:
@@ -117,6 +132,16 @@ kasi_delete(cw_kasi_t * a_kasi)
 
   _cw_check_ptr(a_kasi);
   _cw_assert(_CW_KASI_MAGIC == a_kasi->magic);
+
+  /* This table should be empty by now. */
+#ifdef _LIBKASI_DBG
+  if (0 != dch_count(&a_kasi->roots_dch))
+  {
+    _cw_out_put_e("roots_dch has [i] references (should be 0)\n",
+		  dch_count(&a_kasi->roots_dch));
+  }
+#endif
+  dch_delete(&a_kasi->roots_dch);
 
   while (FALSE == dch_remove_iterate(&a_kasi->kasin_dch, (void **) &key,
 				     (void **) &data))

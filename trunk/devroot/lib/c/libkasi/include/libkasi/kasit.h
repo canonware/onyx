@@ -22,16 +22,20 @@ struct cw_kasit_s
   cw_uint32_t magic;
 #endif
 
+  cw_bool_t is_malloced;
+
   /* kasi this kasit is part of. */
   cw_kasi_t * kasi;
 
-  /* Hash of cached kasin references.  Keys are (cw_kasink_t *); values are
-   * (cw_kasitn_t *). */
-  cw_dch_t * names;
+  /* Hash of cached kasin references.  Keys are (cw_kasink_t *), direct hashed;
+   * values are (cw_kasitn_t *). */
+  cw_dch_t kasin_dch;
 
-/*    cw_mtx_t lock; */
-  void (*dealloc_func)(void *, void *);
-  void * dealloc_arg;
+  /* Hash of external references to the local VM, used for mark and sweep
+   * garbage collection.  Keys are (cw_kasio_t *); values are (cw_kasioe_t *).
+   * References need not be looked at directly, since the value field in the
+   * hash table is all we need to know. */
+  cw_dch_t roots_dch;
 
   /* Tokenizer state.  If a token is broken across two or more input strings,
    * data are copied to an internal buffer, and state machine state is preserved
@@ -109,8 +113,6 @@ struct cw_kasitn_s
 
 cw_kasit_t *
 kasit_new(cw_kasit_t * a_kasit,
-	  void (*a_dealloc_func)(void * dealloc_arg, void * kasit),
-	  void * a_dealloc_arg,
 	  cw_kasi_t * a_kasi);
 
 void
@@ -122,10 +124,10 @@ kasit_interp_str(cw_kasit_t * a_kasit, const char * a_str, cw_uint32_t a_len);
 cw_bool_t
 kasit_interp_buf(cw_kasit_t * a_kasit, cw_buf_t * a_buf);
 
-void
+cw_bool_t
 kasit_detach_str(cw_kasit_t * a_kasit, const char * a_str, cw_uint32_t a_len);
 
-void
+cw_bool_t
 kasit_detach_buf(cw_kasit_t * a_kasit, cw_buf_t * a_buf);
 
 const cw_kasin_t *

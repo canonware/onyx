@@ -18,7 +18,7 @@ typedef enum
   _CW_KASIOEA_UNLIMITED   = 1,
   _CW_KASIOEA_READONLY    = 2,
   _CW_KASIOEA_EXECUTEONLY = 3
-} kasioea;
+} cw_kasioea_t;
 
 /* All extended type objects contain a kasioe.  This provides a poor man's
  * inheritance.  Since kasi's type system is static, this idiom is adequate. */
@@ -56,7 +56,9 @@ struct cw_kasioe_s
 };
 
 void
-kasioe_new(cw_kasioe_t * a_kasioe);
+kasioe_new(cw_kasioe_t * a_kasioe,
+	   void (*a_dealloc_func)(void * dealloc_arg, void * kasioe),
+	   void * a_dealloc_arg);
 
 void
 kasioe_delete(cw_kasioe_t * a_kasioe);

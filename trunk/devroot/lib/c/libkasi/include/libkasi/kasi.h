@@ -34,13 +34,19 @@ struct cw_kasi_s
 
   /* pezz from which kasin's are allocated for the names hash. */
   cw_pezz_t kasin_pezz;
-  /* Hash of names (cw_kasink_t *) to (cw_kasin_t *).  This hash table keeps
-   * track of *all* name "values" in the virtual machine.  When a name object is
-   * created, it actually adds a reference to a kasin and uses a pointer to that
-   * kasin as a unique key.  Note that each kasit maintains a cache of kasin's,
-   * so that under normal circumstances, all objects in a kasit share a single
-   * reference. */
+  /* Hash of names ((cw_kasink_t *) string is hashed) to (cw_kasin_t *).  This
+   * hash table keeps track of *all* name "values" in the virtual machine.  When
+   * a name object is created, it actually adds a reference to a kasin and uses
+   * a pointer to that kasin as a unique key.  Note that each kasit maintains a
+   * cache of kasin's, so that under normal circumstances, all objects in a
+   * kasit share a single reference. */
   cw_dch_t kasin_dch;
+
+  /* Hash of external references to the local VM, used for mark and sweep
+   * garbage collection.  Keys are (cw_kasio_t *); values are (cw_kasioe_t *).
+   * References need not be looked at directly, since the value field in the
+   * hash table is all we need to know. */
+  cw_dch_t roots_dch;
 };
 
 /* Not opaque. */
@@ -94,6 +100,8 @@ kasi_delete(cw_kasi_t * a_kasi);
 
 cw_kasi_bufc_t *
 kasi_get_kasi_bufc(cw_kasi_t * a_kasi);
+
+#define kasit_get_chi_pezz(a_kasi) (&a_kasi->chi_pezz)
 
 const cw_kasin_t *
 kasi_kasin_ref(cw_kasi_t * a_kasi, const cw_uint8_t * a_name, cw_uint32_t a_len,
