@@ -17,13 +17,13 @@
 
 #define _LIBSTASH_TEST_COUNT 50
 
-cw_uint32_t g_count = 0;
+cw_uint32_t	g_count = 0;
 
-void   *
+void *
 thread_entry_func(void *a_arg)
 {
-	cw_uint32_t i, temp;
-	cw_mtx_t *mutex = (cw_mtx_t *)a_arg;
+	cw_uint32_t	i, temp;
+	cw_mtx_t	*mutex = (cw_mtx_t *)a_arg;
 
 	for (i = 0; i < _LIBSTASH_TEST_COUNT; i++) {
 		mtx_lock(mutex);
@@ -40,24 +40,24 @@ thread_entry_func(void *a_arg)
 int
 main()
 {
-	cw_thd_t thread_a, thread_b;
-	cw_mtx_t mutex_a, *mutex_b;
+	cw_thd_t	thread_a, thread_b;
+	cw_mtx_t	mutex_a, *mutex_b;
 
 	libstash_init();
 	_cw_out_put("Test begin\n");
 
-	_cw_assert(&mutex_a == mtx_new(&mutex_a));
+	_cw_assert(mtx_new(&mutex_a) == &mutex_a);
 	/* Unlocked. */
 	mtx_lock(&mutex_a);
 	/* Locked. */
 	mtx_unlock(&mutex_a);
 	/* Unlocked. */
-	_cw_assert(FALSE == mtx_trylock(&mutex_a));
+	_cw_assert(mtx_trylock(&mutex_a) == FALSE);
 	/* Locked. */
-	_cw_assert(TRUE == mtx_trylock(&mutex_a));
+	_cw_assert(mtx_trylock(&mutex_a));
 	mtx_unlock(&mutex_a);
 	/* Unlocked. */
-	_cw_assert(FALSE == mtx_trylock(&mutex_a));
+	_cw_assert(mtx_trylock(&mutex_a) == FALSE);
 	/* Locked. */
 	mtx_unlock(&mutex_a);
 	/* Unlocked. */
@@ -65,7 +65,7 @@ main()
 
 	mutex_b = mtx_new(NULL);
 	mtx_lock(mutex_b);
-	_cw_assert(TRUE == mtx_trylock(mutex_b));
+	_cw_assert(mtx_trylock(mutex_b));
 	mtx_unlock(mutex_b);
 	mtx_delete(mutex_b);
 

@@ -21,14 +21,14 @@ main()
 	libstash_init();
 	_cw_out_put("Test begin\n");
 
-/*    dbg_register(cw_g_dbg, "mem_verbose"); */
+/*  	dbg_register(cw_g_dbg, "mem_verbose"); */
 
 	/* out_new(), out_delete(). */
 	_cw_out_put("out_new(), out_delete()\n");
 	{
-		cw_out_t out, *out_p;
+		cw_out_t	out, *out_p;
 
-		_cw_assert(&out == out_new(&out));
+		_cw_assert(out_new(&out) == &out);
 		out_delete(&out);
 
 		out_p = out_new(NULL);
@@ -39,15 +39,15 @@ main()
 	/* out_register(), out_merge(). */
 	_cw_out_put("out_register(), out_merge()\n");
 	{
-		cw_out_t *out_p;
+		cw_out_t	*out_p;
 
 		out_p = out_new(NULL);
 		_cw_check_ptr(out_p);
 
-		_cw_assert(FALSE == out_register(out_p, "buf", sizeof(cw_buf_t
-		    *), buf_out_metric, buf_out_render));
+		_cw_assert(out_register(out_p, "buf", sizeof(cw_buf_t *),
+		    buf_out_metric, buf_out_render) == FALSE);
 
-		_cw_assert(FALSE == out_merge(out_p, cw_g_out));
+		_cw_assert(out_merge(out_p, cw_g_out) == FALSE);
 
 		out_delete(out_p);
 	}
@@ -55,15 +55,15 @@ main()
 	/* out_get_default_fd(), out_set_default_fd(). */
 	_cw_out_put("out_get_default_fd(), out_set_default_fd()\n");
 	{
-		cw_out_t *out_p;
+		cw_out_t	*out_p;
 
 		out_p = out_new(NULL);
 		_cw_check_ptr(out_p);
 
-		_cw_assert(2 == out_get_default_fd(out_p));
+		_cw_assert(out_get_default_fd(out_p) == 2);
 
 		out_set_default_fd(out_p, 1);
-		_cw_assert(1 == out_get_default_fd(out_p));
+		_cw_assert(out_get_default_fd(out_p) == 1);
 
 		out_delete(out_p);
 	}
@@ -71,14 +71,14 @@ main()
 	/* out_put(). */
 	_cw_out_put("out_put()\n");
 	{
-		cw_out_t *out_p;
+		cw_out_t	*out_p;
 
 		out_p = out_new(NULL);
 		_cw_check_ptr(out_p);
 
-		_cw_assert(16 == out_put(out_p, "16 Bytes output\n"));
-		_cw_assert(0 < out_put(out_p, "[s]\n", "[s]"));
-		_cw_assert(0 == out_put(out_p, ""));
+		_cw_assert(out_put(out_p, "16 Bytes output\n") == 16);
+		_cw_assert(out_put(out_p, "[s]\n", "[s]") > 0);
+		_cw_assert(out_put(out_p, "") == 0);
 
 		out_delete(out_p);
 	}
@@ -86,20 +86,20 @@ main()
 	/* out_put_e(). */
 	_cw_out_put("out_put_e()\n");
 	{
-		cw_out_t *out_p;
+		cw_out_t	*out_p;
 
 		out_p = out_new(NULL);
 		_cw_check_ptr(out_p);
 
-		_cw_assert(0 < out_put_e(out_p, "<file>", 42, "<function>",
-			"Extended output with filename and funcname\n"));
-		_cw_assert(0 < out_put_e(out_p, "<file>", 42, NULL,
-			"Extended output with filename\n"));
-		_cw_assert(0 < out_put_e(out_p, NULL, 42, "<function>",
-			"Extended output with funcname\n"));
-		_cw_assert(0 < out_put_e(out_p, NULL, 42, NULL,
-			"Extended output, NULL args\n"));
-		_cw_assert(0 == out_put_e(out_p, NULL, 42, NULL, ""));
+		_cw_assert(out_put_e(out_p, "<file>", 42, "<function>",
+			"Extended output with filename and funcname\n") > 0);
+		_cw_assert(out_put_e(out_p, "<file>", 42, NULL,
+			"Extended output with filename\n") > 0);
+		_cw_assert(out_put_e(out_p, NULL, 42, "<function>",
+			"Extended output with funcname\n") > 0);
+		_cw_assert(out_put_e(out_p, NULL, 42, NULL,
+			"Extended output, NULL args\n") > 0);
+		_cw_assert(out_put_e(out_p, NULL, 42, NULL, "") == 0);
 
 		out_delete(out_p);
 	}
@@ -107,13 +107,14 @@ main()
 	/* out_put_l(). */
 	_cw_out_put("out_put_l()\n");
 	{
-		cw_out_t *out_p;
+		cw_out_t	*out_p;
 
 		out_p = out_new(NULL);
 		_cw_check_ptr(out_p);
 
-/*      _cw_assert(0 < out_put_l(out_p, "Timestamped output [s]\n", "[s]")); */
-/*      _cw_assert(0 < out_put_l(out_p, "\n")); */
+/*  		_cw_assert(out_put_l(out_p, "Timestamped output [s]\n", "[s]") > */
+/*  		    0); */
+/*  		_cw_assert(out_put_l(out_p, "\n") > 0); */
 
 		out_delete(out_p);
 	}
@@ -121,14 +122,14 @@ main()
 	/* out_put_le(). */
 	_cw_out_put("out_put_le()\n");
 	{
-		cw_out_t *out_p;
+		cw_out_t	*out_p;
 
 		out_p = out_new(NULL);
 		_cw_check_ptr(out_p);
 
-/*      _cw_assert(0 < out_put_le(out_p, "<file>", 42, "<function>", */
-/*  			      "Timestamped output [s]\n", "[s]")); */
-/*      _cw_assert(0 < out_put_le(out_p, NULL, 42, NULL, "\n")); */
+/*  		_cw_assert(out_put_le(out_p, "<file>", 42, "<function>", */
+/*  		    "Timestamped output [s]\n", "[s]") > 0); */
+/*  		_cw_assert(out_put_le(out_p, NULL, 42, NULL, "\n") > 0); */
 
 		out_delete(out_p);
 	}
@@ -136,17 +137,17 @@ main()
 	/* out_put_n(). */
 	_cw_out_put("out_put_n()\n");
 	{
-		cw_out_t *out_p;
-		char    buf[81] =
-		"0123456789012345678901234567890123456789"
-		"0123456789012345678901234567890123456789";
+		cw_out_t	*out_p;
+		char		buf[81] =
+		    "0123456789012345678901234567890123456789"
+		    "0123456789012345678901234567890123456789";
 
 		out_p = out_new(NULL);
 		_cw_check_ptr(out_p);
 
-		_cw_assert(60 == out_put_n(out_p, 60, "[s]", buf));
-		_cw_assert(2 == out_put_n(out_p, 2, ":[s]", "\n:"));
-		_cw_assert(0 == out_put_n(out_p, 80, ""));
+		_cw_assert(out_put_n(out_p, 60, "[s]", buf) == 60);
+		_cw_assert(out_put_n(out_p, 2, ":[s]", "\n:") == 2);
+		_cw_assert(out_put_n(out_p, 80, "") == 0);
 
 		out_delete(out_p);
 	}
@@ -676,17 +677,17 @@ main()
 		out_delete(out_p);
 	}
 
-/*    { */
-/*      cw_uint32_t i; */
-/*      char buf[65]; */
+/*  	{ */
+/*  		cw_uint32_t	i; */
+/*  		char		buf[65]; */
 
-/*      for (i = 0; i < 10000; i++) */
-/*      { */
-/*        _cw_out_put_s(buf, "[i|b:16]", (cw_uint32_t) 0xf2135123); */
-/*        _cw_out_put("."); */
-/*      } */
-/*      _cw_out_put("\n[s]\n", buf); */
-/*    } */
+/*  		for (i = 0; i < 10000; i++) { */
+/*  			_cw_out_put_s(buf, "[i|b:16]", (cw_uint32_t) */
+/*  			    0xf2135123); */
+/*  			_cw_out_put("."); */
+/*  		} */
+/*  		_cw_out_put("\n[s]\n", buf); */
+/*  	} */
 
 	_cw_out_put("Test end\n");
 	libstash_shutdown();

@@ -18,7 +18,7 @@
 void
 do_mem(void)
 {
-	void   *p;
+	void	*p;
 
 	p = _cw_malloc(1024);
 	_cw_check_ptr(p);

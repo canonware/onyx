@@ -18,7 +18,7 @@
 int
 main()
 {
-	cw_buf_t *buf_a, *buf_b, *buf_c, *buf_d;
+	cw_buf_t	*buf_a, *buf_b, *buf_c, *buf_d;
 
 	libstash_init();
 	_cw_out_put("Test begin\n");
@@ -30,9 +30,9 @@ main()
 
 	/* Create the data. */
 	{
-		cw_uint32_t i, j;
-		cw_bufc_t *bufc;
-		void   *data;
+		cw_uint32_t	i, j;
+		cw_bufc_t	*bufc;
+		void		*data;
 
 		for (i = 1; i < 16; i++) {
 			for (j = 1; j < 16; j++) {
@@ -80,84 +80,74 @@ main()
 
 	/* buf_get_uint8() inc loop for each buf. */
 	{
-		cw_uint32_t i, j, size;
+		cw_uint32_t	i, j, size;
 
 		for (i = 0; i < 1; i++) {
-			for (j = 0, size = buf_get_size(buf_a); j < size; j++) {
+			for (j = 0, size = buf_get_size(buf_a); j < size; j++)
 				buf_get_uint8(buf_a, j);
-			}
 		}
 
 		for (i = 0; i < 1; i++) {
-			for (j = 0, size = buf_get_size(buf_b); j < size; j++) {
+			for (j = 0, size = buf_get_size(buf_b); j < size; j++)
 				buf_get_uint8(buf_b, j);
-			}
 		}
 
-		for (i = 0; i < 1; i++) {
+		for (i = 0; i < 1; i++)
 			for (j = 0, size = buf_get_size(buf_c); j < size; j++) {
 				buf_get_uint8(buf_c, j);
-			}
 		}
 	}
 
 	/* buf_get_uint8() dec loop for each buf. */
 	{
-		cw_uint32_t i, j, size;
+		cw_uint32_t	i, j, size;
 
 		for (i = 0; i < 1; i++) {
-			for (j = 0, size = buf_get_size(buf_a); j < size; j++) {
+			for (j = 0, size = buf_get_size(buf_a); j < size; j++)
 				buf_get_uint8(buf_a, size - (1 + j));
-			}
 		}
 
 		for (i = 0; i < 1; i++) {
-			for (j = 0, size = buf_get_size(buf_b); j < size; j++) {
+			for (j = 0, size = buf_get_size(buf_b); j < size; j++)
 				buf_get_uint8(buf_b, size - (1 + j));
-			}
 		}
 
 		for (i = 0; i < 1; i++) {
-			for (j = 0, size = buf_get_size(buf_c); j < size; j++) {
+			for (j = 0, size = buf_get_size(buf_c); j < size; j++)
 				buf_get_uint8(buf_c, size - (1 + j));
-			}
 		}
 	}
 
 	/* Stride-wise buf_get_uint8(). */
 	{
-		cw_uint32_t i, j, size;
+		cw_uint32_t	i, j, size;
 
 		for (i = 0, size = buf_get_size(buf_a); i < 1; i++) {
-			for (j = i; j < size; j += 13) {
+			for (j = i; j < size; j += 13)
 				buf_get_uint8(buf_a, j);
-			}
 		}
 
 		for (i = 0, size = buf_get_size(buf_b); i < 1; i++) {
-			for (j = i; j < size; j += 13) {
+			for (j = i; j < size; j += 13)
 				buf_get_uint8(buf_b, j);
-			}
 		}
 
 		for (i = 0, size = buf_get_size(buf_c); i < 1; i++) {
-			for (j = i; j < size; j += 13) {
+			for (j = i; j < size; j += 13)
 				buf_get_uint8(buf_c, j);
-			}
 		}
 	}
 
 	/* Multi-stride buf_get_uint8(). */
 	{
-		cw_uint32_t h, i, j, k, size;
+		cw_uint32_t	h, i, j, k, size;
 
 		for (h = 0; h < 1; h++) {
 			for (i = 1, size = buf_get_size(buf_a); i < size; i
 			    <<= 1) {
 				for (j = 0; j < i; j++) {
-					for (k = 0; k < size; k += i) {
+					for (k = 0; k < size; k += i)
 						buf_get_uint8(buf_a, k);
-					}
 				}
 			}
 		}
@@ -166,9 +156,8 @@ main()
 			for (i = 1, size = buf_get_size(buf_b); i < size; i
 			    <<= 1) {
 				for (j = 0; j < i; j++) {
-					for (k = 0; k < size; k += i) {
+					for (k = 0; k < size; k += i)
 						buf_get_uint8(buf_b, k);
-					}
 				}
 			}
 		}
@@ -177,9 +166,8 @@ main()
 			for (i = 1, size = buf_get_size(buf_c); i < size; i
 			    <<= 1) {
 				for (j = 0; j < i; j++) {
-					for (k = 0; k < size; k += i) {
+					for (k = 0; k < size; k += i)
 						buf_get_uint8(buf_c, k);
-					}
 				}
 			}
 		}
@@ -187,156 +175,138 @@ main()
 
 	/* buf_get_uint32() inc loop for each buf. */
 	{
-		cw_uint32_t i, j, size;
+		cw_uint32_t	i, j, size;
 
 		for (i = 0; i < 1; i++) {
 			for (j = 0, size = buf_get_size(buf_a); j < size - 3;
-			    j++) {
+			    j++)
 				buf_get_uint32(buf_a, j);
-			}
 		}
 
 		for (i = 0; i < 1; i++) {
 			for (j = 0, size = buf_get_size(buf_b); j < size - 3;
-			    j++) {
+			    j++)
 				buf_get_uint32(buf_b, j);
-			}
 		}
 
 		for (i = 0; i < 1; i++) {
 			for (j = 0, size = buf_get_size(buf_c); j < size - 3;
-			    j++) {
+			    j++)
 				buf_get_uint32(buf_c, j);
-			}
 		}
 	}
 
 	/* buf_get_uint32() dec loop for each buf. */
 	{
-		cw_uint32_t i, j, size;
+		cw_uint32_t	i, j, size;
 
 		for (i = 0; i < 1; i++) {
 			for (j = 0, size = buf_get_size(buf_a); j < size - 3;
-			    j++) {
+			    j++)
 				buf_get_uint32(buf_a, size - (4 + j));
-			}
 		}
 
 		for (i = 0; i < 1; i++) {
 			for (j = 0, size = buf_get_size(buf_b); j < size - 3;
-			    j++) {
+			    j++)
 				buf_get_uint32(buf_b, size - (4 + j));
-			}
 		}
 
 		for (i = 0; i < 1; i++) {
 			for (j = 0, size = buf_get_size(buf_c); j < size - 3;
-			    j++) {
+			    j++)
 				buf_get_uint32(buf_c, size - (4 + j));
-			}
 		}
 	}
 
 	/* Stride-wise buf_get_uint32(). */
 	{
-		cw_uint32_t i, j, size;
+		cw_uint32_t	i, j, size;
 
 		for (i = 0, size = buf_get_size(buf_a); i < 1; i++) {
-			for (j = i; j < size - 3; j += 13) {
+			for (j = i; j < size - 3; j += 13)
 				buf_get_uint32(buf_a, j);
-			}
 		}
 
 		for (i = 0, size = buf_get_size(buf_b); i < 1; i++) {
-			for (j = i; j < size - 3; j += 13) {
+			for (j = i; j < size - 3; j += 13)
 				buf_get_uint32(buf_b, j);
-			}
 		}
 
 		for (i = 0, size = buf_get_size(buf_c); i < 1; i++) {
-			for (j = i; j < size - 3; j += 13) {
+			for (j = i; j < size - 3; j += 13)
 				buf_get_uint32(buf_c, j);
-			}
 		}
 	}
 
 	/* buf_get_uint64() inc loop for each buf. */
 	{
-		cw_uint32_t i, j, size;
+		cw_uint32_t	i, j, size;
 
 		for (i = 0; i < 1; i++) {
 			for (j = 0, size = buf_get_size(buf_a); j < size - 7;
-			    j++) {
+			    j++)
 				buf_get_uint64(buf_a, j);
-			}
 		}
 
 		for (i = 0; i < 1; i++) {
 			for (j = 0, size = buf_get_size(buf_b); j < size - 7;
-			    j++) {
+			    j++)
 				buf_get_uint64(buf_b, j);
-			}
 		}
 
 		for (i = 0; i < 1; i++) {
 			for (j = 0, size = buf_get_size(buf_c); j < size - 7;
-			    j++) {
+			    j++)
 				buf_get_uint64(buf_c, j);
-			}
 		}
 	}
 
 	/* buf_get_uint64() dec loop for each buf. */
 	{
-		cw_uint32_t i, j, size;
+		cw_uint32_t	i, j, size;
 
 		for (i = 0; i < 1; i++) {
 			for (j = 0, size = buf_get_size(buf_a); j < size - 7;
-			    j++) {
+			    j++)
 				buf_get_uint64(buf_a, size - (8 + j));
-			}
 		}
 
 		for (i = 0; i < 1; i++) {
 			for (j = 0, size = buf_get_size(buf_b); j < size - 7;
-			    j++) {
+			    j++)
 				buf_get_uint64(buf_b, size - (8 + j));
-			}
 		}
 
 		for (i = 0; i < 1; i++) {
 			for (j = 0, size = buf_get_size(buf_c); j < size - 7;
-			    j++) {
+			    j++)
 				buf_get_uint64(buf_c, size - (8 + j));
-			}
 		}
 	}
 
 	/* Stride-wise buf_get_uint64(). */
 	{
-		cw_uint32_t i, j, size;
+		cw_uint32_t	i, j, size;
 
 		for (i = 0, size = buf_get_size(buf_a); i < 1; i++) {
-			for (j = i; j < size - 7; j += 13) {
+			for (j = i; j < size - 7; j += 13)
 				buf_get_uint64(buf_a, j);
-			}
 		}
 
 		for (i = 0, size = buf_get_size(buf_b); i < 1; i++) {
-			for (j = i; j < size - 7; j += 13) {
+			for (j = i; j < size - 7; j += 13)
 				buf_get_uint64(buf_b, j);
-			}
 		}
 
 		for (i = 0, size = buf_get_size(buf_c); i < 1; i++) {
-			for (j = i; j < size - 7; j += 13) {
+			for (j = i; j < size - 7; j += 13)
 				buf_get_uint64(buf_c, j);
-			}
 		}
 	}
 
 	{
-		cw_uint32_t i;
+		cw_uint32_t	i;
 
 		for (i = 0; i < 1; i++) {
 			buf_catenate_buf(buf_d, buf_a, FALSE);
@@ -356,31 +326,28 @@ main()
 
 	/* buf_split() loop. */
 	{
-		cw_uint32_t i, j, size;
+		cw_uint32_t	i, j, size;
 
 		for (i = 2099, size = buf_get_size(buf_a); i < size; i +=
 		    2099) {
-			for (j = 0; (j + i) < size; j += i) {
+			for (j = 0; (j + i) < size; j += i)
 				buf_split(buf_d, buf_a, i);
-			}
 			buf_catenate_buf(buf_d, buf_a, FALSE);
 			buf_catenate_buf(buf_a, buf_d, FALSE);
 		}
 
 		for (i = 2099, size = buf_get_size(buf_b); i < size; i +=
 		    2099) {
-			for (j = 0; (j + i) < size; j += i) {
+			for (j = 0; (j + i) < size; j += i)
 				buf_split(buf_d, buf_b, i);
-			}
 			buf_catenate_buf(buf_d, buf_b, FALSE);
 			buf_catenate_buf(buf_b, buf_d, FALSE);
 		}
 
 		for (i = 2099, size = buf_get_size(buf_c); i < size; i +=
 		    2099) {
-			for (j = 0; (j + i) < size; j += i) {
+			for (j = 0; (j + i) < size; j += i)
 				buf_split(buf_d, buf_c, i);
-			}
 			buf_catenate_buf(buf_d, buf_c, FALSE);
 			buf_catenate_buf(buf_c, buf_d, FALSE);
 		}
@@ -388,65 +355,59 @@ main()
 
 	/* buf_release_head_data() loop. */
 	{
-		cw_uint32_t i, j;
+		cw_uint32_t	i, j;
 
 		for (i = 0; i < 1; i++) {
 			buf_catenate_buf(buf_d, buf_a, TRUE);
-			for (j = 0; j < buf_get_size(buf_d); j += 13) {
+			for (j = 0; j < buf_get_size(buf_d); j += 13)
 				buf_release_head_data(buf_d, j);
-			}
 			buf_release_head_data(buf_d, buf_get_size(buf_d));
 		}
 
 		for (i = 0; i < 1; i++) {
 			buf_catenate_buf(buf_d, buf_b, TRUE);
-			for (j = 0; j < buf_get_size(buf_d); j += 13) {
+			for (j = 0; j < buf_get_size(buf_d); j += 13)
 				buf_release_head_data(buf_d, j);
-			}
 			buf_release_head_data(buf_d, buf_get_size(buf_d));
 		}
 
 		for (i = 0; i < 1; i++) {
 			buf_catenate_buf(buf_d, buf_c, TRUE);
-			for (j = 0; j < buf_get_size(buf_d); j += 13) {
+			for (j = 0; j < buf_get_size(buf_d); j += 13)
 				buf_release_head_data(buf_d, j);
-			}
 			buf_release_head_data(buf_d, buf_get_size(buf_d));
 		}
 	}
 
 	/* buf_release_tail_data() loop. */
 	{
-		cw_uint32_t i, j;
+		cw_uint32_t	i, j;
 
 		for (i = 0; i < 1; i++) {
 			buf_catenate_buf(buf_d, buf_a, TRUE);
-			for (j = 0; j < buf_get_size(buf_d); j += 13) {
+			for (j = 0; j < buf_get_size(buf_d); j += 13)
 				buf_release_tail_data(buf_d, j);
-			}
 			buf_release_tail_data(buf_d, buf_get_size(buf_d));
 		}
 
 		for (i = 0; i < 1; i++) {
 			buf_catenate_buf(buf_d, buf_b, TRUE);
-			for (j = 0; j < buf_get_size(buf_d); j += 13) {
+			for (j = 0; j < buf_get_size(buf_d); j += 13)
 				buf_release_tail_data(buf_d, j);
-			}
 			buf_release_tail_data(buf_d, buf_get_size(buf_d));
 		}
 
 		for (i = 0; i < 1; i++) {
 			buf_catenate_buf(buf_d, buf_c, TRUE);
-			for (j = 0; j < buf_get_size(buf_d); j += 13) {
+			for (j = 0; j < buf_get_size(buf_d); j += 13)
 				buf_release_tail_data(buf_d, j);
-			}
 			buf_release_tail_data(buf_d, buf_get_size(buf_d));
 		}
 	}
 
 	/* Cumulative index rebuild. */
 	{
-		cw_uint32_t i, j;
+		cw_uint32_t	i, j;
 
 		for (i = 0; i < 1; i++) {
 			buf_catenate_buf(buf_d, buf_a, TRUE);
@@ -478,8 +439,8 @@ main()
 
 	/* buf_get_iovec(). */
 	{
-		cw_uint32_t i, j;
-		int     iov_cnt;
+		cw_uint32_t	i, j;
+		int		iov_cnt;
 
 		for (i = 0; i < 1; i++) {
 			buf_catenate_buf(buf_d, buf_a, TRUE);
@@ -515,7 +476,6 @@ main()
 	buf_delete(buf_d);
 
 	_cw_out_put("Test end\n");
-
 	libstash_shutdown();
 	return 0;
 }

@@ -17,9 +17,11 @@
 
 #include <limits.h>
 
-/* (_LIBSTASH_TEST_NUM_BUFELS * _LIBSTASH_TEST_SIZEOF_BUFFER *
+/*
+ * (_LIBSTASH_TEST_NUM_BUFELS * _LIBSTASH_TEST_SIZEOF_BUFFER *
  * _LIBSTASH_TEST_NUM_CIRCULATIONS) must fit within a 32 bit unsigned
- * variable. */
+ * variable.
+ */
 
 #define _LIBSTASH_TEST_DATA_MODULUS 103
 #define _LIBSTASH_TEST_NUM_BUFELS 251
@@ -27,26 +29,25 @@
 #define _LIBSTASH_TEST_NUM_CIRCULATIONS 53
 
 struct foo_s {
-	cw_buf_t *buf_a;
-	cw_buf_t *buf_b;
-	cw_mtx_t *rand_lock;
-	char   *thread_name;
+	cw_buf_t	*buf_a;
+	cw_buf_t	*buf_b;
+	cw_mtx_t	*rand_lock;
+	char		*thread_name;
 };
 
-void   *
+void *
 thread_entry_func(void *a_arg)
 {
-	struct foo_s *foo_struct = (struct foo_s *)a_arg;
-	cw_uint32_t i, size, split;
-	cw_buf_t *buf;
+	struct foo_s	*foo_struct = (struct foo_s *)a_arg;
+	cw_uint32_t	i, size, split;
+	cw_buf_t	*buf;
 
 	buf = buf_new(NULL);
 
-	for (i = 0;
-	    i < (_LIBSTASH_TEST_NUM_BUFELS * _LIBSTASH_TEST_SIZEOF_BUFFER
-		* _LIBSTASH_TEST_NUM_CIRCULATIONS);
+	for (i = 0; i < (_LIBSTASH_TEST_NUM_BUFELS *
+	    _LIBSTASH_TEST_SIZEOF_BUFFER * _LIBSTASH_TEST_NUM_CIRCULATIONS);
 	     /* Increment in the body. */ ) {
-/*      _cw_out_put("[s]", foo_struct->thread_name); */
+/*  		_cw_out_put("[s]", foo_struct->thread_name); */
 
 		size = buf_get_size(foo_struct->buf_a);
 
@@ -67,7 +68,7 @@ thread_entry_func(void *a_arg)
 
 		size = buf_get_size(buf);
 		i += size;
-		if (0 < size) {
+		if (size > 0) {
 			mtx_lock(foo_struct->rand_lock);
 			split = random() % size;
 			mtx_unlock(foo_struct->rand_lock);
@@ -80,9 +81,9 @@ thread_entry_func(void *a_arg)
 		}
 	}
 
-	_cw_assert(i == (_LIBSTASH_TEST_NUM_BUFELS *
-	    _LIBSTASH_TEST_SIZEOF_BUFFER * _LIBSTASH_TEST_NUM_CIRCULATIONS));
-	_cw_assert(0 == buf_get_size(buf));
+	_cw_assert((_LIBSTASH_TEST_NUM_BUFELS * _LIBSTASH_TEST_SIZEOF_BUFFER *
+	    _LIBSTASH_TEST_NUM_CIRCULATIONS) == i);
+	_cw_assert(buf_get_size(buf) == 0);
 
 	buf_delete(buf);
 
@@ -92,20 +93,20 @@ thread_entry_func(void *a_arg)
 int
 main(int argc, char **argv)
 {
-	cw_buf_t *buf_a, buf_b;
-	cw_bufc_t *bufc;
-	cw_uint32_t i, j, n;
-	char   *buffer;
-	struct foo_s foo_a, foo_b;
-	cw_thd_t thd_a, thd_b;
-	cw_uint32_t c;
-	cw_mtx_t rand_lock;
-	cw_uint32_t seed;
+	cw_buf_t	*buf_a, buf_b;
+	cw_bufc_t	*bufc;
+	cw_uint32_t	i, j, n;
+	char		*buffer;
+	struct foo_s	foo_a, foo_b;
+	cw_thd_t	thd_a, thd_b;
+	cw_uint32_t	c;
+	cw_mtx_t	rand_lock;
+	cw_uint32_t	seed;
 
 	libstash_init();
 	_cw_out_put("Test begin\n");
 
-/*    dbg_register(cw_g_dbg, "mem_verbose"); */
+/*  	dbg_register(cw_g_dbg, "mem_verbose"); */
 
 	/* Create a buf with a known pattern of data in it. */
 	buf_a = buf_new_r(NULL);
@@ -114,9 +115,8 @@ main(int argc, char **argv)
 		/* Create a bufc, fill it with data, and append it to buf_a. */
 		bufc = bufc_new(NULL, NULL, NULL);
 		buffer = _cw_malloc(_LIBSTASH_TEST_SIZEOF_BUFFER);
-		for (j = 0; j < _LIBSTASH_TEST_SIZEOF_BUFFER; j++, n++) {
+		for (j = 0; j < _LIBSTASH_TEST_SIZEOF_BUFFER; j++, n++)
 			buffer[j] = (char)(n % _LIBSTASH_TEST_DATA_MODULUS);
-		}
 		bufc_set_buffer(bufc, (void *)buffer,
 		    _LIBSTASH_TEST_SIZEOF_BUFFER, FALSE, (cw_opaque_dealloc_t
 		    *)mem_free, cw_g_mem);
@@ -127,12 +127,11 @@ main(int argc, char **argv)
 	buf_new_r(&buf_b);
 	mtx_new(&rand_lock);
 
-	if (argc > 1) {
+	if (argc > 1)
 		seed = strtoul(argv[1], NULL, 10);
-	} else {
+	else
 		seed = getpid();
-	}
-/*    _cw_out_put("seed == [i]\n", seed); */
+/*  	_cw_out_put("seed == [i]\n", seed); */
 	srandom(seed);
 
 	foo_a.buf_a = buf_a;
@@ -152,16 +151,15 @@ main(int argc, char **argv)
 	thd_join(&thd_b);
 
 	/* Make sure the data hasn't been corrupted. */
-	if (_LIBSTASH_TEST_NUM_BUFELS * _LIBSTASH_TEST_SIZEOF_BUFFER
-	    != buf_get_size(buf_a)) {
-		_cw_out_put(
-		    "buf_get_size(buf_a) == [i] (should be [i])\n",
-		    buf_get_size(buf_a),
-		    _LIBSTASH_TEST_NUM_BUFELS * _LIBSTASH_TEST_SIZEOF_BUFFER);
+	if (buf_get_size(buf_a) != _LIBSTASH_TEST_NUM_BUFELS *
+	    _LIBSTASH_TEST_SIZEOF_BUFFER) {
+		_cw_out_put("buf_get_size(buf_a) == [i] (should be [i])\n",
+		    buf_get_size(buf_a), _LIBSTASH_TEST_NUM_BUFELS *
+		    _LIBSTASH_TEST_SIZEOF_BUFFER);
 		buf_dump(buf_a, "buf_a ");
 		_cw_out_put("seed == [i]\n", seed);
 	}
-	if (0 != buf_get_size(&buf_b)) {
+	if (buf_get_size(&buf_b) != 0) {
 		_cw_out_put("buf_get_size(&buf_b) == [i] (should be 0)\n",
 		    buf_get_size(&buf_b));
 		buf_dump(&buf_b, "buf_b ");
@@ -171,8 +169,8 @@ main(int argc, char **argv)
 		c = (cw_uint32_t)buf_get_uint8(buf_a, i);
 
 		if (c != i % _LIBSTASH_TEST_DATA_MODULUS) {
-			_cw_out_put("buf_a[[[i]] == %u, should be %u\n",
-			    i, c, i % _LIBSTASH_TEST_DATA_MODULUS);
+			_cw_out_put("buf_a[[[i]] == %u, should be %u\n", i, c, i
+			    % _LIBSTASH_TEST_DATA_MODULUS);
 			buf_dump(buf_a, "buf_a ");
 			_cw_out_put("seed == [i]\n", seed);
 			break;

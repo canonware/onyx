@@ -25,12 +25,11 @@ main()
 
 	/* bhpi_new(), bhpi_delete(). */
 	{
-		cw_bhpi_t bhpi, *bhpi_p;
-		cw_uint32_t prio, data;
+		cw_bhpi_t	bhpi, *bhpi_p;
+		cw_uint32_t	prio, data;
 
-		_cw_assert(&bhpi == bhpi_new(&bhpi,
-			(const void *)prio,
-			(const void *)data, NULL, NULL));
+		_cw_assert(&bhpi == bhpi_new(&bhpi, (const void *)prio, (const
+		    void *)data, NULL, NULL));
 		bhpi_delete(&bhpi);
 
 		bhpi_p = bhpi_new(NULL, (const void *)prio, (const void *)data,
@@ -41,7 +40,7 @@ main()
 
 	/* bhp_new[_r](), bhp_delete(). */
 	{
-		cw_bhp_t bhp, *bhp_p;
+		cw_bhp_t	bhp, *bhp_p;
 
 		_cw_assert(&bhp == bhp_new_r(&bhp,
 		    bhp_priority_compare_uint32));
@@ -54,9 +53,9 @@ main()
 
 	/* bhp_insert(), bhp_find_min(), bhp_get_size(), bhp_del_min(). */
 	{
-		cw_bhp_t *bhp_p;
-		cw_bhpi_t *bhpi_p;
-		cw_uint32_t items[_LIBSTASH_TEST_HEAP_SIZE], i;
+		cw_bhp_t	*bhp_p;
+		cw_bhpi_t	*bhpi_p;
+		cw_uint32_t	items[_LIBSTASH_TEST_HEAP_SIZE], i;
 
 		bhp_p = bhp_new_r(NULL, bhp_priority_compare_uint32);
 		_cw_check_ptr(bhp_p);
@@ -64,22 +63,21 @@ main()
 		for (i = 0; i < _LIBSTASH_TEST_HEAP_SIZE; i++) {
 			items[i] = i;
 
-			bhpi_p = bhpi_new(NULL,
-			    (const void *)&items[i], (const void *)items[i],
-			    NULL, NULL);
+			bhpi_p = bhpi_new(NULL, (const void *)&items[i], (const
+			    void *)items[i], NULL, NULL);
 			_cw_check_ptr(bhpi_p);
 
-			_cw_assert(i == bhp_get_size(bhp_p));
+			_cw_assert(bhp_get_size(bhp_p) == i);
 			bhp_insert(bhp_p, bhpi_p);
-			_cw_assert(i + 1 == bhp_get_size(bhp_p));
+			_cw_assert(bhp_get_size(bhp_p) == i + 1);
 		}
 
 		for (i = 0; i < 129; i++) {
-			_cw_assert(_LIBSTASH_TEST_HEAP_SIZE - i ==
-			    bhp_get_size(bhp_p));
-			_cw_assert(FALSE == bhp_del_min(bhp_p, NULL, NULL));
-			_cw_assert(_LIBSTASH_TEST_HEAP_SIZE - 1 - i ==
-			    bhp_get_size(bhp_p));
+			_cw_assert(bhp_get_size(bhp_p) ==
+			    _LIBSTASH_TEST_HEAP_SIZE - i);
+			_cw_assert(bhp_del_min(bhp_p, NULL, NULL) == FALSE);
+			_cw_assert(bhp_get_size(bhp_p) ==
+			    _LIBSTASH_TEST_HEAP_SIZE - 1 - i);
 		}
 
 		bhp_delete(bhp_p);
@@ -87,9 +85,9 @@ main()
 
 	/* bhp_union(). */
 	{
-		cw_bhp_t *bhp_p_a, *bhp_p_b;
-		cw_bhpi_t *bhpi_p;
-		cw_uint32_t items[_LIBSTASH_TEST_HEAP_SIZE], i;
+		cw_bhp_t	*bhp_p_a, *bhp_p_b;
+		cw_bhpi_t	*bhpi_p;
+		cw_uint32_t	items[_LIBSTASH_TEST_HEAP_SIZE], i;
 
 		bhp_p_a = bhp_new_r(NULL, bhp_priority_compare_uint32);
 		_cw_check_ptr(bhp_p_a);
@@ -100,15 +98,13 @@ main()
 		for (i = 0; i < _LIBSTASH_TEST_HEAP_SIZE; i++) {
 			items[i] = i;
 
-			bhpi_p = bhpi_new(NULL,
-			    (const void *)&items[i], (const void *)items[i],
-			    NULL, NULL);
+			bhpi_p = bhpi_new(NULL, (const void *)&items[i], (const
+			    void *)items[i], NULL, NULL);
 			_cw_check_ptr(bhpi_p);
 			bhp_insert(bhp_p_a, bhpi_p);
 
-			bhpi_p = bhpi_new(NULL,
-			    (const void *)&items[i], (const void *)items[i],
-			    NULL, NULL);
+			bhpi_p = bhpi_new(NULL, (const void *)&items[i], (const
+			    void *)items[i], NULL, NULL);
 			_cw_check_ptr(bhpi_p);
 			bhp_insert(bhp_p_b, bhpi_p);
 		}

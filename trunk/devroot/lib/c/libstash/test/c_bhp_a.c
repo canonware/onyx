@@ -21,10 +21,9 @@
 int
 main()
 {
-	cw_bhpi_t *bhpi;
-	cw_bhp_t *h;
-	cw_sint32_t i, *a, *b, nums[100] =
-	{
+	cw_bhpi_t	*bhpi;
+	cw_bhp_t	*h;
+	cw_sint32_t	i, *a, *b, nums[100] = {
 		-944, -522, 410, 296, -523, 828, 573, 611, 878, 936,
 		604, 527, -893, -696, 716, 299, -327, -653, 614, 720,
 		-527, 26, -786, -603, 74, -643, 912, -484, -960, -266,
@@ -49,7 +48,7 @@ main()
 		bhp_insert(h, bhpi);
 	}
 	for (i = 0; i < _LIBSTASH_TEST_NUM_NODES; i++) {
-		_cw_assert(FALSE == bhp_del_min(h, (void **)&a, (void **)&b));
+		_cw_assert(bhp_del_min(h, (void **)&a, (void **)&b) == FALSE);
 	}
 
 	for (i = 0; i < _LIBSTASH_TEST_NUM_NODES; i++) {
@@ -58,7 +57,7 @@ main()
 		bhp_insert(h, bhpi);
 	}
 	for (i = 0; i < _LIBSTASH_TEST_NUM_NODES; i++) {
-		_cw_assert(FALSE == bhp_del_min(h, (void **)&a, (void **)&b));
+		_cw_assert(bhp_del_min(h, (void **)&a, (void **)&b) == FALSE);
 		_cw_out_put("i == [i], size == [q]: [i|s:s], [i|s:s]\n",
 		    i, bhp_get_size(h), *a, *b);
 	}
