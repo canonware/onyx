@@ -685,7 +685,7 @@ bhp_p_union(cw_bhp_t * a_a, cw_bhp_t * a_b)
   if (a_a->head == NULL)
   {
     /* Empty heap.  We're done. */
-    goto RETURN;
+    return;
   }
 
   prev_node = NULL;
@@ -728,5 +728,4 @@ bhp_p_union(cw_bhp_t * a_a, cw_bhp_t * a_b)
     }
     next_node = curr_node->sibling;
   }
-  RETURN:
 }

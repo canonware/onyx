@@ -311,7 +311,7 @@ log_lprintf(cw_log_t * a_log, const char * a_format, ...)
   va_list ap;
   int retval = 0;
   FILE * fp;
-  char time_str[29];
+  char time_str[128];
   time_t curr_time;
   struct tm * cts;
 
@@ -337,9 +337,13 @@ log_lprintf(cw_log_t * a_log, const char * a_format, ...)
   /* Create time string. */
   curr_time = time(NULL);
   cts = localtime(&curr_time);
-  sprintf(time_str, "[%4d/%02d/%02d %02d:%02d:%02d (%s)]: ",
-	  cts->tm_year + 1900, cts->tm_mon + 1, cts->tm_mday,
-	  cts->tm_hour, cts->tm_min, cts->tm_sec, tzname[0]);
+  if (0 == strftime(time_str, sizeof(time_str),
+		    "[%Y/%m/%d %T %Z]: ", cts))
+  {
+    /* Wow, this locale must be *really* verbose about displaying time.
+     * Terminate the string, since there's no telling what's there. */
+    time_str[0] = '\0';
+  }
 
   retval += fprintf(fp, "%s", time_str);
   va_start(ap, a_format);
@@ -367,7 +371,7 @@ log_leprintf(cw_log_t * a_log,
   va_list ap;
   int retval = 0;
   FILE * fp;
-  char time_str[29];
+  char time_str[128];
   time_t curr_time;
   struct tm * cts;
 
@@ -394,6 +398,14 @@ log_leprintf(cw_log_t * a_log,
   /* Create time string. */
   curr_time = time(NULL);
   cts = localtime(&curr_time);
+  if (0 == strftime(time_str, sizeof(time_str),
+		    "[%Y/%m/%d %T %Z]: ", cts))
+  {
+    /* Wow, this locale must be *really* verbose about displaying time.
+     * Terminate the string, since there's no telling what's there. */
+    time_str[0] = '\0';
+  }
+  
   sprintf(time_str, "[%4d/%02d/%02d %02d:%02d:%02d (%s)]: ",
 	  cts->tm_year + 1900, cts->tm_mon + 1, cts->tm_mday,
 	  cts->tm_hour, cts->tm_min, cts->tm_sec, tzname[0]);

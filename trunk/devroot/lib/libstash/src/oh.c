@@ -779,7 +779,7 @@ oh_item_delete_iterate(cw_oh_t * a_oh, void ** r_key, void ** r_data)
     oh_p_slot_shuffle(a_oh, item->slot_num);
 
     /* Add item to spares list. */
-    if (0 < a_oh->spares_ring)
+    if (NULL != a_oh->spares_ring)
     {
       ring_meld(a_oh->spares_ring, t_ring);
     }

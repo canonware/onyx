@@ -431,7 +431,7 @@ mem_realloc(cw_mem_t * a_mem, void * a_ptr, size_t a_size)
 
       if (old_size < a_size)
       {
-	memset(retval + old_size, 0xa5, a_size - old_size);
+	memset(((cw_uint8_t *) retval) + old_size, 0xa5, a_size - old_size);
       }
       
       if (dbg_is_registered(cw_g_dbg, "mem_verbose"))

@@ -119,7 +119,8 @@ pezz_new(cw_pezz_t * a_pezz, cw_uint32_t a_buffer_size,
     {
       t_ring = &retval->ring_blocks[0][i];
       ring_new(t_ring, NULL, NULL);
-      ring_set_data(t_ring, retval->mem_blocks[0] + (i * retval->buffer_size));
+      ring_set_data(t_ring, (((cw_uint8_t *) retval->mem_blocks[0])
+			     + (i * retval->buffer_size)));
       ring_meld(retval->spare_buffers, t_ring);
     }
   }
@@ -286,7 +287,7 @@ pezz_get(cw_pezz_t * a_pezz)
 	t_ring = &a_pezz->ring_blocks[a_pezz->num_blocks][i];
 	ring_new(t_ring, NULL, NULL);
 	ring_set_data(t_ring,
-		      (a_pezz->mem_blocks[a_pezz->num_blocks]
+		      (((cw_uint8_t *) a_pezz->mem_blocks[a_pezz->num_blocks])
 		       + (i * a_pezz->buffer_size)));
 	ring_meld(a_pezz->spare_buffers, t_ring);
       }

@@ -53,6 +53,10 @@ libstash_init(void)
     {
       dbg_register(cw_g_dbg, "mem_error");
     }
+    if (NULL != cw_g_dbg)
+    {
+      dbg_register(cw_g_dbg, "pezz_error");
+    }
 #endif
   }
   if (cw_g_mem == NULL)

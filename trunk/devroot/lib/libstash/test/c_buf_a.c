@@ -786,16 +786,16 @@ main()
     _cw_check_ptr(buf);
 
     _cw_assert(FALSE == buf_set_range(buf, 0, strlen(str_a) + 1,
-				      str_a, FALSE));
+				      (cw_uint8_t *) str_a, FALSE));
     _cw_assert(FALSE == buf_set_range(buf, strlen(str_a) + 1, strlen(str_b) + 1,
-				      str_b, FALSE));
+				      (cw_uint8_t *) str_b, FALSE));
     _cw_assert((strlen(str_a) + strlen(str_b) + 2) == buf_get_size(buf));
     buf_release_head_data(buf, buf_get_size(buf));
 
     _cw_assert(FALSE == buf_set_range(buf, 0, strlen(str_a) + 1,
-				      str_a, TRUE));
+				      (cw_uint8_t *) str_a, TRUE));
     _cw_assert(FALSE == buf_set_range(buf, 4, strlen(str_b) + 1,
-				      str_b, TRUE));
+				      (cw_uint8_t *) str_b, TRUE));
 
     buf_delete(buf);
   }
