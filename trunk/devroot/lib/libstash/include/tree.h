@@ -22,6 +22,7 @@ struct cw_tree_s
 {
   cw_bool_t is_malloced;
 #ifdef _CW_REENTRANT
+  cw_bool_t is_thread_safe;
   cw_mtx_t lock;
 #endif
   cw_treen_t * root;
@@ -30,10 +31,13 @@ struct cw_tree_s
 struct cw_treen_s
 {
 #ifdef _CW_REENTRANT
+  cw_bool_t is_thread_safe;
   cw_mtx_t lock;
 #endif
-  
-  
+  void * data;
+  cw_treen_t * parent;
+  cw_uint32_t num_children;
+  cw_treen_t ** children;
 };
 
 #define tree_new _CW_NS_ANY(tree_new)
@@ -53,12 +57,16 @@ struct cw_treen_s
 #define treen_get_child_ptr _CW_NS_ANY(treen_get_child_ptr)
 #define treen_set_child_ptr _CW_NS_ANY(treen_set_child_ptr)
 
+#ifdef _CW_REENTRANT
+cw_tree_t * tree_new(cw_tree_t * a_tree_o, cw_bool_t a_is_thread_safe);
+#else
 cw_tree_t * tree_new(cw_tree_t * a_tree_o);
+#endif
 void tree_delete(cw_tree_t * a_tree_o);
 cw_treen_t * tree_get_root_ptr(cw_tree_t * a_tree_o);
 void tree_set_root_ptr(cw_tree_t * a_tree_o, cw_treen_t * a_treen_o);
 
-cw_treen_t * treen_new();
+cw_treen_t * treen_new(cw_bool_t a_is_thread_safe);
 void treen_delete(cw_treen_t * a_treen_o);
 cw_treen_t * treen_get_parent_ptr(cw_treen_t * a_treen_o);
 void treen_set_parent_ptr(cw_treen_t * a_treen_o, cw_treen_t * a_parent);

@@ -164,7 +164,11 @@ mtx_lock(cw_mtx_t * a_mtx_o)
   int error;
   
   _cw_check_ptr(a_mtx_o);
-
+  fprintf(stderr, "Bang A\n");
+  log_eprintf(g_log_o, NULL, 0, "mtx_lock",
+	      "Error in pthread_mutex_lock(): %s\n", strerror(error));
+  fprintf(stderr, "Bang B\n");
+  
   error = pthread_mutex_lock(&a_mtx_o->mutex);
   if (error)
   {

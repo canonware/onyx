@@ -119,12 +119,6 @@
 #    endif
 #  endif
 
-#  ifdef _INC_TREE_H_
-#    ifndef _INC_LIST_H_
-#      define _INC_LIST_H_
-#    endif
-#  endif
-
 /*
  * Include files.  These must be listed in reverse dependency order (for
  * example, list.h must come before oh.h

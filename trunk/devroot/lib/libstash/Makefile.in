@@ -33,7 +33,8 @@ SRCS := bhp.c buf.c dbg.c \
 # Simple tests.  Output is diff'ed with the expected (.exp file) output.
 CTESTS := c19980411a.c c19980412a.c c19980419a.c c19980430a.c \
 	c19980630a.c c19980907a.c c19980907b.c \
-	c19980908a.c c19980908c.c c19980914a.c c19980917a.c c19981014a.c
+	c19980908a.c c19980908c.c c19980914a.c c19980917a.c c19981014a.c \
+	c19981105a.c
 
 # c19980907c.c (deadlock issue on FreeBSD)
 
