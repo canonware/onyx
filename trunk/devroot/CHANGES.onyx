@@ -4,7 +4,7 @@
 	  + poll
 	  + gstdin, gstdout, gstderr
 	  + setstdin, setstdout, setstderr
-	  + gsetstdin, gsetstdout, geststderr
+	  + setgstdin, setgstdout, setgstderr
 
 	* lib/libonyx/src/nx.c : Add nx_stdin_set(), nx_stdout_set(), and
           nx_stderr_set().
