@@ -308,7 +308,9 @@ void		stilo_hook_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
 #define		stilo_integer_mul(a_a, a_b, r) do {			\
 	(r)->o.integer.i = (a_a)->o.integer.i * (a_b)->o.integer.i;	\
 } while (0)
-#define		stilo_integer_div(a_a, a_b, r) do {			\
+#define		stilo_integer_div(a_a, a_b, a_stilt, r) do {		\
+	if ((a_b)->o.integer.i == 0)					\
+		stilt_error((a_stilt), STILTE_UNDEFINEDRESULT);		\
 	(r)->o.integer.i = (a_a)->o.integer.i / (a_b)->o.integer.i;	\
 } while (0)
 #define		stilo_integer_mod(a_a, a_b, r) do {			\

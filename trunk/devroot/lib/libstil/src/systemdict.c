@@ -865,7 +865,7 @@ systemdict_div(cw_stilt_t *a_stilt)
 		stilt_error(a_stilt, STILTE_TYPECHECK);
 
 	stilo_integer_new(&t_stilo, stilo_integer_get(a));
-	stilo_integer_div(&t_stilo, b, a);
+	stilo_integer_div(&t_stilo, b, a_stilt, a);
 	stils_pop(ostack, a_stilt);
 }
 
