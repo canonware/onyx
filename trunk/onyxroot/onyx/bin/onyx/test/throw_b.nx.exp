@@ -63,7 +63,7 @@ estack/istack trace (0..2):
 	--idup--
 	--known--
 	{--exch-- --get-- --eval--}
-	{--exch-- --pop-- --dup-- /handleerror --get-- --eval-- /stop --get-- --eval--}
+	{--nip-- --dup-- /handleerror --get-- --eval-- /stop --get-- --eval--}
 	--ifelse--
 }
 1:	-file-
