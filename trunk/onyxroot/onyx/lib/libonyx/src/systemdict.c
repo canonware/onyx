@@ -5322,12 +5322,11 @@ systemdict_p_regex_flags_get(cw_nxo_t *a_flags, cw_nxo_t *a_thread,
 void
 systemdict_match(cw_nxo_t *a_thread)
 {
-    cw_nxo_t *ostack, *tstack, *nxo, *flags, *pattern, *regex, *input, *matches;
-    cw_uint32_t npop, tnpop;
+    cw_nxo_t *ostack, *nxo, *flags, *pattern, *input, *matches;
+    cw_uint32_t npop;
     cw_nxn_t error;
 
     ostack = nxo_thread_ostack_get(a_thread);
-    tstack = nxo_thread_tstack_get(a_thread);
 
     npop = 0;
     NXO_STACK_GET(nxo, ostack, a_thread);
@@ -5375,31 +5374,48 @@ systemdict_match(cw_nxo_t *a_thread)
 	    pattern = nxo;
 
 	    npop += 2;
-	    tnpop = 1;
 
-	    /* Create the regex object. */
-	    regex = nxo_stack_push(tstack);
-	    nxo_string_lock(pattern);
-	    error = nxo_regex_new(regex, nxo_thread_nx_get(a_thread),
-				  nxo_string_get(pattern),
-				  nxo_string_len_get(pattern), insensitive,
-				  multiline, singleline, (cw_uint32_t) limit);
-	    nxo_string_unlock(pattern);
-	    if (error)
+	    /* Get input string. */
+	    NXO_STACK_DOWN_GET(input, ostack, a_thread, nxo);
+	    if (nxo_type_get(input) != NXOT_STRING)
 	    {
-		nxo_stack_pop(tstack);
-		nxo_thread_nerror(a_thread, error);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	    }
 
+	    matches = nxo_stack_under_push(ostack, input);
+	    nxo_string_lock(pattern);
+	    error = nxo_regex_nonew_match(a_thread, nxo_string_get(pattern),
+					  nxo_string_len_get(pattern),
+					  insensitive, multiline, singleline,
+					  (cw_uint32_t) limit, input, matches);
+	    nxo_string_unlock(pattern);
+	    if (error)
+	    {
+		nxo_stack_remove(ostack, matches);
+		nxo_thread_nerror(a_thread, error);
+		return;
+	    }
+	    
 	    break;
 	}
 	case NXOT_REGEX:
 	{
+	    cw_nxo_t *regex;
+
 	    npop += 2;
-	    tnpop = 0;
 	    regex = nxo;
 
+	    /* Get input string. */
+	    NXO_STACK_DOWN_GET(input, ostack, a_thread, nxo);
+	    if (nxo_type_get(input) != NXOT_STRING)
+	    {
+		nxo_thread_nerror(a_thread, NXN_typecheck);
+		return;
+	    }
+
+	    matches = nxo_stack_under_push(ostack, input);
+	    nxo_regex_match(regex, a_thread, input, matches);
 	    break;
 	}
 	default:
@@ -5409,20 +5425,7 @@ systemdict_match(cw_nxo_t *a_thread)
 	}
     }
 
-    /* Get input string. */
-    NXO_STACK_DOWN_GET(input, ostack, a_thread, nxo);
-    if (nxo_type_get(input) != NXOT_STRING)
-    {
-	nxo_stack_npop(tstack, tnpop);
-	nxo_thread_nerror(a_thread, NXN_typecheck);
-	return;
-    }
-
-    matches = nxo_stack_under_push(ostack, input);
-    nxo_regex_match(regex, a_thread, input, matches);
-
     nxo_stack_npop(ostack, npop);
-    nxo_stack_npop(tstack, tnpop);
 }
 #endif
 
