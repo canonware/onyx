@@ -9,11 +9,11 @@
  *
  * Stacks are implemented by the stils class.  Stack object space is allocated
  * in chunks (implemented by the stilsc class) in order to improve locality and
- * reduce memory fragmentation.  Freed objects within a chunk are kept in a
- * stack (LIFO ordering) and re-used.  This has the potential to cause adjacent
- * stack objects to be scattered throughout the stilsc's, but typical stack
- * operations have the same effect anyway, so little care is taken to keep stack
- * object re-allocation contiguous, or even local.
+ * reduce memory fragmentation.  Freed objects within a chunk are kept in the
+ * same ring as the actual stack and re-used in LIFO order.  This has the
+ * potential to cause adjacent stack objects to be scattered throughout the
+ * stilsc's, but typical stack operations have the same effect anyway, so little
+ * care is taken to keep stack object re-allocation contiguous, or even local.
  *
  * Since the GC must traverse the entire stack at every collection, we use that
  * opportunity to tidy things up.  The entire stack is re-written contiguously,
@@ -25,13 +25,6 @@
  ******************************************************************************/
 
 #include "../include/libstil/libstil.h"
-
-#ifdef _LIBSTIL_DBG
-#define _CW_STILS_MAGIC 0x0ea67890
-#define _CW_STILSC_MAGIC 0x543e2aff
-#endif
-
-static void	stils_p_spares_create(cw_stils_t *a_stils);
 
 void
 stils_new(cw_stils_t *a_stils, cw_pool_t *a_stilsc_pool)
@@ -145,104 +138,21 @@ stils_collect(cw_stils_t *a_stils, void (*a_add_root_func)
 	}
 }
 
-cw_stilo_t *
-stils_push(cw_stils_t *a_stils)
+cw_uint32_t
+stils_index_get(cw_stils_t *a_stils, cw_stilo_t *a_stilo)
 {
 	cw_stilso_t	*stilso;
-
-	_cw_check_ptr(a_stils);
-	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
-	_cw_assert(ql_first(&a_stils->stack) != &a_stils->under);
-
-	/* Get an unused stilso.  If there are no spares, create some first. */
-	if (qr_prev(ql_first(&a_stils->stack), link) == &a_stils->under)
-		stils_p_spares_create(a_stils);
-	ql_first(&a_stils->stack) = qr_prev(ql_first(&a_stils->stack), link);
-	stilso = ql_first(&a_stils->stack);
-	a_stils->count++;
-
-	stilo_no_new(&stilso->stilo);
-
-	return &stilso->stilo;
-}
-
-cw_stilo_t *
-stils_under_push(cw_stils_t *a_stils, cw_stilo_t *a_stilo)
-{
-	cw_stilso_t	*stilso;
-
-	_cw_check_ptr(a_stils);
-	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
-
-	/* Get an unused stilso.  If there are no spares, create some first. */
-	if (qr_prev(ql_first(&a_stils->stack), link) == &a_stils->under)
-		stils_p_spares_create(a_stils);
-	if (a_stilo != NULL) {
-		stilso = qr_prev(ql_first(&a_stils->stack), link);
-		qr_remove(stilso, link);
-		qr_after_insert((cw_stilso_t *)a_stilo, stilso, link);
-	} else {
-		/* Same as stils_push(). */
-		ql_first(&a_stils->stack) = qr_prev(ql_first(&a_stils->stack),
-		    link);
-		stilso = ql_first(&a_stils->stack);
-	}
-	a_stils->count++;
-
-	stilo_no_new(&stilso->stilo);
-
-	return &stilso->stilo;
-}
-
-cw_bool_t
-stils_pop(cw_stils_t *a_stils)
-{
-	cw_bool_t	retval;
-	cw_stilso_t	*stilso;
-
-	_cw_check_ptr(a_stils);
-	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
-
-	if (a_stils->count == 0) {
-		retval = TRUE;
-		goto RETURN;
-	}
-
-	stilso = ql_first(&a_stils->stack);
-	ql_first(&a_stils->stack) = qr_next(ql_first(&a_stils->stack), link);
-	a_stils->count--;
-
-	retval = FALSE;
-	RETURN:
-	return retval;
-}
-
-cw_bool_t
-stils_npop(cw_stils_t *a_stils, cw_uint32_t a_count)
-{
-	cw_bool_t	retval;
-	cw_stilso_t	*top;
 	cw_uint32_t	i;
 
 	_cw_check_ptr(a_stils);
 	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
-	_cw_assert(a_count > 0);
 
-	if (a_count > a_stils->count) {
-		retval = TRUE;
-		goto RETURN;
-	}
+	for (i = 0, stilso = ql_first(&a_stils->stack); (stilso != (cw_stilso_t
+	    *)a_stilo) && (i < a_stils->count); stilso = qr_next(stilso, link),
+	     i++);
+	_cw_assert(i < a_stils->count);
 
-	/* Get a pointer to what will be the new stack top. */
-	for (i = 0, top = ql_first(&a_stils->stack); i < a_count; i++)
-		top = qr_next(top, link);
-
-	ql_first(&a_stils->stack) = top;
-	a_stils->count -= a_count;
-
-	retval = FALSE;
-	RETURN:
-	return retval;
+	return i;
 }
 
 void
@@ -327,103 +237,7 @@ stils_roll(cw_stils_t *a_stils, cw_uint32_t a_count, cw_sint32_t a_amount)
 	RETURN:
 }
 
-cw_stilo_t *
-stils_get(cw_stils_t *a_stils)
-{
-	cw_stilo_t	*retval;
-	cw_stilso_t	*stilso;
-
-	_cw_check_ptr(a_stils);
-	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
-
-	if (a_stils->count == 0) {
-		retval = NULL;
-		goto RETURN;
-	}
-
-	stilso = ql_first(&a_stils->stack);
-
-	retval = &stilso->stilo;
-	RETURN:
-	return retval;
-}
-
-cw_stilo_t *
-stils_nget(cw_stils_t *a_stils, cw_uint32_t a_index)
-{
-	cw_stilo_t	*retval;
-	cw_stilso_t	*stilso;
-	cw_uint32_t	i;
-
-	_cw_check_ptr(a_stils);
-	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
-
-	if (a_index >= a_stils->count) {
-		retval = NULL;
-		goto RETURN;
-	}
-
-	for (i = 0, stilso = ql_first(&a_stils->stack); i < a_index; i++)
-		stilso = qr_next(stilso, link);
-
-	retval = &stilso->stilo;
-	RETURN:
-	return retval;
-}
-
-cw_stilo_t *
-stils_down_get(cw_stils_t *a_stils, cw_stilo_t *a_stilo)
-{
-	cw_stilo_t	*retval;
-	cw_stilso_t	*stilso;
-
-	_cw_check_ptr(a_stils);
-	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
-
-	if (a_stilo != NULL) {
-		if (a_stils->count <= 1) {
-			retval = NULL;
-			goto RETURN;
-		}
-		stilso = (cw_stilso_t *)a_stilo;
-		stilso = qr_next(stilso, link);
-		if (stilso == &a_stils->under) {
-			retval = NULL;
-			goto RETURN;
-		}
-	} else {
-		/* Same as stils_get(). */
-		if (a_stils->count == 0) {
-			retval = NULL;
-			goto RETURN;
-		}
-
-		stilso = ql_first(&a_stils->stack);
-	}
-
-	retval = &stilso->stilo;
-	RETURN:
-	return retval;
-}
-
-cw_uint32_t
-stils_index_get(cw_stils_t *a_stils, cw_stilo_t *a_stilo)
-{
-	cw_stilso_t	*stilso;
-	cw_uint32_t	i;
-
-	_cw_check_ptr(a_stils);
-	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
-
-	for (i = 0, stilso = ql_first(&a_stils->stack); (stilso != (cw_stilso_t
-	    *)a_stilo) && (i < a_stils->count); stilso = qr_next(stilso, link),
-	     i++);
-	_cw_assert(i < a_stils->count);
-
-	return i;
-}
-
-static void
+void
 stils_p_spares_create(cw_stils_t *a_stils)
 {
 	cw_stilsc_t	*stilsc;
@@ -448,10 +262,6 @@ stils_p_spares_create(cw_stils_t *a_stils)
 		qr_after_insert(&stilsc->objects[i - 1],
 		    &stilsc->objects[i], link);
 	}
-/*  	_cw_out_put_e("nstilso: [i]\n", nstilso); */
-/*  	_cw_out_put_e("[i] --> [i] --> [i]\n", nstilso, */
-/*  	    _CW_STILSC_O2SIZEOF(nstilso), */
-/*  	    _CW_STILSC_SIZEOF2O(_CW_STILSC_O2SIZEOF(nstilso))); */
 
 	qs_push(&a_stils->chunks, stilsc, link);
 	qr_meld(ql_first(&a_stils->stack), &stilsc->objects[0], link);
