@@ -150,6 +150,13 @@ typedef void *cw_opaque_alloc_t (const void *, size_t, const char *,
     cw_uint32_t);
 
 /*
+ * Generic typedef used for memory reallocation hooks.  This typedef is
+ * compatible with functions such as mem_realloc_e().
+ */
+typedef void *cw_opaque_realloc_t (const void *, void *, size_t, const char *,
+    cw_uint32_t);
+
+/*
  * Generic typedef used for memory deallocation hooks.  This typedef is
  * compatible with functions such as mem_free_e(), pezz_put_e() and
  * pool_put_e().

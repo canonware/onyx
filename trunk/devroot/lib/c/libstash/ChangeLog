@@ -1,3 +1,7 @@
+2001-08-16  Jason Evans  <jasone@canonware.com>
+
+	* include/libstash/libstash.h: Add cw_opaque_realloc_t typedef.
+
 2001-08-15  Jason Evans  <jasone@canonware.com>
 
 	* src/thd.c (thd_p_sr_handle): Do not use a mutex within a signal
