@@ -1,5 +1,8 @@
 2000-07-21  Jason Evans  <jasone@canonware.com>
 
+	* src/mem.c: Re-work diagnostic output format to be more
+	consistent and more informative.
+
 	* include/libstash/libstash.h : Do not use cw_g_out in debug
 	macros in order to avoid infinite recursion for libstash-internal
 	bugs.
