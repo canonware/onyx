@@ -18,9 +18,11 @@
 
 Onyx is a stack-based, threaded, interpreted language.  Its closest relative is
 Adobe PostScript, followed by Forth.  Experienced PostScript programmers should
-find most aspects of onyx familiar, but there are several important differences.
-This manual does not assume specific knowledge of other programming languages,
-so stands as a definitive reference manual for onyx.
+find most aspects of onyx familiar, but there are significant differences that
+will prevent a knowledgeable PostScript programmer from programming in onyx
+without first skimming this chapter.  This manual does not assume specific
+knowledge of other programming languages, so stands as a definitive reference
+manual for onyx.
 
 Onyx is different from most languages in that it is not compiled, but rather
 consumed.  For example, there are mechanisms for creating the equivalent of
@@ -43,7 +45,7 @@ later in this manual:
 \begin{itemize}
 \item{Stack-based.  There are no named variables as in procedural languages.
 Operations are done using various stacks, so onyx operations are coded in
-postfix notation.}
+postfix order.}
 \item{Threaded.  Onyx's threading uses the native POSIX threads implementation
 of the operating system.}
 \item{Interpreted.  Onyx code is never compiled, but is instead interpreted as
@@ -95,10 +97,13 @@ described in detail later.
 All objects have a literal or executable attribute associated with them.
 Composite objects each have their own attribute, even for composite objects that
 share the same backing memory.  An object is either literal or executable.  When
-an executable array, file, hook, name, operator, or string is encountered by the
-interpreter, it is pushed onto the execution stack and executed; otherwise the
-object is pushed onto the operand stack.  All other object types, regardless of
-literal/executable attribute, are pushed onto the operand stack.
+an executable file, hook, name, operator, or string is interpreted (encountered
+directly by the interpreter), it is pushed onto the execution stack and
+executed; otherwise the object is pushed onto the operand stack.  When an
+executable array, file, hook, name, operator, or string is evaluated, it is
+pushed onto the execution stack and executed; otherwise the object is pushed
+onto the operand stack.  Note that executable arrays are the only objects that
+behave differently when interpreted versus evaluated.
 
 In practice, attributes are only useful for types that can be executed.
 Attributes are not considered in equality test operations.
@@ -115,11 +120,14 @@ visible.  The following code creates such an array:
 1 3 getinterval
 \end{verbatim}
 
-After the code executes, the array left on the stack looks like:
+After the code executes, the array left on the operand stack looks like:
 
 \begin{verbatim}
 [1 2 3]
 \end{verbatim}
+
+Executable arrays are in effect procedures.  When an array is executed, its
+elements are sequentially interpreted.
 
 \item[boolean: ] A boolean can have two values: true or false.
 
@@ -134,10 +142,15 @@ also be of any type.
 \item[file: ] A file is a handle to an ordered sequence of bytes with a current
 position.  Read and write permissions are set when a file object is created.
 
+When an executable file is executed, it is used as a source of onyx code.  Data
+are sequentially read from the file and interpreted until the end of the file is
+reached.
+
 \item[fino: ] A fino is used as a stack marker when constructing stacks.
 
 \item[hook: ] The hook type is not used by the core onyx language.  It can be
-used by applications that extend the interpreter as a container object.
+used by applications that extend the interpreter as a container object.  Hooks
+can be executed, but the results are application dependent.
 
 \item[integer: ] An integer is a signed integer in the range $-2^{63}$ to
 $2^{63} - 1$.
@@ -151,26 +164,44 @@ Two name objects that correspond to the same sequence of characters can be
 compared for equality with the same approximate cost as comparing two integers
 for equality.  Names are typically used as keys in dictionaries.
 
+When an executable name is executed, the topmost value in the dictionary stack
+associated with the name is evaluated.
+
 \item[null: ] A null has no significance other than its existence.
 
 \item[operator: ] An operator is an operation that is built in to the
-interpreter.
+interpreter.  Operators can be executed.
 
 \item[pmark: ] A pmark is used as a stack marker when creating procedures in
 deferred execution mode (i.e. procedures that use the \{\} syntax).  The
 application will only encounter pmarks in error conditions, and there is never a
 reason for an application to explicitly create a pmark.
 
-\item[stack: ] Stacks are the basis for onyx.  An application can create, then
-manipulate stacks in much the same way that the operand stack can be
-manipulated.
+\item[stack: ] A stack provides LIFO (last in, first out) access to objects that
+it contains, as well as some more advanced access methods.  An application can
+create, then manipulate stacks in much the same way that the operand stack can
+be manipulated.
 
-\item[string: ] A string is an ordered sequence of 8 bit characters.  References
-to substrings within an existing string can be created in the same way that
-subarrays can be created.
+\item[string: ] A string is an ordered sequence of 8 bit characters.  The bytes
+contained in an string are indexed starting at 0.  References to existing
+strings may be constructed such that a contiguous subsequence is visible.  The
+following code creates such a string:
 
-\item[thread: ] Thread objects serve as handles for operations such as detaching
-and joining.
+\begin{verbatim}
+`abcde'
+1 3 getinterval
+\end{verbatim}
+
+After the code executes, the string left on the operand stack looks like:
+
+\begin{verbatim}
+`bcd'
+\end{verbatim}
+
+When a string is executed, its contents are used as a source of onyx code.
+
+\item[thread: ] A thread object serves as a handle for operations such as
+detaching and joining.
 
 \end{description}
 
@@ -181,16 +212,16 @@ parser are implemented as a human-understandable finite state machine (nested C
 switch statements with a couple of auxiliary variables), which should give the
 reader an idea of the simplicity of the language syntax.
 
-CRLF (carriage return, linefeed) pairs are in all important cases converted to
-linefeed during scanning.
+CRNL (carriage return, newline) pairs are in all important cases converted to
+newline during scanning.
 
 The characters \%, /, {\lb}, {\rb}, \{, \}, (, ), `, ', {\lt}, and {\gt} are
 special.  In most cases, any of the special characters and whitespace (space,
-tab, newline, form feed, null) terminate any preceding token.  All other
+tab, newline, formfeed, null) terminate any preceding token.  All other
 characters including non-printing characters are considered regular characters.
 
 A comment starts with a \% character outside of a string context and extends to
-the next newline, linefeed or formfeed.
+the next newline or formfeed.
 
 Procedures are actually executable arrays, but onyx provides special syntax for
 declaring procedures.  Procedures are delimited by \{ and \}, and can be
@@ -233,36 +264,38 @@ foo     % executable
 \end{verbatim}
 
 \item[{\lt}string{\gt} ::= ] `'-delimited string.  Ticks may
-be embedded in the string without escaping them, as long as the ticks are
-matched.  The following sequences have special meaning when escaped by a
+be embedded in the string without escaping them, as long as the unescaped ticks
+are balanced.  The following sequences have special meaning when escaped by a
 ``{\bs}'' character:
 	\begin{description}
 	\item[` ] ` character.
 	\item[' ] ' character.
 	\item[{\bs} ] {\bs} character.
-	\item[n ] New line.
+	\item[n ] Newline.
 	\item[r ] Carriage return.
 	\item[t ] Tab.
 	\item[b ] Backspace.
-	\item[f ] Form feed.
-	\item[xDD ] DD is hex encoding for a byte.
+	\item[f ] Formfeed.
+	\item[x{\lb}0-9a-fA-F{\rb}{\lb}0-9a-fA-F{\rb} ] Hex encoding for a byte.
 	\item[{\bs}n (newline) ] Ignore.
 	\item[{\bs}r{\bs}n (carriage return, newline) ] Ignore.
 	\end{description}
 
-``{\bs}'' has no special meaning if any other character follows it.
+``{\bs}'' has no special meaning unless followed by a character in the above
+list.
 
 Examples include:
 \begin{verbatim}
 `'
 `A string.'
-`Balanced ` and ' are allowed.'
 `An embedded \n newline.'
 `Another embedded 
 newline.'
 `An ignored \
 newline.'
+`Balanced ` and ' are allowed.'
 `Manually escaped \` tick.'
+`Manually escaped \` tick and `balanced unescaped ticks'.'
 `An actual \\ backslash.'
 `Another actual \ backslash.'
 \end{verbatim}
@@ -327,7 +360,7 @@ Each onyx thread has four program-visible stacks associated with it:
 	and code generally uses the operand stack for a place to store objects
 	as they are being manipulated.
 \item[Dictionary stack: ] The dictionary stack is used for looking up names.
-	Each thread starts with with three dictionaries on its dictionary stack,
+	Each thread starts with with four dictionaries on its dictionary stack,
 	which are, from top to bottom:
 	\begin{itemize}
 	\item{userdict}
@@ -335,7 +368,10 @@ Each onyx thread has four program-visible stacks associated with it:
 	\item{systemdict}
 	\item{threaddict}
 	\end{itemize}
-	These dictionaries are discussed in detail later.
+	The dictionary stack is manipulated via the
+	\htmlref{\onyxop{}{begin}{}}{systemdict:begin} and
+	\htmlref{\onyxop{}{end}{}}{systemdict:end} operators.  The initial
+	dictionaries on the dictionary stack cannot be removed.
 \item[Execution stack: ] The interpreter uses the execution stack to store
 	objects that are being executed.  The application generally does not
 	need to explicitly manipulate the execution stack, but its contents are
@@ -356,10 +392,10 @@ the same way as the operand stack can be manipulated.
 
 During onyx interpreter initialization, an object file object corresponding to
 stdin is usually pushed onto the execution stack.  However, depending on how the
-interpreter is invoked, the initial object on the execution stack may be a
-different file than stdin or an executable string.  The interpreter loop can be
-recursively invoked.  For example, if the following code is executed, the eval
-operator recursively invokes the interpreter loop to interpret the string.
+interpreter is invoked, the initial object on the execution stack may be any
+object.  The interpreter loop can be recursively invoked.  For example, if the
+following code is executed, the eval operator recursively invokes the
+interpreter loop to interpret the string.
 \begin{verbatim}
 `2 2 add' cvx eval
 \end{verbatim}
@@ -379,6 +415,11 @@ occurs, the following operations are performed:
 \item{Execute errordict's stop operator.}
 \end{enumerate}
 
+The onyx scanner handles syntax errors specially, in that it pushes an
+executable string that represents the code that caused the syntax error onto the
+operand stack before invoking
+\htmlref{\onyxop{}{syntaxerror}{}}{errordict:syntaxerror}.
+
 \section{Threads}
 
 Onyx supports multiple threads of execution by using the operating system's
@@ -393,10 +434,10 @@ interpreter, which makes it impossible to require the user to explicitly handle
 all synchronization.  Onyx provides optional implicit synchronization
 capabilities for composite objects on an object by object basis.  Each thread
 has a setting which can be accessed via
-\htmlref{currentlocking}{systemdict:currentlocking} (initially set to false) and
-set via \htmlref{setlocking}{systemdict:setlocking}.  If implicit locking is
-active, then new objects will be created such that simple accesses are
-synchronized.
+\htmlref{\onyxop{}{currentlocking}{}}{systemdict:currentlocking} (initially set
+to false) and set via \htmlref{\onyxop{}{setlocking}{}}{systemdict:setlocking}.
+If implicit locking is active, then new objects will be created such that simple
+accesses are synchronized.
 
 Implicit synchronization can be a source of deadlock, so care must be taken when
 accessing implicitly locked objects.  For example, if two threads copy two
@@ -430,7 +471,9 @@ deadlocks due to implicit file locking.
 \item[hook: ] No implicit locking is done for hooks.
 \item[mutex: ] No implicit locking is done for mutexes.
 \item[stack: ] All stack operations are protected.  There are no potential
-deadlocks due to implicit stack locking.
+deadlocks due to implicit stack locking.  However, there are races in stack
+copying, such that the results of copying a stack that is concurrently being
+modified are unpredictable.
 \item[string: ] String copying is protected.  Character access is protected by
 many operators, but string copying is the only potential cause of deadlock for
 string access.
