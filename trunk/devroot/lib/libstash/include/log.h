@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 7 $
- * Last modified: $Date: 1998-01-16 00:20:54 -0800 (Fri, 16 Jan 1998) $
+ * Current revision: $Revision: 10 $
+ * Last modified: $Date: 1998-02-20 00:01:34 -0800 (Fri, 20 Feb 1998) $
  *
  * Description: 
  *              
@@ -82,11 +82,11 @@ int leprintf(char * arg_filename, /* Optional, pass NULL if not used. */
   }
 
 /* Macro to do the drudgery of checking whether a pointer is null. */
-#define _cw_check_ptr(a) \
+#define _cw_check_ptr(x) \
   { \
-    if (a == NULL) \
+    if ((x) == NULL) \
       { \
-	leprintf(__FILE__, __LINE__, NULL, "%s is a NULL pointer\n", #a); \
+	leprintf(__FILE__, __LINE__, NULL, "%s is a NULL pointer\n", #x); \
 	log_close(); \
         abort(); \
       } \
