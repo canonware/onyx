@@ -1,3 +1,15 @@
+2001-07-11  Chris Toshok  <toshok@ximian.com>
+
+	* src/gtkwindow.c (nx_gtk_window_new): store the hook object as
+	named gtk-object-data.
+
+	* src/gtklabel.c (nx_gtk_label_new): store the hook object as
+	named gtk-object-data.
+
+	* src/gtkbutton.c (nx_gtk_button_new): store the hook object as
+	named gtk-object-data.
+	(nx_gtk_button_new_with_label): same.
+
 2001-07-10  Chris Toshok  <toshok@ximian.com>
 
 	* src/modnxgtk.c (_cw_modnxgtk_init): set up our global signal

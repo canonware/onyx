@@ -16,6 +16,7 @@ nx_gtk_button_new (cw_nxo_t *a_thread)
   w = gtk_button_new ();
 
   w_hook = nxo_stack_push (ostack);
+  gtk_object_set_data (GTK_OBJECT (w), "_cw_hook_object", w_hook);
 
   nxo_hook_new (w_hook, nx, w, NULL, NULL, NULL);
 }
@@ -50,6 +51,8 @@ nx_gtk_button_new_with_label (cw_nxo_t *a_thread)
   NXO_STACK_POP (ostack, a_thread);
 
   w_hook = nxo_stack_push (ostack);
+
+  gtk_object_set_data (GTK_OBJECT (w), "_cw_hook_object", w_hook);
 
   nxo_hook_new (w_hook, nx, w, NULL, NULL, NULL);
 }
