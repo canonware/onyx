@@ -172,23 +172,7 @@ struct cw_buf_s
     cw_bufv_t *bufv;
 
     /* Extent trees and lists.  ftree and flist are ordered in forward order.
-     * rtree and rlist are ordered in reverse order.
-     *
-     * For ext's A and B, where beg(X) is the beginning position of X and end(X)
-     * is the ending position of X:
-     *
-     *   Forward order : if ((beg(A) < beg(B))
-     *                       || (start(A) == start(B) && end(A) > end(B)))
-     *                   {
-     *                       A < B
-     *                   }
-     *
-     *   Reverse order : if ((end(A) < end(B))
-     *                       || (end(A) == end(B) && beg(A) > beg(B)))
-     *                   {
-     *                       A < B
-     *                   }
-     */
+     * rtree and rlist are ordered in reverse order. */
     rb_tree(cw_ext_t) ftree;
     ql_head(cw_ext_t) flist;
     rb_tree(cw_ext_t) rtree;

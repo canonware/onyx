@@ -130,6 +130,108 @@
  * In this case, bufp's 2, 3, and 4 have valid caches relative to both the begin
  * and end of the buffer.
  *
+ ******************************************************************************
+ *
+ * Each buffer page keeps a tree/list of markers that point to the page.  Marker
+ * position is maintained as ppos, so that when data are inserted or deleted,
+ * only the markers within the modified range must be updated.  If marker
+ * position were maintained as bpos, then all markers after the modified range
+ * would also have to be updated.
+ *
+ * A down side to this approach is that when the gap is moved, the markers that
+ * point into the moved range of text must be updated.  However, this typically
+ * happens much less often than insertions and deletions.
+ *
+ ******************************************************************************
+ *
+ * Extents keep track of buffer ranges, and are typically used to associate
+ * attributes (primarily for color syntax highlighting) with those ranges.  The
+ * end points of an extent are denoted by markers, which are no different than
+ * other markers.  This is the primary motivation for making marker operations
+ * scalable, since a typical buffer has only a handfull of markers, until
+ * extents come into play, at which time the number of markers can quickly
+ * become huge.
+ *
+ * An extent's end points are each open or closed:
+ *
+ *   * Open : Insertion at the end point causes the text to go outside the
+ *            extent.
+ *
+ *   * Closed : Insertion at the end point causes the text to go inside the
+ *              extent.
+ *
+ * This gives rise to four open/closed combinations:
+ *
+ *   * Closed-closed (default)
+ *
+ *   * Closed-open
+ *
+ *   * Open-closed
+ *
+ *   * Open-open (can't be zero-length)
+ *
+ * The behavior of the various cases is as expected, except that zero-length
+ * open-open extents are not allowed to exist.  If buffer operations shrink an
+ * open-open extent to zero length, it is converted to closed-open.
+ *
+ * An extent can be detachable, which means that if the extent shrinks to zero
+ * length, it is detached from the buffer.
+ *
+ ******************************************************************************
+ *
+ * Extents are ordered two different ways.  For extents A and B, where beg(X) is
+ * the beginning position of X and end(X) is the ending position of X:
+ *
+ *   * Forward order : if ((beg(A) < beg(B))
+ *                         || (start(A) == start(B) && end(A) > end(B)))
+ *                     {
+ *                         A < B
+ *                     }
+ *
+ *   * Reverse order : if ((end(A) < end(B))
+ *                         || (end(A) == end(B) && beg(A) > beg(B)))
+ *                     {
+ *                         A < B
+ *                     }
+ *
+ * Following are examples of extents shown in forward- and reverse-order
+ * (abbreviated as f-order and r-order):
+ *
+ *   f-order :
+ *
+ *     A : |---------|
+ *     B : |-------|
+ *     C :   |---------|
+ *     D :   |-------|
+ *     E :   |-----|
+ *     F :   |---|
+ *     G :       |-------|
+ *     H :       |-----|
+ *     I :         |-----------|
+ *     J :           |---|
+ *     K :             |---|
+ *     L :               |-------|
+ *
+ *   r-order :
+ *
+ *     F :   |---|
+ *     E :   |-----|
+ *     B : |-------|
+ *     D :   |-------|
+ *     A : |---------|
+ *     H :       |-----|
+ *     C :   |---------|
+ *     J :           |---|
+ *     G :       |-------|
+ *     K :             |---|
+ *     I :         |-----------|
+ *     L :               |-------|
+ *
+ * Maintaining both orderings makes it possible to quickly determine the set of
+ * extents that overlap any range of the buffer.  Most importantly though, the
+ * two orderings make it possible to quickly divide the buffer into fragments,
+ * where each fragment is completely overlapped by a particular set of extents.
+ * This is used when displaying the buffer.
  *
  ******************************************************************************/
 
