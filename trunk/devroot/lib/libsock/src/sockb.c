@@ -596,11 +596,9 @@ sockb_p_entry_func(void * a_arg)
 	    
 	    buf_split(&tmp_buf, &buf_in, bytes_read);
 
-	    /* XXX Hack to make a bug go away? */
-	    buf_release_head_data(&buf_in,
-				  buf_get_size(&buf_in));
 	    /* Append to the sock's in_buf. */
 	    sock_l_put_in_data(socks[i], &tmp_buf);
+	    _cw_assert(buf_get_size(&tmp_buf) == 0);
 	  }
 	  else /* if (bytes_read == -1) */
 	  {
@@ -646,12 +644,17 @@ sockb_p_entry_func(void * a_arg)
 	  }
 	  else /* if (bytes_written == -1) */
 	  {
+	    buf_release_head_data(&tmp_buf,
+				  buf_get_size(&tmp_buf));
+	    FD_CLR(i, &fd_m_write_set);
+	    
 	    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
 			"Error in writev(): %s\n", strerror(errno));
 	    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
 			"Closing sockfd %d\n", i);
 	    sock_l_error_callback(socks[i]);
 	  }
+	  _cw_assert(buf_get_size(&tmp_buf) == 0);
 	}
 #if (0)
 	if (FD_ISSET(i, &fd_exception_set))

@@ -630,7 +630,10 @@ sock_l_put_back_out_data(cw_sock_t * a_sock, cw_buf_t * a_buf)
   _cw_check_ptr(a_buf);
 
   mtx_lock(&a_sock->out_lock);
-  buf_catenate_buf(a_buf, &a_sock->out_buf, FALSE);
+/*    buf_catenate_buf(a_buf, &a_sock->out_buf, FALSE); */
+  buf_catenate_buf(&a_sock->out_buf, a_buf, FALSE);
+  _cw_assert(buf_get_size(a_buf) == 0);
+  
   retval = buf_get_size(&a_sock->out_buf);
   if (retval == 0)
   {

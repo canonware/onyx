@@ -61,6 +61,7 @@ handle_client(void * a_arg)
     {
       break;
     }
+    
     _cw_assert(0 == buf_get_size(&buf));
   }
   
@@ -91,7 +92,8 @@ main(int argc, char ** argv)
   }
   
   libstash_init();
-  sockb_init(4096, 1024);
+  sockb_init(512, 0);
+/*    sockb_init(512, 1000000); */
   
 /*    dbg_register(cw_g_dbg, "sockb_verbose"); */
   dbg_register(cw_g_dbg, "sockb_error");
@@ -107,7 +109,7 @@ main(int argc, char ** argv)
 
   for (sock_ptr = NULL; sock_ptr == NULL; sock_ptr = NULL)
   {
-    sock = sock_new(NULL, 8182);
+    sock = sock_new(NULL, 1024);
     _cw_assert(NULL != (sock_ptr = socks_accept_block(socks, sock)));
     thd_new(NULL, handle_client, (void *) sock);
   }

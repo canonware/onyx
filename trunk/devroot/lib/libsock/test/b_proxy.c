@@ -33,7 +33,15 @@ typedef struct
   cw_sock_t remote_sock;
 } connection_t;
 
+cw_bool_t should_quit = FALSE;
+
 /* Function prototypes. */
+void
+sig_int(int a_signum);
+
+void
+sig_hup(int a_signum);
+
 cw_bool_t
 daemonize(char * a_work_dir);
 
@@ -45,6 +53,32 @@ handle_client_send(void * a_arg);
 
 void *
 handle_client_recv(void * a_arg);
+
+void
+sig_int(int a_signum)
+{
+  extern cw_bool_t should_quit;
+  
+  _cw_assert(a_signum == SIGINT);
+
+  log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
+	      "Caught SIGINT\n");
+
+  should_quit = TRUE;
+}
+
+void
+sig_hup(int a_signum)
+{
+  extern cw_bool_t should_quit;
+  
+  _cw_assert(a_signum == SIGHUP);
+
+  log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
+	      "Caught SIGHUP\n");
+
+  should_quit = TRUE;
+}
 
 cw_bool_t
 daemonize(char * a_work_dir)
@@ -829,15 +863,16 @@ handle_client_send(void * a_arg)
     }
 #endif
     /* XXX */
-    hostname = "localhost";
-    port = 23;
+    hostname = "donner";
+/*      port = 23; */
+    port = 6000;
     
     log_printf(conn->log, "Connecting to \"%s\" on port %d\n", hostname, port);
       
     /* Open a connection as specified by the proxy options. */
 
     /* Connect to the remote end, using hostname and port. */
-    sock_new(&conn->remote_sock, 512);
+    sock_new(&conn->remote_sock, 8192);
     if (TRUE == sock_connect(&conn->remote_sock, hostname, port))
     {
       log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
@@ -976,8 +1011,25 @@ main(int argc, char ** argv)
   {
     port = strtol(argv[1], (char **) NULL, 10);
   }
+
+  /* XXX */
+  port = 6010;
   
   libstash_init();
+
+  /* XXX Set the per-thread signal masks such that only one thread will catch
+   * the signal. */
+  if (SIG_ERR == signal(SIGINT, sig_int))
+  {
+    log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
+		"Error setting signal handler for SIGINT\n");
+  }
+  if (SIG_ERR == signal(SIGHUP, sig_int))
+  {
+    log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
+		"Error setting signal handler for SIGHUP\n");
+  }
+  
 /*    log_set_logfile(cw_g_log, "/tmp/b_proxy.log", FALSE); */
 
 /*    if (TRUE == daemonize("/tmp")) */
@@ -987,7 +1039,7 @@ main(int argc, char ** argv)
   log_printf(cw_g_log, "pid: %d\n", getpid());
 
 /*    sockb_init(512, 512); */
-  sockb_init(512, 10);
+  sockb_init(4096, 1024);
   
   dbg_register(cw_g_dbg, "mem_error");
   dbg_register(cw_g_dbg, "mem_verbose");
@@ -1005,11 +1057,11 @@ main(int argc, char ** argv)
   }
   log_lprintf(cw_g_log, "%s: Listening on port %d\n", argv[0], port);
 
-  for (;;)
+  while (should_quit == FALSE)
   {
     conn = _cw_malloc(sizeof(connection_t));
     bzero(conn, sizeof(conn));
-    sock_new(&conn->client_sock, 512);
+    sock_new(&conn->client_sock, 8192);
     
     if (NULL == socks_accept_block(socks, &conn->client_sock))
     {
