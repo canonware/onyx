@@ -94,13 +94,17 @@ CW_P_INLINE void
 histh_p_record_next(cw_histh_t *a_head, cw_histh_t *a_foot, cw_buf_t *a_buf,
 		    cw_mkr_t *a_beg, cw_mkr_t *a_cur, cw_mkr_t *a_end,
 		    cw_mkr_t *a_tmp);
+#ifdef CW_HIST_DUMP
 static void
 histh_p_dump(cw_histh_t *a_histh, const char *a_beg, const char *a_mid,
 	     const char *a_end);
+#endif
 
 /* hist. */
+#ifdef CW_BUF_DUMP
 static void
 hist_p_bufv_print(const cw_bufv_t *a_bufv, cw_uint32_t a_bufvcnt);
+#endif
 static void
 hist_p_record_prev(cw_hist_t *a_hist);
 static void
