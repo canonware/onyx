@@ -59,7 +59,10 @@ Optionally, pass any of the following (not a definitive list) arguments to
 
 --enable-shared
 	Build and install shared libraries.  If this option is specified,
-	binaries will also be linked with the resulting shared libraries.
+	binaries will also be linked with the resulting shared libraries.  Note
+	that the library version numbers are not currently being incremented to
+	reflect incompatible changes, so you will need to handle this manually
+	if upgrading from an older version of the libraries.
 
 Optionally, define environment variables, including (not exclusively):
 
