@@ -806,7 +806,7 @@ error handlers, which call errordict's
 be redefined to suit the thread's or application's error handling requirements.
 
 \begin{longtable}{\optableformat{3}}
-\caption{errordict summary by functional group} \\
+\caption[errordict summary]{errordict summary by functional group} \\
 \hline
 Input(s) & Op/Proc/Var & Output(s) & Description \\
 \hline \hline
@@ -1461,19 +1461,661 @@ The sprintdict dictionary is primarily used to support
 \htmlref{\onyxop{}{sprint}{}}{systemdict:sprint}, but its contents may be of use
 to an application that wishes to extend or modify syntactical printing.
 
-There is an entry in sprintdict for each onyx type (for example,
-\onyxop{}{arraytype}{}).  Each operator takes two arguments: an object to print
-and an integer that represents printing recursion depth.  Each operator removes
-the two arguments from ostack upon completion.  If there is a syntactically
-valid representation for an object and the recursion depth is greater than 0,
-the corresponding operator prints the object syntactically.  Otherwise, a
-non-syntictical representation of the object is printed.  If the recursion depth
-is greater than 0, the operators will recursively print any contained objects.
-All printing is done to \htmlref{\onyxop{}{stdout}{}}{systemdict:stdout}.
+There is an entry in sprintdict for each onyx type.  Each operator takes two
+arguments: an object to print and an integer that represents printing recursion
+depth.  Each operator removes the two arguments from ostack upon completion.  If
+there is a syntactically valid representation for an object and the recursion
+depth is greater than 0, the corresponding operator prints the object
+syntactically.  Otherwise, a non-syntictical representation of the object is
+printed.  If the recursion depth is greater than 0, the operators will
+recursively print any contained objects.  All printing is done to
+\htmlref{\onyxop{}{stdout}{}}{systemdict:stdout}.
 
 The operators do not print whitespace before or after the object
 representations, so if multiple objects are being sequentially printed
 syntactically, care should be taken to insert whitespace delimiters.
+
+The implementation of \htmlref{\onyxop{}{sprint}{}}{systemdict:sprint} is useful
+in illustrating a useful method of doing type-dependent operations:
+
+\begin{verbatim}
+/sprint {
+        1 index type /sprintdict load exch get eval
+        `\n' print flush
+} bind def
+\end{verbatim}
+
+\begin{longtable}{\optableformat{3}}
+\caption[sprintdict summary]{sprintdict summary}
+\\
+\hline
+Input(s) & Op/Proc/Var & Output(s) & Description \\
+\hline \hline
+%begin{latexonly}
+\endfirsthead
+\caption[]{\emph{continued}} \\
+\hline
+Input(s) & Op/Proc/Var & Output(s) & Description \\
+\hline \endhead
+\multicolumn{4}{r}{\emph{Continued on next page...}} \endfoot
+\hline \endlastfoot
+%end{latexonly}
+array depth & {\bf \htmlref{arraytype}{sprintdict:arraytype}} & -- &
+Syntactically print array. \\
+\hline
+boolean depth & {\bf \htmlref{booleantype}{sprintdict:booleantype}} & -- &
+Syntactically print boolean. \\
+\hline
+condition depth & {\bf \htmlref{conditiontype}{sprintdict:conditiontype}} & -- &
+Syntactically print condition. \\
+\hline
+dict depth & {\bf \htmlref{dicttype}{sprintdict:dicttype}} & -- & Syntactically
+print dict. \\
+\hline
+file depth & {\bf \htmlref{filetype}{sprintdict:filetype}} & -- & Syntactically
+print file. \\
+\hline
+fino depth & {\bf \htmlref{finotype}{sprintdict:finotype}} & -- & Syntactically
+print fino. \\
+\hline
+hook depth & {\bf \htmlref{hooktype}{sprintdict:hooktype}} & -- & Syntactically
+print hook. \\
+\hline
+integer depth & {\bf \htmlref{integertype}{sprintdict:integertype}} & -- &
+Syntactically print integer. \\
+\hline
+mark depth & {\bf \htmlref{marktype}{sprintdict:marktype}} & -- & Syntactically
+print mark. \\
+\hline
+mutex depth & {\bf \htmlref{mutextype}{sprintdict:mutextype}} & -- &
+Syntactically print mutex. \\
+\hline
+name depth & {\bf \htmlref{nametype}{sprintdict:nametype}} & -- & Syntactically
+print name. \\
+\hline
+null depth & {\bf \htmlref{nulltype}{sprintdict:nulltype}} & -- & Syntactically
+print null. \\
+\hline
+operator depth & {\bf \htmlref{operatortype}{sprintdict:operatortype}} & -- &
+Syntactically print operator. \\
+\hline
+pmark depth & {\bf \htmlref{pmarktype}{sprintdict:pmarktype}} & -- &
+Syntactically print pmark. \\
+\hline
+stack depth & {\bf \htmlref{stacktype}{sprintdict:stacktype}} & -- &
+Syntactically print stack. \\
+\hline
+string depth & {\bf \htmlref{stringtype}{sprintdict:stringtype}} & -- &
+Syntactically print string. \\
+\hline
+thread depth & {\bf \htmlref{threadtype}{sprintdict:threadtype}} & -- &
+Syntactically print thread. \\
+\end{longtable}
+
+\begin{description}
+\label{sprintdict:arraytype}
+\index{arraytype@\onyxop{}{arraytype}{}}
+\item[{\onyxop{array depth}{arraytype}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[array: ]
+			An array to be syntactically printed.
+		\item[depth: ]
+			Printing recursion depth.
+		\end{description}
+	\item[Output(s): ]
+		Syntactic representation of \oparg{array} printed to stdout.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Syntactically print \oparg{array} to stdout.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> sprintdict begin
+onyx:0> [1 [2 3] 4]
+onyx:1> dup 0 arraytype `\n' print flush
+-array-
+onyx:1> dup 1 arraytype `\n' print flush
+[1 -array- 4]
+onyx:1> dup 2 arraytype `\n' print flush
+[1 [2 3] 4]
+onyx:1>
+		\end{verbatim}
+	\end{description}
+\label{sprintdict:booleantype}
+\index{booleantype@\onyxop{}{booleantype}{}}
+\item[{\onyxop{boolean depth}{booleantype}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[boolean: ]
+			A boolean to be syntactically printed.
+		\item[depth: ]
+			Printing recursion depth.
+		\end{description}
+	\item[Output(s): ]
+		Syntactic representation of \oparg{boolean} printed to stdout.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Syntactically print \oparg{boolean} to stdout.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> sprintdict begin
+onyx:0> true
+onyx:1> dup 0 booleantype `\n' print flush
+true
+onyx:1>
+		\end{verbatim}
+	\end{description}
+\label{sprintdict:conditiontype}
+\index{conditiontype@\onyxop{}{conditiontype}{}}
+\item[{\onyxop{condition depth}{conditiontype}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[condition: ]
+			A condition to be syntactically printed.
+		\item[depth: ]
+			Printing recursion depth.
+		\end{description}
+	\item[Output(s): ]
+		Syntactic representation of \oparg{condition} printed to stdout.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Syntactically print \oparg{condition} to stdout.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> sprintdict begin
+onyx:0> condition
+onyx:1> dup 0 conditiontype `\n' print flush
+-condition-
+onyx:1> dup 1 conditiontype `\n' print flush
+-condition-
+onyx:1>
+		\end{verbatim}
+	\end{description}
+\label{sprintdict:dicttype}
+\index{dicttype@\onyxop{}{dicttype}{}}
+\item[{\onyxop{dict depth}{dicttype}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[dict: ]
+			A dict to be syntactically printed.
+		\item[depth: ]
+			Printing recursion depth.
+		\end{description}
+	\item[Output(s): ]
+		Syntactic representation of \oparg{dict} printed to stdout.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Syntactically print \oparg{dict} to stdout.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> sprintdict begin
+onyx:0> </a `a' /subdict </b `b'>>
+onyx:1> dup 0 dicttype `\n' print flush
+-dict-
+onyx:1> dup 1 dicttype `\n' print flush
+</subdict -dict- /a `a'>
+onyx:1> dup 2 dicttype `\n' print flush
+</subdict </b `b'> /a `a'>
+onyx:1>
+		\end{verbatim}
+	\end{description}
+\label{sprintdict:filetype}
+\index{filetype@\onyxop{}{filetype}{}}
+\item[{\onyxop{file depth}{filetype}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[file: ]
+			A file to be syntactically printed.
+		\item[depth: ]
+			Printing recursion depth.
+		\end{description}
+	\item[Output(s): ]
+		Syntactic representation of \oparg{file} printed to stdout.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Syntactically print \oparg{file} to stdout.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> sprintdict begin
+onyx:0> stdout
+onyx:1> dup 0 filetype `\n' print flush
+-file-
+onyx:1> dup 1 filetype `\n' print flush
+-file-
+onyx:1>
+		\end{verbatim}
+	\end{description}
+\label{sprintdict:finotype}
+\index{finotype@\onyxop{}{finotype}{}}
+\item[{\onyxop{fino depth}{finotype}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[fino: ]
+			A fino to be syntactically printed.
+		\item[depth: ]
+			Printing recursion depth.
+		\end{description}
+	\item[Output(s): ]
+		Syntactic representation of \oparg{fino} printed to stdout.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Syntactically print \oparg{fino} to stdout.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> sprintdict begin
+onyx:0> (
+onyx:1> dup 0 finotype `\n' print flush
+-fino-
+onyx:1> dup 1 finotype `\n' print flush
+-fino-
+onyx:1>
+		\end{verbatim}
+	\end{description}
+\label{sprintdict:hooktype}
+\index{hooktype@\onyxop{}{hooktype}{}}
+\item[{\onyxop{hook depth}{hooktype}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[hook: ]
+			A hook to be syntactically printed.
+		\item[depth: ]
+			Printing recursion depth.
+		\end{description}
+	\item[Output(s): ]
+		Syntactic representation of \oparg{hook} printed to stdout.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Syntactically print \oparg{hook} to stdout.
+	\item[Example(s): ]
+		The following example is a bit contrived, since there is no way
+		to create a hook object with a stock onyx interpreter.
+		Therefore, imagine that an operator named taggedhook exists that
+		creates a hook with a tag that is the name ``tagged'', and that
+		an operator named untaggedhook exists that creates an untagged
+		hook.
+		\begin{verbatim}
+
+onyx:0> sprintdict begin
+onyx:0> taggedhook
+onyx:1> dup 0 hooktype `\n' print flush
+=tagged=
+onyx:1> 1 hooktype `\n' print flush
+=tagged=
+onyx:0> untaggedhook
+onyx:1> dup 0 hooktype `\n' print flush
+-hook-
+onyx:1> 1 hooktype `\n' print flush
+-hook-
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{sprintdict:integertype}
+\index{integertype@\onyxop{}{integertype}{}}
+\item[{\onyxop{integer depth}{integertype}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[integer: ]
+			An integer to be syntactically printed.
+		\item[depth: ]
+			Printing recursion depth.
+		\end{description}
+	\item[Output(s): ]
+		Syntactic representation of \oparg{integer} printed to stdout.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Syntactically print \oparg{integer} to stdout.
+	\item[Example(s): ]\begin{verbatim}
+
+
+onyx:0> sprintdict begin
+onyx:0> 42
+onyx:1> dup 0 integertype `\n' print flush
+42
+onyx:1> dup 1 integertype `\n' print flush
+42
+onyx:1>
+		\end{verbatim}
+	\end{description}
+\label{sprintdict:marktype}
+\index{marktype@\onyxop{}{marktype}{}}
+\item[{\onyxop{mark depth}{marktype}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[mark: ]
+			A mark to be syntactically printed.
+		\item[depth: ]
+			Printing recursion depth.
+		\end{description}
+	\item[Output(s): ]
+		Syntactic representation of \oparg{mark} printed to stdout.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Syntactically print \oparg{mark} to stdout.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> sprintdict begin
+onyx:0> mark
+onyx:1> dup 0 marktype `\n' print flush
+-mark-
+onyx:1> dup 1 marktype `\n' print flush
+-mark-
+onyx:1>
+		\end{verbatim}
+	\end{description}
+\label{sprintdict:mutextype}
+\index{mutextype@\onyxop{}{mutextype}{}}
+\item[{\onyxop{mutex depth}{mutextype}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[mutex: ]
+			A mutex to be syntactically printed.
+		\item[depth: ]
+			Printing recursion depth.
+		\end{description}
+	\item[Output(s): ]
+		Syntactic representation of \oparg{mutex} printed to stdout.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Syntactically print \oparg{mutex} to stdout.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> sprintdict begin
+onyx:0> mutex
+onyx:1> dup 0 mutextype `\n' print flush
+-mutex-
+onyx:1> dup 1 mutextype `\n' print flush
+-mutex-
+onyx:1>
+		\end{verbatim}
+	\end{description}
+\label{sprintdict:nametype}
+\index{nametype@\onyxop{}{nametype}{}}
+\item[{\onyxop{name depth}{nametype}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[name: ]
+			A name to be syntactically printed.
+		\item[depth: ]
+			Printing recursion depth.
+		\end{description}
+	\item[Output(s): ]
+		Syntactic representation of \oparg{name} printed to stdout.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Syntactically print \oparg{name} to stdout.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> sprintdict begin
+onyx:0> /foo
+onyx:1> dup 0 nametype `\n' print flush
+/foo
+onyx:1> dup 1 nametype `\n' print flush
+/foo
+onyx:1>
+		\end{verbatim}
+	\end{description}
+\label{sprintdict:nulltype}
+\index{nulltype@\onyxop{}{nulltype}{}}
+\item[{\onyxop{null depth}{nulltype}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[null: ]
+			A null to be syntactically printed.
+		\item[depth: ]
+			Printing recursion depth.
+		\end{description}
+	\item[Output(s): ]
+		Syntactic representation of \oparg{null} printed to stdout.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Syntactically print \oparg{null} to stdout.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> sprintdict begin
+onyx:0> null
+onyx:1> dup 0 nulltype `\n' print flush
+-null-
+onyx:1> dup 1 nulltype `\n' print flush
+-null-
+onyx:1>
+		\end{verbatim}
+	\end{description}
+\label{sprintdict:operatortype}
+\index{operatortype@\onyxop{}{operatortype}{}}
+\item[{\onyxop{operator depth}{operatortype}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[operator: ]
+			An operator to be syntactically printed.
+		\item[depth: ]
+			Printing recursion depth.
+		\end{description}
+	\item[Output(s): ]
+		Syntactic representation of \oparg{operator} printed to stdout.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Syntactically print \oparg{operator} to stdout.
+	\item[Example(s): ]
+		The following example shows an operator printed out with two
+		leading and trailing dashes.  For some operators, it is possible
+		for them to print out with three leading and trailing dashes,
+		which indicates that the operator is treated specially in the
+		interpreter loop to improve performance.  If the interpreter
+		cannot determine the name associated with an operator, as will
+		be the case for custom operators, the operator will be printed
+		as {\tt -operator-}.
+		\begin{verbatim}
+
+onyx:0> sprintdict begin
+onyx:0> //realtime
+onyx:1> dup 0 operatortype `\n' print flush
+--realtime--
+onyx:1> 1 operatortype `\n' print flush
+--realtime--
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{sprintdict:pmarktype}
+\index{pmarktype@\onyxop{}{pmarktype}{}}
+\item[{\onyxop{pmark depth}{pmarktype}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[pmark: ]
+			A pmark to be syntactically printed.
+		\item[depth: ]
+			Printing recursion depth.
+		\end{description}
+	\item[Output(s): ]
+		Syntactic representation of \oparg{pmark} printed to stdout.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Syntactically print \oparg{pmark} to stdout.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> sprintdict begin
+onyx:0> { //x
+Error /undefined
+ostack: (-pmark- /x)
+dstack: (-dict- -dict- -dict- -dict- -dict-)
+estack/istack trace (0..1):
+0:      -file-
+1:      --start--
+onyx:3> pop pop resume
+onyx:1> dup 0 pmarktype `\n' print flush
+-pmark-
+onyx:1> dup 1 pmarktype `\n' print flush
+-pmark-
+onyx:1>
+		\end{verbatim}
+	\end{description}
+\label{sprintdict:stacktype}
+\index{stacktype@\onyxop{}{stacktype}{}}
+\item[{\onyxop{stack depth}{stacktype}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[stack: ]
+			A stack to be syntactically printed.
+		\item[depth: ]
+			Printing recursion depth.
+		\end{description}
+	\item[Output(s): ]
+		Syntactic representation of \oparg{stack} printed to stdout.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Syntactically print \oparg{stack} to stdout.
+	\item[Example(s): ]\begin{verbatim}
+
+
+onyx:0> sprintdict begin
+onyx:0> (1 (2 3) 4)
+onyx:1> dup 0 stacktype `\n' print flush
+-stack-
+onyx:1> dup 1 stacktype `\n' print flush
+(1 -stack- 4)
+onyx:1> dup 2 stacktype `\n' print flush
+(1 (2 3) 4)
+onyx:1>
+		\end{verbatim}
+	\end{description}
+\label{sprintdict:stringtype}
+\index{stringtype@\onyxop{}{stringtype}{}}
+\item[{\onyxop{string depth}{stringtype}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[string: ]
+			A string to be syntactically printed.
+		\item[depth: ]
+			Printing recursion depth.
+		\end{description}
+	\item[Output(s): ]
+		Syntactic representation of \oparg{string} printed to stdout.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Syntactically print \oparg{string} to stdout.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> sprintdict begin
+onyx:0> `abcd'
+onyx:1> dup 0 stringtype `\n' print flush
+`abcd'
+onyx:1> dup 1 stringtype `\n' print flush
+`abcd'
+onyx:1>
+		\end{verbatim}
+	\end{description}
+\label{sprintdict:threadtype}
+\index{threadtype@\onyxop{}{threadtype}{}}
+\item[{\onyxop{thread depth}{threadtype}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[thread: ]
+			A thread to be syntactically printed.
+		\item[depth: ]
+			Printing recursion depth.
+		\end{description}
+	\item[Output(s): ]
+		Syntactic representation of \oparg{thread} printed to stdout.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Syntactically print \oparg{thread} to stdout.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> sprintdict begin
+onyx:0> thread
+onyx:1> dup 0 threadtype `\n' print flush
+-thread-
+onyx:1> dup 1 threadtype `\n' print flush
+-thread-
+onyx:1>
+		\end{verbatim}
+	\end{description}
+\end{description}
+
 
 \subsection{systemdict}
 \label{sec:systemdict}
