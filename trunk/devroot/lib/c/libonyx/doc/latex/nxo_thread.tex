@@ -18,11 +18,668 @@
 
 The \classname{nxo\_thread} class is a subclass of the \classname{nxo} class.
 
+The \classname{threadp} class is a helper class that contains scanner position
+information.  The \classname{threadp} state is used when recording syntax
+errors.
+
 \subsubsection{API}
 \begin{capi}
+\label{nxo_threade_nxn}
+\index{\cfunc{nxo\_threade\_nxn}{}}
+\citem{\cfunc[cw\_nxn\_t]{nxo\_threade\_nxn}{cw\_nxo\_threade\_t a\_threade}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_threade: ]
+			A \classname{threade} error code.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			An \classname{nxn} corresponding to \cvar{a\_threade}.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return an \classname{nxn} corresponding to \cvar{a\_threade}.
+	\end{capilist}
+\label{nxo_threadp_new}
+\index{\cfunc{nxo\_threadp\_new}{}}
+\citem{\cfunc[void]{nxo\_threadp\_new}{cw\_nxo\_threadp\_t *a\_threadp}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_threadp: ]
+			Pointer to space for a \classname{threadp}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Constructor.
+	\end{capilist}
+\label{nxo_threadp_delete}
+\index{\cfunc{nxo\_threadp\_delete}{}}
+\citem{\cfunc[void]{nxo\_threadp\_delete}{cw\_nxo\_threadp\_t *a\_threadp,
+cw\_nxo\_t *a\_thread}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_threadp: ]
+			Pointer to a \classname{threadp}.
+		\item[a\_thread: ]
+			Pointer to a thread \classname{nxo}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Destructor.
+	\end{capilist}
+\label{nxo_threadp_position_get}
+\index{\cfunc{nxo\_threadp\_position\_get}{}}
+\citem{\cfunc[void]{nxo\_threadp\_position\_get}{cw\_nxo\_threadp\_t
+*a\_threadp, cw\_uint32\_t *r\_line, cw\_uint32\_t *r\_column}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_threadp: ]
+			Pointer to space for a \classname{threadp}.
+		\item[r\_line: ]
+			Pointer to a location to store a line number.
+		\item[r\_column: ]
+			Pointer to a location to store a column number.
+		\end{description}
+	\item[Output(s): ] None.
+		\begin{description}\item[]
+		\item[*r\_line: ]
+			Line number.
+		\item[*r\_column: ]
+			Column number.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Retrieve the line number and column number.
+	\end{capilist}
+\label{nxo_threadp_position_set}
+\index{\cfunc{nxo\_threadp\_position\_set}{}}
+\citem{\cfunc[void]{nxo\_threadp\_position\_set}{cw\_nxo\_threadp\_t
+*a\_threadp, cw\_uint32\_t a\_line, cw\_uint32\_t a\_column}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_threadp: ]
+			Pointer to space for a \classname{threadp}.
+		\item[a\_line: ]
+			Line number.
+		\item[a\_column: ]
+			Column number.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Set the line number and column number.
+	\end{capilist}
 \label{nxo_thread_}
 \index{\cfunc{nxo\_thread\_}{}}
-\citem{\cfunc[]{nxo\_thread\_}{}}
+\citem{\cfunc[]{nxo\_thread\_}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\end{description}
+	\item[Description: ]
+	\end{capilist}
+\label{nxo_thread_}
+\index{\cfunc{nxo\_thread\_}{}}
+\citem{\cfunc[]{nxo\_thread\_}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\end{description}
+	\item[Description: ]
+	\end{capilist}
+\label{nxo_thread_}
+\index{\cfunc{nxo\_thread\_}{}}
+\citem{\cfunc[]{nxo\_thread\_}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\end{description}
+	\item[Description: ]
+	\end{capilist}
+\label{nxo_thread_}
+\index{\cfunc{nxo\_thread\_}{}}
+\citem{\cfunc[]{nxo\_thread\_}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\end{description}
+	\item[Description: ]
+	\end{capilist}
+\label{nxo_thread_}
+\index{\cfunc{nxo\_thread\_}{}}
+\citem{\cfunc[]{nxo\_thread\_}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\end{description}
+	\item[Description: ]
+	\end{capilist}
+\label{nxo_thread_}
+\index{\cfunc{nxo\_thread\_}{}}
+\citem{\cfunc[]{nxo\_thread\_}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\end{description}
+	\item[Description: ]
+	\end{capilist}
+\label{nxo_thread_}
+\index{\cfunc{nxo\_thread\_}{}}
+\citem{\cfunc[]{nxo\_thread\_}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\end{description}
+	\item[Description: ]
+	\end{capilist}
+\label{nxo_thread_}
+\index{\cfunc{nxo\_thread\_}{}}
+\citem{\cfunc[]{nxo\_thread\_}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\end{description}
+	\item[Description: ]
+	\end{capilist}
+\label{nxo_thread_}
+\index{\cfunc{nxo\_thread\_}{}}
+\citem{\cfunc[]{nxo\_thread\_}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\end{description}
+	\item[Description: ]
+	\end{capilist}
+\label{nxo_thread_}
+\index{\cfunc{nxo\_thread\_}{}}
+\citem{\cfunc[]{nxo\_thread\_}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\end{description}
+	\item[Description: ]
+	\end{capilist}
+\label{nxo_thread_}
+\index{\cfunc{nxo\_thread\_}{}}
+\citem{\cfunc[]{nxo\_thread\_}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\end{description}
+	\item[Description: ]
+	\end{capilist}
+\label{nxo_thread_}
+\index{\cfunc{nxo\_thread\_}{}}
+\citem{\cfunc[]{nxo\_thread\_}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\end{description}
+	\item[Description: ]
+	\end{capilist}
+\label{nxo_thread_}
+\index{\cfunc{nxo\_thread\_}{}}
+\citem{\cfunc[]{nxo\_thread\_}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\end{description}
+	\item[Description: ]
+	\end{capilist}
+\label{nxo_thread_}
+\index{\cfunc{nxo\_thread\_}{}}
+\citem{\cfunc[]{nxo\_thread\_}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\end{description}
+	\item[Description: ]
+	\end{capilist}
+\label{nxo_thread_}
+\index{\cfunc{nxo\_thread\_}{}}
+\citem{\cfunc[]{nxo\_thread\_}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\end{description}
+	\item[Description: ]
+	\end{capilist}
+\label{nxo_thread_}
+\index{\cfunc{nxo\_thread\_}{}}
+\citem{\cfunc[]{nxo\_thread\_}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\end{description}
+	\item[Description: ]
+	\end{capilist}
+\label{nxo_thread_}
+\index{\cfunc{nxo\_thread\_}{}}
+\citem{\cfunc[]{nxo\_thread\_}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\end{description}
+	\item[Description: ]
+	\end{capilist}
+\label{nxo_thread_}
+\index{\cfunc{nxo\_thread\_}{}}
+\citem{\cfunc[]{nxo\_thread\_}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\end{description}
+	\item[Description: ]
+	\end{capilist}
+\label{nxo_thread_}
+\index{\cfunc{nxo\_thread\_}{}}
+\citem{\cfunc[]{nxo\_thread\_}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\end{description}
+	\item[Description: ]
+	\end{capilist}
+\label{nxo_thread_}
+\index{\cfunc{nxo\_thread\_}{}}
+\citem{\cfunc[]{nxo\_thread\_}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\end{description}
+	\item[Description: ]
+	\end{capilist}
+\label{nxo_thread_}
+\index{\cfunc{nxo\_thread\_}{}}
+\citem{\cfunc[]{nxo\_thread\_}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\end{description}
+	\item[Description: ]
+	\end{capilist}
+\label{nxo_thread_}
+\index{\cfunc{nxo\_thread\_}{}}
+\citem{\cfunc[]{nxo\_thread\_}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\end{description}
+	\item[Description: ]
+	\end{capilist}
+\label{nxo_thread_}
+\index{\cfunc{nxo\_thread\_}{}}
+\citem{\cfunc[]{nxo\_thread\_}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\end{description}
+	\item[Description: ]
+	\end{capilist}
+\label{nxo_thread_}
+\index{\cfunc{nxo\_thread\_}{}}
+\citem{\cfunc[]{nxo\_thread\_}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\end{description}
+	\item[Description: ]
+	\end{capilist}
+\label{nxo_thread_}
+\index{\cfunc{nxo\_thread\_}{}}
+\citem{\cfunc[]{nxo\_thread\_}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\end{description}
+	\item[Description: ]
+	\end{capilist}
+\label{nxo_thread_}
+\index{\cfunc{nxo\_thread\_}{}}
+\citem{\cfunc[]{nxo\_thread\_}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\end{description}
+	\item[Description: ]
+	\end{capilist}
+\label{nxo_thread_}
+\index{\cfunc{nxo\_thread\_}{}}
+\citem{\cfunc[]{nxo\_thread\_}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\end{description}
+	\item[Description: ]
+	\end{capilist}
+\label{nxo_thread_}
+\index{\cfunc{nxo\_thread\_}{}}
+\citem{\cfunc[]{nxo\_thread\_}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\end{description}
+	\item[Description: ]
+	\end{capilist}
+\label{nxo_thread_}
+\index{\cfunc{nxo\_thread\_}{}}
+\citem{\cfunc[]{nxo\_thread\_}{cw\_nxo\_t *a\_nxo}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
