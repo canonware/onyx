@@ -11,18 +11,16 @@ AC_PROG_CC
 AC_PROG_CPP
 AC_PROG_INSTALL
 AC_PROG_RANLIB
-AC_CHECK_PROG(FLEX, flex, /usr/bin/flex, $PATH)
-AC_CHECK_PROG(BISON, bison, /usr/bin/bison, $PATH)
-AC_CHECK_PROG(AR, ar, /usr/bin/ar, $PATH)
-AC_CHECK_PROG(PERL, perl, /usr/local/bin/perl, $PATH)
-AC_CHECK_PROG(CHMOD, chmod, /bin/chmod, $PATH)
-AC_CHECK_PROG(BASENAME, basename, /usr/bin/basename, $PATH)
-AC_CHECK_PROG(DIFF, diff, /usr/bin/diff, $PATH)
-AC_CHECK_PROG(CAT, cat, /bin/cat, $PATH)
+AC_PATH_PROG(AR, ar, , $PATH)
+AC_PATH_PROG(PERL, perl, , $PATH)
+AC_PATH_PROG(CHMOD, chmod, , $PATH)
+AC_PATH_PROG(BASENAME, basename, , $PATH)
+AC_PATH_PROG(DIFF, diff, , $PATH)
+AC_PATH_PROG(CAT, cat, , $PATH)
+AC_PATH_PROG(ETAGS, etags, , $PATH)
 dnl AC_CHECK_PROG(MAKE, make, , $PATH,
 dnl  AC_CHECK_PROG(MAKE, gmake, , $PATH,
 dnl    AC_MSG_ERROR(Cannot find GNU make anywhere)))
-AC_CHECK_PROG(ETAGS, etags, /space/local/bin/etags, $PATH)
 
 dnl Check for libraries.
 AC_CHECK_LIB(pthread, pthread_create, ,
