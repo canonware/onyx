@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 136 $
- * $Date: 1998-07-10 13:11:48 -0700 (Fri, 10 Jul 1998) $
+ * $Revision: 145 $
+ * $Date: 1998-07-15 17:26:27 -0700 (Wed, 15 Jul 1998) $
  *
  * <<< Description >>>
  *
@@ -99,7 +99,6 @@
 
 #define _INC_BR_H_
 #include <libstash.h>
-
 #include <br_priv.h>
 
 /****************************************************************************

@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 136 $
- * $Date: 1998-07-10 13:11:48 -0700 (Fri, 10 Jul 1998) $
+ * $Revision: 145 $
+ * $Date: 1998-07-15 17:26:27 -0700 (Wed, 15 Jul 1998) $
  *
  * <<< Description >>>
  *
@@ -20,16 +20,16 @@
  *
  ****************************************************************************/
 
-#define _INC_BRBS_H_
-#define _INC_STRING_H_
-#define _INC_FCNTL_H_
-#define _INC_SYS_TYPES_H_
-#define _INC_SYS_UIO_H_
-#define _INC_SYS_STAT_H_
-#define _INC_SYS_ERRNO_H_
-#define _INC_SYS_DISKLABEL_H_
-#include <libstash.h>
+#include <string.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/uio.h>
+#include <sys/stat.h>
+#include <sys/errno.h>
+#include <sys/disklabel.h>
 
+#define _INC_BRBS_H_
+#include <libstash.h>
 #include <brbs_priv.h>
 
 /****************************************************************************
