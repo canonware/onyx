@@ -829,7 +829,7 @@ $require {
 	# Failure.
 	$undefinedfilename throw
     } if
-    1 pop # XXX Avoid tail call optimization.
+    1 pop # X X X Avoid tail call optimization.
 } def
 
 # #filename #symbol mrequire -
