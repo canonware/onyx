@@ -14,8 +14,7 @@
  *
  ****************************************************************************/
 
-#define _LIBSTASH_SOCKB_CONFESS
-
+/*  #define _LIBSTASH_SOCKB_CONFESS */
 
 #define _LIBSTASH_USE_PEZZ
 #define _LIBSTASH_USE_MQ
