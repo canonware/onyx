@@ -394,6 +394,11 @@ void
 systemdict_match(cw_nxo_t *a_thread);
 #endif
 
+#ifdef CW_REGEX
+void
+systemdict_matches(cw_nxo_t *a_thread);
+#endif
+
 #ifdef CW_POSIX
 void
 systemdict_mkdir(cw_nxo_t *a_thread);

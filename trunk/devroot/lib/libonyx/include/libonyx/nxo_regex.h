@@ -12,16 +12,17 @@
 
 cw_nxn_t
 nxo_regex_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_uint8_t *a_pattern,
-	      cw_uint32_t a_len, cw_bool_t a_insensitive, cw_bool_t a_multiline,
-	      cw_bool_t a_singleline, cw_uint32_t a_limit);
+	      cw_uint32_t a_len, cw_bool_t a_cont, cw_bool_t a_global,
+	      cw_bool_t a_insensitive, cw_bool_t a_multiline,
+	      cw_bool_t a_singleline);
 
 void
 nxo_regex_match(cw_nxo_t *a_nxo, cw_nxo_t *a_thread, cw_nxo_t *a_input,
-		cw_nxo_t *r_matches);
+		cw_bool_t *r_match);
 
 cw_nxn_t
 nxo_regex_nonew_match(cw_nxo_t *a_thread, const cw_uint8_t *a_pattern,
-		      cw_uint32_t a_len, cw_bool_t a_insensitive,
-		      cw_bool_t a_multiline, cw_bool_t a_singleline,
-		      cw_uint32_t a_limit, cw_nxo_t *a_input,
-		      cw_nxo_t *r_matches);
+		      cw_uint32_t a_len, cw_bool_t a_cont, cw_bool_t a_global,
+		      cw_bool_t a_insensitive, cw_bool_t a_multiline,
+		      cw_bool_t a_singleline, cw_nxo_t *a_input,
+		      cw_bool_t *r_match);

@@ -36,8 +36,10 @@ struct cw_nxoe_regex_s
     size_t extrasize;
 #endif
 
-    /* Maximum number of matches.  0 means unlimited. */
-    cw_uint32_t limit;
+    /* Flags used when matching that determine where in the input string to
+     * start searching. */
+    cw_bool_t cont:1;
+    cw_bool_t global:1;
 };
 
 #ifndef CW_USE_INLINES

@@ -81,6 +81,9 @@ typedef enum
     NXN_ENTRY(broadcast),
 #endif
     NXN_ENTRY(bytesavailable),
+#ifdef CW_REGEX
+    NXN_ENTRY(c),
+#endif
     NXN_ENTRY(cat),
 #ifdef CW_POSIX
     NXN_ENTRY(cd),
@@ -191,6 +194,9 @@ typedef enum
 #ifdef CW_POSIX
     NXN_ENTRY(forkexec),
 #endif
+#ifdef CW_REGEX
+    NXN_ENTRY(g),
+#endif
     NXN_ENTRY(gcdict),
     NXN_ENTRY(ge),
     NXN_ENTRY(get),
@@ -260,9 +266,6 @@ typedef enum
     NXN_ENTRY(join),
 #endif
     NXN_ENTRY(known),
-#ifdef CW_REGEX
-    NXN_ENTRY(l),
-#endif
 #ifdef CW_THREADS
     NXN_ENTRY(lcheck),
 #endif
@@ -299,6 +302,7 @@ typedef enum
     NXN_ENTRY(marktype),
 #ifdef CW_REGEX
     NXN_ENTRY(match),
+    NXN_ENTRY(matches),
 #endif
 #ifdef CW_POSIX
     NXN_ENTRY(mkdir),

@@ -257,6 +257,10 @@ nxo_thread_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx)
     nxo_no_new(&thread->stdin_nxo);
     nxo_no_new(&thread->stdout_nxo);
     nxo_no_new(&thread->stderr_nxo);
+#ifdef CW_REGEX
+    nxo_no_new(&thread->regex_matches);
+    nxo_no_new(&thread->regex_input);
+#endif
 
     /* Register this thread with the interpreter so that the GC will be able to
      * get to it. */
@@ -283,6 +287,10 @@ nxo_thread_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx)
     nxo_dup(&thread->stdin_nxo, nx_stdin_get(a_nx));
     nxo_dup(&thread->stdout_nxo, nx_stdout_get(a_nx));
     nxo_dup(&thread->stderr_nxo, nx_stderr_get(a_nx));
+
+#ifdef CW_REGEX
+    nxo_array_new(&thread->regex_matches, a_nx, FALSE, 10);
+#endif
 
     /* Push threaddict, systemdict, and globaldict, onto the dictionary stack.
      * The embedded onyx initialization code creates userdict. */

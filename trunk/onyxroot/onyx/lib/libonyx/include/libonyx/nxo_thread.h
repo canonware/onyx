@@ -106,6 +106,22 @@ struct cw_nxoe_thread_s
     cw_nxo_t stdout_nxo;
     cw_nxo_t stderr_nxo;
 
+#ifdef CW_REGEX
+    /* Regular expression state used by the match operator.  Storing this here
+     * rather substantially improves performance without significant bloat. */
+
+    /* A 10 element array that stores the matching substring and the first 9
+     * capturing subpattern matches. */
+    cw_nxo_t regex_matches;
+
+    /* A reference to the string that was most recently matched against.  */
+    cw_nxo_t regex_input;
+
+    /* Offset into regex_input to start the next match at.  This is only used if
+     * the $c or $g flag is set. */
+    cw_uint32_t regex_cont;
+#endif
+
     /* Tokenizer state.  If a token is broken across two or more input strings,
      * data are copied to an internal buffer, and state machine state is
      * preserved so that the buffered data need not be processed again. */
@@ -304,6 +320,11 @@ nxo_thread_stdout_get(cw_nxo_t *a_nxo);
 
 cw_nxo_t *
 nxo_thread_stderr_get(cw_nxo_t *a_nxo);
+
+#ifdef CW_REGEX
+cw_nxo_t *
+nxo_thread_regex_matches_get(cw_nxo_t *a_nxo);
+#endif
 #endif
 
 #if (defined(CW_USE_INLINES) || defined(CW_NXO_THREAD_C_))
@@ -441,4 +462,21 @@ nxo_thread_stderr_get(cw_nxo_t *a_nxo)
 
     return &thread->stderr_nxo;
 }
+
+#ifdef CW_REGEX
+CW_INLINE cw_nxo_t *
+nxo_thread_regex_matches_get(cw_nxo_t *a_nxo)
+{
+    cw_nxoe_thread_t *thread;
+
+    cw_check_ptr(a_nxo);
+    cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+
+    thread = (cw_nxoe_thread_t *) a_nxo->o.nxoe;
+    cw_dassert(thread->nxoe.magic == CW_NXOE_MAGIC);
+    cw_assert(thread->nxoe.type == NXOT_THREAD);
+
+    return &thread->regex_matches;
+}
+#endif
 #endif /* (defined(CW_USE_INLINES) || defined(CW_NXO_THREAD_C_)) */
