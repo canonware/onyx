@@ -1935,6 +1935,7 @@ stilo_file_write(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const cw_uint8_t
 		 * for a wrapped file.
 		 */
 		if (a_len <= file->buffer_size - file->buffer_offset) {
+			/* a_str will fit. */
 			memcpy(&file->buffer[file->buffer_offset],
 			    a_str, a_len);
 			file->buffer_mode = BUFFER_WRITE;
@@ -1942,8 +1943,10 @@ stilo_file_write(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const cw_uint8_t
 		} else if (file->fd >= 0) {
 			struct iovec	iov[2];
 
+			/* a_str won't fit.  Do a writev(). */
+
 			iov[0].iov_base = file->buffer;
-			iov[0].iov_len = file->buffer_size;
+			iov[0].iov_len = file->buffer_offset;
 			iov[1].iov_base = (char *)a_str;
 			iov[1].iov_len = a_len;
 
@@ -1953,6 +1956,10 @@ stilo_file_write(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const cw_uint8_t
 			file->buffer_mode = BUFFER_EMPTY;
 			file->buffer_offset = 0;
 		} else {
+			/*
+			 * a_str won't fit.  Flush the buffer and call the
+			 * write wrapper function.
+			 */
 			stilo_file_buffer_flush(a_stilo, a_stilt);
 
 			if (file->write_f(file->arg, a_stilo, a_stilt, a_str,
@@ -2332,13 +2339,28 @@ stilo_file_buffer_flush(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 	_cw_check_ptr(file);
 	_cw_assert(file->stiloe.magic == _CW_STILOE_MAGIC);
 
-	if (file->fd != -1 && file->buffer != NULL) {
+	if (file->fd == -1)
+		stilt_error(a_stilt, STILTE_IOERROR);
+	
+	if (file->buffer != NULL) {
+		/* Only write if the buffered data is for writing. */
 		if (file->buffer_mode == BUFFER_WRITE) {
-			if (write(file->fd, file->buffer,
-			    file->buffer_offset) == -1) {
-				stilt_error(a_stilt, STILTE_IOERROR);
+			if (file->fd >= 0) {
+				/* Normal file descriptor. */
+				if (write(file->fd, file->buffer,
+				    file->buffer_offset) == -1)
+					stilt_error(a_stilt, STILTE_IOERROR);
+			} else {
+				/* Use the write wrapper function. */
+				if (file->write_f(file->arg, a_stilo, a_stilt,
+				    file->buffer, file->buffer_offset))
+					stilt_error(a_stilt, STILTE_IOERROR);
 			}
 		}
+		/*
+		 * Reset the buffer to being empty, regardless of the type of
+		 * buffered data.
+		 */
 		file->buffer_mode = BUFFER_EMPTY;
 		file->buffer_offset = 0;
 	}
