@@ -13,4 +13,4 @@
 
 `nxe.nxm' `nxe_init' mrequire
 
-`Do something\n' print
+`Do something\n' print flush

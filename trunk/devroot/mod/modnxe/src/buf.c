@@ -204,6 +204,7 @@ static void	buf_p_bufms_apos_adjust(cw_buf_t *a_buf, cw_bufm_t *a_bufm,
 static void	buf_p_gap_move(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_bool_t
     a_exclude, cw_uint64_t a_bpos);
 static void	buf_p_grow(cw_buf_t *a_buf, cw_uint64_t a_minlen);
+static void	buf_p_shrink(cw_buf_t *a_buf);
 
 /* bufm. */
 static void	bufm_p_insert(cw_bufm_t *a_bufm, cw_bool_t a_exclude, const
@@ -452,8 +453,8 @@ buf_p_grow(cw_buf_t *a_buf, cw_uint64_t a_minlen)
 
 	for (new_size = old_size << 1; new_size < a_minlen; new_size <<= 1) {
 		/*
-		 * Continue doubling the size of the buffer until it is big
-		 * enough to contain a_minlen bufc's.
+		 * Iteratively double new_size until it is big enough to contain
+		 * a_minlen bufc's.
 		 */
 	}
 
@@ -462,10 +463,45 @@ buf_p_grow(cw_buf_t *a_buf, cw_uint64_t a_minlen)
 	    1);
 
 	a_buf->b = (cw_bufc_t *)_cw_opaque_realloc(a_buf->realloc, a_buf->arg,
-	    a_buf->b,new_size, old_size);
+	    a_buf->b, new_size, old_size);
 
 	/* Adjust the gap length. */
 	a_buf->gap_len += new_size - old_size;
+}
+
+static void
+buf_p_shrink(cw_buf_t *a_buf)
+{
+	cw_uint64_t	old_size, new_size;
+
+	old_size = a_buf->len + a_buf->gap_len;
+
+	for (new_size = old_size;
+	    (new_size >> 1) > a_buf->len && new_size > _CW_BUF_MINSIZE;
+	    new_size >>= 1) {
+		/*
+		 * Iteratively halve new_size until the actual buffer size is
+		 * between 25% (exclusive) and 50% (inclusive) of new_size, or
+		 * until new_size is the minimum size.
+		 */
+	}
+
+	/*
+	 * Only shrink the gap if the above loop determined that there is
+	 * excessive space being used by the gap.
+	 */
+	if (old_size > new_size) {
+		/* Move the gap to the end. */
+		buf_p_gap_move(a_buf, ql_last(&a_buf->bufms, link), FALSE,
+		    a_buf->len + 1);
+
+		/* Shrink the gap. */
+		a_buf->b = (cw_bufc_t *)_cw_opaque_realloc(a_buf->realloc,
+		    a_buf->arg, a_buf->b, new_size, old_size);
+
+		/* Adjust the gap length. */
+		a_buf->gap_len -= old_size - new_size;
+	}
 }
 
 cw_buf_t *
@@ -1570,26 +1606,52 @@ bufm_remove(cw_bufm_t *a_start, cw_bufm_t *a_end)
 		bufm->apos -= napos;
 		bufm->line -= nlines;
 	}
+
+	/* Try to shrink the gap. */
+	buf_p_shrink(start->buf);
 }
 
-/*
- * Operators.
- */
+/******************************************************************************
+ *
+ * Operators.  It would be nice to put this code in a separate file, but there
+ * are a few operations that are specific to the Onyx interpreter (namely
+ * =buffer= evaluation and saving to a file) that are best implemented with the
+ * ability to access the buf internals.
+ *
+ * Following are the implementations of all the glue operators for =buffer= and
+ * =marker=.  In some ways it would be nice to instead implement =buf= as a more
+ * abstract type, then create an Onyx dict that implements the full range of
+ * operations neccessary on a text editor buffer (such as file
+ * reading/writing), and this would allow a big portion of the buffer code to be
+ * written in Onyx.  However, this would create one very significant problem:
+ * it wouldn't be possible to retrieve a reference to the buffer dict, given a
+ * =marker=.  Thus, =buffer= exists, and there are operators to provide access
+ * to all necessary =buffer= operations.
+ *
+ * A note about GC reference iteration is in order.  =marker=s report references
+ * to their associated =buffer=s, but =buffer=s do not report references to
+ * =marker=s.  This makes sense, but has implications in buf_delete() and
+ * bufm_delete(), since during a GC sweep, associated buf's and bufm's may be
+ * deleted, in no particular order.  Therefore, buf_delete() and bufm_delete()
+ * take care to allow destruction in any order.  This mechanism relies on the
+ * fact that the GC sweep is single-threaded.
+ *
+ ******************************************************************************/
 
 static void
-buf_p_eval(void *a_data, cw_nxo_t *a_thread)
+buffer_p_eval(void *a_data, cw_nxo_t *a_thread)
 {
 	/* XXX Feed the buffer to the Onyx interpreter. */
 }
 
 static cw_nxoe_t *
-buf_p_ref_iter(void *a_data, cw_bool_t a_reset)
+buffer_p_ref_iter(void *a_data, cw_bool_t a_reset)
 {
 	return NULL;
 }
 
 static void
-buf_p_delete(void *a_data, cw_nx_t *a_nx)
+buffer_p_delete(void *a_data, cw_nx_t *a_nx)
 {
 	cw_buf_t	*buf = (cw_buf_t *)a_data;
 
@@ -1597,7 +1659,7 @@ buf_p_delete(void *a_data, cw_nx_t *a_nx)
 }
 
 void
-nxe_buf(cw_nxo_t *a_thread)
+nxe_buffer(cw_nxo_t *a_thread)
 {
 	cw_nxo_t	*ostack, *nxo, *tag;
 	cw_nx_t		*nx;
@@ -1613,19 +1675,20 @@ nxe_buf(cw_nxo_t *a_thread)
 
 	/* Create a reference to the buf. */
 	nxo = nxo_stack_push(ostack);
-	nxo_hook_new(nxo, nx, buf, buf_p_eval, buf_p_ref_iter, buf_p_delete);
+	nxo_hook_new(nxo, nx, buf, buffer_p_eval, buffer_p_ref_iter,
+	    buffer_p_delete);
 
 	/* Set the hook tag. */
 	tag = nxo_hook_tag_get(nxo);
-	nxo_name_new(tag, nx, "buf", sizeof("buf") - 1, FALSE);
+	nxo_name_new(tag, nx, "buffer", sizeof("buffer") - 1, FALSE);
 	nxo_attr_set(tag, NXOA_EXECUTABLE);
 }
 
 /*
- * Verify that a_nxo is a =buf=.
+ * Verify that a_nxo is a =buffer=.
  */
 static cw_nxo_threade_t
-buf_p_type(cw_nxo_t *a_nxo)
+buffer_p_type(cw_nxo_t *a_nxo)
 {
 	cw_nxo_threade_t	retval;
 	cw_nxo_t		*tag;
@@ -1647,7 +1710,7 @@ buf_p_type(cw_nxo_t *a_nxo)
 
 	name_buf = nxo_name_str_get(tag);
 
-	if ((nxo_name_len_get(tag) != strlen("buf")) || strcmp("buf",
+	if ((nxo_name_len_get(tag) != strlen("buffer")) || strcmp("buffer",
 	    name_buf)) {
 		retval = NXO_THREADE_TYPECHECK;
 		goto RETURN;
@@ -1665,7 +1728,7 @@ buf_p_type(cw_nxo_t *a_nxo)
 }
 
 void
-nxe_buf_len(cw_nxo_t *a_thread)
+nxe_buffer_length(cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *hook;
 	cw_nxo_threade_t	error;
@@ -1673,7 +1736,7 @@ nxe_buf_len(cw_nxo_t *a_thread)
 
 	ostack = nxo_thread_ostack_get(a_thread);
 	NXO_STACK_GET(hook, ostack, a_thread);
-	error = buf_p_type(hook);
+	error = buffer_p_type(hook);
 	if (error) {
 		nxo_thread_error(a_thread, error);
 		return;
@@ -1681,11 +1744,13 @@ nxe_buf_len(cw_nxo_t *a_thread)
 
 	buf = (cw_buf_t *)nxo_hook_data_get(hook);
 
+	buf_lock(buf);
 	nxo_integer_new(hook, buf_len(buf));
+	buf_unlock(buf);
 }
 
 void
-nxe_buf_nlines(cw_nxo_t *a_thread)
+nxe_buffer_lines(cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *hook;
 	cw_nxo_threade_t	error;
@@ -1693,7 +1758,7 @@ nxe_buf_nlines(cw_nxo_t *a_thread)
 
 	ostack = nxo_thread_ostack_get(a_thread);
 	NXO_STACK_GET(hook, ostack, a_thread);
-	error = buf_p_type(hook);
+	error = buffer_p_type(hook);
 	if (error) {
 		nxo_thread_error(a_thread, error);
 		return;
@@ -1701,25 +1766,176 @@ nxe_buf_nlines(cw_nxo_t *a_thread)
 
 	buf = (cw_buf_t *)nxo_hook_data_get(hook);
 
+	buf_lock(buf);
 	nxo_integer_new(hook, buf_nlines(buf));
+	buf_unlock(buf);
+}
+
+void
+nxe_buffer_undo(cw_nxo_t *a_thread)
+{
+	cw_nxo_t		*ostack, *hook;
+	cw_nxo_threade_t	error;
+	cw_buf_t		*buf;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	NXO_STACK_GET(hook, ostack, a_thread);
+	error = buffer_p_type(hook);
+	if (error) {
+		nxo_thread_error(a_thread, error);
+		return;
+	}
+
+	buf = (cw_buf_t *)nxo_hook_data_get(hook);
+
+	buf_lock(buf);
+	_cw_error("XXX Not implemented");
+	buf_unlock(buf);
+}
+
+void
+nxe_buffer_redo(cw_nxo_t *a_thread)
+{
+	cw_nxo_t		*ostack, *hook;
+	cw_nxo_threade_t	error;
+	cw_buf_t		*buf;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	NXO_STACK_GET(hook, ostack, a_thread);
+	error = buffer_p_type(hook);
+	if (error) {
+		nxo_thread_error(a_thread, error);
+		return;
+	}
+
+	buf = (cw_buf_t *)nxo_hook_data_get(hook);
+
+	buf_lock(buf);
+	_cw_error("XXX Not implemented");
+	buf_unlock(buf);
+}
+
+void
+nxe_buffer_history_active(cw_nxo_t *a_thread)
+{
+	cw_nxo_t		*ostack, *hook;
+	cw_nxo_threade_t	error;
+	cw_buf_t		*buf;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	NXO_STACK_GET(hook, ostack, a_thread);
+	error = buffer_p_type(hook);
+	if (error) {
+		nxo_thread_error(a_thread, error);
+		return;
+	}
+
+	buf = (cw_buf_t *)nxo_hook_data_get(hook);
+
+	buf_lock(buf);
+	_cw_error("XXX Not implemented");
+	buf_unlock(buf);
+}
+
+void
+nxe_buffer_history_setactive(cw_nxo_t *a_thread)
+{
+	cw_nxo_t		*ostack, *hook;
+	cw_nxo_threade_t	error;
+	cw_buf_t		*buf;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	NXO_STACK_GET(hook, ostack, a_thread);
+	error = buffer_p_type(hook);
+	if (error) {
+		nxo_thread_error(a_thread, error);
+		return;
+	}
+
+	buf = (cw_buf_t *)nxo_hook_data_get(hook);
+
+	buf_lock(buf);
+	_cw_error("XXX Not implemented");
+	buf_unlock(buf);
+}
+
+void
+nxe_buffer_history_startgroup(cw_nxo_t *a_thread)
+{
+	cw_nxo_t		*ostack, *hook;
+	cw_nxo_threade_t	error;
+	cw_buf_t		*buf;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	NXO_STACK_GET(hook, ostack, a_thread);
+	error = buffer_p_type(hook);
+	if (error) {
+		nxo_thread_error(a_thread, error);
+		return;
+	}
+
+	buf = (cw_buf_t *)nxo_hook_data_get(hook);
+
+	buf_lock(buf);
+	_cw_error("XXX Not implemented");
+	buf_unlock(buf);
+}
+
+void
+nxe_buffer_history_endgroup(cw_nxo_t *a_thread)
+{
+	cw_nxo_t		*ostack, *hook;
+	cw_nxo_threade_t	error;
+	cw_buf_t		*buf;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	NXO_STACK_GET(hook, ostack, a_thread);
+	error = buffer_p_type(hook);
+	if (error) {
+		nxo_thread_error(a_thread, error);
+		return;
+	}
+
+	buf = (cw_buf_t *)nxo_hook_data_get(hook);
+
+	buf_lock(buf);
+	_cw_error("XXX Not implemented");
+	buf_unlock(buf);
+}
+
+void
+nxe_buffer_history_flush(cw_nxo_t *a_thread)
+{
+	cw_nxo_t		*ostack, *hook;
+	cw_nxo_threade_t	error;
+	cw_buf_t		*buf;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	NXO_STACK_GET(hook, ostack, a_thread);
+	error = buffer_p_type(hook);
+	if (error) {
+		nxo_thread_error(a_thread, error);
+		return;
+	}
+
+	buf = (cw_buf_t *)nxo_hook_data_get(hook);
+
+	buf_lock(buf);
+	_cw_error("XXX Not implemented");
+	buf_unlock(buf);
 }
 
 /*
  * This structure is necessary since =marker=s need to report a reference to
- * their associated =buf=s.
+ * their associated =buffer=s.
  */
 struct cw_marker_s {
 	cw_nxo_t	buf;
 	cw_bufm_t	bufm;
 };
 
-static void
-bufm_p_eval(void *a_data, cw_nxo_t *a_thread)
-{
-}
-
 static cw_nxoe_t *
-bufm_p_ref_iter(void *a_data, cw_bool_t a_reset)
+marker_p_ref_iter(void *a_data, cw_bool_t a_reset)
 {
 	cw_nxoe_t		*retval;
 	struct cw_marker_s	*marker= (struct cw_marker_s *)a_data;
@@ -1733,7 +1949,7 @@ bufm_p_ref_iter(void *a_data, cw_bool_t a_reset)
 }
 
 static void
-bufm_p_delete(void *a_data, cw_nx_t *a_nx)
+marker_p_delete(void *a_data, cw_nx_t *a_nx)
 {
 	struct cw_marker_s	*marker= (struct cw_marker_s *)a_data;
 
@@ -1754,7 +1970,7 @@ nxe_marker(cw_nxo_t *a_thread)
 	tstack = nxo_thread_tstack_get(a_thread);
 	nx = nxo_thread_nx_get(a_thread);
 	NXO_STACK_GET(nxo, ostack, a_thread);
-	error = buf_p_type(nxo);
+	error = buffer_p_type(nxo);
 	if (error) {
 		nxo_thread_error(a_thread, error);
 		return;
@@ -1774,8 +1990,8 @@ nxe_marker(cw_nxo_t *a_thread)
 	 */
 	tnxo = nxo_stack_push(tstack);
 	nxo_dup(tnxo, nxo);
-	nxo_hook_new(nxo, nx, marker_data, bufm_p_eval, bufm_p_ref_iter,
-	    bufm_p_delete);
+	nxo_hook_new(nxo, nx, marker_data, NULL, marker_p_ref_iter,
+	    marker_p_delete);
 	nxo_stack_pop(tstack);
 
 	/* Set the hook tag. */
@@ -1825,4 +2041,202 @@ marker_p_type(cw_nxo_t *a_nxo)
 	retval = NXO_THREADE_NONE;
 	RETURN:
 	return retval;
+}
+
+void
+nxe_marker_copy(cw_nxo_t *a_thread)
+{
+	cw_nxo_t		*ostack, *hook;
+	cw_nxo_threade_t	error;
+	cw_bufm_t		*bufm;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	NXO_STACK_GET(hook, ostack, a_thread);
+	error = marker_p_type(hook);
+	if (error) {
+		nxo_thread_error(a_thread, error);
+		return;
+	}
+
+	bufm = (cw_bufm_t *)nxo_hook_data_get(hook);
+
+	buf_lock(bufm->buf);
+	_cw_error("XXX Not implemented");
+	buf_unlock(bufm->buf);
+}
+
+void
+nxe_marker_buffer(cw_nxo_t *a_thread)
+{
+	cw_nxo_t		*ostack, *hook;
+	cw_nxo_threade_t	error;
+	cw_bufm_t		*bufm;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	NXO_STACK_GET(hook, ostack, a_thread);
+	error = marker_p_type(hook);
+	if (error) {
+		nxo_thread_error(a_thread, error);
+		return;
+	}
+
+	bufm = (cw_bufm_t *)nxo_hook_data_get(hook);
+
+	buf_lock(bufm->buf);
+	_cw_error("XXX Not implemented");
+	buf_unlock(bufm->buf);
+}
+
+void
+nxe_marker_line(cw_nxo_t *a_thread)
+{
+	cw_nxo_t		*ostack, *hook;
+	cw_nxo_threade_t	error;
+	cw_bufm_t		*bufm;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	NXO_STACK_GET(hook, ostack, a_thread);
+	error = marker_p_type(hook);
+	if (error) {
+		nxo_thread_error(a_thread, error);
+		return;
+	}
+
+	bufm = (cw_bufm_t *)nxo_hook_data_get(hook);
+
+	buf_lock(bufm->buf);
+	_cw_error("XXX Not implemented");
+	buf_unlock(bufm->buf);
+}
+
+void
+nxe_marker_seekline(cw_nxo_t *a_thread)
+{
+	cw_nxo_t		*ostack, *hook;
+	cw_nxo_threade_t	error;
+	cw_bufm_t		*bufm;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	NXO_STACK_GET(hook, ostack, a_thread);
+	error = marker_p_type(hook);
+	if (error) {
+		nxo_thread_error(a_thread, error);
+		return;
+	}
+
+	bufm = (cw_bufm_t *)nxo_hook_data_get(hook);
+
+	buf_lock(bufm->buf);
+	_cw_error("XXX Not implemented");
+	buf_unlock(bufm->buf);
+}
+
+void
+nxe_marker_position(cw_nxo_t *a_thread)
+{
+	cw_nxo_t		*ostack, *hook;
+	cw_nxo_threade_t	error;
+	cw_bufm_t		*bufm;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	NXO_STACK_GET(hook, ostack, a_thread);
+	error = marker_p_type(hook);
+	if (error) {
+		nxo_thread_error(a_thread, error);
+		return;
+	}
+
+	bufm = (cw_bufm_t *)nxo_hook_data_get(hook);
+
+	buf_lock(bufm->buf);
+	_cw_error("XXX Not implemented");
+	buf_unlock(bufm->buf);
+}
+
+void
+nxe_marker_seek(cw_nxo_t *a_thread)
+{
+	cw_nxo_t		*ostack, *hook;
+	cw_nxo_threade_t	error;
+	cw_bufm_t		*bufm;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	NXO_STACK_GET(hook, ostack, a_thread);
+	error = marker_p_type(hook);
+	if (error) {
+		nxo_thread_error(a_thread, error);
+		return;
+	}
+
+	bufm = (cw_bufm_t *)nxo_hook_data_get(hook);
+
+	buf_lock(bufm->buf);
+	_cw_error("XXX Not implemented");
+	buf_unlock(bufm->buf);
+}
+
+void
+nxe_marker_prepend(cw_nxo_t *a_thread)
+{
+	cw_nxo_t		*ostack, *hook;
+	cw_nxo_threade_t	error;
+	cw_bufm_t		*bufm;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	NXO_STACK_GET(hook, ostack, a_thread);
+	error = marker_p_type(hook);
+	if (error) {
+		nxo_thread_error(a_thread, error);
+		return;
+	}
+
+	bufm = (cw_bufm_t *)nxo_hook_data_get(hook);
+
+	buf_lock(bufm->buf);
+	_cw_error("XXX Not implemented");
+	buf_unlock(bufm->buf);
+}
+
+void
+nxe_marker_append(cw_nxo_t *a_thread)
+{
+	cw_nxo_t		*ostack, *hook;
+	cw_nxo_threade_t	error;
+	cw_bufm_t		*bufm;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	NXO_STACK_GET(hook, ostack, a_thread);
+	error = marker_p_type(hook);
+	if (error) {
+		nxo_thread_error(a_thread, error);
+		return;
+	}
+
+	bufm = (cw_bufm_t *)nxo_hook_data_get(hook);
+
+	buf_lock(bufm->buf);
+	_cw_error("XXX Not implemented");
+	buf_unlock(bufm->buf);
+}
+
+void
+nxe_marker_remove(cw_nxo_t *a_thread)
+{
+	cw_nxo_t		*ostack, *hook;
+	cw_nxo_threade_t	error;
+	cw_bufm_t		*bufm;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	NXO_STACK_GET(hook, ostack, a_thread);
+	error = marker_p_type(hook);
+	if (error) {
+		nxo_thread_error(a_thread, error);
+		return;
+	}
+
+	bufm = (cw_bufm_t *)nxo_hook_data_get(hook);
+
+	buf_lock(bufm->buf);
+	_cw_error("XXX Not implemented");
+	buf_unlock(bufm->buf);
 }

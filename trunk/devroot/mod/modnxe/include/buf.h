@@ -115,10 +115,8 @@ struct cw_bufm_s {
 	cw_msgq_t	*msgq;		/* Notify of manual marker movement. */
 };
 
-#ifndef PAGESIZE
-#define	PAGESIZE		4096
-#endif
-#define	_CW_BUF_MINBUFCS	(PAGESIZE / sizeof(cw_bufc_t))
+#define	_CW_BUF_MINSIZE		4096
+#define	_CW_BUF_MINBUFCS	(_CW_BUF_MINSIZE / sizeof(cw_bufc_t))
 struct cw_buf_s {
 #ifdef _CW_DBG
 	cw_uint32_t	magic;
@@ -201,7 +199,24 @@ void	bufm_after_insert(cw_bufm_t *a_bufm, const cw_char_t *a_str,
 void	bufm_remove(cw_bufm_t *a_start, cw_bufm_t *a_end);
 
 /* Operators. */
-void	nxe_buf(cw_nxo_t *a_thread);
-void	nxe_buf_len(cw_nxo_t *a_thread);
-void	nxe_buf_nlines(cw_nxo_t *a_thread);
+void	nxe_buffer(cw_nxo_t *a_thread);
+void	nxe_buffer_length(cw_nxo_t *a_thread);
+void	nxe_buffer_lines(cw_nxo_t *a_thread);
+void	nxe_buffer_undo(cw_nxo_t *a_thread);
+void	nxe_buffer_redo(cw_nxo_t *a_thread);
+void	nxe_buffer_history_active(cw_nxo_t *a_thread);
+void	nxe_buffer_history_setactive(cw_nxo_t *a_thread);
+void	nxe_buffer_history_startgroup(cw_nxo_t *a_thread);
+void	nxe_buffer_history_endgroup(cw_nxo_t *a_thread);
+void	nxe_buffer_history_flush(cw_nxo_t *a_thread);
+
 void	nxe_marker(cw_nxo_t *a_thread);
+void	nxe_marker_copy(cw_nxo_t *a_thread);
+void	nxe_marker_buffer(cw_nxo_t *a_thread);
+void	nxe_marker_line(cw_nxo_t *a_thread);
+void	nxe_marker_seekline(cw_nxo_t *a_thread);
+void	nxe_marker_position(cw_nxo_t *a_thread);
+void	nxe_marker_seek(cw_nxo_t *a_thread);
+void	nxe_marker_prepend(cw_nxo_t *a_thread);
+void	nxe_marker_append(cw_nxo_t *a_thread);
+void	nxe_marker_remove(cw_nxo_t *a_thread);

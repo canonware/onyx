@@ -19,11 +19,26 @@ struct cw_nxe_entry {
 };
 
 static const struct cw_nxe_entry nxe_ops[] = {
-	ENTRY(buf),
-	ENTRY(buf_len),
-	ENTRY(buf_nlines),
+	ENTRY(buffer),
+	ENTRY(buffer_length),
+	ENTRY(buffer_lines),
+	ENTRY(buffer_undo),
+	ENTRY(buffer_redo),
+	ENTRY(buffer_history_active),
+	ENTRY(buffer_history_setactive),
+	ENTRY(buffer_history_startgroup),
+	ENTRY(buffer_history_endgroup),
+	ENTRY(buffer_history_flush),
 	ENTRY(marker),
-	ENTRY(buffer)
+	ENTRY(marker_copy),
+	ENTRY(marker_buffer),
+	ENTRY(marker_line),
+	ENTRY(marker_seekline),
+	ENTRY(marker_position),
+	ENTRY(marker_seek),
+	ENTRY(marker_prepend),
+	ENTRY(marker_append),
+	ENTRY(marker_remove)
 };
 
 void

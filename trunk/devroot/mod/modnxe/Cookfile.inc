@@ -20,7 +20,7 @@
 
 /* Include files (not installed). */
 {
-  local incs = buf.h buffer.h modnxe.h msgq.h;
+  local incs = buf.h modnxe.h msgq.h;
   incs = [fromto % [srcdir]/mod/modnxe/include/% [incs]];
   incs = [incs] [objdir]/mod/modnxe/include/modnxe_defs.h;
 
@@ -29,7 +29,7 @@
 }
 
 /* Source files. */
-MODNXE_MSRCS = buf.c buffer.c modnxe.c msgq.c;
+MODNXE_MSRCS = buf.c modnxe.c msgq.c;
 
 MODNXE_MSRCS = [fromto % [srcdir]/mod/modnxe/src/% [MODNXE_MSRCS]];
 MSRCS = [MSRCS] [MODNXE_MSRCS];
