@@ -2458,7 +2458,8 @@ systemdict_nsleep(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack;
 	cw_stilo_t	*stilo;
-	struct timespec sleeptime;
+	int		error;
+	struct timespec sleeptime, remainder;
 
 	ostack = stilt_ostack_get(a_stilt);
 
@@ -2473,10 +2474,18 @@ systemdict_nsleep(cw_stilt_t *a_stilt)
 		return;
 	}
 
-	sleeptime.tv_sec = stilo_integer_get(stilo) / 1000000000;
-	sleeptime.tv_nsec = stilo_integer_get(stilo) % 1000000000;
+	sleeptime.tv_sec = stilo_integer_get(stilo) / 1000000000LL;
+	sleeptime.tv_nsec = stilo_integer_get(stilo) % 1000000000LL;
 
-	nanosleep(&sleeptime, NULL);
+	for (;;) {
+		error = nanosleep(&sleeptime, &remainder);
+		if (error == 0) {
+			/* We've slept the entire time. */
+			break;
+		}
+		/* A signal interrupted us.  Sleep some more. */
+		memcpy(&sleeptime, &remainder, sizeof(struct timespec));
+	}
 	stils_pop(ostack);
 }
 
