@@ -172,7 +172,7 @@ doc_relclean :
   cp [objdir]/%0latex/%.pdf [objdir]/%0pdf/%.pdf;
 }
 
-[objdir]/%0html/%.html : [objdir]/%0latex/%.pdf
+[objdir]/%0html/%.html : [objdir]/%0pdf/%.pdf
   set mkdir
 {
   [LATEX2HTML] -init_file [srcdir]/%0latex/.latex2html-init
