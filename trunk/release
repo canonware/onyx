@@ -67,8 +67,7 @@ $run =
     "snap @ARGS -p canonware -r devroot -f Howto.cook.in -f COPYING -f INSTALL"
     . " -f README -f aclocal.m4 -f config.guess"
     . " -f config.sub -f configure -f configure.in -f install-sh -f test"
-    . " -f lib/c/libstash -f lib/c/libsock -f bin/suck -f bin/blow"
-    . " -f bin/ncat -f bin/proxy";
+    . " -f lib/c/libstash -f lib/c/libsock -f bin/ncat -f bin/proxy";
 if (defined($opt_verbose))
 {
     print STDERR "$run\n";
