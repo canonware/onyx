@@ -602,15 +602,15 @@ nxo_p_dict_hash(const void *a_key)
 	}
 	case NXOT_STRING:
 	{
-	    uint8_t *str;
+	    unsigned char *str;
 	    uint32_t i, len;
 
 	    str = nxo_string_get(key);
 	    len = nxo_string_len_get(key);
 	    nxo_string_lock(key);
-	    for (i = retval = 0; i < len; i++)
+	    for (i = 0, retval = 5381; i < len; i++, str++)
 	    {
-		retval = retval * 33 + str[i];
+		retval = ((retval << 5) + retval) + *str;
 	    }
 	    nxo_string_unlock(key);
 	    break;

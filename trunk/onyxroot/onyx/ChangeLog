@@ -1,4 +1,15 @@
+2003-12-29  Jason Evans  <jasone@canonware.com>
+
+	* lib/libonyx/src/nxo_dict.c:nxo_p_dict_hash() : Revise string
+	  hashing to marginally improve performance.
+
 2003-12-28 : Jason Evans <jasone@canonware.com>
+
+	* Use the char type rather than uint8_t wherever it makes sense.
+	  This is a sweeping API change, much like the change on
+	  2003-12-13, but it has little actual impact on applications,
+	  except that it fixes some long-standing casting issues for C++
+	  applications.
 
 	* lib/libonyx/src/nxm.c : Add the nxm class, which abstracts
 	  loadable module functionality.  Remove cw_nxmod_t, which is
