@@ -14,8 +14,6 @@
  *
  ****************************************************************************/
 
-#define _OH_PERF_
-
 /* Pseudo-opaque type. */
 typedef struct cw_oh_s cw_oh_t;
 
@@ -54,14 +52,12 @@ struct cw_oh_s
   cw_uint64_t curr_shrink_point;
   cw_uint64_t curr_grow_point;
 
-#ifdef _OH_PERF_  
   /* Counters used to get an idea of performance. */
   cw_uint64_t num_collisions;
   cw_uint64_t num_inserts;
   cw_uint64_t num_deletes;
   cw_uint64_t num_grows;
   cw_uint64_t num_shrinks;
-#endif
 };
 
 #define oh_new _CW_NS_ANY(oh_new)
@@ -88,13 +84,11 @@ struct cw_oh_s
 #define oh_item_delete_iterate _CW_NS_ANY(oh_item_delete_iterate)
 #define oh_dump _CW_NS_ANY(oh_dump)
 
-#ifdef _OH_PERF_
-#  define oh_get_num_collisions _CW_NS_ANY(oh_get_num_collisions)
-#  define oh_get_num_inserts _CW_NS_ANY(oh_get_num_inserts)
-#  define oh_get_num_deletes _CW_NS_ANY(oh_get_num_deletes)
-#  define oh_get_num_grows _CW_NS_ANY(oh_get_num_grows)
-#  define oh_get_num_shrinks _CW_NS_ANY(oh_get_num_shrinks)
-#endif
+#define oh_get_num_collisions _CW_NS_ANY(oh_get_num_collisions)
+#define oh_get_num_inserts _CW_NS_ANY(oh_get_num_inserts)
+#define oh_get_num_deletes _CW_NS_ANY(oh_get_num_deletes)
+#define oh_get_num_grows _CW_NS_ANY(oh_get_num_grows)
+#define oh_get_num_shrinks _CW_NS_ANY(oh_get_num_shrinks)
 
 /* Typedefs to allow easy function pointer passing. */
 typedef cw_uint64_t oh_h1_t(cw_oh_t *, void *);
@@ -138,10 +132,8 @@ cw_bool_t oh_item_delete_iterate(cw_oh_t * a_oh_o, void ** a_key,
 				 void ** a_data);
 void oh_dump(cw_oh_t * a_oh_o, cw_bool_t a_all);
 
-#ifdef _OH_PERF_
 cw_uint64_t oh_get_num_collisions(cw_oh_t * a_oh_o);
 cw_uint64_t oh_get_num_inserts(cw_oh_t * a_oh_o);
 cw_uint64_t oh_get_num_deletes(cw_oh_t * a_oh_o);
 cw_uint64_t oh_get_num_grows(cw_oh_t * a_oh_o);
 cw_uint64_t oh_get_num_shrinks(cw_oh_t * a_oh_o);
-#endif
