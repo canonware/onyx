@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 14 $
- * Last modified: $Date: 1998-03-29 05:26:20 -0800 (Sun, 29 Mar 1998) $
+ * Current revision: $Revision: 17 $
+ * Last modified: $Date: 1998-03-31 00:26:46 -0800 (Tue, 31 Mar 1998) $
  *
  * Description: The idea here is to keep cpp from having to process a header
  *              file more than once.  The tradeoff is that every header gets
@@ -78,10 +78,45 @@
  * Other project headers we don't always want to include.
  */
 
+#if (defined(_INC_LIST_H_) || defined(_INC_ALL_))
+#  ifndef _LIST_H_
+#    include <list.h>
+#    define _LIST_H_
+#  endif
+#endif
+
+#if (defined(_INC_LIST_PRIV_H_) || defined(_INC_ALL_))
+#  ifndef _LIST_PRIV_H_
+#    include <list_priv.h>
+#    define _LIST_PRIV_H_
+#  endif
+#endif
+
 #if (defined(_INC_DBG_PRIV_H_) || defined(_INC_ALL_))
 #  ifndef _DBG_PRIV_H_
 #    include <dbg_priv.h>
 #    define _DBG_PRIV_H_
+#  endif
+#endif
+
+#if (defined(_INC_LOG_PRIV_H_) || defined(_INC_ALL_))
+#  ifndef _LOG_PRIV_H_
+#    include <log_priv.h>
+#    define _LOG_PRIV_H_
+#  endif
+#endif
+
+#if (defined(_INC_OH_H_) || defined(_INC_ALL_))
+#  ifndef _OH_H_
+#    include <oh.h>
+#    define _OH5_H_
+#  endif
+#endif
+
+#if (defined(_INC_OH_PRIV_H_) || defined(_INC_ALL_))
+#  ifndef _OH_PRIV_H_
+#    include <oh_priv.h>
+#    define _OH_PRIV_H_
 #  endif
 #endif
 

@@ -30,8 +30,8 @@
 #
 # $Source$
 # $Author: jasone $
-# Current revision: $Revision: 12 $
-# Last modified: $Date: 1998-02-20 01:33:18 -0800 (Fri, 20 Feb 1998) $
+# Current revision: $Revision: 17 $
+# Last modified: $Date: 1998-03-31 00:26:46 -0800 (Tue, 31 Mar 1998) $
 #
 # Description: Makefile for sqrl include dir.
 #              
@@ -49,7 +49,8 @@ MAKE  = @MAKE@
 #
 
 # file lists
-HDRS = inc_common.h log.h res_parser.tab.h resource.h
+HDRS = common_incs.h log.h dbg.h mem.h dbg_priv.h mem_priv.h oh.h oh_priv.h \
+	list.h log_priv.h
 DIRS =
 
 #

@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 14 $
- * Last modified: $Date: 1998-03-29 05:26:20 -0800 (Sun, 29 Mar 1998) $
+ * Current revision: $Revision: 17 $
+ * Last modified: $Date: 1998-03-31 00:26:46 -0800 (Tue, 31 Mar 1998) $
  *
  * Description: 
  *              
@@ -43,17 +43,27 @@
 #ifndef _LOG_H_
 #define _LOG_H_
 
-int set_g_error(char * arg_format, ...);
-char * get_g_error();
+typedef struct cw_log_s cw_log_t;
 
-int log_init(char * arg_logfile); /* Pass NULL to use stderr. */
-int log_close();
-int lprintf(char * arg_format, ...);
-int leprintf(char * arg_filename, /* Optional, pass NULL if not used. */
-	     int arg_line_num, /* Only used if (arg_filename != NULL) */
-	     char * arg_func_name, /* Optional, pass NULL if not used. */
-	     char * arg_format, 
-	     ...);
+#define log_new _CW_NS_CMN(log_new)
+#define log_delete _CW_NS_CMN(log_delete)
+#define log_set_logfile _CW_NS_CMN(log_set_logfile)
+#define log_printf _CW_NS_CMN(log_printf)
+#define log_eprintf _CW_NS_CMN(log_eprintf)
+
+cw_log_t * log_new();
+void log_delete(cw_log_t * arg_log_obj);
+
+cw_bool_t log_set_logfile(cw_log_t * arg_log_obj,
+			  char * arg_logfile,
+			  cw_bool_t arg_overwrite);
+int log_printf(cw_log_t * arg_log_obj, char * arg_format, ...);
+int log_eprintf(cw_log_t * arg_log_obj, 
+		char * arg_filename, /* Optional, pass NULL if not used. */
+		int arg_line_num, /* Only used if (arg_filename != NULL) */
+		char * arg_func_name, /* Optional, pass NULL if not used. */
+		char * arg_format, 
+		...);
 
 /* 
  * My version of assert().  It's a bit prettier and cleaner, but the same idea.
@@ -61,8 +71,7 @@ int leprintf(char * arg_filename, /* Optional, pass NULL if not used. */
 
 #define _cw_error(a) \
   { \
-    leprintf(__FILE__, __LINE__, NULL, "Error: %s\n", a); \
-    log_close(); \
+    log_eprintf(g_log_obj, __FILE__, __LINE__, NULL, "Error: %s\n", a); \
     abort(); \
   }
 
@@ -70,15 +79,15 @@ int leprintf(char * arg_filename, /* Optional, pass NULL if not used. */
   { \
     if (!(a)) \
       { \
-        leprintf(__FILE__, __LINE__, NULL, "Failed assertion: \"%s\"\n", #a); \
-	log_close(); \
+        log_eprintf(g_log_obj, __FILE__, __LINE__, NULL, \
+		    "Failed assertion: \"%s\"\n", #a); \
         abort(); \
       } \
   }
 
 #define _cw_marker(a) \
   { \
-    leprintf(__FILE__, __LINE__, NULL, "%s\n", a); \
+    log_eprintf(g_log_obj, __FILE__, __LINE__, NULL, "%s\n", a); \
   }
 
 /* Macro to do the drudgery of checking whether a pointer is null. */
@@ -86,8 +95,8 @@ int leprintf(char * arg_filename, /* Optional, pass NULL if not used. */
   { \
     if ((x) == NULL) \
       { \
-	leprintf(__FILE__, __LINE__, NULL, "%s is a NULL pointer\n", #x); \
-	log_close(); \
+	log_eprintf(g_log_obj, __FILE__, __LINE__, NULL, \
+		    "%s is a NULL pointer\n", #x); \
         abort(); \
       } \
   }
