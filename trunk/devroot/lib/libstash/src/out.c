@@ -312,6 +312,31 @@ out_put_e(cw_out_t * a_out,
 }
 
 cw_sint32_t
+out_put_l(cw_out_t * a_out, const char * a_format, ...)
+{
+  cw_sint32_t retval, fd;
+  va_list ap;
+
+  _cw_check_ptr(a_format);
+  
+  if (NULL != a_out)
+  {
+    _cw_assert(_LIBSTASH_OUT_MAGIC == a_out->magic);
+    fd = a_out->fd;
+  }
+  else
+  {
+    fd = 2;
+  }
+  
+  va_start(ap, a_format);
+  retval = out_p_put_fvle(a_out, fd, TRUE, NULL, 0, NULL, a_format, ap);
+  va_end(ap);
+
+  return retval;
+}
+
+cw_sint32_t
 out_put_le(cw_out_t * a_out,
 	   const char * a_file_name,
 	   cw_uint32_t a_line_num,
@@ -400,6 +425,22 @@ out_put_fe(cw_out_t * a_out, cw_sint32_t a_fd,
   va_start(ap, a_format);
   retval = out_p_put_fvle(a_out, a_fd, FALSE, a_file_name, a_line_num,
 			  a_func_name, a_format, ap);
+  va_end(ap);
+
+  return retval;
+}
+
+cw_sint32_t
+out_put_fl(cw_out_t * a_out, cw_sint32_t a_fd, const char * a_format, ...)
+{
+  cw_sint32_t retval;
+  va_list ap;
+
+  _cw_assert(0 <= a_fd);
+  _cw_check_ptr(a_format);
+  
+  va_start(ap, a_format);
+  retval = out_p_put_fvle(a_out, a_fd, TRUE, NULL, 0, NULL, a_format, ap);
   va_end(ap);
 
   return retval;
@@ -936,7 +977,7 @@ out_p_put_fvle(cw_out_t * a_out, cw_sint32_t a_fd,
 	       va_list a_p)
 {
   cw_sint32_t retval;
-  char * format = NULL, timestamp[30];
+  char * format = NULL, timestamp[128];
 
   _cw_assert(0 <= a_fd);
   _cw_check_ptr(a_format);
@@ -948,14 +989,11 @@ out_p_put_fvle(cw_out_t * a_out, cw_sint32_t a_fd,
     
     curr_time = time(NULL);
     cts = localtime(&curr_time);
-    if (-1 == out_put_s(a_out, timestamp,
-			"[[[[[i32|w:4]/[i32|w:2|p:0]/[i32|w:2|p:0] "
-			"[i32|w:2|p:0]:[i32|w:2|p:0]:[i32|w:2|p:0] ([s])]: ",
-			cts->tm_year + 1900, cts->tm_mon + 1, cts->tm_mday,
-			cts->tm_hour, cts->tm_min, cts->tm_sec, tzname[0]))
+    if (0 == strftime(timestamp, sizeof(timestamp), "[[%Y/%m/%d %T %Z]: ", cts))
     {
-      retval = -1;
-      goto RETURN;
+      /* Wow, this locale must be *really* verbose about displaying time.
+       * Terminate the string, since there's no telling what's there. */
+      timestamp[0] = '\0';
     }
   }
   else
@@ -1373,7 +1411,7 @@ out_p_metric_int(const char * a_format, cw_uint32_t a_len,
   cw_uint64_t arg = a_arg;
   cw_bool_t is_negative, show_sign;
   const char * val;
-  cw_uint8_t * syms = "0123456789abcdefghijklmnopqrstuvwxyz";
+  char * syms = "0123456789abcdefghijklmnopqrstuvwxyz";
   char * result, s_result[65] =
     "0000000000000000000000000000000000000000000000000000000000000000";
 
@@ -1492,7 +1530,7 @@ out_p_render_int(const char * a_format, cw_uint32_t a_len,
   cw_uint64_t arg = a_arg;
   cw_bool_t is_negative, show_sign;
   const char * val;
-  cw_uint8_t * syms = "0123456789abcdefghijklmnopqrstuvwxyz";
+  char * syms = "0123456789abcdefghijklmnopqrstuvwxyz";
   char * result, s_result[65] =
     "0000000000000000000000000000000000000000000000000000000000000000";
 

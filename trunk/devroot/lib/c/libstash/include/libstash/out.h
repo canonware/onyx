@@ -389,6 +389,33 @@ out_put_e(cw_out_t * a_out,
  *
  * a_out : Pointer to an out, or NULL.
  *
+ * a_format : Pointer to a formatting string.
+ *
+ * ... : Arguments that correspond to the specifiers in a_format.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : >= 0 : Number of bytes output
+ *            -1 : Memory allocation error.
+ *            -2 : Parse error.
+ *
+ * Output printed to a_out's default file descriptor (2 if (NULL == a_out)).
+ *
+ * <<< Description >>>
+ *
+ * Print formatted output, with "[yy/mm/dd hh:mm:ss (zz)]: " prepended to the
+ * output.
+ *
+ ****************************************************************************/
+cw_sint32_t
+out_put_l(cw_out_t * a_out, const char * a_format, ...);
+
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_out : Pointer to an out, or NULL.
+ *
  * a_file_name : Pointer to a string that represents the source file name,
  *               or NULL.
  *
@@ -523,6 +550,35 @@ out_put_fe(cw_out_t * a_out, cw_sint32_t a_fd,
 	   const char * a_func_name,
 	   const char * a_format,
 	   ...);
+
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_out : Pointer to an out, or NULL.
+ *
+ * a_fd : File descriptor number.
+ *
+ * a_format : Pointer to a formatting string.
+ *
+ * ... : Arguments that correspond to the specifiers in a_format.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : >= 0 : Number of bytes output
+ *            -1 : Memory allocation error.
+ *            -2 : Parse error.
+ *
+ * Output printed to a_fd.
+ *
+ * <<< Description >>>
+ *
+ * Print formatted output, with "[yy/mm/dd hh:mm:ss (zz)]: " prepended to the
+ * output.
+ *
+ ****************************************************************************/
+cw_sint32_t
+out_put_fl(cw_out_t * a_out, cw_sint32_t a_fd, const char * a_format, ...);
 
 /****************************************************************************
  *

@@ -1,3 +1,21 @@
+1999-07-29  Jason Evans  <jasone@canonware.com>
+
+	* : The `log' class is now deprecated.  The `out' class replaces it.
+
+	* src/out.c (out_put_l): Add.
+	(out_put_fl): Add.
+
+1999-07-28  Jason Evans  <jasone@canonware.com>
+
+	* src/libstash.c (libstash_init): Turn "pezz_error" dbg symbol on
+	for the debugging versions of libstash.
+
+	* src/log.c (log_l[e]printf): Use strftime() instead of manually
+	building timestamp string for improved portability.
+
+	* src/out.c (out_p_put_fvle): Use strftime() instead of manually
+	building timestamp string for improved portability.
+
 1999-07-26  Jason Evans  <jasone@canonware.com>
 
 	* Makefile.{gnu,bsd}.in: Quiet noise caused by dependency updating.

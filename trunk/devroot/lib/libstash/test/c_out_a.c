@@ -106,6 +106,20 @@ main()
     out_delete(out_p);
   }
 
+  /* out_put_l(). */
+  out_put(cw_g_out, "out_put_l()\n");
+  {
+    cw_out_t * out_p;
+
+    out_p = out_new(NULL);
+    _cw_check_ptr(out_p);
+
+/*      _cw_assert(0 < out_put_l(out_p, "Timestamped output [s]\n", "[s]")); */
+/*      _cw_assert(0 < out_put_l(out_p, "\n")); */
+    
+    out_delete(out_p);
+  }
+
   /* out_put_le(). */
   out_put(cw_g_out, "out_put_le()\n");
   {
@@ -178,6 +192,20 @@ main()
     out_delete(out_p);
   }
 
+  /* out_put_fl(). */
+  out_put(cw_g_out, "out_put_fl()\n");
+  {
+    cw_out_t * out_p;
+
+    out_p = out_new(NULL);
+    _cw_check_ptr(out_p);
+
+/*      _cw_assert(0 < out_put_fl(out_p, 2, "Timestamped output [s]\n", "[s]")); */
+/*      _cw_assert(0 < out_put_fl(out_p, 2, "\n")); */
+    
+    out_delete(out_p);
+  }
+
   /* out_put_fle(). */
   out_put(cw_g_out, "out_put_fle()\n");
   {
@@ -188,7 +216,7 @@ main()
 
 /*      _cw_assert(0 < out_put_fle(out_p, 2, "<file>", 42, "<function>", */
 /*  			       "Timestamped output [s]\n", "[s]")); */
-/*      _cw_assert(0 < out_put_fle(out_p, 2, NULL, 42, NULL, "")); */
+/*      _cw_assert(0 < out_put_fle(out_p, 2, NULL, 42, NULL, "\n")); */
     
     out_delete(out_p);
   }
