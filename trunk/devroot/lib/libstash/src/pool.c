@@ -44,11 +44,13 @@ pool_new(cw_pool_t *a_pool, cw_mem_t *a_mem, cw_uint32_t a_buffer_size)
 		retval->buffer_size = a_buffer_size;
 		qs_new(&retval->spares);
 
-#ifdef _LIBSTASH_DBG
+#ifdef _LIBSTASH_POOL_DBG
 		dch_new(&retval->addr_hash, a_mem, 8, 6, 2, ch_direct_hash,
 		    ch_direct_key_comp);
 		try_stage = 2;
+#endif
 
+#ifdef _LIBSTASH_DBG
 		retval->magic = _CW_POOL_MAGIC;
 #endif
 	}
@@ -77,7 +79,7 @@ pool_delete(cw_pool_t *a_pool)
 	_cw_check_ptr(a_pool);
 	_cw_assert(a_pool->magic == _CW_POOL_MAGIC);
 
-#ifdef _LIBSTASH_DBG
+#ifdef _LIBSTASH_POOL_DBG
 	{
 		cw_uint32_t	i, num_addrs;
 		void		*addr;
@@ -120,7 +122,7 @@ pool_delete(cw_pool_t *a_pool)
 
 	if (a_pool->is_malloced)
 		mem_free(a_pool->mem, a_pool);
-#ifdef _LIBSTASH_DBG
+#ifdef _LIBSTASH_POOL_DBG
 	else
 		memset(a_pool, 0x5a, sizeof(cw_pool_t));
 #endif
@@ -176,7 +178,7 @@ pool_get_e(cw_pool_t *a_pool, const char *a_filename, cw_uint32_t a_line_num)
 			    sizeof(cw_pool_spare_t));
 	}
 
-#ifdef _LIBSTASH_DBG
+#ifdef _LIBSTASH_POOL_DBG
 	if (a_filename == NULL)
 		a_filename = "<?>";
 	if (retval == NULL) {
@@ -259,7 +261,7 @@ pool_put_e(cw_pool_t *a_pool, void *a_buffer, const char *a_filename,
 	_cw_assert(a_pool->magic == _CW_POOL_MAGIC);
 	mtx_lock(&a_pool->lock);
 
-#ifdef _LIBSTASH_DBG
+#ifdef _LIBSTASH_POOL_DBG
 	if (a_filename == NULL)
 		a_filename = "<?>";
 	{
@@ -296,7 +298,7 @@ pool_put_e(cw_pool_t *a_pool, void *a_buffer, const char *a_filename,
 	qs_elm_new(spare, link);
 	qs_push(&a_pool->spares, spare, link);
 
-#ifdef _LIBSTASH_DBG
+#ifdef _LIBSTASH_POOL_DBG
 	RETURN:
 #endif
 	mtx_unlock(&a_pool->lock);

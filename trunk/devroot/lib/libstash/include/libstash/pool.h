@@ -9,6 +9,10 @@
  *
  ******************************************************************************/
 
+#ifdef _LIBSTASH_DBG
+#define	_LIBSTASH_POOL_DBG
+#endif
+
 /* Pseudo-opaque type. */
 typedef struct cw_pool_s cw_pool_t;
 typedef struct cw_pool_spare_s cw_pool_spare_t;
@@ -17,6 +21,8 @@ struct cw_pool_s {
 	cw_bool_t	is_malloced;
 #ifdef _LIBSTASH_DBG
 	cw_uint32_t	magic;
+#endif
+#ifdef _LIBSTASH_POOL_DBG
 	cw_dch_t	addr_hash;
 #endif
 	/* Allocator. */
@@ -34,7 +40,7 @@ struct cw_pool_spare_s {
 	qs_elm(cw_pool_spare_t) link;
 };
 
-#ifdef _LIBSTASH_DBG
+#ifdef _LIBSTASH_POOL_DBG
 typedef struct {
 	const char	*filename;
 	cw_uint32_t	line_num;
@@ -58,7 +64,7 @@ void		pool_dump(cw_pool_t *a_pool, const char *a_prefix);
  * of the generated binary.  Since these arguments aren't used in the optimized
  * library anyway, this is a free (though perhaps small) memory savings.
  */
-#ifdef _LIBSTASH_DBG
+#ifdef _LIBSTASH_POOL_DBG
 #define pool_get(a_pool)						\
 	pool_get_e((a_pool), __FILE__, __LINE__)
 #define pool_put(a_pool, a_buffer)					\

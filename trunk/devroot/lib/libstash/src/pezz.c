@@ -73,11 +73,13 @@ pezz_new(cw_pezz_t *a_pezz, cw_mem_t *a_mem, cw_uint32_t a_buffer_size,
 		}
 		retval->num_blocks = 1;
 
-#ifdef _LIBSTASH_DBG
+#ifdef _LIBSTASH_PEZZ_DBG
 		dch_new(&retval->addr_hash, a_mem, a_num_buffers * 3,
 		    a_num_buffers * 2, 0, ch_direct_hash, ch_direct_key_comp);
 		try_stage = 4;
+#endif
 
+#ifdef _LIBSTASH_DBG
 		retval->magic = _CW_PEZZ_MAGIC;
 #endif
 	}
@@ -111,7 +113,7 @@ pezz_delete(cw_pezz_t *a_pezz)
 	_cw_check_ptr(a_pezz);
 	_cw_assert(a_pezz->magic == _CW_PEZZ_MAGIC);
 
-#ifdef _LIBSTASH_DBG
+#ifdef _LIBSTASH_PEZZ_DBG
 	{
 		cw_uint32_t	i, num_addrs;
 		void		*addr;
@@ -152,7 +154,7 @@ pezz_delete(cw_pezz_t *a_pezz)
 
 	if (a_pezz->is_malloced)
 		mem_free(a_pezz->mem, a_pezz);
-#ifdef _LIBSTASH_DBG
+#ifdef _LIBSTASH_PEZZ_DBG
 	else
 		memset(a_pezz, 0x5a, sizeof(cw_pezz_t));
 #endif
@@ -211,7 +213,7 @@ pezz_get_e(cw_pezz_t *a_pezz, const char *a_filename, cw_uint32_t a_line_num)
 	retval = (void *)qs_top(&a_pezz->spares);
 	qs_pop(&a_pezz->spares, link);
 
-#ifdef _LIBSTASH_DBG
+#ifdef _LIBSTASH_PEZZ_DBG
 	if (a_filename == NULL)
 		a_filename = "<?>";
 	if (retval == NULL) {
@@ -235,11 +237,11 @@ pezz_get_e(cw_pezz_t *a_pezz, const char *a_filename, cw_uint32_t a_line_num)
 				    a_line_num);
 			}
 		} else {
-			cw_pool_item_t		*allocation;
+			cw_pezz_item_t		*allocation;
 			volatile cw_uint32_t	try_stage = 0;
 
 			xep_begin();
-			volatile cw_pool_item_t	*v_allocation;
+			volatile cw_pezz_item_t	*v_allocation;
 			xep_try {
 				v_allocation = allocation =
 				    mem_malloc(a_pezz->mem,
@@ -266,7 +268,7 @@ pezz_get_e(cw_pezz_t *a_pezz, const char *a_filename, cw_uint32_t a_line_num)
 				try_stage = 2;
 			}
 			xep_catch (_CW_XEPV_OOM) {
-				allocation = (cw_pool_item_t *)v_allocation;
+				allocation = (cw_pezz_item_t *)v_allocation;
 				switch (try_stage) {
 				case 1:
 					mem_free(a_pezz->mem, allocation);
@@ -294,7 +296,7 @@ pezz_put_e(cw_pezz_t *a_pezz, void *a_buffer, const char *a_filename,
 	_cw_assert(a_pezz->magic == _CW_PEZZ_MAGIC);
 	mtx_lock(&a_pezz->lock);
 
-#ifdef _LIBSTASH_DBG
+#ifdef _LIBSTASH_PEZZ_DBG
 	if (a_filename == NULL)
 		a_filename = "<?>";
 	{
@@ -336,7 +338,7 @@ pezz_put_e(cw_pezz_t *a_pezz, void *a_buffer, const char *a_filename,
 
 	qs_push(&a_pezz->spares, (cw_pezzi_t *)a_buffer, link);
 
-#ifdef _LIBSTASH_DBG
+#ifdef _LIBSTASH_PEZZ_DBG
 	/*
 	 * The RETURN label is only used in the debugging versions of
 	 * libstash. Prevent a compiler warning.

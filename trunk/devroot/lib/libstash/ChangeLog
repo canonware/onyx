@@ -1,3 +1,9 @@
+2001-02-09  Jason Evans  <jasone@canonware.com>
+
+	* : Add _LIBSTASH_MEM_DBG, _LIBSTASH_PEZZ_DBG, and
+	_LIBSTASH_POOL_DBG, so that allocation tracking can be shut off
+	independent of _LIBSTASH_DBG.
+
 2001-02-07  Jason Evans  <jasone@canonware.com>
 
 	* src/thd.c (thd_new): Return a pointer to a cw_thd_t rather than

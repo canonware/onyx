@@ -31,7 +31,7 @@
 #endif
 #define _cw_free(a) free(a)
 
-#ifdef _LIBSTASH_DBG
+#ifdef _LIBSTASH_MEM_DBG
 struct cw_mem_item_s {
 	cw_uint32_t	size;
         const char	*filename;
@@ -61,7 +61,7 @@ mem_new(cw_mem_t *a_mem, cw_mem_t *a_internal)
 		mtx_new(&retval->lock);
 		try_stage = 1;
 
-#ifdef _LIBSTASH_DBG
+#ifdef _LIBSTASH_MEM_DBG
 		retval->addr_hash = ch_new(NULL, a_internal, _CW_MEM_TABLE_SIZE,
 		    ch_direct_hash, ch_direct_key_comp);
 		try_stage = 2;
@@ -88,7 +88,7 @@ mem_delete(cw_mem_t *a_mem)
 {
 	_cw_check_ptr(a_mem);
 
-#ifdef _LIBSTASH_DBG
+#ifdef _LIBSTASH_MEM_DBG
 	{
 		cw_uint32_t	i, num_addrs;
 		void		*addr;
@@ -132,7 +132,7 @@ mem_malloc_e(cw_mem_t *a_mem, size_t a_size, const char *a_filename,
 
 	_cw_assert(a_size > 0);
 
-#ifdef _LIBSTASH_DBG
+#ifdef _LIBSTASH_MEM_DBG
 	if (a_mem != NULL)
 		mtx_lock(&a_mem->lock);
 #endif
@@ -141,7 +141,7 @@ mem_malloc_e(cw_mem_t *a_mem, size_t a_size, const char *a_filename,
 	if (retval == NULL)
 		xep_throw(_CW_XEPV_OOM);
 
-#ifdef _LIBSTASH_DBG
+#ifdef _LIBSTASH_MEM_DBG
 	if (a_filename == NULL)
 		a_filename = "<?>";
 	if (retval == NULL) {
@@ -209,7 +209,7 @@ mem_calloc_e(cw_mem_t *a_mem, size_t a_number, size_t a_size, const char
 
 	_cw_assert(a_size * a_number > 0);
 
-#ifdef _LIBSTASH_DBG
+#ifdef _LIBSTASH_MEM_DBG
 	if (a_mem != NULL)
 		mtx_lock(&a_mem->lock);
 #endif
@@ -218,7 +218,7 @@ mem_calloc_e(cw_mem_t *a_mem, size_t a_number, size_t a_size, const char
 	if (retval == NULL)
 		xep_throw(_CW_XEPV_OOM);
 
-#ifdef _LIBSTASH_DBG
+#ifdef _LIBSTASH_MEM_DBG
 	if (a_filename == NULL)
 		a_filename = "<?>";
 	if (retval == NULL) {
@@ -291,7 +291,7 @@ mem_realloc_e(cw_mem_t *a_mem, void *a_ptr, size_t a_size, const char
 	_cw_check_ptr(a_ptr);
 	_cw_assert(a_size > 0);
 
-#ifdef _LIBSTASH_DBG
+#ifdef _LIBSTASH_MEM_DBG
 	if (a_mem != NULL)
 		mtx_lock(&a_mem->lock);
 #endif
@@ -300,7 +300,7 @@ mem_realloc_e(cw_mem_t *a_mem, void *a_ptr, size_t a_size, const char
 	if (retval == NULL)
 		xep_throw(_CW_XEPV_OOM);
 
-#ifdef _LIBSTASH_DBG
+#ifdef _LIBSTASH_MEM_DBG
 	if (a_filename == NULL)
 		a_filename = "<?>";
 	if (retval == NULL) {
@@ -371,7 +371,7 @@ void
 mem_free_e(cw_mem_t *a_mem, void *a_ptr, const char *a_filename, cw_uint32_t
     a_line_num)
 {
-#ifdef _LIBSTASH_DBG
+#ifdef _LIBSTASH_MEM_DBG
 	if (a_filename == NULL)
 		a_filename = "<?>";
 	if (a_mem != NULL) {
@@ -404,7 +404,7 @@ mem_free_e(cw_mem_t *a_mem, void *a_ptr, const char *a_filename, cw_uint32_t
 
 	_cw_free(a_ptr);
 
-#ifdef _LIBSTASH_DBG
+#ifdef _LIBSTASH_MEM_DBG
 	if (a_mem != NULL)
 		mtx_unlock(&a_mem->lock);
 #endif
