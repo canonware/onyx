@@ -55,8 +55,7 @@ CAT     := @CAT@
 PERL    := @PERL@
 BASENAME:= @BASENAME@
 DIFF    := @DIFF@
-PMERGE  := test/pmerge
-PSTUB   := test/pstub
+VERIFY  := test/verify
 
 #
 # Compiler flags.
@@ -145,7 +144,9 @@ $(srcfile:R:S/$/&.o_st_p/) : $(srcfile)
 .endfor
 
 .pl.in.pl :
-	$(PERL) -w $(PMERGE) $(PERL) $(PSTUB) $< $@
+	echo "#!$(PERL) -w" > $@
+	$(CAT) $< >> $@
+	chmod u+x $@
 
 #
 # Dependencies (not rules).
@@ -198,36 +199,12 @@ libs : stat_dbg stat_opt stat_prof @disable_shared@shar_opt
 
 bins : $(BINS)
 
-tests : $(CTESTS) $(PTESTS) $(BTESTS)
+tests : $(CTESTS)# $(PTESTS) $(BTESTS)
 
-check :
-	@$(SHELL) -c \
-	'printf "Running regression tests:\\n" ;\
-	printf "%s\\n" "---------------------------------------------" ;\
-	for i in $(PTESTS); do \
-	printf "%s" "$$i..." ;\
-	$$i ;\
-	done ;\
-	for i in $(CTESTS); do \
-	printf "%s" "$$i..."; \
-	$$i > $$i.out 2>&1 ;\
-	$(DIFF) $$i.out $$i.exp > $$i.diff ;\
-	if [ -s $$i.diff ] ; then \
-	printf "%s\\n" "failed. ****************" ;\
-	else \
-	printf "%s\\n" "passed." ;\
-	rm $$i.diff ;\
-	fi \
-	done ;\
-	printf "%s\\n\\n" "---------------------------------------------" ;\
-	printf "%s\\n" "The following regression tests failed:" ;\
-	printf "%s\\n" "---------------------------------------------" ;\
-	for i in `find ./test -print | grep "\.diff$$"`; do \
-	echo `echo $$i | sed "s/\.\/\(.*\)\.diff/\1/g"` ;\
-	done ;\
-	printf "%s\\n" "---------------------------------------------" ;\
-	cd - \
-	'
+check : tests
+	@$(VERIFY) -- -d $(CTESTS)
+
+#	@$(VERIFY) -- -d $(CTESTS)# -s $(PTESTS)
 
 install : install_stat_dbg install_stat_opt install_stat_prof \
 	@disable_shared@install_shar_opt
@@ -285,10 +262,11 @@ clean : clean_stat_dbg clean_stat_opt clean_shar_opt clean_stat_prof
 	rm -f core test/core *.core test/*.core bin/core bin/*.core
 	rm -f bin/*.[do]
 	rm -f lib/lib*
+	rm -f test/*.out test/*.diff test/*.pl
+	rm -f test/*.[do]
+	rm -f test/*.diff
+	rm -f $(CTESTS) $(BINS)
 
-#	rm -f test/*.out test/*.diff test/*.pl
-#	rm -f test/*.[do]
-#	rm -f test/*.diff
 #	rm -f $(CTESTS) $(PTESTS) $(BTESTS) $(BINS)
 
 distclean : clean
@@ -297,6 +275,7 @@ distclean : clean
 	rm -f config.cache config.log config.status
 	rm -f include/libsock/libsock_defs.h
 	rm -f TAGS
+	rm -f $(VERIFY) test/*.perf
 
 etags : $(INCS) $(P_INCS) $(SRCS)
 	@ETAGS@ $(INCS) $(P_INCS) $(SRCS)

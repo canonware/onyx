@@ -25,7 +25,7 @@ SRCS := sock.c sockb.c socks.c
 BINS := proxy.c ncat.c blow.c suck.c echos.c
 
 # Simple tests.  Output is diff'ed with the expected (.exp file) output.
-CTESTS :=
+CTESTS := c_sock_b.c
 
 # Perl scripts that drive the BTESTS.
 PTESTS :=

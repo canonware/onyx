@@ -109,4 +109,10 @@ CW_SET_MAKEFILE
 
 dnl Process the following files.
 AC_OUTPUT(Makefile.bsd \
-Makefile.gnu)
+Makefile.gnu \
+test/verify)
+
+dnl autoconf doesn't keep the execute bit if it's set for the input file, so do
+dnl it manually.
+echo chmod u+x test/verify
+chmod u+x test/verify
