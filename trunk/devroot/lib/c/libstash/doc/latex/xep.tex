@@ -62,6 +62,9 @@ An exception is not implicitly handled if an exception handler is executed for
 that exception.  Instead, \cfunc{xep\_handled}{} must be manually called to
 avoid propagating the exception up the handler chain.
 
+It is not legal to return from a function within an exception handling code
+block; doing so will corrupt the exception handler chain.
+
 \subsubsection{API}
 \begin{capi}
 \label{xep_begin}
