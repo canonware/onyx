@@ -1,3 +1,16 @@
+1999-08-09  Jason Evans  <jasone@canonware.com>
+
+	* src/mem.c (mem_{m,c}alloc): Pass the key to oh_item_search()
+	rather than the mem pointer.  This only affects the debug versions
+	of libstash.
+	(mem_{m,c,re}alloc, mem_free): Move the mem lock to encompass the
+	calls to the malloc functions in order to avoid race conditions.
+	This only affects the debug versions of libstash.
+
+	* src/pezz.c (pezz_get_e): Pass the key to oh_item_search() rather
+	than the pezz pointer.  This only affects the debug versions of
+	libstash.
+
 1999-07-31  Jason Evans  <jasone@canonware.com>
 
 	* include/libstash/pezz.h (_cw_pezz_{get,put}): Add.  Use these
