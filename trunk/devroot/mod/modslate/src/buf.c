@@ -1584,7 +1584,6 @@ buf_delete(cw_buf_t *a_buf)
 
     cw_check_ptr(a_buf);
     cw_dassert(a_buf->magic == CW_BUF_MAGIC);
-#ifdef XXX_NOT_YET
 #ifdef CW_DBG
     {
 	cw_ext_t *first;
@@ -1601,7 +1600,6 @@ buf_delete(cw_buf_t *a_buf)
     }
 #endif
     cw_assert(ql_first(&a_buf->rlist) == NULL);
-#endif
 
     /* Delete history if it exists. */
     if (a_buf->hist != NULL)
@@ -2096,8 +2094,8 @@ mkr_p_simple_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
 	     mkr = ql_prev(&bufp->mlist, mkr, mlink))
 	{
 	    cw_assert(mkr->order == MKRO_BEFORE);
-	    a_mkr->ppos -= (CW_BUFP_SIZE - bufp->len) + a_count;
-	    a_mkr->pline -= nlines;
+	    mkr->ppos -= (CW_BUFP_SIZE - bufp->len) + a_count;
+	    mkr->pline -= nlines;
 	}
     }
     else
@@ -2113,8 +2111,8 @@ mkr_p_simple_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
 	     mkr != NULL && mkr->ppos == ppos && mkr->order == MKRO_EITHER;
 	     mkr = ql_next(&bufp->mlist, mkr, mlink))
 	{
-	    a_mkr->ppos -= (CW_BUFP_SIZE - bufp->len) + a_count;
-	    a_mkr->pline -= nlines;
+	    mkr->ppos -= (CW_BUFP_SIZE - bufp->len) + a_count;
+	    mkr->pline -= nlines;
 	}
 
 	/* Iterate backward. */
@@ -2122,8 +2120,8 @@ mkr_p_simple_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
 	     mkr != NULL && mkr->ppos == ppos;
 	     mkr = ql_prev(&bufp->mlist, mkr, mlink))
 	{
-	    a_mkr->ppos -= (CW_BUFP_SIZE - bufp->len) + a_count;
-	    a_mkr->pline -= nlines;
+	    mkr->ppos -= (CW_BUFP_SIZE - bufp->len) + a_count;
+	    mkr->pline -= nlines;
 	}	
     }
 
@@ -2607,7 +2605,7 @@ mkr_l_insert(cw_mkr_t *a_mkr, cw_bool_t a_record, cw_bool_t a_after,
 		 mkr != NULL && mkr->ppos == ppos;
 		 mkr = mmkr)
 	    {
-		cw_assert(mkr->order == MKRO_BEFORE);
+		cw_assert(mkr->order != MKRO_AFTER);
 
 		/* Get the previous mkr before removing mkr from the list. */
 		mmkr = ql_prev(&bufp->mlist, mkr, mlink);
@@ -3646,6 +3644,9 @@ mkr_dump(cw_mkr_t *a_mkr, const char *a_beg, const char *a_mid,
     fprintf(stderr, "%s|-> bufp: %p\n", mid, a_mkr->bufp);
     
     fprintf(stderr, "%s|\n", mid);
+    fprintf(stderr, "%s|-> order: %s\n", mid,
+	    (a_mkr->order == MKRO_BEFORE) ? "MKRO_BEFORE" :
+	    (a_mkr->order == MKRO_EITHER) ? "MKRO_EITHER" : "MKRO_AFTER");
     fprintf(stderr, "%s|-> ppos: %u\n", mid, a_mkr->ppos);
     fprintf(stderr, "%s\\-> pline: %u\n", end, a_mkr->pline);
 }
