@@ -66,7 +66,7 @@ stil_new(cw_stil_t *a_stil)
 
 	stilt_setglobal(&stilt, TRUE);
 	/* XXX No way to catch OOM here. */
-	stil_op_systemdict_populate(&retval->systemdict, &stilt);
+	systemdict_populate(&retval->systemdict, &stilt);
 	stilt_delete(&stilt);
 
 	mtx_new(&retval->lock);

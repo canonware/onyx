@@ -11,197 +11,198 @@
 
 #include "../include/libstil/libstil.h"
 
-/*
- * Array of operators in systemdict.
- */
-struct cw_stil_op_dict_entry {
+struct cw_systemdict_entry {
 	const cw_uint8_t	*name;
 	cw_op_t			*op_f;
 };
 
-#define DENTRY(name)	{#name, op_##name}
+#define _SYSTEMDICT_ENTRY(name)	{#name, systemdict_##name}
 
-static struct cw_stil_op_dict_entry systemdict_ops[] = {
-	DENTRY(abort),
-	DENTRY(abs),
-	DENTRY(add),
-	DENTRY(aload),
-	DENTRY(anchorsearch),
-	DENTRY(and),
-	DENTRY(array),
-	DENTRY(astore),
-	DENTRY(begin),
-	DENTRY(bind),
-	DENTRY(bytesavailable),
-	DENTRY(ceiling),
-	DENTRY(clear),
-	DENTRY(cleardictstack),
-	DENTRY(cleartomark),
-	DENTRY(closefile),
-	DENTRY(condition),
-	DENTRY(copy),
-	DENTRY(count),
-	DENTRY(countdictstack),
-	DENTRY(countexecstack),
-	DENTRY(counttomark),
-	DENTRY(currentaccuracy),
-	DENTRY(currentbase),
-	DENTRY(currentcontext),
-	DENTRY(currentdict),
-	DENTRY(currentfile),
-	DENTRY(currentglobal),
-	DENTRY(currentmstate),
-	DENTRY(currentobjectformat),
-	DENTRY(currentpoint),
-	DENTRY(cvlit),
-	DENTRY(cvm),
-	DENTRY(cvn),
-	DENTRY(cvrs),
-	DENTRY(cvs),
-	DENTRY(cvx),
-	DENTRY(def),
-	DENTRY(defineresource),
-	DENTRY(deletefile),
-	DENTRY(detach),
-	DENTRY(dict),
-	DENTRY(dictstack),
-	DENTRY(div),
-	DENTRY(dup),
-	DENTRY(echo),
-	DENTRY(end),
-	DENTRY(eq),
-	DENTRY(exch),
-	DENTRY(exec),
-	DENTRY(execstack),
-	DENTRY(executeonly),
-	DENTRY(executive),
-	DENTRY(exit),
-	DENTRY(exp),
-	DENTRY(false),
-	DENTRY(file),
-	DENTRY(filenameforall),
-	DENTRY(fileposition),
-	DENTRY(filter),
-	DENTRY(findresource),
-	DENTRY(floor),
-	DENTRY(flush),
-	DENTRY(flushfile),
-	DENTRY(for),
-	DENTRY(forall),
-	DENTRY(fork),
-	DENTRY(gcheck),
-	DENTRY(ge),
-	DENTRY(get),
-	DENTRY(getinterval),
-	DENTRY(gt),
-	DENTRY(if),
-	DENTRY(ifelse),
-	DENTRY(index),
-	DENTRY(initmath),
-	DENTRY(join),
-	DENTRY(known),
-	DENTRY(le),
-	DENTRY(length),
-	DENTRY(load),
-	DENTRY(lock),
-	DENTRY(loop),
-	DENTRY(lt),
-	DENTRY(mark),
-	DENTRY(maxlength),
-	DENTRY(mod),
-	DENTRY(mrestore),
-	DENTRY(mrestoreall),
-	DENTRY(msave),
-	DENTRY(mstate),
-	DENTRY(mul),
-	DENTRY(mutex),
-	DENTRY(ne),
-	DENTRY(neg),
-	DENTRY(noaccess),
-	DENTRY(not),
-	DENTRY(notify),
-	DENTRY(null),
-	DENTRY(or),
-	DENTRY(pop),
-	DENTRY(print),
-	DENTRY(printobject),
-	DENTRY(product),
-	DENTRY(prompt),
-	DENTRY(pstack),
-	DENTRY(put),
-	DENTRY(putinterval),
-	DENTRY(quit),
-	DENTRY(rand),
-	DENTRY(rcheck),
-	DENTRY(read),
-	DENTRY(readhexstring),
-	DENTRY(readline),
-	DENTRY(readonly),
-	DENTRY(readstring),
-	DENTRY(realtime),
-	DENTRY(renamefile),
-	DENTRY(repeat),
-	DENTRY(resetfile),
-	DENTRY(resourceforall),
-	DENTRY(resourcestatus),
-	DENTRY(roll),
-	DENTRY(round),
-	DENTRY(rrand),
-	DENTRY(run),
-	DENTRY(search),
-	DENTRY(setaccuracy),
-	DENTRY(setbase),
-	DENTRY(setfileposition),
-	DENTRY(setglobal),
-	DENTRY(setmstate),
-	DENTRY(setobjectformat),
-	DENTRY(setpoint),
-	DENTRY(shift),
-	DENTRY(sqrt),
-	DENTRY(srand),
-	DENTRY(stack),
-	DENTRY(start),
-	DENTRY(status),
-	DENTRY(stop),
-	DENTRY(stopped),
-	DENTRY(store),
-	DENTRY(string),
-	DENTRY(sub),
-	{"=",	op_sym_eq},
-	{"==",	op_sym_eq_eq},
-	{">>",	op_sym_gt_gt},
-	{"[",	op_mark},
-	{"<<",	op_mark},
-	{"]",	op_array},
-	DENTRY(timedwait),
-	DENTRY(token),
-	DENTRY(true),
-	DENTRY(trylock),
-	DENTRY(type),
-	DENTRY(undef),
-	DENTRY(undefineresource),
-	DENTRY(unlock),
-	DENTRY(usertime),
-	DENTRY(version),
-	DENTRY(wait),
-	DENTRY(wcheck),
-	DENTRY(where),
-	DENTRY(write),
-	DENTRY(writehexstring),
-	DENTRY(writeobject),
-	DENTRY(writestring),
-	DENTRY(xcheck),
-	DENTRY(xor),
-	DENTRY(yield)
+/*
+ * Array of operators in systemdict.
+ */
+static struct cw_systemdict_entry systemdict_ops[] = {
+	_SYSTEMDICT_ENTRY(abort),
+	_SYSTEMDICT_ENTRY(abs),
+	_SYSTEMDICT_ENTRY(add),
+	_SYSTEMDICT_ENTRY(aload),
+	_SYSTEMDICT_ENTRY(anchorsearch),
+	_SYSTEMDICT_ENTRY(and),
+	_SYSTEMDICT_ENTRY(array),
+	_SYSTEMDICT_ENTRY(astore),
+	_SYSTEMDICT_ENTRY(begin),
+	_SYSTEMDICT_ENTRY(bind),
+	_SYSTEMDICT_ENTRY(bytesavailable),
+	_SYSTEMDICT_ENTRY(ceiling),
+	_SYSTEMDICT_ENTRY(clear),
+	_SYSTEMDICT_ENTRY(cleardictstack),
+	_SYSTEMDICT_ENTRY(cleartomark),
+	_SYSTEMDICT_ENTRY(closefile),
+	_SYSTEMDICT_ENTRY(condition),
+	_SYSTEMDICT_ENTRY(copy),
+	_SYSTEMDICT_ENTRY(count),
+	_SYSTEMDICT_ENTRY(countdictstack),
+	_SYSTEMDICT_ENTRY(countexecstack),
+	_SYSTEMDICT_ENTRY(counttomark),
+	_SYSTEMDICT_ENTRY(currentaccuracy),
+	_SYSTEMDICT_ENTRY(currentbase),
+	_SYSTEMDICT_ENTRY(currentcontext),
+	_SYSTEMDICT_ENTRY(currentdict),
+	_SYSTEMDICT_ENTRY(currentfile),
+	_SYSTEMDICT_ENTRY(currentglobal),
+	_SYSTEMDICT_ENTRY(currentmstate),
+	_SYSTEMDICT_ENTRY(currentobjectformat),
+	_SYSTEMDICT_ENTRY(currentpoint),
+	_SYSTEMDICT_ENTRY(cvlit),
+	_SYSTEMDICT_ENTRY(cvm),
+	_SYSTEMDICT_ENTRY(cvn),
+	_SYSTEMDICT_ENTRY(cvrs),
+	_SYSTEMDICT_ENTRY(cvs),
+	_SYSTEMDICT_ENTRY(cvx),
+	_SYSTEMDICT_ENTRY(def),
+	_SYSTEMDICT_ENTRY(defineresource),
+	_SYSTEMDICT_ENTRY(deletefile),
+	_SYSTEMDICT_ENTRY(detach),
+	_SYSTEMDICT_ENTRY(dict),
+	_SYSTEMDICT_ENTRY(dictstack),
+	_SYSTEMDICT_ENTRY(div),
+	_SYSTEMDICT_ENTRY(dup),
+	_SYSTEMDICT_ENTRY(echo),
+	_SYSTEMDICT_ENTRY(end),
+	_SYSTEMDICT_ENTRY(eq),
+	_SYSTEMDICT_ENTRY(exch),
+	_SYSTEMDICT_ENTRY(exec),
+	_SYSTEMDICT_ENTRY(execstack),
+	_SYSTEMDICT_ENTRY(executeonly),
+	_SYSTEMDICT_ENTRY(executive),
+	_SYSTEMDICT_ENTRY(exit),
+	_SYSTEMDICT_ENTRY(exp),
+	_SYSTEMDICT_ENTRY(false),
+	_SYSTEMDICT_ENTRY(file),
+	_SYSTEMDICT_ENTRY(filenameforall),
+	_SYSTEMDICT_ENTRY(fileposition),
+	_SYSTEMDICT_ENTRY(filter),
+	_SYSTEMDICT_ENTRY(findresource),
+	_SYSTEMDICT_ENTRY(floor),
+	_SYSTEMDICT_ENTRY(flush),
+	_SYSTEMDICT_ENTRY(flushfile),
+	_SYSTEMDICT_ENTRY(for),
+	_SYSTEMDICT_ENTRY(forall),
+	_SYSTEMDICT_ENTRY(fork),
+	_SYSTEMDICT_ENTRY(gcheck),
+	_SYSTEMDICT_ENTRY(ge),
+	_SYSTEMDICT_ENTRY(get),
+	_SYSTEMDICT_ENTRY(getinterval),
+	_SYSTEMDICT_ENTRY(gt),
+	_SYSTEMDICT_ENTRY(if),
+	_SYSTEMDICT_ENTRY(ifelse),
+	_SYSTEMDICT_ENTRY(index),
+	_SYSTEMDICT_ENTRY(initmath),
+	_SYSTEMDICT_ENTRY(join),
+	_SYSTEMDICT_ENTRY(known),
+	_SYSTEMDICT_ENTRY(le),
+	_SYSTEMDICT_ENTRY(length),
+	_SYSTEMDICT_ENTRY(load),
+	_SYSTEMDICT_ENTRY(lock),
+	_SYSTEMDICT_ENTRY(loop),
+	_SYSTEMDICT_ENTRY(lt),
+	_SYSTEMDICT_ENTRY(mark),
+	_SYSTEMDICT_ENTRY(maxlength),
+	_SYSTEMDICT_ENTRY(mod),
+	_SYSTEMDICT_ENTRY(mrestore),
+	_SYSTEMDICT_ENTRY(mrestoreall),
+	_SYSTEMDICT_ENTRY(msave),
+	_SYSTEMDICT_ENTRY(mstate),
+	_SYSTEMDICT_ENTRY(mul),
+	_SYSTEMDICT_ENTRY(mutex),
+	_SYSTEMDICT_ENTRY(ne),
+	_SYSTEMDICT_ENTRY(neg),
+	_SYSTEMDICT_ENTRY(noaccess),
+	_SYSTEMDICT_ENTRY(not),
+	_SYSTEMDICT_ENTRY(notify),
+	_SYSTEMDICT_ENTRY(null),
+	_SYSTEMDICT_ENTRY(or),
+	_SYSTEMDICT_ENTRY(pop),
+	_SYSTEMDICT_ENTRY(print),
+	_SYSTEMDICT_ENTRY(printobject),
+	_SYSTEMDICT_ENTRY(product),
+	_SYSTEMDICT_ENTRY(prompt),
+	_SYSTEMDICT_ENTRY(pstack),
+	_SYSTEMDICT_ENTRY(put),
+	_SYSTEMDICT_ENTRY(putinterval),
+	_SYSTEMDICT_ENTRY(quit),
+	_SYSTEMDICT_ENTRY(rand),
+	_SYSTEMDICT_ENTRY(rcheck),
+	_SYSTEMDICT_ENTRY(read),
+	_SYSTEMDICT_ENTRY(readhexstring),
+	_SYSTEMDICT_ENTRY(readline),
+	_SYSTEMDICT_ENTRY(readonly),
+	_SYSTEMDICT_ENTRY(readstring),
+	_SYSTEMDICT_ENTRY(realtime),
+	_SYSTEMDICT_ENTRY(renamefile),
+	_SYSTEMDICT_ENTRY(repeat),
+	_SYSTEMDICT_ENTRY(resetfile),
+	_SYSTEMDICT_ENTRY(resourceforall),
+	_SYSTEMDICT_ENTRY(resourcestatus),
+	_SYSTEMDICT_ENTRY(roll),
+	_SYSTEMDICT_ENTRY(round),
+	_SYSTEMDICT_ENTRY(rrand),
+	_SYSTEMDICT_ENTRY(run),
+	_SYSTEMDICT_ENTRY(search),
+	_SYSTEMDICT_ENTRY(setaccuracy),
+	_SYSTEMDICT_ENTRY(setbase),
+	_SYSTEMDICT_ENTRY(setfileposition),
+	_SYSTEMDICT_ENTRY(setglobal),
+	_SYSTEMDICT_ENTRY(setmstate),
+	_SYSTEMDICT_ENTRY(setobjectformat),
+	_SYSTEMDICT_ENTRY(setpoint),
+	_SYSTEMDICT_ENTRY(shift),
+	_SYSTEMDICT_ENTRY(sqrt),
+	_SYSTEMDICT_ENTRY(srand),
+	_SYSTEMDICT_ENTRY(stack),
+	_SYSTEMDICT_ENTRY(start),
+	_SYSTEMDICT_ENTRY(status),
+	_SYSTEMDICT_ENTRY(stop),
+	_SYSTEMDICT_ENTRY(stopped),
+	_SYSTEMDICT_ENTRY(store),
+	_SYSTEMDICT_ENTRY(string),
+	_SYSTEMDICT_ENTRY(sub),
+	{"=",	systemdict_sym_eq},
+	{"==",	systemdict_sym_eq_eq},
+	{">>",	systemdict_sym_gt_gt},
+	{"[",	systemdict_mark},
+	{"<<",	systemdict_mark},
+	{"]",	systemdict_array},
+	_SYSTEMDICT_ENTRY(timedwait),
+	_SYSTEMDICT_ENTRY(token),
+	_SYSTEMDICT_ENTRY(true),
+	_SYSTEMDICT_ENTRY(trylock),
+	_SYSTEMDICT_ENTRY(type),
+	_SYSTEMDICT_ENTRY(undef),
+	_SYSTEMDICT_ENTRY(undefineresource),
+	_SYSTEMDICT_ENTRY(unlock),
+	_SYSTEMDICT_ENTRY(usertime),
+	_SYSTEMDICT_ENTRY(version),
+	_SYSTEMDICT_ENTRY(wait),
+	_SYSTEMDICT_ENTRY(wcheck),
+	_SYSTEMDICT_ENTRY(where),
+	_SYSTEMDICT_ENTRY(write),
+	_SYSTEMDICT_ENTRY(writehexstring),
+	_SYSTEMDICT_ENTRY(writeobject),
+	_SYSTEMDICT_ENTRY(writestring),
+	_SYSTEMDICT_ENTRY(xcheck),
+	_SYSTEMDICT_ENTRY(xor),
+	_SYSTEMDICT_ENTRY(yield)
 };
+#undef _SYSTEMDICT_ENTRY
 
 void
-stil_op_systemdict_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
+systemdict_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 {
 	cw_uint32_t	i;
 	cw_stilo_t	name, operator;
 #define NENTRIES							\
-	((sizeof(systemdict_ops) / sizeof(struct cw_stil_op_dict_entry)))
+	((sizeof(systemdict_ops) / sizeof(struct cw_systemdict_entry)))
 
 	stilo_dict_new(a_dict, a_stilt, NENTRIES);
 
@@ -218,37 +219,37 @@ stil_op_systemdict_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 }
 
 void
-op_abort(cw_stilt_t *a_stilt)
+systemdict_abort(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_abs(cw_stilt_t *a_stilt)
+systemdict_abs(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_add(cw_stilt_t *a_stilt)
+systemdict_add(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_aload(cw_stilt_t *a_stilt)
+systemdict_aload(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_anchorsearch(cw_stilt_t *a_stilt)
+systemdict_anchorsearch(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_and(cw_stilt_t *a_stilt)
+systemdict_and(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_array(cw_stilt_t *a_stilt)
+systemdict_array(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*stack;
 	cw_stilo_t	t_stilo, *stilo, *arr;
@@ -291,247 +292,247 @@ op_array(cw_stilt_t *a_stilt)
 }
 
 void
-op_astore(cw_stilt_t *a_stilt)
+systemdict_astore(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_begin(cw_stilt_t *a_stilt)
+systemdict_begin(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_bind(cw_stilt_t *a_stilt)
+systemdict_bind(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_bytesavailable(cw_stilt_t *a_stilt)
+systemdict_bytesavailable(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_ceiling(cw_stilt_t *a_stilt)
+systemdict_ceiling(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_clear(cw_stilt_t *a_stilt)
+systemdict_clear(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_cleardictstack(cw_stilt_t *a_stilt)
+systemdict_cleardictstack(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_cleartomark(cw_stilt_t *a_stilt)
+systemdict_cleartomark(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_closefile(cw_stilt_t *a_stilt)
+systemdict_closefile(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_condition(cw_stilt_t *a_stilt)
+systemdict_condition(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_copy(cw_stilt_t *a_stilt)
+systemdict_copy(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_count(cw_stilt_t *a_stilt)
+systemdict_count(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_countdictstack(cw_stilt_t *a_stilt)
+systemdict_countdictstack(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_countexecstack(cw_stilt_t *a_stilt)
+systemdict_countexecstack(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_counttomark(cw_stilt_t *a_stilt)
+systemdict_counttomark(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_currentaccuracy(cw_stilt_t *a_stilt)
+systemdict_currentaccuracy(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_currentbase(cw_stilt_t *a_stilt)
+systemdict_currentbase(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_currentcontext(cw_stilt_t *a_stilt)
+systemdict_currentcontext(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_currentdict(cw_stilt_t *a_stilt)
+systemdict_currentdict(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_currentfile(cw_stilt_t *a_stilt)
+systemdict_currentfile(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_currentglobal(cw_stilt_t *a_stilt)
+systemdict_currentglobal(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_currentmstate(cw_stilt_t *a_stilt)
+systemdict_currentmstate(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_currentobjectformat(cw_stilt_t *a_stilt)
+systemdict_currentobjectformat(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_currentpoint(cw_stilt_t *a_stilt)
+systemdict_currentpoint(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_cvlit(cw_stilt_t *a_stilt)
+systemdict_cvlit(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_cvm(cw_stilt_t *a_stilt)
+systemdict_cvm(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_cvn(cw_stilt_t *a_stilt)
+systemdict_cvn(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_cvrs(cw_stilt_t *a_stilt)
+systemdict_cvrs(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_cvs(cw_stilt_t *a_stilt)
+systemdict_cvs(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_cvx(cw_stilt_t *a_stilt)
+systemdict_cvx(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_def(cw_stilt_t *a_stilt)
+systemdict_def(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_defineresource(cw_stilt_t *a_stilt)
+systemdict_defineresource(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_deletefile(cw_stilt_t *a_stilt)
+systemdict_deletefile(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_detach(cw_stilt_t *a_stilt)
+systemdict_detach(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_dict(cw_stilt_t *a_stilt)
+systemdict_dict(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_dictstack(cw_stilt_t *a_stilt)
+systemdict_dictstack(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_div(cw_stilt_t *a_stilt)
+systemdict_div(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_dup(cw_stilt_t *a_stilt)
+systemdict_dup(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_echo(cw_stilt_t *a_stilt)
+systemdict_echo(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_end(cw_stilt_t *a_stilt)
+systemdict_end(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_eq(cw_stilt_t *a_stilt)
+systemdict_eq(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_exch(cw_stilt_t *a_stilt)
+systemdict_exch(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_exec(cw_stilt_t *a_stilt)
+systemdict_exec(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_execstack(cw_stilt_t *a_stilt)
+systemdict_execstack(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_executeonly(cw_stilt_t *a_stilt)
+systemdict_executeonly(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_executive(cw_stilt_t *a_stilt)
+systemdict_executive(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_exit(cw_stilt_t *a_stilt)
+systemdict_exit(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_exp(cw_stilt_t *a_stilt)
+systemdict_exp(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_false(cw_stilt_t *a_stilt)
+systemdict_false(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*stack;
 	cw_stilo_t	*stilo;
@@ -542,147 +543,147 @@ op_false(cw_stilt_t *a_stilt)
 }
 
 void
-op_file(cw_stilt_t *a_stilt)
+systemdict_file(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_filenameforall(cw_stilt_t *a_stilt)
+systemdict_filenameforall(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_fileposition(cw_stilt_t *a_stilt)
+systemdict_fileposition(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_filter(cw_stilt_t *a_stilt)
+systemdict_filter(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_findresource(cw_stilt_t *a_stilt)
+systemdict_findresource(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_floor(cw_stilt_t *a_stilt)
+systemdict_floor(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_flush(cw_stilt_t *a_stilt)
+systemdict_flush(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_flushfile(cw_stilt_t *a_stilt)
+systemdict_flushfile(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_for(cw_stilt_t *a_stilt)
+systemdict_for(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_forall(cw_stilt_t *a_stilt)
+systemdict_forall(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_fork(cw_stilt_t *a_stilt)
+systemdict_fork(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_gcheck(cw_stilt_t *a_stilt)
+systemdict_gcheck(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_ge(cw_stilt_t *a_stilt)
+systemdict_ge(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_get(cw_stilt_t *a_stilt)
+systemdict_get(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_getinterval(cw_stilt_t *a_stilt)
+systemdict_getinterval(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_gt(cw_stilt_t *a_stilt)
+systemdict_gt(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_if(cw_stilt_t *a_stilt)
+systemdict_if(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_ifelse(cw_stilt_t *a_stilt)
+systemdict_ifelse(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_index(cw_stilt_t *a_stilt)
+systemdict_index(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_initmath(cw_stilt_t *a_stilt)
+systemdict_initmath(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_join(cw_stilt_t *a_stilt)
+systemdict_join(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_known(cw_stilt_t *a_stilt)
+systemdict_known(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_le(cw_stilt_t *a_stilt)
+systemdict_le(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_length(cw_stilt_t *a_stilt)
+systemdict_length(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_load(cw_stilt_t *a_stilt)
+systemdict_load(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_lock(cw_stilt_t *a_stilt)
+systemdict_lock(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_loop(cw_stilt_t *a_stilt)
+systemdict_loop(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_lt(cw_stilt_t *a_stilt)
+systemdict_lt(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_mark(cw_stilt_t *a_stilt)
+systemdict_mark(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*stack;
 	cw_stilo_t	*stilo;
@@ -693,72 +694,72 @@ op_mark(cw_stilt_t *a_stilt)
 }
 
 void
-op_maxlength(cw_stilt_t *a_stilt)
+systemdict_maxlength(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_mod(cw_stilt_t *a_stilt)
+systemdict_mod(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_mrestore(cw_stilt_t *a_stilt)
+systemdict_mrestore(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_mrestoreall(cw_stilt_t *a_stilt)
+systemdict_mrestoreall(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_msave(cw_stilt_t *a_stilt)
+systemdict_msave(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_mstate(cw_stilt_t *a_stilt)
+systemdict_mstate(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_mul(cw_stilt_t *a_stilt)
+systemdict_mul(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_mutex(cw_stilt_t *a_stilt)
+systemdict_mutex(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_ne(cw_stilt_t *a_stilt)
+systemdict_ne(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_neg(cw_stilt_t *a_stilt)
+systemdict_neg(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_noaccess(cw_stilt_t *a_stilt)
+systemdict_noaccess(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_not(cw_stilt_t *a_stilt)
+systemdict_not(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_notify(cw_stilt_t *a_stilt)
+systemdict_notify(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_null(cw_stilt_t *a_stilt)
+systemdict_null(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*stack;
 	cw_stilo_t	*stilo;
@@ -769,12 +770,12 @@ op_null(cw_stilt_t *a_stilt)
 }
 
 void
-op_or(cw_stilt_t *a_stilt)
+systemdict_or(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_pop(cw_stilt_t *a_stilt)
+systemdict_pop(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*stack;
 
@@ -785,7 +786,7 @@ op_pop(cw_stilt_t *a_stilt)
 }
 
 void
-op_print(cw_stilt_t *a_stilt)
+systemdict_print(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*stack;
 	cw_stilo_t	*stilo;
@@ -801,12 +802,12 @@ op_print(cw_stilt_t *a_stilt)
 }
 
 void
-op_printobject(cw_stilt_t *a_stilt)
+systemdict_printobject(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_product(cw_stilt_t *a_stilt)
+systemdict_product(cw_stilt_t *a_stilt)
 {
 	cw_stilts_t	stilts;
 	cw_uint8_t	code[] = "`Canonware stil'\n";
@@ -817,7 +818,7 @@ op_product(cw_stilt_t *a_stilt)
 }
 
 void
-op_prompt(cw_stilt_t *a_stilt)
+systemdict_prompt(cw_stilt_t *a_stilt)
 {
 	cw_stilts_t	stilts;
 	cw_uint8_t	code[] = "`stil> ' print flush\n";
@@ -828,7 +829,7 @@ op_prompt(cw_stilt_t *a_stilt)
 }
 
 void
-op_pstack(cw_stilt_t *a_stilt)
+systemdict_pstack(cw_stilt_t *a_stilt)
 {
 	/*
 	 * XXX The correct implementation depends on stilo_p_*_copy() working.
@@ -864,127 +865,127 @@ op_pstack(cw_stilt_t *a_stilt)
 }
 
 void
-op_put(cw_stilt_t *a_stilt)
+systemdict_put(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_putinterval(cw_stilt_t *a_stilt)
+systemdict_putinterval(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_quit(cw_stilt_t *a_stilt)
+systemdict_quit(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_rand(cw_stilt_t *a_stilt)
+systemdict_rand(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_rcheck(cw_stilt_t *a_stilt)
+systemdict_rcheck(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_read(cw_stilt_t *a_stilt)
+systemdict_read(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_readhexstring(cw_stilt_t *a_stilt)
+systemdict_readhexstring(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_readline(cw_stilt_t *a_stilt)
+systemdict_readline(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_readonly(cw_stilt_t *a_stilt)
+systemdict_readonly(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_readstring(cw_stilt_t *a_stilt)
+systemdict_readstring(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_realtime(cw_stilt_t *a_stilt)
+systemdict_realtime(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_renamefile(cw_stilt_t *a_stilt)
+systemdict_renamefile(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_repeat(cw_stilt_t *a_stilt)
+systemdict_repeat(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_resetfile(cw_stilt_t *a_stilt)
+systemdict_resetfile(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_resourceforall(cw_stilt_t *a_stilt)
+systemdict_resourceforall(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_resourcestatus(cw_stilt_t *a_stilt)
+systemdict_resourcestatus(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_roll(cw_stilt_t *a_stilt)
+systemdict_roll(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_round(cw_stilt_t *a_stilt)
+systemdict_round(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_rrand(cw_stilt_t *a_stilt)
+systemdict_rrand(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_run(cw_stilt_t *a_stilt)
+systemdict_run(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_search(cw_stilt_t *a_stilt)
+systemdict_search(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_setaccuracy(cw_stilt_t *a_stilt)
+systemdict_setaccuracy(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_setbase(cw_stilt_t *a_stilt)
+systemdict_setbase(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_setfileposition(cw_stilt_t *a_stilt)
+systemdict_setfileposition(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_setglobal(cw_stilt_t *a_stilt)
+systemdict_setglobal(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*stack;
 	cw_stilo_t	*stilo;
@@ -996,37 +997,37 @@ op_setglobal(cw_stilt_t *a_stilt)
 }
 
 void
-op_setmstate(cw_stilt_t *a_stilt)
+systemdict_setmstate(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_setobjectformat(cw_stilt_t *a_stilt)
+systemdict_setobjectformat(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_setpoint(cw_stilt_t *a_stilt)
+systemdict_setpoint(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_shift(cw_stilt_t *a_stilt)
+systemdict_shift(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_sqrt(cw_stilt_t *a_stilt)
+systemdict_sqrt(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_srand(cw_stilt_t *a_stilt)
+systemdict_srand(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_stack(cw_stilt_t *a_stilt)
+systemdict_stack(cw_stilt_t *a_stilt)
 {
 	cw_stilts_t	stilts;
 	cw_stils_t	*stack;
@@ -1046,43 +1047,43 @@ op_stack(cw_stilt_t *a_stilt)
 }
 
 void
-op_start(cw_stilt_t *a_stilt)
+systemdict_start(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_status(cw_stilt_t *a_stilt)
+systemdict_status(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_stop(cw_stilt_t *a_stilt)
+systemdict_stop(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_stopped(cw_stilt_t *a_stilt)
+systemdict_stopped(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_store(cw_stilt_t *a_stilt)
+systemdict_store(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_string(cw_stilt_t *a_stilt)
+systemdict_string(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_sub(cw_stilt_t *a_stilt)
+systemdict_sub(cw_stilt_t *a_stilt)
 {
 }
 
 /* = */
 void
-op_sym_eq(cw_stilt_t *a_stilt)
+systemdict_sym_eq(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*stack;
 	cw_stilo_t	*stilo;
@@ -1098,7 +1099,7 @@ op_sym_eq(cw_stilt_t *a_stilt)
 
 /* == */
 void
-op_sym_eq_eq(cw_stilt_t *a_stilt)
+systemdict_sym_eq_eq(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*stack;
 	cw_stilo_t	*stilo;
@@ -1114,22 +1115,22 @@ op_sym_eq_eq(cw_stilt_t *a_stilt)
 
 /* >> */
 void
-op_sym_gt_gt(cw_stilt_t *a_stilt)
+systemdict_sym_gt_gt(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_timedwait(cw_stilt_t *a_stilt)
+systemdict_timedwait(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_token(cw_stilt_t *a_stilt)
+systemdict_token(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_true(cw_stilt_t *a_stilt)
+systemdict_true(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*stack;
 	cw_stilo_t	*stilo;
@@ -1140,37 +1141,37 @@ op_true(cw_stilt_t *a_stilt)
 }
 
 void
-op_trylock(cw_stilt_t *a_stilt)
+systemdict_trylock(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_type(cw_stilt_t *a_stilt)
+systemdict_type(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_undef(cw_stilt_t *a_stilt)
+systemdict_undef(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_undefineresource(cw_stilt_t *a_stilt)
+systemdict_undefineresource(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_unlock(cw_stilt_t *a_stilt)
+systemdict_unlock(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_usertime(cw_stilt_t *a_stilt)
+systemdict_usertime(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_version(cw_stilt_t *a_stilt)
+systemdict_version(cw_stilt_t *a_stilt)
 {
 	cw_stilts_t	stilts;
 	cw_uint8_t	code[] = "`" _LIBSTIL_VERSION "'\n";
@@ -1181,51 +1182,51 @@ op_version(cw_stilt_t *a_stilt)
 }
 
 void
-op_wait(cw_stilt_t *a_stilt)
+systemdict_wait(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_wcheck(cw_stilt_t *a_stilt)
+systemdict_wcheck(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_where(cw_stilt_t *a_stilt)
+systemdict_where(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_write(cw_stilt_t *a_stilt)
+systemdict_write(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_writehexstring(cw_stilt_t *a_stilt)
+systemdict_writehexstring(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_writeobject(cw_stilt_t *a_stilt)
+systemdict_writeobject(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_writestring(cw_stilt_t *a_stilt)
+systemdict_writestring(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_xcheck(cw_stilt_t *a_stilt)
+systemdict_xcheck(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_xor(cw_stilt_t *a_stilt)
+systemdict_xor(cw_stilt_t *a_stilt)
 {
 }
 
 void
-op_yield(cw_stilt_t *a_stilt)
+systemdict_yield(cw_stilt_t *a_stilt)
 {
 }
