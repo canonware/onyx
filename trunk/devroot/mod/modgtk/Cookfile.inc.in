@@ -12,7 +12,7 @@
  ******************************************************************************/
 
 /* Include generated dependency files. */
-#include-cooked [glob [objdir]/mod/modgtk/src/"*.d_*"]
+#include-cooked [glob @objdir@/mod/modgtk/src/"*.d_*"]
 
 /*
  * File lists.
@@ -20,18 +20,18 @@
 
 /* Source files. */
 MODGTK_SRCS = modgtk.c;
-MODGTK_SRCS = [fromto % [srcdir]/mod/modgtk/src/% [MODGTK_SRCS]];
+MODGTK_SRCS = [fromto % @srcdir@/mod/modgtk/src/% [MODGTK_SRCS]];
 
 /* Generated source code (created by configure). */
 MODGTK_NX_GEN = modgtk_defs.nx.in;
-MODGTK_NX_GEN = [fromto %.nx.in [objdir]/mod/modgtk/nx/modgtk/%.nx
+MODGTK_NX_GEN = [fromto %.nx.in @objdir@/mod/modgtk/nx/modgtk/%.nx
                         [MODGTK_NX_GEN]];
 
 MODGTK_NX = modgtk.nx;
-MODGTK_NX = [fromto % [srcdir]/mod/modgtk/nx/modgtk/% [MODGTK_NX]];
+MODGTK_NX = [fromto % @srcdir@/mod/modgtk/nx/modgtk/% [MODGTK_NX]];
 
 /* Modules. */
-MODGTK = [objdir]/mod/modgtk/nxm/modgtk.nxm;
+MODGTK = @objdir@/mod/modgtk/nxm/modgtk.nxm;
 
 /*
  * User cook'ables.
@@ -84,8 +84,8 @@ modgtk_mods_uninstall :
 
 modgtk_mods_clean :
 {
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_s [MODGTK_SRCS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_s [MODGTK_SRCS]];
+  rm -f [fromto @srcdir@/%0%.c @objdir@/%0%.d_s [MODGTK_SRCS]];
+  rm -f [fromto @srcdir@/%0%.c @objdir@/%0%.o_s [MODGTK_SRCS]];
   rm -f [MODGTK];
 }
 
@@ -99,21 +99,21 @@ modgtk_mods_distclean :
 MODGTK_CPPFLAGS = @GTK_CFLAGS@;
 MODGTK_LDFLAGS = @GTK_LIBS@;
 
-CPPFLAGS = [CPPFLAGS] -I[srcdir]/mod/modgtk/include
-                      -I[objdir]/mod/modgtk/include
+CPPFLAGS = [CPPFLAGS] -I@srcdir@/mod/modgtk/include
+                      -I@objdir@/mod/modgtk/include
                       [MODGTK_CPPFLAGS];
 
 /*
  * Dependencies.
  */
 
-[MODGTK] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_s [MODGTK_SRCS]]
+[MODGTK] : [fromto @srcdir@/%0%.c @objdir@/%0%.o_s [MODGTK_SRCS]]
   set mkdir
 {
   [CC]
-#if [matches elf [abi]]
+#if [matches elf @abi@]
        -shared
-#elif [matches macho [abi]]
+#elif [matches macho @abi@]
        -undefined suppress -flat_namespace -bundle -all_load
 #endif
        -o [target] [need] [MODGTK_LDFLAGS];

@@ -15,16 +15,9 @@
  * Standard definitions.
  */
 
-/* Paths. */
-srcdir = @top_srcdir@;
-abs_srcdir = @abs_srcdir@;
-objdir = @objdir@;
-abs_objdir = @abs_objdir@;
+/* Installation prefix. */
 if [not [defined PREFIX]] then
   PREFIX = [split " " [strip "@prefix@"]];
-
-/* Executable format. */
-abi = @abi@;
 
 /* Paths to programs used by the build system. */
 SHELL = /bin/sh;
@@ -40,32 +33,31 @@ if [not [defined CFLAGS]] then
   CFLAGS = [split " " [strip "@CFLAGS@"]];
 A_CFLAGS = [CFLAGS];
 S_CFLAGS = [CFLAGS] -fPIC -DPIC
-#if [matches macho [abi]]
+#if [matches macho @abi@]
            -dynamic
 #endif
            ;
 
 if [not [defined LDFLAGS]] then
   LDFLAGS = [split " " [strip "@LDFLAGS@"]];
-EXTRALIBS = @LIBS@;
 
 /* Documentation. */
-#include-cooked [objdir]/doc/Cookfile.inc
+#include-cooked @objdir@/doc/Cookfile.inc
 
 /* Examples. */
-#include-cooked [objdir]/examples/Cookfile.inc
+#include-cooked @objdir@/examples/Cookfile.inc
 
 /* Tests. */
-#include-cooked [objdir]/test/Cookfile.inc
+#include-cooked @objdir@/test/Cookfile.inc
 
 /* Binaries. */
-#include-cooked [objdir]/bin/Cookfile.inc
+#include-cooked @objdir@/bin/Cookfile.inc
 
 /* Libraries. */
-#include-cooked [objdir]/lib/Cookfile.inc
+#include-cooked @objdir@/lib/Cookfile.inc
 
 /* Modules. */
-#include-cooked [objdir]/mod/Cookfile.inc
+#include-cooked @objdir@/mod/Cookfile.inc
 
 /*
  * User targets.
@@ -93,15 +85,15 @@ clean : [addsuffix _clean docs tests bins mods libs]
 data
 #![SHELL]
 
-for i in `find [srcdir] -type f -name .cook.fp` ; do
+for i in `find @srcdir@ -type f -name .cook.fp` ; do
 	echo rm $i;
 	rm $i;
 done
-for i in `find [objdir] -type f -name .cook.fp` ; do
+for i in `find @objdir@ -type f -name .cook.fp` ; do
 	echo rm $i;
 	rm $i;
 done
-for i in `find [objdir] -type f -name Cookfile.list` ; do
+for i in `find @objdir@ -type f -name Cookfile.list` ; do
 	echo rm $i;
 	rm $i;
 done
@@ -110,8 +102,8 @@ dataend
 
 distclean : clean [addsuffix _distclean tests bins mods libs]
 {
-  rm -f [objdir]/config.log;
-  rm -f [objdir]/config.status;
+  rm -f @objdir@/config.log;
+  rm -f @objdir@/config.status;
   rm -f @cfghdrs@;
   rm -f @cfgoutputs@;
 }

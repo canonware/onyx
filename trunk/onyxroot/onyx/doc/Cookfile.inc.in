@@ -12,7 +12,7 @@
  *
  ******************************************************************************/
 
-#include-cooked [fromto % [objdir]/doc/latex/%/Cookfile.inc @docs@]
+#include-cooked [fromto % @objdir@/doc/latex/%/Cookfile.inc @docs@]
 
 /*
  * Targets.
@@ -33,21 +33,21 @@ docs_clean : [addsuffix _docs_clean @docs@];
 
 docs_relclean : [addsuffix _docs_relclean @docs@]
 {
-  rm -rf [objdir]/doc/html;
-  rm -rf [objdir]/doc/pdf;
-  rm -rf [objdir]/doc/ps;
+  rm -rf @objdir@/doc/html;
+  rm -rf @objdir@/doc/pdf;
+  rm -rf @objdir@/doc/ps;
 }
 
 /*
  * Build rules.
  */
-[objdir]/%0%.ps : [srcdir]/%0%.fig
+@objdir@/%0%.ps : @srcdir@/%0%.fig
   set mkdir
 {
-  @FIG2DEV@ -L ps [srcdir]/%0%.fig [objdir]/%0%.ps;
+  @FIG2DEV@ -L ps @srcdir@/%0%.fig @objdir@/%0%.ps;
 }
 
-[objdir]/%0ps/%1/%.ps : [objdir]/%0latex/%1/%.tex
+@objdir@/%0ps/%1/%.ps : @objdir@/%0latex/%1/%.tex
   set mkdir
 {
   /*
@@ -58,19 +58,19 @@ docs_relclean : [addsuffix _docs_relclean @docs@]
    * different location for output files.
    */
 
-  rm -f [addprefix [objdir]/%0latex/%1/%.
+  rm -f [addprefix @objdir@/%0latex/%1/%.
                    alg aux aux-prev idx idx-prev ilg ind lof log lot out toc];
-  rm -f [objdir]/%0latex/%1/texput.log;
+  rm -f @objdir@/%0latex/%1/texput.log;
 
-  cd [objdir]/%0latex/%1/\; @PERL@ [abs_srcdir]/%0latex/ltx2e @LATEX@ %.tex;
-  cd [objdir]/%0latex/%1/\; @MAKEINDEX@ -c -l
-                                        -s [abs_srcdir]/%0latex/%1/%.mst
+  cd @objdir@/%0latex/%1/\; @PERL@ @abs_srcdir@/%0latex/ltx2e @LATEX@ %.tex;
+  cd @objdir@/%0latex/%1/\; @MAKEINDEX@ -c -l
+                                        -s @abs_srcdir@/%0latex/%1/%.mst
                                         %.idx;
-  cd [objdir]/%0latex/%1/\; @PERL@ [abs_srcdir]/%0latex/ltx2e @LATEX@ %.tex;
-  @DVIPS@ [objdir]/%0latex/%1/%.dvi -o [objdir]/%0ps/%1/%.ps;
+  cd @objdir@/%0latex/%1/\; @PERL@ @abs_srcdir@/%0latex/ltx2e @LATEX@ %.tex;
+  @DVIPS@ @objdir@/%0latex/%1/%.dvi -o @objdir@/%0ps/%1/%.ps;
 }
 
-[objdir]/%0pdf/%1/%.pdf : [objdir]/%0latex/%1/%.tex
+@objdir@/%0pdf/%1/%.pdf : @objdir@/%0latex/%1/%.tex
   set mkdir
 {
   /*
@@ -81,34 +81,34 @@ docs_relclean : [addsuffix _docs_relclean @docs@]
    * different location for output files.
    */
 
-  rm -f [addprefix [objdir]/%0latex/%1/%.
+  rm -f [addprefix @objdir@/%0latex/%1/%.
                    alg aux aux-prev idx idx-prev ilg ind lof log lot out toc];
-  rm -f [objdir]/%0latex/%1/texput.log;
+  rm -f @objdir@/%0latex/%1/texput.log;
 
-  cd [objdir]/%0latex/%1/\; @PERL@ [abs_srcdir]/%0latex/ltx2e @PDFLATEX@
+  cd @objdir@/%0latex/%1/\; @PERL@ @abs_srcdir@/%0latex/ltx2e @PDFLATEX@
                                    %.tex;
-  cd [objdir]/%0latex/%1/\; @MAKEINDEX@ -c -l 
-                                        -s [abs_srcdir]/%0latex/%1/%.mst
+  cd @objdir@/%0latex/%1/\; @MAKEINDEX@ -c -l 
+                                        -s @abs_srcdir@/%0latex/%1/%.mst
                                         %.idx;
-  cd [objdir]/%0latex/%1/\; @PERL@ [abs_srcdir]/%0latex/ltx2e @PDFLATEX@
+  cd @objdir@/%0latex/%1/\; @PERL@ @abs_srcdir@/%0latex/ltx2e @PDFLATEX@
                                    %.tex;
-  cp [objdir]/%0latex/%1/%.pdf [objdir]/%0pdf/%1/%.pdf;
+  cp @objdir@/%0latex/%1/%.pdf @objdir@/%0pdf/%1/%.pdf;
 }
 
-[objdir]/%0html/%1/%.html : [objdir]/%0latex/%1/%.tex
+@objdir@/%0html/%1/%.html : @objdir@/%0latex/%1/%.tex
   set mkdir
 {
-  @LATEX2HTML@ -init_file [srcdir]/%0latex/%1/.latex2html-init
-    -dir [abs_objdir]/%0html/%1 -split 5 -toc_depth 4 -show_section_numbers
+  @LATEX2HTML@ -init_file @srcdir@/%0latex/%1/.latex2html-init
+    -dir @abs_objdir@/%0html/%1 -split 5 -toc_depth 4 -show_section_numbers
     -footnode -noinfo -auto_link -transparent -image_type png -local_icons
-    [abs_objdir]/%0latex/%1/%.tex;
+    @abs_objdir@/%0latex/%1/%.tex;
   /*
    * Fix up [, ], and \ characters.
    * Get rid of spurious <> at the end of tables.
    */
   [SHELL] -e;
 data
-  for i in `find [objdir]/%0html/%1/ -type f |grep "\.html$"` ; do
+  for i in `find @objdir@/%0html/%1/ -type f |grep "\.html$"` ; do
     mv $i $i.tmp
     cat $i.tmp | sed -e s/YYYbsZZZ/\\\\\\\\/g \\
       | sed -e s/YYYlbZZZ/\[/g \\
@@ -123,8 +123,8 @@ dataend
   /*
    * Clean up temp files so that they won't get installed.
    */
-  rm -f [objdir]/%0html/%1/WARNINGS;
-  rm -f [addprefix [objdir]/%0html/%1/images. aux idx log pl tex];
-  rm -f [objdir]/%0html/%1/internals.pl;
-  rm -f [objdir]/%0html/%1/labels.pl;
+  rm -f @objdir@/%0html/%1/WARNINGS;
+  rm -f [addprefix @objdir@/%0html/%1/images. aux idx log pl tex];
+  rm -f @objdir@/%0html/%1/internals.pl;
+  rm -f @objdir@/%0html/%1/labels.pl;
 }

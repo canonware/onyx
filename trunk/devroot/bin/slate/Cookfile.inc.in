@@ -12,7 +12,7 @@
  ******************************************************************************/
 
 /* Include generated dependency files. */
-#include-cooked [glob [objdir]/bin/slate/src/"*.d_*"]
+#include-cooked [glob @objdir@/bin/slate/src/"*.d_*"]
 
 /*
  * File lists.
@@ -20,19 +20,19 @@
 
 /* Source files. */
 SLATE_SRCS = buf.c buffer.c hist.c slate.c slate_ops.c;
-SLATE_SRCS = [fromto % [srcdir]/bin/slate/src/% [SLATE_SRCS]];
+SLATE_SRCS = [fromto % @srcdir@/bin/slate/src/% [SLATE_SRCS]];
 
 TSLATE_SRCS = tslate.c;
-TSLATE_SRCS = [fromto % [srcdir]/bin/slate/src/% [TSLATE_SRCS]];
+TSLATE_SRCS = [fromto % @srcdir@/bin/slate/src/% [TSLATE_SRCS]];
 
 /* LaTeX source files. */
 SLATE_TEX_SRCS = ;
-SLATE_TEX_SRCS = [fromto % [srcdir]/bin/slate/doc/latex/% [SLATE_TEX_SRCS]];
-/* SLATE_TEX_SRCS = [SLATE_TEX_SRCS] [objdir]/bin/slate/doc/latex/manual.tex; */
+SLATE_TEX_SRCS = [fromto % @srcdir@/bin/slate/doc/latex/% [SLATE_TEX_SRCS]];
+/* SLATE_TEX_SRCS = [SLATE_TEX_SRCS] @objdir@/bin/slate/doc/latex/manual.tex; */
 
 /* Binaries. */
-SLATE = [objdir]/bin/slate/bin/slate;
-TSLATE = [objdir]/bin/slate/bin/tslate;
+SLATE = @objdir@/bin/slate/bin/slate;
+TSLATE = @objdir@/bin/slate/bin/tslate;
 
 [TSLATE] : [SLATE];
 
@@ -56,9 +56,9 @@ slate_bins_check_update :
 
 slate_bins_bootstrap : onyx
 {
-  cat [srcdir]/bin/slate/src/slate_nxcode.nx
-    | [ONYX] [srcdir]/bin/slate/src/slate_nxcode_gen.nx
-    > [srcdir]/bin/slate/src/slate_nxcode.c;
+  cat @srcdir@/bin/slate/src/slate_nxcode.nx
+    | [ONYX] @srcdir@/bin/slate/src/slate_nxcode_gen.nx
+    > @srcdir@/bin/slate/src/slate_nxcode.c;
 }
 
 slate_bins_install : [SLATE]
@@ -69,18 +69,17 @@ slate_bins_install : [SLATE]
   @INSTALL@ -d [PREFIX]/bin;
 
   [CC] [A_CFLAGS] -o [PREFIX]/bin/slate
-       [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [SLATE_SRCS]]
+       [fromto @srcdir@/%0%.c @objdir@/%0%.o_a [SLATE_SRCS]]
 #if @enable_libonyx@
-#if [matches elf [abi]]
+#if [matches elf @abi@]
        @RPATH@[PREFIX]/lib
 #endif
 #endif
-       [LDFLAGS] -lonyx
-       @EXTRALIBS@;
+       [LDFLAGS] -lonyx @LIBS@;
   chmod 0755 [PREFIX]/bin/slate;
 
   @INSTALL@ -d [PREFIX]/man/man1;
-  @INSTALL@ -m 0444 [objdir]/bin/slate/man/man1/slate.1 [PREFIX]/man/man1;
+  @INSTALL@ -m 0444 @objdir@/bin/slate/man/man1/slate.1 [PREFIX]/man/man1;
 }
 
 slate_bins_uninstall :
@@ -91,8 +90,8 @@ slate_bins_uninstall :
 
 slate_bins_clean :
 {
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_a [SLATE_SRCS] [TSLATE_SRCS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [SLATE_SRCS] [TSLATE_SRCS]];
+  rm -f [fromto @srcdir@/%0%.c @objdir@/%0%.d_a [SLATE_SRCS] [TSLATE_SRCS]];
+  rm -f [fromto @srcdir@/%0%.c @objdir@/%0%.o_a [SLATE_SRCS] [TSLATE_SRCS]];
   rm -f [SLATE] [TSLATE];
 }
 
@@ -104,26 +103,25 @@ slate_bins_distclean :
  * Dependencies.
  */
 
-[TSLATE] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [TSLATE_SRCS]]
+[TSLATE] : [fromto @srcdir@/%0%.c @objdir@/%0%.o_a [TSLATE_SRCS]]
   set mkdir
 {
   [CC] [A_CFLAGS] -o [target]
-       [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [TSLATE_SRCS]];
+       [fromto @srcdir@/%0%.c @objdir@/%0%.o_a [TSLATE_SRCS]];
 }
 
-[SLATE] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [SLATE_SRCS]]
+[SLATE] : [fromto @srcdir@/%0%.c @objdir@/%0%.o_a [SLATE_SRCS]]
 #if @enable_libonyx@
           libonyx_libs_s
 #endif
   set mkdir
 {
   [CC] [A_CFLAGS] -o [target]
-       [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [SLATE_SRCS]]
+       [fromto @srcdir@/%0%.c @objdir@/%0%.o_a [SLATE_SRCS]]
 #if @enable_libonyx@
-#if [matches elf [abi]]
-       @RPATH@[abs_objdir]/lib/libonyx/lib
+#if [matches elf @abi@]
+       @RPATH@@abs_objdir@/lib/libonyx/lib
 #endif
 #endif
-       [LDFLAGS] -lonyx
-       @EXTRALIBS@;
+       [LDFLAGS] -lonyx @LIBS@;
 }
