@@ -21,7 +21,7 @@
 cw_stil_t *
 stil_new(cw_stil_t *a_stil, int a_argc, char **a_argv, char **a_envp,
     cw_stilo_file_read_t *a_stdin, cw_stilo_file_write_t *a_stdout,
-    cw_stilo_file_write_t *a_stderr, void *a_arg)
+    cw_stilo_file_write_t *a_stderr, void *a_arg, cw_op_t *a_stilt_init)
 {
 	cw_stil_t		*retval;
 	volatile cw_uint32_t	try_stage = 0;
@@ -103,6 +103,12 @@ stil_new(cw_stil_t *a_stil, int a_argc, char **a_argv, char **a_envp,
 		    a_argv);
 		try_stage = 9;
 
+		/*
+		 * Set the stilt initialization hook pointer before
+		 * creating the first thread.
+		 */
+		retval->stilt_init = a_stilt_init;
+
 		/* Create initial thread. */
 		stilt_new(&retval->stilt, retval);
 		try_stage = 10;
@@ -136,8 +142,6 @@ stil_new(cw_stil_t *a_stil, int a_argc, char **a_argv, char **a_envp,
 	}
 	xep_end();
 
-	mtx_new(&retval->lock);
-
 #ifdef _LIBSTIL_DBG
 	retval->magic = _CW_STIL_MAGIC;
 #endif
@@ -167,7 +171,6 @@ stil_delete(cw_stil_t *a_stil)
 	stila_delete(&a_stil->stila);
 	dch_delete(&a_stil->name_hash);
 	mtx_delete(&a_stil->name_lock);
-	mtx_delete(&a_stil->lock);
 
 	if (a_stil->is_malloced)
 		_cw_free(a_stil);

@@ -15,7 +15,6 @@ struct cw_stil_s {
 #endif
 
 	cw_bool_t	is_malloced;
-	cw_mtx_t	lock;
 
 	/*
 	 * Used for remembering the current state of reference iteration.
@@ -62,12 +61,17 @@ struct cw_stil_s {
 	 * Initial thread.
 	 */
 	cw_stilt_t	stilt;
+
+	/*
+	 * Thread initialization hook.
+	 */
+	cw_op_t		*stilt_init;
 };
 
 /* stil. */
 cw_stil_t *stil_new(cw_stil_t *a_stil, int a_argc, char **a_argv, char **a_envp,
     cw_stilo_file_read_t *a_stdin, cw_stilo_file_write_t *a_stdout,
-    cw_stilo_file_write_t *a_stderr, void *a_arg);
+    cw_stilo_file_write_t *a_stderr, void *a_arg, cw_op_t *a_stilt_init);
 void	stil_delete(cw_stil_t *a_stil);
 
 #define	stil_stilt_get(a_stil) (&(a_stil)->stilt)

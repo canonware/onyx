@@ -275,6 +275,10 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 		stilo_dup(stilo, &retval->userdict);
 
 		stils_npop(&retval->tstack, 4);
+
+		/* Execute the stilt initialization hook if set. */
+		if (stil_l_stilt_init(a_stil) != NULL)
+			stil_l_stilt_init(a_stil)(retval);
 	}
 	xep_catch(_CW_STASHX_OOM) {
 		retval = (cw_stilt_t *)v_retval;
@@ -1616,7 +1620,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 				a_stilt->m.s.hex_val = c;
 				break;
 			default:
-				stilt_p_syntax_error(a_stilt, "<", "", c);
+				stilt_p_syntax_error(a_stilt, "(", "\\x", c);
 				if (a_token)
 					goto RETURN;
 			}
@@ -1662,10 +1666,14 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 				_CW_STILT_PUTC(val);
 				break;
 			}
-			default:
-				stilt_p_syntax_error(a_stilt, "<", "", c);
+			default: {
+				cw_uint8_t	suffix[] = "\\x?";
+
+				suffix[2] = a_stilt->m.s.hex_val;
+				stilt_p_syntax_error(a_stilt, "(", suffix, c);
 				if (a_token)
 					goto RETURN;
+			}
 			}
 			break;
 		case STILTTS_LIT_STRING:
@@ -1903,17 +1911,13 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 				break;
 			default:
 				switch (a_stilt->index % 4) {
-				case 0:
-					stilt_p_syntax_error(a_stilt, "<~", "~",
-					    c);
-					break;
 				case 2:
 					stilt_p_syntax_error(a_stilt, "<~",
-					    "==~", c);
+					    "==", c);
 					break;
 				case 3:
 					stilt_p_syntax_error(a_stilt, "<~",
-					    "=~", c);
+					    "=", c);
 					break;
 				default:
 					_cw_not_reached();
@@ -2043,10 +2047,6 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 					stilt_p_name_accept(a_stilt, a_stilts);
 				} else {
 					switch (a_stilt->m.m.action) {
-					case ACTION_EXECUTE:
-						stilt_p_syntax_error(a_stilt,
-						    "", "", c);
-						break;
 					case ACTION_LITERAL:
 						stilt_p_syntax_error(a_stilt,
 						    "/", "", c);
