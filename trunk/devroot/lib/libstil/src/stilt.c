@@ -200,7 +200,7 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 	/* XXX Create and push threaddict onto the dictionary stack. */
 	/* Push systemdict onto the dictionary stack. */
 	stilo = stils_push(&retval->dict_stils);
-	stilo_dup(stilo, stil_systemdict_get(a_stil));
+	stilo_dup(stilo, stil_systemdict_get(a_stil), a_stilt);
 	/* XXX Push globaldict onto the dictionary stack. */
 	/* XXX Create and push localdict onto the dictionary stack. */
 

@@ -242,7 +242,7 @@ static cw_bool_t stilo_p_key_comp(const void *a_k1, const void *a_k2);
 
 /* stiloe. */
 static void	stiloe_p_new(cw_stiloe_t *a_stiloe, cw_stilot_t a_type);
-static void	stiloe_p_delete(cw_stiloe_t *a_stiloe, cw_stilt_t *a_stilt);
+/*  static void	stiloe_p_delete(cw_stiloe_t *a_stiloe, cw_stilt_t *a_stilt); */
 
 #define		stiloe_p_lock(a_stiloe) do {				\
 	if ((a_stiloe)->global)						\
@@ -610,37 +610,25 @@ stilo_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
 }
 
 void
-stilo_dup(cw_stilo_t *a_to, cw_stilo_t *a_from)
+stilo_dup(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
 {
-	cw_stilot_t	type;
-
 	_cw_check_ptr(a_to);
 	_cw_assert(a_to->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_to->type == STILOT_NO);
 	_cw_check_ptr(a_from);
 	_cw_assert(a_from->magic == _CW_STILO_MAGIC);
-
-	/* Clean up before stomping on the destination stilo. */
-	stilo_clobber(a_to);
-
-	/* Mark the stilo as invalid. */
-	type = a_from->type;
-	a_from->type = STILOT_NO;
 
 	/* Copy. */
 	memcpy(a_to, a_from, sizeof(cw_stilo_t));
 
 	/* Numbers are not composite, so handle them specially. */
-	if ((type == STILOT_NUMBER) && (a_from->extended)) {
+	if ((a_from->type == STILOT_NUMBER) && (a_from->extended)) {
 		/* XXX Create a duplicate stiloe. */
 	}
 
 	/* Reset debug flags on new copy. */
 	a_to->breakpoint = FALSE;
 	a_to->watchpoint = FALSE;
-
-	/* Mark the the stilo's as valid again. */
-	a_from->type = type;
-	a_to->type = type;
 }
 
 void
@@ -783,12 +771,14 @@ stiloe_p_new(cw_stiloe_t *a_stiloe, cw_stilot_t a_type)
 #endif
 }
 
+#if (0)
 static void
 stiloe_p_delete(cw_stiloe_t *a_stiloe, cw_stilt_t *a_stilt)
 {
 	mtx_delete(&a_stiloe->lock);
 	_cw_stilt_free(a_stilt, a_stiloe);
 }
+#endif
 
 cw_stiloe_t *
 stiloe_l_ref_iterate(cw_stiloe_t *a_stiloe, cw_bool_t a_reset)
@@ -867,7 +857,7 @@ stilo_p_array_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 	}
 	_cw_stilt_free(a_stilt, array->e.a.arr);
 
-	stiloe_p_delete(&array->stiloe, a_stilt);
+/*  	stiloe_p_delete(&array->stiloe, a_stilt); */
 }
 
 static cw_stiloe_t *
@@ -1274,9 +1264,9 @@ stilo_p_dict_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
 		/* Allocate and copy. */
 		dicto_to = _cw_stilt_dicto_get(a_stilt);
 		stilo_no_new(&dicto_to->key);
-		stilo_dup(&dicto_to->key, &dicto_from->key);
+		stilo_dup(&dicto_to->key, &dicto_from->key, a_stilt);
 		stilo_no_new(&dicto_to->val);
-		stilo_dup(&dicto_to->val, &dicto_from->val);
+		stilo_dup(&dicto_to->val, &dicto_from->val, a_stilt);
 		chi = _cw_stilt_chi_get(a_stilt);
 
 		/* Insert. */
@@ -1407,7 +1397,7 @@ stilo_dict_lookup(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const cw_stilo_t
 		if (dch_search(&dict->e.d.hash, (void *)a_key, (void **)&dicto)
 		    == FALSE) {
 			stilo_no_new(r_stilo);
-			stilo_dup(r_stilo, &dicto->val);
+			stilo_dup(r_stilo, &dicto->val, a_stilt);
 			retval = FALSE;
 		} else
 			retval = TRUE;
@@ -1460,7 +1450,7 @@ stilo_dict_iterate(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilo_t
 	else {
 		dch_get_iterate(&dict->e.d.hash, (void **)&stilo, NULL);
 		stilo_no_new(r_stilo);
-		stilo_dup(r_stilo, stilo);
+		stilo_dup(r_stilo, stilo, a_stilt);
 		retval = FALSE;
 	}
 	stiloe_p_unlock(&dict->stiloe);
@@ -2143,6 +2133,89 @@ stilo_p_number_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t
 		_cw_out_put_f(a_fd, "-XXX number-[c]", newline);
 }
 
+void
+stilo_number_add(const cw_stilo_t *a_a, const cw_stilo_t *a_b, cw_stilo_t
+    *r_sum)
+{
+}
+
+void
+stilo_number_sub(const cw_stilo_t *a_num, const cw_stilo_t *a_sub, cw_stilo_t
+    *r_result)
+{
+}
+
+void
+stilo_number_mul(const cw_stilo_t *a_a, const cw_stilo_t *a_b, cw_stilo_t
+    *r_product)
+{
+}
+
+void
+stilo_number_div(const cw_stilo_t *a_num, const cw_stilo_t *a_div, cw_stilo_t
+    *r_quotient)
+{
+}
+
+void
+stilo_number_mod(const cw_stilo_t *a_num, const cw_stilo_t *a_div, cw_stilo_t
+    *r_mod)
+{
+}
+
+void
+stilo_number_abs(const cw_stilo_t *a_a, const cw_stilo_t *a_b, cw_stilo_t
+    *r_abs)
+{
+}
+
+void
+stilo_number_neg(const cw_stilo_t *a_a, const cw_stilo_t *a_b, cw_stilo_t
+    *r_neg)
+{
+}
+
+void
+stilo_number_ceiling(const cw_stilo_t *a_num, cw_stilo_t *r_ceiling)
+{
+}
+
+void
+stilo_number_floor(const cw_stilo_t *a_num, cw_stilo_t *r_floor)
+{
+}
+
+void
+stilo_number_round(const cw_stilo_t *a_num, cw_stilo_t *r_round)
+{
+}
+
+void
+stilo_number_sqrt(const cw_stilo_t *a_num, cw_stilo_t *r_sqrt)
+{
+}
+
+void
+stilo_number_exp(const cw_stilo_t *a_num, const cw_stilo_t *a_exp, cw_stilo_t
+    *r_result)
+{
+}
+
+void
+stilo_number_srand(const cw_stilo_t *a_seed)
+{
+}
+
+void
+stilo_number_rrand(cw_stilo_t *r_seed)
+{
+}
+
+void
+stilo_number_rand(cw_stilo_t *r_num)
+{
+}
+
 /*
  * operator.
  */
@@ -2206,10 +2279,7 @@ stilo_p_string_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 	_cw_check_ptr(string);
 	_cw_assert(string->stiloe.magic == _CW_STILOE_MAGIC);
 
-	if (string->stiloe.indirect == FALSE)
-		_cw_stilt_free(a_stilt, string->e.s.str);
-
-	stiloe_p_delete(&string->stiloe, a_stilt);
+/*  	stiloe_p_delete(&string->stiloe, a_stilt); */
 }
 
 static cw_stiloe_t *

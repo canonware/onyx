@@ -138,7 +138,8 @@ void		stilo_perms_set(cw_stilo_t *a_stilo, cw_stilop_t a_perms);
 void		stilo_cast(cw_stilo_t *a_stilo, cw_stilot_t a_stilot);
 void		stilo_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t
     *a_stilt);
-void		stilo_dup(cw_stilo_t *a_to, cw_stilo_t *a_from);
+void		stilo_dup(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t
+    *a_stilt);
 void		stilo_move(cw_stilo_t *a_to, cw_stilo_t *a_from);
 
 void		stilo_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t
@@ -235,6 +236,33 @@ void		stilo_null_new(cw_stilo_t *a_stilo);
  * number.
  */
 void		stilo_number_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
+void		stilo_number_add(const cw_stilo_t *a_a, const cw_stilo_t *a_b,
+    cw_stilo_t *r_sum);
+void		stilo_number_sub(const cw_stilo_t *a_num, const cw_stilo_t
+    *a_sub, cw_stilo_t *r_result);
+void		stilo_number_mul(const cw_stilo_t *a_a, const cw_stilo_t *a_b,
+    cw_stilo_t *r_product);
+void		stilo_number_div(const cw_stilo_t *a_num, const cw_stilo_t
+    *a_div, cw_stilo_t *r_quotient);
+void		stilo_number_mod(const cw_stilo_t *a_num, const cw_stilo_t
+    *a_div, cw_stilo_t *r_mod);
+void		stilo_number_abs(const cw_stilo_t *a_a, const cw_stilo_t *a_b,
+    cw_stilo_t *r_abs);
+void		stilo_number_neg(const cw_stilo_t *a_a, const cw_stilo_t *a_b,
+    cw_stilo_t *r_neg);
+void		stilo_number_ceiling(const cw_stilo_t *a_num, cw_stilo_t
+    *r_ceiling);
+void		stilo_number_floor(const cw_stilo_t *a_num, cw_stilo_t
+    *r_floor);
+void		stilo_number_round(const cw_stilo_t *a_num, cw_stilo_t
+    *r_round);
+void		stilo_number_sqrt(const cw_stilo_t *a_num, cw_stilo_t
+    *r_sqrt);
+void		stilo_number_exp(const cw_stilo_t *a_num, const cw_stilo_t
+    *a_exp, cw_stilo_t *r_result);
+void		stilo_number_srand(const cw_stilo_t *a_seed);
+void		stilo_number_rrand(cw_stilo_t *r_seed);
+void		stilo_number_rand(cw_stilo_t *r_num);
 
 /*
  * operator.

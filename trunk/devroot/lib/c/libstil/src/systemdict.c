@@ -231,6 +231,21 @@ systemdict_abs(cw_stilt_t *a_stilt)
 void
 systemdict_add(cw_stilt_t *a_stilt)
 {
+	cw_stils_t	*stack;
+	cw_stilo_t	t_stilo, *a, *b;
+
+	stack = stilt_data_stack_get(a_stilt);
+	/* XXX Check depth of stack. */
+	
+	b = stils_get(stack, 0);
+	/* XXX Check type of b. */
+	a = stils_get_down(stack, b);
+	/* XXX Check type of a. */
+	stilo_no_new(&t_stilo);
+	stilo_move(&t_stilo, a);
+	stilo_number_add(&t_stilo, b, a);
+	stils_pop(stack, a_stilt, 1);
+	stilo_delete(&t_stilo, a_stilt);
 }
 
 void
@@ -479,6 +494,15 @@ systemdict_div(cw_stilt_t *a_stilt)
 void
 systemdict_dup(cw_stilt_t *a_stilt)
 {
+	cw_stils_t	*stack;
+	cw_stilo_t	*orig, *dup;
+
+	stack = stilt_data_stack_get(a_stilt);
+	/* XXX Check depth of stack. */
+
+	orig = stils_get(stack, 0);
+	dup = stils_push(stack);
+	stilo_dup(dup, orig, a_stilt);
 }
 
 void
@@ -780,8 +804,8 @@ systemdict_pop(cw_stilt_t *a_stilt)
 	cw_stils_t	*stack;
 
 	stack = stilt_data_stack_get(a_stilt);
+	/* XXX Check depth of stack. */
 
-	/* XXX Check for underflow. */
 	stils_pop(stack, a_stilt, 1);
 }
 
@@ -845,7 +869,7 @@ systemdict_pstack(cw_stilt_t *a_stilt)
 	count = stils_count(stack);
 
 	for (i = 0; i < count; i++) {
-		stils_dup(stack, a_stilt);
+		systemdict_dup(a_stilt);
 		stilt_interp_str(a_stilt, &stilts, code, sizeof(code) - 1);
 		stils_roll(stack, count, 1);
 	}
@@ -1039,7 +1063,7 @@ systemdict_stack(cw_stilt_t *a_stilt)
 	count = stils_count(stack);
 
 	for (i = 0; i < count; i++) {
-		stils_dup(stack, a_stilt);
+		systemdict_dup(a_stilt);
 		stilt_interp_str(a_stilt, &stilts, code, sizeof(code) - 1);
 		stils_roll(stack, count, 1);
 	}

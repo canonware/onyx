@@ -267,37 +267,6 @@ stils_roll(cw_stils_t *a_stils, cw_uint32_t a_count, cw_sint32_t a_amount)
 	return retval;
 }
 
-cw_bool_t
-stils_dup(cw_stils_t *a_stils, cw_stilt_t *a_stilt)
-{
-	cw_bool_t	retval;
-	cw_stilso_t	*orig, *dup;
-
-	_cw_check_ptr(a_stils);
-	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
-
-	if (a_stils->count == 0) {
-		retval = TRUE;
-		goto RETURN;
-	}
-
-	/* Keep track of the original object, since we're about to bury it. */
-	orig = a_stils->stack;
-
-	/* Push an unused stilso. */
-	dup = stils_p_alloc_stilso(a_stils);
-	qr_meld(dup, a_stils->stack, link);
-	a_stils->stack = dup;
-	a_stils->count++;
-
-	/* Copy the object contents. */
-	stilo_copy((cw_stilo_t *)dup, (cw_stilo_t *)orig, a_stilt);
-
-	retval = FALSE;
-	RETURN:
-	return retval;
-}
-
 cw_uint32_t
 stils_count(cw_stils_t *a_stils)
 {
