@@ -176,7 +176,7 @@ systemdict begin
 
 	% Make sure the argument is a name.
 	dup type /nametype ne {
-		/errordict load /typecheck get eval
+		/typecheck /systemdict load /throw get eval
 	} if
 
 	/currenterror load begin

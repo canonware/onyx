@@ -2203,17 +2203,29 @@ proc & {\bf \htmlref{loop}{systemdict:loop}} & -- &  Iterate indefinitely. \\
 -- & {\bf \htmlref{exit}{systemdict:exit}} & -- & Terminate innermost looping
 context. \\
 \hline
-& {\bf \htmlref{start}{systemdict:start}} & & \\
+object & {\bf \htmlref{start}{systemdict:start}} & -- & Evaluate object. \\
 \hline
-& {\bf \htmlref{quit}{systemdict:quit}} & & \\
+-- & {\bf \htmlref{quit}{systemdict:quit}} & -- & Unwind to innermost start
+context. \\
+\hline
+object & {\bf \htmlref{stopped}{systemdict:stopped}} & boolean & Evaluate
+object. \\
+\hline
+-- & {\bf \htmlref{stop}{systemdict:stop}} & -- & Unwind to innermost stopped or
+start context. \\
+\hline
+name & {\bf \htmlref{throw}{systemdict:throw}} & object & Throw an error. \\
+\hline
+-- & {\bf \htmlref{estack}{systemdict:estack}} & stack & Get a current estack
+snapshot. \\
+\hline
+-- & {\bf \htmlref{countestack}{systemdict:countestack}} & count & Get current
+estack depth. \\
+\hline
+-- & {\bf \htmlref{istack}{systemdict:istack}} & stack & Get a current istack
+snapshot. \\
 \hline
 & {\bf \htmlref{die}{systemdict:die}} & & \\
-\hline
-& {\bf \htmlref{stopped}{systemdict:stopped}} & & \\
-\hline
-& {\bf \htmlref{stop}{systemdict:stop}} & & \\
-\hline
-& {\bf \htmlref{throw}{systemdict:throw}} & & \\
 \hline
 & {\bf \htmlref{fork}{systemdict:fork}} & & \\
 \hline
@@ -2226,12 +2238,6 @@ context. \\
 & {\bf \htmlref{realtime}{systemdict:realtime}} & & \\
 \hline
 nanoseconds & {\bf \htmlref{nsleep}{systemdict:nsleep}} & -- & Nanosleep. \\
-\hline
-& {\bf \htmlref{estack}{systemdict:estack}} & & \\
-\hline
-& {\bf \htmlref{countestack}{systemdict:countestack}} & & \\
-\hline
-& {\bf \htmlref{istack}{systemdict:istack}} & & \\
 \hline \hline
 \multicolumn{4}{|l|}{Stack operators} \\
 \hline \hline
@@ -5334,21 +5340,22 @@ onyx:1>
 \index{quit@\onyxop{}{quit}{}}
 \item[{\onyxop{--}{quit}{--}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Unwind the execution stack to the innermost
+		\htmlref{\onyxop{}{start}{}}{systemdict:start} context.  Under
+		normal circumstances, there is always at least one such context.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> stdin cvx start
+onyx:0> estack 1 sprint
+(--start-- -file- --start-- -file- --estack--)
+onyx:0> quit
+onyx:0> estack 1 sprint
+(--start-- -file- --estack--)
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:rand}
@@ -6141,23 +6148,29 @@ onyx:1> pstack
 	\end{description}
 \label{systemdict:start}
 \index{start@\onyxop{}{start}{}}
-\item[{\onyxop{--}{start}{--}}: ]
+\item[{\onyxop{object}{start}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[object: ]
+			An object.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
 	\item[Description: ]
+		Evaluate \oparg{object}.  This operator provides a context that
+		silently terminates execution stack unwinding due to the
+		\htmlref{\onyxop{}{exit}{}}{systemdict:exit},
+		\htmlref{\onyxop{}{quit}{}}{systemdict:quit}, and
+		\htmlref{\onyxop{}{stop}{}}{systemdict:stop} operators.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> stdin cvx start
+onyx:0> quit
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:status}
@@ -6248,42 +6261,55 @@ onyx:1> pstack
 \index{stop@\onyxop{}{stop}{}}
 \item[{\onyxop{--}{stop}{--}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Unwind the execution stack to the innermost
+		\htmlref{\onyxop{}{stopped}{}}{systemdict:stopped} or
+		\htmlref{\onyxop{}{start}{}}{systemdict:start} context.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> {stop} stopped 1 sprint
+true
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:stopped}
 \index{stopped@\onyxop{}{stopped}{}}
-\item[{\onyxop{--}{stopped}{--}}: ]
+\item[{\onyxop{object}{stopped}{boolean}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[object: ]
+			An object to evaluate.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[boolean: ]
+			True if stop operator was executed, false otherwise.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{invalidexit}{invalidexit}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
 	\item[Description: ]
+		Evaluate \oparg{object}.  This operator provides a context that
+		terminates execution stack unwinding due to the
+		\htmlref{\onyxop{}{stop}{}}{systemdict:stop}.  It will also
+		terminate execution stack unwinding due to the 
+		\htmlref{\onyxop{}{exit}{}}{systemdict:exit} operator, but will
+		throw an \htmlref{invalidexit}{invalidexit} error, then do the
+		equivalent of calling
+		\htmlref{\onyxop{}{quit}{}}{systemdict:quit}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> {stop} stopped 1 sprint
+true
+onyx:0> {} stopped 1 sprint
+false
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:store}
@@ -6446,23 +6472,90 @@ onyx:0>
 	\end{description}
 \label{systemdict:throw}
 \index{throw@\onyxop{}{throw}{}}
-\item[{\onyxop{--}{throw}{--}}: ]
+\item[{\onyxop{name}{throw}{object}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[name: ] The name of an error, which can be any of the
+		following:
+			\begin{description}
+			\item[\htmlref{\onyxop{}{dstackunderflow}{}}
+			{errordict:dstackunderflow}.]
+			\item[\htmlref{\onyxop{}{estackoverflow}{}}
+			{errordict:estackoverflow}.]
+			\item[\htmlref{\onyxop{}{invalidaccess}{}}
+			{errordict:invalidaccess}.]
+			\item[\htmlref{\onyxop{}{invalidcontext}{}}
+			{errordict:invalidcontext}.]
+			\item[\htmlref{\onyxop{}{invalidexit}{}}
+			{errordict:invalidexit}.]
+			\item[\htmlref{\onyxop{}{invalidfileaccess}{}}
+			{errordict:invalidfileaccess}.]
+			\item[\htmlref{\onyxop{}{ioerror}{}}
+			{errordict:ioerror}.]
+			\item[\htmlref{\onyxop{}{limitcheck}{}}
+			{errordict:limitcheck}.]
+			\item[\htmlref{\onyxop{}{rangecheck}{}}
+			{errordict:rangecheck}.]
+			\item[\htmlref{\onyxop{}{stackunderflow}{}}
+			{errordict:stackunderflow}.]
+			\item[\htmlref{\onyxop{}{syntaxerror}{}}
+			{errordict:syntaxerror}.]
+			\item[\htmlref{\onyxop{}{typecheck}{}}
+			{errordict:typecheck}.]
+			\item[\htmlref{\onyxop{}{undefined}{}}
+			{errordict:undefined}.]
+			\item[\htmlref{\onyxop{}{undefinedfilename}{}}
+			{errordict:undefinedfilename}.]
+			\item[\htmlref{\onyxop{}{undefinedresult}{}}
+			{errordict:undefinedresult}.]
+			\item[\htmlref{\onyxop{}{unmatchedmark}{}}
+			{errordict:unmatchedmark}.]
+			\item[\htmlref{\onyxop{}{unmatchedfino}{}}
+			{errordict:unmatchedfino}.]
+			\item[\htmlref{\onyxop{}{unregistered}{}}
+			{errordict:unregistered}.]
+			\end{description}
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[object: ]
+			The object that was being executed when the error was
+			thrown.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{undefined}{undefined}.]
 		\end{description}
 	\item[Description: ]
+		Throw an error.  This operator goes through the following steps:
+		\begin{enumerate}
+		\item{Set newerror in the currenterror dictionary to true.}
+		\item{Set errorname in the currenterror dictionary to
+		\oparg{name}.}
+		\item{Set ostack, dstack, estack, and istack in the currenterror
+		dictionary to be current stack snapshots.}
+		\item{Push the object that was being executed before throw was
+		called onto ostack.}
+		\item{Evaluate the error handler in the errordict dictionary
+		that corresponds to \oparg{name}.}
+		\item{Evaluate the errordict dictionary's
+		\htmlref{\onyxop{}{stop}{}}{errordict:stop}.}
+		\end{enumerate}
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> /unregistered throw
+Error /unregistered
+ostack: ()
+dstack: (-dict- -dict- -dict- -dict-)
+estack/istack trace (0..1):
+0:      -file-
+1:      --start--
+onyx:1> pstack
+-file-
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:timedwait}
