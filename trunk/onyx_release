@@ -68,7 +68,8 @@ if (($#ARGV >= 0)
 }
 
 $run =
-    "./snap @ARGS -T ONYX_ -p onyx -r devroot -f CHANGES.onyx"
+    "./snap @ARGS -T ONYX_ -p onyx -r devroot"
+    . " -f .cvsignore -f CHANGES.onyx"
     . " -f Cookfile.in -f Cookfile.inc.in"
     . " -f COPYING -f INSTALL -f PLATFORMS -f README"
     . " -f autogen.sh -f acinclude.m4"
