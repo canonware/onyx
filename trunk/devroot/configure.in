@@ -87,10 +87,6 @@ AC_CHECK_FUNCS(dlopen, AC_DEFINE(HAVE_DLOPEN), \
 
 if test "x$enable_modules" = "xyes" -a "x$enable_threads" = "x1" \
      -a "x$enable_posix" = "x1" ; then
-  AC_PATH_PROGS(GTKCONFIG, gtk-config gtk12-config, , $PATH)
-  if test "x$GTKCONFIG" != "x" ; then
-    CW_BUILD_MOD(modgtk, mod_gtk)
-  fi
   if test "x$enable_slate" = "x1" ; then
     CW_BUILD_MOD(modslate, mod_slate)
   fi
