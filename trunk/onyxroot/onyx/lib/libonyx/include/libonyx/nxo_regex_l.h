@@ -51,7 +51,7 @@ void
 nxo_l_regex_cache_delete(cw_nxo_regex_cache_t *a_cache);
 
 cw_bool_t
-nxoe_l_regex_delete(cw_nxoe_t *a_nxoe cw_uint32_t a_iter);
+nxoe_l_regex_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter);
 
 cw_nxoe_t *
 nxoe_l_regex_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
