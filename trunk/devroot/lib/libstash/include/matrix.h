@@ -1,4 +1,4 @@
-/* -*-mode:c-*-
+/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
  ****************************************************************************
  *
  * <Copyright = "jasone">
@@ -13,9 +13,6 @@
  *
  *
  ****************************************************************************/
-
-#ifndef _MATRIX_H_
-#define _MATRIX_H_
 
 typedef struct cw_matrix_s cw_matrix_t;
 
@@ -74,5 +71,3 @@ void matrix_dump(cw_matrix_t * a_matrix_o, cw_bool_t a_compact);
 cw_bool_t matrix_is_equal(cw_matrix_t * a_a, cw_matrix_t * a_b);
 void matrix_remove_row(cw_matrix_t * a_matrix_o, cw_uint32_t a_row);
 void matrix_remove_column(cw_matrix_t * a_matrix_o, cw_uint32_t a_column);
-
-#endif /* _MATRIX_H_ */

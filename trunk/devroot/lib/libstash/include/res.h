@@ -1,4 +1,4 @@
-/* -*-mode:c-*-
+/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
  ****************************************************************************
  *
  * <Copyright = "jasone">
@@ -15,9 +15,6 @@
  *              
  ****************************************************************************
  */
-
-#ifndef _RES_H_
-#  define _RES_H_
 
 /* Pseudo-opaque type. */
 typedef struct cw_res_s cw_res_t;
@@ -55,5 +52,3 @@ char * res_get_res_val(cw_res_t * a_res_o, char * a_res_name);
 cw_bool_t res_extract_res(cw_res_t * a_res_o, char * a_res_key,
 			  char ** a_res_name, char ** a_res_val);
 cw_bool_t res_dump(cw_res_t * a_res_o, char * a_filename);
-
-#endif /* _RES_H_ */

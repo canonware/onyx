@@ -22,7 +22,7 @@ INCS := libstash_r.h stash_incs.h bhp.h buf.h dbg.h glob.h \
 	lex.h list.h locks.h log.h matrix.h mem.h oh.h res.h thread.h
 
 # Include files that are _not_ installed.
-PRIV_INCS := bhp_priv.h dbg_priv.h lex_priv.h list_priv.h \
+PRIV_INCS := bhp_priv.h lex_priv.h list_priv.h \
 	locks_priv.h log_priv.h mem_priv.h oh_priv.h res_priv.h
 
 # Source files.
@@ -32,8 +32,10 @@ SRCS := bhp.c buf.c dbg.c \
 
 # Simple tests.  Output is diff'ed with the expected (.exp file) output.
 CTESTS := c19980411a.c c19980412a.c c19980419a.c c19980430a.c \
-	c19980630a.c c19980907a.c c19980907b.c c19980907c.c \
+	c19980630a.c c19980907a.c c19980907b.c \
 	c19980908a.c c19980908c.c c19980914a.c c19980917a.c c19981014a.c
+
+# c19980907c.c (deadlock issue on FreeBSD)
 
 # Perl scripts that drive the BTESTS.
 PTESTS := p19980828a.pl.in

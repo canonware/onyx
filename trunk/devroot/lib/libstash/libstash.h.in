@@ -1,8 +1,8 @@
-/* -*-mode:c-*-
+/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
  ****************************************************************************
  *
  * <Copyright = "jasone">
- # <License>
+ * <License>
  *
  ****************************************************************************
  *
@@ -164,9 +164,6 @@ extern cw_log_t * g_log_o;
 #  define _cw_calloc(a, b) mem_calloc(g_mem_o, a, b)
 #  define _cw_realloc(a, b) mem_realloc(g_mem_o, a, b)
 #  define _cw_free(a) mem_free(g_mem_o, a)
-
-#  define _cw_fmatch(a) dbg_fmatch(g_dbg_o, a)
-#  define _cw_pmatch(a) dbg_pmatch(g_dbg_o, a)
 
 #ifdef __cplusplus
 };

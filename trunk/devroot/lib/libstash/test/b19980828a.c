@@ -1,4 +1,4 @@
-/* -*-mode:c-*-
+/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
  ****************************************************************************
  *
  * <Copyright = "jasone">
@@ -21,19 +21,15 @@
 int
 main()
 {
-  glob_new();
-  dbg_clear(g_dbg_o);
-  dbg_turn_on(g_dbg_o, _STASH_DBG_R_RES_ERROR);
-/*   dbg_turn_on(g_dbg_o, _STASH_DBG_R_RES_FUNC); */
+  cw_res_t res_o;
   
-  {
-    cw_res_t res_o;
-
-    res_new(&res_o);
-    _cw_assert(FALSE == res_merge_file(&res_o, "b19980828a.res"));
-    _cw_assert(FALSE == res_dump(&res_o, "b19980828a.dump"));
-    res_delete(&res_o);
-  }
+  glob_new();
+  dbg_register(g_dbg_o, "res_error");
+  
+  res_new(&res_o);
+  _cw_assert(FALSE == res_merge_file(&res_o, "b19980828a.res"));
+  _cw_assert(FALSE == res_dump(&res_o, "b19980828a.dump"));
+  res_delete(&res_o);
       
   glob_delete();
   return 0;

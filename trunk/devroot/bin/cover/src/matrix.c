@@ -1,4 +1,4 @@
-/* -*-mode:c-*-
+/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
  ****************************************************************************
  *
  * <Copyright = "jasone">
@@ -24,10 +24,6 @@ matrix_new(cw_matrix_t * a_matrix_o)
 {
   cw_matrix_t * retval;
 
-  if (_cw_pmatch(_STASH_DBG_R_MATRIX_FUNC))
-  {
-    _cw_marker("Enter matrix_new()");
-  }
   if (a_matrix_o != NULL)
   {
     retval = a_matrix_o;
@@ -41,20 +37,12 @@ matrix_new(cw_matrix_t * a_matrix_o)
     retval->is_malloced = TRUE;
   }
   
-  if (_cw_pmatch(_STASH_DBG_R_MATRIX_FUNC))
-  {
-    _cw_marker("Exit matrix_new()");
-  }
   return retval;
 }
 
 void
 matrix_delete(cw_matrix_t * a_matrix_o)
 {
-  if (_cw_pmatch(_STASH_DBG_R_MATRIX_FUNC))
-  {
-    _cw_marker("Enter matrix_delete()");
-  }
   _cw_check_ptr(a_matrix_o);
 
   if (a_matrix_o->grid != NULL)
@@ -68,20 +56,12 @@ matrix_delete(cw_matrix_t * a_matrix_o)
   {
     _cw_free(a_matrix_o);
   }
-  if (_cw_pmatch(_STASH_DBG_R_MATRIX_FUNC))
-  {
-    _cw_marker("Exit matrix_delete()");
-  }
 }
 
 void
 matrix_init(cw_matrix_t * a_matrix_o, cw_uint32_t a_x_size,
 	    cw_uint32_t a_y_size, cw_bool_t a_should_zero)
 {
-  if (_cw_pmatch(_STASH_DBG_R_MATRIX_FUNC))
-  {
-    _cw_marker("Enter matrix_init()");
-  }
   _cw_check_ptr(a_matrix_o);
   _cw_assert(a_x_size != 0);
   _cw_assert(a_y_size != 0);
@@ -140,19 +120,11 @@ matrix_init(cw_matrix_t * a_matrix_o, cw_uint32_t a_x_size,
       a_matrix_o->y_index[i] = i;
     }
   }
-  if (_cw_pmatch(_STASH_DBG_R_MATRIX_FUNC))
-  {
-    _cw_marker("Exit matrix_init()");
-  }
 }
 
 void
 matrix_rebuild(cw_matrix_t * a_matrix_o)
 {
-  if (_cw_pmatch(_STASH_DBG_R_MATRIX_FUNC))
-  {
-    _cw_marker("Enter matrix_rebuild()");
-  }
   _cw_check_ptr(a_matrix_o);
 
   if ((a_matrix_o->x_size != a_matrix_o->grid_x_size)
@@ -200,10 +172,6 @@ matrix_rebuild(cw_matrix_t * a_matrix_o)
     a_matrix_o->grid_x_size = a_matrix_o->x_size;
     a_matrix_o->grid_y_size = a_matrix_o->y_size;
   }
-  if (_cw_pmatch(_STASH_DBG_R_MATRIX_FUNC))
-  {
-    _cw_marker("Exit matrix_rebuild()");
-  }
 }
 
 #ifdef _STASH_DBG
@@ -213,10 +181,6 @@ matrix_get_element(cw_matrix_t * a_matrix_o, cw_uint32_t a_x_pos,
 {
   cw_sint32_t retval;
   
-  if (_cw_pmatch(_STASH_DBG_R_MATRIX_FUNC))
-  {
-    _cw_marker("Enter matrix_get_element()");
-  }
   _cw_check_ptr(a_matrix_o);
   _cw_assert(a_x_pos < a_matrix_o->x_size);
   _cw_assert(a_y_pos < a_matrix_o->y_size);
@@ -225,10 +189,6 @@ matrix_get_element(cw_matrix_t * a_matrix_o, cw_uint32_t a_x_pos,
 			   * a_matrix_o->grid_x_size
 			   + a_matrix_o->x_index[a_x_pos]];
 
-  if (_cw_pmatch(_STASH_DBG_R_MATRIX_FUNC))
-  {
-    _cw_marker("Exit matrix_get_element()");
-  }
   return retval;
 }
 
@@ -236,10 +196,6 @@ void
 matrix_set_element(cw_matrix_t * a_matrix_o, cw_uint32_t a_x_pos,
 		   cw_uint32_t a_y_pos, cw_sint32_t a_val)
 {
-  if (_cw_pmatch(_STASH_DBG_R_MATRIX_FUNC))
-  {
-    _cw_marker("Enter matrix_set_element()");
-  }
   _cw_check_ptr(a_matrix_o);
   _cw_assert(a_x_pos < a_matrix_o->x_size);
   _cw_assert(a_y_pos < a_matrix_o->y_size);
@@ -248,40 +204,18 @@ matrix_set_element(cw_matrix_t * a_matrix_o, cw_uint32_t a_x_pos,
 		  * a_matrix_o->grid_x_size
 		  + a_matrix_o->x_index[a_x_pos]]
     = a_val;
-  if (_cw_pmatch(_STASH_DBG_R_MATRIX_FUNC))
-  {
-    _cw_marker("Exit matrix_set_element()");
-  }
 }
 
 cw_uint32_t
 matrix_get_x_size(cw_matrix_t * a_matrix_o)
 {
-  if (_cw_pmatch(_STASH_DBG_R_MATRIX_FUNC))
-  {
-    _cw_marker("Enter matrix_get_x_size()");
-  }
   _cw_check_ptr(a_matrix_o);
-
-  if (_cw_pmatch(_STASH_DBG_R_MATRIX_FUNC))
-  {
-    _cw_marker("Exit matrix_get_x_size()");
-  }
   return a_matrix_o->x_size;
 }
 cw_uint32_t
 matrix_get_y_size(cw_matrix_t * a_matrix_o)
 {
-  if (_cw_pmatch(_STASH_DBG_R_MATRIX_FUNC))
-  {
-    _cw_marker("Enter matrix_get_y_size()");
-  }
   _cw_check_ptr(a_matrix_o);
-
-  if (_cw_pmatch(_STASH_DBG_R_MATRIX_FUNC))
-  {
-    _cw_marker("Exit matrix_get_y_size()");
-  }
   return a_matrix_o->y_size;
 }
 #endif
@@ -292,10 +226,6 @@ matrix_copy(cw_matrix_t * a_matrix_o)
   cw_matrix_t * retval;
   cw_uint32_t i, j;
   
-  if (_cw_pmatch(_STASH_DBG_R_MATRIX_FUNC))
-  {
-    _cw_marker("Enter matrix_copy()");
-  }
   _cw_check_ptr(a_matrix_o);
 
   retval = matrix_new(NULL);
@@ -316,20 +246,12 @@ matrix_copy(cw_matrix_t * a_matrix_o)
     }
   }
 
-  if (_cw_pmatch(_STASH_DBG_R_MATRIX_FUNC))
-  {
-    _cw_marker("Exit matrix_copy()");
-  }
   return retval;
 }
 
 void
 matrix_dump(cw_matrix_t * a_matrix_o, cw_bool_t a_compact)
 {
-  if (_cw_pmatch(_STASH_DBG_R_MATRIX_FUNC))
-  {
-    _cw_marker("Enter matrix_dump()");
-  }
   _cw_check_ptr(a_matrix_o);
 
   if (a_matrix_o->grid != NULL)
@@ -440,10 +362,6 @@ matrix_dump(cw_matrix_t * a_matrix_o, cw_bool_t a_compact)
   {
     log_printf(g_log_o, "Invalid matrix\n");
   }
-  if (_cw_pmatch(_STASH_DBG_R_MATRIX_FUNC))
-  {
-    _cw_marker("Exit matrix_dump()");
-  }
 }
 
 cw_bool_t
@@ -451,10 +369,6 @@ matrix_is_equal(cw_matrix_t * a_a, cw_matrix_t * a_b)
 {
   cw_uint32_t i, j;
   
-  if (_cw_pmatch(_STASH_DBG_R_MATRIX_FUNC))
-  {
-    _cw_marker("Enter matrix_is_equal()");
-  }
   _cw_check_ptr(a_a);
   _cw_check_ptr(a_b);
 
@@ -482,10 +396,6 @@ matrix_is_equal(cw_matrix_t * a_a, cw_matrix_t * a_b)
     }
   }
 
-  if (_cw_pmatch(_STASH_DBG_R_MATRIX_FUNC))
-  {
-    _cw_marker("Exit matrix_is_equal()");
-  }
   return TRUE;
 }
 
@@ -494,10 +404,6 @@ matrix_remove_row(cw_matrix_t * a_matrix_o, cw_uint32_t a_row)
 {
   cw_uint32_t j;
 
-  if (_cw_pmatch(_STASH_DBG_R_MATRIX_FUNC))
-  {
-    _cw_marker("Enter matrix_remove_row()");
-  }
   _cw_check_ptr(a_matrix_o);
   _cw_assert(a_row < matrix_get_y_size(a_matrix_o));
 
@@ -506,10 +412,6 @@ matrix_remove_row(cw_matrix_t * a_matrix_o, cw_uint32_t a_row)
     a_matrix_o->y_index[j] = a_matrix_o->y_index[j + 1];
   }
   a_matrix_o->y_size--;
-  if (_cw_pmatch(_STASH_DBG_R_MATRIX_FUNC))
-  {
-    _cw_marker("Exit matrix_remove_row()");
-  }
 }
 
 void
@@ -517,10 +419,6 @@ matrix_remove_column(cw_matrix_t * a_matrix_o, cw_uint32_t a_column)
 {
   cw_uint32_t i;
 
-  if (_cw_pmatch(_STASH_DBG_R_MATRIX_FUNC))
-  {
-    _cw_marker("Enter matrix_remove_column()");
-  }
   _cw_check_ptr(a_matrix_o);
   _cw_assert(a_column < matrix_get_x_size(a_matrix_o));
 
@@ -529,8 +427,4 @@ matrix_remove_column(cw_matrix_t * a_matrix_o, cw_uint32_t a_column)
     a_matrix_o->x_index[i] = a_matrix_o->x_index[i + 1];
   }
   a_matrix_o->x_size--;
-  if (_cw_pmatch(_STASH_DBG_R_MATRIX_FUNC))
-  {
-    _cw_marker("Exit matrix_remove_column()");
-  }
 }

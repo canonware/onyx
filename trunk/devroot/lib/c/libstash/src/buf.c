@@ -1,4 +1,4 @@
-/* -*-mode:c-*-
+/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
  ****************************************************************************
  *
  * <Copyright = "jasone">
@@ -40,10 +40,6 @@ buf_new(cw_buf_t * a_buf_o)
 {
   cw_buf_t * retval;
 
-  if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
-  {
-    _cw_marker("Enter buf_new()");
-  }
   if (a_buf_o == NULL)
   {
     retval = (cw_buf_t *) _cw_malloc(sizeof(cw_buf_t));
@@ -68,10 +64,6 @@ buf_new(cw_buf_t * a_buf_o)
 
   retval->size = 0;
   
-  if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
-  {
-    _cw_marker("Exit buf_new()");
-  }
   return retval;
 }
 
@@ -83,10 +75,6 @@ buf_new(cw_buf_t * a_buf_o)
 void
 buf_delete(cw_buf_t * a_buf_o)
 {
-  if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
-  {
-    _cw_marker("Enter buf_delete()");
-  }
   _cw_check_ptr(a_buf_o);
 
 #ifdef _CW_REENTRANT
@@ -101,10 +89,6 @@ buf_delete(cw_buf_t * a_buf_o)
     bufel_delete(list_hpop(&a_buf_o->bufels));
   }
   list_delete(&a_buf_o->bufels);
-  if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
-  {
-    _cw_marker("Exit buf_delete()");
-  }
 }
 
 /****************************************************************************
@@ -115,16 +99,7 @@ buf_delete(cw_buf_t * a_buf_o)
 cw_uint32_t
 buf_get_size(cw_buf_t * a_buf_o)
 {
-  if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
-  {
-    _cw_marker("Enter buf_get_size()");
-  }
   _cw_check_ptr(a_buf_o);
-
-  if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
-  {
-    _cw_marker("Exit buf_get_size()");
-  }
   return a_buf_o->size;
 }
 
@@ -137,10 +112,6 @@ buf_get_size(cw_buf_t * a_buf_o)
 void
 buf_append_buf(cw_buf_t * a_buf_o, cw_buf_t * a_other)
 {
-  if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
-  {
-    _cw_marker("Enter buf_append_buf()");
-  }
   _cw_check_ptr(a_buf_o);
   _cw_check_ptr(a_other);
 #ifdef _CW_REENTRANT
@@ -171,10 +142,6 @@ buf_append_buf(cw_buf_t * a_buf_o, cw_buf_t * a_other)
     mtx_unlock(&a_buf_o->lock);
   }
 #endif
-  if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
-  {
-    _cw_marker("Exit buf_append_buf()");
-  }
 }
 
 /****************************************************************************
@@ -187,10 +154,6 @@ buf_rm_head_bufel(cw_buf_t * a_buf_o)
 {
   cw_bufel_t * retval;
 
-  if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
-  {
-    _cw_marker("Enter buf_rm_head_bufel()");
-  }
   _cw_check_ptr(a_buf_o);
 #ifdef _CW_REENTRANT
   if (a_buf_o->is_threadsafe == TRUE)
@@ -215,10 +178,6 @@ buf_rm_head_bufel(cw_buf_t * a_buf_o)
     mtx_unlock(&a_buf_o->lock);
   }
 #endif
-  if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
-  {
-    _cw_marker("Exit buf_rm_head_bufel()");
-  }
   return retval;
 }
 
@@ -230,10 +189,6 @@ buf_rm_head_bufel(cw_buf_t * a_buf_o)
 void
 buf_append_bufel(cw_buf_t * a_buf_o, cw_bufel_t * a_bufel_o)
 {
-  if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
-  {
-    _cw_marker("Enter buf_append_bufel()");
-  }
   _cw_check_ptr(a_buf_o);
   _cw_check_ptr(a_bufel_o);
 #ifdef _CW_REENTRANT
@@ -252,10 +207,6 @@ buf_append_bufel(cw_buf_t * a_buf_o, cw_bufel_t * a_bufel_o)
     mtx_unlock(&a_buf_o->lock);
   }
 #endif
-  if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
-  {
-    _cw_marker("Exit buf_append_bufel()");
-  }
 }
 
 /****************************************************************************
@@ -268,10 +219,6 @@ bufel_new(cw_bufel_t * a_bufel_o)
 {
   cw_bufel_t * retval;
 
-  if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
-  {
-    _cw_marker("Enter bufel_new()");
-  }
   if (a_bufel_o == NULL)
   {
     retval = (cw_bufel_t *) _cw_malloc(sizeof(cw_bufel_t));
@@ -288,10 +235,6 @@ bufel_new(cw_bufel_t * a_bufel_o)
   retval->end_offset = 0;
   retval->buf = NULL;
   
-  if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
-  {
-    _cw_marker("Exit bufel_new()");
-  }
   return retval;
 }
 
@@ -303,10 +246,6 @@ bufel_new(cw_bufel_t * a_bufel_o)
 void
 bufel_delete(cw_bufel_t * a_bufel_o)
 {
-  if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
-  {
-    _cw_marker("Enter bufel_delete()");
-  }
   _cw_check_ptr(a_bufel_o);
 
   if (a_bufel_o->buf != NULL)
@@ -316,10 +255,6 @@ bufel_delete(cw_bufel_t * a_bufel_o)
   if (a_bufel_o->is_malloced == TRUE)
   {
     _cw_free(a_bufel_o);
-  }
-  if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
-  {
-    _cw_marker("Exit bufel_delete()");
   }
 }
 
@@ -332,16 +267,7 @@ bufel_delete(cw_bufel_t * a_bufel_o)
 cw_uint32_t
 bufel_get_size(cw_bufel_t * a_bufel_o)
 {
-  if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
-  {
-    _cw_marker("Enter bufel_get_size()");
-  }
   _cw_check_ptr(a_bufel_o);
-  
-  if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
-  {
-    _cw_marker("Exit bufel_get_size()");
-  }
   return a_bufel_o->buf_size;
 }
 
@@ -356,10 +282,6 @@ bufel_set_size(cw_bufel_t * a_bufel_o, cw_uint32_t a_size)
   cw_bool_t retval;
   cw_uint32_t * t_buf;
 
-  if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
-  {
-    _cw_marker("Enter bufel_set_size()");
-  }
   _cw_check_ptr(a_bufel_o);
   _cw_assert((a_size & 0x3) == 0);
 
@@ -386,10 +308,6 @@ bufel_set_size(cw_bufel_t * a_bufel_o, cw_uint32_t a_size)
     retval = FALSE;
   }
   
-  if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
-  {
-    _cw_marker("Exit bufel_set_size()");
-  }
   return retval;
 }
 
@@ -401,16 +319,7 @@ bufel_set_size(cw_bufel_t * a_bufel_o, cw_uint32_t a_size)
 cw_uint32_t
 bufel_get_beg_offset(cw_bufel_t * a_bufel_o)
 {
-  if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
-  {
-    _cw_marker("Enter bufel_get_beg_offset()");
-  }
   _cw_check_ptr(a_bufel_o);
-
-  if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
-  {
-    _cw_marker("Exit bufel_get_beg_offset()");
-  }
   return a_bufel_o->beg_offset;
 }
 
@@ -422,18 +331,10 @@ bufel_get_beg_offset(cw_bufel_t * a_bufel_o)
 void
 bufel_set_beg_offset(cw_bufel_t * a_bufel_o, cw_uint32_t a_offset)
 {
-  if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
-  {
-    _cw_marker("Enter bufel_set_beg_offset()");
-  }
   _cw_check_ptr(a_bufel_o);
   _cw_assert(a_offset <= a_bufel_o->end_offset);
 
   a_bufel_o->beg_offset = a_offset;
-  if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
-  {
-    _cw_marker("Exit bufel_set_beg_offset()");
-  }
 }
 
 /****************************************************************************
@@ -444,16 +345,7 @@ bufel_set_beg_offset(cw_bufel_t * a_bufel_o, cw_uint32_t a_offset)
 cw_uint32_t
 bufel_get_end_offset(cw_bufel_t * a_bufel_o)
 {
-  if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
-  {
-    _cw_marker("Enter bufel_get_end_offset()");
-  }
   _cw_check_ptr(a_bufel_o);
-
-  if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
-  {
-    _cw_marker("Exit bufel_get_end_offset()");
-  }
   return a_bufel_o->end_offset;
 }
 
@@ -465,19 +357,11 @@ bufel_get_end_offset(cw_bufel_t * a_bufel_o)
 void
 bufel_set_end_offset(cw_bufel_t * a_bufel_o, cw_uint32_t a_offset)
 {
-  if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
-  {
-    _cw_marker("Enter bufel_set_end_offset()");
-  }
   _cw_check_ptr(a_bufel_o);
   _cw_assert(a_offset >= a_bufel_o->beg_offset);
   _cw_assert(a_offset <= a_bufel_o->buf_size);
 
   a_bufel_o->end_offset = a_offset;
-  if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
-  {
-    _cw_marker("Exit bufel_set_end_offset()");
-  }
 }
 
 /****************************************************************************
@@ -491,10 +375,6 @@ bufel_get_uint8(cw_bufel_t * a_bufel_o, cw_uint32_t a_offset)
   cw_uint8_t retval;
   cw_uint32_t t;
 
-  if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
-  {
-    _cw_marker("Enter bufel_get_uint8()");
-  }
   _cw_check_ptr(a_bufel_o);
   _cw_assert(a_offset < a_bufel_o->buf_size);
 
@@ -504,10 +384,6 @@ bufel_get_uint8(cw_bufel_t * a_bufel_o, cw_uint32_t a_offset)
   t &= 0xff;
   retval = t;
   
-  if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
-  {
-    _cw_marker("Exit bufel_get_uint8()");
-  }
   return retval;
 }
 
@@ -522,10 +398,6 @@ bufel_set_uint8(cw_bufel_t * a_bufel_o, cw_uint32_t a_offset,
 {
   cw_uint32_t t_a, t_b, mask;
 
-  if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
-  {
-    _cw_marker("Enter bufel_set_uint8()");
-  }
   _cw_check_ptr(a_bufel_o);
   _cw_assert(a_offset < a_bufel_o->buf_size);
 
@@ -543,10 +415,6 @@ bufel_set_uint8(cw_bufel_t * a_bufel_o, cw_uint32_t a_offset,
   t_a |= t_b;
   t_a = ntohl(t_a);
   a_bufel_o->buf[a_offset >> 2] = t_a;
-  if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
-  {
-    _cw_marker("Exit bufel_set_uint8()");
-  }
 }
 
 /****************************************************************************
@@ -559,10 +427,6 @@ bufel_get_uint32(cw_bufel_t * a_bufel_o, cw_uint32_t a_offset)
 {
   cw_uint32_t retval;
 
-  if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
-  {
-    _cw_marker("Enter bufel_get_uint32()");
-  }
   _cw_check_ptr(a_bufel_o);
   _cw_assert((a_offset & 0x3) == 0);
   _cw_assert (a_offset < a_bufel_o->buf_size);
@@ -570,10 +434,6 @@ bufel_get_uint32(cw_bufel_t * a_bufel_o, cw_uint32_t a_offset)
   retval = a_bufel_o->buf[a_offset >> 2];
   retval = htonl(retval);
   
-  if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
-  {
-    _cw_marker("Exit bufel_get_uint32()");
-  }
   return retval;
 }
 
@@ -586,17 +446,9 @@ void
 bufel_set_uint32(cw_bufel_t * a_bufel_o, cw_uint32_t a_offset,
 		 cw_uint32_t a_val)
 {
-  if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
-  {
-    _cw_marker("Enter bufel_set_uint32()");
-  }
   _cw_check_ptr(a_bufel_o);
   _cw_assert((a_offset & 0x3) == 0);
   _cw_assert (a_offset < a_bufel_o->buf_size);
 
   a_bufel_o->buf[a_offset >> 2] = ntohl(a_val);
-  if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
-  {
-    _cw_marker("Exit bufel_set_uint32()");
-  }
 }

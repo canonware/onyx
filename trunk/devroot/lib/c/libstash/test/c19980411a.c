@@ -1,4 +1,4 @@
-/* -*-mode:c-*-
+/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
  ****************************************************************************
  *
  * <Copyright = "jasone">
@@ -30,9 +30,9 @@ main()
   cw_bool_t error;
 
   glob_new();
+  
   oh_new(&hash_o, FALSE);
-/*   dbg_turn_on(g_dbg_o, _STASH_DBG_R_OH_FUNC); */
-/*   dbg_turn_on(g_dbg_o, _STASH_DBG_R_OH_SLOT); */
+/*   dbg_register(g_dbg_o, "oh_slot"); */
   
   strings = (char **) _cw_malloc(sizeof(char *) * NUM_STRINGS);
 

@@ -1,4 +1,4 @@
-/* -*-mode:c-*-
+/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
  ****************************************************************************
  *
  * <Copyright = "jasone">
@@ -25,7 +25,6 @@ main()
   cw_bufel_t * bufel_a, bufel_b;
 
   glob_new();
-/*    dbg_turn_on(g_dbg_o, _STASH_DBG_C_FUNC); */
 
   buf_a = buf_new(NULL, FALSE);
   _cw_check_ptr(buf_a);
@@ -112,6 +111,7 @@ main()
 		 i + 4, bufel_get_uint32(bufel_a, i + 4));
     }
   }
+
 
   _cw_marker("");
   log_printf(g_log_o, "buf_b size == %u\n", buf_get_size(&buf_b));

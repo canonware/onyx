@@ -1,4 +1,4 @@
-/* -*-mode:c-*-
+/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
  ****************************************************************************
  *
  * <Copyright = "jasone">
@@ -14,9 +14,6 @@
  * as the list class (the main reason these needed split out of thread.h).
  *
  ****************************************************************************/
-
-#ifndef _LOCKS_H_
-#define _LOCKS_H_
 
 /* Pseudo-opaque types. */
 typedef struct cw_rwl_s cw_rwl_t;
@@ -131,5 +128,3 @@ void jtl_wunlock(cw_jtl_t * a_jtl_o);
 void jtl_xunlock(cw_jtl_t * a_jtl_o);
 cw_uint32_t jtl_get_max_dlocks(cw_jtl_t * a_jtl_o);
 cw_uint32_t jtl_set_max_dlocks(cw_jtl_t * a_jtl_o, cw_uint32_t a_dlocks);
-
-#endif /* _LOCKS_H_ */

@@ -1,4 +1,4 @@
-/* -*-mode:c-*-
+/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
  ****************************************************************************
  *
  * <Copyright = "jasone">
@@ -13,9 +13,6 @@
  * Private definitions for oh.
  *
  ****************************************************************************/
-
-#ifndef _OH_PRIV_H_
-#define _OH_PRIV_H_
 
 #define oh_p_grow _CW_NS_ANY(oh_p_grow)
 #define oh_p_shrink _CW_NS_ANY(oh_p_shrink)
@@ -47,5 +44,3 @@ cw_bool_t oh_p_item_search(cw_oh_t * a_oh_o,
 			   cw_uint64_t * a_slot);
 void oh_p_rehash(cw_oh_t * a_oh_o);
 void oh_p_slot_shuffle(cw_oh_t * a_oh_o, cw_uint64_t a_slot);
-
-#endif /* _OH_PRIV_H_ */

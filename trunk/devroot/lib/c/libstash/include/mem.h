@@ -1,4 +1,4 @@
-/* -*-mode:c-*-
+/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
  ****************************************************************************
  *
  * <Copyright = "jasone">
@@ -13,9 +13,6 @@
  *
  *
  ****************************************************************************/
-
-#ifndef _MEM_H_
-#define _MEM_H_
 
 typedef struct cw_mem_s cw_mem_t;
 
@@ -32,5 +29,3 @@ void * mem_malloc(cw_mem_t * a_mem_o, size_t a_size);
 void * mem_calloc(cw_mem_t * a_mem_o, size_t a_number, size_t a_size);
 void * mem_realloc(cw_mem_t * a_mem_o, void * a_ptr, size_t a_size);
 void mem_free(cw_mem_t * a_mem_o, void * a_ptr);
-
-#endif /* _MEM_H_ */

@@ -1,4 +1,4 @@
-/* -*-mode:c-*-
+/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
  ****************************************************************************
  *
  * <Copyright = "jasone">
@@ -38,11 +38,6 @@ bhp_new(cw_bhp_t * a_bhp_o)
 {
   cw_bhp_t * retval;
 
-  if (_cw_pmatch(_STASH_DBG_R_BHP_FUNC))
-  {
-    _cw_marker("Enter bhp_new()");
-  }
-  
   if (a_bhp_o == NULL)
   {
     retval = (cw_bhp_t *) _cw_malloc(sizeof(cw_bhp_t));
@@ -70,10 +65,6 @@ bhp_new(cw_bhp_t * a_bhp_o)
   retval->num_nodes = 0;
   retval->priority_compare = bhp_p_priority_compare;
   
-  if (_cw_pmatch(_STASH_DBG_R_BHP_FUNC))
-  {
-    _cw_marker("Exit bhp_new()");
-  }
   return retval;
 }
 
@@ -86,10 +77,6 @@ bhp_new(cw_bhp_t * a_bhp_o)
 void
 bhp_delete(cw_bhp_t * a_bhp_o)
 {
-  if (_cw_pmatch(_STASH_DBG_R_BHP_FUNC))
-  {
-    _cw_marker("Enter bhp_delete()");
-  }
   _cw_check_ptr(a_bhp_o);
 
 #ifdef _CW_REENTRANT
@@ -103,10 +90,6 @@ bhp_delete(cw_bhp_t * a_bhp_o)
   {
     _cw_free(a_bhp_o);
   }
-  if (_cw_pmatch(_STASH_DBG_R_BHP_FUNC))
-  {
-    _cw_marker("Exit bhp_delete()");
-  }
 }
 
 /****************************************************************************
@@ -118,10 +101,6 @@ bhp_delete(cw_bhp_t * a_bhp_o)
 void
 bhp_dump(cw_bhp_t * a_bhp_o)
 {
-  if (_cw_pmatch(_STASH_DBG_R_BHP_FUNC))
-  {
-    _cw_marker("Enter bhp_dump()");
-  }
   _cw_check_ptr(a_bhp_o);
 #ifdef _CW_REENTRANT
   if (a_bhp_o->is_thread_safe == TRUE)
@@ -138,10 +117,6 @@ bhp_dump(cw_bhp_t * a_bhp_o)
     rwl_runlock(&a_bhp_o->rw_lock);
   }
 #endif
-  if (_cw_pmatch(_STASH_DBG_R_BHP_FUNC))
-  {
-    _cw_marker("Exit bhp_dump()");
-  }
 }
 
 /****************************************************************************
@@ -156,10 +131,6 @@ bhp_insert(cw_bhp_t * a_bhp_o, void * a_priority, void * a_data)
   cw_bhp_t temp_heap;
   cw_bhpi_t * new_item;
   
-  if (_cw_pmatch(_STASH_DBG_R_BHP_FUNC))
-  {
-    _cw_marker("Enter bhp_insert()");
-  }
   _cw_check_ptr(a_bhp_o);
 #ifdef _CW_REENTRANT
   if (a_bhp_o->is_thread_safe == TRUE)
@@ -196,10 +167,6 @@ bhp_insert(cw_bhp_t * a_bhp_o, void * a_priority, void * a_data)
     rwl_wunlock(&a_bhp_o->rw_lock);
   }
 #endif
-  if (_cw_pmatch(_STASH_DBG_R_BHP_FUNC))
-  {
-    _cw_marker("Exit bhp_insert()");
-  }
 }
 
 /****************************************************************************
@@ -215,10 +182,6 @@ bhp_find_min(cw_bhp_t * a_bhp_o, void ** a_priority, void ** a_data)
   cw_bool_t retval;
   cw_bhpi_t * curr_min, * curr_pos;
   
-  if (_cw_pmatch(_STASH_DBG_R_BHP_FUNC))
-  {
-    _cw_marker("Enter bhp_find_min()");
-  }
   _cw_check_ptr(a_bhp_o);
 #ifdef _CW_REENTRANT
   if (a_bhp_o->is_thread_safe == TRUE)
@@ -263,10 +226,6 @@ bhp_find_min(cw_bhp_t * a_bhp_o, void ** a_priority, void ** a_data)
     rwl_runlock(&a_bhp_o->rw_lock);
   }
 #endif
-  if (_cw_pmatch(_STASH_DBG_R_BHP_FUNC))
-  {
-    _cw_marker("Exit bhp_find_min()");
-  }
   return retval;
 }
 
@@ -284,10 +243,6 @@ bhp_del_min(cw_bhp_t * a_bhp_o, void ** a_priority, void ** a_data)
   cw_bhpi_t * prev_pos, * curr_pos, * next_pos, * before_min, * curr_min;
   cw_bhp_t temp_heap;
   
-  if (_cw_pmatch(_STASH_DBG_R_BHP_FUNC))
-  {
-    _cw_marker("Enter bhp_del_min()");
-  }
   _cw_check_ptr(a_bhp_o);
 #ifdef _CW_REENTRANT
   if (a_bhp_o->is_thread_safe == TRUE)
@@ -383,10 +338,6 @@ bhp_del_min(cw_bhp_t * a_bhp_o, void ** a_priority, void ** a_data)
     rwl_wunlock(&a_bhp_o->rw_lock);
   }
 #endif
-  if (_cw_pmatch(_STASH_DBG_R_BHP_FUNC))
-  {
-    _cw_marker("Exit bhp_del_min()");
-  }
   return retval;
 }
 
@@ -401,18 +352,10 @@ bhp_get_size(cw_bhp_t * a_bhp_o)
 {
   cw_uint64_t retval;
 
-  if (_cw_pmatch(_STASH_DBG_R_BHP_FUNC))
-  {
-    _cw_marker("Enter bhp_get_size()");
-  }
   _cw_check_ptr(a_bhp_o);
   /* Don't need to lock. */
 
   retval = a_bhp_o->num_nodes;
-  if (_cw_pmatch(_STASH_DBG_R_BHP_FUNC))
-  {
-    _cw_marker("Exit bhp_get_size()");
-  }
   return retval;
 }
 
@@ -427,10 +370,6 @@ bhp_union(cw_bhp_t * a_bhp_o, cw_bhp_t * a_other)
 {
   cw_bhpi_t * prev_node, * curr_node, * next_node;
   
-  if (_cw_pmatch(_STASH_DBG_R_BHP_FUNC))
-  {
-    _cw_marker("Enter bhp_union()");
-  }
   _cw_check_ptr(a_bhp_o);
   _cw_check_ptr(a_other);
   /* XXX Should this be locked? */
@@ -475,10 +414,6 @@ bhp_union(cw_bhp_t * a_bhp_o, cw_bhp_t * a_other)
     next_node = curr_node->parent;
   }
  RETURN:
-  if (_cw_pmatch(_STASH_DBG_R_BHP_FUNC))
-  {
-    _cw_marker("Exit bhp_union()");
-  }
 }
 
 /****************************************************************************
@@ -491,10 +426,6 @@ void
 bhp_set_priority_compare(cw_bhp_t * a_bhp_o,
 			 bhp_prio_comp_t * a_new_prio_comp)
 {
-  if (_cw_pmatch(_STASH_DBG_R_BHP_FUNC))
-  {
-    _cw_marker("Enter bhp_set_priority_compare()");
-  }
   _cw_check_ptr(a_bhp_o);
   _cw_check_ptr(a_new_prio_comp);
 #ifdef _CW_REENTRANT
@@ -515,10 +446,6 @@ bhp_set_priority_compare(cw_bhp_t * a_bhp_o,
     rwl_wunlock(&a_bhp_o->rw_lock);
   }
 #endif
-  if (_cw_pmatch(_STASH_DBG_R_BHP_FUNC))
-  {
-    _cw_marker("Exit bhp_set_priority_compare()");
-  }
 }
 
 /****************************************************************************
@@ -531,10 +458,6 @@ bhp_set_priority_compare(cw_bhp_t * a_bhp_o,
 void
 bhp_p_bin_link(cw_bhpi_t * a_root, cw_bhpi_t * a_non_root)
 {
-  if (_cw_pmatch(_STASH_DBG_R_BHP_FUNC))
-  {
-    _cw_marker("Enter bhp_p_bin_link()");
-  }
 /*   _cw_check_ptr(a_root); */
 /*   _cw_check_ptr(a_non_root); */
   
@@ -542,10 +465,6 @@ bhp_p_bin_link(cw_bhpi_t * a_root, cw_bhpi_t * a_non_root)
   a_non_root->sibling = a_root->child;
   a_root->child = a_non_root;
   a_root->degree++;
-  if (_cw_pmatch(_STASH_DBG_R_BHP_FUNC))
-  {
-    _cw_marker("Exit bhp_p_bin_link()");
-  }
 }
 
 /****************************************************************************
@@ -560,10 +479,6 @@ bhp_p_merge(cw_bhp_t * a_bhp_o, cw_bhp_t * a_other)
 {
   cw_bhpi_t * curr_this, * curr_other, * this_marker = NULL, * other_marker;
   
-  if (_cw_pmatch(_STASH_DBG_R_BHP_FUNC))
-  {
-    _cw_marker("Enter bhp_p_merge()");
-  }
 /*   _cw_check_ptr(a_bhp_o); */
 /*   _cw_check_ptr(a_other); */
 
@@ -652,10 +567,6 @@ bhp_p_merge(cw_bhp_t * a_bhp_o, cw_bhp_t * a_other)
 
   /* Destroy the old other heap. */
   bhp_delete(a_other);
-  if (_cw_pmatch(_STASH_DBG_R_BHP_FUNC))
-  {
-    _cw_marker("Exit bhp_p_merge()");
-  }
 }
 
 /****************************************************************************
@@ -669,10 +580,6 @@ bhp_p_priority_compare(cw_bhpi_t * a_a, cw_bhpi_t * a_b)
 {
   cw_sint32_t retval;
 
-  if (_cw_pmatch(_STASH_DBG_R_BHP_FUNC))
-  {
-    _cw_marker("Enter bhp_p_priority_compare()");
-  }
   /* No need to bullet-proof this, since it's a private method. */
 /*   _cw_check_ptr(a_a); */
 /*   _cw_check_ptr(a_b); */
@@ -690,9 +597,5 @@ bhp_p_priority_compare(cw_bhpi_t * a_a, cw_bhpi_t * a_b)
     retval = 0;
   }
   
-  if (_cw_pmatch(_STASH_DBG_R_BHP_FUNC))
-  {
-    _cw_marker("Exit bhp_p_priority_compare()");
-  }
   return retval;
 }

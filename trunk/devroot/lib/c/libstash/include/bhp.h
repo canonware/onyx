@@ -1,4 +1,4 @@
-/* -*-mode:c-*-
+/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
  ****************************************************************************
  *
  * <Copyright = "jasone">
@@ -13,9 +13,6 @@
  * Header file for bhp class (binomial heap).
  *
  ****************************************************************************/
-
-#ifndef _BHP_H_
-#define _BHP_H_
 
 /* Pseudo-opaque type. */
 typedef struct cw_bhp_s cw_bhp_t;
@@ -69,5 +66,3 @@ cw_uint64_t bhp_get_size(cw_bhp_t * a_bhp_o);
 void bhp_union(cw_bhp_t * a_bhp_o, cw_bhp_t * a_other);
 void bhp_set_priority_compare(cw_bhp_t * a_bhp_o,
 			      bhp_prio_comp_t * a_new_prio_comp);
-
-#endif /* _BHP_H_ */

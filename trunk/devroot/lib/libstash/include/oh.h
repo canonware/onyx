@@ -1,4 +1,4 @@
-/* -*-mode:c-*-
+/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
  ****************************************************************************
  *
  * <Copyright = "jasone">
@@ -13,9 +13,6 @@
  *
  *
  ****************************************************************************/
-
-#ifndef _OH_H_
-#define _OH_H_
 
 #define _OH_PERF_
 
@@ -148,5 +145,3 @@ cw_uint64_t oh_get_num_deletes(cw_oh_t * a_oh_o);
 cw_uint64_t oh_get_num_grows(cw_oh_t * a_oh_o);
 cw_uint64_t oh_get_num_shrinks(cw_oh_t * a_oh_o);
 #endif
-
-#endif /* _OH_H_ */

@@ -1,4 +1,4 @@
-/* -*-mode:c-*-
+/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
  ****************************************************************************
  *
  * <Copyright = "jasone">
@@ -13,9 +13,6 @@
  *
  *
  ****************************************************************************/
-
-#ifndef _LIST_H_
-#define _LIST_H_
 
 /* Pseudo-opaque types. */
 typedef struct cw_list_item_s cw_list_item_t;
@@ -83,5 +80,3 @@ void * list_remove(cw_list_t * a_list_o,
 		   cw_list_item_t * a_to_remove);
 void list_purge_spares(cw_list_t * a_list_o);
 void list_dump(cw_list_t * a_list_o);
-
-#endif /* _LIST_H_ */

@@ -1,4 +1,4 @@
-/* -*-mode:c-*-
+/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
  ****************************************************************************
  *
  * <Copyright = "jasone">
@@ -13,9 +13,6 @@
  * Definition of all thread primitives.
  *
  ****************************************************************************/
-
-#ifndef _THREAD_H_
-#define _THREAD_H_
 
 #ifndef _PTHREAD_H_
 #  include <pthread.h>
@@ -127,5 +124,3 @@ cw_tsd_t * tsd_new(cw_tsd_t * a_tsd_o, void (*a_func)(void *));
 void tsd_delete(cw_tsd_t * a_tsd_o);
 void * tsd_get(cw_tsd_t * a_tsd_o);
 void tsd_set(cw_tsd_t * a_tsd_o, void * a_val);
-
-#endif /* _THREAD_H_ */

@@ -1,4 +1,4 @@
-/* -*-mode:c-*-
+/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
  ****************************************************************************
  *
  * <Copyright = "jasone">
@@ -14,9 +14,6 @@
  * instance that uses a lex instance) classes.
  *
  ****************************************************************************/
-
-#ifndef _LEX_H_
-#define _LEX_H_
 
 /* Pseudo-opaque types. */
 typedef struct cw_lexer_s cw_lexer_t;
@@ -102,5 +99,3 @@ void lexertok_delete(cw_lexertok_t * a_lexertok_o);
 
 cw_uint32_t lexertok_get_tok_val(cw_lexertok_t * a_lexertok_o);
 char * lexertok_get_str(cw_lexertok_t * a_lexertok_o);
-
-#endif /* _LEX_H_ */

@@ -1,4 +1,4 @@
-/* -*-mode:c-*-
+/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
  ****************************************************************************
  *
  * <Copyright = "jasone">
@@ -63,10 +63,6 @@ oh_new(cw_oh_t * a_oh_o)
 {
   cw_oh_t * retval;
 
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Enter oh_new()");
-  }
   if (a_oh_o == NULL)
   {
     retval = (cw_oh_t *) _cw_malloc(sizeof(cw_oh_t));
@@ -136,20 +132,12 @@ oh_new(cw_oh_t * a_oh_o)
     = 0;
 #endif
 
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Exit oh_new()");
-  }
   return retval;
 }
 
 void
 oh_delete(cw_oh_t * a_oh_o)
 {
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Enter oh_delete()");
-  }
   _cw_check_ptr(a_oh_o);
 
 #ifdef _CW_REENTRANT
@@ -190,24 +178,12 @@ oh_delete(cw_oh_t * a_oh_o)
   {
     _cw_free(a_oh_o);
   }
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Exit oh_delete()");
-  }
 }
 
 cw_uint64_t
 oh_get_size(cw_oh_t * a_oh_o)
 {
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Enter oh_get_size()");
-  }
   _cw_check_ptr(a_oh_o);
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Exit oh_get_size()");
-  }
   return a_oh_o->size;
 }
 
@@ -216,10 +192,6 @@ oh_get_num_items(cw_oh_t * a_oh_o)
 {
   cw_uint64_t retval;
   
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Enter oh_get_num_items()");
-  }
   _cw_check_ptr(a_oh_o);
 #ifdef _CW_REENTRANT
   if (a_oh_o->is_thread_safe)
@@ -236,70 +208,34 @@ oh_get_num_items(cw_oh_t * a_oh_o)
     rwl_runlock(&a_oh_o->rw_lock);
   }
 #endif
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Exit oh_get_num_items()");
-  }
   return retval;
 }
 
 cw_uint64_t
 oh_get_base_size(cw_oh_t * a_oh_o)
 {
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Enter oh_get_base_size()");
-  }
   _cw_check_ptr(a_oh_o);
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Exit oh_get_base_size()");
-  }
   return (1 << a_oh_o->base_power);
 }
 
 cw_uint32_t
 oh_get_base_h2(cw_oh_t * a_oh_o)
 {
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Enter oh_get_base_h2()");
-  }
   _cw_check_ptr(a_oh_o);
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Exit oh_get_base_h2()");
-  }
   return a_oh_o->base_h2;
 }
 
 cw_uint32_t
 oh_get_base_shrink_point(cw_oh_t * a_oh_o)
 {
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Enter oh_get_base_shrink_point()");
-  }
   _cw_check_ptr(a_oh_o);
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Exit oh_get_base_shrink_point()");
-  }
   return a_oh_o->base_shrink_point;
 }
 
 cw_uint32_t
 oh_get_base_grow_point(cw_oh_t * a_oh_o)
 {
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Enter oh_get_base_grow_point()");
-  }
   _cw_check_ptr(a_oh_o);
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Exit oh_get_base_grow_point()");
-  }
   return a_oh_o->base_grow_point;
 }
 
@@ -309,10 +245,6 @@ oh_set_h1(cw_oh_t * a_oh_o,
 {
   oh_h1_t * retval;
   
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Enter oh_set_h1()");
-  }
   _cw_check_ptr(a_oh_o);
   _cw_check_ptr(a_new_h1);
 #ifdef _CW_REENTRANT
@@ -336,10 +268,6 @@ oh_set_h1(cw_oh_t * a_oh_o,
     rwl_wunlock(&a_oh_o->rw_lock);
   }
 #endif
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Exit oh_set_h1()");
-  }
   return retval;
 }
 
@@ -349,10 +277,6 @@ oh_set_key_compare(cw_oh_t * a_oh_o,
 {
   oh_key_comp_t * retval;
   
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Enter oh_set_key_compare()");
-  }
   _cw_check_ptr(a_oh_o);
   _cw_check_ptr(a_new_key_compare);
 #ifdef _CW_REENTRANT
@@ -376,10 +300,6 @@ oh_set_key_compare(cw_oh_t * a_oh_o,
     rwl_wunlock(&a_oh_o->rw_lock);
   }
 #endif
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Exit oh_set_key_compare()");
-  }
   return retval;
 }
 
@@ -389,10 +309,6 @@ oh_set_base_h2(cw_oh_t * a_oh_o,
 {
   cw_bool_t retval;
   
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Enter oh_set_base_h2()");
-  }
   _cw_check_ptr(a_oh_o);
 #ifdef _CW_REENTRANT
   if (a_oh_o->is_thread_safe)
@@ -424,10 +340,6 @@ oh_set_base_h2(cw_oh_t * a_oh_o,
     rwl_wunlock(&a_oh_o->rw_lock);
   }
 #endif
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Exit oh_set_base_h2()");
-  }
   return retval;
 }
 
@@ -437,10 +349,6 @@ oh_set_base_shrink_point(cw_oh_t * a_oh_o,
 {
   cw_bool_t retval;
   
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Enter oh_set_base_shrink_point()");
-  }
   _cw_check_ptr(a_oh_o);
 #ifdef _CW_REENTRANT
   if (a_oh_o->is_thread_safe)
@@ -471,10 +379,6 @@ oh_set_base_shrink_point(cw_oh_t * a_oh_o,
     rwl_wunlock(&a_oh_o->rw_lock);
   }
 #endif
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Exit oh_set_base_shrink_point()");
-  }
   return retval;
 }
 
@@ -484,10 +388,6 @@ oh_set_base_grow_point(cw_oh_t * a_oh_o,
 {
   cw_bool_t retval;
   
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Enter oh_set_base_grow_point()");
-  }
   _cw_check_ptr(a_oh_o);
 #ifdef _CW_REENTRANT
   if (a_oh_o->is_thread_safe)
@@ -518,10 +418,6 @@ oh_set_base_grow_point(cw_oh_t * a_oh_o,
     rwl_wunlock(&a_oh_o->rw_lock);
   }
 #endif
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Exit oh_set_base_grow_point()");
-  }
   return retval;
 }
 
@@ -538,10 +434,6 @@ oh_item_insert(cw_oh_t * a_oh_o, void * a_key,
   cw_bool_t retval;
   cw_uint64_t junk;
 
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Enter oh_item_insert()");
-  }
   _cw_check_ptr(a_oh_o);
   _cw_check_ptr(a_key);
 #ifdef _CW_REENTRANT
@@ -587,10 +479,6 @@ oh_item_insert(cw_oh_t * a_oh_o, void * a_key,
     rwl_wunlock(&a_oh_o->rw_lock);
   }
 #endif
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Exit oh_item_insert()");
-  }
   return retval;
 }
 
@@ -609,10 +497,6 @@ oh_item_delete(cw_oh_t * a_oh_o,
   cw_uint64_t slot;
   cw_bool_t retval;
   
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Enter oh_item_delete()");
-  }
   _cw_check_ptr(a_oh_o);
   _cw_check_ptr(a_search_key);
 #ifdef _CW_REENTRANT
@@ -644,12 +528,6 @@ oh_item_delete(cw_oh_t * a_oh_o,
 
     a_oh_o->items[slot] = NULL;
 
-    if (_cw_fmatch(_STASH_DBG_R_OH_SLOT))
-    {
-      log_eprintf(g_log_o, NULL, 0, "oh_item_delete",
-		  "Marking invalid in slot %d\n", slot);
-    }
-
     oh_p_slot_shuffle(a_oh_o, slot);
   }
   else
@@ -664,10 +542,6 @@ oh_item_delete(cw_oh_t * a_oh_o,
     rwl_wunlock(&a_oh_o->rw_lock);
   }
 #endif
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Exit oh_item_delete()");
-  }
   return retval;
 }
 
@@ -685,10 +559,6 @@ oh_item_search(cw_oh_t * a_oh_o,
   cw_uint64_t slot;
   cw_bool_t retval;
   
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Enter oh_item_search()");
-  }
   _cw_check_ptr(a_oh_o);
   _cw_check_ptr(a_key);
 #ifdef _CW_REENTRANT
@@ -704,11 +574,6 @@ oh_item_search(cw_oh_t * a_oh_o,
     retval = FALSE;
     
     *a_data = a_oh_o->items[slot]->data;
-    if (_cw_fmatch(_STASH_DBG_R_OH_SLOT))
-    {
-      log_eprintf(g_log_o, NULL, 0, "oh_item_search",
-		  "Found in slot %d\n", slot);
-    }
   }
   else
   {
@@ -722,10 +587,6 @@ oh_item_search(cw_oh_t * a_oh_o,
     rwl_runlock(&a_oh_o->rw_lock);
   }
 #endif
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Exit oh_item_search()");
-  }
   return retval;
 }
 
@@ -740,10 +601,6 @@ oh_item_get_iterate(cw_oh_t * a_oh_o, void ** a_key, void ** a_data)
 {
   cw_bool_t retval;
   
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Enter oh_item_get_iterate()");
-  }
   _cw_check_ptr(a_oh_o);
 #ifdef _CW_REENTRANT
   if (a_oh_o->is_thread_safe)
@@ -777,10 +634,6 @@ oh_item_get_iterate(cw_oh_t * a_oh_o, void ** a_key, void ** a_data)
     rwl_wunlock(&a_oh_o->rw_lock);
   }
 #endif
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Exit oh_item_get_iterate()");
-  }
   return retval;
 }
 
@@ -795,10 +648,6 @@ oh_item_delete_iterate(cw_oh_t * a_oh_o, void ** a_key, void ** a_data)
 {
   cw_bool_t retval;
   
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Enter oh_item_delete_iterate()");
-  }
   _cw_check_ptr(a_oh_o);
 #ifdef _CW_REENTRANT
   if (a_oh_o->is_thread_safe)
@@ -836,10 +685,6 @@ oh_item_delete_iterate(cw_oh_t * a_oh_o, void ** a_key, void ** a_data)
     rwl_wunlock(&a_oh_o->rw_lock);
   }
 #endif
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Exit oh_item_delete_iterate()");
-  }
   return retval;
 }
 
@@ -854,10 +699,6 @@ oh_dump(cw_oh_t * a_oh_o, cw_bool_t a_all)
   cw_uint64_t i;
   char buf_a[21], buf_b[21], buf_c[21];
 
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Enter oh_dump()");
-  }
   _cw_check_ptr(a_oh_o);
 #ifdef _CW_REENTRANT
   if (a_oh_o->is_thread_safe)
@@ -925,10 +766,6 @@ oh_dump(cw_oh_t * a_oh_o, cw_bool_t a_all)
     rwl_runlock(&a_oh_o->rw_lock);
   }
 #endif
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Exit oh_dump()");
-  }
 }
 
 /****************************************************************************
@@ -943,10 +780,6 @@ oh_p_h1(cw_oh_t * a_oh_o, void * a_key)
   cw_uint64_t retval;
   char * str;
 
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Enter oh_p_h1()");
-  }
   for (str = (char *) a_key, retval = 0; *str != 0; str++)
   {
     retval = retval * 33 + *str;
@@ -954,26 +787,6 @@ oh_p_h1(cw_oh_t * a_oh_o, void * a_key)
 
   retval = retval % (1 << a_oh_o->curr_power);
   
-  if (_cw_fmatch(_STASH_DBG_R_OH_SLOT))
-  {
-    log_eprintf(g_log_o, NULL, 0, "oh_p_h1",
-		"\"%s\" --> %d\n", a_key, retval);
-    if (a_oh_o->items[retval] != NULL)
-    {
-      log_eprintf(g_log_o, NULL, 0, "oh_p_h1",
-		  "(collision) items[%d]->key == :%s:\n",
-		  retval, a_oh_o->items[retval]->key);
-    }
-    else
-    {
-      log_eprintf(g_log_o, NULL, 0, "oh_p_h1",
-		  "Slot %d is empty.\n", retval);
-    }
-  }
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Exit oh_p_h1()");
-  }
   return retval;
 }
 #if (0)
@@ -999,14 +812,6 @@ oh_p_h1(cw_oh_t * a_oh_o, void * a_key)
 cw_bool_t
 oh_p_key_compare(void * a_k1, void * a_k2)
 {
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Enter oh_p_key_compare()");
-  }
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Exit oh_p_key_compare()");
-  }
   return strcmp((char *) a_k1, (char *) a_k2) ? FALSE : TRUE;
 }
 
@@ -1018,10 +823,6 @@ oh_p_key_compare(void * a_k1, void * a_k2)
 void
 oh_p_grow(cw_oh_t * a_oh_o)
 {
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Enter oh_p_grow()");
-  }
   /* Should we grow? */
   if (list_count(&a_oh_o->items_list) >= a_oh_o->curr_grow_point)
   {
@@ -1060,10 +861,6 @@ oh_p_grow(cw_oh_t * a_oh_o)
       }
     }
   }
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Exit oh_p_grow()");
-  }
 }
 
 /****************************************************************************
@@ -1078,10 +875,6 @@ oh_p_shrink(cw_oh_t * a_oh_o)
   cw_uint32_t j;
   cw_uint32_t num_halvings;
 
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Enter oh_p_shrink()");
-  }
   /* Should we shrink? */
   if ((list_count(&a_oh_o->items_list) < a_oh_o->curr_shrink_point)
       && (a_oh_o->curr_power > a_oh_o->base_power))
@@ -1149,10 +942,6 @@ oh_p_shrink(cw_oh_t * a_oh_o)
       list_purge_spares(&a_oh_o->spares_list);
     }
   }
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Exit oh_p_shrink()");
-  }
 }
 
 /****************************************************************************
@@ -1167,10 +956,6 @@ oh_p_item_insert(cw_oh_t * a_oh_o,
   cw_uint64_t slot, i, j;
   cw_bool_t retval = TRUE;
   
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Enter oh_p_item_insert()");
-  }
   /* Primary hash to first possible location to insert. */
   slot = a_oh_o->curr_h1(a_oh_o, a_item->key);
 
@@ -1194,11 +979,6 @@ oh_p_item_insert(cw_oh_t * a_oh_o,
        * deleting. */
       a_item->list_item = list_tpush(&a_oh_o->items_list, a_item);
       retval = FALSE;
-      if (_cw_fmatch(_STASH_DBG_R_OH_SLOT))
-      {
-	log_eprintf(g_log_o, NULL, 0, "oh_p_item_insert",
-		    "Inserting in slot %d\n", slot);
-      }
       break;
     }
 #ifdef _OH_PERF_
@@ -1207,10 +987,6 @@ oh_p_item_insert(cw_oh_t * a_oh_o,
       a_oh_o->num_collisions++;
     }
 #endif
-  }
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Exit oh_p_item_insert()");
   }
 }
 
@@ -1228,10 +1004,6 @@ oh_p_item_search(cw_oh_t * a_oh_o,
   cw_uint64_t slot, i, j;
   cw_bool_t retval;
   
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Enter oh_p_item_search()");
-  }
   /* Primary hash to the first location to look. */
   slot = a_oh_o->curr_h1(a_oh_o, a_key);
 
@@ -1256,10 +1028,6 @@ oh_p_item_search(cw_oh_t * a_oh_o,
     }
   }
   
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Exit oh_p_item_search()");
-  }
   return retval;
 }
 
@@ -1274,10 +1042,6 @@ oh_p_rehash(cw_oh_t * a_oh_o)
   cw_uint64_t i;
   cw_oh_item_t * item;
 
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Enter oh_p_rehash()");
-  }
   /* Clear the table. */
   bzero(a_oh_o->items, a_oh_o->size * sizeof(cw_oh_item_t *));
   
@@ -1286,10 +1050,6 @@ oh_p_rehash(cw_oh_t * a_oh_o)
   {
     item = (cw_oh_item_t *) list_hpop(&a_oh_o->items_list);
     oh_p_item_insert(a_oh_o, item);
-  }
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Exit oh_p_rehash()");
   }
 }
 
@@ -1306,10 +1066,6 @@ oh_p_slot_shuffle(cw_oh_t * a_oh_o, cw_uint64_t a_slot)
 {
   cw_uint64_t i, curr_empty, curr_look, curr_distance;
   
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Enter oh_p_slot_shuffle()");
-  }
   for(i = 0,
 	curr_distance = 1,
 	curr_empty = a_slot,
@@ -1327,12 +1083,6 @@ oh_p_slot_shuffle(cw_oh_t * a_oh_o, cw_uint64_t a_slot)
        * Do so, and reset curr_distance and curr_empty.  Also, update
        * the jumps field of the item we just shuffled, as well as its
        * record of the slot that it's now in. */
-      if (_cw_fmatch(_STASH_DBG_R_OH_SLOT))
-      {
-	log_eprintf(g_log_o, NULL, 0, "oh_p_slot_shuffle",
-		    "Shuffling slot %d to %d (%d jumps)\n",
-		    curr_look, curr_empty, curr_distance);
-      }
 	  
       a_oh_o->items[curr_empty] = a_oh_o->items[curr_look];
       a_oh_o->items[curr_empty]->jumps -= curr_distance;
@@ -1343,85 +1093,41 @@ oh_p_slot_shuffle(cw_oh_t * a_oh_o, cw_uint64_t a_slot)
       curr_distance = 0;
     }
   }
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Exit oh_p_slot_shuffle()");
-  }
 }
 
 #ifdef _OH_PERF_
 cw_uint64_t
 oh_get_num_collisions(cw_oh_t * a_oh_o)
 {
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Enter oh_get_num_collisions()");
-  }
   _cw_check_ptr(a_oh_o);
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Exit oh_get_num_collisions()");
-  }
   return a_oh_o->num_collisions;
 }
 
 cw_uint64_t
 oh_get_num_inserts(cw_oh_t * a_oh_o)
 {
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Enter oh_get_num_inserts()");
-  }
   _cw_check_ptr(a_oh_o);
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Exit oh_get_num_inserts()");
-  }
   return a_oh_o->num_inserts;
 }
 
 cw_uint64_t
 oh_get_num_deletes(cw_oh_t * a_oh_o)
 {
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Enter oh_get_num_deletes()");
-  }
   _cw_check_ptr(a_oh_o);
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Exit oh_get_num_deletes()");
-  }
   return a_oh_o->num_deletes;
 }
 
 cw_uint64_t
 oh_get_num_grows(cw_oh_t * a_oh_o)
 {
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Enter oh_get_num_grows()");
-  }
   _cw_check_ptr(a_oh_o);
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Exit oh_get_num_grows()");
-  }
   return a_oh_o->num_grows;
 }
 
 cw_uint64_t
 oh_get_num_shrinks(cw_oh_t * a_oh_o)
 {
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Enter oh_get_num_shrinks()");
-  }
   _cw_check_ptr(a_oh_o);
-  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
-  {
-    _cw_marker("Exit oh_get_num_shrinks()");
-  }
   return a_oh_o->num_shrinks;
 }
 

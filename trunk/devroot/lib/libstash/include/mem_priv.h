@@ -1,4 +1,4 @@
-/* -*-mode:c-*-
+/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
  ****************************************************************************
  *
  * <Copyright = "jasone">
@@ -14,13 +14,7 @@
  *
  ****************************************************************************/
 
-#ifndef _MEM_PRIV_H_
-#define _MEM_PRIV_H_
-
 struct cw_mem_s
 {
   int garbage;
 };
-
-
-#endif /* _MEM_PRIV_H_ */

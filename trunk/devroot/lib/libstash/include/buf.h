@@ -1,4 +1,4 @@
-/* -*-mode:c-*-
+/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
  ****************************************************************************
  *
  * <Copyright = "jasone">
@@ -13,9 +13,6 @@
  *
  *
  ****************************************************************************/
-
-#ifndef _BUF_H_
-#define _BUF_H_
 
 typedef struct cw_buf_s cw_buf_t;
 typedef struct cw_bufel_s cw_bufel_t;
@@ -91,5 +88,3 @@ void bufel_set_uint8(cw_bufel_t * a_bufel_o, cw_uint32_t a_offset,
 cw_uint32_t bufel_get_uint32(cw_bufel_t * a_bufel_o, cw_uint32_t a_offset);
 void bufel_set_uint32(cw_bufel_t * a_bufel_o, cw_uint32_t a_offset,
 		      cw_uint32_t a_val);
-
-#endif /* _BUF_H_ */

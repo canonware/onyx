@@ -1,4 +1,4 @@
-/* -*-mode:c-*-
+/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
  ****************************************************************************
  *
  * <Copyright = "jasone">
@@ -50,11 +50,10 @@ thd_new(cw_thd_t * a_thd_o,
   }
 
   error = pthread_create(&retval->thread, NULL, a_start_func, a_arg);
-
   if (error)
   {
     log_eprintf(g_log_o, NULL, 0, "thd_new",
-		"Cannot create thread: %s\n", strerror(error));
+		"Error in pthread_create(): %s\n", strerror(error));
     abort();
   }
 
@@ -73,10 +72,18 @@ thd_new(cw_thd_t * a_thd_o,
 void
 thd_delete(cw_thd_t * a_thd_o)
 {
+  int error;
+  
   _cw_check_ptr(a_thd_o);
 
-  pthread_detach(a_thd_o->thread);
-
+  error = pthread_detach(a_thd_o->thread);
+  if (error)
+  {
+    log_eprintf(g_log_o, NULL, 0, "thd_delete",
+		"Error in pthread_detach(): %s\n", strerror(error));
+    abort();
+  }
+  
   if (a_thd_o->is_malloced == TRUE)
   {
     _cw_free(a_thd_o);
@@ -87,10 +94,17 @@ void *
 thd_join(cw_thd_t * a_thd_o)
 {
   void * retval;
+  int error;
   
   _cw_check_ptr(a_thd_o);
 
-  pthread_join(a_thd_o->thread, &retval);
+  error = pthread_join(a_thd_o->thread, &retval);
+  if (error)
+  {
+    log_eprintf(g_log_o, NULL, 0, "thd_join",
+		"Error in pthread_join(): %s\n", strerror(error));
+    abort();
+  }
 
   return retval;
 }
@@ -113,11 +127,10 @@ mtx_new(cw_mtx_t * a_mtx_o)
   }
 
   error = pthread_mutex_init(&retval->mutex, NULL);
-
   if (error)
   {
     log_eprintf(g_log_o, NULL, 0, "mtx_new",
-		"Unable to create mutex: %s\n", strerror(error));
+		"Error in pthread_mutex_init: %s\n", strerror(error));
     abort();
   }
 
@@ -132,11 +145,10 @@ mtx_delete(cw_mtx_t * a_mtx_o)
   _cw_check_ptr(a_mtx_o);
 
   error = pthread_mutex_destroy(&a_mtx_o->mutex);
-
   if (error)
   {
     log_eprintf(g_log_o, NULL, 0, "mtx_delete",
-		"Unable to destroy mutex: %s\n", strerror(error));
+		"Error in pthread_mutex_destroy(): %s\n", strerror(error));
     abort();
   }
 
@@ -154,11 +166,10 @@ mtx_lock(cw_mtx_t * a_mtx_o)
   _cw_check_ptr(a_mtx_o);
 
   error = pthread_mutex_lock(&a_mtx_o->mutex);
-
   if (error)
   {
     log_eprintf(g_log_o, NULL, 0, "mtx_lock",
-		"Error locking mutex: %s\n", strerror(error));
+		"Error in pthread_mutex_lock(): %s\n", strerror(error));
     abort();
   }
 }
@@ -167,16 +178,24 @@ cw_bool_t
 mtx_trylock(cw_mtx_t * a_mtx_o)
 {
   cw_bool_t retval;
+  int error;
   
   _cw_check_ptr(a_mtx_o);
 
-  if (EBUSY == pthread_mutex_trylock(&a_mtx_o->mutex))
+  error = pthread_mutex_trylock(&a_mtx_o->mutex);
+  if (error == 0)
+  {
+    retval = FALSE;
+  }
+  else if (error == EBUSY)
   {
     retval = TRUE;
   }
   else 
   {
-    retval = FALSE;
+    log_eprintf(g_log_o, NULL, 0, "mtx_trylock",
+		"Error in pthread_mutex_trylock(): %s\n", strerror(error));
+    abort();
   }
 
   return retval;
@@ -190,11 +209,10 @@ mtx_unlock(cw_mtx_t * a_mtx_o)
   _cw_check_ptr(a_mtx_o);
 
   error = pthread_mutex_unlock(&a_mtx_o->mutex);
-  
   if (error)
   {
     log_eprintf(g_log_o, NULL, 0, "mtx_unlock",
-		"Error unlocking mutex: %s\n", strerror(error));
+		"Error in pthread_mutex_unlock(): %s\n", strerror(error));
     abort();
   }
 }
@@ -217,11 +235,10 @@ cnd_new(cw_cnd_t * a_cnd_o)
   }
 
   error = pthread_cond_init(&retval->condition, NULL);
-
   if (error)
   {
     log_eprintf(g_log_o, NULL, 0, "cnd_new",
-		"Error creating condition variable: %s\n", strerror(error));
+		"Error in pthread_cond_init(): %s\n", strerror(error));
     abort();
   }
 
@@ -239,7 +256,7 @@ cnd_delete(cw_cnd_t * a_cnd_o)
   if (error)
   {
     log_eprintf(g_log_o, NULL, 0, "cnd_delete",
-		"Error destroying condition variable %s\n", strerror(error));
+		"Error in pthread_cond_destroy(): %s\n", strerror(error));
     abort();
   }
 
@@ -260,7 +277,7 @@ cnd_signal(cw_cnd_t * a_cnd_o)
   if (error)
   {
     log_eprintf(g_log_o, NULL, 0, "cnd_signal",
-		"Error signalling condition variable: %s\n", strerror(error));
+		"Error in pthread_cond_signal(): %s\n", strerror(error));
     abort();
   }
 }
@@ -276,7 +293,7 @@ cnd_broadcast(cw_cnd_t * a_cnd_o)
   if (error)
   {
     log_eprintf(g_log_o, NULL, 0, "cnd_broadcast",
-		"Error broadcasting condition variable: %s\n", strerror(error));
+		"Error in pthread_cond_broadcast(): %s\n", strerror(error));
     abort();
   }
 }
@@ -292,7 +309,6 @@ cnd_timedwait(cw_cnd_t * a_cnd_o, cw_mtx_t * a_mtx_o,
   _cw_check_ptr(a_mtx_o);
 
   error = pthread_cond_timedwait(&a_cnd_o->condition, &a_mtx_o->mutex, a_time);
-
   if (error == 0)
   {
     retval = FALSE;
@@ -301,10 +317,10 @@ cnd_timedwait(cw_cnd_t * a_cnd_o, cw_mtx_t * a_mtx_o,
   {
     retval = TRUE;
   }
-  else /* if (error == EINTR) */
+  else
   {
     log_eprintf(g_log_o, NULL, 0, "cnd_timedwait",
-		"Error waiting on condition variable: %s\n", strerror(error));
+		"Error in pthread_cond_timedwait(): %s\n", strerror(error));
     abort();
   }
   
@@ -323,7 +339,7 @@ cnd_wait(cw_cnd_t * a_cnd_o, cw_mtx_t * a_mtx_o)
   if (error)
   {
     log_eprintf(g_log_o, NULL, 0, "cnd_wait",
-		"Error waiting on condition variable: %s\n", strerror(error));
+		"Error in pthread_cond_wait: %s\n", strerror(error));
     abort();
   }
 }
@@ -468,6 +484,7 @@ cw_tsd_t *
 tsd_new(cw_tsd_t * a_tsd_o, void (*a_func)(void *))
 {
   cw_tsd_t * retval;
+  int error;
 
   if (a_tsd_o == NULL)
   {
@@ -480,7 +497,13 @@ tsd_new(cw_tsd_t * a_tsd_o, void (*a_func)(void *))
     retval->is_malloced = FALSE;
   }
 
-  pthread_key_create(&retval->key, a_func);
+  error = pthread_key_create(&retval->key, a_func);
+  if (error)
+  {
+    log_eprintf(g_log_o, NULL, 0, "tsd_new",
+		"Error in pthread_key_create(): %s\n", strerror(error));
+    abort();
+  }
   
   return retval;
 }
@@ -496,7 +519,7 @@ tsd_delete(cw_tsd_t * a_tsd_o)
   if (error)
   {
     log_eprintf(g_log_o, NULL, 0, "tsd_delete",
-		"Error deleting key: %s\n", strerror(error));
+		"Error in pthread_key_delete(): %s\n", strerror(error));
     abort();
   }
 
@@ -529,7 +552,7 @@ tsd_set(cw_tsd_t * a_tsd_o, void * a_val)
   if (error)
   {
     log_eprintf(g_log_o, NULL, 0, "tsd_set",
-		"Error setting thread-specific data: %s\n", strerror(error));
+		"Error in pthread_setspecific(): %s\n", strerror(error));
     abort();
   }
 }

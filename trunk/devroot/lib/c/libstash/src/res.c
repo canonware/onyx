@@ -1,4 +1,4 @@
-/* -*-mode:c-*-
+/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
  ****************************************************************************
  *
  * <Copyright = "jasone">
@@ -100,10 +100,6 @@ res_new(cw_res_t * a_res_o)
 {
   cw_res_t * retval;
 
-  if (_cw_pmatch(_STASH_DBG_R_RES_FUNC))
-  {
-    _cw_marker("Enter res_new()");
-  }
   if (a_res_o == NULL)
   {
     retval = (cw_res_t *) _cw_malloc(sizeof(cw_res_t));
@@ -127,20 +123,12 @@ res_new(cw_res_t * a_res_o)
   oh_new(&retval->hash_o);
 #endif
 
-  if (_cw_pmatch(_STASH_DBG_R_RES_FUNC))
-  {
-    _cw_marker("Exit res_new()");
-  }
   return retval;
 }
 
 void
 res_delete(cw_res_t * a_res_o)
 {
-  if (_cw_pmatch(_STASH_DBG_R_RES_FUNC))
-  {
-    _cw_marker("Enter res_delete()");
-  }
   _cw_check_ptr(a_res_o);
 
   /* Clean up internals. */
@@ -152,10 +140,6 @@ res_delete(cw_res_t * a_res_o)
   if (a_res_o->is_malloced)
   {
     _cw_free(a_res_o);
-  }
-  if (_cw_pmatch(_STASH_DBG_R_RES_FUNC))
-  {
-    _cw_marker("Exit res_delete()");
   }
 }
 
@@ -170,10 +154,6 @@ res_clear(cw_res_t * a_res_o)
 {
   char * key, * val;
   
-  if (_cw_pmatch(_STASH_DBG_R_RES_FUNC))
-  {
-    _cw_marker("Enter res_clear()");
-  }
   _cw_check_ptr(a_res_o);
 #ifdef _CW_REENTRANT
   rwl_wlock(&a_res_o->rw_lock);
@@ -189,10 +169,6 @@ res_clear(cw_res_t * a_res_o)
 #ifdef _CW_REENTRANT
   rwl_wunlock(&a_res_o->rw_lock);
 #endif
-  if (_cw_pmatch(_STASH_DBG_R_RES_FUNC))
-  {
-    _cw_marker("Exit res_clear()");
-  }
 }
 
 /****************************************************************************
@@ -206,10 +182,6 @@ res_is_equal(cw_res_t * a_res_o, cw_res_t * a_other)
 {
   cw_bool_t retval;
 
-  if (_cw_pmatch(_STASH_DBG_R_RES_FUNC))
-  {
-    _cw_marker("Enter res_is_equal()");
-  }
   _cw_check_ptr(a_res_o);
   _cw_check_ptr(a_other);
 #ifdef _CW_REENTRANT
@@ -252,10 +224,6 @@ res_is_equal(cw_res_t * a_res_o, cw_res_t * a_other)
   rwl_runlock(&a_other->rw_lock);
   rwl_wunlock(&a_res_o->rw_lock);
 #endif
-  if (_cw_pmatch(_STASH_DBG_R_RES_FUNC))
-  {
-    _cw_marker("Exit res_is_equal()");
-  }
   return retval;
 }
 
@@ -275,10 +243,6 @@ res_merge_file(cw_res_t * a_res_o, char * a_filename)
   cw_bool_t retval = FALSE, state_mach_error;
   int error;
   
-  if (_cw_pmatch(_STASH_DBG_R_RES_FUNC))
-  {
-    _cw_marker("Enter res_merge_file()");
-  }
   _cw_check_ptr(a_res_o);
 #ifdef _CW_REENTRANT
   rwl_wlock(&a_res_o->rw_lock);
@@ -309,10 +273,6 @@ res_merge_file(cw_res_t * a_res_o, char * a_filename)
 #ifdef _CW_REENTRANT
   rwl_wunlock(&a_res_o->rw_lock);
 #endif
-  if (_cw_pmatch(_STASH_DBG_R_RES_FUNC))
-  {
-    _cw_marker("Exit res_merge_file()");
-  }
   return retval;
 }
 
@@ -336,10 +296,6 @@ res_merge_list(cw_res_t * a_res_o, ...)
   va_list ap;
   cw_bool_t retval = FALSE, state_mach_error;
   
-  if (_cw_pmatch(_STASH_DBG_R_RES_FUNC))
-  {
-    _cw_marker("Enter res_merge_list()");
-  }
   _cw_check_ptr(a_res_o);
 #ifdef _CW_REENTRANT
   rwl_wlock(&a_res_o->rw_lock);
@@ -362,10 +318,6 @@ res_merge_list(cw_res_t * a_res_o, ...)
 #ifdef _CW_REENTRANT
   rwl_wunlock(&a_res_o->rw_lock);
 #endif
-  if (_cw_pmatch(_STASH_DBG_R_RES_FUNC))
-  {
-    _cw_marker("Exit res_merge_list()");
-  }
   return retval;
 }
 
@@ -387,10 +339,6 @@ res_get_res_val(cw_res_t * a_res_o, char * a_res_name)
   char * retval;
   cw_bool_t error;
   
-  if (_cw_pmatch(_STASH_DBG_R_RES_FUNC))
-  {
-    _cw_marker("Enter res_get_res_val()");
-  }
   _cw_check_ptr(a_res_o);
   _cw_check_ptr(a_res_name);
 #ifdef _CW_REENTRANT
@@ -407,10 +355,6 @@ res_get_res_val(cw_res_t * a_res_o, char * a_res_name)
 #ifdef _CW_REENTRANT
   rwl_runlock(&a_res_o->rw_lock);
 #endif
-  if (_cw_pmatch(_STASH_DBG_R_RES_FUNC))
-  {
-    _cw_marker("Exit res_get_res_val()");
-  }
   return retval;
 }
 
@@ -428,10 +372,6 @@ res_extract_res(cw_res_t * a_res_o, char * a_res_key,
 {
   cw_bool_t retval;
 
-  if (_cw_pmatch(_STASH_DBG_R_RES_FUNC))
-  {
-    _cw_marker("Enter res_extract_res()");
-  }
   _cw_check_ptr(a_res_o);
 #ifdef _CW_REENTRANT
   rwl_wlock(&a_res_o->rw_lock);
@@ -443,10 +383,6 @@ res_extract_res(cw_res_t * a_res_o, char * a_res_key,
 #ifdef _CW_REENTRANT
   rwl_wunlock(&a_res_o->rw_lock);
 #endif
-  if (_cw_pmatch(_STASH_DBG_R_RES_FUNC))
-  {
-    _cw_marker("Exit res_extract_res()");
-  }
   return retval;
 }
 
@@ -463,10 +399,6 @@ res_dump(cw_res_t * a_res_o, char * a_filename)
   cw_bool_t retval;
   cw_log_t * t_log_o;
   
-  if (_cw_pmatch(_STASH_DBG_R_RES_FUNC))
-  {
-    _cw_marker("Enter res_dump()");
-  }
   _cw_check_ptr(a_res_o);
 #ifdef _CW_REENTRANT
   rwl_wlock(&a_res_o->rw_lock);
@@ -540,10 +472,6 @@ res_dump(cw_res_t * a_res_o, char * a_filename)
 #ifdef _CW_REENTRANT
   rwl_wunlock(&a_res_o->rw_lock);
 #endif
-  if (_cw_pmatch(_STASH_DBG_R_RES_FUNC))
-  {
-    _cw_marker("Exit res_dump()");
-  }
   return retval;
 }
 
@@ -566,10 +494,6 @@ res_p_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
   cw_uint32_t state = _STASH_RES_STATE_START, col_num, line_num = 1;
   char c, name[_STASH_RES_BUFFSIZE], val[_STASH_RES_BUFFSIZE];
 
-  if (_cw_pmatch(_STASH_DBG_R_RES_FUNC))
-  {
-    _cw_marker("Enter res_p_parse_res()");
-  }
   for (i = 0, col_num = 1;
        ((state != _STASH_RES_STATE_FINISH) && (retval != TRUE));
        i++, col_num++)
@@ -604,7 +528,7 @@ res_p_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
       c = a_res_o->str[i];
     }
     
-    if (_cw_fmatch(_STASH_DBG_R_RES_STATE))
+    if (dbg_is_registered(g_dbg_o, "res_state"))
     {
       log_printf(g_log_o, "res_parse_res(): State == %d, Input == \'%c\'\n",
 		 state, c);
@@ -1187,10 +1111,6 @@ res_p_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
     }
   }
 
-  if (_cw_pmatch(_STASH_DBG_R_RES_FUNC))
-  {
-    _cw_marker("Exit res_p_parse_res()");
-  }
   return retval;
 }
 
@@ -1205,10 +1125,6 @@ res_p_char_type(char a_char)
 {
   cw_uint32_t retval;
   
-  if (_cw_pmatch(_STASH_DBG_R_RES_FUNC))
-  {
-    _cw_marker("Enter res_p_char_type()");
-  }
   switch (a_char)
   {
     /* Capital letters. */
@@ -1313,10 +1229,6 @@ res_p_char_type(char a_char)
     }
   }
 
-  if (_cw_pmatch(_STASH_DBG_R_RES_FUNC))
-  {
-    _cw_marker("Exit res_p_char_type()");
-  }
   return retval;
 }
 
@@ -1334,17 +1246,13 @@ res_p_merge_res(cw_res_t * a_res_o, char * a_name, char * a_val)
   char * temp_name, * temp_val;
   cw_bool_t error;
 	    
-  if (_cw_pmatch(_STASH_DBG_R_RES_FUNC))
-  {
-    _cw_marker("Enter res_p_merge_res()");
-  }
   /* Make copies to insert into the hash table. */
   temp_name = (char *) _cw_malloc(strlen(a_name) + 1);
   strcpy(temp_name, a_name);
   temp_val = (char *) _cw_malloc(strlen(a_val) + 1);
   strcpy(temp_val, a_val);
 
-  if (_cw_pmatch(_STASH_DBG_R_RES_STATE))
+  if (dbg_is_registered(g_dbg_o, "res_state"))
   {
     log_printf(g_log_o,
 	       "res_merge_res(): Merging name == :%s:, value == :%s:\n",
@@ -1369,9 +1277,5 @@ res_p_merge_res(cw_res_t * a_res_o, char * a_name, char * a_val)
 
     oh_item_insert(&a_res_o->hash_o, (void *) temp_name,
 		   (void *) temp_val);
-  }
-  if (_cw_pmatch(_STASH_DBG_R_RES_FUNC))
-  {
-    _cw_marker("Exit res_p_merge_res()");
   }
 }

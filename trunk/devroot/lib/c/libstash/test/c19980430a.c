@@ -1,4 +1,4 @@
-/* -*-mode:c-*-
+/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
  ****************************************************************************
  *
  * <Copyright = "jasone">
@@ -51,11 +51,7 @@ main()
 
   glob_new();
 
-  dbg_clear(g_dbg_o);
-  dbg_turn_on(g_dbg_o, _STASH_DBG_C_RES_ERROR);
-/*   dbg_turn_on(g_dbg_o, _STASH_DBG_C_OH_FUNC); */
-/*   dbg_turn_on(g_dbg_o, _STASH_DBG_C_OH_SLOT); */
-/*   dbg_turn_on(g_dbg_o, _STASH_DBG_C_RES_STATE); */
+/*   dbg_register(g_dbg_o, "res_state"); */
   
   res_new(&res_o);
 

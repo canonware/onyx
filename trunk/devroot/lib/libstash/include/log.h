@@ -1,4 +1,4 @@
-/* -*-mode:c-*-
+/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
  ****************************************************************************
  *
  * <Copyright = "jasone">
@@ -15,9 +15,6 @@
  *              
  ****************************************************************************
  */
-
-#ifndef _LOG_H_
-#define _LOG_H_
 
 typedef struct cw_log_s cw_log_t;
 
@@ -95,5 +92,3 @@ char * log_print_uint64(cw_uint64_t a_val, cw_uint32_t a_base, char * a_buf);
 #  define _cw_marker(a)
 #  define _cw_check_ptr(a)
 #endif
-
-#endif /* _LOG_H_ */
