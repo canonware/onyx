@@ -774,8 +774,8 @@ systemdict_inline_add(cw_nxo_t *a_thread)
 	 * nxo_real_set(). */
 	nxo_real_new(nxo_a, real_a + real_b);
     }
-#endif
     else
+#endif
     {
 	nxo_integer_set(nxo_a, integer_a + integer_b);
     }

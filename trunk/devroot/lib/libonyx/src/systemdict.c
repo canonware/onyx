@@ -2595,6 +2595,9 @@ systemdict_exp(cw_nxo_t *a_thread)
 		    real_base = (cw_nxor_t) integer_base;
 		    real_exp = (cw_nxor_t) integer_exp;
 #else
+		    /* The rangecheck error for exp is not documented in the
+		     * reference manual, since a non-standard configuration is
+		     * required for this code to be compiled in. */
 		    nxo_thread_nerror(a_thread, NXN_rangecheck);
 		    return;
 #endif
@@ -4312,8 +4315,8 @@ systemdict_mul(cw_nxo_t *a_thread)
 	 * nxo_real_set(). */
 	nxo_real_new(nxo_a, real_a * real_b);
     }
-#endif
     else
+#endif
     {
 	nxo_integer_set(nxo_a, integer_a * integer_b);
     }
@@ -6331,8 +6334,8 @@ systemdict_sub(cw_nxo_t *a_thread)
 	 * nxo_real_set(). */
 	nxo_real_new(nxo_a, real_a - real_b);
     }
-#endif
     else
+#endif
     {
 	nxo_integer_set(nxo_a, integer_a - integer_b);
     }
