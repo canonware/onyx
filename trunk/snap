@@ -2,36 +2,37 @@
 #-*-mode:perl-*-
 #############################################################################
 #
-# Copyright (C) 1998.
-# Jason Evans <jasone@canonware.com>.  All rights reserved.
+# Copyright (C) 1998 Jason Evans <jasone@canonware.com>.  
+#                    All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
 # are met:
 # 1. Redistributions of source code must retain the above copyright
-#    notice, this list of conditions and the following disclaimer as
-#    the first lines of this file unmodified.
+#    notice(s), this list of conditions and the following disclaimer as
+#    the first lines of this file unmodified other than the possible 
+#    addition of on or more copyright notices.
 # 2. Redistributions in binary form must reproduce the above copyright
-#    notice, this list of conditions and the following disclaimer in the
+#    notice(2), this list of conditions and the following disclaimer in the
 #    documentation and/or other materials provided with the distribution.
 #
-# THIS SOFTWARE IS PROVIDED BY JASON EVANS ``AS IS'' AND ANY EXPRESS OR
-# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
-# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-# IN NO EVENT SHALL JASON EVANS BE LIABLE FOR ANY DIRECT, INDIRECT,
-# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
-# NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
-# THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ``AS IS'' AND ANY
+# EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS BE LIABLE FOR ANY
+# DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+# OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+# DAMAGE.
 #############################################################################
 #
 # $Source$
 # $Author: jasone $
-# $Revision: 89 $
-# $Date: 1998-06-23 17:52:25 -0700 (Tue, 23 Jun 1998) $
+# $Revision: 124 $
+# $Date: 1998-07-02 16:26:56 -0700 (Thu, 02 Jul 1998) $
 #
 # <<< Description >>>
 #
@@ -50,30 +51,35 @@ use Getopt::Long;
 $src_dir = "sqrl";
 $dot = "sqlmaster";
 
-@COPYRIGHT = (
-'Copyright (C) 1996-1998 Jason Evans <jasone@canonware.com>.',
-'All rights reserved.',
-'',
-'Redistribution and use in source and binary forms, with or without',
-'modification, are permitted provided that the following conditions',
-'are met:',
-'1. Redistributions of source code must retain the above copyright',
-'   notice, this list of conditions and the following disclaimer as',
-'   the first lines of this file unmodified.',
-'2. Redistributions in binary form must reproduce the above copyright',
-'   notice, this list of conditions and the following disclaimer in the',
-'   documentation and/or other materials provided with the distribution.',
-'',
-"THIS SOFTWARE IS PROVIDED BY JASON EVANS ``AS IS'' AND ANY EXPRESS OR",
-'IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES',
-'OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.',
-'IN NO EVENT SHALL JASON EVANS BE LIABLE FOR ANY DIRECT, INDIRECT,',
-'INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT',
-'NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,',
-'DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY',
-'THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT',
-'(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF',
-'THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.',
+$COPYRIGHT{"jasone"} 
+= ("Copyright (C) 1996-1998 Jason Evans.  All rights reserved.");
+
+@LICENSE = 
+(
+ '',
+ 'Redistribution and use in source and binary forms, with or without',
+ 'modification, are permitted provided that the following conditions',
+ 'are met:',
+ '1. Redistributions of source code must retain the above copyright',
+ '   notice(s), this list of conditions and the following disclaimer as',
+ '   the first lines of this file, unmodified other than the possible',
+ '   addition of one or more copyright notices.',
+ '2. Redistributions in binary form must reproduce the above copyright',
+ '   notice(s), this list of conditions and the following disclaimer in',
+ '   the  documentation and/or other materials provided with the',
+ '   distribution.',
+ '',
+ "THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER(S) ``AS IS'' AND ANY",
+ 'EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE',
+ 'IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR',
+ 'PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT HOLDER(S) BE',
+ 'LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR',
+ 'CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF',
+ 'SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR',
+ 'BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,',
+ 'WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE',
+ 'OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,',
+ 'EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.'
 );
 
 #
@@ -86,7 +92,6 @@ $opt_retval =
 	      "n|noact" => \$opt_noact,
 	      "v|verbose" => \$opt_verbose,
 	      "t|tag=s" => \$opt_tag#,
-#	      "" => \$opt_?,
 	     );
 
 if (($#ARGV >= 0) 
@@ -95,13 +100,6 @@ if (($#ARGV >= 0)
     || ($opt_help)
    )
   {
-#     print STDERR "Got here (error).\n";
-#     print STDERR "ARGV == @ARGV\n";
-#     print STDERR "\$#ARGV == $#ARGV\n";
-#     print STDERR "\$opt_retval == $opt_retval\n";
-#     print STDERR "\$opt_tag == $opt_tag\n";
-#     print STDERR "\$opt_verbose == $opt_verbose\n";
-
     &print_usage;
     exit(1);
   }
@@ -196,10 +194,22 @@ sub expand_copyright
 
 	while (<$ifh>)
 	  {
-	    if (/^(.*)\<Copyright\>.*\n/)
+	    if (/^(.*)\<Copyright([ \t]*=[ \t]*\"([A-Za-z0-9]+)\")?\>.*\n/)
 	      {
 		$did_subst = 1;
-		foreach (@COPYRIGHT)
+		if (defined($COPYRIGHT{$3}))
+		  {
+		    print $ofh "$1$COPYRIGHT{$3}\n";
+		  }
+		else
+		  {
+		    print $ofh "$1$COPYRIGHT{\"jasone\"}\n";
+		  }
+	      }
+	    elsif (/^(.*)\<License\>.*\n/)
+	      {
+		$did_subst = 1;
+		foreach (@LICENSE)
 		  {
 		    print $ofh "$1$_\n";
 		  }
