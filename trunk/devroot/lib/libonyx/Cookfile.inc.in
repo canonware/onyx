@@ -98,7 +98,7 @@ ONYX_TEX_SRCS += [addprefix @srcroot@/lib/libonyx/doc/latex/
                  @objroot@/lib/libonyx/doc/latex/manual.tex;
 
 /* Libraries. */
-LIBONYX_REV = 6;
+LIBONYX_REV = 7;
 
 LIBBONYX_A = @objroot@/lib/libonyx/lib/libbonyx.a;
 LIBONYX_A = @objroot@/lib/libonyx/lib/libonyx.a;
