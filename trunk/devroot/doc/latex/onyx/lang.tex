@@ -3130,8 +3130,14 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 \hline \hline
 -- & {\bf \htmlref{mark}{systemdict:mark}} & mark & Create a mark. \\
 \hline
-\commas obj & {\bf \htmlref{bpush}{systemdict:bpush}} & obj \commas & Push
-object onto bottom of stack. \\
+\commas obj & {\bf \htmlref{aup}{systemdict:aup}} & obj \commas & Rotate stack
+up one position. \\
+\hline
+obj \commas & {\bf \htmlref{adn}{systemdict:adn}} & \commas obj & Rotate stack
+down one position. \\
+\hline
+\dots count & {\bf \htmlref{rot}{systemdict:rot}} & \dots & Rotate stack up
+count positions. \\
 \hline
 -- & {\bf \htmlref{count}{systemdict:count}} & count & Get the number of objects
 on ostack. \\
@@ -3175,6 +3181,9 @@ one. \\
 \hline
 a \dots b count & {\bf \htmlref{ndn}{systemdict:ndn}} & \dots b a & Roll count
 objects down one. \\
+\hline
+\dots amount & {\bf \htmlref{rot}{systemdict:rot}} & \dots & Rotate stack up by
+\oparg{amount}. \\
 \hline
 region count amount & {\bf \htmlref{roll}{systemdict:roll}} & rolled & Roll
 \oparg{count} objects up by \oparg{amount}. \\
@@ -3335,8 +3344,8 @@ fino objects & {\bf \htmlref{)}{systemdict:sym_rp}} & stack & Create a stack. \\
 stack obj & {\bf \htmlref{spush}{systemdict:spush}} & -- & Push object onto
 stack. \\
 \hline
-stack obj & {\bf \htmlref{sbpush}{systemdict:sbpush}} & -- & Push object onto
-bottom of stack. \\
+stack obj & {\bf \htmlref{sbpush}{systemdict:sbpush}} & -- & Push object
+onto bottom of stack. \\
 \hline
 stack & {\bf \htmlref{scount}{systemdict:scount}} & count & Get the number of
 objects on a stack. \\
@@ -3376,11 +3385,20 @@ stack up one. \\
 stack count & {\bf \htmlref{snup}{systemdict:snup}} & -- & Roll count objects on
 stack up one. \\
 \hline
+stack & {\bf \htmlref{saup}{systemdict:saup}} & -- & Roll objects on stack up
+one. \\
+\hline
 stack & {\bf \htmlref{sdn}{systemdict:sdn}} & -- & Roll top three objects on
 stack down one. \\
 \hline
 stack count & {\bf \htmlref{sndn}{systemdict:sndn}} & -- & Roll count objects on
 stack down one. \\
+\hline
+stack & {\bf \htmlref{sadn}{systemdict:sadn}} & -- & Roll objects on stack down
+one. \\
+\hline
+stack amount & {\bf \htmlref{srot}{systemdict:srot}} & -- & Rotate objects on
+stack up by \oparg{amount}. \\
 \hline
 stack count amount & {\bf \htmlref{sroll}{systemdict:sroll}} & -- & Roll objects
 on stack. \\
@@ -4208,6 +4226,39 @@ onyx:0> -1.5 +3e1 add 1 sprint
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:adn}
+\index{adn@\onyxop{}{adn}{}}
+\item[{\onyxop{obj \commas}{adn}{\commas obj}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[obj: ]
+			An object.
+		\item[\commas: ]
+			Zero or more objects.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[\commas: ]
+			Zero or more objects.
+		\item[obj: ]
+			An object.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\end{description}
+	\item[Description: ]
+		Rotate stack down one position.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> 1 2 3 adn pstack
+1
+3
+2
+onyx:3>
+		\end{verbatim}
+	\end{description}
 \label{systemdict:and}
 \index{and@\onyxop{}{and}{}}
 \item[{\onyxop{a b}{and}{r}}: ]
@@ -4331,6 +4382,39 @@ onyx:0> 0 1 atan 1 sprint
 onyx:0> -1.0 0 atan 1 sprint
 -1.570796e+00
 onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:aup}
+\index{aup@\onyxop{}{aup}{}}
+\item[{\onyxop{\commas obj}{aup}{obj \commas}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[\commas: ]
+			Zero or more objects.
+		\item[obj: ]
+			An object.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[obj: ]
+			An object.
+		\item[\commas: ]
+			Zero or more objects.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\end{description}
+	\item[Description: ]
+		Rotate stack up one position.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> 1 2 3 aup pstack
+2
+1
+3
+onyx:3>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:bdup}
@@ -4484,41 +4568,6 @@ onyx:0> 1 2
 onyx:2> bpop pstack
 2
 onyx:1>
-		\end{verbatim}
-	\end{description}
-\label{systemdict:bpush}
-\index{bpush@\onyxop{}{bpush}{}}
-\item[{\onyxop{\commas obj}{bpush}{obj \commas}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[obj: ]
-			An object.
-		\item[\commas: ]
-			Zero or more objects.
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[\commas: ]
-			Zero or more objects.
-		\item[obj: ]
-			An object.
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{stackunderflow}{stackunderflow}.]
-		\end{description}
-	\item[Description: ]
-		Push \oparg{obj} onto the bottom of ostack.
-	\item[Example(s): ]\begin{verbatim}
-
-onyx:0> 1 2 3
-onyx:3> 0 bpush pstack
-3
-2
-1
-0
-onyx:4>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:broadcast}
@@ -8238,24 +8287,37 @@ onyx:0>
 	\end{description}
 \label{systemdict:over}
 \index{over@\onyxop{}{over}{}}
-\item[{\onyxop{OPARGS}{over}{OPOUTS}}: ]
+\item[{\onyxop{a b}{over}{a b a}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a: ]
+			An object.
+		\item[b: ]
+			An object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a: ]
+			An object.
+		\item[b: ]
+			An object.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
-		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Create a duplicate of the second object on ostack and push it
+		onto ostack.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> 0 1 2 over pstack
+1
+2
+1
+0
+onyx:4>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:pid}
@@ -8982,6 +9044,95 @@ onyx:0> 1.51 round 1 sprint
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:rot}
+\index{rot@\onyxop{}{rot}{}}
+\item[{\onyxop{\dots amount}{rot}{\dots}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[\dots: ]
+			One or more objects.
+		\item[amount: ]
+			Number of positions to rotate the stack upward.  A
+			negative value causes downward rotation.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[\dots: ]
+			One or more objects.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Rotate the stack contents up \oparg{amount} positions.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> 1 2 3 4 5 2 rot pstack clear
+3
+2
+1
+5
+4
+onyx:0> 1 2 3 4 5 -2 rot pstack clear
+2
+1
+5
+4
+3
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:sadn}
+\index{sadn@\onyxop{}{sadn}{}}
+\item[{\onyxop{stack}{sadn}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[stack: ]
+			A stack object.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Rotate the contents of \oparg{stack} down one position.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> (1 2 3 4) dup sadn 1 sprint
+(2 3 4 1)
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:saup}
+\index{saup@\onyxop{}{saup}{}}
+\item[{\onyxop{stack}{saup}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[stack: ]
+			A stack object.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Rotate the contents of \oparg{stack} up one position.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> (1 2 3 4) dup saup 1 sprint
+(4 1 2 3)
+onyx:0>
+		\end{verbatim}
+	\end{description}
 \label{systemdict:sbdup}
 \index{sbdup@\onyxop{}{sbdup}{}}
 \item[{\onyxop{OPARGS}{sbdup}{OPOUTS}}: ]
@@ -9028,24 +9179,29 @@ onyx:0>
 	\end{description}
 \label{systemdict:sbpush}
 \index{sbpush@\onyxop{}{sbpush}{}}
-\item[{\onyxop{OPARGS}{sbpush}{OPOUTS}}: ]
+\item[{\onyxop{stack obj}{sbpush}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[stack: ]
+			A stack object.
+		\item[obj: ]
+			An object.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Push \oparg{obj} onto the bottom of \oparg{stack}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> (0) dup 1 sbpush
+onyx:1> pstack
+(1 0)
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sclear}
@@ -10238,9 +10394,9 @@ onyx:0>
 		Push \oparg{obj} onto \oparg{stack}.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> () dup 1 spush
+onyx:0> (0) dup 1 spush
 onyx:1> pstack
-(1)
+(0 1)
 onyx:1>
 		\end{verbatim}
 	\end{description}
@@ -10335,6 +10491,35 @@ onyx:1> dup 3 -2 sroll pstack
 onyx:1> dup 4 0 sroll pstack
 (3 1 0 2)
 onyx:1>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:srot}
+\index{srot@\onyxop{}{srot}{}}
+\item[{\onyxop{stack amount}{srot}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[stack: ]
+			One or more objects.
+		\item[amount: ]
+			Number of positions to rotate \oparg{stack} upward.  A
+			negative value causes downward rotation.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Rotate \oparg{stack} up \oparg{count} positions.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> (1 2 3 4 5) dup 2 srot 1 sprint
+(4 5 1 2 3)
+onyx:0> (1 2 3 4 5) dup -2 srot 1 sprint
+(3 4 5 1 2)
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:stack}
@@ -11350,24 +11535,37 @@ onyx:0>
 	\end{description}
 \label{systemdict:under}
 \index{under@\onyxop{}{under}{}}
-\item[{\onyxop{OPARGS}{under}{OPOUTS}}: ]
+\item[{\onyxop{a b}{under}{a a b}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a: ]
+			An object.
+		\item[b: ]
+			An object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a: ]
+			An object.
+		\item[b: ]
+			An object.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
-		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Create a duplicate of the second object on ostack and put it
+		under the top object on ostack.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> 0 1 2 under pstack
+2
+1
+1
+0
+onyx:4>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:unlink}
