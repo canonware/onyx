@@ -409,6 +409,7 @@ sub expand_tags
 		}
 		else
 		{
+		    print $ofh "$_";
 		    print STDERR "Missing Version tag value for \"$3\""
 			. " in $File::Find::dir/$name\n";
 		}
