@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 165 $
- * $Date: 1998-08-11 17:09:33 -0700 (Tue, 11 Aug 1998) $
+ * $Revision: 167 $
+ * $Date: 1998-08-12 15:02:36 -0700 (Wed, 12 Aug 1998) $
  *
  * <<< Description >>>
  *
@@ -196,11 +196,7 @@ matrix_get_element(cw_matrix_t * a_matrix_o, cw_uint32_t a_x_pos,
 
   return retval;
 }
-#else
-#  define matrix_get_element(a, b, c) (a)->grid[(a)->y_index[(c)] * (a)->grid_x_size + (a)->x_index[(b)]]
-#endif
 
-#ifdef _CW_DEBUG
 void
 matrix_set_element(cw_matrix_t * a_matrix_o, cw_uint32_t a_x_pos,
 		   cw_uint32_t a_y_pos, cw_sint32_t a_val)
@@ -214,11 +210,7 @@ matrix_set_element(cw_matrix_t * a_matrix_o, cw_uint32_t a_x_pos,
 		  + a_matrix_o->x_index[a_x_pos]]
     = a_val;
 }
-#else
-#  define matrix_set_element(a, b, c, d) (a)->grid[(a)->y_index[(c)] * (a)->grid_x_size + (a)->x_index[(b)]] = (d)
-#endif
 
-#ifdef _CW_DEBUG
 cw_uint32_t
 matrix_get_x_size(cw_matrix_t * a_matrix_o)
 {
@@ -226,11 +218,6 @@ matrix_get_x_size(cw_matrix_t * a_matrix_o)
 
   return a_matrix_o->x_size;
 }
-#else
-#  define matrix_get_x_size(a) (a)->x_size
-#endif
-
-#ifdef _CW_DEBUG
 cw_uint32_t
 matrix_get_y_size(cw_matrix_t * a_matrix_o)
 {
@@ -238,8 +225,6 @@ matrix_get_y_size(cw_matrix_t * a_matrix_o)
 
   return a_matrix_o->y_size;
 }
-#else
-#  define matrix_get_y_size(a) (a)->y_size
 #endif
 
 cw_matrix_t *

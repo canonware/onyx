@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 165 $
- * $Date: 1998-08-11 17:09:33 -0700 (Tue, 11 Aug 1998) $
+ * $Revision: 167 $
+ * $Date: 1998-08-12 15:02:36 -0700 (Wed, 12 Aug 1998) $
  *
  * <<< Description >>>
  *
@@ -43,6 +43,15 @@ struct cw_matrix_s
 #  define matrix_set_element _CW_NS_ANY(matrix_set_element)
 #  define matrix_get_x_size _CW_NS_ANY(matrix_get_x_size)
 #  define matrix_get_y_size _CW_NS_ANY(matrix_get_y_size)
+#else
+#  define matrix_get_element(a, b, c) (a)->grid[(a)->y_index[(c)] \
+					       * (a)->grid_x_size \
+					       + (a)->x_index[(b)]]
+#  define matrix_set_element(a, b, c, d) (a)->grid[(a)->y_index[(c)] \
+						  * (a)->grid_x_size \
+						  + (a)->x_index[(b)]] = (d)
+#  define matrix_get_x_size(a) (a)->x_size
+#  define matrix_get_y_size(a) (a)->y_size
 #endif
 #define matrix_copy _CW_NS_ANY(matrix_copy)
 #define matrix_dump _CW_NS_ANY(matrix_dump)
@@ -55,14 +64,14 @@ void matrix_delete(cw_matrix_t * a_matrix_o);
 void matrix_init(cw_matrix_t * a_matrix_o, cw_uint32_t a_x_size,
 		 cw_uint32_t a_y_size, cw_bool_t a_should_zero);
 void matrix_rebuild(cw_matrix_t * a_matrix_o);
-#ifndef _CW_DEBUG
+#ifdef _CW_DEBUG
 cw_sint32_t matrix_get_element(cw_matrix_t * a_matrix_o, cw_uint32_t a_x_pos,
 			       cw_uint32_t a_y_pos);
 void matrix_set_element(cw_matrix_t * a_matrix_o, cw_uint32_t a_x_pos,
 			cw_uint32_t a_y_pos, cw_sint32_t a_val);
-#endif
 cw_uint32_t matrix_get_x_size(cw_matrix_t * a_matrix_o);
 cw_uint32_t matrix_get_y_size(cw_matrix_t * a_matrix_o);
+#endif
 cw_matrix_t * matrix_copy(cw_matrix_t * a_matrix_o);
 void matrix_dump(cw_matrix_t * a_matrix_o, cw_bool_t a_compact);
 cw_bool_t matrix_is_equal(cw_matrix_t * a_a, cw_matrix_t * a_b);
