@@ -1,3 +1,10 @@
+1999-10-28  Jason Evans  <jasone@canonware.com>
+
+	* src/sock.c (sock_write): Fix two bugs that somewhat cancelled
+	each other out.  One bug caused writev() errors to never be
+	noticed, and the other bug was due to not handling EAGAIN as
+	acceptable.
+
 1999-10-21  Jason Evans  <jasone@canonware.com>
 
 	* bin/ncat.c: Clarify error messages.

@@ -651,13 +651,18 @@ sock_write(cw_sock_t * a_sock, cw_buf_t * a_buf)
 			    &iovec_count);
       
       bytes_written = writev(a_sock->sockfd, iovec, iovec_count);
+#ifdef _LIBSOCK_CONFESS
+      out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
+		"[i]w?([i|s:s]/[i])\n",
+		a_sock->sockfd, bytes_written, buf_get_size(&a_sock->out_buf));
+#endif
 
-      if (0 <= bytes_written)
+      if (0 < (cw_sint32_t) bytes_written)
       {
 	buf_release_head_data(&a_sock->out_buf, bytes_written);
 	out_buf_size -= bytes_written;
       }
-      else
+      else if ((0 > (cw_sint32_t) bytes_written) && (EAGAIN != errno))
       {
 	/* Socket error.  Unregister the socket. */
 

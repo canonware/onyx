@@ -23,6 +23,9 @@ extern "C" {
 
 #  define _LIBSOCK_VERSION "<Version>"
 
+/* Causes verbose I/O-related output. */
+/*  #define _LIBSOCK_CONFESS */
+
 /* Project headers to always be included. */
 
 #  include "libsock_incs.h"
