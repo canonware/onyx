@@ -26,6 +26,9 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "[",
     "]",
     "abs",
+#ifdef CW_POSIX
+    "accept",
+#endif
     "active",
     "add",
     "and",
@@ -41,6 +44,7 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "begin",
     "bind",
 #ifdef CW_POSIX
+    "bindsocket",
     "blksize",
     "blocks",
 #endif
@@ -59,6 +63,7 @@ const cw_uint8_t *cw_g_nx_names[] = {
 #ifdef CW_POSIX
     "chmod",
     "chown",
+    "chroot",
 #endif
     "clear",
     "cleardstack",
@@ -70,6 +75,9 @@ const cw_uint8_t *cw_g_nx_names[] = {
 #ifdef CW_THREADS
     "condition",
     "conditiontype",
+#endif
+#ifdef CW_POSIX
+    "connect",
 #endif
     "copy",
 #ifdef CW_REAL
@@ -140,6 +148,10 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "exit",
     "exp",
     "false",
+#ifdef CW_POSIX
+    "fcntl",
+    "fifo",
+#endif
     "filetype",
     "finotype",
 #ifdef CW_REAL
@@ -160,8 +172,16 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "gid",
 #endif
     "globaldict",
+#ifdef CW_THREADS
+    "gstderr",
+    "gstdin",
+    "gstdout",
+#endif
     "gt",
     "hooktag",
+#ifdef CW_POSIX
+    "hostbyname",
+#endif
     "hooktype",
     "idiv",
     "if",
@@ -175,6 +195,9 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "invalidexit",
     "invalidfileaccess",
     "iobuf",
+#ifdef CW_POSIX
+    "ioctl",
+#endif
     "ioerror",
     "istack",
 #ifdef CW_THREADS
@@ -189,6 +212,7 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "limitcheck",
 #ifdef CW_POSIX
     "link",
+    "listen",
 #endif
 #ifdef CW_REAL
     "ln",
@@ -247,6 +271,9 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "operatortype",
     "or",
     "ostack",
+#ifdef CW_POSIX
+    "peername",
+#endif
 #ifdef CW_THREADS
     "period",
 #endif
@@ -255,6 +282,20 @@ const cw_uint8_t *cw_g_nx_names[] = {
 #endif
     "pmark",
     "pmarktype",
+#ifdef CW_POSIX
+    "pipe",
+    "poll",
+    "POLLERR",
+    "POLLHUP",
+    "POLLIN",
+    "POLLNVAL",
+    "POLLOUT",
+    "POLLPRI",
+    "POLLRDBAND",
+    "POLLRDNORM",
+    "POLLWRNORM",
+    "POLLWRBAND",
+#endif
     "pop",
 #ifdef CW_POSIX
     "ppid",
@@ -276,12 +317,14 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "read",
     "readline",
 #ifdef CW_POSIX
+    "readlink",
     "realtime",
 #endif
 #ifdef CW_REAL
     "realtype",
 #endif
 #ifdef CW_POSIX
+    "recv",
     "rename",
 #endif
     "repeat",
@@ -303,6 +346,9 @@ const cw_uint8_t *cw_g_nx_names[] = {
 #ifdef CW_THREADS
     "self",
 #endif
+#ifdef CW_POSIX
+    "send",
+#endif
     "setactive",
 #ifdef CW_POSIX
     "setegid",
@@ -310,14 +356,26 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "seteuid",
     "setgid",
 #endif
+#ifdef CW_THREADS
+    "setgstderr",
+    "setgstdin",
+    "setgstdout",
+#endif
     "setiobuf",
 #ifdef CW_THREADS
     "setlocking",
     "setperiod",
 #endif
+#ifdef CW_POSIX
+    "setsockopt",
+#endif
+    "setstderr",
+    "setstdin",
+    "setstdout",
     "setthreshold",
 #ifdef CW_POSIX
     "setuid",
+    "setumask",
 #endif
     "sexch",
     "shift",
@@ -330,6 +388,10 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "sindex",
 #ifdef CW_POSIX
     "size",
+    "socket",
+    "socketpair",
+    "sockname",
+    "sockopt",
 #endif
     "spop",
     "spush",
@@ -390,6 +452,7 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "typecheck",
 #ifdef CW_POSIX
     "uid",
+    "umask",
 #endif
     "undef",
     "undefined",

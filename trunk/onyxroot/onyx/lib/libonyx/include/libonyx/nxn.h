@@ -25,6 +25,9 @@ typedef enum
     NXN_sym_lb,
     NXN_sym_rb,
     NXN_abs,
+#ifdef CW_POSIX
+    NXN_accept,
+#endif
     NXN_active,
     NXN_add,
     NXN_and,
@@ -40,6 +43,7 @@ typedef enum
     NXN_begin,
     NXN_bind,
 #ifdef CW_POSIX
+    NXN_bindsocket,
     NXN_blksize,
     NXN_blocks,
 #endif
@@ -58,6 +62,7 @@ typedef enum
 #ifdef CW_POSIX
     NXN_chmod,
     NXN_chown,
+    NXN_chroot,
 #endif
     NXN_clear,
     NXN_cleardstack,
@@ -69,6 +74,9 @@ typedef enum
 #ifdef CW_THREADS
     NXN_condition,
     NXN_conditiontype,
+#endif
+#ifdef CW_POSIX
+    NXN_connect,
 #endif
     NXN_copy,
 #ifdef CW_REAL
@@ -139,6 +147,10 @@ typedef enum
     NXN_exit,
     NXN_exp,
     NXN_false,
+#ifdef CW_POSIX
+    NXN_fcntl,
+    NXN_fifo,
+#endif
     NXN_filetype,
     NXN_finotype,
 #ifdef CW_REAL
@@ -159,8 +171,16 @@ typedef enum
     NXN_gid,
 #endif
     NXN_globaldict,
+#ifdef CW_THREADS
+    NXN_gstderr,
+    NXN_gstdin,
+    NXN_gstdout,
+#endif
     NXN_gt,
     NXN_hooktag,
+#ifdef CW_POSIX
+    NXN_hostbyname,
+#endif
     NXN_hooktype,
     NXN_idiv,
     NXN_if,
@@ -174,6 +194,9 @@ typedef enum
     NXN_invalidexit,
     NXN_invalidfileaccess,
     NXN_iobuf,
+#ifdef CW_POSIX
+    NXN_ioctl,
+#endif
     NXN_ioerror,
     NXN_istack,
 #ifdef CW_THREADS
@@ -188,6 +211,7 @@ typedef enum
     NXN_limitcheck,
 #ifdef CW_POSIX
     NXN_link,
+    NXN_listen,
 #endif
 #ifdef CW_REAL
     NXN_ln,
@@ -246,6 +270,9 @@ typedef enum
     NXN_operatortype,
     NXN_or,
     NXN_ostack,
+#ifdef CW_POSIX
+    NXN_peername,
+#endif
 #ifdef CW_THREADS
     NXN_period,
 #endif
@@ -254,6 +281,20 @@ typedef enum
 #endif
     NXN_pmark,
     NXN_pmarktype,
+#ifdef CW_POSIX
+    NXN_pipe,
+    NXN_poll,
+    NXN_POLLERR,
+    NXN_POLLHUP,
+    NXN_POLLIN,
+    NXN_POLLNVAL,
+    NXN_POLLOUT,
+    NXN_POLLPRI,
+    NXN_POLLRDBAND,
+    NXN_POLLRDNORM,
+    NXN_POLLWRNORM,
+    NXN_POLLWRBAND,
+#endif
     NXN_pop,
 #ifdef CW_POSIX
     NXN_ppid,
@@ -275,12 +316,14 @@ typedef enum
     NXN_read,
     NXN_readline,
 #ifdef CW_POSIX
+    NXN_readlink,
     NXN_realtime,
 #endif
 #ifdef CW_REAL
     NXN_realtype,
 #endif
 #ifdef CW_POSIX
+    NXN_recv,
     NXN_rename,
 #endif
     NXN_repeat,
@@ -302,6 +345,9 @@ typedef enum
 #ifdef CW_THREADS
     NXN_self,
 #endif
+#ifdef CW_POSIX
+    NXN_send,
+#endif
     NXN_setactive,
 #ifdef CW_POSIX
     NXN_setegid,
@@ -309,14 +355,26 @@ typedef enum
     NXN_seteuid,
     NXN_setgid,
 #endif
+#ifdef CW_THREADS
+    NXN_setgstderr,
+    NXN_setgstdin,
+    NXN_setgstdout,
+#endif
     NXN_setiobuf,
 #ifdef CW_THREADS
     NXN_setlocking,
     NXN_setperiod,
 #endif
+#ifdef CW_POSIX
+    NXN_setsockopt,
+#endif
+    NXN_setstderr,
+    NXN_setstdin,
+    NXN_setstdout,
     NXN_setthreshold,
 #ifdef CW_POSIX
     NXN_setuid,
+    NXN_setumask,
 #endif
     NXN_sexch,
     NXN_shift,
@@ -329,6 +387,10 @@ typedef enum
     NXN_sindex,
 #ifdef CW_POSIX
     NXN_size,
+    NXN_socket,
+    NXN_socketpair,
+    NXN_sockname,
+    NXN_sockopt,
 #endif
     NXN_spop,
     NXN_spush,
@@ -389,6 +451,7 @@ typedef enum
     NXN_typecheck,
 #ifdef CW_POSIX
     NXN_uid,
+    NXN_umask,
 #endif
     NXN_undef,
     NXN_undefined,
