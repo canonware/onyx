@@ -162,16 +162,16 @@ subarrays can be created.
 
 Stil's syntax is very simple in comparison to most languages.  The scanner and
 parser are implemented as a human-understandable finite state machine (nested C
-switch statements with a couple of auxiliary variables), which should give then
+switch statements with a couple of auxiliary variables), which should give the
 reader an idea of the simplicity of the language syntax.
 
-CRLF (newline, linefeed) pairs are in all important cases converted to newline
-during scanning.
+CRLF (carriage return, linefeed) pairs are in all important cases converted to
+newline during scanning.
 
-The characters \%, /, [, ], \{, \}, (, ), {\lt}, and {\gt} are special.  Any
-of the special characters and whitespace (space, tab, newline, form feed, null)
-terminate any preceding token.  All other characters including non-printing
-characters are considered regular characters.
+The characters \%, /, [, ], \{, \}, (, ), `, ', ", {\lt}, and {\gt} are special.
+Any of the special characters and whitespace (space, tab, newline, form feed,
+null) terminate any preceding token.  All other characters including
+non-printing characters are considered regular characters.
 
 A comment starts with a \% character outside of a string context and extends to
 the next newline, linefeed or formfeed.
