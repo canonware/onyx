@@ -61,9 +61,8 @@ nxo_string_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking,
     string->e.s.alloc_len = a_len;
     if (string->e.s.len > 0)
     {
-	string->e.s.str = (cw_uint8_t *) nxa_malloc(nxa,
+	string->e.s.str = (cw_uint8_t *) nxa_calloc(nxa, 1,
 						    string->e.s.alloc_len);
-	memset(string->e.s.str, 0, string->e.s.len);
     }
     else
     {

@@ -46,8 +46,7 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, int a_argc, char **a_argv,
 	}
 	else
 	{
-	    retval = (cw_nx_t *) cw_malloc(sizeof(cw_nx_t));
-	    memset(retval, 0, sizeof(cw_nx_t));
+	    retval = (cw_nx_t *) cw_calloc(1, sizeof(cw_nx_t));
 	    retval->is_malloced = TRUE;
 	}
 	v_retval = retval;
@@ -59,14 +58,19 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, int a_argc, char **a_argv,
 
 	/* Initialize the GC. */
 	nxa_l_new(&retval->nxa, retval);
+
+	/* Set up the mema to be used for allocation. */
+	mema_new(&retval->mema, (cw_opaque_alloc_t *) nxa_malloc_e,
+		 (cw_opaque_calloc_t *) nxa_calloc_e,
+		 (cw_opaque_realloc_t *) nxa_realloc_e,
+		 (cw_opaque_dealloc_t *) nxa_free_e, &retval->nxa);
 	try_stage = 2;
 
 	/* Initialize the global name cache. */
 #ifdef CW_THREADS
 	mtx_new(&retval->name_lock);
 #endif
-	dch_new(&retval->name_hash, (cw_opaque_alloc_t *) nxa_malloc_e,
-		(cw_opaque_dealloc_t *) nxa_free_e, &retval->nxa,
+	dch_new(&retval->name_hash, &retval->mema,
 		CW_LIBONYX_NAME_HASH, CW_LIBONYX_NAME_HASH / 4 * 3,
 		CW_LIBONYX_NAME_HASH / 4, nxo_l_name_hash,
 		nxo_l_name_key_comp);
@@ -160,6 +164,7 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, int a_argc, char **a_argv,
 	    }
 	    case 2:
 	    {
+		mema_delete(&retval->mema);
 		nxa_l_delete(&retval->nxa);
 	    }
 	    case 1:
@@ -168,7 +173,9 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, int a_argc, char **a_argv,
 		memset(a_nx, 0x5a, sizeof(cw_nx_t));
 #endif
 		if (retval->is_malloced)
-		cw_free(retval);
+		{
+		    cw_free(retval);
+		}
 		break;
 	    }
 	    default:
