@@ -13,22 +13,22 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Definitions and front matter.
-\input{@abs_srcdir@/doc/latex/onyx/front}
+\input{@abs_srcroot@/doc/latex/onyx/front}
 
 % Onyx Language Tutorial.
-\input{@abs_srcdir@/doc/latex/onyx/tut}
+\input{@abs_srcroot@/doc/latex/onyx/tut}
 
 % Onyx Language Examples.
-\input{@abs_srcdir@/doc/latex/onyx/ex}
+\input{@abs_srcroot@/doc/latex/onyx/ex}
 
 % Onyx Language Reference.
-\input{@abs_srcdir@/doc/latex/onyx/lang}
+\input{@abs_srcroot@/doc/latex/onyx/lang}
 
 % The onyx program.
-\input{@abs_objdir@/bin/onyx/doc/latex/manual}
+\input{@abs_objroot@/bin/onyx/doc/latex/manual}
 
 % The libonyx library.
-\input{@abs_objdir@/lib/libonyx/doc/latex/manual}
+\input{@abs_objroot@/lib/libonyx/doc/latex/manual}
 
 % Back matter.
-\input{@abs_srcdir@/doc/latex/onyx/back}
+\input{@abs_srcroot@/doc/latex/onyx/back}
