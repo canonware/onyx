@@ -8,7 +8,9 @@
  *
  * Version: <Version>
  *
- * Description: Master header file for libstash.
+ * <<< Description >>>
+ *
+ * Master header file for libsock.
  *
  ****************************************************************************/
 
@@ -20,19 +22,6 @@ extern "C" {
 #  define _LIBSOCK_H_
 
 #  define _LIBSOCK_VERSION "<Version>"
-
-/* This guarantees that the socket code can handle something over 1000
- * simultaneous clients, rather than the default of under 256 as on some
- * systems. */
-#  ifndef FD_SETSIZE
-#    ifdef _CW_OS_FREEBSD
-#      define FD_SETSIZE 1024
-#    endif
-#  endif
-
-/* Need to include libstash_r.h here for the namespace mangling foo.  It gets
- * included again inside libsock_incs.h.  Oh well, that's okay. */
-#  include <libstash/libstash_r.h>
 
 /* Project headers to always be included. */
 
