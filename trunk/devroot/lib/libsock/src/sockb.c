@@ -976,16 +976,46 @@ sockb_p_entry_func(void * a_arg)
 #ifdef _LIBSTASH_SOCKB_CONFESS
 	out_put(cw_g_out, " [i][s][s][s][s][s][s][s][s][s][s]",
 		sockfd,
-		fds[i].revents & POLLIN ? "IN," : "",
-		fds[i].revents & POLLRDNORM ? "RDNORM," : "",
-		fds[i].revents & POLLRDBAND ? "RDBAND," : "",
-		fds[i].revents & POLLPRI ? "PRI," : "",
-		fds[i].revents & POLLOUT ? "OUT," : "",
-		fds[i].revents & POLLWRNORM ? "WRNORM," : "",
-		fds[i].revents & POLLWRBAND ? "WRBAND," : "",
-		fds[i].revents & POLLERR ? "ERR," : "",
-		fds[i].revents & POLLHUP ? "HUP," : "",
-		fds[i].revents & POLLNVAL ? "NVAL," : "");
+#ifdef POLLIN
+		fds[i].revents & POLLIN ? "IN," :
+#endif
+		"",
+#ifdef POLLRDNORM
+		fds[i].revents & POLLRDNORM ? "RDNORM," :
+#endif
+		"",
+#ifdef POLLRDBAND
+		fds[i].revents & POLLRDBAND ? "RDBAND," :
+#endif
+		"",
+#ifdef POLLPRI
+		fds[i].revents & POLLPRI ? "PRI," :
+#endif
+		"",
+#ifdef POLLOUT
+		fds[i].revents & POLLOUT ? "OUT," :
+#endif
+		"",
+#ifdef POLLWRNORM
+		fds[i].revents & POLLWRNORM ? "WRNORM," :
+#endif
+		"",
+#ifdef POLLWRBAND
+		fds[i].revents & POLLWRBAND ? "WRBAND," :
+#endif
+		"",
+#ifdef POLLERR
+		fds[i].revents & POLLERR ? "ERR," :
+#endif
+		"",
+#ifdef POLLHUP
+		fds[i].revents & POLLHUP ? "HUP," :
+#endif
+		"",
+#ifdef POLLNVAL
+		fds[i].revents & POLLNVAL ? "NVAL," :
+#endif
+		"");
 #endif
 
 	if (fds[i].revents & POLLIN)
