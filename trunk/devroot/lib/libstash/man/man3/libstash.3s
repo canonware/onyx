@@ -14,7 +14,7 @@ cc
 .I file
 -lstash -lpthread
 .br
-cc -g -D_LIBSTASH_DEBUG
+cc -g -D_LIBSTASH_DBG
 .I file
 -lstash_d -lpthread
 .br

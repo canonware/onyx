@@ -157,7 +157,7 @@ extern cw_out_t	*cw_g_out;
  * Used for deallocation via an opaque function pointer.  These macros are used
  * to call functions such as mem_free(), pezz_put(), and pool_put().
  */
-#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
+#ifdef _LIBSTASH_DBG
 #define _cw_opaque_dealloc(a_func, a_arg, a_ptr)			\
 	(a_func)((void *)(a_arg), (void *)(a_ptr), __FILE__, __LINE__)
 #else
@@ -189,7 +189,7 @@ extern cw_out_t	*cw_g_out;
 		abort();						\
 	} while (0)
 
-#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
+#ifdef _LIBSTASH_DBG
 #define _cw_not_reached()						\
 	do {								\
 		out_put_e(NULL, __FILE__, __LINE__, __FUNCTION__,	\

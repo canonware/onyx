@@ -15,7 +15,7 @@ struct cw_mem_s {
 
 	cw_mtx_t	lock;
 
-#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
+#ifdef _LIBSTASH_DBG
 #define _CW_MEM_TABLE_SIZE 1024		/* Number of slots in hash table. */
 	cw_ch_t		*addr_hash;
 #endif
@@ -40,7 +40,7 @@ void	mem_free_e(cw_mem_t *a_mem, void *a_ptr, const char *a_filename,
  * of the generated binary.  Since these arguments aren't used in the optimized
  * library anyway, this is a free (though perhaps small) memory savings.
  */
-#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
+#ifdef _LIBSTASH_DBG
 #define mem_malloc(a_mem, a_size)					\
 	mem_malloc_e((a_mem), (a_size), __FILE__, __LINE__)
 #define mem_calloc(a_mem, a_number, a_size)				\

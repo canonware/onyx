@@ -30,7 +30,7 @@ static void	buf_p_data_position_get(cw_buf_t *a_buf, cw_uint32_t a_offset,
 static void	buf_p_array_fit(cw_buf_t *a_buf, cw_uint32_t a_min_array_size);
 static void	buf_p_buf_catenate(cw_buf_t *a_a, cw_buf_t *a_b, cw_bool_t
     a_preserve);
-#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
+#ifdef _LIBSTASH_DBG
 static void	buf_p_array_copy(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t
     a_num_elements, cw_uint32_t a_a_start, cw_uint32_t a_b_start, cw_bool_t
     a_is_destructive);

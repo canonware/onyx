@@ -13,7 +13,7 @@
 typedef struct cw_treen_s cw_treen_t;
 
 struct cw_treen_s {
-#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
+#ifdef _LIBSTASH_DBG
 	cw_uint32_t	magic_a;
 #endif
 
@@ -33,7 +33,7 @@ struct cw_treen_s {
 
 	void		*data;		/* The payload. */
 
-#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
+#ifdef _LIBSTASH_DBG
 	cw_uint32_t	size_of;
 	cw_uint32_t	magic_b;
 #endif

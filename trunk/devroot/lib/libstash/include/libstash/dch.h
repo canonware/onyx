@@ -13,7 +13,7 @@
 typedef struct cw_dch_s cw_dch_t;
 
 struct cw_dch_s {
-#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
+#ifdef _LIBSTASH_DBG
 	cw_uint32_t	magic;
 
 	/* Counters used to get an idea of performance. */

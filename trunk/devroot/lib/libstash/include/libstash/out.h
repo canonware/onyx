@@ -23,7 +23,7 @@ typedef struct cw_out_s cw_out_t;
 typedef struct cw_out_ent_s cw_out_ent_t;
 
 struct cw_out_s {
-#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
+#ifdef _LIBSTASH_DBG
 	cw_uint32_t	magic;
 #endif
 

@@ -15,7 +15,7 @@ typedef struct cw_pool_spare_s cw_pool_spare_t;
 
 struct cw_pool_s {
 	cw_bool_t	is_malloced;
-#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
+#ifdef _LIBSTASH_DBG
 	cw_uint32_t	magic;
 	cw_dch_t	addr_hash;
 #endif
@@ -58,7 +58,7 @@ void		pool_dump(cw_pool_t *a_pool, const char *a_prefix);
  * of the generated binary.  Since these arguments aren't used in the optimized
  * library anyway, this is a free (though perhaps small) memory savings.
  */
-#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
+#ifdef _LIBSTASH_DBG
 #define pool_get(a_pool)						\
 	pool_get_e((a_pool), __FILE__, __LINE__)
 #define pool_put(a_pool, a_buffer)					\

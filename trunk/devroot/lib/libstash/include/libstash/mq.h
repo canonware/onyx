@@ -15,7 +15,7 @@ typedef struct cw_mq_s cw_mq_t;
 struct cw_mq_s {
 	cw_mem_t	*mem;
 	cw_bool_t	is_malloced;
-#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
+#ifdef _LIBSTASH_DBG
 	cw_uint32_t	magic;
 #endif
 	cw_uint32_t	msg_count;

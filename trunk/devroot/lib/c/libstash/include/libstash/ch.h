@@ -21,7 +21,7 @@ typedef struct cw_mem_s cw_mem_t;
  * multiple ql's in order to implement various LIFO/FIFO orderings.
  */
 struct cw_chi_s {
-#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
+#ifdef _LIBSTASH_DBG
 	cw_uint32_t	magic;
 #endif
 	cw_bool_t	is_malloced;	/* If space for a chi wasn't passed into
@@ -36,7 +36,7 @@ struct cw_chi_s {
 };
 
 struct cw_ch_s {
-#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
+#ifdef _LIBSTASH_DBG
 	cw_uint32_t	magic;
 
 	/* Counters used to get an idea of performance. */

@@ -23,7 +23,7 @@ typedef struct cw_thd_s cw_thd_t;
 #endif
 
 struct cw_thd_s {
-#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
+#ifdef _LIBSTASH_DBG
 	cw_uint32_t	magic;
 #endif
 	pthread_t	thread;

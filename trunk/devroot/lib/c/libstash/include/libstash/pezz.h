@@ -16,7 +16,7 @@ typedef struct cw_pezzi_s cw_pezzi_t;
 struct cw_pezz_s {
 	cw_mem_t	*mem;
 	cw_bool_t	is_malloced;
-#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
+#ifdef _LIBSTASH_DBG
 	cw_uint32_t	magic;
 	cw_dch_t	addr_hash;
 #endif
@@ -74,7 +74,7 @@ void	pezz_dump(cw_pezz_t *a_pezz, const char *a_prefix);
  * of the generated binary.  Since these arguments aren't used in the optimized
  * library anyway, this is a free (though perhaps small) memory savings.
  */
-#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
+#ifdef _LIBSTASH_DBG
 #define pezz_get(a_pezz)						\
 	pezz_get_e((a_pezz), __FILE__, __LINE__)
 #define pezz_put(a_pezz, a_buffer)					\

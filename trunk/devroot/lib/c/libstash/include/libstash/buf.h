@@ -24,7 +24,7 @@ typedef struct cw_bufel_s cw_bufel_t;
 
 /* The following data types should be considered opaque. */
 struct cw_bufc_s {
-#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
+#ifdef _LIBSTASH_DBG
 	cw_uint32_t	magic_a;
 #endif
 	cw_mtx_t	lock;
@@ -36,27 +36,27 @@ struct cw_bufc_s {
 	cw_bool_t	is_writeable;
 	cw_uint32_t	buf_size;
 	cw_uint8_t	*buf;
-#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
+#ifdef _LIBSTASH_DBG
 	cw_uint32_t	size_of;
 	cw_uint32_t	magic_b;
 #endif
 };
 
 struct cw_bufel_s {
-#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
+#ifdef _LIBSTASH_DBG
 	cw_uint32_t	magic_a;
 #endif
 	cw_uint32_t	beg_offset;
 	cw_uint32_t	end_offset;
 	cw_bufc_t	*bufc;
-#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
+#ifdef _LIBSTASH_DBG
 	cw_uint32_t	size_of;
 	cw_uint32_t	magic_b;
 #endif
 };
 
 struct cw_buf_s {
-#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
+#ifdef _LIBSTASH_DBG
 	cw_uint32_t	magic_a;
 #endif
 	cw_mem_t	*mem;
@@ -78,7 +78,7 @@ struct cw_buf_s {
 	cw_bufel_t	static_bufel_array[_LIBSTASH_BUF_ARRAY_MIN_SIZE];
 	cw_uint32_t	static_cumulative_index[_LIBSTASH_BUF_ARRAY_MIN_SIZE];
 	struct iovec	static_iov[_LIBSTASH_BUF_ARRAY_MIN_SIZE];
-#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
+#ifdef _LIBSTASH_DBG
 	cw_uint32_t	size_of;
 	cw_uint32_t	magic_b;
 #endif
