@@ -599,6 +599,10 @@ nxo_p_dict_hash(const void *a_key)
 	case NXOT_MUTEX:
 #endif
 	case NXOT_NAME:
+#ifdef CW_REGEX
+	case NXOT_REGEX:
+	case NXOT_REGSUB:
+#endif
 	case NXOT_STACK:
 	case NXOT_THREAD:
 	{
@@ -642,6 +646,14 @@ nxo_p_dict_hash(const void *a_key)
 	    retval = UINT_MAX;
 	    break;
 	}
+#ifdef CW_REAL
+	case NXOT_REAL:
+	{
+	    /* This could be vastly improved. */
+	    retval = (cw_uint32_t) key->o.real.r;
+	    break;
+	}
+#endif
 	default:
 	{
 	    cw_not_reached();
