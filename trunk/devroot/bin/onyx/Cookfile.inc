@@ -208,9 +208,9 @@ onyx_install_self : [ONYX]
 {
   [INSTALL] -d [PREFIX]/bin;
   [CC] [A_CFLAGS] -o [PREFIX]/bin/onyx
-       [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [ONYX_SRCS]]
+       [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [ONYX_SRCS]] [LIBEDIT_A]
        [RPATH][PREFIX]/lib
-       [LDFLAGS] -lonyx -ledit -lstash -lcurses [EXTRALIBS];
+       [LDFLAGS] -lonyx -lstash -lcurses [EXTRALIBS];
   [CHMOD] 0755 [PREFIX]/bin/onyx;
 }
 
@@ -241,9 +241,9 @@ onyx_distclean :
   set mkdir
 {
   [CC] [A_CFLAGS] -o [target]
-       [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [ONYX_SRCS]]
+       [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [ONYX_SRCS]] [LIBEDIT_A]
        [RPATH][abs_objdir]/lib/c/libonyx/lib
 /*       [RPATH][abs_objdir]/lib/c/libedit/lib */
        [RPATH][abs_objdir]/lib/c/libstash/lib
-       [LDFLAGS] -lonyx -ledit -lstash -lcurses [EXTRALIBS];
+       [LDFLAGS] -lonyx -lstash -lcurses [EXTRALIBS];
 }
