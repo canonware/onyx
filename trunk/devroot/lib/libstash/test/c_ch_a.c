@@ -180,11 +180,34 @@ main()
 		    ch_string_key_comp);
 		_cw_check_ptr(ch);
 
+		/* Iterate with 0 items. */
+		/* Round 1. */
+		_cw_assert(ch_get_iterate(ch, (void **)&k, (void **)&v) ==
+		    TRUE);
+		/* Round 2. */
+		_cw_assert(ch_get_iterate(ch, (void **)&k, (void **)&v) ==
+		    TRUE);
+
 		ch_insert(ch, a, a, (cw_chi_t *)pezz_get(chi_pezz));
+		/* Iterate with 1 item. */
+		/* Round 1. */
+		_cw_assert(ch_get_iterate(ch, (void **)&k, (void **)&v) ==
+		    FALSE);
+		_cw_assert(k == a);
+		_cw_assert(v == a);
+
+		/* Round 2. */
+		_cw_assert(ch_get_iterate(ch, (void **)&k, (void **)&v) ==
+		    FALSE);
+		_cw_assert(k == a);
+		_cw_assert(v == a);
+
 		ch_insert(ch, b, b, (cw_chi_t *)pezz_get(chi_pezz));
 		ch_insert(ch, c, c, (cw_chi_t *)pezz_get(chi_pezz));
 		ch_insert(ch, d, d, (cw_chi_t *)pezz_get(chi_pezz));
 
+		/* Iterate with 4 items. */
+		/* Round 1. */
 		_cw_assert(ch_get_iterate(ch, (void **)&k, (void **)&v) ==
 		    FALSE);
 		_cw_assert(k == a);
@@ -205,11 +228,34 @@ main()
 		_cw_assert(k == d);
 		_cw_assert(v == d);
 
+		/* Round 2. */
 		_cw_assert(ch_get_iterate(ch, (void **)&k, (void **)&v) ==
 		    FALSE);
 		_cw_assert(k == a);
 		_cw_assert(v == a);
 
+		_cw_assert(ch_get_iterate(ch, (void **)&k, (void **)&v) ==
+		    FALSE);
+		_cw_assert(k == b);
+		_cw_assert(v == b);
+
+		_cw_assert(ch_get_iterate(ch, (void **)&k, (void **)&v) ==
+		    FALSE);
+		_cw_assert(k == c);
+		_cw_assert(v == c);
+
+		_cw_assert(ch_get_iterate(ch, (void **)&k, (void **)&v) ==
+		    FALSE);
+		_cw_assert(k == d);
+		_cw_assert(v == d);
+
+		/* Start round 3. */
+		_cw_assert(ch_get_iterate(ch, (void **)&k, (void **)&v) ==
+		    FALSE);
+		_cw_assert(k == a);
+		_cw_assert(v == a);
+
+		/* Remove. */
 		_cw_assert(ch_remove_iterate(ch, (void **)&k, (void **)&v, &chi)
 		    == FALSE);
 		pezz_put(chi_pezz, chi);

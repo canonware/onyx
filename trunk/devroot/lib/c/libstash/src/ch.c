@@ -238,8 +238,7 @@ ch_get_iterate(cw_ch_t *a_ch, void **r_key, void **r_data)
 		*r_data = (void *)chi->data;
 
 	/* Rotate the list. */
-	ql_first(&a_ch->chi_ql) = ql_next(&a_ch->chi_ql,
-	    ql_first(&a_ch->chi_ql), ch_link);
+	ql_first(&a_ch->chi_ql) = qr_next(ql_first(&a_ch->chi_ql), ch_link);
 
 	retval = FALSE;
 	RETURN:
