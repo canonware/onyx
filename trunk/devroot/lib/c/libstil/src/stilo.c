@@ -21,7 +21,6 @@
 typedef struct cw_stiloe_array_s cw_stiloe_array_t;
 typedef struct cw_stiloe_condition_s cw_stiloe_condition_t;
 typedef struct cw_stiloe_dict_s cw_stiloe_dict_t;
-typedef struct cw_stiloe_dicto_s cw_stiloe_dicto_t;
 typedef struct cw_stiloe_hook_s cw_stiloe_hook_t;
 typedef struct cw_stiloe_lock_s cw_stiloe_lock_t;
 typedef struct cw_stiloe_mstate_s cw_stiloe_mstate_t;
@@ -117,11 +116,6 @@ struct cw_stiloe_dict_s {
 			cw_dch_t	hash;
 		}	d;
 	}	e;
-};
-
-struct cw_stiloe_dicto_s {
-	cw_stilo_t	key;
-	cw_stilo_t	val;
 };
 
 struct cw_stiloe_hook_s {

@@ -31,14 +31,6 @@ struct cw_stilt_s {
 	cw_dch_t	stiln_dch;
 
 	/*
-	 * Hash of external references to the local VM, used for mark and
-	 * sweep garbage collection.  Keys are (cw_stilo_t *); values are
-	 * (cw_stiloe_t *). References need not be looked at directly, since
-	 * the value field in the hash table is all we need to know.
-	 */
-	cw_dch_t	roots_dch;
-
-	/*
 	 * Stacks.
 	 */
 	cw_stils_t	exec_stils;

@@ -122,24 +122,27 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 		retval->is_malloced = TRUE;
 	}
 
-	stilat_new(&retval->stilat, a_stilt, stil_stilag_get(a_stil));
+	if (stilat_new(&retval->stilat, a_stilt, stil_stilag_get(a_stil)))
+		goto OOM_2;
 
 	if (dch_new(&retval->stiln_dch, stilt_mem_get(retval),
 	    _CW_STILT_STILN_BASE_TABLE, _CW_STILT_STILN_BASE_GROW,
 	    _CW_STILT_STILN_BASE_SHRINK, ch_hash_direct, ch_key_comp_direct) ==
 	    NULL)
-		goto OOM_2;
-	if (dch_new(&retval->roots_dch, stilt_mem_get(retval),
-	    _CW_STILT_ROOTS_BASE_TABLE, _CW_STILT_ROOTS_BASE_GROW,
-	    _CW_STILT_ROOTS_BASE_SHRINK, ch_hash_direct, ch_key_comp_direct) ==
-	    NULL)
 		goto OOM_3;
-	stils_new(&retval->exec_stils,
-	    stilat_stilsc_pool_get(&a_stilt->stilat));
-	stils_new(&retval->data_stils,
-	    stilat_stilsc_pool_get(&a_stilt->stilat));
-	stils_new(&retval->dict_stils,
-	    stilat_stilsc_pool_get(&a_stilt->stilat));
+
+	if (stils_new(&retval->exec_stils,
+	    stilat_stilsc_pool_get(&a_stilt->stilat)) == NULL)
+		goto OOM_4;
+
+	if (stils_new(&retval->data_stils,
+	    stilat_stilsc_pool_get(&a_stilt->stilat)) == NULL)
+		goto OOM_5;
+
+	if (stils_new(&retval->dict_stils,
+	    stilat_stilsc_pool_get(&a_stilt->stilat)) == NULL)
+		goto OOM_6;
+
 	retval->stdout_fd = 1;
 	retval->stil = a_stil;
 	retval->state = _CW_STILT_STATE_START;
@@ -149,9 +152,14 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 #endif
 
 	return retval;
-
-	OOM_3:
+	OOM_6:
+	stils_delete(&retval->data_stils);
+	OOM_5:
+	stils_delete(&retval->exec_stils);
+	OOM_4:
 	dch_delete(&retval->stiln_dch);
+	OOM_3:
+	stilat_delete(&retval->stilat);
 	OOM_2:
 	if (retval->is_malloced)
 		_cw_free(retval);
@@ -168,7 +176,6 @@ stilt_delete(cw_stilt_t *a_stilt)
 	stils_delete(&a_stilt->dict_stils);
 	stils_delete(&a_stilt->data_stils);
 	stils_delete(&a_stilt->exec_stils);
-	dch_delete(&a_stilt->roots_dch);
 	dch_delete(&a_stilt->stiln_dch);
 	stilat_delete(&a_stilt->stilat);
 	if (a_stilt->is_malloced)

@@ -11,6 +11,7 @@
 
 typedef struct cw_stilo_s cw_stilo_t;
 typedef struct cw_stiloe_s cw_stiloe_t;
+typedef struct cw_stiloe_dicto_s cw_stiloe_dicto_t;
 
 /* Defined here to resolve circular dependencies. */
 typedef struct cw_stila_s cw_stila_t;
@@ -121,6 +122,12 @@ struct cw_stilo_s {
 		}	operator;
 		cw_stiloe_t	*stiloe;
 	}	o;
+};
+
+/* This is private, but stila needs to know its size. */
+struct cw_stiloe_dicto_s {
+	cw_stilo_t	key;
+	cw_stilo_t	val;
 };
 
 /*

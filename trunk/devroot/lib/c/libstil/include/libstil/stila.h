@@ -17,13 +17,6 @@ struct cw_stila_s {
 	 * Keys are pointers to stiloe's.  Values are unused (NULL).
 	 */
 	cw_dch_t	seq_set;
-
-#if (defined(_LIBSTIL_DBG) || defined(_LIBSTIL_DEBUG))
-	/*
-	 * Allocations that are not (yet?) part of the sequence set.
-	 */
-	cw_dch_t	seq_complement;
-#endif
 };
 
 struct cw_stilag_s {
@@ -55,8 +48,6 @@ struct cw_stilat_s {
 #if (defined(_LIBSTIL_DBG) || defined(_LIBSTIL_DEBUG))
 	cw_uint32_t	magic;
 #endif
-	cw_stila_t	stila;
-
 	/* Linkage for the list of all stilat's. */
 	qq_entry(cw_stilat_t) link;
 
@@ -71,6 +62,8 @@ struct cw_stilat_s {
 
 	/* Pointer to the master of all stilat's. */
 	cw_stilag_t	*stilag;
+
+	cw_stila_t	stila;
 };
 
 /* stilag. */
@@ -79,7 +72,8 @@ void		stilag_delete(cw_stilag_t *a_stilag);
 
 void		*stilag_malloc(cw_stilag_t *a_stilag, size_t a_size, const char
     *a_filename, cw_uint32_t a_line_num);
-void		stilag_gc_register(cw_stila_t *a_stila, cw_stiloe_t *a_stiloe);
+cw_bool_t	stilag_gc_register(cw_stilag_t *a_stilag, cw_stilt_t *a_stilt,
+    cw_stiloe_t *a_stiloe);
 void		stilag_free(cw_stilag_t *a_stilag, void *a_ptr, const char
     *a_filename, cw_uint32_t a_line_num);
 
@@ -140,7 +134,8 @@ void		stilat_delete(cw_stilat_t *a_stilat);
 
 void		*stilat_malloc(cw_stilat_t *a_stilat, size_t a_size, const char
     *a_filename, cw_uint32_t a_line_num);
-void		stilat_gc_register(cw_stila_t *a_stila, cw_stiloe_t *a_stiloe);
+cw_bool_t	stilat_gc_register(cw_stilat_t *a_stilat, cw_stiloe_t
+    *a_stiloe);
 void		stilat_free(cw_stilat_t *a_stilat, void *a_ptr, const char
     *a_filename, cw_uint32_t a_line_num);
 
