@@ -378,8 +378,6 @@ onyx_bins_clean :
 onyx_bins_distclean :
 {
   rm -f [fromto @srcroot@/%0%.nx.in @objroot@/%0%.nx.perf [ONYX_OTESTS]];
-
-  rm -f [fromto @srcroot@/%0%.nx.in @objroot@/%0%.nx ONYX_NSRCS];
 }
 
 /*
