@@ -209,6 +209,7 @@ distclean : clean [addsuffix _distclean tests bins mods libs]
   rm -f @objroot@/config.log;
   rm -f @objroot@/config.status;
   rm -f @objroot@/config.stamp;
+  rm -f @objroot@/configure.lineno;
   rm -f @cfghdrs@;
   rm -f @cfgoutputs@;
 }

@@ -51,9 +51,7 @@ onyx_config_bins_bootstrap :
 }
 
 onyx_config_bins_install : mods_install
-#if @enable_onyx@
-                     onyx_bins_install
-#endif
+                           onyx_bins_install
 {
   @INSTALL@ -d [BINDIR];
 
@@ -98,9 +96,7 @@ onyx_config_bins_distclean :
 
 [ONYX_CONFIG] : [fromto @srcroot@/%0%.nx.in.in @objroot@/%0%.nx.in
                         [ONYX_CONFIG_NSRCS]]
-#if @enable_onyx@
-          tonyx
-#endif
+                tonyx
   set mkdir
 {
   echo \"#!@TONYX@\" > [target];

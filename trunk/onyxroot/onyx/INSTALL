@@ -98,6 +98,32 @@ Targets that depend on optional supporting software include:
 	check
 	check_update
 
+Onyx can be configured in a myriad of ways.  The following diagram depicts the
+dependencies among optional features.  The configuration system automatically
+enforces these dependencies, so if, say, regex is disabled, modules will also be
+disabled automatically.
+
+/-----\  /--------\  /-------\  /------------\  /------\  /---------\
+| oop |  | handle |  | regex |  | posix_file |  | real |  | inlines |
+\-----/  \--------/  \-------/  \------------/  \------/  |  or     |
+   ^          ^          ^            ^                   | debug   |
+   |          |          |            |                   \---------/
+   |          |          |        /-------\
+   |          |          |        | posix |               /---------\
+   |          |          |        \-------/               | threads |
+   |          |          |            ^ ^                 |  or     |
+   |          |          |            | |                 | pth     |
+   |           \        /             |  \                \---------/
+    \           \      /             /    \
+     \         /---------\          /   /--------\
+      \--------| modules |---------/    | socket |
+               \---------/              \--------/
+                 ^     ^
+                 |     |
+       /-----------\  /----------\
+       | modprompt |  | modclopt |
+       \-----------/  \----------/
+
 The build system is capable of building in a different directory than the
 source, so that no files are written to the source tree.  In order to use this
 feature, run 'configure' and 'cook' while in the directory that you want to
@@ -140,9 +166,8 @@ Optionally, pass any of the following (not a definitive list) arguments to
 
 --disable-handle
 	Do not include the "handle" Onyx type, which is used by extensions
-	implemented as loadable modules.  This option is incompatible with the
-	modules option, so implies --disable-modules.  The documentation does
-	not mention the effects of this option -- UTSL.
+	implemented as loadable modules.  The documentation does not mention the
+	effects of this option -- UTSL.
 
 --disable-real
 	Do not include the "real" Onyx type, which supports double precision
@@ -167,25 +192,15 @@ Optionally, pass any of the following (not a definitive list) arguments to
 
 --disable-posix-file
 	As much as possible, avoid using POSIX file operations (open(), close(),
-	read(), write()).  This option is incompatible with the posix option, so
-	implies --disable-posix.  This option is useful when embedding Onyx in
-	an application that does not have complete I/O capabilities.  With the
+	read(), write()).  This option is useful when embedding Onyx in an
+	application that does not have complete I/O capabilities.  With the
 	exception of calls to printf() and fprintf(stderr, ...) in debug
 	versions of libonyx, no POSIX file operations are used.  The
 	documentation does not mention the effects of this option -- UTSL.
 
 --disable-socket
-	Do not include networking socket support.  The socket support relies on
-	POSIX functionality, so this option is automatically disabled if the
-	--disable-posix option is set.  The documentation does not mention the
-	effects of this option -- UTSL.
-
---disable-inlines
-	Do not use inline functions.  This reduces the size of binaries at the
-	expense of performance.
-
---disable-libonyx
-	Use an installed copy of libonyx rather than building it.
+	Do not include networking socket support.  The documentation does not
+	mention the effects of this option -- UTSL.
 
 --disable-modules
 	Do not include support for dynamically loadable modules.  This leaves
@@ -200,20 +215,21 @@ Optionally, pass any of the following (not a definitive list) arguments to
 	onyx (less than 50 bytes).  The documentation does not mention the
 	effects of this option.
 
---disable-onyx
-	Use an installed copy of onyx rather than building it.
-
---enable-autogen
-	Include dependency rules in the build system to automatically regenerate
-	files created by configure when their sources are newer.  This is
-	only of interest when making modifications to the source code.
-
 --enable-debug
 	Build debugging code and turn assertions on (controlled by the CW_ASSERT
 	cpp macro).  The resulting libraries and modules will not be binary
 	compatible with ones that were compiled without this option, so
 	specifying this option and installing the results for general use is not
 	recommended.
+
+--disable-inlines
+	Do not use inline functions.  This reduces the size of binaries at the
+	expense of performance.
+
+--enable-autogen
+	Include dependency rules in the build system to automatically regenerate
+	files created by configure when their sources are newer.  This is
+	only of interest when making modifications to the source code.
 
 --with-docs
 	Enable build system rules to build the documentation.  Unless this

@@ -327,19 +327,15 @@ onyx_bins_check_update : onyx_bins_tests [TONYX]
 }
 
 onyx_bins_install : [ONYX] mods_install
-#if @enable_libonyx@
-               libonyx_libs_install_s
-#endif
+                    libonyx_libs_install_s
 {
   @INSTALL@ -d [BINDIR];
 
   [TCC] [A_CFLAGS] -o [BINDIR]/onyx-@onyx_version@
         [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [ONYX_COMMON_SRCS]]
         [fromto %0%.c %0%.o_a [ONYX_ONLY_SRCS]]
-#if @enable_libonyx@
 #if [count @RPATH@]
         @RPATH@@LIBDIR@
-#endif
 #endif
         [LDFLAGS] -lonyx @LIBS@;
   chmod 0755 [BINDIR]/onyx-@onyx_version@;
