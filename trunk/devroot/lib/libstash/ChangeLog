@@ -1,5 +1,16 @@
 2001-02-28  Jason Evans  <jasone@canonware.com>
 
+	* src/mem.c : Use dch rather than ch for memory allocation
+	tracking, so that performance is not so terrible if lots of
+	buffers are allocated.
+
+	* src/ch.c (ch_direct_hash): Fix a bug that severely decreased the
+	quality of hash results.
+
+	* src/dch.c (dch_p_shrink): Shrink as much as possible when the
+	shrink threshold is reached.  Otherwise, it is possible for the
+	table to not shrink back to base size when emptied.
+
 	* : Remove cw_g_out and replace it with out_std and out_err.
 	Convert all internal libstash printing to use out_err.
 
