@@ -25,6 +25,70 @@
 
 systemdict begin
 
+% <array> <depth> arraytype -
+sprintdict begin
+/arraytype {
+	1 sub
+	dup 0 ge {
+		{
+			% Print all but one element with spaces between.
+			% <array> <depth>
+			exch
+			% <depth> <array>
+			dup length 2 sub 0 1 3 2 roll {
+				% <depth> <array> <index>
+				1 index exch get
+				% <depth> <array> <element>
+				dup type sprintdict exch get
+				% <depth> <array> <element> <sprint'er>
+				3 index exch eval
+				% <depth> <array>
+				` ' print
+				% <depth> <array>
+			} for
+			% <depth> <array>
+			dup length 1 sub
+			% <depth> <array> <index>
+			get
+			% <depth> <element>
+			dup type sprintdict exch get
+			% <depth> <element> <sprint'er>
+			3 2 roll exch eval
+			% -
+		}
+		% Recurse.
+		% <array> <depth> <proc>
+		2 index xcheck {
+			% Executable.
+			`{' print
+			% <array> <depth> <proc>
+			eval
+			`}'
+		}{
+			% Literal.
+			`[' print
+			eval
+			`]'
+		} ifelse
+	}{
+		% Terminate recursion.
+		% <array> <depth>
+		pop pop
+		`-array-'
+	} ifelse
+	print
+} bind def
+end %sprintdict
+
+% sprint is used by some of the procedures defined later in this file, so must
+% be defined early.
+%
+% <object> <depth> sprint -
+/sprint {
+	1 index type sprintdict exch get eval
+	`\n' print flush
+} bind def
+
 % :: and : implement a simple mechanism for qualified namespaces.  For example,
 % one can type:
 %
