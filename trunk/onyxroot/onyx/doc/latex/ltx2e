@@ -1,3 +1,4 @@
+#!/usr/bin/perl -w
 #-*-mode:perl-*-
 
 $Pgm = $0; $Pgm =~ s/.*\/([^\/]+)$/\1/;
