@@ -457,6 +457,27 @@ sem_wait(cw_sem_t * a_sem);
  *
  * a_sem : Pointer to a sem.
  *
+ * a_time : Timeout.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : FALSE == success, TRUE == failure.
+ *
+ * <<< Description >>>
+ *
+ * Try to wait on (decrement) a_sem, but return immediately instead of blocking
+ * if unable to.
+ *
+ ****************************************************************************/
+cw_bool_t
+sem_timedwait(cw_sem_t * a_sem, struct timespec * a_time);
+
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_sem : Pointer to a sem.
+ *
  * <<< Output(s) >>>
  *
  * retval : FALSE == success, TRUE == failure.

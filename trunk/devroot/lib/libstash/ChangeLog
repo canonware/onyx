@@ -1,5 +1,7 @@
 1999-09-08  Jason Evans  <jasone@canonware.com>
 
+	* src/thread.c (sem_timedwait): Add.
+
 	* src/mem.c (mem_calloc): Don't initialize memory to 0xa5 bytes,
 	since calloc() is supposed to return zeroed memory.
 	(mem_set_oom_handler): Add.

@@ -417,6 +417,38 @@ sem_wait(cw_sem_t * a_sem)
 }
 
 cw_bool_t
+sem_timedwait(cw_sem_t * a_sem, struct timespec * a_time)
+{
+  cw_bool_t retval;
+  
+  _cw_check_ptr(a_sem);
+  _cw_check_ptr(a_time);
+
+  mtx_lock(&a_sem->lock);
+
+  if (0 >= a_sem->count)
+  {
+    a_sem->waiters++;
+    cnd_timedwait(&a_sem->gtzero, &a_sem->lock, a_time);
+    a_sem->waiters--;
+  }
+  
+  if (0 < a_sem->count)
+  {
+    a_sem->count--;
+    retval = FALSE;
+  }
+  else
+  {
+    retval = TRUE;
+  }
+
+  mtx_unlock(&a_sem->lock);
+
+  return retval;
+}
+
+cw_bool_t
 sem_trywait(cw_sem_t * a_sem)
 {
   cw_bool_t retval;

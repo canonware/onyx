@@ -35,6 +35,9 @@ main()
   cw_sem_t sem_a, * sem_b;
   cw_thd_t threads[_LIBSTASH_TEST_NUM_THREADS];
   cw_uint32_t i;
+  struct timeval now;
+  struct timespec timeout;
+  struct timezone tz;
   
   libstash_init();
   out_put(cw_g_out, "Test begin\n");
@@ -52,6 +55,16 @@ main()
   _cw_assert(FALSE == sem_trywait(sem_b));
   sem_post(sem_b);
   sem_wait(sem_b);
+  sem_post(sem_b);
+
+  /* Set timeout for 2 seconds. */
+  bzero(&tz, sizeof(struct timezone));
+  gettimeofday(&now, &tz);
+  timeout.tv_sec = now.tv_sec + 2;
+  timeout.tv_nsec = now.tv_usec * 1000;
+  
+  _cw_assert(FALSE == sem_timedwait(sem_b, &timeout));
+  _cw_assert(TRUE == sem_timedwait(sem_b, &timeout));
   sem_delete(sem_b);
   
   _cw_assert(&sem_a == sem_new(&sem_a, 0));
