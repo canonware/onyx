@@ -1,3 +1,17 @@
+2000-07-21  Jason Evans  <jasone@canonware.com>
+
+	* src/sema.c: Rename the sem class to sema in order to avoid name
+	collisions with POSIX semaphores.  Since the portable version of
+	thread suspension/resumption uses POSIX semaphores (needs the
+	signal-reentrant sem_post() call), POSIX semaphores are sometimes
+	needed within libstash.  The name "sema" is perhaps not ideal,
+	since Solaris threads uses it for semaphores.  However, if that
+	ever becomes an issue, the name can be changed again.
+
+	* src/thd.c: Add a generic implementation of thread
+	suspension/resumption.  This should make libstash portable to
+	Solaris and Linux again, though the code isn't fully tested.
+
 2000-07-19  Jason Evans  <jasone@canonware.com>
 
 	* src/out.c: Restructure the internals of the out class so that

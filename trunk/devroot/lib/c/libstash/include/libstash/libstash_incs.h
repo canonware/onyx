@@ -22,6 +22,7 @@
 #include <sys/types.h>
 #include <sys/uio.h>
 #include <pthread.h>
+#include <semaphore.h>
 #include <sched.h>
 #include <signal.h>
 
@@ -35,9 +36,9 @@
 #include "ql.h"
 #include "mtx.h"
 #include "cnd.h"
-#include "sem.h"
-#include "thd.h"
+#include "sema.h"
 #include "tsd.h"
+#include "thd.h"
 #include "rwl.h"
 #include "ch.h"
 #include "out.h"

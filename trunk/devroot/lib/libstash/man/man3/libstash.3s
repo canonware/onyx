@@ -531,7 +531,7 @@ l | l | l.
  pool@libstash_pool(3s)@Cached memory allocation.
  res@libstash_res(3s)@Resource (name/value pairs).
  rwl@libstash_rwl(3s)@Read/write lock.
- sem@libstash_sem(3s)@Semaphore.
+ sema@libstash_sema(3s)@Semaphore.
  thd@libstash_thd(3s)@Thread.
  treen@libstash_treen(3s)@Arbitrary tree.
  tsd@libstash_tsd(3s)@Thread-specific data.

@@ -15,132 +15,132 @@
 #include <errno.h>
 
 void
-sem_new(cw_sem_t *a_sem, cw_sint32_t a_count)
+sema_new(cw_sema_t *a_sema, cw_sint32_t a_count)
 {
-	_cw_check_ptr(a_sem);
+	_cw_check_ptr(a_sema);
 
-	a_sem->count = a_count;
-	a_sem->waiters = 0;
+	a_sema->count = a_count;
+	a_sema->waiters = 0;
 
-	mtx_new(&a_sem->lock);
-	cnd_new(&a_sem->gtzero);
+	mtx_new(&a_sema->lock);
+	cnd_new(&a_sema->gtzero);
 }
 
 void
-sem_delete(cw_sem_t *a_sem)
+sema_delete(cw_sema_t *a_sema)
 {
-	_cw_check_ptr(a_sem);
+	_cw_check_ptr(a_sema);
 
-	mtx_delete(&a_sem->lock);
-	cnd_delete(&a_sem->gtzero);
+	mtx_delete(&a_sema->lock);
+	cnd_delete(&a_sema->gtzero);
 }
 
 void
-sem_post(cw_sem_t *a_sem)
+sema_post(cw_sema_t *a_sema)
 {
-	_cw_check_ptr(a_sem);
+	_cw_check_ptr(a_sema);
 
-	mtx_lock(&a_sem->lock);
+	mtx_lock(&a_sema->lock);
 
-	a_sem->count++;
-	if ((a_sem->waiters) && (a_sem->count > 0))
-		cnd_signal(&a_sem->gtzero);
-	mtx_unlock(&a_sem->lock);
+	a_sema->count++;
+	if ((a_sema->waiters) && (a_sema->count > 0))
+		cnd_signal(&a_sema->gtzero);
+	mtx_unlock(&a_sema->lock);
 }
 
 void
-sem_wait(cw_sem_t *a_sem)
+sema_wait(cw_sema_t *a_sema)
 {
-	_cw_check_ptr(a_sem);
+	_cw_check_ptr(a_sema);
 
-	mtx_lock(&a_sem->lock);
+	mtx_lock(&a_sema->lock);
 
-	while (a_sem->count <= 0) {
-		a_sem->waiters++;
-		cnd_wait(&a_sem->gtzero, &a_sem->lock);
-		a_sem->waiters--;
+	while (a_sema->count <= 0) {
+		a_sema->waiters++;
+		cnd_wait(&a_sema->gtzero, &a_sema->lock);
+		a_sema->waiters--;
 	}
-	a_sem->count--;
+	a_sema->count--;
 
-	mtx_unlock(&a_sem->lock);
+	mtx_unlock(&a_sema->lock);
 }
 
 cw_bool_t
-sem_timedwait(cw_sem_t *a_sem, struct timespec *a_timeout)
+sema_timedwait(cw_sema_t *a_sema, struct timespec *a_timeout)
 {
 	cw_bool_t	retval;
 
-        _cw_check_ptr(a_sem);
+        _cw_check_ptr(a_sema);
         _cw_check_ptr(a_timeout);
 
-        mtx_lock(&a_sem->lock);
+        mtx_lock(&a_sema->lock);
 
-	if (a_sem->count <= 0) {
-		a_sem->waiters++;
-		cnd_timedwait(&a_sem->gtzero, &a_sem->lock, a_timeout);
-		a_sem->waiters--;
+	if (a_sema->count <= 0) {
+		a_sema->waiters++;
+		cnd_timedwait(&a_sema->gtzero, &a_sema->lock, a_timeout);
+		a_sema->waiters--;
 	}
-	if (a_sem->count > 0) {
-		a_sem->count--;
+	if (a_sema->count > 0) {
+		a_sema->count--;
 		retval = FALSE;
 	} else
 		retval = TRUE;
 
-	mtx_unlock(&a_sem->lock);
+	mtx_unlock(&a_sema->lock);
 
 	return retval;
 }
 
 cw_bool_t
-sem_trywait(cw_sem_t *a_sem)
+sema_trywait(cw_sema_t *a_sema)
 {
 	cw_bool_t	retval;
 
-	_cw_check_ptr(a_sem);
+	_cw_check_ptr(a_sema);
 
-	mtx_lock(&a_sem->lock);
+	mtx_lock(&a_sema->lock);
 
-	if (a_sem->count > 0) {
+	if (a_sema->count > 0) {
 		/* Success. */
-		a_sem->count--;
+		a_sema->count--;
 		retval = FALSE;
 	} else {
 		/* Failure. */
 		retval = TRUE;
 	}
 
-	mtx_unlock(&a_sem->lock);
+	mtx_unlock(&a_sema->lock);
 
 	return retval;
 }
 
 cw_sint32_t
-sem_getvalue(cw_sem_t *a_sem)
+sema_getvalue(cw_sema_t *a_sema)
 {
 	cw_sint32_t	retval;
 
-	_cw_check_ptr(a_sem);
+	_cw_check_ptr(a_sema);
 
-	mtx_lock(&a_sem->lock);
-	retval = a_sem->count;
-	mtx_unlock(&a_sem->lock);
+	mtx_lock(&a_sema->lock);
+	retval = a_sema->count;
+	mtx_unlock(&a_sema->lock);
 
 	return retval;
 }
 
 void
-sem_adjust(cw_sem_t *a_sem, cw_sint32_t a_adjust)
+sema_adjust(cw_sema_t *a_sema, cw_sint32_t a_adjust)
 {
-	_cw_check_ptr(a_sem);
+	_cw_check_ptr(a_sema);
 
-	mtx_lock(&a_sem->lock);
+	mtx_lock(&a_sema->lock);
 
-	a_sem->count += a_adjust;
-	if ((a_sem->waiters) && (a_sem->count > 0)) {
+	a_sema->count += a_adjust;
+	if ((a_sema->waiters) && (a_sema->count > 0)) {
 		cw_sint32_t	i;
 
-		for (i = 0; (i < a_sem->count) && (i < a_sem->waiters); i++)
-			cnd_signal(&a_sem->gtzero);
+		for (i = 0; (i < a_sema->count) && (i < a_sema->waiters); i++)
+			cnd_signal(&a_sema->gtzero);
 	}
-	mtx_unlock(&a_sem->lock);
+	mtx_unlock(&a_sema->lock);
 }

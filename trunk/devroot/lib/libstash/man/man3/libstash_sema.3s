@@ -5,53 +5,53 @@
 
 Version: <Version>
 ..
-.TH libstash_sem 3s "libstash, version <Version>"
-.Nm libstash_sem
+.TH libstash_sema 3s "libstash, version <Version>"
+.Nm libstash_sema
 .hy 1
 .SH NAME
-sem - Semaphore.
+sema - Semaphore.
 .SH SYNOPSIS
 \fB#include <libstash/libstash.h>\fR
 
-.I cw_sem_t *
+.I cw_sema_t *
 .br
-.B sem_new
-.RI ( "cw_sem_t *a_sem" ", " "cw_sint32_t a_count" )
+.B sema_new
+.RI ( "cw_sema_t *a_sema" ", " "cw_sint32_t a_count" )
 
 .I void
 .br
-.B sem_delete
-.RI ( "cw_sem_t *a_sem" )
+.B sema_delete
+.RI ( "cw_sema_t *a_sema" )
 
 .I void
 .br
-.B sem_post
-.RI ( "cw_sem_t *a_sem" )
+.B sema_post
+.RI ( "cw_sema_t *a_sema" )
 
 .I void
 .br
-.B sem_wait
-.RI ( "cw_sem_t *a_sem" )
+.B sema_wait
+.RI ( "cw_sema_t *a_sema" )
 
 .I cw_bool_t
 .br
-.B sem_timedwait
-.RI ( "cw_sem_t *a_sem" ", " "struct timespec *a_timeout" )
+.B sema_timedwait
+.RI ( "cw_sema_t *a_sema" ", " "struct timespec *a_timeout" )
 
 .I cw_bool_t
 .br
-.B sem_trywait
-.RI ( "cw_sem_t *a_sem" )
+.B sema_trywait
+.RI ( "cw_sema_t *a_sema" )
 
 .I cw_sint32_t
 .br
-.B sem_getvalue
-.RI ( "cw_sem_t *a_sem" )
+.B sema_getvalue
+.RI ( "cw_sema_t *a_sema" )
 
 .I void
 .br
-.B sem_adjust
-.RI ( "cw_sem_t *a_sem" ", " "cw_sint32_t a_adjust" )
+.B sema_adjust
+.RI ( "cw_sema_t *a_sema" ", " "cw_sint32_t a_adjust" )
 
 .SS Debugging (dbg) symbols
 None.
@@ -62,16 +62,16 @@ normal, in that it is possible to decrement the count to less than zero.  This
 allows dynamic modification of resource pools locked by semaphores.
 
 .SH USAGE
-.I cw_sem_t *
+.I cw_sema_t *
 .br
-.B sem_new
-.RI ( "cw_sem_t *a_sem" ", " "cw_sint32_t a_count" )
+.B sema_new
+.RI ( "cw_sema_t *a_sema" ", " "cw_sint32_t a_count" )
 .RS
 Input(s):
 .RS
-.IR a_sem :
+.IR a_sema :
 .RS
-Pointer to space for a sem.
+Pointer to space for a sema.
 .RE
 .IR a_count :
 .RS
@@ -82,9 +82,9 @@ Output(s):
 .RS
 .IR retval :
 .RS
-non-NULL: Pointer to a sem.
+non-NULL: Pointer to a sema.
 .br
-NULL: Memory allocation error.  Can only occur if (NULL == a_sem).
+NULL: Memory allocation error.  Can only occur if (NULL == a_sema).
 .RE
 .RE
 Description:
@@ -95,14 +95,14 @@ Constructor.
 
 .I void
 .br
-.B sem_delete
-.RI ( "cw_sem_t *a_sem" )
+.B sema_delete
+.RI ( "cw_sema_t *a_sema" )
 .RS
 Input(s):
 .RS
-.IR a_sem :
+.IR a_sema :
 .RS
-Pointer to a sem.
+Pointer to a sema.
 .RE
 .RE
 Output(s):
@@ -117,14 +117,14 @@ Destructor.
 
 .I void
 .br
-.B sem_post
-.RI ( "cw_sem_t *a_sem" )
+.B sema_post
+.RI ( "cw_sema_t *a_sema" )
 .RS
 Input(s):
 .RS
-.IR a_sem :
+.IR a_sema :
 .RS
-Pointer to a sem.
+Pointer to a sema.
 .RE
 .RE
 Output(s):
@@ -133,20 +133,20 @@ None.
 .RE
 Description:
 .RS
-Post (increment) a_sem.
+Post (increment) a_sema.
 .RE
 .RE
 
 .I void
 .br
-.B sem_wait
-.RI ( "cw_sem_t *a_sem" )
+.B sema_wait
+.RI ( "cw_sema_t *a_sema" )
 .RS
 Input(s):
 .RS
-.IR a_sem :
+.IR a_sema :
 .RS
-Pointer to a sem.
+Pointer to a sema.
 .RE
 .RE
 Output(s):
@@ -155,20 +155,20 @@ None.
 .RE
 Description:
 .RS
-Wait on (block until able to decrement) a_sem.
+Wait on (block until able to decrement) a_sema.
 .RE
 .RE
 
 .I cw_bool_t
 .br
-.B sem_timedwait
-.RI ( "cw_sem_t *a_sem" ", " "struct timespec *a_timeout" )
+.B sema_timedwait
+.RI ( "cw_sema_t *a_sema" ", " "struct timespec *a_timeout" )
 .RS
 Input(s):
 .RS
-.IR a_sem :
+.IR a_sema :
 .RS
-Pointer to a sem.
+Pointer to a sema.
 .RE
 .IR a_timeout :
 .RS
@@ -186,21 +186,21 @@ TRUE: Failure.
 .RE
 Description:
 .RS
-Try to wait on (decrement) a_sem, but return after a_timeout has expired if
+Try to wait on (decrement) a_sema, but return after a_timeout has expired if
 unable to.
 .RE
 .RE
 
 .I cw_bool_t
 .br
-.B sem_trywait
-.RI ( "cw_sem_t *a_sem" )
+.B sema_trywait
+.RI ( "cw_sema_t *a_sema" )
 .RS
 Input(s):
 .RS
-.IR a_sem :
+.IR a_sema :
 .RS
-Pointer to a sem.
+Pointer to a sema.
 .RE
 .RE
 Output(s):
@@ -214,21 +214,21 @@ TRUE: Failure.
 .RE
 Description:
 .RS
-Try to wait on (decrement) a_sem, but return immediately instead of blocking if
+Try to wait on (decrement) a_sema, but return immediately instead of blocking if
 unable to.
 .RE
 .RE
 
 .I cw_sint32_t
 .br
-.B sem_getvalue
-.RI ( "cw_sem_t *a_sem" )
+.B sema_getvalue
+.RI ( "cw_sema_t *a_sema" )
 .RS
 Input(s):
 .RS
-.IR a_sem :
+.IR a_sema :
 .RS
-Pointer to a sem.
+Pointer to a sema.
 .RE
 .RE
 Output(s):
@@ -240,24 +240,24 @@ Value of semaphore.
 .RE
 Description:
 .RS
-Get value of a_sem.
+Get value of a_sema.
 .RE
 .RE
 
 .I void
 .br
-.B sem_adjust
-.RI ( "cw_sem_t *a_sem" ", " "cw_sint32_t a_adjust" )
+.B sema_adjust
+.RI ( "cw_sema_t *a_sema" ", " "cw_sint32_t a_adjust" )
 .RS
 Input(s):
 .RS
-.IR a_sem :
+.IR a_sema :
 .RS
-Pointer to a sem.
+Pointer to a sema.
 .RE
 .IR a_adjust :
 .RS
-Amount to adjust the value of a_sem by.
+Amount to adjust the value of a_sema by.
 .RE
 .RE
 Output(s):
@@ -266,7 +266,7 @@ None.
 .RE
 Description:
 .RS
-Adjust a_sem by a_adjust.
+Adjust a_sema by a_adjust.
 .RE
 .RE
 
