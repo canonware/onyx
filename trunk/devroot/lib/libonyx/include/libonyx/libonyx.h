@@ -287,7 +287,7 @@ extern cw_mem_t	*cw_g_mem;
 #else
 #define	_cw_opaque_alloc(a_func, a_arg, a_size)				\
 	(a_func)((void *)(a_arg), (size_t)(a_size), NULL, 0)
-#define	_cw_opaque_realloc(a_func, a_ptr, a_arg, a_size)		\
+#define	_cw_opaque_realloc(a_func, a_ptr, a_arg, a_size, a_old_size)	\
 	(a_func)((void *)(a_arg), (void *)(a_ptr), (size_t)(a_size),	\
 	    (size_t)(a_old_size), NULL, 0)
 #define _cw_opaque_dealloc(a_func, a_arg, a_ptr, a_size)		\
