@@ -9,8 +9,8 @@
 #
 # $Source$
 # $Author: jasone $
-# Current revision: $Revision: 141 $
-# Last modified: $Date: 1998-07-10 15:34:34 -0700 (Fri, 10 Jul 1998) $
+# Current revision: $Revision: 162 $
+# Last modified: $Date: 1998-08-07 13:12:08 -0700 (Fri, 07 Aug 1998) $
 #
 # Description: Master Makefile for libstash.
 #              
@@ -54,6 +54,7 @@ endef
 
 # Clear out all vpaths.
 vpath
+vpath c% @top_srcdir@
 
 # Need this here since the includes have dependencies in them, but there's stuff
 # in the includes that we need to see before using $(TARGETS).
@@ -66,10 +67,15 @@ all: default
 .SUFFIXES:
 .SUFFIXES: .la .c .h .lo .d .l .y .yy.c .tab.c .tab.h .pl.in .pl
 
-# This rule is used to build the tests.
+# This rule is used to build the tests.  Note that we copy the binary, even
+# though we have to run it from the main build directory.  This allows make
+# to realize that the target is up to date.  It's a hack necessitated by the
+# fact that libtool doesn't allow a directory component in -o arguments.
 %: %.c $(LIBS)
-	$(CC) -c $< -o $(@:=.o) $(CFLAGS) $(INCPATH) $(DEFINES)
+	$(LIBTOOL) $(CC) $(CFLAGS) $(INCPATH) $(DEFINES) -c $<
+	mv -f $(notdir $(@:=.o)) $(notdir $(@:=.lo)) $(dir $<)
 	$(LIBTOOL) $(CC) -o $(notdir $@) $(@:=.o) $(LIBPATH) $(LNKLIBS) $(EXTRALIBS)
+	cp -f $(notdir $@) $(<:.c=)
 
 %.lo: %.c
 	$(LIBTOOL) $(CC) $(CFLAGS) $(INCPATH) $(DEFINES) -c $<
@@ -180,7 +186,7 @@ clean: FORCE
 	rm -f *.bak *.BAK
 	rm -f core
 	rm -f *.core
-	rm -f $(notdir $(CTESTS))
+	rm -f $(CTESTS) $(notdir $(CTESTS))
 	rm -f $(PTESTS)
 	rm -f $(ALLDIRS:=/*~) bin/*~
 	rm -f $(ALLDIRS:=/*.d)
@@ -235,8 +241,8 @@ $(PARSERS:.y=.tab.h): $(PARSERS)
 $(PARSERS:.y=.tab.c): $(PARSERS)
 $(LEXERS): $(PARSERS:.y=.tab.h)
 
-$(EXECS): $(LIBS)
-	$(CC) -o $@ $($(subst /_,_,$(strip $(dir $@)_OBJS))) $(LIBPATH) $(LNKLIBS) $(EXTRALIBS)
+#$(EXECS): $(LIBS)
+#	$(CC) -o $@ $($(subst /_,_,$(strip $(dir $@)_OBJS))) $(LIBPATH) $(LNKLIBS) $(EXTRALIBS)
 
 # Make sure that the tests are rebuilt if the libraries change.  Also force
 # the libraries to be built if they haven't already been.
