@@ -16,24 +16,223 @@
 \label{qr}
 \index{\classname{qr}{}}
 
+The \classname{qr} macros implement operations on a ring.  The type of the ring
+elements and which field of the elements to use are determined by arguments that
+are passed into the macros.  The macros are optimized for speed and code size,
+which means that there is minimal error checking built in.  As a result, care
+must be taken to assure that these are used as intended, or strange things can
+happen.
+
 \subsubsection{API}
 \begin{description}
-\label{qr_}
-\index{\cfunc{qr\_}{}}
-\item[{\cfunc[]{qr\_}{}}: ]
+\label{qr}
+\index{\cppmacro{qr}{}}
+\item[{\cppmacro[]{qr}{{\lt}qr\_type{\gt} a\_type}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a\_type: ]
+			Data type for the \classname{qr}.
+		\end{description}
+	\item[Output(s): ]
+		A data structure that can be used for a \classname{qr}.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Generate code for a \classname{qr} data structure.
+	\end{description}
+\label{qr_new}
+\index{\cppmacro{qr\_new}{}}
+\item[{\cppmacro[void]{qr\_new}{{\lt}qr\_type{\gt} *a\_qr, {\lt}field\_name{\gt}
+a\_field}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_qr: ]
+			Pointer to a \classname{qr}.
+		\item[a\_field: ]
+			Field within the \classname{qr} elements to use.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Constructor.
+	\end{description}
+\label{qr_next}
+\index{\cppmacro{qr\_next}{}}
+\item[{\cppmacro[{\lt}qr\_type{\gt} *]{qr\_next}{{\lt}qr\_type{\gt} *a\_qr,
+{\lt}field\_name{\gt} a\_field}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_qr: ]
+			Pointer to a \classname{qr}.
+		\item[a\_field: ]
+			Field within the \classname{qr} elements to use.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[retval: ]
+			Pointer to the next element in the \classname{qr}.
 		\end{description}
-	\item[Exception(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
-		\end{description}
+	\item[Exception(s): ] None.
 	\item[Description: ]
+		Return a pointer to the next element in the \classname{qr}.
+	\end{description}
+\label{qr_prev}
+\index{\cppmacro{qr\_prev}{}}
+\item[{\cppmacro[{\lt}qr\_type{\gt} *]{qr\_prev}{{\lt}qr\_type{\gt} *a\_qr,
+{\lt}field\_name{\gt} a\_field}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_qr: ]
+			Pointer to a \classname{qr}.
+		\item[a\_field: ]
+			Field within the \classname{qr} elements to use.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to the previous element in the \classname{qr}.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return a pointer to the previous element in the \classname{qr}.
+	\end{description}
+\label{qr_before_insert}
+\index{\cppmacro{qr\_before\_insert}{}}
+\item[{\cppmacro[void]{qr\_before\_insert}{{\lt}qr\_type{\gt} *a\_qrelm,
+{\lt}qr\_type{\gt} *a\_qr, {\lt}field\_name{\gt} a\_field}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_qrelm: ]
+			Pointer to an element in a \classname{qr}.
+		\item[a\_qr: ]
+			Pointer to an element that is the only element in its
+			ring.
+		\item[a\_field: ]
+			Field within the \classname{qr} elements to use.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Insert \cvar{a\_qr} before \cvar{a\_qrelm}.
+	\end{description}
+\label{qr_after_insert}
+\index{\cppmacro{qr\_after\_insert}{}}
+\item[{\cppmacro[void]{qr\_after\_insert}{{\lt}qr\_type{\gt} *a\_qrelm,
+{\lt}qr\_type{\gt} *a\_qr, {\lt}field\_name{\gt} a\_field}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_qrelm: ]
+			Pointer to an element in a \classname{qr}.
+		\item[a\_qr: ]
+			Pointer to an element that is the only element in its
+			ring.
+		\item[a\_field: ]
+			Field within the \classname{qr} elements to use.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Insert \cvar{a\_qr} after \cvar{a\_qrelm}.
+	\end{description}
+\label{qr_meld}
+\index{\cppmacro{qr\_meld}{}}
+\item[{\cppmacro[void]{qr\_meld}{{\lt}qr\_type{\gt} *a\_qr\_a,
+{\lt}qr\_type{\gt} *a\_qr\_b, {\lt}field\_name{\gt} a\_field}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_qr\_a: ]
+			Pointer to a \classname{qr}.
+		\item[a\_qr\_b: ]
+			Pointer to a \classname{qr}.
+		\item[a\_field: ]
+			Field within the \classname{qr} elements to use.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Meld \cvar{a\_qr\_a} and \cvar{a\_qr\_b} into one ring.
+	\end{description}
+\label{qr_split}
+\index{\cppmacro{qr\_split}{}}
+\item[{\cppmacro[void]{qr\_split}{{\lt}qr\_type{\gt} *a\_qr\_a,
+{\lt}qr\_type{\gt} *a\_qr\_b, {\lt}field\_name{\gt} a\_field}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_qr\_a: ]
+			Pointer to a \classname{qr}.
+		\item[a\_qr\_b: ]
+			Pointer to a \classname{qr}.
+		\item[a\_field: ]
+			Field within the \classname{qr} elements to use.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Split a ring at \cvar{a\_qr\_a} and \cvar{a\_qr\_b}.
+	\end{description}
+\label{qr_remove}
+\index{\cppmacro{qr\_remove}{}}
+\item[{\cppmacro[void]{qr\_remove}{{\lt}qr\_type{\gt} *a\_qr,
+{\lt}field\_name{\gt} a\_field}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_qr: ]
+			Pointer to a \classname{qr}.
+		\item[a\_field: ]
+			Field within the \classname{qr} elements to use.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Remove \cvar{a\_qr} from the ring.
+	\end{description}
+\label{qr_foreach}
+\index{\cppmacro{qr\_foreach}{}}
+\item[{\cppmacro[]{qr\_foreach}{{\lt}qr\_type{\gt} *a\_var, {\lt}qr\_type{\gt}
+*a\_qr, {\lt}field\_name{\gt} a\_field}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_var: ]
+			The name of a temporary variable to use for iteration.
+		\item[a\_qr: ]
+			Pointer to a \classname{qr}.
+		\item[a\_field: ]
+			Field within the \classname{qr} elements to use.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Iterate through the \classname{qr}, storing a pointer to each
+		element in \cvar{a\_var} along the way.
+	\end{description}
+\label{qr_foreach_reverse}
+\index{\cppmacro{qr\_foreach\_reverse}{}}
+\item[{\cppmacro[]{qr\_foreach\_reverse}{{\lt}qr\_type{\gt} *a\_var,
+{\lt}qr\_type{\gt} *a\_qr, {\lt}field\_name{\gt} a\_field}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_var: ]
+			The name of a temporary variable to use for iteration.
+		\item[a\_qr: ]
+			Pointer to a \classname{qr}.
+		\item[a\_field: ]
+			Field within the \classname{qr} elements to use.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Iterate through the \classname{qr} in the reverse direction,
+		storing a pointer to each element in \cvar{a\_var} along the
+		way.
 	\end{description}
 \end{description}
