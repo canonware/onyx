@@ -46,7 +46,7 @@
 % Create an encoding dictionary for various operators.  The values must not
 % correspond to an existing name in dstack.
 /_encdict <
-	/cat	/a	% 19
+	/cat		/a	% 19
 	/cvx		/b	% 13
 	/def		/c	% ~21
 	/dup		/d	% ~37
@@ -56,7 +56,7 @@
 	/flush		/h	% 3
 	/getinterval	/i	% 4
 	/ifelse		/j	% 20
-	/index		/k	% ~57
+	/idup		/k	% ~57
 	/known		/l	% 8
 	/load		/m	% 9
 	/pop		/n	% ~69
@@ -73,17 +73,17 @@
 
 % %proc _encarr -
 /_encarr {
-	0 1 2 index length 1 sub {
+	0 1 2 idup length 1 sub {
 		% %proc %i
-		1 index 1 index get
+		1 idup 1 idup get
 		% %proc %i %el
 		dup type /nametype eq {
 			dup xcheck {
 				% Executable Name.  Try to replace.
-				_encdict 1 index known {
+				_encdict 1 idup known {
 					_encdict exch get cvx
 					% %proc %i %e
-					2 index 3 1 roll
+					2 idup 3 1 roll
 					% %proc %proc %i %e
 					put
 				}{

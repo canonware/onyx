@@ -319,6 +319,9 @@ void
 systemdict_idiv(cw_nxo_t *a_thread);
 
 void
+systemdict_idup(cw_nxo_t *a_thread);
+
+void
 systemdict_if(cw_nxo_t *a_thread);
 
 void
@@ -326,9 +329,6 @@ systemdict_ifelse(cw_nxo_t *a_thread);
 
 void
 systemdict_inc(cw_nxo_t *a_thread);
-
-void
-systemdict_index(cw_nxo_t *a_thread);
 
 void
 systemdict_iobuf(cw_nxo_t *a_thread);
@@ -668,6 +668,9 @@ systemdict_sexch(cw_nxo_t *a_thread);
 void
 systemdict_shift(cw_nxo_t *a_thread);
 
+void
+systemdict_sidup(cw_nxo_t *a_thread);
+
 #ifdef CW_THREADS
 void
 systemdict_signal(cw_nxo_t *a_thread);
@@ -677,9 +680,6 @@ systemdict_signal(cw_nxo_t *a_thread);
 void
 systemdict_sin(cw_nxo_t *a_thread);
 #endif
-
-void
-systemdict_sindex(cw_nxo_t *a_thread);
 
 void
 systemdict_sipop(cw_nxo_t *a_thread);
@@ -930,7 +930,7 @@ systemdict_yield(cw_nxo_t *a_thread);
 #define systemdict_inline_add systemdict_add
 #define systemdict_inline_dup systemdict_dup
 #define systemdict_inline_exch systemdict_exch
-#define systemdict_inline_index systemdict_index
+#define systemdict_inline_idup systemdict_idup
 #define systemdict_inline_pop systemdict_pop
 #define systemdict_inline_roll systemdict_roll
 
@@ -944,7 +944,7 @@ void
 systemdict_inline_exch(cw_nxo_t *a_thread);
 
 void
-systemdict_inline_index(cw_nxo_t *a_thread);
+systemdict_inline_idup(cw_nxo_t *a_thread);
 
 void
 systemdict_inline_pop(cw_nxo_t *a_thread);
@@ -1070,7 +1070,7 @@ systemdict_inline_exch(cw_nxo_t *a_thread)
 }
 
 CW_INLINE void
-systemdict_inline_index(cw_nxo_t *a_thread)
+systemdict_inline_idup(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack;
     cw_nxo_t *nxo, *orig;

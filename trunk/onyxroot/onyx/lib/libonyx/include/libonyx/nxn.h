@@ -186,10 +186,10 @@ typedef enum
 #endif
     NXN_hooktype,
     NXN_idiv,
+    NXN_idup,
     NXN_if,
     NXN_ifelse,
     NXN_inc,
-    NXN_index,
 #ifdef CW_POSIX
     NXN_ino,
 #endif
@@ -390,13 +390,13 @@ typedef enum
 #endif
     NXN_sexch,
     NXN_shift,
+    NXN_sidup,
 #ifdef CW_THREADS
     NXN_signal,
 #endif
 #ifdef CW_REAL
     NXN_sin,
 #endif
-    NXN_sindex,
     NXN_sipop,
 #ifdef CW_POSIX
     NXN_size,

@@ -1,3 +1,9 @@
+2002-04-06 : Jason Evans <jasone@canonware.com>
+
+	* Rename operators:
+	  + index --> idup
+	  + sindex --> sidup
+
 2002-04-04 : Jason Evans <jasone@canonware.com>
 
 	* Add operators:

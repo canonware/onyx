@@ -113,25 +113,25 @@ ONYX_OTESTS =
               getinterval_g.nx.in getinterval_h.nx.in getinterval_i.nx.in
               gt_a.nx.in gt_b.nx.in gt_c.nx.in gt_d.nx.in gt_e.nx.in gt_f.nx.in
               gt_g.nx.in gt_h.nx.in hello.nx.in idiv_a.nx.in idiv_b.nx.in
-              idiv_c.nx.in idiv_d.nx.in idiv_e.nx.in if_a.nx.in if_b.nx.in
-              if_c.nx.in ifelse_a.nx.in ifelse_b.nx.in ifelse_c.nx.in
-              immediate_a.nx.in immediate_b.nx.in index_a.nx.in index_b.nx.in
-              index_c.nx.in index_d.nx.in index_e.nx.in index_f.nx.in
-              integer.nx.in integer_a.nx.in integer_b.nx.in integer_c.nx.in
-              integer_d.nx.in known_a.nx.in known_b.nx.in known_c.nx.in
-              le_a.nx.in le_b.nx.in le_c.nx.in le_d.nx.in le_e.nx.in le_f.nx.in
-              le_g.nx.in le_h.nx.in length_a.nx.in length_b.nx.in length_c.nx.in
-              loop_a.nx.in loop_b.nx.in lt_a.nx.in lt_b.nx.in lt_c.nx.in
-              lt_d.nx.in lt_e.nx.in lt_f.nx.in lt_g.nx.in lt_h.nx.in
-              mark_a.nx.in mod_a.nx.in mod_b.nx.in mod_c.nx.in mod_d.nx.in
-              mod_e.nx.in mul_a.nx.in mul_b.nx.in mul_c.nx.in mul_d.nx.in
-              ndup_a.nx.in ndup_b.nx.in ndup_c.nx.in ndup_d.nx.in ndup_e.nx.in
-              ne_a.nx.in ne_b.nx.in neg_a.nx.in neg_b.nx.in neg_c.nx.in
-              not_a.nx.in not_b.nx.in not_c.nx.in npop_a.nx.in npop_b.nx.in
-              npop_c.nx.in npop_d.nx.in npop_e.nx.in or_a.nx.in or_b.nx.in
-              or_c.nx.in or_d.nx.in or_e.nx.in or_f.nx.in output_a.nx.in
-              pop_a.nx.in pop_b.nx.in put_a.nx.in put_b.nx.in put_c.nx.in
-              put_d.nx.in put_e.nx.in put_f.nx.in put_g.nx.in put_h.nx.in
+              idiv_c.nx.in idiv_d.nx.in idiv_e.nx.in idup_a.nx.in idup_b.nx.in
+              idup_c.nx.in idup_d.nx.in idup_e.nx.in idup_f.nx.in if_a.nx.in
+              if_b.nx.in if_c.nx.in ifelse_a.nx.in ifelse_b.nx.in ifelse_c.nx.in
+              immediate_a.nx.in immediate_b.nx.in integer.nx.in integer_a.nx.in
+              integer_b.nx.in integer_c.nx.in integer_d.nx.in known_a.nx.in
+              known_b.nx.in known_c.nx.in le_a.nx.in le_b.nx.in le_c.nx.in
+              le_d.nx.in le_e.nx.in le_f.nx.in le_g.nx.in le_h.nx.in
+              length_a.nx.in length_b.nx.in length_c.nx.in loop_a.nx.in
+              loop_b.nx.in lt_a.nx.in lt_b.nx.in lt_c.nx.in lt_d.nx.in
+              lt_e.nx.in lt_f.nx.in lt_g.nx.in lt_h.nx.in mark_a.nx.in
+              mod_a.nx.in mod_b.nx.in mod_c.nx.in mod_d.nx.in mod_e.nx.in
+              mul_a.nx.in mul_b.nx.in mul_c.nx.in mul_d.nx.in ndup_a.nx.in
+              ndup_b.nx.in ndup_c.nx.in ndup_d.nx.in ndup_e.nx.in ne_a.nx.in
+              ne_b.nx.in neg_a.nx.in neg_b.nx.in neg_c.nx.in not_a.nx.in
+              not_b.nx.in not_c.nx.in npop_a.nx.in npop_b.nx.in npop_c.nx.in
+              npop_d.nx.in npop_e.nx.in or_a.nx.in or_b.nx.in or_c.nx.in
+              or_d.nx.in or_e.nx.in or_f.nx.in output_a.nx.in pop_a.nx.in
+              pop_b.nx.in put_a.nx.in put_b.nx.in put_c.nx.in put_d.nx.in
+              put_e.nx.in put_f.nx.in put_g.nx.in put_h.nx.in
               putinterval_a.nx.in putinterval_b.nx.in putinterval_c.nx.in
               putinterval_d.nx.in putinterval_e.nx.in putinterval_f.nx.in
               putinterval_g.nx.in putinterval_h.nx.in putinterval_i.nx.in
@@ -148,8 +148,8 @@ ONYX_OTESTS =
               setstdout_a.nx.in setstdout_b.nx.in setstdout_c.nx.in
               sexch_a.nx.in sexch_b.nx.in sexch_c.nx.in sexch_d.nx.in
               shift_a.nx.in shift_b.nx.in shift_c.nx.in shift_d.nx.in
-              sindex_a.nx.in sindex_b.nx.in sindex_c.nx.in sindex_d.nx.in
-              sindex_e.nx.in sindex_f.nx.in sindex_g.nx.in spop_a.nx.in
+              sidup_a.nx.in sidup_b.nx.in sidup_c.nx.in sidup_d.nx.in
+              sidup_e.nx.in sidup_f.nx.in sidup_g.nx.in spop_a.nx.in
               spop_b.nx.in spop_c.nx.in spop_d.nx.in sprint_a.nx.in
               spush_a.nx.in spush_b.nx.in spush_c.nx.in spush_d.nx.in
               sroll_a.nx.in sroll_b.nx.in sroll_c.nx.in sroll_d.nx.in

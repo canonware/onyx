@@ -30,10 +30,10 @@ named procedures that can be called at a later time, but behind the scenes, the
 code is actually being interpreted as it is scanned in such a way that an
 executable object is created.  As such, Onyx is not suited for compilation,
 native or byte code.  However, the language syntax is very simple and the
-scanner/parser is extremely fast.  There is also a mechanism for
-\htmlref{\onyxop{}{bind}{}}{systemdict:bind}ing procedures, which makes
-interpreter performance approximately the same as would be expected of a byte
-code interpreter.
+scanner/parser is extremely fast.  There is also an operator called
+\htmlref{\onyxop{}{bind}{}}{systemdict:bind} that optimizes interpreted code
+execution to approximately the same performance level as would be expected of a
+byte code interpreter.
 
 Onyx is implemented as a C library that can be embedded in other programs.
 Mechanisms are provided for extending the set of operators available.  This
@@ -2385,7 +2385,7 @@ useful in illustrating a useful method of doing type-dependent operations:
 
 \begin{verbatim}
 /sprints {
-        1 index type /sprintsdict load exch get eval
+        1 idup type /sprintsdict load exch get eval
 } def
 \end{verbatim}
 
@@ -3142,7 +3142,7 @@ object. \\
 objects count & {\bf \htmlref{ndup}{systemdict:ndup}} & objects objects &
 Duplicate objects. \\
 \hline
-object \dots index & {\bf \htmlref{index}{systemdict:index}} & object \dots
+object \dots index & {\bf \htmlref{idup}{systemdict:idup}} & object \dots
 object & Duplicate object on ostack at a given index. \\
 \hline
 a b & {\bf \htmlref{exch}{systemdict:exch}} & b a & Exchange the top two objects
@@ -3303,7 +3303,7 @@ depth of the topmost mark on stack. \\
 \hline
 stack & {\bf \htmlref{sdup}{systemdict:sdup}} & -- & Duplicate an object. \\
 \hline
-stack index & {\bf \htmlref{sindex}{systemdict:sindex}} & -- & Duplicate object
+stack index & {\bf \htmlref{sidup}{systemdict:sidup}} & -- & Duplicate object
 in a stack at a given index. \\
 \hline
 stack & {\bf \htmlref{sexch}{systemdict:sexch}} & -- & Exchange top objects on
@@ -6408,6 +6408,47 @@ estack/istack trace (0..2):
 onyx:3>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:idup}
+\index{idup@\onyxop{}{idup}{}}
+\item[{\onyxop{object \dots index}{idup}{object \dots object}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[object: ]
+			An object.
+		\item[\dots: ]
+			\oparg{index} objects.
+		\item[index: ]
+			Depth (count starts at 0, not counting \oparg{index}) of
+			the object to duplicate on ostack.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[object: ]
+			The same object that was passed in.
+		\item[\dots: ]
+			The same \oparg{index} objects that were passed in.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Create a duplicate of the object on on ostack at depth
+		\oparg{index}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> 3 2 1 0 2 idup pstack
+2
+0
+1
+2
+3
+onyx:5>
+		\end{verbatim}
+	\end{description}
 \label{systemdict:if}
 \index{if@\onyxop{}{if}{}}
 \item[{\onyxop{boolean object}{if}{--}}: ]
@@ -6465,47 +6506,6 @@ onyx:0> true {`yes'}{`no'} ifelse 1 sprint
 onyx:0> false {`yes'}{`no'} ifelse 1 sprint
 `no'
 onyx:0>
-		\end{verbatim}
-	\end{description}
-\label{systemdict:index}
-\index{index@\onyxop{}{index}{}}
-\item[{\onyxop{object \dots index}{index}{object \dots object}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[object: ]
-			An object.
-		\item[\dots: ]
-			\oparg{index} objects.
-		\item[index: ]
-			Depth (count starts at 0, not counting \oparg{index}) of
-			the object to duplicate on ostack.
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[object: ]
-			The same object that was passed in.
-		\item[\dots: ]
-			The same \oparg{index} objects that were passed in.
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{rangecheck}{rangecheck}.]
-		\item[\htmlref{stackunderflow}{stackunderflow}.]
-		\item[\htmlref{typecheck}{typecheck}.]
-		\end{description}
-	\item[Description: ]
-		Create a duplicate of the object on on ostack at depth
-		\oparg{index}.
-	\item[Example(s): ]\begin{verbatim}
-
-onyx:0> 3 2 1 0 2 index pstack
-2
-0
-1
-2
-3
-onyx:5>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:iobuf}
@@ -9165,6 +9165,36 @@ onyx:0> 4 -1 shift 1 sprint
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:sidup}
+\index{sidup@\onyxop{}{sidup}{}}
+\item[{\onyxop{stack index}{sidup}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[stack: ]
+			A stack object.
+		\item[index: ]
+			Depth (count starts at 0) of the object to duplicate in
+			\oparg{stack}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Create a duplicate of the object on \oparg{stack} at depth
+		\oparg{index} and push it onto \oparg{stack}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> (3 2 1 0) dup 2 sidup
+onyx:1> 1 sprint
+(3 2 1 0 2)
+onyx:0>
+		\end{verbatim}
+	\end{description}
 \label{systemdict:signal}
 \index{signal@\onyxop{}{signal}{}}
 \item[{\onyxop{condition}{signal}{--}}: ]
@@ -9222,36 +9252,6 @@ onyx:0> 1.570796 sin 1 sprint
 1.000000e+00
 onyx:0> 0.7853982 sin 1 sprint
 7.071068e-01
-onyx:0>
-		\end{verbatim}
-	\end{description}
-\label{systemdict:sindex}
-\index{sindex@\onyxop{}{sindex}{}}
-\item[{\onyxop{stack index}{sindex}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[stack: ]
-			A stack object.
-		\item[index: ]
-			Depth (count starts at 0) of the object to duplicate in
-			\oparg{stack}.
-		\end{description}
-	\item[Output(s): ] None.
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{rangecheck}{rangecheck}.]
-		\item[\htmlref{stackunderflow}{stackunderflow}.]
-		\item[\htmlref{typecheck}{typecheck}.]
-		\end{description}
-	\item[Description: ]
-		Create a duplicate of the object on \oparg{stack} at depth
-		\oparg{index} and push it onto \oparg{stack}.
-	\item[Example(s): ]\begin{verbatim}
-
-onyx:0> (3 2 1 0) dup 2 sindex
-onyx:1> 1 sprint
-(3 2 1 0 2)
 onyx:0>
 		\end{verbatim}
 	\end{description}
@@ -10109,7 +10109,7 @@ onyx:4> thread 3 1 roll
 onyx:3> dup 3 1 roll
 onyx:4> 1000000000 timedwait 1 sprint unlock join
 false
-onyx:0> mutex condition 1 index dup lock 1000000000 timedwait 1 sprint unlock
+onyx:0> mutex condition 1 idup dup lock 1000000000 timedwait 1 sprint unlock
 true
 onyx:0>
 		\end{verbatim}

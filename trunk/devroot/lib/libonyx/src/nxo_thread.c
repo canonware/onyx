@@ -736,9 +736,9 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 				    systemdict_inline_exch(a_nxo);
 				    break;
 				}
-				case NXN_index:
+				case NXN_idup:
 				{
-				    systemdict_inline_index(a_nxo);
+				    systemdict_inline_idup(a_nxo);
 				    break;
 				}
 				case NXN_pop:
@@ -865,9 +865,9 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 			systemdict_inline_exch(a_nxo);
 			break;
 		    }
-		    case NXN_index:
+		    case NXN_idup:
 		    {
-			systemdict_inline_index(a_nxo);
+			systemdict_inline_idup(a_nxo);
 			break;
 		    }
 		    case NXN_pop:

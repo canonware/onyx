@@ -22,7 +22,7 @@
     dup 1 sprint
     cvx eval
     -1 1 8 {
-	1 index exch
+	1 idup exch
 	cvds
 	1 sprint
     } for

@@ -222,7 +222,7 @@ userdict begin
 
 % %string interpc -
 /interpc {
-	keytable 1 index known {
+	keytable 1 idup known {
 		keytable exch get eval
 	}{
 		insert_string

@@ -187,10 +187,10 @@ const cw_uint8_t *cw_g_nx_names[] = {
 #endif
     "hooktype",
     "idiv",
+    "idup",
     "if",
     "ifelse",
     "inc",
-    "index",
 #ifdef CW_POSIX
     "ino",
 #endif
@@ -391,13 +391,13 @@ const cw_uint8_t *cw_g_nx_names[] = {
 #endif
     "sexch",
     "shift",
+    "sidup",
 #ifdef CW_THREADS
     "signal",
 #endif
 #ifdef CW_REAL
     "sin",
 #endif
-    "sindex",
     "sipop",
 #ifdef CW_POSIX
     "size",

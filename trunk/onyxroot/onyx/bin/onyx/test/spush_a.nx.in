@@ -28,7 +28,7 @@
 	``hi''
 ]{
 	cvx eval
-	1 index exch spush
+	1 idup exch spush
 } foreach
 
 pstack

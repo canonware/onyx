@@ -61,7 +61,7 @@ estack/istack trace (0..3):
 	--load--
 	--dup--
 	2
-	--index--
+	--idup--
 	--known--
 	{--exch-- --get-- --eval--}
 	{--exch-- --pop-- --dup-- /handleerror --get-- --eval-- /stop --get-- --eval--}
