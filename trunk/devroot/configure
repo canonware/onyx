@@ -546,7 +546,7 @@ if test -d "$srcdir/lib/c/libonyx" ; then
   build_libonyx="yes"
   lib_onyx=1
   lib_onyx_manual=""
-  if test -e "$srcdir/lib/c/libonyx/doc/latex/manual.tex.in" ; then
+  if test -f "$srcdir/lib/c/libonyx/doc/latex/manual.tex.in" ; then
     cfgoutputs="$cfgoutputs lib/c/libonyx/doc/latex/manual.tex"
   fi
   cfghdrs="$cfghdrs $objdir/lib/c/libonyx/include/libonyx/libonyx_defs.h"
@@ -569,7 +569,7 @@ if test -d "$srcdir/lib/c/libprism" ; then
   build_libprism="yes"
   lib_prism=1
   lib_prism_manual=""
-  if test -e "$srcdir/lib/c/libprism/doc/latex/manual.tex.in" ; then
+  if test -f "$srcdir/lib/c/libprism/doc/latex/manual.tex.in" ; then
     cfgoutputs="$cfgoutputs lib/c/libprism/doc/latex/manual.tex"
   fi
   cfghdrs="$cfghdrs $objdir/lib/c/libprism/include/libprism/libprism_defs.h"
@@ -592,7 +592,7 @@ if test -d "$srcdir/lib/c/libedit" ; then
   build_libedit="yes"
   lib_edit=1
   lib_edit_manual=""
-  if test -e "$srcdir/lib/c/libedit/doc/latex/manual.tex.in" ; then
+  if test -f "$srcdir/lib/c/libedit/doc/latex/manual.tex.in" ; then
     cfgoutputs="$cfgoutputs lib/c/libedit/doc/latex/manual.tex"
   fi
   cfghdrs="$cfghdrs $objdir/lib/c/libedit/include/libedit/libedit_defs.h"
@@ -615,7 +615,7 @@ if test -d "$srcdir/lib/c/libsock" ; then
   build_libsock="yes"
   lib_sock=1
   lib_sock_manual=""
-  if test -e "$srcdir/lib/c/libsock/doc/latex/manual.tex.in" ; then
+  if test -f "$srcdir/lib/c/libsock/doc/latex/manual.tex.in" ; then
     cfgoutputs="$cfgoutputs lib/c/libsock/doc/latex/manual.tex"
   fi
   cfghdrs="$cfghdrs $objdir/lib/c/libsock/include/libsock/libsock_defs.h"
@@ -638,7 +638,7 @@ if test -d "$srcdir/lib/c/libstash" ; then
   build_libstash="yes"
   lib_stash=1
   lib_stash_manual=""
-  if test -e "$srcdir/lib/c/libstash/doc/latex/manual.tex.in" ; then
+  if test -f "$srcdir/lib/c/libstash/doc/latex/manual.tex.in" ; then
     cfgoutputs="$cfgoutputs lib/c/libstash/doc/latex/manual.tex"
   fi
   cfghdrs="$cfghdrs $objdir/lib/c/libstash/include/libstash/libstash_defs.h"
@@ -662,7 +662,7 @@ if test -d "$srcdir/bin/cover" ; then
   build_cover="yes"
   bin_cover=1
   bin_cover_manual=""
-  if test -e "$srcdir/bin/cover/doc/latex/manual.tex.in" ; then
+  if test -f "$srcdir/bin/cover/doc/latex/manual.tex.in" ; then
     cfgoutputs="$cfgoutputs bin/cover/doc/latex/manual.tex"
   fi
   cfghdrs="$cfghdrs $objdir/bin/cover/include/cover_defs.h"
@@ -685,7 +685,7 @@ if test -d "$srcdir/bin/ncat" ; then
   build_ncat="yes"
   bin_ncat=1
   bin_ncat_manual=""
-  if test -e "$srcdir/bin/ncat/doc/latex/manual.tex.in" ; then
+  if test -f "$srcdir/bin/ncat/doc/latex/manual.tex.in" ; then
     cfgoutputs="$cfgoutputs bin/ncat/doc/latex/manual.tex"
   fi
   cfghdrs="$cfghdrs $objdir/bin/ncat/include/ncat_defs.h"
@@ -708,7 +708,7 @@ if test -d "$srcdir/bin/onyx" ; then
   build_onyx="yes"
   bin_onyx=1
   bin_onyx_manual=""
-  if test -e "$srcdir/bin/onyx/doc/latex/manual.tex.in" ; then
+  if test -f "$srcdir/bin/onyx/doc/latex/manual.tex.in" ; then
     cfgoutputs="$cfgoutputs bin/onyx/doc/latex/manual.tex"
   fi
   cfghdrs="$cfghdrs $objdir/bin/onyx/include/onyx_defs.h"
@@ -731,7 +731,7 @@ if test -d "$srcdir/bin/proxy" ; then
   build_proxy="yes"
   bin_proxy=1
   bin_proxy_manual=""
-  if test -e "$srcdir/bin/proxy/doc/latex/manual.tex.in" ; then
+  if test -f "$srcdir/bin/proxy/doc/latex/manual.tex.in" ; then
     cfgoutputs="$cfgoutputs bin/proxy/doc/latex/manual.tex"
   fi
   cfghdrs="$cfghdrs $objdir/bin/proxy/include/proxy_defs.h"
