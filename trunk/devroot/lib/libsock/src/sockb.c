@@ -54,7 +54,7 @@ sockb_init(cw_uint32_t a_bufel_size, cw_uint32_t a_max_spare_bufels)
     bzero(g_sockb, sizeof(cw_sockb_t));
 
     /* Open a temp file with poser_fd, such that the file will disappear as soon
-   * as the descripter goes away. */
+     * as the descripter goes away. */
     tmpfile_name = tmpnam(buf);
     if (tmpfile_name == NULL)
     {
@@ -81,11 +81,11 @@ sockb_init(cw_uint32_t a_bufel_size, cw_uint32_t a_max_spare_bufels)
     }
 
     /* Ignore SIGPIPE, so that writing to a closed socket won't crash the
-   * program. */
+     * program. */
     signal(SIGPIPE, SIG_IGN);
   
     /* Create a pipe that will be used in conjunction with the message queues to
-   * make the back end thread return from the select() call. */
+     * make the back end thread return from the select() call. */
     {
       int filedes[2];
 
@@ -140,8 +140,8 @@ sockb_init(cw_uint32_t a_bufel_size, cw_uint32_t a_max_spare_bufels)
   
     g_sockb->should_quit = FALSE;
 
-  /* Create the semaphore used for determining whether data should be written to
-   * the pipe in order to force a return from select(). */
+    /* Create the semaphore used for determining whether data should be written
+     * to the pipe in order to force a return from select(). */
     sem_new(&g_sockb->pipe_sem, 1);
 
     /* Create the spare bufel pool and initialize associated variables. */
