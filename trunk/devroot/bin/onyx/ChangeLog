@@ -1,3 +1,9 @@
+2002-01-22  Jason Evans  <jasone@canonware.com>
+
+	* : Generate embedded onyx code during the build using a bootstrap
+	onyx interpreter (bonyx) so that the generated code corresponds to the
+	configuration flags.
+
 2002-01-04  Jason Evans  <jasone@canonware.com>
 
 	* src/onyx.c (prompt): Fix an out-of-bounds memory access.
