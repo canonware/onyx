@@ -620,43 +620,61 @@ have any name, but only the following error names are generated internally by
 Onyx:
 \begin{description}
 \label{argcheck}
+\index{argcheck}
 \item[argcheck: ] Incorrect argument value.
 \label{estackoverflow}
+\index{estackoverflow}
 \item[estackoverflow: ] Maximum interpreter recursion was exceeded.
 \label{invalidaccess}
+\index{invalidaccess}
 \item[invalidaccess: ] Permission error.
 \label{invalidexit}
+\index{invalidexit}
 \item[invalidexit: ] The \onyxop{}{exit}{} operator was called outside of any
 loop.  This error is generated as a result of catching an exit, so the execution
 state for where the error really happened is gone.
 \label{invalidfileaccess}
+\index{invalidfileaccess}
 \item[invalidfileaccess: ] Insufficient file permissions.
 \label{ioerror}
+\index{ioerror}
 \item[ioerror: ] I/O error (read(), write(), etc.).
 \label{limitcheck}
+\index{limitcheck}
 \item[limitcheck: ] Value outside of legal range.
 \label{neterror}
+\index{neterror}
 \item[neterror: ] Network error (refused connection, timeout, unreachable net,
 etc.).
 \label{rangecheck}
+\index{rangecheck}
 \item[rangecheck: ] Out of bounds string or array access.
 \label{stackunderflow}
+\index{stackunderflow}
 \item[stackunderflow: ] Not enough objects on stack.
 \label{syntaxerror}
+\index{syntaxerror}
 \item[syntaxerror: ] Scanner syntax error.
 \label{typecheck}
+\index{typecheck}
 \item[typecheck: ] Incorrect argument type.
 \label{undefined}
+\index{undefined}
 \item[undefined: ] Name not defined in any of the dictionaries on dstack.
 \label{undefinedfilename}
+\index{undefinedfilename}
 \item[undefinedfilename: ] Bad filename.
 \label{undefinedresult}
+\index{undefinedresult}
 \item[undefinedresult: ] Attempt to divide by 0.
 \label{unmatchedfino}
+\index{unmatchedfino}
 \item[unmatchedfino: ] No fino on ostack.
 \label{unmatchedmark}
+\index{unmatchedmark}
 \item[unmatchedmark: ] No mark on ostack.
 \label{unregistered}
+\index{unregistered}
 \item[unregistered: ] Non-enumerated error.
 \end{description}
 
