@@ -46,9 +46,9 @@
 #define	_CW_STIL_STDOUT_BUFFER_SIZE	512
 
 cw_stil_t *
-stil_new(cw_stil_t *a_stil, cw_stilo_file_read_t *a_stdin,
-    cw_stilo_file_write_t *a_stdout, cw_stilo_file_write_t *a_stderr, void
-    *a_arg)
+stil_new(cw_stil_t *a_stil, int a_argc, char **a_argv, char **a_envp,
+    cw_stilo_file_read_t *a_stdin, cw_stilo_file_write_t *a_stdout,
+    cw_stilo_file_write_t *a_stderr, void *a_arg)
 {
 	cw_stil_t		*retval;
 	cw_stilt_t		stilt;
@@ -94,10 +94,6 @@ stil_new(cw_stil_t *a_stil, cw_stilo_file_read_t *a_stdin,
 
 		stilt_setglobal(&stilt, TRUE);
 
-		/* Initialize globaldict. */
-		stilo_dict_new(&retval->globaldict, retval,
-		    _CW_STIL_GLOBALDICT_SIZE);
-
 		/* Initialize stdin. */
 		stilo_file_new(&retval->stdin_stilo, retval);
 		if (a_stdin == NULL)
@@ -129,8 +125,16 @@ stil_new(cw_stil_t *a_stil, cw_stilo_file_read_t *a_stdin,
 			    a_stderr, a_arg);
 		}
 
+		/* Initialize globaldict. */
+		stilo_dict_new(&retval->globaldict, retval,
+		    _CW_STIL_GLOBALDICT_SIZE);
+
+		/* Initialize envdict. */
+		envdict_populate(&retval->envdict, &stilt, a_envp);
+
 		/* Finish systemdict initialization. */
-		systemdict_populate(&retval->systemdict, &stilt);
+		systemdict_populate(&retval->systemdict, &stilt, a_argc,
+		    a_argv);
 
 		stilt_delete(&stilt);
 	}

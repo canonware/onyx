@@ -48,12 +48,12 @@ EditLine	*el;
 History		*hist;
 cw_uint8_t	prompt_str[_PROMPT_STRLEN];
 
-void		argv_init(cw_stilt_t *a_stilt, int a_argc, char **a_argv);
-void		envdict_init(cw_stilt_t *a_stilt, char **a_envp);
 char		*prompt(EditLine *a_el);
 cw_sint32_t	cl_read(void *a_arg, cw_stilo_t *a_file, cw_uint32_t a_len,
     cw_uint8_t *r_str);
+#ifdef _STIL_SIGHANDLER
 void		*sig_handler(void *a_arg);
+#endif
 void		usage(const char *a_progname);
 const char	*basename(const char *a_str);
 
@@ -106,13 +106,10 @@ main(int argc, char **argv, char **envp)
 		    ;
 		struct stil_arg_s	arg = {NULL, 0, 0};
 
-		stil_new(&stil, cl_read, NULL, NULL, (void *)&arg);
+		stil_new(&stil, argc, argv, envp, cl_read, NULL, NULL, (void
+		    *)&arg);
 		stilt_new(&stilt, &stil);
 		stilts_new(&stilts);
-
-		/* Set up argv and envdict. */
-		argv_init(&stilt, argc, argv);
-		envdict_init(&stilt, envp);
 
 		/*
 		 * Print product and version info.  Redefine stop so that the
@@ -148,13 +145,14 @@ main(int argc, char **argv, char **envp)
 		static const cw_uint8_t	magic[] =
 		    "/#! {mark} def /!# {cleartomark} def";
 		int			c;
-
-		stil_new(&stil, NULL, NULL, NULL, NULL);
-		stilt_new(&stilt, &stil);
-		stilts_new(&stilts);
+		cw_bool_t		opt_version = FALSE;
+		cw_uint8_t		*opt_expression = NULL;
 
 		/*
-		 * Parse command line arguments.
+		 * Parse command line arguments, but postpone taking any actions
+		 * that require the stil interpreter to be up and running.  This
+		 * is necessary because we need to know how much of argv to pass
+		 * to stil_new().
 		 */
 		c = getopt(argc, argv, "hVe:");
 		switch (c) {
@@ -163,15 +161,9 @@ main(int argc, char **argv, char **envp)
 			retval = 0;
 			goto RETURN;
 		case 'V':
-			stilt_interpret(&stilt, &stilts, version,
-			    sizeof(version) - 1);
-			stilt_flush(&stilt, &stilts);
-			retval = 0;
-			goto RETURN;
+			opt_version = TRUE;
+			break;
 		case 'e': {
-			cw_stilo_t	*string;
-			cw_uint8_t	*str;
-
 			if (argc != 3) {
 				_cw_out_put("[s]: Incorrect number of "
 				    "arguments\n", basename(argv[0]));
@@ -179,13 +171,8 @@ main(int argc, char **argv, char **envp)
 				retval = 1;
 				goto RETURN;
 			}
-			
-			/* Push the string onto the execution stack. */
-			string = stils_push(stilt_estack_get(&stilt));
-			stilo_string_new(string, &stil, strlen(optarg));
-			stilo_attrs_set(string, STILOA_EXECUTABLE);
-			str = stilo_string_get(string);
-			memcpy(str, optarg, stilo_string_len_get(string));
+
+			opt_expression = optarg;
 			break;
 		}
 		case -1:
@@ -199,13 +186,58 @@ main(int argc, char **argv, char **envp)
 		}
 
 		/*
-		 * If there is anything left on the command line, it should be
-		 * the name of a source file, follolwed by optional arguments.
+		 * Do additional command line argument error checking.
 		 */
-		if (optind < argc) {
+		if ((optind < argc && (opt_expression != NULL || opt_version))
+		    || (opt_version && opt_expression != NULL)) {
+			_cw_out_put("[s]: Incorrect number of arguments\n",
+			    basename(argv[0]));
+			usage(basename(argv[0]));
+			retval = 1;
+			goto RETURN;
+		}
+
+		/*
+		 * Since this is a non-interactive invocation, don't include all
+		 * elements of argv, and wrap stdin.
+		 */
+		stil_new(&stil, argc - optind, &argv[optind], envp, NULL, NULL,
+		    NULL, NULL);
+		stilt_new(&stilt, &stil);
+		stilts_new(&stilts);
+
+		/*
+		 * Act on the command line arguments, now that the interpreter
+		 * is initialized.
+		 */
+		if (opt_version) {
+			/*
+			 * Print the version and exit.
+			 */
+			stilt_interpret(&stilt, &stilts, version,
+			    sizeof(version) - 1);
+			stilt_flush(&stilt, &stilts);
+			retval = 0;
+			goto RETURN;
+		} else if (opt_expression != NULL) {
+			cw_stilo_t	*string;
+			cw_uint8_t	*str;
+
+			/*
+			 * Push the string onto the execution stack.
+			 */
+			string = stils_push(stilt_estack_get(&stilt));
+			stilo_string_new(string, &stil, strlen(opt_expression));
+			stilo_attrs_set(string, STILOA_EXECUTABLE);
+			str = stilo_string_get(string);
+			memcpy(str, opt_expression,
+			    stilo_string_len_get(string));
+		} else if (optind < argc) {
 			int	src_fd;
 
 			/*
+			 * Remaining command line arguments should be the name
+			 * of a source file, followed by optional arguments.
 			 * Open the source file, wrap it in a stil file object,
 			 * and push it onto the execution stack.
 			 */
@@ -233,14 +265,8 @@ main(int argc, char **argv, char **envp)
 			file = stils_push(stilt_estack_get(&stilt));
 			stilo_dup(file, stil_stdin_get(&stil));
 			stilo_attrs_set(file, STILOA_EXECUTABLE);
-		}
-
-		/*
-		 * Set up argv and envdict.  Since this is a non-interactive
-		 * invocation, don't include all elements of argv.
-		 */
-		argv_init(&stilt, argc - optind, &argv[optind]);
-		envdict_init(&stilt, envp);
+		} else
+			_cw_not_reached();
 
 		/* Create procedures to handle #! magic. */
 		stilt_interpret(&stilt, &stilts, magic, sizeof(magic) - 1);
@@ -265,93 +291,6 @@ main(int argc, char **argv, char **envp)
 #endif
 	libstash_shutdown();
 	return retval;
-}
-
-/*
- * Define the argv array in globaldict.
- */
-void
-argv_init(cw_stilt_t *a_stilt, int a_argc, char **a_argv)
-{
-	int		i;
-	cw_sint32_t	len;
-	static const cw_uint8_t footer[] = " put setglobal";
-	char		*code;
-	cw_stilts_t	stilts;
-
-	stilts_new(&stilts);
-
-	len = out_put_sa(cw_g_out, &code,
-	    "currentglobal true setglobal globaldict /argv [i] array",
-	    a_argc);
-	stilt_interpret(a_stilt, &stilts, code, len);
-	_cw_free(code);
-
-	for (i = 0; i < a_argc; i++) {
-		len = out_put_sa(cw_g_out, &code, " dup [i] ([s]) put", i,
-		    a_argv[i]);
-		    stilt_interpret(a_stilt, &stilts, code, len);
-		    _cw_free(code);
-	}
-	stilt_interpret(a_stilt, &stilts, footer, sizeof(footer) - 1);
-	
-	stilt_flush(a_stilt, &stilts);
-	stilts_delete(&stilts, a_stilt);
-}
-
-/*
- * Define the envdict dictionary in globaldict.
- */
-void
-envdict_init(cw_stilt_t *a_stilt, char **a_envp)
-{
-	int		i, j;
-	cw_sint32_t	len;
-	static const cw_uint8_t header[] =
-	    "currentglobal true setglobal globaldict /envdict <<";
-	static const cw_uint8_t footer[] = ">> put setglobal";
-	char		*code, *key, *val, *oldval;
-	cw_stilts_t	stilts;
-
-	stilts_new(&stilts);
-
-	stilt_interpret(a_stilt, &stilts, header, sizeof(header) - 1);
-
-	for (i = 0; a_envp[i] != NULL; i++) {
-		/* Break the key and value apart. */
-		oldval = a_envp[i];
-		key = strsep(&oldval, "=");
-		val = (char *)_cw_malloc(2 * strlen(oldval) + 1);
-
-		/*
-		 * Protect '\'' characters, which delimit literal strings in
-		 * stil.
-		 */
-		for (j = 0; *oldval != '\0'; oldval++, j++) {
-			val[j] = *oldval;
-			if (val[j] == '\'') {
-				j++;
-				val[j] = '\'';
-			}
-		}
-		val[j] = '\'';	/* stil string delimiter. */
-
-		len = out_put_sa(cw_g_out, &code, " /[s] `", key);
-		stilt_interpret(a_stilt, &stilts, code, len);
-		_cw_free(code);
-
-		/*
-		 * Inject the value this way, so that the printing code doesn't
-		 * stumble on binary data.
-		 */
-		stilt_interpret(a_stilt, &stilts, val, j + 1);
-
-		_cw_free(val);
-	}
-	stilt_interpret(a_stilt, &stilts, footer, sizeof(footer) - 1);
-	
-	stilt_flush(a_stilt, &stilts);
-	stilts_delete(&stilts, a_stilt);
 }
 
 char *

@@ -250,6 +250,8 @@ cw_bool_t stilt_dict_stack_search(cw_stilt_t *a_stilt, cw_stilo_t *a_key,
 	(stil_systemdict_get((a_stilt)->stil))
 #define	stilt_globaldict_get(a_stilt)					\
 	(stil_globaldict_get((a_stilt)->stil))
+#define	stilt_envdict_get(a_stilt)					\
+	(stil_envdict_get((a_stilt)->stil))
 #define	stilt_userdict_get(a_stilt) (&((a_stilt)->userdict))
 #define	stilt_errordict_get(a_stilt) (&((a_stilt)->errordict))
 #define	stilt_currenterror_get(a_stilt) (&((a_stilt)->currenterror))

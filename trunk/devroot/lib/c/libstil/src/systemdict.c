@@ -170,12 +170,13 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 };
 
 void
-systemdict_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
+systemdict_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt, int a_argc, char
+    **a_argv)
 {
 	cw_uint32_t	i;
 	cw_stilo_t	name, operator;
 
-#define	NEXTRA	8
+#define	NEXTRA	10
 #define NENTRIES							\
 	(sizeof(systemdict_ops) / sizeof(struct cw_systemdict_entry))
 
@@ -207,6 +208,37 @@ systemdict_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 	    stiln_str(STILN_systemdict), stiln_len(STILN_systemdict), TRUE);
 	stilo_dup(&operator, stilt_systemdict_get(a_stilt));
 	stilo_dict_def(a_dict, a_stilt, &name, &operator);
+
+	/* envdict. */
+	stilo_name_new(&name, stilt_stil_get(a_stilt),
+	    stiln_str(STILN_envdict), stiln_len(STILN_envdict), TRUE);
+	stilo_dup(&operator, stilt_envdict_get(a_stilt));
+	stilo_dict_def(a_dict, a_stilt, &name, &operator);
+
+	/* argv. */
+	{
+		int		i;
+		cw_sint32_t	len;
+		cw_stilo_t	argv_stilo, str_stilo;
+		cw_uint8_t	*t_str;
+
+		/* Create the argv array and populate it. */
+		stilo_array_new(&argv_stilo, stilt_stil_get(a_stilt), a_argc);
+		for (i = 0; i < a_argc; i++) {
+			len = strlen(a_argv[i]);
+			stilo_string_new(&str_stilo, stilt_stil_get(a_stilt),
+			    len);
+			t_str = stilo_string_get(&str_stilo);
+			memcpy(t_str, a_argv[i], len);
+
+			stilo_array_el_set(&argv_stilo, &str_stilo, i);
+		}
+
+		/* Insert argv into systemdict. */
+		stilo_name_new(&name, stilt_stil_get(a_stilt),
+		    stiln_str(STILN_argv), stiln_len(STILN_argv), TRUE);
+		stilo_dict_def(a_dict, a_stilt, &name, &argv_stilo);
+	}
 
 	/* stdin. */
 	stilo_name_new(&name, stilt_stil_get(a_stilt), stiln_str(STILN_stdin),

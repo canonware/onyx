@@ -49,6 +49,7 @@ struct cw_stil_s {
 	 */
 	cw_stilo_t	systemdict;
 	cw_stilo_t	globaldict;
+	cw_stilo_t	envdict;
 
 	/*
 	 * Files.
@@ -59,15 +60,16 @@ struct cw_stil_s {
 };
 
 /* stil. */
-cw_stil_t	*stil_new(cw_stil_t *a_stil, cw_stilo_file_read_t *a_stdin,
-    cw_stilo_file_write_t *a_stdout, cw_stilo_file_write_t *a_stderr, void
-    *a_arg);
-void		stil_delete(cw_stil_t *a_stil);
+cw_stil_t *stil_new(cw_stil_t *a_stil, int a_argc, char **a_argv, char **a_envp,
+    cw_stilo_file_read_t *a_stdin, cw_stilo_file_write_t *a_stdout,
+    cw_stilo_file_write_t *a_stderr, void *a_arg);
+void	stil_delete(cw_stil_t *a_stil);
 
 #define	stil_stila_get(a_stil) (&(a_stil)->stila)
 
 #define	stil_systemdict_get(a_stil) (&(a_stil)->systemdict)
 #define	stil_globaldict_get(a_stil) (&(a_stil)->globaldict)
+#define	stil_envdict_get(a_stil) (&(a_stil)->envdict)
 
 #define	stil_stdin_get(a_stil) (&(a_stil)->stdin_stilo)
 #define	stil_stdout_get(a_stil) (&(a_stil)->stdout_stilo)
