@@ -235,13 +235,27 @@ uninstall :
 
 doc :
 
-clean : FORCE
+clean_stat_dbg : FORCE
+	rm -f src/*.[do]_st_d
+	rm -f $(LIB_ST_D)
+
+clean_stat_opt : FORCE
+	rm -f src/*.[do]_st_o
+	rm -f $(LIB_ST_O)
+
+clean_shar_opt : FORCE
+	rm -f src/*.[do]_sh_o
+	rm -f $(LIB_SH_O)
+
+clean_stat_prof : FORCE
+	rm -f src/*.[do]_st_p
+	rm -f $(LIB_ST_P)
+
+clean : clean_stat_dbg clean_stat_opt clean_shar_opt clean_stat_prof
 	rm -f *~ */*~ */*/*~
 	rm -f *.bak *.BAK
 	rm -f core test/core
-	rm -f src/*.[do]_*
 	rm -f test/*.[do]
-	rm -f lib/lib*
 	rm -f test/*.out test/*.diff test/*.pl $(CTESTS) $(PTESTS) $(BTESTS)
 	rm -f src/softcore.c
 	rm -f softwords/softcore.pl
