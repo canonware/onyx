@@ -282,6 +282,7 @@ pool_put(cw_pool_t *a_pool, void *a_buffer, const char *a_filename, cw_uint32_t
 #endif
 
 	spare = (cw_pool_spare_t *)a_buffer;
+	qs_elm_new(spare, link);
 	qs_push(&a_pool->spares, spare, link);
 
 #ifdef _LIBSTASH_DBG

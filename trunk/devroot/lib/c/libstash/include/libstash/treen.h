@@ -25,11 +25,11 @@ struct cw_treen_s {
 
 	/*
 	 * Pointer to one child.  Getting to other children is achieved by
-	 * iterating on the child's sibling ring.
+	 * iterating on the child's sibling qr.
 	 */
 	cw_treen_t	*child;
 
-	cw_ring_t	siblings;	/* Linkage for the sibling ring. */
+	qr_elm(cw_treen_t) sib_link;	/* Linkage for the sibling ring. */
 
 	void		*data;		/* The payload. */
 

@@ -29,13 +29,14 @@ ch_new(cw_ch_t *a_ch, cw_mem_t *a_mem, cw_uint32_t a_table_size, cw_ch_hash_t
 		retval->is_malloced = FALSE;
 	} else {
 		retval = (cw_ch_t
-		    *)_cw_malloc(_CW_CH_TABLE2SIZEOF(a_table_size));
+		    *)_cw_mem_malloc(a_mem, _CW_CH_TABLE2SIZEOF(a_table_size));
 		if (NULL == retval)
 			goto RETURN;
 		memset(retval, 0, _CW_CH_TABLE2SIZEOF(a_table_size));
 		retval->is_malloced = TRUE;
 	}
 
+	retval->mem = a_mem;
 	retval->table_size = a_table_size;
 	retval->hash = a_hash;
 	retval->key_comp = a_key_comp;
@@ -56,22 +57,19 @@ ch_delete(cw_ch_t *a_ch)
 	_cw_check_ptr(a_ch);
 	_cw_assert(a_ch->magic == _CW_CH_MAGIC);
 
-	if (a_ch->chi_qr != NULL) {
-		do {
-			chi = a_ch->chi_qr;
-			a_ch->chi_qr = qr_next(a_ch->chi_qr, ch_link);
-			qr_remove(chi, ch_link);
-			if (chi->is_malloced)
-				_cw_free(chi);
+	while (ql_first(&a_ch->chi_ql) != NULL) {
+		chi = ql_first(&a_ch->chi_ql);
+		ql_head_remove(&a_ch->chi_ql, cw_chi_t, ch_link);
+		if (chi->is_malloced)
+			_cw_mem_free(a_ch->mem, chi);
 #ifdef _LIBSTASH_DBG
-			else
-				memset(chi, 0x5a, sizeof(cw_chi_t));
+		else
+			memset(chi, 0x5a, sizeof(cw_chi_t));
 #endif
-		} while (chi != a_ch->chi_qr);
 	}
 
 	if (a_ch->is_malloced)
-		_cw_free(a_ch);
+		_cw_mem_free(a_ch->mem, a_ch);
 #ifdef _LIBSTASH_DBG
 	else
 		memset(a_ch, 0x5a, _CW_CH_TABLE2SIZEOF(a_ch->table_size));
@@ -103,7 +101,7 @@ ch_insert(cw_ch_t *a_ch, const void *a_key, const void *a_data, cw_chi_t
 		chi = a_chi;
 		chi->is_malloced = FALSE;
 	} else {
-		chi = (cw_chi_t *)_cw_malloc(sizeof(cw_chi_t));
+		chi = (cw_chi_t *)_cw_mem_malloc(a_ch->mem, sizeof(cw_chi_t));
 		if (chi == NULL) {
 			retval = TRUE;
 			goto RETURN;
@@ -112,30 +110,20 @@ ch_insert(cw_ch_t *a_ch, const void *a_key, const void *a_data, cw_chi_t
 	}
 	chi->key = a_key;
 	chi->data = a_data;
-	qr_new(chi, ch_link);
-	qr_new(chi, slot_link);
+	ql_elm_new(chi, ch_link);
+	ql_elm_new(chi, slot_link);
 	slot = a_ch->hash(a_key) % a_ch->table_size;
 	chi->slot = slot;
 
-	/* Hook into ch-wide ring. */
-	if (a_ch->chi_qr != NULL)
-		qr_meld(a_ch->chi_qr, chi, ch_link);
-	else
-		a_ch->chi_qr = chi;
+	/* Hook into ch-wide list. */
+	ql_tail_insert(&a_ch->chi_ql, chi, ch_link);
 
-	if (a_ch->table[slot] != NULL) {
-		/*
-		 * Other chi's in this slot already.  Put this one at the
-		 * head, in order to implement LIFO ordering for multiple
-		 * chi's with the same key.
-		 */
-		qr_meld(chi, a_ch->table[slot], slot_link);
-
+	/* Hook into the slot list. */
 #ifdef _LIBSTASH_DBG
+	if (ql_first(&a_ch->table[slot]) != NULL)
 		a_ch->num_collisions++;
 #endif
-	}
-	a_ch->table[slot] = chi;
+	ql_head_insert(&a_ch->table[slot], chi, slot_link);
 
 	a_ch->count++;
 #ifdef _LIBSTASH_DBG
@@ -160,41 +148,22 @@ ch_remove(cw_ch_t *a_ch, const void *a_search_key, void **r_key, void **r_data,
 
 	slot = a_ch->hash(a_search_key) % a_ch->table_size;
 
-	if (a_ch->table[slot] == NULL) {
-		retval = TRUE;
-		goto RETURN;
-	}
-	chi = a_ch->table[slot];
-	do {
+	for (chi = ql_first(&a_ch->table[slot]); chi != NULL; chi =
+	     ql_next(&a_ch->table[slot], chi, slot_link)) {
 		/* Is this the chi we want? */
-		if (a_ch->key_comp(a_search_key, chi->key) == TRUE) {
-			/* Detach from ch-wide ring. */
-			if (a_ch->chi_qr == chi) {
-				a_ch->chi_qr = qr_next(a_ch->chi_qr, ch_link);
-				if (a_ch->chi_qr == chi) {
-					/* Last chi in the ch. */
-					a_ch->chi_qr = NULL;
-				}
-			}
-			qr_remove(chi, ch_link);
+		if (a_ch->key_comp(a_search_key, chi->key)) {
+			/* Detach from ch-wide list. */
+			ql_remove(&a_ch->chi_ql, chi, ch_link);
 			
-			/* Detach from the slot ring. */
-			if (a_ch->table[slot] == chi) {
-				a_ch->table[slot] = qr_next(a_ch->table[slot],
-				    slot_link);
-				if (a_ch->table[slot] == chi) {
-					/* Last chi in this slot. */
-					a_ch->table[slot] = NULL;
-				}
-			}
-			qr_remove(chi, slot_link);
+			/* Detach from the slot list. */
+			ql_remove(&a_ch->table[slot], chi, slot_link);
 
 			if (r_key != NULL)
 				*r_key = (void *)chi->key;
 			if (r_data != NULL)
 				*r_data = (void *)chi->data;
 			if (chi->is_malloced)
-				_cw_free(chi);
+				_cw_mem_free(a_ch->mem, chi);
 			else if (r_chi != NULL)
 				*r_chi = chi;
 
@@ -205,8 +174,7 @@ ch_remove(cw_ch_t *a_ch, const void *a_search_key, void **r_key, void **r_data,
 			retval = FALSE;
 			goto RETURN;
 		}
-		chi = qr_next(chi, slot_link);
-	} while (chi != a_ch->table[slot]);
+	}
 
 	retval = TRUE;
 	RETURN:
@@ -225,12 +193,8 @@ ch_search(cw_ch_t *a_ch, const void *a_key, void **r_data)
 
 	slot = a_ch->hash(a_key) % a_ch->table_size;
 
-	if (a_ch->table[slot] == NULL) {
-		retval = TRUE;
-		goto RETURN;
-	}
-	chi = a_ch->table[slot];
-	do {
+	for (chi = ql_first(&a_ch->table[slot]); chi != NULL; chi =
+	     ql_next(&a_ch->table[slot], chi, slot_link)) {
 		/* Is this the chi we want? */
 		if (a_ch->key_comp(a_key, chi->key) == TRUE) {
 			if (r_data != NULL)
@@ -238,8 +202,7 @@ ch_search(cw_ch_t *a_ch, const void *a_key, void **r_data)
 			retval = FALSE;
 			goto RETURN;
 		}
-		chi = qr_next(chi, slot_link);
-	} while (chi != a_ch->table[slot]);
+	}
 
 	retval = TRUE;
 	RETURN:
@@ -255,16 +218,19 @@ ch_get_iterate(cw_ch_t *a_ch, void **r_key, void **r_data)
 	_cw_check_ptr(a_ch);
 	_cw_assert(a_ch->magic == _CW_CH_MAGIC);
 
-	if (a_ch->chi_qr == NULL) {
+	chi = ql_first(&a_ch->chi_ql);
+	if (chi == NULL) {
 		retval = TRUE;
 		goto RETURN;
 	}
-	chi = a_ch->chi_qr;
 	if (r_key != NULL)
 		*r_key = (void *)chi->key;
 	if (r_data != NULL)
 		*r_data = (void *)chi->data;
-	a_ch->chi_qr = qr_next(a_ch->chi_qr, ch_link);
+
+	/* Rotate the list. */
+	ql_first(&a_ch->chi_ql) = ql_next(&a_ch->chi_ql,
+	    ql_first(&a_ch->chi_ql), ch_link);
 
 	retval = FALSE;
 	RETURN:
@@ -280,37 +246,24 @@ ch_remove_iterate(cw_ch_t *a_ch, void **r_key, void **r_data, cw_chi_t **r_chi)
 	_cw_check_ptr(a_ch);
 	_cw_assert(a_ch->magic == _CW_CH_MAGIC);
 
-	if (a_ch->chi_qr == NULL) {
+	chi = ql_first(&a_ch->chi_ql);
+	if (chi == NULL) {
 		retval = TRUE;
 		goto RETURN;
 	}
-	chi = a_ch->chi_qr;
 
-	/* Detach from the ch-wide ring. */
-	a_ch->chi_qr = qr_next(a_ch->chi_qr, ch_link);
-	if (a_ch->chi_qr == chi) {
-		/* Last chi in the ch. */
-		a_ch->chi_qr = NULL;
-	}
-	qr_remove(chi, ch_link);
-	
-	/* Detach from the slot ring. */
-	if (a_ch->table[chi->slot] == chi) {
-		a_ch->table[chi->slot] = qr_next(a_ch->table[chi->slot],
-		    slot_link);
-		if (a_ch->table[chi->slot] == chi) {
-			/* Last chi in this slot. */
-			a_ch->table[chi->slot] = NULL;
-		}
-	}
-	qr_remove(chi, slot_link);
-	
+	/* Detach from the ch-wide list. */
+	ql_remove(&a_ch->chi_ql, chi, ch_link);
+
+	/* Detach from the slot list. */
+	ql_remove(&a_ch->table[chi->slot], chi, slot_link);
+
 	if (r_key != NULL)
 		*r_key = (void *)chi->key;
 	if (r_data != NULL)
 		*r_data = (void *)chi->data;
 	if (chi->is_malloced)
-		_cw_free(chi);
+		_cw_mem_free(a_ch->mem, chi);
 	else if (r_chi != NULL)
 		*r_chi = chi;
 
@@ -343,8 +296,8 @@ ch_dump(cw_ch_t *a_ch, const char *a_prefix)
 
 	_cw_out_put("[s]: is_malloced: [s]\n",
 	    a_prefix, (a_ch->is_malloced) ? "TRUE" : "FALSE");
-	_cw_out_put("[s]: chi_qr: 0x[p]\n",
-	    a_prefix, a_ch->chi_qr);
+	_cw_out_put("[s]: ql_first(chi_ql): 0x[p]\n",
+	    a_prefix, ql_first(&a_ch->chi_ql));
 	_cw_out_put("[s]: count: [i], table_size: [i]\n",
 	    a_prefix, a_ch->count, a_ch->table_size);
 
@@ -353,28 +306,24 @@ ch_dump(cw_ch_t *a_ch, const char *a_prefix)
 	    "----------------------\n", a_prefix);
 
 	for (i = 0; i < a_ch->table_size; i++) {
-		if (a_ch->table[i] != NULL) {
-			chi = a_ch->table[i];
-			do {
-				_cw_out_put("[s]: [i]: key: 0x[p],"
-				    " data: 0x[p], slot: [i]\n", a_prefix, i,
-				    chi->key, chi->data, chi->slot);
-				chi = qr_next(chi, slot_link);
-			} while (chi != a_ch->table[i]);
+		if (ql_first(&a_ch->table[i]) != NULL) {
+			ql_foreach(chi, &a_ch->chi_ql, ch_link) {
+				_cw_out_put("[s]: key: 0x[p], data: 0x[p],"
+				    " slot: [i]\n", a_prefix, chi->key,
+				    chi->data, chi->slot);
+			}
 		} else
 			_cw_out_put("[s]: [i]: NULL\n", a_prefix, i);
 	}
 
-	/* chi ring. */
-	_cw_out_put("[s]: chi_ring -----------------------------------"
+	/* chi list. */
+	_cw_out_put("[s]: chi_list -----------------------------------"
 	    "----------------------\n", a_prefix);
-	if (a_ch->chi_qr != NULL) {
-		chi = a_ch->chi_qr;
-		do {
+	if (ql_first(&a_ch->chi_ql) != NULL) {
+		ql_foreach(chi, &a_ch->chi_ql, ch_link) {
 			_cw_out_put("[s]: key: 0x[p], data: 0x[p], slot: [i]\n",
 			    a_prefix, chi->key, chi->data, chi->slot);
-			chi = qr_next(chi, ch_link);
-		} while (chi != a_ch->chi_qr);
+		}
 	} else
 		_cw_out_put("[s]: Empty\n", a_prefix);
 }

@@ -23,8 +23,8 @@
 /* Include files that _are_ installed. */
 {
   local incs = libstash.h libstash_incs.h bhp.h buf.h ch.h cnd.h dch.h dbg.h
-               mem.h mq.h mtx.h out.h pezz.h pool.h ql.h qr.h qs.h res.h ring.h
-               rwl.h sem.h thd.h treen.h tsd.h;
+               mem.h mq.h mtx.h out.h pezz.h pool.h ql.h qr.h qs.h res.h rwl.h
+               sem.h thd.h treen.h tsd.h;
   incs = [fromto % [srcdir]/lib/c/libstash/include/libstash/% [incs]];
   incs = [incs] [objdir]/lib/c/libstash/include/libstash/libstash_defs.h;
 
@@ -42,8 +42,7 @@
 
 /* Source files. */
 LIBSTASH_SRCS = libstash.c bhp.c buf.c ch.c cnd.c dch.c dbg.c mem.c mq.c mtx.c
-                out.c pezz.c pool.c res.c ring.c rwl.c sem.c thd.c treen.c
-                tsd.c;
+                out.c pezz.c pool.c res.c rwl.c sem.c thd.c treen.c tsd.c;
 LIBSTASH_SRCS = [fromto % [srcdir]/lib/c/libstash/src/% [LIBSTASH_SRCS]];
 SRCS = [SRCS] [LIBSTASH_SRCS];
 
@@ -52,8 +51,8 @@ SRCS = [SRCS] [LIBSTASH_SRCS];
   local ctests = c_bhp_a.c c_bhp_b.c c_buf_a.c c_buf_b.c c_buf_c.c c_buf_d.c
                  c_buf_e.c c_ch_a.c c_cnd_a.c c_dbg_a.c c_dch_a.c
                  c_libstash_a.c c_mq_a.c c_mtx_a.c c_out_a.c c_pezz_a.c
-                 c_pool_a.c c_ql_a.c c_qr_a.c c_qs_a.c c_res_a.c c_ring_a.c
-                 c_rwl_a.c c_sem_a.c c_thd_a.c c_thd_b.c c_treen_a.c;
+                 c_pool_a.c c_ql_a.c c_qr_a.c c_qs_a.c c_res_a.c c_rwl_a.c
+                 c_sem_a.c c_thd_a.c c_thd_b.c c_treen_a.c;
   ctests = [fromto % [srcdir]/lib/c/libstash/test/% [ctests]];
 
   CTESTS = [CTESTS] [ctests];
@@ -81,9 +80,8 @@ SRCS = [SRCS] [LIBSTASH_SRCS];
                      libstash_cnd.3s libstash_dch.3s libstash_dbg.3s
                      libstash_mem.3s libstash_mq.3s libstash_mtx.3s
                      libstash_out.3s libstash_pezz.3s libstash_pool.3s
-                     libstash_res.3s libstash_ring.3s libstash_rwl.3s
-                     libstash_sem.3s libstash_thd.3s libstash_tsd.3s
-                     libstash_treen.3s;
+                     libstash_res.3s libstash_rwl.3s libstash_sem.3s
+                     libstash_thd.3s libstash_tsd.3s libstash_treen.3s;
   manpages_3 = [fromto % [srcdir]/lib/c/libstash/man/man3/% [manpages_3]];
 
   LIBSTASH_MANPAGES_3 = [manpages_3];

@@ -18,17 +18,16 @@ typedef struct cw_mem_s cw_mem_t;
 
 /*
  * Internal container used by ch, one per item.  chi's are internally linked to
- * multiple qr's in order to implement various LIFO/FIFO orderings.
+ * multiple ql's in order to implement various LIFO/FIFO orderings.
  */
 struct cw_chi_s {
-	cw_mem_t	*mem;
 	cw_bool_t	is_malloced;	/* If space for a chi wasn't passed into
 					 * ch_insert(), this is TRUE. */
 	const void	*key;		/* Key. */
         const void	*data;		/* Data. */
-	qr_elm(cw_chi_t) ch_link;	/* Link into the ch-wide ring of
+	ql_elm(cw_chi_t) ch_link;	/* Link into the ch-wide list of
 					 * chi's. */
-	qr_elm(cw_chi_t) slot_link;	/* Link into the slot's ring of
+	ql_elm(cw_chi_t) slot_link;	/* Link into the slot's list of
 					 * chi's. */
 	cw_uint32_t	slot;		/* Slot number. */
 };
@@ -43,9 +42,10 @@ struct cw_ch_s {
 	cw_uint32_t	num_removes;
 #endif
 
+	cw_mem_t	*mem;
 	cw_bool_t	is_malloced;	/* TRUE if we malloced this structure
 					 * internally. */
-	cw_chi_t	*chi_qr;	/* Pointer into the qr of chi's. */
+	ql_head(cw_chi_t) chi_ql;	/* Head of the list of chi's. */
 	cw_uint32_t	count;		/* Total number of items. */
 	cw_uint32_t	table_size;	/* Number of table slots. */
 
@@ -57,7 +57,7 @@ struct cw_ch_s {
 	 * Must be last field, since it is used for array indexing of chi's
 	 * beyond the end of the structure.
 	 */
-	cw_chi_t	*table[1];
+	ql_head(cw_chi_t) table[1];
 };
 
 /* Typedefs to allow easy function pointer passing. */

@@ -218,10 +218,9 @@ dch_p_grow(cw_dch_t *a_dch)
 			goto RETURN;
 		}
 		for (i = 0; i < count; i++) {
-			chi = a_dch->ch->chi_qr;
-			a_dch->ch->chi_qr = qr_next(a_dch->ch->chi_qr, ch_link);
-			qr_remove(chi, ch_link);
-			qr_remove(chi, slot_link);
+			chi = ql_first(&a_dch->ch->chi_ql);
+			ql_remove(&a_dch->ch->chi_ql, chi, ch_link);
+			ql_elm_new(chi, slot_link);
 			dch_p_insert(t_ch, chi);
 		}
 
@@ -236,7 +235,7 @@ dch_p_grow(cw_dch_t *a_dch)
 		 * Set to NULL to keep ch_delete() from deleting all the
 		 * items.
 		 */
-		a_dch->ch->chi_qr = NULL;
+		ql_first(&a_dch->ch->chi_ql) = NULL;
 		ch_delete(a_dch->ch);
 		a_dch->ch = t_ch;
 	}
@@ -269,10 +268,9 @@ dch_p_shrink(cw_dch_t *a_dch)
 			goto RETURN;
 		}
 		for (i = 0; i < count; i++) {
-			chi = a_dch->ch->chi_qr;
-			a_dch->ch->chi_qr = qr_next(a_dch->ch->chi_qr, ch_link);
-			qr_remove(chi, ch_link);
-			qr_remove(chi, slot_link);
+			chi = ql_first(&a_dch->ch->chi_ql);
+			ql_remove(&a_dch->ch->chi_ql, chi, ch_link);
+			ql_elm_new(chi, slot_link);
 			dch_p_insert(t_ch, chi);
 		}
 
@@ -287,7 +285,7 @@ dch_p_shrink(cw_dch_t *a_dch)
 		 * Set to NULL to keep ch_delete() from deleting all the
 		 * items.
 		 */
-		a_dch->ch->chi_qr = NULL;
+		ql_first(&a_dch->ch->chi_ql) = NULL;
 		ch_delete(a_dch->ch);
 		a_dch->ch = t_ch;
 	}
@@ -309,25 +307,15 @@ dch_p_insert(cw_ch_t *a_ch, cw_chi_t * a_chi)
 	slot = a_ch->hash(a_chi->key) % a_ch->table_size;
 	a_chi->slot = slot;
 
-	/* Hook into ch-wide ring. */
-	if (a_ch->chi_qr != NULL)
-		qr_meld(a_ch->chi_qr, a_chi, ch_link);
-	else
-		a_ch->chi_qr = a_chi;
+	/* Hook into ch-wide list. */
+	ql_tail_insert(&a_ch->chi_ql, a_chi, ch_link);
 
-	if (a_ch->table[slot] != NULL) {
-		/*
-		 * Other chi's in this slot already.  Put this one at the
-		 * head, in order to implement LIFO ordering for multiple
-		 * chi's with the same key.
-		 */
-		qr_meld(a_chi, a_ch->table[slot], slot_link);
-
+	/* Hook into the slot list. */
 #ifdef _LIBSTASH_DBG
+	if (ql_first(&a_ch->table[slot]) != NULL)
 		a_ch->num_collisions++;
 #endif
-	}
-	a_ch->table[slot] = a_chi;
+	ql_head_insert(&a_ch->table[slot], a_chi, slot_link);
 
 	a_ch->count++;
 #ifdef _LIBSTASH_DBG

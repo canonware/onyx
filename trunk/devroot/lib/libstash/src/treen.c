@@ -36,8 +36,7 @@ treen_new(cw_treen_t *a_treen, cw_mem_t *a_mem, cw_opaque_dealloc_t
 		retval->dealloc_arg = a_mem;
 	}
 
-	ring_new(&retval->siblings);
-	ring_set_data(&retval->siblings, (void *)retval);
+	qr_new(retval, sib_link);
 
 #ifdef _LIBSTASH_DBG
 	retval->magic_a = _CW_TREEN_MAGIC;
@@ -105,7 +104,7 @@ treen_link(cw_treen_t *a_treen, cw_treen_t *a_parent)
 		}
 		a_treen->parent = NULL;
 
-		ring_cut(&a_treen->siblings);
+		qr_remove(a_treen, sib_link);
 	}
 	if (a_parent != NULL) {
 		_cw_assert(_CW_TREEN_MAGIC == a_parent->magic_a);
@@ -120,7 +119,7 @@ treen_link(cw_treen_t *a_treen, cw_treen_t *a_parent)
 		} else {
 			cw_treen_t	*sibling = treen_get_child(a_parent);
 
-			ring_meld(&sibling->siblings, &a_treen->siblings);
+			qr_meld(sibling, a_treen, sib_link);
 		}
 	}
 }
@@ -151,15 +150,13 @@ cw_treen_t *
 treen_get_sibling(cw_treen_t *a_treen)
 {
 	cw_treen_t	*retval;
-	cw_ring_t	*t_ring;
 
 	_cw_check_ptr(a_treen);
 	_cw_assert(a_treen->magic_a == _CW_TREEN_MAGIC);
 	_cw_assert(a_treen->size_of == sizeof(cw_treen_t));
 	_cw_assert(a_treen->magic_b == _CW_TREEN_MAGIC);
 
-	t_ring = ring_next(&a_treen->siblings);
-	retval = (cw_treen_t *)ring_get_data(t_ring);
+	retval = qr_next(a_treen, sib_link);
 
 	return retval;
 }

@@ -1,3 +1,16 @@
+2000-07-16  Jason Evans  <jasone@canonware.com>
+
+	* src/ring.c: Remove.  The qs, qr, and ql macros obsolete the ring
+	class.
+
+	* src/pezz.c: Convert spares ring to a qs.  Merge the memory
+	blocks and ring blocks.
+
+	* : Convert ch and dch from qr to ql.
+
+	* : Re-implement and test the qs (stack), qr (ring), and ql (list)
+	macros.
+
 2000-07-15  Jason Evans  <jasone@canonware.com>
 
 	* src/mem.c (mem_delete): Only free the mem object if it was malloc()ed.

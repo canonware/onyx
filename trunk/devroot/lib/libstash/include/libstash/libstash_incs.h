@@ -33,7 +33,6 @@
 #include "qs.h"
 #include "qr.h"
 #include "ql.h"
-#include "ring.h"
 #include "mtx.h"
 #include "cnd.h"
 #include "sem.h"

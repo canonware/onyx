@@ -1,8 +1,0 @@
-Test begin
-ring_a contents (1): a b c d e f g h i j 
-ring_a contents (2): a b 
-ring_a contents (3): a b 
-ring_b contents (4): c d e f g h i j 
-ring_a contents (5): a 
-ring_a contents (6): a 
-Test end

@@ -11,6 +11,7 @@
 
 /* Pseudo-opaque type. */
 typedef struct cw_pezz_s cw_pezz_t;
+typedef struct cw_pezzi_s cw_pezzi_t;
 
 struct cw_pezz_s {
 	cw_mem_t	*mem;
@@ -37,26 +38,17 @@ struct cw_pezz_s {
 	void		**mem_blocks;
 
 	/*
-	 * Pointer to an array of base addresses for the memory blocks that
-	 * are used for ring structures.
-	 */
-	cw_ring_t	**ring_blocks;
-
-	/*
 	 * Number of blocks allocated (number of elements in the
 	 * mem_blocks[] and ring_blocks[] arrays.
 	 */
 	cw_uint32_t	num_blocks;
 
-	/* Ring seam for spare (unallocated) buffers. */
-	cw_ring_t	*spare_buffers;
+	/* Stack of spare (unallocated) buffers. */
+	qs_head(cw_pezzi_t) spares;
+};
 
-	/*
-	 * Ring seam for spare rings.  This ring has no associated data, and
-	 * is merely a cache of ring structures to be used for insertion
-	 * into the spare_buffers ring.
-	 */
-	cw_ring_t	*spare_rings;
+struct cw_pezzi_s {
+	qs_elm(cw_pezzi_t)	link;
 };
 
 #ifdef _LIBSTASH_DBG
