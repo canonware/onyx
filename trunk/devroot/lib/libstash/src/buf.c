@@ -127,37 +127,8 @@ buf_catenate_buf(cw_buf_t * a_a, cw_buf_t * a_b, cw_bool_t a_try_bufel_merge)
   }
 #endif
 
-  /* Make sure a_a's array is big enough.  Even if we're trying to merge
-   * bufel's, make the array big enough that it doesn't matter how successful
-   * the bufel merging is. */
-  if (a_a->array_num_valid + a_b->array_num_valid > a_a->array_size)
-  {
-    /* Double i until it is big enough to accomodate our needs. */
-    for (i = 2 * a_a->array_size;
-	 i < a_a->array_num_valid + a_b->array_num_valid;
-	 i *= 2);
-
-    a_a->array
-      = (cw_bufel_array_el_t *) _cw_realloc(a_a,
-					    i * sizeof(cw_bufel_array_el_t *));
+  buf_p_fit_array(a_a, a_a->array_num_valid + a_b->array_num_valid);
     
-    if ((a_a->array_start >= a_a->array_end) && (a_a->array_num_valid > 0))
-    {
-      /* The array was wrapped, so we need to move the wrapped part to sit
-       * directly after where the end of the array used to be.  Since we at
-       * least doubled the size of the array, there is no worry of writing past
-       * the end of the array. */
-      memcpy(&a_a->array[a_a->array_size],
-	     a_a->array,
-	     a_a->array_end * sizeof(cw_bufel_array_el_t *));
-      a_a->array_end += a_a->array_size;
-    }
-
-    /* This must happen last, since the old value is used for some calculations
-     * above. */
-    a_a->array_size = i;
-  }
-
   if (TRUE == a_try_bufel_merge)
   {
     /* This looks ugly because we have to be careful to not decrement past the
@@ -240,29 +211,7 @@ buf_prepend_bufel(cw_buf_t * a_buf, cw_bufel_t * a_bufel)
   }
 #endif
 
-  /* Make sure there is space in a_buf's array. */
-  if (a_buf->array_size <= a_buf->array_num_valid)
-  {
-    a_buf->array
-      = (cw_bufel_array_el_t *) _cw_realloc(a_buf,
-					    2 * sizeof(cw_bufel_array_el_t *));
-    
-    if (a_buf->array_start >= a_buf->array_end)
-    {
-      /* The array was wrapped, so we need to move the wrapped part to sit
-       * directly after where the end of the array used to be.  Since we doubled
-       * the size of the array, there is no worry of writing past the end of the
-       * array. */
-      memcpy(&a_buf->array[a_buf->array_size],
-	     a_buf->array,
-	     a_buf->array_end * sizeof(cw_bufel_array_el_t *));
-      a_buf->array_end += a_buf->array_size;
-    }
-
-    /* This must happen last, since the old value is used for some calculations
-     * above. */
-    a_buf->array_size *= 2;
-  }
+  buf_p_fit_array(a_buf, a_buf->array_num_valid + 1);
   
   /* Now prepend the bufel. */
   a_buf->array_start = (((a_buf->array_start + a_buf->array_size) - 1)
@@ -305,29 +254,7 @@ buf_append_bufel(cw_buf_t * a_buf, cw_bufel_t * a_bufel)
   }
 #endif
   
-  /* Make sure there is space in a_buf's array. */
-  if (a_buf->array_size <= a_buf->array_num_valid)
-  {
-    a_buf->array
-      = (cw_bufel_array_el_t *) _cw_realloc(a_buf,
-					    2 * sizeof(cw_bufel_array_el_t *));
-    
-    if (a_buf->array_start >= a_buf->array_end)
-    {
-      /* The array was wrapped, so we need to move the wrapped part to sit
-       * directly after where the end of the array used to be.  Since we doubled
-       * the size of the array, there is no worry of writing past the end of the
-       * array. */
-      memcpy(&a_buf->array[a_buf->array_size],
-	     a_buf->array,
-	     a_buf->array_end * sizeof(cw_bufel_array_el_t *));
-      a_buf->array_end += a_buf->array_size;
-    }
-
-    /* This must happen last, since the old value is used for some calculations
-     * above. */
-    a_buf->array_size *= 2;
-  }
+  buf_p_fit_array(a_buf, a_buf->array_num_valid + 1);
   
   /* Now append the bufel. */
   memcpy(&a_buf->array[a_buf->array_end].bufel,
@@ -392,7 +319,9 @@ buf_release_head_data(cw_buf_t * a_buf, cw_uint32_t a_amount)
       else if (bufel_valid_data > a_amount)
       {
 	/* This will finish things up. */
-	a_buf->array[array_index].bufel.beg_offset += a_amount;
+	bufel_set_beg_offset(&a_buf->array[array_index].bufel,
+			     (bufel_get_beg_offset(
+			       &a_buf->array[array_index].bufel) + a_amount));
 	a_amount = 0;
       }
     }
@@ -455,7 +384,9 @@ buf_release_tail_data(cw_buf_t * a_buf, cw_uint32_t a_amount)
       else if (bufel_valid_data > a_amount)
       {
 	/* This will finish things up. */
-	a_buf->array[array_index].bufel.end_offset -= a_amount;
+	bufel_set_end_offset(&a_buf->array[array_index].bufel,
+			     (bufel_get_end_offset(
+			       &a_buf->array[array_index].bufel) - a_amount));
 	a_buf->array[array_index].cumulative_size -= a_amount;
 	a_amount = 0;
       }
@@ -495,12 +426,6 @@ buf_get_uint8(cw_buf_t * a_buf, cw_uint32_t a_offset)
   }
 #endif
 
-  if ((FALSE == a_buf->is_cumulative_valid)
-      && (a_offset >= a_buf->array[a_buf->array_start].bufel.bufc->buf_size))
-  {
-    buf_p_rebuild_cumulative_index(a_buf);
-  }
-
   buf_p_get_data_position(a_buf, a_offset, &array_element, &bufel_offset);
 
   retval = a_buf->array[array_element].bufel.bufc->buf[bufel_offset];
@@ -529,12 +454,6 @@ buf_set_uint8(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint8_t a_val)
   }
 #endif
 
-  if ((FALSE == a_buf->is_cumulative_valid)
-      && (a_offset >= a_buf->array[a_buf->array_start].bufel.bufc->buf_size))
-  {
-    buf_p_rebuild_cumulative_index(a_buf);
-  }
-
   buf_p_get_data_position(a_buf, a_offset, &array_element, &bufel_offset);
 
   a_buf->array[array_element].bufel.bufc->buf[bufel_offset] = a_val;
@@ -562,13 +481,6 @@ buf_get_uint32(cw_buf_t * a_buf, cw_uint32_t a_offset)
   }
 #endif
 
-  if ((FALSE == a_buf->is_cumulative_valid)
-      && (a_offset + 3
-	  >= a_buf->array[a_buf->array_start].bufel.bufc->buf_size))
-  {
-    buf_p_rebuild_cumulative_index(a_buf);
-  }
-
   buf_p_get_data_position(a_buf, a_offset, &array_element, &bufel_offset);
 
   if (bufel_offset + 3
@@ -577,7 +489,7 @@ buf_get_uint32(cw_buf_t * a_buf, cw_uint32_t a_offset)
   {
     cw_uint32_t a, b, bit_alignment;
 
-    /* Yay, all of the data is in one bufel. */
+    /* All of the data is in one bufel. */
 
     /* XXX Assumes 32 bit addresses. */
     a = *(char *) ((cw_uint32_t)
@@ -598,8 +510,7 @@ buf_get_uint32(cw_buf_t * a_buf, cw_uint32_t a_offset)
   }
   else
   {
-    /* The data is spread across two to four buffers.  Go into paranoid schizo
-     * mode and make this work, no matter how ugly it gets. */
+    /* The data is spread across two to four buffers. */
 
     retval = (a_buf->array[array_element].bufel.bufc->buf[bufel_offset]
 	      << 24);
@@ -641,13 +552,6 @@ buf_set_uint32(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint32_t a_val)
     mtx_lock(&a_buf->lock);
   }
 #endif
-
-  if ((FALSE == a_buf->is_cumulative_valid)
-      && (a_offset + 3
-	  >= a_buf->array[a_buf->array_start].bufel.bufc->buf_size))
-  {
-    buf_p_rebuild_cumulative_index(a_buf);
-  }
 
   buf_p_get_data_position(a_buf, a_offset, &array_element, &bufel_offset);
 
@@ -713,13 +617,6 @@ buf_get_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset)
   }
 #endif
 
-  if ((FALSE == a_buf->is_cumulative_valid)
-      && (a_offset + 7
-	  >= a_buf->array[a_buf->array_start].bufel.bufc->buf_size))
-  {
-    buf_p_rebuild_cumulative_index(a_buf);
-  }
-
   buf_p_get_data_position(a_buf, a_offset, &array_element, &bufel_offset);
 
   if (bufel_offset + 3
@@ -729,7 +626,7 @@ buf_get_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset)
     cw_uint64_t a, b;
     cw_uint32_t bit_alignment;
 
-    /* Yay, all of the data is in one bufel. */
+    /* All of the data is in one bufel. */
 
     /* XXX Assumes 32 bit addresses. */
     a = *(char *)
@@ -816,20 +713,13 @@ buf_set_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint64_t a_val)
   }
 #endif
 
-  if ((FALSE == a_buf->is_cumulative_valid)
-      && (a_offset + 7
-	  >= a_buf->array[a_buf->array_start].bufel.bufc->buf_size))
-  {
-    buf_p_rebuild_cumulative_index(a_buf);
-  }
-
   buf_p_get_data_position(a_buf, a_offset, &array_element, &bufel_offset);
 
   if (bufel_offset + 7
       < 
       a_buf->array[array_element].bufel.end_offset)
   {
-    /* Yay, all of the data is in one bufel. */
+    /* All of the data is in one bufel. */
     a_buf->array[array_element].bufel.bufc->buf[bufel_offset]
       = a_val >> 56;
     
@@ -920,21 +810,79 @@ buf_p_get_data_position(cw_buf_t * a_buf,
 			cw_uint32_t * a_array_element,
 			cw_uint32_t * a_bufel_offset)
 {
-  cw_uint32_t i;
-  
   /* First look to see if what we're looking for is in the first bufel. */
   if (a_offset
-      < bufel_get_valid_data_size(a_buf->array[a_buf->array_start].bufel))
+      < bufel_get_valid_data_size(&a_buf->array[a_buf->array_start].bufel))
   {
     *a_array_element = a_buf->array_start;
     *a_bufel_offset = a_offset;
   }
   else
   {
-    _cw_assert(TRUE == a_buf->is_cumulative_valid);
-
-    /* XXX */
+    cw_uint32_t i, pos;
     
+    if (FALSE == a_buf->is_cumulative_valid)
+    {
+      buf_p_rebuild_cumulative_index(a_buf);
+    }
+
+    /* Do a binary search through the cumulative index to find the bufel we
+     * want. */
+    for (i = 2,
+	   pos = ((a_buf->array_start + (a_buf->array_num_valid / i))
+		  % a_buf->array_size);
+	 !((a_buf->array[pos].cumulative_size > a_offset)
+	   &&
+	   (a_buf->array[pos - 1].cumulative_size < a_offset));
+	 i *= 2,
+	   pos = ((a_buf->array[pos].cumulative_size > a_offset)
+		  ? ((pos + a_buf->array_size
+		      - (a_buf->array_start + (a_buf->array_num_valid / i)))
+		     % a_buf->array_size)
+		  : ((pos + a_buf->array_start + (a_buf->array_num_valid / i))
+		     % a_buf->array_size))
+	 );
+    
+    *a_array_element = pos;
+    *a_bufel_offset = a_offset - a_buf->array[pos - 1].cumulative_size;
+  }
+}
+
+static void
+buf_p_fit_array(cw_buf_t * a_buf, cw_uint32_t a_min_array_size)
+{
+  cw_uint32_t i;
+
+  /* Make sure a_buf's array is big enough.  Even if we're trying to merge
+   * bufel's, make the array big enough that it doesn't matter how successful
+   * the bufel merging is. */
+  if (a_min_array_size > a_buf->array_size)
+  {
+    /* Double i until it is big enough to accomodate our needs. */
+    for (i = 2 * a_buf->array_size;
+	 i < a_min_array_size;
+	 i *= 2);
+
+    a_buf->array
+      = (cw_bufel_array_el_t *) _cw_realloc(a_buf,
+					    i * sizeof(cw_bufel_array_el_t *));
+    
+    if ((a_buf->array_start >= a_buf->array_end)
+	&& (a_buf->array_num_valid > 0))
+    {
+      /* The array was wrapped, so we need to move the wrapped part to sit
+       * directly after where the end of the array used to be.  Since we at
+       * least doubled the size of the array, there is no worry of writing past
+       * the end of the array. */
+      memcpy(&a_buf->array[a_buf->array_size],
+	     a_buf->array,
+	     a_buf->array_end * sizeof(cw_bufel_array_el_t *));
+      a_buf->array_end += a_buf->array_size;
+    }
+
+    /* This must happen last, since the old value is used for some calculations
+     * above. */
+    a_buf->array_size = i;
   }
 }
 
