@@ -105,7 +105,7 @@ ONYX_TEX_SRCS += [addprefix @srcroot@/lib/libonyx/doc/latex/
                  @objroot@/lib/libonyx/doc/latex/manual.tex;
 
 /* Libraries. */
-LIBONYX_REV = 10;
+LIBONYX_REV = 11;
 
 LIBBONYX_A = @objroot@/lib/libonyx/lib/libbonyx.a;
 LIBONYX_A = @objroot@/lib/libonyx/lib/libonyx.a;
@@ -124,7 +124,7 @@ LIBONYX_L = ;
 #endif
 LIBONYX_S = @objroot@/lib/libonyx/lib/[LIBONYX_SNAME];
 
-LDFLAGS = [LDFLAGS] -L@objroot@/lib/libonyx/lib;
+LDFLAGS = -L@objroot@/lib/libonyx/lib [LDFLAGS];
 
 /*
  * User cook'ables.
@@ -241,7 +241,7 @@ libonyx_libs_install_s : [LIBONYX_S] libonyx_libs_install_common
   [TCC] -undefined suppress -flat_namespace -dynamiclib -bind_at_load
         -compatibility_version [LIBONYX_REV]
         -current_version [LIBONYX_REV]
-        -install_name [LIBDIR]/libonyx.[LIBONYX_REV].dylib
+        -install_name @LIBDIR@/libonyx.[LIBONYX_REV].dylib
         -o [LIBONYX_S]
         [fromto @srcroot@/%0%.c @objroot@/%0%.o_s [LIBONYX_COMMON_SRCS]]
         [fromto @objroot@/%0%.c @objroot@/%0%.o_s [LIBONYX_ONLY_SRCS]];
