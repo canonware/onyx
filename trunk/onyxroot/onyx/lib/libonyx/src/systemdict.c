@@ -151,6 +151,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(hooktag),
 	ENTRY(if),
 	ENTRY(ifelse),
+	ENTRY(iobuf),
 	ENTRY(istack),
 #ifdef _CW_THREADS
 	ENTRY(join),
@@ -231,6 +232,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(seteuid),
 	ENTRY(setgid),
 #endif
+	ENTRY(setiobuf),
 #ifdef _CW_THREADS
 	ENTRY(setlocking),
 #endif
@@ -2758,6 +2760,20 @@ systemdict_index(cw_nxo_t *a_thread)
 #endif
 
 void
+systemdict_iobuf(cw_nxo_t *a_thread)
+{
+	cw_nxo_t	*ostack, *nxo;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	NXO_STACK_GET(nxo, ostack, a_thread);
+	if (nxo_type_get(nxo) != NXOT_FILE) {
+		nxo_thread_nerror(a_thread, NXN_typecheck);
+		return;
+	}
+	nxo_integer_new(nxo, nxo_file_buffer_size_get(nxo));
+}
+
+void
 systemdict_istack(cw_nxo_t *a_thread)
 {
 	cw_nxo_t	*ostack, *istack, *stack;
@@ -4350,6 +4366,23 @@ systemdict_setgid(cw_nxo_t *a_thread)
 	nxo_boolean_new(nxo, error == 0 ? FALSE : TRUE);
 }
 #endif
+
+void
+systemdict_setiobuf(cw_nxo_t *a_thread)
+{
+	cw_nxo_t	*ostack, *file, *iobuf;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	NXO_STACK_GET(iobuf, ostack, a_thread);
+	NXO_STACK_DOWN_GET(file, ostack, a_thread, iobuf);
+	if (nxo_type_get(file) != NXOT_FILE || nxo_type_get(iobuf) !=
+	    NXOT_INTEGER) {
+		nxo_thread_nerror(a_thread, NXN_typecheck);
+		return;
+	}
+	nxo_file_buffer_size_set(file, nxo_integer_get(iobuf));
+	nxo_stack_npop(ostack, 2);
+}
 
 #ifdef _CW_THREADS
 void

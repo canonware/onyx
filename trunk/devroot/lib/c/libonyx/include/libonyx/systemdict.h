@@ -96,6 +96,7 @@ void	systemdict_hooktag(cw_nxo_t *a_thread);
 void	systemdict_if(cw_nxo_t *a_thread);
 void	systemdict_ifelse(cw_nxo_t *a_thread);
 void	systemdict_index(cw_nxo_t *a_thread);
+void	systemdict_iobuf(cw_nxo_t *a_thread);
 void	systemdict_istack(cw_nxo_t *a_thread);
 #ifdef _CW_THREADS
 void	systemdict_join(cw_nxo_t *a_thread);
@@ -180,6 +181,7 @@ void	systemdict_setenv(cw_nxo_t *a_thread);
 void	systemdict_seteuid(cw_nxo_t *a_thread);
 void	systemdict_setgid(cw_nxo_t *a_thread);
 #endif
+void	systemdict_setiobuf(cw_nxo_t *a_thread);
 #ifdef _CW_THREADS
 void	systemdict_setlocking(cw_nxo_t *a_thread);
 #endif

@@ -148,6 +148,7 @@ typedef enum {
 	NXN_invalidaccess,
 	NXN_invalidexit,
 	NXN_invalidfileaccess,
+	NXN_iobuf,
 	NXN_ioerror,
 	NXN_istack,
 #ifdef _CW_THREADS
@@ -265,6 +266,7 @@ typedef enum {
 	NXN_seteuid,
 	NXN_setgid,
 #endif
+	NXN_setiobuf,
 #ifdef _CW_THREADS
 	NXN_setlocking,
 	NXN_setperiod,

@@ -1,3 +1,8 @@
+2001-10-04  Jason Evans  <jasone@canonware.com>
+
+	* src/systemdict.c (systemdict_iobuf): Add.
+	(systemdict_setiobuf): Add.
+
 2001-09-21  Jason Evans  <jasone@canonware.com>
 
 	* src/nxa.c (nxa_p_gc_entry): Only do periodic collection if there

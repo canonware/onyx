@@ -3241,6 +3241,12 @@ Read a line from file. \\
 file & {\bf \htmlref{bytesavailable}{systemdict:bytesavailable}} & count &
 Get number of buffered readable bytes. \\
 \hline
+file & {\bf \htmlref{iobuf}{systemdict:iobuf}} & count & Get size of I/O
+buffer. \\
+\hline
+file count & {\bf \htmlref{setiobuf}{systemdict:setiobuf}} & -- & Set size of
+I/O buffer. \\
+\hline
 file integer/string & {\bf \htmlref{write}{systemdict:write}} & -- & Write
 to file. \\
 \hline
@@ -5803,6 +5809,37 @@ onyx:0> 3 2 1 0 2 index pstack
 onyx:5>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:iobuf}
+\index{iobuf@\onyxop{}{iobuf}{}}
+\item[{\onyxop{file}{iobuf}{count}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[file: ]
+			A file object.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[count: ]
+			The size in bytes of the I/O buffer associated with
+			\oparg{file}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Get the size of the I/O buffer associated with \oparg{file}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> stdout iobuf 1 sprint
+512
+onyx:0> stderr iobuf 1 sprint
+0
+onyx:0>
+		\end{verbatim}
+	\end{description}
 \label{systemdict:istack}
 \index{istack@\onyxop{}{istack}{}}
 \item[{\onyxop{--}{istack}{stack}}: ]
@@ -7646,6 +7683,36 @@ onyx:0> 1001 setgid 1 sprint
 false
 onyx:0> 0 setgid 1 sprint
 true
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:setiobuf}
+\index{setiobuf@\onyxop{}{setiobuf}{}}
+\item[{\onyxop{file count}{setiobuf}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[file: ]
+			A file object.
+		\item[count: ]
+			The size in bytes to set the I/O buffer associated with
+			\oparg{file} to.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Set the size of the I/O buffer associated with \oparg{file}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> stdout iobuf 1 sprint
+512
+onyx:0> stdout 0 setiobuf
+onyx:0> stdout iobuf 1 sprint
+0
 onyx:0>
 		\end{verbatim}
 	\end{description}

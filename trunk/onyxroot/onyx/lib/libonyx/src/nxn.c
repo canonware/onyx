@@ -150,6 +150,7 @@ const cw_uint8_t *cw_g_nx_names[] = {
 	"invalidaccess",
 	"invalidexit",
 	"invalidfileaccess",
+	"iobuf",
 	"ioerror",
 	"istack",
 #ifdef _CW_THREADS
@@ -267,6 +268,7 @@ const cw_uint8_t *cw_g_nx_names[] = {
 	"seteuid",
 	"setgid",
 #endif
+	"setiobuf",
 #ifdef _CW_THREADS
 	"setlocking",
 	"setperiod",
