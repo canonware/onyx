@@ -1,3 +1,8 @@
+2001-07-26  Jason Evans  <jasone@canonware.com>
+
+	* src/nxa.c (nxa_p_mark): Ignored unregistered objects, rather
+	than asserting that all objects are registered.
+
 2001-07-23  Jason Evans  <jasone@canonware.com>
 
 	* src/systemdict.c: Add the following operators: pid, ppid, uid,

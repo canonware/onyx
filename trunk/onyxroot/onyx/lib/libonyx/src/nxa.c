@@ -479,12 +479,11 @@ nxa_p_mark(cw_nxa_t *a_nxa, cw_uint32_t *r_nreachable)
 		_cw_assert(nxoe_l_color_get(gray) != a_nxa->white);
 		for (nxoe = nxoe_l_ref_iter(gray, TRUE); nxoe != NULL;
 		    nxoe = nxoe_l_ref_iter(gray, FALSE)) {
-			/* Unregistered nxoe's shouldn't be in the ring. */
-			_cw_assert(nxoe_l_registered_get(nxoe));
 			/*
-			 * If object is white, color it.
+			 * If object is white and registered, color it.
 			 */
-			if (nxoe_l_color_get(nxoe) == a_nxa->white) {
+			if (nxoe_l_color_get(nxoe) == a_nxa->white &&
+			    nxoe_l_registered_get(nxoe)) {
 				nxoe_l_color_set(nxoe, !a_nxa->white);
 				nreachable++;
 				/*
@@ -593,7 +592,6 @@ nxa_p_collect(cw_nxa_t *a_nxa)
 	/* Drain the pools. */
 	pool_drain(&a_nxa->chi_pool);
 	pool_drain(&a_nxa->dicto_pool);
-/*  	pool_drain(&a_nxa->stacko_pool); */
 
 	/* Record the sweep finish time and calculate sweep_us. */
 	gettimeofday(&t_tv, NULL);
