@@ -12,7 +12,7 @@
  * the slate text editor.  The code is broken up into the following classes:
  *
  * buf  : Main buffer class.
- * bufp : Buffer page.  Each bufb has limited expansion/contraction.
+ * bufp : Buffer page.  Each bufp is a fixed size.
  * mkr  : Marker.  Markers are used as handles for many buf operations.
  * ext  : Extent.  Extents denote buf regions, and are internally composed of
  *        two mkr's.
@@ -30,17 +30,8 @@
  * Another advantage to a paged buffer gap is that the cost of gap movement is
  * bounded by the (fixed) page size rather than by the size of the buffer.
  *
- * Unfortunately, the cost of inserting or removing a (randomly placed) page
- * increases linearly with the number of pages.  This is because it is necessary
- * to be able to quickly determine the validity of cached position and line
- * values associated with a page.  The only reasonable way to do this is to keep
- * track of which ranges (sets) of pages have valid caches, and the cheapest way
- * to determine membership in those sets is to number the pages and check if a
- * page's index number falls within a range that is known to have a valid
- * cache.
- *
- * So, there are two aspects in which the paged buffer gap algorithms scale
- * linearly for the common case:
+ * There are two aspects in which the paged buffer gap algorithms scale linearly
+ * for the common case:
  *
  * 1) M: the number of markers in a page.  This number is approximately
  *    proportional to page size for a buffer that contains markers that are
@@ -114,7 +105,7 @@
  * Each bufp keeps track of its bpos and line to speed up many operations.  buf
  * modifications can require the values stored in bufp's to be converted between
  * being relative to BOB/EOB.  At any given time, the ranges of bufp's with
- * caches relative to BOB versus EOD may look something like:
+ * caches relative to BOB versus EOB may look something like:
  *
  *    0           1           2           3           4           5
  * /------\    /------\    /------\    /------\    /------\    /------\
@@ -151,6 +142,14 @@
  *
  ******************************************************************************
  *
+ * In order to avoid excessive internal fragmentation, buffer pages are
+ * coalesced during data deletion, such that for every pair of consecutive
+ * pages, both are at least 25% full.  In addition, special care is taken during
+ * insertion to assure that this requirement is never violated when inserting
+ * new pages.
+ *
+ ******************************************************************************
+ *
  * Extents keep track of buffer ranges, and are typically used to associate
  * attributes (primarily for color syntax highlighting) with those ranges.  The
  * end points of an extent are denoted by markers, which are no different than
@@ -159,27 +158,27 @@
  * extents come into play, at which time the number of markers can quickly
  * become huge.
  *
- * An extent's end points are each open or closed:
+ * An extent's end points are each open or shut:
  *
  *   * Open : Insertion at the end point causes the text to go outside the
  *            extent.
  *
- *   * Closed : Insertion at the end point causes the text to go inside the
- *              extent.
+ *   * Shut : Insertion at the end point causes the text to go inside the
+ *            extent.
  *
- * This gives rise to four open/closed combinations:
+ * This gives rise to four open/shut combinations:
  *
- *   * Closed-closed (default)
+ *   * Shut-shut (default)
  *
- *   * Closed-open
+ *   * Shut-open
  *
- *   * Open-closed
+ *   * Open-shut
  *
  *   * Open-open (can't be zero-length)
  *
  * The behavior of the various cases is as expected, except that zero-length
  * open-open extents are not allowed to exist.  If buffer operations shrink an
- * open-open extent to zero length, it is converted to closed-open.
+ * open-open extent to zero length, it is converted to shut-open.
  *
  * An extent can be detachable, which means that if the extent shrinks to zero
  * length, it is detached from the buffer.
@@ -239,14 +238,6 @@
  * two orderings make it possible to quickly divide the buffer into fragments,
  * where each fragment is completely overlapped by a particular set of extents.
  * This is used when displaying the buffer.
- *
- ******************************************************************************
- *
- * In order to avoid excessive internal fragmentation, buffer pages are
- * coalesced during data deletion, such that for every pair of consecutive
- * pages, both are at least 25% full.  In addition, special care is taken during
- * insertion to assure that this requirement is never violated when inserting
- * new pages.
  *
  ******************************************************************************/
 

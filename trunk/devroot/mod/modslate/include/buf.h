@@ -77,7 +77,7 @@ struct cw_ext_s
     cw_mkr_t beg;
     cw_mkr_t end;
 
-    /* Extents are either open or closed at each end. */
+    /* Extents are either open or shut at each end. */
     cw_bool_t beg_open:1;
     cw_bool_t end_open:1;
 
