@@ -392,6 +392,9 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(origin),
     ENTRY(ostack),
     ENTRY(over),
+#ifdef CW_POSIX
+    ENTRY(path),
+#endif
 #ifdef CW_SOCKET
     ENTRY(peername),
 #endif
@@ -8177,6 +8180,97 @@ systemdict_over(cw_nxo_t *a_thread)
     nxo = nxo_stack_push(ostack);
     nxo_dup(nxo, under);
 }
+
+#ifdef CW_POSIX
+void
+systemdict_path(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *tstack, *envdict, *nxo, *tkey, *tval;
+    cw_uint8_t *prog, *path, *rem, *elm, *buf;
+    cw_uint32_t proglen, pathlen, buflen, len;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    tstack = nxo_thread_tstack_get(a_thread);
+
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    if (nxo_type_get(nxo) != NXOT_STRING)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    prog = nxo_string_get(nxo);
+    proglen = nxo_string_len_get(nxo);
+
+    envdict = libonyx_envdict_get();
+    tkey = nxo_stack_push(tstack);
+    tval = nxo_stack_push(tstack);
+
+    nxo_name_new(tkey, nxn_str(NXN_PATH), nxn_len(NXN_PATH), TRUE);
+    if (nxo_dict_lookup(envdict, tkey, tval))
+    {
+	nxo_stack_npop(tstack, 2);
+	nxo_thread_nerror(a_thread, NXN_undefined);
+	return;
+    }
+    if (nxo_type_get(tval) != NXOT_STRING)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+
+    /* Create a '\0'-terminated copy of the path. */
+    pathlen = nxo_string_len_get(tval) + 1;
+    path = (cw_uint8_t *) cw_malloc(pathlen);
+    memcpy(path, nxo_string_get(tval), pathlen - 1);
+    path[pathlen - 1] = '\0';
+
+    /* Create a buffer that is guaranteed to be large enough to contain the
+     * catenation of a path element and the program name being searched for.
+     *
+     *   "path/prog\0"
+     */
+    buflen =  pathlen + 1 + nxo_string_len_get(nxo);
+    buf = (cw_uint8_t *) cw_malloc(buflen);
+
+    /* Iterate through the path and search for the program. */
+    for (rem = path; (elm = strsep((char **) &rem, ":")) != NULL;)
+    {
+	/* Build up the path. */
+	if (rem != NULL)
+	{
+	    memcpy(buf, elm, rem - elm - 1);
+	    len = rem - elm - 1;
+	}
+	else
+	{
+	    len = strlen(elm);
+	    cw_assert(len < buflen);
+	    memcpy(buf, elm, len);
+	}
+	buf[len] = '/';
+	len++;
+	memcpy(&buf[len], prog, proglen);
+	len += proglen;
+	buf[len] = '\0';
+
+	/* See if an executable file exists for this path. */
+	if (eaccess(buf, X_OK) == 0)
+	{
+	    /* Found. */
+	    nxo_string_new(nxo, nxo_thread_currentlocking(a_thread), len);
+	    memcpy(nxo_string_get(nxo), buf, len);
+	    goto RETURN;
+	}
+    }
+    /* Not found. */
+    nxo_null_new(nxo);
+
+    RETURN:
+    cw_free(buf);
+    cw_free(path);
+    nxo_stack_npop(tstack, 2);
+}
+#endif
 
 #ifdef CW_SOCKET
 static void

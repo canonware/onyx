@@ -457,7 +457,10 @@ typedef enum
     NXN_ENTRY(origin),
     NXN_ENTRY(ostack),
     NXN_ENTRY(over),
-#ifdef CW_SOCKET
+#ifdef CW_POSIX
+    NXN_ENTRY(PATH),
+#endif
+#if (defined(CW_POSIX) || defined(CW_SOCKET))
     NXN_ENTRY(path),
 #endif
 #ifdef CW_POSIX

@@ -518,6 +518,12 @@ execution stack operators} \\
 	{Search for and evaluate a source file.}
 \hline
 \optableent
+	{prog}
+	{{\bf \htmlref{path}{systemdict:path}}}
+	{path/null}
+	{Search PATH for prog.}
+\hline
+\optableent
 	{args}
 	{{\bf \htmlref{exec}{systemdict:exec}}}
 	{--}
@@ -8279,6 +8285,41 @@ onyx:0> 0 1 2 over pstack
 1
 0
 onyx:4>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:path}
+\index{path@\onyxop{}{path}{}}
+\item[{\onyxop{prog}{path}{path/null}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[prog: ]
+			A string that specifies a program to search for in the
+			PATH environment variable.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[path: ]
+			A string that specifies the path to \oparg{prog}.
+		\item[null: ]
+			\oparg{prog} was not found.
+		\end{description}
+	\item[Error(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Search for \oparg{prog} in the PATH, and return a string that is
+		suitable for subsequent calls to operators such as
+		\htmlref{\onyxop{}{exec}{}}{systemdict:exec},
+		\htmlref{\onyxop{}{forkexec}{}}{systemdict:forkexec}, and
+		\htmlref{\onyxop{}{system}{}}{systemdict:system}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> `cat' path 1 sprint
+`/bin/cat'
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:peername}

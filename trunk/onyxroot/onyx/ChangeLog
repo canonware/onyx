@@ -1,5 +1,7 @@
 2003-10-22 : Jason Evans <jasone@canonware.com>
 
+	* Add the path operator.
+
 	* lib/libonyx/src/systemdict.c:systemdict_forkexec() : Add the optional
 	  redirects parameter, which makes it possible to redirect standard I/O,
 	  thus enabling program pipelines.

@@ -654,6 +654,11 @@ systemdict_ostack(cw_nxo_t *a_thread);
 void
 systemdict_over(cw_nxo_t *a_thread);
 
+#ifdef CW_POSIX
+void
+systemdict_path(cw_nxo_t *a_thread);
+#endif
+
 #ifdef CW_SOCKET
 void
 systemdict_peername(cw_nxo_t *a_thread);
