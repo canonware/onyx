@@ -2534,7 +2534,7 @@ systemdict_die(cw_nxo_t *a_thread)
 	return;
     }
 
-    exit(ecode);
+    _exit(ecode);
 }
 
 #ifdef CW_POSIX
@@ -3073,7 +3073,7 @@ systemdict_exec(cw_nxo_t *a_thread)
 	execve(path, argv, envp);
 	/* If we get here, then the execve() call failed.  Get an error back to
 	 * the parent. */
-	exit(1);
+	_exit(1);
     }
 }
 #endif
@@ -3578,7 +3578,7 @@ systemdict_forkexec(cw_nxo_t *a_thread)
 	    execve(path, argv, envp);
 	    /* If we get here, then the execve() call failed.  Get an error back
 	     * to the parent. */
-	    exit(1);
+	    _exit(1);
 	}
 	else
 	{
