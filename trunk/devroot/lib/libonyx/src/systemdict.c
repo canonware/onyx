@@ -6351,6 +6351,8 @@ systemdict_sdn(cw_nxo_t *a_thread)
     }
 
     nxo_stack_roll(stack, 3, -1);
+
+    nxo_stack_pop(ostack);
 }
 
 void
@@ -7118,7 +7120,7 @@ systemdict_sndup(cw_nxo_t *a_thread)
 void
 systemdict_snip(cw_nxo_t *a_thread)
 {
-    cw_nxo_t *ostack, *stack, *snxo;
+    cw_nxo_t *ostack, *stack, *snxo, *nxo;
 
     ostack = nxo_thread_ostack_get(a_thread);
     NXO_STACK_GET(stack, ostack, a_thread);
@@ -7129,8 +7131,10 @@ systemdict_snip(cw_nxo_t *a_thread)
     }
 
     NXO_STACK_NGET(snxo, stack, a_thread, 1);
+    nxo = nxo_stack_push(ostack);
+    nxo_dup(nxo, snxo);
     nxo_stack_remove(stack, snxo);
-    nxo_stack_pop(ostack);
+    nxo_stack_remove(ostack, stack);
 }
 
 void
@@ -7788,7 +7792,7 @@ systemdict_stuck(cw_nxo_t *a_thread)
 
     NXO_STACK_GET(stop, stack, a_thread);
     NXO_STACK_DOWN_GET(snxo, stack, a_thread, stop);
-    snxo = nxo_stack_under_push(ostack, snxo);
+    snxo = nxo_stack_under_push(stack, snxo);
     nxo_dup(snxo, stop);
 
     nxo_stack_pop(ostack);
@@ -7897,7 +7901,7 @@ systemdict_sunder(cw_nxo_t *a_thread)
     }
 
     NXO_STACK_NGET(sunder, stack, a_thread, 1);
-    snxo = nxo_stack_under_push(ostack, sunder);
+    snxo = nxo_stack_under_push(stack, sunder);
     nxo_dup(snxo, sunder);
 
     nxo_stack_pop(ostack);
@@ -7922,6 +7926,8 @@ systemdict_sup(cw_nxo_t *a_thread)
     }
 
     nxo_stack_roll(stack, 3, 1);
+
+    nxo_stack_pop(ostack);
 }
 
 /* ( */
