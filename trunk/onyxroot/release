@@ -75,7 +75,7 @@ $run =
     . " -f autogen.sh -f acinclude.m4"
     . " -f config.guess -f config.sub -f config.stamp.in -f configure.in"
     . " -f install-sh"
-    . " -f bin -f doc -f examples -f mod -f lib -f test"
+    . " -f bin -f doc -f lib -f mod -f test"
     ;
 if (defined($opt_verbose))
 {
