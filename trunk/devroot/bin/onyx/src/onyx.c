@@ -108,8 +108,8 @@ main(int argc, char **argv, char **envp)
 	 * because we need to know how much of argv to pass to nx_new(). */
 	while ((c = getopt(argc, argv,
 #ifdef _GNU_SOURCE
-			   /* Without this, glibc will permute unknown options to
-			    * the end of the argument list. */
+			   /* Without this, glibc will permute unknown options
+			    * to the end of the argument list. */
 			   "+"
 #endif
 			   "hVe:i:"
@@ -135,7 +135,8 @@ main(int argc, char **argv, char **envp)
 		{
 		    if (argc != 3)
 		    {
-			fprintf(stderr, "onyx: Incorrect number of arguments\n");
+			fprintf(stderr,
+				"onyx: Incorrect number of arguments\n");
 			usage();
 			retval = 1;
 			goto CLERROR;
@@ -149,7 +150,8 @@ main(int argc, char **argv, char **envp)
 		    opt_ninit++;
 		    if (opt_ninit == 1)
 		    {
-			opt_init = (cw_nxinit_t *)cw_malloc(sizeof(cw_nxinit_t));
+			opt_init
+			    = (cw_nxinit_t *)cw_malloc(sizeof(cw_nxinit_t));
 		    }
 		    else
 		    {
@@ -167,7 +169,8 @@ main(int argc, char **argv, char **envp)
 		    opt_ninit++;
 		    if (opt_ninit == 1)
 		    {
-			opt_init = (cw_nxinit_t *)cw_malloc(sizeof(cw_nxinit_t));
+			opt_init
+			    = (cw_nxinit_t *)cw_malloc(sizeof(cw_nxinit_t));
 		    }
 		    else
 		    {
@@ -216,8 +219,8 @@ main(int argc, char **argv, char **envp)
 	    goto CLERROR;
 	}
 
-	/* Run differently, depending on whether this is an interactive session, and
-	 * what flags were specified. */
+	/* Run differently, depending on whether this is an interactive session,
+	 * and what flags were specified. */
 	if (isatty(0) && optind == argc
 	    && opt_version == FALSE && opt_expression == NULL)
 	{
