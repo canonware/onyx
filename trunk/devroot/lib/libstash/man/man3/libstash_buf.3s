@@ -135,7 +135,7 @@ buf, bufc - Reference-counted extensible buffer.
 .br
 .B bufc_new
 .RI ( "cw_bufc_t * a_bufc" ", "
-.IR "void (*a_dealloc_func)(void * dealloc_arg, void * bufel)" ", "
+.IR "void (*a_dealloc_func)(void * dealloc_arg, void * bufc)" ", "
 .IR "void * a_dealloc_arg)" )
 
 .I void
@@ -830,7 +830,7 @@ Copy a_offset bytes from a_val to a_buf at offset a_offset.
 .br
 .B bufc_new
 .RI ( "cw_bufc_t * a_bufc" ", "
-.IR "void (*a_dealloc_func)(void * dealloc_arg, void * bufel)" ", "
+.IR "void (*a_dealloc_func)(void * dealloc_arg, void * bufc)" ", "
 .IR "void * a_dealloc_arg)" )
 .RS
 Input(s):

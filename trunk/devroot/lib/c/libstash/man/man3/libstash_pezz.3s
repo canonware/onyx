@@ -224,7 +224,7 @@ Allocate a memory buffer and return a pointer to it.
 .br
 .I void
 .br
-.B pezz_put
+.B pezz_put_e
 .RI ( "cw_pezz_t * a_pezz" ", " "void * a_buffer" ", " 
 .IR "const char * a_filename" ", " "cw_uint32_t a_line_num" )
 .br
