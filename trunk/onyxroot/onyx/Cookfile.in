@@ -53,11 +53,7 @@ CPPDEFS = -D_REENTRANT;
 
 CFLAGS = @CFLAGS@;
 A_CFLAGS = [CFLAGS];
-S_CFLAGS = [CFLAGS] -fPIC -DPIC
-#if [matches elf [abi]]
-           -dynamic
-#endif
-           ;
+S_CFLAGS = [CFLAGS] -fPIC -DPIC;
 
 LDFLAGS = @LDFLAGS@;
 EXTRALIBS = @LIBS@;
