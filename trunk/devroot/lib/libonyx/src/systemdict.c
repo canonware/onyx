@@ -1623,7 +1623,8 @@ systemdict_connect(cw_nxo_t *a_thread)
 	    cw_not_reached();
     }
 
-    error = connect(nxo_file_fd_get(sock), &sockaddr, sizeof(sockaddr));
+    error = connect(nxo_file_fd_get(sock), (struct sockaddr *) &sockaddr,
+		    sizeof(sockaddr));
     if (error == -1)
     {
 	switch (errno)
