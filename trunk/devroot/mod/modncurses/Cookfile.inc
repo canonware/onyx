@@ -7,7 +7,7 @@
  *
  * Version: <Version>
  *
- * cook file for ncurses onyx module.
+ * cook file for ncurses module.
  *
  ******************************************************************************/
 
