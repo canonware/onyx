@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 125 $
- * $Date: 1998-07-02 16:55:52 -0700 (Thu, 02 Jul 1998) $
+ * $Revision: 128 $
+ * $Date: 1998-07-02 18:31:46 -0700 (Thu, 02 Jul 1998) $
  *
  * <<< Description >>>
  *
@@ -396,7 +396,7 @@ log_print_uint64(cw_uint64_t a_val, cw_uint32_t a_base, char * a_buf)
     }
     
     /* Find the first non-zero digit. */
-    for (i = 0; i < 20; i++)
+    for (i = 0; i < 19; i++)
     {
       if (result[i] != '0')
       {
