@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 200 $
- * $Date: 1998-09-07 09:49:54 -0700 (Mon, 07 Sep 1998) $
+ * $Revision: 210 $
+ * $Date: 1998-09-07 23:58:15 -0700 (Mon, 07 Sep 1998) $
  *
  * <<< Description >>>
  *
@@ -604,8 +604,8 @@ oh_item_delete(cw_oh_t * a_oh_o,
 
     if (_cw_fmatch(_STASH_DBG_R_OH_SLOT))
     {
-      log_printf(g_log_o,
-		 "oh_item_delete(): Marking invalid in slot %d\n", slot);
+      log_eprintf(g_log_o, NULL, 0, "oh_item_delete",
+		  "Marking invalid in slot %d\n", slot);
     }
 
     oh_p_slot_shuffle(a_oh_o, slot);
@@ -661,7 +661,8 @@ oh_item_search(cw_oh_t * a_oh_o,
     *a_data = a_oh_o->items[slot]->data;
     if (_cw_fmatch(_STASH_DBG_R_OH_SLOT))
     {
-      log_printf(g_log_o, "oh_item_search(): Found in slot %d\n", slot);
+      log_eprintf(g_log_o, NULL, 0, "oh_item_search",
+		  "Found in slot %d\n", slot);
     }
   }
   else
@@ -848,15 +849,18 @@ oh_p_h1(cw_oh_t * a_oh_o, void * a_key)
   
   if (_cw_fmatch(_STASH_DBG_R_OH_SLOT))
   {
-    log_printf(g_log_o, "oh_p_h1(): :%s: --> %d\n", a_key, retval);
+    log_eprintf(g_log_o, NULL, 0, "oh_p_h1",
+		"\"%s\" --> %d\n", a_key, retval);
     if (a_oh_o->items[retval] != NULL)
     {
-      log_printf(g_log_o, "oh_p_h1(): (collision) items[%d]->key == :%s:\n",
-		 retval, a_oh_o->items[retval]->key);
+      log_eprintf(g_log_o, NULL, 0, "oh_p_h1",
+		  "(collision) items[%d]->key == :%s:\n",
+		  retval, a_oh_o->items[retval]->key);
     }
     else
     {
-      log_printf(g_log_o, "oh_p_h1(): Slot %d is empty.\n", retval);
+      log_eprintf(g_log_o, NULL, 0, "oh_p_h1",
+		  "Slot %d is empty.\n", retval);
     }
   }
   if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
@@ -1092,8 +1096,8 @@ oh_p_item_insert(cw_oh_t * a_oh_o,
       retval = FALSE;
       if (_cw_fmatch(_STASH_DBG_R_OH_SLOT))
       {
-	log_printf(g_log_o, "oh_p_item_insert(): Inserting in slot %d\n",
-		   slot);
+	log_eprintf(g_log_o, NULL, 0, "oh_p_item_insert",
+		    "Inserting in slot %d\n", slot);
       }
       break;
     }
