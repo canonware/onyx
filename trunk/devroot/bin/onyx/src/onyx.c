@@ -322,8 +322,12 @@ cl_read(struct nx_arg_s *a_arg)
 		 * Read data.
 		 */
 		_cw_assert(arg->buffer_count == 0);
-		if ((str = el_gets(el, &count)) == NULL)
-			break;
+		while ((str = el_gets(el, &count)) == NULL) {
+			/*
+			 * An interrupted system call (EINTR) caused an error in
+			 * el_gets().
+			 */
+		}
 		_cw_assert(count > 0);
 
 		/*
