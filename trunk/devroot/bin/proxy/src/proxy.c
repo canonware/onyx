@@ -884,7 +884,7 @@ handle_client_send(void * a_arg)
 
   out_put(conn->out, "New connection\n");
   
-  buf_new(&buf, FALSE);
+  buf_new(&buf);
 
   /* Finish initializing conn. */
   mtx_new(&conn->lock);
@@ -998,7 +998,7 @@ handle_client_recv(void * a_arg)
   connection_t * conn = (connection_t *) a_arg;
   char * str = NULL;
 
-  buf_new(&buf, FALSE);
+  buf_new(&buf);
   
   /* Continually read data from the socket, create a string, print to the log,
    * then send the data on. */

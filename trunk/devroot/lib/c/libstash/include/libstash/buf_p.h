@@ -20,6 +20,9 @@
 #  define _CW_BUFC_MAGIC 0xb00f0003
 #endif
 
+static cw_buf_t *
+buf_p_new(cw_buf_t * a_buf, cw_bool_t a_is_threadsafe);
+
 static void
 buf_p_rebuild_cumulative_index(cw_buf_t * a_buf);
 

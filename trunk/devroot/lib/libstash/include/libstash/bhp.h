@@ -114,8 +114,6 @@ bhpi_delete(cw_bhpi_t * a_bhpi);
  *
  * a_prio_comp : Pointer to a priority comparison function.
  *
- * a_is_thread_safe : FALSE if object is to be thread-safe, TRUE otherwise.
- *
  * <<< Output(s) >>>
  *
  * retval : Pointer to a bhp, or NULL.
@@ -123,17 +121,13 @@ bhpi_delete(cw_bhpi_t * a_bhpi);
  *
  * <<< Description >>>
  *
- * Constructor.
+ * Non-thread-safe and thread-safe constructors.
  *
  ****************************************************************************/
-#ifdef _CW_REENTRANT
-cw_bhp_t *
-bhp_new(cw_bhp_t * a_bhp, bhp_prio_comp_t * a_prio_comp,
-	cw_bool_t a_is_thread_safe);
-#else
 cw_bhp_t *
 bhp_new(cw_bhp_t * a_bhp, bhp_prio_comp_t * a_prio_comp);
-#endif
+cw_bhp_t *
+bhp_new_r(cw_bhp_t * a_bhp, bhp_prio_comp_t * a_prio_comp);
 
 /****************************************************************************
  *

@@ -33,8 +33,7 @@ struct cw_treen_s
  *
  * <<< Input(s) >>>
  *
- * a_is_thread_safe : FALSE == not thread-safe, TRUE == threadsafe.  Ignored for
- *                    non-threaded versions of libstash.
+ * None.
  *
  * <<< Output(s) >>>
  *
@@ -43,11 +42,13 @@ struct cw_treen_s
  *
  * <<< Description >>>
  *
- * Constructor.
+ * Non-thread-safe and thread-safe constructors.
  *
  ****************************************************************************/
 cw_treen_t *
-treen_new(cw_bool_t a_is_thread_safe);
+treen_new(void);
+cw_treen_t *
+treen_new_r(void);
 
 /****************************************************************************
  *

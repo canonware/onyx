@@ -24,6 +24,9 @@
 /* Maximum number of items allowable before growing. */
 #define _OH_BASE_GROW_POINT 192;
 
+static cw_oh_t *
+oh_p_new(cw_oh_t * a_oh, cw_bool_t a_is_thread_safe);
+
 /****************************************************************************
  *
  * If the table is too full, double in size and insert into the new table.

@@ -196,8 +196,8 @@ main(int argc, char ** argv)
     }
   }
 
-  buf_new(&buf, FALSE);
-  buf_new(&t_buf, FALSE);
+  buf_new(&buf);
+  buf_new(&t_buf);
   bufc_new(&bufc, NULL, NULL);
   buffer = _cw_malloc(opt_bsize);
   if (NULL == buffer)

@@ -26,10 +26,10 @@ main()
   libstash_init();
   out_put(cw_g_out, "Test begin\n");
 
-  treen_a = treen_new(FALSE);
+  treen_a = treen_new();
   _cw_check_ptr(treen_a);
   
-  treen_b = treen_new(TRUE);
+  treen_b = treen_new_r();
   _cw_check_ptr(treen_b);
 
   _cw_assert(FALSE == treen_link_child(treen_a, treen_b, 0));
@@ -38,7 +38,7 @@ main()
 
   for (i = 0; i < 7; i++)
   {
-    treens[i] = treen_new(TRUE);
+    treens[i] = treen_new_r();
     _cw_check_ptr(treens);
   }
   

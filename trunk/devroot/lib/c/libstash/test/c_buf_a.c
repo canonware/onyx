@@ -64,21 +64,21 @@ main()
     bufc_delete(bufc_b);
   }
   
-  /* buf_new(), buf_delete(). */
+  /* buf_new[_r](), buf_delete(). */
   {
     cw_buf_t buf, * buf_p;
 
-    _cw_assert(&buf == buf_new(&buf, FALSE));
+    _cw_assert(&buf == buf_new(&buf));
     buf_delete(&buf);
 
-    _cw_assert(&buf == buf_new(&buf, TRUE));
+    _cw_assert(&buf == buf_new_r(&buf));
     buf_delete(&buf);
 
-    buf_p = buf_new(NULL, FALSE);
+    buf_p = buf_new(NULL);
     _cw_check_ptr(buf_p);
     buf_delete(buf_p);
 
-    buf_p = buf_new(NULL, TRUE);
+    buf_p = buf_new_r(NULL);
     _cw_check_ptr(buf_p);
     buf_delete(buf_p);
   }
@@ -92,7 +92,7 @@ main()
     char * buffer;
     cw_uint32_t * buffer_cast;
 
-    buf_p = buf_new(NULL, TRUE);
+    buf_p = buf_new_r(NULL);
 
     buffer = (char *) _cw_malloc(512);
     buffer_cast = (cw_uint32_t *) buffer;
@@ -201,7 +201,7 @@ main()
      * f 42, 15, 16, 17, 18, 19, 20, 21, 22, 23, 42
      */
 
-    buf_new(&buf, TRUE);
+    buf_new_r(&buf);
 
     a = (cw_uint8_t *) _cw_malloc(1);
     a[0] = 0;
@@ -367,7 +367,7 @@ main()
      * r- f (42), 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, (42)
      */
 
-    buf_new(&buf, TRUE);
+    buf_new_r(&buf);
 
     a = (cw_uint8_t *) _cw_malloc(1);
     a[0] = 0;
@@ -508,7 +508,7 @@ main()
      * r- f (42), 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, (42)
      */
 
-    buf_new(&buf, TRUE);
+    buf_new_r(&buf);
 
     a = (cw_uint8_t *) _cw_malloc(1);
     a[0] = 0;
@@ -651,7 +651,7 @@ main()
      * r- f (42), 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, (42)
      */
 
-    buf_new(&buf, TRUE);
+    buf_new_r(&buf);
 
     a = (cw_uint8_t *) _cw_malloc(1);
     a[0] = 0;
@@ -784,7 +784,7 @@ main()
     char str_a[57] = "This is string A.  Blah blah.  Okay, this is now longer.";
     char * str_b = "And following is string B.  Mumble mumble.";
 
-    buf = buf_new(NULL, TRUE);
+    buf = buf_new_r(NULL);
     _cw_check_ptr(buf);
 
     _cw_assert(FALSE == buf_set_range(buf, 0, strlen(str_a) + 1,
@@ -818,7 +818,7 @@ main()
     str_c = (char *) _cw_malloc(1);
     str_c[0] = 'C';
 
-    buf_p = buf_new(NULL, TRUE);
+    buf_p = buf_new_r(NULL);
     _cw_assert(0 == buf_get_size(buf_p));
 
     bufc_p_a = bufc_new(NULL, NULL, NULL);
@@ -895,8 +895,8 @@ main()
     str_c = (char *) _cw_malloc(1);
     str_c[0] = 'C';
 
-    buf_p_a = buf_new(NULL, TRUE);
-    buf_p_b = buf_new(NULL, FALSE);
+    buf_p_a = buf_new_r(NULL);
+    buf_p_b = buf_new(NULL);
     _cw_assert(0 == buf_get_size(buf_p_a));
     _cw_assert(0 == buf_get_size(buf_p_b));
 
@@ -952,9 +952,9 @@ main()
     cw_bufc_t * bufc_p;
     cw_uint32_t i;
 
-    buf_new(&buf_a, TRUE);
-    buf_new(&buf_b, FALSE);
-    buf_new(&buf_c, TRUE);
+    buf_new_r(&buf_a);
+    buf_new(&buf_b);
+    buf_new_r(&buf_c);
 
     for (i = 0; i < 3; i++)
     {
@@ -972,7 +972,7 @@ main()
     }
 
     buf_delete(&buf_c);
-    buf_new(&buf_c, TRUE);
+    buf_new_r(&buf_c);
 
     _cw_assert(24 == buf_get_size(&buf_a));
     _cw_assert(24 == buf_get_size(&buf_b));
@@ -1010,9 +1010,9 @@ main()
     cw_bufc_t * bufc_p;
     cw_uint32_t i;
 
-    buf_new(&buf_a, TRUE);
-    buf_new(&buf_b, FALSE);
-    buf_new(&buf_c, TRUE);
+    buf_new_r(&buf_a);
+    buf_new(&buf_b);
+    buf_new_r(&buf_c);
 
     for (i = 0; i < 3; i++)
     {
@@ -1162,9 +1162,9 @@ main()
     cw_buf_t * buf_p, buf;
     char * buffer;
 
-    buf_p = buf_new(NULL, TRUE);
+    buf_p = buf_new_r(NULL);
     _cw_check_ptr(buf_p);
-    buf_new(&buf, TRUE);
+    buf_new_r(&buf);
     buffer = (char *) _cw_malloc(512);
     bufc_new(&bufc, NULL, NULL);
     bufc_set_buffer(&bufc,

@@ -40,7 +40,7 @@ main()
   libstash_init();
   out_put(cw_g_out, "Test begin\n");
 
-  h = bhp_new(NULL, bhp_priority_compare_sint32, TRUE);
+  h = bhp_new_r(NULL, bhp_priority_compare_sint32);
   _cw_check_ptr(h);
 
   for (i = 0; i < _LIBSTASH_TEST_NUM_NODES; i++)

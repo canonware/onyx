@@ -28,10 +28,10 @@ main()
   libstash_init();
   out_put(cw_g_out, "Test begin\n");
   
-  buf_a = buf_new(NULL, TRUE);
-  buf_b = buf_new(NULL, TRUE);
-  buf_c = buf_new(NULL, TRUE);
-  buf_d = buf_new(NULL, TRUE);
+  buf_a = buf_new_r(NULL);
+  buf_b = buf_new_r(NULL);
+  buf_c = buf_new_r(NULL);
+  buf_d = buf_new_r(NULL);
 
   /* Create the data. */
   {

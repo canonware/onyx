@@ -29,7 +29,12 @@ buf, bufc - Reference-counted extensible buffer.
 .I cw_buf_t *
 .br
 .B buf_new
-.RI ( "cw_buf_t * a_buf" ", " "cw_bool_t a_is_threadsafe" )
+.RI ( "cw_buf_t * a_buf" )
+
+.I cw_buf_t *
+.br
+.B buf_new_r
+.RI ( "cw_buf_t * a_buf" )
 
 .SS General
 .I void
@@ -194,20 +199,14 @@ any buf has a reference to it.
 .br
 .I cw_buf_t *
 .br
-.B buf_new
-.RI ( "cw_buf_t * a_buf" ", " "cw_bool_t a_is_threadsafe" )
+.B buf_new_r
+.RI ( "cw_buf_t * a_buf" )
 .RS
 Input(s):
 .RS
 .IR a_buf :
 .RS
 Pointer to space for a buf, or NULL.
-.RE
-.IR a_is_thread_safe :
-.RS
-FALSE: Not thread-safe.
-.br
-TRUE: Thread-safe.
 .RE
 .RE
 Output(s):
@@ -221,7 +220,7 @@ NULL: Memory allocation.  Can only occur if (NULL == a_buf).
 .RE
 Description:
 .RS
-Constructor.
+Non-thread-safe and thread-safe constructors.
 .RE
 .RE
 

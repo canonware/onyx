@@ -25,66 +25,15 @@
 #endif
 
 cw_buf_t *
-#ifdef _CW_REENTRANT
-buf_new(cw_buf_t * a_buf, cw_bool_t a_is_threadsafe)
-#else
-  buf_new(cw_buf_t * a_buf)
-#endif
+buf_new(cw_buf_t * a_buf)
 {
-  cw_buf_t * retval;
+  return buf_p_new(a_buf, FALSE);
+}
 
-  if (a_buf == NULL)
-  {
-    retval = (cw_buf_t *) _cw_malloc(sizeof(cw_buf_t));
-    if (NULL == retval)
-    {
-      goto RETURN;
-    }
-    retval->is_malloced = TRUE;
-  }
-  else
-  {
-    retval = a_buf;
-    retval->is_malloced = FALSE;
-  }
-
-#ifdef _LIBSTASH_DBG
-  retval->magic = _CW_BUF_MAGIC;
-#endif
-
-#ifdef _CW_REENTRANT
-  retval->is_threadsafe = a_is_threadsafe;
-  if (retval->is_threadsafe == TRUE)
-  {
-    mtx_new(&retval->lock);
-  }
-#endif
-
-  retval->size = 0;
-
-  retval->array_size = _LIBSTASH_BUF_ARRAY_MIN_SIZE;
-  retval->array_num_valid = 0;
-  retval->array_start = 0;
-  retval->array_end = 0;
-  retval->is_cumulative_valid = TRUE;
-  retval->is_cached_bufel_valid = FALSE;
-/*    retval->cached_bufel = 0; */
-
-  retval->bufel_array = retval->static_bufel_array;
-  retval->cumulative_index = retval->static_cumulative_index;
-  retval->iov = retval->static_iov;
-
-#ifdef _LIBSTASH_DBG
-  bzero(retval->bufel_array,
-	_LIBSTASH_BUF_ARRAY_MIN_SIZE * sizeof(cw_bufel_t));
-  bzero(retval->cumulative_index,
-	_LIBSTASH_BUF_ARRAY_MIN_SIZE * sizeof(cw_uint32_t));
-  bzero(retval->iov,
-	_LIBSTASH_BUF_ARRAY_MIN_SIZE * sizeof(struct iovec));
-#endif
-
-  RETURN:
-  return retval;
+cw_buf_t *
+buf_new_r(cw_buf_t * a_buf)
+{
+  return buf_p_new(a_buf, TRUE);
 }
 
 void
@@ -1670,6 +1619,65 @@ buf_set_range(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint32_t a_length,
     mtx_unlock(&a_buf->lock);
   }
 #endif
+  return retval;
+}
+
+static cw_buf_t *
+buf_p_new(cw_buf_t * a_buf, cw_bool_t a_is_threadsafe)
+{
+  cw_buf_t * retval;
+
+  if (a_buf == NULL)
+  {
+    retval = (cw_buf_t *) _cw_malloc(sizeof(cw_buf_t));
+    if (NULL == retval)
+    {
+      goto RETURN;
+    }
+    retval->is_malloced = TRUE;
+  }
+  else
+  {
+    retval = a_buf;
+    retval->is_malloced = FALSE;
+  }
+
+#ifdef _LIBSTASH_DBG
+  retval->magic = _CW_BUF_MAGIC;
+#endif
+
+#ifdef _CW_REENTRANT
+  retval->is_threadsafe = a_is_threadsafe;
+  if (retval->is_threadsafe == TRUE)
+  {
+    mtx_new(&retval->lock);
+  }
+#endif
+
+  retval->size = 0;
+
+  retval->array_size = _LIBSTASH_BUF_ARRAY_MIN_SIZE;
+  retval->array_num_valid = 0;
+  retval->array_start = 0;
+  retval->array_end = 0;
+  retval->is_cumulative_valid = TRUE;
+  retval->is_cached_bufel_valid = FALSE;
+/*    retval->cached_bufel = 0; */
+
+  retval->bufel_array = retval->static_bufel_array;
+  retval->cumulative_index = retval->static_cumulative_index;
+  retval->iov = retval->static_iov;
+
+#ifdef _LIBSTASH_DBG
+  bzero(retval->bufel_array,
+	_LIBSTASH_BUF_ARRAY_MIN_SIZE * sizeof(cw_bufel_t));
+  bzero(retval->cumulative_index,
+	_LIBSTASH_BUF_ARRAY_MIN_SIZE * sizeof(cw_uint32_t));
+  bzero(retval->iov,
+	_LIBSTASH_BUF_ARRAY_MIN_SIZE * sizeof(struct iovec));
+#endif
+
+  RETURN:
   return retval;
 }
 

@@ -21,88 +21,15 @@
 #include "libstash/oh_p.h"
 
 cw_oh_t *
-#ifdef _CW_REENTRANT
-oh_new(cw_oh_t * a_oh, cw_bool_t a_is_thread_safe)
-#else
-  oh_new(cw_oh_t * a_oh)
-#endif
+oh_new(cw_oh_t * a_oh)
 {
-  cw_oh_t * retval;
+  return oh_p_new(a_oh, FALSE);
+}
 
-  if (a_oh == NULL)
-  {
-    retval = (cw_oh_t *) _cw_malloc(sizeof(cw_oh_t));
-    if (NULL == retval)
-    {
-      goto RETURN;
-    }
-    retval->is_malloced = TRUE;
-  }
-  else
-  {
-    retval = a_oh;
-    retval->is_malloced = FALSE;
-  }
-
-#ifdef _CW_REENTRANT
-  if (a_is_thread_safe)
-  {
-    retval->is_thread_safe = TRUE;
-    rwl_new(&retval->rw_lock);
-  }
-  else
-  {
-    retval->is_thread_safe = FALSE;
-  }
-#endif
-
-  retval->items_ring = NULL;
-  retval->items_count = 0;
-
-  retval->size = 1 << _OH_BASE_POWER;
-
-  /* Create the items pointer array. */
-  retval->items = (cw_oh_item_t **) _cw_malloc(retval->size
-					       * sizeof(cw_oh_item_t *));
-  if (NULL == retval->items)
-  {
-    if (retval->is_malloced)
-    {
-      _cw_free(retval);
-    }
-    retval = NULL;
-    goto RETURN;
-  }
-  bzero(retval->items, retval->size * sizeof(cw_oh_item_t *));
-
-  retval->spares_ring = NULL;
-  retval->spares_count = 0;
-  
-  retval->curr_h1 = oh_h1_string;
-  retval->key_compare = oh_key_compare_string;
-
-  retval->curr_power
-    = retval->base_power
-    = _OH_BASE_POWER;
-  retval->curr_h2
-    = retval->base_h2
-    = _OH_BASE_H2;
-  retval->curr_shrink_point
-    = retval->base_shrink_point
-    = _OH_BASE_SHRINK_POINT;
-  retval->curr_grow_point
-    = retval->base_grow_point
-    = _OH_BASE_GROW_POINT;
-
-  retval->num_collisions
-    = retval->num_inserts
-    = retval->num_deletes
-    = retval->num_grows
-    = retval->num_shrinks
-    = 0;
-
-  RETURN:
-  return retval;
+cw_oh_t *
+oh_new_r(cw_oh_t * a_oh)
+{
+  return oh_p_new(a_oh, TRUE);
 }
 
 void
@@ -1068,6 +995,87 @@ cw_bool_t
 oh_key_compare_direct(const void * a_k1, const void * a_k2)
 {
   return (a_k1 == a_k2) ? TRUE : FALSE;
+}
+
+static cw_oh_t *
+oh_p_new(cw_oh_t * a_oh, cw_bool_t a_is_thread_safe)
+{
+  cw_oh_t * retval;
+
+  if (a_oh == NULL)
+  {
+    retval = (cw_oh_t *) _cw_malloc(sizeof(cw_oh_t));
+    if (NULL == retval)
+    {
+      goto RETURN;
+    }
+    retval->is_malloced = TRUE;
+  }
+  else
+  {
+    retval = a_oh;
+    retval->is_malloced = FALSE;
+  }
+
+#ifdef _CW_REENTRANT
+  if (a_is_thread_safe)
+  {
+    retval->is_thread_safe = TRUE;
+    rwl_new(&retval->rw_lock);
+  }
+  else
+  {
+    retval->is_thread_safe = FALSE;
+  }
+#endif
+
+  retval->items_ring = NULL;
+  retval->items_count = 0;
+
+  retval->size = 1 << _OH_BASE_POWER;
+
+  /* Create the items pointer array. */
+  retval->items = (cw_oh_item_t **) _cw_malloc(retval->size
+					       * sizeof(cw_oh_item_t *));
+  if (NULL == retval->items)
+  {
+    if (retval->is_malloced)
+    {
+      _cw_free(retval);
+    }
+    retval = NULL;
+    goto RETURN;
+  }
+  bzero(retval->items, retval->size * sizeof(cw_oh_item_t *));
+
+  retval->spares_ring = NULL;
+  retval->spares_count = 0;
+  
+  retval->curr_h1 = oh_h1_string;
+  retval->key_compare = oh_key_compare_string;
+
+  retval->curr_power
+    = retval->base_power
+    = _OH_BASE_POWER;
+  retval->curr_h2
+    = retval->base_h2
+    = _OH_BASE_H2;
+  retval->curr_shrink_point
+    = retval->base_shrink_point
+    = _OH_BASE_SHRINK_POINT;
+  retval->curr_grow_point
+    = retval->base_grow_point
+    = _OH_BASE_GROW_POINT;
+
+  retval->num_collisions
+    = retval->num_inserts
+    = retval->num_deletes
+    = retval->num_grows
+    = retval->num_shrinks
+    = 0;
+
+  RETURN:
+  return retval;
 }
 
 static cw_bool_t

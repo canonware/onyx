@@ -29,7 +29,12 @@ oh - Dynamic open hashing.
 .I cw_oh_t *
 .br
 .B oh_new
-.RI ( "cw_oh_t * a_oh" ", " "cw_bool_t a_is_thread_safe" )
+.RI ( "cw_oh_t * a_oh" )
+
+.I cw_oh_t *
+.br
+.B oh_new_r
+.RI ( "cw_oh_t * a_oh" )
 
 .SS General
 .br
@@ -216,20 +221,14 @@ kept tidy and at reasonable sizes.
 .br
 .I cw_oh_t *
 .br
-.B oh_new
-.RI ( "cw_oh_t * a_oh" ", " "cw_bool_t a_is_thread_safe" )
+.B oh_new_r
+.RI ( "cw_oh_t * a_oh" )
 .RS
 Input(s):
 .RS
 .IR a_oh :
 .RS
 Pointer to space for an oh, or NULL.
-.RE
-.IR a_is_thread_safe :
-.RS
-FALSE: Not thread-safe.
-.br
-TRUE: Thread-safe.
 .RE
 .RE
 Output(s):
@@ -243,7 +242,7 @@ NULL: Memory allocation error.
 .RE
 Description:
 .RS
-Constructor.
+Non-thread-safe and thread-safe constructors.
 .RE
 .RE
 

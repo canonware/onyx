@@ -47,21 +47,21 @@ main()
     list_item_delete(list_item);
   }
 
-  /* list_new(), list_delete(). */
+  /* list_new[_r](), list_delete(). */
   {
     cw_list_t list_a, * list_b;
 
-    _cw_assert(&list_a == list_new(&list_a, TRUE));
+    _cw_assert(&list_a == list_new_r(&list_a));
     list_delete(&list_a);
 
-    _cw_assert(&list_a == list_new(&list_a, FALSE));
+    _cw_assert(&list_a == list_new(&list_a));
     list_delete(&list_a);
 
-    list_b = list_new(NULL, TRUE);
+    list_b = list_new_r(NULL);
     _cw_check_ptr(list_b);
     list_delete(list_b);
     
-    list_b = list_new(NULL, FALSE);
+    list_b = list_new(NULL);
     _cw_check_ptr(list_b);
     list_delete(list_b);
   }
@@ -72,8 +72,8 @@ main()
     cw_list_t * list_a, * list_b;
     cw_sint32_t ints[13], i;
 
-    list_a = list_new(NULL, TRUE);
-    list_b = list_new(NULL, TRUE);
+    list_a = list_new_r(NULL);
+    list_b = list_new_r(NULL);
 
     _cw_assert(0 == list_count(list_a));
     _cw_assert(0 == list_count(list_b));
@@ -131,7 +131,7 @@ main()
     cw_list_t * list;
     cw_sint32_t ints[13], i;
 
-    list = list_new(NULL, TRUE);
+    list = list_new_r(NULL);
 
     _cw_assert(0 == list_count(list));
 
@@ -177,7 +177,7 @@ main()
     cw_list_t * list;
     cw_sint32_t ints[13], i;
 
-    list = list_new(NULL, TRUE);
+    list = list_new_r(NULL);
 
     _cw_assert(0 == list_count(list));
 
@@ -224,7 +224,7 @@ main()
     cw_list_t * list;
     cw_list_item_t * items[3], * item;
 
-    list = list_new(NULL, TRUE);
+    list = list_new_r(NULL);
 
     items[0] = list_tpush(list, NULL);
     items[1] = list_tpush(list, NULL);
@@ -258,7 +258,7 @@ main()
     cw_list_item_t * items[11];
     cw_uint32_t ints_a[11], ints_b[11], i;
 
-    list = list_new(NULL, TRUE);
+    list = list_new_r(NULL);
 
     /* Push the ints onto the list. */
     for (i = 0; i < 11; i++)
@@ -303,7 +303,7 @@ main()
     cw_list_item_t * items[11];
     cw_uint32_t ints_a[11], ints_b[11], i;
 
-    list = list_new(NULL, TRUE);
+    list = list_new_r(NULL);
 
     /* Push the ints onto the list. */
     for (i = 0; i < 11; i++)
@@ -349,7 +349,7 @@ main()
     cw_list_item_t * items[11];
     cw_uint32_t ints[11], i;
 
-    list = list_new(NULL, TRUE);
+    list = list_new_r(NULL);
 
     /* Push the ints onto the list. */
     for (i = 0; i < 11; i++)
@@ -409,7 +409,7 @@ main()
     cw_list_item_t * items[11];
     cw_uint32_t ints[11], i;
 
-    list = list_new(NULL, TRUE);
+    list = list_new_r(NULL);
 
     /* Push the ints onto the list. */
     for (i = 0; i < 11; i++)
@@ -446,8 +446,8 @@ main()
       out_put_s(cw_g_out, strings[i], "This is string [i]", i);
     }
 
-    list1 = list_new(NULL, FALSE);
-    list_new(&list2, FALSE);
+    list1 = list_new(NULL);
+    list_new(&list2);
     _cw_assert(list_count(list1) == 0);
     _cw_assert(list_count(&list2) == 0);
 	     

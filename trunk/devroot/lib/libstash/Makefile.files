@@ -21,7 +21,7 @@ INCS_R := libstash_r.h locks.h thread.h
 
 # Include files that are _not_ installed.
 PRIV_INCS := bhp_p.h buf_p.h lex_p.h list_p.h log_p.h mem_l.h mem_p.h oh_p.h \
-	out_p.h res_p.h
+	out_p.h res_p.h treen_p.h
 
 PRIV_INCS_R := locks_p.h
 

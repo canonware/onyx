@@ -80,11 +80,7 @@ res_new(cw_res_t * a_res)
 #endif
   /* Non-thread-safe hash table, since we're already taking care of the
    * locking. */
-#ifdef _CW_REENTRANT
-  oh_new(&retval->hash, FALSE);
-#else
   oh_new(&retval->hash);
-#endif
 
   RETURN:
   return retval;

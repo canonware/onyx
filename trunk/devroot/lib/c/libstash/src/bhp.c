@@ -79,54 +79,15 @@ bhpi_delete(cw_bhpi_t * a_bhpi)
 }
 
 cw_bhp_t *
-#ifdef _CW_REENTRANT
-bhp_new(cw_bhp_t * a_bhp, bhp_prio_comp_t * a_prio_comp,
-	cw_bool_t a_is_thread_safe)
-#else
-  bhp_new(cw_bhp_t * a_bhp, bhp_prio_comp_t * a_prio_comp)
-#endif
+bhp_new(cw_bhp_t * a_bhp, bhp_prio_comp_t * a_prio_comp)
 {
-  cw_bhp_t * retval;
+  return bhp_p_new(a_bhp, a_prio_comp, FALSE);
+}
 
-  _cw_check_ptr(a_prio_comp);
-
-  if (a_bhp == NULL)
-  {
-    retval = (cw_bhp_t *) _cw_malloc(sizeof(cw_bhp_t));
-    if (NULL == retval)
-    {
-      goto RETURN;
-    }
-    retval->is_malloced = TRUE;
-  }
-  else
-  {
-    retval = a_bhp;
-    retval->is_malloced = FALSE;
-  }
-
-#ifdef _CW_REENTRANT
-  if (a_is_thread_safe == TRUE)
-  {
-    retval->is_thread_safe = TRUE;
-    mtx_new(&retval->lock);
-  }
-  else
-  {
-    retval->is_thread_safe = FALSE;
-  }
-#endif
-  
-  retval->head = NULL;
-  retval->num_nodes = 0;
-  retval->priority_compare = a_prio_comp;
-
-#ifdef _LIBSTASH_DBG
-  retval->magic = _LIBSTASH_BHP_MAGIC;
-#endif
-
-  RETURN:
-  return retval;
+cw_bhp_t *
+bhp_new_r(cw_bhp_t * a_bhp, bhp_prio_comp_t * a_prio_comp)
+{
+  return bhp_p_new(a_bhp, a_prio_comp, TRUE);
 }
 
 void
@@ -203,11 +164,7 @@ bhp_insert(cw_bhp_t * a_bhp, cw_bhpi_t * a_bhpi)
 #endif
   
   /* Create and initialize temp_heap. */
-#ifdef _CW_REENTRANT
-  bhp_new(&temp_heap, a_bhp->priority_compare, FALSE);
-#else
   bhp_new(&temp_heap, a_bhp->priority_compare);
-#endif
   temp_heap.head = a_bhpi;
   temp_heap.num_nodes = 1;
 
@@ -369,11 +326,7 @@ bhp_del_min(cw_bhp_t * a_bhp, void ** r_priority, void ** r_data)
     }
 
     /* Create a temporary heap and initialize it. */
-#ifdef _CW_REENTRANT
-    bhp_new(&temp_heap, a_bhp->priority_compare, FALSE);
-#else
     bhp_new(&temp_heap, a_bhp->priority_compare);
-#endif
     temp_heap.head = prev_pos;
     bhp_p_union(a_bhp, &temp_heap);
 
@@ -544,6 +497,53 @@ bhp_priority_compare_uint64(const void * a_a, const void * a_b)
     retval = 0;
   }
   
+  return retval;
+}
+
+static cw_bhp_t *
+bhp_p_new(cw_bhp_t * a_bhp, bhp_prio_comp_t * a_prio_comp,
+	  cw_bool_t a_is_thread_safe)
+{
+  cw_bhp_t * retval;
+
+  _cw_check_ptr(a_prio_comp);
+
+  if (a_bhp == NULL)
+  {
+    retval = (cw_bhp_t *) _cw_malloc(sizeof(cw_bhp_t));
+    if (NULL == retval)
+    {
+      goto RETURN;
+    }
+    retval->is_malloced = TRUE;
+  }
+  else
+  {
+    retval = a_bhp;
+    retval->is_malloced = FALSE;
+  }
+
+#ifdef _CW_REENTRANT
+  if (a_is_thread_safe == TRUE)
+  {
+    retval->is_thread_safe = TRUE;
+    mtx_new(&retval->lock);
+  }
+  else
+  {
+    retval->is_thread_safe = FALSE;
+  }
+#endif
+  
+  retval->head = NULL;
+  retval->num_nodes = 0;
+  retval->priority_compare = a_prio_comp;
+
+#ifdef _LIBSTASH_DBG
+  retval->magic = _LIBSTASH_BHP_MAGIC;
+#endif
+
+  RETURN:
   return retval;
 }
 

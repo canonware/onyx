@@ -17,32 +17,18 @@
 #  include "libstash/libstash.h"
 #endif
 
+#include "libstash/treen_p.h"
+
 cw_treen_t *
-treen_new(cw_bool_t a_is_thread_safe)
+treen_new(void)
 {
-  cw_treen_t * retval;
+  return treen_p_new(FALSE);
+}
 
-  retval = (cw_treen_t *) _cw_malloc(sizeof(cw_treen_t));
-  if (NULL == retval)
-  {
-    goto RETURN;
-  }
-  bzero(retval, sizeof(cw_treen_t));
-  
-#ifdef _CW_REENTRANT
-  if (a_is_thread_safe == TRUE)
-  {
-    mtx_new(&retval->lock);
-    retval->is_thread_safe = TRUE;
-  }
-  else
-  {
-    retval->is_thread_safe = FALSE;
-  }
-#endif
-
-  RETURN:
-  return retval;
+cw_treen_t *
+treen_new_r(void)
+{
+  return treen_p_new(FALSE);
 }
 
 void
@@ -322,5 +308,33 @@ treen_set_data_ptr(cw_treen_t * a_treen, void * a_data)
     mtx_unlock(&a_treen->lock);
   }
 #endif
+  return retval;
+}
+
+static cw_treen_t *
+treen_p_new(cw_bool_t a_is_thread_safe)
+{
+  cw_treen_t * retval;
+
+  retval = (cw_treen_t *) _cw_malloc(sizeof(cw_treen_t));
+  if (NULL == retval)
+  {
+    goto RETURN;
+  }
+  bzero(retval, sizeof(cw_treen_t));
+  
+#ifdef _CW_REENTRANT
+  if (a_is_thread_safe == TRUE)
+  {
+    mtx_new(&retval->lock);
+    retval->is_thread_safe = TRUE;
+  }
+  else
+  {
+    retval->is_thread_safe = FALSE;
+  }
+#endif
+
+  RETURN:
   return retval;
 }

@@ -19,6 +19,10 @@
 #  define _LIBSTASH_BHPI_MAGIC 0xbf90ec15
 #endif
 
+static cw_bhp_t *
+bhp_p_new(cw_bhp_t * a_bhp, bhp_prio_comp_t * a_prio_comp,
+	  cw_bool_t a_is_thread_safe);
+
 static cw_bhpi_t *
 bhp_p_dump(cw_bhpi_t * a_bhpi, cw_uint32_t a_depth, cw_bhpi_t * a_last_printed);
 

@@ -115,8 +115,6 @@ list_item_set(cw_list_item_t * a_cont, void * a_data);
  *
  * a_list : Pointer to space for a list, or NULL.
  *
- * a_is_thread_safe : TRUE if list is to be threadsafe, FALSE otherwise.
- *
  * <<< Output(s) >>>
  *
  * retval : Pointer to a list, or NULL.
@@ -124,16 +122,13 @@ list_item_set(cw_list_item_t * a_cont, void * a_data);
  *
  * <<< Description >>>
  *
- * Constructor.
+ * Non-thread-safe and thread-safe constructors.
  *
  ****************************************************************************/
-#ifdef _CW_REENTRANT
-cw_list_t *
-list_new(cw_list_t * a_list, cw_bool_t a_is_thread_safe);
-#else
 cw_list_t *
 list_new(cw_list_t * a_list);
-#endif
+cw_list_t *
+list_new_r(cw_list_t * a_list);
 
 /****************************************************************************
  *

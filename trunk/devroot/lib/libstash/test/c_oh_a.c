@@ -32,7 +32,7 @@ main()
   libstash_init();
   out_put(cw_g_out, "Test begin\n");
   
-  oh_new(&hash, FALSE);
+  oh_new(&hash);
 /*   dbg_register(cw_g_dbg, "oh_slot"); */
   
   strings = (char **) _cw_malloc(sizeof(char *) * NUM_STRINGS);

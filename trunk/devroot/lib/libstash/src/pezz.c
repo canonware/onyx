@@ -127,11 +127,7 @@ pezz_new(cw_pezz_t * a_pezz, cw_uint32_t a_buffer_size,
   retval->num_blocks = 1;
 
 #ifdef _LIBSTASH_DBG
-#  ifdef _CW_REENTRANT
-  oh_new(&retval->addr_hash, FALSE);
-#  else
   oh_new(&retval->addr_hash);
-#  endif
   oh_set_h1(&retval->addr_hash, oh_h1_direct);
   oh_set_key_compare(&retval->addr_hash, oh_key_compare_direct);
   

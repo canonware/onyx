@@ -29,7 +29,7 @@ handle_client(void * a_arg)
 
   out_put(cw_g_out, "New connection\n");
 
-  buf_new(&buf, FALSE);
+  buf_new(&buf);
   
   while (1)
   {

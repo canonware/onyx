@@ -43,7 +43,7 @@ thread_entry_func(void * a_arg)
   cw_uint32_t i, size, split;
   cw_buf_t * buf;
 
-  buf = buf_new(NULL, FALSE);
+  buf = buf_new(NULL);
   
   for (i = 0;
        i < (_LIBSTASH_TEST_NUM_BUFELS * _LIBSTASH_TEST_SIZEOF_BUFFER
@@ -119,7 +119,7 @@ main(int argc, char ** argv)
 /*    dbg_register(cw_g_dbg, "mem_verbose"); */
 
   /* Create a buf with a known pattern of data in it. */
-  buf_a = buf_new(NULL, TRUE);
+  buf_a = buf_new_r(NULL);
 
   for (i = n = 0; i < _LIBSTASH_TEST_NUM_BUFELS; i++)
   {
@@ -140,7 +140,7 @@ main(int argc, char ** argv)
     bufc_delete(bufc);
   }
 
-  buf_new(&buf_b, TRUE);
+  buf_new_r(&buf_b);
   mtx_new(&rand_lock);
 
   if (argc > 1)

@@ -41,14 +41,14 @@ main()
     bhpi_delete(bhpi_p);
   }
 
-  /* bhp_new(), bhp_delete(). */
+  /* bhp_new[_r](), bhp_delete(). */
   {
     cw_bhp_t bhp, * bhp_p;
 
-    _cw_assert(&bhp == bhp_new(&bhp, bhp_priority_compare_uint32, TRUE));
+    _cw_assert(&bhp == bhp_new_r(&bhp, bhp_priority_compare_uint32));
     bhp_delete(&bhp);
 
-    bhp_p = bhp_new(NULL, bhp_priority_compare_sint32, FALSE);
+    bhp_p = bhp_new(NULL, bhp_priority_compare_sint32);
     _cw_check_ptr(bhp_p);
     bhp_delete(bhp_p);
   }
@@ -59,7 +59,7 @@ main()
     cw_bhpi_t * bhpi_p;
     cw_uint32_t items[_LIBSTASH_TEST_HEAP_SIZE], i;
 
-    bhp_p = bhp_new(NULL, bhp_priority_compare_uint32, TRUE);
+    bhp_p = bhp_new_r(NULL, bhp_priority_compare_uint32);
     _cw_check_ptr(bhp_p);
 
     for (i = 0; i < _LIBSTASH_TEST_HEAP_SIZE; i++)
@@ -92,10 +92,10 @@ main()
     cw_bhpi_t * bhpi_p;
     cw_uint32_t items[_LIBSTASH_TEST_HEAP_SIZE], i;
 
-    bhp_p_a = bhp_new(NULL, bhp_priority_compare_uint32, TRUE);
+    bhp_p_a = bhp_new_r(NULL, bhp_priority_compare_uint32);
     _cw_check_ptr(bhp_p_a);
 
-    bhp_p_b = bhp_new(NULL, bhp_priority_compare_uint32, TRUE);
+    bhp_p_b = bhp_new_r(NULL, bhp_priority_compare_uint32);
     _cw_check_ptr(bhp_p_b);
 
     for (i = 0; i < _LIBSTASH_TEST_HEAP_SIZE; i++)

@@ -62,13 +62,11 @@ struct cw_oh_s
 typedef cw_uint64_t oh_h1_t(const void *);
 typedef cw_bool_t oh_key_comp_t(const void *, const void *);
 
-#ifdef _CW_REENTRANT
-cw_oh_t *
-oh_new(cw_oh_t * a_oh, cw_bool_t a_is_thread_safe);
-#else
 cw_oh_t *
 oh_new(cw_oh_t * a_oh);
-#endif
+
+cw_oh_t *
+oh_new_r(cw_oh_t * a_oh);
 
 void
 oh_delete(cw_oh_t * a_oh);

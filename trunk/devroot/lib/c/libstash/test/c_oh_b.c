@@ -61,7 +61,7 @@ main()
 
   libstash_init();
   out_put(cw_g_out, "Test begin\n");
-  hash = oh_new(NULL, TRUE);
+  hash = oh_new_r(NULL);
   rwl_new(&lock);
 
   for (i = 0; i < NUM_THREADS; i++)

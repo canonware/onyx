@@ -78,13 +78,11 @@ struct cw_buf_s
   struct iovec static_iov[_LIBSTASH_BUF_ARRAY_MIN_SIZE];
 };
 
-#ifdef _CW_REENTRANT
-cw_buf_t *
-buf_new(cw_buf_t * a_buf, cw_bool_t a_is_threadsafe);
-#else
 cw_buf_t *
 buf_new(cw_buf_t * a_buf);
-#endif
+
+cw_buf_t *
+buf_new_r(cw_buf_t * a_buf);
 
 void
 buf_delete(cw_buf_t * a_buf);

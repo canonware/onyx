@@ -144,7 +144,7 @@ main(int argc, char ** argv)
 
   /* Loop, accepting connections, reading from the open sock's, and closing
    * sock's on error. */
-  buf_new(&buf, FALSE);
+  buf_new(&buf);
 
   mq = mq_new(NULL);
   if (NULL == mq)

@@ -58,51 +58,17 @@ list_item_set(cw_list_item_t * a_list_item, void * a_data)
 }
 
 cw_list_t *
-#ifdef _CW_REENTRANT
-list_new(cw_list_t * a_list, cw_bool_t a_is_thread_safe)
-#else
-  list_new(cw_list_t * a_list)
-#endif
+list_new(cw_list_t * a_list)
 {
-  cw_list_t * retval;
-
-  if (a_list == NULL)
-  {
-    retval = (cw_list_t *) _cw_malloc(sizeof(cw_list_t));
-    if (NULL == retval)
-    {
-      goto RETURN;
-    }
-    retval->is_malloced = TRUE;
-  }
-  else
-  {
-    retval = a_list;
-    retval->is_malloced = FALSE;
-  }
-
-#ifdef _CW_REENTRANT
-  if (a_is_thread_safe)
-  {
-    retval->is_thread_safe = TRUE;
-    mtx_new(&retval->lock);
-  }
-  else
-  {
-    retval->is_thread_safe = FALSE;
-  }
-#endif
-  
-  retval->head = NULL;
-  retval->tail = NULL;
-  retval->count = 0;
-  retval->spares_head = NULL;
-  retval->spares_count = 0;
-
-  RETURN:
-  return retval;
+  return list_p_new(a_list, FALSE);
 }
-     
+
+cw_list_t *
+list_new_r(cw_list_t * a_list)
+{
+  return list_p_new(a_list, TRUE);
+}
+
 void
 list_delete(cw_list_t * a_list)
 {
@@ -773,6 +739,48 @@ list_dump(cw_list_t * a_list)
 #endif
 }
 
+static cw_list_t *
+list_p_new(cw_list_t * a_list, cw_bool_t a_is_thread_safe)
+{
+  cw_list_t * retval;
+
+  if (a_list == NULL)
+  {
+    retval = (cw_list_t *) _cw_malloc(sizeof(cw_list_t));
+    if (NULL == retval)
+    {
+      goto RETURN;
+    }
+    retval->is_malloced = TRUE;
+  }
+  else
+  {
+    retval = a_list;
+    retval->is_malloced = FALSE;
+  }
+
+#ifdef _CW_REENTRANT
+  if (a_is_thread_safe)
+  {
+    retval->is_thread_safe = TRUE;
+    mtx_new(&retval->lock);
+  }
+  else
+  {
+    retval->is_thread_safe = FALSE;
+  }
+#endif
+  
+  retval->head = NULL;
+  retval->tail = NULL;
+  retval->count = 0;
+  retval->spares_head = NULL;
+  retval->spares_count = 0;
+
+  RETURN:
+  return retval;
+}
+     
 static void *
 list_p_hpop(cw_list_t * a_list)
 {
@@ -871,7 +879,7 @@ list_p_tpop(cw_list_t * a_list)
   return retval;
 }
 
-void *
+static void *
 list_p_remove_container(cw_list_t * a_list, cw_list_item_t * a_to_remove)
 {
   void * retval;

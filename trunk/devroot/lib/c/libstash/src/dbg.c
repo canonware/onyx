@@ -29,11 +29,7 @@ dbg_new(void)
     goto RETURN;
   }
 
-#ifdef _CW_REENTRANT
-  if (NULL == oh_new(&retval->flag_hash, TRUE))
-#else
-  if (NULL == oh_new(&retval->flag_hash))
-#endif
+  if (NULL == oh_new_r(&retval->flag_hash))
   {
     _cw_free(retval);
     retval = NULL;

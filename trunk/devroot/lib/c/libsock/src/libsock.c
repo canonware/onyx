@@ -681,8 +681,8 @@ sockb_p_entry_func(void * a_arg)
   _cw_free(a_arg);
 
   /* Initialize data structures. */
-  buf_new(&tmp_buf, FALSE);
-  buf_new(&buf_in, FALSE);
+  buf_new(&tmp_buf);
+  buf_new(&buf_in);
   {
     cw_uint32_t i;
 
