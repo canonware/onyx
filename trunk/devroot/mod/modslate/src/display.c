@@ -123,16 +123,17 @@ display_p_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t a_iter)
     cw_bool_t retval;
     struct cw_display *display = (struct cw_display *) a_data;
 
-    /* Don't delete until the third GC sweep iteration, so that associated
+    /* Don't delete until the appropriate GC sweep iteration, so that associated
      * frames and windows can be deleted first. */
-    if (a_iter != 2)
+    if (a_iter != MODSLATE_GC_ITER_DISPLAY)
     {
 	retval = TRUE;
 	goto RETURN;
     }
 
-    /* XXX Need locking. */
+    modslate_funnel_c_enter(&modslate_curses_funnel);
     delscreen(display->screen);
+    modslate_funnel_c_leave(&modslate_curses_funnel);
 
     if (display->in != NULL)
     {
@@ -290,6 +291,7 @@ modslate_display(void *a_data, cw_nxo_t *a_thread)
     }
 
     /* Clean up the stacks. */
+    nxo_dup(term, tnxo);
     nxo_stack_npop(ostack, 2);
     nxo_stack_pop(tstack);
 }
@@ -298,7 +300,7 @@ modslate_display(void *a_data, cw_nxo_t *a_thread)
 void
 modslate_display_p(void *a_data, cw_nxo_t *a_thread)
 {
-    modslate_hook_p(a_data, a_thread, "frame");
+    modslate_hook_p(a_data, a_thread, "display");
 }
 
 void
@@ -367,7 +369,8 @@ modslate_display_start(void *a_data, cw_nxo_t *a_thread)
     display = (struct cw_display *)nxo_hook_data_get(nxo);
 
     set_term(display->screen);
-    cbreak();
+    raw();
+//    cbreak();
     noecho();
     nonl();
     intrflush(stdscr, FALSE);

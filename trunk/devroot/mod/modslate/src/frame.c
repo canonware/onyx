@@ -96,27 +96,29 @@ frame_p_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t a_iter)
 {
 	struct cw_frame	*frame = (struct cw_frame *)a_data;
 
-//	slate_slate_lock(NULL, NULL);
-#ifdef _CW_DBG
+	modslate_funnel_c_enter(&modslate_curses_funnel);
+#ifdef CW_DBG
 	{
-		int	error;
+	    int error;
 
-		error = del_panel(frame->panel);
-		if (error) {
-			fprintf(stderr, "%s:%d:%s(): Error in del_panel()\n",
-			    __FILE__, __LINE__, __FUNCTION__);
-		}
-		error = delwin(frame->window);
-		if (error) {
-			fprintf(stderr, "%s:%d:%s(): Error in delwin()\n",
-			    __FILE__, __LINE__, __FUNCTION__);
-		}
+	    error = del_panel(frame->panel);
+	    if (error)
+	    {
+		fprintf(stderr, "%s:%d:%s(): Error in del_panel()\n",
+			__FILE__, __LINE__, __FUNCTION__);
+	    }
+	    error = delwin(frame->window);
+	    if (error)
+	    {
+		fprintf(stderr, "%s:%d:%s(): Error in delwin()\n",
+			__FILE__, __LINE__, __FUNCTION__);
+	    }
 	}
 #else
 	del_panel(frame->panel);
 	delwin(frame->window);
 #endif
-//	slate_slate_unlock(NULL, NULL);
+	modslate_funnel_c_leave(&modslate_curses_funnel);
 
 	nxa_free(nx_nxa_get(a_nx), frame, sizeof(struct cw_frame));
 

@@ -74,7 +74,8 @@ struct cw_extent
     cw_nxoi_t seq;
 };
 
-static const struct cw_modslate_entry modslate_buffer_hooks[] = {
+static const struct cw_modslate_entry modslate_buffer_hooks[] =
+{
     /* buffer. */
     MODSLATE_ENTRY(buffer),
     {"buffer?", modslate_buffer_p},
@@ -251,9 +252,9 @@ buffer_p_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t a_iter)
     cw_bool_t retval;
     struct cw_buffer *buffer = (struct cw_buffer *) a_data;
 
-    /* Don't delete until the second GC sweep iteration, so that associated
+    /* Don't delete until the appropriate GC sweep iteration, so that associated
      * markers can be deleted first. */
-    if (a_iter != 1)
+    if (a_iter != MODSLATE_GC_ITER_BUFFER)
     {
 	retval = TRUE;
 	goto RETURN;
