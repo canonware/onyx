@@ -23,7 +23,7 @@
 
 /* LaTeX source files. */
 ONYX_TEX_SRCS = [addprefix @srcroot@/doc/latex/onyx/
-                           front.tex back.tex lang.tex tut.tex ex.tex]
+                           front.tex back.tex lang.tex]
                 [addprefix @objroot@/doc/latex/onyx/
                            onyx.tex]
                 ;
