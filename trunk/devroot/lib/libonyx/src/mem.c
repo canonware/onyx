@@ -34,12 +34,16 @@
 #define cw_free(a) free(a)
 
 #ifdef CW_MEM_ERROR
+typedef struct cw_mem_item_s cw_mem_item_t;
+
 struct cw_mem_item_s
 {
+    void *addr;
     size_t size;
     char *filename;
     cw_uint32_t line_num;
-    cw_chi_t chi; /* For internal ch linkage. */
+    cw_chi_t chi; /* For internal dch linkage. */
+    ql_elm(cw_mem_item_t) link; /* For iteration. */
 };
 #endif
 
@@ -67,6 +71,7 @@ cw_mema_t s_mem_mema;
 /* Proportional minimal fullness. */
 #define CW_MEM_BASE_SHRINK 32
 static cw_dch_t *s_mem_addr_hash;
+static ql_head(cw_mem_item_t) s_mem_addr_list;
 #endif
 
 /* mema. */
@@ -169,6 +174,7 @@ mem_l_init(void)
     s_mem_addr_hash = dch_new(NULL, &s_mem_mema, CW_MEM_BASE_TABLE,
 			      CW_MEM_BASE_GROW, CW_MEM_BASE_SHRINK,
 			      ch_direct_hash, ch_direct_key_comp);
+    ql_new(&s_mem_addr_list);
 #endif
 #ifdef CW_THREADS
     mtx_new(&s_mem_lock);
@@ -193,29 +199,30 @@ mem_l_shutdown(void)
 
 #ifdef CW_MEM_ERROR
     {
-	cw_uint32_t i, num_addrs;
-	void *addr;
-	struct cw_mem_item_s *allocation;
+	cw_mem_item_t *allocation;
 
-	num_addrs = dch_count(s_mem_addr_hash);
-
-	if (num_addrs > 0)
+	if (dch_count(s_mem_addr_hash) > 0)
 	{
 	    fprintf(stderr, "%s(): %u unfreed allocation%s\n",
-		    __func__, num_addrs, num_addrs != 1 ? "s" : "");
+		    __func__, dch_count(s_mem_addr_hash),
+		    dch_count(s_mem_addr_hash) != 1 ? "s" : "");
 	}
-	for (i = 0; i < num_addrs; i++)
+
+	for (allocation = ql_first(&s_mem_addr_list);
+	     allocation != NULL;
+	     allocation = ql_first(&s_mem_addr_list))
 	{
-	    dch_remove_iterate(s_mem_addr_hash, &addr, (void **) &allocation,
-			       NULL);
+	    dch_chi_remove(s_mem_addr_hash, &allocation->chi);
+	    ql_remove(&s_mem_addr_list, allocation, link);
 	    fprintf(stderr,
 		    "%s(): %p, size %zu never freed (allocated at %s:%u)\n",
-		    __func__, addr,
+		    __func__, allocation->addr,
 		    allocation->size, allocation->filename,
 		    allocation->line_num);
 	    cw_free(allocation->filename);
 	    cw_free(allocation);
 	}
+
 	dch_delete(s_mem_addr_hash);
 	mema_delete(&s_mem_mema);
 #ifdef CW_THREADS
@@ -231,7 +238,7 @@ mem_malloc_e(void *a_arg, size_t a_size, const char *a_filename,
 {
     void *retval;
 #ifdef CW_MEM_ERROR
-    struct cw_mem_item_s *old_allocation;
+    cw_mem_item_t *old_allocation;
 #endif
 
     cw_assert(s_mem_initialized);
@@ -271,16 +278,18 @@ mem_malloc_e(void *a_arg, size_t a_size, const char *a_filename,
     }
     else
     {
-	struct cw_mem_item_s *allocation;
+	cw_mem_item_t *allocation;
 
-	allocation = cw_malloc(sizeof(struct cw_mem_item_s));
+	allocation = (cw_mem_item_t *) cw_malloc(sizeof(cw_mem_item_t));
 	memset(retval, 0xa5, a_size);
 
+	allocation->addr = retval;
 	allocation->size = a_size;
 	allocation->filename = cw_malloc(strlen(a_filename) + 1);
 	memcpy(allocation->filename, a_filename,
 	       strlen(a_filename) + 1);
 	allocation->line_num = a_line_num;
+	ql_elm_new(allocation, link);
 
 #ifdef CW_MEM_VERBOSE
 	fprintf(stderr, "%s(): %p <-- malloc(%zu) at %s:%u\n",
@@ -288,6 +297,7 @@ mem_malloc_e(void *a_arg, size_t a_size, const char *a_filename,
 		a_line_num);
 #endif
 	dch_insert(s_mem_addr_hash, retval, allocation, &allocation->chi);
+	ql_tail_insert(&s_mem_addr_list, allocation, link);
     }
 #ifdef CW_THREADS
     mtx_unlock(&s_mem_lock);
@@ -303,7 +313,7 @@ mem_calloc_e(void *a_arg, size_t a_number, size_t a_size,
 {
     void *retval;
 #ifdef CW_MEM_ERROR
-    struct cw_mem_item_s *old_allocation;
+    cw_mem_item_t *old_allocation;
 #endif
 
     cw_assert(s_mem_initialized);
@@ -344,16 +354,18 @@ mem_calloc_e(void *a_arg, size_t a_number, size_t a_size,
     }
     else
     {
-	struct cw_mem_item_s *allocation;
+	cw_mem_item_t *allocation;
 
-	allocation = cw_malloc(sizeof(struct cw_mem_item_s));
+	allocation = (cw_mem_item_t *) cw_malloc(sizeof(cw_mem_item_t));
 	/* Leave the memory alone, since calloc() is supposed to return
 	 * zeroed memory. */
 
+	allocation->addr = retval;
 	allocation->size = a_number * a_size;
 	allocation->filename = cw_malloc(strlen(a_filename) + 1);
 	memcpy(allocation->filename, a_filename, strlen(a_filename) + 1);
 	allocation->line_num = a_line_num;
+	ql_elm_new(allocation, link);
 
 #ifdef CW_MEM_VERBOSE
 	fprintf(stderr, "%s(): %p <-- calloc(%zu, %zu) at %s:%u\n",
@@ -362,6 +374,7 @@ mem_calloc_e(void *a_arg, size_t a_number, size_t a_size,
 #endif
 	dch_insert(s_mem_addr_hash, retval, allocation,
 		   &allocation->chi);
+	ql_tail_insert(&s_mem_addr_list, allocation, link);
     }
 #ifdef CW_THREADS
     mtx_unlock(&s_mem_lock);
@@ -377,7 +390,7 @@ mem_realloc_e(void *a_arg, void *a_ptr, size_t a_size, size_t a_old_size,
 {
     void *retval;
 #ifdef CW_MEM_ERROR
-    struct cw_mem_item_s *allocation;
+    cw_mem_item_t *allocation;
 #endif
 
     cw_assert(s_mem_initialized);
@@ -418,15 +431,19 @@ mem_realloc_e(void *a_arg, void *a_ptr, size_t a_size, size_t a_old_size,
 	size_t old_size;
 	cw_uint32_t old_line_num;
 
+	ql_remove(&s_mem_addr_list, allocation, link);
+
 	old_filename = allocation->filename;
 	old_size = allocation->size;
 	old_line_num = allocation->line_num;
 	allocation->filename = cw_malloc(strlen(a_filename) + 1);
 	memcpy(allocation->filename, a_filename, strlen(a_filename) + 1);
+	allocation->addr = retval;
 	allocation->size = a_size;
 	allocation->line_num = a_line_num;
 
 	dch_insert(s_mem_addr_hash, retval, allocation, &allocation->chi);
+	ql_tail_insert(&s_mem_addr_list, allocation, link);
 	if (a_size > old_size)
 	{
 	    memset(((cw_uint8_t *) retval) + old_size, 0xa5,
@@ -462,7 +479,7 @@ mem_free_e(void *a_arg, void *a_ptr, size_t a_size, const char *a_filename,
 	   cw_uint32_t a_line_num)
 {
 #ifdef CW_MEM_ERROR
-    struct cw_mem_item_s *allocation;
+    cw_mem_item_t *allocation;
 #endif
 
     cw_assert(s_mem_initialized);
@@ -486,6 +503,8 @@ mem_free_e(void *a_arg, void *a_ptr, size_t a_size, const char *a_filename,
     }
     else
     {
+	ql_remove(&s_mem_addr_list, allocation, link);
+
 	if (a_size != 0 && a_size != allocation->size)
 	{
 	    fprintf(stderr, "%s(): Wrong size %zu for %p "
