@@ -103,10 +103,11 @@ read__fixio(fd, e)
 # endif /* F_SETFL && O_NDELAY */
 
 # ifdef FIONBIO
-	if (ioctl(fd, FIONBIO, (ioctl_t) &e) == -1)
-	    return -1;
-	else
-	    e = 1;
+	while (ioctl(fd, FIONBIO, (ioctl_t) &e) == -1) {
+		if (errno != EINTR)
+			return -1;
+	}
+	e = 1;
 # endif	/* FIONBIO */
 
 #endif /* TRY_AGAIN */
@@ -139,7 +140,10 @@ read_preread(el)
 	return 0;
 
 #ifdef FIONREAD
-    (void) ioctl(el->el_infd, FIONREAD, (ioctl_t) &chrs);
+    while (ioctl(el->el_infd, FIONREAD, (ioctl_t) &chrs) == -1) {
+	    if (errno != EINTR)
+		    break;
+    }
     if (chrs > 0) {
 	char    buf[EL_BUFSIZ];
 
@@ -249,7 +253,6 @@ el_getc(el, cp)
 {
     int num_read;
     unsigned char tcp;
-    int tried = 0;
 
     c_macro_t *ma = &el->el_chared.c_macro;
 
@@ -284,14 +287,9 @@ el_getc(el, cp)
     (void) fprintf(el->el_errfile, "Reading a character\n");
 #endif /* DEBUG_READ */
 /*      _cw_out_put_e("Got here\n"); */
-#if (1)
     while ((num_read = read(el->el_infd, (char *) &tcp, 1)) == -1) {
 /*      _cw_out_put_e("Got here\n"); */
-	if (errno == EINTR)
-		    continue;
-	if (!tried && read__fixio(el->el_infd, errno) == 0)
-	    tried = 1;
-	else {
+	if (read__fixio(el->el_infd, errno) != 0) {
 	    *cp = '\0';
 	    return -1;
 	}
@@ -300,12 +298,6 @@ el_getc(el, cp)
     (void) fprintf(el->el_errfile, "Got it %c\n", tcp);
 #endif /* DEBUG_READ */
     *cp = tcp;
-#else
-    sleep(1);
-    *cp = 'x';
-    num_read = 1;
-
-#endif
 /*      _cw_out_put_e("Got here `[c]' ([i])\n", *cp, num_read); */
     return num_read;
 }
@@ -329,7 +321,10 @@ el_gets(el, nread)
     if (el->el_tty.t_mode == EX_IO && ma->level < 0) {
 	long    chrs = 0;
 
-	(void) ioctl(el->el_infd, FIONREAD, (ioctl_t) &chrs);
+	while (ioctl(el->el_infd, FIONREAD, (ioctl_t) &chrs) == -1) {
+		if (errno != EINTR)
+			break;
+	}
 	if (chrs == 0) {
 	    if (tty_rawmode(el) < 0) {
 		if (nread)

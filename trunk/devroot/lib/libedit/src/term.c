@@ -42,6 +42,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <curses.h>
+#include <errno.h>
 #include <term.h>
 #include <sys/types.h>
 #include <sys/ioctl.h>
@@ -805,6 +806,7 @@ term_get_size(el, lins, cols)
     EditLine *el;
     int    *lins, *cols;
 {
+    int	error;
 
     *cols = Val(T_co);
     *lins = Val(T_li);
@@ -812,7 +814,11 @@ term_get_size(el, lins, cols)
 #ifdef TIOCGWINSZ
     {
 	struct winsize ws;
-	if (ioctl(el->el_infd, TIOCGWINSZ, (ioctl_t) &ws) != -1) {
+	while ((error = ioctl(el->el_infd, TIOCGWINSZ, (ioctl_t) &ws)) == -1) {
+		if (errno != EINTR)
+			break;
+	}
+	if (error != -1) {
 	    if (ws.ws_col)
 		*cols = ws.ws_col;
 	    if (ws.ws_row)
@@ -823,7 +829,11 @@ term_get_size(el, lins, cols)
 #ifdef TIOCGSIZE
     {
 	struct ttysize ts;
-	if (ioctl(el->el_infd, TIOCGSIZE, (ioctl_t) &ts) != -1) {
+	while ((error = ioctl(el->el_infd, TIOCGSIZE, (ioctl_t) &ts)) == -1) {
+		if (errno != EINTR)
+			break;
+	}
+	if (error != -1) {
 	    if (ts.ts_cols)
 		*cols = ts.ts_cols;
 	    if (ts.ts_lines)
@@ -1064,7 +1074,14 @@ protected int
 term__putc(c)
     int c;
 {
-    return fputc(c, term_outfile);
+	int	retval;
+
+	while ((retval = fputc(c, term_outfile)) == EOF) {
+		if (errno != EINTR)
+			break;
+	}
+
+	return retval;
 } /* end term__putc */
 
 
@@ -1074,7 +1091,10 @@ term__putc(c)
 protected void
 term__flush()
 {
-    (void) fflush(term_outfile);
+	while (fflush(term_outfile) == EOF) {
+		if (errno != EINTR)
+			break;
+	}
 } /* end term__flush */
 
 
