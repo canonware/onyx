@@ -110,9 +110,11 @@ buf_get_size(cw_buf_t * a_buf)
 }
 
 void
-buf_catenate_buf(cw_buf_t * a_a, cw_buf_t * a_b, cw_bool_t a_try_bufel_merge)
+buf_catenate_buf(cw_buf_t * a_a, cw_buf_t * a_b,
+		 cw_bool_t a_preserve, cw_bool_t a_try_bufel_merge)
 {
-  cw_uint32_t i;
+  cw_uint32_t i, j, k;
+  cw_bool_t did_bufel_merge = FALSE;
   
   _cw_check_ptr(a_a);
   _cw_check_ptr(a_b);
@@ -141,8 +143,10 @@ buf_catenate_buf(cw_buf_t * a_a, cw_buf_t * a_b, cw_bool_t a_try_bufel_merge)
 	 bufel_get_end_offset(&a_a->array[last_element_index].bufel))
 	>= bufel_get_valid_data_size(&a_b->array[a_b->array_start].bufel))
     {
-      /* Woohoo, there's enough space to merge a_b's first bufel into a_a's last
+      /* There's enough space to merge a_b's first bufel into a_a's last
        * bufel. */
+      did_bufel_merge = TRUE;
+      
       bufel_catenate_bufel(&a_a->array[last_element_index].bufel,
 			   &a_b->array[a_b->array_start].bufel);
       
@@ -155,37 +159,39 @@ buf_catenate_buf(cw_buf_t * a_a, cw_buf_t * a_b, cw_bool_t a_try_bufel_merge)
   
   /* Iterate through a_b's array, creating bufel's in a_a and adding references
    * to a_b's bufel data. */
-  for (i = 0; i < a_b->array_num_valid; i++)
+  for (i = 0,
+	 j = a_a->array_start,
+	 k = (a_b->array_start + (did_bufel_merge ? 1 : 0)) % a_b->array_size;
+       i < a_b->array_num_valid;
+       i++,
+	 j = (j + 1) % a_a->array_size,
+	 k = (k + 1) % a_b->array_size)
+					 
   {
-    memcpy(&a_a->array[(i + a_a->array_start) % a_a->array_size].bufel,
-	   &a_b->array[(i + a_b->array_start) % a_b->array_size].bufel,
+    memcpy(&a_a->array[i].bufel,
+	   &a_b->array[j].bufel,
 	   sizeof(cw_bufel_t));
 
     a_a->size
-      += bufel_get_valid_data_size(&a_a->array[(i + a_a->array_start)
-					      % a_a->array_size].bufel);
+      += bufel_get_valid_data_size(&a_a->array[i].bufel);
 
-    a_a->array[(i + a_a->array_start) % a_a->array_size].cumulative_size
-      = a_a->size;
+    a_a->array[i].cumulative_size = a_a->size;
 
     a_a->array_num_valid++;
 
 #ifdef _CW_REENTRANT
-    mtx_lock(&a_a->array[(i + a_a->array_start)
-			% a_a->array_size].bufel.bufc->lock);
+    mtx_lock(&a_a->array[i].bufel.bufc->lock);
 #endif
 
-    a_a->array[(i + a_a->array_start)
-	      % a_a->array_size].bufel.bufc->ref_count++;
+    a_a->array[i].bufel.bufc->ref_count++;
     
 #ifdef _CW_REENTRANT
-    mtx_unlock(&a_a->array[(i + a_a->array_start)
-			  % a_a->array_size].bufel.bufc->lock);
+    mtx_unlock(&a_a->array[i].bufel.bufc->lock);
 #endif
   }
 
   /* Finish making a_a's state consistent. */
-  a_a->array_end = (i + a_a->array_start) % a_a->array_size;
+  a_a->array_end = i;
   
 #ifdef _CW_REENTRANT
   if (a_b->is_threadsafe == TRUE)
@@ -307,6 +313,7 @@ buf_release_head_data(cw_buf_t * a_buf, cw_uint32_t a_amount)
     for (i = 0; (a_amount > 0) && (i < a_buf->array_num_valid); i++)
     {
       array_index = (i + a_buf->array_start) % a_buf->array_size;
+      
       bufel_valid_data
 	= bufel_get_valid_data_size(&a_buf->array[array_index].bufel);
 

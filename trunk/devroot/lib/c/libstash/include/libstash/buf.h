@@ -100,6 +100,9 @@ buf_get_size(cw_buf_t * a_buf);
  *
  * a_b : Pointer to a buf.
  *
+ * a_preserve : If TRUE, preserve a_b (don't modify it).  If FALSE, release the
+ *              data in a_b after catenating a_b to a_a.
+ *
  * a_try_bufel_merge : If TRUE, try to copy data from a_b into a_a, if there is
  *                     enough space in the last bufel in a_a.  This keeps the
  *                     reference count for at least some of the data in a_b from
@@ -118,7 +121,8 @@ buf_get_size(cw_buf_t * a_buf);
  ****************************************************************************/
 #define buf_append_buf _CW_NS_STASH(buf_append_buf)
 void
-buf_catenate_buf(cw_buf_t * a_a, cw_buf_t * a_b, cw_bool_t a_try_bufel_merge);
+buf_catenate_buf(cw_buf_t * a_a, cw_buf_t * a_b,
+		 cw_bool_t a_preserve, cw_bool_t a_try_bufel_merge);
 
 /****************************************************************************
  *
