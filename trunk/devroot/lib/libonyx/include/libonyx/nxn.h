@@ -362,9 +362,7 @@ typedef enum
 #ifdef CW_POSIX
     NXN_seek,
 #endif
-#ifdef CW_THREADS
     NXN_self,
-#endif
 #ifdef CW_POSIX
     NXN_send,
 #endif
@@ -465,10 +463,14 @@ typedef enum
 #endif
 #ifdef CW_THREADS
     NXN_thread,
-    NXN_threadsdict,
-    NXN_threadstate,
-    NXN_threadtype,
 #endif
+    NXN_threaddstack,
+    NXN_threadestack,
+    NXN_threadistack,
+    NXN_threadostack,
+    NXN_threadtstack,
+    NXN_threadsdict,
+    NXN_threadtype,
     NXN_threshold,
     NXN_throw,
 #ifdef CW_THREADS
@@ -485,7 +487,6 @@ typedef enum
 #ifdef CW_THREADS
     NXN_trylock,
 #endif
-    NXN_tstack,
     NXN_tuck,
     NXN_type,
     NXN_typecheck,

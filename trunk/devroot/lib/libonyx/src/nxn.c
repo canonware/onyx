@@ -363,9 +363,7 @@ const cw_uint8_t *cw_g_nx_names[] = {
 #ifdef CW_POSIX
     "seek",
 #endif
-#ifdef CW_THREADS
     "self",
-#endif
 #ifdef CW_POSIX
     "send",
 #endif
@@ -466,10 +464,14 @@ const cw_uint8_t *cw_g_nx_names[] = {
 #endif
 #ifdef CW_THREADS
     "thread",
-    "threadsdict",
-    "threadstate",
-    "threadtype",
 #endif
+    "threaddstack",
+    "threadestack",
+    "threadistack",
+    "threadostack",
+    "threadtstack",
+    "threadsdict",
+    "threadtype",
     "threshold",
     "throw",
 #ifdef CW_THREADS
@@ -486,7 +488,6 @@ const cw_uint8_t *cw_g_nx_names[] = {
 #ifdef CW_THREADS
     "trylock",
 #endif
-    "tstack",
     "tuck",
     "type",
     "typecheck",

@@ -615,10 +615,8 @@ void
 systemdict_seek(cw_nxo_t *a_thread);
 #endif
 
-#ifdef CW_THREADS
 void
 systemdict_self(cw_nxo_t *a_thread);
-#endif
 
 #ifdef CW_POSIX
 void
@@ -854,14 +852,21 @@ void
 systemdict_thread(cw_nxo_t *a_thread);
 #endif
 
-#ifdef CW_THREADS
 void
-systemdict_threadsdict(cw_nxo_t *a_thread);
-#endif
+systemdict_threaddstack(cw_nxo_t *a_thread);
+
+void
+systemdict_threadestack(cw_nxo_t *a_thread);
+
+void
+systemdict_threadistack(cw_nxo_t *a_thread);
+
+void
+systemdict_threadostack(cw_nxo_t *a_thread);
 
 #ifdef CW_THREADS
 void
-systemdict_threadstate(cw_nxo_t *a_thread);
+systemdict_threadsdict(cw_nxo_t *a_thread);
 #endif
 
 #ifdef CW_THREADS
@@ -886,9 +891,6 @@ systemdict_truncate(cw_nxo_t *a_thread);
 void
 systemdict_trylock(cw_nxo_t *a_thread);
 #endif
-
-void
-systemdict_tstack(cw_nxo_t *a_thread);
 
 void
 systemdict_tuck(cw_nxo_t *a_thread);

@@ -319,9 +319,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #ifdef CW_POSIX
     ENTRY(seek),
 #endif
-#ifdef CW_THREADS
     ENTRY(self),
-#endif
 #ifdef CW_POSIX
     ENTRY(send),
     ENTRY(setegid),
@@ -409,8 +407,13 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #endif
 #ifdef CW_THREADS
     ENTRY(thread),
+#endif
+    ENTRY(threaddstack),
+    ENTRY(threadestack),
+    ENTRY(threadistack),
+    ENTRY(threadostack),
+#ifdef CW_THREADS
     ENTRY(threadsdict),
-    ENTRY(threadstate),
     ENTRY(timedwait),
 #endif
     ENTRY(token),
@@ -423,7 +426,6 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #ifdef CW_THREADS
     ENTRY(trylock),
 #endif
-    ENTRY(tstack),
     ENTRY(tuck),
     ENTRY(type),
 #ifdef CW_POSIX
@@ -6458,7 +6460,6 @@ systemdict_seek(cw_nxo_t *a_thread)
 }
 #endif
 
-#ifdef CW_THREADS
 void
 systemdict_self(cw_nxo_t *a_thread)
 {
@@ -6469,7 +6470,6 @@ systemdict_self(cw_nxo_t *a_thread)
     thread = nxo_stack_push(ostack);
     nxo_dup(thread, a_thread);
 }
-#endif
 
 #ifdef CW_POSIX
 void
@@ -8530,19 +8530,110 @@ systemdict_thread(cw_nxo_t *a_thread)
 }
 #endif
 
+void
+systemdict_threaddstack(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *thread, *nxo;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(thread, ostack, a_thread);
+    if (nxo_type_get(thread) != NXOT_THREAD)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+
+    nxo = nxo_stack_push(ostack);
+    nxo_dup(nxo, nxo_thread_dstack_get(thread));
+
+    nxo_stack_remove(ostack, thread);
+}
+
+void
+systemdict_threadestack(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *thread, *nxo;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(thread, ostack, a_thread);
+    if (nxo_type_get(thread) != NXOT_THREAD)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+
+    nxo = nxo_stack_push(ostack);
+    nxo_dup(nxo, nxo_thread_estack_get(thread));
+
+    nxo_stack_remove(ostack, thread);
+}
+
+void
+systemdict_threadistack(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *thread, *nxo;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(thread, ostack, a_thread);
+    if (nxo_type_get(thread) != NXOT_THREAD)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+
+    nxo = nxo_stack_push(ostack);
+    nxo_dup(nxo, nxo_thread_istack_get(thread));
+
+    nxo_stack_remove(ostack, thread);
+}
+
+void
+systemdict_threadostack(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *thread, *nxo;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(thread, ostack, a_thread);
+    if (nxo_type_get(thread) != NXOT_THREAD)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+
+    nxo = nxo_stack_push(ostack);
+    nxo_dup(nxo, nxo_thread_ostack_get(thread));
+
+    nxo_stack_remove(ostack, thread);
+}
+
+void
+systemdict_threadtstack(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *thread, *nxo;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(thread, ostack, a_thread);
+    if (nxo_type_get(thread) != NXOT_THREAD)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+
+    nxo = nxo_stack_push(ostack);
+    nxo_dup(nxo, nxo_thread_tstack_get(thread));
+
+    nxo_stack_remove(ostack, thread);
+}
+
 #ifdef CW_THREADS
 void
 systemdict_threadsdict(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
-}
-#endif
+    cw_nxo_t *ostack, *nxo;
 
-#ifdef CW_THREADS
-void
-systemdict_threadstate(cw_nxo_t *a_thread)
-{
-    cw_error("XXX Not implemented");
+    ostack = nxo_thread_ostack_get(a_thread);
+    nxo = nxo_stack_push(ostack);
+    nxo_dup(nxo, nx_threadsdict_get(nxo_thread_nx_get(a_thread)));
 }
 #endif
 
@@ -8853,12 +8944,6 @@ systemdict_trylock(cw_nxo_t *a_thread)
 #endif
 
 void
-systemdict_tstack(cw_nxo_t *a_thread)
-{
-    cw_error("XXX Not implemented");
-}
-
-void
 systemdict_tuck(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack;
@@ -8903,11 +8988,7 @@ systemdict_type(cw_nxo_t *a_thread)
 #endif
 	NXN_stacktype,
 	NXN_stringtype,
-#ifdef CW_THREADS
 	NXN_threadtype
-#else
-	0
-#endif
     };
     cw_assert(sizeof(typenames) / sizeof(cw_nxn_t) == NXOT_LAST + 1);
 
