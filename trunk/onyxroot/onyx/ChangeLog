@@ -1,3 +1,7 @@
+2003-12-30  Jason Evans  <jasone@canonware.com>
+
+	* configure.in : Add EXTRA_CFLAGS.
+
 2003-12-29  Jason Evans  <jasone@canonware.com>
 
 	* lib/libonyx/src/systemdict.c:systemdict_localtime() : Use tzname

@@ -84,6 +84,10 @@ if test "x$no_CFLAGS" = "xyes" -a "x$GCC" = "xyes" ; then
     CFLAGS="-Wall -Wno-uninitialized -pipe -g3"
   fi
 fi
+dnl Append EXTRA_CFLAGS to CFLAGS, if defined.
+if test "x$EXTRA_CFLAGS" != "x" ; then
+  CFLAGS="$CFLAGS $EXTRA_CFLAGS"
+fi
 AC_PROG_CPP
 
 dnl Check for non-default host C compiler.
@@ -488,7 +492,8 @@ AC_SUBST([enable_debug])
 
 dnl Only optimize if not debugging.
 if test "x$enable_debug" = "x0" -a "x$no_CFLAGS" = "xyes" ; then
-  CFLAGS="$CFLAGS -O2"
+  dnl Make sure that an optimization flag was not specified in EXTRA_CFLAGS.
+  echo "$EXTRA_CFLAGS" | grep "\-O" >/dev/null || CFLAGS="$CFLAGS -O2"
 fi
 
 dnl Support inlines by default.
