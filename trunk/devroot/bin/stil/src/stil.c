@@ -24,6 +24,7 @@ main(int argc, char **argv)
 {
 	cw_stil_t	stil;
 	cw_stilt_t	stilt;
+	cw_stilts_t	stilts;
 	char		input[_BUF_SIZE];
 	ssize_t		bytes_read;
 	cw_out_t	out;
@@ -40,11 +41,6 @@ main(int argc, char **argv)
 	out_new(&out, cw_g_mem);
 	out_set_default_fd(&out, 1);
 
-	if (is_tty) {
-		out_put(&out, "stil, version [s].\n", _LIBSTIL_VERSION);
-		out_put(&out,
-		    "See http://www.canonware.com/stil/ for information.\n");
-	}
 	if (stil_new(&stil) == NULL) {
 		_cw_out_put_e("Error in stil_new()\n");
 		exit(1);
@@ -53,15 +49,19 @@ main(int argc, char **argv)
 		_cw_out_put_e("Error in stilt_new()\n");
 		exit(1);
 	}
+	if (stilts_new(&stilts, &stilt) == NULL) {
+		_cw_out_put_e("Error in stilts_new()\n");
+		exit(1);
+	}
 
 #if (0)
 	_cw_out_put("sizeof(cw_stil_t): [i]\n", sizeof(cw_stil_t));
 	_cw_out_put("\n");
 
 	_cw_out_put("sizeof(cw_stilt_t): [i]\n", sizeof(cw_stilt_t));
+	_cw_out_put("sizeof(cw_stilts_t): [i]\n", sizeof(cw_stilts_t));
 	_cw_out_put("\n");
 
-	_cw_out_put("sizeof(cw_stiln_t): [i]\n", sizeof(cw_stiln_t));
 	_cw_out_put("sizeof(cw_stilng_t): [i]\n", sizeof(cw_stilng_t));
 	_cw_out_put("sizeof(cw_stilnt_t): [i]\n", sizeof(cw_stilnt_t));
 	_cw_out_put("\n");
@@ -72,9 +72,6 @@ main(int argc, char **argv)
 	_cw_out_put("\n");
 
 	_cw_out_put("sizeof(cw_stilo_t): [i]\n", sizeof(cw_stilo_t));
-	_cw_out_put("sizeof(cw_stiloe_t): [i]\n", sizeof(cw_stiloe_t));
-	_cw_out_put("sizeof(cw_stiloe_name_t): [i]\n",
-	    sizeof(cw_stiloe_name_t));
 	_cw_out_put("sizeof(cw_stiloe_dicto_t): [i]\n",
 	    sizeof(cw_stiloe_dicto_t));
 	_cw_out_put("\n");
@@ -95,20 +92,33 @@ main(int argc, char **argv)
 	_cw_out_put("\n");
 #endif
 
+	if (is_tty) {
+		cw_uint8_t	code[] =
+		    "product print `, version ' print version print \".\n\""
+		    " print"
+		    " `See http://www.canonware.com/stil/ for information.\n'"
+		    " print\n";
+
+		stilt_interp_str(&stilt, &stilts, code, sizeof(code) - 1);
+	}
+		
 	for (;;) {
-		if (is_tty)
-			out_put(&out, "stil> ");
+		if (is_tty) {
+			cw_uint8_t	code[] = "prompt\n";
+
+			stilt_interp_str(&stilt, &stilts, code, sizeof(code) -
+			    1);
+		}
+
 		/* Read input. */
 		bytes_read = read(0, input, _BUF_SIZE - 1);
 		if (bytes_read <= 0)
 			break;
-		stilt_interp_str(&stilt, input, (cw_uint32_t)bytes_read);
-/*  		_cw_out_put("pstack:\n"); */
-/*  		op_pstack(&stilt); */
-/*  		_cw_out_put("stack:\n"); */
-/*  		op_stack(&stilt); */
+		stilt_interp_str(&stilt, &stilts, input,
+		    (cw_uint32_t)bytes_read);
 	}
 
+	stilts_delete(&stilts, &stilt);
 	stilt_delete(&stilt);
 	stil_delete(&stil);
 	libstash_shutdown();
