@@ -427,6 +427,14 @@ fi
 
 dnl Look for modules.
 if test "x$enable_modules" = "x1" ; then
+  dnl modpane.
+  dnl XXX Check for terminfo or termcap.
+  MODPANE_CPPFLAGS=""
+  MODPAND_LDFLAGS=""
+  AC_SUBST(MODPANE_CPPFLAGS)
+  AC_SUBST(MODPANE_LDFLAGS)
+  CW_BUILD_MOD(modpane, enable_modane)
+
   dnl modprompt.
   if test "x$enable_posix" = "x1" ; then
     AC_ARG_WITH(libedit-prefix, [  --with-libedit-prefix   Prefix for libedit],
@@ -520,7 +528,9 @@ if test "x$enable_modules" = "x1" ; then
   fi
 else
   enable_modprompt="0"
+  enable_modpane="0"
 fi
+AC_SUBST(enable_modpane)
 AC_SUBST(enable_modprompt)
 
 dnl Look for binaries.
