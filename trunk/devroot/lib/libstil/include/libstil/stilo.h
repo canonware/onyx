@@ -13,7 +13,7 @@ typedef struct cw_stilo_s cw_stilo_t;
 
 /* Defined here to resolve circular dependencies. */
 typedef struct cw_stiloe_s cw_stiloe_t;
-typedef struct cw_stiloei_s cw_stiloei_t;
+typedef struct cw_stiloec_s cw_stiloec_t;
 typedef struct cw_stiloe_array_s cw_stiloe_array_t;
 typedef struct cw_stiloe_condition_s cw_stiloe_condition_t;
 typedef struct cw_stiloe_dict_s cw_stiloe_dict_t;
@@ -51,11 +51,32 @@ struct cw_stilo_s {
 	cw_uint32_t	magic;
 #endif
 
+	/*
+	 * Type.
+	 *
+	 * The type _CW_STILOT_NOTYPE can be used to protect modifications to a
+	 * stiloe pointer.  Since a thread can be suspended at any time, it is
+	 * critical to mark the pointer invalid while modifying it so that the
+	 * collector knows not to try using a possibly corrupt pointer.
+	 */
 	cw_stilot_t	type:4;
 	/*
-	 * If non-zero, this is an extended number or mstate.  Both number and
-	 * mstate objects can switch between simple and extended
-	 * representations.
+	 * If TRUE, this is an extended object.  This has extra significance if
+	 * the object is a number or mstate.  Both number and mstate objects can
+	 * switch between simple and extended representations.
+	 *
+	 * ---
+	 * For a mstate object, if not extended, the mstate is:
+	 *
+	 * accuracy : 32
+	 * point    : 0
+	 * base     : 10
+	 *
+	 * Otherwise, the mstate is in o.stiloe.
+	 *
+	 * ---
+	 * For a number object, if not extended, this number is representable as
+	 * a 32 bit signed integer.  Otherwise o.stiloe contains the value.
 	 */
 	cw_bool_t	extended:1;
 	/*
@@ -90,53 +111,14 @@ struct cw_stilo_s {
 	 * 0 == One reference. 1 == Overflow (GC knows about the stiloe).
 	 */
 	cw_uint32_t	ref_count:1;
-	/* Reference to a local or global object? */
-	cw_bool_t	global:1;
-	/*
-	 * This bit is used to protect modifications to a stiloe pointer.  Since
-	 * a thread can be suspended at any time, it is critical to mark the
-	 * pointer invalid while modifying it so that the collector knows not to
-	 * try using a possibly corrupt pointer.
-	 */
-	cw_bool_t	valid:1;
 
 	union {
-		struct {
-			cw_stiloe_array_t *stiloe;
-		}	array;
 		struct {
 			cw_bool_t	val;
 		}	boolean;
 		struct {
-			cw_stiloe_condition_t *stiloe;
-		}	condition;
-		struct {
-			cw_stiloe_dict_t *stiloe;
-		}	dict;
-		struct {
 			cw_sint32_t	fd;
 		}	file;
-		struct {
-			cw_stiloe_hook_t *stiloe;
-		}	hook;
-		struct {
-			cw_stiloe_lock_t *stiloe;
-		}	lock;
-		struct {
-			cw_uint32_t	garbage;
-		}	mark;
-		struct {
-			/*
-			 * If not extended, the mstate is:
-			 *
-			 * accuracy : 32
-			 * point    : 0
-			 * base     : 10
-			 *
-			 * Otherwise, the mstate is in ext.
-			 */
-			cw_stiloe_mstate_t *stiloe;
-		}	mstate;
 		struct {
 			union {
 				const void	*key; /*
@@ -148,37 +130,24 @@ struct cw_stilo_s {
 			cw_stiln_t	*stiln;
 		}	name;
 		struct {
-			cw_uint32_t	garbage;
-		}	null;
-		struct {
-			/*
-			 * If not (flags.extended), this number is representable
-			 * as a 32 bit signed integer.  Otherwise the ext
-			 * contains the value.
-			 */
-			union {
-				cw_stiloe_number_t *stiloe;
-				cw_sint32_t	s32;
-			}	val;
+			cw_sint32_t	s32;
 		}	number;
 		struct {
 			void	(*f)(cw_stilt_t *);
 		}	operator;
-		struct {
-			cw_stiloe_string_t *stiloe;
-		}	string;
+		cw_stiloe_t	*stiloe;
 	}	o;
 };
 
 void		stilo_new(cw_stilo_t *a_stilo);
-
 void		stilo_delete(cw_stilo_t *a_stilo);
 
-cw_stilot_t	stilo_type(cw_stilo_t *a_stilo);
-cw_stiloe_t	*stilo_get_extended(cw_stilo_t *a_stilo);
+cw_stilot_t	stilo_type_get(cw_stilo_t *a_stilo);
+void		stilo_type_set(cw_stilo_t *a_stilo, cw_stilot_t a_stilot);
+
+cw_stiloe_t	*stilo_extended_get(cw_stilo_t *a_stilo);
+void		stilo_extended_set(cw_stilo_t *a_stilo, cw_stiloe_t *a_stiloe);
 
 void		stilo_copy(cw_stilo_t *a_to, cw_stilo_t *a_from);
 void		stilo_move(cw_stilo_t *a_to, cw_stilo_t *a_from);
 
-cw_bool_t	stilo_cast(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilot_t
-    a_stilot);

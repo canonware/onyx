@@ -110,7 +110,7 @@ stils_collect(cw_stils_t *a_stils, void (*a_add_root_func) (void *add_root_arg,
 		new_stilo = stils_push(a_stils);
 		stilo_move(new_stilo, &old_stilso->stilo);
 
-		switch (stilo_type(new_stilo)) {
+		switch (stilo_type_get(new_stilo)) {
 		case _CW_STILOT_ARRAYTYPE:
 		case _CW_STILOT_CONDITIONTYPE:
 		case _CW_STILOT_DICTTYPE:

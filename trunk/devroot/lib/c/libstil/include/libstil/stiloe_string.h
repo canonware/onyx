@@ -17,7 +17,7 @@ typedef struct cw_stiloe_string_s cw_stiloe_string_t;
 struct cw_stiloe_string_s {
 	cw_stiloe_t	stiloe;
 	union {
-		cw_stiloei_t	stiloei;
+		cw_stiloec_t	stiloec;
 		struct {
 			cw_uint8_t	*str;
 			cw_sint32_t	len;	/* -1 if unset. */

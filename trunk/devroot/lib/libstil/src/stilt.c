@@ -725,10 +725,9 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 					    a_stilt->index, "string");
 					stilo =
 					    stils_push(&a_stilt->data_stils);
-					stilo_cast(stilo, a_stilt,
+					stilo_type_set(stilo,
 					    _CW_STILOT_STRINGTYPE);
-					stiloe = (cw_stiloe_string_t
-					    *)stilo_get_extended(stilo);
+					stiloe = stiloe_string_new(a_stilt);
 					stiloe_string_len_set(stiloe, a_stilt,
 					    a_stilt->index);
 					if (a_stilt->index <=
@@ -738,6 +737,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 						    a_stilt->index);
 					} else
 						_cw_error("XXX Unimplemented");
+					stilo_extended_set(stilo, (cw_stiloe_t
+					    *)stiloe);
 					stilt_p_reset_tok_buffer(a_stilt);
 				} else
 					_CW_STILT_PUTC(c);

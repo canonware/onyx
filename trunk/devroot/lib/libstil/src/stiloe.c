@@ -16,9 +16,13 @@
 #endif
 
 void
-stiloe_new(cw_stiloe_t *a_stiloe)
+stiloe_new(cw_stiloe_t *a_stiloe, cw_stilt_t *a_stilt, cw_stilot_t a_type)
 {
-	memset(a_stiloe, sizeof(cw_stiloe_t), 0);
+	memset(a_stiloe, 0, sizeof(cw_stiloe_t));
+
+	a_stiloe->type = a_type;
+	a_stiloe->stilt = a_stilt;
+
 #ifdef _LIBSTIL_DBG
 	a_stiloe->magic = _CW_STILOE_MAGIC;
 #endif
@@ -26,6 +30,12 @@ stiloe_new(cw_stiloe_t *a_stiloe)
 
 void
 stiloe_delete(cw_stiloe_t *a_stiloe)
+{
+	/* XXX */
+}
+
+void
+stiloe_gc_register(cw_stiloe_t *a_stiloe)
 {
 	/* XXX */
 }

@@ -17,7 +17,7 @@ typedef struct cw_stiloe_array_s cw_stiloe_array_t;
 struct cw_stiloe_array_s {
 	cw_stiloe_t	stiloe;
 	union {
-		cw_stiloei_t	stiloei;
+		cw_stiloec_t	stiloec;
 		struct {
 			cw_stilo_t	*arr;
 			cw_uint32_t	len;
