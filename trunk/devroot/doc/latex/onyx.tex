@@ -2335,15 +2335,17 @@ string. \\
 \hline \hline
 \multicolumn{4}{|l|}{Array operators} \\
 \hline \hline
-& {\bf \htmlref{argv}{systemdict:argv}} & & \\
+-- & {\bf \htmlref{argv}{systemdict:argv}} & args & Get program arguments. \\
 \hline
-& {\bf \htmlref{[}{systemdict:sym_lb}} & & \\
+-- & {\bf \htmlref{[}{systemdict:sym_lb}} & mark & Begin an array
+declaration. \\
 \hline
-& {\bf \htmlref{]}{systemdict:sym_rb}} & & \\
+mark objects & {\bf \htmlref{]}{systemdict:sym_rb}} & array & Construct an
+array. \\
 \hline
 & {\bf \htmlref{aload}{systemdict:aload}} & & \\
 \hline
-& {\bf \htmlref{array}{systemdict:array}} & & \\
+length & {\bf \htmlref{array}{systemdict:array}} & array & Create an array. \\
 \hline
 & {\bf \htmlref{astore}{systemdict:astore}} & & \\
 \hline \hline
@@ -2716,44 +2718,50 @@ onyx:0>
 	\end{description}
 \label{systemdict:sym_lb}
 \index{[@\onyxop{}{{\lb}}{}}
-\item[{\onyxop{--}{{\lb}}{--}}: ]
+\item[{\onyxop{--}{{\lb}}{mark}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[mark: ]
+			A mark object.
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Begin an array declaration.  See the
+		\htmlref{\onyxop{}{]}{}}{systemdict:sym_rb}} operator
+		documentation for more details on array construction.
 	\item[Example(s): ]\begin{verbatim}
 
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sym_rb}
 \index{]@\onyxop{}{{\rb}}{}}
-\item[{\onyxop{--}{{\rb}}{--}}: ]
+\item[{\onyxop{mark objects}{{\rb}}{array}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[mark: ]
+			A mark object.
+		\item[objects: ]
+			Zero or more non-mark objects.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[array: ]
+			An array that contains \oparg{objects}.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{unmatchedmark}{unmatchedmark}.]
 		\end{description}
 	\item[Description: ]
+		Construct an array that contains all \oparg{objects} on ostack
+		down to the first \oparg{mark}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> mark 1 2 3 ] 1 sprint
+[1 2 3]
 		\end{verbatim}
 	\end{description}
 \label{systemdict:abs}
@@ -2877,44 +2885,57 @@ onyx:0>
 	\end{description}
 \label{systemdict:argv}
 \index{argv@\onyxop{}{argv}{}}
-\item[{\onyxop{--}{argv}{--}}: ]
+\item[{\onyxop{--}{argv}{args}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[args: ]
+			An array of strings.  The first string in \oparg{args}
+			is the path of this program, and any additional
+			array elements are the arguments that were passed during
+			invocation.
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Get the argument vector that was used to invoke this program.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> argv 1 sprint
+[`/usr/local/bin/onyx']
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:array}
 \index{array@\onyxop{}{array}{}}
-\item[{\onyxop{--}{array}{--}}: ]
+\item[{\onyxop{length}{array}{array}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[length: ]
+			Non-negative number of array elements.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[array: ]
+			An array of \oparg{length} elements.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Create an array of \oparg{length} elements.  The elements are
+		initialized to null objects.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> 3 array 1 sprint
+[null null null]
+onyx:0> 0 array 1 sprint
+[]
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:astore}
