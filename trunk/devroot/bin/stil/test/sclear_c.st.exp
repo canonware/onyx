@@ -1,4 +1,4 @@
 Error /typecheck in --sclear--
 ostack: (1 2 3 --sclear--)
-estack: (-file- --sclear--)
+estack: (--start-- -file- --sclear--)
 dstack: (-dict- -dict- -dict- -dict-)

@@ -1,4 +1,4 @@
 Error /typecheck in --scounttomark--
 ostack: (1 --scounttomark--)
-estack: (-file- --scounttomark--)
+estack: (--start-- -file- --scounttomark--)
 dstack: (-dict- -dict- -dict- -dict-)

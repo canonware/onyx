@@ -361,7 +361,7 @@ void
 stilo_thread_start(cw_stilo_t *a_stilo)
 {
 	cw_stiloe_thread_t	*thread;
-	cw_stilo_t		*file;
+	cw_stilo_t		*start;
 
 	_cw_check_ptr(a_stilo);
 	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
@@ -370,11 +370,11 @@ stilo_thread_start(cw_stilo_t *a_stilo)
 	_cw_assert(thread->stiloe.magic == _CW_STILOE_MAGIC);
 	_cw_assert(thread->stiloe.type == STILOT_THREAD);
 
-	file = stilo_stack_push(&thread->ostack);
-	stilo_dup(file, stil_stdin_get(thread->stil));
-	stilo_attrs_set(file, STILOA_EXECUTABLE);
+	start = stilo_stack_push(&thread->estack);
+	stilo_operator_new(start, systemdict_start, STILN_start);
+	stilo_attrs_set(start, STILOA_EXECUTABLE);
 
-	systemdict_start(a_stilo);
+	stilo_thread_loop(a_stilo);
 }
 
 void
@@ -611,7 +611,7 @@ stilo_thread_loop(cw_stilo_t *a_stilo)
 
 	for (sdepth = cdepth = stilo_stack_count(&thread->estack);
 	     cdepth >= sdepth; cdepth = stilo_stack_count(&thread->estack)) {
-		if (cdepth == _LIBSTIL_ESTACK_MAX) {
+		if (cdepth == _LIBSTIL_ESTACK_MAX + 1) {
 			stilo_thread_error(a_stilo,
 			    STILO_THREADE_ESTACKOVERFLOW);
 		}

@@ -92,19 +92,37 @@ main(int argc, char **argv, char **envp)
 	 */
 	if (isatty(0) && argc == 1) {
 		/*
-		 * Do not stop on error.
+		 * Define 'resume' to continue after an error.
+		 *
+		 * Do not stop on error.  Recursively executing stdin can result
+		 * in strange behavior if there are data buffered for stdin that
+		 * haven't been consumed by the interpreter buffer (this only
+		 * happens if the user has typed in a very long statement), but
+		 * at least the error will be handled correctly before this
+		 * happens.
 		 *
 		 * Quit on estackoverflow in order to avoid an infinite loop.
+		 *
+		 * Push an executable stdin on ostack to prepare for the start
+		 * operator.
 		 */
 		static const cw_uint8_t	code[] = "
+/resume //stop def
 currenterror begin
-	/stop {} def
+	/stop {
+		stdin cvx stopped pop
+	} def
 end
 errordict begin
 	/estackoverflow {
-		//estackoverflow quit
+		currenterror begin
+		/stop {flush quit} def
+		end
+
+		//estackoverflow
 	} def
 end
+stdin cvx
 ";
 		struct stil_arg_s	arg = {NULL, 0, 0};
 		char			*editor;
@@ -146,6 +164,7 @@ end
 		stilo_thread_interpret(&thread, &threadp, code, sizeof(code) -
 		    1);
 		stilo_thread_flush(&thread, &threadp);
+
 		/* Run the interpreter such that it will not exit on errors. */
 		stilo_thread_start(&thread);
 
@@ -286,7 +305,7 @@ end
 			_cw_not_reached();
 
 		/* Run the interpreter non-interactively. */
-		systemdict_start(&thread);
+		stilo_thread_start(&thread);
 	}
 
 	retval = 0;

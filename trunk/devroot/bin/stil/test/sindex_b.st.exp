@@ -1,4 +1,4 @@
 Error /stackunderflow in --sindex--
 ostack: (--sindex--)
-estack: (-file- --sindex--)
+estack: (--start-- -file- --sindex--)
 dstack: (-dict- -dict- -dict- -dict-)

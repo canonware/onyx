@@ -3519,33 +3519,31 @@ systemdict_start(cw_stilo_t *a_thread)
 	estack = stilo_thread_estack_get(a_thread);
 	tstack = stilo_thread_tstack_get(a_thread);
 
+	edepth = stilo_stack_count(estack);
+	tdepth = stilo_stack_count(tstack);
+
 	STILO_STACK_GET(ostilo, ostack, a_thread);
 	estilo = stilo_stack_push(estack);
 	stilo_dup(estilo, ostilo);
 	stilo_stack_pop(ostack);
-
-	edepth = stilo_stack_count(estack);
-	tdepth = stilo_stack_count(tstack);
 
 	xep_begin();
 	xep_try {
 		stilo_thread_loop(a_thread);
 	}
 	xep_catch(_CW_STILX_EXIT)
+	xep_mcatch(_CW_STILX_QUIT)
 	xep_mcatch(_CW_STILX_STOP) {
 		xep_handled();
 	}
-	xep_catch(_CW_STILX_QUIT) {
-		/*
-		 * Pop all objects off estack and tstack that weren't there
-		 * before entering this function.
-		 */
-		stilo_stack_npop(estack, stilo_stack_count(estack) - edepth);
-		stilo_stack_npop(tstack, stilo_stack_count(tstack) - tdepth);
-
-		xep_handled();
-	}
 	xep_end();
+
+	/*
+	 * Pop all objects off estack and tstack that weren't there
+	 * before entering this function.
+	 */
+	stilo_stack_npop(estack, stilo_stack_count(estack) - edepth);
+	stilo_stack_npop(tstack, stilo_stack_count(tstack) - tdepth);
 }
 
 void

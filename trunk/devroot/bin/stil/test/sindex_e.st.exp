@@ -1,4 +1,4 @@
 Error /typecheck in --sindex--
 ostack: (-mark- 1 --sindex--)
-estack: (-file- --sindex--)
+estack: (--start-- -file- --sindex--)
 dstack: (-dict- -dict- -dict- -dict-)

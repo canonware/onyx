@@ -1,4 +1,4 @@
 Error /stackunderflow in --spop--
 ostack: (--spop--)
-estack: (-file- --spop--)
+estack: (--start-- -file- --spop--)
 dstack: (-dict- -dict- -dict- -dict-)
