@@ -73,9 +73,6 @@ struct cw_nxoe_dict_s
     } data;
 };
 
-cw_nxo_t *
-nxo_l_dict_lookup(const cw_nxo_t *a_nxo, const cw_nxo_t *a_key);
-
 #ifndef CW_USE_INLINES
 cw_bool_t
 nxoe_l_dict_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter);

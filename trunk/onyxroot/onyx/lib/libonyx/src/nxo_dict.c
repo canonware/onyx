@@ -444,37 +444,6 @@ nxo_dict_lookup(const cw_nxo_t *a_nxo, const cw_nxo_t *a_key, cw_nxo_t *r_nxo)
     return retval;
 }
 
-/* This function is generally unsafe to use, since the return value can
- * disappear due to GC before the pointer is turned into a legitimate reference.
- * However, the GC itself needs to cache pointers to the actual values inside
- * the dict for performance reasons, so it uses this function. */
-cw_nxo_t *
-nxo_l_dict_lookup(const cw_nxo_t *a_nxo, const cw_nxo_t *a_key)
-{
-    cw_nxo_t *retval;
-    cw_nxoe_dict_t *dict;
-
-    cw_check_ptr(a_nxo);
-    cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
-    cw_assert(nxo_type_get(a_nxo) == NXOT_DICT);
-
-    dict = (cw_nxoe_dict_t *) a_nxo->o.nxoe;
-
-    cw_check_ptr(dict);
-    cw_dassert(dict->nxoe.magic == CW_NXOE_MAGIC);
-    cw_assert(dict->nxoe.type == NXOT_DICT);
-
-#ifdef CW_THREADS
-    nxoe_p_dict_lock(dict);
-#endif
-    retval = nxoe_p_dict_lookup(dict, a_key);
-#ifdef CW_THREADS
-    nxoe_p_dict_unlock(dict);
-#endif
-
-    return retval;
-}
-
 cw_uint32_t
 nxo_dict_count(const cw_nxo_t *a_nxo)
 {
