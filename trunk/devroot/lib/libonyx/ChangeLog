@@ -1,5 +1,9 @@
 2001-10-31  Jason Evans  <jasone@canonware.com>
 
+	* src/mem.c: Use size_t instead of cw_uint32_t where appropriate
+	to avoid warnings and the possibility of varargs sizeof mismatches
+	for future ports.
+
 	* src/nx.c (nx_delete): Fix a circular dependency during deletion
 	that could cause a destroyed mutex to be referenced.
 
