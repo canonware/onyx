@@ -19,6 +19,13 @@
 #define _LIBSTASH_USE_BUF
 #include <libstash/libstash_r.h>
 
+#ifdef _CW_OS_SOLARIS
+/* For ntohl(). */
+#  include <sys/types.h>
+#  include <netinet/in.h>
+#endif
+
+
 int
 main()
 {
