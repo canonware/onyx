@@ -1,4 +1,5 @@
 *.out
 *.diff
+*.perf
 *.st
 Cookfile.list
