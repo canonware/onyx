@@ -64,7 +64,7 @@ stil_new(cw_stil_t *a_stil)
 	if (stilt_new(&stilt, retval) == NULL)
 		goto OOM_4;
 
-	op_setglobal(&stilt);
+	stilt_setglobal(&stilt, TRUE);
 	/* XXX No way to catch OOM here. */
 	stil_op_systemdict_populate(&retval->systemdict, &stilt);
 	stilt_delete(&stilt);
