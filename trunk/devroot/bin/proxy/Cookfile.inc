@@ -199,7 +199,7 @@ proxy_install_p : [PROXY_P] proxy_install_common
 #endif
   set mkdir
 {
-  [CC] [D_CFLAGS] -o [target]
+  [CC] [A_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [PROXY_SRCS]]
 #if [ENABLE_SHARED]
        -rpath [objdir]/lib/c/libsock/lib
@@ -212,7 +212,7 @@ proxy_install_p : [PROXY_P] proxy_install_common
            [LIBSOCK_P] [LIBSTASH_P]
   set mkdir
 {
-  [CC] [D_CFLAGS] -o [target]
+  [CC] [P_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [PROXY_SRCS]]
        [LDFLAGS] -lsock_p -lstash_p [EXTRALIBS];
 }

@@ -199,7 +199,7 @@ ficl_install_p : [FICL_P] ficl_install_common
 #endif
   set mkdir
 {
-  [CC] [D_CFLAGS] -o [target]
+  [CC] [A_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [FICL_SRCS]]
 #if [ENABLE_SHARED]
        -rpath [objdir]/lib/c/libficl/lib
@@ -213,7 +213,7 @@ ficl_install_p : [FICL_P] ficl_install_common
            [LIBFICL_P] [LIBEDIT_P] [LIBSTASH_P]
   set mkdir
 {
-  [CC] [D_CFLAGS] -o [target]
+  [CC] [P_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [FICL_SRCS]]
        [LDFLAGS] -lficl_p -ledit_p -lstash_p -ltermcap [EXTRALIBS];
 }

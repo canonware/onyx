@@ -199,7 +199,7 @@ echos_install_p : [ECHOS_P] echos_install_common
 #endif
   set mkdir
 {
-  [CC] [D_CFLAGS] -o [target]
+  [CC] [A_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [ECHOS_SRCS]]
 #if [ENABLE_SHARED]
        -rpath [objdir]/lib/c/libsock/lib
@@ -212,7 +212,7 @@ echos_install_p : [ECHOS_P] echos_install_common
            [LIBSOCK_P] [LIBSTASH_P]
   set mkdir
 {
-  [CC] [D_CFLAGS] -o [target]
+  [CC] [P_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [ECHOS_SRCS]]
        [LDFLAGS] -lsock_p -lstash_p [EXTRALIBS];
 }

@@ -199,7 +199,7 @@ cover_install_p : [COVER_P] cover_install_common
 #endif
   set mkdir
 {
-  [CC] [D_CFLAGS] -o [target]
+  [CC] [A_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [COVER_SRCS]]
 #if [ENABLE_SHARED]
        -rpath [objdir]/lib/c/libstash/lib
@@ -211,7 +211,7 @@ cover_install_p : [COVER_P] cover_install_common
            [LIBSTASH_P]
   set mkdir
 {
-  [CC] [D_CFLAGS] -o [target]
+  [CC] [P_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [COVER_SRCS]]
        [LDFLAGS] -lstash_p [EXTRALIBS];
 }

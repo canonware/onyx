@@ -199,7 +199,7 @@ stile_install_p : [STILE_P] stile_install_common
 #endif
   set mkdir
 {
-  [CC] [D_CFLAGS] -o [target]
+  [CC] [A_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [STILE_SRCS]]
 #if [ENABLE_SHARED]
        -rpath [objdir]/lib/c/libstil/lib
@@ -212,7 +212,7 @@ stile_install_p : [STILE_P] stile_install_common
            [LIBSTIL_P] [LIBSTASH_P]
   set mkdir
 {
-  [CC] [D_CFLAGS] -o [target]
+  [CC] [P_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [STILE_SRCS]]
        [LDFLAGS] -lstil_p -lstash_p [EXTRALIBS];
 }

@@ -199,7 +199,7 @@ edittest_install_p : [EDITTEST_P] edittest_install_common
 #endif
   set mkdir
 {
-  [CC] [D_CFLAGS] -o [target]
+  [CC] [A_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [EDITTEST_SRCS]]
 #if [ENABLE_SHARED]
        -rpath [objdir]/lib/c/libedit/lib
@@ -212,7 +212,7 @@ edittest_install_p : [EDITTEST_P] edittest_install_common
            [LIBEDIT_P] [LIBSTASH_P]
   set mkdir
 {
-  [CC] [D_CFLAGS] -o [target]
+  [CC] [P_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [EDITTEST_SRCS]]
        [LDFLAGS] -ledit_p -lstash_p -ltermcap [EXTRALIBS];
 }
