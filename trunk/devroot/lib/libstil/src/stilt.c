@@ -562,12 +562,6 @@ stilt_error(cw_stilt_t *a_stilt, cw_stilte_t a_error)
 	 * Find handler corresponding to error.
 	 */
 	switch (a_error) {
-	case STILTE_DICTFULL: {
-		cw_uint8_t	keystr[] = "dictfull";
-
-		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
-		break;
-	}
 	case STILTE_DICTSTACKOVERFLOW: {
 		cw_uint8_t	keystr[] = "dictstackoverflow";
 

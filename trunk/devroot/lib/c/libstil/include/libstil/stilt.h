@@ -17,7 +17,6 @@
 
 typedef enum {
 	/* Interpreter errors. */
-	STILTE_DICTFULL,
 	STILTE_DICTSTACKOVERFLOW,	/* dstack too deep. */
 	STILTE_DICTSTACKUNDERFLOW,	/* No poppable dictionary on dstack. */
 	STILTE_EXECSTACKOVERFLOW,	/* estack too deep. */

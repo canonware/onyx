@@ -81,15 +81,6 @@ struct cw_stilo_s {
 	 */
 	cw_stilop_t	perms:2;
 	/*
-	 * If TRUE, this is an extended (not the same as composite) object.
-	 * This only pertains to number stilo's, which can switch between simple
-	 * and extended representations.
-	 *
-	 * For a number stilo, if not extended, this number is representable as
-	 * a 32 bit signed integer.  Otherwise o.stiloe contains the value.
-	 */
-	cw_bool_t	extended:1;
-	/*
 	 * If TRUE, there is a breakpoint set on this object.  In general, this
 	 * field is not looked at unless the interpreter has been put into
 	 * debugging mode.
@@ -127,14 +118,6 @@ struct cw_stiloe_dicto_s {
 void		stilo_clobber(cw_stilo_t *a_stilo);
 void		stilo_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
 
-#define		stilo_type_get(a_stilo)	(a_stilo)->type
-
-#define		stilo_attrs_get(a_stilo) (a_stilo)->attrs
-#define		stilo_attrs_set(a_stilo, a_attrs) (a_stilo)->attrs = (a_attrs)
-
-#define		stilo_perms_get(a_stilo) (a_stilo)->perms
-#define		stilo_perms_set(a_stilo, a_perms) (a_stilo)->perms = (a_perms)
-
 void		stilo_cast(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilot_t
     a_stilot);
 void		stilo_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t
@@ -148,9 +131,17 @@ void		stilo_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t
 	(a_to)->watchpoint = FALSE;					\
 } while (0)
 	
-/*  void		stilo_dup(cw_stilo_t *a_to, const cw_stilo_t *a_from, cw_stilt_t */
-/*      *a_stilt); */
 void		stilo_move(cw_stilo_t *a_to, cw_stilo_t *a_from);
+
+#define		stilo_type_get(a_stilo)	(a_stilo)->type
+cw_bool_t	stilo_global_get(cw_stilo_t *a_stilo);
+cw_bool_t	stilo_local_get(cw_stilo_t *a_stilo);
+
+#define		stilo_attrs_get(a_stilo) (a_stilo)->attrs
+#define		stilo_attrs_set(a_stilo, a_attrs) (a_stilo)->attrs = (a_attrs)
+
+#define		stilo_perms_get(a_stilo) (a_stilo)->perms
+#define		stilo_perms_set(a_stilo, a_perms) (a_stilo)->perms = (a_perms)
 
 void		stilo_print(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilo_t
     *a_file, cw_bool_t a_syntactic, cw_bool_t a_newline);

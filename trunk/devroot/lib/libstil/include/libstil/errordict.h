@@ -11,7 +11,6 @@
 
 void	errordict_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt);
 
-void	errordict_dictfull(cw_stilt_t *a_stilt);
 void	errordict_dictstackoverflow(cw_stilt_t *a_stilt);
 void	errordict_dictstackunderflow(cw_stilt_t *a_stilt);
 void	errordict_execstackoverflow(cw_stilt_t *a_stilt);

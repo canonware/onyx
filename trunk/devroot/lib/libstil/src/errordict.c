@@ -34,7 +34,6 @@ struct cw_errordict_entry {
  * Array of operators in errordict.
  */
 static struct cw_errordict_entry errordict_ops[] = {
-	_ERRORDICT_ENTRY(dictfull),
 	_ERRORDICT_ENTRY(dictstackoverflow),
 	_ERRORDICT_ENTRY(dictstackunderflow),
 	_ERRORDICT_ENTRY(execstackoverflow),
@@ -81,12 +80,6 @@ errordict_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 	}
 
 #undef NENTRIES
-}
-
-void
-errordict_dictfull(cw_stilt_t *a_stilt)
-{
-	_cw_error("XXX Not implemented");
 }
 
 void

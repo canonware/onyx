@@ -13,6 +13,9 @@
 
 #include <errno.h>
 
+/* Initial size of dictionaries created with the dict operator. */
+#define	_CW_SYSTEMDICT_DICT_SIZE	16
+
 struct cw_systemdict_entry {
 	const cw_uint8_t	*name;
 	cw_op_t			*op_f;
@@ -113,7 +116,6 @@ static struct cw_systemdict_entry systemdict_ops[] = {
 	_SYSTEMDICT_ENTRY(loop),
 	_SYSTEMDICT_ENTRY(lt),
 	_SYSTEMDICT_ENTRY(mark),
-	_SYSTEMDICT_ENTRY(maxlength),
 	_SYSTEMDICT_ENTRY(mod),
 	_SYSTEMDICT_ENTRY(mul),
 	_SYSTEMDICT_ENTRY(mutex),
@@ -126,7 +128,6 @@ static struct cw_systemdict_entry systemdict_ops[] = {
 	_SYSTEMDICT_ENTRY(or),
 	_SYSTEMDICT_ENTRY(pop),
 	_SYSTEMDICT_ENTRY(print),
-	_SYSTEMDICT_ENTRY(printobject),
 	_SYSTEMDICT_ENTRY(product),
 	_SYSTEMDICT_ENTRY(prompt),
 	_SYSTEMDICT_ENTRY(pstack),
@@ -154,7 +155,6 @@ static struct cw_systemdict_entry systemdict_ops[] = {
 	_SYSTEMDICT_ENTRY(stack),
 	_SYSTEMDICT_ENTRY(start),
 	_SYSTEMDICT_ENTRY(status),
-	_SYSTEMDICT_ENTRY(statusdict),
 	_SYSTEMDICT_ENTRY(stdin),
 	_SYSTEMDICT_ENTRY(stderr),
 	_SYSTEMDICT_ENTRY(stdout),
@@ -277,7 +277,31 @@ systemdict_aload(cw_stilt_t *a_stilt)
 void
 systemdict_anchorsearch(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	soft_operator("
+%/anchorsearch
+%{
+  exch dup 3 1 roll % Make a copy of the original string.
+  search % -string- -seek- search -post- -match- -pre- true
+         % -string- -seek- search -string- false
+  {
+    % Search string found.  Check if it was at the beginning.
+    3 2 roll length 0 eq
+    {
+      % Success.
+      3 2 roll pop % Get rid of original string.
+      true
+    }{
+      % Nope.  Clean up
+      pop pop
+      false
+    } ifelse
+  }{
+      % Search string not found at all.
+      pop pop pop
+      false
+  } ifelse
+%} bind def
+");
 }
 
 void
@@ -398,7 +422,13 @@ systemdict_clear(cw_stilt_t *a_stilt)
 void
 systemdict_cleardictstack(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*dstack;
+	cw_uint32_t	count;
+
+	dstack = stilt_dstack_get(a_stilt);
+	count = stils_count(dstack);
+	if (count > 3)
+		stils_npop(dstack, a_stilt, count - 3);
 }
 
 void
@@ -697,7 +727,19 @@ systemdict_cvx(cw_stilt_t *a_stilt)
 void
 systemdict_def(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*ostack, *dstack;
+	cw_stilo_t	*dict, *key, *val;
+
+	ostack = stilt_ostack_get(a_stilt);
+	dstack = stilt_dstack_get(a_stilt);
+
+	dict = stils_get(dstack, a_stilt);
+	val = stils_get(ostack, a_stilt);
+	key = stils_down_get(ostack, a_stilt, val);
+
+	stilo_dict_def(dict, a_stilt, key, val);
+
+	stils_npop(ostack, a_stilt, 2);
 }
 
 void
@@ -752,13 +794,50 @@ systemdict_detach(cw_stilt_t *a_stilt)
 void
 systemdict_dict(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*ostack;
+	cw_stilo_t	*dict;
+
+	ostack = stilt_ostack_get(a_stilt);
+
+	dict = stils_push(ostack, a_stilt);
+	stilo_dict_new(dict, a_stilt, _CW_SYSTEMDICT_DICT_SIZE);
 }
 
 void
 systemdict_dictstack(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*ostack, *dstack, *tstack;
+	cw_stilo_t	*array, *subarray, *stilo;
+	cw_sint32_t	i, count;
+
+	ostack = stilt_ostack_get(a_stilt);
+	dstack = stilt_dstack_get(a_stilt);
+	tstack = stilt_tstack_get(a_stilt);
+
+	array = stils_get(ostack, a_stilt);
+	if (stilo_type_get(array) != STILOT_ARRAY)
+		stilt_error(a_stilt, STILTE_TYPECHECK);
+	count = stils_count(dstack);
+	if (count > stilo_array_len_get(array))
+		stilt_error(a_stilt, STILTE_RANGECHECK);
+
+	/* Move array to tstack, create subarray, and pop array. */
+	stilo = stils_push(tstack, a_stilt);
+	stilo_dup(stilo, array);
+	subarray = array;
+	array = stilo;
+	stilo_array_subarray_new(subarray, array, a_stilt, 0, count);
+	stils_pop(tstack, a_stilt);
+
+	/* Copy dictstack to subarray. */
+	i = count - 1;
+	stilo = stils_get(dstack, a_stilt);
+	stilo_dup(stilo_array_el_get(subarray, a_stilt, i), stilo);
+	
+	for (i--; i >= 0; i--) {
+		stilo = stils_down_get(dstack, a_stilt, stilo);
+		stilo_dup(stilo_array_el_get(subarray, a_stilt, i), stilo);
+	}
 }
 
 void
@@ -854,7 +933,38 @@ systemdict_exec(cw_stilt_t *a_stilt)
 void
 systemdict_execstack(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*ostack, *estack, *tstack;
+	cw_stilo_t	*array, *subarray, *stilo;
+	cw_sint32_t	i, count;
+
+	ostack = stilt_ostack_get(a_stilt);
+	estack = stilt_estack_get(a_stilt);
+	tstack = stilt_tstack_get(a_stilt);
+
+	array = stils_get(ostack, a_stilt);
+	if (stilo_type_get(array) != STILOT_ARRAY)
+		stilt_error(a_stilt, STILTE_TYPECHECK);
+	count = stils_count(estack);
+	if (count > stilo_array_len_get(array))
+		stilt_error(a_stilt, STILTE_RANGECHECK);
+
+	/* Move array to tstack, create subarray, and pop array. */
+	stilo = stils_push(tstack, a_stilt);
+	stilo_dup(stilo, array);
+	subarray = array;
+	array = stilo;
+	stilo_array_subarray_new(subarray, array, a_stilt, 0, count);
+	stils_pop(tstack, a_stilt);
+
+	/* Copy dictstack to subarray. */
+	i = count - 1;
+	stilo = stils_get(estack, a_stilt);
+	stilo_dup(stilo_array_el_get(subarray, a_stilt, i), stilo);
+	
+	for (i--; i >= 0; i--) {
+		stilo = stils_down_get(estack, a_stilt, stilo);
+		stilo_dup(stilo_array_el_get(subarray, a_stilt, i), stilo);
+	}
 }
 
 void
@@ -1538,12 +1648,6 @@ systemdict_mark(cw_stilt_t *a_stilt)
 }
 
 void
-systemdict_maxlength(cw_stilt_t *a_stilt)
-{
-	_cw_error("XXX Not implemented");
-}
-
-void
 systemdict_mod(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack;
@@ -1671,12 +1775,6 @@ systemdict_print(cw_stilt_t *a_stilt)
 	stilo = stils_get(ostack, a_stilt);
 	stilo_print(stilo, a_stilt, stdout_stilo, FALSE, FALSE);
 	stils_pop(ostack, a_stilt);
-}
-
-void
-systemdict_printobject(cw_stilt_t *a_stilt)
-{
-	_cw_error("XXX Not implemented");
 }
 
 void
@@ -2185,12 +2283,6 @@ systemdict_start(cw_stilt_t *a_stilt)
 
 void
 systemdict_status(cw_stilt_t *a_stilt)
-{
-	_cw_error("XXX Not implemented");
-}
-
-void
-systemdict_statusdict(cw_stilt_t *a_stilt)
 {
 	_cw_error("XXX Not implemented");
 }

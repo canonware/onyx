@@ -586,6 +586,36 @@ stilo_move(cw_stilo_t *a_to, cw_stilo_t *a_from)
 	stilo_no_new(a_from);
 }
 
+cw_bool_t
+stilo_global_get(cw_stilo_t *a_stilo)
+{
+	cw_bool_t	retval;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+
+#ifdef _LIBSTIL_DBG
+	switch (a_stilo->type) {
+	case STILOT_ARRAY:
+	case STILOT_CONDITION:
+	case STILOT_DICT:
+	case STILOT_FILE:
+	case STILOT_HOOK:
+	case STILOT_LOCK:
+	case STILOT_NAME:
+	case STILOT_STRING:
+		retval = a_stilo->o.stiloe->global;
+		break;
+	default:
+		_cw_not_reached();
+	}
+#else
+	retval = a_stilo->o.stiloe->global;
+#endif
+
+	return retval;
+}
+
 void
 stilo_print(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilo_t *a_file,
     cw_bool_t a_syntactic, cw_bool_t a_newline)
@@ -1312,6 +1342,7 @@ stilo_dict_def(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilo_t *a_key,
 	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
 	_cw_assert(a_stilo->type == STILOT_DICT);
 	/* XXX Make sure setglobal is correct. */
+	/* XXX Make sure value isn't local if dict is global. */
 
 	dict = (cw_stiloe_dict_t *)a_stilo->o.stiloe;
 
