@@ -89,41 +89,6 @@ SRCS = [SRCS] [LIBONYX_SRCS];
   CTESTS = [CTESTS] [ctests];
 }
 
-/*
- * Simple onyx tests.  Output is diff'ed with the expected (.exp file)
- * output.
- */
-{
-  local otests = ;
-  otests = [fromto % [srcdir]/lib/libonyx/test/% [otests]];
-
-  OTESTS = [OTESTS] [otests];
-}
-
-/* Perl scripts that drive other tests. */
-{
-  local ptests = ;
-  ptests = [fromto % [srcdir]/lib/libonyx/test/% [ptests]];
-
-  PTESTS = [PTESTS] [ptests];
-}
-
-/* C programs that are driven by tests. */
-{
-  local cbtests = ;
-  cbtests = [fromto % [srcdir]/lib/libonyx/test/% [cbtests]];
-
-  CBTESTS = [CBTESTS] [cbtests];
-}
-
-/* onyx programs that are driven by tests. */
-{
-  local obtests = ;
-  obtests = [fromto % [srcdir]/lib/libonyx/test/% [obtests]];
-
-  OBTESTS = [OBTESTS] [obtests];
-}
-
 /* LaTeX source files. */
 {
   local tex_srcs = ch.tex cnd.tex dch.tex gcdict.tex mem.tex mq.tex mtx.tex
@@ -137,14 +102,6 @@ SRCS = [SRCS] [LIBONYX_SRCS];
   tex_srcs = [tex_srcs] [objdir]/lib/libonyx/doc/latex/manual.tex;
 
   TEX_SRCS = [TEX_SRCS] [tex_srcs];
-}
-
-/* xfig source files. */
-{
-  local fig_srcs = ;
-  fig_srcs = [fromto % [srcdir]/lib/libonyx/doc/latex/% [fig_srcs]];
-
-  FIG_SRCS = [FIG_SRCS] [fig_srcs];
 }
 
 /* Libraries. */
@@ -289,6 +246,7 @@ libonyx_install_s : [LIBONYX_S] libonyx_install_common
        -undefined suppress -flat_namespace -dynamiclib
        -compatibility_version [LIBONYX_REV]
        -current_version [LIBONYX_REV]
+       -install_name [abs_objdir]/[LIBONYX_S]
 #endif
        -o [target] [need];
 

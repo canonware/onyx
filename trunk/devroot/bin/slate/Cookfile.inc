@@ -32,36 +32,12 @@ SLATE_SRCS = [fromto % [srcdir]/bin/slate/src/% [SLATE_SRCS]];
   OTESTS = [OTESTS] [otests];
 }
 
-/* Perl scripts that drive other tests and use the sequence mode of verify. */
-{
-  local ptests = ;
-  ptests = [fromto % [srcdir]/bin/slate/test/% [ptests]];
-
-  PTESTS = [PTESTS] [ptests];
-}
-
-/* Onyx programs that are driven by tests. */
-{
-  local obtests = ;
-  obtests = [fromto % [srcdir]/bin/slate/test/% [obtests]];
-
-  OBTESTS = [OBTESTS] [obtests];
-}
-
 /* LaTeX source files. */
 {
   local tex_srcs = ;
   tex_srcs = [fromto % [srcdir]/bin/slate/doc/latex/% [tex_srcs]];
 
   TEX_SRCS = [TEX_SRCS] [tex_srcs];
-}
-
-/* xfig source files. */
-{
-  local fig_srcs = ;
-  fig_srcs = [fromto % [srcdir]/bin/slate/doc/latex/% [fig_srcs]];
-
-  FIG_SRCS = [FIG_SRCS] [fig_srcs];
 }
 
 /* Binaries. */
