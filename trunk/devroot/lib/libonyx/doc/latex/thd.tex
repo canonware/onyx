@@ -16,22 +16,23 @@
 \label{thd}
 \index{thd@\classname{thd}{}}
 
-The \classname{thd} class implements a wrapper around the system threads library
-(POSIX threads only, so far).  In most regards, this is a thin wrapper around
-the normal threads functionality provided by the system, but some extra
-information is kept in order to allow implmentation of thread
-suspension/resumption, ``critical sections'', and ``single sections''.
+The \classname{thd} class implements a wrapper around the system POSIX threads
+library or GNU pth library.  In most regards, this is a thin wrapper around the
+normal threading functionality, but some extra information is kept in order to
+allow implmentation of thread suspension/resumption, ``critical sections'', and
+``single sections''.
 
 The suspendibility of each thread is determined by the arguments passed to
 \cfunc{thd\_new}{}.  The initial thread is always suspendible.  Other threads
 that are created via some mechanism other than \cfunc{thd\_new}{} are not
 suspendible.
 
-In most cases, the additional functionality is implemented with the aid of
-signals.  As a result, system calls may be interrupted by signals.  The system
-calls will be automaticalaly restarted if they have made no progress at the time
-of interruption, but will return a partial result otherwise.  Therefore, if any
-of the additional functionality is utilized, the application must be careful to
+Depending on how \libname{libonyx} is built, the additional functionality is
+implemented with the aid of the \cvar{SIGUSR1} and \cvar{SIGUSR2} signals.  As a
+result, system calls may be interrupted by signals.  The system calls will be
+automaticalaly restarted if they have made no progress at the time of
+interruption, but will return a partial result otherwise.  Therefore, if any of
+the additional functionality is utilized, the application must be careful to
 handle partial system call results.  At least the following system calls can be
 interrupted: \cfunc{read}{}, \cfunc{write}{}, \cfunc{sendto}{},
 \cfunc{recvfrom}{}, \cfunc{sendmsg}{}, \cfunc{recvmsg}{}, \cfunc{ioctl}{}, and

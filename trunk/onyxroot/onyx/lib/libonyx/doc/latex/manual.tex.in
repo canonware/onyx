@@ -163,6 +163,13 @@ make any assumptions about interruptible system calls always completing with a
 full result.  See the \htmlref{\classname{thd}}{thd} class documentation for
 more details.
 
+\subsection{Signals}
+Depending on how \libname{libonyx} is built, \cvar{SIGUSR1} and \cvar{SIGUSR2}
+may be reserved by the \htmlref{\classname{thd}}{thd} class for thread
+suspension and resumption.  Additionally, the \cvar{SIGPIPE} signal is ignored
+by default, since socket operations can cause \cvar{SIGPIPE} signals, for which
+the library has no use.
+
 \section{Guidelines for writing extensions}
 When embedding \libname{libonyx} in an application, it is usually desireable to
 add some operators so that the interpreter can interact with the rest of the
