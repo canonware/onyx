@@ -236,9 +236,8 @@ nxo_thread_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx)
     cw_nxoe_thread_t *thread;
     cw_nxo_t *nxo;
 
-    thread = (cw_nxoe_thread_t *) nxa_malloc(nx_nxa_get(a_nx),
+    thread = (cw_nxoe_thread_t *) nxa_calloc(nx_nxa_get(a_nx), 1,
 					     sizeof(cw_nxoe_thread_t));
-    memset(thread, 0, sizeof(cw_nxoe_thread_t));
 
     nxoe_l_new(&thread->nxoe, NXOT_THREAD, FALSE);
 
@@ -529,6 +528,60 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 #ifdef CW_DBG
     cw_uint32_t tdepth;
 #endif
+    /* XXX Move to configure. */
+#ifdef __GNUC__
+//#define CW_COMPUTE_GOTOS
+#endif
+#ifdef CW_COMPUTE_GOTOS
+    static const void *jumps_outer[] = {
+	/* OUTER_A. */
+	[NXOT_BOOLEAN] = &&OUTER_A,
+#ifdef CW_THREADS
+	[NXOT_CONDITION] = &&OUTER_A,
+#endif
+	[NXOT_DICT] = &&OUTER_A,
+	[NXOT_FINO] = &&OUTER_A,
+	[NXOT_INTEGER] = &&OUTER_A,
+	[NXOT_MARK] = &&OUTER_A,
+#ifdef CW_THREADS
+	[NXOT_MUTEX] = &&OUTER_A,
+#endif
+	[NXOT_PMARK] = &&OUTER_A,
+#ifdef CW_REAL
+	[NXOT_REAL] = &&OUTER_A,
+#endif
+#ifdef CW_REGEX
+	[NXOT_REGEX] = &&OUTER_A,
+	[NXOT_REGSUB] = &&OUTER_A,
+#endif
+	[NXOT_STACK] = &&OUTER_A,
+	[NXOT_THREAD] = &&OUTER_A,
+
+	/* OUTER_B. */
+	[NXOT_NULL] = &&OUTER_B,
+
+	/* OUTER_C. */
+	[NXOT_ARRAY] = &&OUTER_C,
+
+	/* OUTER_D. */
+	[NXOT_STRING] = &&OUTER_D,
+
+	/* OUTER_E. */
+	[NXOT_NAME] = &&OUTER_E,
+
+	/* OUTER_F. */
+	[NXOT_OPERATOR] = &&OUTER_F,
+
+	/* OUTER_G. */
+	[NXOT_FILE] = &&OUTER_G,
+
+	/* OUTER_H. */
+	[NXOT_HOOK] = &&OUTER_H,
+
+	/* OUTER_I. */
+	[NXOT_NO] = &&OUTER_I
+    };
+#endif
 
     cw_check_ptr(a_nxo);
     cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
@@ -568,6 +621,11 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 	    continue;
 	}
 
+#ifdef CW_COMPUTE_GOTOS
+	cw_assert(nxo_type_get(nxo) <= NXOT_LAST);
+	goto *jumps_outer[nxo_type_get(nxo)];
+	OUTER_A:
+#else
 	switch (nxo_type_get(nxo))
 	{
 	    case NXOT_BOOLEAN:
@@ -591,25 +649,80 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 #endif
 	    case NXOT_STACK:
 	    case NXOT_THREAD:
+#endif
 	    {
 		/* Always push the object onto the operand stack, even though it
 		 * isn't literal. */
 		tnxo = nxo_stack_push(&thread->ostack);
 		nxo_dup(tnxo, nxo);
 		nxo_stack_pop(&thread->estack);
+#ifdef CW_COMPUTE_GOTOS
+		goto OUTER_OUT;
+#else
 		break;
+#endif
 	    }
+#ifdef CW_COMPUTE_GOTOS
+	    OUTER_B:
+#else
 	    case NXOT_NULL:
+#endif
 	    {
 		/* Do nothing. */
 		nxo_stack_pop(&thread->estack);
+#ifdef CW_COMPUTE_GOTOS
+		goto OUTER_OUT;
+#else
 		break;
+#endif
 	    }
+#ifdef CW_COMPUTE_GOTOS
+	    OUTER_C:
+#else
 	    case NXOT_ARRAY:
+#endif
 	    {
 		cw_uint32_t i, len;
 		cw_nxo_t *el;
 		cw_nxoa_t attr;
+#ifdef CW_COMPUTE_GOTOS
+		static const void *jumps_inner[] = {
+		    /* INNER_A. */
+		    [NXOT_ARRAY] = &&INNER_A,
+
+		    /* INNER_B. */
+		    [NXOT_OPERATOR] = &&INNER_B,
+
+		    /* INNER_C. */
+		    [NXOT_BOOLEAN] = &&INNER_C,
+#ifdef CW_THREADS
+		    [NXOT_CONDITION] = &&INNER_C,
+#endif
+		    [NXOT_DICT] = &&INNER_C,
+		    [NXOT_FILE] = &&INNER_C,
+		    [NXOT_FINO] = &&INNER_C,
+		    [NXOT_HOOK] = &&INNER_C,
+		    [NXOT_INTEGER] = &&INNER_C,
+		    [NXOT_MARK] = &&INNER_C,
+#ifdef CW_THREADS
+		    [NXOT_MUTEX] = &&INNER_C,
+#endif
+		    [NXOT_NAME] = &&INNER_C,
+		    [NXOT_NO] = &&INNER_C,
+		    [NXOT_NULL] = &&INNER_C,
+		    [NXOT_PMARK] = &&INNER_C,
+#ifdef CW_REAL
+		    [NXOT_REAL] = &&INNER_C,
+#endif
+#ifdef CW_REGEX
+		    [NXOT_REGEX] = &&INNER_C,
+		    [NXOT_REGSUB] = &&INNER_C,
+#endif
+		    [NXOT_STACK] = &&INNER_C,
+		    [NXOT_STRING] = &&INNER_C,
+		    [NXOT_THREAD] = &&INNER_C
+		};
+#endif
 
 		len = nxo_array_len_get(nxo);
 		if (len == 0)
@@ -641,9 +754,18 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 		    /* Set the execution index. */
 		    nxo_integer_set(inxo, i);
 
+		    cw_assert(nxo_type_get(el) <= NXOT_LAST);
+#ifdef CW_COMPUTE_GOTOS
+		    goto *jumps_inner[nxo_type_get(el)];
+#else
 		    switch (nxo_type_get(el))
 		    {
+#endif
+#ifdef CW_COMPUTE_GOTOS
+			INNER_A:
+#else
 			case NXOT_ARRAY:
+#endif
 			{
 			    /* Only execute nested arrays that have the
 			     * evaluatable attribute. */
@@ -658,14 +780,30 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 				tnxo = nxo_stack_push(&thread->ostack);
 				nxo_dup(tnxo, el);
 			    }
+#ifdef CW_COMPUTE_GOTOS
+			    goto INNER_OUT;
+#else
 			    break;
+#endif
 			}
+#ifdef CW_COMPUTE_GOTOS
+			INNER_B:
+#else
 			case NXOT_OPERATOR:
+#endif
 			{
 			    nxo_operator_f(el)(a_nxo);
+#ifdef CW_COMPUTE_GOTOS
+			    goto INNER_OUT;
+#else
 			    break;
+#endif
 			}
+#ifdef CW_COMPUTE_GOTOS
+			INNER_C:
+#else
 			default:
+#endif
 			{
 			    /* Not a simple common case, so use the generic
 			     * algorithm. */
@@ -673,7 +811,11 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 			    nxo_dup(tnxo, el);
 			    nxo_thread_loop(a_nxo);
 			}
+#ifdef CW_COMPUTE_GOTOS
+			INNER_OUT:
+#else
 		    }
+#endif
 		    cw_assert(nxo_stack_count(&thread->tstack) == tdepth + 1);
 		}
 
@@ -702,9 +844,17 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 		    nxo_dup(nxo, el);
 		}
 		nxo_stack_pop(&thread->tstack);
+#ifdef CW_COMPUTE_GOTOS
+		goto OUTER_OUT;
+#else
 		break;
+#endif
 	    }
+#ifdef CW_COMPUTE_GOTOS
+	    OUTER_D:
+#else
 	    case NXOT_STRING:
+#endif
 	    {
 		cw_nxo_threadp_t threadp;
 
@@ -721,10 +871,17 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 		nxo_thread_flush(a_nxo, &threadp);
 		nxo_threadp_delete(&threadp, a_nxo);
 		nxo_stack_pop(&thread->estack);
-
+#ifdef CW_COMPUTE_GOTOS
+		goto OUTER_OUT;
+#else
 		break;
+#endif
 	    }
+#ifdef CW_COMPUTE_GOTOS
+	    OUTER_E:
+#else
 	    case NXOT_NAME:
+#endif
 	    {
 		cw_nxo_t *name;
 
@@ -740,15 +897,31 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 		    nxo_stack_pop(&thread->estack);
 		}
 		nxo_stack_pop(&thread->tstack);
+#ifdef CW_COMPUTE_GOTOS
+		goto OUTER_OUT;
+#else
 		break;
+#endif
 	    }
+#ifdef CW_COMPUTE_GOTOS
+	    OUTER_F:
+#else
 	    case NXOT_OPERATOR:
+#endif
 	    {
 		nxo_operator_f(nxo)(a_nxo);
 		nxo_stack_pop(&thread->estack);
+#ifdef CW_COMPUTE_GOTOS
+		goto OUTER_OUT;
+#else
 		break;
+#endif
 	    }
+#ifdef CW_COMPUTE_GOTOS
+	    OUTER_G:
+#else
 	    case NXOT_FILE:
+#endif
 	    {
 		cw_nxo_threadp_t threadp;
 		cw_sint32_t nread;
@@ -769,20 +942,40 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 		nxo_threadp_delete(&threadp, a_nxo);
 
 		nxo_stack_pop(&thread->estack);
+#ifdef CW_COMPUTE_GOTOS
+		goto OUTER_OUT;
+#else
 		break;
+#endif
 	    }
+#ifdef CW_COMPUTE_GOTOS
+	    OUTER_H:
+#else
 	    case NXOT_HOOK:
+#endif
 	    {
 		nxo_hook_eval(nxo, a_nxo);
 
 		nxo_stack_pop(&thread->estack);
+#ifdef CW_COMPUTE_GOTOS
+		goto OUTER_OUT;
+#else
 		break;
+#endif
 	    }
+#ifdef CW_COMPUTE_GOTOS
+	    OUTER_I:
+#else
 	    default:
+#endif
 	    {
 		cw_not_reached();
 	    }
+#ifdef CW_COMPUTE_GOTOS
+	    OUTER_OUT:
+#else
 	}
+#endif
 	cw_assert(nxo_stack_count(&thread->tstack) == tdepth);
     }
 
