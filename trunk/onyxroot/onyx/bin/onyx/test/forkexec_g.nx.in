@@ -1,0 +1,28 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+# Called as: exec_g.nx <srcdir> <objdir>
+
+`Test begin\n' print flush
+
+[
+    argv 1 get `/b_forkexec_g_no_such_name.nx' cat
+] forkexec
+
+waitpid dup 0 ne {
+    `Non-zero exit status: ' exch cvs `\n' 3 ncat print
+}{
+    pop
+} ifelse
+
+`Test end\n' print
+pstack

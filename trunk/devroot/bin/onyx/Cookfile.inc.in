@@ -104,18 +104,21 @@ ONYX_OTESTS =
               argv_a.nx.in argv_b.nx.in chroot_a.nx.in chroot_b.nx.in
               dirforeach_a.nx.in dirforeach_b.nx.in dirforeach_c.nx.in
               exec_a.nx.in exec_b.nx.in exec_c.nx.in exec_d.nx.in exec_e.nx.in
-              exec_f.nx.in exec_g.nx.in localtime_a.nx.in localtime_b.nx.in
-              localtime_c.nx.in localtime_d.nx.in mkfifo_a.nx.in mkfifo_b.nx.in
-              mkfifo_c.nx.in mkfifo_d.nx.in mkfifo_e.nx.in nsleep_a.nx.in
-              nsleep_b.nx.in nsleep_c.nx.in nsleep_d.nx.in pid_a.nx.in
-              pipe_a.nx.in poll_a.nx.in poll_b.nx.in poll_c.nx.in poll_d.nx.in
-              poll_e.nx.in poll_f.nx.in poll_g.nx.in poll_h.nx.in poll_i.nx.in
-              poll_j.nx.in ppid_a.nx.in rand_a.nx.in readlink_a.nx.in
-              readlink_b.nx.in readlink_c.nx.in readlink_d.nx.in setenv_a.nx.in
-              setenv_b.nx.in setenv_c.nx.in srand_a.nx.in srand_b.nx.in
-              srand_c.nx.in srand_d.nx.in truncate_a.nx.in truncate_b.nx.in
-              truncate_c.nx.in truncate_d.nx.in truncate_e.nx.in umask_a.nx.in
-              umask_b.nx.in umask_c.nx.in unsetenv_a.nx.in unsetenv_b.nx.in
+              exec_f.nx.in exec_g.nx.in forkexec_a.nx.in forkexec_b.nx.in
+              forkexec_c.nx.in forkexec_d.nx.in forkexec_e.nx.in
+              forkexec_f.nx.in forkexec_g.nx.in localtime_a.nx.in
+              localtime_b.nx.in localtime_c.nx.in localtime_d.nx.in
+              mkfifo_a.nx.in mkfifo_b.nx.in mkfifo_c.nx.in mkfifo_d.nx.in
+              mkfifo_e.nx.in nsleep_a.nx.in nsleep_b.nx.in nsleep_c.nx.in
+              nsleep_d.nx.in pid_a.nx.in pipe_a.nx.in poll_a.nx.in poll_b.nx.in
+              poll_c.nx.in poll_d.nx.in poll_e.nx.in poll_f.nx.in poll_g.nx.in
+              poll_h.nx.in poll_i.nx.in poll_j.nx.in ppid_a.nx.in rand_a.nx.in
+              readlink_a.nx.in readlink_b.nx.in readlink_c.nx.in
+              readlink_d.nx.in setenv_a.nx.in setenv_b.nx.in setenv_c.nx.in
+              srand_a.nx.in srand_b.nx.in srand_c.nx.in srand_d.nx.in
+              truncate_a.nx.in truncate_b.nx.in truncate_c.nx.in
+              truncate_d.nx.in truncate_e.nx.in umask_a.nx.in umask_b.nx.in
+              umask_c.nx.in unsetenv_a.nx.in unsetenv_b.nx.in
 
 #endif
 
@@ -262,7 +265,8 @@ ONYX_OTESTS = [addprefix @srcroot@/bin/onyx/test/ [ONYX_OTESTS]];
  */
 ONYX_BTESTS = [addprefix @srcroot@/bin/onyx/test/
 #if @enable_posix@
-                         b_argv_b.nx.in b_exec_a.nx.in b_ppid_a.nx.in
+                         b_argv_b.nx.in b_forkexec_a.nx.in b_exec_a.nx.in
+                         b_ppid_a.nx.in
 #endif
                          ];
 
