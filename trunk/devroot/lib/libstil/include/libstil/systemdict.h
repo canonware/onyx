@@ -11,7 +11,6 @@
 
 void	systemdict_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt);
 
-void	systemdict_abort(cw_stilt_t *a_stilt);
 void	systemdict_abs(cw_stilt_t *a_stilt);
 void	systemdict_add(cw_stilt_t *a_stilt);
 void	systemdict_aload(cw_stilt_t *a_stilt);
@@ -37,7 +36,6 @@ void	systemdict_currentdict(cw_stilt_t *a_stilt);
 void	systemdict_currentfile(cw_stilt_t *a_stilt);
 void	systemdict_currentglobal(cw_stilt_t *a_stilt);
 void	systemdict_cvlit(cw_stilt_t *a_stilt);
-void	systemdict_cvm(cw_stilt_t *a_stilt);
 void	systemdict_cvn(cw_stilt_t *a_stilt);
 void	systemdict_cvrs(cw_stilt_t *a_stilt);
 void	systemdict_cvs(cw_stilt_t *a_stilt);
@@ -88,7 +86,6 @@ void	systemdict_lt(cw_stilt_t *a_stilt);
 void	systemdict_mark(cw_stilt_t *a_stilt);
 void	systemdict_mod(cw_stilt_t *a_stilt);
 void	systemdict_mul(cw_stilt_t *a_stilt);
-void	systemdict_mutex(cw_stilt_t *a_stilt);
 void	systemdict_ne(cw_stilt_t *a_stilt);
 void	systemdict_neg(cw_stilt_t *a_stilt);
 void	systemdict_noaccess(cw_stilt_t *a_stilt);

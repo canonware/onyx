@@ -37,7 +37,6 @@ struct cw_systemdict_entry {
  * Array of operators in systemdict.
  */
 static const struct cw_systemdict_entry systemdict_ops[] = {
-	ENTRY(abort),
 	ENTRY(abs),
 	ENTRY(add),
 	ENTRY(aload),
@@ -63,7 +62,6 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(currentfile),
 	ENTRY(currentglobal),
 	ENTRY(cvlit),
-	ENTRY(cvm),
 	ENTRY(cvn),
 	ENTRY(cvrs),
 	ENTRY(cvs),
@@ -114,7 +112,6 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(mark),
 	ENTRY(mod),
 	ENTRY(mul),
-	ENTRY(mutex),
 	ENTRY(ne),
 	ENTRY(neg),
 	ENTRY(noaccess),
@@ -225,12 +222,6 @@ systemdict_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 #endif
 #undef NENTRIES
 #undef NEXTRA
-}
-
-void
-systemdict_abort(cw_stilt_t *a_stilt)
-{
-	_cw_error("XXX Not implemented");
 }
 
 void
@@ -722,12 +713,6 @@ systemdict_cvlit(cw_stilt_t *a_stilt)
 	ostack = stilt_ostack_get(a_stilt);
 	stilo = stils_get(ostack, a_stilt);
 	stilo_attrs_set(stilo, STILOA_LITERAL);
-}
-
-void
-systemdict_cvm(cw_stilt_t *a_stilt)
-{
-	_cw_error("XXX Not implemented");
 }
 
 void
@@ -1888,12 +1873,6 @@ systemdict_mul(cw_stilt_t *a_stilt)
 	stilo_integer_new(&t_stilo, stilo_integer_get(a));
 	stilo_integer_mul(&t_stilo, b, a);
 	stils_pop(ostack, a_stilt);
-}
-
-void
-systemdict_mutex(cw_stilt_t *a_stilt)
-{
-	_cw_error("XXX Not implemented");
 }
 
 void
