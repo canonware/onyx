@@ -38,9 +38,6 @@ typedef int socklen_t;
 #endif
 #endif
 #ifdef CW_REAL
-#ifndef HAVE_ASPRINTF
-#include "asprintf.c"
-#endif
 #endif
 #ifdef CW_MODULES
 #include <dlfcn.h> /* For modload operator. */
