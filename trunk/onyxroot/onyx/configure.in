@@ -12,7 +12,7 @@ AC_SUBST(objdir)
 
 if test "x$objdir" = "x$srcdir" ; then
   dnl Clean up the mess that has thus far been made by autoconf.
-  rm -f config.cache config.log
+  rm -f config.cache config.log confdefs.h
 
   echo "Object directory same as source directory.  Changing to \"obj\""
   mkdir -p obj

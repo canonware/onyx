@@ -71,8 +71,7 @@ libs_s : [S_LIBS];
 libs : libs_d libs_a libs_p libs_s;
 
 tests : [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS] [BTESTS]]
-        [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]]
-        libs_d;
+        [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]];
 
 check : tests
 {
@@ -108,7 +107,7 @@ chmod u+x [target];
 dataend
 }
 
-[objdir]/%0bin/%1.dbg : [objdir]/%0bin/%1.o_d
+[objdir]/%0bin/%1.dbg : [objdir]/%0bin/%1.o_d [D_LIBS]
   set mkdir
 {
   [CC] [D_CFLAGS] [CPPFLAGS] [D_CPPFLAGS] -o [target] [objdir]/%0bin/%1.o_d
@@ -127,7 +126,7 @@ dataend
          -o [fromto %0bin/%.o_d %0bin/%.d_d [target]];
 }
 
-[objdir]/%0test/%1 : [objdir]/%0test/%1.o_d
+[objdir]/%0test/%1 : [objdir]/%0test/%1.o_d [D_LIBS]
   set mkdir
 {
   [CC] [D_CFLAGS] [CPPFLAGS] [D_CPPFLAGS] -o [target] [objdir]/%0test/%1.o_d
