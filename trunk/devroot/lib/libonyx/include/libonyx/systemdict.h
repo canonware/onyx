@@ -254,11 +254,6 @@ void
 systemdict_fcntl(cw_nxo_t *a_thread);
 #endif
 
-#ifdef CW_POSIX
-void
-systemdict_fifo(cw_nxo_t *a_thread);
-#endif
-
 #ifdef CW_REAL
 void
 systemdict_floor(cw_nxo_t *a_thread);
@@ -412,6 +407,11 @@ systemdict_lt(cw_nxo_t *a_thread);
 #ifdef CW_POSIX
 void
 systemdict_mkdir(cw_nxo_t *a_thread);
+#endif
+
+#ifdef CW_POSIX
+void
+systemdict_mkfifo(cw_nxo_t *a_thread);
 #endif
 
 void

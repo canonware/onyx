@@ -151,7 +151,6 @@ typedef enum
     NXN_false,
 #ifdef CW_POSIX
     NXN_fcntl,
-    NXN_fifo,
 #endif
     NXN_filetype,
     NXN_finotype,
@@ -235,6 +234,7 @@ typedef enum
     NXN_marktype,
 #ifdef CW_POSIX
     NXN_mkdir,
+    NXN_mkfifo,
 #endif
     NXN_mod,
 #ifdef CW_POSIX

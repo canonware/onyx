@@ -152,7 +152,6 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "false",
 #ifdef CW_POSIX
     "fcntl",
-    "fifo",
 #endif
     "filetype",
     "finotype",
@@ -236,6 +235,7 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "marktype",
 #ifdef CW_POSIX
     "mkdir",
+    "mkfifo",
 #endif
     "mod",
 #ifdef CW_POSIX
