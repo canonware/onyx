@@ -465,7 +465,7 @@ systemdict_p_bind(cw_stilo_t *a_proc, cw_stilt_t *a_stilt)
 					    systemdict_fastops[j].op_f) {
 						stilo_dup(el, val);
 						/* XXX API abuse. */
-						el->type = STILOT_FASTOP;
+						el->fast_op = TRUE;
 						el->op_code =
 						    systemdict_fastops[j].stiln;
 						break;

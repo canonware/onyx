@@ -440,10 +440,14 @@ stilt_loop(cw_stilt_t *a_stilt)
 					stilo_dup(tstilo, &array[i]);
 					break;
 				case STILOT_OPERATOR:
-					stilo_operator_f(&array[i])(a_stilt);
-/*  					array[i].o.operator.f(a_stilt); */
-					break;
-				case STILOT_FASTOP:
+					if (stilo_operator_fast(&array[i]) ==
+					    FALSE) {
+						stilo_operator_f(&array[i])
+						    (a_stilt);
+						break;
+					}
+
+					/* Fast operator. */
 					switch (stilo_operator_stiln(&array[i])) {
 					case STILN_add: {
 						cw_stilo_t	*a, *b;
@@ -574,8 +578,7 @@ stilt_loop(cw_stilt_t *a_stilt)
 			break;
 		}
 		case STILOT_OPERATOR:
-		case STILOT_FASTOP:
-			stilo->o.operator.f(a_stilt);
+			stilo_operator_f(stilo)(a_stilt);
 			stils_pop(&a_stilt->estack);
 			break;
 		case STILOT_FILE: {

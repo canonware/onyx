@@ -76,8 +76,7 @@ typedef enum {
 	STILOT_NAME		= 10,
 	STILOT_NULL		= 11,
 	STILOT_OPERATOR		= 12,
-	STILOT_FASTOP		= 13,
-	STILOT_STRING		= 14
+	STILOT_STRING		= 13
 }	cw_stilot_t;
 
 /* Attributes. */
@@ -107,7 +106,12 @@ struct cw_stilo_s {
 	 */
 	cw_stilot_t	type:4;
 	/*
-	 * If this is an operator or fast_op, and op_code <= STILN_LAST, op_code
+	 * If type is STILOT_OPERARTOR and fast_op is TRUE, this operator can be
+	 * handled specially in stilt_loop().
+	 */
+	cw_bool_t	fast_op:1;
+	/*
+	 * If this is an operator, and op_code <= STILN_LAST, op_code
 	 * corresponds to the name of this operator.  This can be used to print
 	 * the operator name or inline fast_op's in the interpreter loop.
 	 */
@@ -353,6 +357,7 @@ cw_bool_t	stilo_name_key_comp(const void *a_k1, const void *a_k2);
  */
 void		stilo_operator_new(cw_stilo_t *a_stilo, cw_op_t *a_op,
     cw_stiln_t a_stiln);
+#define		stilo_operator_fast(a_stilo) (a_stilo)->fast_op
 #define		stilo_operator_f(a_stilo) (a_stilo)->o.operator.f
 #define		stilo_operator_stiln(a_stilo) (a_stilo)->op_code
 

@@ -448,11 +448,6 @@ static cw_stilot_vtable_t stilot_vtable[] = {
 	 NULL,
 	 stilo_p_operator_print},
 
-	/* STILOT_FASTOP */
-	{NULL,
-	 NULL,
-	 stilo_p_operator_print},
-
 	/* STILOT_STRING */
 	{stilo_p_string_delete,
 	 stiloe_p_string_ref_iterate,
@@ -490,14 +485,12 @@ stilo_compare(cw_stilo_t *a_a, cw_stilo_t *a_b, cw_stilt_t *a_stilt)
 			retval = 2;
 		break;
 	case STILOT_OPERATOR:
-	case STILOT_FASTOP:
-		if ((a_b->type == STILOT_OPERATOR || a_b->type == STILOT_FASTOP)
-		    && a_a->o.operator.f == a_b->o.operator.f)
+		if (a_a->type == a_b->type && a_a->o.operator.f ==
+		    a_b->o.operator.f)
 			retval = 0;
 		else
 			retval = 2;
 		break;
-
 	case STILOT_NAME:
 	case STILOT_STRING: {
 		const cw_uint8_t	*str_a, *str_b;
