@@ -16,6 +16,13 @@
 #include <errno.h>
 #include <histedit.h>
 
+/* LinuxThreads (the precursor to NPTL) appears to do the wrong thing for
+ * SIGSTOP.  Defining CW_MODPROMPT_LINUXTHREADS works around this problem.
+ *
+ * XXX This workaround should be removed once NPTL-based systems are the
+ * norm. */
+/* #define CW_MODPROMPT_LINUXTHREADS */
+
 #define CW_PROMPT_STRLEN 80
 #define CW_BUFFER_SIZE 512
 
@@ -149,12 +156,16 @@ modprompt_init(void *a_arg, cw_nxo_t *a_thread)
      * delivered there. */
     sigemptyset(&set);
     sigaddset(&set, SIGINT);
+#ifdef CW_MODPROMPT_LINUXTHREADS
     sigaddset(&set, SIGTSTP);
     sigaddset(&set, SIGSTOP);
+#endif
     sigaddset(&set, SIGQUIT);
     sigaddset(&set, SIGHUP);
     sigaddset(&set, SIGTERM);
+#ifdef CW_MODPROMPT_LINUXTHREADS
     sigaddset(&set, SIGCONT);
+#endif
     sigaddset(&set, SIGWINCH);
     thd_sigmask(SIG_BLOCK, &set, &oset);
     synth->read_thd = thd_new(modprompt_entry, synth, TRUE);
@@ -490,8 +501,10 @@ modprompt_handlers_install(void)
     }
     HANDLER_INSTALL(SIGHUP);
     HANDLER_INSTALL(SIGWINCH);
+#ifdef CW_MODPROMPT_LINUXTHREADS
     HANDLER_INSTALL(SIGTSTP);
     HANDLER_INSTALL(SIGCONT);
+#endif
     HANDLER_INSTALL(SIGINT);
     HANDLER_INSTALL(SIGQUIT);
     HANDLER_INSTALL(SIGTERM);
@@ -500,12 +513,16 @@ modprompt_handlers_install(void)
 #ifdef CW_THREADS
     sigemptyset(&set);
     sigaddset(&set, SIGINT);
+#ifdef CW_MODPROMPT_LINUXTHREADS
     sigaddset(&set, SIGTSTP);
     sigaddset(&set, SIGSTOP);
+#endif
     sigaddset(&set, SIGQUIT);
     sigaddset(&set, SIGHUP);
     sigaddset(&set, SIGTERM);
+#ifdef CW_MODPROMPT_LINUXTHREADS
     sigaddset(&set, SIGCONT);
+#endif
     sigaddset(&set, SIGWINCH);
     thd_sigmask(SIG_UNBLOCK, &set, &oset);
 #endif
@@ -521,6 +538,7 @@ modprompt_signal_handle(int a_signal)
 	    el_resize(synth->el);
 	    break;
 	}
+#ifdef CW_MODPROMPT_LINUXTHREADS
 	case SIGTSTP:
 	{
 	    /* Signal the process group. */
@@ -531,13 +549,14 @@ modprompt_signal_handle(int a_signal)
 	{
 	    break;
 	}
+#endif
 	case SIGHUP:
 	case SIGINT:
 	case SIGQUIT:
 	case SIGTERM:
 	{
 	    el_end(synth->el);
-	    exit(0);
+	    _exit(0);
 	}
 	default:
 	{

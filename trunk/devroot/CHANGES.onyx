@@ -1,3 +1,9 @@
+2003-10-21 : Jason Evans <jasone@canonware.com>
+
+	* mod/modprompt/src/modprompt.c : Wrap workaround code for
+	  LinuxThreads's broken handling in #ifdef CW_MODPROMPT_LINUXTHREADS
+	  ... #endif.
+
 2003-10-20 : Jason Evans <jasone@canonware.com>
 
 	* bin/onyx_config/src/onyx_config.nx.in : Add --bindir, --datadir,
