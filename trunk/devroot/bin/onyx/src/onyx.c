@@ -331,7 +331,9 @@ interactive_run(int argc, char **argv, char **envp, cw_nxinit_t *a_init,
     nxo_thread_start(&thread);
 
     retval = 0;
+#ifdef CW_POSIX_FILE
     RETURN:
+#endif
     nx_delete(&nx);
     return retval;
 }
