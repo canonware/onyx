@@ -251,7 +251,7 @@ main(int argc, char ** argv)
     out_put(cw_g_out, "pid: [i]\n", getpid());
   }
 
-  if (sockb_init(2048, 4096))
+  if (sockb_init(1024, 2048, 4096))
   {
     _cw_error("Initialization failure");
   }

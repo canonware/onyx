@@ -38,6 +38,20 @@ struct cw_sockb_msg_s
   } data;
 };
 
+struct cw_sockb_reg_s
+{
+  cw_sock_t * sock; /* sock pointer. */
+  cw_sint32_t pollfd_pos; /* Offset in the pollfd struct passed into poll(). */
+  cw_mq_t * notify_mq; /* mq to notify when readable or closed (or NULL). */
+};
+
+struct cw_sockb_entry_s
+{
+  cw_uint32_t max_fds;
+  struct cw_sockb_reg_s * regs;
+  struct pollfd * fds;
+};
+
 struct cw_sockb_s
 {
   cw_bool_t should_quit;

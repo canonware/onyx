@@ -40,7 +40,7 @@ extern cw_sockb_t * g_sockb;
  *
  * <<< Input(s) >>>
  *
- * a_bufel_size : Size of bufel to use for memory buffering.
+ * a_bufc_size : Size of bufc to use for memory buffering.
  *
  * a_max_spare_bufcs : Maximum number of bufc's to cache in one pezz block.
  *                     If more than this number of bufc's is needed, the sockb
@@ -59,7 +59,8 @@ extern cw_sockb_t * g_sockb;
  *
  ****************************************************************************/
 cw_bool_t
-sockb_init(cw_uint32_t a_bufel_size, cw_uint32_t a_max_spare_bufels);
+sockb_init(cw_uint32_t a_max_fds, cw_uint32_t a_bufc_size,
+	   cw_uint32_t a_max_spare_bufcs);
 
 /****************************************************************************
  *
@@ -93,7 +94,7 @@ sockb_shutdown(void);
  * <<< Description>>>
  *
  * Get a bufc, using internal pezz's.  bufc's are guaranteed to be of the size
- * specified by the a_bufel_size parameter passed to sockb_init().
+ * specified by the a_bufc_size parameter passed to sockb_init().
  *
  ****************************************************************************/
 cw_bufc_t *

@@ -84,7 +84,7 @@ main(int argc, char ** argv)
   }
   
   libstash_init();
-  sockb_init(512, 0);
+  sockb_init(64, 512, 0);
   
   dbg_register(cw_g_dbg, "sockb_verbose");
   dbg_register(cw_g_dbg, "sockb_error");
