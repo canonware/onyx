@@ -20,6 +20,8 @@
  *   for compact usage of memory buffers.
  * - 8, 32, and 64 bit read functions for arbitrary byte offsets (within the
  *   valid data range) within buf's.
+ * - 8, 32, and 64 bit, and string, write/append functions for arbitrary byte
+ *   offsets.
  * - Easy ability to use with readv() and writev().
  *
  ****************************************************************************/
@@ -122,15 +124,18 @@ buf_delete(cw_buf_t * a_buf);
  *
  * <<< Input(s) >>>
  *
+ * a_buf : Pointer to a buf.
  *
+ * a_prefix : Pointer to a string that represents a string to be prefixed to
+ *            each line of output.
  *
  * <<< Output(s) >>>
  *
- *
+ * None.
  *
  * <<< Description >>>
  *
- *
+ * Dump the internal state of a_buf to cw_g_log.
  *
  ****************************************************************************/
 void
