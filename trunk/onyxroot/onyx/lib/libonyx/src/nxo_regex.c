@@ -119,7 +119,7 @@ nxo_p_regex_match(cw_nxoe_regex_t *a_regex, cw_nxo_t *a_thread,
     cw_nxo_regex_cache_t *cache;
     cw_nx_t *nx;
     cw_nxa_t *nxa;
-    int offset;
+    int ioff;
 
     cache = nxo_l_thread_regex_cache_get(a_thread);
     nx = nxo_thread_nx_get(a_thread);
@@ -154,8 +154,8 @@ nxo_p_regex_match(cw_nxoe_regex_t *a_regex, cw_nxo_t *a_thread,
 	if (nxo_type_get(&cache->input) == NXOT_STRING
 	    && nxo_compare(&cache->input, a_input) == 0)
 	{
-	    offset = cache->cont;
-	    if ((cw_uint32_t) offset >= nxo_string_len_get(a_input))
+	    ioff = cache->cont;
+	    if ((cw_uint32_t) ioff >= nxo_string_len_get(a_input))
 	    {
 		cache->mcnt = -1;
 		retval = FALSE;
@@ -164,12 +164,12 @@ nxo_p_regex_match(cw_nxoe_regex_t *a_regex, cw_nxo_t *a_thread,
 	}
 	else
 	{
-	    offset = 0;
+	    ioff = 0;
 	}
     }
     else
     {
-	offset = 0;
+	ioff = 0;
     }
 
     /* Look for a match. */
@@ -177,7 +177,7 @@ nxo_p_regex_match(cw_nxoe_regex_t *a_regex, cw_nxo_t *a_thread,
     cache->mcnt = pcre_exec(a_regex->pcre, a_regex->extra,
 			    (char *) nxo_string_get(a_input),
 			    (int) nxo_string_len_get(a_input),
-			    offset, 0, cache->ovp, cache->ovcnt);
+			    ioff, 0, cache->ovp, cache->ovcnt);
     nxo_string_unlock(a_input);
     if (cache->mcnt <= 0)
     {
@@ -257,7 +257,8 @@ nxo_p_regex_split(cw_nxoe_regex_t *a_regex, cw_nxo_t *a_thread,
     cw_nxo_t *tstack, *tnxo;
     cw_nx_t *nx;
     cw_nxa_t *nxa;
-    int ilen, offset;
+    cw_uint8_t *istr;
+    int ilen, ioff;
     cw_uint32_t i, acnt;
 
     cache = nxo_l_thread_regex_cache_get(a_thread);
@@ -265,6 +266,7 @@ nxo_p_regex_split(cw_nxoe_regex_t *a_regex, cw_nxo_t *a_thread,
     nx = nxo_thread_nx_get(a_thread);
     nxa = nx_nxa_get(nx);
 
+    istr = nxo_string_get(a_input);
     ilen = (int) nxo_string_len_get(a_input);
     if (ilen == 0)
     {
@@ -290,15 +292,15 @@ nxo_p_regex_split(cw_nxoe_regex_t *a_regex, cw_nxo_t *a_thread,
     /* Iteratively search for matches with the splitting pattern and create
      * substrings until there is no more text, or the split limit has been
      * reached. */
-    for (acnt = offset = 0;
-	 offset < ilen && (acnt + 1 < a_limit || a_limit == 0);
+    for (acnt = ioff = 0;
+	 ioff < ilen && (acnt + 1 < a_limit || a_limit == 0);
 	 )
     {
 	/* Look for a match. */
 	nxo_string_lock(a_input);
 	cache->mcnt = pcre_exec(a_regex->pcre, a_regex->extra,
-				(char *) nxo_string_get(a_input), ilen, offset,
-				0, cache->ovp, cache->ovcnt);
+				(char *) istr, ilen, ioff, 0,
+				cache->ovp, cache->ovcnt);
 	nxo_string_unlock(a_input);
 	if (cache->mcnt <= 0)
 	{
@@ -331,16 +333,16 @@ nxo_p_regex_split(cw_nxoe_regex_t *a_regex, cw_nxo_t *a_thread,
 	if (cache->ovp[0] < cache->ovp[1])
 	{
 	    /* Create a substring (normal case). */
-	    nxo_string_substring_new(tnxo, a_input, nx, offset,
-				     cache->ovp[0] - offset);
-	    offset = cache->ovp[1];
+	    nxo_string_substring_new(tnxo, a_input, nx, ioff,
+				     cache->ovp[0] - ioff);
+	    ioff = cache->ovp[1];
 	}
 	else
 	{
 	    /* The pattern matches the empty string, so split a single character
 	     * to avoid an infinite loop. */
-	    nxo_string_substring_new(tnxo, a_input, nx, offset, 1);
-	    offset++;
+	    nxo_string_substring_new(tnxo, a_input, nx, ioff, 1);
+	    ioff++;
 	}
 	acnt++;
 
@@ -363,12 +365,12 @@ nxo_p_regex_split(cw_nxoe_regex_t *a_regex, cw_nxo_t *a_thread,
     DONE:
     /* If there are trailing bytes after the last match, create a substring and
      * push it onto tstack. */
-    if (offset < ilen)
+    if (ioff < ilen)
     {
 	tnxo = nxo_stack_push(tstack);
-	nxo_string_substring_new(tnxo, a_input, nx, offset,
+	nxo_string_substring_new(tnxo, a_input, nx, ioff,
 				 nxo_string_len_get(a_input)
-				 - (cw_uint32_t) offset);
+				 - (cw_uint32_t) ioff);
 	acnt++;
     }
 
@@ -412,7 +414,7 @@ nxo_regex_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_uint8_t *a_pattern,
 
     /* Tell the GC about the space being taken up by regex->pcre and
      * regex->extra. */
-    nxa_l_count_adjust(nxa, regex->size
+    nxa_l_count_adjust(nxa, (cw_nxoi_t) regex->size
 #ifdef PCRE_INFO_EXTRASIZE
 		       + regex->extrasize
 #endif
