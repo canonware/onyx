@@ -90,6 +90,13 @@ if ($opt_verbose && $opt_quiet)
     exit 1;
 }
 
+if ($#STESTS + $#DTESTS + 2 == 0)
+{
+    print STDERR "No tests specified\n";
+    &usage();
+    exit 1;
+}
+
 if ($opt_verbose)
 {
     print STDERR "Option values: h:$opt_help, v:$opt_verbose, q:$opt_quiet, "
