@@ -481,11 +481,6 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 			case '~':
 				a_stilt->state = _CW_STILT_STATE_BASE85_STRING;
 				break;
-			case 'A': case 'B': case 'C': case 'D': case 'E':
-			case 'F':
-				/* To lower case. */
-				c += 32;
-				/* Fall through. */
 			case '0': case '1': case '2': case '3': case '4':
 			case '5': case '6': case '7': case '8': case '9':
 			case 'a': case 'b': case 'c': case 'd': case 'e':
@@ -566,28 +561,6 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 					a_stilt->meta.number.point_offset =
 					    a_stilt->index;
 				} else {
-					a_stilt->state = _CW_STILT_STATE_NAME;
-					a_stilt->meta.name.is_literal = FALSE;
-					a_stilt->meta.name.is_immediate = FALSE;
-				}
-				_CW_STILT_PUTC(c);
-				break;
-			case 'A': case 'B': case 'C': case 'D': case 'E':
-			case 'F': case 'G': case 'H': case 'I': case 'J':
-			case 'K': case 'L': case 'M': case 'N': case 'O':
-			case 'P': case 'Q': case 'R': case 'S': case 'T':
-			case 'U': case 'V': case 'W': case 'X': case 'Y':
-			case 'Z':
-				/*
-				 * We can't change the case of letters, since we
-				 * may later discover that this token is
-				 * actually a name.  So, the number acceptor
-				 * needs to deal with changing the case of
-				 * letters.
-				 */
-				if (a_stilt->meta.number.base <= (10 +
-				    ((cw_uint32_t)(c - 'A')))) {
-					/* Too big for this base. */
 					a_stilt->state = _CW_STILT_STATE_NAME;
 					a_stilt->meta.name.is_literal = FALSE;
 					a_stilt->meta.name.is_immediate = FALSE;
@@ -865,11 +838,6 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 			break;
 		case _CW_STILT_STATE_ASCII_STRING_HEX_CONT:
 			switch (c) {
-			case 'A': case 'B': case 'C': case 'D': case 'E':
-			case 'F':
-				/* To lower case. */
-				c += 32;
-				/* Fall through. */
 			case '0': case '1': case '2': case '3': case '4':
 			case '5': case '6': case '7': case '8': case '9':
 			case 'a': case 'b': case 'c': case 'd': case 'e':
@@ -885,11 +853,6 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 			break;
 		case _CW_STILT_STATE_ASCII_STRING_HEX_FINISH:
 			switch (c) {
-			case 'A': case 'B': case 'C': case 'D': case 'E':
-			case 'F':
-				/* To lower case. */
-				c += 32;
-				/* Fall through. */
 			case '0': case '1': case '2': case '3': case '4':
 			case '5': case '6': case '7': case '8': case '9':
 			case 'a': case 'b': case 'c': case 'd': case 'e':
@@ -1013,11 +976,6 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 				    "hex string");
 				stilt_p_reset_tok_buffer(a_stilt);
 				break;
-			case 'A': case 'B': case 'C': case 'D': case 'E':
-			case 'F':
-				/* To lower case. */
-				c += 32;
-				/* Fall through. */
 			case '0': case '1': case '2': case '3': case '4':
 			case '5': case '6': case '7': case '8': case '9':
 			case 'a': case 'b': case 'c': case 'd': case 'e':
