@@ -40,7 +40,7 @@
 /* Global. */
 cw_sockb_t * g_sockb = NULL;
 
-/*  #define _LIBSTASH_SOCKB_CONFESS */
+#define _LIBSTASH_SOCKB_CONFESS
 
 cw_bool_t
 sockb_init(cw_uint32_t a_max_fds, cw_uint32_t a_bufc_size,
@@ -974,7 +974,18 @@ sockb_p_entry_func(void * a_arg)
 	sockfd = fds[i].fd;
 	
 #ifdef _LIBSTASH_SOCKB_CONFESS
-	out_put(cw_g_out, " [i]", sockfd);
+	out_put(cw_g_out, " [i][s][s][s][s][s][s][s][s][s][s]",
+		sockfd,
+		fds[i].revents & POLLIN ? "IN," : "",
+		fds[i].revents & POLLRDNORM ? "RDNORM," : "",
+		fds[i].revents & POLLRDBAND ? "RDBAND," : "",
+		fds[i].revents & POLLPRI ? "PRI," : "",
+		fds[i].revents & POLLOUT ? "OUT," : "",
+		fds[i].revents & POLLWRNORM ? "WRNORM," : "",
+		fds[i].revents & POLLWRBAND ? "WRBAND," : "",
+		fds[i].revents & POLLERR ? "ERR," : "",
+		fds[i].revents & POLLHUP ? "HUP," : "",
+		fds[i].revents & POLLNVAL ? "NVAL," : "");
 #endif
 
 	if (fds[i].revents & POLLIN)
