@@ -119,7 +119,7 @@ foreach $test (@ARGV)
 
 	if (-e "$opt_objdir/$test.out")
 	{
-	    `diff $opt_objdir/$test.out $opt_srcdir/$test.exp > $opt_objdir/$test.diff 2>&1`;
+	    `diff $opt_srcdir/$test.exp $opt_objdir/$test.out > $opt_objdir/$test.diff 2>&1`;
 	    if ($?)
 	    {
 		# diff returns non-zero if there is a difference.
