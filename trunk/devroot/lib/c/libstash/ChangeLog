@@ -1,3 +1,7 @@
+1999-02-24  Jason Evans  <jasone@canonware.com>
+
+	* : Fully implement and test buf, bufel, and bufpool.
+
 1999-02-22  Jason Evans  <jasone@canonware.com>
 
 	* : Make libstash_init() and libstash_shutdown() optional.  Avoid

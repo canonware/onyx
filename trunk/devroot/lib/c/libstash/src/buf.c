@@ -795,7 +795,9 @@ buf_release_head_data(cw_buf_t * a_buf, cw_uint32_t a_amount)
   }
   else
   {
-    for (i = 0, amount_left = a_amount;
+    for (i = 0,
+	   array_index = a_buf->array_start,
+	   amount_left = a_amount;
 	 amount_left > 0;
 	 i++)
     {
@@ -884,7 +886,10 @@ buf_release_tail_data(cw_buf_t * a_buf, cw_uint32_t a_amount)
   }
   else
   {
-    for (i = 0, amount_left = a_amount;
+    for (i = 0,
+	   array_index = ((a_buf->array_size + a_buf->array_end - 1)
+			  % a_buf->array_size),
+	   amount_left = a_amount;
 	 (amount_left > 0);
 	 i++)
     {
