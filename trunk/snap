@@ -167,12 +167,26 @@ elsif (defined($opt_tag) && defined($opt_cvsnotag))
 {
     $opt_pkgname = $opt_pkgname . "-" . $opt_tag;
     $tag_cvs = "";
-    $exp_cvs = "-r HEAD";
+    if (defined($opt_branchpoint))
+    {
+	$exp_cvs = $branchpoint_cvs;
+    }
+    else
+    {
+	$exp_cvs = "-r HEAD";
+    }
 }
 else
 {
     $tag_cvs = "";
-    $exp_cvs = "-r HEAD";
+    if (defined($opt_branchpoint))
+    {
+	$exp_cvs = $branchpoint_cvs;
+    }
+    else
+    {
+	$exp_cvs = "-r HEAD";
+    }
 }
 
 if ($opt_verbose)
