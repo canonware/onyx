@@ -1469,9 +1469,9 @@ systemdict_p_bind(cw_nxo_t *a_proc, cw_nxo_t *a_thread)
 	    }
 	    case NXOT_NAME:
 	    {
-		if (attr == NXOA_EVALUABLE)
+		if (attr == NXOA_EVALUABLE || attr == NXOA_CALLABLE)
 		{
-		    /* Do not bind evaluable names. */
+		    /* Do not bind evaluable or callable names. */
 		    continue;
 		}
 
