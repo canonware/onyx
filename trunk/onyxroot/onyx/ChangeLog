@@ -1,5 +1,8 @@
 2004-02-29 : Jason Evans <jasone@canonware.com>
 
+	* Install documentation in <prefix>/share/doc/onyx rather than
+	  <prefix>/share/onyx/doc.
+
 	* Change linker flags for OS X from:
 	    -undefined suppress -flat_namespace -bundle -all_load -bind_at_load
 	  or

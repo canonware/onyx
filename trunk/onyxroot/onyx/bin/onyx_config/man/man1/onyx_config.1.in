@@ -60,11 +60,9 @@ Display the library linker flags.
 .IP \-\-libs
 Display the libaries to link against.
 .SH FILES
-@DATADIR@/onyx/doc/html/onyx.html
+@DATADIR@/doc/onyx/html/onyx.html
 .br
-@DATADIR@/onyx/doc/ps/onyx.ps
-.br
-@DATADIR@/onyx/doc/pdf/onyx.pdf
+@DATADIR@/doc/onyx/pdf/onyx.pdf
 .SH SEE ALSO
 onyx(1)
 .SH HISTORY
