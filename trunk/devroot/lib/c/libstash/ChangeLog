@@ -1,3 +1,8 @@
+1999-07-12  Jason Evans  <jasone@canonware.com>
+
+	* src/oh.c (oh_item_delete, oh_item_search, oh_item_get_iterate,
+	oh_item_delete_iterate): Deal gracefully with NULL r_* arguments.
+
 1999-07-08  Jason Evans  <jasone@canonware.com>
 
 	* src/bhp.c (bhp_del_min): Call bhpi_delete(), not _cw_free(),

@@ -386,15 +386,19 @@ oh_item_insert(cw_oh_t * a_oh, const void * a_key, const void * a_data);
  *
  * a_search_key : Pointer to a key.
  *
+ * r_key : Pointer to a pointer, or NULL.
+ *
+ * r_data : Pointer to a pointer, or NULL.
+ *
  * <<< Output(s) >>>
  *
  * retval : FALSE == success, TRUE == error.
  *          TRUE : Item with a_search_key not found.
  *
- * *r_key : Pointer to a key, or invalid if retval == TRUE.
+ * *r_key : If (NULL != r_key), pointer to a key, or invalid if retval == TRUE.
  *
- * *r_data : Pointer to data associated with *r_key, or invalid if retval ==
- *           TRUE.
+ * *r_data : If (NULL != r_data), pointer to data associated with *r_key, or
+ *           invalid if retval == TRUE.
  *
  * <<< Description >>>
  *
@@ -414,12 +418,15 @@ oh_item_delete(cw_oh_t * a_oh, const void * a_search_key, void ** r_key,
  *
  * a_key : Pointer to a key.
  *
+ * r_data : Pointer to a pointer, or NULL.
+ *
  * <<< Output(s) >>>
  *
  * retval : FALSE == success, TRUE == error.
  *          TRUE : Item with key a_key not found in a_oh.
  *
- * *r_data : Data associated with a_key, or invalid if retval == TRUE.
+ * *r_data : If (NULL != r_data), data associated with a_key, or invalid if
+ *           retval == TRUE. 
  *
  * <<< Description >>>
  *
@@ -436,15 +443,19 @@ oh_item_search(cw_oh_t * a_oh, const void * a_key, void ** r_data);
  *
  * a_oh : Pointer to an oh.
  *
+ * r_key : Pointer to a pointer, or NULL.
+ *
+ * r_data : Pointer to a pointer, or NULL.
+ *
  * <<< Output(s) >>>
  *
  * retval : FALSE == success, TRUE == error.
  *          TRUE : a_oh is empty.
  *
- * *r_key : Pointer to a key, or invalid if retval == TRUE.
+ * *r_key : If (NULL != r_key), pointer to a key, or invalid if retval == TRUE.
  *
- * *r_data : Pointer to data associated with *r_key, or invalid if retval ==
- *           TRUE.
+ * *r_data : If (NULL != r_data), pointer to data associated with *r_key, or
+ *           invalid if retval == TRUE.
  *
  * <<< Description >>>
  *
@@ -460,15 +471,19 @@ oh_item_get_iterate(cw_oh_t * a_oh, void ** r_key, void ** r_data);
  *
  * a_oh : Pointer to an oh.
  *
+ * r_key : Pointer to a pointer, or NULL.
+ *
+ * r_data : Pointer to a pointer, or NULL.
+ *
  * <<< Output(s) >>>
  *
  * retval : FALSE == success, TRUE == error.
  *          TRUE : a_oh is empty.
  *
- * *r_key : Pointer to a key, or invalid if retval == TRUE.
+ * *r_key : If (NULL != r_key), pointer to a key, or invalid if retval == TRUE.
  *
- * *r_data : Pointer to data associated with *r_key, or invalid if retval ==
- *           TRUE.
+ * *r_data : If (NULL != r_data), pointer to data associated with *r_key, or
+ *           invalid if retval == TRUE.
  *
  * <<< Description >>>
  *

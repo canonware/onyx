@@ -695,7 +695,6 @@ oh_item_get_iterate(cw_oh_t * a_oh, void ** r_key, void ** r_data)
   cw_bool_t retval;
   
   _cw_check_ptr(a_oh);
-  _cw_check_ptr(r_key);
 #ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
   {
@@ -711,7 +710,10 @@ oh_item_get_iterate(cw_oh_t * a_oh, void ** r_key, void ** r_data)
 
     item = (cw_oh_item_t *) ring_get_data(a_oh->items_ring);
 
-    *r_key = (void *) item->key;
+    if (NULL != r_key)
+    {
+      *r_key = (void *) item->key;
+    }
     if (NULL != r_data)
     {
       *r_data = (void *) item->data;
@@ -763,8 +765,10 @@ oh_item_delete_iterate(cw_oh_t * a_oh, void ** r_key, void ** r_data)
 
     item = (cw_oh_item_t *) ring_get_data(t_ring);
 
-    *r_key = (void *) item->key;
-
+    if (NULL != r_key)
+    {
+      *r_key = (void *) item->key;
+    }
     if (NULL != r_data)
     {
       *r_data = (void *) item->data;
