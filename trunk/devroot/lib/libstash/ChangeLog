@@ -1,3 +1,7 @@
+2000-11-25  Jason Evans  <jasone@canonware.com>
+
+	* include/libstash/qs.h (qs_elm_new): Initialize qse_down to NULL.
+
 2000-11-23  Jason Evans  <jasone@canonware.com>
 
 	(out_put_sn): '\0'-terminate the output string if there is room,

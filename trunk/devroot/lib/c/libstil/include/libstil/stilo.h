@@ -9,6 +9,10 @@
  *
  ******************************************************************************/
 
+#ifdef _LIBSTIL_DBG
+#define _CW_STILO_MAGIC		0x398754ba
+#endif
+
 typedef struct cw_stilo_s cw_stilo_t;
 typedef struct cw_stiloe_s cw_stiloe_t;
 typedef struct cw_stiloe_dicto_s cw_stiloe_dicto_t;
@@ -126,19 +130,28 @@ struct cw_stiloe_dicto_s {
 void		stilo_clobber(cw_stilo_t *a_stilo);
 void		stilo_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
 
-cw_stilot_t	stilo_type_get(cw_stilo_t *a_stilo);
+#define		stilo_type_get(a_stilo)	(a_stilo)->type
 
-cw_stiloa_t	stilo_attrs_get(cw_stilo_t *a_stilo);
-void		stilo_attrs_set(cw_stilo_t *a_stilo, cw_stiloa_t a_attrs);
+#define		stilo_attrs_get(a_stilo) (a_stilo)->attrs
+#define		stilo_attrs_set(a_stilo, a_attrs) (a_stilo)->attrs = (a_attrs)
 
-cw_stilop_t	stilo_perms_get(cw_stilo_t *a_stilo);
-void		stilo_perms_set(cw_stilo_t *a_stilo, cw_stilop_t a_perms);
+#define		stilo_perms_get(a_stilo) (a_stilo)->perms
+#define		stilo_perms_set(a_stilo, a_perms) (a_stilo)->perms = (a_perms)
 
 void		stilo_cast(cw_stilo_t *a_stilo, cw_stilot_t a_stilot);
 void		stilo_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t
     *a_stilt);
-void		stilo_dup(cw_stilo_t *a_to, const cw_stilo_t *a_from, cw_stilt_t
-    *a_stilt);
+#define		stilo_dup(a_to, a_from) do {				\
+	/* Copy. */							\
+	memcpy((a_to), (a_from), sizeof(cw_stilo_t));			\
+									\
+	/* Reset debug flags on new copy. */				\
+	(a_to)->breakpoint = FALSE;					\
+	(a_to)->watchpoint = FALSE;					\
+} while (0)
+	
+/*  void		stilo_dup(cw_stilo_t *a_to, const cw_stilo_t *a_from, cw_stilt_t */
+/*      *a_stilt); */
 void		stilo_move(cw_stilo_t *a_to, cw_stilo_t *a_from);
 
 void		stilo_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t
@@ -151,7 +164,18 @@ cw_stiloe_t	*stiloe_l_ref_iterate(cw_stiloe_t *a_stiloe, cw_bool_t a_reset);
 /*
  * no.
  */
-void		stilo_no_new(cw_stilo_t *a_stilo);
+#ifdef _LIBSTIL_DBG
+#define	stilo_no_new(a_stilo) do {					\
+	*(cw_uint32_t *)(a_stilo) = 0;					\
+	(a_stilo)->type = STILOT_NO;					\
+	(a_stilo)->magic = _CW_STILO_MAGIC;				\
+} while (0)
+#else
+#define	stilo_no_new(a_stilo) do {					\
+	*(cw_uint32_t *)(a_stilo) = 0;					\
+	(a_stilo)->type = STILOT_NO;					\
+} while (0)
+#endif
 
 /*
  * array.
@@ -205,25 +229,48 @@ void		stilo_hook_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
 /*
  * integer.
  */
-void		stilo_integer_new(cw_stilo_t *a_stilo, cw_sint64_t a_val);
-cw_sint64_t	stilo_integer_get(cw_stilo_t *a_stilo);
-void		stilo_integer_set(cw_stilo_t *a_stilo, cw_sint64_t a_val);
-void		stilo_integer_add(const cw_stilo_t *a_a, const cw_stilo_t *a_b,
-    cw_stilo_t *r_sum);
-void		stilo_integer_sub(const cw_stilo_t *a_num, const cw_stilo_t
-    *a_sub, cw_stilo_t *r_result);
-void		stilo_integer_mul(const cw_stilo_t *a_a, const cw_stilo_t *a_b,
-    cw_stilo_t *r_product);
-void		stilo_integer_div(const cw_stilo_t *a_num, const cw_stilo_t
-    *a_div, cw_stilo_t *r_mod);
-void		stilo_integer_mod(const cw_stilo_t *a_num, const cw_stilo_t
-    *a_div, cw_stilo_t *r_mod);
+#ifdef _LIBSTIL_DBG
+#define	stilo_integer_new(a_stilo, a_val) do {				\
+	*(cw_uint32_t *)(a_stilo) = 0;					\
+	(a_stilo)->type = STILOT_INTEGER;				\
+	(a_stilo)->magic = _CW_STILO_MAGIC;				\
+	(a_stilo)->o.integer.i = (a_val);				\
+} while (0)
+#else
+#define	stilo_integer_new(a_stilo, a_val) do {				\
+	*(cw_uint32_t *)(a_stilo) = 0;					\
+	(a_stilo)->type = STILOT_INTEGER;				\
+	(a_stilo)->o.integer.i = (a_val);				\
+} while (0)
+#endif
+
+#define		stilo_integer_get(a_stilo) (a_stilo)->o.integer.i
+#define		stilo_integer_set(a_stilo, a_val) do {			\
+	(a_stilo)->o.integer.i = (a_val);				\
+} while (0)
+
+#define		stilo_integer_add(a_a, a_b, r) do {			\
+	(r)->o.integer.i = (a_a)->o.integer.i + (a_b)->o.integer.i;	\
+} while (0)
+#define		stilo_integer_sub(a_a, a_b, r) do {			\
+	(r)->o.integer.i = (a_a)->o.integer.i - (a_b)->o.integer.i;	\
+} while (0)
+#define		stilo_integer_mul(a_a, a_b, r) do {			\
+	(r)->o.integer.i = (a_a)->o.integer.i * (a_b)->o.integer.i;	\
+} while (0)
+#define		stilo_integer_div(a_a, a_b, r) do {			\
+	(r)->o.integer.i = (a_a)->o.integer.i / (a_b)->o.integer.i;	\
+} while (0)
+#define		stilo_integer_mod(a_a, a_b, r) do {			\
+	(r)->o.integer.i = (a_a)->o.integer.i % (a_b)->o.integer.i;	\
+} while (0)
 void		stilo_integer_exp(const cw_stilo_t *a_num, const cw_stilo_t
     *a_exp, cw_stilo_t *r_result);
-void		stilo_integer_abs(const cw_stilo_t *a_a, const cw_stilo_t *a_b,
-    cw_stilo_t *r_abs);
-void		stilo_integer_neg(const cw_stilo_t *a_a, const cw_stilo_t *a_b,
-    cw_stilo_t *r_neg);
+
+void		stilo_integer_abs(const cw_stilo_t *a_num, cw_stilo_t *r_abs);
+#define		stilo_integer_neg(a_a, r) do {				\
+	(r)->o.integer.i = -(a_a)->o.integer.i;				\
+} while (0)
 void		stilo_integer_srand(const cw_stilo_t *a_seed);
 void		stilo_integer_rand(cw_stilo_t *r_num);
 

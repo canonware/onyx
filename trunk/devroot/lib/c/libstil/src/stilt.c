@@ -249,7 +249,7 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 	/* XXX Create and push threaddict onto the dictionary stack. */
 	/* Push systemdict onto the dictionary stack. */
 	stilo = stils_push(&retval->dict_stils);
-	stilo_dup(stilo, stil_systemdict_get(a_stil), a_stilt);
+	stilo_dup(stilo, stil_systemdict_get(a_stil));
 	/* XXX Push globaldict onto the dictionary stack. */
 	/* XXX Create and push localdict onto the dictionary stack. */
 
@@ -301,107 +301,145 @@ stilt_exec(cw_stilt_t *a_stilt)
 
 	for (sdepth = stils_count(&a_stilt->exec_stils);
 	     stils_count(&a_stilt->exec_stils) >= sdepth;) {
-		stilo = stils_get(&a_stilt->exec_stils, 0);
+		stilo = stils_get(&a_stilt->exec_stils);
 		if (stilo_attrs_get(stilo) == STILOA_LITERAL) {
-			/* Always push the object onto the data stack. */
+			/* Always push literal objects onto the data stack. */
 			tstilo = stils_push(&a_stilt->data_stils);
-			stilo_dup(tstilo, stilo, a_stilt);
-			stils_pop(&a_stilt->exec_stils, a_stilt, 1);
-		} else {
-			switch (stilo_type_get(stilo)) {
-			case STILOT_BOOLEAN:
-			case STILOT_CONDITION:
-			case STILOT_DICT:
-			case STILOT_INTEGER:
-			case STILOT_MARK:
-				/* Push onto the dictionary stack. */
-				tstilo = stils_push(&a_stilt->data_stils);
-				stilo_dup(tstilo, stilo, a_stilt);
-				stils_pop(&a_stilt->exec_stils, a_stilt, 1);
-				break;
-			case STILOT_NULL:
-				/* Do nothing. */
-				stils_pop(&a_stilt->exec_stils, a_stilt, 1);
-				break;
-			case STILOT_ARRAY: {
-				cw_uint32_t	i, len;
-				cw_stilo_t	*array;
+			stilo_dup(tstilo, stilo);
+			stils_pop(&a_stilt->exec_stils);
+			continue;
+		}
 
-				len = stilo_array_len_get(stilo);
-				if (len != 0) {
+		switch (stilo_type_get(stilo)) {
+		case STILOT_BOOLEAN:
+		case STILOT_CONDITION:
+		case STILOT_DICT:
+		case STILOT_INTEGER:
+		case STILOT_MARK:
+			/*
+			 * Always push the object onto the data stack, even
+			 * though it isn't literal.
+			 */
+			tstilo = stils_push(&a_stilt->data_stils);
+			stilo_dup(tstilo, stilo);
+			stils_pop(&a_stilt->exec_stils);
+			break;
+		case STILOT_NULL:
+			/* Do nothing. */
+			stils_pop(&a_stilt->exec_stils);
+			break;
+		case STILOT_ARRAY: {
+			cw_uint32_t	i, len;
+			cw_stilo_t	*array;
+
+			len = stilo_array_len_get(stilo);
+			if (len == 0) {
+				stils_pop(&a_stilt->exec_stils);
+				break;
+			}
+
+			/*
+			 * Iterate through the array and execute each element in
+			 * turn.  The generic algorithm is encapsulated in the
+			 * last part of the if..else if..else statement, but the
+			 * overhead of the pushing, recursion, and popping is
+			 * excessive for the common cases of a simple object or
+			 * operator.  Therefore, check for the most common
+			 * simple cases and handle them specially.
+			 */
+			array = stilo_array_get(stilo);
+			for (i = 0; i < len - 1; i++) {
+				if (stilo_attrs_get(&array[i]) ==
+				    STILOA_LITERAL) {
 					/*
-					 * Iterate through the array and execute
-					 * each element in turn.
+					 * Always push literal objects onto the
+                                         * data stack.
 					 */
-					array = stilo_array_get(stilo);
-					for (i = 0; i < len - 1; i++) {
-						tstilo =
-						    stils_push(&a_stilt->exec_stils);
-						stilo_dup(tstilo, &array[i],
-						    a_stilt);
-						stilt_exec(a_stilt);
-					}
+					tstilo =
+					    stils_push(&a_stilt->data_stils);
+					stilo_dup(tstilo, &array[i]);
+				} else if (stilo_type_get(&array[i]) ==
+				    STILOT_OPERATOR) {
+					/* Operator.  Execute it directly. */
+					array[i].o.operator.f(a_stilt);
+				} else {
 					/*
-					 * Make tail recursion safe by replacing
-					 * the array with its last element
-					 * before executing the last element.
+					 * Not a simple common case, so use the
+					 * generic algorithm.
 					 */
-					stils_pop(&a_stilt->exec_stils, a_stilt,
-					    1);
 					tstilo =
 					    stils_push(&a_stilt->exec_stils);
-					stilo_dup(tstilo, &array[i], a_stilt);
-				} else {
-					stils_pop(&a_stilt->exec_stils, a_stilt,
-					    1);
+					stilo_dup(tstilo, &array[i]);
+					stilt_exec(a_stilt);
 				}
-				
-
-				break;
 			}
-			case STILOT_STRING: {
-				cw_stilts_t	stilts;
 
+			/*
+			 * If recursion is possible and likely, make tail
+			 * recursion safe by replacing the array with its last
+			 * element before executing the last element.
+			 */
+			if (stilo_attrs_get(&array[i]) == STILOA_LITERAL) {
 				/*
-				 * Use the string as a source of code.
+				 * Always push literal objects onto the
+				 * data stack.
 				 */
-				stilts_new(&stilts, a_stilt);
-				stilt_interpret(a_stilt, &stilts,
-				    stilo_string_get(stilo),
-				    stilo_string_len_get(stilo));
-				stilt_flush(a_stilt, &stilts);
-				stilts_delete(&stilts, a_stilt);
-				stils_pop(&a_stilt->exec_stils, a_stilt, 1);
-
-				break;
-			}
-			case STILOT_NAME: {
-				cw_stilo_t	val;
-
+				tstilo = stils_push(&a_stilt->data_stils);
+				stilo_dup(tstilo, &array[i]);
+				stils_pop(&a_stilt->exec_stils);
+			} else {
 				/*
-				 * Search for a value associated with the name
-				 * in the dictionary stack, push it onto the
-				 * execution stack, and execute it.
+				 * Possible recursion, so use the generic
+				 * algorithm.
 				 */
-				stilo = stils_get(&a_stilt->exec_stils, 0);
-				stilo_no_new(&val);
-				if (stilt_dict_stack_search(a_stilt, stilo,
-				    &val))
-					xep_throw(_CW_XEPV_UNDEFINED);
-				stilo_move(stilo, &val);
-				break;
+				/* XXX GC-unsafe. */
+				stils_pop(&a_stilt->exec_stils);
+				tstilo = stils_push(&a_stilt->exec_stils);
+				stilo_dup(tstilo, &array[i]);
 			}
-			case STILOT_OPERATOR:
-				stilo->o.operator.f(a_stilt);
-				stils_pop(&a_stilt->exec_stils, a_stilt, 1);
-				break;
-			case STILOT_FILE:
-			case STILOT_HOOK:
-			case STILOT_LOCK:
-				_cw_not_reached();	/* XXX */
-			default:
-				_cw_not_reached();
-			}
+			break;
+		}
+		case STILOT_STRING: {
+			cw_stilts_t	stilts;
+
+			/*
+			 * Use the string as a source of code.
+			 */
+			stilts_new(&stilts, a_stilt);
+			stilt_interpret(a_stilt, &stilts,
+			    stilo_string_get(stilo),
+			    stilo_string_len_get(stilo));
+			stilt_flush(a_stilt, &stilts);
+			stilts_delete(&stilts, a_stilt);
+			stils_pop(&a_stilt->exec_stils);
+
+			break;
+		}
+		case STILOT_NAME: {
+			cw_stilo_t	val;
+
+			/*
+			 * Search for a value associated with the name
+			 * in the dictionary stack, push it onto the
+			 * execution stack, and execute it.
+			 */
+			stilo = stils_get(&a_stilt->exec_stils);
+			stilo_no_new(&val);
+			if (stilt_dict_stack_search(a_stilt, stilo, &val))
+				xep_throw(_CW_XEPV_UNDEFINED);
+			stilo_move(stilo, &val);
+			break;
+		}
+		case STILOT_OPERATOR:
+			stilo->o.operator.f(a_stilt);
+			stils_pop(&a_stilt->exec_stils);
+			break;
+		case STILOT_FILE:
+		case STILOT_HOOK:
+		case STILOT_LOCK:
+			_cw_not_reached();	/* XXX */
+		default:
+			_cw_not_reached();
 		}
 	}
 }
@@ -458,8 +496,8 @@ stilt_dict_stack_search(cw_stilt_t *a_stilt, cw_stilo_t *a_key, cw_stilo_t
 	 * Iteratively search the dictionaries on the dictionary stack for
 	 * a_key.
 	 */
-	for (dict = stils_get(&a_stilt->dict_stils, 0); dict != NULL; dict =
-	     stils_get_down(&a_stilt->dict_stils, dict)) {
+	for (dict = stils_get(&a_stilt->dict_stils); dict != NULL; dict =
+	     stils_down_get(&a_stilt->dict_stils, dict)) {
 		if (stilo_dict_lookup(dict, a_stilt, a_key, r_value) == FALSE) {
 			/* Found. */
 			retval = FALSE;
@@ -1515,7 +1553,7 @@ stilt_p_special_accept(cw_stilt_t *a_stilt, const cw_uint8_t *a_token,
 
 	stilo = stils_push(&a_stilt->exec_stils);
 	if (stilt_dict_stack_search(a_stilt, &key, stilo)) {
-		stils_pop(&a_stilt->exec_stils, a_stilt, 1);
+		stils_pop(&a_stilt->exec_stils);
 		xep_throw(_CW_XEPV_UNDEFINED);
 	}
 
@@ -1529,9 +1567,9 @@ stilt_p_procedure_accept(cw_stilt_t *a_stilt)
 	cw_uint32_t	nelements, i;
 
 	/* Find the "mark". */
-	for (i = 0, stilo = stils_get(&a_stilt->data_stils, 0);
+	for (i = 0, stilo = stils_get(&a_stilt->data_stils);
 	     stilo != NULL && stilo_type_get(stilo) != STILOT_NO;
-	     i++, stilo = stils_get_down(&a_stilt->data_stils, stilo));
+	     i++, stilo = stils_down_get(&a_stilt->data_stils, stilo));
 
 	_cw_assert(stilo != NULL);
 
@@ -1549,13 +1587,12 @@ stilt_p_procedure_accept(cw_stilt_t *a_stilt)
 	/*
 	 * Traverse up the stack, moving stilo's to the array.
 	 */
-	for (i = 0, stilo = stils_get_up(&a_stilt->data_stils, stilo); i <
-	    nelements; i++, stilo = stils_get_up(&a_stilt->data_stils,
-	    stilo))
-		stilo_move(&arr[i], stilo);
+	for (i = nelements, stilo = stils_get(&a_stilt->data_stils); i > 0;
+	     i--, stilo = stils_down_get(&a_stilt->data_stils, stilo))
+		stilo_move(&arr[i - 1], stilo);
 
 	/* Pop the stilo's off the stack now. */
-	stils_pop(&a_stilt->data_stils, a_stilt, nelements + 1);
+	stils_npop(&a_stilt->data_stils, nelements + 1);
 
 	/* Push the array onto the stack. */
 	stilo = stils_push(&a_stilt->data_stils);

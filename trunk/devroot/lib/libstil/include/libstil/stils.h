@@ -36,40 +36,37 @@ typedef struct cw_stils_s cw_stils_t;
 typedef struct cw_stilso_s cw_stilso_t;
 
 struct cw_stilso_s {
-	cw_stilo_t	stilo;		/* Payload.  Must be first field. */
-	qr(cw_stilso_t) link;		/* Stack/spares ring linkage. */
+	cw_stilo_t		stilo;	/* Payload.  Must be first field. */
+	qs_elm(cw_stilso_t)	link;	/* Stack/spares linkage. */
 };
 
 struct cw_stilsc_s {
 #if (defined(_LIBSTIL_DBG) || defined(_LIBSTIL_DEBUG))
-	cw_uint32_t	magic;
+	cw_uint32_t		magic;
 #endif
+	cw_pool_t		*stilsc_pool; /* stilsc allocator. */
 
-	cw_pool_t	*stilsc_pool;	/* stilsc allocator. */
-
-	ql_elm(cw_stilsc_t) link;	/* Linkage for the list of stilsc's. */
+	qs_elm(cw_stilsc_t)	link;	/* Linkage for the stack of stilsc's. */
 
 	/*
 	 * Must be last field, since it is used for array indexing of
 	 * stilso's beyond the end of the structure.
 	 */
-	cw_stilso_t	objects[1];
+	cw_stilso_t		objects[1];
 };
 
 struct cw_stils_s {
 #if (defined(_LIBSTIL_DBG) || defined(_LIBSTIL_DEBUG))
 	cw_uint32_t	magic;
 #endif
+	qs_head(cw_stilso_t)	stack;	/* Stack. */
+	cw_uint32_t		count;	/* Number of stack elements. */
 
-	cw_stilso_t	*stack;		/* Pointer to the top of the stack. */
-	cw_uint32_t	count;		/* Number of stack elements. */
-	
-	cw_stilso_t	*spares;	/* Pointer to a ring of spare slots. */
-	cw_uint32_t	nspares;	/* Number of spares. */
+	qs_head(cw_stilso_t)	spares;	/* Stack of spare slots. */
 
-	cw_pool_t	*stilsc_pool;	/* Allocator for stilsc's. */
+	cw_pool_t		*stilsc_pool; /* Allocator for stilsc's. */
 
-	ql_head(cw_stilsc_t) chunks;	/* List of stilsc's. */
+	qs_head(cw_stilsc_t)	chunks;	/* List of stilsc's. */
 };
 
 cw_stils_t	*stils_new(cw_stils_t *a_stils, cw_pool_t *a_stilsc_pool);
@@ -78,12 +75,14 @@ void		stils_collect(cw_stils_t *a_stils, void (*a_add_root_func)
     (void *add_root_arg, cw_stilo_t *root), void *a_add_root_arg);
 
 cw_stilo_t	*stils_push(cw_stils_t *a_stils);
-void		stils_pop(cw_stils_t *a_stils, cw_stilt_t *a_stilt, cw_uint32_t
-    a_count);
+cw_stilo_t	*stils_under_push(cw_stils_t *a_stils, cw_stilo_t *a_stilo);
+void		stils_pop(cw_stils_t *a_stils);
+void		stils_npop(cw_stils_t *a_stils, cw_uint32_t a_count);
 void		stils_roll(cw_stils_t *a_stils, cw_uint32_t a_count, cw_sint32_t
     a_amount);
-cw_uint32_t	stils_count(cw_stils_t *a_stils);
-cw_stilo_t	*stils_get(cw_stils_t *a_stils, cw_uint32_t a_index);
-cw_stilo_t	*stils_get_down(cw_stils_t *a_stils, cw_stilo_t *a_stilo);
-cw_stilo_t	*stils_get_up(cw_stils_t *a_stils, cw_stilo_t *a_stilo);
-cw_uint32_t	stils_get_index(cw_stils_t *a_stils, cw_stilo_t *a_stilo);
+#define		stils_count(a_stils) (a_stils)->count
+cw_stilo_t	*stils_get(cw_stils_t *a_stils);
+	
+cw_stilo_t	*stils_nget(cw_stils_t *a_stils, cw_uint32_t a_index);
+cw_stilo_t	*stils_down_get(cw_stils_t *a_stils, cw_stilo_t *a_stilo);
+cw_uint32_t	stils_index_get(cw_stils_t *a_stils, cw_stilo_t *a_stilo);

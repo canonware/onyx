@@ -15,7 +15,6 @@
 #include <ctype.h>
 
 #ifdef _LIBSTIL_DBG
-#define _CW_STILO_MAGIC		0x398754ba
 #define _CW_STILOE_MAGIC	0x0fa6e798
 #endif
 
@@ -209,7 +208,19 @@ struct cw_stiloe_string_s {
  */
 
 /* stilo. */
-static void	stilo_p_new(cw_stilo_t *a_stilo, cw_stilot_t a_type);
+/* Call before other initialization. */
+#ifdef _LIBSTIL_DBG
+#define	stilo_p_new(a_stilo, a_type) do {				\
+	*(cw_uint32_t *)(a_stilo) = 0;					\
+	(a_stilo)->type = (a_type);					\
+	(a_stilo)->magic = _CW_STILO_MAGIC;				\
+} while (0)
+#else
+#define	stilo_p_new(a_stilo, a_type) do {				\
+	*(cw_uint32_t *)(a_stilo) = 0;					\
+	(a_stilo)->type = (a_type);					\
+} while (0)
+#endif
 static cw_uint32_t stilo_p_hash(const void *a_key);
 static cw_bool_t stilo_p_key_comp(const void *a_k1, const void *a_k2);
 
@@ -287,13 +298,6 @@ static void	stilo_p_hook_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd,
 static void	stilo_p_integer_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type);
 static void	stilo_p_integer_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd,
     cw_bool_t a_syntactic, cw_bool_t a_newline);
-#define	_STILO_CALC_ADD	1
-#define	_STILO_CALC_SUB	2
-#define	_STILO_CALC_MUL	3
-#define	_STILO_CALC_DIV	4
-#define	_STILO_CALC_MOD	5
-static void	stilo_p_integer_calc(const cw_stilo_t *a_a, const cw_stilo_t
-    *a_b, cw_uint32_t a_operation, cw_stilo_t *r_sum);
 
 /* lock. */
 static void	stilo_p_lock_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
@@ -496,51 +500,6 @@ stilo_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 	stilo_clobber(a_stilo);
 }
 
-cw_stilot_t
-stilo_type_get(cw_stilo_t *a_stilo)
-{
-	_cw_check_ptr(a_stilo);
-	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
-
-	return a_stilo->type;
-}
-
-cw_stiloa_t
-stilo_attrs_get(cw_stilo_t *a_stilo)
-{
-	_cw_check_ptr(a_stilo);
-	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
-
-	return a_stilo->attrs;
-}
-
-void
-stilo_attrs_set(cw_stilo_t *a_stilo, cw_stiloa_t a_attrs)
-{
-	_cw_check_ptr(a_stilo);
-	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
-
-	a_stilo->attrs = a_attrs;
-}
-
-cw_stilop_t
-stilo_perms_get(cw_stilo_t *a_stilo)
-{
-	_cw_check_ptr(a_stilo);
-	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
-
-	return a_stilo->perms;
-}
-
-void
-stilo_perms_set(cw_stilo_t *a_stilo, cw_stilop_t a_perms)
-{
-	_cw_check_ptr(a_stilo);
-	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
-
-	a_stilo->perms = a_perms;
-}
-
 void
 stilo_cast(cw_stilo_t *a_stilo, cw_stilot_t a_stilot)
 {
@@ -567,6 +526,7 @@ stilo_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
 	stilot_vtable[a_from->type].copy_f(a_to, a_from, a_stilt);
 }
 
+#if (0)
 void
 stilo_dup(cw_stilo_t *a_to, const cw_stilo_t *a_from, cw_stilt_t *a_stilt)
 {
@@ -583,7 +543,7 @@ stilo_dup(cw_stilo_t *a_to, const cw_stilo_t *a_from, cw_stilt_t *a_stilt)
 	a_to->breakpoint = FALSE;
 	a_to->watchpoint = FALSE;
 }
-
+#endif
 void
 stilo_move(cw_stilo_t *a_to, cw_stilo_t *a_from)
 {
@@ -632,20 +592,6 @@ stilo_l_stiloe_get(cw_stilo_t *a_stilo)
 	}
 
 	return retval;
-}
-
-/* Call before other initialization. */
-static void
-stilo_p_new(cw_stilo_t *a_stilo, cw_stilot_t a_type)
-{
-	_cw_check_ptr(a_stilo);
-
-	memset(a_stilo, 0, sizeof(cw_stilo_t));
-	a_stilo->type = a_type;
-
-#ifdef _LIBSTIL_DBG
-	a_stilo->magic = _CW_STILO_MAGIC;
-#endif
 }
 
 /* Hash any stilo, but optimize for name hashing. */
@@ -747,12 +693,6 @@ stiloe_l_ref_iterate(cw_stiloe_t *a_stiloe, cw_bool_t a_reset)
 /*
  * no.
  */
-void
-stilo_no_new(cw_stilo_t *a_stilo)
-{
-	stilo_p_new(a_stilo, STILOT_NO);
-}
-
 static void
 stilo_p_no_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t a_syntactic,
     cw_bool_t a_newline)
@@ -886,7 +826,7 @@ stilo_p_array_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
 	 */
 	for (i = 0; i < len; i++) {
 		stilo_cast(&arr_to[i], STILOT_NO);
-		stilo_dup(&arr_to[i], &arr_from[i], a_stilt);
+		stilo_dup(&arr_to[i], &arr_from[i]);
 	}
 }
 
@@ -1252,9 +1192,9 @@ stilo_p_dict_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
 		/* Allocate and copy. */
 		dicto_to = stilt_dicto_get(a_stilt);
 		stilo_no_new(&dicto_to->key);
-		stilo_dup(&dicto_to->key, &dicto_from->key, a_stilt);
+		stilo_dup(&dicto_to->key, &dicto_from->key);
 		stilo_no_new(&dicto_to->val);
-		stilo_dup(&dicto_to->val, &dicto_from->val, a_stilt);
+		stilo_dup(&dicto_to->val, &dicto_from->val);
 		chi = stilt_chi_get(a_stilt);
 
 		/* Insert. */
@@ -1382,7 +1322,7 @@ stilo_dict_lookup(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const cw_stilo_t
 		if (dch_search(&dict->e.d.hash, (void *)a_key, (void **)&dicto)
 		    == FALSE) {
 			stilo_no_new(r_stilo);
-			stilo_dup(r_stilo, &dicto->val, a_stilt);
+			stilo_dup(r_stilo, &dicto->val);
 			retval = FALSE;
 		} else
 			retval = TRUE;
@@ -1435,7 +1375,7 @@ stilo_dict_iterate(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilo_t
 	else {
 		dch_get_iterate(&dict->e.d.hash, (void **)&stilo, NULL);
 		stilo_no_new(r_stilo);
-		stilo_dup(r_stilo, stilo, a_stilt);
+		stilo_dup(r_stilo, stilo);
 		retval = FALSE;
 	}
 	stiloe_p_unlock(&dict->stiloe);
@@ -1532,14 +1472,6 @@ stilo_p_hook_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t a_syntactic,
 /*
  * integer.
  */
-void
-stilo_integer_new(cw_stilo_t *a_stilo, cw_sint64_t a_val)
-{
-	stilo_p_new(a_stilo, STILOT_INTEGER);
-
-	a_stilo->o.integer.i = a_val;
-}
-
 static void
 stilo_p_integer_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type)
 {
@@ -1559,172 +1491,24 @@ stilo_p_integer_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t
 	_cw_out_put_f(a_fd, "[q|s:s][c]", a_stilo->o.integer.i, newline);
 }
 
-static void
-stilo_p_integer_calc(const cw_stilo_t *a_a, const cw_stilo_t *a_b, cw_uint32_t
-    a_operation, cw_stilo_t *r_sum)
-{
-	cw_sint64_t	a, b, r;
-	
-	if ((a_a->type != STILOT_INTEGER) || (a_b->type != STILOT_INTEGER))
-		xep_throw(_CW_XEPV_TYPECHECK);
-
-	a = a_a->o.integer.i;
-	b = a_b->o.integer.i;
-
-	switch (a_operation) {
-	case _STILO_CALC_ADD:
-		r = a + b;
-		break;
-	case _STILO_CALC_SUB:
-		r = a - b;
-		break;
-	case _STILO_CALC_MUL:
-		r = a * b;
-		break;
-	case _STILO_CALC_DIV:
-		r = a / b;
-		break;
-	case _STILO_CALC_MOD:
-		r = a % b;
-		break;
-	default:
-		_cw_not_reached();
-	}
-
-	stilo_cast(r_sum, STILOT_INTEGER);
-	r_sum->o.integer.i = r;
-}
-
-cw_sint64_t
-stilo_integer_get(cw_stilo_t *a_stilo)
-{
-	_cw_check_ptr(a_stilo);
-	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
-	_cw_assert(a_stilo->type == STILOT_INTEGER);
-
-	return a_stilo->o.integer.i;
-}
-
-void
-stilo_integer_set(cw_stilo_t *a_stilo, cw_sint64_t a_val)
-{
-	_cw_check_ptr(a_stilo);
-	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
-	_cw_assert(a_stilo->type == STILOT_INTEGER);
-
-	a_stilo->o.integer.i = a_val;
-}
-
-void
-stilo_integer_add(const cw_stilo_t *a_a, const cw_stilo_t *a_b, cw_stilo_t
-    *r_sum)
-{
-	_cw_check_ptr(a_a);
-	_cw_assert(a_a->magic == _CW_STILO_MAGIC);
-	_cw_assert(a_a->type == STILOT_INTEGER);
-	_cw_check_ptr(a_b);
-	_cw_assert(a_b->magic == _CW_STILO_MAGIC);
-	_cw_assert(a_b->type == STILOT_INTEGER);
-
-	stilo_p_integer_calc(a_a, a_b, _STILO_CALC_ADD, r_sum);
-}
-
-void
-stilo_integer_sub(const cw_stilo_t *a_num, const cw_stilo_t *a_sub, cw_stilo_t
-    *r_result)
-{
-	_cw_check_ptr(a_num);
-	_cw_assert(a_num->magic == _CW_STILO_MAGIC);
-	_cw_assert(a_num->type == STILOT_INTEGER);
-	_cw_check_ptr(a_sub);
-	_cw_assert(a_sub->magic == _CW_STILO_MAGIC);
-	_cw_assert(a_sub->type == STILOT_INTEGER);
-
-	stilo_p_integer_calc(a_num, a_sub, _STILO_CALC_SUB, r_result);
-}
-
-void
-stilo_integer_mul(const cw_stilo_t *a_a, const cw_stilo_t *a_b, cw_stilo_t
-    *r_product)
-{
-	_cw_check_ptr(a_a);
-	_cw_assert(a_a->magic == _CW_STILO_MAGIC);
-	_cw_assert(a_a->type == STILOT_INTEGER);
-	_cw_check_ptr(a_b);
-	_cw_assert(a_b->magic == _CW_STILO_MAGIC);
-	_cw_assert(a_b->type == STILOT_INTEGER);
-
-	stilo_p_integer_calc(a_a, a_b, _STILO_CALC_MUL, r_product);
-}
-
-void
-stilo_integer_div(const cw_stilo_t *a_num, const cw_stilo_t *a_div, cw_stilo_t
-    *r_quotient)
-{
-	_cw_check_ptr(a_num);
-	_cw_assert(a_num->magic == _CW_STILO_MAGIC);
-	_cw_assert(a_num->type == STILOT_INTEGER);
-	_cw_check_ptr(a_div);
-	_cw_assert(a_div->magic == _CW_STILO_MAGIC);
-	_cw_assert(a_div->type == STILOT_INTEGER);
-
-	stilo_p_integer_calc(a_num, a_div, _STILO_CALC_DIV, r_quotient);
-}
-	
-void
-stilo_integer_mod(const cw_stilo_t *a_num, const cw_stilo_t *a_div, cw_stilo_t
-    *r_mod)
-{
-	_cw_check_ptr(a_num);
-	_cw_assert(a_num->magic == _CW_STILO_MAGIC);
-	_cw_assert(a_num->type == STILOT_INTEGER);
-	_cw_check_ptr(a_div);
-	_cw_assert(a_div->magic == _CW_STILO_MAGIC);
-	_cw_assert(a_div->type == STILOT_INTEGER);
-
-	stilo_p_integer_calc(a_num, a_div, _STILO_CALC_MOD, r_mod);
-}
-
 void
 stilo_integer_exp(const cw_stilo_t *a_num, const cw_stilo_t *a_exp, cw_stilo_t
     *r_result)
 {
-	_cw_check_ptr(a_num);
-	_cw_assert(a_num->magic == _CW_STILO_MAGIC);
-	_cw_assert(a_num->type == STILOT_INTEGER);
-	_cw_check_ptr(a_exp);
-	_cw_assert(a_exp->magic == _CW_STILO_MAGIC);
-	_cw_assert(a_exp->type == STILOT_INTEGER);
+	cw_sint64_t	i;
 
-	_cw_error("XXX Not implemented");
+	for (i = 0, r_result->o.integer.i = a_num->o.integer.i;
+	     i < a_exp->o.integer.i - 1; i++)
+		r_result->o.integer.i *= a_num->o.integer.i;
 }
 
 void
-stilo_integer_abs(const cw_stilo_t *a_a, const cw_stilo_t *a_b, cw_stilo_t
-    *r_abs)
+stilo_integer_abs(const cw_stilo_t *a_num, cw_stilo_t *r_abs)
 {
-	_cw_check_ptr(a_a);
-	_cw_assert(a_a->magic == _CW_STILO_MAGIC);
-	_cw_assert(a_a->type == STILOT_INTEGER);
-	_cw_check_ptr(a_b);
-	_cw_assert(a_b->magic == _CW_STILO_MAGIC);
-	_cw_assert(a_b->type == STILOT_INTEGER);
-
-	_cw_error("XXX Not implemented");
-}
-	
-void
-stilo_integer_neg(const cw_stilo_t *a_a, const cw_stilo_t *a_b, cw_stilo_t
-    *r_neg)
-{
-	_cw_check_ptr(a_a);
-	_cw_assert(a_a->magic == _CW_STILO_MAGIC);
-	_cw_assert(a_a->type == STILOT_INTEGER);
-	_cw_check_ptr(a_b);
-	_cw_assert(a_b->magic == _CW_STILO_MAGIC);
-	_cw_assert(a_b->type == STILOT_INTEGER);
-
-	_cw_error("XXX Not implemented");
+	if (a_num->o.integer.i >= 0)
+		r_abs->o.integer.i = a_num->o.integer.i;
+	else
+		r_abs->o.integer.i = -a_num->o.integer.i;
 }
 
 void
@@ -1733,9 +1517,6 @@ stilo_integer_srand(const cw_stilo_t *a_seed)
 	_cw_check_ptr(a_seed);
 	_cw_assert(a_seed->magic == _CW_STILO_MAGIC);
 	_cw_assert(a_seed->type == STILOT_INTEGER);
-
-	if (a_seed->type != STILOT_INTEGER)
-		xep_throw(_CW_XEPV_TYPECHECK);
 
 	srandom(a_seed->o.integer.i);
 }
@@ -1746,9 +1527,6 @@ stilo_integer_rand(cw_stilo_t *r_num)
 	_cw_check_ptr(r_num);
 	_cw_assert(r_num->magic == _CW_STILO_MAGIC);
 	_cw_assert(r_num->type == STILOT_INTEGER);
-
-	if (r_num->type != STILOT_INTEGER)
-		xep_throw(_CW_XEPV_TYPECHECK);
 
 	r_num->o.integer.i = random();
 }

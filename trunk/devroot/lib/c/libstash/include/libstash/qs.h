@@ -32,7 +32,9 @@ struct {								\
 	(a_head)->qsh_top = NULL;					\
 } while (0)
 
-#define qs_elm_new(a_elm, a_field)
+#define qs_elm_new(a_elm, a_field) do {					\
+	(a_elm)->a_field.qse_down = NULL;				\
+} while (0)
 
 #define qs_top(a_head)	((a_head)->qsh_top)
 

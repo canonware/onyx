@@ -152,7 +152,7 @@ prompt(EditLine *a_el)
 		stilt_flush(&stilt, &estilts);
 
 		/* Get the actual prompt string. */
-		stilo = stils_get(stack, 0);
+		stilo = stils_get(stack);
 		pstr = stilo_string_get(stilo);
 		plen = stilo_string_len_get(stilo);
 
@@ -163,7 +163,7 @@ prompt(EditLine *a_el)
 		prompt_str[maxlen] = '\0';
 
 		/* Pop the prompt string off the data stack. */
-		stils_pop(stack, &stilt, 1);
+		stils_pop(stack);
 	} else {
 		/*
 		 * One or both of:
