@@ -64,6 +64,8 @@ void	nxa_delete(cw_nxa_t *a_nxa);
 
 void	*nxa_malloc_e(cw_nxa_t *a_nxa, size_t a_size, const char *a_filename,
     cw_uint32_t a_line_num);
+void	*nxa_realloc_e(cw_nxa_t *a_nxa, void *a_ptr, size_t a_size, size_t
+    a_old_size, const char *a_filename, cw_uint32_t a_line_num);
 void	nxa_free_e(cw_nxa_t *a_nxa, void *a_ptr, size_t a_size, const char
     *a_filename, cw_uint32_t a_line_num);
 

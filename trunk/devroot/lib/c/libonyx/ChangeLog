@@ -1,3 +1,7 @@
+2001-08-28  Jason Evans  <jasone@canonware.com>
+
+	* src/nxa.c (nxa_realloc_e): Add.
+
 2001-08-21  Jason Evans  <jasone@canonware.com>
 
 	* : Maintain the current number of bytes allocated by the
