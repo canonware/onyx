@@ -25,8 +25,10 @@
 #include <sys/resource.h>
 #include <sys/stat.h>
 #include <dirent.h> /* For dirforeach operator. */
-#ifdef CW_SOCKET
+#if (defined(CW_POSIX) || defined(CW_SOCKET))
 #include <fcntl.h>
+#endif
+#ifdef CW_SOCKET
 #include <netdb.h>
 #include <sys/socket.h>
 #include <sys/un.h>
