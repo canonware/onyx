@@ -143,6 +143,8 @@ struct									\
 	}								\
     } while (0)
 
+/* a_key is always the first argument to a_comp.  This is relied on by the buf
+ * code. */
 #define rb_search(a_tree, a_key, a_comp, a_field, r_node)		\
     do									\
     {									\
