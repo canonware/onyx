@@ -9,8 +9,8 @@
 #
 # $Source$
 # $Author: jasone $
-# Current revision: $Revision: 198 $
-# Last modified: $Date: 1998-09-07 09:48:15 -0700 (Mon, 07 Sep 1998) $
+# Current revision: $Revision: 202 $
+# Last modified: $Date: 1998-09-07 10:22:28 -0700 (Mon, 07 Sep 1998) $
 #
 # Description: Master Makefile for libstash.
 #              
@@ -252,7 +252,7 @@ check : $(CTESTS) $(PTESTS) $(BTESTS)
 	echo The following regression tests failed: ; \
 	echo "---------------------------------------------" ;\
 	for i in `find ./test -print | grep "\.diff$$"`; do \
-	echo `echo $$i | sed "s/\.\/\(.*\)\.diff/\1/g`; \
+	echo `echo $$i | sed "s/\.\/\(.*\)\.diff/\1/g"`; \
 	done; \
 	echo "---------------------------------------------" \
 	'
