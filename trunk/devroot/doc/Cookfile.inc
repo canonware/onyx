@@ -105,6 +105,7 @@ doc_distclean :
 doc_relclean :
 {
   rm -rf [objdir]/doc/html;
+  rm -rf [objdir]/doc/pdf;
   rm -rf [objdir]/doc/ps;
 }
 
