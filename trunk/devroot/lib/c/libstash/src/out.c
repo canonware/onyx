@@ -171,7 +171,7 @@ out_delete(cw_out_t *a_out)
 
 void
 out_register(cw_out_t *a_out, const char *a_type, cw_uint32_t a_size,
-    cw_out_render_t * a_render_func)
+    cw_out_render_t *a_render_func)
 {
 	_cw_check_ptr(a_out);
 	_cw_assert(a_out->magic == _CW_OUT_MAGIC);
