@@ -27,18 +27,9 @@
  ******************************************************************************/
 
 static void
-onyx_nxcode(cw_nxo_t *a_thread)
+interactive_nxcode(cw_nxo_t *a_thread)
 {
-	/*
-	 * Push strings onto ostack before running the rest of the code.  This
-	 * hackery is necessary since there is no simple way to make the build
-	 * system embed cpp macros into onyx code files.
-	 */
-	_cw_onyx_code(a_thread, "`"
-	_CW_ONYX_RPATH
-	"'`"
-	_CW_ONYX_MPATH
-	"'' print
+	_cw_onyx_code(a_thread, "' print
 
 % Read in the code.
 stdin cvx eval

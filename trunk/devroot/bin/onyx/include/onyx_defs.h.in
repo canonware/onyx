@@ -18,3 +18,5 @@
  * Default module path.
  */
 #undef _CW_ONYX_MPATH
+
+#undef _CW_USE_LIBEDIT

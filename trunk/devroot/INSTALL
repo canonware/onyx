@@ -93,6 +93,12 @@ Optionally, pass any of the following (not a definitive list) arguments to
 	Do not use inline functions.  This reduces the size of binaries at the
 	expense of performance.
 
+--disable-libedit
+	Do not use the libedit library for interactive command line editing.
+	This reduces the size of the onyx binary, at the expense of the command
+	line editing functionality.  If the onyx binary is rarely used
+	interactively, using this option may make sense.
+
 --enable-debug
 	Build debugging code and turn assertions on (controlled by the
 	_CW_ASSERT cpp macro).  The resulting libraries and modules will not be

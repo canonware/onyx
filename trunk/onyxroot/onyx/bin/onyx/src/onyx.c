@@ -10,6 +10,7 @@
  ******************************************************************************/
 
 #include <string.h>
+#include <fcntl.h>
 #include <sys/types.h>
 #include <sys/uio.h>
 #include <unistd.h>
@@ -19,10 +20,14 @@
 
 /* Include generated code. */
 #include "onyx_nxcode.c"
+#include "batch_nxcode.c"
+#include "interactive_nxcode.c"
 
-#define	_PROMPT_STRLEN	  80
+#define	_PROMPT_STRLEN	 80
+#define	_BUFFER_SIZE	512
 
 struct nx_arg_s {
+#ifdef _CW_USE_LIBEDIT
 	cw_bool_t	quit;
 	cw_bool_t	want_data;
 	cw_bool_t	have_data;
@@ -30,7 +35,7 @@ struct nx_arg_s {
 	cw_mtx_t	mtx;
 	cw_cnd_t	cl_cnd;
 	cw_cnd_t	nx_cnd;
-
+#endif
 	cw_uint8_t	*buffer;
 	cw_uint32_t	buffer_size;
 	cw_uint32_t	buffer_count;
@@ -42,17 +47,23 @@ struct nx_arg_s {
  */
 cw_nxo_t	thread;
 cw_nxo_threadp_t threadp;
+#ifdef _CW_USE_LIBEDIT
 EditLine	*el;
 History		*hist;
+#endif
 cw_uint8_t	prompt_str[_PROMPT_STRLEN];
 
 int		interactive_run(int argc, char **argv, char **envp);
-char		*prompt(EditLine *a_el);
+#ifdef _CW_USE_LIBEDIT
 void		cl_read(struct nx_arg_s *a_arg);
+char		*prompt(EditLine *a_el);
 void		*nx_entry(void *a_arg);
+void		signal_handle(int a_signal);
+#else
+char		*prompt(void);
+#endif
 cw_sint32_t	nx_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len,
     cw_uint8_t *r_str);
-void		signal_handle(int a_signal);
 int		batch_run(int argc, char **argv, char **envp);
 void		usage(const char *a_progname);
 const char	*basename(const char *a_str);
@@ -76,42 +87,10 @@ main(int argc, char **argv, char **envp)
 	return retval;
 }
 
+#ifdef _CW_USE_LIBEDIT
 int
 interactive_run(int argc, char **argv, char **envp)
 {
-	/*
-	 * Define promptstring in systemdict:
-	 *   - promptstring <string>
-	 *
-	 * Define 'resume' in threaddict to continue after an error.
-	 *
-	 * Do not stop on error.  Instead, recursively evaluate stdin.  File
-	 * bufferring can cause strange behavior, but at least the error will
-	 * get handled first.
-	 *
-	 * Quit on estackoverflow in order to avoid infinite recursion.
-	 *
-	 * Print the product and version info.
-	 *
-	 * Push an executable stdin on ostack to prepare for the start operator.
-	 */
-	static const cw_uint8_t	code[] = "\n\
-systemdict begin\n\
-/promptstring {\n\
-	count cvs `onyx:' exch catenate `> ' catenate\n\
-} bind def\n\
-end\n\
-threaddict begin\n\
-/resume //stop def\n\
-end\n\
-errordict begin\n\
-	/stop {\n\
-		stdin cvx stopped pop\n\
-	} bind def\n\
-end\n\
-product print `, version ' print version print `.\n' print flush\n\
-stdin cvx\n\
-";
 	struct nx_arg_s	arg;
 	struct sigaction action;
 	sigset_t	set, oset;
@@ -198,8 +177,7 @@ stdin cvx\n\
 	/*
 	 * Run embedded initialization code.
 	 */
-	nxo_thread_interpret(&thread, &threadp, code, sizeof(code) - 1);
-	nxo_thread_flush(&thread, &threadp);
+	interactive_nxcode(&thread);
 
 	/*
 	 * Acquire the interlock mtx before creating the interpreter thread, so
@@ -247,9 +225,60 @@ stdin cvx\n\
 	nx_delete(&nx);
 	return 0;
 }
+#else
+int
+interactive_run(int argc, char **argv, char **envp)
+{
+	struct nx_arg_s	arg;
+	cw_nx_t		nx;
+	cw_nxo_t	*stdin_nxo;
+
+	/* Initialize the structure used to keep track of stdin buffering. */
+	arg.buffer = NULL;
+	arg.buffer_size = 0;
+	arg.buffer_count = 0;
+
+	/* Initialize the interpreter. */
+	nx_new(&nx, NULL, argc, argv, envp);
+
+	/* Set up the interactive wrapper for stdin. */
+	stdin_nxo = nx_stdin_get(&nx);
+	nxo_file_new(stdin_nxo, &nx, TRUE);
+	nxo_file_interactive(stdin_nxo, nx_read, NULL, (void *)&arg);
+
+	/* Create the initial thread. */
+	nxo_thread_new(&thread, &nx);
+	nxo_threadp_new(&threadp);
+
+	/*
+	 * Install custom operators and run embedded initialization code.
+	 */
+	onyx_ops_init(&thread);
+	onyx_nxcode(&thread);
+
+	/*
+	 * Run embedded initialization code.
+	 */
+	interactive_nxcode(&thread);
+
+	/* Run the interpreter such that it will not exit on errors. */
+	nxo_thread_start(&thread);
+
+	if (arg.buffer != NULL)
+		_cw_free(arg.buffer);
+
+	nxo_threadp_delete(&threadp, &thread);
+	nx_delete(&nx);
+	return 0;
+}
+#endif
 
 char *
+#ifdef _CW_USE_LIBEDIT
 prompt(EditLine *a_el)
+#else
+prompt(void)
+#endif
 {
 	if ((nxo_thread_deferred(&thread) == FALSE) &&
 	    (nxo_thread_state(&thread) == THREADTS_START)) {
@@ -302,6 +331,7 @@ prompt(EditLine *a_el)
 	return prompt_str;
 }
 
+#ifdef _CW_USE_LIBEDIT
 void
 cl_read(struct nx_arg_s *a_arg)
 {
@@ -402,6 +432,30 @@ nx_entry(void *a_arg)
 	return NULL;
 }
 
+void
+signal_handle(int a_signal)
+{
+	switch (a_signal) {
+	case SIGWINCH:
+		/* XXX Doesn't return until cl_read() returns. */
+		el_resize(el);
+		break;
+	case SIGTSTP:
+		raise(SIGSTOP);
+		break;
+	case SIGCONT:
+		break;
+	case SIGHUP:
+	case SIGINT:
+	case SIGQUIT:
+	case SIGTERM:
+		exit(0);
+	default:
+		_cw_out_put_e("Unexpected signal [i]\n", a_signal);
+		abort();
+	}
+}
+
 cw_sint32_t
 nx_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str)
 {
@@ -443,44 +497,110 @@ nx_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str)
 	mtx_unlock(&arg->mtx);
 	return retval;
 }
-
-void
-signal_handle(int a_signal)
+#else
+cw_sint32_t
+nx_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str)
 {
-	switch (a_signal) {
-	case SIGWINCH:
-		/* XXX Doesn't return until cl_read() returns. */
-		el_resize(el);
-		break;
-	case SIGTSTP:
-		raise(SIGSTOP);
-		break;
-	case SIGCONT:
-		break;
-	case SIGHUP:
-	case SIGINT:
-	case SIGQUIT:
-	case SIGTERM:
-		exit(0);
-	default:
-		_cw_out_put_e("Unexpected signal [i]\n", a_signal);
-		abort();
+	cw_sint32_t		retval;
+	struct nx_arg_s		*arg = (struct nx_arg_s *)a_arg;
+
+	_cw_assert(a_len > 0);
+
+	if (arg->buffer_count == 0) {
+		cw_nxo_t	*stdout_nxo;
+
+		/* Print the prompt. */
+		stdout_nxo = nxo_thread_stdout_get(&thread);
+		nxo_file_output(stdout_nxo, "[s]", prompt());
+		nxo_file_buffer_flush(stdout_nxo);
+
+		/*
+		 * Read data until there are no more.
+		 */
+		while ((retval = read(0, r_str, a_len)) == -1 && errno ==
+		    EINTR) {
+			/*
+			 * Interrupted system call, probably due to garbage
+			 * collection.
+			 */
+		}
+		if (retval == -1) {
+			/* EOF. */
+			retval = 0;
+		} else {
+			if (retval == a_len) {
+				cw_sint32_t	count;
+
+				/*
+				 * There may be more data available.  Store any
+				 * available data in a buffer.
+				 */
+				if (arg->buffer == NULL) {
+					/* Initialize the buffer. */
+					arg->buffer = (cw_uint8_t
+					    *)_cw_malloc(_BUFFER_SIZE);
+					arg->buffer_size = _BUFFER_SIZE;
+					arg->buffer_count = 0;
+				}
+
+				for (;;) {
+					while ((count = read(0,
+					    &arg->buffer[arg->buffer_count],
+					    arg->buffer_size -
+					    arg->buffer_count)) == -1 && errno
+					    == EINTR) {
+						/*
+						 * Interrupted system call,
+						 * probably due to garbage
+						 * collection.
+						 */
+					}
+					if (count <= 0) {
+						/*
+						 * EOF or no more data buffered
+						 * by stdin.
+						 */
+						break;
+					}
+
+					arg->buffer_count += count;
+					if (arg->buffer_count ==
+					    arg->buffer_size) {
+						/* Expand the buffer. */
+						arg->buffer = (cw_uint8_t
+						    *)_cw_realloc(arg->buffer,
+						    arg->buffer_size * 2);
+						arg->buffer_size *= 2;
+					}
+				}
+			}
+		}
+	} else {
+		/*
+		 * Return as much of the buffered data as possible.
+		 */
+		if (arg->buffer_count > a_len) {
+			/* There are more data than we can return. */
+			retval = a_len;
+			memcpy(r_str, arg->buffer, a_len);
+			arg->buffer_count -= a_len;
+			memmove(arg->buffer, &arg->buffer[a_len],
+			    arg->buffer_count);
+		} else {
+			/* Return all the data. */
+			retval = arg->buffer_count;
+			memcpy(r_str, arg->buffer, arg->buffer_count);
+			arg->buffer_count = 0;
+		}
 	}
+
+	return retval;
 }
+#endif
 
 int
 batch_run(int argc, char **argv, char **envp)
 {
-	/*
-	 * Die with an exit code of 1 on error.
-	 */
-	static const cw_uint8_t	code[] = "\n\
-currenterror begin\n\
-	/stop {\n\
-		1 die\n\
-	} def\n\
-end\n\
-";
 	int		retval;
 	cw_nxo_t	*file;
 	int		c;
@@ -555,8 +675,7 @@ end\n\
 	 * Run embedded initialization code specific to non-interactive
 	 * execution.
 	 */
-	nxo_thread_interpret(&thread, &threadp, code, sizeof(code) - 1);
-	nxo_thread_flush(&thread, &threadp);
+	batch_nxcode(&thread);
 
 	/*
 	 * Act on the command line arguments, now that the interpreter is

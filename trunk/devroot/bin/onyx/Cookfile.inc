@@ -32,7 +32,7 @@
   priv_incs = [fromto % [srcdir]/bin/onyx/include/% [priv_incs]];
   priv_incs = [priv_incs] [objdir]/bin/onyx/include/onyx_defs.h;
 
-  local priv_cincs = onyx_nxcode.c;
+  local priv_cincs = onyx_nxcode.c batch_nxcode.c interactive_nxcode.c;
   prix_cincs = [fromto % [srcdir]/bin/onyx/src/% [priv_cincs]];
 
   PRIV_INCS = [PRIV_INCS] [priv_incs] [priv_cincs];
@@ -204,6 +204,14 @@ onyx_bootstrap : [ONYX]
   cat [srcdir]/bin/onyx/src/onyx_nxcode.nx
     | [ONYX] [srcdir]/bin/onyx/src/onyx_nxcode_gen.nx
     > [srcdir]/bin/onyx/src/onyx_nxcode.c;
+
+  cat [srcdir]/bin/onyx/src/batch_nxcode.nx
+    | [ONYX] [srcdir]/bin/onyx/src/batch_nxcode_gen.nx
+    > [srcdir]/bin/onyx/src/batch_nxcode.c;
+
+  cat [srcdir]/bin/onyx/src/interactive_nxcode.nx
+    | [ONYX] [srcdir]/bin/onyx/src/interactive_nxcode_gen.nx
+    > [srcdir]/bin/onyx/src/interactive_nxcode.c;
 }
 
 onyx : [ONYX];
@@ -212,7 +220,10 @@ onyx_install_self : [ONYX]
 {
   [INSTALL] -d [PREFIX]/bin;
   [CC] [A_CFLAGS] -o [PREFIX]/bin/onyx
-       [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [ONYX_SRCS]] [LIBEDIT_A]
+       [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [ONYX_SRCS]]
+#if [enable_libedit]
+       [LIBEDIT_A]
+#endif
        [RPATH][PREFIX]/lib
        [LDFLAGS] -lonyx -lstash -lcurses [EXTRALIBS];
   [CHMOD] 0755 [PREFIX]/bin/onyx;
@@ -245,12 +256,19 @@ onyx_distclean :
  */
 
 [ONYX] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [ONYX_SRCS]]
-         [LIBONYX_S] [LIBEDIT_A] [LIBSTASH_S]
+         [LIBONYX_S]
+#if [enable_libedit]
+         [LIBEDIT_A]
+#endif
+         [LIBSTASH_S]
          [MODS]
   set mkdir
 {
   [CC] [A_CFLAGS] -o [target]
-       [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [ONYX_SRCS]] [LIBEDIT_A]
+       [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [ONYX_SRCS]]
+#if [enable_libedit]
+       [LIBEDIT_A]
+#endif
        [RPATH][abs_objdir]/lib/c/libonyx/lib
 /*       [RPATH][abs_objdir]/lib/c/libedit/lib */
        [RPATH][abs_objdir]/lib/c/libstash/lib

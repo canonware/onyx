@@ -57,6 +57,24 @@ if test "x$enable_inlines" = "x1" ; then
 fi
 ])
 
+dnl Use libedit by default.
+AC_DEFUN(CW_USE_LIBEDIT,
+[
+AC_ARG_ENABLE(libedit, [  --disable-libedit       Do not use inline functions],
+if test "x$enable_libedit" = "xno" ; then
+  enable_libedit="0"
+else
+  enable_libedit="1"
+fi
+,
+enable_libedit="1"
+)
+AC_SUBST(enable_libedit)
+if test "x$enable_libedit" = "x1" ; then
+  AC_DEFINE(_CW_USE_LIBEDIT)
+fi
+])
+
 dnl CW_BUILD_LIB(lib, var)
 dnl lib : Name of library.
 dnl var : Name of variable to substitute in configure output.

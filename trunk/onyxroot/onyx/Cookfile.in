@@ -60,6 +60,8 @@ libs = @libs@;
 mods = @mods@;
 bins = @bins@;
 
+enable_libedit = @enable_libedit@;
+
 BOOTSTRAP = ;
 
 /* Documentation. */
