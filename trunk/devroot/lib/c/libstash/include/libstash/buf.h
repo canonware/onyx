@@ -62,6 +62,7 @@ struct cw_bufel_s
 #define bufel_get_uint32 _CW_NS_STASH(bufel_get_uint32)
 #define bufel_set_uint32 _CW_NS_STASH(bufel_set_uint32)
 
+/* Public buf interface. */
 #ifdef _CW_REENTRANT
 cw_buf_t * buf_new(cw_buf_t * a_buf, cw_bool_t a_is_threadsafe);
 #else
@@ -78,6 +79,7 @@ cw_bufel_t * buf_rm_head_bufel(cw_buf_t * a_buf);
 void buf_prepend_bufel(cw_buf_t * a_buf, cw_bufel_t * a_bufel);
 void buf_append_bufel(cw_buf_t * a_buf, cw_bufel_t * a_bufel);
 
+/* Public bufel interface. */
 cw_bufel_t * bufel_new(cw_bufel_t * a_bufel);
 void bufel_delete(cw_bufel_t * a_bufel);
 
@@ -85,9 +87,9 @@ cw_uint32_t bufel_get_size(cw_bufel_t * a_bufel);
 cw_bool_t bufel_set_size(cw_bufel_t * a_bufel, cw_uint32_t a_size);
 
 cw_uint32_t bufel_get_beg_offset(cw_bufel_t * a_bufel);
-void bufel_set_beg_offset(cw_bufel_t * a_bufel, cw_uint32_t a_offset);
+cw_bool_t bufel_set_beg_offset(cw_bufel_t * a_bufel, cw_uint32_t a_offset);
 cw_uint32_t bufel_get_end_offset(cw_bufel_t * a_bufel);
-void bufel_set_end_offset(cw_bufel_t * a_bufel, cw_uint32_t a_offset);
+cw_bool_t bufel_set_end_offset(cw_bufel_t * a_bufel, cw_uint32_t a_offset);
 cw_uint32_t bufel_get_valid_data_size(cw_bufel_t * a_bufel);
 
 void * bufel_get_data_ptr(cw_bufel_t * a_bufel);

@@ -216,7 +216,7 @@ buf_rm_head_bufel(cw_buf_t * a_buf)
   if (a_buf->size > 0) /* Make sure there is valid data. */
   {
     retval = (cw_bufel_t *) list_hpop(&a_buf->bufels);
-    a_buf->size -= (retval->end_offset - retval->beg_offset);
+    a_buf->size -= bufel_get_valid_data_size(retval);
   }
   else
   {
@@ -250,7 +250,7 @@ buf_prepend_bufel(cw_buf_t * a_buf, cw_bufel_t * a_bufel)
 #endif
 
   list_hpush(&a_buf->bufels, a_bufel);
-  a_buf->size += (a_bufel->end_offset - a_bufel->beg_offset);
+  a_buf->size += bufel_get_valid_data_size(a_bufel);
   
 #ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe == TRUE)
@@ -278,7 +278,7 @@ buf_append_bufel(cw_buf_t * a_buf, cw_bufel_t * a_bufel)
 #endif
 
   list_tpush(&a_buf->bufels, a_bufel);
-  a_buf->size += (a_bufel->end_offset - a_bufel->beg_offset);
+  a_buf->size += bufel_get_valid_data_size(a_bufel);
   
 #ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe == TRUE)
@@ -352,7 +352,9 @@ bufel_get_size(cw_bufel_t * a_bufel)
 
 /****************************************************************************
  *
- * Either malloc()s or realloc()s the internal buffer to be of size a_size.
+ * Either malloc()s or realloc()s the internal buffer to be of size a_size.  If
+ * shrinking the bufel would chop off valid data as indicated by end_offset,
+ * return TRUE.
  *
  ****************************************************************************/
 cw_bool_t
@@ -362,9 +364,8 @@ bufel_set_size(cw_bufel_t * a_bufel, cw_uint32_t a_size)
   cw_uint32_t * t_buf;
 
   _cw_check_ptr(a_bufel);
-  _cw_assert((a_size & 0x3) == 0);
 
-  if (a_size <= a_bufel->end_offset)
+  if (a_size < a_bufel->end_offset)
   {
     /* We would chop off valid data if we did this. */
     retval = TRUE;
@@ -378,7 +379,6 @@ bufel_set_size(cw_bufel_t * a_bufel, cw_uint32_t a_size)
     }
     a_bufel->buf = NULL;
     a_bufel->buf_size = 0;
-    /* XXX These probably don't need set. */
     a_bufel->beg_offset = 0;
     a_bufel->end_offset = 0;
 
@@ -419,16 +419,28 @@ bufel_get_beg_offset(cw_bufel_t * a_bufel)
 
 /****************************************************************************
  *
- * Sets the begin pointer offset.
+ * Sets the begin pointer offset.  If an attempt is made to set the beg_offset
+ * to something greater than end_offset, return TRUE.
  *
  ****************************************************************************/
-void
+cw_bool_t
 bufel_set_beg_offset(cw_bufel_t * a_bufel, cw_uint32_t a_offset)
 {
+  cw_bool_t retval;
+  
   _cw_check_ptr(a_bufel);
-  _cw_assert(a_offset <= a_bufel->end_offset);
 
-  a_bufel->beg_offset = a_offset;
+  if (a_offset > a_bufel->end_offset)
+  {
+    retval = TRUE;
+  }
+  else
+  {
+    a_bufel->beg_offset = a_offset;
+    retval = FALSE;
+  }
+  
+  return retval;
 }
 
 /****************************************************************************
@@ -445,17 +457,34 @@ bufel_get_end_offset(cw_bufel_t * a_bufel)
 
 /****************************************************************************
  *
- * Sets the end pointer offset.
+ * Sets the end pointer offset.  If an attempt is made to set the end_offset
+ * to something less than beg_offset, return TRUE.  If an attempt is made to set
+ * end_offset to something greater than one past the end of the buffer
+ * (buf_size), return TRUE.
  *
  ****************************************************************************/
-void
+cw_bool_t
 bufel_set_end_offset(cw_bufel_t * a_bufel, cw_uint32_t a_offset)
 {
+  cw_bool_t retval;
+  
   _cw_check_ptr(a_bufel);
-  _cw_assert(a_offset >= a_bufel->beg_offset);
-  _cw_assert(a_offset <= a_bufel->buf_size);
 
-  a_bufel->end_offset = a_offset;
+  if (a_offset < a_bufel->beg_offset)
+  {
+    retval = TRUE;
+  }
+  else if (a_offset > a_bufel->buf_size)
+  {
+    retval = TRUE;
+  }
+  else
+  {
+    a_bufel->end_offset = a_offset;
+    retval = FALSE;
+  }
+
+  return retval;
 }
 
 /****************************************************************************
@@ -497,7 +526,6 @@ void
 bufel_set_data_ptr(cw_bufel_t * a_bufel, void * a_buf, cw_uint32_t a_size)
 {
   _cw_check_ptr(a_bufel);
-  _cw_check_ptr(a_buf);
 
   if (a_bufel->buf != NULL)
   {
@@ -553,7 +581,10 @@ bufel_set_uint8(cw_bufel_t * a_bufel, cw_uint32_t a_offset,
 
 /****************************************************************************
  *
- * Returns the uint32 at offset a_offset.
+ * Returns the uint32 at offset a_offset.  If a_offset is not a multiple of 4,
+ * behavior is undefined.  If the buffer size is not a multiple
+ * of 4, reading the last bytes of the buffer has undefined behavior.  That is,
+ * segmentation faults could ensue.
  *
  ****************************************************************************/
 cw_uint32_t
@@ -563,7 +594,7 @@ bufel_get_uint32(cw_bufel_t * a_bufel, cw_uint32_t a_offset)
 
   _cw_check_ptr(a_bufel);
   _cw_assert((a_offset & 0x3) == 0);
-  _cw_assert (a_offset < a_bufel->buf_size);
+  _cw_assert ((a_offset + 4) <= a_bufel->buf_size);
 
   retval = a_bufel->buf[a_offset >> 2];
 #ifndef WORDS_BIGENDIAN
@@ -584,7 +615,7 @@ bufel_set_uint32(cw_bufel_t * a_bufel, cw_uint32_t a_offset,
 {
   _cw_check_ptr(a_bufel);
   _cw_assert((a_offset & 0x3) == 0);
-  _cw_assert (a_offset < a_bufel->buf_size);
+  _cw_assert((a_offset + 4) <= a_bufel->buf_size);
 
 #ifdef WORDS_BIGENDIAN
   a_bufel->buf[a_offset >> 2] = a_val;

@@ -64,11 +64,3 @@ upper long dump:
 488->0x14151617:492->0x10111213
 496->0x0c0d0e0f:500->0x08090a0b
 504->0x04050607:508->0x00010203
-buf_b size == 0
-buf_b size == 512
-buf_a size == 0
-buf_b size == 562
-buf_a size == 512
-buf_b size == 50
-buf_a size == 562
-buf_b size == 0

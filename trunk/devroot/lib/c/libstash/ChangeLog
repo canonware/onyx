@@ -1,3 +1,13 @@
+1998-11-29  Jason Evans  <jasone@canonware.com>
+
+	* src/locks.c: Added function comments.
+
+	* src/buf.c (bufel_set_beg_offset): Add return value.
+	(bufel_set_end_offset): Ditto.
+	(bufel_set_size): Fixed an edge condition bug where TRUE was
+	returned if (a_size == a_bufel->end_offset).
+	(bufel_set_data_ptr): Allow a_buf to equal NULL.
+
 1998-11-27  Jason Evans  <jasone@canonware.com>
 
 	* src/bhp.c (bhp_dump): Implemented.  This needs to go away when
