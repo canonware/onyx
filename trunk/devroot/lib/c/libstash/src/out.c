@@ -1125,10 +1125,14 @@ out_p_metric(cw_out_t *a_out, const char *a_format, cw_out_key_t * a_key,
 	a_key->raw = TRUE;
 
 	for (i = metric = 0, state = NORMAL; a_format[i] != '\0'; i++) {
-		if ((i == _LIBSTASH_OUT_SPEC_BUF) && (a_key->format_key_buf ==
-		    a_key->format_key)) {
+		/*
+		 * Test for overflow here rather than outside the loop to avoid
+		 * having to do a strlen() call all the time.
+		 */
+		if (i == _LIBSTASH_OUT_SPEC_BUF) {
 			cw_uint32_t	format_len;
 
+			_cw_assert(a_key->format_key_buf == a_key->format_key);
 			/*
 			 * We just ran out of space in the statically allocated
 			 * buffer.  Time to face cold hard reality, get the
@@ -1142,12 +1146,13 @@ out_p_metric(cw_out_t *a_out, const char *a_format, cw_out_key_t * a_key,
 				goto RETURN;
 			}
 #ifdef _LIBSTASH_DBG
-			bzero(a_key->format_key, format_len);
+			memset(a_key->format_key, 0, format_len);
 #endif
 			memcpy(a_key->format_key, a_key->format_key_buf,
 			    _LIBSTASH_OUT_SPEC_BUF);
 #ifdef _LIBSTASH_DBG
-			bzero(a_key->format_key_buf, _LIBSTASH_OUT_SPEC_BUF);
+			memset(a_key->format_key_buf, 0,
+			    _LIBSTASH_OUT_SPEC_BUF);
 #endif
 		}
 		switch (state) {
@@ -1282,8 +1287,8 @@ out_p_metric(cw_out_t *a_out, const char *a_format, cw_out_key_t * a_key,
 	}
 	a_key->metric = metric;
 	a_key->format_len = i;
-	retval = metric;
 
+	retval = metric;
 	RETURN:
 	return retval;
 }
