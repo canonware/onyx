@@ -132,7 +132,7 @@ main(int argc, char **argv, char **envp)
 		hist = history_init();
 		history(hist, H_EVENT, 512);
 
-		el = el_init(basename(argv[0]), stdin, stdout);
+		el = el_init(basename(argv[0]), 0, 1);
 		el_set(el, EL_HIST, history, hist);
 		el_set(el, EL_PROMPT, prompt);
 		el_set(el, EL_EDITOR, "emacs");
