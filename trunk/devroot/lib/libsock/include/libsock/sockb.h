@@ -40,18 +40,21 @@ extern cw_sockb_t * g_sockb;
  *
  * <<< Input(s) >>>
  *
- * None.
+ * a_bufel_size : Size of bufel to use for memory buffering.
+ *
+ * a_max_spare_bufels : Maximum number of bufel's to cache.
  *
  * <<< Output(s) >>>
  *
- * None.
+ * retval : FALSE == success, TRUE == error.
+ *          TRUE : Memory allocation failure.
  *
  * <<< Description>>>
  *
  * Global initializer for g_sockb.
  *
  ****************************************************************************/
-void
+cw_bool_t
 sockb_init(cw_uint32_t a_bufel_size, cw_uint32_t a_max_spare_bufels);
 
 /****************************************************************************
@@ -80,7 +83,8 @@ sockb_shutdown(void);
  *
  * <<< Output(s) >>>
  *
- * retval : Pointer to a cw_bufel_t instance.
+ * retval : Pointer to a cw_bufel_t instance, or NULL.
+ *          NULL : Memory allocation error.
  *
  * <<< Description>>>
  *

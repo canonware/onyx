@@ -29,28 +29,23 @@
 
 #include "libsock/sockb_l.h"
 
-/****************************************************************************
- *
- * socks constructor.
- *
- ****************************************************************************/
 cw_socks_t *
 socks_new(void)
 {
   cw_socks_t * retval;
 
   retval = (cw_socks_t *) _cw_malloc(sizeof(cw_socks_t));
+  if (NULL == retval)
+  {
+    goto RETURN;
+  }
 
   bzero(retval, sizeof(cw_socks_t));
-  
+
+  RETURN:
   return retval;
 }
 
-/****************************************************************************
- *
- * socks destructor.
- *
- ****************************************************************************/
 void
 socks_delete(cw_socks_t * a_socks)
 {
@@ -64,37 +59,36 @@ socks_delete(cw_socks_t * a_socks)
     error = close(a_socks->sockfd);
     if (error)
     {
-      log_eprintf(cw_g_log, NULL, 0, "socks_delete",
-		   "Error in close(): %s\n", strerror(error));
+      if (dbg_is_registered(cw_g_dbg, "socks_error"))
+      {
+	log_eprintf(cw_g_log, NULL, 0, "socks_delete",
+		    "Error in close(): %s\n", strerror(error));
+      }
     }
   }
 
   _cw_free(a_socks);
 }
 
-/****************************************************************************
- *
- * Do setup and start accepting connections on *a_port.  If *a_port is 0, let
- * the OS choose what port number to use, and assign the number to *a_port
- * before returning.
- *
- ****************************************************************************/
 cw_bool_t
-socks_listen(cw_socks_t * a_socks, int * a_port)
+socks_listen(cw_socks_t * a_socks, int * r_port)
 {
   cw_bool_t retval;
   struct sockaddr_in server_addr;
 
   _cw_check_ptr(a_socks);
-  _cw_check_ptr(a_port);
+  _cw_check_ptr(r_port);
   _cw_assert(a_socks->is_listening == FALSE);
 
   /* Open a TCP socket stream. */
   a_socks->sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if (a_socks->sockfd < 0)
   {
-    log_eprintf(cw_g_log, NULL, 0, "socks_listen",
-		 "Error in socket(): %s\n", strerror(errno));
+    if (dbg_is_registered(cw_g_dbg, "socks_error"))
+    {
+      log_eprintf(cw_g_log, NULL, 0, "socks_listen",
+		  "Error in socket(): %s\n", strerror(errno));
+    }
     retval = TRUE;
     goto RETURN;
   }
@@ -102,20 +96,23 @@ socks_listen(cw_socks_t * a_socks, int * a_port)
   /* Bind the socket's local address. */
   server_addr.sin_family = AF_INET;
   server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-  server_addr.sin_port = htons(*a_port);
+  server_addr.sin_port = htons(*r_port);
   
   if (bind(a_socks->sockfd,
 	   (struct sockaddr *) &server_addr,
 	   sizeof(server_addr)))
   {
-    log_eprintf(cw_g_log, NULL, 0, "socks_listen",
-		 "Error in bind(): %s\n", strerror(errno));
+    if (dbg_is_registered(cw_g_dbg, "socks_error"))
+    {
+      log_eprintf(cw_g_log, NULL, 0, "socks_listen",
+		  "Error in bind(): %s\n", strerror(errno));
+    }
     retval = TRUE;
     goto RETURN;
   }
 
   /* Find out what port is being used, if not already known. */
-  if (*a_port == 0)
+  if (*r_port == 0)
   {
     int server_addr_size = sizeof(server_addr);
     
@@ -123,12 +120,15 @@ socks_listen(cw_socks_t * a_socks, int * a_port)
     if (getsockname(a_socks->sockfd, (struct sockaddr *) &server_addr,
 		    &server_addr_size))
     {
-      log_eprintf(cw_g_log, NULL, 0, "socks_listen",
-		  "Error in getsockname(): %s\n", strerror(errno));
+      if (dbg_is_registered(cw_g_dbg, "socks_error"))
+      {
+	log_eprintf(cw_g_log, NULL, 0, "socks_listen",
+		    "Error in getsockname(): %s\n", strerror(errno));
+      }
       retval = TRUE;
       goto RETURN;
     }
-    *a_port = ntohs(server_addr.sin_port);
+    *r_port = ntohs(server_addr.sin_port);
   }
   
   /* Now listen.  -1 causes the OS to use the maximum backlog. */
@@ -140,14 +140,8 @@ socks_listen(cw_socks_t * a_socks, int * a_port)
   return retval;
 }
 
-/****************************************************************************
- *
- * Accept a connection.  Don't return until someone connects.  If a_sock is
- * non-NULL, use it for wrapping the socket descriptor.
- *
- ****************************************************************************/
 cw_sock_t *
-socks_accept_block(cw_socks_t * a_socks, cw_sock_t * a_sock)
+socks_accept_block(cw_socks_t * a_socks, cw_sock_t * r_sock)
 {
   cw_sock_t * retval;
   cw_bool_t wrap_error;
@@ -156,6 +150,7 @@ socks_accept_block(cw_socks_t * a_socks, cw_sock_t * a_sock)
   struct sockaddr_in client_addr;
 
   _cw_check_ptr(a_socks);
+  _cw_check_ptr(r_sock);
 
   /* Are we even listening right now? */
   if (a_socks->is_listening == FALSE)
@@ -184,8 +179,11 @@ socks_accept_block(cw_socks_t * a_socks, cw_sock_t * a_sock)
 		      (struct sockaddr *) &client_addr, &sockaddr_struct_size);
   if (new_sockfd < 0)
   {
-    log_eprintf(cw_g_log, NULL, 0, "socks_accept_block",
-		 "Error in accept(): %s\n", strerror(errno));
+    if (dbg_is_registered(cw_g_dbg, "socks_error"))
+    {
+      log_eprintf(cw_g_log, NULL, 0, "socks_accept_block",
+		  "Error in accept(): %s\n", strerror(errno));
+    }
     retval = NULL;
     goto RETURN;
   }
@@ -202,8 +200,11 @@ socks_accept_block(cw_socks_t * a_socks, cw_sock_t * a_sock)
     }
     if (close(new_sockfd))
     {
-      log_eprintf(cw_g_log, __FILE__, __LINE__, "socks_accept_block",
-		  "Error in close(): %s\n", strerror(errno));
+      if (dbg_is_registered(cw_g_dbg, "socks_error"))
+      {
+	log_eprintf(cw_g_log, __FILE__, __LINE__, "socks_accept_block",
+		    "Error in close(): %s\n", strerror(errno));
+      }
     }
   }
   else
@@ -211,13 +212,16 @@ socks_accept_block(cw_socks_t * a_socks, cw_sock_t * a_sock)
     /* Hmm, we didn't need spare_fd after all.  Release it. */
     if (close(spare_fd))
     {
-      log_eprintf(cw_g_log, __FILE__, __LINE__, "socks_accept_block",
-		  "Error in close(): %s\n", strerror(errno));
+      if (dbg_is_registered(cw_g_dbg, "socks_error"))
+      {
+	log_eprintf(cw_g_log, __FILE__, __LINE__, "socks_accept_block",
+		    "Error in close(): %s\n", strerror(errno));
+      }
     }
   }
 
   /* Wrap the socket descriptor inside a sock. */
-  retval = a_sock;
+  retval = r_sock;
 
   wrap_error = sock_wrap(retval, new_sockfd);
   if (wrap_error == TRUE)
@@ -229,14 +233,8 @@ socks_accept_block(cw_socks_t * a_socks, cw_sock_t * a_sock)
   return retval;
 }
 
-/****************************************************************************
- *
- * Accept a connection.  If a_sock is non-NULL, use it for wrapping the socket
- * descriptor.  If no one is trying to connect though, return immediately.
- *
- ****************************************************************************/
 cw_sock_t *
-socks_accept_noblock(cw_socks_t * a_socks, cw_sock_t * a_sock)
+socks_accept_noblock(cw_socks_t * a_socks, cw_sock_t * r_sock)
 {
   cw_sock_t * retval;
   fd_set fd_read_set;
@@ -290,8 +288,11 @@ socks_accept_noblock(cw_socks_t * a_socks, cw_sock_t * a_sock)
 			&sockaddr_struct_size);
     if (new_sockfd < 0)
     {
-      log_eprintf(cw_g_log, NULL, 0, "socks_accept_noblock",
-		   "Error in accept(): %s\n", strerror(errno));
+      if (dbg_is_registered(cw_g_dbg, "socks_error"))
+      {
+	log_eprintf(cw_g_log, NULL, 0, "socks_accept_noblock",
+		    "Error in accept(): %s\n", strerror(errno));
+      }
       retval = NULL;
       goto RETURN;
     }
@@ -308,8 +309,11 @@ socks_accept_noblock(cw_socks_t * a_socks, cw_sock_t * a_sock)
       }
       if (close(new_sockfd))
       {
-	log_eprintf(cw_g_log, __FILE__, __LINE__, "socks_accept_noblock",
-		    "Error in close(): %s\n", strerror(errno));
+	if (dbg_is_registered(cw_g_dbg, "socks_error"))
+	{
+	  log_eprintf(cw_g_log, __FILE__, __LINE__, "socks_accept_noblock",
+		      "Error in close(): %s\n", strerror(errno));
+	}
       }
     }
     else
@@ -317,13 +321,16 @@ socks_accept_noblock(cw_socks_t * a_socks, cw_sock_t * a_sock)
       /* Hmm, we didn't need spare_fd after all.  Release it. */
       if (close(spare_fd))
       {
-	log_eprintf(cw_g_log, __FILE__, __LINE__, "socks_accept_noblock",
-		    "Error in close(): %s\n", strerror(errno));
+	if (dbg_is_registered(cw_g_dbg, "socks_error"))
+	{
+	  log_eprintf(cw_g_log, __FILE__, __LINE__, "socks_accept_noblock",
+		      "Error in close(): %s\n", strerror(errno));
+	}
       }
     }
   
     /* Wrap the socket descriptor inside a sock. */
-    retval = a_sock;
+    retval = r_sock;
 
     wrap_error = sock_wrap(retval, new_sockfd);
     if (wrap_error == TRUE)

@@ -114,7 +114,6 @@ main(int argc, char ** argv)
 	dbg_register(cw_g_dbg, "prog_verbose");
 /*  	dbg_register(cw_g_dbg, "mem_verbose"); */
 	dbg_register(cw_g_dbg, "sockb_verbose");
-/*  	dbg_register(cw_g_dbg, "sockb_maxfd"); */
 	dbg_register(cw_g_dbg, "socks_verbose");
 /*  	dbg_register(cw_g_dbg, "sock_sockopt"); */
 	/* Nothing uses this flag. */
@@ -250,7 +249,10 @@ main(int argc, char ** argv)
     log_printf(cw_g_log, "pid: %d\n", getpid());
   }
 
-  sockb_init(2048, 4096);
+  if (sockb_init(2048, 4096))
+  {
+    _cw_error("Initialization failure");
+  }
   
   socks = socks_new();
   if (TRUE == socks_listen(socks, &opt_port))
@@ -272,7 +274,7 @@ main(int argc, char ** argv)
     }
     
     bzero(conn, sizeof(connection_t));
-    sock_new(&conn->client_sock, 32768);
+    sock_new(&conn->client_sock, 4096);
     
     if (NULL == socks_accept_block(socks, &conn->client_sock)
 	|| should_quit)
@@ -892,8 +894,8 @@ handle_client_send(void * a_arg)
 	     conn->rhost, conn->rport);
       
   /* Connect to the remote end. */
-  sock_new(&conn->remote_sock, 32768);
-  if (TRUE == sock_connect(&conn->remote_sock, conn->rhost, conn->rport))
+  sock_new(&conn->remote_sock, 4096);
+  if (TRUE == sock_connect(&conn->remote_sock, conn->rhost, conn->rport, NULL))
   {
     log_eprintf(conn->log, __FILE__, __LINE__, __FUNCTION__,
 		"Error in sock_connect(&conn->remote_sock, \"%s\", %d)\n",

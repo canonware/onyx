@@ -10,7 +10,7 @@
  *
  * <<< Description >>>
  *
- *
+ * Implementation of the sockb class.
  *
  ****************************************************************************/
 
@@ -35,9 +35,10 @@
 /* Global. */
 cw_sockb_t * g_sockb = NULL;
 
-void
+cw_bool_t
 sockb_init(cw_uint32_t a_bufel_size, cw_uint32_t a_max_spare_bufels)
 {
+  cw_bool_t retval;
   char * tmpfile_name, buf[L_tmpnam];
   
   _cw_assert(a_bufel_size > 0);
@@ -45,6 +46,11 @@ sockb_init(cw_uint32_t a_bufel_size, cw_uint32_t a_max_spare_bufels)
   if (NULL == g_sockb)
   {
     g_sockb = (cw_sockb_t *) _cw_malloc(sizeof(cw_sockb_t));
+    if (NULL == g_sockb)
+    {
+      retval = TRUE;
+      goto RETURN;
+    }
     bzero(g_sockb, sizeof(cw_sockb_t));
 
     /* Open a temp file with poser_fd, such that the file will disappear as soon
@@ -70,8 +76,11 @@ sockb_init(cw_uint32_t a_bufel_size, cw_uint32_t a_max_spare_bufels)
     if (unlink(tmpfile_name))
     {
       /* Not fatal, but make some noise. */
-      log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-		  "Error in unlink(): %s\n", strerror(errno));
+      if (dbg_is_registered(cw_g_dbg, "sockb_error"))
+      {
+	log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
+		    "Error in unlink(): %s\n", strerror(errno));
+      }
     }
 
     /* Ignore SIGPIPE, so that writing to a closed socket won't crash the
@@ -93,7 +102,6 @@ sockb_init(cw_uint32_t a_bufel_size, cw_uint32_t a_max_spare_bufels)
       g_sockb->pipe_in = filedes[1];
 
       /* Set g_sockb->pipe_in to non-blocking. */
-      /* XXX Why?  What about pipe_out (below)? */
       {
 	int val;
 	val = fcntl(g_sockb->pipe_in, F_GETFL, 0);
@@ -139,9 +147,33 @@ sockb_init(cw_uint32_t a_bufel_size, cw_uint32_t a_max_spare_bufels)
     sem_new(&g_sockb->pipe_sem, 1);
 
     /* Create the spare bufel pool and initialize associated variables. */
-    pezz_new(&g_sockb->bufel_pool, sizeof(cw_bufel_t), a_max_spare_bufels);
-    pezz_new(&g_sockb->bufc_pool, sizeof(cw_bufc_t), a_max_spare_bufels);
-    pezz_new(&g_sockb->buffer_pool, a_bufel_size, a_max_spare_bufels);
+    if (NULL == pezz_new(&g_sockb->bufel_pool,
+			 sizeof(cw_bufel_t), a_max_spare_bufels))
+    {
+      _cw_free(g_sockb);
+      g_sockb = NULL;
+      retval = TRUE;
+      goto RETURN;
+    }
+    if (NULL == pezz_new(&g_sockb->bufc_pool,
+			 sizeof(cw_bufc_t), a_max_spare_bufels))
+    {
+      pezz_delete(&g_sockb->bufel_pool);
+      _cw_free(g_sockb);
+      g_sockb = NULL;
+      retval = TRUE;
+      goto RETURN;
+    }
+    if (NULL == pezz_new(&g_sockb->buffer_pool,
+			 a_bufel_size, a_max_spare_bufels))
+    {
+      pezz_delete(&g_sockb->bufc_pool);
+      pezz_delete(&g_sockb->bufel_pool);
+      _cw_free(g_sockb);
+      g_sockb = NULL;
+      retval = TRUE;
+      goto RETURN;
+    }
   
     /* Create the message queues. */
     list_new(&g_sockb->registrations, TRUE);
@@ -154,6 +186,11 @@ sockb_init(cw_uint32_t a_bufel_size, cw_uint32_t a_max_spare_bufels)
     /* Create a new thread to handle all of the back end socket foo. */
     thd_new(&g_sockb->thread, sockb_p_entry_func, NULL);
   }
+
+  retval = FALSE;
+
+  RETURN:
+  return retval;
 }
 
 void
@@ -163,7 +200,7 @@ sockb_shutdown(void)
 
   /* Tell the back end thread to quit, then join on it. */
   g_sockb->should_quit = TRUE;
-  sockb_p_select_return();
+  sockb_l_wakeup();
   thd_join(&g_sockb->thread);
   thd_delete(&g_sockb->thread);
 
@@ -180,8 +217,11 @@ sockb_shutdown(void)
 
   if (close(g_sockb->poser_fd))
   {
-    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-		 "Error in close(): %s\n", strerror(errno));
+    if (dbg_is_registered(cw_g_dbg, "sockb_error"))
+    {
+      log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
+		  "Error in close(): %s\n", strerror(errno));
+    }
   }
 
   /* Delete the gethostbyaddr() protection lock. */
@@ -195,17 +235,36 @@ sockb_get_spare_bufel(void)
 {
   cw_bufel_t * retval;
   cw_bufc_t * bufc;
+  void * buffer;
   
   _cw_check_ptr(g_sockb);
 
   retval = bufel_new((cw_bufel_t *) pezz_get(&g_sockb->bufel_pool),
 		     pezz_put,
 		     (void *) &g_sockb->bufel_pool);
+  if (NULL == retval)
+  {
+    goto RETURN;
+  }
   bufc = bufc_new((cw_bufc_t *) pezz_get(&g_sockb->bufc_pool),
 		  pezz_put,
 		  (void *) &g_sockb->bufc_pool);
+  if (NULL == bufc)
+  {
+    bufel_delete(retval);
+    retval = NULL;
+    goto RETURN;
+  }
+  buffer = pezz_get(&g_sockb->buffer_pool);
+  if (NULL == buffer)
+  {
+    bufc_delete(bufc);
+    bufel_delete(retval);
+    retval = NULL;
+    goto RETURN;
+  }
   bufc_set_buffer(bufc,
-		  pezz_get(&g_sockb->buffer_pool),
+		  buffer,
 		  pezz_get_buffer_size(&g_sockb->buffer_pool),
 		  TRUE,
 		  pezz_put,
@@ -213,14 +272,26 @@ sockb_get_spare_bufel(void)
   bufel_set_bufc(retval, bufc);
   bufel_set_beg_offset(retval, 0);
 
+  RETURN:
   return retval;
 }
 
-/****************************************************************************
- *
- * Tell g_sockb that a_sock needs to be handled.
- *
- ****************************************************************************/
+void
+sockb_l_wakeup(void)
+{
+  if (FALSE == sem_trywait(&g_sockb->pipe_sem))
+  {
+    if (-1 == write(g_sockb->pipe_in, "X", 1))
+    {
+      if (dbg_is_registered(cw_g_dbg, "sockb_error"))
+      {
+	log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
+		    "Error in write(): %s\n", strerror(errno));
+      }
+    }
+  }
+}
+
 void
 sockb_l_register_sock(cw_sock_t * a_sock)
 {
@@ -230,14 +301,9 @@ sockb_l_register_sock(cw_sock_t * a_sock)
   _cw_assert(sock_l_get_fd(a_sock) < FD_SETSIZE);
 
   list_tpush(&g_sockb->registrations, (void *) a_sock);
-  sockb_p_select_return();
+  sockb_l_wakeup();
 }
 
-/****************************************************************************
- *
- * Tell g_sockb to stop handling a_sockfd.
- *
- ****************************************************************************/
 void
 sockb_l_unregister_sock(cw_uint32_t * a_sockfd)
 {
@@ -245,19 +311,9 @@ sockb_l_unregister_sock(cw_uint32_t * a_sockfd)
   _cw_assert(*a_sockfd < FD_SETSIZE);
 
   list_tpush(&g_sockb->unregistrations, (void *) a_sockfd);
-  sockb_p_select_return();
+  sockb_l_wakeup();
 }
 
-/****************************************************************************
- *
- * Tell g_sockb that there is outgoing data for *a_sockfd.  A pointer to
- * a_sockfd is needed so that we can cleanly shove the descriptor number into
- * the out_notifications list.  This of course means that a_sockfd has to stick
- * around until the notification is handled, so the sock needs to pass a pointer
- * to its internal storage for the sockfd number so we can be sure that it
- * sticks around.
- *
- ****************************************************************************/
 void
 sockb_l_out_notify(cw_uint32_t * a_sockfd)
 {
@@ -265,23 +321,11 @@ sockb_l_out_notify(cw_uint32_t * a_sockfd)
   _cw_assert(*a_sockfd < FD_SETSIZE);
 
   list_tpush(&g_sockb->out_notifications, (void *) a_sockfd);
-  sockb_p_select_return();
+  sockb_l_wakeup();
 }
 
-/****************************************************************************
- *
- * Convert a_host_str to an IP address and put it in *a_host_ip.  Return TRUE if
- * there is an error.
- *
- * This function is necessary because gethostbyname() is not reentrant.  Of
- * course, there may be gethostbyname_r() on the system, but even if there is,
- * the resolver functions and BIND probably are not reentrant, according to
- * Stevens's UNP, 2nd Ed., Volume 1, page 305.  That being the case, this code
- * doesn't even bother with gethostbyname_r().
- *
- ****************************************************************************/
 cw_bool_t
-sockb_l_get_host_ip(char * a_host_str, cw_uint32_t * a_host_ip)
+sockb_l_get_host_ip(char * a_host_str, cw_uint32_t * r_host_ip)
 {
   cw_bool_t retval;
   cw_uint32_t host_ip;
@@ -301,11 +345,14 @@ sockb_l_get_host_ip(char * a_host_str, cw_uint32_t * a_host_ip)
     host_entry = gethostbyname(a_host_str);
     if (host_entry == NULL)
     {
-      log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-		  "Error in gethostbyname(): %s\n", hstrerror(h_errno));
-      log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-		  "Host \"%s\" isn't an IP address or a hostname\n",
-		  a_host_str);
+      if (dbg_is_registered(cw_g_dbg, "sockb_error"))
+      {
+	log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
+		    "Error in gethostbyname(): %s\n", hstrerror(h_errno));
+	log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
+		    "Host \"%s\" isn't an IP address or a hostname\n",
+		    a_host_str);
+      }
       retval = TRUE;
     }
     else
@@ -316,7 +363,7 @@ sockb_l_get_host_ip(char * a_host_str, cw_uint32_t * a_host_ip)
       _cw_assert(host_entry->h_addr_list[0] != NULL);
 
       addr_ptr = (struct in_addr *) host_entry->h_addr_list[0];
-      *a_host_ip = addr_ptr->s_addr;
+      *r_host_ip = addr_ptr->s_addr;
 
       retval = FALSE;
     }
@@ -326,7 +373,7 @@ sockb_l_get_host_ip(char * a_host_str, cw_uint32_t * a_host_ip)
   }
   else
   {
-    *a_host_ip = host_ip;
+    *r_host_ip = host_ip;
     retval = FALSE;
   }
 
@@ -334,22 +381,15 @@ sockb_l_get_host_ip(char * a_host_str, cw_uint32_t * a_host_ip)
   {
     log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
 		"IP address: %d.%d.%d.%d\n",
-		*a_host_ip & 0xff,
-		(*a_host_ip >> 8) & 0xff,
-		(*a_host_ip >> 16) & 0xff,
-		*a_host_ip >> 24);
+		*r_host_ip & 0xff,
+		(*r_host_ip >> 8) & 0xff,
+		(*r_host_ip >> 16) & 0xff,
+		*r_host_ip >> 24);
   }
 
   return retval;
 }
 
-/****************************************************************************
- *
- * Returns a useless, but reserved file descriptor within the range that
- * select() can handle.  The caller is responsible for disposing of the file
- * descriptor.  If none are available in the needed range, return -1.
- *
- ****************************************************************************/
 int
 sockb_l_get_spare_fd(void)
 {
@@ -381,12 +421,6 @@ sockb_l_get_spare_fd(void)
   return retval;
 }
 
-/****************************************************************************
- *
- * Entry point for the back end thread.  The back end thread essentially
- * executes a select() loop.
- *
- ****************************************************************************/
 static void *
 sockb_p_entry_func(void * a_arg)
 {
@@ -404,8 +438,14 @@ sockb_p_entry_func(void * a_arg)
   FD_ZERO(&fd_m_read_set);
   FD_ZERO(&fd_m_write_set);
   FD_ZERO(&fd_m_exception_set);
-  buf_new(&tmp_buf, FALSE);
-  buf_new(&buf_in, FALSE);
+  if (NULL == buf_new(&tmp_buf, FALSE))
+  {
+    _cw_error("buf allocation failure during sockb startup");
+  }
+  if (NULL == buf_new(&buf_in, FALSE))
+  {
+    _cw_error("buf allocation failure during sockb startup");
+  }
 
   /* Add g_sockb->pipe_out to the read set, so that this thread will return from
    * select() when data is written to g_sockb->pipe_in. */
@@ -413,11 +453,6 @@ sockb_p_entry_func(void * a_arg)
   /* Increase max_fd if necessary. */
   if (g_sockb->pipe_out > max_fd)
   {
-    if (dbg_is_registered(cw_g_dbg, "sockb_maxfd"))
-    {
-      log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-		  "max_fd: %d --> %d\n", max_fd, g_sockb->pipe_out);
-    }
     max_fd = g_sockb->pipe_out;
   }
 
@@ -443,11 +478,6 @@ sockb_p_entry_func(void * a_arg)
 	/* Increase max_fd if necessary. */
 	if (sockfd > max_fd)
 	{
-	  if (dbg_is_registered(cw_g_dbg, "sockb_maxfd"))
-	  {
-	    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-			"max_fd: %d --> %d\n", max_fd, sockfd);
-	  }
 	  max_fd = sockfd;
 	}
 
@@ -484,11 +514,6 @@ sockb_p_entry_func(void * a_arg)
 	    break;
 	  }
 	}
-      }
-      if (dbg_is_registered(cw_g_dbg, "sockb_maxfd"))
-      {
-	log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-		    "max_fd: %d\n", max_fd);
       }
 	
       /* Notify the sock that it's unregistered. */
@@ -532,8 +557,6 @@ sockb_p_entry_func(void * a_arg)
 	  if (NULL != socks[i])
 	  {
 	    /* Is any space available? */
-/*  	    if (sock_l_get_in_max_buf_size(socks[i]) */
-/*  		<= sock_l_get_in_size(socks[i])) */
 	    if (0 >= (sock_l_get_in_max_buf_size(socks[i])
 			- sock_l_get_in_size(socks[i])))
 	    {
@@ -563,8 +586,11 @@ sockb_p_entry_func(void * a_arg)
     {
       /* This should never happen when there is no timeout. */
       /* Timeout expired.  Oh well. */
-      log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-		  "select() timeout expired\n");
+      if (dbg_is_registered(cw_g_dbg, "sockb_error"))
+      {
+	log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
+		    "select() timeout expired\n");
+      }
     }
 #endif
     else
@@ -591,8 +617,11 @@ sockb_p_entry_func(void * a_arg)
 	bytes_read = read(g_sockb->pipe_out, t_buf, 2);
 	if (bytes_read == -1)
 	{
-	  log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-		      "Error in read(): %s\n", strerror(errno));
+	  if (dbg_is_registered(cw_g_dbg, "sockb_error"))
+	  {
+	    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
+			"Error in read(): %s\n", strerror(errno));
+	  }
 	}
 	else if (bytes_read > 0)
 	{
@@ -626,12 +655,8 @@ sockb_p_entry_func(void * a_arg)
 
 	  /* Figure out how much data we're willing to shove into this sock's
 	   * incoming buffer. */
-	  /* XXX We could cache this from above, though there could potentially
-	   * be more room now... */
 	  max_read = (sock_l_get_in_max_buf_size(socks[i])
 		      - sock_l_get_in_size(socks[i]));
-/*  	  _cw_assert(sock_l_get_in_max_buf_size(socks[i]) */
-/*  		     >= sock_l_get_in_size(socks[i])); */
 
 	  _cw_assert(max_read > 0);
 
@@ -639,16 +664,62 @@ sockb_p_entry_func(void * a_arg)
 	  while (buf_get_size(&buf_in) < max_read)
 	  {
 	    bufel = sockb_get_spare_bufel();
-	    buf_append_bufel(&buf_in, bufel);
+	    if (NULL == bufel)
+	    {
+	      /* There isn't enough free memory to make the incoming buffer as
+	       * big as we would like.  As long as the incoming buffer has at
+	       * least some space though, continue processing.  Otherwise, we
+	       * could loop, trying to allocate buffer space.  For the first cut
+	       * at implementing this though, just abort(). */
+	      if (dbg_is_registered(cw_g_dbg, "sockb_error"))
+	      {
+		log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
+			    "Allocation error.  Got %lu/%l desired bytes"
+			    " buffer space\n",
+			    buf_get_size(&buf_in), max_read);
+	      }
+	      
+	      if (0 < buf_get_size(&buf_in))
+	      {
+		break;
+	      }
+	      else
+	      {
+		_cw_error("No space in &buf_in");
+	      }
+	    }
+	    if (TRUE == buf_append_bufel(&buf_in, bufel))
+	    {
+	      /* As above, we have a memory allocation problem.  Clean up bufel,
+	       * but otherwise take the same approach. */
+	      bufel_delete(bufel);
+	      
+	      if (dbg_is_registered(cw_g_dbg, "sockb_error"))
+	      {
+		log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
+			    "Allocation error.  Got %lu/%l desired bytes"
+			    " buffer space\n",
+			    buf_get_size(&buf_in), max_read);
+	      }
+	      
+	      if (0 < buf_get_size(&buf_in))
+	      {
+		break;
+	      }
+	      else
+	      {
+		_cw_error("No space in &buf_in");
+	      }
+	    }
 	    bufel_delete(bufel);
 	  }
 
 	  /* Get an iovec for reading.  This somewhat goes against the idea of
-	     * never writing the internals of a buf after the buffers have been
-	     * inserted.  However, this is quite safe, since as a result of how
-	     * we use buf_in, we know for sure that there are no other
-	     * references to the byte ranges of the buffers we are writing
-	     * to. */
+	   * never writing the internals of a buf after the buffers have been
+	   * inserted.  However, this is quite safe, since as a result of how
+	   * we use buf_in, we know for sure that there are no other
+	   * references to the byte ranges of the buffers we are writing
+	   * to. */
 	  iovec = buf_get_iovec(&buf_in, max_read, TRUE, &iovec_count);
 
 	  bytes_read = readv(i, iovec, iovec_count);
@@ -657,7 +728,10 @@ sockb_p_entry_func(void * a_arg)
 	  {
 	    _cw_assert(buf_get_size(&tmp_buf) == 0);
 	    
-	    buf_split(&tmp_buf, &buf_in, bytes_read);
+	    if (TRUE == buf_split(&tmp_buf, &buf_in, bytes_read))
+	    {
+	      /* XXX */
+	    }
 
 	    /* Append to the sock's in_buf. */
 	    sock_l_put_in_data(socks[i], &tmp_buf);
@@ -712,10 +786,13 @@ sockb_p_entry_func(void * a_arg)
 				  buf_get_size(&tmp_buf));
 	    FD_CLR(i, &fd_m_write_set);
 	    
-	    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-			"Error in writev(): %s\n", strerror(errno));
-	    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-			"Closing sockfd %d\n", i);
+	    if (dbg_is_registered(cw_g_dbg, "sockb_error"))
+	    {
+	      log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
+			  "Error in writev(): %s\n", strerror(errno));
+	      log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
+			  "Closing sockfd %d\n", i);
+	    }
 	    sock_l_error_callback(socks[i]);
 	  }
 	  _cw_assert(buf_get_size(&tmp_buf) == 0);
@@ -736,33 +813,4 @@ sockb_p_entry_func(void * a_arg)
   buf_delete(&buf_in);
   buf_delete(&tmp_buf);
   return NULL;
-}
-
-/****************************************************************************
- *
- * <<< Input(s) >>>
- *
- * None.
- *
- * <<< Output(s) >>>
- *
- * None.
- *
- * <<< Description >>>
- *
- * If no data has been written to the pipe that causes select() to return, write
- * a byte.  This function makes it possible to use a non-polling select loop.
- *
- ****************************************************************************/
-static void
-sockb_p_select_return(void)
-{
-  if (FALSE == sem_trywait(&g_sockb->pipe_sem))
-  {
-    if (-1 == write(g_sockb->pipe_in, "X", 1))
-    {
-      log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-		  "Error in write(): %s\n", strerror(errno));
-    }
-  }
 }

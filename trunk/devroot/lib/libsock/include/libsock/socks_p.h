@@ -10,7 +10,7 @@
  *
  * <<< Description >>>
  *
- *
+ * Private data structure for the socks class.
  *
  ****************************************************************************/
 

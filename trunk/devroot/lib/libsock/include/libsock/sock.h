@@ -57,7 +57,8 @@ struct cw_sock_s
  *
  * <<< Output(s) >>>
  *
- * retval : Pointer to a cw_sock_t instance.
+ * retval : Pointer to a cw_sock_t instance, or NULL.
+ *          NULL : Memory allocation error.
  *
  * <<< Description >>>
  *
@@ -127,7 +128,11 @@ sock_get_port(cw_sock_t * a_sock);
  *
  * a_sock : Pointer to a cw_sock_t instance.
  *
+ * a_server_host : String that represents remote hostname or IP address.
  *
+ * a_port : Remote port number to connect to.
+ *
+ * a_timeout : Connect timeout, or NULL for no timeout.
  *
  * <<< Output(s) >>>
  *
@@ -145,7 +150,8 @@ sock_get_port(cw_sock_t * a_sock);
  *
  ****************************************************************************/
 cw_bool_t
-sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port);
+sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port,
+	     struct timeval * a_timeout);
 
 /****************************************************************************
  *
@@ -274,7 +280,7 @@ sock_write(cw_sock_t * a_sock, cw_buf_t * a_buf);
  *
  * <<< Output(s) >>>
  *
- * None. XXX
+ * retval : FALSE == success, TRUE == error.
  *
  * <<< Description >>>
  *

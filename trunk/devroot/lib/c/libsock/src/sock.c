@@ -33,6 +33,10 @@ sock_new(cw_sock_t * a_sock, cw_uint32_t a_in_max_buf_size)
   if (a_sock == NULL)
   {
     retval = (cw_sock_t *) _cw_malloc(sizeof(cw_sock_t));
+    if (NULL == retval)
+    {
+      goto RETURN;
+    }
     retval->is_malloced = TRUE;
   }
   else
@@ -41,6 +45,26 @@ sock_new(cw_sock_t * a_sock, cw_uint32_t a_in_max_buf_size)
     retval->is_malloced = FALSE;
   }
 
+  if (NULL == buf_new(&retval->in_buf, FALSE))
+  {
+    if (retval->is_malloced)
+    {
+      _cw_free(retval);
+      retval = NULL;
+      goto RETURN;
+    }
+  }
+  if (NULL == buf_new(&retval->out_buf, FALSE))
+  {
+    buf_delete(&retval->in_buf);
+    if (retval->is_malloced)
+    {
+      _cw_free(retval);
+      retval = NULL;
+      goto RETURN;
+    }
+  }
+  
   mtx_new(&retval->lock);
   cnd_new(&retval->callback_cnd);
 
@@ -51,16 +75,15 @@ sock_new(cw_sock_t * a_sock, cw_uint32_t a_in_max_buf_size)
 
   retval->in_max_buf_size = a_in_max_buf_size;
   mtx_new(&retval->in_lock);
-  buf_new(&retval->in_buf, FALSE);
   retval->in_need_signal_count = 0;
   cnd_new(&retval->in_cnd);
 
   mtx_new(&retval->out_lock);
-  buf_new(&retval->out_buf, FALSE);
   retval->out_need_broadcast_count = 0;
   retval->out_is_flushed = TRUE;
   cnd_new(&retval->out_cnd);
-  
+
+  RETURN:
   return retval;
 }
 
@@ -114,7 +137,8 @@ sock_get_port(cw_sock_t * a_sock)
 }
 
 cw_bool_t
-sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port)
+sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port,
+	     struct timeval * a_timeout)
 {
   cw_bool_t retval;
   cw_uint32_t server_ip;
@@ -134,8 +158,11 @@ sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port)
   a_sock->sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if (a_sock->sockfd < 0)
   {
-    log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		 "Error in socket(): %s\n", strerror(errno));
+    if (dbg_is_registered(cw_g_dbg, "sock_error"))
+    {
+      log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
+		  "Error in socket(): %s\n", strerror(errno));
+    }
     retval = TRUE;
     goto RETURN;
   }
@@ -143,13 +170,19 @@ sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port)
   if (a_sock->sockfd >= FD_SETSIZE)
   {
     /* This is outside the acceptable range for sockb, so return an error. */
-    log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		 "Exceded maximum number of simultaneous connections (%d)\n",
-		 FD_SETSIZE);
-    if (close(a_sock->sockfd))
+    if (dbg_is_registered(cw_g_dbg, "sock_error"))
     {
       log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		  "Error in close(): %s\n", strerror(errno));
+		  "Exceded maximum number of simultaneous connections (%d)\n",
+		  FD_SETSIZE);
+    }
+    if (close(a_sock->sockfd))
+    {
+      if (dbg_is_registered(cw_g_dbg, "sock_error"))
+      {
+	log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
+		    "Error in close(): %s\n", strerror(errno));
+      }
     }
     a_sock->sockfd = -1;
     retval = TRUE;
@@ -168,8 +201,11 @@ sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port)
   {
     if (close(a_sock->sockfd))
     {
-      log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		  "Error in close(): %s\n", strerror(errno));
+      if (dbg_is_registered(cw_g_dbg, "sock_error"))
+      {
+	log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
+		    "Error in close(): %s\n", strerror(errno));
+      }
     }
     a_sock->sockfd = -1;
     retval = TRUE;
@@ -199,10 +235,13 @@ sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port)
       FD_SET(a_sock->sockfd, &fd_read_set);
       FD_SET(a_sock->sockfd, &fd_write_set);
       if (0 > select(a_sock->sockfd + 1, &fd_read_set, &fd_write_set,
-		     NULL, NULL)) /* XXX Need timeout. */
+		     NULL, a_timeout))
       {
-	log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		    "Error in select(): %s\n", strerror(errno));
+	if (dbg_is_registered(cw_g_dbg, "sock_error"))
+	{
+	  log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
+		      "Error in select(): %s\n", strerror(errno));
+	}
 	a_sock->sockfd = -1;
 	retval = TRUE;
 	goto RETURN;
@@ -220,17 +259,23 @@ sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port)
 			     &error, &len);
 	  if (error < 0)
 	  {
-	    log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-			"Error in getsockopt(): %s\n", strerror(errno));
+	    if (dbg_is_registered(cw_g_dbg, "sock_error"))
+	    {
+	      log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
+			  "Error in getsockopt(): %s\n", strerror(errno));
+	    }
 	    a_sock->sockfd = -1;
 	    retval = TRUE;
 	    goto RETURN;
 	  }
 	  else if (error > 0)
 	  {
-	    log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-			"Error in getsockopt() due to connect(): %s\n",
-			strerror(error));
+	    if (dbg_is_registered(cw_g_dbg, "sock_error"))
+	    {
+	      log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
+			  "Error in getsockopt() due to connect(): %s\n",
+			  strerror(error));
+	    }
 	    a_sock->sockfd = -1;
 	    retval = TRUE;
 	    goto RETURN;
@@ -240,9 +285,11 @@ sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port)
       else
       {
 	/* Timed out. */
-	/* XXX This can't happen, since no timeout is specified. */
-	log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		    "select() timeout.  Connection failed\n");
+	if (dbg_is_registered(cw_g_dbg, "sock_error"))
+	{
+	  log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
+		      "select() timeout.  Connection failed\n");
+	}
 	a_sock->sockfd = -1;
 	retval = TRUE;
 	goto RETURN;
@@ -250,8 +297,11 @@ sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port)
     }
     else
     {
-      log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		  "Error in connect(): %s\n", strerror(errno));
+      if (dbg_is_registered(cw_g_dbg, "sock_error"))
+      {
+	log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
+		    "Error in connect(): %s\n", strerror(errno));
+      }
       a_sock->sockfd = -1;
       retval = TRUE;
       goto RETURN;
@@ -266,8 +316,11 @@ sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port)
     name_size = sizeof(name);
     if (0 > getsockname(a_sock->sockfd, (struct sockaddr *) &name, &name_size))
     {
-      log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		  "Error in getsockname(): %s\n", strerror(errno));
+      if (dbg_is_registered(cw_g_dbg, "sock_error"))
+      {
+	log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
+		    "Error in getsockname(): %s\n", strerror(errno));
+      }
       retval = TRUE;
       goto RETURN;
     }
@@ -329,8 +382,11 @@ sock_wrap(cw_sock_t * a_sock, int a_sockfd)
 			  (struct sockaddr *) &name,
 			  &name_size))
       {
-	log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		    "Error in getsockname(): %s\n", strerror(errno));
+	if (dbg_is_registered(cw_g_dbg, "sock_error"))
+	{
+	  log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
+		      "Error in getsockname(): %s\n", strerror(errno));
+	}
 	retval = TRUE;
 	goto RETURN;
       }
@@ -412,7 +468,7 @@ sock_read_noblock(cw_sock_t * a_sock, cw_buf_t * a_spare,
       
       if (size >= a_sock->in_max_buf_size)
       {
-	/* XXX Notify sockb to wake up. */
+	sockb_l_wakeup();
       }
     }
     else
@@ -481,7 +537,7 @@ sock_read_block(cw_sock_t * a_sock, cw_buf_t * a_spare,	cw_sint32_t a_max_read,
       
       if (size >= a_sock->in_max_buf_size)
       {
-	/* XXX Notify sockb to wake up. */
+	sockb_l_wakeup();
       }
     }
     else
@@ -594,16 +650,6 @@ sock_flush_out(cw_sock_t * a_sock)
   return retval;
 }
 
-/****************************************************************************
- *
- * Returns the number of the file descriptor for a_sock's socket, or -1 if not
- * connected.
- *
- * Don't lock, since sockb needs to get at this info without causing deadlock.
- * This is safe, since the socket is never closed except after sockb says it's
- * okay, in which case sockb wouldn't ask for this info anyway.
- *
- ****************************************************************************/
 int
 sock_l_get_fd(cw_sock_t * a_sock)
 {
@@ -621,12 +667,6 @@ sock_l_get_in_size(cw_sock_t * a_sock)
 
   mtx_lock(&a_sock->in_lock);
   retval = buf_get_size(&a_sock->in_buf);
-  if (retval > a_sock->in_max_buf_size)
-  {
-    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-		"Have %lu in bytes buffered, should have max %lu\n",
-		retval, a_sock->in_max_buf_size);
-  }
   mtx_unlock(&a_sock->in_lock);
 
   return retval;
@@ -638,33 +678,24 @@ sock_l_get_in_max_buf_size(cw_sock_t * a_sock)
   return a_sock->in_max_buf_size;
 }
 
-/****************************************************************************
- *
- * Get the data that is buffered in out_buf.  If there is no data buffered, then
- * signal flush_cond.  Note that this assumes sockb will write all data that it
- * has before asking for more.  If for some reason this needs to change, then a
- * more sophisticated message passing scheme will be necessary for flushing the
- * output buffer.
- *
- ****************************************************************************/
 void
-sock_l_get_out_data(cw_sock_t * a_sock, cw_buf_t * a_buf)
+sock_l_get_out_data(cw_sock_t * a_sock, cw_buf_t * r_buf)
 {
   _cw_check_ptr(a_sock);
-  _cw_check_ptr(a_buf);
+  _cw_check_ptr(r_buf);
 
   mtx_lock(&a_sock->out_lock);
 
   if (buf_get_size(&a_sock->out_buf) > a_sock->os_outbuf_size)
   {
-    buf_split(a_buf, &a_sock->out_buf, a_sock->os_outbuf_size);
+    buf_split(r_buf, &a_sock->out_buf, a_sock->os_outbuf_size);
   }
   else
   {
-    buf_catenate_buf(a_buf, &a_sock->out_buf, FALSE);
+    buf_catenate_buf(r_buf, &a_sock->out_buf, FALSE);
   }
   
-  if (buf_get_size(a_buf) == 0)
+  if (buf_get_size(r_buf) == 0)
   {
     /* No data was available. */
     a_sock->out_is_flushed = TRUE;
@@ -678,11 +709,6 @@ sock_l_get_out_data(cw_sock_t * a_sock, cw_buf_t * a_buf)
   mtx_unlock(&a_sock->out_lock);
 }
 
-/****************************************************************************
- *
- * Push data back into out_buf.
- *
- ****************************************************************************/
 cw_uint32_t
 sock_l_put_back_out_data(cw_sock_t * a_sock, cw_buf_t * a_buf)
 {
@@ -692,7 +718,11 @@ sock_l_put_back_out_data(cw_sock_t * a_sock, cw_buf_t * a_buf)
   _cw_check_ptr(a_buf);
 
   mtx_lock(&a_sock->out_lock);
-/*    buf_catenate_buf(a_buf, &a_sock->out_buf, FALSE); */
+  if (0 < buf_get_size(&a_sock->out_buf))
+  {
+    /* There are still data in out_buf, so preserve the order. */
+    buf_catenate_buf(a_buf, &a_sock->out_buf, FALSE);
+  }
   buf_catenate_buf(&a_sock->out_buf, a_buf, FALSE);
   _cw_assert(buf_get_size(a_buf) == 0);
   
@@ -710,11 +740,6 @@ sock_l_put_back_out_data(cw_sock_t * a_sock, cw_buf_t * a_buf)
   return retval;
 }
 
-/****************************************************************************
- *
- * Append data to in_buf.
- *
- ****************************************************************************/
 void
 sock_l_put_in_data(cw_sock_t * a_sock, cw_buf_t * a_buf)
 {
@@ -734,11 +759,6 @@ sock_l_put_in_data(cw_sock_t * a_sock, cw_buf_t * a_buf)
   mtx_unlock(&a_sock->in_lock);
 }
 
-/****************************************************************************
- *
- * sockb calls this function to notify the sock of the result of a message.
- *
- ****************************************************************************/
 void
 sock_l_message_callback(cw_sock_t * a_sock)
 {
@@ -759,11 +779,6 @@ sock_l_error_callback(cw_sock_t * a_sock)
   mtx_unlock(&a_sock->state_lock);
 }
 
-/****************************************************************************
- *
- * Set socket options correctly.
- *
- ****************************************************************************/
 static cw_bool_t
 sock_p_config_socket(cw_sock_t * a_sock)
 {
@@ -797,30 +812,6 @@ sock_p_config_socket(cw_sock_t * a_sock)
     _CW_SOCK_GETSOCKOPT(SO_REUSEPORT);
 #endif
     _CW_SOCK_GETSOCKOPT(SO_KEEPALIVE);
-
-    /* Apparently, this causes a blocking close(), so take it out. */
-#if (0)
-    /* SO_LINGER uses a different data structure, so handle this one
-     * separately. */
-    len = sizeof(linger_struct);
-    if (getsockopt(a_sock->sockfd, SOL_SOCKET, SO_LINGER,
-		   (void *) &linger_struct, &len))
-    {
-      log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		  "Error for SO_LINGER in getsockopt(): %s\n",
-		  strerror(errno));
-      retval = TRUE;
-      goto RETURN;
-    }
-    else
-    {
-      log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		  "SO_LINGER: %s, %d second%s\n",
-		  linger_struct.l_onoff ? "on" : "off",
-		  linger_struct.l_linger,
-		  linger_struct.l_linger != 1 ? "s" : "");
-    }
-#endif
     _CW_SOCK_GETSOCKOPT(SO_OOBINLINE);
     _CW_SOCK_GETSOCKOPT(SO_SNDBUF);
     _CW_SOCK_GETSOCKOPT(SO_RCVBUF);
@@ -849,8 +840,12 @@ sock_p_config_socket(cw_sock_t * a_sock)
     if (getsockopt(a_sock->sockfd, SOL_SOCKET, SO_SNDBUF,
 		   (void *) &a_sock->os_outbuf_size, &len))
     {
-      log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		  "Error for SO_SNDBUF in getsockopt(): %s\n", strerror(errno));
+      if (dbg_is_registered(cw_g_dbg, "sock_error"))
+      {
+	log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
+		    "Error for SO_SNDBUF in getsockopt(): %s\n",
+		    strerror(errno));
+      }
       retval = TRUE;
       goto RETURN;
     }
@@ -861,15 +856,21 @@ sock_p_config_socket(cw_sock_t * a_sock)
   val = fcntl(a_sock->sockfd, F_GETFL, 0);
   if (val == -1)
   {
-    log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		"Error for F_GETFL in fcntl(): %s\n", strerror(errno));
+    if (dbg_is_registered(cw_g_dbg, "sock_error"))
+    {
+      log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
+		  "Error for F_GETFL in fcntl(): %s\n", strerror(errno));
+    }
     retval = TRUE;
     goto RETURN;
   }
   if (fcntl(a_sock->sockfd, F_SETFL, val | O_NONBLOCK))
   {
-    log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		"Error for F_SETFL in fcntl(): %s\n", strerror(errno));
+    if (dbg_is_registered(cw_g_dbg, "sock_error"))
+    {
+      log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
+		  "Error for F_SETFL in fcntl(): %s\n", strerror(errno));
+    }
     retval = TRUE;
     goto RETURN;
   }
@@ -882,8 +883,11 @@ sock_p_config_socket(cw_sock_t * a_sock)
   if (setsockopt(a_sock->sockfd, SOL_SOCKET, SO_LINGER,
 		 (void *) &linger_struct, sizeof(linger_struct)))
   {
-    log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		"Error for SO_LINGER in setsockopt(): %s\n", strerror(errno));
+    if (dbg_is_registered(cw_g_dbg, "sock_error"))
+    {
+      log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
+		  "Error for SO_LINGER in setsockopt(): %s\n", strerror(errno));
+    }
     retval = TRUE;
     goto RETURN;
   }
@@ -902,8 +906,12 @@ sock_p_config_socket(cw_sock_t * a_sock)
   if (setsockopt(a_sock->sockfd, SOL_SOCKET, SO_SNDLOWAT,
 		 (void *) &val, sizeof(val)))
   {
-    log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		"Error for SO_SNDLOWAT in setsockopt(): %s\n", strerror(errno));
+    if (dbg_is_registered(cw_g_dbg, "sock_error"))
+    {
+      log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
+		  "Error for SO_SNDLOWAT in setsockopt(): %s\n",
+		  strerror(errno));
+    }
     retval = TRUE;
     goto RETURN;
   }
@@ -982,20 +990,29 @@ sock_p_disconnect(cw_sock_t * a_sock)
     val = fcntl(a_sock->sockfd, F_GETFL, 0);
     if (val == -1)
     {
-      log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		  "Error for F_GETFL in fcntl(): %s\n", strerror(errno));
+      if (dbg_is_registered(cw_g_dbg, "sock_error"))
+      {
+	log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
+		    "Error for F_GETFL in fcntl(): %s\n", strerror(errno));
+      }
       retval = TRUE;
     }
     else if (fcntl(a_sock->sockfd, F_SETFL, val & ~O_NONBLOCK))
     {
-      log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		  "Error for F_SETFL in fcntl(): %s\n", strerror(errno));
+      if (dbg_is_registered(cw_g_dbg, "sock_error"))
+      {
+	log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
+		    "Error for F_SETFL in fcntl(): %s\n", strerror(errno));
+      }
       retval = TRUE;
     }
     else if (close(a_sock->sockfd))
     {
-      log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		  "Error in close(): %s\n", strerror(errno));
+      if (dbg_is_registered(cw_g_dbg, "sock_error"))
+      {
+	log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
+		    "Error in close(): %s\n", strerror(errno));
+      }
       retval = TRUE;
     }
     else

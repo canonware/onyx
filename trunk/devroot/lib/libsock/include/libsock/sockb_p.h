@@ -10,7 +10,7 @@
  *
  * <<< Description >>>
  *
- * Private data structures and methods for sockb.
+ * Private data structures and methods for the sockb class.
  *
  ****************************************************************************/
 
@@ -38,8 +38,22 @@ struct cw_sockb_s
   cw_mtx_t get_ip_addr_lock;
 };
 
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_arg : Unused, merely for function prototype compatibility with thd_new().
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : NULL, never used.
+ *
+ * <<< Description >>>
+ *
+ * Entry point for the back end thread.  The back end thread essentially
+ * executes a select() loop and communicates with other threads via message
+ * queues (list's).
+ *
+ ****************************************************************************/
 static void *
 sockb_p_entry_func(void * a_arg);
-
-static void
-sockb_p_select_return(void);
