@@ -84,7 +84,7 @@ data
 
 echo \"[srcdir]/bin/slate/src/slate.nx --> [PREFIX]/bin/slate\"
 
-echo \"#![prefix]/bin/onyx\" > [PREFIX]/bin/slate
+echo \"#![PREFIX]/bin/onyx\" > [PREFIX]/bin/slate
 echo \"!#\" >> [PREFIX]/bin/slate
 [CAT] [srcdir]/bin/slate/src/slate.nx >> [PREFIX]/bin/slate;
 chmod u+x [PREFIX]/bin/slate;
