@@ -266,12 +266,26 @@ if test "x$enable_libonyx" = "x1" ; then
   AC_DEFINE(CW_USE_LIBONYX)
 fi
 
-dnl Check if modules can be used.
-enable_modules="yes"
-AC_CHECK_FUNCS(dlopen, AC_DEFINE(HAVE_DLOPEN), \
-  AC_CHECK_LIB(dl, dlopen, LIBS="$LIBS -ldl" ; AC_DEFINE(HAVE_DLOPEN), \
-    [enable_modules="no"
-    AC_MSG_RESULT(Modules disabled since dlopen is missing)]))
+dnl Check if modules should be used.
+AC_ARG_ENABLE(modules, [  --disable-modules       Do not support modules],
+if test "x$enable_modules" = "xno" ; then
+  enable_modules="0"
+else
+  enable_modules="1"
+fi
+,
+enable_modules="1"
+)
+if test "x$enable_modules" = "x1" ; then
+  AC_CHECK_FUNCS(dlopen, , \
+    AC_CHECK_LIB(dl, dlopen, LIBS="$LIBS -ldl", \
+      [enable_modules="0"
+      AC_MSG_RESULT(Modules disabled since dlopen is missing)]))
+fi
+AC_SUBST(enable_modules)
+if test "x$enable_modules" = "x1" ; then
+  AC_DEFINE(CW_MODULES)
+fi
 
 dnl Build onyx by default.
 if echo "<Version = onyx>" | grep Version >/dev/null ; then
@@ -389,7 +403,7 @@ if test "x$enable_onyx" = "x1" ; then
 fi
 
 dnl Look for modules.
-if test "x$enable_modules" = "xyes" ; then
+if test "x$enable_modules" = "x1" ; then
   dnl modprompt.
   if test "x$enable_posix" = "x1" ; then
     AC_ARG_WITH(libedit-prefix, [  --with-libedit-prefix   Prefix for libedit],
@@ -664,9 +678,11 @@ if test "x$bin_onyx" = "x1" ; then
     tmpath=$tmpath:$abs_objroot/mod/$i/nxm
     trpath=$trpath:$abs_objroot/mod/$i/nx
   done
-  dnl XXX Leading ":" should be removed.
-  AC_DEFINE_UNQUOTED(CW_TONYX_RPATH, "$trpath")
+  dnl Remove leading ':'.
+  tmpath=`echo $tmpath | sed s/://`
+  trpath=`echo $trpath | sed s/://`
   AC_DEFINE_UNQUOTED(CW_TONYX_MPATH, "$tmpath")
+  AC_DEFINE_UNQUOTED(CW_TONYX_RPATH, "$trpath")
 fi
 
 dnl 
@@ -691,9 +707,11 @@ if test "x$bin_slate" = "x1" ; then
     tmpath=$tmpath:$abs_objroot/mod/$i/nxm
     trpath=$trpath:$abs_objroot/mod/$i/nx
   done
-  dnl XXX Leading ":" should be removed.
-  AC_DEFINE_UNQUOTED(CW_TSLATE_RPATH, "$trpath")
+  dnl Remove leading ':'.
+  tmpath=`echo $tmpath | sed s/://`
+  trpath=`echo $trpath | sed s/://`
   AC_DEFINE_UNQUOTED(CW_TSLATE_MPATH, "$tmpath")
+  AC_DEFINE_UNQUOTED(CW_TSLATE_RPATH, "$trpath")
 fi
 
 dnl Process .in files.
@@ -740,6 +758,7 @@ AC_MSG_RESULT(posix         : ${enable_posix})
 AC_MSG_RESULT(posix-file    : ${enable_posix_file})
 AC_MSG_RESULT(inlines       : ${enable_inlines})
 AC_MSG_RESULT(libonyx       : ${enable_libonyx})
+AC_MSG_RESULT(modules       : ${enable_modules})
 AC_MSG_RESULT(autogen       : ${enable_autogen})
 AC_MSG_RESULT(debug         : ${enable_debug})
 AC_MSG_RESULT(docs          : ${with_docs})
