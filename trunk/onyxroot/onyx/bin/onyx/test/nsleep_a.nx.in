@@ -1,0 +1,22 @@
+% Check that we're really sleeping long enough.
+
+`Test begin\n' print
+
+/sleepinterval 100000000 def
+
+10 {
+	realtime
+	sleepinterval nsleep
+	realtime exch sub % Actual interval slept.
+	dup sleepinterval lt {
+		`Didn\'t sleep long enough: ' print
+		cvs print
+		` vs ' print
+		sleepinterval cvs print
+		`\n' print
+	}{
+		pop
+	} ifelse
+} repeat
+
+`Test end\n' print

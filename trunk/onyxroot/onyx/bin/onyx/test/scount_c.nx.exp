@@ -1,0 +1,4 @@
+Error /typecheck in --scount--
+ostack: (1 --scount--)
+estack: (--start-- -file- --scount--)
+dstack: (-dict- -dict- -dict- -dict-)

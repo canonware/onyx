@@ -1,0 +1,4 @@
+() scount pstack clear
+(1) scount pstack clear
+(1 2) scount pstack clear
+(1 2 3) scount pstack clear

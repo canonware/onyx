@@ -49,14 +49,14 @@ SRCS = [SRCS] [NCAT_SRCS];
 }
 
 /*
- * Simple stil tests.  Output is diff'ed with the expected (.exp file)
+ * Simple onyx tests.  Output is diff'ed with the expected (.exp file)
  * output.
  */
 {
-  local stests = ;
-  stests = [fromto % [srcdir]/bin/ncat/test/% [stests]];
+  local otests = ;
+  otests = [fromto % [srcdir]/bin/ncat/test/% [otests]];
 
-  STESTS = [STESTS] [stests];
+  OTESTS = [OTESTS] [otests];
 }
 
 /* Perl scripts that drive other tests and use the sequence mode of verify. */
@@ -75,12 +75,12 @@ SRCS = [SRCS] [NCAT_SRCS];
   CBTESTS = [CBTESTS] [cbtests];
 }
 
-/* stil programs that are driven by tests. */
+/* onyx programs that are driven by tests. */
 {
-  local sbtests = ;
-  sbtests = [fromto % [srcdir]/bin/ncat/test/% [sbtests]];
+  local obtests = ;
+  obtests = [fromto % [srcdir]/bin/ncat/test/% [obtests]];
 
-  SBTESTS = [SBTESTS] [sbtests];
+  OBTESTS = [OBTESTS] [obtests];
 }
 
 /* LaTeX source files. */

@@ -15,10 +15,10 @@
  * Global variables.
  */
 CTESTS = ;
-STESTS = ;
+OTESTS = ;
 PTESTS = ;
 CBTESTS = ;
-SBTESTS = ;
+OBTESTS = ;
 
 test_clean :
 {
@@ -29,10 +29,10 @@ test_clean :
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.perf [CTESTS]];
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS]];
 
-  rm -f [fromto [srcdir]/%0%.st.in [objdir]/%0%.st.out [STESTS]];
-  rm -f [fromto [srcdir]/%0%.st.in [objdir]/%0%.st.diff [STESTS]];
-  rm -f [fromto [srcdir]/%0%.st.in [objdir]/%0%.st.perf [STESTS]];
-  rm -f [fromto [srcdir]/%0%.st.in [objdir]/%0%.st [STESTS]];
+  rm -f [fromto [srcdir]/%0%.nx.in [objdir]/%0%.nx.out [OTESTS]];
+  rm -f [fromto [srcdir]/%0%.nx.in [objdir]/%0%.nx.diff [OTESTS]];
+  rm -f [fromto [srcdir]/%0%.nx.in [objdir]/%0%.nx.perf [OTESTS]];
+  rm -f [fromto [srcdir]/%0%.nx.in [objdir]/%0%.nx [OTESTS]];
 
   rm -f [fromto [srcdir]/%0%.pl.in [objdir]/%0%.out [PTESTS]];
   rm -f [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl.out [PTESTS]];
@@ -45,9 +45,9 @@ test_clean :
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.diff [CBTESTS]];
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0% [CBTESTS]];
 
-  rm -f [fromto [srcdir]/%0%.st.in [objdir]/%0%.st.out [SBTESTS]];
-  rm -f [fromto [srcdir]/%0%.st.in [objdir]/%0%.st.diff [SBTESTS]];
-  rm -f [fromto [srcdir]/%0%.st.in [objdir]/%0%.st [SBTESTS]];
+  rm -f [fromto [srcdir]/%0%.nx.in [objdir]/%0%.nx.out [OBTESTS]];
+  rm -f [fromto [srcdir]/%0%.nx.in [objdir]/%0%.nx.diff [OBTESTS]];
+  rm -f [fromto [srcdir]/%0%.nx.in [objdir]/%0%.nx [OBTESTS]];
 }
 
 test_distclean :
@@ -94,20 +94,20 @@ dataend
 }
 
 /*
- * Add magic to stil files.
+ * Add magic to onyx files.
  */
-[objdir]/%0%.st : [srcdir]/%0%.st.in
+[objdir]/%0%.nx : [srcdir]/%0%.nx.in
   set mkdir
 {
   [SHELL] -e;
 data
 #![SHELL]
 
-echo \"[srcdir]/%0%.st.in --> [target]\"
+echo \"[srcdir]/%0%.nx.in --> [target]\"
 
-echo \"#![abs_objdir]/[STIL_D]\" > [target]
+echo \"#![abs_objdir]/[ONYX_D]\" > [target]
 echo \"!#\" >> [target]
-[CAT] [srcdir]/%0%.st.in >> [target];
+[CAT] [srcdir]/%0%.nx.in >> [target];
 chmod u+x [target];
 dataend
 }

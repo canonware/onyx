@@ -19,20 +19,20 @@
 \clearemptydoublepage
 \part{Programs}
 \input{@abs_objdir@/bin/ncat/doc/latex/manual}
+\input{@abs_objdir@/bin/onyx/doc/latex/manual}
 \input{@abs_objdir@/bin/proxy/doc/latex/manual}
-\input{@abs_objdir@/bin/stil/doc/latex/manual}
 
 % Libraries.
 \clearemptydoublepage
 \part{Libraries}
 \input{@abs_objdir@/lib/c/libstash/doc/latex/manual}
 \input{@abs_objdir@/lib/c/libsock/doc/latex/manual}
-\input{@abs_objdir@/lib/c/libstil/doc/latex/manual}
+\input{@abs_objdir@/lib/c/libonyx/doc/latex/manual}
 
-% stil Language Reference.
+% onyx Language Reference.
 \clearemptydoublepage
 \part{Languages}
-\input{@abs_srcdir@/doc/latex/stil}
+\input{@abs_srcdir@/doc/latex/onyx}
 
 % Back matter.
 \clearemptydoublepage

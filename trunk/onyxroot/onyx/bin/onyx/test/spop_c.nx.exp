@@ -1,0 +1,4 @@
+Error /typecheck in --spop--
+ostack: (1 --spop--)
+estack: (--start-- -file- --spop--)
+dstack: (-dict- -dict- -dict- -dict-)

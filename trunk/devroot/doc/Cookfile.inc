@@ -26,7 +26,7 @@ H_MANUAL = [objdir]/doc/html/manual.html;
 
 /* LaTeX source files. */
 {
-  local tex_srcs = front.tex back.tex stil.tex;
+  local tex_srcs = front.tex back.tex onyx.tex;
   tex_srcs = [fromto % [srcdir]/doc/latex/% [tex_srcs]];
 
   TEX_SRCS = [TEX_SRCS] [tex_srcs];

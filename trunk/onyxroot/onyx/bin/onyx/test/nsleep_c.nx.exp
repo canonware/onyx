@@ -1,0 +1,4 @@
+Error /typecheck in --nsleep--
+ostack: (`a' --nsleep--)
+estack: (--start-- -file- --nsleep--)
+dstack: (-dict- -dict- -dict- -dict-)

@@ -1,0 +1,4 @@
+Error /typecheck in --sroll--
+ostack: (-stack- -mark- 1 --sroll--)
+estack: (--start-- -file- --sroll--)
+dstack: (-dict- -dict- -dict- -dict-)

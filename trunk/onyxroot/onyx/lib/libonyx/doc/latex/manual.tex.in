@@ -1,0 +1,146 @@
+%-*-mode:latex-*-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% <Copyright = jasone>
+% <License>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Version: <Version>
+%
+% libonyx portion of Canonware Software Manual.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\clearemptydoublepage
+\chapter{libonyx}
+The \libname{libonyx} library implements an embeddable \htmlref{onyx}{onyxlang}
+interpreter.  \libname{libonyx} is designed to allow multiple interpreter
+instances in the same program, though since \htmlref{onyx}{onyxlang} is a
+multi-threaded language, in most cases it makes more sense to use a single
+interpreter instance with multiple threads.
+
+\htmlref{onyx}{onyxlang} is described elsewhere in this manual, so this chapter
+documents the C API with as little information about the
+\htmlref{onyx}{onyxlang} language as possible.
+
+\section{Compilation}
+\begin{description}
+\item[Normal: ] cc \filename{file} -lonyx -lstash -lpthread
+\item[Debug: ] cc -g -D\_LIBONYX\_DBG -D\_LIBSTASH\_DBG \filename{file}
+-lonyx\_d -lstash\_d -lpthread
+\item[Profile: ] cc -pg \filename{file} -lonyx\_p -lstash\_p -lpthread
+\end{description}
+
+\section{Threads}
+\libname{libonyx} encapsulates each interpreter instance in a \classname{onyx}
+object.  A \classname{onyx} object supports running multiple concurrent threads.
+Each thread context is encapsulated by a \classname{nxo\_thread} object.  There
+is always at least one \classname{nxo\_thread} object associated with a
+\classname{nx} object, since one \classname{nxo\_thread} object is embedded in
+the \classname{nx} object.  The reasons for this have to do with garbage
+collection; if there were no references to the built in dictionaries, they would
+be in danger of being collected.  It is possible to use the initial
+\classname{nxo\_thread} object the same as any other, except that it must not be
+destroyed, since the \classname{nx} object explicitly manages it during
+interpreter initialization and shutdown.
+
+In general, each process thread should execute in its own
+\classname{nxo\_thread} object context, though the only explicit restriction
+places on \classname{nxo\_thread} object operations is that only one thread can
+be executing in a \classname{nxo\_thread} object context at a time.  In other
+words, the \classname{nxo\_thread} class does not synchronize access to its
+internals, since there is normally no reason for multiple threads to execute in
+the same \classname{nxo\_thread} object context.
+
+\section{Garbage Collection}
+Garbage collection is done asynchronously by a separate thread that does nothing
+but garbage collection.  Since there can be arbitrary threads executing in the
+interpreter concurrently, there are two ways to implement safe garbage
+collection: concurrent or atomic.  \libname{libonyx} uses atomic garbage
+collection, which means that the garbage collector thread suspends all other
+threads (with the exception of signal handler threads) during its mark phase.
+In order for this to work, the garbage collector must not do any locking while
+the other threads are suspended, or else there is a high probability of
+eventual deadlock.  \libname{libonyx} itself meets these criteria, as must any C
+extensions to the interpreter.
+
+\section{Exceptions}
+\libname{libonyx} reserves \htmlref{xep}{xep} exception numbers 128 to 255 and
+defines the following exceptions:
+\begin{description}
+\label{_CW_ONYXX_EXIT}
+\item[\cppdef{\_CW\_ONYXX\_EXIT}: ]
+	Internal use, for the exit operator.
+\label{_CW_ONYXX_STOP}
+\item[\cppdef{\_CW\_ONYXX\_STOP}: ]
+	Internal use, for the stop operator.
+\label{_CW_ONYXX_QUIT}
+\item[\cppdef{\_CW\_ONYXX\_QUIT}: ]
+	Internal use, for the quit operator, caught by the start operator.
+\end{description}
+
+\section{Integration issues}
+\subsection{Thread creation}
+\libname{libonyx} relies on \libname{libstash} for a number of features.  In
+most cases, \libname{libstash} quietly does its job behind the scenes,
+regardless of whether the application directly uses its functionality.  However,
+\libname{libonyx}'s garbage collector uses the \htmlref{\classname{thd}}{thd}
+class to suspend and resume all other threads during the mark phase of atomic
+collection.  For this to work, all threads that have any contact with
+\libname{libonyx} must be created using the \htmlref{\classname{thd}}{thd}
+class.
+
+This can cause integration headaches for existing threaded applications, but
+there is no other portable way to suspend and resume threads.  The only
+alternative is to modify \libname{libonyx} to use synchronous garbage
+collection, but this is only safe for applications that have a single thread
+executing in the interpreter.  In other words, converting to synchronous garbage
+collection requires stripping significant functionality out of
+\libname{libonyx}.  If you decide that you need to go this route, the author
+would be interested in hearing from you; the work involved in implementing
+synchronous garbage collection seems not worth the effort, considering the low
+likelihood of anyone ever needing to use \libname{libonyx} in such a
+configuration.
+
+\subsection{Restarted interrupted system calls}
+As mentioned above, \libname{libonyx} uses thread suspension and resumption to
+implement garbage collection.  This has the side-effect of making restarted
+interrupted system calls a real possibility.  However, the operating system will
+return with a partial result if the system call was partially complete when it
+was interrupted.  In practice, what this means is that short reads and writes
+are possible where they otherwise wouldn't happen, so the application should not
+make any assumptions about interruptible system calls always completing with a
+full result.  See the \htmlref{\classname{thd}}{thd} class documentation for
+more details.
+
+\section{API}
+\begin{capi}
+\label{_cw_onyx_code}
+\index{\cppmacro{\_cw\_onyx\_code}{}}
+\citem{\cppmacro[void]{\_cw\_onyx\_code}{cw\_nxo\_t *a\_thread, a\_code}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_thread: ]
+			Pointer to a thread \classname{nxo}.
+		\item[a\_code: ]
+			A "-delimited string constant.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] Depends on actions of a\_code.
+	\item[Description: ]
+		Convenience macro for static embedded \htmlref{onyx}{onyxlang}
+		code.
+	\end{capilist}
+\end{capi}
+
+\section{Classes}
+\input{@abs_srcdir@/lib/c/libonyx/doc/latex/nx}
+\input{@abs_srcdir@/lib/c/libonyx/doc/latex/nxa}
+\input{@abs_srcdir@/lib/c/libonyx/doc/latex/nxo}
+
+\section{Dictionaries}
+\input{@abs_srcdir@/lib/c/libonyx/doc/latex/envdict}
+\input{@abs_srcdir@/lib/c/libonyx/doc/latex/gcdict}
+\input{@abs_srcdir@/lib/c/libonyx/doc/latex/systemdict}

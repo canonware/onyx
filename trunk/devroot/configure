@@ -539,20 +539,20 @@ bins=
 libs=
 
 
-echo $ac_n "checking include libstil in build""... $ac_c" 1>&6
-echo "configure:544: checking include libstil in build" >&5
-if test -d "$srcdir/lib/c/libstil" ; then
-  build_libstil="yes"
-  lib_stil=1
-  cfghdrs="$cfghdrs $objdir/lib/c/libstil/include/libstil/libstil_defs.h"
-  libs="$libs libstil"
-  mkdir -p $objdir/lib/c/libstil/include/libstil
-  mkdir -p $objdir/lib/c/libstil/doc/latex
+echo $ac_n "checking include libonyx in build""... $ac_c" 1>&6
+echo "configure:544: checking include libonyx in build" >&5
+if test -d "$srcdir/lib/c/libonyx" ; then
+  build_libonyx="yes"
+  lib_onyx=1
+  cfghdrs="$cfghdrs $objdir/lib/c/libonyx/include/libonyx/libonyx_defs.h"
+  libs="$libs libonyx"
+  mkdir -p $objdir/lib/c/libonyx/include/libonyx
+  mkdir -p $objdir/lib/c/libonyx/doc/latex
 else
-  build_libstil="no"
-  lib_stil=0
+  build_libonyx="no"
+  lib_onyx=0
 fi
-echo "$ac_t""$build_libstil" 1>&6
+echo "$ac_t""$build_libonyx" 1>&6
 
 
 
@@ -642,8 +642,25 @@ echo "$ac_t""$build_ncat" 1>&6
 
 
 
+echo $ac_n "checking include onyx in build""... $ac_c" 1>&6
+echo "configure:647: checking include onyx in build" >&5
+if test -d "$srcdir/bin/onyx" ; then
+  build_onyx="yes"
+  bin_onyx=1
+  cfghdrs="$cfghdrs $objdir/bin/onyx/include/onyx_defs.h"
+  bins="$bins onyx"
+  mkdir -p $objdir/bin/onyx/include
+  mkdir -p $objdir/bin/onyx/doc/latex
+else
+  build_onyx="no"
+  bin_onyx=0
+fi
+echo "$ac_t""$build_onyx" 1>&6
+
+
+
 echo $ac_n "checking include proxy in build""... $ac_c" 1>&6
-echo "configure:647: checking include proxy in build" >&5
+echo "configure:664: checking include proxy in build" >&5
 if test -d "$srcdir/bin/proxy" ; then
   build_proxy="yes"
   bin_proxy=1
@@ -656,23 +673,6 @@ else
   bin_proxy=0
 fi
 echo "$ac_t""$build_proxy" 1>&6
-
-
-
-echo $ac_n "checking include stil in build""... $ac_c" 1>&6
-echo "configure:664: checking include stil in build" >&5
-if test -d "$srcdir/bin/stil" ; then
-  build_stil="yes"
-  bin_stil=1
-  cfghdrs="$cfghdrs $objdir/bin/stil/include/stil_defs.h"
-  bins="$bins stil"
-  mkdir -p $objdir/bin/stil/include
-  mkdir -p $objdir/bin/stil/doc/latex
-else
-  build_stil="no"
-  bin_stil=0
-fi
-echo "$ac_t""$build_stil" 1>&6
 
 
 
@@ -2869,11 +2869,11 @@ ac_given_INSTALL="$INSTALL"
 
 trap 'rm -fr `echo "Cookfile \
 bin/ncat/doc/latex/manual.tex \
+bin/onyx/doc/latex/manual.tex \
 bin/proxy/doc/latex/manual.tex \
-bin/stil/doc/latex/manual.tex \
 lib/c/libstash/doc/latex/manual.tex \
 lib/c/libsock/doc/latex/manual.tex \
-lib/c/libstil/doc/latex/manual.tex \
+lib/c/libonyx/doc/latex/manual.tex \
 doc/latex/manual.tex \
 doc/latex/ltx2e \
 test/verify \
@@ -2912,14 +2912,14 @@ s%@mandir@%$mandir%g
 s%@abs_srcdir@%$abs_srcdir%g
 s%@objdir@%$objdir%g
 s%@abs_objdir@%$abs_objdir%g
-s%@lib_stil@%$lib_stil%g
+s%@lib_onyx@%$lib_onyx%g
 s%@lib_edit@%$lib_edit%g
 s%@lib_sock@%$lib_sock%g
 s%@lib_stash@%$lib_stash%g
 s%@bin_cover@%$bin_cover%g
 s%@bin_ncat@%$bin_ncat%g
+s%@bin_onyx@%$bin_onyx%g
 s%@bin_proxy@%$bin_proxy%g
-s%@bin_stil@%$bin_stil%g
 s%@cfghdrs@%$cfghdrs%g
 s%@bins@%$bins%g
 s%@libs@%$libs%g
@@ -2994,11 +2994,11 @@ cat >> $CONFIG_STATUS <<EOF
 
 CONFIG_FILES=\${CONFIG_FILES-"Cookfile \
 bin/ncat/doc/latex/manual.tex \
+bin/onyx/doc/latex/manual.tex \
 bin/proxy/doc/latex/manual.tex \
-bin/stil/doc/latex/manual.tex \
 lib/c/libstash/doc/latex/manual.tex \
 lib/c/libsock/doc/latex/manual.tex \
-lib/c/libstil/doc/latex/manual.tex \
+lib/c/libonyx/doc/latex/manual.tex \
 doc/latex/manual.tex \
 doc/latex/ltx2e \
 test/verify \

@@ -69,7 +69,7 @@ $run =
     . " -f config.sub -f configure -f configure.in -f install-sh"
     . " -f doc -f test -f lib"
     . " -f bin/.cvsignore -f bin/Cookfile -f bin/Cookfile.inc"
-    . " -f bin/ncat -f bin/proxy -f bin/stil";
+    . " -f bin/ncat -f bin/onyx -f bin/proxy";
 if (defined($opt_verbose))
 {
     print STDERR "$run\n";

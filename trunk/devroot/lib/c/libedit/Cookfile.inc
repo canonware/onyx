@@ -52,26 +52,26 @@ SRCS = [SRCS] [LIBEDIT_SRCS];
 /* Simple C tests.  Output is diff'ed with the expected (.exp file) output. */
 {
   local ctests = ;
-  ctests = [fromto % [srcdir]/lib/c/libstil/test/% [ctests]];
+  ctests = [fromto % [srcdir]/lib/c/libedit/test/% [ctests]];
 
   CTESTS = [CTESTS] [ctests];
 }
 
 /*
- * Simple stil tests.  Output is diff'ed with the expected (.exp file)
+ * Simple onyx tests.  Output is diff'ed with the expected (.exp file)
  * output.
  */
 {
-  local stests = ;
-  stests = [fromto % [srcdir]/lib/c/libstil/test/% [stests]];
+  local otests = ;
+  otests = [fromto % [srcdir]/lib/c/libedit/test/% [otests]];
 
-  STESTS = [STESTS] [stests];
+  OTESTS = [OTESTS] [otests];
 }
 
 /* Perl scripts that drive other tests and use the sequence mode of verify. */
 {
   local ptests = ;
-  ptests = [fromto % [srcdir]/lib/c/libstil/test/% [ptests]];
+  ptests = [fromto % [srcdir]/lib/c/libedit/test/% [ptests]];
 
   PTESTS = [PTESTS] [ptests];
 }
@@ -79,17 +79,17 @@ SRCS = [SRCS] [LIBEDIT_SRCS];
 /* C programs that are driven by tests. */
 {
   local cbtests = ;
-  cbtests = [fromto % [srcdir]/lib/c/libstil/test/% [cbtests]];
+  cbtests = [fromto % [srcdir]/lib/c/libedit/test/% [cbtests]];
 
   CBTESTS = [CBTESTS] [cbtests];
 }
 
-/* stil programs that are driven by tests. */
+/* onyx programs that are driven by tests. */
 {
-  local sbtests = ;
-  sbtests = [fromto % [srcdir]/lib/c/libstil/test/% [sbtests]];
+  local obtests = ;
+  obtests = [fromto % [srcdir]/lib/c/libedit/test/% [obtests]];
 
-  SBTESTS = [SBTESTS] [sbtests];
+  OBTESTS = [OBTESTS] [obtests];
 }
 
 /* LaTeX source files. */
