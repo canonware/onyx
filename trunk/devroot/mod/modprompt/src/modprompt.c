@@ -92,10 +92,7 @@ modprompt_init(void *a_arg, cw_nxo_t *a_thread)
 #endif
 
     synth = (struct cw_modprompt_synth_s *)
-	cw_malloc(sizeof(struct cw_modprompt_synth_s));
-#ifdef CW_DBG
-    memset(synth, 0xa5, sizeof(struct cw_modprompt_synth_s));
-#endif
+	cw_calloc(1, sizeof(struct cw_modprompt_synth_s));
 
     /* Initialize stdin.  Only convert the initial thread's stdin, since it
      * isn't safe for multiple threads to use the synthetic file.  If the
@@ -118,19 +115,11 @@ modprompt_init(void *a_arg, cw_nxo_t *a_thread)
     /* Finish initializing synth. */
     synth->thread = a_thread;
     nxo_threadp_new(&synth->threadp);
-    synth->continuation = FALSE;
 #ifdef CW_THREADS
-    synth->quit = FALSE;
-    synth->resize = FALSE;
     mtx_new(&synth->mtx);
-    synth->have_data = FALSE;
     cnd_new(&synth->put_cnd);
-    synth->want_data = FALSE;
     cnd_new(&synth->get_cnd);
 #endif
-    synth->buffer = NULL;
-    synth->buffer_size = 0;
-    synth->buffer_count = 0;
 
     /* Initialize the command editor. */
     synth->hist = history_init();

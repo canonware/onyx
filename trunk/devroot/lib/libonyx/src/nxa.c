@@ -115,6 +115,8 @@ nxa_l_new(cw_nxa_t *a_nxa, cw_nx_t *a_nx)
 #endif
     volatile cw_uint32_t try_stage = 0;
 
+    /* This function assumes that memory was already zeroed by nx_new(). */
+
     xep_begin();
     xep_try
     {
@@ -129,14 +131,11 @@ nxa_l_new(cw_nxa_t *a_nxa, cw_nx_t *a_nx)
 	mtx_new(&a_nxa->seq_mtx);
 #endif
 	ql_new(&a_nxa->seq_set);
-	a_nxa->white = FALSE;
 	try_stage = 2;
 
 #ifdef CW_PTHREADS
 	mq_new(&a_nxa->gc_mq, NULL, sizeof(cw_nxam_t));
 #endif
-	a_nxa->gc_pending = FALSE;
-	a_nxa->gc_allocated = FALSE;
 	try_stage = 3;
 
 #ifdef CW_DBG
@@ -144,15 +143,10 @@ nxa_l_new(cw_nxa_t *a_nxa, cw_nx_t *a_nx)
 #endif
 
 	/* Initialize gcdict state. */
-	a_nxa->gcdict_active = FALSE;
 #ifdef CW_PTHREADS
 	a_nxa->gcdict_period = CW_LIBONYX_GCDICT_PERIOD;
 #endif
 	a_nxa->gcdict_threshold = CW_LIBONYX_GCDICT_THRESHOLD;
-	a_nxa->gcdict_count = 0;
-	memset(a_nxa->gcdict_current, 0, sizeof(cw_nxoi_t) * 3);
-	memset(a_nxa->gcdict_maximum, 0, sizeof(cw_nxoi_t) * 3);
-	memset(a_nxa->gcdict_sum, 0, sizeof(cw_nxoi_t) * 3);
 
 #ifdef CW_PTHREADS
 	/* Block all signals during thread creation, so that the GC thread does
@@ -242,6 +236,18 @@ nxa_malloc_e(cw_nxa_t *a_nxa, size_t a_size, const char *a_filename,
     nxa_l_count_adjust(a_nxa, (cw_nxoi_t) a_size);
 
     return mem_malloc_e(cw_g_mem, a_size, a_filename, a_line_num);
+}
+
+void *
+nxa_calloc_e(cw_nxa_t *a_nxa, size_t a_number, size_t a_size,
+	     const char *a_filename, cw_uint32_t a_line_num)
+{
+    cw_check_ptr(a_nxa);
+    cw_dassert(a_nxa->magic == CW_NXA_MAGIC);
+
+    nxa_l_count_adjust(a_nxa, (cw_nxoi_t) (a_number * a_size));
+
+    return mem_calloc_e(cw_g_mem, a_number, a_size, a_filename, a_line_num);
 }
 
 void *

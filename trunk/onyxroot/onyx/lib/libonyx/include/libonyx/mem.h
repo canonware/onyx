@@ -19,11 +19,26 @@
 #endif
 #endif
 
+struct cw_mema_s
+{
+    cw_bool_t is_malloced;
+
+    cw_opaque_alloc_t *alloc;
+    cw_opaque_calloc_t *calloc;
+    cw_opaque_realloc_t *realloc;
+    cw_opaque_dealloc_t *dealloc;
+
+    void *arg;
+};
+
 struct cw_mem_s
 {
     /* Allocator for internal use.  This can be used during debugging for
      * finding leaks in the mem code itself. */
     cw_mem_t *mem;
+#ifdef CW_MEM_ERROR
+    cw_mema_t mema;
+#endif
 
     cw_bool_t is_malloced;
 
@@ -44,6 +59,65 @@ struct cw_mem_s
     const void *handler_data;
 };
 
+/* mema. */
+cw_mema_t *
+mema_new(cw_mema_t *a_mema, cw_opaque_alloc_t *a_alloc,
+	 cw_opaque_calloc_t *a_calloc, cw_opaque_realloc_t *a_realloc,
+	 cw_opaque_dealloc_t *a_dealloc, void *a_arg);
+
+void
+mema_delete(cw_mema_t *a_mema);
+
+#ifndef CW_USE_INLINES
+cw_opaque_alloc_t *
+mema_alloc_get(cw_mema_t *a_mema);
+
+cw_opaque_calloc_t *
+mema_calloc_get(cw_mema_t *a_mema);
+
+cw_opaque_realloc_t *
+mema_realloc_get(cw_mema_t *a_mema);
+
+cw_opaque_dealloc_t *
+mema_dealloc_get(cw_mema_t *a_mema);
+
+void *
+mema_arg_get(cw_mema_t *a_mema);
+#endif
+
+#if (defined(CW_USE_INLINES) || defined(CW_MEM_C_))
+CW_INLINE cw_opaque_alloc_t *
+mema_alloc_get(cw_mema_t *a_mema)
+{
+    return a_mema->alloc;
+}
+
+CW_INLINE cw_opaque_calloc_t *
+mema_calloc_get(cw_mema_t *a_mema)
+{
+    return a_mema->calloc;
+}
+
+CW_INLINE cw_opaque_realloc_t *
+mema_realloc_get(cw_mema_t *a_mema)
+{
+    return a_mema->realloc;
+}
+
+CW_INLINE cw_opaque_dealloc_t *
+mema_dealloc_get(cw_mema_t *a_mema)
+{
+    return a_mema->dealloc;
+}
+
+CW_INLINE void *
+mema_arg_get(cw_mema_t *a_mema)
+{
+    return a_mema->arg;
+}
+#endif /* (defined(CW_USE_INLINES) || defined(CW_MEM_C_)) */
+
+/* mem. */
 cw_mem_t *
 mem_new(cw_mem_t *a_mem, cw_mem_t *a_internal);
 

@@ -38,6 +38,9 @@ struct cw_nx_s
     /* Memory allocator. */
     cw_nxa_t nxa;
 
+    /* Structure containing opaque memory allocator pointers. */
+    cw_mema_t mema;
+
     /* Dictionaries. */
     cw_nxo_t threadsdict;
     cw_nxo_t systemdict;
@@ -76,6 +79,9 @@ nx_stderr_set(cw_nx_t *a_nx, cw_nxo_t *a_stderr);
 cw_nxa_t *
 nx_nxa_get(cw_nx_t *a_nx);
 
+cw_mema_t *
+nx_mema_get(cw_nx_t *a_nx);
+
 cw_nxo_t *
 nx_threadsdict_get(cw_nx_t *a_nx);
 
@@ -108,6 +114,15 @@ nx_nxa_get(cw_nx_t *a_nx)
     cw_dassert(a_nx->magic == CW_NX_MAGIC);
 
     return &a_nx->nxa;
+}
+
+CW_INLINE cw_mema_t *
+nx_mema_get(cw_nx_t *a_nx)
+{
+    cw_check_ptr(a_nx);
+    cw_dassert(a_nx->magic == CW_NX_MAGIC);
+
+    return &a_nx->mema;
 }
 
 CW_INLINE cw_nxo_t *

@@ -232,6 +232,11 @@ typedef unsigned int cw_bool_t;
 typedef void *cw_opaque_alloc_t (const void *, size_t, const char *,
 				 cw_uint32_t);
 
+/* Generic typedef used for zeroed memory allocation hooks.  This typedef is
+ * compatible with functions such as mem_calloc_e(). */
+typedef void *cw_opaque_calloc_t (const void *, size_t, size_t, const char *,
+				  cw_uint32_t);
+
 /* Generic typedef used for memory reallocation hooks.  This typedef is
  * compatible with functions such as mem_realloc_e(). */
 typedef void *cw_opaque_realloc_t (const void *, void *, size_t, size_t,
@@ -241,6 +246,10 @@ typedef void *cw_opaque_realloc_t (const void *, void *, size_t, size_t,
  * compatible with functions such as mem_free_e(). */
 typedef void cw_opaque_dealloc_t (const void *, const void *, size_t,
 				  const char *, cw_uint32_t);
+
+/* Pseudo-opaque type that is used to pass allocator parameters to functions
+ * like ch_new() and dch_new().  See mem.h for methods that act on this type. */
+typedef struct cw_mema_s cw_mema_t;
 
 #include "qs.h"
 #include "qr.h"
@@ -276,11 +285,14 @@ extern cw_mtx_t cw_g_getprotobyname_mtx;
 extern cw_mtx_t cw_g_getservbyname_mtx;
 #endif
 
-/* Used for deallocation via an opaque function pointer.  These macros are used
+/* Used for allocation via an opaque function pointer.  These macros are used
  * to call functions such as mem_free_e(). */
 #ifdef CW_DBG
 #define cw_opaque_alloc(a_func, a_arg, a_size)				\
     (a_func)((void *) (a_arg), (size_t) (a_size), __FILE__, __LINE__)
+#define cw_opaque_calloc(a_func, a_num, a_arg, a_size)			\
+    (a_func)((void *) (a_arg), (size_t) (a_num), (size_t) (a_size),	\
+	     __FILE__, __LINE__)
 #define cw_opaque_realloc(a_func, a_ptr, a_arg, a_size, a_old_size)	\
     (a_func)((void *) (a_arg), (void *) (a_ptr), (size_t) (a_size),	\
 	     (size_t) (a_old_size), __FILE__, __LINE__)
@@ -290,6 +302,9 @@ extern cw_mtx_t cw_g_getservbyname_mtx;
 #else
 #define cw_opaque_alloc(a_func, a_arg, a_size)				\
     (a_func)((void *) (a_arg), (size_t) (a_size), NULL, 0)
+#define cw_opaque_calloc(a_func, a_num, a_arg, a_size)			\
+    (a_func)((void *) (a_arg), (size_t) (a_num), (size_t) (a_size),	\
+	     NULL, 0)
 #define cw_opaque_realloc(a_func, a_ptr, a_arg, a_size, a_old_size)	\
     (a_func)((void *) (a_arg), (void *) (a_ptr), (size_t) (a_size),	\
 	     (size_t) (a_old_size), NULL, 0)

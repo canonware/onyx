@@ -18,14 +18,15 @@
 #endif
 
 cw_ch_t *
-ch_new(cw_ch_t *a_ch, cw_opaque_alloc_t *a_alloc,
-       cw_opaque_dealloc_t *a_dealloc, void *a_arg, cw_uint32_t a_table_size,
+ch_new(cw_ch_t *a_ch, cw_mema_t *a_mema, cw_uint32_t a_table_size,
        cw_ch_hash_t *a_hash, cw_ch_key_comp_t *a_key_comp)
 {
     cw_ch_t *retval;
 
-    cw_check_ptr(a_alloc);
-    cw_check_ptr(a_dealloc);
+    cw_check_ptr(a_mema);
+    cw_check_ptr(mema_alloc_get(a_mema));
+    cw_check_ptr(mema_calloc_get(a_mema));
+    cw_check_ptr(mema_dealloc_get(a_mema));
     cw_assert(a_table_size > 0);
     cw_check_ptr(a_hash);
     cw_check_ptr(a_key_comp);
@@ -38,15 +39,13 @@ ch_new(cw_ch_t *a_ch, cw_opaque_alloc_t *a_alloc,
     }
     else
     {
-	retval = (cw_ch_t *) a_alloc(a_arg, CW_CH_TABLE2SIZEOF(a_table_size),
-				     __FILE__, __LINE__);
-	memset(retval, 0, CW_CH_TABLE2SIZEOF(a_table_size));
+	retval = (cw_ch_t *) cw_opaque_calloc(mema_calloc_get(a_mema), 1,
+					      mema_arg_get(a_mema),
+					      CW_CH_TABLE2SIZEOF(a_table_size));
 	retval->is_malloced = TRUE;
     }
 
-    retval->alloc = a_alloc;
-    retval->dealloc = a_dealloc;
-    retval->arg = a_arg;
+    retval->mema = a_mema;
     retval->table_size = a_table_size;
     retval->hash = a_hash;
     retval->key_comp = a_key_comp;
@@ -82,7 +81,8 @@ ch_delete(cw_ch_t *a_ch)
 	ql_head_remove(&a_ch->chi_ql, cw_chi_t, ch_link);
 	if (chi->is_malloced)
 	{
-	    cw_opaque_dealloc(a_ch->dealloc, a_ch->arg, chi, sizeof(cw_chi_t));
+	    cw_opaque_dealloc(mema_dealloc_get(a_ch->mema),
+			      mema_arg_get(a_ch->mema), chi, sizeof(cw_chi_t));
 	}
 #ifdef CW_DBG
 	else
@@ -94,7 +94,8 @@ ch_delete(cw_ch_t *a_ch)
 
     if (a_ch->is_malloced)
     {
-	cw_opaque_dealloc(a_ch->dealloc, a_ch->arg, a_ch,
+	cw_opaque_dealloc(mema_dealloc_get(a_ch->mema),
+			  mema_arg_get(a_ch->mema), a_ch,
 			  CW_CH_TABLE2SIZEOF(a_ch->table_size));
     }
 #ifdef CW_DBG
@@ -132,7 +133,8 @@ ch_insert(cw_ch_t *a_ch, const void *a_key, const void *a_data,
     }
     else
     {
-	chi = (cw_chi_t *) cw_opaque_alloc(a_ch->alloc, a_ch->arg,
+	chi = (cw_chi_t *) cw_opaque_alloc(mema_alloc_get(a_ch->mema),
+					   mema_arg_get(a_ch->mema),
 					   sizeof(cw_chi_t));
 	chi->is_malloced = TRUE;
     }
@@ -202,7 +204,8 @@ ch_remove(cw_ch_t *a_ch, const void *a_search_key, void **r_key, void **r_data,
 	    }
 	    if (chi->is_malloced)
 	    {
-		cw_opaque_dealloc(a_ch->dealloc, a_ch->arg, chi,
+		cw_opaque_dealloc(mema_dealloc_get(a_ch->mema),
+				  mema_arg_get(a_ch->mema), chi,
 				  sizeof(cw_chi_t));
 	    }
 	    else if (r_chi != NULL)
@@ -334,7 +337,8 @@ ch_remove_iterate(cw_ch_t *a_ch, void **r_key, void **r_data, cw_chi_t **r_chi)
     }
     if (chi->is_malloced)
     {
-	cw_opaque_dealloc(a_ch->dealloc, a_ch->arg, chi, sizeof(cw_chi_t));
+	cw_opaque_dealloc(mema_dealloc_get(a_ch->mema),
+			  mema_arg_get(a_ch->mema), chi, sizeof(cw_chi_t));
     }
     else if (r_chi != NULL)
     {

@@ -77,8 +77,7 @@ nxo_dict_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking,
 
 	/* Don't let the table get more than 80% full, or less than 25% full,
 	 * when shrinking. */
-	dch_new(&dict->data.hash, (cw_opaque_alloc_t *) nxa_malloc_e,
-		(cw_opaque_dealloc_t *) nxa_free_e, nxa, a_dict_size * 1.25,
+	dch_new(&dict->data.hash, nx_mema_get(a_nx), a_dict_size * 1.25,
 		a_dict_size, a_dict_size / 4, nxo_p_dict_hash,
 		nxo_p_dict_key_comp);
     }
@@ -192,8 +191,7 @@ nxoe_p_dict_def(cw_nxoe_dict_t *a_dict, cw_nx_t *a_nx, cw_nxo_t *a_key,
 		 *
 		 * Don't let the table get more than 80% full, or less than 25%
 		 * full, when shrinking. */
-		dch_new(&a_dict->data.hash, (cw_opaque_alloc_t *) nxa_malloc_e,
-			(cw_opaque_dealloc_t *) nxa_free_e, nx_nxa_get(a_nx),
+		dch_new(&a_dict->data.hash, nx_mema_get(a_nx),
 			CW_LIBONYX_DICT_SIZE * 2.5, CW_LIBONYX_DICT_SIZE * 2,
 			CW_LIBONYX_DICT_SIZE / 2,
 			nxo_p_dict_hash, nxo_p_dict_key_comp);

@@ -39,8 +39,160 @@ Instead, there are several preprocessor macros that can be used:
 \cppmacro{cw\_malloc}{}, \cppmacro{cw\_calloc}{},
 \cppmacro{cw\_realloc}{}, and \cppmacro{cw\_free}{}.
 
+The \classname{mema} class encapsulates a set of pointers to allocation
+functions.  It is used by the \htmlref{\classname{ch}}{ch} and
+\htmlref{\classname{dch}}{dch} classes.
+
 \subsubsection{API}
 \begin{capi}
+\label{mema_new}
+\index{mema_new@\cfunc{mema\_new}{}}
+\citem{\cfunc[cw\_mema\_t *]{mema\_new}{cw\_mema\_t *a\_mema,
+cw\_opaque\_alloc\_t *a\_alloc, cw\_opaque\_calloc\_t *a\_calloc,
+cw\_opaque\_realloc\_t *a\_realloc, cw\_opaque\_dealloc\_t *a\_dealloc, void
+*a\_arg}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_mema: ]
+			Pointer to space for a \classname{mema}, or NULL.
+		\item[a\_alloc: ]
+			Pointer to an allocation function.
+		\item[a\_alloc: ]
+			Pointer to a zero-ing allocation function.
+		\item[a\_alloc: ]
+			Pointer to a reallocation function.
+		\item[a\_dealloc: ]
+			Pointer to a deallocation function.
+		\item[a\_arg: ]
+			Opaque pointer to pass to \cfunc{a\_alloc}{},
+			\cfunc{a\_calloc}{}, \cfunc{a\_realloc}{}, and
+			\cfunc{a\_dealloc}{}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to a \classname{mema}.
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{CW\_ONYXX\_OOM}{CW_ONYXX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Constructor.
+	\end{capilist}
+\label{mema_delete}
+\index{mema_delete@\cfunc{mema\_delete}{}}
+\citem{\cfunc[void]{mema\_delete}{cw\_mema\_t *a\_mema}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_mema: ]
+			Pointer to a \classname{mema}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Destructor.
+	\end{capilist}
+\label{mema_alloc_get}
+\index{mema_alloc_get@\cfunc{mema\_alloc\_get}}
+\citem{\cfunc[cw\_opaque\_alloc\_t *]{mema\_alloc\_get}{cw\_mema\_t *a\_mema}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_mema: ]
+			Pointer to a \classname{mema}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to an allocation function.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return a pointer to an allocation function.
+	\end{capilist}
+\label{mema_calloc_get}
+\index{mema_calloc_get@\cfunc{mema\_calloc\_get}}
+\citem{\cfunc[cw\_opaque\_calloc\_t *]{mema\_calloc\_get}{cw\_mema\_t *a\_mema}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_mema: ]
+			Pointer to a \classname{mema}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to a zero-ing allocation function.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return a pointer to a zero-ing allocation function.
+	\end{capilist}
+\label{mema_realloc_get}
+\index{mema_realloc_get@\cfunc{mema\_realloc\_get}}
+\citem{\cfunc[cw\_opaque\_realloc\_t *]{mema\_realloc\_get}{cw\_mema\_t
+*a\_mema}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_mema: ]
+			Pointer to a \classname{mema}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to a reallocation function.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return a pointer to a reallocation function.
+	\end{capilist}
+\label{mema_dealloc_get}
+\index{mema_dealloc_get@\cfunc{mema\_dealloc\_get}}
+\citem{\cfunc[cw\_opaque\_dealloc\_t *]{mema\_dealloc\_get}{cw\_mema\_t
+*a\_mema}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_mema: ]
+			Pointer to a \classname{mema}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to a deallocation function.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return a pointer to a deallocation function.
+	\end{capilist}
+\label{mema_arg_get}
+\index{mema_arg_get@\cfunc{mema\_arg\_get}}
+\citem{\cfunc[cw\_opaque\_arg\_t *]{mema\_arg\_get}{cw\_mema\_t *a\_mema}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_mema: ]
+			Pointer to a \classname{mema}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Opaque pointer to pass to \cfunc{a\_alloc}{},
+			\cfunc{a\_calloc}{}, \cfunc{a\_realloc}{}, and
+			\cfunc{a\_dealloc}{}.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return an opaque pointer to pass to the allocation functions
+		returned by \cfunc{mema\_alloc\_get}{\cvar{a\_mema}},
+		\cfunc{mema\_calloc\_get}{\cvar{a\_mema}},
+		\cfunc{mema\_realloc\_get}{\cvar{a\_mema}}, and
+		\cfunc{mema\_dealloc\_get}{\cvar{a\_mema}}.
+	\end{capilist}
 \label{mem_new}
 \index{mem_new@\cfunc{mem\_new}{}}
 \citem{\cfunc[cw\_mem\_t *]{mem\_new}{cw\_mem\_t *a\_mem, cw\_mem\_t

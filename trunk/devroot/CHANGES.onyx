@@ -1,3 +1,22 @@
+2003-03-12 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/include/libonyx/mem.h : Add the mema class, which reduces
+	  memory usage for the ch and dch classes.
+
+	* lib/libonyx/src/ch.c:ch_new(): Modify to use the mema class.
+
+	* lib/libonyx/src/dch.c:dch_new(): Modify to use the mema class.
+
+	* lib/libonyx/include/libonyx/nx.h:nx_mema_get() : Add.
+
+	* lib/libonyx/include/libonyx/nxa.h:nxa_calloc[_e](): Add.
+
+	* lib/libonyx/include/libonyx/libonyx.h:cw_opaque_calloc{_t,()}: Add.
+
+	* Use calloc rather than malloc followed by memset wherever possible,
+	  which appears to have a significant positive performance impact in
+	  many cases.
+
 2003-03-03 : Jason Evans <jasone@canonware.com>
 
 	* Remove CPPDEFS from the build system, and modify calls to c_incl so

@@ -24,15 +24,16 @@ static void
 dch_p_insert(cw_ch_t *a_ch, cw_chi_t * a_chi);
 
 cw_dch_t *
-dch_new(cw_dch_t *a_dch, cw_opaque_alloc_t *a_alloc,
-	cw_opaque_dealloc_t *a_dealloc, void *a_arg, cw_uint32_t a_base_table,
+dch_new(cw_dch_t *a_dch, cw_mema_t *a_mema, cw_uint32_t a_base_table,
 	cw_uint32_t a_base_grow, cw_uint32_t a_base_shrink,
 	cw_ch_hash_t *a_hash, cw_ch_key_comp_t *a_key_comp)
 {
     cw_dch_t *retval;
 
-    cw_check_ptr(a_alloc);
-    cw_check_ptr(a_dealloc);
+    cw_check_ptr(a_mema);
+    cw_check_ptr(mema_alloc_get(a_mema));
+    cw_check_ptr(mema_calloc_get(a_mema));
+    cw_check_ptr(mema_dealloc_get(a_mema));
     cw_assert(a_base_table > 0);
     cw_assert(a_base_grow > 0);
     cw_assert(a_base_grow > a_base_shrink);
@@ -47,14 +48,13 @@ dch_new(cw_dch_t *a_dch, cw_opaque_alloc_t *a_alloc,
     }
     else
     {
-	retval = (cw_dch_t *) cw_opaque_alloc(a_alloc, a_arg, sizeof(cw_dch_t));
-	memset(retval, 0, sizeof(cw_dch_t));
+	retval = (cw_dch_t *) cw_opaque_calloc(mema_calloc_get(a_mema), 1,
+					       mema_arg_get(a_mema),
+					       sizeof(cw_dch_t));
 	retval->is_malloced = TRUE;
     }
 
-    retval->alloc = a_alloc;
-    retval->dealloc = a_dealloc;
-    retval->arg = a_arg;
+    retval->mema = a_mema;
     retval->base_table = a_base_table;
     retval->base_grow = a_base_grow;
     retval->base_shrink = a_base_shrink;
@@ -68,15 +68,16 @@ dch_new(cw_dch_t *a_dch, cw_opaque_alloc_t *a_alloc,
     xep_try
     {
 	v_retval = retval;
-	retval->ch = ch_new(NULL, a_alloc, a_dealloc, a_arg, retval->base_table,
-			    retval->hash, retval->key_comp);
+	retval->ch = ch_new(NULL, a_mema, retval->base_table, retval->hash,
+			    retval->key_comp);
     }
     xep_catch(CW_ONYXX_OOM)
     {
 	retval = (cw_dch_t *) v_retval;
 	if (a_dch->is_malloced)
 	{
-	    cw_opaque_dealloc(a_dealloc, a_arg, retval, sizeof(cw_dch_t));
+	    cw_opaque_dealloc(mema_dealloc_get(a_mema), mema_arg_get(a_mema),
+			      retval, sizeof(cw_dch_t));
 	}
     }
     xep_end();
@@ -108,7 +109,8 @@ dch_delete(cw_dch_t *a_dch)
 
     if (a_dch->is_malloced)
     {
-	cw_opaque_dealloc(a_dch->dealloc, a_dch->arg, a_dch, sizeof(cw_dch_t));
+	cw_opaque_dealloc(mema_dealloc_get(a_dch->mema),
+			  mema_arg_get(a_dch->mema), a_dch, sizeof(cw_dch_t));
     }
 #ifdef CW_DBG
     else
@@ -235,9 +237,9 @@ dch_p_grow(cw_dch_t *a_dch)
     if ((count + 1) > (a_dch->grow_factor * a_dch->base_grow))
     {
 	/* Too big.  Create a new ch twice as large and populate it. */
-	t_ch = ch_new(NULL, a_dch->alloc, a_dch->dealloc, a_dch->arg,
-		      a_dch->base_table * a_dch->grow_factor * 2, a_dch->hash,
-		      a_dch->key_comp);
+	t_ch = ch_new(NULL, a_dch->mema,
+		      a_dch->base_table * a_dch->grow_factor * 2,
+		      a_dch->hash, a_dch->key_comp);
 	for (i = 0; i < count; i++)
 	{
 	    chi = ql_first(&a_dch->ch->chi_ql);
@@ -290,7 +292,7 @@ dch_p_shrink(cw_dch_t *a_dch)
 	cw_assert(new_factor > 0);
 	cw_assert(new_factor < a_dch->grow_factor);
 
-	t_ch = ch_new(NULL, a_dch->alloc, a_dch->dealloc, a_dch->arg,
+	t_ch = ch_new(NULL, a_dch->mema,
 		      a_dch->base_table * new_factor, a_dch->hash,
 		      a_dch->key_comp);
 	for (i = 0; i < count; i++)

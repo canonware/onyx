@@ -10,6 +10,7 @@
 *
 ******************************************************************************/
 
+#define CW_MEM_C_
 #include "../include/libonyx/libonyx.h"
 
 #ifdef cw_malloc
@@ -42,6 +43,50 @@ struct cw_mem_item_s
 };
 #endif
 
+/* mema. */
+cw_mema_t *
+mema_new(cw_mema_t *a_mema, cw_opaque_alloc_t *a_alloc,
+	 cw_opaque_calloc_t *a_calloc, cw_opaque_realloc_t *a_realloc,
+	 cw_opaque_dealloc_t *a_dealloc, void *a_arg)
+{
+    cw_mema_t *retval;
+
+    if (a_mema != NULL)
+    {
+	retval = a_mema;
+	retval->is_malloced = FALSE;
+    }
+    else
+    {
+	cw_check_ptr(a_alloc);
+	cw_check_ptr(a_dealloc);
+    	retval = (cw_mema_t *) cw_opaque_alloc(a_alloc, a_arg,
+					       sizeof(cw_mema_t));
+	retval->is_malloced = TRUE;
+    }
+
+    retval->alloc = a_alloc;
+    retval->calloc = a_calloc;
+    retval->realloc = a_realloc;
+    retval->dealloc = a_dealloc;
+    retval->arg = a_arg;
+
+    return retval;
+}
+
+void
+mema_delete(cw_mema_t *a_mema)
+{
+    cw_check_ptr(a_mema);
+
+    if (a_mema->is_malloced)
+    {
+	cw_opaque_dealloc(a_mema->dealloc, a_mema->arg, a_mema,
+			  sizeof(cw_mema_t));
+    }
+}
+
+/* mem. */
 cw_mem_t *
 mem_new(cw_mem_t *a_mem, cw_mem_t *a_internal)
 {
@@ -49,7 +94,7 @@ mem_new(cw_mem_t *a_mem, cw_mem_t *a_internal)
     volatile cw_uint32_t try_stage = 0;
 
     xep_begin();
-    volatile cw_mem_t	*v_retval;
+    volatile cw_mem_t *v_retval;
     xep_try
     {
 	if (a_mem != NULL)
@@ -64,18 +109,21 @@ mem_new(cw_mem_t *a_mem, cw_mem_t *a_internal)
 	    retval->is_malloced = TRUE;
 	}
 	retval->mem = a_internal;
+#ifdef CW_MEM_ERROR
+	mema_new(&retval->mema, (cw_opaque_alloc_t *) mem_malloc_e,
+		 (cw_opaque_calloc_t *) mem_calloc_e,
+		 (cw_opaque_realloc_t *) mem_realloc_e,
+		 (cw_opaque_dealloc_t *) mem_free_e, a_internal);
+#endif
 #ifdef CW_THREADS
 	mtx_new(&retval->lock);
 #endif
 	try_stage = 1;
 
 #ifdef CW_MEM_ERROR
-	retval->addr_hash = dch_new(NULL, (cw_opaque_alloc_t *) mem_malloc_e,
-				    (cw_opaque_dealloc_t *) mem_free_e,
-				    a_internal, CW_MEM_BASE_TABLE,
-				    CW_MEM_BASE_GROW,
-				    CW_MEM_BASE_SHRINK, ch_direct_hash,
-				    ch_direct_key_comp);
+	retval->addr_hash = dch_new(NULL, &retval->mema, CW_MEM_BASE_TABLE,
+				    CW_MEM_BASE_GROW, CW_MEM_BASE_SHRINK,
+				    ch_direct_hash, ch_direct_key_comp);
 	try_stage = 2;
 #endif
 	retval->handler_data = NULL;
@@ -89,6 +137,9 @@ mem_new(cw_mem_t *a_mem, cw_mem_t *a_internal)
 	    {
 #ifdef CW_THREADS
 		mtx_delete(&retval->lock);
+#endif
+#ifdef CW_MEM_ERROR
+		mema_delete(&retval->mema);
 #endif
 		if (retval->is_malloced)
 		{
@@ -139,6 +190,7 @@ mem_delete(cw_mem_t *a_mem)
 #ifdef CW_THREADS
 	mtx_delete(&a_mem->lock);
 #endif
+	mema_delete(&a_mem->mema);
     }
 #endif
 
