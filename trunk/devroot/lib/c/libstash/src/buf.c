@@ -1222,7 +1222,7 @@ buf_get_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset)
       < 
       a_buf->bufel_array[array_element].end_offset)
   {
-#ifdef _WORDS_BIGENDIAN
+#ifdef WORDS_BIGENDIAN
     retval = _LIBSTASH_BUF_OR_BYTE(0, 7);
     retval |= _LIBSTASH_BUF_OR_BYTE(1, 6);
     retval |= _LIBSTASH_BUF_OR_BYTE(2, 5);
@@ -1244,7 +1244,7 @@ buf_get_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset)
   }
   else
   {
-#ifdef _WORDS_BIGENDIAN
+#ifdef WORDS_BIGENDIAN
     retval = _LIBSTASH_BUF_OR_BYTE(0, 7);
     buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
     retval |= _LIBSTASH_BUF_OR_BYTE(0, 6);
@@ -1351,38 +1351,66 @@ buf_set_uint32(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint32_t a_val)
     goto RETURN;
   }
 
+  /* Get a byte from a_val and put in in the least significant byte. */
+#define _LIBSTASH_BUF_BYTE(s) ((a_val >> ((s) << 3)) & 0xff)
+  
   buf_p_get_data_position(a_buf, a_offset, &array_element, &bufel_offset);
-  a_buf->bufel_array[array_element].bufc->buf[bufel_offset] = a_val & 0xff;
   
   if (bufel_offset + 3
       < 
       a_buf->bufel_array[array_element].end_offset)
   {
     /* The whole thing is in one bufel. */
+#ifdef WORDS_BIGENDIAN
+    a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
+      = _LIBSTASH_BUF_BYTE(3);
     a_buf->bufel_array[array_element].bufc->buf[bufel_offset + 1]
-      = (a_val >> 8) & 0xff;
-    
+      = _LIBSTASH_BUF_BYTE(2);
     a_buf->bufel_array[array_element].bufc->buf[bufel_offset + 2]
-      = (a_val >> 16) & 0xff;
-    
+      = _LIBSTASH_BUF_BYTE(1);
     a_buf->bufel_array[array_element].bufc->buf[bufel_offset + 3]
-      = (a_val >> 24) & 0xff;
+      = _LIBSTASH_BUF_BYTE(0);
+#else
+    a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
+      = _LIBSTASH_BUF_BYTE(0);
+    a_buf->bufel_array[array_element].bufc->buf[bufel_offset + 1]
+      = _LIBSTASH_BUF_BYTE(1);
+    a_buf->bufel_array[array_element].bufc->buf[bufel_offset + 2]
+      = _LIBSTASH_BUF_BYTE(2);
+    a_buf->bufel_array[array_element].bufc->buf[bufel_offset + 3]
+      = _LIBSTASH_BUF_BYTE(3);
+#endif    
   }
   else
   {
     /* Split across two or more bufels. */
+#ifdef WORDS_BIGENDIAN
+    a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
+      = _LIBSTASH_BUF_BYTE(3);
     buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
     a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
-      = (a_val >> 8) & 0xff;
-    
+      = _LIBSTASH_BUF_BYTE(2);
     buf_p_get_data_position(a_buf, a_offset + 2, &array_element, &bufel_offset);
     a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
-      = (a_val >> 16) & 0xff;
-    
+      = _LIBSTASH_BUF_BYTE(1);
     buf_p_get_data_position(a_buf, a_offset + 3, &array_element, &bufel_offset);
     a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
-      = (a_val >> 24) & 0xff;
+      = _LIBSTASH_BUF_BYTE(0);
+#else
+    a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
+      = _LIBSTASH_BUF_BYTE(0);
+    buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
+    a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
+      = _LIBSTASH_BUF_BYTE(1);
+    buf_p_get_data_position(a_buf, a_offset + 2, &array_element, &bufel_offset);
+    a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
+      = _LIBSTASH_BUF_BYTE(2);
+    buf_p_get_data_position(a_buf, a_offset + 3, &array_element, &bufel_offset);
+    a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
+      = _LIBSTASH_BUF_BYTE(3);
+#endif
   }
+#undef _LIBSTASH_BUF_BYTE
 
   retval = FALSE;
 
@@ -1419,67 +1447,107 @@ buf_set_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint64_t a_val)
     goto RETURN;
   }
 
+  /* Get a byte from a_val and put in in the least significant byte. */
+#define _LIBSTASH_BUF_BYTE(s) ((a_val >> ((s) << 3)) & 0xff)
+  
   buf_p_get_data_position(a_buf, a_offset, &array_element, &bufel_offset);
-  a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
-    = a_val & 0xff;
+  
   if (bufel_offset + 7
       <
       a_buf->bufel_array[array_element].end_offset)
   {
     /* The whole thing is in one bufel. */
+#ifdef WORDS_BIGENDIAN
+    a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
+      = _LIBSTASH_BUF_BYTE(7);
     a_buf->bufel_array[array_element].bufc->buf[bufel_offset + 1]
-      = (a_val >> 8) & 0xff;
-
+      = _LIBSTASH_BUF_BYTE(6);
     a_buf->bufel_array[array_element].bufc->buf[bufel_offset + 2]
-      = (a_val >> 16) & 0xff;
-
+      = _LIBSTASH_BUF_BYTE(5);
     a_buf->bufel_array[array_element].bufc->buf[bufel_offset + 3]
-      = (a_val >> 24) & 0xff;
-
+      = _LIBSTASH_BUF_BYTE(4);
     a_buf->bufel_array[array_element].bufc->buf[bufel_offset + 4]
-      = (a_val >> 32) & 0xff;
-
+      = _LIBSTASH_BUF_BYTE(3);
     a_buf->bufel_array[array_element].bufc->buf[bufel_offset + 5]
-      = (a_val >> 40) & 0xff;
-
+      = _LIBSTASH_BUF_BYTE(2);
     a_buf->bufel_array[array_element].bufc->buf[bufel_offset + 6]
-      = (a_val >> 48) & 0xff;
-
+      = _LIBSTASH_BUF_BYTE(1);
     a_buf->bufel_array[array_element].bufc->buf[bufel_offset + 7]
-      = (a_val >> 56) & 0xff;
+      = _LIBSTASH_BUF_BYTE(0);
+#else
+    a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
+      = _LIBSTASH_BUF_BYTE(0);
+    a_buf->bufel_array[array_element].bufc->buf[bufel_offset + 1]
+      = _LIBSTASH_BUF_BYTE(1);
+    a_buf->bufel_array[array_element].bufc->buf[bufel_offset + 2]
+      = _LIBSTASH_BUF_BYTE(2);
+    a_buf->bufel_array[array_element].bufc->buf[bufel_offset + 3]
+      = _LIBSTASH_BUF_BYTE(3);
+    a_buf->bufel_array[array_element].bufc->buf[bufel_offset + 4]
+      = _LIBSTASH_BUF_BYTE(4);
+    a_buf->bufel_array[array_element].bufc->buf[bufel_offset + 5]
+      = _LIBSTASH_BUF_BYTE(5);
+    a_buf->bufel_array[array_element].bufc->buf[bufel_offset + 6]
+      = _LIBSTASH_BUF_BYTE(6);
+    a_buf->bufel_array[array_element].bufc->buf[bufel_offset + 7]
+      = _LIBSTASH_BUF_BYTE(7);
+#endif
   }
   else
   {
     /* Split across two or more bufels. */
+#ifdef WORDS_BIGENDIAN
+    a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
+      = _LIBSTASH_BUF_BYTE(7);
     buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
     a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
-      = (a_val >> 8) & 0xff;
-
+      = _LIBSTASH_BUF_BYTE(6);
     buf_p_get_data_position(a_buf, a_offset + 2, &array_element, &bufel_offset);
     a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
-      = (a_val >> 16) & 0xff;
-
+      = _LIBSTASH_BUF_BYTE(5);
     buf_p_get_data_position(a_buf, a_offset + 3, &array_element, &bufel_offset);
     a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
-      = (a_val >> 24) & 0xff;
-
+      = _LIBSTASH_BUF_BYTE(4);
     buf_p_get_data_position(a_buf, a_offset + 4, &array_element, &bufel_offset);
     a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
-      = (a_val >> 32) & 0xff;
-
+      = _LIBSTASH_BUF_BYTE(3);
     buf_p_get_data_position(a_buf, a_offset + 5, &array_element, &bufel_offset);
     a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
-      = (a_val >> 40) & 0xff;
-
+      = _LIBSTASH_BUF_BYTE(2);
     buf_p_get_data_position(a_buf, a_offset + 6, &array_element, &bufel_offset);
     a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
-      = (a_val >> 48) & 0xff;
-
+      = _LIBSTASH_BUF_BYTE(1);
     buf_p_get_data_position(a_buf, a_offset + 7, &array_element, &bufel_offset);
     a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
-      = (a_val >> 56) & 0xff;
+      = _LIBSTASH_BUF_BYTE(0);
+#else
+    a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
+      = _LIBSTASH_BUF_BYTE(0);
+    buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
+    a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
+      = _LIBSTASH_BUF_BYTE(1);
+    buf_p_get_data_position(a_buf, a_offset + 2, &array_element, &bufel_offset);
+    a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
+      = _LIBSTASH_BUF_BYTE(2);
+    buf_p_get_data_position(a_buf, a_offset + 3, &array_element, &bufel_offset);
+    a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
+      = _LIBSTASH_BUF_BYTE(3);
+    buf_p_get_data_position(a_buf, a_offset + 4, &array_element, &bufel_offset);
+    a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
+      = _LIBSTASH_BUF_BYTE(4);
+    buf_p_get_data_position(a_buf, a_offset + 5, &array_element, &bufel_offset);
+    a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
+      = _LIBSTASH_BUF_BYTE(5);
+    buf_p_get_data_position(a_buf, a_offset + 6, &array_element, &bufel_offset);
+    a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
+      = _LIBSTASH_BUF_BYTE(6);
+    buf_p_get_data_position(a_buf, a_offset + 7, &array_element, &bufel_offset);
+    a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
+      = _LIBSTASH_BUF_BYTE(7);
+#endif
   }
-
+#undef _LIBSTASH_BUF_BYTE
+  
   retval = FALSE;
 
   RETURN:

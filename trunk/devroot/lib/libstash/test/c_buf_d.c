@@ -24,7 +24,6 @@ main()
   cw_bufc_t * bufc;
   cw_uint32_t longs[8];
   cw_uint64_t quads[4];
-  cw_uint32_t i;
   
   libstash_init();
   out_put(cw_g_out, "Test begin\n");
