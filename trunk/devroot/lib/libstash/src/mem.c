@@ -47,18 +47,6 @@
 			abort();					\
 		}							\
 	} while (0)
-#if (0)
-/* The out class can't be used here due to bootstrapping issues. */
-#define _cw_mem_check_ptr(x)						\
-	do {								\
-		if ((x) == NULL) {					\
-			fprintf(stderr,					\
-			    "At %s, line %d, %s(): %s is a NULL pointer\n", \
-			    __FILE__, __LINE__, __FUNCTION__, #x);	\
-			abort();					\
-		}							\
-	} while (0)
-#endif
 
 #ifdef _LIBSTASH_DBG
 struct cw_mem_item_s {
