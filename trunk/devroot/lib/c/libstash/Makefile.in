@@ -9,8 +9,8 @@
 #
 # $Source$
 # $Author: jasone $
-# Current revision: $Revision: 162 $
-# Last modified: $Date: 1998-08-07 13:12:08 -0700 (Fri, 07 Aug 1998) $
+# Current revision: $Revision: 164 $
+# Last modified: $Date: 1998-08-11 17:08:58 -0700 (Tue, 11 Aug 1998) $
 #
 # Description: Master Makefile for libstash.
 #              
@@ -83,7 +83,7 @@ all: default
 
 # Rule for dependency file creation
 %.d: %.c
-	$(SHELL) -ec "$(CC) -M $(DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o $(subst /,\/,$(strip $(dir $@)))\1.d \2/g\" > $@"
+	$(SHELL) -ec "$(CC) -M $(DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.lo $(subst /,\/,$(strip $(dir $@)))\1.d \2/g\" > $@"
 
 %.tab.c %.tab.h: %.y
 	$(BISON) $(BISONFLAGS) -o $(<:.y=.tab.c) $<
