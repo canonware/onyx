@@ -18,12 +18,11 @@
  * File lists.
  */
 
-/* Source files. */
-SLATE_SRCS = buf.c buffer.c hist.c slate.c slate_ops.c;
-SLATE_SRCS = [addprefix @srcroot@/bin/slate/src/ [SLATE_SRCS]];
-
 TSLATE_SRCS = tslate.c;
 TSLATE_SRCS = [addprefix @srcroot@/bin/slate/src/ [TSLATE_SRCS]];
+
+/* Source file. */
+SLATE_NSRCS = @srcroot@/bin/slate/src/slate.nx.in.in;
 
 /* LaTeX source files. */
 SLATE_TEX_SRCS = ;
@@ -40,7 +39,8 @@ TSLATE = @objroot@/bin/slate/bin/tslate;
  * User cook'ables.
  */
 
-slate : [SLATE] [TSLATE];
+tslate : [TSLATE];
+slate : [SLATE];
 
 slate_bins_tests :
 {
@@ -54,34 +54,31 @@ slate_bins_check_update :
 {
 }
 
-slate_bins_bootstrap : onyx
+slate_bins_bootstrap :
 {
-  cat @srcroot@/bin/slate/src/slate_nxcode.nx
-    | @ONYX@ @srcroot@/bin/slate/src/slate_nxcode_gen.nx
-    > @srcroot@/bin/slate/src/slate_nxcode.c;
 }
 
-slate_bins_install : [SLATE]
-#if @enable_libonyx@
-                libonyx_libs_install_s
+slate_bins_install : mods_install
+#if @enable_onyx@
+                     onyx_bins_install
 #endif
 {
   @INSTALL@ -d [PREFIX]/bin;
 
-  [CC] [A_CFLAGS] -o [PREFIX]/bin/slate-@slate_version@
-       [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [SLATE_SRCS]]
-#if @enable_libonyx@
-#if [count @RPATH@]
-       @RPATH@[PREFIX]/lib
-#endif
-#endif
-       [LDFLAGS] -lonyx @LIBS@;
+  echo \"#!@ONYX@\" > [PREFIX]/bin/slate-@slate_version@;
+  echo \"!#\" >> [PREFIX]/bin/slate-@slate_version@;
+  cat [fromto @srcroot@/%0%.nx.in.in @objroot@/%0%.nx.in [SLATE_NSRCS]]
+      >> [PREFIX]/bin/slate-@slate_version@;
   chmod 0755 [PREFIX]/bin/slate-@slate_version@;
+
+  rm -f [PREFIX]/bin/slate;
   ln -s slate-@slate_version@ [PREFIX]/bin/slate;
 
   @INSTALL@ -d [PREFIX]/man/man1;
   @INSTALL@ -m 0444 @objroot@/bin/slate/man/man1/slate.1 [PREFIX]/man/man1;
 
+  @INSTALL@ -d [PREFIX]/share;
+  rm -f [PREFIX]/share/slate;
   ln -s slate-@slate_version@ [PREFIX]/share/slate;
 }
 
@@ -95,13 +92,17 @@ slate_bins_uninstall :
 
 slate_bins_clean :
 {
-  rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.d_a [SLATE_SRCS] [TSLATE_SRCS]];
-  rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [SLATE_SRCS] [TSLATE_SRCS]];
+  rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.d_a
+                [ONYX_COMMON_SRCS] [BONYX_ONLY_SRCS] [TSLATE_SRCS]];
+  rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.o_a
+                [ONYX_COMMON_SRCS] [BONYX_ONLY_SRCS] [TSLATE_SRCS]];
+
   rm -f [SLATE] [TSLATE];
 }
 
 slate_bins_distclean :
 {
+  rm -f [fromto @srcroot@/%0%.nx.in.in @objroot@/%0%.nx.in [SLATE_NSRCS]];
 }
 
 /*
@@ -109,24 +110,24 @@ slate_bins_distclean :
  */
 
 [TSLATE] : [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [TSLATE_SRCS]]
+#if @enable_modprompt@
+          modprompt
+#endif
   set mkdir
 {
   [CC] [A_CFLAGS] -o [target]
        [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [TSLATE_SRCS]];
 }
 
-[SLATE] : [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [SLATE_SRCS]]
-#if @enable_libonyx@
-          libonyx_libs_s
+[SLATE] : [fromto @srcroot@/%0%.nx.in.in @objroot@/%0%.nx.in [SLATE_NSRCS]] mods
+#if @enable_onyx@
+          onyx
 #endif
   set mkdir
 {
-  [CC] [A_CFLAGS] -o [target]
-       [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [SLATE_SRCS]]
-#if @enable_libonyx@
-#if [count @RPATH@]
-       @RPATH@@abs_objroot@/lib/libonyx/lib
-#endif
-#endif
-       [LDFLAGS] -lonyx @LIBS@;
+  echo \"#!@TONYX@\" > [target];
+  echo \"!#\" >> [target];
+  cat [fromto @srcroot@/%0%.nx.in.in @objroot@/%0%.nx.in [SLATE_NSRCS]]
+      >> [target];
+  chmod 0755 [target];
 }

@@ -202,7 +202,7 @@ onyx_bins_check_update : onyx_bins_tests [TONYX]
 #endif
 }
 
-onyx_bins_install : [ONYX]
+onyx_bins_install : [ONYX] mods_install
 #if @enable_libonyx@
                libonyx_libs_install_s
 #endif

@@ -10,13 +10,6 @@
  *
  ******************************************************************************/
 
-/* Default source code path for require. */
-#undef CW_SLATE_RPATH
-
-/* Default module path. */
-#undef CW_SLATE_MPATH
-
-
 /* Used for tslate. */
 #undef CW_TSLATE_SLATE
 #undef CW_TSLATE_RPATH

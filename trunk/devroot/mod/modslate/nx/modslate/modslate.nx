@@ -13,14 +13,14 @@
 currentlocking true setlocking
 % %currentlocking
 
-% Define pcredict in globaldict, and push it onto dstack.
-globaldict /pcredict dict dup begin put
+% Define slatedict in globaldict, and push it onto dstack.
+globaldict /slatedict dict dup begin put
 
 % Initialize hooks.
-`modpcre.nxm' `modpcre_init' mrequire
+`modslate.nxm' `modslate_init' mrequire
 
-`modpcre/modpcre_defs.nx' require
+`modslate/modslate_defs.nx' require
 
-% Pop pcredict off dstack and restore currentlocking.
+% Pop slatedict off dstack and restore currentlocking.
 setlocking
 end

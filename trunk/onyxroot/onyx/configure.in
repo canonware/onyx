@@ -227,7 +227,62 @@ if test "x$enable_libonyx" = "x1" ; then
   AC_DEFINE(CW_USE_LIBONYX)
 fi
 
+dnl Check if modules can be used.
+enable_modules="yes"
+AC_CHECK_FUNCS(dlopen, AC_DEFINE(HAVE_DLOPEN), \
+  AC_CHECK_LIB(dl, dlopen, LIBS="$LIBS -ldl" ; AC_DEFINE(HAVE_DLOPEN), \
+    [enable_modules="no"
+    AC_MSG_RESULT(Modules disabled since dlopen is missing)]))
+
+dnl Check for libpcre.
+AC_ARG_WITH(libpcre-prefix, [  --with-libpcre-prefix   Prefix for libpcre],
+if test "x$with_libpcre_prefix" = "xno" ; then
+  LIBPCRE_PREFIX=
+else
+  LIBPCRE_PREFIX="$with_libpcre_prefix"
+fi
+,
+LIBPCRE_PREFIX=
+)
+AC_SUBST(LIBPCRE_PREFIX)
+
+if test "x$LIBPCRE_PREFIX" = "x" ; then
+  AC_PATH_PROG(PCRE_CONFIG, pcre-config, , $PATH)
+else
+  AC_PATH_PROG(PCRE_CONFIG, pcre-config, , "$LIBPCRE_PREFIX/bin")
+fi
+if test "x$PCRE_CONFIG" != "x" ; then
+  dnl Make sure the version of pcre found is sufficient.
+  AC_MSG_CHECKING(for pcre >= $PCRE_VERSION_MIN)
+  PCRE_MAJOR=`$PCRE_CONFIG --version | tr . " " | awk '{print $1}'`
+  PCRE_MINOR=`$PCRE_CONFIG --version | tr . " " | awk '{print $2}'`
+  PCRE_MAJOR_MIN=`echo $PCRE_VERSION_MIN | tr . " " | awk '{print $1}'`
+  PCRE_MINOR_MIN=`echo $PCRE_VERSION_MIN | tr . " " | awk '{print $2}'`
+  if test $PCRE_MAJOR -gt $PCRE_MAJOR_MIN \
+       -o $PCRE_MAJOR -eq $PCRE_MAJOR_MIN \
+       -a $PCRE_MINOR -ge $PCRE_MINOR_MIN ; then
+    AC_MSG_RESULT($PCRE_MAJOR.$PCRE_MINOR)
+    LIBPCRE_CPPFLAGS=`$PCRE_CONFIG --cflags`
+    LIBPCRE_LDFLAGS=`$PCRE_CONFIG --libs`
+    AC_SUBST(LIBPCRE_CPPFLAGS)
+    AC_SUBST(LIBPCRE_LDFLAGS)
+    have_libpcre="1"
+  else
+    AC_MSG_RESULT(no)
+    have_libpcre="0"
+  fi
+else
+  have_libpcre="0"
+fi
+
 dnl Build onyx by default.
+if echo "<Version = onyx>" | grep Version >/dev/null ; then
+  onyx_version=devel
+else
+  onyx_version="<Version = onyx>"
+fi
+AC_SUBST(onyx_version)
+
 AC_ARG_ENABLE(onyx, [  --disable-onyx          Do not build onyx],
 if test "x$enable_onyx" = "xno" ; then
   enable_onyx="0"
@@ -238,21 +293,21 @@ fi
 enable_onyx="1"
 )
 if test "x$enable_onyx" = "x0" ; then
-  AC_PATH_PROG(ONYX, onyx, , $PATH)
+  AC_PATH_PROG(ONYX, onyx-$onyx_version, , $PATH)
   if test "x$ONYX" = "x" ; then
-    AC_MSG_ERROR(Cannot find onyx)
+    AC_MSG_ERROR(Cannot find onyx-$onyx_version)
   fi
+  TONYX="$ONYX"
 else
-  ONYX="$abs_objroot/bin/onyx/bin/tonyx"
+  if test "x$prefix" = "xNONE" ; then
+    ONYX="/usr/local/bin/onyx-$onyx_version"
+  else
+    ONYX="$prefix/bin/onyx-$onyx_version"
+  fi
   AC_SUBST(ONYX)
+  TONYX="$abs_objroot/bin/onyx/bin/tonyx"
 fi
-
-if echo "<Version = onyx>" | grep Version >/dev/null ; then
-  onyx_version=devel
-else
-  onyx_version="<Version = onyx>"
-fi
-AC_SUBST(onyx_version)
+AC_SUBST(TONYX)
 
 AC_SUBST(enable_onyx)
 if test "x$enable_onyx" = "x1" ; then
@@ -280,11 +335,20 @@ AC_SUBST(slate_version)
 
 if test "x$enable_slate" = "x1" ; then
   if test "x$enable_threads" = "x0" -o "x$enable_real" = "x0" \
-     -o "x$enable_posix" = "x0" -o "x$enable_posix_file" = "x0" ; then
-    AC_MSG_RESULT(Missing configuration options necessary for slate)
+     -o "x$enable_posix" = "x0" -o "x$enable_posix_file" = "x0" \
+     -o "x$enable_modules" = "x0" -o "x$have_libpcre" = "x0" ; then
+    AC_MSG_RESULT(Missing features or onfiguration options necessary for slate)
     enable_slate=0
   else
-    AC_DEFINE(CW_USE_SLATE)
+    CW_BUILD_MOD(modslate, enable_slate)
+    if test "x$enable_slate" = "x1" ; then
+      cfgoutputs="$cfgoutputs bin/slate/src/slate.nx.in"
+      AC_DEFINE(CW_USE_SLATE)
+      MODSLATE_CPPFLAGS="$LIBPCRE_CPPFLAGS"
+      MODSLATE_LDFLAGS="$LIBPCRE_CPPFLAGS"
+      AC_SUBST(MODSLATE_CPPFLAGS)
+      AC_SUBST(MODSLATE_LDFLAGS)
+    fi
   fi
 fi
 AC_SUBST(enable_slate)
@@ -342,27 +406,9 @@ if test "x$enable_onyx" = "x1" ; then
 fi
 
 dnl Look for modules.
-enable_modules="yes"
-AC_CHECK_FUNCS(dlopen, AC_DEFINE(HAVE_DLOPEN), \
-  AC_CHECK_LIB(dl, dlopen, LIBS="$LIBS -ldl" ; AC_DEFINE(HAVE_DLOPEN), \
-    [enable_modules="no"
-    AC_MSG_RESULT(Modules disabled since dlopen is missing)]))
-
 if test "x$enable_modules" = "xyes" ; then
   dnl modpcre.
-  if test "x$enable_threads" = "x1" -a "x$enable_real" = "x1" \
-       -a "x$enable_posix" = "x1" ; then
-    AC_ARG_WITH(libpcre-prefix, [  --with-libpcre-prefix   Prefix for libpcre],
-    if test "x$with_libpcre_prefix" = "xno" ; then
-      LIBPCRE_PREFIX=
-    else
-      LIBPCRE_PREFIX="$with_libpcre_prefix"
-    fi
-    ,
-    LIBPCRE_PREFIX=
-    )
-    AC_SUBST(LIBPCRE_PREFIX)
-
+  if test "x$enable_posix" = "x1" ; then
     AC_ARG_ENABLE(modpcre, [  --disable-modpcre       Do not use modpcre],
     if test "x$enable_modpcre" = "xno" ; then
       enable_modpcre="0"
@@ -372,33 +418,14 @@ if test "x$enable_modules" = "xyes" ; then
     ,
     enable_modpcre="1"
     )
-    if test "x$enable_modpcre" = "x1" ; then
-      if test "x$LIBPCRE_PREFIX" = "x" ; then
-        AC_PATH_PROG(PCRE_CONFIG, pcre-config, , $PATH)
-      else
-        AC_PATH_PROG(PCRE_CONFIG, pcre-config, , "$LIBPCRE_PREFIX/bin")
-      fi
-      if test "x$PCRE_CONFIG" != "x" ; then
-        dnl Make sure the version of pcre found is sufficient.
-        AC_MSG_CHECKING(for pcre >= $PCRE_VERSION_MIN)
-        PCRE_MAJOR=`$PCRE_CONFIG --version | tr . " " | awk '{print $1}'`
-        PCRE_MINOR=`$PCRE_CONFIG --version | tr . " " | awk '{print $2}'`
-        PCRE_MAJOR_MIN=`echo $PCRE_VERSION_MIN | tr . " " | awk '{print $1}'`
-        PCRE_MINOR_MIN=`echo $PCRE_VERSION_MIN | tr . " " | awk '{print $2}'`
-        if test $PCRE_MAJOR -gt $PCRE_MAJOR_MIN \
-             -o $PCRE_MAJOR -eq $PCRE_MAJOR_MIN \
-             -a $PCRE_MINOR -ge $PCRE_MINOR_MIN ; then
-          AC_MSG_RESULT($PCRE_MAJOR.$PCRE_MINOR)
-          MODPCRE_CPPFLAGS=`$PCRE_CONFIG --cflags`
-          MODPCRE_LDFLAGS=`$PCRE_CONFIG --libs`
-          AC_SUBST(MODPCRE_CPPFLAGS)
-          AC_SUBST(MODPCRE_LDFLAGS)
-          CW_BUILD_MOD(modpcre, enable_modpcre)
-        else
-          AC_MSG_RESULT(no)
-          enable_modpcre="0"
-        fi
-      fi
+    if test "x$enable_modpcre" = "x1" -a "x$have_libpcre" = "x1" ; then
+      MODPCRE_CPPFLAGS="$LIBPCRE_CPPFLAGS"
+      MODPCRE_LDFLAGS="$LIBPCRE_LDFLAGS"
+      AC_SUBST(MODPCRE_CPPFLAGS)
+      AC_SUBST(MODPCRE_LDFLAGS)
+      CW_BUILD_MOD(modpcre, enable_modpcre)
+    else
+      enable_modpcre="0"
     fi
     if test "x$enable_modpcre" = "x1" ; then
       AC_DEFINE(CW_USE_MODPCRE)
@@ -699,28 +726,39 @@ dnl
 dnl slate configuration.
 dnl 
 if test "x$bin_slate" = "x1" ; then
-  if test "x$prefix" = "xNONE" ; then
-    CW_SLATE_RPATH="/usr/local/share/slate-$slate_version/nx:/usr/local/share/onyx-$onyx_version/nx"
-    CW_SLATE_MPATH="/usr/local/share/slate-$slate_version/nxm:/usr/local/share/onyx-$onyx_version/nxm"
-  else
-    CW_SLATE_RPATH="$prefix/share/slate-$slate_version/nx:$prefix/share/onyx-$onyx_version/nx"
-    CW_SLATE_MPATH="$prefix/share/slate-$slate_version/nxm:$prefix/share/onyx-$onyx_version/nxm"
-  fi
-  AC_DEFINE_UNQUOTED(CW_SLATE_RPATH, "$CW_SLATE_RPATH")
-  AC_DEFINE_UNQUOTED(CW_SLATE_MPATH, "$CW_SLATE_MPATH")
-
   AC_DEFINE_UNQUOTED(CW_TSLATE_SLATE, "$abs_objroot/bin/slate/bin/slate")
 
-  dnl XXX Update to be similar to onyx.
-  tmpath=SLATE_MPATH=:.
-  trpath=SLATE_RPATH=:.
+  if test "x$prefix" = "xNONE" ; then
+    slate_rpath_post="\`/usr/local/share/slate-$slate_version/nx'"
+    slate_mpath_post="\`/usr/local/share/slate-$slate_version/nxm'"
+  else
+    slate_rpath_post="\`$prefix/share/slate-$slate_version/nx'"
+    slate_mpath_post="\`$prefix/share/slate-$slate_version/nxm'"
+  fi
+  AC_SUBST(slate_rpath_post)
+  AC_SUBST(slate_mpath_post)
+
+  tmpath=SLATE_MPATH=
+  trpath=SLATE_RPATH=
   for i in $mods ; do
     tmpath=$tmpath:$abs_objroot/mod/$i/nxm
     trpath=$trpath:$abs_objroot/mod/$i/nx
   done
+  dnl XXX Leading ":" should be removed.
   AC_DEFINE_UNQUOTED(CW_TSLATE_RPATH, "$trpath")
   AC_DEFINE_UNQUOTED(CW_TSLATE_MPATH, "$tmpath")
 fi
+
+dnl Process .in files.
+AC_SUBST(cfghdrs)
+AC_CONFIG_HEADER($cfghdrs)
+
+dnl verify is handled separately, since it must be executable.
+AC_CONFIG_FILES($cfgoutputs, chmod +x $objroot/test/verify)
+AC_CONFIG_FILES(test/verify, chmod +x test/verify)
+cfgoutputs="$cfgoutputs test/verify"
+AC_SUBST(cfgoutputs)
+AC_OUTPUT
 
 dnl 
 dnl Print out the results of configuration.
@@ -760,14 +798,3 @@ AC_MSG_RESULT(debug         : ${enable_debug})
 AC_MSG_RESULT(profile       : ${enable_profile})
 AC_MSG_RESULT(docs          : ${with_docs})
 AC_MSG_RESULT(===============================================================================)
-
-dnl Process .in files.
-AC_SUBST(cfghdrs)
-AC_CONFIG_HEADER($cfghdrs)
-
-dnl verify is handled separately, since it must be executable.
-AC_CONFIG_FILES($cfgoutputs, chmod +x $objroot/test/verify)
-AC_CONFIG_FILES(test/verify, chmod +x test/verify)
-cfgoutputs="$cfgoutputs test/verify"
-AC_SUBST(cfgoutputs)
-AC_OUTPUT

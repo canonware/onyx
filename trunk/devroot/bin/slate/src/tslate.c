@@ -8,8 +8,9 @@
  *
  * Version: Slate <Version = slate>
  *
- * Wrapper program that sets SLATE_MPATH and SLATE_RPATH appropriately for
- * running slate in the source tree.
+ * Wrapper program that sets ONYX_MPATH and ONYX_RPATH appropriately for running
+ * slate in the source tree.  This must be a binary executable rather than a
+ * shell script due to how nested #! magic is (not) handled by the OS.
  *
  ******************************************************************************/
 

@@ -1,51 +1,32 @@
-/******************************************************************************
+/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
+ ******************************************************************************
  *
  * <Copyright = jasone>
  * <License>
  *
  ******************************************************************************
  *
- * Version: <Version>
+ * Version: Slate <Version = slate>
  *
  ******************************************************************************/
 
-#include "modslate_defs.h"
-
 #include <libonyx/libonyx.h>
 
-#include <sys/param.h>
-#include <curses.h>
-#include <panel.h>
+#include <pcre.h>
 
 #include "buf.h"
 #include "hist.h"
-
 #include "buffer.h"
-#include "slate.h"
-#include "display.h"
-#include "frame.h"
-#include "window.h"
 
-#define	SLATE_ENTRY(name)	{#name, slate_##name}
+#define MODSLATE_ENTRY(name) {#name, modslate_##name}
 
-struct cw_slate_entry {
-	const cw_uint8_t	*name;
-	cw_nxo_hook_eval_t	*eval_f;
+struct cw_modslate_entry
+{
+    const cw_uint8_t *name;
+    cw_nxo_hook_eval_t *eval_f;
 };
 
-void	slate_hooks_init(cw_nxo_t *a_thread, const struct cw_slate_entry
-    *a_entries, cw_uint32_t a_nentries);
-
-#ifdef WORDS_BIGENDIAN
-#define _cw_ntohq(a) (a)
-#define _cw_htonq(a) (a)
-#else
-#define _cw_ntohq(a)							\
-	(cw_uint64_t) (((cw_uint64_t) (ntohl((cw_uint32_t) ((a) >>	\
-	    32)))) | (((cw_uint64_t) (ntohl((cw_uint32_t) ((a) &	\
-	    0x00000000ffffffff)))) << 32))
-#define _cw_htonq(a)							\
-        (cw_uint64_t) (((cw_uint64_t) (htonl((cw_uint32_t) ((a) >>	\
-            32)))) | (((cw_uint64_t) (htonl((cw_uint32_t) ((a) &	\
-            0x00000000ffffffff)))) << 32))
-#endif
+void
+modslate_hooks_init(cw_nxo_t *a_thread,
+		    const struct cw_modslate_entry *a_entries,
+		    cw_uint32_t a_nentries);
