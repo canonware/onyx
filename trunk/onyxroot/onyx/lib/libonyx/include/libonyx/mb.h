@@ -24,7 +24,7 @@ mb_write(void);
 
 #if (defined(CW_USE_INLINES) || defined(CW_MB_C_))
 
-#if (defined(CW_CPU_I586) || defined(CW_CPU_I686))
+#ifdef CW_CPU_IA32
 /* According to the Intel Architecture Software Developer's Manual, current
  * processors execute instructions in order from the perspective of other
  * processors in a multiprocessor system, but 1) Intel reserves the right to
@@ -50,14 +50,7 @@ mb_write(void)
 		  : "memory" /* Clobbers. */
 		  );
 }
-#elif (defined(CW_CPU_I386) || defined(CW_CPU_I486))
-CW_INLINE void
-mb_write(void)
-{
-    /* The compiler cannot optimize this away. */
-    static volatile void *p = NULL;
-}
-#elif (defined(CW_CPU_POWERPC))
+#elif (defined(CW_CPU_PPC))
 CW_INLINE void
 mb_write(void)
 {

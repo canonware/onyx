@@ -90,23 +90,14 @@ AC_SUBST(abi)
 AC_SUBST(RPATH)
 
 case "${host_cpu}" in
-  i386)
-	AC_DEFINE(CW_CPU_I386)
-	;;
-  i486)
-	AC_DEFINE(CW_CPU_I486)
-	;;
-  i586)
-	AC_DEFINE(CW_CPU_I586)
-	;;
-  i686)
-	AC_DEFINE(CW_CPU_I686)
+  i[[3456]]86)
+	AC_DEFINE(CW_CPU_IA32)
 	;;
   powerpc)
-	AC_DEFINE(CW_CPU_POWERPC)
+	AC_DEFINE(CW_CPU_PPC)
 	;;
   *)
-	AC_MSG_RESULT(Unsupported CPU "${host_cpu}"; very slow memory barriers)
+	AC_MSG_RESULT(Unsupported CPU "${host_cpu}"; very slow mb_write())
 	;;
 esac
 
