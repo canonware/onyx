@@ -25,7 +25,7 @@ stilo_hook_new(cw_stilo_t *a_stilo, cw_stil_t *a_stil, void *a_data,
 	hook = (cw_stiloe_hook_t *)_cw_malloc(sizeof(cw_stiloe_hook_t));
 
 	stiloe_l_new(&hook->stiloe, STILOT_HOOK, FALSE);
-	stilo_no_new(&hook->tag);
+	stilo_null_new(&hook->tag);
 	hook->data = a_data;
 	hook->eval_f = a_eval_f;
 	hook->ref_iter_f = a_ref_iter_f;
@@ -116,7 +116,7 @@ stilo_l_hook_print(cw_stilo_t *a_thread)
 	_cw_assert(hook->stiloe.type == STILOT_FILE);
 
 
-	if (stilo_type_get(&hook->tag) != STILOT_NO) {
+	if (stilo_type_get(&hook->tag) != STILOT_NULL) {
 		error = stilo_file_output(stdout_stilo, "-hook[[");
 		if (error) {
 			stilo_thread_error(a_thread, error);
