@@ -594,7 +594,9 @@ stilo_cast(cw_stilo_t *a_stilo, cw_stilot_t a_stilot)
 	_cw_check_ptr(a_stilo);
 	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
 
-	stilot_vtable[a_stilo->type].cast_f(a_stilo, a_stilot);
+	if (stilot_vtable[a_stilo->type].cast_f != NULL)
+		stilot_vtable[a_stilo->type].cast_f(a_stilo, a_stilot);
+	a_stilo->type = a_stilot;
 }
 
 void
@@ -602,9 +604,12 @@ stilo_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
 {
 	_cw_check_ptr(a_to);
 	_cw_assert(a_to->magic == _CW_STILO_MAGIC);
-	_cw_assert(a_to->type == STILOT_NO);
 	_cw_check_ptr(a_from);
 	_cw_assert(a_from->magic == _CW_STILO_MAGIC);
+
+	/* Make sure both objects are of the same type. */
+	if (stilo_type_get(a_to) != stilo_type_get(a_from))
+		xep_throw(_CW_XEPV_TYPECHECK);
 
 	stilot_vtable[a_from->type].copy_f(a_to, a_from, a_stilt);
 }
@@ -897,6 +902,7 @@ stiloe_p_array_ref_iterate(cw_stiloe_t *a_stiloe, cw_bool_t a_reset)
 static void
 stilo_p_array_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type)
 {
+	_cw_not_reached();	/* XXX */
 }
 
 static void
@@ -927,15 +933,19 @@ stilo_p_array_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
 		len = array->e.a.len;
 	}
 
-	/* Create new array. */
-	stilo_array_new(a_to, a_stilt, len);
 	arr_to = ((cw_stiloe_array_t *)a_to->o.stiloe)->e.a.arr;
 
-	/* Iteratively copy elements. */
+	/* Make sure destination is large enough. */
+	if (((cw_stiloe_array_t *)a_to->o.stiloe)->e.a.len < len)
+		xep_throw(_CW_XEPV_RANGECHECK);
+
+	/*
+	 * Iteratively copy elements.  Only copy one level deep (not
+	 * recursively), by using dup.
+	 */
 	for (i = 0; i < len; i++) {
-		/* XXX copy or dup? */
-		stilo_copy(&arr_to[i], &arr_from[i], a_stilt);
-/*  		stilo_dup(&arr_to[i], &arr_from[i], a_stilt); */
+		stilo_cast(&arr_to[i], STILOT_NO);
+		stilo_dup(&arr_to[i], &arr_from[i], a_stilt);
 	}
 }
 
@@ -1080,6 +1090,7 @@ stilo_boolean_new(cw_stilo_t *a_stilo, cw_bool_t a_val)
 static void
 stilo_p_boolean_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type)
 {
+	_cw_not_reached();	/* XXX */
 }
 
 static void
@@ -1126,17 +1137,20 @@ stilo_condition_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 static void
 stilo_p_condition_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 {
+	_cw_not_reached();	/* XXX */
 }
 
 static cw_stiloe_t *
 stiloe_p_condition_ref_iterate(cw_stiloe_t *a_stilo, cw_bool_t a_reset)
 {
+	_cw_not_reached();	/* XXX */
 	return NULL;	/* XXX */
 }
 
 static void
 stilo_p_condition_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type)
 {
+	_cw_not_reached();	/* XXX */
 }
 
 static void
@@ -1270,6 +1284,7 @@ stiloe_p_dict_ref_iterate(cw_stiloe_t *a_stiloe, cw_bool_t a_reset)
 static void
 stilo_p_dict_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type)
 {
+	_cw_not_reached();	/* XXX */
 }
 
 static void
@@ -1505,22 +1520,26 @@ stilo_file_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 static void
 stilo_p_file_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 {
+	_cw_not_reached();	/* XXX */
 }
 
 static cw_stiloe_t *
 stiloe_p_file_ref_iterate(cw_stiloe_t *a_stilo, cw_bool_t a_reset)
 {
+	_cw_not_reached();	/* XXX */
 	return NULL;	/* XXX */
 }
 
 static void
 stilo_p_file_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type)
 {
+	_cw_not_reached();	/* XXX */
 }
 
 static void
 stilo_p_file_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
 {
+	_cw_not_reached();	/* XXX */
 }
 
 static void
@@ -1547,22 +1566,26 @@ stilo_hook_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 static void
 stilo_p_hook_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 {
+	_cw_not_reached();	/* XXX */
 }
 
 static cw_stiloe_t *
 stiloe_p_hook_ref_iterate(cw_stiloe_t *a_stilo, cw_bool_t a_reset)
 {
+	_cw_not_reached();	/* XXX */
 	return NULL;	/* XXX */
 }
 
 static void
 stilo_p_hook_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type)
 {
+	_cw_not_reached();	/* XXX */
 }
 
 static void
 stilo_p_hook_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
 {
+	_cw_not_reached();	/* XXX */
 }
 
 static void
@@ -1589,17 +1612,20 @@ stilo_lock_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 static void
 stilo_p_lock_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 {
+	_cw_not_reached();	/* XXX */
 }
 
 static cw_stiloe_t *
 stiloe_p_lock_ref_iterate(cw_stiloe_t *a_stilo, cw_bool_t a_reset)
 {
+	_cw_not_reached();	/* XXX */
 	return NULL;	/* XXX */
 }
 
 static void
 stilo_p_lock_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type)
 {
+	_cw_not_reached();	/* XXX */
 }
 
 static void
@@ -1626,6 +1652,7 @@ stilo_mark_new(cw_stilo_t *a_stilo)
 static void
 stilo_p_mark_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type)
 {
+	_cw_not_reached();	/* XXX */
 }
 
 static void
@@ -1652,6 +1679,7 @@ stilo_mstate_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 static void
 stilo_p_mstate_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 {
+	_cw_not_reached();	/* XXX */
 }
 
 static cw_stiloe_t *
@@ -1663,11 +1691,13 @@ stiloe_p_mstate_ref_iterate(cw_stiloe_t *a_stilo, cw_bool_t a_reset)
 static void
 stilo_p_mstate_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type)
 {
+	_cw_not_reached();	/* XXX */
 }
 
 static void
 stilo_p_mstate_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
 {
+	_cw_not_reached();	/* XXX */
 }
 
 static void
@@ -1918,11 +1948,13 @@ stiloe_p_name_ref_iterate(cw_stiloe_t *a_stiloe, cw_bool_t a_reset)
 static void
 stilo_p_name_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type)
 {
+	_cw_not_reached();	/* XXX */
 }
 
 static void
 stilo_p_name_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
 {
+	_cw_not_reached();	/* XXX */
 }
 
 static void
@@ -2108,6 +2140,7 @@ stilo_null_new(cw_stilo_t *a_stilo)
 static void
 stilo_p_null_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type)
 {
+	_cw_not_reached();	/* XXX */
 }
 
 static void
@@ -2134,6 +2167,7 @@ stilo_number_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 static void
 stilo_p_number_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 {
+	_cw_not_reached();	/* XXX */
 }
 
 static cw_stiloe_t *
@@ -2146,11 +2180,13 @@ stiloe_p_number_ref_iterate(cw_stiloe_t *a_stilo, cw_bool_t a_reset)
 static void
 stilo_p_number_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type)
 {
+	_cw_not_reached();	/* XXX */
 }
 
 static void
 stilo_p_number_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
 {
+	_cw_not_reached();	/* XXX */
 }
 
 static void
@@ -2169,83 +2205,98 @@ void
 stilo_number_add(const cw_stilo_t *a_a, const cw_stilo_t *a_b, cw_stilo_t
     *r_sum)
 {
+	_cw_not_reached();	/* XXX */
 }
 
 void
 stilo_number_sub(const cw_stilo_t *a_num, const cw_stilo_t *a_sub, cw_stilo_t
     *r_result)
 {
+	_cw_not_reached();	/* XXX */
 }
 
 void
 stilo_number_mul(const cw_stilo_t *a_a, const cw_stilo_t *a_b, cw_stilo_t
     *r_product)
 {
+	_cw_not_reached();	/* XXX */
 }
 
 void
 stilo_number_div(const cw_stilo_t *a_num, const cw_stilo_t *a_div, cw_stilo_t
     *r_quotient)
 {
+	_cw_not_reached();	/* XXX */
 }
 
 void
 stilo_number_mod(const cw_stilo_t *a_num, const cw_stilo_t *a_div, cw_stilo_t
     *r_mod)
 {
+	_cw_not_reached();	/* XXX */
 }
 
 void
 stilo_number_abs(const cw_stilo_t *a_a, const cw_stilo_t *a_b, cw_stilo_t
     *r_abs)
 {
+	_cw_not_reached();	/* XXX */
 }
 
 void
 stilo_number_neg(const cw_stilo_t *a_a, const cw_stilo_t *a_b, cw_stilo_t
     *r_neg)
 {
+	_cw_not_reached();	/* XXX */
 }
 
 void
 stilo_number_ceiling(const cw_stilo_t *a_num, cw_stilo_t *r_ceiling)
 {
+	_cw_not_reached();	/* XXX */
 }
 
 void
 stilo_number_floor(const cw_stilo_t *a_num, cw_stilo_t *r_floor)
 {
+	_cw_not_reached();	/* XXX */
 }
 
 void
 stilo_number_round(const cw_stilo_t *a_num, cw_stilo_t *r_round)
 {
+	_cw_not_reached();	/* XXX */
 }
 
 void
 stilo_number_sqrt(const cw_stilo_t *a_num, cw_stilo_t *r_sqrt)
 {
+	_cw_not_reached();	/* XXX */
 }
 
 void
 stilo_number_exp(const cw_stilo_t *a_num, const cw_stilo_t *a_exp, cw_stilo_t
     *r_result)
 {
+	_cw_not_reached();	/* XXX */
 }
 
 void
 stilo_number_srand(const cw_stilo_t *a_seed)
 {
+	_cw_not_reached();	/* XXX */
 }
 
 void
 stilo_number_rrand(cw_stilo_t *r_seed)
 {
+	_cw_not_reached();	/* XXX */
 }
 
 void
 stilo_number_rand(cw_stilo_t *r_num)
 {
+	_cw_not_reached();	/* XXX */
 }
 
 /*
@@ -2261,6 +2312,7 @@ stilo_operator_new(cw_stilo_t *a_stilo, cw_op_t *a_op)
 static void
 stilo_p_operator_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type)
 {
+	_cw_not_reached();	/* XXX */
 }
 
 static void
@@ -2341,6 +2393,18 @@ stiloe_p_string_ref_iterate(cw_stiloe_t *a_stiloe, cw_bool_t a_reset)
 static void
 stilo_p_string_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type)
 {
+	switch (a_type) {
+	case STILOT_NO:
+		break;
+	case STILOT_NAME:
+		_cw_not_reached();	/* XXX */
+		break;
+	case STILOT_NUMBER:
+		_cw_not_reached();	/* XXX */
+		break;
+	default:
+		xep_throw(_CW_XEPV_TYPECHECK);
+	}
 }
 
 static void

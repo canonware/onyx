@@ -235,7 +235,6 @@ systemdict_add(cw_stilt_t *a_stilt)
 	cw_stilo_t	t_stilo, *a, *b;
 
 	stack = stilt_data_stack_get(a_stilt);
-	/* XXX Check depth of stack. */
 	
 	b = stils_get(stack, 0);
 	/* XXX Check type of b. */
@@ -363,11 +362,25 @@ systemdict_copy(cw_stilt_t *a_stilt)
 	cw_stilo_t	*orig, *copy;
 
 	stack = stilt_data_stack_get(a_stilt);
-	/* XXX Check depth of stack. */
 
-	orig = stils_get(stack, 0);
-	copy = stils_push(stack);
-	stilo_copy(copy, orig, a_stilt);
+	copy = stils_get(stack, 0);
+	orig = stils_get_down(stack, copy);
+	if (stilo_type_get(copy) == STILOT_NUMBER) {
+		/* Copy a range of the stack. */
+		/* XXX Check that number is > 0. */
+		/* XXX Implement. */
+	} else {
+		switch (stilo_type_get(copy)) {
+		case STILOT_ARRAY:
+		case STILOT_DICT:
+		case STILOT_STRING:
+		case STILOT_MSTATE:
+			stilo_copy(copy, orig, a_stilt);
+			break;
+		default:
+			xep_throw(_CW_XEPV_TYPECHECK);
+		}
+	}
 }
 
 void
@@ -507,7 +520,6 @@ systemdict_dup(cw_stilt_t *a_stilt)
 	cw_stilo_t	*orig, *dup;
 
 	stack = stilt_data_stack_get(a_stilt);
-	/* XXX Check depth of stack. */
 
 	orig = stils_get(stack, 0);
 	dup = stils_push(stack);
@@ -813,7 +825,6 @@ systemdict_pop(cw_stilt_t *a_stilt)
 	cw_stils_t	*stack;
 
 	stack = stilt_data_stack_get(a_stilt);
-	/* XXX Check depth of stack. */
 
 	stils_pop(stack, a_stilt, 1);
 }
@@ -829,7 +840,6 @@ systemdict_print(cw_stilt_t *a_stilt)
 	fd = stilt_stdout_get(a_stilt);
 
 	stilo = stils_get(stack, 0);
-	/* XXX Make sure stilo is a string. */
 	stilo_print(stilo, fd, FALSE, FALSE);
 	stils_pop(stack, a_stilt, 1);
 }
