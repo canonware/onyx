@@ -14,220 +14,222 @@ helpers.
 .SH SYNOPSIS
 \fB#include <libstash/libstash.h>\fR
 
+.SS Type definitions
 .I typedef cw_sint32_t
 .br
 .B cw_out_metric_t
-.RI ( "const char * a_format" ", " "cw_uint32_t a_format_len" ", "
-.IR "const void * a_arg" )
+.RI ( "const char *a_format" ", " "cw_uint32_t a_format_len" ", "
+.IR "const void *a_arg" )
 
 .I typedef char *
 .br
 .B cw_out_render_t
-.RI ( "const char * a_format" ", " "cw_uint32_t a_format_len" ", "
-.IR "const void * a_arg" ", " "char * r_str" )
+.RI ( "const char *a_format" ", " "cw_uint32_t a_format_len" ", "
+.IR "const void *a_arg" ", " "char *r_str" )
 
+.SS General
 .I cw_out_t *
 .br
 .B out_new
-.RI ( "cw_out_t * a_out" )
+.RI ( "cw_out_t *a_out" )
 
 .I void
 .br
 .B out_delete
-.RI ( "cw_out_t * a_out" )
+.RI ( "cw_out_t *a_out" )
 
 .I cw_bool_t
 .br
 .B out_register
-.RI ( "cw_out_t * a_out" ", " "const char * a_type" ", " "cw_uint32_t a_size"
-.RI ", " "cw_out_metric_t * a_metric_func" ", "
-.IR "cw_out_render_t * a_render_func" )
+.RI ( "cw_out_t *a_out" ", " "const char *a_type" ", " "cw_uint32_t a_size"
+.RI ", " "cw_out_metric_t *a_metric_func" ", "
+.IR "cw_out_render_t *a_render_func" )
 
 .I cw_bool_t
 .br
 .B out_merge
-.RI ( "cw_out_t * a_a" ", " "cw_out_t * a_b" )
+.RI ( "cw_out_t *a_a" ", " "cw_out_t *a_b" )
 
 .I cw_sint32_t
 .br
 .B out_get_default_fd
-.RI ( "cw_out_t * a_out" )
+.RI ( "cw_out_t *a_out" )
 
 .I void
 .br
 .B out_set_default_fd
-.RI ( "cw_out_t * a_out" ", " "cw_sint32_t a_fd" )
+.RI ( "cw_out_t *a_out" ", " "cw_sint32_t a_fd" )
 
 .I cw_sint32_t
 .br
 .B out_put
-.RI ( "cw_out_t * a_out" ", " "const char * a_format" ", " "..." )
+.RI ( "cw_out_t *a_out" ", " "const char *a_format" ", " "..." )
 .br
 .I cw_sint32_t
 .br
 .B _cw_out_put
-.RI ( "const char * a_format" ", " "..." )
+.RI ( "const char *a_format" ", " "..." )
 
 .I cw_sint32_t
 .br
 .B out_put_e
-.RI ( "cw_out_t * a_out" ", " "const char * a_file_name" ", "
-.IR "cw_uint32_t a_line_num" ", " "const char * a_func_name" ", "
-.IR "const char * a_format" ", " "..." )
+.RI ( "cw_out_t *a_out" ", " "const char *a_file_name" ", "
+.IR "cw_uint32_t a_line_num" ", " "const char *a_func_name" ", "
+.IR "const char *a_format" ", " "..." )
 .br
 .I cw_sint32_t
 .br
 .B _cw_out_put_e
-.RI ( "const char * a_file_name" ", "
-.IR "cw_uint32_t a_line_num" ", " "const char * a_func_name" ", "
-.IR "const char * a_format" ", " "..." )
+.RI ( "const char *a_file_name" ", "
+.IR "cw_uint32_t a_line_num" ", " "const char *a_func_name" ", "
+.IR "const char *a_format" ", " "..." )
 
 .I cw_sint32_t
 .br
 .B out_put_l
-.RI ( "cw_out_t * a_out" ", " "const char * a_format" ", " "..." )
+.RI ( "cw_out_t *a_out" ", " "const char *a_format" ", " "..." )
 .br
 .I cw_sint32_t
 .br
 .B _cw_out_put_l
-.RI ( "const char * a_format" ", " "..." )
+.RI ( "const char *a_format" ", " "..." )
 
 .I cw_sint32_t
 .br
 .B out_put_le
-.RI ( "cw_out_t * a_out" ", " "const char * a_file_name" ", "
-.IR "cw_uint32_t a_line_num" ", " "const char * a_func_name" ", "
-.IR "const char * a_format" ", " "..." )
+.RI ( "cw_out_t *a_out" ", " "const char *a_file_name" ", "
+.IR "cw_uint32_t a_line_num" ", " "const char *a_func_name" ", "
+.IR "const char *a_format" ", " "..." )
 .br
 .I cw_sint32_t
 .br
 .B _cw_out_put_le
-.RI ( "const char * a_file_name" ", "
-.IR "cw_uint32_t a_line_num" ", " "const char * a_func_name" ", "
-.IR "const char * a_format" ", " "..." )
+.RI ( "const char *a_file_name" ", "
+.IR "cw_uint32_t a_line_num" ", " "const char *a_func_name" ", "
+.IR "const char *a_format" ", " "..." )
 
 .I cw_sint32_t
 .br
 .B out_put_n
-.RI ( "cw_out_t * a_out" ", " "cw_uint32_t a_size" ", "
-.IR "const char * a_format" ", " "..." )
+.RI ( "cw_out_t *a_out" ", " "cw_uint32_t a_size" ", "
+.IR "const char *a_format" ", " "..." )
 .br
 .I cw_sint32_t
 .br
 .B _cw_out_put_n
 .RI ( "cw_uint32_t a_size" ", "
-.IR "const char * a_format" ", " "..." )
+.IR "const char *a_format" ", " "..." )
 
 .I cw_sint32_t
 .br
 .B out_put_f
-.RI ( "cw_out_t * a_out" ", " "cw_sint32_t a_fd" ", "
-.IR "const char * a_format" ", " "..." )
+.RI ( "cw_out_t *a_out" ", " "cw_sint32_t a_fd" ", "
+.IR "const char *a_format" ", " "..." )
 .br
 .I cw_sint32_t
 .br
 .B _cw_out_put_f
 .RI ( "cw_sint32_t a_fd" ", "
-.IR "const char * a_format" ", " "..." )
+.IR "const char *a_format" ", " "..." )
 
 .I cw_sint32_t
 .br
 .B out_put_fe
-.RI ( "cw_out_t * a_out" ", " "cw_sint32_t a_fd" ", "
-.IR "const char * a_file_name" ", " "cw_uint32_t a_line_num" ", "
-.IR "const char * a_func_name" ", " "const char * a_format" ", " "..." )
+.RI ( "cw_out_t *a_out" ", " "cw_sint32_t a_fd" ", "
+.IR "const char *a_file_name" ", " "cw_uint32_t a_line_num" ", "
+.IR "const char *a_func_name" ", " "const char *a_format" ", " "..." )
 
 .I cw_sint32_t
 .br
 .B out_put_fl
-.RI ( "cw_out_t * a_out" ", " "cw_sint32_t a_fd" ", "
-.IR "const char * a_format" ", " "..." )
+.RI ( "cw_out_t *a_out" ", " "cw_sint32_t a_fd" ", "
+.IR "const char *a_format" ", " "..." )
 
 .I cw_sint32_t
 .br
 .B out_put_fle
-.RI ( "cw_out_t * a_out" ", " "cw_sint32_t a_fd" ", "
-.IR "const char * a_file_name" ", " "cw_uint32_t a_line_num" ", "
-.IR "const char * a_func_name" ", " "const char * a_format" ", " "..." )
+.RI ( "cw_out_t *a_out" ", " "cw_sint32_t a_fd" ", "
+.IR "const char *a_file_name" ", " "cw_uint32_t a_line_num" ", "
+.IR "const char *a_func_name" ", " "const char *a_format" ", " "..." )
 
 .I cw_sint32_t
 .br
 .B out_put_fn
-.RI ( "cw_out_t * a_out" ", " "cw_sint32_t a_fd" ", " "cw_uint32_t a_size"
-.RI ", " "const char * a_format" ", " "..." )
+.RI ( "cw_out_t *a_out" ", " "cw_sint32_t a_fd" ", " "cw_uint32_t a_size"
+.RI ", " "const char *a_format" ", " "..." )
 .br
 .I cw_sint32_t
 .br
 .B _cw_out_put_fn
 .RI ( "cw_sint32_t a_fd" ", " "cw_uint32_t a_size"
-.RI ", " "const char * a_format" ", " "..." )
+.RI ", " "const char *a_format" ", " "..." )
 
 .I cw_sint32_t
 .br
 .B out_put_fv
-.RI ( "cw_out_t * a_out" ", " "cw_sint32_t a_fd" ", "
-.IR "const char * a_format" ", " "va_list a_p" )
+.RI ( "cw_out_t *a_out" ", " "cw_sint32_t a_fd" ", "
+.IR "const char *a_format" ", " "va_list a_p" )
 
 .I cw_sint32_t
 .br
 .B out_put_s
-.RI ( "cw_out_t * a_out" ", " "char * a_str" ", " "const char * a_format"
+.RI ( "cw_out_t *a_out" ", " "char *a_str" ", " "const char *a_format"
 .RI ", " "..." )
 .br
 .I cw_sint32_t
 .br
 .B _cw_out_put_s
-.RI ( "char * a_str" ", " "const char * a_format"
+.RI ( "char *a_str" ", " "const char *a_format"
 .RI ", " "..." )
 
 .I cw_sint32_t
 .br
 .B out_put_sa
-.RI ( "cw_out_t * a_out" ", " "char ** r_str" ", " "const char * a_format"
+.RI ( "cw_out_t *a_out" ", " "char **r_str" ", " "const char *a_format"
 .RI ", " "..." )
 
 .I cw_sint32_t
 .br
 .B out_put_sn
-.RI ( "cw_out_t * a_out" ", " "char * a_str" ", " "cw_uint32_t a_size" ", "
-.IR "const char * a_format" ", " "..." )
+.RI ( "cw_out_t *a_out" ", " "char *a_str" ", " "cw_uint32_t a_size" ", "
+.IR "const char *a_format" ", " "..." )
 .br
 .I cw_sint32_t
 .br
 .B _cw_out_put_sn
-.RI ( "char * a_str" ", " "cw_uint32_t a_size" ", "
-.IR "const char * a_format" ", " "..." )
+.RI ( "char *a_str" ", " "cw_uint32_t a_size" ", "
+.IR "const char *a_format" ", " "..." )
 
 .I cw_sint32_t
 .br
 .B out_put_sv
-.RI ( "cw_out_t * a_out" ", " "char * a_str" ", " "const char * a_format"
+.RI ( "cw_out_t *a_out" ", " "char *a_str" ", " "const char *a_format"
 .RI ", " "va_list a_p" )
 
 .I cw_sint32_t
 .br
 .B out_put_sva
-.RI ( "cw_out_t * a_out" ", " "char ** r_str" ", " "const char * a_format"
+.RI ( "cw_out_t *a_out" ", " "char **r_str" ", " "const char *a_format"
 .RI ", " "va_list a_p" )
 
 .I cw_sint32_t
 .br
 .B out_put_svn
-.RI ( "cw_out_t * a_out" ", " "char * a_str" ", " "cw_uint32_t a_size" ", "
-.IR "const char * a_format" ", " "va_list a_p" )
+.RI ( "cw_out_t *a_out" ", " "char *a_str" ", " "cw_uint32_t a_size" ", "
+.IR "const char *a_format" ", " "va_list a_p" )
 
 .I cw_sint32_t
 .br
 .B spec_get_type
-.RI ( "const char * a_spec" ", " "cw_uint32_t a_spec_len" ", "
-.IR "const char ** r_val" )
+.RI ( "const char *a_spec" ", " "cw_uint32_t a_spec_len" ", "
+.IR "const char **r_val" )
 
 .I cw_sint32_t
 .br
 .B spec_get_val
-.RI ( "const char * a_spec" ", " "cw_uint32_t a_spec_len" ", "
-.IR "const char * a_name" ", " "cw_uint32_t a_name_len" ", "
-.IR "const char ** r_val" )
+.RI ( "const char *a_spec" ", " "cw_uint32_t a_spec_len" ", "
+.IR "const char *a_name" ", " "cw_uint32_t a_name_len" ", "
+.IR "const char **r_val" )
 
 .SS Debugging (dbg) symbols
 None.
@@ -306,7 +308,7 @@ Only print sign if output is negative.
 Always print sign.
 .RE
 
-Below is a matrix of the builtin output types, supported flags, and flag
+The following is a matrix of the builtin output types, supported flags, and flag
 defaults:
 
 .TS
@@ -354,9 +356,9 @@ _
 .I typedef cw_sint32_t
 .br
 .B cw_out_metric_t
-.RI ( "const char * a_format" ", " "cw_uint32_t a_format_len" ", " 
-.IR "const void * a_arg" )
-.br
+.RI ( "const char *a_format" ", " "cw_uint32_t a_format_len" ", " 
+.IR "const void *a_arg" )
+.RS
 Input(s):
 .RS
 .IR a_format :
@@ -394,9 +396,9 @@ pointed to by a_format.
 .I typedef char *
 .br
 .B cw_out_render_t
-.RI ( "const char * a_format" ", " "cw_uint32_t a_format_len" ", " 
-.IR "const void * a_arg" ", " "char * r_str" )
-.br
+.RI ( "const char *a_format" ", " "cw_uint32_t a_format_len" ", " 
+.IR "const void *a_arg" ", " "char *r_str" )
+.RS
 Input(s):
 .RS
 .IR a_format :
@@ -437,8 +439,8 @@ Print a_arg, given the specification pointed to by a_format.
 .I cw_out_t *
 .br
 .B out_new
-.RI ( "cw_out_t * a_out" )
-.br
+.RI ( "cw_out_t *a_out" )
+.RS
 Input(s):
 .RS
 .IR a_out :
@@ -464,8 +466,8 @@ Constructor.
 .I void
 .br
 .B out_delete
-.RI ( "cw_out_t * a_out" )
-.br
+.RI ( "cw_out_t *a_out" )
+.RS
 Input(s):
 .RS
 .IR a_out :
@@ -486,10 +488,10 @@ Destructor.
 .I cw_bool_t
 .br
 .B out_register
-.RI ( "cw_out_t * a_out" ", " "const char * a_type" ", " "cw_uint32_t a_size"
-.RI ", " "cw_out_metric_t * a_metric_func" ", "
-.IR "cw_out_render_t * a_render_func" )
-.br
+.RI ( "cw_out_t *a_out" ", " "const char *a_type" ", " "cw_uint32_t a_size"
+.RI ", " "cw_out_metric_t *a_metric_func" ", "
+.IR "cw_out_render_t *a_render_func" )
+.RS
 Input(s):
 .RS
 .IR a_out :
@@ -535,8 +537,8 @@ embedded in formatting strings.
 .I cw_bool_t
 .br
 .B out_merge
-.RI ( "cw_out_t * a_a" ", " "cw_out_t * a_b" )
-.br
+.RI ( "cw_out_t *a_a" ", " "cw_out_t *a_b" )
+.RS
 Input(s):
 .RS
 .IR a_a :
@@ -566,8 +568,8 @@ Merge a_b's extended type handlers into a_a.
 .I cw_sint32_t
 .br
 .B out_get_default_fd
-.RI ( "cw_out_t * a_out" )
-.br
+.RI ( "cw_out_t *a_out" )
+.RS
 Input(s):
 .RS
 .IR a_out :
@@ -591,8 +593,8 @@ Return a_out's default file descriptor.
 .I void
 .br
 .B out_set_default_fd
-.RI ( "cw_out_t * a_out" ", " "cw_sint32_t a_fd" )
-.br
+.RI ( "cw_out_t *a_out" ", " "cw_sint32_t a_fd" )
+.RS
 Input(s):
 .RS
 .IR a_out :
@@ -617,13 +619,13 @@ Set a_out's default file descriptor number.
 .I cw_sint32_t
 .br
 .B out_put
-.RI ( "cw_out_t * a_out" ", " "const char * a_format" ", " "..." )
+.RI ( "cw_out_t *a_out" ", " "const char *a_format" ", " "..." )
 .br
 .I cw_sint32_t
 .br
 .B _cw_out_put
-.RI ( "const char * a_format" ", " "..." )
-.br
+.RI ( "const char *a_format" ", " "..." )
+.RS
 Input(s):
 .RS
 .IR a_out :
@@ -662,17 +664,17 @@ Print formatted output.
 .I cw_sint32_t
 .br
 .B out_put_e
-.RI ( "cw_out_t * a_out" ", " "const char * a_file_name" ", "
-.IR "cw_uint32_t a_line_num" ", " "const char * a_func_name" ", "
-.IR "const char * a_format" ", " "..." )
+.RI ( "cw_out_t *a_out" ", " "const char *a_file_name" ", "
+.IR "cw_uint32_t a_line_num" ", " "const char *a_func_name" ", "
+.IR "const char *a_format" ", " "..." )
 .br
 .I cw_sint32_t
 .br
 .B _cw_out_put_e
-.RI ( "const char * a_file_name" ", "
-.IR "cw_uint32_t a_line_num" ", " "const char * a_func_name" ", "
-.IR "const char * a_format" ", " "..." )
-.br
+.RI ( "const char *a_file_name" ", "
+.IR "cw_uint32_t a_line_num" ", " "const char *a_func_name" ", "
+.IR "const char *a_format" ", " "..." )
+.RS
 Input(s):
 .RS
 .IR a_out :
@@ -727,13 +729,13 @@ prepended to the output.
 .I cw_sint32_t
 .br
 .B out_put_l
-.RI ( "cw_out_t * a_out" ", " "const char * a_format" ", " "..." )
+.RI ( "cw_out_t *a_out" ", " "const char *a_format" ", " "..." )
 .br
 .I cw_sint32_t
 .br
 .B _cw_out_put_l
-.RI ( "const char * a_format" ", " "..." )
-.br
+.RI ( "const char *a_format" ", " "..." )
+.RS
 Input(s):
 .RS
 .IR a_out :
@@ -773,17 +775,17 @@ the output.
 .I cw_sint32_t
 .br
 .B out_put_le
-.RI ( "cw_out_t * a_out" ", " "const char * a_file_name" ", "
-.IR "cw_uint32_t a_line_num" ", " "const char * a_func_name" ", "
-.IR "const char * a_format" ", " "..." )
+.RI ( "cw_out_t *a_out" ", " "const char *a_file_name" ", "
+.IR "cw_uint32_t a_line_num" ", " "const char *a_func_name" ", "
+.IR "const char *a_format" ", " "..." )
 .br
 .I cw_sint32_t
 .br
 .B _cw_out_put_le
-.RI ( "const char * a_file_name" ", "
-.IR "cw_uint32_t a_line_num" ", " "const char * a_func_name" ", "
-.IR "const char * a_format" ", " "..." )
-.br
+.RI ( "const char *a_file_name" ", "
+.IR "cw_uint32_t a_line_num" ", " "const char *a_func_name" ", "
+.IR "const char *a_format" ", " "..." )
+.RS
 Input(s):
 .RS
 .IR a_out :
@@ -835,15 +837,15 @@ Print formatted output, with \*(lq[yy/mm/dd hh:mm:ss (zz)]: \*(rq and optional
 .I cw_sint32_t
 .br
 .B out_put_n
-.RI ( "cw_out_t * a_out" ", " "cw_uint32_t a_size" ", "
-.IR "const char * a_format" ", " "..." )
+.RI ( "cw_out_t *a_out" ", " "cw_uint32_t a_size" ", "
+.IR "const char *a_format" ", " "..." )
 .br
 .I cw_sint32_t
 .br
 .B _cw_out_put_n
 .RI ( "cw_uint32_t a_size" ", "
-.IR "const char * a_format" ", " "..." )
-.br
+.IR "const char *a_format" ", " "..." )
+.RS
 Input(s):
 .RS
 .IR a_out :
@@ -886,15 +888,15 @@ Print at most a_size bytes of formatted output.
 .I cw_sint32_t
 .br
 .B out_put_f
-.RI ( "cw_out_t * a_out" ", " "cw_sint32_t a_fd" ", "
-.IR "const char * a_format" ", " "..." )
+.RI ( "cw_out_t *a_out" ", " "cw_sint32_t a_fd" ", "
+.IR "const char *a_format" ", " "..." )
 .br
 .I cw_sint32_t
 .br
 .B _cw_out_put_f
 .RI ( "cw_sint32_t a_fd" ", "
-.IR "const char * a_format" ", " "..." )
-.br
+.IR "const char *a_format" ", " "..." )
+.RS
 Input(s):
 .RS
 .IR a_out :
@@ -937,10 +939,10 @@ Print formatted output.
 .I cw_sint32_t
 .br
 .B out_put_fe
-.RI ( "cw_out_t * a_out" ", " "cw_sint32_t a_fd" ", "
-.IR "const char * a_file_name" ", " "cw_uint32_t a_line_num" ", "
-.IR "const char * a_func_name" ", " "const char * a_format" ", " "..." )
-.br
+.RI ( "cw_out_t *a_out" ", " "cw_sint32_t a_fd" ", "
+.IR "const char *a_file_name" ", " "cw_uint32_t a_line_num" ", "
+.IR "const char *a_func_name" ", " "const char *a_format" ", " "..." )
+.RS
 Input(s):
 .RS
 .IR a_out :
@@ -999,9 +1001,9 @@ prepended to the output.
 .I cw_sint32_t
 .br
 .B out_put_fl
-.RI ( "cw_out_t * a_out" ", " "cw_sint32_t a_fd" ", "
-.IR "const char * a_format" ", " "..." )
-.br
+.RI ( "cw_out_t *a_out" ", " "cw_sint32_t a_fd" ", "
+.IR "const char *a_format" ", " "..." )
+.RS
 Input(s):
 .RS
 .IR a_out :
@@ -1045,10 +1047,10 @@ the output.
 .I cw_sint32_t
 .br
 .B out_put_fle
-.RI ( "cw_out_t * a_out" ", " "cw_sint32_t a_fd" ", "
-.IR "const char * a_file_name" ", " "cw_uint32_t a_line_num" ", "
-.IR "const char * a_func_name" ", " "const char * a_format" ", " "..." )
-.br
+.RI ( "cw_out_t *a_out" ", " "cw_sint32_t a_fd" ", "
+.IR "const char *a_file_name" ", " "cw_uint32_t a_line_num" ", "
+.IR "const char *a_func_name" ", " "const char *a_format" ", " "..." )
+.RS
 Input(s):
 .RS
 .IR a_out :
@@ -1104,15 +1106,15 @@ Print formatted output, with \*(lq[yy/mm/dd hh:mm:ss (zz)]: \*(rq and optional
 .I cw_sint32_t
 .br
 .B out_put_fn
-.RI ( "cw_out_t * a_out" ", " "cw_sint32_t a_fd" ", " "cw_uint32_t a_size"
-.RI ", " "const char * a_format" ", " "..." )
+.RI ( "cw_out_t *a_out" ", " "cw_sint32_t a_fd" ", " "cw_uint32_t a_size"
+.RI ", " "const char *a_format" ", " "..." )
 .br
 .I cw_sint32_t
 .br
 .B _cw_out_put_fn
 .RI ( "cw_sint32_t a_fd" ", " "cw_uint32_t a_size"
-.RI ", " "const char * a_format" ", " "..." )
-.br
+.RI ", " "const char *a_format" ", " "..." )
+.RS
 Input(s):
 .RS
 .IR a_out :
@@ -1159,9 +1161,9 @@ Print at most a_size bytes of formatted output.
 .I cw_sint32_t
 .br
 .B out_put_fv
-.RI ( "cw_out_t * a_out" ", " "cw_sint32_t a_fd" ", "
-.IR "const char * a_format" ", " "va_list a_p" )
-.br
+.RI ( "cw_out_t *a_out" ", " "cw_sint32_t a_fd" ", "
+.IR "const char *a_format" ", " "va_list a_p" )
+.RS
 Input(s):
 .RS
 .IR a_out :
@@ -1204,15 +1206,15 @@ Print formatted output.
 .I cw_sint32_t
 .br
 .B out_put_s
-.RI ( "cw_out_t * a_out" ", " "char * a_str" ", " "const char * a_format"
+.RI ( "cw_out_t *a_out" ", " "char *a_str" ", " "const char *a_format"
 .RI ", " "..." )
 .br
 .I cw_sint32_t
 .br
 .B _cw_out_put_s
-.RI ( "char * a_str" ", " "const char * a_format"
+.RI ( "char *a_str" ", " "const char *a_format"
 .RI ", " "..." )
-.br
+.RS
 Input(s):
 .RS
 .IR a_out :
@@ -1256,9 +1258,9 @@ Print formatted output.
 .I cw_sint32_t
 .br
 .B out_put_sa
-.RI ( "cw_out_t * a_out" ", " "char ** r_str" ", " "const char * a_format"
+.RI ( "cw_out_t *a_out" ", " "char **r_str" ", " "const char *a_format"
 .RI ", " "..." )
-.br
+.RS
 Input(s):
 .RS
 .IR a_out :
@@ -1302,15 +1304,15 @@ Allocate space, then print formatted output to it.
 .I cw_sint32_t
 .br
 .B out_put_sn
-.RI ( "cw_out_t * a_out" ", " "char * a_str" ", " "cw_uint32_t a_size" ", "
-.IR "const char * a_format" ", " "..." )
+.RI ( "cw_out_t *a_out" ", " "char *a_str" ", " "cw_uint32_t a_size" ", "
+.IR "const char *a_format" ", " "..." )
 .br
 .I cw_sint32_t
 .br
 .B _cw_out_put_sn
-.RI ( "char * a_str" ", " "cw_uint32_t a_size" ", "
-.IR "const char * a_format" ", " "..." )
-.br
+.RI ( "char *a_str" ", " "cw_uint32_t a_size" ", "
+.IR "const char *a_format" ", " "..." )
+.RS
 Input(s):
 .RS
 .IR a_out :
@@ -1364,9 +1366,9 @@ Print at most a_size bytes of formatted output.
 .I cw_sint32_t
 .br
 .B out_put_sv
-.RI ( "cw_out_t * a_out" ", " "char * a_str" ", " "const char * a_format"
+.RI ( "cw_out_t *a_out" ", " "char *a_str" ", " "const char *a_format"
 .RI ", " "va_list a_p" )
-.br
+.RS
 Input(s):
 .RS
 .IR a_out :
@@ -1410,9 +1412,9 @@ Print formatted output.
 .I cw_sint32_t
 .br
 .B out_put_sva
-.RI ( "cw_out_t * a_out" ", " "char ** r_str" ", " "const char * a_format"
+.RI ( "cw_out_t *a_out" ", " "char **r_str" ", " "const char *a_format"
 .RI ", " "va_list a_p" )
-.br
+.RS
 Input(s):
 .RS
 .IR a_out :
@@ -1456,9 +1458,9 @@ Allocate space, then print formatted output to it.
 .I cw_sint32_t
 .br
 .B out_put_svn
-.RI ( "cw_out_t * a_out" ", " "char * a_str" ", " "cw_uint32_t a_size" ", "
-.IR "const char * a_format" ", " "va_list a_p" )
-.br
+.RI ( "cw_out_t *a_out" ", " "char *a_str" ", " "cw_uint32_t a_size" ", "
+.IR "const char *a_format" ", " "va_list a_p" )
+.RS
 Input(s):
 .RS
 .IR a_out :
@@ -1511,9 +1513,9 @@ Print at most a_size bytes of formatted output.
 .I cw_sint32_t
 .br
 .B spec_get_type
-.RI ( "const char * a_spec" ", " "cw_uint32_t a_spec_len" ", "
-.IR "const char ** r_val" )
-.br
+.RI ( "const char *a_spec" ", " "cw_uint32_t a_spec_len" ", "
+.IR "const char **r_val" )
+.RS
 Input(s):
 .RS
 .IR a_spec :
@@ -1549,10 +1551,10 @@ Return the length of the type value string, and set *r_val to point to it.
 .I cw_sint32_t
 .br
 .B spec_get_val
-.RI ( "const char * a_spec" ", " "cw_uint32_t a_spec_len" ", "
-.IR "const char * a_name" ", " "cw_uint32_t a_name_len" ", "
-.IR "const char ** r_val" )
-.br
+.RI ( "const char *a_spec" ", " "cw_uint32_t a_spec_len" ", "
+.IR "const char *a_name" ", " "cw_uint32_t a_name_len" ", "
+.IR "const char **r_val" )
+.RS
 Input(s):
 .RS
 .IR a_spec :

@@ -16,42 +16,42 @@ sem - Semaphore.
 .I cw_sem_t *
 .br
 .B sem_new
-.RI ( "cw_sem_t * a_sem" ", " "cw_sint32_t a_count" )
+.RI ( "cw_sem_t *a_sem" ", " "cw_sint32_t a_count" )
 
 .I void
 .br
 .B sem_delete
-.RI ( "cw_sem_t * a_sem" )
+.RI ( "cw_sem_t *a_sem" )
 
 .I void
 .br
 .B sem_post
-.RI ( "cw_sem_t * a_sem" )
+.RI ( "cw_sem_t *a_sem" )
 
 .I void
 .br
 .B sem_wait
-.RI ( "cw_sem_t * a_sem" )
+.RI ( "cw_sem_t *a_sem" )
 
 .I cw_bool_t
 .br
 .B sem_timedwait
-.RI ( "cw_sem_t * a_sem" ", " "struct timespec * a_timeout" )
+.RI ( "cw_sem_t *a_sem" ", " "struct timespec *a_timeout" )
 
 .I cw_bool_t
 .br
 .B sem_trywait
-.RI ( "cw_sem_t * a_sem" )
+.RI ( "cw_sem_t *a_sem" )
 
 .I cw_sint32_t
 .br
 .B sem_getvalue
-.RI ( "cw_sem_t * a_sem" )
+.RI ( "cw_sem_t *a_sem" )
 
 .I void
 .br
 .B sem_adjust
-.RI ( "cw_sem_t * a_sem" ", " "cw_sint32_t a_adjust" )
+.RI ( "cw_sem_t *a_sem" ", " "cw_sint32_t a_adjust" )
 
 .SS Debugging (dbg) symbols
 None.
@@ -65,8 +65,8 @@ allows dynamic modification of resource pools locked by semaphores.
 .I cw_sem_t *
 .br
 .B sem_new
-.RI ( "cw_sem_t * a_sem" ", " "cw_sint32_t a_count" )
-.br
+.RI ( "cw_sem_t *a_sem" ", " "cw_sint32_t a_count" )
+.RS
 Input(s):
 .RS
 .IR a_sem :
@@ -96,8 +96,8 @@ Constructor.
 .I void
 .br
 .B sem_delete
-.RI ( "cw_sem_t * a_sem" )
-.br
+.RI ( "cw_sem_t *a_sem" )
+.RS
 Input(s):
 .RS
 .IR a_sem :
@@ -118,8 +118,8 @@ Destructor.
 .I void
 .br
 .B sem_post
-.RI ( "cw_sem_t * a_sem" )
-.br
+.RI ( "cw_sem_t *a_sem" )
+.RS
 Input(s):
 .RS
 .IR a_sem :
@@ -140,8 +140,8 @@ Post (increment) a_sem.
 .I void
 .br
 .B sem_wait
-.RI ( "cw_sem_t * a_sem" )
-.br
+.RI ( "cw_sem_t *a_sem" )
+.RS
 Input(s):
 .RS
 .IR a_sem :
@@ -162,8 +162,8 @@ Wait on (block until able to decrement) a_sem.
 .I cw_bool_t
 .br
 .B sem_timedwait
-.RI ( "cw_sem_t * a_sem" ", " "struct timespec * a_timeout" )
-.br
+.RI ( "cw_sem_t *a_sem" ", " "struct timespec *a_timeout" )
+.RS
 Input(s):
 .RS
 .IR a_sem :
@@ -194,8 +194,8 @@ unable to.
 .I cw_bool_t
 .br
 .B sem_trywait
-.RI ( "cw_sem_t * a_sem" )
-.br
+.RI ( "cw_sem_t *a_sem" )
+.RS
 Input(s):
 .RS
 .IR a_sem :
@@ -222,8 +222,8 @@ unable to.
 .I cw_sint32_t
 .br
 .B sem_getvalue
-.RI ( "cw_sem_t * a_sem" )
-.br
+.RI ( "cw_sem_t *a_sem" )
+.RS
 Input(s):
 .RS
 .IR a_sem :
@@ -247,8 +247,8 @@ Get value of a_sem.
 .I void
 .br
 .B sem_adjust
-.RI ( "cw_sem_t * a_sem" ", " "cw_sint32_t a_adjust" )
-.br
+.RI ( "cw_sem_t *a_sem" ", " "cw_sint32_t a_adjust" )
+.RS
 Input(s):
 .RS
 .IR a_sem :

@@ -16,54 +16,54 @@ ring - Doubly linked ring, similar to a doubly linked list.
 .I cw_ring_t *
 .br
 .B ring_new
-.RI ( "cw_ring_t * a_ring" ", " 
-.IR "void (*a_dealloc_func)(void * dealloc_arg, void * ring)" ", " 
-.IR "void * a_dealloc_arg" )
+.RI ( "cw_ring_t *a_ring" ", " 
+.IR "void (*a_dealloc_func)(void *dealloc_arg, void *ring)" ", " 
+.IR "void *a_dealloc_arg" )
 
 .I void
 .br
 .B ring_delete
-.RI ( "cw_ring_t * a_ring" )
+.RI ( "cw_ring_t *a_ring" )
 
 .I void
 .br
 .B ring_dump
-.RI ( "cw_ring_t * a_ring" ", " "const char * a_prefix" )
+.RI ( "cw_ring_t *a_ring" ", " "const char *a_prefix" )
 
 .I void *
 .br
 .B ring_get_data
-.RI ( "cw_ring_t * a_ring" )
+.RI ( "cw_ring_t *a_ring" )
 
 .I void
 .br
 .B ring_set_data
-.RI ( "cw_ring_t * a_ring" ", " "void * a_data" )
+.RI ( "cw_ring_t *a_ring" ", " "void *a_data" )
 
 .I cw_ring_t *
 .br
 .B ring_next
-.RI ( "cw_ring_t * a_ring" )
+.RI ( "cw_ring_t *a_ring" )
 
 .I cw_ring_t *
 .br
 .B ring_prev
-.RI ( "cw_ring_t * a_ring" )
+.RI ( "cw_ring_t *a_ring" )
 
 .I void
 .br
 .B ring_meld
-.RI ( "cw_ring_t * a_a" ", " "cw_ring_t * a_b" )
+.RI ( "cw_ring_t *a_a" ", " "cw_ring_t *a_b" )
 
 .I cw_ring_t *
 .br
 .B ring_cut
-.RI ( "cw_ring_t * a_ring" )
+.RI ( "cw_ring_t *a_ring" )
 
 .I void
 .br
 .B ring_split
-.RI ( "cw_ring_t * a_a" ", " "cw_ring_t * a_b" )
+.RI ( "cw_ring_t *a_a" ", " "cw_ring_t *a_b" )
 
 .SS Debugging (dbg) symbols
 None.
@@ -84,10 +84,10 @@ disadvantage of making built in thread safeness impractical.  Therefore
 .I cw_ring_t *
 .br
 .B ring_new
-.RI ( "cw_ring_t * a_ring" ", " 
-.IR "void (*a_dealloc_func)(void * dealloc_arg, void * ring)" ", " 
-.IR "void * a_dealloc_arg" )
-.br
+.RI ( "cw_ring_t *a_ring" ", " 
+.IR "void (*a_dealloc_func)(void *dealloc_arg, void *ring)" ", " 
+.IR "void *a_dealloc_arg" )
+.RS
 Input(s):
 .RS
 .IR a_ring :
@@ -122,8 +122,8 @@ Constructor.
 .I void
 .br
 .B ring_delete
-.RI ( "cw_ring_t * a_ring" )
-.br
+.RI ( "cw_ring_t *a_ring" )
+.RS
 Input(s):
 .RS
 .IR a_ring :
@@ -144,8 +144,8 @@ Destructor.
 .I void
 .br
 .B ring_dump
-.RI ( "cw_ring_t * a_ring" ", " "const char * a_prefix" )
-.br
+.RI ( "cw_ring_t *a_ring" ", " "const char *a_prefix" )
+.RS
 Input(s):
 .RS
 .IR a_ring :
@@ -170,8 +170,8 @@ Dump the internals of a_ring to cw_g_out.
 .I void *
 .br
 .B ring_get_data
-.RI ( "cw_ring_t * a_ring" )
-.br
+.RI ( "cw_ring_t *a_ring" )
+.RS
 Input(s):
 .RS
 .IR a_ring :
@@ -195,8 +195,8 @@ Return the value of a_ring's data pointer.
 .I void
 .br
 .B ring_set_data
-.RI ( "cw_ring_t * a_ring" ", " "void * a_data" )
-.br
+.RI ( "cw_ring_t *a_ring" ", " "void *a_data" )
+.RS
 Input(s):
 .RS
 .IR a_ring :
@@ -221,8 +221,8 @@ Set a_ring's data pointer to a_data.
 .I cw_ring_t *
 .br
 .B ring_next
-.RI ( "cw_ring_t * a_ring" )
-.br
+.RI ( "cw_ring_t *a_ring" )
+.RS
 Input(s):
 .RS
 .IR a_ring :
@@ -246,8 +246,8 @@ Return a pointer to the next element in a_ring.
 .I cw_ring_t *
 .br
 .B ring_prev
-.RI ( "cw_ring_t * a_ring" )
-.br
+.RI ( "cw_ring_t *a_ring" )
+.RS
 Input(s):
 .RS
 .IR a_ring :
@@ -271,8 +271,8 @@ Return a pointer to the previous element in a_ring.
 .I void
 .br
 .B ring_meld
-.RI ( "cw_ring_t * a_a" ", " "cw_ring_t * a_b" )
-.br
+.RI ( "cw_ring_t *a_a" ", " "cw_ring_t *a_b" )
+.RS
 Input(s):
 .RS
 .IR a_a :
@@ -300,8 +300,8 @@ Combine a_a and a_b into one ring.
 .I cw_ring_t *
 .br
 .B ring_cut
-.RI ( "cw_ring_t * a_ring" )
-.br
+.RI ( "cw_ring_t *a_ring" )
+.RS
 Input(s):
 .RS
 .IR a_ring :
@@ -325,8 +325,8 @@ Remove a_ring from the rest of the ring and return the new ring.
 .I void
 .br
 .B ring_split
-.RI ( "cw_ring_t * a_a" ", " "cw_ring_t * a_b" )
-.br
+.RI ( "cw_ring_t *a_a" ", " "cw_ring_t *a_b" )
+.RS
 Input(s):
 .RS
 .IR a_a :

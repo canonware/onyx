@@ -16,22 +16,22 @@ tsd - Thread-specific data.
 .I cw_tsd_t *
 .br
 .B tsd_new
-.RI ( "cw_tsd_t * a_tsd" ", " "void (*a_func)(void *)" )
+.RI ( "cw_tsd_t *a_tsd" ", " "void (*a_func)(void *)" )
 
 .I void
 .br
 .B tsd_delete
-.RI ( "cw_tsd_t * a_tsd" )
+.RI ( "cw_tsd_t *a_tsd" )
 
 .I void *
 .br
 .B tsd_get
-.RI ( "cw_tsd_t * a_tsd" )
+.RI ( "cw_tsd_t *a_tsd" )
 
 .I void
 .br
 .B tsd_set
-.RI ( "cw_tsd_t * a_tsd" ", " "void * a_val" )
+.RI ( "cw_tsd_t *a_tsd" ", " "void *a_val" )
 
 .SS Debugging (dbg) symbols
 None.
@@ -45,8 +45,8 @@ thread-specific pointer to data.
 .I cw_tsd_t *
 .br
 .B tsd_new
-.RI ( "cw_tsd_t * a_tsd" ", " "void (*a_func)(void *)" )
-.br
+.RI ( "cw_tsd_t *a_tsd" ", " "void (*a_func)(void *)" )
+.RS
 Input(s):
 .RS
 .IR a_tsd :
@@ -76,8 +76,8 @@ Constructor.
 .I void
 .br
 .B tsd_delete
-.RI ( "cw_tsd_t * a_tsd" )
-.br
+.RI ( "cw_tsd_t *a_tsd" )
+.RS
 Input(s):
 .RS
 .IR a_tsd :
@@ -98,8 +98,8 @@ Destructor.
 .I void *
 .br
 .B tsd_get
-.RI ( "cw_tsd_t * a_tsd" )
-.br
+.RI ( "cw_tsd_t *a_tsd" )
+.RS
 Input(s):
 .RS
 .IR a_tsd :
@@ -123,8 +123,8 @@ Get thread-specific data pointer.
 .I void
 .br
 .B tsd_set
-.RI ( "cw_tsd_t * a_tsd" ", " "void * a_val" )
-.br
+.RI ( "cw_tsd_t *a_tsd" ", " "void *a_val" )
+.RS
 Input(s):
 .RS
 .IR a_tsd :

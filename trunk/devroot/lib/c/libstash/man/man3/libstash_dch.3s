@@ -79,7 +79,7 @@ class behaves almost exactly like the \fBch\f class.
 .RI ( "cw_dch_t *a_dch" ", " "cw_uint32_t a_base_table" ", "
 .IR "cw_uint32_t a_base_grow" ", " "cw_uint32_t a_base_shrink" ", "
 .IR "cw_ch_hash_t *a_hash" ", " "cw_ch_key_comp_t *a_key_comp" )
-.br
+.RS
 Input(s):
 .RS
 .IR a_dch :
@@ -129,7 +129,7 @@ Constructor.
 .br
 .B dch_delete
 .RI ( "cw_dch_t *a_dch" )
-.br
+.RS
 Input(s):
 .RS
 .IR a_dch :
@@ -151,7 +151,7 @@ Destructor.
 .br
 .B dch_count
 .RI ( "cw_dch_t *a_dch" )
-.br
+.RS
 Input(s):
 .RS
 .IR a_dch :
@@ -177,7 +177,7 @@ Return the number of items in a_dch.
 .B dch_insert
 .RI ( "cw_dch_t *a_dch" ", " "const void *a_key" ", " 
 .IR "const void *a_data" ", " "cw_chi_t *a_chi" )
-.br
+.RS
 Input(s):
 .RS
 .IR a_dch :
@@ -217,7 +217,7 @@ Insert a_data into a_dch, using key a_key.
 .B dch_remove
 .RI ( "cw_dch_t *a_dch" ", " "const void *a_search_key" ", " "void **r_key"
 .RI ", " "void **r_data" ", " "cw_chi_t **r_chi" )
-.br
+.RS
 Input(s):
 .RS
 .IR a_dch :
@@ -280,7 +280,7 @@ data, respectively.
 .br
 .B dch_search
 .RI ( "cw_dch_t *a_dch" ", " "const void *a_key" ", " "void **r_data" )
-.br
+.RS
 Input(s):
 .RS
 .IR a_dch :
@@ -320,7 +320,7 @@ point to the associated data.
 .br
 .B dch_get_iterate
 .RI ( "cw_dch_t *a_dch" ", "  "void **r_key" ", " "void **r_data" )
-.br
+.RS
 Input(s):
 .RS
 .IR a_dch :
@@ -369,7 +369,7 @@ so that it is the newest item in a_dch.
 .B dch_remove_iterate
 .RI ( "cw_dch_t *a_dch" ", " "void **r_key" ", " "void **r_data" ", "
 .IR "cw_chi_t **r_chi" )
-.br
+.RS
 Input(s):
 .RS
 .IR a_dch :
@@ -427,7 +427,7 @@ from a_dch.
 .br
 .B dch_dump
 .RI ( "cw_dch_t *a_dch" ", " "const char *a_prefix" )
-.br
+.RS
 Input(s):
 .RS
 .IR a_dch :

@@ -16,32 +16,32 @@ rwl - Read/write lock.
 .I cw_rwl_t *
 .br
 .B rwl_new
-.RI ( "cw_rwl_t * a_rwl" )
+.RI ( "cw_rwl_t *a_rwl" )
 
 .I void
 .br
 .B rwl_delete
-.RI ( "cw_rwl_t * a_rwl" )
+.RI ( "cw_rwl_t *a_rwl" )
 
 .I void
 .br
 .B rwl_rlock
-.RI ( "cw_rwl_t * a_rwl" )
+.RI ( "cw_rwl_t *a_rwl" )
 
 .I void
 .br
 .B rwl_runlock
-.RI ( "cw_rwl_t * a_rwl" )
+.RI ( "cw_rwl_t *a_rwl" )
 
 .I void
 .br
 .B rwl_wlock
-.RI ( "cw_rwl_t * a_rwl" )
+.RI ( "cw_rwl_t *a_rwl" )
 
 .I void
 .br
 .B rwl_wunlock
-.RI ( "cw_rwl_t * a_rwl" )
+.RI ( "cw_rwl_t *a_rwl" )
 
 .SS Debugging (dbg) symbols
 None.
@@ -56,8 +56,8 @@ deterministic locking.
 .I cw_rwl_t *
 .br
 .B rwl_new
-.RI ( "cw_rwl_t * a_rwl" )
-.br
+.RI ( "cw_rwl_t *a_rwl" )
+.RS
 Input(s):
 .RS
 .IR a_rwl :
@@ -83,8 +83,8 @@ Constructor.
 .I void
 .br
 .B rwl_delete
-.RI ( "cw_rwl_t * a_rwl" )
-.br
+.RI ( "cw_rwl_t *a_rwl" )
+.RS
 Input(s):
 .RS
 .IR a_rwl :
@@ -105,8 +105,8 @@ Destructor.
 .I void
 .br
 .B rwl_rlock
-.RI ( "cw_rwl_t * a_rwl" )
-.br
+.RI ( "cw_rwl_t *a_rwl" )
+.RS
 Input(s):
 .RS
 .IR a_rwl :
@@ -127,8 +127,8 @@ Get a r-lock.
 .I void
 .br
 .B rwl_runlock
-.RI ( "cw_rwl_t * a_rwl" )
-.br
+.RI ( "cw_rwl_t *a_rwl" )
+.RS
 Input(s):
 .RS
 .IR a_rwl :
@@ -149,8 +149,8 @@ Release a r-lock.
 .I void
 .br
 .B rwl_wlock
-.RI ( "cw_rwl_t * a_rwl" )
-.br
+.RI ( "cw_rwl_t *a_rwl" )
+.RS
 Input(s):
 .RS
 .IR a_rwl :
@@ -171,8 +171,8 @@ Get a w-lock.
 .I void
 .br
 .B rwl_wunlock
-.RI ( "cw_rwl_t * a_rwl" )
-.br
+.RI ( "cw_rwl_t *a_rwl" )
+.RS
 Input(s):
 .RS
 .IR a_rwl :

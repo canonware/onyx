@@ -16,7 +16,7 @@ Version: <Version>
 .I <return type>
 .br
 .B <template>_<func>
-.RI ( "cw_<template>_t * a_<template>" ", " <args> )
+.RI ( "cw_<template>_t *a_<template>" ", " <args> )
 
 .SS Debugging (dbg) symbols
 .TP \" XXX
@@ -28,7 +28,7 @@ Version: <Version>
 
 .SH USAGE
 
-.br
+.RS
 Input(s):
 .RS
 .IR a_<template> :
@@ -50,6 +50,7 @@ Output(s):
 Description:
 .RS
 <description>
+.RE
 .RE
 
 .SH SEE ALSO

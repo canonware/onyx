@@ -16,27 +16,27 @@ mtx - Mutex (mutual exclusion lock).
 .I cw_mtx_t *
 .br
 .B mtx_new
-.RI ( "cw_mtx_t * a_mtx" )
+.RI ( "cw_mtx_t *a_mtx" )
 
 .I void
 .br
 .B mtx_delete
-.RI ( "cw_mtx_t * a_mtx" )
+.RI ( "cw_mtx_t *a_mtx" )
 
 .I void
 .br
 .B mtx_lock
-.RI ( "cw_mtx_t * a_mtx" )
+.RI ( "cw_mtx_t *a_mtx" )
 
 .I cw_bool_t
 .br
 .B mtx_trylock
-.RI ( "cw_mtx_t * a_mtx" )
+.RI ( "cw_mtx_t *a_mtx" )
 
 .I void
 .br
 .B mtx_unlock
-.RI ( "cw_mtx_t * a_mtx" )
+.RI ( "cw_mtx_t *a_mtx" )
 
 .SS Debugging (dbg) symbols
 None.
@@ -50,8 +50,8 @@ undefined results.
 .I cw_mtx_t *
 .br
 .B mtx_new
-.RI ( "cw_mtx_t * a_mtx" )
-.br
+.RI ( "cw_mtx_t *a_mtx" )
+.RS
 Input(s):
 .RS
 .IR a_mtx :
@@ -75,8 +75,8 @@ Constructor.
 .I void
 .br
 .B mtx_delete
-.RI ( "cw_mtx_t * a_mtx" )
-.br
+.RI ( "cw_mtx_t *a_mtx" )
+.RS
 Input(s):
 .RS
 .IR a_mtx :
@@ -97,8 +97,8 @@ Destructor.
 .I void
 .br
 .B mtx_lock
-.RI ( "cw_mtx_t * a_mtx" )
-.br
+.RI ( "cw_mtx_t *a_mtx" )
+.RS
 Input(s):
 .RS
 .IR a_mtx :
@@ -119,8 +119,8 @@ Lock a_mtx.
 .I cw_bool_t
 .br
 .B mtx_trylock
-.RI ( "cw_mtx_t * a_mtx" )
-.br
+.RI ( "cw_mtx_t *a_mtx" )
+.RS
 Input(s):
 .RS
 .IR a_mtx :
@@ -147,8 +147,8 @@ already locked.
 .I void
 .br
 .B mtx_unlock
-.RI ( "cw_mtx_t * a_mtx" )
-.br
+.RI ( "cw_mtx_t *a_mtx" )
+.RS
 Input(s):
 .RS
 .IR a_mtx :

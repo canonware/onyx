@@ -14,6 +14,11 @@ mem - malloc wrapper.
 .SH SYNOPSIS
 \fB#include <libstash/libstash.h>\fR
 
+.SS Type definitions
+.I cw_bool_t
+.B cw_mem_oom_handler_t
+.RI ( "const void *a_data" ", " "cw_uint32_t a_size" )
+
 .SS General
 .I cw_mem_t *
 .br
@@ -80,11 +85,6 @@ mem - malloc wrapper.
 .B mem_dealloc
 .RI ( "void *a_mem" ", " "void *a_ptr" )
 
-.SS Type definitions
-.I cw_bool_t
-.B cw_mem_oom_handler_t
-.RI ( "const void *a_data" ", " "cw_uint32_t a_size" )
-
 .SS Debugging (dbg) symbols
 .TP
 \*(lqmem_verbose\*(rq
@@ -118,11 +118,44 @@ several preprocessor macros that can be used: \fB_cw_malloc\fR(),
 \fB_cw_calloc\fR(), \fB_cw_realloc\fR(), and \fB_cw_free\fR().
 
 .SH USAGE
+.I typedef cw_bool_t
+.br
+.B cw_mem_oom_handler_t
+.RI ( "const void *a_data" ", " "cw_uint32_t a_size" )
+.RS
+Input(s):
+.RS
+.IR a_data :
+.RS
+Data pointer, as specified by the a_data argument of
+\fBmem_set_oom_handler\fR().
+.RE
+.IR a_size :
+.RS
+Size of failed memory allocation.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+FALSE: Don't retry allocation.
+.br
+TRUE: Retry allocation.
+.RE
+.RE
+Description:
+.RS
+A function pointer of this type can be passed in via
+\fBmem_set_oom_handler\fR().
+.RE
+.RE
+
 .I cw_mem_t *
 .br
 .B mem_new
 .RI ( "void" )
-.br
+.RS
 Input(s):
 .RS
 None.
@@ -140,12 +173,13 @@ Description:
 .RS
 Constructor.
 .RE
+.RE
 
 .I void
 .br
 .B mem_delete
 .RI ( "cw_mem_t *a_mem" )
-.br
+.RS
 Input(s):
 .RS
 .IR a_mem :
@@ -161,13 +195,14 @@ Description:
 .RS
 Destructor.
 .RE
+.RE
 
 .I void
 .br
 .B mem_set_oom_handler
 .RI ( "cw_mem_t *a_mem" ", " "cw_mem_oom_handler_t *a_oom_handler" ", "
 .IR "const void *a_data" )
-.br
+.RS
 Input(s):
 .RS
 .IR a_mem :
@@ -193,6 +228,7 @@ Set an out of memory handler function.  The handler function is called whenever
 memory allocation fails.  If the handler returns TRUE, alloction is
 re-attempted.
 .RE
+.RE
 
 .I void *
 .br
@@ -204,7 +240,7 @@ re-attempted.
 .B mem_malloc
 .RI ( "cw_mem_t *a_mem" ", " "size_t a_size" ", " "const char *a_filename"
 .RI ", " "cw_uint32_t a_line_num" )
-.br
+.RS
 Input(s):
 .RS
 .IR a_mem :
@@ -237,6 +273,7 @@ Description:
 .RS
 \fBmalloc\fR() wrapper.
 .RE
+.RE
 
 .I void *
 .br
@@ -248,7 +285,7 @@ Description:
 .B mem_calloc
 .RI ( "cw_mem_t *a_mem" ", " "size_t a_number" ", " "size_t a_size" ", "
 .IR "const char *a_filename" ", " "cw_uint32_t a_line_num" )
-.br
+.RS
 Input(s):
 .RS
 .IR a_mem :
@@ -285,6 +322,7 @@ Description:
 .RS
 \fBcalloc\fR() wrapper.
 .RE
+.RE
 
 .I void *
 .br
@@ -296,7 +334,7 @@ Description:
 .B mem_realloc
 .RI ( "cw_mem_t *a_mem" ", " "void *a_ptr" ", " "size_t a_size" ", "
 .IR "const char *a_filename" ", " "cw_uint32_t a_line_num" )
-.br
+.RS
 Input(s):
 .RS
 .IR a_mem :
@@ -333,6 +371,7 @@ Description:
 .RS
 \fBrealloc\fR() wrapper.
 .RE
+.RE
 
 .I void
 .br
@@ -344,7 +383,7 @@ Description:
 .B mem_free
 .RI ( "cw_mem_t *a_mem" ", " "void *a_ptr" ", " "const char *a_filename"
 .RI ", " "cw_uint32_t a_line_num" )
-.br
+.RS
 Input(s):
 .RS
 .IR a_mem :
@@ -376,63 +415,6 @@ Description:
 .RS
 \fBfree\fR() wrapper.
 .RE
-
-.I void
-.br
-.B mem_dealloc
-.RI ( "void *a_mem" ", " "void *a_ptr" )
-.br
-Input(s):
-.RS
-.IR a_mem :
-.RS
-Pointer to a mem.
-.RE
-.IR a_ptr :
-.RS
-Pointer to be freed.
-.RE
-.RE
-Output(s):
-.RS
-None.
-.RE
-Description:
-.RS
-Basically the same as \fBmem_free\fR(), but with a different function prototype.
-This function can be used for passing a function pointer to do automatic
-deallocation, as in the buf and ring classes.
-.RE
-
-.I cw_bool_t
-.B cw_mem_oom_handler_t
-.RI ( "const void *a_data" ", " "cw_uint32_t a_size" )
-.br
-Input(s):
-.RS
-.IR a_data :
-.RS
-Data pointer, as specified by the a_data argument of
-\fBmem_set_oom_handler\fR().
-.RE
-.IR a_size :
-.RS
-Size of failed memory allocation.
-.RE
-.RE
-Output(s):
-.RS
-.IR retval :
-.RS
-FALSE: Don't retry allocation.
-.br
-TRUE: Retry allocation.
-.RE
-.RE
-Description:
-.RS
-A function pointer of this type can be passed in via
-\fBmem_set_oom_handler\fR().
 .RE
 
 .SH SEE ALSO

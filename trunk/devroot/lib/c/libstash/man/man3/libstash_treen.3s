@@ -16,44 +16,44 @@ treen - Arbitrary tree (tree node).
 .I cw_treen_t *
 .br
 .B treen_new
-.RI ( "cw_treen_t * a_treen" ", " 
-.IR "void (*a_dealloc_func)(void * dealloc_arg, void * a_treen)" ", " 
-.IR "void * a_dealloc_arg" )
+.RI ( "cw_treen_t *a_treen" ", " 
+.IR "void (*a_dealloc_func)(void *dealloc_arg, void *a_treen)" ", " 
+.IR "void *a_dealloc_arg" )
 
 .I void
 .br
 .B treen_delete
-.RI ( "cw_treen_t * a_treen" )
+.RI ( "cw_treen_t *a_treen" )
 
 .I void
 .br
 .B treen_link
-.RI ( "cw_treen_t * a_treen" ", " "cw_treen_t * a_parent" )
+.RI ( "cw_treen_t *a_treen" ", " "cw_treen_t *a_parent" )
 
 .I cw_treen_t *
 .br
 .B treen_get_parent
-.RI ( "cw_treen_t * a_treen" )
+.RI ( "cw_treen_t *a_treen" )
 
 .I cw_treen_t *
 .br
 .B treen_get_child
-.RI ( "cw_treen_t * a_treen" )
+.RI ( "cw_treen_t *a_treen" )
 
 .I cw_treen_t *
 .br
 .B treen_get_sibling
-.RI ( "cw_treen_t * a_treen" )
+.RI ( "cw_treen_t *a_treen" )
 
 .I void *
 .br
 .B treen_get_data_ptr
-.RI ( "cw_treen_t * a_treen" )
+.RI ( "cw_treen_t *a_treen" )
 
 .I void
 .br
 .B treen_set_data_ptr
-.RI ( "cw_treen_t * a_treen" ", " "void * a_data" )
+.RI ( "cw_treen_t *a_treen" ", " "void *a_data" )
 
 .SS Debugging (dbg) symbols
 None.
@@ -70,10 +70,10 @@ of the fan-out.  Care must be taken when iterating on the sibling ring with
 .I cw_treen_t *
 .br
 .B treen_new
-.RI ( "cw_treen_t * a_treen" ", " 
-.IR "void (*a_dealloc_func)(void * dealloc_arg, void * a_treen)" ", " 
-.IR "void * a_dealloc_arg" )
-.br
+.RI ( "cw_treen_t *a_treen" ", " 
+.IR "void (*a_dealloc_func)(void *dealloc_arg, void *a_treen)" ", " 
+.IR "void *a_dealloc_arg" )
+.RS
 Input(s):
 .RS
 .IR a_treen :
@@ -111,8 +111,8 @@ Constructor.
 .I void
 .br
 .B treen_delete
-.RI ( "cw_treen_t * a_treen" )
-.br
+.RI ( "cw_treen_t *a_treen" )
+.RS
 Input(s):
 .RS
 .IR a_treen :
@@ -133,8 +133,8 @@ Destructor.
 .I void
 .br
 .B treen_link
-.RI ( "cw_treen_t * a_treen" ", " "cw_treen_t * a_parent" )
-.br
+.RI ( "cw_treen_t *a_treen" ", " "cw_treen_t *a_parent" )
+.RS
 Input(s):
 .RS
 .IR a_treen :
@@ -161,8 +161,8 @@ ring, starting at \fBtreen_get_child\fR(a_parent) will get to a_treen last.
 .I cw_treen_t *
 .br
 .B treen_get_parent
-.RI ( "cw_treen_t * a_treen" )
-.br
+.RI ( "cw_treen_t *a_treen" )
+.RS
 Input(s):
 .RS
 .IR a_treen :
@@ -188,8 +188,8 @@ Return a pointer to a_treen's parent.
 .I cw_treen_t *
 .br
 .B treen_get_child
-.RI ( "cw_treen_t * a_treen" )
-.br
+.RI ( "cw_treen_t *a_treen" )
+.RS
 Input(s):
 .RS
 .IR a_treen :
@@ -215,8 +215,8 @@ Return a pointer to a_treen's first child.
 .I cw_treen_t *
 .br
 .B treen_get_sibling
-.RI ( "cw_treen_t * a_treen" )
-.br
+.RI ( "cw_treen_t *a_treen" )
+.RS
 Input(s):
 .RS
 .IR a_treen :
@@ -242,8 +242,8 @@ Return a pointer to a_treen's sibling.
 .I void *
 .br
 .B treen_get_data_ptr
-.RI ( "cw_treen_t * a_treen" )
-.br
+.RI ( "cw_treen_t *a_treen" )
+.RS
 Input(s):
 .RS
 .IR a_treen :
@@ -267,8 +267,8 @@ Return a pointer to the data for a_treen.
 .I void
 .br
 .B treen_set_data_ptr
-.RI ( "cw_treen_t * a_treen" ", " "void * a_data" )
-.br
+.RI ( "cw_treen_t *a_treen" ", " "void *a_data" )
+.RS
 Input(s):
 .RS
 .IR a_treen :

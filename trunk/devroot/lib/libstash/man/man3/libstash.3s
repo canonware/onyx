@@ -51,12 +51,12 @@ cc -pg
 .I void *
 .br
 .B _cw_realloc
-.RI ( "void * a_ptr" ", " "size_t a_size" )
+.RI ( "void *a_ptr" ", " "size_t a_size" )
 
 .I void *
 .br
 .B _cw_free
-.RI ( "void * a_ptr" )
+.RI ( "void *a_ptr" )
 
 .I void
 .br
@@ -66,17 +66,17 @@ cc -pg
 .I void
 .br
 .B _cw_check_ptr
-.RI ( "void * a_ptr" )
+.RI ( "void *a_ptr" )
 
 .I void
 .br
 .B _cw_marker
-.RI ( "const char * a_str" )
+.RI ( "const char *a_str" )
 
 .I void
 .br
 .B _cw_error
-.RI ( "const char * a_str" )
+.RI ( "const char *a_str" )
 
 .I cw_uint64_t
 .br
@@ -234,7 +234,7 @@ Description:
 .I void *
 .br
 .B _cw_realloc
-.RI ( "void * a_ptr" ", " "size_t a_size" )
+.RI ( "void *a_ptr" ", " "size_t a_size" )
 .RS
 Input(s):
 .RS
@@ -267,7 +267,7 @@ Description:
 .I void *
 .br
 .B _cw_free
-.RI ( "void * a_ptr" )
+.RI ( "void *a_ptr" )
 .RS
 Input(s):
 .RS
@@ -314,7 +314,7 @@ Note: This macro is optimized out of the non-debug versions of the library.
 .I void
 .br
 .B _cw_check_ptr
-.RI ( "void * a_ptr" )
+.RI ( "void *a_ptr" )
 .RS
 Input(s):
 .RS
@@ -339,7 +339,7 @@ Note: This macro is optimized out of the non-debug versions of the library.
 .I void
 .br
 .B _cw_marker
-.RI ( "const char * a_str" )
+.RI ( "const char *a_str" )
 .RS
 Input(s):
 .RS
@@ -361,7 +361,7 @@ Print the contents of \fIa_str\fR to \fIcw_g_out\fR.
 .I void
 .br
 .B _cw_error
-.RI ( "const char * a_str" )
+.RI ( "const char *a_str" )
 .RS
 Input(s):
 .RS

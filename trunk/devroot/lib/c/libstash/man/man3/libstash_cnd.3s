@@ -16,33 +16,33 @@ cnd - Condition variable.
 .I cw_cnd_t *
 .br
 .B cnd_new
-.RI ( "cw_cnd_t * a_cnd" )
+.RI ( "cw_cnd_t *a_cnd" )
 
 .I void
 .br
 .B cnd_delete
-.RI ( "cw_cnd_t * a_cnd" )
+.RI ( "cw_cnd_t *a_cnd" )
 
 .I void
 .br
 .B cnd_signal
-.RI ( "cw_cnd_t * a_cnd" )
+.RI ( "cw_cnd_t *a_cnd" )
 
 .I void
 .br
 .B cnd_broadcast
-.RI ( "cw_cnd_t * a_cnd" )
+.RI ( "cw_cnd_t *a_cnd" )
 
 .I cw_bool_t
 .br
 .B cnd_timedwait
-.RI ( "cw_cnd_t * a_cnd" ", " "cw_mtx_t * a_mtx" ", " 
-.IR "const struct timespec * a_timeout" )
+.RI ( "cw_cnd_t *a_cnd" ", " "cw_mtx_t *a_mtx" ", " 
+.IR "const struct timespec *a_timeout" )
 
 .I void
 .br
 .B cnd_wait
-.RI ( "cw_cnd_t * a_cnd" ", " "cw_mtx_t * a_mtx" )
+.RI ( "cw_cnd_t *a_cnd" ", " "cw_mtx_t *a_mtx" )
 
 .SS Debugging (dbg) symbols
 None.
@@ -55,8 +55,8 @@ the \fBmtx\fR class to wait for a condition to occur.
 .I cw_cnd_t *
 .br
 .B cnd_new
-.RI ( "cw_cnd_t * a_cnd" )
-.br
+.RI ( "cw_cnd_t *a_cnd" )
+.RS
 Input(s):
 .RS
 .IR a_cnd :
@@ -82,8 +82,8 @@ Constructor.
 .I void
 .br
 .B cnd_delete
-.RI ( "cw_cnd_t * a_cnd" )
-.br
+.RI ( "cw_cnd_t *a_cnd" )
+.RS
 Input(s):
 .RS
 .IR a_cnd :
@@ -104,8 +104,8 @@ Destructor.
 .I void
 .br
 .B cnd_signal
-.RI ( "cw_cnd_t * a_cnd" )
-.br
+.RI ( "cw_cnd_t *a_cnd" )
+.RS
 Input(s):
 .RS
 .IR a_cnd :
@@ -126,8 +126,8 @@ Signal one thread waiting on a_cnd.
 .I void
 .br
 .B cnd_broadcast
-.RI ( "cw_cnd_t * a_cnd" )
-.br
+.RI ( "cw_cnd_t *a_cnd" )
+.RS
 Input(s):
 .RS
 .IR a_cnd :
@@ -148,9 +148,9 @@ Signal all threads waiting on a_cnd.
 .I cw_bool_t
 .br
 .B cnd_timedwait
-.RI ( "cw_cnd_t * a_cnd" ", " "cw_mtx_t * a_mtx" ", " 
-.IR "const struct timespec * a_timeout" )
-.br
+.RI ( "cw_cnd_t *a_cnd" ", " "cw_mtx_t *a_mtx" ", " 
+.IR "const struct timespec *a_timeout" )
+.RS
 Input(s):
 .RS
 .IR a_cnd :
@@ -184,8 +184,8 @@ Wait for a_cnd for at least a_time.
 .I void
 .br
 .B cnd_wait
-.RI ( "cw_cnd_t * a_cnd" ", " "cw_mtx_t * a_mtx" )
-.br
+.RI ( "cw_cnd_t *a_cnd" ", " "cw_mtx_t *a_mtx" )
+.RS
 Input(s):
 .RS
 .IR a_cnd :

@@ -16,48 +16,48 @@ res - Simple resource class.
 .I cw_res_t *
 .br
 .B res_new
-.RI ( "cw_res_t * a_res" )
+.RI ( "cw_res_t *a_res" )
 
 .I void
 .br
 .B res_delete
-.RI ( "cw_res_t * a_res" )
+.RI ( "cw_res_t *a_res" )
 
 .I void
 .br
 .B res_clear
-.RI ( "cw_res_t * a_res" )
+.RI ( "cw_res_t *a_res" )
 
 .I cw_bool_t
 .br
 .B res_is_equal
-.RI ( "cw_res_t * a_a" ", " "cw_res_t * a_b" )
+.RI ( "cw_res_t *a_a" ", " "cw_res_t *a_b" )
 
 .I cw_bool_t
 .br
 .B res_merge_file
-.RI ( "cw_res_t * a_res" ", " "const char * a_filename" )
+.RI ( "cw_res_t *a_res" ", " "const char *a_filename" )
 
 .I cw_bool_t
 .br
 .B res_merge_list
-.RI ( "cw_res_t * a_res" ", " "..." )
+.RI ( "cw_res_t *a_res" ", " "..." )
 
 .I const char *
 .br
 .B res_get_res_val
-.RI ( "cw_res_t * a_res" ", " "const char * a_res_name" )
+.RI ( "cw_res_t *a_res" ", " "const char *a_res_name" )
 
 .I cw_bool_t
 .br
 .B res_extract_res
-.RI ( "cw_res_t * a_res" ", " "const char * a_res_key" ", " 
-.IR "char ** r_res_name" ", " "char ** r_res_val" )
+.RI ( "cw_res_t *a_res" ", " "const char *a_res_key" ", " 
+.IR "char **r_res_name" ", " "char **r_res_val" )
 
 .I cw_bool_t
 .br
 .B res_dump
-.RI ( "cw_res_t * a_res" ", " "const char * a_filename" )
+.RI ( "cw_res_t *a_res" ", " "const char *a_filename" )
 
 .SS Debugging (dbg) symbols
 .TP
@@ -208,8 +208,8 @@ Epsilon.
 .I cw_res_t *
 .br
 .B res_new
-.RI ( "cw_res_t * a_res" )
-.br
+.RI ( "cw_res_t *a_res" )
+.RS
 Input(s):
 .RS
 .IR a_res :
@@ -235,8 +235,8 @@ Constructor.
 .I void
 .br
 .B res_delete
-.RI ( "cw_res_t * a_res" )
-.br
+.RI ( "cw_res_t *a_res" )
+.RS
 Input(s):
 .RS
 .IR a_res :
@@ -257,8 +257,8 @@ Destructor.
 .I void
 .br
 .B res_clear
-.RI ( "cw_res_t * a_res" )
-.br
+.RI ( "cw_res_t *a_res" )
+.RS
 Input(s):
 .RS
 .IR a_res :
@@ -279,8 +279,8 @@ Clear all resources.
 .I cw_bool_t
 .br
 .B res_is_equal
-.RI ( "cw_res_t * a_a" ", " "cw_res_t * a_b" )
-.br
+.RI ( "cw_res_t *a_a" ", " "cw_res_t *a_b" )
+.RS
 Input(s):
 .RS
 .IR a_a :
@@ -310,8 +310,8 @@ If a_res and a_other are equivalent, return TRUE, otherwise FALSE.
 .I cw_bool_t
 .br
 .B res_merge_file
-.RI ( "cw_res_t * a_res" ", " "const char * a_filename" )
-.br
+.RI ( "cw_res_t *a_res" ", " "const char *a_filename" )
+.RS
 Input(s):
 .RS
 .IR a_res :
@@ -341,8 +341,8 @@ Merge the resources contained in a_filename into the resource database.
 .I cw_bool_t
 .br
 .B res_merge_list
-.RI ( "cw_res_t * a_res" ", " "..." )
-.br
+.RI ( "cw_res_t *a_res" ", " "..." )
+.RS
 Input(s):
 .RS
 .IR a_res :
@@ -372,8 +372,8 @@ Merge the resources (...) into the resource database (a_res).
 .I const char *
 .br
 .B res_get_res_val
-.RI ( "cw_res_t * a_res" ", " "const char * a_res_name" )
-.br
+.RI ( "cw_res_t *a_res" ", " "const char *a_res_name" )
+.RS
 Input(s):
 .RS
 .IR a_res :
@@ -403,9 +403,9 @@ Return the value associoted with a_res_name if it exists.
 .I cw_bool_t
 .br
 .B res_extract_res
-.RI ( "cw_res_t * a_res" ", " "const char * a_res_key" ", " 
-.IR "char ** r_res_name" ", " "char ** r_res_val" )
-.br
+.RI ( "cw_res_t *a_res" ", " "const char *a_res_key" ", " 
+.IR "char **r_res_name" ", " "char **r_res_val" )
+.RS
 Input(s):
 .RS
 .IR a_res :
@@ -457,8 +457,8 @@ TRUE.
 .I cw_bool_t
 .br
 .B res_dump
-.RI ( "cw_res_t * a_res" ", " "const char * a_filename" )
-.br
+.RI ( "cw_res_t *a_res" ", " "const char *a_filename" )
+.RS
 Input(s):
 .RS
 .IR a_res :

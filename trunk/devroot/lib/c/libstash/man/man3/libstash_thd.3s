@@ -16,18 +16,18 @@ thd - Thread.
 .I cw_thd_t *
 .br
 .B thd_new
-.RI ( "cw_thd_t * a_thd" ", " "void * (*a_start_func)(void *)" ", " 
-.IR "void * a_arg" )
+.RI ( "cw_thd_t *a_thd" ", " "void *(*a_start_func)(void *)" ", " 
+.IR "void *a_arg" )
 
 .I void
 .br
 .B thd_delete
-.RI ( "cw_thd_t * a_thd" )
+.RI ( "cw_thd_t *a_thd" )
 
 .I void *
 .br
 .B thd_join
-.RI ( "cw_thd_t * a_thd" )
+.RI ( "cw_thd_t *a_thd" )
 
 .I void
 .br
@@ -37,7 +37,7 @@ thd - Thread.
 .I int
 .br
 .B thd_sigmask
-.RI ( "int a_action" ", " "sigset_t * a_sigset" )
+.RI ( "int a_action" ", " "sigset_t *a_sigset" )
 
 .SS Debugging (dbg) symbols
 None.
@@ -49,9 +49,9 @@ None.
 .I cw_thd_t *
 .br
 .B thd_new
-.RI ( "cw_thd_t * a_thd" ", " "void * (*a_start_func)(void *)" ", " 
-.IR "void * a_arg" )
-.br
+.RI ( "cw_thd_t *a_thd" ", " "void *(*a_start_func)(void *)" ", " 
+.IR "void *a_arg" )
+.RS
 Input(s):
 .RS
 .IR a_thd :
@@ -85,8 +85,8 @@ Constructor (creates new thread).
 .I void
 .br
 .B thd_delete
-.RI ( "cw_thd_t * a_thd" )
-.br
+.RI ( "cw_thd_t *a_thd" )
+.RS
 Input(s):
 .RS
 .IR a_thd :
@@ -107,8 +107,8 @@ Destructor.
 .I void *
 .br
 .B thd_join
-.RI ( "cw_thd_t * a_thd" )
-.br
+.RI ( "cw_thd_t *a_thd" )
+.RS
 Input(s):
 .RS
 .IR a_thd :
@@ -133,7 +133,7 @@ Join (wait for) the thread associated with a_thd.
 .br
 .B thd_yield
 .RI ( "void" )
-.br
+.RS
 Input(s):
 .RS
 None.
@@ -151,8 +151,8 @@ Give up the rest of this thread's time slice.
 .I int
 .br
 .B thd_sigmask
-.RI ( "int a_action" ", " "sigset_t * a_sigset" )
-.br
+.RI ( "int a_action" ", " "sigset_t *a_sigset" )
+.RS
 Input(s):
 .RS
 .IR a_action :

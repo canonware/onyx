@@ -110,7 +110,7 @@ the number of items can vary wildly.
 .B ch_new
 .RI ( "cw_ch_t *a_ch" ", " "cw_uint32_t a_table_size" ", "
 .IR "cw_ch_hash_t *a_hash" ", " "cw_ch_key_comp_t *a_key_comp" )
-.br
+.RS
 Input(s):
 .RS
 .IR a_ch :
@@ -151,7 +151,7 @@ Constructor.
 .br
 .B ch_delete
 .RI ( "cw_ch_t *a_ch" )
-.br
+.RS
 Input(s):
 .RS
 .IR a_ch :
@@ -173,7 +173,7 @@ Destructor.
 .br
 .B ch_count
 .RI ( "cw_ch_t *a_ch" )
-.br
+.RS
 Input(s):
 .RS
 .IR a_ch :
@@ -199,7 +199,7 @@ Return the number of items in a_ch.
 .B ch_insert
 .RI ( "cw_ch_t *a_ch" ", " "const void *a_key" ", " "const void *a_data"
 .RI ", " "cw_chi_t *a_chi" )
-.br
+.RS
 Input(s):
 .RS
 .IR a_ch :
@@ -240,7 +240,7 @@ container if non-NULL.
 .B ch_remove
 .RI ( "cw_ch_t *a_ch" ", " "const void *a_search_key" ", " "void **r_key" ", "
 .IR "void **r_data" ", " "cw_chi_t **r_chi" )
-.br
+.RS
 Input(s):
 .RS
 .IR a_ch :
@@ -303,7 +303,7 @@ data, and externally allocated chi, respectively.
 .br
 .B ch_search
 .RI ( "cw_ch_t *a_ch" ", " "const void *a_key" ", " "void **r_data" )
-.br
+.RS
 Input(s):
 .RS
 .IR a_ch :
@@ -343,7 +343,7 @@ point to the associated data.
 .br
 .B ch_get_iterate
 .RI ( "cw_ch_t *a_ch" ", "  "void **r_key" ", " "void **r_data" )
-.br
+.RS
 Input(s):
 .RS
 .IR a_ch :
@@ -392,7 +392,7 @@ that it is the newest item in a_ch.
 .B ch_remove_iterate
 .RI ( "cw_ch_t *a_ch" ", " "void **r_key" ", " "void **r_data" ", "
 .IR "cw_chi_t **r_chi" )
-.br
+.RS
 Input(s):
 .RS
 .IR a_ch :
@@ -450,7 +450,7 @@ to the item's container, if externally allocated, and remove the item from a_ch.
 .br
 .B ch_dump
 .RI ( "cw_ch_t *a_ch" ", " "const char *a_prefix" )
-.br
+.RS
 Input(s):
 .RS
 .IR a_ch :
@@ -476,7 +476,7 @@ Print the internal state of a_ch.
 .br
 .B ch_hash_string
 .RI ( "const void *a_key" )
-.br
+.RS
 Input(s):
 .RS
 .IR a_key :
@@ -501,7 +501,7 @@ NULL-terminated string hashing function.
 .br
 .B ch_hash_direct
 .RI ( "const void *a_key" )
-.br
+.RS
 Input(s):
 .RS
 .IR a_key :
@@ -526,7 +526,7 @@ Direct (pointer) hashing function.
 .br
 .B ch_key_comp_string
 .RI ( "const void *a_k1" ", " "const void *a_k2" )
-.br
+.RS
 Input(s):
 .RS
 .IR a_k1 :
@@ -557,7 +557,7 @@ Test two keys (NULL-terminated strings) for equality.
 .br
 .B ch_key_comp_direct
 .RI ( "const void *a_k1" ", " "const void *a_k2" )
-.br
+.RS
 Input(s):
 .RS
 .IR a_k1 :

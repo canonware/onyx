@@ -16,55 +16,55 @@ pezz - Grouped memory allocation of equal-size buffers.
 .I cw_pezz_t *
 .br
 .B pezz_new
-.RI ( "cw_pezz_t * a_pezz" ", " "cw_uint32_t a_buffer_size" ", "
+.RI ( "cw_pezz_t *a_pezz" ", " "cw_uint32_t a_buffer_size" ", "
 .IR "cw_uint32_t a_num_buffers" )
 
 .I void
 .br
 .B pezz_delete
-.RI ( "cw_pezz_t * a_pezz" )
+.RI ( "cw_pezz_t *a_pezz" )
 
 .I cw_uint32_t
 .br
 .B pezz_get_buffer_size
-.RI ( "cw_pezz_t * a_pezz" )
+.RI ( "cw_pezz_t *a_pezz" )
 
 .I void *
 .br
 .B pezz_get
-.RI ( "cw_pezz_t * a_pezz" )
+.RI ( "cw_pezz_t *a_pezz" )
 .br
 .I void *
 .br
 .B pezz_get_e
-.RI ( "cw_pezz_t * a_pezz" ", " "const char * a_filename" ", " 
+.RI ( "cw_pezz_t *a_pezz" ", " "const char *a_filename" ", " 
 .IR "cw_uint32_t a_line_num" )
 .br
 .I void *
 .br
 .B _cw_pezz_get
-.RI ( "cw_pezz_t * a_pezz" )
+.RI ( "cw_pezz_t *a_pezz" )
 
 .I void
 .br
 .B pezz_put
-.RI ( "cw_pezz_t * a_pezz" ", " "void * a_buffer" )
+.RI ( "cw_pezz_t *a_pezz" ", " "void *a_buffer" )
 .br
 .I void
 .br
 .B pezz_put
-.RI ( "cw_pezz_t * a_pezz" ", " "void * a_buffer" ", " 
-.IR "const char * a_filename" ", " "cw_uint32_t a_line_num" )
+.RI ( "cw_pezz_t *a_pezz" ", " "void *a_buffer" ", " 
+.IR "const char *a_filename" ", " "cw_uint32_t a_line_num" )
 .br
 .I void
 .br
 .B _cw_pezz_put
-.RI ( "cw_pezz_t * a_pezz" ", " "void * a_buffer" )
+.RI ( "cw_pezz_t *a_pezz" ", " "void *a_buffer" )
 
 .I void
 .br
 .B pezz_dump
-.RI ( "cw_pezz_t * a_pezz" ", " "const char * a_prefix" )
+.RI ( "cw_pezz_t *a_pezz" ", " "const char *a_prefix" )
 
 .SS Debugging (dbg) symbols
 .TP
@@ -85,9 +85,9 @@ is freed until \fBpezz_delete\fR() is called.
 .I cw_pezz_t *
 .br
 .B pezz_new
-.RI ( "cw_pezz_t * a_pezz" ", " "cw_uint32_t a_buffer_size" ", "
+.RI ( "cw_pezz_t *a_pezz" ", " "cw_uint32_t a_buffer_size" ", "
 .IR "cw_uint32_t a_num_buffers" )
-.br
+.RS
 Input(s):
 .RS
 .IR a_pezz :
@@ -122,8 +122,8 @@ Constructor.
 .I void
 .br
 .B pezz_delete
-.RI ( "cw_pezz_t * a_pezz" )
-.br
+.RI ( "cw_pezz_t *a_pezz" )
+.RS
 Input(s):
 .RS
 .IR a_pezz :
@@ -144,8 +144,8 @@ Destructor.
 .I cw_uint32_t
 .br
 .B pezz_get_buffer_size
-.RI ( "cw_pezz_t * a_pezz" )
-.br
+.RI ( "cw_pezz_t *a_pezz" )
+.RS
 Input(s):
 .RS
 .IR a_pezz :
@@ -169,19 +169,19 @@ Return the size of the buffers that a_pezz is using.
 .I void *
 .br
 .B pezz_get
-.RI ( "cw_pezz_t * a_pezz" )
+.RI ( "cw_pezz_t *a_pezz" )
 .br
 .I void *
 .br
 .B pezz_get_e
-.RI ( "cw_pezz_t * a_pezz" ", " "const char * a_filename" ", " 
+.RI ( "cw_pezz_t *a_pezz" ", " "const char *a_filename" ", " 
 .IR "cw_uint32_t a_line_num" )
 .br
 .I void *
 .br
 .B _cw_pezz_get
-.RI ( "cw_pezz_t * a_pezz" )
-.br
+.RI ( "cw_pezz_t *a_pezz" )
+.RS
 Input(s):
 .RS
 .IR a_pezz :
@@ -215,19 +215,19 @@ Allocate a memory buffer and return a pointer to it.
 .I void
 .br
 .B pezz_put
-.RI ( "cw_pezz_t * a_pezz" ", " "void * a_buffer" )
+.RI ( "cw_pezz_t *a_pezz" ", " "void *a_buffer" )
 .br
 .I void
 .br
 .B pezz_put_e
-.RI ( "cw_pezz_t * a_pezz" ", " "void * a_buffer" ", " 
-.IR "const char * a_filename" ", " "cw_uint32_t a_line_num" )
+.RI ( "cw_pezz_t *a_pezz" ", " "void *a_buffer" ", " 
+.IR "const char *a_filename" ", " "cw_uint32_t a_line_num" )
 .br
 .I void
 .br
 .B _cw_pezz_put
-.RI ( "cw_pezz_t * a_pezz" ", " "void * a_buffer" )
-.br
+.RI ( "cw_pezz_t *a_pezz" ", " "void *a_buffer" )
+.RS
 Input(s):
 .RS
 .IR a_pezz :
@@ -260,8 +260,8 @@ Put back (deallocate) a_buffer.
 .I void
 .br
 .B pezz_dump
-.RI ( "cw_pezz_t * a_pezz" ", " "const char * a_prefix" )
-.br
+.RI ( "cw_pezz_t *a_pezz" ", " "const char *a_prefix" )
+.RS
 Input(s):
 .RS
 .IR a_pezz :

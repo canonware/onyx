@@ -22,22 +22,22 @@ dbg - Dynamic debug spew.
 .I void
 .br
 .B dbg_delete
-.RI ( "cw_dbg_t * a_dbg" )
+.RI ( "cw_dbg_t *a_dbg" )
 
 .I cw_bool_t
 .br
 .B dbg_register
-.RI ( "cw_dbg_t * a_dbg" ", " "const char * a_flag" )
+.RI ( "cw_dbg_t *a_dbg" ", " "const char *a_flag" )
 
 .I void
 .br
 .B dbg_unregister
-.RI ( "cw_dbg_t * a_dbg" ", " "const char * a_flag" )
+.RI ( "cw_dbg_t *a_dbg" ", " "const char *a_flag" )
 
 .I cw_bool_t
 .br
 .B dbg_is_registered
-.RI ( "cw_dbg_t * a_dbg" ", " "const char * a_flag" )
+.RI ( "cw_dbg_t *a_dbg" ", " "const char *a_flag" )
 
 .SS Debugging (dbg) symbols
 N/A.
@@ -54,7 +54,7 @@ symbol is registered.
 .br
 .B dbg_new
 .RI ( "void" )
-.br
+.RS
 Input(s):
 .RS
 None.
@@ -77,8 +77,8 @@ Constructor.
 .I void
 .br
 .B dbg_delete
-.RI ( "cw_dbg_t * a_dbg" )
-.br
+.RI ( "cw_dbg_t *a_dbg" )
+.RS
 Input(s):
 .RS
 .IR a_dbg :
@@ -99,8 +99,8 @@ Destructor.
 .I cw_bool_t
 .br
 .B dbg_register
-.RI ( "cw_dbg_t * a_dbg" ", " "const char * a_flag" )
-.br
+.RI ( "cw_dbg_t *a_dbg" ", " "const char *a_flag" )
+.RS
 Input(s):
 .RS
 .IR a_dbg :
@@ -130,8 +130,8 @@ Register a debug flag string (turn it on).
 .I void
 .br
 .B dbg_unregister
-.RI ( "cw_dbg_t * a_dbg" ", " "const char * a_flag" )
-.br
+.RI ( "cw_dbg_t *a_dbg" ", " "const char *a_flag" )
+.RS
 Input(s):
 .RS
 .IR a_dbg :
@@ -156,8 +156,8 @@ Unregister a flag (turn it off) if it is registered.
 .I cw_bool_t
 .br
 .B dbg_is_registered
-.RI ( "cw_dbg_t * a_dbg" ", " "const char * a_flag" )
-.br
+.RI ( "cw_dbg_t *a_dbg" ", " "const char *a_flag" )
+.RS
 Input(s):
 .RS
 .IR a_dbg :

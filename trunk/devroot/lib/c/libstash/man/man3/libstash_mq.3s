@@ -16,52 +16,52 @@ mq - Message queue.
 .I cw_mq_t *
 .br
 .B mq_new
-.RI ( "cw_mq_t * a_mq" )
+.RI ( "cw_mq_t *a_mq" )
 
 .I void
 .br
 .B mq_delete
-.RI ( "cw_mq_t * a_mq" )
+.RI ( "cw_mq_t *a_mq" )
 
 .I void *
 .br
 .B mq_tryget
-.RI ( "cw_mq_t * a_mq" )
+.RI ( "cw_mq_t *a_mq" )
 
 .I void *
 .br
 .B mq_timedget
-.RI ( "cw_mq_t * a_mq" ", " "const struct timespec * a_timeout" )
+.RI ( "cw_mq_t *a_mq" ", " "const struct timespec *a_timeout" )
 
 .I void *
 .br
 .B mq_get
-.RI ( "cw_mq_t * a_mq" )
+.RI ( "cw_mq_t *a_mq" )
 
 .I cw_sint32_t
 .br
 .B mq_put
-.RI ( "cw_mq_t * a_mq" ", " "const void * a_message" )
+.RI ( "cw_mq_t *a_mq" ", " "const void *a_message" )
 
 .I cw_bool_t
 .br
 .B mq_start_get
-.RI ( "cw_mq_t * a_mq" )
+.RI ( "cw_mq_t *a_mq" )
 
 .I cw_bool_t
 .br
 .B mq_stop_get
-.RI ( "cw_mq_t * a_mq" )
+.RI ( "cw_mq_t *a_mq" )
 
 .I cw_bool_t
 .br
 .B mq_start_put
-.RI ( "cw_mq_t * a_mq" )
+.RI ( "cw_mq_t *a_mq" )
 
 .I cw_bool_t
 .br
 .B mq_stop_put
-.RI ( "cw_mq_t * a_mq" )
+.RI ( "cw_mq_t *a_mq" )
 
 .SS Debugging (dbg) symbols
 None.
@@ -75,8 +75,8 @@ or put.  This provides a simple out of band state transition capability.
 .I cw_mq_t *
 .br
 .B mq_new
-.RI ( "cw_mq_t * a_mq" )
-.br
+.RI ( "cw_mq_t *a_mq" )
+.RS
 Input(s):
 .RS
 .IR a_mq :
@@ -102,8 +102,8 @@ Constructor.
 .I void
 .br
 .B mq_delete
-.RI ( "cw_mq_t * a_mq" )
-.br
+.RI ( "cw_mq_t *a_mq" )
+.RS
 Input(s):
 .RS
 .IR a_mq :
@@ -124,8 +124,8 @@ Destructor.
 .I void *
 .br
 .B mq_tryget
-.RI ( "cw_mq_t * a_mq" )
-.br
+.RI ( "cw_mq_t *a_mq" )
+.RS
 Input(s):
 .RS
 .IR a_mq :
@@ -151,8 +151,8 @@ Try to get a message, but return NULL if none are available.
 .I void *
 .br
 .B mq_timedget
-.RI ( "cw_mq_t * a_mq" ", " "const struct timespec * a_timeout" )
-.br
+.RI ( "cw_mq_t *a_mq" ", " "const struct timespec *a_timeout" )
+.RS
 Input(s):
 .RS
 .IR a_mq :
@@ -183,8 +183,8 @@ until timeout.
 .I void *
 .br
 .B mq_get
-.RI ( "cw_mq_t * a_mq" )
-.br
+.RI ( "cw_mq_t *a_mq" )
+.RS
 Input(s):
 .RS
 .IR a_mq :
@@ -210,8 +210,8 @@ Get a message.  If none are available, block until a message is available.
 .I cw_sint32_t
 .br
 .B mq_put
-.RI ( "cw_mq_t * a_mq" ", " "const void * a_message" )
-.br
+.RI ( "cw_mq_t *a_mq" ", " "const void *a_message" )
+.RS
 Input(s):
 .RS
 .IR a_mq :
@@ -243,8 +243,8 @@ Put a message in a_mq.
 .I cw_bool_t
 .br
 .B mq_start_get
-.RI ( "cw_mq_t * a_mq" )
-.br
+.RI ( "cw_mq_t *a_mq" )
+.RS
 Input(s):
 .RS
 .IR a_mq :
@@ -271,8 +271,8 @@ NULL).
 .I cw_bool_t
 .br
 .B mq_stop_get
-.RI ( "cw_mq_t * a_mq" )
-.br
+.RI ( "cw_mq_t *a_mq" )
+.RS
 Input(s):
 .RS
 .IR a_mq :
@@ -298,8 +298,8 @@ Change the get operation to the stop state (\fBmq_get\fR() will return NULL).
 .I cw_bool_t
 .br
 .B mq_start_put
-.RI ( "cw_mq_t * a_mq" )
-.br
+.RI ( "cw_mq_t *a_mq" )
+.RS
 Input(s):
 .RS
 .IR a_mq :
@@ -325,8 +325,8 @@ Change the put operation to the start state (\fBmq_put\fR() will not return 1).
 .I cw_bool_t
 .br
 .B mq_stop_put
-.RI ( "cw_mq_t * a_mq" )
-.br
+.RI ( "cw_mq_t *a_mq" )
+.RS
 Input(s):
 .RS
 .IR a_mq :

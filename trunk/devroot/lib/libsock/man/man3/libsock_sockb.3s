@@ -32,7 +32,7 @@ sockb - Back end I/O thread.
 .I cw_bool_t
 .br
 .B sockb_in_notify
-.RI ( "cw_mq_t * a_mq" ", " "int a_sockfd" )
+.RI ( "cw_mq_t *a_mq" ", " "int a_sockfd" )
 
 .SS Debugging (dbg) symbols
 .TP
@@ -70,7 +70,7 @@ writing seem completely asynchronous at the \fBsock\fR interface level.
 .B sockb_init
 .RI ( "cw_uint32_t a_max_fds" ", " "cw_uint32_t a_bufc_size" ", "
 .IR "cw_uint32_t a_max_spare_bufcs" )
-.br
+.RS
 Input(s):
 .RS
 .IR a_max_fds :
@@ -108,7 +108,7 @@ Global initializer for g_sockb and the I/O thread.
 .br
 .B sockb_shutdown
 .RI ( "void" )
-.br
+.RS
 Input(s):
 .RS
 None.
@@ -127,7 +127,7 @@ Global shutdown for g_sockb.
 .br
 .B sockb_get_spare_bufc
 .RI ( "void" )
-.br
+.RS
 Input(s):
 .RS
 None.
@@ -152,8 +152,8 @@ be of the size specified by the a_bufc_size parameter passed to
 .I cw_bool_t
 .br
 .B sockb_in_notify
-.RI ( "cw_mq_t * a_mq" ", " "int a_sockfd" )
-.br
+.RI ( "cw_mq_t *a_mq" ", " "int a_sockfd" )
+.RS
 Input(s):
 .RS
 .IR a_mq :
