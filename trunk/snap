@@ -42,15 +42,23 @@ use File::Find; # For find().
 use FileHandle; # For file manipulation.
 use Getopt::Long;
 
-# XXX The following variable(s) should be set according to the needs of the
-# project.
-$dot = "lib_master";
+# XXX Path of this script relative to cvsroot.
+$dot = ".";
 
+# XXX Add values to the %COPYRIGHT associative array as shown below to add 
+# copyright holder tag keys.  This allows substition of tags that look like:
+#
+# <Copyright = "jasone">
+#
 $COPYRIGHT{"jasone", 0} 
 = "Copyright (C) 1996-1999 Jason Evans <jasone\@canonware.com>.";
 $COPYRIGHT{"jasone", 1}
 = "All rights reserved.";
 
+# XXX The contents of @LICENSE are substituted for tags that look like:
+#
+# <License>
+#
 @LICENSE = 
 (
  '',
@@ -140,7 +148,7 @@ if ($opt_verbose)
   }
 unless ($opt_noact)
   {
-    finddepth(\&expand_copyright, "$opt_subdir\_$opt_tag");
+    finddepth(\&expand_tags, "$opt_subdir\_$opt_tag");
   }
 
 if ($opt_verbose)
@@ -162,7 +170,7 @@ $0 usage:
 EOF
   }
 
-sub expand_copyright
+sub expand_tags
   {
     my ($name) = $_;
     my ($did_subst) = 0;
