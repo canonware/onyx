@@ -722,7 +722,17 @@ out_put_svn(cw_out_t * a_out, char * a_str, cw_uint32_t a_size,
 	  /* Find the type string. */
 	  type_len = spec_get_type(&a_format[i], spec_len, &type);
 	  _cw_assert(0 <= type_len);
-
+	  
+	  /* XXX */
+/*  	  { */
+/*  	    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
+/*  			"Specifier :"); */
+/*  	    log_nprintf(cw_g_log, spec_len, "%s", &a_format[i]); */
+/*  	    log_printf(cw_g_log, ": arg %x %x %x %x\n", */
+/*  		       0xff & ((char *) a_p)[0], 0xff &((char *) a_p)[1], */
+/*  		       0xff & ((char *) a_p)[2], 0xff & ((char *) a_p)[3]); */
+/*  	  } */
+	  
 	  ent = out_p_get_ent(a_out, type, type_len);
 	  _cw_assert(NULL != ent);
 	
@@ -1399,6 +1409,15 @@ out_p_metric_int(const char * a_format, cw_uint32_t a_len,
   char * result, s_result[65] =
     "0000000000000000000000000000000000000000000000000000000000000000";
 
+  /* XXX */
+/*    { */
+/*      char buf[17]; */
+    
+/*      log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
+/*  		"arg: 0x%s\n", */
+/*  		log_print_uint64(arg, 16, buf)); */
+/*    } */
+  
   _cw_assert((8 == a_nbits) || (16 == a_nbits)
 	     || (32 == a_nbits) || (64 == a_nbits));
 
@@ -1517,6 +1536,15 @@ out_p_render_int(const char * a_format, cw_uint32_t a_len,
   char * syms = "0123456789abcdefghijklmnopqrstuvwxyz";
   char * result, s_result[65] =
     "0000000000000000000000000000000000000000000000000000000000000000";
+
+  /* XXX */
+/*    { */
+/*      char buf[17]; */
+    
+/*      log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
+/*  		"arg: 0x%s\n", */
+/*  		log_print_uint64(arg, 16, buf)); */
+/*    } */
 
   _cw_assert((8 == a_nbits) || (16 == a_nbits)
 	     || (32 == a_nbits) || (64 == a_nbits));
@@ -1681,7 +1709,16 @@ out_p_metric_int8(const char * a_format, cw_uint32_t a_len,
 		  const void * a_arg)
 {
   cw_sint32_t retval;
-  cw_uint64_t arg = (cw_uint64_t) *(const cw_uint8_t *) a_arg;
+  cw_uint64_t arg = (cw_uint64_t) *(const cw_uint32_t *) a_arg;
+  
+  /* XXX */
+/*    { */
+/*      char buf[17]; */
+    
+/*      log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
+/*  		"arg: 0x%s\n", */
+/*  		log_print_uint64(arg, 16, buf)); */
+/*    } */
   
   retval = out_p_metric_int(a_format, a_len, arg, 8, 10);
 
@@ -1693,7 +1730,7 @@ out_p_render_int8(const char * a_format, cw_uint32_t a_len,
 		  const void * a_arg, char * r_buf)
 {
   char * retval;
-  cw_uint64_t arg = (cw_uint64_t) *(const cw_uint8_t *) a_arg;
+  cw_uint64_t arg = (cw_uint64_t) *(const cw_uint32_t *) a_arg;
 
   retval = out_p_render_int(a_format, a_len, arg, r_buf, 8, 10);
 
@@ -1705,7 +1742,7 @@ out_p_metric_int16(const char * a_format, cw_uint32_t a_len,
 		   const void * a_arg)
 {
   cw_sint32_t retval;
-  cw_uint64_t arg = (cw_uint64_t) *(const cw_uint16_t *) a_arg;
+  cw_uint64_t arg = (cw_uint64_t) *(const cw_uint32_t *) a_arg;
   
   retval = out_p_metric_int(a_format, a_len, arg, 16, 10);
 
@@ -1717,7 +1754,7 @@ out_p_render_int16(const char * a_format, cw_uint32_t a_len,
 		   const void * a_arg, char * r_buf)
 {
   char * retval;
-  cw_uint64_t arg = (cw_uint64_t) *(const cw_uint16_t *) a_arg;
+  cw_uint64_t arg = (cw_uint64_t) *(const cw_uint32_t *) a_arg;
 
   retval = out_p_render_int(a_format, a_len, arg, r_buf, 16, 10);
 
@@ -1807,7 +1844,7 @@ out_p_render_char(const char * a_format, cw_uint32_t a_len,
   cw_uint32_t width;
   cw_sint32_t val_len;
   const char * val;
-  cw_uint8_t pad, c = *(const cw_uint8_t *) a_arg;
+  cw_uint8_t pad, c = *(const cw_uint32_t *) a_arg;
 
   width = out_p_metric_char(a_format, a_len, a_arg);
 
