@@ -12,6 +12,7 @@
 #include "../include/libstil/libstil.h"
 
 #include <ctype.h>
+#include <limits.h>
 
 /*
  * If defined, inline oft-used functions for improved performance (and slightly

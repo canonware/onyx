@@ -1,3 +1,8 @@
+2000-05-23  Jason Evans  <jasone@canonware.com>
+
+	* include/libstash/queue.h: Change the names of all macros in order to
+	avoid namespace collisions.
+
 2000-05-02  Jason Evans  <jasone@canonware.com>
 
 	* include/libstash/out.h: Add _cw_out_put_[fs]{n}().

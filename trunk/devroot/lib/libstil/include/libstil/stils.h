@@ -38,7 +38,7 @@ typedef struct cw_stilsc_s cw_stilsc_t;
 
 struct cw_stilso_s {
 	cw_stilo_t	stilo;		/* Payload.  Must be first field. */
-	RING_ENTRY(cw_stilso_s)	link;	/* Stack/spares ring linkage. */
+	_cw_ring_entry(cw_stilso_t) link;/* Stack/spares ring linkage. */
 };
 
 struct cw_stilsc_s {
@@ -48,7 +48,8 @@ struct cw_stilsc_s {
 
 	cw_pezz_t	*allocator;
 
-	SLIST_ENTRY(cw_stilsc_s) link;	/* Linkage for the list of stilsc's. */
+	/* Linkage for the list of stilsc's. */
+	_cw_slist_entry(cw_stilsc_t) link;
 
 	/*
 	 * Must be last field, since it is used for array indexing of
@@ -70,7 +71,7 @@ struct cw_stils_s {
 
 	cw_pezz_t	*stilsc_pezz;	/* Allocator for stilsc's. */
 
-	SLIST_HEAD(, cw_stilsc_s) chunks; /* List of stilsc's. */
+	_cw_slist_head(, cw_stilsc_t) chunks; /* List of stilsc's. */
 };
 
 cw_stils_t	*stils_new(cw_stils_t *a_stils, cw_pezz_t *a_stilsc_pezz);
