@@ -7,7 +7,7 @@
  *
  * Version: <Version>
  *
- * Master Canonware Cookfile.
+ * Master Onyx Cookfile.
  *
  ******************************************************************************/
 
@@ -61,14 +61,6 @@ mods = @mods@;
 bins = @bins@;
 
 BOOTSTRAP = ;
-
-/*
- * For cleanliness purposes, it would be nice to have this in libstash's
- * Cookfile.inc, but that file doesn't get processed by configure.  In practice,
- * this isn't so bad, since everything depends on libstash, making it a surety
- * that libstash is part of this build.
- */
-HAVE_LIBSTASH_BUF = @enable_libstash_buf@;
 
 /* Documentation. */
 #include-cooked [srcdir]/doc/Cookfile.inc
