@@ -81,6 +81,12 @@ libonyx_init(void)
 	}
     }
     xep_end();
+
+#ifdef CW_POSIX
+    /* Ignore SIGPIPE, so that writing to a closed socket won't crash the
+     * program. */
+    signal(SIGPIPE, SIG_IGN);
+#endif
 }
 
 void
