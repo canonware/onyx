@@ -62,10 +62,10 @@ SRCS = [SRCS] [STIL_SRCS];
                  sdup_d.st.in search.st.in sindex_a.st.in sindex_b.st.in
                  sindex_c.st.in sindex_d.st.in sindex_e.st.in sindex_f.st.in
                  sindex_g.st.in spop_a.st.in spop_b.st.in spop_c.st.in
-                 spop_d.st.in spush_a.st.in spush_b.st.in spush_c.st.in
-                 spush_d.st.in sroll_a.st.in sroll_b.st.in sroll_c.st.in
-                 sroll_d.st.in sroll_e.st.in sroll_f.st.in sroll_g.st.in
-                 sroll_h.st.in sroll_i.st.in syntaxerror_a.st.in
+                 spop_d.st.in sprint_a.st.in spush_a.st.in spush_b.st.in
+                 spush_c.st.in spush_d.st.in sroll_a.st.in sroll_b.st.in
+                 sroll_c.st.in sroll_d.st.in sroll_e.st.in sroll_f.st.in
+                 sroll_g.st.in sroll_h.st.in sroll_i.st.in syntaxerror_a.st.in
                  syntaxerror_b.st.in syntaxerror_c.st.in syntaxerror_d.st.in
                  syntaxerror_e.st.in syntaxerror_f.st.in syntaxerror_g.st.in
                  syntaxerror_h.st.in syntaxerror_i.st.in syntaxerror_j.st.in
