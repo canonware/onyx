@@ -156,9 +156,25 @@ struct cw_stiloe_s {
 struct cw_stiloe_name_s {
 	cw_stiloe_t	stiloe;
 	/*
-	 * Key.  The value is a pointer to this stiloe.
+	 * Always the value of the root name stiloe, regardless of whether this
+	 * is a reference (local) or the root (global).  This allows fast access
+	 * to what is effectively the key for name comparisions.
 	 */
-	cw_stiln_t	key;
+	cw_stiloe_t	*val;
+	union {
+		/* Thread-specific (local) name.  Indirect object. */
+		struct {
+			cw_stilo_t	stilo;
+		}	i;
+		/* Root (global) name.  Direct object. */
+		struct {
+			/*
+			 * Key.  The value is a pointer to this stiloe, and is
+			 * always available via val (above).
+			 */
+			cw_stiln_t	key;
+		}	n;
+	}	e;
 };
 
 /*
@@ -169,7 +185,7 @@ void		stilo_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilot_t
 void		stilo_new_v(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
     cw_stilot_t a_type, va_list a_p);
 
-void		stilo_delete(cw_stilo_t *a_stilo);
+void		stilo_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
 
 cw_stilot_t	stilo_type_get(cw_stilo_t *a_stilo);
 
@@ -183,8 +199,10 @@ void		stilo_literal_set(cw_stilo_t *a_stilo, cw_bool_t a_literal);
 void		stilo_cast(cw_stilo_t *a_stilo, cw_stilot_t a_stilot);
 void		stilo_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t
     *a_stilt);
-void		stilo_dup(cw_stilo_t *a_to, cw_stilo_t *a_from);
-void		stilo_move(cw_stilo_t *a_to, cw_stilo_t *a_from);
+void		stilo_dup(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t
+    *a_stilt);
+void		stilo_move(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t
+    *a_stilt);
 
 void		stilo_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t
     a_syntactic, cw_bool_t a_newline);

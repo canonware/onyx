@@ -20,6 +20,9 @@
 #define _CW_STILN_BASE_GROW	400
 #define _CW_STILN_BASE_SHRINK	128
 
+/* XXX Functions that need this should be moved to stilo.c. */
+static void	stiloe_p_new(cw_stiloe_t *a_stiloe, cw_stilot_t a_type);
+
 /* For stilo only. */
 cw_stiloe_name_t *stiln_l_ref(cw_stilt_t *a_stilt, const char *a_str,
     cw_uint32_t a_len, cw_bool_t a_is_static);
@@ -58,7 +61,7 @@ stiln_l_ref(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len, cw_bool_t
 	cw_stiln_t		key;
 
 	/* Fake up a key so that we can search the hash tables. */
-	key.name = a_name;
+	key.name = a_str;
 	key.len = a_len;
 	   
 	if (stilt_currentglobal(a_stilt) == FALSE) {
@@ -72,8 +75,22 @@ stiln_l_ref(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len, cw_bool_t
 		stilnt = stilt_stilnt_get(a_stilt);
 		if (dch_search(&stilnt->hash, (void *)&key, (void **)&retval)) {
 			/* Not found in the per-thread name cache. */
-			retval = stiln_p_gref(a_stilt, a_str, a_len,
+			gname = stiln_p_gref(a_stilt, a_str, a_len,
 			    a_is_static);
+
+			retval = (cw_stiloe_name_t *)_cw_stilt_malloc(a_stilt,
+			    sizeof(cw_stlioe_name_t));
+
+			retval->val = gname;
+
+			/* XXX stilo-internal initialization. */
+			memset(&retval->e.i.stilo, 0, sizeof(cw_stilo_t));
+			retval->e.i.stilo.type = _CW_STILOT_NAMETYPE;
+			retval->e.i.stilo.stiloe = gname;
+
+			/* XXX */
+			stiloe_p_new(retval, _CW_STILOT_NAMETYPE);
+			retval->stiloe.indirect = TRUE;
 
 			/*
 			 * Insert a cached entry for this thread.
@@ -84,7 +101,6 @@ stiln_l_ref(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len, cw_bool_t
 	} else
 		retval = stiln_p_gref(a_stilt, a_str, a_len, a_is_static);
 
-	RETURN:
 	return retval;
 }
 
@@ -118,13 +134,15 @@ stiln_p_gref(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len,
 		retval = (cw_stiloe_name_t *)_cw_stilag_malloc(stilag,
 		    sizeof(cw_stiloe_name_t));
 
-		stiln_p_new(&retval->key, a_stilt, a_name, a_len,
+		retval->val = retval;
+
+		stiln_p_new(&retval->e.n.key, a_stilt, a_name, a_len,
 		    a_is_static);
 
 		/* XXX */
 		stiloe_p_new(retval, _CW_STILOT_NAMETYPE);
 
-		dch_insert(&stilng->hash, (void *)&retval->key, (void
+		dch_insert(&stilng->hash, (void *)&retval->e.n.key, (void
 		    **)retval, _cw_stilt_chi_get(a_stilt));
 	}
 	mtx_unlock(&stilng->lock);
@@ -134,10 +152,31 @@ stiln_p_gref(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len,
 
 /* Insert a keyed reference. */
 cw_bool_t
-stiln_l_gdict_insert(cw_stiln_t *a_stiln, const cw_stiloe_dict_t *a_dict)
+stiln_l_gdict_insert(cw_stiln_t *a_stiln, cw_stilt_t *a_stilt, const
+    cw_stiloe_dict_t *a_dict)
 {
-	
-	return TRUE;	/* XXX */
+	cw_bool_t	retval;
+
+	mtx_lock(&a_stiln->lock);
+	if (a_stiln->keyed_refs == NULL) {
+		/* No keyed references.  Create the hash. */
+		a_stiln->keyed_refs = dch_new(NULL,
+		    stilag_mem_get(stil_stilag_get(stilt_stil_get(a_stilt))),
+		    _CW_STILN_KREF_TABLE, _CW_STILN_KREF_GROW,
+		    _CW_STILN_KREF_SHRINK, ch_hash_direct, ch_key_comp_direct);
+		/* XXX Check dch_new() return. */
+	}
+
+	if (dch_insert(a_stiln->keyed_refs, (void *)a_dict, NULL,
+	    _cw_stilt_chi_get(a_stilt))) {
+		retval = TRUE;
+		goto RETURN;
+	}
+
+	retval = FALSE;
+	RETURN:
+	mtx_unlock(&a_stiln->lock);
+	return retval;
 }
 
 /* Search for a keyed reference matching a_dict. */
