@@ -54,17 +54,22 @@ SRCS = [SRCS] [ONYX_SRCS];
  */
 {
   local otests = catenate_a.nx.in catenate_b.nx.in catenate_c.nx.in
-                 catenate_d.nx.in copy_a.nx.in eval.nx.in gc_roll.nx.in
+                 catenate_d.nx.in copy_a.nx.in eval.nx.in fino_a.nx.in
+                 gc_roll.nx.in
                  hello.nx.in
                  integer.nx.in monitor_a.nx.in monitor_b.nx.in monitor_c.nx.in
                  nsleep_a.nx.in nsleep_b.nx.in nsleep_c.nx.in
-                 nsleep_d.nx.in pop_a.nx.in pop_b.nx.in sclear_a.nx.in
+                 nsleep_d.nx.in pop_a.nx.in pop_b.nx.in roll_a.nx.in
+                 roll_b.nx.in roll_c.nx.in roll_d.nx.in roll_e.nx.in
+                 roll_f.nx.in roll_g.nx.in sclear_a.nx.in
                  sclear_b.nx.in sclear_c.nx.in
                  scleartomark_a.nx.in scleartomark_b.nx.in scleartomark_c.nx.in
                  scleartomark_d.nx.in scount_a.nx.in scount_b.nx.in
                  scount_c.nx.in scounttomark_a.nx.in scounttomark_b.nx.in
                  scounttomark_c.nx.in sdup_a.nx.in sdup_b.nx.in sdup_c.nx.in
-                 sdup_d.nx.in search.nx.in sindex_a.nx.in sindex_b.nx.in
+                 sdup_d.nx.in search.nx.in sexch_a.nx.in sexch_b.nx.in
+                 sexch_c.nx.in sexch_d.nx.in
+                 sindex_a.nx.in sindex_b.nx.in
                  sindex_c.nx.in sindex_d.nx.in sindex_e.nx.in sindex_f.nx.in
                  sindex_g.nx.in spop_a.nx.in spop_b.nx.in spop_c.nx.in
                  spop_d.nx.in sprint_a.nx.in spush_a.nx.in spush_b.nx.in

@@ -1,0 +1,5 @@
+Test begin
+Error /rangecheck in --roll--
+ostack: (`a' 0 1 --roll--)
+estack: (--start-- -file- --roll--)
+dstack: (-dict- -dict- -dict-)

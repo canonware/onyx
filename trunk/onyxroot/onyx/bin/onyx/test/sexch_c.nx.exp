@@ -1,0 +1,5 @@
+Test begin
+Error /typecheck in --sexch--
+ostack: (3 --sexch--)
+estack: (--start-- -file- --sexch--)
+dstack: (-dict- -dict- -dict-)

@@ -1740,7 +1740,7 @@ nanoseconds & {\bf \htmlref{nsleep}{systemdict:nsleep}} & -- & Nanosleep. \\
 \hline \hline
 \multicolumn{4}{|l|}{Stack operators} \\
 \hline \hline
-& {\bf \htmlref{fino}{systemdict:fino}} & & \\
+& {\bf \htmlref{fino}{systemdict:fino}} & Create a fino. & \\
 \hline
 -- & {\bf \htmlref{(}{systemdict:sym_lp}} & fino & Begin a stack declaration. \\
 \hline
@@ -1754,16 +1754,19 @@ onto a stack. \\
 stack & {\bf \htmlref{scount}{systemdict:scount}} & stack count & Get the number
 of objects on a stack. \\
 \hline
-stack & {\bf \htmlref{scounttomark}{systemdict:scounttomark}} & stack count & \\
+stack & {\bf \htmlref{scounttomark}{systemdict:scounttomark}} & stack count &
+Depth of mark on stack. \\
 \hline
 stack & {\bf \htmlref{sdup}{systemdict:sdup}} & stack & Duplicate an object. \\
 \hline
 stack index & {\bf \htmlref{sindex}{systemdict:sindex}} & stack & Duplicate
 object in a stack at a given index. \\
 \hline
-& {\bf \htmlref{sexch}{systemdict:sexch}} & & \\
+stack & {\bf \htmlref{sexch}{systemdict:sexch}} & stack & Exchange top objects
+on stack. \\
 \hline
-& {\bf \htmlref{sroll}{systemdict:sroll}} & & \\
+stack count amount & {\bf \htmlref{sroll}{systemdict:sroll}} & stack & Roll
+objects on stack. \\
 \hline
 stack & {\bf \htmlref{spop}{systemdict:spop}} & stack object & Pop an object off
 a stack. \\
@@ -3323,23 +3326,22 @@ onyx:0>
 	\end{description}
 \label{systemdict:fino}
 \index{fino@\onyxop{}{fino}{}}
-\item[{\onyxop{--}{fino}{--}}: ]
+\item[{\onyxop{--}{fino}{fino}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[fino: ]
+			A fino object.
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Push a fino onto ostack.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> fino pstack
+-fino-
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:flush}
@@ -4673,23 +4675,30 @@ onyx:1>
 	\end{description}
 \label{systemdict:sexch}
 \index{sexch@\onyxop{}{sexch}{}}
-\item[{\onyxop{--}{sexch}{--}}: ]
+\item[{\onyxop{stack}{sexch}{stack}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[stack: ]
+			A stack object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[stack: ]
+			The same stack as was passed in.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Exchange the top two objects on \oparg{stack}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> (1 2 3) sexch pstack
+(1 3 2)
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:shift}
@@ -4900,19 +4909,41 @@ onyx:1>
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[stack: ]
+			A stack object.
+		\item[count: ]
+			Number of objects to roll in \oparg{stack}.
+		\item[amount: ]
+			Amount by which to roll.  If positive, roll
+			upward.  If negative, roll downward.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[stack: ]
+			The same stack as was passed in.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Roll the top \oparg{count} objects on \oparg{stack} by
+		\oparg{amount} positions.  A positive \oparg{amount}
+		indicates an upward roll, whereas a negative \oparg{amount}
+		indicates a downward roll.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> (3 2 1 0) pstack
+(3 2 1 0)
+onyx:1> 3 1 sroll pstack
+(3 0 2 1)
+onyx:1> 3 -2 sroll pstack
+(3 1 0 2)
+onyx:1> 4 0 sroll pstack
+(3 1 0 2)
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sstore}
