@@ -38,11 +38,7 @@
  * Maximum size of stack buffer to use for printing.  Must be at least 2
  * bytes.
  */
-#ifdef _LIBSTASH_DBG
-#define _CW_OUT_PRINT_BUF	   8
-#else
 #define _CW_OUT_PRINT_BUF 	 128
-#endif
 
 /*
  * Number of bytes to add to the size of a buffer when realloc()ing.  Must be
