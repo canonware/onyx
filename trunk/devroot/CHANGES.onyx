@@ -1,5 +1,38 @@
 2003-05-01 : Jason Evans <jasone@canonware.com>
 
+	* lib/libonyx/src/libonyx.c:libonyx_init() : Remove exception handling
+	  code, since there is no possible way for the caller to recover from an
+	  error anyway.
+
+	* Restructure data structures for dict and name objects, such that most
+	  critical sections could be safely removed.  Additionally, embed chi's
+	  directly into the dict and name structures, in order to reduce memory
+	  fragmentation and improve cache locality.
+
+	* lib/libonyx/src/nxa.c:nxa_p_collect() : Prune dead names from the name
+	  hash while the mutators are suspended (call nxo_l_name_list_prune()).
+	  This dramatically reduces the complexity of garbage collection for
+	  name objects, thus making interleaved sweeping (see note on
+	  2003-04-26) safe.
+
+	* lib/libonyx/src/mem.c : Use a ql to keep a list of all allocations
+	  stored in the allocation hash table, since dch_remove_iterate() was
+	  removed.
+
+	* lib/libonyx/include/libonyx/dch.h : Add the following function:
+	  + dch_chi_remove()
+
+	  Remove the following functions:
+	  + dch_get_iterate()
+	  + dch_remove_iterate()
+
+	* lib/libonyx/include/libonyx/ch.h : Add the following function:
+	  + ch_chi_remove()
+
+	  Remove the following functions:
+	  + ch_get_iterate()
+	  + ch_remove_iterate()
+
 	* lib/libonyx/src/nx.nx.in:throw
 	  lib/libonyx/src/nxo_thread.nx.in:errorict handleerror :
 
