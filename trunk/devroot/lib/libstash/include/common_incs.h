@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 64 $
- * Last modified: $Date: 1998-05-01 21:20:21 -0700 (Fri, 01 May 1998) $
+ * Current revision: $Revision: 69 $
+ * Last modified: $Date: 1998-05-02 02:08:51 -0700 (Sat, 02 May 1998) $
  *
  * Description: The idea here is to keep cpp from having to process a header
  *              file more than once.
@@ -52,12 +52,17 @@
  */
 
 #ifndef _THREAD_H_
+#  include <thread.h>
+#  define _THREAD_H_
+#endif
+
+#ifndef _LOCKS_H_
 #  ifndef _LIST_H_
 #    include <list.h>
 #    define _LIST_H_
 #  endif
-#  include <thread.h>
-#  define _THREAD_H_
+#  include <locks.h>
+#  define _LOCKS_H_
 #endif
 
 #ifndef _DBG_H_
