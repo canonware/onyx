@@ -125,7 +125,7 @@ buf, bufc - Reference-counted extensible buffer.
 .br
 .B bufc_new
 .RI ( "cw_bufc_t *a_bufc" ", "
-.IR "void (*a_dealloc_func)(void *dealloc_arg, void *bufc)" ", "
+.IR "cw_opaque_dealloc_t *a_dealloc_func" ", "
 .IR "void *a_dealloc_arg)" )
 
 .I void
@@ -138,7 +138,7 @@ buf, bufc - Reference-counted extensible buffer.
 .B bufc_set_buffer
 .RI ( "cw_bufc_t *a_bufc" ", " "void *a_buffer" ", " "cw_uint32_t a_size"
 .RI ", " "cw_bool_t a_is_writeable" ", "
-.IR "void (*a_dealloc_func)(void *dealloc_arg, void *buffer" ", "
+.IR "cw_opaque_dealloc_t *a_dealloc_func" ", "
 .IR "void *a_dealloc_arg" )
 
 .I cw_uint32_t
@@ -820,7 +820,7 @@ Copy a_offset bytes from a_val to a_buf at offset a_offset.
 .br
 .B bufc_new
 .RI ( "cw_bufc_t *a_bufc" ", "
-.IR "void (*a_dealloc_func)(void *dealloc_arg, void *bufc)" ", "
+.IR "cw_opaque_dealloc_t *a_dealloc_func" ", "
 .IR "void *a_dealloc_arg)" )
 .RS
 Input(s):
@@ -884,7 +884,7 @@ Destructor.
 .B bufc_set_buffer
 .RI ( "cw_bufc_t *a_bufc" ", " "void *a_buffer" ", " "cw_uint32_t a_size"
 .RI ", " "cw_bool_t a_is_writeable" ", "
-.IR "void (*a_dealloc_func)(void *dealloc_arg, void *buffer" ", "
+.IR "cw_opaque_dealloc_t *a_dealloc_func" ", "
 .IR "void *a_dealloc_arg" )
 .RS
 Input(s):
@@ -959,7 +959,7 @@ Return the number of bytes in a_bufc's internal buffer.
 .RE
 
 .SH SEE ALSO
-libstash(3s), readv(2), writev(2).
+libstash(3s), libstash_mem(3s), readv(2), writev(2).
 
 .SH HISTORY
 Written by Jason Evans <jasone@canonware.com>.

@@ -39,51 +39,46 @@ mem - malloc wrapper.
 .I void *
 .br
 .B mem_malloc
-.RI ( "cw_mem_t *a_mem" ", " "size_t a_size" )
-.br
-.I void *
-.br
-.B mem_malloc
 .RI ( "cw_mem_t *a_mem" ", " "size_t a_size" ", " "const char *a_filename"
 .RI ", " "cw_uint32_t a_line_num" )
-
+.br
 .I void *
 .br
-.B mem_calloc
-.RI ( "cw_mem_t *a_mem" ", " "size_t a_number" ", " "size_t a_size" )
-.br
+.B _cw_malloc
+.RI ( "size_t a_size" )
+
 .I void *
 .br
 .B mem_calloc
 .RI ( "cw_mem_t *a_mem" ", " "size_t a_number" ", " "size_t a_size" ", "
 .IR "const char *a_filename" ", " "cw_uint32_t a_line_num" )
-
+.br
 .I void *
 .br
-.B mem_realloc
-.RI ( "cw_mem_t *a_mem" ", " "void *a_ptr" ", " "size_t a_size" )
-.br
+.B _cw_calloc
+.RI ( "size_t a_number" ", " "size_t a_size" )
+
 .I void *
 .br
 .B mem_realloc
 .RI ( "cw_mem_t *a_mem" ", " "void *a_ptr" ", " "size_t a_size" ", "
 .IR "const char *a_filename" ", " "cw_uint32_t a_line_num" )
+.br
+.I void *
+.br
+.B _cw_realloc
+.RI ( "void *a_ptr" ", " "size_t a_size" )
 
-.I void
-.br
-.B mem_free
-.RI ( "cw_mem_t *a_mem" ", " "void *a_ptr" )
-.br
 .I void
 .br
 .B mem_free
 .RI ( "cw_mem_t *a_mem" ", " "void *a_ptr" ", " "const char *a_filename"
 .RI ", " "cw_uint32_t a_line_num" )
-
+.br
 .I void
 .br
-.B mem_dealloc
-.RI ( "void *a_mem" ", " "void *a_ptr" )
+.B _cw_free
+.RI ( "void *a_ptr" )
 
 .SS Debugging (dbg) symbols
 .TP
@@ -105,7 +100,7 @@ that allows tracking of the following:
 .br
 - Double allocation/deallocation of the same address.
 .br
-- Memory leaks memory left allocated at mem destruction time.
+- Memory leaks (memory left allocated at mem destruction time).
 .RE
 
 Also, the debug versions of the library set all newly allocated bytes to 0xa5,
@@ -233,13 +228,13 @@ re-attempted.
 .I void *
 .br
 .B mem_malloc
-.RI ( "cw_mem_t *a_mem" ", " "size_t a_size" )
+.RI ( "cw_mem_t *a_mem" ", " "size_t a_size" ", " "const char *a_filename"
+.RI ", " "cw_uint32_t a_line_num" )
 .br
 .I void *
 .br
-.B mem_malloc
-.RI ( "cw_mem_t *a_mem" ", " "size_t a_size" ", " "const char *a_filename"
-.RI ", " "cw_uint32_t a_line_num" )
+.B _cw_malloc
+.RI ( "size_t a_size" )
 .RS
 Input(s):
 .RS
@@ -278,13 +273,13 @@ Description:
 .I void *
 .br
 .B mem_calloc
-.RI ( "cw_mem_t *a_mem" ", " "size_t a_number" ", " "size_t a_size" )
+.RI ( "cw_mem_t *a_mem" ", " "size_t a_number" ", " "size_t a_size" ", "
+.IR "const char *a_filename" ", " "cw_uint32_t a_line_num" )
 .br
 .I void *
 .br
-.B mem_calloc
-.RI ( "cw_mem_t *a_mem" ", " "size_t a_number" ", " "size_t a_size" ", "
-.IR "const char *a_filename" ", " "cw_uint32_t a_line_num" )
+.B _cw_calloc
+.RI ( "size_t a_number" ", " "size_t a_size" )
 .RS
 Input(s):
 .RS
@@ -313,7 +308,7 @@ Output(s):
 .RS
 .IR retval :
 .RS
-non_NULL: Pointer to a zeroed memory range.
+non-NULL: Pointer to a zeroed memory range.
 .br
 NULL: Memory allocation error.
 .RE
@@ -327,13 +322,13 @@ Description:
 .I void *
 .br
 .B mem_realloc
-.RI ( "cw_mem_t *a_mem" ", " "void *a_ptr" ", " "size_t a_size" )
+.RI ( "cw_mem_t *a_mem" ", " "void *a_ptr" ", " "size_t a_size" ", "
+.IR "const char *a_filename" ", " "cw_uint32_t a_line_num" )
 .br
 .I void *
 .br
-.B mem_realloc
-.RI ( "cw_mem_t *a_mem" ", " "void *a_ptr" ", " "size_t a_size" ", "
-.IR "const char *a_filename" ", " "cw_uint32_t a_line_num" )
+.B _cw_realloc
+.RI ( "void *a_ptr" ", " "size_t a_size" )
 .RS
 Input(s):
 .RS
@@ -376,13 +371,13 @@ Description:
 .I void
 .br
 .B mem_free
-.RI ( "cw_mem_t *a_mem" ", " "void *a_ptr" )
+.RI ( "cw_mem_t *a_mem" ", " "void *a_ptr" ", " "const char *a_filename"
+.RI ", " "cw_uint32_t a_line_num" )
 .br
 .I void
 .br
-.B mem_free
-.RI ( "cw_mem_t *a_mem" ", " "void *a_ptr" ", " "const char *a_filename"
-.RI ", " "cw_uint32_t a_line_num" )
+.B _cw_free
+.RI ( "void *a_ptr" )
 .RS
 Input(s):
 .RS

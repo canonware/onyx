@@ -32,11 +32,6 @@ pezz - Grouped memory allocation of equal-size buffers.
 .I void *
 .br
 .B pezz_get
-.RI ( "cw_pezz_t *a_pezz" )
-.br
-.I void *
-.br
-.B pezz_get_e
 .RI ( "cw_pezz_t *a_pezz" ", " "const char *a_filename" ", " 
 .IR "cw_uint32_t a_line_num" )
 .br
@@ -45,11 +40,6 @@ pezz - Grouped memory allocation of equal-size buffers.
 .B _cw_pezz_get
 .RI ( "cw_pezz_t *a_pezz" )
 
-.I void
-.br
-.B pezz_put
-.RI ( "cw_pezz_t *a_pezz" ", " "void *a_buffer" )
-.br
 .I void
 .br
 .B pezz_put
@@ -169,11 +159,6 @@ Return the size of the buffers that a_pezz is using.
 .I void *
 .br
 .B pezz_get
-.RI ( "cw_pezz_t *a_pezz" )
-.br
-.I void *
-.br
-.B pezz_get_e
 .RI ( "cw_pezz_t *a_pezz" ", " "const char *a_filename" ", " 
 .IR "cw_uint32_t a_line_num" )
 .br
@@ -215,11 +200,6 @@ Allocate a memory buffer and return a pointer to it.
 .I void
 .br
 .B pezz_put
-.RI ( "cw_pezz_t *a_pezz" ", " "void *a_buffer" )
-.br
-.I void
-.br
-.B pezz_put_e
 .RI ( "cw_pezz_t *a_pezz" ", " "void *a_buffer" ", " 
 .IR "const char *a_filename" ", " "cw_uint32_t a_line_num" )
 .br

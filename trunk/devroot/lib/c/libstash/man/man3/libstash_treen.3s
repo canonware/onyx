@@ -17,7 +17,7 @@ treen - Arbitrary tree (tree node).
 .br
 .B treen_new
 .RI ( "cw_treen_t *a_treen" ", " 
-.IR "void (*a_dealloc_func)(void *dealloc_arg, void *a_treen)" ", " 
+.IR "cw_opaque_dealloc_t *a_dealloc_func" ", " 
 .IR "void *a_dealloc_arg" )
 
 .I void
@@ -71,7 +71,7 @@ of the fan-out.  Care must be taken when iterating on the sibling ring with
 .br
 .B treen_new
 .RI ( "cw_treen_t *a_treen" ", " 
-.IR "void (*a_dealloc_func)(void *dealloc_arg, void *a_treen)" ", " 
+.IR "cw_opaque_dealloc_t *a_dealloc_func" ", " 
 .IR "void *a_dealloc_arg" )
 .RS
 Input(s):
@@ -291,7 +291,7 @@ Set the pointer for data for a_treen.
 .RE
 
 .SH SEE ALSO
-libstash(3s).
+libstash(3s), libstash_mem(3s).
 
 .SH HISTORY
 Written by Jason Evans <jasone@canonware.com>.
