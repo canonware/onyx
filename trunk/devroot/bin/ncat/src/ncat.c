@@ -36,7 +36,7 @@ main(int argc, char ** argv)
   cw_sock_t * sock_stdin = NULL;
   cw_sock_t * sock_stdout = NULL;
   cw_mq_t * mq = NULL;
-  struct timeval tout;
+  struct timeval * tout = NULL;
 
   int c;
   cw_bool_t cl_error = FALSE, opt_help = FALSE, opt_version = FALSE;
@@ -110,8 +110,10 @@ main(int argc, char ** argv)
       case 't':
       {
 	opt_timeout = strtoul(optarg, NULL, 10);
-	tout.tv_sec = opt_timeout;
-	tout.tv_usec = 0;
+	
+	tout = _cw_malloc(sizeof(struct timeval));
+	tout->tv_sec = opt_timeout;
+	tout->tv_usec = 0;
 	break;
       }
       default:
@@ -170,7 +172,7 @@ main(int argc, char ** argv)
 
   sock = sock_new(NULL, 32768);
 
-  error = sock_connect(sock, opt_rhost, opt_rport, &tout);
+  error = sock_connect(sock, opt_rhost, opt_rport, tout);
   if (-1 == error)
   {
     if (dbg_is_registered(cw_g_dbg, "prog_error"))
@@ -220,7 +222,7 @@ main(int argc, char ** argv)
 
     while (1)
     {
-      if (0 != opt_timeout)
+      if (NULL != tout)
       {
 	bzero(&tz, sizeof(struct timezone));
 	gettimeofday(&now, &tz);
@@ -245,7 +247,7 @@ main(int argc, char ** argv)
       }
       else
       {
-	fd = (int) mq_timedget(mq, &timeout);
+	fd = (int) mq_get(mq);
 
 	if (0 == fd)
 	{
@@ -304,6 +306,10 @@ main(int argc, char ** argv)
   if (NULL != mq)
   {
     mq_delete(mq);
+  }
+  if (NULL != tout)
+  {
+    _cw_free(tout);
   }
   sockb_shutdown();
   libstash_shutdown();
