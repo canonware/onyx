@@ -83,17 +83,16 @@ there is normally no reason for multiple threads to execute in the same
 \classname{nxo} thread object context.
 
 \section{Garbage collection}
-Garbage collection is done asynchronously by a separate thread that does nothing
-but garbage collection.  Since there can be arbitrary threads executing in the
-interpreter concurrently, there are two ways to implement safe garbage
-collection: concurrent or atomic.  \libname{libonyx} uses atomic garbage
-collection, which means that the garbage collector thread suspends all other
-threads that are created via \cfunc{\htmlref{thd\_new}{thd_new}}{..., TRUE}
-during its mark phase.  In order for this to work, the garbage collector must
-not do any locking while the other threads are suspended, or else there is a
-high probability of eventual deadlock.  \libname{libonyx} itself meets these
-criteria, as must any C extensions to the interpreter that are executed by the
-garbage collector thread during the mark phase (reference iteration).
+Since there can be arbitrary threads executing in the interpreter concurrently,
+there are two ways to implement safe garbage collection: concurrent or atomic.
+\libname{libonyx} uses atomic garbage collection, which means that the thread
+doing garbage collection suspends all other threads that are created via
+\cfunc{\htmlref{thd\_new}{thd_new}}{..., TRUE} during the mark phase.  In order
+for this to work, the garbage collector must not do any locking while the other
+threads are suspended, or else there is a high probability of eventual deadlock.
+\libname{libonyx} itself meets these criteria, as must any C extensions to the
+interpreter that are executed by the garbage collector during the mark phase
+(reference iteration).
 
 \section{Exceptions}
 \libname{libonyx} reserves \htmlref{xep}{xep} exception numbers 128 to 255 and
@@ -123,15 +122,8 @@ collection.  For this to work, all threads that have any contact with
 
 This can cause integration headaches for existing threaded applications, but
 there is no other portable way to suspend and resume threads.  The only
-alternative is to modify \libname{libonyx} to use synchronous garbage
-collection, but this is only safe for applications that have a single thread
-executing in the interpreter.  In other words, converting to synchronous garbage
-collection requires stripping significant functionality out of
-\libname{libonyx}.  If you decide that you need to go this route, the author
-would be interested in hearing from you; the work involved in implementing
-synchronous garbage collection seems not worth the effort, considering the low
-likelihood of anyone ever needing to use \libname{libonyx} in such a
-configuration.
+alternative is to assure that only one thread is executing in the interpreter
+and to disable timeout-based (asynchronous) collection.
 
 \subsection{Restarted interrupted system calls}
 As mentioned above, \libname{libonyx} uses thread suspension and resumption to

@@ -18,6 +18,8 @@ struct cw_nxa_s {
 #define	_CW_NXA_MAGIC	0x63935743
 #endif
 	cw_mtx_t	lock;
+	cw_mtx_t	interlock;	/* Interlock entry into collection. */
+	cw_nxoi_t	prev_new;	/* Previous number of new objects. */
 
 	/* Various pools. */
 	cw_pool_t	chi_pool;

@@ -87,11 +87,11 @@
 
 typedef enum {
 	NXAM_NONE,
-	NXAM_COLLECT,
 	NXAM_RECONFIGURE,
 	NXAM_SHUTDOWN
 } cw_nxam_t;
 
+static void nxa_p_collect(cw_nxa_t *a_nxa);
 static void *nxa_p_gc_entry(void *a_arg);
 
 void
@@ -105,6 +105,8 @@ nxa_new(cw_nxa_t *a_nxa, cw_nx_t *a_nx)
 		a_nxa->nx = a_nx;
 
 		mtx_new(&a_nxa->lock);
+		mtx_new(&a_nxa->interlock);
+		a_nxa->prev_new = 0;
 		try_stage = 1;
 
 		pool_new(&a_nxa->chi_pool, NULL, sizeof(cw_chi_t));
@@ -165,6 +167,7 @@ nxa_new(cw_nxa_t *a_nxa, cw_nx_t *a_nx)
 		case 2:
 			pool_delete(&a_nxa->chi_pool);
 		case 1:
+			mtx_delete(&a_nxa->interlock);
 			mtx_delete(&a_nxa->lock);
 			break;
 		default:
@@ -181,6 +184,7 @@ nxa_delete(cw_nxa_t *a_nxa)
 	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
 
 	mq_put(&a_nxa->gc_mq, NXAM_SHUTDOWN);
+
 	thd_join(a_nxa->gc_thd);
 	mq_delete(&a_nxa->gc_mq);
 
@@ -195,7 +199,12 @@ nxa_collect(cw_nxa_t *a_nxa)
 	_cw_check_ptr(a_nxa);
 	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
 
-	mq_put(&a_nxa->gc_mq, NXAM_COLLECT);
+	mtx_lock(&a_nxa->lock);
+	mtx_lock(&a_nxa->interlock);
+	a_nxa->prev_new = 0;
+	mtx_unlock(&a_nxa->lock);
+	nxa_p_collect(a_nxa);
+	mtx_unlock(&a_nxa->interlock);
 }
 
 cw_bool_t
@@ -277,11 +286,15 @@ nxa_threshold_set(cw_nxa_t *a_nxa, cw_nxoi_t a_threshold)
 
 	mtx_lock(&a_nxa->lock);
 	a_nxa->gcdict_threshold = a_threshold;
-	if (a_threshold <= a_nxa->gcdict_new)
-		mq_put(&a_nxa->gc_mq, NXAM_COLLECT);
-	else
-		mq_put(&a_nxa->gc_mq, NXAM_RECONFIGURE);
-	mtx_unlock(&a_nxa->lock);
+	if (a_threshold <= a_nxa->gcdict_new) {
+		mtx_lock(&a_nxa->interlock);
+		a_nxa->prev_new = 0;
+		mtx_unlock(&a_nxa->lock);
+		nxa_p_collect(a_nxa);
+		mtx_unlock(&a_nxa->interlock);
+	} else
+		mtx_unlock(&a_nxa->lock);
+
 }
 
 void
@@ -364,10 +377,14 @@ nxa_l_gc_register(cw_nxa_t *a_nxa, cw_nxoe_t *a_nxoe)
 
 	/* Trigger a collection if the threshold was reached. */
 	if (a_nxa->gcdict_new == a_nxa->gcdict_threshold &&
-	    a_nxa->gcdict_active && a_nxa->gcdict_threshold != 0)
-		mq_put(&a_nxa->gc_mq, NXAM_COLLECT);
-
-	mtx_unlock(&a_nxa->lock);
+	    a_nxa->gcdict_active && a_nxa->gcdict_threshold != 0) {
+		mtx_lock(&a_nxa->interlock);
+		a_nxa->prev_new = 0;
+		mtx_unlock(&a_nxa->lock);
+		nxa_p_collect(a_nxa);
+		mtx_unlock(&a_nxa->interlock);
+	} else
+		mtx_unlock(&a_nxa->lock);
 }
 
 cw_bool_t
@@ -535,7 +552,7 @@ nxa_p_sweep(cw_nxoe_t *a_garbage, cw_nx_t *a_nx)
 /*
  * Collect garbage using a Baker's Treadmill.
  */
-_CW_INLINE void
+void
 nxa_p_collect(cw_nxa_t *a_nxa)
 {
 	cw_uint32_t	nroot, nreachable;
@@ -629,23 +646,18 @@ nxa_p_gc_entry(void *a_arg)
 	cw_nxa_t	*nxa = (cw_nxa_t *)a_arg;
 	struct timespec	period;
 	cw_nxam_t	message;
-	cw_bool_t	shutdown, collect;
-	cw_nxoi_t	seq_new, prev_seq_new;
+	cw_bool_t	shutdown;
 
 	/*
-	 * Any of the following conditions will cause a collection:
+	 * An asynchronous collection is done if some registrations were done,
+	 * followed by a period of no registrations for more than gcdict_period
+	 * seconds, and collection is active.
 	 *
-	 * 1) Enough allocation was done to trigger immediate collection.
-	 *
-	 * 2) Some registrations were done, followed by a period of no
-	 *    registrations for more than gcdict_period seconds.
-	 *
-	 * 3) Collection was explicitly requested.
+	 * Explicit collection and collection due to reaching the threshold are
+	 * done synchronously in the context of the mutator thread.
 	 */
-	prev_seq_new = 0;
 	period.tv_nsec = 0;
-	for (shutdown = FALSE, collect = FALSE; shutdown == FALSE; collect =
-	    FALSE) {
+	for (shutdown = FALSE; shutdown == FALSE;) {
 		mtx_lock(&nxa->lock);
 		period.tv_sec = nxa->gcdict_period;
 		mtx_unlock(&nxa->lock);
@@ -659,39 +671,34 @@ nxa_p_gc_entry(void *a_arg)
 		switch (message) {
 		case NXAM_NONE:
 			mtx_lock(&nxa->lock);
-			if (nxa->gcdict_active) {
+			if (nxa->gcdict_active && nxa->gcdict_new > 0) {
 				/*
-				 * No messages.  Check to see if there
-				 * have been any additions to the
-				 * sequence set.
+				 * No messages.  Check to see if there have been
+				 * any additions to the sequence set since the
+				 * last timeout.
 				 */
-				seq_new = nxa->gcdict_new;
-			}
-			mtx_unlock(&nxa->lock);
-
-			if (seq_new > 0) {
-				/*
-				 * If no additional registrations have
-				 * happened since the last mq_timedget()
-				 * timeout, collect.
-				 */
-				if (prev_seq_new == seq_new) {
+				if (nxa->prev_new == nxa->gcdict_new) {
+					mtx_lock(&nxa->interlock);
+					nxa->prev_new = 0;
+					mtx_unlock(&nxa->lock);
 					nxa_p_collect(nxa);
-					prev_seq_new = 0;
-				} else
-					prev_seq_new = seq_new;
-			}
-			break;
-		case NXAM_COLLECT:
-			nxa_p_collect(nxa);
-			prev_seq_new = 0;
+					mtx_unlock(&nxa->interlock);
+				} else {
+					nxa->prev_new = nxa->gcdict_new;
+					mtx_unlock(&nxa->lock);
+				}
+			} else
+				mtx_unlock(&nxa->lock);
 			break;
 		case NXAM_RECONFIGURE:
 			/* Don't do anything here. */
 			break;
 		case NXAM_SHUTDOWN:
-			shutdown = TRUE;
+			mtx_lock(&nxa->interlock);
 			nxa_p_collect(nxa);
+			mtx_unlock(&nxa->interlock);
+
+			shutdown = TRUE;
 			break;
 		default:
 			_cw_not_reached();

@@ -17,7 +17,10 @@
 \index{nxa@\classname{nxa}{}}
 
 The \classname{nxa} class implements garbage collection.  The garbage collector
-runs in a separate thread and is controlled via an asynchronous message queue.
+runs a separate thread that is controlled via an asynchronous message queue.
+The collector thread is only responsible for doing asynchronous collection due
+to allocation inactivity; all other collection is synchronously done in the
+thread context of the mutator that triggers collection.
 
 \subsubsection{API}
 \begin{capi}
@@ -69,8 +72,7 @@ runs in a separate thread and is controlled via an asynchronous message queue.
 		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
 		\end{description}
 	\item[Description: ]
-		Send a message to the garbage collector thread to do a
-		collection.
+		Do a synchronous garbage collection.
 	\end{capilist}
 \label{nxa_dump}
 \index{nxa_dump@\cfunc{nxa\_dump}{}}

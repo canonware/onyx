@@ -534,11 +534,8 @@ other synchronization primitives can be constructed.
 
 \section{Memory management}
 Onyx programs do not need to track memory allocations, since memory reclamation
-is done implicitly via automatic garbage collection.  Onyx uses an asynchronous
-atomic mark and sweep garbage collector.  The garbage collector is asynchronous
-in that it is a separate thread that can run at any time.  However, it is
-atomic, which means that while the garbage collector is in the mark phase, no
-other threads are running.
+is done implicitly via automatic garbage collection.  Onyx uses an atomic mark
+and sweep garbage collector.
 
 The atomic nature of garbage collection may sound worrisome with regard to
 performance, but in fact there are tangible benefits and no significant negative
@@ -558,9 +555,9 @@ There are three parameters that can be used to control garbage collection:
 \begin{enumerate}
 \item{The garbage collector can be turned off for situations where many objects
 are being created over a short period of time.}
-\item{The garbage collector is sent a message to run whenever a certain number
-of composite objects have been created since the last collection.  This
-threshold can be changed or disabled.}
+\item{The garbage collector runs whenever a certain number of composite objects
+have been created since the last collection.  This threshold can be changed or
+disabled.}
 \item{If no composite objects have been created for an extended period of time
 (seconds), the garbage collector will run if any composite objects have been
 allocated since the last collection.  This idle timeout period can be changed or
@@ -1341,10 +1338,7 @@ false
 	\item[Output(s): ] None.
 	\item[Errors(s): ] None.
 	\item[Description: ]
-		Force a garbage collection.  The garbage collection occurs
-		asynchronously, so there are no guarantees as to when the
-		garbage collection will occur, only that a garbage collection
-		will occur.
+		Force a garbage collection.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> gcdict begin collect end

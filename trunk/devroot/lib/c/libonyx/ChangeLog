@@ -1,5 +1,10 @@
 2001-07-27  Jason Evans  <jasone@canonware.com>
 
+	* src/nxa.c: Restructure garbage collection such that explicit and
+	threshhold-triggered collection are done synchronously using the
+	context of the mutator thread.  This avoids context switches and
+	prevents the possibility of a backlog of pending collections.
+
 	* src/systemdict.c (systemdict_copy): Pop the source dictionary off
 	ostack before returning.
 
