@@ -63,7 +63,7 @@ test_distclean :
   [CC] [A_CFLAGS] -o [target]
        [objdir]/%0test/%1.o_a
        [split " "
-              [prepost [prepost "-rpath " "/lib/c/" [abs_objdir]]
+              [prepost [prepost [RPATH] "/lib/c/" [abs_objdir]]
                        "/lib"
                        [libs]]]
        [LDFLAGS] [LIBS] [EXTRALIBS];

@@ -115,7 +115,7 @@ ncat_install_self : [NCAT]
   [INSTALL] -d [PREFIX]/bin;
   [CC] [A_CFLAGS] -o [PREFIX]/bin/ncat
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [NCAT_SRCS]]
-       -Wl,-rpath,[PREFIX]/lib
+       [RPATH][PREFIX]/lib
        [LDFLAGS] -lsock -lstash [EXTRALIBS];
   [CHMOD] 0755 [PREFIX]/bin/ncat;
 }
@@ -146,7 +146,7 @@ ncat_distclean :
 {
   [CC] [A_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [NCAT_SRCS]]
-       -Wl,-rpath,[abs_objdir]/lib/c/libsock/lib
-       -Wl,-rpath,[abs_objdir]/lib/c/libstash/lib
+       [RPATH][abs_objdir]/lib/c/libsock/lib
+       [RPATH][abs_objdir]/lib/c/libstash/lib
        [LDFLAGS] -lsock -lstash [EXTRALIBS];
 }

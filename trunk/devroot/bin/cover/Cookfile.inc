@@ -114,7 +114,7 @@ cover_install_self : [COVER]
   [INSTALL] -d [PREFIX]/bin;
   [CC] [A_CFLAGS] -o [PREFIX]/bin/cover
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [COVER_SRCS]]
-       -rpath [PREFIX]/lib
+       [RPATH][PREFIX]/lib
        [LDFLAGS] -lstash [EXTRALIBS];
   [CHMOD] 0755 [PREFIX]/bin/cover;
 }
@@ -144,6 +144,6 @@ cover_distclean :
 {
   [CC] [A_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [COVER_SRCS]]
-       -rpath [abs_objdir]/lib/c/libstash/lib
+       [RPATH][abs_objdir]/lib/c/libstash/lib
        [LDFLAGS] -lstash [EXTRALIBS];
 }

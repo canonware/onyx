@@ -54,6 +54,7 @@ S_CFLAGS = [CFLAGS] -fPIC -DPIC;
 
 LDFLAGS = @LDFLAGS@;
 EXTRALIBS = @LIBS@;
+RPATH = @RPATH@;
 
 libs = @libs@;
 mods = @mods@;

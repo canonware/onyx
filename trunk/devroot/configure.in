@@ -61,16 +61,20 @@ AC_CANONICAL_HOST
 case "${host}" in
   i386-*-freebsd*)
 	AC_DEFINE(_CW_OS_FREEBSD, )
+	RPATH="-Wl,-rpath,"
         ;;
   *-*-linux*)
 	AC_DEFINE(_CW_OS_LINUX, )
+	RPATH="-Wl,-rpath,"
         ;;
   *-*-solaris2*)
 	AC_DEFINE(_CW_OS_SOLARIS, )
 	AC_DEFINE(_POSIX_PTHREAD_SEMANTICS)
+	RPATH="-Wl,-R,"
 	LIBS="$LIBS -lposix4 -lsocket -lnsl"
         ;;
 esac
+AC_SUBST(RPATH)
 
 dnl Check for programs.
 
@@ -109,7 +113,7 @@ AC_SUBST(VERIFY)
 dnl Find libraries.
 
 if test "x$build_libedit" = "xyes" ; then
-  AC_CHECK_LIB(curses, tigetstr, LIBS="$LIBS", \
+  AC_CHECK_LIB(curses, tigetstr, , \
     AC_MSG_ERROR(Cannot find the curses library))
 fi
 
@@ -225,6 +229,10 @@ if test "x$build_ncat" = "xyes" -o "x$build_proxy" = "xyes" ; then
 fi
 
 if test "x$build_onyx" = "xyes" ; then
+  AC_CHECK_FUNCS(dlopen, , \
+    AC_CHECK_LIB(dl, dlopen, LIBS="$LIBS -ldl", \
+      AC_MSG_ERROR(Cannot find dlopen)))
+
   if test "x$prefix" = "xNONE" ; then
     _CW_ONYX_RPATH="/usr/local/share/canonware/onyx/nxcode"
     _CW_ONYX_MPATH="/usr/local/share/canonware/onyx/nxmod"
