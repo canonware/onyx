@@ -186,7 +186,7 @@ TRUE: Failure.
 .RE
 Description:
 .RS
-Try to wait on (decrement) a_sem, but return immediately instead of blocking if
+Try to wait on (decrement) a_sem, but return after a_timeout has expired if
 unable to.
 .RE
 .RE
