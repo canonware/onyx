@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 93 $
- * $Date: 1998-06-26 01:34:33 -0700 (Fri, 26 Jun 1998) $
+ * $Revision: 120 $
+ * $Date: 1998-07-01 17:22:16 -0700 (Wed, 01 Jul 1998) $
  *
  * <<< Description >>>
  *
@@ -45,8 +45,8 @@
  * of the br is composed of one or more plain files and raw devices.  These
  * sections are mapped into a unified address space.  That is, files and
  * devices are mapped into an address space that the br sits on top of.  It
- * is possible to have unmapped holes in the br_addr space, but mappings
- * never overlap.
+ * is possible to have unmapped holes in the br_addr space, and mappings
+ * can overlap.
  *
  * In order to prevent having to shuffle sections around to allow expansion
  * and contraction, the sections are set at fixed br_addr's during creation
@@ -60,15 +60,15 @@
  *
  * we can calculate the base address of pdb:
  *
- *       base_addr(pdb) == sizeof(vlt) == (2^64 / (8 * page_size + 1))
+ *       base_addr(pdb) == sizeof(vlt) == ((2^64 - vltc) / (8 * page_size + 1))
  *                                        div page_size
  *
  * and
  *
- *       sizeof(pdb) == ((2^64 * 8 * page_size) / (8 * page_size + 1))
+ *       sizeof(pdb) == (((2^64 - vltc) * 8 * page_size) / (8 * page_size + 1))
  *                      div page_size
  *
- * So, assuming a page size of 8kB:
+ * So, assuming a page size of 8kB and vltc of 0B:
  *
  *   base_addr(pdb) == 281470681800704 == FFFF0000E000
  *   sizeof(pdb) == 18446462603027742720 == 0xffff0000ffff0000
@@ -83,6 +83,16 @@
  *
  * So, that is what br does.  Each backing store is mapped to one or more
  * br_addr ranges.
+ *
+ * Note that once a portion of the address range dedicated to the vlt is
+ * mapped, it cannot be unmapped.  The only way to remove a backing store
+ * that is partially or completely mapped to the vtl address range is to
+ * first map one or more backing stores to create a redundant copy of that
+ * portion of the vlt that we wish to remove a backing store mapping for.
+ *
+ * Backing stores that have been mapped entirely within the pdb can be
+ * removed from the repository by moving all valid blocks to other backing
+ * stores and changing the logical to physical address mappings accordingly.
  * 
  ****************************************************************************/
 

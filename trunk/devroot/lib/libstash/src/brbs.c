@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 118 $
- * $Date: 1998-07-01 00:06:33 -0700 (Wed, 01 Jul 1998) $
+ * $Revision: 120 $
+ * $Date: 1998-07-01 17:22:16 -0700 (Wed, 01 Jul 1998) $
  *
  * <<< Description >>>
  *
@@ -293,6 +293,38 @@ brbs_close(cw_brbs_t * a_brbs_o)
 /****************************************************************************
  * <<< Description >>>
  *
+ * Create a new file backing store of size a_size.
+ *
+ ****************************************************************************/
+cw_bool_t
+brbs_create(cw_brbs_t * a_brbs_o, cw_uint64_t a_size)
+{
+  cw_bool_t retval;
+
+  /* XXX Implement. */
+  
+  return retval;
+}
+
+/****************************************************************************
+ * <<< Description >>>
+ *
+ * Destroy (unlink) a file backing store.  The file must be currently open.
+ *
+ ****************************************************************************/
+cw_bool_t
+brbs_destroy(cw_brbs_t * a_brbs_o)
+{
+  cw_bool_t retval;
+  
+  /* XXX Implement. */
+
+  return retval;
+}
+
+/****************************************************************************
+ * <<< Description >>>
+ *
  * Get the current filename.
  *
  ****************************************************************************/
@@ -370,6 +402,34 @@ brbs_set_filename(cw_brbs_t * a_brbs_o, char * a_filename)
 /****************************************************************************
  * <<< Description >>>
  *
+ * Return a_brbs_o->size.
+ *
+ ****************************************************************************/
+cw_uint64_t 
+brbs_get_size(cw_brbs_t * a_brbs_o)
+{
+  cw_uint64_t retval;
+  
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
+  {
+    _cw_marker("Enter brbs_get_size()");
+  }
+  _cw_check_ptr(a_brbs_o);
+/*   rwl_rlock(&a_brbs_o->rw_lock); */
+
+  retval = a_brbs_o->size;
+
+/*   rwl_runlock(&a_brbs_o->rw_lock); */
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
+  {
+    _cw_marker("Exit brbs_get_size()");
+  }
+  return retval;
+}
+
+/****************************************************************************
+ * <<< Description >>>
+ *
  * Returns whether the file is a raw device.
  *
  ****************************************************************************/
@@ -419,84 +479,6 @@ brbs_get_sect_size(cw_brbs_t * a_brbs_o)
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
   {
     _cw_marker("Exit brbs_get_()");
-  }
-  return retval;
-}
-
-/****************************************************************************
- * <<< Description >>>
- *
- * Return a_brbs_o->size.
- *
- ****************************************************************************/
-cw_uint64_t 
-brbs_get_size(cw_brbs_t * a_brbs_o)
-{
-  cw_uint64_t retval;
-  
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
-  {
-    _cw_marker("Enter brbs_get_size()");
-  }
-  _cw_check_ptr(a_brbs_o);
-/*   rwl_rlock(&a_brbs_o->rw_lock); */
-
-  retval = a_brbs_o->size;
-
-/*   rwl_runlock(&a_brbs_o->rw_lock); */
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
-  {
-    _cw_marker("Exit brbs_get_size()");
-  }
-  return retval;
-}
-
-/****************************************************************************
- * <<< Description >>>
- *
- * As long as the backing store isn't an open raw device, set
- * a_brbs_o->size.
- *
- ****************************************************************************/
-cw_bool_t 
-brbs_set_size(cw_brbs_t * a_brbs_o, cw_uint64_t a_size)
-{
-  cw_bool_t retval;
-  
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
-  {
-    _cw_marker("Enter brbs_set_size()");
-  }
-  _cw_check_ptr(a_brbs_o);
-  rwl_wlock(&a_brbs_o->rw_lock);
-
-  if (((a_brbs_o->is_open == TRUE) && (a_brbs_o->is_raw == TRUE))
-      || (a_brbs_o->is_open == FALSE))
-  {
-    retval = TRUE;
-  }
-  else
-  {
-    if (-1 == lseek(a_brbs_o->fd, a_size, SEEK_SET))
-    {
-      retval = TRUE;
-      if (dbg_fmatch(g_dbg_o, _CW_DBG_R_BRBS_ERROR))
-      {
-	log_leprintf(g_log_o, __FILE__, __LINE__, "brbs_set_size",
-		     "lseek() error: %s\n", strerror(errno));
-      }
-    }
-    else
-    {
-      retval = FALSE;
-      a_brbs_o->size = a_size;
-    }
-  }
-
-  rwl_wunlock(&a_brbs_o->rw_lock);
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
-  {
-    _cw_marker("Exit brbs_set_size()");
   }
   return retval;
 }
