@@ -55,7 +55,7 @@ kasi_new(cw_kasi_t * a_kasi)
     retval = (cw_kasi_t *) _cw_malloc(sizeof(cw_kasi_t));
     if (NULL == retval)
     {
-      goto RETURN;
+      goto OOM_1;
     }
     bzero(retval, sizeof(cw_kasi_t));
     retval->is_malloced = TRUE;
@@ -64,52 +64,26 @@ kasi_new(cw_kasi_t * a_kasi)
   if (NULL == pezz_new(&retval->kasi_bufc_pezz, sizeof(cw_kasi_bufc_t),
 		       _CW_KASI_BUFC_CHUNK_COUNT))
   {
-    if (TRUE == retval->is_malloced)
-    {
-      _cw_free(retval);
-    }
-    retval = NULL;
-    goto RETURN;
+    goto OOM_2;
   }
 
   if (NULL == pezz_new(&retval->chi_pezz, sizeof(cw_chi_t),
 		       _CW_KASI_KASIN_BASE_GROW / 4))
   {
-    pezz_delete(&retval->kasi_bufc_pezz);
-    if (TRUE == retval->is_malloced)
-    {
-      _cw_free(retval);
-    }
-    retval = NULL;
-    goto RETURN;
+    goto OOM_3;
   }
 
   if (NULL == pezz_new(&retval->kasin_pezz, sizeof(cw_kasin_t),
 		       _CW_KASI_KASIN_BASE_GROW / 4))
   {
-    pezz_delete(&retval->chi_pezz);
-    pezz_delete(&retval->kasi_bufc_pezz);
-    if (TRUE == retval->is_malloced)
-    {
-      _cw_free(retval);
-    }
-    retval = NULL;
-    goto RETURN;
+    goto OOM_4;
   }
 
   if (NULL == dch_new(&retval->kasin_dch, _CW_KASI_KASIN_BASE_TABLE,
 		      _CW_KASI_KASIN_BASE_GROW, _CW_KASI_KASIN_BASE_SHRINK,
 		      &retval->chi_pezz, kasink_p_hash, kasink_p_key_comp))
   {
-    pezz_delete(&retval->chi_pezz);
-    pezz_delete(&retval->kasin_pezz);
-    pezz_delete(&retval->kasi_bufc_pezz);
-    if (TRUE == retval->is_malloced)
-    {
-      _cw_free(retval);
-    }
-    retval = NULL;
-    goto RETURN;
+    goto OOM_5;
   }
 
   mtx_new(&retval->lock);
@@ -118,8 +92,21 @@ kasi_new(cw_kasi_t * a_kasi)
   retval->magic = _CW_KASI_MAGIC;
 #endif
 
-  RETURN:
   return retval;
+
+  OOM_5:
+  pezz_delete(&retval->kasin_pezz);
+  OOM_4:
+  pezz_delete(&retval->chi_pezz);
+  OOM_3:
+  pezz_delete(&retval->kasi_bufc_pezz);
+  OOM_2:
+  if (TRUE == retval->is_malloced)
+  {
+    _cw_free(retval);
+  }
+  OOM_1:
+  return NULL;
 }
 
 void
@@ -184,6 +171,7 @@ kasi_kasin_ref(cw_kasi_t * a_kasi, const cw_uint8_t * a_name, cw_uint32_t a_len,
 {
   cw_kasin_t * retval;
   cw_kasin_t search_key, * data;
+  cw_uint8_t * name;
   
   _cw_check_ptr(a_kasi);
   _cw_assert(_CW_KASI_MAGIC == a_kasi->magic);
@@ -205,8 +193,7 @@ kasi_kasin_ref(cw_kasi_t * a_kasi, const cw_uint8_t * a_name, cw_uint32_t a_len,
       if (TRUE == kasi_p_kasin_kref(a_kasi, data, a_key, a_data))
       {
 	mtx_unlock(&data->lock);
-	retval = NULL;
-	goto RETURN;
+	goto OOM_1;
       }
       mtx_unlock(&data->lock);
     }
@@ -216,14 +203,11 @@ kasi_kasin_ref(cw_kasi_t * a_kasi, const cw_uint8_t * a_name, cw_uint32_t a_len,
   }
   else if (TRUE == a_force)
   {
-    cw_uint8_t * name;
-    
     /* The name doesn't exist, and the caller wants it created. */
     data = kasi_p_kasin_new(a_kasi);
     if (NULL == data)
     {
-      retval = NULL;
-      goto RETURN;
+      goto OOM_1;
     }
 
     if (FALSE == a_is_static)
@@ -232,9 +216,7 @@ kasi_kasin_ref(cw_kasi_t * a_kasi, const cw_uint8_t * a_name, cw_uint32_t a_len,
       name = _cw_malloc(sizeof(cw_uint8_t) * a_len);
       if (NULL == name)
       {
-	kasi_p_kasin_delete(a_kasi, data);
-	retval = NULL;
-	goto RETURN;
+	goto OOM_2;
       }
       memcpy(name, a_name, a_len);
     }
@@ -253,19 +235,13 @@ kasi_kasin_ref(cw_kasi_t * a_kasi, const cw_uint8_t * a_name, cw_uint32_t a_len,
     data->ref_count++;
 
     /* Add a keyed reference if necessary.  We don't need to lock the kasin,
-     * because it hasn't been inserted into the hash table yet, so no othre
+     * because it hasn't been inserted into the hash table yet, so no other
      * threads can get to it. */
     if (NULL != a_key)
     {
       if (TRUE == kasi_p_kasin_kref(a_kasi, data, a_key, a_data))
       {
-	if (FALSE == a_is_static)
-	{
-	  _cw_free(name);
-	}
-	kasi_p_kasin_delete(a_kasi, data);
-	retval = NULL;
-	goto RETURN;
+	goto OOM_3;
       }
     }
 
@@ -273,17 +249,7 @@ kasi_kasin_ref(cw_kasi_t * a_kasi, const cw_uint8_t * a_name, cw_uint32_t a_len,
     if (TRUE == dch_insert(&a_kasi->kasin_dch, (void *) &data->key,
 			   (void *) data))
     {
-      if (NULL != data->keyed_refs)
-      {
-	dch_delete(data->keyed_refs);
-      }
-      if (FALSE == a_is_static)
-      {
-	_cw_free(name);
-      }
-      kasi_p_kasin_delete(a_kasi, data);
-      retval = NULL;
-      goto RETURN;
+      goto OOM_4;
     }
 
     retval = data;
@@ -293,9 +259,24 @@ kasi_kasin_ref(cw_kasi_t * a_kasi, const cw_uint8_t * a_name, cw_uint32_t a_len,
     retval = NULL;
   }
   
-  RETURN:
   mtx_unlock(&a_kasi->lock);
   return retval;
+
+  OOM_4:
+  if (NULL != data->keyed_refs)
+  {
+    dch_delete(data->keyed_refs);
+  }
+  OOM_3:
+  if (FALSE == a_is_static)
+  {
+    _cw_free(name);
+  }
+  OOM_2:
+  kasi_p_kasin_delete(a_kasi, data);
+  OOM_1:
+  mtx_unlock(&a_kasi->lock);
+  return NULL;
 }
 
 void
