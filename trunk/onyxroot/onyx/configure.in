@@ -21,13 +21,6 @@ bins=
 mods=
 libs=
 
-dnl Compile in libstash's buf by default.  This check must happen here so that
-dnl components that depend on the buf class can be left out of the build if the
-dnl buf class isn't compiled in.  It would be nice to do this check along with
-dnl the check for libstash, but libstash must be the last library to be checked
-dnl ussing CW_BUILD_LIB so that library link order is correct.
-CW_ENABLE_LIBSTASH_BUF()
-
 dnl Look for libraries.  Order matters.  They should appear in an order that
 dnl works on the link line (-lonyx -ledit -lstash).
 CW_BUILD_LIB(libonyx, lib_onyx)
@@ -136,50 +129,6 @@ if test "x$build_libstash" = "xyes" ; then
   AC_CHECK_SIZEOF(long long, 4)
   AC_CHECK_SIZEOF(unsigned long long, 4)
   AC_CHECK_SIZEOF(int *, 4) dnl defines SIZEOF_INT_P
-
-  dnl Find maximum iovec compatible with readv()/writev().
-  AC_MSG_CHECKING(maximum iov for readv()/writev())
-  AC_TRY_RUN([
-#include <stdio.h>
-#include <fcntl.h>
-#include <sys/types.h>
-#include <sys/uio.h>
-#include <unistd.h>
-
-int
-main()
-{
-	int	i, fd, nwrite;
-	char	buf[1024];
-	struct	iovec iov[1024];
-
-	for (i = 0; i < 1024; i++) {
-		iov[i].iov_base = &buf[i];
-		iov[i].iov_len = 1;
-	}
-
-	fd = open("_CW_MAX_IOV", O_RDWR | O_CREAT | O_TRUNC, 0644);
-
-	for (i = 1024; i > 16; i >>= 1) {
-		if (-1 != writev(fd, iov, i))
-			break;
-	}
-
-	fprintf(stderr, "iovcnt: %d\n", i);
-
-	ftruncate(fd, 0);
-	lseek(fd, 0, SEEK_SET);
-	nwrite = sprintf(buf, "%d\n", i);
-	write(fd, buf, nwrite);
-
-	close(fd);
-	return 0;
-}
-])
-  maxiov=`cat _CW_MAX_IOV`
-  AC_MSG_RESULT($maxiov)
-  AC_DEFINE_UNQUOTED(_CW_MAX_IOV, $maxiov)
-  rm -f _CW_MAX_IOV
 fi
 
 if test "x$build_libonyx" = "xyes" ; then
@@ -275,7 +224,6 @@ AC_MSG_RESULT()
 AC_MSG_RESULT(debug        : ${enable_debug})
 AC_MSG_RESULT(profile      : ${enable_profile})
 AC_MSG_RESULT(inlines      : ${enable_inlines})
-AC_MSG_RESULT(libstash buf : ${enable_libstash_buf})
 AC_MSG_RESULT(===============================================================================)
 
 dnl Create additional directories that processed files will land in.

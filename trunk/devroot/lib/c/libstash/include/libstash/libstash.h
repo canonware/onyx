@@ -182,9 +182,6 @@ typedef void cw_opaque_dealloc_t (const void *, const void *, const char *,
 #include "dch.h"
 #include "out.h"
 #include "mem.h"
-#ifdef _CW_HAVE_LIBSTASH_BUF
-#include "buf.h"
-#endif
 #include "pezz.h"
 #include "pool.h"
 #include "bhp.h"

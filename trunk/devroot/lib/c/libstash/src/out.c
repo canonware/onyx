@@ -111,10 +111,6 @@ static cw_uint32_t	out_p_string_render(const char *a_format, cw_uint32_t
     a_len, const void *a_arg, cw_uint32_t a_max_len, cw_uint8_t *r_buf);
 static cw_uint32_t	out_p_pointer_render(const char *a_format, cw_uint32_t
     a_len, const void *a_arg, cw_uint32_t a_max_len, cw_uint8_t *r_buf);
-#ifdef _CW_HAVE_LIBSTASH_BUF
-static cw_uint32_t	out_p_buf_render(const char *a_format, cw_uint32_t
-    a_len, const void *a_arg, cw_uint32_t a_max_len, cw_uint8_t *r_buf);
-#endif
 
 static cw_out_ent_t cw_g_out_builtins[] = {
 	{"s",	1,	sizeof(cw_uint8_t *),	out_p_string_render},
@@ -122,10 +118,6 @@ static cw_out_ent_t cw_g_out_builtins[] = {
 	{"p",	1,	sizeof(void *),		out_p_pointer_render},
 	{"c",	1,	sizeof(cw_uint8_t),	out_p_char_render},
 	{"q",	1,	sizeof(cw_uint64_t),	out_p_int64_render}
-#ifdef _CW_HAVE_LIBSTASH_BUF
-	,
-	{"b",	1,	sizeof(cw_buf_t *),	out_p_buf_render}
-#endif
 };
 
 cw_out_t *
@@ -1412,62 +1404,3 @@ out_p_pointer_render(const char *a_format, cw_uint32_t a_len, const void *a_arg,
 
 	return retval;
 }
-
-#ifdef _CW_HAVE_LIBSTASH_BUF
-static cw_uint32_t
-out_p_buf_render(const char *a_format, cw_uint32_t a_len, const void *a_arg,
-    cw_uint32_t a_max_len, cw_uint8_t *r_buf)
-{
-	cw_sint32_t	val_len;
-	const cw_uint8_t *val;
-	cw_uint32_t	olen, rlen, owidth, width, offset;
-	cw_buf_t	*buf;
-	const struct iovec *iov;
-	int		iov_cnt, i;
-
-	_cw_check_ptr(a_format);
-	_cw_assert(a_len > 0);
-	_cw_check_ptr(a_arg);
-	_cw_check_ptr(r_buf);
-
-	buf = *(cw_buf_t **)a_arg;
-	_cw_check_ptr(buf);
-
-	rlen = buf_size_get(buf);
-
-	if ((val_len = spec_val_get(a_format, a_len, "w", 1, &val)) != -1) {
-		/* Width specified. */
-		/*
-		 * The next character after val is either `|' or `]', so we
-		 * don't have to worry about terminating the string that val
-		 * points to.
-		 */
-		width = strtoul(val, NULL, 10);
-		if (width < rlen)
-			width = rlen;
-	} else
-		width = rlen;
-
-	out_p_common_render(a_format, a_len, a_max_len, ' ', rlen, r_buf,
-	    &width, &owidth, &offset);
-
-	if (offset < owidth) {
-		/*
-		 * Copy bytes from the buf to the output string.  Use the buf's
-		 * iovec and memcpy for efficiency.
-		 */
-		if (offset + rlen <= owidth)
-			olen = rlen;
-		else
-			olen = owidth - offset;
-		iov = buf_iovec_get(buf, olen, FALSE, &iov_cnt);
-		r_buf += offset;
-		for (i = 0; i < iov_cnt; i++) {
-			memcpy(r_buf, iov[i].iov_base, iov[i].iov_len);
-			r_buf += iov[i].iov_len;
-		}
-	}
-
-	return width;
-}
-#endif

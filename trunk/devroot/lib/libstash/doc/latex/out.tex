@@ -102,17 +102,10 @@ cw\_*int8\_t *	& s	& Fit	& r	& ` '	&	&	&	\\
 \hline
 void *		& p	& Fit	& r	& ` '	& 16	& u	& --	\\
 \hline
-cw\_buf\_t *	& b	& Fit	& r	& ` '	&	&	&	\\
-\hline
 \end{tabular}
 \end{center}
 \caption{Flag defaults for builtin output types}
 \end{table}
-
-Note that \classname{buf} printing is not provided if \libname{libstash} is
-compiled without the buf class.  Whether \classname{buf} printing is supported
-can be determined via the
-\htmlref{\cppdef{\_CW\_HAVE\_LIBSTASH\_BUF}}{_CW_HAVE_LIBSTASH_BUF} cpp macro.
 
 \subsubsection{API}
 \begin{capi}

@@ -280,7 +280,6 @@ char *a\_filename, cw\_uint32\_t a\_line\_num}}
 
 \section{Classes}
 \input{@abs_srcdir@/lib/c/libstash/doc/latex/bhp}
-\input{@abs_srcdir@/lib/c/libstash/doc/latex/buf}
 \input{@abs_srcdir@/lib/c/libstash/doc/latex/ch}
 \input{@abs_srcdir@/lib/c/libstash/doc/latex/cnd}
 \input{@abs_srcdir@/lib/c/libstash/doc/latex/dch}

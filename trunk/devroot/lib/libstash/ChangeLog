@@ -1,5 +1,7 @@
 2001-07-27  Jason Evans  <jasone@canonware.com>
 
+	* : Remove the buf class.
+
 	* src/dch.c: Use opaque allocator/deallocator pointers.
 
 	* src/ch.c: Use opaque allocator/deallocator pointers.
