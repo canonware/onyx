@@ -15,6 +15,7 @@ AC_SUBST(objdir)
 abs_objdir=`pwd`
 AC_SUBST(abs_objdir)
 
+cfgoutputs="Cookfile doc/latex/manual.tex doc/latex/ltx2e test/verify"
 cfghdrs=
 bins=
 libs=
@@ -200,19 +201,8 @@ AC_MSG_RESULT(==================================================================
 dnl Create additional directories that processed files will land in.
 mkdir -p $objdir/doc/latex
 
-dnl Process the following files.
-AC_OUTPUT(Cookfile \
-bin/ncat/doc/latex/manual.tex \
-bin/onyx/doc/latex/manual.tex \
-bin/proxy/doc/latex/manual.tex \
-lib/c/libstash/doc/latex/manual.tex \
-lib/c/libsock/doc/latex/manual.tex \
-lib/c/libprism/doc/latex/manual.tex \
-lib/c/libonyx/doc/latex/manual.tex \
-doc/latex/manual.tex \
-doc/latex/ltx2e \
-test/verify \
-)
+dnl Process .in files.
+AC_OUTPUT($cfgoutputs)
 
 dnl autoconf doesn't keep the execute bit if it's set for the input files, so do
 dnl it manually.

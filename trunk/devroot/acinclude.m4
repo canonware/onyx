@@ -45,11 +45,14 @@ dnl lib : Name of library.
 dnl var : Name of variable to substitute in configure output.
 AC_DEFUN(CW_BUILD_LIB,
 [
-AC_MSG_CHECKING(include $1 in build)
+AC_MSG_CHECKING(whether to include $1 in build)
 if test -d "$srcdir/lib/c/$1" ; then
   build_$1="yes"
   $2=1
   $2_manual=""
+  if test -e "$srcdir/lib/c/$1/doc/latex/manual.tex.in" ; then
+    cfgoutputs="$cfgoutputs lib/c/$1/doc/latex/manual.tex"
+  fi
   cfghdrs="$cfghdrs $objdir/lib/c/$1/include/$1/$1_defs.h"
   libs="$libs $1"
   mkdir -p $objdir/lib/c/$1/include/$1
@@ -69,11 +72,14 @@ dnl bin : Name of binary.
 dnl var : Name of variable to substitute in configure output.
 AC_DEFUN(CW_BUILD_BIN,
 [
-AC_MSG_CHECKING(include $1 in build)
+AC_MSG_CHECKING(whether to include $1 in build)
 if test -d "$srcdir/bin/$1" ; then
   build_$1="yes"
   $2=1
   $2_manual=""
+  if test -e "$srcdir/bin/$1/doc/latex/manual.tex.in" ; then
+    cfgoutputs="$cfgoutputs bin/$1/doc/latex/manual.tex"
+  fi
   cfghdrs="$cfghdrs $objdir/bin/$1/include/$1_defs.h"
   bins="$bins $1"
   mkdir -p $objdir/bin/$1/include
