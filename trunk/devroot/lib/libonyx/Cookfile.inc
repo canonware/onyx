@@ -102,8 +102,8 @@ SRCS = [SRCS] [LIBONYX_SRCS];
                    nxo_dict.tex nxo_file.tex nxo_fino.tex nxo_hook.tex
                    nxo_integer.tex nxo_mark.tex nxo_mutex.tex nxo_name.tex
                    nxo_no.tex nxo_null.tex nxo_operator.tex nxo_pmark.tex
-                   nxo_stack.tex nxo_string.tex nxo_thread.tex ql.tex qr.tex
-                   qs.tex systemdict.tex thd.tex tsd.tex xep.tex;
+                   nxo_real.tex nxo_stack.tex nxo_string.tex nxo_thread.tex
+                   ql.tex qr.tex qs.tex systemdict.tex thd.tex tsd.tex xep.tex;
   tex_srcs = [fromto % [srcdir]/lib/libonyx/doc/latex/% [tex_srcs]];
   tex_srcs = [tex_srcs] [objdir]/lib/libonyx/doc/latex/manual.tex;
 

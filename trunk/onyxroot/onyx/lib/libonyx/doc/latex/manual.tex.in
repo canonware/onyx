@@ -121,8 +121,8 @@ interpreter that are executed by the garbage collector during the mark phase
 (reference iteration).
 
 \section{Exceptions}
-\libname{libonyx} reserves \htmlref{xep}{xep} exception numbers 0 to 127 and
-defines the following exceptions:
+\libname{libonyx} reserves \htmlref{\classname{xep}}{xep} exception numbers 0 to
+127 and defines the following exceptions:
 \begin{description}
 \label{CW_ONYXX_OOM}
 \item[\cppdef{CW\_ONYXX\_OOM}: ]
@@ -197,10 +197,10 @@ API is structured such that it is invalid to do such a thing, for this reason.}
 \item{tstack must be cleaned up before returning from a function.  This
 constraint is placed on the code in order to avoid leaking space on tstack.  In
 debug versions of \libname{libonyx}, this is enforced by assertions.  The one
-exception to this rule has to do with \classname{xep} exceptions, in which case
-the catchers of the exceptions are responsible for cleaning up tstack.
-Therefore, it is not necessary to catch exceptions merely to avoid tstack
-leakage.}
+exception to this rule has to do with \htmlref{\classname{xep}}{xep} exceptions,
+in which case the catchers of the exceptions are responsible for cleaning up
+tstack.  Therefore, it is not necessary to catch exceptions merely to avoid
+tstack leakage.}
 \end{itemize}
 
 Since Onyx type checking is dynamic, it is the responsibility of the operators
@@ -469,6 +469,7 @@ a\_size, const char *a\_filename, cw\_uint32\_t a\_line\_num}}
 \input{@abs_srcdir@/lib/libonyx/doc/latex/nxo_null}
 \input{@abs_srcdir@/lib/libonyx/doc/latex/nxo_operator}
 \input{@abs_srcdir@/lib/libonyx/doc/latex/nxo_pmark}
+\input{@abs_srcdir@/lib/libonyx/doc/latex/nxo_real}
 \input{@abs_srcdir@/lib/libonyx/doc/latex/nxo_stack}
 \input{@abs_srcdir@/lib/libonyx/doc/latex/nxo_string}
 \input{@abs_srcdir@/lib/libonyx/doc/latex/nxo_thread}
