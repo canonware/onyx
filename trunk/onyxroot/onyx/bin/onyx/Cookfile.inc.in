@@ -163,22 +163,26 @@ ONYX_OTESTS =
 #endif
 #if @enable_socket@
 
-              bindsocket_a.nx.in bindsocket_b.nx.in bindsocket_c.nx.in
-              bindsocket_d.nx.in bindsocket_e.nx.in bindsocket_f.nx.in
-              bindsocket_g.nx.in bindsocket_h.nx.in bindsocket_i.nx.in
-              bindsocket_j.nx.in listen_a.nx.in listen_b.nx.in listen_c.nx.in
-              listen_d.nx.in listen_e.nx.in listen_f.nx.in listen_g.nx.in
-              peername_a.nx.in peername_b.nx.in peername_c.nx.in
-              peername_d.nx.in peername_e.nx.in serviceport_a.nx.in
-              serviceport_b.nx.in serviceport_c.nx.in socket_a.nx.in
-              socket_b.nx.in socket_c.nx.in socket_d.nx.in socket_e.nx.in
-              socket_f.nx.in socket_g.nx.in socket_h.nx.in socket_i.nx.in
-              socket_j.nx.in socketpair_a.nx.in socketpair_b.nx.in
-              socketpair_c.nx.in socketpair_d.nx.in socketpair_e.nx.in
-              socketpair_f.nx.in socketpair_g.nx.in socketpair_h.nx.in
-              socketpair_i.nx.in socketpair_j.nx.in sockname_a.nx.in
-              sockname_b.nx.in sockname_c.nx.in sockname_d.nx.in
-              sockname_e.nx.in
+              accept_a.nx.in accept_b.nx.in accept_c.nx.in accept_d.nx.in
+              connect_a.nx.in connect_b.nx.in connect_c.nx.in connect_d.nx.in
+              connect_e.nx.in connect_f.nx.in connect_g.nx.in connect_h.nx.in
+              connect_i.nx.in connect_j.nx.in connect_k.nx.in connect_l.nx.in
+              connect_m.nx.in connect_n.nx.in bindsocket_a.nx.in
+              bindsocket_b.nx.in bindsocket_c.nx.in bindsocket_d.nx.in
+              bindsocket_e.nx.in bindsocket_f.nx.in bindsocket_g.nx.in
+              bindsocket_h.nx.in bindsocket_i.nx.in bindsocket_j.nx.in
+              listen_a.nx.in listen_b.nx.in listen_c.nx.in listen_d.nx.in
+              listen_e.nx.in listen_f.nx.in listen_g.nx.in peername_a.nx.in
+              peername_b.nx.in peername_c.nx.in peername_d.nx.in
+              peername_e.nx.in serviceport_a.nx.in serviceport_b.nx.in
+              serviceport_c.nx.in socket_a.nx.in socket_b.nx.in socket_c.nx.in
+              socket_d.nx.in socket_e.nx.in socket_f.nx.in socket_g.nx.in
+              socket_h.nx.in socket_i.nx.in socket_j.nx.in socketpair_a.nx.in
+              socketpair_b.nx.in socketpair_c.nx.in socketpair_d.nx.in
+              socketpair_e.nx.in socketpair_f.nx.in socketpair_g.nx.in
+              socketpair_h.nx.in socketpair_i.nx.in socketpair_j.nx.in
+              sockname_a.nx.in sockname_b.nx.in sockname_c.nx.in
+              sockname_d.nx.in sockname_e.nx.in
 
 #endif
 
@@ -333,6 +337,11 @@ ONYX_BTESTS = [addprefix @srcroot@/bin/onyx/test/
                          b_kill_a.nx.in b_ppid_a.nx.in b_system_a.nx.in
                          b_waitpid_a_a.nx.in b_waitpid_a_b.nx.in
                          b_waitpid_a_c.nx.in
+
+#endif
+#if @enable_socket@
+
+                         b_accept_a.nx.in
 
 #endif
                          ];

@@ -2439,7 +2439,8 @@ systemdict_connect(cw_nxo_t *a_thread)
     cw_nxo_t *ostack, *tstack, *sock, *addr, *taddr;
     uint32_t npop;
     sa_family_t family;
-    int sockport, error;
+    cw_nxoi_t sockport;
+    int error;
 
     ostack = nxo_thread_ostack_get(a_thread);
     tstack = nxo_thread_tstack_get(a_thread);
@@ -2447,6 +2448,11 @@ systemdict_connect(cw_nxo_t *a_thread)
     if (nxo_type_get(addr) == NXOT_INTEGER)
     {
 	sockport = nxo_integer_get(addr);
+	if (sockport < 0 || sockport > 65535)
+	{
+	    nxo_thread_nerror(a_thread, NXN_rangecheck);
+	    return;
+	}
 	NXO_STACK_NGET(addr, ostack, a_thread, 1);
 	npop = 3;
     }
@@ -2488,7 +2494,7 @@ systemdict_connect(cw_nxo_t *a_thread)
 	    /* Begin initialization of sockaddr. */
 	    memset(&sockaddr, 0, sizeof(struct sockaddr_in));
 	    sockaddr.sin_family = family;
-	    sockaddr.sin_port = htons(sockport);
+	    sockaddr.sin_port = htons((u_short) sockport);
 
 	    error = inet_pton(family, nxo_string_get(taddr),
 			      &sockaddr.sin_addr);

@@ -1,0 +1,70 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+# Called as: accept_a.nx <srcdir> <objdir>
+
+# TCP/IP socket.
+$AF_INET $SOCK_STREAM socket
+$s exch def
+
+s `localhost' bindsocket
+s sockname $port get
+$port exch cvs def
+
+# Launch a process that will connect to port.
+[
+    argv 2 get `/b_accept_a.nx' cat
+    `AF_INET'
+    port
+] forkexec
+$child exch def
+
+s listen
+s accept
+$c exch def
+
+c readline pop 1 sprint
+c close
+
+s close
+
+# Clean up child.
+child waitpid pop
+
+# Unix-domain socket.
+$AF_LOCAL $SOCK_STREAM socket
+$s exch def
+
+$sockpath `/tmp/accept_a_' uid cvs `_' pid cvs 4 ncat def
+
+s sockpath bindsocket
+
+# Launch a process that will connect to sockpath.
+[
+    argv 2 get `/b_accept_a.nx' cat
+    `AF_LOCAL'
+    sockpath
+] forkexec
+$child exch def
+
+s listen
+s accept
+$c exch def
+
+c readline pop 1 sprint
+c close
+
+s close
+sockpath unlink
+
+# Clean up child.
+child waitpid pop
