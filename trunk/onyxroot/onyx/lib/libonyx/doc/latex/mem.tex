@@ -27,7 +27,7 @@ memory allocation that allows tracking of the following:
 \end{itemize}
 
 If any memory leaks are detected, diagnostic output is printed to
-\cvar{out\_err}.
+\cvar{stderr}.
 
 Also, the debug version of \libname{libonyx} sets all newly allocated bytes to
 {\tt 0xa5}, and all deallocated bytes to {\tt 0x5a} (except in the case of

@@ -248,6 +248,7 @@ typedef void *cw_opaque_realloc_t (const void *, void *, size_t, size_t,
 typedef void cw_opaque_dealloc_t (const void *, const void *, size_t,
 				  const char *, cw_uint32_t);
 
+#include "mb.h"
 #include "qs.h"
 #include "qr.h"
 #include "ql.h"
