@@ -53,6 +53,20 @@ static cw_thd_t	cw_g_thd;
 /* Protects the ring of thd's in thd_single_{enter,leave}(). */
 static cw_mtx_t	cw_g_thd_single_lock;
 
+#ifdef _CW_THD_GENERIC_SR
+/*
+ * Protects the suspend/resume code, since a global variable (cw_g_sr_self)
+ * is involved.
+ */
+static cw_mtx_t cw_g_thd_sr_lock;
+
+/*
+ * Since a signal handler can't call thd_self(), this variable is used to
+ * "pass" a thd pointer to the signal handler function.
+ */
+static cw_thd_t *cw_g_sr_self;
+#endif
+
 /* For thd_self(). */
 cw_tsd_t	cw_g_thd_self_key;
 
@@ -98,7 +112,7 @@ thd_l_init(void)
 
 	/*
 	 * Install a signal handler for suspend and resume.  Restart system
-	 * calls in order to reduce the impact of signals on the application
+	 * calls in order to reduce the impact of signals on the application.
 	 */
 	action.sa_flags = SA_RESTART;
 	action.sa_handler = thd_p_sr_handle;
@@ -109,6 +123,9 @@ thd_l_init(void)
 		    strerror(error));
 		abort();
 	}
+
+	/* Initialize globals that support suspend/resume. */
+	mtx_new(&cw_g_thd_sr_lock);
 #endif
 	_cw_assert(cw_g_thd_initialized == FALSE);
 
@@ -164,12 +181,15 @@ thd_l_shutdown(void)
 
 	mtx_delete(&cw_g_thd.crit_lock);
 #ifdef _CW_THD_GENERIC_SR
+	mtx_delete(&cw_g_thd_sr_lock);
+
 	error = sem_destroy(&cw_g_thd.sem);
 	if (error) {
 		out_put_e(NULL, NULL, 0, __FUNCTION__,
 		    "Error in sem_destroy(): [s]\n", strerror(error));
 		abort();
 	}
+
 #endif
 	tsd_delete(&cw_g_thd_self_key);
 	mtx_delete(&cw_g_thd_single_lock);
@@ -425,9 +445,8 @@ thd_resume(cw_thd_t *a_thd)
 		    strerror(error));
 		abort();
 	}
-	error = sem_wait(&a_thd->sem);
-	if (error != 0) {
-		_cw_out_put_e("Error in sem_wait(): [s]\n", strerror(error));
+	if (sem_wait(&a_thd->sem) != 0) {
+		_cw_out_put_e("Error in sem_wait(): [s]\n", strerror(errno));
 		abort();
 	}
 #endif
@@ -511,15 +530,25 @@ thd_p_suspend(cw_thd_t *a_thd)
 	int	error;
 
 #ifdef _CW_THD_GENERIC_SR
+	/*
+	 * Save the thread's pointer in a place that the signal handler can
+	 * get to it.  We don't have to worry about other threads writing
+	 * to cw_g_sr_self, since we're under the protection of
+	 * cw_g_thd_single_lock, but we need a memory barrier to make sure
+	 * that the signal handler gets a clean read.
+	 */
+	mtx_lock(&cw_g_thd_sr_lock);
+	cw_g_sr_self = a_thd;
+	mtx_unlock(&cw_g_thd_sr_lock);
+
 	error = pthread_kill(a_thd->thread, _CW_THD_SIGSR);
 	if (error != 0) {
 		_cw_out_put_e("Error in pthread_kill(): [s]\n",
 		    strerror(error));
 		abort();
 	}
-	error = sem_wait(&a_thd->sem);
-	if (error != 0) {
-		_cw_out_put_e("Error in sem_wait(): [s]\n", strerror(error));
+	if (sem_wait(&a_thd->sem) != 0) {
+		_cw_out_put_e("Error in sem_wait(): [s]\n", strerror(errno));
 		abort();
 	}
 #endif
@@ -542,7 +571,13 @@ thd_p_sr_handle(int a_signal)
 	sigset_t	set;
 	cw_thd_t	*thd;
 
-	thd = thd_self();
+	/*
+	 * Lock the mutex purely to get a memory barrier that assures us a
+	 * clean read of cw_g_sr_self.
+	 */
+	mtx_lock(&cw_g_thd_sr_lock);
+	thd = cw_g_sr_self;
+	mtx_unlock(&cw_g_thd_sr_lock);
 
 	/*
 	 * Only enter the following block of code if we're being suspended;

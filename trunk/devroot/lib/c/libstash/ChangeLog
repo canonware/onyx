@@ -1,3 +1,10 @@
+2001-07-12  Jason Evans  <jasone@canonware.com>
+
+	* src/thd.c: thd_self() isn't safe to call within a signal
+	handler.  Therefore, use a global variable to store a pointer to
+	the thread being suspended so that the signal handler can access
+	it.
+
 2001-07-10  Jason Evans  <jasone@canonware.com>
 
 	* src/thd.c: Make sure thread stacks aren't too small.
