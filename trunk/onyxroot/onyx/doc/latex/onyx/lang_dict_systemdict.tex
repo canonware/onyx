@@ -2352,7 +2352,7 @@ operators} \\
 %% 		\begin{description}\item[]
 %% 		\item[: ]
 %% 		\end{description}
-%% 	\item[Errors(s): ]
+%% 	\item[Error(s): ]
 %% 		\begin{description}\item[]
 %% 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 %% 		\item[\htmlref{typecheck}{typecheck}.]
@@ -2374,7 +2374,7 @@ operators} \\
 		\item[fino: ]
 			A fino object.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Push a fino object onto ostack to denote the bottom of a stack
 		that has not yet been constructed.
@@ -2403,7 +2403,7 @@ onyx:1>
 		\item[stack: ]
 			A stack object.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{unmatchedfino}{unmatchedfino}.]
 		\end{description}
@@ -2436,7 +2436,7 @@ onyx:0>
 		\item[mark: ]
 			A mark object.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Begin a dictionary declaration.  See the
 		\htmlref{\onyxop{}{>}{}}{systemdict:sym_gt} operator
@@ -2465,7 +2465,7 @@ onyx:0>
 		\item[dict: ]
 			A dictionary that contains \oparg{kvpairs}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{unmatchedmark}{unmatchedmark}.]
@@ -2485,28 +2485,6 @@ onyx:1> pstack
 onyx:1>
 		\end{verbatim}
 	\end{description}
-\label{systemdict:gtailopt}
-\index{gtailopt@\onyxop{}{gtailopt}{}}
-\item[{\onyxop{--}{gtailopt}{boolean}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ] None.
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[boolean: ]
-			True if tail call optimization is enabled by default for
-			new threads, false otherwise.
-		\end{description}
-	\item[Errors(s): ] None.
-	\item[Description: ]
-		Get whether tail call optimization is enabled by default for new
-		threads.
-	\item[Example(s): ]\begin{verbatim}
-
-onyx:0> gtailopt 1 sprint
-true
-onyx:0>
-		\end{verbatim}
-	\end{description}
 \label{systemdict:sym_lb}
 \index{[@\onyxop{}{{\lb}}{}}
 \item[{\onyxop{--}{{\lb}}{mark}}: ]
@@ -2517,7 +2495,7 @@ onyx:0>
 		\item[mark: ]
 			A mark object.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Begin an array declaration.  See the
 		\htmlref{\onyxop{}{]}{}}{systemdict:sym_rb} operator
@@ -2545,7 +2523,7 @@ onyx:0>
 		\item[array: ]
 			An array that contains \oparg{objects}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{unmatchedmark}{unmatchedmark}.]
 		\end{description}
@@ -2572,7 +2550,7 @@ onyx:0> mark 1 2 3 ] 1 sprint
 		\item[r: ]
 			Absolute value of \oparg{a}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -2606,7 +2584,7 @@ onyx:0>
 		\item[sock: ]
 			A socket that is connected to a client.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{argcheck}{argcheck}.]
 		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
@@ -2644,7 +2622,7 @@ onyx:2>
 		\item[r: ]
 			Arc cosine of \oparg{a} in radians.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -2673,7 +2651,7 @@ onyx:0>
 		\item[r: ]
 			Hyperbolic arc cosine of \oparg{a}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -2704,7 +2682,7 @@ onyx:0>
 		\item[r: ]
 			The sum of \oparg{a} and \oparg{b}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -2742,7 +2720,7 @@ onyx:0>
 		\item[obj: ]
 			An object.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
@@ -2774,7 +2752,7 @@ onyx:3>
 			If \oparg{a} and \oparg{b} are integers, their bitwise
 			and, otherwise their logical and.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -2806,7 +2784,7 @@ onyx:0>
 			array elements are the arguments that were passed during
 			invocation.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get the argument vector that was used to invoke this program.
 	\item[Example(s): ]\begin{verbatim}
@@ -2830,7 +2808,7 @@ onyx:0>
 		\item[array: ]
 			An array of \oparg{length} elements.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -2862,7 +2840,7 @@ onyx:0>
 		\item[r: ]
 			Arc sine of \oparg{a} in radians.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -2891,7 +2869,7 @@ onyx:0>
 		\item[r: ]
 			Hyperbolic arc sine of \oparg{a}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -2919,7 +2897,7 @@ onyx:0>
 		\item[r: ]
 			Arctangent of \oparg{x} in radians.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -2949,7 +2927,7 @@ onyx:0>
 		\item[r: ]
 			Arctangent of $\frac{y}{x}$ in radians.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -2981,7 +2959,7 @@ onyx:0>
 		\item[r: ]
 			Hyperbolic arctangent of \oparg{x}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -3014,7 +2992,7 @@ onyx:0>
 		\item[\commas: ]
 			Zero or more objects.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
@@ -3049,7 +3027,7 @@ onyx:3>
 		\item[dup: ]
 			A duplicate of \oparg{obj}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
@@ -3077,7 +3055,7 @@ onyx:4>
 			A dictionary.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -3109,7 +3087,7 @@ onyx:0>
 		\item[proc: ]
 			The same procedure as was passed in.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -3175,7 +3153,7 @@ onyx:1>
 			A filesystem path for a Unix-domain socket.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{argcheck}{argcheck}.]
 		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
@@ -3218,7 +3196,7 @@ onyx:1>
 		\item[\commas: ]
 			Zero or more objects.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
@@ -3242,7 +3220,7 @@ onyx:1>
 			A condition object.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -3274,7 +3252,7 @@ onyx:0>
 		\item[count: ]
 			Number of buffered readable bytes.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -3314,7 +3292,7 @@ onyx:1>
 		\item[ab: ]
 			The catenation of \oparg{a} and \oparg{b}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -3350,7 +3328,7 @@ onyx:0>
 			True if \oparg{obj} has the callable attribute, false
 			otherwise.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
@@ -3375,7 +3353,7 @@ onyx:0>
 			A string that represents a filesystem path.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{invalidaccess}{invalidaccess}.]
 		\item[\htmlref{ioerror}{ioerror}.]
@@ -3394,6 +3372,28 @@ onyx:0> pwd 1 sprint
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:cdef}
+\index{cdef@\onyxop{}{cdef}{}}
+\item[{\onyxop{OPARGS}{cdef}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Error(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
 \label{systemdict:ceiling}
 \index{ceiling@\onyxop{}{ceiling}{}}
 \item[{\onyxop{a}{ceiling}{r}}: ]
@@ -3408,7 +3408,7 @@ onyx:0>
 		\item[r: ]
 			Integer ceiling of \oparg{a}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -3444,7 +3444,7 @@ onyx:0>
 			An integer that represents a Unix file mode.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
 		\item[\htmlref{ioerror}{ioerror}.]
@@ -3482,7 +3482,7 @@ onyx:1>
 			An integer that represents a group ID.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
 		\item[\htmlref{ioerror}{ioerror}.]
@@ -3520,7 +3520,7 @@ onyx:0>
 			A string that represents a filesystem path.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{invalidaccess}{invalidaccess}.]
 		\item[\htmlref{ioerror}{ioerror}.]
@@ -3550,7 +3550,7 @@ onyx:0>
 		\item[class: ]
 			A class object.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Create a class object.
 	\item[Example(s): ]\begin{verbatim}
@@ -3574,7 +3574,7 @@ onyx:0>
 		\item[name/null: ]
 			A name or null object.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -3600,7 +3600,7 @@ onyx:0>
 			All objects on ostack.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Pop all objects off of ostack.
 	\item[Example(s): ]\begin{verbatim}
@@ -3625,7 +3625,7 @@ onyx:0>
 			A mark object.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{unmatchedmark}{unmatchedmark}.]
 		\end{description}
@@ -3654,7 +3654,7 @@ onyx:1>
 			A file object.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{ioerror}{ioerror}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -3679,7 +3679,7 @@ onyx:0>
 		\item[condition: ]
 			A condition object.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Create a condition object.
 	\item[Example(s): ]\begin{verbatim}
@@ -3707,7 +3707,7 @@ onyx:0>
 			A filesystem path for a Unix-domain socket.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{argcheck}{argcheck}.]
 		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
@@ -3731,7 +3731,7 @@ onyx:1>
 	\begin{description}\item[]
 	\item[Input(s): ] None.
 	\item[Output(s): ] None.
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Terminate the current iteration of the innermost enclosing
 		context, and start at the beginning of the next iteration.
@@ -3795,7 +3795,7 @@ onyx:0>
 			A substring of \oparg{dststring}, with the same contents
 			as \oparg{srcstring}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -3831,7 +3831,7 @@ onyx:1>
 		\item[r: ]
 			Cosine of \oparg{a} in radians.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -3863,7 +3863,7 @@ onyx:0>
 		\item[r: ]
 			Hyperbolic cosine of \oparg{a} in radians.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -3887,7 +3887,7 @@ onyx:0>
 		\item[count: ]
 			The number of objects on ostack.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get the number of objects on ostack.
 	\item[Example(s): ]\begin{verbatim}
@@ -3910,7 +3910,7 @@ onyx:4>
 		\item[count: ]
 			Number of dictionaries on dstack.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get the number of dictionaries on dstack.
 	\item[Example(s): ]\begin{verbatim}
@@ -3934,7 +3934,7 @@ onyx:0>
 			The number of objects currently on the execution stack
 			(recursion depth).
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get the current number of objects on the execution stack.
 	\item[Example(s): ]\begin{verbatim}
@@ -3966,7 +3966,7 @@ onyx:0>
 		\item[count: ]
 			The depth of \oparg{mark} on ostack.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{unmatchedmark}{unmatchedmark}.]
 		\end{description}
@@ -3979,6 +3979,28 @@ onyx:0> 4 mark 2 1 0 counttomark 1 sprint
 onyx:5>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:cstack}
+\index{cstack@\onyxop{}{cstack}{}}
+\item[{\onyxop{OPARGS}{cstack}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Error(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
 \label{systemdict:currentdict}
 \index{currentdict@\onyxop{}{currentdict}{}}
 \item[{\onyxop{--}{currentdict}{dict}}: ]
@@ -3989,7 +4011,7 @@ onyx:5>
 		\item[dict: ]
 			Topmost stack on dstack.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get the topmost dictionary on dstack.
 	\item[Example(s): ]\begin{verbatim}
@@ -4012,7 +4034,7 @@ onyx:0>
 			disabled.  Otherwise, new objects are created with
 			implicit locking enabled.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get the current implicit locking mode.  See
 		Section~\ref{sec:onyx_implicit_synchronization} for implicit
@@ -4042,7 +4064,7 @@ onyx:0>
 			The same object that was passed in, but with the
 			callable attribute set.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
@@ -4073,7 +4095,7 @@ onyx:0>
 			A string representation of \oparg{real} in decimal form
 			with \oparg{precision} digits of decimal precision.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -4109,7 +4131,7 @@ onyx:0>
 			The same object that was passed in, but with the
 			evaluable attribute set.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
@@ -4139,7 +4161,7 @@ onyx:0>
 			A string representation of \oparg{real} in exponential
 			form with \oparg{precision} digits of decimal precision.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -4160,6 +4182,50 @@ onyx:0> -42.3 5 cves 1 sprint
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:cvf}
+\index{cvf@\onyxop{}{cvf}{}}
+\item[{\onyxop{OPARGS}{cvf}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Error(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{systemdict:cvi}
+\index{cvi@\onyxop{}{cvi}{}}
+\item[{\onyxop{OPARGS}{cvi}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Error(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
 \label{systemdict:cvl}
 \index{cvl@\onyxop{}{cvl}{}}
 \item[{\onyxop{obj}{cvl}{obj}}: ]
@@ -4175,7 +4241,7 @@ onyx:0>
 			The same object that was passed in, but with the literal
 			attribute set.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
@@ -4202,7 +4268,7 @@ onyx:0>
 		\item[name: ]
 			A literal name that corresponds to \oparg{string}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -4233,7 +4299,7 @@ onyx:0>
 			A string representation of \oparg{integer} in base
 			\oparg{radix}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -4278,7 +4344,7 @@ onyx:0>
 			\item[Other types: ] {\tt `--nostringval--'}.
 			\end{description}
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
@@ -4318,7 +4384,7 @@ onyx:0>
 			The same object that was passed in, but with the
 			executable attribute set.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
@@ -4345,7 +4411,7 @@ onyx:0>
 		\item[dict/null: ]
 			A dict or null object.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -4373,7 +4439,7 @@ onyx:0>
 		\item[r: ]
 			$a - 1$.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -4399,7 +4465,7 @@ onyx:0>
 			A value associated with \oparg{key}.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
@@ -4428,7 +4494,7 @@ onyx:0>
 			A thread object.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -4455,7 +4521,7 @@ onyx:1>
 		\item[dict: ]
 			An empty dictionary.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Create an empty dictionary.
 	\item[Example(s): ]\begin{verbatim}
@@ -4476,7 +4542,7 @@ onyx:0>
 			code.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -4501,7 +4567,7 @@ onyx:0> 1 die
 			An object to be executed.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{invalidaccess}{invalidaccess}.]
 		\item[\htmlref{ioerror}{ioerror}.]
@@ -4551,7 +4617,7 @@ onyx:0>
 		\item[r: ]
 			The quotient of \oparg{a} divided by \oparg{b}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -4569,6 +4635,7 @@ onyx:0> 5.0 0 div
 Error $undefinedresult
 ostack: (5.000000e+00 0)
 dstack: (-dict- -dict- -dict- -dict-)
+cstack: ()
 estack/istack trace (0..2):
 0:      --div--
 1:      -file-
@@ -4598,7 +4665,7 @@ onyx:3>
 		\item[a: ]
 			An object.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
@@ -4624,7 +4691,7 @@ onyx:4>
 		\item[stack: ]
 			A snapshot of dstack.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get a snapshot of dstack.
 	\item[Example(s): ]\begin{verbatim}
@@ -4650,7 +4717,7 @@ onyx:0>
 		\item[dup: ]
 			A duplicate of \oparg{obj}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
@@ -4681,7 +4748,7 @@ onyx:2>
 			True if \oparg{obj} has the evaluable attribute,
 			false otherwise.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
@@ -4711,7 +4778,7 @@ onyx:0>
 		\item[gid: ]
 			Process's effective group ID.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get the process's effective group ID.
 	\item[Example(s): ]\begin{verbatim}
@@ -4727,7 +4794,7 @@ onyx:0>
 	\begin{description}\item[]
 	\item[Input(s): ] None.
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
@@ -4744,6 +4811,7 @@ onyx:0> foo 1 sprint
 Error $undefined
 ostack: ()
 dstack: (-dict- -dict- -dict- -dict-)
+cstack: ()
 estack/istack trace (0..2):
 0:      foo
 1:      -file-
@@ -4761,7 +4829,7 @@ onyx:1>
 		\item[dict: ]
 			A dictionary.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get envdict.  See Section~\ref{sec:envdict} for details on
 		envdict.
@@ -4770,6 +4838,28 @@ onyx:1>
 onyx:0> envdict 0 sprint
 -dict-
 onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:escape}
+\index{escape@\onyxop{}{escape}{}}
+\item[{\onyxop{OPARGS}{escape}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Error(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
 		\end{verbatim}
 	\end{description}
 \label{systemdict:eq}
@@ -4789,7 +4879,7 @@ onyx:0>
 			True if \oparg{a} is equal to \oparg{b}, false
 			otherwise.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
@@ -4842,7 +4932,7 @@ onyx:0>
 		\item[stack: ]
 			A current snapshot (copy) of the execution stack.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get a current snapshot of the execution stack.
 	\item[Example(s): ]\begin{verbatim}
@@ -4862,7 +4952,7 @@ onyx:0>
 		\item[uid: ]
 			Process's effective user ID.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get the process's effective user ID.
 	\item[Example(s): ]\begin{verbatim}
@@ -4882,7 +4972,7 @@ onyx:0>
 			An object.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
@@ -4914,7 +5004,7 @@ onyx:0>
 		\item[a: ]
 			The same object that was passed in.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
@@ -4944,7 +5034,7 @@ onyx:2>
 			the invoked program.
 		\end{description}
 	\item[Output(s): ] None (this operator does not return).
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -4967,7 +5057,7 @@ onyx:0>
 	\begin{description}\item[]
 	\item[Input(s): ] None.
 	\item[Output(s): ] None.
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Exit the innermost enclosing looping context immediately.
 		This operator can be called within the looping context of
@@ -4999,7 +5089,7 @@ onyx:0>
 		\item[r: ]
 			$e$ raised to the \oparg{b} power.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -5024,7 +5114,7 @@ onyx:0>
 		\item[false: ]
 			The boolean value false.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Return false.
 	\item[Example(s): ]\begin{verbatim}
@@ -5032,6 +5122,28 @@ onyx:0>
 onyx:0> false 1 sprint
 false
 onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:fcheck}
+\index{fcheck@\onyxop{}{fcheck}{}}
+\item[{\onyxop{OPARGS}{fcheck}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Error(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
 		\end{verbatim}
 	\end{description}
 \label{systemdict:floor}
@@ -5048,7 +5160,7 @@ onyx:0>
 		\item[r: ]
 			Integer floor of \oparg{a}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -5076,7 +5188,7 @@ onyx:0>
 	\begin{description}\item[]
 	\item[Input(s): ] None.
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{ioerror}{ioerror}.]
 		\end{description}
@@ -5100,7 +5212,7 @@ onyx:0>
 			A file object.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{ioerror}{ioerror}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -5136,7 +5248,7 @@ onyx:0>
 		\end{description}
 	\item[Output(s): ]  At the beginning of each iteration, the current
 		value of the control variable is pushed onto ostack.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -5192,7 +5304,7 @@ onyx:0>
 			A string object.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -5250,7 +5362,7 @@ onyx:0>
 			Process identifier for the new process, or 0 if the
 			child process.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{limitcheck}{limitcheck}.]
 		\item[\htmlref{rangecheck}{rangecheck}.]
@@ -5279,7 +5391,7 @@ onyx:0>
 		\item[dict: ]
 			A dictionary.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get gcdict.  See Section~\ref{sec:gcdict} for details on
 		gcdict.
@@ -5307,7 +5419,7 @@ onyx:0>
 			True if \oparg{a} is greater than or equal to \oparg{b},
 			false otherwise.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -5366,7 +5478,7 @@ onyx:0>
 			The ascii value of the character in \oparg{string} at
 			offset \oparg{index}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -5414,7 +5526,7 @@ onyx:0>
 			A substring of \oparg{string} at offset \oparg{index}
 			and of length \oparg{length}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -5441,7 +5553,7 @@ onyx:0>
 		\item[gid: ]
 			Process's group ID.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get the process's group ID.
 	\item[Example(s): ]\begin{verbatim}
@@ -5461,7 +5573,7 @@ onyx:0>
 		\item[dict: ]
 			A dictionary.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get globaldict.  See Section~\ref{sec:globaldict} for details on
 		globaldict.
@@ -5482,7 +5594,7 @@ onyx:0>
 		\item[count: ]
 			Default maximum allowable estack depth.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get the default maximum allowable estack depth.  This value is
 		used when creating new threads.
@@ -5503,7 +5615,7 @@ onyx:0>
 		\item[file: ]
 			A file object corresponding to the global stderr.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get the global stderr that is inherited by new threads.  See
 		Section~\ref{sec:onyx_standard_io} for standard I/O details.
@@ -5524,7 +5636,7 @@ onyx:1>
 		\item[file: ]
 			A file object corresponding to the global stdin.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get the global stdin that is inherited by new threads.  See
 		Section~\ref{sec:onyx_standard_io} for standard I/O details.
@@ -5545,7 +5657,7 @@ onyx:1>
 		\item[file: ]
 			A file object corresponding to the global stdout.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get the global stdout that is inherited by new threads.  See
 		Section~\ref{sec:onyx_standard_io} for standard I/O details.
@@ -5573,7 +5685,7 @@ onyx:1>
 			True if \oparg{a} is greater than \oparg{b}, false
 			otherwise.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -5597,6 +5709,28 @@ true
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:gtailopt}
+\index{gtailopt@\onyxop{}{gtailopt}{}}
+\item[{\onyxop{--}{gtailopt}{boolean}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[boolean: ]
+			True if tail call optimization is enabled by default for
+			new threads, false otherwise.
+		\end{description}
+	\item[Error(s): ] None.
+	\item[Description: ]
+		Get whether tail call optimization is enabled by default for new
+		threads.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> gtailopt 1 sprint
+true
+onyx:0>
+		\end{verbatim}
+	\end{description}
 \label{systemdict:handletag}
 \index{handletag@\onyxop{}{handletag}{}}
 \item[{\onyxop{handle}{handletag}{tag}}: ]
@@ -5611,7 +5745,7 @@ onyx:0>
 		\item[tag: ]
 			The tag associated with \oparg{handle}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -5648,7 +5782,7 @@ onyx:0>
 		\item[dup: ]
 			Duplicate of \oparg{obj}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -5690,7 +5824,7 @@ onyx:5>
 		\item[\commas: ]
 			Zero or more objects.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -5709,6 +5843,28 @@ onyx:4> 2 ibpop pstack
 onyx:3>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:icheck}
+\index{icheck@\onyxop{}{icheck}{}}
+\item[{\onyxop{OPARGS}{icheck}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Error(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
 \label{systemdict:idiv}
 \index{idiv@\onyxop{}{idiv}{}}
 \item[{\onyxop{a b}{idiv}{r}}: ]
@@ -5725,7 +5881,7 @@ onyx:3>
 		\item[r: ]
 			The integer quotient of \oparg{a} divided by \oparg{b}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -5743,6 +5899,7 @@ onyx:0> 5 0 idiv
 Error $undefinedresult
 ostack: (5 0)
 dstack: (-dict- -dict- -dict- -dict-)
+cstack: ()
 estack/istack trace (0..2):
 0:      --idiv--
 1:      -file-
@@ -5769,7 +5926,7 @@ onyx:3>
 		\item[dup: ]
 			A duplicate of \oparg{obj}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -5800,7 +5957,7 @@ onyx:5>
 			An object.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -5829,7 +5986,7 @@ onyx:0>
 			An object.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -5862,7 +6019,7 @@ onyx:0>
 			True if \oparg{obj} is implicitly locked, false
 			otherwise.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -5896,7 +6053,7 @@ onyx:0>
 		\item[class/null: ]
 			A class or null object.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -5930,7 +6087,7 @@ onyx:0>
 			True if \oparg{name} is implemented by \oparg{class},
 			false otherwise.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -5961,7 +6118,7 @@ onyx:1>
 		\item[r: ]
 			$a + 1$.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -5984,7 +6141,7 @@ onyx:0>
 		\begin{description}\item[]
 		\item[instance: ]
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Create an instance object.
 	\item[Example(s): ]\begin{verbatim}
@@ -6009,7 +6166,7 @@ onyx:0>
 			The size in bytes of the I/O buffer associated with
 			\oparg{file}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -6038,7 +6195,7 @@ onyx:0>
 			\oparg{index}), of the object to remove from ostack.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -6068,7 +6225,7 @@ onyx:2>
 		\item[class/null: ]
 			A class or null object.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -6096,7 +6253,7 @@ onyx:0>
 		\item[stack: ]
 			A current snapshot (copy) of the index stack.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get a current snapshot of the index stack.
 	\item[Example(s): ]\begin{verbatim}
@@ -6116,7 +6273,7 @@ onyx:0>
 			A thread object.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -6180,7 +6337,7 @@ onyx:0>
 			\end{itemize}
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{argcheck}{argcheck}.]
 		\item[\htmlref{invalidaccess}{invalidaccess}.]
@@ -6216,7 +6373,7 @@ onyx:0>
 			True if \oparg{class} is in \oparg{instance}'s
 			inheritance hierarchy, false otherwise.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -6252,7 +6409,7 @@ onyx:1>
 			True if \oparg{key} is defined in \oparg{dict}, false
 			otherwise.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -6283,7 +6440,7 @@ onyx:1>
 			True if \oparg{obj} has the literal attribute, false
 			otherwise.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
@@ -6315,7 +6472,7 @@ onyx:0>
 			True if \oparg{a} is less than or equal to \oparg{b},
 			false otherwise.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -6370,7 +6527,7 @@ onyx:0>
 			in \oparg{dict}, number of characters in \oparg{name},
 			or number of characters in \oparg{string}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -6404,7 +6561,7 @@ onyx:0>
 			A string that represents a filename.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
 		\item[\htmlref{ioerror}{ioerror}.]
@@ -6443,7 +6600,7 @@ onyx:2>
 			specified, the maximum backlog is used.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
 		\item[\htmlref{neterror}{neterror}.]
@@ -6475,7 +6632,7 @@ onyx:1>
 		\item[r: ]
 			Natural logarithm of \oparg{a}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -6507,7 +6664,7 @@ onyx:0>
 			The value associated with the topmost definition of
 			\oparg{key} in dstack.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{undefined}{undefined}.]
@@ -6561,7 +6718,7 @@ onyx:1>
 				Offset from UTC in seconds.
 			\end{description}
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{rangecheck}{rangecheck}.]
@@ -6619,7 +6776,7 @@ onyx:0>
 			A mutex object.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -6648,7 +6805,7 @@ onyx:0>
 		\item[r: ]
 			Base 10 logarithm of \oparg{a}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -6675,7 +6832,7 @@ onyx:0>
 			An object to evaluate.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
@@ -6710,7 +6867,7 @@ onyx:0>
 			True if \oparg{a} is less than \oparg{b}, false
 			otherwise.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -6746,7 +6903,7 @@ onyx:0>
 		\item[mark: ]
 			A mark object.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Push a mark onto ostack.
 	\item[Example(s): ]\begin{verbatim}
@@ -6766,7 +6923,7 @@ onyx:1>
 		\item[count: ]
 			Maximum allowable estack depth.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get the maximum allowable estack depth.
 	\item[Example(s): ]\begin{verbatim}
@@ -6820,7 +6977,7 @@ onyx:0>
 			\item[FALSE: ] No match found.
 			\end{description}
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{regexerror}{regexerror}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -6856,7 +7013,7 @@ onyx:0>
 			The bottommost method associated with \oparg{name} in
 			\oparg{class}'s inheritance hierarchy.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -6887,7 +7044,7 @@ onyx:0>
 		\item[dict/null: ]
 			A dict or null object.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -6914,7 +7071,7 @@ onyx:0>
 			An integer that represents a Unix file mode.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
 		\item[\htmlref{ioerror}{ioerror}.]
@@ -6947,7 +7104,7 @@ onyx:0>
 			An integer that represents a Unix file mode.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
 		\item[\htmlref{ioerror}{ioerror}.]
@@ -6980,7 +7137,7 @@ onyx:0>
 		\item[r: ]
 			The modulus of \oparg{a} and \oparg{b}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -7000,6 +7157,7 @@ onyx:0> 5 0 mod
 Error $undefinedresult
 ostack: (5 0)
 dstack: (-dict- -dict- -dict- -dict-)
+cstack: ()
 estack/istack trace (0..2):
 0:      --mod--
 1:      -file-
@@ -7020,7 +7178,7 @@ onyx:3>
 			module initialization function to be executed.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -7073,7 +7231,7 @@ onyx:0>
 			Any object.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -7100,7 +7258,7 @@ onyx:0>
 			module initialization function to be executed.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -7145,7 +7303,7 @@ onyx:0>
 		\item[r: ]
 			The product of \oparg{a} and \oparg{b}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -7175,7 +7333,7 @@ onyx:0>
 		\item[mutex: ]
 			A mutex object.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Create a mutex.
 	\item[Example(s): ]\begin{verbatim}
@@ -7197,7 +7355,7 @@ onyx:0>
 			Number of \oparg{objects} to pop.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -7237,7 +7395,7 @@ onyx:1>
 			The catenation of \oparg{arrays}, \oparg{stacks}, or
 			\oparg{strings}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -7281,7 +7439,7 @@ onyx:0>
 		\item[a: ]
 			An object.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -7316,7 +7474,7 @@ onyx:5>
 		\item[objects: ]
 			The same objects that were passed in.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -7354,7 +7512,7 @@ onyx:5>
 			True if \oparg{a} is not equal to \oparg{b}, false
 			otherwise.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
@@ -7414,7 +7572,7 @@ onyx:0>
 		\item[r: ]
 			The negative of \oparg{a}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -7452,7 +7610,7 @@ onyx:0>
 		\item[b: ]
 			An object.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
@@ -7481,7 +7639,7 @@ onyx:2>
 		\item[boolean: ]
 			Nonb-blocking mode for \oparg{file}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -7514,7 +7672,7 @@ onyx:1>
 			If \oparg{a} is an integer, the bitwise negation of
 			\oparg{a}, otherwise the logical negation of \oparg{a}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -7545,7 +7703,7 @@ onyx:0>
 			Number of \oparg{objects} to pop.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -7572,7 +7730,7 @@ onyx:1>
 			than 0.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -7596,7 +7754,7 @@ onyx:0>
 		\item[null: ]
 			A null object.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Create a null object.
 	\item[Example(s): ]\begin{verbatim}
@@ -7630,7 +7788,7 @@ onyx:1>
 		\item[\dots: ]
 			$count - 2$ objects.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -7666,7 +7824,7 @@ onyx:5>
 			The integer offset of \oparg{submatch}, relative to the
 			beginning of \oparg{input}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -7693,7 +7851,7 @@ onyx:0>
 		\item[dict: ]
 			A dictionary.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get onyxdict.  See Section~\ref{sec:onyxdict} for details on
 		onyxdict.
@@ -7741,7 +7899,7 @@ onyx:0>
 		\item[file: ]
 			A file object.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
 		\item[\htmlref{ioerror}{ioerror}.]
@@ -7776,7 +7934,7 @@ onyx:1>
 			If \oparg{a} and \oparg{b} are integers, their bitwise
 			or, otherwise their logical or.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -7805,7 +7963,7 @@ onyx:0>
 		\item[stack: ]
 			A current snapshot (copy) of ostack.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get a current snapshot of ostack.
 	\item[Example(s): ]\begin{verbatim}
@@ -7830,7 +7988,7 @@ onyx:4>
 			Maximum recursion depth.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{ioerror}{ioerror}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -7876,7 +8034,7 @@ onyx:0>
 			See Section~\ref{sec:outputsdict} for format specifier
 			details.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -7911,7 +8069,7 @@ onyx:0>
 		\item[dict: ]
 			A dictionary.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get outputsdict.  See Section~\ref{sec:outputsdict} for details
 		on outputsdict.
@@ -7940,7 +8098,7 @@ onyx:0>
 		\item[b: ]
 			An object.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
@@ -7979,7 +8137,7 @@ onyx:4>
 			\item[path: ] Unix-domain socket path.
 			\end{description}
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{argcheck}{argcheck}.]
 		\item[\htmlref{ioerror}{ioerror}.]
@@ -8011,7 +8169,7 @@ onyx:2>
 		\item[pid: ]
 			Process identifier.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get the process ID of the running process.
 	\item[Example(s): ]\begin{verbatim}
@@ -8035,7 +8193,7 @@ onyx:0>
 			A writeable file object.  Data written to \oparg{wfile}
 			can subsequently be read from \oparg{rfile}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{ioerror}{ioerror}.]
 		\item[\htmlref{unregistered}{unregistered}.]
@@ -8128,7 +8286,7 @@ onyx:0>
 				\oparg{file} is not an open file.
 			\end{description}
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{rangecheck}{rangecheck}.]
@@ -8156,7 +8314,7 @@ onyx:0>
 			An object.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
@@ -8190,7 +8348,7 @@ onyx:1>
 		\item[r: ]
 			\oparg{a} to the \oparg{b} power.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -8228,7 +8386,7 @@ onyx:0>
 		\item[pid: ]
 			Process identifier.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get the process ID of the running process's parent.
 	\item[Example(s): ]\begin{verbatim}
@@ -8248,7 +8406,7 @@ onyx:0>
 			A string object.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{ioerror}{ioerror}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -8274,7 +8432,7 @@ onyx:0>
 			A string that contains the product name, normally
 			`Canonware Onyx'.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get the product string.  The string returned is a reference to
 		the original product string.
@@ -8291,7 +8449,7 @@ onyx:1>
 	\begin{description}\item[]
 	\item[Input(s): ] None.
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{ioerror}{ioerror}.]
 		\end{description}
@@ -8339,7 +8497,7 @@ onyx:6>
 			\oparg{string} at offset \oparg{index}.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -8382,7 +8540,7 @@ onyx:0>
 			extend past the end of \oparg{string}.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -8409,7 +8567,7 @@ onyx:0>
 		\item[path: ]
 			A string that represents the present working directory.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{invalidaccess}{invalidaccess}.]
 		\end{description}
@@ -8430,7 +8588,7 @@ onyx:1>
 	\begin{description}\item[]
 	\item[Input(s): ] None.
 	\item[Output(s): ] None.
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Unwind the execution stack to the innermost
 		\htmlref{\onyxop{}{start}{}}{systemdict:start} context.  Under
@@ -8457,7 +8615,7 @@ onyx:0>
 			A pseudo-random non-negative integer, with 63 bits of
 			psuedo-randomness.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Return a pseudo-random integer.
 	\item[Example(s): ]\begin{verbatim}
@@ -8493,7 +8651,7 @@ onyx:0>
 		\item[boolean: ]
 			If true, end of file reached during read.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{ioerror}{ioerror}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -8528,7 +8686,7 @@ onyx:3> pop 1 sprint
 		\item[boolean: ]
 			If true, end of file reached during read.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{ioerror}{ioerror}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -8571,7 +8729,7 @@ onyx:1>
 			A string that represents the link data associated with
 			\oparg{linkname}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{invalidaccess}{invalidaccess}.]
 		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
@@ -8602,7 +8760,7 @@ onyx:0>
 			Number of nanoseconds since the epoch (midnight on 1
 			January 1970).
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get the number of nanoseconds since the epoch.
 	\item[Example(s): ]\begin{verbatim}
@@ -8639,7 +8797,7 @@ onyx:0>
 			A substring of \oparg{string} that contains message
 			data.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{argcheck}{argcheck}.]
 		\item[\htmlref{neterror}{neterror}.]
@@ -8695,7 +8853,7 @@ onyx:1>
 		\item[regex: ]
 			A regex object.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{regexerror}{regexerror}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -8745,7 +8903,7 @@ onyx:0>
 		\item[regsub: ]
 			A regsub object.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{regexerror}{regexerror}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -8774,7 +8932,7 @@ onyx:0>
 			A string object that represents a file path.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
 		\item[\htmlref{ioerror}{ioerror}.]
@@ -8807,7 +8965,7 @@ onyx:0>
 			An object to evaluate.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -8837,7 +8995,7 @@ onyx:0>
 			A string that represents a module filename.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -8876,7 +9034,7 @@ onyx:0>
 			A string object that represents a directory path.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
 		\item[\htmlref{ioerror}{ioerror}.]
@@ -8912,7 +9070,7 @@ onyx:0>
 		\item[rolled: ]
 			Rolled version of \oparg{region}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -8966,7 +9124,7 @@ onyx:4>
 		\item[r: ]
 			Integer round of \oparg{a}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -9005,7 +9163,7 @@ onyx:0>
 		\item[\dots: ]
 			One or more objects.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -9039,7 +9197,7 @@ onyx:0>
 			A stack object.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -9063,7 +9221,7 @@ onyx:0>
 			A stack object.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -9087,7 +9245,7 @@ onyx:0>
 			A stack object.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -9116,7 +9274,7 @@ onyx:1>
 		\item[obj: ]
 			An object.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -9143,7 +9301,7 @@ onyx:2>
 			An object.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -9168,7 +9326,7 @@ onyx:1>
 			A stack object.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -9192,7 +9350,7 @@ onyx:1>
 			A stack object.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -9222,7 +9380,7 @@ onyx:1>
 		\item[count: ]
 			The number of objects on \oparg{stack}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -9250,7 +9408,7 @@ onyx:0>
 		\item[count: ]
 			The depth of the topmost mark on \oparg{stack}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -9275,7 +9433,7 @@ onyx:0>
 			A stack object.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -9299,7 +9457,7 @@ onyx:1>
 			A stack object.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -9327,7 +9485,7 @@ onyx:0>
 			to move the file position pointer to.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{ioerror}{ioerror}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -9357,7 +9515,7 @@ onyx:2>
 		\item[thread: ]
 			A thread object that corresponds to the running thread.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get a thread object for the running thread.
 	\item[Example(s): ]\begin{verbatim}
@@ -9392,7 +9550,7 @@ onyx:0>
 		\item[nsend: ]
 			Number of bytes of \oparg{mesg} actually sent.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{argcheck}{argcheck}.]
 		\item[\htmlref{neterror}{neterror}.]
@@ -9427,7 +9585,7 @@ onyx:1>
 			The port number corresponding to \oparg{service}, or 0
 			if the service is unknown.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -9452,7 +9610,7 @@ onyx:0>
 			A name or null object.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -9479,7 +9637,7 @@ onyx:0>
 			A dict or null object.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -9508,7 +9666,7 @@ onyx:0>
 		\item[boolean: ]
 			If false, success, otherwise failure.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -9537,7 +9695,7 @@ onyx:0>
 			A value to associate with \oparg{key}.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -9576,7 +9734,7 @@ onyx:0>
 		\item[boolean: ]
 			If false, success, otherwise failure.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -9607,7 +9765,7 @@ onyx:0>
 		\item[boolean: ]
 			If false, success, otherwise failure.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -9634,7 +9792,7 @@ onyx:0>
 			Default maximum allowable estack depth.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -9659,7 +9817,7 @@ onyx:0>
 			A file to set the global stderr to.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -9686,7 +9844,7 @@ onyx:0>
 			A file to set the global stdin to.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -9723,7 +9881,7 @@ onyx:0>
 			A file to set the global stdout to.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -9758,7 +9916,7 @@ onyx:0>
 			optimization by default for new threads.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -9784,7 +9942,7 @@ onyx:0>
 			\oparg{file} to.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -9813,7 +9971,7 @@ onyx:0>
 			A class or null object.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -9838,7 +9996,7 @@ onyx:0>
 			A boolean to set the implicit locking mode to.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -9867,7 +10025,7 @@ onyx:0>
 			Maximum allowable estack depth.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -9893,7 +10051,7 @@ onyx:0>
 			A dict or null object.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -9920,7 +10078,7 @@ onyx:0>
 			Non-blocking mode to set \oparg{file} to.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{ioerror}{ioerror}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -9986,7 +10144,7 @@ onyx:1>
 			Value to associate with \oparg{optname}.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{argcheck}{argcheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -10016,7 +10174,7 @@ onyx:1>
 			A file to set the calling thread's stderr to.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -10043,7 +10201,7 @@ onyx:0>
 			A file to set the calling thread's stdin to.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -10080,7 +10238,7 @@ onyx:3>
 			A file to set the calling thread's stdout to.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -10116,7 +10274,7 @@ onyx:0>
 			A class or null object.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -10143,7 +10301,7 @@ onyx:0>
 			thread.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -10175,7 +10333,7 @@ onyx:0>
 		\item[boolean: ]
 			If false, success, otherwise failure.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -10202,7 +10360,7 @@ onyx:0>
 			A stack object.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -10234,7 +10392,7 @@ onyx:1>
 		\item[r: ]
 			\oparg{a} shifted by \oparg{shift} bits.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -10263,7 +10421,7 @@ onyx:0>
 			the object to duplicate.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -10297,7 +10455,7 @@ onyx:1>
 		\item[obj: ]
 			An object removed from \oparg{stack}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -10327,7 +10485,7 @@ onyx:2>
 			\oparg{stack}.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -10354,7 +10512,7 @@ onyx:0>
 			A condition object.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -10386,7 +10544,7 @@ onyx:0>
 		\item[r: ]
 			Sine of \oparg{a} in radians.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -10418,7 +10576,7 @@ onyx:0>
 		\item[r: ]
 			Hyperbolic sine of \oparg{a}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -10449,7 +10607,7 @@ onyx:0>
 		\item[obj: ]
 			An object removed from \oparg{stack}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -10484,7 +10642,7 @@ onyx:2>
 			\oparg{stack}, with the same object ordering as when on
 			\oparg{stack}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -10514,7 +10672,7 @@ onyx:2>
 			position.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -10540,7 +10698,7 @@ onyx:1>
 			Number of objects on \oparg{stack} to duplicate.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -10571,7 +10729,7 @@ onyx:1>
 			The object that was the second to top object on
 			\oparg{stack}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -10603,7 +10761,7 @@ onyx:2>
 			An array of objects popped off of \oparg{stack}, with
 			the same object ordering as when on \oparg{stack}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -10633,7 +10791,7 @@ onyx:2>
 			position.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -10671,7 +10829,7 @@ onyx:1>
 		\item[sock: ]
 			A socket.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{argcheck}{argcheck}.]
 		\item[\htmlref{invalidaccess}{invalidaccess}.]
@@ -10712,7 +10870,7 @@ onyx:2>
 			A connected socket.  There are no functional differences
 			between the two sockets that are returned.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{argcheck}{argcheck}.]
 		\item[\htmlref{invalidaccess}{invalidaccess}.]
@@ -10753,7 +10911,7 @@ onyx:2>
 			\item[path: ] Unix-domain socket path.
 			\end{description}
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{argcheck}{argcheck}.]
 		\item[\htmlref{ioerror}{ioerror}.]
@@ -10827,7 +10985,7 @@ onyx:1>
 		\item[optval: ]
 			Value associated with \oparg{optname}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{argcheck}{argcheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -10854,7 +11012,7 @@ onyx:1>
 			A stack object.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -10907,7 +11065,7 @@ onyx:1>
 			An array of substrings containing the text between
 			pattern matches.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{regexerror}{regexerror}.]
@@ -10953,7 +11111,7 @@ onyx:0>
 		\item[obj: ]
 			The object that was popped off of \oparg{stack}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -10981,7 +11139,7 @@ onyx:2>
 			Maximum recursion depth.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{ioerror}{ioerror}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -11019,7 +11177,7 @@ onyx:1>
 			A syntactical string representation of \oparg{obj}.
 			See Section~\ref{sec:sprintsdict} for printing details.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -11048,7 +11206,7 @@ onyx:1>
 		\item[dict: ]
 			A dictionary.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get sprintsdict.  See Section~\ref{sec:sprintsdict} for details
 		on sprintsdict.
@@ -11071,7 +11229,7 @@ onyx:0>
 			An object.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -11100,7 +11258,7 @@ onyx:1>
 		\item[r: ]
 			Square root of \oparg{a}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -11127,7 +11285,7 @@ onyx:0>
 			A non-negative integer.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -11156,7 +11314,7 @@ onyx:0>
 			upward.  If negative, roll downward.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -11192,7 +11350,7 @@ onyx:1>
 			negative value causes downward rotation.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -11218,7 +11376,7 @@ onyx:0>
 		\item[stack: ]
 			An empty stack object.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Create a new stack object and push it onto ostack.
 	\item[Example(s): ]\begin{verbatim}
@@ -11238,7 +11396,7 @@ onyx:1> pstack
 			An object.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
@@ -11302,7 +11460,7 @@ onyx:0>
 				Number of blocks allocated.
 			\end{description}
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
 		\item[\htmlref{ioerror}{ioerror}.]
@@ -11332,7 +11490,7 @@ onyx:0>
 			A file object corresponding to the calling thread's
 			stderr.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get the thread's stderr.  See Section~\ref{sec:onyx_standard_io}
 		for standard I/O details.
@@ -11354,7 +11512,7 @@ onyx:1>
 			A file object corresponding to the calling thread's
 			stdin.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get the thread's stdin.  See Section~\ref{sec:onyx_standard_io}
 		for standard I/O details.
@@ -11376,7 +11534,7 @@ onyx:1>
 			A file object corresponding to the calling thread's
 			stdout.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get the thread's stdout.  See Section~\ref{sec:onyx_standard_io}
 		for standard I/O details.
@@ -11393,7 +11551,7 @@ onyx:1>
 	\begin{description}\item[]
 	\item[Input(s): ] None.
 	\item[Output(s): ] None.
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Unwind the execution stack to the innermost
 		\htmlref{\onyxop{}{stopped}{}}{systemdict:stopped} or
@@ -11419,7 +11577,7 @@ onyx:0>
 		\item[boolean: ]
 			True if stop operator was executed, false otherwise.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{invalidcontinue}{invalidcontinue}.]
 		\item[\htmlref{invalidexit}{invalidexit}.]
@@ -11459,7 +11617,7 @@ onyx:0>
 		\item[string: ]
 			A string of \oparg{length} bytes.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -11488,7 +11646,7 @@ onyx:0>
 			A stack object.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -11519,7 +11677,7 @@ onyx:1>
 		\item[r: ]
 			The value of \oparg{b} subtracted from \oparg{a}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -11567,7 +11725,7 @@ onyx:0>
 			\htmlref{\onyxop{}{subst}{}}{systemdict:subst}
 			operators.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -11625,7 +11783,7 @@ onyx:0>
 			made, then \oparg{output} is a duplicate of
 			\oparg{input}, rather than a copy.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{regexerror}{regexerror}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -11653,7 +11811,7 @@ onyx:2>
 			A stack object.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -11678,7 +11836,7 @@ onyx:1>
 			A stack object.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -11706,7 +11864,7 @@ onyx:1>
 		\item[super/null: ]
 			A class or null object.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -11735,7 +11893,7 @@ onyx:0>
 			A string that represents a filename.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
 		\item[\htmlref{ioerror}{ioerror}.]
@@ -11773,7 +11931,7 @@ onyx:2>
 			True if tail call optimization is enabled for this
 			thread; false otherwise.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get whether tail call optimization is enabled for this thread.
 	\item[Example(s): ]\begin{verbatim}
@@ -11805,7 +11963,7 @@ onyx:0>
 			value is the exit code of a program that terminated
 			normally.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -11833,7 +11991,7 @@ onyx:0>
 		\item[dict: ]
 			A dictionary.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get systemdict.  See Section~\ref{sec:systemdict} for details on
 		systemdict.
@@ -11858,7 +12016,7 @@ onyx:0>
 		\item[r: ]
 			Tangent of \oparg{a} in radians.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -11887,7 +12045,7 @@ onyx:0>
 		\item[r: ]
 			Hyperbolic tangent of \oparg{a}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -11915,7 +12073,7 @@ onyx:0>
 		\item[offset: ]
 			Offset of the file position pointer for \oparg{file}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{ioerror}{ioerror}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -11991,7 +12149,7 @@ onyx:1>
 		\item[boolean: ]
 			If true, the test evaluated to true; false otherwise.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
 		\item[\htmlref{ioerror}{ioerror}.]
@@ -12011,6 +12169,28 @@ true
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:this}
+\index{this@\onyxop{}{this}{}}
+\item[{\onyxop{OPARGS}{this}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Error(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
 \label{systemdict:thread}
 \index{thread@\onyxop{}{thread}{}}
 \item[{\onyxop{stack entry}{thread}{thread}}: ]
@@ -12028,7 +12208,7 @@ onyx:0>
 		\item[thread: ]
 			A thread object that corresponds to the new thread.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -12041,6 +12221,28 @@ onyx:0> (1 2) {add 1 sprint} thread join `Done\n' print flush
 3
 Done
 onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:threadcstack}
+\index{threadcstack@\onyxop{}{threadcstack}{}}
+\item[{\onyxop{OPARGS}{threadcstack}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Error(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
 		\end{verbatim}
 	\end{description}
 \label{systemdict:threaddstack}
@@ -12057,7 +12259,7 @@ onyx:0>
 		\item[stack: ]
 			The dictionary stack belonging to \oparg{thread}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -12086,7 +12288,7 @@ onyx:0>
 		\item[stack: ]
 			The execution stack belonging to \oparg{thread}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -12115,7 +12317,7 @@ onyx:0>
 		\item[stack: ]
 			The index stack belonging to \oparg{thread}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -12143,7 +12345,7 @@ onyx:0>
 		\item[stack: ]
 			The operand stack belonging to \oparg{thread}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -12170,7 +12372,7 @@ onyx:0>
 			default, each value is null, but this need not be so,
 			and the value can be redefined for debugging purposes.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get a dictionary containing references to all threads.
 	\item[Example(s): ]\begin{verbatim}
@@ -12194,7 +12396,7 @@ onyx:0>
 			The object that was being executed when the error was
 			thrown.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -12222,6 +12424,7 @@ onyx:0> $unregistered throw
 Error $unregistered
 ostack: ()
 dstack: (-dict- -dict- -dict- -dict-)
+cstack: ()
 estack/istack trace (0..1):
 0:      -file-
 1:      --start--
@@ -12249,7 +12452,7 @@ onyx:1>
 		\item[boolean: ]
 			If false, success, otherwise timeout.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -12299,7 +12502,7 @@ onyx:0>
 			If true, a token was successfully scanned, false
 			otherwise.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{syntaxerror}{syntaxerror}.]
@@ -12341,6 +12544,28 @@ false
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:trapped}
+\index{trapped@\onyxop{}{trapped}{}}
+\item[{\onyxop{OPARGS}{trapped}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Error(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
 \label{systemdict:trunc}
 \index{trunc@\onyxop{}{trunc}{}}
 \item[{\onyxop{a}{trunc}{r}}: ]
@@ -12356,7 +12581,7 @@ onyx:0>
 			Integer created from \oparg{a} by discarding the
 			fractional portion.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -12391,7 +12616,7 @@ onyx:0>
 			New length for \oparg{file}.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{ioerror}{ioerror}.]
 		\item[\htmlref{rangecheck}{rangecheck}.]
@@ -12429,7 +12654,7 @@ onyx:1>
 		\item[true: ]
 			The boolean value true.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Return true.
 	\item[Example(s): ]\begin{verbatim}
@@ -12454,7 +12679,7 @@ onyx:0>
 			If false, \oparg{mutex} was successfully acquired.
 			Otherwise the mutex acquisition failed.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -12487,7 +12712,7 @@ onyx:0>
 		\begin{description}\item[]
 		\item[: ]
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -12540,7 +12765,7 @@ onyx:4>
 			\item[thread: ] threadtype.
 			\end{description}
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
@@ -12563,7 +12788,7 @@ onyx:0>
 		\item[uid: ]
 			Process's user ID.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get the process's user ID.
 	\item[Example(s): ]\begin{verbatim}
@@ -12587,7 +12812,7 @@ onyx:0>
 		\item[omask: ]
 			Old umask.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -12614,7 +12839,7 @@ onyx:0>
 			A key in \oparg{dict} to undefine.
 		\end{description}
 	\item[Output(s): ] None
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -12647,7 +12872,7 @@ onyx:0>
 		\item[b: ]
 			An object.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
@@ -12676,7 +12901,7 @@ onyx:4>
 			An object.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -12701,7 +12926,7 @@ onyx:0>
 			A string that represents a filename.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
 		\item[\htmlref{ioerror}{ioerror}.]
@@ -12723,6 +12948,7 @@ onyx:0> `/tmp/foo' `r' open
 Error $invalidfileaccess
 ostack: (`/tmp/foo' `r')
 dstack: (-dict- -dict- -dict- -dict-)
+cstack: ()
 estack/istack trace (0..2):
 0:      --open--
 1:      -file-
@@ -12740,7 +12966,7 @@ onyx:3>
 			A mutex object.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -12764,7 +12990,7 @@ onyx:0>
 			A name object.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -12798,7 +13024,7 @@ onyx:0>
 			ostack.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -12842,7 +13068,7 @@ onyx:0>
 		\item[b: ]
 			An object.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
@@ -12868,7 +13094,7 @@ onyx:4>
 		\item[dict: ]
 			A dictionary.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get userdict.  See Section~\ref{sec:userdict} for details on
 		userdict.
@@ -12889,7 +13115,7 @@ onyx:0>
 		\item[dict: ]
 			A class.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get vclass.  See Section~\ref{sec:vclass} for details on vclass.
 	\item[Example(s): ]\begin{verbatim}
@@ -12909,7 +13135,7 @@ onyx:0>
 		\item[string: ]
 			A string that contains the version name.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get the version string.  The string returned is a reference to
 		the original version string.
@@ -12932,7 +13158,7 @@ onyx:1>
 			A mutex object that this thread currently owns.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -12972,7 +13198,7 @@ onyx:0>
 			value is the exit code of a program that terminated
 			normally.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -13009,7 +13235,7 @@ onyx:0>
 			dictionary in dstack that contains a definition for
 			\oparg{key}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
@@ -13039,7 +13265,7 @@ onyx:0>
 			An object to be repeatedly evaluated.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -13086,7 +13312,7 @@ onyx:0>
 		\item[true: ]
 			Successful partial write.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{ioerror}{ioerror}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -13121,7 +13347,7 @@ onyx:1>
 			True if \oparg{obj} has the executable attribute, false
 			otherwise.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
@@ -13151,7 +13377,7 @@ onyx:0>
 			True if \oparg{obj} has the executable or evaluable
 			attribute, false otherwise.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
@@ -13185,7 +13411,7 @@ onyx:0>
 			If \oparg{a} and \oparg{b} are integers, their bitwise
 			exclusive or, otherwise their logical exclusive or.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -13210,7 +13436,7 @@ onyx:0>
 	\begin{description}\item[]
 	\item[Input(s): ] None.
 	\item[Output(s): ] None.
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Vuluntarily yield the processor, so that another thread or
 		process may be run.

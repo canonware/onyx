@@ -62,7 +62,7 @@ handling machinery.
 	\begin{description}\item[]
 	\item[Input(s): ] None.
 	\item[Output(s): ] None.
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		Under normal conditions, no errors occur.  However, it is
 		possible for the application to corrupt the error handling
 		machinery to the point that an error will occur.  If that
@@ -78,6 +78,7 @@ true
 Error $undefined
 ostack: ()
 dstack: (-dict- -dict- -dict- -dict-)
+cstack: ()
 estack/istack trace (0..5):
 0:      x
 1: {
@@ -95,6 +96,7 @@ onyx:1> errordict begin handleerror end
 Error $undefined
 ostack: ()
 dstack: (-dict- -dict- -dict- -dict-)
+cstack: ()
 estack/istack trace (0..5):
 0:      x
 1: {
@@ -117,7 +119,7 @@ onyx:1>
 	\begin{description}\item[]
 	\item[Input(s): ] None.
 	\item[Output(s): ] None.
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		This is called as the very last operation when an error occurs.
 		Initially, its value is the same as that for the
@@ -131,6 +133,7 @@ onyx:0> x
 Error $undefined
 ostack: ()
 dstack: (-dict- -dict- -dict- -dict- -dict-)
+cstack: ()
 estack/istack trace (0..2):
 0:      x
 1:      -file-

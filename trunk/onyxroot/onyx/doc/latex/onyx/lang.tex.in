@@ -17,7 +17,7 @@
 \label{onyxlang}
 
 Onyx is a stack-based, threaded, interpreted language.  Its closest relative is
-Adobe PostScript$_{TM}$, followed by Forth.  Experienced PostScript programmers
+Adobe PostScript$^{TM}$, followed by Forth.  Experienced PostScript programmers
 should find most aspects of Onyx familiar, but there are significant differences
 that will prevent a knowledgeable PostScript programmer from programming in Onyx
 without first skimming this chapter.  This chapter does not assume specific
@@ -62,9 +62,9 @@ collector.}
 An Onyx object has three aspects: type, attribute, and value.
 
 Objects fall into two categories according to type: simple and composite.  A
-simple object takes up no memory of its own; it uses space within a stack,
-array, or dictionary.  A composite object requires space of its own in addition
-to the space taken up in stacks, arrays, or dictionaries to refer to the
+simple object takes up no memory of its own; it uses space within another object
+(typically a stack, array, or dictionary).  A composite object requires space of
+its own in addition to the space taken up in another object to refer to the
 composite object.  See Table~\ref{simple-composite} for object type
 classifications.
 
@@ -100,142 +100,116 @@ indistinguishable, but for arrays and strings, composite objects may only be
 able to access a subset of the total memory backing them.  This behavior is
 described in detail later.
 
-All objects have a literal, executable, evaluable, or callable attribute
-associated with them.  Composite objects each have their own attribute, even for
-composite objects that share the same backing memory.  Objects are
-``interpreted'' when they are encountered directly by the interpreter.  Objects
-can also be ``evaluated''.  One of two actions is taken when an object is
-interpreted or evaluated:
+All objects have a literal, executable, evaluable, callable, invokable, or
+fetchable attribute associated with them.  Composite objects each have their own
+attribute, even for composite objects that share the same backing memory.
+Objects are ``interpreted'' when they are encountered directly by the
+interpreter.  Objects can also be ``evaluated''.  Objects are handled as one of
+the following cases when interpreted or evaluated:
 
-\begin{itemize}
-\item{The object may be treated as code (executed).  When executed, an object is
-pushed onto the execution stack and executed.}
-\item{The object may be treated as data.  A data object is push onto the operand
-stack.}
-\end{itemize}
+\begin{description}
+\item[code: ]
+	An object may be treated as code and be executed.  When executed, an
+	object is pushed onto the execution stack and executed.
+\item[data: ]
+	An object may be treated as data.  A data object is push onto the
+	operand stack.  All literal objects are treated as data.
+\item[mkey: ]
+	A callable object is executed and treated as a method key.  When a
+	callable object is executed, the following steps are taken:
+	\begin{enumerate}
+	\item{The topmost object on the operand stack is pushed onto the context
+		stack, then popped off of the operand stack.}
+	\item{The callable object is used as a key to search for a method in
+		the class hierarchy of the topmost object on the context stack.}
+	\item{The method found in the previous step is evaluated.}
+	\item{All objects on the context stack down to and including the object
+		pushed in step 1 are popped off of the context stack.}
+	\end{enumerate}
+\item[cmkey: ]
+	A invokable object is executed and treated as a method key in the
+	context of the topmost object on the context stack.  When a
+	invokable object is executed, the following steps are taken:
+	\begin{enumerate}
+	\item{The invokable object is used as a key to search for a method in
+		the class hierarchy of the topmost object on the context stack.}
+	\item{The method found in the previous step is evaluated.}
+	\end{enumerate}
+\item[cdkey: ]
+	A fetchable object is executed and treated as a data key in the context
+	of the topmost object on the context stack.  When a fetchable object is
+	executed, the following steps are taken:
+	\begin{enumerate}
+	\item{The fetchable object is used as a key to search for data in
+		the data dictionary of the topmost object on the context stack.}
+	\item{The data found in the previous step is pushed onto the operand
+		stack.}
+	\end{enumerate}
+\end{description}
 
-Table~\ref{interp-act} enumerates under what circumstances object interpretation
-results in execution.  Table~\ref{eval-act} enumerates under what circumstances
-object evaluation results in execution.  Note that executable arrays are the
-only objects that behave differently when interpreted versus evaluated.
+Table~\ref{interp-eval-act} enumerates what action is taken during
+interpretation/evaluation for all object type/attribute combinations.  Note that
+executable arrays are the only objects that behave differently when interpreted
+versus evaluated.
 
-In practice, attributes are only useful for types that can be executed.
 Attributes are not considered in equality test operations.
 
 \begin{table}[htb]
 \begin{center}
-\begin{tabular}{|l|c|c|c|c|}
+\begin{tabular}{|l|c|c|c|c|c|c|}
 \hline
-Type		& \multicolumn{4}{|c|}{Attribute}	\\
-\cline{2-5}
-		& literal & executable & evaluable & callable \\
+Type		& \multicolumn{6}{|c|}{Attribute}	\\
+\cline{2-7}
+		& literal & executable & evaluable & callable & invokable & fetchable \\
 \hline \hline
-array		& data	& data	& code	& code		\\
+array		& data	& data/code	& code	& mkey	& cmkey	& cdkey	\\
 \hline
-boolean		& data	& data	& data	& data		\\
+boolean		& data	& data	& data	& mkey	& cmkey	& cdkey	\\
 \hline
-class		& data	& data	& data	& data		\\
+class		& data	& data	& data	& mkey	& cmkey	& cdkey	\\
 \hline
-condition	& data	& data	& data	& data		\\
+condition	& data	& data	& data	& mkey	& cmkey	& cdkey	\\
 \hline
-dict		& data	& data	& data	& data		\\
+dict		& data	& data	& data	& mkey	& cmkey	& cdkey	\\
 \hline
-file		& data	& code	& code	& code		\\
+file		& data	& code	& code	& mkey	& cmkey	& cdkey	\\
 \hline
-fino		& data	& data	& data	& data		\\
+fino		& data	& data	& data	& mkey	& cmkey	& cdkey	\\
 \hline
-handle		& data	& code	& code	& code		\\
+handle		& data	& code	& code	& mkey	& cmkey	& cdkey	\\
 \hline
-instance	& data	& data	& data	& data		\\
+instance	& data	& data	& data	& mkey	& cmkey	& cdkey	\\
 \hline
-integer		& data	& data	& data	& data		\\
+integer		& data	& data	& data	& mkey	& cmkey	& cdkey	\\
 \hline
-mark		& data	& data	& data	& data		\\
+mark		& data	& data	& data	& mkey	& cmkey	& cdkey	\\
 \hline
-mutex		& data	& data	& data	& data		\\
+mutex		& data	& data	& data	& mkey	& cmkey	& cdkey	\\
 \hline
-name		& data	& code	& code	& code		\\
+name		& data	& code	& code	& mkey	& cmkey	& cdkey	\\
 \hline
-null		& data	& code	& code	& code		\\
+null		& data	& code	& code	& mkey	& cmkey	& cdkey	\\
 \hline
-operator	& data	& code	& code	& code		\\
+operator	& data	& code	& code	& mkey	& cmkey	& cdkey	\\
 \hline
-pmark		& data	& data	& data	& data		\\
+pmark		& data	& data	& data	& mkey	& cmkey	& cdkey	\\
 \hline
-real		& data	& data	& data	& data		\\
+real		& data	& data	& data	& mkey	& cmkey	& cdkey	\\
 \hline
-regex		& data	& data	& data	& data		\\
+regex		& data	& data	& data	& mkey	& cmkey	& cdkey	\\
 \hline
-regsub		& data	& data	& data	& data		\\
+regsub		& data	& data	& data	& mkey	& cmkey	& cdkey	\\
 \hline
-stack		& data	& data	& data	& data		\\
+stack		& data	& data	& data	& mkey	& cmkey	& cdkey	\\
 \hline
-string		& data	& code	& code	& code		\\
+string		& data	& code	& code	& mkey	& cmkey	& cdkey	\\
 \hline
-thread		& data	& data	& data	& data		\\
+thread		& data	& data	& data	& mkey	& cmkey	& cdkey	\\
 \hline
 \end{tabular}
 \end{center}
-\caption{\label{interp-act}
-Interpretation of objects by type and attribute}
-\end{table}
-
-\begin{table}[htb]
-\begin{center}
-\begin{tabular}{|l|c|c|c|c|}
-\hline
-Type		& \multicolumn{4}{|c|}{Attribute}	\\
-\cline{2-5}
-		& literal & executable & evaluable & callable \\
-\hline \hline
-array		& data	& code	& code	& code		\\
-\hline
-boolean		& data	& data	& data	& data		\\
-\hline
-class		& data	& data	& data	& data		\\
-\hline
-condition	& data	& data	& data	& data		\\
-\hline
-dict		& data	& data	& data	& data		\\
-\hline
-file		& data	& code	& code	& code		\\
-\hline
-fino		& data	& data	& data	& data		\\
-\hline
-handle		& data	& code	& code	& code		\\
-\hline
-instance	& data	& data	& data	& data		\\
-\hline
-integer		& data	& data	& data	& data		\\
-\hline
-mark		& data	& data	& data	& data		\\
-\hline
-mutex		& data	& data	& data	& data		\\
-\hline
-name		& data	& code	& code	& code		\\
-\hline
-null		& data	& code	& code	& code		\\
-\hline
-operator	& data	& code	& code	& code		\\
-\hline
-pmark		& data	& data	& data	& data		\\
-\hline
-real		& data	& data	& data	& data		\\
-\hline
-regex		& data	& data	& data	& data		\\
-\hline
-regsub		& data	& data	& data	& data		\\
-\hline
-stack		& data	& data	& data	& data		\\
-\hline
-string		& data	& code	& code	& code		\\
-\hline
-thread		& data	& data	& data	& data		\\
-\hline
-\end{tabular}
-\end{center}
-\caption{\label{eval-act}
-Evaluation of objects by type and attribute}
+\caption{\label{interp-eval-act}
+Interpretation/evaluation of objects by type and attribute}
 \end{table}
 
 \begin{description}
@@ -314,10 +288,6 @@ for equality.  Names are typically used as keys in dictionaries.
 When an executable name is executed, the topmost value in the dictionary stack
 associated with the name is evaluated.
 
-When a callable name is executed, the name is dynamically looked up as a method
-name in the context of the instance which is on the top of the operand stack,
-and the associated value is evaluated.
-
 \item[null: ] A null has no significance other than its existence.  When an
 executable null is executed, it does nothing.  Executable nulls can be useful as
 place holders that can later be replaced with useful code, or for replacing
@@ -327,7 +297,7 @@ obsolete code so that the code is no longer executed.
 interpreter.  Operators can be executed.
 
 \item[pmark: ] A pmark is used as a stack marker when creating procedures in
-deferred execution mode (i.e. procedures that use the \{\} syntax).  The
+deferred execution mode (i.e. procedures that use the ``\{\}'' syntax).  The
 application will only encounter pmarks in error conditions, and there is never a
 reason for an application to explicitly create a pmark.
 
@@ -379,23 +349,24 @@ reader an idea of the simplicity of the language syntax.
 CRNL (carriage return, newline) pairs are in all important cases converted to
 newlines during scanning.
 
-The characters \#, !, :, \$, {\twid}, {\lb}, {\rb}, \{, \}, (, ), `, ', {\lt},
-and {\gt} are special.  In most cases, any of the special characters and
+The characters ``\#'', ``!'', ``,'', ``;'', ``:'', ``\$'', ``{\twid}'',
+``{\lb}'', ``{\rb}'', ``\{'', ``\}'', ``('', ``)'', `` ` '', `` ' '', ``{\lt}'',
+and ``{\gt}'' are special.  In most cases, any of the special characters and
 whitespace (space, tab, newline, formfeed, null) terminate any preceding token.
 All other characters including non-printing characters are considered regular
 characters.
 
-A comment starts with a \# character outside of a string context and extends to
-the next newline or formfeed.
+A comment starts with a ``\#'' character outside of a string context and extends
+to the next newline or formfeed.
 
 Procedures are actually executable arrays, but Onyx provides special syntax for
-declaring procedures.  Procedures are delimited by \{ and \}, and can be
+declaring procedures.  Procedures are delimited by ``\{'' and ``\}'', and can be
 nested.  Normally, the interpreter executes code as it is scanned, but inside of
 procedure declarations, execution is deferred.  Instead of executing a procedure
 body as it is encountered, the tokens of the procedure body are pushed onto the
-operand stack until the closing \} is encountered, at which time an executable
-array is constructed from the tokens in the procedure body and pushed onto the
-operand stack.
+operand stack until the closing ``\}'' is encountered, at which time an
+executable array is constructed from the tokens in the procedure body and pushed
+onto the operand stack.
 
 A partial grammar specification, using BNF notation (where convenient) is as
 follows:
@@ -417,21 +388,24 @@ follows:
 \item[{\lt}real{\gt} ::= ] {\lt}dec\_real{\gt} {\pipe} {\lt}exp\_real{\gt}
 
 \item[{\lt}name{\gt} : ] Any token that cannot be interpreted as a number or a
-string is interpreted as an executable name.  There are five syntaxes for names:
-executable, evaluable, callable, literal, and immediately evaluated.  Executable
-and evaluable names are looked up in the dictionary stack and executed (unless
-execution is deferred).  Evaluable names behave the same as executable names,
-except when being processed by the \htmlref{\onyxop{}{bind}{}}{systemdict:bind}
-operator.  Callable names are looked up in the context of the topmost object on
-the operand stack, which must be an instance.  Literal names are simply pushed
-onto the operand stack.  Immediately evaluated names are replaced by their
-values as defined in the dictionary stack, even if execution is deferred.
-Examples include:
+string is interpreted as an executable name.  There are seven syntaxes for
+names: executable, evaluable, callable, invokable, fetchable, literal, and
+immediately evaluated.  Executable and evaluable names are looked up in the
+dictionary stack and executed (unless execution is deferred).  Evaluable names
+behave the same as executable names, except when being processed by the
+\htmlref{\onyxop{}{bind}{}}{systemdict:bind} operator.  Callable, invokable,
+fetchable, and literal names are handled the same as for all other types; the
+special syntax for names with these attributes are merely a programming
+convenience.  Immediately evaluated names are replaced by their values as
+defined in the dictionary stack, even if execution is deferred.  Examples
+include:
 \begin{verbatim}
 foo     # executable
 4noth3r # executable
 !bar    # evaluable
 :method # callable
+;method # invokable
+,data   # fetchable
 $biz    # literal
 ~baz    # immediately evaluated
 \end{verbatim}
@@ -442,10 +416,10 @@ interpreted, it is executed.  This allows immediate evaluation to be
 indiscriminately used without concern for whether the result is an executable
 array or, say, an executable operator.
 
-\item[{\lt}string{\gt} ::= ] `'-delimited string.  Ticks may
-be embedded in the string without escaping them, as long as the unescaped ticks
-are balanced.  The following sequences have special meaning when escaped by a
-{\bs} character:
+\item[{\lt}string{\gt} ::= ] A string delimited by `` ` '' and `` ' ''.  Ticks
+may be embedded in the string without escaping them, as long as the unescaped
+ticks are balanced.  The following sequences have special meaning when escaped
+by a ``{\bs}'' character:
 	\begin{description}
 	\item[` ] ` character.
 	\item[' ] ' character.
@@ -464,7 +438,8 @@ are balanced.  The following sequences have special meaning when escaped by a
 	\item[{\bs}r{\bs}n (carriage return, newline) ] Ignore.
 	\end{description}
 
-{\bs} has no special meaning unless followed by a character in the above list.
+``{\bs}'' has no special meaning unless followed by a character in the above
+list.  This is especially convenient when specifying regular expressions.
 
 Examples include:
 \begin{verbatim}
@@ -568,7 +543,7 @@ Stacks in Onyx are the core data structure that programs act on.  Stacks store
 objects in a last in, first out (LIFO) order.  Onyx includes a number of
 operators that manipulate stacks.
 
-Each Onyx thread has four program-visible stacks associated with it:
+Each Onyx thread has five program-visible stacks associated with it:
 \begin{description}
 \item[Operand stack (ostack): ] Most direct object manipulations are done using
 	the operand stack.  Operators use the operand stack for inputs and
@@ -588,6 +563,12 @@ Each Onyx thread has four program-visible stacks associated with it:
 	\htmlref{\onyxop{}{end}{}}{systemdict:end} operators.  The initial
 	dictionaries on the dictionary stack should not generally be removed,
 	since doing so can cause interpreter crashes.
+\item[Context stack (cstack): ] The context stack supports Onyx's
+	object-oriented programming facilities.  The topmost object on the
+	context stack (either a class or an instance) is used by the Onyx
+	interpreter to look up methods and data.  That object is known as
+	``this'' in object-oriented programming parlance, and can be quickly
+	accessed via the \htmlref{\onyxop{}{this}{}}{systemdict:this} operator.
 \item[Execution stack (estack): ] The interpreter uses the execution stack to
 	store objects that are being executed.  The application generally does
 	not need to explicitly manipulate the execution stack, but its contents
@@ -678,6 +659,9 @@ Onyx:
 \label{argcheck}
 \index{argcheck}
 \item[argcheck: ] Incorrect argument value.
+\label{cstackunderflow}
+\index{cstackunderflow}
+\item[cstackunderflow: ] Not enough objects on cstack.
 \label{estackoverflow}
 \index{estackoverflow}
 \item[estackoverflow: ] Maximum interpreter recursion was exceeded.
@@ -757,7 +741,9 @@ In addition to the \htmlref{\onyxop{}{throw}{}}{systemdict:throw} operator,
 there are several other operators that exist specifically for the purpose of
 error handling.  The \htmlref{\onyxop{}{start}{}}{systemdict:start} operator
 silently catches any uncaught \htmlref{\onyxop{}{stop}{}}{systemdict:stop},
-\htmlref{\onyxop{}{exit}{}}{systemdict:exit}, or
+\htmlref{\onyxop{}{exit}{}}{systemdict:exit},
+\htmlref{\onyxop{}{continue}{}}{systemdict:continue},
+\htmlref{\onyxop{}{escape}{}}{systemdict:escape}, or
 \htmlref{\onyxop{}{quit}{}}{systemdict:quit} calls.  The \onyxop{}{start}{}
 operator is the first operator called by the Onyx interpreter during startup,
 and it can also be used by applications to limit execution stack unwinding.  The
@@ -776,9 +762,9 @@ synchronization between threads.
 \label{sec:onyx_implicit_synchronization}
 
 Implicit synchronization is a mandatory language feature, since objects such as
-\htmlref{globaldict}{systemdict:globaldict} are implicitly accessed by the
-interpreter, which makes it impossible to require the user to explicitly handle
-all synchronization.  Onyx provides optional implicit synchronization
+\htmlref{\onyxop{}{globaldict}{}}{systemdict:globaldict} are implicitly accessed
+by the interpreter, which makes it impossible to require the user to explicitly
+handle all synchronization.  Onyx provides optional implicit synchronization
 capabilities for composite objects on an object by object basis.  Each thread
 has a setting which can be accessed via
 \htmlref{\onyxop{}{currentlocking}{}}{systemdict:currentlocking} (initially set
@@ -894,9 +880,9 @@ more information about how PCRE's regular expressions work, see the following:
 
 \begin{itemize}
 \item{The pcre(3) manual page.}
-\item{The official PCRE website: \htmlurl{http://www.pcre.org/}.}
 \item{The official PCRE download site:
 \htmlurl{ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/}.}
+\item{The unofficial PCRE website: \htmlurl{http://www.pcre.org/}.}
 \end{itemize}
 
 For general information about Perl regular expressions, the following are
@@ -958,11 +944,13 @@ Sequence & Description \\
 \end{longtable}
 
 \section{Object-oriented programming}
+\label{sec:onyx_oop}
 
 Onyx provides basic mechanisms for programming in an object-oriented style.  The
-class and instance types, a set of operators, and \htmlref{vclass}{sec:vclass},
-provide all the necessary functionality.  The object-oriented programming
-support can be summarized by the following feature list:
+class and instance types, additional attributes (callable, invokable, and
+fetchable), a set of operators, and \htmlref{vclass}{sec:vclass}, provide all
+the necessary functionality.  The object-oriented programming support can be
+summarized by the following feature list:
 
 \begin{itemize}
 \item{Single inheritance.}

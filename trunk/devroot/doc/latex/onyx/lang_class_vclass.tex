@@ -490,15 +490,6 @@ onyx:0>
 		This method is typically only used internally by constructors.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> #name #super #data #methods cdef -
-onyx:0> $cdef {
-    class
-    dup dn setmethods
-    dup dn setdata
-    dup dn setsuper
-    2 ndup exch setclassname
-    def
-} def
 onyx:0> $fooclass vclass <><$new {:rnew}> cdef
 onyx:0> fooclass:new:isa:classname 1 sprint
 $fooclass

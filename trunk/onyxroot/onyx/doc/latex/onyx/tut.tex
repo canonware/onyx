@@ -64,6 +64,7 @@ then tries to execute the name, resulting in the following error:
 Error $undefined
 ostack: ()
 dstack: (-dict- -dict- -dict- -dict-)
+cstack: ()
 estack/istack trace (0..2):
 0:      1000L
 1:      -file-
@@ -689,6 +690,7 @@ onyx:0> 1 5L add
 Error $undefined
 ostack: (1)
 dstack: (-dict- -dict- -dict- -dict-)
+cstack: ()
 estack/istack trace (0..2):
 0:      5L
 1:      -file-
@@ -706,6 +708,7 @@ onyx:2> pop $five resume
 Error $typecheck
 ostack: (1 $five)
 dstack: (-dict- -dict- -dict- -dict-)
+cstack: ()
 estack/istack trace (0..2):
 0:      --add--
 1:      -file-

@@ -211,7 +211,7 @@ $sprints {
 		\item[string: ]
 			Syntactical string representation of \oparg{array}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -247,7 +247,7 @@ onyx:1>
 		\item[string: ]
 			Syntactical string representation of \oparg{boolean}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -279,7 +279,7 @@ onyx:1>
 		\item[string: ]
 			Syntactical string representation of \oparg{class}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -313,7 +313,7 @@ onyx:1>
 		\item[string: ]
 			Syntactical string representation of \oparg{condition}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -347,7 +347,7 @@ onyx:1>
 		\item[string: ]
 			Syntactical string representation of \oparg{dict}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -383,7 +383,7 @@ onyx:1>
 		\item[string: ]
 			Syntactical string representation of \oparg{file}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -417,7 +417,7 @@ onyx:1>
 		\item[string: ]
 			Syntactical string representation of \oparg{fino}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -451,7 +451,7 @@ onyx:1>
 		\item[string: ]
 			Syntactical string representation of \oparg{handle}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -497,7 +497,7 @@ onyx:0>
 		\item[string: ]
 			Syntactical string representation of \oparg{instance}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -531,7 +531,7 @@ onyx:1>
 		\item[string: ]
 			Syntactical string representation of \oparg{integer}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -565,7 +565,7 @@ onyx:1>
 		\item[string: ]
 			Syntactical string representation of \oparg{mark}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -599,7 +599,7 @@ onyx:1>
 		\item[string: ]
 			Syntactical string representation of \oparg{mutex}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -633,7 +633,7 @@ onyx:1>
 		\item[string: ]
 			Syntactical string representation of \oparg{name}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -667,7 +667,7 @@ onyx:1>
 		\item[string: ]
 			Syntactical string representation of \oparg{null}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -701,7 +701,7 @@ onyx:1>
 		\item[string: ]
 			Syntactical string representation of \oparg{operator}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -741,7 +741,7 @@ onyx:0>
 		\item[string: ]
 			Syntactical string representation of \oparg{pmark}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -755,6 +755,7 @@ onyx:0> { ~x
 Error $undefined
 ostack: (-pmark- $x)
 dstack: (-dict- -dict- -dict- -dict- -dict-)
+cstack: ()
 estack/istack trace (0..1):
 0:      -file-
 1:      --start--
@@ -782,7 +783,7 @@ onyx:1>
 		\item[string: ]
 			Syntactical string representation of \oparg{regex}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -816,7 +817,7 @@ onyx:1>
 		\item[string: ]
 			Syntactical string representation of \oparg{regsub}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -850,7 +851,7 @@ onyx:1>
 		\item[string: ]
 			Syntactical string representation of \oparg{real}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -884,7 +885,7 @@ onyx:1>
 		\item[string: ]
 			Syntactical string representation of \oparg{stack}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -920,7 +921,7 @@ onyx:1>
 		\item[string: ]
 			Syntactical string representation of \oparg{string}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -954,7 +955,7 @@ onyx:1>
 		\item[string: ]
 			Syntactical string representation of \oparg{thread}.
 		\end{description}
-	\item[Errors(s): ]
+	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]

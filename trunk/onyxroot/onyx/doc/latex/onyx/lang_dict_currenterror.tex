@@ -80,6 +80,12 @@ handling machinery to store error state.
 \hline
 \optableent
 	{--}
+	{{\bf \htmlref{cstack}{currenterror:cstack}}}
+	{stack}
+	{cstack snaphot.}
+\hline
+\optableent
+	{--}
 	{{\bf \htmlref{estack}{currenterror:estack}}}
 	{stack}
 	{estack snapshot.}
@@ -103,7 +109,7 @@ handling machinery to store error state.
 			Column number, valid only if the error was a
 			syntaxerror.  Column numbering starts at 0.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get the column number that a syntaxerror occurred on.
 	\item[Example(s): ]\begin{verbatim}
@@ -112,6 +118,7 @@ onyx:0> `1 2 3}' cvx eval
 At line 1, column 5: Error $syntaxerror
 ostack: (1 2 3 `}')
 dstack: (-dict- -dict- -dict- -dict-)
+cstack: ()
 estack/istack trace (0..3):
 0:      `1 2 3}'
 1:      --eval--
@@ -120,6 +127,36 @@ estack/istack trace (0..3):
 onyx:5> currenterror $column get 1 sprint
 5
 onyx:5>
+		\end{verbatim}
+	\end{description}
+\label{currenterror:cstack}
+\index{cstack@\onyxop{}{cstack}{}}
+\item[{\onyxop{--}{cstack}{stack}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[stack: ]
+			A cstack snapshot.
+		\end{description}
+	\item[Error(s): ] None.
+	\item[Description: ]
+		Get a stack that is a cstack snapshot as of the most recent
+		error.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> x
+Error $undefined
+ostack: ()
+dstack: (-dict- -dict- -dict- -dict-)
+cstack: ()
+estack/istack trace (0..2):
+0:      x
+1:      -file-
+2:      --start--
+onyx:1> currenterror begin cstack end 1 sprint
+()
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{currenterror:dstack}
@@ -132,7 +169,7 @@ onyx:5>
 		\item[stack: ]
 			A dstack snapshot.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get a stack that is a dstack snapshot as of the most recent
 		error.
@@ -142,6 +179,7 @@ onyx:0> x
 Error $undefined
 ostack: ()
 dstack: (-dict- -dict- -dict- -dict-)
+cstack: ()
 estack/istack trace (0..2):
 0:      x
 1:      -file-
@@ -161,7 +199,7 @@ onyx:1>
 		\item[name: ]
 			Name of the most recent error.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get the name of the most recent error.
 	\item[Example(s): ]\begin{verbatim}
@@ -170,6 +208,7 @@ onyx:0> x
 Error $undefined
 ostack: ()
 dstack: (-dict- -dict- -dict- -dict-)
+cstack: ()
 estack/istack trace (0..2):
 0:      x
 1:      -file-
@@ -189,7 +228,7 @@ onyx:1>
 		\item[stack: ]
 			An estack snapshot.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get a stack that is an estack snapshot as of the most recent
 		error.
@@ -199,6 +238,7 @@ onyx:0> x
 Error $undefined
 ostack: ()
 dstack: (-dict- -dict- -dict- -dict-)
+cstack: ()
 estack/istack trace (0..2):
 0:      x
 1:      -file-
@@ -218,7 +258,7 @@ onyx:1>
 		\item[stack: ]
 			An istack snapshot.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get a stack that is an istack snapshot as of the most recent
 		error.
@@ -228,6 +268,7 @@ onyx:0> x
 Error $undefined
 ostack: ()
 dstack: (-dict- -dict- -dict- -dict-)
+cstack: ()
 estack/istack trace (0..2):
 0:      x
 1:      -file-
@@ -248,7 +289,7 @@ onyx:1>
 			False if there has been no error since the last time
 			newerror was reset; true otherwise.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get a boolean that represents whether there has been an error
 		since the last time newerror was set to false (as during
@@ -264,6 +305,7 @@ onyx:0> x
 Error $undefined
 ostack: ()
 dstack: (-dict- -dict- -dict- -dict- -dict-)
+cstack: ()
 estack/istack trace (0..2):
 0:      x
 1:      -file-
@@ -278,6 +320,7 @@ onyx:1> y
 Error $undefined
 ostack: (x)
 dstack: (-dict- -dict- -dict- -dict- -dict-)
+cstack: ()
 estack/istack trace (0..2):
 0:      y
 1:      -file-
@@ -298,7 +341,7 @@ onyx:2>
 			Line number, valid only if the error was a syntaxerror.
 			Line numbering starts at 1.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get the line number that a syntaxerror occurred on.
 	\item[Example(s): ]\begin{verbatim}
@@ -307,6 +350,7 @@ onyx:0> `1 2 3}' cvx eval
 At line 1, column 5: Error $syntaxerror
 ostack: (1 2 3 `}')
 dstack: (-dict- -dict- -dict- -dict-)
+cstack: ()
 estack/istack trace (0..3):
 0:      `1 2 3}'
 1:      --eval--
@@ -327,7 +371,7 @@ onyx:5>
 		\item[stack: ]
 			An ostack snapshot.
 		\end{description}
-	\item[Errors(s): ] None.
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get a stack that is an ostack snapshot as of the most recent
 		error.
@@ -337,6 +381,7 @@ onyx:0> x
 Error $undefined
 ostack: ()
 dstack: (-dict- -dict- -dict- -dict-)
+cstack: ()
 estack/istack trace (0..2):
 0:      x
 1:      -file-
