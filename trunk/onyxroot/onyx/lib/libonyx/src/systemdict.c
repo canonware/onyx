@@ -4964,7 +4964,7 @@ systemdict_poll(cw_nxo_t *a_thread)
 	return;
     }
     NXO_STACK_DOWN_GET(nxo, ostack, a_thread, nxo);
-    if (nxo_type_get(dict) != NXOT_DICT)
+    if (nxo_type_get(nxo) != NXOT_DICT)
     {
 	nxo_thread_nerror(a_thread, NXN_typecheck);
 	return;
@@ -5028,7 +5028,7 @@ systemdict_poll(cw_nxo_t *a_thread)
 
 	fds[i].fd = nxo_file_fd_get(file);
 	fds[i].events = 0;
-	nflags = nxo_dict_count(dict);
+	nflags = nxo_dict_count(flags);
 	if (nflags == 0)
 	{
 	    nxa_free(nxa, fds, nfds * sizeof(struct pollfd));
