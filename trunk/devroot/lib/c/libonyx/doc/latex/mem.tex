@@ -17,7 +17,7 @@
 \index{mem@\classname{mem}{}}
 
 The \classname{mem} class implements a memory allocation (malloc) wrapper.  For
-the debug version of \libname{libstash}, extra information is hashed for each
+the debug version of \libname{libonyx}, extra information is hashed for each
 memory allocation that allows tracking of the following:
 
 \begin{itemize}
@@ -29,7 +29,7 @@ memory allocation that allows tracking of the following:
 If any memory leaks are detected, diagnostic output is printed to
 \cvar{out\_err}.
 
-Also, the debug version of \libname{libstash} sets all newly allocated bytes to
+Also, the debug version of \libname{libonyx} sets all newly allocated bytes to
 {\tt 0xa5}, and all deallocated bytes to {\tt 0x5a} (except in the case of
 \cfunc{mem\_calloc}{}).  This tends to cause things to break sooner when
 uninitialized or deallocated memory is referenced.
