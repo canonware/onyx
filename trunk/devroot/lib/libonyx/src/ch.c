@@ -1,14 +1,14 @@
 /* -*- mode: c ; c-file-style: "canonware-c-style" -*-
-******************************************************************************
-*
-* <Copyright = jasone>
-* <License>
-*
-******************************************************************************
-*
-* Version: Onyx <Version = onyx>
-*
-******************************************************************************/
+ ******************************************************************************
+ *
+ * <Copyright = jasone>
+ * <License>
+ *
+ ******************************************************************************
+ *
+ * Version: Onyx <Version = onyx>
+ *
+ ******************************************************************************/
 
 #include "../include/libonyx/libonyx.h"
 
@@ -31,7 +31,7 @@ ch_new(cw_ch_t *a_ch, cw_mema_t *a_mema, cw_uint32_t a_table_size,
     cw_check_ptr(a_hash);
     cw_check_ptr(a_key_comp);
 
-    if (NULL != a_ch)
+    if (a_ch != NULL)
     {
 	retval = a_ch;
 	memset(retval, 0, CW_CH_TABLE2SIZEOF(a_table_size));
@@ -179,8 +179,9 @@ ch_remove(cw_ch_t *a_ch, const void *a_search_key, void **r_key, void **r_data,
 
     slot = a_ch->hash(a_search_key) % a_ch->table_size;
 
-    for (chi = ql_first(&a_ch->table[slot]); chi != NULL; chi =
-	     ql_next(&a_ch->table[slot], chi, slot_link))
+    for (chi = ql_first(&a_ch->table[slot]);
+	 chi != NULL;
+	 chi = ql_next(&a_ch->table[slot], chi, slot_link))
     {
 	cw_check_ptr(chi);
 	cw_dassert(chi->magic == CW_CHI_MAGIC);
@@ -250,7 +251,7 @@ ch_search(cw_ch_t *a_ch, const void *a_key, void **r_data)
 	cw_dassert(chi->magic == CW_CHI_MAGIC);
 
 	/* Is this the chi we want? */
-	if (a_ch->key_comp(a_key, chi->key) == TRUE)
+	if (a_ch->key_comp(a_key, chi->key))
 	{
 	    if (r_data != NULL)
 	    {
@@ -343,7 +344,7 @@ ch_remove_iterate(cw_ch_t *a_ch, void **r_key, void **r_data, cw_chi_t **r_chi)
     else if (r_chi != NULL)
     {
 #ifdef CW_DBG
-	chi->magic = 0;
+	memset(chi, 0x5a, sizeof(cw_chi_t));
 #endif
 	*r_chi = chi;
     }
