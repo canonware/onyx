@@ -197,6 +197,10 @@ bhp_insert(cw_bhp_t * a_bhp, cw_bhpi_t * a_bhpi);
  *
  * a_bhp : Pointer to a bhp.
  *
+ * r_priority : Pointer to a pointer, or NULL.
+ *
+ * r_data : Pointer to a pointer, or NULL.
+ *
  * <<< Output(s) >>>
  *
  * retval : FALSE == success, TRUE == error.
@@ -219,6 +223,10 @@ bhp_find_min(cw_bhp_t * a_bhp, void ** r_priority, void ** r_data);
  * <<< Input(s) >>>
  *
  * a_bhp : Pointer to a bhp.
+ *
+ * r_priority : Pointer to a pointer, or NULL.
+ *
+ * r_data : Pointer to a pointer, or NULL.
  *
  * <<< Output(s) >>>
  *

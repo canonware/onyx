@@ -135,6 +135,15 @@ bhp_delete(cw_bhp_t * a_bhp)
   _cw_check_ptr(a_bhp);
   _cw_assert(_LIBSTASH_BHP_MAGIC == a_bhp->magic);
 
+  /* Empty the heap. */
+  if (NULL != a_bhp->head)
+  {
+    while (0 < a_bhp->num_nodes)
+    {
+      bhp_del_min(a_bhp, NULL, NULL);
+    }
+  }
+  
 #ifdef _CW_REENTRANT
   if (a_bhp->is_thread_safe == TRUE)
   {
@@ -253,8 +262,14 @@ bhp_find_min(cw_bhp_t * a_bhp, void ** r_priority, void ** r_data)
 
     /* We've found a minimum priority item now, so point *r_priority and
      * *r_data to it. */
-    *r_priority = (void *) curr_min->priority;
-    *r_data = (void *) curr_min->data;
+    if (NULL != r_priority)
+    {
+      *r_priority = (void *) curr_min->priority;
+    }
+    if (NULL != r_data)
+    {
+      *r_data = (void *) curr_min->data;
+    }
   }
   else
   {
@@ -363,8 +378,14 @@ bhp_del_min(cw_bhp_t * a_bhp, void ** r_priority, void ** r_data)
 
     /* Now point *r_priority and *r_data to the item and free the space taken 
      * up by the item structure. */
-    *r_priority = (void *) curr_min->priority;
-    *r_data = (void *) curr_min->data;
+    if (NULL != r_priority)
+    {
+      *r_priority = (void *) curr_min->priority;
+    }
+    if (NULL != r_data)
+    {
+      *r_data = (void *) curr_min->data;
+    }
     _cw_free(curr_min);
   }
   
