@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 81 $
- * $Date: 1998-05-18 23:41:27 -0700 (Mon, 18 May 1998) $
+ * $Revision: 85 $
+ * $Date: 1998-05-26 23:47:53 -0700 (Tue, 26 May 1998) $
  *
  * <<< Description >>>
  *
@@ -47,6 +47,7 @@ typedef struct cw_br_s cw_br_t;
 struct cw_br_s
 {
   cw_bool_t is_malloced;
+  cw_bool_t is_thread_safe;
   cw_rwl_t rw_lock;
   cw_bool_t is_open;
 };
@@ -60,14 +61,13 @@ struct cw_br_s
 #define br_get_block_size _CW_NS_CMN(br_get_block_size)
 #define br_add_file _CW_NS_CMN(br_add_file)
 #define br_rm_file _CW_NS_CMN(br_rm_file)
+#define br_block_create _CW_NS_CMN(br_block_create)
+#define br_block_destroy _CW_NS_CMN(br_block_destroy)
 #define br_block_slock _CW_NS_CMN(br_slock)
 #define br_block_tlock _CW_NS_CMN(br_tlock)
-#define br_block_destroy _CW_NS_CMN(br_block_destroy)
-/* #define br_ _CW_NS_CMN(br_) */
-/* #define br_ _CW_NS_CMN(br_) */
 
 /* Function prototypes. */
-cw_br_t * br_new(cw_br_t * a_br_o);
+cw_br_t * br_new(cw_br_t * a_br_o, cw_bool_t a_is_thread_safe);
 void br_delete(cw_br_t * a_br_o);
 
 cw_bool_t br_is_open(cw_br_t * a_br_o);
@@ -76,17 +76,18 @@ cw_bool_t br_open(cw_br_t * a_br_o, char * a_filename);
 cw_bool_t br_close(cw_br_t * a_br_o);
 
 cw_uint64_t br_get_block_size(cw_br_t * a_br_o);
-			    
+
 cw_bool_t br_add_file(cw_br_t * a_br_o, char * a_filename,
 		      cw_bool_t a_is_raw, cw_bool_t a_can_overlap,
 		      cw_bool_t a_is_dynamic,
 		      cw_uint64_t a_base_addr, cw_uint64_t a_max_size);
 cw_bool_t br_rm_file(cw_br_t * a_br_o, char * a_filename);
 
+cw_bool_t br_block_create(cw_br_t * a_br_o, cw_brblk_t ** a_brblk_o);
+cw_bool_t br_block_destroy(cw_br_t * a_br_o, cw_brblk_t * a_brblk_o);
+
 cw_brblk_t * br_block_slock(cw_br_t * a_br_o,
 			     cw_uint64_t a_logical_addr);
 cw_brblk_t * br_block_tlock(cw_br_t * a_br_o,
 			     cw_uint64_t a_logical_addr);
-cw_bool_t br_block_destroy(cw_br_t * a_br_o, cw_brblk_t * a_brblk_o);
-
 #endif /* _BR_H_ */
