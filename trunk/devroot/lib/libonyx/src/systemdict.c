@@ -25,8 +25,9 @@
 #include <sys/stat.h>
 #include <dirent.h> /* For dirforeach operator. */
 #ifdef CW_SOCKET
-#include <netdb.h> /* For socket, socketpair, connect, serviceport operators. */
-#include <sys/socket.h> /* For socket and socketpair operators. */
+#include <netdb.h>
+#include <sys/socket.h>
+#include <sys/un.h>
 #ifndef CW_HAVE_SOCKLEN_T
 /* socklen_t is missing on Mac OS X <= 10.2. */
 typedef int socklen_t;
@@ -1690,9 +1691,6 @@ systemdict_connect(cw_nxo_t *a_thread)
     switch (family)
     {
 	case AF_INET:
-#ifdef AF_INET6
-	case AF_INET6:
-#endif
 	{
 	    error = inet_pton(family, nxo_string_get(taddr),
 			      &sockaddr.sin_addr);
@@ -1734,17 +1732,6 @@ systemdict_connect(cw_nxo_t *a_thread)
 	{
 	    cw_error("XXX Not implemented");
 	}
-	case AF_ROUTE:
-	{
-	    cw_error("XXX Not implemented");
-	}
-#ifdef AF_KEY
-	case AF_KEY:
-	{
-	    cw_error("XXX Not implemented");
-	    break;
-	}
-#endif
 	default:
 	{
 	    cw_not_reached();
@@ -5924,10 +5911,15 @@ systemdict_over(cw_nxo_t *a_thread)
 static void
 systemdict_p_peername(cw_nxo_t *a_thread, cw_bool_t a_peer)
 {
-    cw_nxo_t *ostack, *nxo;
+    cw_nxo_t *ostack, *tstack, *nxo, *tkey, *tval;
+    cw_nx_t *nx;
     sa_family_t family;
+    int len, error;
 
     ostack = nxo_thread_ostack_get(a_thread);
+    tstack = nxo_thread_tstack_get(a_thread);
+    nx = nxo_thread_nx_get(a_thread);
+
     NXO_STACK_GET(nxo, ostack, a_thread);
     if (nxo_type_get(nxo) != NXOT_FILE)
     {
@@ -5946,11 +5938,7 @@ systemdict_p_peername(cw_nxo_t *a_thread, cw_bool_t a_peer)
     {
 	case AF_INET:
 	{
-	    cw_nxo_t *tstack;
-	    cw_nxo_t *tkey, *tval;
-	    cw_nx_t *nx;
 	    struct sockaddr_in sa;
-	    int len, error;
 
 	    len = sizeof(sa);
 	    if (a_peer)
@@ -5990,8 +5978,6 @@ systemdict_p_peername(cw_nxo_t *a_thread, cw_bool_t a_peer)
 		}
 	    }
 
-	    tstack = nxo_thread_tstack_get(a_thread);
-	    nx = nxo_thread_nx_get(a_thread);
 	    tkey = nxo_stack_push(tstack);
 	    tval = nxo_stack_push(tstack);
 
@@ -6019,26 +6005,71 @@ systemdict_p_peername(cw_nxo_t *a_thread, cw_bool_t a_peer)
 	    nxo_stack_npop(tstack, 2);
 	    break;
 	}
-#ifdef AF_INET6
-	case AF_INET6:
-	{
-	    /* XXX */
-	    break;
-	}
-#endif
 	case AF_LOCAL:
 	{
-	    /* XXX */
-	    break;
-	}
-	case AF_ROUTE:
-	{
-	    /* XXX */
-	    break;
-	}
-	case AF_KEY:
-	{
-	    /* XXX */
+	    struct sockaddr_un sa;
+	    cw_uint32_t pathlen;
+
+	    len = sizeof(sa);
+	    if (a_peer)
+	    {
+		error = getpeername(nxo_file_fd_get(nxo),
+				    (struct sockaddr *) &sa, &len);
+	    }
+	    else
+	    {
+		error = getsockname(nxo_file_fd_get(nxo),
+				    (struct sockaddr *) &sa, &len);
+	    }
+	    if (error == -1)
+	    {
+		switch (errno)
+		{
+		    case EBADF:
+		    {
+			nxo_thread_nerror(a_thread, NXN_ioerror);
+			return;
+		    }
+		    case ENOTSOCK:
+		    {
+			nxo_thread_nerror(a_thread, NXN_argcheck);
+			return;
+		    }
+		    case ENOBUFS:
+		    {
+			xep_throw(CW_ONYXX_OOM);
+			/* Not reached. */
+		    }
+		    default:
+		    {
+			nxo_thread_nerror(a_thread, NXN_unregistered);
+			return;
+		    }
+		}
+	    }
+
+	    tkey = nxo_stack_push(tstack);
+	    tval = nxo_stack_push(tstack);
+
+	    nxo_dict_new(nxo, nx, nxo_thread_currentlocking(a_thread), 2);
+
+	    /* family. */
+	    nxo_name_new(tkey, nx, nxn_str(NXN_family), nxn_len(NXN_family),
+			 TRUE);
+	    nxo_name_new(tval, nx, nxn_str(NXN_AF_LOCAL), nxn_len(NXN_AF_LOCAL),
+			 TRUE);
+	    nxo_dict_def(nxo, nx, tkey, tval);
+
+	    /* path. */
+	    pathlen = strlen(sa.sun_path);
+	    nxo_name_new(tkey, nx, nxn_str(NXN_path), nxn_len(NXN_path),
+			 TRUE);
+	    nxo_string_new(tval, nx, nxo_thread_currentlocking(a_thread),
+			   pathlen);
+	    nxo_string_set(tval, 0, sa.sun_path, pathlen);
+	    nxo_dict_def(nxo, nx, tkey, tval);
+
+	    nxo_stack_npop(tstack, 2);
 	    break;
 	}
 	default:
@@ -8653,16 +8684,7 @@ systemdict_snup(cw_nxo_t *a_thread)
 static const struct cw_systemdict_name_arg socket_family[] =
 {
     {NXN_AF_INET, AF_INET},
-    {NXN_AF_LOCAL, AF_LOCAL},
-    {NXN_AF_ROUTE, AF_ROUTE}
-#ifdef AF_INET6
-    ,
-    {NXN_AF_INET6, AF_INET6}
-#endif
-#ifdef AF_KEY
-    ,
-    {NXN_AF_KEY, AF_KEY}
-#endif
+    {NXN_AF_LOCAL, AF_LOCAL}
 };
 
 static const struct cw_systemdict_name_arg socket_type[] =
@@ -8670,14 +8692,6 @@ static const struct cw_systemdict_name_arg socket_type[] =
     {NXN_SOCK_STREAM, SOCK_STREAM},
     {NXN_SOCK_DGRAM, SOCK_DGRAM},
     {NXN_SOCK_RAW, SOCK_RAW}
-#ifdef SOCK_RDM
-    ,
-    {NXN_SOCK_RDM, SOCK_RDM}
-#endif
-#ifdef SOCK_SEQPACKET
-    ,
-    {NXN_SOCK_SEQPACKET, SOCK_SEQPACKET}
-#endif
 };
 
 static void

@@ -41,14 +41,7 @@ typedef enum
     NXN_SENTRY(sym_rb, "]"),
 #ifdef CW_SOCKET
     NXN_ENTRY(AF_INET),
-#ifdef AF_INET6
-    NXN_ENTRY(AF_INET6),
-#endif
-#ifdef AF_KEY
-    NXN_ENTRY(AF_KEY),
-#endif
     NXN_ENTRY(AF_LOCAL),
-    NXN_ENTRY(AF_ROUTE),
 #endif
     NXN_ENTRY(abs),
 #ifdef CW_SOCKET
@@ -56,7 +49,7 @@ typedef enum
 #endif
     NXN_ENTRY(active),
     NXN_ENTRY(add),
-#ifdef CW_POSIX
+#ifdef CW_SOCKET
     NXN_ENTRY(address),
 #endif
     NXN_ENTRY(adn),
@@ -347,6 +340,9 @@ typedef enum
     NXN_ENTRY(or),
     NXN_ENTRY(ostack),
     NXN_ENTRY(over),
+#ifdef CW_SOCKET
+    NXN_ENTRY(path),
+#endif
 #ifdef CW_POSIX
     NXN_ENTRY(POLLERR),
     NXN_ENTRY(POLLHUP),
@@ -438,12 +434,6 @@ typedef enum
     NXN_ENTRY(SO_TYPE),
     NXN_ENTRY(SOCK_DGRAM),
     NXN_ENTRY(SOCK_RAW),
-#ifdef SOCK_RDM
-    NXN_ENTRY(SOCK_RDM),
-#endif
-#ifdef SOCK_SEQPACKET
-    NXN_ENTRY(SOCK_SEQPACKET),
-#endif
     NXN_ENTRY(SOCK_STREAM),
     NXN_ENTRY(SOL_SOCKET),
 #endif
