@@ -142,7 +142,7 @@ doc_relclean :
 [objdir]/%0pdf/%.pdf : [objdir]/%0latex/%.dvi
   set mkdir
 {
-  [DVIPDF] [objdir]/%0latex/%.dvi [objdir]/%0pdf/%.pdf;
+  [DVIPDFM] -o [objdir]/%0pdf/%.pdf [objdir]/%0latex/%.dvi;
 }
 
 [objdir]/%0html/%.html : [objdir]/%0ps/%.ps
