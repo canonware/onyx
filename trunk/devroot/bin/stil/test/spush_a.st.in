@@ -9,7 +9,7 @@ mark spush
 mutex spush
 /foo spush
 null spush
-//pstack spush
+//pop spush
 () spush
 `hi' spush
 pstack
