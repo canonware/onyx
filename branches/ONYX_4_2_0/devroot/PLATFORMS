@@ -1,0 +1,30 @@
+################################################################################
+#
+# Version: <Version>
+#
+# Supported platforms and platform-specific information.
+#
+################################################################################
+
+* FreeBSD 4.5.
+
+* Red Hat Linux 7.2.
+
+* Sun Solaris 2.6.
+
+* NetBSD 1.5.
+
+  - POSIX threading does not work due to NetBSD's lack of pthreads.  However,
+    GNU pth threading should work.
+
+* Apple OS X 10.2.
+
+  - OS X uses the Mach-O binary format rather than ELF.  Therefore, dlopen() and
+    friends do not natively exist.  Dynamically loadable modules and the modload
+    and mrequire operators are not supported unless a libdl compatibility shim
+    is installed.  One can be obtained from Apple's cvs repository, but even
+    then, the shim does not work 100% compatibly.  Specifically, dlsym() does
+    not implicitly search for symbols with a "_" prefixed.  The solution is
+    either to modify the shim or modify scripts to explicitly include the "_"
+    prefix.  The module(s) included with the distribution assume that symbols
+    with "_" prefixes are implicitly searched for.

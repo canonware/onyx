@@ -1,0 +1,130 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+`Test begin\n' print flush
+
+[
+    {`' `.' <> match pstack clear}
+    {`' `.' <> regex  match pstack clear}
+    {`' `.' match pstack clear}
+    {`' `.' regex match pstack clear}
+
+    {`Some input text.' `.' <> match 1 sprint 0 submatch 1 sprint}
+    {`Some input text.' `.' <> regex match 1 sprint 0 submatch 1 sprint}
+    {`Some input text.' `.' match 1 sprint 0 submatch 1 sprint}
+    {`Some input text.' `.' regex match 1 sprint 0 submatch 1 sprint}
+
+    {
+	`INPUT Input input' `input' <$g true>
+
+	{3 ndup match}{
+	    0 submatch 1 sprint
+	} while
+	3 npop
+    }
+    {
+	`INPUT Input input' `input' <$g true> regex
+
+	{2 ndup match}{
+	    0 submatch 1 sprint
+	} while
+	2 npop
+    }
+    {
+	`INPUT Input input' `input' <$g true $i true>
+
+	{3 ndup match}{
+	    0 submatch 1 sprint
+	} while
+	3 npop
+    }
+    {
+	`INPUT Input input' `input' <$g true $i true> regex
+
+	{2 ndup match}{
+	    0 submatch 1 sprint
+	} while
+	2 npop
+    }
+
+    {
+	`Some multiline\ninput text.' `^\w+' <$g true>
+
+	{3 ndup match}{
+	    0 submatch 1 sprint
+	} while
+	3 npop
+    }
+    {
+	`Some multiline\ninput text.' `^\w+' <$g true> regex
+
+	{2 ndup match}{
+	    0 submatch 1 sprint
+	} while
+	2 npop
+    }
+    {
+	`Some multiline\ninput text.' `^\w+' <$g true $m true>
+
+	{3 ndup match}{
+	    0 submatch 1 sprint
+	} while
+	3 npop
+    }
+    {
+	`Some multiline\ninput text.' `^\w+' <$g true $m true> regex
+
+	{2 ndup match}{
+	    0 submatch 1 sprint
+	} while
+	2 npop
+    }
+
+    {
+	`Some multiline\ninput text.' `\w+.' <$g true>
+
+	{3 ndup match}{
+	    0 submatch 1 sprint
+	} while
+	3 npop
+    }
+    {
+	`Some multiline\ninput text.' `\w+.' <$g true> regex
+
+	{2 ndup match}{
+	    0 submatch 1 sprint
+	} while
+	2 npop
+    }
+    {
+	`Some multiline\ninput text.' `\w+.' <$g true $s true>
+
+	{3 ndup match}{
+	    0 submatch 1 sprint
+	} while
+	3 npop
+    }
+    {
+	`Some multiline\ninput text.' `\w+.' <$g true $s true> regex
+
+	{2 ndup match}{
+	    0 submatch 1 sprint
+	} while
+	2 npop
+    }
+]{
+    dup 1 sprint
+    eval
+} foreach
+
+`Test end\n' print
+pstack
