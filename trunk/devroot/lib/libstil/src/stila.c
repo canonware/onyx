@@ -18,7 +18,7 @@
  * The downside of atomic collection is that if marking takes more than about
  * 100 milliseconds, the user may notice a lag.  In practice, the collector
  * appears to perform very well; marking is fast enough to stay well below the
- * threshhold of user awareness, unless memory is low enough that system paging
+ * threshold of user awareness, unless memory is low enough that system paging
  * becomes a factor.
  *
  * For situations where a significant amount of allocation is done over a short
@@ -114,10 +114,10 @@
  * Number of sequence set additions since last collection that will cause an
  * immediate collection.
  */
-#define	_CW_STILA_THRESHHOLD	50000
+#define	_CW_STILA_THRESHOLD	50000
 
 typedef enum {
-	STILAM_THRESHHOLD,
+	STILAM_THRESHOLD,
 	STILAM_SUSPEND,
 	STILAM_RESUME,
 	STILAM_SHUTDOWN
@@ -219,8 +219,8 @@ stila_gc_register(cw_stila_t *a_stila, cw_stiloe_t *a_stiloe)
 	stiloe_l_registered_set(a_stiloe, TRUE);
 	ql_tail_insert(&a_stila->seq_set, a_stiloe, link);
 	a_stila->seq_new++;
-	if (a_stila->seq_new == _CW_STILA_THRESHHOLD)
-		mq_put(&a_stila->gc_mq, STILAM_THRESHHOLD);
+	if (a_stila->seq_new == _CW_STILA_THRESHOLD)
+		mq_put(&a_stila->gc_mq, STILAM_THRESHOLD);
 	mtx_unlock(&a_stila->lock);
 }
 
@@ -626,7 +626,7 @@ stila_p_gc_entry(void *a_arg)
 	    FALSE; collect = FALSE) {
 		if (mq_timedget(&stila->gc_mq, &interval, &message) == FALSE) {
 			switch (message) {
-			case STILAM_THRESHHOLD:
+			case STILAM_THRESHOLD:
 				if (suspend == FALSE)
 					collect = TRUE;
 				break;
