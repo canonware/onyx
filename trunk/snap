@@ -117,6 +117,7 @@ $opt_retval =
 		"V|version=s%" => \%OPT_VERSION,
 		"p|pkgname=s" => \$opt_pkgname,
 		"r|root=s" => \$opt_root,
+		"m|majorbranch=s" => \$opt_majorbranch,
 		"b|branchpoint=s" => \$opt_branchpoint,
 		"B|branchtag=s" => \$opt_branchtag,
 		"T|tagprefix=s" => \$opt_tagprefix,
@@ -196,12 +197,13 @@ else
 
 if ($opt_verbose)
 {
-    print STDERR "branch point   : $opt_branchpoint\n";
-    print STDERR "branch tag     : $opt_branchtag\n";
-    print STDERR "tag            : $opt_tag\n";
-    print STDERR "cvs tag        : $tag_cvs\n";
-    print STDERR "Tree root      : $opt_root\n";
-    print STDERR "Package name   : $opt_pkgname\n";
+    print STDERR "major branch point : $opt_majorbranch\n";
+    print STDERR "branch point       : $opt_branchpoint\n";
+    print STDERR "branch tag         : $opt_branchtag\n";
+    print STDERR "tag                : $opt_tag\n";
+    print STDERR "cvs tag            : $tag_cvs\n";
+    print STDERR "Tree root          : $opt_root\n";
+    print STDERR "Package name       : $opt_pkgname\n";
 }
 
 foreach $dir (@OPT_FILETREES)
@@ -225,6 +227,51 @@ if ($opt_verbose)
 unless ($opt_noact)
 {
     `rm -rf $tagdir`;
+}
+
+if (defined($opt_majorbranch))
+{
+    # Check out.
+    if ($opt_verbose)
+    {
+	print STDERR "cvs co -r $opt_majorbranch -d $tagdir @TREES\n";
+    }
+    unless ($opt_noact)
+    {
+	`cvs co -r $opt_majorbranch -d $tagdir @TREES`;
+    }
+
+    # Branch.
+    if ($opt_verbose)
+    {
+	print STDERR
+	    "cd $tagdir && cvs tag -b $opt_branchpoint\_BP @TREES\n";
+    }
+    unless ($opt_noact)
+    {
+	`cd $tagdir && cvs tag -b $opt_branchpoint\_BP @TREES`;
+    }
+
+    # Branch.
+    if ($opt_verbose)
+    {
+	print STDERR
+	    "cd $tagdir && cvs tag -b $opt_branchpoint @TREES\n";
+    }
+    unless ($opt_noact)
+    {
+	`cd $tagdir && cvs tag -b $opt_branchpoint @TREES`;
+    }
+
+    # Delete checkout.
+    if ($opt_verbose)
+    {
+	print STDERR "rm -rf $tagdir\n";
+    }
+    unless ($opt_noact)
+    {
+	`rm -rf $tagdir`;
+    }
 }
 
 # Check out on the appropriate tag, if specified.
@@ -425,7 +472,8 @@ sub print_usage
     print STDERR <<EOF;
 $0 usage:
 $0 [-chnv --cvsnotag --help --noact --verbose]
-       [--branchpoint=<revision> | -b <revision>]
+       [--majorbranch=<tag> | -m <tag>]
+       [--branchpoint=<tag> | -b <tag>]
        [--branchtag=<tag> | -B <tag>]
        [--tag=<tag> | -t <tag>]
        [--tagprefix=<prefix> | -T <prefix>]

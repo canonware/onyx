@@ -2,7 +2,7 @@ Branches are created for major and minor releases, but not for bugfix releases.
 
 To do a major release of onyx:
 
-	./release -v -b ONYX_5 -B ONYX_5_0 -t 5.0.0 -V onyx=5.0.0
+	./release -v -m HEAD -b ONYX_5 -B ONYX_5_0 -t 5.0.0 -V onyx=5.0.0
 
 To do a minor release of onyx:
 

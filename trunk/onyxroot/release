@@ -52,6 +52,7 @@ $opt_retval =
 		"h|help" => \$opt_help,
 		"n|noact" => \$opt_noact,
 		"v|verbose" => \$opt_verbose,
+		"m|majorbranch=s" => \$opt_majorbranch,
 		"b|branchpoint=s" => \$opt_branchpoint,
 		"B|branchtag=s" => \$opt_branchtag,
 		"t|tag=s" => \$opt_tag,
@@ -102,7 +103,8 @@ sub print_usage
     print <<EOF;
 $0 usage:
 $0 [-chnv --cvsnotag --help --noact --verbose]
-       [--branchpoint=<revision> | -b <revision>]
+       [--majorbranch=<tag> | -m <tag>]
+       [--branchpoint=<tag> | -b <tag>]
        [--branchtag=<tag> | -B <tag>]
        [--tag=<tag> | -t <tag>]
        {--pkgname=<name> | -p <pkgname>}
