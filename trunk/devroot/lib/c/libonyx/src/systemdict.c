@@ -3391,10 +3391,10 @@ systemdict_read(cw_nxo_t *a_thread)
 
 		if (nread == 0) {
 			nxo_integer_new(value, 0);
-			nxo_boolean_new(code, FALSE);
+			nxo_boolean_new(code, TRUE);
 		} else {
 			nxo_integer_new(value, (cw_nxoi_t)val);
-			nxo_boolean_new(code, TRUE);
+			nxo_boolean_new(code, FALSE);
 		}
 
 		nxo_stack_roll(ostack, 3, 2);

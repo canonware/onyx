@@ -2468,58 +2468,75 @@ elements pushed by \htmlref{\onyxop{}{begin}{}}{systemdict:begin}. \\
 \hline \hline
 \multicolumn{4}{|l|}{File and filesystem operators} \\
 \hline \hline
+filename flags & {\bf \htmlref{open}{systemdict:open}} & file & Open a file. \\
+\hline
+file & {\bf \htmlref{close}{systemdict:close}} & -- & Close file. \\
+\hline
+%begin{latexonly}
+file & {\bf \htmlref{read}{systemdict:read}} & integer boolean & Read from
+file. \\
+file string & {\bf \htmlref{read}{systemdict:read}} & string boolean & \\
+\hline
+%end{latexonly}
+\begin{htmlonly}
+file & {\bf \htmlref{read}{systemdict:read}} & integer boolean & Read from
+file. \\
+file string & {\bf \htmlref{read}{systemdict:read}} & substring boolean &
+Read from file. \\
+\end{htmlonly}
+file & {\bf \htmlref{readline}{systemdict:readline}} & string boolean &
+Read a line from file. \\
+\hline
+file & {\bf \htmlref{bytesavailable}{systemdict:bytesavailable}} & count &
+Get number of buffered readable bytes. \\
+\hline
+file integer/string & {\bf \htmlref{write}{systemdict:write}} & -- & Write
+to file. \\
+string & {\bf \htmlref{print}{systemdict:print}} & -- & Print string to
+stdout. \\
+\hline
+object depth & {\bf \htmlref{sprint}{systemdict:sprint}} & -- &
+Syntactically print object to stdout. \\
+\hline
+-- & {\bf \htmlref{pstack}{systemdict:pstack}} & -- & Syntactically print
+ostack elements. \\
+\hline
+file & {\bf \htmlref{flushfile}{systemdict:flushfile}} & -- & Flush file
+buffer. \\
+\hline
+-- & {\bf \htmlref{flush}{systemdict:flush}} & -- & Flush stdout buffer. \\
+\hline
 file length & {\bf \htmlref{truncate}{systemdict:truncate}} & -- & Truncate
 file. \\
 \hline
-& {\bf \htmlref{unlink}{systemdict:unlink}} & & \\
-\hline
-& {\bf \htmlref{write}{systemdict:write}} & & \\
+file offset & {\bf \htmlref{seek}{systemdict:seek}} & -- & Move file position
+pointer. \\
 \hline
 & {\bf \htmlref{tell}{systemdict:tell}} & & \\
 \hline
-& {\bf \htmlref{test}{systemdict:test}} & & \\
-\hline
-& {\bf \htmlref{symlink}{systemdict:symlink}} & & \\
-\hline
-& {\bf \htmlref{status}{systemdict:status}} & & \\
-\hline
-& {\bf \htmlref{sprint}{systemdict:sprint}} & & \\
-\hline
-& {\bf \htmlref{seek}{systemdict:seek}} & & \\
-\hline
-& {\bf \htmlref{rename}{systemdict:rename}} & & \\
-\hline
-& {\bf \htmlref{read}{systemdict:read}} & & \\
-\hline
-& {\bf \htmlref{readline}{systemdict:readline}} & & \\
-\hline
-& {\bf \htmlref{pstack}{systemdict:pstack}} & & \\
-\hline
-& {\bf \htmlref{print}{systemdict:print}} & & \\
-\hline
-& {\bf \htmlref{open}{systemdict:open}} & & \\
-\hline
 & {\bf \htmlref{mkdir}{systemdict:mkdir}} & & \\
 \hline
-& {\bf \htmlref{link}{systemdict:link}} & & \\
-\hline
-& {\bf \htmlref{flush}{systemdict:flush}} & & \\
-\hline
-& {\bf \htmlref{flushfile}{systemdict:flushfile}} & & \\
-\hline
-path & {\bf \htmlref{cd}{systemdict:cd}} & -- & \\
-\hline
--- & {\bf \htmlref{pwd}{systemdict:pwd}} & path & \\
-\hline
-path proc & {\bf \htmlref{dirforeach}{systemdict:dirforeach}} & -- & \\
-\hline
-& {\bf \htmlref{bytesavailable}{systemdict:bytesavailable}} & & \\
+& {\bf \htmlref{rename}{systemdict:rename}} & & \\
 \hline
 & {\bf \htmlref{chmod}{systemdict:chmod}} & & \\
 \hline
 & {\bf \htmlref{chown}{systemdict:chown}} & & \\
 \hline
-& {\bf \htmlref{close}{systemdict:close}} & & \\
+& {\bf \htmlref{link}{systemdict:link}} & & \\
+\hline
+& {\bf \htmlref{symlink}{systemdict:symlink}} & & \\
+\hline
+& {\bf \htmlref{unlink}{systemdict:unlink}} & & \\
+\hline
+& {\bf \htmlref{test}{systemdict:test}} & & \\
+\hline
+& {\bf \htmlref{status}{systemdict:status}} & & \\
+\hline
+path proc & {\bf \htmlref{dirforeach}{systemdict:dirforeach}} & -- & \\
+\hline
+-- & {\bf \htmlref{pwd}{systemdict:pwd}} & path & \\
+\hline
+path & {\bf \htmlref{cd}{systemdict:cd}} & -- & \\
 \hline \hline
 \multicolumn{4}{|l|}{Logical and bitwise operators} \\
 \hline \hline
@@ -3125,24 +3142,39 @@ onyx:0>
 	\end{description}
 \label{systemdict:bytesavailable}
 \index{bytesavailable@\onyxop{}{bytesavailable}{}}
-\item[{\onyxop{--}{bytesavailable}{--}}: ]
+\item[{\onyxop{file}{bytesavailable}{count}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[file: ]
+			A file object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[count: ]
+			Number of buffered readable bytes.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Get the number of buffered readable bytes that can be read
+		without the possibility of blocking.
 	\item[Example(s): ]\begin{verbatim}
 
-		\end{verbatim}
+onyx:0> `/tmp/foo' `w+' open
+onyx:1> dup `Hello\n' write
+onyx:1> dup `Goodbye\n' write
+onyx:1> dup 0 seek
+onyx:1> dup readline 1 sprint 1 sprint
+false
+`Hello'
+onyx:1> dup bytesavailable 1 sprint
+8
+onyx:1>
+	\end{verbatim}
 	\end{description}
 \label{systemdict:catenate}
 \index{catenate@\onyxop{}{catenate}{}}
@@ -3334,23 +3366,27 @@ onyx:1>
 	\end{description}
 \label{systemdict:close}
 \index{close@\onyxop{}{close}{}}
-\item[{\onyxop{--}{close}{--}}: ]
+\item[{\onyxop{file}{close}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[file: ]
+			A file object.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{ioerror}{ioerror}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Close a file.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> `/tmp/foo' `w' open
+onyx:1> close
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:condition}
@@ -4301,42 +4337,46 @@ onyx:0>
 \index{flush@\onyxop{}{flush}{}}
 \item[{\onyxop{--}{flush}{--}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{ioerror}{ioerror}.]
 		\end{description}
 	\item[Description: ]
+		Flush any buffered data associated with stdout.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> `Hi\n' print
+onyx:0> flush
+Hi
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:flushfile}
 \index{flushfile@\onyxop{}{flushfile}{}}
-\item[{\onyxop{--}{flushfile}{--}}: ]
+\item[{\onyxop{file}{flushfile}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[file: ]
+			A file object.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{ioerror}{ioerror}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Flush any buffered data associated with \oparg{file}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> `Hi\n' print
+onyx:0> stdout flushfile
+Hi
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:for}
@@ -5465,23 +5505,51 @@ onyx:1>
 	\end{description}
 \label{systemdict:open}
 \index{open@\onyxop{}{open}{}}
-\item[{\onyxop{--}{open}{--}}: ]
+\item[{\onyxop{filename flags}{open}{file}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[filename: ]
+			A string that represents a filename.
+		\item[flags: ]
+			A string that represents a file mode:
+			\begin{description}\item[]
+			\item[`r': ]
+				Read only.
+			\item[`r+': ]
+				Read/write, starting at offset 0.
+			\item[`w': ]
+				Write only.  Create file if necessary.  Truncate
+				file if non-zero length.
+			\item[`w+': ]
+				Read/write, starting at offset 0.  Create
+				file if necessary.
+			\item[`a': ]
+				Write only, starting at end of file.
+			\item[`a+': ]
+				Read/write, starting at end of file.
+			\end{description}
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[file: ]
+			A file object.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
+		\item[\htmlref{ioerror}{ioerror}.]
+		\item[\htmlref{limitcheck}{limitcheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Open a file.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> `/tmp/foo' `w' open pstack
+-file-
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:or}
@@ -5571,23 +5639,27 @@ onyx:1>
 	\end{description}
 \label{systemdict:print}
 \index{print@\onyxop{}{print}{}}
-\item[{\onyxop{--}{print}{--}}: ]
+\item[{\onyxop{string}{print}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[string: ]
+			A string object.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{ioerror}{ioerror}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Print \oparg{string} to stdout.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> `Hi\n' print flush
+Hi
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:product}
@@ -5610,6 +5682,31 @@ onyx:1>
 onyx:0> product pstack
 `Canonware onyx'
 onyx:1>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:pstack}
+\index{pstack@\onyxop{}{pstack}{}}
+\item[{\onyxop{--}{pstack}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{ioerror}{ioerror}.]
+		\end{description}
+	\item[Description: ]
+		Syntactically print the elements of ostack, one per line.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> `a' 1 mark /foo [1 2 3] (4 5 6)
+onyx:6> pstack
+(4 5 6)
+[1 2 3]
+/foo
+-mark-
+1
+`a'
+onyx:6>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:put}
@@ -5774,44 +5871,88 @@ onyx:0>
 	\end{description}
 \label{systemdict:read}
 \index{read@\onyxop{}{read}{}}
-\item[{\onyxop{--}{read}{--}}: ]
+\item[{\onyxop{file}{read}{integer boolean}}: ]
+\item[{\onyxop{file string}{read}{substring boolean}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[file: ]
+			A file object.
+		\item[string: ]
+			A string object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[integer: ]
+			An integer that represents the ascii value of a
+			character that was read from \oparg{file}.
+		\item[substring: ]
+			A substring of \oparg{string} that contains data
+			read from \oparg{file}.
+		\item[boolean: ]
+			If true, end of file reached during read.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{ioerror}{ioerror}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Read from \oparg{file}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> `/tmp/foo' `w+' open
+onyx:1> dup `Hello\n' write
+onyx:1> dup flushfile
+onyx:1> dup 0 seek
+onyx:1> dup 10 string read
+onyx:3> pop 1 sprint
+`Hello\n'
 		\end{verbatim}
 	\end{description}
 \label{systemdict:readline}
 \index{readline@\onyxop{}{readline}{}}
-\item[{\onyxop{--}{readline}{--}}: ]
+\item[{\onyxop{file}{readline}{string boolean}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[file: ]
+			A file object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[string: ]
+			A string that contains a line of text from \oparg{file}.
+		\item[boolean: ]
+			If true, end of file reached during read.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{ioerror}{ioerror}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Read a line of text from \oparg{file}.  Lines are separated
+		by ``{\bs}n'' or ``{\bs}r{\bs}n'', which is removed.  The
+		last line in a file may not have a newline at the end.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> `/tmp/foo' `w+' open
+onyx:1> dup `Hello\n' write
+onyx:1> dup `Goodbye\n' write
+onyx:1> dup 0 seek
+onyx:1> dup readline 1 sprint 1 sprint
+false
+`Hello'
+onyx:1> dup readline 1 sprint 1 sprint
+false
+`Goodbye'
+onyx:1> dup readline 1 sprint 1 sprint
+true
+`'
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:realtime}
@@ -6124,23 +6265,35 @@ onyx:1>
 	\end{description}
 \label{systemdict:seek}
 \index{seek@\onyxop{}{seek}{}}
-\item[{\onyxop{--}{seek}{--}}: ]
+\item[{\onyxop{file offset}{seek}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[file: ]
+			A file object.
+		\item[offset: ]
+			Offset in bytes from the beginning of \oparg{file}
+			to move the file position pointer to.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{ioerror}{ioerror}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Move the file position pointer for \oparg{file} to
+		\oparg{offset}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> `/tmp/foo' `w+' open
+onyx:1> dup `Hello\n' write
+onyx:1> dup 0 seek
+onyx:1> readline pstack
+false
+`Hello'
+onyx:2>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:self}
@@ -6371,23 +6524,34 @@ onyx:2>
 	\end{description}
 \label{systemdict:sprint}
 \index{sprint@\onyxop{}{sprint}{}}
-\item[{\onyxop{--}{sprint}{--}}: ]
+\item[{\onyxop{object depth}{sprint}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[object: ]
+			An object to print syntactically.
+		\item[depth: ]
+			Maximum recursion depth.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{ioerror}{ioerror}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Syntactically print \oparg{object}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> [1 [2 3] 4]
+onyx:1> dup 0 sprint
+-array-
+onyx:1> dup 1 sprint
+[1 -array- 4]
+onyx:1> dup 2 sprint
+[1 [2 3] 4]
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sprintdict}
@@ -6857,6 +7021,13 @@ onyx:0>
 	\item[Description: ]
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> `/tmp/foo' `w+' open
+onyx:1> dup tell 1 sprint
+0
+onyx:1> dup `Hello\n' write
+onyx:1> dup tell 1 sprint
+6
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:test}
@@ -7117,12 +7288,12 @@ onyx:0>
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[file: ]
+			A file object.
+		\item[length: ]
+			New length for \oparg{file}.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{ioerror}{ioerror}.]
@@ -7131,8 +7302,24 @@ onyx:0>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Set the length of \oparg{file} to \oparg{length}.  If this
+		causes the file to grow, the appended bytes will have the
+		value zero.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> `/tmp/foo' `w+' open
+onyx:1> dup `Hello\n' write
+onyx:1> dup flushfile
+onyx:1> dup 0 seek
+onyx:1> dup 10 string read
+onyx:3> pop 1 sprint
+`Hello\n'
+onyx:1> dup 3 truncate
+onyx:1> dup 0 seek
+onyx:1> dup 10 string read
+onyx:3> pop 1 sprint
+`Hel'
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:true}
@@ -7437,23 +7624,35 @@ onyx:0>
 	\end{description}
 \label{systemdict:write}
 \index{write@\onyxop{}{write}{}}
-\item[{\onyxop{--}{write}{--}}: ]
+\item[{\onyxop{file integer/string}{write}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[file: ]
+			A file object.
+		\item[integer: ]
+			An integer that represents an ascii character value.
+		\item[string: ]
+			A string object.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{ioerror}{ioerror}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Write \oparg{integer} or \oparg{string} to \oparg{file}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> `/tmp/foo' `w+' open
+onyx:1> dup `Hello\n' write
+onyx:1> dup 0 seek
+onyx:1> dup readline 1 sprint 1 sprint
+false
+`Hello'
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:xcheck}
