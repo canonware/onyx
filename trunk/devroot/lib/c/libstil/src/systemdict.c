@@ -296,9 +296,9 @@ systemdict_anchorsearch(cw_stilt_t *a_stilt)
       false
     } ifelse
   }{
-      % Search string not found at all.
-      pop pop pop
-      false
+    % Search string not found at all.
+    pop pop pop
+    false
   } ifelse
 %} bind def
 ");
