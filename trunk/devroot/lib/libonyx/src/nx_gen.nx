@@ -42,8 +42,9 @@ $_encdict <
 	$systemdict	$v	# 3
 	$true		$w	# 4
 	$type		$x	# >= 17
-	$write		$y	# 10
-	$xcheck		$z	# 3
+	$until		$y	# 10
+	$write		$z	# 10
+	$xcheck		$+	# 3
 > def
 
 # #proc _encarr -

@@ -61,49 +61,45 @@ $errordict <
     $handleerror {
 	$currenterror load begin
 
-	# Avoid the need to check for partial writes.
-	stderr nonblocking
-	stderr false setnonblocking
-
 	# If this is a syntaxerror, print the line and column numbers.
 	$errorname load $syntaxerror eq {
-	    stderr dup `At line ' write pop
-	    dup $line load cvs write pop
-	    dup `, column ' write pop
-	    dup $column load cvs write pop
-	    `: ' write pop
+	    stderr dup `At line ' {write}{} until
+	    dup $line load cvs {write}{} until
+	    dup `, column ' {write}{} until
+	    dup $column load cvs {write}{} until
+	    `: ' {write}{} until
 	} if
 
 	# Print the errorname.
-	stderr dup `Error ' write pop
-	dup $errorname load 1 sprints write pop
+	stderr dup `Error ' {write}{} until
+	dup $errorname load 1 sprints {write}{} until
 
 	# Print ostack and dstack using sprint.
-	dup `\nostack: ' write pop
-	dup $ostack load 1 sprints write pop
-	dup `\ndstack: ' write pop
-	dup $dstack load 1 sprints write pop
-	`\n' write pop
+	dup `\nostack: ' {write}{} until
+	dup $ostack load 1 sprints {write}{} until
+	dup `\ndstack: ' {write}{} until
+	dup $dstack load 1 sprints {write}{} until
+	`\n' {write}{} until
 
 	# Print a stack trace that depicts the currently executing element of
 	# arrays.
 	$estack load scount 1 sub dup 0 gt {
-	    stderr dup `estack/istack trace (0..' write pop
-	    1 idup cvs stderr exch write pop
-	    `):\n' write pop
+	    stderr dup `estack/istack trace (0..' {write}{} until
+	    1 idup cvs stderr exch {write}{} until
+	    `):\n' {write}{} until
 	} if
 
 	# For each element in estack:
 	0 1 dn {
 	    # #edepth
 	    # If this element is an array, print it specially.
-	    dup cvs stderr exch write pop
+	    dup cvs stderr exch {write}{} until
 	    dup $estack load dup dn sidup spop
 	    # #edepth #array
 
 	    dup type $arraytype eq {
 		# Array.
-		`: {\n' stderr exch write pop
+		`: {\n' stderr exch {write}{} until
 		# #edepth #array
 		dup length 1 sub 0 1 dn {
 		    # #edepth #array #aindex
@@ -114,36 +110,33 @@ $errordict <
 		    # #edepth #array #aindex #iindex #aindex
 		    eq {
 			dup <$w 3> outputs
-			stderr exch write pop
+			stderr exch {write}{} until
 			`:--> '
 		    }{
 			`\t'
 		    } ifelse
-		    stderr exch write pop
+		    stderr exch {write}{} until
 		    # #edepth #array #aindex
 		    1 idup exch get 1 sprints
-		    stderr exch write pop
-		    stderr `\n' write pop
+		    stderr exch {write}{} until
+		    stderr `\n' {write}{} until
 		    # #edepth #array
 		} for
-		stderr `}\n' write pop
+		stderr `}\n' {write}{} until
 		# #edepth #array
 		pop
 		# #edepth
 	    }{
 		# Non-array.
-		stderr `:\t' write pop
+		stderr `:\t' {write}{} until
 		# #edepth #array
-		1 sprints stderr exch write pop
-		stderr `\n' write pop
+		1 sprints stderr exch {write}{} until
+		stderr `\n' {write}{} until
 		# #edepth
 	    } ifelse
 	    # #edepth
 	    pop
 	} for
-
-	# Set nonblocking mode of stderr back.
-	stderr exch setnonblocking
 
 	end # currenterror.
 

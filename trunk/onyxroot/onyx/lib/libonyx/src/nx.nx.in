@@ -890,25 +890,23 @@ $throw {
 	{$currenterror where {pop true}{false} ifelse}
     }{
 	eval not {
-	    # Avoid the need to check for partial writes.
-	    stderr false setnonblocking
-
-	    stderr `Onyx: Missing errordict or currenterror defs\n' write
+	    stderr `Onyx: Missing errordict or currenterror defs\n'
+	    {write}{} until
 
 	    # Print stack dumps.
-	    stderr `ostack: ' write
-	    ostack 2 sprints stderr exch write
+	    stderr `ostack: ' {write}{} until
+	    ostack 2 sprints stderr exch {write}{} until
 
-	    stderr `\ndstack: ' write
-	    stderr dstack 2 sprints write
+	    stderr `\ndstack: ' {write}{} until
+	    stderr dstack 2 sprints {write}{} until
 
-	    stderr `\nestack: ' write
-	    stderr estack 2 sprints write
+	    stderr `\nestack: ' {write}{} until
+	    stderr estack 2 sprints {write}{} until
 
-	    stderr `\nistack: ' write
-	    stderr istack 2 sprints write
+	    stderr `\nistack: ' {write}{} until
+	    stderr istack 2 sprints {write}{} until
 
-	    stderr `\nOnyx: dieing\n' write
+	    stderr `\nOnyx: dieing\n' {write}{} until
 	    1 die
 	} if
     } foreach
