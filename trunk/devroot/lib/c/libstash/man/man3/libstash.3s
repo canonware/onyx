@@ -118,7 +118,7 @@ _CW_XEPV_OOM.
 Description:
 .RS
 Initialize various global variables.  In particular, initialize cw_g_mem,
-cw_g_dbg, and cw_g_out.
+cw_g_dbg, and cw_g_out (default output to file descriptor 1).
 .RE
 .RE
 .PP

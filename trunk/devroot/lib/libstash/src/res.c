@@ -285,7 +285,7 @@ res_dump(cw_res_t *a_res, const char *a_filename)
 			retval = TRUE;
 			goto RETURN;
 		}
-		out_set_default_fd(t_out, fd);
+		out_default_fd_set(t_out, fd);
 	} else
 		t_out = NULL;
 

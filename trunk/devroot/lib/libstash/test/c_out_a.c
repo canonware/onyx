@@ -51,18 +51,18 @@ main()
 		out_delete(out_p);
 	}
 
-	/* out_get_default_fd(), out_set_default_fd(). */
-	_cw_out_put("out_get_default_fd(), out_set_default_fd()\n");
+	/* out_default_fd_get(), out_default_fd_set(). */
+	_cw_out_put("out_default_fd_get(), out_default_fd_set()\n");
 	{
 		cw_out_t	*out_p;
 
 		out_p = out_new(NULL, cw_g_mem);
 		_cw_check_ptr(out_p);
 
-		_cw_assert(out_get_default_fd(out_p) == 2);
+		_cw_assert(out_default_fd_get(out_p) == 2);
 
-		out_set_default_fd(out_p, 1);
-		_cw_assert(out_get_default_fd(out_p) == 1);
+		out_default_fd_set(out_p, 1);
+		_cw_assert(out_default_fd_get(out_p) == 1);
 
 		out_delete(out_p);
 	}

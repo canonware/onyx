@@ -1,5 +1,8 @@
 2001-02-06  Jason Evans  <jasone@canonware.com>
 
+	* include/libstash/out.h: Rename out_[gs]et_default_fd() to
+	out_default_fd_[gs]et().
+
 	* include/libstash/thd.h (thd_sigmask): Add argument to allow
 	retrieval of the old signal mask.
 

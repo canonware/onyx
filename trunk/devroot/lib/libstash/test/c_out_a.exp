@@ -1,7 +1,7 @@
 Test begin
 out_new(), out_delete()
 out_register(), out_merge()
-out_get_default_fd(), out_set_default_fd()
+out_default_fd_get(), out_default_fd_set()
 out_put()
 16 Bytes output
 [s]

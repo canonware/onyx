@@ -250,7 +250,7 @@ out_merge(cw_out_t *a_a, cw_out_t *a_b)
 }
 
 cw_sint32_t
-out_get_default_fd(cw_out_t *a_out)
+out_default_fd_get(cw_out_t *a_out)
 {
 	cw_sint32_t retval;
 
@@ -263,7 +263,7 @@ out_get_default_fd(cw_out_t *a_out)
 }
 
 void
-out_set_default_fd(cw_out_t *a_out, cw_sint32_t a_fd)
+out_default_fd_set(cw_out_t *a_out, cw_sint32_t a_fd)
 {
 	_cw_check_ptr(a_out);
 	_cw_assert(a_out->magic == _CW_OUT_MAGIC);

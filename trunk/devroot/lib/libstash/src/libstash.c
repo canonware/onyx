@@ -57,6 +57,7 @@ libstash_init(void)
 		try_stage = 3;
 #endif
 		cw_g_out = out_new(NULL, cw_g_mem);
+		out_default_fd_set(cw_g_out, 1);
 		try_stage = 4;
 	}
 	xep_catch(_CW_XEPV_OOM) {

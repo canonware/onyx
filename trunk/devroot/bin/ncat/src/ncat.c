@@ -245,7 +245,7 @@ main(int argc, char **argv)
 			retval = 1;
 			goto RETURN;
 		}
-		out_set_default_fd(log_out, fd);
+		out_default_fd_set(log_out, fd);
 	}
 	if (dbg_is_registered(cw_g_dbg, "ncat_verbose"))
 		_cw_out_put("[s]: pid: [i]\n", g_progname, getpid());
@@ -416,7 +416,7 @@ main(int argc, char **argv)
 	if (tout != NULL)
 		_cw_free(tout);
 	if (log_out != NULL) {
-		close(out_get_default_fd(log_out));
+		close(out_default_fd_get(log_out));
 		out_delete(log_out);
 	}
 	libsock_shutdown();

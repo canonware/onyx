@@ -293,7 +293,7 @@ main(int argc, char **argv)
 				    strerror(errno));
 			}
 		}
-		out_set_default_fd(cw_g_out, fd);
+		out_default_fd_set(cw_g_out, fd);
 	}
 	if (dbg_is_registered(cw_g_dbg, "prog_verbose"))
 		_cw_out_put("[s]: pid: [i]\n", g_progname, getpid());
@@ -344,7 +344,7 @@ main(int argc, char **argv)
 					out_delete(conn->out);
 					conn->out = NULL;
 				}
-				out_set_default_fd(conn->out, fd);
+				out_default_fd_set(conn->out, fd);
 			}
 #ifdef _CW_IPFILTER
 			if (opt_transparent) {

@@ -42,12 +42,12 @@ helpers.
 .PP
 .I cw_sint32_t
 .br
-.B out_get_default_fd
+.B out_default_fd_get
 .RI ( "cw_out_t *a_out" )
 .PP
 .I void
 .br
-.B out_set_default_fd
+.B out_default_fd_set
 .RI ( "cw_out_t *a_out" ", " "cw_sint32_t a_fd" )
 .PP
 .I cw_sint32_t
@@ -526,7 +526,7 @@ Merge a_b's extended type handlers into a_a.
 .PP
 .I cw_sint32_t
 .br
-.B out_get_default_fd
+.B out_default_fd_get
 .RI ( "cw_out_t *a_out" )
 .RS
 Input(s):
@@ -555,7 +555,7 @@ Return a_out's default file descriptor.
 .PP
 .I void
 .br
-.B out_set_default_fd
+.B out_default_fd_set
 .RI ( "cw_out_t *a_out" ", " "cw_sint32_t a_fd" )
 .RS
 Input(s):
