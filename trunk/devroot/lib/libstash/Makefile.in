@@ -9,8 +9,8 @@
 #
 # $Source$
 # $Author: jasone $
-# Current revision: $Revision: 202 $
-# Last modified: $Date: 1998-09-07 10:22:28 -0700 (Mon, 07 Sep 1998) $
+# Current revision: $Revision: 208 $
+# Last modified: $Date: 1998-09-07 23:57:24 -0700 (Mon, 07 Sep 1998) $
 #
 # Description: Master Makefile for libstash.
 #              
@@ -35,12 +35,12 @@ SRCS := bhp.c br.c brblk.c brbs.c brmap.c buf.c dbg.c \
 	glob.c jt.c list.c locks.c log.c matrix.c mem.c oh.c res.c sock.c \
 	socks.c thread.c zt.c
 
-# Simple tests.  Output is diff'ed with the expected (.expect file) output.
+# Simple tests.  Output is diff'ed with the expected (.exp file) output.
 CTESTS := c19980411a.c c19980412a.c c19980419a.c c19980430a.c \
-	c19980627a.c c19980630a.c c19980731a.c
+	c19980627a.c c19980630a.c c19980907a.c c19980907b.c c19980907c.c
 
 # Perl scripts that drive the BTESTS.
-PTESTS := p19980701a.pl.in p19980828a.pl.in
+PTESTS := p19980828a.pl.in
 
 # Backend test programs that are driven by the PTESTS.
 BTESTS := b19980828a.c
@@ -239,7 +239,7 @@ check : $(CTESTS) $(PTESTS) $(BTESTS)
 	for i in $(CTESTS); do \
 	echo -n "$$i..."; \
 	./$$i > ./$$i.out 2>&1; \
-	$(DIFF) $$i.out $$i.expect > $$i.diff ; \
+	$(DIFF) $$i.out $$i.exp > $$i.diff ; \
 	if [ -s $$i.diff ] ; then \
 	echo "failed. ****************" ; \
 	else \
@@ -303,7 +303,7 @@ clean : FORCE
 	rm -f *~ */*~
 	rm -f *.bak *.BAK
 	rm -f core test/core *.core test/*.core
-	rm -f test/*.o test/*.out test/*.diff
+	rm -f test/*.o test/*.out test/*.diff test/*.pl
 	rm -f $(CTESTS) $(PTESTS) $(BTESTS)
 	rm -f obj/*/*.[dop]*
 	rm -f lib/lib*
