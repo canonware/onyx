@@ -1068,13 +1068,6 @@ sockb_p_entry_func(void * a_arg)
 
 	  if (bytes_read > 0)
 	  {
-	    if (NULL != regs[sockfd].notify_mq)
-	    {
-	      if (TRUE == sockb_p_notify(regs[sockfd].notify_mq, sockfd))
-	      {
-		regs[sockfd].notify_mq = NULL;
-	      }
-	    }
 	    _cw_assert(buf_get_size(&tmp_buf) == 0);
 
 	    if (TRUE == buf_split(&tmp_buf, &buf_in, bytes_read))
@@ -1084,7 +1077,6 @@ sockb_p_entry_func(void * a_arg)
 	    }
 
 	    /* Append to the sock's in_buf. */
-/*  	    sock_l_put_in_data(regs[sockfd].sock, &tmp_buf); */
 	    if (0 == sock_l_put_in_data(regs[sockfd].sock, &tmp_buf))
 	    {
 	      /* Turn off the read bit for this sock.  The sock will send a
@@ -1093,6 +1085,14 @@ sockb_p_entry_func(void * a_arg)
 	      out_put(cw_g_out, "u");
 #endif
 	      fds[i].events ^= (fds[i].events & POLLIN);
+	    }
+	    
+	    if (NULL != regs[sockfd].notify_mq)
+	    {
+	      if (TRUE == sockb_p_notify(regs[sockfd].notify_mq, sockfd))
+	      {
+		regs[sockfd].notify_mq = NULL;
+	      }
 	    }
 	    _cw_assert(buf_get_size(&tmp_buf) == 0);
 	  }
