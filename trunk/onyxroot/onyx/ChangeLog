@@ -7,6 +7,8 @@
 
 2004-03-16 : Jason Evans <jasone@canonware.com>
 
+	* Onyx 5.1.1 released.
+
 	* lib/libonyx/src/nxo_dict.c:nxoe_p_dict_def() : Fix the ordering
 	  of code that sets a key/value pair in an array-based dict.  This
 	  fixes a small race condition window, wherein the GC could end up
@@ -36,11 +38,11 @@
 
 	  This change has two caveats:
 	  1) It is not backward compatible; it only works for OS X 10.3.
-	  2) The -bind_at_load flag was removed, is a bad thing if the -prebind
-	     flag doesn't prevent dynamic symbol lookups at the same time as
-	     garbage collections.  -prebind probably does the right thing, but
-	     if deadlocks in dyld start appearing, this change is probably the
-	     cause.
+	  2) The -bind_at_load flag was removed, which is a bad thing if the
+	     -prebind flag doesn't prevent dynamic symbol lookups at the
+	     same time as garbage collections.  -prebind probably does the
+	     right thing, but if deadlocks in dyld start appearing, this
+	     change is probably the cause.
 
 2004-01-17 : Jason Evans <jasone@canonware.com>
 
