@@ -71,14 +71,18 @@ typedef long cw_sint64_t;
 typedef unsigned long cw_uint64_t;
 #endif
 
+#ifndef _TYPE_SINT64_DEFINED
 #if (SIZEOF_LONG_LONG == 8)
 #define _TYPE_SINT64_DEFINED
 typedef long long cw_sint64_t;
 #endif
+#endif
 
+#ifndef _TYPE_UINT64_DEFINED
 #if (SIZEOF_UNSIGNED_LONG_LONG == 8)
 #define _TYPE_UINT64_DEFINED
 typedef unsigned long long cw_uint64_t;
+#endif
 #endif
 
 #if (!defined(_TYPE_SINT8_DEFINED) || !defined(_TYPE_UINT8_DEFINED) ||	\

@@ -370,18 +370,30 @@ cw_uint32_t
 ch_direct_hash(const void *a_key)
 {
 	cw_uint32_t	retval, i;
-
-	retval = (cw_uint32_t)a_key;
+#if (SIZEOF_INT_P == 4)
+	cw_uint32_t	t = (cw_uint32_t)a_key;
+#elif (SIZEOF_INT_P == 8)
+	cw_uint64_t	t = (cw_uint64_t)a_key;
+#else
+#error Unsupported pointer size
+#endif
 
 	/* Shift right until we've shifted one 1 bit off. */
 	for (i = 0; i < 8 * sizeof(void *); i++) {
-		if ((retval & 0x1) == 1) {
+		if ((t & 0x1) == 1) {
 			retval >>= 1;
 			break;
 		} else
 			retval >>= 1;
 	}
 
+#if (SIZEOF_INT_P == 4)
+	retval = t;
+#elif (SIZEOF_INT_P == 8)
+	retval = (cw_uint32_t)t;
+#else
+#error Unsupported pointer size
+#endif
 	return retval;
 }
 

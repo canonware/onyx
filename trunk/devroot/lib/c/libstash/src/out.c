@@ -516,7 +516,6 @@ out_put_fv(cw_out_t *a_out, cw_sint32_t a_fd, const char *a_format, va_list a_p)
 
 	_cw_assert(a_fd >= 0);
 	_cw_check_ptr(a_format);
-	_cw_check_ptr(a_p);
 
 	retval = out_p_put_fvn(a_out, a_fd, UINT_MAX, a_format, a_p);
 
@@ -578,7 +577,6 @@ out_put_sv(cw_out_t *a_out, char *a_str, const char *a_format, va_list a_p)
 
 	_cw_check_ptr(a_str);
 	_cw_check_ptr(a_format);
-	_cw_check_ptr(a_p);
 
 	retval = out_p_put_svn(a_out, &a_str, UINT_MAX, UINT_MAX, a_format,
 	    a_p);
@@ -596,7 +594,6 @@ out_put_sva(cw_out_t *a_out, char **r_str, const char *a_format, va_list a_p)
 	cw_sint32_t	retval;
 
 	_cw_check_ptr(a_format);
-	_cw_check_ptr(a_p);
 
 	retval = out_p_put_sva(a_out, r_str, a_format, a_p);
 
@@ -612,7 +609,6 @@ out_put_svn(cw_out_t *a_out, char *a_str, cw_uint32_t a_size,
 	_cw_check_ptr(a_str);
 	_cw_assert(a_size >= 0);
 	_cw_check_ptr(a_format);
-	_cw_check_ptr(a_p);
 
 	retval = out_p_put_svn(a_out, &a_str, a_size, a_size, a_format,
 	    a_p);
@@ -868,7 +864,6 @@ out_p_put_svn(cw_out_t *a_out, char **a_str, cw_uint32_t a_size, cw_uint32_t
 
 	_cw_check_ptr(a_str);
 	_cw_check_ptr(a_format);
-	_cw_check_ptr(a_p);
 
 	if ((retval = out_p_format_scan(a_out, a_format, &key, a_p)) < 0)
 		goto RETURN;

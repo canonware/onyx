@@ -27,11 +27,11 @@ main()
 		cw_uint32_t	prio, data;
 
 		_cw_assert(&bhpi == bhpi_new(&bhpi, cw_g_mem, (const void
-		    *)prio, (const void *)data, NULL, NULL));
+		    *)&prio, (const void *)&data, NULL, NULL));
 		bhpi_delete(&bhpi);
 
-		bhpi_p = bhpi_new(NULL, cw_g_mem, (const void *)prio, (const
-		    void *)data, NULL, NULL);
+		bhpi_p = bhpi_new(NULL, cw_g_mem, (const void *)&prio, (const
+		    void *)&data, NULL, NULL);
 		_cw_check_ptr(bhpi_p);
 		bhpi_delete(bhpi_p);
 	}
@@ -62,7 +62,7 @@ main()
 			items[i] = i;
 
 			bhpi_p = bhpi_new(NULL, cw_g_mem, (const void
-			    *)&items[i], (const void *)items[i], NULL, NULL);
+			    *)&items[i], (const void *)&items[i], NULL, NULL);
 			_cw_check_ptr(bhpi_p);
 
 			_cw_assert(bhp_size_get(bhp_p) == i);
@@ -99,12 +99,12 @@ main()
 			items[i] = i;
 
 			bhpi_p = bhpi_new(NULL, cw_g_mem, (const void
-			    *)&items[i], (const void *)items[i], NULL, NULL);
+			    *)&items[i], (const void *)&items[i], NULL, NULL);
 			_cw_check_ptr(bhpi_p);
 			bhp_insert(bhp_p_a, bhpi_p);
 
 			bhpi_p = bhpi_new(NULL, cw_g_mem, (const void
-			    *)&items[i], (const void *)items[i], NULL, NULL);
+			    *)&items[i], (const void *)&items[i], NULL, NULL);
 			_cw_check_ptr(bhpi_p);
 			bhp_insert(bhp_p_b, bhpi_p);
 		}
