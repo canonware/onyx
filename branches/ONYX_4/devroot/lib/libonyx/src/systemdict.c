@@ -26,6 +26,7 @@
 #include <sys/stat.h>
 #include <dirent.h> /* For dirforeach operator. */
 #ifdef CW_SOCKET
+#include <fcntl.h>
 #include <netdb.h>
 #include <sys/socket.h>
 #include <sys/un.h>
@@ -8002,8 +8003,11 @@ systemdict_recv(cw_nxo_t *a_thread)
     }
 
     nxo_string_lock(nxo);
-    nread = recv(nxo_file_fd_get(sock), nxo_string_get(nxo),
-		 nxo_string_len_get(nxo), flags);
+    while ((nread = recv(nxo_file_fd_get(sock), nxo_string_get(nxo),
+		 nxo_string_len_get(nxo), flags)) == -1 && errno == EINTR)
+    {
+	/* EINTR; try again. */
+    }
     nxo_string_unlock(nxo);
 
     if (nread == -1)
@@ -8028,7 +8032,6 @@ systemdict_recv(cw_nxo_t *a_thread)
 	    }
 	    case EBADF:
 	    case EFAULT:
-	    case EINTR:
 	    case EINVAL:
 	    default:
 	    {
@@ -8796,8 +8799,11 @@ void
 systemdict_send(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack, *sock, *nxo;
-    cw_uint32_t npop;
-    int flags, nwrite;
+    cw_uint8_t *str;
+    cw_uint32_t npop, len;
+    int fd, flags;
+    ssize_t count, nwritten;
+    cw_bool_t blocking;
 
     ostack = nxo_thread_ostack_get(a_thread);
 
@@ -8843,51 +8849,64 @@ systemdict_send(cw_nxo_t *a_thread)
 	return;
     }
 
+    fd = nxo_file_fd_get(sock);
+    blocking = (fcntl(fd, F_GETFL, O_NONBLOCK) & O_NONBLOCK) ? TRUE : FALSE;
+    str = nxo_string_get(nxo);
+    len = nxo_string_len_get(nxo);
+    nwritten = 0;
     nxo_string_lock(nxo);
-    nwrite = send(nxo_file_fd_get(sock), nxo_string_get(nxo),
-		  nxo_string_len_get(nxo), flags);
-    nxo_string_unlock(nxo);
-
-    if (nwrite == -1)
+    do
     {
-	switch (errno)
+	while ((count = send(fd, &str[nwritten], len - nwritten, flags)) == -1)
 	{
-	    case EWOULDBLOCK:
+	    switch (errno)
 	    {
-		/* Failed non-blocking write. */
-		nwrite = 0;
-		break;
-	    }
-	    case ECONNREFUSED:
-	    case EHOSTDOWN:
-	    case EHOSTUNREACH:
-	    case EMSGSIZE:
-	    case ENOTCONN:
-	    {
-		nxo_thread_nerror(a_thread, NXN_neterror);
-		return;
-	    }
-	    case ENOTSOCK:
-	    {
-		nxo_thread_nerror(a_thread, NXN_argcheck);
-		return;
-	    }
-	    case EBADF:
-	    case EFAULT:
-	    case ENOBUFS:
-	    case EINTR:
-	    case EINVAL:
-	    case ENOMEM:
-	    case EPIPE:
-	    default:
-	    {
-		nxo_thread_nerror(a_thread, NXN_unregistered);
-		return;
+		case EINTR:
+		{
+		    /* Interrupted system call. */
+		    break;
+		}
+		case EWOULDBLOCK:
+		{
+		    /* Failed non-blocking write. */
+		    goto OUT;
+		}
+		case ECONNREFUSED:
+		case EHOSTDOWN:
+		case EHOSTUNREACH:
+		case EMSGSIZE:
+		case ENOTCONN:
+		{
+		    nxo_string_unlock(nxo);
+		    nxo_thread_nerror(a_thread, NXN_neterror);
+		    return;
+		}
+		case ENOTSOCK:
+		{
+		    nxo_string_unlock(nxo);
+		    nxo_thread_nerror(a_thread, NXN_argcheck);
+		    return;
+		}
+		case EBADF:
+		case EFAULT:
+		case ENOBUFS:
+		case EINVAL:
+		case ENOMEM:
+		case EPIPE:
+		default:
+		{
+		    nxo_string_unlock(nxo);
+		    nxo_thread_nerror(a_thread, NXN_unregistered);
+		    return;
+		}
 	    }
 	}
-    }
+	nwritten += count;
+    } while (nwritten < len && blocking);
+    OUT:
+    nxo_string_unlock(nxo);
 
-    nxo_integer_new(sock, (cw_nxoi_t) nwrite);
+    nxo_integer_new(sock, (cw_nxoi_t) nwritten);
 
     nxo_stack_npop(ostack, npop);
 }
@@ -12792,7 +12811,14 @@ systemdict_waitpid(cw_nxo_t *a_thread)
     }
     pid = nxo_integer_get(nxo);
 
-    waitpid(pid, &status, 0);
+    while (waitpid(pid, &status, 0) == -1)
+    {
+	if (errno != EINTR)
+	{
+	    nxo_thread_nerror(a_thread, NXN_unregistered);
+	    return;
+	}
+    }
     if (WIFEXITED(status))
     {
 	/* Normal program exit. */
