@@ -1,9 +1,8 @@
 *.[do]
 *.out
 *.diff
+*.perf
 c_*_[a-z]
 b_*_[a-z]
 p*.pl
-*.core
-core
 .cook.fp

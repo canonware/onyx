@@ -95,16 +95,18 @@ tests : [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS] [BTESTS]]
 
 check : tests
 {
-  [VERIFY] -s [srcdir] --
-           -d [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS]]
-           -s [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]];
+  [VERIFY] -z -r [srcdir]
+           [prepost "-d " "" [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS]]]
+           [prepost "-s " ""
+                    [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]]];
 }
 
 check_update : tests
 {
-  [VERIFY] -u -s [srcdir] --
-           -d [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS]]
-           -s [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]];
+  [VERIFY] -u -z -r [srcdir]
+           [prepost "-d " "" [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS]]]
+           [prepost "-s " ""
+                    [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]]];
 }
 
 install : install_bins install_libs;
@@ -217,6 +219,7 @@ clean :
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_s [CTESTS]];
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.out [CTESTS]];
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.diff [CTESTS]];
+  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.perf [CTESTS]];
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS]];
 
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_d [BTESTS]];
@@ -233,6 +236,7 @@ clean :
 
   rm -f [fromto [srcdir]/%0%.pl.in [objdir]/%0%.out [PTESTS]];
   rm -f [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl.out [PTESTS]];
+  rm -f [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl.perf [PTESTS]];
   rm -f [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]];
 
   /* Delete .cook.fp files from the source tree and object tree. */

@@ -27,7 +27,7 @@ Getopt::Long::config("bundling"); # Allow -hv rather than forcing -h -v.
 $opt_help = 0;
 $opt_verbose = 0;
 $opt_quiet = 0;
-$opt_srcdir = ".";
+$opt_rootdir = ".";
 $opt_ustats = 0;
 $opt_zero = 0;
 
@@ -35,41 +35,12 @@ $opt_retval =
 &GetOptions("h|help" => \$opt_help,
 	    "v|verbose" => \$opt_verbose,
 	    "q|quiet" => \$opt_quiet,
-            "s|srcdir=s" => \$opt_srcdir,
+            "r|rootdir=s" => \$opt_rootdir,
 	    "u|ustats" => \$opt_ustats,
-	    "z|zero" => \$opt_zero
+	    "z|zero" => \$opt_zero,
+	    "d|difftest=s@" => \@OPT_DTESTS,
+	    "s|seqtest=s@" => \@OPT_STESTS
 	    );
-
-$mode = "d";
-for ($i = 0; $i <= $#ARGV; $i++)
-{
-    if (($ARGV[$i] eq "-s") || ($ARGV[$i] eq "--sequence"))
-    {
-	$mode = "s";
-    }
-    elsif (($ARGV[$i] eq "-d") || ($ARGV[$i] eq "--diff"))
-    {
-	$mode = "d";
-    }
-    elsif (-x $ARGV[$i])
-    {
-	if ($mode eq "s")
-	{
-	    @STESTS = (@STESTS, $ARGV[$i]);
-	}
-	else
-	{
-	    @DTESTS = (@DTESTS, $ARGV[$i]);
-	}
-    }
-    else
-    {
-	if (!$opt_quiet)
-	{
-	    print STDERR "Cannot run \"$ARGV[$i]\"\n";
-	}
-    }
-}
 
 if ($opt_help)
 {
@@ -90,7 +61,7 @@ if ($opt_verbose && $opt_quiet)
     exit 1;
 }
 
-if ($#STESTS + $#DTESTS + 2 == 0)
+if ($#OPT_STESTS + $#OPT_DTESTS + 2 == 0)
 {
     print STDERR "No tests specified\n";
     &usage();
@@ -99,10 +70,10 @@ if ($#STESTS + $#DTESTS + 2 == 0)
 
 if ($opt_verbose)
 {
-    print STDERR "Option values: h:$opt_help, v:$opt_verbose, q:$opt_quiet, "
-	. "u:$opt_ustats\n";
-    printf STDERR "Sequence tests (%d total): @STESTS\n", $#STESTS + 1;
-    printf STDERR "Diff tests (%d total): @DTESTS\n", $#DTESTS + 1;
+    print STDERR "Option values: h:$opt_help, v:$opt_verbose, "
+	. "r:\"$opt_rootdir\", q:$opt_quiet, u:$opt_ustats, z:$opt_zero\n";
+    printf STDERR "Sequence tests (%d total): @OPT_STESTS\n", $#OPT_STESTS + 1;
+    printf STDERR "Diff tests (%d total): @OPT_DTESTS\n", $#OPT_DTESTS + 1;
 }
 
 #
@@ -132,14 +103,18 @@ $total_hutime = 0.0; # Total historical user time.
 $total_hstime = 0.0; # Total historical system time.
 $total_ntime = 0.0; # Total time for tests that have historical data.
 
-foreach $test (@STESTS)
+foreach $test (@OPT_STESTS)
 {
     # sequence mode.
+
+    # Strip out any whitespace in $test.
+    $test =~ s/^\s*(.*)\s*$/$1/;
+
     $okay = 1;
 
     ($okay, $utime, $stime) = &run_test($test);
 
-    if (open (STEST_OUT, "<./$test.out"))
+    if (open (STEST_OUT, "<$opt_rootdir/$test.out"))
     {
 	$num_failed_subtests = 0;
 
@@ -208,7 +183,7 @@ foreach $test (@STESTS)
     {
 	if (!$opt_quiet)
 	{
-	    print STDERR "Cannot open output file \"$test.out\"\n";
+	    print STDERR "Cannot open output file \"$opt_rootdir/$test.out\"\n";
 	}
 	exit 1;
     }
@@ -236,16 +211,20 @@ foreach $test (@STESTS)
 	$total_ntime += $utime + $stime;
     }
 }
-foreach $test (@DTESTS)
+foreach $test (@OPT_DTESTS)
 {
     # Diff mode.
+
+    # Strip out any whitespace in $test.
+    $test =~ s/^\s*(.*)\s*$/$1/;
+
     $okay = 1;
 
     ($okay, $utime, $stime) = &run_test($test);
 
-    if (-e "./$test.out" && -e "$opt_srcdir/$test.exp")
+    if (-e "$opt_rootdir/$test.out" && -e "$opt_rootdir/$test.exp")
     {
-	`diff ./$test.out $opt_srcdir/$test.exp > ./$test.diff 2>&1`;
+	`diff $opt_rootdir/$test.out $opt_rootdir/$test.exp > $opt_rootdir/$test.diff 2>&1`;
 	if ($?)
 	{
 	    # diff returns non-zero if there is a difference.
@@ -258,8 +237,7 @@ foreach $test (@DTESTS)
 	if ($opt_verbose)
 	{
 	    print STDERR
-		"Nonexistent expected output file \"$opt_srcdir/$test.exp\"\n";
-            print STDERR "\$opt_srcdir is \"$opt_srcdir\"\n";
+		"Nonexistent expected output file \"$opt_rootdir/$test.exp\"\n";
 	}
     }
 
@@ -287,10 +265,10 @@ foreach $test (@DTESTS)
 
 # Print summary stats.
 $tt_str = sprintf ("%d / %d passed (%5.2f%%%%)",
-		   ($#STESTS + $#DTESTS + 2) - ($#FAILED_TESTS + 1),
-		   $#STESTS + $#DTESTS + 2,
-		   (($#STESTS + $#DTESTS + 2) - ($#FAILED_TESTS + 1))
-		   / ($#STESTS + $#DTESTS + 2) * 100);
+		   ($#OPT_STESTS + $#OPT_DTESTS + 2) - ($#FAILED_TESTS + 1),
+		   $#OPT_STESTS + $#OPT_DTESTS + 2,
+		   (($#OPT_STESTS + $#OPT_DTESTS + 2) - ($#FAILED_TESTS + 1))
+		   / ($#OPT_STESTS + $#OPT_DTESTS + 2) * 100);
 
 $t_str = sprintf ("Totals                                   %7.2f  %7.2f %7.2f"
                   . "  %7.2f\n"
@@ -341,7 +319,7 @@ sub run_test
     }
 
     ($utime, $stime, $cutime, $cstime) = times;
-    `./$test $opt_srcdir > ./$test.out 2>&1`;
+    `$opt_rootdir/$test $opt_rootdir > $opt_rootdir/$test.out 2>&1`;
     ($utime, $stime, $tutime, $tstime) = times;
 
     # Subtract the before time from the after time.
@@ -355,7 +333,9 @@ sub run_test
 	    $okay = 0;
 	    if ($opt_verbose)
 	    {
-		print STDERR "\"./$test > ./$test.out 2>&1\" returned $?\n";
+		print STDERR
+		    "\"$opt_rootdir/$test > $opt_rootdir/$test.out 2>&1\""
+			. " returned $?\n";
 	    }
 	}
     }
@@ -380,9 +360,9 @@ sub print_stats
     
     if (-r "$test.perf")
     {
-	if (!open (TEST_PERF, "<./$test.perf"))
+	if (!open (TEST_PERF, "<$opt_rootdir/$test.perf"))
 	{
-	    print STDERR "Unable to open \"./$test.perf\"\n";
+	    print STDERR "Unable to open \"$opt_rootdir/$test.perf\"\n";
 	    exit 1;
 	}
 	$_ = <TEST_PERF>;
@@ -421,11 +401,11 @@ sub print_stats
 
     if ($okay && $opt_ustats)
     {
-	if (!open (TEST_PERF, ">./$test.perf"))
+	if (!open (TEST_PERF, ">$opt_rootdir/$test.perf"))
 	{
 	    if (!$opt_quiet)
 	    {
-		print STDERR "Unable to update \"$test.perf\"\n";
+		print STDERR "Unable to update \"$opt_rootdir/$test.perf\"\n";
 	    }
 	}
 	else
@@ -442,14 +422,14 @@ sub usage
 {
     print <<EOF;
 $0 usage:
-    $0 [<options>] -- {[-s | -d | --sequence | --diff] <test>+}+
+    $0 [<options>] {[-s | -d | --sequence | --diff] <test>}+
 
     Option        | Description
     --------------+-------------------------------------------------------------
     -h --help     | Print usage and exit.
     -v --verbose  | Verbose (incompatible with quiet).
     -q --quiet    | Quiet (incompatible with verbose).
-    -s --srcdir   | Path to source tree (default is ".").
+    -r --rootdir  | Path to source tree (default is ".").
     -u --ustats   | Update historical statistics (stored in "<test>.perf".
     -z --zero     | Consider non-zero exit code to be an error.
     --------------+-------------------------------------------------------------
