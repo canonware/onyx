@@ -34,6 +34,7 @@ currenterror_l_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 	stilo_name_new(name, stilt_stil_get(a_stilt),
 	    stiln_str(STILN_stop), stiln_len(STILN_stop), TRUE);
 	stilo_operator_new(val, systemdict_stop, STILN_stop);
+	stilo_attrs_set(val, STILOA_EXECUTABLE);
 	stilo_dict_def(a_dict, stilt_stil_get(a_stilt), name, val);
 
 	/*
