@@ -17,12 +17,12 @@
 cw_tsd_t *
 tsd_new(cw_tsd_t *a_tsd, void (*a_func) (void *))
 {
-	cw_tsd_t *retval;
-	int     error;
+	cw_tsd_t	*retval;
+	int		error;
 
 	if (a_tsd == NULL) {
 		retval = (cw_tsd_t *)_cw_malloc(sizeof(cw_tsd_t));
-		if (NULL == retval)
+		if (retval == NULL)
 			goto RETURN;
 		retval->is_malloced = TRUE;
 	} else {
@@ -36,14 +36,14 @@ tsd_new(cw_tsd_t *a_tsd, void (*a_func) (void *))
 		    "Error in pthread_key_create(): [s]\n", strerror(error));
 		abort();
 	}
-RETURN:
+	RETURN:
 	return retval;
 }
 
 void
 tsd_delete(cw_tsd_t *a_tsd)
 {
-	int     error;
+	int	error;
 
 	_cw_check_ptr(a_tsd);
 
@@ -53,14 +53,14 @@ tsd_delete(cw_tsd_t *a_tsd)
 		    "Error in pthread_key_delete(): [s]\n", strerror(error));
 		abort();
 	}
-	if (a_tsd->is_malloced == TRUE)
+	if (a_tsd->is_malloced)
 		_cw_free(a_tsd);
 }
 
-void   *
+void *
 tsd_get(cw_tsd_t *a_tsd)
 {
-	void   *retval;
+	void	*retval;
 
 	_cw_check_ptr(a_tsd);
 
@@ -72,7 +72,7 @@ tsd_get(cw_tsd_t *a_tsd)
 void
 tsd_set(cw_tsd_t *a_tsd, void *a_val)
 {
-	int     error;
+	int	error;
 
 	_cw_check_ptr(a_tsd);
 

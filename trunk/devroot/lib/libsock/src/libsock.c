@@ -32,52 +32,56 @@
 
 struct cw_sockb_msg_s {
 #ifdef _LIBSOCK_DBG
-	cw_uint32_t magic;
+	cw_uint32_t	magic;
 #endif
 	enum {
 		REGISTER, UNREGISTER, OUT_NOTIFY, IN_SPACE, IN_NOTIFY
-	}       type;
+	}	type;
 	union {
-		cw_sock_t *sock;
-		cw_uint32_t sockfd;
+		cw_sock_t	*sock;
+		cw_uint32_t	sockfd;
 		struct {
-			int     sockfd;
-			cw_mq_t *mq;
+			int	sockfd;
+			cw_mq_t	*mq;
 			cw_mtx_t *mtx;
 			cw_cnd_t *cnd;
-		}       in_notify;
-	}       data;
+		}	in_notify;
+	}	data;
 };
 
 struct cw_sockb_reg_s {
-	cw_sock_t *sock;	/* sock pointer. */
-	cw_sint32_t pollfd_pos;	/* Offset in the pollfd struct passed into
-				 * poll(). */
-	cw_mq_t *notify_mq;	/* mq to notify when readable or closed (or
-				 * NULL). */
+	cw_sock_t	*sock;	/* sock pointer. */
+	cw_sint32_t	pollfd_pos; /*
+				     * Offset in the pollfd struct passed into
+				     * poll().
+				     */
+	cw_mq_t		*notify_mq; /*
+				     * mq to notify when readable or closed (or
+				     * NULL).
+				     */
 };
 
 struct cw_sockb_entry_s {
-	cw_uint32_t max_fds;
+	cw_uint32_t	max_fds;
 	struct cw_sockb_reg_s *regs;
-	struct pollfd *fds;
+	struct pollfd	*fds;
 };
 
 struct cw_sockb_s {
-	cw_bool_t should_quit;
-	cw_thd_t thread;
-	int     pipe_in;
-	int     pipe_out;
-	cw_sem_t pipe_sem;
+	cw_bool_t	should_quit;
+	cw_thd_t	thread;
+	int		pipe_in;
+	int		pipe_out;
+	cw_sem_t	pipe_sem;
 
-	cw_pezz_t bufc_pool;
-	cw_pezz_t buffer_pool;
+	cw_pezz_t	bufc_pool;
+	cw_pezz_t	buffer_pool;
 
-	cw_pezz_t messages_pezz;
-	cw_mq_t messages;
-	cw_cnd_t wait_cnd;
+	cw_pezz_t	messages_pezz;
+	cw_mq_t		messages;
+	cw_cnd_t	wait_cnd;
 
-	cw_mtx_t get_ip_addr_lock;
+	cw_mtx_t	get_ip_addr_lock;
 };
 
 static cw_bool_t sockb_p_notify(cw_mq_t *a_mq, int a_sockfd);
@@ -99,60 +103,45 @@ static cw_bool_t sockb_p_notify(cw_mq_t *a_mq, int a_sockfd);
  * queues (list's).
  *
  ****************************************************************************/
-static void * sockb_p_entry_func(void *a_arg);
+static void	*sockb_p_entry_func(void *a_arg);
 
 /* Global. */
-cw_sockb_t *g_sockb = NULL;
+cw_sockb_t	*g_sockb = NULL;
 
 cw_bool_t
 sockb_init(cw_uint32_t a_max_fds, cw_uint32_t a_bufc_size, cw_uint32_t
     a_max_spare_bufcs)
 {
-	cw_bool_t retval;
 	struct cw_sockb_entry_s *arg;
-	int     filedes[2];
-	int     val;
+	int		filedes[2];
+	int		val;
 
 	_cw_assert(a_bufc_size > 0);
 
 	arg = (struct cw_sockb_entry_s *)_cw_malloc(sizeof(struct
 	    cw_sockb_entry_s));
 
-	if (NULL == arg) {
-		retval = TRUE;
-		goto RETURN;
-	}
+	if (arg == NULL)
+		goto OOM_1;
 	arg->max_fds = a_max_fds;
-	arg->regs = (struct cw_sockb_reg_s *)_cw_calloc(a_max_fds,
-	    sizeof(struct cw_sockb_reg_s));
+	arg->regs = (struct cw_sockb_reg_s *)_cw_calloc(a_max_fds, sizeof(struct
+	    cw_sockb_reg_s));
 
-	if (NULL == arg->regs) {
-		_cw_free(arg);
-		retval = TRUE;
-		goto RETURN;
-	}
+	if (arg->regs == NULL)
+		goto OOM_2;
 	bzero(arg->regs, a_max_fds * sizeof(struct cw_sockb_reg_s));
 
 	arg->fds = (struct pollfd *)_cw_calloc(a_max_fds, sizeof(struct
 	    pollfd));
 
-	if (NULL == arg->fds) {
-		_cw_free(arg->regs);
-		_cw_free(arg);
-		retval = TRUE;
-		goto RETURN;
-	}
+	if (arg->fds == NULL)
+		goto OOM_3;
 	bzero(arg->fds, a_max_fds * sizeof(struct pollfd));
 
-	if (NULL == g_sockb) {
+	if (g_sockb == NULL) {
 		g_sockb = (cw_sockb_t *)_cw_malloc(sizeof(cw_sockb_t));
-		if (NULL == g_sockb) {
-			_cw_free(arg->fds);
-			_cw_free(arg->regs);
-			_cw_free(arg);
-			retval = TRUE;
-			goto RETURN;
-		}
+		if (g_sockb == NULL)
+			goto OOM_4;
 		bzero(g_sockb, sizeof(cw_sockb_t));
 
 		/*
@@ -163,11 +152,11 @@ sockb_init(cw_uint32_t a_max_fds, cw_uint32_t a_bufc_size, cw_uint32_t
 
 		/*
 		 * Create a pipe that will be used in conjunction with the
-		 * message queues to make the back end thread return from
-		 * the poll() call.
+		 * message queues to make the back end thread return from the
+		 * poll() call.
 		 */
 
-		if (-1 == pipe(filedes)) {
+		if (pipe(filedes) == -1) {
 			_cw_out_put_e("Fatal error in pipe(): [s]\n",
 			    strerror(errno));
 			abort();
@@ -178,34 +167,34 @@ sockb_init(cw_uint32_t a_max_fds, cw_uint32_t a_bufc_size, cw_uint32_t
 		/* Set g_sockb->pipe_in to non-blocking. */
 		val = fcntl(g_sockb->pipe_in, F_GETFL, 0);
 		if (val == -1) {
-			_cw_out_put_e("Fatal error for F_GETFL in fcntl(): [s]\n",
-			    strerror(errno));
+			_cw_out_put_e("Fatal error for F_GETFL in fcntl(): "
+			    "[s]\n", strerror(errno));
 			abort();
 		}
 		if (fcntl(g_sockb->pipe_in, F_SETFL, val | O_NONBLOCK)) {
-			_cw_out_put_e("Fatal error for F_SETFL in fcntl(): [s]\n",
-			    strerror(errno));
+			_cw_out_put_e("Fatal error for F_SETFL in fcntl(): "
+			    "[s]\n", strerror(errno));
 			abort();
 		}
 
 		val = fcntl(g_sockb->pipe_out, F_GETFL, 0);
 		if (val == -1) {
-			_cw_out_put_e("Fatal error for F_GETFL in fcntl(): [s]\n",
-			    strerror(errno));
+			_cw_out_put_e("Fatal error for F_GETFL in fcntl(): "
+			    "[s]\n", strerror(errno));
 			abort();
 		}
 		if (fcntl(g_sockb->pipe_in, F_SETFL, val | O_NONBLOCK)) {
-			_cw_out_put_e("Fatal error for F_SETFL in fcntl(): [s]\n",
-			    strerror(errno));
+			_cw_out_put_e("Fatal error for F_SETFL in fcntl(): "
+			    "[s]\n", strerror(errno));
 			abort();
 		}
 
 		g_sockb->should_quit = FALSE;
 
 		/*
-		 * Create the semaphore used for determining whether data
-		 * should be written to the pipe in order to force a return
-		 * from poll().
+		 * Create the semaphore used for determining whether data should
+		 * be written to the pipe in order to force a return from
+		 * poll().
 		 */
 		sem_new(&g_sockb->pipe_sem, 1);
 
@@ -213,42 +202,16 @@ sockb_init(cw_uint32_t a_max_fds, cw_uint32_t a_bufc_size, cw_uint32_t
 		 * Create the spare bufc pool and initialize associated
 		 * variables.
 		 */
-		if (NULL == pezz_new(&g_sockb->bufc_pool,
-			sizeof(cw_bufc_t),
-			(a_max_spare_bufcs)? a_max_spare_bufcs : 1)) {
-			_cw_free(g_sockb);
-			g_sockb = NULL;
-			_cw_free(arg->fds);
-			_cw_free(arg->regs);
-			_cw_free(arg);
-			retval = TRUE;
-			goto RETURN;
-		}
-		if (NULL == pezz_new(&g_sockb->buffer_pool,
-			a_bufc_size,
-			(a_max_spare_bufcs) ? a_max_spare_bufcs : 1)) {
-			pezz_delete(&g_sockb->bufc_pool);
-			_cw_free(g_sockb);
-			g_sockb = NULL;
-			_cw_free(arg->fds);
-			_cw_free(arg->regs);
-			_cw_free(arg);
-			retval = TRUE;
-			goto RETURN;
-		}
+		if (pezz_new(&g_sockb->bufc_pool, sizeof(cw_bufc_t),
+		    (a_max_spare_bufcs)? a_max_spare_bufcs : 1) == NULL)
+			goto OOM_5;
+		if (pezz_new(&g_sockb->buffer_pool, a_bufc_size,
+		    (a_max_spare_bufcs) ? a_max_spare_bufcs : 1) == NULL)
+			goto OOM_6;
 		/* Create the message queues. */
-		if (NULL == pezz_new(&g_sockb->messages_pezz,
-			sizeof(struct cw_sockb_msg_s), 8)) {
-			pezz_delete(&g_sockb->buffer_pool);
-			pezz_delete(&g_sockb->bufc_pool);
-			_cw_free(g_sockb);
-			g_sockb = NULL;
-			_cw_free(arg->fds);
-			_cw_free(arg->regs);
-			_cw_free(arg);
-			retval = TRUE;
-			goto RETURN;
-		}
+		if (pezz_new(&g_sockb->messages_pezz, sizeof(struct
+		    cw_sockb_msg_s), 8) == NULL)
+			goto OOM_7;
 		mq_new(&g_sockb->messages);
 
 		/* Create the lock used for protecting gethostbyname(). */
@@ -260,16 +223,30 @@ sockb_init(cw_uint32_t a_max_fds, cw_uint32_t a_bufc_size, cw_uint32_t
 		 */
 		thd_new(&g_sockb->thread, sockb_p_entry_func, (void *)arg);
 	}
-	retval = FALSE;
 
-RETURN:
-	return retval;
+	return FALSE;
+
+	OOM_7:
+	pezz_delete(&g_sockb->buffer_pool);
+	OOM_6:
+	pezz_delete(&g_sockb->bufc_pool);
+	OOM_5:
+	_cw_free(g_sockb);
+	g_sockb = NULL;
+	OOM_4:
+	_cw_free(arg->fds);
+	OOM_3:
+	_cw_free(arg->regs);
+	OOM_2:
+	_cw_free(arg);
+	OOM_1:
+	return TRUE;
 }
 
 void
 sockb_shutdown(void)
 {
-	if (NULL != g_sockb) {
+	if (g_sockb != NULL) {
 		/* Tell the back end thread to quit, then join on it. */
 		g_sockb->should_quit = TRUE;
 		sockb_l_wakeup();
@@ -294,19 +271,19 @@ sockb_shutdown(void)
 cw_bufc_t *
 sockb_get_spare_bufc(void)
 {
-	cw_bufc_t *retval;
-	void   *buffer;
+	cw_bufc_t	*retval;
+	void		*buffer;
 
 	_cw_check_ptr(g_sockb);
 
 	retval = bufc_new((cw_bufc_t *)_cw_pezz_get(&g_sockb->bufc_pool),
 	    (cw_opaque_dealloc_t *)pezz_put, (void *)&g_sockb->bufc_pool);
-	if (NULL == retval) {
+	if (retval == NULL) {
 		retval = NULL;
 		goto RETURN;
 	}
 	buffer = _cw_pezz_get(&g_sockb->buffer_pool);
-	if (NULL == buffer) {
+	if (buffer == NULL) {
 		bufc_delete(retval);
 		retval = NULL;
 		goto RETURN;
@@ -315,17 +292,17 @@ sockb_get_spare_bufc(void)
 	    buffer,pezz_get_buffer_size(&g_sockb->buffer_pool), TRUE,
 	    (cw_opaque_dealloc_t *)pezz_put, (void *)&g_sockb->buffer_pool);
 
-RETURN:
+	RETURN:
 	return retval;
 }
 
 cw_bool_t
 sockb_in_notify(cw_mq_t *a_mq, int a_sockfd)
 {
-	cw_bool_t retval;
+	cw_bool_t	retval;
 	struct cw_sockb_msg_s *message;
-	cw_mtx_t mtx;
-	cw_cnd_t cnd;
+	cw_mtx_t	mtx;
+	cw_cnd_t	cnd;
 
 	_cw_check_ptr(g_sockb);
 	_cw_assert(a_sockfd >= 0);
@@ -336,7 +313,7 @@ sockb_in_notify(cw_mq_t *a_mq, int a_sockfd)
 	message = (struct cw_sockb_msg_s
 	    *)_cw_pezz_get(&g_sockb->messages_pezz);
 
-	if (NULL == message) {
+	if (message == NULL) {
 		retval = TRUE;
 		goto RETURN;
 	}
@@ -350,7 +327,7 @@ sockb_in_notify(cw_mq_t *a_mq, int a_sockfd)
 	message->data.in_notify.cnd = &cnd;
 
 	mtx_lock(&mtx);
-	if (0 != mq_put(&g_sockb->messages, (const void *)message)) {
+	if (mq_put(&g_sockb->messages, (const void *)message) != 0) {
 		_cw_pezz_put(&g_sockb->messages_pezz, (void *)message);
 		retval = TRUE;
 		goto RETURN;
@@ -362,7 +339,7 @@ sockb_in_notify(cw_mq_t *a_mq, int a_sockfd)
 
 	retval = FALSE;
 
-RETURN:
+	RETURN:
 	mtx_delete(&mtx);
 	cnd_delete(&cnd);
 	return retval;
@@ -371,8 +348,8 @@ RETURN:
 void
 sockb_l_wakeup(void)
 {
-	if (FALSE == sem_trywait(&g_sockb->pipe_sem)) {
-		if (-1 == write(g_sockb->pipe_in, "X", 1)) {
+	if (sem_trywait(&g_sockb->pipe_sem) == FALSE) {
+		if (write(g_sockb->pipe_in, "X", 1) == -1) {
 			if (dbg_is_registered(cw_g_dbg, "sockb_error")) {
 				_cw_out_put_e("Error in write(): [s]\n",
 				    strerror(errno));
@@ -384,8 +361,8 @@ sockb_l_wakeup(void)
 cw_bool_t
 sockb_l_register_sock(cw_sock_t *a_sock)
 {
-	cw_bool_t retval;
-	struct cw_sockb_msg_s *message;
+	cw_bool_t		retval;
+	struct cw_sockb_msg_s	*message;
 
 	_cw_check_ptr(a_sock);
 	_cw_check_ptr(g_sockb);
@@ -394,7 +371,7 @@ sockb_l_register_sock(cw_sock_t *a_sock)
 	message = (struct cw_sockb_msg_s
 	    *)_cw_pezz_get(&g_sockb->messages_pezz);
 
-	if (NULL == message) {
+	if (message == NULL) {
 		retval = TRUE;
 		goto RETURN;
 	}
@@ -403,7 +380,7 @@ sockb_l_register_sock(cw_sock_t *a_sock)
 #endif
 	message->type = REGISTER;
 	message->data.sock = a_sock;
-	if (0 != mq_put(&g_sockb->messages, (const void *)message)) {
+	if (mq_put(&g_sockb->messages, (const void *)message) != 0) {
 		_cw_pezz_put(&g_sockb->messages_pezz, (void *)message);
 		retval = TRUE;
 		goto RETURN;
@@ -412,22 +389,22 @@ sockb_l_register_sock(cw_sock_t *a_sock)
 
 	retval = FALSE;
 
-RETURN:
+	RETURN:
 	return retval;
 }
 
 cw_bool_t
 sockb_l_unregister_sock(cw_uint32_t a_sockfd)
 {
-	cw_bool_t retval;
-	struct cw_sockb_msg_s *message;
+	cw_bool_t		retval;
+	struct cw_sockb_msg_s	*message;
 
 	_cw_check_ptr(g_sockb);
 
 	message = (struct cw_sockb_msg_s
 	    *)_cw_pezz_get(&g_sockb->messages_pezz);
 
-	if (NULL == message) {
+	if (message == NULL) {
 		retval = TRUE;
 		goto RETURN;
 	}
@@ -436,7 +413,7 @@ sockb_l_unregister_sock(cw_uint32_t a_sockfd)
 #endif
 	message->type = UNREGISTER;
 	message->data.sockfd = a_sockfd;
-	if (0 != mq_put(&g_sockb->messages, (const void *)message)) {
+	if (mq_put(&g_sockb->messages, (const void *)message) != 0) {
 		_cw_pezz_put(&g_sockb->messages_pezz, (void *)message);
 		retval = TRUE;
 		goto RETURN;
@@ -444,16 +421,15 @@ sockb_l_unregister_sock(cw_uint32_t a_sockfd)
 	sockb_l_wakeup();
 
 	retval = FALSE;
-
-RETURN:
+	RETURN:
 	return retval;
 }
 
 cw_bool_t
 sockb_l_out_notify(cw_uint32_t a_sockfd)
 {
-	cw_bool_t retval;
-	struct cw_sockb_msg_s *message;
+	cw_bool_t		retval;
+	struct cw_sockb_msg_s	*message;
 
 	_cw_check_ptr(g_sockb);
 
@@ -469,7 +445,7 @@ sockb_l_out_notify(cw_uint32_t a_sockfd)
 #endif
 	message->type = OUT_NOTIFY;
 	message->data.sockfd = a_sockfd;
-	if (0 != mq_put(&g_sockb->messages, (const void *)message)) {
+	if (mq_put(&g_sockb->messages, (const void *)message) != 0) {
 		_cw_pezz_put(&g_sockb->messages_pezz, (void *)message);
 		retval = TRUE;
 		goto RETURN;
@@ -477,8 +453,7 @@ sockb_l_out_notify(cw_uint32_t a_sockfd)
 	sockb_l_wakeup();
 
 	retval = FALSE;
-
-RETURN:
+	RETURN:
 	return retval;
 }
 
@@ -493,7 +468,7 @@ sockb_l_in_space(cw_uint32_t a_sockfd)
 	message = (struct cw_sockb_msg_s
 	    *)_cw_pezz_get(&g_sockb->messages_pezz);
 
-	if (NULL == message) {
+	if (message == NULL) {
 		retval = TRUE;
 		goto RETURN;
 	}
@@ -502,7 +477,7 @@ sockb_l_in_space(cw_uint32_t a_sockfd)
 #endif
 	message->type = IN_SPACE;
 	message->data.sockfd = a_sockfd;
-	if (0 != mq_put(&g_sockb->messages, (const void *)message)) {
+	if (mq_put(&g_sockb->messages, (const void *)message) != 0) {
 		_cw_pezz_put(&g_sockb->messages_pezz, (void *)message);
 		retval = TRUE;
 		goto RETURN;
@@ -510,16 +485,15 @@ sockb_l_in_space(cw_uint32_t a_sockfd)
 	sockb_l_wakeup();
 
 	retval = FALSE;
-
-RETURN:
+	RETURN:
 	return retval;
 }
 
 cw_bool_t
 sockb_l_get_host_ip(const char *a_host_str, cw_uint32_t *r_host_ip)
 {
-	cw_bool_t retval;
-	cw_uint32_t host_ip;
+	cw_bool_t	retval;
+	cw_uint32_t	host_ip;
 
 	_cw_check_ptr(g_sockb);
 
@@ -531,11 +505,10 @@ sockb_l_get_host_ip(const char *a_host_str, cw_uint32_t *r_host_ip)
 	if (host_ip == INADDR_NONE)
 #endif
 	{
-		struct hostent *host_entry;
+		struct hostent	*host_entry;
 
 		/*
-		 * Not a dotted number IP address.  Let's try it as a
-		 * hostname.
+		 * Not a dotted number IP address.  Let's try it as a hostname.
 		 */
 
 		/* Lock the mutex first. */
@@ -551,12 +524,12 @@ sockb_l_get_host_ip(const char *a_host_str, cw_uint32_t *r_host_ip)
 				_cw_out_put_e("Error in gethostbyname(): [s]\n",
 				    hstrerror(h_errno));
 #endif
-				_cw_out_put_e("Host \"[s]\" isn't an IP address or a hostname\n",
-				    a_host_str);
+				_cw_out_put_e("Host \"[s]\" isn't an IP address"
+				    " or a hostname\n", a_host_str);
 			}
 			retval = TRUE;
 		} else {
-			struct in_addr *addr_ptr;
+			struct in_addr	*addr_ptr;
 
 			_cw_assert(host_entry->h_addrtype == AF_INET);
 			_cw_assert(host_entry->h_addr_list[0] != NULL);
@@ -568,8 +541,8 @@ sockb_l_get_host_ip(const char *a_host_str, cw_uint32_t *r_host_ip)
 			retval = FALSE;
 		}
 		/*
-		 * We're done with h_errno and the global structure pointed
-		 * to by host_entry, so unlock the mutex now.
+		 * We're done with h_errno and the global structure pointed to
+		 * by host_entry, so unlock the mutex now.
 		 */
 		mtx_unlock(&g_sockb->get_ip_addr_lock);
 	} else {
@@ -578,14 +551,11 @@ sockb_l_get_host_ip(const char *a_host_str, cw_uint32_t *r_host_ip)
 	}
 
 	if (dbg_is_registered(cw_g_dbg, "sockb_verbose")) {
-		cw_uint32_t t_host_ip = ntohl(*r_host_ip);
+		cw_uint32_t	t_host_ip = ntohl(*r_host_ip);
 
 		out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-		    "IP address: [i].[i].[i].[i]\n",
-		    t_host_ip >> 24,
-		    (t_host_ip >> 16) & 0xff,
-		    (t_host_ip >> 8) & 0xff,
-		    t_host_ip & 0xff);
+		    "IP address: [i].[i].[i].[i]\n", t_host_ip >> 24, (t_host_ip
+		    >> 16) & 0xff, (t_host_ip >> 8) & 0xff, t_host_ip & 0xff);
 	}
 	return retval;
 }
@@ -593,22 +563,22 @@ sockb_l_get_host_ip(const char *a_host_str, cw_uint32_t *r_host_ip)
 static cw_bool_t
 sockb_p_notify(cw_mq_t *a_mq, int a_sockfd)
 {
-	cw_bool_t retval;
-	cw_sint32_t error;
+	cw_bool_t	retval;
+	cw_sint32_t	error;
 
 	_cw_check_ptr(a_mq);
 
-	while (-1 == (error = mq_put(a_mq, (void *)a_sockfd))) {
+	while ((error = mq_put(a_mq, (void *)a_sockfd)) == -1) {
 		/*
-		 * We can't afford to lose the message, since it could end
-		 * up causing deadlock.
+		 * We can't afford to lose the message, since it could end up
+		 * causing deadlock.
 		 */
 		if (dbg_is_registered(cw_g_dbg, "sockb_error"))
 			_cw_out_put_e("Memory allocation error; yielding\n");
 		thd_yield();
 	}
 
-	if (1 == error) {
+	if (error == 1) {
 		/*
 		 * The mq is in the stop state.  We might as well stop
 		 * notifying.
@@ -621,22 +591,22 @@ sockb_p_notify(cw_mq_t *a_mq, int a_sockfd)
 	_cw_out_put("n");
 #endif
 
-RETURN:
+	RETURN:
 	return retval;
 }
 
 static void *
 sockb_p_entry_func(void *a_arg)
 {
-	struct cw_sockb_entry_s *arg = (struct cw_sockb_entry_s *)a_arg;
-	cw_uint32_t max_fds = arg->max_fds;
-	struct cw_sockb_reg_s *regs = arg->regs;
-	struct pollfd *fds = arg->fds;
-	unsigned nfds;
-	cw_sock_t *sock;
-	int     sockfd, num_ready;
-	cw_buf_t tmp_buf, buf_in;
-	struct cw_sockb_msg_s *message;
+	struct cw_sockb_entry_s	*arg = (struct cw_sockb_entry_s *)a_arg;
+	cw_uint32_t		max_fds = arg->max_fds;
+	struct cw_sockb_reg_s	*regs = arg->regs;
+	struct pollfd		*fds = arg->fds;
+	unsigned		nfds;
+	cw_sock_t		*sock;
+	int			sockfd, num_ready;
+	cw_buf_t		tmp_buf, buf_in;
+	struct cw_sockb_msg_s	*message;
 
 	_cw_free(a_arg);
 
@@ -644,15 +614,15 @@ sockb_p_entry_func(void *a_arg)
 	buf_new(&tmp_buf);
 	buf_new(&buf_in);
 	{
-		cw_uint32_t i;
+		cw_uint32_t	i;
 
 		for (i = 0; i < max_fds; i++)
 			regs[i].pollfd_pos = -1;
 	}
 
 	/*
-	 * Add g_sockb->pipe_out for readingg, so that this thread will
-	 * return from poll() when data is written to g_sockb->pipe_in.
+	 * Add g_sockb->pipe_out for readingg, so that this thread will return
+	 * from poll() when data is written to g_sockb->pipe_in.
 	 */
 	fds[0].fd = g_sockb->pipe_out;
 	fds[0].events = POLLIN;
@@ -660,25 +630,25 @@ sockb_p_entry_func(void *a_arg)
 
 	while (g_sockb->should_quit == FALSE) {
 		/* Check for messages in the message queues. */
-		while (NULL != (message = (struct cw_sockb_msg_s
-		    *)mq_tryget(&g_sockb->messages))) {
+		while ((message = (struct cw_sockb_msg_s
+		    *)mq_tryget(&g_sockb->messages)) != NULL) {
 			switch (message->type) {
 			case REGISTER:
 				sock = message->data.sock;
 
 				sockfd = sock_get_fd(sock);
-				if (max_fds <= sockfd) {
+				if (sockfd >= max_fds) {
 					out_put_e(cw_g_out, NULL, 0,
 					    __FUNCTION__,
-					    "Maximum file descriptor exceeded ([i] <= [i])\n",
-					    max_fds, sockfd);
+					    "Maximum file descriptor exceeded"
+					    " ([i] <= [i])\n", max_fds, sockfd);
 					abort();
 				}
-				if ((-1 == regs[sockfd].pollfd_pos) && (max_fds
-				    > nfds)) {
+				if ((regs[sockfd].pollfd_pos == -1) && (nfds <
+				    max_fds)) {
 					/*
-					 * The sock isn't registered.
-					 * Register it.
+					 * The sock isn't registered.  Register
+					 * it.
 					 */
 					regs[sockfd].sock = sock;
 					regs[sockfd].pollfd_pos = nfds;
@@ -686,17 +656,16 @@ sockb_p_entry_func(void *a_arg)
 
 					fds[nfds].fd = sockfd;
 					/*
-					 * If the buffer size is 0, don't
-					 * ever try to read on this
-					 * descriptor.
+					 * If the buffer size is 0, don't ever
+					 * try to read on this descriptor.
 					 */
-					if (0 !=
-					    sock_l_get_in_max_buf_size(sock)) {
+					if (sock_l_get_in_max_buf_size(sock) !=
+					    0) {
 #ifdef _LIBSOCK_CONFESS
 						out_put_e(cw_g_out, __FILE__,
 						    __LINE__, NULL,
-						    "Register [i] ([i] byte input buffer)\n",
-						    sockfd,
+						    "Register [i] ([i] byte "
+						    "input buffer)\n", sockfd,
 						    sock_l_get_in_max_buf_size(sock));
 #endif
 						fds[nfds].events = POLLIN;
@@ -704,23 +673,22 @@ sockb_p_entry_func(void *a_arg)
 #ifdef _LIBSOCK_CONFESS
 						out_put_e(cw_g_out, __FILE__,
 						    __LINE__, NULL,
-						    "Register [i](no in buffer)\n",
-						    sockfd);
+						    "Register [i](no in buffer"
+						    ")\n", sockfd);
 #endif
 						fds[nfds].events = 0;
 					}
 					nfds++;
 
 					/*
-					 * Notify the sock that it's
-					 * registered.
+					 * Notify the sock that it's registered.
 					 */
 					sock_l_message_callback(sock, FALSE);
 				} else {
 #ifdef _LIBSOCK_CONFESS
 					out_put_e(cw_g_out, __FILE__, __LINE__,
-					    NULL,
-					    "Refuse to register [i]\n", sockfd);
+					    NULL, "Refuse to register [i]\n",
+					    sockfd);
 #endif
 
 					sock_l_message_callback(sock, TRUE);
@@ -730,7 +698,7 @@ sockb_p_entry_func(void *a_arg)
 			case UNREGISTER:
 				sockfd = message->data.sockfd;
 
-				if (-1 != regs[sockfd].pollfd_pos) {
+				if (regs[sockfd].pollfd_pos != -1) {
 #ifdef _LIBSOCK_CONFESS
 					out_put_e(cw_g_out, __FILE__, __LINE__,
 					    NULL, "Unregister [i]\n", sockfd);
@@ -739,7 +707,8 @@ sockb_p_entry_func(void *a_arg)
 					nfds--;
 					if (regs[sockfd].pollfd_pos != nfds) {
 #ifdef _LIBSOCK_CONFESS
-						_cw_out_put("h([i]-->[i])", nfds,
+						_cw_out_put("h([i]-->[i])",
+						    nfds,
 						    regs[sockfd].pollfd_pos);
 #endif
 
@@ -752,12 +721,12 @@ sockb_p_entry_func(void *a_arg)
 					regs[sockfd].pollfd_pos = -1;
 
 					/*
-					 * If this sock has a notification
-					 * mq associated with it, send a
-					 * final message, then deactivate
+					 * If this sock has a notification mq
+					 * associated with it, send a final
+					 * message, then deactivate
 					 * notifications.
 					 */
-					if (NULL != regs[sockfd].notify_mq) {
+					if (regs[sockfd].notify_mq != NULL) {
 						sockb_p_notify(regs[sockfd].notify_mq,
 						    sockfd);
 						regs[sockfd].notify_mq = NULL;
@@ -766,8 +735,7 @@ sockb_p_entry_func(void *a_arg)
 #ifdef _LIBSOCK_CONFESS
 				else {
 					out_put_e(cw_g_out, __FILE__, __LINE__,
-					    NULL,
-					    "Refuse to unregister [i]\n",
+					    NULL, "Refuse to unregister [i]\n",
 					    sockfd);
 				}
 #endif
@@ -780,7 +748,7 @@ sockb_p_entry_func(void *a_arg)
 			case OUT_NOTIFY:
 				sockfd = message->data.sockfd;
 
-				if (-1 != regs[sockfd].pollfd_pos) {
+				if (regs[sockfd].pollfd_pos != -1) {
 #ifdef _LIBSOCK_CONFESS
 					out_put_e(cw_g_out, __FILE__, __LINE__,
 					    NULL, "Set [i]w\n", sockfd);
@@ -792,15 +760,15 @@ sockb_p_entry_func(void *a_arg)
 #ifdef _LIBSOCK_CONFESS
 				else {
 					out_put_e(cw_g_out, __FILE__, __LINE__,
-					    NULL,
-					    "Refuse to set [i]w\n", sockfd);
+					    NULL, "Refuse to set [i]w\n",
+					    sockfd);
 				}
 #endif
 				break;
 			case IN_SPACE:
 				sockfd = message->data.sockfd;
 
-				if (-1 != regs[sockfd].pollfd_pos) {
+				if (regs[sockfd].pollfd_pos != -1) {
 #ifdef _LIBSOCK_CONFESS
 					out_put_e(cw_g_out, __FILE__, __LINE__,
 					    NULL, "Set [i]r\n", sockfd);
@@ -820,7 +788,7 @@ sockb_p_entry_func(void *a_arg)
 			case IN_NOTIFY:
 				sockfd = message->data.in_notify.sockfd;
 
-				if (-1 != regs[sockfd].pollfd_pos) {
+				if (regs[sockfd].pollfd_pos != -1) {
 					_cw_check_ptr(regs[sockfd].sock);
 					regs[sockfd].notify_mq =
 					    message->data.in_notify.mq;
@@ -836,16 +804,15 @@ sockb_p_entry_func(void *a_arg)
 					mtx_unlock(message->data.in_notify.mtx);
 
 					if (NULL != regs[sockfd].notify_mq) {
-						if (0 <
-						    sock_l_get_in_size(regs[sockfd].sock)) {
+						if (sock_l_get_in_size(regs[sockfd].sock)
+						    > 0) {
 							/*
 							 * Send an out
-							 * notification,
-							 * since there are
-							 * data already
-							 * queued up.
+							 * notification, since
+							 * there are data
+							 * already queued up.
 							 */
-							if (TRUE == sockb_p_notify(regs[sockfd].notify_mq,
+							if (sockb_p_notify(regs[sockfd].notify_mq,
 							    sockfd)) {
 								regs[sockfd].notify_mq
 								    = NULL;
@@ -858,15 +825,16 @@ sockb_p_entry_func(void *a_arg)
 					mtx_unlock(message->data.in_notify.mtx);
 
 					/*
-					 * Send a message here to avoid a
-					 * race condition where a sock is
+					 * Send a message here to avoid a race
+					 * condition where a sock is
 					 * unregistered due to a failed
-					 * readv()/writev(), but the user
-					 * hasn't realized this yet, since
-					 * no sock_*() calls have been made
-					 * since the unregistration.
+					 * readv()/writev(), but the user hasn't
+					 * realized this yet, since no sock_*()
+					 * calls have been made since the
+					 * unregistration.
 					 */
-					if (NULL != message->data.in_notify.mq) {
+					if (message->data.in_notify.mq !=
+					    NULL) {
 						sockb_p_notify(message->data.in_notify.mq,
 						    sockfd);
 					}
@@ -874,8 +842,7 @@ sockb_p_entry_func(void *a_arg)
 					out_put_e(cw_g_out, __FILE__, __LINE__,
 					    NULL,
 					    "Refuse to set regs[[[i]].notify_mq = 0x[p]\n",
-					    sockfd,
-					    message->data.in_notify.mq);
+					    sockfd, message->data.in_notify.mq);
 #endif
 				}
 
@@ -891,7 +858,7 @@ sockb_p_entry_func(void *a_arg)
 
 #ifdef _LIBSOCK_CONFESS
 		{
-			cw_uint32_t i;
+			cw_uint32_t	i;
 
 			out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
 			    "poll fd's:");
@@ -919,18 +886,15 @@ sockb_p_entry_func(void *a_arg)
 		_cw_out_put("-->([i|s:s])\n", num_ready);
 #endif
 
-		if (-1 == num_ready) {
+		if (num_ready == -1) {
 			if (errno != EINTR) {
-				/*
-				 * This is an error that should never
-				 * happen.
-				 */
+				/* This is an error that should never happen. */
 				_cw_out_put_e("Fatal error in poll(): [s]\n",
 				    strerror(errno));
 				abort();
 			}
 		} else {
-			cw_sint32_t i, j;
+			cw_sint32_t	i, j;
 
 #ifdef _LIBSOCK_CONFESS
 			out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
@@ -939,12 +903,11 @@ sockb_p_entry_func(void *a_arg)
 
 			/* Ready descriptors. */
 			if (fds[0].revents & POLLIN) {
-				char    t_buf[2];
-				ssize_t bytes_read;
+				char	t_buf[2];
+				ssize_t	bytes_read;
 
 #ifdef _LIBSOCK_CONFESS
-				_cw_out_put(" ([i|s:s]r)",
-				    g_sockb->pipe_out);
+				_cw_out_put(" ([i|s:s]r)", g_sockb->pipe_out);
 #endif
 
 				/*
@@ -956,13 +919,12 @@ sockb_p_entry_func(void *a_arg)
 				/*
 				 * Read the data out of the pipe so that the
 				 * next call doesn't immediately return just
-				 * because of data already in the pipe.
-				 * Note that there is no risk of deadlock
-				 * due to emptying data from the pipe that
-				 * is written after the poll() call, since
-				 * the message queues are checked after
-				 * emptying the pipe, but before calling
-				 * poll() again.
+				 * because of data already in the pipe.  Note
+				 * that there is no risk of deadlock due to
+				 * emptying data from the pipe that is written
+				 * after the poll() call, since the message
+				 * queues are checked after emptying the pipe,
+				 * but before calling poll() again.
 				 */
 				bytes_read = read(g_sockb->pipe_out, t_buf, 2);
 				if (bytes_read == -1) {
@@ -973,22 +935,20 @@ sockb_p_entry_func(void *a_arg)
 					}
 				} else if (bytes_read > 0) {
 					/*
-					 * Set the semaphore to one.  This
-					 * will cause one, and only one byte
-					 * to be written to g_sockb->pipe_in
-					 * and cause a return from poll() if
-					 * one or more messages needs
-					 * handled.  Note that we must post
-					 * the semophore before handling the
-					 * message queues, since it is
-					 * possible to have new messages
-					 * come in and miss them otherwise.
-					 * Posting first means that we may
-					 * execute the poll() loop once
-					 * without doing anything, since the
-					 * message that caused data to be
-					 * written to the pipe may have
-					 * already been read.
+					 * Set the semaphore to one.  This will
+					 * cause one, and only one byte to be
+					 * written to g_sockb->pipe_in and cause
+					 * a return from poll() if one or more
+					 * messages needs handled.  Note that we
+					 * must post the semophore before
+					 * handling the message queues, since it
+					 * is possible to have new messages come
+					 * in and miss them otherwise.  Posting
+					 * first means that we may execute the
+					 * poll() loop once without doing
+					 * anything, since the message that
+					 * caused data to be written to the pipe
+					 * may have already been read.
 					 */
 					sem_post(&g_sockb->pipe_sem);
 				}
@@ -1049,10 +1009,10 @@ sockb_p_entry_func(void *a_arg)
 
 				if (fds[i].revents & POLLIN) {
 					const struct iovec *iov;
-					int     iov_cnt;
-					ssize_t bytes_read;
-					cw_sint32_t max_read;
-					cw_bufc_t *bufc;
+					int		iov_cnt;
+					ssize_t		bytes_read;
+					cw_sint32_t	max_read;
+					cw_bufc_t	*bufc;
 
 					j++;
 
@@ -1070,24 +1030,25 @@ sockb_p_entry_func(void *a_arg)
 					    sock_l_get_in_space(regs[sockfd].sock);
 
 					/*
-					 * Build up buf_in to be at least
-					 * large enough for the readv().
+					 * Build up buf_in to be at least large
+					 * enough for the readv().
 					 */
 					while (buf_get_size(&buf_in) <
 					    max_read) {
-						while (NULL == (bufc =
-						    sockb_get_spare_bufc())) {
+						while ((bufc =
+						    sockb_get_spare_bufc()) ==
+						    NULL) {
 							if (dbg_is_registered(cw_g_dbg,
 							    "sockb_error"))
 								_cw_out_put_e("Memory allocation error; yielding\n");
 							thd_yield();
 						}
 
-						while (TRUE ==
-						    buf_append_bufc(&buf_in,
+						while (buf_append_bufc(&buf_in,
 						        bufc, 0,
 							pezz_get_buffer_size(&g_sockb->buffer_pool))) {
-							if (dbg_is_registered(cw_g_dbg, "sockb_error"))
+							if (dbg_is_registered(cw_g_dbg,
+								    "sockb_error"))
 								_cw_out_put_e("Memory allocation error; yielding\n");
 							thd_yield();
 						}
@@ -1097,14 +1058,13 @@ sockb_p_entry_func(void *a_arg)
 					/*
 					 * Get an iovec for reading.  This
 					 * somewhat goes against the idea of
-					 * never writing the internals of a
-					 * buf after the buffers have been
-					 * inserted.  However, this is quite
-					 * safe, since as a result of how we
-					 * use buf_in, we know for sure that
-					 * there are no other references to
-					 * the byte ranges of the buffers we
-					 * are writing to.
+					 * never writing the internals of a buf
+					 * after the buffers have been inserted.
+					 * However, this is quite safe, since as
+					 * a result of how we use buf_in, we
+					 * know for sure that there are no other
+					 * references to the byte ranges of the
+					 * buffers we are writing to.
 					 */
 					iov = buf_get_iovec(&buf_in, max_read,
 					    TRUE, &iov_cnt);
@@ -1116,14 +1076,13 @@ sockb_p_entry_func(void *a_arg)
 					    bytes_read);
 #endif
 
-					if (0 < bytes_read) {
-						cw_uint32_t in_buf_free;
+					if (bytes_read > 0) {
+						cw_uint32_t	in_buf_free;
 
 						_cw_assert(buf_get_size(&tmp_buf)
 						    == 0);
 
-						while (TRUE ==
-						    buf_split(&tmp_buf,
+						while (buf_split(&tmp_buf,
 						    &buf_in, bytes_read)) {
 							if (dbg_is_registered(cw_g_dbg,
 							    "sockb_error"))
@@ -1132,21 +1091,18 @@ sockb_p_entry_func(void *a_arg)
 						}
 
 						/*
-						 * Append to the sock's
-						 * in_buf.
+						 * Append to the sock's in_buf.
 						 */
 						in_buf_free =
 						    sock_l_put_in_data(regs[sockfd].sock,
 						    &tmp_buf);
-						if (0 == in_buf_free) {
+						if (in_buf_free == 0) {
 							/*
-							 * Turn off the read
-							 * bit for this
-							 * sock.  The sock
-							 * will send a
-							 * message when
-							 * there is once
-							 * again space.
+							 * Turn off the read bit
+							 * for this sock.  The
+							 * sock will send a
+							 * message when there is
+							 * once again space.
 							 */
 #ifdef _LIBSOCK_CONFESS
 							_cw_out_put("u");
@@ -1156,16 +1112,17 @@ sockb_p_entry_func(void *a_arg)
 							    POLLIN);
 						}
 						/*
-						 * Only send a message if
-						 * the sock buffer was empty
-						 * before we put data in it.
+						 * Only send a message if the
+						 * sock buffer was empty before
+						 * we put data in it.
 						 */
-						if (0 ==
-						    (sock_l_get_in_max_buf_size(regs[sockfd].sock)
-						    - (in_buf_free + bytes_read))) {
-							if (NULL !=
-							     regs[sockfd].notify_mq) {
-								if (TRUE == sockb_p_notify(regs[sockfd].notify_mq,
+						if ((sock_l_get_in_max_buf_size(regs[sockfd].sock)
+						    - (in_buf_free +
+						    bytes_read)) == 0) {
+							if (regs[sockfd].notify_mq
+								    != NULL) {
+								
+								if (sockb_p_notify(regs[sockfd].notify_mq,
 								    sockfd)) {
 									regs[sockfd].notify_mq
 									    = NULL;
@@ -1174,7 +1131,7 @@ sockb_p_entry_func(void *a_arg)
 						}
 						_cw_assert(buf_get_size(&tmp_buf)
 						    == 0);
-					} else if (0 == bytes_read) {
+					} else if (bytes_read == 0) {
 						/* readv() error. */
 						if (dbg_is_registered(cw_g_dbg,
 						    "sockb_verbose")) {
@@ -1182,8 +1139,8 @@ sockb_p_entry_func(void *a_arg)
 							    sockfd);
 						}
 						/*
-						 * Fill this hole, decrement
-						 * i, continue.
+						 * Fill this hole, decrement i,
+						 * continue.
 						 */
 						nfds--;
 						if (regs[sockfd].pollfd_pos !=
@@ -1205,10 +1162,9 @@ sockb_p_entry_func(void *a_arg)
 
 						sock_l_error_callback(regs[sockfd].sock);
 
-						if (NULL !=
-						    regs[sockfd].notify_mq) {
-							if (TRUE ==
-							    sockb_p_notify(regs[sockfd].notify_mq,
+						if (regs[sockfd].notify_mq !=
+						    NULL) {
+							if (sockb_p_notify(regs[sockfd].notify_mq,
 							    sockfd)) {
 								regs[sockfd].notify_mq
 								    = NULL;
@@ -1218,7 +1174,7 @@ sockb_p_entry_func(void *a_arg)
 						_cw_out_put("\n");
 #endif
 						continue;
-					} else {	/* if (bytes_read == -1) */
+					} else {/* if (bytes_read == -1) */
 						/* readv() error. */
 						if (dbg_is_registered(cw_g_dbg,
 						    "sockb_error")) {
@@ -1228,10 +1184,10 @@ sockb_p_entry_func(void *a_arg)
 					}
 				} else if (fds[i].revents & POLLHUP) {
 					const struct iovec *iov;
-					int     iov_cnt;
-					ssize_t bytes_read;
-					cw_bufc_t *bufc = NULL;
-					cw_uint32_t buffer_size;
+					int		iov_cnt;
+					ssize_t		bytes_read;
+					cw_bufc_t	*bufc = NULL;
+					cw_uint32_t	buffer_size;
 
 					j++;
 
@@ -1260,28 +1216,27 @@ sockb_p_entry_func(void *a_arg)
 						 * Add some more space to
 						 * &buf_in if necessary.
 						 */
-						if (0 ==
-						    buf_get_size(&buf_in)) {
-							while (NULL == (bufc =
-							    sockb_get_spare_bufc())) {
+						if (buf_get_size(&buf_in) ==
+						    0) {
+							while ((bufc =
+							    sockb_get_spare_bufc()) == NULL) {
 								if (dbg_is_registered(cw_g_dbg,
 								    "sockb_error"))
 									_cw_out_put_e("Memory allocation error; yielding\n");
 								thd_yield();
 							}
 
-							while (TRUE ==
-							    buf_append_bufc(&buf_in,
+							while (buf_append_bufc(&buf_in,
 							    bufc, 0,
 							    buffer_size)) {
+
 								if (dbg_is_registered(cw_g_dbg,
 								    "sockb_error"))
 									_cw_out_put_e("Memory allocation error; yielding\n");
 								thd_yield();
 							}
 							/*
-							 * Drop our
-							 * reference.
+							 * Drop our reference.
 							 */
 							bufc_delete(bufc);
 						}
@@ -1294,14 +1249,13 @@ sockb_p_entry_func(void *a_arg)
 
 #ifdef _LIBSOCK_CONFESS
 						_cw_out_put("[i|s:s][s]",
-						    bytes_read, (0 <
-						    bytes_read) ? ", " : ")");
+						    bytes_read, (0 < bytes_read)
+						    ? ", " : ")");
 #endif
 						_cw_assert(buf_get_size(&tmp_buf)
 						    == 0);
 
-						while (TRUE ==
-						    buf_split(&tmp_buf,
+						while (buf_split(&tmp_buf,
 						    &buf_in, bytes_read)) {
 							if (dbg_is_registered(cw_g_dbg,
 							    "sockb_error"))
@@ -1310,7 +1264,7 @@ sockb_p_entry_func(void *a_arg)
 						}
 						sock_l_put_in_data(regs[sockfd].sock,
 						    &tmp_buf);
-					} while (0 < bytes_read);
+					} while (bytes_read > 0);
 
 #ifdef _LIBSOCK_CONFESS
 					_cw_out_put("c");
@@ -1342,9 +1296,8 @@ sockb_p_entry_func(void *a_arg)
 
 					sock_l_error_callback(regs[sockfd].sock);
 
-					if (NULL != regs[sockfd].notify_mq) {
-						if (TRUE ==
-						    sockb_p_notify(regs[sockfd].notify_mq,
+					if (regs[sockfd].notify_mq != NULL) {
+						if (sockb_p_notify(regs[sockfd].notify_mq,
 						    sockfd)) {
 							regs[sockfd].notify_mq
 							    = NULL;
@@ -1357,8 +1310,8 @@ sockb_p_entry_func(void *a_arg)
 				}
 				if (fds[i].revents & POLLOUT) {
 					const struct iovec *iov;
-					int     iov_cnt;
-					ssize_t bytes_written;
+					int		iov_cnt;
+					ssize_t		bytes_written;
 
 					j++;
 
@@ -1368,24 +1321,22 @@ sockb_p_entry_func(void *a_arg)
 					/* Ready for writing. */
 
 					/* Get the socket's buf. */
-					_cw_assert(0 == buf_get_size(&tmp_buf));
+					_cw_assert(buf_get_size(&tmp_buf) == 0);
 					sock_l_get_out_data(regs[sockfd].sock,
 					    &tmp_buf);
 
 					/* Build an iovec for writing. */
 					iov = buf_get_iovec(&tmp_buf,
-					    buf_get_size(&tmp_buf),
-					    TRUE,
+					    buf_get_size(&tmp_buf), TRUE,
 					    &iov_cnt);
 
 					/*
-					 * If the buf exceeds the maximum
-					 * iovec, it's possible that we'll
-					 * only write part of the data, when
-					 * we could have written it all.
-					 * This is in practice very unlikely
-					 * though, and doesn't cause
-					 * erroneous behavior.
+					 * If the buf exceeds the maximum iovec,
+					 * it's possible that we'll only write
+					 * part of the data, when we could have
+					 * written it all.  This is in practice
+					 * very unlikely though, and doesn't
+					 * cause erroneous behavior.
 					 */
 					bytes_written = writev(sockfd, iov,
 					    iov_cnt);
@@ -1399,16 +1350,14 @@ sockb_p_entry_func(void *a_arg)
 						buf_release_head_data(&tmp_buf,
 						    bytes_written);
 
-						if (0 ==
-						    sock_l_put_back_out_data(regs[sockfd].sock,
-						    &tmp_buf)) {
+						if (sock_l_put_back_out_data(regs[sockfd].sock,
+						    &tmp_buf) == 0) {
 							/*
 							 * The socket has no
-							 * more outgoing
-							 * data, so turn the
-							 * write bit off in
-							 * the master write
-							 * descriptor set.
+							 * more outgoing data,
+							 * so turn the write bit
+							 * off in the master
+							 * write descriptor set.
 							 */
 #ifdef _LIBSOCK_CONFESS
 							_cw_out_put("u");
@@ -1421,8 +1370,7 @@ sockb_p_entry_func(void *a_arg)
 						else
 							_cw_out_put("i");
 #endif
-					} else {	/* if (bytes_written ==
-							 * -1) */
+					} else {/* if (bytes_written == -1) */
 						buf_release_head_data(&tmp_buf,
 						    buf_get_size(&tmp_buf));
 
@@ -1434,8 +1382,7 @@ sockb_p_entry_func(void *a_arg)
 							    sockfd);
 						}
 						/*
-						 * Fill this hole, decrement
-						 * i.
+						 * Fill this hole, decrement i.
 						 */
 						nfds--;
 						if (regs[sockfd].pollfd_pos !=
@@ -1456,10 +1403,8 @@ sockb_p_entry_func(void *a_arg)
 
 						sock_l_error_callback(regs[sockfd].sock);
 
-						if (NULL !=
-						    regs[sockfd].notify_mq) {
-							if (TRUE ==
-							    sockb_p_notify(regs[sockfd].notify_mq,
+						if (regs[sockfd].notify_mq != NULL) {
+							if (sockb_p_notify(regs[sockfd].notify_mq,
 							    sockfd)) {
 								regs[sockfd].notify_mq
 								    = NULL;

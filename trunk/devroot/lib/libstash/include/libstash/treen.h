@@ -41,17 +41,10 @@ struct cw_treen_s {
 
 cw_treen_t	*treen_new(cw_treen_t *a_treen, cw_opaque_dealloc_t
     *a_dealloc_func, void *a_dealloc_arg);
-
 void		treen_delete(cw_treen_t *a_treen);
-
 void		treen_link(cw_treen_t *a_treen, cw_treen_t *a_parent);
-
 cw_treen_t	*treen_get_parent(cw_treen_t *a_treen);
-
 cw_treen_t	*treen_get_child(cw_treen_t *a_treen);
-
 cw_treen_t	*treen_get_sibling(cw_treen_t *a_treen);
-
 void		*treen_get_data_ptr(cw_treen_t *a_treen);
-
 void		treen_set_data_ptr(cw_treen_t *a_treen, void *a_data);

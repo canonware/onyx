@@ -16,14 +16,14 @@
 #include "../include/libstash/libstash.h"
 
 /* Globals. */
-cw_mem_t *cw_g_mem = NULL;
-cw_dbg_t *cw_g_dbg = NULL;
-cw_out_t *cw_g_out = NULL;
+cw_mem_t	*cw_g_mem = NULL;
+cw_dbg_t	*cw_g_dbg = NULL;
+cw_out_t	*cw_g_out = NULL;
 
 cw_bool_t
 libstash_init(void)
 {
-	cw_bool_t retval = FALSE;
+	cw_bool_t	retval = FALSE;
 
 	/* Start up global modules. */
 	if (cw_g_out == NULL)
@@ -31,15 +31,15 @@ libstash_init(void)
 	if (cw_g_dbg == NULL) {
 		cw_g_dbg = dbg_new();
 #ifdef _LIBSTASH_DBG
-		if (NULL != cw_g_dbg)
+		if (cw_g_dbg != NULL)
 			dbg_register(cw_g_dbg, "mem_error");
-		if (NULL != cw_g_dbg)
+		if (cw_g_dbg != NULL)
 			dbg_register(cw_g_dbg, "pezz_error");
 #endif
 	}
 	if (cw_g_mem == NULL)
 		cw_g_mem = mem_new();
-	if ((NULL == cw_g_out) || (NULL == cw_g_dbg) || (NULL == cw_g_mem))
+	if ((cw_g_out == NULL) || (cw_g_dbg == NULL) || (cw_g_mem == NULL))
 		retval = TRUE;
 	return retval;
 }

@@ -29,7 +29,7 @@
  * a byte.  This function makes it possible to use a non-polling poll loop.
  *
  ****************************************************************************/
-void sockb_l_wakeup(void);
+void		sockb_l_wakeup(void);
 
 /****************************************************************************
  *
@@ -47,7 +47,7 @@ void sockb_l_wakeup(void);
  * Register a_sock with the sockb thread.
  *
  ****************************************************************************/
-cw_bool_t sockb_l_register_sock(cw_sock_t *a_sock);
+cw_bool_t	sockb_l_register_sock(cw_sock_t *a_sock);
 
 /****************************************************************************
  *
@@ -65,7 +65,7 @@ cw_bool_t sockb_l_register_sock(cw_sock_t *a_sock);
  * Unregister the sock corresponding to a_sockfd with the sockb thread.
  *
  ****************************************************************************/
-cw_bool_t sockb_l_unregister_sock(cw_uint32_t a_sockfd);
+cw_bool_t	sockb_l_unregister_sock(cw_uint32_t a_sockfd);
 
 /****************************************************************************
  *
@@ -84,7 +84,7 @@ cw_bool_t sockb_l_unregister_sock(cw_uint32_t a_sockfd);
  * outgoing data.
  *
  ****************************************************************************/
-cw_bool_t sockb_l_out_notify(cw_uint32_t a_sockfd);
+cw_bool_t	sockb_l_out_notify(cw_uint32_t a_sockfd);
 
 /****************************************************************************
  *
@@ -103,7 +103,7 @@ cw_bool_t sockb_l_out_notify(cw_uint32_t a_sockfd);
  * available for incoming data.
  *
  ****************************************************************************/
-cw_bool_t sockb_l_in_space(cw_uint32_t a_sockfd);
+cw_bool_t	sockb_l_in_space(cw_uint32_t a_sockfd);
 
 /****************************************************************************
  *
@@ -133,4 +133,5 @@ cw_bool_t sockb_l_in_space(cw_uint32_t a_sockfd);
  * doesn't even bother with gethostbyname_r().
  *
  ****************************************************************************/
-cw_bool_t sockb_l_get_host_ip(const char *a_host_str, cw_uint32_t *r_host_ip);
+cw_bool_t	sockb_l_get_host_ip(const char *a_host_str, cw_uint32_t
+    *r_host_ip);

@@ -14,11 +14,11 @@
 cw_rwl_t *
 rwl_new(cw_rwl_t *a_rwl)
 {
-	cw_rwl_t *retval;
+	cw_rwl_t	*retval;
 
 	if (a_rwl == NULL) {
 		retval = (cw_rwl_t *)_cw_malloc(sizeof(cw_rwl_t));
-		if (NULL == retval)
+		if (retval == NULL)
 			goto RETURN;
 		retval->is_malloced = TRUE;
 	} else {
@@ -35,7 +35,7 @@ rwl_new(cw_rwl_t *a_rwl)
 	retval->read_waiters = 0;
 	retval->write_waiters = 0;
 
-RETURN:
+	RETURN:
 	return retval;
 }
 
@@ -110,10 +110,9 @@ rwl_wunlock(cw_rwl_t *a_rwl)
 	a_rwl->num_writers--;
 
 	/*
-	 * Doing this in reverse order could potentially be more efficient,
-	 * but by using this order, we get rid of any non-determinism, i.e.
-	 * we don't have to worry about a read lock waiter never getting the
-	 * lock.
+	 * Doing this in reverse order could potentially be more efficient, but
+	 * by using this order, we get rid of any non-determinism, i.e.  we
+	 * don't have to worry about a read lock waiter never getting the lock.
 	 */
 	if (a_rwl->read_waiters > 0)
 		cnd_broadcast(&a_rwl->read_wait);

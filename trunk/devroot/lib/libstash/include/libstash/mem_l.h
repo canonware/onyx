@@ -34,11 +34,7 @@
 #endif
 #define _cw_free(a) free(a)
 
-#ifdef _cw_dealloc
-#undef _cw_dealloc
-#endif
-#define _cw_dealloc(a) free(a)
-
+/* The out class can't be used here due to bootstrapping issues. */
 #define _cw_mem_check_ptr(x)						\
 	do {								\
 		if ((x) == NULL) {					\

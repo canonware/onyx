@@ -18,14 +18,10 @@
 
 static cw_bhp_t	*bhp_p_new(cw_bhp_t *a_bhp, bhp_prio_comp_t *a_prio_comp,
     cw_bool_t a_is_thread_safe);
-
 static cw_bhpi_t *bhp_p_dump(cw_bhpi_t *a_bhpi, cw_uint32_t a_depth, cw_bhpi_t
     *a_last_printed);
-
 static void	bhp_p_bin_link(cw_bhpi_t *a_root, cw_bhpi_t *a_non_root);
-
 static void	bhp_p_merge(cw_bhp_t *a_bhp, cw_bhp_t *a_other);
-
 static void	bhp_p_union(cw_bhp_t *a_bhp, cw_bhp_t *a_other);
 
 cw_bhpi_t *
@@ -65,11 +61,11 @@ void
 bhpi_delete(cw_bhpi_t *a_bhpi)
 {
 	_cw_check_ptr(a_bhpi);
-	_cw_assert(_LIBSTASH_BHPI_MAGIC == a_bhpi->magic_a);
-	_cw_assert(sizeof(cw_bhpi_t) == a_bhpi->size_of);
-	_cw_assert(_LIBSTASH_BHPI_MAGIC == a_bhpi->magic_b);
+	_cw_assert(a_bhpi->magic_a == _LIBSTASH_BHPI_MAGIC);
+	_cw_assert(a_bhpi->size_of == sizeof(cw_bhpi_t));
+	_cw_assert(a_bhpi->magic_b == _LIBSTASH_BHPI_MAGIC);
 
-	if (NULL != a_bhpi->dealloc_func) {
+	if (a_bhpi->dealloc_func != NULL) {
 		_cw_opaque_dealloc(a_bhpi->dealloc_func, a_bhpi->dealloc_arg,
 		    a_bhpi);
 	}
@@ -95,18 +91,18 @@ void
 bhp_delete(cw_bhp_t *a_bhp)
 {
 	_cw_check_ptr(a_bhp);
-	_cw_assert(_LIBSTASH_BHP_MAGIC == a_bhp->magic_a);
-	_cw_assert(sizeof(cw_bhp_t) == a_bhp->size_of);
-	_cw_assert(_LIBSTASH_BHP_MAGIC == a_bhp->magic_b);
+	_cw_assert(a_bhp->magic_a == _LIBSTASH_BHP_MAGIC);
+	_cw_assert(a_bhp->size_of == sizeof(cw_bhp_t));
+	_cw_assert(a_bhp->magic_b == _LIBSTASH_BHP_MAGIC);
 
 	/* Empty the heap. */
-	if (NULL != a_bhp->head) {
-		while (0 < a_bhp->num_nodes)
+	if (a_bhp->head != NULL) {
+		while (a_bhp->num_nodes > 0)
 			bhp_del_min(a_bhp, NULL, NULL);
 	}
-	if (a_bhp->is_thread_safe == TRUE)
+	if (a_bhp->is_thread_safe)
 		mtx_delete(&a_bhp->lock);
-	if (TRUE == a_bhp->is_malloced)
+	if (a_bhp->is_malloced)
 		_cw_free(a_bhp);
 }
 
@@ -114,39 +110,39 @@ void
 bhp_dump(cw_bhp_t *a_bhp)
 {
 	_cw_check_ptr(a_bhp);
-	_cw_assert(_LIBSTASH_BHP_MAGIC == a_bhp->magic_a);
-	_cw_assert(sizeof(cw_bhp_t) == a_bhp->size_of);
-	_cw_assert(_LIBSTASH_BHP_MAGIC == a_bhp->magic_b);
+	_cw_assert(a_bhp->magic_a == _LIBSTASH_BHP_MAGIC);
+	_cw_assert(a_bhp->size_of == sizeof(cw_bhp_t));
+	_cw_assert(a_bhp->magic_b == _LIBSTASH_BHP_MAGIC);
 
-	if (a_bhp->is_thread_safe == TRUE)
+	if (a_bhp->is_thread_safe)
 		mtx_lock(&a_bhp->lock);
-	_cw_out_put(
-	    "=== bhp_dump() start ==============================\n");
+	_cw_out_put("=== bhp_dump() start ==============================\n");
 	_cw_out_put("num_nodes: [q]\n", a_bhp->num_nodes);
-	if (NULL != a_bhp->head)
+	if (a_bhp->head != NULL)
 		bhp_p_dump(a_bhp->head, 0, NULL);
-	_cw_out_put(
-	    "=== bhp_dump() end ================================\n");
+	_cw_out_put("=== bhp_dump() end ================================\n");
 
-	if (a_bhp->is_thread_safe == TRUE)
+	if (a_bhp->is_thread_safe)
 		mtx_unlock(&a_bhp->lock);
 }
 
 void
 bhp_insert(cw_bhp_t *a_bhp, cw_bhpi_t *a_bhpi)
 {
-	cw_bhp_t temp_heap;
+	cw_bhp_t	temp_heap;
 
 	_cw_check_ptr(a_bhp);
-	_cw_assert(_LIBSTASH_BHP_MAGIC == a_bhp->magic_a);
-	_cw_assert(sizeof(cw_bhp_t) == a_bhp->size_of);
-	_cw_assert(_LIBSTASH_BHP_MAGIC == a_bhp->magic_b);
+	_cw_assert(a_bhp->magic_a == _LIBSTASH_BHP_MAGIC);
+	_cw_assert(a_bhp->size_of == sizeof(cw_bhp_t));
+	_cw_assert(a_bhp->magic_b == _LIBSTASH_BHP_MAGIC);
 	_cw_check_ptr(a_bhpi);
-	_cw_assert(_LIBSTASH_BHPI_MAGIC == a_bhpi->magic_a);
-	_cw_assert(sizeof(cw_bhpi_t) == a_bhpi->size_of);
-	_cw_assert(_LIBSTASH_BHPI_MAGIC == a_bhpi->magic_b);
-	if (a_bhp->is_thread_safe == TRUE)
+	_cw_assert(a_bhpi->magic_a == _LIBSTASH_BHPI_MAGIC);
+	_cw_assert(a_bhpi->size_of == sizeof(cw_bhpi_t));
+	_cw_assert(a_bhpi->magic_b == _LIBSTASH_BHPI_MAGIC);
+
+	if (a_bhp->is_thread_safe)
 		mtx_lock(&a_bhp->lock);
+
 	/* Create and initialize temp_heap. */
 	bhp_new(&temp_heap, a_bhp->priority_compare);
 	temp_heap.head = a_bhpi;
@@ -159,22 +155,24 @@ bhp_insert(cw_bhp_t *a_bhp, cw_bhpi_t *a_bhpi)
 	temp_heap.head = NULL;
 	bhp_delete(&temp_heap);
 
-	if (a_bhp->is_thread_safe == TRUE)
+	if (a_bhp->is_thread_safe)
 		mtx_unlock(&a_bhp->lock);
 }
 
 cw_bool_t
 bhp_find_min(cw_bhp_t *a_bhp, void **r_priority, void **r_data)
 {
-	cw_bool_t retval;
-	cw_bhpi_t *curr_min, *curr_pos;
+	cw_bool_t	retval;
+	cw_bhpi_t	*curr_min, *curr_pos;
 
 	_cw_check_ptr(a_bhp);
-	_cw_assert(_LIBSTASH_BHP_MAGIC == a_bhp->magic_a);
-	_cw_assert(sizeof(cw_bhp_t) == a_bhp->size_of);
-	_cw_assert(_LIBSTASH_BHP_MAGIC == a_bhp->magic_b);
-	if (a_bhp->is_thread_safe == TRUE)
+	_cw_assert(a_bhp->magic_a == _LIBSTASH_BHP_MAGIC);
+	_cw_assert(a_bhp->size_of == sizeof(cw_bhp_t));
+	_cw_assert(a_bhp->magic_b == _LIBSTASH_BHP_MAGIC);
+
+	if (a_bhp->is_thread_safe)
 		mtx_lock(&a_bhp->lock);
+
 	if (a_bhp->head != NULL) {
 		retval = FALSE;
 
@@ -184,27 +182,27 @@ bhp_find_min(cw_bhp_t *a_bhp, void **r_priority, void **r_data)
 		while (curr_pos != NULL) {
 			/*
 			 * Check if curr_pos is less than curr_min For
-			 * priority_compare(a, b), -1 means a < b, 0 means a
-			 * == b, 1 means a > b.
+			 * priority_compare(a, b), -1 means a < b, 0 means a ==
+			 * b, 1 means a > b.
 			 */
-			if (-1 == a_bhp->priority_compare(curr_pos->priority,
-			    curr_min->priority))
+			if (a_bhp->priority_compare(curr_pos->priority,
+			    curr_min->priority) == -1)
 				curr_min = curr_pos;
 			curr_pos = curr_pos->sibling;
 		}
 
 		/*
-		 * We've found a minimum priority item now, so point
-		 * *r_priority and *r_data to it.
+		 * We've found a minimum priority item now, so point *r_priority
+		 * and *r_data to it.
 		 */
-		if (NULL != r_priority)
+		if (r_priority != NULL)
 			*r_priority = (void *)curr_min->priority;
-		if (NULL != r_data)
+		if (r_data != NULL)
 			*r_data = (void *)curr_min->data;
 	} else
 		retval = TRUE;
 
-	if (a_bhp->is_thread_safe == TRUE)
+	if (a_bhp->is_thread_safe)
 		mtx_unlock(&a_bhp->lock);
 	return retval;
 }
@@ -212,16 +210,18 @@ bhp_find_min(cw_bhp_t *a_bhp, void **r_priority, void **r_data)
 cw_bool_t
 bhp_del_min(cw_bhp_t *a_bhp, void **r_priority, void **r_data)
 {
-	cw_bool_t retval;
-	cw_bhpi_t *prev_pos, *curr_pos, *next_pos, *before_min, *curr_min;
-	cw_bhp_t temp_heap;
+	cw_bool_t	retval;
+	cw_bhpi_t	*prev_pos, *curr_pos, *next_pos, *before_min, *curr_min;
+	cw_bhp_t	temp_heap;
 
 	_cw_check_ptr(a_bhp);
-	_cw_assert(_LIBSTASH_BHP_MAGIC == a_bhp->magic_a);
-	_cw_assert(sizeof(cw_bhp_t) == a_bhp->size_of);
-	_cw_assert(_LIBSTASH_BHP_MAGIC == a_bhp->magic_b);
-	if (a_bhp->is_thread_safe == TRUE)
+	_cw_assert(a_bhp->magic_a == _LIBSTASH_BHP_MAGIC);
+	_cw_assert(a_bhp->size_of == sizeof(cw_bhp_t));
+	_cw_assert(a_bhp->magic_b == _LIBSTASH_BHP_MAGIC);
+
+	if (a_bhp->is_thread_safe)
 		mtx_lock(&a_bhp->lock);
+
 	if (a_bhp->num_nodes == 0)
 		retval = TRUE;
 	else {
@@ -233,8 +233,8 @@ bhp_del_min(cw_bhp_t *a_bhp, void **r_priority, void **r_data)
 		curr_pos = a_bhp->head;
 		curr_min = curr_pos;
 		while (curr_pos != NULL) {
-			if (-1 == a_bhp->priority_compare(curr_pos->priority,
-				curr_min->priority)) {
+			if (a_bhp->priority_compare(curr_pos->priority,
+			    curr_min->priority) == -1) {
 				/* Found a new minimum. */
 				curr_min = curr_pos;
 				before_min = prev_pos;
@@ -261,9 +261,11 @@ bhp_del_min(cw_bhp_t *a_bhp, void **r_priority, void **r_data)
 		if (curr_pos != NULL)
 			next_pos = curr_pos->sibling;
 		else {
-			next_pos = NULL;	/* Make optimizing compilers
-						 * shut up about using
-						 * next_pos uninitialized. */
+			/*
+			 * Make optimizing compilers shut up about using
+			 * next_pos uninitialized.
+			 */
+			next_pos = NULL;	
 		}
 
 		while (curr_pos != NULL) {
@@ -291,14 +293,14 @@ bhp_del_min(cw_bhp_t *a_bhp, void **r_priority, void **r_data)
 		 * Now point *r_priority and *r_data to the item and free
 		 * the space taken up by the item structure.
 		 */
-		if (NULL != r_priority)
+		if (r_priority != NULL)
 			*r_priority = (void *)curr_min->priority;
-		if (NULL != r_data)
+		if (r_data != NULL)
 			*r_data = (void *)curr_min->data;
 		bhpi_delete(curr_min);
 	}
 
-	if (a_bhp->is_thread_safe == TRUE)
+	if (a_bhp->is_thread_safe)
 		mtx_unlock(&a_bhp->lock);
 	return retval;
 }
@@ -306,17 +308,19 @@ bhp_del_min(cw_bhp_t *a_bhp, void **r_priority, void **r_data)
 cw_uint64_t
 bhp_get_size(cw_bhp_t *a_bhp)
 {
-	cw_uint64_t retval;
+	cw_uint64_t	retval;
 
 	_cw_check_ptr(a_bhp);
-	_cw_assert(_LIBSTASH_BHP_MAGIC == a_bhp->magic_a);
-	_cw_assert(sizeof(cw_bhp_t) == a_bhp->size_of);
-	_cw_assert(_LIBSTASH_BHP_MAGIC == a_bhp->magic_b);
-	if (a_bhp->is_thread_safe == TRUE)
+	_cw_assert(a_bhp->magic_a == _LIBSTASH_BHP_MAGIC);
+	_cw_assert(a_bhp->size_of == sizeof(cw_bhp_t));
+	_cw_assert(a_bhp->magic_b == _LIBSTASH_BHP_MAGIC);
+
+	if (a_bhp->is_thread_safe)
 		mtx_lock(&a_bhp->lock);
+
 	retval = a_bhp->num_nodes;
 
-	if (a_bhp->is_thread_safe == TRUE)
+	if (a_bhp->is_thread_safe)
 		mtx_unlock(&a_bhp->lock);
 	return retval;
 }
@@ -325,35 +329,37 @@ void
 bhp_union(cw_bhp_t *a_a, cw_bhp_t *a_b)
 {
 	_cw_check_ptr(a_a);
-	_cw_assert(_LIBSTASH_BHP_MAGIC == a_a->magic_a);
-	_cw_assert(sizeof(cw_bhp_t) == a_a->size_of);
-	_cw_assert(_LIBSTASH_BHP_MAGIC == a_a->magic_b);
+	_cw_assert(a_a->magic_a == _LIBSTASH_BHP_MAGIC);
+	_cw_assert(a_a->size_of == sizeof(cw_bhp_t));
+	_cw_assert(a_a->magic_b == _LIBSTASH_BHP_MAGIC);
 	_cw_check_ptr(a_b);
-	_cw_assert(_LIBSTASH_BHP_MAGIC == a_b->magic_a);
-	_cw_assert(sizeof(cw_bhp_t) == a_b->size_of);
-	_cw_assert(_LIBSTASH_BHP_MAGIC == a_b->magic_b);
-	if (a_a->is_thread_safe == TRUE)
+	_cw_assert(a_b->magic_a == _LIBSTASH_BHP_MAGIC);
+	_cw_assert(a_b->size_of == sizeof(cw_bhp_t));
+	_cw_assert(a_b->magic_b == _LIBSTASH_BHP_MAGIC);
+
+	if (a_a->is_thread_safe)
 		mtx_lock(&a_a->lock);
-	if (a_b->is_thread_safe == TRUE)
+	if (a_b->is_thread_safe)
 		mtx_lock(&a_b->lock);
+
 	bhp_p_union(a_a, a_b);
 
-	if (a_b->is_thread_safe == TRUE)
+	if (a_b->is_thread_safe)
 		mtx_unlock(&a_b->lock);
 	/* Destroy the old heap. */
 	a_b->head = NULL;
 	bhp_delete(a_b);
 
-	if (a_a->is_thread_safe == TRUE)
+	if (a_a->is_thread_safe)
 		mtx_unlock(&a_a->lock);
 }
 
 cw_sint32_t
 bhp_priority_compare_uint32(const void *a_a, const void *a_b)
 {
-	cw_sint32_t retval;
-	cw_uint32_t a = *(cw_uint32_t *)a_a;
-	cw_uint32_t b = *(cw_uint32_t *)a_b;
+	cw_sint32_t	retval;
+	cw_uint32_t	a = *(cw_uint32_t *)a_a;
+	cw_uint32_t	b = *(cw_uint32_t *)a_b;
 
 	_cw_check_ptr(a_a);
 	_cw_check_ptr(a_b);
@@ -371,9 +377,9 @@ bhp_priority_compare_uint32(const void *a_a, const void *a_b)
 cw_sint32_t
 bhp_priority_compare_sint32(const void *a_a, const void *a_b)
 {
-	cw_sint32_t retval;
-	cw_sint32_t a = *(cw_sint32_t *)a_a;
-	cw_sint32_t b = *(cw_sint32_t *)a_b;
+	cw_sint32_t	retval;
+	cw_sint32_t	a = *(cw_sint32_t *)a_a;
+	cw_sint32_t	b = *(cw_sint32_t *)a_b;
 
 	_cw_check_ptr(a_a);
 	_cw_check_ptr(a_b);
@@ -391,9 +397,9 @@ bhp_priority_compare_sint32(const void *a_a, const void *a_b)
 cw_sint32_t
 bhp_priority_compare_uint64(const void *a_a, const void *a_b)
 {
-	cw_sint32_t retval;
-	cw_uint64_t a = *(cw_uint64_t *)a_a;
-	cw_uint64_t b = *(cw_uint64_t *)a_b;
+	cw_sint32_t	retval;
+	cw_uint64_t	a = *(cw_uint64_t *)a_a;
+	cw_uint64_t	b = *(cw_uint64_t *)a_b;
 
 	_cw_check_ptr(a_a);
 	_cw_check_ptr(a_b);
@@ -409,16 +415,16 @@ bhp_priority_compare_uint64(const void *a_a, const void *a_b)
 }
 
 static cw_bhp_t *
-bhp_p_new(cw_bhp_t *a_bhp, bhp_prio_comp_t *a_prio_comp,
-    cw_bool_t a_is_thread_safe)
+bhp_p_new(cw_bhp_t *a_bhp, bhp_prio_comp_t *a_prio_comp, cw_bool_t
+    a_is_thread_safe)
 {
-	cw_bhp_t *retval;
+	cw_bhp_t	*retval;
 
 	_cw_check_ptr(a_prio_comp);
 
 	if (a_bhp == NULL) {
 		retval = (cw_bhp_t *)_cw_malloc(sizeof(cw_bhp_t));
-		if (NULL == retval)
+		if (retval == NULL)
 			goto RETURN;
 		retval->is_malloced = TRUE;
 	} else {
@@ -426,7 +432,7 @@ bhp_p_new(cw_bhp_t *a_bhp, bhp_prio_comp_t *a_prio_comp,
 		retval->is_malloced = FALSE;
 	}
 
-	if (a_is_thread_safe == TRUE) {
+	if (a_is_thread_safe) {
 		retval->is_thread_safe = TRUE;
 		mtx_new(&retval->lock);
 	} else
@@ -449,11 +455,13 @@ bhp_p_new(cw_bhp_t *a_bhp, bhp_prio_comp_t *a_prio_comp,
 static cw_bhpi_t *
 bhp_p_dump(cw_bhpi_t *a_bhpi, cw_uint32_t a_depth, cw_bhpi_t *a_last_printed)
 {
-	cw_uint32_t i;
+	cw_uint32_t	i;
 
 	/* Sibling. */
-	if (NULL != a_bhpi->sibling)
-		a_last_printed = bhp_p_dump(a_bhpi->sibling, a_depth, a_last_printed);
+	if (a_bhpi->sibling != NULL) {
+		a_last_printed = bhp_p_dump(a_bhpi->sibling, a_depth,
+		    a_last_printed);
+	}
 	/* Self. */
 	if (a_bhpi->parent != a_last_printed) {
 		/* Indent. */
@@ -465,7 +473,7 @@ bhp_p_dump(cw_bhpi_t *a_bhpi, cw_uint32_t a_depth, cw_bhpi_t *a_last_printed)
 	a_last_printed = a_bhpi;
 
 	/* Child. */
-	if (NULL != a_bhpi->child) {
+	if (a_bhpi->child != NULL) {
 		_cw_out_put("-");
 		a_last_printed = bhp_p_dump(a_bhpi->child, a_depth + 1, a_bhpi);
 	} else
@@ -498,19 +506,19 @@ bhp_p_bin_link(cw_bhpi_t *a_root, cw_bhpi_t *a_non_root)
 static void
 bhp_p_merge(cw_bhp_t *a_a, cw_bhp_t *a_b)
 {
-	if (NULL == a_a->head)
+	if (a_a->head == NULL)
 		a_a->head = a_b->head;
-	else if (NULL != a_b->head) {
-		cw_bhpi_t *mark_a, *curr_a, *mark_b, *curr_b;
+	else if (a_b->head != NULL) {
+		cw_bhpi_t	*mark_a, *curr_a, *mark_b, *curr_b;
 
 		/* Both heaps have contents. */
 
 		if (a_a->head->degree > a_b->head->degree) {
-			cw_bhpi_t *t_bhpi;
+			cw_bhpi_t	*t_bhpi;
 
 			/*
-			 * Swap the heads to simplify the following loop.
-			 * Now we know that a_a->head is set correctly.
+			 * Swap the heads to simplify the following loop.  Now
+			 * we know that a_a->head is set correctly.
 			 */
 			t_bhpi = a_a->head;
 			a_a->head = a_b->head;
@@ -520,9 +528,9 @@ bhp_p_merge(cw_bhp_t *a_a, cw_bhp_t *a_b)
 				 * uninitialized reads. */
 		curr_a = a_a->head;
 		curr_b = a_b->head;
-		while ((NULL != curr_a->sibling) && (NULL != curr_b)) {
+		while ((curr_a->sibling != NULL) && (curr_b != NULL)) {
 			/* Fast forward to where we need to insert from b. */
-			while ((NULL != curr_a->sibling) && (curr_a->degree <=
+			while ((curr_a->sibling != NULL) && (curr_a->degree <=
 			    curr_b->degree)) {
 				mark_a = curr_a;
 				curr_a = curr_a->sibling;
@@ -534,7 +542,7 @@ bhp_p_merge(cw_bhp_t *a_a, cw_bhp_t *a_b)
 
 			/* Link things together. */
 			mark_a->sibling = mark_b;
-			while ((NULL != curr_b) && (curr_b->degree <=
+			while ((curr_b != NULL) && (curr_b->degree <=
 			    curr_a->degree)) {
 				mark_b = curr_b;
 				curr_b = curr_b->sibling;
@@ -544,10 +552,12 @@ bhp_p_merge(cw_bhp_t *a_a, cw_bhp_t *a_b)
 		}
 
 		/* If there are still nodes in b, append them. */
-		if (NULL != curr_b) {	/* curr_a->sibling is implicitly NULL
+		if (curr_b != NULL) {	/*
+					 * curr_a->sibling is implicitly NULL
 					 * if this is true, due to the loop
-					 * exit condition above. */
-			_cw_assert(NULL == curr_a->sibling);
+					 * exit condition above.
+					 */
+			_cw_assert(curr_a->sibling == NULL);
 			_cw_check_ptr(curr_b);
 			curr_a->sibling = curr_b;
 		}
@@ -559,7 +569,7 @@ bhp_p_merge(cw_bhp_t *a_a, cw_bhp_t *a_b)
 static void
 bhp_p_union(cw_bhp_t *a_a, cw_bhp_t *a_b)
 {
-	cw_bhpi_t *prev_node, *curr_node, *next_node;
+	cw_bhpi_t	*prev_node, *curr_node, *next_node;
 
 	_cw_assert(a_a->priority_compare == a_b->priority_compare);
 
@@ -577,15 +587,14 @@ bhp_p_union(cw_bhp_t *a_a, cw_bhp_t *a_b)
 		    ((next_node->sibling != NULL) &&
 		    (next_node->sibling->degree == curr_node->degree))) {
 			/*
-			 * Either these two roots are unequal, or we're
-			 * looking at the first two of three roots of equal
-			 * degree (can happen because of merge (2) plus
-			 * ripple carry (1)).
+			 * Either these two roots are unequal, or we're looking
+			 * at the first two of three roots of equal degree (can
+			 * happen because of merge (2) plus ripple carry (1)).
 			 */
 			prev_node = curr_node;
 			curr_node = next_node;
-		} else if (1 != a_a->priority_compare(curr_node->priority,
-		    next_node->priority)) {
+		} else if (a_a->priority_compare(curr_node->priority,
+		    next_node->priority) != 1) {
 			/*
 			 * The priority of the root of curr_node is <= the
 			 * priority of the root of next_node.

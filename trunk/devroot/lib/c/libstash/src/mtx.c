@@ -17,12 +17,12 @@
 cw_mtx_t *
 mtx_new(cw_mtx_t *a_mtx)
 {
-	cw_mtx_t *retval;
-	int     error;
+	cw_mtx_t	*retval;
+	int		error;
 
 	if (a_mtx == NULL) {
 		retval = (cw_mtx_t *)_cw_malloc(sizeof(cw_mtx_t));
-		if (NULL == retval)
+		if (retval == NULL)
 			goto RETURN;
 		retval->is_malloced = TRUE;
 	} else {
@@ -36,14 +36,15 @@ mtx_new(cw_mtx_t *a_mtx)
 		    "Error in pthread_mutex_init: [s]\n", strerror(error));
 		abort();
 	}
-RETURN:
+
+	RETURN:
 	return retval;
 }
 
 void
 mtx_delete(cw_mtx_t *a_mtx)
 {
-	int     error;
+	int	error;
 
 	_cw_check_ptr(a_mtx);
 
@@ -53,14 +54,14 @@ mtx_delete(cw_mtx_t *a_mtx)
 		    "Error in pthread_mutex_destroy(): [s]\n", strerror(error));
 		abort();
 	}
-	if (a_mtx->is_malloced == TRUE)
+	if (a_mtx->is_malloced)
 		_cw_free(a_mtx);
 }
 
 void
 mtx_lock(cw_mtx_t *a_mtx)
 {
-	int     error;
+	int	error;
 
 	_cw_check_ptr(a_mtx);
 
@@ -75,8 +76,8 @@ mtx_lock(cw_mtx_t *a_mtx)
 cw_bool_t
 mtx_trylock(cw_mtx_t *a_mtx)
 {
-	cw_bool_t retval;
-	int     error;
+	cw_bool_t	retval;
+	int		error;
 
 	_cw_check_ptr(a_mtx);
 
@@ -97,7 +98,7 @@ mtx_trylock(cw_mtx_t *a_mtx)
 void
 mtx_unlock(cw_mtx_t *a_mtx)
 {
-	int     error;
+	int	error;
 
 	_cw_check_ptr(a_mtx);
 

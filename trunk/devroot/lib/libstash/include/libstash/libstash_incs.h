@@ -27,7 +27,7 @@
 
 /*
  * Include files.  These must be listed in reverse dependency order (for
- * example, ring.h must come before oh.h.
+ * example, q.h must come before dch.h).
  */
 
 #include "q.h"

@@ -40,7 +40,7 @@ struct cw_mem_item_s {
 cw_mem_t *
 mem_new(void)
 {
-	cw_mem_t *retval;
+	cw_mem_t	*retval;
 
 	retval = (cw_mem_t *)_cw_malloc(sizeof(cw_mem_t));
 	if (retval == NULL)
@@ -78,8 +78,8 @@ mem_delete(cw_mem_t *a_mem)
 
 #ifdef _LIBSTASH_DBG
 	{
-		cw_uint64_t i, num_addrs;
-		void   *addr;
+		cw_uint64_t	i, num_addrs;
+		void		*addr;
 		struct cw_mem_item_s *allocation;
 
 		num_addrs = ch_count(a_mem->addr_hash);
@@ -87,28 +87,26 @@ mem_delete(cw_mem_t *a_mem)
 		if (dbg_is_registered(cw_g_dbg, "mem_verbose") ||
 		    (dbg_is_registered(cw_g_dbg, "mem_error") && (0 <
 		    num_addrs))) {
-			char    buf[1025];
+			char	buf[1025];
 
 			bzero(buf, sizeof(buf));
 			_cw_out_put_sn(buf, 1024,
-			    "[s](): [q] unfreed allocation[s]\n",
-			    __FUNCTION__, num_addrs,
-			    num_addrs != 1 ? "s" : "");
+			    "[s](): [q] unfreed allocation[s]\n", __FUNCTION__,
+			    num_addrs, num_addrs != 1 ? "s" : "");
 			_cw_out_put(buf);
 		}
 		for (i = 0; i < num_addrs; i++) {
 			ch_remove_iterate(a_mem->addr_hash, &addr, (void
 			    **)&allocation, NULL);
 			if (dbg_is_registered(cw_g_dbg, "mem_error")) {
-				char    buf[1025];
+				char	buf[1025];
 
 				bzero(buf, sizeof(buf));
 				_cw_out_put_sn(buf, 1024,
 				    "[s](): 0x[p], size [i] never freed "
 				    "(allocated at [s], line [i])\n",
 				    __FUNCTION__, addr, allocation->size,
-				    allocation->filename,
-				    allocation->line_num);
+				    allocation->filename, allocation->line_num);
 				_cw_out_put(buf);
 			}
 			_cw_free(allocation);
@@ -140,28 +138,26 @@ void *
 mem_malloc(cw_mem_t *a_mem, size_t a_size, const char *a_filename,
     cw_uint32_t a_line_num)
 {
-	void   *retval;
+	void	*retval;
 
 	_cw_assert(a_size > 0);
 
 #ifdef _LIBSTASH_DBG
-	if (NULL != a_mem)
+	if (a_mem != NULL)
 		mtx_lock(&a_mem->lock);
 #endif
 
 	retval = _cw_malloc(a_size);
 
-	if (NULL == retval) {
-		if (NULL != a_mem) {
+	if (retval == NULL) {
+		if (a_mem != NULL) {
 #ifndef _LIBSTASH_DBG
 			mtx_lock(&a_mem->lock);
 #endif
-			if (NULL != a_mem->oom_handler) {
-				if (TRUE ==
-				    a_mem->oom_handler(a_mem->handler_data,
-				    a_size)) {
+			if (a_mem->oom_handler != NULL) {
+				if (a_mem->oom_handler(a_mem->handler_data,
+				    a_size))
 					retval = _cw_malloc(a_size);
-				}
 			}
 #ifndef _LIBSTASH_DBG
 			mtx_unlock(&a_mem->lock);
@@ -169,23 +165,24 @@ mem_malloc(cw_mem_t *a_mem, size_t a_size, const char *a_filename,
 		}
 	}
 #ifdef _LIBSTASH_DBG
-	if (NULL == a_filename)
+	if (a_filename == NULL)
 		a_filename = "<?>";
-	if (NULL == retval) {
+	if (retval == NULL) {
 		if (dbg_is_registered(cw_g_dbg, "mem_error")) {
-			char    buf[1025];
+			char	buf[1025];
 
 			bzero(buf, sizeof(buf));
 			_cw_out_put_sn(buf, 1024,
-			    "[s](): malloc([i]) returned NULL at [s], line [i]\n",
+			    "[s](): malloc([i]) returned NULL at [s], "
+			    "line [i]\n",
 			    __FUNCTION__, a_size, a_filename, a_line_num);
 			_cw_out_put(buf);
 		}
-	} else if (NULL != a_mem) {
-		struct cw_mem_item_s *old_allocation;
+	} else if (a_mem != NULL) {
+		struct cw_mem_item_s	*old_allocation;
 
-		if (FALSE == ch_search(a_mem->addr_hash, retval, (void
-		    **)&old_allocation)) {
+		if (ch_search(a_mem->addr_hash, retval, (void
+		    **)&old_allocation) == FALSE) {
 			if (dbg_is_registered(cw_g_dbg, "mem_error")) {
 				char	buf[1025];
 
@@ -199,18 +196,16 @@ mem_malloc(cw_mem_t *a_mem, size_t a_size, const char *a_filename,
 				    __FUNCTION__, retval,
 				    old_allocation->filename,
 				    old_allocation->line_num,
-				    old_allocation->size,
-				    a_filename,
-				    a_line_num,
-				    a_size);
+				    old_allocation->size, a_filename,
+				    a_line_num, a_size);
 				_cw_out_put(buf);
 			}
 		} else {
-			struct cw_mem_item_s *allocation;
+			struct cw_mem_item_s	*allocation;
 
 			allocation = _cw_malloc(sizeof(struct cw_mem_item_s));
 			if (allocation == NULL) {
-				char    buf[1025];
+				char	buf[1025];
 
 				bzero(buf, sizeof(buf));
 				_cw_out_put_sn(buf, 1024,
@@ -226,26 +221,29 @@ mem_malloc(cw_mem_t *a_mem, size_t a_size, const char *a_filename,
 
 				if (dbg_is_registered(cw_g_dbg,
 				    "mem_verbose")) {
-					char    buf[1025];
+					char	buf[1025];
 
 					bzero(buf, sizeof(buf));
 					_cw_out_put_sn(buf, 1024,
-					    "[s](): 0x[p] <-- malloc([i]) at [s], line [i]\n",
-					    __FUNCTION__, retval, a_size,
-					    a_filename, a_line_num);
+					    "[s](): 0x[p] <-- malloc([i]) "
+					    "at [s], line [i]\n", __FUNCTION__,
+					    retval, a_size, a_filename,
+					    a_line_num);
 					_cw_out_put(buf);
 				}
-				if (-1 == ch_insert(a_mem->addr_hash, retval,
+				if (ch_insert(a_mem->addr_hash, retval,
 				    allocation, &allocation->chi)) {
 					if (dbg_is_registered(cw_g_dbg,
 					    "mem_error")) {
-						char    buf[1025];
+						char	buf[1025];
 
 						bzero(buf, sizeof(buf));
 
 						_cw_out_put_sn(buf, 1024,
-						    "[s](): Memory allocation error; "
-						    "unable to record allocation 0x[p] at [s], line [i]\n",
+						    "[s](): Memory allocation"
+						    " error; unable to record"
+						    " allocation 0x[p] at [s]"
+						    ", line [i]\n",
 						    __FUNCTION__, retval,
 						    a_filename, a_line_num);
 						_cw_out_put(buf);
@@ -264,28 +262,26 @@ void *
 mem_calloc(cw_mem_t *a_mem, size_t a_number, size_t a_size, const char
     *a_filename, cw_uint32_t a_line_num)
 {
-	void   *retval;
+	void	*retval;
 
 	_cw_assert(a_size * a_number > 0);
 
 #ifdef _LIBSTASH_DBG
-	if (NULL != a_mem)
+	if (a_mem != NULL)
 		mtx_lock(&a_mem->lock);
 #endif
 
 	retval = _cw_calloc(a_number, a_size);
 
-	if (NULL == retval) {
-		if (NULL != a_mem) {
+	if (retval == NULL) {
+		if (a_mem != NULL) {
 #ifndef _LIBSTASH_DBG
 			mtx_lock(&a_mem->lock);
 #endif
-			if (NULL != a_mem->oom_handler) {
-				if (TRUE ==
-				    a_mem->oom_handler(a_mem->handler_data,
-				    a_number * a_size)) {
+			if (a_mem->oom_handler != NULL) {
+				if (a_mem->oom_handler(a_mem->handler_data,
+				    a_number * a_size))
 					retval = _cw_calloc(a_number, a_size);
-				}
 			}
 #ifndef _LIBSTASH_DBG
 			mtx_unlock(&a_mem->lock);
@@ -293,27 +289,26 @@ mem_calloc(cw_mem_t *a_mem, size_t a_number, size_t a_size, const char
 		}
 	}
 #ifdef _LIBSTASH_DBG
-	if (NULL == a_filename)
+	if (a_filename == NULL)
 		a_filename = "<?>";
-	if (NULL == retval) {
+	if (retval == NULL) {
 		if (dbg_is_registered(cw_g_dbg, "mem_error")) {
-			char    buf[1025];
+			char	buf[1025];
 
 			bzero(buf, sizeof(buf));
 			_cw_out_put_sn(buf, 1024,
 			    "[s](): calloc([i], [i]) returned NULL "
-			    "at [s], line [i]\n",
-			    __FUNCTION__, a_number, a_size, a_filename,
-			    a_line_num);
+			    "at [s], line [i]\n", __FUNCTION__, a_number,
+			    a_size, a_filename, a_line_num);
 			_cw_out_put(buf);
 		}
-	} else if (NULL != a_mem) {
-		struct cw_mem_item_s *old_allocation;
+	} else if (a_mem != NULL) {
+		struct cw_mem_item_s	*old_allocation;
 
-		if (FALSE == ch_search(a_mem->addr_hash, retval, (void
-		    **)&old_allocation)) {
+		if (ch_search(a_mem->addr_hash, retval, (void
+		    **)&old_allocation) == FALSE) {
 			if (dbg_is_registered(cw_g_dbg, "mem_error")) {
-				char    buf[1025];
+				char	buf[1025];
 
 				_cw_check_ptr(old_allocation);
 
@@ -325,18 +320,16 @@ mem_calloc(cw_mem_t *a_mem, size_t a_number, size_t a_size, const char
 				    __FUNCTION__, retval,
 				    old_allocation->filename,
 				    old_allocation->line_num,
-				    old_allocation->size,
-				    a_filename,
-				    a_line_num,
-				    a_size);
+				    old_allocation->size, a_filename,
+				    a_line_num, a_size);
 				_cw_out_put(buf);
 			}
 		} else {
-			struct cw_mem_item_s *allocation;
+			struct cw_mem_item_s	*allocation;
 
 			allocation = _cw_malloc(sizeof(struct cw_mem_item_s));
 			if (allocation == NULL) {
-				char    buf[1025];
+				char	buf[1025];
 
 				bzero(buf, sizeof(buf));
 				_cw_out_put_sn(buf, 1024,
@@ -353,29 +346,33 @@ mem_calloc(cw_mem_t *a_mem, size_t a_number, size_t a_size, const char
 				allocation->filename = a_filename;
 				allocation->line_num = a_line_num;
 
-				if (dbg_is_registered(cw_g_dbg, "mem_verbose")) {
-					char    buf[1025];
+				if (dbg_is_registered(cw_g_dbg,
+				    "mem_verbose")) {
+					char	buf[1025];
 
 					bzero(buf, sizeof(buf));
 					_cw_out_put_sn(buf, 1024,
 					    "[s](): 0x[p] <-- calloc([i], [i]) "
 					    "at [s], line [i]\n",
-					    __FUNCTION__, retval, a_number, a_size,
-					    a_filename, a_line_num);
+					    __FUNCTION__, retval, a_number,
+					    a_size, a_filename, a_line_num);
 					_cw_out_put(buf);
 				}
-				if (-1 == ch_insert(a_mem->addr_hash, retval,
+				if (ch_insert(a_mem->addr_hash, retval,
 				    allocation, &allocation->chi)) {
-					if (dbg_is_registered(cw_g_dbg, "mem_error")) {
-						char    buf[1025];
+					if (dbg_is_registered(cw_g_dbg,
+					    "mem_error")) {
+						char	buf[1025];
 
 						bzero(buf, sizeof(buf));
 
 						_cw_out_put_sn(buf, 1024,
-						    "[s](): Memory allocation error; "
-						    "unable to record allocation 0x[p] at [s], line [i]\n",
-						    __FUNCTION__, retval,
-						    a_filename, a_line_num);
+						    "[s](): Memory allocation "
+						    "error; unable to record "
+						    "allocation 0x[p] at [s], "
+						    "line [i]\n", __FUNCTION__,
+						    retval, a_filename,
+						    a_line_num);
 						_cw_out_put(buf);
 					}
 				}
@@ -392,29 +389,27 @@ void *
 mem_realloc(cw_mem_t *a_mem, void *a_ptr, size_t a_size, const char *a_filename,
     cw_uint32_t a_line_num)
 {
-	void   *retval;
+	void	*retval;
 
 	_cw_check_ptr(a_ptr);
 	_cw_assert(a_size > 0);
 
 #ifdef _LIBSTASH_DBG
-	if (NULL != a_mem)
+	if (a_mem != NULL)
 		mtx_lock(&a_mem->lock);
 #endif
 
 	retval = _cw_realloc(a_ptr, a_size);
 
-	if (NULL == retval) {
-		if (NULL != a_mem) {
+	if (retval == NULL) {
+		if (a_mem != NULL) {
 #ifndef _LIBSTASH_DBG
 			mtx_lock(&a_mem->lock);
 #endif
-			if (NULL != a_mem->oom_handler) {
-				if (TRUE ==
-				    a_mem->oom_handler(a_mem->handler_data,
-				    a_size)) {
+			if (a_mem->oom_handler != NULL) {
+				if (a_mem->oom_handler(a_mem->handler_data,
+				    a_size))
 					retval = _cw_realloc(a_ptr, a_size);
-				}
 			}
 #ifndef _LIBSTASH_DBG
 			mtx_unlock(&a_mem->lock);
@@ -422,27 +417,25 @@ mem_realloc(cw_mem_t *a_mem, void *a_ptr, size_t a_size, const char *a_filename,
 		}
 	}
 #ifdef _LIBSTASH_DBG
-	if (NULL == a_filename)
+	if (a_filename == NULL)
 		a_filename = "<?>";
-	if (NULL == retval) {
+	if (retval == NULL) {
 		if (dbg_is_registered(cw_g_dbg, "mem_error")) {
-			char    buf[1025];
+			char	buf[1025];
 
 			bzero(buf, sizeof(buf));
-			_cw_out_put_sn(buf, 1024,
-			    "[s](): realloc(0x[p], [i]) "
-			    "returned NULL at [s], line [i]\n",
-			    __FUNCTION__, a_ptr, a_size,
-			    a_filename, a_line_num);
+			_cw_out_put_sn(buf, 1024, "[s](): realloc(0x[p], [i]) "
+			    "returned NULL at [s], line [i]\n", __FUNCTION__,
+			    a_ptr, a_size, a_filename, a_line_num);
 			_cw_out_put(buf);
 		}
-	} else if (NULL != a_mem) {
-		struct cw_mem_item_s *allocation;
+	} else if (a_mem != NULL) {
+		struct cw_mem_item_s	*allocation;
 
-		if (TRUE == ch_remove(a_mem->addr_hash, a_ptr, NULL,
-			(void **)&allocation, NULL)) {
+		if (ch_remove(a_mem->addr_hash, a_ptr, NULL, (void
+		    **)&allocation, NULL)) {
 			if (dbg_is_registered(cw_g_dbg, "mem_error")) {
-				char    buf[1025];
+				char	buf[1025];
 
 				bzero(buf, sizeof(buf));
 				_cw_out_put_sn(buf, 1024,
@@ -451,8 +444,8 @@ mem_realloc(cw_mem_t *a_mem, void *a_ptr, size_t a_size, const char *a_filename,
 				_cw_out_put(buf);
 			}
 		} else {
-			const char *old_filename;
-			cw_uint32_t old_size, old_line_num;
+			const char	*old_filename;
+			cw_uint32_t	old_size, old_line_num;
 
 			old_filename = allocation->filename;
 			old_size = allocation->size;
@@ -461,41 +454,36 @@ mem_realloc(cw_mem_t *a_mem, void *a_ptr, size_t a_size, const char *a_filename,
 			allocation->size = a_size;
 			allocation->line_num = a_line_num;
 
-			if (-1 == ch_insert(a_mem->addr_hash, retval,
-			    allocation, &allocation->chi)) {
+			if (ch_insert(a_mem->addr_hash, retval, allocation,
+			    &allocation->chi)) {
 				if (dbg_is_registered(cw_g_dbg, "mem_error")) {
-					char    buf[1025];
+					char	buf[1025];
 
 					bzero(buf, sizeof(buf));
 
 					_cw_out_put_sn(buf, 1024,
 					    "[s](): Memory allocation error; "
-					    "unable to record allocation 0x[p] at [s], line [i]\n",
-					    __FUNCTION__, retval,
-					    a_filename, a_line_num);
+					    "unable to record allocation 0x[p]"
+					    " at [s], line [i]\n", __FUNCTION__,
+					    retval, a_filename, a_line_num);
 					_cw_out_put(buf);
 				}
 			}
-			if (old_size < a_size) {
+			if (a_size > old_size) {
 				memset(((cw_uint8_t *)retval) + old_size,
 				    0xa5, a_size - old_size);
 			}
 			if (dbg_is_registered(cw_g_dbg, "mem_verbose")) {
-				char    buf[1025];
+				char	buf[1025];
 
 				bzero(buf, sizeof(buf));
 				_cw_out_put_sn(buf, 1024,
 				    "[s](): reallocing 0x[p]"
-				    " (was size [i], allocated at [s], line [i])"
-				    " to 0x[p], size [i] at [s], line [i]\n",
-				    __FUNCTION__, a_ptr,
-				    old_size,
-				    old_filename,
-				    old_line_num,
-				    retval,
-				    a_size,
-				    a_filename,
-				    a_line_num);
+				    " (was size [i], allocated at [s], line"
+				    " [i]) to 0x[p], size [i] at [s], line"
+				    " [i]\n", __FUNCTION__, a_ptr, old_size,
+				    old_filename, old_line_num, retval, a_size,
+				    a_filename, a_line_num);
 				_cw_out_put(buf);
 			}
 		}
@@ -511,41 +499,37 @@ mem_free(cw_mem_t *a_mem, void *a_ptr, const char *a_filename, cw_uint32_t
     a_line_num)
 {
 #ifdef _LIBSTASH_DBG
-	if (NULL == a_filename)
+	if (a_filename == NULL)
 		a_filename = "<?>";
-	if (NULL != a_mem) {
-		struct cw_mem_item_s *allocation;
+	if (a_mem != NULL) {
+		struct cw_mem_item_s	*allocation;
 
 		mtx_lock(&a_mem->lock);
 
-		if (TRUE == ch_remove(a_mem->addr_hash, a_ptr, NULL,
+		if (ch_remove(a_mem->addr_hash, a_ptr, NULL,
 			(void **)&allocation, NULL)) {
 			if (dbg_is_registered(cw_g_dbg, "mem_error")) {
-				char    buf[1025];
+				char	buf[1025];
 
 				bzero(buf, sizeof(buf));
 				_cw_out_put_sn(buf, 1024,
 				    "[s](): 0x[p] not allocated, "
 				    "attempted to free at [s], line [i]\n",
-				    __FUNCTION__, a_ptr,
-				    a_filename,
+				    __FUNCTION__, a_ptr, a_filename,
 				    a_line_num);
 				_cw_out_put(buf);
 			}
 		} else {
 			if (dbg_is_registered(cw_g_dbg, "mem_verbose")) {
-				char    buf[1025];
+				char	buf[1025];
 
 				bzero(buf, sizeof(buf));
 				_cw_out_put_sn(buf, 1024,
-				    "[s](): Freeing 0x[p], size [i], at [s], line [i] "
-				    "(allocated at [s], line [i])\n",
-				    __FUNCTION__, a_ptr,
-				    allocation->size,
-				    a_filename,
-				    a_line_num,
-				    allocation->filename,
-				    allocation->line_num);
+				    "[s](): Freeing 0x[p], size [i], at [s], "
+				    "line [i] (allocated at [s], line [i])\n",
+				    __FUNCTION__, a_ptr, allocation->size,
+				    a_filename, a_line_num,
+				    allocation->filename, allocation->line_num);
 				_cw_out_put(buf);
 			}
 			memset(a_ptr, 0x5a, allocation->size);
@@ -557,7 +541,7 @@ mem_free(cw_mem_t *a_mem, void *a_ptr, const char *a_filename, cw_uint32_t
 	_cw_free(a_ptr);
 
 #ifdef _LIBSTASH_DBG
-	if (NULL != a_mem)
+	if (a_mem != NULL)
 		mtx_unlock(&a_mem->lock);
 #endif
 }

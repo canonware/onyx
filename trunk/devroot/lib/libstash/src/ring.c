@@ -47,7 +47,7 @@ ring_delete(cw_ring_t *a_ring)
 void
 ring_dump(cw_ring_t *a_ring, const char *a_prefix)
 {
-	cw_ring_t *t_ring;
+	cw_ring_t	*t_ring;
 
 	_cw_check_ptr(a_prefix);
 
@@ -111,7 +111,7 @@ ring_prev(cw_ring_t *a_ring)
 void
 ring_meld(cw_ring_t *a_a, cw_ring_t *a_b)
 {
-	cw_ring_t *t_ring;
+	cw_ring_t	*t_ring;
 
 	_cw_check_ptr(a_a);
 	_cw_assert(a_a->magic == _CW_RING_MAGIC);
@@ -129,7 +129,7 @@ ring_meld(cw_ring_t *a_a, cw_ring_t *a_b)
 cw_ring_t *
 ring_cut(cw_ring_t *a_ring)
 {
-	cw_ring_t *retval;
+	cw_ring_t	*retval;
 
 	_cw_check_ptr(a_ring);
 	_cw_assert(a_ring->magic == _CW_RING_MAGIC);
@@ -147,7 +147,7 @@ ring_cut(cw_ring_t *a_ring)
 void
 ring_split(cw_ring_t *a_a, cw_ring_t *a_b)
 {
-	cw_ring_t *t_ring;
+	cw_ring_t	*t_ring;
 
 	_cw_check_ptr(a_a);
 	_cw_assert(a_a->magic == _CW_RING_MAGIC);

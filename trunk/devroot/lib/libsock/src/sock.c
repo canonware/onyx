@@ -47,7 +47,8 @@
  * Set socket options for a_sock.
  *
  ****************************************************************************/
-static cw_bool_t sock_p_config_socket(cw_sock_t *a_sock, cw_bool_t a_init);
+static cw_bool_t	sock_p_config_socket(cw_sock_t *a_sock, cw_bool_t
+    a_init);
 
 /****************************************************************************
  *
@@ -67,16 +68,16 @@ static cw_bool_t sock_p_config_socket(cw_sock_t *a_sock, cw_bool_t a_init);
  * Disconnect a_sock.
  *
  ****************************************************************************/
-static cw_bool_t sock_p_disconnect(cw_sock_t *a_sock);
+static cw_bool_t	sock_p_disconnect(cw_sock_t *a_sock);
 
 cw_sock_t *
 sock_new(cw_sock_t *a_sock, cw_uint32_t a_in_max_buf_size)
 {
-	cw_sock_t *retval;
+	cw_sock_t	*retval;
 
 	if (a_sock == NULL) {
 		retval = (cw_sock_t *)_cw_malloc(sizeof(cw_sock_t));
-		if (NULL == retval)
+		if (retval == NULL)
 			goto RETURN;
 		retval->is_malloced = TRUE;
 	} else {
@@ -84,14 +85,14 @@ sock_new(cw_sock_t *a_sock, cw_uint32_t a_in_max_buf_size)
 		retval->is_malloced = FALSE;
 	}
 
-	if (NULL == buf_new(&retval->in_buf)) {
+	if (buf_new(&retval->in_buf) == NULL) {
 		if (retval->is_malloced) {
 			_cw_free(retval);
 			retval = NULL;
 			goto RETURN;
 		}
 	}
-	if (NULL == buf_new(&retval->out_buf)) {
+	if (buf_new(&retval->out_buf) == NULL) {
 		buf_delete(&retval->in_buf);
 		if (retval->is_malloced) {
 			_cw_free(retval);
@@ -123,7 +124,7 @@ sock_new(cw_sock_t *a_sock, cw_uint32_t a_in_max_buf_size)
 	retval->magic = _LIBSOCK_SOCK_MAGIC;
 #endif
 
-RETURN:
+	RETURN:
 	return retval;
 }
 
@@ -131,9 +132,9 @@ void
 sock_delete(cw_sock_t *a_sock)
 {
 	_cw_check_ptr(a_sock);
-	_cw_assert(_LIBSOCK_SOCK_MAGIC == a_sock->magic);
+	_cw_assert(a_sock->magic == _LIBSOCK_SOCK_MAGIC);
 
-	if (TRUE == a_sock->is_connected)
+	if (a_sock->is_connected)
 		sock_p_disconnect(a_sock);
 	mtx_delete(&a_sock->lock);
 	cnd_delete(&a_sock->callback_cnd);
@@ -159,16 +160,16 @@ sock_delete(cw_sock_t *a_sock)
 cw_bool_t
 sock_is_connected(cw_sock_t *a_sock)
 {
-	cw_bool_t retval;
+	cw_bool_t	retval;
 
 	_cw_check_ptr(a_sock);
-	_cw_assert(_LIBSOCK_SOCK_MAGIC == a_sock->magic);
+	_cw_assert(a_sock->magic == _LIBSOCK_SOCK_MAGIC);
 
 	/*
 	 * Yeah, it's strange naming that results in us not returning
-	 * a_sock->is_connected.  The problem is that a_sock->error is the
-	 * first indication that we're disconnected, whereas
-	 * a_sock->is_connected means that we realize that fact internally.
+	 * a_sock->is_connected.  The problem is that a_sock->error is the first
+	 * indication that we're disconnected, whereas a_sock->is_connected
+	 * means that we realize that fact internally.
 	 */
 	mtx_lock(&a_sock->state_lock);
 	retval = !a_sock->error;
@@ -181,7 +182,7 @@ cw_uint32_t
 sock_get_port(cw_sock_t *a_sock)
 {
 	_cw_check_ptr(a_sock);
-	_cw_assert(_LIBSOCK_SOCK_MAGIC == a_sock->magic);
+	_cw_assert(a_sock->magic == _LIBSOCK_SOCK_MAGIC);
 
 	return a_sock->port;
 }
@@ -190,22 +191,23 @@ cw_sint32_t
 sock_connect(cw_sock_t *a_sock, const char *a_server_host, int a_port, struct
     timespec *a_timeout)
 {
-	cw_sint32_t retval;
-	int     error = 0;
-	cw_uint32_t server_ip;
+	cw_sint32_t	retval;
+	int		error = 0;
+	cw_uint32_t	server_ip;
 	struct sockaddr_in server_addr;
 
         _cw_check_ptr(a_sock);
-        _cw_assert(_LIBSOCK_SOCK_MAGIC == a_sock->magic);
+	_cw_assert(a_sock->magic == _LIBSOCK_SOCK_MAGIC);
         _cw_check_ptr(a_server_host);
+
         mtx_lock(&a_sock->state_lock);
 
-	if (TRUE == a_sock->is_connected) {
+	if (a_sock->is_connected) {
 		/* We're already connected to someone! */
 		retval = -1;
 		goto RETURN;
 	}
-	if (FALSE == a_sock->in_progress) {
+	if (a_sock->in_progress == FALSE) {
 		a_sock->sockfd = socket(AF_INET, SOCK_STREAM, 0);
 		if (a_sock->sockfd < 0) {
 			if (dbg_is_registered(cw_g_dbg, "sock_error")) {
@@ -245,30 +247,29 @@ sock_connect(cw_sock_t *a_sock, const char *a_server_host, int a_port, struct
 		    (struct sockaddr *)&server_addr,
 		            sizeof(struct sockaddr_in));
 	}
-	if ((0 > error) || (TRUE == a_sock->in_progress)) {
-		if ((errno == EINPROGRESS) || (TRUE == a_sock->in_progress)) {
-			struct pollfd pfd;
-			int     timeout;
+	if ((error < 0) || (a_sock->in_progress)) {
+		if ((errno == EINPROGRESS) || (a_sock->in_progress)) {
+			struct pollfd	pfd;
+			int		timeout;
 
 			bzero(&pfd, sizeof(struct pollfd));
 			pfd.fd = a_sock->sockfd;
 			pfd.events = POLLIN | POLLOUT;
 
 			/*
-			 * Convert a_timeout to something useful to
-			 * poll().
+			 * Convert a_timeout to something useful to poll().
 			 */
-			if (NULL == a_timeout)
+			if (a_timeout == NULL)
 				timeout = -1;
 			else {
 				timeout = (a_timeout->tv_sec * 1000) +
 				    (a_timeout->tv_nsec / 1000000);
 
-				if (0 > timeout)
+				if (timeout < 0)
 					timeout = INT_MAX;
 			}
 
-			if (0 > poll(&pfd, 1, timeout)) {
+			if (poll(&pfd, 1, timeout) < 0) {
 				if (dbg_is_registered(cw_g_dbg, "sock_error")) {
 					out_put_e(cw_g_out, NULL, 0,
 					    __FUNCTION__,
@@ -280,12 +281,11 @@ sock_connect(cw_sock_t *a_sock, const char *a_server_host, int a_port, struct
 				goto RETURN;
 			} else if (pfd.revents & POLLOUT) {
 				if (pfd.revents & POLLIN) {
-					int     error, len;
+					int	error, len;
 
 					/*
-					 * Make sure that the socket
-					 * is both readable and
-					 * writeable because data
+					 * Make sure that the socket is both
+					 * readable and writeable because data
 					 * has already arrived.
 					 */
 					len = sizeof(error);
@@ -298,7 +298,9 @@ sock_connect(cw_sock_t *a_sock, const char *a_server_host, int a_port, struct
 							out_put_e(cw_g_out,
 							    NULL, 0,
 							    __FUNCTION__,
-							    "Error in getsockopt(): [s]\n",
+							    "Error in "
+							    "getsockopt():"
+							    " [s]\n",
 							    strerror(errno));
 						}
 						a_sock->sockfd = -1;
@@ -310,7 +312,10 @@ sock_connect(cw_sock_t *a_sock, const char *a_server_host, int a_port, struct
 							out_put_e(cw_g_out,
 							    NULL, 0,
 							    __FUNCTION__,
-							    "Error in getsockopt() due to connect(): [s]\n",
+							    "Error in "
+							    "getsockopt() due "
+							    "to connect(): "
+							    "[s]\n",
 							    strerror(error));
 						}
 						a_sock->sockfd = -1;
@@ -323,7 +328,8 @@ sock_connect(cw_sock_t *a_sock, const char *a_server_host, int a_port, struct
 				if (dbg_is_registered(cw_g_dbg, "sock_error")) {
 					out_put_e(cw_g_out, NULL, 0,
 					    __FUNCTION__,
-					    "poll() timeout.  Connection failed\n");
+					    "poll() timeout.  Connection "
+					    "failed\n");
 				}
 				a_sock->in_progress = TRUE;
 				retval = 1;
@@ -335,7 +341,7 @@ sock_connect(cw_sock_t *a_sock, const char *a_server_host, int a_port, struct
 				    "Error in connect(): [s]\n",
 				    strerror(errno));
 			}
-			if (-1 == close(a_sock->sockfd)) {
+			if (close(a_sock->sockfd) == -1) {
 				if (dbg_is_registered(cw_g_dbg, "sock_error")) {
 					out_put_e(cw_g_out, NULL, 0,
 					    __FUNCTION__,
@@ -350,12 +356,12 @@ sock_connect(cw_sock_t *a_sock, const char *a_server_host, int a_port, struct
 	}
 	/* Get the port number for the socket. */
 	{
-		struct sockaddr_in name;
-		int     name_size;
+		struct sockaddr_in	name;
+		int			name_size;
 
 		name_size = sizeof(name);
-		if (0 > getsockname(a_sock->sockfd, (struct sockaddr *)&name,
-		    &name_size)) {
+		if (getsockname(a_sock->sockfd, (struct sockaddr *)&name,
+		    &name_size) < 0) {
 			if (dbg_is_registered(cw_g_dbg, "sock_error")) {
 				out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
 				    "Error in getsockname(): [s]\n",
@@ -368,22 +374,22 @@ sock_connect(cw_sock_t *a_sock, const char *a_server_host, int a_port, struct
 	}
 
 	/*
-	 * This is the only path through this function that does not
-	 * handle an error, so we can unconditionally toggle
-	 * a_sock->is_connected here and only here.
+	 * This is the only path through this function that does not handle an
+	 * error, so we can unconditionally toggle a_sock->is_connected here and
+	 * only here.
 	 */
 	a_sock->is_connected = TRUE;
 	a_sock->in_progress = FALSE;
 	a_sock->error = FALSE;
 
 	mtx_lock(&a_sock->lock);
-	if (TRUE == sockb_l_register_sock(a_sock)) {
+	if (sockb_l_register_sock(a_sock)) {
 		mtx_unlock(&a_sock->lock);
 		retval = -1;
 		goto RETURN;
 	}
 	cnd_wait(&a_sock->callback_cnd, &a_sock->lock);
-	if (TRUE == a_sock->error) {
+	if (a_sock->error) {
 		mtx_unlock(&a_sock->lock);
 		retval = -1;
 		goto RETURN;
@@ -392,8 +398,7 @@ sock_connect(cw_sock_t *a_sock, const char *a_server_host, int a_port, struct
 	mtx_unlock(&a_sock->lock);
 
 	retval = 0;
-
-RETURN:
+	RETURN:
 	mtx_unlock(&a_sock->state_lock);
 	return retval;
 }
@@ -401,13 +406,14 @@ RETURN:
 cw_bool_t
 sock_wrap(cw_sock_t *a_sock, int a_sockfd, cw_bool_t a_init)
 {
-	cw_bool_t retval;
+	cw_bool_t	retval;
 
 	_cw_check_ptr(a_sock);
-	_cw_assert(_LIBSOCK_SOCK_MAGIC == a_sock->magic);
+	_cw_assert(a_sock->magic == _LIBSOCK_SOCK_MAGIC);
+
 	mtx_lock(&a_sock->state_lock);
 
-	if (TRUE == a_sock->is_connected) {
+	if (a_sock->is_connected) {
 		/* We're already connected to someone! */
 		retval = TRUE;
 		goto RETURN;
@@ -417,16 +423,16 @@ sock_wrap(cw_sock_t *a_sock, int a_sockfd, cw_bool_t a_init)
 		a_sock->sockfd = -1;
 		retval = TRUE;
 	} else {
-		if (TRUE == a_init) {
-			struct sockaddr_in name;
-			int     name_size;
+		if (a_init) {
+			struct sockaddr_in	name;
+			int			name_size;
 
-			/* Get the port number for the socket. */
-
+			/*
+			 * Get the port number for the socket.
+			 */
 			name_size = sizeof(name);
-			if (0 > getsockname(a_sock->sockfd,
-				(struct sockaddr *)&name,
-				       &name_size)) {
+			if (getsockname(a_sock->sockfd, (struct sockaddr
+			    *)&name, &name_size) < 0) {
 				if (dbg_is_registered(cw_g_dbg, "sock_error")) {
 					out_put_e(cw_g_out, NULL, 0,
 					    __FUNCTION__,
@@ -446,13 +452,13 @@ sock_wrap(cw_sock_t *a_sock, int a_sockfd, cw_bool_t a_init)
 		a_sock->error = FALSE;
 
 		mtx_lock(&a_sock->lock);
-		if (TRUE == sockb_l_register_sock(a_sock)) {
+		if (sockb_l_register_sock(a_sock)) {
 			mtx_unlock(&a_sock->lock);
 			retval = TRUE;
 			goto RETURN;
 		}
 		cnd_wait(&a_sock->callback_cnd, &a_sock->lock);
-		if (TRUE == a_sock->error) {
+		if (a_sock->error) {
 			mtx_unlock(&a_sock->lock);
 			retval = TRUE;
 			goto RETURN;
@@ -463,7 +469,7 @@ sock_wrap(cw_sock_t *a_sock, int a_sockfd, cw_bool_t a_init)
 		retval = FALSE;
 	}
 
-RETURN:
+	RETURN:
 	mtx_unlock(&a_sock->state_lock);
 	return retval;
 }
@@ -471,10 +477,10 @@ RETURN:
 cw_bool_t
 sock_disconnect(cw_sock_t *a_sock)
 {
-	cw_bool_t retval;
+	cw_bool_t	retval;
 
 	_cw_check_ptr(a_sock);
-	_cw_assert(_LIBSOCK_SOCK_MAGIC == a_sock->magic);
+	_cw_assert(a_sock->magic == _LIBSOCK_SOCK_MAGIC);
 
 	retval = sock_p_disconnect(a_sock);
 
@@ -484,10 +490,10 @@ sock_disconnect(cw_sock_t *a_sock)
 cw_uint32_t
 sock_buffered_in(cw_sock_t *a_sock)
 {
-	cw_uint32_t retval;
+	cw_uint32_t	retval;
 
 	_cw_check_ptr(a_sock);
-	_cw_assert(_LIBSOCK_SOCK_MAGIC == a_sock->magic);
+	_cw_assert(a_sock->magic == _LIBSOCK_SOCK_MAGIC);
 
 	mtx_lock(&a_sock->in_lock);
 	retval = buf_get_size(&a_sock->in_buf);
@@ -500,10 +506,10 @@ cw_sint32_t
 sock_read(cw_sock_t *a_sock, cw_buf_t *a_spare, cw_sint32_t a_max_read, struct
     timespec *a_timeout)
 {
-	cw_sint32_t retval, size;
+	cw_sint32_t	retval, size;
 
         _cw_check_ptr(a_sock);
-        _cw_assert(_LIBSOCK_SOCK_MAGIC == a_sock->magic);
+	_cw_assert(a_sock->magic == _LIBSOCK_SOCK_MAGIC);
         _cw_check_ptr(a_spare);
 
         mtx_lock(&a_sock->in_lock);
@@ -514,17 +520,15 @@ sock_read(cw_sock_t *a_sock, cw_buf_t *a_spare, cw_sint32_t a_max_read, struct
 		 */
 
 		size = buf_get_size(&a_sock->in_buf);
-		if (0 == size)
+		if (size == 0)
 			retval = -2;
 		else if ((a_max_read == 0) || (size < a_max_read)) {
-			if (TRUE == (buf_catenate_buf(a_spare, &a_sock->in_buf,
-			    FALSE)))
+			if ((buf_catenate_buf(a_spare, &a_sock->in_buf, FALSE)))
 				retval = -1;
 			else
 				retval = size;
 		} else {
-			if (TRUE == (buf_split(a_spare, &a_sock->in_buf,
-			    a_max_read)))
+			if ((buf_split(a_spare, &a_sock->in_buf, a_max_read)))
 				retval = -1;
 			else
 				retval = a_max_read;
@@ -532,43 +536,42 @@ sock_read(cw_sock_t *a_sock, cw_buf_t *a_spare, cw_sint32_t a_max_read, struct
 
 		mtx_unlock(&a_sock->in_lock);
 	} else {
-		if (0 == buf_get_size(&a_sock->in_buf)) {
+		if (buf_get_size(&a_sock->in_buf) == 0) {
 			/* There's no data available right now. */
 			a_sock->in_need_signal_count++;
-			if (NULL == a_timeout)
+			if (a_timeout == NULL)
 				cnd_wait(&a_sock->in_cnd, &a_sock->in_lock);
-			else if ((0 != a_timeout->tv_sec) || (0 !=
-			    a_timeout->tv_nsec)) {
+			else if ((a_timeout->tv_sec != 0) || (a_timeout->tv_nsec
+			    != 0)) {
 				/*
-				 * a_timeout is non-zero, so wait.
-				 * We could call cnd_timedwait()
-				 * unconditionally, but there's no
-				 * real need to.
+				 * a_timeout is non-zero, so wait.  We could
+				 * call cnd_timedwait() unconditionally, but
+				 * there's no real need to.
 				 */
-				cnd_timedwait(&a_sock->in_cnd, &a_sock->in_lock, a_timeout);
+				cnd_timedwait(&a_sock->in_cnd, &a_sock->in_lock,
+				    a_timeout);
 			}
 			a_sock->in_need_signal_count--;
 		}
 		size = buf_get_size(&a_sock->in_buf);
-		if (0 < size) {
-			_cw_assert(a_sock->in_max_buf_size >= size);
-			if (a_sock->in_max_buf_size == size) {
+		if (size > 0) {
+			_cw_assert(size <= a_sock->in_max_buf_size);
+			if (size == a_sock->in_max_buf_size) {
 				/*
-				 * The incoming buffer was maxed,
-				 * but now there is space.
+				 * The incoming buffer was maxed, but now there
+				 * is space.
 				 */
-				while (TRUE ==
-				    sockb_l_in_space(a_sock->sockfd));
+				while (sockb_l_in_space(a_sock->sockfd));
 			}
 			if ((a_max_read == 0) || (size < a_max_read)) {
-				if (TRUE == (buf_catenate_buf(a_spare,
-				    &a_sock->in_buf, FALSE)))
+				if ((buf_catenate_buf(a_spare, &a_sock->in_buf,
+				    FALSE)))
 					retval = -1;
 				else
 					retval = size;
 			} else {
-				if (TRUE == (buf_split(a_spare,
-				    &a_sock->in_buf, a_max_read)))
+				if ((buf_split(a_spare, &a_sock->in_buf,
+				    a_max_read)))
 					retval = -1;
 				else
 					retval = a_max_read;
@@ -580,7 +583,7 @@ sock_read(cw_sock_t *a_sock, cw_buf_t *a_spare, cw_sint32_t a_max_read, struct
 				sockb_l_wakeup();
 		} else {
 			/* Make sure there wasn't an error. */
-			if (TRUE == a_sock->error)
+			if (a_sock->error)
 				retval = -2;
 			else
 				retval = 0;
@@ -595,35 +598,35 @@ sock_read(cw_sock_t *a_sock, cw_buf_t *a_spare, cw_sint32_t a_max_read, struct
 cw_bool_t
 sock_write(cw_sock_t *a_sock, cw_buf_t *a_buf)
 {
-	cw_bool_t retval;
-	cw_uint32_t out_buf_size;
+	cw_bool_t	retval;
+	cw_uint32_t	out_buf_size;
 
 	_cw_check_ptr(a_sock);
-	_cw_assert(_LIBSOCK_SOCK_MAGIC == a_sock->magic);
+	_cw_assert(a_sock->magic == _LIBSOCK_SOCK_MAGIC);
 	_cw_check_ptr(a_buf);
 
 	mtx_lock(&a_sock->out_lock);
 
-	if (TRUE == a_sock->error) {
+	if (a_sock->error) {
 		retval = TRUE;
 		goto RETURN;
 	}
-	if (0 < buf_get_size(a_buf)) {
-		if (TRUE == buf_catenate_buf(&a_sock->out_buf, a_buf, FALSE)) {
+	if (buf_get_size(a_buf) > 0) {
+		if (buf_catenate_buf(&a_sock->out_buf, a_buf, FALSE)) {
 			retval = TRUE;
 			goto RETURN;
 		}
 		out_buf_size = buf_get_size(&a_sock->out_buf);
 
-		if ((FALSE == a_sock->sockb_in_progress)
-		    && (TRUE == a_sock->out_is_flushed)) {
-			const struct iovec *iovec;
-			int     iovec_count;
-			cw_uint32_t bytes_written;
+		if ((a_sock->sockb_in_progress == FALSE)
+		    && (a_sock->out_is_flushed)) {
+			const struct iovec	*iovec;
+			int			iovec_count;
+			cw_uint32_t		bytes_written;
 
 			/*
-			 * Try to write the data immediately, instead of
-			 * always context switching to the sockb thread.
+			 * Try to write the data immediately, instead of always
+			 * context switching to the sockb thread.
 			 */
 			iovec = buf_get_iovec(&a_sock->out_buf, out_buf_size,
 			    TRUE, &iovec_count);
@@ -635,17 +638,17 @@ sock_write(cw_sock_t *a_sock, cw_buf_t *a_buf)
 			    bytes_written, buf_get_size(&a_sock->out_buf));
 #endif
 
-			if (0 < (cw_sint32_t)bytes_written) {
+			if ((cw_sint32_t)bytes_written > 0) {
 				buf_release_head_data(&a_sock->out_buf,
 				    bytes_written);
 				out_buf_size -= bytes_written;
-			} else if ((0 > (cw_sint32_t)bytes_written) && (EAGAIN
-			    != errno)) {
+			} else if (((cw_sint32_t)bytes_written < 0) && (errno !=
+			    EAGAIN)) {
 				/* Socket error.  Unregister the socket. */
 
 				/*
-				 * sock_p_disconnect() locks out_lock, so
-				 * avoid deadlock.
+				 * sock_p_disconnect() locks out_lock, so avoid
+				 * deadlock.
 				 */
 				mtx_unlock(&a_sock->out_lock);
 
@@ -653,14 +656,13 @@ sock_write(cw_sock_t *a_sock, cw_buf_t *a_buf)
 				retval = TRUE;
 				goto WRITE_ERROR;
 			}
-			if (0 < out_buf_size) {
-				if (TRUE == a_sock->out_is_flushed) {
+			if (out_buf_size > 0) {
+				if (a_sock->out_is_flushed) {
 					/*
 					 * Notify the sockb that we now have
 					 * data.
 					 */
-					if (TRUE ==
-					    sockb_l_out_notify(a_sock->sockfd)) {
+					if (sockb_l_out_notify(a_sock->sockfd)) {
 						retval = TRUE;
 						goto RETURN;
 					}
@@ -668,30 +670,30 @@ sock_write(cw_sock_t *a_sock, cw_buf_t *a_buf)
 				}
 			} else
 				a_sock->out_is_flushed = TRUE;
-		} else if (a_sock->out_is_flushed == TRUE) {
+		} else if (a_sock->out_is_flushed) {
 			/* Notify the sockb that we now have data. */
-			if (TRUE == sockb_l_out_notify(a_sock->sockfd)) {
+			if (sockb_l_out_notify(a_sock->sockfd)) {
 				retval = TRUE;
 				goto RETURN;
 			}
 			a_sock->out_is_flushed = FALSE;
 		}
 	}
-	retval = FALSE;
 
-RETURN:
+	retval = FALSE;
+	RETURN:
 	mtx_unlock(&a_sock->out_lock);
-WRITE_ERROR:
+	WRITE_ERROR:
 	return retval;
 }
 
 cw_bool_t
 sock_flush_out(cw_sock_t *a_sock)
 {
-	cw_bool_t retval;
+	cw_bool_t	retval;
 
 	_cw_check_ptr(a_sock);
-	_cw_assert(_LIBSOCK_SOCK_MAGIC == a_sock->magic);
+	_cw_assert(a_sock->magic == _LIBSOCK_SOCK_MAGIC);
 
 	mtx_lock(&a_sock->out_lock);
 	if (a_sock->error) {
@@ -704,13 +706,13 @@ sock_flush_out(cw_sock_t *a_sock)
 		cnd_wait(&a_sock->out_cnd, &a_sock->out_lock);
 		a_sock->out_need_broadcast_count--;
 	}
-	if (0 < buf_get_size(&a_sock->out_buf)) {
+	if (buf_get_size(&a_sock->out_buf) > 0) {
 		retval = TRUE;
 		goto RETURN;
 	}
-	retval = FALSE;
 
-RETURN:
+	retval = FALSE;
+	RETURN:
 	mtx_unlock(&a_sock->out_lock);
 	return retval;
 }
@@ -719,7 +721,7 @@ int
 sock_get_fd(cw_sock_t *a_sock)
 {
 	_cw_check_ptr(a_sock);
-	_cw_assert(_LIBSOCK_SOCK_MAGIC == a_sock->magic);
+	_cw_assert(a_sock->magic == _LIBSOCK_SOCK_MAGIC);
 
 	return a_sock->sockfd;
 }
@@ -727,10 +729,10 @@ sock_get_fd(cw_sock_t *a_sock)
 cw_uint32_t
 sock_l_get_in_space(cw_sock_t *a_sock)
 {
-	cw_uint32_t retval;
+	cw_uint32_t	retval;
 
 	_cw_check_ptr(a_sock);
-	_cw_assert(_LIBSOCK_SOCK_MAGIC == a_sock->magic);
+	_cw_assert(a_sock->magic == _LIBSOCK_SOCK_MAGIC);
 
 	retval = a_sock->in_max_buf_size;
 
@@ -746,10 +748,10 @@ sock_l_get_in_space(cw_sock_t *a_sock)
 cw_uint32_t
 sock_l_get_in_size(cw_sock_t *a_sock)
 {
-	cw_uint32_t retval;
+	cw_uint32_t	retval;
 
 	_cw_check_ptr(a_sock);
-	_cw_assert(_LIBSOCK_SOCK_MAGIC == a_sock->magic);
+	_cw_assert(a_sock->magic == _LIBSOCK_SOCK_MAGIC);
 
 	mtx_lock(&a_sock->in_lock);
 	retval = buf_get_size(&a_sock->in_buf);
@@ -762,7 +764,7 @@ cw_uint32_t
 sock_l_get_in_max_buf_size(cw_sock_t *a_sock)
 {
 	_cw_check_ptr(a_sock);
-	_cw_assert(_LIBSOCK_SOCK_MAGIC == a_sock->magic);
+	_cw_assert(a_sock->magic == _LIBSOCK_SOCK_MAGIC);
 
 	return a_sock->in_max_buf_size;
 }
@@ -771,16 +773,16 @@ void
 sock_l_get_out_data(cw_sock_t *a_sock, cw_buf_t *r_buf)
 {
 	_cw_check_ptr(a_sock);
-	_cw_assert(_LIBSOCK_SOCK_MAGIC == a_sock->magic);
+	_cw_assert(a_sock->magic == _LIBSOCK_SOCK_MAGIC);
 	_cw_check_ptr(r_buf);
 
 	mtx_lock(&a_sock->out_lock);
 
 	/*
-	 * If buf_split() or buf_catenate() has a memory allocation, it
-	 * isn't fatal, since it will simply cause the sockb thread to try
-	 * to write 0 bytes.  In actuality, this is extremely unlikely to
-	 * happen in the steady state, but even if it does, oh well.
+	 * If buf_split() or buf_catenate() has a memory allocation, it isn't
+	 * fatal, since it will simply cause the sockb thread to try to write 0
+	 * bytes.  In actuality, this is extremely unlikely to happen in the
+	 * steady state, but even if it does, oh well.
 	 */
 	if (buf_get_size(&a_sock->out_buf) > a_sock->os_outbuf_size)
 		buf_split(r_buf, &a_sock->out_buf, a_sock->os_outbuf_size);
@@ -796,17 +798,17 @@ sock_l_get_out_data(cw_sock_t *a_sock, cw_buf_t *r_buf)
 cw_uint32_t
 sock_l_put_back_out_data(cw_sock_t *a_sock, cw_buf_t *a_buf)
 {
-	cw_uint32_t retval;
+	cw_uint32_t	retval;
 
 	_cw_check_ptr(a_sock);
-	_cw_assert(_LIBSOCK_SOCK_MAGIC == a_sock->magic);
+	_cw_assert(a_sock->magic == _LIBSOCK_SOCK_MAGIC);
 	_cw_check_ptr(a_buf);
 
 	mtx_lock(&a_sock->out_lock);
 
 	/*
-	 * Make a note that the sockb thread gave our data back, or got rid
-	 * of it for us.
+	 * Make a note that the sockb thread gave our data back, or got rid of
+	 * it for us.
 	 */
 	a_sock->sockb_in_progress = FALSE;
 
@@ -814,19 +816,19 @@ sock_l_put_back_out_data(cw_sock_t *a_sock, cw_buf_t *a_buf)
 	 * It's very unlikely that a memory error would occur in
 	 * buf_catenate_buf() here, since we previously had at least as much
 	 * data buffered in a_sock, and a_buf tends to have a sufficiently
-	 * expanded bufel array.  However, an error could occur, and there's
-	 * no good way to deal with it.
+	 * expanded bufel array.  However, an error could occur, and there's no
+	 * good way to deal with it.
 	 */
 	if (0 < buf_get_size(&a_sock->out_buf)) {
 		/* There are still data in out_buf, so preserve the order. */
-		while (TRUE == buf_catenate_buf(a_buf, &a_sock->out_buf,
-		    FALSE)) {
+		while (buf_catenate_buf(a_buf, &a_sock->out_buf, FALSE)) {
 			if (dbg_is_registered(cw_g_dbg, "sock_error"))
-				_cw_out_put_e("Memory allocation error; yielding\n");
+				_cw_out_put_e("Memory allocation error; "
+				    "yielding\n");
 			thd_yield();
 		}
 	}
-	while (TRUE == buf_catenate_buf(&a_sock->out_buf, a_buf, FALSE)) {
+	while (buf_catenate_buf(&a_sock->out_buf, a_buf, FALSE)) {
 		if (dbg_is_registered(cw_g_dbg, "sock_error"))
 			_cw_out_put_e("Memory allocation error; yielding\n");
 		thd_yield();
@@ -834,9 +836,9 @@ sock_l_put_back_out_data(cw_sock_t *a_sock, cw_buf_t *a_buf)
 	_cw_assert(0 == buf_get_size(a_buf));
 
 	retval = buf_get_size(&a_sock->out_buf);
-	if (0 == retval) {
+	if (retval == 0) {
 		a_sock->out_is_flushed = TRUE;
-		if (0 < a_sock->out_need_broadcast_count)
+		if (a_sock->out_need_broadcast_count > 0)
 			cnd_broadcast(&a_sock->out_cnd);
 	}
 	mtx_unlock(&a_sock->out_lock);
@@ -847,16 +849,16 @@ sock_l_put_back_out_data(cw_sock_t *a_sock, cw_buf_t *a_buf)
 cw_uint32_t
 sock_l_put_in_data(cw_sock_t *a_sock, cw_buf_t *a_buf)
 {
-	cw_uint32_t retval;
-	cw_uint32_t buffered_in;
+	cw_uint32_t	retval;
+	cw_uint32_t	buffered_in;
 
 	_cw_check_ptr(a_sock);
-	_cw_assert(_LIBSOCK_SOCK_MAGIC == a_sock->magic);
+	_cw_assert(a_sock->magic == _LIBSOCK_SOCK_MAGIC);
 	_cw_check_ptr(a_buf);
 
 	mtx_lock(&a_sock->in_lock);
 
-	while (TRUE == buf_catenate_buf(&a_sock->in_buf, a_buf, FALSE)) {
+	while (buf_catenate_buf(&a_sock->in_buf, a_buf, FALSE)) {
 		if (dbg_is_registered(cw_g_dbg, "sock_error"))
 			_cw_out_put_e("Memory allocation error; yielding\n");
 		thd_yield();
@@ -872,13 +874,12 @@ sock_l_put_in_data(cw_sock_t *a_sock, cw_buf_t *a_buf)
 	 * over-full, avoid wrapping the retval.
 	 */
 	buffered_in = buf_get_size(&a_sock->in_buf);
-	if (a_sock->in_max_buf_size > buffered_in)
+	if (buffered_in < a_sock->in_max_buf_size)
 		retval = a_sock->in_max_buf_size - buffered_in;
 	else
 		retval = 0;
 
 	mtx_unlock(&a_sock->in_lock);
-
 	return retval;
 }
 
@@ -886,13 +887,13 @@ void
 sock_l_message_callback(cw_sock_t *a_sock, cw_bool_t a_error)
 {
 	_cw_check_ptr(a_sock);
-	_cw_assert(_LIBSOCK_SOCK_MAGIC == a_sock->magic);
+	_cw_assert(a_sock->magic == _LIBSOCK_SOCK_MAGIC);
 
 	mtx_lock(&a_sock->lock);
 	mtx_lock(&a_sock->in_lock);
 	mtx_lock(&a_sock->out_lock);
 
-	if (TRUE == a_error)
+	if (a_error)
 		a_sock->error = TRUE;
 	cnd_signal(&a_sock->callback_cnd);
 
@@ -905,7 +906,7 @@ void
 sock_l_error_callback(cw_sock_t *a_sock)
 {
 	_cw_check_ptr(a_sock);
-	_cw_assert(_LIBSOCK_SOCK_MAGIC == a_sock->magic);
+	_cw_assert(a_sock->magic == _LIBSOCK_SOCK_MAGIC);
 
 	mtx_lock(&a_sock->state_lock);
 	mtx_lock(&a_sock->lock);
@@ -918,13 +919,13 @@ sock_l_error_callback(cw_sock_t *a_sock)
 	mtx_unlock(&a_sock->state_lock);
 
 	/* Wake up waiting threads, if there are any. */
-	if (FALSE == mtx_trylock(&a_sock->in_lock)) {
-		if (0 != a_sock->in_need_signal_count)
+	if (mtx_trylock(&a_sock->in_lock) == FALSE) {
+		if (a_sock->in_need_signal_count != 0)
 			cnd_signal(&a_sock->in_cnd);
 		mtx_unlock(&a_sock->in_lock);
 	}
-	if (FALSE == mtx_trylock(&a_sock->out_lock)) {
-		if (0 != a_sock->out_need_broadcast_count)
+	if (mtx_trylock(&a_sock->out_lock) == FALSE) {
+		if (a_sock->out_need_broadcast_count != 0)
 			cnd_broadcast(&a_sock->out_cnd);
 		mtx_unlock(&a_sock->out_lock);
 	}
@@ -933,17 +934,17 @@ sock_l_error_callback(cw_sock_t *a_sock)
 static cw_bool_t
 sock_p_config_socket(cw_sock_t *a_sock, cw_bool_t a_init)
 {
-	cw_bool_t retval;
-	int     val, len;
-	struct linger linger_struct;
+	cw_bool_t	retval;
+	int		val, len;
+	struct linger	linger_struct;
 
-	if (TRUE == a_init) {
+	if (a_init) {
 		/* Print out all kinds of socket info. */
 		if (dbg_is_registered(cw_g_dbg, "sock_sockopt")) {
 			/*
 			 * Define a macro to do the drudgery of getting an
-			 * option and printing it, since we're doing this
-			 * quite a few times.
+			 * option and printing it, since we're doing this quite
+			 * a few times.
 			 */
 #define _CW_SOCK_GETSOCKOPT(a)						\
 	do {								\
@@ -985,19 +986,19 @@ sock_p_config_socket(cw_sock_t *a_sock, cw_bool_t a_init)
 #undef _CW_SOCK_GETSOCKOPT
 		}
 		/*
-		 * Tell the socket to wait and try to flush buffered data
-		 * before closing at the end.
+		 * Tell the socket to wait and try to flush buffered data before
+		 * closing at the end.
 		 * 
 		 * 10 seconds is a bit arbitrary, eh?
 		 */
 		linger_struct.l_onoff = 1;
 		linger_struct.l_linger = 10;
-		if (setsockopt(a_sock->sockfd, SOL_SOCKET, SO_LINGER,
-		    (void *)&linger_struct, sizeof(linger_struct))) {
+		if (setsockopt(a_sock->sockfd, SOL_SOCKET, SO_LINGER, (void
+		    *)&linger_struct, sizeof(linger_struct))) {
 			if (dbg_is_registered(cw_g_dbg, "sock_error")) {
 				out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-				    "Error for SO_LINGER in setsockopt(): [s]\n",
-				    strerror(errno));
+				    "Error for SO_LINGER in setsockopt(): "
+				    "[s]\n", strerror(errno));
 			}
 			retval = TRUE;
 			goto RETURN;
@@ -1005,21 +1006,21 @@ sock_p_config_socket(cw_sock_t *a_sock, cw_bool_t a_init)
 			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
 			    "SO_LINGER: [s], [i] second[s]\n",
 			    linger_struct.l_onoff ? "on" : "off",
-			    linger_struct.l_linger,
-			    linger_struct.l_linger != 1 ? "s" : "");
+			    linger_struct.l_linger, linger_struct.l_linger != 1
+			    ? "s" : "");
 		}
 #ifdef SO_SNDLOWAIT
 		/*
-		 * Set the socket to not buffer outgoing data without trying
-		 * to send it.
+		 * Set the socket to not buffer outgoing data without trying to
+		 * send it.
 		 */
 		val = 1;
-		if (setsockopt(a_sock->sockfd, SOL_SOCKET, SO_SNDLOWAT,
-		    (void *)&val, sizeof(val))) {
+		if (setsockopt(a_sock->sockfd, SOL_SOCKET, SO_SNDLOWAT, (void
+		    *)&val, sizeof(val))) {
 			if (dbg_is_registered(cw_g_dbg, "sock_error")) {
 				out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-				    "Error for SO_SNDLOWAT in setsockopt(): [s]\n",
-				    strerror(errno));
+				    "Error for SO_SNDLOWAT in setsockopt(): "
+				    "[s]\n", strerror(errno));
 			}
 			retval = TRUE;
 			goto RETURN;
@@ -1031,8 +1032,8 @@ sock_p_config_socket(cw_sock_t *a_sock, cw_bool_t a_init)
 
 		/* Re-use the socket. */
 		val = 1;
-		if (0 > setsockopt(a_sock->sockfd, SOL_SOCKET, SO_REUSEADDR,
-		    (void *)&val, sizeof(val))) {
+		if (setsockopt(a_sock->sockfd, SOL_SOCKET, SO_REUSEADDR, (void
+		    *)&val, sizeof(val)) < 0) {
 			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
 			    "Error for SO_REUSEADDR in setsockopt(): [s]\n",
 			    strerror(errno));
@@ -1041,45 +1042,46 @@ sock_p_config_socket(cw_sock_t *a_sock, cw_bool_t a_init)
 		}
 	}
 	/*
-	 * Get the size of the OS's incoming buffer, so that we don't place
-	 * undo strain on the sockb thread when it asks how much it should
-	 * try to read.
+	 * Get the size of the OS's incoming buffer, so that we don't place undo
+	 * strain on the sockb thread when it asks how much it should try to
+	 * read.
 	 */
 	{
-		int     len;
+		int	len;
 
 		len = sizeof(a_sock->os_inbuf_size);
-		if (getsockopt(a_sock->sockfd, SOL_SOCKET, (SO_RCVBUF),
-		    (void *)&a_sock->os_inbuf_size, &len)) {
+		if (getsockopt(a_sock->sockfd, SOL_SOCKET, (SO_RCVBUF), (void
+		    *)&a_sock->os_inbuf_size, &len)) {
 			/* Just choose some number... */
 			a_sock->os_inbuf_size = 65536;
 		}
 	}
 
 	/*
-	 * Get the size of the OS's outgoing buffer, so that we can hand no
-	 * more than that amount to sockb each time it asks for data.
+	 * Get the size of the OS's outgoing buffer, so that we can hand no more
+	 * than that amount to sockb each time it asks for data.
 	 */
 	{
-		int     len;
+		int	len;
 
 		len = sizeof(a_sock->os_outbuf_size);
-		if (getsockopt(a_sock->sockfd, SOL_SOCKET, SO_SNDBUF,
-		    (void *)&a_sock->os_outbuf_size, &len)) {
+		if (getsockopt(a_sock->sockfd, SOL_SOCKET, SO_SNDBUF, (void
+		    *)&a_sock->os_outbuf_size, &len)) {
 			/* Just choose some number... */
 			a_sock->os_outbuf_size = 65536;
 		}
 	}
 
 	/*
-	 * Set the socket to non-blocking, so that we don't have to worry
-	 * about sockb's poll loop locking up.
+	 * Set the socket to non-blocking, so that we don't have to worry about
+	 * sockb's poll loop locking up.
 	 */
 	val = fcntl(a_sock->sockfd, F_GETFL, 0);
 	if (val == -1) {
 		if (dbg_is_registered(cw_g_dbg, "sock_error")) {
 			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-			    "Error for F_GETFL in fcntl(): [s]\n", strerror(errno));
+			    "Error for F_GETFL in fcntl(): [s]\n",
+			    strerror(errno));
 		}
 		retval = TRUE;
 		goto RETURN;
@@ -1087,29 +1089,30 @@ sock_p_config_socket(cw_sock_t *a_sock, cw_bool_t a_init)
 	if (fcntl(a_sock->sockfd, F_SETFL, val | O_NONBLOCK)) {
 		if (dbg_is_registered(cw_g_dbg, "sock_error")) {
 			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-			    "Error for F_SETFL in fcntl(): [s]\n", strerror(errno));
+			    "Error for F_SETFL in fcntl(): [s]\n",
+			    strerror(errno));
 		}
 		retval = TRUE;
 		goto RETURN;
 	}
-	retval = FALSE;
 
-RETURN:
+	retval = FALSE;
+	RETURN:
 	return retval;
 }
 
 static cw_bool_t
 sock_p_disconnect(cw_sock_t *a_sock)
 {
-	cw_bool_t retval;
-	cw_bool_t did_broadcast, done;
-	int     val;
+	cw_bool_t	retval;
+	cw_bool_t	did_broadcast, done;
+	int		val;
 
-	if (TRUE == a_sock->is_connected) {
+	if (a_sock->is_connected) {
 		/* Unregister the sock with sockb. */
 		mtx_lock(&a_sock->state_lock);
 		mtx_lock(&a_sock->lock);
-		if (FALSE == a_sock->error) {
+		if (a_sock->error == FALSE) {
 			mtx_lock(&a_sock->in_lock);
 			mtx_lock(&a_sock->out_lock);
 			a_sock->error = TRUE;
@@ -1117,7 +1120,7 @@ sock_p_disconnect(cw_sock_t *a_sock)
 			mtx_unlock(&a_sock->in_lock);
 			mtx_unlock(&a_sock->state_lock);
 
-			if (TRUE == sockb_l_unregister_sock(a_sock->sockfd)) {
+			if (sockb_l_unregister_sock(a_sock->sockfd)) {
 				mtx_unlock(&a_sock->lock);
 				retval = TRUE;
 				goto RETURN;
@@ -1130,8 +1133,8 @@ sock_p_disconnect(cw_sock_t *a_sock)
 		mtx_unlock(&a_sock->lock);
 
 		/*
-		 * Make sure there are no threads blocked inside a_sock
-		 * before cleaning up.
+		 * Make sure there are no threads blocked inside a_sock before
+		 * cleaning up.
 		 */
 		for (did_broadcast = done = FALSE; done == FALSE;) {
 			mtx_lock(&a_sock->in_lock);
@@ -1186,6 +1189,6 @@ sock_p_disconnect(cw_sock_t *a_sock)
 	} else
 		retval = TRUE;
 
-RETURN:
+	RETURN:
 	return retval;
 }

@@ -17,12 +17,12 @@
 cw_thd_t *
 thd_new(cw_thd_t *a_thd, void *(*a_start_func) (void *), void *a_arg)
 {
-	cw_thd_t *retval;
-	int     error;
+	cw_thd_t	*retval;
+	int		error;
 
 	if (a_thd == NULL) {
 		retval = (cw_thd_t *)_cw_malloc(sizeof(cw_thd_t));
-		if (NULL == retval)
+		if (retval == NULL)
 			goto RETURN;
 		retval->is_malloced = TRUE;
 	} else {
@@ -36,14 +36,14 @@ thd_new(cw_thd_t *a_thd, void *(*a_start_func) (void *), void *a_arg)
 		    "Error in pthread_create(): [s]\n", strerror(error));
 		abort();
 	}
-RETURN:
+	RETURN:
 	return retval;
 }
 
 void
 thd_delete(cw_thd_t *a_thd)
 {
-	int     error;
+	int	error;
 
 	_cw_check_ptr(a_thd);
 
@@ -53,15 +53,15 @@ thd_delete(cw_thd_t *a_thd)
 		    "Error in pthread_detach(): [s]\n", strerror(error));
 		abort();
 	}
-	if (a_thd->is_malloced == TRUE)
+	if (a_thd->is_malloced)
 		_cw_free(a_thd);
 }
 
-void   *
+void *
 thd_join(cw_thd_t *a_thd)
 {
-	void   *retval;
-	int     error;
+	void	*retval;
+	int	error;
 
 	_cw_check_ptr(a_thd);
 
@@ -71,7 +71,7 @@ thd_join(cw_thd_t *a_thd)
 		    "Error in pthread_join(): [s]\n", strerror(error));
 		abort();
 	}
-	if (a_thd->is_malloced == TRUE)
+	if (a_thd->is_malloced)
 		_cw_free(a_thd);
 	return retval;
 }

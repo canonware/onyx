@@ -24,28 +24,28 @@
 
 /* Designator values.  These codes are used to designate the type of each
  * byte in a_format by building a corresponding string during parsing. */
-#define _LIBSTASH_OUT_DES_NORMAL    'n'
-#define _LIBSTASH_OUT_DES_SPECIFIER 's'
-#define _LIBSTASH_OUT_DES_WHITEOUT  'w'
+#define _LIBSTASH_OUT_DES_NORMAL	'n'
+#define _LIBSTASH_OUT_DES_SPECIFIER	's'
+#define _LIBSTASH_OUT_DES_WHITEOUT 	'w'
 
 /* Maximum size of specifier to use a stack buffer for parsing. */
 #ifdef _LIBSTASH_DBG
-#define _LIBSTASH_OUT_SPEC_BUF 8
+#define _LIBSTASH_OUT_SPEC_BUF		   8
 #else
-#define _LIBSTASH_OUT_SPEC_BUF 128
+#define _LIBSTASH_OUT_SPEC_BUF		 128
 #endif
 
 /* Maximum size of stack buffer to use for printing. */
 #ifdef _LIBSTASH_DBG
-#define _LIBSTASH_OUT_PRINT_BUF 8
+#define _LIBSTASH_OUT_PRINT_BUF		   8
 #else
-#define _LIBSTASH_OUT_PRINT_BUF 1024
+#define _LIBSTASH_OUT_PRINT_BUF 	1024
 #endif
 
 #ifdef _LIBSTASH_DBG
-#define _LIBSTASH_OUT_ENT_CACHE 1
+#define _LIBSTASH_OUT_ENT_CACHE		   1
 #else
-#define _LIBSTASH_OUT_ENT_CACHE 8
+#define _LIBSTASH_OUT_ENT_CACHE		   8
 #endif
 
 /*
@@ -108,40 +108,43 @@ static char		*out_p_render_pointer(const char *a_format, cw_uint32_t
     a_len, const void *a_arg, char *r_buf);
 
 static cw_out_ent_t cw_g_out_builtins[] = {
-	{"s", 1, sizeof(cw_uint8_t *), out_p_metric_string,
+	{"s",	1,	sizeof(cw_uint8_t *),	out_p_metric_string,
 	     out_p_render_string},
-	{"i", 1, sizeof(cw_uint32_t), out_p_metric_int32, out_p_render_int32},
-	{"p", 1, sizeof(void *), out_p_metric_pointer, out_p_render_pointer},
-	{"c", 1, sizeof(cw_uint8_t), out_p_metric_char, out_p_render_char},
-	{"q", 1, sizeof(cw_uint64_t), out_p_metric_int64, out_p_render_int64},
-
-	{"b", 1, sizeof(cw_buf_t *), buf_out_metric, buf_out_render},
+	{"i",	1,	sizeof(cw_uint32_t),	out_p_metric_int32,
+	 out_p_render_int32},
+	{"p",	1,	sizeof(void *),		out_p_metric_pointer,
+	 out_p_render_pointer},
+	{"c",	1,	sizeof(cw_uint8_t),	out_p_metric_char,
+	 out_p_render_char},
+	{"q",	1,	sizeof(cw_uint64_t),	out_p_metric_int64,
+	 out_p_render_int64},
+	{"b",	1,	sizeof(cw_buf_t *),	buf_out_metric,	buf_out_render},
 
 #ifdef _TYPE_FP32_DEFINED
-	{"f32", 3, sizeof(cw_fp32_t), NULL, NULL},
+	{"f32",	3,	sizeof(cw_fp32_t),	NULL,		NULL},
 #endif
 #ifdef _TYPE_FP64_DEFINED
-	{"f64", 3, sizeof(cw_fp64_t), NULL, NULL},
+	{"f64",	3,	sizeof(cw_fp64_t),	NULL,		NULL},
 #endif
 #ifdef _TYPE_FP96_DEFINED
-	{"f96", 3, sizeof(cw_fp96_t), NULL, NULL},
+	{"f96",	3,	sizeof(cw_fp96_t),	NULL,		NULL},
 #endif
 #ifdef _TYPE_FP128_DEFINED
-	{"f128", 4, sizeof(cw_fp128_t), NULL, NULL}
+	{"f128",4,	sizeof(cw_fp128_t),	NULL,		NULL}
 #endif
 };
 
 cw_out_t *
 out_new(cw_out_t *a_out)
 {
-	cw_out_t *retval;
+	cw_out_t	*retval;
 
-	if (NULL != a_out) {
+	if (a_out != NULL) {
 		retval = a_out;
 		retval->is_malloced = FALSE;
 	} else {
 		retval = (cw_out_t *)_cw_malloc(sizeof(cw_out_t));
-		if (NULL == retval)
+		if (retval == NULL)
 			goto RETURN;
 		retval->is_malloced = TRUE;
 	}
@@ -157,7 +160,7 @@ out_new(cw_out_t *a_out)
 	retval->magic = _LIBSTASH_OUT_MAGIC;
 #endif
 
-RETURN:
+	RETURN:
 	return retval;
 }
 
@@ -165,13 +168,13 @@ void
 out_delete(cw_out_t *a_out)
 {
 	_cw_check_ptr(a_out);
-	_cw_assert(_LIBSTASH_OUT_MAGIC == a_out->magic);
+	_cw_assert(a_out->magic == _LIBSTASH_OUT_MAGIC);
 
-	if (NULL != a_out->extensions)
+	if (a_out->extensions != NULL)
 		_cw_free(a_out->extensions);
 	mtx_delete(&a_out->lock);
 
-	if (TRUE == a_out->is_malloced)
+	if (a_out->is_malloced)
 		_cw_free(a_out);
 #ifdef _LIBSTASH_DBG
 	else
@@ -183,36 +186,38 @@ cw_bool_t
 out_register(cw_out_t *a_out, const char *a_type, cw_uint32_t a_size,
     cw_out_metric_t * a_metric_func, cw_out_render_t * a_render_func)
 {
-	cw_bool_t retval;
+	cw_bool_t	retval;
 
 	_cw_check_ptr(a_out);
-	_cw_assert(_LIBSTASH_OUT_MAGIC == a_out->magic);
+	_cw_assert(a_out->magic == _LIBSTASH_OUT_MAGIC);
 	_cw_check_ptr(a_type);
-	_cw_assert(_LIBSTASH_OUT_MAX_TYPE >= strlen(a_type));
-	_cw_assert((1 == a_size) || (2 == a_size) || (4 == a_size) ||
-	    (8 == a_size) || (12 == a_size) || (16 == a_size));
+	_cw_assert(strlen(a_type) <= _LIBSTASH_OUT_MAX_TYPE);
+	_cw_assert((a_size == 1) || (a_size == 2) || (a_size == 4) ||
+	    (a_size == 8) || (a_size == 12) || (a_size == 16));
 	_cw_check_ptr(a_metric_func);
 	_cw_check_ptr(a_render_func);
 
-	if (NULL == a_out->extensions) {
-		a_out->extensions = (cw_out_ent_t *)_cw_malloc(sizeof(cw_out_ent_t));
-		if (NULL == a_out->extensions) {
+	if (a_out->extensions == NULL) {
+		a_out->extensions = (cw_out_ent_t
+		    *)_cw_malloc(sizeof(cw_out_ent_t));
+		if (a_out->extensions == NULL) {
 			retval = TRUE;
 			goto RETURN;
 		}
 	} else {
-		cw_out_ent_t *t_ptr;
+		cw_out_ent_t	*t_ptr;
 
 		t_ptr = (cw_out_ent_t *)_cw_realloc(a_out->extensions,
 		    ((a_out->nextensions + 1) * sizeof(cw_out_ent_t)));
-		if (NULL == t_ptr) {
+		if (t_ptr == NULL) {
 			retval = TRUE;
 			goto RETURN;
 		}
 		a_out->extensions = t_ptr;
 	}
 
-	memcpy(a_out->extensions[a_out->nextensions].type, a_type, strlen(a_type));
+	memcpy(a_out->extensions[a_out->nextensions].type, a_type,
+	    strlen(a_type));
 	a_out->extensions[a_out->nextensions].len = strlen(a_type);
 	a_out->extensions[a_out->nextensions].size = a_size;
 	a_out->extensions[a_out->nextensions].metric_func = a_metric_func;
@@ -222,37 +227,37 @@ out_register(cw_out_t *a_out, const char *a_type, cw_uint32_t a_size,
 
 	retval = FALSE;
 
-RETURN:
+	RETURN:
 	return retval;
 }
 
 cw_bool_t
 out_merge(cw_out_t *a_a, cw_out_t *a_b)
 {
-	cw_bool_t retval;
-	cw_sint32_t i;
+	cw_bool_t	retval;
+	cw_sint32_t	i;
 
 	_cw_check_ptr(a_a);
-	_cw_assert(_LIBSTASH_OUT_MAGIC == a_a->magic);
+	_cw_assert(a_a->magic == _LIBSTASH_OUT_MAGIC);
 	_cw_check_ptr(a_b);
-	_cw_assert(_LIBSTASH_OUT_MAGIC == a_b->magic);
+	_cw_assert(a_b->magic == _LIBSTASH_OUT_MAGIC);
 
-	if (0 < a_b->nextensions) {
-		if (NULL == a_a->extensions) {
+	if (a_b->nextensions > 0) {
+		if (a_a->extensions == NULL) {
 			a_a->extensions = (cw_out_ent_t
 			    *)_cw_calloc(a_b->nextensions,
 			    sizeof(cw_out_ent_t));
-			if (NULL == a_a->extensions) {
+			if (a_a->extensions == NULL) {
 				retval = TRUE;
 				goto RETURN;
 			}
 		} else {
-			cw_out_ent_t *t_ptr;
+			cw_out_ent_t	*t_ptr;
 
 			t_ptr = (cw_out_ent_t *)_cw_realloc(a_a->extensions,
 			    ((a_a->nextensions + a_b->nextensions) *
 			    sizeof(cw_out_ent_t)));
-			if (NULL == t_ptr) {
+			if (t_ptr == NULL) {
 				retval = TRUE;
 				goto RETURN;
 			}
@@ -264,16 +269,15 @@ out_merge(cw_out_t *a_a, cw_out_t *a_b)
 
 		/* Make copies of the type strings. */
 		for (i = 0; i < a_b->nextensions; i++) {
-			memcpy(a_b->extensions[i].type,
-			    a_a->extensions[i + a_a->nextensions].type,
-			    _LIBSTASH_OUT_MAX_TYPE);
+			memcpy(a_b->extensions[i].type, a_a->extensions[i +
+			    a_a->nextensions].type, _LIBSTASH_OUT_MAX_TYPE);
 		}
 
 		a_a->nextensions += a_b->nextensions;
 	}
-	retval = FALSE;
 
-RETURN:
+	retval = FALSE;
+	RETURN:
 	return retval;
 }
 
@@ -282,7 +286,7 @@ out_get_default_fd(cw_out_t *a_out)
 {
 	cw_sint32_t retval;
 
-	if (NULL != a_out)
+	if (a_out != NULL)
 		retval = a_out->fd;
 	else
 		retval = 2;
@@ -294,7 +298,7 @@ void
 out_set_default_fd(cw_out_t *a_out, cw_sint32_t a_fd)
 {
 	_cw_check_ptr(a_out);
-	_cw_assert(_LIBSTASH_OUT_MAGIC == a_out->magic);
+	_cw_assert(a_out->magic == _LIBSTASH_OUT_MAGIC);
 	_cw_assert(0 <= a_fd);
 
 	a_out->fd = a_fd;
@@ -303,12 +307,12 @@ out_set_default_fd(cw_out_t *a_out, cw_sint32_t a_fd)
 cw_sint32_t
 out_put(cw_out_t *a_out, const char *a_format,...)
 {
-	cw_sint32_t retval, fd;
-	va_list ap;
+	cw_sint32_t	retval, fd;
+	va_list		ap;
 
 	_cw_check_ptr(a_format);
 
-	if (NULL != a_out) {
+	if (a_out != NULL) {
 		_cw_assert(_LIBSTASH_OUT_MAGIC == a_out->magic);
 		fd = a_out->fd;
 	} else
@@ -325,12 +329,12 @@ cw_sint32_t
 out_put_e(cw_out_t *a_out, const char *a_file_name, cw_uint32_t a_line_num,
     const char *a_func_name, const char *a_format, ...)
 {
-	cw_sint32_t retval, fd;
-	va_list ap;
+	cw_sint32_t	retval, fd;
+	va_list		ap;
 
 	_cw_check_ptr(a_format);
 
-	if (NULL != a_out) {
+	if (a_out != NULL) {
 		_cw_assert(_LIBSTASH_OUT_MAGIC == a_out->magic);
 		fd = a_out->fd;
 	} else
@@ -347,12 +351,12 @@ out_put_e(cw_out_t *a_out, const char *a_file_name, cw_uint32_t a_line_num,
 cw_sint32_t
 out_put_l(cw_out_t *a_out, const char *a_format,...)
 {
-	cw_sint32_t retval, fd;
-	va_list ap;
+	cw_sint32_t	retval, fd;
+	va_list		ap;
 
 	_cw_check_ptr(a_format);
 
-	if (NULL != a_out) {
+	if (a_out != NULL) {
 		_cw_assert(_LIBSTASH_OUT_MAGIC == a_out->magic);
 		fd = a_out->fd;
 	} else
@@ -369,12 +373,12 @@ cw_sint32_t
 out_put_le(cw_out_t *a_out, const char *a_file_name, cw_uint32_t a_line_num,
     const char *a_func_name, const char *a_format, ...)
 {
-	cw_sint32_t retval, fd;
-	va_list ap;
+	cw_sint32_t	retval, fd;
+	va_list		ap;
 
 	_cw_check_ptr(a_format);
 
-	if (NULL != a_out) {
+	if (a_out != NULL) {
 		_cw_assert(_LIBSTASH_OUT_MAGIC == a_out->magic);
 		fd = a_out->fd;
 	} else
@@ -391,13 +395,13 @@ out_put_le(cw_out_t *a_out, const char *a_file_name, cw_uint32_t a_line_num,
 cw_sint32_t
 out_put_n(cw_out_t *a_out, cw_uint32_t a_size, const char *a_format,...)
 {
-	cw_sint32_t retval, fd, metric;
-	va_list ap;
-	cw_out_key_t key;
+	cw_sint32_t	retval, fd, metric;
+	va_list		ap;
+	cw_out_key_t	key;
 
 	_cw_check_ptr(a_format);
 
-	if (NULL != a_out) {
+	if (a_out != NULL) {
 		_cw_assert(_LIBSTASH_OUT_MAGIC == a_out->magic);
 		fd = a_out->fd;
 	} else
@@ -405,14 +409,14 @@ out_put_n(cw_out_t *a_out, cw_uint32_t a_size, const char *a_format,...)
 
 	va_start(ap, a_format);
 	metric = out_p_metric(a_out, a_format, &key, ap);
-	if (0 >= metric) {
+	if (metric <= 0) {
 		retval = metric;
 		goto RETURN;
 	}
 	retval = out_p_put_fvn(a_out, fd, a_size, &key, a_format, ap);
 	va_end(ap);
 
-RETURN:
+	RETURN:
 	if (key.format_key_buf != key.format_key) {
 		/* out_p_metric() allocated a new spec key. */
 		_cw_free(key.format_key);
@@ -423,8 +427,8 @@ RETURN:
 cw_sint32_t
 out_put_f(cw_out_t *a_out, cw_sint32_t a_fd, const char *a_format,...)
 {
-	cw_sint32_t retval;
-	va_list ap;
+	cw_sint32_t	retval;
+	va_list		ap;
 
 	_cw_assert(0 <= a_fd);
 	_cw_check_ptr(a_format);
@@ -440,10 +444,10 @@ cw_sint32_t
 out_put_fe(cw_out_t *a_out, cw_sint32_t a_fd, const char *a_file_name,
     cw_uint32_t a_line_num, const char *a_func_name, const char *a_format, ...)
 {
-	cw_sint32_t retval;
-	va_list ap;
+	cw_sint32_t	retval;
+	va_list		ap;
 
-	_cw_assert(0 <= a_fd);
+	_cw_assert(a_fd >= 0);
 	_cw_check_ptr(a_format);
 
 	va_start(ap, a_format);
@@ -457,10 +461,10 @@ out_put_fe(cw_out_t *a_out, cw_sint32_t a_fd, const char *a_file_name,
 cw_sint32_t
 out_put_fl(cw_out_t *a_out, cw_sint32_t a_fd, const char *a_format,...)
 {
-	cw_sint32_t retval;
-	va_list ap;
+	cw_sint32_t	retval;
+	va_list		ap;
 
-	_cw_assert(0 <= a_fd);
+	_cw_assert(a_fd >= 0);
 	_cw_check_ptr(a_format);
 
 	va_start(ap, a_format);
@@ -474,10 +478,10 @@ cw_sint32_t
 out_put_fle(cw_out_t *a_out, cw_sint32_t a_fd, const char *a_file_name,
     cw_uint32_t a_line_num, const char *a_func_name, const char *a_format, ...)
 {
-	cw_sint32_t retval;
-	va_list ap;
+	cw_sint32_t	retval;
+	va_list		ap;
 
-	_cw_assert(0 <= a_fd);
+	_cw_assert(a_fd >= 0);
 	_cw_check_ptr(a_format);
 
 	va_start(ap, a_format);
@@ -492,23 +496,23 @@ cw_sint32_t
 out_put_fn(cw_out_t *a_out, cw_sint32_t a_fd, cw_uint32_t a_size,
     const char *a_format,...)
 {
-	cw_sint32_t retval, metric;
-	va_list ap;
-	cw_out_key_t key;
+	cw_sint32_t	retval, metric;
+	va_list		ap;
+	cw_out_key_t	key;
 
-	_cw_assert(0 <= a_fd);
+	_cw_assert(a_fd >= 0);
 	_cw_check_ptr(a_format);
 
 	va_start(ap, a_format);
 	metric = out_p_metric(a_out, a_format, &key, ap);
-	if (0 >= metric) {
+	if (metric <= 0) {
 		retval = metric;
 		goto RETURN;
 	}
 	retval = out_p_put_fvn(a_out, a_fd, a_size, &key, a_format, ap);
 	va_end(ap);
 
-RETURN:
+	RETURN:
 	if (key.format_key_buf != key.format_key) {
 		/* out_p_metric() allocated a new spec key. */
 		_cw_free(key.format_key);
@@ -517,24 +521,23 @@ RETURN:
 }
 
 cw_sint32_t
-out_put_fv(cw_out_t *a_out, cw_sint32_t a_fd,
-    const char *a_format, va_list a_p)
+out_put_fv(cw_out_t *a_out, cw_sint32_t a_fd, const char *a_format, va_list a_p)
 {
-	cw_sint32_t retval, metric;
-	cw_out_key_t key;
+	cw_sint32_t	retval, metric;
+	cw_out_key_t	key;
 
-	_cw_assert(0 <= a_fd);
+	_cw_assert(a_fd >= 0);
 	_cw_check_ptr(a_format);
 	_cw_check_ptr(a_p);
 
 	metric = out_p_metric(a_out, a_format, &key, a_p);
-	if (0 >= metric) {
+	if (metric <= 0) {
 		retval = metric;
 		goto RETURN;
 	}
 	retval = out_p_put_fvn(a_out, a_fd, metric, &key, a_format, a_p);
 
-RETURN:
+	RETURN:
 	if (key.format_key_buf != key.format_key) {
 		/* out_p_metric() allocated a new spec key. */
 		_cw_free(key.format_key);
@@ -545,8 +548,8 @@ RETURN:
 cw_sint32_t
 out_put_s(cw_out_t *a_out, char *a_str, const char *a_format,...)
 {
-	cw_sint32_t retval;
-	va_list ap;
+	cw_sint32_t	retval;
+	va_list		ap;
 
 	_cw_check_ptr(a_str);
 	_cw_check_ptr(a_format);
@@ -561,8 +564,8 @@ out_put_s(cw_out_t *a_out, char *a_str, const char *a_format,...)
 cw_sint32_t
 out_put_sa(cw_out_t *a_out, char **r_str, const char *a_format,...)
 {
-	cw_sint32_t retval;
-	va_list ap;
+	cw_sint32_t	retval;
+	va_list		ap;
 
 	_cw_check_ptr(a_format);
 
@@ -577,8 +580,8 @@ cw_sint32_t
 out_put_sn(cw_out_t *a_out, char *a_str, cw_uint32_t a_size, const char
     *a_format,...)
 {
-	cw_sint32_t retval;
-	va_list ap;
+	cw_sint32_t	retval;
+	va_list		ap;
 
 	_cw_check_ptr(a_str);
 	_cw_check_ptr(a_format);
@@ -593,24 +596,24 @@ out_put_sn(cw_out_t *a_out, char *a_str, cw_uint32_t a_size, const char
 cw_sint32_t
 out_put_sv(cw_out_t *a_out, char *a_str, const char *a_format, va_list a_p)
 {
-	cw_sint32_t retval, metric;
-	cw_out_key_t key;
+	cw_sint32_t	retval, metric;
+	cw_out_key_t	key;
 
 	_cw_check_ptr(a_str);
 	_cw_check_ptr(a_format);
 	_cw_check_ptr(a_p);
 
 	metric = out_p_metric(a_out, a_format, &key, a_p);
-	if (0 >= metric) {
+	if (metric <= 0) {
 		retval = metric;
 		goto RETURN;
 	}
 	retval = out_p_put_svn(a_out, a_str, metric, &key, a_format, a_p);
-	if (0 > retval)
+	if (retval < 0)
 		goto RETURN;
 	a_str[retval] = '\0';
 
-RETURN:
+	RETURN:
 	if (key.format_key_buf != key.format_key) {
 		/* out_p_metric() allocated a new spec key. */
 		_cw_free(key.format_key);
@@ -619,23 +622,22 @@ RETURN:
 }
 
 cw_sint32_t
-out_put_sva(cw_out_t *a_out, char **r_str,
-    const char *a_format, va_list a_p)
+out_put_sva(cw_out_t *a_out, char **r_str, const char *a_format, va_list a_p)
 {
-	cw_sint32_t retval, metric;
-	cw_out_key_t key;
+	cw_sint32_t	retval, metric;
+	cw_out_key_t	key;
 
 	_cw_check_ptr(a_format);
 	_cw_check_ptr(a_p);
 
 	metric = out_p_metric(a_out, a_format, &key, a_p);
-	if (0 > metric) {
+	if (metric < 0) {
 		retval = metric;
 		goto RETURN;
 	}
 	retval = out_p_put_sva(a_out, r_str, &key, a_format, a_p);
 
-RETURN:
+	RETURN:
 	if (key.format_key_buf != key.format_key) {
 		/* out_p_metric() allocated a new spec key. */
 		_cw_free(key.format_key);
@@ -647,22 +649,22 @@ cw_sint32_t
 out_put_svn(cw_out_t *a_out, char *a_str, cw_uint32_t a_size,
     const char *a_format, va_list a_p)
 {
-	cw_sint32_t retval, metric;
-	cw_out_key_t key;
+	cw_sint32_t	retval, metric;
+	cw_out_key_t	key;
 
 	_cw_check_ptr(a_str);
-	_cw_assert(0 <= a_size);
+	_cw_assert(a_size >= 0);
 	_cw_check_ptr(a_format);
 	_cw_check_ptr(a_p);
 
 	metric = out_p_metric(a_out, a_format, &key, a_p);
-	if (0 >= metric) {
+	if (metric <= 0) {
 		retval = metric;
 		goto RETURN;
 	}
 	retval = out_p_put_svn(a_out, a_str, a_size, &key, a_format, a_p);
 
-RETURN:
+	RETURN:
 	if (key.format_key_buf != key.format_key) {
 		/* out_p_metric() allocated a new spec key. */
 		_cw_free(key.format_key);
@@ -673,10 +675,10 @@ RETURN:
 cw_sint32_t
 spec_get_type(const char *a_spec, cw_uint32_t a_spec_len, const char **r_val)
 {
-	cw_sint32_t retval, i;
+	cw_sint32_t	retval, i;
 
 	_cw_check_ptr(a_spec);
-	_cw_assert(0 < a_spec_len);
+	_cw_assert(a_spec_len > 0);
 	_cw_check_ptr(r_val);
 
 	for (i = 0; i < a_spec_len; i++) {
@@ -691,19 +693,18 @@ spec_get_type(const char *a_spec, cw_uint32_t a_spec_len, const char **r_val)
 }
 
 cw_sint32_t
-spec_get_val(const char *a_spec, cw_uint32_t a_spec_len,
-    const char *a_name, cw_uint32_t a_name_len,
-    const char **r_val)
+spec_get_val(const char *a_spec, cw_uint32_t a_spec_len, const char *a_name,
+    cw_uint32_t a_name_len, const char **r_val)
 {
-	cw_sint32_t retval, i, curr_name_len, val_len;
-	cw_bool_t match;
+	cw_sint32_t	retval, i, curr_name_len, val_len;
+	cw_bool_t	match;
 	enum {
 		NAME,
 		VALUE
-	}       state;
+	}	state;
 
 	_cw_check_ptr(a_spec);
-	_cw_assert(0 < a_spec_len);
+	_cw_assert(a_spec_len > 0);
 	_cw_check_ptr(a_name);
 	_cw_check_ptr(r_val);
 
@@ -713,16 +714,15 @@ spec_get_val(const char *a_spec, cw_uint32_t a_spec_len,
 	    i++) {
 		switch (state) {
 		case NAME:
-			if (':' == a_spec[i]) {
-				if (a_name_len != curr_name_len) {
+			if (a_spec[i] == ':') {
+				if (curr_name_len != a_name_len) {
 					/* Too short. */
 					match = FALSE;
 				}
-				if (TRUE == match) {
+				if (match) {
 					/*
-					 * Set the return pointer.
-					 * We'll figure out how long
-					 * the value is later.
+					 * Set the return pointer.  We'll figure
+					 * out how long the value is later.
 					 */
 					*r_val = &a_spec[i + 1];
 				}
@@ -736,9 +736,9 @@ spec_get_val(const char *a_spec, cw_uint32_t a_spec_len,
 
 			break;
 		case VALUE:
-			if ('|' == a_spec[i]) {
+			if (a_spec[i] == '|') {
 				/* End of the value. */
-				if (TRUE == match) {
+				if (match) {
 					retval = val_len;
 					goto RETURN;
 				} else {
@@ -748,12 +748,12 @@ spec_get_val(const char *a_spec, cw_uint32_t a_spec_len,
 				}
 			} else if (i == a_spec_len - 1) {
 				/*
-				 * End of the value, and end of
-				 * specifier.  Add one to val_len.
+				 * End of the value, and end of specifier.  Add
+				 * one to val_len.
 				 */
 				val_len++;
 
-				if (TRUE == match) {
+				if (match) {
 					retval = val_len;
 					goto RETURN;
 				} else {
@@ -772,7 +772,7 @@ spec_get_val(const char *a_spec, cw_uint32_t a_spec_len,
 
 	retval = -1;
 
-RETURN:
+	RETURN:
 	return retval;
 }
 
@@ -781,68 +781,60 @@ out_p_put_fvle(cw_out_t *a_out, cw_sint32_t a_fd, cw_bool_t a_time_stamp, const
     char *a_file_name, cw_uint32_t a_line_num, const char *a_func_name, const
     char *a_format, va_list a_p)
 {
-	cw_sint32_t retval;
-	char   *format = NULL, timestamp[128];
+	cw_sint32_t	retval;
+	char		*format = NULL, timestamp[128];
 
-	_cw_assert(0 <= a_fd);
+	_cw_assert(a_fd >= 0);
 	_cw_check_ptr(a_format);
 
-	if (TRUE == a_time_stamp) {
-		time_t  curr_time;
-		struct tm *cts;
+	if (a_time_stamp) {
+		time_t		curr_time;
+		struct tm	*cts;
 
 		curr_time = time(NULL);
 		cts = localtime(&curr_time);
-		if (0 == strftime(timestamp, sizeof(timestamp),
-		    "[[%Y/%m/%d %T %Z]: ", cts)) {
+		if (strftime(timestamp, sizeof(timestamp),
+		    "[[%Y/%m/%d %T %Z]: ", cts) == 0) {
 			/*
 			 * Wow, this locale must be *really* verbose about
-			 * displaying time. Terminate the string, since
-			 * there's no telling what's there.
+			 * displaying time. Terminate the string, since there's
+			 * no telling what's there.
 			 */
 			timestamp[0] = '\0';
 		}
 	} else
 		timestamp[0] = '\0';
 
-	if (NULL != a_file_name) {
-		if (NULL != a_func_name) {
+	if (a_file_name != NULL) {
+		if (a_func_name != NULL) {
 			/* Print filename, line number, and function name. */
-			if (-1 == out_put_sa(a_out, &format,
-				"[s]At [s], line [i]: [s](): [s]",
-				timestamp,
-				a_file_name, a_line_num, a_func_name,
-				a_format)) {
+			if (out_put_sa(a_out, &format,
+			    "[s]At [s], line [i]: [s](): [s]", timestamp,
+			    a_file_name, a_line_num, a_func_name, a_format) ==
+			    -1) {
 				retval = -1;
 				goto RETURN;
 			}
 		} else {
 			/* Print filename and line number. */
-			if (-1 == out_put_sa(a_out, &format,
-				"[s]At [s], line [i]: [s]",
-				timestamp,
-				a_file_name, a_line_num,
-				a_format)) {
+			if (out_put_sa(a_out, &format,
+			    "[s]At [s], line [i]: [s]", timestamp, a_file_name,
+			    a_line_num, a_format) == -1) {
 				retval = -1;
 				goto RETURN;
 			}
 		}
-	} else if (NULL != a_func_name) {
+	} else if (a_func_name != NULL) {
 		/* Print function name. */
-		if (-1 == out_put_sa(a_out, &format,
-			"[s][s](): [s]",
-			timestamp,
-			a_func_name,
-			a_format)) {
+		if (out_put_sa(a_out, &format, "[s][s](): [s]", timestamp,
+		    a_func_name, a_format) == -1) {
 			retval = -1;
 			goto RETURN;
 		}
 	} else {
 		/* Make no modifications. */
-		if (-1 == out_put_sa(a_out, &format,
-			"[s][s]",
-			timestamp,
-			a_format)) {
+		if (out_put_sa(a_out, &format, "[s][s]", timestamp, a_format) ==
+		    -1) {
 			retval = -1;
 			goto RETURN;
 		}
@@ -850,11 +842,11 @@ out_p_put_fvle(cw_out_t *a_out, cw_sint32_t a_fd, cw_bool_t a_time_stamp, const
 
 	retval = out_put_fv(a_out, a_fd, format, a_p);
 
-RETURN:
-	if (NULL != format) {
+	RETURN:
+	if (format != NULL) {
 		/*
-		 * This string was allocated using the mem class.  Free it
-		 * as such.
+		 * This string was allocated using the mem class.  Free it as
+		 * such.
 		 */
 #ifdef _LIBSTASH_DBG
 		mem_free(cw_g_mem, format, __FILE__, __LINE__);
@@ -867,76 +859,74 @@ RETURN:
 
 static cw_sint32_t
 out_p_put_fvn(cw_out_t *a_out, cw_sint32_t a_fd, cw_uint32_t a_size,
-    cw_out_key_t * a_key,
-    const char *a_format, va_list a_p)
+    cw_out_key_t * a_key, const char *a_format, va_list a_p)
 {
-	cw_sint32_t retval, i, out_size, nwritten;
-	cw_bool_t malloced_output;
-	char    output_buf[_LIBSTASH_OUT_PRINT_BUF];
-	char   *output;
+	cw_sint32_t	retval, i, out_size, nwritten;
+	cw_bool_t	malloced_output;
+	char		output_buf[_LIBSTASH_OUT_PRINT_BUF];
+	char		*output;
 
-	_cw_assert(0 <= a_fd);
+	_cw_assert(a_fd >= 0);
 	_cw_check_ptr(a_format);
 
-	if (TRUE == a_key->raw) {
+	if (a_key->raw) {
 		malloced_output = FALSE;
 		out_size = a_size;
 		output = (char *)a_format;
 	} else {
-		if (_LIBSTASH_OUT_PRINT_BUF >= a_size) {
+		if (a_size <= _LIBSTASH_OUT_PRINT_BUF) {
 			malloced_output = FALSE;
 			output = output_buf;
 		} else {
 			malloced_output = TRUE;
 			output = (char *)_cw_malloc(a_size);
-			if (NULL == output) {
+			if (output == NULL) {
 				retval = -1;
 				goto RETURN;
 			}
 		}
 
-		if (0 > (out_size = out_p_put_svn(a_out, output, a_size, a_key,
-		    a_format, a_p))) {
+		if ((out_size = out_p_put_svn(a_out, output, a_size, a_key,
+		    a_format, a_p)) < 0) {
 			retval = -1;
 			goto RETURN;
 		}
 	}
 
-	if (NULL != a_out)
+	if (a_out != NULL)
 		mtx_lock(&a_out->lock);
 	i = 0;
 	do {
 		nwritten = write(a_fd, &output[i], out_size - i);
-		if (-1 != nwritten)
+		if (nwritten != -1)
 			i += nwritten;
 		else {
 			retval = -3;
 			goto RETURN;
 		}
-	} while ((i < out_size) && (-1 == nwritten) && (EAGAIN == errno));
+	} while ((i < out_size) && (nwritten == -1) && (errno == EAGAIN));
 
 	retval = i;
 
-RETURN:
-	if (NULL != a_out)
+	RETURN:
+	if (a_out != NULL)
 		mtx_unlock(&a_out->lock);
-	if ((TRUE == malloced_output) && (NULL != output))
+	if (malloced_output && (output != NULL))
 		_cw_free(output);
 	return retval;
 }
 
 static cw_sint32_t
-out_p_put_sva(cw_out_t *a_out, char **r_str,
-    cw_out_key_t * a_key,
-    const char *a_format, va_list a_p)
+out_p_put_sva(cw_out_t *a_out, char **r_str, cw_out_key_t * a_key, const char
+    *a_format, va_list a_p)
 {
-	cw_sint32_t retval;
-	char   *output = NULL;
+	cw_sint32_t	retval;
+	char		*output = NULL;
 
 	/*
-	 * Since this string will get passed out to the user, we must
-	 * allocate it using the mem class.  Otherwise, if the user tries to
-	 * free the string with mem_free(), an error will occur.
+	 * Since this string will get passed out to the user, we must allocate
+	 * it using the mem class.  Otherwise, if the user tries to free the
+	 * string with mem_free(), an error will occur.
 	 */
 #ifdef _LIBSTASH_DBG
 	output = (char *)mem_malloc(cw_g_mem, a_key->metric + 1, __FILE__,
@@ -944,16 +934,17 @@ out_p_put_sva(cw_out_t *a_out, char **r_str,
 #else
 	output = (char *)mem_malloc(cw_g_mem, a_key->metric + 1, NULL, 0);
 #endif
-	if (NULL == output) {
+	if (output == NULL) {
 		retval = -1;
 		goto RETURN;
 	}
-	retval = out_p_put_svn(a_out, output, a_key->metric, a_key, a_format, a_p);
-	_cw_assert(a_key->metric == retval);
+	retval = out_p_put_svn(a_out, output, a_key->metric, a_key, a_format,
+	    a_p);
+	_cw_assert(retval == a_key->metric);
 
-RETURN:
-	if (0 <= retval) {
-		if (NULL != output)
+	RETURN:
+	if (retval >= 0) {
+		if (output != NULL)
 			output[retval] = '\0';
 		*r_str = output;
 	} else
@@ -965,11 +956,11 @@ static cw_sint32_t
 out_p_put_svn(cw_out_t *a_out, char *a_str, cw_uint32_t a_size, cw_out_key_t
     *a_key, const char *a_format, va_list a_p)
 {
-	cw_sint32_t retval, size, format_len, i, j, enti;
-	cw_uint32_t metric;
+	cw_sint32_t	retval, size, format_len, i, j, enti;
+	cw_uint32_t	metric;
 
 	_cw_check_ptr(a_str);
-	_cw_assert(0 <= a_size);
+	_cw_assert(a_size >= 0);
 	_cw_check_ptr(a_format);
 	_cw_check_ptr(a_p);
 
@@ -979,7 +970,7 @@ out_p_put_svn(cw_out_t *a_out, char *a_str, cw_uint32_t a_size, cw_out_key_t
 	else
 		size = (cw_sint32_t)a_size;
 
-	if (TRUE == a_key->raw)
+	if (a_key->raw)
 		memcpy(a_str, a_format, size);
 	else {
 		for (i = j = enti = 0, format_len = strlen(a_format); (i <
@@ -991,20 +982,19 @@ out_p_put_svn(cw_out_t *a_out, char *a_str, cw_uint32_t a_size, cw_out_key_t
 				i++;
 				break;
 			case _LIBSTASH_OUT_DES_SPECIFIER: {
-				cw_sint32_t spec_len, type_len;
-				const char *type;
-				cw_out_ent_t *ent;
-				void   *arg;
+				cw_sint32_t	spec_len, type_len;
+				const char	*type;
+				cw_out_ent_t	*ent;
+				void		*arg;
 
-				if (_LIBSTASH_OUT_ENT_CACHE > enti) {
+				if (enti < _LIBSTASH_OUT_ENT_CACHE) {
 					spec_len = a_key->ents[enti].spec_len;
 					ent = a_key->ents[enti].ent;
 				} else {
 					/*
-					 * Calculate the specifier
-					 * length.  We're guaranteed
-					 * that there is a whiteout
-					 * character following the
+					 * Calculate the specifier length.
+					 * We're guaranteed that there is a
+					 * whiteout character following the
 					 * specifier.
 					 */
 					for (spec_len = 0; a_key->format_key[i
@@ -1015,7 +1005,7 @@ out_p_put_svn(cw_out_t *a_out, char *a_str, cw_uint32_t a_size, cw_out_key_t
 					/* Find the type string. */
 					type_len = spec_get_type(&a_format[i],
 					    spec_len, &type);
-					_cw_assert(0 <= type_len);
+					_cw_assert(type_len >= 0);
 
 					ent = out_p_get_ent(a_out, type,
 					    type_len);
@@ -1040,18 +1030,20 @@ out_p_put_svn(cw_out_t *a_out, char *a_str, cw_uint32_t a_size, cw_out_key_t
 					break;
 #endif
 				default:
-					arg = NULL;	/* Keep the optimizer
-							 * quiet. */
+					arg = NULL;	/*
+							 * Keep the optimizer
+							 * quiet.
+							 */
 					_cw_error("Programming error");
 				}
 
-				if (_LIBSTASH_OUT_ENT_CACHE > enti)
+				if (enti < _LIBSTASH_OUT_ENT_CACHE)
 					metric = a_key->ents[enti].metric;
 				else {
 					metric =
 					    ent->metric_func(&a_format[i],
 					    spec_len, arg);
-					if (0 > metric) {
+					if (metric < 0) {
 						retval = metric;
 						goto RETURN;
 					}
@@ -1059,9 +1051,8 @@ out_p_put_svn(cw_out_t *a_out, char *a_str, cw_uint32_t a_size, cw_out_key_t
 
 				if (j + metric <= size) {
 					/*
-					 * The printout of this item
-					 * will fit in the output
-					 * string.
+					 * The printout of this item will fit in
+					 * the output string.
 					 */
 					if (NULL ==
 					    ent->render_func(&a_format[i],
@@ -1070,26 +1061,22 @@ out_p_put_svn(cw_out_t *a_out, char *a_str, cw_uint32_t a_size, cw_out_key_t
 						goto RETURN;
 					}
 				} else {
-					char   *t_buf;
+					char	*t_buf;
 
 					/*
-					 * The printout of this item
-					 * will not fit in the
-					 * string.  Therefore,
-					 * allocate a temporary
-					 * buffer, render the item
-					 * there, then copy as much
-					 * as will fit into the
-					 * output string.
+					 * The printout of this item will not
+					 * fit in the string.  Therefore,
+					 * allocate a temporary buffer, render
+					 * the item there, then copy as much as
+					 * will fit into the output string.
 					 */
 					t_buf = (char *)_cw_malloc(metric);
-					if (NULL == t_buf) {
+					if (t_buf == NULL) {
 						retval = -1;
 						goto RETURN;
 					}
-					if (NULL ==
-					    ent->render_func(&a_format[i],
-					    spec_len, arg, t_buf)) {
+					if (ent->render_func(&a_format[i],
+					    spec_len, arg, t_buf) == NULL) {
 						_cw_free(t_buf);
 						retval = -1;
 						goto RETURN;
@@ -1115,44 +1102,42 @@ out_p_put_svn(cw_out_t *a_out, char *a_str, cw_uint32_t a_size, cw_out_key_t
 
 	retval = size;
 
-RETURN:
+	RETURN:
 	return retval;
 }
 
 static cw_sint32_t
-out_p_metric(cw_out_t *a_out, const char *a_format,
-    cw_out_key_t * a_key,
+out_p_metric(cw_out_t *a_out, const char *a_format, cw_out_key_t * a_key,
     va_list a_p)
 {
-	cw_sint32_t retval, spec_metric;
-	cw_uint32_t i, metric;	/* Total number of bytes to be printed. */
-	cw_uint32_t spec_len = 0;	/* Shut up the optimizer warning. */
-	cw_uint32_t next_ent = 0;
+	cw_sint32_t	retval, spec_metric;
+	cw_uint32_t	i, metric;
+	cw_uint32_t	spec_len = 0;	/* Shut up the optimizer warning. */
+	cw_uint32_t	next_ent = 0;
 	enum {
 		NORMAL,
 		BRACKET,
 		NAME,
 		VALUE
-	}       state;
+	}	state;
 
 	a_key->format_key = a_key->format_key_buf;
 	a_key->raw = TRUE;
 
 	for (i = metric = 0, state = NORMAL; a_format[i] != '\0'; i++) {
-		if ((_LIBSTASH_OUT_SPEC_BUF == i) && (a_key->format_key_buf ==
+		if ((i == _LIBSTASH_OUT_SPEC_BUF) && (a_key->format_key_buf ==
 		    a_key->format_key)) {
-			cw_uint32_t format_len;
+			cw_uint32_t	format_len;
 
 			/*
-			 * We just ran out of space in the statically
-			 * allocated buffer.  Time to face cold hard
-			 * reality, get the specifier length, allocate a
-			 * buffer, and copy the static buffer's contents
-			 * over.
+			 * We just ran out of space in the statically allocated
+			 * buffer.  Time to face cold hard reality, get the
+			 * specifier length, allocate a buffer, and copy the
+			 * static buffer's contents over.
 			 */
 			format_len = strlen(a_format);
 			a_key->format_key = (char *)_cw_malloc(format_len);
-			if (NULL == a_key->format_key) {
+			if (a_key->format_key == NULL) {
 				retval = -1;
 				goto RETURN;
 			}
@@ -1167,12 +1152,11 @@ out_p_metric(cw_out_t *a_out, const char *a_format,
 		}
 		switch (state) {
 		case NORMAL:
-			if ('[' == a_format[i]) {
+			if (a_format[i] == '[') {
 				/*
-				 * We can unconditionally white this
-				 * character out.  If the next
-				 * character is a `[', we can leave
-				 * that one intact.
+				 * We can unconditionally white this character
+				 * out.  If the next character is a `[', we can
+				 * leave that one intact.
 				 */
 				a_key->format_key[i] =
 				    _LIBSTASH_OUT_DES_WHITEOUT;
@@ -1186,7 +1170,7 @@ out_p_metric(cw_out_t *a_out, const char *a_format,
 		case BRACKET:
 			a_key->raw = FALSE;
 
-			if ('[' == a_format[i]) {
+			if (a_format[i] == '[') {
 				a_key->format_key[i] = _LIBSTASH_OUT_DES_NORMAL;
 				metric++;
 				state = NORMAL;
@@ -1202,42 +1186,42 @@ out_p_metric(cw_out_t *a_out, const char *a_format,
 			a_key->format_key[i] = _LIBSTASH_OUT_DES_SPECIFIER;
 			spec_len++;
 
-			if (':' == a_format[i])
+			if (a_format[i] == ':')
 					state = VALUE;
 			break;
 		case VALUE:
 			a_key->format_key[i] = _LIBSTASH_OUT_DES_SPECIFIER;
 
-			if ('|' == a_format[i]) {
+			if (a_format[i] == '|') {
 				spec_len++;
 				state = NAME;
-			} else if (']' == a_format[i]) {
-				const char *val;
-				cw_sint32_t val_len;
-				cw_out_ent_t *ent;
+			} else if (a_format[i] == ']') {
+				const char	*val;
+				cw_sint32_t	val_len;
+				cw_out_ent_t	*ent;
 
 				a_key->format_key[i] =
 				    _LIBSTASH_OUT_DES_WHITEOUT;
 				state = NORMAL;
 
 				/*
-				 * Successful completion of parsing
-				 * this specifier.  Call the
-				 * corresponding metric function.
+				 * Successful completion of parsing this
+				 * specifier.  Call the corresponding metric
+				 * function.
 				 */
-				val_len = spec_get_type(&a_format[i -
-				    spec_len], spec_len, &val);
-				if (-1 == val_len) {
+				val_len = spec_get_type(&a_format[i - spec_len],
+				    spec_len, &val);
+				if (val_len == -1) {
 					retval = -2;
 					goto RETURN;
 				}
 				ent = out_p_get_ent(a_out, val, val_len);
-				if (NULL == ent) {
+				if (ent == NULL) {
 					/* No handler. */
 					retval = -2;
 					goto RETURN;
 				} {
-					void   *arg;
+					void	*arg;
 
 					switch (ent->size) {
 					case 1: case 2: case 4:
@@ -1268,14 +1252,14 @@ out_p_metric(cw_out_t *a_out, const char *a_format,
 					spec_metric =
 					    ent->metric_func(&a_format[i -
 					    spec_len], spec_len, arg);
-					if (0 > spec_metric) {
+					if (spec_metric < 0) {
 						retval = spec_metric;
 						goto RETURN;
 					}
 					metric += spec_metric;
 				}
 
-				if (_LIBSTASH_OUT_ENT_CACHE > next_ent) {
+				if (next_ent < _LIBSTASH_OUT_ENT_CACHE) {
 					a_key->ents[next_ent].metric =
 					    spec_metric;
 					a_key->ents[next_ent].spec_len =
@@ -1292,7 +1276,7 @@ out_p_metric(cw_out_t *a_out, const char *a_format,
 			_cw_error("Programming error");
 		}
 	}
-	if (NORMAL != state) {
+	if (state != NORMAL) {
 		retval = -2;
 		goto RETURN;
 	}
@@ -1300,39 +1284,39 @@ out_p_metric(cw_out_t *a_out, const char *a_format,
 	a_key->format_len = i;
 	retval = metric;
 
-RETURN:
+	RETURN:
 	return retval;
 }
 
 static cw_out_ent_t *
 out_p_get_ent(cw_out_t *a_out, const char *a_format, cw_uint32_t a_len)
 {
-	cw_out_ent_t *retval;
-	cw_uint32_t i;
+	cw_out_ent_t	*retval;
+	cw_uint32_t	i;
 
 	_cw_check_ptr(a_format);
-	_cw_assert(0 < a_len);
+	_cw_assert(a_len > 0);
 
 	/*
-	 * Find a match for the type.  Use the first match found by
-	 * searching the built in types, then the extended types.  If there
-	 * is no match, return an error, since we have no way of knowing the
-	 * size of argument to use.
+	 * Find a match for the type.  Use the first match found by searching
+	 * the built in types, then the extended types.  If there is no match,
+	 * return an error, since we have no way of knowing the size of argument
+	 * to use.
 	 */
 	for (i = 0; i < (sizeof(cw_g_out_builtins) / sizeof(struct
 	    cw_out_ent_s)); i++) {
-		if (0 == strncmp(a_format, cw_g_out_builtins[i].type,
-		    cw_g_out_builtins[i].len) && (a_len ==
+		if ((strncmp(a_format, cw_g_out_builtins[i].type,
+		    cw_g_out_builtins[i].len) == 0) && (a_len ==
 		    cw_g_out_builtins[i].len)) {
 			retval = &cw_g_out_builtins[i];
 			goto RETURN;
 		}
 	}
 
-	if (NULL != a_out) {
+	if (a_out != NULL) {
 		for (i = 0; i < a_out->nextensions; i++) {
-			if (0 == strncmp(a_format, a_out->extensions[i].type,
-			    a_out->extensions[i].len) && (a_len ==
+			if ((strncmp(a_format, a_out->extensions[i].type,
+			    a_out->extensions[i].len) == 0) && (a_len ==
 			    a_out->extensions[i].len)) {
 				retval = &a_out->extensions[i];
 				goto RETURN;
@@ -1341,34 +1325,32 @@ out_p_get_ent(cw_out_t *a_out, const char *a_format, cw_uint32_t a_len)
 	}
 	retval = NULL;
 
-RETURN:
+	RETURN:
 	return retval;
 }
 
 static cw_sint32_t
-out_p_metric_int(const char *a_format, cw_uint32_t a_len,
-    cw_uint64_t a_arg,
+out_p_metric_int(const char *a_format, cw_uint32_t a_len, cw_uint64_t a_arg,
     cw_uint32_t a_nbits, cw_uint32_t a_default_base)
 {
-	cw_sint32_t retval, val_len;
-	cw_uint32_t width, base, i;
-	cw_uint64_t arg = a_arg;
-	cw_bool_t is_negative, show_sign;
-	const char *val;
-	char   *syms = "0123456789abcdefghijklmnopqrstuvwxyz";
-	char   *result, s_result[65] =
-	"0000000000000000000000000000000000000000000000000000000000000000";
+	cw_sint32_t	retval, val_len;
+	cw_uint32_t	width, base, i;
+	cw_uint64_t	arg = a_arg;
+	cw_bool_t	is_negative, show_sign;
+	const char	*val;
+	char		*syms = "0123456789abcdefghijklmnopqrstuvwxyz";
+	char		*result, s_result[65] =
+	    "0000000000000000000000000000000000000000000000000000000000000000";
 
-	_cw_assert((8 == a_nbits) || (16 == a_nbits) || (32 == a_nbits) || (64
-	    == a_nbits));
+	_cw_assert((a_nbits == 8) || (a_nbits == 16) || (a_nbits == 32) ||
+	    (a_nbits == 64));
 
 	/*
-	 * Move the pointer forward so that unnecessary digits can be
-	 * ignored.
+	 * Move the pointer forward so that unnecessary digits can be ignored.
 	 */
 	result = &s_result[64 - a_nbits];
 
-	if (-1 != (val_len = spec_get_val(a_format, a_len, "w", 1, &val))) {
+	if ((val_len = spec_get_val(a_format, a_len, "w", 1, &val)) != -1) {
 		/* Width specified. */
 		/*
 		 * The next character after val is either `|' or `]', so we
@@ -1380,9 +1362,9 @@ out_p_metric_int(const char *a_format, cw_uint32_t a_len,
 		width = 0;
 
 	/* Determine sign. */
-	if ((-1 != (val_len = spec_get_val(a_format, a_len, "s", 1, &val))) &&
-	    ('s' == val[0]) && (0 != (arg & (((cw_uint64_t)1) << (a_nbits -
-	    1))))) {
+	if (((val_len = spec_get_val(a_format, a_len, "s", 1, &val)) != -1) &&
+	    (val[0] == 's') && ((arg & (((cw_uint64_t)1) << (a_nbits - 1))) !=
+	    0)) {
 		is_negative = TRUE;
 		/* Convert two's complement to positive. */
 		arg ^= ((cw_uint64_t)0xffffffff << 32) + 0xffffffff;
@@ -1391,13 +1373,13 @@ out_p_metric_int(const char *a_format, cw_uint32_t a_len,
 		is_negative = FALSE;
 
 	/* Should we show the sign if the number is positive? */
-	if (((-1 != (val_len = spec_get_val(a_format, a_len, "+", 1, &val))) &&
-	    ('+' == val[0])) || (TRUE == is_negative))
+	if ((((val_len = spec_get_val(a_format, a_len, "+", 1, &val)) != -1) &&
+	    (val[0] == '+')) || (is_negative))
 		show_sign = TRUE;
 	else
 		show_sign = FALSE;
 
-	if (-1 != (val_len = spec_get_val(a_format, a_len, "b", 1, &val))) {
+	if ((val_len = spec_get_val(a_format, a_len, "b", 1, &val)) != -1) {
 		/* Base specified. */
 		/*
 		 * The next character after val is either `|' or `]', so we
@@ -1405,24 +1387,24 @@ out_p_metric_int(const char *a_format, cw_uint32_t a_len,
 		 * points to.
 		 */
 		base = strtoul(val, NULL, 10);
-		_cw_assert(2 <= base);
-		_cw_assert(36 >= base);
+		_cw_assert(base >= 2);
+		_cw_assert(base <= 36);
 	} else
 		base = a_default_base;
 
 	/*
-	 * Treat 64 bit numbers separately, since they're much slower on 32
-	 * bit architectures.
+	 * Treat 64 bit numbers separately, since they're much slower on 32 bit
+	 * architectures.
 	 */
-	if (64 != a_nbits) {
-		cw_uint32_t rval = (cw_uint32_t)arg;
+	if (a_nbits != 64) {
+		cw_uint32_t	rval = (cw_uint32_t)arg;
 
 		for (i = a_nbits - 1; rval != 0; i--) {
 			result[i] = syms[rval % base];
 			rval /= base;
 		}
 	} else {
-		cw_uint64_t rval = (cw_uint64_t)arg;
+		cw_uint64_t	rval = (cw_uint64_t)arg;
 
 		for (i = a_nbits - 1; rval != 0; i--) {
 			result[i] = syms[rval % base];
@@ -1437,38 +1419,36 @@ out_p_metric_int(const char *a_format, cw_uint32_t a_len,
 	}
 
 	retval = a_nbits - i;
-	if (TRUE == show_sign)
+	if (show_sign)
 		retval++;
-	if (width > retval)
+	if (retval < width)
 		retval = width;
 	return retval;
 }
 
 static char *
-out_p_render_int(const char *a_format, cw_uint32_t a_len,
-    cw_uint64_t a_arg, char *r_buf,
-    cw_uint32_t a_nbits, cw_uint32_t a_default_base)
+out_p_render_int(const char *a_format, cw_uint32_t a_len, cw_uint64_t a_arg,
+    char *r_buf, cw_uint32_t a_nbits, cw_uint32_t a_default_base)
 {
-	char   *retval;
-	cw_uint32_t base, width, out_len, i;
-	cw_sint32_t val_len;
-	cw_uint64_t arg = a_arg;
-	cw_bool_t is_negative, show_sign;
-	const char *val;
-	char   *syms = "0123456789abcdefghijklmnopqrstuvwxyz";
-	char   *result, s_result[65] =
-	"0000000000000000000000000000000000000000000000000000000000000000";
+	char		*retval;
+	cw_uint32_t	base, width, out_len, i;
+	cw_sint32_t	val_len;
+	cw_uint64_t	arg = a_arg;
+	cw_bool_t	is_negative, show_sign;
+	const char	*val;
+	char		*syms = "0123456789abcdefghijklmnopqrstuvwxyz";
+	char		*result, s_result[65] =
+	    "0000000000000000000000000000000000000000000000000000000000000000";
 
-	_cw_assert((8 == a_nbits) || (16 == a_nbits) || (32 == a_nbits) || (64
-	    == a_nbits));
+	_cw_assert((a_nbits == 8) || (a_nbits == 16) || (a_nbits == 32) ||
+	    (a_nbits == 64));
 
 	/*
-	 * Move the pointer forward so that unnecessary digits can be
-	 * ignored.
+	 * Move the pointer forward so that unnecessary digits can be ignored.
 	 */
 	result = &s_result[64 - a_nbits];
 
-	if (-1 != (val_len = spec_get_val(a_format, a_len, "b", 1, &val))) {
+	if ((val_len = spec_get_val(a_format, a_len, "b", 1, &val)) != -1) {
 		/* Base specified. */
 		/*
 		 * The next character after val is either `|' or `]', so we
@@ -1482,9 +1462,9 @@ out_p_render_int(const char *a_format, cw_uint32_t a_len,
 		base = a_default_base;
 
 	/* Determine sign. */
-	if ((-1 != (val_len = spec_get_val(a_format, a_len, "s", 1, &val))) &&
-	    ('s' == val[0]) && (0 != (arg & (((cw_uint64_t)1) << (a_nbits -
-	    1))))) {
+	if (((val_len = spec_get_val(a_format, a_len, "s", 1, &val)) != -1) &&
+	    (val[0] == 's') && ((arg & (((cw_uint64_t)1) << (a_nbits - 1))) !=
+	    0)) {
 		is_negative = TRUE;
 		/* Convert two's complement to positive. */
 		arg ^= ((cw_uint64_t)0xffffffff << 32) + 0xffffffff;
@@ -1493,25 +1473,25 @@ out_p_render_int(const char *a_format, cw_uint32_t a_len,
 		is_negative = FALSE;
 
 	/* Should we show the sign if the number is positive? */
-	if (((-1 != (val_len = spec_get_val(a_format, a_len, "+", 1, &val))) &&
-	    ('+' == val[0])) || (TRUE == is_negative))
+	if ((((val_len = spec_get_val(a_format, a_len, "+", 1, &val)) != -1) &&
+	    (val[0]) == '+') || (is_negative))
 		show_sign = TRUE;
 	else
 		show_sign = FALSE;
 
 	/*
-	 * Treat 64 bit numbers separately, since they're much slower on 32
-	 * bit architectures.
+	 * Treat 64 bit numbers separately, since they're much slower on 32 bit
+	 * architectures.
 	 */
-	if (64 != a_nbits) {
-		cw_uint32_t rval = (cw_uint32_t)arg;
+	if (a_nbits != 64) {
+		cw_uint32_t	rval = (cw_uint32_t)arg;
 
 		for (i = a_nbits - 1; rval != 0; i--) {
 			result[i] = syms[rval % base];
 			rval /= base;
 		}
 	} else {
-		cw_uint64_t rval = arg;
+		cw_uint64_t	rval = arg;
 
 		for (i = a_nbits - 1; rval != 0; i--) {
 			result[i] = syms[rval % base];
@@ -1525,7 +1505,7 @@ out_p_render_int(const char *a_format, cw_uint32_t a_len,
 			break;
 	}
 
-	if (-1 != (val_len = spec_get_val(a_format, a_len, "w", 1, &val))) {
+	if ((val_len = spec_get_val(a_format, a_len, "w", 1, &val)) != -1) {
 		/* Width specified. */
 		/*
 		 * The next character after val is either `|' or `]', so we
@@ -1538,23 +1518,23 @@ out_p_render_int(const char *a_format, cw_uint32_t a_len,
 
 	out_len = (a_nbits - i) + (show_sign ? 1 : 0);
 
-	if (width > out_len) {
-		char    pad, justify, *output;
+	if (out_len < width) {
+		char	pad, justify, *output;
 
 		/*
-		 * Padding needed.  memset() the output string to the
-		 * padding character, then determine where to render the
-		 * integer based on justification.
+		 * Padding needed.  memset() the output string to the padding
+		 * character, then determine where to render the integer based
+		 * on justification.
 		 */
-		if (-1 != (val_len = spec_get_val(a_format, a_len, "p", 1,
-		    &val)))
+		if ((val_len = spec_get_val(a_format, a_len, "p", 1, &val)) !=
+		    -1)
 			pad = val[0];
 		else
 			pad = ' ';
 		memset(r_buf, pad, width);
 
-		if (-1 != (val_len = spec_get_val(a_format, a_len, "j", 1,
-		    &val)))
+		if ((val_len = spec_get_val(a_format, a_len, "j", 1, &val)) !=
+		    -1)
 			justify = val[0];
 		else
 			justify = 'r';
@@ -1573,13 +1553,13 @@ out_p_render_int(const char *a_format, cw_uint32_t a_len,
 			_cw_error("Unknown justification");
 		}
 
-		if (TRUE == show_sign) {
+		if (show_sign) {
 			output[0] = (is_negative) ? '-' : '+';
 			memcpy(&output[1], &result[i], a_nbits - i);
 		} else
 			memcpy(output, &result[i], a_nbits - i);
 	} else {
-		if (TRUE == show_sign) {
+		if (show_sign) {
 			r_buf[0] = (is_negative) ? '-' : '+';
 			memcpy(&r_buf[1], &result[i], a_nbits - i);
 		} else
@@ -1594,11 +1574,11 @@ out_p_render_int(const char *a_format, cw_uint32_t a_len,
 static cw_sint32_t
 out_p_metric_int32(const char *a_format, cw_uint32_t a_len, const void *a_arg)
 {
-	cw_sint32_t retval;
-	cw_uint64_t arg;
+	cw_sint32_t	retval;
+	cw_uint64_t	arg;
 
 	_cw_check_ptr(a_format);
-	_cw_assert(0 < a_len);
+	_cw_assert(a_len > 0);
 	_cw_check_ptr(a_arg);
 
 	arg = (cw_uint64_t)*(const cw_uint32_t *)a_arg;
@@ -1612,11 +1592,11 @@ static char *
 out_p_render_int32(const char *a_format, cw_uint32_t a_len, const void *a_arg,
     char *r_buf)
 {
-	char   *retval;
-	cw_uint64_t arg;
+	char		*retval;
+	cw_uint64_t	arg;
 
 	_cw_check_ptr(a_format);
-	_cw_assert(0 < a_len);
+	_cw_assert(a_len > 0);
 	_cw_check_ptr(a_arg);
 	_cw_check_ptr(r_buf);
 
@@ -1630,11 +1610,11 @@ out_p_render_int32(const char *a_format, cw_uint32_t a_len, const void *a_arg,
 static cw_sint32_t
 out_p_metric_int64(const char *a_format, cw_uint32_t a_len, const void *a_arg)
 {
-	cw_sint32_t retval;
-	cw_uint64_t arg;
+	cw_sint32_t	retval;
+	cw_uint64_t	arg;
 
 	_cw_check_ptr(a_format);
-	_cw_assert(0 < a_len);
+	_cw_assert(a_len > 0);
 	_cw_check_ptr(a_arg);
 
 	arg = *(const cw_uint64_t *)a_arg;
@@ -1648,11 +1628,11 @@ static char *
 out_p_render_int64(const char *a_format, cw_uint32_t a_len, const void *a_arg,
     char *r_buf)
 {
-	char   *retval;
-	cw_uint64_t arg;
+	char		*retval;
+	cw_uint64_t	arg;
 
 	_cw_check_ptr(a_format);
-	_cw_assert(0 < a_len);
+	_cw_assert(a_len > 0);
 	_cw_check_ptr(a_arg);
 	_cw_check_ptr(r_buf);
 
@@ -1666,15 +1646,15 @@ out_p_render_int64(const char *a_format, cw_uint32_t a_len, const void *a_arg,
 static cw_sint32_t
 out_p_metric_char(const char *a_format, cw_uint32_t a_len, const void *a_arg)
 {
-	cw_sint32_t retval, val_len;
-	cw_uint32_t width;
-	const char *val;
+	cw_sint32_t	retval, val_len;
+	cw_uint32_t	width;
+	const char	*val;
 
 	_cw_check_ptr(a_format);
-	_cw_assert(0 < a_len);
+	_cw_assert(a_len > 0);
 	_cw_check_ptr(a_arg);
 
-	if (-1 != (val_len = spec_get_val(a_format, a_len, "w", 1, &val))) {
+	if ((val_len = spec_get_val(a_format, a_len, "w", 1, &val)) != -1) {
 		/* Width specified. */
 		/*
 		 * The next character after val is either `|' or `]', so we
@@ -1689,22 +1669,22 @@ out_p_metric_char(const char *a_format, cw_uint32_t a_len, const void *a_arg)
 	}
 	retval = 1;
 
-RETURN:
+	RETURN:
 	return retval;
 }
 
 static char *
-out_p_render_char(const char *a_format, cw_uint32_t a_len,
-    const void *a_arg, char *r_buf)
+out_p_render_char(const char *a_format, cw_uint32_t a_len, const void *a_arg,
+    char *r_buf)
 {
-	char   *retval;
-	cw_uint32_t width;
-	cw_sint32_t val_len;
-	const char *val;
-	cw_uint8_t pad, c;
+	char		*retval;
+	cw_uint32_t	width;
+	cw_sint32_t	val_len;
+	const char	*val;
+	cw_uint8_t	pad, c;
 
 	_cw_check_ptr(a_format);
-	_cw_assert(0 < a_len);
+	_cw_assert(a_len > 0);
 	_cw_check_ptr(a_arg);
 	_cw_check_ptr(r_buf);
 
@@ -1712,10 +1692,10 @@ out_p_render_char(const char *a_format, cw_uint32_t a_len,
 
 	width = out_p_metric_char(a_format, a_len, a_arg);
 
-	if (1 < width) {
+	if (width > 1) {
 		/* Padding character. */
-		if (-1 != (val_len = spec_get_val(a_format, a_len, "p", 1,
-		    &val)))
+		if ((val_len = spec_get_val(a_format, a_len, "p", 1, &val)) !=
+		    -1)
 			pad = val[0];
 		else
 			pad = ' ';
@@ -1723,8 +1703,8 @@ out_p_render_char(const char *a_format, cw_uint32_t a_len,
 		memset(r_buf, pad, width);
 
 		/* Justification. */
-		if (-1 != (val_len = spec_get_val(a_format, a_len, "j", 1,
-		    &val))) {
+		if ((val_len = spec_get_val(a_format, a_len, "j", 1, &val)) !=
+		    -1) {
 			switch (val[0]) {
 			case 'r':
 				r_buf[width - 1] = c;
@@ -1753,19 +1733,19 @@ out_p_render_char(const char *a_format, cw_uint32_t a_len,
 static cw_sint32_t
 out_p_metric_string(const char *a_format, cw_uint32_t a_len, const void *a_arg)
 {
-	cw_sint32_t retval, val_len;
-	cw_uint32_t len, width;
-	const char *val, *str;
+	cw_sint32_t	retval, val_len;
+	cw_uint32_t	len, width;
+	const char	*val, *str;
 
 	_cw_check_ptr(a_format);
-	_cw_assert(0 < a_len);
+	_cw_assert(a_len > 0);
 	_cw_check_ptr(a_arg);
 
 	str = *(const char **)a_arg;
 
 	len = strlen(str);
 
-	if (-1 != (val_len = spec_get_val(a_format, a_len, "w", 1, &val))) {
+	if ((val_len = spec_get_val(a_format, a_len, "w", 1, &val)) != -1) {
 		/* Width specified. */
 		/*
 		 * The next character after val is either `|' or `]', so we
@@ -1780,22 +1760,22 @@ out_p_metric_string(const char *a_format, cw_uint32_t a_len, const void *a_arg)
 	}
 	retval = len;
 
-RETURN:
+	RETURN:
 	return retval;
 }
 
 static char *
-out_p_render_string(const char *a_format, cw_uint32_t a_len,
-    const void *a_arg, char *r_buf)
+out_p_render_string(const char *a_format, cw_uint32_t a_len, const void *a_arg,
+    char *r_buf)
 {
-	char   *retval, pad;
-	cw_sint32_t val_len;
-	const char *val;
-	cw_uint32_t len, width;
-	const char *str;
+	char		*retval, pad;
+	cw_sint32_t	val_len;
+	const char	*val;
+	cw_uint32_t	len, width;
+	const char	*str;
 
 	_cw_check_ptr(a_format);
-	_cw_assert(0 < a_len);
+	_cw_assert(a_len > 0);
 	_cw_check_ptr(a_arg);
 	_cw_check_ptr(r_buf);
 
@@ -1805,10 +1785,10 @@ out_p_render_string(const char *a_format, cw_uint32_t a_len,
 
 	width = out_p_metric_string(a_format, a_len, a_arg);
 
-	if (len < width) {
+	if (width > len) {
 		/* Padding character. */
-		if (-1 != (val_len = spec_get_val(a_format, a_len, "p", 1,
-		    &val)))
+		if ((val_len = spec_get_val(a_format, a_len, "p", 1, &val)) !=
+		    -1)
 			pad = val[0];
 		else
 			pad = ' ';
@@ -1816,8 +1796,8 @@ out_p_render_string(const char *a_format, cw_uint32_t a_len,
 		memset(r_buf, pad, width);
 
 		/* Justification. */
-		if (-1 != (val_len = spec_get_val(a_format, a_len, "j", 1,
-		    &val))) {
+		if ((val_len = spec_get_val(a_format, a_len, "j", 1, &val)) !=
+		    -1) {
 			switch (val[0]) {
 			case 'r':
 				memcpy(&r_buf[width - len], str, len);
@@ -1844,16 +1824,13 @@ out_p_render_string(const char *a_format, cw_uint32_t a_len,
 }
 
 static cw_sint32_t
-out_p_metric_pointer(const char *a_format, cw_uint32_t a_len,
-    const void *a_arg)
+out_p_metric_pointer(const char *a_format, cw_uint32_t a_len, const void *a_arg)
 {
-	cw_sint32_t retval;
-
-	/* Assumes 32 bit pointer. */
-	cw_uint64_t arg;
+	cw_sint32_t	retval;
+	cw_uint64_t	arg;	/* Assumes 32 bit pointer. */
 
 	_cw_check_ptr(a_format);
-	_cw_assert(0 < a_len);
+	_cw_assert(a_len > 0);
 	_cw_check_ptr(a_arg);
 
 	arg = (cw_uint64_t)(cw_uint32_t)*(const void **)a_arg;
@@ -1864,16 +1841,14 @@ out_p_metric_pointer(const char *a_format, cw_uint32_t a_len,
 }
 
 static char *
-out_p_render_pointer(const char *a_format, cw_uint32_t a_len,
-    const void *a_arg, char *r_buf)
+out_p_render_pointer(const char *a_format, cw_uint32_t a_len, const void *a_arg,
+    char *r_buf)
 {
-	char   *retval;
-
-	/* Assumes 32 bit pointer. */
-	cw_uint64_t arg;
+	char		*retval;
+	cw_uint64_t	arg;	/* Assumes 32 bit pointer. */
 
 	_cw_check_ptr(a_format);
-	_cw_assert(0 < a_len);
+	_cw_assert(a_len > 0);
 	_cw_check_ptr(a_arg);
 	_cw_check_ptr(r_buf);
 

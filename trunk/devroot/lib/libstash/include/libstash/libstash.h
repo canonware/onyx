@@ -153,16 +153,15 @@ typedef void cw_opaque_dealloc_t (const void *, const void *, const char *,
 /*
  * libstash initialization and shutdown function prototypes.
  */
-cw_bool_t libstash_init(void);
-
-void    libstash_shutdown(void);
+cw_bool_t	libstash_init(void);
+void		libstash_shutdown(void);
 
 /*
  * Global variables.
  */
-extern cw_mem_t *cw_g_mem;
-extern cw_dbg_t *cw_g_dbg;
-extern cw_out_t *cw_g_out;
+extern cw_mem_t	*cw_g_mem;
+extern cw_dbg_t	*cw_g_dbg;
+extern cw_out_t	*cw_g_out;
 
 /*
  * Global macros we use everywhere.

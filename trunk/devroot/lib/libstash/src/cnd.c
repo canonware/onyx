@@ -17,12 +17,12 @@
 cw_cnd_t *
 cnd_new(cw_cnd_t *a_cnd)
 {
-	cw_cnd_t *retval;
-	int     error;
+	cw_cnd_t	*retval;
+	int		error;
 
 	if (a_cnd == NULL) {
 		retval = (cw_cnd_t *)_cw_malloc(sizeof(cw_cnd_t));
-		if (NULL == retval)
+		if (retval == NULL)
 			goto RETURN;
 		retval->is_malloced = TRUE;
 	} else {
@@ -36,14 +36,14 @@ cnd_new(cw_cnd_t *a_cnd)
 		    "Error in pthread_cond_init(): [s]\n", strerror(error));
 		abort();
 	}
-RETURN:
+	RETURN:
 	return retval;
 }
 
 void
 cnd_delete(cw_cnd_t *a_cnd)
 {
-	int     error;
+	int	error;
 
 	_cw_check_ptr(a_cnd);
 
@@ -53,14 +53,14 @@ cnd_delete(cw_cnd_t *a_cnd)
 		    "Error in pthread_cond_destroy(): [s]\n", strerror(error));
 		abort();
 	}
-	if (a_cnd->is_malloced == TRUE)
+	if (a_cnd->is_malloced)
 		_cw_free(a_cnd);
 }
 
 void
 cnd_signal(cw_cnd_t *a_cnd)
 {
-	int     error;
+	int	error;
 
 	_cw_check_ptr(a_cnd);
 
@@ -75,7 +75,7 @@ cnd_signal(cw_cnd_t *a_cnd)
 void
 cnd_broadcast(cw_cnd_t *a_cnd)
 {
-	int     error;
+	int	error;
 
 	_cw_check_ptr(a_cnd);
 
@@ -92,11 +92,11 @@ cw_bool_t
 cnd_timedwait(cw_cnd_t *a_cnd, cw_mtx_t *a_mtx, const struct timespec
     *a_timeout)
 {
-	int     error;
-	cw_bool_t retval;
-	struct timeval now;
-	struct timespec timeout;
-	struct timezone tz;
+	int		error;
+	cw_bool_t	retval;
+	struct timeval	now;
+	struct timespec	timeout;
+	struct timezone	tz;
 
         _cw_check_ptr(a_cnd);
         _cw_check_ptr(a_mtx);
@@ -107,8 +107,10 @@ cnd_timedwait(cw_cnd_t *a_cnd, cw_mtx_t *a_mtx, const struct timespec
         gettimeofday(&now, &tz);
         timeout.tv_nsec = now.tv_usec * 1000 + a_timeout->tv_nsec;
         timeout.tv_sec = (now.tv_sec + a_timeout->tv_sec
-	    + (timeout.tv_nsec / 1000000000));	/* Carry if nanoseconds
-						 * overflowed. */
+	    + (timeout.tv_nsec / 1000000000));	/*
+						 * Carry if nanoseconds
+						 * overflowed.
+						 */
 	/*
 	 * Chop off the number of nanoseconds to be less than one
 	 * second.
@@ -134,7 +136,7 @@ cnd_timedwait(cw_cnd_t *a_cnd, cw_mtx_t *a_mtx, const struct timespec
 void
 cnd_wait(cw_cnd_t *a_cnd, cw_mtx_t *a_mtx)
 {
-	int     error;
+	int	error;
 
 	_cw_check_ptr(a_cnd);
 	_cw_check_ptr(a_mtx);
