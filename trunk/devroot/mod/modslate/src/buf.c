@@ -680,6 +680,7 @@ bufp_p_delete(cw_bufp_t *a_bufp)
 		      sizeof(cw_bufp_t));
 }
 
+/* Convert page position (ppos) to bpos, relative to the beginning of a_bufp. */
 static cw_uint32_t
 bufp_p_pos_p2r(cw_bufp_t *a_bufp, cw_uint64_t a_ppos)
 {
@@ -687,8 +688,9 @@ bufp_p_pos_p2r(cw_bufp_t *a_bufp, cw_uint64_t a_ppos)
 
     cw_check_ptr(a_bufp);
     cw_dassert(a_bufp->magic == CW_BUFP_MAGIC);
-    cw_assert(a_ppos <= a_bufp->gap_off
-	      || a_ppos >= a_bufp->gap_off + (CW_BUFP_SIZE - a_bufp->len)
+    cw_assert(a_ppos < a_bufp->gap_off
+	      || (a_ppos >= a_bufp->gap_off + (CW_BUFP_SIZE - a_bufp->len)
+		  && a_ppos < CW_BUFP_SIZE)
 	      || (a_ppos == CW_BUFP_SIZE
 		  && a_bufp == ql_last(&a_bufp->buf->plist, plink)));
 
@@ -704,6 +706,7 @@ bufp_p_pos_p2r(cw_bufp_t *a_bufp, cw_uint64_t a_ppos)
     return bpos;
 }
 
+/* Convert bpos to ppos. */
 static cw_uint32_t
 bufp_p_pos_b2p(cw_bufp_t *a_bufp, cw_uint64_t a_bpos)
 {
@@ -727,16 +730,19 @@ bufp_p_pos_b2p(cw_bufp_t *a_bufp, cw_uint64_t a_bpos)
 	ppos = rel_bpos + (CW_BUFP_SIZE - a_bufp->len);
     }
 
-    cw_assert(ppos < CW_BUFP_SIZE
-	      || (a_bufp == ql_last(&a_bufp->buf->plist, plink)
-		  && ppos == CW_BUFP_SIZE));
+    cw_assert(ppos < a_bufp->gap_off
+	      || (ppos >= a_bufp->gap_off + (CW_BUFP_SIZE - a_bufp->len)
+		  && ppos < CW_BUFP_SIZE)
+	      || (ppos == CW_BUFP_SIZE
+		  && a_bufp == ql_last(&a_bufp->buf->plist, plink)));
     return ppos;
 }
 
+/* Convert ppos to bpos. */
 static cw_uint32_t
 bufp_p_pos_p2b(cw_bufp_t *a_bufp, cw_uint64_t a_ppos)
 {
-    return bufp_p_pos_p2r(a_bufp, a_ppos) + bufp_p_bpos(a_bufp);
+    return (bufp_p_pos_p2r(a_bufp, a_ppos) + bufp_p_bpos(a_bufp));
 }
 
 static cw_uint32_t
@@ -2242,7 +2248,6 @@ mkr_l_insert(cw_mkr_t *a_mkr, cw_bool_t a_record, cw_bool_t a_after,
 
     buf->len += cnt;
     buf->nlines += nlines;
-    buf_dump(buf, __FUNCTION__ "");
 }
 
 void
@@ -2458,8 +2463,8 @@ mkr_line_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence)
 
     /* Update the internal state of a_mkr. */
     a_mkr->bufp = bufp;
-    a_mkr->ppos = bpos - bufp_p_bpos(bufp);
-    a_mkr->pline = line - bufp_p_line(bufp);
+    a_mkr->ppos = bufp_p_pos_b2p(bufp, bpos);
+    a_mkr->pline = bufp_p_ppos2pline(bufp, a_mkr->ppos);
     rb_node_new(&bufp->mtree, a_mkr, mnode);
 
     /* Insert a_mkr into the bufp's tree and list. */
