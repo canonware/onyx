@@ -34,6 +34,28 @@ typedef struct cw_mem_s cw_mem_t;
  *
  * <<< Input(s) >>>
  *
+ * a_data : Data pointer, as specified by the a_data argument of
+ *          mem_set_oom_handler().
+ *
+ * a_size : Size of failed memory allocation.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : FALSE : Don't retry allocation.
+ *          TRUE : Retry allocation.
+ *
+ * <<< Description >>>
+ *
+ * Prototype for allocation error handler.
+ *
+ ****************************************************************************/
+typedef cw_bool_t
+mem_oom_handler_t(const void * a_data, cw_uint32_t a_size);
+
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
  * None.
  *
  * <<< Output(s) >>>
@@ -65,6 +87,29 @@ mem_new(void);
  ****************************************************************************/
 void
 mem_delete(cw_mem_t * a_mem);
+
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_mem : Pointer to a mem.
+ *
+ * a_oom_handler : Pointer to an out of memory handler, or NULL.
+ *
+ * a_data : Data pointer that is passed into a_oom_handler().
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
+ * <<< Description >>>
+ *
+ * Set an out of memory handler function
+ *
+ ****************************************************************************/
+void
+mem_set_oom_handler(cw_mem_t * a_mem, mem_oom_handler_t * a_oom_handler,
+		    const void * a_data);
 
 /****************************************************************************
  *

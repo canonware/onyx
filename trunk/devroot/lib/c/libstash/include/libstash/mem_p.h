@@ -16,14 +16,16 @@
 
 struct cw_mem_s
 {
+#ifdef _CW_REENTRANT
+  cw_mtx_t lock;
+#endif
+
 #ifdef _LIBSTASH_DBG
   cw_oh_t addr_hash;
-#  ifdef _CW_REENTRANT
-  cw_mtx_t lock;
-#  endif
-#else
-  int garbage;
 #endif
+
+  mem_oom_handler_t * oom_handler;
+  const void * handler_data;
 };
 
 #ifdef _LIBSTASH_DBG

@@ -1,3 +1,9 @@
+1999-09-08  Jason Evans  <jasone@canonware.com>
+
+	* src/mem.c (mem_calloc): Don't initialize memory to 0xa5 bytes,
+	since calloc() is supposed to return zeroed memory.
+	(mem_set_oom_handler): Add.
+
 1999-08-18  Jason Evans  <jasone@canonware.com>
 
 	* test/c_libstash_a.c: Test whether libstash works correctly

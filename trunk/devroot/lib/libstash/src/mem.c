@@ -26,15 +26,19 @@ mem_new(void)
   retval = (cw_mem_t *) _cw_malloc(sizeof(cw_mem_t));
   _cw_check_ptr(retval);
 
-#ifdef _LIBSTASH_DBG
-#  ifdef _CW_REENTRANT
+#ifdef _CW_REENTRANT
   mtx_new(&retval->lock);
-#  endif
+#endif
+  
+#ifdef _LIBSTASH_DBG
   oh_new(&retval->addr_hash);
   oh_set_h1(&retval->addr_hash, oh_h1_direct);
   oh_set_key_compare(&retval->addr_hash, oh_key_compare_direct);
 #endif
 
+  retval->oom_handler = NULL;
+  retval->handler_data = NULL;
+  
   return retval;
 }
 
@@ -93,6 +97,24 @@ mem_delete(cw_mem_t * a_mem)
   _cw_free(a_mem);
 }
 
+void
+mem_set_oom_handler(cw_mem_t * a_mem, mem_oom_handler_t * a_oom_handler,
+		    const void * a_data)
+{
+  _cw_check_ptr(a_mem);
+
+#ifdef _CW_REENTRANT
+  mtx_lock(&a_mem->lock);
+#endif
+
+  a_mem->oom_handler = a_oom_handler;
+  a_mem->handler_data = a_data;
+  
+#ifdef _CW_REENTRANT
+  mtx_unlock(&a_mem->lock);
+#endif
+}
+
 #ifdef _LIBSTASH_DBG
 void *
 mem_malloc(cw_mem_t * a_mem, size_t a_size, const char * a_filename,
@@ -116,6 +138,30 @@ mem_malloc(cw_mem_t * a_mem, size_t a_size)
 #endif
     
   retval = _cw_malloc(a_size);
+  
+  if (NULL == retval)
+  {
+    if (NULL != a_mem)
+    {
+#ifndef _LIBSTASH_DBG
+#  ifdef _CW_REENTRANT
+      mtx_lock(&a_mem->lock);
+#  endif
+#endif
+      if (NULL != a_mem->oom_handler)
+      {
+	if (TRUE == a_mem->oom_handler(a_mem->handler_data, a_size))
+	{
+	  retval = _cw_malloc(a_size);
+	}
+      }
+#ifndef _LIBSTASH_DBG
+#  ifdef _CW_REENTRANT
+      mtx_unlock(&a_mem->lock);
+#  endif
+#endif
+    }
+  }
   
 #ifdef _LIBSTASH_DBG
   if (NULL == a_filename)
@@ -251,6 +297,30 @@ mem_calloc(cw_mem_t * a_mem, size_t a_number, size_t a_size)
   
   retval = _cw_calloc(a_number, a_size);
 
+  if (NULL == retval)
+  {
+    if (NULL != a_mem)
+    {
+#ifndef _LIBSTASH_DBG
+#  ifdef _CW_REENTRANT
+      mtx_lock(&a_mem->lock);
+#  endif
+#endif
+      if (NULL != a_mem->oom_handler)
+      {
+	if (TRUE == a_mem->oom_handler(a_mem->handler_data, a_number * a_size))
+	{
+	  retval = _cw_calloc(a_number, a_size);
+	}
+      }
+#ifndef _LIBSTASH_DBG
+#  ifdef _CW_REENTRANT
+      mtx_unlock(&a_mem->lock);
+#  endif
+#endif
+    }
+  }
+  
 #ifdef _LIBSTASH_DBG
   if (NULL == a_filename)
   {
@@ -317,7 +387,8 @@ mem_calloc(cw_mem_t * a_mem, size_t a_number, size_t a_size)
       }
       else
       {
-	memset(retval, 0xa5, a_number * a_size);
+	/* Leave the memory alone, since calloc() is supposed to return zeroed
+	 * memory. */
 	
 	allocation->size = a_number * a_size;
 	allocation->filename = a_filename;
@@ -387,6 +458,30 @@ mem_realloc(cw_mem_t * a_mem, void * a_ptr, size_t a_size)
 #endif
   
   retval = _cw_realloc(a_ptr, a_size);
+  
+  if (NULL == retval)
+  {
+    if (NULL != a_mem)
+    {
+#ifndef _LIBSTASH_DBG
+#  ifdef _CW_REENTRANT
+      mtx_lock(&a_mem->lock);
+#  endif
+#endif
+      if (NULL != a_mem->oom_handler)
+      {
+	if (TRUE == a_mem->oom_handler(a_mem->handler_data, a_size))
+	{
+	  retval = _cw_realloc(a_ptr, a_size);
+	}
+      }
+#ifndef _LIBSTASH_DBG
+#  ifdef _CW_REENTRANT
+      mtx_unlock(&a_mem->lock);
+#  endif
+#endif
+    }
+  }
   
 #ifdef _LIBSTASH_DBG
   if (NULL == a_filename)
