@@ -663,10 +663,169 @@ systemdict_abs(cw_nxo_t *a_thread)
 }
 
 #ifdef CW_SOCKET
+static cw_bool_t
+systemdict_p_sock_family(cw_nxo_t *a_thread, int a_fd, cw_bool_t a_peer,
+			 sa_family_t *r_family)
+{
+    cw_bool_t retval;
+    int error;
+/* Stevens hard codes 128 in his unp.h header.  This seems sketchy to me, but
+ * should work fine for the limited types of sockets Onyx supports. */
+#define CW_MAXSOCKADDR 128
+    union
+    {
+	struct sockaddr sa;
+	char pad[CW_MAXSOCKADDR];
+    } u;
+    socklen_t len;
+
+    len = CW_MAXSOCKADDR;
+#undef CW_MAXSOCKADDR
+    if (a_peer)
+    {
+	error = getpeername(a_fd, &u.sa, &len);
+    }
+    else
+    {
+	error = getsockname(a_fd, &u.sa, &len);
+    }
+    if (error == -1)
+    {
+	switch (errno)
+	{
+	    case EBADF:
+	    {
+		nxo_thread_nerror(a_thread, NXN_ioerror);
+		retval = TRUE;
+		goto RETURN;
+	    }
+	    case ECONNRESET:
+	    case ENOTCONN:
+	    {
+		nxo_thread_nerror(a_thread, NXN_neterror);
+		retval = TRUE;
+		goto RETURN;
+	    }
+	    case ENOTSOCK:
+	    {
+		nxo_thread_nerror(a_thread, NXN_argcheck);
+		retval = TRUE;
+		goto RETURN;
+	    }
+	    case ENOBUFS:
+	    {
+		xep_throw(CW_ONYXX_OOM);
+		/* Not reached. */
+	    }
+	    default:
+	    {
+		nxo_thread_nerror(a_thread, NXN_unregistered);
+		retval = TRUE;
+		goto RETURN;
+	    }
+	}
+    }
+
+    *r_family = u.sa.sa_family;
+
+    retval = FALSE;
+    RETURN:
+    return retval;
+}
+
 void
 systemdict_accept(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *sock;
+    sa_family_t family;
+    int sockfd;
+    socklen_t sockaddrlen;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(sock, ostack, a_thread);
+    if (nxo_type_get(sock) != NXOT_FILE)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    
+    /* Get the socket family. */
+    if (systemdict_p_sock_family(a_thread, nxo_file_fd_get(sock), FALSE,
+				 &family))
+    {
+	return;
+    }
+
+    switch (family)
+    {
+	case AF_INET:
+	{
+	    struct sockaddr_in sockaddr;
+
+	    sockaddrlen = sizeof(sockaddr);
+	    sockfd = accept(nxo_file_fd_get(sock), (struct sockaddr *)&sockaddr,
+			    &sockaddrlen);
+	    break;
+	}
+	case AF_LOCAL:
+	{
+	    struct sockaddr_un sockaddr;
+
+	    sockaddrlen = sizeof(sockaddr);
+	    sockfd = accept(nxo_file_fd_get(sock), (struct sockaddr *)&sockaddr,
+			    &sockaddrlen);
+	    break;
+	}
+	default:
+	{
+	    cw_not_reached();
+	}
+    }
+
+    if (sockfd == -1)
+    {
+	switch (errno)
+	{
+	    case ECONNABORTED:
+	    {
+		nxo_thread_nerror(a_thread, NXN_neterror);
+		return;
+	    }
+	    case EINTR:
+	    case EWOULDBLOCK:
+	    {
+		nxo_thread_nerror(a_thread, NXN_ioerror);
+		return;
+	    }
+	    case ENOTSOCK:
+	    case EOPNOTSUPP:
+	    {
+		nxo_thread_nerror(a_thread, NXN_argcheck);
+		return;
+	    }
+	    case EPERM:
+	    {
+		nxo_thread_nerror(a_thread, NXN_invalidfileaccess);
+		return;
+	    }
+	    case EBADF:
+	    case EFAULT:
+	    case EINVAL:
+	    case EMFILE:
+	    case ENFILE:
+	    case ENOBUFS:
+	    case ENOMEM:
+	    default:
+	    {
+		nxo_thread_nerror(a_thread, NXN_unregistered);
+		return;
+	    }
+	}
+    }
+
+    nxo_file_new(sock, nxo_thread_nx_get(a_thread),
+		 nxo_thread_currentlocking(a_thread));
+    nxo_file_fd_wrap(sock, sockfd);
 }
 #endif
 
@@ -1031,7 +1190,172 @@ systemdict_bind(cw_nxo_t *a_thread)
 void
 systemdict_bindsocket(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *tstack, *sock, *addr, *taddr;
+    cw_uint32_t npop;
+    sa_family_t family;
+    int sockport, error;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    tstack = nxo_thread_tstack_get(a_thread);
+    NXO_STACK_GET(addr, ostack, a_thread);
+    if (nxo_type_get(addr) == NXOT_INTEGER)
+    {
+	sockport = nxo_integer_get(addr);
+	NXO_STACK_DOWN_GET(addr, ostack, a_thread, addr);
+	npop = 3;
+    }
+    else
+    {
+	npop = 2;
+    }
+    NXO_STACK_DOWN_GET(sock, ostack, a_thread, addr);
+    if (nxo_type_get(sock) != NXOT_FILE || nxo_type_get(addr) != NXOT_STRING)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+
+    /* Get the socket family. */
+    if (systemdict_p_sock_family(a_thread, nxo_file_fd_get(sock), FALSE,
+				 &family))
+    {
+	return;
+    }
+
+    /* Create a '\0'-terminated copy of addr. */
+    taddr = nxo_stack_push(tstack);
+    nxo_string_cstring(taddr, addr, a_thread);
+
+    switch (family)
+    {
+	case AF_INET:
+	{
+	    struct sockaddr_in sockaddr;
+
+	    /* Begin initialization of sockaddr. */
+	    memset(&sockaddr, 0, sizeof(struct sockaddr_in));
+	    sockaddr.sin_family = family;
+	    sockaddr.sin_port = htons(sockport);
+
+	    error = inet_pton(family, nxo_string_get(taddr),
+			      &sockaddr.sin_addr);
+	    if (error < 0)
+	    {
+		nxo_thread_nerror(a_thread, NXN_argcheck);
+		goto ERROR;
+	    }
+	    else if (error == 0)
+	    {
+		struct hostent *ent;
+		struct in_addr *iaddr;
+
+		/* Not a dotted number IP address.  Try it as a hostname. */
+#ifdef CW_THREADS
+		mtx_lock(&cw_g_gethostbyname_mtx);
+#endif
+		ent = gethostbyname(nxo_string_get(taddr));
+		if (ent == NULL)
+		{
+#ifdef CW_THREADS
+		    mtx_unlock(&cw_g_gethostbyname_mtx);
+#endif
+		    nxo_thread_nerror(a_thread, NXN_argcheck);
+		    goto ERROR;
+		}
+
+		iaddr = (struct in_addr *) ent->h_addr_list[0];
+
+		sockaddr.sin_addr = *iaddr;
+	    }
+
+#ifdef CW_THREADS
+	    mtx_unlock(&cw_g_gethostbyname_mtx);
+#endif
+
+	    /* Bind. */
+	    error = bind(nxo_file_fd_get(sock),
+			 (struct sockaddr *) &sockaddr,
+			 sizeof(sockaddr));
+
+	    break;
+	}
+	case AF_LOCAL:
+	{
+	    struct sockaddr_un sockaddr;
+
+	    if (npop == 3)
+	    {
+		/* Port shouldn't be specified for a Unix domain socket. */
+		nxo_thread_nerror(a_thread, NXN_typecheck);
+		goto ERROR;
+	    }
+
+	    if (nxo_string_len_get(taddr) > sizeof(sockaddr.sun_path))
+	    {
+		/* Not enough room for path. */
+		nxo_thread_nerror(a_thread, NXN_rangecheck);
+		goto ERROR;
+	    }
+
+	    /* Initialize sockaddr. */
+	    memset(&sockaddr, 0, sizeof(struct sockaddr_un));
+	    sockaddr.sun_family = family;
+	    memcpy(sockaddr.sun_path, nxo_string_get(taddr),
+		   nxo_string_len_get(taddr));
+
+	    /* Bind. */
+	    error = bind(nxo_file_fd_get(sock),
+			 (struct sockaddr *) &sockaddr,
+			 sizeof(sockaddr));
+
+	    break;
+	}
+	default:
+	{
+	    cw_not_reached();
+	}
+    }
+
+    /* Check for bind() error. */
+    if (error == -1)
+    {
+	switch (errno)
+	{
+	    case EADDRINUSE:
+	    case EADDRNOTAVAIL:
+	    {
+		nxo_thread_nerror(a_thread, NXN_neterror);
+		goto ERROR;
+	    }
+	    case EACCES:
+	    case EINVAL:
+	    case EIO:
+	    case EISDIR:
+	    case ELOOP:
+	    case ENAMETOOLONG:
+	    case ENOENT:
+	    case EROFS:
+	    case ENOTDIR:
+	    case ENOTSOCK:
+	    {
+		nxo_thread_nerror(a_thread, NXN_invalidfileaccess);
+		goto ERROR;
+	    }
+	    case EAGAIN:
+	    case EBADF:
+	    case EFAULT:
+	    case ENOMEM:
+	    default:
+	    {
+		nxo_thread_nerror(a_thread, NXN_unregistered);
+		goto ERROR;
+	    }
+	}
+    }
+
+    nxo_stack_npop(ostack, npop);
+    ERROR:
+    nxo_stack_pop(tstack);
 }
 #endif
 
@@ -1573,76 +1897,6 @@ systemdict_condition(cw_nxo_t *a_thread)
 #endif
 
 #ifdef CW_SOCKET
-static cw_bool_t
-systemdict_p_sock_family(cw_nxo_t *a_thread, int a_fd, cw_bool_t a_peer,
-			 sa_family_t *r_family)
-{
-    cw_bool_t retval;
-    int error;
-/* Stevens hard codes 128 in his unp.h header.  This seems sketchy to me, but
- * should work fine for the limited types of sockets Onyx supports. */
-#define CW_MAXSOCKADDR 128
-    union
-    {
-	struct sockaddr sa;
-	char pad[CW_MAXSOCKADDR];
-    } u;
-    socklen_t len;
-
-    len = CW_MAXSOCKADDR;
-#undef CW_MAXSOCKADDR
-    if (a_peer)
-    {
-	error = getpeername(a_fd, &u.sa, &len);
-    }
-    else
-    {
-	error = getsockname(a_fd, &u.sa, &len);
-    }
-    if (error == -1)
-    {
-	switch (errno)
-	{
-	    case EBADF:
-	    {
-		nxo_thread_nerror(a_thread, NXN_ioerror);
-		retval = TRUE;
-		goto RETURN;
-	    }
-	    case ECONNRESET:
-	    case ENOTCONN:
-	    {
-		nxo_thread_nerror(a_thread, NXN_neterror);
-		retval = TRUE;
-		goto RETURN;
-	    }
-	    case ENOTSOCK:
-	    {
-		nxo_thread_nerror(a_thread, NXN_argcheck);
-		retval = TRUE;
-		goto RETURN;
-	    }
-	    case ENOBUFS:
-	    {
-		xep_throw(CW_ONYXX_OOM);
-		/* Not reached. */
-	    }
-	    default:
-	    {
-		nxo_thread_nerror(a_thread, NXN_unregistered);
-		retval = TRUE;
-		goto RETURN;
-	    }
-	}
-    }
-
-    *r_family = u.sa.sa_family;
-
-    retval = FALSE;
-    RETURN:
-    return retval;
-}
-
 void
 systemdict_connect(cw_nxo_t *a_thread)
 {
@@ -1777,6 +2031,7 @@ systemdict_connect(cw_nxo_t *a_thread)
     {
 	switch (errno)
 	{
+	    case EADDRINUSE:
 	    case ECONNREFUSED:
 	    case ETIMEDOUT:
 	    case ENETUNREACH:
@@ -1803,7 +2058,6 @@ systemdict_connect(cw_nxo_t *a_thread)
 		nxo_thread_nerror(a_thread, NXN_invalidfileaccess);
 		goto ERROR;
 	    }
-	    case EADDRINUSE:
 	    case EAGAIN:
 	    case EBADF:
 	    case EFAULT:
@@ -4646,7 +4900,56 @@ systemdict_link(cw_nxo_t *a_thread)
 void
 systemdict_listen(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *sock;
+    cw_uint32_t npop;
+    int backlog, error;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(sock, ostack, a_thread);
+    if (nxo_type_get(sock) == NXOT_INTEGER)
+    {
+	backlog = (int) nxo_integer_get(sock);
+	NXO_STACK_DOWN_GET(sock, ostack, a_thread, sock);
+	npop = 3;
+    }
+    else
+    {
+	/* Maximum backlog. */
+	backlog = -1;
+	npop = 2;
+    }
+    if (nxo_type_get(sock) != NXOT_FILE)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+
+    error = listen(nxo_file_fd_get(sock), backlog);
+    if (error == -1)
+    {
+	switch (errno)
+	{
+	    case EADDRINUSE:
+	    case EOPNOTSUPP:
+	    {
+		nxo_thread_nerror(a_thread, NXN_neterror);
+		return;
+	    }
+	    case ENOTSOCK:
+	    {
+		nxo_thread_nerror(a_thread, NXN_invalidfileaccess);
+		return;
+	    }
+	    case EBADF:
+	    default:
+	    {
+		nxo_thread_nerror(a_thread, NXN_unregistered);
+		return;
+	    }
+	}
+    }
+
+    nxo_stack_npop(ostack, npop);
 }
 #endif
 
@@ -6916,11 +7219,116 @@ systemdict_realtime(cw_nxo_t *a_thread)
 }
 #endif
 
-#ifdef CW_POSIX
+#ifdef CW_SOCKET
+static const struct cw_systemdict_name_arg send_recv_flag[] =
+{
+    {NXN_MSG_OOB, MSG_OOB},
+    {NXN_MSG_PEEK, MSG_PEEK},
+    {NXN_MSG_WAITALL, MSG_WAITALL},
+    {NXN_MSG_NOSIGNAL, MSG_NOSIGNAL}
+};
+
 void
 systemdict_recv(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *sock, *nxo;
+    cw_uint32_t npop;
+    int flags, nread;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+
+    /* Process flags array, if specified. */
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    flags = 0;
+    if (nxo_type_get(nxo) == NXOT_ARRAY)
+    {
+	cw_nxo_t *tstack, *el;
+	cw_uint32_t i, count, argcnt, argind;
+
+	tstack = nxo_thread_tstack_get(a_thread);
+	el = nxo_stack_push(tstack);
+
+	argcnt = sizeof(send_recv_flag) / sizeof(struct cw_systemdict_name_arg);
+	for (i = 0, count = nxo_array_len_get(nxo); i < count; i++)
+	{
+	    nxo_array_el_get(nxo, i, el);
+	    argind = systemdict_p_name_arg(nxo, send_recv_flag, argcnt);
+	    if (argind == argcnt)
+	    {
+		nxo_stack_pop(tstack);
+		nxo_thread_nerror(a_thread, NXN_argcheck);
+		return;
+	    }
+	    flags |= send_recv_flag[argind].arg;
+	}
+
+	nxo_stack_pop(tstack);
+
+	/* Get string. */
+	NXO_STACK_DOWN_GET(nxo, ostack, a_thread, nxo);
+	npop = 2;
+    }
+    else
+    {
+	npop = 1;
+    }
+    NXO_STACK_DOWN_GET(sock, ostack, a_thread, nxo);
+    if (nxo_type_get(sock) != NXOT_FILE || nxo_type_get(nxo) != NXOT_STRING)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+
+    nxo_string_lock(nxo);
+    nread = recv(nxo_file_fd_get(sock), nxo_string_get(nxo),
+		 nxo_string_len_get(nxo), 0);
+    nxo_string_unlock(nxo);
+
+    if (nread == -1)
+    {
+	switch (errno)
+	{
+	    case EWOULDBLOCK:
+	    {
+		/* Failed non-blocking read. */
+		nread = 0;
+		break;
+	    }
+	    case ENOTCONN:
+	    {
+		nxo_thread_nerror(a_thread, NXN_neterror);
+		return;
+	    }
+	    case ENOTSOCK:
+	    {
+		nxo_thread_nerror(a_thread, NXN_argcheck);
+		return;
+	    }
+	    case EBADF:
+	    case EFAULT:
+	    case EINTR:
+	    case EINVAL:
+	    default:
+	    {
+		nxo_thread_nerror(a_thread, NXN_unregistered);
+		return;
+	    }
+	}
+    }
+
+    if (nread < nxo_string_len_get(nxo))
+    {
+	/* Create a substring. */
+	nxo_string_substring_new(sock, nxo, nxo_thread_nx_get(a_thread),
+				 0, (cw_uint32_t) nread);
+    }
+    else
+    {
+	/* Entire string filled; return it as-is. */
+	nxo_dup(sock, nxo);
+    }
+
+    nxo_stack_npop(ostack, npop);
 }
 #endif
 
@@ -7508,7 +7916,101 @@ systemdict_self(cw_nxo_t *a_thread)
 void
 systemdict_send(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *sock, *nxo;
+    cw_uint32_t npop;
+    int flags, nwrite;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+
+    /* Process flags array, if specified. */
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    flags = 0;
+    if (nxo_type_get(nxo) == NXOT_ARRAY)
+    {
+	cw_nxo_t *tstack, *el;
+	cw_uint32_t i, count, argcnt, argind;
+
+	tstack = nxo_thread_tstack_get(a_thread);
+	el = nxo_stack_push(tstack);
+
+	argcnt = sizeof(send_recv_flag) / sizeof(struct cw_systemdict_name_arg);
+	for (i = 0, count = nxo_array_len_get(nxo); i < count; i++)
+	{
+	    nxo_array_el_get(nxo, i, el);
+	    argind = systemdict_p_name_arg(nxo, send_recv_flag, argcnt);
+	    if (argind == argcnt)
+	    {
+		nxo_stack_pop(tstack);
+		nxo_thread_nerror(a_thread, NXN_argcheck);
+		return;
+	    }
+	    flags |= send_recv_flag[argind].arg;
+	}
+
+	nxo_stack_pop(tstack);
+
+	/* Get string. */
+	NXO_STACK_DOWN_GET(nxo, ostack, a_thread, nxo);
+	npop = 2;
+    }
+    else
+    {
+	npop = 1;
+    }
+    NXO_STACK_DOWN_GET(sock, ostack, a_thread, nxo);
+    if (nxo_type_get(sock) != NXOT_FILE || nxo_type_get(nxo) != NXOT_STRING)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+
+    nxo_string_lock(nxo);
+    nwrite = send(nxo_file_fd_get(sock), nxo_string_get(nxo),
+		  nxo_string_len_get(nxo), 0);
+    nxo_string_unlock(nxo);
+
+    if (nwrite == -1)
+    {
+	switch (errno)
+	{
+	    case EWOULDBLOCK:
+	    {
+		/* Failed non-blocking write. */
+		nwrite = 0;
+		break;
+	    }
+	    case ECONNREFUSED:
+	    case EHOSTDOWN:
+	    case EHOSTUNREACH:
+	    case EMSGSIZE:
+	    case ENOTCONN:
+	    {
+		nxo_thread_nerror(a_thread, NXN_neterror);
+		return;
+	    }
+	    case ENOTSOCK:
+	    {
+		nxo_thread_nerror(a_thread, NXN_argcheck);
+		return;
+	    }
+	    case EBADF:
+	    case EFAULT:
+	    case ENOBUFS:
+	    case EINTR:
+	    case EINVAL:
+	    case ENOMEM:
+	    case EPIPE:
+	    default:
+	    {
+		nxo_thread_nerror(a_thread, NXN_unregistered);
+		return;
+	    }
+	}
+    }
+
+    nxo_integer_new(sock, (cw_nxoi_t) nwrite);
+
+    nxo_stack_npop(ostack, npop);
 }
 #endif
 
@@ -8723,8 +9225,7 @@ static const struct cw_systemdict_name_arg socket_family[] =
 static const struct cw_systemdict_name_arg socket_type[] =
 {
     {NXN_SOCK_STREAM, SOCK_STREAM},
-    {NXN_SOCK_DGRAM, SOCK_DGRAM},
-    {NXN_SOCK_RAW, SOCK_RAW}
+    {NXN_SOCK_DGRAM, SOCK_DGRAM}
 };
 
 static void
