@@ -50,8 +50,11 @@ SRCS = [SRCS] [ONYX_SRCS] [TONYX_SRCS];
 #endif
 #if [enable_real]
 
-                 div_a.nx.in div_b.nx.in div_c.nx.in div_d.nx.in div_e.nx.in
-                 exp_e.nx.in
+                 ceiling_a.nx.in ceiling_b.nx.in ceiling_c.nx.in div_a.nx.in
+                 div_b.nx.in div_c.nx.in div_d.nx.in div_e.nx.in exp_e.nx.in
+                 floor_a.nx.in floor_b.nx.in floor_c.nx.in round_a.nx.in
+                 round_b.nx.in round_c.nx.in trunc_a.nx.in trunc_b.nx.in
+                 trunc_c.nx.in
 
 #endif
 #if [enable_posix]
