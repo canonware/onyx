@@ -540,7 +540,7 @@ interactive_run(int argc, char **argv, char **envp)
 #endif
 	interactive_nxcode(&thread);
 
-#ifdef _CW_THREADS
+#if (defined(_CW_USE_LIBEDIT) && defined(_CW_THREADS))
 	/*
 	 * Acquire the interlock mtx before creating the interpreter thread, so
 	 * that we won't miss any cnd_signal()s from it.
