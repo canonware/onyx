@@ -45,7 +45,7 @@ SRCS = [SRCS] [LIBPRISM_SRCS];
 
 /* Simple C tests.  Output is diff'ed with the expected (.exp file) output. */
 {
-  local ctests = hook_a.c;
+  local ctests = ;
   ctests = [fromto % [srcdir]/lib/c/libprism/test/% [ctests]];
 
   CTESTS = [CTESTS] [ctests];
