@@ -103,18 +103,13 @@ tree_get_root_ptr(cw_tree_t * a_tree_o)
 {
   cw_treen_t * retval;
   
-  _cw_marker("Got here");
   _cw_check_ptr(a_tree_o);
-  _cw_marker("Got here");
 #ifdef _CW_REENTRANT
   if (a_tree_o->is_thread_safe)
   {
-  _cw_marker("Got here");
     mtx_lock(&a_tree_o->lock);
-  _cw_marker("Got here");
   }
 #endif
-  _cw_marker("Got here");
 
   retval = a_tree_o->root;
   
