@@ -146,7 +146,20 @@ void *
 stilat_malloc(cw_stilat_t *a_stilat, size_t a_size, const char *a_filename,
     cw_uint32_t a_line_num)
 {
-	return stilag_malloc(a_stilat->stilag, a_size, a_filename, a_line_num);
+	void	*retval;
+
+	retval = stilag_malloc(a_stilat->stilag, a_size, a_filename,
+	    a_line_num);
+	
+	while (retval == NULL) {
+		/* Throw memory error. */
+		/* XXX */
+
+		retval = stilag_malloc(a_stilat->stilag, a_size, a_filename,
+		    a_line_num);
+	}
+
+	return retval;
 }
 
 cw_bool_t
