@@ -10,14 +10,10 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 <> 1 sprint
 <
-	$foo `foo'
-	$bar $bar
-	$biz ()
-	$baz null
+    $foo `foo'
+    $bar $bar
+    $biz ()
+    $baz null
 > 0 sprint
-
-`Test end\n' print

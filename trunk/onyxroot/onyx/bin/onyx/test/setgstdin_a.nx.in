@@ -10,8 +10,6 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 gstdin
 
 gstdout setgstdin
@@ -22,6 +20,3 @@ gstdin gstdout ne {
 gstdin eq {
     `gstdin did not really change\n' print
 } if
-
-`Test end\n' print
-pstack

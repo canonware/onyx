@@ -10,9 +10,4 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 0 $SIGFOO kill
-
-`Test end\n' print
-pstack

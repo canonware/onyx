@@ -10,8 +10,6 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 [
     `0 ncat'
     `[$a] 0 ncat'
@@ -47,6 +45,3 @@
     pstack clear
     `\n' print
 } foreach
-
-`Test end\n' print
-pstack

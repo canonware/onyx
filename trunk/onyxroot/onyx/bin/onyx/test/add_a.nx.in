@@ -10,8 +10,6 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 [
 	`0 0 add'
 	`0 -1 add'
@@ -23,5 +21,3 @@
 	cvx eval
 	1 sprint
 } foreach
-
-`Test end\n' print

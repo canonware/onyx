@@ -10,9 +10,4 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 threadestack
-
-`Test end\n' print
-pstack

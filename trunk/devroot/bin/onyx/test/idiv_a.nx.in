@@ -10,19 +10,15 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 [
-	`0 1 idiv'
-	`4 2 idiv'
-	`5 2 idiv'
-	`5 -3 idiv'
-	`-5 3 idiv'
-	`-5 -3 idiv'
+    `0 1 idiv'
+    `4 2 idiv'
+    `5 2 idiv'
+    `5 -3 idiv'
+    `-5 3 idiv'
+    `-5 -3 idiv'
 ]{
-	dup 1 sprint
-	cvx eval
-	1 sprint
+    dup 1 sprint
+    cvx eval
+    1 sprint
 } foreach
-
-`Test end\n' print

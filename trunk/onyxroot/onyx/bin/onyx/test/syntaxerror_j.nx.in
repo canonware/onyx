@@ -1,3 +1,1 @@
-`Test begin\n' print flush
 `Unterminated string
-`Test end\n' print

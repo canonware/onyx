@@ -10,11 +10,6 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 8@777 umask
 umask
 <$b 8 $w 3 $p `0'> output `\n' print
-
-`Test end\n' print
-pstack

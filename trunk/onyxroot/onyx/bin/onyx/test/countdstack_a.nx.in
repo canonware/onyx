@@ -10,12 +10,8 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 countdstack 1 sprint
 <> begin
 countdstack 1 sprint
 end
 countdstack 1 sprint
-
-`Test end\n' print

@@ -10,8 +10,6 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 [
     `(0 42) dup stuck'
     `(1 0 ()) dup stuck'
@@ -21,6 +19,3 @@
     cvx eval
     pstack clear
 } foreach
-
-`Test end\n' print
-pstack

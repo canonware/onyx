@@ -10,9 +10,4 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 -1 localtime
-
-`Test end\n' print
-pstack

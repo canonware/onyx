@@ -10,16 +10,11 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 [
-	`0 0 idup'
-	`1 0 1 idup'
-	`2 1 0 1 idup'
-	`2 1 0 2 idup'
+    `0 0 idup'
+    `1 0 1 idup'
+    `2 1 0 1 idup'
+    `2 1 0 2 idup'
 ]{
-	dup 1 sprint cvx eval 1 sprint clear
+    dup 1 sprint cvx eval 1 sprint clear
 } foreach
-
-
-`Test end\n' print

@@ -10,9 +10,4 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 setgtailopt
-
-`Test end\n' print
-pstack

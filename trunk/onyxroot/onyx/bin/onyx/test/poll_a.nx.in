@@ -10,8 +10,6 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 $tmpfilename_a argv 2 get `/poll_a.tmp_a' cat def
 $tmpfile_a tmpfilename_a `w' open def
 tmpfile_a 0 setiobuf
@@ -74,6 +72,3 @@ tmpfilename_a unlink
 
 tmpfile_b close
 tmpfilename_b unlink
-
-`Test end\n' print
-pstack

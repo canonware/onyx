@@ -10,8 +10,4 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 [`a'] mark 1 getinterval
-
-`Test end\n' print

@@ -10,8 +10,6 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 [
     {`a:b:c' `:' split 1 sprint}
     {`a:b:c' `:' <> split 1 sprint}
@@ -45,6 +43,3 @@
     dup 1 sprint
     eval
 } foreach
-
-`Test end\n' print
-pstack

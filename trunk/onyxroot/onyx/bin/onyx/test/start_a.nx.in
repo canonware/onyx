@@ -10,8 +10,6 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 {quit} start
 estack 1 sprint
 
@@ -23,5 +21,3 @@ estack 1 sprint
 
 {exit} start
 estack 1 sprint
-
-`Test end\n' print

@@ -10,9 +10,4 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 `input' mark <> match
-
-`Test end\n' print
-pstack

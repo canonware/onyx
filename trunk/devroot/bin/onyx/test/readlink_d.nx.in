@@ -10,9 +10,4 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 `Let us hope that this name does not exist.' readlink
-
-`Test end\n' print
-pstack

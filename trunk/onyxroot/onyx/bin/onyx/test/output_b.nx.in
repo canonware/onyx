@@ -10,8 +10,6 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 # Decimal notation.
 42.5 <$s $+ $e false> output `\n' print
 -42.5 <$s $+ $e false> output `\n' print
@@ -57,6 +55,3 @@
 12345.6 <$d 1 $e true> output `\n' print
 12345.6 <$d 0 $e true> output `\n' print
 12345.6 <$d -1 $e true> output `\n' print
-
-`Test end\n' print
-pstack

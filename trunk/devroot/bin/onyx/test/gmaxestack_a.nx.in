@@ -10,9 +10,4 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 gmaxestack 1 sprint
-
-`Test end\n' print
-pstack

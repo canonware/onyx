@@ -10,8 +10,6 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 stderr
 
 stdout setstderr
@@ -22,6 +20,3 @@ stderr stdout ne {
 stderr eq {
     `stderr did not really change\n' print
 } if
-
-`Test end\n' print
-pstack

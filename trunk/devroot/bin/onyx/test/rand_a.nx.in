@@ -10,24 +10,20 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 0 srand rand
 0 srand rand
 eq {
-	`Equal'
+    `Equal'
 }{
-	`Not equal'
+    `Not equal'
 } ifelse
 1 sprint
 
 42 srand rand
 42 srand rand
 eq {
-	`Equal'
+    `Equal'
 }{
-	`Not equal'
+    `Not equal'
 } ifelse
 1 sprint
-
-`Test end\n' print

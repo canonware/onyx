@@ -10,8 +10,6 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 gstdout
 
 gstderr setgstdout
@@ -22,6 +20,3 @@ gstdout gstderr ne {
 gstdout eq {
     `gstdout did not really change\n' print
 } if
-
-`Test end\n' print
-pstack

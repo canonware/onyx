@@ -10,9 +10,4 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 0 1 2 mark ibpop
-
-`Test end\n' print
-pstack

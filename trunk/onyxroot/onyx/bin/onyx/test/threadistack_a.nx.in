@@ -10,9 +10,4 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 self threadistack 0 sprint
-
-`Test end\n' print
-pstack

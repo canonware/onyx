@@ -9,10 +9,3 @@
 # Version: Onyx <Version = onyx>
 #
 ################################################################################
-
-`Test begin\n' print flush
-
-
-
-`Test end\n' print
-pstack

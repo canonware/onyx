@@ -10,9 +10,4 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 mark snip
-
-`Test end\n' print
-pstack

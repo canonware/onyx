@@ -153,15 +153,15 @@ ONYX_OTESTS =
               getinterval_c.nx.in getinterval_d.nx.in getinterval_e.nx.in
               getinterval_f.nx.in getinterval_g.nx.in getinterval_h.nx.in
               getinterval_i.nx.in gt_a.nx.in gt_b.nx.in gt_c.nx.in gt_d.nx.in
-              gt_e.nx.in gt_f.nx.in gt_g.nx.in gt_h.nx.in hello.nx.in
-              ibdup_a.nx.in ibdup_b.nx.in ibdup_c.nx.in ibdup_d.nx.in
-              ibdup_e.nx.in ibdup_f.nx.in ibpop_a.nx.in ibpop_b.nx.in
-              ibpop_c.nx.in ibpop_d.nx.in ibpop_e.nx.in ibpop_f.nx.in
-              idiv_a.nx.in idiv_b.nx.in idiv_c.nx.in idiv_d.nx.in idiv_e.nx.in
-              idup_a.nx.in idup_b.nx.in idup_c.nx.in idup_d.nx.in idup_e.nx.in
-              idup_f.nx.in if_a.nx.in if_b.nx.in if_c.nx.in ifelse_a.nx.in
-              ifelse_b.nx.in ifelse_c.nx.in immediate_a.nx.in immediate_b.nx.in
-              inc_a.nx.in inc_b.nx.in inc_d.nx.in integer.nx.in integer_a.nx.in
+              gt_e.nx.in gt_f.nx.in gt_g.nx.in gt_h.nx.in ibdup_a.nx.in
+              ibdup_b.nx.in ibdup_c.nx.in ibdup_d.nx.in ibdup_e.nx.in
+              ibdup_f.nx.in ibpop_a.nx.in ibpop_b.nx.in ibpop_c.nx.in
+              ibpop_d.nx.in ibpop_e.nx.in ibpop_f.nx.in idiv_a.nx.in
+              idiv_b.nx.in idiv_c.nx.in idiv_d.nx.in idiv_e.nx.in idup_a.nx.in
+              idup_b.nx.in idup_c.nx.in idup_d.nx.in idup_e.nx.in idup_f.nx.in
+              if_a.nx.in if_b.nx.in if_c.nx.in ifelse_a.nx.in ifelse_b.nx.in
+              ifelse_c.nx.in immediate_a.nx.in immediate_b.nx.in inc_a.nx.in
+              inc_b.nx.in inc_d.nx.in integer.nx.in integer_a.nx.in
               integer_b.nx.in integer_c.nx.in integer_d.nx.in ipop_a.nx.in
               ipop_b.nx.in ipop_c.nx.in ipop_d.nx.in ipop_e.nx.in known_a.nx.in
               known_b.nx.in known_c.nx.in le_a.nx.in le_b.nx.in le_c.nx.in

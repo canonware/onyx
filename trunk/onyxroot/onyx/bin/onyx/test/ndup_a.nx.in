@@ -10,8 +10,6 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 0 ndup
 `First:\n'
 pstack clear
@@ -27,5 +25,3 @@ pstack clear
 `a' `b' 2 ndup
 `Fourth:\n'
 pstack clear
-
-`Test end\n' print

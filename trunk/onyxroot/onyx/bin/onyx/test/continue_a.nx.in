@@ -10,8 +10,6 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 [
 	`0 1 4 {dup 1 sprint 3 eq {continue} if `bye' 1 sprint} for'
 	`5 {`hi' 1 sprint continue `bye' 1 sprint} repeat'
@@ -27,6 +25,3 @@
 	dup 1 sprint
 	cvx eval
 } foreach
-
-`Test end\n' print
-pstack

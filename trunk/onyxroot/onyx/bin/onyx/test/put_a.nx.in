@@ -10,30 +10,26 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 [
-	`1 array dup 0 `a' put'
-	`2 array dup 0 `a' put'
-	`2 array dup 1 `a' put'
-	`3 array dup 0 `a' put'
-	`3 array dup 1 `a' put'
-	`3 array dup 2 `a' put'
+    `1 array dup 0 `a' put'
+    `2 array dup 0 `a' put'
+    `2 array dup 1 `a' put'
+    `3 array dup 0 `a' put'
+    `3 array dup 1 `a' put'
+    `3 array dup 2 `a' put'
 
-	`dict dup $foo `foo' put'
-	`<$foo `foo'> dup $foo `FOO' put'
-	`<$foo `foo'> dup $bar `bar' put'
+    `dict dup $foo `foo' put'
+    `<$foo `foo'> dup $foo `FOO' put'
+    `<$foo `foo'> dup $bar `bar' put'
 
-	`` ' dup 0 97 put'
-	``  ' dup 0 97 put'
-	``  ' dup 1 97 put'
-	``   ' dup 0 97 put'
-	``   ' dup 1 97 put'
-	``   ' dup 2 97 put'
+    `` ' dup 0 97 put'
+    ``  ' dup 0 97 put'
+    ``  ' dup 1 97 put'
+    ``   ' dup 0 97 put'
+    ``   ' dup 1 97 put'
+    ``   ' dup 2 97 put'
 ]{
-	dup 1 sprint
-	cvx eval
-	1 sprint
+    dup 1 sprint
+    cvx eval
+    1 sprint
 } foreach
-
-`Test end\n' print

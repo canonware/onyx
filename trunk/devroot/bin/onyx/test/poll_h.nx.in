@@ -10,9 +10,4 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 <$foo <$POLLOUT false>> 0 poll
-
-`Test end\n' print
-pstack

@@ -1,3 +1,4 @@
+Test begin
 0 0 add 1 sprint
 0
 3 0 add 1 sprint
@@ -6,3 +7,4 @@
 7
 -5 5 add 1 sprint
 0
+Test end

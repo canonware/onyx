@@ -10,8 +10,6 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 [
     `0 adn'
     `0 1 adn'
@@ -21,6 +19,3 @@
     cvx eval
     pstack clear
 } foreach
-
-`Test end\n' print
-pstack

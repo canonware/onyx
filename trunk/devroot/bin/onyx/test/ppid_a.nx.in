@@ -14,8 +14,6 @@
 #
 # The child actually does the ppid testing.
 
-`Test begin\n' print flush
-
 [
     argv 2 get `/b_ppid_a.nx' cat
     pid cvs
@@ -26,6 +24,3 @@ waitpid dup 0 ne {
 }{
     pop
 } ifelse
-
-`Test end\n' print
-pstack

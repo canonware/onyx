@@ -10,9 +10,5 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 {stop} stopped 1 sprint
 {} stopped 1 sprint
-
-`Test end\n' print

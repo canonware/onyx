@@ -10,8 +10,6 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 # Open file for writing.
 argv 2 get
 `/truncate_a_tmp.out' cat
@@ -55,5 +53,3 @@ dup 0 seek
 } ifelse
 
 unlink
-
-`Test end\n' print

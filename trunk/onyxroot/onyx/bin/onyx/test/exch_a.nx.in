@@ -10,9 +10,6 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 2 1 0 exch pstack
 exch pstack
-
-`Test end\n' print
+clear

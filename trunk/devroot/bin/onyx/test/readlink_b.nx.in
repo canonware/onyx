@@ -10,9 +10,4 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 readlink
-
-`Test end\n' print
-pstack

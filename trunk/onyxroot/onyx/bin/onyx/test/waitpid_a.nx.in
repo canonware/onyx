@@ -12,8 +12,6 @@
 
 # Called as: waitpid_a.nx <srcdir> <objdir>
 
-`Test begin\n' print flush
-
 # Test successful child.
 [
     argv 2 get `/b_waitpid_a_a.nx' cat
@@ -48,6 +46,3 @@ waitpid dup 0 ne {
 }{
     pop
 } ifelse
-
-`Test end\n' print
-pstack

@@ -10,9 +10,4 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 [`foo' 42] forkexec
-
-`Test end\n' print
-pstack

@@ -15,3 +15,4 @@ dup scleartomark pstack
 dup scleartomark pstack
 dup scleartomark pstack
 dup scleartomark pstack
+pop

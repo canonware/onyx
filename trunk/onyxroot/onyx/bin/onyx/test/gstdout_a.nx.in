@@ -10,10 +10,5 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 gstdout 1 sprint
 gstdout `Written to gstdout\n' write pop
-
-`Test end\n' print
-pstack

@@ -77,8 +77,6 @@ $deltree {
 # Begin main program.
 #
 
-`Test begin\n' print flush
-
 # Clean up the directory tree if it already exists.
 argv 2 get `/dirforeach_a' cat `d' test {
     argv 2 get `/dirforeach_a' cat deltree
@@ -105,6 +103,3 @@ argv 2 get `/dirforeach_a' cat `d' test {
     argv 2 get `/dirforeach_a' cat printtree
     1 die
 } if
-
-`Test end\n' print
-pstack

@@ -10,9 +10,4 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 `(pattern' `' regsub
-
-`Test end\n' print
-pstack

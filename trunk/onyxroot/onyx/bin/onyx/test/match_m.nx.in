@@ -10,9 +10,4 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 `input' `pattern' <$g 0> match
-
-`Test end\n' print
-pstack

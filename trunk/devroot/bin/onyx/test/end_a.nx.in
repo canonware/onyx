@@ -10,8 +10,6 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 <$foo `foo'> begin
 foo 1 sprint
 
@@ -24,5 +22,3 @@ foo 1 sprint
 dstack 1 sprint
 end
 dstack 1 sprint
-
-`Test end\n' print

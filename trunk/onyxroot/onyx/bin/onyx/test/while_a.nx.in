@@ -10,8 +10,6 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 [
     `false {`Got here\n' print} while'
     `true {`Got here\n' print exit} while'
@@ -30,6 +28,3 @@
 
     cvx eval
 } foreach
-
-`Test end\n' print
-pstack

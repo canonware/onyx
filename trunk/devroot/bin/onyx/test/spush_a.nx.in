@@ -10,27 +10,22 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 ()
 
 [
-	`true'
-	`[]'
-	`<>'
-	`('
-	`1'
-	`mark'
-	`$foo'
-	`null'
-	`~pop'
-	`()'
-	``hi''
+    `true'
+    `[]'
+    `<>'
+    `('
+    `1'
+    `mark'
+    `$foo'
+    `null'
+    `~pop'
+    `()'
+    ``hi''
 ]{
-	cvx eval
-	1 idup exch spush
+    cvx eval
+    1 idup exch spush
 } foreach
-
-pstack
-
-`Test end\n' print
+1 sprint

@@ -10,15 +10,11 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 [
-	`currentdict $foo'
-	`userdict $bar'
-	`systemdict $pop'
-	`threaddict $pop'
+    `currentdict $foo'
+    `userdict $bar'
+    `systemdict $pop'
+    `threaddict $pop'
 ]{
-	dup 1 sprint cvx eval known 1 sprint
+    dup 1 sprint cvx eval known 1 sprint
 } foreach
-
-`Test end\n' print

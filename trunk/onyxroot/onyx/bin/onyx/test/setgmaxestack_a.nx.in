@@ -10,8 +10,6 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 #- thread_entry -
 $thread_entry {
     maxestack 1 sprint
@@ -21,6 +19,3 @@ $thread_entry {
 gmaxestack 1 sprint
 () ~thread_entry thread
 join
-
-`Test end\n' print
-pstack

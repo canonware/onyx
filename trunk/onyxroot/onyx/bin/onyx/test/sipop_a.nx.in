@@ -10,8 +10,6 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 [
     `(0) dup 0 sipop'
     `(1 0) dup 0 sipop'
@@ -24,6 +22,3 @@
     cvx eval
     pstack clear
 } foreach
-
-`Test end\n' print
-pstack

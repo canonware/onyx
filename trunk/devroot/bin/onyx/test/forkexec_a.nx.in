@@ -12,8 +12,6 @@
 
 # Called as: forkexec_a.nx <srcdir> <objdir>
 
-`Test begin\n' print flush
-
 [
     argv 2 get `/b_forkexec_a.nx' cat
 ] forkexec
@@ -23,6 +21,3 @@ waitpid dup 0 ne {
 }{
     pop
 } ifelse
-
-`Test end\n' print
-pstack

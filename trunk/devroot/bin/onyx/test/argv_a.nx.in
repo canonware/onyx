@@ -10,8 +10,6 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 # verify should always pass two arguments, which means argv should have 3
 # elements.
 `Number of arguments: ' print
@@ -27,6 +25,3 @@ argv 1 2 getinterval {
 	`Not a directory: ' print 1 sprint
     } ifelse
 } foreach
-
-`Test end\n' print
-pstack

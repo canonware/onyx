@@ -10,9 +10,4 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 setgstdout
-
-`Test end\n' print
-pstack

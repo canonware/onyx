@@ -10,8 +10,6 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 [
     {`.'}
     {`.' <>}
@@ -22,6 +20,3 @@
     eval regex
     1 sprint
 } foreach
-
-`Test end\n' print
-pstack

@@ -10,8 +10,6 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 [
 	`[] []'
 	`[] [`a']'
@@ -32,6 +30,3 @@
 	cvx eval
 	copy 1 sprint
 } foreach
-
-pstack
-`Test end\n' print

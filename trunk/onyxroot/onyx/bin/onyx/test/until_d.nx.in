@@ -10,9 +10,4 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 {`Got here\n' print flush} {1} until
-
-`Test end\n' print
-pstack

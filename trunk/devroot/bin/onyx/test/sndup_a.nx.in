@@ -10,8 +10,6 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 [
     `() dup 0 sndup'
     `(0) dup 0 sndup'
@@ -27,6 +25,3 @@
     dup 1 sprint
     cvx eval pstack clear
 } foreach
-
-`Test end\n' print
-pstack

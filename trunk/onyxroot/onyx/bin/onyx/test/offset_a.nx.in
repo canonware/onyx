@@ -10,8 +10,6 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 [
     {`Input string of words' `.'}
     {`Input string of words' `string'}
@@ -23,6 +21,3 @@
     0 submatch dup 1 sprint
     offset 1 sprint
 } foreach
-
-`Test end\n' print
-pstack

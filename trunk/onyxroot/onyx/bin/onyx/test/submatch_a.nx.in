@@ -10,8 +10,6 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 [
     {`' `'}
     {`' `.'}
@@ -30,6 +28,3 @@
 	submatch 1 sprint
     } for
 } foreach
-
-`Test end\n' print
-pstack

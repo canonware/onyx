@@ -10,56 +10,52 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 [
-	`0 0 pow'
-	`4 0 pow'
-	`4 1 pow'
-	`4 2 pow'
-	`4 3 pow'
-	`5 3 pow'
-	`-5 1 pow'
-	`-5 2 pow'
-	`-5 3 pow'
-	`3 -1 pow'
+    `0 0 pow'
+    `4 0 pow'
+    `4 1 pow'
+    `4 2 pow'
+    `4 3 pow'
+    `5 3 pow'
+    `-5 1 pow'
+    `-5 2 pow'
+    `-5 3 pow'
+    `3 -1 pow'
 
-	`0.0 0 pow'
-	`4.0 0 pow'
-	`4.0 1 pow'
-	`4.0 2 pow'
-	`4.0 3 pow'
-	`5.0 3 pow'
-	`-5.0 1 pow'
-	`-5.0 2 pow'
-	`-5.0 3 pow'
-	`3.0 -1 pow'
+    `0.0 0 pow'
+    `4.0 0 pow'
+    `4.0 1 pow'
+    `4.0 2 pow'
+    `4.0 3 pow'
+    `5.0 3 pow'
+    `-5.0 1 pow'
+    `-5.0 2 pow'
+    `-5.0 3 pow'
+    `3.0 -1 pow'
 
-	`0 0.0 pow'
-	`4 0.0 pow'
-	`4 1.0 pow'
-	`4 2.0 pow'
-	`4 3.0 pow'
-	`5 3.0 pow'
-	`-5 1.0 pow'
-	`-5 2.0 pow'
-	`-5 3.0 pow'
-	`3 -1.0 pow'
+    `0 0.0 pow'
+    `4 0.0 pow'
+    `4 1.0 pow'
+    `4 2.0 pow'
+    `4 3.0 pow'
+    `5 3.0 pow'
+    `-5 1.0 pow'
+    `-5 2.0 pow'
+    `-5 3.0 pow'
+    `3 -1.0 pow'
 
-	`0 0.0 pow'
-	`4 0.0 pow'
-	`4 1.0 pow'
-	`4 2.0 pow'
-	`4 3.0 pow'
-	`5 3.0 pow'
-	`-5 1.0 pow'
-	`-5 2.0 pow'
-	`-5 3.0 pow'
-	`3 -1.0 pow'
+    `0 0.0 pow'
+    `4 0.0 pow'
+    `4 1.0 pow'
+    `4 2.0 pow'
+    `4 3.0 pow'
+    `5 3.0 pow'
+    `-5 1.0 pow'
+    `-5 2.0 pow'
+    `-5 3.0 pow'
+    `3 -1.0 pow'
 ]{
-	dup 1 sprint
-	cvx eval
-	1 sprint
+    dup 1 sprint
+    cvx eval
+    1 sprint
 } foreach
-
-`Test end\n' print

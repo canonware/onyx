@@ -10,8 +10,6 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 ()
 
 [
@@ -27,10 +25,7 @@
     `()'
     ``hi''
 ]{
-	cvx eval
-	over exch sbpush
+    cvx eval
+    over exch sbpush
 } foreach
-
-pstack
-
-`Test end\n' print
+1 sprint

@@ -10,11 +10,7 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 0 srand
 1 srand
 16@ffffffff srand
 16@7fffffffffffffff srand
-
-`Test end\n' print

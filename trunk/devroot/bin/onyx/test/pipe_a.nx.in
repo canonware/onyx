@@ -10,8 +10,6 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 pipe
 $wfile exch def
 $rfile exch def
@@ -20,6 +18,3 @@ wfile flushfile
 rfile readline pop 1 sprint
 rfile readline pop 1 sprint
 rfile readline pop 1 sprint
-
-`Test end\n' print
-pstack

@@ -10,8 +10,6 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 {
     `A\n' print
     quit
@@ -41,6 +39,3 @@
 `J\n' print
 quit
 `K\n' print
-
-`Test end\n' print
-pstack

@@ -10,8 +10,6 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 0 localtime
 
 dup $sec get type $integertype ne {
@@ -57,6 +55,3 @@ dup $zone get type $stringtype ne {
 $gmtoff get type $integertype ne {
     `$gmtoff not an integer\n' print
 } if
-
-`Test end\n' print
-pstack

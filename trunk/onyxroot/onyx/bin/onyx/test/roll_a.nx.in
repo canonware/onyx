@@ -10,8 +10,6 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 `1 2 3 4 1 0 roll pstack clear\n' dup print cvx eval
 `1 2 3 4 1 1 roll pstack clear\n' dup print cvx eval
 `1 2 3 4 1 2 roll pstack clear\n' dup print cvx eval
@@ -33,5 +31,3 @@
 `1 2 3 4 4 3 roll pstack clear\n' dup print cvx eval
 `1 2 3 4 4 4 roll pstack clear\n' dup print cvx eval
 `1 2 3 4 4 5 roll pstack clear\n' dup print cvx eval
-
-`Test end\n' print

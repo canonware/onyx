@@ -10,14 +10,10 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 2 1 36 {
-	dup 1 sprint 42 exch cvrs 1 sprint
+    dup 1 sprint 42 exch cvrs 1 sprint
 } for
 
 2 1 36 {
-	dup 1 sprint -42 exch cvrs 1 sprint
+    dup 1 sprint -42 exch cvrs 1 sprint
 } for
-
-`Test end\n' print

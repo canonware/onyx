@@ -10,10 +10,5 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 `input' dup 0 5 getinterval offset 1 sprint
 `input' dup 0 5 getinterval exch offset 1 sprint
-
-`Test end\n' print
-pstack

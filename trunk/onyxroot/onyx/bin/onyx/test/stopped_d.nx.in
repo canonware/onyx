@@ -10,8 +10,4 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 {continue} stopped
-
-`Test end\n' print

@@ -10,8 +10,6 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 [
     `{`Got here\n' print} false until'
     `{`Got here\n' print exit} true until'
@@ -30,6 +28,3 @@
 
     cvx eval
 } foreach
-
-`Test end\n' print
-pstack

@@ -10,8 +10,4 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 mark {`mark' 1 sprint} unless
-
-`Test end\n' print

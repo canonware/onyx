@@ -10,8 +10,6 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 [
     {`Input string' `p(.)' `X\1Y' <> subst pstack 2 npop}
     {`Input string' `p(.)' `X\1Y' <> subst pstack 2 npop}
@@ -51,6 +49,3 @@
     dup 2 sprint
     eval
 } foreach
-
-`Test end\n' print
-pstack

@@ -12,8 +12,6 @@
 
 # Called as: system_g.nx <srcdir> <objdir>
 
-`Test begin\n' print flush
-
 [
     argv 1 get `/b_system_g_no_such_name.nx' cat
 ] system
@@ -23,6 +21,3 @@ dup 0 ne {
 }{
     pop
 } ifelse
-
-`Test end\n' print
-pstack

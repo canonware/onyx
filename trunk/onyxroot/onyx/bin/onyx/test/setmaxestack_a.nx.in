@@ -10,12 +10,7 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 128 setmaxestack
 maxestack 1 sprint
 $foo {foo 1} def
 foo
-
-`Test end\n' print
-pstack

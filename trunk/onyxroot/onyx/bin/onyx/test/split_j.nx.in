@@ -10,9 +10,4 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 mark `pattern' <> 0 split
-
-`Test end\n' print
-pstack

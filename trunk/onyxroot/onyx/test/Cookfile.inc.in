@@ -60,9 +60,25 @@ tests_distclean :
  * Add magic to onyx files.
  */
 @objroot@/%0test/%.nx : @srcroot@/%0test/%.nx.in
+                        @srcroot@/%0test/test_header.nx
+                        @srcroot@/%0test/test_footer.nx
+                        [glob @srcroot@/%0test/%_test_header.nx]
+                        [glob @srcroot@/%0test/%_test_footer.nx]
   set mkdir
 {
   echo \"#!@TONYX@\" > [target];
+
+  if [exists @srcroot@/%0test/%_test_header.nx] then
+    cat @srcroot@/%0test/%_test_header.nx >> [target];
+  else if [exists @srcroot@/%0test/test_header.nx] then
+    cat @srcroot@/%0test/test_header.nx >> [target];
+
   cat @srcroot@/%0test/%.nx.in >> [target];
+
+  if [exists @srcroot@/%0test/%_test_footer.nx] then
+    cat @srcroot@/%0test/%_test_footer.nx >> [target];
+  else if [exists @srcroot@/%0test/test_footer.nx] then
+    cat @srcroot@/%0test/test_footer.nx >> [target];
+
   chmod u+x [target];
 }

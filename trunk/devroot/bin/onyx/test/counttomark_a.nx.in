@@ -10,8 +10,6 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 [
 	`mark'
 	`mark mark'
@@ -20,5 +18,3 @@
 ]{
 	dup 1 sprint cvx eval counttomark 1 sprint clear
 } foreach
-
-`Test end\n' print

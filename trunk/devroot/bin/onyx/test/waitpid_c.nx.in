@@ -10,9 +10,4 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 mark waitpid
-
-`Test end\n' print
-pstack

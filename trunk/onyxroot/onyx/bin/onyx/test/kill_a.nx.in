@@ -12,8 +12,6 @@
 
 # Called as: kill_a.nx <srcdir> <objdir>
 
-`Test begin\n' print flush
-
 # Signal number.
 [
     argv 2 get `/b_kill_a.nx' cat
@@ -44,6 +42,3 @@ waitpid dup 0 ne {
 pid $SIGCONT kill
 # XXX Uncomment once getpgid is implemented.
 # getpgid neg $SIGCONT kill
-
-`Test end\n' print
-pstack

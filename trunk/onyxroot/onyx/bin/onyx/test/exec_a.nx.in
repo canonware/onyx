@@ -12,12 +12,7 @@
 
 # Called as: exec_a.nx <srcdir> <objdir>
 
-`Test begin\n' print flush
-
 [
     argv 2 get `/b_exec_a.nx' cat
 ] exec
 # Not reached.
-
-`Test end\n' print
-pstack

@@ -10,9 +10,4 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 setstdin
-
-`Test end\n' print
-pstack

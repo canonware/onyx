@@ -1,3 +1,5 @@
+Test begin
 (`a' `b' `c' `c')
 (`a' `b' `c' `b')
 (`a' `b' `c' `a')
+Test end

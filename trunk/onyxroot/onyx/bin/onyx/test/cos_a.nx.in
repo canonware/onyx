@@ -10,8 +10,6 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 [
     `-7'
     `-6'
@@ -51,6 +49,3 @@
     cvx eval cos
     1 sprint
 } foreach
-
-`Test end\n' print
-pstack

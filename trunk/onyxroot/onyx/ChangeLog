@@ -1,3 +1,10 @@
+2003-08-18 : Jason Evans <jasone@canonware.com>
+
+	* Modify the build system to prepend/append headers/footers when
+	  creating tests written in Onyx.  Modify error output in the header so
+	  that errors are reported with the same format, regardless of
+	  configuration.
+
 2003-08-08 : Jason Evans <jasone@canonware.com>
 
 	* Add operators:
@@ -797,7 +804,7 @@
 
 	* lib/libonyx/src/systemdict.c : Add operators:
 	  + bpop, nbpop, ipop, nip, tuck, under, over, up, nup, dn, ndn, bdup,
-	    ibdup, ibpop, bpush
+	    ibdup, ibpop
 	  + sbpop, snbpop, sipop, snip, stuck, sunder, sover, sup, snup, sdn,
 	    sndn, sndup, snpop, sbdup, sibdup, sibpop, sbpush
 

@@ -10,8 +10,6 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 [
     {`' `.' <> match pstack clear}
     {`' `.' <> regex  match pstack clear}
@@ -125,6 +123,3 @@
     dup 1 sprint
     eval
 } foreach
-
-`Test end\n' print
-pstack

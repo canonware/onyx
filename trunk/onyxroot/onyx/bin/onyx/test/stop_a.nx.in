@@ -10,8 +10,6 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 # In start context.
 {
     `A\n' print
@@ -69,6 +67,3 @@
 `S\n' print
 stop
 `T\n' print
-
-`Test end\n' print
-pstack

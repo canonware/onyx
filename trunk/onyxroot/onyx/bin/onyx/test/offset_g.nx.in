@@ -10,9 +10,4 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 `input' dup 0 2 getinterval exch offset
-
-`Test end\n' print
-pstack

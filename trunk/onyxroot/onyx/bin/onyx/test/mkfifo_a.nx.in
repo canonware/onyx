@@ -10,8 +10,6 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 $fifo_name argv 2 get `/mkfifo_a' cat def
 
 fifo_name `p' test {
@@ -31,6 +29,3 @@ fifo_name `p' test {
 }{
     `fifo does not exist (2)\n' print
 } ifelse
-
-`Test end\n' print
-pstack

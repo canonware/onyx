@@ -10,12 +10,8 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 <$foo `foo'> begin
 foo 1 sprint
 
 <$foo `FOO'> begin
 foo 1 sprint
-
-`Test end\n' print

@@ -10,8 +10,6 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 globaldict begin
 
 $bar {
@@ -38,6 +36,3 @@ false setgtailopt
 gtailopt 1 sprint
 () ~thread_entry thread
 join
-
-`Test end\n' print
-pstack

@@ -10,8 +10,6 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 $symlink_name argv 2 get `/readlink_a' cat def
 
 # Remove the symlink if it already exists.
@@ -25,6 +23,3 @@ symlink_name readlink
 1 sprint
 
 symlink_name unlink
-
-`Test end\n' print
-pstack

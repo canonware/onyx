@@ -10,9 +10,5 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 true {`true' 1 sprint} if
 false {`false' 1 sprint} if
-
-`Test end\n' print

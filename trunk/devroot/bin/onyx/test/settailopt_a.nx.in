@@ -10,8 +10,6 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 $bar {
     estack 2 sprint
 } def
@@ -26,6 +24,3 @@ foo
 false settailopt
 tailopt 1 sprint
 foo
-
-`Test end\n' print
-pstack

@@ -10,8 +10,6 @@
 #
 ################################################################################
 
-`Test begin\n' print flush
-
 [
     `0 1 2'
     `() [] {}'
@@ -27,6 +25,3 @@
     up pstack
     clear
 } foreach
-
-`Test end\n' print
-pstack
