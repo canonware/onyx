@@ -21,7 +21,7 @@
 
 /* Source files. */
 MODSLATE_SRCS = [addprefix @srcroot@/mod/modslate/src/
-                           buf.c buffer.c display.c frame.c funnel.c hist.c
+                           buf.c buffer.c frame.c hist.c
                            modslate.c window.c
                            ];
 

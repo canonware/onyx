@@ -24,6 +24,12 @@ end
 slatedict begin
 dstack saup
 
+`modpane/modpane.nx' require
+
+# Move panedict to the bottom of dstack.
+panedict begin
+dstack saup
+
 # - hs -
 $hs {
     # ANSI home cursor sequence: `\e[H'
@@ -281,15 +287,15 @@ scratch <
 
 scratch true buffer_history_setactive
 
-curses_funnel funnel_enter
-$disp envdict $TERM get stdin stdout display def
+$disp envdict $TERM get stdin stdout display
+ostack {
+    2 sprint
+} foreach
+def
 disp display_start
-curses_funnel funnel_leave
 
 stdin 0 setiobuf {
-    curses_funnel funnel_enter
     redisplay
-    curses_funnel funnel_leave
     getc
     interpc
 #    scratch `' buffer_dump

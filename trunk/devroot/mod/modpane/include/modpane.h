@@ -13,6 +13,8 @@
 #include <libonyx/libonyx.h>
 #include "modpane_defs.h"
 
+#include <termios.h>
+
 #include "ds.h"
 #include "pn.h"
 

@@ -27,10 +27,10 @@ struct cw_frame
     cw_nxo_t display;
 
     /* curses window */
-    WINDOW *window;
+//    WINDOW *window;
 
     /* curses panel, associated with window. */
-    PANEL *panel;
+//    PANEL *panel;
 };
 
 static const struct cw_modslate_entry modslate_frame_hooks[] = {
@@ -104,29 +104,8 @@ frame_p_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t a_iter)
 {
 	struct cw_frame	*frame = (struct cw_frame *)a_data;
 
-	modslate_funnel_c_enter(&modslate_curses_funnel);
-#ifdef CW_DBG
-	{
-	    int error;
-
-	    error = del_panel(frame->panel);
-	    if (error)
-	    {
-		fprintf(stderr, "%s:%d:%s(): Error in del_panel()\n",
-			__FILE__, __LINE__, __FUNCTION__);
-	    }
-	    error = delwin(frame->window);
-	    if (error)
-	    {
-		fprintf(stderr, "%s:%d:%s(): Error in delwin()\n",
-			__FILE__, __LINE__, __FUNCTION__);
-	    }
-	}
-#else
-	del_panel(frame->panel);
-	delwin(frame->window);
-#endif
-	modslate_funnel_c_leave(&modslate_curses_funnel);
+//	del_panel(frame->panel);
+//	delwin(frame->window);
 
 	nxa_free(nx_nxa_get(a_nx), frame, sizeof(struct cw_frame));
 
@@ -166,21 +145,9 @@ modslate_frame(void *a_data, cw_nxo_t *a_thread)
     nxo_no_new(&frame->display);
     nxo_dup(&frame->display, display);
 
-    frame->window = newwin(0, 0, 0, 0);
-    if (frame->window == NULL)
-    {
-	nxo_thread_nerror(a_thread, NXN_unregistered);
-	nxo_stack_pop(tstack);
-	return;
-    }
+//    frame->window = newwin(0, 0, 0, 0);
 
-    frame->panel = new_panel(frame->window);
-    if (frame->panel == NULL)
-    {
-	nxo_thread_nerror(a_thread, NXN_unregistered);
-	nxo_stack_pop(tstack);
-	return;
-    }
+//    frame->panel = new_panel(frame->window);
 
     /* Create a reference to the frame, now that the internals are
      * initialized. */
@@ -268,7 +235,7 @@ modslate_frame_focus(void *a_data, cw_nxo_t *a_thread)
     }
     frame = (struct cw_frame *)nxo_hook_data_get(nxo);
 
-    show_panel(frame->panel);
+//    show_panel(frame->panel);
 
     nxo_stack_pop(ostack);
 }

@@ -438,60 +438,6 @@ else
 fi
 AC_SUBST(slate_version)
 
-if test "x$enable_slate" = "x1" ; then
-  dnl Set up CPPFLAGS and LDFLAGS before doing header and library tests.
-  TEMP_CPPFLAGS="$CPPFLAGS"
-  TEMP_LDFLAGS="$LDFLAGS"
-  if test "x$MODSLATE_CPPFLAGS" = "x" ; then
-    MODSLATE_CPPFLAGS=
-  else
-    CPPFLAGS="$MODSLATE_CPPFLAGS $CPPFLAGS"
-  fi
-  if test "x$MODSLATE_LDFLAGS" = "x" ; then
-    MODSLATE_LDFLAGS=
-  else
-    LDFLAGS="$MODSLATE_LDFLAGS $LDFLAGS"
-  fi
-
-  dnl Check for libcurses and libpanel.
-  AC_CHECK_HEADERS(curses.h, , enable_slate="0")
-  AC_CHECK_HEADERS(panel.h, , enable_slate="0")
-  AC_CHECK_LIB(ncurses, set_term, \
-    MODSLATE_LDFLAGS="$MODSLATE_LDFLAGS -lncurses" , \
-    AC_CHECK_LIB(curses, set_term, \
-      MODSLATE_LDFLAGS="$MODSLATE_LDFLAGS -lcurses" , \
-      enable_slate="0"))
-  AC_CHECK_LIB(panel, new_panel, \
-    MODSLATE_LDFLAGS="$MODSLATE_LDFLAGS -lpanel" , \
-    enable_slate="0")
-
-  dnl Check if necessary features are enabled.
-  if test "x$enable_threads" = "x0" -o "x$enable_real" = "x0" \
-     -o "x$enable_posix" = "x0" -o "x$enable_posix_file" = "x0" \
-     -o "x$enable_modules" = "x0" ; then
-    enable_slate="0"
-    dnl XXX We need modpane too, which is configured later.
-  fi
-
-  if test "x$enable_slate" = "x0" ; then
-    AC_MSG_RESULT(Missing features or configuration options necessary for slate)
-  else
-    dnl Check if slate is in the source tree.
-    CW_BUILD_MOD(modslate, enable_slate)
-    if test "x$enable_slate" = "x1" ; then
-      cfgoutputs="$cfgoutputs bin/slate/src/slate.nx.in"
-      AC_DEFINE(CW_USE_SLATE)
-      AC_SUBST(MODSLATE_CPPFLAGS)
-      AC_SUBST(MODSLATE_LDFLAGS)
-    fi
-  fi
-
-  dnl Restore CPPFLAGS and LDFLAGS.
-  CPPFLAGS="$TEMP_CPPFLAGS"
-  LDFLAGS="$TEMP_LDFLAGS"
-fi
-AC_SUBST(enable_slate)
-
 dnl Disable rules that do automatic regeneration of configure output by default.
 AC_ARG_ENABLE(autogen, [  --enable-autogen        Automatically regenerate configure output],
 if test "x$enable_autogen" = "xno" ; then
@@ -645,7 +591,11 @@ if test "x$enable_modules" = "x1" ; then
       LDFLAGS="$MODPANE_LDFLAGS $LDFLAGS"
     fi
 
-    dnl XXX Check for pty-related functionality.
+    dnl Check for pty-related functionality.
+    AC_CHECK_HEADERS(termios.h, , enable_modpane="0")
+    AC_CHECK_FUNCS(tcgetattr, , enable_modpane="0")
+    AC_CHECK_FUNCS(cfmakeraw, , enable_modpane="0")
+    AC_CHECK_FUNCS(tcsetattr, , enable_modpane="0")
 
     dnl Check if modpane is in the source tree.
     if test "x$enable_modpane" = "x1" ; then
@@ -666,13 +616,58 @@ if test "x$enable_modules" = "x1" ; then
   if test "x$enable_modpane" = "x0" ; then
     AC_MSG_RESULT(Missing features or configuration options necessary for modpane)
   fi
+
+  dnl modslate
+  if test "x$enable_slate" = "x1" -a "x$enable_threads" = "x1" \
+     -a "x$enable_real" = "x1" -a "x$enable_posix" = "x1" \
+     -a "x$enable_posix_file" = "x1" -a "x$enable_modules" = "x1" \
+     -a "x$enable_modpane" = "x1" ; then
+    dnl Set up CPPFLAGS and LDFLAGS before doing header and library tests.
+    TEMP_CPPFLAGS="$CPPFLAGS"
+    TEMP_LDFLAGS="$LDFLAGS"
+    if test "x$MODSLATE_CPPFLAGS" = "x" ; then
+      MODSLATE_CPPFLAGS=
+    else
+      CPPFLAGS="$MODSLATE_CPPFLAGS $CPPFLAGS"
+    fi
+    if test "x$MODSLATE_LDFLAGS" = "x" ; then
+      MODSLATE_LDFLAGS=
+    else
+      LDFLAGS="$MODSLATE_LDFLAGS $LDFLAGS"
+    fi
+
+    dnl Check for functionality needed by modslate.
+    dnl ...
+
+    if test "x$enable_slate" = "x1" ; then
+      dnl Check if slate is in the source tree.
+      CW_BUILD_MOD(modslate, enable_slate)
+    fi
+    if test "x$enable_slate" = "x1" ; then
+      cfgoutputs="$cfgoutputs bin/slate/src/slate.nx.in"
+      AC_DEFINE(CW_USE_SLATE)
+      AC_SUBST(MODSLATE_CPPFLAGS)
+      AC_SUBST(MODSLATE_LDFLAGS)
+    fi
+
+    dnl Restore CPPFLAGS and LDFLAGS.
+    CPPFLAGS="$TEMP_CPPFLAGS"
+    LDFLAGS="$TEMP_LDFLAGS"
+  else
+    enable_slate="0"
+  fi
+  if test "x$enable_slate" = "x0" ; then
+    AC_MSG_RESULT(Missing features or configuration options necessary for slate)
+  fi
 else
   AC_MSG_RESULT(Modules disabled; not doing module configuration)
   enable_modprompt="0"
   enable_modpane="0"
+  enable_slate="0"
 fi
 AC_SUBST(enable_modprompt)
 AC_SUBST(enable_modpane)
+AC_SUBST(enable_slate)
 
 dnl Look for binaries.
 if test "x$enable_onyx" = "x1" ; then

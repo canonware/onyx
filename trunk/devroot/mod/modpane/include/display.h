@@ -41,4 +41,10 @@ void
 modpane_display_pane(void *a_data, cw_nxo_t *a_thread);
 
 void
+modpane_display_start(void *a_data, cw_nxo_t *a_thread);
+
+void
+modpane_display_stop(void *a_data, cw_nxo_t *a_thread);
+
+void
 modpane_display_refresh(void *a_data, cw_nxo_t *a_thread);

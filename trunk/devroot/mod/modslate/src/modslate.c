@@ -15,12 +15,9 @@
 /* Refers to a hook that holds a reference to the dynamically loaded module. */
 static cw_nxo_t modslate_module_hook;
 
-/* Code funnel for curses API calls. */
-cw_nxo_t modslate_curses_funnel;
-
 /* Reference iterator function used for modslate hooks created via
- * modslate_hooks_init().  This function makes sure that modslate_module_hook
- * and modslate_curses_funnal are not deleted until there are no more hooks. */
+ * modslate_hooks_init().  This function makes sure that modslate_module_hook is
+ * not deleted until there are no more hooks. */
 static cw_nxoe_t *
 modslate_p_hook_ref_iter(void *a_data, cw_bool_t a_reset)
 {
@@ -39,11 +36,6 @@ modslate_p_hook_ref_iter(void *a_data, cw_bool_t a_reset)
 	    case 0:
 	    {
 		retval = nxo_nxoe_get(&modslate_module_hook);
-		break;
-	    }
-	    case 1:
-	    {
-		retval = nxo_nxoe_get(&modslate_curses_funnel);
 		break;
 	    }
 	    default:
@@ -145,7 +137,6 @@ void
 modslate_init(void *a_arg, cw_nxo_t *a_thread)
 {
     cw_nxo_t *estack, *ostack;
-    cw_nxo_t *currentdict, *name, *value;
     cw_nx_t *nx;
     cw_nxmod_t *nxmod;
 
@@ -165,20 +156,6 @@ modslate_init(void *a_arg, cw_nxo_t *a_thread)
 
     /* Initialize hooks. */
     modslate_buffer_init(a_thread);
-    modslate_display_init(a_thread);
     modslate_frame_init(a_thread);
     modslate_window_init(a_thread);
-    modslate_funnel_init(a_thread);
-
-    /* Initialize curses_funnel such that it is usable both in Onyx code and C
-     * code. */
-    currentdict = nxo_stack_get(nxo_thread_dstack_get(a_thread));
-    name = nxo_stack_push(ostack);
-    nxo_name_new(name, nx, "curses_funnel", sizeof("curses_funnel") - 1, FALSE);
-    modslate_funnel(NULL, a_thread);
-    value = nxo_stack_get(ostack);
-    nxo_dict_def(currentdict, nx, name, value);
-    nxo_no_new(&modslate_curses_funnel);
-    nxo_dup(&modslate_curses_funnel, value);
-    nxo_stack_npop(ostack, 2);
 }

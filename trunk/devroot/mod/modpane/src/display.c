@@ -17,17 +17,17 @@ struct cw_display
     /* For GC iteration. */
     cw_uint32_t iter;
 
-    /* Display. */
-    cw_ds_t ds;
-
-    /* Protects all ds operations. */
-    cw_mtx_t mtx;
-
     /* Reference to =display=, prevents premature module unload. */
     cw_nxo_t hook;
 
     /* Auxiliary data for display_aux_[gs]et. */
     cw_nxo_t aux;
+
+    /* Display. */
+    cw_ds_t ds;
+
+    /* Protects all ds operations. */
+    cw_mtx_t mtx;
 };
 
 static const struct cw_modpane_entry modpane_display_hooks[] = {
@@ -38,6 +38,8 @@ static const struct cw_modpane_entry modpane_display_hooks[] = {
     MODPANE_ENTRY(display_aux_set),
     MODPANE_ENTRY(display_size),
     MODPANE_ENTRY(display_pane),
+    MODPANE_ENTRY(display_start),
+    MODPANE_ENTRY(display_stop),
     MODPANE_ENTRY(display_refresh)
 };
 
@@ -154,12 +156,24 @@ void
 modpane_display(void *a_data, cw_nxo_t *a_thread)
 {
     cw_nxo_t *estack, *ostack, *nxo, *tag;
+    cw_nxo_t *term, *infile, *outfile;
     cw_nx_t *nx;
     struct cw_display *display;
 
     estack = nxo_thread_estack_get(a_thread);
     ostack = nxo_thread_ostack_get(a_thread);
     nx = nxo_thread_nx_get(a_thread);
+
+    NXO_STACK_GET(outfile, ostack, a_thread);
+    NXO_STACK_DOWN_GET(infile, ostack, a_thread, outfile);
+    NXO_STACK_DOWN_GET(term, ostack, a_thread, infile);
+    if (nxo_type_get(outfile) != NXOT_FILE
+	|| nxo_type_get(infile) != NXOT_FILE
+	|| nxo_type_get(term) != NXOT_STRING)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
 
     display = (struct cw_display *) nxa_malloc(nx_nxa_get(nx),
 					       sizeof(struct cw_display));
@@ -170,16 +184,16 @@ modpane_display(void *a_data, cw_nxo_t *a_thread)
     nxo_dup(&display->hook, nxo_stack_get(estack));
 
     /* Initialize the ds. */
-/*      ds_new(&display->ds, (cw_opaque_alloc_t *) nxa_malloc_e, */
-/*  	   (cw_opaque_realloc_t *) nxa_realloc_e, */
-/*  	   (cw_opaque_dealloc_t *) nxa_free_e, (void *) nx_nxa_get(nx), */
-/*  	   XXX, XXX); */
+    ds_new(&display->ds, (cw_opaque_alloc_t *) nxa_malloc_e,
+	   (cw_opaque_realloc_t *) nxa_realloc_e,
+	   (cw_opaque_dealloc_t *) nxa_free_e, (void *) nx_nxa_get(nx),
+	   nxo_file_fd_get(infile), nxo_file_fd_get(outfile));
 
     /* Initialize the protection mutex; ds's aren't thread-safe. */
     mtx_new(&display->mtx);
 
     /* Create a reference to the display. */
-    nxo = nxo_stack_push(ostack);
+    nxo = nxo_stack_under_push(ostack, term);
     nxo_hook_new(nxo, nx, display, NULL, display_p_ref_iter, display_p_delete);
 
     /* Set the hook tag. */
@@ -189,20 +203,16 @@ modpane_display(void *a_data, cw_nxo_t *a_thread)
 
     /* Initialize aux. */
     nxo_null_new(&display->aux);
+
+    /* Clean up ostack. */
+    nxo_stack_npop(ostack, 3);
 }
 
 /* %object display? %boolean */
 void
 modpane_display_p(void *a_data, cw_nxo_t *a_thread)
 {
-    cw_nxo_t *ostack, *nxo;
-    cw_nxn_t error;
-
-    ostack = nxo_thread_ostack_get(a_thread);
-    NXO_STACK_GET(nxo, ostack, a_thread);
-    error = display_type(nxo);
-
-    nxo_boolean_new(nxo, error ? FALSE : TRUE);
+    modpane_hook_p(a_data, a_thread, "display");
 }
 
 void
@@ -283,6 +293,52 @@ void
 modpane_display_pane(void *a_data, cw_nxo_t *a_thread)
 {
     cw_error("XXX Not implemented");
+}
+
+void
+modpane_display_start(void *a_data, cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *nxo;
+    cw_nxn_t error;
+    struct cw_display *display;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    error = display_type(nxo);
+    if (error)
+    {
+	nxo_thread_nerror(a_thread, error);
+	return;
+    }
+    display = (struct cw_display *) nxo_hook_data_get(nxo);
+
+    display_p_lock(display);
+    /* XXX Check error return. */
+    ds_start(&display->ds);
+    display_p_unlock(display);
+}
+
+void
+modpane_display_stop(void *a_data, cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *nxo;
+    cw_nxn_t error;
+    struct cw_display *display;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    error = display_type(nxo);
+    if (error)
+    {
+	nxo_thread_nerror(a_thread, error);
+	return;
+    }
+    display = (struct cw_display *) nxo_hook_data_get(nxo);
+
+    display_p_lock(display);
+    /* XXX Check error return. */
+    ds_stop(&display->ds);
+    display_p_unlock(display);
 }
 
 void
