@@ -619,7 +619,7 @@ hist_redo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 		     *
 		     * uhdr's count is updated before the mkr_remove(), whereas
 		     * rhdr's count is updated later.  This is necessary because
-		     * the count can never be 0.
+		     * the count can never be 0 (only 1..32 are representable).
 		     *
 		     * There are more efficient ways of doing this, but it
 		     * requires more special case code. */
@@ -635,7 +635,7 @@ hist_redo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 			    && hst_cnt_get(rhdr) < HST_CNT_MAX)
 			{
 			    hst_cnt_set(uhdr, hst_cnt_get(uhdr) + 1);
-			    mkr_seek(&a_hist->htmp, - 1, BUFW_REL);
+			    mkr_seek(&a_hist->htmp, -1, BUFW_REL);
 			}
 			else
 			{
@@ -1331,7 +1331,7 @@ hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
 	    {
 		fprintf(stderr, "I%d(", hst_cnt_get(hdr));
 		mkr_dup(&ttmkr, &tmkr);
-		mkr_seek(&tmkr, -1 - hst_cnt_get(hdr), BUFW_REL);
+		mkr_seek(&tmkr, -1 - (cw_sint64_t) hst_cnt_get(hdr), BUFW_REL);
 		bufv = mkr_range_get(&tmkr, &ttmkr, &bufvcnt);
 		bufv_copy(&cbufv, 1, bufv, bufvcnt, 0);
 		for (i = 0; i < hst_cnt_get(hdr); i++)
@@ -1354,7 +1354,7 @@ hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
 	    {
 		fprintf(stderr, "Y%d(", hst_cnt_get(hdr));
 		mkr_dup(&ttmkr, &tmkr);
-		mkr_seek(&tmkr, -1 - hst_cnt_get(hdr), BUFW_REL);
+		mkr_seek(&tmkr, -1 - (cw_sint64_t) hst_cnt_get(hdr), BUFW_REL);
 		bufv = mkr_range_get(&tmkr, &ttmkr, &bufvcnt);
 		bufv_copy(&cbufv, 1, bufv, bufvcnt, 0);
 		for (i = 0; i < hst_cnt_get(hdr); i++)
@@ -1377,7 +1377,7 @@ hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
 	    {
 		fprintf(stderr, "R%d(", hst_cnt_get(hdr));
 		mkr_dup(&ttmkr, &tmkr);
-		mkr_seek(&tmkr, -1 - hst_cnt_get(hdr), BUFW_REL);
+		mkr_seek(&tmkr, -1 - (cw_sint64_t) hst_cnt_get(hdr), BUFW_REL);
 		bufv = mkr_range_get(&tmkr, &ttmkr, &bufvcnt);
 		bufv_copy(&cbufv, 1, bufv, bufvcnt, 0);
 		for (i = 0; i < hst_cnt_get(hdr); i++)
@@ -1400,7 +1400,7 @@ hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
 	    {
 		fprintf(stderr, "D%d(", hst_cnt_get(hdr));
 		mkr_dup(&ttmkr, &tmkr);
-		mkr_seek(&tmkr, -1 - hst_cnt_get(hdr), BUFW_REL);
+		mkr_seek(&tmkr, -1 - (cw_sint64_t) hst_cnt_get(hdr), BUFW_REL);
 		bufv = mkr_range_get(&tmkr, &ttmkr, &bufvcnt);
 		bufv_copy(&cbufv, 1, bufv, bufvcnt, 0);
 		for (i = 0; i < hst_cnt_get(hdr); i++)
