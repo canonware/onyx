@@ -4187,12 +4187,10 @@ systemdict_exec(cw_nxo_t *a_thread)
 {
     char *path, **argv, **envp;
     cw_nxn_t error;
-    int execerror;
 
     if (systemdict_p_exec_prepare(a_thread, &path, &argv, &envp) == FALSE)
     {
-	execerror = execve(path, argv, envp);
-	if (execerror == -1)
+	if (execve(path, argv, envp) == -1)
 	{
 	    switch (errno)
 	    {
@@ -5087,8 +5085,7 @@ systemdict_forkexec(cw_nxo_t *a_thread)
     {
 	/* Child. */
 
-	/* If a file remapping dict was specified, perform the
-	 * remappings. */
+	/* If a file remapping dict was specified, perform the remappings. */
 	if (systemdict_p_fork_remap(remap, nremap))
 	{
 	    /* Error while remapping file descriptors. */

@@ -107,7 +107,7 @@ ONYX_OTESTS =
               fcheck_a.nx.in fcheck_b.nx.in icheck_a.nx.in icheck_b.nx.in
               methods_a.nx.in methods_b.nx.in methods_c.nx.in this_a.nx.in
               this_b.nx.in threadcstack_a.nx.in threadcstack_b.nx.in
-              threadcstack_c.nx.in
+              threadcstack_c.nx.in vclass_a.nx.in
 
 #endif
 #if @enable_posix@
@@ -160,26 +160,27 @@ ONYX_OTESTS =
               cvx_a.nx.in cvx_b.nx.in dec_a.nx.in dec_b.nx.in dec_d.nx.in
               def_a.nx.in def_b.nx.in dict_a.nx.in dn_a.nx.in dn_b.nx.in
               dstack_a.nx.in dup_a.nx.in dup_b.nx.in echeck_a.nx.in
-              echeck_b.nx.in end_a.nx.in eq_a.nx.in eq_b.nx.in eval.nx.in
-              eval_a.nx.in eval_b.nx.in exch_a.nx.in exch_b.nx.in exch_c.nx.in
-              exit_a.nx.in for_a.nx.in for_b.nx.in for_c.nx.in for_d.nx.in
-              for_e.nx.in foreach_a.nx.in foreach_b.nx.in foreach_c.nx.in
-              foreach_d.nx.in gc_dict_finalize.nx.in ge_a.nx.in ge_b.nx.in
-              ge_c.nx.in ge_d.nx.in ge_e.nx.in ge_f.nx.in ge_g.nx.in ge_h.nx.in
-              get_a.nx.in get_b.nx.in get_c.nx.in get_d.nx.in get_e.nx.in
-              get_f.nx.in get_g.nx.in get_h.nx.in getinterval_a.nx.in
-              getinterval_b.nx.in getinterval_c.nx.in getinterval_d.nx.in
-              getinterval_e.nx.in getinterval_f.nx.in getinterval_g.nx.in
-              getinterval_h.nx.in getinterval_i.nx.in gt_a.nx.in gt_b.nx.in
-              gt_c.nx.in gt_d.nx.in gt_e.nx.in gt_f.nx.in gt_g.nx.in gt_h.nx.in
-              ibdup_a.nx.in ibdup_b.nx.in ibdup_c.nx.in ibdup_d.nx.in
-              ibdup_e.nx.in ibdup_f.nx.in ibpop_a.nx.in ibpop_b.nx.in
-              ibpop_c.nx.in ibpop_d.nx.in ibpop_e.nx.in ibpop_f.nx.in
-              idiv_a.nx.in idiv_b.nx.in idiv_c.nx.in idiv_d.nx.in idiv_e.nx.in
-              idup_a.nx.in idup_b.nx.in idup_c.nx.in idup_d.nx.in idup_e.nx.in
-              idup_f.nx.in if_a.nx.in if_b.nx.in if_c.nx.in ifelse_a.nx.in
-              ifelse_b.nx.in ifelse_c.nx.in immediate_a.nx.in immediate_b.nx.in
-              inc_a.nx.in inc_b.nx.in inc_d.nx.in integer.nx.in integer_a.nx.in
+              echeck_b.nx.in end_a.nx.in eq_a.nx.in eq_b.nx.in escape_a.nx.in
+              escape_b.nx.in eval.nx.in eval_a.nx.in eval_b.nx.in exch_a.nx.in
+              exch_b.nx.in exch_c.nx.in exit_a.nx.in for_a.nx.in for_b.nx.in
+              for_c.nx.in for_d.nx.in for_e.nx.in foreach_a.nx.in
+              foreach_b.nx.in foreach_c.nx.in foreach_d.nx.in
+              gc_dict_finalize.nx.in ge_a.nx.in ge_b.nx.in ge_c.nx.in ge_d.nx.in
+              ge_e.nx.in ge_f.nx.in ge_g.nx.in ge_h.nx.in get_a.nx.in
+              get_b.nx.in get_c.nx.in get_d.nx.in get_e.nx.in get_f.nx.in
+              get_g.nx.in get_h.nx.in getinterval_a.nx.in getinterval_b.nx.in
+              getinterval_c.nx.in getinterval_d.nx.in getinterval_e.nx.in
+              getinterval_f.nx.in getinterval_g.nx.in getinterval_h.nx.in
+              getinterval_i.nx.in gt_a.nx.in gt_b.nx.in gt_c.nx.in gt_d.nx.in
+              gt_e.nx.in gt_f.nx.in gt_g.nx.in gt_h.nx.in ibdup_a.nx.in
+              ibdup_b.nx.in ibdup_c.nx.in ibdup_d.nx.in ibdup_e.nx.in
+              ibdup_f.nx.in ibpop_a.nx.in ibpop_b.nx.in ibpop_c.nx.in
+              ibpop_d.nx.in ibpop_e.nx.in ibpop_f.nx.in idiv_a.nx.in
+              idiv_b.nx.in idiv_c.nx.in idiv_d.nx.in idiv_e.nx.in idup_a.nx.in
+              idup_b.nx.in idup_c.nx.in idup_d.nx.in idup_e.nx.in idup_f.nx.in
+              if_a.nx.in if_b.nx.in if_c.nx.in ifelse_a.nx.in ifelse_b.nx.in
+              ifelse_c.nx.in immediate_a.nx.in immediate_b.nx.in inc_a.nx.in
+              inc_b.nx.in inc_d.nx.in integer.nx.in integer_a.nx.in
               integer_b.nx.in integer_c.nx.in integer_d.nx.in ipop_a.nx.in
               ipop_b.nx.in ipop_c.nx.in ipop_d.nx.in ipop_e.nx.in known_a.nx.in
               known_b.nx.in known_c.nx.in lcheck_a.nx.in lcheck_b.nx.in
@@ -269,8 +270,9 @@ ONYX_OTESTS =
               threadistack_a.nx.in threadistack_b.nx.in threadistack_c.nx.in
               threadostack_a.nx.in threadostack_b.nx.in threadostack_c.nx.in
               throw_a.nx.in throw_b.nx.in throw_c.nx.in token_a.nx.in
-              token_b.nx.in token_c.nx.in tuck_a.nx.in tuck_b.nx.in tuck_c.nx.in
-              type_a.nx.in type_b.nx.in undef_a.nx.in undef_b.nx.in
+              token_b.nx.in token_c.nx.in trapped_a.nx.in trapped_b.nx.in
+              trapped_c.nx.in trapped_d.nx.in tuck_a.nx.in tuck_b.nx.in
+              tuck_c.nx.in type_a.nx.in type_b.nx.in undef_a.nx.in undef_b.nx.in
               undef_c.nx.in under_a.nx.in under_b.nx.in unless_a.nx.in
               unless_b.nx.in unless_c.nx.in until_a.nx.in until_b.nx.in
               until_c.nx.in until_d.nx.in up_a.nx.in up_b.nx.in where_a.nx.in
