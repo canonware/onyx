@@ -1,3 +1,20 @@
+2003-05-01 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/nx.nx.in:throw
+	  lib/libonyx/src/nxo_thread.nx.in:errorict handleerror :
+
+	  Convert code of the following formats:
+
+	    stderr `str' {write}{} until
+
+	  or:
+
+	    `str' stderr exch {write}{} until
+
+	  to:
+
+	    `str' {stderr exch write}{} until
+
 2003-04-27 : Jason Evans <jasone@canonware.com>
 
 	* lib/libonyx/include/libonyx/nxa.h:nxa_stats_get() : Remove the

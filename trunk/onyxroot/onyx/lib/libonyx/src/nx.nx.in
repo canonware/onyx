@@ -926,23 +926,23 @@ $throw {
 	{$currenterror where {pop true}{false} ifelse}
     }{
 	eval not {
-	    stderr `Onyx: Missing errordict or currenterror defs\n'
-	    {write}{} until
+	    `Onyx: Missing errordict or currenterror defs\n'
+	    {stderr exch write}{} until
 
 	    # Print stack dumps.
-	    stderr `ostack: ' {write}{} until
-	    ostack 2 sprints stderr exch {write}{} until
+	    `ostack: ' {stderr exch write}{} until
+	    ostack 2 sprints {stderr exch write}{} until
 
-	    stderr `\ndstack: ' {write}{} until
-	    stderr dstack 2 sprints {write}{} until
+	    `\ndstack: ' {stderr exch write}{} until
+	    dstack 2 sprints {stderr exch write}{} until
 
-	    stderr `\nestack: ' {write}{} until
-	    stderr estack 2 sprints {write}{} until
+	    `\nestack: ' {stderr exch write}{} until
+	    estack 2 sprints {stderr exch write}{} until
 
-	    stderr `\nistack: ' {write}{} until
-	    stderr istack 2 sprints {write}{} until
+	    `\nistack: ' {stderr exch write}{} until
+	    istack 2 sprints {stderr exch write}{} until
 
-	    stderr `\nOnyx: dieing\n' {write}{} until
+	    `\nOnyx: dieing\n' {stderr exch write}{} until
 	    1 die
 	} if
     } foreach

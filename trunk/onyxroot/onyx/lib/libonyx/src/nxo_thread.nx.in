@@ -63,43 +63,43 @@ $errordict <
 
 	# If this is a syntaxerror, print the line and column numbers.
 	!errorname $syntaxerror eq {
-	    stderr dup `At line ' {write}{} until
-	    dup !line cvs {write}{} until
-	    dup `, column ' {write}{} until
-	    dup !column cvs {write}{} until
-	    `: ' {write}{} until
+	    `At line ' {stderr exch write}{} until
+	    !line cvs {stderr exch write}{} until
+	    `, column ' {stderr exch write}{} until
+	    !column cvs {stderr exch write}{} until
+	    `: ' {stderr exch write}{} until
 	} if
 
 	# Print the errorname.
-	stderr dup `Error ' {write}{} until
-	dup !errorname 1 sprints {write}{} until
+	`Error ' {stderr exch write}{} until
+	!errorname 1 sprints {stderr exch write}{} until
 
 	# Print ostack and dstack using sprint.
-	dup `\nostack: ' {write}{} until
-	dup !ostack 1 sprints {write}{} until
-	dup `\ndstack: ' {write}{} until
-	dup !dstack 1 sprints {write}{} until
-	`\n' {write}{} until
+	`\nostack: ' {stderr exch write}{} until
+	!ostack 1 sprints {stderr exch write}{} until
+	`\ndstack: ' {stderr exch write}{} until
+	!dstack 1 sprints {stderr exch write}{} until
+	`\n' {stderr exch write}{} until
 
 	# Print a stack trace that depicts the currently executing element of
 	# arrays.
 	!estack scount 1 sub dup 0 gt {
-	    stderr dup `estack/istack trace (0..' {write}{} until
-	    over cvs stderr exch {write}{} until
-	    `):\n' {write}{} until
+	    `estack/istack trace (0..' {stderr exch write}{} until
+	    dup cvs {stderr exch write}{} until
+	    `):\n' {stderr exch write}{} until
 	} if
 
 	# For each element in estack:
 	0 1 dn {
 	    #edepth
 	    # If this element is an array, print it specially.
-	    dup cvs stderr exch {write}{} until
+	    dup cvs {stderr exch write}{} until
 	    dup !estack dup dn sidup spop
 	    #edepth #array
 
 	    dup type $arraytype eq {
 		# Array.
-		`: {\n' stderr exch {write}{} until
+		`: {\n' {stderr exch write}{} until
 		#edepth #array
 		dup length 1 sub 0 1 dn {
 		    #edepth #array #aindex
@@ -110,28 +110,28 @@ $errordict <
 		    #edepth #array #aindex #iindex #aindex
 		    eq {
 			dup <$w 3> outputs
-			stderr exch {write}{} until
+			{stderr exch write}{} until
 			`:--> '
 		    }{
 			`\t'
 		    } ifelse
-		    stderr exch {write}{} until
+		    {stderr exch write}{} until
 		    #edepth #array #aindex
 		    over exch get 1 sprints
-		    stderr exch {write}{} until
-		    stderr `\n' {write}{} until
+		    {stderr exch write}{} until
+		    `\n' {stderr exch write}{} until
 		    #edepth #array
 		} for
-		stderr `}\n' {write}{} until
+		`}\n' {stderr exch write}{} until
 		#edepth #array
 		pop
 		#edepth
 	    }{
 		# Non-array.
-		stderr `:\t' {write}{} until
+		`:\t' {stderr exch write}{} until
 		#edepth #array
-		1 sprints stderr exch {write}{} until
-		stderr `\n' {write}{} until
+		1 sprints {stderr exch write}{} until
+		`\n' {stderr exch write}{} until
 		#edepth
 	    } ifelse
 	    #edepth
