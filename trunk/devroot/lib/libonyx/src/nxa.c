@@ -97,6 +97,7 @@ static void *nxa_p_gc_entry(void *a_arg);
 void
 nxa_new(cw_nxa_t *a_nxa, cw_nx_t *a_nx)
 {
+	sigset_t		sig_mask, old_mask;
 	volatile cw_uint32_t	try_stage = 0;
 
 	xep_begin();
@@ -139,7 +140,16 @@ nxa_new(cw_nxa_t *a_nxa, cw_nx_t *a_nx)
 		gcdict_l_populate(&a_nxa->gcdict, a_nxa);
 		try_stage = 6;
 
+		/*
+		 * Block all signals during thread creation, so that the GC
+		 * thread does not receive any signals.  Doing this here rather
+		 * than in the GC thread itself avoids a race condition where
+		 * signals can be delivered to the GC thread.
+		 */
+		sigfillset(&sig_mask);
+		thd_sigmask(SIG_BLOCK, &sig_mask, &old_mask);
 		a_nxa->gc_thd = thd_new(nxa_p_gc_entry, (void *)a_nxa, TRUE);
+		thd_sigmask(SIG_SETMASK, &old_mask, NULL);
 		try_stage = 7;
 	}
 	xep_catch(_CW_STASHX_OOM) {
