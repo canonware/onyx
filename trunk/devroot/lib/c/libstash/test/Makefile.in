@@ -43,7 +43,7 @@ DIRS     =
 # b* : backend C code driven by the perl scripts
 # c* : stand alone C tests
 # p*.pl : perl scripts that drive the b* programs
-CTESTS   = 
+CTESTS   = c19971207a
 PTESTS   = 
 
 #
