@@ -55,6 +55,7 @@ ONYX_OTESTS =
               gc_roll.nx.in gstderr_a.nx.in gstdin_a.nx.in gstdout_a.nx.in
               monitor_a.nx.in monitor_b.nx.in monitor_c.nx.in
               threadsdict_a.nx.in
+
 #endif
 #if @enable_real@
 
