@@ -109,7 +109,6 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(chroot),
 #endif
     ENTRY(clear),
-    ENTRY(cleardstack),
     ENTRY(cleartomark),
 #ifdef CW_POSIX
     ENTRY(close),
@@ -1359,20 +1358,6 @@ systemdict_clear(cw_nxo_t *a_thread)
     if (count > 0)
     {
 	nxo_stack_npop(ostack, count);
-    }
-}
-
-void
-systemdict_cleardstack(cw_nxo_t *a_thread)
-{
-    cw_nxo_t *dstack;
-    cw_uint32_t count;
-
-    dstack = nxo_thread_dstack_get(a_thread);
-    count = nxo_stack_count(dstack);
-    if (count > 4)
-    {
-	nxo_stack_npop(dstack, count - 4);
     }
 }
 
@@ -2655,14 +2640,7 @@ systemdict_end(cw_nxo_t *a_thread)
 
     dstack = nxo_thread_dstack_get(a_thread);
 
-    /* threaddict, systemdict, globaldict, and userdict cannot be popped. */
-    if (nxo_stack_count(dstack) <= 4)
-    {
-	nxo_thread_nerror(a_thread, NXN_dstackunderflow);
-	return;
-    }
-
-    nxo_stack_pop(dstack);
+    NXO_STACK_POP(dstack, a_thread);
 }
 
 void

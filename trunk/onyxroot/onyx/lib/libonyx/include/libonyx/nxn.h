@@ -67,7 +67,6 @@ typedef enum
     NXN_chroot,
 #endif
     NXN_clear,
-    NXN_cleardstack,
     NXN_cleartomark,
 #ifdef CW_POSIX
     NXN_close,
@@ -126,7 +125,6 @@ typedef enum
 #endif
     NXN_dn,
     NXN_dstack,
-    NXN_dstackunderflow,
     NXN_dup,
     NXN_echeck,
 #ifdef CW_POSIX

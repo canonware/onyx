@@ -101,9 +101,6 @@ void
 systemdict_clear(cw_nxo_t *a_thread);
 
 void
-systemdict_cleardstack(cw_nxo_t *a_thread);
-
-void
 systemdict_cleartomark(cw_nxo_t *a_thread);
 
 #ifdef CW_POSIX

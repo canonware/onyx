@@ -537,10 +537,11 @@ Each Onyx thread has four program-visible stacks associated with it:
 		\item{systemdict}
 		\item{threaddict}
 	\end{itemize}
-	The dictionary stack is manipulated via the
+	The dictionary stack is normally manipulated via the
 	\htmlref{\onyxop{}{begin}{}}{systemdict:begin} and
 	\htmlref{\onyxop{}{end}{}}{systemdict:end} operators.  The initial
-	dictionaries on the dictionary stack cannot be removed.
+	dictionaries on the dictionary stack should not generally be removed,
+	since doing so can cause interpreter crashes.
 \item[Execution stack (estack): ] The interpreter uses the execution stack to
 	store objects that are being executed.  The application generally does
 	not need to explicitly manipulate the execution stack, but its contents
@@ -618,9 +619,6 @@ occurs, \htmlref{\onyxop{}{throw}{}}{systemdict:throw} is called.  An error can
 have any name, but only the following error names are generated internally by
 Onyx:
 \begin{description}
-\label{dstackunderflow}
-\item[dstackunderflow: ] An attempt was made to remove one of the initial
-dictionaries from dstack.
 \label{estackoverflow}
 \item[estackoverflow: ] Maximum interpreter recursion was exceeded.
 \label{invalidaccess}
@@ -3635,9 +3633,6 @@ dstack dictionary. \\
 \hline
 -- & {\bf \htmlref{countdstack}{systemdict:countdstack}} & count & Get number of
 stacks on dstack. \\
-\hline
--- & {\bf \htmlref{cleardstack}{systemdict:cleardstack}} & -- & Pop all dstack
-elements pushed by \htmlref{\onyxop{}{begin}{}}{systemdict:begin}. \\
 \hline \hline
 \multicolumn{4}{|l|}{File and filesystem operators} \\
 \hline \hline
@@ -4786,30 +4781,6 @@ onyx:3> clear pstack
 onyx:0>
 		\end{verbatim}
 	\end{description}
-\label{systemdict:cleardstack}
-\index{cleardstack@\onyxop{}{cleardstack}{}}
-\item[{\onyxop{--}{cleardstack}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ] None.
-	\item[Output(s): ] None.
-	\item[Errors(s): ] None.
-	\item[Description: ]
-		Pop all dictionaries on dstack that were pushed by
-		\htmlref{\onyxop{}{begin}{}}{systemdict:begin}.
-	\item[Example(s): ]\begin{verbatim}
-
-onyx:0> dict begin
-onyx:0> dstack 1 sprint
-(-dict- -dict- -dict- -dict- -dict-)
-onyx:0> cleardstack
-onyx:0> dstack 1 sprint
-(-dict- -dict- -dict- -dict-)
-onyx:0> cleardstack
-onyx:0> dstack 1 sprint
-(-dict- -dict- -dict- -dict-)
-onyx:0>
-		\end{verbatim}
-	\end{description}
 \label{systemdict:cleartomark}
 \index{cleartomark@\onyxop{}{cleartomark}{}}
 \item[{\onyxop{mark \dots}{cleartomark}{--}}: ]
@@ -5745,7 +5716,7 @@ onyx:0>
 	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{dstackunderflow}{dstackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
 	\item[Description: ]
 		Pop the topmost dictionary off dstack, thereby removing its

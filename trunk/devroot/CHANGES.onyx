@@ -1,3 +1,15 @@
+2002-04-21 : Jason Evans <jasone@canonware.com>
+
+	* Remove dstackunderflow as an error.  With the addition of the
+          threaddstack operator, it is possible for a program to directly
+          manipulate dstack in ways that would thwart dstackunderflow checking,
+          and it is undesirable to prevent applications from being able to take
+          advantage of the possibilities afforded.  On the down side, this makes
+          it easier to accidentally get the interpreter into an unusable state.
+
+	* Remove operators:
+	  + cleardstack
+
 2002-04-20 : Jason Evans <jasone@canonware.com>
 
 	* lib/libonyx/include/libonyx/nx.h : Add nx_threadsdict_get().
