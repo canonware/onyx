@@ -28,6 +28,10 @@ MODCLOPT_NX = [addprefix @srcroot@/mod/modclopt/nx/modclopt/
                          clopt.nx modclopt.nx
                          ];
 
+MODCLOPT_OTESTS = [addprefix @srcroot@/mod/modclopt/test/
+                             modclopt_a.nx.in
+                             ];
+
 /*
  * User cook'ables.
  */
@@ -36,16 +40,19 @@ modclopt :
 {
 }
 
-modclopt_mods_tests :
+modclopt_mods_tests : [fromto @srcroot@/%0%.nx.in @objroot@/%0%.nx
+                              [MODCLOPT_OTESTS]];
+
+modclopt_mods_check : modclopt_mods_tests [TONYX]
 {
+  @VERIFY@ -s @srcroot@ -o @objroot@
+           [fromto @srcroot@/%0%.nx.in @objroot@/%0%.nx [MODCLOPT_OTESTS]];
 }
 
-modclopt_mods_check :
+modclopt_mods_check_update : modclopt_mods_tests [TONYX]
 {
-}
-
-modclopt_mods_check_update :
-{
+  @VERIFY@ -u -s @srcroot@ -o @objroot@
+           [fromto @srcroot@/%0%.nx.in @objroot@/%0%.nx [MODCLOPT_OTESTS]];
 }
 
 modclopt_mods_install :

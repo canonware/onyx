@@ -42,11 +42,6 @@ ONYX_ONLY_SRCS = [fromto @srcroot@/%0%.nx.in @objroot@/%0%_nxcode.c
  * Onyx tests.
  */
 ONYX_OTESTS =
-#if @enable_modules@
-
-              modclopt_a.nx.in
-
-#endif
 #if [and @enable_threads@ @enable_posix@]
 
               setgstderr_a.nx.in setgstderr_b.nx.in setgstderr_c.nx.in
