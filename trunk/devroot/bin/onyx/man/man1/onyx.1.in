@@ -17,10 +17,11 @@ onyx - stand-alone Onyx language interpreter
 .B onyx \-e
 .I <expr>
 .br
-.B onyx \-i
-.RI [ <expr> ]*
-.B \-s
-.RI [ <file> ]*
+.B onyx
+.RB [ \-i
+.IR <expr> ]*
+.RB [ \-s
+.IR <file> ]*
 .br
 .B onyx
 .I <file>
