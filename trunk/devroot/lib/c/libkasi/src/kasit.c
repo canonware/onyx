@@ -12,8 +12,8 @@
 
 #include "../include/libkasi/libkasi.h"
 
-/* If defined, inline oft-used functions for improved performance (and increased
- * code size). */
+/* If defined, inline oft-used functions for improved performance (and slightly
+ * increased code size). */
 #define _CW_KASIT_INLINE
 
 #ifdef _CW_KASIT_INLINE
@@ -56,22 +56,25 @@
   } while (0)
 #endif
 
-cw_sint32_t
+static cw_sint32_t
 kasit_p_feed(cw_kasit_t * a_kasit, const char * a_str, cw_uint32_t a_len);
-void
+static void
 kasit_p_reset_tok_buffer(cw_kasit_t * a_kasit);
-cw_uint8_t
+#ifndef _CW_KASIT_INLINE
+static cw_uint8_t
 kasit_p_getc(cw_kasit_t * a_kasit, cw_uint32_t a_index);
-cw_sint32_t
+#endif
+static cw_sint32_t
 kasit_p_putc(cw_kasit_t * a_kasit, cw_uint32_t a_c);
-void
+static void
 kasit_p_print_token(cw_kasit_t * a_kasit, cw_uint32_t a_length,
 		    const char * a_note);
-void
+static void
 kasit_p_print_syntax_error(cw_kasit_t * a_kasit, cw_uint8_t a_c);
-void *
+#if (0)
+static void *
 kasit_p_entry(cw_kasit_t * a_kasit, void * a_arg);
-
+#endif
 
 cw_kasit_t *
 kasit_new(cw_kasit_t * a_kasit,
@@ -140,7 +143,7 @@ kasit_detach_buf(cw_kasit_t * a_kasit, cw_buf_t * a_buf)
 {
 }
 
-cw_sint32_t
+static cw_sint32_t
 kasit_p_feed(cw_kasit_t * a_kasit, const char * a_str, cw_uint32_t a_len)
 {
   cw_sint32_t retval;
@@ -169,6 +172,7 @@ kasit_p_feed(cw_kasit_t * a_kasit, const char * a_str, cw_uint32_t a_len)
     _CW_KASIS_PSTATE(_CW_KASIT_STATE_COMMENT);
     _CW_KASIS_PSTATE(_CW_KASIT_STATE_NUMBER);
     _CW_KASIS_PSTATE(_CW_KASIT_STATE_ASCII_STRING);
+    _CW_KASIS_PSTATE(_CW_KASIT_STATE_ASCII_STRING_NEWLINE_CONT);
     _CW_KASIS_PSTATE(_CW_KASIT_STATE_ASCII_STRING_CRLF_CONT);
     _CW_KASIS_PSTATE(_CW_KASIT_STATE_ASCII_STRING_PROT_CONT);
     _CW_KASIS_PSTATE(_CW_KASIT_STATE_ASCII_STRING_HEX_CONT);
@@ -619,10 +623,35 @@ kasit_p_feed(cw_kasit_t * a_kasit, const char * a_str, cw_uint32_t a_len)
 	    }
 	    break;
 	  }
+	  case '\r':
+	  {
+	    a_kasit->state = _CW_KASIT_STATE_ASCII_STRING_NEWLINE_CONT;
+	    break;
+	  }
 	  default:
 	  {
 	    _CW_KASIT_PUTC(c);
 	    break;
+	  }
+	}
+	break;
+      }
+      case _CW_KASIT_STATE_ASCII_STRING_NEWLINE_CONT:
+      {
+	/* All cases in the switch statement do this. */
+	_CW_KASIT_PUTC('\n');
+	a_kasit->state = _CW_KASIT_STATE_ASCII_STRING;
+	switch (c)
+	{
+	  case '\n':
+	  {
+	    break;
+	  }
+	  default:
+	  {
+	    /* '\r' was not followed by a '\n'.  Translate the '\r' to a '\n'
+	     * and jump back up to the string scanning state to scan c again. */
+	    goto ASCII_STRING_CONTINUE;
 	  }
 	}
 	break;
@@ -953,7 +982,7 @@ kasit_p_feed(cw_kasit_t * a_kasit, const char * a_str, cw_uint32_t a_len)
   return retval;
 }
 
-void
+static void
 kasit_p_reset_tok_buffer(cw_kasit_t * a_kasit)
 {
   if (_CW_KASI_BUFC_SIZE < a_kasit->index)
@@ -963,7 +992,8 @@ kasit_p_reset_tok_buffer(cw_kasit_t * a_kasit)
   a_kasit->index = 0;
 }
 
-cw_uint8_t
+#ifndef _CW_KASIT_INLINE
+static cw_uint8_t
 kasit_p_getc(cw_kasit_t * a_kasit, cw_uint32_t a_index)
 {
   cw_uint8_t retval;
@@ -979,8 +1009,9 @@ kasit_p_getc(cw_kasit_t * a_kasit, cw_uint32_t a_index)
   
   return retval;
 }
+#endif
 
-cw_sint32_t
+static cw_sint32_t
 kasit_p_putc(cw_kasit_t * a_kasit, cw_uint32_t a_c)
 {
   cw_sint32_t retval;
@@ -1030,7 +1061,7 @@ kasit_p_putc(cw_kasit_t * a_kasit, cw_uint32_t a_c)
   return retval;
 }
 
-void
+static void
 kasit_p_print_token(cw_kasit_t * a_kasit, cw_uint32_t a_length,
 		    const char * a_note)
 {
@@ -1048,7 +1079,7 @@ kasit_p_print_token(cw_kasit_t * a_kasit, cw_uint32_t a_length,
 #endif
 }
 
-void
+static void
 kasit_p_print_syntax_error(cw_kasit_t * a_kasit, cw_uint8_t a_c)
 {
   _cw_out_put_e("Syntax error for '[c]' (0x[i|b:16]), following -->", a_c, a_c);
@@ -1065,8 +1096,10 @@ kasit_p_print_syntax_error(cw_kasit_t * a_kasit, cw_uint8_t a_c)
   kasit_p_reset_tok_buffer(a_kasit);
 }
 
-void *
+#if (0)
+static void *
 kasit_p_entry(cw_kasit_t * a_kasit, void * a_arg)
 {
   return NULL;
 }
+#endif
