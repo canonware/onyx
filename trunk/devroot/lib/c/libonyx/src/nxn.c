@@ -92,7 +92,6 @@ const cw_uint8_t *cw_g_nx_names[] = {
 	"exp",
 	"false",
 	"filetype",
-	"fino",
 	"finotype",
 	"flush",
 	"flushfile",

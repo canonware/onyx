@@ -37,11 +37,23 @@ struct cw_systemdict_entry {
 #define ENTRY(name)	{NXN_##name, systemdict_##name}
 
 /*
+ * Array of fast operators in systemdict.  This operators must have
+ * corresponding handlers in nxo_thread_loop().
+ */
+static const struct cw_systemdict_entry systemdict_fastops[] = {
+	ENTRY(add),
+	ENTRY(dup),
+	ENTRY(exch),
+	ENTRY(index),
+	ENTRY(pop),
+	ENTRY(roll)
+};
+
+/*
  * Array of operators in systemdict.
  */
 static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(abs),
-	ENTRY(add),
 	ENTRY(aload),
 	ENTRY(and),
 	ENTRY(array),
@@ -79,17 +91,14 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(dirforeach),
 	ENTRY(div),
 	ENTRY(dstack),
-	ENTRY(dup),
 	ENTRY(end),
 	ENTRY(eq),
 	ENTRY(estack),
 	ENTRY(eval),
-	ENTRY(exch),
 	ENTRY(exec),
 	ENTRY(exit),
 	ENTRY(exp),
 	ENTRY(flush),
-	ENTRY(fino),
 	ENTRY(flushfile),
 	ENTRY(for),
 	ENTRY(foreach),
@@ -100,7 +109,6 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(gt),
 	ENTRY(if),
 	ENTRY(ifelse),
-	ENTRY(index),
 	ENTRY(istack),
 	ENTRY(join),
 	ENTRY(known),
@@ -124,7 +132,6 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(open),
 	ENTRY(or),
 	ENTRY(ostack),
-	ENTRY(pop),
 	ENTRY(print),
 	ENTRY(put),
 	ENTRY(putinterval),
@@ -137,7 +144,6 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(rename),
 	ENTRY(repeat),
 	ENTRY(rmdir),
-	ENTRY(roll),
 	ENTRY(run),
 	ENTRY(sclear),
 	ENTRY(scleartomark),
@@ -170,7 +176,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(sub),
 	{NXN_sym_hash_bang, systemdict_mark},
 	{NXN_sym_bang_hash, systemdict_cleartomark},
-	{NXN_sym_lp, systemdict_fino},
+	ENTRY(sym_lp),
 	ENTRY(sym_rp),
 	{NXN_sym_lt, systemdict_mark},
 	ENTRY(sym_gt),
@@ -205,12 +211,28 @@ systemdict_l_populate(cw_nxo_t *a_dict, cw_nx_t *a_nx, int a_argc, char
 	cw_nxo_t	name, value;
 
 #define	NEXTRA	9
-#define NENTRIES							\
+#define NFASTOPS							\
+	(sizeof(systemdict_fastops) / sizeof(struct cw_systemdict_entry))
+#define NOPS								\
 	(sizeof(systemdict_ops) / sizeof(struct cw_systemdict_entry))
 
-	nxo_dict_new(a_dict, a_nx, TRUE, NENTRIES + NEXTRA);
+	nxo_dict_new(a_dict, a_nx, TRUE, NFASTOPS + NOPS + NEXTRA);
 
-	for (i = 0; i < NENTRIES; i++) {
+	/* Fast operators. */
+	for (i = 0; i < NFASTOPS; i++) {
+		nxo_name_new(&name, a_nx,
+		    nxn_str(systemdict_fastops[i].nxn),
+		    nxn_len(systemdict_fastops[i].nxn), TRUE);
+		nxo_operator_new(&value, systemdict_fastops[i].op_f,
+		    systemdict_fastops[i].nxn);
+		nxo_attr_set(&value, NXOA_EXECUTABLE);
+		nxo_l_operator_fast_op_set(&value, systemdict_fastops[i].nxn);
+
+		nxo_dict_def(a_dict, a_nx, &name, &value);
+	}
+
+	/* Operators. */
+	for (i = 0; i < NOPS; i++) {
 		nxo_name_new(&name, a_nx,
 		    nxn_str(systemdict_ops[i].nxn),
 		    nxn_len(systemdict_ops[i].nxn), TRUE);
@@ -297,14 +319,15 @@ systemdict_l_populate(cw_nxo_t *a_dict, cw_nx_t *a_nx, int a_argc, char
 	nxo_dict_def(a_dict, a_nx, &name, &value);
 
 #ifdef _CW_DBG
-	if (nxo_dict_count(a_dict) != NENTRIES + NEXTRA) {
-		_cw_out_put_e("nxo_dict_count(a_dict) != NENTRIES + NEXTRA"
-		    " ([i] != [i])\n", nxo_dict_count(a_dict), NENTRIES +
+	if (nxo_dict_count(a_dict) != NFASTOPS + NOPS + NEXTRA) {
+		_cw_out_put_e("nxo_dict_count(a_dict) != NFASTOPS + NOPS"
+		    " + NEXTRA ([i] != [i])\n", nxo_dict_count(a_dict), NOPS +
 		    NEXTRA);
 		_cw_error("Adjust NEXTRA");
 	}
 #endif
-#undef NENTRIES
+#undef NOPS
+#undef NFASTOPS
 #undef NEXTRA
 }
 
@@ -476,18 +499,6 @@ systemdict_p_bind(cw_nxo_t *a_proc, cw_nxo_t *a_thread)
 	cw_nxo_t	*tstack;
 	cw_nxo_t	*el, *val;
 	cw_uint32_t	i, count;
-	/*
-	 * Array of fastops.  nxo_thread_loop() must have corresponding
-	 * handlers.
-	 */
-	static const struct cw_systemdict_entry fastops[] = {
-		ENTRY(add),
-		ENTRY(dup),
-		ENTRY(exch),
-		ENTRY(index),
-		ENTRY(pop),
-		ENTRY(roll)
-	};
 
 	tstack = nxo_thread_tstack_get(a_thread);
 
@@ -509,39 +520,9 @@ systemdict_p_bind(cw_nxo_t *a_proc, cw_nxo_t *a_thread)
 		case NXOT_NAME:
 			if (nxo_thread_dstack_search(a_thread, el, val) ==
 			    FALSE) {
-				if (nxo_type_get(val) == NXOT_OPERATOR) {
-					cw_uint32_t	j;
-
-#define	NFASTOPS							\
-	(sizeof(fastops) / sizeof(struct cw_systemdict_entry))
-
-					/*
-					 * If val can be converted to a fastop,
-					 * do so.
-					 */
-					for (j = 0; j < NFASTOPS; j++) {
-						if (nxo_operator_f(val) ==
-						    fastops[j].op_f) {
-							nxo_dup(el, val);
-							nxo_l_operator_fast_op_set(el,
-							    fastops[j].nxn);
-							nxo_array_el_set(
-							    a_proc, el, i);
-							break;
-						}
-					}
-					/*
-					 * If val isn't a fastop, still convert
-					 * the name to an operator.
-					 */
-					if (j == NFASTOPS) {
-						/* Replace el with val. */
-						nxo_array_el_set(a_proc, val,
-						    i);
-					}
-#undef NFASTOPS
-				} else if (nxo_attr_get(val) !=
-				    NXOA_EXECUTABLE) {
+				if (nxo_type_get(val) == NXOT_OPERATOR)
+					nxo_array_el_set(a_proc, val, i);
+				else if (nxo_attr_get(val) != NXOA_EXECUTABLE) {
 					/* Replace el with val. */
 					nxo_dup(el, val);
 				}
@@ -1918,17 +1899,6 @@ systemdict_exp(cw_nxo_t *a_thread)
 
 	nxo_integer_set(a, r);
 	nxo_stack_pop(ostack);
-}
-
-void
-systemdict_fino(cw_nxo_t *a_thread)
-{
-	cw_nxo_t	*ostack;
-	cw_nxo_t	*nxo;
-
-	ostack = nxo_thread_ostack_get(a_thread);
-	nxo = nxo_stack_push(ostack);
-	nxo_fino_new(nxo);
 }
 
 void
@@ -4594,6 +4564,18 @@ systemdict_sub(cw_nxo_t *a_thread)
 
 	nxo_integer_set(a, nxo_integer_get(a) - nxo_integer_get(b));
 	nxo_stack_pop(ostack);
+}
+
+/* ( */
+void
+systemdict_sym_lp(cw_nxo_t *a_thread)
+{
+	cw_nxo_t	*ostack;
+	cw_nxo_t	*nxo;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	nxo = nxo_stack_push(ostack);
+	nxo_fino_new(nxo);
 }
 
 /* ) */

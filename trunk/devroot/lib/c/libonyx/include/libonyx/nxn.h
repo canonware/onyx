@@ -90,7 +90,6 @@ typedef enum {
 	NXN_exp,
 	NXN_false,
 	NXN_filetype,
-	NXN_fino,
 	NXN_finotype,
 	NXN_flush,
 	NXN_flushfile,

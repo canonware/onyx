@@ -41,13 +41,8 @@ nxo_l_operator_print(cw_nxo_t *a_thread)
 
 	if (nxo_p_opcode_get(operator) != NXN_ZERO) {
 		_cw_assert(nxo_p_opcode_get(operator) <= NXN_LAST);
-		if (nxo_p_fastop_get(operator)) {
-			error = nxo_file_output(stdout_nxo, "---[s]---",
-			    nxn_str(nxo_p_opcode_get(operator)));
-		} else {
-			error = nxo_file_output(stdout_nxo, "--[s]--",
-			    nxn_str(nxo_p_opcode_get(operator)));
-		}
+		error = nxo_file_output(stdout_nxo, "--[s]--",
+		    nxn_str(nxo_p_opcode_get(operator)));
 	} else
 		error = nxo_file_output(stdout_nxo, "-operator-");
 
