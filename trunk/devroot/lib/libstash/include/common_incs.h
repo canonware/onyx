@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 52 $
- * Last modified: $Date: 1998-04-30 02:39:06 -0700 (Thu, 30 Apr 1998) $
+ * Current revision: $Revision: 64 $
+ * Last modified: $Date: 1998-05-01 21:20:21 -0700 (Fri, 01 May 1998) $
  *
  * Description: The idea here is to keep cpp from having to process a header
  *              file more than once.
@@ -79,6 +79,34 @@
  * Other project headers we don't always want to include.
  */
 
+#if (defined(_INC_BHP_H_) || defined(_INC_ALL_))
+#  ifndef _BHP_H_
+#    include <bhp.h>
+#    define _BHP_H_
+#  endif
+#endif
+
+#if (defined(_INC_BR_H_) || defined(_INC_ALL_))
+#  ifndef _BR_H_
+#    include <br.h>
+#    define _BR_H_
+#  endif
+#endif
+
+#if (defined(_INC_BT_H_) || defined(_INC_ALL_))
+#  ifndef _BT_H_
+#    include <bt.h>
+#    define _BT_H_
+#  endif
+#endif
+
+#if (defined(_INC_BUF_H_) || defined(_INC_ALL_))
+#  ifndef _BUF_H_
+#    include <buf.h>
+#    define _BUF_H_
+#  endif
+#endif
+
 #if (defined(_INC_GLOB_H_) || defined(_INC_ALL_))
 #  ifndef _GLOB_H_
 #    include <glob.h>
@@ -108,6 +136,13 @@
 #    endif
 #    include <res.h>
 #    define _RES_H_
+#  endif
+#endif
+
+#if (defined(_INC_SOCK_H_) || defined(_INC_ALL_))
+#  ifndef _SOCK_H_
+#    include <sock.h>
+#    define _SOCK_H_
 #  endif
 #endif
 

@@ -30,8 +30,8 @@
 #
 # $Source$
 # $Author: jasone $
-# Current revision: $Revision: 52 $
-# Last modified: $Date: 1998-04-30 02:39:06 -0700 (Thu, 30 Apr 1998) $
+# Current revision: $Revision: 64 $
+# Last modified: $Date: 1998-05-01 21:20:21 -0700 (Fri, 01 May 1998) $
 #
 # Description: Sample Makefile stub for a subdirectory.
 #              
@@ -40,8 +40,10 @@
 # Current directory, don't need to touch this.
 CURRDIR := lib/common/include
 
-$(CURRDIR)_INCS := common_incs.h dbg.h dbg_priv.h glob.h list.h list_priv.h \
-	log.h log_priv.h mem.h mem_priv.h oh.h oh_priv.h res.h res_priv.h \
+$(CURRDIR)_INCS := common_incs.h bhp.h bhp_priv.h br.h br_priv.h \
+	bt.h bt_priv.h buf.h buf_priv.h dbg.h dbg_priv.h glob.h \
+	list.h list_priv.h log.h log_priv.h mem.h mem_priv.h \
+	oh.h oh_priv.h res.h res_priv.h sock.h sock_priv.h \
 	thread.h thread_priv.h
 $(CURRDIR)_SRCS :=# List of .c sources.
 $(CURRDIR)_LEXERS :=# List of .l sources.
