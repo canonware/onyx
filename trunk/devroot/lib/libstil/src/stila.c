@@ -90,6 +90,21 @@ stilag_malloc(cw_stilag_t *a_stilag, size_t a_size, const char *a_filename,
 	return mem_malloc(&a_stilag->mem, a_size, a_filename, a_line_num);
 }
 
+void
+stilag_free(cw_stilag_t *a_stilag, void *a_ptr, const char *a_filename,
+    cw_uint32_t a_line_num)
+{
+	mem_free(&a_stilag->mem, a_ptr, a_filename, a_line_num);
+}
+
+void *
+stilag_gc_malloc(cw_stilag_t *a_stilag, size_t a_size, const char *a_filename,
+    cw_uint32_t a_line_num)
+{
+	/* XXX Not at all right. */
+	return mem_malloc(&a_stilag->mem, a_size, a_filename, a_line_num);
+}
+
 cw_bool_t
 stilag_gc_register(cw_stilag_t *a_stilag, cw_stilt_t *a_stilt, cw_stiloe_t
     *a_stiloe)
@@ -101,13 +116,6 @@ stilag_gc_register(cw_stilag_t *a_stilag, cw_stilt_t *a_stilt, cw_stiloe_t
 	mtx_unlock(&a_stilag->lock);
 
 	return retval;
-}
-
-void
-stilag_free(cw_stilag_t *a_stilag, void *a_ptr, const char *a_filename,
-    cw_uint32_t a_line_num)
-{
-	mem_free(&a_stilag->mem, a_ptr, a_filename, a_line_num);
 }
 
 /* stilat. */
@@ -149,6 +157,26 @@ stilat_malloc(cw_stilat_t *a_stilat, size_t a_size, const char *a_filename,
 {
 	void	*retval;
 
+	retval = stilag_malloc(a_stilat->stilag, a_size, a_filename,
+	    a_line_num);
+
+	while (retval == NULL) {
+		/* XXX Throw memory error. */
+
+		retval = stilag_malloc(a_stilat->stilag, a_size, a_filename,
+		    a_line_num);
+	}
+
+	return retval;
+}
+
+void *
+stilat_gc_malloc(cw_stilat_t *a_stilat, size_t a_size, const char *a_filename,
+    cw_uint32_t a_line_num)
+{
+	void	*retval;
+
+	/* XXX Not at all right. */
 	retval = stilag_malloc(a_stilat->stilag, a_size, a_filename,
 	    a_line_num);
 

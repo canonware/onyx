@@ -72,10 +72,13 @@ void		stilag_delete(cw_stilag_t *a_stilag);
 
 void		*stilag_malloc(cw_stilag_t *a_stilag, size_t a_size, const char
     *a_filename, cw_uint32_t a_line_num);
-cw_bool_t	stilag_gc_register(cw_stilag_t *a_stilag, cw_stilt_t *a_stilt,
-    cw_stiloe_t *a_stiloe);
 void		stilag_free(cw_stilag_t *a_stilag, void *a_ptr, const char
     *a_filename, cw_uint32_t a_line_num);
+
+void		*stilag_gc_malloc(cw_stilag_t *a_stilag, size_t a_size, const
+    char *a_filename, cw_uint32_t a_line_num);
+cw_bool_t	stilag_gc_register(cw_stilag_t *a_stilag, cw_stilt_t *a_stilt,
+    cw_stiloe_t *a_stiloe);
 
 #define		stilag_mem_get(a_stilag)				\
 	&(a_stilag)->mem
@@ -95,11 +98,15 @@ void		stilag_free(cw_stilag_t *a_stilag, void *a_ptr, const char
 	stilag_malloc((a_stilag), (a_size), __FILE__, __LINE__)
 #define		_cw_stilag_free(a_stilag, a_ptr)			\
 	stilag_free((a_stilag), (a_ptr), __FILE__, __LINE__)
+#define		_cw_stilag_gc_malloc(a_stilag, a_size)			\
+	stilag_gc_malloc((a_stilag), (a_size), __FILE__, __LINE__)
 #else
 #define		_cw_stilag_malloc(a_stilag, a_size)			\
 	stilag_malloc((a_stilag), (a_size), NULL, 0)
 #define		_cw_stilag_free(a_stilag, a_ptr)			\
 	stilag_free((a_stilag), (a_ptr), NULL, 0)
+#define		_cw_stilag_gc_malloc(a_stilag, a_size)			\
+	stilag_gc_malloc((a_stilag), (a_size), NULL, 0)
 #endif
 
 #define		_cw_stilag_stil_bufc_get(a_stilag)			\
@@ -145,6 +152,8 @@ cw_stiloe_dicto_t *stilat_dicto_get(cw_stilat_t *a_stilat, const char
 
 void		*stilat_malloc(cw_stilat_t *a_stilat, size_t a_size, const char
     *a_filename, cw_uint32_t a_line_num);
+void		*stilat_gc_malloc(cw_stilat_t *a_stilat, size_t a_size, const
+    char *a_filename, cw_uint32_t a_line_num);
 cw_bool_t	stilat_gc_register(cw_stilat_t *a_stilat, cw_stiloe_t
     *a_stiloe);
 void		stilat_free(cw_stilat_t *a_stilat, void *a_ptr, const char
@@ -176,6 +185,8 @@ void		stilat_free(cw_stilat_t *a_stilat, void *a_ptr, const char
 	stilat_dicto_get((a_stilat), __FILE__, __LINE__)
 #define		_cw_stilat_malloc(a_stilat, a_size)			\
 	stilat_malloc((a_stilat), (a_size), __FILE__, __LINE__)
+#define		_cw_stilat_gc_malloc(a_stilat, a_size)			\
+	stilat_gc_malloc((a_stilat), (a_size), __FILE__, __LINE__)
 #define		_cw_stilat_free(a_stilat, a_ptr)			\
 	stilat_free((a_stilat), (a_ptr), __FILE__, __LINE__)
 #else
@@ -191,6 +202,8 @@ void		stilat_free(cw_stilat_t *a_stilat, void *a_ptr, const char
 	stilat_dicto_get((a_stilat), NULL, 0)
 #define		_cw_stilat_malloc(a_stilat, a_size)			\
 	stilat_malloc((a_stilat), (a_size), NULL, 0)
+#define		_cw_stilat_gc_malloc(a_stilat, a_size)			\
+	stilat_gc_malloc((a_stilat), (a_size), NULL, 0)
 #define		_cw_stilat_free(a_stilat, a_ptr)			\
 	stilat_free((a_stilat), (a_ptr), NULL, 0)
 #endif
