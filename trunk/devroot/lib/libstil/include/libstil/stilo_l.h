@@ -86,19 +86,10 @@ cw_stiloe_t *stiloe_l_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t a_reset);
 	(a_stiloe)->registered = (a_registered)
 
 /*
- * stilo.
- */
-
-#define	stilo_l_operator_fast_op_get(a_stilo) (a_stilo)->fast_op
-#define	stilo_l_operator_fast_op_set(a_stilo, a_op_code) do {		\
-	(a_stilo)->fast_op = TRUE;					\
-	(a_stilo)->op_code = (a_op_code);				\
-} while (0)
-#define	stilo_l_operator_fast_op_stiln(a_stilo) (a_stilo)->op_code
-
-/*
  * array.
  */
+cw_stilo_t *stilo_l_array_get(cw_stilo_t *a_stilo);
+
 #define	stilo_l_array_bound_get(a_stilo) (a_stilo)->array_bound
 #define	stilo_l_array_bound_set(a_stilo, a_bound)			\
 	(a_stilo)->array_bound = (a_bound);
@@ -114,3 +105,13 @@ cw_stilo_t *stilo_l_dict_lookup(cw_stilo_t *a_stilo, const cw_stilo_t
  */
 cw_uint32_t stilo_l_name_hash(const void *a_key);
 cw_bool_t stilo_l_name_key_comp(const void *a_k1, const void *a_k2);
+
+/*
+ * operator.
+ */
+#define	stilo_l_operator_fast_op_get(a_stilo) (a_stilo)->fast_op
+#define	stilo_l_operator_fast_op_set(a_stilo, a_op_code) do {		\
+	(a_stilo)->fast_op = TRUE;					\
+	(a_stilo)->op_code = (a_op_code);				\
+} while (0)
+#define	stilo_l_operator_fast_op_stiln(a_stilo) (a_stilo)->op_code

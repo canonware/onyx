@@ -502,7 +502,7 @@ stilt_loop(cw_stilt_t *a_stilt)
 			break;
 		case STILOT_ARRAY: {
 			cw_uint32_t	i, len;
-			cw_stilo_t	*array;
+			cw_stilo_t	*el;
 
 			len = stilo_array_len_get(stilo);
 			if (len == 0) {
@@ -519,37 +519,36 @@ stilt_loop(cw_stilt_t *a_stilt)
 			 * operator.  Therefore, check for the most common
 			 * simple cases and handle them specially.
 			 */
-			array = stilo_array_get(stilo);
+			el = stils_push(&a_stilt->tstack);
 			for (i = 0; i < len - 1; i++) {
-				if (stilo_attrs_get(&array[i]) ==
-				    STILOA_LITERAL) {
+				stilo_array_el_get(stilo, i, el);
+				if (stilo_attrs_get(el) == STILOA_LITERAL) {
 					/*
 					 * Always push literal objects onto the
 					 * data stack.
 					 */
 					tstilo = stils_push(&a_stilt->ostack);
-					stilo_dup(tstilo, &array[i]);
+					stilo_dup(tstilo, el);
 					continue;
 				}
 
-				switch (stilo_type_get(&array[i])) {
+				switch (stilo_type_get(el)) {
 				case STILOT_ARRAY:
 					/*
 					 * Don't execute nested arrays.
 					 */
 					tstilo = stils_push(&a_stilt->ostack);
-					stilo_dup(tstilo, &array[i]);
+					stilo_dup(tstilo, el);
 					break;
 				case STILOT_OPERATOR:
-					if (stilo_l_operator_fast_op_get(&array[i])
+					if (stilo_l_operator_fast_op_get(el)
 					    == FALSE) {
-						stilo_operator_f(&array[i])
-						    (a_stilt);
+						stilo_operator_f(el)(a_stilt);
 						break;
 					}
 
 					/* Fast operator. */
-					switch (stilo_l_operator_fast_op_stiln(&array[i])) {
+					switch (stilo_l_operator_fast_op_stiln(el)) {
 					case STILN_add: {
 						cw_stilo_t	*a, *b;
 
@@ -715,7 +714,7 @@ stilt_loop(cw_stilt_t *a_stilt)
 					 * generic algorithm.
 					 */
 					tstilo = stils_push(&a_stilt->estack);
-					stilo_dup(tstilo, &array[i]);
+					stilo_dup(tstilo, el);
 					stilt_loop(a_stilt);
 				}
 				NEXT:
@@ -726,22 +725,24 @@ stilt_loop(cw_stilt_t *a_stilt)
 			 * recursion safe by replacing the array with its last
 			 * element before executing the last element.
 			 */
-			if ((stilo_attrs_get(&array[i]) == STILOA_LITERAL) ||
-			    (stilo_type_get(&array[i]) == STILOT_ARRAY)) {
+			stilo_array_el_get(stilo, i, el);
+			if ((stilo_attrs_get(el) == STILOA_LITERAL) ||
+			    (stilo_type_get(el) == STILOT_ARRAY)) {
 				/*
 				 * Always push literal objects and nested arrays
 				 * onto the data stack.
 				 */
 				tstilo = stils_push(&a_stilt->ostack);
-				stilo_dup(tstilo, &array[i]);
+				stilo_dup(tstilo, el);
 				stils_pop(&a_stilt->estack);
 			} else {
 				/* Possible recursion. */
 				tstilo = stils_push(&a_stilt->estack);
-				stilo_dup(tstilo, &array[i]);
+				stilo_dup(tstilo, el);
 				stils_roll(&a_stilt->estack, 2, 1);
 				stils_pop(&a_stilt->estack);
 			}
+			stils_pop(&a_stilt->tstack);
 			break;
 		}
 		case STILOT_STRING: {
@@ -2113,25 +2114,24 @@ static void
 stilt_p_special_accept(cw_stilt_t *a_stilt, const cw_uint8_t *a_token,
     cw_uint32_t a_len)
 {
-	cw_stilo_t	*stilo, key;	/*
-					 * XXX In theory, GC-unsafe.  In
-					 * practice, just bad practice.
-					 */
+	cw_stilo_t	*stilo, *key;
 
-	stilo_name_new(&key, a_stilt->stil, a_token, a_len, TRUE);
+	key = stils_push(&a_stilt->tstack);
+	stilo_name_new(key, a_stilt->stil, a_token, a_len, TRUE);
 
 	stilo = stils_push(&a_stilt->estack);
-	if (stilt_dict_stack_search(a_stilt, &key, stilo)) {
+	if (stilt_dict_stack_search(a_stilt, key, stilo)) {
 		stilt_error(a_stilt, STILTE_UNDEFINED);
 		stils_pop(&a_stilt->estack);
 	} else
 		stilt_loop(a_stilt);
+	stils_pop(&a_stilt->tstack);
 }
 
 static void
 stilt_p_procedure_accept(cw_stilt_t *a_stilt)
 {
-	cw_stilo_t	*tstilo, *stilo, *arr;
+	cw_stilo_t	*tstilo, *stilo;
 	cw_uint32_t	nelements, i, depth;
 
 	/* Find the no "mark". */
@@ -2153,14 +2153,13 @@ stilt_p_procedure_accept(cw_stilt_t *a_stilt)
 	tstilo = stils_push(&a_stilt->tstack);
 	stilo_array_new(tstilo, a_stilt->stil, a_stilt->locking, nelements);
 	stilo_attrs_set(tstilo, STILOA_EXECUTABLE);
-	arr = stilo_array_get(tstilo);
 
 	/*
 	 * Traverse down the stack, moving stilo's to the array.
 	 */
 	for (i = nelements, stilo = NULL; i > 0; i--) {
 		stilo = stils_down_get(&a_stilt->ostack, stilo);
-		stilo_dup(&arr[i - 1], stilo);
+		stilo_array_el_set(tstilo, stilo, i - 1);
 	}
 
 	/* Pop the stilo's off the stack now. */

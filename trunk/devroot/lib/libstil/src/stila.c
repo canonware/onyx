@@ -180,7 +180,7 @@ stila_new(cw_stila_t *a_stila, cw_stil_t *a_stil)
 		stilo_name_new(&key, a_stil, stiln_str(STILN_current),
 		    stiln_len(STILN_current), TRUE);
 		array = stilo_l_dict_lookup(&a_stila->gcdict, &key);
-		a_stila->gcdict_current = stilo_array_el_get(array, 0);
+		a_stila->gcdict_current = stilo_l_array_get(array);
 		stilo_integer_set(a_stila->gcdict_current,
 		    stilo_integer_get(&t_current));
 
@@ -188,7 +188,7 @@ stila_new(cw_stila_t *a_stila, cw_stil_t *a_stil)
 		stilo_name_new(&key, a_stil, stiln_str(STILN_maximum),
 		    stiln_len(STILN_maximum), TRUE);
 		array = stilo_l_dict_lookup(&a_stila->gcdict, &key);
-		a_stila->gcdict_maximum = stilo_array_el_get(array, 0);
+		a_stila->gcdict_maximum = stilo_l_array_get(array);
 		stilo_integer_set(a_stila->gcdict_maximum,
 		    stilo_integer_get(&t_maximum));
 
@@ -196,7 +196,7 @@ stila_new(cw_stila_t *a_stila, cw_stil_t *a_stil)
 		stilo_name_new(&key, a_stil, stiln_str(STILN_sum),
 		    stiln_len(STILN_sum), TRUE);
 		array = stilo_l_dict_lookup(&a_stila->gcdict, &key);
-		a_stila->gcdict_sum = stilo_array_el_get(array, 0);
+		a_stila->gcdict_sum = stilo_l_array_get(array);
 		stilo_integer_set(a_stila->gcdict_sum,
 		    stilo_integer_get(&sum_count));
 
