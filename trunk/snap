@@ -233,9 +233,9 @@ unless ($opt_noact)
     `cd $tmpdir/devroot && cook release`;
 
     # Sanity check to make sure documentation got built.
-    unless (-e "$tmpdir/devroot/doc/ps/manual.ps"
-	    && -e "$tmpdir/devroot/doc/pdf/manual.pdf"
-	    && -e "$tmpdir/devroot/doc/html/manual.html")
+    unless (-e "$tmpdir/devroot/doc/ps/onyx.ps"
+	    && -e "$tmpdir/devroot/doc/pdf/onyx.pdf"
+	    && -e "$tmpdir/devroot/doc/html/onyx.html")
     {
 	print STDERR "'cook release' seems to have failed\n";
 	exit 1;
@@ -250,9 +250,9 @@ unless ($opt_noact)
     `cd $tmpdir/devroot && cook distclean`;
 
     # Sanity check to make sure documentation is still in the tree.
-    unless (-e "$tmpdir/devroot/doc/ps/manual.ps"
-	    && -e "$tmpdir/devroot/doc/pdf/manual.pdf"
-	    && -e "$tmpdir/devroot/doc/html/manual.html")
+    unless (-e "$tmpdir/devroot/doc/ps/onyx.ps"
+	    && -e "$tmpdir/devroot/doc/pdf/onyx.pdf"
+	    && -e "$tmpdir/devroot/doc/html/onyx.html")
     {
 	print STDERR "'cook release' seems to have failed\n";
 	exit 1;
