@@ -61,17 +61,15 @@ stil_new(cw_stil_t *a_stil)
 		retval->is_malloced = TRUE;
 	}
 
-	if (stila_gnew(&retval->stila, &retval->stil_bufc_pool,
-	    &retval->chi_pool, &retval->stiln_pool, &retval->stilsc_pool,
-	    &retval->dicto_pool))
+	if (stilag_new(&retval->stilag))
 		goto OOM_2;
 
-	if (dch_new(&retval->stiln_dch, stila_mem_get(&a_stil->stila),
+	if (dch_new(&retval->stiln_dch, stilag_mem_get(&retval->stilag),
 	    _CW_STIL_STILN_BASE_TABLE, _CW_STIL_STILN_BASE_GROW,
 	    _CW_STIL_STILN_BASE_SHRINK, stilnk_p_hash, stilnk_p_key_comp) ==
 	    NULL)
 		goto OOM_3;
-	if (dch_new(&retval->roots_dch, stila_mem_get(&a_stil->stila),
+	if (dch_new(&retval->roots_dch, stilag_mem_get(&retval->stilag),
 	    _CW_STIL_ROOTS_BASE_TABLE, _CW_STIL_ROOTS_BASE_GROW,
 	    _CW_STIL_ROOTS_BASE_SHRINK, ch_hash_direct, ch_key_comp_direct) ==
 	    NULL)
@@ -87,7 +85,7 @@ stil_new(cw_stil_t *a_stil)
 	OOM_4:
 	dch_delete(&retval->stiln_dch);
 	OOM_3:
-	stila_delete(&retval->stila);
+	stilag_delete(&retval->stilag);
 	OOM_2:
 	if (retval->is_malloced)
 		_cw_free(retval);
@@ -117,15 +115,10 @@ stil_delete(cw_stil_t *a_stil)
 	while (dch_remove_iterate(&a_stil->stiln_dch, (void **)&key,
 	    (void **)&data, &chi) == FALSE) {
 		stil_p_stiln_delete(a_stil, data);
-		_cw_pool_put(&a_stil->chi_pool, chi);
+		_cw_stilag_chi_put(&a_stil->stilag, chi);
 	}
 	dch_delete(&a_stil->stiln_dch);
-	pool_delete(&a_stil->stilsc_pool);
-	pool_delete(&a_stil->stiln_pool);
-	
-	pool_delete(&a_stil->chi_pool);
-	pool_delete(&a_stil->stil_bufc_pool);
-
+	stilag_delete(&a_stil->stilag);
 	mtx_delete(&a_stil->lock);
 
 	if (a_stil->is_malloced)
@@ -144,11 +137,12 @@ stil_stil_bufc_get(cw_stil_t *a_stil)
 	_cw_check_ptr(a_stil);
 	_cw_assert(a_stil->magic == _CW_STIL_MAGIC);
 
-	retval = (cw_stil_bufc_t *)_cw_pool_get(&a_stil->stil_bufc_pool);
+	retval = _cw_stilag_stil_bufc_get(&a_stil->stilag);
 	if (retval == NULL)
 		goto RETURN;
-	bufc_new(&retval->bufc, stila_mem_get(&a_stil->stila),
-	    (cw_opaque_dealloc_t *)pool_put, &a_stil->stil_bufc_pool);
+	bufc_new(&retval->bufc, stilag_mem_get(&a_stil->stilag),
+	    (cw_opaque_dealloc_t *)pool_put,
+	    stilag_stil_bufc_pool_get(&a_stil->stilag));
 	memset(retval->buffer, 0, sizeof(retval->buffer));
 	bufc_set_buffer(&retval->bufc, retval->buffer, _CW_STIL_BUFC_SIZE, TRUE,
 	    NULL, NULL);
@@ -165,6 +159,7 @@ stil_stiln_ref(cw_stil_t *a_stil, const cw_uint8_t *a_name, cw_uint32_t a_len,
 	cw_stiln_t	*retval;
 	cw_stiln_t	search_key, *data;
 	cw_uint8_t	*name;
+	cw_chi_t	*chi;
 
 	_cw_check_ptr(a_stil);
 	_cw_assert(a_stil->magic == _CW_STIL_MAGIC);
@@ -227,9 +222,12 @@ stil_stiln_ref(cw_stil_t *a_stil, const cw_uint8_t *a_name, cw_uint32_t a_len,
 				goto OOM_3;
 		}
 		/* Finally, insert the stiln into the hash table. */
-		if (dch_insert(&a_stil->stiln_dch, (void *)&data->key,
-		    (void *)data, (cw_chi_t *)_cw_pool_get(&a_stil->chi_pool)))
+		chi = _cw_stilag_chi_get(&a_stil->stilag);
+		if (chi == NULL)
 			goto OOM_4;
+		if (dch_insert(&a_stil->stiln_dch, (void *)&data->key,
+		    (void *)data, chi))
+			goto OOM_5;
 		retval = data;
 	} else
 		retval = NULL;
@@ -237,6 +235,8 @@ stil_stiln_ref(cw_stil_t *a_stil, const cw_uint8_t *a_name, cw_uint32_t a_len,
 	mtx_unlock(&a_stil->lock);
 	return retval;
 
+	OOM_5:
+	_cw_stilag_chi_put(&a_stil->stilag, chi);
 	OOM_4:
 	if (data->keyed_refs != NULL)
 		dch_delete(data->keyed_refs);
@@ -274,7 +274,7 @@ stil_stiln_unref(cw_stil_t *a_stil, const cw_stiln_t *a_stiln, const void
 			_cw_error("Trying to remove a non-existent keyed ref");
 #endif
 		}
-		_cw_pool_put(&a_stil->chi_pool, chi);
+		_cw_stilag_chi_put(&a_stil->stilag, chi);
 
 		if (dch_count(stiln->keyed_refs) == 0) {
 			dch_delete(stiln->keyed_refs);
@@ -288,7 +288,7 @@ stil_stiln_unref(cw_stil_t *a_stil, const cw_stiln_t *a_stiln, const void
 	else {
 		mtx_unlock(&stiln->lock);
 		dch_remove(&a_stil->stiln_dch, &stiln->key, NULL, NULL, &chi);
-		_cw_pool_put(&a_stil->chi_pool, chi);
+		_cw_stilag_chi_put(&a_stil->stilag, chi);
 		stil_p_stiln_delete(a_stil, stiln);
 	}
 
@@ -348,7 +348,7 @@ stil_p_stiln_new(cw_stil_t *a_stil)
 {
 	cw_stiln_t *retval;
 
-	retval = (cw_stiln_t *)_cw_pool_get(&a_stil->stiln_pool);
+	retval = _cw_stilag_stiln_get(&a_stil->stilag);
 	if (retval == NULL)
 		goto RETURN;
 	memset(retval, 0, sizeof(cw_stiln_t));
@@ -392,14 +392,15 @@ stil_p_stiln_delete(cw_stil_t *a_stil, cw_stiln_t *a_stiln)
 #endif
 
 	mtx_delete(&a_stiln->lock);
-	_cw_pool_put(&a_stil->stiln_pool, a_stiln);
+	_cw_stilag_stiln_put(&a_stil->stilag, a_stiln);
 }
 
 static cw_bool_t
 stil_p_stiln_kref(cw_stil_t *a_stil, cw_stiln_t *a_stiln, const void *a_key,
     const void *a_data)
 {
-	cw_bool_t	retval, is_new_dch = FALSE;
+	cw_bool_t	is_new_dch = FALSE;
+	cw_chi_t	*chi;
 
 	/*
 	 * Assume that a_stiln is locked, or that no other threads can get to
@@ -410,28 +411,29 @@ stil_p_stiln_kref(cw_stil_t *a_stil, cw_stiln_t *a_stiln, const void *a_key,
 		is_new_dch = TRUE;
 
 		/* XXX Magic numbers here. */
-		/* XXX NULL pointer. */
 		a_stiln->keyed_refs = dch_new(NULL,
-		    stila_mem_get(&a_stil->stila), 4, 3, 1, ch_hash_direct,
+		    stilag_mem_get(&a_stil->stilag), 4, 3, 1, ch_hash_direct,
 		    ch_key_comp_direct);
-		if (a_stiln->keyed_refs == NULL) {
-			retval = TRUE;
-			goto RETURN;
-		}
+		if (a_stiln->keyed_refs == NULL)
+			goto OOM_1;
 	}
-	if (dch_insert(a_stiln->keyed_refs, a_key, a_data, (cw_chi_t
-	    *)_cw_pool_get(&a_stil->chi_pool))) {
-		if (is_new_dch) {
-			dch_delete(a_stiln->keyed_refs);
-			a_stiln->keyed_refs = NULL;
-		}
-		retval = TRUE;
-		goto RETURN;
-	}
-	retval = FALSE;
 
-	RETURN:
-	return retval;
+	chi = _cw_stilag_chi_get(&a_stil->stilag);
+	if (chi == NULL)
+		goto OOM_2;
+	if (dch_insert(a_stiln->keyed_refs, a_key, a_data, chi))
+		goto OOM_3;
+
+	return FALSE;
+	OOM_3:
+	_cw_stilag_chi_put(&a_stil->stilag, chi);
+	OOM_2:
+	if (is_new_dch) {
+		dch_delete(a_stiln->keyed_refs);
+		a_stiln->keyed_refs = NULL;
+	}
+	OOM_1:
+	return TRUE;
 }
 
 static cw_uint32_t

@@ -9,9 +9,6 @@
  *
  ****************************************************************************/
 
-/* Size of buffer used for large extended objects. */
-#define _CW_STIL_BUFC_SIZE 256
-
 typedef struct cw_stil_s cw_stil_t;
 typedef struct cw_stilnk_s cw_stilnk_t;
 
@@ -24,19 +21,7 @@ struct cw_stil_s {
 	cw_mtx_t	lock;
 
 	/* Global allocator. */
-	cw_stila_t	stila;
-
-	cw_pool_t	stil_bufc_pool;
-	cw_pool_t	chi_pool;
-
-	/* pool from which stiln's are allocated for the names hash. */
-	cw_pool_t	stiln_pool;
-
-	/* pool from which stilsc's are allocated for stacks. */
-	cw_pool_t	stilsc_pool;
-
-	/* pool from which dicto's are allocated for dicts. */
-	cw_pool_t	dicto_pool; /* XXX Initialize! */
+	cw_stilag_t	stilag;
 
 	/*
 	 * Hash of names ((cw_stilnk_t *) string is hashed) to (cw_stiln_t).
@@ -60,6 +45,8 @@ struct cw_stil_s {
 /* Not opaque. */
 typedef struct {
 	cw_bufc_t	bufc;
+/* Size of buffer used for large extended objects. */
+#define _CW_STIL_BUFC_SIZE 256
 	cw_uint8_t	buffer[_CW_STIL_BUFC_SIZE];
 }	cw_stil_bufc_t;
 
@@ -113,11 +100,7 @@ void		stil_delete(cw_stil_t *a_stil);
 
 cw_stil_bufc_t	*stil_stil_bufc_get(cw_stil_t *a_stil);
 
-#define stil_stila_get(a_stil) (&(a_stil)->stila)
-
-#define stil_chi_pool_get(a_stil) (&(a_stil)->chi_pool)
-#define stil_stilsc_pool_get(a_stil) (&(a_stil)->stilsc_pool)
-#define stil_dicto_pool_get(a_stil) (&(a_stil)->dicto_pool)
+#define stil_stilag_get(a_stil) (&(a_stil)->stilag)
 
 const cw_stiln_t *stil_stiln_ref(cw_stil_t *a_stil, const cw_uint8_t *a_name,
     cw_uint32_t a_len, cw_bool_t a_force, cw_bool_t a_is_static, const void

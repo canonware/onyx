@@ -21,17 +21,8 @@ struct cw_stilt_s {
 	/* stil this stilt is part of. */
 	cw_stil_t	*stil;
 
-	/*
-	 * If TRUE, in global allocation mode for this stilt.  Otherwise,
-	 * allocation mode is local.
-	 */
-	cw_bool_t	galloc;
-
-	/*
-	 * Local allocator.  For global allocation, use the main stil's
-	 * allocator.
-	 */
-	cw_stila_t	stila;
+	/* Allocator. */
+	cw_stilat_t	stilat;
 
 	/*
 	 * Hash of cached stiln references.  Keys are (cw_stilnk_t *), direct
@@ -153,53 +144,64 @@ struct cw_stiltn_s {
 	cw_stilnk_t	key;
 };
 
-cw_stilt_t	*stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil, cw_stila_t
-    *a_stila);
+cw_stilt_t	*stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil);
 void		stilt_delete(cw_stilt_t *a_stilt);
 
 void		stilt_get_position(cw_stilt_t *a_stilt, cw_uint32_t *r_line,
     cw_uint32_t *r_column);
-
 void		stilt_set_position(cw_stilt_t *a_stilt, cw_uint32_t a_line,
     cw_uint32_t a_column);
 	
 cw_bool_t	stilt_interp_str(cw_stilt_t *a_stilt, const char *a_str,
     cw_uint32_t a_len);
-
 cw_bool_t	stilt_interp_buf(cw_stilt_t *a_stilt, cw_buf_t *a_buf);
-
 cw_bool_t	stilt_detach_str(cw_stilt_t *a_stilt, const char *a_str,
     cw_uint32_t a_len);
-
 cw_bool_t	stilt_detach_buf(cw_stilt_t *a_stilt, cw_buf_t *a_buf);
 
-#define		stilt_get_stil(a_stilt) (a_stilt)->stil
+#define		stilt_stil_get(a_stilt) (a_stilt)->stil
+#define		stilt_stdout_get(a_stilt) (a_stilt)->stdout_fd
+#define		stilt_data_stack_get(a_stilt) (&((a_stilt)->data_stils))
 
-#define		stilt_stila_get(a_stilt)				\
-	((a_stilt)->galloc) ? stila_gget(&(a_stilt)->stila) : &(a_stilt)->stila
+#define		stilt_mem_get(a_stilt)					\
+	stilat_mem_get(&(a_stilt)->stilat)
 
-void		*stilt_malloc(cw_stilt_t *a_stilt, size_t a_size, const char
-    *a_filename, cw_uint32_t a_line_num);
 #if (defined(_LIBSTIL_DBG) || defined(_LIBSTIL_DEBUG))
 #define		_cw_stilt_malloc(a_stilt, a_size)			\
-	stilt_malloc((a_stilt), (a_size), __FILE__, __LINE__)
+	stilat_malloc(&(a_stilt)->stilat, (a_size), __FILE__, __LINE__)
+#define		_cw_stilt_free(a_stilt, a_ptr)				\
+	stilat_free(&(a_stilt)->stilat, (a_ptr), __FILE__, __LINE__)
 #else
 #define		_cw_stilt_malloc(a_stilt, a_size)			\
-	stilt_malloc((a_stilt), (a_size), NULL, 0)
+	stilat_malloc(&(a_stilt)->stilat, (a_size), NULL, 0)
+#define		_cw_stilt_free(a_stilt, a_ptr)				\
+	stilat_free(&(a_stilt)->stilat, (a_ptr), NULL, 0)
 #endif
 
-void		stilt_free(cw_stilt_t *a_stilt, void *a_ptr, const char
-    *a_filename, cw_uint32_t a_line_num);
-#if (defined(_LIBSTIL_DBG) || defined(_LIBSTIL_DEBUG))
-#define		_cw_stilt_free(a_stilt, a_ptr)				\
-	stilt_free((a_stilt), (a_ptr), __FILE__, __LINE__)
-#else
-#define		_cw_stilt_free(a_stilt, a_ptr)				\
-	stilt_free((a_stilt), (a_ptr), NULL, 0)
-#endif
+#define		_cw_stilt_stil_bufc_get(a_stilt)			\
+	_cw_stilat_stil_bufc_get(&(a_stilt)->stilat)
+#define		_cw_stilt_stil_bufc_put(a_stilt, a_stil_bufc)		\
+	_cw_stilat_stil_bufc_put(&(a_stilt)->stilat, (a_stil_bufc))
 
-#define stilt_stdout_get(a_stilt) (a_stilt)->stdout_fd
-#define stilt_data_stack_get(a_stilt) (&((a_stilt)->data_stils))
+#define		_cw_stilt_chi_get(a_stilt)				\
+	_cw_stilat_chi_get(&(a_stilt)->stilat)
+#define		_cw_stilt_chi_put(a_stilt, a_chi)			\
+	_cw_stilat_chi_put(&(a_stilt)->stilat, (a_chi))
+
+#define		_cw_stilt_stiln_get(a_stilt)				\
+	_cw_stilat_stiln_get(&(a_stilt)->stilat)
+#define		_cw_stilt_stiln_put(a_stilt, a_stiln)			\
+	_cw_stilat_stiln_put(&(a_stilt)->stilat, (a_stiln))
+
+#define		_cw_stilt_stilsc_get(a_stilt)				\
+	_cw_stilat_stilsc_get(&(a_stilt)->stilat)
+#define		_cw_stilt_stilsc_put(a_stilt, a_stilsc)			\
+	_cw_stilat_stilsc_put(&(a_stilt)->stilat, (a_stilsc))
+
+#define		_cw_stilt_dicto_get(a_stilt)				\
+	_cw_stilat_dicto_get(&(a_stilt)->stilat)
+#define		_cw_stilt_dicto_put(a_stilt, a_dicto)			\
+	_cw_stilat_dicto_put(&(a_stilt)->stilat, (a_dicto))
 
 /* stiltn. */
 const cw_stiln_t	*stiltn_ref(cw_stilt_t *a_stilt, const cw_uint8_t

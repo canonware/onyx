@@ -14,6 +14,8 @@ typedef struct cw_stiloe_s cw_stiloe_t;
 
 /* Defined here to resolve circular dependencies. */
 typedef struct cw_stila_s cw_stila_t;
+typedef struct cw_stilag_s cw_stilag_t;
+typedef struct cw_stilat_s cw_stilat_t;
 typedef struct cw_stiln_s cw_stiln_t;
 typedef struct cw_stilt_s cw_stilt_t;
 
@@ -103,12 +105,6 @@ struct cw_stilo_s {
 	 * reference to the extension.
 	 */
 	cw_bool_t	watchpoint:1;
-	/*
-	 * Reference count.  We use only one bit:
-	 *
-	 * 0 == One reference. 1 == Overflow (GC knows about the stiloe).
-	 */
-	cw_uint32_t	ref_count:1;
 
 	union {
 		struct {
@@ -174,7 +170,8 @@ void		stilo_array_set(cw_stilo_t *a_stilo, cw_uint32_t a_offset,
 /* Destroys a_key and a_val. */
 void		stilo_dict_def(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
     cw_stilo_t *a_key, cw_stilo_t *a_val);
-void		stilo_dict_undef(cw_stilo_t *a_stilo, const cw_stilo_t *a_key);
+void		stilo_dict_undef(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const
+    cw_stilo_t *a_key);
 const cw_stilo_t *stilo_dict_lookup(cw_stilo_t *a_stilo, const cw_stilo_t
     *a_key);
 cw_uint32_t	stilo_dict_count(cw_stilo_t *a_stilo);

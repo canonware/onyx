@@ -106,7 +106,7 @@ static void		stilt_p_procedure_accept(cw_stilt_t *a_stilt);
 #define _CW_STILT_ROOTS_BASE_SHRINK	  8
 
 cw_stilt_t *
-stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil, cw_stila_t *a_stila)
+stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 {
 	cw_stilt_t	*retval;
 
@@ -122,21 +122,24 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil, cw_stila_t *a_stila)
 		retval->is_malloced = TRUE;
 	}
 
-	stila_tnew(&retval->stila, a_stila, retval);
+	stilat_new(&retval->stilat, a_stilt, stil_stilag_get(a_stil));
 
-	if (dch_new(&retval->stiln_dch, stila_mem_get(a_stila),
+	if (dch_new(&retval->stiln_dch, stilt_mem_get(retval),
 	    _CW_STILT_STILN_BASE_TABLE, _CW_STILT_STILN_BASE_GROW,
 	    _CW_STILT_STILN_BASE_SHRINK, ch_hash_direct, ch_key_comp_direct) ==
 	    NULL)
 		goto OOM_2;
-	if (dch_new(&retval->roots_dch, stila_mem_get(a_stila),
+	if (dch_new(&retval->roots_dch, stilt_mem_get(retval),
 	    _CW_STILT_ROOTS_BASE_TABLE, _CW_STILT_ROOTS_BASE_GROW,
 	    _CW_STILT_ROOTS_BASE_SHRINK, ch_hash_direct, ch_key_comp_direct) ==
 	    NULL)
 		goto OOM_3;
-	stils_new(&retval->exec_stils, stil_stilsc_pool_get(a_stil));
-	stils_new(&retval->data_stils, stil_stilsc_pool_get(a_stil));
-	stils_new(&retval->dict_stils, stil_stilsc_pool_get(a_stil));
+	stils_new(&retval->exec_stils,
+	    stilat_stilsc_pool_get(&a_stilt->stilat));
+	stils_new(&retval->data_stils,
+	    stilat_stilsc_pool_get(&a_stilt->stilat));
+	stils_new(&retval->dict_stils,
+	    stilat_stilsc_pool_get(&a_stilt->stilat));
 	retval->stdout_fd = 1;
 	retval->stil = a_stil;
 	retval->state = _CW_STILT_STATE_START;
@@ -167,7 +170,7 @@ stilt_delete(cw_stilt_t *a_stilt)
 	stils_delete(&a_stilt->exec_stils);
 	dch_delete(&a_stilt->roots_dch);
 	dch_delete(&a_stilt->stiln_dch);
-	stila_delete(&a_stilt->stila);
+	stilat_delete(&a_stilt->stilat);
 	if (a_stilt->is_malloced)
 		_cw_free(a_stilt);
 }
@@ -243,7 +246,7 @@ stilt_detach_str(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 	_cw_assert(a_stilt->magic == _CW_STILT_MAGIC);
 	_cw_check_ptr(a_str);
 
-	buf_new(&buf, stila_mem_get(stilt_stila_get(a_stilt)));
+	buf_new(&buf, stilt_mem_get(a_stilt));
 	if (buf_set_range(&buf, 0, a_len, (cw_uint8_t *)a_str, FALSE)) {
 		retval = TRUE;
 		goto RETURN;
@@ -269,7 +272,7 @@ stilt_detach_buf(cw_stilt_t *a_stilt, cw_buf_t *a_buf)
 
 	if (entry_arg == NULL)
 		goto OOM_1;
-	buf_new(&entry_arg->buf, stila_mem_get(stilt_stila_get(a_stilt)));
+	buf_new(&entry_arg->buf, stilt_mem_get(a_stilt));
 	if (buf_catenate_buf(&entry_arg->buf, a_buf, TRUE))
 		goto OOM_2;
 	stilt_p_entry((void *)entry_arg);
@@ -281,20 +284,6 @@ stilt_detach_buf(cw_stilt_t *a_stilt, cw_buf_t *a_buf)
 	_cw_free(entry_arg);
 	OOM_1:
 	return TRUE;
-}
-
-void *
-stilt_malloc(cw_stilt_t *a_stilt, size_t a_size, const char *a_filename,
-    cw_uint32_t a_line_num)
-{
-	return mem_malloc(cw_g_mem, a_size, a_filename, a_line_num);
-}
-
-void
-stilt_free(cw_stilt_t *a_stilt, void *a_ptr, const char *a_filename, cw_uint32_t
-    a_line_num)
-{
-	mem_free(cw_g_mem, a_ptr, a_filename, a_line_num);
 }
 
 const cw_stiln_t *
@@ -1076,7 +1065,7 @@ stilt_p_putc(cw_stilt_t *a_stilt, cw_uint32_t a_c)
 			memcpy(kbufc->buffer, a_stilt->tok_buffer.str,
 			    _CW_STIL_BUFC_SIZE);
 			buf_new(&a_stilt->tok_buffer.buf,
-			    stila_mem_get(stilt_stila_get(a_stilt)));
+			    stilt_mem_get(a_stilt));
 			if (buf_append_bufc(&a_stilt->tok_buffer.buf,
 			    &kbufc->bufc, 0, _CW_STIL_BUFC_SIZE)) {
 				bufc_delete(&kbufc->bufc);
