@@ -51,6 +51,7 @@ struct cw_stilt_entry_s {
 
 static cw_sint32_t	stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str,
     cw_uint32_t a_len);
+static cw_sint32_t	stilt_p_exec(cw_stilt_t *a_stilt);
 static void		stilt_p_tok_str_reset(cw_stilt_t *a_stilt);
 
 static cw_sint32_t	stilt_p_tok_str_expand(cw_stilt_t *a_stilt);
@@ -1019,6 +1020,19 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 	return retval;
 }
 
+static cw_sint32_t
+stilt_p_exec(cw_stilt_t *a_stilt)
+{
+	cw_stilo_t	*stilo;
+
+	/* XXX It's harder than this. */
+	stilo = stils_get(&a_stilt->exec_stils, 0);
+	stilo->o.operator.f(a_stilt);
+	stils_pop(&a_stilt->exec_stils, a_stilt, 1);
+
+	return 0;	/* XXX */
+}
+
 static void
 stilt_p_tok_str_reset(cw_stilt_t *a_stilt)
 {
@@ -1163,11 +1177,28 @@ stilt_p_name_accept(cw_stilt_t *a_stilt)
 
 	switch (a_stilt->meta.name.action) {
 	case EXEC:
-		/*
-		 * Execute the value associated with the name in the dictionary
-		 * stack.
-		 */
-		break;
+		if (a_stilt->defer_count == 0) {
+			/*
+			 * Execute the value associated with the name in the
+			 * dictionary stack.
+			 */
+			/* XXX Actually search dictionary stack. */
+			cw_stilo_t	key, *systemdict;
+
+			stilo_name_new(&key, a_stilt, a_stilt->tok_str,
+			    a_stilt->index, FALSE);
+			systemdict = stil_systemdict_get(a_stilt->stil);
+
+			stilo = stils_push(&a_stilt->exec_stils);
+			if (stilo_dict_lookup(systemdict, a_stilt, &key,
+			    stilo)) {
+				_cw_error("XXX Undefined name");
+			}
+
+			stilt_p_exec(a_stilt);
+			break;
+		}
+		/* Fall through. */
 	case LITERAL:
 		/* Push the name object onto the data stack. */
 		stilo = stils_push(&a_stilt->data_stils);
