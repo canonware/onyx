@@ -238,6 +238,25 @@
  * where each fragment is completely overlapped by a particular set of extents.
  * This is used when displaying the buffer.
  *
+ * Any single buffer operation (insert or remove) is not capable of re-ordering
+ * extents.  At the most extreme, a remove is capable of converting (A > B) or
+ * (A < B) to (A == B).  Similarly, an insertion is capable of converting (A ==
+ * B) to (A < B) or (A > B).  However, this still has implications during insert
+ * and remove operations due to the way extent ordering is handled, and the fact
+ * that multiple buffer operations *can* re-order extents.
+ *
+ * No special maintenance is necessary for the markers that denote the ends of
+ * extents; they are normal markers that stay well ordered at all times.
+ * However, extent ordering is actually kept track of separately, and there
+ * situations during insertion into a buffer where extra work is necessary to
+ * maintain extent ordering.  Specifically, when there are both MKRO_BEFORE and
+ * MKRO_AFTER markers at the insertion position, one set or the other of the
+ * extents corresponding to the markers needs to be removed, then reinserted.
+ *
+ * In order to support detachable extents, it is necessary to iterate through
+ * either the MKRO_BEFORE or MKRO_AFTER markers at the deletion point and remove
+ * any detachable extents that have shrunk to zero length.
+ *
  ******************************************************************************/
 
 #include "../include/modslate.h"
