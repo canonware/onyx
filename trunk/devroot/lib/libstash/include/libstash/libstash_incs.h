@@ -53,7 +53,6 @@
 #include "pezz.h"
 #include "arena.h"
 #include "bhp.h"
-#include "matrix.h"
 #include "res.h"
 #include "treen.h"
 #include "mq.h"
