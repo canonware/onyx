@@ -84,7 +84,6 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(executeonly),
 	ENTRY(exit),
 	ENTRY(exp),
-	ENTRY(false),
 	ENTRY(file),
 	ENTRY(filenameforall),
 	ENTRY(fileposition),
@@ -119,7 +118,6 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(noaccess),
 	ENTRY(not),
 	ENTRY(notify),
-	ENTRY(null),
 	ENTRY(or),
 	ENTRY(pop),
 	ENTRY(print),
@@ -163,7 +161,6 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(sym_rb),
 	ENTRY(timedwait),
 	ENTRY(token),
-	ENTRY(true),
 	ENTRY(trylock),
 	ENTRY(type),
 	ENTRY(undef),
@@ -186,7 +183,7 @@ systemdict_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 	cw_uint32_t	i;
 	cw_stilo_t	name, operator;
 
-#define	NEXTRA	2
+#define	NEXTRA	5
 #define NENTRIES							\
 	(sizeof(systemdict_ops) / sizeof(struct cw_systemdict_entry))
 
@@ -204,14 +201,35 @@ systemdict_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 	}
 
 	/* Initialize entries that are not operators. */
+
+	/* globaldict. */
 	stilo_name_new(&name, a_stilt, stiln_str(STILN_globaldict),
 	    stiln_len(STILN_globaldict), TRUE);
 	stilo_dup(&operator, stilt_globaldict_get(a_stilt));
 	stilo_dict_def(a_dict, a_stilt, &name, &operator);
 
+	/* systemdict. */
 	stilo_name_new(&name, a_stilt, stiln_str(STILN_systemdict),
 	    stiln_len(STILN_systemdict), TRUE);
 	stilo_dup(&operator, stilt_systemdict_get(a_stilt));
+	stilo_dict_def(a_dict, a_stilt, &name, &operator);
+
+	/* true. */
+	stilo_name_new(&name, a_stilt, stiln_str(STILN_true),
+	    stiln_len(STILN_true), TRUE);
+	stilo_boolean_new(&operator, TRUE);
+	stilo_dict_def(a_dict, a_stilt, &name, &operator);
+
+	/* false. */
+	stilo_name_new(&name, a_stilt, stiln_str(STILN_false),
+	    stiln_len(STILN_false), TRUE);
+	stilo_boolean_new(&operator, FALSE);
+	stilo_dict_def(a_dict, a_stilt, &name, &operator);
+
+	/* null. */
+	stilo_name_new(&name, a_stilt, stiln_str(STILN_null),
+	    stiln_len(STILN_null), TRUE);
+	stilo_null_new(&operator);
 	stilo_dict_def(a_dict, a_stilt, &name, &operator);
 
 #ifdef _LIBSTIL_DBG
@@ -453,36 +471,43 @@ systemdict_p_bind(cw_stilo_t *a_proc, cw_stilt_t *a_stilt)
 				systemdict_p_bind(el, a_stilt);
 			break;
 		case STILOT_NAME:
-			if ((stilt_dict_stack_search(a_stilt, el, val) == FALSE)
-			    && stilo_type_get(val) == STILOT_OPERATOR) {
-				cw_uint32_t	j;
+			if (stilt_dict_stack_search(a_stilt, el, val) ==
+			    FALSE) {
+				if (stilo_type_get(val) == STILOT_OPERATOR) {
+					cw_uint32_t	j;
 
 #define	NFASTOPS							\
 	(sizeof(systemdict_fastops) / sizeof(struct cw_systemdict_entry))
 
-				/*
-				 * If val can be converted to a fastop, do so.
-				 */
-				for (j = 0; j < NFASTOPS; j++) {
-					if (stilo_operator_f(val) ==
-					    systemdict_fastops[j].op_f) {
-						stilo_dup(el, val);
-						/* XXX API abuse. */
-						el->fast_op = TRUE;
-						el->op_code =
-						    systemdict_fastops[j].stiln;
-						break;
+					/*
+					 * If val can be converted to a fastop,
+					 * do so.
+					 */
+					for (j = 0; j < NFASTOPS; j++) {
+						if (stilo_operator_f(val) ==
+						    systemdict_fastops[j].op_f) {
+							stilo_dup(el, val);
+							/* XXX API abuse. */
+							el->fast_op = TRUE;
+							el->op_code =
+							    systemdict_fastops[j].stiln;
+							break;
+						}
 					}
-				}
-				/*
-				 * If val isn't a fastop, still convert the name
-				 * to an operator.
-				 */
-				if (j == NFASTOPS) {
+					/*
+					 * If val isn't a fastop, still convert
+					 * the name to an operator.
+					 */
+					if (j == NFASTOPS) {
+						/* Replace el with val. */
+						stilo_dup(el, val);
+					}
+#undef NFASTOPS
+				} else if (stilo_attrs_get(val) !=
+				    STILOA_EXECUTABLE) {
 					/* Replace el with val. */
 					stilo_dup(el, val);
 				}
-#undef NFASTOPS
 			}
 		default:
 		}
@@ -1172,17 +1197,6 @@ systemdict_exp(cw_stilt_t *a_stilt)
 		r *= stilo_integer_get(a);
 	stilo_integer_set(a, r);
 	stils_pop(ostack);
-}
-
-void
-systemdict_false(cw_stilt_t *a_stilt)
-{
-	cw_stils_t	*ostack;
-	cw_stilo_t	*stilo;
-
-	ostack = stilt_ostack_get(a_stilt);
-	stilo = stils_push(ostack);
-	stilo_boolean_new(stilo, FALSE);
 }
 
 void
@@ -2147,17 +2161,6 @@ void
 systemdict_notify(cw_stilt_t *a_stilt)
 {
 	_cw_error("XXX Not implemented");
-}
-
-void
-systemdict_null(cw_stilt_t *a_stilt)
-{
-	cw_stils_t	*ostack;
-	cw_stilo_t	*stilo;
-
-	ostack = stilt_ostack_get(a_stilt);
-	stilo = stils_push(ostack);
-	stilo_null_new(stilo);
 }
 
 void
@@ -3128,17 +3131,6 @@ void
 systemdict_token(cw_stilt_t *a_stilt)
 {
 	_cw_error("XXX Not implemented");
-}
-
-void
-systemdict_true(cw_stilt_t *a_stilt)
-{
-	cw_stils_t	*ostack;
-	cw_stilo_t	*stilo;
-
-	ostack = stilt_ostack_get(a_stilt);
-	stilo = stils_push(ostack);
-	stilo_boolean_new(stilo, TRUE);
 }
 
 void
