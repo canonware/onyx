@@ -1797,8 +1797,11 @@ mkr_p_insert(cw_mkr_t *a_mkr)
     cw_bufp_t *bufp = a_mkr->bufp;
     cw_mkr_t *next;
 
+    cw_assert(a_mkr->mnode.rbn_par == rb_tree_nil(&bufp->mtree));
+    cw_assert(a_mkr->mnode.rbn_left == rb_tree_nil(&bufp->mtree));
+    cw_assert(a_mkr->mnode.rbn_right == rb_tree_nil(&bufp->mtree));
+
     /* Insert into tree. */
-    rb_node_new(&bufp->mtree, a_mkr, mnode);
     rb_insert(&bufp->mtree, a_mkr, mkr_p_comp, cw_mkr_t, mnode);
 
     /* Insert into list.  Make sure that the tree and list orders are the same.
@@ -1911,6 +1914,7 @@ fprintf(stderr, "%s:%d:%s():\n", __FILE__, __LINE__, __FUNCTION__);
 	mkr->bufp = a_prevp;
 	mkr->ppos += a_prevp->gap_off;
 	mkr->pline += a_prevp->nlines;
+	rb_node_new(&a_prevp->mtree, mkr, mnode);
 	mkr_p_insert(mkr);
     }
 
@@ -2001,6 +2005,7 @@ fprintf(stderr, "%s:%d:%s():\n", __FILE__, __LINE__, __FUNCTION__);
 	mkr->bufp = a_nextp;
 	mkr->ppos -= CW_BUFP_SIZE - nmove;
 	mkr->pline -= bufp->nlines - nmovelines;
+	rb_node_new(&a_nextp->mtree, mkr, mnode);
 	mkr_p_insert(mkr);
     }
 
@@ -2107,6 +2112,7 @@ mkr_p_split_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
 	mmkr->bufp = nextp;
 	fprintf(stderr, "%s:%d:%s() pline: %llu --> %llu\n", __FILE__, __LINE__, __FUNCTION__, mkr->pline, mkr->pline - bufp->nlines);
 	mmkr->pline -= bufp->nlines;
+	rb_node_new(&nextp->mtree, mmkr, mnode);
 	mkr_p_insert(mmkr);
     }
 
@@ -2288,9 +2294,7 @@ mkr_new(cw_mkr_t *a_mkr, cw_buf_t *a_buf)
     a_mkr->bufp = bufp;
     a_mkr->ppos = bufp_p_pos_b2p(bufp, 1);
     a_mkr->pline = 0;
-    /* mnode doesn't need to be initialized, since it is always initialized
-     * before insertion in mkr_p_insert(). */
-/*     rb_node_new(&bufp->mtree, a_mkr, mnode); */
+    rb_node_new(&bufp->mtree, a_mkr, mnode);
     ql_elm_new(a_mkr, mlink);
 
 #ifdef CW_DBG
@@ -2316,6 +2320,7 @@ mkr_dup(cw_mkr_t *a_to, const cw_mkr_t *a_from)
     a_to->ppos = a_from->ppos;
     a_to->pline = a_from->pline;
 
+    rb_node_new(&a_to->bufp->mtree, a_to, mnode);
     mkr_p_insert(a_to);
 }
 
@@ -2491,6 +2496,7 @@ mkr_line_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence)
 /* 	    line, bufp_p_line(bufp)); */
 	fprintf(stderr, "%s:%d:%s() pline: %llu --> %llu\n", __FILE__, __LINE__, __FUNCTION__, a_mkr->pline, line - bufp_p_line(bufp));
     a_mkr->pline = line - bufp_p_line(bufp);
+    rb_node_new(&bufp->mtree, a_mkr, mnode);
 
     /* Insert a_mkr into the bufp's tree and list. */
     mkr_p_insert(a_mkr);
@@ -2615,6 +2621,7 @@ mkr_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence)
     fprintf(stderr, "%s:%d:%s(): pline: %llu --> %u\n", __FILE__, __LINE__, __FUNCTION__, a_mkr->pline, bufp_p_ppos2pline(bufp, a_mkr->ppos));
     
     a_mkr->pline = bufp_p_ppos2pline(bufp, a_mkr->ppos);
+    rb_node_new(&bufp->mtree, a_mkr, mnode);
 
     /* Insert a_mkr into the bufp's tree and list. */
     mkr_p_insert(a_mkr);
