@@ -2979,7 +2979,7 @@ EOF
 
 fi
 
-if test "x$build_ncurses" = "xyes" ; then
+if test "x$build_modncurses" = "xyes" ; then
   for ac_hdr in ncurses.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
@@ -3023,22 +3023,67 @@ done
 
 fi
 
+if test "x$build_modnxgtk" = "xyes" ; then
+
+for ac_prog in gtk-config gtk12-config
+do
+# Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
+echo "configure:3034: checking for $ac_word" >&5
+if eval "test \"`echo '$''{'ac_cv_path_GTKCONFIG'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  case "$GTKCONFIG" in
+  /*)
+  ac_cv_path_GTKCONFIG="$GTKCONFIG" # Let the user override the test with a path.
+  ;;
+  ?:/*)			 
+  ac_cv_path_GTKCONFIG="$GTKCONFIG" # Let the user override the test with a dos path.
+  ;;
+  *)
+  IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS=":"
+  ac_dummy="$PATH"
+  for ac_dir in $ac_dummy; do 
+    test -z "$ac_dir" && ac_dir=.
+    if test -f $ac_dir/$ac_word; then
+      ac_cv_path_GTKCONFIG="$ac_dir/$ac_word"
+      break
+    fi
+  done
+  IFS="$ac_save_ifs"
+  ;;
+esac
+fi
+GTKCONFIG="$ac_cv_path_GTKCONFIG"
+if test -n "$GTKCONFIG"; then
+  echo "$ac_t""$GTKCONFIG" 1>&6
+else
+  echo "$ac_t""no" 1>&6
+fi
+
+test -n "$GTKCONFIG" && break
+done
+
+  
+fi
+
 if test "x$build_proxy" = "xyes" ; then
   for ac_hdr in netinet/ip_nat.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
-echo "configure:3032: checking for $ac_hdr" >&5
+echo "configure:3077: checking for $ac_hdr" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 3037 "configure"
+#line 3082 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:3042: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:3087: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -3335,6 +3380,7 @@ s%@FIG2DEV@%$FIG2DEV%g
 s%@LATEX2HTML@%$LATEX2HTML%g
 s%@MAKEINDEX@%$MAKEINDEX%g
 s%@VERIFY@%$VERIFY%g
+s%@GTKCONFIG@%$GTKCONFIG%g
 
 CEOF
 EOF

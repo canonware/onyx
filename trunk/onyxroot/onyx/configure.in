@@ -232,8 +232,15 @@ if test "x$build_onyx" = "xyes" ; then
   AC_DEFINE_UNQUOTED(_CW_ONYX_MPATH, "$_CW_ONYX_MPATH")
 fi
 
-if test "x$build_ncurses" = "xyes" ; then
+if test "x$build_modncurses" = "xyes" ; then
   AC_CHECK_HEADERS(ncurses.h, , AC_MSG_ERROR(Cannot build without ncurses.h))
+fi
+
+if test "x$build_modnxgtk" = "xyes" ; then
+dnl  AC_PATH_PROG(GTKCONFIG, gtk-config, AC_PATH_PROG(GTKCONFIG, gtk12-config, AC_MSG_ERROR(Cannot build without gtk-config), $PATH), $PATH)
+
+AC_PATH_PROGS(GTKCONFIG, gtk-config gtk12-config, , $PATH)
+  
 fi
 
 if test "x$build_proxy" = "xyes" ; then

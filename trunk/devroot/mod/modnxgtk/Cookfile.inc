@@ -15,11 +15,6 @@
 #include-cooked [glob [objdir]/mod/modnxgtk/src/"*.d_*"]
 
 /*
- * XXX Make this a configure test.
- */
-GTKCONFIG = gtk12-config;
-
-/*
  * File lists.
  */
 
