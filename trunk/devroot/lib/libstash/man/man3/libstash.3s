@@ -115,8 +115,6 @@ with 32 bit variables.
 FreeBSD, Linux, and Solaris.  The \fBpthreads\fR library is required for the
 multi-threaded versions of \fBlibstash\fR.
 
-\"  .SH OPTIONS
-
 .SH USAGE
 Detailed usage of the various available classes is discussed in detail in other
 man pages.  Regardless of what classes are used, at least the following minimal
