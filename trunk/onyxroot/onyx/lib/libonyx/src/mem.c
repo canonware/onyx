@@ -91,7 +91,9 @@ mem_new(cw_mem_t *a_mem, cw_mem_t *a_internal)
 		mtx_delete(&retval->lock);
 #endif
 		if (retval->is_malloced)
-		mem_free(a_internal, retval);
+		{
+		    mem_free(a_internal, retval);
+		}
 	    }
 	    case 0:
 	    {
