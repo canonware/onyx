@@ -84,6 +84,11 @@ void
 modslate_buffer_dump(void *a_data, cw_nxo_t *a_thread);
 #endif
 
+#ifdef CW_BUF_VALIDATE
+void
+modslate_buffer_validate(void *a_data, cw_nxo_t *a_thread);
+#endif
+
 /* marker. */
 void
 modslate_marker(void *a_data, cw_nxo_t *a_thread);
@@ -139,6 +144,11 @@ modslate_marker_range_cut(void *a_data, cw_nxo_t *a_thread);
 #ifdef CW_BUF_DUMP
 void
 modslate_marker_dump(void *a_data, cw_nxo_t *a_thread);
+#endif
+
+#ifdef CW_BUF_VALIDATE
+void
+modslate_marker_validate(void *a_data, cw_nxo_t *a_thread);
 #endif
 
 /* extent. */
@@ -210,3 +220,13 @@ modslate_extent_detached_get(void *a_data, cw_nxo_t *a_thread);
 
 void
 modslate_extent_detach(void *a_data, cw_nxo_t *a_thread);
+
+#ifdef CW_BUF_DUMP
+void
+modslate_extent_dump(void *a_data, cw_nxo_t *a_thread);
+#endif
+
+#ifdef CW_BUF_VALIDATE
+void
+modslate_extent_validate(void *a_data, cw_nxo_t *a_thread);
+#endif

@@ -95,6 +95,9 @@ static const struct cw_modslate_entry modslate_buffer_hooks[] = {
 #ifdef CW_BUF_DUMP
     MODSLATE_ENTRY(buffer_dump),
 #endif
+#ifdef CW_BUF_VALIDATE
+    MODSLATE_ENTRY(buffer_validate),
+#endif
 
     /* marker. */
     MODSLATE_ENTRY(marker),
@@ -115,6 +118,9 @@ static const struct cw_modslate_entry modslate_buffer_hooks[] = {
     MODSLATE_ENTRY(marker_range_cut),
 #ifdef CW_BUF_DUMP
     MODSLATE_ENTRY(marker_dump),
+#endif
+#ifdef CW_BUF_VALIDATE
+    MODSLATE_ENTRY(marker_validate),
 #endif
 
     /* extent. */
@@ -141,6 +147,14 @@ static const struct cw_modslate_entry modslate_buffer_hooks[] = {
     MODSLATE_ENTRY(extent_detachable_set),
     MODSLATE_ENTRY(extent_detached_get),
     MODSLATE_ENTRY(extent_detach)
+#ifdef CW_BUF_DUMP
+    ,
+    MODSLATE_ENTRY(extent_dump)
+#endif
+#ifdef CW_BUF_VALIDATE
+    ,
+    MODSLATE_ENTRY(extent_validate),
+#endif
 };
 
 static void
@@ -829,6 +843,14 @@ modslate_buffer_dump(void *a_data, cw_nxo_t *a_thread)
     {
 	nxo_stack_pop(ostack);
     }
+}
+#endif
+
+#ifdef CW_BUF_VALIDATE
+void
+modslate_buffer_validate(void *a_data, cw_nxo_t *a_thread)
+{
+    cw_error("XXX Not implemented");
 }
 #endif
 
@@ -1810,6 +1832,14 @@ modslate_marker_dump(void *a_data, cw_nxo_t *a_thread)
 }
 #endif
 
+#ifdef CW_BUF_VALIDATE
+void
+modslate_marker_validate(void *a_data, cw_nxo_t *a_thread)
+{
+    cw_error("XXX Not implemented");
+}
+#endif
+
 /* extent. */
 #ifdef NOT_YET
 static cw_nxoe_t *
@@ -2051,3 +2081,20 @@ modslate_extent_detach(void *a_data, cw_nxo_t *a_thread)
 {
     cw_error("XXX Not implemented");
 }
+
+#ifdef CW_BUF_DUMP
+void
+modslate_extent_dump(void *a_data, cw_nxo_t *a_thread)
+{
+    cw_error("XXX Not implemented");
+}
+#endif
+
+#ifdef CW_BUF_VALIDATE
+void
+modslate_extent_validate(void *a_data, cw_nxo_t *a_thread)
+{
+    cw_error("XXX Not implemented");
+}
+#endif
+
