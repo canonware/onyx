@@ -73,16 +73,80 @@ clopt <
     #
     #argv #instance :parse #remainder
     $parse {
-	# Iterate over #argv.  If a string starts with `--', split on `='.  If a
-	# string starts with only one `-', use the packing mode to decide how to
-	# parse the string.
-	# XXX
+	# Iterate over #argv (skip element 0).
+	1 {dup 3 idup length lt}{
+	    #argv #instance #i
+
+	    # Set index.
+	    over data $index 2 idup put
+
+	    # Reset arg.
+	    over data $arg null put
+
+	    2 idup over get
+	    #argv #instance #i #elm
+
+	    dup `^--' match {
+		# Long format option.
+		dup `=' 2 split
+		#argv #instance #i #elm #splitarr
+		dup length 2 eq {
+		    # Option is of the form: --opt=arg.
+		    nip
+		    dup 0 get exch 1 get
+		    #argv #instance #i #opt #arg
+		    3 idup data $arg dn put
+		}{
+		    # No argument.
+		    pop
+		} ifelse
+		#argv #instance #i #opt
+
+		2 idup data $handlers get
+		#argv #instance #i #opt #handlers
+		dup 2 idup known {
+		    # Handler defined.
+		    exch get
+		    #argv #instance #i #[arg? handler]
+		    1 get 2 idup exch
+		    #argv #instance #i #instance #handler
+		    eval
+		    #argv #instance #i
+		}{
+		    # No handler defined.
+		    pop
+		    #argv #instance #i
+		    exit
+		} ifelse
+	    }{
+	    dup `^-' match {
+		# Short format option.
+		# XXX
+	    }{
+		# Not an option.
+		pop
+		#argv #instance #i
+		exit
+	    } ifelse
+	    } ifelse
+	    #argv #instance #i
+
+	    # Increment index.
+	    inc
+	} while
+	#argv #instance #i
+	2 idup length over sub
+	#argv #instance #i #remlen
+	2 ipop
+	getinterval
+	#remainder
     } bind
 
     # Return the current argv index.  This is provided to aid option handlers.
     #
     #instance :index_get #index
     $index_get {
+	data $index get
     } bind
 
     # Return the current option argument.  This is provided to aid option
@@ -90,5 +154,6 @@ clopt <
     #
     #instance :arg_get #arg
     $arg_get {
+	data $arg get
     } bind
 > setmethods
