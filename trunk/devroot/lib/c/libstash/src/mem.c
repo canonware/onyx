@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 136 $
- * $Date: 1998-07-10 13:11:48 -0700 (Fri, 10 Jul 1998) $
+ * $Revision: 199 $
+ * $Date: 1998-09-07 09:48:59 -0700 (Mon, 07 Sep 1998) $
  *
  * <<< Description >>>
  *
@@ -21,18 +21,6 @@
 #include <mem_priv.h>
 
 /****************************************************************************
- * <<< Function >>>
- *
- *
- *
- * <<< Arguments >>>
- *
- *
- *
- * <<< Return Value >>>
- *
- *
- *
  * <<< Description >>>
  *
  *
@@ -51,18 +39,6 @@ mem_new()
 }
 
 /****************************************************************************
- * <<< Function >>>
- *
- *
- *
- * <<< Arguments >>>
- *
- *
- *
- * <<< Return Value >>>
- *
- *
- *
  * <<< Description >>>
  *
  *
@@ -78,18 +54,6 @@ mem_delete(cw_mem_t * a_mem_o)
 }
 
 /****************************************************************************
- * <<< Function >>>
- *
- *
- *
- * <<< Arguments >>>
- *
- *
- *
- * <<< Return Value >>>
- *
- *
- *
  * <<< Description >>>
  *
  *
@@ -105,25 +69,15 @@ mem_malloc(cw_mem_t * a_mem_o, size_t a_size)
   retval = malloc(a_size);
   if (retval == NULL)
   {
-    _cw_error("malloc() returned a NULL pointer.");
+    log_eprintf(g_log_o, __FILE__, __LINE__, "mem_malloc",
+		"malloc(%d) returned NULL\n", a_size);
+    abort();
   }
 
   return retval;
 }
 
 /****************************************************************************
- * <<< Function >>>
- *
- *
- *
- * <<< Arguments >>>
- *
- *
- *
- * <<< Return Value >>>
- *
- *
- *
  * <<< Description >>>
  *
  *
@@ -140,25 +94,15 @@ mem_calloc(cw_mem_t * a_mem_o, size_t a_number,
   retval = calloc(a_number, a_size);
   if (retval == NULL)
   {
-    _cw_error("calloc() returned a NULL pointer.");
+    log_eprintf(g_log_o, __FILE__, __LINE__, "mem_calloc",
+		"calloc(%d, %d) returned NULL\n", a_number, a_size);
+    abort();
   }
 
   return retval;
 }
 
 /****************************************************************************
- * <<< Function >>>
- *
- *
- *
- * <<< Arguments >>>
- *
- *
- *
- * <<< Return Value >>>
- *
- *
- *
  * <<< Description >>>
  *
  *
@@ -175,25 +119,15 @@ mem_realloc(cw_mem_t * a_mem_o, void * a_ptr, size_t a_size)
   retval = realloc(a_ptr, a_size);
   if (retval == NULL)
   {
-    _cw_error("realloc() returned a NULL pointer.");
+    log_eprintf(g_log_o, __FILE__, __LINE__, "mem_realloc",
+		"realloc(%p, %d) returned NULL\n", a_ptr, a_size);
+    abort();
   }
   
   return retval;
 }
 
 /****************************************************************************
- * <<< Function >>>
- *
- *
- *
- * <<< Arguments >>>
- *
- *
- *
- * <<< Return Value >>>
- *
- *
- *
  * <<< Description >>>
  *
  *
