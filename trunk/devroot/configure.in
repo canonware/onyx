@@ -11,21 +11,21 @@ objdir=.
 AC_SUBST(objdir)
 
 cfghdrs=
-targets=
+bins=
+libs=
 
-dnl Look for libraries.
-CW_BUILD_LIB(libstash, lib_stash)
-CW_BUILD_LIB(libsock, lib_sock)
-CW_BUILD_LIB(libedit, lib_edit)
-CW_BUILD_LIB(libficl, lib_ficl)
+dnl Look for libraries.  Order matters.  They should appear in an order that
+dnl works on the link line (-lstil -ledit -lsock -lstash).
 CW_BUILD_LIB(libstil, lib_stil)
+CW_BUILD_LIB(libedit, lib_edit)
+CW_BUILD_LIB(libsock, lib_sock)
+CW_BUILD_LIB(libstash, lib_stash)
 
 dnl Look for binaries.
 CW_BUILD_BIN(blow, bin_blow)
 CW_BUILD_BIN(cover, bin_cover)
 CW_BUILD_BIN(edittest, bin_edittest)
 CW_BUILD_BIN(echos, bin_echos)
-CW_BUILD_BIN(ficl, bin_ficl)
 CW_BUILD_BIN(ncat, bin_ncat)
 CW_BUILD_BIN(proxy, bin_proxy)
 CW_BUILD_BIN(stil, bin_stil)
@@ -35,6 +35,8 @@ CW_BUILD_BIN(xvx, bin_xvx)
 
 AC_CONFIG_HEADER($cfghdrs)
 AC_SUBST(cfghdrs)
+AC_SUBST(bins)
+AC_SUBST(libs)
 
 AC_CANONICAL_HOST
 case "${host}" in
@@ -176,22 +178,17 @@ AC_MSG_RESULT(objdir   : ${srcdir})
 AC_MSG_RESULT(srcdir   : ${objdir})
 AC_MSG_RESULT(prefix   : ${prefix})
 AC_MSG_RESULT()
-AC_MSG_RESULT(Targets  :${targets})
+AC_MSG_RESULT(libs     :${libs})
+AC_MSG_RESULT(bins     :${bins})
 AC_MSG_RESULT(===============================================================================)
 
 dnl Process the following files.
 
 AC_OUTPUT(Cookfile \
 test/verify \
-lib/c/libficl/softwords/softcore.pl \
 )
 
 dnl autoconf doesn't keep the execute bit if it's set for the input file, so do
 dnl it manually.
 echo chmod u+x $objdir/test/verify
 chmod u+x $objdir/test/verify
-
-if test "x$build_libficl" = "xyes" ; then
-  echo chmod u+x $objdir/lib/c/libficl/softwords/softcore.pl
-  chmod u+x $objdir/lib/c/libficl/softwords/softcore.pl
-fi
