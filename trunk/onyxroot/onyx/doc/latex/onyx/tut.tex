@@ -166,7 +166,7 @@ used as a place to store objects, pass arguments into operators and procedures,
 and return results.
 
 Onyx is a postfix language, which means that code is written such that operands
-preceed operators.  For example, the following code Calculates $5 x (3 + 4)$ and
+precede operators.  For example, the following code Calculates $5 x (3 + 4)$ and
 prints the result:
 
 \begin{verbatim}
@@ -179,18 +179,92 @@ onyx:0>
 There are no parentheses to clarify operator precedence, because precedence is
 implicit in the code.
 
+Stacks are either written bottom to top on one line, or top to bottom on
+separate lines, as in the following examples.  The example stack contains the
+numbers 0, 1, and 2, where 0 is the top object and 2 is the bottom object:
+
+\begin{verbatim}
+onyx:0> 2 1 0
+onyx:3> ostack 1 sprint
+(2 1 0)
+onyx:3> pstack
+0
+1
+2
+onyx:3>
+\end{verbatim}
+
 Learning to efficiently (and accurately) manage stacks is a mind-warping process
 that no amount of reading is likely to impress upon the reader.  There are
-general concepts presented here, but ultimately, the reader will have to write
-a good bit of code to get a handle on stacks.  Even the author of Onyx found
-himself stumbling over stacks well after Onyx was complete, and he was already
-warped beforehand.  The problem seems to be that programmers learn to think in a
-different way that doesn't exercise the parts of the brain necessary for stack
-manipulation.  
+general concepts presented here, but ultimately, the reader will have to write a
+good bit of code to get a handle on stacks.  Even the author of Onyx found
+himself stumbling over stacks well after Onyx was complete, despite limited
+exposure to stack-based languages beforehand.  The problem seems to be that
+programmers learn to think in a different way that doesn't exercise the parts of
+the brain necessary for stack manipulation.  Some people might argue that stack
+manipulation is the job of the compiler.  In any case, stack manipulation is an
+acquired skill that requires practice.
 
-XXX finish
+\subsection{Using stacks as queues}
+
+Stacks are implemented such that access to the top or bottom is very efficient,
+and efficiency decreases linearly, the farther into the stack an operation has
+to iterate.  Since pushing and popping is efficient for both ends of stacks,
+this means that stacks are suitable for use as queues.
+
+\subsection{Efficiency issues}
+
+Since stacks are stored internally as a doubly linked list, the cost of indexed
+access to an object on a stack is proportional to its offset from the top or
+bottom of the stack, depending on the operator being used.  Therefore, stacks
+are not ideal in situations where arbitrary access to an object is a common
+operation.  An array is a better choice for indexed access, and a dictionary is
+a better choice for keyed access.
+
+Indexed access doesn't just apply to operators like
+\htmlref{\onyxop{}{idup}{}}{systemdict:idup}; operators like
+\htmlref{\onyxop{}{nup}{}}{systemdict:nup} and
+\htmlref{\onyxop{}{roll}{}}{systemdict:roll} are also affected.  However,
+operators such as \htmlref{\onyxop{}{rot}{}}{systemdict:rot} are not as heavily
+impacted, since they only need to index into the stack by the number of
+positions to rotate.
 
 \section{Dictionaries}
+
+Dictionaries are known by various other names, including hashes and associative
+arrays.  Dictionaries in Onyx associate keys with values.  Keys and values can
+be of any type, but for each dictionary, all keys are unique.  For example, the
+following dictionary cannot exist:
+
+\begin{verbatim}
+<
+    42 `Some value'
+    42 `Another value'
+>
+\end{verbatim}
+
+To demonstrate this, the following example creates a dictionary with the first
+key/value pair listed above, then inserts the second key/value pair.
+
+\begin{verbatim}
+onyx:0> <42 `Some value'>
+onyx:1> dup 1 sprint
+<42 `Some value'>
+onyx:1> dup 42 `Another value' put
+onyx:1> dup 1 sprint
+<42 `Another value'>
+onyx:1>
+\end{verbatim}
+
+When the second key/value pair is inserted, it replaces the first pair.
+
+\subsection{Efficiency issues}
+
+Although dictionaries can handle keys of any type, they are optimized to use
+names as keys.  The performance penalty for other key types is slight, but can
+be exacerbated by the cost of comparison for other types.  Names comparison is a
+constant time operation, but string comparison is not.  Therefore, use names
+rather than strins whenever possible.
 
 \section{Code organization}
 \subsection{Procedures}
