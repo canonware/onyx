@@ -353,7 +353,33 @@ Each stil thread has three program-visible stacks associated with it:
 
 \section{Execution}
 
+During stil interpreter initialization, an object file object corresponding to
+stdin is usually pushed onto the execution stack.  However, depending on how the
+interpreter is invoked, the initial object on the execution stack may be a
+different file than stdin or an executable string.  The interpreter loop can be
+recursively invoked.  For example, if the following code is executed, the eval
+operator recursively invokes the interpreter loop to interpret the string.
+\begin{verbatim}
+(2 2 add) cvx eval
+\end{verbatim}
+
+The depth of the execution stack directly corresponds to the recursion depth of
+the interpreter.  Execution stack depth is limited in order to catch unbounded
+recursion.
+
 \section{Error handling}
+
+The error handling mechanisms in stil are simple but flexible.  When an error
+occurs, the following operations are performed:
+\begin{enumerate}
+\item{Find an error handler in errordict corresponding to the current error.}
+\item{Unless the error is an interrupt or a timeout, push the object whose
+execution caused the error onto the operand stack.}
+\item{Execute the error handler.}
+\end{enumerate}
+
+The standard error handlers all execute errordict's stop operator as the last
+step of handling the error.
 
 \section{Threads}
 \subsection{Implicit synchronization}
@@ -365,7 +391,330 @@ Each stil thread has three program-visible stacks associated with it:
 
 \section{Dictionary reference}
 \subsection{Operator summary}
-Naming conventions.
+
+All operators built in to stil have corresponding names that are composed
+intirely of lower case letters.  In order to avoid any possibility of namespace
+collisions in future versions of stil, use at least one character that is not a
+lower case letter in names (for example, capital letters, numbers, underscore,
+etc.).
+
+\begin{longtable}{|r|l|l|p{4in}|}
+\caption[Operator summary]{Operator summary by functional group} \\
+\hline
+Input(s) & Operator & Output(s) & Description \\
+\hline \hline \endfirsthead
+\caption[]{\emph{continued}} \\
+\hline
+Input(s) & Operator & Output(s) & Description \\
+\hline \hline \endhead
+\hline
+\multicolumn{4}{r}{\emph{Continued on next page...}} \endfoot
+\hline \endlastfoot
+\multicolumn{4}{|l|}{Operand stack operators} \\
+\hline \hline
+XXX & roll & XXX & XXX \\
+\hline
+XXX & mark & XXX & XXX \\
+\hline
+XXX & index & XXX & XXX \\
+\hline
+any & pop & - & Pop an object off the operand stack. \\
+\hline
+XXX & clear & XXX & XXX \\
+\hline
+XXX & cleartomark & XXX & XXX \\
+\hline
+XXX & count & XXX & XXX \\
+\hline
+XXX & counttomark & XXX & XXX \\
+\hline
+XXX & dup & XXX & XXX \\
+\hline
+XXX & exch & XXX & XXX \\
+\hline \hline
+\multicolumn{4}{|l|}{Execution, control, and execution stack operators} \\
+\hline \hline
+XXX & waitpid & XXX & XXX \\
+\hline
+XXX & system & XXX & XXX \\
+\hline
+XXX & stopped & XXX & XXX \\
+\hline
+XXX & start & XXX & XXX \\
+\hline
+XXX & stop & XXX & XXX \\
+\hline
+XXX & run & XXX & XXX \\
+\hline
+XXX & repeat & XXX & XXX \\
+\hline
+XXX & realtime & XXX & XXX \\
+\hline
+XXX & quit & XXX & XXX \\
+\hline
+XXX & nsleep & XXX & XXX \\
+\hline
+XXX & loop & XXX & XXX \\
+\hline
+XXX & if & XXX & XXX \\
+\hline
+XXX & ifelse & XXX & XXX \\
+\hline
+XXX & fork & XXX & XXX \\
+\hline
+XXX & for & XXX & XXX \\
+\hline
+XXX & exit & XXX & XXX \\
+\hline
+XXX & exec & XXX & XXX \\
+\hline
+XXX & estack & XXX & XXX \\
+\hline
+XXX & eval & XXX & XXX \\
+\hline
+XXX & countestack & XXX & XXX \\
+\hline \hline
+\multicolumn{4}{|l|}{Polymorphic operators} \\
+\hline \hline
+XXX & token & XXX & XXX \\
+\hline
+XXX & store & XXX & XXX \\
+\hline
+XXX & put & XXX & XXX \\
+\hline
+XXX & putinterval & XXX & XXX \\
+\hline
+XXX & length & XXX & XXX \\
+\hline
+XXX & get & XXX & XXX \\
+\hline
+XXX & getinterval & XXX & XXX \\
+\hline
+XXX & foreach & XXX & XXX \\
+\hline
+XXX & copy & XXX & XXX \\
+\hline \hline
+\multicolumn{4}{|l|}{Integer and math operators} \\
+\hline \hline
+XXX & sub & XXX & XXX \\
+\hline
+XXX & srand & XXX & XXX \\
+\hline
+XXX & rand & XXX & XXX \\
+\hline
+XXX & neg & XXX & XXX \\
+\hline
+XXX & mod & XXX & XXX \\
+\hline
+XXX & mul & XXX & XXX \\
+\hline
+XXX & exp & XXX & XXX \\
+\hline
+XXX & abs & XXX & XXX \\
+\hline
+XXX & div & XXX & XXX \\
+\hline
+XXX & add & XXX & XXX \\
+\hline \hline
+\multicolumn{4}{|l|}{String operators} \\
+\hline \hline
+XXX & string & XXX & XXX \\
+\hline \hline
+\multicolumn{4}{|l|}{Array operators} \\
+\hline \hline
+XXX & [ & XXX & XXX \\
+\hline
+XXX & ] & XXX & XXX \\
+\hline
+XXX & aload & XXX & XXX \\
+\hline
+XXX & array & XXX & XXX \\
+\hline
+XXX & astore & XXX & XXX \\
+\hline \hline
+\multicolumn{4}{|l|}{Dictionary and dictionary stack operators} \\
+\hline \hline
+XXX & gcdict & XXX & XXX \\
+\hline
+XXX & errordict & XXX & XXX \\
+\hline
+XXX & currenterror & XXX & XXX \\
+\hline
+XXX & userdict & XXX & XXX \\
+\hline
+XXX & globaldict & XXX & XXX \\
+\hline
+XXX & threaddict & XXX & XXX \\
+\hline
+XXX & where & XXX & XXX \\
+\hline
+XXX & undef & XXX & XXX \\
+\hline
+XXX & {\lt}{\lt} & XXX & XXX \\
+\hline
+XXX & {\gt}{\gt} & XXX & XXX \\
+\hline
+XXX & load & XXX & XXX \\
+\hline
+XXX & known & XXX & XXX \\
+\hline
+XXX & end & XXX & XXX \\
+\hline
+XXX & dstack & XXX & XXX \\
+\hline
+XXX & dict & XXX & XXX \\
+\hline
+XXX & def & XXX & XXX \\
+\hline
+XXX & currentdict & XXX & XXX \\
+\hline
+XXX & countdstack & XXX & XXX \\
+\hline
+XXX & begin & XXX & XXX \\
+\hline
+XXX & cleardstack & XXX & XXX \\
+\hline \hline
+\multicolumn{4}{|l|}{File and filesystem operators} \\
+\hline \hline
+XXX & truncate & XXX & XXX \\
+\hline
+XXX & unlink & XXX & XXX \\
+\hline
+XXX & write & XXX & XXX \\
+\hline
+XXX & tell & XXX & XXX \\
+\hline
+XXX & test & XXX & XXX \\
+\hline
+XXX & symlink & XXX & XXX \\
+\hline
+XXX & stat & XXX & XXX \\
+\hline
+XXX & spop & XXX & XXX \\
+\hline
+XXX & seek & XXX & XXX \\
+\hline
+XXX & renamefile & XXX & XXX \\
+\hline
+XXX & read & XXX & XXX \\
+\hline
+XXX & readline & XXX & XXX \\
+\hline
+XXX & pstack & XXX & XXX \\
+\hline
+XXX & print & XXX & XXX \\
+\hline
+XXX & open & XXX & XXX \\
+\hline
+XXX & mkdir & XXX & XXX \\
+\hline
+XXX & link & XXX & XXX \\
+\hline
+XXX & flush & XXX & XXX \\
+\hline
+XXX & flushfile & XXX & XXX \\
+\hline
+XXX & dirforeach & XXX & XXX \\
+\hline
+XXX & currentfile & XXX & XXX \\
+\hline
+XXX & bytesavailable & XXX & XXX \\
+\hline
+XXX & chmod & XXX & XXX \\
+\hline
+XXX & chown & XXX & XXX \\
+\hline
+XXX & closefile & XXX & XXX \\
+\hline \hline
+\multicolumn{4}{|l|}{Logical and bitwise operators} \\
+\hline \hline
+XXX & xor & XXX & XXX \\
+\hline
+XXX & shift & XXX & XXX \\
+\hline
+XXX & or & XXX & XXX \\
+\hline
+XXX & not & XXX & XXX \\
+\hline
+XXX & ne & XXX & XXX \\
+\hline
+XXX & le & XXX & XXX \\
+\hline
+XXX & gt & XXX & XXX \\
+\hline
+XXX & eq & XXX & XXX \\
+\hline
+XXX & lt & XXX & XXX \\
+\hline
+XXX & ge & XXX & XXX \\
+\hline
+XXX & and & XXX & XXX \\
+\hline \hline
+\multicolumn{4}{|l|}{Type, conversion, and attribute operators} \\
+\hline \hline
+XXX & type & XXX & XXX \\
+\hline
+XXX & xcheck & XXX & XXX \\
+\hline
+XXX & lcheck & XXX & XXX \\
+\hline
+XXX & cvlit & XXX & XXX \\
+\hline
+XXX & cvn & XXX & XXX \\
+\hline
+XXX & cvrs & XXX & XXX \\
+\hline
+XXX & cvs & XXX & XXX \\
+\hline
+XXX & cvx & XXX & XXX \\
+\hline \hline
+\multicolumn{4}{|l|}{Threading and synchronization operators} \\
+\hline \hline
+XXX & wait & XXX & XXX \\
+\hline
+XXX & thread & XXX & XXX \\
+\hline
+XXX & timedwait & XXX & XXX \\
+\hline
+XXX & unlock & XXX & XXX \\
+\hline
+XXX & yield & XXX & XXX \\
+\hline
+XXX & trylock & XXX & XXX \\
+\hline
+XXX & signal & XXX & XXX \\
+\hline
+XXX & self & XXX & XXX \\
+\hline
+XXX & setlocking & XXX & XXX \\
+\hline
+XXX & mutex & XXX & XXX \\
+\hline
+XXX & lock & XXX & XXX \\
+\hline
+XXX & join & XXX & XXX \\
+\hline
+XXX & detach & XXX & XXX \\
+\hline
+XXX & currentlocking & XXX & XXX \\
+\hline
+XXX & broadcast & XXX & XXX \\
+\hline
+XXX & condition & XXX & XXX \\
+\hline \hline
+\multicolumn{4}{|l|}{Miscellaneous operators} \\
+\hline \hline
+XXX & version & XXX & XXX \\
+\hline
+XXX & product & XXX & XXX \\
+\hline
+XXX & promptstring & XXX & XXX \\
+\hline
+XXX & handleerror & XXX & XXX \\
+\hline
+XXX & bind & XXX & XXX \\
+\end{longtable}
+
 \subsection{currenterror}
 \subsection{envdict}
 \subsection{errordict}
