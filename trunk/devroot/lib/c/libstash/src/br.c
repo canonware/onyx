@@ -8,93 +8,213 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 184 $
- * $Date: 1998-08-29 21:04:44 -0700 (Sat, 29 Aug 1998) $
+ * $Revision: 185 $
+ * $Date: 1998-08-30 22:42:04 -0700 (Sun, 30 Aug 1998) $
  *
  * <<< Description >>>
  *
- * Block repository (br) implementation.  The br consists of four distinct
- * sections, which are spread across multiple files.  Logically, the br
- * looks like:
+ *  Block repository (br) implementation.
  *
- * /----------------------------------\
+ * << Summary of acronyms >>
+ *
+ * vaddr     : virtual address (block repository address space)
+ * paddr     : physical address (block repository address space)
+ * BS        : block size
+ * V2P       : vaddr to paddr map
+ * P2V       : paddr to vaddr map
+ * TB        : temporary buffer space
+ * DS        : data space
+ * V2P_BASE  : base address of V2P
+ * P2V_BASE  : base address of P2V
+ * TB_BASE   : base address of TB
+ * DS_BASE   : base address of DS
+ * 
+ * << Logical br layout >>
+ *
+ *  Section name                        paddr
+ *  ------------                        -----
+ *
+ * /----------------------------------\ V2P_BASE == 0x0000000000000000
  * |                                  |
- * | config space (CS)                |
+ * | vaddr --> paddr map              |
+ * | and vaddr --> paddr map snapshot |
+ * | (V2P)                            |
  * |                                  |
- * |----------------------------------| 0x0000000000000000
+ * |----------------------------------| P2V_BASE == V2P_BASE + (2^67 / BS)
  * |                                  |
- * | v_addr lookup table (VLT)        |
+ * | paddr --> vaddr map              |
+ * | (P2V)                            |
  * |                                  |
+ * |----------------------------------| TB_BASE == P2V_BASE + (2^66 / BS)
  * |                                  |
- * |----------------------------------| (2^64 / (8 * page_size + 1)) 
- * |                                  | div page_size
- * | data blocks (PDB)                |
+ * | temporary buffers                |
+ * | (TB)                             |
  * |                                  |
+ * :                                  :
+ * :                                  :
+ * :                                  :
+ * :                                  :
  * |                                  |
+ * |----------------------------------| 0x8000000000000000
  * |                                  |
+ * | data space                       |
+ * | (DS)                             |
  * |                                  |
- * |                                  |
- * |                                  |
- * |                                  |
- * |----------------------------------|
- * |                                  |
- * | v_addr lookup table cache (VLTC) |
+ * :                                  :
+ * :                                  :
+ * :                                  :
+ * :                                  :
+ * :                                  :
  * |                                  |
  * \----------------------------------/ 0xffffffffffffffff
  *
- * However, the config space is actually a separate file, and the remainder
- * of the br is composed of one or more plain files and raw devices.  These
- * sections are mapped into a unified address space.  That is, files and
- * devices are mapped into an address space that the br sits on top of.  It
- * is possible to have unmapped holes in the br_addr space, and mappings
- * can overlap.
+ * << Example values for BS == 8kB (2^13) >>
  *
- * In order to prevent having to shuffle sections around to allow expansion
- * and contraction, the sections are set at fixed br_addr's during creation
- * of the repository.  The VLTC starts at the top of the address space
- * (0xffffffffffffffff) and grows downward.  Since we know in advance the
- * following:
+ * V2P_BASE  == 0x0000000000000000
+ * P2V_BASE  == 0x0040000000000000
+ * TB_BASE   == 0x0060000000000000
+ * DS_BASE   == 0x8000000000000000
  *
- *       (VLT + PDB + VLTC) <= 2^64 bytes
- *                     VLTC >= 0 bytes
- *              sizeof(VLT) == (sizeof(PDB) / page_size) / 8
+ * << Summary of br features >>
  *
- * we can calculate the base address of PDB:
+ * The br is essentially a filesystem, with some simplifications, and some
+ * additions.  Through the help of the block repository file (brf) class, a
+ * simple file API is available.  The br class only deals with data blocks
+ * though.
  *
- *       base_addr(PDB) == sizeof(VLT) == ((2^64 - VLTC) / (8 * page_size + 1))
- *                                        div page_size
+ * Most of the complexity of the br is necessitated by the need for
+ * atomicity guarantees on block updates.  All block writes are done in
+ * such a way that other than due to media failure, committed data is never
+ * lost, even during unexpected crashes.  This necessarily has a large
+ * performance impact, so the br also allows relaxation of these
+ * constraints for cases where performance is more important than
+ * recovery.  Both write policies can be used at the same time without any
+ * worries of br corruption, though data can be lost during crashes for
+ * those transactions that use the relaxed commit API.
  *
- * and
+ * The br provides complex locking modes for blocks.  This facilitates
+ * implementation of complex concurrent algorithms such as the JOE-tree
+ * (jt) class implements, as well as the brf class mentioned above.
  *
- *       sizeof(PDB) == (((2^64 - VLTC) * 8 * page_size) / (8 * page_size + 1))
- *                      div page_size
+ * << Virtual address lookups >>
  *
- * So, assuming a page size of 8kB and VLTC of 0B:
+ * Virtual addresses are broken into two components.  The example below
+ * assumes 8kB pages.
  *
- *   base_addr(PDB) == 281470681800704 == FFFF0000E000
- *   sizeof(PDB) == 18446462603027742720 == 0xffff0000ffff0000
+ * bit
+ * 63 62                                                    13   12           0
+ *  \ |                                                       \ /             |
+ *   ?XXX XXXX XXXX XXXX XXXX XXXX XXXX XXXX XXXX XXXX XXXX XXXx xxxx xxxx xxxx
  *
- ****************************************************************************
+ * The least significant 13 (x) bits are the offset into the block.  The
+ * most significant 50 (X) bits are the virtual block address.  Bit 63 is
+ * always 0, since the data blocks start at 0x8000000000000000, and there
+ * can never be enough physical blocks to require a 1 in the most
+ * significant bit of the vaddr.  Since the minimum block size in the br is
+ * 512 bytes, the least significant 8 bytes in the V2P and P2V translations
+ * are never used.  This leaves at least 9 bits per translation available
+ * for additional metadata.
  *
- * This hard coding of section offsets if all fine and good, except that
- * there are some pretty definite holes in the address space.  Since we
- * want the option of using a single backing store (bs) (file or raw
- * device) for all three sections, there needs to be a way of mapping
- * chunks of a bs to separate address ranges.
+ * << Mapping of block repository backing stores (brbs) >>
  *
- * So, that is what br does.  Each backing store is mapped to one or more
- * br_addr ranges.
+ * The brbs class encapsulates the fundamental operations on files and raw
+ * devices that are necessary for reading and writing persistent data.  The
+ * br uses brbs instances by mapping them into the paddr space.  brbs
+ * instances are of constant size, and they can be broken up and mapped
+ * into multiple portions of the paddr space.
  *
- * Note that once a portion of the address range dedicated to the VLT is
- * mapped, it cannot be unmapped.  The only way to remove a backing store
- * that is partially or completely mapped to the vtl address range is to
- * first map one or more backing stores to create a redundant copy of that
- * portion of the VLT that we wish to remove a backing store mapping for.
+ * There can be one overlapping mappings at any given time in the V2P.
+ * This is important because it allows consolidation of mappings as a br
+ * evolves.  Say for example that an installation starts off with only a
+ * relatively small portion of the V2P map backed by a brbs.  Sometime
+ * later, additional storage is needed, so more of the V2P map is backed by
+ * a different brbs.  If this goes on for a while, it may be desireable to
+ * replace the multiple small backings with one big backing.  Since we
+ * can't just delete the V2P and start over, instead we can add an
+ * additional backing to the entire range.  Once that backing is committed
+ * (all data is also stored on the new backing), the other backings can be
+ * removed.
  *
- * Backing stores that have been mapped entirely within the PDB can be
- * removed from the repository by moving all valid blocks to other backing
- * stores and changing the logical to physical address mappings accordingly.
- * 
+ * Each brbs instance is responsible for mapping the relevant portion of
+ * the P2B, so there is no need for overlapping mappings there.  For the
+ * DS, other algorithms can be employed to empty a backing, such as moving
+ * data blocks from one backing to another and reflecting the moves in the
+ * maps.  However, for the V2P, there is no other way to consolidate and
+ * remove backings.
+ *
+ * << Brief explanation of the br components and logical sections >>
+ *
+ * The br physically consists of the resource file (triple redundant) and
+ * one or more backing stores.  The backing stores are mapped into the br's
+ * paddr space.  The paddr space is logically divided into 5 sections.
+ * Following are short discriptions of the physical components and logical
+ * sections.
+ *
+ * < resource file >
+ *
+ * All information necessary to get the br up and running is stored in the
+ * resource file, in a format that the res class can read and write.
+ * During startup, all three copies of the resource file are checked to
+ * make sure that the br is in a consistent state.  Whenever changes are
+ * made to the resource file, they are sequentially written out to the
+ * three copies so that the changes can be rolled forward or backward in
+ * case of a crash.
+ *
+ * < paddr space >
+ *
+ * The paddr space is a 64 bit address space into which brbs instances are
+ * mapped.  This is where all working data and metadata is stored, other
+ * than the bootstrapping information in the resource file.
+ *
+ * < V2P >
+ *
+ * The V2P contains a map of vaddr to paddr translations.  Each entry is 16
+ * bytes (2 * 64 bits).  The first 8 bytes of each entry is the "primary
+ * translation".  The last 8 bytes is the "mirror translation" and is
+ * explained below.  Entries are sequentially numbered from V2P_BASE,
+ * starting at 0.  vaddr 0 is not used (invalid, illegal) in a normal way 
+ * in order to facilitate discovering programming bugs.
+ *
+ * Free vaddrs are chained together in a free list.  The head and tail of
+ * the list, as well as the list size is stored immediately after the last
+ * valid vaddr entry.
+ *
+ * Once any part of the V2P has been backed by a brbs instance, backing can
+ * never be removed.  This means that as br usage increases, V2P backing
+ * must be increased, but can never be removed.  This is a design tradeoff
+ * that avoids considerable overhead and complexity.  Hopefully it is
+ * acceptable, since most usage will increase over time, without any
+ * permanent decreases in space usage.  If this turns out to have
+ * significant negative implications, it may be possible to compact the V2P
+ * offline, and perhaps even compact with a smooth transition to the
+ * compacted br without ever going offline.  I'll leave these algorithms
+ * unimplemented unless the need arises, however.
+ *
+ * Each V2P entry contains a mirror translation that can be frozen to allow
+ * online snapshot backups to be taken.  While the snapshot is being taken,
+ * all valid data blocks are left unmodified.  To make this possible, the
+ * br switches to a different write algorithm while a backup is in
+ * progress.  All block updates are written to new blocks and the V2P is
+ * modified to reflect these changes.  Once the backup is complete, all the
+ * old blocks pointed to in the mirror mirror entries but not in the
+ * primary entries are deallocated.  Then the mirror is brought back in
+ * sync with the primary entries.
+ *
+ * < P2V >
+ *
+ * The P2V maps paddrs to vaddrs.  This table has embedded in it free
+ * lists similar to that in the V2P, except that there is one free list for
+ * each brbs mapping.  The head, tail and list size info is stored
+ * immediately following the last translation.
+ *
+ * < TB >
+ *
+ * The TB contains temporary buffers.  Each buffer is 2 blocks.
+ *
+ * < DS >
+ *
+ * The DS contains data blocks.
+ *
  ****************************************************************************/
 
 #define _INC_BR_H_
