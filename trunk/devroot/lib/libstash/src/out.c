@@ -1182,8 +1182,8 @@ out_p_el_accept(cw_out_t *a_out, const char *a_format, cw_out_key_t *a_key,
 		_cw_assert(a_key->key_els == a_key->key_els_buf);
 			
 		/*
-		 * Overflow.  Time to face cold hard reality, calculate a tight
-		 * upper bound (at most off by one) on the total number of el's,
+		 * Overflow.  Time to face cold hard reality, calculate an upper
+		 * bound (at most off by (2n + 1)) on the total number of el's,
 		 * allocate a buffer, and copy the static buffer's contents
 		 * over.  We know that we need to expand by at least 1 el, and
 		 * there may be one more el than there are '[' characters (hence
