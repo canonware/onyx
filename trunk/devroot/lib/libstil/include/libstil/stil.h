@@ -36,9 +36,11 @@ struct cw_stil_s {
 	cw_mtx_t	name_lock;
 	cw_dch_t	name_hash;
 
+	/* Dictionaries. */
 	cw_stilo_t	systemdict;
 	cw_stilo_t	globaldict;
 
+	/* Files. */
 	cw_stilo_t	stdin_internal;
 	cw_stilo_t	stdin_stilo;
 	cw_stilo_t	stdout_stilo;
