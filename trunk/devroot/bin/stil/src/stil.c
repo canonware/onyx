@@ -106,7 +106,6 @@ errordict begin
 		currenterror begin
 		(Error /) print errorname cvs print ( in ) print
 		    /command load 1 spop
-		(Thread ) print self 1 spop
 		recordstacks {
 			(ostack: ) print
 			ostack 1 spop
