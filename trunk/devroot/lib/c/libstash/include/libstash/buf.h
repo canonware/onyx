@@ -334,7 +334,7 @@ buf_get_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset);
  ****************************************************************************/
 #define buf_set_uint64 _CW_NS_STASH(buf_set_uint64)
 void
-buf_set_uint64(cw_buf_t * a_buf, cw_uint64_t a_offset, cw_uint32_t a_val);
+buf_set_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint64_t a_val);
 
 /****************************************************************************
  *

@@ -563,7 +563,8 @@ buf_get_uint32(cw_buf_t * a_buf, cw_uint32_t a_offset)
 #endif
 
   if ((FALSE == a_buf->is_cumulative_valid)
-      && (a_offset >= a_buf->array[a_buf->array_start].bufel.bufc->buf_size))
+      && (a_offset + 3
+	  >= a_buf->array[a_buf->array_start].bufel.bufc->buf_size))
   {
     buf_p_rebuild_cumulative_index(a_buf);
   }
@@ -579,8 +580,6 @@ buf_get_uint32(cw_buf_t * a_buf, cw_uint32_t a_offset)
     /* Yay, all of the data is in one bufel. */
 
     /* XXX Assumes 32 bit addresses. */
-/*      a = *((a_buf->array[array_element].bufel.bufc->buf + bufel_offset) */
-/*  	 & (0xfffffffc)); */
     a = *(char *) ((cw_uint32_t)
 		   (a_buf->array[array_element].bufel.bufc->buf + bufel_offset)
 		   & ((cw_uint32_t) 0xfffffffc));
@@ -644,14 +643,51 @@ buf_set_uint32(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint32_t a_val)
 #endif
 
   if ((FALSE == a_buf->is_cumulative_valid)
-      && (a_offset >= a_buf->array[a_buf->array_start].bufel.bufc->buf_size))
+      && (a_offset + 3
+	  >= a_buf->array[a_buf->array_start].bufel.bufc->buf_size))
   {
     buf_p_rebuild_cumulative_index(a_buf);
   }
 
   buf_p_get_data_position(a_buf, a_offset, &array_element, &bufel_offset);
 
-  /* XXX */
+  if (bufel_offset + 3
+      < 
+      a_buf->array[array_element].bufel.end_offset)
+  {
+    /* Yay, all of the data is in one bufel. */
+
+    a_buf->array[array_element].bufel.bufc->buf[bufel_offset]
+      = a_val >> 24;
+    
+    a_buf->array[array_element].bufel.bufc->buf[bufel_offset + 1]
+      = (a_val >> 16) & 0x000000ff;
+    
+    a_buf->array[array_element].bufel.bufc->buf[bufel_offset + 2]
+      = (a_val >> 8) & 0x000000ff;
+    
+    a_buf->array[array_element].bufel.bufc->buf[bufel_offset + 3]
+      = a_val & 0x000000ff;
+  }
+  else
+  {
+    /* The data is spread across two to four buffers. */
+
+    a_buf->array[array_element].bufel.bufc->buf[bufel_offset]
+      = a_val >> 24;
+    
+    buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
+    a_buf->array[array_element].bufel.bufc->buf[bufel_offset]
+      = (a_val >> 16) & 0x000000ff;
+    
+    buf_p_get_data_position(a_buf, a_offset + 2, &array_element, &bufel_offset);
+    a_buf->array[array_element].bufel.bufc->buf[bufel_offset]
+      = (a_val >> 8) & 0x000000ff;
+    
+    buf_p_get_data_position(a_buf, a_offset + 3, &array_element, &bufel_offset);
+    a_buf->array[array_element].bufel.bufc->buf[bufel_offset]
+      = a_val & 0x000000ff;
+  }
 
 #ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe)
@@ -678,7 +714,8 @@ buf_get_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset)
 #endif
 
   if ((FALSE == a_buf->is_cumulative_valid)
-      && (a_offset >= a_buf->array[a_buf->array_start].bufel.bufc->buf_size))
+      && (a_offset + 7
+	  >= a_buf->array[a_buf->array_start].bufel.bufc->buf_size))
   {
     buf_p_rebuild_cumulative_index(a_buf);
   }
@@ -714,9 +751,7 @@ buf_get_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset)
   }
   else
   {
-    /* The data is spread across two to four buffers.  Go into paranoid schizo
-     * mode and make this work, no matter how ugly it gets. */
-
+    /* The data is spread across two to eight buffers. */
     retval = ((cw_uint64_t)
 	      a_buf->array[array_element].bufel.bufc->buf[bufel_offset]
 	      << 56);
@@ -767,7 +802,7 @@ buf_get_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset)
 }
 
 void
-buf_set_uint64(cw_buf_t * a_buf, cw_uint64_t a_offset, cw_uint32_t a_val)
+buf_set_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint64_t a_val)
 {
   cw_uint32_t array_element, bufel_offset;
 
@@ -782,14 +817,77 @@ buf_set_uint64(cw_buf_t * a_buf, cw_uint64_t a_offset, cw_uint32_t a_val)
 #endif
 
   if ((FALSE == a_buf->is_cumulative_valid)
-      && (a_offset >= a_buf->array[a_buf->array_start].bufel.bufc->buf_size))
+      && (a_offset + 7
+	  >= a_buf->array[a_buf->array_start].bufel.bufc->buf_size))
   {
     buf_p_rebuild_cumulative_index(a_buf);
   }
 
   buf_p_get_data_position(a_buf, a_offset, &array_element, &bufel_offset);
 
-  /* XXX */
+  if (bufel_offset + 7
+      < 
+      a_buf->array[array_element].bufel.end_offset)
+  {
+    /* Yay, all of the data is in one bufel. */
+    a_buf->array[array_element].bufel.bufc->buf[bufel_offset]
+      = a_val >> 56;
+    
+    a_buf->array[array_element].bufel.bufc->buf[bufel_offset + 1]
+      = (a_val >> 48) & (((cw_uint64_t) 0x00000000 << 32) & 0x000000ff);
+    
+    a_buf->array[array_element].bufel.bufc->buf[bufel_offset + 2]
+      = (a_val >> 40) & (((cw_uint64_t) 0x00000000 << 32) & 0x000000ff);
+    
+    a_buf->array[array_element].bufel.bufc->buf[bufel_offset + 3]
+      = (a_val >> 32) & (((cw_uint64_t) 0x00000000 << 32) & 0x000000ff);
+    
+    a_buf->array[array_element].bufel.bufc->buf[bufel_offset + 4]
+      = (a_val >> 24) & (((cw_uint64_t) 0x00000000 << 32) & 0x000000ff);
+    
+    a_buf->array[array_element].bufel.bufc->buf[bufel_offset + 5]
+      = (a_val >> 16) & (((cw_uint64_t) 0x00000000 << 32) & 0x000000ff);
+    
+    a_buf->array[array_element].bufel.bufc->buf[bufel_offset + 6]
+      = (a_val >> 8) & (((cw_uint64_t) 0x00000000 << 32) & 0x000000ff);
+    
+    a_buf->array[array_element].bufel.bufc->buf[bufel_offset + 7]
+      = a_val & (((cw_uint64_t) 0x00000000 << 32) & 0x000000ff);
+  }
+  else
+  {
+    /* The data is spread across two to eight buffers. */
+    a_buf->array[array_element].bufel.bufc->buf[bufel_offset]
+      = a_val >> 56;
+
+    buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
+    a_buf->array[array_element].bufel.bufc->buf[bufel_offset + 1]
+      = (a_val >> 48) & (((cw_uint64_t) 0x00000000 << 32) & 0x000000ff);
+    
+    buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
+    a_buf->array[array_element].bufel.bufc->buf[bufel_offset + 2]
+      = (a_val >> 40) & (((cw_uint64_t) 0x00000000 << 32) & 0x000000ff);
+    
+    buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
+    a_buf->array[array_element].bufel.bufc->buf[bufel_offset + 3]
+      = (a_val >> 32) & (((cw_uint64_t) 0x00000000 << 32) & 0x000000ff);
+    
+    buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
+    a_buf->array[array_element].bufel.bufc->buf[bufel_offset + 4]
+      = (a_val >> 24) & (((cw_uint64_t) 0x00000000 << 32) & 0x000000ff);
+    
+    buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
+    a_buf->array[array_element].bufel.bufc->buf[bufel_offset + 5]
+      = (a_val >> 16) & (((cw_uint64_t) 0x00000000 << 32) & 0x000000ff);
+    
+    buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
+    a_buf->array[array_element].bufel.bufc->buf[bufel_offset + 6]
+      = (a_val >> 8) & (((cw_uint64_t) 0x00000000 << 32) & 0x000000ff);
+    
+    buf_p_get_data_position(a_buf, a_offset + 3, &array_element, &bufel_offset);
+    a_buf->array[array_element].bufel.bufc->buf[bufel_offset + 7]
+      = a_val & (((cw_uint64_t) 0x00000000 << 32) & 0x000000ff);
+  }
 
 #ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe)
@@ -822,7 +920,22 @@ buf_p_get_data_position(cw_buf_t * a_buf,
 			cw_uint32_t * a_array_element,
 			cw_uint32_t * a_bufel_offset)
 {
-  /* XXX */
+  cw_uint32_t i;
+  
+  /* First look to see if what we're looking for is in the first bufel. */
+  if (a_offset
+      < bufel_get_valid_data_size(a_buf->array[a_buf->array_start].bufel))
+  {
+    *a_array_element = a_buf->array_start;
+    *a_bufel_offset = a_offset;
+  }
+  else
+  {
+    _cw_assert(TRUE == a_buf->is_cumulative_valid);
+
+    /* XXX */
+    
+  }
 }
 
 cw_bufel_t *
