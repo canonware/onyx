@@ -21,37 +21,11 @@
  * dependency order.
  */
 
-#ifdef _LIBSOCK_USE_SOCKS
-#  ifndef _LIBSOCK_USE_SOCK
-#    define _LIBSOCK_USE_SOCK
-#  endif
+#ifndef _LIBSTASH_USE_BUF
+#  define _LIBSTASH_USE_BUF
 #endif
-
-#ifdef _LIBSOCK_USE_SOCKB
-#  ifndef _LIBSOCK_USE_SOCK
-#    define _LIBSOCK_USE_SOCK
-#  endif
-#  ifndef _LIBSTASH_USE_BUF
-#    define _LIBSTASH_USE_BUF
-#  endif
-#  ifndef _LIBSTASH_USE_PEZZ
-#    define _LIBSTASH_USE_PEZZ
-#  endif
-#  ifndef _LIBSTASH_USE_LIST
-#    define _LIBSTASH_USE_LIST
-#  endif
-#endif
-
-#ifdef _LIBSOCK_USE_SOCK
-#  ifndef _LIBSOCK_USE_SOCKB
-#    define _LIBSOCK_USE_SOCKB
-#  endif
-#  ifndef _LIBSTASH_USE_BUF
-#    define _LIBSTASH_USE_BUF
-#  endif
-#  ifndef _LIBSTASH_USE_LIST
-#    define _LIBSTASH_USE_LIST
-#  endif
+#ifndef _LIBSTASH_USE_PEZZ
+#  define _LIBSTASH_USE_PEZZ
 #endif
  
 /*
@@ -66,18 +40,14 @@
  * example, sock.h must come before socks.h.
  */
 
-#ifdef _LIBSOCK_USE_SOCK
-#  ifndef _SOCK_H_
-#    include "sock.h"
-#    define _SOCK_H_
-#  endif
+#ifndef _SOCK_H_
+#  include "sock.h"
+#  define _SOCK_H_
 #endif
  
-#ifdef _LIBSOCK_USE_SOCKB
-#  ifndef _SOCKB_H_
-#    include "sockb.h"
-#    define _SOCKB_H_
-#  endif
+#ifndef _SOCKB_H_
+#  include "sockb.h"
+#  define _SOCKB_H_
 #endif
  
 #ifdef _LIBSOCK_USE_SOCKS
