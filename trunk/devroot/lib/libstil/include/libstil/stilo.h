@@ -38,7 +38,6 @@ typedef enum {
 	STILTE_IOERROR,			/* read()/write()/etc. error. */
 	STILTE_LIMITCHECK,		/* Value outside legal range. */
 	STILTE_RANGECHECK,		/* Out of bounds string or array use. */
-	STILTE_STACKOVERFLOW,		/* ostack too full. */
 	STILTE_STACKUNDERFLOW,		/* Not enough objects on ostack. */
 	STILTE_SYNTAXERROR,		/* Scanner syntax error. */
 	STILTE_TIMEOUT,			/* Timeout. */
