@@ -140,24 +140,33 @@ log_printf(cw_log_t * a_log_o, char * a_format, ...)
   int retval;
   FILE * fp;
 
-  _cw_check_ptr(a_log_o);
-  mtx_lock(&a_log_o->lock);
-
-  if (a_log_o->log_fp == NULL)
+  if (a_log_o == NULL)
   {
     fp = stderr;
   }
   else
   {
-    fp = a_log_o->log_fp;
-  }
+    mtx_lock(&a_log_o->lock);
 
+    if (a_log_o->log_fp == NULL)
+    {
+      fp = stderr;
+    }
+    else
+    {
+      fp = a_log_o->log_fp;
+    }
+  }
+  
   va_start(ap, a_format);
   retval = vfprintf(fp, a_format, ap);
   va_end(ap);
   fflush(fp);
 
-  mtx_unlock(&a_log_o->lock);
+  if (a_log_o != NULL)
+  {
+    mtx_unlock(&a_log_o->lock);
+  }
   return retval;
 }
 
@@ -180,18 +189,24 @@ log_eprintf(cw_log_t * a_log_o,
   int retval;
   FILE * fp;
 
-  _cw_check_ptr(a_log_o);
-  mtx_lock(&a_log_o->lock);
-  
-  if (a_log_o->log_fp == NULL)
+  if (a_log_o == NULL)
   {
     fp = stderr;
   }
   else
   {
-    fp = a_log_o->log_fp;
+    mtx_lock(&a_log_o->lock);
+  
+    if (a_log_o->log_fp == NULL)
+    {
+      fp = stderr;
+    }
+    else
+    {
+      fp = a_log_o->log_fp;
+    }
   }
-
+  
   if (a_filename != NULL)
   {
     fprintf(fp,
@@ -211,7 +226,11 @@ log_eprintf(cw_log_t * a_log_o,
   va_end(ap);
   fflush(fp);
 
-  mtx_unlock(&a_log_o->lock);
+  if (a_log_o != NULL)
+  {
+    mtx_unlock(&a_log_o->lock);
+  }
+  
   return retval;
 }
 
@@ -231,32 +250,41 @@ log_lprintf(cw_log_t * a_log_o, char * a_format, ...)
   time_t curr_time;
   struct tm * cts;
 
-  _cw_check_ptr(a_log_o);
-  mtx_lock(&a_log_o->lock);
-
-  /* Create time string. */
-  curr_time = time(NULL);
-  cts = localtime(&curr_time);
-  sprintf(time_str, "[%4d/%02d/%02d %02d:%02d:%02d (%s)]: ",
-	  cts->tm_year + 1900, cts->tm_mon + 1, cts->tm_mday,
-	  cts->tm_hour, cts->tm_min, cts->tm_sec, cts->tm_zone);
-  
-  if (a_log_o->log_fp == NULL)
+  if (a_log_o == NULL)
   {
     fp = stderr;
   }
   else
   {
-    fp = a_log_o->log_fp;
-  }
+    mtx_lock(&a_log_o->lock);
 
+  /* Create time string. */
+    curr_time = time(NULL);
+    cts = localtime(&curr_time);
+    sprintf(time_str, "[%4d/%02d/%02d %02d:%02d:%02d (%s)]: ",
+	    cts->tm_year + 1900, cts->tm_mon + 1, cts->tm_mday,
+	    cts->tm_hour, cts->tm_min, cts->tm_sec, cts->tm_zone);
+  
+    if (a_log_o->log_fp == NULL)
+    {
+      fp = stderr;
+    }
+    else
+    {
+      fp = a_log_o->log_fp;
+    }
+  }
+  
   fprintf(fp, "%s", time_str);
   va_start(ap, a_format);
   retval = vfprintf(fp, a_format, ap);
   va_end(ap);
   fflush(fp);
 
-  mtx_unlock(&a_log_o->lock);
+  if (a_log_o != NULL)
+  {
+    mtx_unlock(&a_log_o->lock);
+  }
   return retval;
 }
 
@@ -282,8 +310,23 @@ log_leprintf(cw_log_t * a_log_o,
   time_t curr_time;
   struct tm * cts;
 
-  _cw_check_ptr(a_log_o);
-  mtx_lock(&a_log_o->lock);
+  if (a_log_o == NULL)
+  {
+    fp = stderr;
+  }
+  else
+  {
+    mtx_lock(&a_log_o->lock);
+
+    if (a_log_o->log_fp == NULL)
+    {
+      fp = stderr;
+    }
+    else
+    {
+      fp = a_log_o->log_fp;
+    }
+  }
   
   /* Create time string. */
   curr_time = time(NULL);
@@ -291,15 +334,6 @@ log_leprintf(cw_log_t * a_log_o,
   sprintf(time_str, "[%4d/%02d/%02d %02d:%02d:%02d (%s)]: ",
 	  cts->tm_year + 1900, cts->tm_mon + 1, cts->tm_mday,
 	  cts->tm_hour, cts->tm_min, cts->tm_sec, cts->tm_zone);
-
-  if (a_log_o->log_fp == NULL)
-  {
-    fp = stderr;
-  }
-  else
-  {
-    fp = a_log_o->log_fp;
-  }
 
   if (a_filename != NULL)
   {
@@ -321,7 +355,10 @@ log_leprintf(cw_log_t * a_log_o,
   va_end(ap);
   fflush(fp);
 
-  mtx_unlock(&a_log_o->lock);
+  if (a_log_o != NULL)
+  {
+    mtx_unlock(&a_log_o->lock);
+  }
   return retval;
 }
 
