@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 41 $
- * $Date: 1998-04-26 20:06:13 -0700 (Sun, 26 Apr 1998) $
+ * $Revision: 48 $
+ * $Date: 1998-04-26 22:55:06 -0700 (Sun, 26 Apr 1998) $
  *
  * <<< Description >>>
  *
@@ -47,13 +47,14 @@
 int
 main()
 {
-  cw_oh_t * hash_o;
-  char ** strings, ** junk;
+  cw_oh_t hash_o;
+  char ** strings, * junk;
 /*   oh_h1_t * h1_ptr; */
   int i;
   cw_bool_t error;
 
   glob_new();
+  oh_new(&hash_o);
   
   strings = (char **) _cw_malloc(sizeof(char *) * NUM_STRINGS);
 
@@ -62,15 +63,13 @@ main()
     strings[i] = (char *) _cw_malloc(sizeof(char) * 50);
     sprintf(strings[i], "(%d) This is string %d", i, i);
   }
-  
-  hash_o = oh_new();
 
 /*   h1_ptr = oh_get_h1(hash_o); */
 /*   oh_set_h1(hash_o, new_h1); */
   
   for (i = 0; i < NUM_STRINGS; i++)
   {
-    error = oh_item_insert(hash_o, (void *) strings[i],
+    error = oh_item_insert(&hash_o, (void *) strings[i],
 				 (void *) &(strings[i]));
     if (error == TRUE)
     {
@@ -81,8 +80,8 @@ main()
 
   for (i = 0; i < (NUM_STRINGS / 2); i++)
   {
-    error = oh_item_delete(hash_o, (void *) strings[i],
-				 (void *) junk);
+    error = oh_item_delete(&hash_o, (void *) strings[i],
+			   (void **) &junk);
     if (error == TRUE)
     {
       log_printf(g_log_o, "(2) Error at i == %d\n", i);
@@ -92,7 +91,7 @@ main()
 
   for (i = 0; i < NUM_STRINGS / 2; i++)
   {
-    error = oh_item_insert(hash_o, (void *) strings[i],
+    error = oh_item_insert(&hash_o, (void *) strings[i],
 				 (void *) &(strings[i]));
     if (error == TRUE)
     {
@@ -103,8 +102,8 @@ main()
 
   for (i = 0; i < NUM_STRINGS; i++)
   {
-    error = oh_item_delete(hash_o, (void *) strings[i],
-				 (void *) junk);
+    error = oh_item_delete(&hash_o, (void *) strings[i],
+				 (void **) &junk);
     if (error == TRUE)
     {
       log_printf(g_log_o, "(4) Error at i == %d\n", i);
@@ -112,21 +111,22 @@ main()
     }
   }
 
-  error = oh_item_insert(hash_o, (void *) strings[0],
+  error = oh_item_insert(&hash_o, (void *) strings[0],
 			       (void *) &(strings[0]));
   
   log_printf(g_log_o, "Table size: %d\n",
-	     oh_get_size(hash_o));
+	     oh_get_size(&hash_o));
   log_printf(g_log_o, "Number of items: %d\n",
-	     oh_get_num_items(hash_o));
+	     oh_get_num_items(&hash_o));
   log_printf(g_log_o, "Number of invalid slots: %d\n",
-	     oh_get_num_invalid(hash_o));
+	     oh_get_num_invalid(&hash_o));
 
   for (i = 0; i < NUM_STRINGS; i++)
   {
     _cw_free(strings[i]);
   }
 
+  oh_delete(&hash_o);
   glob_delete();
   
   return 0;
