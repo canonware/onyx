@@ -69,7 +69,7 @@ struct cw_stils_s {
 	qs_head(cw_stilsc_t)	chunks;	/* List of stilsc's. */
 };
 
-cw_stils_t	*stils_new(cw_stils_t *a_stils, cw_pool_t *a_stilsc_pool);
+void		stils_new(cw_stils_t *a_stils, cw_pool_t *a_stilsc_pool);
 void		stils_delete(cw_stils_t *a_stils, cw_stilt_t *a_stilt);
 void		stils_collect(cw_stils_t *a_stils, void (*a_add_root_func)
     (void *add_root_arg, cw_stilo_t *root), void *a_add_root_arg);

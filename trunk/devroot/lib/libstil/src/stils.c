@@ -18,26 +18,21 @@
 
 static void	stils_p_spares_create(cw_stils_t *a_stils);
 
-cw_stils_t *
+void
 stils_new(cw_stils_t *a_stils, cw_pool_t *a_stilsc_pool)
 {
-	cw_stils_t	*retval;
-
 	_cw_check_ptr(a_stils);
 	_cw_check_ptr(a_stilsc_pool);
 
-	retval = a_stils;
-	qs_new(&retval->stack);
-	retval->count = 0;
-	qs_new(&retval->spares);
-	retval->stilsc_pool = a_stilsc_pool;
-	qs_new(&retval->chunks);
+	qs_new(&a_stils->stack);
+	a_stils->count = 0;
+	qs_new(&a_stils->spares);
+	a_stils->stilsc_pool = a_stilsc_pool;
+	qs_new(&a_stils->chunks);
 
 #ifdef _LIBSTIL_DBG
-	retval->magic = _CW_STILS_MAGIC;
+	a_stils->magic = _CW_STILS_MAGIC;
 #endif
-
-	return retval;
 }
 
 void
