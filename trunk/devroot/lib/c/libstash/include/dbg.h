@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 65 $
- * $Date: 1998-05-01 21:20:37 -0700 (Fri, 01 May 1998) $
+ * $Revision: 67 $
+ * $Date: 1998-05-02 02:07:58 -0700 (Sat, 02 May 1998) $
  *
  * <<< Description >>>
  *
@@ -43,31 +43,35 @@
 
 /* Debug flags (columns).  Use these with calls to dbg_turn_on() and
  * dbg_turn_off(). */
-#define _CW_DBG_C_FUNC 0
-#define _CW_DBG_C_ERROR 1
-#define _CW_DBG_C_OH_FUNC 2
-#define _CW_DBG_C_OH_SLOT 3
-#define _CW_DBG_C_RES_FUNC 4
-#define _CW_DBG_C_RES_ERROR 5
-#define _CW_DBG_C_RES_STATE 6
-#define _CW_DBG_C_BHP_FUNC 7
+#define _CW_DBG_C_DBG 0
+#define _CW_DBG_C_FUNC 1
+#define _CW_DBG_C_ERROR 2
+#define _CW_DBG_C_OH_FUNC 3
+#define _CW_DBG_C_OH_SLOT 4
+#define _CW_DBG_C_RES_FUNC 5
+#define _CW_DBG_C_RES_ERROR 6
+#define _CW_DBG_C_RES_STATE 7
+#define _CW_DBG_C_BHP_FUNC 8
+#define _CW_DBG_C_LIST_FUNC 9
 /* <ADD> */
 
 /* Filters (rows).  Use these with calls to dbg_fmatch() and dbg_pmatch(). */
-#define _CW_DBG_R_FUNC 0
-#define _CW_DBG_R_ERROR 1
-#define _CW_DBG_R_OH_FUNC 2
-#define _CW_DBG_R_OH_SLOT 3
-#define _CW_DBG_R_RES_FUNC 4
-#define _CW_DBG_R_RES_ERROR 5
-#define _CW_DBG_R_RES_STATE 6
-#define _CW_DBG_R_BHP_FUNC 7
+#define _CW_DBG_R_DBG 0
+#define _CW_DBG_R_FUNC 1
+#define _CW_DBG_R_ERROR 2
+#define _CW_DBG_R_OH_FUNC 3
+#define _CW_DBG_R_OH_SLOT 4
+#define _CW_DBG_R_RES_FUNC 5
+#define _CW_DBG_R_RES_ERROR 6
+#define _CW_DBG_R_RES_STATE 7
+#define _CW_DBG_R_BHP_FUNC 8
+#define _CW_DBG_R_LIST_FUNC 9
 /* <ADD> */
 
 /* Put these here only because they're related to the above macros.  They
  * aren't directly useful to the caller. */
-#define _CW_DBG_C_MAX 7 /* Highest numbered column in table. */
-#define _CW_DBG_R_MAX 7 /* Highest numbered row in table. */
+#define _CW_DBG_C_MAX 9 /* Highest numbered column in table. */
+#define _CW_DBG_R_MAX 9 /* Highest numbered row in table. */
 /* <ADD> */
 
 typedef struct cw_dbg_s cw_dbg_t;

@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 65 $
- * $Date: 1998-05-01 21:20:37 -0700 (Fri, 01 May 1998) $
+ * $Revision: 67 $
+ * $Date: 1998-05-02 02:07:58 -0700 (Sat, 02 May 1998) $
  *
  * <<< Description >>>
  *
@@ -60,6 +60,7 @@
  * is also important. */
 cw_sint32_t dbg_raw_tbl[] =
 {
+  _CW_DBG_C_DBG, -1, /* CW_DBG_R_DBG */
   _CW_DBG_C_FUNC, -1, /* _CW_DBG_R_FUNC */
   _CW_DBG_C_ERROR, -1, /* _CW_DBG_R_ERROR */
   _CW_DBG_C_OH_FUNC, _CW_DBG_C_FUNC, -1, /* _CW_DBG_R_OH_FUNC */
@@ -67,7 +68,8 @@ cw_sint32_t dbg_raw_tbl[] =
   _CW_DBG_C_RES_FUNC, _CW_DBG_C_FUNC, -1, /* _CW_DBG_R_RES_FUNC */
   _CW_DBG_C_RES_ERROR, _CW_DBG_C_ERROR, -1, /* _CW_DBG_R_RES_ERROR */
   _CW_DBG_C_RES_STATE, -1, /* _CW_DBG_R_RES_STATE */
-  _CW_DBG_C_BHP_FUNC, _CW_DBG_C_FUNC, -1 /* _CW_DBG_R_BHP_FUNC */
+  _CW_DBG_C_BHP_FUNC, _CW_DBG_C_FUNC, -1, /* _CW_DBG_R_BHP_FUNC */
+  _CW_DBG_C_LIST_FUNC, _CW_DBG_C_FUNC, -1, /* _CW_DBG_R_LIST_FUNC */
   /* <ADD> */
   -1
 };
@@ -77,7 +79,7 @@ cw_sint32_t dbg_raw_tbl[] =
  */
 cw_sint32_t dbg_raw_on[] =
 {
-/*   _CW_DBG_C_FUNC, */
+  _CW_DBG_C_DBG,
   /* <ADD> */
   -1
 };
