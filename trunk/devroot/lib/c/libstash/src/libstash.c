@@ -15,6 +15,11 @@
 
 /*  #define _LIBSTASH_MEM_DBG */
 
+void	thd_l_init(void);
+void	thd_l_shutdown(void);
+void	xep_l_init(void);
+void	xep_l_shutdown(void);
+
 /* Globals. */
 cw_dbg_t	*cw_g_dbg = NULL;
 cw_mem_t	*cw_g_mem = NULL;
@@ -27,6 +32,9 @@ cw_bool_t
 libstash_init(void)
 {
 	/* Start up global modules. */
+	thd_l_init();
+	xep_l_init();
+
 	cw_g_dbg = dbg_new(cw_g_mem);
 	if (cw_g_dbg == NULL)
 		goto OOM_1;
@@ -86,4 +94,7 @@ libstash_shutdown(void)
 
 	dbg_delete(cw_g_dbg);
 	cw_g_dbg = NULL;
+
+	xep_l_shutdown();
+	thd_l_shutdown();
 }

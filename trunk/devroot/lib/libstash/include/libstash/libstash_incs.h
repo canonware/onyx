@@ -24,6 +24,7 @@
 #include <sys/uio.h>
 #include <pthread.h>
 #include <semaphore.h>
+#include <setjmp.h>
 #include <sched.h>
 #include <signal.h>
 
@@ -35,6 +36,7 @@
 #include "qs.h"
 #include "qr.h"
 #include "ql.h"
+#include "xep.h"
 #include "mtx.h"
 #include "cnd.h"
 #include "sema.h"
