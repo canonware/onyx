@@ -42,22 +42,22 @@ if [not [defined LDFLAGS]] then
   LDFLAGS = [split " " [strip "@LDFLAGS@"]];
 
 /* Documentation. */
-#include-cooked @objdir@/doc/Cookfile.inc
+#include-cooked @objroot@/doc/Cookfile.inc
 
 /* Examples. */
-#include-cooked @objdir@/examples/Cookfile.inc
+#include-cooked @objroot@/examples/Cookfile.inc
 
 /* Tests. */
-#include-cooked @objdir@/test/Cookfile.inc
+#include-cooked @objroot@/test/Cookfile.inc
 
 /* Binaries. */
-#include-cooked @objdir@/bin/Cookfile.inc
+#include-cooked @objroot@/bin/Cookfile.inc
 
 /* Libraries. */
-#include-cooked @objdir@/lib/Cookfile.inc
+#include-cooked @objroot@/lib/Cookfile.inc
 
 /* Modules. */
-#include-cooked @objdir@/mod/Cookfile.inc
+#include-cooked @objroot@/mod/Cookfile.inc
 
 /*
  * User targets.
@@ -85,15 +85,15 @@ clean : [addsuffix _clean docs tests bins mods libs]
 data
 #![SHELL]
 
-for i in `find @srcdir@ -type f -name .cook.fp` ; do
+for i in `find @srcroot@ -type f -name .cook.fp` ; do
 	echo rm $i;
 	rm $i;
 done
-for i in `find @objdir@ -type f -name .cook.fp` ; do
+for i in `find @objroot@ -type f -name .cook.fp` ; do
 	echo rm $i;
 	rm $i;
 done
-for i in `find @objdir@ -type f -name Cookfile.list` ; do
+for i in `find @objroot@ -type f -name Cookfile.list` ; do
 	echo rm $i;
 	rm $i;
 done
@@ -102,8 +102,8 @@ dataend
 
 distclean : clean [addsuffix _distclean tests bins mods libs]
 {
-  rm -f @objdir@/config.log;
-  rm -f @objdir@/config.status;
+  rm -f @objroot@/config.log;
+  rm -f @objroot@/config.status;
   rm -f @cfghdrs@;
   rm -f @cfgoutputs@;
 }

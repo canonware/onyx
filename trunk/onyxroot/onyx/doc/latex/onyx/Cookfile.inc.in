@@ -12,22 +12,22 @@
  ******************************************************************************/
 
 #if @with_docs@
-  ONYX_PS = @objdir@/doc/ps/onyx/onyx.ps;
-  ONYX_PDF = @objdir@/doc/pdf/onyx/onyx.pdf;
-  ONYX_HTML = @objdir@/doc/html/onyx/onyx.html;
+  ONYX_PS = @objroot@/doc/ps/onyx/onyx.ps;
+  ONYX_PDF = @objroot@/doc/pdf/onyx/onyx.pdf;
+  ONYX_HTML = @objroot@/doc/html/onyx/onyx.html;
 #else
-  ONYX_PS = @srcdir@/doc/ps/onyx/onyx.ps;
-  ONYX_PDF = @srcdir@/doc/pdf/onyx/onyx.pdf;
-  ONYX_HTML = @srcdir@/doc/html/onyx/onyx.html;
+  ONYX_PS = @srcroot@/doc/ps/onyx/onyx.ps;
+  ONYX_PDF = @srcroot@/doc/pdf/onyx/onyx.pdf;
+  ONYX_HTML = @srcroot@/doc/html/onyx/onyx.html;
 #endif
 
 /* LaTeX source files. */
 ONYX_TEX_SRCS = front.tex back.tex lang.tex tut.tex ex.tex;
-ONYX_TEX_SRCS = [fromto % @srcdir@/doc/latex/% [ONYX_TEX_SRCS]];
+ONYX_TEX_SRCS = [fromto % @srcroot@/doc/latex/% [ONYX_TEX_SRCS]];
 
 /* xfig source files. */
 ONYX_FIG_SRCS = ;
-ONYX_FIG_SRCS = [fromto % @srcdir@/doc/latex/% [ONYX_FIG_SRCS]];
+ONYX_FIG_SRCS = [fromto % @srcroot@/doc/latex/% [ONYX_FIG_SRCS]];
 
 /*
  * Targets.
@@ -90,25 +90,25 @@ dataend
 
 onyx_docs_clean :
 {
-  rm -f [addprefix @objdir@/doc/latex/onyx/onyx.
+  rm -f [addprefix @objroot@/doc/latex/onyx/onyx.
                    alg aux aux-prev dvi idx idx-prev ilg ind lof log lot out pdf
                    toc];
-  rm -f @objdir@/doc/latex/onyx/texput.log;
+  rm -f @objroot@/doc/latex/onyx/texput.log;
 }
 
 onyx_docs_relclean :
 {
-  rm -rf @objdir@/doc/html/onyx;
-  rm -rf @objdir@/doc/pdf/onyx;
-  rm -rf @objdir@/doc/ps/onyx;
+  rm -rf @objroot@/doc/html/onyx;
+  rm -rf @objroot@/doc/pdf/onyx;
+  rm -rf @objroot@/doc/ps/onyx;
 }
 
 /*
  * Dependencies.
  */
-@objdir@/%0ps/onyx/%.ps : @objdir@/%0latex/onyx/%.tex [ONYX_TEX_SRCS]
-                          [fromto @srcdir@/%0latex/onyx/%.fig
-                                  @objdir@/%0latex/onyx/%.ps
+@objroot@/%0ps/onyx/%.ps : @objroot@/%0latex/onyx/%.tex [ONYX_TEX_SRCS]
+                          [fromto @srcroot@/%0latex/onyx/%.fig
+                                  @objroot@/%0latex/onyx/%.ps
                                   [ONYX_FIG_SRCS]];
 
 /*
@@ -116,13 +116,13 @@ onyx_docs_relclean :
  * will not run in parallel.  This is necessary in order to keep them from
  * stomping all over each others' temporory files.
  */
-@objdir@/%0pdf/onyx/%.pdf : @objdir@/%0latex/onyx/%.tex @objdir@/%0ps/onyx/%.ps
+@objroot@/%0pdf/onyx/%.pdf : @objroot@/%0latex/onyx/%.tex @objroot@/%0ps/onyx/%.ps
                             [ONYX_TEX_SRCS]
-                            [fromto @srcdir@/%0latex/onyx/%.fig
-                                    @objdir@/%0latex/onyx/%.ps
+                            [fromto @srcroot@/%0latex/onyx/%.fig
+                                    @objroot@/%0latex/onyx/%.ps
                                     [ONYX_FIG_SRCS]];
 
-@objdir@/%0html/onyx/%.html : @objdir@/%0latex/onyx/%.tex [ONYX_TEX_SRCS]
-                              [fromto @srcdir@/%0latex/onyx/%.fig
-                                      @objdir@/%0latex/onyx/%.ps
+@objroot@/%0html/onyx/%.html : @objroot@/%0latex/onyx/%.tex [ONYX_TEX_SRCS]
+                              [fromto @srcroot@/%0latex/onyx/%.fig
+                                      @objroot@/%0latex/onyx/%.ps
                                       [ONYX_FIG_SRCS]];
