@@ -308,6 +308,124 @@ be exacerbated by the cost of comparison for other types.  Name comparison is a
 constant time operation, but string comparison is not.  Therefore, use names
 rather than strings whenever possible.
 
+\section{Regular expressions}
+Onyx provides regular expression support that is very similar to what the Perl
+programming language provides.  There are two special data types, regex and
+regsub, that are specific to regular expressions, but there is no special
+language syntax devoted to regular expressions, unlike Perl.  Instead, patterns
+and substitution templates are specified via normal strings, and flags are
+specified via dictionaries.
+
+\subsection{Matching}
+The following snippet iteratively searches for capitalized words:
+
+\begin{verbatim}
+`This is an Onyx string.'
+
+{dup `[A-Z]\w+' <$g true> match}{
+    0 submatch 1 sprint
+} while
+\end{verbatim}
+
+The above code generates the following output:
+
+\begin{verbatim}
+`This'
+`Onyx'
+\end{verbatim}
+
+The {\tt \$g} flag to the \htmlref{\onyxop{}{match}{}}{systemdict:match}
+operator says to store the location to start the next match at, which is what
+makes the {\tt while} loop possible.  The
+\htmlref{\onyxop{}{submatch}{}}{systemdict:submatch} operator gets the substring
+of the input string that the regular expression most recently matched.
+
+With a slight modification to the previous example, it is possible to get at the
+capital letters, rather than the entire capitalized words.  This is achieved by
+using a set of capturing parentheses, and changing the argument to
+\htmlref{\onyxop{}{submatch}{}}{systemdict:submatch}:
+
+\begin{verbatim}
+`This is an Onyx string.'
+
+{dup `([A-Z])\w+' <$g true> match}{
+    1 submatch 1 sprint
+} while
+\end{verbatim}
+
+This generates the following output:
+
+\begin{verbatim}
+`T'
+`O'
+\end{verbatim}
+
+This is a trivial example of how capturing subpatterns can be used, but the
+possibilities are wide and varied.
+
+\subsection{Splitting}
+
+Sometimes it is desirable to \htmlref{\onyxop{}{split}{}}{systemdict:split} a
+string into pieces, such as when dealing with a comma-delimited file:
+
+\begin{verbatim}
+`Jason Evans, jasone@canonware.com, http://www.canonware.com/~jasone/'
+
+`,\s*' split
+1 sprint
+\end{verbatim}
+
+This generates the following output:
+
+\begin{verbatim}
+[`Jason Evans' `jasone@canonware.com' `http://www.canonware.com/~jasone/']
+\end{verbatim}
+
+If for some reason preserving the delimiters is important, capturing parentheses
+can be added to the splitting pattern:
+
+\begin{verbatim}
+`Jason Evans, jasone@canonware.com, http://www.canonware.com/~jasone/'
+
+`(,)\s*' split
+1 sprint
+\end{verbatim}
+
+This generates the following output:
+
+\begin{verbatim}
+[`Jason Evans' `,' `jasone@canonware.com' `,' `http://www.canonware.com/~jasone/']
+\end{verbatim}
+
+\subsection{Substituting}
+
+The \htmlref{\onyxop{}{match}{}}{systemdict:match} and
+\htmlref{\onyxop{}{split}{}}{systemdict:split} operators provide enough power
+that with some effort, it is possible to find regular expression matches, modify
+the matched text, and create a modified string as output.  However, this is a
+common operation when using regular expressions for text processing, so the
+\htmlref{\onyxop{}{subst}{}}{systemdict:subst} operator is also provided as a
+more convenient interface for the most common types of substitution.
+
+Suppose that a comma-delimited file needs to be converted to a colon-delmited
+file, consecutive separators need to be merged, and whitespace around the
+separators needs to be stripped out.  The following snippet does that:
+
+\begin{verbatim}
+`Jason Evans (jasone@canonware.com)
+Jason O. Evans ( jasone@canonware.com )'
+
+`(\w[A-Za-z. ]*\w) \(\s*([^)])\s*\)' `"\1" <\2>' <$g true> subst
+stdout exch write pop
+\end{verbatim}
+
+This generates the following output:
+
+\begin{verbatim}
+"Jason Evans" <jasone@canonware.com>
+"Jason O. Evans" <jasone@canonware.com>
+\end{verbatim}
+
 \section{Code organization}
 
 As mentioned earlier, Onyx does not have named variables in the same way as many
