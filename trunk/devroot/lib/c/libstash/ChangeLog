@@ -6,6 +6,8 @@
 	* src/pezz.c: Convert spares ring to a qs.  Merge the memory
 	blocks and ring blocks.
 
+	* src/treen.c: Convert from ring to qr.
+
 	* : Convert ch and dch from qr to ql.
 
 	* : Re-implement and test the qs (stack), qr (ring), and ql (list)
