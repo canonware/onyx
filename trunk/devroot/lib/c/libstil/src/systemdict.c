@@ -1543,7 +1543,7 @@ systemdict_for(cw_stilo_t *a_thread)
 {
 	cw_stilo_t	*ostack, *estack, *tstack;
 	cw_stilo_t	*exec, *ostilo, *estilo, *tstilo;
-	cw_stiloi_t	i, inc, limit, edepth;
+	cw_stiloi_t	i, inc, limit, edepth, tdepth;
 
 	ostack = stilo_thread_ostack_get(a_thread);
 	estack = stilo_thread_estack_get(a_thread);
@@ -1577,8 +1577,12 @@ systemdict_for(cw_stilo_t *a_thread)
 	stilo_dup(tstilo, exec);
 	stilo_stack_npop(ostack, 4);
 
-	/* Record estack's depth so that we can clean up estack if necessary. */
+	/*
+	 * Record estack's and tstack's depth so that we can clean up if
+	 * necessary.
+	 */
 	edepth = stilo_stack_count(estack);
+	tdepth = stilo_stack_count(tstack);
 
 	/*
 	 * Catch an exit exception, if thrown, but do not continue executing the
@@ -1630,6 +1634,9 @@ systemdict_for(cw_stilo_t *a_thread)
 		/* Clean up whatever mess was left on the execution stack. */
 		for (i = stilo_stack_count(estack); i > edepth; i--)
 			stilo_stack_pop(estack);
+
+		/* Clean up tstack. */
+		stilo_stack_npop(tstack, stilo_stack_count(tstack) - tdepth);
 	}
 	xep_end();
 
@@ -1641,13 +1648,13 @@ systemdict_foreach(cw_stilo_t *a_thread)
 {
 	cw_stilo_t	*ostack, *estack, *tstack;
 	cw_stilo_t	*stilo, *what, *proc;
-	cw_uint32_t	tstack_depth;
+	cw_uint32_t	tdepth;
 	cw_stiloi_t	i, count;
 
 	ostack = stilo_thread_ostack_get(a_thread);
 	estack = stilo_thread_estack_get(a_thread);
 	tstack = stilo_thread_tstack_get(a_thread);
-	tstack_depth = stilo_stack_count(tstack);
+	tdepth = stilo_stack_count(tstack);
 
 	STILO_STACK_GET(proc, ostack, a_thread);
 	STILO_STACK_DOWN_GET(what, ostack, a_thread, proc);
@@ -1790,11 +1797,11 @@ systemdict_foreach(cw_stilo_t *a_thread)
 
 		/* Clean up tstack. */
 		stilo_stack_npop(tstack, stilo_stack_count(tstack) -
-		    tstack_depth);
+		    tdepth);
 	}
 	xep_end();
 
-	stilo_stack_npop(tstack, stilo_stack_count(tstack) - tstack_depth);
+	stilo_stack_npop(tstack, stilo_stack_count(tstack) - tdepth);
 }
 
 void
@@ -2284,7 +2291,7 @@ systemdict_loop(cw_stilo_t *a_thread)
 {
 	cw_stilo_t	*ostack, *estack, *tstack;
 	cw_stilo_t	*exec, *stilo, *tstilo;
-	cw_uint32_t	sdepth;
+	cw_uint32_t	sdepth, tdepth;
 
 	ostack = stilo_thread_ostack_get(a_thread);
 	estack = stilo_thread_estack_get(a_thread);
@@ -2298,6 +2305,7 @@ systemdict_loop(cw_stilo_t *a_thread)
 	stilo_stack_pop(ostack);
 
 	sdepth = stilo_stack_count(estack);
+	tdepth = stilo_stack_count(tstack);
 
 	/*
 	 * Catch an exit exception, if thrown, but do not continue executing the
@@ -2319,6 +2327,9 @@ systemdict_loop(cw_stilo_t *a_thread)
 		/* Clean up whatever mess was left on the execution stack. */
 		for (i = stilo_stack_count(estack); i > sdepth + 1; i--)
 			stilo_stack_pop(estack);
+
+		/* Clean up tstack. */
+		stilo_stack_npop(tstack, stilo_stack_count(tstack) - tdepth);
 	}
 	xep_end();
 
@@ -2993,7 +3004,7 @@ systemdict_repeat(cw_stilo_t *a_thread)
 	cw_stilo_t	*ostack, *estack, *tstack;
 	cw_stilo_t	*count, *exec, *stilo, *tstilo;
 	cw_stiloi_t	i, cnt;
-	cw_uint32_t	sdepth;
+	cw_uint32_t	sdepth, tdepth;
 
 	ostack = stilo_thread_ostack_get(a_thread);
 	estack = stilo_thread_estack_get(a_thread);
@@ -3013,6 +3024,7 @@ systemdict_repeat(cw_stilo_t *a_thread)
 	stilo_stack_npop(ostack, 2);
 
 	sdepth = stilo_stack_count(estack);
+	tdepth = stilo_stack_count(tstack);
 
 	/*
 	 * Catch an exit exception, if thrown, but do not continue executing the
@@ -3032,6 +3044,9 @@ systemdict_repeat(cw_stilo_t *a_thread)
 		/* Clean up whatever mess was left on the execution stack. */
 		for (i = stilo_stack_count(estack); i > sdepth; i--)
 			stilo_stack_pop(estack);
+
+		/* Clean up tstack. */
+		stilo_stack_npop(tstack, stilo_stack_count(tstack) - tdepth);
 	}
 	xep_end();
 
@@ -3050,7 +3065,7 @@ systemdict_run(cw_stilo_t *a_thread)
 	cw_stilo_t		*ostack, *estack, *tstack;
 	cw_stilo_t		*stilo, *tfile;
 	cw_stilo_threade_t	error;
-	cw_uint32_t		sdepth;
+	cw_uint32_t		sdepth, tdepth;
 
 	ostack = stilo_thread_ostack_get(a_thread);
 	estack = stilo_thread_estack_get(a_thread);
@@ -3078,6 +3093,8 @@ systemdict_run(cw_stilo_t *a_thread)
 	stilo = stilo_stack_push(estack);
 
 	sdepth = stilo_stack_count(estack);
+	tdepth = stilo_stack_count(tstack);
+
 	stilo_dup(stilo, tfile);
 
 	xep_begin();
@@ -3098,13 +3115,15 @@ systemdict_run(cw_stilo_t *a_thread)
 
 		/* Close the file, but don't handle the exception. */
 		error = stilo_file_close(tfile);
-		stilo_stack_pop(tstack);
 		if (error)
 			stilo_thread_error(a_thread, error);
 
 		/* Clean up estack. */
 		for (i = stilo_stack_count(estack); i > sdepth; i--)
 			stilo_stack_pop(estack);
+
+		/* Clean up tstack. */
+		stilo_stack_npop(tstack, stilo_stack_count(tstack) - tdepth);
 	}
 	xep_end();
 
@@ -3491,19 +3510,21 @@ systemdict_stack(cw_stilo_t *a_thread)
 void
 systemdict_start(cw_stilo_t *a_thread)
 {
-	cw_stilo_t	*ostack, *estack;
+	cw_stilo_t	*ostack, *estack, *tstack;
 	cw_stilo_t	*ostilo, *estilo;
-	cw_uint32_t	depth;
+	cw_uint32_t	edepth, tdepth;
 
 	ostack = stilo_thread_ostack_get(a_thread);
 	estack = stilo_thread_estack_get(a_thread);
+	tstack = stilo_thread_tstack_get(a_thread);
 
 	STILO_STACK_GET(ostilo, ostack, a_thread);
 	estilo = stilo_stack_push(estack);
 	stilo_dup(estilo, ostilo);
 	stilo_stack_pop(ostack);
 
-	depth = stilo_stack_count(estack);
+	edepth = stilo_stack_count(estack);
+	tdepth = stilo_stack_count(tstack);
 
 	xep_begin();
 	xep_try {
@@ -3515,10 +3536,11 @@ systemdict_start(cw_stilo_t *a_thread)
 	}
 	xep_catch(_CW_STILX_QUIT) {
 		/*
-		 * Pop all objects off the exec stack that weren't there before
-		 * entering this function.
+		 * Pop all objects off estack and tstack that weren't there
+		 * before entering this function.
 		 */
-		stilo_stack_npop(estack, stilo_stack_count(estack) - depth);
+		stilo_stack_npop(estack, stilo_stack_count(estack) - edepth);
+		stilo_stack_npop(tstack, stilo_stack_count(tstack) - tdepth);
 
 		xep_handled();
 	}
@@ -3549,17 +3571,21 @@ systemdict_stop(cw_stilo_t *a_thread)
 void
 systemdict_stopped(cw_stilo_t *a_thread)
 {
-	cw_stilo_t	*ostack, *estack;
+	cw_stilo_t	*ostack, *estack, *tstack;
 	cw_stilo_t	*exec, *stilo;
 	cw_bool_t	result = FALSE;
+	cw_uint32_t	tdepth;
 
 	ostack = stilo_thread_ostack_get(a_thread);
 	estack = stilo_thread_estack_get(a_thread);
+	tstack = stilo_thread_tstack_get(a_thread);
 	
 	STILO_STACK_GET(exec, ostack, a_thread);
 	stilo = stilo_stack_push(estack);
 	stilo_dup(stilo, exec);
 	stilo_stack_pop(ostack);
+
+	tdepth = stilo_stack_count(tstack);
 
 	/*
 	 * Point exec to the copy on the execution stack, so that it can be used
@@ -3582,6 +3608,9 @@ systemdict_stopped(cw_stilo_t *a_thread)
 			stilo = stilo_stack_get(estack);
 			stilo_stack_pop(estack);
 		} while (stilo != exec);
+
+		/* Clean up tstack. */
+		stilo_stack_npop(tstack, stilo_stack_count(tstack) - tdepth);
 	}
 	xep_end();
 
