@@ -54,14 +54,17 @@ main()
 		bufc_delete(bufc_b);
 
 		bufc_b = _cw_malloc(sizeof(cw_bufc_t));
-		_cw_assert(bufc_b == bufc_new(bufc_b, mem_dealloc, cw_g_mem));
+		_cw_assert(bufc_b == bufc_new(bufc_b, (cw_opaque_dealloc_t
+		    *)mem_free, cw_g_mem));
 		_cw_assert(0 == bufc_get_size(bufc_b));
 		bufc_delete(bufc_b);
 
 		bufc_b = _cw_malloc(sizeof(cw_bufc_t));
-		_cw_assert(bufc_b == bufc_new(bufc_b, mem_dealloc, cw_g_mem));
+		_cw_assert(bufc_b == bufc_new(bufc_b, (cw_opaque_dealloc_t
+		    *)mem_free, cw_g_mem));
 		buffer = _cw_malloc(789);
-		bufc_set_buffer(bufc_b, buffer, 789, FALSE, mem_dealloc,
+		bufc_set_buffer(bufc_b, buffer, 789, FALSE, (cw_opaque_dealloc_t
+		    *)mem_free,
 		    cw_g_mem);
 		_cw_assert(789 == bufc_get_size(bufc_b));
 		bufc_delete(bufc_b);
@@ -101,12 +104,8 @@ main()
 		buffer_cast = (cw_uint32_t *)buffer;
 
 		bufc_new(&bufc, NULL, NULL);
-		bufc_set_buffer(&bufc,
-		    buffer,
-		    512,
-		    FALSE,
-		    mem_dealloc,
-		    (void *)cw_g_mem);
+		bufc_set_buffer(&bufc, buffer, 512, FALSE, (cw_opaque_dealloc_t
+		    *)mem_free, (void *)cw_g_mem);
 
 		for (i = 0; i < 256; i++) {
 			buffer[i] = i;
@@ -209,7 +208,8 @@ main()
 		a = (cw_uint8_t *)_cw_malloc(1);
 		a[0] = 0;
 		bufc_p = bufc_new(NULL, NULL, NULL);
-		bufc_set_buffer(bufc_p, a, 1, FALSE, mem_dealloc, cw_g_mem);
+		bufc_set_buffer(bufc_p, a, 1, FALSE, (cw_opaque_dealloc_t
+		    *)mem_free, cw_g_mem);
 		_cw_assert(0 == buf_get_num_bufels(&buf));
 		buf_append_bufc(&buf, bufc_p, 0, 1);
 		_cw_assert(1 == buf_get_num_bufels(&buf));
@@ -238,8 +238,8 @@ main()
 		d[2] = 8;
 		d[3] = 9;
 		bufc_p = bufc_new(NULL, NULL, NULL);
-		bufc_set_buffer(bufc_p, (void *)d, 4, FALSE, mem_dealloc,
-		    cw_g_mem);
+		bufc_set_buffer(bufc_p, (void *)d, 4, FALSE,
+		    (cw_opaque_dealloc_t *)mem_free, cw_g_mem);
 		buf_append_bufc(&buf, bufc_p, 0, 4);
 		_cw_assert(4 == buf_get_num_bufels(&buf));
 		bufc_delete(bufc_p);
@@ -251,8 +251,8 @@ main()
 		e[3] = 13;
 		e[4] = 14;
 		bufc_p = bufc_new(NULL, NULL, NULL);
-		bufc_set_buffer(bufc_p, (void *)e, 5, FALSE, mem_dealloc,
-		    cw_g_mem);
+		bufc_set_buffer(bufc_p, (void *)e, 5, FALSE,
+		    (cw_opaque_dealloc_t *)mem_free, cw_g_mem);
 		buf_append_bufc(&buf, bufc_p, 0, 5);
 		_cw_assert(5 == buf_get_num_bufels(&buf));
 		bufc_delete(bufc_p);
@@ -382,7 +382,8 @@ main()
 		a = (cw_uint8_t *)_cw_malloc(1);
 		a[0] = 0;
 		bufc_p = bufc_new(NULL, NULL, NULL);
-		bufc_set_buffer(bufc_p, a, 1, FALSE, mem_dealloc, cw_g_mem);
+		bufc_set_buffer(bufc_p, a, 1, FALSE, (cw_opaque_dealloc_t
+		    *)mem_free, cw_g_mem);
 		_cw_assert(0 == buf_get_num_bufels(&buf));
 		buf_append_bufc(&buf, bufc_p, 0, 1);
 		_cw_assert(1 == buf_get_num_bufels(&buf));
@@ -414,8 +415,8 @@ main()
 		d[2] = 8;
 		d[3] = 9;
 		bufc_p = bufc_new(NULL, NULL, NULL);
-		bufc_set_buffer(bufc_p, (void *)d, 4, FALSE, mem_dealloc,
-		    cw_g_mem);
+		bufc_set_buffer(bufc_p, (void *)d, 4, FALSE,
+		    (cw_opaque_dealloc_t *)mem_free, cw_g_mem);
 		buf_append_bufc(&buf, bufc_p, 0, 4);
 		_cw_assert(4 == buf_get_num_bufels(&buf));
 		bufc_delete(bufc_p);
@@ -428,8 +429,8 @@ main()
 		e[3] = 13;
 		e[4] = 14;
 		bufc_p = bufc_new(NULL, NULL, NULL);
-		bufc_set_buffer(bufc_p, (void *)e, 5, TRUE, mem_dealloc,
-		    cw_g_mem);
+		bufc_set_buffer(bufc_p, (void *)e, 5, TRUE, (cw_opaque_dealloc_t
+		    *)mem_free, cw_g_mem);
 		buf_append_bufc(&buf, bufc_p, 0, 5);
 		_cw_assert(5 == buf_get_num_bufels(&buf));
 		bufc_delete(bufc_p);
@@ -521,7 +522,8 @@ main()
 		a = (cw_uint8_t *)_cw_malloc(1);
 		a[0] = 0;
 		bufc_p = bufc_new(NULL, NULL, NULL);
-		bufc_set_buffer(bufc_p, a, 1, FALSE, mem_dealloc, cw_g_mem);
+		bufc_set_buffer(bufc_p, a, 1, FALSE, (cw_opaque_dealloc_t
+		    *)mem_free, cw_g_mem);
 		_cw_assert(0 == buf_get_num_bufels(&buf));
 		buf_append_bufc(&buf, bufc_p, 0, 1);
 		_cw_assert(1 == buf_get_num_bufels(&buf));
@@ -553,8 +555,8 @@ main()
 		d[2] = 8;
 		d[3] = 9;
 		bufc_p = bufc_new(NULL, NULL, NULL);
-		bufc_set_buffer(bufc_p, (void *)d, 4, FALSE, mem_dealloc,
-		    cw_g_mem);
+		bufc_set_buffer(bufc_p, (void *)d, 4, FALSE,
+		    (cw_opaque_dealloc_t *)mem_free, cw_g_mem);
 		buf_append_bufc(&buf, bufc_p, 0, 4);
 		_cw_assert(4 == buf_get_num_bufels(&buf));
 		bufc_delete(bufc_p);
@@ -567,8 +569,8 @@ main()
 		e[3] = 13;
 		e[4] = 14;
 		bufc_p = bufc_new(NULL, NULL, NULL);
-		bufc_set_buffer(bufc_p, (void *)e, 5, TRUE, mem_dealloc,
-		    cw_g_mem);
+		bufc_set_buffer(bufc_p, (void *)e, 5, TRUE, (cw_opaque_dealloc_t
+		    *)mem_free, cw_g_mem);
 		buf_append_bufc(&buf, bufc_p, 0, 5);
 		_cw_assert(5 == buf_get_num_bufels(&buf));
 		bufc_delete(bufc_p);
@@ -664,7 +666,8 @@ main()
 		a = (cw_uint8_t *)_cw_malloc(1);
 		a[0] = 0;
 		bufc_p = bufc_new(NULL, NULL, NULL);
-		bufc_set_buffer(bufc_p, a, 1, FALSE, mem_dealloc, cw_g_mem);
+		bufc_set_buffer(bufc_p, a, 1, FALSE, (cw_opaque_dealloc_t
+		    *)mem_free, cw_g_mem);
 		_cw_assert(0 == buf_get_num_bufels(&buf));
 		buf_append_bufc(&buf, bufc_p, 0, 1);
 		_cw_assert(1 == buf_get_num_bufels(&buf));
@@ -696,8 +699,8 @@ main()
 		d[2] = 8;
 		d[3] = 9;
 		bufc_p = bufc_new(NULL, NULL, NULL);
-		bufc_set_buffer(bufc_p, (void *)d, 4, FALSE, mem_dealloc,
-		    cw_g_mem);
+		bufc_set_buffer(bufc_p, (void *)d, 4, FALSE,
+		    (cw_opaque_dealloc_t *)mem_free, cw_g_mem);
 		buf_append_bufc(&buf, bufc_p, 0, 4);
 		_cw_assert(4 == buf_get_num_bufels(&buf));
 		bufc_delete(bufc_p);
@@ -710,8 +713,8 @@ main()
 		e[3] = 13;
 		e[4] = 14;
 		bufc_p = bufc_new(NULL, NULL, NULL);
-		bufc_set_buffer(bufc_p, (void *)e, 5, TRUE, mem_dealloc,
-		    cw_g_mem);
+		bufc_set_buffer(bufc_p, (void *)e, 5, TRUE, (cw_opaque_dealloc_t
+		    *)mem_free, cw_g_mem);
 		buf_append_bufc(&buf, bufc_p, 0, 5);
 		_cw_assert(5 == buf_get_num_bufels(&buf));
 		bufc_delete(bufc_p);
@@ -832,28 +835,16 @@ main()
 		_cw_assert(0 == buf_get_size(buf_p));
 
 		bufc_p_a = bufc_new(NULL, NULL, NULL);
-		bufc_set_buffer(bufc_p_a,
-		    (void *)str_a,
-		    1,
-		    FALSE,
-		    mem_dealloc,
-		    (void *)cw_g_mem);
+		bufc_set_buffer(bufc_p_a, (void *)str_a, 1, FALSE,
+		    (cw_opaque_dealloc_t *)mem_free, (void *)cw_g_mem);
 
 		bufc_p_b = bufc_new(NULL, NULL, NULL);
-		bufc_set_buffer(bufc_p_b,
-		    (void *)str_b,
-		    1,
-		    FALSE,
-		    mem_dealloc,
-		    (void *)cw_g_mem);
+		bufc_set_buffer(bufc_p_b, (void *)str_b, 1, FALSE,
+		    (cw_opaque_dealloc_t *)mem_free, (void *)cw_g_mem);
 
 		bufc_p_c = bufc_new(NULL, NULL, NULL);
-		bufc_set_buffer(bufc_p_c,
-		    (void *)str_c,
-		    1,
-		    FALSE,
-		    mem_dealloc,
-		    (void *)cw_g_mem);
+		bufc_set_buffer(bufc_p_c, (void *)str_c, 1, FALSE,
+		    (cw_opaque_dealloc_t *)mem_free, (void *)cw_g_mem);
 
 		buf_append_bufc(buf_p, bufc_p_a, 0, 1);
 		_cw_assert(1 == buf_get_size(buf_p));
@@ -912,28 +903,16 @@ main()
 		_cw_assert(0 == buf_get_size(buf_p_b));
 
 		bufc_p_a = bufc_new(NULL, NULL, NULL);
-		bufc_set_buffer(bufc_p_a,
-		    (void *)str_a,
-		    1,
-		    FALSE,
-		    mem_dealloc,
-		    (void *)cw_g_mem);
+		bufc_set_buffer(bufc_p_a, (void *)str_a, 1, FALSE,
+		    (cw_opaque_dealloc_t *)mem_free, (void *)cw_g_mem);
 
 		bufc_p_b = bufc_new(NULL, NULL, NULL);
-		bufc_set_buffer(bufc_p_b,
-		    (void *)str_b,
-		    1,
-		    FALSE,
-		    mem_dealloc,
-		    (void *)cw_g_mem);
+		bufc_set_buffer(bufc_p_b, (void *)str_b, 1, FALSE,
+		    (cw_opaque_dealloc_t *)mem_free, (void *)cw_g_mem);
 
 		bufc_p_c = bufc_new(NULL, NULL, NULL);
-		bufc_set_buffer(bufc_p_c,
-		    (void *)str_c,
-		    1,
-		    FALSE,
-		    mem_dealloc,
-		    (void *)cw_g_mem);
+		bufc_set_buffer(bufc_p_c, (void *)str_c, 1, FALSE,
+		    (cw_opaque_dealloc_t *)mem_free, (void *)cw_g_mem);
 
 		buf_append_bufc(buf_p_a, bufc_p_a, 0, 1);
 		buf_append_bufc(buf_p_a, bufc_p_b, 0, 1);
@@ -969,12 +948,8 @@ main()
 
 		for (i = 0; i < 3; i++) {
 			bufc_p = bufc_new(NULL, NULL, NULL);
-			bufc_set_buffer(bufc_p,
-			    _cw_malloc(8),
-			    8,
-			    FALSE,
-			    mem_dealloc,
-			    (void *)cw_g_mem);
+			bufc_set_buffer(bufc_p, _cw_malloc(8), 8, FALSE,
+			    (cw_opaque_dealloc_t *)mem_free, (void *)cw_g_mem);
 			buf_append_bufc(&buf_a, bufc_p, 0, 8);
 			buf_catenate_buf(&buf_c, &buf_b, FALSE);
 			buf_catenate_buf(&buf_b, &buf_a, TRUE);
@@ -1026,12 +1001,8 @@ main()
 
 		for (i = 0; i < 3; i++) {
 			bufc_p = bufc_new(NULL, NULL, NULL);
-			bufc_set_buffer(bufc_p,
-			    _cw_malloc(8),
-			    8,
-			    FALSE,
-			    mem_dealloc,
-			    (void *)cw_g_mem);
+			bufc_set_buffer(bufc_p, _cw_malloc(8), 8, FALSE,
+			    (cw_opaque_dealloc_t *)mem_free, (void *)cw_g_mem);
 			buf_append_bufc(&buf_a, bufc_p, 0, 8);
 			buf_append_bufc(&buf_b, bufc_p, 0, 8);
 			buf_prepend_bufc(&buf_c, bufc_p, 0, 8);
@@ -1176,23 +1147,20 @@ main()
 		buf_new_r(&buf);
 		buffer = (char *)_cw_malloc(512);
 		bufc_new(&bufc, NULL, NULL);
-		bufc_set_buffer(&bufc,
-		    buffer,
-		    512,
-		    FALSE,
-		    mem_dealloc,
-		    (void *)cw_g_mem);
+		bufc_set_buffer(&bufc, buffer, 512, FALSE, (cw_opaque_dealloc_t
+		    *)mem_free, (void *)cw_g_mem);
+
 		/* Fill buffer. */
-		memcpy(buffer,
-		    "This is a whack of text in a buffer, which is inside a buf.  Now"
-		    " here is some more text.  Since this is a 512 byte buf, we might"
-		    " as well fill it with some readable text, as opposed to random g"
-		    "arbage.  Then again, writing prose just to fill a space is rathe"
-		    "r reminiscent of the good ol' school days.  Perhaps some margin "
-		    "indentation or slightly wider line spacing is in order.  Oh wait"
-		    ", this is ascii text.  Oh well.  Who says technology can solve a"
-		    "ny problem?  Well, I'm about to run out of space.  Live long an",
-		    512);
+		memcpy(buffer, "This is a whack of text in a buffer, which is"
+		    " inside a buf.  Now here is some more text.  Since this "
+		    "is a 512 byte buf, we might as well fill it with some re"
+		    "adable text, as opposed to random garbage.  Then again, "
+		    "writing prose just to fill a space is rather reminiscent"
+		    " of the good ol' school days.  Perhaps some margin inden"
+		    "tation or slightly wider line spacing is in order.  Oh w"
+		    "ait, this is ascii text.  Oh well.  Who says technology "
+		    "can solve any problem?  Well, I'm about to run out of sp"
+		    "ace.  Live long an", 512);
 
 		buf_append_bufc(buf_p, &bufc, 0, 512);
 		bufc_delete(&bufc);

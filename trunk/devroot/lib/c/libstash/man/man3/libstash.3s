@@ -443,9 +443,9 @@ directly support object-oriented design, a number of stylistic conventions
 are used.
 
 Each class is referred to by a name, which is used as a prefix for all member
-methods.  For example, open hashing is implemented by the \fBoh\fR class, and 
-member methods of \fBoh\fR are named \fBoh_new()\fR, \fBoh_delete()\fR, 
-\fBoh_item_insert()\fR, etc.
+methods.  For example, dynamic chained hashing is implemented by the \fBdch\fR
+class, and member methods of \fBdch\fR are named \fBdch_new()\fR,
+\fBdch_delete()\fR, \fBdch_insert()\fR, etc.
 
 .SS Variable types
 \fBlibstash\fR is careful to use the following data types rather than the
@@ -522,10 +522,10 @@ l | l | l.
  ch@libstash_ch(3s)@Chained hashing.
  cnd@libstash_cnd(3s)@Condition.
  dbg@libstash_dbg(3s)@Runtime debugging symbol lookup.
+ dch@libstash_dch(3s)@Dynamic chained hashing.
  mem@libstash_mem(3s)@Memory allocation (malloc(3) wrapper).
  mq@libstash_mq(3s)@Message queue.
  mtx@libstash_mtx(3s)@Mutex.
- oh@libstash_oh(3s)@Open hashing.
  out@libstash_out(3s)@Output (printf(3) replacement).
  pezz@libstash_pezz(3s)@Cached memory allocation.
  res@libstash_res(3s)@Resource (name/value pairs).

@@ -10,13 +10,16 @@
  ****************************************************************************/
 
 #include "../include/libstash/libstash.h"
-#include "../include/libstash/treen_p.h"
+
+#ifdef _LIBSTASH_DBG
+#define _CW_TREEN_MAGIC 0x34561278
+#endif
 
 cw_treen_t *
-treen_new(cw_treen_t *a_treen, void (*a_dealloc_func) (void *dealloc_arg, void
-    *move), void *a_dealloc_arg)
+treen_new(cw_treen_t *a_treen, cw_opaque_dealloc_t *a_dealloc_func, void
+    *a_dealloc_arg)
 {
-	cw_treen_t *retval;
+	cw_treen_t	*retval;
 
 	if (NULL != a_treen) {
 		retval = a_treen;
@@ -28,7 +31,7 @@ treen_new(cw_treen_t *a_treen, void (*a_dealloc_func) (void *dealloc_arg, void
 		if (NULL == retval)
 			goto RETURN;
 		bzero(retval, sizeof(cw_treen_t));
-		retval->dealloc_func = mem_dealloc;
+		retval->dealloc_func = (cw_opaque_dealloc_t *)mem_free;
 		retval->dealloc_arg = cw_g_mem;
 	}
 
@@ -61,8 +64,10 @@ treen_delete(cw_treen_t *a_treen)
 
 	/* Delete self. */
 	treen_link(a_treen, NULL);
-	if (NULL != a_treen->dealloc_func)
-		a_treen->dealloc_func(a_treen->dealloc_arg, (void *)a_treen);
+	if (NULL != a_treen->dealloc_func) {
+		_cw_opaque_dealloc(a_treen->dealloc_func, a_treen->dealloc_arg,
+		    a_treen);
+	}
 #ifdef _LIBSTASH_DBG
 	else
 		memset(a_treen, 0x5a, sizeof(cw_treen_t));

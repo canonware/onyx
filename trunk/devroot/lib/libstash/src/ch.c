@@ -19,9 +19,9 @@ cw_ch_t *
 ch_new(cw_ch_t *a_ch, cw_uint32_t a_table_size, cw_ch_hash_t *a_hash,
     cw_ch_key_comp_t *a_key_comp)
 {
-	cw_ch_t *retval;
+	cw_ch_t	*retval;
 
-	_cw_assert(0 < a_table_size);
+	_cw_assert(a_table_size > 0);
 
 	if (NULL != a_ch) {
 		retval = a_ch;
@@ -44,36 +44,33 @@ ch_new(cw_ch_t *a_ch, cw_uint32_t a_table_size, cw_ch_hash_t *a_hash,
 	retval->magic = _CW_CH_MAGIC;
 #endif
 
-RETURN:
+	RETURN:
 	return retval;
 }
 
 void
 ch_delete(cw_ch_t *a_ch)
 {
-	cw_ring_t *t_ring;
-	cw_chi_t *chi;
+	cw_chi_t	*chi;
 
 	_cw_check_ptr(a_ch);
-	_cw_assert(_CW_CH_MAGIC == a_ch->magic);
+	_cw_assert(a_ch->magic == _CW_CH_MAGIC);
 
-	if (NULL != a_ch->chi_qr) {
+	if (a_ch->chi_qr != NULL) {
 		do {
-			t_chi = a_ch->chi_qr;
-			a_ch->chi_qr = qr_next(a_ch->chi_qr);
-			qr_remove(t_chi, ch_link);
-			if (t_chi->is_malloced) {
-				_cw_free(t_chi);
-			}
+			chi = a_ch->chi_qr;
+			a_ch->chi_qr = qr_next(a_ch->chi_qr, ch_link);
+			qr_remove(chi, ch_link);
+			if (chi->is_malloced)
+				_cw_free(chi);
 #ifdef _LIBSTASH_DBG
-			else {
-				memset(t_chi, 0x5a, sizeof(cw_chi_t));
-			}
+			else
+				memset(chi, 0x5a, sizeof(cw_chi_t));
 #endif
-		} while (a_ch->chi_qr != t_chi);
+		} while (chi != a_ch->chi_qr);
 	}
 
-	if (TRUE == a_ch->is_malloced)
+	if (a_ch->is_malloced)
 		_cw_free(a_ch);
 #ifdef _LIBSTASH_DBG
 	else
@@ -85,63 +82,60 @@ cw_uint32_t
 ch_count(cw_ch_t *a_ch)
 {
 	_cw_check_ptr(a_ch);
-	_cw_assert(_CW_CH_MAGIC == a_ch->magic);
+	_cw_assert(a_ch->magic == _CW_CH_MAGIC);
 
 	return a_ch->count;
 }
 
 cw_bool_t
 ch_insert(cw_ch_t *a_ch, const void *a_key, const void *a_data, cw_chi_t
-    *a_linkage)
+    *a_chi)
 {
-	cw_bool_t retval;
-	cw_uint32_t slot;
-	cw_chi_t *chi;
+	cw_bool_t	retval;
+	cw_uint32_t	slot;
+	cw_chi_t	*chi;
 
 	_cw_check_ptr(a_ch);
-	_cw_assert(_CW_CH_MAGIC == a_ch->magic);
+	_cw_assert(a_ch->magic == _CW_CH_MAGIC);
 
 	/* Initialize chi. */
-	if (a_linkage != NULL) {
-		chi = a_linkage;
+	if (a_chi != NULL) {
+		chi = a_chi;
 		chi->is_malloced = FALSE;
 	} else {
 		chi = (cw_chi_t *)_cw_malloc(sizeof(cw_chi_t));
-		if (NULL == chi) {
+		if (chi == NULL) {
 			retval = TRUE;
 			goto RETURN;
 		}
 		chi->is_malloced = TRUE;
 	}
-	/* XXX */
 	chi->key = a_key;
 	chi->data = a_data;
-	ring_new(&chi->ch_link);
-	ring_set_data(&chi->ch_link, chi);
-	ring_new(&chi->slot_link);
-	ring_set_data(&chi->slot_link, chi);
+	qr_init(chi, ch_link);
+	qr_init(chi, slot_link);
 	slot = a_ch->hash(a_key) % a_ch->table_size;
 	chi->slot = slot;
 
 	/* Hook into ch-wide ring. */
-	if (NULL != a_ch->chi_ring)
-		ring_meld(a_ch->chi_ring, &chi->ch_link);
+	if (a_ch->chi_qr != NULL)
+		qr_meld(a_ch->chi_qr, chi, ch_link);
 	else
-		a_ch->chi_ring = &chi->ch_link;
+		a_ch->chi_qr = chi;
 
-	if (NULL != a_ch->table[slot]) {
+	if (a_ch->table[slot] != NULL) {
 		/*
 		 * Other chi's in this slot already.  Put this one at the
 		 * head, in order to implement LIFO ordering for multiple
 		 * chi's with the same key.
 		 */
-		ring_meld(&chi->slot_link, a_ch->table[slot]);
+		qr_meld(chi, a_ch->table[slot], slot_link);
 
 #ifdef _LIBSTASH_DBG
 		a_ch->num_collisions++;
 #endif
 	}
-	a_ch->table[slot] = &chi->slot_link;
+	a_ch->table[slot] = chi;
 
 	a_ch->count++;
 #ifdef _LIBSTASH_DBG
@@ -149,60 +143,60 @@ ch_insert(cw_ch_t *a_ch, const void *a_key, const void *a_data, cw_chi_t
 #endif
 
 	retval = FALSE;
-RETURN:
+	RETURN:
 	return retval;
 }
 
 cw_bool_t
-ch_remove(cw_ch_t *a_ch, const void *a_search_key, void **r_key, void **r_data)
+ch_remove(cw_ch_t *a_ch, const void *a_search_key, void **r_key, void **r_data,
+    cw_chi_t **r_chi)
 {
-	cw_bool_t retval;
-	cw_uint32_t slot;
-	cw_chi_t *chi;
-	cw_ring_t *t_ring;
+	cw_bool_t	retval;
+	cw_uint32_t	slot;
+	cw_chi_t	*chi;
 
 	_cw_check_ptr(a_ch);
-	_cw_assert(_CW_CH_MAGIC == a_ch->magic);
+	_cw_assert(a_ch->magic == _CW_CH_MAGIC);
 
 	slot = a_ch->hash(a_search_key) % a_ch->table_size;
 
-	if (NULL == a_ch->table[slot]) {
+	if (a_ch->table[slot] == NULL) {
 		retval = TRUE;
 		goto RETURN;
 	}
-	t_ring = a_ch->table[slot];
+	chi = a_ch->table[slot];
 	do {
-		chi = (cw_chi_t *) ring_get_data(t_ring);
-
 		/* Is this the chi we want? */
-		if (TRUE == a_ch->key_comp(a_search_key, chi->key)) {
+		if (a_ch->key_comp(a_search_key, chi->key) == TRUE) {
 			/* Detach from ch-wide ring. */
-			if (a_ch->chi_ring == &chi->ch_link) {
-				a_ch->chi_ring = ring_next(a_ch->chi_ring);
-				if (a_ch->chi_ring == &chi->ch_link) {
-					a_ch->chi_ring = NULL;
+			if (a_ch->chi_qr == chi) {
+				a_ch->chi_qr = qr_next(a_ch->chi_qr, ch_link);
+				if (a_ch->chi_qr == chi) {
+					/* Last chi in the ch. */
+					a_ch->chi_qr = NULL;
 				}
 			}
-			ring_cut(&chi->ch_link);
-
+			qr_remove(chi, ch_link);
+			
 			/* Detach from the slot ring. */
-			if (a_ch->table[slot] == t_ring) {
-				a_ch->table[slot] =
-				    ring_next(a_ch->table[slot]);
-				if (a_ch->table[slot] == t_ring)
+			if (a_ch->table[slot] == chi) {
+				a_ch->table[slot] = qr_next(a_ch->table[slot],
+				    slot_link);
+				if (a_ch->table[slot] == chi) {
+					/* Last chi in this slot. */
 					a_ch->table[slot] = NULL;
+				}
 			}
-			ring_cut(&chi->slot_link);
+			qr_remove(chi, slot_link);
 
-			if (NULL != r_key)
+			if (r_key != NULL)
 				*r_key = (void *)chi->key;
-			if (NULL != r_data)
+			if (r_data != NULL)
 				*r_data = (void *)chi->data;
-			/* Deallocate the chi. */
-			if (NULL != a_ch->chi_pezz)
-				_cw_pezz_put(a_ch->chi_pezz, chi);
-			else
+			if (chi->is_malloced)
 				_cw_free(chi);
+			else if (r_chi != NULL)
+				*r_chi = chi;
 
 			a_ch->count--;
 #ifdef _LIBSTASH_DBG
@@ -211,113 +205,114 @@ ch_remove(cw_ch_t *a_ch, const void *a_search_key, void **r_key, void **r_data)
 			retval = FALSE;
 			goto RETURN;
 		}
-		t_ring = ring_next(t_ring);
-	} while (t_ring != a_ch->table[slot]);
+		chi = qr_next(chi, slot_link);
+	} while (chi != a_ch->table[slot]);
 
 	retval = TRUE;
-RETURN:
+	RETURN:
 	return retval;
 }
 
 cw_bool_t
 ch_search(cw_ch_t *a_ch, const void *a_key, void **r_data)
 {
-	cw_bool_t retval;
-	cw_uint32_t slot;
-	cw_chi_t *chi;
-	cw_ring_t *t_ring;
+	cw_bool_t	retval;
+	cw_uint32_t	slot;
+	cw_chi_t	*chi;
 
 	_cw_check_ptr(a_ch);
-	_cw_assert(_CW_CH_MAGIC == a_ch->magic);
+	_cw_assert(a_ch->magic == _CW_CH_MAGIC);
 
 	slot = a_ch->hash(a_key) % a_ch->table_size;
 
-	if (NULL == a_ch->table[slot]) {
+	if (a_ch->table[slot] == NULL) {
 		retval = TRUE;
 		goto RETURN;
 	}
-	t_ring = a_ch->table[slot];
+	chi = a_ch->table[slot];
 	do {
-		chi = (cw_chi_t *) ring_get_data(t_ring);
-
 		/* Is this the chi we want? */
-		if (TRUE == a_ch->key_comp(a_key, chi->key)) {
-			if (NULL != r_data)
+		if (a_ch->key_comp(a_key, chi->key) == TRUE) {
+			if (r_data != NULL)
 				*r_data = (void *)chi->data;
 			retval = FALSE;
 			goto RETURN;
 		}
-		t_ring = ring_next(t_ring);
-	} while (t_ring != a_ch->table[slot]);
+		chi = qr_next(chi, slot_link);
+	} while (chi != a_ch->table[slot]);
 
 	retval = TRUE;
-RETURN:
+	RETURN:
 	return retval;
 }
 
 cw_bool_t
 ch_get_iterate(cw_ch_t *a_ch, void **r_key, void **r_data)
 {
-	cw_bool_t retval;
-	cw_chi_t *chi;
+	cw_bool_t	retval;
+	cw_chi_t	*chi;
 
 	_cw_check_ptr(a_ch);
-	_cw_assert(_CW_CH_MAGIC == a_ch->magic);
+	_cw_assert(a_ch->magic == _CW_CH_MAGIC);
 
-	if (NULL == a_ch->chi_ring) {
+	if (a_ch->chi_qr == NULL) {
 		retval = TRUE;
 		goto RETURN;
 	}
-	chi = (cw_chi_t *) ring_get_data(a_ch->chi_ring);
-	if (NULL != r_key)
+	chi = a_ch->chi_qr;
+	if (r_key != NULL)
 		*r_key = (void *)chi->key;
-	if (NULL != r_data)
+	if (r_data != NULL)
 		*r_data = (void *)chi->data;
-	a_ch->chi_ring = ring_next(a_ch->chi_ring);
+	a_ch->chi_qr = qr_next(a_ch->chi_qr, ch_link);
 
 	retval = FALSE;
-RETURN:
+	RETURN:
 	return retval;
 }
 
 cw_bool_t
-ch_remove_iterate(cw_ch_t *a_ch, void **r_key, void **r_data)
+ch_remove_iterate(cw_ch_t *a_ch, void **r_key, void **r_data, cw_chi_t **r_chi)
 {
-	cw_bool_t retval;
-	cw_ring_t *t_ring;
-	cw_chi_t *chi;
+	cw_bool_t	retval;
+	cw_chi_t	*chi;
 
 	_cw_check_ptr(a_ch);
-	_cw_assert(_CW_CH_MAGIC == a_ch->magic);
+	_cw_assert(a_ch->magic == _CW_CH_MAGIC);
 
-	if (NULL == a_ch->chi_ring) {
+	if (a_ch->chi_qr == NULL) {
 		retval = TRUE;
 		goto RETURN;
 	}
-	chi = (cw_chi_t *) ring_get_data(a_ch->chi_ring);
-	if (NULL != r_key)
-		*r_key = (void *)chi->key;
-	if (NULL != r_data)
-		*r_data = (void *)chi->data;
-	/* Detach from the ch-wide ring. */
-	t_ring = a_ch->chi_ring;
-	a_ch->chi_ring = ring_cut(t_ring);
-	if (t_ring == a_ch->chi_ring)
-		a_ch->chi_ring = NULL;
-	/* Detach from the slot ring. */
-	t_ring = &chi->slot_link;
-	if (t_ring == a_ch->table[chi->slot]) {
-		a_ch->table[chi->slot] = ring_next(a_ch->table[chi->slot]);
-		if (t_ring == a_ch->table[chi->slot])
-			a_ch->table[chi->slot] = NULL;
-	}
-	ring_cut(t_ring);
+	chi = a_ch->chi_qr;
 
-	/* Deallocate the chi. */
-	if (NULL != a_ch->chi_pezz)
-		_cw_pezz_put(a_ch->chi_pezz, chi);
-	else
+	/* Detach from the ch-wide ring. */
+	a_ch->chi_qr = qr_next(a_ch->chi_qr, ch_link);
+	if (a_ch->chi_qr == chi) {
+		/* Last chi in the ch. */
+		a_ch->chi_qr = NULL;
+	}
+	qr_remove(chi, ch_link);
+	
+	/* Detach from the slot ring. */
+	if (a_ch->table[chi->slot] == chi) {
+		a_ch->table[chi->slot] = qr_next(a_ch->table[chi->slot],
+		    slot_link);
+		if (a_ch->table[chi->slot] == chi) {
+			/* Last chi in this slot. */
+			a_ch->table[chi->slot] = NULL;
+		}
+	}
+	qr_remove(chi, slot_link);
+	
+	if (r_key != NULL)
+		*r_key = (void *)chi->key;
+	if (r_data != NULL)
+		*r_data = (void *)chi->data;
+	if (chi->is_malloced)
 		_cw_free(chi);
+	else if (r_chi != NULL)
+		*r_chi = chi;
 
 	a_ch->count--;
 #ifdef _LIBSTASH_DBG
@@ -325,65 +320,61 @@ ch_remove_iterate(cw_ch_t *a_ch, void **r_key, void **r_data)
 #endif
 
 	retval = FALSE;
-RETURN:
+	RETURN:
 	return retval;
 }
 
 void
 ch_dump(cw_ch_t *a_ch, const char *a_prefix)
 {
-	cw_uint32_t i;
-	cw_ring_t *t_ring;
-	cw_chi_t *chi;
+	cw_uint32_t	i;
+	cw_chi_t	*chi;
 
 	_cw_check_ptr(a_ch);
-	_cw_assert(_CW_CH_MAGIC == a_ch->magic);
+	_cw_assert(a_ch->magic == _CW_CH_MAGIC);
 	_cw_check_ptr(a_prefix);
 
 #ifdef _LIBSTASH_DBG
-	_cw_out_put("[s]: num_collisions: [i], num_inserts: [i], num_removes: [i]\n",
+	_cw_out_put("[s]: num_collisions: [i], num_inserts: [i],"
+	    " num_removes: [i]\n",
 	    a_prefix, a_ch->num_collisions, a_ch->num_inserts,
 	    a_ch->num_removes);
 #endif
 
 	_cw_out_put("[s]: is_malloced: [s]\n",
 	    a_prefix, (a_ch->is_malloced) ? "TRUE" : "FALSE");
-	_cw_out_put("[s]: chi_ring: 0x[p]\n",
-	    a_prefix, a_ch->chi_ring);
+	_cw_out_put("[s]: chi_qr: 0x[p]\n",
+	    a_prefix, a_ch->chi_qr);
 	_cw_out_put("[s]: count: [i], table_size: [i]\n",
 	    a_prefix, a_ch->count, a_ch->table_size);
 
 	/* Table. */
-	_cw_out_put(
-	    "[s]: table ------------------------------------------------------------\n",
-	    a_prefix);
+	_cw_out_put("[s]: table --------------------------------------"
+	    "----------------------\n", a_prefix);
 
 	for (i = 0; i < a_ch->table_size; i++) {
-		if (NULL != a_ch->table[i]) {
-			t_ring = a_ch->table[i];
-
+		if (a_ch->table[i] != NULL) {
+			chi = a_ch->table[i];
 			do {
-				chi = (cw_chi_t *) ring_get_data(t_ring);
-				_cw_out_put("[s]: [i]: key: 0x[p], data: 0x[p], slot: [i]\n",
-				    a_prefix, i, chi->key, chi->data, chi->slot);
-				t_ring = ring_next(t_ring);
-			} while (a_ch->table[i] != t_ring);
+				_cw_out_put("[s]: [i]: key: 0x[p],"
+				    " data: 0x[p], slot: [i]\n", a_prefix, i,
+				    chi->key, chi->data, chi->slot);
+				chi = qr_next(chi, slot_link);
+			} while (chi != a_ch->table[i]);
 		} else
 			_cw_out_put("[s]: [i]: NULL\n", a_prefix, i);
 	}
 
 	/* chi ring. */
-	_cw_out_put(
-	    "[s]: chi_ring ---------------------------------------------------------\n",
-	    a_prefix);
-	if (NULL != a_ch->chi_ring) {
-		t_ring = a_ch->chi_ring;
+	_cw_out_put("[s]: chi_ring -----------------------------------"
+	    "----------------------\n", a_prefix);
+	if (a_ch->chi_qr != NULL) {
+		chi = a_ch->chi_qr;
 		do {
-			chi = (cw_chi_t *) ring_get_data(t_ring);
 			_cw_out_put("[s]: key: 0x[p], data: 0x[p], slot: [i]\n",
 			    a_prefix, chi->key, chi->data, chi->slot);
-			t_ring = ring_next(t_ring);
-		} while (a_ch->chi_ring != t_ring);
+			chi = qr_next(chi, ch_link);
+		} while (chi != a_ch->chi_qr);
 	} else
 		_cw_out_put("[s]: Empty\n", a_prefix);
 }
@@ -391,8 +382,8 @@ ch_dump(cw_ch_t *a_ch, const char *a_prefix)
 cw_uint32_t
 ch_hash_string(const void *a_key)
 {
-	cw_uint32_t retval;
-	char   *str;
+	cw_uint32_t	retval;
+	char		*str;
 
 	_cw_check_ptr(a_key);
 
@@ -405,8 +396,7 @@ ch_hash_string(const void *a_key)
 cw_uint32_t
 ch_hash_direct(const void *a_key)
 {
-	cw_uint32_t retval;
-	cw_uint32_t i;
+	cw_uint32_t	retval, i;
 
 	retval = (cw_uint32_t)a_key;
 

@@ -125,6 +125,13 @@ typedef enum {
 } cw_bool_t;
 
 /*
+ * Generic typedef used for memory deallocation hooks.  This typedef is
+ * compatible with functions such as mem_free(), pezz_put() and pool_put().
+ */
+typedef void cw_opaque_dealloc_t (const void *, const void *, const char *,
+    cw_uint32_t);
+
+/*
  * More grossness to make sure things still work, even if TRUE and/or FALSE
  * are/is defined.
  */
@@ -160,18 +167,17 @@ extern cw_out_t *cw_g_out;
 /*
  * Global macros we use everywhere.
  */
+
+/*
+ * Used for deallocation via an opaque function pointer.  These macros are used
+ * to call functions such as mem_free(), pezz_put(), and pool_put().
+ */
 #if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
-#define _cw_malloc(a) mem_malloc(cw_g_mem, a, __FILE__, __LINE__)
-#define _cw_calloc(a, b) mem_calloc(cw_g_mem, a, b, __FILE__, __LINE__)
-#define _cw_realloc(a, b) mem_realloc(cw_g_mem, a, b, __FILE__, __LINE__)
-#define _cw_free(a) mem_free(cw_g_mem, a, __FILE__, __LINE__)
-#define _cw_dealloc(a) mem_dealloc((void *) cw_g_mem, a, __FILE__, __LINE__)
+#define _cw_opaque_dealloc(a_func, a_arg, a_ptr)			\
+	(a_func)((void *)(a_arg), (void *)(a_ptr), __FILE__, __LINE__)
 #else
-#define _cw_malloc(a) mem_malloc(cw_g_mem, a)
-#define _cw_calloc(a, b) mem_calloc(cw_g_mem, a, b)
-#define _cw_realloc(a, b) mem_realloc(cw_g_mem, a, b)
-#define _cw_free(a) mem_free(cw_g_mem, a)
-#define _cw_dealloc(a) mem_dealloc((void *) cw_g_mem, a)
+#define _cw_opaque_dealloc(a_func, a_arg, a_ptr)			\
+	(a_func)((void *)(a_arg), (void *)(a_ptr), NULL, 0)
 #endif
 
 #ifdef WORDS_BIGENDIAN

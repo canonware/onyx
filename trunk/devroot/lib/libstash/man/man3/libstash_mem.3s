@@ -23,62 +23,67 @@ mem - malloc wrapper.
 .I void
 .br
 .B mem_delete
-.RI ( "cw_mem_t * a_mem" )
+.RI ( "cw_mem_t *a_mem" )
 
 .I void
 .br
 .B mem_set_oom_handler
-.RI ( "cw_mem_t * a_mem" ", " "cw_mem_oom_handler_t * a_oom_handler" ", "
-.IR "const void * a_data" )
+.RI ( "cw_mem_t *a_mem" ", " "cw_mem_oom_handler_t *a_oom_handler" ", "
+.IR "const void *a_data" )
 
 .I void *
 .br
 .B mem_malloc
-.RI ( "cw_mem_t * a_mem" ", " "size_t a_size" )
+.RI ( "cw_mem_t *a_mem" ", " "size_t a_size" )
 .br
 .I void *
 .br
 .B mem_malloc
-.RI ( "cw_mem_t * a_mem" ", " "size_t a_size" ", " "const char * a_filename"
+.RI ( "cw_mem_t *a_mem" ", " "size_t a_size" ", " "const char *a_filename"
 .RI ", " "cw_uint32_t a_line_num" )
 
 .I void *
 .br
 .B mem_calloc
-.RI ( "cw_mem_t * a_mem" ", " "size_t a_number" ", " "size_t a_size" )
+.RI ( "cw_mem_t *a_mem" ", " "size_t a_number" ", " "size_t a_size" )
 .br
 .I void *
 .br
 .B mem_calloc
-.RI ( "cw_mem_t * a_mem" ", " "size_t a_number" ", " "size_t a_size" ", "
-.IR "const char * a_filename" ", " "cw_uint32_t a_line_num" )
+.RI ( "cw_mem_t *a_mem" ", " "size_t a_number" ", " "size_t a_size" ", "
+.IR "const char *a_filename" ", " "cw_uint32_t a_line_num" )
 
 .I void *
 .br
 .B mem_realloc
-.RI ( "cw_mem_t * a_mem" ", " "void * a_ptr" ", " "size_t a_size" )
+.RI ( "cw_mem_t *a_mem" ", " "void *a_ptr" ", " "size_t a_size" )
 .br
 .I void *
 .br
 .B mem_realloc
-.RI ( "cw_mem_t * a_mem" ", " "void * a_ptr" ", " "size_t a_size" ", "
-.IR "const char * a_filename" ", " "cw_uint32_t a_line_num" )
+.RI ( "cw_mem_t *a_mem" ", " "void *a_ptr" ", " "size_t a_size" ", "
+.IR "const char *a_filename" ", " "cw_uint32_t a_line_num" )
 
 .I void
 .br
 .B mem_free
-.RI ( "cw_mem_t * a_mem" ", " "void * a_ptr" )
+.RI ( "cw_mem_t *a_mem" ", " "void *a_ptr" )
 .br
 .I void
 .br
 .B mem_free
-.RI ( "cw_mem_t * a_mem" ", " "void * a_ptr" ", " "const char * a_filename"
+.RI ( "cw_mem_t *a_mem" ", " "void *a_ptr" ", " "const char *a_filename"
 .RI ", " "cw_uint32_t a_line_num" )
 
 .I void
 .br
 .B mem_dealloc
-.RI ( "void * a_mem" ", " "void * a_ptr" )
+.RI ( "void *a_mem" ", " "void *a_ptr" )
+
+.SS Type definitions
+.I cw_bool_t
+.B cw_mem_oom_handler_t
+.RI ( "const void *a_data" ", " "cw_uint32_t a_size" )
 
 .SS Debugging (dbg) symbols
 .TP
@@ -110,8 +115,7 @@ memory is referenced.
 
 In general, this class doesn't need to be used directly.  Instead, there are
 several preprocessor macros that can be used: \fB_cw_malloc\fR(),
-\fB_cw_calloc\fR(), \fB_cw_realloc\fR(), \fB_cw_free\fR(), and
-\fB_cw_dealloc\fR().
+\fB_cw_calloc\fR(), \fB_cw_realloc\fR(), and \fB_cw_free\fR().
 
 .SH USAGE
 .I cw_mem_t *
@@ -136,12 +140,11 @@ Description:
 .RS
 Constructor.
 .RE
-.RE
 
 .I void
 .br
 .B mem_delete
-.RI ( "cw_mem_t * a_mem" )
+.RI ( "cw_mem_t *a_mem" )
 .br
 Input(s):
 .RS
@@ -158,13 +161,12 @@ Description:
 .RS
 Destructor.
 .RE
-.RE
 
 .I void
 .br
 .B mem_set_oom_handler
-.RI ( "cw_mem_t * a_mem" ", " "cw_mem_oom_handler_t * a_oom_handler" ", "
-.IR "const void * a_data" )
+.RI ( "cw_mem_t *a_mem" ", " "cw_mem_oom_handler_t *a_oom_handler" ", "
+.IR "const void *a_data" )
 .br
 Input(s):
 .RS
@@ -189,19 +191,18 @@ Description:
 .RS
 Set an out of memory handler function.  The handler function is called whenever
 memory allocation fails.  If the handler returns TRUE, alloction is
-re-attempted once.
-.RE
+re-attempted.
 .RE
 
 .I void *
 .br
 .B mem_malloc
-.RI ( "cw_mem_t * a_mem" ", " "size_t a_size" )
+.RI ( "cw_mem_t *a_mem" ", " "size_t a_size" )
 .br
 .I void *
 .br
 .B mem_malloc
-.RI ( "cw_mem_t * a_mem" ", " "size_t a_size" ", " "const char * a_filename"
+.RI ( "cw_mem_t *a_mem" ", " "size_t a_size" ", " "const char *a_filename"
 .RI ", " "cw_uint32_t a_line_num" )
 .br
 Input(s):
@@ -236,18 +237,17 @@ Description:
 .RS
 \fBmalloc\fR() wrapper.
 .RE
-.RE
 
 .I void *
 .br
 .B mem_calloc
-.RI ( "cw_mem_t * a_mem" ", " "size_t a_number" ", " "size_t a_size" )
+.RI ( "cw_mem_t *a_mem" ", " "size_t a_number" ", " "size_t a_size" )
 .br
 .I void *
 .br
 .B mem_calloc
-.RI ( "cw_mem_t * a_mem" ", " "size_t a_number" ", " "size_t a_size" ", "
-.IR "const char * a_filename" ", " "cw_uint32_t a_line_num" )
+.RI ( "cw_mem_t *a_mem" ", " "size_t a_number" ", " "size_t a_size" ", "
+.IR "const char *a_filename" ", " "cw_uint32_t a_line_num" )
 .br
 Input(s):
 .RS
@@ -285,18 +285,17 @@ Description:
 .RS
 \fBcalloc\fR() wrapper.
 .RE
-.RE
 
 .I void *
 .br
 .B mem_realloc
-.RI ( "cw_mem_t * a_mem" ", " "void * a_ptr" ", " "size_t a_size" )
+.RI ( "cw_mem_t *a_mem" ", " "void *a_ptr" ", " "size_t a_size" )
 .br
 .I void *
 .br
 .B mem_realloc
-.RI ( "cw_mem_t * a_mem" ", " "void * a_ptr" ", " "size_t a_size" ", "
-.IR "const char * a_filename" ", " "cw_uint32_t a_line_num" )
+.RI ( "cw_mem_t *a_mem" ", " "void *a_ptr" ", " "size_t a_size" ", "
+.IR "const char *a_filename" ", " "cw_uint32_t a_line_num" )
 .br
 Input(s):
 .RS
@@ -325,7 +324,7 @@ Output(s):
 .RS
 .IR retval :
 .RS
-non_NULL: Pointer to a zeroed memory range.
+non-NULL: Pointer to a zeroed memory range.
 .br
 NULL: Memory allocation error.
 .RE
@@ -334,17 +333,16 @@ Description:
 .RS
 \fBrealloc\fR() wrapper.
 .RE
-.RE
 
 .I void
 .br
 .B mem_free
-.RI ( "cw_mem_t * a_mem" ", " "void * a_ptr" )
+.RI ( "cw_mem_t *a_mem" ", " "void *a_ptr" )
 .br
 .I void
 .br
 .B mem_free
-.RI ( "cw_mem_t * a_mem" ", " "void * a_ptr" ", " "const char * a_filename"
+.RI ( "cw_mem_t *a_mem" ", " "void *a_ptr" ", " "const char *a_filename"
 .RI ", " "cw_uint32_t a_line_num" )
 .br
 Input(s):
@@ -378,12 +376,11 @@ Description:
 .RS
 \fBfree\fR() wrapper.
 .RE
-.RE
 
 .I void
 .br
 .B mem_dealloc
-.RI ( "void * a_mem" ", " "void * a_ptr" )
+.RI ( "void *a_mem" ", " "void *a_ptr" )
 .br
 Input(s):
 .RS
@@ -406,6 +403,36 @@ Basically the same as \fBmem_free\fR(), but with a different function prototype.
 This function can be used for passing a function pointer to do automatic
 deallocation, as in the buf and ring classes.
 .RE
+
+.I cw_bool_t
+.B cw_mem_oom_handler_t
+.RI ( "const void *a_data" ", " "cw_uint32_t a_size" )
+.br
+Input(s):
+.RS
+.IR a_data :
+.RS
+Data pointer, as specified by the a_data argument of
+\fBmem_set_oom_handler\fR().
+.RE
+.IR a_size :
+.RS
+Size of failed memory allocation.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+FALSE: Don't retry allocation.
+.br
+TRUE: Retry allocation.
+.RE
+.RE
+Description:
+.RS
+A function pointer of this type can be passed in via
+\fBmem_set_oom_handler\fR().
 .RE
 
 .SH SEE ALSO

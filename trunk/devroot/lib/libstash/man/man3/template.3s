@@ -51,7 +51,6 @@ Description:
 .RS
 <description>
 .RE
-.RE
 
 .SH SEE ALSO
 libstash(3s).

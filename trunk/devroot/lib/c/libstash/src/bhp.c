@@ -10,12 +10,27 @@
  ****************************************************************************/
 
 #include "../include/libstash/libstash.h"
-#include "../include/libstash/bhp_p.h"
+
+#ifdef _LIBSTASH_DBG
+#define _LIBSTASH_BHP_MAGIC 0xbf917ca1
+#define _LIBSTASH_BHPI_MAGIC 0xbf90ec15
+#endif
+
+static cw_bhp_t	*bhp_p_new(cw_bhp_t *a_bhp, bhp_prio_comp_t *a_prio_comp,
+    cw_bool_t a_is_thread_safe);
+
+static cw_bhpi_t *bhp_p_dump(cw_bhpi_t *a_bhpi, cw_uint32_t a_depth, cw_bhpi_t
+    *a_last_printed);
+
+static void	bhp_p_bin_link(cw_bhpi_t *a_root, cw_bhpi_t *a_non_root);
+
+static void	bhp_p_merge(cw_bhp_t *a_bhp, cw_bhp_t *a_other);
+
+static void	bhp_p_union(cw_bhp_t *a_bhp, cw_bhp_t *a_other);
 
 cw_bhpi_t *
 bhpi_new(cw_bhpi_t *a_bhpi, const void *a_priority, const void *a_data,
-    void (*a_dealloc_func) (void *dealloc_arg, void *bhpi),
-    void *a_dealloc_arg)
+    cw_opaque_dealloc_t *a_dealloc_func, void *a_dealloc_arg)
 {
 	cw_bhpi_t *retval;
 
@@ -29,7 +44,7 @@ bhpi_new(cw_bhpi_t *a_bhpi, const void *a_priority, const void *a_data,
 		if (NULL == retval)
 			goto RETURN;
 		bzero(retval, sizeof(cw_bhpi_t));
-		retval->dealloc_func = mem_dealloc;
+		retval->dealloc_func = (cw_opaque_dealloc_t *)mem_free;
 		retval->dealloc_arg = cw_g_mem;
 	}
 
@@ -54,8 +69,10 @@ bhpi_delete(cw_bhpi_t *a_bhpi)
 	_cw_assert(sizeof(cw_bhpi_t) == a_bhpi->size_of);
 	_cw_assert(_LIBSTASH_BHPI_MAGIC == a_bhpi->magic_b);
 
-	if (NULL != a_bhpi->dealloc_func)
-		a_bhpi->dealloc_func(a_bhpi->dealloc_arg, a_bhpi);
+	if (NULL != a_bhpi->dealloc_func) {
+		_cw_opaque_dealloc(a_bhpi->dealloc_func, a_bhpi->dealloc_arg,
+		    a_bhpi);
+	}
 #ifdef _LIBSTASH_DBG
 	else
 		memset(a_bhpi, 0x5a, sizeof(cw_bhpi_t));

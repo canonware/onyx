@@ -16,52 +16,52 @@ dch - Dynamic chained hashing.
 .I cw_dch_t *
 .br
 .B dch_new
-.RI ( "cw_dch_t * a_dch" ", " "cw_uint32_t a_base_table" ", "
+.RI ( "cw_dch_t *a_dch" ", " "cw_uint32_t a_base_table" ", "
 .IR "cw_uint32_t a_base_grow" ", " "cw_uint32_t a_base_shrink" ", "
-.IR "cw_pezz_t * a_chi_pezz" ", " "cw_ch_hash_t * a_hash" ", "
-.IR "cw_ch_key_comp_t * a_key_comp" )
+.IR "cw_ch_hash_t *a_hash" ", " "cw_ch_key_comp_t *a_key_comp" )
 
 .I void
 .br
 .B dch_delete
-.RI ( "cw_dch_t * a_dch" )
+.RI ( "cw_dch_t *a_dch" )
 
 .I cw_uint32_t
 .br
 .B dch_count
-.RI ( "cw_dch_t * a_dch" )
+.RI ( "cw_dch_t *a_dch" )
 
 .I cw_bool_t
 .br
 .B dch_insert
-.RI ( "cw_dch_t * a_dch" ", " "const void * a_key" ", " 
-.IR "const void * a_data" )
+.RI ( "cw_dch_t *a_dch" ", " "const void *a_key" ", " 
+.IR "const void *a_data" ", " "cw_chi_t *a_chi" )
 
 .I cw_bool_t
 .br
 .B dch_remove
-.RI ( "cw_dch_t * a_dch" ", " "const void * a_search_key" ", " "void ** r_key"
-.RI ", " "void ** r_data" )
+.RI ( "cw_dch_t *a_dch" ", " "const void *a_search_key" ", " "void **r_key"
+.RI ", " "void **r_data" ", " "cw_chi_t **r_chi" )
 
 .I cw_bool_t
 .br
 .B dch_search
-.RI ( "cw_dch_t * a_dch" ", " "const void * a_key" ", " "void ** r_data" )
+.RI ( "cw_dch_t *a_dch" ", " "const void *a_key" ", " "void **r_data" )
 
 .I cw_bool_t
 .br
 .B dch_get_iterate
-.RI ( "cw_dch_t * a_dch" ", "  "void ** r_key" ", " "void ** r_data" )
+.RI ( "cw_dch_t *a_dch" ", "  "void **r_key" ", " "void **r_data" )
 
 .I cw_bool_t
 .br
 .B dch_remove_iterate
-.RI ( "cw_dch_t * a_dch" ", " "void ** r_key" ", " "void ** r_data" )
+.RI ( "cw_dch_t *a_dch" ", " "void **r_key" ", " "void **r_data" ", "
+.IR "cw_chi_t **r_chi" )
 
 .I void
 .br
 .B dch_dump
-.RI ( "cw_dch_t * a_dch" ", " "const char * a_prefix" )
+.RI ( "cw_dch_t *a_dch" ", " "const char *a_prefix" )
 
 .SS Debugging (dbg) symbols
 None.
@@ -76,10 +76,9 @@ class behaves almost exactly like the \fBch\f class.
 .I cw_dch_t *
 .br
 .B dch_new
-.RI ( "cw_dch_t * a_dch" ", " "cw_uint32_t a_base_table" ", "
+.RI ( "cw_dch_t *a_dch" ", " "cw_uint32_t a_base_table" ", "
 .IR "cw_uint32_t a_base_grow" ", " "cw_uint32_t a_base_shrink" ", "
-.IR "cw_pezz_t * a_chi_pezz" ", " "cw_ch_hash_t * a_hash" ", "
-.IR "cw_ch_key_comp_t * a_key_comp" )
+.IR "cw_ch_hash_t *a_hash" ", " "cw_ch_key_comp_t *a_key_comp" )
 .br
 Input(s):
 .RS
@@ -101,12 +100,6 @@ double the table additional times.
 .RS
 Minimum proportional (with respect to a_base_table) emptiness to allow in the
 hash table before cutting the hash table size in half.  This
-.RE
-.IR a_chi_pezz :
-.RS
-Non-NULL: Pointer to a pezz from which to allocate cw_chi_t structures.
-.br
-NULL: Allocate cw_chi_t structures using the mem class.
 .RE
 .IR a_hash :
 .RS
@@ -135,7 +128,7 @@ Constructor.
 .I void
 .br
 .B dch_delete
-.RI ( "cw_dch_t * a_dch" )
+.RI ( "cw_dch_t *a_dch" )
 .br
 Input(s):
 .RS
@@ -157,7 +150,7 @@ Destructor.
 .I cw_uint32_t
 .br
 .B dch_count
-.RI ( "cw_dch_t * a_dch" )
+.RI ( "cw_dch_t *a_dch" )
 .br
 Input(s):
 .RS
@@ -182,8 +175,8 @@ Return the number of items in a_dch.
 .I cw_bool_t
 .br
 .B dch_insert
-.RI ( "cw_dch_t * a_dch" ", " "const void * a_key" ", "
-.IR "const void * a_data" )
+.RI ( "cw_dch_t *a_dch" ", " "const void *a_key" ", " 
+.IR "const void *a_data" ", " "cw_chi_t *a_chi" )
 .br
 Input(s):
 .RS
@@ -198,6 +191,10 @@ Pointer to a key.
 .IR a_data :
 .RS
 Pointer to data associated with a_key.
+.RE
+.IR a_chi :
+.RS
+Pointer to space for a chi, or NULL.
 .RE
 .RE
 Output(s):
@@ -218,8 +215,8 @@ Insert a_data into a_dch, using key a_key.
 .I cw_bool_t
 .br
 .B dch_remove
-.RI ( "cw_dch_t * a_dch" ", " "const void * a_search_key" ", " "void ** r_key"
-.RI ", " "void ** r_data" )
+.RI ( "cw_dch_t *a_dch" ", " "const void *a_search_key" ", " "void **r_key"
+.RI ", " "void **r_data" ", " "cw_chi_t **r_chi" )
 .br
 Input(s):
 .RS
@@ -239,6 +236,10 @@ Pointer to a key pointer, or NULL.
 .RS
 Pointer to a data pointer, or NULL.
 .RE
+.IR r_chi :
+.RS
+Pointer to a chi pointer, or NULL.
+.RE
 .RE
 Output(s):
 .RS
@@ -250,13 +251,19 @@ TRUE: Item with key a_search_key not found.
 .RE
 .IR *r_key :
 .RS
-If (NULL != r_key) and (FALSE == retval): Pointer to a key.
+If (r_key != NULL) and (retval == FALSE): Pointer to a key.
 .br
 Otherwise: Undefined.
 .RE
 .IR *r_data :
 .RS
-If (NULL != r_data) and (FALSE == retval): Pointer to data.
+If (r_data != NULL) and (retval == FALSE): Pointer to data.
+.br
+Otherwise: Undefined.
+.RE
+.IR *r_chi :
+.RS
+If (r_chi != NULL) and (retval == FALSE): Pointer to space for a chi, or NULL.
 .br
 Otherwise: Undefined.
 .RE
@@ -272,7 +279,7 @@ data, respectively.
 .I cw_bool_t
 .br
 .B dch_search
-.RI ( "cw_dch_t * a_dch" ", " "const void * a_key" ", " "void ** r_data" )
+.RI ( "cw_dch_t *a_dch" ", " "const void *a_key" ", " "void **r_data" )
 .br
 Input(s):
 .RS
@@ -299,7 +306,7 @@ TRUE: Item with key a_key not found in a_dch.
 .RE
 .IR *r_data :
 .RS
-If (NULL != r_data) and (FALSE == retval): Pointer to data.
+If (r_data != NULL) and (retval == FALSE): Pointer to data.
 .RE
 .RE
 Description:
@@ -312,7 +319,7 @@ point to the associated data.
 .I cw_bool_t
 .br
 .B dch_get_iterate
-.RI ( "cw_dch_t * a_dch" ", "  "void ** r_key" ", " "void ** r_data" )
+.RI ( "cw_dch_t *a_dch" ", "  "void **r_key" ", " "void **r_data" )
 .br
 Input(s):
 .RS
@@ -339,13 +346,13 @@ TRUE: a_dch is empty.
 .RE
 .IR *r_key :
 .RS
-If (NULL != r_key) and (FALSE == retval): Pointer to a key.
+If (r_key != NULL) and (retval == FALSE): Pointer to a key.
 .br
 Otherwise: Undefined.
 .RE
 .IR *r_data :
 .RS
-If (NULL != r_data) and (FALSE == retval): Pointer to data.
+If (r_data != NULL) and (retval == FALSE): Pointer to data.
 .br
 Otherwise: Undefined.
 .RE
@@ -360,7 +367,8 @@ so that it is the newest item in a_dch.
 .I cw_bool_t
 .br
 .B dch_remove_iterate
-.RI ( "cw_dch_t * a_dch" ", " "void ** r_key" ", " "void ** r_data" )
+.RI ( "cw_dch_t *a_dch" ", " "void **r_key" ", " "void **r_data" ", "
+.IR "cw_chi_t **r_chi" )
 .br
 Input(s):
 .RS
@@ -376,6 +384,10 @@ Pointer to a key pointer, or NULL.
 .RS
 Pointer to a data pointer, or NULL.
 .RE
+.IR r_chi :
+.RS
+Pointer to a chi pointer, or NULL.
+.RE
 .RE
 Output(s):
 .RS
@@ -387,13 +399,19 @@ TRUE: a_dch is empty.
 .RE
 .IR *r_key :
 .RS
-If (NULL != r_key) and (FALSE == retval): Pointer to a key.
+If (r_key != NULL) and (retval == FALSE): Pointer to a key.
 .br
 Otherwise: Undefined.
 .RE
 .IR *r_data :
 .RS
-If (NULL != r_data) and (FALSE == retval): Pointer to data.
+If (r_data != NULL) and (retval == FALSE): Pointer to data.
+.br
+Otherwise: Undefined.
+.RE
+.IR *r_chi :
+.RS
+If (r_chi != NULL) and (retval == FALSE): Pointer to a chi, or NULL.
 .br
 Otherwise: Undefined.
 .RE
@@ -408,7 +426,7 @@ from a_dch.
 .I void
 .br
 .B dch_dump
-.RI ( "cw_dch_t * a_dch" ", " "const char * a_prefix" )
+.RI ( "cw_dch_t *a_dch" ", " "const char *a_prefix" )
 .br
 Input(s):
 .RS
@@ -432,7 +450,7 @@ Print the internal state of a_dch.
 .RE
 
 .SH SEE ALSO
-libstash(3s), libstash_pezz(3s), libstash_ch(3s).
+libstash(3s), libstash_ch(3s).
 
 .SH HISTORY
 Written by Jason Evans <jasone@canonware.com>.

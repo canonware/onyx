@@ -38,10 +38,10 @@ main()
 			for (j = 1; j < 16; j++) {
 				bufc = bufc_new((cw_bufc_t
 				    *)_cw_malloc(sizeof(cw_bufc_t)),
-				    mem_dealloc, cw_g_mem);
+				    (cw_opaque_dealloc_t *)mem_free, cw_g_mem);
 				data = _cw_malloc(i * j);
 				bufc_set_buffer(bufc, data, i * j, FALSE,
-				    mem_dealloc, cw_g_mem);
+				    (cw_opaque_dealloc_t *)mem_free, cw_g_mem);
 
 				buf_append_bufc(buf_a, bufc, 0, i * j);
 				bufc_delete(bufc);
@@ -50,22 +50,22 @@ main()
 
 		for (i = 0; i < 4; i++) {
 			bufc = bufc_new((cw_bufc_t
-			    *)_cw_malloc(sizeof(cw_bufc_t)), mem_dealloc,
-			    cw_g_mem);
+			    *)_cw_malloc(sizeof(cw_bufc_t)),
+			    (cw_opaque_dealloc_t *)mem_free, cw_g_mem);
 			data = _cw_malloc(4096);
-			bufc_set_buffer(bufc, data, 4096, FALSE, mem_dealloc,
-			    cw_g_mem);
+			bufc_set_buffer(bufc, data, 4096, FALSE,
+			    (cw_opaque_dealloc_t *)mem_free, cw_g_mem);
 			buf_append_bufc(buf_b, bufc, 0, 4096);
 			bufc_delete(bufc);
 		}
 
 		for (i = 0; i < 1024; i++) {
 			bufc = bufc_new((cw_bufc_t
-			    *)_cw_malloc(sizeof(cw_bufc_t)), mem_dealloc,
-			    cw_g_mem);
+			    *)_cw_malloc(sizeof(cw_bufc_t)),
+			    (cw_opaque_dealloc_t *)mem_free, cw_g_mem);
 			data = _cw_malloc(16);
-			bufc_set_buffer(bufc, data, 16, FALSE, mem_dealloc,
-			    cw_g_mem);
+			bufc_set_buffer(bufc, data, 16, FALSE,
+			    (cw_opaque_dealloc_t *)mem_free, cw_g_mem);
 			buf_append_bufc(buf_c, bufc, 0, 16);
 			bufc_delete(bufc);
 		}

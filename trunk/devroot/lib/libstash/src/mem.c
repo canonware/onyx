@@ -13,8 +13,29 @@
  ****************************************************************************/
 
 #include "../include/libstash/libstash.h"
-#include "../include/libstash/mem_p.h"
 #include "../include/libstash/mem_l.h"
+
+
+struct cw_mem_s {
+	cw_mtx_t	lock;
+
+#ifdef _LIBSTASH_DBG
+#define _CW_MEM_TABLE_SIZE 1024		/* Number of slots in hash table. */
+	cw_ch_t		*addr_hash;
+#endif
+
+	cw_mem_oom_handler_t *oom_handler;
+        const void	*handler_data;
+};
+
+#ifdef _LIBSTASH_DBG
+struct cw_mem_item_s {
+	cw_uint32_t	size;
+        const char	*filename;
+	cw_uint32_t	line_num;
+	cw_chi_t	chi;		/* For internal ch linkage. */
+};
+#endif
 
 cw_mem_t *
 mem_new(void)
@@ -22,20 +43,31 @@ mem_new(void)
 	cw_mem_t *retval;
 
 	retval = (cw_mem_t *)_cw_malloc(sizeof(cw_mem_t));
-	if (NULL == retval)
-		goto RETURN;
+	if (retval == NULL)
+		goto OOM_1;
 	mtx_new(&retval->lock);
 
 #ifdef _LIBSTASH_DBG
-	oh_new(&retval->addr_hash);
-	oh_set_h1(&retval->addr_hash, oh_h1_direct);
-	oh_set_key_compare(&retval->addr_hash, oh_key_compare_direct);
+	retval->addr_hash = (cw_ch_t
+	    *)_cw_malloc(_CW_CH_TABLE2SIZEOF(_CW_MEM_TABLE_SIZE));
+	if (retval->addr_hash == NULL)
+		goto OOM_2;
+	ch_new(retval->addr_hash, _CW_MEM_TABLE_SIZE, ch_hash_direct,
+	    ch_key_comp_direct);
 #endif
 
 	retval->oom_handler = NULL;
 	retval->handler_data = NULL;
 
-RETURN:
+	return retval;
+
+#ifdef _LIBSTASH_DBG
+	OOM_2:
+	mtx_delete(&retval->lock);
+	_cw_free(retval);
+	retval = NULL;
+#endif
+	OOM_1:
 	return retval;
 }
 
@@ -50,7 +82,7 @@ mem_delete(cw_mem_t *a_mem)
 		void   *addr;
 		struct cw_mem_item_s *allocation;
 
-		num_addrs = oh_get_num_items(&a_mem->addr_hash);
+		num_addrs = ch_count(a_mem->addr_hash);
 
 		if (dbg_is_registered(cw_g_dbg, "mem_verbose") ||
 		    (dbg_is_registered(cw_g_dbg, "mem_error") && (0 <
@@ -65,8 +97,8 @@ mem_delete(cw_mem_t *a_mem)
 			_cw_out_put(buf);
 		}
 		for (i = 0; i < num_addrs; i++) {
-			oh_item_delete_iterate(&a_mem->addr_hash,
-			    &addr, (void **)&allocation);
+			ch_remove_iterate(a_mem->addr_hash, &addr, (void
+			    **)&allocation, NULL);
 			if (dbg_is_registered(cw_g_dbg, "mem_error")) {
 				char    buf[1025];
 
@@ -81,7 +113,8 @@ mem_delete(cw_mem_t *a_mem)
 			}
 			_cw_free(allocation);
 		}
-		oh_delete(&a_mem->addr_hash);
+		ch_delete(a_mem->addr_hash);
+		_cw_free(a_mem->addr_hash);
 		mtx_delete(&a_mem->lock);
 	}
 #endif
@@ -90,8 +123,8 @@ mem_delete(cw_mem_t *a_mem)
 }
 
 void
-mem_set_oom_handler(cw_mem_t *a_mem, cw_mem_oom_handler_t * a_oom_handler,
-    const void *a_data)
+mem_set_oom_handler(cw_mem_t *a_mem, cw_mem_oom_handler_t * a_oom_handler, const
+    void *a_data)
 {
 	_cw_check_ptr(a_mem);
 
@@ -103,14 +136,9 @@ mem_set_oom_handler(cw_mem_t *a_mem, cw_mem_oom_handler_t * a_oom_handler,
 	mtx_unlock(&a_mem->lock);
 }
 
-#ifdef _LIBSTASH_DBG
-void   *
+void *
 mem_malloc(cw_mem_t *a_mem, size_t a_size, const char *a_filename,
     cw_uint32_t a_line_num)
-#else
-void   *
-mem_malloc(cw_mem_t *a_mem, size_t a_size)
-#endif
 {
 	void   *retval;
 
@@ -156,10 +184,10 @@ mem_malloc(cw_mem_t *a_mem, size_t a_size)
 	} else if (NULL != a_mem) {
 		struct cw_mem_item_s *old_allocation;
 
-		if (FALSE == oh_item_search(&a_mem->addr_hash, retval, (void
+		if (FALSE == ch_search(a_mem->addr_hash, retval, (void
 		    **)&old_allocation)) {
 			if (dbg_is_registered(cw_g_dbg, "mem_error")) {
-				char    buf[1025];
+				char	buf[1025];
 
 				_cw_check_ptr(old_allocation);
 
@@ -207,8 +235,8 @@ mem_malloc(cw_mem_t *a_mem, size_t a_size)
 					    a_filename, a_line_num);
 					_cw_out_put(buf);
 				}
-				if (-1 == oh_item_insert(&a_mem->addr_hash,
-				    retval, allocation)) {
+				if (-1 == ch_insert(a_mem->addr_hash, retval,
+				    allocation, &allocation->chi)) {
 					if (dbg_is_registered(cw_g_dbg,
 					    "mem_error")) {
 						char    buf[1025];
@@ -232,14 +260,9 @@ mem_malloc(cw_mem_t *a_mem, size_t a_size)
 	return retval;
 }
 
-#ifdef _LIBSTASH_DBG
-void   *
-mem_calloc(cw_mem_t *a_mem, size_t a_number, size_t a_size,
-    const char *a_filename, cw_uint32_t a_line_num)
-#else
-void   *
-mem_calloc(cw_mem_t *a_mem, size_t a_number, size_t a_size)
-#endif
+void *
+mem_calloc(cw_mem_t *a_mem, size_t a_number, size_t a_size, const char
+    *a_filename, cw_uint32_t a_line_num)
 {
 	void   *retval;
 
@@ -287,7 +310,7 @@ mem_calloc(cw_mem_t *a_mem, size_t a_number, size_t a_size)
 	} else if (NULL != a_mem) {
 		struct cw_mem_item_s *old_allocation;
 
-		if (FALSE == oh_item_search(&a_mem->addr_hash, retval, (void
+		if (FALSE == ch_search(a_mem->addr_hash, retval, (void
 		    **)&old_allocation)) {
 			if (dbg_is_registered(cw_g_dbg, "mem_error")) {
 				char    buf[1025];
@@ -341,7 +364,8 @@ mem_calloc(cw_mem_t *a_mem, size_t a_number, size_t a_size)
 					    a_filename, a_line_num);
 					_cw_out_put(buf);
 				}
-				if (-1 == oh_item_insert(&a_mem->addr_hash, retval, allocation)) {
+				if (-1 == ch_insert(a_mem->addr_hash, retval,
+				    allocation, &allocation->chi)) {
 					if (dbg_is_registered(cw_g_dbg, "mem_error")) {
 						char    buf[1025];
 
@@ -364,14 +388,9 @@ mem_calloc(cw_mem_t *a_mem, size_t a_number, size_t a_size)
 	return retval;
 }
 
-#ifdef _LIBSTASH_DBG
-void   *
-mem_realloc(cw_mem_t *a_mem, void *a_ptr, size_t a_size,
-    const char *a_filename, cw_uint32_t a_line_num)
-#else
-void   *
-mem_realloc(cw_mem_t *a_mem, void *a_ptr, size_t a_size)
-#endif
+void *
+mem_realloc(cw_mem_t *a_mem, void *a_ptr, size_t a_size, const char *a_filename,
+    cw_uint32_t a_line_num)
 {
 	void   *retval;
 
@@ -420,8 +439,8 @@ mem_realloc(cw_mem_t *a_mem, void *a_ptr, size_t a_size)
 	} else if (NULL != a_mem) {
 		struct cw_mem_item_s *allocation;
 
-		if (TRUE == oh_item_delete(&a_mem->addr_hash, a_ptr, NULL,
-			(void **)&allocation)) {
+		if (TRUE == ch_remove(a_mem->addr_hash, a_ptr, NULL,
+			(void **)&allocation, NULL)) {
 			if (dbg_is_registered(cw_g_dbg, "mem_error")) {
 				char    buf[1025];
 
@@ -442,8 +461,8 @@ mem_realloc(cw_mem_t *a_mem, void *a_ptr, size_t a_size)
 			allocation->size = a_size;
 			allocation->line_num = a_line_num;
 
-			if (-1 == oh_item_insert(&a_mem->addr_hash, retval,
-			    allocation)) {
+			if (-1 == ch_insert(a_mem->addr_hash, retval,
+			    allocation, &allocation->chi)) {
 				if (dbg_is_registered(cw_g_dbg, "mem_error")) {
 					char    buf[1025];
 
@@ -487,14 +506,9 @@ mem_realloc(cw_mem_t *a_mem, void *a_ptr, size_t a_size)
 	return retval;
 }
 
-#ifdef _LIBSTASH_DBG
 void
-mem_free(cw_mem_t *a_mem, void *a_ptr,
-    const char *a_filename, cw_uint32_t a_line_num)
-#else
-void
-mem_free(cw_mem_t *a_mem, void *a_ptr)
-#endif
+mem_free(cw_mem_t *a_mem, void *a_ptr, const char *a_filename, cw_uint32_t
+    a_line_num)
 {
 #ifdef _LIBSTASH_DBG
 	if (NULL == a_filename)
@@ -504,8 +518,8 @@ mem_free(cw_mem_t *a_mem, void *a_ptr)
 
 		mtx_lock(&a_mem->lock);
 
-		if (TRUE == oh_item_delete(&a_mem->addr_hash, a_ptr, NULL,
-			(void **)&allocation)) {
+		if (TRUE == ch_remove(a_mem->addr_hash, a_ptr, NULL,
+			(void **)&allocation, NULL)) {
 			if (dbg_is_registered(cw_g_dbg, "mem_error")) {
 				char    buf[1025];
 
@@ -545,15 +559,5 @@ mem_free(cw_mem_t *a_mem, void *a_ptr)
 #ifdef _LIBSTASH_DBG
 	if (NULL != a_mem)
 		mtx_unlock(&a_mem->lock);
-#endif
-}
-
-void
-mem_dealloc(void *a_mem, void *a_ptr)
-{
-#ifdef _LIBSTASH_DBG
-	mem_free((cw_mem_t *)a_mem, a_ptr, NULL, 0);
-#else
-	mem_free((cw_mem_t *)a_mem, a_ptr);
 #endif
 }

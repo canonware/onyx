@@ -10,12 +10,39 @@
  ****************************************************************************/
 
 #include "../include/libstash/libstash.h"
-#include "../include/libstash/buf_p.h"
 
 #ifdef _CW_OS_FREEBSD
 #include <sys/types.h>
 #include <sys/uio.h>
 #endif
+
+#ifdef _LIBSTASH_DBG
+#define _CW_BUF_MAGIC 0xb00f0001
+#define _CW_BUFEL_MAGIC 0xb00f0002
+#define _CW_BUFC_MAGIC 0xb00f0003
+#endif
+
+static cw_buf_t	*buf_p_new(cw_buf_t *a_buf, cw_bool_t a_is_threadsafe);
+static void	buf_p_rebuild_cumulative_index(cw_buf_t *a_buf);
+static void	buf_p_get_data_position(cw_buf_t *a_buf, cw_uint32_t a_offset,
+    cw_uint32_t *a_array_element, cw_uint32_t *a_bufel_offset);
+static cw_bool_t buf_p_fit_array(cw_buf_t *a_buf, cw_uint32_t a_min_array_size);
+static cw_bool_t buf_p_catenate_buf(cw_buf_t *a_a, cw_buf_t *a_b, cw_bool_t
+    a_preserve);
+#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
+static void	buf_p_copy_array(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t
+    a_num_elements, cw_uint32_t a_a_start, cw_uint32_t a_b_start, cw_bool_t
+    a_is_destructive);
+#else
+static void	buf_p_copy_array(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t
+    a_num_elements, cw_uint32_t a_a_start, cw_uint32_t a_b_start);
+#endif
+static cw_bool_t buf_p_make_range_writeable(cw_buf_t *a_buf, cw_uint32_t
+    a_offset, cw_uint32_t a_length);
+static void	bufc_p_dump(cw_bufc_t *a_bufc, const char *a_prefix);
+static cw_bool_t bufc_p_get_is_writeable(cw_bufc_t *a_bufc);
+static cw_uint32_t bufc_p_get_ref_count(cw_bufc_t *a_bufc);
+static void	bufc_p_ref_increment(cw_bufc_t *a_bufc);
 
 cw_buf_t *
 buf_new(cw_buf_t *a_buf)
@@ -2255,7 +2282,8 @@ buf_p_make_range_writeable(cw_buf_t *a_buf, cw_uint32_t a_offset,
 	 * range we're creating extends past the current end of the buf.
 	 */
 	if (a_offset + a_length > a_buf->size) {
-		bufc = bufc_new(NULL, mem_dealloc, cw_g_mem);
+		bufc = bufc_new(NULL, (cw_opaque_dealloc_t *)mem_free,
+		    cw_g_mem);
 		if (NULL == bufc) {
 			retval = TRUE;
 			goto RETURN;
@@ -2267,7 +2295,8 @@ buf_p_make_range_writeable(cw_buf_t *a_buf, cw_uint32_t a_offset,
 			goto RETURN;
 		}
 		bufc_set_buffer(bufc, buffer, (a_offset + a_length) -
-		    a_buf->size, TRUE, mem_dealloc, cw_g_mem);
+		    a_buf->size, TRUE, (cw_opaque_dealloc_t *)mem_free,
+		    cw_g_mem);
 
 		if (buf_p_fit_array(a_buf, a_buf->array_num_valid + 1)) {
 			bufc_delete(bufc);
@@ -2329,7 +2358,8 @@ buf_p_make_range_writeable(cw_buf_t *a_buf, cw_uint32_t a_offset,
 				goto RETURN;
 			}
 			bufc_set_buffer(bufc, buffer, bufel->end_offset -
-			    bufel->beg_offset, TRUE, mem_dealloc, cw_g_mem);
+			    bufel->beg_offset, TRUE, (cw_opaque_dealloc_t
+			    *)mem_free, cw_g_mem);
 
 			memcpy(buffer,
 			    bufel->bufc->buf + bufel->beg_offset,
@@ -2351,9 +2381,8 @@ RETURN:
 }
 
 cw_bufc_t *
-bufc_new(cw_bufc_t *a_bufc,
-    void (*a_dealloc_func) (void *dealloc_arg, void *bufc),
-    void *a_dealloc_arg)
+bufc_new(cw_bufc_t *a_bufc, cw_opaque_dealloc_t *a_dealloc_func, void
+    *a_dealloc_arg)
 {
 	cw_bufc_t *retval;
 
@@ -2362,8 +2391,8 @@ bufc_new(cw_bufc_t *a_bufc,
 		if (NULL == retval)
 			goto RETURN;
 		bzero(retval, sizeof(cw_bufc_t));
-		retval->dealloc_func = mem_dealloc;
-		retval->dealloc_arg = cw_g_mem;
+		retval->dealloc_func = (cw_opaque_dealloc_t *)mem_free;
+		retval->dealloc_arg = (void *)cw_g_mem;
 	} else {
 		retval = a_bufc;
 		bzero(retval, sizeof(cw_bufc_t));
@@ -2412,20 +2441,20 @@ bufc_delete(cw_bufc_t *a_bufc)
 		mtx_delete(&a_bufc->lock);
 
 		if (NULL != a_bufc->buffer_dealloc_func) {
-			a_bufc->buffer_dealloc_func(a_bufc->buffer_dealloc_arg,
-			    (void *)a_bufc->buf);
+			_cw_opaque_dealloc(a_bufc->buffer_dealloc_func,
+			    a_bufc->buffer_dealloc_arg, a_bufc->buf);
 		}
 		if (NULL != a_bufc->dealloc_func) {
-			a_bufc->dealloc_func(a_bufc->dealloc_arg,
-			    (void *)a_bufc);
+			_cw_opaque_dealloc(a_bufc->dealloc_func,
+			    a_bufc->dealloc_arg, a_bufc);
 		}
 	}
 }
 
 void
 bufc_set_buffer(cw_bufc_t *a_bufc, void *a_buffer, cw_uint32_t a_size,
-    cw_bool_t a_is_writeable, void (*a_dealloc_func) (void *dealloc_arg, void
-    *buffer), void *a_dealloc_arg)
+    cw_bool_t a_is_writeable, cw_opaque_dealloc_t *a_dealloc_func, void
+    *a_dealloc_arg)
 {
 	_cw_check_ptr(a_bufc);
 	_cw_assert(a_bufc->magic_a == _CW_BUFC_MAGIC);

@@ -1,6 +1,21 @@
+2000-06-03  Jason Evans  <jasone@canonware.com>
+
+	* : Simplify pezz and mem APIs, so that the API is the same
+	regardless of whether the library is compiled as a debugging
+	library.
+	
+	* : Create the cw_opaque_dealloc_t typedef and use it everywhere
+	that a deallocation function pointer is passed or stored.
+
+	* : Remove oh.  ch and dch do a superior job in virtually every
+	regard, and libstash no longer has internal dependencies on oh.
+
+	* : Change ch and dch to not use pezz allocation internally, but
+	instead to allow arbitrary allocation methods externally.
+
 2000-05-24  Jason Evans  <jasone@canonware.com>
 
-	* Remove the list and arena classes.
+	* : Remove the list and arena classes.
 
 	* include/libstash/q.h: Change the names of all macros in order to
 	avoid namespace collisions.
