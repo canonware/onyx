@@ -1,3 +1,15 @@
+1998-11-27  Jason Evans  <jasone@canonware.com>
+
+	* src/bhp.c (bhp_dump): Implemented.  This needs to go away when
+	debugging is complete, or else hooks need to be added for setting
+	priority and data printing functions.
+	(bhp_p_dump): Added in support of bhp_dump().
+
+	* test/c_cnd_a.c: Don't rely on being able to lock a mutex in one
+	thread and unlock it in another thread.
+
+	* : Rename the tests to semi-meaningful names.
+
 1998-11-23  Jason Evans  <jasone@canonware.com>
 
 	* configure.in (CFLAGS): Added -lsocket -lnsl to LIBS for Solaris.

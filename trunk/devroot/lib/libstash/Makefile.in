@@ -36,12 +36,12 @@ SRCS := libstash.c bhp.c buf.c dbg.c lex.c list.c log.c matrix.c mem.c oh.c \
 SRCS_R := locks.c thread.c
 
 # Simple tests.  Output is diff'ed with the expected (.exp file) output.
-CTESTS := c19980411a.c c19980412a.c c19980419a.c c19980430a.c \
-	c19980630a.c c19980907a.c c19980907b.c \
-	c19980908a.c c19980908c.c c19980914a.c c19980917a.c c19981014a.c \
-	c19981105a.c
+CTESTS := c_buf_a.c c_cnd_a.c c_jtl_a.c c_list_a.c c_log_a.c c_matrix_a.c \
+	c_mtx_a.c c_oh_a.c c_oh_b.c c_res_a.c c_rwl_a.c c_sem_a.c c_thd_a.c \
+	c_treen_a.c
 
-# c19980907c.c (deadlock issue on FreeBSD)
+# Hopelessly broken.
+# c_bhp_a.c 
 
 # Perl scripts that drive the BTESTS.
 PTESTS := p19980828a.pl.in
@@ -286,7 +286,9 @@ all_r : stat_dbg_r stat_opt_r shar_opt_r stat_prof_r
 # Empty target, but make still creates all the dependency files.
 depend:
 
-check : $(CTESTS) $(PTESTS) $(BTESTS)
+tests : $(CTESTS) $(PTESTS) $(BTESTS)
+
+check : tests
 	@$(SHELL) -c \
 	'echo Running regression tests: ; \
 	echo "---------------------------------------------" ;\

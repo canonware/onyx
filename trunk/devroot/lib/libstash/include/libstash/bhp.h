@@ -14,18 +14,14 @@
  *
  ****************************************************************************/
 
+/* Typedef to allow easy function pointer passing. */
+typedef cw_sint32_t bhp_prio_comp_t(void *, void *);
+
 /* Pseudo-opaque type. */
 typedef struct cw_bhp_s cw_bhp_t;
 
-typedef struct cw_bhpi_s
-{
-  void * priority;
-  void * data;
-  struct cw_bhpi_s * parent;
-  struct cw_bhpi_s * child;
-  struct cw_bhpi_s * sibling;
-  cw_uint32_t degree;
-} cw_bhpi_t;
+/* Opaque type. */
+typedef struct cw_bhpi_s cw_bhpi_t;
 
 struct cw_bhp_s
 {
@@ -36,7 +32,8 @@ struct cw_bhp_s
 #endif
   cw_bhpi_t * head;
   cw_uint64_t num_nodes;
-  cw_sint32_t (*priority_compare)(cw_bhpi_t *, cw_bhpi_t *);
+  bhp_prio_comp_t * priority_compare;
+/*    cw_sint32_t (*priority_compare)(cw_bhpi_t *, cw_bhpi_t *); */
 };
 
 #define bhp_new _CW_NS_STASH(bhp_new)
@@ -49,20 +46,18 @@ struct cw_bhp_s
 #define bhp_union _CW_NS_STASH(bhp_union)
 #define bhp_set_priority_compare _CW_NS_STASH(bhp_set_priority_compare)
 
-/* Typedefs to allow easy function pointer passing. */
-typedef cw_sint32_t bhp_prio_comp_t(cw_bhpi_t *, cw_bhpi_t *);
 
 #ifdef _CW_REENTRANT
-cw_bhp_t * bhp_new(cw_bhp_t * a_bhp_o, cw_bool_t a_is_thread_safe);
+cw_bhp_t * bhp_new(cw_bhp_t * a_bhp, cw_bool_t a_is_thread_safe);
 #else
-cw_bhp_t * bhp_new(cw_bhp_t * a_bhp_o);
+cw_bhp_t * bhp_new(cw_bhp_t * a_bhp);
 #endif
-void bhp_delete(cw_bhp_t * a_bhp_o);
-void bhp_dump(cw_bhp_t * a_bhp_o);
-void bhp_insert(cw_bhp_t * a_bhp_o, void * a_priority, void * a_data);
-cw_bool_t bhp_find_min(cw_bhp_t * a_bhp_o, void ** a_priority, void ** a_data);
-cw_bool_t bhp_del_min(cw_bhp_t * a_bhp_o, void ** a_priority, void ** a_data);
-cw_uint64_t bhp_get_size(cw_bhp_t * a_bhp_o);
-void bhp_union(cw_bhp_t * a_bhp_o, cw_bhp_t * a_other);
-void bhp_set_priority_compare(cw_bhp_t * a_bhp_o,
+void bhp_delete(cw_bhp_t * a_bhp);
+void bhp_dump(cw_bhp_t * a_bhp);
+void bhp_insert(cw_bhp_t * a_bhp, void * a_priority, void * a_data);
+cw_bool_t bhp_find_min(cw_bhp_t * a_bhp, void ** a_priority, void ** a_data);
+cw_bool_t bhp_del_min(cw_bhp_t * a_bhp, void ** a_priority, void ** a_data);
+cw_uint64_t bhp_get_size(cw_bhp_t * a_bhp);
+void bhp_union(cw_bhp_t * a_bhp, cw_bhp_t * a_other);
+void bhp_set_priority_compare(cw_bhp_t * a_bhp,
 			      bhp_prio_comp_t * a_new_prio_comp);

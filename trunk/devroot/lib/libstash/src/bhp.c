@@ -10,7 +10,10 @@
  *
  * <<< Description >>>
  *
- * Implementation of bhp (binomial heap).
+ * Implementation of binomial heaps.  This class is pretty straight-forward,
+ * except that bhp_set_priority_compare() should be called before inserting any
+ * data into the heap.  bhp does not re-heapify if the priority comparison
+ * function is changed while there is data in the tree, so "don't do that".
  *
  ****************************************************************************/
 
@@ -24,28 +27,27 @@
 #include "libstash/bhp_priv.h"
 
 /****************************************************************************
- * <<< Description >>>
  *
  * bhp constructor.
  *
  ****************************************************************************/
 cw_bhp_t *
 #ifdef _CW_REENTRANT
-bhp_new(cw_bhp_t * a_bhp_o, cw_bool_t a_is_thread_safe)
+bhp_new(cw_bhp_t * a_bhp, cw_bool_t a_is_thread_safe)
 #else
-bhp_new(cw_bhp_t * a_bhp_o)
+bhp_new(cw_bhp_t * a_bhp)
 #endif
 {
   cw_bhp_t * retval;
 
-  if (a_bhp_o == NULL)
+  if (a_bhp == NULL)
   {
     retval = (cw_bhp_t *) _cw_malloc(sizeof(cw_bhp_t));
     retval->is_malloced = TRUE;
   }
   else
   {
-    retval = a_bhp_o;
+    retval = a_bhp;
     retval->is_malloced = FALSE;
   }
 
@@ -69,73 +71,71 @@ bhp_new(cw_bhp_t * a_bhp_o)
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * bhp destructor.
  *
  ****************************************************************************/
 void
-bhp_delete(cw_bhp_t * a_bhp_o)
+bhp_delete(cw_bhp_t * a_bhp)
 {
-  _cw_check_ptr(a_bhp_o);
+  _cw_check_ptr(a_bhp);
 
 #ifdef _CW_REENTRANT
-  if (a_bhp_o->is_thread_safe == TRUE)
+  if (a_bhp->is_thread_safe == TRUE)
   {
-    rwl_delete(&a_bhp_o->rw_lock);
+    rwl_delete(&a_bhp->rw_lock);
   }
 #endif
 
-  if (a_bhp_o->is_malloced == TRUE)
+  if (a_bhp->is_malloced == TRUE)
   {
-    _cw_free(a_bhp_o);
+    _cw_free(a_bhp);
   }
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
- * Print out the internal state in pseudo tree format.
+ * Print out the internal state of the heap.
  *
  ****************************************************************************/
 void
-bhp_dump(cw_bhp_t * a_bhp_o)
+bhp_dump(cw_bhp_t * a_bhp)
 {
-  _cw_check_ptr(a_bhp_o);
+
+  _cw_check_ptr(a_bhp);
 #ifdef _CW_REENTRANT
-  if (a_bhp_o->is_thread_safe == TRUE)
+  if (a_bhp->is_thread_safe == TRUE)
   {
-    rwl_rlock(&a_bhp_o->rw_lock);
+    rwl_wlock(&a_bhp->rw_lock);
   }
 #endif
 
-  _cw_error("Not implemented");
+  bhp_p_dump(a_bhp->head, 0, NULL);
   
 #ifdef _CW_REENTRANT
-  if (a_bhp_o->is_thread_safe == TRUE)
+  if (a_bhp->is_thread_safe == TRUE)
   {
-    rwl_runlock(&a_bhp_o->rw_lock);
+    rwl_wunlock(&a_bhp->rw_lock);
   }
 #endif
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * Insert an item.
  *
  ****************************************************************************/
 void
-bhp_insert(cw_bhp_t * a_bhp_o, void * a_priority, void * a_data)
+bhp_insert(cw_bhp_t * a_bhp, void * a_priority, void * a_data)
 {
   cw_bhp_t temp_heap;
   cw_bhpi_t * new_item;
   
-  _cw_check_ptr(a_bhp_o);
+  _cw_check_ptr(a_bhp);
 #ifdef _CW_REENTRANT
-  if (a_bhp_o->is_thread_safe == TRUE)
+  if (a_bhp->is_thread_safe == TRUE)
   {
-    rwl_wlock(&a_bhp_o->rw_lock);
+    rwl_wlock(&a_bhp->rw_lock);
   }
 #endif
   
@@ -155,47 +155,46 @@ bhp_insert(cw_bhp_t * a_bhp_o, void * a_priority, void * a_data)
   temp_heap.num_nodes = 1;
 
   /* Combine this heap and temp_heap. */
-  bhp_union(a_bhp_o, &temp_heap);
+  bhp_union(a_bhp, &temp_heap);
 
   /* Clean up temp_heap. */
   /* XXX This should be done by bhp_merge(). */
 /*   bhp_delete(&temp_heap); */
   
 #ifdef _CW_REENTRANT
-  if (a_bhp_o->is_thread_safe == TRUE)
+  if (a_bhp->is_thread_safe == TRUE)
   {
-    rwl_wunlock(&a_bhp_o->rw_lock);
+    rwl_wunlock(&a_bhp->rw_lock);
   }
 #endif
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * Find an item on the heap with minimum priority and set *a_priority and
  * *a_data to point to it.
  *
  ****************************************************************************/
 cw_bool_t
-bhp_find_min(cw_bhp_t * a_bhp_o, void ** a_priority, void ** a_data)
+bhp_find_min(cw_bhp_t * a_bhp, void ** a_priority, void ** a_data)
 {
   cw_bool_t retval;
   cw_bhpi_t * curr_min, * curr_pos;
   
-  _cw_check_ptr(a_bhp_o);
+  _cw_check_ptr(a_bhp);
 #ifdef _CW_REENTRANT
-  if (a_bhp_o->is_thread_safe == TRUE)
+  if (a_bhp->is_thread_safe == TRUE)
   {
-    rwl_rlock(&a_bhp_o->rw_lock);
+    rwl_rlock(&a_bhp->rw_lock);
   }
 #endif
 
-  if (a_bhp_o->head != NULL)
+  if (a_bhp->head != NULL)
   {
     retval = FALSE;
 
-    curr_min = a_bhp_o->head;
-    curr_pos = a_bhp_o->head->sibling;
+    curr_min = a_bhp->head;
+    curr_pos = a_bhp->head->sibling;
     
     while (curr_pos != NULL)
     {
@@ -203,7 +202,8 @@ bhp_find_min(cw_bhp_t * a_bhp_o, void ** a_priority, void ** a_data)
        * For priority_compare(a, b), -1 means a < b,
        *                              0 means a == b,
        *                              1 means a > b. */
-      if (a_bhp_o->priority_compare(curr_pos, curr_min) == -1)
+      if (-1 == a_bhp->priority_compare(curr_pos->priority,
+					  curr_min->priority))
       {
 	curr_min = curr_pos;
       }
@@ -221,37 +221,36 @@ bhp_find_min(cw_bhp_t * a_bhp_o, void ** a_priority, void ** a_data)
   }
   
 #ifdef _CW_REENTRANT
-  if (a_bhp_o->is_thread_safe == TRUE)
+  if (a_bhp->is_thread_safe == TRUE)
   {
-    rwl_runlock(&a_bhp_o->rw_lock);
+    rwl_runlock(&a_bhp->rw_lock);
   }
 #endif
   return retval;
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * Find an item on the heap with minimum priority, set *a_priority and
  * *a_data to point to it, and delete the item from the heap.
  *
  ****************************************************************************/
 cw_bool_t
-bhp_del_min(cw_bhp_t * a_bhp_o, void ** a_priority, void ** a_data)
+bhp_del_min(cw_bhp_t * a_bhp, void ** a_priority, void ** a_data)
 {
   cw_bool_t retval;
   cw_bhpi_t * prev_pos, * curr_pos, * next_pos, * before_min, * curr_min;
   cw_bhp_t temp_heap;
   
-  _cw_check_ptr(a_bhp_o);
+  _cw_check_ptr(a_bhp);
 #ifdef _CW_REENTRANT
-  if (a_bhp_o->is_thread_safe == TRUE)
+  if (a_bhp->is_thread_safe == TRUE)
   {
-    rwl_wlock(&a_bhp_o->rw_lock);
+    rwl_wlock(&a_bhp->rw_lock);
   }
 #endif
 
-  if (a_bhp_o->num_nodes == 0)
+  if (a_bhp->num_nodes == 0)
   {
     retval = TRUE;
   }
@@ -262,11 +261,12 @@ bhp_del_min(cw_bhp_t * a_bhp_o, void ** a_priority, void ** a_data)
     /* Find a root with minimum priority. */
     before_min = NULL;
     prev_pos = NULL;
-    curr_pos = a_bhp_o->head;
+    curr_pos = a_bhp->head;
     curr_min = curr_pos;
     while (curr_pos != NULL)
     {
-      if (a_bhp_o->priority_compare(curr_pos, curr_min) == -1)
+      if (-1 == a_bhp->priority_compare(curr_pos->priority,
+					  curr_min->priority))
       {
 	/* Found a new minimum. */
 	curr_min = curr_pos;
@@ -281,7 +281,7 @@ bhp_del_min(cw_bhp_t * a_bhp_o, void ** a_priority, void ** a_data)
     {
       /* Minimum root is the first in the list, so move the head pointer
        * forward. */
-      a_bhp_o->head = curr_min->sibling;
+      a_bhp->head = curr_min->sibling;
     }
     else
     {
@@ -322,8 +322,8 @@ bhp_del_min(cw_bhp_t * a_bhp_o, void ** a_priority, void ** a_data)
     bhp_new(&temp_heap);
 #endif
     temp_heap.head = prev_pos;
-    bhp_union(a_bhp_o, &temp_heap);
-    a_bhp_o->num_nodes--;
+    bhp_union(a_bhp, &temp_heap);
+    a_bhp->num_nodes--;
 
     /* Now point *a_priority and *a_data to the item and free the space taken 
      * up by the item structure. */
@@ -333,56 +333,54 @@ bhp_del_min(cw_bhp_t * a_bhp_o, void ** a_priority, void ** a_data)
   }
   
 #ifdef _CW_REENTRANT
-  if (a_bhp_o->is_thread_safe == TRUE)
+  if (a_bhp->is_thread_safe == TRUE)
   {
-    rwl_wunlock(&a_bhp_o->rw_lock);
+    rwl_wunlock(&a_bhp->rw_lock);
   }
 #endif
   return retval;
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * Return the size of the heap.
  *
  ****************************************************************************/
 cw_uint64_t
-bhp_get_size(cw_bhp_t * a_bhp_o)
+bhp_get_size(cw_bhp_t * a_bhp)
 {
   cw_uint64_t retval;
 
-  _cw_check_ptr(a_bhp_o);
+  _cw_check_ptr(a_bhp);
   /* Don't need to lock. */
 
-  retval = a_bhp_o->num_nodes;
+  retval = a_bhp->num_nodes;
   return retval;
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * Creates a new heap that is the union of the two arguments.
  *
  ****************************************************************************/
 void
-bhp_union(cw_bhp_t * a_bhp_o, cw_bhp_t * a_other)
+bhp_union(cw_bhp_t * a_bhp, cw_bhp_t * a_other)
 {
   cw_bhpi_t * prev_node, * curr_node, * next_node;
   
-  _cw_check_ptr(a_bhp_o);
+  _cw_check_ptr(a_bhp);
   _cw_check_ptr(a_other);
   /* XXX Should this be locked? */
 
-  bhp_p_merge(a_bhp_o, a_other);
-  if (a_bhp_o->head == NULL)
+  bhp_p_merge(a_bhp, a_other);
+  if (a_bhp->head == NULL)
   {
     /* Empty heap.  We're done. */
     goto RETURN;
   }
 
   prev_node = NULL;
-  curr_node = a_bhp_o->head;
+  curr_node = a_bhp->head;
   next_node = curr_node->sibling;
   while(next_node != NULL)
   {
@@ -393,7 +391,8 @@ bhp_union(cw_bhp_t * a_bhp_o, cw_bhp_t * a_other)
       prev_node = curr_node;
       curr_node = next_node;
     }
-    else if (a_bhp_o->priority_compare(curr_node, next_node) != 1) /* <= */
+    else if (1 != a_bhp->priority_compare(curr_node->priority,
+					    next_node->priority)) /* <= */
     {
       curr_node->sibling = next_node->sibling;
       bhp_p_bin_link(curr_node, next_node);
@@ -402,7 +401,7 @@ bhp_union(cw_bhp_t * a_bhp_o, cw_bhp_t * a_other)
     {
       if (prev_node == NULL)
       {
-	a_bhp_o->head = next_node;
+	a_bhp->head = next_node;
       }
       else
       {
@@ -417,39 +416,86 @@ bhp_union(cw_bhp_t * a_bhp_o, cw_bhp_t * a_other)
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
+ * Set the priority comparison function.  If the heap has any data in it,
+ * behavior is undefined.  The comparison function's return value should be:
  *
+ * A < B  --> -1
+ * A == B -->  0
+ * A > B  -->  1
  *
  ****************************************************************************/
 void
-bhp_set_priority_compare(cw_bhp_t * a_bhp_o,
+bhp_set_priority_compare(cw_bhp_t * a_bhp,
 			 bhp_prio_comp_t * a_new_prio_comp)
 {
-  _cw_check_ptr(a_bhp_o);
+  _cw_check_ptr(a_bhp);
   _cw_check_ptr(a_new_prio_comp);
 #ifdef _CW_REENTRANT
-  if (a_bhp_o->is_thread_safe == TRUE)
+  if (a_bhp->is_thread_safe == TRUE)
   {
-    rwl_wlock(&a_bhp_o->rw_lock);
+    rwl_wlock(&a_bhp->rw_lock);
   }
 #endif
 
   /* To change this while there are items in the heap will wreak havoc. */
-  _cw_assert(a_bhp_o->num_nodes == 0);
+  _cw_assert(a_bhp->num_nodes == 0);
   
-  a_bhp_o->priority_compare = a_new_prio_comp;
+  a_bhp->priority_compare = a_new_prio_comp;
   
 #ifdef _CW_REENTRANT
-  if (a_bhp_o->is_thread_safe == TRUE)
+  if (a_bhp->is_thread_safe == TRUE)
   {
-    rwl_wunlock(&a_bhp_o->rw_lock);
+    rwl_wunlock(&a_bhp->rw_lock);
   }
 #endif
 }
 
 /****************************************************************************
- * <<< Description >>>
+ *
+ * Recursively print out the internal state of the heap (actually do the work).
+ *
+ ****************************************************************************/
+cw_bhpi_t *
+bhp_p_dump(cw_bhpi_t * a_bhpi, cw_uint32_t a_depth, cw_bhpi_t * a_last_printed)
+{
+/*    cw_bhpi_t * bhpi_p; */
+  cw_uint32_t i;
+  
+  /* Sibling. */
+  if (NULL != a_bhpi->sibling)
+  {
+    a_last_printed = bhp_p_dump(a_bhpi->sibling, a_depth, a_last_printed);
+  }
+
+  /* Self. */
+  if (a_bhpi->parent != a_last_printed)
+  {
+    /* Indent. */
+    for (i = 0; i < (a_depth * 50); i++)
+    {
+      log_printf(g_log_o, " ");
+    }
+  }
+  log_printf(g_log_o, "[depth: %d, degree: %d, priority: %d, data: %d]",
+	     a_depth, a_bhpi->degree, *(cw_sint32_t *) a_bhpi->priority,
+	     *(cw_sint32_t *) a_bhpi->data);
+  
+  /* Child. */
+  if (NULL != a_bhpi->child)
+  {
+    log_printf(g_log_o, " ---> ");
+    a_last_printed = bhp_p_dump(a_bhpi->child, a_depth + 1, a_bhpi);
+  }
+  else
+  {
+    log_printf(g_log_o, "\n");
+  }
+
+  return a_last_printed;
+}
+
+/****************************************************************************
  *
  * Links two binomial heaps of the same degree (n) together into one heap
  * of degree (n + 1).  a_root points to the root of the resulting heap.
@@ -458,9 +504,6 @@ bhp_set_priority_compare(cw_bhp_t * a_bhp_o,
 void
 bhp_p_bin_link(cw_bhpi_t * a_root, cw_bhpi_t * a_non_root)
 {
-/*   _cw_check_ptr(a_root); */
-/*   _cw_check_ptr(a_non_root); */
-  
   a_non_root->parent = a_root;
   a_non_root->sibling = a_root->child;
   a_root->child = a_non_root;
@@ -468,27 +511,23 @@ bhp_p_bin_link(cw_bhpi_t * a_root, cw_bhpi_t * a_non_root)
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * Merges the root lists of the two heaps specified by the arguments, in
- * monotonically increasing order.  The result is stored in a_bhp_o.
+ * monotonically increasing order.  The result is stored in a_bhp.
  *
  ****************************************************************************/
 void
-bhp_p_merge(cw_bhp_t * a_bhp_o, cw_bhp_t * a_other)
+bhp_p_merge(cw_bhp_t * a_bhp, cw_bhp_t * a_other)
 {
   cw_bhpi_t * curr_this, * curr_other, * this_marker = NULL, * other_marker;
   
-/*   _cw_check_ptr(a_bhp_o); */
-/*   _cw_check_ptr(a_other); */
-
-  if (a_bhp_o->head != NULL)
+  if (a_bhp->head != NULL)
   {
-    curr_this = a_bhp_o->head;
+    curr_this = a_bhp->head;
   }
   else
   {
-    a_bhp_o->head = a_other->head;
+    a_bhp->head = a_other->head;
     goto RETURN;
   }
 
@@ -520,9 +559,9 @@ bhp_p_merge(cw_bhp_t * a_bhp_o, cw_bhp_t * a_other)
     {
       /* If first item in the list comes from other, then the following if
        * statement probably always evaluates to true. */
-      if (curr_this == a_bhp_o->head)
+      if (curr_this == a_bhp->head)
       {
-	a_bhp_o->head = a_other->head;
+	a_bhp->head = a_other->head;
       }
 
       /* Fast forward to where we need to insert. */
@@ -548,10 +587,10 @@ bhp_p_merge(cw_bhp_t * a_bhp_o, cw_bhp_t * a_other)
     }
     else
     {
-      if (curr_this == a_bhp_o->head)
+      if (curr_this == a_bhp->head)
       {
 	/* This is an empty list! */
-	a_bhp_o->head = a_other->head;
+	a_bhp->head = a_other->head;
       }
       else
       {
@@ -563,32 +602,28 @@ bhp_p_merge(cw_bhp_t * a_bhp_o, cw_bhp_t * a_other)
   }
   
  RETURN:
-  a_bhp_o->num_nodes += a_other->num_nodes;
+  a_bhp->num_nodes += a_other->num_nodes;
 
   /* Destroy the old other heap. */
   bhp_delete(a_other);
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
- *
+ * Default priority comparison function, compares the values of the pointers
+ * themselves.  This probably isn't very useful.
  *
  ****************************************************************************/
 cw_sint32_t
-bhp_p_priority_compare(cw_bhpi_t * a_a, cw_bhpi_t * a_b)
+bhp_p_priority_compare(void * a_a, void * a_b)
 {
   cw_sint32_t retval;
 
-  /* No need to bullet-proof this, since it's a private method. */
-/*   _cw_check_ptr(a_a); */
-/*   _cw_check_ptr(a_b); */
-
-  if (a_a->priority < a_b->priority)
+  if (a_a < a_b)
   {
     retval = -1;
   }
-  else if (a_a->priority > a_b->priority)
+  else if (a_a > a_b)
   {
     retval = 1;
   }
