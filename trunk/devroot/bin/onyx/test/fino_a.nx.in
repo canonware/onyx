@@ -12,6 +12,6 @@
 
 `Test begin\n' print
 
-fino 1 sprint
+( 1 sprint
 
 `Test end\n' print

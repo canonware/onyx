@@ -12,6 +12,6 @@
 
 `Test begin\n' print
 
-fino null true counttomark
+( null true counttomark
 
 `Test end\n' print
