@@ -52,46 +52,16 @@ cw_nxo_t cw_g_envdict;
 void
 libonyx_init(int a_argc, char **a_argv, char **a_envp)
 {
-    volatile cw_uint32_t try_stage = 0;
-
-    /* Start up global modules. */
+    /* Start up global modules.  Since there is no way for the caller to have
+     * set up an exception handler, if an exception occurs during
+     * initialization, it will result in program termination, so don't bother
+     * cleaning up if an exception occurs. */
 #ifdef CW_THREADS
     thd_l_init();
 #endif
     xep_l_init();
-
-    xep_begin();
-    xep_try
-    {
-	mem_l_init();
-	try_stage = 1;
-
-	nxa_l_init();
-    }
-    xep_catch(CW_ONYXX_OOM)
-    {
-	switch (try_stage)
-	{
-	    case 1:
-	    {
-		mem_l_shutdown();
-	    }
-	    case 0:
-	    {
-		xep_l_shutdown();
-#ifdef CW_THREADS
-		thd_l_shutdown();
-#endif
-		break;
-	    }
-	    default:
-	    {
-		cw_not_reached();
-	    }
-	}
-    }
-    xep_end();
-
+    mem_l_init();
+    nxa_l_init();
     systemdict_l_init();
 
     /* Initialize argv. */
@@ -122,7 +92,6 @@ libonyx_init(int a_argc, char **a_argv, char **a_envp)
 	envdict_l_populate(&cw_g_envdict, &temp_a, &temp_b, a_envp);
     }
 #endif
-
 
     /* Turn the GC on, now that argv and envdict are initialized. */
     nxa_active_set(TRUE);
