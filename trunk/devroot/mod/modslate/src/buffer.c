@@ -28,7 +28,7 @@ struct cw_buffer
     /* Reference to =buffer=, prevents premature module unload. */
     cw_nxo_t hook;
 
-    /* Auxiliary data for buffer_{set}aux. */
+    /* Auxiliary data for buffer_aux_[gs]et. */
     cw_nxo_t aux;
 
     /* Sequence number. */
@@ -66,6 +66,9 @@ struct cw_extent
 
     cw_nxo_t buffer_nxo;
     cw_ext_t ext;
+
+    /* Auxiliary data for extent_aux_[gs]et. */
+    cw_nxo_t aux;
 
     /* Sequence number. */
     cw_nxoi_t seq;
