@@ -78,3 +78,17 @@ libs_distclean : [addsuffix _libs_distclean @libs@];
          "--suffix='set nodefault;'"
          -o [fromto lib/%0src/%1.o_a lib/%0src/%1.d_a [target]];
 }
+
+/* For generated C files. */
+@objroot@/lib/%0src/%1.o_s : @objroot@/lib/%0src/%1.c
+  set mkdir
+{
+  [CC] [S_CFLAGS] [CPPFLAGS] [CPPDEFS] -c @objroot@/lib/%0src/%1.c
+       -o [target];
+
+  c_incl [CPPFLAGS] --no-cache -Absent_Local_Ignore -No_System
+         @objroot@/lib/%0src/%1.c
+         "--prefix='"[target]" : "@objroot@/lib/%0src/%1.c"'"
+         "--suffix='set nodefault;'"
+         -o [fromto lib/%0src/%1.o_s lib/%0src/%1.d_s [target]];
+}

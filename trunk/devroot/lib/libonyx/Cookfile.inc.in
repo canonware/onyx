@@ -43,33 +43,32 @@
 }
 
 /* Source files common to libonyx and libbonyx. */
-LIBONYX_COMMON_SRCS = libonyx.c ch.c dch.c gcdict.c mem.c nx.c nxa.c nxn.c nxo.c
-                      nxo_array.c nxo_boolean.c nxo_dict.c nxo_file.c nxo_fino.c
-                      nxo_hook.c nxo_integer.c nxo_mark.c nxo_name.c nxo_null.c
-                      nxo_operator.c nxo_pmark.c nxo_stack.c nxo_string.c
-                      nxo_thread.c systemdict.c xep.c
+LIBONYX_COMMON_SRCS = [addprefix @srcroot@/lib/libonyx/src/
+                                 libonyx.c ch.c dch.c gcdict.c mem.c nx.c nxa.c
+                                 nxn.c nxo.c nxo_array.c nxo_boolean.c
+                                 nxo_dict.c nxo_file.c nxo_fino.c nxo_hook.c
+                                 nxo_integer.c nxo_mark.c nxo_name.c nxo_null.c
+                                 nxo_operator.c nxo_pmark.c nxo_stack.c
+                                 nxo_string.c nxo_thread.c systemdict.c xep.c
 #if @enable_threads@
-                      cnd.c mq.c mtx.c nxo_condition.c nxo_mutex.c thd.c tsd.c
+                                 cnd.c mq.c mtx.c nxo_condition.c nxo_mutex.c
+                                 thd.c tsd.c
 #endif
 #if @enable_real@
-                      nxo_real.c
+                                 nxo_real.c
 #endif
 #if @enable_posix@
-                      envdict.c
+                                 envdict.c
 #endif
-                      ;
+                                 ];
 
 /* libonyx source files. */
-LIBONYX_SRCS = [fromto % @srcroot@/lib/libonyx/src/% [LIBONYX_COMMON_SRCS]]
-               [fromto % @objroot@/lib/libonyx/src/%
-                         nx_nxcode.c nxo_thread_nxcode.c
-               ];
+LIBONYX_ONLY_SRCS = [addprefix @objroot@/lib/libonyx/src/
+                               nx_nxcode.c nxo_thread_nxcode.c];
 
 /* libbonyx source files. */
-LIBBONYX_SRCS = [fromto % @srcroot@/lib/libonyx/src/%
-                        [LIBONYX_COMMON_SRCS]
-                        nx_bootstrap.c nxo_thread_bootstrap.c
-                ];
+LIBBONYX_ONLY_SRCS = [addprefix @srcroot@/lib/libonyx/src/
+                                nx_bootstrap.c nxo_thread_bootstrap.c];
 
 /* Simple C tests.  Output is diff'ed with the expected (.exp file) output. */
 LIBONYX_CTESTS = ch_a.c dch_a.c libonyx_a.c ql_a.c qr_a.c qs_a.c xep_a.c
@@ -170,10 +169,19 @@ dataend
 
 libonyx_libs_clean :
 {
-  rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.d_a [LIBONYX_SRCS]];
-  rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.d_s [LIBONYX_SRCS]];
-  rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [LIBONYX_SRCS]];
-  rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.o_s [LIBONYX_SRCS]];
+  rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.d_a [LIBONYX_COMMON_SRCS]];
+  rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.d_s [LIBONYX_COMMON_SRCS]];
+  rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [LIBONYX_COMMON_SRCS]];
+  rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.o_s [LIBONYX_COMMON_SRCS]];
+
+  rm -f [LIBONYX_ONLY_SRCS];
+  rm -f [fromto %0%.c %0%.d_a [LIBONYX_ONLY_SRCS]];
+  rm -f [fromto %0%.c %0%.d_s [LIBONYX_ONLY_SRCS]];
+  rm -f [fromto %0%.c %0%.o_a [LIBONYX_ONLY_SRCS]];
+  rm -f [fromto %0%.c %0%.o_s [LIBONYX_ONLY_SRCS]];
+
+  rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.d_a [LIBBONYX_ONLY_SRCS]];
+  rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [LIBBONYX_ONLY_SRCS]];
 
   rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.d_a [LIBONYX_CTESTS]];
   rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [LIBONYX_CTESTS]];
@@ -181,15 +189,15 @@ libonyx_libs_clean :
   rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.diff [LIBONYX_CTESTS]];
   rm -f [fromto @srcroot@/%0%.c @objroot@/%0% [LIBONYX_CTESTS]];
 
-  rm -f [addprefix @objroot@/lib/libonyx/src/
-                   nx_nxcode.c nxo_thread_nxcode.c];
-
   rm -f [LIBBONYX_A] [LIBONYX_A] [LIBONYX_S] [LIBONYX_L];
 }
 
 libonyx_libs_distclean :
 {
   rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.perf [LIBONYX_CTESTS]];
+
+  rm -f [addprefix @objroot@/lib/libonyx/src/
+                   nx.nx nxo_thread.nx];
 }
 
 /*
@@ -237,7 +245,9 @@ libonyx_libs_install_s : [LIBONYX_S] libonyx_libs_install_common
        -compatibility_version [LIBONYX_REV]
        -current_version [LIBONYX_REV]
        -install_name [PREFIX]/lib/libonyx.[LIBONYX_REV].dylib
-       -o [LIBONYX_S] [fromto @srcroot@/%0%.c @objroot@/%0%.o_s [LIBONYX_SRCS]];
+       -o [LIBONYX_S]
+       [fromto @srcroot@/%0%.c @objroot@/%0%.o_s [LIBONYX_COMMON_SRCS]]
+       [fromto @objroot@/%0%.c @objroot@/%0%.o_s [LIBONYX_ONLY_SRCS]];
 #endif
 
   @INSTALL@ -m 0444 [LIBONYX_S] [PREFIX]/lib;
@@ -252,21 +262,24 @@ libonyx_libs_install_s : [LIBONYX_S] libonyx_libs_install_common
  * Dependencies.
  */
 
-[LIBBONYX_A] : [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [LIBBONYX_SRCS]]
+[LIBBONYX_A] : [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [LIBONYX_COMMON_SRCS]]
+               [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [LIBBONYX_ONLY_SRCS]]
   set mkdir
 {
   @AR@ cru [target] [younger];
   @RANLIB@ [target];
 }
 
-[LIBONYX_A] : [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [LIBONYX_SRCS]]
+[LIBONYX_A] : [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [LIBONYX_COMMON_SRCS]]
+              [fromto @objroot@/%0%.c @objroot@/%0%.o_a [LIBONYX_ONLY_SRCS]]
   set mkdir
 {
   @AR@ cru [target] [younger];
   @RANLIB@ [target];
 }
 
-[LIBONYX_S] : [fromto @srcroot@/%0%.c @objroot@/%0%.o_s [LIBONYX_SRCS]]
+[LIBONYX_S] : [fromto @srcroot@/%0%.c @objroot@/%0%.o_s [LIBONYX_COMMON_SRCS]]
+              [fromto @objroot@/%0%.c @objroot@/%0%.o_s [LIBONYX_ONLY_SRCS]]
   set mkdir
 {
   [CC]

@@ -162,9 +162,7 @@ TONYX = @objroot@/bin/onyx/bin/tonyx;
  * User cook'ables.
  */
 
-onyx : [ONYX] [TONYX];
-
-bonyx : [BONYX];
+onyx : [ONYX] [BONYX] [TONYX];
 
 onyx_bins_bootstrap : [ONYX]
 {

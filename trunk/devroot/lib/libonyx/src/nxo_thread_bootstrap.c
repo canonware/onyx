@@ -11,7 +11,7 @@
  *
  ******************************************************************************/
 
-#include "../include/libonyx/libonyx.h"
+#include <libonyx/libonyx.h>
 
 void
 nxo_p_thread_nxcode(cw_nxo_t *a_thread)
