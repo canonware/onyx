@@ -54,11 +54,7 @@
  * Maximum number of el's to store in a stack buffer before allocating space on
  * the heap.  Must be at least 1.
  */
-#ifdef _LIBSTASH_DBG
-#define _CW_OUT_ELS_BUF		   1
-#else
 #define _CW_OUT_ELS_BUF		  16
-#endif
 
 /*
  * The following structures are used for caching the results from
