@@ -914,10 +914,8 @@ mkr_dup(cw_mkr_t *a_to, const cw_mkr_t *a_from)
 {
     cw_check_ptr(a_to);
     cw_dassert(a_to->magic == CW_MKR_MAGIC);
-    cw_check_ptr(a_to->bufp);
     cw_check_ptr(a_from);
     cw_dassert(a_from->magic == CW_MKR_MAGIC);
-    cw_check_ptr(a_from->bufp);
     cw_assert(a_to->bufp->buf == a_from->bufp->buf);
 
     mkr_p_remove(a_to);
@@ -934,7 +932,6 @@ mkr_delete(cw_mkr_t *a_mkr)
 {
     cw_check_ptr(a_mkr);
     cw_dassert(a_mkr->magic == CW_MKR_MAGIC);
-    cw_check_ptr(a_mkr->bufp);
 
     mkr_p_remove(a_mkr);
 
@@ -948,7 +945,6 @@ mkr_buf(const cw_mkr_t *a_mkr)
 {
     cw_check_ptr(a_mkr);
     cw_dassert(a_mkr->magic == CW_MKR_MAGIC);
-    cw_check_ptr(a_mkr->bufp);
 
     return a_mkr->bufp->buf;
 }
@@ -962,7 +958,6 @@ mkr_line_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence)
 
     cw_check_ptr(a_mkr);
     cw_dassert(a_mkr->magic == CW_MKR_MAGIC);
-    cw_check_ptr(a_mkr->bufp);
 
     buf = a_mkr->bufp->buf;
 
@@ -1104,7 +1099,6 @@ mkr_line(cw_mkr_t *a_mkr)
 
     cw_check_ptr(a_mkr);
     cw_dassert(a_mkr->magic == CW_MKR_MAGIC);
-    cw_check_ptr(a_mkr->bufp);
 
     bufp_p_cache_validate(a_mkr->bufp);
     retval = mkr_p_line(a_mkr);
@@ -1121,7 +1115,6 @@ mkr_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence)
 
     cw_check_ptr(a_mkr);
     cw_dassert(a_mkr->magic == CW_MKR_MAGIC);
-    cw_check_ptr(a_mkr->bufp);
 
     buf = a_mkr->bufp->buf;
 
@@ -1230,7 +1223,6 @@ mkr_pos(const cw_mkr_t *a_mkr)
 
     cw_check_ptr(a_mkr);
     cw_dassert(a_mkr->magic == CW_MKR_MAGIC);
-    cw_check_ptr(a_mkr->bufp);
 
     bufp_p_cache_validate(a_mkr->bufp);
     retval = bufp_p_pos_p2b(a_mkr->bufp, a_mkr->ppos);
@@ -1241,13 +1233,87 @@ mkr_pos(const cw_mkr_t *a_mkr)
 cw_uint8_t *
 mkr_before_get(const cw_mkr_t *a_mkr)
 {
-    cw_error("XXX Not implemented");
+    cw_uint8_t *retval;
+    cw_uint32_t offset;
+
+    cw_check_ptr(a_mkr);
+    cw_dassert(a_mkr->magic == CW_MKR_MAGIC);
+
+    /* Determine offset of a_mkr. */
+    if (a_mkr->ppos <= a_mkr->bufp->gap_off)
+    {
+	/* Before gap. */
+	offset = a_mkr->ppos;
+    }
+    else
+    {
+	/* After gap. */
+	offset = a_mkr->ppos - a_mkr->bufp->gap_len;
+    }
+
+    if (offset == 0)
+    {
+	if (a_mkr->bufp->index == 0)
+	{
+	    /* There is no character before BOB. */
+	    retval = NULL;
+	}
+	else
+	{
+	    cw_bufp_t *bufp;
+
+	    /* The character is in the previous bufp. */
+	    bufp = a_mkr->bufp->buf->bufps[a_mkr->bufp->index - 1];
+
+	    if (bufp->len > bufp->gap_off)
+	    {
+		/* Last character in raw buffer. */
+		retval = &bufp->b[CW_BUFP_SIZE - 1];
+	    }
+	    else
+	    {
+		/* Last character in raw buffer before gap. */
+		retval = &bufp->b[bufp->len - 1];
+	    }
+	}
+    }
+    else
+    {
+	/* Determine offset of character before a_mkr. */
+	if (a_mkr->ppos <= a_mkr->bufp->gap_off + a_mkr->bufp->gap_len)
+	{
+	    /* Before gap. */
+	    offset = a_mkr->ppos - 1;
+	}
+	else
+	{
+	    /* After gap. */
+	    offset = a_mkr->ppos - 1 - a_mkr->bufp->gap_len;
+	}
+	retval = &a_mkr->bufp->b[offset];
+    }
+
+    return retval;
 }
 
 cw_uint8_t *
 mkr_after_get(const cw_mkr_t *a_mkr)
 {
-    cw_error("XXX Not implemented");
+    cw_uint32_t offset;
+
+    cw_check_ptr(a_mkr);
+    cw_dassert(a_mkr->magic == CW_MKR_MAGIC);
+
+    if (a_mkr->ppos <= a_mkr->bufp->gap_off)
+    {
+	offset = a_mkr->ppos;
+    }
+    else
+    {
+	offset = a_mkr->ppos - a_mkr->bufp->gap_len;
+    }
+    
+    return &a_mkr->bufp->b[offset];
 }
 
 cw_bufv_t *
