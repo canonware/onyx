@@ -292,6 +292,7 @@ buf_out_render(const char * a_format, cw_uint32_t a_len, const void * a_arg,
   char * retval;
 
   /* XXX */
+  retval = NULL;
   
   return retval;
 }

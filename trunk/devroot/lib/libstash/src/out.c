@@ -555,7 +555,7 @@ out_put_sva(cw_out_t * a_out, char ** r_str,
 	    const char * a_format, va_list a_p)
 {
   cw_sint32_t retval, out_size;
-  char * output;
+  char * output = NULL;
 
   _cw_check_ptr(a_format);
   _cw_check_ptr(a_p);
@@ -807,6 +807,7 @@ spec_get_val(const char * a_spec, cw_uint32_t a_spec_len,
   _cw_check_ptr(a_name);
   _cw_check_ptr(r_val);
 
+  curr_name_len = 0; /* Shut up the optimizer warnings. */
   name_len = strlen(a_name);
 
   for (i = val_len = 0, match = FALSE, state = VALUE;
@@ -1082,7 +1083,8 @@ out_p_metric(cw_out_t * a_out, const char * a_format, char ** r_format,
     NAME,
     VALUE
   } state;
-  
+
+  spec_len = 0; /* Shut up the optimizer warning. */
   format_len = strlen(a_format);
 
   format = (char *) _cw_malloc(format_len + 1);
@@ -1969,6 +1971,8 @@ out_p_render_string(const char * a_format, cw_uint32_t a_len,
     memcpy(r_buf, str, len);
   }
 
+  retval = r_buf;
+  
   return retval;
 }
 
