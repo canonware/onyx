@@ -140,6 +140,7 @@ main(int argc, char ** argv)
     bufc_set_buffer(bufc,
 		    (void *) buffer,
 		    _LIBSTASH_TEST_SIZEOF_BUFFER,
+		    FALSE,
 		    mem_dealloc,
 		    cw_g_mem);
     bufel_set_bufc(bufel, bufc);

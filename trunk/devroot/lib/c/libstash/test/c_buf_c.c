@@ -50,7 +50,7 @@ main()
 			mem_dealloc,
 			cw_g_mem);
 	data = _cw_malloc(i * j);
-	bufc_set_buffer(bufc, data, i * j, mem_dealloc, cw_g_mem);
+	bufc_set_buffer(bufc, data, i * j, FALSE, mem_dealloc, cw_g_mem);
 	bufel_set_bufc(&bufel, bufc);
 
 	buf_append_bufel(buf_a, &bufel);
@@ -63,7 +63,7 @@ main()
 		      mem_dealloc,
 		      cw_g_mem);
       data = _cw_malloc(4096);
-      bufc_set_buffer(bufc, data, 4096, mem_dealloc, cw_g_mem);
+      bufc_set_buffer(bufc, data, 4096, FALSE, mem_dealloc, cw_g_mem);
       bufel_set_bufc(&bufel, bufc);
       buf_append_bufel(buf_b, &bufel);
     }
@@ -74,7 +74,7 @@ main()
 		      mem_dealloc,
 		      cw_g_mem);
       data = _cw_malloc(16);
-      bufc_set_buffer(bufc, data, 16, mem_dealloc, cw_g_mem);
+      bufc_set_buffer(bufc, data, 16, FALSE, mem_dealloc, cw_g_mem);
       bufel_set_bufc(&bufel, bufc);
       buf_append_bufel(buf_c, &bufel);
     }

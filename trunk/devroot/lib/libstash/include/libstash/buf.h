@@ -62,8 +62,9 @@ typedef struct
   void (*buffer_dealloc_func)(void *, void *);
   void * buffer_dealloc_arg;
   cw_uint32_t ref_count;
+  cw_bool_t is_writeable;
   cw_uint32_t buf_size;
-  const cw_uint8_t * buf;
+  cw_uint8_t * buf;
 } cw_bufc_t;
 
 struct cw_bufel_s
@@ -643,6 +644,8 @@ buf_set_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint64_t a_val);
  *
  * a_val : Value to set data at a_offset to.
  *
+ * a_is_writeable : FALSE == non-writeable buffer, TRUE == writeable buffer.
+ *
  * <<< Output(s) >>>
  *
  * retval : FALSE == success, TRUE == error.
@@ -655,7 +658,7 @@ buf_set_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint64_t a_val);
  ****************************************************************************/
 cw_bool_t
 buf_set_range(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint32_t a_length,
-	      cw_uint8_t * a_val);
+	      cw_uint8_t * a_val, cw_bool_t a_is_writeable);
 
 /****************************************************************************
  *
@@ -959,6 +962,7 @@ bufc_delete(cw_bufc_t * a_bufc);
  *
  ****************************************************************************/
 void
-bufc_set_buffer(cw_bufc_t * a_bufc, const void * a_buffer, cw_uint32_t a_size,
+bufc_set_buffer(cw_bufc_t * a_bufc, void * a_buffer, cw_uint32_t a_size,
+		cw_bool_t a_is_writeable,
 		void (*a_dealloc_func)(void * dealloc_arg, void * buffer),
 		void * a_dealloc_arg);

@@ -1425,7 +1425,7 @@ buf_set_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint64_t a_val)
 
 cw_bool_t
 buf_set_range(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint32_t a_length,
-	      cw_uint8_t * a_val)
+	      cw_uint8_t * a_val, cw_bool_t a_is_writeable)
 {
   return TRUE; /* XXX */
 }
@@ -2446,7 +2446,8 @@ bufc_delete(cw_bufc_t * a_bufc)
 }
 
 void
-bufc_set_buffer(cw_bufc_t * a_bufc, const void * a_buffer, cw_uint32_t a_size,
+bufc_set_buffer(cw_bufc_t * a_bufc, void * a_buffer, cw_uint32_t a_size,
+		cw_bool_t a_is_writeable,
 		void (*a_dealloc_func)(void * dealloc_arg, void * buffer),
 		void * a_dealloc_arg)
 {
@@ -2457,8 +2458,9 @@ bufc_set_buffer(cw_bufc_t * a_bufc, const void * a_buffer, cw_uint32_t a_size,
 #ifdef _CW_REENTRANT
   mtx_lock(&a_bufc->lock);
 #endif
-  a_bufc->buf = (const cw_uint8_t *) a_buffer;
+  a_bufc->buf = (cw_uint8_t *) a_buffer;
   a_bufc->buf_size = a_size;
+  a_bufc->is_writeable = a_is_writeable;
   a_bufc->buffer_dealloc_func = a_dealloc_func;
   a_bufc->buffer_dealloc_arg = a_dealloc_arg;
 #ifdef _CW_REENTRANT
