@@ -1468,7 +1468,7 @@ fi
 fi
 if eval "test \"`echo '$ac_cv_file_'$ac_safe`\" = yes"; then
   echo "$ac_t""yes" 1>&6
-  TEST_LIBS="-static -lstash_r_d"
+  TEST_LIBS="-lstash_r_d"
 else
   echo "$ac_t""no" 1>&6
 echo Was hoping for $ac_config_dir/lib/libstash
@@ -1503,7 +1503,7 @@ LIBS="$ac_save_LIBS"
 fi
 if eval "test \"`echo '$ac_cv_lib_'$ac_lib_var`\" = yes"; then
   echo "$ac_t""yes" 1>&6
-  TEST_LIBS="-static -lstash_r_d"
+  TEST_LIBS="-lstash_r_d"
 else
   echo "$ac_t""no" 1>&6
 \
@@ -1579,7 +1579,7 @@ fi
 fi
 if eval "test \"`echo '$ac_cv_file_'$ac_safe`\" = yes"; then
   echo "$ac_t""yes" 1>&6
-  BIN_LIBS="-static -lstash_r_d"
+  BIN_LIBS="-lstash_r_d"
 else
   echo "$ac_t""no" 1>&6
 echo Was hoping for $ac_config_dir/lib/libstash
@@ -1614,7 +1614,7 @@ LIBS="$ac_save_LIBS"
 fi
 if eval "test \"`echo '$ac_cv_lib_'$ac_lib_var`\" = yes"; then
   echo "$ac_t""yes" 1>&6
-  BIN_LIBS="-static -lstash_r_d"
+  BIN_LIBS="-lstash_r_d"
 else
   echo "$ac_t""no" 1>&6
 \
@@ -1691,7 +1691,7 @@ fi
 fi
 if eval "test \"`echo '$ac_cv_file_'$ac_safe`\" = yes"; then
   echo "$ac_t""yes" 1>&6
-  BIN_LIBS="-static -lstash_r"
+  BIN_LIBS="-lstash_r"
 else
   echo "$ac_t""no" 1>&6
 echo Was hoping for $ac_config_dir/lib/libstash
@@ -1726,7 +1726,7 @@ LIBS="$ac_save_LIBS"
 fi
 if eval "test \"`echo '$ac_cv_lib_'$ac_lib_var`\" = yes"; then
   echo "$ac_t""yes" 1>&6
-  BIN_LIBS="-static -lstash_r"
+  BIN_LIBS="-lstash_r"
 else
   echo "$ac_t""no" 1>&6
 \

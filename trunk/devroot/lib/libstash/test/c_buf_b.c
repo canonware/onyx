@@ -84,15 +84,7 @@ thread_entry_func(void * a_arg)
     else
     {
       /* Hope for a context switch. */
-#ifdef _CW_OS_FREEBSD
-      pthread_yield();
-#endif
-#ifdef _CW_OS_SOLARIS
-      /* XXX This is what we need, but it requires -lposix4 for linking, and I'm
-       * too lazy to deal with it right now, especially since this really
-       * belongs in the thd class. */
-/*        sched_yield(); */
-#endif
+      thd_yield();
     }
   }
 

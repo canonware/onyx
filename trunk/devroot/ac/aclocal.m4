@@ -23,9 +23,9 @@ AC_DEFUN(SQRL_USE_LIBSTASH_R,
   AC_CHECK_HEADERS(libstash/libstash_r.h, , \
                    AC_MSG_ERROR(Cannot build without libstash/libstash_r.h))
 
-  AC_CHECK_FILE([$3/libstash],$2="-static -lstash_r$1",
+  AC_CHECK_FILE([$3/libstash],$2="-lstash_r$1",
     echo Was hoping for $ac_config_dir/lib/libstash
-    AC_CHECK_LIB(stash$1, main, $2="-static -lstash_r$1", \
+    AC_CHECK_LIB(stash$1, main, $2="-lstash_r$1", \
       AC_MSG_ERROR(Cannot find the stash_r$1 library)))
 ])
 

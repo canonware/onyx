@@ -131,14 +131,14 @@ all : default
 
 # This rule is used to build the tests.
 test/% : test/%.o
-	$(CC) -o $@ $< $(LIBPATH) $(LIB_ST_D) $(TEST_LIBS) -dynamic $(EXTRALIBS)
+	$(CC) -o $@ $< $(LIBPATH) $(LIB_ST_D) $(TEST_LIBS) $(EXTRALIBS)
 
 test/%.o : test/%.c
 	$(CC) $(CFLAGS) $(TEST_CFLAGS) $(INCPATH) $(DEFINES) $(TEST_DEFINES) -c $< -o $@
 	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(TEST_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o \2/g\" > $(@:%.o=%.d)"
 
 bin/% : bin/%.o
-	$(CC) -o $@ $< $(LIBPATH) $(BIN_LIBSOCK) $(BIN_LIBS) -dynamic $(EXTRALIBS)
+	$(CC) -o $@ $< $(LIBPATH) $(BIN_LIBSOCK) $(BIN_LIBS) $(EXTRALIBS)
 
 bin/%.o : bin/%.c
 	$(CC) $(CFLAGS) $(BIN_CFLAGS) $(INCPATH) $(DEFINES) $(BIN_DEFINES) -c $< -o $(@)

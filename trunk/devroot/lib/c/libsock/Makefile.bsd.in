@@ -131,7 +131,7 @@ all : default
 
 .for bin in $(CTESTS) $(BTESTS)
 $(bin) : $(LIB_ST_D) $(bin:S/$/&.o/)
-	$(CC) -o $@ $(@:S/$/&.o/) $(LIBPATH) $(LIB_ST_D) $(TEST_LIBS) -dynamic $(EXTRALIBS)
+	$(CC) -o $@ $(@:S/$/&.o/) $(LIBPATH) $(LIB_ST_D) $(TEST_LIBS) $(EXTRALIBS)
 
 $(bin:S/$/&.o/) : $(bin:S/$/&.c/)
 	$(CC) $(CFLAGS) $(TEST_CFLAGS) $(INCPATH) $(DEFINES) $(TEST_DEFINES) -c $(bin:S/$/&.c/) -o $@
@@ -140,7 +140,7 @@ $(bin:S/$/&.o/) : $(bin:S/$/&.c/)
 
 .for bin in $(BINS)
 $(bin) : $(BIN_LIBSOCK) $(bin:S/$/&.o/)
-	$(CC) -o $@ $(@:S/$/&.o/) $(LIBPATH) $(BIN_LIBSOCK) $(BIN_LIBS) -dynamic $(EXTRALIBS)
+	$(CC) -o $@ $(@:S/$/&.o/) $(LIBPATH) $(BIN_LIBSOCK) $(BIN_LIBS) $(EXTRALIBS)
 
 $(bin:S/$/&.o/) : $(bin:S/$/&.c/)
 	$(CC) $(CFLAGS) $(BIN_CFLAGS) $(INCPATH) $(DEFINES) $(BIN_DEFINES) -c $(bin:S/$/&.c/) -o $@

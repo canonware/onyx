@@ -146,7 +146,7 @@ all : all_s @without_threads@all_r
 # This rule is used to build the tests.
 % : %.c $(LIB_ST_R_D)
 	$(CC) $(CFLAGS) $(ST_CFLAGS) $(D_CFLAGS) $(R_CFLAGS) $(INCPATH) $(DEFINES) $(R_DEFINES) $(TEST_DEFINES) -c $< -o $(@:=.o)
-	$(CC) -o $@ $(@:=.o) $(LIB_ST_R_D) $(LIBPATH) -dynamic $(EXTRALIBS)
+	$(CC) -o $@ $(@:=.o) $(LIB_ST_R_D) $(LIBPATH) $(EXTRALIBS)
 	$(SHELL) -ec "$(CC) -M $(DEFINES) $(ST_DEFINES) $(D_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o \2/g\" > $(@:%=%.d)"
 
 src/%.o_st_d : src/%.c
