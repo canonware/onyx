@@ -136,14 +136,16 @@ ONYX_OTESTS =
               lt_h.nx.in mark_a.nx.in mod_a.nx.in mod_b.nx.in mod_c.nx.in
               mod_d.nx.in mod_e.nx.in mul_a.nx.in mul_b.nx.in mul_c.nx.in
               mul_d.nx.in nbpop_a.nx.in nbpop_b.nx.in nbpop_c.nx.in
-              nbpop_d.nx.in nbpop_e.nx.in ndn_a.nx.in ndn_b.nx.in ndn_c.nx.in
-              ndn_d.nx.in ndn_e.nx.in ndn_f.nx.in ndup_a.nx.in ndup_b.nx.in
-              ndup_c.nx.in ndup_d.nx.in ndup_e.nx.in ne_a.nx.in ne_b.nx.in
-              neg_a.nx.in neg_b.nx.in neg_c.nx.in nip_a.nx.in nip_b.nx.in
-              not_a.nx.in not_b.nx.in not_c.nx.in npop_a.nx.in npop_b.nx.in
-              npop_c.nx.in npop_d.nx.in npop_e.nx.in nup_a.nx.in nup_b.nx.in
-              nup_c.nx.in nup_d.nx.in nup_e.nx.in nup_f.nx.in or_a.nx.in
-              or_b.nx.in or_c.nx.in or_d.nx.in or_e.nx.in or_f.nx.in
+              nbpop_d.nx.in nbpop_e.nx.in ncat_a.nx.in ncat_b.nx.in ncat_c.nx.in
+              ncat_d.nx.in ncat_e.nx.in ncat_f.nx.in ncat_g.nx.in ncat_h.nx.in
+              ncat_i.nx.in ncat_j.nx.in ncat_k.nx.in ndn_a.nx.in ndn_b.nx.in
+              ndn_c.nx.in ndn_d.nx.in ndn_e.nx.in ndn_f.nx.in ndup_a.nx.in
+              ndup_b.nx.in ndup_c.nx.in ndup_d.nx.in ndup_e.nx.in ne_a.nx.in
+              ne_b.nx.in neg_a.nx.in neg_b.nx.in neg_c.nx.in nip_a.nx.in
+              nip_b.nx.in not_a.nx.in not_b.nx.in not_c.nx.in npop_a.nx.in
+              npop_b.nx.in npop_c.nx.in npop_d.nx.in npop_e.nx.in nup_a.nx.in
+              nup_b.nx.in nup_c.nx.in nup_d.nx.in nup_e.nx.in nup_f.nx.in
+              or_a.nx.in or_b.nx.in or_c.nx.in or_d.nx.in or_e.nx.in or_f.nx.in
               output_a.nx.in over_a.nx.in over_b.nx.in pop_a.nx.in pop_b.nx.in
               put_a.nx.in put_b.nx.in put_c.nx.in put_d.nx.in put_e.nx.in
               put_f.nx.in put_g.nx.in put_h.nx.in putinterval_a.nx.in

@@ -305,6 +305,7 @@ typedef enum
 #endif
     NXN_ENTRY(nametype),
     NXN_ENTRY(nbpop),
+    NXN_ENTRY(ncat),
     NXN_ENTRY(ndn),
     NXN_ENTRY(ndup),
     NXN_ENTRY(ne),

@@ -429,6 +429,9 @@ void
 systemdict_nbpop(cw_nxo_t *a_thread);
 
 void
+systemdict_ncat(cw_nxo_t *a_thread);
+
+void
 systemdict_ndn(cw_nxo_t *a_thread);
 
 void

@@ -243,6 +243,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(mutex),
 #endif
     ENTRY(nbpop),
+    ENTRY(ncat),
     ENTRY(ndn),
     ENTRY(ndup),
     ENTRY(ne),
@@ -1093,22 +1094,21 @@ systemdict_cat(cw_nxo_t *a_thread)
 	{
 	    cw_nxo_t *fr, *to;
 
-	    len_a = nxo_stack_count(a);
-	    len_b = nxo_stack_count(b);
-
 	    nxo_stack_new(r, nxo_thread_nx_get(a_thread),
 			  nxo_thread_currentlocking(a_thread));
 
-	    for (i = 0, fr = to = NULL; i < len_b; i++)
+	    for (fr = nxo_stack_get(b);
+		 fr != NULL;
+		 fr = nxo_stack_down_get(b, fr))
 	    {
-		fr = nxo_stack_down_get(b, fr);
-		to = nxo_stack_under_push(r, to);
+		to = nxo_stack_bpush(r);
 		nxo_dup(to, fr);
 	    }
-	    for (i = 0, fr = NULL; i < len_a; i++)
+	    for (fr = nxo_stack_get(a);
+		 fr != NULL;
+		 fr = nxo_stack_down_get(a, fr))
 	    {
-		fr = nxo_stack_down_get(a, fr);
-		to = nxo_stack_under_push(r, to);
+		to = nxo_stack_bpush(r);
 		nxo_dup(to, fr);
 	    }
 
@@ -1122,7 +1122,6 @@ systemdict_cat(cw_nxo_t *a_thread)
 	    nxo_string_new(r, nxo_thread_nx_get(a_thread),
 			   nxo_thread_currentlocking(a_thread), len_a + len_b);
 
-	    nxo_string_lock(r);
 	    nxo_string_lock(a);
 	    nxo_string_set(r, 0, nxo_string_get(a), len_a);
 	    nxo_string_unlock(a);
@@ -1130,7 +1129,6 @@ systemdict_cat(cw_nxo_t *a_thread)
 	    nxo_string_lock(b);
 	    nxo_string_set(r, len_a, nxo_string_get(b), len_b);
 	    nxo_string_unlock(b);
-	    nxo_string_unlock(r);
 
 	    break;
 	}
@@ -3495,12 +3493,10 @@ systemdict_foreach(cw_nxo_t *a_thread)
 
 		/* Iterate through the stack, push each element onto ostack, and
 		 * execute proc. */
-		for (i = 0, count = nxo_stack_count(what), el = NULL;
-		     i < count;
-		     i++)
+		for (el = nxo_stack_get(what);
+		     el != NULL;
+		     el = nxo_stack_down_get(what, el))
 		{
-		    el = nxo_stack_down_get(what, el);
-
 		    nxo = nxo_stack_push(ostack);
 		    nxo_dup(nxo, el);
 
@@ -5216,6 +5212,170 @@ systemdict_nbpop(cw_nxo_t *a_thread)
 }
 
 void
+systemdict_ncat(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *nxo, *tnxo, *r;
+    cw_nxoi_t count;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    if (nxo_type_get(nxo) != NXOT_INTEGER)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    count = nxo_integer_get(nxo);
+    if (count < 0)
+    {
+	nxo_thread_nerror(a_thread, NXN_rangecheck);
+	return;
+    }
+
+    if (count > 0)
+    {
+	cw_nxot_t type;
+	cw_uint32_t i, j;
+
+	tnxo = nxo;
+	NXO_STACK_DOWN_GET(nxo, ostack, a_thread, nxo);
+	type = nxo_type_get(nxo);
+	nxo = tnxo;
+	switch (type)
+	{
+	    case NXOT_ARRAY:
+	    {
+		cw_uint32_t len, off, nelms = 0;
+
+		/* Check argument type and add up the total number of
+		 * elements. */
+		for (i = 0; i < count; i++)
+		{
+		    NXO_STACK_DOWN_GET(nxo, ostack, a_thread, nxo);
+		    if (nxo_type_get(nxo) != NXOT_ARRAY)
+		    {
+			nxo_thread_nerror(a_thread, NXN_typecheck);
+			return;
+		    }
+		    nelms += nxo_array_len_get(nxo);
+		}
+
+		/* Allocate the array. */
+		r = nxo_stack_under_push(ostack, nxo);
+		nxo_array_new(r, nxo_thread_nx_get(a_thread),
+			      nxo_thread_currentlocking(a_thread), nelms);
+
+		/* Fill in the array. */
+		for (i = off = 0; i < count; i++)
+		{
+		    len = nxo_array_len_get(nxo);
+		    for (j = 0; j < len; j++)
+		    {
+			nxo_array_el_get(nxo, j, tnxo);
+			nxo_array_el_set(r, tnxo, off);
+			off++;
+		    }
+
+		    nxo = nxo_stack_up_get(ostack, nxo);
+		}
+
+		break;
+	    }
+	    case NXOT_STACK:
+	    {
+		cw_nxo_t *tstack, *to, *fr;
+
+		/* Iterate over the stacks to be catenated in one pass, since
+		 * there is no actual need for a first pass to calculate the
+		 * final stack size, unlike with arrays and strings. */
+
+		tstack = nxo_thread_tstack_get(a_thread);
+
+		/* Allocate the stack. */
+		r = nxo_stack_push(tstack);
+		nxo_stack_new(r, nxo_thread_nx_get(a_thread),
+			      nxo_thread_currentlocking(a_thread));
+
+		/* Fill in the stack. */
+		for (i = 0; i < count; i++)
+		{
+		    nxo = nxo_stack_down_get(ostack, nxo);
+		    if (nxo == NULL)
+		    {
+			nxo_stack_pop(tstack);
+			nxo_thread_nerror(a_thread, NXN_stackunderflow);
+			return;
+		    }
+		    if (nxo_type_get(nxo) != NXOT_STACK)
+		    {
+			nxo_stack_pop(tstack);
+			nxo_thread_nerror(a_thread, NXN_typecheck);
+			return;
+		    }
+
+		    for (fr = nxo_stack_get(nxo);
+			 fr != NULL;
+			 fr = nxo_stack_down_get(nxo, fr))
+		    {
+			to = nxo_stack_bpush(r);
+			nxo_dup(to, fr);
+		    }
+		}
+
+		nxo = nxo_stack_under_push(ostack, nxo);
+		nxo_dup(nxo, r);
+		nxo_stack_pop(tstack);
+
+		break;
+	    }
+	    case NXOT_STRING:
+	    {
+		cw_uint32_t len, off, nelms = 0;
+
+		/* Check argument type and add up the total number of
+		 * elements. */
+		for (i = 0; i < count; i++)
+		{
+		    NXO_STACK_DOWN_GET(nxo, ostack, a_thread, nxo);
+		    if (nxo_type_get(nxo) != NXOT_STRING)
+		    {
+			nxo_thread_nerror(a_thread, NXN_typecheck);
+			return;
+		    }
+		    nelms += nxo_string_len_get(nxo);
+		}
+
+		/* Allocate the string. */
+		r = nxo_stack_under_push(ostack, nxo);
+		nxo_string_new(r, nxo_thread_nx_get(a_thread),
+			       nxo_thread_currentlocking(a_thread), nelms);
+
+		/* Fill in the string. */
+		for (i = off = 0; i < count; i++)
+		{
+		    len = nxo_string_len_get(nxo);
+		    nxo_string_lock(nxo);
+		    nxo_string_set(r, off, nxo_string_get(nxo), len);
+		    nxo_string_unlock(nxo);
+		    off += len;
+
+		    nxo = nxo_stack_up_get(ostack, nxo);
+		}
+
+		break;
+	    }
+	    default:
+	    {
+		nxo_thread_nerror(a_thread, NXN_typecheck);
+		return;
+	    }
+	}
+    }
+
+    nxo_stack_npop(ostack, count + 1);
+}
+
+void
 systemdict_ndn(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack, *nxo;
@@ -6853,6 +7013,11 @@ systemdict_scleartomark(cw_nxo_t *a_thread)
     for (i = 0, depth = nxo_stack_count(stack), nxo = NULL; i < depth; i++)
     {
 	nxo = nxo_stack_down_get(stack, nxo);
+	if (nxo == NULL)
+	{
+	    nxo_thread_nerror(a_thread, NXN_unmatchedmark);
+	    return;
+	}
 	if (nxo_type_get(nxo) == NXOT_MARK)
 	{
 	    break;
@@ -6889,7 +7054,7 @@ void
 systemdict_scounttomark(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack, *stack, *nxo;
-    cw_uint32_t i, depth;
+    cw_uint32_t i;
 
     ostack = nxo_thread_ostack_get(a_thread);
     NXO_STACK_GET(stack, ostack, a_thread);
@@ -6899,15 +7064,14 @@ systemdict_scounttomark(cw_nxo_t *a_thread)
 	return;
     }
 
-    for (i = 0, depth = nxo_stack_count(stack), nxo = NULL; i < depth; i++)
+    for (i = 0, nxo = nxo_stack_get(stack);
+	 nxo != NULL && nxo_type_get(nxo) != NXOT_MARK;
+	 i++, nxo = nxo_stack_down_get(stack, nxo))
     {
-	nxo = nxo_stack_down_get(stack, nxo);
-	if (nxo_type_get(nxo) == NXOT_MARK)
-	{
-	    break;
-	}
+	/* Do nothing. */
     }
-    if (i == depth)
+
+    if (nxo == NULL)
     {
 	nxo_thread_nerror(a_thread, NXN_unmatchedmark);
 	return;
@@ -7707,6 +7871,15 @@ systemdict_sndup(cw_nxo_t *a_thread)
     for (i = 0, nxo = NULL, dup = NULL; i < count; i++)
     {
 	nxo = nxo_stack_down_get(stack, nxo);
+	if (nxo == NULL)
+	{
+	    /* This is very bad, and means that another thread is mucking with
+	     * the stack.  The right thing to do is try to restore the stack
+	     * state, but there's no way to know for sure what state the stack
+	     * is in.  Throw an error. */
+	    nxo_thread_nerror(a_thread, NXN_unregistered);
+	    return;
+	}
 	dup = nxo_stack_under_push(stack, dup);
 	nxo_dup(dup, nxo);
     }
@@ -10144,7 +10317,6 @@ systemdict_where(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack, *dstack;
     cw_nxo_t *dict, *key, *nxo;
-    cw_uint32_t i, depth;
 
     ostack = nxo_thread_ostack_get(a_thread);
     dstack = nxo_thread_dstack_get(a_thread);
@@ -10152,9 +10324,10 @@ systemdict_where(cw_nxo_t *a_thread)
     NXO_STACK_GET(key, ostack, a_thread);
 
     /* Iteratively search the dictionaries on the dictionary stack for key. */
-    for (i = 0, depth = nxo_stack_count(dstack), dict = NULL; i < depth; i++)
+    for (dict = nxo_stack_get(dstack);
+	 dict != NULL;
+	 dict = nxo_stack_down_get(dstack, dict))
     {
-	dict = nxo_stack_down_get(dstack, dict);
 	if (nxo_dict_lookup(dict, key, NULL) == FALSE)
 	{
 	    /* Found. */

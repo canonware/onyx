@@ -7921,6 +7921,42 @@ onyx:0> `a' `b' `c' 2 nbpop pstack
 onyx:1>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:ncat}
+\index{ncat@\onyxop{objects count}{ncat}{obj}}
+\item[{\onyxop{OPARGS}{ncat}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[objects: ]
+			\oparg{count} objects, all of one type: array, stack, or
+			string.
+		\item[count: ]
+			Number of \oparg{objects} to catenate.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[obj: ]
+			The catenation of \oparg{objects}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Catenate \oparg{count} \oparg{objects}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> [`a'] [`b'] [`c'] 3 ncat 1 sprint
+[`a' `b' `c']
+onyx:0> (`a') (`b') (`c') 3 ncat 1 sprint
+(`a' `b' `c')
+onyx:0> `a' `b' `c' 3 ncat 1 sprint
+`abc'
+onyx:0>
+		\end{verbatim}
+	\end{description}
 \label{systemdict:ndn}
 \index{ndn@\onyxop{}{ndn}{}}
 \item[{\onyxop{a \dots b count}{ndn}{\dots b a}}: ]
