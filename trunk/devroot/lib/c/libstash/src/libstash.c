@@ -48,6 +48,12 @@ libstash_init(void)
   if (cw_g_dbg == NULL)
   {
     cw_g_dbg = dbg_new();
+#ifdef _LIBSTASH_DBG
+    if (NULL != cw_g_dbg)
+    {
+      dbg_register(cw_g_dbg, "mem_error");
+    }
+#endif
   }
   if (cw_g_mem == NULL)
   {

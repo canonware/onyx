@@ -40,10 +40,6 @@ dbg_new(void)
     goto RETURN;
   }
 
-#ifdef _LIBSTASH_DBG
-  dbg_register(retval, "mem_error");
-#endif
-
   RETURN:
   return retval;
 }
