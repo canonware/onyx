@@ -9288,7 +9288,107 @@ systemdict_unsetenv(cw_nxo_t *a_thread)
 void
 systemdict_until(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *estack, *tstack;
+    cw_nxo_t *nxo, *exec, *cond;
+    cw_uint32_t edepth, tdepth;
+    cw_bool_t do_exec;
+    cw_nxn_t nerror;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    estack = nxo_thread_estack_get(a_thread);
+    tstack = nxo_thread_tstack_get(a_thread);
+
+    NXO_STACK_GET(cond, ostack, a_thread);
+    NXO_STACK_DOWN_GET(exec, ostack, a_thread, cond);
+
+    /* Move exec and cond to tstack. */
+    nxo = nxo_stack_push(tstack);
+    nxo_dup(nxo, exec);
+    exec = nxo;
+
+    nxo = nxo_stack_push(tstack);
+    nxo_dup(nxo, cond);
+    cond = nxo;
+
+    nxo_stack_npop(ostack, 2);
+
+    /* Record stack depths so that we can clean up if necessary. */
+    edepth = nxo_stack_count(estack);
+    tdepth = nxo_stack_count(tstack);
+
+    /* Catch an exit exception, if thrown, but do not continue executing the
+     * loop. */
+    xep_begin();
+    xep_try
+    {
+	while (1)
+	{
+	    /* Execute the body of the until statement. */
+	    nxo = nxo_stack_push(estack);
+	    nxo_dup(nxo, exec);
+	    nxo_thread_loop(a_thread);
+
+	    /* Execute the conditional. */
+	    nxo = nxo_stack_push(estack);
+	    nxo_dup(nxo, cond);
+	    nxo_thread_loop(a_thread);
+
+	    /* Get the conditional result. */
+	    nxo = nxo_stack_get(ostack);
+	    if (nxo == NULL)
+	    {
+		nerror = NXN_stackunderflow;
+	    }
+	    else if (nxo_type_get(nxo) != NXOT_BOOLEAN)
+	    {
+		nerror = NXN_typecheck;
+	    }
+	    else
+	    {
+		nerror = NXN_ZERO;
+	    }
+
+	    if (nerror != NXN_ZERO)
+	    {
+		/* Push the inputs back onto ostack before throwing an error. */
+		nxo = nxo_stack_push(ostack);
+		nxo_dup(nxo, exec);
+		nxo = nxo_stack_push(ostack);
+		nxo_dup(nxo, cond);
+
+		nxo_stack_npop(tstack, 2);
+
+		nxo_thread_nerror((a_thread), NXN_stackunderflow);
+		return;
+	    }
+
+	    /* Get the result of the conditional, and break out of the loop if
+	     * the result was FALSE. */
+	    do_exec = nxo_boolean_get(nxo);
+	    nxo_stack_pop(ostack);
+	    if (do_exec == FALSE)
+	    {
+		break;
+	    }
+	}
+    }
+    xep_catch(CW_ONYXX_EXIT)
+    {
+	cw_nxo_t *istack;
+
+	xep_handled();
+
+	/* Clean up stacks. */
+	nxo_stack_npop(estack, nxo_stack_count(estack) - edepth);
+	istack = nxo_thread_istack_get(a_thread);
+	nxo_stack_npop(istack, nxo_stack_count(istack)
+		       - nxo_stack_count(estack));
+	nxo_stack_npop(tstack, nxo_stack_count(tstack) - tdepth);
+    }
+    xep_end();
+    
+    /* Remove exec and cond from tstack. */
+    nxo_stack_npop(tstack, 2);
 }
 
 void
@@ -9396,7 +9496,107 @@ systemdict_where(cw_nxo_t *a_thread)
 void
 systemdict_while(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *estack, *tstack;
+    cw_nxo_t *nxo, *exec, *cond;
+    cw_uint32_t edepth, tdepth;
+    cw_bool_t do_exec;
+    cw_nxn_t nerror;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    estack = nxo_thread_estack_get(a_thread);
+    tstack = nxo_thread_tstack_get(a_thread);
+
+    NXO_STACK_GET(exec, ostack, a_thread);
+    NXO_STACK_DOWN_GET(cond, ostack, a_thread, exec);
+
+    /* Move exec and cond to tstack. */
+    nxo = nxo_stack_push(tstack);
+    nxo_dup(nxo, cond);
+    cond = nxo;
+
+    nxo = nxo_stack_push(tstack);
+    nxo_dup(nxo, exec);
+    exec = nxo;
+
+    nxo_stack_npop(ostack, 2);
+
+    /* Record stack depths so that we can clean up if necessary. */
+    edepth = nxo_stack_count(estack);
+    tdepth = nxo_stack_count(tstack);
+
+    /* Catch an exit exception, if thrown, but do not continue executing the
+     * loop. */
+    xep_begin();
+    xep_try
+    {
+	while (1)
+	{
+	    /* Execute the conditional. */
+	    nxo = nxo_stack_push(estack);
+	    nxo_dup(nxo, cond);
+	    nxo_thread_loop(a_thread);
+
+	    /* Get the conditional result. */
+	    nxo = nxo_stack_get(ostack);
+	    if (nxo == NULL)
+	    {
+		nerror = NXN_stackunderflow;
+	    }
+	    else if (nxo_type_get(nxo) != NXOT_BOOLEAN)
+	    {
+		nerror = NXN_typecheck;
+	    }
+	    else
+	    {
+		nerror = NXN_ZERO;
+	    }
+
+	    if (nerror != NXN_ZERO)
+	    {
+		/* Push the inputs back onto ostack before throwing an error. */
+		nxo = nxo_stack_push(ostack);
+		nxo_dup(nxo, cond);
+		nxo = nxo_stack_push(ostack);
+		nxo_dup(nxo, exec);
+
+		nxo_stack_npop(tstack, 2);
+
+		nxo_thread_nerror((a_thread), NXN_stackunderflow);
+		return;
+	    }
+
+	    /* Get the result of the conditional, and break out of the loop if
+	     * the result was FALSE. */
+	    do_exec = nxo_boolean_get(nxo);
+	    nxo_stack_pop(ostack);
+	    if (do_exec == FALSE)
+	    {
+		break;
+	    }
+
+	    /* Execute the body of the while statement. */
+	    nxo = nxo_stack_push(estack);
+	    nxo_dup(nxo, exec);
+	    nxo_thread_loop(a_thread);
+	}
+    }
+    xep_catch(CW_ONYXX_EXIT)
+    {
+	cw_nxo_t *istack;
+
+	xep_handled();
+
+	/* Clean up stacks. */
+	nxo_stack_npop(estack, nxo_stack_count(estack) - edepth);
+	istack = nxo_thread_istack_get(a_thread);
+	nxo_stack_npop(istack, nxo_stack_count(istack)
+		       - nxo_stack_count(estack));
+	nxo_stack_npop(tstack, nxo_stack_count(tstack) - tdepth);
+    }
+    xep_end();
+    
+    /* Remove exec and cond from tstack. */
+    nxo_stack_npop(tstack, 2);
 }
 
 void
