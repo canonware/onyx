@@ -18,9 +18,6 @@
 
 The \classname{nxa} class implements garbage collection.  The garbage collector
 runs a separate thread that is controlled via an asynchronous message queue.
-The collector thread is only responsible for doing asynchronous collection due
-to allocation inactivity and all sweeping; all other marking is synchronously
-done in the thread context of the mutator that triggers collection.
 
 \subsubsection{API}
 \begin{capi}
@@ -57,11 +54,13 @@ char *a\_filename, cw\_uint32\_t a\_line\_num}}
 	\end{capilist}
 \label{nxa_realloc_e}
 \index{nxa_realloc_e@\cfunc{nxa\_realloc\_e}{}}
-\citem{\cfunc[void *]{nxa\_realloc\_e}{cw\_nxa\_t *a\_nxa, size\_t a\_size,
-size\_t a\_old\_size, const char *a\_filename, cw\_uint32\_t a\_line\_num}}
+\citem{\cfunc[void *]{nxa\_realloc\_e}{cw\_nxa\_t *a\_nxa, void *a\_ptr, size\_t
+a\_size, size\_t a\_old\_size, const char *a\_filename, cw\_uint32\_t
+a\_line\_num}}
 \label{nxa_realloc}
 \index{nxa_realloc@\cfunc{nxa\_malloc}{}}
-\citem{\cfunc[void *]{nxa\_realloc}{cw\_nxa\_t *a\_nxa, size\_t a\_size}}
+\citem{\cfunc[void *]{nxa\_realloc}{cw\_nxa\_t *a\_nxa, void *a\_ptr, size\_t
+a\_size, size\_t a\_old\_size}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -133,7 +132,7 @@ a\_size}}
 		\item[\htmlref{CW\_ONYXX\_OOM}{CW_ONYXX_OOM}.]
 		\end{description}
 	\item[Description: ]
-		Do a synchronous garbage collection.
+		Force an asynchronous garbage collection.
 	\end{capilist}
 \label{nxa_dump}
 \index{nxa_dump@\cfunc{nxa\_dump}{}}

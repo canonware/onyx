@@ -92,6 +92,10 @@
 #include "../include/libonyx/nxo_mutex_l.h"
 #endif
 #include "../include/libonyx/nxo_name_l.h"
+#ifdef CW_REGEX
+#include "../include/libonyx/nxo_regex_l.h"
+#include "../include/libonyx/nxo_regsub_l.h"
+#endif
 #include "../include/libonyx/nxo_stack_l.h"
 #include "../include/libonyx/nxo_string_l.h"
 #include "../include/libonyx/nxo_thread_l.h"
@@ -235,42 +239,7 @@ nxa_malloc_e(cw_nxa_t *a_nxa, size_t a_size, const char *a_filename,
     cw_check_ptr(a_nxa);
     cw_dassert(a_nxa->magic == CW_NXA_MAGIC);
 
-#ifdef CW_THREADS
-    mtx_lock(&a_nxa->lock);
-#endif
-
-    /* Note that allocation has been done. */
-    a_nxa->gc_allocated = TRUE;
-
-    /* Update count. */
-    a_nxa->gcdict_count += (cw_nxoi_t) a_size;
-    if (a_nxa->gcdict_count > a_nxa->gcdict_maximum[0])
-    {
-	a_nxa->gcdict_maximum[0] = a_nxa->gcdict_count;
-    }
-    a_nxa->gcdict_sum[0] += (cw_nxoi_t) a_size;
-
-    /* Trigger a collection if the threshold was reached. */
-    if (a_nxa->gcdict_count - a_nxa->gcdict_current[0] >=
-	a_nxa->gcdict_threshold && a_nxa->gcdict_active &&
-	a_nxa->gcdict_threshold != 0)
-    {
-	if (a_nxa->gc_pending == FALSE)
-	{
-	    a_nxa->gc_pending = TRUE;
-#ifdef CW_PTHREADS
-	    mq_put(&a_nxa->gc_mq, NXAM_COLLECT);
-#else
-	    if (a_nxa->gcdict_active)
-	    {
-		nxa_p_collect(a_nxa);
-	    }
-#endif
-	}
-    }
-#ifdef CW_THREADS
-    mtx_unlock(&a_nxa->lock);
-#endif
+    nxa_l_count_adjust(a_nxa, (cw_nxoi_t) a_size);
 
     return mem_malloc_e(cw_g_mem, a_size, a_filename, a_line_num);
 }
@@ -282,45 +251,7 @@ nxa_realloc_e(cw_nxa_t *a_nxa, void *a_ptr, size_t a_size, size_t a_old_size,
     cw_check_ptr(a_nxa);
     cw_dassert(a_nxa->magic == CW_NXA_MAGIC);
 
-#ifdef CW_THREADS
-    mtx_lock(&a_nxa->lock);
-#endif
-
-    /* Note that allocation has been done. */
-    a_nxa->gc_allocated = TRUE;
-
-    /* Update count. */
-    a_nxa->gcdict_count += (cw_nxoi_t) a_size - (cw_nxoi_t) a_old_size;
-    if (a_nxa->gcdict_count > a_nxa->gcdict_maximum[0])
-    {
-	a_nxa->gcdict_maximum[0] = a_nxa->gcdict_count;
-    }
-    if (a_size - a_old_size > 0)
-    {
-	a_nxa->gcdict_sum[0] += (cw_nxoi_t) a_size - (cw_nxoi_t) a_old_size;
-    }
-
-    /* Trigger a collection if the threshold was reached. */
-    if (a_nxa->gcdict_count - a_nxa->gcdict_current[0] >=
-	a_nxa->gcdict_threshold && a_nxa->gcdict_active &&
-	a_nxa->gcdict_threshold != 0)
-    {
-	if (a_nxa->gc_pending == FALSE)
-	{
-	    a_nxa->gc_pending = TRUE;
-#ifdef CW_PTHREADS
-	    mq_put(&a_nxa->gc_mq, NXAM_COLLECT);
-#else
-	    if (a_nxa->gcdict_active)
-	    {
-		nxa_p_collect(a_nxa);
-	    }
-#endif
-	}
-    }
-#ifdef CW_THREADS
-    mtx_unlock(&a_nxa->lock);
-#endif
+    nxa_l_count_adjust(a_nxa, (cw_nxoi_t) a_size - (cw_nxoi_t) a_old_size);
 
     return mem_realloc_e(cw_g_mem, a_ptr, a_size, a_old_size, a_filename,
 			 a_line_num);
@@ -333,13 +264,7 @@ nxa_free_e(cw_nxa_t *a_nxa, void *a_ptr, size_t a_size, const char *a_filename,
     cw_check_ptr(a_nxa);
     cw_dassert(a_nxa->magic == CW_NXA_MAGIC);
 
-#ifdef CW_THREADS
-    mtx_lock(&a_nxa->lock);
-#endif
-    a_nxa->gcdict_count -= (cw_nxoi_t) a_size;
-#ifdef CW_THREADS
-    mtx_unlock(&a_nxa->lock);
-#endif
+    nxa_l_count_adjust(a_nxa, -(cw_nxoi_t)a_size);
 
     mem_free_e(cw_g_mem, a_ptr, a_size, a_filename, a_line_num);
 }
@@ -631,6 +556,57 @@ nxa_l_gc_reregister(cw_nxa_t *a_nxa, cw_nxoe_t *a_nxoe)
 #endif
 }
 
+void
+nxa_l_count_adjust(cw_nxa_t *a_nxa, cw_nxoi_t a_adjust)
+{
+    cw_check_ptr(a_nxa);
+    cw_dassert(a_nxa->magic == CW_NXA_MAGIC);
+
+#ifdef CW_THREADS
+    mtx_lock(&a_nxa->lock);
+#endif
+
+    /* Update count. */
+    a_nxa->gcdict_count += a_adjust;
+
+    if (a_adjust > 0)
+    {
+	if (a_nxa->gcdict_count > a_nxa->gcdict_maximum[0])
+	{
+	    /* Maximum amount of allocated memory seen. */
+	    a_nxa->gcdict_maximum[0] = a_nxa->gcdict_count;
+	}
+
+	/* Note that allocation has been done. */
+	a_nxa->gc_allocated = TRUE;
+
+	/* Adjust the total allocation sum. */
+	a_nxa->gcdict_sum[0] += a_adjust;
+
+	/* Trigger a collection if the threshold was reached. */
+	if (a_nxa->gcdict_count - a_nxa->gcdict_current[0]
+	    >= a_nxa->gcdict_threshold && a_nxa->gcdict_active
+	    && a_nxa->gcdict_threshold != 0)
+	{
+	    if (a_nxa->gc_pending == FALSE)
+	    {
+		a_nxa->gc_pending = TRUE;
+#ifdef CW_PTHREADS
+		mq_put(&a_nxa->gc_mq, NXAM_COLLECT);
+#else
+		if (a_nxa->gcdict_active)
+		{
+		    nxa_p_collect(a_nxa);
+		}
+#endif
+	    }
+	}
+    }
+#ifdef CW_THREADS
+    mtx_unlock(&a_nxa->lock);
+#endif
+}
+
 cw_bool_t
 nxa_l_white_get(cw_nxa_t *a_nxa)
 {
@@ -744,6 +720,18 @@ nxa_p_mark(cw_nxa_t *a_nxa, cw_uint32_t *r_nreachable)
 		    nxoe = nxoe_l_name_ref_iter(gray, reset);
 		    break;
 		}
+#ifdef CW_REGEX
+		case NXOT_REGEX:
+		{
+		    nxoe = nxoe_l_regex_ref_iter(gray, reset);
+		    break;
+		}
+		case NXOT_REGSUB:
+		{
+		    nxoe = nxoe_l_regsub_ref_iter(gray, reset);
+		    break;
+		}
+#endif
 		case NXOT_STACK:
 		{
 		    nxoe = nxoe_l_stack_ref_iter(gray, reset);
@@ -870,6 +858,18 @@ nxa_p_sweep(cw_nxa_t *a_nxa, cw_nxoe_t *a_garbage)
 		    notyet = nxoe_l_name_delete(nxoe, a_nxa, i);
 		    break;
 		}
+#ifdef CW_REGEX
+		case NXOT_REGEX:
+		{
+		    notyet = nxoe_l_regex_delete(nxoe, a_nxa, i);
+		    break;
+		}
+		case NXOT_REGSUB:
+		{
+		    notyet = nxoe_l_regsub_delete(nxoe, a_nxa, i);
+		    break;
+		}
+#endif
 		case NXOT_STACK:
 		{
 		    notyet = nxoe_l_stack_delete(nxoe, a_nxa, i);

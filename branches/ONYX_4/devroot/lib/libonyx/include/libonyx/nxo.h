@@ -42,6 +42,10 @@ typedef enum
 #ifdef CW_REAL
     NXOT_REAL,
 #endif
+#ifdef CW_REGEX
+    NXOT_REGEX,
+    NXOT_REGSUB,
+#endif
     NXOT_STACK,
     NXOT_STRING,
     NXOT_THREAD

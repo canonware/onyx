@@ -1,8 +1,52 @@
+2002-12-01 : Jason Evans <jasone@canonware.com>
+
+	* Onyx 4.2.0 released.
+
+2002-11-30 : Jason Evans <jasone@canonware.com>
+
+	* Add operators:
+	  + regsub
+	  + subst
+
+2002-11-29 : Jason Evans <jasone@canonware.com>
+
+	* Add operators:
+	  + regex
+	  + match
+	  + submatch
+	  + offset
+	  + split
+
+2002-11-27 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/include/libonyx/nxa.h : Add nxa_realloc() (bug fix).
+
+2002-11-15 : Jason Evans <jasone@canonware.com>
+
+	* Add the regexerror error.
+
+	* lib/libonyx/include/libonyx/nxa_l.h:nxa_l_count_adjust() : Add.
+
+2002-11-03 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/nxo_dict.c:nxo_p_dict_hash() : Add case for NXOT_REAL
+	  (bug fix).
+
+	* lib/libonyx/src/nxo_thread.c:nxo_thread_loop() : Add case for
+	  NXOT_REAL (bug fix).
+
+	* lib/libonyx/src/systemdic.c:systemdict_lcheck() : Add case for
+	  NXOT_REAL (bug fix).
+
+2002-09-08 : Jason Evans <jasone@canonware.com>
+
+	* Onyx 4.1.0 released.
+
 2002-09-07 : Jason Evans <jasone@canonware.com>
 
 	* Treat evaluatable names specially when binding (don't bind them), in
-          order to make it possible to force dynamic lookup of names, without
-          having to resort to using the load operator on literal names.
+	  order to make it possible to force dynamic lookup of names, without
+	  having to resort to using the load operator on literal names.
 
 	  This required a language syntax change so that evaluatable names can
 	  be created in deferred execution mode.  The possibilities for

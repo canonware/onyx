@@ -78,8 +78,7 @@ struct cw_nxoe_thread_s
 #endif
 
 #ifdef CW_THREADS
-    /* TRUE  : New array, dict, file, and string objects are implicitly
-     *         locked.
+    /* TRUE  : New array, dict, file, and string objects are implicitly locked.
      * FALSE : No implicit locking for new objects. */
     cw_bool_t locking:1;
 #endif
@@ -105,6 +104,30 @@ struct cw_nxoe_thread_s
     cw_nxo_t stdin_nxo;
     cw_nxo_t stdout_nxo;
     cw_nxo_t stderr_nxo;
+
+#ifdef CW_REGEX
+    /* Cached regular expression state used by the match operator.  This needs
+     * to be stored here since the cache is per-thread, and there is no other
+     * reasonable place to store the information that provides adequate
+     * performance.  Stuffing this in threaddict would impose a huge performance
+     * penalty due to dstack lookup overhead.
+     *
+     * The thread object initializes this structure, reports object
+     * references during GC reference iteration, and frees allocated memory.  Otherwise, all operations on
+     * this structure are done by the regex class. */
+    cw_nxo_regex_cache_t regex_cache;
+
+    /* A 10 element array that stores the matching substring and the first 9
+     * capturing subpattern matches. */
+//    cw_nxo_t regex_matches;
+
+    /* A reference to the string that was most recently matched against.  */
+//    cw_nxo_t regex_input;
+
+    /* Offset into regex_input to start the next match at.  This is only used if
+     * the $c or $g flag is set. */
+//    cw_uint32_t regex_cont;
+#endif
 
     /* Tokenizer state.  If a token is broken across two or more input strings,
      * data are copied to an internal buffer, and state machine state is

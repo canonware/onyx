@@ -39,5 +39,8 @@ nxa_l_gc_register(cw_nxa_t *a_nxa, cw_nxoe_t *a_nxoe);
 void
 nxa_l_gc_reregister(cw_nxa_t *a_nxa, cw_nxoe_t *a_nxoe);
 
+void
+nxa_l_count_adjust(cw_nxa_t *a_nxa, cw_nxoi_t a_adjust);
+
 cw_bool_t
 nxa_l_white_get(cw_nxa_t *a_nxa);

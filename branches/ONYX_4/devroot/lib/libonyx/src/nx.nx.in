@@ -243,6 +243,18 @@ $sprintsdict <
     }
     ' cat
 } if
+@enable_regex@ 1 eq {
+    `
+    $regextype {
+	pop pop
+	`-regex-'
+    }
+    $regsubtype {
+	pop pop
+	`-regsub-'
+    }
+    ' cat
+} if
 `
     $stacktype {
 	# #stack #depth
@@ -548,6 +560,14 @@ $outputsdict <
 	$nulltype
 	$operatortype
 	$pmarktype
+' cat
+@enable_regex@ 1 eq {
+    `
+	$regextype
+	$regsubtype
+    ' cat
+} if
+`
 	$stacktype
 	$threadtype
     ]{

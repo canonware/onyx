@@ -25,6 +25,9 @@
 #include "../include/libonyx/nxa_l.h"
 #include "../include/libonyx/nxo_l.h"
 #include "../include/libonyx/nxo_array_l.h"
+#ifdef CW_REGEX
+#include "../include/libonyx/nxo_regex_l.h"
+#endif
 #include "../include/libonyx/nxo_thread_l.h"
 
 #define CW_NXO_THREAD_GETC(a_i) a_thread->tok_str[(a_i)]
@@ -257,6 +260,9 @@ nxo_thread_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx)
     nxo_no_new(&thread->stdin_nxo);
     nxo_no_new(&thread->stdout_nxo);
     nxo_no_new(&thread->stderr_nxo);
+#ifdef CW_REGEX
+    nxo_l_regex_cache_new(&thread->regex_cache);
+#endif
 
     /* Register this thread with the interpreter so that the GC will be able to
      * get to it. */
@@ -576,6 +582,13 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 	    case NXOT_MUTEX:
 #endif
 	    case NXOT_PMARK:
+#ifdef CW_REAL
+	    case NXOT_REAL:
+#endif
+#ifdef CW_REGEX
+	    case NXOT_REGEX:
+	    case NXOT_REGSUB:
+#endif
 	    case NXOT_STACK:
 	    case NXOT_THREAD:
 	    {

@@ -81,6 +81,9 @@ typedef enum
     NXN_ENTRY(broadcast),
 #endif
     NXN_ENTRY(bytesavailable),
+#ifdef CW_REGEX
+    NXN_ENTRY(c),
+#endif
     NXN_ENTRY(cat),
 #ifdef CW_POSIX
     NXN_ENTRY(cd),
@@ -191,6 +194,9 @@ typedef enum
 #ifdef CW_POSIX
     NXN_ENTRY(forkexec),
 #endif
+#ifdef CW_REGEX
+    NXN_ENTRY(g),
+#endif
     NXN_ENTRY(gcdict),
     NXN_ENTRY(ge),
     NXN_ENTRY(get),
@@ -234,6 +240,9 @@ typedef enum
     NXN_ENTRY(IPPROTO_PIM),
     NXN_ENTRY(IPPROTO_COMP),
     NXN_ENTRY(IPPROTO_RAW),
+#endif
+#ifdef CW_REGEX
+    NXN_ENTRY(i),
 #endif
     NXN_ENTRY(ibdup),
     NXN_ENTRY(ibpop),
@@ -286,8 +295,14 @@ typedef enum
     NXN_ENTRY(MSG_PEEK),
     NXN_ENTRY(MSG_WAITALL),
 #endif
+#ifdef CW_REGEX
+    NXN_ENTRY(m),
+#endif
     NXN_ENTRY(mark),
     NXN_ENTRY(marktype),
+#ifdef CW_REGEX
+    NXN_ENTRY(match),
+#endif
 #ifdef CW_POSIX
     NXN_ENTRY(mkdir),
     NXN_ENTRY(mkfifo),
@@ -334,6 +349,9 @@ typedef enum
     NXN_ENTRY(null),
     NXN_ENTRY(nulltype),
     NXN_ENTRY(nup),
+#ifdef CW_REGEX
+    NXN_ENTRY(offset),
+#endif
 #ifdef CW_POSIX
     NXN_ENTRY(on),
 #endif
@@ -406,6 +424,13 @@ typedef enum
 #ifdef CW_SOCKET
     NXN_ENTRY(recv),
 #endif
+#ifdef CW_REGEX
+    NXN_ENTRY(regex),
+    NXN_ENTRY(regexerror),
+    NXN_ENTRY(regextype),
+    NXN_ENTRY(regsub),
+    NXN_ENTRY(regsubtype),
+#endif
 #ifdef CW_POSIX
     NXN_ENTRY(rename),
 #endif
@@ -441,6 +466,9 @@ typedef enum
     NXN_ENTRY(SOCK_RAW),
     NXN_ENTRY(SOCK_STREAM),
     NXN_ENTRY(SOL_SOCKET),
+#endif
+#ifdef CW_REGEX
+    NXN_ENTRY(s),
 #endif
     NXN_ENTRY(sadn),
     NXN_ENTRY(saup),
@@ -519,6 +547,9 @@ typedef enum
     NXN_ENTRY(sockopt),
 #endif
     NXN_ENTRY(sover),
+#ifdef CW_REGEX
+    NXN_ENTRY(split),
+#endif
     NXN_ENTRY(spop),
     NXN_ENTRY(spush),
 #ifdef CW_REAL
@@ -546,6 +577,10 @@ typedef enum
     NXN_ENTRY(stringtype),
     NXN_ENTRY(stuck),
     NXN_ENTRY(sub),
+#ifdef CW_REGEX
+    NXN_ENTRY(submatch),
+    NXN_ENTRY(subst),
+#endif
     NXN_ENTRY(sunder),
     NXN_ENTRY(sup),
 #ifdef CW_POSIX

@@ -52,9 +52,13 @@ typedef int socklen_t;
 #include <math.h>
 #endif
 
+#include "../include/libonyx/nxa_l.h"
 #include "../include/libonyx/nxo_l.h"
 #include "../include/libonyx/nxo_array_l.h"
 #include "../include/libonyx/nxo_operator_l.h"
+#ifdef CW_REGEX
+#include "../include/libonyx/nxo_regex_l.h"
+#endif
 #include "../include/libonyx/nxo_thread_l.h"
 
 #ifdef CW_SOCKET
@@ -204,9 +208,6 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #endif
     ENTRY(exit),
     ENTRY(exp),
-#ifdef CW_POSIX
-    ENTRY(mkfifo),
-#endif
 #ifdef CW_REAL
     ENTRY(floor),
 #endif
@@ -267,8 +268,12 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #endif
     ENTRY(loop),
     ENTRY(lt),
+#ifdef CW_REGEX
+    ENTRY(match),
+#endif
 #ifdef CW_POSIX
     ENTRY(mkdir),
+    ENTRY(mkfifo),
 #endif
     ENTRY(mod),
 #ifdef CW_MODULES
@@ -295,6 +300,9 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(nsleep),
 #endif
     ENTRY(nup),
+#ifdef CW_REGEX
+    ENTRY(offset),
+#endif
 #ifdef CW_POSIX
     ENTRY(open),
 #endif
@@ -329,6 +337,10 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #endif
 #ifdef CW_SOCKET
     ENTRY(recv),
+#endif
+#ifdef CW_REGEX
+    ENTRY(regex),
+    ENTRY(regsub),
 #endif
 #ifdef CW_POSIX
     ENTRY(rename),
@@ -411,6 +423,9 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(sockopt),
 #endif
     ENTRY(sover),
+#ifdef CW_REGEX
+    ENTRY(split),
+#endif
     ENTRY(spop),
     ENTRY(spush),
 #ifdef CW_REAL
@@ -434,6 +449,10 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(string),
     ENTRY(stuck),
     ENTRY(sub),
+#ifdef CW_REGEX
+    ENTRY(submatch),
+    ENTRY(subst),
+#endif
     ENTRY(sunder),
     ENTRY(sup),
     ENTRY(sym_lp),
@@ -2856,6 +2875,10 @@ systemdict_cvs(cw_nxo_t *a_thread)
 #endif
 	case NXOT_NULL:
 	case NXOT_PMARK:
+#ifdef CW_REGEX
+	case NXOT_REGEX:
+	case NXOT_REGSUB:
+#endif
 	case NXOT_STACK:
 	case NXOT_THREAD:
 	{
@@ -4707,6 +4730,13 @@ systemdict_lcheck(cw_nxo_t *a_thread)
 	case NXOT_NULL:
 	case NXOT_OPERATOR:
 	case NXOT_PMARK:
+#ifdef CW_REAL
+	case NXOT_REAL:
+#endif
+#ifdef CW_REGEX
+	case NXOT_REGEX:
+	case NXOT_REGSUB:
+#endif
 	case NXOT_THREAD:
 	{
 	    nxo_thread_nerror(a_thread, NXN_typecheck);
@@ -5199,6 +5229,172 @@ systemdict_lt(cw_nxo_t *a_thread)
 
     nxo_stack_pop(ostack);
 }
+
+#ifdef CW_REGEX
+/* Get flags in preparation for calling nxo_regex_new(). */
+CW_P_INLINE cw_nxn_t
+systemdict_p_regex_flags_get(cw_nxo_t *a_flags, cw_nxo_t *a_thread,
+			     cw_bool_t *r_cont, cw_bool_t *r_global,
+			     cw_bool_t *r_insensitive, cw_bool_t *r_multiline,
+			     cw_bool_t *r_singleline)
+{
+    cw_nxn_t retval;
+    cw_nxo_t *tstack, *tkey, *tval;
+    cw_nx_t *nx;
+
+    tstack = nxo_thread_tstack_get(a_thread);
+    tkey = nxo_stack_push(tstack);
+    tval = nxo_stack_push(tstack);
+    nx = nxo_thread_nx_get(a_thread);
+
+#define REGEX_FLAG_GET(a_nxn, a_var)					\
+    do									\
+    {									\
+	if ((a_var) != NULL)						\
+	{								\
+	    nxo_name_new(tkey, nx, nxn_str(a_nxn), nxn_len(a_nxn),	\
+			 TRUE);						\
+	    if (nxo_dict_lookup(a_flags, tkey, tval))			\
+	    {								\
+		*(a_var) = FALSE;					\
+	    }								\
+	    else							\
+	    {								\
+	        if (nxo_type_get(tval) != NXOT_BOOLEAN)			\
+	        {							\
+		    retval = NXN_typecheck;				\
+		    goto RETURN;					\
+	        }							\
+									\
+		*(a_var) = nxo_boolean_get(tval);			\
+	    }								\
+	}								\
+    } while (0)
+
+    REGEX_FLAG_GET(NXN_c, r_cont);
+    REGEX_FLAG_GET(NXN_g, r_global);
+    REGEX_FLAG_GET(NXN_i, r_insensitive);
+    REGEX_FLAG_GET(NXN_m, r_multiline);
+    REGEX_FLAG_GET(NXN_s, r_singleline);
+
+#undef REGEX_FLAG_GET
+
+    retval = NXN_ZERO;
+    RETURN:
+    nxo_stack_npop(tstack, 2);
+    return retval;
+}
+
+void
+systemdict_match(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *nxo, *flags, *pattern, *input;
+    cw_uint32_t npop;
+    cw_bool_t match;
+    cw_nxn_t error;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+
+    npop = 0;
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    switch (nxo_type_get(nxo))
+    {
+	case NXOT_DICT:
+	{
+	    npop++;
+	    flags = nxo;
+	    NXO_STACK_DOWN_GET(nxo, ostack, a_thread, nxo);
+	    if (nxo_type_get(nxo) != NXOT_STRING)
+	    {
+		nxo_thread_nerror(a_thread, NXN_typecheck);
+		return;
+	    }
+
+	    /* Fall through. */
+	}
+	case NXOT_STRING:
+	{
+	    cw_bool_t cont, global, insensitive, multiline, singleline;
+
+	    /* Get regex flags. */
+	    if (npop != 0)
+	    {
+		error = systemdict_p_regex_flags_get(flags, a_thread,
+						     &cont, &global,
+						     &insensitive, &multiline,
+						     &singleline);
+		if (error)
+		{
+		    nxo_thread_nerror(a_thread, error);
+		    return;
+		}
+	    }
+	    else
+	    {
+		cont = FALSE;
+		global = FALSE;
+		insensitive = FALSE;
+		multiline = FALSE;
+		singleline = FALSE;
+	    }
+
+	    /* Get pattern. */
+	    pattern = nxo;
+
+	    npop++;
+
+	    /* Get input string. */
+	    NXO_STACK_DOWN_GET(input, ostack, a_thread, nxo);
+	    if (nxo_type_get(input) != NXOT_STRING)
+	    {
+		nxo_thread_nerror(a_thread, NXN_typecheck);
+		return;
+	    }
+
+	    nxo_string_lock(pattern);
+	    error = nxo_regex_nonew_match(a_thread, nxo_string_get(pattern),
+					  nxo_string_len_get(pattern), cont,
+					  global, insensitive, multiline,
+					  singleline, input, &match);
+	    nxo_string_unlock(pattern);
+	    if (error)
+	    {
+		nxo_thread_nerror(a_thread, error);
+		return;
+	    }
+
+	    break;
+	}
+	case NXOT_REGEX:
+	{
+	    cw_nxo_t *regex;
+
+	    npop++;
+	    regex = nxo;
+
+	    /* Get input string. */
+	    NXO_STACK_DOWN_GET(input, ostack, a_thread, nxo);
+	    if (nxo_type_get(input) != NXOT_STRING)
+	    {
+		nxo_thread_nerror(a_thread, NXN_typecheck);
+		return;
+	    }
+
+	    nxo_regex_match(regex, a_thread, input, &match);
+
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+
+    nxo_boolean_new(input, match);
+    nxo_stack_npop(ostack, npop);
+}
+#endif
 
 #ifdef CW_POSIX
 void
@@ -6135,6 +6331,47 @@ systemdict_nup(cw_nxo_t *a_thread)
 	nxo_stack_roll(ostack, count, 1);
     }
 }
+
+#ifdef CW_REGEX
+void
+systemdict_offset(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *input, *submatch;
+    cw_uint8_t *instr, *inend, *smstr, *smend;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(submatch, ostack, a_thread);
+    NXO_STACK_DOWN_GET(input, ostack, a_thread, submatch);
+    if (nxo_type_get(input) != NXOT_STRING
+	|| nxo_type_get(submatch) != NXOT_STRING)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+
+    /* Get pointers that bound the input string. */
+    instr = nxo_string_get(input);
+    inend = &instr[nxo_string_len_get(input)];
+
+    /* Get substring. */
+    smstr = nxo_string_get(submatch);
+    smend = &smstr[nxo_string_len_get(submatch)];
+
+    /* Make sure smstr really is a substring of instr (or equal in position and
+     * length). */
+    if (smstr < instr || smstr >= inend || smend > inend)
+    {
+	nxo_thread_nerror(a_thread, NXN_rangecheck);
+	return;
+    }
+
+    /* Calculate the substring offset and store it on ostack. */
+    nxo_integer_new(input, (cw_nxoi_t) (smstr - instr));
+
+    /* Clean up ostack. */
+    nxo_stack_pop(ostack);
+}
+#endif
 
 #ifdef CW_POSIX
 void
@@ -7407,6 +7644,163 @@ systemdict_rename(cw_nxo_t *a_thread)
 
     nxo_stack_npop(tstack, 2);
     nxo_stack_npop(ostack, 2);
+}
+#endif
+
+#ifdef CW_REGEX
+void
+systemdict_regex(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *pattern, *nxo;
+    cw_nxn_t error;
+    cw_uint32_t npop;
+    cw_bool_t cont, global, insensitive, multiline, singleline;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+
+    NXO_STACK_GET(pattern, ostack, a_thread);
+    switch (nxo_type_get(pattern))
+    {
+	case NXOT_DICT:
+	{
+	    cw_nxo_t *flags;
+
+	    flags = pattern;
+	    npop = 2;
+	    NXO_STACK_DOWN_GET(pattern, ostack, a_thread, pattern);
+	    if (nxo_type_get(pattern) != NXOT_STRING)
+	    {
+		nxo_thread_nerror(a_thread, NXN_typecheck);
+		return;
+	    }
+
+	    error = systemdict_p_regex_flags_get(flags, a_thread, &cont,
+						 &global, &insensitive,
+						 &multiline, &singleline);
+	    if (error)
+	    {
+		nxo_thread_nerror(a_thread, error);
+		return;
+	    }
+	    break;
+	}
+	case NXOT_STRING:
+	{
+	    npop = 1;
+
+	    cont = FALSE;
+	    global = FALSE;
+	    insensitive = FALSE;
+	    multiline = FALSE;
+	    singleline = FALSE;
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+
+    /* Create the regex object. */
+    nxo = nxo_stack_under_push(ostack, pattern);
+    nxo_string_lock(pattern);
+    error = nxo_regex_new(nxo, nxo_thread_nx_get(a_thread),
+			  nxo_string_get(pattern),
+			  nxo_string_len_get(pattern), cont, global,
+			  insensitive, multiline, singleline);
+    nxo_string_unlock(pattern);
+    if (error)
+    {
+	nxo_stack_remove(ostack, nxo);
+	nxo_thread_nerror(a_thread, error);
+	return;
+    }
+
+    nxo_stack_npop(ostack, npop);
+}
+#endif
+
+#ifdef CW_REGEX
+void
+systemdict_regsub(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *pattern, *template, *nxo;
+    cw_nxn_t error;
+    cw_uint32_t npop;
+    cw_bool_t global, insensitive, multiline, singleline;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+
+    NXO_STACK_GET(template, ostack, a_thread);
+    switch (nxo_type_get(template))
+    {
+	case NXOT_DICT:
+	{
+	    cw_nxo_t *flags;
+
+	    flags = template;
+	    npop = 3;
+	    NXO_STACK_DOWN_GET(template, ostack, a_thread, template);
+	    if (nxo_type_get(template) != NXOT_STRING)
+	    {
+		nxo_thread_nerror(a_thread, NXN_typecheck);
+		return;
+	    }
+
+	    error = systemdict_p_regex_flags_get(flags, a_thread, NULL,
+						 &global, &insensitive,
+						 &multiline, &singleline);
+	    if (error)
+	    {
+		nxo_thread_nerror(a_thread, error);
+		return;
+	    }
+	    break;
+	}
+	case NXOT_STRING:
+	{
+	    npop = 2;
+
+	    global = FALSE;
+	    insensitive = FALSE;
+	    multiline = FALSE;
+	    singleline = FALSE;
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+    NXO_STACK_DOWN_GET(pattern, ostack, a_thread, template);
+    if (nxo_type_get(pattern) != NXOT_STRING)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+
+    /* Create the regex object. */
+    nxo = nxo_stack_under_push(ostack, pattern);
+    nxo_string_lock(pattern);
+    nxo_string_lock(template);
+    error = nxo_regsub_new(nxo, nxo_thread_nx_get(a_thread),
+			   nxo_string_get(pattern),
+			   nxo_string_len_get(pattern), global,
+			   insensitive, multiline, singleline,
+			   nxo_string_get(template),
+			   nxo_string_len_get(template));
+    nxo_string_unlock(template);
+    nxo_string_unlock(pattern);
+    if (error)
+    {
+	nxo_stack_remove(ostack, nxo);
+	nxo_thread_nerror(a_thread, error);
+	return;
+    }
+
+    nxo_stack_npop(ostack, npop);
 }
 #endif
 
@@ -9476,6 +9870,136 @@ systemdict_sover(cw_nxo_t *a_thread)
     nxo_stack_pop(ostack);
 }
 
+#ifdef CW_REGEX
+void
+systemdict_split(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *nxo, *flags, *pattern, *input, *output;
+    cw_uint32_t npop;
+    cw_nxn_t error;
+    cw_nxoi_t limit;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+
+    /* Get limit, if specified. */
+    npop = 1;
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    if (nxo_type_get(nxo) == NXOT_INTEGER)
+    {
+	npop++;
+	limit = nxo_integer_get(nxo);
+	if (limit < 0LL)
+	{
+	    nxo_thread_nerror(a_thread, NXN_rangecheck);
+	    return;
+	}
+	NXO_STACK_DOWN_GET(nxo, ostack, a_thread, nxo);
+    }
+    else
+    {
+	limit = 0;
+    }
+
+    flags = NULL;
+    switch (nxo_type_get(nxo))
+    {
+	case NXOT_DICT:
+	{
+	    npop++;
+	    flags = nxo;
+	    NXO_STACK_DOWN_GET(nxo, ostack, a_thread, nxo);
+	    if (nxo_type_get(nxo) != NXOT_STRING)
+	    {
+		nxo_thread_nerror(a_thread, NXN_typecheck);
+		return;
+	    }
+
+	    /* Fall through. */
+	}
+	case NXOT_STRING:
+	{
+	    cw_bool_t insensitive, multiline, singleline;
+
+	    /* Get regex flags. */
+	    if (flags != NULL)
+	    {
+		error = systemdict_p_regex_flags_get(flags, a_thread,
+						     NULL, NULL,
+						     &insensitive, &multiline,
+						     &singleline);
+		if (error)
+		{
+		    nxo_thread_nerror(a_thread, error);
+		    return;
+		}
+	    }
+	    else
+	    {
+		insensitive = FALSE;
+		multiline = FALSE;
+		singleline = FALSE;
+	    }
+
+	    /* Get pattern. */
+	    pattern = nxo;
+
+	    /* Get input string. */
+	    npop++;
+	    NXO_STACK_DOWN_GET(input, ostack, a_thread, nxo);
+	    if (nxo_type_get(input) != NXOT_STRING)
+	    {
+		nxo_thread_nerror(a_thread, NXN_typecheck);
+		return;
+	    }
+
+	    output = nxo_stack_under_push(ostack, input);
+	    nxo_string_lock(pattern);
+	    error = nxo_regex_nonew_split(a_thread, nxo_string_get(pattern),
+					  nxo_string_len_get(pattern),
+					  insensitive, multiline, singleline,
+					  (cw_uint32_t) limit, input, output);
+	    nxo_string_unlock(pattern);
+	    if (error)
+	    {
+		nxo_stack_remove(ostack, output);
+		nxo_thread_nerror(a_thread, error);
+		return;
+	    }
+
+	    break;
+	}
+	case NXOT_REGEX:
+	{
+	    cw_nxo_t *regex;
+
+	    regex = nxo;
+
+	    /* Get input string. */
+	    npop++;
+	    NXO_STACK_DOWN_GET(input, ostack, a_thread, nxo);
+	    if (nxo_type_get(input) != NXOT_STRING)
+	    {
+		nxo_thread_nerror(a_thread, NXN_typecheck);
+		return;
+	    }
+
+	    output = nxo_stack_under_push(ostack, input);
+	    nxo_regex_split(regex, a_thread, (cw_uint32_t) limit, input,
+			    output);
+
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+
+    nxo_stack_npop(ostack, npop);
+}
+#endif
+
 void
 systemdict_spop(cw_nxo_t *a_thread)
 {
@@ -10102,6 +10626,149 @@ systemdict_sub(cw_nxo_t *a_thread)
 
     nxo_stack_pop(ostack);
 }
+
+#ifdef CW_REGEX
+void
+systemdict_submatch(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *nxo;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    if (nxo_type_get(nxo) != NXOT_INTEGER)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    nxo_regex_submatch(a_thread, nxo_integer_get(nxo), nxo);
+}
+#endif
+
+#ifdef CW_REGEX
+void
+systemdict_subst(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *nxo, *flags, *template, *pattern, *input, *output;
+    cw_uint32_t npop, count;
+    cw_nxn_t error;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+
+    flags = NULL;
+    npop = 0;
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    switch (nxo_type_get(nxo))
+    {
+	case NXOT_DICT:
+	{
+	    flags = nxo;
+
+	    /* Get template. */
+	    npop++;
+	    NXO_STACK_DOWN_GET(nxo, ostack, a_thread, nxo);
+	    if (nxo_type_get(nxo) != NXOT_STRING)
+	    {
+		nxo_thread_nerror(a_thread, NXN_typecheck);
+		return;
+	    }
+
+	    /* Fall through. */
+	}
+	case NXOT_STRING:
+	{
+	    cw_bool_t global, insensitive, multiline, singleline;
+
+	    /* Get regex flags. */
+	    if (flags != NULL)
+	    {
+		error = systemdict_p_regex_flags_get(flags, a_thread, NULL,
+						     &global, &insensitive,
+						     &multiline, &singleline);
+		if (error)
+		{
+		    nxo_thread_nerror(a_thread, error);
+		    return;
+		}
+	    }
+	    else
+	    {
+		global = FALSE;
+		insensitive = FALSE;
+		multiline = FALSE;
+		singleline = FALSE;
+	    }
+
+	    template = nxo;
+
+	    /* Get pattern. */
+	    npop++;
+	    NXO_STACK_DOWN_GET(pattern, ostack, a_thread, nxo);
+	    if (nxo_type_get(pattern) != NXOT_STRING)
+	    {
+		nxo_thread_nerror(a_thread, NXN_typecheck);
+		return;
+	    }
+
+	    /* Get input string. */
+	    npop++;
+	    NXO_STACK_DOWN_GET(input, ostack, a_thread, pattern);
+	    if (nxo_type_get(input) != NXOT_STRING)
+	    {
+		nxo_thread_nerror(a_thread, NXN_typecheck);
+		return;
+	    }
+
+	    output = nxo_stack_under_push(ostack, input);
+	    nxo_string_lock(pattern);
+	    nxo_string_lock(template);
+	    error = nxo_regsub_nonew_subst(a_thread, nxo_string_get(pattern),
+					   nxo_string_len_get(pattern), global,
+					   insensitive, multiline, singleline,
+					   nxo_string_get(template),
+					   nxo_string_len_get(template), input,
+					   output, &count);
+	    nxo_string_unlock(template);
+	    nxo_string_unlock(pattern);
+	    if (error)
+	    {
+		nxo_stack_remove(ostack, output);
+		nxo_thread_nerror(a_thread, error);
+		return;
+	    }
+
+	    break;
+	}
+	case NXOT_REGSUB:
+	{
+	    cw_nxo_t *regsub;
+
+	    regsub = nxo;
+
+	    /* Get input string. */
+	    npop++;
+	    NXO_STACK_DOWN_GET(input, ostack, a_thread, nxo);
+	    if (nxo_type_get(input) != NXOT_STRING)
+	    {
+		nxo_thread_nerror(a_thread, NXN_typecheck);
+		return;
+	    }
+
+	    output = nxo_stack_under_push(ostack, input);
+	    nxo_regsub_subst(regsub, a_thread, input, output, &count);
+
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+
+    nxo_integer_new(input, (cw_nxoi_t) count);
+    nxo_stack_npop(ostack, npop);
+}
+#endif
 
 void
 systemdict_sunder(cw_nxo_t *a_thread)
@@ -11131,6 +11798,10 @@ systemdict_type(cw_nxo_t *a_thread)
 	NXN_pmarktype,
 #ifdef CW_REAL
 	NXN_realtype,
+#endif
+#ifdef CW_REGEX
+	NXN_regextype,
+	NXN_regsubtype,
 #endif
 	NXN_stacktype,
 	NXN_stringtype,

@@ -9,7 +9,7 @@
  * Version: Onyx <Version = onyx>
  *
  * Stack object space is allocated on a per-element basis, and a certain number
- * of elements are cached to avoid allocation deallocation overhead in the
+ * of elements are cached to avoid allocation/deallocation overhead in the
  * common case.  Doing chunked allocation of stack elements would be slightly
  * more memory efficient (and probably more cache friendly) in the common case,
  * but would require extra code complexity in the critical paths of pushing and

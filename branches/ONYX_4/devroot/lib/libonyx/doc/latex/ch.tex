@@ -25,8 +25,8 @@ contiguously allocated, which means that care must be taken when manually
 pre-allocating space for the structure.  Each item that is inserted into the
 \classname{ch} object is encapsulated by a \classname{chi} object, for which
 space can optionally be passed in as a parameter to \cfunc{ch\_insert}{}.  If no
-space for the \classname{chi} object is passed in, the \classname{mem} class is
-used internally for allocation.
+space for the \classname{chi} object is passed in, an opaque allocator function
+is used internally for allocation.
 
 Multiple entries with the same key are allowed and are stored in LIFO order.
 

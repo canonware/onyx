@@ -12,6 +12,12 @@ see:
 
 	http://www.canb.auug.org.au/~millerp/cook/cook.html
 
+Optional: Regular expression support in Onyx depends on the pcre library.  pcre
+is distributed separately, and needs to be installed before building the
+software:
+
+	ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/
+
 Optional: Interactive command line editing is implemented in modprompt, which
 relies on libedit.  libedit is distributed separately, and needs to be installed
 before building this software:
@@ -117,14 +123,70 @@ Optionally, pass any of the following (not a definitive list) arguments to
 		make
 		make install
 
-	As of pth 1.4.1, there are some problems with poll().  A patch has been
-	submitted to the pth maintainer, which will hopefully be incorporated in
-	later releases.
-
 --disable-real
 	Do not include the "real" Onyx type, which supports double precision
 	floating point operations.  The documentation does not mention the
 	effects of this option -- UTSL.
+
+--disable-regex
+	Do not use include support for regular expressions.  This excludes the
+	"regex" and "regsub" Onyx types and associated operators.  The
+	documentation does not mention the effects of this option -- UTSL.
+
+	Regular expression support is provided by the PCRE library package,
+	which is open source software, written by Philip Hazel, and copyright
+	by the University of Cambridge, England.
+
+	Onyx's garbage collector tracks memory allocation to trigger collection,
+	but as of PCRE 3.9, there is no reasonable way to get all the needed
+	memory allocation information from PCRE.  The following patch addresses
+	this problem.  Although nothing will break if this patch is not applied
+	to PCRE, without it, the Onyx interpreter will not have a 100% accurate
+	picture of memory usage.
+
+--------------------------------------------------------------------------------
+diff -ru pcre-3.9/doc/pcre.3 pcre-3.9-extra/doc/pcre.3
+--- pcre-3.9/doc/pcre.3	Wed Jan  2 07:57:58 2002
++++ pcre-3.9-extra/doc/pcre.3	Sat Nov 23 16:10:00 2002
+@@ -426,6 +426,13 @@
+ it is used to pass back information about the first character of any matched
+ string (see PCRE_INFO_FIRSTCHAR above).
+ 
++  PCRE_INFO_EXTRASIZE
++
++Return the size of the pcre_extra data (if any), that is, the value that was
++passed as the argument to \fBpcre_malloc()\fR when PCRE was getting memory in
++which to place the information created by \fBpcre_study()\fR. The fourth
++argument should point to a \fBsize_t\fR variable.
++
+ 
+ .SH MATCHING A PATTERN
+ The function \fBpcre_exec()\fR is called to match a subject string against a
+diff -ru pcre-3.9/pcre.c pcre-3.9-extra/pcre.c
+--- pcre-3.9/pcre.c	Wed Jan  2 07:57:57 2002
++++ pcre-3.9-extra/pcre.c	Sat Nov 23 16:07:59 2002
+@@ -436,6 +436,10 @@
+     ((re->options & PCRE_REQCHSET) != 0)? re->req_char : -1;
+   break;
+ 
++  case PCRE_INFO_EXTRASIZE:
++  *((size_t *)where) = (study != NULL) ? sizeof(real_pcre_extra) : 0;
++  break;
++
+   default: return PCRE_ERROR_BADOPTION;
+   }
+ 
+diff -ru pcre-3.9/pcre.in pcre-3.9-extra/pcre.in
+--- pcre-3.9/pcre.in	Wed Jan  2 07:57:58 2002
++++ pcre-3.9-extra/pcre.in	Sat Nov 23 16:05:48 2002
+@@ -71,6 +71,7 @@
+ #define PCRE_INFO_FIRSTCHAR       4
+ #define PCRE_INFO_FIRSTTABLE      5
+ #define PCRE_INFO_LASTLITERAL     6
++#define PCRE_INFO_EXTRASIZE       7
+ 
+ /* Types */
+--------------------------------------------------------------------------------
 
 --disable-posix
 	As much as reasonably possible, avoid using any external library
@@ -194,6 +256,15 @@ Optionally, pass any of the following (not a definitive list) arguments to
 	so in order to completely empty the objdir, the relclean target must be
 	used.  This option is only useful when modifications have been made to
 	the documentation source.
+
+--with-pcre-prefix=<prefix>
+	If specified, libonyx will be built using the copy of pcre in <prefix>.
+	Specifically, <prefix>/bin/pcre-config will be used to determine the
+	appropriate compiler and linker flags.
+
+	This option should only be necessary when <prefix>/bin is not in the
+	shell's PATH.  This option does not provide a mechanism to choose
+	between multiple installations of pcre.
 
 --with-libedit-prefix=<prefix>
 	If specified, modprompt will be built using the copy of libedit in
@@ -267,3 +338,6 @@ CFLAGS="?"
 
 LDFLAGS="?"
 	Pass these flags when linking.
+
+PATH="?"
+	Use this to search for programs used during configuration and building.

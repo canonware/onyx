@@ -429,6 +429,10 @@ extern cw_mtx_t cw_g_getservbyname_mtx;
 #ifdef CW_REAL
 #include "nxo_real.h"
 #endif
+#ifdef CW_REGEX
+#include "nxo_regex.h"
+#include "nxo_regsub.h"
+#endif
 #include "nxa.h"
 #include "nxo_stack.h"
 #include "nxo_string.h"
