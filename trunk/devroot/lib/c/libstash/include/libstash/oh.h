@@ -65,8 +65,10 @@ typedef cw_bool_t oh_key_comp_t(const void *, const void *);
 cw_oh_t *
 oh_new(cw_oh_t * a_oh);
 
+#ifdef _CW_REENTRANT
 cw_oh_t *
 oh_new_r(cw_oh_t * a_oh);
+#endif
 
 void
 oh_delete(cw_oh_t * a_oh);

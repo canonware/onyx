@@ -2648,6 +2648,19 @@ bufc_set_buffer(cw_bufc_t * a_bufc, void * a_buffer, cw_uint32_t a_size,
   a_bufc->buffer_dealloc_arg = a_dealloc_arg;
 }
 
+cw_uint32_t
+bufc_get_size(cw_bufc_t * a_bufc)
+{
+  cw_uint32_t retval;
+
+  _cw_check_ptr(a_bufc);
+  _cw_assert(a_bufc->magic == _CW_BUFC_MAGIC);
+  
+  retval = a_bufc->buf_size;
+  
+  return retval;
+}
+
 static void
 bufc_p_dump(cw_bufc_t * a_bufc, const char * a_prefix)
 {

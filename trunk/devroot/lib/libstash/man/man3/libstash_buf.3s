@@ -155,6 +155,11 @@ buf, bufc - Reference-counted extensible buffer.
 .IR "void (*a_dealloc_func)(void * dealloc_arg, void * buffer" ", "
 .IR "void * a_dealloc_arg" )
 
+.I cw_uint32_t
+.br
+.B bufc_get_size
+.RI ( "cw_bufc_t * a_bufc" )
+
 .SS Debugging (dbg) symbols
 None.
 
@@ -910,6 +915,12 @@ Pointer to a buffer.
 .RS
 Size of buffer pointed to by a_buffer.
 .RE
+.IR a_is_writeable :
+.RS
+FALSE: a_buffer may not be modified.
+.br
+TRUE: a_buffer may be modified if there is only one reference to it.
+.RE
 .IR a_dealloc_func :
 .RS
 non-NULL: Pointer to a deallocation function.
@@ -933,6 +944,31 @@ deallocation function a_dealloc_func(a_dealloc_arg, a_buffer).
 This function is not reentrant, and assumes that no other references to a_bufc
 exist (or at least they don't rely on the bufc's state).  In other words, don't
 call this function after the bufc has been inserted into one or more buf's.
+.RE
+.RE
+
+.I cw_uint32_t
+.br
+.B bufc_get_size
+.RI ( "cw_bufc_t * a_bufc" )
+.RS
+Input(s):
+.RS
+.IR a_bufc :
+.RS
+Pointer to a bufc.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+Size of a_bufc's internal buffer.
+.RE
+.RE
+Description:
+.RS
+Return the number of bytes in a_bufc's internal buffer.
 .RE
 .RE
 

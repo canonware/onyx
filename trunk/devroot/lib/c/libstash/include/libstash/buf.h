@@ -81,8 +81,10 @@ struct cw_buf_s
 cw_buf_t *
 buf_new(cw_buf_t * a_buf);
 
+#ifdef _CW_REENTRANT
 cw_buf_t *
 buf_new_r(cw_buf_t * a_buf);
+#endif
 
 void
 buf_delete(cw_buf_t * a_buf);
@@ -162,3 +164,6 @@ bufc_set_buffer(cw_bufc_t * a_bufc, void * a_buffer, cw_uint32_t a_size,
 		cw_bool_t a_is_writeable,
 		void (*a_dealloc_func)(void * dealloc_arg, void * buffer),
 		void * a_dealloc_arg);
+
+cw_uint32_t
+bufc_get_size(cw_bufc_t * a_bufc);

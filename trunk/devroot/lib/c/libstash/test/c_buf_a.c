@@ -36,7 +36,7 @@ main()
 
 /*    dbg_register(cw_g_dbg, "mem_verbose"); */
 
-  /* bufc_new(), bufc_delete(), bufc_set_buffer(). */
+  /* bufc_new(), bufc_delete(), bufc_set_buffer(), bufc_get_size(). */
   {
     cw_bufc_t bufc_a, * bufc_b;
     void * buffer;
@@ -47,20 +47,24 @@ main()
     
     _cw_assert(&bufc_a == bufc_new(&bufc_a, NULL, NULL));
     bufc_set_buffer(&bufc_a, str, 512, FALSE, NULL, NULL);
+    _cw_assert(512 == bufc_get_size(&bufc_a));
     bufc_delete(&bufc_a);
 
     bufc_b = bufc_new(NULL, NULL, NULL);
     _cw_check_ptr(bufc_b);
+    _cw_assert(0 == bufc_get_size(bufc_b));
     bufc_delete(bufc_b);
     
     bufc_b = _cw_malloc(sizeof(cw_bufc_t));
     _cw_assert(bufc_b == bufc_new(bufc_b, mem_dealloc, cw_g_mem));
+    _cw_assert(0 == bufc_get_size(bufc_b));
     bufc_delete(bufc_b);
     
     bufc_b = _cw_malloc(sizeof(cw_bufc_t));
     _cw_assert (bufc_b == bufc_new(bufc_b, mem_dealloc, cw_g_mem));
     buffer = _cw_malloc(789);
     bufc_set_buffer(bufc_b, buffer, 789, FALSE, mem_dealloc, cw_g_mem);
+    _cw_assert(789 == bufc_get_size(bufc_b));
     bufc_delete(bufc_b);
   }
   

@@ -1,3 +1,21 @@
+1999-08-12  Jason Evans  <jasone@canonware.com>
+
+	* include/libstash/treen.h (treen_new): Convert to treen_new() and
+	treen_new_r().
+
+	* include/libstash/oh.h (oh_new): Convert to oh_new() and oh_new_r().
+
+	* include/libstash/list.h (list_new): Convert to list_new() and
+	list_new_r().
+
+	* include/libstash/buf.h (buf_new): Convert to buf_new() and
+	buf_new_r().
+
+	* include/libstash/bhp.h (bhp_new): Convert to bhp_new() and
+	bhp_new_r().
+
+	* src/buf.c (bufc_get_size): Add.
+
 1999-08-09  Jason Evans  <jasone@canonware.com>
 
 	* src/mem.c (mem_{m,c}alloc): Pass the key to oh_item_search()

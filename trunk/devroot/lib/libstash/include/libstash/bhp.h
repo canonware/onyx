@@ -126,8 +126,10 @@ bhpi_delete(cw_bhpi_t * a_bhpi);
  ****************************************************************************/
 cw_bhp_t *
 bhp_new(cw_bhp_t * a_bhp, bhp_prio_comp_t * a_prio_comp);
+#ifdef _CW_REENTRANT
 cw_bhp_t *
 bhp_new_r(cw_bhp_t * a_bhp, bhp_prio_comp_t * a_prio_comp);
+#endif
 
 /****************************************************************************
  *

@@ -127,8 +127,10 @@ list_item_set(cw_list_item_t * a_cont, void * a_data);
  ****************************************************************************/
 cw_list_t *
 list_new(cw_list_t * a_list);
+#ifdef _CW_REENTRANT
 cw_list_t *
 list_new_r(cw_list_t * a_list);
+#endif
 
 /****************************************************************************
  *
