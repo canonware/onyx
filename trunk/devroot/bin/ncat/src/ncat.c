@@ -429,12 +429,15 @@ main(int argc, char ** argv)
 	  if (TRUE == sock_write(sock, buf))
 	  {
 	    sock_flush_out(sock_stdout);
-	    done_reading = TRUE;
-	    break;
+	    
+	    /* We're two loops deep here, so our choices are to check a variable
+	     * every time around the outer while loop, or use a goto (not much
+	     * different than break, really). */
+	    goto DONE;
 	  }
 	} while (0 < sock_buffered_in(sock_stdin));
 
-	if ((FALSE == done_reading) && (0 > bytes_read))
+	if (0 > bytes_read)
 	{
 	  sock_flush_out(sock_stdout);
 	  done_reading = TRUE;
@@ -496,6 +499,8 @@ main(int argc, char ** argv)
 	break;
       }
     }
+    
+    DONE:
     if (NULL != str)
     {
       _cw_free(str);
