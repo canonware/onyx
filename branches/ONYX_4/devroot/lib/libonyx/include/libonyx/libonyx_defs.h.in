@@ -16,13 +16,6 @@
 #undef CW_ASSERT
 #endif
 
-/* Solaris needs this for sigwait(). */
-#undef _POSIX_PTHREAD_SEMANTICS
-
-/* GNU libc hides various prototypes, such as that for asprintf() unless this is
- * defined. */
-#undef _GNU_SOURCE
-
 #undef WORDS_BIGENDIAN
 
 #undef CW_THREADS
