@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 7 $
- * Last modified: $Date: 1998-01-16 00:20:54 -0800 (Fri, 16 Jan 1998) $
+ * Current revision: $Revision: 8 $
+ * Last modified: $Date: 1998-02-08 22:16:40 -0800 (Sun, 08 Feb 1998) $
  *
  * Description: 
  *              
@@ -45,8 +45,7 @@
 
 typedef struct
 {
-  
-
+  int garbage;
 } res_t;
 
 typedef struct
