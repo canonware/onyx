@@ -13,8 +13,10 @@
 #ifdef CW_DBG
 /* Track allocations and report leaks. */
 #define CW_MEM_ERROR
-/* Report all allocations.  Requires CW_MEM_ERROR. */
+#ifdef CW_MEM_ERROR
+/* Report all allocations. */
 /*  #define CW_MEM_VERBOSE */
+#endif
 #endif
 
 struct cw_mem_s
