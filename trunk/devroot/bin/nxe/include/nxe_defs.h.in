@@ -8,3 +8,15 @@
  * Version: <Version>
  *
  ******************************************************************************/
+
+/*
+ * Default source code path for require.
+ */
+#undef _CW_ONYX_RPATH
+
+/*
+ * Default module path.
+ */
+#undef _CW_ONYX_MPATH
+
+#undef _CW_USE_LIBEDIT

@@ -9,7 +9,7 @@
  *
  ******************************************************************************/
 
-#include "modcanonyx.h"
+#include "nxe.h"
 
 static void
 buffer_p_eval(void *a_data, cw_nxo_t *a_thread)
@@ -29,7 +29,7 @@ buffer_p_delete(void *a_data, cw_nx_t *a_nx)
 }
 
 void
-canonyx_buffer(cw_nxo_t *a_thread)
+nxe_buffer(cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, /*  *tstack,  */*nxo, *tag;
 	cw_nx_t			*nx;
@@ -57,7 +57,7 @@ canonyx_buffer(cw_nxo_t *a_thread)
 
 #if (0)
 void
-canonyx_buffer_file_open(cw_nxo_t *a_thread)
+nxe_buffer_file_open(cw_nxo_t *a_thread)
 {
 	cw_nxo_t	*ostack, *tstack, *file, *tfile;
 	cw_nx_t		*nx;

@@ -69,13 +69,12 @@ fi
 
 dnl Look for modules.
 if test "x$enable_threads" = "x1" -a "x$enable_posix" = "x1" ; then
-  CW_BUILD_MOD(modcanonyx, mod_canonyx)
   CW_BUILD_MOD(modgtk, mod_gtk)
-  CW_BUILD_MOD(modncurses, mod_ncurses)
 fi
 
 dnl Look for binaries.
 CW_BUILD_BIN(onyx, bin_onyx)
+CW_BUILD_BIN(nxe, bin_nxe)
 
 AC_CONFIG_HEADER($cfghdrs)
 AC_SUBST(cfghdrs)
@@ -208,7 +207,7 @@ if test "x$build_onyx" = "xyes" ; then
   cfgoutputs="$cfgoutputs bin/onyx/man/man1/onyx.1"
 fi
 
-if test "x$build_modncurses" = "xyes" ; then
+if test "x$build_nxe" = "xyes" ; then
   AC_CHECK_HEADERS(ncurses.h, , AC_MSG_ERROR(Cannot build without ncurses.h))
 fi
 
