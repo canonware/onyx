@@ -15,7 +15,7 @@
 #define CW_MEM_ERROR
 #ifdef CW_MEM_ERROR
 /* Report all allocations. */
-/*  #define CW_MEM_VERBOSE */
+/* #define CW_MEM_VERBOSE */
 #endif
 #endif
 
