@@ -22,7 +22,11 @@ onyx_ops_modload_sym_ref_iter(void *a_data, cw_bool_t a_reset)
 static void
 onyx_ops_modload_sym_delete(void *a_data, cw_nx_t *a_nx)
 {
-	dlclose(a_data);
+	/*
+	 * XXX This seems like the right thing to do, but it causes symbols
+	 * to be unavailable, which can cause crashes.  Think about what to do.
+	 */
+/*  	dlclose(a_data); */
 }
 
 static void
