@@ -219,68 +219,6 @@ if test "x$enable_real" = "x1" ; then
   AC_CHECK_FUNCS(asprintf)
 fi
 
-dnl Check for pcre.
-AC_ARG_WITH(pcre-prefix, [  --with-pcre-prefix      Prefix for pcre],
-if test "x$with_pcre_prefix" = "xno" ; then
-  PCRE_PREFIX=
-else
-  PCRE_PREFIX="$with_pcre_prefix"
-fi
-,
-PCRE_PREFIX=
-)
-AC_SUBST(PCRE_PREFIX)
-
-if test "x$PCRE_PREFIX" = "x" ; then
-  AC_PATH_PROG(PCRE_CONFIG, pcre-config, , $PATH)
-else
-  AC_PATH_PROG(PCRE_CONFIG, pcre-config, , "$PCRE_PREFIX/bin")
-fi
-if test "x$PCRE_CONFIG" != "x" ; then
-  dnl Make sure the version of pcre found is sufficient.
-  AC_MSG_CHECKING(for pcre >= $PCRE_VERSION_MIN)
-  PCRE_MAJOR=`$PCRE_CONFIG --version | tr . " " | awk '{print $1}'`
-  PCRE_MINOR=`$PCRE_CONFIG --version | tr . " " | awk '{print $2}'`
-  PCRE_MAJOR_MIN=`echo $PCRE_VERSION_MIN | tr . " " | awk '{print $1}'`
-  PCRE_MINOR_MIN=`echo $PCRE_VERSION_MIN | tr . " " | awk '{print $2}'`
-  if test $PCRE_MAJOR -gt $PCRE_MAJOR_MIN \
-       -o $PCRE_MAJOR -eq $PCRE_MAJOR_MIN \
-       -a $PCRE_MINOR -ge $PCRE_MINOR_MIN ; then
-    AC_MSG_RESULT($PCRE_MAJOR.$PCRE_MINOR)
-    PCRE_CPPFLAGS=`$PCRE_CONFIG --cflags`
-    PCRE_LDFLAGS=`$PCRE_CONFIG --libs | tr " " "\n" | grep "^\-L"`
-    PCRE_LIBS=`$PCRE_CONFIG --libs | tr " " "\n" | grep "^\-l"`
-    have_pcre="1"
-  else
-    AC_MSG_RESULT(no)
-    have_pcre="0"
-  fi
-else
-  have_pcre="0"
-fi
-
-dnl Enable regular expression support by default.
-AC_ARG_ENABLE(regex, [  --disable-regex         Disable regular expression support],
-
-if test "x$enable_regex" = "xyes" ; then
-  enable_regex="1"
-else
-  enable_regex="0"
-fi
-,
-enable_regex="1"
-)
-if test "x$have_pcre" = "x0" ; then
-  enable_regex="0"
-fi
-AC_SUBST(enable_regex)
-if test "x$enable_regex" = "x1" ; then
-  CPPFLAGS="$CPPFLAGS $PCRE_CPPFLAGS"
-  LDFLAGS="$LDFLAGS $PCRE_LDFLAGS"
-  LIBS="$LIBS $PCRE_LIBS"
-  AC_DEFINE(CW_REGEX)
-fi
-
 dnl Support POSIX file operations by default.
 AC_ARG_ENABLE(posix-file, [  --disable-posix-file    Disable POSIX file support],
 if test "x$enable_posix_file" = "xyes" ; then
@@ -697,6 +635,45 @@ VERIFY="$objroot/test/verify"
 AC_SUBST(VERIFY)
 
 dnl Find libraries.
+dnl Check for pcre.
+AC_ARG_WITH(pcre-prefix, [  --with-pcre-prefix      Prefix for pcre],
+if test "x$with_pcre_prefix" = "xno" ; then
+  PCRE_PREFIX=
+else
+  PCRE_PREFIX="$with_pcre_prefix"
+fi
+,
+PCRE_PREFIX=
+)
+AC_SUBST(PCRE_PREFIX)
+
+if test "x$PCRE_PREFIX" = "x" ; then
+  AC_PATH_PROG(PCRE_CONFIG, pcre-config, , $PATH)
+else
+  AC_PATH_PROG(PCRE_CONFIG, pcre-config, , "$PCRE_PREFIX/bin")
+fi
+if test "x$PCRE_CONFIG" != "x" ; then
+  dnl Make sure the version of pcre found is sufficient.
+  AC_MSG_CHECKING(for pcre >= $PCRE_VERSION_MIN)
+  PCRE_MAJOR=`$PCRE_CONFIG --version | tr . " " | awk '{print $1}'`
+  PCRE_MINOR=`$PCRE_CONFIG --version | tr . " " | awk '{print $2}'`
+  PCRE_MAJOR_MIN=`echo $PCRE_VERSION_MIN | tr . " " | awk '{print $1}'`
+  PCRE_MINOR_MIN=`echo $PCRE_VERSION_MIN | tr . " " | awk '{print $2}'`
+  if test $PCRE_MAJOR -gt $PCRE_MAJOR_MIN \
+       -o $PCRE_MAJOR -eq $PCRE_MAJOR_MIN \
+       -a $PCRE_MINOR -ge $PCRE_MINOR_MIN ; then
+    AC_MSG_RESULT($PCRE_MAJOR.$PCRE_MINOR)
+    PCRE_CPPFLAGS=`$PCRE_CONFIG --cflags`
+    PCRE_LDFLAGS=`$PCRE_CONFIG --libs | tr " " "\n" | grep "^\-L"`
+    PCRE_LIBS=`$PCRE_CONFIG --libs | tr " " "\n" | grep "^\-l"`
+    have_pcre="1"
+  else
+    AC_MSG_RESULT(no)
+    have_pcre="0"
+  fi
+else
+  have_pcre="0"
+fi
 
 dnl Define preprocessor macros.
 
@@ -799,6 +776,28 @@ if test "x$lib_onyx" = "x1" ; then
    AC_MSG_RESULT(no))
 
     AC_CHECK_FUNCS(unsetenv)
+  fi
+
+  dnl Enable regular expression support by default.
+  AC_ARG_ENABLE(regex, [  --disable-regex         Disable regular expression support],
+
+  if test "x$enable_regex" = "xyes" ; then
+    enable_regex="1"
+  else
+    enable_regex="0"
+  fi
+  ,
+  enable_regex="1"
+  )
+  if test "x$have_pcre" = "x0" ; then
+    enable_regex="0"
+  fi
+  AC_SUBST(enable_regex)
+  if test "x$enable_regex" = "x1" ; then
+    CPPFLAGS="$CPPFLAGS $PCRE_CPPFLAGS"
+    LDFLAGS="$LDFLAGS $PCRE_LDFLAGS"
+    LIBS="$LIBS $PCRE_LIBS"
+    AC_DEFINE(CW_REGEX)
   fi
 fi
 

@@ -103,9 +103,9 @@ modslate_mods_distclean :
 MODSLATE_CPPFLAGS = @MODSLATE_CPPFLAGS@;
 MODSLATE_LDFLAGS = @MODSLATE_LDFLAGS@;
 
-CPPFLAGS = [CPPFLAGS] -I@srcroot@/mod/modslate/include
-                      -I@objroot@/mod/modslate/include
-                      [MODSLATE_CPPFLAGS];
+CPPFLAGS = -I@srcroot@/mod/modslate/include
+           -I@objroot@/mod/modslate/include
+           [MODSLATE_CPPFLAGS] [CPPFLAGS];
 
 /*
  * Dependencies.

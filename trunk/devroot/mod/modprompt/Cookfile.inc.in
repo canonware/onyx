@@ -94,9 +94,9 @@ MODPROMPT_LDFLAGS =
                     @LIBEDIT_LDFLAGS@
                     [LDFLAGS] @MODPROMPT_LDFLAGS@;
 
-CPPFLAGS = [CPPFLAGS] -I@srcroot@/mod/modprompt/include
-                      -I@objroot@/mod/modprompt/include
-                      [MODPROMPT_CPPFLAGS];
+CPPFLAGS = -I@srcroot@/mod/modprompt/include
+           -I@objroot@/mod/modprompt/include
+           [MODPROMPT_CPPFLAGS] [CPPFLAGS];
 
 /*
  * Dependencies.

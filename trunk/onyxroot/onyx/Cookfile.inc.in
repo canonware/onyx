@@ -11,6 +11,12 @@
  *
  ******************************************************************************/
 
+/* 
+ * Make sure file timestamps are at least 1 second apart for all adjacent
+ * dependency nodes.
+ */
+set time-adjust;
+
 /*
  * Standard definitions.
  */

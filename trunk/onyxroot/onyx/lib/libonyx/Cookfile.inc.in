@@ -204,8 +204,9 @@ libonyx_libs_distclean :
  * Various flags.
  */
 
-CPPFLAGS = [CPPFLAGS] -I@srcroot@/lib/libonyx/include
-                      -I@objroot@/lib/libonyx/include/libonyx;
+CPPFLAGS = -I@srcroot@/lib/libonyx/include
+           -I@objroot@/lib/libonyx/include/libonyx
+           [CPPFLAGS];
 
 /*
  * Build rules.
