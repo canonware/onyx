@@ -94,7 +94,7 @@
  *
  *         /------- len ------\
  *        /                    \
- * |-----------|           |-------|
+ * |- gap_off -|           |-------|
  *
  * |--------- CW_BUFP_SIZE --------|
  * /---+---+---+---+---+---+---+---\
@@ -1539,34 +1539,12 @@ mkr_p_before_slide_insert(cw_mkr_t *a_mkr, cw_bool_t a_after,
     buf = bufp->buf;
 
     /* The data won't fit in this bufp, but enough data can be slid to the
-     * previous bufp to make room.
-     *
-     **************************************************************************
-     *           I
-     * [X   ][YYYY]
-     *           ^
-     *
-     * [XYYY][YI  ]
-     *
-     **************************************************************************
-     *         IIIII
-     * [X   ][YY  ]
-     *         ^
-     *
-     * [XYII][IIIY]
-     *
-     **************************************************************************
-     *         II
-     * [X   ][YYY ]
-     *         ^
-     * [XYII][   Y]
-     *
-     **************************************************************************/
+     * previous bufp to make room. */
 
     /* Move the gap to the insertion point. */
     bufp_p_gap_move(bufp, a_mkr->ppos);
 
-    /* Move the previous bufp's gap to the end. */
+    /* Move a_prevp's gap to the end. */
     bufp_p_gap_move(a_prevp, a_prevp->len);
 
     /* Copy all data that will fit to a_prevp. */
@@ -1614,6 +1592,7 @@ mkr_p_before_slide_insert(cw_mkr_t *a_mkr, cw_bool_t a_after,
 	bufp_p_mkrs_ppos_adjust(bufp, -nmove, 0, bufp->gap_off);
 
 	/* Adjust the line numbers for all mkr's in bufp. */
+	/* XXX This is the only place this function is used. */
 	bufp_p_mkrs_pline_adjust(bufp, -nmovelines, 0,
 				 bufp->nlines - nmovelines);
     }
@@ -1623,15 +1602,81 @@ mkr_p_before_slide_insert(cw_mkr_t *a_mkr, cw_bool_t a_after,
 		      a_bufv, a_bufvcnt);
 }
 
+/* XXX a_mkr isn't moved if a_after is FALSE. */
 static void
 mkr_p_after_slide_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, cw_bufp_t *a_nextp,
 			 const cw_bufv_t *a_bufv, cw_uint32_t a_bufvcnt,
 			 cw_uint32_t a_count)
 {
-    /* The same rules apply to mkr_p_after_slide_insert() as to
-     * mkr_p_before_slide_insert(), except that sliding involves the other
-     * neighboring bufp. */
+    cw_buf_t *buf;
+    cw_bufp_t *bufp;
+    cw_mkr_t *mkr;
+    cw_bufv_t bufv;
+    cw_sint32_t nmove, nmovelines, nslide;
 
+    bufp = a_mkr->bufp;
+    buf = bufp->buf;
+
+    /* The data won't fit in this bufp, but enough data can be slid to the next
+     * bufp to make room. */
+
+    /* Move the gap to the insertion point. */
+    bufp_p_gap_move(bufp, a_mkr->ppos);
+
+    /* Move a_nextp's gap to the beginning. */
+    bufp_p_gap_move(a_nextp, 0);
+
+    /* Copy all data that will fit to a_nextp. */
+    if (CW_BUFP_SIZE - a_nextp->len >= bufp->len - bufp->gap_off)
+    {
+	/* All data can be moved to a_prevp. */
+	nmove = bufp->len - bufp->gap_off;
+    }
+    else
+    {
+	/* Only some of the data can be moved to a_nextp. */
+	nmove = CW_BUFP_SIZE - a_nextp->len;
+    }
+    nslide = bufp->len - bufp->gap_off - nmove;
+
+    bufv.data = &bufp->b[CW_BUFP_SIZE - nmove];
+    bufv.len = nmove;
+    nmovelines = mkr_p_raw_insert(a_nextp, &bufv, 1, nmove);
+
+    /* Move markers that belong with the data copied to a_nextp. */
+    for (mkr = ql_last(&bufp->mlist, mlink);
+	 mkr != NULL && mkr->ppos >= CW_BUFP_SIZE - nmove;
+	 mkr = ql_prev(&bufp->mlist, mkr, mlink))
+    {
+	mkr_p_remove(mkr);
+	mkr->bufp = a_nextp;
+	mkr->ppos -= CW_BUFP_SIZE - nmove;
+	mkr->pline -= bufp->nlines - nmovelines;
+	mkr_p_insert(mkr);
+    }
+
+    /* If not all slid data fit in a_nextp: */
+    if (nslide > 0)
+    {
+	/* Slide the remainder to the end of bufp. */
+	memmove(&bufp->b[CW_BUFP_SIZE - nmove],
+		&bufp->b[bufp->len - bufp->gap_off],
+		nslide);
+
+	/* Adjust bufp's internal state. */
+	bufp->len -= nmove;
+	bufp->nlines -= nmovelines;
+	bufp->gap_off -= nmove;
+
+	/* Adjust the internal state of markers associated with the slid
+	 * data. */
+	bufp_p_mkrs_ppos_adjust(bufp, nmove,
+				bufp->len - bufp->gap_off, CW_BUFP_SIZE);
+    }
+
+    /* Insert the data. */
+    buf_p_bufv_insert(buf, bufp, ql_next(&buf->plist, a_nextp, plink),
+		      a_bufv, a_bufvcnt);
 }
 
 /* a_bufv won't fit in the a_mkr's bufp, so split it. */
