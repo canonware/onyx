@@ -38,24 +38,26 @@ struct cw_libsock_msg_s {
 	union {
 		cw_sock_t	*sock;
 		struct {
-			int	sockfd;
-			cw_mq_t	*mq;
-			cw_mtx_t *mtx;
-			cw_cnd_t *cnd;
+			cw_sock_t	*sock;
+			cw_mq_t		*mq;
+			void		*val;
+			cw_mtx_t	*mtx;
+			cw_cnd_t	*cnd;
 		}	in_notify;
 	}	data;
 };
 
 struct cw_libsock_reg_s {
-	cw_sock_t	*sock;	/* sock pointer. */
-	cw_sint32_t	pollfd_pos; /*
-				     * Offset in the pollfd struct passed into
-				     * poll().
-				     */
-	cw_mq_t		*notify_mq; /*
-				     * mq to notify when readable or closed (or
-				     * NULL).
-				     */
+	cw_sock_t	*sock;		/* sock pointer. */
+	cw_sint32_t	pollfd_pos;	/*
+					 * Offset in the pollfd struct passed
+					 * into poll().
+					 */
+	cw_mq_t		*notify_mq;	/*
+					 * mq to notify when readable or closed
+					 * (or NULL).
+					 */
+	void		*notify_val;	/* Message to mq_put(). */
 };
 
 struct cw_libsock_entry_s {
@@ -81,7 +83,7 @@ struct cw_libsock_s {
 	cw_mtx_t	get_ip_addr_lock;
 };
 
-static cw_bool_t libsock_p_notify(cw_mq_t *a_mq, int a_sockfd);
+static cw_bool_t libsock_p_notify(cw_mq_t *a_mq, void *a_msg);
 
 /******************************************************************************
  *
@@ -311,7 +313,7 @@ libsock_spare_bufc_get(void)
 }
 
 void
-libsock_in_notify(cw_mq_t *a_mq, int a_sockfd)
+libsock_in_notify(cw_mq_t *a_mq, cw_sock_t *a_sock, void *a_val)
 {
 	struct cw_libsock_msg_s	*message;
 	cw_mtx_t		mtx;
@@ -319,7 +321,7 @@ libsock_in_notify(cw_mq_t *a_mq, int a_sockfd)
 	volatile cw_uint32_t	try_stage = 0;
 
 	_cw_check_ptr(g_libsock);
-	_cw_assert(a_sockfd >= 0);
+	_cw_check_ptr(a_sock);
 
 	mtx_new(&mtx);
 	cnd_new(&cnd);
@@ -334,8 +336,9 @@ libsock_in_notify(cw_mq_t *a_mq, int a_sockfd)
 		message->magic = _LIBSOCK_MSG_MAGIC;
 #endif
 		message->type = LIBSOCK_MSG_IN_NOTIFY;
-		message->data.in_notify.sockfd = a_sockfd;
+		message->data.in_notify.sock = a_sock;
 		message->data.in_notify.mq = a_mq;
+		message->data.in_notify.val = a_val;
 		message->data.in_notify.mtx = &mtx;
 		message->data.in_notify.cnd = &cnd;
 
@@ -484,7 +487,7 @@ libsock_l_host_ip_get(const char *a_host_str, cw_uint32_t *r_host_ip)
 }
 
 static cw_bool_t
-libsock_p_notify(cw_mq_t *a_mq, int a_sockfd)
+libsock_p_notify(cw_mq_t *a_mq, void *a_msg)
 {
 	cw_bool_t		retval;
 	volatile cw_sint32_t	error = 0;
@@ -493,7 +496,7 @@ libsock_p_notify(cw_mq_t *a_mq, int a_sockfd)
 
 	xep_begin();
 	xep_try {
-		error = mq_put(a_mq, a_sockfd);
+		error = mq_put(a_mq, a_msg);
 	}
 	xep_catch(_CW_STASHX_OOM) {
 		/*
@@ -654,7 +657,7 @@ libsock_p_entry_func(void *a_arg)
 					 */
 					if (regs[sockfd].notify_mq != NULL) {
 						libsock_p_notify(regs[sockfd].notify_mq,
-						    sockfd);
+						    regs[sockfd].notify_val);
 						regs[sockfd].notify_mq = NULL;
 					}
 				}
@@ -712,7 +715,7 @@ libsock_p_entry_func(void *a_arg)
 #endif
 				break;
 			case LIBSOCK_MSG_IN_NOTIFY:
-				sockfd = message->data.in_notify.sockfd;
+				sockfd = sock_fd_get(message->data.in_notify.sock);
 
 				if (regs[sockfd].pollfd_pos != -1) {
 					_cw_check_ptr(regs[sockfd].sock);
@@ -739,7 +742,7 @@ libsock_p_entry_func(void *a_arg)
 							 * already queued up.
 							 */
 							if (libsock_p_notify(regs[sockfd].notify_mq,
-							    sockfd)) {
+							    regs[sockfd].notify_val)) {
 								regs[sockfd].notify_mq
 								    = NULL;
 							}
@@ -762,7 +765,7 @@ libsock_p_entry_func(void *a_arg)
 					if (message->data.in_notify.mq !=
 					    NULL) {
 						libsock_p_notify(message->data.in_notify.mq,
-						    sockfd);
+						    message->data.in_notify.val);
 					}
 #ifdef _LIBSOCK_CONFESS
 					out_put_e(out_err, __FILE__, __LINE__,
@@ -1062,7 +1065,7 @@ libsock_p_entry_func(void *a_arg)
 								    != NULL) {
 								
 								if (libsock_p_notify(regs[sockfd].notify_mq,
-								    sockfd)) {
+								    regs[sockfd].notify_val)) {
 									regs[sockfd].notify_mq
 									    = NULL;
 								}
@@ -1104,7 +1107,7 @@ libsock_p_entry_func(void *a_arg)
 						if (regs[sockfd].notify_mq !=
 						    NULL) {
 							if (libsock_p_notify(regs[sockfd].notify_mq,
-							    sockfd)) {
+							    regs[sockfd].notify_val)) {
 								regs[sockfd].notify_mq
 								    = NULL;
 							}
@@ -1252,7 +1255,7 @@ libsock_p_entry_func(void *a_arg)
 
 					if (regs[sockfd].notify_mq != NULL) {
 						if (libsock_p_notify(regs[sockfd].notify_mq,
-						    sockfd)) {
+						    regs[sockfd].notify_val)) {
 							regs[sockfd].notify_mq
 							    = NULL;
 						}
@@ -1362,7 +1365,7 @@ libsock_p_entry_func(void *a_arg)
 
 						if (regs[sockfd].notify_mq != NULL) {
 							if (libsock_p_notify(regs[sockfd].notify_mq,
-							    sockfd)) {
+							    regs[sockfd].notify_val)) {
 								regs[sockfd].notify_mq
 								    = NULL;
 							}

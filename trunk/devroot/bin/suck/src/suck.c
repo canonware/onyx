@@ -128,7 +128,8 @@ main(int argc, char **argv)
 					/* Throw the data away. */
 					buf_head_data_release(&buf, bytes_read);
 				} else if (bytes_read < 0) {
-					libsock_in_notify(NULL, sockfd);
+					libsock_in_notify(NULL,
+					    sock_vec[sockfd], sock_vec[sockfd]);
 
 					sock_delete(sock_vec[sockfd]);
 					sock_vec[sockfd] = NULL;
@@ -161,7 +162,7 @@ accept_entry_func(void *a_arg)
 
 			sock_vec[sock_fd_get(sock)] = sock;
 
-			libsock_in_notify(mq, sock_fd_get(sock));
+			libsock_in_notify(mq, sock, sock);
 
 			/*
 			 * Create another sock object for the next time we call

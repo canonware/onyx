@@ -37,7 +37,7 @@ void		libsock_init(cw_uint32_t a_max_fds, cw_uint32_t a_bufc_size,
     cw_uint32_t a_max_spare_bufcs);
 void		libsock_shutdown(void);
 cw_bufc_t	*libsock_spare_bufc_get(void);
-void		libsock_in_notify(cw_mq_t *a_mq, int a_sockfd);
+void		libsock_in_notify(cw_mq_t *a_mq, cw_sock_t *a_sock, void *a_val);
 	
 #endif /* _LIBSOCK_H_ */
 

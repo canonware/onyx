@@ -68,6 +68,12 @@ main(int argc, char **argv)
 	char		*opt_log = NULL;
 	format_t	opt_format = NONE;
 
+	struct timespec	zero;
+	cw_sint32_t	bytes_read;
+	cw_bool_t	done_reading = FALSE;
+	char		*str = NULL;
+	cw_sock_t	*notify_sock;
+
 	libstash_init();
 
 	g_progname = basename(argv[0]);
@@ -163,9 +169,9 @@ main(int argc, char **argv)
 
 				if (inet_aton(optarg, &addr) == 0) {
 					/* Conversion error. */
-					out_put(out_err, "[s]: Invalid IP address "
-					    "specified with \"-i\" flag\n",
-					    g_progname);
+					out_put(out_err, "[s]: Invalid IP "
+					    "address specified with \"-i\" "
+					    "flag\n", g_progname);
 					usage();
 					retval = 1;
 					goto RETURN;
@@ -260,138 +266,122 @@ main(int argc, char **argv)
 				    " [i] or timeout\n", g_progname, opt_port);
 			}
 		}
-	} else {
-		struct timespec	zero;
-		int		fd, fd_sock, fd_sock_stdin;
-		cw_sint32_t	bytes_read;
-		cw_bool_t	done_reading = FALSE;
-		char		*str = NULL;
+		goto RETURN;
+	}
 
-		mq = mq_new(NULL, cw_g_mem, sizeof(int));
-		buf = buf_new(NULL, cw_g_mem);
+	mq = mq_new(NULL, cw_g_mem, sizeof(cw_sock_t *));
+	buf = buf_new(NULL, cw_g_mem);
 
-		sock_stdin = sock_new(NULL, 16384);
-		sock_wrap(sock_stdin, dup(0), FALSE);
-		fd_sock_stdin = sock_fd_get(sock_stdin);
-		libsock_in_notify(mq, fd_sock_stdin);
+	sock_stdin = sock_new(NULL, 16384);
+	sock_wrap(sock_stdin, 0, FALSE);
+	libsock_in_notify(mq, sock_stdin, sock_stdin);
 
-		sock_stdout = sock_new(NULL, 0);
-		sock_wrap(sock_stdout, 1, FALSE);
+	sock_stdout = sock_new(NULL, 0);
+	sock_wrap(sock_stdout, 1, FALSE);
 
-		fd_sock = sock_fd_get(sock);
-		libsock_in_notify(mq, fd_sock);
+	libsock_in_notify(mq, sock, sock);
 
-		zero.tv_sec = 0;
-		zero.tv_nsec = 0;
+	zero.tv_sec = 0;
+	zero.tv_nsec = 0;
 
-		for (;;) {
-			if ((tout != NULL) && (done_reading)) {
-				/*
-				 * If mq_timedget() times out, set fd to 0,
-				 * which will cause the program to quit.
-				 */
-				if (mq_timedget(mq, tout, &fd))
-					fd = 0;
-			} else
-				mq_get(mq, &fd);
+	for (;;) {
+		if ((tout != NULL) && (done_reading)) {
+			if (mq_timedget(mq, tout, &notify_sock))
+				break;
+		} else
+			mq_get(mq, &notify_sock);
 
-			if (fd == fd_sock_stdin) {
-				do {
-					bytes_read = sock_read(sock_stdin, buf,
-					    0, &zero);
+		if (notify_sock == sock_stdin) {
+			do {
+				bytes_read = sock_read(sock_stdin, buf, 0,
+				    &zero);
 
-					/* Log. */
-					switch (opt_format) {
-					case NONE:
-						break;
-					case PRETTY:
-						str = get_out_str_pretty(buf,
-						    TRUE, str);
-						out_put(log_out, str);
-						break;
-					case HEX:
-						str = get_out_str_hex(buf, TRUE,
-						    str);
-						out_put(log_out, str);
-						break;
-					case ASCII:
-						str = get_out_str_ascii(buf,
-						    TRUE, str);
-						out_put(log_out, str);
-						break;
-					default:
-						_cw_not_reached();
-					}
-
-					if (sock_write(sock, buf)) {
-						sock_out_flush(sock_stdout);
-
-						/*
-						 * We're two loops deep here, so
-						 * our choices are to check a
-						 * variable every time around
-						 * the outer while loop, or use
-						 * a goto (not much different
-						 * than break, really).
-						 */
-						goto DONE;
-					}
-				} while (sock_buffered_in(sock_stdin) > 0);
-
-				if (bytes_read < 0) {
-					sock_out_flush(sock_stdout);
-					done_reading = TRUE;
-				}
-			} else if (fd == fd_sock) {
-				do {
-					bytes_read = sock_read(sock, buf, 0,
-					    &zero);
-
-					/* Log. */
-					switch (opt_format) {
-					case NONE:
-						break;
-					case PRETTY:
-						str = get_out_str_pretty(buf,
-						    FALSE, str);
-						out_put(log_out, str);
-						break;
-					case HEX:
-						str = get_out_str_hex(buf,
-						    FALSE, str);
-						out_put(log_out, str);
-						break;
-					case ASCII:
-						str = get_out_str_ascii(buf,
-						    FALSE, str);
-						out_put(log_out, str);
-						break;
-					default:
-						_cw_not_reached();
-					}
-
-					if (sock_write(sock_stdout, buf))
-						break;
-				} while (sock_buffered_in(sock) > 0);
-
-				if (bytes_read < 0) {
-					/*
-					 * The peer has disconnected.  Flush any
-					 * buffered data to stdout, then quit.
-					 */
-					sock_out_flush(sock_stdout);
+				/* Log. */
+				switch (opt_format) {
+				case NONE:
 					break;
+				case PRETTY:
+					str = get_out_str_pretty(buf, TRUE,
+					    str);
+					out_put(log_out, str);
+					break;
+				case HEX:
+					str = get_out_str_hex(buf, TRUE, str);
+					out_put(log_out, str);
+					break;
+				case ASCII:
+					str = get_out_str_ascii(buf, TRUE, str);
+					out_put(log_out, str);
+					break;
+				default:
+					_cw_not_reached();
 				}
-			} else {
-				/* Timeout. */
+
+				if (sock_write(sock, buf)) {
+					sock_out_flush(sock_stdout);
+
+					/*
+					 * We're two loops deep here, so our
+					 * choices are to check a variable every
+					 * time around the outer while loop, or
+					 * use a goto (not much different than
+					 * break, really).
+					 */
+					goto DONE;
+				}
+			} while (sock_buffered_in(sock_stdin) > 0);
+
+			if (bytes_read < 0) {
+				sock_out_flush(sock_stdout);
+				done_reading = TRUE;
+			}
+		} else if (notify_sock == sock) {
+			do {
+				bytes_read = sock_read(sock, buf, 0, &zero);
+
+				/* Log. */
+				switch (opt_format) {
+				case NONE:
+					break;
+				case PRETTY:
+					str = get_out_str_pretty(buf, FALSE,
+					    str);
+					out_put(log_out, str);
+					break;
+				case HEX:
+					str = get_out_str_hex(buf, FALSE, str);
+					out_put(log_out, str);
+					break;
+				case ASCII:
+					str = get_out_str_ascii(buf, FALSE,
+					    str);
+					out_put(log_out, str);
+					break;
+				default:
+					_cw_not_reached();
+				}
+
+				if (sock_write(sock_stdout, buf))
+					break;
+			} while (sock_buffered_in(sock) > 0);
+
+			if (bytes_read < 0) {
+				/*
+				 * The peer has disconnected.  Flush any
+				 * buffered data to stdout, then quit.
+				 */
+				sock_out_flush(sock_stdout);
 				break;
 			}
+		} else {
+			/* Timeout. */
+			break;
 		}
-
-		DONE:
-		if (str != NULL)
-			_cw_free(str);
 	}
+
+	DONE:
+	if (str != NULL)
+		_cw_free(str);
 
 	RETURN:
 	if (buf != NULL)
@@ -490,27 +480,34 @@ char *
 get_out_str_pretty(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 {
 	char		*retval, *p, *p_a, *p_b, *t_str;
+	char		*syms = "0123456789abcdef";
 	char		*c_trans, line_a[81], line_b[81];
 	char		line_sep[81] = "         |                 |        "
 	    "         |                 |\n";
 	cw_uint32_t	str_len, buf_size, i, j;
 	cw_uint8_t	c;
 	static char *c_strs[] = {"nul", "soh", "stx", "etx", "eot", "enq",
-				 "ack", "bel", "bs", "ht", "lf", "vt", "ff",
-				 "cr", "so", "si", "dle", "dc1", "dc2", "dc3",
-				 "dc4", "ack", "syn", "etb", "can", "em", "sub",
-				 "ec", "fs", "gs", "rs", "us", "sp", "!", "\"",
-				 "#", "$", "%", "&", "'", "(", ")", "*", "+",
-				 ",", "-", ".", "/", "0", "1", "2", "3", "4",
-				 "5", "6", "7", "8", "9", ":", ";", "<", "=",
-				 ">", "?", "@", "A", "B", "C", "D", "E", "F",
-				 "G", "H", "I", "J", "K", "L", "M", "N", "O",
-				 "P", "Q", "R", "S", "T", "U", "V", "W", "X",
-				 "Y", "Z", "[", "\\", "]", "^", "_", "`", "a",
-				 "b", "c", "d", "e", "f", "g", "h", "i", "j",
-				 "k", "l", "m", "n", "o", "p", "q", "r", "s",
-				 "t", "u", "v", "w", "x", "y", "z", "{", "|",
-				 "}", "~", "del"};
+				 "ack", "bel", " bs", " ht", " lf", " vt",
+				 " ff", " cr", " so", " si", "dle", "dc1",
+				 "dc2", "dc3", "dc4", "ack", "syn", "etb",
+				 "can", " em", "sub", " ec", " fs", " gs",
+				 " rs", " us", " sp", "  !", "  \"", "  #",
+				 "  $", "  %", "  &", "  '", "  (", "  )",
+				 "  *", "  +", "  ,", "  -", "  .", "  /",
+				 "  0", "  1", "  2", "  3", "  4", "  5",
+				 "  6", "  7", "  8", "  9", "  :", "  ;",
+				 "  <", "  =", "  >", "  ?", "  @", "  A",
+				 "  B", "  C", "  D", "  E", "  F", "  G",
+				 "  H", "  I", "  J", "  K", "  L", "  M",
+				 "  N", "  O", "  P", "  Q", "  R", "  S",
+				 "  T", "  U", "  V", "  W", "  X", "  Y",
+				 "  Z", "  [", "  \\", "  ]", "  ^", "  _",
+				 "  `", "  a", "  b", "  c", "  d", "  e",
+				 "  f", "  g", "  h", "  i", "  j", "  k",
+				 "  l", "  m", "  n", "  o", "  p", "  q",
+				 "  r", "  s", "  t", "  u", "  v", "  w",
+				 "  x", "  y", "  z", "  {", "  |", "  }",
+				 "  ~", "del"};
 	size_t		len;
 
 	buf_size = buf_size_get(a_buf);
@@ -570,7 +567,11 @@ get_out_str_pretty(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 		memcpy(line_b, t_str, len);
 		p_b += len;
 
-		/* Each iteration generates out text for 16 bytes of data. */
+		/*
+		 * Each iteration through the enclosing loop generates out text
+		 * for 16 bytes of data.  Optimize the inner loop to not use
+		 * out_put_s(), though it would be easier to use it.
+		 */
 		for (j = 0; (j < 16) && ((i + j) < buf_size); j++) {
 			if ((j % 4) == 0) {
 				/* Print the word separators. */
@@ -588,8 +589,21 @@ get_out_str_pretty(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 			else
 				c_trans = "---";
 
-			p_a += _cw_out_put_s(p_a, "  [i|b:16|w:2|p:0]", c);
-			p_b += _cw_out_put_s(p_b, " [s|w:3]", c_trans);
+			/* Hex codes. */
+			*p_a = ' ';
+			p_a++;
+			*p_a = ' ';
+			p_a++;
+			*p_a = syms[c >> 4];
+			p_a++;
+			*p_a = syms[c & 0xf];
+			p_a++;
+
+			/* Symbols. */
+			*p_b = ' ';
+			p_b++;
+			memcpy(p_b, c_trans, 3);
+			p_b += 3;
 		}
 		/* Actually copy the strings to the final output string. */
 		len = p_a - line_a;

@@ -1,3 +1,10 @@
+2001-03-26  Jason Evans  <jasone@canonware.com>
+
+	* : Change libsock_in_notify() to take a sock pointer and an
+	opaque pointer, rather than a file descriptor number.  This should
+	make it easier to write scalable servers without using a
+	(potentially) sparse descriptor array.
+
 2001-02-03  Jason Evans  <jasone@canonware.com>
 
 	* : Fold _LIBSOCK_DEBUG into _LIBSOCK_DBG.

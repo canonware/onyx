@@ -263,6 +263,9 @@ main(int argc, char **argv)
 	thd_sigmask(SIG_BLOCK, &handler_arg.hupset, NULL);
 	handler_arg.sig_thd = thd_new(sig_handler, (void *)&handler_arg, FALSE);
 
+	/*
+	 * Set up out_err.
+	 */
 	if (opt_dirname != NULL) {
 		cw_sint32_t	fd;
 
@@ -282,7 +285,12 @@ main(int argc, char **argv)
 	}
 	if (g_verbosity == 2)
 		_cw_out_put("[s]: pid: [i]\n", g_progname, getpid());
+
 	libsock_init(1024, 2048, 4096);
+
+	/*
+	 * Start listening for connections.
+	 */
 	socks = socks_new();
 	if (socks_listen(socks, opt_ip, &opt_port))
 		exit(1);
@@ -290,6 +298,11 @@ main(int argc, char **argv)
 		_cw_out_put_l("[s]: Listening on port [i]\n", g_progname,
 		    opt_port);
 	}
+
+	/*
+	 * Accept connections until a signal is sent for the program to shut
+	 * down.
+	 */
 	for (conn_num = 0; should_quit == FALSE;) {
 		conn = _cw_malloc(sizeof(connection_t));
 
@@ -334,7 +347,7 @@ main(int argc, char **argv)
 			if (opt_transparent) {
 				if (ipnat_set_connect(conn)) {
 					retval = 1;
-					goto CLERROR;
+					goto ERROR;
 				}
 			} else {
 #endif
@@ -352,10 +365,13 @@ main(int argc, char **argv)
 		}
 	}
 
+	/* Wait for the signal handler thread to exit. */
 	thd_join(handler_arg.sig_thd);
 
+#ifdef _CW_IPFILTER
+	ERROR:
+#endif
 	socks_delete(socks);
-
 	libsock_shutdown();
 	CLERROR:
 	libstash_shutdown();
@@ -384,27 +400,34 @@ char *
 get_out_str_pretty(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 {
 	char		*retval, *p, *p_a, *p_b, *t_str;
+	char		*syms = "0123456789abcdef";
 	char		*c_trans, line_a[81], line_b[81];
 	char		line_sep[81] = "         |                 |        "
 	    "         |                 |\n";
 	cw_uint32_t	str_len, buf_size, i, j;
 	cw_uint8_t	c;
 	static char *c_strs[] = {"nul", "soh", "stx", "etx", "eot", "enq",
-				 "ack", "bel", "bs", "ht", "lf", "vt", "ff",
-				 "cr", "so", "si", "dle", "dc1", "dc2", "dc3",
-				 "dc4", "ack", "syn", "etb", "can", "em", "sub",
-				 "ec", "fs", "gs", "rs", "us", "sp", "!", "\"",
-				 "#", "$", "%", "&", "'", "(", ")", "*", "+",
-				 ",", "-", ".", "/", "0", "1", "2", "3", "4",
-				 "5", "6", "7", "8", "9", ":", ";", "<", "=",
-				 ">", "?", "@", "A", "B", "C", "D", "E", "F",
-				 "G", "H", "I", "J", "K", "L", "M", "N", "O",
-				 "P", "Q", "R", "S", "T", "U", "V", "W", "X",
-				 "Y", "Z", "[", "\\", "]", "^", "_", "`", "a",
-				 "b", "c", "d", "e", "f", "g", "h", "i", "j",
-				 "k", "l", "m", "n", "o", "p", "q", "r", "s",
-				 "t", "u", "v", "w", "x", "y", "z", "{", "|",
-				 "}", "~", "del"};
+				 "ack", "bel", " bs", " ht", " lf", " vt",
+				 " ff", " cr", " so", " si", "dle", "dc1",
+				 "dc2", "dc3", "dc4", "ack", "syn", "etb",
+				 "can", " em", "sub", " ec", " fs", " gs",
+				 " rs", " us", " sp", "  !", "  \"", "  #",
+				 "  $", "  %", "  &", "  '", "  (", "  )",
+				 "  *", "  +", "  ,", "  -", "  .", "  /",
+				 "  0", "  1", "  2", "  3", "  4", "  5",
+				 "  6", "  7", "  8", "  9", "  :", "  ;",
+				 "  <", "  =", "  >", "  ?", "  @", "  A",
+				 "  B", "  C", "  D", "  E", "  F", "  G",
+				 "  H", "  I", "  J", "  K", "  L", "  M",
+				 "  N", "  O", "  P", "  Q", "  R", "  S",
+				 "  T", "  U", "  V", "  W", "  X", "  Y",
+				 "  Z", "  [", "  \\", "  ]", "  ^", "  _",
+				 "  `", "  a", "  b", "  c", "  d", "  e",
+				 "  f", "  g", "  h", "  i", "  j", "  k",
+				 "  l", "  m", "  n", "  o", "  p", "  q",
+				 "  r", "  s", "  t", "  u", "  v", "  w",
+				 "  x", "  y", "  z", "  {", "  |", "  }",
+				 "  ~", "del"};
 	size_t		len;
 
 	buf_size = buf_size_get(a_buf);
@@ -464,7 +487,11 @@ get_out_str_pretty(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 		memcpy(line_b, t_str, len);
 		p_b += len;
 
-		/* Each iteration generates out text for 16 bytes of data. */
+		/*
+		 * Each iteration through the enclosing loop generates out text
+		 * for 16 bytes of data.  Optimize the inner loop to not use
+		 * out_put_s(), though it would be easier to use it.
+		 */
 		for (j = 0; (j < 16) && ((i + j) < buf_size); j++) {
 			if ((j % 4) == 0) {
 				/* Print the word separators. */
@@ -482,8 +509,21 @@ get_out_str_pretty(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 			else
 				c_trans = "---";
 
-			p_a += _cw_out_put_s(p_a, "  [i|b:16|w:2|p:0]", c);
-			p_b += _cw_out_put_s(p_b, " [s|w:3]", c_trans);
+			/* Hex codes. */
+			*p_a = ' ';
+			p_a++;
+			*p_a = ' ';
+			p_a++;
+			*p_a = syms[c >> 4];
+			p_a++;
+			*p_a = syms[c & 0xf];
+			p_a++;
+
+			/* Symbols. */
+			*p_b = ' ';
+			p_b++;
+			memcpy(p_b, c_trans, 3);
+			p_b += 3;
 		}
 		/* Actually copy the strings to the final output string. */
 		len = p_a - line_a;
