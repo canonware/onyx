@@ -6,13 +6,9 @@
 #
 ################################################################################
 
-* FreeBSD 4.3 or newer.
+* FreeBSD 4.5.
 
-* Slackware Linux 7.1.
-
-* Red Hat Linux 6.1, 6.2.
-
-* Debian Linux 2.2.
+* Red Hat Linux 7.2.
 
 * Sun Solaris 2.6.
 
@@ -22,11 +18,12 @@
 
 * Apple OS X 10.1.
 
-  - OS X's threading is incomplete, and as a result, signal-related problems
-    should be expected.
-
-  - The version of curses on OS X is very old and lacks terminfo, so the
-    libedit-based command line editing is not built in.
+  - OS X's threading is incomplete.  For example, pthread_sigmask() is missing.
+    Unless --disable-threads is specified, the build will fail as a result.  The
+    one call to pthread_sigmask() in lib/libonyx/src/thd.c can be commented out,
+    but signal-related problems should then be expected.  Then again, signals
+    are very broken as well, so this should come as no big surprise.  The good
+    news is that OS X 10.2 is expected to have these problems mostly solved.
 
   - OS X uses the Mach-O binary format rather than ELF.  Therefore, dlopen() and
     friends do not natively exist.  Dynamically loadable modules and the modload
@@ -35,4 +32,5 @@
     then, the shim does not work 100% compatibly.  Specifically, dlsym() does
     not implicitly search for symbols with a "_" prefixed.  The solution is
     either to modify the shim or modify scripts to explicitly include the "_"
-    prefix.
+    prefix.  The module(s) included with the distribution assume that symbols
+    with "_" prefixes are implicitly searched for.
