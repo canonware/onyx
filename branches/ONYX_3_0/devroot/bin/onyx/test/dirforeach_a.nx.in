@@ -15,7 +15,7 @@
 % %dirname %nfiles subfiles -
 /subfiles {
     1 1 3 2 roll {
-	1 index `/' cat exch cvs cat
+	1 index `/' catenate exch cvs catenate
 	`w' open
 	dup `content\n' write
 	close
@@ -36,7 +36,7 @@
 % %dirname printtree -
 /printtree {
     dup {
-	1 index `/' cat exch cat
+	1 index `/' catenate exch catenate
 	dup 1 sprint
 	dup `f' test {
 %	    `file\n' print flush
@@ -57,7 +57,7 @@
 % %dirname deltree -
 /deltree {
     dup {
-	1 index `/' cat exch cat
+	1 index `/' catenate exch catenate
 %	dup 1 sprint
 	dup `f' test {
 %	    `file\n' print flush
@@ -80,29 +80,29 @@
 `Test begin\n' print flush
 
 % Clean up the directory tree if it already exists.
-argv 2 get `/dirforeach_a' cat `d' test {
-    argv 2 get `/dirforeach_a' cat deltree
+argv 2 get `/dirforeach_a' catenate `d' test {
+    argv 2 get `/dirforeach_a' catenate deltree
 } if
-argv 2 get `/dirforeach_a' cat `d' test {
+argv 2 get `/dirforeach_a' catenate `d' test {
     `Directory tree already existed, and was not completely deletable:\n' print
-    argv 2 get `/dirforeach_a' cat printtree
+    argv 2 get `/dirforeach_a' catenate printtree
     1 die
 } if
 
 % Create a directory tree and contents.
-argv 2 get `/dirforeach_a' cat subdir
-argv 2 get `/dirforeach_a/dir_a' cat subdir
-argv 2 get `/dirforeach_a/dir_b' cat subdir
-argv 2 get `/dirforeach_a/dir_b/dir_c' cat subdir
+argv 2 get `/dirforeach_a' catenate subdir
+argv 2 get `/dirforeach_a/dir_a' catenate subdir
+argv 2 get `/dirforeach_a/dir_b' catenate subdir
+argv 2 get `/dirforeach_a/dir_b/dir_c' catenate subdir
 
 % Do a depth first traversal and deletion of the directory tree.
-%argv 2 get `/dirforeach_a' cat printtree
-argv 2 get `/dirforeach_a' cat deltree
+%argv 2 get `/dirforeach_a' catenate printtree
+argv 2 get `/dirforeach_a' catenate deltree
 
 % Make sure the directory tree is gone.
-argv 2 get `/dirforeach_a' cat `d' test {
+argv 2 get `/dirforeach_a' catenate `d' test {
     `Directory tree not completeley deleted:\n' print
-    argv 2 get `/dirforeach_a' cat printtree
+    argv 2 get `/dirforeach_a' catenate printtree
     1 die
 } if
 

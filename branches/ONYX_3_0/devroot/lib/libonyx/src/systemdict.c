@@ -2135,6 +2135,9 @@ systemdict_dirforeach(cw_nxo_t *a_thread)
     DIR *dir;
     cw_uint32_t edepth, tdepth;
     struct dirent *entp;
+#ifndef CW_HAVE_DIRENT_NAMLEN
+	size_t namlen;
+#endif
 #ifdef HAVE_READDIR_R
     struct dirent ent;
     int error;
@@ -2188,13 +2191,13 @@ systemdict_dirforeach(cw_nxo_t *a_thread)
 	while ((entp = readdir(dir)) != NULL)
 #endif
 	{
-/* OSes don't agree on field naming.  Try using d_reclen instead of d_namlen if
- * d_namlen isn't in struct dirent. */
-#ifdef CW_LIBONYX_USE_DIRENT_RECLEN
-#define d_namlen d_reclen
-#endif
 	    /* Ignore "." and "..". */
+#ifdef CW_HAVE_DIRENT_NAMLEN
 	    switch (entp->d_namlen)
+#else
+	    namlen = strlen(entp->d_name);
+	    switch (namlen)
+#endif
 	    {
 		case 2:
 		{
@@ -2228,8 +2231,13 @@ systemdict_dirforeach(cw_nxo_t *a_thread)
 		/* Push a string onto ostack that represents the directory
 		 * entry. */
 		entry = nxo_stack_push(ostack);
+#ifdef CW_HAVE_DIRENT_NAMLEN
 		nxo_string_new(entry, nx, currentlocking, entp->d_namlen);
 		nxo_string_set(entry, 0, entp->d_name, entp->d_namlen);
+#else
+		nxo_string_new(entry, nx, currentlocking, namlen);
+		nxo_string_set(entry, 0, entp->d_name, namlen);
+#endif
 
 		/* Evaluate proc. */
 		nxo = nxo_stack_push(estack);

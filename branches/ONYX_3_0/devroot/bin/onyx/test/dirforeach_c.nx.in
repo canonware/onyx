@@ -12,7 +12,7 @@
 
 `Test begin\n' print flush
 
-%argv 1 get `/dirforeach_c.nx.in' cat
+%argv 1 get `/dirforeach_c.nx.in' catenate
 `/dev/null' {
     `Somehow managed to iterate on a file: ' print 1 sprint
 } dirforeach
