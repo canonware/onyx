@@ -153,6 +153,9 @@ cw_bool_t	stilt_detach_buf(cw_stilt_t *a_stilt, cw_buf_t *a_buf);
  */
 #define		stilt_currentglobal(a_stilt)				\
 	stilat_currentglobal(&(a_stilt)->stilat)
+#define		stilt_setglobal(a_stilt, a_global)			\
+	stilat_setglobal(&(a_stilt)->stilat, (a_global))
+
 #define		stilt_mem_get(a_stilt)					\
 	stilat_mem_get(&(a_stilt)->stilat)
 

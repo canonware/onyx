@@ -150,6 +150,8 @@ void		stilat_free(cw_stilat_t *a_stilat, void *a_ptr, const char
 
 #define		stilat_currentglobal(a_stilat)				\
 	(a_stilat)->global
+#define		stilat_setglobal(a_stilat, a_global)			\
+	(a_stilat)->global = (a_global)
 #define		stilat_mem_get(a_stilat)				\
 	stilag_mem_get((a_stilat)->stilag)
 #define		stilat_chi_pool_get(a_stilat)				\

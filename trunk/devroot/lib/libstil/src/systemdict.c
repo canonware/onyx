@@ -502,6 +502,12 @@ op_exp(cw_stilt_t *a_stilt)
 void
 op_false(cw_stilt_t *a_stilt)
 {
+	cw_stils_t	*stack;
+	cw_stilo_t	*stilo;
+
+	stack = stilt_data_stack_get(a_stilt);
+	stilo = stils_push(stack);
+	stilo_boolean_new(stilo, FALSE);
 }
 
 void
@@ -647,9 +653,11 @@ op_lt(cw_stilt_t *a_stilt)
 void
 op_mark(cw_stilt_t *a_stilt)
 {
+	cw_stils_t	*stack;
 	cw_stilo_t	*stilo;
 
-	stilo = stils_push(&a_stilt->data_stils);
+	stack = stilt_data_stack_get(a_stilt);
+	stilo = stils_push(stack);
 	stilo_mark_new(stilo);
 }
 
@@ -761,15 +769,15 @@ op_prompt(cw_stilt_t *a_stilt)
 void
 op_pstack(cw_stilt_t *a_stilt)
 {
-	cw_stils_t	*stils;
+	cw_stils_t	*stack;
 	cw_stilo_t	*stilo;
 	cw_sint32_t	fd;
 
-	stils = stilt_data_stack_get(a_stilt);
+	stack = stilt_data_stack_get(a_stilt);
 	fd = stilt_stdout_get(a_stilt);
 
-	for (stilo = stils_get(stils, 0); stilo != NULL; stilo =
-		 stils_get_down(stils, stilo))
+	for (stilo = stils_get(stack, 0); stilo != NULL; stilo =
+		 stils_get_down(stack, stilo))
 		stilo_print(stilo, fd, TRUE, TRUE);
 }
 
@@ -896,6 +904,13 @@ op_setfileposition(cw_stilt_t *a_stilt)
 void
 op_setglobal(cw_stilt_t *a_stilt)
 {
+	cw_stils_t	*stack;
+	cw_stilo_t	*stilo;
+
+	stack = stilt_data_stack_get(a_stilt);
+	stilo = stils_get(stack, 0);
+	stilt_setglobal(a_stilt, stilo_boolean_get(stilo));
+	stils_pop(stack, a_stilt, 1);
 }
 
 void
@@ -936,15 +951,15 @@ op_srand(cw_stilt_t *a_stilt)
 void
 op_stack(cw_stilt_t *a_stilt)
 {
-	cw_stils_t	*stils;
+	cw_stils_t	*stack;
 	cw_stilo_t	*stilo;
 	cw_sint32_t	fd;
 
-	stils = stilt_data_stack_get(a_stilt);
+	stack = stilt_data_stack_get(a_stilt);
 	fd = stilt_stdout_get(a_stilt);
 
-	for (stilo = stils_get(stils, 0); stilo != NULL; stilo =
-		 stils_get_down(stils, stilo))
+	for (stilo = stils_get(stack, 0); stilo != NULL; stilo =
+		 stils_get_down(stack, stilo))
 		stilo_print(stilo, fd, FALSE, TRUE);
 }
 
@@ -1002,9 +1017,11 @@ op_sym_gt_gt(cw_stilt_t *a_stilt)
 void
 op_sym_lb(cw_stilt_t *a_stilt)
 {
+	cw_stils_t	*stack;
 	cw_stilo_t	*stilo;
 
-	stilo = stils_push(&a_stilt->data_stils);
+	stack = stilt_data_stack_get(a_stilt);
+	stilo = stils_push(stack);
 	stilo_mark_new(stilo);
 }
 
@@ -1012,9 +1029,11 @@ op_sym_lb(cw_stilt_t *a_stilt)
 void
 op_sym_lt_lt(cw_stilt_t *a_stilt)
 {
+	cw_stils_t	*stack;
 	cw_stilo_t	*stilo;
 
-	stilo = stils_push(&a_stilt->data_stils);
+	stack = stilt_data_stack_get(a_stilt);
+	stilo = stils_push(stack);
 	stilo_mark_new(stilo);
 }
 
@@ -1022,13 +1041,15 @@ op_sym_lt_lt(cw_stilt_t *a_stilt)
 void
 op_sym_rb(cw_stilt_t *a_stilt)
 {
+	cw_stils_t	*stack;
 	cw_stilo_t	t_stilo, *stilo, *arr;
 	cw_uint32_t	nelements, i;
 
+	stack = stilt_data_stack_get(a_stilt);
 	/* Find the mark. */
-	for (i = 0, stilo = stils_get(&a_stilt->data_stils, 0);
+	for (i = 0, stilo = stils_get(stack, 0);
 	     stilo != NULL && stilo_type_get(stilo) != _CW_STILOT_MARKTYPE;
-	     i++, stilo = stils_get_down(&a_stilt->data_stils, stilo));
+	     i++, stilo = stils_get_down(stack, stilo));
 
 	_cw_assert(stilo != NULL);
 
@@ -1045,16 +1066,15 @@ op_sym_rb(cw_stilt_t *a_stilt)
 	/*
 	 * Traverse up the stack, moving stilo's to the array.
 	 */
-	for (i = 0, stilo = stils_get_up(&a_stilt->data_stils, stilo); i <
-	    nelements; i++, stilo = stils_get_up(&a_stilt->data_stils,
-	    stilo))
+	for (i = 0, stilo = stils_get_up(stack, stilo); i <
+	    nelements; i++, stilo = stils_get_up(stack, stilo))
 		stilo_move(&arr[i], stilo);
 
 	/* Pop the stilo's off the stack now. */
-	stils_pop(&a_stilt->data_stils, a_stilt, nelements + 1);
+	stils_pop(stack, a_stilt, nelements + 1);
 
 	/* Push the array onto the stack. */
-	stilo = stils_push(&a_stilt->data_stils);
+	stilo = stils_push(stack);
 	stilo_move(stilo, &t_stilo);
 
 	/* Clean up. */
@@ -1074,6 +1094,12 @@ op_token(cw_stilt_t *a_stilt)
 void
 op_true(cw_stilt_t *a_stilt)
 {
+	cw_stils_t	*stack;
+	cw_stilo_t	*stilo;
+
+	stack = stilt_data_stack_get(a_stilt);
+	stilo = stils_push(stack);
+	stilo_boolean_new(stilo, TRUE);
 }
 
 void
