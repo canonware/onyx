@@ -1,0 +1,5 @@
+Test begin
+Error /unmatchedmark in --counttomark--
+ostack: (--counttomark--)
+estack: (--start-- -file- --counttomark--)
+dstack: (-dict- -dict- -dict-)

@@ -1671,13 +1671,25 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 %end{latexonly}
 \multicolumn{4}{|l|}{Operand stack operators} \\
 \hline \hline
+-- & {\bf \htmlref{mark}{systemdict:mark}} & mark & Create a mark. \\
+\hline
+-- & {\bf \htmlref{count}{systemdict:count}} & count & Get the number of objects
+on ostack. \\
+\hline
+mark \dots & {\bf \htmlref{counttomark}{systemdict:counttomark}} & mark \dots
+count & Get the depth of the topmost mark on ostack. \\
+\hline
+object & {\bf \htmlref{dup}{systemdict:dup}} & object object & Duplicate an
+object. \\
+\hline
+object \dots index & {\bf \htmlref{index}{systemdict:index}} & object \dots
+object & Duplicate object on ostack at a given index. \\
+\hline
+& {\bf \htmlref{exch}{systemdict:exch}} & & \\
+\hline
 \oparg{region} \oparg{count} \oparg{amount} & {\bf
 \htmlref{roll}{systemdict:roll}} & \oparg{rolled} & Roll the top
 \oparg{count} objects up by \oparg{amount}. \\
-\hline
-& {\bf \htmlref{mark}{systemdict:mark}} & & \\
-\hline
-& {\bf \htmlref{index}{systemdict:index}} & & \\
 \hline
 any & {\bf \htmlref{pop}{systemdict:pop}} & -- & Remove the top object from the
 operand stack. \\
@@ -1685,14 +1697,6 @@ operand stack. \\
 & {\bf \htmlref{clear}{systemdict:clear}} & & \\
 \hline
 & {\bf \htmlref{cleartomark}{systemdict:cleartomark}} & & \\
-\hline
-& {\bf \htmlref{count}{systemdict:count}} & & \\
-\hline
-& {\bf \htmlref{counttomark}{systemdict:counttomark}} & & \\
-\hline
-& {\bf \htmlref{dup}{systemdict:dup}} & & \\
-\hline
-& {\bf \htmlref{exch}{systemdict:exch}} & & \\
 \hline \hline
 \multicolumn{4}{|l|}{Execution, control, and execution stack operators} \\
 \hline \hline
@@ -1755,7 +1759,7 @@ stack & {\bf \htmlref{scount}{systemdict:scount}} & stack count & Get the number
 of objects on a stack. \\
 \hline
 stack & {\bf \htmlref{scounttomark}{systemdict:scounttomark}} & stack count &
-Depth of mark on stack. \\
+Get the depth of the topmost mark on stack. \\
 \hline
 stack & {\bf \htmlref{sdup}{systemdict:sdup}} & stack & Duplicate an object. \\
 \hline
@@ -2667,23 +2671,25 @@ onyx:0>
 	\end{description}
 \label{systemdict:count}
 \index{count@\onyxop{}{count}{}}
-\item[{\onyxop{--}{count}{--}}: ]
+\item[{\onyxop{--}{count}{count}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[count: ]
+			The number of objects on ostack.
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Get the number of objects on ostack.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> 2 1 0 count pstack
+3
+0
+1
+2
+onyx:4>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:countdstack}
@@ -2730,23 +2736,35 @@ onyx:0>
 	\end{description}
 \label{systemdict:counttomark}
 \index{counttomark@\onyxop{}{counttomark}{}}
-\item[{\onyxop{--}{counttomark}{--}}: ]
+\item[{\onyxop{mark \dots}{counttomark}{mark \dots count}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[mark: ]
+			A mark object.
+		\item[\dots: ]
+			Zero or more non-mark objects.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[mark: ]
+			The same mark that was passed in.
+		\item[\dots: ]
+			The same non-mark objects that were passed in.
+		\item[count: ]
+			The depth of \oparg{mark} on ostack.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{unmatchedmark}{unmatchedmark}.]
 		\end{description}
 	\item[Description: ]
+		Get the depth of the topmost mark on ostack.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> 4 mark 2 1 0 counttomark 1 sprint
+3
+onyx:5>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:currentdict}
@@ -3118,23 +3136,32 @@ onyx:0>
 	\end{description}
 \label{systemdict:dup}
 \index{dup@\onyxop{}{dup}{}}
-\item[{\onyxop{--}{dup}{--}}: ]
+\item[{\onyxop{object}{dup}{object object}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[object: ]
+			An object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[object: ]
+			The same object that was passed in.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
 	\item[Description: ]
+		Create a duplicate of the top object on ostack.  For composite
+		objects, the new object is a reference to the same composite
+		object.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> 1 dup pstack
+1
+1
+onyx:2>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:end}
@@ -3600,23 +3627,43 @@ onyx:1>
 	\end{description}
 \label{systemdict:index}
 \index{index@\onyxop{}{index}{}}
-\item[{\onyxop{--}{index}{--}}: ]
+\item[{\onyxop{object \dots index}{index}{object \dots object}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[object: ]
+			An object.
+		\item[\dots: ]
+			\oparg{index} objects.
+		\item[index: ]
+			Depth (count starts at 0, not counting \oparg{index}) of
+			the object to duplicate on ostack.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[object: ]
+			The same object that was passed in.
+		\item[\dots: ]
+			The same \oparg{index} objects that were passed in.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Create a duplicate of the object on on ostack at depth
+		\oparg{index}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> 3 2 1 0 2 index pstack
+2
+0
+1
+2
+3
+onyx:5>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:join}
@@ -3831,23 +3878,22 @@ onyx:1>
 	\end{description}
 \label{systemdict:mark}
 \index{mark@\onyxop{}{mark}{}}
-\item[{\onyxop{--}{mark}{--}}: ]
+\item[{\onyxop{--}{mark}{mark}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[mark: ]
+			A mark object.
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Push a mark onto ostack.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> mark pstack
+-mark-
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:mkdir}
@@ -4488,7 +4534,7 @@ onyx:4>
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[stack: ]
-			The same stack as was passed in.
+			The same stack that was passed in.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
@@ -4518,7 +4564,7 @@ onyx:1>
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[stack: ]
-			The same stack as was passed in.
+			The same stack that was passed in.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
@@ -4548,7 +4594,7 @@ onyx:1>
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[stack: ]
-			The same stack as was passed in.
+			The same stack that was passed in.
 		\item[count: ]
 			The number of objects on \oparg{stack}.
 		\end{description}
@@ -4580,7 +4626,7 @@ onyx:2>
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[stack: ]
-			The same stack as was passed in.
+			The same stack that was passed in.
 		\item[count: ]
 			The depth of the topmost mark on \oparg{stack}.
 		\end{description}
@@ -4612,7 +4658,7 @@ onyx:2>
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[stack: ]
-			The same stack as was passed in.
+			The same stack that was passed in.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
@@ -4705,7 +4751,7 @@ onyx:1>
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[stack: ]
-			The same stack as was passed in.
+			The same stack that was passed in.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
@@ -4778,7 +4824,7 @@ onyx:1>
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[stack: ]
-			The same stack as was passed in.
+			The same stack that was passed in.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
@@ -4830,7 +4876,7 @@ onyx:1>
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[stack: ]
-			The same stack as was passed in.
+			The same stack that was passed in.
 		\item[object: ]
 			The object that was popped off of \oparg{stack}.
 		\end{description}
@@ -4885,7 +4931,7 @@ onyx:2>
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[stack: ]
-			The same stack as was passed in.
+			The same stack that was passed in.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
@@ -4940,7 +4986,7 @@ onyx:1>
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[stack: ]
-			The same stack as was passed in.
+			The same stack that was passed in.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]

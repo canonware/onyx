@@ -1,0 +1,5 @@
+Test begin
+Error /stackunderflow in --index--
+ostack: (--index--)
+estack: (--start-- -file- --index--)
+dstack: (-dict- -dict- -dict-)
