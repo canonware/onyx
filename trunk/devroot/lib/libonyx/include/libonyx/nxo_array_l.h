@@ -19,7 +19,7 @@ struct cw_nxoe_array_s
     cw_nxoe_t nxoe;
 #ifdef CW_THREADS
     /* Access is locked if this object has the locking bit set.  Indirect
-     * arrays aren't locked, but their parents are. */
+     * arrays aren't locked. */
     cw_mtx_t lock;
 #endif
     union
@@ -38,26 +38,6 @@ struct cw_nxoe_array_s
 	} a;
     } e;
 };
-
-#ifdef CW_THREADS
-/* Private, but defined here for the inline function. */
-#define nxoe_p_array_lock(a_nxoe)					\
-    do									\
-    {									\
-	if ((a_nxoe)->nxoe.locking && !(a_nxoe)->nxoe.indirect)		\
-	{								\
-	    mtx_lock(&(a_nxoe)->lock);					\
-	}								\
-    } while (0)
-#define nxoe_p_array_unlock(a_nxoe)					\
-    do									\
-    {									\
-	if ((a_nxoe)->nxoe.locking && !(a_nxoe)->nxoe.indirect)		\
-	{								\
-	    mtx_unlock(&(a_nxoe)->lock);				\
-	}								\
-    } while (0)
-#endif
 
 #ifndef CW_USE_INLINES
 cw_bool_t
@@ -155,6 +135,9 @@ CW_INLINE void
 nxo_l_array_el_get(const cw_nxo_t *a_nxo, cw_nxoi_t a_offset, cw_nxo_t *r_el)
 {
     cw_nxoe_array_t *array;
+#ifdef CW_THREADS
+    cw_bool_t locking;
+#endif
 
     cw_check_ptr(a_nxo);
     cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
@@ -167,20 +150,41 @@ nxo_l_array_el_get(const cw_nxo_t *a_nxo, cw_nxoi_t a_offset, cw_nxo_t *r_el)
     cw_dassert(array->nxoe.magic == CW_NXOE_MAGIC);
     cw_assert(array->nxoe.type == NXOT_ARRAY);
 
-#ifdef CW_THREADS
-    nxoe_p_array_lock(array);
-#endif
     if (array->nxoe.indirect)
     {
 	a_offset += array->e.i.beg_offset;
 	array = array->e.i.array;
+#ifdef CW_THREADS
+	locking = FALSE;
+#endif
     }
+#ifdef CW_THREADS
+    else
+    {
+	if (array->nxoe.locking)
+	{
+	    locking = TRUE;
+	}
+	else
+	{
+	    locking = FALSE;
+	}
+    }
+
+    if (locking)
+    {
+	mtx_lock(&array->lock);
+    }
+#endif
     cw_assert(array->nxoe.indirect == FALSE);
     
     cw_assert(a_offset >= 0 && a_offset < array->e.a.len);
     nxo_dup(r_el, &array->e.a.arr[a_offset]);
 #ifdef CW_THREADS
-    nxoe_p_array_unlock(array);
+    if (locking)
+    {
+	mtx_unlock(&array->lock);
+    }
 #endif
 }
 

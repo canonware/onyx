@@ -103,6 +103,9 @@ nxo_array_copy(cw_nxo_t *a_to, cw_nxo_t *a_from)
     cw_nxoe_array_t *array_to, *array_to_i = NULL, *array_to_l;
     cw_nxo_t *arr_fr, *arr_to;
     cw_uint32_t i, len_fr, len_to;
+#ifdef CW_THREADS
+    cw_bool_t locking_fr, locking_to;
+#endif
 
     /* Set array pointers. */
     array_fr = (cw_nxoe_array_t *) a_from->o.nxoe;
@@ -153,15 +156,35 @@ nxo_array_copy(cw_nxo_t *a_to, cw_nxo_t *a_from)
     /* Iteratively copy elements.  Only copy one level deep (not recursively),
      * by using dup. */
 #ifdef CW_THREADS
-    nxoe_p_array_lock(array_fr_l);
-    nxoe_p_array_lock(array_to_l);
+    if (array_fr_l->nxoe.locking && array_fr_l->nxoe.indirect == FALSE)
+    {
+	locking_fr = TRUE;
+	mtx_lock(&array_fr_l->lock);
+    }
+    else
+    {
+	locking_fr = FALSE;
+    }
+
+    if (array_to_l->nxoe.locking && array_to_l->nxoe.indirect == FALSE)
+    {
+	locking_to = TRUE;
+	mtx_lock(&array_to_l->lock);
+    }
+    else
+    {
+	locking_to = FALSE;
+    }
 #endif
     for (i = 0; i < len_fr; i++)
     {
 	nxo_dup(&arr_to[i], &arr_fr[i]);
     }
 #ifdef CW_THREADS
-    nxoe_p_array_unlock(array_fr_l);
+    if (locking_fr)
+    {
+	mtx_unlock(&array_fr_l->lock);
+    }
 #endif
 
     /* Truncate the destination array if it is shorter than the source array. */
@@ -177,7 +200,10 @@ nxo_array_copy(cw_nxo_t *a_to, cw_nxo_t *a_from)
 	}
     }
 #ifdef CW_THREADS
-    nxoe_p_array_unlock(array_to_l);
+    if (locking_to)
+    {
+	mtx_unlock(&array_to_l->lock);
+    }
 #endif
 }
 
@@ -218,6 +244,9 @@ void
 nxo_array_el_set(cw_nxo_t *a_nxo, cw_nxo_t *a_el, cw_nxoi_t a_offset)
 {
     cw_nxoe_array_t *array;
+#ifdef CW_THREADS
+    cw_bool_t locking;
+#endif
 
     cw_check_ptr(a_nxo);
     cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
@@ -233,9 +262,27 @@ nxo_array_el_set(cw_nxo_t *a_nxo, cw_nxo_t *a_el, cw_nxoi_t a_offset)
     {
 	a_offset += array->e.i.beg_offset;
 	array = array->e.i.array;
+#ifdef CW_THREADS
+	locking = FALSE;
+#endif
     }
 #ifdef CW_THREADS
-    nxoe_p_array_lock(array);
+    else
+    {
+	if (array->nxoe.locking)
+	{
+	    locking = TRUE;
+	}
+	else
+	{
+	    locking = FALSE;
+	}
+    }
+
+    if (locking)
+    {
+	mtx_lock(&array->lock);
+    }
 #endif
     cw_assert(array->nxoe.indirect == FALSE);
 
@@ -243,6 +290,9 @@ nxo_array_el_set(cw_nxo_t *a_nxo, cw_nxo_t *a_el, cw_nxoi_t a_offset)
     nxo_no_new(&array->e.a.arr[a_offset]);
     nxo_dup(&array->e.a.arr[a_offset], a_el);
 #ifdef CW_THREADS
-    nxoe_p_array_unlock(array);
+    if (locking)
+    {
+	mtx_unlock(&array->lock);
+    }
 #endif
 }
