@@ -468,6 +468,16 @@ signal_handle(int a_signal)
 int
 batch_run(int argc, char **argv, char **envp)
 {
+	/*
+	 * Die with an exit code of 1 on error.
+	 */
+	static const cw_uint8_t	code[] = "
+currenterror begin
+	/stop {
+		1 die
+	} def
+end
+";
 	int		retval;
 	cw_nxo_t	*file;
 	int		c;
@@ -532,6 +542,12 @@ batch_run(int argc, char **argv, char **envp)
 	    NULL, NULL, NULL);
 	nxo_thread_new(&thread, &nx);
 	nxo_threadp_new(&threadp);
+
+	/*
+	 * Run embedded initialization code.
+	 */
+	nxo_thread_interpret(&thread, &threadp, code, sizeof(code) - 1);
+	nxo_thread_flush(&thread, &threadp);
 
 	/*
 	 * Act on the command line arguments, now that the interpreter is
