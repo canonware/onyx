@@ -242,7 +242,7 @@ hist_p_pos(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos)
 	}
 
 	/* Old position. */
-	u.bpos = a_hist->hbpos;
+	u.bpos = _cw_htonq(a_hist->hbpos);
 	bufm_before_insert(&a_hist->hcur, u.str, sizeof(u.bpos));
 
 	/* Record header. */
@@ -503,8 +503,8 @@ hist_undo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_uint64_t
 				/* Swap from and to. */
 				bufv_copy(&pbufv, 1, 1, bufv, bufvcnt, 1, 0);
 				from = a_hist->hbpos;
-				a_hist->hbpos = u.bpos;
-				u.bpos = from;
+				a_hist->hbpos = _cw_ntohq(u.bpos);
+				u.bpos = _cw_htonq(from);
 
 				/* Invert the history record. */
 				bufm_seek(&a_hist->htmp, 1, BUFW_REL);
@@ -710,8 +710,8 @@ hist_redo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_uint64_t
 				/* Swap from and to. */
 				bufv_copy(&pbufv, 1, 1, bufv, bufvcnt, 1, 0);
 				from = a_hist->hbpos;
-				a_hist->hbpos = u.bpos;
-				u.bpos = from;
+				a_hist->hbpos = _cw_ntohq(u.bpos);
+				u.bpos = _cw_htonq(from);
 
 				/* Invert the history record. */
 				bufv = bufm_range_get(&a_hist->htmp,
@@ -1152,7 +1152,7 @@ hist_dump(cw_hist_t *a_hist, cw_buf_t *a_buf)
 			bufm_seek(&tbufm, -9, BUFW_REL);
 			bufv = bufm_range_get(&tbufm, &ttbufm, &bufvcnt);
 			bufv_copy(&pbufv, 1, 1, bufv, bufvcnt, 1, 0);
-			fprintf(stderr, "P(%llu)", u.bpos);
+			fprintf(stderr, "P(%llu)", _cw_ntohq(u.bpos));
 			break;
 		case HST_TAG_INS:
 			fprintf(stderr, "I%d(", hst_cnt_get(hdr));
@@ -1226,7 +1226,7 @@ hist_dump(cw_hist_t *a_hist, cw_buf_t *a_buf)
 			bufm_seek(&ttbufm, 1, BUFW_REL);
 			bufv = bufm_range_get(&tbufm, &ttbufm, &bufvcnt);
 			bufv_copy(&pbufv, 1, 1, bufv, bufvcnt, 1, 0);
-			fprintf(stderr, "P(%llu)", u.bpos);
+			fprintf(stderr, "P(%llu)", _cw_ntohq(u.bpos));
 			break;
 		case HST_TAG_INS:
 			fprintf(stderr, "I%d(", hst_cnt_get(hdr));

@@ -14,6 +14,8 @@ void	slate_buffer_init(cw_nxo_t *a_thread);
 
 /* Operators. */
 void	slate_buffer(void *a_data, cw_nxo_t *a_thread);
+void	slate_buffer_aux(void *a_data, cw_nxo_t *a_thread);
+void	slate_buffer_setaux(void *a_data, cw_nxo_t *a_thread);
 void	slate_buffer_length(void *a_data, cw_nxo_t *a_thread);
 void	slate_buffer_lines(void *a_data, cw_nxo_t *a_thread);
 void	slate_buffer_undoable(void *a_data, cw_nxo_t *a_thread);

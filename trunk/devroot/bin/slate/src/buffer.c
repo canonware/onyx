@@ -7,31 +7,18 @@
  *
  * Version: <Version>
  *
- * This file contains the implementations of all the glue operators for =buffer=
- * and =marker=.  In some ways it would be nice to instead implement =buf= as a
- * more abstract type, then create an Onyx dict that implements the full range
- * of operations neccessary on a text editor buffer (such as file
- * reading/writing), and this would allow a big portion of the buffer code to be
- * written in Onyx.  However, this would create one very significant problem: it
- * wouldn't be possible to retrieve a reference to the buffer dict, given a
- * =marker=.  Thus, =buffer= exists, and there are operators to provide access
- * to all necessary =buffer= operations.
- *
- * A note about GC reference iteration is in order.  =marker=s report references
- * to their associated =buffer=s, but =buffer=s do not report references to
- * =marker=s.  This makes sense, but has implications in buf_delete() and
- * bufm_delete(), since during a GC sweep, associated buf's and bufm's may be
- * deleted, in no particular order.  Therefore, buf_delete() and bufm_delete()
- * take care to allow destruction in any order.  This mechanism relies on the
- * fact that the GC sweep is single-threaded.
+ * This file contains the implementations of all the glue hooks for =buffer=
+ * and =marker=.
  *
  ******************************************************************************/
 
 #include "../include/modslate.h"
 
 struct cw_buffer {
-	cw_nxo_t	hook;	/* Ref to =buffer=, prevents mod unload. */
+	cw_uint32_t	iter;	/* For GC iteration. */
 	cw_buf_t	buf;
+	cw_nxo_t	hook;	/* Ref to =buffer=, prevents mod unload. */
+	cw_nxo_t	aux;	/* Auxiliary data for buffer_{set}aux. */
 };
 
 /*
@@ -47,6 +34,8 @@ struct cw_marker {
 
 static const struct cw_slate_entry slate_buffer_ops[] = {
 	ENTRY(buffer),
+	ENTRY(buffer_aux),
+	ENTRY(buffer_setaux),
 	ENTRY(buffer_length),
 	ENTRY(buffer_lines),
 	ENTRY(buffer_undoable),
@@ -113,9 +102,19 @@ buffer_p_ref_iter(void *a_data, cw_bool_t a_reset)
 	struct cw_buffer	*buffer = (struct cw_buffer *)a_data;
 
 	if (a_reset)
+		buffer->iter = 0;
+
+	switch (buffer->iter) {
+	case 0:
 		retval = nxo_nxoe_get(&buffer->hook);
-	else
+		break;
+	case 1:
+		retval = nxo_nxoe_get(&buffer->aux);
+		break;
+	default:
 		retval = NULL;
+	}
+	buffer->iter++;
 
 	return retval;
 }
@@ -123,12 +122,25 @@ buffer_p_ref_iter(void *a_data, cw_bool_t a_reset)
 static cw_bool_t
 buffer_p_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t a_iter)
 {
+	cw_bool_t		retval;
 	struct cw_buffer	*buffer = (struct cw_buffer *)a_data;
+
+	/*
+	 * Don't delete until the second GC sweep iteration, so that associated
+	 * bufm's can be deleted first.
+	 */
+	fprintf(stderr, "Iteration %u\n", a_iter);
+	if (a_iter != 1) {
+		retval = TRUE;
+		goto RETURN;
+	}
 
 	buf_delete(&buffer->buf);
 	nxa_free(nx_nxa_get(a_nx), buffer, sizeof(struct cw_buffer));
 
-	return FALSE;
+	retval = FALSE;
+	RETURN:
+	return retval;
 }
 
 /*
@@ -201,6 +213,59 @@ slate_buffer(void *a_data, cw_nxo_t *a_thread)
 	tag = nxo_hook_tag_get(nxo);
 	nxo_name_new(tag, nx, "buffer", sizeof("buffer") - 1, FALSE);
 	nxo_attr_set(tag, NXOA_EXECUTABLE);
+
+	/* Initialize aux. */
+	nxo_null_new(&buffer->aux);
+}
+
+void
+slate_buffer_aux(void *a_data, cw_nxo_t *a_thread)
+{
+	cw_nxo_t		*ostack, *tstack, *nxo, *tnxo;
+	cw_nxn_t		error;
+	struct cw_buffer	*buffer;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	tstack = nxo_thread_tstack_get(a_thread);
+	NXO_STACK_GET(nxo, ostack, a_thread);
+	error = buffer_p_type(nxo);
+	if (error) {
+		nxo_thread_nerror(a_thread, error);
+		return;
+	}
+
+	buffer = (struct cw_buffer *)nxo_hook_data_get(nxo);
+
+	/*
+	 * Avoid a GC race by using tnxo to store a reachable ref to the
+	 * buffer.
+	 */
+	tnxo = nxo_stack_push(tstack);
+	nxo_dup(tnxo, nxo);
+	nxo_dup(nxo, &buffer->aux);
+	nxo_stack_pop(tstack);
+}
+
+void
+slate_buffer_setaux(void *a_data, cw_nxo_t *a_thread)
+{
+	cw_nxo_t		*ostack, *nxo, *aux;
+	cw_nxn_t		error;
+	struct cw_buffer	*buffer;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	NXO_STACK_GET(aux, ostack, a_thread);
+	NXO_STACK_DOWN_GET(nxo, ostack, a_thread, aux);
+	error = buffer_p_type(nxo);
+	if (error) {
+		nxo_thread_nerror(a_thread, error);
+		return;
+	}
+
+	buffer = (struct cw_buffer *)nxo_hook_data_get(nxo);
+
+	nxo_dup(&buffer->aux, aux);
+	nxo_stack_npop(ostack, 2);
 }
 
 void

@@ -477,23 +477,12 @@ buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc, cw_opaque_realloc_t
 void
 buf_delete(cw_buf_t *a_buf)
 {
-	cw_bufm_t	*bufm;
-
 	_cw_check_ptr(a_buf);
 	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
+	_cw_assert(ql_first(&a_buf->bufms) == NULL);
 
 	if (a_buf->hist != NULL)
 		hist_delete(a_buf->hist);
-
-	/*
-	 * Set the buf pointers of all objects that point to this one to NULL,
-	 * so that they won't try to disconnect during destruction.  All objects
-	 * that reference this one effectively become invalid, but they can (and
-	 * should) be destroyed even though this base buf is gone.
-	 */
-	ql_foreach(bufm, &a_buf->bufms, link) {
-		bufm->buf = NULL;
-	}
 
 	_cw_opaque_dealloc(a_buf->dealloc, a_buf->arg, a_buf->b, (a_buf->len +
 	    a_buf->gap_len) * a_buf->elmsize);
@@ -1005,9 +994,10 @@ void
 bufm_delete(cw_bufm_t *a_bufm)
 {
 	_cw_check_ptr(a_bufm);
+	_cw_dassert(a_bufm->magic == _CW_BUFM_MAGIC);
+	_cw_check_ptr(a_bufm->buf);
 
-	if (a_bufm->buf != NULL)
-		ql_remove(&a_bufm->buf->bufms, a_bufm, link);
+	ql_remove(&a_bufm->buf->bufms, a_bufm, link);
 
 	if (a_bufm->dealloc != NULL) {
 		_cw_opaque_dealloc(a_bufm->dealloc, a_bufm->arg, a_bufm,

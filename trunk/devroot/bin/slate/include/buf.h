@@ -34,7 +34,7 @@ struct cw_bufm_s {
 #endif
 
 	ql_elm(cw_bufm_t) link;		/* Ordered bufm list linkage. */
-	cw_buf_t	*buf;		/* NULL if buf has been deleted. */
+	cw_buf_t	*buf;
 
 	/* Allocator state. */
 	cw_opaque_dealloc_t *dealloc;
