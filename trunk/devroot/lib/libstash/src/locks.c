@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 145 $
- * $Date: 1998-07-15 17:26:27 -0700 (Wed, 15 Jul 1998) $
+ * $Revision: 213 $
+ * $Date: 1998-09-08 20:22:29 -0700 (Tue, 08 Sep 1998) $
  *
  * <<< Description >>>
  *
@@ -93,7 +93,7 @@ lwq_lock(cw_lwq_t * a_lwq_o)
   
   mtx_lock(&a_lwq_o->lock);
 
-  if ((a_lwq_o->num_lockers > 0) ||(a_lwq_o->num_lockers > 0))
+  if ((a_lwq_o->num_lockers > 0) || (a_lwq_o->num_lock_waiters > 0))
   {
     /* Create a condition variable. */
     cnd_new(&condition);
@@ -261,7 +261,7 @@ rwl_wlock(cw_rwl_t * a_rwl_o)
 
   mtx_lock(&a_rwl_o->lock);
 
-  while (a_rwl_o->num_readers > 0)
+  while ((a_rwl_o->num_readers > 0) || (a_rwl_o->num_writers > 0))
   {
     a_rwl_o->write_waiters++;
     cnd_wait(&a_rwl_o->write_wait, &a_rwl_o->lock);

@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 209 $
- * $Date: 1998-09-07 23:57:53 -0700 (Mon, 07 Sep 1998) $
+ * $Revision: 213 $
+ * $Date: 1998-09-08 20:22:29 -0700 (Tue, 08 Sep 1998) $
  *
  * <<< Description >>>
  * 
@@ -454,6 +454,15 @@ sem_adjust(cw_sem_t * a_sem_o, cw_sint32_t a_adjust)
   mtx_lock(&a_sem_o->lock);
 
   a_sem_o->count += a_adjust;
+  if ((a_sem_o->waiters) && (a_sem_o->count > 0))
+  {
+    cw_sint32_t i;
+    
+    for (i = 0; (i < a_sem_o->count) && (i < a_sem_o->waiters); i++)
+    {
+      cnd_signal(&a_sem_o->gtzero);
+    }
+  }
   
   mtx_unlock(&a_sem_o->lock);
 }
@@ -482,9 +491,17 @@ tsd_new(cw_tsd_t * a_tsd_o, void (*a_func)(void *))
 void
 tsd_delete(cw_tsd_t * a_tsd_o)
 {
+  int error;
+  
   _cw_check_ptr(a_tsd_o);
 
-  pthread_key_delete(a_tsd_o->key);
+  error = pthread_key_delete(a_tsd_o->key);
+  if (error)
+  {
+    log_eprintf(g_log_o, NULL, 0, "tsd_delete",
+		"Error deleting key: %s\n", strerror(error));
+    abort();
+  }
 
   if (a_tsd_o->is_malloced == TRUE)
   {
