@@ -2246,7 +2246,7 @@ systemdict_get(cw_nxo_t *a_thread)
 		}
 		index = nxo_integer_get(with);
 
-		if (index >= nxo_array_len_get(from)) {
+		if (index < 0 || index >= nxo_array_len_get(from)) {
 			nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
 			return;
 		}
@@ -2315,6 +2315,10 @@ systemdict_getinterval(cw_nxo_t *a_thread)
 	}
 	index = nxo_integer_get(with);
 	len = nxo_integer_get(count);
+	if (index < 0 || len < 0) {
+		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+		return;
+	}
 
 	switch (nxo_type_get(from)) {
 	case NXOT_ARRAY:
@@ -3210,7 +3214,7 @@ systemdict_put(cw_nxo_t *a_thread)
 		}
 		index = nxo_integer_get(with);
 
-		if (index >= nxo_array_len_get(into)) {
+		if (index < 0 || index >= nxo_array_len_get(into)) {
 			nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
 			return;
 		}
@@ -3232,7 +3236,7 @@ systemdict_put(cw_nxo_t *a_thread)
 		index = nxo_integer_get(with);
 		val = nxo_integer_get(what);
 
-		if (index >= nxo_string_len_get(into)) {
+		if (index < 0 || index >= nxo_string_len_get(into)) {
 			nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
 			return;
 		}
@@ -3264,6 +3268,10 @@ systemdict_putinterval(cw_nxo_t *a_thread)
 		return;
 	}
 	index = nxo_integer_get(with);
+	if (index < 0) {
+		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+		return;
+	}
 
 	switch (nxo_type_get(into)) {
 	case NXOT_ARRAY: {

@@ -4618,19 +4618,41 @@ onyx:0>
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[array: ]
+			An array object.
+		\item[string: ]
+			A string object.
+		\item[index: ]
+			The offset into \oparg{array} or \oparg{string} to get
+			the interval from.
+		\item[length: ]
+			The length of the interval in \oparg{array} or
+			\oparg{string} to get.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[subarray: ]
+			A subarray of \oparg{array} at offset \oparg{index} and
+			of length \oparg{length}.
+		\item[substring: ]
+			A substring of \oparg{string} at offset \oparg{index}
+			and of length \oparg{length}.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Get an interval of \oparg{array} or \oparg{string}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> [0 1 2 3] 1 2 getinterval 1 sprint
+[1 2]
+onyx:0> `abcd' 1 2 getinterval 1 sprint
+`bc'
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:globaldict}
