@@ -236,8 +236,8 @@ $sprintsdict <
 		`-instance-'
 	    } ifelse
 	}{
-		2 npop
-		`-instance-'
+	    2 npop
+	    `-instance-'
 	} ifelse
     } bind
 ' cat
