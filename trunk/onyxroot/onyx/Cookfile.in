@@ -99,7 +99,8 @@ bins_a : [A_BINS];
 bins_p : [P_BINS];
 bins : bins_d bins_a bins_p;
 
-tests : [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS] [CBTESTS]]
+tests : [STIL_D]
+        [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS] [CBTESTS]]
         [fromto [srcdir]/%0%.st.in [objdir]/%0%.st [STESTS] [SBTESTS]]
         [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]];
 

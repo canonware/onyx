@@ -96,7 +96,7 @@ dataend
 /*
  * Add magic to stil files.
  */
-[objdir]/%0%.st : [srcdir]/%0%.st.in [STIL_D]
+[objdir]/%0%.st : [srcdir]/%0%.st.in
   set mkdir
 {
   [SHELL] -e;
