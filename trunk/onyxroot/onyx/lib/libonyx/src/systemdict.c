@@ -621,8 +621,7 @@ systemdict_l_populate(cw_nxo_t *a_dict, cw_nxo_t *a_tname, cw_nxo_t *a_tvalue,
     /* systemdict. */
     nxo_name_new(a_tname, nxn_str(NXN_systemdict), nxn_len(NXN_systemdict),
 		 TRUE);
-    nxo_dup(a_tvalue, nx_systemdict_get(a_nx));
-    nxo_dict_def(a_dict, a_tname, a_tvalue);
+    nxo_dict_def(a_dict, a_tname, a_dict);
 
     /* gcdict. */
     nxo_name_new(a_tname, nxn_str(NXN_gcdict), nxn_len(NXN_gcdict), TRUE);
