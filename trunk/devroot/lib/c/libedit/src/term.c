@@ -792,7 +792,7 @@ term_set(el, term)
     (void) term_get_size(el, &lins, &cols);/* get the correct window size */
     term_change_size(el, lins, cols);
     term_bind_arrow(el);
-    return i <= 0 ? -1 : 0;
+    return i != OK ? -1 : 0;
 } /* end term_set */
 
 
