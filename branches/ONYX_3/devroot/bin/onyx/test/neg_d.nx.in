@@ -13,7 +13,7 @@
 `Test begin\n' print flush
 
 [
-    `0.0 neg'
+    `0.0 neg neg'
     `5.0 neg'
     `-5.0 neg'
 ]{
