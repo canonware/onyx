@@ -90,10 +90,14 @@ mem - malloc wrapper.
 \*(lqmem_verbose\*(rq
 In the debug versions of libstash, print out full tracking information for every
 allocation and deallocation.
+Output is printed to file descriptor 2, since using cw_g_out would cause a
+circular dependency, resulting in possible infinite recursion.
 .TP
 \*(lqmem_error\*(rq
 In the debug versions of libstash, print out information about memory leaks and
 other detectable errors or inconsistencies.
+Output is printed to file descriptor 2, since using cw_g_out would cause a
+circular dependency, resulting in possible infinite recursion.
 .SH DESCRIPTION
 Public interface for a memory allocation (malloc) wrapper class.  For the debug
 versions of libstash, extra information is hashed for each memory allocation
