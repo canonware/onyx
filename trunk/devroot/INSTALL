@@ -113,8 +113,7 @@ Optionally, pass any of the following (not a definitive list) arguments to
 	an application that does not have complete I/O capabilities.  With the
 	exception of calls to printf() and fprintf(stderr, ...) in debug
 	versions of libonyx, no POSIX file operations are used.  The
-	documentation does not mention the effects of this option, and you
-	absolutely will get bitten if you aren't careful -- UTSL.
+	documentation does not mention the effects of this option -- UTSL.
 
 --disable-inlines
 	Do not use inline functions.  This reduces the size of binaries at the
@@ -137,6 +136,11 @@ Optionally, pass any of the following (not a definitive list) arguments to
 --disable-slate
 	Do not build slate.
 
+--enable-autogen
+	Include dependency rules in the build system to automatically regenerate
+	files created by configure when their sources are newer.  This is
+	only of interest when making modifications to the source code.
+
 --enable-debug
 	Build debugging code and turn assertions on (controlled by the CW_ASSERT
 	cpp macro).  The resulting libraries and modules will not be binary
@@ -155,6 +159,39 @@ Optionally, pass any of the following (not a definitive list) arguments to
 	so in order to completely empty the objdir, the relclean target must be
 	used.  This option is only useful when modifications have been made to
 	the documentation source.
+
+--with-libpcre-prefix=<prefix>
+	If specified, modprompt will be built using the copy of pcre in
+	<prefix>.  Specifically, <prefix>/pcre-config will be used to determine
+	the appropriate compiler and linker flags.
+
+	In addition, if building on a system that requires that the library
+	search path be encoded in modpcre, the link line will also include
+	something like:
+
+		-Wl,-rpath,<prefix>/lib
+
+	This option should only be necessary when there are multiple versions of
+	libpcre installed on the system, and the desired version does not come
+	first in the default library search path.
+
+--with-libedit-prefix=<prefix>
+	If specified, modprompt will be built using the copy of libedit in
+	<prefix>.  Specifically, the following will be used when compiling and
+	linking modprompt:
+
+		* Compiling: -I<prefix>/include
+		* Linking: -L<prefix>/lib
+
+	In addition, if building on a system that requires that the library
+	search path be encoded in modprompt, the link line will also include
+	something like:
+
+		-Wl,-rpath,<prefix>/lib
+
+	This option should only be necessary when there are multiple versions of
+	libedit installed on the system, and the desired version does not come
+	first in the default library search path.
 
 Optionally, define environment variables, including (not exclusively):
 

@@ -88,8 +88,13 @@ modprompt_mods_distclean :
 /*
  * Various flags.
  */
-MODPROMPT_CPPFLAGS = @PROMPT_CFLAGS@;
-MODPROMPT_LDFLAGS = @PROMPT_LIBS@;
+MODPROMPT_CPPFLAGS = @LIBEDIT_CPPFLAGS@ @MODPROMPT_CPPFLAGS@;
+MODPROMPT_LDFLAGS =
+#if [and [count @RPATH@] [count @LIBEDIT_PREFIX@]]
+                    @RPATH@@LIBEDIT_PREFIX@/lib
+#endif
+                    @LIBEDIT_LDFLAGS@
+                    [LDFLAGS] @MODPROMPT_LDFLAGS@;
 
 CPPFLAGS = [CPPFLAGS] -I@srcroot@/mod/modprompt/include
                       -I@objroot@/mod/modprompt/include
@@ -108,5 +113,6 @@ CPPFLAGS = [CPPFLAGS] -I@srcroot@/mod/modprompt/include
 #elif [matches macho @abi@]
        -undefined suppress -flat_namespace -bundle -all_load
 #endif
-       -o [target] [need] [MODPROMPT_LDFLAGS];
+       -o [target] [need]
+       [MODPROMPT_LDFLAGS];
 }

@@ -88,8 +88,8 @@ modpcre_mods_distclean :
 /*
  * Various flags.
  */
-MODPCRE_CPPFLAGS = @PCRE_CFLAGS@;
-MODPCRE_LDFLAGS = @PCRE_LIBS@;
+MODPCRE_CPPFLAGS = @MODPCRE_CPPFLAGS@;
+MODPCRE_LDFLAGS = @MODPCRE_LDFLAGS@;
 
 CPPFLAGS = [CPPFLAGS] -I@srcroot@/mod/modpcre/include
                       -I@objroot@/mod/modpcre/include

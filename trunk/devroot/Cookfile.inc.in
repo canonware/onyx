@@ -41,6 +41,7 @@ S_CFLAGS = [CFLAGS] -fPIC -DPIC
 if [not [defined LDFLAGS]] then
   LDFLAGS = [split " " [strip "@LDFLAGS@"]];
 
+#if @enable_autogen@
 /*
  * Re-configuration rules.
  */
@@ -78,6 +79,7 @@ if [not [defined LDFLAGS]] then
 {
   @objroot@/config.status;
 }
+#endif
 
 /* Documentation. */
 #include-cooked @objroot@/doc/Cookfile.inc

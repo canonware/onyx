@@ -1,3 +1,15 @@
+2002-02-07  Jason Evans  <jasone@canonware.com>
+
+	* Add --with-libedit-prefix and --with-libpcre-prefix, which make
+	it possible to get rpath right if there are multiple copies of the
+	libraries installed.
+
+2002-02-06  Jason Evans  <jasone@canonware.com>
+
+	* Add --enable-autogen, so that the automatic rebuilding of
+	configure output is disabled by default.  autogen.sh always passes
+	this flag.
+
 2002-02-04  Jason Evans  <jasone@canonware.com>
 
 	* : Move command line editing support from the onyx binary to
