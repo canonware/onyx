@@ -207,6 +207,7 @@ const cw_uint8_t *cw_g_stil_names[] = {
 	"userdict",
 	"version",
 	"wait",
+	"waitpid",
 	"where",
 	"write",
 	"xcheck",

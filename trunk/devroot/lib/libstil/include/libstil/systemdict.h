@@ -136,6 +136,7 @@ void	systemdict_unlink(cw_stilt_t *a_stilt);
 void	systemdict_unlock(cw_stilt_t *a_stilt);
 void	systemdict_version(cw_stilt_t *a_stilt);
 void	systemdict_wait(cw_stilt_t *a_stilt);
+void	systemdict_waitpid(cw_stilt_t *a_stilt);
 void	systemdict_where(cw_stilt_t *a_stilt);
 void	systemdict_write(cw_stilt_t *a_stilt);
 void	systemdict_xcheck(cw_stilt_t *a_stilt);

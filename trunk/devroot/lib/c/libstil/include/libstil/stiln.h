@@ -210,6 +210,7 @@ typedef enum {
 	STILN_userdict,
 	STILN_version,
 	STILN_wait,
+	STILN_waitpid,
 	STILN_where,
 	STILN_write,
 	STILN_xcheck,
