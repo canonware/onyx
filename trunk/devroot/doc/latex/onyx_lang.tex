@@ -81,7 +81,7 @@ name	& hook		\\
 null	& mutex		\\
 operator & stack	\\
 pmark	& string	\\
-	& thread	\\
+real	& thread	\\
 \hline
 \end{tabular}
 \end{center}
@@ -153,6 +153,8 @@ operator	& data	& code	& code	\\
 \hline
 pmark		& data	& data	& data	\\
 \hline
+real		& data	& data	& data	\\
+\hline
 stack		& data	& data	& data	\\
 \hline
 string		& data	& code	& code	\\
@@ -200,6 +202,8 @@ null		& data	& code	& code	\\
 operator	& data	& code	& code	\\
 \hline
 pmark		& data	& data	& data	\\
+\hline
+real		& data	& data	& data	\\
 \hline
 stack		& data	& data	& data	\\
 \hline
@@ -294,6 +298,8 @@ deferred execution mode (i.e. procedures that use the \{\} syntax).  The
 application will only encounter pmarks in error conditions, and there is never a
 reason for an application to explicitly create a pmark.
 
+\item[real: ] A real is a double precision (64 bit) floating point number.
+
 \item[stack: ] A stack provides LIFO (last in, first out) access to objects that
 it contains, as well as some more advanced access methods.  An application can
 create, then manipulate stacks in much the same way that the operand stack can
@@ -361,11 +367,13 @@ follows:
 
 \item[{\lt}procedure{\gt} ::= ] \{{\lt}statement{\gt}\}
 
-\item[{\lt}object{\gt} ::= ] {\lt}integer{\gt} {\pipe} {\lt}name{\gt} {\pipe}
-{\lt}string{\gt}
+\item[{\lt}object{\gt} ::= ] {\lt}integer{\gt} {\pipe} {\lt}real{\gt} {\pipe}
+{\lt}name{\gt} {\pipe} {\lt}string{\gt}
 
 \item[{\lt}integer{\gt} ::= ] {\lt}dec\_integer{\gt} {\pipe}
 {\lt}radix\_integer{\gt}
+
+\item[{\lt}real{\gt} ::= ] {\lt}dec\_real{\gt} {\pipe} {\lt}exp\_real{\gt}
 
 \item[{\lt}name{\gt} : ] Any token that cannot be interpreted as a number or a
 string is interpreted as an executable name.  There are three syntaxes for
@@ -447,6 +455,33 @@ optional.  Examples include:
 9#18
 35#7r3x
 35#7R3x
+\end{verbatim}
+
+\item[{\lt}dec\_real{\gt} : ] Double precision floating point number in decimal
+notation.  At least one decimal digit and a decimal point are required.
+Examples include:
+\begin{verbatim}
+0.
+.0
+3.
+.141
+3.141
+42.75
++3.50
+-5.0
+\end{verbatim}
+
+\item[{\lt}exp\_real{\gt} : ] Floating point number in exponential notation.
+The format is the same as for {\lt}dec\_real{\gt}, except that an exponent is
+appended.  The exponent is composed of an ``e'' or ``E'', an optional sign, and
+a base 10 integer that is limited by the precision of the floating point format
+(approximately $-308$ to $307$).  Examples include:
+\begin{verbatim}
+6.022e23
+60.22e22
+6.022e+23
+1.661e-24
+1.661E-24
 \end{verbatim}
 
 \end{description}
@@ -1476,7 +1511,7 @@ following flags are supported for all types:
 	Syntactic rendering recursion depth.  Default: 1.
 \end{description}
 
-In addition, the following flags are supported for integers:
+The following additional flags are supported for integers:
 \begin{description}
 \item[{\tt /b}: ]
 	Base, from 2 to 36.  Default: 10.
@@ -1488,6 +1523,14 @@ In addition, the following flags are supported for integers:
 	\item[{\tt /+}: ]
 		Always print sign.
 	\end{description}
+\end{description}
+
+The following additional flags are supported for reals:
+\begin{description}
+\item[{\tt /d}: ]
+	Digits of precision past decimal point.  Default: 6.
+\item[{\tt /e}: ]
+	Exponential notation, if true.  Default: false.
 \end{description}
 
 \begin{longtable}{\optableformat{3}}
@@ -1546,6 +1589,9 @@ operator flags & {\bf \htmlref{operatortype}{outputsdict:operatortype}} & string
 \hline
 pmark flags & {\bf \htmlref{pmarktype}{outputsdict:pmarktype}} & string &
 Create formatted string from pmark. \\
+\hline
+real flags & {\bf \htmlref{realtype}{outputsdict:realtype}} & string &
+Create formatted string from real. \\
 \hline
 stack flags & {\bf \htmlref{stacktype}{outputsdict:stacktype}} & string &
 Create formatted string from stack. \\
@@ -2030,6 +2076,43 @@ onyx:1> </w 30 /p `.' /j /c> pmarktype print `\n' print flush
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{outputsdict:realtype}
+\index{realtype@\onyxop{}{realtype}{}}
+\item[{\onyxop{real flags}{realtype}{string}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[real: ]
+			A real object.
+		\item[flags: ]
+			Formatting flags.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[string: ]
+			Formatted string representation of \oparg{real}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Create a formatted string representation of \oparg{real}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> outputsdict begin
+onyx:0> 6.022e23 </d 4> realtype print `\n' print flush
+602200000000000027262976.0000
+onyx:0> 6.022e23 </d 4 /e true> realtype print `\n' print flush
+6.0220e+23
+onyx:0> 6.022e23 </d 0 /e true> realtype print `\n' print flush
+6e+23
+onyx:0> 6.022e23 </d 4 /w 40 /p `0'> realtype print `\n' print flush
+00000000000602200000000000027262976.0000
+onyx:0>
+		\end{verbatim}
+	\end{description}
 \label{outputsdict:stacktype}
 \index{stacktype@\onyxop{}{stacktype}{}}
 \item[{\onyxop{stack flags}{stacktype}{string}}: ]
@@ -2142,7 +2225,7 @@ syntactically valid representation for an object and the recursion depth is
 greater than 0, the corresponding operator creates a string that syntactically
 represents the object.  Otherwise, a string with a non-syntictical
 representation of the object is created, except for booleans, integers, names,
-nulls, and strings, for which the results are always syntactical.  If the
+nulls, reals, and strings, for which the results are always syntactical.  If the
 recursion depth is greater than 0, the operators will recursively convert any
 contained objects.
 
@@ -2211,6 +2294,9 @@ operator depth & {\bf \htmlref{operatortype}{sprintsdict:operatortype}} & string
 \hline
 pmark depth & {\bf \htmlref{pmarktype}{sprintsdict:pmarktype}} & string &
 Create syntactical string from pmark. \\
+\hline
+real depth & {\bf \htmlref{realtype}{sprintsdict:realtype}} & string &
+Create syntactical string from real. \\
 \hline
 stack depth & {\bf \htmlref{stacktype}{sprintsdict:stacktype}} & string &
 Create syntactical string from stack. \\
@@ -2726,6 +2812,40 @@ onyx:1> dup 1 pmarktype print `\n' print flush
 onyx:1>
 		\end{verbatim}
 	\end{description}
+\label{sprintsdict:realtype}
+\index{realtype@\onyxop{}{realtype}{}}
+\item[{\onyxop{real depth}{realtype}{string}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[real: ]
+			A real object.
+		\item[depth: ]
+			Recursion depth.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[string: ]
+			Syntactical string representation of \oparg{real}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Create a syntactical string representation of \oparg{real}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> sprintsdict begin
+onyx:0> 42.0
+onyx:1> dup 0 realtype print `\n' print flush
+4.200000e+01
+onyx:1> dup 1 realtype print `\n' print flush
+4.200000e+01
+onyx:1>
+		\end{verbatim}
+	\end{description}
 \label{sprintsdict:stacktype}
 \index{stacktype@\onyxop{}{stacktype}{}}
 \item[{\onyxop{stack depth}{stacktype}{string}}: ]
@@ -3060,7 +3180,9 @@ a b & {\bf \htmlref{mul}{systemdict:mul}} & r & Multiply a and b. \\
 \hline
 a b & {\bf \htmlref{div}{systemdict:div}} & r & Divide a by b. \\
 \hline
-a b & {\bf \htmlref{mod}{systemdict:mod}} & r & Mod a by b. \\
+a b & {\bf \htmlref{idiv}{systemdict:idiv}} & r & Divide a by b (integers). \\
+\hline
+a b & {\bf \htmlref{mod}{systemdict:mod}} & r & Mod a by b (integers). \\
 \hline
 a b & {\bf \htmlref{exp}{systemdict:exp}} & r & Raise a to the power of b. \\
 \hline
@@ -3697,7 +3819,7 @@ onyx:0> mark 1 2 3 ] 1 sprint
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a: ]
-			An integer.
+			An integer or real.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
@@ -3717,6 +3839,10 @@ onyx:0> 5 abs 1 sprint
 5
 onyx:0> -5 abs 1 sprint
 5
+onyx:0> 3.14 abs 1 sprint
+3.140000e+00
+onyx:0> -3.14 abs 1 sprint
+3.140000e+00
 onyx:0>
 		\end{verbatim}
 	\end{description}
@@ -3727,9 +3853,9 @@ onyx:0>
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a: ]
-			An integer.
+			An integer or real.
 		\item[b: ]
-			An integer.
+			An integer or real.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
@@ -3749,6 +3875,10 @@ onyx:0> 2 2 add 1 sprint
 4
 onyx:0> -1 3 add 1 sprint
 2
+onyx:0> 2.0 3.1 add 1 sprint
+5.100000e+00
+onyx:0> -1.5 +3e1 add 1 sprint
+2.850000e+01
 onyx:0>
 		\end{verbatim}
 	\end{description}
@@ -4598,6 +4728,7 @@ onyx:0>
 			\item[integer: ] The integer in base 10.
 			\item[operator: ] The string representation of the
 			operator name or {\tt `-operator-'}.
+			\item[real: ] The real in exponential notation.
 			\item[string: ] A printable representation of
 			\oparg{object}.  The result can be evaluated to produce
 			the original string.
@@ -4620,6 +4751,8 @@ onyx:0> 42 cvs 1 sprint
 `42'
 onyx:0> //pop cvs 1 sprint
 `pop'
+onyx:0> 42.0 cvs 1 sprint
+`4.200000e+01'
 onyx:0> `foo\nbar\\biz\`baz' cvs 1 sprint
 `\`foo\\nbar\\\\biz\\\`baz\''
 onyx:0> mutex cvs 1 sprint
@@ -4814,9 +4947,9 @@ onyx:0>
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a: ]
-			An integer.
+			An integer or real.
 		\item[b: ]
-			A non-zero integer.
+			A non-zero integer or real.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
@@ -4834,12 +4967,12 @@ onyx:0>
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> 4 2 div 1 sprint
-2
-onyx:0> 5 2 div 1 sprint
-2
-onyx:0> 5 0 div
+2.000000e+00
+onyx:0> 5 2.0 div 1 sprint
+2.500000e+00
+onyx:0> 5.0 0 div
 Error /undefinedresult
-ostack: (5 0)
+ostack: (5.000000e+00 0)
 dstack: (-dict- -dict- -dict- -dict-)
 estack/istack trace (0..2):
 0:      --div--
@@ -5038,8 +5171,8 @@ onyx:0>
 		are lexically equivalent.  A name can be equal to a string.
 		\item[boolean: ] \oparg{a} and \oparg{b} are equal iff they
 		are the same value.
-		\item[integer: ] \oparg{a} and \oparg{b} are equal iff they
-		are the same value.
+		\item[integer, real: ] \oparg{a} and \oparg{b} are equal iff
+		they are the same value.
 		\end{description}
 	\item[Example(s): ]\begin{verbatim}
 
@@ -5056,6 +5189,10 @@ false
 onyx:0> 1 1 eq 1 sprint
 true
 onyx:0> 1 2 eq 1 sprint
+false
+onyx:0> 1.0 1 eq 1 sprint
+true
+onyx:0> 1.0 1.1 eq 1 sprint
 false
 onyx:0>
 		\end{verbatim}
@@ -5218,9 +5355,9 @@ onyx:0>
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a: ]
-			An integer.
+			An integer or real.
 		\item[b: ]
-			A non-negative. integer.
+			An integer or real.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
@@ -5229,12 +5366,13 @@ onyx:0>
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Return \oparg{a} to the \oparg{b} power.
+		Return \oparg{a} to the \oparg{b} power.  If a negative exponent
+		is specified, the result will always be a real, even if both
+		arguments are integers.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> 5 0 exp 1 sprint
@@ -5246,14 +5384,12 @@ onyx:0> 5 2 exp 1 sprint
 onyx:0> -5 3 exp 1 sprint
 -125
 onyx:0> 5 -3 exp 1 sprint
-Error /rangecheck
-ostack: (5 -3)
-dstack: (-dict- -dict- -dict- -dict-)
-estack/istack trace (0..2):
-0:      --exp--
-1:      -file-
-2:      --start--
-onyx:3>
+8.000000e-03
+onyx:0> 2.1 3.5 exp 1 sprint
+1.342046e+01
+onyx:0> 100 .01 exp 1 sprint
+1.000000e+02
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:false}
@@ -5717,6 +5853,47 @@ onyx:0>
 		Get the tag associated with \oparg{hook}.
 	\item[Example(s): ]\begin{verbatim}
 
+		\end{verbatim}
+	\end{description}
+\label{systemdict:idiv}
+\index{idiv@\onyxop{}{idiv}{}}
+\item[{\onyxop{a b}{idiv}{r}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a: ]
+			An integer.
+		\item[b: ]
+			A non-zero integer.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[r: ]
+			The integer quotient of \oparg{a} divided by \oparg{b}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{undefinedresult}{undefinedresult}.]
+		\end{description}
+	\item[Description: ]
+		Return the integer quotient of \oparg{a} divided by \oparg{b}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> 4 2 idiv 1 sprint
+2
+onyx:0> 5 2 idiv 1 sprint
+2
+onyx:0> 5 0 idiv
+Error /undefinedresult
+ostack: (5 0)
+dstack: (-dict- -dict- -dict- -dict-)
+estack/istack trace (0..2):
+0:      --idiv--
+1:      -file-
+2:      --start--
+onyx:3>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:if}
@@ -6388,9 +6565,9 @@ onyx:0>
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a: ]
-			An integer.
+			An integer or real.
 		\item[b: ]
-			An integer.
+			An integer or real.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
@@ -6410,6 +6587,10 @@ onyx:0> 3 17 mul 1 sprint
 51
 onyx:0> -5 -6 mul 1 sprint
 30
+onyx:0> 3.5 4.0 mul 1 sprint
+1.400000e+01
+onyx:0> -1.5 3 mul 1 sprint
+-4.500000e+00
 onyx:0>
 		\end{verbatim}
 	\end{description}
@@ -6505,8 +6686,8 @@ onyx:5>
 		they are lexically equivalent.  A name can be equal to a string.
 		\item[boolean: ] \oparg{a} and \oparg{b} are not equal unless
 		they are the same value.
-		\item[integer: ] \oparg{a} and \oparg{b} are not equal unless
-		they are the same value.
+		\item[integer, real: ] \oparg{a} and \oparg{b} are not equal
+		unless they are the same value.
 		\end{description}
 	\item[Example(s): ]\begin{verbatim}
 
@@ -6525,6 +6706,10 @@ false
 onyx:0> 1 1 ne 1 sprint
 false
 onyx:0> 1 2 ne 1 sprint
+true
+onyx:0> 1.0 1 ne 1 sprint
+false
+onyx:0> 1.0 1.1 ne 1 sprint
 true
 onyx:0>
 		\end{verbatim}
@@ -6558,6 +6743,10 @@ onyx:0> 5 neg 1 sprint
 -5
 onyx:0> -5 neg 1 sprint
 5
+onyx:0> 3.14 neg 1 sprint
+-3.140000e+00
+onyx:0> -3.14 neg 1 sprint
+3.140000e+00
 onyx:0>
 		\end{verbatim}
 	\end{description}
@@ -8487,9 +8676,9 @@ onyx:0>
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a: ]
-			An integer.
+			An integer or real.
 		\item[b: ]
-			An integer.
+			An integer or real.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
@@ -8509,6 +8698,12 @@ onyx:0> 5 3 sub 1 sprint
 2
 onyx:0> -3 4 sub 1 sprint
 -7
+onyx:0> 5.1 1.1 sub 1 sprint
+4.000000e+00
+onyx:0> 5 1.0 sub 1 sprint
+4.000000e+00
+onyx:0> -3.0 4.1 sub 1 sprint
+-7.100000e+00
 onyx:0>
 		\end{verbatim}
 	\end{description}
