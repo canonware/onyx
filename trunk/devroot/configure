@@ -539,9 +539,9 @@ if test -d "$srcdir/lib/c/libsock" ; then
   cfghdrs="$cfghdrs $objdir/lib/c/libsock/include/libsock/libsock_defs.h"
 fi
 
-if test -d "$srcdir/lib/c/libkasi" ; then
-  mkdir -p $objdir/lib/c/libkasi/include/libkasi
-  cfghdrs="$cfghdrs $objdir/lib/c/libkasi/include/libkasi/libkasi_defs.h"
+if test -d "$srcdir/lib/c/libstil" ; then
+  mkdir -p $objdir/lib/c/libstil/include/libstil
+  cfghdrs="$cfghdrs $objdir/lib/c/libstil/include/libstil/libstil_defs.h"
 fi
 
 

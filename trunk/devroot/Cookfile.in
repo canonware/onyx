@@ -297,6 +297,6 @@ dataend
          -o [fromto %0%.o_s %0%.d_s [target]];
 }
 
-#include-cooked-nowarn [srcdir]/lib/c/libkasi/Howto.cook
+#include-cooked-nowarn [srcdir]/lib/c/libstil/Howto.cook
 #include-cooked-nowarn [srcdir]/lib/c/libsock/Howto.cook
 #include-cooked-nowarn [srcdir]/lib/c/libstash/Howto.cook
