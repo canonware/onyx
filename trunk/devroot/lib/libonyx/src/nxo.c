@@ -153,8 +153,8 @@ nxo_compare(cw_nxo_t *a_a, cw_nxo_t *a_b)
 		     * additional test unconditionally would be safe, but there
 		     * is no need to do it unless inlines are used.
 		     */
-		    && nxo_l_operator_fast_op_get(a_a) ==
-		    nxo_l_operator_fast_op_get(a_b)
+		    && nxo_l_operator_opcode_get(a_a) ==
+		    nxo_l_operator_opcode_get(a_b)
 #endif
 		    )
 			retval = 0;
