@@ -21,9 +21,13 @@
  * Using a ring makes it relatively simple to make all the stack operations
  * GC-safe.  One disadvantage of using rings, however, is that the stils_roll()
  * re-orders stack elements, and over time, the elements become jumbled enough
- * that it is possible that additional cache misses result.  Every algorithm I
- * have thought of that keeps from jumbling the elements requires a very
- * expensive stils_roll() implementation.
+ * that it is possible that additional cache misses result.
+ *
+ * XXX A reasonably simple solution to the ring re-ordering problem is to
+ * maintain rings of free elements on a per-chunk basis.  This will cause re-use
+ * to occur mainly in the first-listed chunk, so that other chunks will tend to
+ * become entirely free.  This allows other chunks to be freed, as well as
+ * causing adjacent stack elements to be more contiguous in memory.
  *
  ******************************************************************************/
 

@@ -103,17 +103,18 @@ stil_new(cw_stil_t *a_stil, int a_argc, char **a_argv, char **a_envp,
 		    a_argv);
 		try_stage = 9;
 
+		/* Create initial thread. */
 		stilt_new(&retval->stilt, retval);
 		try_stage = 10;
 
-		/*
-		 * Now that we have an initial thread, activate the GC.
-		 */
+		/* Now that we have an initial thread, activate the GC. */
 		stila_active_set(&retval->stila, TRUE);
 	}
 	xep_catch (_CW_XEPV_OOM) {
 		retval = (cw_stil_t *)v_retval;
 		switch (try_stage) {
+		case 10:
+			stilt_delete(&retval->stilt);
 		case 9:
 		case 8:
 		case 7:

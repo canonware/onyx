@@ -80,7 +80,7 @@ extern  "C" {
 /*
  * Initial size of userdict.
  */
-#define	_LIBSTASH_USERDICT_HASH	 64
+#define	_LIBSTASH_USERDICT_HASH		  64
 
 /*
  * Exception numbers.  libstil reserves -128 to -255.
