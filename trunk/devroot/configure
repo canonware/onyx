@@ -563,19 +563,19 @@ echo "$ac_t""$build_libsock" 1>&6
 
 
 
-echo $ac_n "checking include libcl in build""... $ac_c" 1>&6
-echo "configure:568: checking include libcl in build" >&5
-if test -d "$srcdir/lib/c/libcl" ; then
-  build_libcl="yes"
-  lib_cl=1
-  cfghdrs="$cfghdrs $objdir/lib/c/libcl/include/libcl/libcl_defs.h"
-  targets="$targets libcl"
-  mkdir -p $objdir/lib/c/libcl/include/libcl
+echo $ac_n "checking include libedit in build""... $ac_c" 1>&6
+echo "configure:568: checking include libedit in build" >&5
+if test -d "$srcdir/lib/c/libedit" ; then
+  build_libedit="yes"
+  lib_edit=1
+  cfghdrs="$cfghdrs $objdir/lib/c/libedit/include/libedit/libedit_defs.h"
+  targets="$targets libedit"
+  mkdir -p $objdir/lib/c/libedit/include/libedit
 else
-  build_libcl="no"
-  lib_cl=0
+  build_libedit="no"
+  lib_edit=0
 fi
-echo "$ac_t""$build_libcl" 1>&6
+echo "$ac_t""$build_libedit" 1>&6
 
 
 
@@ -612,19 +612,19 @@ echo "$ac_t""$build_blow" 1>&6
 
 
 
-echo $ac_n "checking include cltest in build""... $ac_c" 1>&6
-echo "configure:617: checking include cltest in build" >&5
-if test -d "$srcdir/bin/cltest" ; then
-  build_cltest="yes"
-  bin_cltest=1
-  cfghdrs="$cfghdrs $objdir/bin/cltest/include/cltest_defs.h"
-  targets="$targets cltest"
-  mkdir -p $objdir/bin/cltest/include
+echo $ac_n "checking include edittest in build""... $ac_c" 1>&6
+echo "configure:617: checking include edittest in build" >&5
+if test -d "$srcdir/bin/edittest" ; then
+  build_edittest="yes"
+  bin_edittest=1
+  cfghdrs="$cfghdrs $objdir/bin/edittest/include/edittest_defs.h"
+  targets="$targets edittest"
+  mkdir -p $objdir/bin/edittest/include
 else
-  build_cltest="no"
-  bin_cltest=0
+  build_edittest="no"
+  bin_edittest=0
 fi
-echo "$ac_t""$build_cltest" 1>&6
+echo "$ac_t""$build_edittest" 1>&6
 
 
 
@@ -2693,10 +2693,10 @@ s%@mandir@%$mandir%g
 s%@objdir@%$objdir%g
 s%@lib_stash@%$lib_stash%g
 s%@lib_sock@%$lib_sock%g
-s%@lib_cl@%$lib_cl%g
+s%@lib_edit@%$lib_edit%g
 s%@lib_stil@%$lib_stil%g
 s%@bin_blow@%$bin_blow%g
-s%@bin_cltest@%$bin_cltest%g
+s%@bin_edittest@%$bin_edittest%g
 s%@bin_echos@%$bin_echos%g
 s%@bin_ncat@%$bin_ncat%g
 s%@bin_proxy@%$bin_proxy%g

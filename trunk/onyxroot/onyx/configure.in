@@ -16,12 +16,12 @@ targets=
 dnl Look for libraries.
 CW_BUILD_LIB(libstash, lib_stash)
 CW_BUILD_LIB(libsock, lib_sock)
-CW_BUILD_LIB(libcl, lib_cl)
+CW_BUILD_LIB(libedit, lib_edit)
 CW_BUILD_LIB(libstil, lib_stil)
 
 dnl Look for binaries.
 CW_BUILD_BIN(blow, bin_blow)
-CW_BUILD_BIN(cltest, bin_cltest)
+CW_BUILD_BIN(edittest, bin_edittest)
 CW_BUILD_BIN(echos, bin_echos)
 CW_BUILD_BIN(ncat, bin_ncat)
 CW_BUILD_BIN(proxy, bin_proxy)
