@@ -1,3 +1,8 @@
+2001-10-04  Jason Evans  <jasone@canonware.com>
+
+	* src/onyx.c (signal_handle): Reset the terminal before exiting
+	due to a signal.
+
 2001-07-23  Jason Evans  <jasone@canonware.com>
 
 	* src/onyx.c (cl_read): Retry if there is an error in el_gets().  This

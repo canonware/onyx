@@ -827,6 +827,7 @@ signal_handle(int a_signal)
 	case SIGINT:
 	case SIGQUIT:
 	case SIGTERM:
+		tty_cookedmode(el);
 		exit(0);
 	default:
 		fprintf(stderr, "Unexpected signal %d\n", a_signal);
