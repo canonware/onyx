@@ -1264,6 +1264,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 			case '\n':
 				_CW_STILT_NEWLINE();
 				/* Fall through. */
+			case '\f':
+				/* Fall through. */
 			case '\r':
 				a_stilt->state = STILTTS_START;
 				break;
