@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 218 $
- * $Date: 1998-09-11 00:24:05 -0700 (Fri, 11 Sep 1998) $
+ * $Revision: 229 $
+ * $Date: 1998-09-19 23:30:48 -0700 (Sat, 19 Sep 1998) $
  *
  * <<< Description >>>
  *
@@ -106,7 +106,6 @@ struct cw_jtl_tq_el_s
 #define jtl_xunlock _CW_NS_ANY(jtl_xunlock)
 #define jtl_get_max_dlocks _CW_NS_ANY(jtl_get_max_dlocks)
 #define jtl_set_max_dlocks _CW_NS_ANY(jtl_set_max_dlocks)
-#define jtl_get_num_stlocks _CW_NS_ANY(jtl_get_num_stlocks)
 
 /* Function prototypes. */
 cw_rwl_t * rwl_new(cw_rwl_t * a_rwl_o);
@@ -135,6 +134,5 @@ void jtl_wunlock(cw_jtl_t * a_jtl_o);
 void jtl_xunlock(cw_jtl_t * a_jtl_o);
 cw_uint32_t jtl_get_max_dlocks(cw_jtl_t * a_jtl_o);
 cw_uint32_t jtl_set_max_dlocks(cw_jtl_t * a_jtl_o, cw_uint32_t a_dlocks);
-cw_uint32_t jtl_get_num_stlocks(cw_jtl_t * a_jtl_o);
 
 #endif /* _LOCKS_H_ */

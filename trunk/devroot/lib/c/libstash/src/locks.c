@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 227 $
- * $Date: 1998-09-19 18:11:22 -0700 (Sat, 19 Sep 1998) $
+ * $Revision: 229 $
+ * $Date: 1998-09-19 23:30:48 -0700 (Sat, 19 Sep 1998) $
  *
  * <<< Description >>>
  *
@@ -552,23 +552,6 @@ jtl_set_max_dlocks(cw_jtl_t * a_jtl_o, cw_uint32_t a_dlocks)
   mtx_lock(&a_jtl_o->lock);
   retval = a_jtl_o->max_dlocks;
   a_jtl_o->max_dlocks = a_dlocks;
-  mtx_unlock(&a_jtl_o->lock);
-
-  return retval;
-}
-
-cw_uint32_t
-jtl_get_num_stlocks(cw_jtl_t * a_jtl_o)
-{
-  cw_uint32_t retval;
-
-  _cw_check_ptr(a_jtl_o);
-
-  mtx_lock(&a_jtl_o->lock);
-
-  /* XXX Implement. */
-  retval = 0; /* XXX Gets rid of warning. */
-
   mtx_unlock(&a_jtl_o->lock);
 
   return retval;
