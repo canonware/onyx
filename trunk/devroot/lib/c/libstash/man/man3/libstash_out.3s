@@ -15,11 +15,11 @@ helpers.
 \fB#include <libstash/libstash.h>\fR
 
 .SS Type definitions
-.I typedef char *
+.I typedef cw_uint32_t
 .br
 .B cw_out_render_t
 .RI ( "const char *a_format" ", " "cw_uint32_t a_format_len" ", "
-.IR "const void *a_arg" ", " "cw_uint32_t a_max_len" ", " "char *r_str" )
+.IR "const void *a_arg" ", " "cw_uint32_t a_max_len" ", " "cw_uint8_t *r_str" )
 
 .SS General
 .I cw_out_t *
@@ -222,7 +222,7 @@ helpers.
 .B spec_get_val
 .RI ( "const char *a_spec" ", " "cw_uint32_t a_spec_len" ", "
 .IR "const char *a_name" ", " "cw_uint32_t a_name_len" ", "
-.IR "const char **r_val" )
+.IR "const cw_uint8_t **r_val" )
 
 .SS Debugging (dbg) symbols
 None.
@@ -346,11 +346,11 @@ _
 .TE
 
 .SH USAGE
-.I typedef char *
+.I typedef cw_uint32_t
 .br
 .B cw_out_render_t
 .RI ( "const char *a_format" ", " "cw_uint32_t a_format_len" ", " 
-.IR "const void *a_arg" ", " "char *r_str" )
+.IR "const void *a_arg" ", " "cw_uint8_t *r_str" )
 .RS
 Input(s):
 .RS
@@ -1509,7 +1509,7 @@ Return the length of the type value string, and set *r_val to point to it.
 .B spec_get_val
 .RI ( "const char *a_spec" ", " "cw_uint32_t a_spec_len" ", "
 .IR "const char *a_name" ", " "cw_uint32_t a_name_len" ", "
-.IR "const char **r_val" )
+.IR "const cw_uint8_t **r_val" )
 .RS
 Input(s):
 .RS
