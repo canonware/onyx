@@ -30,7 +30,7 @@ bins_uninstall : [addsuffix _bins_uninstall @bins@];
 
 bins_clean : [addsuffix _bins_clean @bins@];
 
-bins_distclean : [addsuffix _bins_clean @bins@];
+bins_distclean : [addsuffix _bins_distclean @bins@];
 
 /*
  * Build rules for binary C files --> object files.
@@ -40,9 +40,10 @@ bins_distclean : [addsuffix _bins_clean @bins@];
 {
   [TCC] [A_CFLAGS] [CPPFLAGS]
         -I@srcroot@/bin/%0include -I@objroot@/bin/%0include
-        [CPPDEFS] -c @srcroot@/bin/%0src/%1.c -o [target];
+        -c @srcroot@/bin/%0src/%1.c -o [target];
 
-  c_incl [CPPFLAGS] -I@srcroot@/bin/%0include -I@objroot@/bin/%0include
+  c_incl [filter_cppdefs [CPPFLAGS]]
+         -I@srcroot@/bin/%0include -I@objroot@/bin/%0include
          --no-cache -Absent_Local_Ignore -No_System @srcroot@/bin/%0src/%1.c
          "--prefix='"[target]" : "@srcroot@/bin/%0src/%1.c"'"
          "--suffix='set nodefault;'"
@@ -54,10 +55,11 @@ bins_distclean : [addsuffix _bins_clean @bins@];
   set mkdir
 {
   [TCC] [A_CFLAGS] [CPPFLAGS]
-       -I@srcroot@/bin/%0include -I@objroot@/bin/%0include
-       [CPPDEFS] -c @objroot@/bin/%0src/%1.c -o [target];
+        -I@srcroot@/bin/%0include -I@objroot@/bin/%0include
+        -c @objroot@/bin/%0src/%1.c -o [target];
 
-  c_incl [CPPFLAGS] -I@srcroot@/bin/%0include -I@objroot@/bin/%0include
+  c_incl [filter_cppdefs [CPPFLAGS]]
+         -I@srcroot@/bin/%0include -I@objroot@/bin/%0include
          --no-cache -Absent_Local_Ignore -No_System @objroot@/bin/%0src/%1.c
          "--prefix='"[target]" : "@objroot@/bin/%0src/%1.c"'"
          "--suffix='set nodefault;'"
