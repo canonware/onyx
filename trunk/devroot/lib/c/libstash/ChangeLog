@@ -1,3 +1,8 @@
+2000-06-13  Jason Evans  <jasone@canonware.com>
+
+	* src/thd.c: Add thd_crit_enter(), thd_crit_leave(),
+	thd_suspend(), thd_trysuspend(), and thd_resume().
+
 2000-06-11  Jason Evans  <jasone@canonware.com>
 
 	* src/dbg.c: Fix regressions due to switching from the oh class to

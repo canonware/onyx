@@ -32,10 +32,10 @@
 
 #include "q.h"
 #include "ring.h"
-#include "thd.h"
 #include "mtx.h"
 #include "cnd.h"
 #include "sem.h"
+#include "thd.h"
 #include "tsd.h"
 #include "rwl.h"
 #include "dbg.h"

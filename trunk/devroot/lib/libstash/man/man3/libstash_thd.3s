@@ -39,6 +39,31 @@ thd - Thread.
 .B thd_sigmask
 .RI ( "int a_action" ", " "sigset_t *a_sigset" )
 
+.I void
+.br
+.B thd_crit_enter
+.RI ( "cw_thd_t *a_thd" )
+
+.I void
+.br
+.B thd_crit_leave
+.RI ( "cw_thd_t *a_thd" )
+
+.I void
+.br
+.B thd_suspend
+.RI ( "cw_thd_t *a_thd" )
+
+.I cw_bool_t
+.br
+.B thd_trysuspend
+.RI ( "cw_thd_t *a_thd" )
+
+.I void
+.br
+.B thd_resume
+.RI ( "cw_thd_t *a_thd" )
+
 .SS Debugging (dbg) symbols
 None.
 
@@ -178,6 +203,121 @@ Always zero, unless the arguments are invalid.
 Description:
 .RS
 Set the current thread's signal mask.
+.RE
+.RE
+
+.I void
+.br
+.B thd_crit_enter
+.RI ( "cw_thd_t *a_thd" )
+.RS
+Input(s):
+.RS
+.IR a_thd :
+.RS
+Pointer to a thd.
+.RE
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Enter a critical region where a_thd may not be suspended.
+.RE
+.RE
+
+.I void
+.br
+.B thd_crit_leave
+.RI ( "cw_thd_t *a_thd" )
+.RS
+Input(s):
+.RS
+.IR a_thd :
+.RS
+Pointer to a thd.
+.RE
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Leave a critical section; a_thd may once again be suspended.
+.RE
+.RE
+
+.I void
+.br
+.B thd_suspend
+.RI ( "cw_thd_t *a_thd" )
+.RS
+Input(s):
+.RS
+.IR a_thd :
+.RS
+Pointer to a thd.
+.RE
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Suspend a_thd.
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B thd_trysuspend
+.RI ( "cw_thd_t *a_thd" )
+.RS
+Input(s):
+.RS
+.IR a_thd :
+.RS
+Pointer to a thd.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+FALSE: Success.
+.br
+TRUE: Failure.
+.RE
+.RE
+Description:
+.RS
+Try to suspend a_thd, but fail if a_thd is in a critical section.
+.RE
+.RE
+
+.I void
+.br
+.B thd_resume
+.RI ( "cw_thd_t *a_thd" )
+.RS
+Input(s):
+.RS
+.IR a_thd :
+.RS
+Pointer to a thd.
+.RE
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Resume (make runnable) a_thd.
 .RE
 .RE
 
