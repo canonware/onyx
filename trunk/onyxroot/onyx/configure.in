@@ -10,6 +10,7 @@ AC_INIT(Cookfile.in)
 dnl 
 dnl Version requirements for external software we depend on.
 dnl 
+PTH_VERSION_MIN=2.0
 PCRE_VERSION_MIN=3.9
 LIBEDIT_VERSION_MIN=2.6
 
@@ -184,14 +185,37 @@ if test "x$enable_threads" = "x1" ; then
     fi
   else
     dnl Look for GNU pth.
-    have_pth="1"
-    if test "x$PTH_CPPFLAGS" != "x" ; then
-      CPPFLAGS="$CPPFLAGS $PTH_CPPFLAGS"
+    if test "x$PTH_PREFIX" = "x" ; then
+      AC_PATH_PROG(PTH_CONFIG, pth-config, , $PATH)
+    else
+      AC_PATH_PROG(PTH_CONFIG, pth-config, , "$PTH_PREFIX/bin")
     fi
-    AC_CHECK_HEADERS(pth.h, , have_pth="0")
-
-    AC_CHECK_LIB(pth, pth_init, LIBS="$LIBS -lpth", have_pth="0")
+    if test "x$PTH_CONFIG" != "x" ; then
+      dnl Make sure the version of pth found is sufficient.
+      AC_MSG_CHECKING(for pth >= $PTH_VERSION_MIN)
+      PTH_MAJOR=`$PTH_CONFIG --version | awk '{print $3}' | tr . " " | awk '{print $1}'`
+      PTH_MINOR=`$PTH_CONFIG --version | awk '{print $3}' | tr . " " | awk '{print $2}'`
+      PTH_MAJOR_MIN=`echo $PTH_VERSION_MIN | tr . " " | awk '{print $1}'`
+      PTH_MINOR_MIN=`echo $PTH_VERSION_MIN | tr . " " | awk '{print $2}'`
+      if test $PTH_MAJOR -gt $PTH_MAJOR_MIN \
+           -o $PTH_MAJOR -eq $PTH_MAJOR_MIN \
+           -a $PTH_MINOR -ge $PTH_MINOR_MIN ; then
+        AC_MSG_RESULT($PTH_MAJOR.$PTH_MINOR)
+        PTH_CPPFLAGS=`$PTH_CONFIG --cflags`
+        PTH_LDFLAGS=`$PTH_CONFIG --all --ldflags`
+        PTH_LIBS=`$PTH_CONFIG --all --libs`
+        have_pth="1"
+      else
+        AC_MSG_RESULT(no)
+        have_pth="0"
+      fi
+    else
+      have_pth="0"
+    fi
     if test "x$have_pth" = "x1" ; then
+      CPPFLAGS="$CPPFLAGS $PTH_CPPFLAGS"
+      LDFLAGS="$LDFLAGS $PTH_LDFLAGS"
+      LIBS="$LIBS $PTH_LIBS"
       AC_DEFINE(CW_THREADS)
       AC_DEFINE(CW_PTH)
     else
