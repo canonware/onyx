@@ -3968,6 +3968,27 @@ systemdict_p_exec_prepare(cw_nxo_t *a_thread, char **r_path, char ***r_argv,
     return TRUE;
 }
 
+static void
+systemdict_p_exec_cleanup(char *a_path, char **a_argv, char **a_envp)
+{
+    cw_uint32_t i;
+
+    /* Clean up memory allocation. */
+    for (i = 0; a_envp[i] != NULL; i++)
+    {
+	cw_free(a_envp[i]);
+    }
+    cw_free(a_envp);
+
+    for (i = 0; a_argv[i] != NULL; i++)
+    {
+	cw_free(a_argv[i]);
+    }
+    cw_free(a_argv);
+
+    cw_free(a_path);
+}
+
 void
 systemdict_exec(cw_nxo_t *a_thread)
 {
@@ -4023,26 +4044,7 @@ systemdict_exec(cw_nxo_t *a_thread)
     }
 
     ERROR:
-    {
-	cw_uint32_t i;
-
-	/* Clean up memory allocation. */
-	for (i = 0; envp[i] != NULL; i++)
-	{
-	    cw_free(envp[i]);
-	}
-	cw_free(envp);
-
-	for (i = 0; argv[i] != NULL; i++)
-	{
-	    cw_free(argv[i]);
-	}
-	cw_free(argv);
-
-	cw_free(path);
-    }
-
-    /* Throw error. */
+    systemdict_p_exec_cleanup(path, argv, envp);
     nxo_thread_nerror(a_thread, error);
 }
 #endif
@@ -4502,49 +4504,16 @@ systemdict_forkexec(cw_nxo_t *a_thread)
 	    cw_not_reached();
 
 	    ERROR:
-	    {
-		cw_uint32_t i;
-
-		/* Clean up memory allocation. */
-		for (i = 0; envp[i] != NULL; i++)
-		{
-		    cw_free(envp[i]);
-		}
-		cw_free(envp);
-
-		for (i = 0; argv[i] != NULL; i++)
-		{
-		    cw_free(argv[i]);
-		}
-		cw_free(argv);
-
-		cw_free(path);
-	    }
-
-	    /* Throw error. */
+	    systemdict_p_exec_cleanup(path, argv, envp);
 	    nxo_thread_nerror(a_thread, error);
 	}
 	else
 	{
 	    cw_nxo_t *ostack, *nxo;
-	    cw_uint32_t i;
 
 	    /* Parent. */
 
-	    /* Clean up memory allocation. */
-	    for (i = 0; envp[i] != NULL; i++)
-	    {
-		cw_free(envp[i]);
-	    }
-	    cw_free(envp);
-
-	    for (i = 0; argv[i] != NULL; i++)
-	    {
-		cw_free(argv[i]);
-	    }
-	    cw_free(argv);
-
-	    cw_free(path);
+	    systemdict_p_exec_cleanup(path, argv, envp);
 
 	    if (pid == -1)
 	    {
