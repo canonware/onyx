@@ -20,8 +20,7 @@
 
 /* Include files that are _not_ installed. */
 {
-  local priv_incs = buf.h buffer.h display.h frame.h funnel.h hist.h slate.h
-                    slate_ops.h window.h;
+  local priv_incs = buf.h buffer.h hist.h slate.h slate_ops.h;
   priv_incs = [fromto % [srcdir]/bin/slate/include/% [priv_incs]];
   priv_incs = [priv_incs] [objdir]/bin/slate/include/slate_defs.h;
 
@@ -32,8 +31,7 @@
 }
 
 /* Source files. */
-SLATE_SRCS = buf.c buffer.c display.c frame.c funnel.c hist.c slate.c
-             slate_ops.c window.c;
+SLATE_SRCS = buf.c buffer.c hist.c slate.c slate_ops.c;
 SLATE_SRCS = [fromto % [srcdir]/bin/slate/src/% [SLATE_SRCS]];
 
 SRCS = [SRCS] [SLATE_SRCS];

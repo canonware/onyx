@@ -18,14 +18,10 @@
 #include <panel.h>
 
 #include "slate_ops.h"
-#include "funnel.h"
 #include "buf.h"
 #include "hist.h"
 
 #include "buffer.h"
-#include "display.h"
-#include "frame.h"
-#include "window.h"
 
 #ifdef WORDS_BIGENDIAN
 #define _cw_ntohq(a) (a)
