@@ -116,9 +116,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #ifdef _CW_POSIX
 	ENTRY(dirforeach),
 #endif
-#ifdef _CW_POSIX
 	ENTRY(div),
-#endif
 	ENTRY(dstack),
 	ENTRY(echeck),
 #ifdef _CW_POSIX
