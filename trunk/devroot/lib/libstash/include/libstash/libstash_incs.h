@@ -27,10 +27,12 @@
 
 /*
  * Include files.  These must be listed in reverse dependency order (for
- * example, q.h must come before dch.h).
+ * example, qr.h must come before dch.h).
  */
 
-#include "q.h"
+#include "qs.h"
+#include "qr.h"
+#include "ql.h"
 #include "ring.h"
 #include "mtx.h"
 #include "cnd.h"

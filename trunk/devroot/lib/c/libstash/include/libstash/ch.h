@@ -26,9 +26,9 @@ struct cw_chi_s {
 					 * ch_insert(), this is TRUE. */
 	const void	*key;		/* Key. */
         const void	*data;		/* Data. */
-	qr_entry(cw_chi_t) ch_link;	/* Link into the ch-wide ring of
+	qr_elm(cw_chi_t) ch_link;	/* Link into the ch-wide ring of
 					 * chi's. */
-	qr_entry(cw_chi_t) slot_link;	/* Link into the slot's ring of
+	qr_elm(cw_chi_t) slot_link;	/* Link into the slot's ring of
 					 * chi's. */
 	cw_uint32_t	slot;		/* Slot number. */
 };

@@ -100,9 +100,9 @@ pool_delete(cw_pool_t *a_pool)
 	}
 #endif
 
-	for (spare = qs_first(&a_pool->spares); spare != NULL; spare =
-	     qs_first(&a_pool->spares)) {
-		qs_remove_head(&a_pool->spares, link);
+	for (spare = qs_top(&a_pool->spares); spare != NULL; spare =
+	     qs_top(&a_pool->spares)) {
+		qs_pop(&a_pool->spares, link);
 		_cw_mem_free(a_pool->mem, spare);
 	}
 
@@ -134,9 +134,9 @@ pool_drain(cw_pool_t *a_pool)
 	_cw_assert(a_pool->magic == _CW_POOL_MAGIC);
 	mtx_lock(&a_pool->lock);
 
-	for (spare = qs_first(&a_pool->spares); spare != NULL; spare =
-	     qs_first(&a_pool->spares)) {
-		qs_remove_head(&a_pool->spares, link);
+	for (spare = qs_top(&a_pool->spares); spare != NULL; spare =
+	     qs_top(&a_pool->spares)) {
+		qs_pop(&a_pool->spares, link);
 		_cw_mem_free(a_pool->mem, spare);
 	}
 
@@ -153,9 +153,9 @@ pool_get(cw_pool_t *a_pool, const char *a_filename, cw_uint32_t a_line_num)
 	_cw_assert(a_pool->magic == _CW_POOL_MAGIC);
 	mtx_lock(&a_pool->lock);
 
-	spare = qs_first(&a_pool->spares);
+	spare = qs_top(&a_pool->spares);
 	if (spare != NULL) {
-		qs_remove_head(&a_pool->spares, link);
+		qs_pop(&a_pool->spares, link);
 		retval = (void *)spare;
 	} else {
 		if (a_pool->buffer_size >= sizeof(cw_pool_spare_t))
@@ -282,7 +282,7 @@ pool_put(cw_pool_t *a_pool, void *a_buffer, const char *a_filename, cw_uint32_t
 #endif
 
 	spare = (cw_pool_spare_t *)a_buffer;
-	qs_insert_head(&a_pool->spares, spare, link);
+	qs_push(&a_pool->spares, spare, link);
 
 #ifdef _LIBSTASH_DBG
 	RETURN:
@@ -303,7 +303,7 @@ pool_dump(cw_pool_t *a_pool, const char *a_prefix)
 	    a_prefix);
 	_cw_out_put("[s]buffer_size : [i]\n", a_prefix, a_pool->buffer_size);
 
-	if (qs_first(&a_pool->spares) != NULL) {
+	if (qs_top(&a_pool->spares) != NULL) {
 		cw_uint32_t	i = 0;
 
 		qs_foreach(spare, &a_pool->spares, link) {

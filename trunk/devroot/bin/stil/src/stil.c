@@ -54,29 +54,13 @@ main(int argc, char **argv)
 		exit(1);
 	}
 
-#if (0)
+#if (1)
+	_cw_out_put("sizeof(cw_stila_t): [i]\n", sizeof(cw_stila_t));
+	_cw_out_put("sizeof(cw_stilag_t): [i]\n", sizeof(cw_stilag_t));
+	_cw_out_put("sizeof(cw_stilat_t): [i]\n", sizeof(cw_stilat_t));
 	_cw_out_put("sizeof(cw_stilo_t): [i]\n", sizeof(cw_stilo_t));
-	_cw_out_put("sizeof(cw_stiloe_t): [i]\n", sizeof(cw_stiloe_t));
-	_cw_out_put("sizeof(cw_stiloe_array_t): [i]\n",
-	    sizeof(cw_stiloe_array_t));
-	_cw_out_put("sizeof(cw_stiloe_condition_t): [i]\n",
-	    sizeof(cw_stiloe_condition_t));
-	_cw_out_put("sizeof(cw_stiloe_dict_t): [i]\n",
-	    sizeof(cw_stiloe_dict_t));
-	_cw_out_put("sizeof(cw_stiloe_dict_t)[[[i]]: [i]\n", 256,
-	    _CW_STILOE_DICT_ENTS2SIZEOF(256));
-	_cw_out_put("sizeof(cw_stiloe_dict_t)[[[i]]: [i]\n", 16,
-	    _CW_STILOE_DICT_ENTS2SIZEOF(16));
 	_cw_out_put("sizeof(cw_stiloe_dicto_t): [i]\n",
 	    sizeof(cw_stiloe_dicto_t));
-	_cw_out_put("sizeof(cw_stiloe_lock_t): [i]\n",
-	    sizeof(cw_stiloe_lock_t));
-	_cw_out_put("sizeof(cw_stiloe_mstate_t): [i]\n",
-	    sizeof(cw_stiloe_mstate_t));
-	_cw_out_put("sizeof(cw_stiloe_number_t): [i]\n",
-	    sizeof(cw_stiloe_number_t));
-	_cw_out_put("sizeof(cw_stiloe_string_t): [i]\n",
-	    sizeof(cw_stiloe_string_t));
 	_cw_out_put("\n");
 
 	_cw_out_put("sizeof(cw_stil_t): [i]\n", sizeof(cw_stil_t));

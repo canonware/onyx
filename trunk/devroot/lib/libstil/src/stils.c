@@ -39,7 +39,7 @@ stils_new(cw_stils_t *a_stils, cw_pool_t *a_stilsc_pool)
 	retval->spares = NULL;
 	retval->nspares = 0;
 	retval->stilsc_pool = a_stilsc_pool;
-	qq_init(&retval->chunks);
+	ql_new(&retval->chunks);
 
 #ifdef _LIBSTIL_DBG
 	retval->magic = _CW_STILS_MAGIC;
@@ -63,9 +63,9 @@ stils_delete(cw_stils_t *a_stils)
 	if (a_stils->count > 0)
 		stils_pop(a_stils, a_stils->count);
 
-	while (!qq_empty(&a_stils->chunks)) {
-		stilsc = qq_first(&a_stils->chunks);
-		qq_remove_head(&a_stils->chunks, link);
+	while (ql_first(&a_stils->chunks) != NULL) {
+		stilsc = ql_first(&a_stils->chunks);
+		ql_head_remove(&a_stils->chunks, cw_stilsc_t, link);
 		stilsc_p_delete(stilsc);
 	}
 
@@ -82,7 +82,7 @@ stils_collect(cw_stils_t *a_stils, void (*a_add_root_func) (void *add_root_arg,
 	cw_stilso_t	*old_stilso;
 	cw_stilo_t	*new_stilo;
 	cw_uint32_t	old_count, i;
-	qq_head(cw_stilsc_t) old_chunks;
+	ql_head(cw_stilsc_t) old_chunks;
 
 	_cw_check_ptr(a_stils);
 	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
@@ -98,7 +98,7 @@ stils_collect(cw_stils_t *a_stils, void (*a_add_root_func) (void *add_root_arg,
 	a_stils->spares = NULL;
 	a_stils->nspares = 0;
 	memcpy(&old_chunks, &a_stils->chunks, sizeof(old_chunks));
-	qq_init(&a_stils->chunks);
+	ql_new(&a_stils->chunks);
 
 	/*
 	 * Iterate through the entire stack, moving stilso's to the new stack.
@@ -128,9 +128,9 @@ stils_collect(cw_stils_t *a_stils, void (*a_add_root_func) (void *add_root_arg,
 	 * Now delete the old stilsc's.  We've moved everything important to new
 	 * storage, so nothing more than deletion is necessary.
 	 */
-	while (!qq_empty(&old_chunks)) {
-		stilsc = qq_first(&old_chunks);
-		qq_remove_head(&old_chunks, link);
+	while (ql_first(&old_chunks) != NULL) {
+		stilsc = ql_first(&old_chunks);
+		ql_head_remove(&old_chunks, cw_stilsc_t, link);
 		stilsc_p_delete(stilsc);
 	}
 }
@@ -417,7 +417,7 @@ stils_p_alloc_stilso(cw_stils_t *a_stils)
 
 		stilsc = stilsc_p_new(a_stils->stilsc_pool);
 
-		qq_insert_head(&a_stils->chunks, stilsc, link);
+		ql_head_insert(&a_stils->chunks, stilsc, link);
 		a_stils->spares = stilsc_p_get_stilso(stilsc, 0);
 		a_stils->nspares = stilsc_p_get_nstilso(stilsc);
 	}
@@ -448,6 +448,7 @@ stilsc_p_new(cw_pool_t *a_stilsc_pool)
 	retval->magic = _CW_STILSC_MAGIC;
 #endif
 	retval->stilsc_pool = a_stilsc_pool;
+	ql_elm_new(retval, link);
 
 	stilso_p_new(&retval->objects[0]);
 	for (i = 1, nstilso = stilsc_p_get_nstilso(retval); i < nstilso; i++) {

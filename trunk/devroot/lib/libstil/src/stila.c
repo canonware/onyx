@@ -26,7 +26,7 @@ cw_bool_t
 stilag_new(cw_stilag_t *a_stilag)
 {
 	mtx_new(&a_stilag->lock);
-	qq_init(&a_stilag->head);
+	ql_new(&a_stilag->head);
 
 	if (mem_new(&a_stilag->mem, cw_g_mem) == NULL)
 		goto OOM_1;
@@ -114,6 +114,7 @@ stilag_free(cw_stilag_t *a_stilag, void *a_ptr, const char *a_filename,
 cw_bool_t
 stilat_new(cw_stilat_t *a_stilat, cw_stilt_t *a_stilt, cw_stilag_t *a_stilag)
 {
+	ql_elm_new(a_stilat, link);
 	a_stilat->global = FALSE;
 	a_stilat->stilt = a_stilt;
 	a_stilat->stilag = a_stilag;
@@ -123,7 +124,7 @@ stilat_new(cw_stilat_t *a_stilat, cw_stilt_t *a_stilt, cw_stilag_t *a_stilag)
 
 	/* Add this stilat to the stilag's list. */
 	mtx_lock(&a_stilag->lock);
-	qq_insert_head(&a_stilag->head, a_stilat, link);
+	ql_head_insert(&a_stilag->head, a_stilat, link);
 	mtx_unlock(&a_stilag->lock);
 
 	return FALSE;
@@ -136,7 +137,7 @@ stilat_delete(cw_stilat_t *a_stilat)
 {
 	/* Remove this stilat from the stilag's list. */
 	mtx_lock(&a_stilat->stilag->lock);
-	qq_remove(&a_stilat->stilag->head, a_stilat, cw_stilat_t, link);
+	ql_remove(&a_stilat->stilag->head, a_stilat, link);
 	mtx_unlock(&a_stilat->stilag->lock);
 
 	stila_p_delete(&a_stilat->stila);

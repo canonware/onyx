@@ -29,7 +29,7 @@ struct cw_stilag_s {
 	 * Head of list of stila's for all stilt's.  This is needed in order to
 	 * supsend threads and recurse when doing GC.
 	 */
-	qq_head(cw_stilat_t)	head;
+	ql_head(cw_stilat_t)	head;
 
 	/* Allocator. */
 	cw_mem_t	mem;
@@ -49,7 +49,7 @@ struct cw_stilat_s {
 	cw_uint32_t	magic;
 #endif
 	/* Linkage for the list of all stilat's. */
-	qq_entry(cw_stilat_t) link;
+	ql_elm(cw_stilat_t) link;
 
 	/*
 	 * TRUE  : Global allocation mode.

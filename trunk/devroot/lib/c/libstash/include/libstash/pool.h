@@ -31,7 +31,7 @@ struct cw_pool_s {
 };
 
 struct cw_pool_spare_s {
-	qs_entry(cw_pool_spare_t) link;
+	qs_elm(cw_pool_spare_t) link;
 };
 
 #ifdef _LIBSTASH_DBG

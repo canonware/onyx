@@ -23,8 +23,8 @@
 /* Include files that _are_ installed. */
 {
   local incs = libstash.h libstash_incs.h bhp.h buf.h ch.h cnd.h dch.h dbg.h
-               mem.h mq.h mtx.h out.h pezz.h pool.h res.h ring.h rwl.h sem.h
-               thd.h treen.h tsd.h;
+               mem.h mq.h mtx.h out.h pezz.h pool.h ql.h qr.h qs.h res.h ring.h
+               rwl.h sem.h thd.h treen.h tsd.h;
   incs = [fromto % [srcdir]/lib/c/libstash/include/libstash/% [incs]];
   incs = [incs] [objdir]/lib/c/libstash/include/libstash/libstash_defs.h;
 
@@ -52,8 +52,8 @@ SRCS = [SRCS] [LIBSTASH_SRCS];
   local ctests = c_bhp_a.c c_bhp_b.c c_buf_a.c c_buf_b.c c_buf_c.c c_buf_d.c
                  c_buf_e.c c_ch_a.c c_cnd_a.c c_dbg_a.c c_dch_a.c
                  c_libstash_a.c c_mq_a.c c_mtx_a.c c_out_a.c c_pezz_a.c
-                 c_pool_a.c c_res_a.c c_ring_a.c c_rwl_a.c c_sem_a.c c_thd_a.c
-                 c_thd_b.c c_treen_a.c;
+                 c_pool_a.c c_ql_a.c c_qr_a.c c_qs_a.c c_res_a.c c_ring_a.c
+                 c_rwl_a.c c_sem_a.c c_thd_a.c c_thd_b.c c_treen_a.c;
   ctests = [fromto % [srcdir]/lib/c/libstash/test/% [ctests]];
 
   CTESTS = [CTESTS] [ctests];
