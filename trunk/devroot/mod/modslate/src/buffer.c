@@ -364,10 +364,7 @@ modslate_buffer_buffer(void *a_data, cw_nxo_t *a_thread)
     buffer = (struct cw_buffer *) nxa_malloc(sizeof(struct cw_buffer));
 
     /* Initialize the buf. */
-    /* XXX Use cw_g_nxaa. */
-    buf_new(&buffer->buf, bufp_size, (cw_opaque_alloc_t *) nxa_malloc_e,
-	    (cw_opaque_realloc_t *) nxa_realloc_e,
-	    (cw_opaque_dealloc_t *) nxa_free_e, NULL);
+    buf_new(&buffer->buf, bufp_size, cw_g_nxaa);
 
     /* Initialize the protection mutex; buf's aren't thread-safe. */
     mtx_new(&buffer->mtx);

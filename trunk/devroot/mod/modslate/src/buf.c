@@ -806,7 +806,8 @@ bufp_p_new(cw_buf_t *a_buf)
     cw_bufp_t *retval;
 
     /* Allocate. */
-    retval = (cw_bufp_t *) cw_opaque_alloc(a_buf->alloc, a_buf->arg,
+    retval = (cw_bufp_t *) cw_opaque_alloc(mema_alloc_get(a_buf->mema),
+					   mema_arg_get(a_buf->mema),
 					   sizeof(cw_bufp_t));
 
     retval->buf = a_buf;
@@ -822,7 +823,8 @@ bufp_p_new(cw_buf_t *a_buf)
     retval->gap_off = 0;
 
     /* Allocate buffer. */
-    retval->b = (cw_uint8_t *) cw_opaque_alloc(a_buf->alloc, a_buf->arg,
+    retval->b = (cw_uint8_t *) cw_opaque_alloc(mema_alloc_get(a_buf->mema),
+					       mema_arg_get(a_buf->mema),
 					       a_buf->bufp_size);
 
     /* Initialize marker tree and list. */
@@ -896,10 +898,12 @@ bufp_p_delete(cw_bufp_t *a_bufp)
     cw_assert(ql_first(&a_bufp->mlist) == NULL);
     cw_assert(qr_next(a_bufp, plink) == a_bufp);
 
-    cw_opaque_dealloc(a_bufp->buf->dealloc, a_bufp->buf->arg, a_bufp->b,
+    cw_opaque_dealloc(mema_dealloc_get(a_bufp->buf->mema),
+		      mema_arg_get(a_bufp->buf->mema), a_bufp->b,
 		      a_bufp->buf->bufp_size);
 
-    cw_opaque_dealloc(a_bufp->buf->dealloc, a_bufp->buf->arg, a_bufp,
+    cw_opaque_dealloc(mema_dealloc_get(a_bufp->buf->mema),
+		      mema_arg_get(a_bufp->buf->mema), a_bufp,
 		      sizeof(cw_bufp_t));
 }
 
@@ -1817,9 +1821,7 @@ buf_p_bufp_splice(cw_buf_t *a_buf, cw_bufp_t *a_start, cw_bufp_t *a_end)
 }
 
 cw_buf_t *
-buf_new(cw_buf_t *a_buf, cw_uint32_t a_bufp_size, cw_opaque_alloc_t *a_alloc,
-	cw_opaque_realloc_t *a_realloc, cw_opaque_dealloc_t *a_dealloc,
-	void *a_arg)
+buf_new(cw_buf_t *a_buf, cw_uint32_t a_bufp_size, cw_mema_t *a_mema)
 {
     cw_buf_t *retval;
     cw_bufp_t *bufp;
@@ -1835,7 +1837,9 @@ buf_new(cw_buf_t *a_buf, cw_uint32_t a_bufp_size, cw_opaque_alloc_t *a_alloc,
     }
     else
     {
-	retval = (cw_buf_t *) cw_opaque_alloc(a_alloc, a_arg, sizeof(cw_buf_t));
+	retval = (cw_buf_t *) cw_opaque_alloc(mema_alloc_get(a_mema),
+					      mema_arg_get(a_mema),
+					      sizeof(cw_buf_t));
 	retval->alloced = TRUE;
     }
 
@@ -1844,11 +1848,8 @@ buf_new(cw_buf_t *a_buf, cw_uint32_t a_bufp_size, cw_opaque_alloc_t *a_alloc,
      * ideal under normal circumstances. */
     retval->bufp_size = a_bufp_size;
 
-    /* Initialize internal allocator pointers. */
-    retval->alloc = a_alloc;
-    retval->realloc = a_realloc;
-    retval->dealloc = a_dealloc;
-    retval->arg = a_arg;
+    /* Initialize internal allocator. */
+    retval->mema = a_mema;
 
     /* Set size. */
     retval->len = 0;
@@ -1870,7 +1871,8 @@ buf_new(cw_buf_t *a_buf, cw_uint32_t a_bufp_size, cw_opaque_alloc_t *a_alloc,
 
     /* Initialize bufv to have two elements, since the buf starts out with one
      * bufp. */
-    retval->bufv = (cw_bufv_t *) cw_opaque_alloc(a_alloc, a_arg,
+    retval->bufv = (cw_bufv_t *) cw_opaque_alloc(mema_alloc_get(a_mema),
+						 mema_arg_get(a_mema),
 						 2 * sizeof(cw_bufv_t));
     retval->bufvcnt = 2;
 
@@ -1931,12 +1933,14 @@ buf_delete(cw_buf_t *a_buf)
 
     /* Delete the bufv array. */
     cw_assert(a_buf->bufvcnt >= 2);
-    cw_opaque_dealloc(a_buf->dealloc, a_buf->arg, a_buf->bufv,
+    cw_opaque_dealloc(mema_dealloc_get(a_buf->mema),
+		      mema_arg_get(a_buf->mema), a_buf->bufv,
 		      a_buf->bufvcnt * sizeof(cw_bufv_t));
 
     if (a_buf->alloced)
     {
-	cw_opaque_dealloc(a_buf->dealloc, a_buf->arg, a_buf, sizeof(cw_buf_t));
+	cw_opaque_dealloc(mema_dealloc_get(a_buf->mema),
+			  mema_arg_get(a_buf->mema), a_buf, sizeof(cw_buf_t));
     }
 #ifdef CW_DBG
     else
@@ -2000,8 +2004,7 @@ buf_hist_active_set(cw_buf_t *a_buf, cw_bool_t a_active)
 
     if (a_active == TRUE && a_buf->hist == NULL)
     {
-	a_buf->hist = hist_new(a_buf->alloc, a_buf->realloc, a_buf->dealloc,
-			       a_buf->arg);
+	a_buf->hist = hist_new(a_buf->mema);
     }
     else if (a_active == FALSE && a_buf->hist != NULL)
     {
@@ -2156,10 +2159,7 @@ buf_dump(cw_buf_t *a_buf, const char *a_beg, const char *a_mid,
     fprintf(stderr, "%s|\n", mid);
     fprintf(stderr, "%s|-> alloced: %s\n", mid,
 	    a_buf->alloced ? "TRUE" : "FALSE");
-    fprintf(stderr, "%s|-> alloc: %p\n", mid, a_buf->alloc);
-    fprintf(stderr, "%s|-> realloc: %p\n", mid, a_buf->realloc);
-    fprintf(stderr, "%s|-> dealloc: %p\n", mid, a_buf->dealloc);
-    fprintf(stderr, "%s|-> arg: %p\n", mid, a_buf->arg);
+    fprintf(stderr, "%s|-> mema: %p\n", mid, a_buf->mema);
 
     fprintf(stderr, "%s|\n", mid);
     fprintf(stderr, "%s|-> len: %llu\n", mid, a_buf->len);
@@ -2943,7 +2943,8 @@ mkr_p_split_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
 
     /* Resize bufv to make enough room for all of the bufp's that were just
      * inserted (including the extra one from splitting). */
-    buf->bufv = (cw_bufv_t *) cw_opaque_realloc(buf->realloc, buf->arg,
+    buf->bufv = (cw_bufv_t *) cw_opaque_realloc(mema_realloc_get(buf->mema),
+						mema_arg_get(buf->mema),
 						buf->bufv,
 						(buf->bufvcnt
 						 + ((nextra + 1) * 2))
@@ -3485,7 +3486,8 @@ mkr_l_remove(cw_mkr_t *a_start, cw_mkr_t *a_end, cw_bool_t a_record)
     /* Resize bufv if any bufp's were removed. */
     if (nrem != 0)
     {
-	buf->bufv = (cw_bufv_t *) cw_opaque_realloc(buf->realloc, buf->arg,
+	buf->bufv = (cw_bufv_t *) cw_opaque_realloc(mema_realloc_get(buf->mema),
+						    mema_arg_get(buf->mema),
 						    buf->bufv,
 						    (buf->bufvcnt - (nrem * 2))
 						    * sizeof(cw_bufv_t),
@@ -4547,7 +4549,8 @@ ext_new(cw_ext_t *a_ext, cw_buf_t *a_buf)
     }
     else
     {
-	retval = (cw_ext_t *) cw_opaque_alloc(a_buf->alloc, a_buf->arg,
+	retval = (cw_ext_t *) cw_opaque_alloc(mema_alloc_get(a_buf->mema),
+					      mema_arg_get(a_buf->mema),
 					      sizeof(cw_ext_t));
 	retval->alloced = TRUE;
     }
@@ -4628,7 +4631,8 @@ ext_delete(cw_ext_t *a_ext)
 
     if (a_ext->alloced)
     {
-	cw_opaque_dealloc(buf->dealloc, buf->arg, a_ext, sizeof(cw_ext_t));
+	cw_opaque_dealloc(mema_dealloc_get(buf->mema),
+			  mema_arg_get(buf->mema), a_ext, sizeof(cw_ext_t));
     }
 #ifdef CW_DBG
     else

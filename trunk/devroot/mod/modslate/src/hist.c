@@ -1082,14 +1082,14 @@ hist_p_ins_ynk_rem_del(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos,
 }
 
 cw_hist_t *
-hist_new(cw_opaque_alloc_t *a_alloc, cw_opaque_realloc_t *a_realloc,
-	 cw_opaque_dealloc_t *a_dealloc, void *a_arg)
+hist_new(cw_mema_t *a_mema)
 {
     cw_hist_t *retval;
 
-    retval = (cw_hist_t *) cw_opaque_alloc(a_alloc, a_arg, sizeof(cw_hist_t));
-    buf_new(&retval->h, CW_HIST_BUFP_SIZE, a_alloc, a_realloc, a_dealloc,
-	    a_arg);
+    retval = (cw_hist_t *) cw_opaque_alloc(mema_alloc_get(a_mema),
+					   mema_arg_get(a_mema),
+					   sizeof(cw_hist_t));
+    buf_new(&retval->h, CW_HIST_BUFP_SIZE, a_mema);
     histh_p_new(&retval->hhead);
     histh_p_new(&retval->hfoot);
     mkr_new(&retval->hbeg, &retval->h);
@@ -1098,8 +1098,7 @@ hist_new(cw_opaque_alloc_t *a_alloc, cw_opaque_realloc_t *a_realloc,
     mkr_new(&retval->htmp, &retval->h);
     retval->hbpos = 0;
     retval->gdepth = 0;
-    retval->dealloc = a_dealloc;
-    retval->arg = a_arg;
+    retval->mema = a_mema;
 #ifdef CW_DBG
     retval->magic = CW_HIST_MAGIC;
 #endif
@@ -1120,7 +1119,8 @@ hist_delete(cw_hist_t *a_hist)
     histh_p_delete(&a_hist->hfoot);
     histh_p_delete(&a_hist->hhead);
     buf_delete(&a_hist->h);
-    cw_opaque_dealloc(a_hist->dealloc, a_hist->arg, a_hist, sizeof(cw_hist_t));
+    cw_opaque_dealloc(mema_dealloc_get(a_hist->mema),
+		      mema_arg_get(a_hist->mema), a_hist, sizeof(cw_hist_t));
 }
 
 cw_bool_t

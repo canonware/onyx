@@ -179,10 +179,7 @@ struct cw_buf_s
 
     /* Allocator state. */
     cw_bool_t alloced;
-    cw_opaque_alloc_t *alloc;
-    cw_opaque_realloc_t *realloc;
-    cw_opaque_dealloc_t *dealloc;
-    void *arg;
+    cw_mema_t *mema;
 
     /* Length. */
     cw_uint64_t len;
@@ -228,9 +225,7 @@ bufv_rcopy(cw_bufv_t *a_to, cw_uint32_t a_to_len, const cw_bufv_t *a_fr,
 
 /* buf. */
 cw_buf_t *
-buf_new(cw_buf_t *a_buf, cw_uint32_t a_bufp_size, cw_opaque_alloc_t *a_alloc,
-	cw_opaque_realloc_t *a_realloc, cw_opaque_dealloc_t *a_dealloc,
-	void *a_arg);
+buf_new(cw_buf_t *a_buf, cw_uint32_t a_bufp_size, cw_mema_t *a_mema);
 
 void
 buf_delete(cw_buf_t *a_buf);

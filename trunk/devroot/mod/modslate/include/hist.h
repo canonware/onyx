@@ -87,13 +87,11 @@ struct cw_hist_s
     cw_uint32_t gdepth;
 
     /* Allocator state. */
-    cw_opaque_dealloc_t *dealloc;
-    const void *arg;
+    cw_mema_t *mema;
 };
 
 cw_hist_t *
-hist_new(cw_opaque_alloc_t *a_alloc, cw_opaque_realloc_t *a_realloc,
-	 cw_opaque_dealloc_t *a_dealloc, void *a_arg);
+hist_new(cw_mema_t *a_mema);
 
 void
 hist_delete(cw_hist_t *a_hist);
