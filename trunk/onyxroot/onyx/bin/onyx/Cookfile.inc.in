@@ -18,9 +18,22 @@
  * File lists.
  */
 
-/* Source files. */
-ONYX_SRCS = onyx.c;
-ONYX_SRCS = [addprefix @srcroot@/bin/onyx/src/ [ONYX_SRCS]];
+/* Source files common to onyx and bonyx. */
+ONYX_COMMON_SRCS = [addprefix @srcroot@/bin/onyx/src/
+                              onyx.c
+                              ];
+
+/* Onyx source files that are used to generate C code. */
+ONYX_NSRCS = [addprefix @srcroot@/bin/onyx/src/
+                        batch.nx.in interactive.nx.in onyx.nx.in
+                        ];
+
+/* bonyx-only source files. */
+BONYX_ONLY_SRCS = [fromto %0%.nx.in %0%_bootstrap.c [ONYX_NSRCS]];
+
+/* onyx-only source files. */
+ONYX_ONLY_SRCS = [fromto @srcroot@/%0%.nx.in @objroot@/%0%_nxcode.c
+                         [ONYX_NSRCS]];
 
 TONYX_SRCS = tonyx.c;
 TONYX_SRCS = [addprefix @srcroot@/bin/onyx/src/ [TONYX_SRCS]];
@@ -163,19 +176,19 @@ TONYX = @objroot@/bin/onyx/bin/tonyx;
 
 onyx : [ONYX] [BONYX] [TONYX];
 
-onyx_bins_bootstrap : [ONYX]
+onyx_bins_bootstrap : [BONYX]
 {
-  cat @srcroot@/bin/onyx/src/onyx_nxcode.nx
-    | [ONYX] @srcroot@/bin/onyx/src/onyx_nxcode_gen.nx
-    > @srcroot@/bin/onyx/src/onyx_nxcode.c;
+  cat @objroot@/bin/onyx/src/batch.nx
+    | [BONYX] @srcroot@/bin/onyx/src/batch_gen.nx
+    > @srcroot@/bin/onyx/src/batch_bootstrap.c;
 
-  cat @srcroot@/bin/onyx/src/batch_nxcode.nx
-    | [ONYX] @srcroot@/bin/onyx/src/batch_nxcode_gen.nx
-    > @srcroot@/bin/onyx/src/batch_nxcode.c;
+  cat @objroot@/bin/onyx/src/interactive.nx
+    | [BONYX] @srcroot@/bin/onyx/src/interactive_gen.nx
+    > @srcroot@/bin/onyx/src/interactive_bootstrap.c;
 
-  cat @srcroot@/bin/onyx/src/interactive_nxcode.nx
-    | [ONYX] @srcroot@/bin/onyx/src/interactive_nxcode_gen.nx
-    > @srcroot@/bin/onyx/src/interactive_nxcode.c;
+  cat @objroot@/bin/onyx/src/onyx.nx
+    | [BONYX] @srcroot@/bin/onyx/src/onyx_gen.nx
+    > @srcroot@/bin/onyx/src/onyx_bootstrap.c;
 }
 
 onyx_bins_tests : [fromto @srcroot@/%0%.nx.in @objroot@/%0%.nx [ONYX_OTESTS]];
@@ -204,7 +217,8 @@ onyx_bins_install : [ONYX]
   @INSTALL@ -d [PREFIX]/bin;
 
   [CC] [A_CFLAGS] -o [PREFIX]/bin/onyx-@onyx_version@
-       [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [ONYX_SRCS]]
+       [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [ONYX_COMMON_SRCS]]
+       [fromto %0%.c %0%.o_a [ONYX_ONLY_SRCS]]
 #if @enable_libedit@
        [LIBEDIT_A]
 #endif
@@ -233,8 +247,14 @@ onyx_bins_uninstall :
 
 onyx_bins_clean :
 {
-  rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.d_a [ONYX_SRCS] [TONYX_SRCS]];
-  rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [ONYX_SRCS] [TONYX_SRCS]];
+  rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.d_a
+                [ONYX_COMMON_SRCS] [BONYX_ONLY_SRCS] [ONYX_ONLY_SRCS]
+                [TONYX_SRCS]];
+  rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.o_a
+                [ONYX_COMMON_SRCS] [BONYX_ONLY_SRCS] [ONYX_ONLY_SRCS]
+                [TONYX_SRCS]];
+
+  rm -f [ONYX_ONLY_SRCS];
 
 #if [count [ONYX_OTESTS]]
   rm -f [fromto @srcroot@/%0%.nx.in @objroot@/%0%.nx.out [ONYX_OTESTS]];
@@ -248,6 +268,8 @@ onyx_bins_clean :
 onyx_bins_distclean :
 {
   rm -f [fromto @srcroot@/%0%.nx.in @objroot@/%0%.nx.perf [ONYX_OTESTS]];
+
+  rm -f [fromto @srcroot@/%0%.nx.in @objroot@/%0%.nx ONYX_NSRCS];
 }
 
 /*
@@ -261,44 +283,33 @@ onyx_bins_distclean :
        [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [TONYX_SRCS]];
 }
 
-[BONYX] : [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [ONYX_SRCS]]
+[BONYX] : [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [ONYX_COMMON_SRCS]]
+          [fromto %0%.c %0%.o_a [BONYX_ONLY_SRCS]]
           [LIBBONYX_A]
 #if @enable_libedit@
           [LIBEDIT_A]
 #endif
   set mkdir
 {
-  [CC] [A_CFLAGS] -o [target]
-       [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [ONYX_SRCS]]
-#if @enable_libedit@
-       [LIBEDIT_A]
-#endif
-#if @enable_libonyx@
-#if [count @RPATH@]
-       @RPATH@@abs_objroot@/lib/libonyx/lib
-#endif
-#endif
-       [LDFLAGS] -lbonyx @LIBS@;
+  [CC] [A_CFLAGS] -o [target] [need] [LDFLAGS] @LIBS@;
 }
 
-[ONYX] : [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [ONYX_SRCS]]
-#if @enable_libonyx@
-          libonyx_libs_s
-#endif
+[ONYX] : [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [ONYX_COMMON_SRCS]]
+         [fromto %0%.c %0%.o_a [ONYX_ONLY_SRCS]]
+         libonyx_libs_s
 #if @enable_libedit@
           [LIBEDIT_A]
 #endif
   set mkdir
 {
   [CC] [A_CFLAGS] -o [target]
-       [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [ONYX_SRCS]]
+       [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [ONYX_COMMON_SRCS]]
+       [fromto %0%.c %0%.o_a [ONYX_ONLY_SRCS]]
 #if @enable_libedit@
        [LIBEDIT_A]
 #endif
-#if @enable_libonyx@
 #if [count @RPATH@]
        @RPATH@@abs_objroot@/lib/libonyx/lib
-#endif
 #endif
        [LDFLAGS] -lonyx @LIBS@;
 }

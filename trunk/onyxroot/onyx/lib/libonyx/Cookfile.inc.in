@@ -62,11 +62,18 @@ LIBONYX_COMMON_SRCS = [addprefix @srcroot@/lib/libonyx/src/
 #endif
                                  ];
 
-/* libonyx source files. */
-LIBONYX_ONLY_SRCS = [addprefix @objroot@/lib/libonyx/src/
-                               nx_nxcode.c nxo_thread_nxcode.c];
+/* Onyx source files that are used to generate C code. */
+LIBONYX_NSRCS = [addprefix @srcroot@/lib/libonyx/src/
+                           nx.nx.in nxo_thread.nx.in
+                           ];
 
-/* libbonyx source files. */
+/* libbonyx-only source files. */
+LIBBONYX_ONLY_SRCS = [fromto %.nx.in %_bootstrap.c [LIBONYX_NSRCS]];
+
+/* libonyx-only source files. */
+LIBONYX_ONLY_SRCS = [fromto @srcroot@/%0%.nx.in @objroot@/%0%_nxcode.c
+                            [LIBONYX_NSRCS]];
+
 LIBBONYX_ONLY_SRCS = [addprefix @srcroot@/lib/libonyx/src/
                                 nx_bootstrap.c nxo_thread_bootstrap.c];
 
@@ -131,6 +138,7 @@ libonyx_libs_bootstrap : [BONYX]
   cat @objroot@/lib/libonyx/src/nx.nx
     | [BONYX] @srcroot@/lib/libonyx/src/nx_gen.nx
     > @srcroot@/lib/libonyx/src/nx_bootstrap.c;
+
   cat @objroot@/lib/libonyx/src/nxo_thread.nx
     | [BONYX] @srcroot@/lib/libonyx/src/nxo_thread_gen.nx
     > @srcroot@/lib/libonyx/src/nxo_thread_bootstrap.c;
@@ -196,8 +204,7 @@ libonyx_libs_distclean :
 {
   rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.perf [LIBONYX_CTESTS]];
 
-  rm -f [addprefix @objroot@/lib/libonyx/src/
-                   nx.nx nxo_thread.nx];
+  rm -f [fromto @srcroot@/%0%.nx.in @objroot@/%0%.nx LIBONYX_NSRCS];
 }
 
 /*
@@ -297,18 +304,4 @@ libonyx_libs_install_s : [LIBONYX_S] libonyx_libs_install_common
   rm -f @objroot@/lib/libonyx/lib/[LIBONYX_LNAME];
   ln -s [LIBONYX_SNAME] @objroot@/lib/libonyx/lib/[LIBONYX_LNAME];
 #endif
-}
-
-@objroot@/lib/libonyx/src/nx_nxcode.c : [BONYX]
-{
-  cat @objroot@/lib/libonyx/src/nx.nx
-    | [BONYX] @srcroot@/lib/libonyx/src/nx_gen.nx
-    > @objroot@/lib/libonyx/src/nx_nxcode.c;
-}
-
-@objroot@/lib/libonyx/src/nxo_thread_nxcode.c : [BONYX]
-{
-  cat @objroot@/lib/libonyx/src/nxo_thread.nx
-    | [BONYX] @srcroot@/lib/libonyx/src/nxo_thread_gen.nx
-    > @objroot@/lib/libonyx/src/nxo_thread_nxcode.c;
 }

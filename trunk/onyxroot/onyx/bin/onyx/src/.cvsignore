@@ -1,2 +1,4 @@
 *.[do]_[a]
 Cookfile.list
+{batch,interactive,onyx}.nx
+{batch,interactive,onyx}_nxcode.c

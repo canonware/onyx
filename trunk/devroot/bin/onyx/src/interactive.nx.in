@@ -7,23 +7,33 @@
 %
 % Version: Onyx <Version = onyx>
 %
-% This file is processed to produce a more compact version embedded in C code.
-% Due to bootstrapping issues, this cannot safely be done automatically as part
-% of the build process.  In order to make changes to this file take effect,
-% either type:
+% This file is processed by interactive_gen.nx to produce a more compact
+% embedded version in interactive_nxcode.c (normal build) and
+% interactive_bootstrap.c (development bootstrap).  In order to make changes to
+% this file take effect in the bootstrap interpreter, either type:
 %
 %   cook bootstrap
 %
 % or
 %
-%   cat interactive_nxcode.nx | onyx interactive_nxcode_gen.nx
-%     > interactive_nxcode.c
+%   cat interactive.nx | onyx interactive_gen.nx > interactive_boostrap.c
+%
+% The end result of executing this file is a procedure (executable array).  In
+% order to support output that differs according to configuration options, a
+% string is constructed, then evaluated.
+%
+% The output of running sprints on the procedure must be evaluatable, which
+% means that certain language features such as immediate evaluation must be
+% avoided.
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Enclose this entire file in an outer array to defer execution.
-{
 
+% Initial string with an opening brace to defer execution, to which other
+% strings are catenated.
+`{'
+
+`
 % Define promptstring in systemdict.
 systemdict begin
 % - promptstring <string>
@@ -32,7 +42,7 @@ systemdict begin
 } bind def
 end
 
-% Define 'resume' in threaddict to continue after an error.
+% Define resume in threaddict to continue after an error.
 threaddict begin
 /resume /stop load def
 end
@@ -50,5 +60,7 @@ product print `, version ' print version print `.\n' print flush
 
 % Push an executable stdin on ostack to prepare for the start operator.
 stdin cvx
+' catenate
 
-} % End deferral.
+% Final closing brace.
+`}' catenate cvx eval

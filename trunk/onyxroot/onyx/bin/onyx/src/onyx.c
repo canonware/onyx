@@ -19,12 +19,13 @@
 
 #include "../include/onyx.h"
 
-/* Include generated code. */
-#ifdef CW_POSIX
-#include "onyx_nxcode.c"
-#endif
-#include "batch_nxcode.c"
-#include "interactive_nxcode.c"
+/* Prototypes for generated code. */
+void
+batch_nxcode(cw_nxo_t *a_thread);
+void
+interactive_nxcode(cw_nxo_t *a_thread);
+void
+onyx_nxcode(cw_nxo_t *a_thread);
 
 #define CW_PROMPT_STRLEN 80
 #define CW_BUFFER_SIZE 512
@@ -515,9 +516,7 @@ interactive_run(int argc, char **argv, char **envp)
     nxo_threadp_new(&threadp);
 
     /* Run embedded initialization code. */
-#ifdef CW_POSIX
     onyx_nxcode(&thread);
-#endif
     interactive_nxcode(&thread);
 
 #if (defined(CW_USE_LIBEDIT) && defined(CW_THREADS))
@@ -641,9 +640,7 @@ batch_run(int argc, char **argv, char **envp)
     nxo_threadp_new(&threadp);
 
     /* Run embedded initialization code. */
-#ifdef CW_POSIX
     onyx_nxcode(&thread);
-#endif
 
     /* Run embedded initialization code specific to non-interactive
      * execution. */

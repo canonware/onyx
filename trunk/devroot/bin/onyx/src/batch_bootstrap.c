@@ -11,7 +11,9 @@
  *
  ******************************************************************************/
 
-static void
+#include "onyx.h"
+
+void
 batch_nxcode(cw_nxo_t *a_thread)
 {
     cw_onyx_code(a_thread, "{currenterror begin /stop {1 die} def end}bind eval");

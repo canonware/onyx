@@ -11,7 +11,9 @@
  *
  ******************************************************************************/
 
-static void
+#include "onyx.h"
+
+void
 onyx_nxcode(cw_nxo_t *a_thread)
 {
     /* Push strings onto ostack before running the rest of the code.  This

@@ -113,3 +113,13 @@ distclean : clean [addsuffix _distclean tests bins mods libs]
 }
 
 relclean : distclean [addsuffix _relclean docs];
+
+/*
+ * Rule for generation of C code from Onyx code.  This rule assumes a stylized
+ * file naming convention, which all the pertinent source files conform to.
+ */
+@objroot@/%0%_nxcode.c : @objroot@/%0%.nx @srcroot@/%0%_gen.nx [BONYX]
+  set mkdir
+{
+  cat @objroot@/%0%.nx | [BONYX] @srcroot@/%0%_gen.nx > [target];
+}

@@ -7,22 +7,34 @@
 %
 % Version: Onyx <Version = onyx>
 %
-% This file is processed to produce a more compact version embedded in C code.
-% Due to bootstrapping issues, this cannot safely be done automatically as part
-% of the build process.  In order to make changes to this file take effect,
-% either type:
+% This file is processed by onyx_gen.nx to produce a more compact embedded
+% version in onyx_nxcode.c (normal build) and onyx_bootstrap.c (development
+% bootstrap).  In order to make changes to this file take effect in the
+% bootstrap interpreter, either type:
 %
 %   cook bootstrap
 %
 % or
 %
-%   cat onyx_nxcode.nx | onyx onyx_nxcode_gen.nx > onyx_nxcode.c
+%   cat onyx.nx | onyx onyx_gen.nx > onyx_boostrap.c
+%
+% The end result of executing this file is a procedure (executable array).  In
+% order to support output that differs according to configuration options, a
+% string is constructed, then evaluated.
+%
+% The output of running sprints on the procedure must be evaluatable, which
+% means that certain language features such as immediate evaluation must be
+% avoided.
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Enclose this entire file in an outer array to defer execution.
-{
 
+% Initial string with an opening brace to defer execution, to which other
+% strings are catenated.
+`{'
+
+@enable_posix@ 1 eq {
+    `
 % ostack currently contains: %ONYX_RPATH %ONYX_MPATH
 
 % Define ONYX_RPATH and ONYX_MPATH in envdict.  They may already be defined, in
@@ -57,7 +69,7 @@
 		} ifelse
 		% %ONYX_[MR]PATH /ONYX_[MR]PATH `:.:%PATH'
 
-		% Append %ONYX_[MR]PATH only if it isn't already the path
+		% Append %ONYX_[MR]PATH only if it is not already the path
 		% suffix.
 		dup 3 index `:' exch catenate search {
 			% String found.  Check if the match is at the end.
@@ -66,7 +78,7 @@
 			pop pop
 			`' ne {
 				% Match not at end.  Searching finds the first
-				% match, so there's the possibility that the
+				% match, so there iss the possibility that the
 				% end of the path is in fact already set.  We
 				% know that %PATH is at least as long as
 				% `:%ONYX_[MR]PATH', so create a substring of
@@ -92,7 +104,7 @@
 					3 2 roll pop
 				} ifelse
 			}{
-				% Match at end.  Don't append.
+				% Match at end.  Do not append.
 				% %ONYX_[MR]PATH /ONYX_[MR]PATH `:.:%PATH'
 				3 2 roll pop
 			} ifelse
@@ -161,7 +173,7 @@ systemdict begin
 		} ifelse
 	} loop
 
-	% Throw an error if we didn't find the file.
+	% Throw an error if we did not find the file.
 	{
 		/undefinedfilename throw
 	} if
@@ -220,12 +232,15 @@ systemdict begin
 		} ifelse
 	} loop
 
-	% Throw an error if we didn't find the file.
+	% Throw an error if we did not find the file.
 	{
 		/undefinedfilename throw
 	} if
 } def
 
 end % systemdict.
+    ' catenate
+} if
 
-} % End deferral.
+% Final closing brace.
+`}' catenate cvx eval
