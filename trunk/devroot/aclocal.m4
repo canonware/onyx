@@ -303,7 +303,6 @@ AC_MSG_CHECKING(whether to include $1 in build)
 if test -d "$srcdir/lib/$1" ; then
   build_$1="yes"
   $2=1
-  $2_manual=""
   if test -f "$srcdir/lib/$1/doc/latex/manual.tex.in" ; then
     mkdir -p $objdir/lib/$1/doc/latex
     cfgoutputs="$cfgoutputs lib/$1/doc/latex/manual.tex"
@@ -314,11 +313,9 @@ if test -d "$srcdir/lib/$1" ; then
 else
   build_$1="no"
   $2=0
-  $2_manual="%"
 fi
 AC_MSG_RESULT($build_$1)
 AC_SUBST($2)
-AC_SUBST($2_manual)
 ])
 
 dnl CW_BUILD_MOD(mod, var)
@@ -330,7 +327,6 @@ AC_MSG_CHECKING(whether to include $1 in build)
 if test -d "$srcdir/mod/$1" ; then
   build_$1="yes"
   $2=1
-  $2_manual=""
   if test -f "$srcdir/mod/$1/doc/latex/manual.tex.in" ; then
     mkdir -p $objdir/mod/$1/doc/latex
     cfgoutputs="$cfgoutputs mod/$1/doc/latex/manual.tex"
@@ -341,11 +337,9 @@ if test -d "$srcdir/mod/$1" ; then
 else
   build_$1="no"
   $2=0
-  $2_manual="%"
 fi
 AC_MSG_RESULT($build_$1)
 AC_SUBST($2)
-AC_SUBST($2_manual)
 ])
 
 dnl CW_BUILD_BIN(bin, var)
@@ -357,7 +351,6 @@ AC_MSG_CHECKING(whether to include $1 in build)
 if test -d "$srcdir/bin/$1" ; then
   build_$1="yes"
   $2=1
-  $2_manual=""
   if test -f "$srcdir/bin/$1/doc/latex/manual.tex.in" ; then
     mkdir -p $objdir/bin/$1/doc/latex
     cfgoutputs="$cfgoutputs bin/$1/doc/latex/manual.tex"
@@ -374,11 +367,9 @@ if test -d "$srcdir/bin/$1" ; then
 else
   build_$1="no"
   $2=0
-  $2_manual="%"
 fi
 AC_MSG_RESULT($build_$1)
 AC_SUBST($2)
-AC_SUBST($2_manual)
 ])
 
 

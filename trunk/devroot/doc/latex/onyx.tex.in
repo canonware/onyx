@@ -13,7 +13,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Definitions and front matter.
-\input{@abs_srcdir@/doc/latex/front}
+\input{@abs_srcdir@/doc/latex/onyx_front}
 
 % Onyx Language Tutorial.
 \input{@abs_srcdir@/doc/latex/onyx_tut}
@@ -25,10 +25,10 @@
 \input{@abs_srcdir@/doc/latex/onyx_lang}
 
 % The onyx program.
-@bin_onyx_manual@\input{@abs_objdir@/bin/onyx/doc/latex/manual}
+\input{@abs_objdir@/bin/onyx/doc/latex/manual}
 
 % The libonyx library.
-@lib_onyx_manual@\input{@abs_objdir@/lib/libonyx/doc/latex/manual}
+\input{@abs_objdir@/lib/libonyx/doc/latex/manual}
 
 % Back matter.
-\input{@abs_srcdir@/doc/latex/back}
+\input{@abs_srcdir@/doc/latex/onyx_back}
