@@ -35,8 +35,8 @@
 /*
  * el.h: Internal structures.
  */
-#ifndef _LIBCL_H_
-#define _LIBCL_H_
+#ifndef _LIBEDIT_H_
+#define _LIBEDIT_H_
 /*
  * Local defaults
  */
@@ -110,4 +110,4 @@ struct editline {
     void         *data;		/* user data */
 };
 
-#endif /* _LIBCL_H_ */
+#endif /* _LIBEDIT_H_ */

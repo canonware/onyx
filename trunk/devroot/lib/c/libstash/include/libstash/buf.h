@@ -15,7 +15,7 @@
  * Note also that static arrays are included in the buf structure for this
  * number of elements, so the higher this number, the larger cw_buf_t.
  */
-#define _LIBSTASH_BUF_ARRAY_MIN_SIZE 4
+#define _CW_BUF_ARRAY_MIN_SIZE 4
 
 /* Pseudo-opaque typedefs. */
 typedef struct cw_buf_s cw_buf_t;
@@ -24,7 +24,7 @@ typedef struct cw_bufel_s cw_bufel_t;
 
 /* The following data types should be considered opaque. */
 struct cw_bufc_s {
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 	cw_uint32_t	magic_a;
 #endif
 	cw_mtx_t	lock;
@@ -36,27 +36,27 @@ struct cw_bufc_s {
 	cw_bool_t	is_writeable;
 	cw_uint32_t	buf_size;
 	cw_uint8_t	*buf;
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 	cw_uint32_t	size_of;
 	cw_uint32_t	magic_b;
 #endif
 };
 
 struct cw_bufel_s {
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 	cw_uint32_t	magic_a;
 #endif
 	cw_uint32_t	beg_offset;
 	cw_uint32_t	end_offset;
 	cw_bufc_t	*bufc;
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 	cw_uint32_t	size_of;
 	cw_uint32_t	magic_b;
 #endif
 };
 
 struct cw_buf_s {
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 	cw_uint32_t	magic_a;
 #endif
 	cw_mem_t	*mem;
@@ -75,10 +75,10 @@ struct cw_buf_s {
 	cw_bufel_t	*bufel_array;
 	cw_uint32_t	*cumulative_index;
 	struct iovec	*iov;
-	cw_bufel_t	static_bufel_array[_LIBSTASH_BUF_ARRAY_MIN_SIZE];
-	cw_uint32_t	static_cumulative_index[_LIBSTASH_BUF_ARRAY_MIN_SIZE];
-	struct iovec	static_iov[_LIBSTASH_BUF_ARRAY_MIN_SIZE];
-#ifdef _LIBSTASH_DBG
+	cw_bufel_t	static_bufel_array[_CW_BUF_ARRAY_MIN_SIZE];
+	cw_uint32_t	static_cumulative_index[_CW_BUF_ARRAY_MIN_SIZE];
+	struct iovec	static_iov[_CW_BUF_ARRAY_MIN_SIZE];
+#ifdef _CW_DBG
 	cw_uint32_t	size_of;
 	cw_uint32_t	magic_b;
 #endif

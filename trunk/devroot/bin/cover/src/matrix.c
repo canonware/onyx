@@ -216,7 +216,7 @@ matrix_rebuild(cw_matrix_t *a_matrix)
 	return retval;
 }
 
-#ifdef _COVER_DBG
+#ifdef _CW_DBG
 cw_sint8_t
 matrix_get_element(cw_matrix_t *a_matrix, cw_uint32_t a_x_pos, cw_uint32_t
     a_y_pos)

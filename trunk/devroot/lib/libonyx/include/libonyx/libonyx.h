@@ -18,29 +18,29 @@ extern  "C" {
 #ifndef _LIBONYX_H_
 #define _LIBONYX_H_
 
-#define _LIBONYX_VERSION "<Version>"
+#define _CW_LIBONYX_VERSION "<Version>"
 
 /*
  * Minimum initial size of dictionaries.
  */
-#define	_LIBONYX_DICT_SIZE		  16
+#define	_CW_LIBONYX_DICT_SIZE		   16
 
 /*
  * Maximum depth of estack.
  */
-#define	_LIBONYX_ESTACK_MAX		 256
+#define	_CW_LIBONYX_ESTACK_MAX		  256
 
 /*
  * Default file buffer size.
  */
-#define	_LIBONYX_FILE_BUFFER_SIZE	 512
+#define	_CW_LIBONYX_FILE_BUFFER_SIZE	  512
 
 /*
  * Size of stack-allocated buffer to use when executing file objects.  This
  * generally doesn't need to be huge, because there is usually additional
  * buffering going on upstream.
  */
-#define	_LIBONYX_FILE_EVAL_READ_SIZE	 128
+#define	_CW_LIBONYX_FILE_EVAL_READ_SIZE	  128
 
 /*
  * Default minimum period of registration inactivity before a periodic
@@ -48,55 +48,55 @@ extern  "C" {
  * collection).  On average, the actual inactivity period will be 1.5 times
  * this, but can range from 1 to 2 times this.
  */
-#define	_LIBONYX_GCDICT_PERIOD		  20
+#define	_CW_LIBONYX_GCDICT_PERIOD	   20
 
 /*
  * Default number of sequence set additions since last collection that will
  * cause an immediate collection.
  */
-#define	_LIBONYX_GCDICT_THRESHOLD      20000
+#define	_CW_LIBONYX_GCDICT_THRESHOLD	20000
 
 /*
  * Initial size of globaldict.  This is a bit arbitrary, and some applications
  * could benefit from making it larger or smaller.
  */
-#define	_LIBONYX_GLOBALDICT_HASH	  64
+#define	_CW_LIBONYX_GLOBALDICT_HASH	   64
 
 /*
  * Initial size of threadsdict.  Most applications don't use many threads, so
  * the initial size is set pretty low.
  */
-#define	_LIBONYX_THREADSDICT_HASH	  16
+#define	_CW_LIBONYX_THREADSDICT_HASH	   16
 
 /*
  * Initial size initial name cache hash table.  We know for sure that there will
  * be about 250 names referenced by systemdict, errordict, and currenterror to
  * begin with.
  */
-#define _LIBONYX_NAME_HASH		1024
+#define _CW_LIBONYX_NAME_HASH		 1024
 
 /*
  * Number of objects to allocate in a chunk for internal stack use.
  */
-#define	_LIBONYX_STACKC_COUNT		  32
+#define	_CW_LIBONYX_STACKC_COUNT	   32
 
 /*
  * Initial size of userdict.
  */
-#define	_LIBSTASH_USERDICT_HASH		  64
+#define	_CW_LIBONYX_USERDICT_HASH	   64
 
 /*
  * Exception numbers.  libonyx reserves 128 through 255.
  */
-#define	_CW_ONYXX_MIN			 128
-#define	_CW_ONYXX_MAX			 255
+#define	_CW_ONYXX_MIN			  128
+#define	_CW_ONYXX_MAX			  255
 
 /* Internal use, for the exit operator. */
-#define	_CW_ONYXX_EXIT			 128
+#define	_CW_ONYXX_EXIT			  128
 /* Internal use, for the stop operator, caught by the stopped operator. */
-#define	_CW_ONYXX_STOP			 129
+#define	_CW_ONYXX_STOP			  129
 /* Internal use, for the quit operator, caught by the start operator. */
-#define	_CW_ONYXX_QUIT			 130
+#define	_CW_ONYXX_QUIT			  130
 
 #include "libonyx_defs.h"
 #include "libonyx_incs.h"

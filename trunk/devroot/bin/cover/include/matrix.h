@@ -120,7 +120,7 @@ cw_bool_t	matrix_rebuild(cw_matrix_t *a_matrix);
  * Get the value of the element at (a_x_pos, a_y_pos).
  *
  ****************************************************************************/
-#ifdef _COVER_DBG
+#ifdef _CW_DBG
 cw_sint8_t	matrix_get_element(cw_matrix_t *a_matrix, cw_uint32_t a_x_pos,
     cw_uint32_t a_y_pos);
 #else
@@ -149,7 +149,7 @@ cw_sint8_t	matrix_get_element(cw_matrix_t *a_matrix, cw_uint32_t a_x_pos,
  * Set the element at (a_x_pos, a_y_pos) to a_val.
  *
  ****************************************************************************/
-#ifdef _COVER_DBG
+#ifdef _CW_DBG
 void		matrix_set_element(cw_matrix_t *a_matrix, cw_uint32_t a_x_pos,
     cw_uint32_t a_y_pos, cw_sint8_t a_val);
 #else
@@ -173,7 +173,7 @@ void		matrix_set_element(cw_matrix_t *a_matrix, cw_uint32_t a_x_pos,
  * Get number of columns.
  *
  ****************************************************************************/
-#ifdef _COVER_DBG
+#ifdef _CW_DBG
 cw_uint32_t	matrix_get_x_size(cw_matrix_t *a_matrix);
 #else
 #define	matrix_get_x_size(a) (a)->x_size
@@ -194,7 +194,7 @@ cw_uint32_t	matrix_get_x_size(cw_matrix_t *a_matrix);
  * Get number of rows.
  *
  ****************************************************************************/
-#ifdef _COVER_DBG
+#ifdef _CW_DBG
 cw_uint32_t	matrix_get_y_size(cw_matrix_t *a_matrix);
 #else
 #define	matrix_get_y_size(a) (a)->y_size

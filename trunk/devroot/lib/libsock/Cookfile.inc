@@ -164,7 +164,6 @@ libsock_distclean :
 
 CPPFLAGS = [CPPFLAGS] -I[srcdir]/lib/c/libsock/include
                       -I[objdir]/lib/c/libsock/include/libsock;
-D_CPPFLAGS = [D_CPPFLAGS] -D_LIBSOCK_DBG;
 
 /*
  * Build rules.

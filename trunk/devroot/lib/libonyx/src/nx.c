@@ -44,14 +44,14 @@ nx_new(cw_nx_t *a_nx, int a_argc, char **a_argv, char **a_envp,
 		v_retval = retval;
 		try_stage = 1;
 
-#ifdef _LIBONYX_DBG
+#ifdef _CW_DBG
 		retval->magic = _CW_NX_MAGIC;
 #endif
 
 		/* Initialize the global name cache. */
 		mtx_new(&retval->name_lock);
-		dch_new(&retval->name_hash, NULL, _LIBONYX_NAME_HASH,
-		    _LIBONYX_NAME_HASH / 4 * 3, _LIBONYX_NAME_HASH / 4,
+		dch_new(&retval->name_hash, NULL, _CW_LIBONYX_NAME_HASH,
+		    _CW_LIBONYX_NAME_HASH / 4 * 3, _CW_LIBONYX_NAME_HASH / 4,
 		    nxo_l_name_hash, nxo_l_name_key_comp);
 		try_stage = 2;
 
@@ -68,7 +68,7 @@ nx_new(cw_nx_t *a_nx, int a_argc, char **a_argv, char **a_envp,
 			    a_arg);
 		}
 		nxo_file_buffer_size_set(&retval->stdin_nxo,
-		    _LIBONYX_FILE_BUFFER_SIZE);
+		    _CW_LIBONYX_FILE_BUFFER_SIZE);
 		try_stage = 4;
 
 		/* Initialize stdout. */
@@ -80,7 +80,7 @@ nx_new(cw_nx_t *a_nx, int a_argc, char **a_argv, char **a_envp,
 			    a_stdout, a_arg);
 		}
 		nxo_file_buffer_size_set(&retval->stdout_nxo,
-		    _LIBONYX_FILE_BUFFER_SIZE);
+		    _CW_LIBONYX_FILE_BUFFER_SIZE);
 		try_stage = 5;
 
 		/* Initialize stderr. */
@@ -95,7 +95,7 @@ nx_new(cw_nx_t *a_nx, int a_argc, char **a_argv, char **a_envp,
 
 		/* Initialize globaldict. */
 		nxo_dict_new(&retval->globaldict, retval, TRUE,
-		    _LIBONYX_GLOBALDICT_HASH);
+		    _CW_LIBONYX_GLOBALDICT_HASH);
 		try_stage = 7;
 
 		/* Initialize sprintdict. */
@@ -113,7 +113,7 @@ nx_new(cw_nx_t *a_nx, int a_argc, char **a_argv, char **a_envp,
 
 		/* Initialize threadsdict. */
 		nxo_dict_new(&retval->threadsdict, retval, TRUE,
-		    _LIBONYX_THREADSDICT_HASH);
+		    _CW_LIBONYX_THREADSDICT_HASH);
 		try_stage = 11;
 
 		/* Set the thread initialization hook pointer. */
@@ -142,7 +142,7 @@ nx_new(cw_nx_t *a_nx, int a_argc, char **a_argv, char **a_envp,
 			dch_delete(&retval->name_hash);
 			mtx_delete(&retval->name_lock);
 		case 1:
-#ifdef _LIBONYX_DBG
+#ifdef _CW_DBG
 			memset(a_nx, 0x5a, sizeof(cw_nx_t));
 #endif
 			if (retval->is_malloced)
@@ -176,7 +176,7 @@ nx_delete(cw_nx_t *a_nx)
 
 	if (a_nx->is_malloced)
 		_cw_free(a_nx);
-#ifdef _LIBONYX_DBG
+#ifdef _CW_DBG
 	else
 		memset(a_nx, 0x5a, sizeof(cw_nx_t));
 #endif

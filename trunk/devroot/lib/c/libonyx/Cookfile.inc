@@ -188,7 +188,6 @@ libonyx_distclean :
 
 CPPFLAGS = [CPPFLAGS] -I[srcdir]/lib/c/libonyx/include
                       -I[objdir]/lib/c/libonyx/include/libonyx;
-D_CPPFLAGS = [D_CPPFLAGS] -D_LIBONYX_DBG;
 
 /*
  * Build rules.

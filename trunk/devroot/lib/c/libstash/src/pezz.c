@@ -11,7 +11,7 @@
 
 #include "../include/libstash/libstash.h"
 
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 #define _CW_PEZZ_MAGIC 0x4e224e22
 #endif
 
@@ -87,13 +87,13 @@ pezz_new(cw_pezz_t *a_pezz, cw_mem_t *a_mem, cw_uint32_t a_buffer_size,
 		}
 		retval->num_blocks = 1;
 
-#ifdef _LIBSTASH_PEZZ_ERROR
+#ifdef _CW_PEZZ_ERROR
 		dch_new(&retval->addr_hash, a_mem, a_num_buffers * 3,
 		    a_num_buffers * 2, 0, ch_direct_hash, ch_direct_key_comp);
 		try_stage = 4;
 #endif
 
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 		retval->magic = _CW_PEZZ_MAGIC;
 #endif
 	}
@@ -127,7 +127,7 @@ pezz_delete(cw_pezz_t *a_pezz)
 	_cw_check_ptr(a_pezz);
 	_cw_assert(a_pezz->magic == _CW_PEZZ_MAGIC);
 
-#ifdef _LIBSTASH_PEZZ_ERROR
+#ifdef _CW_PEZZ_ERROR
 	{
 		cw_uint32_t	i, num_addrs;
 		void		*addr;
@@ -162,7 +162,7 @@ pezz_delete(cw_pezz_t *a_pezz)
 
 	if (a_pezz->is_malloced)
 		mem_free(a_pezz->mem, a_pezz);
-#ifdef _LIBSTASH_PEZZ_ERROR
+#ifdef _CW_PEZZ_ERROR
 	else
 		memset(a_pezz, 0x5a, sizeof(cw_pezz_t));
 #endif
@@ -220,7 +220,7 @@ pezz_get_e(cw_pezz_t *a_pezz, const char *a_filename, cw_uint32_t a_line_num)
 	retval = (void *)qs_top(&a_pezz->spares);
 	qs_pop(&a_pezz->spares, link);
 
-#ifdef _LIBSTASH_PEZZ_ERROR
+#ifdef _CW_PEZZ_ERROR
 	{
 		cw_pezz_item_t	*old_allocation;
 
@@ -251,7 +251,7 @@ pezz_get_e(cw_pezz_t *a_pezz, const char *a_filename, cw_uint32_t a_line_num)
 				allocation->filename = a_filename;
 				allocation->line_num = a_line_num;
 
-#ifdef _LIBSTASH_PEZZ_VERBOSE
+#ifdef _CW_PEZZ_VERBOSE
 				out_put_e(out_err, NULL, 0, __FUNCTION__,
 				    "0x[p] ([i] B) <-- pezz_get() at [s], line "
 				    "[i]\n", retval, a_pezz->buffer_size,
@@ -291,7 +291,7 @@ pezz_put_e(cw_pezz_t *a_pezz, void *a_buffer, const char *a_filename,
 	_cw_assert(a_pezz->magic == _CW_PEZZ_MAGIC);
 	mtx_lock(&a_pezz->lock);
 
-#ifdef _LIBSTASH_PEZZ_ERROR
+#ifdef _CW_PEZZ_ERROR
 	{
 		cw_pezz_item_t	*allocation;
 
@@ -316,7 +316,7 @@ pezz_put_e(cw_pezz_t *a_pezz, void *a_buffer, const char *a_filename,
 			    "line [i]\n", a_buffer, a_filename, a_line_num);
 			goto RETURN;
 		} else {
-#ifdef _LIBSTASH_PEZZ_VERBOSE
+#ifdef _CW_PEZZ_VERBOSE
 			out_put_e(out_err, NULL, 0, __FUNCTION__,
 			    "Freeing 0x[p] at [s], line [i], allocated at [s], "
 			    "line [i]\n", a_buffer, a_filename, a_line_num,
@@ -330,7 +330,7 @@ pezz_put_e(cw_pezz_t *a_pezz, void *a_buffer, const char *a_filename,
 
 	qs_push(&a_pezz->spares, (cw_pezzi_t *)a_buffer, link);
 
-#ifdef _LIBSTASH_PEZZ_ERROR
+#ifdef _CW_PEZZ_ERROR
 	/*
 	 * The RETURN label is only used in the debugging versions of
 	 * libstash. Prevent a compiler warning.

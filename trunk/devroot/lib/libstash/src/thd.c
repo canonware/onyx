@@ -18,12 +18,12 @@
 #include <pthread_np.h>
 #endif
 
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 #define _CW_THD_MAGIC 0x5638638e
 #endif
 
 struct cw_thd_s {
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 	cw_uint32_t	magic;
 #endif
 	pthread_t	thread;
@@ -40,7 +40,7 @@ struct cw_thd_s {
 	cw_bool_t	delete:1;
 };
 
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 static cw_bool_t cw_g_thd_initialized = FALSE;
 #endif
 
@@ -126,13 +126,13 @@ thd_l_init(void)
 	cw_g_thd.suspended = FALSE;
 	cw_g_thd.singled = FALSE;
 	qr_new(&cw_g_thd, link);
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 	cw_g_thd.magic = _CW_THD_MAGIC;
 #endif
 	/* Make thd_self() work for the main thread. */
 	tsd_set(&cw_g_thd_self_key, (void *)&cw_g_thd);
 	
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 	cw_g_thd_initialized = TRUE;
 #endif
 }
@@ -156,7 +156,7 @@ thd_l_shutdown(void)
 #endif
 	tsd_delete(&cw_g_thd_self_key);
 	mtx_delete(&cw_g_thd_single_lock);
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 	memset(&cw_g_thd, 0x5a, sizeof(cw_thd_t));
 	cw_g_thd_initialized = FALSE;
 #endif
@@ -187,7 +187,7 @@ thd_new(void *(*a_start_func)(void *), void *a_arg, cw_bool_t a_suspendible)
 	retval->suspended = FALSE;
 	retval->singled = FALSE;
 	retval->delete = FALSE;
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 	retval->magic = _CW_THD_MAGIC;
 #endif
 

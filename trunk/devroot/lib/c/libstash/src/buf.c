@@ -16,7 +16,7 @@
 #include <sys/uio.h>
 #endif
 
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 #define _CW_BUF_MAGIC 0xb00f0001
 #define _CW_BUFEL_MAGIC 0xb00f0002
 #define _CW_BUFC_MAGIC 0xb00f0003
@@ -30,7 +30,7 @@ static void	buf_p_data_position_get(cw_buf_t *a_buf, cw_uint32_t a_offset,
 static void	buf_p_array_fit(cw_buf_t *a_buf, cw_uint32_t a_min_array_size);
 static void	buf_p_buf_catenate(cw_buf_t *a_a, cw_buf_t *a_b, cw_bool_t
     a_preserve);
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 static void	buf_p_array_copy(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t
     a_num_elements, cw_uint32_t a_a_start, cw_uint32_t a_b_start, cw_bool_t
     a_is_destructive);
@@ -72,7 +72,7 @@ buf_delete(cw_buf_t *a_buf)
 			bufc_delete(a_buf->bufel_array[(i + a_buf->array_start)
 			    & (a_buf->array_size - 1)].bufc);
 		}
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 /*  		memset(&a_buf->bufel_array[(i + a_buf->array_start) */
 /*  		    & (a_buf->array_size - 1)], */
 /*  		    0x5a, */
@@ -104,7 +104,7 @@ buf_dump(cw_buf_t *a_buf, const char *a_prefix)
 		mtx_lock(&a_buf->lock);
 
 	out_put(out_err, "[s]| buf_dump()\n", a_prefix);
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 	out_put(out_err, "[s]|--> magic_a : 0x[i|b:16]\n", a_prefix,
 	    a_buf->magic_a);
 	out_put(out_err, "[s]|--> magic_b : 0x[i|b:16]\n", a_prefix,
@@ -140,7 +140,7 @@ buf_dump(cw_buf_t *a_buf, const char *a_prefix)
 		    i, a_prefix);
 
 		/* Dump bufel. */
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 		out_put(out_err, "[s]|   |--> magic_a : 0x[i|b:16]\n", a_prefix,
 		    a_buf->bufel_array[i].magic_a);
 		out_put(out_err, "[s]|   |--> magic_b : 0x[i|b:16]\n", a_prefix,
@@ -152,7 +152,7 @@ buf_dump(cw_buf_t *a_buf, const char *a_prefix)
 		    a_buf->bufel_array[i].beg_offset);
 		out_put(out_err, "[s]|   |--> end_offset : [i]\n", a_prefix,
 		    a_buf->bufel_array[i].end_offset);
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 		if ((a_buf->bufel_array[i].bufc != NULL) &&
 		    (a_buf->bufel_array[i].magic_a == _CW_BUFEL_MAGIC) &&
 		    (a_buf->bufel_array[i].size_of == sizeof(cw_bufel_t)) &&
@@ -371,7 +371,7 @@ buf_split(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t a_offset)
 				 */
 				bufc_delete(a_b->bufel_array[a_b->array_start].bufc);
 
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 				memset(&a_b->bufel_array[a_b->array_start], 0,
 				    sizeof(cw_bufel_t));
 				memset(&a_b->cumulative_index[a_b->array_start],
@@ -419,7 +419,7 @@ buf_split(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t a_offset)
 					 * reference count.
 					 */
 					bufc_delete(a_b->bufel_array[a_b->array_start].bufc);
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 					memset(&a_b->bufel_array[a_b->array_start],
 					    0, sizeof(cw_bufel_t));
 					memset(&a_b->cumulative_index[a_b->array_start],
@@ -440,7 +440,7 @@ buf_split(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t a_offset)
 			}
 		}
 		if (num_bufels_to_move > 0) {
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 			/*
 			 * Non-destructively copy all the bufel's we care about.
 			 */
@@ -478,7 +478,7 @@ buf_split(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t a_offset)
 
 			/* Deal with the bufel that the split is in. */
 			if (bufel_offset != 0) {
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 				/*
 				 * Copy the bufel back to a_b, since the data
 				 * are split and the original bufel must still
@@ -531,7 +531,7 @@ buf_split(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t a_offset)
 		a_b->is_cached_bufel_valid = FALSE;
 
 		if ((a_b->array_num_valid == 0) && (a_b->array_size !=
-		    _LIBSTASH_BUF_ARRAY_MIN_SIZE)) {
+		    _CW_BUF_ARRAY_MIN_SIZE)) {
 /*  			a_b->array_start = 0; */
 /*  			a_b->array_end = 0; */
 			a_b->is_cumulative_valid = TRUE;
@@ -593,7 +593,7 @@ buf_bufc_prepend(cw_buf_t *a_buf, cw_bufc_t *a_bufc, cw_uint32_t a_beg_offset,
 			    a_buf->array_size) - 1) & (a_buf->array_size - 1));
 			a_buf->array_num_valid++;
 
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 			a_buf->bufel_array[a_buf->array_start].magic_a =
 			    _CW_BUFEL_MAGIC;
 			a_buf->bufel_array[a_buf->array_start].size_of =
@@ -670,7 +670,7 @@ buf_bufc_append(cw_buf_t *a_buf, cw_bufc_t *a_bufc, cw_uint32_t a_beg_offset,
 		if (did_bufel_merge == FALSE) {
 			buf_p_array_fit(a_buf, a_buf->array_num_valid + 1);
 			/* Now append the bufel. */
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 			a_buf->bufel_array[a_buf->array_end].magic_a =
 			    _CW_BUFEL_MAGIC;
 			a_buf->bufel_array[a_buf->array_end].size_of =
@@ -730,7 +730,7 @@ buf_head_data_release(cw_buf_t *a_buf, cw_uint32_t a_amount)
 				if (a_buf->bufel_array[array_index].bufc !=
 				    NULL)
 					bufc_delete(a_buf->bufel_array[array_index].bufc);
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 				memset(&a_buf->bufel_array[array_index], 0,
 				    sizeof(cw_bufel_t));
 #endif
@@ -752,7 +752,7 @@ buf_head_data_release(cw_buf_t *a_buf, cw_uint32_t a_amount)
 		a_buf->size -= a_amount;
 
 		if ((a_buf->array_num_valid == 0) && (a_buf->array_size !=
-		    _LIBSTASH_BUF_ARRAY_MIN_SIZE)) {
+		    _CW_BUF_ARRAY_MIN_SIZE)) {
 /*  			a_buf->array_start = 0; */
 /*  			a_buf->array_end = 0; */
 			a_buf->is_cumulative_valid = TRUE;
@@ -801,7 +801,7 @@ buf_tail_data_release(cw_buf_t *a_buf, cw_uint32_t a_amount)
 				if (a_buf->bufel_array[array_index].bufc !=
 				    NULL)
 					bufc_delete(a_buf->bufel_array[array_index].bufc);
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 				memset(&a_buf->bufel_array[array_index], 0,
 				    sizeof(cw_bufel_t));
 #endif
@@ -822,7 +822,7 @@ buf_tail_data_release(cw_buf_t *a_buf, cw_uint32_t a_amount)
 		a_buf->size -= a_amount;
 
 		if ((a_buf->array_num_valid == 0) && (a_buf->array_size !=
-		    _LIBSTASH_BUF_ARRAY_MIN_SIZE)) {
+		    _CW_BUF_ARRAY_MIN_SIZE)) {
 /*  			a_buf->array_start = 0; */
 /*  			a_buf->array_end = 0; */
 			a_buf->is_cumulative_valid = TRUE;
@@ -879,7 +879,7 @@ buf_uint32_get(cw_buf_t *a_buf, cw_uint32_t a_offset)
 	 * Prepare a byte for logical or into retval. o: Offset from
 	 * bufel_offset. s: Number of bytes to left shift.
 	 */
-#define _LIBSTASH_BUF_OR_BYTE(o, s)					\
+#define _CW_BUF_OR_BYTE(o, s)					\
 	((cw_uint32_t) *(a_buf->bufel_array[array_element].bufc->buf	\
 	    + bufel_offset + (o)) << ((s) << 3))
 
@@ -888,42 +888,42 @@ buf_uint32_get(cw_buf_t *a_buf, cw_uint32_t a_offset)
 	if (bufel_offset + 3 <
 	    a_buf->bufel_array[array_element].end_offset) {
 #ifdef WORDS_BIGENDIAN
-		retval = _LIBSTASH_BUF_OR_BYTE(0, 3);
-		retval |= _LIBSTASH_BUF_OR_BYTE(1, 2);
-		retval |= _LIBSTASH_BUF_OR_BYTE(2, 1);
-		retval |= _LIBSTASH_BUF_OR_BYTE(3, 0);
+		retval = _CW_BUF_OR_BYTE(0, 3);
+		retval |= _CW_BUF_OR_BYTE(1, 2);
+		retval |= _CW_BUF_OR_BYTE(2, 1);
+		retval |= _CW_BUF_OR_BYTE(3, 0);
 #else
-		retval = _LIBSTASH_BUF_OR_BYTE(0, 0);
-		retval |= _LIBSTASH_BUF_OR_BYTE(1, 1);
-		retval |= _LIBSTASH_BUF_OR_BYTE(2, 2);
-		retval |= _LIBSTASH_BUF_OR_BYTE(3, 3);
+		retval = _CW_BUF_OR_BYTE(0, 0);
+		retval |= _CW_BUF_OR_BYTE(1, 1);
+		retval |= _CW_BUF_OR_BYTE(2, 2);
+		retval |= _CW_BUF_OR_BYTE(3, 3);
 #endif
 	} else {
 #ifdef WORDS_BIGENDIAN
-		retval = _LIBSTASH_BUF_OR_BYTE(0, 3);
+		retval = _CW_BUF_OR_BYTE(0, 3);
 		buf_p_data_position_get(a_buf, a_offset + 1, &array_element,
 		    &bufel_offset);
-		retval |= _LIBSTASH_BUF_OR_BYTE(0, 2);
+		retval |= _CW_BUF_OR_BYTE(0, 2);
 		buf_p_data_position_get(a_buf, a_offset + 2, &array_element,
 		    &bufel_offset);
-		retval |= _LIBSTASH_BUF_OR_BYTE(0, 1);
+		retval |= _CW_BUF_OR_BYTE(0, 1);
 		buf_p_data_position_get(a_buf, a_offset + 3, &array_element,
 		    &bufel_offset);
-		retval |= _LIBSTASH_BUF_OR_BYTE(0, 0);
+		retval |= _CW_BUF_OR_BYTE(0, 0);
 #else
-		retval = _LIBSTASH_BUF_OR_BYTE(0, 0);
+		retval = _CW_BUF_OR_BYTE(0, 0);
 		buf_p_data_position_get(a_buf, a_offset + 1, &array_element,
 		    &bufel_offset);
-		retval |= _LIBSTASH_BUF_OR_BYTE(0, 1);
+		retval |= _CW_BUF_OR_BYTE(0, 1);
 		buf_p_data_position_get(a_buf, a_offset + 2, &array_element,
 		    &bufel_offset);
-		retval |= _LIBSTASH_BUF_OR_BYTE(0, 2);
+		retval |= _CW_BUF_OR_BYTE(0, 2);
 		buf_p_data_position_get(a_buf, a_offset + 3, &array_element,
 		    &bufel_offset);
-		retval |= _LIBSTASH_BUF_OR_BYTE(0, 3);
+		retval |= _CW_BUF_OR_BYTE(0, 3);
 #endif
 	}
-#undef _LIBSTASH_BUF_OR_BYTE
+#undef _CW_BUF_OR_BYTE
 
 	if (a_buf->is_threadsafe)
 		mtx_unlock(&a_buf->lock);
@@ -949,7 +949,7 @@ buf_uint64_get(cw_buf_t *a_buf, cw_uint32_t a_offset)
 	 * Prepare a byte for logical or into retval. o: Offset from
 	 * bufel_offset. s: Number of bytes to left shift.
 	 */
-#define _LIBSTASH_BUF_OR_BYTE(o, s)					\
+#define _CW_BUF_OR_BYTE(o, s)					\
 	((cw_uint64_t) *(a_buf->bufel_array[array_element].bufc->buf	\
 	    + bufel_offset + (o)) << ((s) << 3))
 
@@ -957,74 +957,74 @@ buf_uint64_get(cw_buf_t *a_buf, cw_uint32_t a_offset)
 
 	if (bufel_offset + 7 < a_buf->bufel_array[array_element].end_offset) {
 #ifdef WORDS_BIGENDIAN
-		retval = _LIBSTASH_BUF_OR_BYTE(0, 7);
-		retval |= _LIBSTASH_BUF_OR_BYTE(1, 6);
-		retval |= _LIBSTASH_BUF_OR_BYTE(2, 5);
-		retval |= _LIBSTASH_BUF_OR_BYTE(3, 4);
-		retval |= _LIBSTASH_BUF_OR_BYTE(4, 3);
-		retval |= _LIBSTASH_BUF_OR_BYTE(5, 2);
-		retval |= _LIBSTASH_BUF_OR_BYTE(6, 1);
-		retval |= _LIBSTASH_BUF_OR_BYTE(7, 0);
+		retval = _CW_BUF_OR_BYTE(0, 7);
+		retval |= _CW_BUF_OR_BYTE(1, 6);
+		retval |= _CW_BUF_OR_BYTE(2, 5);
+		retval |= _CW_BUF_OR_BYTE(3, 4);
+		retval |= _CW_BUF_OR_BYTE(4, 3);
+		retval |= _CW_BUF_OR_BYTE(5, 2);
+		retval |= _CW_BUF_OR_BYTE(6, 1);
+		retval |= _CW_BUF_OR_BYTE(7, 0);
 #else
-		retval = _LIBSTASH_BUF_OR_BYTE(0, 0);
-		retval |= _LIBSTASH_BUF_OR_BYTE(1, 1);
-		retval |= _LIBSTASH_BUF_OR_BYTE(2, 2);
-		retval |= _LIBSTASH_BUF_OR_BYTE(3, 3);
-		retval |= _LIBSTASH_BUF_OR_BYTE(4, 4);
-		retval |= _LIBSTASH_BUF_OR_BYTE(5, 5);
-		retval |= _LIBSTASH_BUF_OR_BYTE(6, 6);
-		retval |= _LIBSTASH_BUF_OR_BYTE(7, 7);
+		retval = _CW_BUF_OR_BYTE(0, 0);
+		retval |= _CW_BUF_OR_BYTE(1, 1);
+		retval |= _CW_BUF_OR_BYTE(2, 2);
+		retval |= _CW_BUF_OR_BYTE(3, 3);
+		retval |= _CW_BUF_OR_BYTE(4, 4);
+		retval |= _CW_BUF_OR_BYTE(5, 5);
+		retval |= _CW_BUF_OR_BYTE(6, 6);
+		retval |= _CW_BUF_OR_BYTE(7, 7);
 #endif
 	} else {
 #ifdef WORDS_BIGENDIAN
-		retval = _LIBSTASH_BUF_OR_BYTE(0, 7);
+		retval = _CW_BUF_OR_BYTE(0, 7);
 		buf_p_data_position_get(a_buf, a_offset + 1, &array_element,
 		    &bufel_offset);
-		retval |= _LIBSTASH_BUF_OR_BYTE(0, 6);
+		retval |= _CW_BUF_OR_BYTE(0, 6);
 		buf_p_data_position_get(a_buf, a_offset + 2, &array_element,
 		    &bufel_offset);
-		retval |= _LIBSTASH_BUF_OR_BYTE(0, 5);
+		retval |= _CW_BUF_OR_BYTE(0, 5);
 		buf_p_data_position_get(a_buf, a_offset + 3, &array_element,
 		    &bufel_offset);
-		retval |= _LIBSTASH_BUF_OR_BYTE(0, 4);
+		retval |= _CW_BUF_OR_BYTE(0, 4);
 		buf_p_data_position_get(a_buf, a_offset + 4, &array_element,
 		    &bufel_offset);
-		retval |= _LIBSTASH_BUF_OR_BYTE(0, 3);
+		retval |= _CW_BUF_OR_BYTE(0, 3);
 		buf_p_data_position_get(a_buf, a_offset + 5, &array_element,
 		    &bufel_offset);
-		retval |= _LIBSTASH_BUF_OR_BYTE(0, 2);
+		retval |= _CW_BUF_OR_BYTE(0, 2);
 		buf_p_data_position_get(a_buf, a_offset + 6, &array_element,
 		    &bufel_offset);
-		retval |= _LIBSTASH_BUF_OR_BYTE(0, 1);
+		retval |= _CW_BUF_OR_BYTE(0, 1);
 		buf_p_data_position_get(a_buf, a_offset + 7, &array_element,
 		    &bufel_offset);
-		retval |= _LIBSTASH_BUF_OR_BYTE(0, 0);
+		retval |= _CW_BUF_OR_BYTE(0, 0);
 #else
-		retval = _LIBSTASH_BUF_OR_BYTE(0, 0);
+		retval = _CW_BUF_OR_BYTE(0, 0);
 		buf_p_data_position_get(a_buf, a_offset + 1, &array_element,
 		    &bufel_offset);
-		retval |= _LIBSTASH_BUF_OR_BYTE(0, 1);
+		retval |= _CW_BUF_OR_BYTE(0, 1);
 		buf_p_data_position_get(a_buf, a_offset + 2, &array_element,
 		    &bufel_offset);
-		retval |= _LIBSTASH_BUF_OR_BYTE(0, 2);
+		retval |= _CW_BUF_OR_BYTE(0, 2);
 		buf_p_data_position_get(a_buf, a_offset + 3, &array_element,
 		    &bufel_offset);
-		retval |= _LIBSTASH_BUF_OR_BYTE(0, 3);
+		retval |= _CW_BUF_OR_BYTE(0, 3);
 		buf_p_data_position_get(a_buf, a_offset + 4, &array_element,
 		    &bufel_offset);
-		retval |= _LIBSTASH_BUF_OR_BYTE(0, 4);
+		retval |= _CW_BUF_OR_BYTE(0, 4);
 		buf_p_data_position_get(a_buf, a_offset + 5, &array_element,
 		    &bufel_offset);
-		retval |= _LIBSTASH_BUF_OR_BYTE(0, 5);
+		retval |= _CW_BUF_OR_BYTE(0, 5);
 		buf_p_data_position_get(a_buf, a_offset + 6, &array_element,
 		    &bufel_offset);
-		retval |= _LIBSTASH_BUF_OR_BYTE(0, 6);
+		retval |= _CW_BUF_OR_BYTE(0, 6);
 		buf_p_data_position_get(a_buf, a_offset + 7, &array_element,
 		    &bufel_offset);
-		retval |= _LIBSTASH_BUF_OR_BYTE(0, 7);
+		retval |= _CW_BUF_OR_BYTE(0, 7);
 #endif
 	}
-#undef _LIBSTASH_BUF_OR_BYTE
+#undef _CW_BUF_OR_BYTE
 
 	if (a_buf->is_threadsafe)
 		mtx_unlock(&a_buf->lock);
@@ -1070,7 +1070,7 @@ buf_uint32_set(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint32_t a_val)
 
 	buf_p_writeable_range_make(a_buf, a_offset, sizeof(cw_uint32_t));
 	/* Get a byte from a_val and put in in the least significant byte. */
-#define _LIBSTASH_BUF_BYTE(s) ((a_val >> ((s) << 3)) & 0xff)
+#define _CW_BUF_BYTE(s) ((a_val >> ((s) << 3)) & 0xff)
 
 	buf_p_data_position_get(a_buf, a_offset, &array_element, &bufel_offset);
 
@@ -1078,58 +1078,58 @@ buf_uint32_set(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint32_t a_val)
 		/* The whole thing is in one bufel. */
 #ifdef WORDS_BIGENDIAN
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
-		    = _LIBSTASH_BUF_BYTE(3);
+		    = _CW_BUF_BYTE(3);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset + 1]
-		    = _LIBSTASH_BUF_BYTE(2);
+		    = _CW_BUF_BYTE(2);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset + 2]
-		    = _LIBSTASH_BUF_BYTE(1);
+		    = _CW_BUF_BYTE(1);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset + 3]
-		    = _LIBSTASH_BUF_BYTE(0);
+		    = _CW_BUF_BYTE(0);
 #else
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
-		    = _LIBSTASH_BUF_BYTE(0);
+		    = _CW_BUF_BYTE(0);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset + 1]
-		    = _LIBSTASH_BUF_BYTE(1);
+		    = _CW_BUF_BYTE(1);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset + 2]
-		    = _LIBSTASH_BUF_BYTE(2);
+		    = _CW_BUF_BYTE(2);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset + 3]
-		    = _LIBSTASH_BUF_BYTE(3);
+		    = _CW_BUF_BYTE(3);
 #endif
 	} else {
 		/* Split across two or more bufels. */
 #ifdef WORDS_BIGENDIAN
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
-		    = _LIBSTASH_BUF_BYTE(3);
+		    = _CW_BUF_BYTE(3);
 		buf_p_data_position_get(a_buf, a_offset + 1, &array_element,
 		    &bufel_offset);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
-		    = _LIBSTASH_BUF_BYTE(2);
+		    = _CW_BUF_BYTE(2);
 		buf_p_data_position_get(a_buf, a_offset + 2, &array_element,
 		    &bufel_offset);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
-		    = _LIBSTASH_BUF_BYTE(1);
+		    = _CW_BUF_BYTE(1);
 		buf_p_data_position_get(a_buf, a_offset + 3, &array_element,
 		    &bufel_offset);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
-		    = _LIBSTASH_BUF_BYTE(0);
+		    = _CW_BUF_BYTE(0);
 #else
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
-		    = _LIBSTASH_BUF_BYTE(0);
+		    = _CW_BUF_BYTE(0);
 		buf_p_data_position_get(a_buf, a_offset + 1, &array_element,
 		    &bufel_offset);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
-		    = _LIBSTASH_BUF_BYTE(1);
+		    = _CW_BUF_BYTE(1);
 		buf_p_data_position_get(a_buf, a_offset + 2, &array_element,
 		    &bufel_offset);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
-		    = _LIBSTASH_BUF_BYTE(2);
+		    = _CW_BUF_BYTE(2);
 		buf_p_data_position_get(a_buf, a_offset + 3, &array_element,
 		    &bufel_offset);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
-		    = _LIBSTASH_BUF_BYTE(3);
+		    = _CW_BUF_BYTE(3);
 #endif
 	}
-#undef _LIBSTASH_BUF_BYTE
+#undef _CW_BUF_BYTE
 
 	if (a_buf->is_threadsafe)
 		mtx_unlock(&a_buf->lock);
@@ -1151,7 +1151,7 @@ buf_uint64_set(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint64_t a_val)
 
 	buf_p_writeable_range_make(a_buf, a_offset, sizeof(cw_uint64_t));
 	/* Get a byte from a_val and put in in the least significant byte. */
-#define _LIBSTASH_BUF_BYTE(s) ((a_val >> ((s) << 3)) & 0xff)
+#define _CW_BUF_BYTE(s) ((a_val >> ((s) << 3)) & 0xff)
 
 	buf_p_data_position_get(a_buf, a_offset, &array_element, &bufel_offset);
 
@@ -1159,106 +1159,106 @@ buf_uint64_set(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint64_t a_val)
 		/* The whole thing is in one bufel. */
 #ifdef WORDS_BIGENDIAN
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
-		    = _LIBSTASH_BUF_BYTE(7);
+		    = _CW_BUF_BYTE(7);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset + 1]
-		    = _LIBSTASH_BUF_BYTE(6);
+		    = _CW_BUF_BYTE(6);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset + 2]
-		    = _LIBSTASH_BUF_BYTE(5);
+		    = _CW_BUF_BYTE(5);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset + 3]
-		    = _LIBSTASH_BUF_BYTE(4);
+		    = _CW_BUF_BYTE(4);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset + 4]
-		    = _LIBSTASH_BUF_BYTE(3);
+		    = _CW_BUF_BYTE(3);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset + 5]
-		    = _LIBSTASH_BUF_BYTE(2);
+		    = _CW_BUF_BYTE(2);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset + 6]
-		    = _LIBSTASH_BUF_BYTE(1);
+		    = _CW_BUF_BYTE(1);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset + 7]
-		    = _LIBSTASH_BUF_BYTE(0);
+		    = _CW_BUF_BYTE(0);
 #else
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
-		    = _LIBSTASH_BUF_BYTE(0);
+		    = _CW_BUF_BYTE(0);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset + 1]
-		    = _LIBSTASH_BUF_BYTE(1);
+		    = _CW_BUF_BYTE(1);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset + 2]
-		    = _LIBSTASH_BUF_BYTE(2);
+		    = _CW_BUF_BYTE(2);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset + 3]
-		    = _LIBSTASH_BUF_BYTE(3);
+		    = _CW_BUF_BYTE(3);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset + 4]
-		    = _LIBSTASH_BUF_BYTE(4);
+		    = _CW_BUF_BYTE(4);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset + 5]
-		    = _LIBSTASH_BUF_BYTE(5);
+		    = _CW_BUF_BYTE(5);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset + 6]
-		    = _LIBSTASH_BUF_BYTE(6);
+		    = _CW_BUF_BYTE(6);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset + 7]
-		    = _LIBSTASH_BUF_BYTE(7);
+		    = _CW_BUF_BYTE(7);
 #endif
 	} else {
 		/* Split across two or more bufels. */
 #ifdef WORDS_BIGENDIAN
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
-		    = _LIBSTASH_BUF_BYTE(7);
+		    = _CW_BUF_BYTE(7);
 		buf_p_data_position_get(a_buf, a_offset + 1, &array_element,
 		    &bufel_offset);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
-		    = _LIBSTASH_BUF_BYTE(6);
+		    = _CW_BUF_BYTE(6);
 		buf_p_data_position_get(a_buf, a_offset + 2, &array_element,
 		    &bufel_offset);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
-		    = _LIBSTASH_BUF_BYTE(5);
+		    = _CW_BUF_BYTE(5);
 		buf_p_data_position_get(a_buf, a_offset + 3, &array_element,
 		    &bufel_offset);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
-		    = _LIBSTASH_BUF_BYTE(4);
+		    = _CW_BUF_BYTE(4);
 		buf_p_data_position_get(a_buf, a_offset + 4, &array_element,
 		    &bufel_offset);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
-		    = _LIBSTASH_BUF_BYTE(3);
+		    = _CW_BUF_BYTE(3);
 		buf_p_data_position_get(a_buf, a_offset + 5, &array_element,
 		    &bufel_offset);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
-		    = _LIBSTASH_BUF_BYTE(2);
+		    = _CW_BUF_BYTE(2);
 		buf_p_data_position_get(a_buf, a_offset + 6, &array_element,
 		    &bufel_offset);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
-		    = _LIBSTASH_BUF_BYTE(1);
+		    = _CW_BUF_BYTE(1);
 		buf_p_data_position_get(a_buf, a_offset + 7, &array_element,
 		    &bufel_offset);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
-		    = _LIBSTASH_BUF_BYTE(0);
+		    = _CW_BUF_BYTE(0);
 #else
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
-		    = _LIBSTASH_BUF_BYTE(0);
+		    = _CW_BUF_BYTE(0);
 		buf_p_data_position_get(a_buf, a_offset + 1, &array_element,
 		    &bufel_offset);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
-		    = _LIBSTASH_BUF_BYTE(1);
+		    = _CW_BUF_BYTE(1);
 		buf_p_data_position_get(a_buf, a_offset + 2, &array_element,
 		    &bufel_offset);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
-		    = _LIBSTASH_BUF_BYTE(2);
+		    = _CW_BUF_BYTE(2);
 		buf_p_data_position_get(a_buf, a_offset + 3, &array_element,
 		    &bufel_offset);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
-		    = _LIBSTASH_BUF_BYTE(3);
+		    = _CW_BUF_BYTE(3);
 		buf_p_data_position_get(a_buf, a_offset + 4, &array_element,
 		    &bufel_offset);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
-		    = _LIBSTASH_BUF_BYTE(4);
+		    = _CW_BUF_BYTE(4);
 		buf_p_data_position_get(a_buf, a_offset + 5, &array_element,
 		    &bufel_offset);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
-		    = _LIBSTASH_BUF_BYTE(5);
+		    = _CW_BUF_BYTE(5);
 		buf_p_data_position_get(a_buf, a_offset + 6, &array_element,
 		    &bufel_offset);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
-		    = _LIBSTASH_BUF_BYTE(6);
+		    = _CW_BUF_BYTE(6);
 		buf_p_data_position_get(a_buf, a_offset + 7, &array_element,
 		    &bufel_offset);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
-		    = _LIBSTASH_BUF_BYTE(7);
+		    = _CW_BUF_BYTE(7);
 #endif
 	}
-#undef _LIBSTASH_BUF_BYTE
+#undef _CW_BUF_BYTE
 
 	if (a_buf->is_threadsafe)
 		mtx_unlock(&a_buf->lock);
@@ -1299,7 +1299,7 @@ buf_range_set(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint32_t a_length,
 		/* Initialize bufel. */
 /*  		memset(&a_buf->bufel_array[a_buf->array_end], 0, */
 /*  		    sizeof(cw_bufel_t)); */
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 		a_buf->bufel_array[a_buf->array_end].magic_a = _CW_BUFEL_MAGIC;
 		a_buf->bufel_array[a_buf->array_end].size_of =
 		    sizeof(cw_bufel_t);
@@ -1366,7 +1366,7 @@ buf_p_new(cw_buf_t *a_buf, cw_mem_t *a_mem, cw_bool_t a_is_threadsafe)
 
 	retval->mem = a_mem;
 
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 	retval->magic_a = _CW_BUF_MAGIC;
 	retval->size_of = sizeof(cw_buf_t);
 	retval->magic_b = _CW_BUF_MAGIC;
@@ -1377,7 +1377,7 @@ buf_p_new(cw_buf_t *a_buf, cw_mem_t *a_mem, cw_bool_t a_is_threadsafe)
 		mtx_new(&retval->lock);
 	retval->size = 0;
 
-	retval->array_size = _LIBSTASH_BUF_ARRAY_MIN_SIZE;
+	retval->array_size = _CW_BUF_ARRAY_MIN_SIZE;
 	retval->array_num_valid = 0;
 	retval->array_start = 0;
 	retval->array_end = 0;
@@ -1389,13 +1389,13 @@ buf_p_new(cw_buf_t *a_buf, cw_mem_t *a_mem, cw_bool_t a_is_threadsafe)
 	retval->cumulative_index = retval->static_cumulative_index;
 	retval->iov = retval->static_iov;
 
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 	memset(retval->bufel_array, 0,
-	    _LIBSTASH_BUF_ARRAY_MIN_SIZE * sizeof(cw_bufel_t));
+	    _CW_BUF_ARRAY_MIN_SIZE * sizeof(cw_bufel_t));
 	memset(retval->cumulative_index, 0,
-	    _LIBSTASH_BUF_ARRAY_MIN_SIZE * sizeof(cw_uint32_t));
+	    _CW_BUF_ARRAY_MIN_SIZE * sizeof(cw_uint32_t));
 	memset(retval->iov, 0,
-	    _LIBSTASH_BUF_ARRAY_MIN_SIZE * sizeof(struct iovec));
+	    _CW_BUF_ARRAY_MIN_SIZE * sizeof(struct iovec));
 #endif
 
 	return retval;
@@ -1522,7 +1522,7 @@ buf_p_array_fit(cw_buf_t *a_buf, cw_uint32_t a_min_array_size)
 			    sizeof(cw_bufel_t));
 			memcpy(t_ptr, a_buf->bufel_array,
 			    (size_t) (a_buf->array_size * sizeof(cw_bufel_t)));
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 			memset(a_buf->bufel_array, 0x5a,
 			    (a_buf->array_size * sizeof(cw_bufel_t)));
 #endif
@@ -1537,7 +1537,7 @@ buf_p_array_fit(cw_buf_t *a_buf, cw_uint32_t a_min_array_size)
 			    sizeof(cw_uint32_t));
 			memcpy(t_ptr, a_buf->cumulative_index,
 			    (a_buf->array_size * sizeof(cw_uint32_t)));
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 			memset(a_buf->cumulative_index, 0x5a,
 			    (a_buf->array_size * sizeof(cw_uint32_t)));
 #endif
@@ -1550,14 +1550,14 @@ buf_p_array_fit(cw_buf_t *a_buf, cw_uint32_t a_min_array_size)
 		} else {
 			t_ptr = mem_calloc(a_buf->mem, i, sizeof(struct
 			    iovec));
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 			memset(a_buf->iov, 0x5a,
 			    (a_buf->array_size * sizeof(struct iovec)));
 #endif
 		}
 		a_buf->iov = (struct iovec *)t_ptr;
 
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 		memset(&a_buf->bufel_array[a_buf->array_size], 0,
 		    ((i - a_buf->array_size) * sizeof(cw_bufel_t)));
 		memset(&a_buf->cumulative_index[a_buf->array_size], 0,
@@ -1586,7 +1586,7 @@ buf_p_array_fit(cw_buf_t *a_buf, cw_uint32_t a_min_array_size)
 			    a_buf->cumulative_index,
 			    a_buf->array_end * sizeof(cw_uint32_t));
 
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 			/*
 			 * Zero the old copy to get rid of the bufel's' magic.
 			 */
@@ -1649,14 +1649,14 @@ buf_p_buf_catenate(cw_buf_t *a_a, cw_buf_t *a_b, cw_bool_t a_preserve)
 				if (a_b->bufel_array[a_b->array_start].bufc !=
 				    NULL)
 					bufc_delete(a_b->bufel_array[a_b->array_start].bufc);
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 				memset(&a_b->bufel_array[a_b->array_start], 0,
 				    sizeof(cw_bufel_t));
 #endif
 			}
 		}
 	}
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 	if (did_bufel_merge) {
 		buf_p_array_copy(a_a, a_b, a_b->array_num_valid - 1,
 		    a_a->array_end, (a_b->array_start + 1) & (a_b->array_size -
@@ -1710,7 +1710,7 @@ buf_p_buf_catenate(cw_buf_t *a_a, cw_buf_t *a_b, cw_bool_t a_preserve)
 	}
 }
 
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 static void
 buf_p_array_copy(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t a_num_elements,
     cw_uint32_t a_a_start, cw_uint32_t a_b_start, cw_bool_t a_is_destructive)
@@ -1767,7 +1767,7 @@ buf_p_array_copy(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t a_num_elements,
 			    &a_b->bufel_array[a_b_start],
 			    a_num_elements * sizeof(cw_bufel_t));
 		}
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 		if (a_is_destructive) {
 			memset(&a_b->bufel_array[a_b_start], 0,
 			    a_num_elements * sizeof(cw_bufel_t));
@@ -1810,7 +1810,7 @@ buf_p_array_copy(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t a_num_elements,
 		memcpy(&a_a->bufel_array[a_a_start],
 		    &a_b->bufel_array[a_b_start],
 		    first_chunk_size * sizeof(cw_bufel_t));
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 		if (a_is_destructive) {
 			memset(&a_b->bufel_array[a_b_start], 0,
 			    first_chunk_size * sizeof(cw_bufel_t));
@@ -1820,7 +1820,7 @@ buf_p_array_copy(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t a_num_elements,
 		memcpy(&a_a->bufel_array[0],
 		    &a_b->bufel_array[a_b_start + first_chunk_size],
 		    second_chunk_size * sizeof(cw_bufel_t));
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 		if (a_is_destructive) {
 			memset(&a_b->bufel_array[a_b_start + first_chunk_size],
 			    0, second_chunk_size * sizeof(cw_bufel_t));
@@ -1867,7 +1867,7 @@ buf_p_array_copy(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t a_num_elements,
 			memcpy(&a_a->bufel_array[a_a_start],
 			    &a_b->bufel_array[a_b_start],
 			    first_chunk_size * sizeof(cw_bufel_t));
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 			if (a_is_destructive) {
 				memset(&a_b->bufel_array[a_b_start], 0,
 				    first_chunk_size * sizeof(cw_bufel_t));
@@ -1877,7 +1877,7 @@ buf_p_array_copy(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t a_num_elements,
 			memcpy(&a_a->bufel_array[0],
 			    &a_b->bufel_array[a_b_start + first_chunk_size],
 			    second_chunk_size * sizeof(cw_bufel_t));
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 			if (a_is_destructive) {
 				memset(&a_b->bufel_array[a_b_start +
 				    first_chunk_size], 0, second_chunk_size *
@@ -1888,7 +1888,7 @@ buf_p_array_copy(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t a_num_elements,
 			memcpy(&a_a->bufel_array[second_chunk_size],
 			    &a_b->bufel_array[0], third_chunk_size *
 			    sizeof(cw_bufel_t));
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 			if (a_is_destructive) {
 				memset(&a_b->bufel_array[0], 0,
 				    third_chunk_size * sizeof(cw_bufel_t));
@@ -1934,7 +1934,7 @@ buf_p_array_copy(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t a_num_elements,
 			memcpy(&a_a->bufel_array[a_a_start],
 			    &a_b->bufel_array[a_b_start],
 			    first_chunk_size * sizeof(cw_bufel_t));
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 			if (a_is_destructive) {
 				memset(&a_a->bufel_array[a_b_start], 0,
 				    first_chunk_size * sizeof(cw_bufel_t));
@@ -1944,7 +1944,7 @@ buf_p_array_copy(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t a_num_elements,
 			memcpy(&a_a->bufel_array[a_a_start + first_chunk_size],
 			    &a_b->bufel_array[0],
 			    second_chunk_size * sizeof(cw_bufel_t));
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 			if (a_is_destructive) {
 				memset(&a_b->bufel_array[0], 0,
 				    second_chunk_size * sizeof(cw_bufel_t));
@@ -1954,7 +1954,7 @@ buf_p_array_copy(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t a_num_elements,
 			memcpy(&a_a->bufel_array[0],
 			    &a_b->bufel_array[second_chunk_size],
 			    third_chunk_size * sizeof(cw_bufel_t));
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 			if (a_is_destructive) {
 				memset(&a_b->bufel_array[second_chunk_size], 0,
 				    third_chunk_size * sizeof(cw_bufel_t));
@@ -2028,7 +2028,7 @@ buf_p_array_copy(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t a_num_elements,
 			memcpy(&a_a->bufel_array[a_a_start],
 			    &a_b->bufel_array[a_b_start],
 			    first_chunk_size * sizeof(cw_bufel_t));
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 			if (a_is_destructive) {
 				memset(&a_b->bufel_array[a_b_start], 0,
 				    first_chunk_size * sizeof(cw_bufel_t));
@@ -2039,7 +2039,7 @@ buf_p_array_copy(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t a_num_elements,
 				& (a_a->array_size - 1)],
 			    &a_b->bufel_array[0],
 			    second_chunk_size * sizeof(cw_bufel_t));
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 			if (a_is_destructive) {
 				memset(&a_b->bufel_array[0], 0,
 				    second_chunk_size * sizeof(cw_bufel_t));
@@ -2109,7 +2109,7 @@ buf_p_writeable_range_make(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint32_t
 		/* Initialize bufel. */
 /*  		memset(&a_buf->bufel_array[a_buf->array_end], 0, */
 /*  		    sizeof(cw_bufel_t)); */
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 		a_buf->bufel_array[a_buf->array_end].magic_a = _CW_BUFEL_MAGIC;
 		a_buf->bufel_array[a_buf->array_end].size_of =
 		    sizeof(cw_bufel_t);
@@ -2196,7 +2196,7 @@ bufc_new(cw_bufc_t *a_bufc, cw_mem_t *a_mem, cw_opaque_dealloc_t
 	}
 	retval->ref_count = 1;
 
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 	retval->magic_a = _CW_BUFC_MAGIC;
 	retval->size_of = sizeof(cw_bufc_t);
 	retval->magic_b = _CW_BUFC_MAGIC;
@@ -2292,7 +2292,7 @@ bufc_p_dump(cw_bufc_t *a_bufc, const char *a_prefix)
 	mtx_lock(&a_bufc->lock);
 
 	out_put(out_err, "[s]| bufc_dump()\n", a_prefix);
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 	out_put(out_err, "[s]|--> magic_a : 0x[i|b:16]\n", a_prefix,
 	    a_bufc->magic_a);
 	out_put(out_err, "[s]|--> magic_b : 0x[i|b:16]\n", a_prefix,

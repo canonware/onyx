@@ -88,7 +88,7 @@ currenterror_l_populate(cw_nxo_t *a_dict, cw_nxo_t *a_thread)
 	
 	nxo_stack_npop(tstack, 2);
 
-#ifdef _LIBONYX_DBG
+#ifdef _CW_DBG
 	if (nxo_dict_count(a_dict) != NENTRIES) {
 		_cw_out_put_e("nxo_dict_count(a_dict) != NENTRIES "
 		    "([i] != [i])\n", nxo_dict_count(a_dict), NENTRIES);

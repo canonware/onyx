@@ -11,7 +11,7 @@
 
 #include "../include/libstash/libstash.h"
 
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 #define _CW_CH_MAGIC 0x574936af
 #define _CW_CHI_MAGIC 0xabdcee0e
 #endif
@@ -42,7 +42,7 @@ ch_new(cw_ch_t *a_ch, cw_mem_t *a_mem, cw_uint32_t a_table_size, cw_ch_hash_t
 	retval->hash = a_hash;
 	retval->key_comp = a_key_comp;
 
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 	retval->magic = _CW_CH_MAGIC;
 #endif
 
@@ -65,7 +65,7 @@ ch_delete(cw_ch_t *a_ch)
 		ql_head_remove(&a_ch->chi_ql, cw_chi_t, ch_link);
 		if (chi->is_malloced)
 			mem_free(a_ch->mem, chi);
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 		else
 			memset(chi, 0x5a, sizeof(cw_chi_t));
 #endif
@@ -73,7 +73,7 @@ ch_delete(cw_ch_t *a_ch)
 
 	if (a_ch->is_malloced)
 		mem_free(a_ch->mem, a_ch);
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 	else
 		memset(a_ch, 0x5a, _CW_CH_TABLE2SIZEOF(a_ch->table_size));
 #endif
@@ -112,7 +112,7 @@ ch_insert(cw_ch_t *a_ch, const void *a_key, const void *a_data, cw_chi_t
 	ql_elm_new(chi, slot_link);
 	slot = a_ch->hash(a_key) % a_ch->table_size;
 	chi->slot = slot;
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 	chi->magic = _CW_CHI_MAGIC;
 #endif
 
@@ -120,14 +120,14 @@ ch_insert(cw_ch_t *a_ch, const void *a_key, const void *a_data, cw_chi_t
 	ql_tail_insert(&a_ch->chi_ql, chi, ch_link);
 
 	/* Hook into the slot list. */
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 	if (ql_first(&a_ch->table[slot]) != NULL)
 		a_ch->num_collisions++;
 #endif
 	ql_head_insert(&a_ch->table[slot], chi, slot_link);
 
 	a_ch->count++;
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 	a_ch->num_inserts++;
 #endif
 }
@@ -165,14 +165,14 @@ ch_remove(cw_ch_t *a_ch, const void *a_search_key, void **r_key, void **r_data,
 			if (chi->is_malloced)
 				mem_free(a_ch->mem, chi);
 			else if (r_chi != NULL) {
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 				chi->magic = 0;
 #endif
 				*r_chi = chi;
 			}
 
 			a_ch->count--;
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 			a_ch->num_removes++;
 #endif
 			retval = FALSE;
@@ -275,14 +275,14 @@ ch_remove_iterate(cw_ch_t *a_ch, void **r_key, void **r_data, cw_chi_t **r_chi)
 	if (chi->is_malloced)
 		mem_free(a_ch->mem, chi);
 	else if (r_chi != NULL) {
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 		chi->magic = 0;
 #endif
 		*r_chi = chi;
 	}
 
 	a_ch->count--;
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 	a_ch->num_removes++;
 #endif
 
@@ -301,7 +301,7 @@ ch_dump(cw_ch_t *a_ch, const char *a_prefix)
 	_cw_assert(a_ch->magic == _CW_CH_MAGIC);
 	_cw_check_ptr(a_prefix);
 
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 	out_put(out_err, "[s]: num_collisions: [i], num_inserts: [i],"
 	    " num_removes: [i]\n",
 	    a_prefix, a_ch->num_collisions, a_ch->num_inserts,

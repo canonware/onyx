@@ -47,7 +47,7 @@ Use one of the following compiler command lines to compile applications with
 \libname{libstash}.
 \begin{description}
 \item[Normal: ] cc \filename{file} -lstash -lpthread
-\item[Debug: ] cc -g -D\_LIBSTASH\_DBG \filename{file} -lstash\_d -lpthread
+\item[Debug: ] cc -g -D\_CW\_DBG \filename{file} -lstash\_d -lpthread
 \item[Profile: ] cc -pg \filename{file} -lstash\_p -lpthread
 \end{description}
 

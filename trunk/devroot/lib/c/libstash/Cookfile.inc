@@ -173,7 +173,6 @@ libstash_distclean :
 
 CPPFLAGS = [CPPFLAGS] -I[srcdir]/lib/c/libstash/include
                       -I[objdir]/lib/c/libstash/include/libstash;
-D_CPPFLAGS = [D_CPPFLAGS] -D_LIBSTASH_DBG;
 
 /*
  * Build rules.

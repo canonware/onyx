@@ -11,9 +11,9 @@
 
 #include "../include/libstash/libstash.h"
 
-#ifdef _LIBSTASH_DBG
-#define _LIBSTASH_BHP_MAGIC 0xbf917ca1
-#define _LIBSTASH_BHPI_MAGIC 0xbf90ec15
+#ifdef _CW_DBG
+#define _CW_BHP_MAGIC 0xbf917ca1
+#define _CW_BHPI_MAGIC 0xbf90ec15
 #endif
 
 static cw_bhp_t	*bhp_p_new(cw_bhp_t *a_bhp, cw_mem_t *a_mem, bhp_prio_comp_t
@@ -45,10 +45,10 @@ bhpi_new(cw_bhpi_t *a_bhpi, cw_mem_t *a_mem, const void *a_priority, const void
 	retval->priority = a_priority;
 	retval->data = a_data;
 
-#ifdef _LIBSTASH_DBG
-	retval->magic_a = _LIBSTASH_BHPI_MAGIC;
+#ifdef _CW_DBG
+	retval->magic_a = _CW_BHPI_MAGIC;
 	retval->size_of = sizeof(cw_bhpi_t);
-	retval->magic_b = _LIBSTASH_BHPI_MAGIC;
+	retval->magic_b = _CW_BHPI_MAGIC;
 #endif
 
 	return retval;
@@ -58,15 +58,15 @@ void
 bhpi_delete(cw_bhpi_t *a_bhpi)
 {
 	_cw_check_ptr(a_bhpi);
-	_cw_assert(a_bhpi->magic_a == _LIBSTASH_BHPI_MAGIC);
+	_cw_assert(a_bhpi->magic_a == _CW_BHPI_MAGIC);
 	_cw_assert(a_bhpi->size_of == sizeof(cw_bhpi_t));
-	_cw_assert(a_bhpi->magic_b == _LIBSTASH_BHPI_MAGIC);
+	_cw_assert(a_bhpi->magic_b == _CW_BHPI_MAGIC);
 
 	if (a_bhpi->dealloc_func != NULL) {
 		_cw_opaque_dealloc(a_bhpi->dealloc_func, a_bhpi->dealloc_arg,
 		    a_bhpi);
 	}
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 	else
 		memset(a_bhpi, 0x5a, sizeof(cw_bhpi_t));
 #endif
@@ -88,9 +88,9 @@ void
 bhp_delete(cw_bhp_t *a_bhp)
 {
 	_cw_check_ptr(a_bhp);
-	_cw_assert(a_bhp->magic_a == _LIBSTASH_BHP_MAGIC);
+	_cw_assert(a_bhp->magic_a == _CW_BHP_MAGIC);
 	_cw_assert(a_bhp->size_of == sizeof(cw_bhp_t));
-	_cw_assert(a_bhp->magic_b == _LIBSTASH_BHP_MAGIC);
+	_cw_assert(a_bhp->magic_b == _CW_BHP_MAGIC);
 
 	/* Empty the heap. */
 	if (a_bhp->head != NULL) {
@@ -107,9 +107,9 @@ void
 bhp_dump(cw_bhp_t *a_bhp)
 {
 	_cw_check_ptr(a_bhp);
-	_cw_assert(a_bhp->magic_a == _LIBSTASH_BHP_MAGIC);
+	_cw_assert(a_bhp->magic_a == _CW_BHP_MAGIC);
 	_cw_assert(a_bhp->size_of == sizeof(cw_bhp_t));
-	_cw_assert(a_bhp->magic_b == _LIBSTASH_BHP_MAGIC);
+	_cw_assert(a_bhp->magic_b == _CW_BHP_MAGIC);
 
 	if (a_bhp->is_thread_safe)
 		mtx_lock(&a_bhp->lock);
@@ -131,13 +131,13 @@ bhp_insert(cw_bhp_t *a_bhp, cw_bhpi_t *a_bhpi)
 	cw_bhp_t	temp_heap;
 
 	_cw_check_ptr(a_bhp);
-	_cw_assert(a_bhp->magic_a == _LIBSTASH_BHP_MAGIC);
+	_cw_assert(a_bhp->magic_a == _CW_BHP_MAGIC);
 	_cw_assert(a_bhp->size_of == sizeof(cw_bhp_t));
-	_cw_assert(a_bhp->magic_b == _LIBSTASH_BHP_MAGIC);
+	_cw_assert(a_bhp->magic_b == _CW_BHP_MAGIC);
 	_cw_check_ptr(a_bhpi);
-	_cw_assert(a_bhpi->magic_a == _LIBSTASH_BHPI_MAGIC);
+	_cw_assert(a_bhpi->magic_a == _CW_BHPI_MAGIC);
 	_cw_assert(a_bhpi->size_of == sizeof(cw_bhpi_t));
-	_cw_assert(a_bhpi->magic_b == _LIBSTASH_BHPI_MAGIC);
+	_cw_assert(a_bhpi->magic_b == _CW_BHPI_MAGIC);
 
 	if (a_bhp->is_thread_safe)
 		mtx_lock(&a_bhp->lock);
@@ -165,9 +165,9 @@ bhp_min_find(cw_bhp_t *a_bhp, void **r_priority, void **r_data)
 	cw_bhpi_t	*curr_min, *curr_pos;
 
 	_cw_check_ptr(a_bhp);
-	_cw_assert(a_bhp->magic_a == _LIBSTASH_BHP_MAGIC);
+	_cw_assert(a_bhp->magic_a == _CW_BHP_MAGIC);
 	_cw_assert(a_bhp->size_of == sizeof(cw_bhp_t));
-	_cw_assert(a_bhp->magic_b == _LIBSTASH_BHP_MAGIC);
+	_cw_assert(a_bhp->magic_b == _CW_BHP_MAGIC);
 
 	if (a_bhp->is_thread_safe)
 		mtx_lock(&a_bhp->lock);
@@ -214,9 +214,9 @@ bhp_min_del(cw_bhp_t *a_bhp, void **r_priority, void **r_data)
 	cw_bhp_t	temp_heap;
 
 	_cw_check_ptr(a_bhp);
-	_cw_assert(a_bhp->magic_a == _LIBSTASH_BHP_MAGIC);
+	_cw_assert(a_bhp->magic_a == _CW_BHP_MAGIC);
 	_cw_assert(a_bhp->size_of == sizeof(cw_bhp_t));
-	_cw_assert(a_bhp->magic_b == _LIBSTASH_BHP_MAGIC);
+	_cw_assert(a_bhp->magic_b == _CW_BHP_MAGIC);
 
 	if (a_bhp->is_thread_safe)
 		mtx_lock(&a_bhp->lock);
@@ -303,9 +303,9 @@ bhp_size_get(cw_bhp_t *a_bhp)
 	cw_uint64_t	retval;
 
 	_cw_check_ptr(a_bhp);
-	_cw_assert(a_bhp->magic_a == _LIBSTASH_BHP_MAGIC);
+	_cw_assert(a_bhp->magic_a == _CW_BHP_MAGIC);
 	_cw_assert(a_bhp->size_of == sizeof(cw_bhp_t));
-	_cw_assert(a_bhp->magic_b == _LIBSTASH_BHP_MAGIC);
+	_cw_assert(a_bhp->magic_b == _CW_BHP_MAGIC);
 
 	if (a_bhp->is_thread_safe)
 		mtx_lock(&a_bhp->lock);
@@ -321,13 +321,13 @@ void
 bhp_union(cw_bhp_t *a_a, cw_bhp_t *a_b)
 {
 	_cw_check_ptr(a_a);
-	_cw_assert(a_a->magic_a == _LIBSTASH_BHP_MAGIC);
+	_cw_assert(a_a->magic_a == _CW_BHP_MAGIC);
 	_cw_assert(a_a->size_of == sizeof(cw_bhp_t));
-	_cw_assert(a_a->magic_b == _LIBSTASH_BHP_MAGIC);
+	_cw_assert(a_a->magic_b == _CW_BHP_MAGIC);
 	_cw_check_ptr(a_b);
-	_cw_assert(a_b->magic_a == _LIBSTASH_BHP_MAGIC);
+	_cw_assert(a_b->magic_a == _CW_BHP_MAGIC);
 	_cw_assert(a_b->size_of == sizeof(cw_bhp_t));
-	_cw_assert(a_b->magic_b == _LIBSTASH_BHP_MAGIC);
+	_cw_assert(a_b->magic_b == _CW_BHP_MAGIC);
 
 	if (a_a->is_thread_safe)
 		mtx_lock(&a_a->lock);
@@ -434,10 +434,10 @@ bhp_p_new(cw_bhp_t *a_bhp, cw_mem_t *a_mem, bhp_prio_comp_t *a_prio_comp,
 	retval->num_nodes = 0;
 	retval->priority_compare = a_prio_comp;
 
-#ifdef _LIBSTASH_DBG
-	retval->magic_a = _LIBSTASH_BHP_MAGIC;
+#ifdef _CW_DBG
+	retval->magic_a = _CW_BHP_MAGIC;
 	retval->size_of = sizeof(cw_bhp_t);
-	retval->magic_b = _LIBSTASH_BHP_MAGIC;
+	retval->magic_b = _CW_BHP_MAGIC;
 #endif
 
 	return retval;

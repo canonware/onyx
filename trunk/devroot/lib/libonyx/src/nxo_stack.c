@@ -293,7 +293,7 @@ nxoe_p_stack_spares_create(cw_nxoe_stack_t *a_stack)
 
 	qr_new(&stackc->objects[0], link);
 	stackc->objects[0].stackc = stackc;
-	for (i = 1; i < _LIBONYX_STACKC_COUNT; i++) {
+	for (i = 1; i < _CW_LIBONYX_STACKC_COUNT; i++) {
 		qr_new(&stackc->objects[i], link);
 		qr_after_insert(&stackc->objects[i - 1], &stackc->objects[i],
 		    link);
@@ -303,7 +303,7 @@ nxoe_p_stack_spares_create(cw_nxoe_stack_t *a_stack)
 	ql_tail_insert(&a_stack->chunks, stackc, link);
 	qr_meld(ql_first(&a_stack->stack), &stackc->objects[0], link);
 
-	a_stack->nspare += _LIBONYX_STACKC_COUNT;
+	a_stack->nspare += _CW_LIBONYX_STACKC_COUNT;
 }
 
 void
@@ -316,7 +316,7 @@ nxoe_p_stack_spares_destroy(cw_nxoe_stack_t *a_stack, cw_nxoe_stackc_t
 	 * Iterate through the objects and remove them from the stack-wide
 	 * object ring.
 	 */
-	for (i = 0; i < _LIBONYX_STACKC_COUNT; i++)
+	for (i = 0; i < _CW_LIBONYX_STACKC_COUNT; i++)
 		qr_remove(&a_stackc->objects[i], link);
 
 	/* Remove the stackc from the stack's list of stackc's. */
@@ -325,5 +325,5 @@ nxoe_p_stack_spares_destroy(cw_nxoe_stack_t *a_stack, cw_nxoe_stackc_t
 	/* Deallocate. */
 	nxa_l_stackc_put(nx_nxa_get(a_stack->nx), a_stackc);
 
-	a_stack->nspare -= _LIBONYX_STACKC_COUNT;
+	a_stack->nspare -= _CW_LIBONYX_STACKC_COUNT;
 }

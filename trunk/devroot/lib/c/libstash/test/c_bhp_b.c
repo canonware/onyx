@@ -13,7 +13,7 @@
 
 #include "../include/libstash/libstash.h"
 
-#define _LIBSTASH_TEST_HEAP_SIZE 4097
+#define _CW_TEST_HEAP_SIZE 4097
 
 int
 main()
@@ -53,12 +53,12 @@ main()
 	{
 		cw_bhp_t	*bhp_p;
 		cw_bhpi_t	*bhpi_p;
-		cw_uint32_t	items[_LIBSTASH_TEST_HEAP_SIZE], i;
+		cw_uint32_t	items[_CW_TEST_HEAP_SIZE], i;
 
 		bhp_p = bhp_new_r(NULL, cw_g_mem, bhp_uint32_priority_compare);
 		_cw_check_ptr(bhp_p);
 
-		for (i = 0; i < _LIBSTASH_TEST_HEAP_SIZE; i++) {
+		for (i = 0; i < _CW_TEST_HEAP_SIZE; i++) {
 			items[i] = i;
 
 			bhpi_p = bhpi_new(NULL, cw_g_mem, (const void
@@ -72,10 +72,10 @@ main()
 
 		for (i = 0; i < 129; i++) {
 			_cw_assert(bhp_size_get(bhp_p) ==
-			    _LIBSTASH_TEST_HEAP_SIZE - i);
+			    _CW_TEST_HEAP_SIZE - i);
 			_cw_assert(bhp_min_del(bhp_p, NULL, NULL) == FALSE);
 			_cw_assert(bhp_size_get(bhp_p) ==
-			    _LIBSTASH_TEST_HEAP_SIZE - 1 - i);
+			    _CW_TEST_HEAP_SIZE - 1 - i);
 		}
 
 		bhp_delete(bhp_p);
@@ -85,7 +85,7 @@ main()
 	{
 		cw_bhp_t	*bhp_p_a, *bhp_p_b;
 		cw_bhpi_t	*bhpi_p;
-		cw_uint32_t	items[_LIBSTASH_TEST_HEAP_SIZE], i;
+		cw_uint32_t	items[_CW_TEST_HEAP_SIZE], i;
 
 		bhp_p_a = bhp_new_r(NULL, cw_g_mem,
 		    bhp_uint32_priority_compare);
@@ -95,7 +95,7 @@ main()
 		    bhp_uint32_priority_compare);
 		_cw_check_ptr(bhp_p_b);
 
-		for (i = 0; i < _LIBSTASH_TEST_HEAP_SIZE; i++) {
+		for (i = 0; i < _CW_TEST_HEAP_SIZE; i++) {
 			items[i] = i;
 
 			bhpi_p = bhpi_new(NULL, cw_g_mem, (const void

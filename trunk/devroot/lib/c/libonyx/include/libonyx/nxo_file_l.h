@@ -13,7 +13,7 @@
  * Size of stack-allocated buffer to use for nxo_file_readline().  If this
  * overflows, heap allocation is used.
  */
-#ifdef _LIBONYX_DBG
+#ifdef _CW_DBG
 #define	_CW_NXO_FILE_READLINE_BUFSIZE	 25
 #else
 #define	_CW_NXO_FILE_READLINE_BUFSIZE	100

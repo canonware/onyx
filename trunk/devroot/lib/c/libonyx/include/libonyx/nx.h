@@ -10,7 +10,7 @@
  ******************************************************************************/
 
 struct cw_nx_s {
-#ifdef _LIBONYX_DBG
+#ifdef _CW_DBG
 	cw_uint32_t	magic;
 #define _CW_NX_MAGIC	0xae9678fd
 #endif

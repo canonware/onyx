@@ -12,7 +12,7 @@
 typedef struct cw_sock_s cw_sock_t;
 
 struct cw_sock_s {
-#ifdef _LIBSOCK_DBG
+#ifdef _CW_DBG
 	cw_uint32_t	magic;
 #endif
 	cw_bool_t	is_malloced;

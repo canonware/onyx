@@ -13,7 +13,7 @@
 
 #include "../include/libstash/libstash.h"
 
-#define _LIBSTASH_TEST_NUM_THREADS 20
+#define _CW_TEST_NUM_THREADS 20
 
 void *
 thread_entry_func(void *a_arg)
@@ -30,7 +30,7 @@ thread_entry_func(void *a_arg)
 int
 main()
 {
-	cw_thd_t	*threads[_LIBSTASH_TEST_NUM_THREADS];
+	cw_thd_t	*threads[_CW_TEST_NUM_THREADS];
 	cw_rwl_t	lock_a, lock_b;
 	cw_uint32_t	i;
 
@@ -50,7 +50,7 @@ main()
 	rwl_rlock(&lock_a);
 	rwl_rlock(&lock_a);
 	rwl_rlock(&lock_a);
-	for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
+	for (i = 0; i < _CW_TEST_NUM_THREADS; i++)
 		threads[i] = thd_new(thread_entry_func, (void *)&lock_a, TRUE);
 	out_put_e(out_err, NULL, 0, "main", "About to release rlock\n");
 	rwl_runlock(&lock_a);
@@ -61,17 +61,17 @@ main()
 	out_put_e(out_err, NULL, 0, "main", "About to release rlock\n");
 	rwl_runlock(&lock_a);
 
-	for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
+	for (i = 0; i < _CW_TEST_NUM_THREADS; i++)
 		thd_join(threads[i]);
 
 	rwl_wlock(&lock_a);
-	for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
+	for (i = 0; i < _CW_TEST_NUM_THREADS; i++)
 		threads[i] = thd_new(thread_entry_func, (void *)&lock_a, TRUE);
 	out_put_e(out_err, NULL, 0, "main", "About to release wlock\n");
 	usleep(1);
 	rwl_wunlock(&lock_a);
 
-	for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
+	for (i = 0; i < _CW_TEST_NUM_THREADS; i++)
 		thd_join(threads[i]);
 
 	rwl_delete(&lock_a);

@@ -25,7 +25,7 @@ P_BINS = ;
   set mkdir
 {
   [CC] [D_CFLAGS] [CPPFLAGS] -I[srcdir]/bin/%0include -I[objdir]/bin/%0include
-       [D_CPPFLAGS] -D_[upcase [subst "/" "" %0]]_DBG
+       [D_CPPFLAGS]
        -c [srcdir]/bin/%0src/%1.c -o [target];
 
   c_incl [CPPFLAGS] -I[srcdir]/bin/%0include -I[objdir]/bin/%0include

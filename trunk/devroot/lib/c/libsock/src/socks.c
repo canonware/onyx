@@ -23,10 +23,10 @@
 
 #include "../include/libsock/libsock_l.h"
 
-#define _LIBSOCK_SOCKS_MAGIC 0x19730803
+#define _CW_SOCKS_MAGIC 0x19730803
 
 struct cw_socks_s {
-#ifdef _LIBSOCK_DBG
+#ifdef _CW_DBG
 	cw_uint32_t	magic;
 #endif
 	cw_bool_t	is_listening;
@@ -41,8 +41,8 @@ socks_new(void)
 	retval = (cw_socks_t *)_cw_malloc(sizeof(cw_socks_t));
 	memset(retval, 0, sizeof(cw_socks_t));
 
-#ifdef _LIBSOCK_DBG
-	retval->magic = _LIBSOCK_SOCKS_MAGIC;
+#ifdef _CW_DBG
+	retval->magic = _CW_SOCKS_MAGIC;
 #endif
 
 	return retval;
@@ -52,21 +52,21 @@ void
 socks_delete(cw_socks_t *a_socks)
 {
 	_cw_check_ptr(a_socks);
-	_cw_assert(a_socks->magic == _LIBSOCK_SOCKS_MAGIC);
+	_cw_assert(a_socks->magic == _CW_SOCKS_MAGIC);
 
 	if (a_socks->is_listening) {
 		int	error;
 
 		/* Shut the port down. */
 		error = close(a_socks->sockfd);
-#ifdef _LIBSOCK_CONFESS
+#ifdef _CW_CONFESS
 		if (error) {
 			out_put_e(out_err, NULL, 0, __FUNCTION__,
 			    "Error in close(): [s]\n", strerror(error));
 		}
 #endif
 	}
-#ifdef _LIBSOCK_DBG
+#ifdef _CW_DBG
 	a_socks->magic = 0;
 #endif
 
@@ -81,14 +81,14 @@ socks_listen(cw_socks_t *a_socks, cw_uint32_t a_mask, int *r_port)
 	struct sockaddr_in	server_addr;
 
 	_cw_check_ptr(a_socks);
-	_cw_assert(a_socks->magic == _LIBSOCK_SOCKS_MAGIC);
+	_cw_assert(a_socks->magic == _CW_SOCKS_MAGIC);
 	_cw_check_ptr(r_port);
 	_cw_assert(a_socks->is_listening == FALSE);
 
 	/* Open a TCP socket stream. */
 	a_socks->sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (a_socks->sockfd < 0) {
-#ifdef _LIBSOCK_CONFESS
+#ifdef _CW_CONFESS
 		out_put_e(out_err, NULL, 0, __FUNCTION__,
 		    "Error in socket(): [s]\n", strerror(errno));
 #endif
@@ -107,7 +107,7 @@ socks_listen(cw_socks_t *a_socks, cw_uint32_t a_mask, int *r_port)
 	}
 
 	/* Bind the socket's local address. */
-#ifdef _LIBSOCK_CONFESS
+#ifdef _CW_CONFESS
 	{
 		cw_uint32_t	t_host_ip = ntohl(a_mask);
 
@@ -125,7 +125,7 @@ socks_listen(cw_socks_t *a_socks, cw_uint32_t a_mask, int *r_port)
 
 	if (bind(a_socks->sockfd, (struct sockaddr *)&server_addr,
 	    sizeof(server_addr)) == -1) {
-#ifdef _LIBSOCK_CONFESS
+#ifdef _CW_CONFESS
 		out_put_e(out_err, NULL, 0, __FUNCTION__,
 		    "Error in bind(): [s]\n", strerror(errno));
 #endif
@@ -139,7 +139,7 @@ socks_listen(cw_socks_t *a_socks, cw_uint32_t a_mask, int *r_port)
 		/* What port number did the OS choose? */
 		if (getsockname(a_socks->sockfd, (struct sockaddr
 		    *)&server_addr, &server_addr_size)) {
-#ifdef _LIBSOCK_CONFESS
+#ifdef _CW_CONFESS
 			out_put_e(out_err, NULL, 0, __FUNCTION__,
 			    "Error in getsockname(): [s]\n", strerror(errno));
 #endif
@@ -153,7 +153,7 @@ socks_listen(cw_socks_t *a_socks, cw_uint32_t a_mask, int *r_port)
 	 * bits are heeded.
 	 */
 	if (listen(a_socks->sockfd, 511) == -1) {
-#ifdef _LIBSOCK_CONFESS
+#ifdef _CW_CONFESS
 		out_put_e(out_err, NULL, 0, __FUNCTION__,
 		    "Error in listen(): [s]\n", strerror(errno));
 #endif
@@ -176,7 +176,7 @@ socks_accept(cw_socks_t *a_socks, struct timespec *a_timeout, cw_sock_t
 	int		timeout, nready;
 
         _cw_check_ptr(a_socks);
-	_cw_assert(a_socks->magic == _LIBSOCK_SOCKS_MAGIC);
+	_cw_assert(a_socks->magic == _CW_SOCKS_MAGIC);
         _cw_check_ptr(r_sock);
 
 	/* Are we even listening right now? */
@@ -202,7 +202,7 @@ socks_accept(cw_socks_t *a_socks, struct timespec *a_timeout, cw_sock_t
 
 	nready = poll(&pfd, 1, timeout);
 	if (nready == -1) {
-#ifdef _LIBSOCK_CONFESS
+#ifdef _CW_CONFESS
 			out_put_e(out_err, NULL, 0, __FUNCTION__,
 			    "Error in poll(): [s]\n", strerror(errno));
 #endif
@@ -220,7 +220,7 @@ socks_accept(cw_socks_t *a_socks, struct timespec *a_timeout, cw_sock_t
 		    *)&client_addr, &sockaddr_struct_size);
 
 		if (sockfd < 0) {
-#ifdef _LIBSOCK_CONFESS
+#ifdef _CW_CONFESS
 			out_put_e(out_err, NULL, 0, __FUNCTION__,
 			    "Error in accept(): [s]\n", strerror(errno));
 #endif

@@ -13,7 +13,7 @@
 
 #include "../include/libstash/libstash.h"
 
-#define _LIBSTASH_TEST_COUNT 50
+#define _CW_TEST_COUNT 50
 
 cw_uint32_t	g_count = 0;
 
@@ -23,7 +23,7 @@ thread_entry_func(void *a_arg)
 	cw_uint32_t	i, temp;
 	cw_mtx_t	*mutex = (cw_mtx_t *)a_arg;
 
-	for (i = 0; i < _LIBSTASH_TEST_COUNT; i++) {
+	for (i = 0; i < _CW_TEST_COUNT; i++) {
 		mtx_lock(mutex);
 		temp = g_count;
 		usleep(1);

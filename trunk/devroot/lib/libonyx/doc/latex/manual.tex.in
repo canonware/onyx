@@ -65,7 +65,7 @@ little else needs to be done.
 \section{Compilation}
 \begin{description}
 \item[Normal: ] cc \filename{file} -lonyx -lstash -lpthread
-\item[Debug: ] cc -g -D\_LIBONYX\_DBG -D\_LIBSTASH\_DBG \filename{file}
+\item[Debug: ] cc -g -D\_CW\_DBG \filename{file}
 -lonyx\_d -lstash\_d -lpthread
 \item[Profile: ] cc -pg \filename{file} -lonyx\_p -lstash\_p -lpthread
 \end{description}

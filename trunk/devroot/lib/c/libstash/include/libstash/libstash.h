@@ -18,7 +18,7 @@ extern  "C" {
 #ifndef _LIBSTASH_H_
 #define _LIBSTASH_H_
 
-#define _LIBSTASH_VERSION_ <Version>
+#define _CW_LIBSTASH_VERSION_ <Version>
 
 /* Must be defined for pthreads. */
 #ifndef _REENTRANT
@@ -163,7 +163,7 @@ extern cw_out_t	*out_err;
  * Used for deallocation via an opaque function pointer.  These macros are used
  * to call functions such as mem_free(), pezz_put(), and pool_put().
  */
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 #define _cw_opaque_dealloc(a_func, a_arg, a_ptr)			\
 	(a_func)((void *)(a_arg), (void *)(a_ptr), __FILE__, __LINE__)
 #else
@@ -195,7 +195,7 @@ extern cw_out_t	*out_err;
 		abort();						\
 	} while (0)
 
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 #define _cw_not_reached()						\
 	do {								\
 		out_put_e(NULL, __FILE__, __LINE__, __FUNCTION__,	\

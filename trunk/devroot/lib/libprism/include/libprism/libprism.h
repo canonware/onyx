@@ -18,7 +18,7 @@ extern  "C" {
 #ifndef _LIBPRISM_H_
 #define _LIBPRISM_H_
 
-#define _LIBPRISM_VERSION "<Version>"
+#define _CW_LIBPRISM_VERSION "<Version>"
 
 /*
  * Exception numbers.  libprism reserves 256 through 383.

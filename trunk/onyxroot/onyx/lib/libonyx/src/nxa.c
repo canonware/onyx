@@ -121,7 +121,7 @@ nxa_new(cw_nxa_t *a_nxa, cw_nx_t *a_nx)
 		mq_new(&a_nxa->gc_mq, NULL, sizeof(cw_nxam_t));
 		try_stage = 5;
 
-#ifdef _LIBONYX_DBG
+#ifdef _CW_DBG
 		a_nxa->magic = _CW_NXA_MAGIC;
 #endif
 
@@ -129,8 +129,8 @@ nxa_new(cw_nxa_t *a_nxa, cw_nx_t *a_nx)
 		 * Initialize gcdict state.
 		 */
 		a_nxa->gcdict_active = FALSE;
-		a_nxa->gcdict_period = _LIBONYX_GCDICT_PERIOD;
-		a_nxa->gcdict_threshold = _LIBONYX_GCDICT_THRESHOLD;
+		a_nxa->gcdict_period = _CW_LIBONYX_GCDICT_PERIOD;
+		a_nxa->gcdict_threshold = _CW_LIBONYX_GCDICT_THRESHOLD;
 		a_nxa->gcdict_new = 0;
 		memset(a_nxa->gcdict_current, 0, sizeof(cw_nxoi_t) * 3);
 		memset(a_nxa->gcdict_maximum, 0, sizeof(cw_nxoi_t) * 3);

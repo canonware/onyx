@@ -14,7 +14,7 @@
 #include "../include/libstash/libstash.h"
 
 /* Make sure that nums is at least as large. */
-#define _LIBSTASH_TEST_NUM_NODES 100
+#define _CW_TEST_NUM_NODES 100
 
 int
 main()
@@ -39,22 +39,22 @@ main()
 	h = bhp_new_r(NULL, cw_g_mem, bhp_sint32_priority_compare);
 	_cw_check_ptr(h);
 
-	for (i = 0; i < _LIBSTASH_TEST_NUM_NODES; i++) {
+	for (i = 0; i < _CW_TEST_NUM_NODES; i++) {
 		bhpi = bhpi_new(NULL, cw_g_mem, &(nums[i]), &(nums[i]), NULL,
 		    NULL);
 		_cw_check_ptr(bhpi);
 		bhp_insert(h, bhpi);
 	}
-	for (i = 0; i < _LIBSTASH_TEST_NUM_NODES; i++)
+	for (i = 0; i < _CW_TEST_NUM_NODES; i++)
 		_cw_assert(bhp_min_del(h, (void **)&a, (void **)&b) == FALSE);
 
-	for (i = 0; i < _LIBSTASH_TEST_NUM_NODES; i++) {
+	for (i = 0; i < _CW_TEST_NUM_NODES; i++) {
 		bhpi = bhpi_new(NULL, cw_g_mem, &(nums[i]), &(nums[i]), NULL,
 		    NULL);
 		_cw_check_ptr(bhpi);
 		bhp_insert(h, bhpi);
 	}
-	for (i = 0; i < _LIBSTASH_TEST_NUM_NODES; i++) {
+	for (i = 0; i < _CW_TEST_NUM_NODES; i++) {
 		_cw_assert(bhp_min_del(h, (void **)&a, (void **)&b) == FALSE);
 		out_put(out_err, "i == [i], size == [q]: [i|s:s], [i|s:s]\n", i,
 		    bhp_size_get(h), *a, *b);

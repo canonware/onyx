@@ -1,0 +1,6 @@
+2001-06-07  Jason Evans  <jasone@canonware.com>
+
+	* : Convert _LIB*_DBG to _CW_DBG.  This affects compiling and
+	linking with debug versions of the libraries.
+
+	* : Consistently prefix publicly visible cpp macros with _CW_.

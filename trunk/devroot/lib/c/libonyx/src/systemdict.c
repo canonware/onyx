@@ -298,7 +298,7 @@ systemdict_l_populate(cw_nxo_t *a_dict, cw_nx_t *a_nx, int a_argc, char
 	nxo_null_new(&value);
 	nxo_dict_def(a_dict, a_nx, &name, &value);
 
-#ifdef _LIBONYX_DBG
+#ifdef _CW_DBG
 	if (nxo_dict_count(a_dict) != NENTRIES + NEXTRA) {
 		_cw_out_put_e("nxo_dict_count(a_dict) != NENTRIES + NEXTRA"
 		    " ([i] != [i])\n", nxo_dict_count(a_dict), NENTRIES +
@@ -3162,7 +3162,7 @@ systemdict_open(cw_nxo_t *a_thread)
 		return;
 	}
 
-	nxo_file_buffer_size_set(file, _LIBONYX_FILE_BUFFER_SIZE);
+	nxo_file_buffer_size_set(file, _CW_LIBONYX_FILE_BUFFER_SIZE);
 
 	nxo_stack_pop(ostack);
 	nxo_dup(name, file);

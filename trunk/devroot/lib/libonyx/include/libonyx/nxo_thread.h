@@ -9,7 +9,7 @@
  *
  ******************************************************************************/
 
-#ifdef _LIBONYX_DBG
+#ifdef _CW_DBG
 #define	_CW_NXO_THREAD_BUFFER_SIZE	  8
 #else
 #define	_CW_NXO_THREAD_BUFFER_SIZE	256
@@ -48,7 +48,7 @@ typedef enum {
 } cw_nxo_threadts_t;
 
 struct cw_nxo_threadp_s {
-#ifdef _LIBONYX_DBG
+#ifdef _CW_DBG
 	cw_uint32_t	magic;
 #endif
 	/*

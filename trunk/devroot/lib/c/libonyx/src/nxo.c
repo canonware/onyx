@@ -271,7 +271,7 @@ nxo_lcheck(cw_nxo_t *a_nxo)
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
 
-#ifdef _LIBONYX_DBG
+#ifdef _CW_DBG
 	switch (nxo_type_get(a_nxo)) {
 	case NXOT_ARRAY:
 	case NXOT_DICT:
@@ -303,7 +303,7 @@ nxoe_l_new(cw_nxoe_t *a_nxoe, cw_nxot_t a_type, cw_bool_t a_locking)
 	qr_new(a_nxoe, link);
 	a_nxoe->type = a_type;
 	a_nxoe->locking = a_locking;
-#ifdef _LIBONYX_DBG
+#ifdef _CW_DBG
 	a_nxoe->magic = _CW_NXOE_MAGIC;
 #endif
 }

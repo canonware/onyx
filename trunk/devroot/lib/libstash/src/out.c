@@ -16,7 +16,7 @@
 #include <errno.h>
 #include <ctype.h>
 
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 #define _CW_OUT_MAGIC 0x8293cade
 
 /* Avoid recursive calls to the out class when crashing. */
@@ -44,7 +44,7 @@
  * Number of bytes to add to the size of a buffer when realloc()ing.  Must be
  * at least 4 bytes.
  */
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 #define _CW_OUT_REALLOC_INC	   8
 #else
 #define _CW_OUT_REALLOC_INC	4096
@@ -144,7 +144,7 @@ out_new(cw_out_t *a_out, cw_mem_t *a_mem)
 	retval->nextensions = 0;
 	retval->extensions = NULL;
 
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 	retval->magic = _CW_OUT_MAGIC;
 #endif
 
@@ -163,7 +163,7 @@ out_delete(cw_out_t *a_out)
 
 	if (a_out->is_malloced)
 		mem_free(a_out->mem, a_out);
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 	else
 		memset(a_out, 0x5a, sizeof(cw_out_t));
 #endif
@@ -1009,12 +1009,12 @@ out_p_el_accept(cw_out_t *a_out, const char *a_format, cw_out_key_t *a_key,
 		}
 		a_key->key_els = (cw_out_el_t *)mem_malloc((a_out != NULL)
 		    ? a_out->mem : NULL, total_els * sizeof(cw_out_el_t));
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 		memset(a_key->key_els, 0, total_els * sizeof(cw_out_el_t));
 #endif
 		memcpy(a_key->key_els, a_key->key_els_buf, _CW_OUT_ELS_BUF *
 		    sizeof(cw_out_el_t));
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 		memset(a_key->key_els_buf, 0, _CW_OUT_ELS_BUF *
 		    sizeof(cw_out_el_t));
 #endif

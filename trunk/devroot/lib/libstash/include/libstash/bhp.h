@@ -20,7 +20,7 @@ typedef struct cw_bhp_s cw_bhp_t;
 typedef struct cw_bhpi_s cw_bhpi_t;
 
 struct cw_bhp_s {
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 	cw_uint32_t	magic_a;
 #endif
 	cw_mem_t	*mem;
@@ -30,14 +30,14 @@ struct cw_bhp_s {
 	cw_bhpi_t	*head;
 	cw_uint64_t	num_nodes;
 	bhp_prio_comp_t	*priority_compare;
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 	cw_uint32_t	size_of;
 	cw_uint32_t	magic_b;
 #endif
 };
 
 struct cw_bhpi_s {
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 	cw_uint32_t magic_a;
 #endif
 	cw_opaque_dealloc_t *dealloc_func;
@@ -49,7 +49,7 @@ struct cw_bhpi_s {
 	struct cw_bhpi_s *child;
 	struct cw_bhpi_s *sibling;
 	cw_uint32_t	degree;
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 	cw_uint32_t	size_of;
 	cw_uint32_t	magic_b;
 #endif

@@ -168,7 +168,6 @@ libedit_distclean :
 
 CPPFLAGS = [CPPFLAGS] -I[srcdir]/lib/c/libedit/include
                       -I[objdir]/lib/c/libedit/include/libedit;
-D_CPPFLAGS = [D_CPPFLAGS] -D_LIBEDIT_DBG;
 
 /*
  * Build rules.

@@ -28,7 +28,7 @@ struct cw_nxoe_stackc_s {
 
 	cw_uint32_t		nused;	/* Number of objects in use. */
 
-	cw_nxoe_stacko_t	objects[_LIBONYX_STACKC_COUNT];
+	cw_nxoe_stacko_t	objects[_CW_LIBONYX_STACKC_COUNT];
 };
 
 struct cw_nxoe_stack_s {
@@ -183,7 +183,7 @@ nxo_stack_pop(cw_nxo_t *a_nxo)
 	stack->count--;
 	stack->nspare++;
 	if (stacko->stackc->nused == 0 && stack->nspare > 2 *
-	    _LIBONYX_STACKC_COUNT)
+	    _CW_LIBONYX_STACKC_COUNT)
 		nxoe_p_stack_spares_destroy(stack, stacko->stackc);
 
 	retval = FALSE;
@@ -221,7 +221,7 @@ nxo_stack_npop(cw_nxo_t *a_nxo, cw_uint32_t a_count)
 		stacko->stackc->nused--;
 		stack->nspare++;
 		if (stacko->stackc->nused == 0 && stack->nspare > 2 *
-		    _LIBONYX_STACKC_COUNT)
+		    _CW_LIBONYX_STACKC_COUNT)
 			nxoe_p_stack_spares_destroy(stack, stacko->stackc);
 	}
 

@@ -11,7 +11,7 @@
 
 #include "../include/libstash/libstash.h"
 
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 #define _CW_DCH_MAGIC 0x4327589e
 #endif
 
@@ -62,7 +62,7 @@ dch_new(cw_dch_t *a_dch, cw_mem_t *a_mem, cw_uint32_t a_base_table, cw_uint32_t
 	}
 	xep_end();
 
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 	retval->magic = _CW_DCH_MAGIC;
 #endif
 
@@ -79,7 +79,7 @@ dch_delete(cw_dch_t *a_dch)
 
 	if (TRUE == a_dch->is_malloced)
 		mem_free(a_dch->mem, a_dch);
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 	else
 		memset(a_dch, 0x5a, sizeof(cw_dch_t));
 #endif
@@ -168,7 +168,7 @@ dch_dump(cw_dch_t *a_dch, const char *a_prefix)
 	_cw_assert(a_dch->magic == _CW_DCH_MAGIC);
 	_cw_check_ptr(a_prefix);
 
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 	out_put(out_err, "[s]: num_grows: [i], num_shrinks: [i]\n",
 	    a_prefix, a_dch->num_grows, a_dch->num_shrinks);
 #endif
@@ -208,7 +208,7 @@ dch_p_grow(cw_dch_t *a_dch)
 		}
 
 		a_dch->grow_factor *= 2;
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 		a_dch->num_grows++;
 		t_ch->num_collisions += a_dch->ch->num_collisions;
 		t_ch->num_inserts += a_dch->ch->num_inserts;
@@ -261,7 +261,7 @@ dch_p_shrink(cw_dch_t *a_dch)
 		}
 
 		a_dch->grow_factor = new_factor;
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 		a_dch->num_shrinks++;
 		t_ch->num_collisions += a_dch->ch->num_collisions;
 		t_ch->num_inserts += a_dch->ch->num_inserts;
@@ -293,14 +293,14 @@ dch_p_insert(cw_ch_t *a_ch, cw_chi_t * a_chi)
 	ql_tail_insert(&a_ch->chi_ql, a_chi, ch_link);
 
 	/* Hook into the slot list. */
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 	if (ql_first(&a_ch->table[slot]) != NULL)
 		a_ch->num_collisions++;
 #endif
 	ql_head_insert(&a_ch->table[slot], a_chi, slot_link);
 
 	a_ch->count++;
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 	a_ch->num_inserts++;
 #endif
 }

@@ -41,15 +41,15 @@ nxo_dict_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking, cw_uint32_t
 	dict->dicto = NULL;
 
 	/*
-	 * Don't create a dict smaller than _LIBONYX_DICT_SIZE, since rounding
-	 * errors for calculating the grow/shrink points can cause severe
-	 * performance problems if the dict grows significantly.
+	 * Don't create a dict smaller than _CW_LIBONYX_DICT_SIZE, since
+	 * rounding errors for calculating the grow/shrink points can cause
+	 * severe performance problems if the dict grows significantly.
 	 *
 	 * Don't let the table get more than 80% full, or less than 25% full,
 	 * when shrinking.
 	 */
-	if (a_dict_size < _LIBONYX_DICT_SIZE)
-		a_dict_size = _LIBONYX_DICT_SIZE;
+	if (a_dict_size < _CW_LIBONYX_DICT_SIZE)
+		a_dict_size = _CW_LIBONYX_DICT_SIZE;
 
 	dch_new(&dict->hash, NULL, a_dict_size * 1.25, a_dict_size, a_dict_size
 	    / 4, nxo_p_dict_hash, nxo_p_dict_key_comp);

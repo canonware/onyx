@@ -65,7 +65,7 @@ gcdict_l_populate(cw_nxo_t *a_dict, cw_nxa_t *a_nxa)
 		nxo_dict_def(a_dict, nx, &name, &value);
 	}
 
-#ifdef _LIBONYX_DBG
+#ifdef _CW_DBG
 	if (nxo_dict_count(a_dict) != NENTRIES + NEXTRA) {
 		_cw_out_put_e("nxo_dict_count(a_dict) != NENTRIES"
 		    " ([i] != [i])\n", nxo_dict_count(a_dict), NENTRIES +

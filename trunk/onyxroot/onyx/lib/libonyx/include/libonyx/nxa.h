@@ -13,7 +13,7 @@
  * Memory allocator.
  */
 struct cw_nxa_s {
-#ifdef _LIBONYX_DBG
+#ifdef _CW_DBG
 	cw_uint32_t	magic;
 #define	_CW_NXA_MAGIC	0x63935743
 #endif

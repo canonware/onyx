@@ -9,11 +9,11 @@
  *
  ******************************************************************************/
 
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 /* Track allocations and report leaks. */
-#define	_LIBSTASH_MEM_ERROR
-/* Report all allocations.  Requires _LIBSTASH_MEM_ERROR. */
-/*  #define	_LIBSTASH_MEM_VERBOSE */
+#define	_CW_MEM_ERROR
+/* Report all allocations.  Requires _CW_MEM_ERROR. */
+/*  #define	_CW_MEM_VERBOSE */
 #endif
 
 struct cw_mem_s {
@@ -22,7 +22,7 @@ struct cw_mem_s {
 
 	cw_mtx_t	lock;
 
-#ifdef _LIBSTASH_MEM_ERROR
+#ifdef _CW_MEM_ERROR
 #define	_CW_MEM_BASE_TABLE	1024	/* Slots in base hash table. */
 #define	_CW_MEM_BASE_GROW	 256	/* Maximum fullness of base table. */
 #define	_CW_MEM_BASE_SHRINK	  32	/* Proportional minimal fullness. */
@@ -49,7 +49,7 @@ void	mem_free_e(cw_mem_t *a_mem, void *a_ptr, const char *a_filename,
  * of the generated binary.  Since these arguments aren't used in the optimized
  * library anyway, this is a free (though perhaps small) memory savings.
  */
-#ifdef _LIBSTASH_MEM_ERROR
+#ifdef _CW_MEM_ERROR
 #define mem_malloc(a_mem, a_size)					\
 	mem_malloc_e((a_mem), (a_size), __FILE__, __LINE__)
 #define mem_calloc(a_mem, a_number, a_size)				\

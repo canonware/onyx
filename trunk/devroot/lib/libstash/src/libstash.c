@@ -13,7 +13,7 @@
 
 #include "../include/libstash/libstash.h"
 
-/*  #define _LIBSTASH_MEM_DBG */
+/*  #define _CW_MEM_DBG */
 
 void	thd_l_init(void);
 void	thd_l_shutdown(void);
@@ -24,7 +24,7 @@ void	xep_l_shutdown(void);
 cw_mem_t	*cw_g_mem = NULL;
 cw_out_t	*out_std = NULL;
 cw_out_t	*out_err = NULL;
-#ifdef _LIBSTASH_MEM_DBG
+#ifdef _CW_MEM_DBG
 static cw_mem_t	*cw_g_mem_mem = NULL;
 #endif
 
@@ -39,7 +39,7 @@ libstash_init(void)
 
 	xep_begin();
 	xep_try {
-#ifdef _LIBSTASH_MEM_DBG
+#ifdef _CW_MEM_DBG
 		cw_g_mem_mem = mem_new(NULL, NULL);
 		try_stage = 1;
 
@@ -66,7 +66,7 @@ libstash_init(void)
 			mem_delete(cw_g_mem);
 			cw_g_mem = NULL;
 		case 1:
-#ifdef _LIBSTASH_MEM_DBG
+#ifdef _CW_MEM_DBG
 			mem_delete(cw_g_mem_mem);
 			cw_g_mem_mem = NULL;
 #endif
@@ -92,7 +92,7 @@ libstash_shutdown(void)
 	mem_delete(cw_g_mem);
 	cw_g_mem = NULL;
 
-#ifdef _LIBSTASH_MEM_DBG
+#ifdef _CW_MEM_DBG
 	mem_delete(cw_g_mem_mem);
 	cw_g_mem_mem = NULL;
 #endif

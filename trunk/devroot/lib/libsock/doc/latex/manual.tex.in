@@ -70,7 +70,7 @@ Use one of the following compiler command lines to compile applications with
 \libname{libsock}.
 \begin{description}
 \item[Normal: ] cc \filename{file} -lsock -lstash -lpthread
-\item[Debug: ] cc -g -D\_LIBSTASH\_DBG -D\_LIBSOCK\_DBG \filename{file}
+\item[Debug: ] cc -g -D\_CW\_DBG \filename{file}
 -lsock\_d -lstash\_d -lpthread
 \item[Profile: ] cc -pg \filename{file} -lsock\_p -lstash\_p -lpthread
 \end{description}

@@ -11,7 +11,7 @@
 
 #include "../include/libstash/libstash.h"
 
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 static cw_bool_t cw_g_xep_initialized = FALSE;
 #endif
 static cw_tsd_t	cw_g_xep_key;
@@ -22,7 +22,7 @@ xep_l_init(void)
 	_cw_assert(cw_g_xep_initialized == FALSE);
 
 	tsd_new(&cw_g_xep_key, NULL);
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 	cw_g_xep_initialized = TRUE;
 #endif
 }
@@ -33,7 +33,7 @@ xep_l_shutdown(void)
 	_cw_assert(cw_g_xep_initialized);
 
 	tsd_delete(&cw_g_xep_key);
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 	cw_g_xep_initialized = FALSE;
 #endif
 }	
@@ -104,7 +104,7 @@ xep_retry(void)
 	_cw_assert(cw_g_xep_initialized);
 
 	xep = qr_prev((cw_xep_t *)tsd_get(&cw_g_xep_key), link);
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 	switch (xep->state) {
 	case _CW_XEPS_CATCH:
 		break;
@@ -130,7 +130,7 @@ xep_handled(void)
 	_cw_assert(cw_g_xep_initialized);
 
 	xep = qr_prev((cw_xep_t *)tsd_get(&cw_g_xep_key), link);
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 	switch (xep->state) {
 	case _CW_XEPS_CATCH:
 		break;

@@ -13,7 +13,7 @@
 
 #include "../include/libstash/libstash.h"
 
-#define _LIBSTASH_TEST_NUM_THREADS 10
+#define _CW_TEST_NUM_THREADS 10
 
 void *
 thread_entry_func(void *a_arg)
@@ -30,7 +30,7 @@ int
 main()
 {
 	cw_sema_t	sema_a, sema_b;
-	cw_thd_t	*threads[_LIBSTASH_TEST_NUM_THREADS];
+	cw_thd_t	*threads[_CW_TEST_NUM_THREADS];
 	cw_uint32_t	i;
 	struct timespec	timeout;
 
@@ -61,21 +61,21 @@ main()
 
 	sema_new(&sema_a, 0);
 
-	for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
+	for (i = 0; i < _CW_TEST_NUM_THREADS; i++)
 		threads[i] = thd_new(thread_entry_func, (void *)&sema_a, TRUE);
 
-	sema_adjust(&sema_a, _LIBSTASH_TEST_NUM_THREADS);
+	sema_adjust(&sema_a, _CW_TEST_NUM_THREADS);
 
-	for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
+	for (i = 0; i < _CW_TEST_NUM_THREADS; i++)
 		thd_join(threads[i]);
 
-	for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
+	for (i = 0; i < _CW_TEST_NUM_THREADS; i++)
 		threads[i] = thd_new(thread_entry_func, (void *)&sema_a, TRUE);
 
-	for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
+	for (i = 0; i < _CW_TEST_NUM_THREADS; i++)
 		sema_post(&sema_a);
 
-	for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
+	for (i = 0; i < _CW_TEST_NUM_THREADS; i++)
 		thd_join(threads[i]);
 
 	sema_delete(&sema_a);

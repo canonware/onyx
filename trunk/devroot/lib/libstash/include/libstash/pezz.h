@@ -9,11 +9,11 @@
  *
  ******************************************************************************/
 
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 /* Track allocations and report leaks. */
-#define	_LIBSTASH_PEZZ_DBG
-/* Report all allocations.  Requires _LIBSTASH_PEZZ_ERROR. */
-/*  #define	_LIBSTASH_PEZZ_VERBOSE */
+#define	_CW_PEZZ_ERROR
+/* Report all allocations.  Requires _CW_PEZZ_ERROR. */
+/*  #define	_CW_PEZZ_VERBOSE */
 #endif
 
 /* Pseudo-opaque type. */
@@ -23,10 +23,10 @@ typedef struct cw_pezzi_s cw_pezzi_t;
 struct cw_pezz_s {
 	cw_mem_t	*mem;
 	cw_bool_t	is_malloced;
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 	cw_uint32_t	magic;
 #endif
-#ifdef _LIBSTASH_PEZZ_ERROR
+#ifdef _CW_PEZZ_ERROR
 	cw_dch_t	addr_hash;
 #endif
 	cw_mtx_t	lock;
@@ -66,7 +66,7 @@ struct cw_pezzi_s {
 	qs_elm(cw_pezzi_t)	link;
 };
 
-#ifdef _LIBSTASH_PEZZ_ERROR
+#ifdef _CW_PEZZ_ERROR
 typedef struct {
 	const char	*filename;
 	cw_uint32_t	line_num;
@@ -89,7 +89,7 @@ void	pezz_dump(cw_pezz_t *a_pezz, const char *a_prefix);
  * of the generated binary.  Since these arguments aren't used in the optimized
  * library anyway, this is a free (though perhaps small) memory savings.
  */
-#ifdef _LIBSTASH_PEZZ_ERROR
+#ifdef _CW_PEZZ_ERROR
 #define pezz_get(a_pezz)						\
 	pezz_get_e((a_pezz), __FILE__, __LINE__)
 #define pezz_put(a_pezz, a_buffer)					\

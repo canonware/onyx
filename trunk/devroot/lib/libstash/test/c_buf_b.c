@@ -16,15 +16,15 @@
 #include <limits.h>
 
 /*
- * (_LIBSTASH_TEST_NUM_BUFELS * _LIBSTASH_TEST_SIZEOF_BUFFER *
- * _LIBSTASH_TEST_NUM_CIRCULATIONS) must fit within a 32 bit unsigned
+ * (_CW_TEST_NUM_BUFELS * _CW_TEST_SIZEOF_BUFFER *
+ * _CW_TEST_NUM_CIRCULATIONS) must fit within a 32 bit unsigned
  * variable.
  */
 
-#define _LIBSTASH_TEST_DATA_MODULUS 103
-#define _LIBSTASH_TEST_NUM_BUFELS 251
-#define _LIBSTASH_TEST_SIZEOF_BUFFER 283
-#define _LIBSTASH_TEST_NUM_CIRCULATIONS 53
+#define _CW_TEST_DATA_MODULUS 103
+#define _CW_TEST_NUM_BUFELS 251
+#define _CW_TEST_SIZEOF_BUFFER 283
+#define _CW_TEST_NUM_CIRCULATIONS 53
 
 struct foo_s {
 	cw_buf_t	*buf_a;
@@ -42,26 +42,26 @@ thread_entry_func(void *a_arg)
 
 	buf = buf_new(NULL, cw_g_mem);
 
-	for (i = 0; i < (_LIBSTASH_TEST_NUM_BUFELS *
-	    _LIBSTASH_TEST_SIZEOF_BUFFER * _LIBSTASH_TEST_NUM_CIRCULATIONS);
+	for (i = 0; i < (_CW_TEST_NUM_BUFELS *
+	    _CW_TEST_SIZEOF_BUFFER * _CW_TEST_NUM_CIRCULATIONS);
 	     /* Increment in the body. */ ) {
 /*  		out_put(out_err, "[s]", foo_struct->thread_name); */
 
 		size = buf_size_get(foo_struct->buf_a);
 
-		if (i <= (_LIBSTASH_TEST_NUM_BUFELS *
-		    _LIBSTASH_TEST_SIZEOF_BUFFER *
-		    (_LIBSTASH_TEST_NUM_CIRCULATIONS - 1)))
+		if (i <= (_CW_TEST_NUM_BUFELS *
+		    _CW_TEST_SIZEOF_BUFFER *
+		    (_CW_TEST_NUM_CIRCULATIONS - 1)))
 			buf_buf_catenate(buf, foo_struct->buf_a, FALSE);
-		else if ((size + i) < (_LIBSTASH_TEST_NUM_BUFELS *
-		    _LIBSTASH_TEST_SIZEOF_BUFFER *
-		    _LIBSTASH_TEST_NUM_CIRCULATIONS))
+		else if ((size + i) < (_CW_TEST_NUM_BUFELS *
+		    _CW_TEST_SIZEOF_BUFFER *
+		    _CW_TEST_NUM_CIRCULATIONS))
 			buf_split(buf, foo_struct->buf_a, size);
 		else {
 			buf_split(buf, foo_struct->buf_a,
-			    ((_LIBSTASH_TEST_NUM_BUFELS *
-			    _LIBSTASH_TEST_SIZEOF_BUFFER *
-			    _LIBSTASH_TEST_NUM_CIRCULATIONS) - i));
+			    ((_CW_TEST_NUM_BUFELS *
+			    _CW_TEST_SIZEOF_BUFFER *
+			    _CW_TEST_NUM_CIRCULATIONS) - i));
 		}
 
 		size = buf_size_get(buf);
@@ -79,8 +79,8 @@ thread_entry_func(void *a_arg)
 		}
 	}
 
-	_cw_assert((_LIBSTASH_TEST_NUM_BUFELS * _LIBSTASH_TEST_SIZEOF_BUFFER *
-	    _LIBSTASH_TEST_NUM_CIRCULATIONS) == i);
+	_cw_assert((_CW_TEST_NUM_BUFELS * _CW_TEST_SIZEOF_BUFFER *
+	    _CW_TEST_NUM_CIRCULATIONS) == i);
 	_cw_assert(buf_size_get(buf) == 0);
 
 	buf_delete(buf);
@@ -107,16 +107,16 @@ main(int argc, char **argv)
 	/* Create a buf with a known pattern of data in it. */
 	buf_a = buf_new_r(NULL, cw_g_mem);
 
-	for (i = n = 0; i < _LIBSTASH_TEST_NUM_BUFELS; i++) {
+	for (i = n = 0; i < _CW_TEST_NUM_BUFELS; i++) {
 		/* Create a bufc, fill it with data, and append it to buf_a. */
 		bufc = bufc_new(NULL, cw_g_mem, NULL, NULL);
-		buffer = _cw_malloc(_LIBSTASH_TEST_SIZEOF_BUFFER);
-		for (j = 0; j < _LIBSTASH_TEST_SIZEOF_BUFFER; j++, n++)
-			buffer[j] = (char)(n % _LIBSTASH_TEST_DATA_MODULUS);
+		buffer = _cw_malloc(_CW_TEST_SIZEOF_BUFFER);
+		for (j = 0; j < _CW_TEST_SIZEOF_BUFFER; j++, n++)
+			buffer[j] = (char)(n % _CW_TEST_DATA_MODULUS);
 		bufc_buffer_set(bufc, (void *)buffer,
-		    _LIBSTASH_TEST_SIZEOF_BUFFER, FALSE, (cw_opaque_dealloc_t
+		    _CW_TEST_SIZEOF_BUFFER, FALSE, (cw_opaque_dealloc_t
 		    *)mem_free_e, cw_g_mem);
-		buf_bufc_append(buf_a, bufc, 0, _LIBSTASH_TEST_SIZEOF_BUFFER);
+		buf_bufc_append(buf_a, bufc, 0, _CW_TEST_SIZEOF_BUFFER);
 		bufc_delete(bufc);
 	}
 
@@ -147,11 +147,11 @@ main(int argc, char **argv)
 	thd_join(thd_b);
 
 	/* Make sure the data hasn't been corrupted. */
-	if (buf_size_get(buf_a) != _LIBSTASH_TEST_NUM_BUFELS *
-	    _LIBSTASH_TEST_SIZEOF_BUFFER) {
+	if (buf_size_get(buf_a) != _CW_TEST_NUM_BUFELS *
+	    _CW_TEST_SIZEOF_BUFFER) {
 		out_put(out_err, "buf_size_get(buf_a) == [i] (should be [i])\n",
-		    buf_size_get(buf_a), _LIBSTASH_TEST_NUM_BUFELS *
-		    _LIBSTASH_TEST_SIZEOF_BUFFER);
+		    buf_size_get(buf_a), _CW_TEST_NUM_BUFELS *
+		    _CW_TEST_SIZEOF_BUFFER);
 		buf_dump(buf_a, "buf_a ");
 		out_put(out_err, "seed == [i]\n", seed);
 	}
@@ -164,9 +164,9 @@ main(int argc, char **argv)
 	for (i = 0; i < buf_size_get(buf_a); i++) {
 		c = (cw_uint32_t)buf_uint8_get(buf_a, i);
 
-		if (c != i % _LIBSTASH_TEST_DATA_MODULUS) {
+		if (c != i % _CW_TEST_DATA_MODULUS) {
 			out_put(out_err, "buf_a[[[i]] == %u, should be %u\n", i,
-			    c, i % _LIBSTASH_TEST_DATA_MODULUS);
+			    c, i % _CW_TEST_DATA_MODULUS);
 			buf_dump(buf_a, "buf_a ");
 			out_put(out_err, "seed == [i]\n", seed);
 			break;

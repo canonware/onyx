@@ -98,7 +98,7 @@ static void	nxoe_p_thread_reset(cw_nxoe_thread_t *a_thread);
 static void	nxoe_p_thread_procedure_accept(cw_nxoe_thread_t *a_thread);
 static void	nxoe_p_thread_name_accept(cw_nxoe_thread_t *a_thread);
 
-#ifdef _LIBONYX_DBG
+#ifdef _CW_DBG
 #define _CW_NXO_THREADP_MAGIC 0xdfe76a68
 #endif
 
@@ -113,7 +113,7 @@ nxo_threadp_new(cw_nxo_threadp_t *a_threadp)
 	a_threadp->line = 1;
 	a_threadp->column = 0;
 
-#ifdef _LIBONYX_DBG
+#ifdef _CW_DBG
 	a_threadp->magic = _CW_NXO_THREADP_MAGIC;
 #endif
 }
@@ -139,7 +139,7 @@ nxo_threadp_delete(cw_nxo_threadp_t *a_threadp, cw_nxo_t *a_thread)
 		nxoe_p_thread_reset(thread);
 	}
 
-#ifdef _LIBONYX_DBG
+#ifdef _CW_DBG
 	memset(a_threadp, 0x5a, sizeof(cw_nxo_threadp_t));
 #endif
 }
@@ -215,7 +215,7 @@ nxo_thread_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx)
 	 */
 	nxo_no_new(a_nxo);
 	a_nxo->o.nxoe = (cw_nxoe_t *)thread;
-#ifdef _LIBONYX_DBG
+#ifdef _CW_DBG
 	a_nxo->magic = _CW_NXO_MAGIC;
 #endif
 	nxo_p_type_set(a_nxo, NXOT_THREAD);
@@ -232,8 +232,7 @@ nxo_thread_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx)
 
 	currenterror_l_populate(&thread->currenterror, a_nxo);
 	errordict_l_populate(&thread->errordict, a_nxo);
-	nxo_dict_new(&thread->userdict, a_nx, FALSE,
-	    _LIBSTASH_USERDICT_HASH);
+	nxo_dict_new(&thread->userdict, a_nx, FALSE, _CW_LIBONYX_USERDICT_HASH);
 
 	nxo_dup(&thread->stdin_nxo, nx_stdin_get(a_nx));
 	nxo_dup(&thread->stdout_nxo, nx_stdout_get(a_nx));
@@ -588,7 +587,7 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 	cw_nxoe_thread_t	*thread;
 	cw_nxo_t		*nxo, *tnxo;
 	cw_uint32_t		sdepth, cdepth;
-#ifdef _LIBONYX_DBG
+#ifdef _CW_DBG
 	cw_uint32_t		tdepth;
 #endif
 
@@ -599,7 +598,7 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 	_cw_assert(thread->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(thread->nxoe.type == NXOT_THREAD);
 
-#ifdef _LIBONYX_DBG
+#ifdef _CW_DBG
 	/*
 	 * The assertions about stack depth in this function check for tstack
 	 * leaks in operators.
@@ -609,7 +608,7 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 
 	for (sdepth = cdepth = nxo_stack_count(&thread->estack);
 	     cdepth >= sdepth; cdepth = nxo_stack_count(&thread->estack)) {
-		if (cdepth == _LIBONYX_ESTACK_MAX + 1) {
+		if (cdepth == _CW_LIBONYX_ESTACK_MAX + 1) {
 			nxo_thread_error(a_nxo,
 			    NXO_THREADE_ESTACKOVERFLOW);
 		}
@@ -833,7 +832,7 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 		case NXOT_FILE: {
 			cw_nxo_threadp_t	threadp;
 			cw_sint32_t	nread;
-			cw_uint8_t	buffer[_LIBONYX_FILE_EVAL_READ_SIZE];
+			cw_uint8_t	buffer[_CW_LIBONYX_FILE_EVAL_READ_SIZE];
 
 			nxo_threadp_new(&threadp);
 			/*
@@ -841,9 +840,9 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 			 * (0 byte read).
 			 */
 			for (nread = nxo_file_read(nxo,
-			    _LIBONYX_FILE_EVAL_READ_SIZE, buffer); nread > 0;
+			    _CW_LIBONYX_FILE_EVAL_READ_SIZE, buffer); nread > 0;
 			    nread = nxo_file_read(nxo,
-			    _LIBONYX_FILE_EVAL_READ_SIZE, buffer)) {
+			    _CW_LIBONYX_FILE_EVAL_READ_SIZE, buffer)) {
 				nxo_thread_interpret(a_nxo, &threadp, buffer,
 				    nread);
 			}

@@ -13,8 +13,8 @@
 
 #include <stdarg.h>
 
-#ifdef _LIBSTASH_DBG
-#define _LIBSTASH_MQ_MAGIC 0xab01cd23
+#ifdef _CW_DBG
+#define _CW_MQ_MAGIC 0xab01cd23
 #endif
 
 /*
@@ -23,10 +23,10 @@
  * number isn't very important to performance, but if it is too high, space may
  * be wasted.
  */
-#ifdef _LIBSTASH_DBG
-#define _LIBSTASH_MQ_ARRAY_MIN_SIZE 1
+#ifdef _CW_DBG
+#define _CW_MQ_ARRAY_MIN_SIZE 1
 #else
-#define _LIBSTASH_MQ_ARRAY_MIN_SIZE 8
+#define _CW_MQ_ARRAY_MIN_SIZE 8
 #endif
 
 void
@@ -54,7 +54,7 @@ mq_new(cw_mq_t *a_mq, cw_mem_t *a_mem, cw_uint32_t a_msg_size)
 		_cw_not_reached();
 	}
 
-	a_mq->msgs_vec_count = _LIBSTASH_MQ_ARRAY_MIN_SIZE;
+	a_mq->msgs_vec_count = _CW_MQ_ARRAY_MIN_SIZE;
 	a_mq->msgs_beg = 0;
 	a_mq->msgs_end = 0;
 
@@ -67,8 +67,8 @@ mq_new(cw_mq_t *a_mq, cw_mem_t *a_mem, cw_uint32_t a_msg_size)
 	a_mq->get_stop = FALSE;
 	a_mq->put_stop = FALSE;
 
-#ifdef _LIBSTASH_DBG
-	a_mq->magic = _LIBSTASH_MQ_MAGIC;
+#ifdef _CW_DBG
+	a_mq->magic = _CW_MQ_MAGIC;
 #endif
 }
 
@@ -76,14 +76,14 @@ void
 mq_delete(cw_mq_t *a_mq)
 {
 	_cw_check_ptr(a_mq);
-	_cw_assert(a_mq->magic == _LIBSTASH_MQ_MAGIC);
+	_cw_assert(a_mq->magic == _CW_MQ_MAGIC);
 
 	mtx_delete(&a_mq->lock);
 	cnd_delete(&a_mq->cond);
 
 	mem_free(a_mq->mem, a_mq->msgs.x);
 
-#ifdef _LIBSTASH_DBG
+#ifdef _CW_DBG
 	memset(a_mq, 0x5a, sizeof(cw_mq_t));
 #endif
 }
@@ -102,7 +102,7 @@ mq_tryget(cw_mq_t *a_mq, ...)
 	va_list		ap;
 
 	_cw_check_ptr(a_mq);
-	_cw_assert(a_mq->magic == _LIBSTASH_MQ_MAGIC);
+	_cw_assert(a_mq->magic == _CW_MQ_MAGIC);
 
 	va_start(ap, a_mq);
 	r_msg.x = (void *)va_arg(ap, void *);
@@ -158,7 +158,7 @@ mq_timedget(cw_mq_t *a_mq, const struct timespec *a_timeout, ...)
 	va_list		ap;
 
         _cw_check_ptr(a_mq);
-	_cw_assert(a_mq->magic == _LIBSTASH_MQ_MAGIC);
+	_cw_assert(a_mq->magic == _CW_MQ_MAGIC);
         _cw_check_ptr(a_timeout);
 
 	va_start(ap, a_timeout);
@@ -228,7 +228,7 @@ mq_get(cw_mq_t *a_mq, ...)
 	va_list		ap;
 
 	_cw_check_ptr(a_mq);
-	_cw_assert(a_mq->magic == _LIBSTASH_MQ_MAGIC);
+	_cw_assert(a_mq->magic == _CW_MQ_MAGIC);
 
 	va_start(ap, a_mq);
 	r_msg.x = (void *)va_arg(ap, void *);
@@ -285,7 +285,7 @@ mq_put(cw_mq_t *a_mq, ...)
 	va_list		ap;
 
 	_cw_check_ptr(a_mq);
-	_cw_assert(a_mq->magic == _LIBSTASH_MQ_MAGIC);
+	_cw_assert(a_mq->magic == _CW_MQ_MAGIC);
 
 	va_start(ap, a_mq);
 	a_msg.x = (void *)&va_arg(ap, void *);
@@ -393,7 +393,7 @@ mq_get_start(cw_mq_t *a_mq)
 	cw_bool_t	retval;
 
 	_cw_check_ptr(a_mq);
-	_cw_assert(a_mq->magic == _LIBSTASH_MQ_MAGIC);
+	_cw_assert(a_mq->magic == _CW_MQ_MAGIC);
 	mtx_lock(&a_mq->lock);
 
 	if (a_mq->get_stop == FALSE) {
@@ -414,7 +414,7 @@ mq_get_stop(cw_mq_t *a_mq)
 	cw_bool_t	retval;
 
 	_cw_check_ptr(a_mq);
-	_cw_assert(a_mq->magic == _LIBSTASH_MQ_MAGIC);
+	_cw_assert(a_mq->magic == _CW_MQ_MAGIC);
 	mtx_lock(&a_mq->lock);
 
 	if (a_mq->get_stop) {
@@ -436,7 +436,7 @@ mq_put_start(cw_mq_t *a_mq)
 	cw_bool_t retval;
 
 	_cw_check_ptr(a_mq);
-	_cw_assert(a_mq->magic == _LIBSTASH_MQ_MAGIC);
+	_cw_assert(a_mq->magic == _CW_MQ_MAGIC);
 	mtx_lock(&a_mq->lock);
 
 	if (a_mq->put_stop == FALSE) {
@@ -457,7 +457,7 @@ mq_put_stop(cw_mq_t *a_mq)
 	cw_bool_t retval;
 
 	_cw_check_ptr(a_mq);
-	_cw_assert(a_mq->magic == _LIBSTASH_MQ_MAGIC);
+	_cw_assert(a_mq->magic == _CW_MQ_MAGIC);
 	mtx_lock(&a_mq->lock);
 
 	if (a_mq->put_stop) {
@@ -478,7 +478,7 @@ mq_dump(cw_mq_t *a_mq, const char *a_prefix)
 	cw_uint32_t	i, offset;
 
 	_cw_check_ptr(a_mq);
-	_cw_assert(a_mq->magic == _LIBSTASH_MQ_MAGIC);
+	_cw_assert(a_mq->magic == _CW_MQ_MAGIC);
 
 	out_put(out_err, "[s]msg_count : [i]\n", a_prefix, a_mq->msg_count);
 	out_put(out_err, "[s]msg_size : [i]\n", a_prefix, a_mq->msg_size);

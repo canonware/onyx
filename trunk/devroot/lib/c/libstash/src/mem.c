@@ -31,7 +31,7 @@
 #endif
 #define _cw_free(a) free(a)
 
-#ifdef _LIBSTASH_MEM_ERROR
+#ifdef _CW_MEM_ERROR
 struct cw_mem_item_s {
 	cw_uint32_t	size;
         const char	*filename;
@@ -61,7 +61,7 @@ mem_new(cw_mem_t *a_mem, cw_mem_t *a_internal)
 		mtx_new(&retval->lock);
 		try_stage = 1;
 
-#ifdef _LIBSTASH_MEM_ERROR
+#ifdef _CW_MEM_ERROR
 		retval->addr_hash = dch_new(NULL, a_internal,
 		    _CW_MEM_BASE_TABLE, _CW_MEM_BASE_GROW, _CW_MEM_BASE_SHRINK,
 		    ch_direct_hash, ch_direct_key_comp);
@@ -89,7 +89,7 @@ mem_delete(cw_mem_t *a_mem)
 {
 	_cw_check_ptr(a_mem);
 
-#ifdef _LIBSTASH_MEM_ERROR
+#ifdef _CW_MEM_ERROR
 	{
 		cw_uint32_t	i, num_addrs;
 		void		*addr;
@@ -128,7 +128,7 @@ mem_malloc_e(cw_mem_t *a_mem, size_t a_size, const char *a_filename,
 
 	_cw_assert(a_size > 0);
 
-#ifdef _LIBSTASH_MEM_ERROR
+#ifdef _CW_MEM_ERROR
 	if (a_mem != NULL)
 		mtx_lock(&a_mem->lock);
 #endif
@@ -137,7 +137,7 @@ mem_malloc_e(cw_mem_t *a_mem, size_t a_size, const char *a_filename,
 	if (retval == NULL)
 		xep_throw(_CW_STASHX_OOM);
 
-#ifdef _LIBSTASH_MEM_ERROR
+#ifdef _CW_MEM_ERROR
 	if (a_mem != NULL) {
 		struct cw_mem_item_s	*old_allocation;
 
@@ -163,7 +163,7 @@ mem_malloc_e(cw_mem_t *a_mem, size_t a_size, const char *a_filename,
 			allocation->filename = a_filename;
 			allocation->line_num = a_line_num;
 
-#ifdef _LIBSTASH_MEM_VERBOSE
+#ifdef _CW_MEM_VERBOSE
 			out_put(NULL, "[s](0x[p]): 0x[p] <-- malloc([i]) at "
 			    "[s], line [i]\n", __FUNCTION__, a_mem, retval,
 			    a_size, a_filename, a_line_num);
@@ -186,7 +186,7 @@ mem_calloc_e(cw_mem_t *a_mem, size_t a_number, size_t a_size, const char
 
 	_cw_assert(a_size * a_number > 0);
 
-#ifdef _LIBSTASH_MEM_ERROR
+#ifdef _CW_MEM_ERROR
 	if (a_mem != NULL)
 		mtx_lock(&a_mem->lock);
 #endif
@@ -195,7 +195,7 @@ mem_calloc_e(cw_mem_t *a_mem, size_t a_number, size_t a_size, const char
 	if (retval == NULL)
 		xep_throw(_CW_STASHX_OOM);
 
-#ifdef _LIBSTASH_MEM_ERROR
+#ifdef _CW_MEM_ERROR
 	if (a_mem != NULL) {
 		struct cw_mem_item_s	*old_allocation;
 
@@ -224,7 +224,7 @@ mem_calloc_e(cw_mem_t *a_mem, size_t a_number, size_t a_size, const char
 			allocation->filename = a_filename;
 			allocation->line_num = a_line_num;
 
-#ifdef _LIBSTASH_MEM_VERBOSE
+#ifdef _CW_MEM_VERBOSE
 			out_put(NULL, "[s](0x[p]): 0x[p] <-- calloc([i], [i]) "
 			    "at [s], line [i]\n", __FUNCTION__, a_mem, retval,
 			    a_number, a_size, a_filename, a_line_num);
@@ -249,7 +249,7 @@ mem_realloc_e(cw_mem_t *a_mem, void *a_ptr, size_t a_size, const char
 	_cw_check_ptr(a_ptr);
 	_cw_assert(a_size > 0);
 
-#ifdef _LIBSTASH_MEM_ERROR
+#ifdef _CW_MEM_ERROR
 	if (a_mem != NULL)
 		mtx_lock(&a_mem->lock);
 #endif
@@ -258,7 +258,7 @@ mem_realloc_e(cw_mem_t *a_mem, void *a_ptr, size_t a_size, const char
 	if (retval == NULL)
 		xep_throw(_CW_STASHX_OOM);
 
-#ifdef _LIBSTASH_MEM_ERROR
+#ifdef _CW_MEM_ERROR
 	if (a_mem != NULL) {
 		struct cw_mem_item_s	*allocation;
 
@@ -286,7 +286,7 @@ mem_realloc_e(cw_mem_t *a_mem, void *a_ptr, size_t a_size, const char
 				memset(((cw_uint8_t *)retval) + old_size,
 				    0xa5, a_size - old_size);
 			}
-#ifdef _LIBSTASH_MEM_VERBOSE
+#ifdef _CW_MEM_VERBOSE
 			out_put(NULL, "[s](0x[p]): 0x[p] <-- realloc(0x[p], "
 			    "[i]) at [s], line [i] (was size [i], allocated at "
 			    "[s], line [i])\n", __FUNCTION__, a_mem, retval,
@@ -306,7 +306,7 @@ void
 mem_free_e(cw_mem_t *a_mem, void *a_ptr, const char *a_filename, cw_uint32_t
     a_line_num)
 {
-#ifdef _LIBSTASH_MEM_ERROR
+#ifdef _CW_MEM_ERROR
 	if (a_mem != NULL) {
 		struct cw_mem_item_s	*allocation;
 
@@ -321,7 +321,7 @@ mem_free_e(cw_mem_t *a_mem, void *a_ptr, const char *a_filename, cw_uint32_t
 			    "attempted to free at [s], line [i]\n",
 			    __FUNCTION__, a_mem, a_ptr, a_filename, a_line_num);
 		} else {
-#ifdef _LIBSTASH_MEM_VERBOSE
+#ifdef _CW_MEM_VERBOSE
 			out_put(NULL, "[s](0x[p]): free(0x[p]) at [s], line [i]"
 			    " (size [i], allocated at [s], line [i])\n",
 			    __FUNCTION__, a_mem, a_ptr, a_filename, a_line_num,
@@ -336,7 +336,7 @@ mem_free_e(cw_mem_t *a_mem, void *a_ptr, const char *a_filename, cw_uint32_t
 
 	_cw_free(a_ptr);
 
-#ifdef _LIBSTASH_MEM_ERROR
+#ifdef _CW_MEM_ERROR
 	if (a_mem != NULL)
 		mtx_unlock(&a_mem->lock);
 #endif

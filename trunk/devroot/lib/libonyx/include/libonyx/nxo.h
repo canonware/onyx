@@ -76,7 +76,7 @@ typedef cw_sint64_t cw_nxoi_t;
  * Main object structure.
  */
 struct cw_nxo_s {
-#ifdef _LIBONYX_DBG
+#ifdef _CW_DBG
 	cw_uint32_t	magic;
 #define _CW_NXO_MAGIC	0x398754ba
 #endif
@@ -130,7 +130,7 @@ struct cw_nxo_s {
  * adequate.
  */
 struct cw_nxoe_s {
-#ifdef _LIBONYX_DBG
+#ifdef _CW_DBG
 	cw_uint32_t	magic;
 #define _CW_NXOE_MAGIC	0x0fa6e798
 #endif
@@ -240,7 +240,7 @@ nxo_p_new(cw_nxo_t *a_nxo, cw_nxot_t a_type)
 	 * The order of operations is important in order to avoid a GC race.
 	 */
 	a_nxo->flags = 0;
-#ifdef _LIBONYX_DBG
+#ifdef _CW_DBG
 	a_nxo->magic = _CW_NXO_MAGIC;
 #endif
 
