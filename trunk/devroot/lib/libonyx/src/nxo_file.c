@@ -1129,8 +1129,7 @@ nxo_file_write(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len,
 	if (a_len <= file->buffer_size - file->buffer_offset)
 	{
 	    /* a_str will fit. */
-	    memcpy(&file->buffer[file->buffer_offset], a_str,
-		   a_len);
+	    memcpy(&file->buffer[file->buffer_offset], a_str, a_len);
 	    file->buffer_mode = BUFFER_WRITE;
 	    file->buffer_offset += a_len;
 	    retcount = a_len;
@@ -1182,9 +1181,18 @@ nxo_file_write(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len,
 			    {
 				/* a_str didn't get completely written.  Copy of
 				 * much of it as possible to the buffer. */
-				memcpy(&file->buffer[0], &a_str[count],
-				       a_len - count);
-				file->buffer_offset = a_len - count;
+				if (a_len - count <= file->buffer_size)
+				{
+				    memcpy(&file->buffer[0], &a_str[count],
+					   a_len - count);
+				    file->buffer_offset = a_len - count;
+				}
+				else
+				{
+				    memcpy(&file->buffer[0], &a_str[count],
+					   file->buffer_size);
+				    file->buffer_offset = file->buffer_size;
+				}
 			    }
 			    retcount += count;
 			}
