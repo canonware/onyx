@@ -39,18 +39,11 @@ CW_INLINE void
 mb_write(void)
 {
 #if (0)
-    /* This is a true memory barrier.  Benchmarks indicate a ~2.5x slowdown of
-     * Onyx with this enabled. */
-    asm volatile ("push %%eax;"
-		  "push %%ebx;"
-		  "push %%ecx;"
-		  "push %%edx;"
+    /* This is a true memory barrier. */
+    asm volatile ("pusha;"
 		  "xor  %%eax,%%eax;"
 		  "cpuid;"
-		  "pop  %%edx;"
-		  "pop  %%ecx;"
-		  "pop  %%ebx;"
-		  "pop  %%eax;"
+		  "popa;"
 		  : /* Outputs. */
 		  : /* Inputs. */
 		  : "memory" /* Clobbers. */
