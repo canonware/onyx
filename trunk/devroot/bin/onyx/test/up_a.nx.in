@@ -1,0 +1,32 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% <Copyright = jasone>
+%
+% <License>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Version: Onyx <Version = onyx>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+`Test begin\n' print flush
+
+[
+    `0 1 2'
+    `() [] {}'
+    `0 1 2 3'
+]{
+    dup 1 sprint
+    cvx eval
+    `First:\n' print
+    up pstack
+    `Second:\n' print
+    up pstack
+    `Third:\n' print
+    up pstack
+    clear
+} foreach
+
+`Test end\n' print
+pstack

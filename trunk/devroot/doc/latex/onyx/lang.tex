@@ -5578,24 +5578,40 @@ onyx:3>
 	\end{description}
 \label{systemdict:dn}
 \index{dn@\onyxop{}{dn}{}}
-\item[{\onyxop{OPARGS}{dn}{OPOUTS}}: ]
+\item[{\onyxop{a b c}{dn}{b c a}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a: ]
+			An object.
+		\item[b: ]
+			An object.
+		\item[c: ]
+			An object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[b: ]
+			An object.
+		\item[c: ]
+			An object.
+		\item[a: ]
+			An object.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
-		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Rotate the top three objects on ostack down one position.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> `a' `b' `c' `d' dn pstack
+`b'
+`d'
+`c'
+`a'
+onyx:4>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:dstack}
@@ -10516,7 +10532,6 @@ onyx:0>
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
-		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
 	\item[Example(s): ]\begin{verbatim}
@@ -11120,11 +11135,14 @@ onyx:0>
 	\end{description}
 \label{systemdict:tuck}
 \index{tuck@\onyxop{}{tuck}{}}
-\item[{\onyxop{OPARGS}{tuck}{OPOUTS}}: ]
+\item[{\onyxop{a b}{tuck}{b a b}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a: ]
+			An object.
+		\item[b: ]
+			An object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
@@ -11136,8 +11154,17 @@ onyx:0>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Create a duplicate of the top object on ostack and put it under
+		the second object on ostack.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> `a' `b' `c' 
+oonyx:3> tuck pstack
+`c'
+`b'
+`c'
+`a'
+onyx:4>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:type}
@@ -11352,24 +11379,40 @@ onyx:0>
 	\end{description}
 \label{systemdict:up}
 \index{up@\onyxop{}{up}{}}
-\item[{\onyxop{OPARGS}{up}{OPOUTS}}: ]
+\item[{\onyxop{a b c}{up}{c a b}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a: ]
+			An object.
+		\item[b: ]
+			An object.
+		\item[c: ]
+			An object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[c: ]
+			An object.
+		\item[a: ]
+			An object.
+		\item[b: ]
+			An object.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
-		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Rotate the top three objects on ostack up one position.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> `a' `b' `c' `d' up pstack
+`c'
+`b'
+`d'
+`a'
+onyx:4>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:version}
