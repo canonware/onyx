@@ -2876,6 +2876,69 @@ done
 
 fi
 
+if test "x$build_libonyx" = "xyes" ; then
+
+echo $ac_n "checking for (struct dirent).d_namlen""... $ac_c" 1>&6
+echo "configure:2883: checking for (struct dirent).d_namlen" >&5
+cat > conftest.$ac_ext <<EOF
+#line 2885 "configure"
+#include "confdefs.h"
+
+#include <dirent.h>
+
+int main() {
+
+	struct dirent	ent;
+
+	ent.d_namlen = 0;
+
+; return 0; }
+EOF
+if { (eval echo configure:2898: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+  rm -rf conftest*
+  echo "$ac_t""yes" 1>&6
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  echo "$ac_t""no" 1>&6
+
+echo $ac_n "checking for (struct dirent).d_reclen""... $ac_c" 1>&6
+echo "configure:2908: checking for (struct dirent).d_reclen" >&5
+cat > conftest.$ac_ext <<EOF
+#line 2910 "configure"
+#include "confdefs.h"
+
+#include <dirent.h>
+
+int main() {
+
+	struct dirent	ent;
+
+	ent.d_reclen = 0;
+
+; return 0; }
+EOF
+if { (eval echo configure:2923: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+  rm -rf conftest*
+  echo "$ac_t""yes" 1>&6
+   cat >> confdefs.h <<\EOF
+#define _CW_LIBONYX_USE_DIRENT_RECLEN 1
+EOF
+
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  echo "$ac_t""no" 1>&6
+   { echo "configure: error: struct dirent too deviant" 1>&2; exit 1; }
+fi
+rm -f conftest*
+fi
+rm -f conftest*
+
+fi
+
 if test "x$build_onyx" = "xyes" ; then
   if test "x$prefix" = "xNONE" ; then
     _CW_ONYX_RPATH="/usr/local/share/canonware/onyx/nxcode"
@@ -2899,17 +2962,17 @@ if test "x$build_ncurses" = "xyes" ; then
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
-echo "configure:2903: checking for $ac_hdr" >&5
+echo "configure:2966: checking for $ac_hdr" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2908 "configure"
+#line 2971 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:2913: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:2976: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -2943,17 +3006,17 @@ if test "x$build_proxy" = "xyes" ; then
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
-echo "configure:2947: checking for $ac_hdr" >&5
+echo "configure:3010: checking for $ac_hdr" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2952 "configure"
+#line 3015 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:2957: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:3020: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*

@@ -1463,7 +1463,9 @@ void
 systemdict_dirforeach(cw_nxo_t *a_thread)
 {
 	cw_nxo_t	*ostack, *estack, *tstack;
-	cw_nxo_t	*nxo, *tnxo, *path, *proc, *scratch, *entry;
+	cw_nxo_t	*nxo, *tnxo, *path, *proc, *entry;
+	cw_nx_t		*nx;
+	cw_bool_t	currentlocking;
 	DIR		*dir;
 	struct dirent	ent, *entp;
 	int		error;
@@ -1474,6 +1476,8 @@ systemdict_dirforeach(cw_nxo_t *a_thread)
 	tstack = nxo_thread_tstack_get(a_thread);
 	edepth = nxo_stack_count(estack);
 	tdepth = nxo_stack_count(tstack);
+	nx = nxo_thread_nx_get(a_thread);
+	currentlocking = nxo_thread_currentlocking(a_thread);
 
 	NXO_STACK_GET(tnxo, ostack, a_thread);
 	NXO_STACK_DOWN_GET(nxo, ostack, a_thread, tnxo);
@@ -1515,14 +1519,6 @@ systemdict_dirforeach(cw_nxo_t *a_thread)
 	/* Pop the path and proc off ostack before going into the loop. */
 	nxo_stack_npop(ostack, 2);
 
-	/*
-	 * Create a scratch string for storing directory entries.  The string
-	 * pushed onto ostack in the loop below is a substring of this.
-	 */
-	scratch = nxo_stack_push(tstack);
-	nxo_string_new(scratch, nxo_thread_nx_get(a_thread),
-	    nxo_thread_currentlocking(a_thread), PATH_MAX);
-
 	xep_begin();
 	xep_try {
 		/*
@@ -1531,21 +1527,19 @@ systemdict_dirforeach(cw_nxo_t *a_thread)
 		while ((error = readdir_r(dir, &ent, &entp) == 0) && entp ==
 		    &ent) {
 /*
- * OSes don't agree on field naming!
+ * OSes don't agree on field naming.  Try using d_reclen instead of d_namlen if
+ * d_namlen isn't in struct dirent.
  */
-#ifndef d_namlen
+#ifdef _CW_LIBONYX_USE_DIRENT_RECLEN
 #define	d_namlen	d_reclen
 #endif
-			_cw_assert(ent.d_namlen < PATH_MAX);
-
 			/*
 			 * Push a string onto ostack that represents the
 			 * directory entry.
 			 */
 			entry = nxo_stack_push(ostack);
-			nxo_string_set(scratch, 0, ent.d_name, ent.d_namlen);
-			nxo_string_substring_new(entry, scratch,
-			    nxo_thread_nx_get(a_thread), 0, ent.d_namlen);
+			nxo_string_new(entry, nx, currentlocking, ent.d_namlen);
+			nxo_string_set(entry, 0, ent.d_name, ent.d_namlen);
 
 			/*
 			 * Evaluate proc.

@@ -192,6 +192,33 @@ if test "x$build_libsock" = "xyes" ; then
   AC_CHECK_FUNCS(poll, , AC_MSG_ERROR(Cannot build without poll))
 fi
 
+if test "x$build_libonyx" = "xyes" ; then
+
+dnl Try to figure out which field of struct dirent contains the entry string
+dnl length.
+AC_MSG_CHECKING(for (struct dirent).d_namlen)
+AC_TRY_LINK([
+#include <dirent.h>
+], [
+	struct dirent	ent;
+
+	ent.d_namlen = 0;
+], AC_MSG_RESULT(yes), AC_MSG_RESULT(no)
+
+dnl d_namlen doesn't exist, so try d_reclen.
+AC_MSG_CHECKING(for (struct dirent).d_reclen)
+AC_TRY_LINK([
+#include <dirent.h>
+], [
+	struct dirent	ent;
+
+	ent.d_reclen = 0;
+], AC_MSG_RESULT(yes)
+   AC_DEFINE(_CW_LIBONYX_USE_DIRENT_RECLEN),
+   AC_MSG_RESULT(no)
+   AC_MSG_ERROR(struct dirent too deviant)))
+fi
+
 if test "x$build_onyx" = "xyes" ; then
   if test "x$prefix" = "xNONE" ; then
     _CW_ONYX_RPATH="/usr/local/share/canonware/onyx/nxcode"
