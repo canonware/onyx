@@ -1,3 +1,9 @@
+1999-07-20  Jason Evans  <jasone@canonware.com>
+
+	* src/mem.c (mem_malloc, mem_calloc): Fix error printing logic
+	that caused erroneous allocation failure messages if
+	libstash_init() hadn't been called.
+
 1999-07-18  Jason Evans  <jasone@canonware.com>
 
 	* : Convert use of log_*() to out_*().

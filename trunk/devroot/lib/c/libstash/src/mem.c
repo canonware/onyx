@@ -108,17 +108,20 @@ mem_malloc(cw_mem_t * a_mem, size_t a_size)
   retval = _cw_malloc(a_size);
   
 #ifdef _LIBSTASH_DBG
-  if (NULL == a_mem)
+  if (NULL == retval)
   {
-    char buf[1025];
+    if (dbg_is_registered(cw_g_dbg, "mem_error"))
+    {
+      char buf[1025];
 
-    bzero(buf, sizeof(buf));
-    out_put_sn(cw_g_out, buf, 1024,
-	       "[s](): malloc([i32]) returned NULL at [s], line [i32]\n",
-	       __FUNCTION__, a_size, a_filename, a_line_num);
-    out_put(cw_g_out, buf);
+      bzero(buf, sizeof(buf));
+      out_put_sn(cw_g_out, buf, 1024,
+		 "[s](): malloc([i32]) returned NULL at [s], line [i32]\n",
+		 __FUNCTION__, a_size, a_filename, a_line_num);
+      out_put(cw_g_out, buf);
+    }
   }
-  else
+  else if (NULL != a_mem)
   {
     struct cw_mem_item_s * old_allocation;
     
@@ -209,17 +212,21 @@ mem_calloc(cw_mem_t * a_mem, size_t a_number, size_t a_size)
   retval = _cw_calloc(a_number, a_size);
 
 #ifdef _LIBSTASH_DBG
-  if (NULL == a_mem)
+  if (NULL == retval)
   {
-    char buf[1025];
+    if (dbg_is_registered(cw_g_dbg, "mem_error"))
+    {
+      char buf[1025];
 
-    bzero(buf, sizeof(buf));
-    out_put_sn(cw_g_out, buf, 1024,
-	       "[s](): calloc([i32], [i32]) returned NULL at [s], line [i32]\n",
-	       __FUNCTION__, a_number, a_size, a_filename, a_line_num);
-    out_put(cw_g_out, buf);
+      bzero(buf, sizeof(buf));
+      out_put_sn(cw_g_out, buf, 1024,
+		 "[s](): calloc([i32], [i32]) returned NULL "
+		 "at [s], line [i32]\n",
+		 __FUNCTION__, a_number, a_size, a_filename, a_line_num);
+      out_put(cw_g_out, buf);
+    }
   }
-  else
+  else if (NULL != a_mem)
   {
     struct cw_mem_item_s * old_allocation;
     
