@@ -783,40 +783,40 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 		{
 		    nxo_integer_set(inxo, index);
 		    nxo_l_array_el_get(enxo, index, el);
-		    cnxo = el;
-		    attr = nxo_attr_get(cnxo);
+		    attr = nxo_attr_get(el);
 		    if ((index == len - 1)
 			&& (attr == NXOA_EVALUATABLE
 			    || (attr == NXOA_EXECUTABLE
-				&& nxo_type_get(cnxo) != NXOT_ARRAY)))
+				&& nxo_type_get(el) != NXOT_ARRAY)))
 		    {
 			/* Possible tail recursion.  Replace the array with its
 			 * last element before the next iteration of the outer
 			 * loop. */
 			tnxo = nxo_stack_push(&thread->estack);
-			nxo_dup(tnxo, cnxo);
+			nxo_dup(tnxo, el);
 			nxo_stack_remove(&thread->estack, enxo);
 			enxo = cnxo = tnxo;
 			nxo_integer_set(inxo, 0);
 			break;
 		    }
 
-		    if (nxo_type_get(cnxo) == NXOT_ARRAY)
+		    if (nxo_type_get(el) == NXOT_ARRAY)
 		    {
-			if (nxo_attr_get(cnxo) != NXOA_EVALUATABLE)
+			if (attr != NXOA_EVALUATABLE)
 			{
 			    /* Only nested arrays with the evaluatable attribute
 			     * are evaluated.  Push this nested array onto
 			     * ostack, since it isn't evaluatable. */
 			    tnxo = nxo_stack_push(&thread->ostack);
-			    nxo_dup(tnxo, cnxo);
+			    nxo_dup(tnxo, el);
+			    cnxo = NULL;
 			}
 			else
 			{
 			    /* Set up for nested array evaluation. */
 			    enxo = nxo_stack_push(&thread->estack);
 			    cdepth++;
-			    nxo_dup(enxo, cnxo);
+			    nxo_dup(enxo, el);
 			    cnxo = enxo;
 
 			    inxo = nxo_stack_push(&thread->istack);
@@ -828,6 +828,7 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 		    {
 			/* Evaluate the element of the array in the outer
 			 * loop. */
+			cnxo = el;
 			break;
 		    }
 		}
