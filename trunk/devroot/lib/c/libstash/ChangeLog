@@ -1,3 +1,7 @@
+2000-02-11  Jason Evans  <jasone@canonware.com>
+
+	* : Add the dch (dynamic chained hashing) class.
+
 2000-02-09  Jason Evans  <jasone@canonware.com>
 
 	* include/libstash/out.h: Add _cw_out_put*() macros.

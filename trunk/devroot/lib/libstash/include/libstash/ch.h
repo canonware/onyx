@@ -50,8 +50,8 @@ struct cw_ch_s
 };
 
 /* Typedefs to allow easy function pointer passing. */
-typedef cw_uint32_t ch_hash_t(const void *);
-typedef cw_bool_t ch_key_comp_t(const void *, const void *);
+typedef cw_uint32_t cw_ch_hash_t(const void *);
+typedef cw_bool_t cw_ch_key_comp_t(const void *, const void *);
 
 /* Calculates ch size, given the number of hash table slots.  Use this to
  * calculate space allocation when passing pre-allocated space to ch_new(). */
@@ -60,7 +60,7 @@ typedef cw_bool_t ch_key_comp_t(const void *, const void *);
 
 cw_ch_t *
 ch_new(cw_ch_t * a_ch, cw_uint32_t a_table_size, cw_pezz_t * a_chi_pezz,
-       ch_hash_t * a_hash, ch_key_comp_t * a_key_comp);
+       cw_ch_hash_t * a_hash, cw_ch_key_comp_t * a_key_comp);
 
 void
 ch_delete(cw_ch_t * a_ch);

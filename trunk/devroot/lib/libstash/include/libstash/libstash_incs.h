@@ -46,6 +46,7 @@
 #include "buf.h"
 #include "pezz.h"
 #include "ch.h"
+#include "dch.h"
 #include "arena.h"
 #include "bhp.h"
 #include "res.h"
