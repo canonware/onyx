@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 136 $
- * $Date: 1998-07-10 13:11:48 -0700 (Fri, 10 Jul 1998) $
+ * $Revision: 155 $
+ * $Date: 1998-07-29 16:58:01 -0700 (Wed, 29 Jul 1998) $
  *
  * <<< Description >>>
  *
@@ -19,6 +19,4 @@
 
 #define _INC_ZT_H_
 #include <libstash.h>
-
-#include <zt_priv.h>
 

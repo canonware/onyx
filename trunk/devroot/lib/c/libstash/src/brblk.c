@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 145 $
- * $Date: 1998-07-15 17:26:27 -0700 (Wed, 15 Jul 1998) $
+ * $Revision: 155 $
+ * $Date: 1998-07-29 16:58:01 -0700 (Wed, 29 Jul 1998) $
  *
  * <<< Description >>>
  *
@@ -19,7 +19,6 @@
 
 #define _INC_BRBLK_H_
 #include <libstash.h>
-#include <brblk_priv.h>
 
 /****************************************************************************
  * <<< Description >>>
