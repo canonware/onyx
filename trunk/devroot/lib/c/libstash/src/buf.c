@@ -1442,17 +1442,16 @@ buf_p_catenate_buf(cw_buf_t * a_a, cw_buf_t * a_b, cw_bool_t a_preserve)
     buf_p_copy_array(a_a, a_b, a_b->array_num_valid, a_a->array_end,
 		     a_b->array_start, !a_preserve);
   }
-  
 #else
   if (did_bufel_merge)
   {
     buf_p_copy_array(a_a, a_b, a_b->array_num_valid - 1, a_a->array_end,
-		     a_b->array_start);
+		     (a_b->array_start + 1) % a_b->array_size);
   }
   else
   {
     buf_p_copy_array(a_a, a_b, a_b->array_num_valid, a_a->array_end,
-		     (a_b->array_start + 1) % a_b->array_size);
+		     a_b->array_start);
   }
 #endif
       

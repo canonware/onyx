@@ -1,3 +1,9 @@
+1999-03-10  Jason Evans  <jasone@canonware.com>
+
+	* src/buf.c (buf_p_catenate_buf): Call buf_p_copy_array() with the
+	same arguments in the optimized library as in the debug library
+	(other than the extra argument).
+
 1999-03-08    <jasone@canonware.com>
 
 	* src/buf.c (buf_get_uint8): Fix locking bug.
