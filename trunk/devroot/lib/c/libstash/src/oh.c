@@ -47,12 +47,12 @@
 
 #define _INC_OH_H_
 #ifdef _CW_REENTRANT
-#  include <libstash_r.h>
+#  include "libstash_r.h"
 #else
-#  include <libstash.h>
+#  include "libstash.h"
 #endif
 
-#include <oh_priv.h>
+#include "oh_priv.h"
 
 cw_oh_t *
 #ifdef _CW_REENTRANT
@@ -526,7 +526,6 @@ oh_set_base_grow_point(cw_oh_t * a_oh_o,
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * Insert an item, unless an item with the same key already exists.
  *
@@ -596,7 +595,6 @@ oh_item_insert(cw_oh_t * a_oh_o, void * a_key,
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * Delete an item with key a_search_key.  If successful, set *a_key and
  * *a_data to point to the key and data, respectively.
@@ -674,7 +672,6 @@ oh_item_delete(cw_oh_t * a_oh_o,
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * Search for an item with key a_key.  If found, set *a_data to point to
  * the associated data.
@@ -733,7 +730,61 @@ oh_item_search(cw_oh_t * a_oh_o,
 }
 
 /****************************************************************************
- * <<< Description >>>
+ *
+ * Searches linearly through the hash table and deletes the first valid
+ * item found.
+ *
+ ****************************************************************************/
+cw_bool_t
+oh_item_get_iterate(cw_oh_t * a_oh_o, void ** a_key, void ** a_data)
+{
+  cw_bool_t retval;
+  
+  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
+  {
+    _cw_marker("Enter oh_item_get_iterate()");
+  }
+  _cw_check_ptr(a_oh_o);
+#ifdef _CW_REENTRANT
+  if (a_oh_o->is_thread_safe)
+  {
+    rwl_wlock(&a_oh_o->rw_lock);
+  }
+#endif
+
+  if (list_count(&a_oh_o->items_list) > 0)
+  {
+    cw_oh_item_t * item;
+
+    retval = FALSE;
+
+    item = (cw_oh_item_t *) list_hpop(&a_oh_o->items_list);
+
+    *a_key = item->key;
+    *a_data = item->data;
+
+    /* Put the item back on the tail of the list. */
+    list_tpush(&a_oh_o->items_list, item);
+  }
+  else
+  {
+    retval = TRUE;
+  }
+  
+#ifdef _CW_REENTRANT
+  if (a_oh_o->is_thread_safe)
+  {
+    rwl_wunlock(&a_oh_o->rw_lock);
+  }
+#endif
+  if (_cw_pmatch(_STASH_DBG_R_OH_FUNC))
+  {
+    _cw_marker("Exit oh_item_get_iterate()");
+  }
+  return retval;
+}
+
+/****************************************************************************
  *
  * Searches linearly through the hash table and deletes the first valid
  * item found.
@@ -793,7 +844,6 @@ oh_item_delete_iterate(cw_oh_t * a_oh_o, void ** a_key, void ** a_data)
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * Print the internal state of the hash table.
  *
@@ -882,7 +932,6 @@ oh_dump(cw_oh_t * a_oh_o, cw_bool_t a_all)
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * Default primary hash function.  This is a string hash, so if the keys
  * being used for an oh instance aren't strings, don't use this.
@@ -942,13 +991,9 @@ oh_p_h1(cw_oh_t * a_oh_o, void * a_key)
 #endif
 
 /****************************************************************************
- * <<< Return Value >>>
  *
- * TRUE == Keys are equal.
- *
- * <<< Description >>>
- *
- * Compares two keys for equality.
+ * Compares two keys for equality.  A return value of TRUE means the
+ * arguments are equal.
  *
  ****************************************************************************/
 cw_bool_t
@@ -966,7 +1011,6 @@ oh_p_key_compare(void * a_k1, void * a_k2)
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * If the table is too full, double in size and insert into the new table.
  *
@@ -1023,7 +1067,6 @@ oh_p_grow(cw_oh_t * a_oh_o)
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * If the table is too empty, shrink it as small as possible, without
  * making it so small that the table would need to immediately grow again.
@@ -1113,7 +1156,6 @@ oh_p_shrink(cw_oh_t * a_oh_o)
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * Find the slot that we should insert into, given a_item, and insert.
  *
@@ -1173,7 +1215,6 @@ oh_p_item_insert(cw_oh_t * a_oh_o,
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * Uses the primary and secondary hash function to search for an item with
  * key == a_key.
@@ -1223,7 +1264,6 @@ oh_p_item_search(cw_oh_t * a_oh_o,
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  * Rehash.
  *
@@ -1254,7 +1294,6 @@ oh_p_rehash(cw_oh_t * a_oh_o)
 }
 
 /****************************************************************************
- * <<< Description >>>
  *
  *  Figure out whether there are any items that bounced past this slot
  *  using the secondary hash.  If so, shuffle things backward to fill this

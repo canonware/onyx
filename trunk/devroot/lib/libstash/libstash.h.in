@@ -146,7 +146,7 @@ typedef enum
  */
 
 #  ifndef _STASH_INCS_H_
-#    include <stash_incs.h>
+#    include "stash_incs.h"
 #    define _STASH_INCS_H_
 #  endif
 

@@ -16,12 +16,12 @@
 
 #define _INC_BHP_H_
 #ifdef _CW_REENTRANT
-#  include <libstash_r.h>
+#  include "libstash_r.h"
 #else
-#  include <libstash.h>
+#  include "libstash.h"
 #endif
 
-#include <bhp_priv.h>
+#include "bhp_priv.h"
 
 /****************************************************************************
  * <<< Description >>>

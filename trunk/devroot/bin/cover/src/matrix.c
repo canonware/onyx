@@ -15,7 +15,7 @@
  ****************************************************************************/
 
 #define _INC_MATRIX_H_
-#include <libstash.h>
+#include "libstash.h"
 
 #include <limits.h>
 

@@ -87,6 +87,7 @@ struct cw_oh_s
 #define oh_item_delete _CW_NS_ANY(oh_item_delete)
 #define oh_item_search _CW_NS_ANY(oh_item_search)
 
+#define oh_item_get_iterate _CW_NS_ANY(oh_item_get_iterate)
 #define oh_item_delete_iterate _CW_NS_ANY(oh_item_delete_iterate)
 #define oh_dump _CW_NS_ANY(oh_dump)
 
@@ -134,6 +135,8 @@ cw_bool_t oh_item_delete(cw_oh_t * a_oh_o, void * a_search_key, void ** a_key,
 cw_bool_t oh_item_search(cw_oh_t * a_oh_o, void * a_key,
 			 void ** a_data);
 
+cw_bool_t oh_item_get_iterate(cw_oh_t * a_oh_o, void ** a_key,
+			      void ** a_data);
 cw_bool_t oh_item_delete_iterate(cw_oh_t * a_oh_o, void ** a_key,
 				 void ** a_data);
 void oh_dump(cw_oh_t * a_oh_o, cw_bool_t a_all);

@@ -17,12 +17,12 @@
 
 #define _INC_LEX_H_
 #ifdef _CW_REENTRANT
-#  include <libstash_r.h>
+#  include "libstash_r.h"
 #else
-#  include <libstash.h>
+#  include "libstash.h"
 #endif
 
-#include <lex_priv.h>
+#include "lex_priv.h"
 
 /****************************************************************************
  *

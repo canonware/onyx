@@ -15,7 +15,7 @@
  ****************************************************************************/
 
 #define _INC_GLOB_H_
-#include <libstash.h>
+#include "libstash.h"
 
 /* Globals. */
 cw_mem_t * g_mem_o = NULL;

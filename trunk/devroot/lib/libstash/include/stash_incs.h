@@ -58,7 +58,7 @@
 
 #  ifdef _CW_REENTRANT
 #    ifndef _THREAD_H_
-#      include <thread.h>
+#      include "thread.h"
 #      define _THREAD_H_
 #    endif
 #  endif
@@ -66,26 +66,26 @@
 #  ifdef _CW_REENTRANT
 #    ifndef _LOCKS_H_
 #      ifndef _LIST_H_
-#        include <list.h>
+#        include "list.h"
 #        define _LIST_H_
 #      endif
-#      include <locks.h>
+#      include "locks.h"
 #      define _LOCKS_H_
 #    endif
 #  endif
 
 #  ifndef _DBG_H_
-#    include <dbg.h>
+#    include "dbg.h"
 #    define _DBG_H_
 #  endif
 
 #  ifndef _LOG_H_
-#    include <log.h>
+#    include "log.h"
 #    define _LOG_H_
 #  endif
 
 #  ifndef _MEM_H_
-#    include <mem.h>
+#    include "mem.h"
 #    define _MEM_H_
 #  endif
 
@@ -95,7 +95,7 @@
 
 #  if (defined(_INC_BHP_H_))
 #    ifndef _BHP_H_
-#      include <bhp.h>
+#      include "bhp.h"
 #      define _BHP_H_
 #    endif
 #  endif
@@ -103,16 +103,16 @@
 #  if (defined(_INC_BUF_H_))
 #    ifndef _BUF_H_
 #      ifndef _LIST_H_
-#        include <list.h>
+#        include "list.h"
 #      endif
-#      include <buf.h>
+#      include "buf.h"
 #      define _BUF_H_
 #    endif
 #  endif
 
 #  if (defined(_INC_GLOB_H_))
 #    ifndef _GLOB_H_
-#      include <glob.h>
+#      include "glob.h"
 #      define _GLOB_H_
 #    endif
 #  endif
@@ -121,26 +121,26 @@
 #    ifndef _LEX_H_
 #      ifndef _BUF_H_
 #        ifndef _LIST_H_
-#          include <list.h>
+#          include "list.h"
 #        endif
-#        include <buf.h>
+#        include "buf.h"
 #        define _BUF_H_
 #      endif
-#      include <lex.h>
+#      include "lex.h"
 #      define _LEX_H_
 #    endif
 #  endif
 
 #  if (defined(_INC_LIST_H_))
 #    ifndef _LIST_H_
-#      include <list.h>
+#      include "list.h"
 #      define _LIST_H_
 #    endif
 #  endif
 
 #  if (defined(_INC_MATRIX_H_))
 #    ifndef _MATRIX_H_
-#      include <matrix.h>
+#      include "matrix.h"
 #      define _MATRIX_H_
 #    endif
 #  endif
@@ -148,10 +148,10 @@
 #  if (defined(_INC_OH_H_))
 #    ifndef _OH_H_
 #      ifndef _LIST_H_
-#        include <list.h>
+#        include "list.h"
 #        define _LIST_H_
 #      endif
-#      include <oh.h>
+#      include "oh.h"
 #      define _OH_H_
 #    endif
 #  endif
@@ -159,10 +159,10 @@
 #  if (defined(_INC_RES_H_))
 #    ifndef _RES_H_
 #      ifndef _OH_H_
-#        include <oh.h>
+#        include "oh.h"
 #        define _OH_H_
 #      endif
-#      include <res.h>
+#      include "res.h"
 #      define _RES_H_
 #    endif
 #  endif
@@ -172,7 +172,7 @@
 
 #  if (defined(_INC_?_H_))
 #    ifndef _?_H_
-#      include <?.h>
+#      include "?.h"
 #      define _?_H_
 #    endif
 #  endif

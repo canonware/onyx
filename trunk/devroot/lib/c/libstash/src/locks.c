@@ -52,8 +52,8 @@
  *
  ****************************************************************************/
 
-#include <libstash_r.h>
-#include <locks_priv.h>
+#include "libstash_r.h"
+#include "locks_priv.h"
 
 cw_rwl_t *
 rwl_new(cw_rwl_t * a_rwl_o)

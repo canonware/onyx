@@ -2,7 +2,7 @@
  ****************************************************************************
  *
  * <Copyright = "jasone">
- # <License>
+ * <License>
  *
  ****************************************************************************
  *
@@ -26,6 +26,6 @@
 #    define _CW_REENTRANT
 #  endif
 
-#  include <libstash.h>
+#  include "libstash.h"
 
 #endif /* _LIBSTASH_R_H_ */

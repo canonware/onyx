@@ -124,7 +124,7 @@ all : default
 #
 
 .SUFFIXES :
-.SUFFIXES : .a .c .h .o .pl.in .pl \
+.SUFFIXES : .a .c .h .o .d .pl.in .pl \
 	.o_st_d .o_st_o .o_sh_o .o_st_p \
 	.o_st_r_d .o_st_r_o .o_sh_r_o .o_st_r_p \
 	.d_st_d .d_st_o .d_sh_o .d_st_p \
@@ -174,28 +174,28 @@ obj/st_r_p/%.o_st_r_p : src/%.c
 	$(SHELL) -ec "$(CC) -M $(DEFINES) $(ST_DEFINES) $(D_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o $(subst /,\/,$(strip $(dir $@)))\1.d \2/g\" > $@"
 
 obj/st_d/%.d_st_d : src/%.c
-	$(SHELL) -ec "$(CC) -M $(DEFINES) $(ST_DEFINES) $(D_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_st_d $(subst /,\/,$(strip $(dir $@)))\1.d_st_d \2/g\" > $@"
+	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(D_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_st_d $(subst /,\/,$(strip $(dir $@)))\1.d_st_d \2/g\" > $@"
 
 obj/st_o/%.d_st_o : src/%.c
-	$(SHELL) -ec "$(CC) -M $(DEFINES) $(ST_DEFINES) $(O_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_st_o $(subst /,\/,$(strip $(dir $@)))\1.d_st_o \2/g\" > $@"
+	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(O_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_st_o $(subst /,\/,$(strip $(dir $@)))\1.d_st_o \2/g\" > $@"
 
 obj/sh_o/%.d_sh_o : src/%.c
-	$(SHELL) -ec "$(CC) -M $(DEFINES) $(SH_DEFINES) $(O_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_sh_o $(subst /,\/,$(strip $(dir $@)))\1.d_sh_o \2/g\" > $@"
+	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(SH_DEFINES) $(O_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_sh_o $(subst /,\/,$(strip $(dir $@)))\1.d_sh_o \2/g\" > $@"
 
 obj/st_p/%.d_st_p : src/%.c
-	$(SHELL) -ec "$(CC) -M $(DEFINES) $(ST_DEFINES) $(P_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_st_p $(subst /,\/,$(strip $(dir $@)))\1.d_st_p \2/g\" > $@"
+	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(P_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_st_p $(subst /,\/,$(strip $(dir $@)))\1.d_st_p \2/g\" > $@"
 
 obj/st_r_d/%.d_st_r_d : src/%.c
-	$(SHELL) -ec "$(CC) -M $(DEFINES) $(ST_DEFINES) $(D_DEFINES) $(R_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_st_r_d $(subst /,\/,$(strip $(dir $@)))\1.d_st_r_d \2/g\" > $@"
+	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(D_DEFINES) $(R_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_st_r_d $(subst /,\/,$(strip $(dir $@)))\1.d_st_r_d \2/g\" > $@"
 
 obj/st_r_o/%.d_st_r_o : src/%.c
-	$(SHELL) -ec "$(CC) -M $(DEFINES) $(ST_DEFINES) $(O_DEFINES) $(R_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_st_r_o $(subst /,\/,$(strip $(dir $@)))\1.d_st_r_o \2/g\" > $@"
+	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(O_DEFINES) $(R_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_st_r_o $(subst /,\/,$(strip $(dir $@)))\1.d_st_r_o \2/g\" > $@"
 
 obj/sh_r_o/%.d_sh_r_o : src/%.c
-	$(SHELL) -ec "$(CC) -M $(DEFINES) $(SH_DEFINES) $(O_DEFINES) $(R_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_sh_r_o $(subst /,\/,$(strip $(dir $@)))\1.d_sh_r_o \2/g\" > $@"
+	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(SH_DEFINES) $(O_DEFINES) $(R_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_sh_r_o $(subst /,\/,$(strip $(dir $@)))\1.d_sh_r_o \2/g\" > $@"
 
 obj/st_r_p/%.d_st_r_p : src/%.c
-	$(SHELL) -ec "$(CC) -M $(DEFINES) $(ST_DEFINES) $(P_DEFINES) $(R_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_st_r_p $(subst /,\/,$(strip $(dir $@)))\1.d_st_r_p \2/g\" > $@"
+	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(P_DEFINES) $(R_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_st_r_p $(subst /,\/,$(strip $(dir $@)))\1.d_st_r_p \2/g\" > $@"
 
 #
 # Dependencies (not rules).

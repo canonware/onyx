@@ -18,12 +18,12 @@
 #include <time.h>
 
 #ifdef _CW_REENTRANT
-#  include <libstash_r.h>
+#  include "libstash_r.h"
 #else
-#  include <libstash.h>
+#  include "libstash.h"
 #endif
 
-#include <log_priv.h>
+#include "log_priv.h"
 
 /****************************************************************************
  * <<< Description >>>
