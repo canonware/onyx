@@ -419,8 +419,10 @@ if test "x$enable_modules" = "xyes" ; then
   else
     enable_modprompt="0"
   fi
-  AC_SUBST(enable_modprompt)
+else
+  enable_modprompt="0"
 fi
+AC_SUBST(enable_modprompt)
 
 dnl Look for binaries.
 if test "x$enable_onyx" = "x1" ; then
