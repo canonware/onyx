@@ -582,11 +582,11 @@ sockb_p_notify(cw_mq_t * a_mq, int a_sockfd)
   }
 
   retval = FALSE;
-
-  RETURN:
 #ifdef _LIBSOCK_SOCKB_CONFESS
   out_put(cw_g_out, "n");
 #endif
+
+  RETURN:
   return retval;
 }
 
@@ -1169,7 +1169,6 @@ sockb_p_entry_func(void * a_arg)
 
 	  buffer_size = pezz_get_buffer_size(&g_sockb->buffer_pool);
 
-	  _cw_assert(0 == buf_get_size(&buf_in));
 	  do
 	  {
 	    /* Add some more space to &buf_in if necessary. */
