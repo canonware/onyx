@@ -19,7 +19,7 @@ main()
 	cw_buf_t	*buf_a, *buf_b, *buf_c, *buf_d;
 
 	libstash_init();
-	_cw_out_put("Test begin\n");
+	out_put(out_err, "Test begin\n");
 
 	buf_a = buf_new_r(NULL, cw_g_mem);
 	buf_b = buf_new_r(NULL, cw_g_mem);
@@ -71,11 +71,11 @@ main()
 		}
 	}
 
-	_cw_out_put("[i] bytes of data in buf_a (various sized bufc's)\n",
+	out_put(out_err, "[i] bytes of data in buf_a (various sized bufc's)\n",
 	    buf_size_get(buf_a));
-	_cw_out_put("[i] bytes of data in buf_b (4kB bufc's)\n",
+	out_put(out_err, "[i] bytes of data in buf_b (4kB bufc's)\n",
 	    buf_size_get(buf_b));
-	_cw_out_put("[i] bytes of data in buf_c (16B bufc's)\n",
+	out_put(out_err, "[i] bytes of data in buf_c (16B bufc's)\n",
 	    buf_size_get(buf_c));
 
 	/* buf_uint8_get() inc loop for each buf. */
@@ -475,7 +475,7 @@ main()
 	buf_delete(buf_c);
 	buf_delete(buf_d);
 
-	_cw_out_put("Test end\n");
+	out_put(out_err, "Test end\n");
 	libstash_shutdown();
 	return 0;
 }

@@ -66,14 +66,14 @@ main(int argc, char **argv)
 			opt_port = strtol(optarg, NULL, 10);
 			break;
 		default:
-			_cw_out_put("Unrecognized option '[c]'\n", c);
+			out_put(out_err, "Unrecognized option '[c]'\n", c);
 			cl_error = TRUE;
 			break;
 		}
 	}
 
 	if (cl_error || (optind < argc)) {
-		_cw_out_put("Unrecognized option(s)\n");
+		out_put(out_err, "Unrecognized option(s)\n");
 		usage(basename(argv[0]));
 		retval = 1;
 		goto CLERROR;
@@ -87,7 +87,7 @@ main(int argc, char **argv)
 		goto CLERROR;
 	}
 	if (opt_bsize == 0) {
-		_cw_out_put("Invalid block size\n");
+		out_put(out_err, "Invalid block size\n");
 		retval = 1;
 		goto CLERROR;
 	}

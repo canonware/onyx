@@ -75,7 +75,7 @@ main(int argc, char **argv)
 
 	socks = socks_new();
 	if (socks_listen(socks, INADDR_ANY, &port)) {
-		_cw_out_put("[s]: Error listening on port [i]\n", argv[0],
+		out_put(out_err, "[s]: Error listening on port [i]\n", argv[0],
 		    port);
 		goto RETURN;
 	}

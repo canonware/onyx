@@ -35,17 +35,17 @@ do_mem(void)
 int
 main()
 {
-	_cw_out_put("Test begin\n");
+	out_put(out_err, "Test begin\n");
 	do_mem();
 
-	_cw_out_put("libstash_init()\n");
+	out_put(out_err, "libstash_init()\n");
 	libstash_init();
 	do_mem();
 
-	_cw_out_put("libstash_shutdown()\n");
+	out_put(out_err, "libstash_shutdown()\n");
 	libstash_shutdown();
 	do_mem();
 
-	_cw_out_put("Test end\n");
+	out_put(out_err, "Test end\n");
 	return 0;
 }

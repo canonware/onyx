@@ -88,7 +88,7 @@ pool_delete(cw_pool_t *a_pool)
 		num_addrs = dch_count(&a_pool->addr_hash);
 
 		if (0 < num_addrs) {
-			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+			out_put_e(out_err, NULL, 0, __FUNCTION__,
 			    "[i] leaked buffer[s] (buffer size [i] bytes)\n",
 			    num_addrs, num_addrs != 1 ? "s" : "",
 			    a_pool->buffer_size);
@@ -96,7 +96,7 @@ pool_delete(cw_pool_t *a_pool)
 		for (i = 0; i < num_addrs; i++) {
 			dch_remove_iterate(&a_pool->addr_hash, &addr,
 			    (void **)&allocation, NULL);
-			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+			out_put_e(out_err, NULL, 0, __FUNCTION__,
 			    "0x[p] never freed (allocated at [s], line [i])\n",
 			    addr, ((NULL == allocation->filename) ? "<?>" :
 			    allocation->filename), allocation->line_num);
@@ -181,7 +181,7 @@ pool_get_e(cw_pool_t *a_pool, const char *a_filename, cw_uint32_t a_line_num)
 
 		if (dch_search(&a_pool->addr_hash, retval, (void
 		    **)&old_allocation) == FALSE) {
-			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+			out_put_e(out_err, NULL, 0, __FUNCTION__,
 			    "0x[p] multiply-allocated (was at [s], line [i]; "
 			    "now at [s], line [i])\n", retval,
 			    old_allocation->filename, old_allocation->line_num,
@@ -203,7 +203,7 @@ pool_get_e(cw_pool_t *a_pool, const char *a_filename, cw_uint32_t a_line_num)
 				allocation->line_num = a_line_num;
 
 #ifdef _LIBSTASH_POOL_VERBOSE
-				out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+				out_put_e(out_err, NULL, 0, __FUNCTION__,
 				    "0x[p] ([i] B) <-- pool_get() at [s], line "
 				    "[i]\n", retval, a_pool->buffer_size,
 				    a_filename, a_line_num);
@@ -252,7 +252,7 @@ pool_put_e(cw_pool_t *a_pool, void *a_buffer, const char *a_filename,
 
 		if (dch_remove(&a_pool->addr_hash, a_buffer, NULL, (void
 		    **)&allocation, NULL)) {
-			out_put_e(cw_g_out, NULL, 0, __FUNCTION__, "0x[p] not "
+			out_put_e(out_err, NULL, 0, __FUNCTION__, "0x[p] not "
 			    "allocated, attempted to free at [s], line [i]\n",
 			    a_buffer, a_filename, a_line_num);
 			/*
@@ -262,7 +262,7 @@ pool_put_e(cw_pool_t *a_pool, void *a_buffer, const char *a_filename,
 			goto RETURN;
 		} else {
 #ifdef _LIBSTASH_POOL_VERBOSE
-			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+			out_put_e(out_err, NULL, 0, __FUNCTION__,
 			    "Freeing 0x[p] at [s], line [i], allocated at [s], "
 			    "line [i]\n", a_buffer, a_filename, a_line_num,
 			    allocation->filename, allocation->line_num);
@@ -292,9 +292,10 @@ pool_dump(cw_pool_t *a_pool, const char *a_prefix)
 	_cw_assert(a_pool->magic == _CW_POOL_MAGIC);
 	mtx_lock(&a_pool->lock);
 
-	_cw_out_put("[s]start ==========================================\n",
-	    a_prefix);
-	_cw_out_put("[s]buffer_size : [i]\n", a_prefix, a_pool->buffer_size);
+	out_put(out_err,
+	    "[s]start ==========================================\n", a_prefix);
+	out_put(out_err, "[s]buffer_size : [i]\n", a_prefix,
+	    a_pool->buffer_size);
 
 	if (qs_top(&a_pool->spares) != NULL) {
 		cw_uint32_t	i = 0;
@@ -302,16 +303,17 @@ pool_dump(cw_pool_t *a_pool, const char *a_prefix)
 		qs_foreach(spare, &a_pool->spares, link) {
 			i++;
 		}
-		_cw_out_put("[s]spares ([i]) : \n", a_prefix, i);
+		out_put(out_err, "[s]spares ([i]) : \n", a_prefix, i);
 
 		qs_foreach(spare, &a_pool->spares, link) {
-			_cw_out_put("[s]             0x[p]\n", a_prefix, spare);
+			out_put(out_err, "[s]             0x[p]\n", a_prefix,
+			    spare);
 		}
 	} else
-		_cw_out_put("[s]spares (0) : (null)\n", a_prefix);
+		out_put(out_err, "[s]spares (0) : (null)\n", a_prefix);
 
-	_cw_out_put("[s]end ============================================\n",
-	    a_prefix);
+	out_put(out_err,
+	    "[s]end ============================================\n", a_prefix);
 
 	mtx_unlock(&a_pool->lock);
 }

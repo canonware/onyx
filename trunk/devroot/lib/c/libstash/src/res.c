@@ -280,7 +280,7 @@ res_dump(cw_res_t *a_res, const char *a_filename)
 		}
 		fd = open(a_filename, O_RDWR | O_CREAT | O_TRUNC, 0644);
 		if (fd == -1) {
-			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+			out_put_e(out_err, NULL, 0, __FUNCTION__,
 			    "Error opening file \"[s]\"\n", a_filename);
 			retval = TRUE;
 			goto RETURN;
@@ -397,7 +397,7 @@ res_p_res_parse(cw_res_t *a_res, cw_bool_t a_is_file)
 			if (c == EOF) {
 				/* Make sure it's an EOF, not an error. */
 				if (ferror(a_res->fd)) {
-					_cw_out_put("res_parse_res(): "
+					out_put(out_err, "res_parse_res(): "
 					    "Error reading from file\n");
 					retval = TRUE;
 					break;
@@ -462,7 +462,7 @@ res_p_res_parse(cw_res_t *a_res, cw_bool_t a_is_file)
 			case _LIBSTASH_RES_CHAR_OTHER:
 			default:
 				/* Error. */
-				out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+				out_put_e(out_err, NULL, 0, __FUNCTION__,
 				    "Illegal character while in "
 				    "_LIBSTASH_RES_STATE_START,"
 				    " line [i], column [i]\n",
@@ -509,7 +509,7 @@ res_p_res_parse(cw_res_t *a_res, cw_bool_t a_is_file)
 			case _LIBSTASH_RES_CHAR_VALID_IN_VAL:
 			case _LIBSTASH_RES_CHAR_OTHER:
 			default:
-				out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+				out_put_e(out_err, NULL, 0, __FUNCTION__,
 				    "Illegal character while in "
 				    "_LIBSTASH_RES_STATE_BEGIN_WHITESPACE,"
 				    " line [i], column [i]\n",
@@ -546,7 +546,7 @@ res_p_res_parse(cw_res_t *a_res, cw_bool_t a_is_file)
 			case _LIBSTASH_RES_CHAR_OTHER:
 			default:
 				/* Error. */
-				out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+				out_put_e(out_err, NULL, 0, __FUNCTION__,
 				    "Illegal character while in "
 				    "_LIBSTASH_RES_STATE_BEGIN_COMMENT, "
 				    "line [i], column [i]\n",
@@ -594,7 +594,7 @@ res_p_res_parse(cw_res_t *a_res, cw_bool_t a_is_file)
 			case _LIBSTASH_RES_CHAR_OTHER:
 			default:
 				/* Error. */
-				out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+				out_put_e(out_err, NULL, 0, __FUNCTION__,
 				    "Illegal character while in "
 				    "_LIBSTASH_RES_STATE_NAME, "
 				    "line [i], column [i]\n",
@@ -630,7 +630,7 @@ res_p_res_parse(cw_res_t *a_res, cw_bool_t a_is_file)
 			case _LIBSTASH_RES_CHAR_OTHER:
 			default:
 				/* Error. */
-				out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+				out_put_e(out_err, NULL, 0, __FUNCTION__,
 				    "Illegal character while in "
 				    "_LIBSTASH_RES_STATE_POST_NAME_WHITESPACE, "
 				    "line [i], column [i]\n",
@@ -693,7 +693,7 @@ res_p_res_parse(cw_res_t *a_res, cw_bool_t a_is_file)
 			case _LIBSTASH_RES_CHAR_OTHER:
 			default:
 				/* Error. */
-				out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+				out_put_e(out_err, NULL, 0, __FUNCTION__,
 				    "Illegal character while in "
 				    "_LIBSTASH_RES_STATE_POST_COLON_WHITESPACE"
 				    ", line [i], column [i]\n",
@@ -762,7 +762,7 @@ res_p_res_parse(cw_res_t *a_res, cw_bool_t a_is_file)
 			case _LIBSTASH_RES_CHAR_OTHER:
 			default:
 				/* Error. */
-				out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+				out_put_e(out_err, NULL, 0, __FUNCTION__,
 				    "Illegal character while in "
 				    "_LIBSTASH_RES_STATE_VALUE, "
 				    "line [i], column [i]\n",
@@ -842,7 +842,7 @@ res_p_res_parse(cw_res_t *a_res, cw_bool_t a_is_file)
 			case _LIBSTASH_RES_CHAR_OTHER:
 			default:
 				/* Error. */
-				out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+				out_put_e(out_err, NULL, 0, __FUNCTION__,
 				    "Illegal character while in "
 				    "_LIBSTASH_RES_STATE_VALUE_BACKSLASH, "
 				    "line [i], column [i]\n",
@@ -878,7 +878,7 @@ res_p_res_parse(cw_res_t *a_res, cw_bool_t a_is_file)
 			case _LIBSTASH_RES_CHAR_OTHER:
 			default:
 				/* Error. */
-				out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+				out_put_e(out_err, NULL, 0, __FUNCTION__,
 				    "Illegal character while in "
 				    "_LIBSTASH_RES_STATE_BACKSLASH_WHITESPACE, "
 				    "line [i], column [i]\n",
@@ -918,7 +918,7 @@ res_p_res_parse(cw_res_t *a_res, cw_bool_t a_is_file)
 			case _LIBSTASH_RES_CHAR_OTHER:
 			default:
 				/* Error. */
-				out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+				out_put_e(out_err, NULL, 0, __FUNCTION__,
 				    "Illegal character while in "
 				    "_LIBSTASH_RES_STATE_TRAILING_COMMENT, "
 				    "line [i], column [i]\n",
@@ -928,7 +928,7 @@ res_p_res_parse(cw_res_t *a_res, cw_bool_t a_is_file)
 			}
 			break;
 		default:
-			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+			out_put_e(out_err, NULL, 0, __FUNCTION__,
 			    "Jumped to non-existant state, line [i], "
 			    "column [i]\n", line_num, col_num);
 			retval = TRUE;

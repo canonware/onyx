@@ -19,7 +19,7 @@ int
 main()
 {
 	libstash_init();
-	_cw_out_put("Test begin\n");
+	out_put(out_err, "Test begin\n");
 
 	/* bhpi_new(), bhpi_delete(). */
 	{
@@ -114,7 +114,7 @@ main()
 		bhp_delete(bhp_p_a);
 	}
 
-	_cw_out_put("Test end\n");
+	out_put(out_err, "Test end\n");
 	libstash_shutdown();
 	return 0;
 }

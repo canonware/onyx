@@ -90,7 +90,7 @@ main(int argc, char **argv)
 	}
 
 	if ((cl_error) || (optind < argc)) {
-		_cw_out_put("Unrecognized option(s)\n");
+		out_put(out_err, "Unrecognized option(s)\n");
 		usage(basename(argv[0]));
 		retval = 1;
 		goto CLERROR;
@@ -104,22 +104,22 @@ main(int argc, char **argv)
 		goto CLERROR;
 	}
 	if (opt_rhost == NULL) {
-		_cw_out_put("Remote host:port not specified\n");
+		out_put(out_err, "Remote host:port not specified\n");
 		retval = 1;
 		goto CLERROR;
 	}
 	if (opt_bsize == 0) {
-		_cw_out_put("Invalid block size\n");
+		out_put(out_err, "Invalid block size\n");
 		retval = 1;
 		goto CLERROR;
 	}
 	if (opt_nsocks == 0) {
-		_cw_out_put("Invalid number of connections\n");
+		out_put(out_err, "Invalid number of connections\n");
 		retval = 1;
 		goto CLERROR;
 	}
 	if (opt_nblocks == 0) {
-		_cw_out_put("Invalid number of blocks\n");
+		out_put(out_err, "Invalid number of blocks\n");
 		retval = 1;
 		goto CLERROR;
 	}
@@ -160,14 +160,14 @@ main(int argc, char **argv)
 		if ((i & 0xf) == 0xf) {
 			for (j = 0; j < opt_nsocks; j++) {
 				if (sock_out_flush(&sock_array[j])) {
-					out_put_e(cw_g_out, __FILE__, __LINE__,
+					out_put_e(out_err, __FILE__, __LINE__,
 					    NULL, "Error in sock_flush_out() "
 					    "for connection [i]\n", j);
 					goto SHUTDOWN;
 				}
 				buf_buf_catenate(&t_buf, &buf, TRUE);
 				if (sock_write(&sock_array[j], &t_buf)) {
-					out_put_e(cw_g_out, __FILE__, __LINE__,
+					out_put_e(out_err, __FILE__, __LINE__,
 					    NULL, "Error in sock_write() "
 					    "for connection [i]\n", j);
 					goto SHUTDOWN;
@@ -177,7 +177,7 @@ main(int argc, char **argv)
 			for (j = 0; j < opt_nsocks; j++) {
 				buf_buf_catenate(&t_buf, &buf, TRUE);
 				if (sock_write(&sock_array[j], &t_buf)) {
-					out_put_e(cw_g_out, __FILE__, __LINE__,
+					out_put_e(out_err, __FILE__, __LINE__,
 					    NULL, "Error in sock_write() "
 					    "for connection [i]\n", j);
 					goto SHUTDOWN;

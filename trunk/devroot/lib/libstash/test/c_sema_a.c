@@ -21,7 +21,7 @@ thread_entry_func(void *a_arg)
 	cw_sema_t	*sema = (cw_sema_t *)a_arg;
 
 	sema_wait(sema);
-	_cw_out_put("Got semaphore.\n");
+	out_put(out_err, "Got semaphore.\n");
 
 	return NULL;
 }
@@ -35,7 +35,7 @@ main()
 	struct timespec	timeout;
 
 	libstash_init();
-	_cw_out_put("Test begin\n");
+	out_put(out_err, "Test begin\n");
 
 	sema_new(&sema_b, 0);
 	_cw_assert(sema_getvalue(&sema_b) == 0);
@@ -80,7 +80,7 @@ main()
 
 	sema_delete(&sema_a);
 
-	_cw_out_put("Test end\n");
+	out_put(out_err, "Test end\n");
 	libstash_shutdown();
 	return 0;
 }

@@ -15,7 +15,7 @@ int
 main()
 {
 	libstash_init();
-	out_put(cw_g_out, "Test begin\n");
+	out_put(out_err, "Test begin\n");
 	libsock_init(1024,	/* a_max_fds */
 	    4096,		/* a_bufc_size */
 	    16			/* a_max_spare_bufcs */
@@ -24,7 +24,7 @@ main()
 
 
 	libsock_shutdown();
-	out_put(cw_g_out, "Test end\n");
+	out_put(out_err, "Test end\n");
 	libstash_shutdown();
 	return 0;
 }

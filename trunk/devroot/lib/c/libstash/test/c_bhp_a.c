@@ -34,7 +34,7 @@ main()
 	};
 
 	libstash_init();
-	_cw_out_put("Test begin\n");
+	out_put(out_err, "Test begin\n");
 
 	h = bhp_new_r(NULL, cw_g_mem, bhp_sint32_priority_compare);
 	_cw_check_ptr(h);
@@ -56,12 +56,12 @@ main()
 	}
 	for (i = 0; i < _LIBSTASH_TEST_NUM_NODES; i++) {
 		_cw_assert(bhp_min_del(h, (void **)&a, (void **)&b) == FALSE);
-		_cw_out_put("i == [i], size == [q]: [i|s:s], [i|s:s]\n", i,
+		out_put(out_err, "i == [i], size == [q]: [i|s:s], [i|s:s]\n", i,
 		    bhp_size_get(h), *a, *b);
 	}
 
 	bhp_delete(h);
-	_cw_out_put("Test end\n");
+	out_put(out_err, "Test end\n");
 	libstash_shutdown();
 	return 0;
 }

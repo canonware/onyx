@@ -192,7 +192,7 @@ end
 			break;
 		case 'e': {
 			if (argc != 3) {
-				_cw_out_put("[s]: Incorrect number of "
+				out_put(out_err, "[s]: Incorrect number of "
 				    "arguments\n", basename(argv[0]));
 				usage(basename(argv[0]));
 				retval = 1;
@@ -205,7 +205,7 @@ end
 		case -1:
 			break;
 		default:
-			_cw_out_put("[s]: Unrecognized option\n",
+			out_put(out_err, "[s]: Unrecognized option\n",
 			    basename(argv[0]));
 			usage(basename(argv[0]));
 			retval = 1;
@@ -217,7 +217,7 @@ end
 		 */
 		if ((optind < argc && (opt_expression != NULL || opt_version))
 		    || (opt_version && opt_expression != NULL)) {
-			_cw_out_put("[s]: Incorrect number of arguments\n",
+			out_put(out_err, "[s]: Incorrect number of arguments\n",
 			    basename(argv[0]));
 			usage(basename(argv[0]));
 			retval = 1;
@@ -271,7 +271,7 @@ end
 			 */
 			src_fd = open(argv[optind], O_RDONLY);
 			if (src_fd == -1) {
-				_cw_out_put("[s]: Error in open(\"[s]\","
+				out_put(out_err, "[s]: Error in open(\"[s]\","
 				    " O_RDONLY): [s]\n", basename(argv[0]),
 				    argv[optind], strerror(errno));
 				retval = 1;

@@ -302,44 +302,45 @@ ch_dump(cw_ch_t *a_ch, const char *a_prefix)
 	_cw_check_ptr(a_prefix);
 
 #ifdef _LIBSTASH_DBG
-	_cw_out_put("[s]: num_collisions: [i], num_inserts: [i],"
+	out_put(out_err, "[s]: num_collisions: [i], num_inserts: [i],"
 	    " num_removes: [i]\n",
 	    a_prefix, a_ch->num_collisions, a_ch->num_inserts,
 	    a_ch->num_removes);
 #endif
 
-	_cw_out_put("[s]: is_malloced: [s]\n",
+	out_put(out_err, "[s]: is_malloced: [s]\n",
 	    a_prefix, (a_ch->is_malloced) ? "TRUE" : "FALSE");
-	_cw_out_put("[s]: ql_first(chi_ql): 0x[p]\n",
+	out_put(out_err, "[s]: ql_first(chi_ql): 0x[p]\n",
 	    a_prefix, ql_first(&a_ch->chi_ql));
-	_cw_out_put("[s]: count: [i], table_size: [i]\n",
+	out_put(out_err, "[s]: count: [i], table_size: [i]\n",
 	    a_prefix, a_ch->count, a_ch->table_size);
 
 	/* Table. */
-	_cw_out_put("[s]: table --------------------------------------"
+	out_put(out_err, "[s]: table --------------------------------------"
 	    "----------------------\n", a_prefix);
 
 	for (i = 0; i < a_ch->table_size; i++) {
 		if (ql_first(&a_ch->table[i]) != NULL) {
 			ql_foreach(chi, &a_ch->chi_ql, ch_link) {
-				_cw_out_put("[s]: key: 0x[p], data: 0x[p],"
+				out_put(out_err, "[s]: key: 0x[p], data: 0x[p],"
 				    " slot: [i]\n", a_prefix, chi->key,
 				    chi->data, chi->slot);
 			}
 		} else
-			_cw_out_put("[s]: [i]: NULL\n", a_prefix, i);
+			out_put(out_err, "[s]: [i]: NULL\n", a_prefix, i);
 	}
 
 	/* chi list. */
-	_cw_out_put("[s]: chi_list -----------------------------------"
+	out_put(out_err, "[s]: chi_list -----------------------------------"
 	    "----------------------\n", a_prefix);
 	if (ql_first(&a_ch->chi_ql) != NULL) {
 		ql_foreach(chi, &a_ch->chi_ql, ch_link) {
-			_cw_out_put("[s]: key: 0x[p], data: 0x[p], slot: [i]\n",
+			out_put(out_err,
+			    "[s]: key: 0x[p], data: 0x[p], slot: [i]\n",
 			    a_prefix, chi->key, chi->data, chi->slot);
 		}
 	} else
-		_cw_out_put("[s]: Empty\n", a_prefix);
+		out_put(out_err, "[s]: Empty\n", a_prefix);
 }
 
 cw_uint32_t

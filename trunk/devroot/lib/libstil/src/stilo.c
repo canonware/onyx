@@ -2527,7 +2527,7 @@ stilo_file_output(cw_stilo_t *a_stilo, const char *a_format, ...)
 
 		maxlen = file->buffer_size - file->buffer_offset;
 		va_start(ap, a_format);
-		if ((nwrite = out_put_svn(cw_g_out,
+		if ((nwrite = out_put_svn(NULL,
 		    &file->buffer[file->buffer_offset], maxlen, a_format, ap))
 		    == maxlen) {
 			/*
@@ -2544,7 +2544,7 @@ stilo_file_output(cw_stilo_t *a_stilo, const char *a_format, ...)
 			if (file->fd >= 0) {
 				/* Write directly to the file. */
 				va_start(ap, a_format);
-				if (out_put_fv(cw_g_out, file->fd, a_format, ap)
+				if (out_put_fv(NULL, file->fd, a_format, ap)
 				    == -1) {
 					retval = STILTE_IOERROR;
 					goto RETURN;
@@ -2559,7 +2559,7 @@ stilo_file_output(cw_stilo_t *a_stilo, const char *a_format, ...)
 				va_end(ap);
 				va_start(ap, a_format);
 
-				if ((nwrite = out_put_svn(cw_g_out,
+				if ((nwrite = out_put_svn(NULL,
 				    &file->buffer[file->buffer_offset], maxlen,
 				    a_format, ap)) == maxlen) {
 					char	*str;
@@ -2567,7 +2567,7 @@ stilo_file_output(cw_stilo_t *a_stilo, const char *a_format, ...)
 					va_end(ap);
 					va_start(ap, a_format);
 
-					nwrite = out_put_sva(cw_g_out, &str,
+					nwrite = out_put_sva(NULL, &str,
 					    a_format, ap);
 					if (file->write_f(file->arg, a_stilo,
 					    str, nwrite)) {
@@ -2590,7 +2590,7 @@ stilo_file_output(cw_stilo_t *a_stilo, const char *a_format, ...)
 		va_end(ap);
 	} else {
 		va_start(ap, a_format);
-		if (out_put_fv(cw_g_out, file->fd, a_format, ap) == -1) {
+		if (out_put_fv(NULL, file->fd, a_format, ap) == -1) {
 			retval = STILTE_IOERROR;
 			goto RETURN;
 		}
@@ -2650,7 +2650,7 @@ stilo_file_output_n(cw_stilo_t *a_stilo, cw_uint32_t a_size, const char
 
 			/* It will fit. */
 
-			nwrite = out_put_svn(cw_g_out,
+			nwrite = out_put_svn(NULL,
 			    &file->buffer[file->buffer_offset],
 			    a_size, a_format, ap);
 			_cw_assert(nwrite == a_size);
@@ -2666,7 +2666,7 @@ stilo_file_output_n(cw_stilo_t *a_stilo, cw_uint32_t a_size, const char
 
 			if (file->fd >= 0) {
 				/* Write directly to the file. */
-				if (out_put_fvn(cw_g_out, file->fd, a_size,
+				if (out_put_fvn(NULL, file->fd, a_size,
 				    a_format, ap) == -1) {
 					retval = STILTE_IOERROR;
 					goto RETURN;
@@ -2675,7 +2675,7 @@ stilo_file_output_n(cw_stilo_t *a_stilo, cw_uint32_t a_size, const char
 				cw_sint32_t	nwrite;
 				char		*str;
 
-				nwrite = out_put_sva(cw_g_out, &str, a_format,
+				nwrite = out_put_sva(NULL, &str, a_format,
 				    ap);
 				if (file->write_f(file->arg, a_stilo, str,
 				    (nwrite < a_size) ? nwrite : a_size)) {
@@ -2688,7 +2688,7 @@ stilo_file_output_n(cw_stilo_t *a_stilo, cw_uint32_t a_size, const char
 		}
 	} else {
 		if (file->fd >= 0) {
-			if (out_put_fvn(cw_g_out, file->fd, a_size, a_format,
+			if (out_put_fvn(NULL, file->fd, a_size, a_format,
 			    ap) == -1) {
 				retval = STILTE_IOERROR;
 				goto RETURN;
@@ -2697,7 +2697,7 @@ stilo_file_output_n(cw_stilo_t *a_stilo, cw_uint32_t a_size, const char
 			cw_sint32_t	nwrite;
 			char		*str;
 
-			nwrite = out_put_sva(cw_g_out, &str, a_format, ap);
+			nwrite = out_put_sva(NULL, &str, a_format, ap);
 			if (file->write_f(file->arg, a_stilo, str, (nwrite <
 			    a_size) ? nwrite : a_size)) {
 				_cw_free(str);

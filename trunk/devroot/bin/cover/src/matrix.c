@@ -305,13 +305,13 @@ matrix_dump(cw_matrix_t *a_matrix, const char *a_prefix, cw_bool_t a_compact)
     
 		if (a_compact) {
 			for (j = 0; j < a_matrix->y_size; j++) {
-				_cw_out_put("[s]", a_prefix);
+				out_put(out_err, "[s]", a_prefix);
 				for (i = 0; i < a_matrix->x_size; i++) {
-					_cw_out_put("[s]",
+					out_put(out_err, "[s]",
 					    matrix_get_element(a_matrix, i, j) ?
 					    "X" : ".");
 				}
-				_cw_out_put("\n");
+				out_put(out_err, "\n");
 			}
 		} else {
 			cw_uint32_t	k, x_digits, y_digits, t_len, x, y;
@@ -342,37 +342,37 @@ matrix_dump(cw_matrix_t *a_matrix, const char *a_prefix, cw_bool_t a_compact)
 			}
 
 			/* Top labels. */
-			_cw_out_put("[s]", a_prefix);
+			out_put(out_err, "[s]", a_prefix);
 			for (k = 0; k < y_digits; k++)
-				_cw_out_put(" ");
-			_cw_out_put("|");
+				out_put(out_err, " ");
+			out_put(out_err, "|");
 			for (i = 0; i < a_matrix->x_size; i++) {
 				_cw_out_put_s(t_str, "[i]", i);
 				t_len = strlen(t_str);
 				for (k = 0; k < ((x_digits + 1) - t_len); k++)
-					_cw_out_put(" ");
-				_cw_out_put("[i]", i);
+					out_put(out_err, " ");
+				out_put(out_err, "[i]", i);
 			}
-			_cw_out_put("\n");
+			out_put(out_err, "\n");
 
 			/* Top horizontal line. */
-			_cw_out_put("[s]", a_prefix);
+			out_put(out_err, "[s]", a_prefix);
 			for (k = 0; k < y_digits; k++)
-				_cw_out_put("-");
-			_cw_out_put("+");
+				out_put(out_err, "-");
+			out_put(out_err, "+");
 			for (i = 0; i < (a_matrix->x_size * (x_digits + 1));
 			     i++)
-				_cw_out_put("-");
-			_cw_out_put("\n");
+				out_put(out_err, "-");
+			out_put(out_err, "\n");
 
 			for (j = 0; j < a_matrix->y_size; j++) {
-				_cw_out_put("[s]", a_prefix);
+				out_put(out_err, "[s]", a_prefix);
 				/* Side label. */
 				_cw_out_put_s(t_str, "[i]", j);
 				t_len = strlen(t_str);
 				for (k = 0; k < ((y_digits) - t_len); k++)
-					_cw_out_put(" ");
-				_cw_out_put("[i]|", j);
+					out_put(out_err, " ");
+				out_put(out_err, "[i]|", j);
 
 				/* Matrix elements. */
 				for (i = 0; i < a_matrix->x_size; i++) {
@@ -380,17 +380,17 @@ matrix_dump(cw_matrix_t *a_matrix, const char *a_prefix, cw_bool_t a_compact)
 					    _cw_out_put_s(t_str, "[i]",
 					    matrix_get_element(a_matrix, i,
 					    j))); k++)
-						_cw_out_put(" ");
-					_cw_out_put("[i|s:s]",
+						out_put(out_err, " ");
+					out_put(out_err, "[i|s:s]",
 					    matrix_get_element(a_matrix, i, j));
 				}
 	
-				_cw_out_put("\n");
+				out_put(out_err, "\n");
 			}
 		}
 	}
 	else
-		_cw_out_put("Invalid matrix\n");
+		out_put(out_err, "Invalid matrix\n");
 }
 
 cw_bool_t

@@ -234,7 +234,7 @@ matrix_copy(cw_matrix_t *a_matrix);
  *
  * <<< Description >>>
  *
- * Print a_matrix to cw_g_out.
+ * Print a_matrix to out_err.
  *
  ****************************************************************************/
 void

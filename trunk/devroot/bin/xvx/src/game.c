@@ -215,8 +215,8 @@ game_dump(cw_game_t *a_game)
 	_cw_check_ptr(a_game);
 	_cw_assert(a_game->magic == _CW_GAME_MAGIC);
 
-	_cw_out_put("Players: [i]\n", a_game->nplayers);
-	_cw_out_put(
+	out_put(out_err, "Players: [i]\n", a_game->nplayers);
+	out_put(out_err,
 		"Rules:            teams: [s]\n"
 		"       constrained_open: [s]\n"
 		"           perfect_five: [s]\n"
@@ -235,15 +235,15 @@ game_dump(cw_game_t *a_game)
 	     i++, t_move = move_get_child(t_move)) {
 		if (i % a_game->nplayers == 0) {
 			/* Print turn number. */
-			_cw_out_put("[i|w:3]. ", i / a_game->nplayers + 1);
+			out_put(out_err, "[i|w:3]. ", i / a_game->nplayers + 1);
 		}
 
-		_cw_out_put("[move|w:8|j:r]", t_move);
+		out_put(out_err, "[move|w:8|j:r]", t_move);
 
 		if (i % a_game->nplayers == a_game->nplayers - 1) {
 			/* Newline. */
-			_cw_out_put("\n");
+			out_put(out_err, "\n");
 		}
 	}
-	_cw_out_put("\n");
+	out_put(out_err, "\n");
 }

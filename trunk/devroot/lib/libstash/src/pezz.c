@@ -136,14 +136,14 @@ pezz_delete(cw_pezz_t *a_pezz)
 		num_addrs = dch_count(&a_pezz->addr_hash);
 
 		if (0 < num_addrs) {
-			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+			out_put_e(out_err, NULL, 0, __FUNCTION__,
 			    "[i] leaked buffer[s]\n",
 			    num_addrs, num_addrs != 1 ? "s" : "");
 		}
 		for (i = 0; i < num_addrs; i++) {
 			dch_remove_iterate(&a_pezz->addr_hash, &addr,
 			    (void **)&allocation, NULL);
-			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+			out_put_e(out_err, NULL, 0, __FUNCTION__,
 			    "0x[p] never freed (allocated at [s], line [i])\n",
 			    addr, ((NULL == allocation->filename) ? "<?>" :
 			    allocation->filename), allocation->line_num);
@@ -229,7 +229,7 @@ pezz_get_e(cw_pezz_t *a_pezz, const char *a_filename, cw_uint32_t a_line_num)
 
 		if (dch_search(&a_pezz->addr_hash, retval, (void
 		    **)&old_allocation) == FALSE) {
-			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+			out_put_e(out_err, NULL, 0, __FUNCTION__,
 			    "0x[p] multiply-allocated (was at [s], line [i];"
 			    " now at [s], line [i])\n", retval,
 			    old_allocation->filename, old_allocation->line_num,
@@ -252,7 +252,7 @@ pezz_get_e(cw_pezz_t *a_pezz, const char *a_filename, cw_uint32_t a_line_num)
 				allocation->line_num = a_line_num;
 
 #ifdef _LIBSTASH_PEZZ_VERBOSE
-				out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+				out_put_e(out_err, NULL, 0, __FUNCTION__,
 				    "0x[p] ([i] B) <-- pezz_get() at [s], line "
 				    "[i]\n", retval, a_pezz->buffer_size,
 				    a_filename, a_line_num);
@@ -311,13 +311,13 @@ pezz_put_e(cw_pezz_t *a_pezz, void *a_buffer, const char *a_filename,
 			 * effect, and all we're doing here is leaking one
 			 * buffer.
 			 */
-			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+			out_put_e(out_err, NULL, 0, __FUNCTION__,
 			    "0x[p] not allocated, attempted to free at [s], "
 			    "line [i]\n", a_buffer, a_filename, a_line_num);
 			goto RETURN;
 		} else {
 #ifdef _LIBSTASH_PEZZ_VERBOSE
-			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+			out_put_e(out_err, NULL, 0, __FUNCTION__,
 			    "Freeing 0x[p] at [s], line [i], allocated at [s], "
 			    "line [i]\n", a_buffer, a_filename, a_line_num,
 			    allocation->filename, allocation->line_num);
@@ -349,40 +349,41 @@ pezz_dump(cw_pezz_t *a_pezz, const char *a_prefix)
 	_cw_assert(a_pezz->magic == _CW_PEZZ_MAGIC);
 	mtx_lock(&a_pezz->lock);
 
-	_cw_out_put("[s]start ==========================================\n",
-	    a_prefix);
-	_cw_out_put("[s]buffer_size : [i]\n",
+	out_put(out_err,
+	    "[s]start ==========================================\n", a_prefix);
+	out_put(out_err, "[s]buffer_size : [i]\n",
 	    a_prefix, a_pezz->buffer_size);
-	_cw_out_put("[s]aligned_size : [i]\n",
+	out_put(out_err, "[s]aligned_size : [i]\n",
 	    a_prefix, a_pezz->aligned_size);
-	_cw_out_put("[s]block_num_buffers : [i]\n",
+	out_put(out_err, "[s]block_num_buffers : [i]\n",
 	    a_prefix, a_pezz->block_num_buffers);
-	_cw_out_put("[s]num_blocks : [i]\n",
+	out_put(out_err, "[s]num_blocks : [i]\n",
 	    a_prefix, a_pezz->num_blocks);
 
-	_cw_out_put("[s]mem_blocks : 0x[p]\n",
+	out_put(out_err, "[s]mem_blocks : 0x[p]\n",
 	    a_prefix, a_pezz->mem_blocks);
 
 	for (i = 0; i < a_pezz->num_blocks; i++);
 	{
-		_cw_out_put("[s]mem_blocks[[[i]] : 0x[p] : "
+		out_put(out_err, "[s]mem_blocks[[[i]] : 0x[p] : "
 		    "0x[p]\n", a_prefix, i, a_pezz->mem_blocks[i], i);
 	}
 
 	if (qs_top(&a_pezz->spares) != NULL) {
 		cw_pezzi_t	*pezzi;
 
-		_cw_out_put("[s]spares : \n",
+		out_put(out_err, "[s]spares : \n",
 		    a_prefix);
 
 		qs_foreach(pezzi, &a_pezz->spares, link) {
-			_cw_out_put("[s]       : 0x[p]\n", a_prefix, pezzi);
+			out_put(out_err, "[s]       : 0x[p]\n", a_prefix,
+			    pezzi);
 		}
 	} else
-		_cw_out_put("[s]spares : (none)\n", a_prefix);
+		out_put(out_err, "[s]spares : (none)\n", a_prefix);
 
-	_cw_out_put("[s]end ============================================\n",
-	    a_prefix);
+	out_put(out_err,
+	    "[s]end ============================================\n", a_prefix);
 
 	mtx_unlock(&a_pezz->lock);
 }

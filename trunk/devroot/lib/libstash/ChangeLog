@@ -1,3 +1,8 @@
+2001-02-28  Jason Evans  <jasone@canonware.com>
+
+	* : Remove cw_g_out and replace it with out_std and out_err.
+	Convert all internal libstash printing to use out_err.
+
 2001-02-27  Jason Evans  <jasone@canonware.com>
 
 	* : Remove the dbg class.  Convert

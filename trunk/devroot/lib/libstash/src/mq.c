@@ -509,20 +509,21 @@ mq_dump(cw_mq_t *a_mq, const char *a_prefix)
 	_cw_check_ptr(a_mq);
 	_cw_assert(a_mq->magic == _LIBSTASH_MQ_MAGIC);
 
-	_cw_out_put("[s]is_malloced : [s]\n", a_prefix, a_mq->is_malloced ?
+	out_put(out_err, "[s]is_malloced : [s]\n", a_prefix, a_mq->is_malloced ?
 	    "TRUE" : "FALSE");
-	_cw_out_put("[s]msg_count : [i]\n", a_prefix, a_mq->msg_count);
-	_cw_out_put("[s]msg_size : [i]\n", a_prefix, a_mq->msg_size);
-	_cw_out_put("[s]msg_msgs_vec_count : [i]\n", a_prefix,
+	out_put(out_err, "[s]msg_count : [i]\n", a_prefix, a_mq->msg_count);
+	out_put(out_err, "[s]msg_size : [i]\n", a_prefix, a_mq->msg_size);
+	out_put(out_err, "[s]msg_msgs_vec_count : [i]\n", a_prefix,
 	    a_mq->msgs_vec_count);
-	_cw_out_put("[s]msg_beg : [i]\n", a_prefix, a_mq->msgs_beg);
-	_cw_out_put("[s]msg_end : [i]\n", a_prefix, a_mq->msgs_end);
+	out_put(out_err, "[s]msg_beg : [i]\n", a_prefix, a_mq->msgs_beg);
+	out_put(out_err, "[s]msg_end : [i]\n", a_prefix, a_mq->msgs_end);
 
 	switch (a_mq->msg_size) {
 	case 1:
 		for (i = 0, offset = a_mq->msgs_beg; i < a_mq->msg_count; i++,
 			 offset = (offset + 1) % a_mq->msgs_vec_count) {
-			_cw_out_put("[s]  msgs[[[i]]([i]) : [i] (0x[i|b:16])\n",
+			out_put(out_err,
+			    "[s]  msgs[[[i]]([i]) : [i] (0x[i|b:16])\n",
 			    a_prefix, i, offset, a_mq->msgs.one[i],
 			    a_mq->msgs.one[i]);
 		}
@@ -530,7 +531,8 @@ mq_dump(cw_mq_t *a_mq, const char *a_prefix)
 	case 2:
 		for (i = 0, offset = a_mq->msgs_beg; i < a_mq->msg_count; i++,
 			 offset = (offset + 1) % a_mq->msgs_vec_count) {
-			_cw_out_put("[s]  msgs[[[i]]([i]) : [i] (0x[i|b:16])\n",
+			out_put(out_err,
+			    "[s]  msgs[[[i]]([i]) : [i] (0x[i|b:16])\n",
 			    a_prefix, i, offset, a_mq->msgs.two[i],
 			    a_mq->msgs.two[i]);
 		}
@@ -538,7 +540,8 @@ mq_dump(cw_mq_t *a_mq, const char *a_prefix)
 	case 4:
 		for (i = 0, offset = a_mq->msgs_beg; i < a_mq->msg_count; i++,
 			 offset = (offset + 1) % a_mq->msgs_vec_count) {
-			_cw_out_put("[s]  msgs[[[i]]([i]) : [i] (0x[i|b:16])\n",
+			out_put(out_err,
+			    "[s]  msgs[[[i]]([i]) : [i] (0x[i|b:16])\n",
 			    a_prefix, i, offset, a_mq->msgs.four[i],
 			    a_mq->msgs.four[i]);
 		}
@@ -546,7 +549,8 @@ mq_dump(cw_mq_t *a_mq, const char *a_prefix)
 	case 8:
 		for (i = 0, offset = a_mq->msgs_beg; i < a_mq->msg_count; i++,
 			 offset = (offset + 1) % a_mq->msgs_vec_count) {
-			_cw_out_put("[s]  msgs[[[i]]([i]) : [i] (0x[i|b:16])\n",
+			out_put(out_err,
+			    "[s]  msgs[[[i]]([i]) : [i] (0x[i|b:16])\n",
 			    a_prefix, offset, i, a_mq->msgs.eight[i],
 			    a_mq->msgs.eight[i]);
 		}
@@ -555,8 +559,8 @@ mq_dump(cw_mq_t *a_mq, const char *a_prefix)
 		_cw_not_reached();
 	}
 
-	_cw_out_put("[s]get_stop : [s]\n", a_prefix, a_mq->get_stop ? "TRUE" :
-	    "FALSE");
-	_cw_out_put("[s]put_stop : [s]\n", a_prefix, a_mq->put_stop ? "TRUE" :
-	    "FALSE");
+	out_put(out_err, "[s]get_stop : [s]\n", a_prefix, a_mq->get_stop ?
+	    "TRUE" : "FALSE");
+	out_put(out_err, "[s]put_stop : [s]\n", a_prefix, a_mq->put_stop ?
+	    "TRUE" : "FALSE");
 }

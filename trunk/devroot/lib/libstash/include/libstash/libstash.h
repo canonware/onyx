@@ -152,7 +152,8 @@ void	libstash_shutdown(void);
  * Global variables.
  */
 extern cw_mem_t	*cw_g_mem;
-extern cw_out_t	*cw_g_out;
+extern cw_out_t	*out_std;
+extern cw_out_t	*out_err;
 
 /*
  * Global macros we use everywhere.

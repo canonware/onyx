@@ -475,7 +475,7 @@ libsock_l_host_ip_get(const char *a_host_str, cw_uint32_t *r_host_ip)
 	{
 		cw_uint32_t	t_host_ip = ntohl(*r_host_ip);
 
-		out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+		out_put_e(out_err, NULL, 0, __FUNCTION__,
 		    "IP address: [i].[i].[i].[i]\n", t_host_ip >> 24, (t_host_ip
 		    >> 16) & 0xff, (t_host_ip >> 8) & 0xff, t_host_ip & 0xff);
 	}
@@ -515,7 +515,7 @@ libsock_p_notify(cw_mq_t *a_mq, int a_sockfd)
 	}
 	retval = FALSE;
 #ifdef _LIBSOCK_CONFESS
-	_cw_out_put("n");
+	out_put(out_err, "n");
 #endif
 	RETURN:
 	return retval;
@@ -564,7 +564,7 @@ libsock_p_entry_func(void *a_arg)
 
 				sockfd = sock_fd_get(sock);
 				if (sockfd >= max_fds) {
-					out_put_e(cw_g_out, NULL, 0,
+					out_put_e(out_err, NULL, 0,
 					    __FUNCTION__,
 					    "Maximum file descriptor exceeded"
 					    " ([i] <= [i])\n", max_fds, sockfd);
@@ -588,7 +588,7 @@ libsock_p_entry_func(void *a_arg)
 					if (sock_l_in_max_buf_size_get(sock) !=
 					    0) {
 #ifdef _LIBSOCK_CONFESS
-						out_put_e(cw_g_out, __FILE__,
+						out_put_e(out_err, __FILE__,
 						    __LINE__, NULL,
 						    "Register [i] ([i] byte "
 						    "input buffer)\n", sockfd,
@@ -597,7 +597,7 @@ libsock_p_entry_func(void *a_arg)
 						fds[nfds].events = POLLIN;
 					} else {
 #ifdef _LIBSOCK_CONFESS
-						out_put_e(cw_g_out, __FILE__,
+						out_put_e(out_err, __FILE__,
 						    __LINE__, NULL,
 						    "Register [i](no in buffer"
 						    ")\n", sockfd);
@@ -612,7 +612,7 @@ libsock_p_entry_func(void *a_arg)
 					sock_l_message_callback(sock, FALSE);
 				} else {
 #ifdef _LIBSOCK_CONFESS
-					out_put_e(cw_g_out, __FILE__, __LINE__,
+					out_put_e(out_err, __FILE__, __LINE__,
 					    NULL, "Refuse to register [i]\n",
 					    sockfd);
 #endif
@@ -626,14 +626,14 @@ libsock_p_entry_func(void *a_arg)
 
 				if (regs[sockfd].pollfd_pos != -1) {
 #ifdef _LIBSOCK_CONFESS
-					out_put_e(cw_g_out, __FILE__, __LINE__,
+					out_put_e(out_err, __FILE__, __LINE__,
 					    NULL, "Unregister [i]\n", sockfd);
 #endif
 
 					nfds--;
 					if (regs[sockfd].pollfd_pos != nfds) {
 #ifdef _LIBSOCK_CONFESS
-						_cw_out_put("h([i]-->[i])",
+						out_put(out_err, "h([i]-->[i])",
 						    nfds,
 						    regs[sockfd].pollfd_pos);
 #endif
@@ -660,7 +660,7 @@ libsock_p_entry_func(void *a_arg)
 				}
 #ifdef _LIBSOCK_CONFESS
 				else {
-					out_put_e(cw_g_out, __FILE__, __LINE__,
+					out_put_e(out_err, __FILE__, __LINE__,
 					    NULL, "Refuse to unregister [i]\n",
 					    sockfd);
 				}
@@ -676,7 +676,7 @@ libsock_p_entry_func(void *a_arg)
 
 				if (regs[sockfd].pollfd_pos != -1) {
 #ifdef _LIBSOCK_CONFESS
-					out_put_e(cw_g_out, __FILE__, __LINE__,
+					out_put_e(out_err, __FILE__, __LINE__,
 					    NULL, "Set [i]w\n", sockfd);
 #endif
 
@@ -685,7 +685,7 @@ libsock_p_entry_func(void *a_arg)
 				}
 #ifdef _LIBSOCK_CONFESS
 				else {
-					out_put_e(cw_g_out, __FILE__, __LINE__,
+					out_put_e(out_err, __FILE__, __LINE__,
 					    NULL, "Refuse to set [i]w\n",
 					    sockfd);
 				}
@@ -696,7 +696,7 @@ libsock_p_entry_func(void *a_arg)
 
 				if (regs[sockfd].pollfd_pos != -1) {
 #ifdef _LIBSOCK_CONFESS
-					out_put_e(cw_g_out, __FILE__, __LINE__,
+					out_put_e(out_err, __FILE__, __LINE__,
 					    NULL, "Set [i]r\n", sockfd);
 #endif
 
@@ -705,7 +705,7 @@ libsock_p_entry_func(void *a_arg)
 				}
 #ifdef _LIBSOCK_CONFESS
 				else {
-					out_put_e(cw_g_out, __FILE__, __LINE__,
+					out_put_e(out_err, __FILE__, __LINE__,
 					    NULL,
 					    "Refuse to set [i]r\n", sockfd);
 				}
@@ -719,7 +719,7 @@ libsock_p_entry_func(void *a_arg)
 					regs[sockfd].notify_mq =
 					    message->data.in_notify.mq;
 #ifdef _LIBSOCK_CONFESS
-					out_put_e(cw_g_out, __FILE__, __LINE__,
+					out_put_e(out_err, __FILE__, __LINE__,
 					    NULL,
 					    "regs[[[i]].notify_mq = 0x[p]\n",
 					    sockfd, regs[sockfd].notify_mq);
@@ -765,7 +765,7 @@ libsock_p_entry_func(void *a_arg)
 						    sockfd);
 					}
 #ifdef _LIBSOCK_CONFESS
-					out_put_e(cw_g_out, __FILE__, __LINE__,
+					out_put_e(out_err, __FILE__, __LINE__,
 					    NULL,
 					    "Refuse to set regs[[[i]].notify_mq = 0x[p]\n",
 					    sockfd, message->data.in_notify.mq);
@@ -786,30 +786,30 @@ libsock_p_entry_func(void *a_arg)
 		{
 			cw_uint32_t	i;
 
-			out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
+			out_put_e(out_err, __FILE__, __LINE__, NULL,
 			    "poll fd's:");
 			for (i = 1; i < nfds; i++) {
 				sockfd = fds[i].fd;
 
-				_cw_out_put(" [i]R", sockfd);
+				out_put(out_err, " [i]R", sockfd);
 
 				if (fds[i].events & POLLIN)
-					_cw_out_put("r");
+					out_put(out_err, "r");
 				if (fds[i].events & POLLOUT)
-					_cw_out_put("w");
+					out_put(out_err, "w");
 			}
-			_cw_out_put(" ([i][s])\n", fds[0].fd,
+			out_put(out_err, " ([i][s])\n", fds[0].fd,
 			    (fds[0].events & POLLIN) ? "r" : "");
 		}
 
-		out_put_e(cw_g_out, __FILE__, __LINE__, NULL, "poll([i])",
+		out_put_e(out_err, __FILE__, __LINE__, NULL, "poll([i])",
 		    nfds);
 #endif
 
 		num_ready = poll(fds, nfds, -1);
 
 #ifdef _LIBSOCK_CONFESS
-		_cw_out_put("-->([i|s:s])\n", num_ready);
+		out_put(out_err, "-->([i|s:s])\n", num_ready);
 #endif
 
 		if (num_ready == -1) {
@@ -832,7 +832,7 @@ libsock_p_entry_func(void *a_arg)
 				ssize_t	bytes_read;
 
 #ifdef _LIBSOCK_CONFESS
-				_cw_out_put(" ([i|s:s]r)", g_libsock->pipe_out);
+				out_put(out_err, " ([i|s:s]r)", g_libsock->pipe_out);
 #endif
 
 				/*
@@ -882,7 +882,7 @@ libsock_p_entry_func(void *a_arg)
 				sockfd = fds[i].fd;
 
 #ifdef _LIBSOCK_CONFESS
-				out_put(cw_g_out,
+				out_put(out_err,
 				    " [i][s][s][s][s][s][s][s][s][s][s]",
 				    sockfd,
 #ifdef POLLIN
@@ -943,7 +943,7 @@ libsock_p_entry_func(void *a_arg)
 					j++;
 
 #ifdef _LIBSOCK_CONFESS
-					_cw_out_put("r");
+					out_put(out_err, "r");
 #endif
 					/* Ready for reading. */
 
@@ -1007,7 +1007,7 @@ libsock_p_entry_func(void *a_arg)
 							break;
 					}
 #ifdef _LIBSOCK_CONFESS
-					_cw_out_put("([i|s:s])",
+					out_put(out_err, "([i|s:s])",
 					    bytes_read);
 #endif
 
@@ -1044,7 +1044,7 @@ libsock_p_entry_func(void *a_arg)
 							 * once again space.
 							 */
 #ifdef _LIBSOCK_CONFESS
-							_cw_out_put("u");
+							out_put(out_err, "u");
 #endif
 							fds[i].events ^=
 							    (fds[i].events &
@@ -1085,7 +1085,7 @@ libsock_p_entry_func(void *a_arg)
 						if (regs[sockfd].pollfd_pos !=
 						    nfds) {
 #ifdef _LIBSOCK_CONFESS
-							_cw_out_put("h([i]-->[i])",
+							out_put(out_err, "h([i]-->[i])",
 							    nfds, i);
 #endif
 
@@ -1110,7 +1110,7 @@ libsock_p_entry_func(void *a_arg)
 							}
 						}
 #ifdef _LIBSOCK_CONFESS
-						_cw_out_put("\n");
+						out_put(out_err, "\n");
 #endif
 						continue;
 					} else {/* if (bytes_read == -1) */
@@ -1131,7 +1131,7 @@ libsock_p_entry_func(void *a_arg)
 					j++;
 
 #ifdef _LIBSOCK_CONFESS
-					_cw_out_put("r(");
+					out_put(out_err, "r(");
 #endif
 
 					/*
@@ -1198,7 +1198,7 @@ libsock_p_entry_func(void *a_arg)
 						}
 
 #ifdef _LIBSOCK_CONFESS
-						_cw_out_put("[i|s:s][s]",
+						out_put(out_err, "[i|s:s][s]",
 						    bytes_read, (0 < bytes_read)
 						    ? ", " : ")");
 #endif
@@ -1222,7 +1222,7 @@ libsock_p_entry_func(void *a_arg)
 					} while (bytes_read > 0);
 
 #ifdef _LIBSOCK_CONFESS
-					_cw_out_put("c");
+					out_put(out_err, "c");
 #endif
 
 #ifdef _LIBSOCK_CONFESS
@@ -1236,7 +1236,7 @@ libsock_p_entry_func(void *a_arg)
 					nfds--;
 					if (regs[sockfd].pollfd_pos != nfds) {
 #ifdef _LIBSOCK_CONFESS
-						_cw_out_put("h([i]-->[i])",
+						out_put(out_err, "h([i]-->[i])",
 						    nfds, i);
 #endif
 
@@ -1258,7 +1258,7 @@ libsock_p_entry_func(void *a_arg)
 						}
 					}
 #ifdef _LIBSOCK_CONFESS
-					_cw_out_put("\n");
+					out_put(out_err, "\n");
 #endif
 					continue;
 				}
@@ -1270,7 +1270,7 @@ libsock_p_entry_func(void *a_arg)
 					j++;
 
 #ifdef _LIBSOCK_CONFESS
-					_cw_out_put("w");
+					out_put(out_err, "w");
 #endif
 					/* Ready for writing. */
 
@@ -1298,7 +1298,7 @@ libsock_p_entry_func(void *a_arg)
 							break;
 					}
 #ifdef _LIBSOCK_CONFESS
-					_cw_out_put("([i|s:s]/[i])",
+					out_put(out_err, "([i|s:s]/[i])",
 					    bytes_written,
 					    buf_size_get(&tmp_buf));
 #endif
@@ -1317,7 +1317,7 @@ libsock_p_entry_func(void *a_arg)
 							 * write descriptor set.
 							 */
 #ifdef _LIBSOCK_CONFESS
-							_cw_out_put("u");
+							out_put(out_err, "u");
 #endif
 							fds[i].events ^=
 							    (fds[i].events &
@@ -1325,7 +1325,7 @@ libsock_p_entry_func(void *a_arg)
 						}
 #ifdef _LIBSOCK_CONFESS
 						else
-							_cw_out_put("i");
+							out_put(out_err, "i");
 #endif
 					} else {/* if (bytes_written == -1) */
 						buf_head_data_release(&tmp_buf,
@@ -1345,7 +1345,7 @@ libsock_p_entry_func(void *a_arg)
 						if (regs[sockfd].pollfd_pos !=
 						    nfds) {
 #ifdef _LIBSOCK_CONFESS
-							_cw_out_put("h([i]-->[i])",
+							out_put(out_err, "h([i]-->[i])",
 							    nfds, i);
 #endif
 							regs[fds[nfds].fd].pollfd_pos
@@ -1372,7 +1372,7 @@ libsock_p_entry_func(void *a_arg)
 				}
 			}
 #ifdef _LIBSOCK_CONFESS
-			_cw_out_put("\n");
+			out_put(out_err, "\n");
 #endif
 		}
 	}

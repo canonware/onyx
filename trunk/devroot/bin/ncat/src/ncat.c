@@ -163,7 +163,7 @@ main(int argc, char **argv)
 
 				if (inet_aton(optarg, &addr) == 0) {
 					/* Conversion error. */
-					_cw_out_put("[s]: Invalid IP address "
+					out_put(out_err, "[s]: Invalid IP address "
 					    "specified with \"-i\" flag\n",
 					    g_progname);
 					usage();
@@ -185,14 +185,14 @@ main(int argc, char **argv)
 	}
 
 	if ((cl_error) || (optind < argc)) {
-		_cw_out_put("[s]: Unrecognized option(s)\n", g_progname);
+		out_put(out_err, "[s]: Unrecognized option(s)\n", g_progname);
 		usage();
 		retval = 1;
 		goto RETURN;
 	}
 	/* Check validity of command line options. */
 	if (opt_verbose && opt_quiet) {
-		_cw_out_put("[s]: \"-v\" and \"-q\" are incompatible\n",
+		out_put(out_err, "[s]: \"-v\" and \"-q\" are incompatible\n",
 		    g_progname);
 		usage();
 		retval = 1;
@@ -200,20 +200,21 @@ main(int argc, char **argv)
 	}
 	if (opt_client == FALSE) {
 		if (opt_server == FALSE) {
-			_cw_out_put("[s]: -p or -r must be specified\n",
+			out_put(out_err, "[s]: -p or -r must be specified\n",
 			    g_progname);
 			usage();
 			retval = 1;
 			goto RETURN;
 		}
 	} else if (opt_server) {
-		_cw_out_put("[s]: -p and -r are incompatible\n", g_progname);
+		out_put(out_err, "[s]: -p and -r are incompatible\n",
+		    g_progname);
 		usage();
 		retval = 1;
 		goto RETURN;
 	}
 	if ((opt_log == NULL) && (opt_format != NONE)) {
-		_cw_out_put("[s]: -f requires -l to be specified\n",
+		out_put(out_err, "[s]: -f requires -l to be specified\n",
 		    g_progname);
 		usage();
 		retval = 1;
@@ -229,7 +230,7 @@ main(int argc, char **argv)
 
 		if (fd == -1) {
 			if (g_verbosity == 2) {
-				_cw_out_put("[s]: Unable to open log file"
+				out_put(out_err, "[s]: Unable to open log file"
 				    " \"[s]\"\n", g_progname, opt_log);
 			}
 			retval = 1;
@@ -252,10 +253,10 @@ main(int argc, char **argv)
 	if (sock == NULL) {
 		if (g_verbosity > 0) {
 			if (opt_client) {
-				_cw_out_put("[s]: Connection failure or "
+				out_put(out_err, "[s]: Connection failure or "
 				    "timeout\n", g_progname);
 			} else {
-				_cw_out_put("[s]: Error listening on port"
+				out_put(out_err, "[s]: Error listening on port"
 				    " [i] or timeout\n", g_progname, opt_port);
 			}
 		}
@@ -425,7 +426,7 @@ client_setup(const char *a_rhost, int a_rport, struct timespec * a_timeout)
         error = sock_connect(retval, a_rhost, a_rport, a_timeout);
 	if (error == -1) {
 		if (g_verbosity > 0) {
-			_cw_out_put("[s]: Error connecting to [s]:[i]\n",
+			out_put(out_err, "[s]: Error connecting to [s]:[i]\n",
 			    g_progname, a_rhost, a_rport);
 		}
 		sock_delete(retval);
@@ -433,7 +434,7 @@ client_setup(const char *a_rhost, int a_rport, struct timespec * a_timeout)
 		retval = NULL;
 	} else if (error == 1) {
 		if (g_verbosity > 0) {
-			_cw_out_put("[s]: Timeout connecting to [s]:[i]\n",
+			out_put(out_err, "[s]: Timeout connecting to [s]:[i]\n",
 			    g_progname, a_rhost, a_rport);
 		}
 		sock_delete(retval);

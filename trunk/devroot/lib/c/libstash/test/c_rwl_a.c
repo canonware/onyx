@@ -21,7 +21,7 @@ thread_entry_func(void *a_arg)
 	cw_rwl_t	*lock = (cw_rwl_t *)a_arg;
 
 	rwl_wlock(lock);
-	out_put_e(cw_g_out, NULL, 0, __FUNCTION__, "Got wlock\n");
+	out_put_e(out_err, NULL, 0, __FUNCTION__, "Got wlock\n");
 	rwl_wunlock(lock);
 
 	return NULL;
@@ -35,7 +35,7 @@ main()
 	cw_uint32_t	i;
 
 	libstash_init();
-	_cw_out_put("Test begin\n");
+	out_put(out_err, "Test begin\n");
 
 	rwl_new(&lock_b);
 	rwl_rlock(&lock_b);
@@ -52,13 +52,13 @@ main()
 	rwl_rlock(&lock_a);
 	for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
 		threads[i] = thd_new(thread_entry_func, (void *)&lock_a);
-	out_put_e(cw_g_out, NULL, 0, "main", "About to release rlock\n");
+	out_put_e(out_err, NULL, 0, "main", "About to release rlock\n");
 	rwl_runlock(&lock_a);
 	usleep(1);
-	out_put_e(cw_g_out, NULL, 0, "main", "About to release rlock\n");
+	out_put_e(out_err, NULL, 0, "main", "About to release rlock\n");
 	rwl_runlock(&lock_a);
 	usleep(1);
-	out_put_e(cw_g_out, NULL, 0, "main", "About to release rlock\n");
+	out_put_e(out_err, NULL, 0, "main", "About to release rlock\n");
 	rwl_runlock(&lock_a);
 
 	for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
@@ -67,7 +67,7 @@ main()
 	rwl_wlock(&lock_a);
 	for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
 		threads[i] = thd_new(thread_entry_func, (void *)&lock_a);
-	out_put_e(cw_g_out, NULL, 0, "main", "About to release wlock\n");
+	out_put_e(out_err, NULL, 0, "main", "About to release wlock\n");
 	usleep(1);
 	rwl_wunlock(&lock_a);
 
@@ -76,7 +76,7 @@ main()
 
 	rwl_delete(&lock_a);
 
-	_cw_out_put("Test end\n");
+	out_put(out_err, "Test end\n");
 	libstash_shutdown();
 	return 0;
 }

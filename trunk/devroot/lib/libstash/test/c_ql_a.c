@@ -29,224 +29,231 @@ main()
 	ql_head(list_t) head;
 
 	libstash_init();
-	_cw_out_put("Test begin\n");
+	out_put(out_err, "Test begin\n");
 
 	/* Initialize entries. */
-	_cw_out_put("ql_new()\n");
+	out_put(out_err, "ql_new()\n");
 	ql_new(&head);
 	for (i = 0; i < NENTRIES; i++) {
 		entries[i].id = 'a' + i;
 		ql_elm_new(&entries[i], link);
 	}
 	if (ql_first(&head) != NULL)
-		_cw_out_put("  ql_first(): [c]\n", ql_first(&head)->id);
+		out_put(out_err, "  ql_first(): [c]\n", ql_first(&head)->id);
 	else
-		_cw_out_put("  ql_first(): NULL\n");
-	if (ql_last(&head, link) != NULL)
-		_cw_out_put("  ql_last(): [c]\n", ql_last(&head, link)->id);
-	else
-		_cw_out_put("  ql_last(): NULL\n");
-	_cw_out_put("  ql_foreach():");
+		out_put(out_err, "  ql_first(): NULL\n");
+	if (ql_last(&head, link) != NULL) {
+		out_put(out_err, "  ql_last(): [c]\n", ql_last(&head,
+		    link)->id);
+	} else
+		out_put(out_err, "  ql_last(): NULL\n");
+	out_put(out_err, "  ql_foreach():");
 	ql_foreach(t, &head, link) {
-		_cw_out_put(" [c]", t->id);
+		out_put(out_err, " [c]", t->id);
 	}
-	_cw_out_put("\n");
-	_cw_out_put("  ql_reverse_foreach():");
+	out_put(out_err, "\n");
+	out_put(out_err, "  ql_reverse_foreach():");
 	ql_reverse_foreach(t, &head, link) {
-		_cw_out_put(" [c]", t->id);
+		out_put(out_err, " [c]", t->id);
 	}
-	_cw_out_put("\n");
+	out_put(out_err, "\n");
 	ql_foreach(t, &head, link) {
 		if (ql_next(&head, t, link) != NULL) {
-			_cw_out_put("  ql_next([c]): [c]\n", t->id,
+			out_put(out_err, "  ql_next([c]): [c]\n", t->id,
 			    ql_next(&head, t, link)->id);
 		} else
-			_cw_out_put("  ql_next([c]): NULL\n", t->id);
+			out_put(out_err, "  ql_next([c]): NULL\n", t->id);
 	}
 	ql_reverse_foreach(t, &head, link) {
 		if (ql_prev(&head, t, link) != NULL) {
-			_cw_out_put("  ql_prev([c]): [c]\n", t->id,
+			out_put(out_err, "  ql_prev([c]): [c]\n", t->id,
 			    ql_prev(&head, t, link)->id);
 		} else
-			_cw_out_put("  ql_prev([c]): NULL\n", t->id);
+			out_put(out_err, "  ql_prev([c]): NULL\n", t->id);
 	}
 
 	/* Link the entries together. */
-	_cw_out_put("ql_tail_insert()\n");
+	out_put(out_err, "ql_tail_insert()\n");
 	for (i = 0; i < NENTRIES; i++)
 		ql_tail_insert(&head, &entries[i], link);
 	if (ql_first(&head) != NULL)
-		_cw_out_put("  ql_first(): [c]\n", ql_first(&head)->id);
+		out_put(out_err, "  ql_first(): [c]\n", ql_first(&head)->id);
 	else
-		_cw_out_put("  ql_first(): NULL\n");
-	if (ql_last(&head, link) != NULL)
-		_cw_out_put("  ql_last(): [c]\n", ql_last(&head, link)->id);
-	else
-		_cw_out_put("  ql_last(): NULL\n");
-	_cw_out_put("  ql_foreach():");
+		out_put(out_err, "  ql_first(): NULL\n");
+	if (ql_last(&head, link) != NULL) {
+		out_put(out_err, "  ql_last(): [c]\n", ql_last(&head,
+		    link)->id);
+	} else
+		out_put(out_err, "  ql_last(): NULL\n");
+	out_put(out_err, "  ql_foreach():");
 	ql_foreach(t, &head, link) {
-		_cw_out_put(" [c]", t->id);
+		out_put(out_err, " [c]", t->id);
 	}
-	_cw_out_put("\n");
-	_cw_out_put("  ql_reverse_foreach():");
+	out_put(out_err, "\n");
+	out_put(out_err, "  ql_reverse_foreach():");
 	ql_reverse_foreach(t, &head, link) {
-		_cw_out_put(" [c]", t->id);
+		out_put(out_err, " [c]", t->id);
 	}
-	_cw_out_put("\n");
+	out_put(out_err, "\n");
 	ql_foreach(t, &head, link) {
 		if (ql_next(&head, t, link) != NULL) {
-			_cw_out_put("  ql_next([c]): [c]\n", t->id,
+			out_put(out_err, "  ql_next([c]): [c]\n", t->id,
 			    ql_next(&head, t, link)->id);
 		} else
-			_cw_out_put("  ql_next([c]): NULL\n", t->id);
+			out_put(out_err, "  ql_next([c]): NULL\n", t->id);
 	}
 	ql_reverse_foreach(t, &head, link) {
 		if (ql_prev(&head, t, link) != NULL) {
-			_cw_out_put("  ql_prev([c]): [c]\n", t->id,
+			out_put(out_err, "  ql_prev([c]): [c]\n", t->id,
 			    ql_prev(&head, t, link)->id);
 		} else
-			_cw_out_put("  ql_prev([c]): NULL\n", t->id);
+			out_put(out_err, "  ql_prev([c]): NULL\n", t->id);
 	}
 
-	_cw_out_put("ql_tail_remove()\n");
+	out_put(out_err, "ql_tail_remove()\n");
 	for (i = 0; i < NENTRIES; i++) {
-		_cw_out_put("  --> Iteration [i]\n", i);
-		if (ql_first(&head) != NULL)
-			_cw_out_put("  ql_first(): [c]\n", ql_first(&head)->id);
-		else
-			_cw_out_put("  ql_first(): NULL\n");
+		out_put(out_err, "  --> Iteration [i]\n", i);
+		if (ql_first(&head) != NULL) {
+			out_put(out_err, "  ql_first(): [c]\n",
+			    ql_first(&head)->id);
+		} else
+			out_put(out_err, "  ql_first(): NULL\n");
 		if (ql_last(&head, link) != NULL) {
-			_cw_out_put("  ql_last(): [c]\n", ql_last(&head,
+			out_put(out_err, "  ql_last(): [c]\n", ql_last(&head,
 			    link)->id);
 		} else
-			_cw_out_put("  ql_last(): NULL\n");
-		_cw_out_put("  ql_foreach():");
+			out_put(out_err, "  ql_last(): NULL\n");
+		out_put(out_err, "  ql_foreach():");
 		ql_foreach(t, &head, link) {
-			_cw_out_put(" [c]", t->id);
+			out_put(out_err, " [c]", t->id);
 		}
-		_cw_out_put("\n");
+		out_put(out_err, "\n");
 		ql_tail_remove(&head, list_t, link);
 	}
 	if (ql_first(&head) != NULL)
-		_cw_out_put("  ql_first(): [c]\n", ql_first(&head)->id);
+		out_put(out_err, "  ql_first(): [c]\n", ql_first(&head)->id);
 	else
-		_cw_out_put("  ql_first(): NULL\n");
-	if (ql_last(&head, link) != NULL)
-		_cw_out_put("  ql_last(): [c]\n", ql_last(&head, link)->id);
-	else
-		_cw_out_put("  ql_last(): NULL\n");
-	_cw_out_put("  ql_foreach():");
+		out_put(out_err, "  ql_first(): NULL\n");
+	if (ql_last(&head, link) != NULL) {
+		out_put(out_err, "  ql_last(): [c]\n", ql_last(&head,
+		    link)->id);
+	} else
+		out_put(out_err, "  ql_last(): NULL\n");
+	out_put(out_err, "  ql_foreach():");
 	ql_foreach(t, &head, link) {
-		_cw_out_put(" [c]", t->id);
+		out_put(out_err, " [c]", t->id);
 	}
-	_cw_out_put("\n");
-	_cw_out_put("  ql_reverse_foreach():");
+	out_put(out_err, "\n");
+	out_put(out_err, "  ql_reverse_foreach():");
 	ql_reverse_foreach(t, &head, link) {
-		_cw_out_put(" [c]", t->id);
+		out_put(out_err, " [c]", t->id);
 	}
-	_cw_out_put("\n");
+	out_put(out_err, "\n");
 	ql_foreach(t, &head, link) {
 		if (ql_next(&head, t, link) != NULL) {
-			_cw_out_put("  ql_next([c]): [c]\n", t->id,
+			out_put(out_err, "  ql_next([c]): [c]\n", t->id,
 			    ql_next(&head, t, link)->id);
 		} else
-			_cw_out_put("  ql_next([c]): NULL\n", t->id);
+			out_put(out_err, "  ql_next([c]): NULL\n", t->id);
 	}
 	ql_reverse_foreach(t, &head, link) {
 		if (ql_prev(&head, t, link) != NULL) {
-			_cw_out_put("  ql_prev([c]): [c]\n", t->id,
+			out_put(out_err, "  ql_prev([c]): [c]\n", t->id,
 			    ql_prev(&head, t, link)->id);
 		} else
-			_cw_out_put("  ql_prev([c]): NULL\n", t->id);
+			out_put(out_err, "  ql_prev([c]): NULL\n", t->id);
 	}
 
 	/* Link the entries together. */
-	_cw_out_put("ql_head_insert()\n");
+	out_put(out_err, "ql_head_insert()\n");
 	for (i = 0; i < NENTRIES; i++)
 		ql_head_insert(&head, &entries[i], link);
 	if (ql_first(&head) != NULL)
-		_cw_out_put("  ql_first(): [c]\n", ql_first(&head)->id);
+		out_put(out_err, "  ql_first(): [c]\n", ql_first(&head)->id);
 	else
-		_cw_out_put("  ql_first(): NULL\n");
-	if (ql_last(&head, link) != NULL)
-		_cw_out_put("  ql_last(): [c]\n", ql_last(&head, link)->id);
-	else
-		_cw_out_put("  ql_last(): NULL\n");
-	_cw_out_put("  ql_foreach():");
+		out_put(out_err, "  ql_first(): NULL\n");
+	if (ql_last(&head, link) != NULL) {
+		out_put(out_err, "  ql_last(): [c]\n", ql_last(&head,
+		    link)->id);
+	} else
+		out_put(out_err, "  ql_last(): NULL\n");
+	out_put(out_err, "  ql_foreach():");
 	ql_foreach(t, &head, link) {
-		_cw_out_put(" [c]", t->id);
+		out_put(out_err, " [c]", t->id);
 	}
-	_cw_out_put("\n");
-	_cw_out_put("  ql_reverse_foreach():");
+	out_put(out_err, "\n");
+	out_put(out_err, "  ql_reverse_foreach():");
 	ql_reverse_foreach(t, &head, link) {
-		_cw_out_put(" [c]", t->id);
+		out_put(out_err, " [c]", t->id);
 	}
-	_cw_out_put("\n");
+	out_put(out_err, "\n");
 	ql_foreach(t, &head, link) {
 		if (ql_next(&head, t, link) != NULL) {
-			_cw_out_put("  ql_next([c]): [c]\n", t->id,
+			out_put(out_err, "  ql_next([c]): [c]\n", t->id,
 			    ql_next(&head, t, link)->id);
 		} else
-			_cw_out_put("  ql_next([c]): NULL\n", t->id);
+			out_put(out_err, "  ql_next([c]): NULL\n", t->id);
 	}
 	ql_reverse_foreach(t, &head, link) {
 		if (ql_prev(&head, t, link) != NULL) {
-			_cw_out_put("  ql_prev([c]): [c]\n", t->id,
+			out_put(out_err, "  ql_prev([c]): [c]\n", t->id,
 			    ql_prev(&head, t, link)->id);
 		} else
-			_cw_out_put("  ql_prev([c]): NULL\n", t->id);
+			out_put(out_err, "  ql_prev([c]): NULL\n", t->id);
 	}
 
-	_cw_out_put("ql_head_remove()\n");
+	out_put(out_err, "ql_head_remove()\n");
 	for (i = 0; i < NENTRIES; i++) {
-		_cw_out_put("  --> Iteration [i]\n", i);
-		if (ql_first(&head) != NULL)
-			_cw_out_put("  ql_first(): [c]\n", ql_first(&head)->id);
-		else
-			_cw_out_put("  ql_first(): NULL\n");
+		out_put(out_err, "  --> Iteration [i]\n", i);
+		if (ql_first(&head) != NULL) {
+			out_put(out_err, "  ql_first(): [c]\n",
+			    ql_first(&head)->id);
+		} else
+			out_put(out_err, "  ql_first(): NULL\n");
 		if (ql_last(&head, link) != NULL) {
-			_cw_out_put("  ql_last(): [c]\n", ql_last(&head,
+			out_put(out_err, "  ql_last(): [c]\n", ql_last(&head,
 			    link)->id);
 		} else
-			_cw_out_put("  ql_last(): NULL\n");
-		_cw_out_put("  ql_foreach():");
+			out_put(out_err, "  ql_last(): NULL\n");
+		out_put(out_err, "  ql_foreach():");
 		ql_foreach(t, &head, link) {
-			_cw_out_put(" [c]", t->id);
+			out_put(out_err, " [c]", t->id);
 		}
-		_cw_out_put("\n");
+		out_put(out_err, "\n");
 		ql_head_remove(&head, list_t, link);
 	}
 	if (ql_first(&head) != NULL)
-		_cw_out_put("  ql_first(): [c]\n", ql_first(&head)->id);
+		out_put(out_err, "  ql_first(): [c]\n", ql_first(&head)->id);
 	else
-		_cw_out_put("  ql_first(): NULL\n");
-	if (ql_last(&head, link) != NULL)
-		_cw_out_put("  ql_last(): [c]\n", ql_last(&head, link)->id);
-	else
-		_cw_out_put("  ql_last(): NULL\n");
-	_cw_out_put("  ql_foreach():");
+		out_put(out_err, "  ql_first(): NULL\n");
+	if (ql_last(&head, link) != NULL) {
+		out_put(out_err, "  ql_last(): [c]\n", ql_last(&head,
+		    link)->id);
+	} else
+		out_put(out_err, "  ql_last(): NULL\n");
+	out_put(out_err, "  ql_foreach():");
 	ql_foreach(t, &head, link) {
-		_cw_out_put(" [c]", t->id);
+		out_put(out_err, " [c]", t->id);
 	}
-	_cw_out_put("\n");
-	_cw_out_put("  ql_reverse_foreach():");
+	out_put(out_err, "\n");
+	out_put(out_err, "  ql_reverse_foreach():");
 	ql_reverse_foreach(t, &head, link) {
-		_cw_out_put(" [c]", t->id);
+		out_put(out_err, " [c]", t->id);
 	}
-	_cw_out_put("\n");
+	out_put(out_err, "\n");
 	ql_foreach(t, &head, link) {
 		if (ql_next(&head, t, link) != NULL) {
-			_cw_out_put("  ql_next([c]): [c]\n", t->id,
+			out_put(out_err, "  ql_next([c]): [c]\n", t->id,
 			    ql_next(&head, t, link)->id);
 		} else
-			_cw_out_put("  ql_next([c]): NULL\n", t->id);
+			out_put(out_err, "  ql_next([c]): NULL\n", t->id);
 	}
 	ql_reverse_foreach(t, &head, link) {
 		if (ql_prev(&head, t, link) != NULL) {
-			_cw_out_put("  ql_prev([c]): [c]\n", t->id,
+			out_put(out_err, "  ql_prev([c]): [c]\n", t->id,
 			    ql_prev(&head, t, link)->id);
 		} else
-			_cw_out_put("  ql_prev([c]): NULL\n", t->id);
+			out_put(out_err, "  ql_prev([c]): NULL\n", t->id);
 	}
 
 	/*
@@ -255,7 +262,7 @@ main()
 	 * need to test them completely.  However, insertion/deletion from the
 	 * middle of lists is not tested, so do that here.
 	 */
-	_cw_out_put("ql_tail_insert(), ql_before_insert(),"
+	out_put(out_err, "ql_tail_insert(), ql_before_insert(),"
 	    " ql_after_insert()\n");
 	ql_tail_insert(&head, &entries[0], link);
 	ql_before_insert(&head, &entries[0], &entries[1], link);
@@ -267,59 +274,61 @@ main()
 	ql_before_insert(&head, &entries[3], &entries[7], link);
 
 	if (ql_first(&head) != NULL)
-		_cw_out_put("  ql_first(): [c]\n", ql_first(&head)->id);
+		out_put(out_err, "  ql_first(): [c]\n", ql_first(&head)->id);
 	else
-		_cw_out_put("  ql_first(): NULL\n");
-	if (ql_last(&head, link) != NULL)
-		_cw_out_put("  ql_last(): [c]\n", ql_last(&head, link)->id);
-	else
-		_cw_out_put("  ql_last(): NULL\n");
-	_cw_out_put("  ql_foreach():");
+		out_put(out_err, "  ql_first(): NULL\n");
+	if (ql_last(&head, link) != NULL) {
+		out_put(out_err, "  ql_last(): [c]\n", ql_last(&head,
+		    link)->id);
+	} else
+		out_put(out_err, "  ql_last(): NULL\n");
+	out_put(out_err, "  ql_foreach():");
 	ql_foreach(t, &head, link) {
-		_cw_out_put(" [c]", t->id);
+		out_put(out_err, " [c]", t->id);
 	}
-	_cw_out_put("\n");
-	_cw_out_put("  ql_reverse_foreach():");
+	out_put(out_err, "\n");
+	out_put(out_err, "  ql_reverse_foreach():");
 	ql_reverse_foreach(t, &head, link) {
-		_cw_out_put(" [c]", t->id);
+		out_put(out_err, " [c]", t->id);
 	}
-	_cw_out_put("\n");
+	out_put(out_err, "\n");
 	ql_foreach(t, &head, link) {
 		if (ql_next(&head, t, link) != NULL) {
-			_cw_out_put("  ql_next([c]): [c]\n", t->id,
+			out_put(out_err, "  ql_next([c]): [c]\n", t->id,
 			    ql_next(&head, t, link)->id);
 		} else
-			_cw_out_put("  ql_next([c]): NULL\n", t->id);
+			out_put(out_err, "  ql_next([c]): NULL\n", t->id);
 	}
 	ql_reverse_foreach(t, &head, link) {
 		if (ql_prev(&head, t, link) != NULL) {
-			_cw_out_put("  ql_prev([c]): [c]\n", t->id,
+			out_put(out_err, "  ql_prev([c]): [c]\n", t->id,
 			    ql_prev(&head, t, link)->id);
 		} else
-			_cw_out_put("  ql_prev([c]): NULL\n", t->id);
+			out_put(out_err, "  ql_prev([c]): NULL\n", t->id);
 	}
 
-	_cw_out_put("ql_remove()\n");
+	out_put(out_err, "ql_remove()\n");
 	for (i = 0; i < NENTRIES; i++) {
-		_cw_out_put("  --> Iteration [i]\n", i);
+		out_put(out_err, "  --> Iteration [i]\n", i);
 		ql_remove(&head, &entries[i], link);
-		if (ql_first(&head) != NULL)
-			_cw_out_put("  ql_first(): [c]\n", ql_first(&head)->id);
-		else
-			_cw_out_put("  ql_first(): NULL\n");
+		if (ql_first(&head) != NULL) {
+			out_put(out_err, "  ql_first(): [c]\n",
+			    ql_first(&head)->id);
+		} else
+			out_put(out_err, "  ql_first(): NULL\n");
 		if (ql_last(&head, link) != NULL) {
-			_cw_out_put("  ql_last(): [c]\n", ql_last(&head,
+			out_put(out_err, "  ql_last(): [c]\n", ql_last(&head,
 			    link)->id);
 		} else
-			_cw_out_put("  ql_last(): NULL\n");
-		_cw_out_put("  ql_foreach():");
+			out_put(out_err, "  ql_last(): NULL\n");
+		out_put(out_err, "  ql_foreach():");
 		ql_foreach(t, &head, link) {
-			_cw_out_put(" [c]", t->id);
+			out_put(out_err, " [c]", t->id);
 		}
-		_cw_out_put("\n");
+		out_put(out_err, "\n");
 	}
 
-	_cw_out_put("Test end\n");
+	out_put(out_err, "Test end\n");
 	libstash_shutdown();
 	return 0;
 }

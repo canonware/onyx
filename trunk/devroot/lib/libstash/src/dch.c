@@ -169,15 +169,16 @@ dch_dump(cw_dch_t *a_dch, const char *a_prefix)
 	_cw_check_ptr(a_prefix);
 
 #ifdef _LIBSTASH_DBG
-	_cw_out_put("[s]: num_grows: [i], num_shrinks: [i]\n",
+	out_put(out_err, "[s]: num_grows: [i], num_shrinks: [i]\n",
 	    a_prefix, a_dch->num_grows, a_dch->num_shrinks);
 #endif
-	_cw_out_put("[s]: is_malloced: [s]\n",
+	out_put(out_err, "[s]: is_malloced: [s]\n",
 	    a_prefix, (a_dch->is_malloced) ? "TRUE" : "FALSE");
-	_cw_out_put("[s]: base_table: [i], base_grow: [i], base_shrink: [i]\n",
+	out_put(out_err,
+	    "[s]: base_table: [i], base_grow: [i], base_shrink: [i]\n",
 	    a_prefix, a_dch->base_table, a_dch->base_grow,
 	    a_dch->base_shrink);
-	_cw_out_put("[s]: grow_factor: [i]\n",
+	out_put(out_err, "[s]: grow_factor: [i]\n",
 	    a_prefix, a_dch->grow_factor);
 
 	ch_dump(a_dch->ch, a_prefix);

@@ -61,7 +61,7 @@ socks_delete(cw_socks_t *a_socks)
 		error = close(a_socks->sockfd);
 #ifdef _LIBSOCK_CONFESS
 		if (error) {
-			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+			out_put_e(out_err, NULL, 0, __FUNCTION__,
 			    "Error in close(): [s]\n", strerror(error));
 		}
 #endif
@@ -89,7 +89,7 @@ socks_listen(cw_socks_t *a_socks, cw_uint32_t a_mask, int *r_port)
 	a_socks->sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (a_socks->sockfd < 0) {
 #ifdef _LIBSOCK_CONFESS
-		out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+		out_put_e(out_err, NULL, 0, __FUNCTION__,
 		    "Error in socket(): [s]\n", strerror(errno));
 #endif
 		retval = TRUE;
@@ -99,7 +99,7 @@ socks_listen(cw_socks_t *a_socks, cw_uint32_t a_mask, int *r_port)
 	val = 1;
 	if (setsockopt(a_socks->sockfd, SOL_SOCKET, SO_REUSEADDR, (void *)&val,
 	    sizeof(val)) < 0) {
-		out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+		out_put_e(out_err, NULL, 0, __FUNCTION__,
 		    "Error for SO_REUSEADDR in setsockopt(): [s]\n",
 		    strerror(errno));
 		retval = TRUE;
@@ -111,7 +111,7 @@ socks_listen(cw_socks_t *a_socks, cw_uint32_t a_mask, int *r_port)
 	{
 		cw_uint32_t	t_host_ip = ntohl(a_mask);
 
-		out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+		out_put_e(out_err, NULL, 0, __FUNCTION__,
 		    "Binding to IP address [i].[i].[i].[i]\n", t_host_ip >> 24,
 		    (t_host_ip >> 16) & 0xff, (t_host_ip >> 8) & 0xff, t_host_ip
 		    & 0xff);
@@ -126,7 +126,7 @@ socks_listen(cw_socks_t *a_socks, cw_uint32_t a_mask, int *r_port)
 	if (bind(a_socks->sockfd, (struct sockaddr *)&server_addr,
 	    sizeof(server_addr)) == -1) {
 #ifdef _LIBSOCK_CONFESS
-		out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+		out_put_e(out_err, NULL, 0, __FUNCTION__,
 		    "Error in bind(): [s]\n", strerror(errno));
 #endif
 		retval = TRUE;
@@ -140,7 +140,7 @@ socks_listen(cw_socks_t *a_socks, cw_uint32_t a_mask, int *r_port)
 		if (getsockname(a_socks->sockfd, (struct sockaddr
 		    *)&server_addr, &server_addr_size)) {
 #ifdef _LIBSOCK_CONFESS
-			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+			out_put_e(out_err, NULL, 0, __FUNCTION__,
 			    "Error in getsockname(): [s]\n", strerror(errno));
 #endif
 			retval = TRUE;
@@ -154,7 +154,7 @@ socks_listen(cw_socks_t *a_socks, cw_uint32_t a_mask, int *r_port)
 	 */
 	if (listen(a_socks->sockfd, 511) == -1) {
 #ifdef _LIBSOCK_CONFESS
-		out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+		out_put_e(out_err, NULL, 0, __FUNCTION__,
 		    "Error in listen(): [s]\n", strerror(errno));
 #endif
 		retval = TRUE;
@@ -203,7 +203,7 @@ socks_accept(cw_socks_t *a_socks, struct timespec *a_timeout, cw_sock_t
 	nready = poll(&pfd, 1, timeout);
 	if (nready == -1) {
 #ifdef _LIBSOCK_CONFESS
-			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+			out_put_e(out_err, NULL, 0, __FUNCTION__,
 			    "Error in poll(): [s]\n", strerror(errno));
 #endif
 		retval = NULL;
@@ -221,7 +221,7 @@ socks_accept(cw_socks_t *a_socks, struct timespec *a_timeout, cw_sock_t
 
 		if (sockfd < 0) {
 #ifdef _LIBSOCK_CONFESS
-			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+			out_put_e(out_err, NULL, 0, __FUNCTION__,
 			    "Error in accept(): [s]\n", strerror(errno));
 #endif
 			retval = NULL;

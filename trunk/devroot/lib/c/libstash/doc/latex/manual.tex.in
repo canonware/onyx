@@ -73,7 +73,8 @@ sizes:
 the application:
 \begin{description}
 \item[cw\_g\_mem: ] \classname{mem} instance, default memory allocator.
-\item[cw\_g\_out: ] \classname{out} instance, default output context.
+\item[out\_std: ] \classname{out} instance, prints to file descriptor 1.
+\item[out\_err: ] \classname{out} instance, prints to file descriptor 2.
 \end{description}
 
 \section{Object instantiation}
@@ -108,8 +109,8 @@ defines the following exceptions:
 		\end{description}
 	\item[Description: ]
 		Initialize various global variables.  In particular, initialize
-		\cvar{cw\_g\_mem} and \cvar{cw\_g\_out} (default output to file
-                descriptor 1).
+		\cvar{cw\_g\_mem}, \cvar{out\_std}, and \cvar{out\_err} (default
+		output to file descriptor 1).
 	\end{description}
 \label{libstash_shutdown}
 \index{\cfunc{libstash\_shutdown}{}}
@@ -132,11 +133,11 @@ defines the following exceptions:
 			C expression that evaluates to zero or non-zero.
 		\end{description}
 	\item[Output(s): ]
-			Possible error printed to \cvar{cw\_g\_out}.
+			Possible error printed to file descriptor 2.
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		If the expression evaluates to zero, print an error message to
-		\cvar{cw\_g\_out} and \cfunc{abort}{}.
+		file descriptor 2 and \cfunc{abort}{}.
 
 		Note: This macro is optimized out of the non-debug versions of
 		\libname{libstash}.
@@ -163,11 +164,11 @@ defines the following exceptions:
 		\end{description}
 	\item[Output(s): ]
 		Contents of \cvar{a\_str}, followed by a carriage return,
-		printed to \cvar{cw\_g\_out}.
+		printed to file descriptor 2.
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Print the contents of \cvar{a\_str}, followed by a carriage
-		return, to \cvar{cw\_g\_out}.
+		return, to file descriptor 2.
 	\end{description}
 \label{_cw_ntohq}
 \index{\cppmacro{\_cw\_ntohq}{}}

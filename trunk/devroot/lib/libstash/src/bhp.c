@@ -113,11 +113,13 @@ bhp_dump(cw_bhp_t *a_bhp)
 
 	if (a_bhp->is_thread_safe)
 		mtx_lock(&a_bhp->lock);
-	_cw_out_put("=== bhp_dump() start ==============================\n");
-	_cw_out_put("num_nodes: [q]\n", a_bhp->num_nodes);
+	out_put(out_err,
+	    "=== bhp_dump() start ==============================\n");
+	out_put(out_err, "num_nodes: [q]\n", a_bhp->num_nodes);
 	if (a_bhp->head != NULL)
 		bhp_p_dump(a_bhp->head, 0, NULL);
-	_cw_out_put("=== bhp_dump() end ================================\n");
+	out_put(out_err,
+	    "=== bhp_dump() end ================================\n");
 
 	if (a_bhp->is_thread_safe)
 		mtx_unlock(&a_bhp->lock);
@@ -455,18 +457,18 @@ bhp_p_dump(cw_bhpi_t *a_bhpi, cw_uint32_t a_depth, cw_bhpi_t *a_last_printed)
 	if (a_bhpi->parent != a_last_printed) {
 		/* Indent. */
 		for (i = 0; i < (a_depth * 38); i++)
-			_cw_out_put(" ");
+			out_put(out_err, " ");
 	}
-	_cw_out_put("[[deg:[i] pri:0x[p|w:8|p:0] dat:0x[p|w:8|p:0]]",
+	out_put(out_err, "[[deg:[i] pri:0x[p|w:8|p:0] dat:0x[p|w:8|p:0]]",
 	    a_bhpi->degree, a_bhpi->priority, a_bhpi->data);
 	a_last_printed = a_bhpi;
 
 	/* Child. */
 	if (a_bhpi->child != NULL) {
-		_cw_out_put("-");
+		out_put(out_err, "-");
 		a_last_printed = bhp_p_dump(a_bhpi->child, a_depth + 1, a_bhpi);
 	} else
-		_cw_out_put("\n");
+		out_put(out_err, "\n");
 
 	return a_last_printed;
 }

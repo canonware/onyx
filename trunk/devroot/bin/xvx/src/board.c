@@ -120,7 +120,7 @@ board_dump(cw_board_t *a_board)
 	_cw_assert(a_board->magic == _CW_BOARD_MAGIC);
 
 	for (j = 18; j >= 0; j--) {
-		_cw_out_put("[i|w:2]", j);
+		out_put(out_err, "[i|w:2]", j);
 		for (i = 0; i < 19; i++) {
 			switch (a_board->vstate[_XVX_XY2I(i, j)]) {
 			case _XVX_EMPTY:
@@ -158,17 +158,17 @@ board_dump(cw_board_t *a_board)
 			default:
 				_cw_not_reached();
 			}
-			_cw_out_put("  [c]", c);
+			out_put(out_err, "  [c]", c);
 		}
-		_cw_out_put("\n");
+		out_put(out_err, "\n");
 	}
 
-	_cw_out_put("\n  ");
+	out_put(out_err, "\n  ");
 	for (i = 0; i < 19; i++)
-		_cw_out_put(" [i|w:2]", i);
-	_cw_out_put("\n\n");
+		out_put(out_err, " [i|w:2]", i);
+	out_put(out_err, "\n\n");
 
-	_cw_out_put("Captured: P1: [i|w:2], P2: [i|w:2], P3: [i|w:2],"
+	out_put(out_err, "Captured: P1: [i|w:2], P2: [i|w:2], P3: [i|w:2],"
 	    " P5: [i|w:2], P5: [i|w:2], P6: [i|w:2]\n",
 	    a_board->captured[_XVX_P1],
 	    a_board->captured[_XVX_P2],

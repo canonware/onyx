@@ -29,114 +29,118 @@ main()
 	qs_head(qstack_t) head;
 
 	libstash_init();
-	_cw_out_put("Test begin\n");
+	out_put(out_err, "Test begin\n");
 
 	/* Initialize entries. */
-	_cw_out_put("qs_new(), qs_elm_new()\n");
+	out_put(out_err, "qs_new(), qs_elm_new()\n");
 	qs_new(&head);
 	for (i = 0; i < NENTRIES; i++) {
 		qs_elm_new(&entries[i], link);
 		entries[i].id = 'a' + i;
 	}
-	_cw_out_put("  qs_foreach():");
+	out_put(out_err, "  qs_foreach():");
 	qs_foreach(t, &head, link) {
-		_cw_out_put(" [c]", t->id);
-/*  		_cw_out_put("(this:0x[p] prev:0x[p] next:0x[p])", */
+		out_put(out_err, " [c]", t->id);
+/*  		out_put(out_err, "(this:0x[p] prev:0x[p] next:0x[p])", */
 /*  		    t, t->link.qse_prev, t->link.qse_next); */
 	}
-	_cw_out_put("\n");
+	out_put(out_err, "\n");
 	if (qs_top(&head) != NULL) {
-		_cw_out_put("  qs_top(): [c]\n", qs_top(&head)->id);
+		out_put(out_err, "  qs_top(): [c]\n", qs_top(&head)->id);
 		if (qs_down(qs_top(&head), link) != NULL) {
-			_cw_out_put("  qs_down(qs_top()): [c]\n",
+			out_put(out_err, "  qs_down(qs_top()): [c]\n",
 			    qs_down(qs_top(&head), link)->id);
 		} else
-			_cw_out_put("  qs_down(qs_top()): NULL\n");
+			out_put(out_err, "  qs_down(qs_top()): NULL\n");
 	} else
-		_cw_out_put("  qs_top(): NULL\n");
+		out_put(out_err, "  qs_top(): NULL\n");
 
-	_cw_out_put("qs_push()\n");
+	out_put(out_err, "qs_push()\n");
 	for (i = 0; i < NENTRIES; i++) {
 		qs_push(&head, &entries[i], link);
-		_cw_out_put("  -->Iteration [i]\n", i);
-		_cw_out_put("  qs_foreach():");
+		out_put(out_err, "  -->Iteration [i]\n", i);
+		out_put(out_err, "  qs_foreach():");
 		qs_foreach(t, &head, link) {
-			_cw_out_put(" [c]", t->id);
+			out_put(out_err, " [c]", t->id);
 		}
-		_cw_out_put("\n");
+		out_put(out_err, "\n");
 		if (qs_top(&head) != NULL) {
-			_cw_out_put("  qs_top(): [c]\n", qs_top(&head)->id);
+			out_put(out_err, "  qs_top(): [c]\n",
+			    qs_top(&head)->id);
 			if (qs_down(qs_top(&head), link) != NULL) {
-				_cw_out_put("  qs_down(qs_top()): [c]\n",
+				out_put(out_err, "  qs_down(qs_top()): [c]\n",
 				    qs_down(qs_top(&head), link)->id);
 			} else
-				_cw_out_put("  qs_down(qs_top()): NULL\n");
+				out_put(out_err, "  qs_down(qs_top()): NULL\n");
 		} else
-			_cw_out_put("  qs_top(): NULL\n");
+			out_put(out_err, "  qs_top(): NULL\n");
 	}
 
-	_cw_out_put("qs_pop()\n");
+	out_put(out_err, "qs_pop()\n");
 	for (i = 0; i < NENTRIES; i++) {
 		qs_pop(&head, link);
-		_cw_out_put("  -->Iteration [i]\n", i);
-		_cw_out_put("  qs_foreach():");
+		out_put(out_err, "  -->Iteration [i]\n", i);
+		out_put(out_err, "  qs_foreach():");
 		qs_foreach(t, &head, link) {
-			_cw_out_put(" [c]", t->id);
+			out_put(out_err, " [c]", t->id);
 		}
-		_cw_out_put("\n");
+		out_put(out_err, "\n");
 		if (qs_top(&head) != NULL) {
-			_cw_out_put("  qs_top(): [c]\n", qs_top(&head)->id);
+			out_put(out_err, "  qs_top(): [c]\n",
+			    qs_top(&head)->id);
 			if (qs_down(qs_top(&head), link) != NULL) {
-				_cw_out_put("  qs_down(qs_top()): [c]\n",
+				out_put(out_err, "  qs_down(qs_top()): [c]\n",
 				    qs_down(qs_top(&head), link)->id);
 			} else
-				_cw_out_put("  qs_down(qs_top()): NULL\n");
+				out_put(out_err, "  qs_down(qs_top()): NULL\n");
 		} else
-			_cw_out_put("  qs_top(): NULL\n");
+			out_put(out_err, "  qs_top(): NULL\n");
 	}
 
-	_cw_out_put("qs_under_push()\n");
+	out_put(out_err, "qs_under_push()\n");
 	qs_push(&head, &entries[0], link);
 	for (i = 1; i < NENTRIES; i++) {
 		qs_under_push(&entries[0], &entries[i], link);
-		_cw_out_put("  -->Iteration [i]\n", i);
-		_cw_out_put("  qs_foreach():");
+		out_put(out_err, "  -->Iteration [i]\n", i);
+		out_put(out_err, "  qs_foreach():");
 		qs_foreach(t, &head, link) {
-			_cw_out_put(" [c]", t->id);
+			out_put(out_err, " [c]", t->id);
 		}
-		_cw_out_put("\n");
+		out_put(out_err, "\n");
 		if (qs_top(&head) != NULL) {
-			_cw_out_put("  qs_top(): [c]\n", qs_top(&head)->id);
+			out_put(out_err, "  qs_top(): [c]\n",
+			    qs_top(&head)->id);
 			if (qs_down(qs_top(&head), link) != NULL) {
-				_cw_out_put("  qs_down(qs_top()): [c]\n",
+				out_put(out_err, "  qs_down(qs_top()): [c]\n",
 				    qs_down(qs_top(&head), link)->id);
 			} else
-				_cw_out_put("  qs_down(qs_top()): NULL\n");
+				out_put(out_err, "  qs_down(qs_top()): NULL\n");
 		} else
-			_cw_out_put("  qs_top(): NULL\n");
+			out_put(out_err, "  qs_top(): NULL\n");
 	}
 
-	_cw_out_put("qs_pop()\n");
+	out_put(out_err, "qs_pop()\n");
 	for (i = 0; i < NENTRIES; i++) {
 		qs_pop(&head, link);
-		_cw_out_put("  -->Iteration [i]\n", i);
-		_cw_out_put("  qs_foreach():");
+		out_put(out_err, "  -->Iteration [i]\n", i);
+		out_put(out_err, "  qs_foreach():");
 		qs_foreach(t, &head, link) {
-			_cw_out_put(" [c]", t->id);
+			out_put(out_err, " [c]", t->id);
 		}
-		_cw_out_put("\n");
+		out_put(out_err, "\n");
 		if (qs_top(&head) != NULL) {
-			_cw_out_put("  qs_top(): [c]\n", qs_top(&head)->id);
+			out_put(out_err, "  qs_top(): [c]\n",
+			    qs_top(&head)->id);
 			if (qs_down(qs_top(&head), link) != NULL) {
-				_cw_out_put("  qs_down(qs_top()): [c]\n",
+				out_put(out_err, "  qs_down(qs_top()): [c]\n",
 				    qs_down(qs_top(&head), link)->id);
 			} else
-				_cw_out_put("  qs_down(qs_top()): NULL\n");
+				out_put(out_err, "  qs_down(qs_top()): NULL\n");
 		} else
-			_cw_out_put("  qs_top(): NULL\n");
+			out_put(out_err, "  qs_top(): NULL\n");
 	}
 
-	_cw_out_put("Test end\n");
+	out_put(out_err, "Test end\n");
 	libstash_shutdown();
 	return 0;
 }

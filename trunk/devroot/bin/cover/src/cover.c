@@ -107,7 +107,7 @@ main(int argc, char **argv)
 	}
 
 	if ((cl_error) || (optind < argc)) {
-		_cw_out_put("Unrecognized option(s)\n");
+		out_put(out_err, "Unrecognized option(s)\n");
 		usage(basename(argv[0]));
 		retval = 1;
 		goto RETURN;
@@ -120,7 +120,7 @@ main(int argc, char **argv)
 	}
 
 	if (opt_nnodes > 6)
-		_cw_out_put("Too many nodes (maximum 6)\n");
+		out_put(out_err, "Too many nodes (maximum 6)\n");
 
 	_cw_out_put("opt_nnodes == [i]\n", opt_nnodes);
 

@@ -18,7 +18,7 @@ main(int argc, char **argv)
 
 	libstash_init();
   
-	out_register(cw_g_out, "move", sizeof(cw_move_t *), move_out_put);
+	out_register(out_err, "move", sizeof(cw_move_t *), move_out_put);
   
 	game_new(&game, 2, FALSE, 10, TRUE, FALSE, FALSE, FALSE);
 	game_dump(&game);

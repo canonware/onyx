@@ -17,7 +17,7 @@ int
 main()
 {
 	libstash_init();
-	_cw_out_put("Test begin\n");
+	out_put(out_err, "Test begin\n");
 
 	/* treen_new(), treen_delete(). */
 	{
@@ -113,7 +113,7 @@ main()
 		treen_delete(treen_a);
 	}
 
-	_cw_out_put("Test end\n");
+	out_put(out_err, "Test end\n");
 	libstash_shutdown();
 	return 0;
 }

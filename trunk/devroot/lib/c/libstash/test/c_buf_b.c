@@ -45,7 +45,7 @@ thread_entry_func(void *a_arg)
 	for (i = 0; i < (_LIBSTASH_TEST_NUM_BUFELS *
 	    _LIBSTASH_TEST_SIZEOF_BUFFER * _LIBSTASH_TEST_NUM_CIRCULATIONS);
 	     /* Increment in the body. */ ) {
-/*  		_cw_out_put("[s]", foo_struct->thread_name); */
+/*  		out_put(out_err, "[s]", foo_struct->thread_name); */
 
 		size = buf_size_get(foo_struct->buf_a);
 
@@ -102,7 +102,7 @@ main(int argc, char **argv)
 	cw_uint32_t	seed;
 
 	libstash_init();
-	_cw_out_put("Test begin\n");
+	out_put(out_err, "Test begin\n");
 
 	/* Create a buf with a known pattern of data in it. */
 	buf_a = buf_new_r(NULL, cw_g_mem);
@@ -127,7 +127,7 @@ main(int argc, char **argv)
 		seed = strtoul(argv[1], NULL, 10);
 	else
 		seed = getpid();
-/*  	_cw_out_put("seed == [i]\n", seed); */
+/*  	out_put(out_err, "seed == [i]\n", seed); */
 	srandom(seed);
 
 	foo_a.buf_a = buf_a;
@@ -149,26 +149,26 @@ main(int argc, char **argv)
 	/* Make sure the data hasn't been corrupted. */
 	if (buf_size_get(buf_a) != _LIBSTASH_TEST_NUM_BUFELS *
 	    _LIBSTASH_TEST_SIZEOF_BUFFER) {
-		_cw_out_put("buf_size_get(buf_a) == [i] (should be [i])\n",
+		out_put(out_err, "buf_size_get(buf_a) == [i] (should be [i])\n",
 		    buf_size_get(buf_a), _LIBSTASH_TEST_NUM_BUFELS *
 		    _LIBSTASH_TEST_SIZEOF_BUFFER);
 		buf_dump(buf_a, "buf_a ");
-		_cw_out_put("seed == [i]\n", seed);
+		out_put(out_err, "seed == [i]\n", seed);
 	}
 	if (buf_size_get(&buf_b) != 0) {
-		_cw_out_put("buf_size_get(&buf_b) == [i] (should be 0)\n",
+		out_put(out_err, "buf_size_get(&buf_b) == [i] (should be 0)\n",
 		    buf_size_get(&buf_b));
 		buf_dump(&buf_b, "buf_b ");
-		_cw_out_put("seed == [i]\n", seed);
+		out_put(out_err, "seed == [i]\n", seed);
 	}
 	for (i = 0; i < buf_size_get(buf_a); i++) {
 		c = (cw_uint32_t)buf_uint8_get(buf_a, i);
 
 		if (c != i % _LIBSTASH_TEST_DATA_MODULUS) {
-			_cw_out_put("buf_a[[[i]] == %u, should be %u\n", i, c, i
-			    % _LIBSTASH_TEST_DATA_MODULUS);
+			out_put(out_err, "buf_a[[[i]] == %u, should be %u\n", i,
+			    c, i % _LIBSTASH_TEST_DATA_MODULUS);
 			buf_dump(buf_a, "buf_a ");
-			_cw_out_put("seed == [i]\n", seed);
+			out_put(out_err, "seed == [i]\n", seed);
 			break;
 		}
 	}
@@ -177,7 +177,7 @@ main(int argc, char **argv)
 	buf_delete(&buf_b);
 	mtx_delete(&rand_lock);
 
-	_cw_out_put("Test end\n");
+	out_put(out_err, "Test end\n");
 	libstash_shutdown();
 	return 0;
 }

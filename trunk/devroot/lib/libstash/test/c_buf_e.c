@@ -21,12 +21,14 @@ print_arr(const char *a_arr, cw_uint32_t a_size, const char *a_prefix)
 	cw_uint32_t	i;
 
 	for (i = 0; i < a_size; i++) {
-		if ((i % 16) == 0)
-			_cw_out_put("[s] 0x[i|w:4|p:0|b:16]:", a_prefix, i);
-		_cw_out_put(" [i|w:2|p:0|b:16]", a_arr[i]);
+		if ((i % 16) == 0) {
+			out_put(out_err, "[s] 0x[i|w:4|p:0|b:16]:", a_prefix,
+			    i);
+		}
+		out_put(out_err, " [i|w:2|p:0|b:16]", a_arr[i]);
 
 		if ((i % 16) == 15)
-			_cw_out_put("\n");
+			out_put(out_err, "\n");
 	}
 }
 
@@ -58,11 +60,11 @@ int
 main()
 {
 	libstash_init();
-	_cw_out_put("Test begin\n");
+	out_put(out_err, "Test begin\n");
 
 	foo();
 
-	_cw_out_put("Test end\n");
+	out_put(out_err, "Test end\n");
 	libstash_shutdown();
 	return 0;
 }

@@ -133,9 +133,9 @@ main(int argc, char **argv)
 
 				if (inet_aton(optarg, &addr) == 0) {
 					/* Conversion error. */
-					_cw_out_put("[s]: Invalid IP address "
-					    "specified with \"-i\" flag\n",
-					    g_progname);
+					out_put(out_err,
+					    "[s]: Invalid IP address specified "
+					    "with \"-i\" flag\n", g_progname);
 					usage();
 					retval = 1;
 					goto CLERROR;
@@ -196,7 +196,7 @@ main(int argc, char **argv)
 	}
 
 	if ((cl_error) || (optind < argc)) {
-		_cw_out_put("[s]: Unrecognized option(s)\n", g_progname);
+		out_put(out_err, "[s]: Unrecognized option(s)\n", g_progname);
 		usage();
 		retval = 1;
 		goto CLERROR;
@@ -211,21 +211,21 @@ main(int argc, char **argv)
 	}
 	/* Check validity of command line options. */
 	if ((opt_verbose) && (opt_quiet)) {
-		_cw_out_put("[s]: \"-v\" and \"-q\" are incompatible\n",
+		out_put(out_err, "[s]: \"-v\" and \"-q\" are incompatible\n",
 		    g_progname);
 		usage();
 		retval = 1;
 		goto CLERROR;
 	}
 	if ((opt_log) && (opt_dirname != NULL)) {
-		_cw_out_put("[s]: \"-l\" and \"-d\" are incompatible\n",
+		out_put(out_err, "[s]: \"-l\" and \"-d\" are incompatible\n",
 		    g_progname);
 		usage();
 		retval = 1;
 		goto CLERROR;
 	}
 	if ((opt_dirname != NULL) && (strlen(opt_dirname) > 512)) {
-		_cw_out_put("[s]: Argument to \"-d\" flag is too long "
+		out_put(out_err, "[s]: Argument to \"-d\" flag is too long "
 		    "(512 bytes max)\n", g_progname);
 		usage();
 		retval = 1;
@@ -233,13 +233,13 @@ main(int argc, char **argv)
 	}
 #ifdef _CW_IPFILTER
 	if (opt_transparent && opt_rhost != NULL) {
-		_cw_out_put("[s]: \"-r\" and \"-t\" are incompatible\n",
+		out_put(out_err, "[s]: \"-r\" and \"-t\" are incompatible\n",
 		    g_progname);
 		usage();
 		retval = 1;
 		goto CLERROR;
 	} else if (!opt_transparent && opt_rhost == NULL) {
-		_cw_out_put("[s]: \"-r\" or \"-t\" must be specified\n",
+		out_put(out_err, "[s]: \"-r\" or \"-t\" must be specified\n",
 		    g_progname);
 		usage();
 		retval = 1;
@@ -247,7 +247,7 @@ main(int argc, char **argv)
 	}
 #else
 	if (opt_rhost == NULL) {
-		_cw_out_put("[s]: \"-r\" must be specified\n", g_progname);
+		out_put(out_err, "[s]: \"-r\" must be specified\n", g_progname);
 		usage();
 		retval = 1;
 		goto CLERROR;
@@ -278,7 +278,7 @@ main(int argc, char **argv)
 				    strerror(errno));
 			}
 		}
-		out_default_fd_set(cw_g_out, fd);
+		out_default_fd_set(out_err, fd);
 	}
 	if (g_verbosity == 2)
 		_cw_out_put("[s]: pid: [i]\n", g_progname, getpid());
@@ -373,7 +373,7 @@ sig_handler(void *a_arg)
 	if (error || (sig != SIGHUP && sig != SIGINT))
 		_cw_error("sigwait() error");
 	if (g_verbosity == 2)
-		out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+		out_put_e(out_err, NULL, 0, __FUNCTION__,
 		    "[s]: Caught signal\n", g_progname);
 	should_quit = TRUE;
 

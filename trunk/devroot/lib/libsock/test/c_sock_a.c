@@ -34,7 +34,7 @@ handle_client(void *a_arg)
 
 		_cw_assert(buf_size_get(&buf) >= 4);
 		message = buf_uint32_get(&buf, 0);
-		out_put(cw_g_out, "Connection [i], message [i]\n", i, message);
+		out_put(out_err, "Connection [i], message [i]\n", i, message);
 
 		_cw_assert(sock_disconnect(&sock) == FALSE);
 	}
@@ -55,7 +55,7 @@ main()
 	cw_uint32_t	i;
 
 	libstash_init();
-	out_put(cw_g_out, "Test begin\n");
+	out_put(out_err, "Test begin\n");
 	libsock_init(1024,	/* a_max_fds */
 	    4096,		/* a_bufc_size */
 	    16			/* a_max_spare_bufcs */
@@ -66,7 +66,7 @@ main()
 	socks = socks_new();
 	_cw_check_ptr(socks);
 	if (socks_listen(socks, htonl(INADDR_LOOPBACK), &port)) {
-		out_put(cw_g_out, "Error listening on port [i]\n", port);
+		out_put(out_err, "Error listening on port [i]\n", port);
 		goto RETURN;
 	}
 	thd = thd_new(handle_client, (void *)socks);
@@ -90,7 +90,7 @@ main()
 		socks_delete(socks);
 	libsock_shutdown();
 	buf_delete(&buf);
-	out_put(cw_g_out, "Test end\n");
+	out_put(out_err, "Test end\n");
 	libstash_shutdown();
 	return 0;
 }

@@ -1001,10 +1001,10 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 #define _CW_STILT_PSTATE(a)						\
 	do {								\
 		if (a_stilt->state == (a))				\
-			_cw_out_put("[s]\n", #a);			\
+			out_put(out_err, "[s]\n", #a);			\
 	} while (0)
 
-		_cw_out_put("c: '[c]' ([i]), index: [i] ", c, c,
+		out_put(out_err, "c: '[c]' ([i]), index: [i] ", c, c,
 		    a_stilt->index);
 		_CW_STILT_PSTATE(STILTTS_START);
 		_CW_STILT_PSTATE(STILTTS_LT_CONT);
@@ -2082,9 +2082,9 @@ stilt_p_token_print(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t
 	cw_uint32_t	line, col;
 
 	stilts_position_get(a_stilts, &line, &col);
-	_cw_out_put("-->");
+	out_put(out_err, "-->");
 	_cw_out_put_n(a_length, "[s]", a_stilt->tok_str);
-	_cw_out_put("<-- [s] ([i]:[i] [[--> [i]:[i])\n", a_note,
+	out_put(out_err, "<-- [s] ([i]:[i] [[--> [i]:[i])\n", a_note,
 	    a_stilt->tok_line, a_stilt->tok_column, a_stilts->line,
 	    (a_stilts->column != -1) ? a_stilts->column : 0);
 }
@@ -2092,10 +2092,10 @@ stilt_p_token_print(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t
 static void
 stilt_p_syntax_error_print(cw_stilt_t *a_stilt, cw_uint8_t a_c)
 {
-	_cw_out_put("Syntax error for '[c]' (0x[i|b:16]), following -->", a_c,
-	    a_c);
+	out_put(out_err, "Syntax error for '[c]' (0x[i|b:16]), following -->",
+	    a_c, a_c);
 	_cw_out_put_n(a_stilt->index, "[s]", a_stilt->tok_str);
-	_cw_out_put("<-- (starts at line [i], column [i])\n",
+	out_put(out_err, "<-- (starts at line [i], column [i])\n",
 	    a_stilt->tok_line, a_stilt->tok_column);
 }
 #endif
