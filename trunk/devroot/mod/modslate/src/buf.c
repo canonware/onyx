@@ -472,21 +472,23 @@ bufp_p_bpos(cw_bufp_t *a_bufp)
 }
 
 CW_INLINE cw_uint64_t
-bufp_p_line_get(cw_bufp_t *a_bufp)
+bufp_p_line(cw_bufp_t *a_bufp)
 {
+    cw_uint64_t retval;
+
     cw_check_ptr(a_bufp);
     cw_dassert(a_bufp->magic == CW_BUFP_MAGIC);
 
-    return a_bufp->line;
-}
+    if (a_bufp->bob_relative)
+    {
+	retval = a_bufp->line;
+    }
+    else
+    {
+	retval = a_bufp->buf->nlines + 1 - a_bufp->line;
+    }
 
-CW_INLINE void
-bufp_p_line_set(cw_bufp_t *a_bufp, cw_uint64_t a_line)
-{
-    cw_check_ptr(a_bufp);
-    cw_dassert(a_bufp->magic == CW_BUFP_MAGIC);
-
-    a_bufp->line = a_line;
+    return retval;
 }
 
 static cw_uint32_t
@@ -538,6 +540,134 @@ bufp_p_pos_p2b(cw_bufp_t *a_bufp, cw_uint64_t a_ppos)
 }
 
 /* buf. */
+static cw_sint32_t
+buf_p_bufp_at_bpos_comp(cw_bufp_t *a_key, cw_bufp_t *a_bufp)
+{
+    cw_sint32_t retval;
+    cw_uint64_t bpos = bufp_p_bpos(a_bufp);
+
+    if (a_key->bpos < bpos)
+    {
+	retval = -1;
+    }
+    else if (a_key->bpos < bpos + (CW_BUFP_SIZE - a_bufp->gap_len))
+    {
+	retval = 0;
+    }
+    else
+    {
+	retval = 1;
+    }
+
+    return retval;
+}
+
+static cw_bufp_t *
+buf_p_bufp_at_bpos(cw_buf_t *a_buf, cw_uint64_t a_bpos)
+{
+    cw_bufp_t *retval, key;
+
+    /* Initialize enough of key for searching. */
+    key.bpos = a_bpos;
+
+    rb_search(&a_buf->ptree, &key, buf_p_bufp_at_bpos_comp, pnode, retval);
+    cw_check_ptr(retval);
+
+    return retval;
+}
+
+static cw_sint32_t
+buf_p_bpos_lf_comp(cw_bufp_t *a_key, cw_bufp_t *a_bufp)
+{
+    cw_sint32_t retval;
+    cw_uint64_t line = bufp_p_line(a_bufp);
+
+    if (a_key->line < line)
+    {
+	retval = -1;
+    }
+    else if (a_key->line < line + a_bufp->nlines)
+    {
+	retval = 0;
+    }
+    else
+    {
+	retval = 1;
+    }
+
+    return retval;
+}
+
+static cw_uint64_t
+buf_p_bpos_before_lf(cw_buf_t *a_buf, cw_uint64_t a_line, cw_bufp_t **r_bufp)
+{
+    cw_uint32_t ppos, nlines;
+    cw_uint64_t retval, bufp_line;
+    cw_bufp_t *bufp, key;
+
+    /* Initialize enough of key for searching. */
+    key.line = a_line;
+
+    rb_search(&a_buf->ptree, &key, buf_p_bpos_lf_comp, pnode, bufp);
+    cw_check_ptr(bufp);
+
+    bufp_line = bufp_p_line(bufp);
+
+    /* Before the gap. */
+    for (ppos = nlines = 0; ppos < bufp->gap_off; ppos++)
+    {
+	if (bufp->b[ppos] == '\n')
+	{
+	    nlines++;
+	    if (nlines + bufp_line == a_line)
+	    {
+		retval = bufp_p_bpos(bufp) + ppos;
+		goto DONE;
+	    }
+	}
+    }
+
+    /* After the gap. */
+    for (ppos += bufp->gap_len;; ppos++)
+    {
+	cw_assert(ppos < CW_BUFP_SIZE);
+
+	if (bufp->b[ppos] == '\n')
+	{
+	    nlines++;
+	    if (nlines + bufp_line == a_line)
+	    {
+		retval = bufp_p_bpos(bufp) + ppos - bufp->gap_len;
+		goto DONE;
+	    }
+	}
+    }
+
+    DONE:
+    *r_bufp = bufp;
+    return retval;
+}
+
+static cw_uint64_t
+buf_p_bpos_after_lf(cw_buf_t *a_buf, cw_uint64_t a_line, cw_bufp_t **r_bufp)
+{
+    cw_uint64_t bpos;
+    cw_bufp_t *bufp;
+
+    bpos = buf_p_bpos_before_lf(a_buf, a_line, &bufp);
+
+    /* Move forward one position.  This could involve moving to the next
+     * bufp. */
+    if (bpos - bufp_p_bpos(bufp) + 1 >= CW_BUFP_SIZE - bufp->gap_len)
+    {
+	/* Move to the next bufp. */
+	bufp = ql_next(&bufp->buf->plist, bufp, plink);
+    }
+
+    *r_bufp = bufp;
+    return bpos + 1;
+}
+
 cw_buf_t *
 buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc,
 	cw_opaque_realloc_t *a_realloc, cw_opaque_dealloc_t *a_dealloc,
@@ -834,13 +964,13 @@ buf_hist_group_end(cw_buf_t *a_buf)
 static cw_uint64_t
 mkr_p_bpos(cw_mkr_t *a_mkr)
 {
-    return (a_mkr->bufp->bpos + a_mkr->ppos);
+    return (bufp_p_bpos(a_mkr->bufp) + a_mkr->ppos);
 }
 
 static cw_uint64_t
 mkr_p_line(cw_mkr_t *a_mkr)
 {
-    return (a_mkr->bufp->line + a_mkr->pline);
+    return (bufp_p_line(a_mkr->bufp) + a_mkr->pline);
 }
 
 static cw_sint32_t
@@ -998,6 +1128,7 @@ mkr_line_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence)
 {
     cw_uint64_t bpos;
     cw_buf_t *buf;
+    cw_bufp_t *bufp = NULL;
 
     cw_check_ptr(a_mkr);
     cw_dassert(a_mkr->magic == CW_MKR_MAGIC);
@@ -1027,7 +1158,7 @@ mkr_line_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence)
 		 *   hello\ngoodbye\nyadda\nblah
 		 *                /\
 		 */
-//		bpos = buf_p_bpos_before_lf_validate(buf, a_offset);
+		bpos = buf_p_bpos_before_lf(buf, a_offset, &bufp);
 	    }
 	    break;
 	}
@@ -1050,9 +1181,10 @@ mkr_line_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence)
 		     *   hello\ngoodbye\nyadda\nblah
 		     *                       /\
 		     */
-//		    bpos = buf_p_bpos_before_lf_validate(buf,
-//							 mkr_p_line(a_mkr) - 1
-//							 + a_offset);
+		    bpos = buf_p_bpos_before_lf(buf,
+						mkr_p_line(a_mkr) - 1
+						+ a_offset,
+						&bufp);
 		}
 	    }
 	    else if (a_offset < 0)
@@ -1072,8 +1204,9 @@ mkr_line_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence)
 		     *   hello\ngoodbye\nyadda\nblah
 		     *         /\
 		     */
-//		    bpos = buf_p_bpos_after_lf_validate(buf, mkr_p_line(a_mkr)
-//							- a_offset + 1);
+		    bpos = buf_p_bpos_after_lf(buf,
+					       mkr_p_line(a_mkr) - a_offset + 1,
+					       &bufp);
 		}
 	    }
 	    else
@@ -1105,8 +1238,8 @@ mkr_line_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence)
 		 *   hello\ngoodbye\nyadda\nblah
 		 *                  /\
 		 */
-//		bpos = buf_p_bpos_after_lf_validate(buf,
-//						    buf->nlines + a_offset + 1);
+		bpos = buf_p_bpos_after_lf(buf, buf->nlines + a_offset + 1,
+					   &bufp);
 	    }
 	    break;
 	}
@@ -1116,13 +1249,19 @@ mkr_line_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence)
 	}
     }
 
+    /* If not already known, get the bufp that contains bpos. */
+    if (bufp == NULL)
+    {
+	bufp = buf_p_bufp_at_bpos(buf, bpos);
+    }
+
     /* Remove a_mkr from the tree and list of the bufp at its old location. */
     mkr_p_remove(a_mkr);
 
     /* Update the internal state of a_mkr. */
-//    a_mkr->bufp = buf->bufps[pindex];
-    a_mkr->ppos = bpos - a_mkr->bufp->bpos;
-    a_mkr->pline = 1 + a_offset - a_mkr->bufp->line;
+    a_mkr->bufp = bufp;
+    a_mkr->ppos = bpos - bufp_p_bpos(bufp);
+    a_mkr->pline = 1 + a_offset - bufp_p_line(bufp);
 
     /* Insert a_mkr into the bufp's tree and list. */
     mkr_p_insert(a_mkr);
@@ -1149,6 +1288,7 @@ mkr_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence)
 {
     cw_uint64_t bpos;
     cw_buf_t *buf;
+    cw_bufp_t *bufp;
 
     cw_check_ptr(a_mkr);
     cw_dassert(a_mkr->magic == CW_MKR_MAGIC);
@@ -1234,16 +1374,16 @@ mkr_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence)
 	}
     }
 
-    /* Get the index of the bufp that contains bpos. */
-//    pindex = buf_p_bpos_cache_validate(buf, bpos);
+    /* Get the bufp that contains bpos. */
+    bufp = buf_p_bufp_at_bpos(buf, bpos);
 
     /* Remove a_mkr from the tree and list of the bufp at its old location. */
     mkr_p_remove(a_mkr);
 
     /* Update the internal state of a_mkr. */
-//    a_mkr->bufp = buf->bufps[pindex];
-    a_mkr->ppos = bpos - a_mkr->bufp->bpos;
-    a_mkr->pline = 1 + a_offset - a_mkr->bufp->line;
+    a_mkr->bufp = bufp;
+    a_mkr->ppos = bpos - bufp_p_bpos(bufp);
+    a_mkr->pline = 1 + a_offset - bufp_p_line(bufp);
 
     /* Insert a_mkr into the bufp's tree and list. */
     mkr_p_insert(a_mkr);
