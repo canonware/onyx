@@ -1,3 +1,7 @@
+1999-07-17  J. Owen Evans  <jasone@canonware.com>
+
+	* test/c_out_a.c: Add unit tests for the out class.
+
 1999-07-16  J. Owen Evans  <jasone@canonware.com>
 
 	* : Add the out (extendible printf-alike) class.

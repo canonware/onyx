@@ -38,11 +38,11 @@
  *
  * As can be seen above, flags are specified as name/value pairs.  Each name and
  * value is separated by `:', and name/value pairs are separated from each other
- * (and the type specifier) by `|'.  Names and values can be of arbitrary
- * length, and can contain any characters except (in some cases) `]', `|', `:',
- * and `\0'.  The parser may let these characters slip through in some cases,
- * but such behavior should not be relied on.  Some or all of the following
- * flags are supported for the builtin types:
+ * (and the type specifier) by `|'.  Names and values can be of arbitrary length
+ * (nonzero for names), and can contain any characters except (in some cases)
+ * `]', `|', `:', and `\0'.  The parser may let these characters slip through in
+ * some cases, but such behavior should not be relied on.  Some or all of the
+ * following flags are supported for the builtin types:
  *
  * "w" : Minimum number of bytes of output.
  

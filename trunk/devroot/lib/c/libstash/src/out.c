@@ -592,7 +592,7 @@ out_put_svn(cw_out_t * a_out, char * a_str, cw_uint32_t a_size,
 {
   cw_sint32_t retval, metric_size, size, format_len, i, j;
   cw_uint32_t metric;
-  char * format;
+  char * format = NULL;
 
   _cw_check_ptr(a_str);
   _cw_assert(0 <= a_size);
@@ -620,8 +620,6 @@ out_put_svn(cw_out_t * a_out, char * a_str, cw_uint32_t a_size,
        (i < format_len) && (j < size);
        )
   {
-/*      log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
-/*  		"i == %d, j == %d\n", i, j); */
     switch (format[i])
     {
       case _LIBSTASH_OUT_DES_NORMAL:
@@ -689,10 +687,6 @@ out_put_svn(cw_out_t * a_out, char * a_str, cw_uint32_t a_size,
 	  }
 	}
 
-/*  	log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
-/*  		    "metric == %lu\n", ent->metric_func(&a_format[i], */
-/*  							spec_len, arg)); */
-
 	metric = ent->metric_func(&a_format[i], spec_len, arg);
 	if (0 > metric)
 	{
@@ -703,11 +697,7 @@ out_put_svn(cw_out_t * a_out, char * a_str, cw_uint32_t a_size,
 	if (j + metric <= size)
 	{
 	  /* The printout of this item will fit in the output string. */
-/*  	  log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
-/*  		      "Fit\n"); */
-
-	  if (NULL == ent->render_func(&a_format[i], spec_len, arg,
-				       &a_str[j]))
+	  if (NULL == ent->render_func(&a_format[i], spec_len, arg, &a_str[j]))
 	  {
 	    retval = -1;
 	    goto RETURN;
@@ -735,12 +725,6 @@ out_put_svn(cw_out_t * a_out, char * a_str, cw_uint32_t a_size,
 	  memcpy(&a_str[j], t_buf, size - j);
 	  
 	  _cw_free(t_buf);
-	  
-/*  	  log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
-/*  		      "Unfit\n"); */
-
-	  /* XXX */
-/*  	  memset(&a_str[j], 'X', size - j); */
 	}
 	
 	j += metric;
@@ -762,10 +746,6 @@ out_put_svn(cw_out_t * a_out, char * a_str, cw_uint32_t a_size,
   retval = size;
 
   RETURN:
-/*    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
-/*  	      "Output: \""); */
-/*    log_nprintf(cw_g_log, retval, "%s", a_str); */
-/*    log_printf(cw_g_log, "\"\n"); */
   if (NULL != format)
   {
     _cw_free(format);
@@ -819,14 +799,6 @@ spec_get_val(const char * a_spec, cw_uint32_t a_spec_len,
        i < a_spec_len;
        i++)
   {
-/*      log_eprintf(cw_g_log, NULL, 0, __FUNCTION__, */
-/*  		"state: %s, curr_name_len: %d, val_len: %d, match: %s, i: %d\n", */
-/*  		(state == NAME) ? " NAME" : "VALUE", */
-/*  		curr_name_len, */
-/*  		val_len, */
-/*  		match ? " TRUE" : "FALSE", */
-/*  		i); */
-    
     switch (state)
     {
       case NAME:
@@ -1047,10 +1019,6 @@ out_p_put_fvn(cw_out_t * a_out, cw_sint32_t a_fd, cw_uint32_t a_size,
   }
 #endif
 
-/*    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
-/*  	      "len == %d, output \"", out_size); */
-/*    log_nprintf(cw_g_log, out_size, "%s", output); */
-/*    log_printf(cw_g_log, "\"\n"); */
   i = 0;
   do
   {
@@ -1096,16 +1064,10 @@ out_p_metric(cw_out_t * a_out, const char * a_format, char ** r_format,
   } state;
   
   format_len = strlen(a_format);
-/*    if (0 == format_len) */
-/*    { */
-/*      retval = 0; */
-/*      goto RETURN; */
-/*    } */
 
   format = (char *) _cw_malloc(format_len + 1);
   if (NULL == format)
   {
-    _cw_marker("Error");
     retval = -1;
     goto RETURN;
   }
@@ -1129,9 +1091,6 @@ out_p_metric(cw_out_t * a_out, const char * a_format, char ** r_format,
 	else
 	{
 	  format[i] = _LIBSTASH_OUT_DES_NORMAL;
-/*  	  log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
-/*  		      "out_size++ (%lu --> %lu)\n", */
-/*  		      out_size, out_size + 1); */
 	  out_size++;
 	}
 	
@@ -1142,9 +1101,6 @@ out_p_metric(cw_out_t * a_out, const char * a_format, char ** r_format,
 	if ('[' == a_format[i])
 	{
 	  format[i] = _LIBSTASH_OUT_DES_NORMAL;
-/*  	  log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
-/*  		      "out_size++ (%lu --> %lu)\n", */
-/*  		      out_size, out_size + 1); */
 	  out_size++;
 	  state = NORMAL;
 	}
@@ -1189,33 +1145,17 @@ out_p_metric(cw_out_t * a_out, const char * a_format, char ** r_format,
 
 	  /* Successful completion of parsing this specifier.  Call the
 	   * corresponding metric function. */
-/*  	  log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
-/*  		      "spec_len == %lu, \"", spec_len); */
-/*  	  log_nprintf(cw_g_log, spec_len, "%s", &a_format[i - spec_len]); */
-/*  	  log_printf(cw_g_log, "\"\n"); */
-
 	  val_len = spec_get_type(&a_format[i - spec_len], spec_len, &val);
 	  if (-1 == val_len)
 	  {
-	    _cw_marker("Error");
 	    retval = -2;
 	    goto RETURN;
 	  }
-/*  	  log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
-/*  		      "val_len == %d, \"", val_len); */
-/*  	  log_nprintf(cw_g_log, val_len, "%s", val); */
-/*  	  log_printf(cw_g_log, "\"\n"); */
 
 	  ent = out_p_get_ent(a_out, val, val_len);
 	  if (NULL == ent)
 	  {
 	    /* No handler. */
-	    _cw_marker("Error");
-	    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-			"type \"");
-	    log_nprintf(cw_g_log, val_len, "%s", val);
-	    log_printf(cw_g_log, "\"\n");
-	    
 	    retval = -2;
 	    goto RETURN;
 	  }
@@ -1257,18 +1197,10 @@ out_p_metric(cw_out_t * a_out, const char * a_format, char ** r_format,
 /*  	      } */
 	      default:
 	      {
-		_cw_marker("Error");
-/*  		log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
-/*  			    "ent->size == %lu\n", ent->size); */
 		retval = -2;
 		goto RETURN;
 	      }
 	    }
-
-/*  	    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
-/*  			"out_size += %lu\n", */
-/*  			ent->metric_func(&a_format[i - spec_len], */
-/*  					 spec_len, arg)); */
 
 	    metric = ent->metric_func(&a_format[i - spec_len], spec_len, arg);
 	    if (0 > metric)
@@ -1294,7 +1226,6 @@ out_p_metric(cw_out_t * a_out, const char * a_format, char ** r_format,
   }
   if (NORMAL != state)
   {
-    _cw_marker("Error");
     retval = -2;
     goto RETURN;
   }
@@ -1302,10 +1233,6 @@ out_p_metric(cw_out_t * a_out, const char * a_format, char ** r_format,
   retval = out_size;
   
   RETURN:
-/*    _cw_marker("Before"); */
-/*    log_printf(cw_g_log, "\"%s\"\n\"%s\"\nretval == %d\n", */
-/*  	     a_format, format, retval); */
-/*    _cw_marker("After"); */
   if (0 > retval)
   {
     if (NULL != format)
@@ -1352,9 +1279,6 @@ out_p_get_ent(cw_out_t * a_out, const char * a_format, cw_uint32_t a_len)
       if (0 == strncmp(a_format, a_out->extensions[i].type, a_len)
 	  && (a_len == strlen(a_out->extensions[i].type)))
       {
-/*  	log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
-/*  		    "Type: \"%s\", i == %d\n", */
-/*  		    a_out->extensions[i].type, i); */
 	retval = &a_out->extensions[i];
 	goto RETURN;
       }
@@ -1368,9 +1292,6 @@ out_p_get_ent(cw_out_t * a_out, const char * a_format, cw_uint32_t a_len)
     if (0 == strncmp(a_format, cw_g_out_builtins[i].type, a_len)
 	&& (a_len == strlen(cw_g_out_builtins[i].type)))
     {
-/*        log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
-/*  		  "Type: \"%s\", i == %d\n", */
-/*  		  cw_g_out_builtins[i].type, i); */
       retval = &cw_g_out_builtins[i];
       goto RETURN;
     }
@@ -1379,10 +1300,6 @@ out_p_get_ent(cw_out_t * a_out, const char * a_format, cw_uint32_t a_len)
   retval = NULL;
 
   RETURN:
-/*    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
-/*  	      "Search for \""); */
-/*    log_nprintf(cw_g_log, a_len, "%s", a_format); */
-/*    log_printf(cw_g_log, "\" --> %010p\n", retval); */
   return retval;
 }
 
@@ -1403,7 +1320,7 @@ out_p_add(cw_uint32_t a_base, cw_uint32_t a_ndigits,
 
   for (i = a_ndigits - 1, carry = 0; i >= 0; i--)
   {
-    /* This is slower than it would be if ascii were assumed, but it always
+    /* This is slower than it could be if ascii were assumed, but it always
      * works. */
     for (j = k = 0, a = a_a[i], b = a_b[i], digit = carry;
 	 k < 2 && j < 36;
@@ -1556,8 +1473,6 @@ out_p_metric_int(const char * a_format, cw_uint32_t a_len,
     retval = width;
   }
 
-/*    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
-/*  	      "\"%s\"_%lu, metric %lu\n", &result[i], base, retval); */
   return retval;
 }
 
@@ -1737,10 +1652,6 @@ out_p_render_int(const char * a_format, cw_uint32_t a_len,
 
   retval = r_buf;
 
-/*    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
-/*  	      "r_buf \""); */
-/*    log_nprintf(cw_g_log, width, "%s", r_buf); */
-/*    log_printf(cw_g_log, "\"\n"); */
   return retval;
 }
 
@@ -1848,7 +1759,6 @@ out_p_metric_char(const char * a_format, cw_uint32_t a_len,
   cw_uint32_t width;
   const char * val;
 
-  /* Options: w: p: j: */
   if (-1 != (val_len = spec_get_val(a_format, a_len, "w", &val)))
   {
     /* Width specified. */
@@ -1878,7 +1788,6 @@ out_p_render_char(const char * a_format, cw_uint32_t a_len,
   const char * val;
   cw_uint8_t pad, c = *(const cw_uint8_t *) a_arg;
 
-  /* Options: w: p: j: */
   width = out_p_metric_char(a_format, a_len, a_arg);
 
   if (1 < width)
@@ -1967,10 +1876,6 @@ out_p_metric_string(const char * a_format, cw_uint32_t a_len,
   retval = len;
 
   RETURN:
-/*    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
-/*  	      "str == %010p, retval == %lu: \"", str, retval); */
-/*    log_nprintf(cw_g_log, retval, "%s", str); */
-/*    log_printf(cw_g_log, "\"\n"); */
   return retval;
 }
 
