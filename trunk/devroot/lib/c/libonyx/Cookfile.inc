@@ -102,7 +102,7 @@ SRCS = [SRCS] [LIBONYX_SRCS];
 
 /* LaTeX source files. */
 {
-  local tex_srcs = envdict.tex gcdict.tex nx.tex nxa.tex nxo.tex systemdict.tex;
+  local tex_srcs = gcdict.tex nx.tex nxa.tex nxn.tex nxo.tex systemdict.tex;
   tex_srcs = [fromto % [srcdir]/lib/c/libonyx/doc/latex/% [tex_srcs]];
   tex_srcs = [tex_srcs] [objdir]/lib/c/libonyx/doc/latex/manual.tex;
 

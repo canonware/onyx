@@ -33,25 +33,25 @@ documents the C API with as little information about the
 \end{description}
 
 \section{Threads}
-\libname{libonyx} encapsulates each interpreter instance in a \classname{onyx}
-object.  A \classname{onyx} object supports running multiple concurrent threads.
-Each thread context is encapsulated by a \classname{nxo\_thread} object.  There
-is always at least one \classname{nxo\_thread} object associated with a
-\classname{nx} object, since one \classname{nxo\_thread} object is embedded in
+\libname{libonyx} encapsulates each interpreter instance in an \classname{nx}
+object.  An \classname{nx} object supports running multiple concurrent threads.
+Each thread context is encapsulated by an \classname{nxo} thread object.  There
+is always at least one \classname{nxo} thread object associated with a
+\classname{nx} object, since one \classname{nxo} thread object is embedded in
 the \classname{nx} object.  The reasons for this have to do with garbage
 collection; if there were no references to the built in dictionaries, they would
 be in danger of being collected.  It is possible to use the initial
-\classname{nxo\_thread} object the same as any other, except that it must not be
+\classname{nxo} thread object the same as any other, except that it must not be
 destroyed, since the \classname{nx} object explicitly manages it during
 interpreter initialization and shutdown.
 
 In general, each process thread should execute in its own
-\classname{nxo\_thread} object context, though the only explicit restriction
-places on \classname{nxo\_thread} object operations is that only one thread can
-be executing in a \classname{nxo\_thread} object context at a time.  In other
-words, the \classname{nxo\_thread} class does not synchronize access to its
+\classname{nxo} thread object context, though the only explicit restriction
+places on \classname{nxo} thread object operations is that only one thread can
+be executing in an \classname{nxo} thread object context at a time.  In other
+words, the \classname{nxo} thread class does not synchronize access to its
 internals, since there is normally no reason for multiple threads to execute in
-the same \classname{nxo\_thread} object context.
+the same \classname{nxo} thread object context.
 
 \section{Garbage Collection}
 Garbage collection is done asynchronously by a separate thread that does nothing
@@ -118,7 +118,8 @@ more details.
 \begin{capi}
 \label{_cw_onyx_code}
 \index{\cppmacro{\_cw\_onyx\_code}{}}
-\citem{\cppmacro[void]{\_cw\_onyx\_code}{cw\_nxo\_t *a\_thread, a\_code}}
+\citem{\cppmacro[void]{\_cw\_onyx\_code}{cw\_nxo\_t *a\_thread, const char
+*a\_code}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -138,9 +139,9 @@ more details.
 \section{Classes}
 \input{@abs_srcdir@/lib/c/libonyx/doc/latex/nx}
 \input{@abs_srcdir@/lib/c/libonyx/doc/latex/nxa}
+\input{@abs_srcdir@/lib/c/libonyx/doc/latex/nxn}
 \input{@abs_srcdir@/lib/c/libonyx/doc/latex/nxo}
 
 \section{Dictionaries}
-\input{@abs_srcdir@/lib/c/libonyx/doc/latex/envdict}
 \input{@abs_srcdir@/lib/c/libonyx/doc/latex/gcdict}
 \input{@abs_srcdir@/lib/c/libonyx/doc/latex/systemdict}
