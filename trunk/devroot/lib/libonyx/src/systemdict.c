@@ -1649,7 +1649,6 @@ systemdict_connect(cw_nxo_t *a_thread)
     cw_nxo_t *ostack, *tstack, *sock, *addr, *taddr;
     cw_uint32_t npop;
     sa_family_t family;
-    struct sockaddr_in sockaddr;
     int sockport, error;
 
     ostack = nxo_thread_ostack_get(a_thread);
@@ -1683,15 +1682,17 @@ systemdict_connect(cw_nxo_t *a_thread)
     taddr = nxo_stack_push(tstack);
     nxo_string_cstring(taddr, addr, a_thread);
 
-    /* Begin initialization of sockaddr. */
-    memset(&sockaddr, 0, sizeof(struct sockaddr_in));
-    sockaddr.sin_family = family;
-    sockaddr.sin_port = htons(sockport);
-
     switch (family)
     {
 	case AF_INET:
 	{
+	    struct sockaddr_in sockaddr;
+
+	    /* Begin initialization of sockaddr. */
+	    memset(&sockaddr, 0, sizeof(struct sockaddr_in));
+	    sockaddr.sin_family = family;
+	    sockaddr.sin_port = htons(sockport);
+
 	    error = inet_pton(family, nxo_string_get(taddr),
 			      &sockaddr.sin_addr);
 	    if (error < 0)
@@ -1726,11 +1727,44 @@ systemdict_connect(cw_nxo_t *a_thread)
 #ifdef CW_THREADS
 	    mtx_unlock(&cw_g_gethostbyname_mtx);
 #endif
+
+	    /* Connect. */
+	    error = connect(nxo_file_fd_get(sock),
+			    (struct sockaddr *) &sockaddr,
+			    sizeof(sockaddr));
+
 	    break;
 	}
 	case AF_LOCAL:
 	{
-	    cw_error("XXX Not implemented");
+	    struct sockaddr_un sockaddr;
+
+	    if (npop == 3)
+	    {
+		/* Port shouldn't be specified for a Unix domain connection. */
+		nxo_thread_nerror(a_thread, NXN_typecheck);
+		goto ERROR;
+	    }
+
+	    if (nxo_string_len_get(taddr) > sizeof(sockaddr.sun_path))
+	    {
+		/* Not enough room for path. */
+		nxo_thread_nerror(a_thread, NXN_rangecheck);
+		goto ERROR;
+	    }
+
+	    /* Initialize sockaddr. */
+	    memset(&sockaddr, 0, sizeof(struct sockaddr_un));
+	    sockaddr.sun_family = family;
+	    memcpy(sockaddr.sun_path, nxo_string_get(taddr),
+		   nxo_string_len_get(taddr));
+
+	    /* Connect. */
+	    error = connect(nxo_file_fd_get(sock),
+			    (struct sockaddr *) &sockaddr,
+			    sizeof(sockaddr));
+
+	    break;
 	}
 	default:
 	{
@@ -1738,8 +1772,7 @@ systemdict_connect(cw_nxo_t *a_thread)
 	}
     }
 
-    error = connect(nxo_file_fd_get(sock), (struct sockaddr *) &sockaddr,
-		    sizeof(sockaddr));
+    /* Check for connect() error. */
     if (error == -1)
     {
 	switch (errno)
