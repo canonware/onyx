@@ -69,7 +69,7 @@ main(int argc, char **argv, char **envp)
 	cw_nx_t		nx;
 	cw_nxo_t	thread, *ostack, *name, *operator;
 
-	libstash_init();
+	libonyx_init();
 	fprintf(stderr, "Test begin\n");
 
 	_cw_assert(nx_new(&nx, NULL, argc, argv, envp) == &nx);
@@ -103,6 +103,6 @@ mark_hook eval
 	nx_delete(&nx);
 
 	fprintf(stderr, "Test end\n");
-	libstash_shutdown();
+	libonyx_shutdown();
 	return 0;
 }

@@ -45,7 +45,7 @@ main(int argc, char **argv)
 	cw_bool_t		interactive;
 
 	/* Start up. */
-	libstash_init();
+	libonyx_init();
 	nx_new(&nx, NULL, argc, argv, NULL);
 	interactive = (isatty(0) && argc == 1) ? TRUE : FALSE;
 
@@ -93,7 +93,7 @@ main(int argc, char **argv)
 	if (stdin_arg.buffer != NULL)
 		_cw_free(stdin_arg.buffer);
 	nx_delete(&nx);
-	libstash_shutdown();
+	libonyx_shutdown();
 	return 0;
 }
 

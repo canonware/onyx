@@ -11,5 +11,4 @@
 
 #include "nx_defs.h"
 
-#include <libstash/libstash.h>
 #include <libonyx/libonyx.h>

@@ -73,7 +73,7 @@ main(int argc, char **argv, char **envp)
 {
 	int			retval;
 
-	libstash_init();
+	libonyx_init();
 
 	/*
 	 * Run differently, depending on whether this is an interactive session.
@@ -83,7 +83,7 @@ main(int argc, char **argv, char **envp)
 	else
 		retval = batch_run(argc, argv, envp);
 
-	libstash_shutdown();
+	libonyx_shutdown();
 	return retval;
 }
 

@@ -229,7 +229,7 @@ onyx_install_self : [ONYX]
        [LIBEDIT_A]
 #endif
        [RPATH][PREFIX]/lib
-       [LDFLAGS] -lonyx -lstash -lcurses [EXTRALIBS];
+       [LDFLAGS] -lonyx -lcurses [EXTRALIBS];
   [CHMOD] 0755 [PREFIX]/bin/onyx;
 
   [INSTALL] -d [PREFIX]/man/man1;
@@ -237,7 +237,7 @@ onyx_install_self : [ONYX]
 }
 
 onyx_install : onyx_install_self
-               libonyx_install_s /* libedit_install_s */ libstash_install_s;
+               libonyx_install_s /* libedit_install_s */;
 
 onyx_uninstall :
 {
@@ -264,7 +264,6 @@ onyx_distclean :
 #if [enable_libedit]
          [LIBEDIT_A]
 #endif
-         [LIBSTASH_S]
          [MODS]
   set mkdir
 {
@@ -273,8 +272,7 @@ onyx_distclean :
 #if [enable_libedit]
        [LIBEDIT_A]
 #endif
-       [RPATH][abs_objdir]/lib/c/libonyx/lib
 /*       [RPATH][abs_objdir]/lib/c/libedit/lib */
-       [RPATH][abs_objdir]/lib/c/libstash/lib
-       [LDFLAGS] -lonyx -lstash -lcurses [EXTRALIBS];
+       [RPATH][abs_objdir]/lib/c/libonyx/lib
+       [LDFLAGS] -lonyx -lcurses [EXTRALIBS];
 }

@@ -27,7 +27,6 @@
 
 % Libraries.
 @lib_onyx_manual@\input{@abs_objdir@/lib/c/libonyx/doc/latex/manual}
-@lib_stash_manual@\input{@abs_objdir@/lib/c/libstash/doc/latex/manual}
 
 % Back matter.
 \clearemptydoublepage

@@ -9,7 +9,7 @@
  *
  ******************************************************************************/
 
-#include <libstash/libstash.h>
+#include <libonyx/libonyx.h>
 
 #define _GENERATIONS 1000
 #define _POP_SIZE 1000

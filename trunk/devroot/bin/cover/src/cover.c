@@ -71,7 +71,7 @@ main(int argc, char **argv)
 	cw_bool_t	cl_error = FALSE;
 	cw_bool_t	opt_help = FALSE;
 
-	libstash_init();
+	libonyx_init();
 
 	/* Parse command line. */
 	while (-1 != (c = getopt(argc, argv, "hktn:g:s:m:p:"))) {
@@ -181,7 +181,7 @@ main(int argc, char **argv)
 
 		matrix_delete(matrix);
 	}
-	libstash_shutdown();
+	libonyx_shutdown();
 	return retval;
 }
 

@@ -1,3 +1,7 @@
+2001-08-19  Jason Evans  <jasone@canonware.com>
+
+	* : Fold libstash into libonyx.
+
 2001-08-17  Jason Evans  <jasone@canonware.com>
 
 	* : Add the --disable-posix configure option.  This option

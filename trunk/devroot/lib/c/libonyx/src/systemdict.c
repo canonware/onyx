@@ -4344,7 +4344,7 @@ systemdict_setenv(cw_nxo_t *a_thread)
 
 	/* Do the puttenv(). */
 	if (putenv(tstr) == -1)
-		xep_throw(_CW_STASHX_OOM);
+		xep_throw(_CW_ONYXX_OOM);
 	nxo_stack_pop(tstack);
 
 	/* Insert the key/value pair into envdict. */
@@ -5962,7 +5962,7 @@ systemdict_unsetenv(cw_nxo_t *a_thread)
 
 	/* Do the putenv(). */
 	if (putenv(nxo_string_get(tkey)) == -1)
-		xep_throw(_CW_STASHX_OOM);
+		xep_throw(_CW_ONYXX_OOM);
 #endif
 	nxo_stack_pop(tstack);
 

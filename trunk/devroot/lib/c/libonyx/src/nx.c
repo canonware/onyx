@@ -119,7 +119,7 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, int a_argc, char **a_argv, char
 		 */
 		retval->thread_init = a_thread_init;
 	}
-	xep_catch (_CW_STASHX_OOM) {
+	xep_catch (_CW_ONYXX_OOM) {
 		retval = (cw_nx_t *)v_retval;
 		switch (try_stage) {
 		case 11:

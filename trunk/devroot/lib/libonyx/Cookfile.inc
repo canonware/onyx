@@ -21,13 +21,13 @@
 
 /* Include files that _are_ installed. */
 {
-  local incs = libonyx.h gcdict.h nx.h nxa.h nxn.h nxo.h nxo_array.h
-               nxo_boolean.h nxo_dict.h nxo_file.h nxo_fino.h nxo_hook.h
-               nxo_integer.h nxo_mark.h nxo_name.h nxo_no.h nxo_null.h
-               nxo_operator.h nxo_pmark.h nxo_stack.h nxo_string.h nxo_thread.h
-               systemdict.h
+  local incs = libonyx.h ch.h dch.h gcdict.h mem.h nx.h nxa.h nxn.h nxo.h
+               nxo_array.h nxo_boolean.h nxo_dict.h nxo_file.h nxo_fino.h
+               nxo_hook.h nxo_integer.h nxo_mark.h nxo_name.h nxo_no.h
+               nxo_null.h nxo_operator.h nxo_pmark.h nxo_stack.h nxo_string.h
+               nxo_thread.h ql.h qr.h qs.h systemdict.h xep.h
 #if [enable_threads]
-               nxo_condition.h nxo_mutex.h
+               cnd.h mq.h mtx.h nxo_condition.h nxo_mutex.h thd.h tsd.h
 #endif
                ;
   incs = [fromto % [srcdir]/lib/c/libonyx/include/libonyx/% [incs]];
@@ -56,13 +56,14 @@
 }
 
 /* Source files. */
-LIBONYX_SRCS = envdict.c gcdict.c nx.c nxa.c nxn.c nxo.c nxo_array.c
-               nxo_boolean.c nxo_dict.c nxo_file.c nxo_fino.c
-               nxo_hook.c nxo_integer.c nxo_mark.c nxo_name.c
-               nxo_null.c nxo_operator.c nxo_pmark.c nxo_stack.c nxo_string.c
-               nxo_thread.c systemdict.c
+LIBONYX_SRCS = libonyx.c ch.c dch.c envdict.c gcdict.c mem.c nx.c nxa.c nxn.c
+               nxo.c nxo_array.c nxo_boolean.c nxo_dict.c nxo_file.c nxo_fino.c
+               nxo_hook.c nxo_integer.c nxo_mark.c nxo_name.c nxo_null.c
+               nxo_operator.c nxo_pmark.c nxo_stack.c nxo_string.c nxo_thread.c
+               systemdict.c xep.c
+
 #if [enable_threads]
-               nxo_condition.c nxo_mutex.c
+               cnd.c mq.c mtx.c nxo_condition.c nxo_mutex.c thd.c tsd.c
 #endif
                ;
 
@@ -71,7 +72,13 @@ SRCS = [SRCS] [LIBONYX_SRCS];
 
 /* Simple C tests.  Output is diff'ed with the expected (.exp file) output. */
 {
-  local ctests = hook_a.c;
+  local ctests = ch_a.c dch_a.c hook_a.c libonyx_a.c ql_a.c qr_a.c qs_a.c
+                 xep_a.c
+#if [enable_threads]
+                 cnd_a.c mq_a.c mtx_a.c thd_a.c thd_b.c thd_c.c
+                 tsd_a.c
+#endif
+                 ;
   ctests = [fromto % [srcdir]/lib/c/libonyx/test/% [ctests]];
 
   CTESTS = [CTESTS] [ctests];
@@ -114,12 +121,13 @@ SRCS = [SRCS] [LIBONYX_SRCS];
 
 /* LaTeX source files. */
 {
-  local tex_srcs = gcdict.tex nx.tex nxa.tex nxn.tex nxo.tex nxo_array.tex
-                   nxo_boolean.tex nxo_dict.tex nxo_file.tex nxo_fino.tex
-                   nxo_hook.tex nxo_integer.tex nxo_mark.tex nxo_mutex.tex
-                   nxo_name.tex nxo_no.tex nxo_null.tex nxo_operator.tex
-                   nxo_pmark.tex nxo_stack.tex nxo_string.tex nxo_thread.tex
-                   systemdict.tex;
+  local tex_srcs = ch.tex cnd.tex dch.tex gcdict.tex mem.tex mq.tex mtx.tex
+                   nx.tex nxa.tex nxn.tex nxo.tex nxo_array.tex nxo_boolean.tex
+                   nxo_dict.tex nxo_file.tex nxo_fino.tex nxo_hook.tex
+                   nxo_integer.tex nxo_mark.tex nxo_mutex.tex nxo_name.tex
+                   nxo_no.tex nxo_null.tex nxo_operator.tex nxo_pmark.tex
+                   nxo_stack.tex nxo_string.tex nxo_thread.tex ql.tex qr.tex
+                   qs.tex systemdict.tex thd.tex tsd.tex xep.tex;
   tex_srcs = [fromto % [srcdir]/lib/c/libonyx/doc/latex/% [tex_srcs]];
   tex_srcs = [tex_srcs] [objdir]/lib/c/libonyx/doc/latex/manual.tex;
 

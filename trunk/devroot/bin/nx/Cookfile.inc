@@ -148,11 +148,10 @@ nx_distclean :
 
 [NX] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [NX_SRCS]]
          [LIBONYX_A]
-         [LIBSTASH_A]
   set mkdir
 {
   [CC] [A_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [NX_SRCS]]
-       [LIBONYX_A] [LIBSTASH_A]
+       [LIBONYX_A]
        [LDFLAGS] [EXTRALIBS];
 }

@@ -149,7 +149,7 @@ nxa_new(cw_nxa_t *a_nxa, cw_nx_t *a_nx)
 		try_stage = 4;
 #endif
 	}
-	xep_catch(_CW_STASHX_OOM) {
+	xep_catch(_CW_ONYXX_OOM) {
 		switch (try_stage) {
 		case 4:
 		case 3:

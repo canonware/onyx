@@ -9,7 +9,6 @@
  *
  ******************************************************************************/
 
-#include "libstash/libstash.h"
 #include "libonyx/libonyx.h"
 
 #include "gtk/gtk.h"

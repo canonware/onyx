@@ -115,11 +115,11 @@ cover_install_self : [COVER]
   [CC] [A_CFLAGS] -o [PREFIX]/bin/cover
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [COVER_SRCS]]
        [RPATH][PREFIX]/lib
-       [LDFLAGS] -lstash [EXTRALIBS];
+       [LDFLAGS] -lonyx [EXTRALIBS];
   [CHMOD] 0755 [PREFIX]/bin/cover;
 }
 
-cover_install : cover_install_self libstash_install_s;
+cover_install : cover_install_self libonyx_install_s;
 
 cover_uninstall :
 {
@@ -139,11 +139,11 @@ cover_distclean :
  */
 
 [COVER] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [COVER_SRCS]]
-          [LIBSTASH_S]
+          [LIBONYX_S]
   set mkdir
 {
   [CC] [A_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [COVER_SRCS]]
-       [RPATH][abs_objdir]/lib/c/libstash/lib
-       [LDFLAGS] -lstash [EXTRALIBS];
+       [RPATH][abs_objdir]/lib/c/libonyx/lib
+       [LDFLAGS] -lonyx [EXTRALIBS];
 }

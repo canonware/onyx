@@ -34,8 +34,8 @@ main(int argc, char **argv, char **envp)
         cw_nx_t         nx;
         cw_nxo_t        thread, *nxo;
 
-        /* Initialize libstash and the Onyx interpreter. */
-        libstash_init();
+        /* Initialize libonyx and the Onyx interpreter. */
+        libonyx_init();
         nx_new(&nx, NULL, argc, argv, envp);
 
         /* Create a thread. */
@@ -51,7 +51,7 @@ main(int argc, char **argv, char **envp)
 
         /* Clean up. */
         nx_delete(&nx);
-        libstash_shutdown();
+        libonyx_shutdown();
         return 0;
 }
 \end{verbatim}
@@ -66,8 +66,38 @@ little else needs to be done.
 Use the following compiler command line to compile applications with
 \libname{libonyx}.
 \begin{verbatim}
-cc <file> -lonyx -lstash -lpthread
+cc <file> -lonyx -lpthread
 \end{verbatim}
+
+\section{Types}
+\libname{libonyx} is careful to use the following data types rather than the
+built-in types (other than when using system library functions and string
+pointers (char *)) to allow easy porting and explicit knowledge of variable
+sizes:
+\begin{description}
+\item[cw\_bool\_t: ] Boolean, either FALSE or TRUE.
+\item[cw\_sint8\_t: ] Signed 8 bit variable.
+\item[cw\_uint8\_t: ] Unsigned 8 bit variable.
+\item[cw\_sint16\_t: ] Signed 16 bit variable.
+\item[cw\_uint16\_t: ] Unsigned 16 bit variable.
+\item[cw\_sint32\_t: ] Signed 32 bit variable.
+\item[cw\_uint32\_t: ] Unsigned 32 bit variable.
+\item[cw\_sint64\_t: ] Signed 64 bit variable.
+\item[cw\_uint64\_t: ] Unsigned 64 bit variable.
+\end{description}
+
+\section{Global variables}
+\libname{libonyx} defines the following global variables, which can be used by
+the application:
+\begin{description}
+\item[cw\_g\_mem: ] \classname{mem} instance, default memory allocator.
+\end{description}
+
+\section{Object instantiation}
+Many classes provide a means for external memory allocation, and in some cases
+for automatic cleanup during destruction.  This feature enables improved
+performance and cache locality, but if misunderstood, can result in mysterious
+memory corruption and leaks.
 
 \section{Threads}
 \libname{libonyx} encapsulates each interpreter instance in an \classname{nx}
@@ -95,9 +125,11 @@ interpreter that are executed by the garbage collector during the mark phase
 (reference iteration).
 
 \section{Exceptions}
-\libname{libonyx} reserves \htmlref{xep}{xep} exception numbers 128 to 255 and
+\libname{libonyx} reserves \htmlref{xep}{xep} exception numbers 0 to 127 and
 defines the following exceptions:
 \begin{description}
+\item[\cppdef{\_CW\_ONYXX\_OOM}: ]
+	Memory allocation error.
 \label{_CW_ONYXX_EXIT}
 \item[\cppdef{\_CW\_ONYXX\_EXIT}: ]
 	Internal use, for the exit operator.
@@ -111,9 +143,6 @@ defines the following exceptions:
 
 \section{Integration issues}
 \subsection{Thread creation}
-\libname{libonyx} relies on \libname{libstash} for a number of features.  In
-most cases, \libname{libstash} quietly does its job behind the scenes,
-regardless of whether the application directly uses its functionality.  However,
 \libname{libonyx}'s garbage collector uses the \htmlref{\classname{thd}}{thd}
 class to suspend and resume all other threads during the mark phase of atomic
 collection.  For this to work, all threads that have any contact with
@@ -176,6 +205,110 @@ behavior and likely crashes.
 
 \section{API}
 \begin{capi}
+\label{libonyx_init}
+\index{libonyx_init@\cfunc{libonyx\_init}{}}
+\citem{\cfunc[void]{libonyx\_init}{void}}
+	\begin{capilist}
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_ONYXX\_OOM}{_CW_ONYXX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Initialize various global variables.  In particular, initialize
+		\cvar{cw\_g\_mem}, \cvar{out\_std}, and \cvar{out\_err}.
+	\end{capilist}
+\label{libonyx_shutdown}
+\index{libonyx_shutdown@\cfunc{libonyx\_shutdown}{}}
+\citem{\cfunc[void]{libonyx\_shutdown}{void}}
+	\begin{capilist}
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Clean up the global variables that are initialized by
+		\cfunc{libonyx\_init}{}.
+	\end{capilist}
+\label{cw_opaque_alloc_t}
+\index{cw_opaque_alloc_t@\cfunc{cw\_opaque\_alloc\_t}{}}
+\citem{\cfunc[void *]{cw\_opaque\_alloc\_t}{void *a\_arg, size\_t a\_size,
+const char *a\_filename, cw\_uint32\_t a\_line\_num}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_arg: ]
+			Opaque pointer.
+		\item[a\_size: ]
+			Size of memory range to allocate.
+		\item[a\_filename: ]
+			Should be \_\_FILE\_\_.
+		\item[a\_line\_num: ]
+			Should be \_\_LINE\_\_.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to a memory range.
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_ONYXX\_OOM}{_CW_ONYXX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Allocate \cvar{a\_size} of space and return a pointer to it.
+	\end{capilist}
+\label{cw_opaque_realloc_t}
+\index{cw_opaque_realloc_t@\cfunc{cw\_opaque\_realloc\_t}{}}
+\citem{\cfunc[void *]{cw\_opaque\_realloc\_t}{void *a\_arg, void *a\_ptr,
+size\_t a\_size, const char *a\_filename, cw\_uint32\_t a\_line\_num}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_arg: ]
+			Opaque pointer.
+		\item[a\_ptr: ]
+			Pointer to memory range to be reallocated.
+		\item[a\_size: ]
+			Size of memory range to allocate.
+		\item[a\_filename: ]
+			Should be \_\_FILE\_\_.
+		\item[a\_line\_num: ]
+			Should be \_\_LINE\_\_.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to a memory range.
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_ONYXX\_OOM}{_CW_ONYXX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Allocate \cvar{a\_size} of space and return a pointer to it.
+	\end{capilist}
+\label{cw_opaque_dealloc_t}
+\index{cw_opaque_dealloc_t@\cfunc{cw\_opaque\_dealloc\_t}{}}
+\citem{\cfunc[void]{cw\_opaque\_dealloc\_t}{void *a\_mem, void *a\_ptr, const
+char *a\_filename, cw\_uint32\_t a\_line\_num}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_arg: ]
+			Opaque pointer.
+		\item[a\_ptr: ]
+			Pointer to to memory range to be freed.
+		\item[a\_filename: ]
+			Should be \_\_FILE\_\_.
+		\item[a\_line\_num: ]
+			Should be \_\_LINE\_\_.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Deallocate the memory pointed to by \cvar{a\_ptr}.
+	\end{capilist}
 \label{_cw_onyx_code}
 \index{_cw_onyx_code@\cppmacro{\_cw\_onyx\_code}{}}
 \citem{\cppmacro[void]{\_cw\_onyx\_code}{cw\_nxo\_t *a\_thread, const char
@@ -194,9 +327,122 @@ behavior and likely crashes.
 		Convenience macro for static embedded \htmlref{Onyx}{onyxlang}
 		code.
 	\end{capilist}
+\label{_cw_assert}
+\index{_cw_assert@\cppmacro{\_cw\_assert}{}}
+\citem{\cppmacro[void]{\_cw\_assert}{expression}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[expression: ]
+			C expression that evaluates to zero or non-zero.
+		\end{description}
+	\item[Output(s): ]
+			Possible error printed to file descriptor 2.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		If the expression evaluates to zero, print an error message to
+		file descriptor 2 and \cfunc{abort}{}.
+
+		Note: This macro is only active if the \cppdef{\_CW\_ASSERT} cpp
+		macro is defined.
+	\end{capilist}
+\label{_cw_not_reached}
+\index{_cw_not_reached@\cppmacro{\_cw\_not\_reached}{}}
+\citem{\cppmacro[void]{\_cw\_not\_reached}{void}}
+	\begin{capilist}
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		Error printed to file descriptor 2.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Abort with an error message.
+
+		Note: This macro is only active if the \cppdef{\_CW\_ASSERT} cpp
+		macro is defined.
+	\end{capilist}
+\label{_cw_check_ptr}
+\index{_cw_check\_ptr@\cppmacro{\_cw\_check\_ptr}{}}
+\citem{\cppmacro[void]{\_cw\_check\_ptr}{a\_pointer}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_pointer: ]
+			A pointer.
+		\end{description}
+	\item[Output(s): ]
+			Possible error printed to file descriptor 2.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		If \cvar{a\_pointer} is NULL, print an error message to file
+		descriptor 2 and \cfunc{abort}{}.
+
+		Note: This macro is only active if the \cppdef{\_CW\_ASSERT} cpp
+		macro is defined.
+	\end{capilist}
+\label{_cw_error}
+\index{_cw_error@\cppmacro{\_cw\_error}{}}
+\citem{\cppmacro[void]{\_cw\_error}{const char *a\_str}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_str: ]
+			Pointer to a NULL-terminated character array.
+		\end{description}
+	\item[Output(s): ]
+		Contents of \cvar{a\_str}, followed by a carriage return,
+		printed to file descriptor 2.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Print the contents of \cvar{a\_str}, followed by a carriage
+		return, to file descriptor 2.
+	\end{capilist}
+\label{_cw_ntohq}
+\index{_cw_ntohq@\cppmacro{\_cw\_ntohq}{}}
+\citem{\cppmacro[cw\_uint64\_t]{\_cw\_ntohq}{cw\_uint64\_t a\_val}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_val: ]
+			64 bit integer.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			64 bit integer.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Convert \cvar{a\_val} from network byte order to host byte order
+		and return the result.
+	\end{capilist}
+\label{_cw_htonq}
+\index{_cw_htonq@\cppmacro{\_cw\_htonq}{}}
+\citem{\cppmacro[cw\_uint64\_t]{\_cw\_htonq}{cw\_uint64\_t a\_val}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_val: ]
+			64 bit integer.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			64 bit integer.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Convert \cvar{a\_val} from host byte order to network byte order
+		and return the result.
+	\end{capilist}
 \end{capi}
 
 \section{Classes}
+\input{@abs_srcdir@/lib/c/libonyx/doc/latex/ch}
+\input{@abs_srcdir@/lib/c/libonyx/doc/latex/cnd}
+\input{@abs_srcdir@/lib/c/libonyx/doc/latex/dch}
+\input{@abs_srcdir@/lib/c/libonyx/doc/latex/mem}
+\input{@abs_srcdir@/lib/c/libonyx/doc/latex/mq}
+\input{@abs_srcdir@/lib/c/libonyx/doc/latex/mtx}
 \input{@abs_srcdir@/lib/c/libonyx/doc/latex/nx}
 \input{@abs_srcdir@/lib/c/libonyx/doc/latex/nxa}
 \input{@abs_srcdir@/lib/c/libonyx/doc/latex/nxn}
@@ -219,6 +465,12 @@ behavior and likely crashes.
 \input{@abs_srcdir@/lib/c/libonyx/doc/latex/nxo_stack}
 \input{@abs_srcdir@/lib/c/libonyx/doc/latex/nxo_string}
 \input{@abs_srcdir@/lib/c/libonyx/doc/latex/nxo_thread}
+\input{@abs_srcdir@/lib/c/libonyx/doc/latex/ql}
+\input{@abs_srcdir@/lib/c/libonyx/doc/latex/qr}
+\input{@abs_srcdir@/lib/c/libonyx/doc/latex/qs}
+\input{@abs_srcdir@/lib/c/libonyx/doc/latex/thd}
+\input{@abs_srcdir@/lib/c/libonyx/doc/latex/tsd}
+\input{@abs_srcdir@/lib/c/libonyx/doc/latex/xep}
 
 \section{Dictionaries}
 \input{@abs_srcdir@/lib/c/libonyx/doc/latex/gcdict}

@@ -58,12 +58,11 @@ if test "x$enable_profile" = "x1" ; then
 fi
 
 dnl Look for libraries.  Order matters.  They should appear in an order that
-dnl works on the link line (-lonyx -ledit -lstash).
+dnl works on the link line (-lonyx -ledit).
 CW_BUILD_LIB(libonyx, lib_onyx)
 if test "x$enable_libedit" = "x1" ; then
   CW_BUILD_LIB(libedit, lib_edit)
 fi
-CW_BUILD_LIB(libstash, lib_stash)
 
 dnl Look for modules.
 if test "x$enable_threads" = "x1" -a "x$enable_posix" = "x1" ; then
@@ -150,7 +149,7 @@ AC_CHECK_HEADERS(unistd.h, , AC_MSG_ERROR(Cannot build without poll.h))
 dnl Check for typedefs, structures, and compiler characteristics.
 AC_C_BIGENDIAN
 
-if test "x$build_libstash" = "xyes" ; then
+if test "x$build_libonyx" = "xyes" ; then
   AC_CHECK_SIZEOF(signed char, 1)
   AC_CHECK_SIZEOF(unsigned char, 1)
   AC_CHECK_SIZEOF(signed short, 2)
@@ -162,9 +161,6 @@ if test "x$build_libstash" = "xyes" ; then
   AC_CHECK_SIZEOF(long long, 4)
   AC_CHECK_SIZEOF(unsigned long long, 4)
   AC_CHECK_SIZEOF(int *, 4) dnl defines SIZEOF_INT_P
-fi
-
-if test "x$build_libonyx" = "xyes" ; then
 
 dnl Try to figure out which field of struct dirent contains the entry string
 dnl length.
