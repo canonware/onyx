@@ -82,16 +82,18 @@
 \newcommand{\classname}[1]{{\em #1}}
 \newcommand{\dbgsym}[1]{{``#1''}}
 
-% TeX doesn't have '<', '>', and '|' in its text fonts.  For PS output, use
+% TeX doesn't have '<', '>', '|', and '~' in its text fonts.  For PS output, use
 % math mode to get the characters.  For html output, it works correctly
 % without any help.
 \newcommand{\lt}{$<$}
 \newcommand{\gt}{$>$}
 \newcommand{\pipe}{$|$}
+\newcommand{\twid}{$\sim$}
 \begin{htmlonly}
 \newcommand{\lt}{<}
 \newcommand{\gt}{>}
 \newcommand{\pipe}{|}
+%\newcommand{\twid}{~}
 \end{htmlonly}
 
 % Generate an index.
