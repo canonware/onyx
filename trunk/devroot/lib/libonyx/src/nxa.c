@@ -273,14 +273,14 @@ nxa_realloc_e(cw_nxa_t *a_nxa, void *a_ptr, size_t a_size, size_t a_old_size,
     a_nxa->gc_allocated = TRUE;
 
     /* Update count. */
-    a_nxa->gcdict_count += (cw_nxoi_t) (a_size - a_old_size);
+    a_nxa->gcdict_count += (cw_nxoi_t) a_size - (cw_nxoi_t) a_old_size;
     if (a_nxa->gcdict_count > a_nxa->gcdict_maximum[0])
     {
 	a_nxa->gcdict_maximum[0] = a_nxa->gcdict_count;
     }
     if (a_size - a_old_size > 0)
     {
-	a_nxa->gcdict_sum[0] += (cw_nxoi_t) (a_size - a_old_size);
+	a_nxa->gcdict_sum[0] += (cw_nxoi_t) a_size - (cw_nxoi_t) a_old_size;
     }
 
     /* Trigger a collection if the threshold was reached. */
