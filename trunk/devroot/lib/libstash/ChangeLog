@@ -3,7 +3,7 @@
 	* src/thd.c (thd_sigmask): Implement as a C function and mask the
 	suspend/resume signal if suspend/resume is signal-based.
 
-	* src/out.c : Change the default padding character for [p] from 
+	* src/out.c : Change the default padding character for [p] from
 	' ' to '0'.
 
 2001-02-28  Jason Evans  <jasone@canonware.com>
