@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  *
- * Version: <Version>
+ * Version: Slate <Version = slate>
  *
  * Undo/redo history:
  *

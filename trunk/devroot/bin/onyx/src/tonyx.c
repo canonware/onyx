@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  *
- * Version: <Version>
+ * Version: Onyx <Version = onyx>
  *
  * Wrapper program that sets ONYX_MPATH and ONYX_RPATH appropriately for running
  * onyx in the source tree.  This must be a binary executable rather than a

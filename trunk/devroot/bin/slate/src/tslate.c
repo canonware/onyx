@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  *
- * Version: <Version>
+ * Version: Slate <Version = slate>
  *
  * Wrapper program that sets SLATE_MPATH and SLATE_RPATH appropriately for
  * running slate in the source tree.

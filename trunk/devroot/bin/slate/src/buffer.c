@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  *
- * Version: <Version>
+ * Version: Slate <Version = slate>
  *
  * This file contains the implementations of all the glue hooks for =buffer=
  * and =marker=.

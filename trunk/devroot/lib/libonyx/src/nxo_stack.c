@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  *
- * Version: <Version>
+ * Version: Onyx <Version = onyx>
  *
  * Stack object space is allocated on a per-element basis, and a certain number
  * of elements are cached to avoid allocation deallocation overhead in the

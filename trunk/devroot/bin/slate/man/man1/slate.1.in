@@ -3,9 +3,9 @@
 <Copyright = jasone>
 <License>
 
-Version: <Version>
+Version: Slate <Version = slate>
 ..
-.TH slate 1 "slate, version <Version>"
+.TH slate 1 "slate, version Slate <Version = slate>"
 .hy 1
 .SH NAME
 slate - text editor

@@ -6,7 +6,7 @@
 *
 ******************************************************************************
 *
-* Version: <Version>
+* Version: Onyx <Version = onyx>
 *
 * Initialization and shutdown functions for the whole library.
 *

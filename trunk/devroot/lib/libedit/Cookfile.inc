@@ -5,7 +5,7 @@
  *
  ******************************************************************************
  *
- * Version: <Version>
+ * Version: Onyx <Version = onyx>
  *
  * cook file for libedit.  libedit is only built as a static library for the
  * benefit of onyx command line editing, so it is not installed.

@@ -5,7 +5,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% Version: <Version>
+% Version: Onyx <Version = onyx>
 %
 % Read onyx code from stdin and output a compacted version to stdout.  The
 % output code defines the C function nxo_p_thread_nxcode().
@@ -24,7 +24,7 @@
  *
  ******************************************************************************
  *
- * Version: <Version>
+ * Version: Onyx <Version = onyx>
  *
  ******************************************************************************/
 

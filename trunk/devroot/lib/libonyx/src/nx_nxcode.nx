@@ -5,7 +5,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% Version: <Version>
+% Version: Onyx <Version = onyx>
 %
 % This file is processed by nx_nxcode_gen.nx to produce a more compact embedded
 % version in nx_nxcode.c.  Due to bootstrapping issues, this cannot safely be
@@ -765,7 +765,7 @@ systemdict begin
 } def
 
 % - version <string>
-/version `<Version>' def
+/version `<Version = onyx>' def
 
 end % systemdict.
 

@@ -5,7 +5,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% Version: <Version>
+% Version: Slate <Version = slate>
 %
 % This file is processed to produce a more compact version embedded in C code.
 % Due to bootstrapping issues, this cannot safely be done automatically as part

@@ -5,7 +5,7 @@
  *
  ******************************************************************************
  *
- * Version: <Version>
+ * Version: Slate <Version = slate>
  *
  * cook file for slate.
  *

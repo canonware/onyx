@@ -3,9 +3,9 @@
 <Copyright = jasone>
 <License>
 
-Version: <Version>
+Version: Onyx <Version = onyx>
 ..
-.TH onyx 1 "onyx, version <Version>"
+.TH onyx 1 "onyx, version Onyx <Version = onyx>"
 .hy 1
 .SH NAME
 onyx - stand-alone Onyx language interpreter

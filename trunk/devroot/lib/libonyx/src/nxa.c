@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  *
- * Version: <Version>
+ * Version: Onyx <Version = onyx>
  *
  * nxa uses a Baker's Treadmill (an elegant form of mark and sweep) to
  * implement garbage collection.  The collector is atomic, which means that all

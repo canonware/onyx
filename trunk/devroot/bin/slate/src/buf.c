@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  *
- * Version: <Version>
+ * Version: Slate <Version = slate>
  *
  * This file contains a buffer gap implementation of buffers for use in the
  * slate text editor.  The code is broken up into the following classes:

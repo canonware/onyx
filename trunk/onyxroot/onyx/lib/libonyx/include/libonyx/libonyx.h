@@ -6,7 +6,7 @@
  *
  ******************************************************************************
  *
- * Version: <Version>
+ * Version: Onyx <Version = onyx>
  *
  * Master header file for libonyx.
  *
@@ -19,7 +19,7 @@ extern  "C" {
 #ifndef CW_LIBONYX_H_
 #define CW_LIBONYX_H_
 
-#define CW_LIBONYX_VERSION "<Version>"
+#define CW_LIBONYX_VERSION "Onyx <Version = onyx>"
 
 /* Must be defined for pthreads. */
 #ifndef _REENTRANT

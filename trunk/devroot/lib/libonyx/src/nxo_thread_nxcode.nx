@@ -5,7 +5,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% Version: <Version>
+% Version: Onyx <Version = onyx>
 %
 % This file is processed by nxo_thread_nxcode_gen.nx to produce a more compact
 % embedded version in nxo_thread_nxcode.c.  Due to bootstrapping issues, this

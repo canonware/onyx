@@ -5,7 +5,7 @@
  *
  ******************************************************************************
  *
- * Version: <Version>
+ * Version: Onyx <Version = onyx>
  *
  * cook file for gtk module.
  *
