@@ -8,8 +8,6 @@
  *
  * Version: <Version>
  *
- * <<< Description >>>
- *
  * Implementation of a TCP/IP socket wrapper class.  The sock class communicates
  * with the sockb class in order to implement asynchronous reads and writes
  * efficiently.

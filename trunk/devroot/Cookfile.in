@@ -70,6 +70,9 @@ libs_p : [P_LIBS];
 libs_s : [S_LIBS];
 libs : libs_d libs_a libs_p libs_s;
 
+bins : [fromto [srcdir]/%0%.c [objdir]/%0% [BINS]]
+       [fromto [srcdir]/%0%.c [objdir]/%0%.dbg [BINS]];
+
 tests : [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS] [BTESTS]]
         [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]];
 
@@ -107,21 +110,40 @@ chmod u+x [target];
 dataend
 }
 
-[objdir]/%0bin/%1.dbg : [objdir]/%0bin/%1.o_d [D_LIBS]
+[objdir]/%0bin/% : [objdir]/%0bin/%.o_a [A_LIBS]
   set mkdir
 {
-  [CC] [D_CFLAGS] [CPPFLAGS] [D_CPPFLAGS] -o [target] [objdir]/%0bin/%1.o_d
+  [CC] [A_CFLAGS] [CPPFLAGS] [A_CPPFLAGS] -o [target] [objdir]/%0bin/%.o_a
+       [A_LIBS] [LDFLAGS] [EXTRALIBS];
+}
+
+[objdir]/%0bin/%.o_a : [srcdir]/%0bin/%.c
+  set mkdir
+{
+  [CC] [A_CFLAGS] [CPPFLAGS] [A_CPPFLAGS] -c [srcdir]/%0bin/%.c -o [target];
+
+  c_incl [CPPFLAGS] --no-cache -Absent_Local_Ignore -No_System
+         [srcdir]/%0bin/%.c
+         "--prefix='"[target]" : "[srcdir]/%0bin/%.c"'"
+         "--suffix='set nodefault;'"
+         -o [fromto %0bin/%.o_a %0bin/%.d_a [target]];
+}
+
+[objdir]/%0bin/%.dbg : [objdir]/%0bin/%.o_d [D_LIBS]
+  set mkdir
+{
+  [CC] [D_CFLAGS] [CPPFLAGS] [D_CPPFLAGS] -o [target] [objdir]/%0bin/%.o_d
        [D_LIBS] [LDFLAGS] [EXTRALIBS];
 }
 
-[objdir]/%0bin/%1.o_d : [srcdir]/%0bin/%1.c
+[objdir]/%0bin/%.o_d : [srcdir]/%0bin/%.c
   set mkdir
 {
-  [CC] [D_CFLAGS] [CPPFLAGS] [D_CPPFLAGS] -c [srcdir]/%0bin/%1.c -o [target];
+  [CC] [D_CFLAGS] [CPPFLAGS] [D_CPPFLAGS] -c [srcdir]/%0bin/%.c -o [target];
 
   c_incl [CPPFLAGS] --no-cache -Absent_Local_Ignore -No_System
-         [srcdir]/%0bin/%1.c
-         "--prefix='"[target]" : "[srcdir]/%0bin/%1.c"'"
+         [srcdir]/%0bin/%.c
+         "--prefix='"[target]" : "[srcdir]/%0bin/%.c"'"
          "--suffix='set nodefault;'"
          -o [fromto %0bin/%.o_d %0bin/%.d_d [target]];
 }
@@ -190,5 +212,6 @@ dataend
          -o [fromto %0%.o_s %0%.d_s [target]];
 }
 
-#include-cooked-nowarn [srcdir]/lib/c/libstash/Howto.cook
+#include-cooked-nowarn [srcdir]/lib/c/libkasi/Howto.cook
 #include-cooked-nowarn [srcdir]/lib/c/libsock/Howto.cook
+#include-cooked-nowarn [srcdir]/lib/c/libstash/Howto.cook
