@@ -9520,7 +9520,7 @@ onyx:1>
 			\item[hour: ]
 				Hours (0-23).
 			\item[mday: ]
-				Month day (0-30).
+				Month day (1-31).
 			\item[mon: ]
 				Month (0-11).
 			\item[year: ]
@@ -9563,7 +9563,7 @@ onyx:0> $date {
     over $mon get inc <$w 2 $p `0'> outputs
     `/' 3 ncat
 
-    over $mday get inc <$w 2 $p `0'> outputs
+    over $mday get <$w 2 $p `0'> outputs
     ` ' 3 ncat
 
     over $hour get <$w 2 $p `0'> outputs
@@ -9581,7 +9581,7 @@ onyx:0> $date {
     print flush
 } def
 onyx:0> date
-Monday 2003/03/18 01:31:49 (PST)
+Monday 2003/03/17 01:31:49 (PST)
 onyx:0>
 		\end{verbatim}
 	\end{description}
