@@ -23,7 +23,7 @@ onyx - stand-alone Onyx language interpreter
 .SH DESCRIPTION
 The
 .B onyx
-programis a stand-alone Onyx language interpreter, with an integrated command
+program is a stand-alone Onyx language interpreter, with an integrated command
 line editor.
 This manual page only documents the command line usage for
 .BR onyx ;
