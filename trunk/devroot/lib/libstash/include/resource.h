@@ -21,8 +21,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 2 $
- * Last modified: $Date: 1997-12-07 17:34:03 -0800 (Sun, 07 Dec 1997) $
+ * Current revision: $Revision: 3 $
+ * Last modified: $Date: 1997-12-14 22:01:05 -0800 (Sun, 14 Dec 1997) $
  *
  * Description: 
  *              
@@ -32,11 +32,29 @@
  ****************************************************************************
  */
 
-#ifndef _GLOBAL_DEFS_H_
-#define _GLOBAL_DEFS_H_
+#ifndef _RESOURCE_H_
+#  define _RESOURCE_H_
 
-#define _cw_malloc(a) malloc(a)
-#define _cw_calloc(a, b) calloc(a, b)
-#define _cw_free(a) free(a)
+typedef struct
+{
+  
 
-#endif /* _GLOBAL_DEFS_H_ */
+} res_t;
+
+typedef struct
+{
+  char valid_long;
+  int long_val;
+  char * res_string;
+} res_val_t;
+
+res_t * res_create_context();
+void res_destroy_context(res_t * arg_res_context);
+int res_merge_file(res_t * arg_res_context, char * arg_filename);
+int res_merge_list(res_t * arg_res_context, ...);
+void res_dump(res_t * arg_res_context);
+res_val_t res_query(res_t * arg_res_context, char * arg_query_string);
+long res_val_get_long(res_val_t * arg_res_val);
+char * res_val_get_str(res_val_t * arg_res_val);
+
+#endif _RESOURCE_H_

@@ -21,8 +21,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 2 $
- * Last modified: $Date: 1997-12-07 17:34:03 -0800 (Sun, 07 Dec 1997) $
+ * Current revision: $Revision: 3 $
+ * Last modified: $Date: 1997-12-14 22:01:05 -0800 (Sun, 14 Dec 1997) $
  *
  * Description: The idea here is to keep cpp from having to process a header
  *              file more than once.  The tradeoff is that every header gets
@@ -41,6 +41,7 @@
 /*
  * Always include these once per run.
  */
+
 #ifndef _CONFIG_H_
 #  include <config.h>
 #  define _CONFIG_H_
@@ -51,32 +52,13 @@
 #  define _LOG_H_
 #endif
 
-#ifndef _GLOBAL_DEFS_H_
-#  include <global_defs.h>
-#  define _GLOBAL_DEFS_H_
-#endif
-
-#ifndef _STDIO_H_
-#  include <stdio.h>
-#  define _STDIO_H_
-#endif
-
-#ifndef _STDLIB_H_
-#  include <stdlib.h>
-#  define _STDLIB_H_
-#endif
-
-#if (HAVE_UNISTD_H)
-#  ifndef _UNISTD_H_
-#    include <unistd.h>
-#    define _UNISTD_H_
-#  endif
-#else
-#  error "unistd.h not found.  Cannot continue"
+#ifndef _RESOURCE_H_
+#  include <resource.h>
+#  define _RESOURCE_H_
 #endif
 
 /* 
- * Project headers. 
+ * Other project headers we don't always want to include.
  */
 
 /* Skeleton */
@@ -87,67 +69,6 @@
 #  ifndef _?_H_
 #    include <?.h>
 #    define _?_H_
-#  endif
-#endif
-
-#endif
-
-/* 
- * System headers.
- */
-#if (defined(_INC_STDARG_H_) || defined(_INC_ALL_))
-#  ifndef _STDARG_H_
-#    include <stdarg.h>
-#    define _STDARG_H_
-#  endif
-#endif
-
-#if (defined(_INC_STRING_H_) || defined(_INC_ALL_))
-#  ifndef _STRING_H_
-#    include <string.h>
-#    define _STRING_H_
-#  endif
-#endif
-
-#if (defined(_INC_SIGNAL_H_) || defined(_INC_ALL_))
-#  ifndef _SIGNAL_H_
-#    define _SIGNAL_H_
-#    include <signal.h>
-#  endif
-#endif
-
-#if (defined(_INC_SYS_STAT_H_) || defined(_INC_ALL_))
-#  ifndef _SYS_STAT_H_
-#    define _SYS_STAT_H_
-#    include <sys/stat.h>
-#  endif
-#endif
-
-#if (defined(_INC_GETOPT_H_) || defined(_INC_ALL_))
-#  ifndef _GETOPT_H_
-#    define _GETOPT_H_
-#    include <getopt.h>
-#  endif
-#endif
-
-#if (HAVE_PTHREAD_H)
-#  if (defined(_INC_PTHREAD_H_) || defined(_INC_ALL_))
-#    ifndef _PTHREAD_H_
-#      include <pthread.h>
-#      define _PTHREAD_H_
-#    endif
-#  endif
-#else
-#  error "pthread.h not found.  Cannot continue"
-#endif
-
-/* Skeleton */
-#if (0) 
-
-#if (defined(_INC_?_H_) || defined(_INC_ALL_))
-#  ifndef _?_H_
-#    define _?_H_
-#    include <?.h>
 #  endif
 #endif
 
