@@ -2962,6 +2962,9 @@ snapshot. \\
 \hline
 status & {\bf \htmlref{die}{systemdict:die}} & -- & Exit program. \\
 \hline
+path symbol & {\bf \htmlref{modload}{systemdict:modload}} & -- & Load a
+module. \\
+\hline
 -- & {\bf \htmlref{fork}{systemdict:fork}} & pid & Fork a new process. \\
 \hline
 args & {\bf \htmlref{exec}{systemdict:exec}} & -- & Overlay a new program and
@@ -6293,6 +6296,59 @@ estack/istack trace (0..2):
 2:      --start--
 onyx:3>
 		\end{verbatim}
+	\end{description}
+\label{systemdict:modload}
+\index{modload@\onyxop{}{modload}{}}
+\item[{\onyxop{path symbol}{modload}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[path: ]
+			A string that represents a module filename.
+		\item[symbol: ]
+			A string that represents the symbol name of a
+			module initialization function to be executed.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{undefined}{undefined}.]
+		\end{description}
+	\item[Description: ]
+		Dynamically load a module, create a hook object that
+		encapsulates the handle returned by dlopen(3) (hook data
+		pointer) and the module initialization function (hook evaluation
+		function), and evaluate the hook.
+
+		All objects that refer to code and/or data that are part of the
+		module must directly and/or indirectly maintain a reference to
+		the hook that is evaluated by this operator, since failing to do
+		so would allow the garbage collector to unload the module, which
+		could result in dangling pointers to unmapped memory regions.
+
+		Loadable modules present a problem for the garbage collector
+		during the sweep phase.  All objects that refer to memory that
+		is dynamically mapped as part of the module must be destroyed
+		before the module is unloaded.  Destruction ordering constraints
+		show up in other situations as well, but in the case of loadable
+		modules, there is no reasonable solution except to explicitly
+		order the destruction of objects.  Therefore, by default, the
+		hook that is evaluated by modload is destroyed during the second
+		sweep pass.  It is possible for a module to override what sweep
+		pass the hook is destroyed on, in cases where there are
+		additional ordering constraints for the objects created by a
+		module.  This isn't important from the Onyx language
+		perspective, but is important to understand when implementing
+		modules.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> `/usr/local/share/onyx/nxmod/gtk.nxm' `modpane_init'
+onyx:2> modload
+onyx:0>
+	\end{verbatim}
 	\end{description}
 \label{systemdict:monitor}
 \index{monitor@\onyxop{}{monitor}{}}
