@@ -2,7 +2,8 @@
 #-*-mode:perl-*-
 #############################################################################
 #
-# Copyright (C) 1998-1999 Jason Evans.  All rights reserved.
+# Copyright (C) 1998-2000 Jason Evans <jasone@canonware.com>.
+# All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -29,8 +30,6 @@
 #
 #############################################################################
 #
-# <<< Description >>>
-#
 # This script does all the necessary work to create a snapshot release of a 
 # source tree that is under cvs control.  It also does string substitution 
 # for certain tags, such as <Copyright = "Author">, <License>, and <Version>.
@@ -48,7 +47,7 @@ use Getopt::Long;
 # <Copyright = jasone>
 #
 $COPYRIGHT{"jasone", 0}
-= "Copyright (C) 1996-1999 Jason Evans <jasone\@canonware.com>.";
+= "Copyright (C) 1996-2000 Jason Evans <jasone\@canonware.com>.";
 $COPYRIGHT{"jasone", 1}
 = "All rights reserved.";
 $COPYRIGHT{"toshok", 0}
@@ -89,6 +88,11 @@ $COPYRIGHT{"toshok", 1}
  );
 
 #
+# Name to use for a temporary directory.
+#
+$tmpdir = "tmpdir";
+
+#
 # Parse command-line arguments.
 #
 Getopt::Long::config("bundling"); # Allow -hv rather than forcing -h -v.
@@ -97,13 +101,17 @@ $opt_retval =
     &GetOptions("h|help" => \$opt_help,
 		"n|noact" => \$opt_noact,
 		"v|verbose" => \$opt_verbose,
+		"p|pkgname=s" => \$opt_pkgname,
+		"r|root=s" => \$opt_root,
 		"t|tag=s" => \$opt_tag,
-		"d|dir=s" => \$opt_subdir
+		"f|filetree=s@" => \@OPT_FILETREES
 		);
 
-if (($#ARGV >= 0) 
+if (($#ARGV >= 0)
     || ($opt_retval == 0)
-    || (!defined($opt_subdir))
+    || (!defined($opt_root))
+    || (!defined($opt_pkgname))
+    || (!defined(@OPT_FILETREES))
     || ($opt_help)
     )
 {
@@ -111,62 +119,87 @@ if (($#ARGV >= 0)
     exit(1);
 }
 
-if (defined($opt_tag))
-{
-    if ($opt_tag =~ /^[^A-Za-z]/)
-    {
-	print STDERR "Error: tag must start with a letter\n";
-	&print_usage;
-	exit(1);
-    }
-}
-
-while ($opt_subdir =~ /\/$/)
+while ($opt_root =~ /\/$/)
 {
     if ($opt_verbose)
     {
-	print STDERR "Discarding trailing '/' from \"$opt_subdir\"\n";
+	print STDERR "Discarding trailing '/' from \"$opt_root\"\n";
     }
-    chop $opt_subdir;
+    chop $opt_root;
 }
-if ($opt_subdir =~ /\//)
+
+if (defined($opt_tag))
 {
-    $opt_subdir =~ /(.+)\/([-A-Za-z_0-9]+)$/;
-    $dirpath = $1;
-    $subdir = $2;
+    $opt_pkgname = $opt_pkgname . "_" . $opt_tag;
+    $tag_cvs = $opt_tag;
+    $tag_cvs =~ s/\./_/g;
+    $tag_cvs = "SNAP_$tag_cvs";
+    $tag_cmd = "-r $tag_cvs";
 }
 else
 {
-    $dirpath = ".";
-    $subdir = $opt_subdir;
+    $tag_cvs = "";
+    $tag_cmd = "-r HEAD";
 }
 
 if ($opt_verbose)
 {
-    print STDERR "Path to directory: \"$dirpath\"\n";
-    print STDERR "Directory: \"$subdir\"\n";
+    print STDERR "tag            : $opt_tag\n";
+    print STDERR "cvs tag        : $tag_cvs\n";
+    print STDERR "Tree root      : $opt_root\n";
+    print STDERR "Package name   : $opt_pkgname\n";
+}
+
+foreach $dir (@OPT_FILETREES)
+{
+    while ($dir =~ /\/$/)
+    {
+	if ($opt_verbose)
+	{
+	    print STDERR "Discarding trailing '/' from \"$dir\"\n";
+	}
+	chop $dir;
+    }
+    @TREES = (@TREES, "$opt_root/$dir");
 }
 
 if (defined($opt_tag))
 {
     if ($opt_verbose)
     {
-	print STDERR "cvs tag $opt_tag $dirpath/$subdir\n";
+	print STDERR "cvs tag $tag_cvs @TREES\n";
     }
     unless ($opt_noact)
     {
-	`cvs tag $opt_tag $dirpath/$subdir`;
+	`cvs tag $tag_cvs @TREES`;
     }
 }
 
 if ($opt_verbose)
 {
-    print STDERR 
-	"cvs export -r $opt_tag -d $subdir\_$opt_tag $dirpath/$subdir\n";
+    print STDERR "cvs export $tag_cmd -d $tmpdir @TREES\n";
 }
 unless ($opt_noact)
 {
-    `cvs export -r $opt_tag -d $subdir\_$opt_tag $dirpath/$subdir`;
+    `cvs export $tag_cmd -d $tmpdir @TREES`;
+}
+
+if ($opt_verbose)
+{
+    print STDERR "mv $tmpdir/devroot $opt_pkgname\n";
+}
+unless ($opt_noact)
+{
+    `mv $tmpdir/devroot $opt_pkgname`;
+}
+
+if ($opt_verbose)
+{
+    print STDERR "rmdir $tmpdir\n";
+}
+unless ($opt_noact)
+{
+    `rmdir $tmpdir`;
 }
 
 # Find all the files that need the copyright tag expanded.
@@ -176,16 +209,16 @@ if ($opt_verbose)
 }
 unless ($opt_noact)
 {
-    finddepth(\&expand_tags, "$subdir\_$opt_tag");
+    finddepth(\&expand_tags, "$opt_pkgname");
 }
 
 if ($opt_verbose)
 {
-    print STDERR "tar cvzf $subdir\_$opt_tag.tar.gz $subdir\_$opt_tag\n";
+    print STDERR "tar cvzf $opt_pkgname.tar.gz $opt_pkgname\n";
 }
 unless ($opt_noact)
 {
-    `tar cvzf $subdir\_$opt_tag.tar.gz $subdir\_$opt_tag`;
+    `tar cvzf $opt_pkgname.tar.gz $opt_pkgname`;
 }
 
 # End of main execution.
@@ -193,8 +226,11 @@ unless ($opt_noact)
 sub print_usage
 {
     print <<EOF;
-    $0 usage:
-    $0 [-hnv --help --noact --verbose] {--tag=<tag> | -t <tag>} {--dir=<subdir> | -d <subdir>}
+$0 usage:
+$0 [-hnv --help --noact --verbose] [--tag=<tag> | -t <tag>]
+       {--pkgname=<name> | -p <pkgname>}
+       {--root=<treeroot> | -t <treeroot>}
+       {--filetree=<filetree> | -f <filetree>}+
 EOF
 }
 
