@@ -245,6 +245,15 @@ and efficiency decreases linearly, the farther into the stack an operation has
 to iterate.  Since pushing and popping is efficient for both ends of stacks,
 this means that stacks are suitable for use as queues.
 
+\subsection{Using the operand stack as two stacks}
+
+The ability to efficiently manipulate both ends of the operand stack means that
+the operand stack can effectively be thought of as two stacks.  This can be very
+useful in situations where more than a handful of objects are being manipulated,
+and an additional location to temporarily stash objects would be useful.  If a
+program is repeatedly doing large stack rotations, using the bottom of the stack
+can often help to simplify the code and reduce stack manipulation overhead.
+
 \subsection{Efficiency issues}
 
 Since stacks are stored internally as doubly linked lists, the cost of indexed
@@ -459,14 +468,14 @@ necessary for a single-threaded interpreter.
 
 \subsection{Implicit synchronization}
 
-Of more importance to the Onyx user is the fact that Onyx has the concept of
-implicit object synchronization.  To see why implicit object synchronization is
-necessary, consider what happens when two threads concurrently modify globaldict
-(a perfectly legitimate thing to do, by the way).  The internals of a dictionary
-are rather complex, and if two modifications were interleaved, havoc would
-ensue.  Therefore, globaldict is implicitly locked.  That is a good thing,
-except that it slows down every access to globaldict.  In contrast, userdict is
-a per-thread dictionary, so it is not implicitly locked.
+Onyx provides mechanisms for implicit object synchronization.  To see why
+implicit object synchronization is necessary, consider what happens when two
+threads concurrently modify globaldict (a perfectly legitimate thing to do, by
+the way).  The internals of a dictionary are rather complex, and if two
+modifications were interleaved, havoc would ensue.  Therefore, globaldict is
+implicitly locked.  That is a good thing, except that it slows down every access
+to globaldict.  In contrast, userdict is a per-thread dictionary, so it is not
+implicitly locked.
 
 Implicit locking for new objects is controlled via
 \htmlref{\onyxop{}{setlocking}{}}{systemdict:setlocking}, and can be queried via
