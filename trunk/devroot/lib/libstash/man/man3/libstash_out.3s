@@ -22,13 +22,13 @@ helpers.
 .I typedef cw_sint32_t
 .br
 .B cw_out_metric_t
-.RI ( "const char * a_format" ", " "cw_uint32_t a_format_len" ", " 
+.RI ( "const char * a_format" ", " "cw_uint32_t a_format_len" ", "
 .IR "const void * a_arg" )
 
 .I typedef char *
 .br
 .B cw_out_render_t
-.RI ( "const char * a_format" ", " "cw_uint32_t a_format_len" ", " 
+.RI ( "const char * a_format" ", " "cw_uint32_t a_format_len" ", "
 .IR "const void * a_arg" ", " "char * r_str" )
 
 .I cw_out_t *
@@ -1117,7 +1117,7 @@ Output(s):
 .RS
 .IR retval :
 .RS
->= 0: Number of bytes output.
+>= 0: Number of bytes output, not including the terminating '\\0'.
 .br
 -1: Memory allocation error.
 .br
@@ -1163,7 +1163,7 @@ Output(s):
 .RS
 .IR retval :
 .RS
->= 0: Number of bytes output.
+>= 0: Number of bytes output, not including the terminating '\\0'.
 .br
 -1: Memory allocation error.
 .br
@@ -1218,7 +1218,7 @@ Output(s):
 .RS
 .IR retval :
 .RS
->= 0: Number of bytes output.
+>= 0: Number of bytes output, not including the terminating '\\0'.
 .br
 -1: Memory allocation error.
 .br
@@ -1265,7 +1265,7 @@ Output(s):
 .RS
 .IR retval :
 .RS
->= 0: Number of bytes output.
+>= 0: Number of bytes output, not including the terminating '\\0'.
 .br
 -1: Memory allocation error.
 .br
@@ -1311,7 +1311,7 @@ Output(s):
 .RS
 .IR retval :
 .RS
->= 0: Number of bytes output.
+>= 0: Number of bytes output, not including the terminating '\\0'.
 .br
 -1: Memory allocation error.
 .br
@@ -1366,7 +1366,7 @@ Output(s):
 .RS
 .IR retval :
 .RS
->= 0: Number of bytes output.
+>= 0: Number of bytes output, not including the terminating '\\0'.
 .br
 -1: Memory allocation error.
 .br

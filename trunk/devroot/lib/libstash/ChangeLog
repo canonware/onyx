@@ -1,5 +1,9 @@
 1999-12-28  Jason Evans  <jasone@canonware.com>
 
+	* man/man3/libstash_out.3s: Document that the out_put_s*()
+	functions do not count the terminating '\0' when calculating the
+	return value.
+
 	* src/buf.c (buf_p_copy_array): memcpy() from the source buf, not
 	the destination buf.  Also, unreverse two wrapping cases.
 
