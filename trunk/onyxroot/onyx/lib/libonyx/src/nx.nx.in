@@ -1064,6 +1064,208 @@ dup <
 > setmethods
     ' cat
 } if
+@enable_oop@ 1 eq @enable_modules@ 1 eq and opt_bootstrap not and {
+    `
+# Singleton responsible for tracking all loaded modules.
+$mclass class dup up def
+dup $mclass setclassname
+dup vclass setsuper
+dup <
+    # Dictionary of classname-->singleton associations.
+    $singletons dict
+> setdata
+<
+    # This is a singleton class, so do not allow :new to be called.
+    # Subclasses should call :l_new instead when instantiating a singleton.
+    #
+    #class :new #instance
+    $new {
+	$invalidaccess throw
+    }
+
+    #class :p_new #instance
+    $p_new {
+	:rnew
+	#instance
+
+	dup data <
+	    $modules dict
+	> copy pop
+    }
+
+    #class :singleton #instance
+    $singleton {
+	dup data $singletons get
+	#class #singletons
+	over classname
+	#class #singletons #classname
+	2 ndup known {
+	    # Already instantiated.  Retrieve the singleton.
+	    get nip
+	}{
+	    # Not instantiated.  Instantiate and record a reference.
+	    dn :p_new
+	    #singletons #classname #instance
+	    dup 4 nup
+	    #instance #singletons #classname #instance
+	    put
+	} ifelse
+    }
+
+    #modname #instance :load #module
+    $load {
+	dup data $modules get
+	#modname #instance #modules
+	2 idup known {
+	    # Already loaded.
+	    nip exch get
+	}{
+	    up under
+	    #modules #modname #modname #instance
+	    module:new
+	    #modules #modname #module
+	    dup 4 nup put
+	    #module
+	} ifelse
+    }
+
+    # Called by module:unload.
+    #
+    #modname #instance :unload_notify -
+    $unload_notify {
+	data exch get pop
+    }
+
+    #instance :modules #<modules>
+    $modules {
+	data $modules get
+    }
+> setmethods
+
+# Each loaded module has a corresponding instance of this class, which can be
+# accessed via mclass:singleton:modules.
+$module class dup up def
+dup $module setclassname
+dup vclass setsuper
+dup <
+> setdata
+<
+    #modname #mclass_singleton #class :new #instance
+    $new {
+	:rnew
+	#modname #mclass_singleton #instance
+
+	# Define instance data.
+	dup data <
+	    #modname #mclass_singleton #instance #data #<
+	    $name 5 idup
+	    $mclass_singleton 6 idup
+	    $defs dict
+	    $deps dict
+	    $version 0
+	> copy pop
+
+	# Define $mclass_singleton as instance data before loading the module,
+	# so that it is available to the module initialization code.
+	dup data dup $mclass_singleton 4 idup put
+	#modname #mclass_singleton #instance #data
+
+	# Define $name.
+	$name 4 idup put
+	#modname #mclass_singleton #instance
+
+	# Load the module.
+	`modX/modX.nx' `X' 4 idup <$g true> subst pop
+	#modname #mclass_singleton #instance `mod#modname/#modname.nx'
+	require
+	#modname #mclass_singleton #instance
+
+	# Notify #mclass_singleton of this registration.
+	dup 4 nup
+	#instance #modname #mclass_singleton #instance
+	exch :load_notify
+	#instance
+    }
+
+    #instance :version_get #version
+    $version_get {
+	data $version get
+    }
+
+    #version #instance :version_set -
+    $version_set {
+	data $version dn put
+    }
+
+    #instance :deps_get #<deps>
+    $deps_get {
+	data $deps get
+    }
+
+    #instance :defs_get #<defs>
+    $defs_get {
+	data $defs get
+    }
+
+    # Define #defname as #defval in #defdict.  Make a record of the definition
+    # in the $defs dictionary, with a format of:
+    #
+    #   [#defname #defval] --> #defdict
+    #
+    #defname #defval #defdict #instance :def -
+    $def {
+	# Record the existence of the definition in $defs.
+	data $defs get
+	#defname #defval #defdict #data
+	[
+	    4 idup
+	    4 idup
+	]
+	2 idup
+	#defname #defval #defdict #defs [#defname #defval] #defdict
+	put
+	#defname #defval #defdict
+
+	# Define.
+	3 ndup up put
+    }
+
+    # Load a module that this one depends on, and record the dependency.
+    #
+    #depname #instance :dep_load -
+    $dep_load {
+	dup data
+	#depname #instance #data
+	dup $mclass_singleton get
+	#depname #instance #data #mclass_singleton
+	3 idup exch :load
+	#depname #instance #data #depmod
+	4 ndn exch put
+	#instance
+	pop
+    }
+
+    # Unload the module.
+    #
+    #instance :unload -
+    $unload {
+	# Iteratively undefine the modules definitions, as recorded in the defs
+	# dict.
+	dup data $defs get {
+	    exch 0 get
+	    #instance #defdict #defname
+	    undef
+	} foreach
+	#instance
+
+	# Notify mclass_singleton of the unload.
+	data
+	dup $name get
+	exch $mclass_singleton get :unload_notify
+    }
+> setmethods
+    ' cat
+} if
 `
 # $errorname throw -
 $throw {
